@@ -1,0 +1,23 @@
+# === Reverse proxy for the inbound WhatsApp receiver ===
+# APPEND this to the END of the followup.dr-manoj.in vHost Conf
+# (CyberPanel → followup.dr-manoj.in → Manage → Config → vHost Conf),
+# just after the closing } of the vhssl { ... } block. Do NOT delete anything else.
+# The acme-challenge context above it must stay (it auto-renews SSL).
+# OpenLiteSpeed does NOT support the Apache [P] rewrite flag — that gives HTTP 500.
+# This extprocessor + context proxy is the supported method.
+
+extprocessor wa_receiver {
+  type                    proxy
+  address                 127.0.0.1:8095
+  maxConns                100
+  pcKeepAliveTimeout      60
+  initTimeout             60
+  retryTimeout            0
+  respBuffer              0
+}
+
+context / {
+  type                    proxy
+  handler                 wa_receiver
+  addDefaultCharset       off
+}
