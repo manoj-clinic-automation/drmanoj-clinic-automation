@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#eef2f8; --bg2:#e7ecf5; --card:#ffffff; --ink:#172033; --muted:#667085; --line:#e4e8f0;
+    --brand:#15457e; --brand2:#2f9e44;
+    --accent:#1b6ef3; --accent-soft:#e9f0fe; --accent-line:#cfe0fd;
+    --danger:#d92d20; --danger-soft:#fdecea; --danger-line:#f6cfca;
+    --ok:#188a4e; --ok-soft:#e7f6ee; --ok-line:#c7ead6;
+    --warn:#b45309; --warn-soft:#fdf3e3; --warn-line:#f2dca6;
+    --wa:#0b7a64; --wa-soft:#e7f5ef; --wa-line:#cdeadd;
+    --shadow:0 1px 2px rgba(16,24,40,.04), 0 4px 14px rgba(16,24,40,.06);
+    --shadow-sm:0 1px 2px rgba(16,24,40,.05);
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);background-attachment:fixed;
+    color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  .wrap{max-width:1120px;margin:0 auto;padding:18px 16px 48px}
+
+  /* ---------- top brand bar ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:14px 18px;margin-bottom:16px}
+  .brand{display:flex;align-items:center;gap:13px;min-width:0}
+  .mark{width:42px;height:42px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--brand) 0%,var(--brand2) 100%);
+    box-shadow:0 3px 8px rgba(21,69,126,.28)}
+  .brandtext{min-width:0}
+  .bname{font-size:19px;font-weight:800;letter-spacing:-.01em;line-height:1.15}
+  .bsub{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:13px;font-weight:600;margin-top:2px}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);
+    box-shadow:0 0 0 0 rgba(24,138,78,.5);animation:pulse 2.2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(24,138,78,.45)}70%{box-shadow:0 0 0 8px rgba(24,138,78,0)}100%{box-shadow:0 0 0 0 rgba(24,138,78,0)}}
+  .meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;color:var(--muted);font-size:12.5px}
+  .meta b{color:var(--ink)}
+  .meta .sep{opacity:.5}
+  .bld{color:var(--muted);font-size:11px;opacity:.75}
+  .btn{border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--accent);font-weight:700;
+    padding:8px 14px;border-radius:10px;cursor:pointer;font-size:13px;transition:filter .12s ease}
+  .btn:hover{filter:brightness(.97)} .btn:active{transform:translateY(1px)}
+  .btn:disabled{opacity:.6;cursor:default}
+
+  .banner{display:none;background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line);
+    border-radius:12px;padding:9px 13px;font-size:13px;margin-bottom:14px;font-weight:600}
+
+  /* ---------- KPI tiles ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:6px}
+  .kpi{position:relative;overflow:hidden;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);padding:15px 17px;box-shadow:var(--shadow-sm)}
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);opacity:.85}
+  .kpi .lbl{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+  .kpi .num{font-size:40px;font-weight:800;line-height:1.05;margin-top:6px;letter-spacing:-.02em}
+  .kpi .sub{font-size:12px;color:var(--muted);margin-top:3px}
+  .kpi.hero::before{background:var(--accent)}
+  .kpi.hero{background:linear-gradient(180deg,#f3f8ff 0%,#ffffff 60%);border-color:var(--accent-line)}
+  .kpi.hero .num{color:var(--accent)}
+  .kpi.alarm::before{background:var(--danger)}
+  .kpi.alarm{background:linear-gradient(180deg,#fff4f3 0%,#ffffff 60%);border-color:var(--danger-line)}
+  .kpi.alarm .num{color:var(--danger)}
+
+  /* ---------- collapsible sections ---------- */
+  section.sec{margin:20px 0 0}
+  .sechead{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;
+    font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);
+    font-weight:800;margin:0 0 12px;padding:2px 0}
+  .sechead .caret{font-size:11px;color:var(--muted);transition:transform .15s ease;display:inline-block;
+    width:18px;height:18px;line-height:18px;text-align:center;background:#eef1f6;border-radius:6px}
+  section.sec:not(.collapsed) .sechead .caret{transform:rotate(90deg)}
+  section.sec.collapsed .secbody{display:none}
+  .cnt{font-size:12px;font-weight:800;color:var(--muted);text-transform:none;letter-spacing:0;
+    background:#eaeef4;border-radius:999px;padding:2px 10px;min-width:24px;text-align:center}
+  .cnt.alarm{background:var(--danger);color:#fff}
+  .muted-note{color:var(--muted);font-size:13px;padding:10px 4px;background:var(--card);border:1px dashed var(--line);
+    border-radius:12px;text-align:center}
+
+  .list{display:flex;flex-direction:column;gap:11px}
+  .row{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--line);
+    border-radius:14px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px;
+    box-shadow:var(--shadow-sm);transition:box-shadow .14s ease,transform .14s ease}
+  .row.prio{border-left-color:var(--danger);background:linear-gradient(90deg,#fff7f6 0%,#ffffff 40%)}
+  .row.done{border-left-color:var(--ok);background:linear-gradient(90deg,#f5fbf7 0%,#ffffff 40%)}
+  .row .info{min-width:0;flex:1}
+  .num-big{font-size:23px;font-weight:800;letter-spacing:.3px}
+  .num-big a{color:inherit;text-decoration:none;border-bottom:2px solid transparent}
+  .num-big a:hover{border-bottom-color:var(--accent-line)}
+  .row .when{color:var(--muted);font-size:13px;margin-top:3px}
+  .row .when .ag{color:var(--ink);font-weight:700}
+  .tried{color:#b25e00;font-size:12.5px;margin-top:3px;font-weight:600}
+  .ctx{font-size:14px;margin-top:6px;font-weight:600}
+  .ctx .nm{color:var(--ink)}
+  .ctx .dx{color:var(--accent);font-weight:600}
+  .ctx .un{color:var(--muted);font-weight:500;font-style:italic}
+  .ctx .more{color:var(--muted);font-weight:500}
+  .wa-line{margin-top:7px;font-size:13px;color:var(--wa);background:var(--wa-soft);
+    border:1px solid var(--wa-line);border-radius:9px;padding:6px 10px;display:inline-block;max-width:100%}
+  .wa-line b{font-weight:800}
+
+  .chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+  .chip{font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap;letter-spacing:.02em}
+  .chip.prio{background:var(--danger);color:#fff}
+  .chip.after{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line)}
+  .chip.att{background:#eef1f6;color:#475467}
+  .chip.ok{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line)}
+  .call{background:var(--ok);color:#fff;border:none;font-weight:800;padding:10px 18px;border-radius:10px;
+    text-decoration:none;font-size:14px;white-space:nowrap;box-shadow:0 2px 6px rgba(24,138,78,.25)}
+  .call:active{transform:translateY(1px)}
+  .rec{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);font-weight:800;
+    padding:9px 15px;border-radius:10px;text-decoration:none;font-size:13.5px;white-space:nowrap;cursor:pointer}
+  .rec:disabled{opacity:.6;cursor:default}
+  .recslot audio{width:100%;margin-top:10px;height:40px;display:block}
+
+  .empty{background:var(--ok-soft);border:1px solid var(--ok-line);color:var(--ok);
+    border-radius:14px;padding:24px;text-align:center;font-size:18px;font-weight:800}
+
+  .handled{display:flex;flex-wrap:wrap;gap:8px}
+  .htag{background:var(--card);border:1px solid var(--line);color:var(--muted);border-radius:999px;
+    padding:6px 12px;font-size:13px;box-shadow:var(--shadow-sm)}
+
+  .wa-feed{display:flex;flex-direction:column;gap:9px}
+  .wa-item{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:10px 14px;
+    display:flex;gap:11px;align-items:baseline;box-shadow:var(--shadow-sm)}
+  .wa-item .arr{font-weight:800;font-size:13px;min-width:74px}
+  .wa-item .arr.in{color:var(--wa)} .wa-item .arr.out{color:var(--muted)}
+  .wa-item .who{font-weight:700;white-space:nowrap}
+  .wa-item .txt{color:var(--ink);flex:1;min-width:0}
+  .wa-item .tm{color:var(--muted);font-size:12px;white-space:nowrap}
+
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm)}
+  th,td{padding:11px 15px;text-align:left;font-size:14px;border-top:1px solid var(--line)}
+  th{background:#f6f8fc;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;
+    font-weight:800;border-top:none}
+  tbody tr:nth-child(even) td{background:#fbfcfe}
+  td.n,th.n{text-align:center}
+  td .nm-cell{font-weight:700}
+
+  .foot{color:var(--muted);font-size:12px;margin-top:26px;text-align:center;line-height:1.6}
+
+  /* custom audio player — drawn by us so it shows the same on every Android,
+     portrait or landscape (the native player collapses in narrow portrait) */
+  .player{display:flex;align-items:center;gap:10px;margin-top:10px;background:#f3f7fd;
+    border:1px solid var(--accent-line);border-radius:11px;padding:8px 12px}
+  .pbtn{flex:none;width:40px;height:40px;border-radius:50%;border:none;background:var(--accent);color:#fff;
+    font-size:15px;cursor:pointer;line-height:1;box-shadow:0 2px 6px rgba(27,110,243,.3)}
+  .pbtn:active{transform:translateY(1px)}
+  .pseek{flex:1;min-width:80px;height:26px;accent-color:var(--accent);cursor:pointer}
+  .ptime{flex:none;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;
+    white-space:nowrap;min-width:78px;text-align:right}
+
+  /* Clinic Team — expandable member cards */
+  .tm-card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);margin-bottom:10px;overflow:hidden}
+  .tm-head{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:13px 16px;flex-wrap:wrap}
+  .tm-head .caret{font-size:11px;color:var(--muted);width:18px;height:18px;line-height:18px;text-align:center;
+    background:#eef1f6;border-radius:6px;transition:transform .15s ease;flex:none}
+  .tm-card:not(.collapsed) .tm-head .caret{transform:rotate(90deg)}
+  .tm-card.collapsed .tm-body{display:none}
+  .tm-name{font-weight:800;font-size:15px}
+  .tm-stats{color:var(--muted);font-size:12.5px;flex:1;min-width:150px}
+  .tm-recs{font-size:12px;font-weight:800;color:var(--accent);background:var(--accent-soft);
+    border:1px solid var(--accent-line);border-radius:999px;padding:2px 11px;white-space:nowrap}
+  .tm-body{border-top:1px solid var(--line);padding:4px 16px 10px}
+  .tm-call{padding:11px 0;border-top:1px solid var(--line)}
+  .tm-call:first-child{border-top:none}
+  .tm-cinfo{font-size:14px}
+  .tm-cinfo b{font-weight:800}
+  .tm-when{color:var(--muted);font-size:12.5px}
+  .tm-dir{font-size:12px;font-weight:800;margin-right:4px}
+  .tm-dir.in{color:var(--wa)} .tm-dir.out{color:var(--accent)}
+  .tm-call .rec{margin-top:9px;display:inline-block}
+  .norec{color:var(--muted);font-size:12px;margin-top:9px;display:inline-block}
+
+  @media (hover:hover){
+    .row:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+  }
+  @media (max-width:760px){
+    .wrap{padding:14px 12px 40px}
+    .kpis{grid-template-columns:repeat(2,1fr);gap:10px}
+    .kpi{padding:13px 14px}
+    .kpi .num{font-size:33px}
+    .num-big{font-size:21px}
+    .row{flex-wrap:wrap;align-items:flex-start}
+    .chips{justify-content:flex-start;width:100%;margin-top:4px}
+    .call{flex:1;text-align:center;padding:12px 18px}
+    .rec{flex:1;text-align:center;padding:11px 15px}
+    .meta{width:100%;justify-content:space-between}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22">
+          <path fill="#fff" d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.3 1.1.4 2.4.6 3.6.6.6 0 1 .5 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.5-1 1-1h3.6c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4.1.8-.3 1.1l-2.3 2.1z"/>
+        </svg>
+      </span>
+      <div class="brandtext">
+        <div class="bname">Dr Manoj Agarwal Clinic</div>
+        <div class="bsub"><span class="dot" id="dot"></span> Callback Dashboard · Live</div>
+      </div>
+    </div>
+    <div class="meta">
+      <span id="dateLabel">—</span>
+      <span class="sep">·</span>
+      <span>Updated <b id="updated">—</b></span>
+      <span class="bld">· <span id="build">—</span></span>
+      <span class="sep">· next <b id="count">—</b>s</span>
+      <button class="btn" id="refresh" onclick="poll(true)">↻ Refresh</button>
+    </div>
+  </header>
+
+  <div class="banner" id="banner"></div>
+
+  <!-- KPI tiles: always visible -->
+  <div class="kpis">
+    <div class="kpi hero"><div class="lbl">Awaiting callback</div><div class="num" id="k_await">—</div><div class="sub">need a call now</div></div>
+    <div class="kpi" id="k_missed_card"><div class="lbl">Incoming missed</div><div class="num" id="k_missed">—</div><div class="sub" id="k_rate">—</div></div>
+    <div class="kpi"><div class="lbl">Total calls today</div><div class="num" id="k_total">—</div><div class="sub" id="k_incoming">—</div></div>
+    <div class="kpi"><div class="lbl">WhatsApp (48h)</div><div class="num" id="k_wa">—</div><div class="sub">recent messages</div></div>
+  </div>
+
+  <!-- Needs a callback now: open by default -->
+  <section class="sec" data-key="pending" data-default="open">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Needs a callback now <span class="cnt" id="pendingCnt">0</span></h2>
+    <div class="secbody"><div id="pending" class="list"></div></div>
+  </section>
+
+  <!-- Resolved callbacks: open by default -->
+  <section class="sec" data-key="resolved" data-default="open">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Resolved callbacks <span class="cnt" id="resolvedCnt">0</span></h2>
+    <div class="secbody"><div id="resolved" class="list"></div></div>
+  </section>
+
+  <!-- Recent WhatsApp: open by default -->
+  <section class="sec" data-key="whatsapp" data-default="open">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Recent WhatsApp <span class="cnt" id="waCnt">0</span></h2>
+    <div class="secbody"><div id="waFeed" class="wa-feed"></div></div>
+  </section>
+
+  <!-- Handled today (staff-marked): collapsed by default -->
+  <section class="sec" data-key="handled" data-default="collapsed">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Handled today <span class="cnt" id="handledCnt">0</span></h2>
+    <div class="secbody"><div id="handled" class="handled"></div></div>
+  </section>
+
+  <!-- Agent activity: collapsed by default -->
+  <section class="sec" data-key="agents" data-default="collapsed">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Clinic Team <span class="cnt" id="agentsCnt">0</span></h2>
+    <div class="secbody"><div id="agentsWrap"></div></div>
+  </section>
+
+  <div class="foot">Live from the clinic IVR logs · patient details matched from Patient_Master · WhatsApp from WA_Inbox.<br>
+    Callers marked Done / Booked / Called / Reached move to Handled. Resolved callbacks are detected automatically when a missed caller later connects.</div>
+</div>
+
+<script>
+  var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
+  var PAGE_BUILD = 'v7 · clinic team + player';
+  var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
+  var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
+  var teamOpen = {};       // remembered expanded Clinic Team members
+  try{ teamOpen = JSON.parse(localStorage.getItem('dashTeamOpen')||'{}'); }catch(e){ teamOpen={}; }
+
+  /* ---- collapsible sections (remembered per device) ---- */
+  function toggleSec(head){
+    head.parentNode.classList.toggle('collapsed');
+    saveSecState();
+  }
+  function saveSecState(){
+    try{
+      var st={};
+      var secs=document.querySelectorAll('section.sec');
+      for(var i=0;i<secs.length;i++){ st[secs[i].getAttribute('data-key')] = secs[i].classList.contains('collapsed')?1:0; }
+      localStorage.setItem('dashSecState', JSON.stringify(st));
+    }catch(e){}
+  }
+  function applySecState(){
+    var saved={};
+    try{ saved = JSON.parse(localStorage.getItem('dashSecState')||'{}'); }catch(e){ saved={}; }
+    var secs=document.querySelectorAll('section.sec');
+    for(var i=0;i<secs.length;i++){
+      var s=secs[i], k=s.getAttribute('data-key');
+      var def = s.getAttribute('data-default')==='collapsed';
+      var coll = (k in saved) ? !!saved[k] : def;
+      s.classList.toggle('collapsed', coll);
+    }
+  }
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function digits(n){ return String(n||'').replace(/\D/g,''); }
+  function tel(n){ var d=digits(n); return d.length===10 ? '+91'+d : '+'+d; }
+  function jsq(s){ return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+  function patientLine(p){
+    if(!p || (!p.name && !p.dx)){ return '<div class="ctx"><span class="un">Not in patient list</span></div>'; }
+    var bits=[];
+    if(p.name){ var ag=[]; if(p.age) ag.push(p.age); if(p.sex) ag.push(p.sex.charAt(0).toUpperCase());
+      bits.push('<span class="nm">'+esc(p.name)+(ag.length?(' · '+esc(ag.join('/'))):'')+'</span>'); }
+    if(p.dx)  bits.push('<span class="dx">'+esc(p.dx)+'</span>');
+    if(p.last)bits.push('<span class="more">last visit '+esc(p.last)+'</span>');
+    if(p.more)bits.push('<span class="more">+'+p.more+' more on this no.</span>');
+    return '<div class="ctx">'+bits.join(' · ')+'</div>';
+  }
+  function waLine(w){
+    if(!w) return '';
+    var dir = w.dir==='out' ? 'we replied' : 'patient sent';
+    return '<div class="wa-line">💬 <b>WhatsApp</b> ('+esc(dir)+', '+esc(w.time)+
+           (w.count>1?(' · '+w.count+' msgs'):'')+'): '+esc(w.text)+'</div>';
+  }
+  function setCnt(id, n, alarm){
+    var el=document.getElementById(id); if(!el) return;
+    el.textContent = n;
+    el.className = 'cnt' + (alarm && n>0 ? ' alarm' : '');
+  }
+
+  /* ---- convert a base64 data: URI to a Blob URL (mobile browsers stream this
+          reliably, where a big data: URI shows no player) ---- */
+  function dataUriToBlobUrl(dataUri){
+    try{
+      var comma = dataUri.indexOf(',');
+      if(comma < 0) return null;
+      var header = dataUri.substring(5, comma);            // e.g. "audio/mpeg;base64"
+      var isB64  = /;base64/i.test(header);
+      var mime   = (header.split(';')[0] || 'audio/mpeg');
+      var raw    = dataUri.substring(comma + 1);
+      var bytes;
+      if(isB64){
+        var bin = atob(raw);
+        bytes = new Uint8Array(bin.length);
+        for(var i=0;i<bin.length;i++){ bytes[i] = bin.charCodeAt(i); }
+      } else {
+        var txt = decodeURIComponent(raw);
+        bytes = new Uint8Array(txt.length);
+        for(var j=0;j<txt.length;j++){ bytes[j] = txt.charCodeAt(j); }
+      }
+      return URL.createObjectURL(new Blob([bytes], {type: mime}));
+    }catch(e){ return null; }
+  }
+
+  function fmtT(s){ s=Math.max(0,Math.floor(s||0)); var m=Math.floor(s/60), ss=s%60; return m+':'+(ss<10?'0':'')+ss; }
+
+  /* Our own audio player (play button + progress bar + time). Native <audio>
+     controls collapse to almost nothing on Android Chrome in portrait; this does not. */
+  function mountPlayer(slot, url){
+    slot.innerHTML='';
+    var wrap=document.createElement('div'); wrap.className='player';
+    var btn=document.createElement('button'); btn.type='button'; btn.className='pbtn'; btn.textContent='▶';
+    var seek=document.createElement('input'); seek.type='range'; seek.className='pseek';
+    seek.min=0; seek.max=1000; seek.step=1; seek.value=0;
+    var tl=document.createElement('span'); tl.className='ptime'; tl.textContent='0:00 / 0:00';
+    var au=document.createElement('audio'); au.preload='metadata'; au.setAttribute('playsinline',''); au.src=url;
+    wrap.appendChild(btn); wrap.appendChild(seek); wrap.appendChild(tl); wrap.appendChild(au);
+    slot.appendChild(wrap);
+
+    var seeking=false;
+    function dur(){ return isFinite(au.duration)?au.duration:0; }
+    function showTime(){ tl.textContent=fmtT(au.currentTime)+' / '+fmtT(dur()); }
+    function showSeek(){ var d=dur(); seek.value = d ? Math.round(au.currentTime/d*1000) : 0; }
+    btn.addEventListener('click', function(){
+      if(au.paused){ var p=au.play(); if(p&&p.catch)p.catch(function(){}); } else { au.pause(); }
+    });
+    au.addEventListener('play',  function(){ btn.textContent='⏸'; activeAudio=au; });
+    au.addEventListener('pause', function(){ btn.textContent='▶'; if(activeAudio===au) activeAudio=null; });
+    au.addEventListener('ended', function(){ btn.textContent='▶'; seek.value=0; showTime(); if(activeAudio===au) activeAudio=null; });
+    au.addEventListener('loadedmetadata', function(){ showTime(); showSeek(); });
+    au.addEventListener('timeupdate', function(){ if(!seeking){ showSeek(); } showTime(); });
+    seek.addEventListener('input',  function(){ seeking=true; var d=dur(); if(d) tl.textContent=fmtT(d*seek.value/1000)+' / '+fmtT(d); });
+    seek.addEventListener('change', function(){ var d=dur(); if(d) au.currentTime=d*seek.value/1000; seeking=false; });
+    return au;
+  }
+
+  /* expand/collapse one Clinic Team member; remembered across refreshes */
+  function toggleTeam(head, name){
+    var card=head.parentNode;
+    while(card && (' '+card.className+' ').indexOf(' tm-card ')<0){ card=card.parentNode; }
+    if(!card) return;
+    card.classList.toggle('collapsed');
+    if(card.classList.contains('collapsed')) delete teamOpen[name]; else teamOpen[name]=1;
+    try{ localStorage.setItem('dashTeamOpen', JSON.stringify(teamOpen)); }catch(e){}
+  }
+
+  function playRec(file, slotId, btn){
+    if(!file){ return; }
+    var label = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Loading…';
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.dataUri){
+          var slot = document.getElementById(slotId);
+          if(slot){
+            if(recUrls[slotId]){ try{ URL.revokeObjectURL(recUrls[slotId]); }catch(e){} }
+            var url = dataUriToBlobUrl(res.dataUri) || res.dataUri;   // Blob URL for mobile
+            recUrls[slotId] = url;
+            var au = mountPlayer(slot, url);
+            var pr = au.play();                      // desktop auto-starts; mobile shows the player to tap
+            if(pr && pr.catch){ pr.catch(function(){}); }
+          }
+          btn.style.display = 'none';
+        } else {
+          btn.disabled = false; btn.textContent = label;
+          showBanner('Could not load recording'+(res&&res.error?(': '+res.error):'.'));
+        }
+      })
+      .withFailureHandler(function(err){
+        btn.disabled = false; btn.textContent = label;
+        showBanner('Could not load recording: '+((err&&err.message)||err));
+      })
+      .getRecordingAudio(file);
+  }
+
+  function render(d){
+    if(d && d.error){ showBanner('Could not refresh: '+d.error); return; }
+    hideBanner(); lastOk=d;
+
+    document.getElementById('dateLabel').textContent = d.dateLabel||'';
+    document.getElementById('updated').textContent = d.updated||'';
+
+    var k=d.kpis||{};
+    document.getElementById('k_await').textContent=k.awaiting;
+    document.getElementById('k_missed').textContent=k.missed;
+    document.getElementById('k_rate').textContent=(k.missedRate||0)+'% of incoming';
+    document.getElementById('k_total').textContent=k.total;
+    document.getElementById('k_incoming').textContent=(k.incoming||0)+' incoming · '+(k.resolved||0)+' resolved';
+    document.getElementById('k_wa').textContent=(k.waCount||0);
+
+    document.getElementById('k_await').closest('.kpi').className='kpi hero'+(k.awaiting>0?' alarm':'');
+    document.getElementById('k_missed_card').className='kpi'+(k.missed>0?' alarm':'');
+
+    // pending (missed, awaiting) — attempts + times; no agent/duration (never answered)
+    var p=d.pending||[], box=document.getElementById('pending');
+    setCnt('pendingCnt', p.length, true);
+    if(!p.length){ box.className=''; box.innerHTML='<div class="empty">✅ All clear — no callbacks pending.</div>'; }
+    else{
+      box.className='list';
+      box.innerHTML=p.map(function(e){
+        var chips='';
+        if(e.priority) chips+='<span class="chip prio">PRIORITY</span>';
+        if(e.afterHours) chips+='<span class="chip after">after-hours</span>';
+        var when=e.times?('Incoming missed'+(e.attempts>1?(' '+e.attempts):'')+' ('+esc(e.times)+')'):('Incoming missed ('+esc(e.lastCall)+')');
+        var t=e.triedOut;
+        var triedLine = t ? '<div class="tried">↗ Outgoing not replied'+(t.count>1?(' '+t.count):'')+' ('+esc(t.times)+')</div>' : '';
+        return '<div class="row'+(e.priority?' prio':'')+'">'+
+                 '<div class="info">'+
+                   '<div class="num-big"><a href="tel:'+tel(e.number)+'">'+esc(e.number)+'</a></div>'+
+                   '<div class="when">'+when+'</div>'+
+                   triedLine+
+                   patientLine(e.patient)+ waLine(e.wa)+
+                 '</div>'+
+                 '<div class="chips">'+chips+'<a class="call" href="tel:'+tel(e.number)+'">Call</a></div>'+
+               '</div>';
+      }).join('');
+    }
+
+    // resolved callbacks — agent + time + duration + attempts
+    var rc=d.resolved||[], rbox=document.getElementById('resolved');
+    setCnt('resolvedCnt', rc.length, false);
+    if(!rc.length){ rbox.className=''; rbox.innerHTML='<div class="muted-note">No resolved callbacks yet today.</div>'; }
+    else{
+      rbox.className='list';
+      rbox.innerHTML=rc.map(function(e,i){
+        var when=esc(e.how||'Connected')+
+                 (e.agent?(' by <span class="ag">'+esc(e.agent)+'</span>'):'')+
+                 (e.time?(' · '+esc(e.time)):'')+
+                 (e.durationSec>0?(' · talk '+esc(e.duration)):'');
+        var chips='<span class="chip att">'+e.attempts+' attempt'+(e.attempts>1?'s':'')+'</span>'+
+                  '<span class="chip ok">resolved</span>';
+        var recId='rec_'+esc(String(e.number))+'_'+i;
+        var recBtn = e.recFile
+          ? '<button class="rec" onclick="playRec(\''+esc(e.recFile)+'\',\''+recId+'\',this)">▶ Recording</button>'
+          : '';
+        return '<div class="row done">'+
+                 '<div class="info">'+
+                   '<div class="num-big"><a href="tel:'+tel(e.number)+'">'+esc(e.number)+'</a></div>'+
+                   '<div class="when">'+when+'</div>'+
+                   patientLine(e.patient)+
+                   '<div class="recslot" id="'+recId+'"></div>'+
+                 '</div>'+
+                 '<div class="chips">'+chips+recBtn+'<a class="call" href="tel:'+tel(e.number)+'">Call</a></div>'+
+               '</div>';
+      }).join('');
+    }
+
+    // recent WhatsApp feed
+    var w=d.recentWA||[];
+    setCnt('waCnt', w.length, false);
+    var waBox=document.getElementById('waFeed');
+    if(!w.length){ waBox.className=''; waBox.innerHTML='<div class="muted-note">No WhatsApp messages in the last 48 hours.</div>'; }
+    else{
+      waBox.className='wa-feed';
+      waBox.innerHTML=w.map(function(m){
+        var inbound=m.dir!=='out';
+        var who=m.name?esc(m.name):esc(m.number);
+        return '<div class="wa-item">'+
+                 '<span class="arr '+(inbound?'in':'out')+'">'+(inbound?'▸ from':'we →')+'</span>'+
+                 '<span class="who">'+who+'</span>'+
+                 '<span class="txt">'+esc(m.text)+'</span>'+
+                 '<span class="tm">'+esc(m.time)+'</span>'+
+               '</div>';
+      }).join('');
+    }
+
+    // handled (staff-marked done)
+    var h=d.handled||[];
+    setCnt('handledCnt', h.length, false);
+    var hBox=document.getElementById('handled');
+    if(!h.length){ hBox.className=''; hBox.innerHTML='<div class="muted-note">Nothing marked done by staff yet today.</div>'; }
+    else{
+      hBox.className='handled';
+      hBox.innerHTML=h.map(function(e){
+        var nm=(e.patient&&e.patient.name)?(esc(e.patient.name)+' · '):'';
+        return '<span class="htag">'+nm+esc(e.number)+' · '+esc(e.staffStatus||'done')+'</span>';
+      }).join('');
+    }
+
+    // Clinic Team — expandable per member; each connected call has its own ▶ Recording
+    var a=d.agents||[];
+    setCnt('agentsCnt', a.length, false);
+    var tw=document.getElementById('agentsWrap');
+    if(!a.length){ tw.innerHTML='<div class="muted-note">No team activity yet today.</div>'; }
+    else{
+      tw.innerHTML = a.map(function(x,idx){
+        var calls=x.calls||[];
+        var recs=calls.filter(function(c){return c.recFile;}).length;
+        var coll = teamOpen[x.name] ? '' : ' collapsed';
+        var head='<div class="tm-head" onclick="toggleTeam(this,\''+jsq(x.name)+'\')">'+
+                   '<span class="caret">▸</span>'+
+                   '<span class="tm-name">'+esc(x.name)+'</span>'+
+                   '<span class="tm-stats">'+(x.answered||0)+' answered · '+(x.talkMin||0)+' min talk · '+(x.callbacks||0)+' callbacks</span>'+
+                   '<span class="tm-recs">'+recs+' ▶</span>'+
+                 '</div>';
+        var body = calls.length ? calls.map(function(c,ci){
+            var recId='tcall_'+idx+'_'+ci;
+            var dirTxt = c.dir==='out' ? '📤 outgoing' : '📥 incoming';
+            var who = c.patient ? esc(c.patient) : esc(c.number);
+            var sub = c.patient ? (' · '+esc(c.number)) : '';
+            var recBtn = c.recFile
+              ? '<button class="rec" onclick="playRec(\''+esc(c.recFile)+'\',\''+recId+'\',this)">▶ Recording</button>'
+              : '<span class="norec">no recording</span>';
+            return '<div class="tm-call">'+
+                     '<div class="tm-cinfo">'+
+                       '<span class="tm-dir '+(c.dir==='out'?'out':'in')+'">'+dirTxt+'</span> '+
+                       '<b>'+who+'</b>'+sub+
+                       '<span class="tm-when"> · '+esc(c.time)+' · talk '+esc(c.dur)+'</span>'+
+                     '</div>'+
+                     recBtn+
+                     '<div class="recslot" id="'+recId+'"></div>'+
+                   '</div>';
+          }).join('') : '<div class="muted-note" style="margin:8px 0 4px">No connected calls today.</div>';
+        return '<div class="tm-card'+coll+'">'+head+'<div class="tm-body">'+body+'</div></div>';
+      }).join('');
+    }
+  }
+
+  function showBanner(m){ var b=document.getElementById('banner'); b.textContent=m; b.style.display='block';
+    document.getElementById('dot').style.background='var(--warn)'; }
+  function hideBanner(){ document.getElementById('banner').style.display='none';
+    document.getElementById('dot').style.background='var(--ok)'; }
+
+  function poll(force){
+    var btn=document.getElementById('refresh'); btn.disabled=true; btn.textContent='Updating…';
+    google.script.run
+      .withSuccessHandler(function(d){ render(d); reset(btn); })
+      .withFailureHandler(function(err){ showBanner('Reconnecting… ('+((err&&err.message)||err)+')'); reset(btn); })
+      .getDashboardData(!!force);
+  }
+  function reset(btn){ btn.disabled=false; btn.textContent='↻ Refresh'; left=REFRESH_SECONDS; }
+
+  setInterval(function(){
+    // don't auto-refresh (which rebuilds the page) while a recording is actually playing
+    if(activeAudio && !activeAudio.paused){ left=REFRESH_SECONDS;
+      document.getElementById('count').textContent=left; return; }
+    left--; if(left<0)left=0;
+    document.getElementById('count').textContent=left; if(left===0) poll(false); },1000);
+
+  document.getElementById('build').textContent = PAGE_BUILD;
+  applySecState();
+  poll(false);
+</script>
+</body>
+</html>
