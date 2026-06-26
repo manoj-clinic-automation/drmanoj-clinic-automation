@@ -1,0 +1,15 @@
+[Unit]
+Description=WhatsApp send relay for the dashboard Reply box (Flask via gunicorn)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/wa
+ExecStart=/root/wa/venv/bin/gunicorn -w 1 -b 127.0.0.1:8096 --timeout 60 wa_send_api:app
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,30 @@
+# === Reverse proxy for the WhatsApp SEND relay (dashboard Reply box) ===
+# APPEND this to the followup.dr-manoj.in vHost Conf, in the SAME place the
+# receiver's proxy lives (CyberPanel -> followup.dr-manoj.in -> Manage ->
+# Config -> vHost Conf). Do NOT delete anything that is already there.
+#
+# Put the new "extprocessor wa_send_api { ... }" block right AFTER the existing
+# "extprocessor wa_receiver { ... }" block, and put the new
+# "context /wa-send { ... }" block right BEFORE the existing "context / { ... }".
+#
+# Why before: OpenLiteSpeed routes by the most specific path, so /wa-send goes
+# to this relay (port 8096) and everything else (incl. /wa-webhook) keeps going
+# to the receiver (port 8095). The receiver is not touched.
+#
+# After saving, run:  systemctl restart lsws
+
+extprocessor wa_send_api {
+  type                    proxy
+  address                 127.0.0.1:8096
+  maxConns                100
+  pcKeepAliveTimeout      60
+  initTimeout             60
+  retryTimeout            0
+  respBuffer              0
+}
+
+context /wa-send {
+  type                    proxy
+  handler                 wa_send_api
+  addDefaultCharset       off
+}
