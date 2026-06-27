@@ -234,6 +234,17 @@ def build_row(payload):
     if not is_inbound_message(event, direction, mtype, message):
         return None
 
+    # --- media link capture -------------------------------------------------
+    # Photos / PDFs / audio / video carry no text 'body'; the file sits at
+    # payload.data.context.link, which is MyOperator's OWN public S3 copy
+    # (opens with no token, no expiry). Store THAT link in the message cell so
+    # the dashboard can render it. The sibling field context.url points at
+    # lookaside.fbsbx.com, which needs WhatsApp auth and expires -> ignored.
+    MEDIA_TYPES = ("image", "document", "video", "audio", "sticker", "voice")
+    if (not message) and str(mtype).lower() in MEDIA_TYPES:
+        message = dig(payload, "payload.data.context.link",
+                      "data.context.link", default="")
+
     fields = {
         "timestamp":       to_ist_iso(ts),
         "phone":           "".join(ch for ch in str(phone) if ch.isdigit()),

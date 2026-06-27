@@ -1,0 +1,19 @@
+[Unit]
+Description=WhatsApp -> ntfy notifier (read-only watcher)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/wa
+Environment=NTFY_SERVER=https://ntfy.sh
+Environment=NTFY_TOPIC=drmka-yfv80gjcixa643
+Environment=POLL_SECONDS=30
+Environment=PAT_REFRESH_MIN=30
+ExecStart=/root/wa/venv/bin/python /root/wa/notifier_wa.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
