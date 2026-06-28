@@ -1,6 +1,6 @@
 # Revenue Reconciliation (Marg + Lab → ledger)
 
-**Status:** spec locked (Decision D11), build pending.
+**Status:** BUILT & live-installed (Session 15, 28 Jun 2026). Reconciler proven on real Labmate + Marg files.
 **Source sample files are PHI — they are NOT in this repo. Local handoff kit only.**
 
 ## Goal (D11)
@@ -43,5 +43,25 @@ One durable Source-tagged ledger (Pharmacy / Lab / Unclassified), each row carry
 Build the fuzzy engine first (where the 1-Apr backlog money is), prove on Labmate,
 then the Clinic-ID engine. Always dry-run a summary before writing anything.
 
-## To build
-`reconcile_revenue.py` — not yet written.
+## Built (Session 15)
+- `reconcile_revenue.py` — standalone CLI reconciler (dry-run by default, `--write` to emit ledgers).
+- `revenue_ingest.py` — tracker-native module (imports the app's own `processor` + `revenue`,
+  so behaviour is identical). Powers the admin-only **📊 Revenue Upload** screen
+  (`/revenue/upload`, `/preview`, `/commit`, `/review`, `/promote`, `/lookup`).
+- `APP_PY_PATCH_revenue.md` — the add-only patch applied to the live `app.py`
+  (live file kept local, not committed).
+
+**Proven (sandbox, real samples):**
+- Labmate 200 bills / ₹3,50,130 → matched 148 / ₹2,58,560 · held 52 / ₹91,570
+- Marg 32 bills / ₹32,822 → matched 23 / ₹24,794 · held 9 / ₹8,028
+
+**Policy lock:** only MATCHED bills enter the live ledger now; review + unclassified are held
+in `data/revenue_pending_review.csv` and enter the ledger only after manual **promote**.
+Invariant: ₹in == ₹matched + ₹held (no rupee dropped).
+
+**Detector fix:** filename keywords win before file extension (a `.XLS`-named Labmate file was
+being mis-read as pharmacy); `_read_any_excel()` opens .xlsx / true .xls / .xls-as-HTML.
+**Open:** byte-verify the real `LABMATE_..._.XLS` next session.
+
+**Never commit (PHI):** the source sample files, `data/*.csv`, `revenue_ledger.csv`,
+`revenue_pending_review.csv`, `revenue_source_meta.json`, the live `app.py`.
