@@ -1,0 +1,13 @@
+[Unit]
+Description=Clinic attendance dashboard (read-only web view)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root
+ExecStart=/usr/bin/python3 /root/att_dashboard.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

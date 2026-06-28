@@ -1,0 +1,13 @@
+[Unit]
+Description=Secureye attendance proxy and capture
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root
+ExecStart=/usr/bin/python3 /root/attlistener_v2.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
