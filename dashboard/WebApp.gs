@@ -38,26 +38,154 @@ var WA_LOOKBACK_HOURS = 48;       // consider WhatsApp activity from the last N 
 var WA_RECENT_MAX     = 12;       // size of the "Recent WhatsApp" panel
 var WA_SNIPPET_MAX    = 90;       // characters of message text to keep
 
-/** Optional one-time helper: set the dashboard access key from the editor. */
+// --- WhatsApp free-text reply (component 2): the dashboard asks the VPS relay
+//     to send; the relay runs the proven 24h-window-guarded sender. The WhatsApp
+//     token never reaches Apps Script - only the relay gate secret does. ---
+var WA_SEND_URL = 'https://followup.dr-manoj.in/wa-send';   // relay base (NOT a secret)
+var CALL_URL    = 'https://followup.dr-manoj.in/call';      // OBD click-to-call relay (NOT a secret)
+
+/** Optional one-time helpers: set the access keys from the editor. */
 function setDashboardKey(k) {
   PropertiesService.getScriptProperties().setProperty('DASH_KEY', String(k || ''));
-  Logger.log('DASH_KEY set. Open the dashboard at <url>?k=%s', k);
+  Logger.log('DASH_KEY (full access) set.');
+}
+function setStaffKey(k) {
+  PropertiesService.getScriptProperties().setProperty('STAFF_KEY', String(k || ''));
+  Logger.log('STAFF_KEY (read-only) set.');
 }
 
-/** Serve the dashboard page. */
-function doGet(e) {
-  var key = PropertiesService.getScriptProperties().getProperty('DASH_KEY');
-  if (key) {
-    var given = (e && e.parameter) ? e.parameter.k : '';
-    if (given !== key) {
-      return HtmlService.createHtmlOutput(
-        '<div style="font-family:Arial;padding:48px;color:#9b1c1c;font-size:18px;">' +
-        'Access key required. Open this page with <b>?k=YOUR_KEY</b> in the address.</div>')
-        .setTitle('Clinic Callbacks');
+/**
+ * ACCESS MODEL (server-enforced, not cosmetic):
+ *   DASH_KEY  -> 'full'  : doctor; sees everything, including the WhatsApp Reply box.
+ *   STAFF_KEY -> 'staff' : reception; read-only, NO Reply box, cannot send.
+ *   anything else -> 'none' : the dashboard HTML is NEVER served; only the login page.
+ * The send functions (checkWindow/sendReply) re-check the FULL key server-side, so a
+ * staff key can never send even if a request is forged.
+ */
+// --- Per-agent identity (server-enforced + roster-driven) -------------------
+//   * Each agent logs in with their OWN key (Script Property AKEY_<ext>; the
+//     doctor's DASH_KEY = ext 10). The key -> ext mapping is the bind.
+//   * The "Agents" tab of the tracker sheet is the roster: Ext | Name | UserId
+//     | Active. It drives the display name, the user_id we dial as, and an
+//     Active flag (set Active = no to instantly off-board someone).
+//   * The agent is ALWAYS derived here from the key, NEVER from the page.
+//   * Degrade-safe: if the Agents tab can't be read, fall back to the built-in
+//     7 below and DO NOT lock anyone out.
+// ---------------------------------------------------------------------------
+var AGENTS_TAB = 'Agents';
+var AGENT_NAME_BY_EXT = {
+  '10': 'Dr Manoj Agarwal', '11': 'Shavez Ahmed', '12': 'Shivani Srivastava',
+  '13': 'Manoj Bhati', '14': 'Alisha Khan', '15': 'Darpan Robert', '16': 'Reception Mobile'
+};
+var AGENT_USERID_BY_EXT = {
+  '10': '6838435041f29988', '11': '686cf49a692bb162', '12': '686cf557c4f09495',
+  '13': '686cf5a29a97d527', '14': '69cfa941359e1649', '15': '6a2017dd50280597',
+  '16': '6a2018cda8975829'
+};
+
+/** Read the Agents roster tab -> { ext: {name, userId, active(bool)} }, or null
+ *  if it can't be read (caller then uses the built-in fallback, never locking out). */
+function rosterByExt_() {
+  try {
+    var id = PropertiesService.getScriptProperties().getProperty(CFG.SHEET_ID_PROP);
+    if (!id) return null;
+    var sh = SpreadsheetApp.openById(id).getSheetByName(AGENTS_TAB);
+    if (!sh) return null;
+    var vals = sh.getDataRange().getValues();
+    if (vals.length < 2) return null;
+    var head = vals[0].map(function (h) { return String(h || '').trim().toLowerCase(); });
+    var iExt = head.indexOf('ext'), iName = head.indexOf('name'),
+        iUid = head.indexOf('userid'), iAct = head.indexOf('active');
+    if (iExt < 0) return null;
+    var out = {};
+    for (var r = 1; r < vals.length; r++) {
+      var ext = String(vals[r][iExt] || '').replace(/\D/g, '');
+      if (!ext) continue;
+      var act = (iAct >= 0) ? String(vals[r][iAct] || '').trim().toLowerCase() : 'yes';
+      out[ext] = {
+        name:   iName >= 0 ? String(vals[r][iName] || '').trim() : '',
+        userId: iUid  >= 0 ? String(vals[r][iUid]  || '').trim() : '',
+        active: !(act === 'no' || act === 'n' || act === 'false' || act === '0')
+      };
     }
+    return out;
+  } catch (err) { return null; }   // degrade-safe
+}
+
+/** Return the agent extension bound to this login key, or '' if none.
+ *  Candidate extensions = the built-in 7 plus any rows added in the roster,
+ *  so a brand-new agent works from a sheet row + AKEY_<ext> with no code edit. */
+function agentExtForKey_(key, roster) {
+  var sp = PropertiesService.getScriptProperties();
+  key = String(key || '').trim();
+  if (!key) return '';
+  var full = (sp.getProperty('DASH_KEY') || sp.getProperty('SECRET_KEY') || '').trim();
+  if (full && key === full) return '10';        // the doctor's key = Dr Manoj
+  var cand = { '10':1, '11':1, '12':1, '13':1, '14':1, '15':1, '16':1 };
+  if (roster) { for (var k in roster) { if (roster.hasOwnProperty(k)) cand[k] = 1; } }
+  for (var e in cand) {
+    if (!cand.hasOwnProperty(e)) continue;
+    var v = (sp.getProperty('AKEY_' + e) || '').trim();
+    if (v && key === v) return e;
   }
+  return '';
+}
+
+/** Full identity for a login key: { ext, name, userId, active, isMaster } or null. */
+function agentInfoForKey_(key) {
+  var sp = PropertiesService.getScriptProperties();
+  var full = (sp.getProperty('DASH_KEY') || sp.getProperty('SECRET_KEY') || '').trim();
+  var isMaster = !!(full && String(key || '').trim() === full);
+  var roster = rosterByExt_();
+  var ext = agentExtForKey_(key, roster);
+  if (!ext) return null;
+  var row = (roster && roster[ext]) ? roster[ext] : null;
+  var name   = (row && row.name)   ? row.name   : (AGENT_NAME_BY_EXT[ext]   || '');
+  var userId = (row && row.userId) ? row.userId : (AGENT_USERID_BY_EXT[ext] || '');
+  // Active: the master key is never gated; if a roster row exists honour its flag;
+  // if there is no row (or the roster is unreadable) default active, never lock out.
+  var active = isMaster ? true : (row ? row.active : true);
+  return { ext: ext, name: name, userId: userId, active: active, isMaster: isMaster };
+}
+
+function dashRole_(key) {
+  var sp = PropertiesService.getScriptProperties();
+  var full  = (sp.getProperty('DASH_KEY') || sp.getProperty('SECRET_KEY') || '').trim();   // SECRET_KEY = your existing full key
+  var staff = (sp.getProperty('STAFF_KEY') || '').trim();
+  key = String(key || '').trim();
+  if (full  && key === full)  return 'full';            // master key, never roster-gated
+  var info = agentInfoForKey_(key);
+  if (info) return info.active ? 'staff' : 'none';      // Active=no off-boards entirely
+  if (staff && key === staff) return 'staff';           // legacy shared key -> view only
+  return 'none';
+}
+
+/** TEMP diagnostic. Run from the editor, then open View -> Execution log. Prints NO secret. */
+function keyInfo() {
+  var sp = PropertiesService.getScriptProperties();
+  ['DASH_KEY', 'SECRET_KEY', 'STAFF_KEY'].forEach(function (name) {
+    var raw = sp.getProperty(name);
+    if (raw == null) { Logger.log(name + ': NOT SET'); return; }
+    Logger.log(name + ': length=' + raw.length
+      + ', leadingSpace=' + (raw !== raw.replace(/^\s+/, ''))
+      + ', trailingSpace=' + (raw !== raw.replace(/\s+$/, '')));
+  });
+}
+
+/** The page calls this to learn its own access level (so it can hide the Reply box). */
+function getAccess(key) {
+  var info = agentInfoForKey_(key);
+  return {
+    role: dashRole_(key),
+    agentExt:  info ? info.ext : '',
+    agentName: (info && info.active) ? info.name : ''
+  };
+}
+
+/** Serve the dashboard page (access is enforced inside the page + on every data call). */
+function doGet(e) {
   return HtmlService.createHtmlOutputFromFile('Dashboard')
-    .setTitle('Clinic Callbacks — Live')
+    .setTitle('Clinic Callbacks \u2014 Live')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
@@ -65,7 +193,8 @@ function doGet(e) {
  * Called by the page via google.script.run. Returns a plain object
  * (strings / numbers / arrays only). force=true (Refresh button) bypasses cache.
  */
-function getDashboardData(force) {
+function getDashboardData(key, force) {
+  if (dashRole_(key) === 'none') return { error: 'Not authorized. Please sign in again.' };
   var cache = CacheService.getScriptCache();
   if (!force) {
     var hit = cache.get(DASH_CACHE_KEY);
@@ -135,7 +264,7 @@ function computeDashboard_() {
 
   var recentWA = wa.recent.map(function (m) {
     var p = pat[m.ph];
-    return { number: m.ph, name: p ? p.name : '', time: m.time, dir: m.dir, text: m.text };
+    return { number: m.ph, name: p ? p.name : '', time: m.time, dir: m.dir, text: m.text, full: m.full };
   });
 
   var callsByAgent = agentCallsMap_(raw, pat);
@@ -154,7 +283,7 @@ function computeDashboard_() {
   return {
     updated: Utilities.formatDate(new Date(), tz, 'h:mm:ss a'),
     dateLabel: Utilities.formatDate(b.start, tz, 'EEE d MMM yyyy'),
-    build: 'v7 \u00b7 clinic team',
+    build: 'v12 \u00b7 media',
     kpis: {
       awaiting: pending.length, missed: s.incomingMissed, missedRate: rate,
       total: s.total, incoming: s.incoming, resolved: net.stats.resolved,
@@ -352,8 +481,9 @@ function resolvedCallbacks_(raw) {
  * base64 data-URI. The MyOperator link and the token NEVER reach the browser.
  * Returns { dataUri } on success or { error } on failure.
  */
-function getRecordingAudio(filename) {
+function getRecordingAudio(key, filename) {
   try {
+    if (dashRole_(key) === 'none') return { error: 'Not authorized.' };
     filename = String(filename || '').trim();
     if (!filename) return { error: 'No recording for this call.' };
     var token = PropertiesService.getScriptProperties().getProperty(CFG.TOKEN_PROP);
@@ -390,6 +520,167 @@ function findFirstUrl_(o) {
     for (var k in o) { if (o.hasOwnProperty(k)) { var u = findFirstUrl_(o[k]); if (u) return u; } }
   }
   return '';
+}
+
+/* ---------------------------------------------------------------------------
+ * WHATSAPP REPLY — free-text send via the VPS relay (component 2)
+ * ---------------------------------------------------------------------------
+ * checkWindow(number)        -> is the 24h window open for this number? (no send)
+ * sendReply(number, message) -> send a free-text reply (guarded server-side)
+ * Both authenticate to the relay with the gate secret in Script Property
+ * SEND_API_SECRET (set once in Project Settings -> Script Properties). The
+ * WhatsApp token lives only on the VPS and never reaches this project.
+ * ------------------------------------------------------------------------- */
+function waSendSecret_() {
+  return PropertiesService.getScriptProperties().getProperty('SEND_API_SECRET') || '';
+}
+
+/** Window status for a number (no send). Called when a Reply box opens. */
+function checkWindow(key, number) {
+  try {
+    if (dashRole_(key) !== 'full') return { ok: false, reason: 'Not authorized.' };
+    var num = String(number || '').replace(/\D/g, '');
+    if (num.length < 10) return { ok: false, reason: 'Bad number.' };
+    var secret = waSendSecret_();
+    if (!secret) return { ok: false, reason: 'Reply not configured (SEND_API_SECRET missing).' };
+    var url = WA_SEND_URL + '/check?number=' + encodeURIComponent(num);
+    var resp = UrlFetchApp.fetch(url, {
+      method: 'get',
+      headers: { 'X-Send-Key': secret },
+      muteHttpExceptions: true
+    });
+    var code = resp.getResponseCode();
+    if (code === 403) return { ok: false, reason: 'Relay rejected the key (403).' };
+    var out = {};
+    try { out = JSON.parse(resp.getContentText()); } catch (e) { out = {}; }
+    if (code !== 200 || !out) return { ok: false, reason: 'Relay HTTP ' + code };
+    return out;   // { ok, number, window_open, last_inbound, hours_since }
+  } catch (err) {
+    return { ok: false, reason: String(err && err.message ? err.message : err) };
+  }
+}
+
+/** Send a free-text WhatsApp reply via the relay (24h window enforced server-side). */
+function sendReply(key, number, message) {
+  try {
+    if (dashRole_(key) !== 'full') return { ok: false, sent: false, reason: 'Not authorized.' };
+    var num = String(number || '').replace(/\D/g, '');
+    var msg = String(message == null ? '' : message).trim();
+    if (num.length < 10) return { ok: false, sent: false, reason: 'Bad number.' };
+    if (!msg)            return { ok: false, sent: false, reason: 'Empty message.' };
+    if (msg.length > 4000) return { ok: false, sent: false, reason: 'Message too long (max 4000).' };
+    var secret = waSendSecret_();
+    if (!secret) return { ok: false, sent: false, reason: 'Reply not configured (SEND_API_SECRET missing).' };
+
+    var resp = UrlFetchApp.fetch(WA_SEND_URL, {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { 'X-Send-Key': secret },
+      payload: JSON.stringify({ number: num, message: msg }),
+      muteHttpExceptions: true
+    });
+    var code = resp.getResponseCode();
+    if (code === 403) return { ok: false, sent: false, reason: 'Relay rejected the key (403).' };
+    var out = {};
+    try { out = JSON.parse(resp.getContentText()); } catch (e) { out = {}; }
+    if (!out || typeof out !== 'object') return { ok: false, sent: false, reason: 'Relay HTTP ' + code };
+    return out;   // { sent, ok, window_open, message_id, http_status, reason, ... }
+  } catch (err) {
+    return { ok: false, sent: false, reason: String(err && err.message ? err.message : err) };
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * CLICK-TO-CALL — place a real MyOperator OBD call via the VPS /call relay.
+ * ---------------------------------------------------------------------------
+ * triggerCall(key, agent, number, rowId)
+ *   Rings the chosen agent's OWN mobile first; when they answer, MyOperator
+ *   dials the patient and bridges them. MyOperator logs it AS THAT AGENT
+ *   (we send the agent's panel user_id, resolved on the VPS from name/ext).
+ * The OBD secrets live ONLY on the VPS; this project holds only the gate
+ * secret CALL_API_SECRET (Project Settings -> Script Properties).
+ * Both reception (staff) and the doctor (full) may place callbacks.
+ * ------------------------------------------------------------------------- */
+function callApiSecret_() {
+  return PropertiesService.getScriptProperties().getProperty('CALL_API_SECRET') || '';
+}
+
+function triggerCall(key, number, rowId) {
+  try {
+    if (dashRole_(key) === 'none') return { ok: false, accepted: false, reason: 'Not authorized.' };
+    var info = agentInfoForKey_(key);   // agent is bound to the login, never sent by the page
+    if (!info) return { ok: false, accepted: false, reason: 'Your login is not linked to an agent. Ask the doctor to set your key.' };
+    if (!info.active) return { ok: false, accepted: false, reason: 'This agent is set inactive. Ask the doctor.' };
+    var num = String(number || '').replace(/\D/g, '');
+    if (num.length < 10) return { ok: false, accepted: false, reason: 'Bad number.' };
+    var secret = callApiSecret_();
+    if (!secret) return { ok: false, accepted: false, reason: 'Calling not configured (CALL_API_SECRET missing).' };
+
+    var resp = UrlFetchApp.fetch(CALL_URL, {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { 'X-Call-Key': secret },
+      payload: JSON.stringify({ agent: info.ext, user_id: info.userId, patient_number: num, reference_id: String(rowId || num) }),
+      muteHttpExceptions: true
+    });
+    var code = resp.getResponseCode();
+    if (code === 403) return { ok: false, accepted: false, reason: 'Relay rejected the key (403).' };
+    var out = {};
+    try { out = JSON.parse(resp.getContentText()); } catch (e) { out = {}; }
+    if (!out || typeof out !== 'object') return { ok: false, accepted: false, reason: 'Relay HTTP ' + code };
+    return out;   // { ok, accepted, agent, agent_ext, reference_id, unique_id, reason, http_status }
+  } catch (err) {
+    return { ok: false, accepted: false, reason: String(err && err.message ? err.message : err) };
+  }
+}
+
+/**
+ * getThread(key, number) -> { ok, number, messages:[{time,dir,type,text,status}] }
+ * Every WhatsApp message (incoming + outgoing) for one number, OLDEST first, for
+ * the conversation/thread view. Read-only; any valid key (full or staff) may read.
+ * Outgoing rows are written by the VPS relay (wa_send_api.py v2) as direction="out".
+ */
+function getThread(key, number) {
+  if (dashRole_(key) === 'none') return { ok: false, reason: 'Not authorized.' };
+  var want = last10_(number);
+  if (!want) return { ok: false, reason: 'Bad number.' };
+  try {
+    var id = PropertiesService.getScriptProperties().getProperty(CFG.SHEET_ID_PROP);
+    if (!id) return { ok: true, number: want, messages: [] };
+    var sh = SpreadsheetApp.openById(id).getSheetByName(WA_TAB);
+    if (!sh) return { ok: true, number: want, messages: [] };
+    var vals = sh.getDataRange().getValues();
+    if (vals.length < 2) return { ok: true, number: want, messages: [] };
+    var H = vals[0].map(function (x) { return String(x).trim().toLowerCase(); });
+    var iTime  = findCol_(H, ['timestamp', 'time', 'received_at', 'date']);
+    var iPhone = findCol_(H, ['phone', 'number', 'customer_number', 'from', 'mobile']);
+    var iDir   = findCol_(H, ['direction', 'dir']);
+    var iText  = findCol_(H, ['message', 'text', 'body', 'snippet']);
+    var iType  = findCol_(H, ['type', 'message_type']);
+    var iStat  = findCol_(H, ['status']);
+    if (iPhone < 0) return { ok: true, number: want, messages: [] };
+    var tz = Session.getScriptTimeZone(), rows = [];
+    for (var r = 1; r < vals.length; r++) {
+      if (last10_(vals[r][iPhone]) !== want) continue;
+      var t = iTime >= 0 ? dateVal_(vals[r][iTime]) : 0;
+      var type = iType >= 0 ? String(vals[r][iType] || '').trim() : '';
+      var text = iText >= 0 ? String(vals[r][iText] || '').trim() : '';
+      if (!text) text = '[' + (type || 'message') + ']';
+      rows.push({
+        _t: t,
+        time: t ? Utilities.formatDate(new Date(t), tz, 'd MMM h:mm a') : '',
+        dir: iDir >= 0 ? (String(vals[r][iDir] || '').toLowerCase().indexOf('out') >= 0 ? 'out' : 'in') : 'in',
+        type: type, text: text,
+        status: iStat >= 0 ? String(vals[r][iStat] || '').trim() : ''
+      });
+    }
+    rows.sort(function (a, b) { return a._t - b._t; });   // oldest first (chat order)
+    return { ok: true, number: want, messages: rows.map(function (m) {
+      return { time: m.time, dir: m.dir, type: m.type, text: m.text, status: m.status };
+    }) };
+  } catch (err) {
+    return { ok: false, reason: String(err && err.message ? err.message : err) };
+  }
 }
 
 /** Map phone10 -> patient context from the Patient_Master tab (your CSV). */
@@ -466,14 +757,15 @@ function waLookup_() {
       var t = iTime >= 0 ? dateVal_(vals[r][iTime]) : 0;
       if (t && t < cutoff) continue;
       var type = iType >= 0 ? String(vals[r][iType] || '').trim() : '';
-      var text = iText >= 0 ? String(vals[r][iText] || '').trim() : '';
-      if (!text) text = '[' + (type || 'message') + ']';
+      var full = iText >= 0 ? String(vals[r][iText] || '').trim() : '';
+      if (!full) full = '[' + (type || 'message') + ']';
+      var text = full;
       if (text.length > WA_SNIPPET_MAX) text = text.slice(0, WA_SNIPPET_MAX - 1) + '…';
       rows.push({
         ph: ph, t: t,
         time: t ? Utilities.formatDate(new Date(t), tz, 'd MMM h:mm a') : '',
         dir: iDir >= 0 ? (String(vals[r][iDir] || '').toLowerCase().indexOf('out') >= 0 ? 'out' : 'in') : 'in',
-        text: text
+        text: text, full: full
       });
     }
     rows.sort(function (a, b) { return b.t - a.t; });

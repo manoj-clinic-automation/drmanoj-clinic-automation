@@ -1,0 +1,32 @@
+# === Reverse proxy for the OBD CLICK-TO-CALL relay (dashboard Call buttons) ===
+# APPEND this to the followup.dr-manoj.in vHost Conf, in the SAME place the
+# WhatsApp send relay's proxy lives (CyberPanel -> followup.dr-manoj.in ->
+# Manage -> Config -> vHost Conf). Do NOT delete anything already there.
+#
+# Put the new "extprocessor call_api { ... }" block right AFTER the existing
+# "extprocessor wa_send_api { ... }" block, and put the new
+# "context /call { ... }" block right BEFORE the existing "context / { ... }".
+#
+# Why before "context /": OpenLiteSpeed routes by the most specific path, so
+#   /call      -> this relay (port 8097)
+#   /wa-send   -> WhatsApp send relay (port 8096)   [unchanged]
+#   everything else incl. /wa-webhook -> receiver (port 8095)   [unchanged]
+# Nothing already running is touched.
+#
+# After saving, run:  systemctl restart lsws
+
+extprocessor call_api {
+  type                    proxy
+  address                 127.0.0.1:8097
+  maxConns                100
+  pcKeepAliveTimeout      60
+  initTimeout             60
+  retryTimeout            0
+  respBuffer              0
+}
+
+context /call {
+  type                    proxy
+  handler                 call_api
+  addDefaultCharset       off
+}

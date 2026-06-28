@@ -257,6 +257,18 @@
   #loginOverlay input:focus{border-color:#1b6ef3}
   #loginOverlay button{width:100%;margin-top:12px;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:800;color:#fff;background:#15457e;cursor:pointer}
   .login-hint{color:#667085;font-size:12.5px;margin-top:14px;line-height:1.5}
+  /* Who-is-calling bar + call toast (click-to-call) */
+  .callerbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#eef7f0;border:1px solid #cfe9d8;
+    border-radius:12px;padding:10px 14px;margin:0 0 14px}
+  .callerbar label{font-weight:800;font-size:14px;color:var(--ink)}
+  .callerbar select{font-size:15px;padding:8px 12px;border:1px solid #bcd;border-radius:9px;background:#fff;color:var(--ink);min-width:190px}
+  .callerhint{font-size:12.5px;color:var(--muted)}
+  .callerbar.need{background:#fdeceb;border-color:#f3b4ad}
+  .callerwho{font-weight:800;font-size:15px;color:var(--ink)}
+  #callToast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);max-width:92%;
+    background:#102a43;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;
+    box-shadow:0 6px 22px rgba(16,24,40,.28);z-index:9999;opacity:0;pointer-events:none;transition:opacity .2s}
+  #callToast.show{opacity:1}
 </style>
 </head>
 <body>
@@ -298,10 +310,16 @@
 
   <!-- KPI tiles: always visible -->
   <div class="kpis">
-    <div class="kpi hero"><div class="lbl">Awaiting callback</div><div class="num" id="k_await">—</div><div class="sub">need a call now</div></div>
-    <div class="kpi" id="k_missed_card"><div class="lbl">Incoming missed</div><div class="num" id="k_missed">—</div><div class="sub" id="k_rate">—</div></div>
-    <div class="kpi"><div class="lbl">Total calls today</div><div class="num" id="k_total">—</div><div class="sub" id="k_incoming">—</div></div>
+    <div class="kpi hero tap" onclick="goToSection('pending')" title="Go to callbacks needed"><div class="lbl">Awaiting callback</div><div class="num" id="k_await">—</div><div class="sub">need a call now</div></div>
+    <div class="kpi tap" id="k_missed_card" onclick="goToSection('pending')" title="Go to missed callers"><div class="lbl">Incoming missed</div><div class="num" id="k_missed">—</div><div class="sub" id="k_rate">—</div></div>
+    <div class="kpi tap" onclick="goToSection('agents')" title="Go to clinic team"><div class="lbl">Total calls today</div><div class="num" id="k_total">—</div><div class="sub" id="k_incoming">—</div></div>
     <div class="kpi tap" id="kpi_wa" onclick="goToWA()" title="Go to WhatsApp chats"><div class="lbl">WhatsApp (48h)</div><div class="num" id="k_wa">—</div><div class="sub">tap to view chats ↓</div></div>
+  </div>
+
+  <!-- Who is calling? — sets which agent's mobile rings & who the call is logged under -->
+  <div class="callerbar" id="callerbar">
+    <span class="callerwho">📞 Calling as: <b id="callerName">…</b></span>
+    <span class="callerhint" id="callerhint"></span>
   </div>
 
   <!-- Needs a callback now: open by default -->
@@ -354,10 +372,11 @@
     </div>
   </div>
 </div>
+<div id="callToast"></div>
 <script>
   var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
   var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
-  var PAGE_BUILD = 'v11 · thread view';
+  var PAGE_BUILD = 'v15 · agent roster';
   var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
   var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
   var replyOpen = false, openReplyId = null;  // a WhatsApp reply composer is open
@@ -368,6 +387,14 @@
   function toggleSec(head){
     head.parentNode.classList.toggle('collapsed');
     saveSecState();
+  }
+  function goToSection(key){
+    var sec=document.querySelector('section.sec[data-key="'+key+'"]');
+    if(!sec) return;
+    sec.classList.remove('collapsed');
+    saveSecState();
+    var head=sec.querySelector('.sechead')||sec;
+    head.scrollIntoView({behavior:'smooth', block:'start'});
   }
   function goToWA(){
     var sec=document.querySelector('section.sec[data-key="whatsapp"]');
@@ -599,7 +626,7 @@
                    triedLine+
                    patientLine(e.patient)+ waLine(e.wa)+
                  '</div>'+
-                 '<div class="chips">'+chips+'<a class="call" href="tel:'+tel(e.number)+'">Call</a></div>'+
+                 '<div class="chips">'+chips+'<button class="call" onclick="placeCall(\''+esc(e.number)+'\')">Call</button></div>'+
                '</div>';
       }).join('');
     }
@@ -628,7 +655,7 @@
                    patientLine(e.patient)+
                    '<div class="recslot" id="'+recId+'"></div>'+
                  '</div>'+
-                 '<div class="chips">'+chips+recBtn+'<a class="call" href="tel:'+tel(e.number)+'">Call</a></div>'+
+                 '<div class="chips">'+chips+recBtn+'<button class="call" onclick="placeCall(\''+esc(e.number)+'\')">Call</button></div>'+
                '</div>';
       }).join('');
     }
@@ -824,6 +851,38 @@
   function hideBanner(){ document.getElementById('banner').style.display='none';
     document.getElementById('dot').style.background='var(--ok)'; }
 
+  /* ---- Click-to-call: agent is BOUND to the login (server-enforced) ---- */
+  var CALLER_NAME = '';   // set from getAccess on login; '' = not linked to an agent
+  function setCaller(name){
+    CALLER_NAME = name || '';
+    var b=document.getElementById('callerName'), h=document.getElementById('callerhint'), bar=document.getElementById('callerbar');
+    if(b) b.textContent = CALLER_NAME || '\u26a0 login not linked to an agent';
+    if(CALLER_NAME){ if(bar) bar.classList.remove('need'); if(h) h.textContent='Your phone rings first on each Call, then the patient.'; }
+    else { if(bar) bar.classList.add('need'); if(h) h.textContent='Ask the doctor to link your login — calling is disabled.'; }
+  }
+  function placeCall(number){
+    if(DASH_ROLE==='none') return;
+    if(!CALLER_NAME){
+      var bar=document.getElementById('callerbar');
+      if(bar){ bar.classList.add('need'); bar.scrollIntoView({behavior:'smooth',block:'center'}); }
+      showToast('Your login is not linked to an agent — ask the doctor.'); return;
+    }
+    showToast('Calling… '+CALLER_NAME+'\'s phone will ring first (a few seconds), then the patient.');
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.accepted){ showToast('\ud83d\udcde Ringing '+CALLER_NAME+' — answer your phone; the patient will be connected.'); }
+        else { showToast('Call not placed: '+((res&&res.reason)||'unknown error')); }
+      })
+      .withFailureHandler(function(e){ showToast('Call error: '+(e&&e.message?e.message:e)); })
+      .triggerCall(DASH_KEY, String(number||''), String(number||''));
+  }
+  var _toastT=null;
+  function showToast(msg){
+    var t=document.getElementById('callToast'); if(!t) return;
+    t.textContent=msg; t.classList.add('show');
+    if(_toastT) clearTimeout(_toastT);
+    _toastT=setTimeout(function(){ t.classList.remove('show'); }, 6000);
+  }
   function poll(force){
     var btn=document.getElementById('refresh'); btn.disabled=true; btn.textContent='Updating…';
     google.script.run
@@ -959,7 +1018,9 @@
     google.script.run
       .withSuccessHandler(function(a){
         var role=(a&&a.role)?a.role:'none';
-        if(role==='none') showLogin(isLoginAttempt); else applyAccess(k, role);
+        if(role==='none'){ showLogin(isLoginAttempt); return; }
+        setCaller(a&&a.agentName);
+        applyAccess(k, role);
       })
       .withFailureHandler(function(){ showLogin(false); })
       .getAccess(k);
