@@ -283,7 +283,7 @@ function computeDashboard_() {
   return {
     updated: Utilities.formatDate(new Date(), tz, 'h:mm:ss a'),
     dateLabel: Utilities.formatDate(b.start, tz, 'EEE d MMM yyyy'),
-    build: 'v12 \u00b7 media',
+    build: 'v17 \u00b7 inbound',
     kpis: {
       awaiting: pending.length, missed: s.incomingMissed, missedRate: rate,
       total: s.total, incoming: s.incoming, resolved: net.stats.resolved,
@@ -793,3 +793,549 @@ function waLookup_() {
  *     Status          : received / delivered / read / failed
  * The dashboard reads only Timestamp, Phone, Direction, Type, Message.
  * ------------------------------------------------------------------------- */
+
+/* ===========================================================================
+ * PHASE 1 — FOLLOW-UP CALL LOOP  (added v16)
+ * ---------------------------------------------------------------------------
+ * The dashboard's "Today's follow-up calls" worklist + outcome capture.
+ *
+ * TABS (all in the same tracker spreadsheet, resolved via CFG.SHEET_ID_PROP):
+ *   Followups_Today      READ  - written each morning by push_followups_today.py
+ *                              headers: Key, Section, PR, Patient Name, Mobile,
+ *                                       Diagnosis, Due Date, OD, Status
+ *   Followups_Settled    READ  - returned/dropout history (same script)
+ *   Followup_Outcomes    WRITE - THIS file is the only writer. One row per
+ *                              logged outcome. The morning re-push NEVER touches
+ *                              this tab, so results are never wiped.
+ *   Followup_Escalations WRITE - THIS file is the only writer. Items the doctor
+ *                              must personally resolve; persist until resolved.
+ *
+ * SETTLE MODEL (mirrors the Umbrella outcome model, D13):
+ *   - settling outcomes  -> row leaves the worklist (Coming / Out of town /
+ *                           On medication).
+ *   - non-settling       -> "Couldn't communicate" stays on the worklist (retry).
+ *   - escalating         -> also appended to Followup_Escalations and persists
+ *                           there until the doctor picks a resolution
+ *                           (Dikha chuke / Problem / Close follow-up /
+ *                            Not interested / Treatment elsewhere).
+ *
+ * ACCESS:
+ *   - Any valid key (staff or full) may read the worklist and LOG an outcome
+ *     (same as triggerCall, which both reception and the doctor may use).
+ *   - The Escalations VIEW + resolving an escalation = FULL (doctor) key only.
+ * ========================================================================= */
+
+var FU_TAB_TODAY    = 'Followups_Today';
+var FU_TAB_SETTLED  = 'Followups_Settled';
+var FU_TAB_OUTCOMES = 'Followup_Outcomes';
+var FU_TAB_ESCAL    = 'Followup_Escalations';
+
+var FU_OUTCOME_HEADERS = ['When', 'Key', 'Patient', 'Mobile', 'Section',
+                          'Outcome', 'Source', 'Days', 'Expected Date',
+                          'Detail', 'Handled By', 'Agent Ext', 'Settle',
+                          'Identity', 'Reason', 'Channel', 'For Whom', 'Clinic ID'];
+var FU_ESCAL_HEADERS = ['Raised', 'Key', 'Patient', 'Clinic ID', 'Diagnosis',
+                        'Mobile', 'Last Visit', 'Reason', 'Detail',
+                        'Raised By', 'Status', 'Resolution', 'Resolved When'];
+
+/** Which outcome codes settle the row, which escalate, which persist (retry). */
+var FU_SETTLING  = { coming: 1, out_of_town: 1, on_medication: 1 };
+var FU_ESCALATING = { dikha_chuke: 1, problem: 1, close_followup: 1,
+                      not_interested: 1, treatment_elsewhere: 1 };
+// 'cant_communicate' is neither: it stays on the worklist for a retry.
+
+/** Open spreadsheet by the shared Script Property (same as every other reader). */
+function fuSheet_() {
+  var id = PropertiesService.getScriptProperties().getProperty(CFG.SHEET_ID_PROP);
+  if (!id) return null;
+  return SpreadsheetApp.openById(id);
+}
+
+/** Read a whole tab as array-of-objects keyed by lower-cased header. */
+function fuReadObjects_(ss, tabName) {
+  var out = [];
+  var sh = ss.getSheetByName(tabName);
+  if (!sh) return out;
+  var vals = sh.getDataRange().getValues();
+  if (vals.length < 2) return out;
+  var H = vals[0].map(function (x) { return String(x).trim().toLowerCase(); });
+  for (var r = 1; r < vals.length; r++) {
+    var o = {};
+    for (var c = 0; c < H.length; c++) o[H[c]] = vals[r][c];
+    out.push(o);
+  }
+  return out;
+}
+
+/** Today's set of keys that already have a SETTLING or ESCALATING outcome today,
+ *  plus the latest non-settling note, so the worklist can drop/annotate rows.
+ *  Returns { settledKeys:{key:outcome}, retryKeys:{key:detail} }. */
+function fuTodaysOutcomeState_(ss) {
+  var res = { settledKeys: {}, retryKeys: {} };
+  var rows = fuReadObjects_(ss, FU_TAB_OUTCOMES);
+  if (!rows.length) return res;
+  var tz = Session.getScriptTimeZone();
+  var todayStr = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+  rows.forEach(function (o) {
+    var key = String(o['key'] || '').trim();
+    if (!key) return;
+    var whenT = dateVal_(o['when']);
+    var whenStr = whenT ? Utilities.formatDate(new Date(whenT), tz, 'yyyy-MM-dd') : '';
+    if (whenStr && whenStr !== todayStr) return;     // only today's outcomes affect today's list
+    var code = String(o['outcome'] || '').trim().toLowerCase().replace(/[^a-z]+/g, '_');
+    var settle = String(o['settle'] || '').trim().toLowerCase();
+    if (settle === 'settle' || FU_SETTLING[code] || FU_ESCALATING[code]) {
+      res.settledKeys[key] = code;                   // leaves the worklist
+    } else {
+      res.retryKeys[key] = String(o['detail'] || o['outcome'] || '').trim();  // stays, annotated
+    }
+  });
+  return res;
+}
+
+/** getFollowups(key) -> the live worklist + settled history for the page. */
+function getFollowups(key) {
+  if (dashRole_(key) === 'none') return { error: 'Not authorized. Please sign in again.' };
+  try {
+    var ss = fuSheet_();
+    if (!ss) return { today: [], settled: [], bySection: {}, counts: { open: 0, retry: 0, settled: 0 } };
+
+    var state = fuTodaysOutcomeState_(ss);
+    var rawToday = fuReadObjects_(ss, FU_TAB_TODAY);
+
+    var open = [], settledToday = 0, retryCount = 0;
+    rawToday.forEach(function (o) {
+      var key0 = String(o['key'] || '').trim();
+      if (key0 && state.settledKeys[key0]) { settledToday++; return; }   // already handled -> drop
+      var mobile = String(o['mobile'] || '').replace(/\D/g, '');
+      if (mobile.length > 10) mobile = mobile.slice(-10);
+      var retryNote = (key0 && state.retryKeys[key0]) ? state.retryKeys[key0] : '';
+      if (retryNote) retryCount++;
+      open.push({
+        key:       key0,
+        section:   String(o['section'] || 'Follow-up').trim() || 'Follow-up',
+        pr:        String(o['pr'] || '').trim(),
+        name:      String(o['patient name'] || o['patient'] || o['name'] || '').trim(),
+        mobile:    mobile,
+        diagnosis: String(o['diagnosis'] || '').trim(),
+        due:       fmtDateCell_(o['due date'] || o['due'] || ''),
+        od:        String(o['od'] || '').trim(),
+        status:    String(o['status'] || '').trim(),
+        retry:     retryNote
+      });
+    });
+
+    // group by section, then by priority (PR ascending, blanks last)
+    function prNum(p) { var n = parseInt(String(p).replace(/\D/g, ''), 10); return isNaN(n) ? 9999 : n; }
+    open.sort(function (a, b) {
+      if (a.section !== b.section) return a.section < b.section ? -1 : 1;
+      return prNum(a.pr) - prNum(b.pr);
+    });
+    var bySection = {};
+    open.forEach(function (it) { (bySection[it.section] || (bySection[it.section] = [])).push(it); });
+
+    // settled history (read-only view)
+    var settled = fuReadObjects_(ss, FU_TAB_SETTLED).map(function (o) {
+      return {
+        due:     fmtDateCell_(o['due'] || ''),
+        patient: String(o['patient'] || '').trim(),
+        mobile:  String(o['mobile'] || '').replace(/\D/g, '').slice(-10),
+        clinicId:String(o['clinic id'] || o['clinicid'] || '').trim(),
+        outcome: String(o['outcome'] || '').trim(),
+        by:      String(o['handled by'] || o['handledby'] || '').trim(),
+        when:    fmtDateCell_(o['when'] || '')
+      };
+    });
+
+    return {
+      today: open, bySection: bySection, settled: settled,
+      counts: { open: open.length, retry: retryCount, settled: settledToday },
+      updated: Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'h:mm:ss a')
+    };
+  } catch (err) {
+    return { error: String(err && err.message ? err.message : err) };
+  }
+}
+
+/** Ensure a tab exists with the given headers; return the sheet. */
+function fuEnsureTab_(ss, tabName, headers) {
+  var sh = ss.getSheetByName(tabName);
+  if (!sh) {
+    sh = ss.insertSheet(tabName);
+    sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+    return sh;
+  }
+  if (sh.getLastRow() === 0) {
+    sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+  }
+  return sh;
+}
+
+/**
+ * saveFollowupOutcome(key, payload) — log one follow-up call outcome.
+ * payload = { rowKey, name, mobile, section, outcome, source, days,
+ *             expected, detail, clinicId, diagnosis, lastVisit }
+ * 'outcome' is a code: coming | out_of_town | on_medication | cant_communicate |
+ *           dikha_chuke | problem | close_followup | not_interested | treatment_elsewhere
+ * The handler (agent) is taken from the LOGIN KEY server-side, never from the page.
+ * Escalating outcomes also append a persistent row to Followup_Escalations.
+ */
+function saveFollowupOutcome(key, payload) {
+  try {
+    if (dashRole_(key) === 'none') return { ok: false, reason: 'Not authorized.' };
+    var info = agentInfoForKey_(key);
+    var handler = (info && info.name) ? info.name : (dashRole_(key) === 'full' ? 'Doctor' : 'Staff');
+    var ext     = (info && info.ext)  ? info.ext  : '';
+    payload = payload || {};
+    var code = String(payload.outcome || '').trim().toLowerCase().replace(/[^a-z]+/g, '_');
+    if (!code) return { ok: false, reason: 'No outcome chosen.' };
+
+    var ss = fuSheet_();
+    if (!ss) return { ok: false, reason: 'Sheet not configured.' };
+
+    var settle = FU_SETTLING[code] ? 'settle'
+               : (FU_ESCALATING[code] ? 'escalate' : 'retry');
+
+    var mobile = String(payload.mobile || '').replace(/\D/g, '').slice(-10);
+    var tz = Session.getScriptTimeZone();
+    var whenStr = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd HH:mm');
+
+    // 1) always log the outcome (one-writer tab)
+    var shO = fuEnsureTab_(ss, FU_TAB_OUTCOMES, FU_OUTCOME_HEADERS);
+    shO.appendRow([
+      whenStr,
+      String(payload.rowKey || '').trim(),
+      String(payload.name || '').trim(),
+      mobile,
+      String(payload.section || '').trim(),
+      code,
+      String(payload.source || '').trim(),     // here | outside (on_medication)
+      String(payload.days || '').trim(),        // days' supply (on_medication, both sources)
+      String(payload.expected || '').trim(),    // expected date (coming / out_of_town)
+      String(payload.detail || '').trim(),
+      handler,
+      ext,
+      settle
+    ]);
+
+    // 2) if escalating, also persist to the doctor's escalations tab
+    if (settle === 'escalate') {
+      var shE = fuEnsureTab_(ss, FU_TAB_ESCAL, FU_ESCAL_HEADERS);
+      var reasonLabel = ({
+        dikha_chuke: 'Already visited (dikha chuke)',
+        problem: 'Problem / needs attention',
+        close_followup: 'Close follow-up - treatment complete',
+        not_interested: 'Not interested',
+        treatment_elsewhere: 'Treatment elsewhere'
+      })[code] || code;
+      shE.appendRow([
+        whenStr,
+        String(payload.rowKey || '').trim(),
+        String(payload.name || '').trim(),
+        String(payload.clinicId || '').trim(),
+        String(payload.diagnosis || '').trim(),
+        mobile,
+        String(payload.lastVisit || '').trim(),
+        reasonLabel,
+        String(payload.detail || '').trim(),
+        handler,
+        'OPEN',
+        '',     // Resolution - filled when the doctor resolves
+        ''      // Resolved When
+      ]);
+    }
+
+    return { ok: true, settle: settle, outcome: code };
+  } catch (err) {
+    return { ok: false, reason: String(err && err.message ? err.message : err) };
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * INCOMING-CALL OUTCOMES (v17)
+ * ---------------------------------------------------------------------------
+ * An incoming caller is not on the follow-up ladder, so it has its own outcome
+ * model: identity (known / existing-new-number / new-patient / surgery-enquiry /
+ * non-patient), a reason or type, and a resolution. It writes to the SAME
+ * Followup_Outcomes tab (Source = 'incoming') so the next-day summary and
+ * escalations absorb it automatically — no new tabs.
+ *
+ * Escalation rule: any clinical reason (post-op / new symptom / wants doctor) or
+ * an explicit "escalated to doctor" resolution -> Followup_Escalations.
+ * Non-settling: "needs callback" and "couldn't communicate" stay actionable
+ *   (they are logged but the caller is expected to be re-contacted).
+ * ------------------------------------------------------------------------- */
+
+// reasons/resolutions that mean "this needs the doctor"
+var IN_ESCALATE_REASON = { post_op: 1, new_symptom: 1, wants_doctor: 1 };
+var IN_ESCALATE_RESOLN = { escalated: 1 };
+// resolutions that DON'T settle (caller still needs action)
+var IN_NONSETTLING = { needs_callback: 1, cant_communicate: 1 };
+
+/**
+ * saveIncomingOutcome(key, p) — log an outcome for an incoming call.
+ * p = { phone, identity, name, clinicId, reason, resolution, expected,
+ *       channel, forWhom, surgery(bool), detail, lastVisit }
+ *   identity: known | existing_new_number | new_patient | surgery_enquiry | non_patient
+ * Handler taken from the login key server-side. Returns { ok, settle }.
+ */
+function saveIncomingOutcome(key, p) {
+  try {
+    if (dashRole_(key) === 'none') return { ok: false, reason: 'Not authorized.' };
+    var info = agentInfoForKey_(key);
+    var handler = (info && info.name) ? info.name : (dashRole_(key) === 'full' ? 'Doctor' : 'Staff');
+    var ext     = (info && info.ext)  ? info.ext  : '';
+    p = p || {};
+
+    var phone = String(p.phone || '').replace(/\D/g, '').slice(-10);
+    if (phone.length !== 10) return { ok: false, reason: 'Bad number.' };
+
+    var identity   = String(p.identity || '').trim().toLowerCase().replace(/[^a-z_]+/g, '_');
+    var reason     = String(p.reason || '').trim().toLowerCase().replace(/[^a-z_]+/g, '_');
+    var resolution = String(p.resolution || '').trim().toLowerCase().replace(/[^a-z_]+/g, '_');
+    if (!resolution && !reason) return { ok: false, reason: 'Nothing to log yet.' };
+
+    var ss = fuSheet_();
+    if (!ss) return { ok: false, reason: 'Sheet not configured.' };
+
+    var escalate = !!(IN_ESCALATE_REASON[reason] || IN_ESCALATE_RESOLN[resolution]);
+    var settle = escalate ? 'escalate'
+               : (IN_NONSETTLING[resolution] ? 'retry' : 'settle');
+
+    var tz = Session.getScriptTimeZone();
+    var whenStr = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd HH:mm');
+    var dayKey  = Utilities.formatDate(new Date(), tz, 'yyyyMMdd');
+    var rowKey  = 'IN_' + phone + '_' + dayKey;
+    // a readable combined "outcome" code for the summary cross-tab
+    var outcomeCode = 'in_' + (resolution || reason || 'logged');
+
+    var shO = fuEnsureTab_(ss, FU_TAB_OUTCOMES, FU_OUTCOME_HEADERS);
+    shO.appendRow([
+      whenStr,
+      rowKey,
+      String(p.name || '').trim(),
+      phone,
+      'Incoming',               // Section
+      outcomeCode,              // Outcome (summary groups on this)
+      '',                       // Source-on-medication (n/a)
+      '',                       // Days (n/a)
+      String(p.expected || '').trim(),
+      String(p.detail || '').trim(),
+      handler,
+      ext,
+      settle,
+      identity,                 // Identity
+      reason,                   // Reason
+      String(p.channel || '').trim(),   // Channel (how heard) - new patients only
+      String(p.forWhom || '').trim(),   // For Whom - self/other
+      String(p.clinicId || '').trim()   // Clinic ID
+    ]);
+
+    // escalate clinical/flagged incoming calls into the same doctor queue
+    if (settle === 'escalate') {
+      var shE = fuEnsureTab_(ss, FU_TAB_ESCAL, FU_ESCAL_HEADERS);
+      var reasonLabel = ({
+        post_op: 'Incoming: post-op / recovery concern',
+        new_symptom: 'Incoming: new symptom / problem',
+        wants_doctor: 'Incoming: wants to speak to doctor'
+      })[reason] || 'Incoming: escalated to doctor';
+      shE.appendRow([
+        whenStr, rowKey, String(p.name || '').trim(),
+        String(p.clinicId || '').trim(), '', phone,
+        String(p.lastVisit || '').trim(), reasonLabel,
+        String(p.detail || '').trim(), handler, 'OPEN', '', ''
+      ]);
+    }
+
+    return { ok: true, settle: settle };
+  } catch (err) {
+    return { ok: false, reason: String(err && err.message ? err.message : err) };
+  }
+}
+
+/** getEscalations(key) — DOCTOR ONLY: the open escalations to resolve. */
+function getEscalations(key) {
+  if (dashRole_(key) !== 'full') return { ok: false, reason: 'Not authorized.' };
+  try {
+    var ss = fuSheet_();
+    if (!ss) return { ok: true, open: [] };
+    var sh = ss.getSheetByName(FU_TAB_ESCAL);
+    if (!sh) return { ok: true, open: [] };
+    var vals = sh.getDataRange().getValues();
+    if (vals.length < 2) return { ok: true, open: [] };
+    var H = vals[0].map(function (x) { return String(x).trim().toLowerCase(); });
+    var col = function (name) { return H.indexOf(name); };
+    var tz = Session.getScriptTimeZone();
+    var open = [];
+    for (var r = 1; r < vals.length; r++) {
+      var status = String(vals[r][col('status')] || '').trim().toUpperCase();
+      if (status && status !== 'OPEN') continue;          // resolved ones drop off
+      open.push({
+        rowIndex:  r + 1,                                  // 1-based sheet row (for resolve)
+        raised:    fmtDateCell_(vals[r][col('raised')]),
+        name:      String(vals[r][col('patient')] || '').trim(),
+        clinicId:  String(vals[r][col('clinic id')] || '').trim(),
+        diagnosis: String(vals[r][col('diagnosis')] || '').trim(),
+        mobile:    String(vals[r][col('mobile')] || '').replace(/\D/g, '').slice(-10),
+        lastVisit: String(vals[r][col('last visit')] || '').trim(),
+        reason:    String(vals[r][col('reason')] || '').trim(),
+        detail:    String(vals[r][col('detail')] || '').trim(),
+        by:        String(vals[r][col('raised by')] || '').trim()
+      });
+    }
+    open.reverse();   // newest first
+    return { ok: true, open: open };
+  } catch (err) {
+    return { ok: false, reason: String(err && err.message ? err.message : err) };
+  }
+}
+
+/** resolveEscalation(key, rowIndex, resolution) — DOCTOR ONLY. Stamps a row resolved. */
+function resolveEscalation(key, rowIndex, resolution) {
+  if (dashRole_(key) !== 'full') return { ok: false, reason: 'Not authorized.' };
+  try {
+    var ri = parseInt(rowIndex, 10);
+    if (!ri || ri < 2) return { ok: false, reason: 'Bad row.' };
+    var res = String(resolution || '').trim();
+    if (!res) return { ok: false, reason: 'Pick a resolution.' };
+    var ss = fuSheet_();
+    var sh = ss && ss.getSheetByName(FU_TAB_ESCAL);
+    if (!sh) return { ok: false, reason: 'No escalations tab.' };
+    var H = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0]
+              .map(function (x) { return String(x).trim().toLowerCase(); });
+    var iStat = H.indexOf('status'), iResn = H.indexOf('resolution'), iWhen = H.indexOf('resolved when');
+    if (iStat < 0) return { ok: false, reason: 'Tab missing Status column.' };
+    var when = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm');
+    sh.getRange(ri, iStat + 1).setValue('RESOLVED');
+    if (iResn >= 0) sh.getRange(ri, iResn + 1).setValue(res);
+    if (iWhen >= 0) sh.getRange(ri, iWhen + 1).setValue(when);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, reason: String(err && err.message ? err.message : err) };
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * NEXT-DAY SUMMARY — staff-wise x outcome-wise, emailed + ntfy nudge.
+ * ---------------------------------------------------------------------------
+ * Set a daily time-driven trigger on sendFollowupSummary (e.g. 8 AM).
+ * Reads YESTERDAY's Followup_Outcomes rows, builds the cross-tab, emails a
+ * readable HTML table to Script Property SUMMARY_EMAIL, and posts a short
+ * companion nudge to ntfy topic in Script Property NTFY_TOPIC.
+ * No secrets in this file: both the address and the topic live in Properties.
+ * ------------------------------------------------------------------------- */
+var FU_OUTCOME_LABEL = {
+  coming: 'Coming / will visit',
+  out_of_town: 'Out of town',
+  on_medication: 'On medication',
+  cant_communicate: "Couldn't communicate",
+  dikha_chuke: 'Already visited',
+  problem: 'Problem / attention',
+  close_followup: 'Close follow-up',
+  not_interested: 'Not interested',
+  treatment_elsewhere: 'Treatment elsewhere',
+  in_resolved_on_call: 'In: resolved on call',
+  in_appointment_booked: 'In: appointment booked',
+  in_info_given: 'In: info given',
+  in_info_given_will_act: 'In: info given',
+  in_needs_callback: 'In: needs callback',
+  in_escalated: 'In: escalated to doctor',
+  in_cant_communicate: "In: couldn't communicate",
+  in_will_come: 'In: will come / considering',
+  in_enquiry_only: 'In: enquiry only',
+  in_no_action: 'In: no action',
+  in_not_relevant: 'In: not relevant'
+};
+
+function sendFollowupSummary() {
+  var sp = PropertiesService.getScriptProperties();
+  var email = (sp.getProperty('SUMMARY_EMAIL') || '').trim();
+  var topic = (sp.getProperty('NTFY_TOPIC') || '').trim();
+  var ss = fuSheet_();
+  if (!ss) { Logger.log('summary: no sheet'); return; }
+
+  var tz = Session.getScriptTimeZone();
+  var yday = new Date(Date.now() - 24 * 3600 * 1000);
+  var ydayStr = Utilities.formatDate(yday, tz, 'yyyy-MM-dd');
+  var prettyDay = Utilities.formatDate(yday, tz, 'EEE d MMM yyyy');
+
+  var rows = fuReadObjects_(ss, FU_TAB_OUTCOMES).filter(function (o) {
+    var t = dateVal_(o['when']);
+    return t && Utilities.formatDate(new Date(t), tz, 'yyyy-MM-dd') === ydayStr;
+  });
+
+  // cross-tab: staff -> outcomeCode -> count
+  var staffSet = {}, outcomeSet = {}, grid = {};
+  rows.forEach(function (o) {
+    var staff = String(o['handled by'] || 'Unknown').trim() || 'Unknown';
+    var code  = String(o['outcome'] || '').trim().toLowerCase().replace(/[^a-z]+/g, '_');
+    if (!code) return;
+    staffSet[staff] = 1; outcomeSet[code] = 1;
+    (grid[staff] || (grid[staff] = {}));
+    grid[staff][code] = (grid[staff][code] || 0) + 1;
+  });
+  var staves = Object.keys(staffSet).sort();
+  var codes  = Object.keys(outcomeSet).sort();
+
+  var total = rows.length;
+  var subject = 'Clinic follow-ups — ' + prettyDay + ' — ' + total + ' outcome' + (total === 1 ? '' : 's') + ' logged';
+
+  // build a readable HTML table
+  var html = '<div style="font-family:Arial,Helvetica,sans-serif;color:#1f2937">';
+  html += '<h2 style="margin:0 0 4px">Follow-up call outcomes</h2>';
+  html += '<div style="color:#6b7280;margin-bottom:14px">' + prettyDay + ' · ' + total + ' logged</div>';
+  if (!total) {
+    html += '<p>No follow-up outcomes were logged yesterday.</p>';
+  } else {
+    html += '<table style="border-collapse:collapse;font-size:14px">';
+    html += '<tr><th style="text-align:left;padding:6px 10px;border:1px solid #e5e7eb;background:#f9fafb">Staff</th>';
+    codes.forEach(function (c) {
+      html += '<th style="padding:6px 10px;border:1px solid #e5e7eb;background:#f9fafb">' +
+              (FU_OUTCOME_LABEL[c] || c) + '</th>';
+    });
+    html += '<th style="padding:6px 10px;border:1px solid #e5e7eb;background:#eef2ff">Total</th></tr>';
+    var colTot = {};
+    staves.forEach(function (s) {
+      var rowTot = 0;
+      html += '<tr><td style="padding:6px 10px;border:1px solid #e5e7eb;font-weight:bold">' + s + '</td>';
+      codes.forEach(function (c) {
+        var n = (grid[s] && grid[s][c]) || 0; rowTot += n; colTot[c] = (colTot[c] || 0) + n;
+        html += '<td style="text-align:center;padding:6px 10px;border:1px solid #e5e7eb">' + (n || '') + '</td>';
+      });
+      html += '<td style="text-align:center;padding:6px 10px;border:1px solid #e5e7eb;font-weight:bold;background:#eef2ff">' + rowTot + '</td></tr>';
+    });
+    html += '<tr><td style="padding:6px 10px;border:1px solid #e5e7eb;font-weight:bold;background:#f9fafb">Total</td>';
+    codes.forEach(function (c) {
+      html += '<td style="text-align:center;padding:6px 10px;border:1px solid #e5e7eb;font-weight:bold;background:#f9fafb">' + (colTot[c] || 0) + '</td>';
+    });
+    html += '<td style="text-align:center;padding:6px 10px;border:1px solid #e5e7eb;font-weight:bold;background:#e0e7ff">' + total + '</td></tr>';
+    html += '</table>';
+  }
+  html += '<p style="color:#9ca3af;font-size:12px;margin-top:16px">Auto-generated by the clinic dashboard. Open the dashboard to action open escalations.</p></div>';
+
+  if (email) {
+    MailApp.sendEmail({ to: email, subject: subject, htmlBody: html });
+    Logger.log('summary: emailed ' + total + ' rows');
+  } else {
+    Logger.log('summary: SUMMARY_EMAIL not set — skipped email');
+  }
+
+  // short ntfy nudge — OFF by default (ntfy.sh free quota is reserved for the
+  // live notifier). Flip Script Property SUMMARY_NTFY = 'on' once a no-quota
+  // self-hosted ntfy exists (planned for the VPS brain-migration, rollout #4).
+  var ntfyOn = String(sp.getProperty('SUMMARY_NTFY') || '').trim().toLowerCase() === 'on';
+  if (topic && ntfyOn) {
+    try {
+      var line = total
+        ? (total + ' follow-up outcomes logged ' + prettyDay + '. Open email for the staff-wise table.')
+        : ('No follow-up outcomes logged ' + prettyDay + '.');
+      UrlFetchApp.fetch('https://ntfy.sh/' + encodeURIComponent(topic), {
+        method: 'post',
+        contentType: 'text/plain; charset=utf-8',
+        headers: { 'Title': 'Clinic follow-up summary', 'Tags': 'clipboard' },
+        payload: line,
+        muteHttpExceptions: true
+      });
+    } catch (e) { Logger.log('summary: ntfy failed ' + e); }
+  }
+}

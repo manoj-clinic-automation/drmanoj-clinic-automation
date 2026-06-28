@@ -269,6 +269,57 @@
     background:#102a43;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;
     box-shadow:0 6px 22px rgba(16,24,40,.28);z-index:9999;opacity:0;pointer-events:none;transition:opacity .2s}
   #callToast.show{opacity:1}
+  /* ---------- follow-up call loop (v16) ---------- */
+  .fu-secband{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--brand);background:var(--accent-soft);border:1px solid var(--accent-line);
+    border-radius:8px;padding:4px 9px;margin:10px 0 6px;display:inline-block}
+  .fu-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:11px 13px;margin-bottom:8px;box-shadow:var(--shadow-sm)}
+  .fu-row.retry{border-color:var(--warn-line);background:var(--warn-soft)}
+  .fu-row .dx{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .fu-row .due{font-size:12px;color:var(--muted);margin-top:2px}
+  .fu-row .due b{color:var(--danger)}
+  .fu-pr{display:inline-block;min-width:20px;text-align:center;font-weight:800;font-size:11px;
+    color:#fff;background:var(--brand);border-radius:6px;padding:1px 5px;margin-right:6px}
+  .fu-name{font-weight:800;font-size:15px;color:var(--ink)}
+  .fu-right{display:flex;flex-direction:column;gap:6px;align-items:flex-end;min-width:160px}
+  .fu-retrytag{font-size:11px;font-weight:800;color:var(--warn);text-transform:uppercase;letter-spacing:.04em}
+  select.fu-out,select.fu-sub,input.fu-in{font-size:13px;padding:6px 8px;border:1px solid var(--line);
+    border-radius:8px;background:#fff;color:var(--ink);width:100%;box-sizing:border-box}
+  .fu-extra{display:flex;flex-direction:column;gap:5px;width:100%}
+  .fu-actions{display:flex;gap:6px;width:100%}
+  .fu-actions .call{flex:0 0 auto}
+  .fu-save{flex:1;border:1px solid var(--ok-line);background:var(--ok-soft);color:var(--ok);
+    font-weight:800;border-radius:9px;padding:7px 10px;cursor:pointer;font-size:13px}
+  .fu-save:disabled{opacity:.5;cursor:default}
+  .fu-msg{font-size:12px;margin-top:3px}
+  .fu-msg.ok{color:var(--ok)} .fu-msg.warn{color:var(--warn)}
+  .fu-esc{border-left:4px solid var(--danger)}
+  .fu-esc .reason{font-weight:800;color:var(--danger);font-size:13px}
+  .fu-esc .meta2{font-size:12px;color:var(--muted);margin-top:2px}
+  .fu-settledrow{display:flex;justify-content:space-between;gap:10px;font-size:13px;
+    padding:7px 11px;border-bottom:1px solid var(--line)}
+  .fu-settledrow .o{color:var(--ok);font-weight:700}
+  /* ---------- incoming-call outcome flow (v17) ---------- */
+  .logbtn{border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--accent);
+    font-weight:700;border-radius:9px;padding:7px 11px;cursor:pointer;font-size:13px;margin-left:6px}
+  .in-slot{margin-top:9px}
+  .in-card{background:#fff;border:1px solid var(--accent-line);border-radius:12px;padding:11px;margin-top:8px;
+    box-shadow:var(--shadow-sm)}
+  .in-card .step{margin-bottom:8px}
+  .in-card label{display:block;font-size:11.5px;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+  .in-card select,.in-card input{width:100%;box-sizing:border-box;font-size:14px;padding:9px 10px;
+    border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+  .in-card .row2{display:flex;gap:8px}.in-card .row2>*{flex:1}
+  .in-actions{display:flex;gap:8px;margin-top:6px}
+  .in-actions .savebtn{flex:1;border:1px solid var(--ok-line);background:var(--ok-soft);color:var(--ok);
+    font-weight:800;border-radius:10px;padding:10px;cursor:pointer;font-size:14px}
+  .in-actions .savebtn:disabled{opacity:.45}
+  .in-actions .cancel{border:1px solid var(--line);background:#fff;color:var(--muted);
+    border-radius:10px;padding:10px 14px;cursor:pointer;font-size:14px}
+  .in-msg{font-size:12.5px;margin-top:6px}.in-msg.ok{color:var(--ok)}.in-msg.warn{color:var(--warn)}
 </style>
 </head>
 <body>
@@ -314,6 +365,7 @@
     <div class="kpi tap" id="k_missed_card" onclick="goToSection('pending')" title="Go to missed callers"><div class="lbl">Incoming missed</div><div class="num" id="k_missed">—</div><div class="sub" id="k_rate">—</div></div>
     <div class="kpi tap" onclick="goToSection('agents')" title="Go to clinic team"><div class="lbl">Total calls today</div><div class="num" id="k_total">—</div><div class="sub" id="k_incoming">—</div></div>
     <div class="kpi tap" id="kpi_wa" onclick="goToWA()" title="Go to WhatsApp chats"><div class="lbl">WhatsApp (48h)</div><div class="num" id="k_wa">—</div><div class="sub">tap to view chats ↓</div></div>
+    <div class="kpi tap" id="kpi_fu" onclick="goToSection('fuToday')" title="Go to today's follow-up calls"><div class="lbl">Follow-ups due</div><div class="num" id="k_fu">—</div><div class="sub" id="k_fu_sub">tap to call ↓</div></div>
   </div>
 
   <!-- Who is calling? — sets which agent's mobile rings & who the call is logged under -->
@@ -332,6 +384,24 @@
   <section class="sec" data-key="resolved" data-default="open">
     <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Resolved callbacks <span class="cnt" id="resolvedCnt">0</span></h2>
     <div class="secbody"><div id="resolved" class="list"></div></div>
+  </section>
+
+  <!-- Today's follow-up calls: open by default -->
+  <section class="sec" data-key="fuToday" data-default="open">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Today's follow-up calls <span class="cnt" id="fuTodayCnt">0</span></h2>
+    <div class="secbody"><div id="fuToday" class="list"></div></div>
+  </section>
+
+  <!-- Escalations (doctor key only; shown by applyAccess): collapsed by default -->
+  <section class="sec" data-key="fuEscal" data-default="collapsed" id="secEscal" style="display:none">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Escalations — for you to resolve <span class="cnt" id="fuEscalCnt">0</span></h2>
+    <div class="secbody"><div id="fuEscal" class="list"></div></div>
+  </section>
+
+  <!-- Settled follow-ups (read-only history): collapsed by default -->
+  <section class="sec" data-key="fuSettled" data-default="collapsed">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Settled follow-ups <span class="cnt" id="fuSettledCnt">0</span></h2>
+    <div class="secbody"><div id="fuSettled" class="list"></div></div>
   </section>
 
   <!-- Recent WhatsApp: open by default -->
@@ -376,7 +446,7 @@
 <script>
   var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
   var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
-  var PAGE_BUILD = 'v15 · agent roster';
+  var PAGE_BUILD = 'v17 · inbound';
   var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
   var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
   var replyOpen = false, openReplyId = null;  // a WhatsApp reply composer is open
@@ -476,6 +546,7 @@
     if(p.name){ var ag=[]; if(p.age) ag.push(p.age); if(p.sex) ag.push(p.sex.charAt(0).toUpperCase());
       bits.push('<span class="nm">'+esc(p.name)+(ag.length?(' · '+esc(ag.join('/'))):'')+'</span>'); }
     if(p.dx)  bits.push('<span class="dx">'+esc(p.dx)+'</span>');
+    if(p.uid) bits.push('<span class="more">ID '+esc(p.uid)+'</span>');
     if(p.last)bits.push('<span class="more">last visit '+esc(p.last)+'</span>');
     if(p.more)bits.push('<span class="more">+'+p.more+' more on this no.</span>');
     return '<div class="ctx">'+bits.join(' · ')+'</div>';
@@ -619,14 +690,21 @@
         var when=e.times?('Incoming missed'+(e.attempts>1?(' '+e.attempts):'')+' ('+esc(e.times)+')'):('Incoming missed ('+esc(e.lastCall)+')');
         var t=e.triedOut;
         var triedLine = t ? '<div class="tried">↗ Outgoing not replied'+(t.count>1?(' '+t.count):'')+' ('+esc(t.times)+')</div>' : '';
+        var inId='in_'+esc(String(e.number))+'_'+i;
+        var known = !!(e.patient && (e.patient.name || e.patient.dx));
+        var pj = e.patient ? jsq(JSON.stringify({name:e.patient.name||'',uid:e.patient.uid||'',last:e.patient.last||'',dx:e.patient.dx||''})) : '{}';
         return '<div class="row'+(e.priority?' prio':'')+'">'+
                  '<div class="info">'+
                    '<div class="num-big"><a href="tel:'+tel(e.number)+'">'+esc(e.number)+'</a></div>'+
                    '<div class="when">'+when+'</div>'+
                    triedLine+
                    patientLine(e.patient)+ waLine(e.wa)+
+                   '<div class="in-slot" id="'+inId+'"></div>'+
                  '</div>'+
-                 '<div class="chips">'+chips+'<button class="call" onclick="placeCall(\''+esc(e.number)+'\')">Call</button></div>'+
+                 '<div class="chips">'+chips+
+                   '<button class="call" onclick="placeCall(\''+esc(e.number)+'\')">Call</button>'+
+                   '<button class="logbtn" onclick="inOpen(\''+inId+'\',\''+esc(e.number)+'\','+(known?'true':'false')+',\''+pj+'\')">Log outcome ▾</button>'+
+                 '</div>'+
                '</div>';
       }).join('');
     }
@@ -883,12 +961,438 @@
     if(_toastT) clearTimeout(_toastT);
     _toastT=setTimeout(function(){ t.classList.remove('show'); }, 6000);
   }
+  /* ====================================================================
+   * INCOMING-CALL OUTCOME FLOW (v17) — guided, one step at a time (Option A)
+   * Everything stays hidden behind "Log outcome ▾"; controls unfold downward.
+   * ==================================================================== */
+  // reasons a KNOWN patient might call in (clinical ones * auto-escalate)
+  var IN_REASONS = [
+    ['', '— why did they call? —'],
+    ['appointment', 'Appointment — book / reschedule / cancel'],
+    ['reports', 'Reports — ready?'],
+    ['pharmacy', 'Pharmacy / medicines'],
+    ['xray', 'X-ray — availability'],
+    ['billing', 'Billing / payment'],
+    ['post_op', 'Post-op / recovery concern *'],
+    ['new_symptom', 'New symptom / problem *'],
+    ['info', 'Directions / timings / info'],
+    ['wants_doctor', 'Wants to speak to doctor *'],
+    ['other', 'Other']
+  ];
+  var IN_RESOLUTIONS = [
+    ['', '— how did it end? —'],
+    ['resolved_on_call', 'Resolved on call'],
+    ['appointment_booked', 'Appointment booked'],
+    ['info_given_will_act', 'Info given, will act'],
+    ['needs_callback', 'Needs callback (stays on list)'],
+    ['escalated', 'Escalate to doctor'],
+    ['cant_communicate', "Couldn't communicate (stays)"]
+  ];
+  // lighter outcome set for new / non-patient callers
+  var IN_NEW_OUTCOMES = [
+    ['', '— outcome —'],
+    ['appointment_booked', 'Appointment booked'],
+    ['will_come', 'Will come / considering'],
+    ['enquiry_only', 'Info given / enquiry only'],
+    ['needs_callback', 'Needs callback (stays)'],
+    ['escalated', 'Escalate to doctor'],
+    ['no_action', 'No action / not relevant']
+  ];
+  var IN_CHANNELS = [
+    ['', '(optional) how did they hear?'],
+    ['gmb', 'Google / GMB'],
+    ['referral', 'Referral'],
+    ['hoarding', 'Hoarding / banner'],
+    ['app', 'Clinic app'],
+    ['family', 'Family / friend'],
+    ['online', 'Online / social'],
+    ['other', 'Other']
+  ];
+  function inOpts(arr, sel){
+    return arr.map(function(o){ return '<option value="'+o[0]+'"'+(o[0]===sel?' selected':'')+'>'+esc(o[1])+'</option>'; }).join('');
+  }
+  function inDateNeeded(code){ return code==='appointment_booked' || code==='will_come'; }
+
+  // open the guided card for one incoming row
+  function inOpen(slotId, number, known, patientJson){
+    var slot=document.getElementById(slotId); if(!slot) return;
+    if(slot.innerHTML){ slot.innerHTML=''; return; }   // toggle closed if already open
+    var pat={}; try{ pat=JSON.parse(patientJson||'{}'); }catch(e){}
+    slot.dataset.number=number; slot.dataset.known=known?'1':'';
+    slot.dataset.pat=patientJson||'{}';
+    var html='<div class="in-card">';
+    if(known){
+      // Case A: known patient -> straight to reason + resolution
+      html+= inKnownBlock(slotId);
+    } else {
+      // unknown number -> ask identity first
+      html+='<div class="step"><label>Who is this?</label>'+
+            '<select onchange="inIdentity(\''+slotId+'\',this.value)">'+
+              '<option value="">— identify caller —</option>'+
+              '<option value="existing_new_number">Existing patient — new number</option>'+
+              '<option value="new_patient">New patient enquiry</option>'+
+              '<option value="surgery_enquiry">Surgery / second-opinion enquiry</option>'+
+              '<option value="non_patient">Not a patient</option>'+
+            '</select></div>'+
+            '<div id="'+slotId+'_body"></div>';
+    }
+    html+='<div class="in-msg" id="'+slotId+'_msg"></div></div>';
+    slot.innerHTML=html;
+  }
+
+  // the known-patient (also existing-patient-new-number after linking) block
+  function inKnownBlock(slotId){
+    return '<div class="step"><label>Reason for call</label>'+
+             '<select id="'+slotId+'_reason" onchange="inKnownCheck(\''+slotId+'\')">'+inOpts(IN_REASONS,'')+'</select></div>'+
+           '<div class="step"><label>Resolution</label>'+
+             '<select id="'+slotId+'_reso" onchange="inKnownCheck(\''+slotId+'\')">'+inOpts(IN_RESOLUTIONS,'')+'</select></div>'+
+           '<div class="step" id="'+slotId+'_datewrap" style="display:none"><label>Date</label>'+
+             '<input type="date" id="'+slotId+'_date"></div>'+
+           inActions(slotId);
+  }
+  function inActions(slotId){
+    return '<div class="in-actions">'+
+             '<button class="savebtn" id="'+slotId+'_save" disabled onclick="inSave(\''+slotId+'\')">Save outcome</button>'+
+             '<button class="cancel" onclick="document.getElementById(\''+slotId+'\').innerHTML=\'\'">Cancel</button>'+
+           '</div>';
+  }
+
+  // identity chosen for an unknown number -> render the right sub-block
+  function inIdentity(slotId, identity){
+    var body=document.getElementById(slotId+'_body'); if(!body) return;
+    var slot=document.getElementById(slotId); slot.dataset.identity=identity;
+    if(identity==='existing_new_number'){
+      body.innerHTML='<div class="step"><label>Patient name</label><input id="'+slotId+'_name" placeholder="Type the patient\u2019s name"></div>'+
+                     '<div class="step"><label>Clinic ID (optional)</label><input id="'+slotId+'_cid" placeholder="If they know it"></div>'+
+                     inKnownBlock(slotId);
+      // wire the name field to enable Save logic too
+    } else if(identity==='new_patient' || identity==='surgery_enquiry'){
+      var forWhom = (identity==='new_patient')
+        ? '<div class="step"><label>Appointment is for</label><select id="'+slotId+'_for"><option value="self">Themselves</option><option value="other">Someone else</option></select></div>'
+        : '';
+      var channel = '<div class="step"><label>How did they hear? (optional)</label><select id="'+slotId+'_chan">'+inOpts(IN_CHANNELS,'')+'</select></div>';
+      body.innerHTML=forWhom+channel+
+                     '<div class="step"><label>Outcome</label><select id="'+slotId+'_reso" onchange="inNewCheck(\''+slotId+'\')">'+inOpts(IN_NEW_OUTCOMES,'')+'</select></div>'+
+                     '<div class="step" id="'+slotId+'_datewrap" style="display:none"><label>Date</label><input type="date" id="'+slotId+'_date"></div>'+
+                     inActions(slotId);
+    } else if(identity==='non_patient'){
+      body.innerHTML='<div class="step"><label>Type</label><select id="'+slotId+'_np">'+
+                       '<option value="vendor">Vendor / supplier / sales</option>'+
+                       '<option value="marketing">Marketing / spam</option>'+
+                       '<option value="admin">Administrative / official</option>'+
+                       '<option value="wrong">Wrong number</option>'+
+                       '<option value="attendant">Attendant / family of a patient</option>'+
+                       '<option value="other">Other</option></select></div>'+
+                     '<div class="step"><label>Outcome</label><select id="'+slotId+'_reso" onchange="inNewCheck(\''+slotId+'\')">'+
+                       '<option value="">— outcome —</option>'+
+                       '<option value="enquiry_only">Info given</option>'+
+                       '<option value="no_action">No action / not relevant</option>'+
+                       '<option value="needs_callback">Needs callback (stays)</option>'+
+                       '<option value="cant_communicate">Couldn\'t communicate (stays)</option></select></div>'+
+                     inActions(slotId);
+    } else { body.innerHTML=''; }
+  }
+
+  function inKnownCheck(slotId){
+    var reason=(document.getElementById(slotId+'_reason')||{}).value||'';
+    var reso=(document.getElementById(slotId+'_reso')||{}).value||'';
+    var dw=document.getElementById(slotId+'_datewrap');
+    if(dw) dw.style.display = inDateNeeded(reso) ? '' : 'none';
+    var save=document.getElementById(slotId+'_save');
+    if(save) save.disabled = !(reason && reso);
+  }
+  function inNewCheck(slotId){
+    var reso=(document.getElementById(slotId+'_reso')||{}).value||'';
+    var dw=document.getElementById(slotId+'_datewrap');
+    if(dw) dw.style.display = inDateNeeded(reso) ? '' : 'none';
+    var save=document.getElementById(slotId+'_save');
+    if(save) save.disabled = !reso;
+  }
+
+  function inSave(slotId){
+    var slot=document.getElementById(slotId); if(!slot) return;
+    var number=slot.dataset.number||'';
+    var known=slot.dataset.known==='1';
+    var identity=slot.dataset.identity||(known?'known':'');
+    var pat={}; try{ pat=JSON.parse(slot.dataset.pat||'{}'); }catch(e){}
+    var g=function(id){ var el=document.getElementById(slotId+'_'+id); return el?el.value:''; };
+    var p={ phone:number, identity:identity,
+            name: g('name') || pat.name || '',
+            clinicId: g('cid') || pat.uid || '',
+            lastVisit: pat.last || '',
+            reason: g('reason') || g('np') || '',
+            resolution: g('reso'),
+            expected: g('date'),
+            channel: g('chan'),
+            forWhom: g('for'),
+            detail: '' };
+    if(!p.resolution){ inMsg(slotId,'Pick how the call ended.','warn'); return; }
+    var save=document.getElementById(slotId+'_save'); if(save){ save.disabled=true; save.textContent='Saving…'; }
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.ok){
+          var verb = res.settle==='escalate' ? 'saved & escalated to doctor'
+                   : (res.settle==='retry' ? 'saved — stays for callback' : 'saved');
+          inMsg(slotId, '✓ Outcome '+verb+'.','ok');
+          setTimeout(function(){ var s=document.getElementById(slotId); if(s) s.innerHTML=''; }, 1400);
+        } else {
+          if(save){ save.disabled=false; save.textContent='Save outcome'; }
+          inMsg(slotId, 'Not saved: '+((res&&res.reason)||'error'),'warn');
+        }
+      })
+      .withFailureHandler(function(err){
+        if(save){ save.disabled=false; save.textContent='Save outcome'; }
+        inMsg(slotId, 'Error: '+((err&&err.message)||err),'warn');
+      })
+      .saveIncomingOutcome(DASH_KEY, p);
+  }
+  function inMsg(slotId, text, kind){
+    var m=document.getElementById(slotId+'_msg'); if(!m) return;
+    m.textContent=text; m.className='in-msg '+(kind||'');
+  }
+
+  /* ====================================================================
+   * FOLLOW-UP CALL LOOP (v16) — worklist, outcome capture, escalations
+   * ==================================================================== */
+  var FU_OUTCOMES = [
+    { code:'',                    label:'— mark outcome —' },
+    { code:'coming',              label:'Coming / will visit' },
+    { code:'out_of_town',         label:'Out of town' },
+    { code:'on_medication',       label:'On medication' },
+    { code:'cant_communicate',    label:"Connected but couldn't communicate" },
+    { code:'dikha_chuke',         label:'Already visited (dikha chuke)' },
+    { code:'problem',             label:'Problem / needs attention' },
+    { code:'close_followup',      label:'Close follow-up · treatment complete' },
+    { code:'not_interested',      label:'Not interested' },
+    { code:'treatment_elsewhere', label:'Treatment elsewhere' }
+  ];
+  // which outcomes need extra fields
+  var FU_NEEDS_DATE = { coming:1, out_of_town:1 };
+  var FU_IS_MED     = { on_medication:1 };
+  var fuData = null;   // last getFollowups result, so save handlers can read row details
+
+  function fuOptions(sel){
+    return FU_OUTCOMES.map(function(o){
+      return '<option value="'+o.code+'"'+(o.code===sel?' selected':'')+'>'+esc(o.label)+'</option>';
+    }).join('');
+  }
+
+  function pollFollowups(){
+    google.script.run
+      .withSuccessHandler(function(d){ renderFollowups(d); })
+      .withFailureHandler(function(){ /* leave last view; never break the page */ })
+      .getFollowups(DASH_KEY);
+    if(DASH_ROLE==='full'){
+      google.script.run
+        .withSuccessHandler(function(d){ renderEscalations(d); })
+        .withFailureHandler(function(){})
+        .getEscalations(DASH_KEY);
+    }
+  }
+
+  function renderFollowups(d){
+    fuData = d;
+    var box=document.getElementById('fuToday');
+    var sbox=document.getElementById('fuSettled');
+    if(!box) return;
+    if(d && d.error){ box.innerHTML='<div class="empty">Could not load follow-ups: '+esc(d.error)+'</div>'; return; }
+    var counts=(d&&d.counts)||{open:0,retry:0,settled:0};
+    setCnt('fuTodayCnt', counts.open||0, (counts.open||0)>0);
+    // KPI tile
+    var kfu=document.getElementById('k_fu'); if(kfu) kfu.textContent=(counts.open||0);
+    var kfus=document.getElementById('k_fu_sub');
+    if(kfus) kfus.textContent=(counts.settled||0)+' settled · '+(counts.retry||0)+' retry';
+
+    var groups=(d&&d.bySection)||{};
+    var secNames=Object.keys(groups);
+    if(!secNames.length){ box.className=''; box.innerHTML='<div class="empty">✅ No follow-up calls pending — list is clear (or not yet pushed today).</div>'; }
+    else{
+      box.className='list';
+      var html='';
+      secNames.forEach(function(sec){
+        html+='<div class="fu-secband">'+esc(sec)+' · '+groups[sec].length+'</div>';
+        groups[sec].forEach(function(it){ html+=fuRowHtml(it); });
+      });
+      box.innerHTML=html;
+    }
+
+    // settled (read-only)
+    var s=(d&&d.settled)||[];
+    setCnt('fuSettledCnt', s.length, false);
+    if(!s.length){ sbox.className=''; sbox.innerHTML='<div class="muted-note">No settled follow-ups recorded.</div>'; }
+    else{
+      sbox.className='list';
+      sbox.innerHTML=s.map(function(e){
+        return '<div class="fu-settledrow"><span><b>'+esc(e.patient||'')+'</b>'+
+               (e.clinicId?(' · '+esc(e.clinicId)):'')+(e.due?(' · due '+esc(e.due)):'')+'</span>'+
+               '<span class="o">'+esc(e.outcome||'')+(e.by?(' · '+esc(e.by)):'')+(e.when?(' · '+esc(e.when)):'')+'</span></div>';
+      }).join('');
+    }
+  }
+
+  function fuRowHtml(it){
+    var rid=esc(String(it.key||('r'+Math.random())));
+    var prChip = it.pr ? '<span class="fu-pr">'+esc(it.pr)+'</span>' : '';
+    var dueLine = it.due ? ('<div class="due">Due '+esc(it.due)+(it.od&&String(it.od)!=='0'?(' · <b>'+esc(it.od)+'d overdue</b>'):'')+'</div>') : '';
+    var retryTag = it.retry ? '<div class="fu-retrytag">⟳ retry — '+esc(it.retry)+'</div>' : '';
+    var callBtn = it.mobile ? '<button class="call" onclick="placeCall(\''+esc(it.mobile)+'\')">Call</button>'
+                            : '<button class="call" disabled title="no valid mobile">Call</button>';
+    return '<div class="fu-row'+(it.retry?' retry':'')+'" id="furow_'+rid+'">'+
+             '<div class="info">'+
+               '<div class="fu-name">'+prChip+esc(it.name||'(no name)')+'</div>'+
+               (it.diagnosis?('<div class="dx">'+esc(it.diagnosis)+'</div>'):'')+
+               dueLine + retryTag +
+             '</div>'+
+             '<div class="fu-right">'+
+               '<select class="fu-out" id="fuout_'+rid+'" onchange="fuOnOutcome(\''+rid+'\')">'+fuOptions('')+'</select>'+
+               '<div class="fu-extra" id="fuextra_'+rid+'"></div>'+
+               '<div class="fu-actions">'+callBtn+
+                 '<button class="fu-save" id="fusave_'+rid+'" disabled onclick="fuSave(\''+rid+'\')">Save</button>'+
+               '</div>'+
+               '<div class="fu-msg" id="fumsg_'+rid+'"></div>'+
+             '</div>'+
+           '</div>';
+  }
+
+  // show/hide the extra fields when an outcome is chosen; enable Save
+  function fuOnOutcome(rid){
+    var sel=document.getElementById('fuout_'+rid);
+    var extra=document.getElementById('fuextra_'+rid);
+    var save=document.getElementById('fusave_'+rid);
+    var code=sel?sel.value:'';
+    var h='';
+    if(FU_NEEDS_DATE[code]){
+      h='<input class="fu-in" type="date" id="fudate_'+rid+'" title="Expected date">';
+    } else if(FU_IS_MED[code]){
+      h='<select class="fu-sub" id="fumed_'+rid+'">'+
+          '<option value="here">Medicine from here</option>'+
+          '<option value="outside">Medicine from outside</option>'+
+        '</select>'+
+        '<input class="fu-in" type="number" min="0" id="fudays_'+rid+'" placeholder="Days\u2019 supply (e.g. 30)">';
+    }
+    if(extra) extra.innerHTML=h;
+    if(save) save.disabled = !code;
+  }
+
+  function fuSave(rid){
+    var sel=document.getElementById('fuout_'+rid);
+    var code=sel?sel.value:''; if(!code) return;
+    var save=document.getElementById('fusave_'+rid);
+    var msg=document.getElementById('fumsg_'+rid);
+    // pull the row's patient details from the last fuData snapshot
+    var it=null;
+    if(fuData && fuData.today){ for(var i=0;i<fuData.today.length;i++){ if(String(fuData.today[i].key)===String(rid)){ it=fuData.today[i]; break; } } }
+    var payload={
+      rowKey: rid,
+      name:   it?it.name:'',
+      mobile: it?it.mobile:'',
+      section:it?it.section:'',
+      diagnosis: it?it.diagnosis:'',
+      outcome: code, source:'', days:'', expected:'', detail:'',
+      clinicId:'', lastVisit:''
+    };
+    if(FU_NEEDS_DATE[code]){ var dt=document.getElementById('fudate_'+rid); payload.expected=dt?dt.value:''; }
+    if(FU_IS_MED[code]){
+      var ms=document.getElementById('fumed_'+rid); payload.source=ms?ms.value:'';
+      var dd=document.getElementById('fudays_'+rid); payload.days=dd?dd.value:'';
+    }
+    if(save){ save.disabled=true; save.textContent='Saving…'; }
+    if(msg){ msg.textContent=''; msg.className='fu-msg'; }
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(save) save.textContent='Save';
+        if(res && res.ok){
+          var row=document.getElementById('furow_'+rid);
+          if(res.settle==='retry'){
+            if(msg){ msg.textContent='Saved — stays on list for retry.'; msg.className='fu-msg warn'; }
+            if(save) save.disabled=false;
+          } else if(res.settle==='escalate'){
+            if(row){ row.style.transition='opacity .4s'; row.style.opacity='0.35'; }
+            if(msg){ msg.textContent='Saved & escalated to the doctor.'; msg.className='fu-msg ok'; }
+          } else {
+            if(row){ row.style.transition='opacity .4s'; row.style.opacity='0.35'; }
+            if(msg){ msg.textContent='Saved — settled.'; msg.className='fu-msg ok'; }
+          }
+        } else {
+          if(save) save.disabled=false;
+          if(msg){ msg.textContent='Not saved: '+((res&&res.reason)||'error'); msg.className='fu-msg warn'; }
+        }
+      })
+      .withFailureHandler(function(err){
+        if(save){ save.disabled=false; save.textContent='Save'; }
+        if(msg){ msg.textContent='Error: '+((err&&err.message)||err); msg.className='fu-msg warn'; }
+      })
+      .saveFollowupOutcome(DASH_KEY, payload);
+  }
+
+  /* ---- Escalations (doctor key only) ---- */
+  function renderEscalations(d){
+    var box=document.getElementById('fuEscal'); if(!box) return;
+    var open=(d&&d.open)||[];
+    setCnt('fuEscalCnt', open.length, open.length>0);
+    if(!open.length){ box.className=''; box.innerHTML='<div class="muted-note">No open escalations. 👍</div>'; return; }
+    box.className='list';
+    box.innerHTML=open.map(function(e){
+      var meta=[];
+      if(e.clinicId)  meta.push('ID '+esc(e.clinicId));
+      if(e.diagnosis) meta.push(esc(e.diagnosis));
+      if(e.lastVisit) meta.push('last visit '+esc(e.lastVisit));
+      if(e.by)        meta.push('by '+esc(e.by));
+      if(e.raised)    meta.push(esc(e.raised));
+      var callBtn = e.mobile ? '<button class="call" onclick="placeCall(\''+esc(e.mobile)+'\')">Call</button>' : '';
+      return '<div class="fu-row fu-esc" id="esc_'+e.rowIndex+'">'+
+               '<div class="info">'+
+                 '<div class="reason">'+esc(e.reason||'Escalation')+'</div>'+
+                 '<div class="fu-name" style="font-size:14px">'+esc(e.name||'(no name)')+'</div>'+
+                 (e.detail?('<div class="dx">'+esc(e.detail)+'</div>'):'')+
+                 '<div class="meta2">'+meta.join(' · ')+'</div>'+
+               '</div>'+
+               '<div class="fu-right">'+
+                 '<select class="fu-out" id="escres_'+e.rowIndex+'">'+
+                   '<option value="">— resolve as —</option>'+
+                   '<option value="Completed treatment">Completed treatment</option>'+
+                   '<option value="Dropped out">Dropped out</option>'+
+                   '<option value="Will follow up">Will follow up</option>'+
+                   '<option value="Other">Other</option>'+
+                 '</select>'+
+                 '<div class="fu-actions">'+callBtn+
+                   '<button class="fu-save" onclick="resolveEsc('+e.rowIndex+')">Resolve</button>'+
+                 '</div>'+
+                 '<div class="fu-msg" id="escmsg_'+e.rowIndex+'"></div>'+
+               '</div>'+
+             '</div>';
+    }).join('');
+  }
+
+  function resolveEsc(rowIndex){
+    var sel=document.getElementById('escres_'+rowIndex);
+    var res=sel?sel.value:''; var msg=document.getElementById('escmsg_'+rowIndex);
+    if(!res){ if(msg){ msg.textContent='Pick a resolution first.'; msg.className='fu-msg warn'; } return; }
+    google.script.run
+      .withSuccessHandler(function(r){
+        if(r && r.ok){
+          var row=document.getElementById('esc_'+rowIndex);
+          if(row){ row.style.transition='opacity .4s'; row.style.opacity='0.3'; }
+          if(msg){ msg.textContent='Resolved: '+esc(res); msg.className='fu-msg ok'; }
+        } else if(msg){ msg.textContent='Not saved: '+((r&&r.reason)||'error'); msg.className='fu-msg warn'; }
+      })
+      .withFailureHandler(function(err){ if(msg){ msg.textContent='Error: '+((err&&err.message)||err); msg.className='fu-msg warn'; } })
+      .resolveEscalation(DASH_KEY, rowIndex, res);
+  }
+
+  function fuEditing(){
+    // don't blow away a half-entered outcome on auto-refresh
+    var sels=document.querySelectorAll('select.fu-out');
+    for(var i=0;i<sels.length;i++){ if(sels[i].value) return true; }
+    return false;
+  }
   function poll(force){
     var btn=document.getElementById('refresh'); btn.disabled=true; btn.textContent='Updating…';
     google.script.run
       .withSuccessHandler(function(d){ if(d&&d.error&&/authoriz/i.test(d.error)){ reset(btn); showLogin(true); return; } render(d); reset(btn); })
       .withFailureHandler(function(err){ showBanner('Reconnecting… ('+((err&&err.message)||err)+')'); reset(btn); })
       .getDashboardData(DASH_KEY, !!force);
+    if(force || !fuEditing()) pollFollowups();   // refresh the follow-up loop too (unless mid-edit)
   }
   function reset(btn){ btn.disabled=false; btn.textContent='↻ Refresh'; left=REFRESH_SECONDS; }
 
@@ -1012,6 +1516,7 @@
   function applyAccess(k, role){
     DASH_KEY=k; DASH_ROLE=role;
     try{ localStorage.setItem('clinicDashKey', k); }catch(e){}   // remember on this device
+    var escSec=document.getElementById('secEscal'); if(escSec) escSec.style.display=(role==='full')?'':'none';
     hideLogin(); startDashboard();
   }
   function tryKey(k, isLoginAttempt){
