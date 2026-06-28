@@ -1409,3 +1409,185 @@ function sendFollowupSummary() {
     } catch (e) { Logger.log('summary: ntfy failed ' + e); }
   }
 }
+
+/**
+ * =====================================================================
+ * "WHO IS THIS?" 360 PATIENT LOOKUP  (added Session 14, mobile-first)
+ * ---------------------------------------------------------------------
+ * A read-only, glance-first patient lookup for use on the phone (rounds,
+ * chamber, away from the desk). Answers: who they are, when last seen,
+ * sanitised taxonomical diagnosis, and what's pending.
+ *
+ * Source: the SAME live tabs the dashboard already reads -
+ *   - Patient_Master  (mirror of the tracker's patient_master.csv)
+ *   - Followups_Today  (the live worklist, for the "pending" line)
+ * No new tabs, no new plumbing. Survives the VPS/SQLite migration
+ * untouched (it reads the Sheet, which the migration keeps filling).
+ *
+ * Tiers (server-enforced, never trusted from the page):
+ *   - role 'none'  -> refused.
+ *   - role 'staff' / 'full' -> may look up patients (clinical context).
+ *   Revenue is NOT in Patient_Master, so nothing financial is exposed
+ *   here yet; the Doctor-only financial widening comes with the
+ *   migration (KB: M6). 'canFinancial' is returned for the page to use
+ *   once that lands.
+ *
+ * Search modes (one of):
+ *   mode 'mobile'   -> exact, last-10 digits.
+ *   mode 'clinicid' -> exact; tolerant: matches the 4-digit Clinic ID
+ *                      column AND the opaque UID column (whichever the
+ *                      mirror pushed), so it works regardless.
+ *   mode 'name'     -> partial, case-insensitive; returns a short
+ *                      pick-list when several match.
+ *
+ * Returns:
+ *   { ok, mode, query, freshness, canFinancial,
+ *     matches: [ {name, age, sex, clinicId, uid, mobile, dx,
+ *                 lastVisit, lastAgo, pending} ],
+ *     tooMany (bool), note }
+ * Phone numbers are returned in full ONLY for the one-tap Call action
+ * (the dashboard already shows numbers to authorised staff); nothing is
+ * logged by this function - it is pure read.
+ * =====================================================================
+ */
+var P360_MAX_NAME_HITS = 25;   // cap a name pick-list (older base: names repeat)
+
+function lookupPatient360(key, mode, query) {
+  var role = dashRole_(key);
+  if (role === 'none') return { ok: false, error: 'Not authorized. Please sign in again.' };
+
+  mode  = String(mode || '').trim().toLowerCase();
+  query = String(query || '').trim();
+  if (!query) return { ok: false, error: 'Type something to search.' };
+
+  var canFinancial = (role === 'full');   // for the future revenue widening (M6)
+
+  try {
+    var sp = PropertiesService.getScriptProperties();
+    var id = sp.getProperty('PATIENT_SHEET_ID') || sp.getProperty(CFG.SHEET_ID_PROP);
+    if (!id) return { ok: false, error: 'Patient sheet not configured.' };
+    var sh = SpreadsheetApp.openById(id).getSheetByName(PATIENT_TAB);
+    if (!sh) return { ok: false, error: 'Patient_Master tab not found.' };
+
+    var vals = sh.getDataRange().getValues();
+    if (vals.length < 2) return { ok: true, mode: mode, query: query, matches: [],
+                                  freshness: '', canFinancial: canFinancial,
+                                  note: 'Patient list is empty.' };
+
+    var H = vals[0].map(function (x) { return String(x).trim().toLowerCase(); });
+    var iPhone = findCol_(H, ['mobile', 'phone number', 'mobile number', 'mobile no', 'phone', 'number', 'phone10']);
+    var iName  = findCol_(H, ['patient name', 'name', 'first name']);
+    var iDx    = findCol_(H, ['diagnosis', 'dx', 'purpose of visit', 'purpose']);
+    var iAge   = findCol_(H, ['age']);
+    var iSex   = findCol_(H, ['gender', 'sex']);
+    var iLast  = findCol_(H, ['last visit', 'consultation date', 'last seen', 'seen']);
+    var iUid   = findCol_(H, ['clinic specific id', 'clinic id', 'patient uid', 'uid']);
+
+    // Freshness stamp: when the spreadsheet was last written (best-effort).
+    // The mirror replaces Patient_Master on each run, so the file's
+    // last-updated time is a good "data as of" proxy.
+    var freshness = '';
+    try {
+      var file = DriveApp.getFileById(id);
+      freshness = Utilities.formatDate(file.getLastUpdated(), Session.getScriptTimeZone(), 'd MMM, h:mm a');
+    } catch (e) { freshness = ''; }
+
+    var qDigits = query.replace(/\D/g, '');
+    var qLower  = query.toLowerCase();
+    var hits = [];
+
+    for (var r = 1; r < vals.length && hits.length <= (P360_MAX_NAME_HITS + 1); r++) {
+      var phRaw = iPhone >= 0 ? vals[r][iPhone] : '';
+      var ph    = last10_(phRaw);
+      var name  = iName >= 0 ? String(vals[r][iName] || '').trim() : '';
+      var uid   = iUid  >= 0 ? String(vals[r][iUid]  || '').trim() : '';
+
+      var isMatch = false;
+      if (mode === 'mobile') {
+        if (qDigits.length >= 6 && ph && ph.slice(-10) === qDigits.slice(-10)) isMatch = true;
+      } else if (mode === 'clinicid') {
+        // tolerant: compare against the id column both as-typed and digits-only
+        var uidL = uid.toLowerCase();
+        if (uid && (uidL === qLower || uid.replace(/\D/g, '') === qDigits && qDigits !== '')) isMatch = true;
+      } else { // name (partial)
+        if (name && qLower && name.toLowerCase().indexOf(qLower) >= 0) isMatch = true;
+      }
+      if (!isMatch) continue;
+
+      var lastStr = iLast >= 0 ? fmtDateCell_(vals[r][iLast]) : '';
+      var lastMs  = iLast >= 0 ? dateVal_(vals[r][iLast])     : 0;
+      hits.push({
+        name:      name,
+        age:       iAge >= 0 ? String(vals[r][iAge] || '').trim() : '',
+        sex:       iSex >= 0 ? String(vals[r][iSex] || '').trim() : '',
+        clinicId:  uid,
+        uid:       uid,
+        mobile:    ph || '',
+        dx:        iDx >= 0 ? String(vals[r][iDx] || '').trim() : '',
+        lastVisit: lastStr,
+        lastAgo:   agoFromMs_(lastMs),
+        _sort:     lastMs,
+        pending:   ''
+      });
+    }
+
+    var tooMany = false;
+    if (hits.length > P360_MAX_NAME_HITS) { hits = hits.slice(0, P360_MAX_NAME_HITS); tooMany = true; }
+
+    // Most-recent first (helps tell repeated names apart).
+    hits.sort(function (a, b) { return (b._sort || 0) - (a._sort || 0); });
+
+    // Add the "pending" line from Followups_Today (best-effort; never blocks).
+    if (hits.length) {
+      try {
+        var pend = pendingByMobile_();
+        hits.forEach(function (h) {
+          if (h.mobile && pend[h.mobile]) h.pending = pend[h.mobile];
+        });
+      } catch (e) { /* pending optional */ }
+    }
+    hits.forEach(function (h) { delete h._sort; });
+
+    return {
+      ok: true, mode: mode, query: query,
+      freshness: freshness, canFinancial: canFinancial,
+      matches: hits, tooMany: tooMany,
+      note: hits.length ? '' : 'No patient matched.'
+    };
+  } catch (err) {
+    return { ok: false, error: String(err && err.message ? err.message : err) };
+  }
+}
+
+/** "x days/months ago" from a millis timestamp, or '' if unknown. */
+function agoFromMs_(ms) {
+  if (!ms) return '';
+  var days = Math.floor((Date.now() - ms) / 86400000);
+  if (days < 0)   return '';
+  if (days === 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 30)  return days + ' days ago';
+  var months = Math.floor(days / 30);
+  if (months < 12) return months + (months === 1 ? ' month ago' : ' months ago');
+  var years = Math.floor(days / 365);
+  return years + (years === 1 ? ' year ago' : ' years ago');
+}
+
+/** phone10 -> short pending text, read from Followups_Today (best-effort). */
+function pendingByMobile_() {
+  var out = {};
+  try {
+    var ss = fuSheet_();
+    if (!ss) return out;
+    var rows = fuReadObjects_(ss, FU_TAB_TODAY);
+    rows.forEach(function (o) {
+      var m = String(o['mobile'] || '').replace(/\D/g, '');
+      if (m.length > 10) m = m.slice(-10);
+      if (!m) return;
+      var sec = String(o['section'] || 'Follow-up').trim();
+      var due = fmtDateCell_(o['due date'] || o['due'] || '');
+      out[m] = sec + (due ? (' \u00b7 due ' + due) : '');
+    });
+  } catch (e) { /* optional */ }
+  return out;
+}

@@ -1,0 +1,300 @@
+#!/usr/bin/env python3
+# push_followups_today.py
+# -----------------------------------------------------------------------------
+# One-way mirror of the Follow-Up Tracker's daily "Staff_Action_Today_*.xlsx"
+# into two tabs of the Clinic Callback Tracker Google Sheet, so the dashboard
+# can show a live "Today's follow-up calls" worklist with one-tap calling.
+#
+#   Call Sheet  tab  ->  "Followups_Today"     (the worklist the staff call)
+#   Settled     tab  ->  "Followups_Settled"   (returned / dropout history)
+#
+# It is a deliberate TWIN of push_patient_mirror.py — same safety model:
+#   - Reads the workbook READ-ONLY. Never writes to your local file.
+#   - Pushes UP only (local -> cloud). Never reads the sheet back.
+#   - Replace-only: rewrites each tab fresh every run.
+#   - Refuses to push an empty Call Sheet (so a bad export can't wipe the list).
+#   - Console output MASKS phone numbers. The full 10-digit number is written
+#     to the sheet (the dashboard needs it to place the call), exactly as the
+#     patient mirror already does for Patient_Master.
+#   - Outcomes (who called / what happened) are NOT touched here. They live in
+#     a separate "Followup_Outcomes" tab the dashboard writes, so re-running
+#     this in the morning never wipes a result.
+#
+# HOW TO RUN (staff PC, once each morning — same habit as the patient mirror):
+#   python push_followups_today.py            <-- PREVIEW (writes nothing)
+#   python push_followups_today.py --push     <-- LIVE push to the sheet
+#   python push_followups_today.py --file "C:\path\Staff_Action_Today_2026-06-29.xlsx" --push
+# -----------------------------------------------------------------------------
+
+import os
+import sys
+import glob
+import json
+
+# --- openpyxl is the only extra dependency (same one the tracker already uses)
+try:
+    import openpyxl
+except ImportError:
+    print("STOP: the 'openpyxl' library isn't installed. Run once:")
+    print("   pip install --upgrade openpyxl")
+    sys.exit(1)
+
+# =============================== CONFIG ======================================
+# Normally nothing here needs changing.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Where the tracker drops its daily workbook. Default: an "outputs" subfolder
+# next to this script (the tracker's OUTPUTS_DIR). Override with --file.
+OUTPUTS_DIR = os.path.join(BASE_DIR, "outputs")
+
+# Folder holding the service-account .json key (same key as the patient mirror).
+KEY_DIR = BASE_DIR
+
+# The Clinic Callback Tracker sheet + the two tabs the dashboard reads.
+SHEET_ID       = "1USjArkqIdrE9hIqerghms76STatM5XTbSW_a9I3klo0"
+TAB_TODAY      = "Followups_Today"
+TAB_SETTLED    = "Followups_Settled"
+# =============================================================================
+
+TODAY_HEADERS = ["Key", "Section", "PR", "Patient Name", "Mobile",
+                 "Diagnosis", "Due Date", "OD", "Status"]
+SETTLED_HEADERS = ["Due", "Patient", "Mobile", "Clinic ID", "Outcome",
+                   "Handled By", "When"]
+
+
+# ------------------------------- helpers ------------------------------------
+def norm(s):
+    return "".join(ch for ch in str(s or "").lower() if ch.isalnum())
+
+
+def mask_phone(p):
+    p = "".join(ch for ch in str(p or "") if ch.isdigit())
+    return ("..." + p[-4:]) if len(p) >= 4 else ("..." if p else "")
+
+
+def normalize_phone(raw):
+    """Return a clean 10-digit Indian mobile, or '' if not valid."""
+    digits = "".join(ch for ch in str(raw or "") if ch.isdigit())
+    if len(digits) > 10:
+        digits = digits[-10:]
+    if len(digits) == 10 and digits[0] in "6789":
+        return digits
+    return ""
+
+
+def find_workbook():
+    """Pick the workbook: --file if given, else the newest Staff_Action_Today_*."""
+    if "--file" in sys.argv:
+        i = sys.argv.index("--file")
+        if i + 1 < len(sys.argv):
+            return sys.argv[i + 1]
+    cands = glob.glob(os.path.join(OUTPUTS_DIR, "Staff_Action_Today_*.xlsx"))
+    if not cands:
+        # also try this script's own folder, just in case
+        cands = glob.glob(os.path.join(BASE_DIR, "Staff_Action_Today_*.xlsx"))
+    if not cands:
+        return None
+    return max(cands, key=os.path.getmtime)   # newest by modified time
+
+
+def header_index(ws, must_have, scan_rows=12):
+    """Find the header row (1-based) containing a cell whose normalized text
+    matches one of `must_have`. Return (row_index, {field: col_index})."""
+    for r in range(1, min(scan_rows, ws.max_row) + 1):
+        cells = [norm(ws.cell(r, c).value) for c in range(1, ws.max_column + 1)]
+        if any(m in cells for m in must_have):
+            return r, cells
+    return None, None
+
+
+def col_of(header_cells, *aliases):
+    for a in aliases:
+        a = norm(a)
+        if a in header_cells:
+            return header_cells.index(a)  # 0-based within row
+    return -1
+
+
+# ----------------------------- Call Sheet -----------------------------------
+def read_call_sheet(wb):
+    ws = wb["Call Sheet"]
+    hrow, H = header_index(ws, ["patientname"])
+    if not hrow:
+        return []
+    iSN  = col_of(H, "s.n", "sn")
+    iPR  = col_of(H, "pr")
+    iNm  = col_of(H, "patient name", "name")
+    iMob = col_of(H, "mobile", "mobile no")
+    iDx  = col_of(H, "diagnosis / info", "diagnosis", "info")
+    iDt  = col_of(H, "date", "due", "due date")
+    iOD  = col_of(H, "od")
+    iSt  = col_of(H, "status")
+    iKey = col_of(H, "key")
+
+    def cell(row, idx):
+        if idx < 0:
+            return ""
+        v = ws.cell(row, idx + 1).value
+        return "" if v is None else str(v).strip()
+
+    out, seen = [], set()
+    section = "Follow-up"          # the sheet opens with the follow-up block
+    for r in range(hrow + 1, ws.max_row + 1):
+        a    = cell(r, iSN)
+        name = cell(r, iNm)
+        # ---- detect a section banner / note row (no patient name on it) ----
+        if not name:
+            banner = " ".join(cell(r, c) for c in range(0, 3) if cell(r, c)).lower()
+            if "procedure" in banner:
+                section = "Procedure"
+            elif "follow" in banner:
+                section = "Follow-up"
+            continue                                   # skip all non-patient rows
+        if norm(name) in ("total", "drmanojagarwalclinic"):
+            continue
+        key = cell(r, iKey) or ("ROW%d" % r)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append([
+            key,
+            section,
+            cell(r, iPR),
+            name,
+            normalize_phone(cell(r, iMob)),            # '' if uncallable (dashboard hides Call)
+            cell(r, iDx),
+            cell(r, iDt),
+            cell(r, iOD),
+            cell(r, iSt),
+        ])
+    return out
+
+
+# --------------------------- Settled Follow-Ups -----------------------------
+def read_settled(wb):
+    if "Settled Follow-Ups" not in wb.sheetnames:
+        return []
+    ws = wb["Settled Follow-Ups"]
+    hrow, H = header_index(ws, ["outcome", "patient"])
+    if not hrow:
+        return []
+    iDue = col_of(H, "due")
+    iPt  = col_of(H, "patient")
+    iMob = col_of(H, "mobile")
+    iCid = col_of(H, "clinic id", "clinicid")
+    iOut = col_of(H, "outcome")
+    iBy  = col_of(H, "handled by", "handledby")
+    iWhn = col_of(H, "when")
+
+    def cell(row, idx):
+        if idx < 0:
+            return ""
+        v = ws.cell(row, idx + 1).value
+        return "" if v is None else str(v).strip()
+
+    out = []
+    for r in range(hrow + 1, ws.max_row + 1):
+        pt = cell(r, iPt)
+        if not pt:
+            continue
+        out.append([
+            cell(r, iDue), pt, normalize_phone(cell(r, iMob)),
+            cell(r, iCid), cell(r, iOut), cell(r, iBy), cell(r, iWhn),
+        ])
+    return out
+
+
+# --------------------------------- write ------------------------------------
+def write_tab(sh, title, headers, rows):
+    import gspread
+    try:
+        ws = sh.worksheet(title)
+    except gspread.WorksheetNotFound:
+        ws = sh.add_worksheet(title=title, rows=len(rows) + 10, cols=len(headers))
+        print("Created new tab: " + title)
+    values = [headers] + rows
+    ws.resize(rows=max(len(values), 1), cols=len(headers))
+    ws.update(values=values, range_name="A1", value_input_option="RAW")
+
+
+def find_key():
+    keys = []
+    for path in glob.glob(os.path.join(KEY_DIR, "*.json")):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                obj = json.load(f)
+            if obj.get("type") == "service_account" and obj.get("client_email"):
+                keys.append(path)
+        except Exception:
+            pass
+    return keys
+
+
+# --------------------------------- main -------------------------------------
+def main():
+    push = "--push" in sys.argv
+    print("=" * 64)
+    print("FOLLOW-UP INGEST  -  " + ("LIVE PUSH" if push else "PREVIEW (no write)"))
+    print("=" * 64)
+
+    wbpath = find_workbook()
+    if not wbpath or not os.path.exists(wbpath):
+        print("STOP: could not find a 'Staff_Action_Today_*.xlsx'.")
+        print("Looked in: " + OUTPUTS_DIR)
+        print("Pass one explicitly with:  --file \"<path to the workbook>\"")
+        sys.exit(1)
+    print("Workbook : " + os.path.basename(wbpath))
+
+    wb = openpyxl.load_workbook(wbpath, data_only=True)
+    today = read_call_sheet(wb)
+    settled = read_settled(wb)
+
+    callable_n = sum(1 for r in today if r[4])
+    print("\nWorklist rows (Call Sheet) : %d   (%d callable, %d without a valid mobile)"
+          % (len(today), callable_n, len(today) - callable_n))
+    # quick section + status breakdown
+    from collections import Counter
+    sec = Counter(r[1] for r in today)
+    print("By section : " + ", ".join("%s=%d" % (k, v) for k, v in sec.items()))
+    print("Settled rows               : %d" % len(settled))
+
+    print("\nSample worklist (phone masked):")
+    print("   " + " | ".join(TODAY_HEADERS))
+    for row in today[:4]:
+        shown = row[:4] + [mask_phone(row[4])] + row[5:]
+        print("   " + " | ".join(str(x) for x in shown))
+
+    if not today:
+        print("\nSTOP: the Call Sheet had zero patient rows. Refusing to push.")
+        sys.exit(1)
+
+    if not push:
+        print("\nThis was a PREVIEW - nothing was written.")
+        print("If it looks right, run again with:  --push")
+        return
+
+    # ----------------------------- live push ---------------------------------
+    try:
+        import gspread  # noqa: F401
+    except ImportError:
+        print("\nSTOP: 'gspread' isn't installed. Run once:  pip install --upgrade gspread")
+        sys.exit(1)
+    keys = find_key()
+    if len(keys) != 1:
+        print("\nSTOP: need exactly one service-account .json in:\n   " + KEY_DIR)
+        for k in keys:
+            print("   found: " + os.path.basename(k))
+        sys.exit(1)
+    import gspread
+    print("\nUsing key file: " + os.path.basename(keys[0]))
+    gc = gspread.service_account(filename=keys[0])
+    sh = gc.open_by_key(SHEET_ID)
+    write_tab(sh, TAB_TODAY, TODAY_HEADERS, today)
+    write_tab(sh, TAB_SETTLED, SETTLED_HEADERS, settled)
+    print("\nDONE. Wrote %d worklist rows to '%s' and %d to '%s'. (Replace-only.)"
+          % (len(today), TAB_TODAY, len(settled), TAB_SETTLED))
+    print("The dashboard will show today's follow-up calls on its next refresh.")
+
+
+if __name__ == "__main__":
+    main()
