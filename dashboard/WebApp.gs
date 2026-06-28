@@ -283,7 +283,7 @@ function computeDashboard_() {
   return {
     updated: Utilities.formatDate(new Date(), tz, 'h:mm:ss a'),
     dateLabel: Utilities.formatDate(b.start, tz, 'EEE d MMM yyyy'),
-    build: 'v17 \u00b7 inbound',
+    build: 'v17.1 \u00b7 inbound',
     kpis: {
       awaiting: pending.length, missed: s.incomingMissed, missedRate: rate,
       total: s.total, incoming: s.incoming, resolved: net.stats.resolved,
@@ -1069,6 +1069,11 @@ function saveFollowupOutcome(key, payload) {
 // reasons/resolutions that mean "this needs the doctor"
 var IN_ESCALATE_REASON = { post_op: 1, new_symptom: 1, wants_doctor: 1 };
 var IN_ESCALATE_RESOLN = { escalated: 1 };
+// caller TYPES that always reach the doctor, whatever outcome is logged.
+// 'surgery_enquiry' is the Doctor/urgent path (surgery, fracture, accident,
+//  severe pain): it always escalates AND fires an instant ntfy push, while the
+//  staff still record the outcome (appointment booked / will come / etc.).
+var IN_ESCALATE_IDENTITY = { surgery_enquiry: 1 };
 // resolutions that DON'T settle (caller still needs action)
 var IN_NONSETTLING = { needs_callback: 1, cant_communicate: 1 };
 
@@ -1098,7 +1103,8 @@ function saveIncomingOutcome(key, p) {
     var ss = fuSheet_();
     if (!ss) return { ok: false, reason: 'Sheet not configured.' };
 
-    var escalate = !!(IN_ESCALATE_REASON[reason] || IN_ESCALATE_RESOLN[resolution]);
+    var isUrgent = !!IN_ESCALATE_IDENTITY[identity];
+    var escalate = !!(isUrgent || IN_ESCALATE_REASON[reason] || IN_ESCALATE_RESOLN[resolution]);
     var settle = escalate ? 'escalate'
                : (IN_NONSETTLING[resolution] ? 'retry' : 'settle');
 
@@ -1134,11 +1140,13 @@ function saveIncomingOutcome(key, p) {
     // escalate clinical/flagged incoming calls into the same doctor queue
     if (settle === 'escalate') {
       var shE = fuEnsureTab_(ss, FU_TAB_ESCAL, FU_ESCAL_HEADERS);
-      var reasonLabel = ({
-        post_op: 'Incoming: post-op / recovery concern',
-        new_symptom: 'Incoming: new symptom / problem',
-        wants_doctor: 'Incoming: wants to speak to doctor'
-      })[reason] || 'Incoming: escalated to doctor';
+      var reasonLabel =
+        isUrgent ? 'Incoming: Doctor/urgent (surgery / fracture / accident / severe pain)'
+        : ({
+            post_op: 'Incoming: post-op / recovery concern',
+            new_symptom: 'Incoming: new symptom / problem',
+            wants_doctor: 'Incoming: wants to speak to doctor'
+          })[reason] || 'Incoming: escalated to doctor';
       shE.appendRow([
         whenStr, rowKey, String(p.name || '').trim(),
         String(p.clinicId || '').trim(), '', phone,
@@ -1147,10 +1155,72 @@ function saveIncomingOutcome(key, p) {
       ]);
     }
 
+    // INSTANT push for the Doctor/urgent path (surgery / fracture / accident /
+    // severe pain). Staff are also trained to call the doctor at once; this is
+    // the written backup buzz. Best-effort: never let a push failure block the
+    // save (the outcome + escalation are already written above).
+    if (isUrgent) {
+      try { notifyUrgentIncoming_(p, phone, handler); } catch (e) {}
+    }
+
     return { ok: true, settle: settle };
   } catch (err) {
     return { ok: false, reason: String(err && err.message ? err.message : err) };
   }
+}
+
+/**
+ * notifyUrgentIncoming_ — fire a high-priority ntfy push for a Doctor/urgent
+ * incoming call. Option A: posts to the EXISTING ntfy topic (NTFY_TOPIC) so we
+ * don't trip the ntfy.sh free-tier second-topic 429. A distinct 🚨 title + high
+ * priority + tags make it stand out from the ordinary WhatsApp name alerts.
+ *
+ * Body content (graduated, per owner decision 28 Jun 2026):
+ *   - known patient:        name + short status tag + number + staff
+ *   - existing/new number:  name (as given) + number + staff
+ *   - new / unknown:        "new patient" + number + staff
+ * The patient NUMBER is included (owner wants one-tap call-back from the push).
+ * No clinical free-text is ever placed in the push body.
+ */
+function notifyUrgentIncoming_(p, phone, handler) {
+  var topic = (PropertiesService.getScriptProperties().getProperty('NTFY_TOPIC') || '').trim();
+  if (!topic) return;                       // no topic configured -> silently skip
+
+  var name = String((p && p.name) || '').trim();
+  var identity = String((p && p.identity) || '').trim().toLowerCase().replace(/[^a-z_]+/g, '_');
+  var lastVisit = String((p && p.lastVisit) || '').trim();
+  var clinicId = String((p && p.clinicId) || '').trim();
+
+  // short status tag from what we know (no VIP flag yet -> derive op/known/new)
+  var tag;
+  if (identity === 'surgery_enquiry' && !name && !clinicId) tag = 'new patient';
+  else if (clinicId || lastVisit)                           tag = 'known patient';
+  else if (name)                                            tag = name;          // name itself is the signal
+  else                                                       tag = 'new patient';
+
+  // assemble a single readable line. Name leads when we have it.
+  var who = name ? name : 'new patient';
+  var bits = [who];
+  if (tag !== who && tag !== 'new patient') bits.push(tag);
+  else if (!name) bits.push(tag);
+  if (lastVisit) bits.push('last visit ' + lastVisit);
+  bits.push('\uD83D\uDCDE ' + phone);                       // 📞 number (owner-approved)
+  if (handler) bits.push('by ' + handler);
+  bits.push('open dashboard');
+  var body = bits.join('  \u00b7  ');
+
+  var url = 'https://ntfy.sh/' + encodeURIComponent(topic);
+  UrlFetchApp.fetch(url, {
+    method: 'post',
+    contentType: 'text/plain; charset=utf-8',
+    payload: Utilities.newBlob(body).getBytes(),
+    headers: {
+      'Title': '\uD83D\uDEA8 URGENT incoming call',        // 🚨
+      'Priority': 'urgent',                                 // max ntfy priority
+      'Tags': 'rotating_light,hospital'
+    },
+    muteHttpExceptions: true
+  });
 }
 
 /** getEscalations(key) — DOCTOR ONLY: the open escalations to resolve. */

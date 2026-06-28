@@ -320,6 +320,8 @@
   .in-actions .cancel{border:1px solid var(--line);background:#fff;color:var(--muted);
     border-radius:10px;padding:10px 14px;cursor:pointer;font-size:14px}
   .in-msg{font-size:12.5px;margin-top:6px}.in-msg.ok{color:var(--ok)}.in-msg.warn{color:var(--warn)}
+  .in-urgent{background:#fbeae8;border:1px solid #e0b4ad;border-left:5px solid #c0392b;
+    color:#7a1c12;font-weight:700;font-size:13.5px;border-radius:8px;padding:9px 11px;margin-bottom:9px}
 </style>
 </head>
 <body>
@@ -446,7 +448,7 @@
 <script>
   var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
   var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
-  var PAGE_BUILD = 'v17 · inbound';
+  var PAGE_BUILD = 'v17.1 · inbound';
   var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
   var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
   var replyOpen = false, openReplyId = null;  // a WhatsApp reply composer is open
@@ -1031,7 +1033,7 @@
               '<option value="">— identify caller —</option>'+
               '<option value="existing_new_number">Existing patient — new number</option>'+
               '<option value="new_patient">New patient enquiry</option>'+
-              '<option value="surgery_enquiry">Surgery / second-opinion enquiry</option>'+
+              '<option value="surgery_enquiry">\ud83d\udea8 Doctor/urgent \u2014 surgery, fracture, accident, severe pain</option>'+
               '<option value="non_patient">Not a patient</option>'+
             '</select></div>'+
             '<div id="'+slotId+'_body"></div>';
@@ -1066,10 +1068,17 @@
                      '<div class="step"><label>Clinic ID (optional)</label><input id="'+slotId+'_cid" placeholder="If they know it"></div>'+
                      inKnownBlock(slotId);
       // wire the name field to enable Save logic too
-    } else if(identity==='new_patient' || identity==='surgery_enquiry'){
-      var forWhom = (identity==='new_patient')
-        ? '<div class="step"><label>Appointment is for</label><select id="'+slotId+'_for"><option value="self">Themselves</option><option value="other">Someone else</option></select></div>'
-        : '';
+    } else if(identity==='surgery_enquiry'){
+      // URGENT path: surgery / fracture / accident / severe pain.
+      // Always escalates (server-side). Keep it lean: a clear call-the-doctor
+      // banner, an optional name, and the outcome. No "how did they hear?".
+      body.innerHTML='<div class="in-urgent">\ud83d\udea8 Call Doctor urgently \u2014 then log the outcome below.</div>'+
+                     '<div class="step"><label>Patient name (if given)</label><input id="'+slotId+'_name" placeholder="Optional \u2014 helps the doctor"></div>'+
+                     '<div class="step"><label>Outcome</label><select id="'+slotId+'_reso" onchange="inNewCheck(\''+slotId+'\')">'+inOpts(IN_NEW_OUTCOMES,'')+'</select></div>'+
+                     '<div class="step" id="'+slotId+'_datewrap" style="display:none"><label>Date</label><input type="date" id="'+slotId+'_date"></div>'+
+                     inActions(slotId);
+    } else if(identity==='new_patient'){
+      var forWhom = '<div class="step"><label>Appointment is for</label><select id="'+slotId+'_for"><option value="self">Themselves</option><option value="other">Someone else</option></select></div>';
       var channel = '<div class="step"><label>How did they hear? (optional)</label><select id="'+slotId+'_chan">'+inOpts(IN_CHANNELS,'')+'</select></div>';
       body.innerHTML=forWhom+channel+
                      '<div class="step"><label>Outcome</label><select id="'+slotId+'_reso" onchange="inNewCheck(\''+slotId+'\')">'+inOpts(IN_NEW_OUTCOMES,'')+'</select></div>'+
