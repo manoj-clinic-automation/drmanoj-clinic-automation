@@ -1,0 +1,88 @@
+FOLLOWUP TRACKER — DAILY GUIDE
+Dr. Manoj Agarwal Clinic, Bareilly
+=====================================
+
+EVERY WORKING DAY — 4 STEPS
+------------------------------
+
+STEP 1 — Export from Docterz (2 minutes)
+  Log into Docterz EMR.
+
+  Export A — Consultation Report:
+    Reports → Consultation Report → Today's date → Export CSV
+    Save to: SHAVEZ → Followup Tracker → Input
+
+  Export B — Follow-Up Log:
+    Reports → Follow-Up Report → Tomorrow's date → Export CSV
+    Save to: same Input folder
+
+STEP 2 — Double-click desktop shortcut (5 seconds)
+  Click: "Open Followup Tracker" on the desktop.
+
+  This automatically:
+    - Moves yesterday's CSV files to Archive (clears Input)
+    - Opens the Input folder in Windows Explorer
+    - Opens the tracker website in Chrome
+
+STEP 3 — Upload and process (30 seconds)
+  On the tracker page:
+    - Select both CSV files from the Input folder
+    - Click "Process and Generate Report"
+    - Wait 3-5 seconds
+
+STEP 4 — Done
+  Excel downloads automatically to the Output folder.
+  It syncs to Dr. Manoj's PC and mobile instantly via Google Drive.
+
+
+ONE-TIME SETUP ON EACH PC
+---------------------------
+Run setup_tracker.bat once on each PC.
+It will:
+  - Detect the correct folder path automatically
+  - Create the desktop shortcut
+  - Open Chrome to set the Output folder as download location
+
+
+TROUBLESHOOTING
+----------------
+"Desktop shortcut not working"
+  → Run setup_tracker.bat again from the Followup Tracker folder.
+
+"The website asks for a password"
+  → Enter the clinic password. Stays logged in for 24 hours.
+
+"I uploaded the wrong file by mistake"
+  → Upload again with the correct files. No harm done.
+
+"Chrome downloaded the Excel to the wrong folder"
+  → Open Chrome → Settings → Downloads
+  → Change location to: SHAVEZ\Followup Tracker\Output
+
+"The Input folder still has old files"
+  → The batch file moves them automatically on the next run.
+  → Or move them to Archive manually.
+
+"All three PCs have the same shortcut?"
+  → Yes. Run setup_tracker.bat once on each PC.
+  → The tracker works identically from any of the three PCs.
+
+
+FOLDER STRUCTURE
+-----------------
+SHAVEZ\
+└── Followup Tracker\
+    ├── Input\     Save today's Docterz exports here
+    ├── Output\    Today's Excel appears here automatically
+    └── Archive\   Yesterday's CSVs moved here automatically
+
+
+IMPORTANT
+----------
+- Always save Docterz CSVs to Input before running the shortcut.
+- Never delete anything from Archive — these are your backup records.
+- The tracker only reads from Docterz. It never changes any Docterz data.
+- If Dr. Manoj or reception staff runs it instead, the result is identical.
+
+
+Dr. Manoj Agarwal Clinic · Bareilly

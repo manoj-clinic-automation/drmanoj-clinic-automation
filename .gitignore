@@ -39,6 +39,11 @@ wa_logs/
 recordings/
 exports/
 uploads/
+data/
+data_backup_09_jun/
+outputs/
+Archive/
+
 
 # ---- PYTHON runtime / build junk ----
 venv/

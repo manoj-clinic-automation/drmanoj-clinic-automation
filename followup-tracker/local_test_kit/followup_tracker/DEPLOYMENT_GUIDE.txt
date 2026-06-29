@@ -1,0 +1,116 @@
+==============================================================
+ FOLLOW-UP TRACKER — LOCAL PC SETUP & USE GUIDE
+ Dr. Manoj Agarwal Clinic, Bareilly
+ Runs entirely on a Windows PC. No internet, no hosting, no server.
+==============================================================
+
+WHAT THIS IS
+  A small program that runs ON THE CLINIC PC. You open it in your web
+  browser at a local address (http://127.0.0.1:5000) that only this PC
+  can see. Nothing is uploaded anywhere — all data stays on the PC.
+
+--------------------------------------------------------------
+ WHAT YOU NEED (once)
+--------------------------------------------------------------
+  1. A Windows PC.
+  2. Python installed. If missing, setup_tracker.bat will tell you.
+     Get it from https://www.python.org/downloads/ and on the FIRST
+     install screen TICK "Add python.exe to PATH", then Install.
+  3. Google Chrome.
+
+--------------------------------------------------------------
+ THE FOLDER
+--------------------------------------------------------------
+  Copy the whole "followup_tracker" folder onto the PC — ideally inside
+  the SHAVEZ synced folder so it also backs up to Drive.
+
+  followup_tracker/
+    app.py                 the program
+    processor.py           the engine (tracker logic + safeguards)
+    run_local.py           starts the program on this PC
+    diagnosis_normalizer.py / seed_diagnosis.py / build_insight.py
+                           the diagnosis layer
+    requirements.txt       libraries to install
+    setup_tracker.bat      <- run ONCE per PC
+    open_tracker.bat       <- run EVERY DAY (via desktop shortcut)
+    test_suite.py          self-tests (optional)
+    data/                  the memory of the system — NEVER delete
+    Input/ Output/ Archive/  created by setup
+
+--------------------------------------------------------------
+ ONE-TIME SETUP (per PC)
+--------------------------------------------------------------
+  1. Double-click  setup_tracker.bat
+     It checks Python, installs libraries (flask, pandas, openpyxl,
+     waitress), creates Input/Output/Archive, makes a desktop shortcut
+     "Open Followup Tracker", and opens Chrome download settings.
+  2. In Chrome download settings, set the download location to the
+     Output folder (so the Excel saves there automatically).
+  You do this once per PC.
+
+--------------------------------------------------------------
+ DAILY USE
+--------------------------------------------------------------
+  1. In Docterz, export the two CSV files (consultation report +
+     follow-up log). Save them somewhere easy (e.g. the Input folder).
+  2. Double-click the "Open Followup Tracker" desktop shortcut.
+       - A small black window starts the tracker on this PC.
+       - The browser opens automatically to http://127.0.0.1:5000
+       - No password is needed.
+  3. Choose the two CSV files, click Process.
+     The audit Excel downloads to your Output folder.
+     Open it and use the "Staff Action Today" sheet.
+  4. When finished, CLOSE the small black window to stop the tracker.
+
+--------------------------------------------------------------
+ DIAGNOSIS LAYER (periodic — optional)
+--------------------------------------------------------------
+  On the same page, the "Ingest Docterz File" card accepts a Docterz
+  Patient List or Patient Detail export. It updates the diagnosis data
+  and rebuilds MKA_Patient_Diagnosis_Insight.xlsx, which puts
+  Diagnosis / Priority / VIP onto the Staff Action Today sheet.
+
+--------------------------------------------------------------
+ UPDATING TO A NEW VERSION (very important)
+--------------------------------------------------------------
+  The system's MEMORY lives entirely in the data/ folder:
+     data/patient_master.csv     - patient identity
+     data/visit_ledger.csv       - every visit
+     data/followup_ledger.csv    - every follow-up + status (PENDING ones)
+     data/patient_diagnosis.csv  - diagnosis / VIP / concession layer
+     data/backups/               - automatic dated snapshots (last 30)
+
+  "Staff Action Today" is rebuilt fresh each run from followup_ledger.csv,
+  so pending follow-ups survive as long as data/ survives.
+
+  GOLDEN RULE:
+     >> Replace the program files (*.py and .bat) ONLY.        <<
+     >> NEVER delete or overwrite the data/ folder.            <<
+
+  Steps:
+     1. (Extra safety) copy the data/ folder somewhere, dated.
+     2. Replace only the code files from the new kit. Leave data/,
+        Input/, Output/, Archive/ untouched.
+     3. Run once. The new code auto-snapshots data/ (look for "[backup]")
+        and upgrades old ledgers if a column was added (look for
+        "[schema] added new column(s)") — pending follow-ups are kept.
+     4. Check the pending follow-up count looks the same as before.
+
+  If a run ever looks wrong, copy the most recent folder from
+  data/backups/ back into data/ and run again.
+
+--------------------------------------------------------------
+ TROUBLESHOOTING
+--------------------------------------------------------------
+  "python is not recognized"  -> Python not installed / not on PATH.
+     Reinstall from python.org, TICK "Add python.exe to PATH", re-run setup.
+  Browser didn't open  -> open it and go to http://127.0.0.1:5000
+  Excel didn't save to Output  -> re-run setup and set Chrome's download
+     folder, or move the downloaded file into Output yourself.
+  More than one PC  -> run setup_tracker.bat once on each. If they share
+     the SHAVEZ folder, let only ONE PC process each day so two machines
+     don't write the ledgers at the same time.
+
+==============================================================
+ Dr. Manoj Agarwal Clinic · Bareilly · Local PC Guide
+==============================================================
