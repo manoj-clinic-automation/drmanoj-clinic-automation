@@ -6,20 +6,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   :root{
-    --bg:#eef2f8; --bg2:#e7ecf5; --card:#ffffff; --ink:#172033; --muted:#667085; --line:#e4e8f0;
-    --brand:#15457e; --brand2:#2f9e44;
-    --accent:#1b6ef3; --accent-soft:#e9f0fe; --accent-line:#cfe0fd;
-    --danger:#d92d20; --danger-soft:#fdecea; --danger-line:#f6cfca;
-    --ok:#188a4e; --ok-soft:#e7f6ee; --ok-line:#c7ead6;
-    --warn:#b45309; --warn-soft:#fdf3e3; --warn-line:#f2dca6;
-    --wa:#0b7a64; --wa-soft:#e7f5ef; --wa-line:#cdeadd;
-    --shadow:0 1px 2px rgba(16,24,40,.04), 0 4px 14px rgba(16,24,40,.06);
-    --shadow-sm:0 1px 2px rgba(16,24,40,.05);
+    /* DARK THEME — Session 16. Same variable names; dark values. */
+    --bg:#0e1320; --bg2:#0b1019; --card:#1a2232; --ink:#f2f5fa; --muted:#9fb0c8; --line:#2b3650;
+    --brand:#6fa8ff; --brand2:#4ad07f;
+    --accent:#4f9dff; --accent-soft:#16263f; --accent-line:#2d456e;
+    --danger:#ff6b5e; --danger-soft:#371a18; --danger-line:#5e2a26;
+    --ok:#43d27f; --ok-soft:#16301f; --ok-line:#26573a;
+    --warn:#f0a83c; --warn-soft:#332512; --warn-line:#5c4423;
+    --wa:#34c6a4; --wa-soft:#14302a; --wa-line:#235448;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 6px 20px rgba(0,0,0,.45);
+    --shadow-sm:0 1px 2px rgba(0,0,0,.4);
     --radius:16px;
   }
   *{box-sizing:border-box}
   html,body{margin:0}
-  body{background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);background-attachment:fixed;
+  body{background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);background-attachment:fixed;font-size:16px;
     color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
     -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   .wrap{max-width:1120px;margin:0 auto;padding:18px 16px 48px}
@@ -58,39 +59,39 @@
   .kpi{position:relative;overflow:hidden;background:var(--card);border:1px solid var(--line);
     border-radius:var(--radius);padding:15px 17px;box-shadow:var(--shadow-sm)}
   .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);opacity:.85}
-  .kpi .lbl{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
-  .kpi .num{font-size:40px;font-weight:800;line-height:1.05;margin-top:6px;letter-spacing:-.02em}
+  .kpi .lbl{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+  .kpi .num{font-size:46px;font-weight:800;line-height:1.05;margin-top:6px;letter-spacing:-.02em}
   .kpi .sub{font-size:12px;color:var(--muted);margin-top:3px}
   .kpi.hero::before{background:var(--accent)}
-  .kpi.hero{background:linear-gradient(180deg,#f3f8ff 0%,#ffffff 60%);border-color:var(--accent-line)}
+  .kpi.hero{background:linear-gradient(180deg,#16263f 0%,var(--card) 60%);border-color:var(--accent-line)}
   .kpi.hero .num{color:var(--accent)}
   .kpi.alarm::before{background:var(--danger)}
-  .kpi.alarm{background:linear-gradient(180deg,#fff4f3 0%,#ffffff 60%);border-color:var(--danger-line)}
+  .kpi.alarm{background:linear-gradient(180deg,#371a18 0%,var(--card) 60%);border-color:var(--danger-line)}
   .kpi.alarm .num{color:var(--danger)}
 
   /* ---------- collapsible sections ---------- */
   section.sec{margin:20px 0 0}
   .sechead{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;
-    font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);
+    font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);
     font-weight:800;margin:0 0 12px;padding:2px 0}
   .sechead .caret{font-size:11px;color:var(--muted);transition:transform .15s ease;display:inline-block;
-    width:18px;height:18px;line-height:18px;text-align:center;background:#eef1f6;border-radius:6px}
+    width:18px;height:18px;line-height:18px;text-align:center;background:var(--line);border-radius:6px}
   section.sec:not(.collapsed) .sechead .caret{transform:rotate(90deg)}
   section.sec.collapsed .secbody{display:none}
-  .cnt{font-size:12px;font-weight:800;color:var(--muted);text-transform:none;letter-spacing:0;
-    background:#eaeef4;border-radius:999px;padding:2px 10px;min-width:24px;text-align:center}
+  .cnt{font-size:14px;font-weight:800;color:var(--muted);text-transform:none;letter-spacing:0;
+    background:var(--line);border-radius:999px;padding:2px 10px;min-width:24px;text-align:center}
   .cnt.alarm{background:var(--danger);color:#fff}
-  .muted-note{color:var(--muted);font-size:13px;padding:10px 4px;background:var(--card);border:1px dashed var(--line);
+  .muted-note{color:var(--muted);font-size:15px;padding:10px 4px;background:var(--card);border:1px dashed var(--line);
     border-radius:12px;text-align:center}
 
   .list{display:flex;flex-direction:column;gap:11px}
   .row{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--line);
     border-radius:14px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px;
     box-shadow:var(--shadow-sm);transition:box-shadow .14s ease,transform .14s ease}
-  .row.prio{border-left-color:var(--danger);background:linear-gradient(90deg,#fff7f6 0%,#ffffff 40%)}
-  .row.done{border-left-color:var(--ok);background:linear-gradient(90deg,#f5fbf7 0%,#ffffff 40%)}
+  .row.prio{border-left-color:var(--danger);background:linear-gradient(90deg,#2a1a18 0%,var(--card) 40%)}
+  .row.done{border-left-color:var(--ok);background:linear-gradient(90deg,#16261c 0%,var(--card) 40%)}
   .row .info{min-width:0;flex:1}
-  .num-big{font-size:23px;font-weight:800;letter-spacing:.3px}
+  .num-big{font-size:26px;font-weight:800;letter-spacing:.3px}
   .num-big a{color:inherit;text-decoration:none;border-bottom:2px solid transparent}
   .num-big a:hover{border-bottom-color:var(--accent-line)}
   .row .when{color:var(--muted);font-size:13px;margin-top:3px}
@@ -168,7 +169,7 @@
   th,td{padding:11px 15px;text-align:left;font-size:14px;border-top:1px solid var(--line)}
   th{background:#f6f8fc;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;
     font-weight:800;border-top:none}
-  tbody tr:nth-child(even) td{background:#fbfcfe}
+  tbody tr:nth-child(even) td{background:rgba(255,255,255,.03)}
   td.n,th.n{text-align:center}
   td .nm-cell{font-weight:700}
 
@@ -176,7 +177,7 @@
 
   /* custom audio player — drawn by us so it shows the same on every Android,
      portrait or landscape (the native player collapses in narrow portrait) */
-  .player{display:flex;align-items:center;gap:10px;margin-top:10px;background:#f3f7fd;
+  .player{display:flex;align-items:center;gap:10px;margin-top:10px;background:var(--accent-soft);
     border:1px solid var(--accent-line);border-radius:11px;padding:8px 12px}
   .pbtn{flex:none;width:40px;height:40px;border-radius:50%;border:none;background:var(--accent);color:#fff;
     font-size:15px;cursor:pointer;line-height:1;box-shadow:0 2px 6px rgba(27,110,243,.3)}
@@ -249,10 +250,10 @@
   .wa-chat-btn:active{transform:translateY(1px)}
   /* --- sign-in overlay --- */
   #loginOverlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(180deg,#eef2f8,#e7ecf5);display:flex;align-items:center;justify-content:center;padding:20px}
-  .login-box{background:#fff;border:1px solid #e4e8f0;border-radius:16px;box-shadow:0 4px 18px rgba(16,24,40,.08);padding:28px 22px;width:100%;max-width:360px;text-align:center}
+  .login-box{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 18px rgba(16,24,40,.08);padding:28px 22px;width:100%;max-width:360px;text-align:center}
   .login-logo{font-size:19px;font-weight:800;color:#15457e}
   .login-sub{color:#667085;font-size:13px;margin-top:3px;margin-bottom:18px}
-  .login-err{display:none;color:#b42318;background:#fdecea;border:1px solid #f6cfca;border-radius:10px;padding:9px;font-size:13px;font-weight:700;margin-bottom:14px}
+  .login-err{display:none;color:var(--danger);background:var(--danger-soft);border:1px solid var(--danger-line);border-radius:10px;padding:9px;font-size:13px;font-weight:700;margin-bottom:14px}
   #loginOverlay input{width:100%;border:1px solid #cfe0fd;border-radius:11px;padding:13px 14px;font-size:16px;text-align:center;outline:none}
   #loginOverlay input:focus{border-color:#1b6ef3}
   #loginOverlay button{width:100%;margin-top:12px;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:800;color:#fff;background:#15457e;cursor:pointer}
@@ -263,7 +264,7 @@
   .callerbar label{font-weight:800;font-size:14px;color:var(--ink)}
   .callerbar select{font-size:15px;padding:8px 12px;border:1px solid #bcd;border-radius:9px;background:#fff;color:var(--ink);min-width:190px}
   .callerhint{font-size:12.5px;color:var(--muted)}
-  .callerbar.need{background:#fdeceb;border-color:#f3b4ad}
+  .callerbar.need{background:var(--danger-soft);border-color:var(--danger-line)}
   .callerwho{font-weight:800;font-size:15px;color:var(--ink)}
   #callToast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);max-width:92%;
     background:#102a43;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;
@@ -320,7 +321,7 @@
   .in-actions .cancel{border:1px solid var(--line);background:#fff;color:var(--muted);
     border-radius:10px;padding:10px 14px;cursor:pointer;font-size:14px}
   .in-msg{font-size:12.5px;margin-top:6px}.in-msg.ok{color:var(--ok)}.in-msg.warn{color:var(--warn)}
-  .in-urgent{background:#fbeae8;border:1px solid #e0b4ad;border-left:5px solid #c0392b;
+  .in-urgent{background:var(--danger-soft);border:1px solid var(--danger-line);border-left:5px solid var(--danger);
     color:#7a1c12;font-weight:700;font-size:13.5px;border-radius:8px;padding:9px 11px;margin-bottom:9px}
 </style>
 </head>
@@ -685,7 +686,7 @@
     if(!p.length){ box.className=''; box.innerHTML='<div class="empty">✅ All clear — no callbacks pending.</div>'; }
     else{
       box.className='list';
-      box.innerHTML=p.map(function(e){
+      box.innerHTML=p.map(function(e,i){
         var chips='';
         if(e.priority) chips+='<span class="chip prio">PRIORITY</span>';
         if(e.afterHours) chips+='<span class="chip after">after-hours</span>';
