@@ -67,6 +67,9 @@ desktop.ini
 *.swp
 *.swo
 *~
-
 # ---- Logs ----
 *.log
+recordings-archive/client_secret.json
+recordings-archive/drive_token.json
+recordings-archive/__pycache__/
+!recordings-archive/get_drive_token.py
