@@ -30,6 +30,7 @@ import os
 import sys
 import glob
 import json
+import datetime
 
 # --- openpyxl is the only extra dependency (same one the tracker already uses)
 try:
@@ -80,6 +81,79 @@ def normalize_phone(raw):
     if len(digits) == 10 and digits[0] in "6789":
         return digits
     return ""
+
+
+# --- date normalizer --------------------------------------------------------
+# The tracker writes the per-row date as yearless text (e.g. "30-Jun"). When the
+# dashboard formats that, it can't find a year and falls back to "2001". We fix
+# it HERE, at the source, so the sheet always carries a full "DD-Mon-YYYY" date.
+# This is defensive: it accepts a real Excel date object, yearless text, a full
+# date in several formats, or junk — and never raises.
+_MONTHS = {
+    "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
+    "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+}
+
+
+def to_full_date(raw, default_year=None):
+    """Normalize any date cell value to 'DD-Mon-YYYY' (e.g. '30-Jun-2026').
+
+    Handles:
+      - a real datetime/date object  -> formatted directly (year already right)
+      - yearless text like '30-Jun'   -> current year attached
+      - full text '30-Jun-2026', '30/06/2026', '2026-06-30' -> parsed & reformatted
+      - anything unparseable           -> returned as a trimmed string, unchanged
+    Never raises. Blank stays blank.
+    """
+    if default_year is None:
+        default_year = datetime.date.today().year
+
+    # 1) real date/datetime object straight from Excel
+    if isinstance(raw, (datetime.datetime, datetime.date)):
+        return raw.strftime("%d-%b-%Y")
+
+    s = "" if raw is None else str(raw).strip()
+    if not s:
+        return ""
+
+    # 2) try a set of explicit formats (full dates first)
+    fmts_full = ("%d-%b-%Y", "%d-%B-%Y", "%d/%m/%Y", "%d-%m-%Y",
+                 "%Y-%m-%d", "%Y/%m/%d", "%d %b %Y", "%d %B %Y")
+    for f in fmts_full:
+        try:
+            return datetime.datetime.strptime(s, f).strftime("%d-%b-%Y")
+        except ValueError:
+            pass
+
+    # 3) yearless forms like '30-Jun', '30 Jun', '30/06', '30-6'
+    #    parse day + month ourselves, attach default_year.
+    cleaned = s.replace("/", "-").replace(" ", "-")
+    parts = [p for p in cleaned.split("-") if p != ""]
+    if len(parts) == 2:
+        d_str, m_str = parts[0], parts[1]
+        try:
+            day = int(d_str)
+        except ValueError:
+            day = None
+        month = None
+        ml = m_str.lower()[:3]
+        if ml in _MONTHS:
+            month = _MONTHS[ml]
+        else:
+            try:
+                mi = int(m_str)
+                if 1 <= mi <= 12:
+                    month = mi
+            except ValueError:
+                month = None
+        if day and month and 1 <= day <= 31:
+            try:
+                return datetime.date(default_year, month, day).strftime("%d-%b-%Y")
+            except ValueError:
+                pass
+
+    # 4) give up safely: hand back the original trimmed text
+    return s
 
 
 def find_workbook():
@@ -137,6 +211,12 @@ def read_call_sheet(wb):
         v = ws.cell(row, idx + 1).value
         return "" if v is None else str(v).strip()
 
+    def raw_cell(row, idx):
+        # untouched value (keeps real date objects intact for to_full_date)
+        if idx < 0:
+            return None
+        return ws.cell(row, idx + 1).value
+
     out, seen = [], set()
     section = "Follow-up"          # the sheet opens with the follow-up block
     for r in range(hrow + 1, ws.max_row + 1):
@@ -163,7 +243,7 @@ def read_call_sheet(wb):
             name,
             normalize_phone(cell(r, iMob)),            # '' if uncallable (dashboard hides Call)
             cell(r, iDx),
-            cell(r, iDt),
+            to_full_date(raw_cell(r, iDt)),            # always full DD-Mon-YYYY (fixes "2001")
             cell(r, iOD),
             cell(r, iSt),
         ])
@@ -192,14 +272,19 @@ def read_settled(wb):
         v = ws.cell(row, idx + 1).value
         return "" if v is None else str(v).strip()
 
+    def raw_cell(row, idx):
+        if idx < 0:
+            return None
+        return ws.cell(row, idx + 1).value
+
     out = []
     for r in range(hrow + 1, ws.max_row + 1):
         pt = cell(r, iPt)
         if not pt:
             continue
         out.append([
-            cell(r, iDue), pt, normalize_phone(cell(r, iMob)),
-            cell(r, iCid), cell(r, iOut), cell(r, iBy), cell(r, iWhn),
+            to_full_date(raw_cell(r, iDue)), pt, normalize_phone(cell(r, iMob)),
+            cell(r, iCid), cell(r, iOut), cell(r, iBy), to_full_date(raw_cell(r, iWhn)),
         ])
     return out
 
