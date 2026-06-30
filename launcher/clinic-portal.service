@@ -1,0 +1,14 @@
+[Unit]
+Description=Clinic Launcher Portal (Flask via gunicorn, port 8090)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/portal
+ExecStart=/root/wa/venv/bin/gunicorn --chdir /root/portal -w 2 -b 127.0.0.1:8090 --timeout 60 portal:app
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
