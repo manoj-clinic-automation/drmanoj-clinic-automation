@@ -156,7 +156,7 @@
   .reply-status{font-size:12.5px;font-weight:700;margin-bottom:8px;color:var(--wa)}
   .reply-status.ok{color:var(--ok)} .reply-status.warn{color:var(--warn)}
   .reply-text{width:100%;border:1px solid var(--wa-line);border-radius:9px;padding:9px 11px;font-size:14px;
-    font-family:inherit;resize:vertical;min-height:60px;background:#fff;color:var(--ink)}
+    font-family:inherit;resize:vertical;min-height:60px;background:#fff;color:#1d2733;color-scheme:light}
   .reply-text:disabled{background:#f4f6f9;color:var(--muted)}
   .reply-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;flex-wrap:wrap}
   .reply-count{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -167,7 +167,7 @@
   table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);
     border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm)}
   th,td{padding:11px 15px;text-align:left;font-size:14px;border-top:1px solid var(--line)}
-  th{background:#f6f8fc;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;
+  th{background:#f6f8fc;color:#5a6a7d;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;
     font-weight:800;border-top:none}
   tbody tr:nth-child(even) td{background:rgba(255,255,255,.03)}
   td.n,th.n{text-align:center}
@@ -223,6 +223,12 @@
     .call{flex:1;text-align:center;padding:12px 18px}
     .rec{flex:1;text-align:center;padding:11px 15px}
     .meta{width:100%;justify-content:space-between}
+    /* follow-up & incoming rows: stack the outcome controls full-width, and
+       use >=16px fonts so iOS doesn't auto-zoom when a dropdown/field is tapped */
+    .fu-row{flex-wrap:wrap}
+    .fu-right{min-width:0;width:100%;align-items:stretch}
+    select.fu-out,select.fu-sub,input.fu-in{font-size:16px}
+    .in-card select,.in-card input{font-size:16px}
   }
   /* WhatsApp conversation thread (modal) */
   #threadOverlay{position:fixed;inset:0;z-index:9000;background:rgba(16,24,40,.45);display:none;align-items:flex-end;justify-content:center}
@@ -234,16 +240,16 @@
   .thread-head .t-close{background:rgba(255,255,255,.18);border:none;color:#fff;font-size:20px;font-weight:800;width:32px;height:32px;border-radius:50%;cursor:pointer;line-height:1;flex:none}
   .thread-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#ece5dd}
   .bub{max-width:82%;padding:8px 11px;border-radius:12px;font-size:14px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:0 1px 1px rgba(0,0,0,.08)}
-  .bub .bt{display:block;font-size:11px;color:var(--muted);margin-top:4px;text-align:right}
-  .bub.in{align-self:flex-start;background:#fff;color:var(--ink);border-top-left-radius:3px}
+  .bub .bt{display:block;font-size:11px;color:#6b7a8d;margin-top:4px;text-align:right}
+  .bub.in{align-self:flex-start;background:#fff;color:#1d2733;border-top-left-radius:3px}
   .bub.out{align-self:flex-end;background:#d9fdd3;color:#0b2e23;border-top-right-radius:3px}
   .bub.out .bt{color:#3b6b57}
-  .thread-empty{color:var(--muted);text-align:center;font-size:13px;margin:auto;padding:24px}
+  .thread-empty{color:#5a6a7d;text-align:center;font-size:13px;margin:auto;padding:24px}
   .thread-foot{flex:none;border-top:1px solid var(--line);background:var(--card);padding:10px 12px}
   .thread-status{font-size:12.5px;font-weight:700;margin-bottom:7px;color:var(--wa)}
   .thread-status.ok{color:var(--ok)} .thread-status.warn{color:var(--warn)}
   .thread-compose{display:flex;gap:8px;align-items:flex-end}
-  .thread-compose textarea{flex:1;border:1px solid var(--wa-line);border-radius:10px;padding:9px 11px;font-size:14px;font-family:inherit;resize:none;min-height:42px;max-height:140px;background:#fff;color:var(--ink)}
+  .thread-compose textarea{flex:1;border:1px solid var(--wa-line);border-radius:10px;padding:9px 11px;font-size:14px;font-family:inherit;resize:none;min-height:42px;max-height:140px;background:#fff;color:#1d2733;color-scheme:light}
   .thread-compose textarea:disabled{background:#f4f6f9;color:var(--muted)}
   .thread-send{padding:10px 16px;font-size:14px}
   .wa-chat-btn{flex:none;border:1px solid var(--wa-line);background:#fff;color:var(--wa);font-weight:800;font-size:12px;padding:4px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}
@@ -254,18 +260,17 @@
   .login-logo{font-size:19px;font-weight:800;color:#15457e}
   .login-sub{color:#667085;font-size:13px;margin-top:3px;margin-bottom:18px}
   .login-err{display:none;color:var(--danger);background:var(--danger-soft);border:1px solid var(--danger-line);border-radius:10px;padding:9px;font-size:13px;font-weight:700;margin-bottom:14px}
-  #loginOverlay input{width:100%;border:1px solid #cfe0fd;border-radius:11px;padding:13px 14px;font-size:16px;text-align:center;outline:none}
+  #loginOverlay input{width:100%;border:1px solid #cfe0fd;border-radius:11px;padding:13px 14px;font-size:16px;text-align:center;outline:none;background:#fff;color:#1d2733;color-scheme:light}
   #loginOverlay input:focus{border-color:#1b6ef3}
-  #loginOverlay button{width:100%;margin-top:12px;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:800;color:#fff;background:#15457e;cursor:pointer}
   .login-hint{color:#667085;font-size:12.5px;margin-top:14px;line-height:1.5}
   /* Who-is-calling bar + call toast (click-to-call) */
   .callerbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#eef7f0;border:1px solid #cfe9d8;
     border-radius:12px;padding:10px 14px;margin:0 0 14px}
-  .callerbar label{font-weight:800;font-size:14px;color:var(--ink)}
-  .callerbar select{font-size:15px;padding:8px 12px;border:1px solid #bcd;border-radius:9px;background:#fff;color:var(--ink);min-width:190px}
-  .callerhint{font-size:12.5px;color:var(--muted)}
+  .callerbar label{font-weight:800;font-size:14px;color:#1d2733}
+  .callerbar select{font-size:15px;padding:8px 12px;border:1px solid #bcd;border-radius:9px;background:#fff;color:#1d2733;color-scheme:light;min-width:190px}
+  .callerhint{font-size:12.5px;color:#41566d}
   .callerbar.need{background:var(--danger-soft);border-color:var(--danger-line)}
-  .callerwho{font-weight:800;font-size:15px;color:var(--ink)}
+  .callerwho{font-weight:800;font-size:15px;color:#1d2733}
   #callToast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);max-width:92%;
     background:#102a43;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;
     box-shadow:0 6px 22px rgba(16,24,40,.28);z-index:9999;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -287,7 +292,10 @@
   .fu-right{display:flex;flex-direction:column;gap:6px;align-items:flex-end;min-width:160px}
   .fu-retrytag{font-size:11px;font-weight:800;color:var(--warn);text-transform:uppercase;letter-spacing:.04em}
   select.fu-out,select.fu-sub,input.fu-in{font-size:13px;padding:6px 8px;border:1px solid var(--line);
-    border-radius:8px;background:#fff;color:var(--ink);width:100%;box-sizing:border-box}
+    border-radius:8px;background:#fff;color:#1d2733;color-scheme:light;width:100%;box-sizing:border-box}
+  /* dropdown option list — force readable dark text on a white list in EVERY
+     browser and OS (fixes options that were invisible on dark-mode phones/PCs) */
+  select option,select optgroup{background:#fff;color:#1d2733;color-scheme:light}
   .fu-extra{display:flex;flex-direction:column;gap:5px;width:100%}
   .fu-actions{display:flex;gap:6px;width:100%}
   .fu-actions .call{flex:0 0 auto}
@@ -309,16 +317,16 @@
   .in-card{background:#fff;border:1px solid var(--accent-line);border-radius:12px;padding:11px;margin-top:8px;
     box-shadow:var(--shadow-sm)}
   .in-card .step{margin-bottom:8px}
-  .in-card label{display:block;font-size:11.5px;font-weight:700;color:var(--muted);
+  .in-card label{display:block;font-size:11.5px;font-weight:700;color:#5a6a7d;
     text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
   .in-card select,.in-card input{width:100%;box-sizing:border-box;font-size:14px;padding:9px 10px;
-    border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+    border:1px solid var(--line);border-radius:9px;background:#fff;color:#1d2733;color-scheme:light}
   .in-card .row2{display:flex;gap:8px}.in-card .row2>*{flex:1}
   .in-actions{display:flex;gap:8px;margin-top:6px}
   .in-actions .savebtn{flex:1;border:1px solid var(--ok-line);background:var(--ok-soft);color:var(--ok);
     font-weight:800;border-radius:10px;padding:10px;cursor:pointer;font-size:14px}
   .in-actions .savebtn:disabled{opacity:.45}
-  .in-actions .cancel{border:1px solid var(--line);background:#fff;color:var(--muted);
+  .in-actions .cancel{border:1px solid var(--line);background:#fff;color:#5a6a7d;
     border-radius:10px;padding:10px 14px;cursor:pointer;font-size:14px}
   .in-msg{font-size:12.5px;margin-top:6px}.in-msg.ok{color:var(--ok)}.in-msg.warn{color:var(--warn)}
   .in-urgent{background:var(--danger-soft);border:1px solid var(--danger-line);border-left:5px solid var(--danger);
@@ -330,7 +338,7 @@
   <div class="login-box">
     <div class="login-logo">Dr Manoj Agarwal Clinic</div>
     <div class="login-sub">Callback Dashboard</div>
-    <div class="login-err" id="loginErr">Incorrect key \u2014 kripya dobara daalein.</div>
+    <div class="login-err" id="loginErr">Incorrect key — kripya dobara daalein.</div>
     <input id="pin" type="password" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Access key / एक्सेस की">
     <button onclick="doLogin()">Open Dashboard / खोलें</button>
     <div class="login-hint">Clinic staff: apni access key daalein.<br>Yeh device aapko yaad rakhega.</div>
@@ -401,6 +409,16 @@
     <div class="secbody"><div id="fuEscal" class="list"></div></div>
   </section>
 
+  <!-- Staff outcome log (doctor key only; shown by applyAccess): collapsed by default -->
+  <section class="sec" data-key="outLog" data-default="collapsed" id="secOutLog" style="display:none">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Staff outcome log <span class="cnt" id="outLogCnt">0</span></h2>
+    <div class="secbody">
+      <div id="outLogTally" class="muted-note" style="display:none;text-align:left"></div>
+      <div id="outLogLinkWrap" style="margin:0 0 10px"></div>
+      <div id="outLog" class="list"></div>
+    </div>
+  </section>
+
   <!-- Settled follow-ups (read-only history): collapsed by default -->
   <section class="sec" data-key="fuSettled" data-default="collapsed">
     <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Settled follow-ups <span class="cnt" id="fuSettledCnt">0</span></h2>
@@ -449,7 +467,7 @@
 <script>
   var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
   var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
-  var PAGE_BUILD = 'v17.1 · inbound';
+  var PAGE_BUILD = 'v17.4 · outcome log';
   var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
   var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
   var replyOpen = false, openReplyId = null;  // a WhatsApp reply composer is open
@@ -1197,6 +1215,10 @@
         .withSuccessHandler(function(d){ renderEscalations(d); })
         .withFailureHandler(function(){})
         .getEscalations(DASH_KEY);
+      google.script.run
+        .withSuccessHandler(function(d){ renderOutcomeLog(d); })
+        .withFailureHandler(function(){})
+        .getOutcomeLog(DASH_KEY);
     }
   }
 
@@ -1374,6 +1396,46 @@
     }).join('');
   }
 
+  /* ---- Staff outcome log (doctor key only, read-only, today) ---- */
+  function renderOutcomeLog(d){
+    var box=document.getElementById('outLog'); if(!box) return;
+    var tallyBox=document.getElementById('outLogTally');
+    var linkWrap=document.getElementById('outLogLinkWrap');
+    if(d && d.error){
+      setCnt('outLogCnt', 0, false);
+      box.className=''; box.innerHTML='<div class="muted-note">Could not load outcome log: '+esc(d.error)+'</div>';
+      if(tallyBox){ tallyBox.style.display='none'; }
+      return;
+    }
+    var rows=(d&&d.rows)||[];
+    setCnt('outLogCnt', rows.length, false);
+    // link to the full sheet tab
+    if(linkWrap){
+      linkWrap.innerHTML = (d && d.sheetUrl)
+        ? '<a class="rec" href="'+esc(d.sheetUrl)+'" target="_blank" rel="noopener">Open full sheet ↗</a>'
+        : '';
+    }
+    // per-staff tally line
+    if(tallyBox){
+      var tally=(d&&d.tally)||[];
+      if(tally.length){
+        tallyBox.style.display='';
+        tallyBox.innerHTML='<b>'+esc(d.dateLabel||'Today')+':</b> '+rows.length+' logged · '+
+          tally.map(function(x){ return esc(x.by)+' '+x.n; }).join(' · ');
+      } else { tallyBox.style.display='none'; tallyBox.innerHTML=''; }
+    }
+    if(!rows.length){ box.className=''; box.innerHTML='<div class="muted-note">No outcomes logged yet today.</div>'; return; }
+    box.className='list';
+    box.innerHTML=rows.map(function(e){
+      var src = e.source==='in' ? ' <span class="chip att">incoming</span>' : '';
+      var last4 = e.last4 ? (' · …'+esc(e.last4)) : '';
+      return '<div class="fu-settledrow">'+
+               '<span><b>'+esc(e.time)+'</b> · '+esc(e.outcome)+' — '+esc(e.patient||'(no name)')+last4+'</span>'+
+               '<span class="o">by '+esc(e.by)+src+'</span>'+
+             '</div>';
+    }).join('');
+  }
+
   function resolveEsc(rowIndex){
     var sel=document.getElementById('escres_'+rowIndex);
     var res=sel?sel.value:''; var msg=document.getElementById('escmsg_'+rowIndex);
@@ -1527,6 +1589,7 @@
     DASH_KEY=k; DASH_ROLE=role;
     try{ localStorage.setItem('clinicDashKey', k); }catch(e){}   // remember on this device
     var escSec=document.getElementById('secEscal'); if(escSec) escSec.style.display=(role==='full')?'':'none';
+    var olSec=document.getElementById('secOutLog'); if(olSec) olSec.style.display=(role==='full')?'':'none';
     hideLogin(); startDashboard();
   }
   function tryKey(k, isLoginAttempt){
