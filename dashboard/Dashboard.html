@@ -284,6 +284,9 @@
     padding:11px 13px;margin-bottom:8px;box-shadow:var(--shadow-sm)}
   .fu-row.retry{border-color:var(--warn-line);background:var(--warn-soft)}
   .fu-row .dx{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .fu-row .fu-lv{font-size:12px;color:var(--muted);margin-top:2px}
+  .fu-rec{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);font-weight:700;font-size:12px;padding:5px 10px;border-radius:8px;cursor:pointer;margin-top:5px}
+  .fu-recslot{margin-top:6px}
   .fu-row .due{font-size:12px;color:var(--muted);margin-top:2px}
   .fu-row .due b{color:var(--danger)}
   .fu-pr{display:inline-block;min-width:20px;text-align:center;font-weight:800;font-size:11px;
@@ -331,6 +334,36 @@
   .in-msg{font-size:12.5px;margin-top:6px}.in-msg.ok{color:var(--ok)}.in-msg.warn{color:var(--warn)}
   .in-urgent{background:var(--danger-soft);border:1px solid var(--danger-line);border-left:5px solid var(--danger);
     color:#7a1c12;font-weight:700;font-size:13.5px;border-radius:8px;padding:9px 11px;margin-bottom:9px}
+
+  /* ---- Today's calls (live stream) — v1.1 §4.4 (Slice 1, dark theme) ---- */
+  @keyframes acflash{0%{box-shadow:0 0 0 0 rgba(240,168,60,.55)}70%{box-shadow:0 0 0 9px rgba(240,168,60,0)}100%{box-shadow:0 0 0 0 rgba(240,168,60,0)}}
+  .ac-row{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow-sm)}
+  .ac-row.ac-new{animation:acflash 1s ease-out 3;border-color:var(--warn-line)}
+  .ac-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ac-time{font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+  .ac-name{font-weight:700;color:var(--ink)}
+  .ac-cid{font-size:12px;color:var(--muted)}
+  .ac-dir{font-size:11px;font-weight:800;border-radius:6px;padding:2px 6px}
+  .ac-dir.in{color:var(--ok);background:var(--ok-soft)}
+  .ac-dir.out{color:var(--accent);background:var(--accent-soft)}
+  .ac-row .dx{font-size:12.5px;color:var(--accent);font-weight:600;margin-top:3px}
+  .ac-lv{font-size:12px;color:var(--muted);margin-top:2px}
+  .ac-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:12.5px;color:var(--muted)}
+  .ac-ag{font-weight:600;color:var(--ink)}
+  .ac-dur{font-variant-numeric:tabular-nums;color:var(--muted)}
+  .ac-st{font-size:11px;font-weight:800;border-radius:6px;padding:2px 6px}
+  .ac-st.ok{color:var(--ok);background:var(--ok-soft)}
+  .ac-st.missed{color:var(--danger);background:var(--danger-soft)}
+  .ac-rec{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);font-weight:700;padding:6px 12px;border-radius:9px;cursor:pointer}
+  .ac-play{margin-top:6px}
+
+  /* ---- Floating back-to-top (§4.8) ---- */
+  #toTop{position:fixed;right:18px;bottom:18px;z-index:8000;display:none;
+    width:46px;height:46px;border-radius:50%;border:1px solid var(--accent-line);
+    background:var(--accent-soft);color:var(--accent);font-size:20px;font-weight:800;
+    cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.35);align-items:center;justify-content:center;line-height:1}
+  #toTop.show{display:flex}
+  #toTop:active{transform:translateY(1px)}
 </style>
 </head>
 <body>
@@ -384,6 +417,12 @@
     <span class="callerwho">📞 Calling as: <b id="callerName">…</b></span>
     <span class="callerhint" id="callerhint"></span>
   </div>
+
+  <!-- Today's calls (live stream, newest first): v1.1 §4.4 — collapsed by default -->
+  <section class="sec" data-key="allcalls" data-default="collapsed">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Today's calls <span class="cnt" id="allCallsCnt">0</span></h2>
+    <div class="secbody"><div id="allCalls" class="list"></div></div>
+  </section>
 
   <!-- Needs a callback now: open by default -->
   <section class="sec" data-key="pending" data-default="open">
@@ -464,10 +503,12 @@
   </div>
 </div>
 <div id="callToast"></div>
+<button id="toTop" onclick="scrollTop_()" title="Back to top" aria-label="Back to top">▲</button>
 <script>
   var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
   var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
-  var PAGE_BUILD = 'v17.4 · outcome log';
+  var PAGE_BUILD = 'v17.9 · fu recordings';
+  var acPrevIds = null;    // v1.1: ids seen last poll, to flash genuinely-new calls
   var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
   var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
   var replyOpen = false, openReplyId = null;  // a WhatsApp reply composer is open
@@ -677,6 +718,35 @@
         showBanner('Could not load recording: '+((err&&err.message)||err));
       })
       .getRecordingAudio(DASH_KEY, file);
+  }
+
+  /* ---- play an ARCHIVED recording (from Drive) — used by follow-up 🎧 (Slice 2b) ---- */
+  function playArchived(fileId, slotId, btn){
+    if(!fileId){ return; }
+    var label = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Loading…';
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.dataUri){
+          var slot = document.getElementById(slotId);
+          if(slot){
+            if(recUrls[slotId]){ try{ URL.revokeObjectURL(recUrls[slotId]); }catch(e){} }
+            var url = dataUriToBlobUrl(res.dataUri) || res.dataUri;
+            recUrls[slotId] = url;
+            var au = mountPlayer(slot, url);
+            var pr = au.play(); if(pr && pr.catch){ pr.catch(function(){}); }
+          }
+          btn.style.display = 'none';
+        } else {
+          btn.disabled = false; btn.textContent = label;
+          showBanner('Could not load recording'+(res&&res.error?(': '+res.error):'.'));
+        }
+      })
+      .withFailureHandler(function(err){
+        btn.disabled = false; btn.textContent = label;
+        showBanner('Could not load recording: '+((err&&err.message)||err));
+      })
+      .getArchivedRecordingAudio(DASH_KEY, fileId);
   }
 
   function render(d){
@@ -1198,6 +1268,8 @@
   var FU_NEEDS_DATE = { coming:1, out_of_town:1 };
   var FU_IS_MED     = { on_medication:1 };
   var fuData = null;   // last getFollowups result, so save handlers can read row details
+  var fuLastVisits = {};   // v1.1 Slice 2: mobile(last10) -> last-visit date (additive)
+  var fuRecordings = {};   // v1.1 Slice 2b: mobile(last10) -> {fileId,date} of most recent archived call
 
   function fuOptions(sel){
     return FU_OUTCOMES.map(function(o){
@@ -1210,6 +1282,14 @@
       .withSuccessHandler(function(d){ renderFollowups(d); })
       .withFailureHandler(function(){ /* leave last view; never break the page */ })
       .getFollowups(DASH_KEY);
+    google.script.run
+      .withSuccessHandler(function(res){ if(res&&res.ok){ fuLastVisits=res.map||{}; if(fuData) renderFollowups(fuData); } })
+      .withFailureHandler(function(){})
+      .getFollowupLastVisits(DASH_KEY);
+    google.script.run
+      .withSuccessHandler(function(res){ if(res&&res.ok){ fuRecordings=res.map||{}; if(fuData) renderFollowups(fuData); } })
+      .withFailureHandler(function(){})
+      .getFollowupRecordings(DASH_KEY);
     if(DASH_ROLE==='full'){
       google.script.run
         .withSuccessHandler(function(d){ renderEscalations(d); })
@@ -1269,10 +1349,17 @@
     var retryTag = it.retry ? '<div class="fu-retrytag">⟳ retry — '+esc(it.retry)+'</div>' : '';
     var callBtn = it.mobile ? '<button class="call" onclick="placeCall(\''+esc(it.mobile)+'\')">Call</button>'
                             : '<button class="call" disabled title="no valid mobile">Call</button>';
+    var lvStr = (it.mobile && fuLastVisits[it.mobile]) ? fuLastVisits[it.mobile] : '';
+    var lvLine = lvStr ? ('<div class="fu-lv">Last visit '+esc(lvStr)+'</div>') : '';
+    var recInfo = (it.mobile && fuRecordings[it.mobile]) ? fuRecordings[it.mobile] : null;
+    var recBtn  = recInfo ? ('<button class="fu-rec" onclick="playArchived(\''+jsq(recInfo.fileId)+'\',\'furecslot_'+rid+'\',this)">\ud83c\udfa7 Last call'+(recInfo.date?(' \u00b7 '+esc(recInfo.date)):'')+'</button>') : '';
+    var recSlot = recInfo ? ('<div class="fu-recslot" id="furecslot_'+rid+'"></div>') : '';
     return '<div class="fu-row'+(it.retry?' retry':'')+'" id="furow_'+rid+'">'+
              '<div class="info">'+
                '<div class="fu-name">'+prChip+esc(it.name||'(no name)')+'</div>'+
                (it.diagnosis?('<div class="dx">'+esc(it.diagnosis)+'</div>'):'')+
+               lvLine +
+               recBtn + recSlot +
                dueLine + retryTag +
              '</div>'+
              '<div class="fu-right">'+
@@ -1458,6 +1545,73 @@
     for(var i=0;i<sels.length;i++){ if(sels[i].value) return true; }
     return false;
   }
+  /* ---------- Today's calls (live stream) — v1.1 Slice 1 (display-only) ---------- */
+  function pollAllCalls(){
+    google.script.run
+      .withSuccessHandler(function(res){ renderAllCalls(res); })
+      .withFailureHandler(function(){ /* leave last view; never break the page */ })
+      .getAllCallsToday(DASH_KEY, false);
+  }
+  function acDirBadge(dir){
+    return (dir==='outgoing') ? '<span class="ac-dir out">\u25b2 OUT</span>'
+                              : '<span class="ac-dir in">\u25bc IN</span>';
+  }
+  function acStatusBadge(st){
+    return (st==='missed') ? '<span class="ac-st missed">missed</span>'
+                           : '<span class="ac-st ok">connected</span>';
+  }
+  function acRowHtml(c, isNew){
+    var rid  = esc(String(c.id || ('c'+Math.random())));
+    var name = esc(c.name || 'Unknown');
+    var cid  = c.clinicId ? ('<span class="ac-cid">ID '+esc(c.clinicId)+'</span>') : '';
+    var dx   = c.diagnosis ? ('<div class="dx">'+esc(c.diagnosis)+'</div>') : '';
+    var lv   = c.lastVisit ? ('<div class="ac-lv">Last visit '+esc(c.lastVisit)+'</div>') : '';
+    var rec  = c.recording
+      ? ('<button class="ac-rec" id="acrec_'+rid+'" onclick="playRec(\''+jsq(c.recording)+'\',\'acplay_'+rid+'\',this)">\ud83c\udfa7 Rec</button>'
+         + '<div id="acplay_'+rid+'" class="ac-play"></div>')
+      : '';
+    return '<div class="ac-row'+(isNew?' ac-new':'')+'" id="acrow_'+rid+'">'+
+             '<div class="ac-top">'+
+               '<span class="ac-time">'+esc(c.time||'')+'</span>'+
+               acDirBadge(c.direction)+
+               '<span class="ac-name">'+name+'</span>'+ cid +
+             '</div>'+ dx + lv +
+             '<div class="ac-meta">'+
+               (c.agent ? ('<span class="ac-ag">'+esc(c.agent)+'</span>') : '')+
+               '<span class="ac-dur">'+esc(c.duration||'')+'</span>'+
+               acStatusBadge(c.status)+ rec +
+             '</div>'+
+           '</div>';
+  }
+  function renderAllCalls(res){
+    var box=document.getElementById('allCalls');
+    if(!box) return;
+    if(!res || res.ok!==true){
+      var em=(res&&res.error)?esc(res.error):"Could not load today's calls.";
+      setCnt('allCallsCnt',0,false);
+      box.className=''; box.innerHTML='<div class="empty">'+em+'</div>';
+      return;
+    }
+    var calls=res.calls||[];
+    setCnt('allCallsCnt', calls.length, false);
+    var seen={}; for(var i=0;i<calls.length;i++){ seen[calls[i].id]=1; }
+    var firstLoad=(acPrevIds===null);
+    if(!calls.length){
+      box.className=''; box.innerHTML='<div class="empty">No calls yet today.</div>';
+    } else {
+      box.className='list';
+      box.innerHTML=calls.map(function(c){
+        var isNew=(!firstLoad && acPrevIds && !acPrevIds[c.id]);
+        return acRowHtml(c, isNew);
+      }).join('');
+      setTimeout(function(){
+        var ns=document.querySelectorAll('#allCalls .ac-new');
+        for(var j=0;j<ns.length;j++){ ns[j].classList.remove('ac-new'); }
+      }, 3000);
+    }
+    acPrevIds=seen;
+  }
+
   function poll(force){
     var btn=document.getElementById('refresh'); btn.disabled=true; btn.textContent='Updating…';
     google.script.run
@@ -1465,8 +1619,16 @@
       .withFailureHandler(function(err){ showBanner('Reconnecting… ('+((err&&err.message)||err)+')'); reset(btn); })
       .getDashboardData(DASH_KEY, !!force);
     if(force || !fuEditing()) pollFollowups();   // refresh the follow-up loop too (unless mid-edit)
+    pollAllCalls();                              // v1.1: refresh today's live call stream
   }
   function reset(btn){ btn.disabled=false; btn.textContent='↻ Refresh'; left=REFRESH_SECONDS; }
+
+  /* ---- Floating back-to-top (§4.8) ---- */
+  function scrollTop_(){ window.scrollTo({top:0, behavior:'smooth'}); }
+  window.addEventListener('scroll', function(){
+    var b=document.getElementById('toTop'); if(!b) return;
+    if(window.scrollY > 320) b.classList.add('show'); else b.classList.remove('show');
+  }, {passive:true});
 
   /* ---- WhatsApp conversation thread (per number) ---- */
   var threadNumber = '';

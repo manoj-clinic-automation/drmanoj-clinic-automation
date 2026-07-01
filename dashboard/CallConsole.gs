@@ -2,7 +2,15 @@
  * CallConsole.gs  —  Call Console Step 1 (server data layer)
  * ==========================================================
  * Dr. Manoj Agarwal Clinic, Bareilly.  Session 21 · 30 Jun 2026.
- * Spec: Call_Console_Evolution_Spec v1.0, §5 + §7 Step 1.
+ * Updated Session 27 · 01 Jul 2026 — v1.1: adds LAST-VISIT to the patient
+ *   context (spec v1.1 §4.4/§6, decision C16). Only change vs the v1.0 file.
+ * Spec: Call_Console_Evolution_Spec v1.1, §5 + §7 Step 1.
+ * Session 27 fix: clinicId now reads the NUMERIC 'Clinic_Specific_Id' column
+ *   IF a Clinic_Specific_Id column exists in Patient_Master; blank otherwise.
+ *   Never shows the alphanumeric Patient UID or the patient name as the ID.
+ *   (Patient_Master currently has: mobile, patient name, diagnosis, age, gender,
+ *    last visit, patient uid — no numeric Clinic ID yet. Add that column and the
+ *    numeric ID appears automatically, no code change.)
  *
  * WHY A SEPARATE FILE (not an edit to WebApp.gs):
  *   The spec said "add these functions to WebApp.gs". A new file in the same
@@ -162,10 +170,127 @@ function CC_SELFTEST() {
   Logger.log('calls today: %s (updated %s)', res.calls.length, res.updated);
   if (res.calls.length) {
     var c = res.calls[0];
-    Logger.log('sample: time=%s dir=%s name=%s id=%s agent=%s dur=%s status=%s',
-      c.time, c.direction, c.name, c.clinicId, c.agent, c.duration, c.status);
+    Logger.log('sample: time=%s dir=%s name=%s id=%s dx=%s lastVisit=%s agent=%s dur=%s status=%s',
+      c.time, c.direction, c.name, c.clinicId, c.diagnosis, c.lastVisit, c.agent, c.duration, c.status);
   }
+  // Diagnostic: Patient_Master header names + which column we detect as Clinic ID (NO patient data printed).
+  try {
+    var pv = cc_sheetValues_(CC_TAB_PATIENT);
+    if (pv.length) {
+      var Hh = cc_lc_(pv[0]);
+      Logger.log('Patient_Master headers: %s', JSON.stringify(Hh));
+      var ix = cc_col_(Hh, ['clinic_specific_id','clinic specific id','clinic id','clinic_id','patient id']);
+      Logger.log('clinic-id header match index: %s (0-based; column B = 1). Using column %s.', ix, (ix<0?1:ix));
+    }
+  } catch (e) { Logger.log('header diagnostic error: %s', e); }
   Logger.log('Outcomes_Log will be created on first logOutcome() call. No write done here.');
+}
+
+
+/**
+ * getFollowupLastVisits(key) -> { ok, map:{ mobile(last10): lastVisitDate } }
+ * Last-visit dates for the patients on TODAY's follow-up worklist, so the page can
+ * show last-visit on follow-up rows WITHOUT editing WebApp.gs (Slice 2, additive).
+ * Scoped to today's follow-up mobiles only -> small payload, not the whole patient DB.
+ */
+function getFollowupLastVisits(key) {
+  try {
+    if (dashRole_(key) === 'none') return { ok: false, error: 'Not authorized.' };
+    var ss = cc_openSheet_();
+    var sh = ss.getSheetByName('Followups_Today');   // FU_TAB_TODAY (read-only here)
+    if (!sh) return { ok: true, map: {} };
+    var vals = sh.getDataRange().getValues();
+    if (vals.length < 2) return { ok: true, map: {} };
+    var H = cc_lc_(vals[0]);
+    var iMob = cc_col_(H, ['mobile', 'phone number', 'mobile number', 'phone', 'number']);
+    if (iMob < 0) return { ok: true, map: {} };
+    var pmap = cc_patientMap_();     // phone10 -> {name, clinicId, diagnosis, lastVisit}
+    var out = {};
+    for (var r = 1; r < vals.length; r++) {
+      var ph = cc_last10_(iMob < vals[r].length ? vals[r][iMob] : '');
+      if (!ph || out[ph] !== undefined) continue;
+      var pinfo = pmap[ph];
+      out[ph] = (pinfo && pinfo.lastVisit) ? pinfo.lastVisit : '';
+    }
+    return { ok: true, map: out };
+  } catch (err) {
+    return { ok: false, error: String(err && err.message ? err.message : err) };
+  }
+}
+
+
+/**
+ * getFollowupRecordings(key) -> { ok, map:{ phone10: { fileId, date } } }
+ * The most-recent ARCHIVED recording (permanent Drive copy) for each patient on TODAY's
+ * follow-up worklist, so a follow-up row can offer "listen to their last call". Matches by
+ * phone10, parsed from the Call_Recordings Join Key (= phone10 + "_" + start_unix). Scoped
+ * to today's follow-up mobiles -> small result. Additive; WebApp.gs untouched.
+ */
+function getFollowupRecordings(key) {
+  try {
+    if (dashRole_(key) === 'none') return { ok: false, error: 'Not authorized.' };
+    var ss = cc_openSheet_();
+    var fu = ss.getSheetByName('Followups_Today');
+    if (!fu) return { ok: true, map: {} };
+    var fv = fu.getDataRange().getValues();
+    if (fv.length < 2) return { ok: true, map: {} };
+    var FH = cc_lc_(fv[0]);
+    var iMob = cc_col_(FH, ['mobile', 'phone number', 'mobile number', 'phone', 'number']);
+    if (iMob < 0) return { ok: true, map: {} };
+    var want = {};
+    for (var r = 1; r < fv.length; r++) {
+      var ph = cc_last10_(iMob < fv[r].length ? fv[r][iMob] : '');
+      if (ph) want[ph] = 1;
+    }
+    var rec = ss.getSheetByName('Call_Recordings');
+    if (!rec) return { ok: true, map: {} };
+    var rv = rec.getDataRange().getValues();
+    if (rv.length < 2) return { ok: true, map: {} };
+    var RH = cc_lc_(rv[0]);
+    var iKey  = cc_col_(RH, ['join key', 'join_key', 'key']);
+    var iFile = cc_col_(RH, ['drive file id', 'drive_file_id', 'file id']);
+    var iDate = cc_col_(RH, ['date']);
+    if (iKey < 0 || iFile < 0) return { ok: true, map: {} };
+    var best = {};   // phone10 -> { su, fileId, date }
+    for (var q = 1; q < rv.length; q++) {
+      var jk = String(rv[q][iKey] || '').trim();
+      if (!jk) continue;
+      var us = jk.indexOf('_');
+      var ph2 = (us > 0) ? cc_last10_(jk.slice(0, us)) : cc_last10_(jk);
+      if (!want[ph2]) continue;
+      var su = (us > 0) ? cc_int_(jk.slice(us + 1)) : 0;
+      var fileId = String((iFile < rv[q].length ? rv[q][iFile] : '') || '').trim();
+      if (!fileId) continue;
+      if (!best[ph2] || su > best[ph2].su) {
+        best[ph2] = { su: su, fileId: fileId, date: (iDate >= 0 ? cc_dateStr_(rv[q][iDate]) : '') };
+      }
+    }
+    var out = {};
+    Object.keys(best).forEach(function (p) { out[p] = { fileId: best[p].fileId, date: best[p].date }; });
+    return { ok: true, map: out };
+  } catch (err) {
+    return { ok: false, error: String(err && err.message ? err.message : err) };
+  }
+}
+
+/**
+ * getArchivedRecordingAudio(key, fileId) -> { dataUri } | { error }
+ * Streams a permanently-archived recording straight from the owner's Drive by File ID.
+ * The web app runs AS the owner, so it can read the restricted recordings folder — this
+ * works for OLD calls, where the 24h MyOperator on-demand link is long gone.
+ * (First Drive use in this project -> a one-time Google re-authorization is expected.)
+ */
+function getArchivedRecordingAudio(key, fileId) {
+  try {
+    if (dashRole_(key) === 'none') return { error: 'Not authorized.' };
+    fileId = String(fileId || '').trim();
+    if (!fileId) return { error: 'No recording.' };
+    var bytes = DriveApp.getFileById(fileId).getBlob().getBytes();
+    if (!bytes || !bytes.length) return { error: 'Empty audio.' };
+    return { dataUri: 'data:audio/mpeg;base64,' + Utilities.base64Encode(bytes) };
+  } catch (err) {
+    return { error: String(err && err.message ? err.message : err) };
+  }
 }
 
 // ===========================================================================
@@ -214,6 +339,7 @@ function cc_buildAllCallsToday_() {
       name:      pinfo ? (pinfo.name || 'Unknown') : 'Unknown',
       clinicId:  pinfo ? (pinfo.clinicId || '') : '',
       diagnosis: pinfo ? (pinfo.diagnosis || '') : '',
+      lastVisit: pinfo ? (pinfo.lastVisit || '') : '',
       agent:     agent,
       durationSec: durSec,
       duration:  cc_mmss_(durSec),
@@ -259,8 +385,9 @@ function cc_patientMap_() {
     var H = cc_lc_(vals[0]);
     var iPhone = cc_col_(H, ['mobile', 'phone number', 'mobile number', 'phone', 'number', 'phone10']);
     var iName  = cc_col_(H, ['patient name', 'name']);
-    var iId    = cc_col_(H, ['patient uid', 'clinic id', 'clinic_id', 'uid', 'patient id']);
+    var iId    = cc_col_(H, ['clinic_specific_id', 'clinic specific id', 'clinic id', 'clinic_id', 'patient id']);  // numeric Clinic ID column IF present in Patient_Master; blank if absent (never the UID/name)
     var iDx    = cc_col_(H, ['diagnosis']);
+    var iLast  = cc_col_(H, ['last visit', 'consultation date', 'last seen', 'seen']);
     if (iPhone < 0) return map;
     for (var r = 1; r < vals.length; r++) {
       var row = vals[r];
@@ -270,7 +397,8 @@ function cc_patientMap_() {
       map[ph] = {
         name:      (iName >= 0 && iName < row.length) ? String(row[iName]).trim() : '',
         clinicId:  (iId   >= 0 && iId   < row.length) ? String(row[iId]).trim()   : '',
-        diagnosis: (iDx   >= 0 && iDx   < row.length) ? String(row[iDx]).trim()   : ''
+        diagnosis: (iDx   >= 0 && iDx   < row.length) ? String(row[iDx]).trim()   : '',
+        lastVisit: (iLast >= 0 && iLast < row.length) ? cc_dateStr_(row[iLast])    : ''
       };
     }
   } catch (e) {}
@@ -374,6 +502,12 @@ function cc_pick_(obj, keys) {
     if (v !== undefined && v !== null && v !== '') return v;
   }
   return '';
+}
+
+/** Normalise a last-visit cell: a real Date -> yyyy-MM-dd; anything else -> trimmed text. */
+function cc_dateStr_(v) {
+  if (v instanceof Date && !isNaN(v.getTime())) return Utilities.formatDate(v, CC_TZ, 'yyyy-MM-dd');
+  return String(v == null ? '' : v).trim();
 }
 
 function cc_last10_(v) {
