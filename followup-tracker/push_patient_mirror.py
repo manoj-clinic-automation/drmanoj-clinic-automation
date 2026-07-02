@@ -11,7 +11,15 @@
 #   - Refuses to push if the CSV is missing or has zero valid rows,
 #     so a bad/empty file can never wipe the mirror with nothing.
 #   - Only the needed columns travel up: phone, name, diagnosis, age,
-#     gender, last visit, UID. (Less PHI, faster.)
+#     gender, last visit, UID, and the numeric Clinic ID. (Less PHI, faster.)
+#
+# SESSION 30 CHANGE:
+#   - Added a dedicated "Clinic_Specific_Id" output column so the numeric
+#     Clinic ID travels up as its own column (the dashboard reads it by that
+#     exact name). Previously the clinic id was only a low-priority alias for
+#     the Patient UID, so it was being dropped whenever a real UID existed.
+#   - Cleaned up: "clinicspecificid" removed from the Patient UID alias list
+#     so the two IDs can never be confused.
 #
 # HOW TO RUN:
 #   python push_patient_mirror.py            <-- PREVIEW (writes nothing)
@@ -43,18 +51,19 @@ TAB_NAME = "Patient_Master"
 # =============================================================================
 
 # Output column order (these names are what the dashboard recognises).
-OUT_HEADERS = ["Mobile", "Patient Name", "Diagnosis", "Age", "Gender", "Last Visit", "Patient UID"]
+OUT_HEADERS = ["Mobile", "Patient Name", "Diagnosis", "Age", "Gender", "Last Visit", "Patient UID", "Clinic_Specific_Id"]
 
 # For each output field, the possible header names in your local CSV.
 # Matching ignores case, spaces and underscores. First match wins.
 FIELD_ALIASES = {
-    "Mobile":       ["mobileclean", "mobile", "phone", "phonenumber", "mobileno", "mobilenumber", "mobileraw", "contact", "contactno"],
-    "Patient Name": ["patientname", "name", "fullname"],
-    "Diagnosis":    ["diagnosis", "dx", "purposeofvisit", "purpose"],
-    "Age":          ["age"],
-    "Gender":       ["gender", "sex"],
-    "Last Visit":   ["lastseendate", "lastvisit", "consultationdate", "lastvisited", "lastseen", "visitdate"],
-    "Patient UID":  ["patientuid", "uid", "patientid", "clinicspecificid", "id"],
+    "Mobile":             ["mobileclean", "mobile", "phone", "phonenumber", "mobileno", "mobilenumber", "mobileraw", "contact", "contactno"],
+    "Patient Name":       ["patientname", "name", "fullname"],
+    "Diagnosis":          ["diagnosis", "dx", "purposeofvisit", "purpose"],
+    "Age":                ["age"],
+    "Gender":             ["gender", "sex"],
+    "Last Visit":         ["lastseendate", "lastvisit", "consultationdate", "lastvisited", "lastseen", "visitdate"],
+    "Patient UID":        ["patientuid", "uid", "patientid", "id"],
+    "Clinic_Specific_Id": ["clinicspecificid", "clinicid", "clinicspecific"],
 }
 
 
@@ -115,7 +124,7 @@ def load_rows():
     for field in OUT_HEADERS:
         idx = mapping[field]
         shown = "(NOT FOUND - will be blank)" if idx is None else '"' + str(headers[idx]) + '"'
-        print(f"   {field:<14} <- {shown}")
+        print(f"   {field:<18} <- {shown}")
 
     if mapping["Mobile"] is None:
         print("\nSTOP: no phone column found - cannot build the mirror.")
@@ -144,6 +153,7 @@ def load_rows():
             cell("Gender"),
             cell("Last Visit"),
             cell("Patient UID"),
+            cell("Clinic_Specific_Id"),
         ]  # keep last occurrence per phone
 
     return list(seen.values()), bad_phone
