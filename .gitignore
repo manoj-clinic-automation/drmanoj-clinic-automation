@@ -17,6 +17,7 @@
 *.json
 # allow only clearly-safe example/template json
 !*.example.json
+!dashboard/appsscript.json
 *.pem
 *.key
 *.p12
