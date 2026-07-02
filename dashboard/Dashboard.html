@@ -279,6 +279,16 @@
   .fu-secband{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
     color:var(--brand);background:var(--accent-soft);border:1px solid var(--accent-line);
     border-radius:8px;padding:4px 9px;margin:10px 0 6px;display:inline-block}
+  /* collapsible follow-up bands (Session 29, Decision D47) */
+  .fu-band{margin:10px 0 6px}
+  .fu-bandhead{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;
+    font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--brand);background:var(--accent-soft);border:1px solid var(--accent-line);
+    border-radius:8px;padding:6px 10px}
+  .fu-bandhead .fu-caret{font-size:11px;transition:transform .15s;display:inline-block}
+  .fu-band:not(.collapsed) .fu-bandhead .fu-caret{transform:rotate(90deg)}
+  .fu-band.collapsed .fu-bandbody{display:none}
+  .fu-bandbody{margin-top:8px}
   .fu-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;
     background:var(--card);border:1px solid var(--line);border-radius:12px;
     padding:11px 13px;margin-bottom:8px;box-shadow:var(--shadow-sm)}
@@ -507,7 +517,7 @@
 <script>
   var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
   var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
-  var PAGE_BUILD = 'v17.9 · fu recordings';
+  var PAGE_BUILD = 'v18.0 · fu bands';
   var acPrevIds = null;    // v1.1: ids seen last poll, to flash genuinely-new calls
   var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
   var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
@@ -1302,6 +1312,44 @@
     }
   }
 
+  /* ---- follow-up band ordering + per-device collapse memory (Session 29) ---- */
+  // Calling order: Due Today, Grace Period, Actionable Missed Follow-Up, Probable
+  // Dropout, Procedure, then any contact-problem bands (Invalid Mobile / Identity
+  // Unresolved) alphabetically at the bottom. Matching is prefix-based so it is
+  // robust to spacing/case coming from the sheet.
+  var FU_BAND_ORDER = ['due today','grace period','actionable missed follow-up','probable dropout','procedure'];
+  function fuBandRank(sec){
+    var k=String(sec||'').toLowerCase().trim();
+    for(var i=0;i<FU_BAND_ORDER.length;i++){ if(k.indexOf(FU_BAND_ORDER[i])===0) return i; }
+    return 90;   // everything else (contact-problem bands) sinks to the bottom
+  }
+  function fuOrderedSections(names){
+    return names.slice().sort(function(a,b){
+      var ra=fuBandRank(a), rb=fuBandRank(b);
+      if(ra!==rb) return ra-rb;
+      return String(a).localeCompare(String(b));   // stable, alpha within same rank
+    });
+  }
+  // Default-open bands: Due Today + Grace Period. Others start collapsed.
+  // The user's per-band choice is remembered on this device.
+  var fuBandState = {};
+  try{ fuBandState = JSON.parse(localStorage.getItem('dashFuBands')||'{}'); }catch(e){ fuBandState={}; }
+  function fuBandDefaultOpen(sec){
+    var k=String(sec||'').toLowerCase().trim();
+    return (k.indexOf('due today')===0 || k.indexOf('grace period')===0);
+  }
+  function fuBandOpen(sec){
+    if(Object.prototype.hasOwnProperty.call(fuBandState, sec)) return !!fuBandState[sec];
+    return fuBandDefaultOpen(sec);
+  }
+  function toggleFuBand(head){
+    var band=head.parentNode;
+    band.classList.toggle('collapsed');
+    var sec=band.getAttribute('data-fuband');
+    fuBandState[sec] = !band.classList.contains('collapsed');
+    try{ localStorage.setItem('dashFuBands', JSON.stringify(fuBandState)); }catch(e){}
+  }
+
   function renderFollowups(d){
     fuData = d;
     var box=document.getElementById('fuToday');
@@ -1321,9 +1369,16 @@
     else{
       box.className='list';
       var html='';
-      secNames.forEach(function(sec){
-        html+='<div class="fu-secband">'+esc(sec)+' · '+groups[sec].length+'</div>';
-        groups[sec].forEach(function(it){ html+=fuRowHtml(it); });
+      fuOrderedSections(secNames).forEach(function(sec){
+        var open = fuBandOpen(sec);
+        var rows='';
+        groups[sec].forEach(function(it){ rows+=fuRowHtml(it); });
+        html+='<div class="fu-band'+(open?'':' collapsed')+'" data-fuband="'+esc(sec)+'">'+
+                '<div class="fu-bandhead" onclick="toggleFuBand(this)">'+
+                  '<span class="fu-caret">▸</span>'+esc(sec)+' · '+groups[sec].length+
+                '</div>'+
+                '<div class="fu-bandbody">'+rows+'</div>'+
+              '</div>';
       });
       box.innerHTML=html;
     }
