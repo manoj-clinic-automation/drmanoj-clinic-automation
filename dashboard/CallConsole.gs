@@ -4,6 +4,9 @@
  * Dr. Manoj Agarwal Clinic, Bareilly.  Session 21 · 30 Jun 2026.
  * Updated Session 27 · 01 Jul 2026 — v1.1: adds LAST-VISIT to the patient
  *   context (spec v1.1 §4.4/§6, decision C16). Only change vs the v1.0 file.
+ * Updated Session 31 · 02 Jul 2026 — v1.2: adds getFollowupClinicIds (D52) —
+ *   phone→Clinic ID enrichment for follow-up rows, cloning the S27 last-visit
+ *   pattern. Purely additive; no existing function changed.
  * Spec: Call_Console_Evolution_Spec v1.1, §5 + §7 Step 1.
  * Session 27 fix: clinicId now reads the NUMERIC 'Clinic_Specific_Id' column
  *   IF a Clinic_Specific_Id column exists in Patient_Master; blank otherwise.
@@ -211,6 +214,42 @@ function getFollowupLastVisits(key) {
       if (!ph || out[ph] !== undefined) continue;
       var pinfo = pmap[ph];
       out[ph] = (pinfo && pinfo.lastVisit) ? pinfo.lastVisit : '';
+    }
+    return { ok: true, map: out };
+  } catch (err) {
+    return { ok: false, error: String(err && err.message ? err.message : err) };
+  }
+}
+
+
+/**
+ * getFollowupClinicIds(key) -> { ok, map:{ mobile(last10): clinicId } }
+ * Session 31 (D52): numeric Clinic ID for the patients on TODAY's follow-up
+ * worklist, enriched from Patient_Master by phone — exact clone of the proven
+ * getFollowupLastVisits pattern (S27). Followups_Today itself carries no Clinic
+ * ID column, and its row builder (getFollowups) lives in the protected
+ * WebApp.gs, so this stays additive: WebApp.gs and the push scripts untouched.
+ * Only returns an entry when the patient's phone matches Patient_Master AND a
+ * numeric Clinic_Specific_Id is present (graceful blank otherwise).
+ */
+function getFollowupClinicIds(key) {
+  try {
+    if (dashRole_(key) === 'none') return { ok: false, error: 'Not authorized.' };
+    var ss = cc_openSheet_();
+    var sh = ss.getSheetByName('Followups_Today');   // read-only here
+    if (!sh) return { ok: true, map: {} };
+    var vals = sh.getDataRange().getValues();
+    if (vals.length < 2) return { ok: true, map: {} };
+    var H = cc_lc_(vals[0]);
+    var iMob = cc_col_(H, ['mobile', 'phone number', 'mobile number', 'phone', 'number']);
+    if (iMob < 0) return { ok: true, map: {} };
+    var pmap = cc_patientMap_();     // phone10 -> {name, clinicId, diagnosis, lastVisit}
+    var out = {};
+    for (var r = 1; r < vals.length; r++) {
+      var ph = cc_last10_(iMob < vals[r].length ? vals[r][iMob] : '');
+      if (!ph || out[ph] !== undefined) continue;
+      var pinfo = pmap[ph];
+      out[ph] = (pinfo && pinfo.clinicId) ? pinfo.clinicId : '';
     }
     return { ok: true, map: out };
   } catch (err) {

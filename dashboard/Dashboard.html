@@ -353,6 +353,27 @@
   .ac-time{font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
   .ac-name{font-weight:700;color:var(--ink)}
   .ac-cid{font-size:12px;color:var(--muted)}
+  /* ---- doctor's outcome review console (v18.2) ---- */
+  .ol-topbar{display:flex;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
+  .ol-day{padding:6px 14px;border-radius:16px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:13px;cursor:pointer}
+  .ol-day.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .ol-hint{font-size:12px;color:var(--muted)}
+  .ol-row{position:relative}
+  .ol-call{font-size:12px;color:var(--muted)}
+  .ol-filed{font-size:13px;margin-top:2px}
+  .ol-extra{font-size:12px;color:var(--muted)}
+  .ol-chip{display:inline-block;font-size:11px;border-radius:10px;padding:1px 8px;margin-left:6px;vertical-align:middle}
+  .ol-chip.settle{background:#1d4d2b;color:#9fe0b0}
+  .ol-chip.retry{background:#4d3a1d;color:#e0c99f}
+  .ol-chip.escalate{background:#4d1d1d;color:#e09f9f}
+  .ol-note{width:100%;max-width:340px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:#fff;color:#1d2733;font-size:13px}
+  .ol-acts{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}
+  .ol-approve{background:#1d7a3a;color:#fff;border:0;border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer}
+  .ol-sendback{background:transparent;color:#e0a84f;border:1px solid #e0a84f;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
+  .ol-notesave{background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer}
+  .ol-tx{display:none;white-space:pre-wrap;background:#10151c;border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;font-size:12.5px;line-height:1.5;max-height:280px;overflow:auto}
+  .ol-approveall{float:right;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:2px 10px;font-size:12px;cursor:pointer}
+  .ol-done{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(20,90,45,.88);border-radius:10px;color:#fff;font-size:17px;font-weight:600;z-index:2}
   .ac-dir{font-size:11px;font-weight:800;border-radius:6px;padding:2px 6px}
   .ac-dir.in{color:var(--ok);background:var(--ok-soft)}
   .ac-dir.out{color:var(--accent);background:var(--accent-soft)}
@@ -458,10 +479,15 @@
     <div class="secbody"><div id="fuEscal" class="list"></div></div>
   </section>
 
-  <!-- Staff outcome log (doctor key only; shown by applyAccess): collapsed by default -->
+  <!-- Doctor's outcome review console (doctor key only; shown by applyAccess): collapsed by default -->
   <section class="sec" data-key="outLog" data-default="collapsed" id="secOutLog" style="display:none">
-    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Staff outcome log <span class="cnt" id="outLogCnt">0</span></h2>
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Outcome review — your console <span class="cnt" id="outLogCnt">0</span></h2>
     <div class="secbody">
+      <div class="ol-topbar">
+        <button class="ol-day active" id="olDayToday" onclick="olSetDay('today')">Today</button>
+        <button class="ol-day" id="olDayYest" onclick="olSetDay('yesterday')">Yesterday</button>
+        <span class="ol-hint" id="olHint"></span>
+      </div>
       <div id="outLogTally" class="muted-note" style="display:none;text-align:left"></div>
       <div id="outLogLinkWrap" style="margin:0 0 10px"></div>
       <div id="outLog" class="list"></div>
@@ -517,7 +543,7 @@
 <script>
   var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
   var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
-  var PAGE_BUILD = 'v18.0 · fu bands';
+  var PAGE_BUILD = 'v18.2 · outcome review console';
   var acPrevIds = null;    // v1.1: ids seen last poll, to flash genuinely-new calls
   var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
   var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
@@ -1280,6 +1306,9 @@
   var fuData = null;   // last getFollowups result, so save handlers can read row details
   var fuLastVisits = {};   // v1.1 Slice 2: mobile(last10) -> last-visit date (additive)
   var fuRecordings = {};   // v1.1 Slice 2b: mobile(last10) -> {fileId,date} of most recent archived call
+  var fuClinicIds  = {};   // v18.1 (D52): mobile(last10) -> numeric Clinic ID from Patient_Master
+  var olDay = 'today';     // v18.2 review console: which day is being reviewed
+  var olRows = {};         // v18.2: last-loaded pending rows by key (for actions)
 
   function fuOptions(sel){
     return FU_OUTCOMES.map(function(o){
@@ -1300,6 +1329,10 @@
       .withSuccessHandler(function(res){ if(res&&res.ok){ fuRecordings=res.map||{}; if(fuData) renderFollowups(fuData); } })
       .withFailureHandler(function(){})
       .getFollowupRecordings(DASH_KEY);
+    google.script.run
+      .withSuccessHandler(function(res){ if(res&&res.ok){ fuClinicIds=res.map||{}; if(fuData) renderFollowups(fuData); } })
+      .withFailureHandler(function(){})
+      .getFollowupClinicIds(DASH_KEY);
     if(DASH_ROLE==='full'){
       google.script.run
         .withSuccessHandler(function(d){ renderEscalations(d); })
@@ -1308,7 +1341,7 @@
       google.script.run
         .withSuccessHandler(function(d){ renderOutcomeLog(d); })
         .withFailureHandler(function(){})
-        .getOutcomeLog(DASH_KEY);
+        .getOutcomeLog(DASH_KEY, olDay);
     }
   }
 
@@ -1406,12 +1439,14 @@
                             : '<button class="call" disabled title="no valid mobile">Call</button>';
     var lvStr = (it.mobile && fuLastVisits[it.mobile]) ? fuLastVisits[it.mobile] : '';
     var lvLine = lvStr ? ('<div class="fu-lv">Last visit '+esc(lvStr)+'</div>') : '';
+    var cidStr = (it.mobile && fuClinicIds[it.mobile]) ? fuClinicIds[it.mobile] : '';
+    var cidChip = cidStr ? ('<span class="ac-cid">ID '+esc(cidStr)+'</span>') : '';
     var recInfo = (it.mobile && fuRecordings[it.mobile]) ? fuRecordings[it.mobile] : null;
     var recBtn  = recInfo ? ('<button class="fu-rec" onclick="playArchived(\''+jsq(recInfo.fileId)+'\',\'furecslot_'+rid+'\',this)">\ud83c\udfa7 Last call'+(recInfo.date?(' \u00b7 '+esc(recInfo.date)):'')+'</button>') : '';
     var recSlot = recInfo ? ('<div class="fu-recslot" id="furecslot_'+rid+'"></div>') : '';
     return '<div class="fu-row'+(it.retry?' retry':'')+'" id="furow_'+rid+'">'+
              '<div class="info">'+
-               '<div class="fu-name">'+prChip+esc(it.name||'(no name)')+'</div>'+
+               '<div class="fu-name">'+prChip+esc(it.name||'(no name)')+(cidChip?(' '+cidChip):'')+'</div>'+
                (it.diagnosis?('<div class="dx">'+esc(it.diagnosis)+'</div>'):'')+
                lvLine +
                recBtn + recSlot +
@@ -1463,7 +1498,8 @@
       section:it?it.section:'',
       diagnosis: it?it.diagnosis:'',
       outcome: code, source:'', days:'', expected:'', detail:'',
-      clinicId:'', lastVisit:''
+      clinicId: (it && it.mobile && fuClinicIds[it.mobile]) ? fuClinicIds[it.mobile] : '',
+      lastVisit:(it && it.mobile && fuLastVisits[it.mobile]) ? fuLastVisits[it.mobile] : ''
     };
     if(FU_NEEDS_DATE[code]){ var dt=document.getElementById('fudate_'+rid); payload.expected=dt?dt.value:''; }
     if(FU_IS_MED[code]){
@@ -1538,44 +1574,243 @@
     }).join('');
   }
 
-  /* ---- Staff outcome log (doctor key only, read-only, today) ---- */
+  /* ---- Doctor's outcome review console (v18.2, doctor key only) ---- */
+  // Outcome shown EXACTLY as staff filed it: same label table as the staff
+  // dropdown, plus incoming-call codes; unknown codes are humanised.
+  var OL_IN_LABELS = {
+    in_resolved_on_call:'Incoming · resolved on call', resolved_on_call:'Resolved on call',
+    in_appointment_booked:'Incoming · appointment booked', appointment_booked:'Appointment booked',
+    in_info_given:'Incoming · info given', in_info_given_will_act:'Incoming · info given, will act',
+    info_given_will_act:'Info given, will act', in_needs_callback:'Incoming · needs callback',
+    needs_callback:'Needs callback', in_escalated:'Incoming · escalated to doctor',
+    escalated:'Escalated to doctor', in_cant_communicate:"Incoming · couldn't communicate",
+    in_will_come:'Incoming · will come / considering', will_come:'Will come / considering',
+    in_enquiry_only:'Incoming · enquiry only', enquiry_only:'Info given / enquiry only',
+    in_no_action:'Incoming · no action', no_action:'No action / not relevant',
+    in_not_relevant:'Incoming · not relevant'
+  };
+  function olLabel(code){
+    code=String(code||'').trim().toLowerCase();
+    if(!code) return '—';
+    for(var i=0;i<FU_OUTCOMES.length;i++){ if(FU_OUTCOMES[i].code===code) return FU_OUTCOMES[i].label; }
+    if(OL_IN_LABELS[code]) return OL_IN_LABELS[code];
+    return code.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
+  }
+  function olSetDay(d){
+    olDay=(d==='yesterday')?'yesterday':'today';
+    var bt=document.getElementById('olDayToday'), by=document.getElementById('olDayYest');
+    if(bt) bt.className='ol-day'+(olDay==='today'?' active':'');
+    if(by) by.className='ol-day'+(olDay==='yesterday'?' active':'');
+    var box=document.getElementById('outLog');
+    if(box) box.innerHTML='<div class="muted-note">Loading '+olDay+'…</div>';
+    google.script.run
+      .withSuccessHandler(function(d2){ renderOutcomeLog(d2); })
+      .withFailureHandler(function(){})
+      .getOutcomeLog(DASH_KEY, olDay);
+  }
+  function olEditing(){
+    var a=document.activeElement;
+    if(a && a.classList && a.classList.contains('ol-note')) return true;
+    var ins=document.querySelectorAll('input.ol-note');
+    for(var i=0;i<ins.length;i++){
+      var rid=ins[i].id.replace('olnote_','');
+      var saved=(olRows[rid]&&olRows[rid].note)||'';
+      if(ins[i].value!==saved) return true;   // unsaved edit — protect it
+    }
+    return false;
+  }
   function renderOutcomeLog(d){
     var box=document.getElementById('outLog'); if(!box) return;
+    if(olEditing()) return;   // never blow away a half-typed doctor note
     var tallyBox=document.getElementById('outLogTally');
     var linkWrap=document.getElementById('outLogLinkWrap');
+    var hint=document.getElementById('olHint');
     if(d && d.error){
       setCnt('outLogCnt', 0, false);
-      box.className=''; box.innerHTML='<div class="muted-note">Could not load outcome log: '+esc(d.error)+'</div>';
-      if(tallyBox){ tallyBox.style.display='none'; }
+      box.className=''; box.innerHTML='<div class="muted-note">Could not load: '+esc(d.error)+'</div>';
+      if(tallyBox) tallyBox.style.display='none';
       return;
     }
     var rows=(d&&d.rows)||[];
-    setCnt('outLogCnt', rows.length, false);
-    // link to the full sheet tab
+    olRows={};
+    rows.forEach(function(e){ olRows[String(e.rowIndex)]=e; });
+    setCnt('outLogCnt', rows.length, rows.length>0);
+    if(hint) hint.textContent = (d&&d.day==='today')
+      ? 'Transcripts ready tomorrow after 3 AM · recordings play via live link'
+      : 'Archived recordings + transcripts';
     if(linkWrap){
-      linkWrap.innerHTML = (d && d.sheetUrl)
-        ? '<a class="rec" href="'+esc(d.sheetUrl)+'" target="_blank" rel="noopener">Open full sheet ↗</a>'
-        : '';
+      linkWrap.innerHTML=(d&&d.sheetUrl)
+        ? '<a class="rec" href="'+esc(d.sheetUrl)+'" target="_blank" rel="noopener">Open full sheet ↗</a>' : '';
     }
-    // per-staff tally line
     if(tallyBox){
       var tally=(d&&d.tally)||[];
-      if(tally.length){
+      if(tally.length || (d&&d.reviewedCount)){
         tallyBox.style.display='';
-        tallyBox.innerHTML='<b>'+esc(d.dateLabel||'Today')+':</b> '+rows.length+' logged · '+
-          tally.map(function(x){ return esc(x.by)+' '+x.n; }).join(' · ');
+        tallyBox.innerHTML='<b>'+esc((d&&d.dateLabel)||'')+':</b> '+rows.length+' awaiting your review · '+
+          ((d&&d.reviewedCount)||0)+' already reviewed'+
+          (tally.length?(' — '+tally.map(function(x){return esc(x.by)+' '+x.n;}).join(' · ')):'');
       } else { tallyBox.style.display='none'; tallyBox.innerHTML=''; }
     }
-    if(!rows.length){ box.className=''; box.innerHTML='<div class="muted-note">No outcomes logged yet today.</div>'; return; }
+    if(!rows.length){
+      box.className='';
+      box.innerHTML='<div class="muted-note">✅ Nothing awaiting review for '+esc((d&&d.dateLabel)||'this day')+'.</div>';
+      return;
+    }
+    // group by the band frozen at save-time; same order as the staff list
+    var groups={};
+    rows.forEach(function(e){ var s=e.section||'Other'; (groups[s]||(groups[s]=[])).push(e); });
+    var html='';
+    fuOrderedSections(Object.keys(groups)).forEach(function(sec){
+      var open=fuBandOpen('ol:'+sec);
+      var items=groups[sec];
+      var ids=items.map(function(e){return String(e.rowIndex);}).join(',');
+      var rowsHtml=''; items.forEach(function(e){ rowsHtml+=olRowHtml(e); });
+      html+='<div class="fu-band'+(open?'':' collapsed')+'" data-fuband="ol:'+esc(sec)+'">'+
+              '<div class="fu-bandhead" onclick="toggleFuBand(this)">'+
+                '<span class="fu-caret">▸</span>'+esc(sec)+' · '+items.length+
+                '<button class="ol-approveall" onclick="event.stopPropagation();olApproveBand(\''+esc(ids)+'\',this)">Approve all</button>'+
+              '</div>'+
+              '<div class="fu-bandbody">'+rowsHtml+'</div>'+
+            '</div>';
+    });
     box.className='list';
-    box.innerHTML=rows.map(function(e){
-      var src = e.source==='in' ? ' <span class="chip att">incoming</span>' : '';
-      var last4 = e.last4 ? (' · …'+esc(e.last4)) : '';
-      return '<div class="fu-settledrow">'+
-               '<span><b>'+esc(e.time)+'</b> · '+esc(e.outcome)+' — '+esc(e.patient||'(no name)')+last4+'</span>'+
-               '<span class="o">by '+esc(e.by)+src+'</span>'+
-             '</div>';
-    }).join('');
+    box.innerHTML=html;
+  }
+  function olRowHtml(e){
+    var rid=esc(String(e.rowIndex));
+    var cid=e.clinicId?('<span class="ac-cid">ID '+esc(e.clinicId)+'</span>'):'';
+    var call=e.callTime
+      ? ('<span class="ol-call">📞 call '+esc(e.callTime)+(e.callDur?(' · '+esc(e.callDur)):'')+'</span>')
+      : ('<span class="ol-call">logged at '+esc(e.time)+' (no call matched)</span>');
+    var filed=olLabel(e.code);
+    var extras=[];
+    if(e.source) extras.push(e.source==='here'?'medicine from here':(e.source==='outside'?'medicine from outside':e.source));
+    if(e.days) extras.push(e.days+' days\u2019 supply');
+    if(e.expected) extras.push('expected '+e.expected);
+    if(e.detail) extras.push('\u201c'+e.detail+'\u201d');
+    var chip=e.settle?('<span class="ol-chip '+esc(e.settle)+'">'+esc(e.settle==='settle'?'settled':(e.settle==='escalate'?'escalated':'retry'))+'</span>'):'';
+    var recBtn='', recSlot='';
+    if(e.rec && e.rec.kind==='myop'){
+      recBtn='<button class="fu-rec" onclick="playRec(\''+jsq(e.rec.ref)+'\',\'olrec_'+rid+'\',this)">\ud83c\udfa7 Recording</button>';
+      recSlot='<div class="fu-recslot" id="olrec_'+rid+'"></div>';
+    } else if(e.rec && e.rec.kind==='drive'){
+      recBtn='<button class="fu-rec" onclick="playArchived(\''+jsq(e.rec.ref)+'\',\'olrec_'+rid+'\',this)">\ud83c\udfa7 Recording</button>';
+      recSlot='<div class="fu-recslot" id="olrec_'+rid+'"></div>';
+    }
+    var txBtn=e.tx?('<button class="fu-rec" onclick="olTx(\''+rid+'\',\''+jsq(e.tx)+'\',this)">\ud83d\udcc4 Transcript \u25be</button>'):'';
+    var txSlot=e.tx?('<div class="ol-tx" id="oltx_'+rid+'"></div>'):'';
+    return '<div class="fu-row ol-row" id="olrow_'+rid+'">'+
+             '<div class="info">'+
+               '<div class="fu-name">'+esc(e.patient||'(no name)')+(cid?(' '+cid):'')+
+                 (e.last4?(' <span class="ol-call">\u2026'+esc(e.last4)+'</span>'):'')+'</div>'+
+               '<div>'+call+'</div>'+
+               '<div class="ol-filed"><b>'+esc(filed)+'</b>'+chip+'</div>'+
+               (extras.length?('<div class="ol-extra">'+esc(extras.join(' · '))+'</div>'):'')+
+               '<div class="ol-extra">by '+esc(e.by||'')+' · saved '+esc(e.time||'')+'</div>'+
+               recBtn+txBtn+recSlot+txSlot+
+             '</div>'+
+             '<div class="fu-right">'+
+               '<input class="ol-note" id="olnote_'+rid+'" placeholder="Your note (optional)" value="'+esc(e.note||'')+'">'+
+               '<div class="ol-acts">'+
+                 '<button class="ol-approve" onclick="olReview(\''+rid+'\',\'approve\',this)">\u2713 Approve</button>'+
+                 '<button class="ol-sendback" onclick="olReview(\''+rid+'\',\'sendback\',this)">\u21a9 Send back</button>'+
+                 '<button class="ol-notesave" onclick="olReview(\''+rid+'\',\'note\',this)" title="Save note only">\ud83d\udcbe</button>'+
+               '</div>'+
+               '<div class="fu-msg" id="olmsg_'+rid+'"></div>'+
+             '</div>'+
+           '</div>';
+  }
+  function olTx(rid, fileId, btn){
+    var slot=document.getElementById('oltx_'+rid); if(!slot) return;
+    if(slot.dataset.loaded){
+      slot.style.display=(slot.style.display==='block')?'none':'block';
+      return;
+    }
+    if(btn){ btn.disabled=true; btn.textContent='\u23f3 Loading\u2026'; }
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(btn){ btn.disabled=false; btn.textContent='\ud83d\udcc4 Transcript \u25be'; }
+        if(res && res.ok){
+          slot.textContent=res.text||'';
+          slot.dataset.loaded='1';
+          slot.style.display='block';
+        } else {
+          showBanner('Could not load transcript'+(res&&res.error?(': '+res.error):'.'));
+        }
+      })
+      .withFailureHandler(function(err){
+        if(btn){ btn.disabled=false; btn.textContent='\ud83d\udcc4 Transcript \u25be'; }
+        showBanner('Could not load transcript: '+((err&&err.message)||err));
+      })
+      .getTranscriptText(DASH_KEY, fileId);
+  }
+  function olReview(rid, action, btn){
+    var e=olRows[rid]; if(!e) return;
+    var noteEl=document.getElementById('olnote_'+rid);
+    var msg=document.getElementById('olmsg_'+rid);
+    if(btn) btn.disabled=true;
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(btn) btn.disabled=false;
+        if(res && res.ok){
+          if(action==='note'){
+            if(msg){ msg.textContent='Note saved.'; msg.className='fu-msg ok'; }
+            if(noteEl && olRows[rid]) olRows[rid].note=noteEl.value;
+            return;
+          }
+          var row=document.getElementById('olrow_'+rid);
+          if(row){
+            var ov=document.createElement('div'); ov.className='ol-done';
+            ov.textContent=(action==='approve')?'\u2713 Approved':'\u21a9 Sent back to staff';
+            row.appendChild(ov);
+            setTimeout(function(){
+              row.style.transition='opacity .4s'; row.style.opacity='0';
+              setTimeout(function(){
+                if(row.parentNode) row.parentNode.removeChild(row);
+                delete olRows[rid];
+                var n=Object.keys(olRows).length;
+                setCnt('outLogCnt', n, n>0);
+              },420);
+            },900);
+          }
+        } else {
+          if(msg){ msg.textContent='Not saved: '+((res&&res.reason)||'error'); msg.className='fu-msg warn'; }
+        }
+      })
+      .withFailureHandler(function(err){
+        if(btn) btn.disabled=false;
+        if(msg){ msg.textContent='Error: '+((err&&err.message)||err); msg.className='fu-msg warn'; }
+      })
+      .reviewOutcome(DASH_KEY, { rowIndex:e.rowIndex, fp:e.fp, action:action,
+                                 note:(noteEl?noteEl.value:'') });
+  }
+  function olApproveBand(idsCsv, btn){
+    var ids=String(idsCsv||'').split(',').filter(function(x){return x && olRows[x];});
+    if(!ids.length) return;
+    if(!confirm('Approve all '+ids.length+' outcomes in this band?')) return;
+    if(btn){ btn.disabled=true; btn.textContent='\u23f3'; }
+    var items=ids.map(function(x){ return { rowIndex:olRows[x].rowIndex, fp:olRows[x].fp }; });
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(btn){ btn.disabled=false; btn.textContent='Approve all'; }
+        if(res && res.ok){
+          ids.forEach(function(x){
+            var row=document.getElementById('olrow_'+x);
+            if(row && row.parentNode) row.parentNode.removeChild(row);
+            delete olRows[x];
+          });
+          var n=Object.keys(olRows).length;
+          setCnt('outLogCnt', n, n>0);
+          if(res.failed) showBanner(res.failed+' rows could not be approved \u2014 refresh and retry.');
+        } else {
+          showBanner('Approve-all failed'+(res&&res.reason?(': '+res.reason):'.'));
+        }
+      })
+      .withFailureHandler(function(err){
+        if(btn){ btn.disabled=false; btn.textContent='Approve all'; }
+        showBanner('Approve-all error: '+((err&&err.message)||err));
+      })
+      .reviewOutcomeBatch(DASH_KEY, items);
   }
 
   function resolveEsc(rowIndex){
