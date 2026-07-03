@@ -839,10 +839,18 @@ var FU_ESCAL_HEADERS = ['Raised', 'Key', 'Patient', 'Clinic ID', 'Diagnosis',
                         'Raised By', 'Status', 'Resolution', 'Resolved When'];
 
 /** Which outcome codes settle the row, which escalate, which persist (retry). */
-var FU_SETTLING  = { coming: 1, out_of_town: 1, on_medication: 1 };
+var FU_SETTLING  = { coming: 1, out_of_town: 1, on_medication: 1,
+                     // v18.4 (2B) doctor Unreachable-band actions — settle the row for today
+                     unreach_retry: 1, unreach_pause: 1, unreach_remove: 1 };
 var FU_ESCALATING = { dikha_chuke: 1, problem: 1, close_followup: 1,
-                      not_interested: 1, treatment_elsewhere: 1 };
-// 'cant_communicate' is neither: it stays on the worklist for a retry.
+                      not_interested: 1, treatment_elsewhere: 1,
+                      // v18.4 connected-call escape outcomes -> route to doctor review
+                      wrong_number: 1, asked_not_to_call: 1 };
+// 'cant_communicate' (connected, couldn't talk) stays on the worklist for a retry.
+// 'no_answer' (2A) is counted separately by fuTodaysOutcomeState_ (snooze / 3-strike).
+var FU_NOANSWER_CODE = 'no_answer';
+var FU_NOANSWER_MAX  = 3;      // missed tries/day before the tile exits to the doctor
+var FU_SNOOZE_MIN    = 60;     // minutes a missed tile stays snoozed before it wakes
 
 /** Open spreadsheet by the shared Script Property (same as every other reader). */
 function fuSheet_() {
@@ -871,7 +879,7 @@ function fuReadObjects_(ss, tabName) {
  *  plus the latest non-settling note, so the worklist can drop/annotate rows.
  *  Returns { settledKeys:{key:outcome}, retryKeys:{key:detail} }. */
 function fuTodaysOutcomeState_(ss) {
-  var res = { settledKeys: {}, retryKeys: {} };
+  var res = { settledKeys: {}, retryKeys: {}, noAnswer: {} };
   var rows = fuReadObjects_(ss, FU_TAB_OUTCOMES);
   if (!rows.length) return res;
   var tz = Session.getScriptTimeZone();
@@ -883,6 +891,16 @@ function fuTodaysOutcomeState_(ss) {
     var whenStr = whenT ? Utilities.formatDate(new Date(whenT), tz, 'yyyy-MM-dd') : '';
     if (whenStr && whenStr !== todayStr) return;     // only today's outcomes affect today's list
     var code = String(o['outcome'] || '').trim().toLowerCase().replace(/[^a-z]+/g, '_');
+    if (code === FU_NOANSWER_CODE) {                 // 2A: a missed-call attempt — count it
+      var na = res.noAnswer[key] || (res.noAnswer[key] = { count: 0, lastT: 0, attempts: [] });
+      na.count++;
+      if (whenT && whenT > na.lastT) na.lastT = whenT;
+      na.attempts.push({
+        t:  whenT ? Utilities.formatDate(new Date(whenT), tz, 'h:mm a') : '',
+        by: String(o['handled by'] || o['handledby'] || '').trim()
+      });
+      return;
+    }
     var settle = String(o['settle'] || '').trim().toLowerCase();
     if (settle === 'settle' || FU_SETTLING[code] || FU_ESCALATING[code]) {
       res.settledKeys[key] = code;                   // leaves the worklist
@@ -895,23 +913,28 @@ function fuTodaysOutcomeState_(ss) {
 
 /** getFollowups(key) -> the live worklist + settled history for the page. */
 function getFollowups(key) {
-  if (dashRole_(key) === 'none') return { error: 'Not authorized. Please sign in again.' };
+  var role = dashRole_(key);
+  if (role === 'none') return { error: 'Not authorized. Please sign in again.' };
   try {
     var ss = fuSheet_();
-    if (!ss) return { today: [], settled: [], bySection: {}, counts: { open: 0, retry: 0, settled: 0 } };
+    if (!ss) return { today: [], settled: [], bySection: {}, unreachable: [], counts: { open: 0, retry: 0, settled: 0, unreachable: 0 } };
 
     var state = fuTodaysOutcomeState_(ss);
     var rawToday = fuReadObjects_(ss, FU_TAB_TODAY);
+    var nowMs = (new Date()).getTime();
+    var tzf = Session.getScriptTimeZone();
 
-    var open = [], settledToday = 0, retryCount = 0;
+    var open = [], unreachable = [], settledToday = 0, retryCount = 0;
     rawToday.forEach(function (o) {
       var key0 = String(o['key'] || '').trim();
       if (key0 && state.settledKeys[key0]) { settledToday++; return; }   // already handled -> drop
       var mobile = String(o['mobile'] || '').replace(/\D/g, '');
       if (mobile.length > 10) mobile = mobile.slice(-10);
-      var retryNote = (key0 && state.retryKeys[key0]) ? state.retryKeys[key0] : '';
-      if (retryNote) retryCount++;
-      open.push({
+
+      var na = (key0 && state.noAnswer[key0]) ? state.noAnswer[key0] : null;
+      var naCount = na ? na.count : 0;
+
+      var base = {
         key:       key0,
         section:   String(o['section'] || 'Follow-up').trim() || 'Follow-up',
         pr:        String(o['pr'] || '').trim(),
@@ -920,9 +943,31 @@ function getFollowups(key) {
         diagnosis: String(o['diagnosis'] || '').trim(),
         due:       fmtDateCell_(o['due date'] || o['due'] || ''),
         od:        String(o['od'] || '').trim(),
-        status:    String(o['status'] || '').trim(),
-        retry:     retryNote
-      });
+        status:    String(o['status'] || '').trim()
+      };
+
+      // 2A/2B: 3 missed attempts -> tile exits the staff worklist to the doctor's band
+      if (naCount >= FU_NOANSWER_MAX) {
+        if (role === 'full') { base.attempts = na.attempts; unreachable.push(base); }
+        return;                                       // never shown on the staff worklist
+      }
+
+      // 2A: snooze after a missed attempt (auto-wakes after FU_SNOOZE_MIN minutes)
+      var snoozeUntil = '';
+      if (na && na.lastT) {
+        var minsSince = (nowMs - na.lastT) / 60000;
+        if (minsSince < FU_SNOOZE_MIN) {
+          snoozeUntil = Utilities.formatDate(new Date(na.lastT + FU_SNOOZE_MIN * 60000), tzf, 'h:mm a');
+        }
+      }
+
+      var retryNote = (key0 && state.retryKeys[key0]) ? state.retryKeys[key0] : '';
+      if (retryNote) retryCount++;
+      base.retry = retryNote;
+      base.naCount = naCount;
+      base.snoozeUntil = snoozeUntil;
+      base.attempts = na ? na.attempts : [];
+      open.push(base);
     });
 
     // group by section, then by priority (PR ascending, blanks last)
@@ -948,8 +993,8 @@ function getFollowups(key) {
     });
 
     return {
-      today: open, bySection: bySection, settled: settled,
-      counts: { open: open.length, retry: retryCount, settled: settledToday },
+      today: open, bySection: bySection, settled: settled, unreachable: unreachable,
+      counts: { open: open.length, retry: retryCount, settled: settledToday, unreachable: unreachable.length },
       updated: Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'h:mm:ss a')
     };
   } catch (err) {
@@ -1026,7 +1071,9 @@ function saveFollowupOutcome(key, payload) {
         problem: 'Problem / needs attention',
         close_followup: 'Close follow-up - treatment complete',
         not_interested: 'Not interested',
-        treatment_elsewhere: 'Treatment elsewhere'
+        treatment_elsewhere: 'Treatment elsewhere',
+        wrong_number: 'Wrong number',
+        asked_not_to_call: 'Asked not to call'
       })[code] || code;
       shE.appendRow([
         whenStr,
@@ -1236,21 +1283,83 @@ function getEscalations(key) {
     var H = vals[0].map(function (x) { return String(x).trim().toLowerCase(); });
     var col = function (name) { return H.indexOf(name); };
     var tz = Session.getScriptTimeZone();
+    var fmtLV_   = function (v) { var t = dateVal_(v); return t ? Utilities.formatDate(new Date(t), tz, 'd MMM yy')     : String(v == null ? '' : v).trim(); };
+    var fmtWhen_ = function (v) { var t = dateVal_(v); return t ? Utilities.formatDate(new Date(t), tz, 'h:mm a, d MMM') : String(v == null ? '' : v).trim(); };
+    // v18.6: attach the escalated call's recording + transcript (reuses the
+    // outcome-console plumbing: MyOperator link same-day, Drive archive + transcript later).
+    var todayStr = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+    var escPatMap = {}, escTodayCalls = {}, escMissed = {}, escTxMap = {}, escArchiveCache = {};
+    try { escPatMap = cc_patientMap_() || {}; } catch (eP) {}                       // v18.8: live patient lookup fills blanks
+    try { var _tc = OL_todayCallsAndMissed_(); escTodayCalls = _tc.connected || {}; escMissed = _tc.missed || {}; } catch (e0) {}
+    try { escTxMap = OL_transcriptsByKey_(ss) || {}; } catch (e1) {}
+    // v18.8: prefer the call at/just-before the outcome; never attach one logged hours later
+    var escPick_ = function (list, saveEpoch) {
+      if (!list || !list.length) return null;
+      var before = null, after = null;
+      for (var i = 0; i < list.length; i++) {
+        var c = list[i];
+        if (c.epoch <= saveEpoch) { if (!before || c.epoch > before.epoch) before = c; }
+        else                      { if (!after  || c.epoch < after.epoch)  after  = c; }
+      }
+      if (before) return before;
+      if (after && (after.epoch - saveEpoch) <= 1800) return after;                 // 30-min clock-skew grace only
+      return null;
+    };
+
     var open = [];
     for (var r = 1; r < vals.length; r++) {
       var status = String(vals[r][col('status')] || '').trim().toUpperCase();
       if (status && status !== 'OPEN') continue;          // resolved ones drop off
+
+      var phE = String(vals[r][col('mobile')] || '').replace(/\D/g, '').slice(-10);
+      var wpE = OL_whenParts_(vals[r][col('raised')]);
+      var recE = null, txE = '', callTimeE = '', callDurE = '', agentCallE = '', callStateE = 'none';
+      if (phE) {
+        if (wpE.date === todayStr) {
+          var mmA = escPick_(escTodayCalls[phE], wpE.epoch);
+          if (mmA) {
+            callStateE = 'connected';
+            callTimeE  = mmA.epoch ? Utilities.formatDate(new Date(mmA.epoch * 1000), tz, 'h:mm a') : '';
+            callDurE   = cc_mmss_(mmA.durSec || 0);
+            agentCallE = mmA.agent || '';
+            if (mmA.filename) recE = { kind: 'myop', ref: mmA.filename };            // same-day MyOperator link
+          } else {
+            callStateE = escMissed[phE] ? 'missed' : 'none';                          // clearly say missed vs no-call
+          }
+        } else if (wpE.date) {
+          if (!escArchiveCache[wpE.date]) {
+            try { escArchiveCache[wpE.date] = OL_archivedCallsByPhone_(ss, wpE.date) || {}; }
+            catch (e2) { escArchiveCache[wpE.date] = {}; }
+          }
+          var mmB = escPick_(escArchiveCache[wpE.date][phE], wpE.epoch);
+          if (mmB) {
+            callStateE = 'connected';
+            callTimeE = mmB.timeStr || '';
+            callDurE  = String(mmB.durStr || '');
+            recE = { kind: 'drive', ref: mmB.fileId }; txE = escTxMap[mmB.joinKey] || '';   // Drive archive + transcript
+          } else {
+            callStateE = 'noarchive';                                                 // older day, no archived recording
+          }
+        }
+      }
+
+      var pmE = escPatMap[phE] || {};                      // v18.8: live patient record fills any blanks
       open.push({
         rowIndex:  r + 1,                                  // 1-based sheet row (for resolve)
-        raised:    fmtDateCell_(vals[r][col('raised')]),
+        raised:    fmtWhen_(vals[r][col('raised')]),       // e.g. "1:20 pm, 2 Jul"
         name:      String(vals[r][col('patient')] || '').trim(),
-        clinicId:  String(vals[r][col('clinic id')] || '').trim(),
-        diagnosis: String(vals[r][col('diagnosis')] || '').trim(),
-        mobile:    String(vals[r][col('mobile')] || '').replace(/\D/g, '').slice(-10),
-        lastVisit: String(vals[r][col('last visit')] || '').trim(),
+        clinicId:  String(vals[r][col('clinic id')] || '').trim() || String(pmE.clinicId || '').trim(),
+        diagnosis: String(vals[r][col('diagnosis')] || '').trim() || String(pmE.diagnosis || '').trim(),
+        mobile:    phE,
+        lastVisit: fmtLV_(vals[r][col('last visit')]) || String(pmE.lastVisit || '').trim(),
         reason:    String(vals[r][col('reason')] || '').trim(),
         detail:    String(vals[r][col('detail')] || '').trim(),
-        by:        String(vals[r][col('raised by')] || '').trim()
+        by:        agentCallE || String(vals[r][col('raised by')] || '').trim(),   // v18.7: prefer the call's real agent
+        callTime:  callTimeE,
+        callDur:   callDurE,
+        callState: callStateE,                             // v18.8: connected | missed | none | noarchive
+        rec:       recE,
+        tx:        txE
       });
     }
     open.reverse();   // newest first

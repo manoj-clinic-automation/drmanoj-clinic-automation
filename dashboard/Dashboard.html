@@ -299,6 +299,24 @@
   .fu-recslot{margin-top:6px}
   .fu-row .due{font-size:12px;color:var(--muted);margin-top:2px}
   .fu-row .due b{color:var(--danger)}
+  /* v18.4 (2A) missed-call snooze + button */
+  .fu-row.snoozed{opacity:.6}
+  .fu-na{font-size:12px;color:var(--muted);margin-top:3px}
+  .fu-na.snooze{color:#b06a2c;font-weight:700}
+  .fu-noans{background:#fff3e6;color:#8a4b12;border:1px solid #e6c39a;font-weight:700;
+    font-size:12.5px;padding:6px 11px;border-radius:8px;cursor:pointer}
+  .fu-noans:disabled{opacity:.5;cursor:default}
+  /* v18.4 (2B) doctor Unreachable — review cards */
+  .un-card{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;
+    background:var(--card);border:1px solid var(--warn-line);background:var(--warn-soft);
+    border-radius:12px;padding:11px 13px;margin-bottom:8px;box-shadow:var(--shadow-sm)}
+  .un-att{font-size:12px;color:#8a4b12;margin-top:3px;font-weight:600}
+  .un-acts{display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:150px}
+  .un-acts button{font-weight:700;font-size:12.5px;padding:6px 11px;border-radius:8px;cursor:pointer;border:1px solid}
+  .un-retry{background:#e8f1ff;color:#1c4587;border-color:#b6cff5}
+  .un-pause{background:#f3f0e6;color:#6b5d1d;border-color:#ddd19a}
+  .un-remove{background:#fde8e8;color:#7a1c1c;border-color:#e6a8a8}
+  .un-acts button:disabled{opacity:.5;cursor:default}
   .fu-pr{display:inline-block;min-width:20px;text-align:center;font-weight:800;font-size:11px;
     color:#fff;background:var(--brand);border-radius:6px;padding:1px 5px;margin-right:6px}
   .fu-name{font-weight:800;font-size:15px;color:var(--ink)}
@@ -320,6 +338,7 @@
   .fu-esc{border-left:4px solid var(--danger)}
   .fu-esc .reason{font-weight:800;color:var(--danger);font-size:13px}
   .fu-esc .meta2{font-size:12px;color:var(--muted);margin-top:2px}
+  .fu-esc .meta2.nocall{color:#b06a2c;font-weight:600}
   .fu-settledrow{display:flex;justify-content:space-between;gap:10px;font-size:13px;
     padding:7px 11px;border-bottom:1px solid var(--line)}
   .fu-settledrow .o{color:var(--ok);font-weight:700}
@@ -366,6 +385,8 @@
   .ol-chip.settle{background:#1d4d2b;color:#9fe0b0}
   .ol-chip.retry{background:#4d3a1d;color:#e0c99f}
   .ol-chip.escalate{background:#4d1d1d;color:#e09f9f}
+  .ol-norec{display:inline-block;font-size:11px;border-radius:10px;padding:1px 8px;margin-left:8px;
+            vertical-align:middle;background:#3a2a2a;color:#e0b5a8;border:1px solid #5a3d3d}
   .ol-note{width:100%;max-width:340px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:#fff;color:#1d2733;font-size:13px}
   .ol-acts{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}
   .ol-approve{background:#1d7a3a;color:#fff;border:0;border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer}
@@ -479,6 +500,12 @@
     <div class="secbody"><div id="fuEscal" class="list"></div></div>
   </section>
 
+  <!-- Unreachable — review (doctor key only; 3-strike follow-up tiles): open by default -->
+  <section class="sec" data-key="fuUnreach" id="secUnreach" style="display:none">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Unreachable — review <span class="cnt" id="fuUnreachCnt">0</span></h2>
+    <div class="secbody"><div id="fuUnreach" class="list"></div></div>
+  </section>
+
   <!-- Doctor's outcome review console (doctor key only; shown by applyAccess): collapsed by default -->
   <section class="sec" data-key="outLog" data-default="collapsed" id="secOutLog" style="display:none">
     <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Outcome review — your console <span class="cnt" id="outLogCnt">0</span></h2>
@@ -543,7 +570,7 @@
 <script>
   var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
   var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
-  var PAGE_BUILD = 'v18.2 · outcome review console';
+  var PAGE_BUILD = 'v18.8 · escalation: live patient fill + call-status label + match fix';
   var acPrevIds = null;    // v1.1: ids seen last poll, to flash genuinely-new calls
   var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
   var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
@@ -1298,7 +1325,9 @@
     { code:'problem',             label:'Problem / needs attention' },
     { code:'close_followup',      label:'Close follow-up · treatment complete' },
     { code:'not_interested',      label:'Not interested' },
-    { code:'treatment_elsewhere', label:'Treatment elsewhere' }
+    { code:'treatment_elsewhere', label:'Treatment elsewhere' },
+    { code:'wrong_number',        label:'Wrong number' },
+    { code:'asked_not_to_call',   label:'Asked not to call' }
   ];
   // which outcomes need extra fields
   var FU_NEEDS_DATE = { coming:1, out_of_town:1 };
@@ -1363,17 +1392,14 @@
       return String(a).localeCompare(String(b));   // stable, alpha within same rank
     });
   }
-  // Default-open bands: Due Today + Grace Period. Others start collapsed.
-  // The user's per-band choice is remembered on this device.
+  // v18.3: only the single highest-priority band that has patients is open by
+  // default; every other band header stays visible but renders collapsed. Any
+  // band the user opens/closes by hand is remembered on this device and wins.
   var fuBandState = {};
   try{ fuBandState = JSON.parse(localStorage.getItem('dashFuBands')||'{}'); }catch(e){ fuBandState={}; }
-  function fuBandDefaultOpen(sec){
-    var k=String(sec||'').toLowerCase().trim();
-    return (k.indexOf('due today')===0 || k.indexOf('grace period')===0);
-  }
-  function fuBandOpen(sec){
-    if(Object.prototype.hasOwnProperty.call(fuBandState, sec)) return !!fuBandState[sec];
-    return fuBandDefaultOpen(sec);
+  function fuBandOpen(key, defOpen){
+    if(Object.prototype.hasOwnProperty.call(fuBandState, key)) return !!fuBandState[key];
+    return !!defOpen;
   }
   function toggleFuBand(head){
     var band=head.parentNode;
@@ -1402,8 +1428,10 @@
     else{
       box.className='list';
       var html='';
-      fuOrderedSections(secNames).forEach(function(sec){
-        var open = fuBandOpen(sec);
+      var fuOrdered = fuOrderedSections(secNames);
+      var fuTopSec = fuOrdered.length ? fuOrdered[0] : '';
+      fuOrdered.forEach(function(sec){
+        var open = fuBandOpen(sec, sec===fuTopSec);
         var rows='';
         groups[sec].forEach(function(it){ rows+=fuRowHtml(it); });
         html+='<div class="fu-band'+(open?'':' collapsed')+'" data-fuband="'+esc(sec)+'">'+
@@ -1428,6 +1456,7 @@
                '<span class="o">'+esc(e.outcome||'')+(e.by?(' · '+esc(e.by)):'')+(e.when?(' · '+esc(e.when)):'')+'</span></div>';
       }).join('');
     }
+    renderUnreachable((d&&d.unreachable)||[]);
   }
 
   function fuRowHtml(it){
@@ -1435,8 +1464,18 @@
     var prChip = it.pr ? '<span class="fu-pr">'+esc(it.pr)+'</span>' : '';
     var dueLine = it.due ? ('<div class="due">Due '+esc(it.due)+(it.od&&String(it.od)!=='0'?(' · <b>'+esc(it.od)+'d overdue</b>'):'')+'</div>') : '';
     var retryTag = it.retry ? '<div class="fu-retrytag">⟳ retry — '+esc(it.retry)+'</div>' : '';
-    var callBtn = it.mobile ? '<button class="call" onclick="placeCall(\''+esc(it.mobile)+'\')">Call</button>'
-                            : '<button class="call" disabled title="no valid mobile">Call</button>';
+    // v18.4 (2A): missed-call snooze + try counter
+    var naCount = it.naCount||0;
+    var snoozed = !!it.snoozeUntil;
+    var naLine = snoozed
+      ? ('<div class="fu-na snooze">\u23f3 No answer — retry after '+esc(it.snoozeUntil)+' · try '+naCount+'/3</div>')
+      : (naCount>0 ? ('<div class="fu-na">\u260e tried '+naCount+'/3</div>') : '');
+    var callBtn = (it.mobile && !snoozed) ? '<button class="call" onclick="placeCall(\''+esc(it.mobile)+'\')">Call</button>'
+                : (it.mobile ? '<button class="call" disabled title="snoozed until '+esc(it.snoozeUntil||'')+'">Call</button>'
+                             : '<button class="call" disabled title="no valid mobile">Call</button>');
+    var noAnsBtn = it.mobile
+      ? '<button class="fu-noans" id="funoans_'+rid+'"'+(snoozed?' disabled':'')+' onclick="fuNoAnswer(\''+rid+'\')">No answer</button>'
+      : '';
     var lvStr = (it.mobile && fuLastVisits[it.mobile]) ? fuLastVisits[it.mobile] : '';
     var lvLine = lvStr ? ('<div class="fu-lv">Last visit '+esc(lvStr)+'</div>') : '';
     var cidStr = (it.mobile && fuClinicIds[it.mobile]) ? fuClinicIds[it.mobile] : '';
@@ -1444,18 +1483,18 @@
     var recInfo = (it.mobile && fuRecordings[it.mobile]) ? fuRecordings[it.mobile] : null;
     var recBtn  = recInfo ? ('<button class="fu-rec" onclick="playArchived(\''+jsq(recInfo.fileId)+'\',\'furecslot_'+rid+'\',this)">\ud83c\udfa7 Last call'+(recInfo.date?(' \u00b7 '+esc(recInfo.date)):'')+'</button>') : '';
     var recSlot = recInfo ? ('<div class="fu-recslot" id="furecslot_'+rid+'"></div>') : '';
-    return '<div class="fu-row'+(it.retry?' retry':'')+'" id="furow_'+rid+'">'+
+    return '<div class="fu-row'+(it.retry?' retry':'')+(snoozed?' snoozed':'')+'" id="furow_'+rid+'">'+
              '<div class="info">'+
                '<div class="fu-name">'+prChip+esc(it.name||'(no name)')+(cidChip?(' '+cidChip):'')+'</div>'+
                (it.diagnosis?('<div class="dx">'+esc(it.diagnosis)+'</div>'):'')+
                lvLine +
                recBtn + recSlot +
-               dueLine + retryTag +
+               dueLine + retryTag + naLine +
              '</div>'+
              '<div class="fu-right">'+
-               '<select class="fu-out" id="fuout_'+rid+'" onchange="fuOnOutcome(\''+rid+'\')">'+fuOptions('')+'</select>'+
+               '<select class="fu-out" id="fuout_'+rid+'"'+(snoozed?' disabled':'')+' onchange="fuOnOutcome(\''+rid+'\')">'+fuOptions('')+'</select>'+
                '<div class="fu-extra" id="fuextra_'+rid+'"></div>'+
-               '<div class="fu-actions">'+callBtn+
+               '<div class="fu-actions">'+callBtn+noAnsBtn+
                  '<button class="fu-save" id="fusave_'+rid+'" disabled onclick="fuSave(\''+rid+'\')">Save</button>'+
                '</div>'+
                '<div class="fu-msg" id="fumsg_'+rid+'"></div>'+
@@ -1535,6 +1574,96 @@
       .saveFollowupOutcome(DASH_KEY, payload);
   }
 
+  // v18.4 (2A): mark a follow-up call as "No answer" -> logs a missed attempt;
+  // the tile snoozes for 1 hour and exits to the doctor after 3 tries.
+  function fuNoAnswer(rid){
+    var it=null;
+    if(fuData && fuData.today){ for(var i=0;i<fuData.today.length;i++){ if(String(fuData.today[i].key)===String(rid)){ it=fuData.today[i]; break; } } }
+    var btn=document.getElementById('funoans_'+rid);
+    var msg=document.getElementById('fumsg_'+rid);
+    var payload={
+      rowKey: rid, name: it?it.name:'', mobile: it?it.mobile:'', section: it?it.section:'',
+      diagnosis: it?it.diagnosis:'', outcome:'no_answer', source:'', days:'', expected:'', detail:'',
+      clinicId: (it && it.mobile && fuClinicIds[it.mobile]) ? fuClinicIds[it.mobile] : '',
+      lastVisit:(it && it.mobile && fuLastVisits[it.mobile]) ? fuLastVisits[it.mobile] : ''
+    };
+    if(btn){ btn.disabled=true; btn.textContent='\u2026'; }
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.ok){ pollFollowups(); }
+        else { if(btn){ btn.disabled=false; btn.textContent='No answer'; } if(msg){ msg.textContent='Not saved: '+((res&&res.reason)||'error'); msg.className='fu-msg warn'; } }
+      })
+      .withFailureHandler(function(err){ if(btn){ btn.disabled=false; btn.textContent='No answer'; } if(msg){ msg.textContent='Error: '+((err&&err.message)||err); msg.className='fu-msg warn'; } })
+      .saveFollowupOutcome(DASH_KEY, payload);
+  }
+
+  /* ---- v18.4 (2B): doctor's "Unreachable — review" band (3-strike tiles) ---- */
+  function renderUnreachable(list){
+    var box=document.getElementById('fuUnreach'); if(!box) return;
+    setCnt('fuUnreachCnt', list.length, list.length>0);
+    if(!list.length){ box.className=''; box.innerHTML='<div class="muted-note">No unreachable patients right now. \ud83d\udc4d</div>'; return; }
+    box.className='list';
+    box.innerHTML=list.map(function(it){
+      var rid=esc(String(it.key||''));
+      var cidStr=(it.mobile && fuClinicIds[it.mobile]) ? fuClinicIds[it.mobile] : '';
+      var lvStr =(it.mobile && fuLastVisits[it.mobile]) ? fuLastVisits[it.mobile] : '';
+      var meta=[];
+      if(cidStr) meta.push('ID '+esc(cidStr));
+      if(it.diagnosis) meta.push(esc(it.diagnosis));
+      if(lvStr) meta.push('last visit '+esc(lvStr));
+      if(it.due) meta.push('due '+esc(it.due));
+      var att=(it.attempts||[]).map(function(a){ return esc(a.t||'')+(a.by?(' \u00b7 '+esc(a.by)):''); }).join('  |  ');
+      return '<div class="un-card" id="uncard_'+rid+'">'+
+               '<div class="info">'+
+                 '<div class="fu-name">'+esc(it.name||'(no name)')+'</div>'+
+                 (meta.length?('<div class="dx">'+meta.join(' \u00b7 ')+'</div>'):'')+
+                 '<div class="un-att">3 missed attempts'+(att?(' \u2014 '+att):'')+'</div>'+
+                 '<div class="fu-msg" id="unmsg_'+rid+'"></div>'+
+               '</div>'+
+               '<div class="fu-right">'+
+                 '<div class="un-acts">'+
+                   '<button class="un-retry"  onclick="unreachAction(\''+rid+'\',\'retry\',this)">Retry tomorrow</button>'+
+                   '<button class="un-pause"  onclick="unreachAction(\''+rid+'\',\'pause\',this)">Pause</button>'+
+                   '<button class="un-remove" onclick="unreachAction(\''+rid+'\',\'remove\',this)">Remove</button>'+
+                 '</div>'+
+               '</div>'+
+             '</div>';
+    }).join('');
+  }
+  var UN_CODE = { retry:'unreach_retry', pause:'unreach_pause', remove:'unreach_remove' };
+  var UN_WORD = { retry:'Retry set for tomorrow', pause:'Paused', remove:'Removed' };
+  function unreachAction(rid, action, btn){
+    var it=null;
+    if(fuData && fuData.unreachable){ for(var i=0;i<fuData.unreachable.length;i++){ if(String(fuData.unreachable[i].key)===String(rid)){ it=fuData.unreachable[i]; break; } } }
+    var msg=document.getElementById('unmsg_'+rid);
+    var payload={
+      rowKey: rid, name: it?it.name:'', mobile: it?it.mobile:'', section: it?it.section:'',
+      diagnosis: it?it.diagnosis:'', outcome: UN_CODE[action]||'', source:'', days:'', expected:'',
+      detail: 'Doctor: '+(UN_WORD[action]||action),
+      clinicId: (it && it.mobile && fuClinicIds[it.mobile]) ? fuClinicIds[it.mobile] : '',
+      lastVisit:(it && it.mobile && fuLastVisits[it.mobile]) ? fuLastVisits[it.mobile] : ''
+    };
+    var card=document.getElementById('uncard_'+rid);
+    var acts=card?card.querySelectorAll('button'):[];
+    for(var j=0;j<acts.length;j++){ acts[j].disabled=true; }
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.ok){
+          if(card){ card.style.transition='opacity .4s'; card.style.opacity='0.35'; }
+          if(msg){ msg.textContent=(UN_WORD[action]||action)+'.'; msg.className='fu-msg ok'; }
+          setTimeout(pollFollowups, 600);
+        } else {
+          for(var j2=0;j2<acts.length;j2++){ acts[j2].disabled=false; }
+          if(msg){ msg.textContent='Not saved: '+((res&&res.reason)||'error'); msg.className='fu-msg warn'; }
+        }
+      })
+      .withFailureHandler(function(err){
+        for(var j3=0;j3<acts.length;j3++){ acts[j3].disabled=false; }
+        if(msg){ msg.textContent='Error: '+((err&&err.message)||err); msg.className='fu-msg warn'; }
+      })
+      .saveFollowupOutcome(DASH_KEY, payload);
+  }
+
   /* ---- Escalations (doctor key only) ---- */
   function renderEscalations(d){
     var box=document.getElementById('fuEscal'); if(!box) return;
@@ -1544,18 +1673,39 @@
     box.className='list';
     box.innerHTML=open.map(function(e){
       var meta=[];
-      if(e.clinicId)  meta.push('ID '+esc(e.clinicId));
+      if(e.lastVisit) meta.push('Last visit '+esc(e.lastVisit));
       if(e.diagnosis) meta.push(esc(e.diagnosis));
-      if(e.lastVisit) meta.push('last visit '+esc(e.lastVisit));
-      if(e.by)        meta.push('by '+esc(e.by));
-      if(e.raised)    meta.push(esc(e.raised));
+      if(e.mobile)    meta.push('\ud83d\udcde '+esc(e.mobile));
+      var callLine='';
+      if(e.callState==='connected' && e.callTime){
+        callLine='<div class="meta2">\ud83d\udcde Call '+esc(e.callTime)+(e.callDur?(' \u00b7 '+esc(e.callDur)):'')+'</div>';
+      } else if(e.callState==='missed'){
+        callLine='<div class="meta2 nocall">\ud83d\udcf5 Missed call \u2014 no recording</div>';
+      } else if(e.callState==='noarchive'){
+        callLine='<div class="meta2 nocall">\u2014 No recording archived for this call</div>';
+      } else {
+        callLine='<div class="meta2 nocall">\u2014 No call recorded for this patient</div>';
+      }
+      var outLine  = '<div class="meta2">Outcome'+(e.by?(' '+esc(e.by)):'')+(e.raised?(' \u00b7 '+esc(e.raised)):'')+'</div>';
+      var recBtn='', recSlot='';
+      if(e.rec && e.rec.kind==='myop'){
+        recBtn='<button class="fu-rec" onclick="playRec(\''+jsq(e.rec.ref)+'\',\'escrec_'+e.rowIndex+'\',this)">\ud83c\udfa7 Recording</button>';
+        recSlot='<div class="fu-recslot" id="escrec_'+e.rowIndex+'"></div>';
+      } else if(e.rec && e.rec.kind==='drive'){
+        recBtn='<button class="fu-rec" onclick="playArchived(\''+jsq(e.rec.ref)+'\',\'escrec_'+e.rowIndex+'\',this)">\ud83c\udfa7 Recording</button>';
+        recSlot='<div class="fu-recslot" id="escrec_'+e.rowIndex+'"></div>';
+      }
+      var txBtn = e.tx?('<button class="fu-rec" id="esctxbtn_'+e.rowIndex+'" onclick="escTx(\'esc'+e.rowIndex+'\',\''+jsq(e.tx)+'\',this)">\ud83d\udcc4 Transcript \u25be</button>'):'';
+      var txSlot = e.tx?('<div class="ol-tx" id="oltx_esc'+e.rowIndex+'"></div>'):'';
       var callBtn = e.mobile ? '<button class="call" onclick="placeCall(\''+esc(e.mobile)+'\')">Call</button>' : '';
       return '<div class="fu-row fu-esc" id="esc_'+e.rowIndex+'">'+
                '<div class="info">'+
                  '<div class="reason">'+esc(e.reason||'Escalation')+'</div>'+
-                 '<div class="fu-name" style="font-size:14px">'+esc(e.name||'(no name)')+'</div>'+
+                 '<div class="fu-name" style="font-size:14px">'+esc(e.name||'(no name)')+(e.clinicId?(' <span class="ac-cid">ID '+esc(e.clinicId)+'</span>'):'')+'</div>'+
                  (e.detail?('<div class="dx">'+esc(e.detail)+'</div>'):'')+
-                 '<div class="meta2">'+meta.join(' · ')+'</div>'+
+                 '<div class="meta2">'+meta.join(' \u00b7 ')+'</div>'+
+                 callLine + outLine +
+                 recBtn+txBtn+recSlot+txSlot+
                '</div>'+
                '<div class="fu-right">'+
                  '<select class="fu-out" id="escres_'+e.rowIndex+'">'+
@@ -1572,6 +1722,48 @@
                '</div>'+
              '</div>';
     }).join('');
+    // v18.7: keep any open escalation transcript expanded across the auto-refresh (manual fold)
+    Object.keys(escTxOpen).forEach(function(rid){
+      if(escTxOpen[rid] && escTxCache[rid]!=null){
+        var sl=document.getElementById('oltx_'+rid);
+        if(sl){ sl.textContent=escTxCache[rid]; sl.style.display='block'; }
+      }
+    });
+  }
+
+  // v18.7: escalation transcript with MANUAL fold — loads once, then stays open
+  // across the follow-up auto-refresh until the doctor taps to close it.
+  var escTxCache = {};   // rid -> transcript text (once loaded)
+  var escTxOpen  = {};   // rid -> currently expanded?
+  function escTx(rid, fileId, btn){
+    var slot=document.getElementById('oltx_'+rid); if(!slot) return;
+    if(escTxCache[rid]!=null){
+      escTxOpen[rid]=!escTxOpen[rid];
+      slot.textContent=escTxCache[rid];
+      slot.style.display=escTxOpen[rid]?'block':'none';
+      if(btn) btn.textContent=escTxOpen[rid]?'\ud83d\udcc4 Transcript \u25b4':'\ud83d\udcc4 Transcript \u25be';
+      return;
+    }
+    if(btn){ btn.disabled=true; btn.textContent='\u23f3 Loading\u2026'; }
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(btn) btn.disabled=false;
+        if(res && res.ok){
+          escTxCache[rid]=res.text||'';
+          escTxOpen[rid]=true;
+          slot.textContent=escTxCache[rid];
+          slot.style.display='block';
+          if(btn) btn.textContent='\ud83d\udcc4 Transcript \u25b4';
+        } else {
+          if(btn) btn.textContent='\ud83d\udcc4 Transcript \u25be';
+          showBanner('Could not load transcript'+(res&&res.error?(': '+res.error):'.'));
+        }
+      })
+      .withFailureHandler(function(err){
+        if(btn){ btn.disabled=false; btn.textContent='\ud83d\udcc4 Transcript \u25be'; }
+        showBanner('Could not load transcript: '+((err&&err.message)||err));
+      })
+      .getTranscriptText(DASH_KEY, fileId);
   }
 
   /* ---- Doctor's outcome review console (v18.2, doctor key only) ---- */
@@ -1660,8 +1852,10 @@
     var groups={};
     rows.forEach(function(e){ var s=e.section||'Other'; (groups[s]||(groups[s]=[])).push(e); });
     var html='';
-    fuOrderedSections(Object.keys(groups)).forEach(function(sec){
-      var open=fuBandOpen('ol:'+sec);
+    var olOrdered = fuOrderedSections(Object.keys(groups));
+    var olTopSec = olOrdered.length ? olOrdered[0] : '';
+    olOrdered.forEach(function(sec){
+      var open=fuBandOpen('ol:'+sec, sec===olTopSec);
       var items=groups[sec];
       var ids=items.map(function(e){return String(e.rowIndex);}).join(',');
       var rowsHtml=''; items.forEach(function(e){ rowsHtml+=olRowHtml(e); });
@@ -1679,6 +1873,8 @@
   function olRowHtml(e){
     var rid=esc(String(e.rowIndex));
     var cid=e.clinicId?('<span class="ac-cid">ID '+esc(e.clinicId)+'</span>'):'';
+    var lv=e.lastVisit?('<div class="fu-lv">Last visit '+esc(e.lastVisit)+'</div>'):'';
+    var noRec=(!e.rec)?('<span class="ol-norec" title="No recording to review for this call">\ud83d\udcf5 no recording</span>'):'';
     var call=e.callTime
       ? ('<span class="ol-call">📞 call '+esc(e.callTime)+(e.callDur?(' · '+esc(e.callDur)):'')+'</span>')
       : ('<span class="ol-call">logged at '+esc(e.time)+' (no call matched)</span>');
@@ -1703,7 +1899,8 @@
              '<div class="info">'+
                '<div class="fu-name">'+esc(e.patient||'(no name)')+(cid?(' '+cid):'')+
                  (e.last4?(' <span class="ol-call">\u2026'+esc(e.last4)+'</span>'):'')+'</div>'+
-               '<div>'+call+'</div>'+
+               lv +
+               '<div>'+call+noRec+'</div>'+
                '<div class="ol-filed"><b>'+esc(filed)+'</b>'+chip+'</div>'+
                (extras.length?('<div class="ol-extra">'+esc(extras.join(' · '))+'</div>'):'')+
                '<div class="ol-extra">by '+esc(e.by||'')+' · saved '+esc(e.time||'')+'</div>'+
@@ -2041,6 +2238,7 @@
     DASH_KEY=k; DASH_ROLE=role;
     try{ localStorage.setItem('clinicDashKey', k); }catch(e){}   // remember on this device
     var escSec=document.getElementById('secEscal'); if(escSec) escSec.style.display=(role==='full')?'':'none';
+    var unSec=document.getElementById('secUnreach'); if(unSec) unSec.style.display=(role==='full')?'':'none';
     var olSec=document.getElementById('secOutLog'); if(olSec) olSec.style.display=(role==='full')?'':'none';
     hideLogin(); startDashboard();
   }

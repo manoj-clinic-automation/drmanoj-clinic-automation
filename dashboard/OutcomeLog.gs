@@ -103,6 +103,8 @@ function OL_todayCallsByPhone_() {
   try {
     var b = cc_todayBounds_();
     var raw = fetchCallsBetween_(b.start, b.end) || [];
+    var amap = {};
+    try { amap = cc_agentMap_() || {}; } catch (eA) {}
     for (var i = 0; i < raw.length; i++) {
       var s = raw[i] || {};
       var missed = (typeof s.is_missed === 'boolean')
@@ -116,11 +118,43 @@ function OL_todayCallsByPhone_() {
       (m[ph] || (m[ph] = [])).push({
         epoch: epoch,
         durSec: cc_int_(cc_pick_(s, ['duration_seconds', 'duration', 'seconds'])),
-        filename: String(cc_pick_(s, ['filename', 'recording_filename']) || '')
+        filename: String(cc_pick_(s, ['filename', 'recording_filename']) || ''),
+        agent: cc_agentName_(s, amap)                    // v18.7: who handled the call
       });
     }
   } catch (e) { /* feed unavailable -> rows simply show no call match */ }
   return m;
+}
+
+/** TODAY: connected calls by phone (with agent) AND the set of phones that had a
+ *  missed call today — computed in one feed pass. Lets the escalation card show the
+ *  call, or state clearly that it was a missed call / no call. */
+function OL_todayCallsAndMissed_() {
+  var connected = {}, missed = {};
+  try {
+    var b = cc_todayBounds_();
+    var raw = fetchCallsBetween_(b.start, b.end) || [];
+    var amap = {};
+    try { amap = cc_agentMap_() || {}; } catch (eA) {}
+    for (var i = 0; i < raw.length; i++) {
+      var s = raw[i] || {};
+      var ph = cc_last10_(cc_pick_(s, ['phone10', 'caller_number_raw', 'caller_number', 'number']));
+      if (!ph) continue;
+      var isMissed = (typeof s.is_missed === 'boolean')
+        ? s.is_missed
+        : (String(cc_pick_(s, ['status', 'call_status'])) === '2');
+      if (isMissed) { missed[ph] = true; continue; }
+      var epoch = cc_int_(cc_pick_(s, ['start_time', 'synced_time', 'time']));
+      if (!epoch) continue;
+      (connected[ph] || (connected[ph] = [])).push({
+        epoch: epoch,
+        durSec: cc_int_(cc_pick_(s, ['duration_seconds', 'duration', 'seconds'])),
+        filename: String(cc_pick_(s, ['filename', 'recording_filename']) || ''),
+        agent: cc_agentName_(s, amap)
+      });
+    }
+  } catch (e) { /* feed unavailable -> escalation cards say "no call" */ }
+  return { connected: connected, missed: missed };
 }
 
 /** YESTERDAY(+ any archived day): phone10 -> [ {epoch, timeStr, durStr, fileId, joinKey} ]
@@ -292,6 +326,7 @@ function getOutcomeLog(key, day) {
         patient:  String(cell(row, ix.patient) || '').trim(),
         last4:    OL_last4_(mob),
         clinicId: cid,
+        lastVisit:(ph && pmap[ph]) ? String(pmap[ph].lastVisit || '') : '',   // v18.3: last-visit on console
         section:  String(cell(row, ix.section) || '').trim() || 'Other',
         code:     String(cell(row, ix.outcome) || '').trim(),
         source:   String(cell(row, ix.source) || '').trim(),
