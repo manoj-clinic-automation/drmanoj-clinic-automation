@@ -275,6 +275,22 @@
     background:#102a43;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;
     box-shadow:0 6px 22px rgba(16,24,40,.28);z-index:9999;opacity:0;pointer-events:none;transition:opacity .2s}
   #callToast.show{opacity:1}
+  /* D66: today's follow-up progress (section-wise) shown in the card header */
+  .fu-progress{background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:12px;
+    padding:10px 13px;margin:0 0 12px}
+  .fu-progress .fp-top{font-weight:800;font-size:14.5px;color:var(--ink);margin-bottom:4px}
+  .fu-progress .fp-sec{font-size:12.5px;color:var(--muted);padding:2px 0 2px 12px}
+  .fu-progress .fp-sec b{color:var(--brand2)}
+  .fu-progress .fp-when{font-size:11.5px;color:var(--muted);margin-top:6px;opacity:.85}
+  /* D66: UNDO toast (vanish-on-file) */
+  #fuUndoToast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);max-width:92%;
+    display:flex;align-items:center;gap:12px;background:#0d2a1c;color:#eafff3;
+    padding:11px 14px 11px 18px;border:1px solid var(--ok-line);border-radius:12px;font-size:14px;font-weight:600;
+    box-shadow:0 6px 22px rgba(0,0,0,.4);z-index:9999;opacity:0;pointer-events:none;transition:opacity .2s}
+  #fuUndoToast.show{opacity:1;pointer-events:auto}
+  #fuUndoToast .fu-ut-msg{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
+  #fuUndoToast .fu-ut-undo{border:1px solid var(--ok-line);background:var(--ok-soft);color:var(--ok);
+    font-weight:800;border-radius:9px;padding:7px 12px;cursor:pointer;font-size:13px;flex:0 0 auto}
   /* ---------- follow-up call loop (v16) ---------- */
   .fu-secband{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
     color:var(--brand);background:var(--accent-soft);border:1px solid var(--accent-line);
@@ -500,7 +516,7 @@
   <!-- Today's follow-up calls: open by default -->
   <section class="sec" data-key="fuToday" data-default="open">
     <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Today's follow-up calls <span class="cnt" id="fuTodayCnt">0</span></h2>
-    <div class="secbody"><div id="fuToday" class="list"></div></div>
+    <div class="secbody"><div id="fuProgress" class="fu-progress" style="display:none"></div><div id="fuToday" class="list"></div></div>
   </section>
 
   <!-- Escalations (doctor key only; shown by applyAccess): collapsed by default -->
@@ -575,11 +591,12 @@
   </div>
 </div>
 <div id="callToast"></div>
+<div id="fuUndoToast"></div>
 <button id="toTop" onclick="scrollTop_()" title="Back to top" aria-label="Back to top">▲</button>
 <script>
   var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
   var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
-  var PAGE_BUILD = 'v18.14 · call-first gate: outcome only after Call, then Talked; No answer = missed';
+  var PAGE_BUILD = 'v18.15 · D66: filed tile vanishes + 10s UNDO + section-wise total/done progress';
   var acPrevIds = null;    // v1.1: ids seen last poll, to flash genuinely-new calls
   var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
   var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
@@ -1341,6 +1358,13 @@
   // which outcomes need extra fields
   var FU_NEEDS_DATE = { coming:1, out_of_town:1 };
   var FU_IS_MED     = { on_medication:1 };
+  // D66: outcomes that LEAVE the worklist -> the tile vanishes on Save.
+  // Exact mirror of WebApp.gs FU_SETTLING + FU_ESCALATING (staff codes only).
+  // Anything NOT listed here (only 'cant_communicate') stays on the list for a
+  // callback, exactly as before.
+  var FU_VANISH = { coming:1, out_of_town:1, on_medication:1, dikha_chuke:1, problem:1,
+                    close_followup:1, not_interested:1, treatment_elsewhere:1,
+                    wrong_number:1, asked_not_to_call:1 };
   var fuData = null;   // last getFollowups result, so save handlers can read row details
   var fuLastVisits = {};   // v1.1 Slice 2: mobile(last10) -> last-visit date (additive)
   var fuRecordings = {};   // v1.1 Slice 2b: mobile(last10) -> {fileId,date} of most recent archived call
@@ -1425,9 +1449,11 @@
     if(!box) return;
     if(d && d.error){ box.innerHTML='<div class="empty">Could not load follow-ups: '+esc(d.error)+'</div>'; return; }
     var counts=(d&&d.counts)||{open:0,retry:0,settled:0};
-    setCnt('fuTodayCnt', counts.open||0, (counts.open||0)>0);
+    fuRenderProgress(d);                                     // D66: section-wise total / done header
+    var openShown=Math.max(0,(counts.open||0)-fuPendingCount());
+    setCnt('fuTodayCnt', openShown, openShown>0);
     // KPI tile
-    var kfu=document.getElementById('k_fu'); if(kfu) kfu.textContent=(counts.open||0);
+    var kfu=document.getElementById('k_fu'); if(kfu) kfu.textContent=openShown;
     var kfus=document.getElementById('k_fu_sub');
     if(kfus) kfus.textContent=(counts.settled||0)+' settled · '+(counts.retry||0)+' retry';
 
@@ -1441,11 +1467,12 @@
       var fuTopSec = fuOrdered.length ? fuOrdered[0] : '';
       fuOrdered.forEach(function(sec){
         var open = fuBandOpen(sec, sec===fuTopSec);
-        var rows='';
-        groups[sec].forEach(function(it){ rows+=fuRowHtml(it); });
+        var rows='', shown=0;
+        groups[sec].forEach(function(it){ if(fuPending[String(it.key)]) return; rows+=fuRowHtml(it); shown++; });
+        if(!shown) return;   // whole band is momentarily pending -> hide it this cycle
         html+='<div class="fu-band'+(open?'':' collapsed')+'" data-fuband="'+esc(sec)+'">'+
                 '<div class="fu-bandhead" onclick="toggleFuBand(this)">'+
-                  '<span class="fu-caret">▸</span>'+esc(sec)+' · '+groups[sec].length+
+                  '<span class="fu-caret">▸</span>'+esc(sec)+' · '+shown+
                 '</div>'+
                 '<div class="fu-bandbody">'+rows+'</div>'+
               '</div>';
@@ -1504,6 +1531,95 @@
     if(!it) return;
     var el=document.getElementById('furow_'+rid);
     if(el && el.parentNode){ var tmp=document.createElement('div'); tmp.innerHTML=fuRowHtml(it); var nw=tmp.firstChild; if(nw) el.parentNode.replaceChild(nw, el); }
+  }
+
+  /* ---- D66: vanish-on-file + 10-second UNDO + section-wise progress ---- */
+  function fuFindToday(rid){
+    if(fuData && fuData.today){ for(var i=0;i<fuData.today.length;i++){ if(String(fuData.today[i].key)===String(rid)){ return fuData.today[i]; } } }
+    return null;
+  }
+  var fuPending = {};        // rid -> { payload, timerId, section, name } during the undo window
+  var FU_UNDO_MS = 10000;    // how long the write is held so UNDO can cancel it
+  function fuPendingCount(){ var n=0; for(var k in fuPending){ if(fuPending.hasOwnProperty(k)) n++; } return n; }
+  function fuPendingInSection(sec){ var n=0; for(var k in fuPending){ if(fuPending.hasOwnProperty(k) && fuPending[k].section===sec) n++; } return n; }
+
+  // remove the tile now; hold the actual write for the undo window
+  function fuVanishAndDefer(rid, it, payload){
+    var sec=(it&&it.section)||payload.section||'Follow-up';
+    var nm =(it&&it.name)||payload.name||'Patient';
+    var row=document.getElementById('furow_'+rid);
+    if(row && row.parentNode){ row.parentNode.removeChild(row); }
+    var timerId=setTimeout(function(){ fuCommit(rid); }, FU_UNDO_MS);
+    fuPending[rid]={ payload:payload, timerId:timerId, section:sec, name:nm };
+    if(fuData) fuRenderProgress(fuData);      // tick the "done" count up immediately
+    fuShowUndo(rid, nm);
+  }
+  // the deferred write actually reaches the sheet here
+  function fuCommit(rid){
+    var p=fuPending[rid]; if(!p) return;
+    google.script.run
+      .withSuccessHandler(function(res){
+        delete fuPending[rid];
+        if(!(res && res.ok)){ showToast('Could not save '+(p.name||'')+' \u2014 it will reappear on the list.'); }
+        pollFollowups();
+      })
+      .withFailureHandler(function(){
+        delete fuPending[rid];
+        showToast('Save failed for '+(p.name||'')+' \u2014 it will reappear on the list.');
+        pollFollowups();
+      })
+      .saveFollowupOutcome(DASH_KEY, p.payload);
+  }
+  // cancel a pending write and bring the tile back exactly as it was
+  function fuUndo(rid){
+    var p=fuPending[rid]; if(!p) return;
+    clearTimeout(p.timerId);
+    delete fuPending[rid];
+    fuHideUndo();
+    if(fuData){ renderFollowups(fuData); }     // tile returns (never written) + counter re-ticks
+  }
+  var _fuUndoT=null, _fuUndoTick=null;
+  function fuShowUndo(rid, name){
+    var t=document.getElementById('fuUndoToast'); if(!t) return;
+    var secs=Math.round(FU_UNDO_MS/1000);
+    t.innerHTML='<span class="fu-ut-msg">\u2713 '+esc(name)+' filed</span>'+
+                '<button class="fu-ut-undo" onclick="fuUndo(\''+esc(String(rid))+'\')">UNDO <span id="fuUtSec">'+secs+'</span></button>';
+    t.classList.add('show');
+    if(_fuUndoT) clearTimeout(_fuUndoT);
+    if(_fuUndoTick) clearInterval(_fuUndoTick);
+    var n=secs;
+    _fuUndoTick=setInterval(function(){ n--; var s=document.getElementById('fuUtSec'); if(s) s.textContent=(n>0?n:0); if(n<=0){ clearInterval(_fuUndoTick); } }, 1000);
+    _fuUndoT=setTimeout(function(){ fuHideUndo(); }, FU_UNDO_MS);
+  }
+  function fuHideUndo(){
+    var t=document.getElementById('fuUndoToast'); if(t) t.classList.remove('show');
+    if(_fuUndoTick){ clearInterval(_fuUndoTick); _fuUndoTick=null; }
+    if(_fuUndoT){ clearTimeout(_fuUndoT); _fuUndoT=null; }
+  }
+  // section-wise progress line in the follow-up card header
+  function fuRenderProgress(d){
+    var box=document.getElementById('fuProgress'); if(!box) return;
+    var counts=(d&&d.counts)||{open:0,retry:0,settled:0};
+    var sectionDone=(d&&d.sectionDone)||{};
+    var groups=(d&&d.bySection)||{};
+    var pend=fuPendingCount();
+    var totalN=(counts.open||0)+(counts.settled||0);
+    if(totalN<=0){ box.style.display='none'; box.innerHTML=''; return; }
+    var doneN=(counts.settled||0)+pend;
+    var html='<div class="fp-top">Today\u2019s follow-up calls \u2014 total '+totalN+' / '+doneN+' done</div>';
+    var secNames=Object.keys(groups).filter(function(s){ return String(s).toLowerCase().indexOf('sent back')!==0; });
+    fuOrderedSections(secNames).forEach(function(sec){
+      var openSec=(groups[sec]||[]).length;
+      var doneSec=sectionDone[sec]||0;
+      var t=openSec+doneSec;
+      var dn=doneSec+fuPendingInSection(sec);
+      html+='<div class="fp-sec">'+esc(sec)+' \u2014 total '+t+' / <b>'+dn+'</b> done</div>';
+    });
+    var when=(d&&d.updated)?esc(d.updated):'';
+    var today=fmtDMY(new Date().toISOString().slice(0,10));
+    html+='<div class="fp-when">'+(when?('as of '+when+' \u00b7 '):'')+esc(today)+'</div>';
+    box.innerHTML=html;
+    box.style.display='block';
   }
 
   function fuRowHtml(it){
@@ -1616,8 +1732,7 @@
     var save=document.getElementById('fusave_'+rid);
     var msg=document.getElementById('fumsg_'+rid);
     // pull the row's patient details from the last fuData snapshot
-    var it=null;
-    if(fuData && fuData.today){ for(var i=0;i<fuData.today.length;i++){ if(String(fuData.today[i].key)===String(rid)){ it=fuData.today[i]; break; } } }
+    var it=fuFindToday(rid);
     var payload={
       rowKey: rid,
       name:   it?it.name:'',
@@ -1633,22 +1748,24 @@
       var ms=document.getElementById('fumed_'+rid); payload.source=ms?ms.value:'';
       var dd=document.getElementById('fudays_'+rid); payload.days=dd?dd.value:'';
     }
+
+    // D66: an outcome that LEAVES the worklist -> vanish now, write after the undo window.
+    if(FU_VANISH[code]){ fuVanishAndDefer(rid, it, payload); return; }
+
+    // "Connected but couldn't communicate" stays on the list -> write immediately, as before.
     if(save){ save.disabled=true; save.textContent='Saving…'; }
     if(msg){ msg.textContent=''; msg.className='fu-msg'; }
     google.script.run
       .withSuccessHandler(function(res){
         if(save) save.textContent='Save';
         if(res && res.ok){
-          var row=document.getElementById('furow_'+rid);
           if(res.settle==='retry'){
-            if(msg){ msg.textContent='Saved — stays on list for retry.'; msg.className='fu-msg warn'; }
+            if(msg){ msg.textContent='Saved — stays on list for callback.'; msg.className='fu-msg warn'; }
             if(save) save.disabled=false;
-          } else if(res.settle==='escalate'){
-            if(row){ row.style.transition='opacity .4s'; row.style.opacity='0.35'; }
-            if(msg){ msg.textContent='Saved & escalated to the doctor.'; msg.className='fu-msg ok'; }
           } else {
+            var row=document.getElementById('furow_'+rid);
             if(row){ row.style.transition='opacity .4s'; row.style.opacity='0.35'; }
-            if(msg){ msg.textContent='Saved — settled.'; msg.className='fu-msg ok'; }
+            if(msg){ msg.textContent='Saved.'; msg.className='fu-msg ok'; }
           }
         } else {
           if(save) save.disabled=false;

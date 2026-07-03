@@ -1019,9 +1019,15 @@ function getFollowups(key) {
     var tzf = Session.getScriptTimeZone();
 
     var open = [], unreachable = [], settledToday = 0, retryCount = 0;
+    var doneBySection = {};   // D66: per-section "done today" count (settled staff outcomes)
     rawToday.forEach(function (o) {
       var key0 = String(o['key'] || '').trim();
-      if (key0 && state.settledKeys[key0]) { settledToday++; return; }   // already handled -> drop
+      if (key0 && state.settledKeys[key0]) {
+        settledToday++;
+        var _secD = String(o['section'] || 'Follow-up').trim() || 'Follow-up';
+        doneBySection[_secD] = (doneBySection[_secD] || 0) + 1;
+        return;                                                         // already handled -> drop
+      }
       if (key0 && sentBackKeys[key0]) return;   // shown in the Sent-back band instead
       var mobile = String(o['mobile'] || '').replace(/\D/g, '');
       if (mobile.length > 10) mobile = mobile.slice(-10);
@@ -1091,6 +1097,7 @@ function getFollowups(key) {
 
     return {
       today: open, bySection: bySection, settled: settled, unreachable: unreachable,
+      sectionDone: doneBySection,
       counts: { open: open.length, retry: retryCount, settled: settledToday, unreachable: unreachable.length },
       updated: Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'h:mm:ss a')
     };
