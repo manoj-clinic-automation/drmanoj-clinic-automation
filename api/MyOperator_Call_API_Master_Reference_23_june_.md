@@ -2,8 +2,8 @@
 
 **Dr. Manoj Agarwal Clinic, Bareilly**
 **Scope:** Everything call/IVR-related in one place — Search Logs, Filters, Recording Links, Users, click-to-call (OBD), and the new call webhooks. **WhatsApp sending is a separate system and is intentionally out of scope here** (different host, different token).
-**Sources reconciled:** official API PDF + official Postman collection ("MyOperator API Document") + the live, in-production Google Apps Script project (the missed-call digest poller) + your two prior KB notes.
-**Last reconciled:** 23 June 2026.
+**Sources reconciled:** official API PDF + official Postman collection ("MyOperator API Document") + the live, in-production Google Apps Script project (the missed-call digest poller) + your two prior KB notes + **real production `call.end` / `call.summary` bodies captured from OUR OWN account (Session 54, 03 Jul 2026)**.
+**Last reconciled:** 03 July 2026 (Session 54 — call-webhook fields verified in production; see §9.0).
 
 > **One-line summary:** The Call/Logs system is hosted at `developers.myoperator.co`, authenticated by a single `token` (the `3f76…`, 32-char Calling/Logs key — *not* the WhatsApp Bearer key). The method that is actually running and confirmed in your GS poller is **`POST /search` with all parameters in the query string and no request body.**
 
@@ -306,6 +306,18 @@ Use this only if you ever want programmatic outbound calls / callbacks from code
 
 The vendor's new webhook suite POSTs call-lifecycle events **to a receiver URL you host**. All share a standard **envelope + `payload`** structure. Events: `call.initiated` → `call.dial_begin` → `call.answered` → `call.end` → `call.summary`, plus `disposition`.
 
+### 9.0 ⭐ PRODUCTION-VERIFIED on OUR account (Session 54, 03 Jul 2026) — READ FIRST
+
+We captured real `call.end` + `call.summary` bodies from our OWN company (`68384350414b9847`) at a receiver on `/mo-callhook`. The vendor examples below (§9.2–§9.3) are from a **sample** company and an **incoming** call; ours are **outbound OBD**. These account-verified facts override any conflicting assumption elsewhere in this doc:
+
+1. **Join key for OUR OBD calls = `payload.client_ref_id`, NOT `ref_id`.** The value our dialer stamps (`call_api.py` → `make_reference_id`) comes back as **`client_ref_id`**. The webhook's **`ref_id` is MyOperator's OWN UUID** (e.g. `3b4014a4-76cd-11f1-…`) — do **not** match on it. `session_id` (= `payload.id`, shaped like `cb9.<epoch>.<n>`) is a stable backup key.
+2. **"Did we reach the patient?" comes from the CUSTOMER LEG, not top-level `duration`.** In `payload.legs[]`, the entry with `type == "customer"` carries `talk_duration` (real seconds talking) and `result`. Top-level `payload.duration` **includes agent-pickup + ring time** — a real call showed top-level `49` while the patient leg talked `32`. **Require `result == "answered"`**: a real incoming call showed `result:"connected"` with `answered_at: null` at `11` talk-seconds, i.e. *reached, not answered*. `"connected"` alone is **not** a genuine pickup.
+3. **Tell OBD (outbound) apart from incoming:** OBD → `payload.category == "obd"` **and** a populated `client_ref_id`; incoming → `category == "incoming"` **and** empty `client_ref_id` / `ref_id`. Our receiver ignores anything that isn't OBD.
+4. **Full per-account envelope** (fields the vendor sample omitted): top-level `event_id`, `event_version`, `system_identifier`; `payload.did`, `payload.obd_campaign { id, job_id }`; per-leg `dial_status`, `pickup_device`, `answered_at`, `ring_duration`. `recording_filename` is present and complete in `call.end`.
+5. **Setup is SELF-SERVE — no vendor ticket, no token rotation.** Panel → **APIs & Webhooks → Webhooks v2 → Add New Webhook** → paste your receiver URL (Authentication: **None** — the `?key=` in the URL is your own gate) → tick **Call Ended** (`call.end`) + **Call Summary** (`call.summary`). This is a **separate** webhook entry from the WhatsApp "Message Received" one and does not disturb it. Both `call.end` and `call.summary` fire per call, in real time.
+
+**Where this is used:** the live duration gate — the VPS `call-hook` receiver writes a PHI-clean `Call_Durations` tab keyed on `client_ref_id`; `CallConsole.gs::getCallDuration` unlocks an outcome only when `status == "bridged"` AND customer `result == "answered"` AND `talk_duration ≥ 15s` (dashboard v18.16). See Master KB v1.23 §54 and Call Console Spec v1.4 §G.
+
 ### 9.1 ✅ Recording field — now confirmed
 
 The earlier open question ("does the webhook carry the recording reference, and under what name?") is **resolved**: both `call.end` and `call.summary` carry **`recording_filename`** in `payload`. This is the *same value* you'd pass to `/recordings/link?file=…` (§6).
@@ -398,7 +410,7 @@ Final, enriched call log: top-level call fields + full `legs[]` (never empty) + 
 Fires when a disposition is submitted for a call — use it to push call+disposition data into your datastore or to create/update a lead. Single event.
 
 ### 9.6 If you switch missed-call detection to webhooks
-You'd no longer poll. Map the webhook's modern status to your existing logic: `status == "missed"` (or all agent legs `result == "not_answered"`) = a missed candidate; `status == "bridged"` = resolved. **Capture one real `call.summary` body from your own account first** and confirm field names before wiring — the examples above are from the vendor's sample company, and small per-account variations are possible.
+You'd no longer poll. Map the webhook's modern status to your existing logic: `status == "missed"` (or all agent legs `result == "not_answered"`) = a missed candidate; `status == "bridged"` = resolved. **We DID capture real bodies from our own account (Session 54) — see §9.0 for what they actually showed** (join key `client_ref_id`; the patient answer read from the customer leg's `talk_duration` / `result`; extra per-account fields). Where §9.2–§9.3 (vendor sample + incoming call) differ from §9.0, **trust §9.0.**
 
 ---
 
@@ -408,11 +420,15 @@ You'd no longer poll. Map the webhook's modern status to your existing logic: `s
 |---|---|---|
 | Direction | `event` (`1`/`2`) | `direction` (`"incoming"`/`"outgoing"`) |
 | Connected vs missed | `status` (`1`/`2`) | `status` (`"bridged"`/`"missed"`/`"voicemail"`) |
+| **OUR OBD call id** (join key) | — (not carried) | **`client_ref_id`** ⭐ (our `reference_id`; **`ref_id` = MyOperator's own UUID**, do not use) · backup `session_id`/`id` |
 | Caller number | `caller_number` / `caller_number_raw` | `customer_number` / `customer_identifier` |
 | Recording file | **`filename`** | **`recording_filename`** |
-| Total duration | `duration` (`"HH:MM:SS"`, incl. ring) | `duration` (int seconds) |
+| Total duration (incl. ring) | `duration` (`"HH:MM:SS"`, incl. ring) | `duration` (int seconds, incl. agent-pickup + ring) |
+| **Patient talk time** (real) | — (use `log_details[]`) | **`legs[](type=="customer").talk_duration`** ⭐ + `.result` (`"answered"` = genuine pickup; `"connected"` w/ `answered_at:null` = reached only) |
 | Times | unix seconds | ISO-8601 strings |
 | Agent | `log_details[].received_by[].name` | `legs[].agent.name` |
+
+> **⭐ = production-verified on our account (Session 54, §9.0).** For the duration gate, match on `client_ref_id` and read the **customer leg's** `talk_duration` + `result` — never the top-level `duration` (which includes the agent leg + ring).
 
 ---
 
@@ -514,7 +530,14 @@ function fetchCallsBetween_(startDate, endDate) {
 - **Times in Search Logs are UTC unix seconds; webhooks are ISO-8601.** Convert to Asia/Kolkata for display.
 - **Recording field name differs by source:** `filename` (logs) vs `recording_filename` (webhooks).
 - **Caller name is never in the call record** — only the agent name is. Resolve patient identity downstream.
+- **[Prod, S54] OBD join key is `client_ref_id`, not `ref_id`.** `ref_id` is MyOperator's own UUID; our stamped `reference_id` returns as `client_ref_id`.
+- **[Prod, S54] Top-level webhook `duration` includes agent-pickup + ring.** For real patient talk-time use the customer leg's `talk_duration`; for a genuine pickup require `result == "answered"` (not just `"connected"`).
+- **[Prod, S54] Call webhooks are self-serve** in Webhooks v2 (Add New Webhook → Call Ended + Call Summary), a separate entry from the WhatsApp webhook — no vendor ticket, no token rotation.
 
 ---
 
 *Reference only. No real tokens stored. Companion: live GS project (Search Logs poller) + `MyOperator_WhatsApp_Postman_CallLogs_API_Working_KB_16Jun2026.md` (WhatsApp side).*
+
+## Changelog
+- **03 Jul 2026 (Session 54):** Added **§9.0 — production-verified account facts** (join key `client_ref_id`; patient signal from the customer leg's `talk_duration`/`result`; OBD-vs-incoming filter; full per-account envelope; self-serve Webhooks-v2 setup). Corrected §9.6, the §10 cross-reference table, and §13 gotchas to match real captured bodies. Header source list + "Last reconciled" bumped.
+- **23 Jun 2026:** Initial master reference (PDF + Postman + live GS poller + prior KB notes).

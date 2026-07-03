@@ -1,0 +1,37 @@
+# === Reverse proxy for the MyOperator CALL-WEBHOOK capture (Phase A, passive) ===
+# APPEND this to the followup.dr-manoj.in vHost Conf, in the SAME place the
+# other relays' proxies live (CyberPanel -> followup.dr-manoj.in -> Manage ->
+# Config -> vHost Conf). Do NOT delete anything already there.
+#
+# Put the new "extprocessor call_hook { ... }" block right AFTER the existing
+# "extprocessor call_api { ... }" block, and put the new
+# "context /mo-callhook { ... }" block right BEFORE the existing
+# "context / { ... }".
+#
+# Why the path is /mo-callhook (not /call-hook): OpenLiteSpeed matches contexts
+# by path prefix, and you already have a "context /call" (the dialer). A path
+# starting with /call could be swallowed by that context. /mo-callhook shares no
+# prefix with any existing context, so there is ZERO chance of a mis-route:
+#   /mo-callhook -> this capture (port 8098)      [new]
+#   /call        -> OBD dialer relay (port 8097)  [unchanged]
+#   /wa-send     -> WhatsApp send relay (port 8096) [unchanged]
+#   everything else incl. /wa-webhook -> WA receiver (port 8095) [unchanged]
+# Nothing already running is touched.
+#
+# After saving, run:  systemctl restart lsws
+
+extprocessor call_hook {
+  type                    proxy
+  address                 127.0.0.1:8098
+  maxConns                100
+  pcKeepAliveTimeout      60
+  initTimeout             60
+  retryTimeout            0
+  respBuffer              0
+}
+
+context /mo-callhook {
+  type                    proxy
+  handler                 call_hook
+  addDefaultCharset       off
+}

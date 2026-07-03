@@ -57,6 +57,8 @@ var CC_SHEET_ID_FALLBACK = '1USjArkqIdrE9hIqerghms76STatM5XTbSW_a9I3klo0';
 var CC_TAB_PATIENT   = 'Patient_Master';
 var CC_TAB_AGENTS    = 'Agents';
 var CC_TAB_OUTCOMES  = 'Outcomes_Log';
+var CC_TAB_DURATIONS = 'Call_Durations';   // D77: PHI-clean call-facts feed (VPS receiver writes it)
+var CC_GATE_MIN_TALK = 15;                 // D77: seconds of PATIENT talk-time to unlock an outcome
 
 var CC_OUTCOMES_HEADER = [
   'Timestamp', 'Agent Name', 'Ext', 'Direction', 'Number (last-4)',
@@ -335,6 +337,51 @@ function getArchivedRecordingAudio(key, fileId) {
 // ===========================================================================
 // CORE BUILDER
 // ===========================================================================
+
+// ===========================================================================
+// DURATION GATE (D77) — after a follow-up call, the dashboard asks whether THAT
+// exact call really connected long enough to allow an outcome to be logged.
+// Reads the PHI-clean Call_Durations tab (written in real time by the VPS
+// call-webhook receiver), matching on the call's client_ref_id. Read-only;
+// WebApp.gs untouched (D34).
+// ===========================================================================
+/**
+ * getCallDuration(key, clientRefId)
+ *   -> { ok:true, found:false }                                   (no row yet)
+ *   -> { ok:true, found:true, status, customerResult, talk, allowOutcome }
+ *   -> { ok:false, error }
+ * allowOutcome is TRUE only when the call bridged AND the patient leg was
+ * answered AND the patient talk-time is >= CC_GATE_MIN_TALK seconds.
+ * Fail-safe: any ambiguity or missing field -> allowOutcome:false.
+ */
+function getCallDuration(key, clientRefId) {
+  try {
+    if (dashRole_(key) === 'none') return { ok: false, error: 'Not authorized.' };
+    var ref = String(clientRefId || '').trim();
+    if (!ref) return { ok: true, found: false };
+    var vals = cc_sheetValues_(CC_TAB_DURATIONS);
+    if (!vals || vals.length < 2) return { ok: true, found: false };
+    var H = cc_lc_(vals[0]);
+    var iRef  = cc_col_(H, ['client_ref_id', 'client ref id', 'clientrefid']);
+    var iStat = cc_col_(H, ['status']);
+    var iRes  = cc_col_(H, ['customer_result', 'customer result']);
+    var iTalk = cc_col_(H, ['customer_talk_duration', 'customer talk duration', 'talk_duration']);
+    if (iRef < 0) return { ok: true, found: false };
+    var hit = null;
+    for (var r = vals.length - 1; r >= 1; r--) {           // newest matching row wins
+      if (String(vals[r][iRef] || '').trim() === ref) { hit = vals[r]; break; }
+    }
+    if (!hit) return { ok: true, found: false };
+    var status = (iStat >= 0) ? String(hit[iStat] || '').trim().toLowerCase() : '';
+    var cres   = (iRes  >= 0) ? String(hit[iRes]  || '').trim().toLowerCase() : '';
+    var talk   = (iTalk >= 0) ? cc_int_(hit[iTalk]) : 0;
+    var allow  = (status === 'bridged') && (cres === 'answered') && (talk >= CC_GATE_MIN_TALK);
+    return { ok: true, found: true, status: status, customerResult: cres, talk: talk, allowOutcome: allow };
+  } catch (err) {
+    return { ok: false, error: String(err && err.message ? err.message : err) };
+  }
+}
+
 
 function cc_buildAllCallsToday_() {
   var b = cc_todayBounds_();
