@@ -379,6 +379,7 @@
   .ol-hint{font-size:12px;color:var(--muted)}
   .ol-row{position:relative}
   .ol-call{font-size:12px;color:var(--muted)}
+  .ol-nocall{color:#e0a84f;font-weight:600}
   .ol-filed{font-size:13px;margin-top:2px}
   .ol-extra{font-size:12px;color:var(--muted)}
   .ol-chip{display:inline-block;font-size:11px;border-radius:10px;padding:1px 8px;margin-left:6px;vertical-align:middle}
@@ -391,6 +392,14 @@
   .ol-acts{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}
   .ol-approve{background:#1d7a3a;color:#fff;border:0;border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer}
   .ol-sendback{background:transparent;color:#e0a84f;border:1px solid #e0a84f;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
+  .fu-note{width:100%;box-sizing:border-box;margin-top:6px;padding:6px 8px;font-size:13px;background:#1c1f26;color:#e8eaed;border:1px solid #3a3f4b;border-radius:8px;color-scheme:dark}
+  .fu-note::placeholder{color:#8a90a0}
+  .fu-docnote{margin-top:6px;font-size:13px;font-weight:600;color:#e0a84f;background:#2a2415;border-left:3px solid #e0a84f;border-radius:6px;padding:6px 9px}
+  .fu-sbmeta{margin-top:4px;font-size:12px;color:#aab1c0}
+  .fu-sbmeta.nocall{color:#e0a84f;font-weight:600}
+  .fu-talked{background:#14532d;color:#d7f5e3;border:none;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer}
+  .fu-recall{margin-top:6px;background:transparent;color:#9aa4b2;border:1px solid #3a3f4b;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
+  .fu-hint{margin-top:6px;font-size:11px;color:#8a90a0;font-style:italic}
   .ol-notesave{background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer}
   .ol-tx{display:none;white-space:pre-wrap;background:#10151c;border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;font-size:12.5px;line-height:1.5;max-height:280px;overflow:auto}
   .ol-approveall{float:right;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:2px 10px;font-size:12px;cursor:pointer}
@@ -570,7 +579,7 @@
 <script>
   var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
   var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
-  var PAGE_BUILD = 'v18.8 · escalation: live patient fill + call-status label + match fix';
+  var PAGE_BUILD = 'v18.14 · call-first gate: outcome only after Call, then Talked; No answer = missed';
   var acPrevIds = null;    // v1.1: ids seen last poll, to flash genuinely-new calls
   var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
   var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
@@ -1364,7 +1373,7 @@
       .getFollowupClinicIds(DASH_KEY);
     if(DASH_ROLE==='full'){
       google.script.run
-        .withSuccessHandler(function(d){ renderEscalations(d); })
+        .withSuccessHandler(function(d){ if(!escEditing()) renderEscalations(d); })
         .withFailureHandler(function(){})
         .getEscalations(DASH_KEY);
       google.script.run
@@ -1379,7 +1388,7 @@
   // Dropout, Procedure, then any contact-problem bands (Invalid Mobile / Identity
   // Unresolved) alphabetically at the bottom. Matching is prefix-based so it is
   // robust to spacing/case coming from the sheet.
-  var FU_BAND_ORDER = ['due today','grace period','actionable missed follow-up','probable dropout','procedure'];
+  var FU_BAND_ORDER = ['sent back by doctor','due today','grace period','actionable missed follow-up','probable dropout','procedure'];
   function fuBandRank(sec){
     var k=String(sec||'').toLowerCase().trim();
     for(var i=0;i<FU_BAND_ORDER.length;i++){ if(k.indexOf(FU_BAND_ORDER[i])===0) return i; }
@@ -1459,6 +1468,44 @@
     renderUnreachable((d&&d.unreachable)||[]);
   }
 
+  // format an ISO date (yyyy-mm-dd) as "22 Jun 26"; pass anything else through unchanged
+  function fmtDMY(s){
+    if(!s) return '';
+    var m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(!m) return String(s);
+    var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var mi=parseInt(m[2],10)-1;
+    if(mi<0||mi>11) return String(s);
+    return parseInt(m[3],10)+' '+mo[mi]+' '+m[1].slice(2);
+  }
+  /* ---- Call-first gate (Session 52): an outcome can be logged only after a call ---- */
+  var fuCalled = {};   // rid -> 1 : a call was placed for this tile today (persisted per-day)
+  var fuTalked = {};   // rid -> 1 : staff declared "Talked" (this session)
+  (function(){
+    try{
+      var raw=JSON.parse(localStorage.getItem('dashFuCalled')||'{}');
+      var today=new Date().toISOString().slice(0,10);
+      if(raw && raw.date===today && raw.ids) fuCalled=raw.ids;
+    }catch(e){ fuCalled={}; }
+  })();
+  function fuPersistCalled(){
+    try{ localStorage.setItem('dashFuCalled', JSON.stringify({date:new Date().toISOString().slice(0,10), ids:fuCalled})); }catch(e){}
+  }
+  function fuMarkCalled(rid){ fuCalled[rid]=1; fuPersistCalled(); }
+  function fuClearCalled(rid){ delete fuCalled[rid]; delete fuTalked[rid]; fuPersistCalled(); }
+  function fuDoCall(rid, number){
+    placeCall(number);
+    if(CALLER_NAME){ fuMarkCalled(rid); fuRerenderTile(rid); }   // advance only if the call was actually placed
+  }
+  function fuTalkedYes(rid){ fuTalked[rid]=1; fuRerenderTile(rid); }
+  function fuRerenderTile(rid){
+    var it=null;
+    if(fuData && fuData.today){ for(var i=0;i<fuData.today.length;i++){ if(String(fuData.today[i].key)===String(rid)){ it=fuData.today[i]; break; } } }
+    if(!it) return;
+    var el=document.getElementById('furow_'+rid);
+    if(el && el.parentNode){ var tmp=document.createElement('div'); tmp.innerHTML=fuRowHtml(it); var nw=tmp.firstChild; if(nw) el.parentNode.replaceChild(nw, el); }
+  }
+
   function fuRowHtml(it){
     var rid=esc(String(it.key||('r'+Math.random())));
     var prChip = it.pr ? '<span class="fu-pr">'+esc(it.pr)+'</span>' : '';
@@ -1477,28 +1524,69 @@
       ? '<button class="fu-noans" id="funoans_'+rid+'"'+(snoozed?' disabled':'')+' onclick="fuNoAnswer(\''+rid+'\')">No answer</button>'
       : '';
     var lvStr = (it.mobile && fuLastVisits[it.mobile]) ? fuLastVisits[it.mobile] : '';
-    var lvLine = lvStr ? ('<div class="fu-lv">Last visit '+esc(lvStr)+'</div>') : '';
+    var lvLine = lvStr ? ('<div class="fu-lv">Last visit '+esc(fmtDMY(lvStr))+'</div>') : '';
     var cidStr = (it.mobile && fuClinicIds[it.mobile]) ? fuClinicIds[it.mobile] : '';
     var cidChip = cidStr ? ('<span class="ac-cid">ID '+esc(cidStr)+'</span>') : '';
     var recInfo = (it.mobile && fuRecordings[it.mobile]) ? fuRecordings[it.mobile] : null;
-    var recBtn  = recInfo ? ('<button class="fu-rec" onclick="playArchived(\''+jsq(recInfo.fileId)+'\',\'furecslot_'+rid+'\',this)">\ud83c\udfa7 Last call'+(recInfo.date?(' \u00b7 '+esc(recInfo.date)):'')+'</button>') : '';
+    var recBtn  = recInfo ? ('<button class="fu-rec" onclick="playArchived(\''+jsq(recInfo.fileId)+'\',\'furecslot_'+rid+'\',this)">\ud83c\udfa7 Last call'+(recInfo.date?(' \u00b7 '+esc(fmtDMY(recInfo.date))):'')+'</button>') : '';
     var recSlot = recInfo ? ('<div class="fu-recslot" id="furecslot_'+rid+'"></div>') : '';
+    // sent-back tiles carry the original outcome (+ agent + timestamp) and the matched call
+    var sbCtx='';
+    if(it.section==='Sent back by doctor'){
+      recBtn=''; recSlot='';   // hide the generic last-call; show the specific matched call instead
+      var oc=[];
+      if(it.outcomeReason) oc.push('\ud83d\udccb '+esc(it.outcomeReason));
+      if(it.filedBy)       oc.push('by '+esc(it.filedBy));
+      if(it.filedWhen)     oc.push(esc(it.filedWhen));
+      if(oc.length) sbCtx+='<div class="fu-sbmeta">'+oc.join(' \u00b7 ')+'</div>';
+      if(it.callState==='connected' && it.callTime){
+        sbCtx+='<div class="fu-sbmeta">\ud83d\udcde '+(it.callDate?esc(it.callDate)+' \u00b7 ':'')+esc(it.callTime)+(it.callDur?' \u00b7 '+esc(it.callDur):'')+(it.callAgent?' \u00b7 '+esc(it.callAgent):'')+'</div>';
+      } else if(it.callState==='missed'){
+        sbCtx+='<div class="fu-sbmeta nocall">\ud83d\udcf5 missed call \u2014 no recording</div>';
+      } else {
+        sbCtx+='<div class="fu-sbmeta nocall">\ud83d\udeab no call recorded</div>';
+      }
+    }
+    // ---- Call-first gate: the outcome dropdown is reachable only after a call ----
+    var called = !!fuCalled[rid];
+    var talked = !!fuTalked[rid];
+    var callTapBtn = it.mobile
+      ? (snoozed
+          ? '<button class="call" disabled title="snoozed until '+esc(it.snoozeUntil||'')+'">Call</button>'
+          : '<button class="call" onclick="fuDoCall(\''+rid+'\',\''+esc(it.mobile)+'\')">Call</button>')
+      : '<button class="call" disabled title="no valid mobile">Call</button>';
+    var fuRight;
+    if(snoozed){
+      fuRight = '<div class="fu-actions">'+callTapBtn+'</div>';
+    } else if(!called){
+      fuRight = '<div class="fu-actions">'+callTapBtn+'</div>'+
+                '<div class="fu-hint">Call first, then log the outcome</div>';
+    } else if(!talked){
+      fuRight = '<div class="fu-actions">'+
+                  '<button class="fu-talked" onclick="fuTalkedYes(\''+rid+'\')">\u2705 Talked</button>'+
+                  '<button class="fu-noans" id="funoans_'+rid+'" onclick="fuNoAnswer(\''+rid+'\')">\ud83d\udcf5 No answer</button>'+
+                '</div>'+
+                '<button class="fu-recall" onclick="fuDoCall(\''+rid+'\',\''+esc(it.mobile)+'\')" title="Call again">\u21bb Call again</button>'+
+                '<div class="fu-msg" id="fumsg_'+rid+'"></div>';
+    } else {
+      fuRight = '<select class="fu-out" id="fuout_'+rid+'" onchange="fuOnOutcome(\''+rid+'\')">'+fuOptions('')+'</select>'+
+                '<div class="fu-extra" id="fuextra_'+rid+'"></div>'+
+                '<div class="fu-actions">'+
+                  '<button class="fu-save" id="fusave_'+rid+'" disabled onclick="fuSave(\''+rid+'\')">Save</button>'+
+                '</div>'+
+                '<div class="fu-msg" id="fumsg_'+rid+'"></div>';
+    }
     return '<div class="fu-row'+(it.retry?' retry':'')+(snoozed?' snoozed':'')+'" id="furow_'+rid+'">'+
              '<div class="info">'+
                '<div class="fu-name">'+prChip+esc(it.name||'(no name)')+(cidChip?(' '+cidChip):'')+'</div>'+
+               (it.docNote?('<div class="fu-docnote">\ud83d\udc68\u200d\u2695\ufe0f Doctor: '+esc(it.docNote)+'</div>'):'')+
+               sbCtx +
                (it.diagnosis?('<div class="dx">'+esc(it.diagnosis)+'</div>'):'')+
                lvLine +
                recBtn + recSlot +
                dueLine + retryTag + naLine +
              '</div>'+
-             '<div class="fu-right">'+
-               '<select class="fu-out" id="fuout_'+rid+'"'+(snoozed?' disabled':'')+' onchange="fuOnOutcome(\''+rid+'\')">'+fuOptions('')+'</select>'+
-               '<div class="fu-extra" id="fuextra_'+rid+'"></div>'+
-               '<div class="fu-actions">'+callBtn+noAnsBtn+
-                 '<button class="fu-save" id="fusave_'+rid+'" disabled onclick="fuSave(\''+rid+'\')">Save</button>'+
-               '</div>'+
-               '<div class="fu-msg" id="fumsg_'+rid+'"></div>'+
-             '</div>'+
+             '<div class="fu-right">'+fuRight+'</div>'+
            '</div>';
   }
 
@@ -1577,6 +1665,7 @@
   // v18.4 (2A): mark a follow-up call as "No answer" -> logs a missed attempt;
   // the tile snoozes for 1 hour and exits to the doctor after 3 tries.
   function fuNoAnswer(rid){
+    fuClearCalled(rid);
     var it=null;
     if(fuData && fuData.today){ for(var i=0;i<fuData.today.length;i++){ if(String(fuData.today[i].key)===String(rid)){ it=fuData.today[i]; break; } } }
     var btn=document.getElementById('funoans_'+rid);
@@ -1673,12 +1762,12 @@
     box.className='list';
     box.innerHTML=open.map(function(e){
       var meta=[];
-      if(e.lastVisit) meta.push('Last visit '+esc(e.lastVisit));
+      if(e.lastVisit) meta.push('Last visit '+esc(fmtDMY(e.lastVisit)));
       if(e.diagnosis) meta.push(esc(e.diagnosis));
       if(e.mobile)    meta.push('\ud83d\udcde '+esc(e.mobile));
       var callLine='';
       if(e.callState==='connected' && e.callTime){
-        callLine='<div class="meta2">\ud83d\udcde Call '+esc(e.callTime)+(e.callDur?(' \u00b7 '+esc(e.callDur)):'')+'</div>';
+        callLine='<div class="meta2">\ud83d\udcde Call '+(e.callDate?(esc(e.callDate)+' \u00b7 '):'')+esc(e.callTime)+(e.callDur?(' \u00b7 '+esc(e.callDur)):'')+'</div>';
       } else if(e.callState==='missed'){
         callLine='<div class="meta2 nocall">\ud83d\udcf5 Missed call \u2014 no recording</div>';
       } else if(e.callState==='noarchive'){
@@ -1715,7 +1804,9 @@
                    '<option value="Will follow up">Will follow up</option>'+
                    '<option value="Other">Other</option>'+
                  '</select>'+
+                 '<input class="fu-note" id="escnote_'+e.rowIndex+'" placeholder="Note for staff (optional)\u2026">'+
                  '<div class="fu-actions">'+callBtn+
+                   '<button class="ol-sendback" onclick="sendBackEsc('+e.rowIndex+')">\ud83d\udd04 Send back to staff</button>'+
                    '<button class="fu-save" onclick="resolveEsc('+e.rowIndex+')">Resolve</button>'+
                  '</div>'+
                  '<div class="fu-msg" id="escmsg_'+e.rowIndex+'"></div>'+
@@ -1873,11 +1964,17 @@
   function olRowHtml(e){
     var rid=esc(String(e.rowIndex));
     var cid=e.clinicId?('<span class="ac-cid">ID '+esc(e.clinicId)+'</span>'):'';
-    var lv=e.lastVisit?('<div class="fu-lv">Last visit '+esc(e.lastVisit)+'</div>'):'';
-    var noRec=(!e.rec)?('<span class="ol-norec" title="No recording to review for this call">\ud83d\udcf5 no recording</span>'):'';
-    var call=e.callTime
-      ? ('<span class="ol-call">📞 call '+esc(e.callTime)+(e.callDur?(' · '+esc(e.callDur)):'')+'</span>')
-      : ('<span class="ol-call">logged at '+esc(e.time)+' (no call matched)</span>');
+    var lv=e.lastVisit?('<div class="fu-lv">Last visit '+esc(fmtDMY(e.lastVisit))+'</div>'):'';
+    var cst=e.callState||(e.callTime?'connected':'nocall');
+    var noRec=(cst==='connected' && !e.rec)?('<span class="ol-norec" title="No recording to review for this call">\ud83d\udcf5 no recording</span>'):'';
+    var call;
+    if(cst==='connected' && e.callTime){
+      call='<span class="ol-call">📞 call '+(e.callDate?(esc(e.callDate)+' · '):'')+esc(e.callTime)+(e.callDur?(' · '+esc(e.callDur)):'')+'</span>';
+    } else if(cst==='missed'){
+      call='<span class="ol-call ol-nocall">📵 missed call — no recording</span>';
+    } else {
+      call='<span class="ol-call ol-nocall">🚫 no call made</span>';
+    }
     var filed=olLabel(e.code);
     var extras=[];
     if(e.source) extras.push(e.source==='here'?'medicine from here':(e.source==='outside'?'medicine from outside':e.source));
@@ -1903,7 +2000,7 @@
                '<div>'+call+noRec+'</div>'+
                '<div class="ol-filed"><b>'+esc(filed)+'</b>'+chip+'</div>'+
                (extras.length?('<div class="ol-extra">'+esc(extras.join(' · '))+'</div>'):'')+
-               '<div class="ol-extra">by '+esc(e.by||'')+' · saved '+esc(e.time||'')+'</div>'+
+               '<div class="ol-extra">by '+esc(e.by||'')+' · saved '+(e.date?(esc(e.date)+' · '):'')+esc(e.time||'')+'</div>'+
                recBtn+txBtn+recSlot+txSlot+
              '</div>'+
              '<div class="fu-right">'+
@@ -2010,10 +2107,22 @@
       .reviewOutcomeBatch(DASH_KEY, items);
   }
 
+  // don't wipe a half-typed escalation note / resolution on the auto-refresh
+  function escEditing(){
+    var ns=document.querySelectorAll('input.fu-note');
+    for(var i=0;i<ns.length;i++){ if(ns[i].value && ns[i].value.trim()) return true; }
+    var sels=document.querySelectorAll('select[id^="escres_"]');
+    for(var j=0;j<sels.length;j++){ if(sels[j].value) return true; }
+    return false;
+  }
+
   function resolveEsc(rowIndex){
     var sel=document.getElementById('escres_'+rowIndex);
     var res=sel?sel.value:''; var msg=document.getElementById('escmsg_'+rowIndex);
     if(!res){ if(msg){ msg.textContent='Pick a resolution first.'; msg.className='fu-msg warn'; } return; }
+    var noteEl=document.getElementById('escnote_'+rowIndex);
+    var note=noteEl?noteEl.value.trim():'';
+    if(note) res=res+' \u2014 '+note;
     google.script.run
       .withSuccessHandler(function(r){
         if(r && r.ok){
@@ -2024,6 +2133,22 @@
       })
       .withFailureHandler(function(err){ if(msg){ msg.textContent='Error: '+((err&&err.message)||err); msg.className='fu-msg warn'; } })
       .resolveEscalation(DASH_KEY, rowIndex, res);
+  }
+
+  // send an escalation back to the staff worklist with the doctor's note
+  function sendBackEsc(rowIndex){
+    var noteEl=document.getElementById('escnote_'+rowIndex);
+    var note=noteEl?noteEl.value.trim():''; var msg=document.getElementById('escmsg_'+rowIndex);
+    google.script.run
+      .withSuccessHandler(function(r){
+        if(r && r.ok){
+          var row=document.getElementById('esc_'+rowIndex);
+          if(row){ row.style.transition='opacity .4s'; row.style.opacity='0.3'; }
+          if(msg){ msg.textContent='\ud83d\udd04 Sent back to staff'+(note?(': '+esc(note)):''); msg.className='fu-msg ok'; }
+        } else if(msg){ msg.textContent='Not saved: '+((r&&r.reason)||'error'); msg.className='fu-msg warn'; }
+      })
+      .withFailureHandler(function(err){ if(msg){ msg.textContent='Error: '+((err&&err.message)||err); msg.className='fu-msg warn'; } })
+      .sendBackToStaff(DASH_KEY, rowIndex, note);
   }
 
   function fuEditing(){

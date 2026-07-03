@@ -911,6 +911,20 @@ function fuTodaysOutcomeState_(ss) {
   return res;
 }
 
+/** key -> latest outcome epoch (ms) across ALL Followup_Outcomes rows.
+ *  Used to retire a doctor "sent back" tile once staff act on it. */
+function fuLastOutcomeEpochByKey_(ss) {
+  var m = {};
+  var rows = fuReadObjects_(ss, FU_TAB_OUTCOMES);
+  rows.forEach(function (o) {
+    var k = String(o['key'] || '').trim();
+    if (!k) return;
+    var t = dateVal_(o['when']);
+    if (t && (!m[k] || t > m[k])) m[k] = t;
+  });
+  return m;
+}
+
 /** getFollowups(key) -> the live worklist + settled history for the page. */
 function getFollowups(key) {
   var role = dashRole_(key);
@@ -920,6 +934,86 @@ function getFollowups(key) {
     if (!ss) return { today: [], settled: [], bySection: {}, unreachable: [], counts: { open: 0, retry: 0, settled: 0, unreachable: 0 } };
 
     var state = fuTodaysOutcomeState_(ss);
+
+    // --- full loop (Session 52): doctor "sent back" escalations re-surface here ---
+    var lastOut = fuLastOutcomeEpochByKey_(ss);
+    var sbItems = [], sentBackKeys = {};
+    var tzSb = Session.getScriptTimeZone();
+    fuReadObjects_(ss, FU_TAB_ESCAL).forEach(function (o) {
+      if (String(o['status'] || '').trim().toUpperCase() !== 'SENT_BACK') return;
+      var k = String(o['key'] || '').trim();
+      var sbWhen = dateVal_(o['resolved when']);
+      if (k && lastOut[k] && sbWhen && lastOut[k] >= sbWhen) return;   // staff already acted -> clear
+      var mob = String(o['mobile'] || '').replace(/\D/g, '').slice(-10);
+      var raisedT = dateVal_(o['raised']);
+      sbItems.push({
+        key: k, section: 'Sent back by doctor', pr: '',
+        name: String(o['patient'] || '').trim(), mobile: mob,
+        diagnosis: String(o['diagnosis'] || '').trim(),
+        due: '', od: '', status: 'Sent back',
+        retry: '', naCount: 0, snoozeUntil: '', attempts: [],
+        docNote: String(o['resolution'] || '').trim(),
+        // original outcome context, straight off the escalation row:
+        outcomeReason: String(o['reason'] || '').trim(),
+        filedBy:       String(o['raised by'] || '').trim(),
+        filedWhen:     raisedT ? Utilities.formatDate(new Date(raisedT), tzSb, 'h:mm a, d MMM') : String(o['raised'] || '').trim(),
+        _raisedRaw:    o['raised'],
+        // matched-call context (filled just below):
+        callTime: '', callDur: '', callDate: '', callAgent: '', callState: 'none'
+      });
+      if (k) sentBackKeys[k] = 1;
+    });
+
+    // Enrich sent-back tiles with the ACTUAL call (time / duration / agent) tied to
+    // the filed outcome — reuses the escalation-card helpers, and only runs when at
+    // least one sent-back tile exists (so the normal worklist stays fast).
+    if (sbItems.length) {
+      var sbToday = {}, sbMissed = {}, sbArch = {};
+      var todaySb = Utilities.formatDate(new Date(), tzSb, 'yyyy-MM-dd');
+      try { var _tcSb = OL_todayCallsAndMissed_(); sbToday = _tcSb.connected || {}; sbMissed = _tcSb.missed || {}; } catch (eSb) {}
+      var sbPick_ = function (list, ep) {
+        if (!list || !list.length) return null;
+        var b = null, a = null;
+        for (var i = 0; i < list.length; i++) {
+          var c = list[i];
+          if (c.epoch <= ep) { if (!b || c.epoch > b.epoch) b = c; }
+          else               { if (!a || c.epoch < a.epoch) a = c; }
+        }
+        if (b) return b;
+        if (a && (a.epoch - ep) <= 1800) return a;
+        return null;
+      };
+      sbItems.forEach(function (it) {
+        var ph = it.mobile; if (!ph) { delete it._raisedRaw; return; }
+        var wp = OL_whenParts_(it._raisedRaw);
+        if (wp.date === todaySb) {
+          var mm = sbPick_(sbToday[ph], wp.epoch);
+          if (mm) {
+            it.callState = 'connected';
+            it.callTime  = mm.epoch ? Utilities.formatDate(new Date(mm.epoch * 1000), tzSb, 'h:mm a') : '';
+            it.callDate  = mm.epoch ? Utilities.formatDate(new Date(mm.epoch * 1000), tzSb, 'd MMM') : '';
+            it.callDur   = cc_mmss_(mm.durSec || 0);
+            it.callAgent = mm.agent || '';
+          } else {
+            it.callState = sbMissed[ph] ? 'missed' : 'none';
+          }
+        } else if (wp.date) {
+          if (!sbArch[wp.date]) { try { sbArch[wp.date] = OL_archivedCallsByPhone_(ss, wp.date) || {}; } catch (eA) { sbArch[wp.date] = {}; } }
+          var mmB = sbPick_(sbArch[wp.date][ph], wp.epoch);
+          if (mmB) {
+            it.callState = 'connected';
+            it.callTime  = mmB.timeStr || '';
+            it.callDate  = wp.epoch ? Utilities.formatDate(new Date(wp.epoch * 1000), tzSb, 'd MMM') : '';
+            it.callDur   = String(mmB.durStr || '');
+            it.callAgent = mmB.agent || '';        // archive may not carry agent -> blank
+          } else {
+            it.callState = 'noarchive';
+          }
+        }
+        delete it._raisedRaw;
+      });
+    }
+
     var rawToday = fuReadObjects_(ss, FU_TAB_TODAY);
     var nowMs = (new Date()).getTime();
     var tzf = Session.getScriptTimeZone();
@@ -928,6 +1022,7 @@ function getFollowups(key) {
     rawToday.forEach(function (o) {
       var key0 = String(o['key'] || '').trim();
       if (key0 && state.settledKeys[key0]) { settledToday++; return; }   // already handled -> drop
+      if (key0 && sentBackKeys[key0]) return;   // shown in the Sent-back band instead
       var mobile = String(o['mobile'] || '').replace(/\D/g, '');
       if (mobile.length > 10) mobile = mobile.slice(-10);
 
@@ -969,6 +1064,8 @@ function getFollowups(key) {
       base.attempts = na ? na.attempts : [];
       open.push(base);
     });
+
+    open = sbItems.concat(open);   // sent-back band items join the worklist
 
     // group by section, then by priority (PR ascending, blanks last)
     function prNum(p) { var n = parseInt(String(p).replace(/\D/g, ''), 10); return isNaN(n) ? 9999 : n; }
@@ -1313,7 +1410,7 @@ function getEscalations(key) {
 
       var phE = String(vals[r][col('mobile')] || '').replace(/\D/g, '').slice(-10);
       var wpE = OL_whenParts_(vals[r][col('raised')]);
-      var recE = null, txE = '', callTimeE = '', callDurE = '', agentCallE = '', callStateE = 'none';
+      var recE = null, txE = '', callTimeE = '', callDurE = '', agentCallE = '', callStateE = 'none', callDateE = '';
       if (phE) {
         if (wpE.date === todayStr) {
           var mmA = escPick_(escTodayCalls[phE], wpE.epoch);
@@ -1321,6 +1418,7 @@ function getEscalations(key) {
             callStateE = 'connected';
             callTimeE  = mmA.epoch ? Utilities.formatDate(new Date(mmA.epoch * 1000), tz, 'h:mm a') : '';
             callDurE   = cc_mmss_(mmA.durSec || 0);
+            callDateE  = mmA.epoch ? Utilities.formatDate(new Date(mmA.epoch * 1000), tz, 'd MMM') : '';
             agentCallE = mmA.agent || '';
             if (mmA.filename) recE = { kind: 'myop', ref: mmA.filename };            // same-day MyOperator link
           } else {
@@ -1336,6 +1434,7 @@ function getEscalations(key) {
             callStateE = 'connected';
             callTimeE = mmB.timeStr || '';
             callDurE  = String(mmB.durStr || '');
+            callDateE = wpE.epoch ? Utilities.formatDate(new Date(wpE.epoch * 1000), tz, 'd MMM') : '';
             recE = { kind: 'drive', ref: mmB.fileId }; txE = escTxMap[mmB.joinKey] || '';   // Drive archive + transcript
           } else {
             callStateE = 'noarchive';                                                 // older day, no archived recording
@@ -1356,6 +1455,7 @@ function getEscalations(key) {
         detail:    String(vals[r][col('detail')] || '').trim(),
         by:        agentCallE || String(vals[r][col('raised by')] || '').trim(),   // v18.7: prefer the call's real agent
         callTime:  callTimeE,
+        callDate:  callDateE,
         callDur:   callDurE,
         callState: callStateE,                             // v18.8: connected | missed | none | noarchive
         rec:       recE,
@@ -1387,6 +1487,31 @@ function resolveEscalation(key, rowIndex, resolution) {
     var when = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm');
     sh.getRange(ri, iStat + 1).setValue('RESOLVED');
     if (iResn >= 0) sh.getRange(ri, iResn + 1).setValue(res);
+    if (iWhen >= 0) sh.getRange(ri, iWhen + 1).setValue(when);
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, reason: String(err && err.message ? err.message : err) };
+  }
+}
+
+/** sendBackToStaff(key, rowIndex, note) — DOCTOR ONLY. Stamps an escalation as
+ *  SENT_BACK with the doctor's free-text note; getFollowups re-surfaces it on the
+ *  staff worklist ("Sent back by doctor") until staff log an outcome for it. */
+function sendBackToStaff(key, rowIndex, note) {
+  if (dashRole_(key) !== 'full') return { ok: false, reason: 'Not authorized.' };
+  try {
+    var ri = parseInt(rowIndex, 10);
+    if (!ri || ri < 2) return { ok: false, reason: 'Bad row.' };
+    var ss = fuSheet_();
+    var sh = ss && ss.getSheetByName(FU_TAB_ESCAL);
+    if (!sh) return { ok: false, reason: 'No escalations tab.' };
+    var H = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0]
+              .map(function (x) { return String(x).trim().toLowerCase(); });
+    var iStat = H.indexOf('status'), iResn = H.indexOf('resolution'), iWhen = H.indexOf('resolved when');
+    if (iStat < 0) return { ok: false, reason: 'Tab missing Status column.' };
+    var when = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm');
+    sh.getRange(ri, iStat + 1).setValue('SENT_BACK');
+    if (iResn >= 0) sh.getRange(ri, iResn + 1).setValue(String(note || '').trim());
     if (iWhen >= 0) sh.getRange(ri, iWhen + 1).setValue(when);
     return { ok: true };
   } catch (err) {

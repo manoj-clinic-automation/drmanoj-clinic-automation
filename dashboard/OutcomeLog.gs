@@ -279,8 +279,14 @@ function getOutcomeLog(key, day) {
     if (ix.when < 0) return { error: 'Outcome tab has no When column.' };
 
     // enrichment sources for the chosen day
-    var callMap = (day === 'today') ? OL_todayCallsByPhone_()
-                                    : OL_archivedCallsByPhone_(ss, dateStr);
+    var callMap, missedToday = {};
+    if (day === 'today') {
+      var _tcOL = OL_todayCallsAndMissed_();
+      callMap = _tcOL.connected || {};
+      missedToday = _tcOL.missed || {};
+    } else {
+      callMap = OL_archivedCallsByPhone_(ss, dateStr);
+    }
     var txMap   = (day === 'today') ? {} : OL_transcriptsByKey_(ss);
     var pmap    = {};
     try { pmap = cc_patientMap_() || {}; } catch (e) {}
@@ -305,24 +311,31 @@ function getOutcomeLog(key, day) {
       if (!cid && ph && pmap[ph]) cid = String(pmap[ph].clinicId || '');
 
       var match = ph ? OL_nearestCall_(callMap[ph], wp.epoch) : null;
-      var rec = null, callTime = '', callDur = '', tx = '';
+      var rec = null, callTime = '', callDur = '', callDate = '', tx = '';
+      var callState = 'nocall';
       if (match) {
+        callState = 'connected';
         if (day === 'today') {
           callTime = match.epoch ? Utilities.formatDate(new Date(match.epoch * 1000), CC_TZ, 'HH:mm') : '';
+          callDate = match.epoch ? Utilities.formatDate(new Date(match.epoch * 1000), CC_TZ, 'd MMM') : '';
           callDur  = cc_mmss_(match.durSec || 0);
           if (match.filename) rec = { kind: 'myop', ref: match.filename };
         } else {
           callTime = match.timeStr || '';
+          callDate = Utilities.formatDate(ref, CC_TZ, 'd MMM');
           callDur  = String(match.durStr || '');
           rec = { kind: 'drive', ref: match.fileId };
           tx  = txMap[match.joinKey] || '';
         }
+      } else if (day === 'today' && ph && missedToday[ph]) {
+        callState = 'missed';
       }
 
       rows.push({
         rowIndex: r + 1,                                  // 1-based sheet row
         fp:       wp.date + '|' + OL_last4_(mob),         // write-safety fingerprint
         time:     wp.time,
+        date:     Utilities.formatDate(ref, CC_TZ, 'd MMM'),
         patient:  String(cell(row, ix.patient) || '').trim(),
         last4:    OL_last4_(mob),
         clinicId: cid,
@@ -336,7 +349,7 @@ function getOutcomeLog(key, day) {
         by:       by,
         settle:   String(cell(row, ix.settle) || '').trim().toLowerCase(),
         note:     String(cell(row, ix.note) || '').trim(),
-        callTime: callTime, callDur: callDur,
+        callTime: callTime, callDur: callDur, callDate: callDate, callState: callState,
         rec: rec, tx: tx
       });
     }
