@@ -1,0 +1,13 @@
+[Unit]
+Description=Run the clinic service watchman every 5 minutes
+
+[Timer]
+# First run 2 min after boot, then every 5 minutes thereafter.
+OnBootSec=2min
+OnUnitActiveSec=5min
+# If the box was off/asleep at a scheduled time, run once on wake.
+Persistent=true
+Unit=clinic-watchdog.service
+
+[Install]
+WantedBy=timers.target

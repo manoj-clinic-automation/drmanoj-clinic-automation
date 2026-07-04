@@ -1,0 +1,13 @@
+[Unit]
+Description=Clinic service watchman - checks the nine always-on services and alerts on failure (read-only)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/wa
+# Loads WATCHDOG_* / SMTP settings if present in .env; harmless if absent.
+EnvironmentFile=-/root/wa/.env
+ExecStart=/root/wa/venv/bin/python3 /root/wa/clinic_watchdog.py
+# Never let a failed check wedge anything; it just logs and exits.
+TimeoutStartSec=120
