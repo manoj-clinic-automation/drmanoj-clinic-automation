@@ -233,6 +233,18 @@
   /* WhatsApp conversation thread (modal) */
   #threadOverlay{position:fixed;inset:0;z-index:9000;background:rgba(16,24,40,.45);display:none;align-items:flex-end;justify-content:center}
   #threadOverlay.show{display:flex}
+  /* v18.17 (S57) WhatsApp call-confirm dialog — custom, no browser URL header */
+  #waCallOverlay{position:fixed;inset:0;z-index:9100;background:rgba(16,24,40,.45);display:none;align-items:center;justify-content:center;padding:20px}
+  #waCallOverlay.show{display:flex}
+  .wc-box{background:#fff;color:#1d2733;width:100%;max-width:360px;border-radius:16px;padding:20px 18px;box-shadow:0 12px 40px rgba(16,24,40,.35);color-scheme:light}
+  .wc-title{font-size:18px;font-weight:800;margin-bottom:12px}
+  .wc-who{font-size:16px;line-height:1.45;background:#f4f7fb;border:1px solid #e3ebf6;border-radius:11px;padding:11px 13px;margin-bottom:12px;word-break:break-word}
+  .wc-who .wc-last4{color:#6b7684;font-weight:600;font-size:14px}
+  .wc-note{font-size:13px;color:#5a6472;margin-bottom:16px}
+  .wc-actions{display:flex;gap:10px;justify-content:flex-end}
+  .wc-cancel{border:1px solid #cfd8e6;background:#fff;color:#3a4656;font-weight:700;font-size:15px;padding:10px 18px;border-radius:11px;cursor:pointer}
+  .wc-go{border:1px solid #1a7f37;background:#1a7f37;color:#fff;font-weight:800;font-size:15px;padding:10px 20px;border-radius:11px;cursor:pointer}
+  .wc-cancel:active,.wc-go:active{transform:translateY(1px)}
   .thread-box{background:var(--bg);width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;border-radius:18px 18px 0 0;box-shadow:0 -6px 24px rgba(16,24,40,.18);overflow:hidden}
   @media(min-width:560px){#threadOverlay{align-items:center}.thread-box{border-radius:18px}}
   .thread-head{display:flex;align-items:center;gap:10px;padding:13px 16px;background:var(--wa);color:#fff;flex:none}
@@ -254,6 +266,8 @@
   .thread-send{padding:10px 16px;font-size:14px}
   .wa-chat-btn{flex:none;border:1px solid var(--wa-line);background:#fff;color:var(--wa);font-weight:800;font-size:12px;padding:4px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}
   .wa-chat-btn:active{transform:translateY(1px)}
+  .wa-call-btn{flex:none;border:1px solid #1a7f37;background:#e9f7ee;color:#1a7f37;font-weight:800;font-size:12px;padding:4px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;margin-left:6px}
+  .wa-call-btn:active{transform:translateY(1px)}
   /* --- sign-in overlay --- */
   #loginOverlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(180deg,#eef2f8,#e7ecf5);display:flex;align-items:center;justify-content:center;padding:20px}
   .login-box{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 18px rgba(16,24,40,.08);padding:28px 22px;width:100%;max-width:360px;text-align:center}
@@ -445,9 +459,17 @@
     cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.35);align-items:center;justify-content:center;line-height:1}
   #toTop.show{display:flex}
   #toTop:active{transform:translateY(1px)}
+  /* v18.18 (S57) stale-list top bar — loud, fixed, impossible to miss */
+  #staleBar{position:fixed;top:0;left:0;right:0;z-index:9500;display:none;
+    background:#b3261e;color:#fff;padding:11px 16px;font-size:14px;font-weight:700;
+    line-height:1.4;text-align:center;box-shadow:0 3px 12px rgba(0,0,0,.35)}
+  #staleBar.show{display:block}
+  #staleBar .sb-sub{display:block;font-weight:600;font-size:12.5px;opacity:.95;margin-top:2px}
+  body.stale-on .wrap{padding-top:60px}
 </style>
 </head>
 <body>
+<div id="staleBar" role="alert"></div>
 <div id="loginOverlay">
   <div class="login-box">
     <div class="login-logo">Dr Manoj Agarwal Clinic</div>
@@ -596,11 +618,22 @@
 </div>
 <div id="callToast"></div>
 <div id="fuUndoToast"></div>
+<div id="waCallOverlay" onclick="if(event.target===this)waCallCancel()">
+  <div class="wc-box">
+    <div class="wc-title">📞 Call this patient?</div>
+    <div class="wc-who" id="waCallWho"></div>
+    <div class="wc-note">Your phone rings first, then the patient is connected.</div>
+    <div class="wc-actions">
+      <button class="wc-cancel" onclick="waCallCancel()">Cancel</button>
+      <button class="wc-go" onclick="waCallGo()">📞 Call</button>
+    </div>
+  </div>
+</div>
 <button id="toTop" onclick="scrollTop_()" title="Back to top" aria-label="Back to top">▲</button>
 <script>
   var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
   var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
-  var PAGE_BUILD = 'v18.16 · D77: duration gate — outcome unlocks only on a measured connected call (\u226515s talk)';
+  var PAGE_BUILD = 'v18.18 · S57: stale-list top-bar guard (matches email sentinel) + WhatsApp tap-to-call';
   var acPrevIds = null;    // v1.1: ids seen last poll, to flash genuinely-new calls
   var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
   var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
@@ -948,7 +981,7 @@
                      '<span class="arr '+(inbound?'in':'out')+'">'+(inbound?'▸ from':'we →')+'</span>'+
                      '<span class="who">'+who+'</span>'+
                      '<span class="tm">'+esc(m.time)+'</span>'+
-                     '<button class="wa-chat-btn" onclick="openThread(\''+jsq(m.number)+'\')">Chat</button>'+(DASH_ROLE==='full' ? '<button class="wa-reply-btn" onclick="openReply('+i+',\''+jsq(m.number)+'\',this)">Reply</button>' : '')+
+                     '<button class="wa-chat-btn" onclick="openThread(\''+jsq(m.number)+'\')">Chat</button>'+(inbound ? '<button class="wa-call-btn" onclick="waCall(\''+jsq(m.number)+'\',\''+jsq(m.name||'')+'\')">\ud83d\udcde Call</button>' : '')+(DASH_ROLE==='full' ? '<button class="wa-reply-btn" onclick="openReply('+i+',\''+jsq(m.number)+'\',this)">Reply</button>' : '')+
                    '</div>'+
                    '<div class="wa-msg" id="wamsg_'+i+'">'+msg+'</div>'+
                  '</div>'+
@@ -1121,6 +1154,29 @@
     if(b) b.textContent = CALLER_NAME || '\u26a0 login not linked to an agent';
     if(CALLER_NAME){ if(bar) bar.classList.remove('need'); if(h) h.textContent='Your phone rings first on each Call, then the patient.'; }
     else { if(bar) bar.classList.add('need'); if(h) h.textContent='Ask the doctor to link your login — calling is disabled.'; }
+  }
+  /* v18.17 (Session 57): tap-to-call from the WhatsApp feed.
+   * Tap 1 = a custom in-page confirm dialog (NO browser URL header, unlike native confirm()).
+   * Tap 2 (Call) = reuse the proven live placeCall path (agent rings first, then patient).
+   * No new server code: placeCall -> triggerCall handles the OBD + duration-gate binding. */
+  var _waCallNum=null;
+  function waCall(number, name){
+    var n=String(number||'');
+    if(!n){ showToast('No number on this message to call.'); return; }
+    _waCallNum=n;
+    var digits=n.replace(/\D/g,'');
+    var last4=digits.slice(-4);
+    var nm=String(name||'').trim();
+    var whoLine = nm ? ('<b>'+esc(nm)+'</b><br>'+esc(digits)) : ('<b>'+esc(digits)+'</b>');
+    var body=document.getElementById('waCallWho');
+    if(body) body.innerHTML = whoLine + '<span class="wc-last4"> (\u2026'+esc(last4)+')</span>';
+    var o=document.getElementById('waCallOverlay'); if(o) o.classList.add('show');
+  }
+  function waCallCancel(){ _waCallNum=null; var o=document.getElementById('waCallOverlay'); if(o) o.classList.remove('show'); }
+  function waCallGo(){
+    var n=_waCallNum; _waCallNum=null;
+    var o=document.getElementById('waCallOverlay'); if(o) o.classList.remove('show');
+    if(n) placeCall(n);
   }
   function placeCall(number){
     if(DASH_ROLE==='none') return;
@@ -2441,6 +2497,25 @@
       .getDashboardData(DASH_KEY, !!force);
     if(force || !fuEditing()) pollFollowups();   // refresh the follow-up loop too (unless mid-edit)
     pollAllCalls();                              // v1.1: refresh today's live call stream
+    checkFreshness();                            // v18.18 (S57): stale-list top-bar guard
+  }
+  /* ---- v18.18 (S57): stale-list guard — same truth as the email sentinel ---- */
+  function checkFreshness(){
+    if(DASH_ROLE==='none') return;
+    google.script.run
+      .withSuccessHandler(function(r){
+        var bar=document.getElementById('staleBar'); if(!bar) return;
+        if(r && r.ok && r.stale){
+          bar.innerHTML='\u26A0\uFE0F This may be YESTERDAY\u2019S list \u2014 today\u2019s follow-ups have not reached the board.'+
+            '<span class="sb-sub">Newest date on the board: '+esc(r.newestDue||'\u2014')+' (today is '+esc(r.today||'')+'). '+
+            'On the clinic laptop, run the follow-up push \u2014 or ask the doctor.</span>';
+          bar.classList.add('show'); document.body.classList.add('stale-on');
+        } else {
+          bar.classList.remove('show'); document.body.classList.remove('stale-on');
+        }
+      })
+      .withFailureHandler(function(){ /* a broken guard must never block the board */ })
+      .getFollowupFreshness(DASH_KEY);
   }
   function reset(btn){ btn.disabled=false; btn.textContent='↻ Refresh'; left=REFRESH_SECONDS; }
 

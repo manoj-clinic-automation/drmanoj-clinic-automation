@@ -383,6 +383,55 @@ function getCallDuration(key, clientRefId) {
 }
 
 
+/**
+ * getFollowupFreshness(key) -> { ok, stale, today, newestDue, rows }
+ * Session 57: the DASHBOARD-side stale-list guard. Uses the SAME truth as the live
+ * email sentinel (Diagnostics.gs::checkFollowupListFresh): the list is FRESH when the
+ * newest Due Date on Followups_Today is >= today (yyyy-MM-dd strings sort chronologically).
+ * Read-only. WebApp.gs untouched (D34). No patient data returned — dates + a count only.
+ */
+function cc_freshParseDate_(v) {
+  // mirrors sentParseDate_: "03-Jul-2026", a Date, or an ISO string -> epoch ms (0 if unparseable)
+  if (v instanceof Date) return v.getTime();
+  var s = String(v == null ? '' : v).trim();
+  if (!s) return 0;
+  var MON = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
+  var m = s.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);   // 03-Jul-2026
+  if (m) {
+    var mon = MON[m[2].toLowerCase()];
+    if (mon != null) return new Date(parseInt(m[3], 10), mon, parseInt(m[1], 10)).getTime();
+  }
+  var d = new Date(s);
+  return isNaN(d.getTime()) ? 0 : d.getTime();
+}
+function getFollowupFreshness(key) {
+  try {
+    if (dashRole_(key) === 'none') return { ok: false, error: 'Not authorized.' };
+    var tz = Session.getScriptTimeZone();
+    var todayStr = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+    var ss = cc_openSheet_();
+    var sh = ss ? ss.getSheetByName('Followups_Today') : null;
+    if (!sh) return { ok: true, stale: false, today: todayStr, newestDue: '', rows: 0, note: 'no-tab' };
+    var vals = sh.getDataRange().getValues();
+    if (vals.length < 2) return { ok: true, stale: false, today: todayStr, newestDue: '', rows: 0, note: 'empty' };
+    var H = cc_lc_(vals[0]);
+    var iDue = cc_col_(H, ['due date', 'due', 'follow up date', 'followup date', 'next follow up']);
+    if (iDue < 0) return { ok: true, stale: false, today: todayStr, newestDue: '', rows: (vals.length - 1), note: 'no-due-col' };
+    var newestEpoch = 0;
+    for (var r = 1; r < vals.length; r++) {
+      var t = cc_freshParseDate_(iDue < vals[r].length ? vals[r][iDue] : '');
+      if (t && t > newestEpoch) newestEpoch = t;
+    }
+    var newestStr = newestEpoch ? Utilities.formatDate(new Date(newestEpoch), tz, 'yyyy-MM-dd') : '';
+    var fresh = !!newestStr && (newestStr >= todayStr);   // same rule as the email sentinel
+    return { ok: true, stale: !fresh, today: todayStr, newestDue: newestStr, rows: (vals.length - 1) };
+  } catch (err) {
+    // a broken guard must never block the dashboard -> report not-stale, carry the error
+    return { ok: false, stale: false, error: String(err && err.message ? err.message : err) };
+  }
+}
+
+
 function cc_buildAllCallsToday_() {
   var b = cc_todayBounds_();
   var raw = fetchCallsBetween_(b.start, b.end) || [];
