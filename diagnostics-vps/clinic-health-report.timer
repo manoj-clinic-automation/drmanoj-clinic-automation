@@ -1,0 +1,13 @@
+[Unit]
+Description=Fire the clinic daily health report at 08:00 IST
+
+[Timer]
+# 08:00 India Standard Time. The box runs IST (verify with `timedatectl`).
+OnCalendar=*-*-* 08:00:00
+# If the box was off/asleep at 08:00, run as soon as it's back (missed
+# morning still catches up).
+Persistent=true
+Unit=clinic-health-report.service
+
+[Install]
+WantedBy=timers.target

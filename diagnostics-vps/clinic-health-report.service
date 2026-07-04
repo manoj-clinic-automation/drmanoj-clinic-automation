@@ -1,0 +1,12 @@
+[Unit]
+Description=Clinic daily health report (read-only digest, 08:00 IST)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/wa
+ExecStart=/root/wa/venv/bin/python3 /root/wa/clinic_health_report.py
+# Read-only script: no restart-on-failure needed. If it errors it shouts
+# via ntfy (fail-loud, built in). A missed run is itself informative
+# (absence of the 08:00 report = reporter or box is down).
