@@ -1,0 +1,11 @@
+[Unit]
+Description=Timer-freshness checker (did the sleeping jobs actually run?) - Session 62
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/root/wa
+EnvironmentFile=-/root/wa/.env
+ExecStart=/root/wa/venv/bin/python3 /root/wa/clinic_timer_freshness.py

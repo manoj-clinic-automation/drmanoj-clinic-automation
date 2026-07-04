@@ -1,0 +1,12 @@
+[Unit]
+Description=Run the timer-freshness checker hourly - Session 62
+
+[Timer]
+# Hourly is enough: the tightest deadline is followup-push 07:00 + 2h grace = 09:00,
+# and an hourly check catches any missed run within the hour. Persistent so a
+# missed check after a reboot runs on next boot.
+OnCalendar=*-*-* *:05:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
