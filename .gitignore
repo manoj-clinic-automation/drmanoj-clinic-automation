@@ -74,3 +74,9 @@ recordings-archive/client_secret.json
 recordings-archive/drive_token.json
 recordings-archive/__pycache__/
 !recordings-archive/get_drive_token.py
+
+# ---- ATTENDANCE subsystem secrets (Session 59) ----
+# att_config.py holds the attendance dashboard password + SECRET_KEY — NEVER commit.
+# The non-secret attendance code (att_dashboard.py, att_core.py, attlistener_v2.py) IS committable.
+att_config.py
+attendance/att_config.py

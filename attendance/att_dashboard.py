@@ -3,14 +3,123 @@ att_dashboard.py  —  live, password-protected, mobile-friendly attendance page
 
 Read-only: it only reads punches.csv + staff_master.csv.  Uses each person's own
 weekday/Sunday shift to judge late and early.  Runs as the systemd service
-'attendance-dashboard'.   Open on your phone:  http://93.127.195.49:8042
+'attendance-dashboard'.
+
+Access:  https://attendance.dr-manoj.in   (also http://93.127.195.49:8042 fallback)
+
+AUTH (Session 59): cookie-based session login so an iPhone Home-Screen icon stays
+logged in.  A signed cookie is set after /login.  HTTP Basic Auth is still accepted
+as a fallback (old IP URL / saved-password bookmarks keep working). Same username &
+password from att_config.py.
 """
 import datetime
-from flask import Flask, request, Response
+import hmac
+import hashlib
+import base64
+from flask import Flask, request, Response, redirect
 import att_config as cfg
 import att_core as core
 
 app = Flask(__name__)
+
+# ---- session cookie (signed, no external library) -------------------------
+COOKIE_NAME = "att_session"
+COOKIE_MAX_AGE = 60 * 60 * 24 * 30  # 30 days
+
+
+def _sign(msg):
+    key = cfg.SECRET_KEY.encode() if isinstance(cfg.SECRET_KEY, str) else cfg.SECRET_KEY
+    return hmac.new(key, msg.encode(), hashlib.sha256).hexdigest()
+
+
+def make_token():
+    # payload = username ; token = payload.signature(payload)
+    payload = cfg.DASHBOARD_USER
+    return payload + "." + _sign(payload)
+
+
+def token_valid(token):
+    if not token or "." not in token:
+        return False
+    payload, sig = token.rsplit(".", 1)
+    if payload != cfg.DASHBOARD_USER:
+        return False
+    return hmac.compare_digest(sig, _sign(payload))
+
+
+def basic_ok():
+    a = request.authorization
+    return bool(a and a.username == cfg.DASHBOARD_USER
+                and a.password == cfg.DASHBOARD_PASSWORD)
+
+
+def authed():
+    # accept EITHER a valid session cookie OR HTTP Basic Auth (fallback)
+    if token_valid(request.cookies.get(COOKIE_NAME)):
+        return True
+    return basic_ok()
+
+
+LOGIN_CSS = """
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { margin:0; font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+       background:#f3f5f7; color:#1d2733; font-size:16px; }
+.wrap { max-width:400px; margin:0 auto; padding:40px 18px; }
+.card { background:#fff; border-radius:16px; padding:26px 22px; box-shadow:0 2px 10px rgba(0,0,0,.07); }
+h1 { margin:0 0 4px; font-size:20px; color:#1f4e79; }
+.sub { color:#6b7785; font-size:14px; margin:0 0 22px; }
+label { display:block; font-size:13px; color:#6b7785; margin:14px 0 5px; font-weight:600; }
+input { width:100%; padding:13px; font-size:16px; border:1px solid #cfd6dd; border-radius:10px; background:#fff; color:#1d2733; }
+button { width:100%; margin-top:22px; padding:14px; font-size:16px; font-weight:700; color:#fff;
+         background:#1f4e79; border:none; border-radius:10px; cursor:pointer; }
+.err { background:#ffe0e0; color:#c0392b; font-size:14px; padding:10px 12px; border-radius:9px; margin:14px 0 0; }
+.foot { text-align:center; color:#9aa4af; font-size:12px; margin-top:22px; }
+"""
+
+
+def login_page(error=""):
+    err_html = f'<div class="err">{error}</div>' if error else ""
+    return f"""<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Attendance Login</title><style>{LOGIN_CSS}</style></head>
+<body><div class="wrap"><div class="card">
+<h1>Clinic Attendance</h1>
+<p class="sub">Please sign in to continue</p>
+<form method="post" action="/login">
+<label>Username</label>
+<input name="username" autocomplete="username" autocapitalize="none" autocorrect="off" required>
+<label>Password</label>
+<input name="password" type="password" autocomplete="current-password" required>
+<button type="submit">Sign in</button>
+{err_html}
+</form>
+<div class="foot">Dr. Manoj Agarwal Clinic</div>
+</div></div></body></html>"""
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        if authed():
+            return redirect("/")
+        return login_page()
+    # POST
+    u = request.form.get("username", "")
+    p = request.form.get("password", "")
+    if u == cfg.DASHBOARD_USER and p == cfg.DASHBOARD_PASSWORD:
+        resp = redirect("/")
+        resp.set_cookie(COOKIE_NAME, make_token(), max_age=COOKIE_MAX_AGE,
+                        secure=True, httponly=True, samesite="Lax")
+        return resp
+    return login_page("Wrong username or password. Please try again.")
+
+
+@app.route("/logout")
+def logout():
+    resp = redirect("/login")
+    resp.delete_cookie(COOKIE_NAME)
+    return resp
+
 
 CSS = """
 * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -44,6 +153,7 @@ h2 { font-size:14px; color:#6b7785; text-transform:uppercase; letter-spacing:.5p
 .absent .nm { color:#c0392b; }
 .sunday .absent .nm { color:#67727e; }
 .foot { text-align:center; color:#9aa4af; font-size:12px; margin:18px 0 6px; }
+.foot a { color:#9aa4af; }
 .empty { color:#8893a0; padding:8px 4px; font-size:14px; }
 """
 
@@ -108,20 +218,14 @@ def render(data, d, is_today):
 </div>
 <h2>Present ({data['present_count']})</h2>{present_rows}
 <h2>{esc(absent_label)} ({data['absent_count']})</h2>{absent_rows}
-<div class="foot">Auto-refreshes every minute &middot; Dr. Manoj Agarwal Clinic</div>
+<div class="foot">Auto-refreshes every minute &middot; Dr. Manoj Agarwal Clinic &middot; <a href="/logout">Sign out</a></div>
 </div></body></html>"""
-
-
-def authed():
-    a = request.authorization
-    return a and a.username == cfg.DASHBOARD_USER and a.password == cfg.DASHBOARD_PASSWORD
 
 
 @app.route("/")
 def home():
     if not authed():
-        return Response("Login required", 401,
-                        {"WWW-Authenticate": 'Basic realm="Clinic Attendance"'})
+        return redirect("/login")
     qd = request.args.get("date")
     today = datetime.date.today()
     try:
@@ -189,8 +293,7 @@ td.fut { background:#fff; border-color:#eceff2; }
 @app.route("/month")
 def month_view():
     if not authed():
-        return Response("Login required", 401,
-                        {"WWW-Authenticate": 'Basic realm="Clinic Attendance"'})
+        return redirect("/login")
     import calendar as _cal
     today = datetime.date.today()
     ym = request.args.get("ym")
