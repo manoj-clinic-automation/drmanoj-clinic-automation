@@ -1,0 +1,16 @@
+[Unit]
+Description=Follow-up push safety-net (10 PM + 7 AM + 11 AM IST)
+
+[Timer]
+# Fires at 22:00 (night the workbook is usually made),
+#          07:00 (next-morning case), and 11:00 (last backstop before
+#          the post-lunch calling window). VPS clock is IST.
+# Backstop only + replace-only: re-pushing when nothing new arrived
+# simply re-writes the same rows, which is harmless.
+OnCalendar=*-*-* 22:00:00
+OnCalendar=*-*-* 07:00:00
+OnCalendar=*-*-* 11:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

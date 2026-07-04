@@ -1,0 +1,10 @@
+[Unit]
+Description=Follow-up list push to Google Sheet (Gap A pusher, replaces Windows watcher)
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/root/wa
+EnvironmentFile=/root/wa/.env
+ExecStart=/root/wa/venv/bin/python3 /root/wa/push_followups_vps.py --push

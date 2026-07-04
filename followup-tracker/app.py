@@ -865,6 +865,19 @@ def run():
         # Quick stats from the output
         import pandas as pd
         from processor import load_followups, load_master, INGEST_NOTICES
+
+        # ---- Gap A, Piece 3: auto-upload the staff workbook to the VPS ------
+        # Fire-and-forget, non-blocking. The VPS catcher receives it and the
+        # VPS timer pushes it to the Google Sheet on its own clock (no Windows
+        # watcher). Any failure here is captured as a notice and NEVER breaks
+        # report generation. Manual push_followups_vps.py remains the fallback.
+        try:
+            from push_to_vps import upload_workbook
+            _ok, _msg = upload_workbook(staff_path)
+            INGEST_NOTICES.append(_msg)
+        except Exception as _e:
+            INGEST_NOTICES.append("VPS upload hook skipped (non-fatal): %s" % _e)
+
         fu = load_followups()
         master = load_master()
         sc = fu["Followup_Status"].value_counts().to_dict()

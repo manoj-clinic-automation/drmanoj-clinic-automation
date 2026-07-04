@@ -1,0 +1,15 @@
+[Unit]
+Description=Follow-up workbook receiver (Gap A catcher, Flask via gunicorn, port 8100)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/wa
+EnvironmentFile=/root/wa/.env
+ExecStart=/root/wa/venv/bin/gunicorn --workers 1 --bind 127.0.0.1:8100 followup_receiver:app
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
