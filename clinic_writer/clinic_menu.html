@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dr. Manoj Agarwal Clinic — Tools</title>
+<style>
+  body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:#eef3f1;margin:0;
+       min-height:100vh;display:flex;align-items:center;justify-content:center}
+  .card{background:#fff;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.08);
+        padding:28px 30px;max-width:460px;width:92%}
+  h1{font-size:19px;margin:0 0 4px;color:#1E7CB0}
+  .sub{font-size:12.5px;color:#5C6B67;margin:0 0 18px}
+  a.tile{display:flex;align-items:center;gap:12px;text-decoration:none;color:#1a2e2a;
+         border:1px solid #d9e6e1;border-radius:10px;padding:14px 16px;margin:10px 0;
+         font-size:15px;transition:background .12s}
+  a.tile:hover{background:#f3f9f6}
+  .ic{font-size:22px}
+  .desc{font-size:11.5px;color:#5C6B67;margin-top:2px}
+  .note{font-size:11px;color:#8a3a28;margin-top:16px;line-height:1.5}
+  .ok{color:#2E7D5B}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Dr. Manoj Agarwal Clinic</h1>
+    <p class="sub">Local tools — this PC only.</p>
+
+    <a class="tile" href="http://127.0.0.1:5000/" target="_blank">
+      <span class="ic">📋</span>
+      <span><b>Follow-up Tracker</b>
+        <div class="desc">Daily follow-ups, calls, revenue. (Launch open_tracker.bat first.)</div></span>
+    </a>
+
+    <a class="tile" href="http://127.0.0.1:5057/vitals" target="_blank">
+      <span class="ic">🩺</span>
+      <span><b>Vitals &amp; Plan</b>
+        <div class="desc">Look up a patient, enter vitals, print &amp; save the rehab/nutrition plan. (Launch open_vitals.bat first.)</div></span>
+    </a>
+
+    <div class="note" id="status">
+      Tip: each tool needs its own launcher (.bat) running. If a tile says the page
+      can't be reached, double-click that tool's .bat first, then click again.
+    </div>
+  </div>
+
+  <script>
+    /* light liveness hint for the vitals tool (best-effort, no error if down) */
+    fetch("http://127.0.0.1:5057/health").then(function(r){return r.json();})
+      .then(function(j){
+        var s=document.getElementById("status");
+        if(j&&j.ok){
+          s.className="note ok";
+          s.innerHTML="Vitals tool is running ✓"
+            + (j.master_found? " · patient data found ✓" : " · ⚠ patient CSVs not found at the data folder");
+        }
+      }).catch(function(){});
+  </script>
+</body>
+</html>

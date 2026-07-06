@@ -384,14 +384,39 @@ def archive_pdf(out_path, title, patient_line, sections):
     if d and not os.path.exists(d):
         os.makedirs(d, exist_ok=True)
 
+    # --- Hindi (Devanagari) support -------------------------------------------
+    # The patient/physio sheets are Hindi-first. reportlab's built-in fonts cannot
+    # draw Devanagari, so we register NotoSansDevanagari-Regular.ttf if it sits
+    # beside this module. If the font file is missing we fall back to Helvetica
+    # (English still renders; Hindi would show as boxes) so archiving never fails.
+    # English text uses Helvetica (built in). Hindi (Devanagari) RUNS inside a line
+    # are wrapped in <font name="NotoDev"> by _mixed() below, drawn with the Noto
+    # Devanagari TTF if it sits beside this module. This renders BOTH scripts in the
+    # same line. If the font file is missing, Hindi shows as boxes but English (and
+    # the whole archive) still works — archiving never fails on a font issue.
+    base_font = "Helvetica"
+    hindi_ok = False
+    try:
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
+        _here = os.path.dirname(os.path.abspath(__file__))
+        _font_path = os.path.join(_here, "NotoSansDevanagari-Regular.ttf")
+        if os.path.exists(_font_path):
+            if "NotoDev" not in pdfmetrics.getRegisteredFontNames():
+                pdfmetrics.registerFont(TTFont("NotoDev", _font_path))
+            hindi_ok = True
+    except Exception:
+        hindi_ok = False
+
     styles = getSampleStyleSheet()
-    h1 = ParagraphStyle("h1", parent=styles["Heading1"], fontSize=15, spaceAfter=4)
+    h1 = ParagraphStyle("h1", parent=styles["Heading1"], fontSize=15, spaceAfter=4,
+                        fontName=base_font)
     sub = ParagraphStyle("sub", parent=styles["Normal"], fontSize=9,
-                         textColor="#555555", spaceAfter=8)
+                         textColor="#555555", spaceAfter=8, fontName=base_font)
     h2 = ParagraphStyle("h2", parent=styles["Heading2"], fontSize=11.5,
-                        spaceBefore=8, spaceAfter=3)
+                        spaceBefore=8, spaceAfter=3, fontName=base_font)
     body = ParagraphStyle("body", parent=styles["Normal"], fontSize=9.5,
-                          leading=13, alignment=TA_LEFT)
+                          leading=13, alignment=TA_LEFT, fontName=base_font)
 
     doc = SimpleDocTemplate(
         out_path, pagesize=A4,
@@ -400,16 +425,16 @@ def archive_pdf(out_path, title, patient_line, sections):
         title=title,
     )
     flow = []
-    flow.append(Paragraph(_esc(title), h1))
+    flow.append(Paragraph(_mixed(title, hindi_ok), h1))
     if patient_line:
-        flow.append(Paragraph(_esc(patient_line), sub))
+        flow.append(Paragraph(_mixed(patient_line, hindi_ok), sub))
     flow.append(HRFlowable(width="100%", thickness=0.6, color="#cccccc"))
     flow.append(Spacer(1, 4))
     for heading, lines in (sections or []):
         if heading:
-            flow.append(Paragraph(_esc(heading), h2))
+            flow.append(Paragraph(_mixed(heading, hindi_ok), h2))
         for ln in (lines or []):
-            flow.append(Paragraph(_esc(ln), body))
+            flow.append(Paragraph(_mixed(ln, hindi_ok), body))
     doc.build(flow)
     return out_path
 
@@ -418,6 +443,32 @@ def _esc(s):
     """Escape the few characters reportlab's mini-markup treats specially."""
     s = "" if s is None else str(s)
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+_DEV_RE = re.compile(r'([\u0900-\u097F][\u0900-\u097F\u0020\u200d\u0964\u0965]*)')
+
+def _mixed(s, hindi_ok=True):
+    """
+    Build a reportlab mini-markup string that renders BOTH English and Hindi in one
+    line: Devanagari runs are wrapped in <font name="NotoDev">, everything else stays
+    in the base (Helvetica) font. Each piece is escaped. If hindi_ok is False (no
+    font file) the text is still returned escaped (Hindi would show as boxes, English
+    fine). This is why numbers-only worked before but English words did not: the
+    Devanagari-only font lacked Latin letters. (Session 91 fix.)
+    """
+    s = "" if s is None else str(s)
+    parts = re.split(r'([\u0900-\u097F][\u0900-\u097F\u0020\u200d\u0964\u0965]*)', s)
+    out = []
+    for part in parts:
+        if not part:
+            continue
+        is_dev = any('\u0900' <= c <= '\u097F' for c in part)
+        esc = part.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        if is_dev and hindi_ok:
+            out.append('<font name="NotoDev">' + esc + '</font>')
+        else:
+            out.append(esc)
+    return "".join(out)
 
 
 # ----------------------------------------------------------------------------- #
