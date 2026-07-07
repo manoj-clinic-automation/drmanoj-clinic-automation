@@ -2246,6 +2246,117 @@ def build_staff_call_workbook(
         pass  # a de-dupe hiccup must never break the sheet — keep full list
 
 
+    # ── Item 3 (S103): daily cap + drip + 3-strike Hard-to-Reach split ───────────
+    # Owner policy (Sessions 109-114):
+    #   • DAILY CAP = 120 total follow-up callbacks on the staff sheet.
+    #   • Fill order: winnable buckets first (Due Today > Grace Period >
+    #     Actionable Missed), in the engine's existing priority order. Whatever
+    #     room is left under 120 is back-filled with the OLDEST Probable Dropouts
+    #     (drip). When winnable alone >= 120, dropouts get zero room and the
+    #     winnable OVERFLOW simply rolls to tomorrow (not shown today; it reappears
+    #     next run because its ledger status is unchanged).
+    #   • 3 STRIKES: any row with Call_Attempts >= 3 and still no contact
+    #     (Call_Resolution not RESOLVE/DECLINE) is pulled OFF the daily list into a
+    #     Hard-to-Reach queue (its own tab), carrying name, Clinic ID, mobile,
+    #     diagnosis, last-visit date and attempts — so the doctor decides per
+    #     patient: keep calling or archive. Not auto-archived.
+    #   • The AUDIT workbook is untouched and stays full; only THIS staff sheet is
+    #     capped. Wrapped in try/except → any error falls back to the full list; it
+    #     can never blank the sheet.
+    hard_to_reach_records = []   # filled by the 3-strike split below
+    DAILY_CALL_CAP = 120
+    STRIKE_LIMIT   = 3
+    try:
+        if combined is not None and len(combined):
+            _w = combined.copy().reset_index(drop=True)
+
+            # last-visit date per patient (read-only from the visit ledger)
+            _lastvisit = {}
+            try:
+                if visits is not None and len(visits):
+                    for _, _vr in visits.iterrows():
+                        _uid = str(_vr.get("Patient_UID", "") or "").strip()
+                        _vd  = parse_date(_vr.get("Visit_Date"))
+                        if _uid and _vd:
+                            _prev = _lastvisit.get(_uid)
+                            if _prev is None or _vd > _prev:
+                                _lastvisit[_uid] = _vd
+            except Exception:
+                _lastvisit = {}
+
+            def _attempts(row):
+                try:
+                    return int(float(str(row.get("Call_Attempts", "") or 0).strip() or 0))
+                except Exception:
+                    return 0
+
+            def _no_contact(row):
+                # a strike counts only if the row is NOT already resolved/declined
+                return str(row.get("Call_Resolution", "") or "").strip().upper() \
+                       not in ("RESOLVE", "DECLINE")
+
+            # reinstated rows are protected — never pulled into Hard-to-Reach
+            _reins_ids = set(reinstate_note.keys()) if reinstate_note else set()
+
+            # ── Step A: 3-strike split ───────────────────────────────────────────
+            _keep_mask = []
+            for _i, _row in _w.iterrows():
+                _fid = str(_row.get("Followup_ID", ""))
+                if (_fid not in _reins_ids
+                        and _attempts(_row) >= STRIKE_LIMIT
+                        and _no_contact(_row)):
+                    _uid = str(_row.get("Patient_UID_Resolved", "") or "").strip()
+                    _lv  = _lastvisit.get(_uid)
+                    hard_to_reach_records.append({
+                        "name":     _row.get("FU_Name_Raw", ""),
+                        "clinic":   _row.get("Clinic_Specific_Id_Resolved", ""),
+                        "mobile":   str(_row.get("FU_Mobile_Clean", "") or ""),
+                        "diag":     clean_diag(_row.get("Diagnosis", "")),
+                        "lastvisit": _lv.strftime("%d-%b-%Y") if _lv else "",
+                        "attempts": _attempts(_row),
+                    })
+                    _keep_mask.append(False)
+                else:
+                    _keep_mask.append(True)
+            _w = _w[pd.Series(_keep_mask, index=_w.index)].reset_index(drop=True)
+
+            # ── Step B: 120 cap + drip + roll-to-tomorrow ────────────────────────
+            if len(_w) > DAILY_CALL_CAP:
+                _WINNABLE = {"Due Today", "Grace Period", "Actionable Missed Follow-Up"}
+                _st = _w["Followup_Status"].astype(str)
+                _win = _w[_st.isin(_WINNABLE)].copy()
+                _drop = _w[~_st.isin(_WINNABLE)].copy()   # Probable Dropout (+ any other)
+
+                # _w already arrived in the engine's priority order (freshest-first
+                # + post-op float); the de-dupe preserved that order. So the first
+                # N winnable rows ARE the top-priority winnable rows.
+                if len(_win) >= DAILY_CALL_CAP:
+                    # winnable alone fills the cap → keep top 120, rest roll tomorrow;
+                    # dropouts get no room today.
+                    combined = _win.head(DAILY_CALL_CAP).reset_index(drop=True)
+                else:
+                    # room left after winnable → drip in OLDEST dropouts (most overdue)
+                    _room = DAILY_CALL_CAP - len(_win)
+                    def _od(v):
+                        try:
+                            return int(float(str(v or 0).strip() or 0))
+                        except Exception:
+                            return 0
+                    if len(_drop):
+                        _drop = _drop.assign(_od=_drop["Days_Overdue"].map(_od)) \
+                                     .sort_values("_od", ascending=False) \
+                                     .drop(columns=["_od"])
+                        _drip = _drop.head(_room)
+                    else:
+                        _drip = _drop.iloc[0:0]
+                    combined = pd.concat([_win, _drip], ignore_index=True, sort=False)
+            else:
+                # already within cap → keep all (minus the 3-strike rows already removed)
+                combined = _w
+    except Exception:
+        pass  # any cap/split hiccup must never break the sheet — keep the de-duped list
+
+
     r = 4
     r = section_header(r, "1.  FOLLOW-UP CALLS  —  due today, overdue & upcoming", NAVY)
     r = write_rows(r, fu_records(combined, notes_override=reinstate_note))
@@ -2351,6 +2462,50 @@ def build_staff_call_workbook(
     # answers "what happened to yesterday's calls?" so nothing vanishes silently.
     if full_fu_ledger is not None and len(full_fu_ledger):
         _build_settled_sheet(wb, full_fu_ledger, today, AR, border)
+
+    # ── Hard-to-Reach tab (Item 3, S103) ──────────────────────────────────────
+    # Patients pulled OFF the daily call list after 3 no-contact attempts. Shown
+    # so staff see they are parked (not lost) and the doctor can decide per
+    # patient: keep calling, or archive. Carries the four LOCAL fields now
+    # (last-visit date, mobile, Clinic ID, diagnosis); recording/transcript links
+    # are a planned fast follow-up (owner choice 'b', S111).
+    try:
+        wsh = wb.create_sheet("Hard-to-Reach")
+        _htr_title = ("HARD-TO-REACH  —  %d patient(s) off the call list after %d+ "
+                      "no-contact attempts. DOCTOR TO DECIDE: keep calling or archive."
+                      % (len(hard_to_reach_records), STRIKE_LIMIT))
+        _htr_cols = ["Patient", "Clinic ID", "Mobile", "Diagnosis",
+                     "Last Visit", "Attempts"]
+        wsh.merge_cells(start_row=1, start_column=1, end_row=1,
+                        end_column=len(_htr_cols))
+        _tc = wsh.cell(1, 1, _htr_title)
+        _tc.font = Font(AR, bold=True, size=11, color="FFFFFF")
+        _tc.fill = PatternFill("solid", fgColor="C00000")
+        _tc.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+        for _ci, _cn in enumerate(_htr_cols, 1):
+            _hc = wsh.cell(2, _ci, _cn)
+            _hc.font = Font(AR, bold=True, color="1F4E79")
+            _hc.fill = PatternFill("solid", fgColor="F2F2F2")
+            _hc.alignment = Alignment(horizontal="center", vertical="center",
+                                      wrap_text=True)
+            _hc.border = border
+        _rr = 3
+        for _rec in hard_to_reach_records:
+            _vals = [_rec.get("name", ""), _rec.get("clinic", ""),
+                     _rec.get("mobile", ""), _rec.get("diag", ""),
+                     _rec.get("lastvisit", ""), _rec.get("attempts", "")]
+            for _ci, _v in enumerate(_vals, 1):
+                _dc = wsh.cell(_rr, _ci, "" if _v is None else str(_v))
+                _dc.font = Font(AR, size=10)
+                _dc.alignment = Alignment(horizontal="left", vertical="center")
+                _dc.border = border
+            _rr += 1
+        _htr_widths = [22, 12, 14, 30, 13, 9]
+        for _ci, _w in enumerate(_htr_widths, 1):
+            wsh.column_dimensions[chr(64 + _ci)].width = _w
+        wsh.freeze_panes = "A3"
+    except Exception:
+        pass  # a Hard-to-Reach tab hiccup must never break the sheet
 
     # ── Day Revenue tab ───────────────────────────────────────────────────────
     if day_revenue_df is not None and len(day_revenue_df):
