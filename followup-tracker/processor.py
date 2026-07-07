@@ -2186,6 +2186,66 @@ def build_staff_call_workbook(
     except Exception:
         reinstate_note = {}   # a reinstatement hiccup must never break the sheet
 
+
+    # ── De-duplicate the follow-up list: one row per patient (S102, Item 1) ──────
+    # A patient can carry several OPEN follow-ups from different visit cycles that
+    # all land on the same day's sheet. Staff then see the same person 2–3 times.
+    # RULE (owner-confirmed, S102):
+    #   • Group by mobile + name (+ diagnosis, so two genuinely different clinical
+    #     problems for one patient stay as separate rows).
+    #   • Keep ONLY the most recent follow-up cycle = latest Due_Date. Older cycles
+    #     are removed from the sheet entirely (NO note — a note would confuse staff).
+    #   • EXCEPTION: a reinstated ("call back & complete", amber) row always wins its
+    #     group, even if older — that flag means we owe the patient a callback and it
+    #     must never be dropped.
+    #   • Blank / invalid mobile → group by name only (they are un-callable anyway).
+    # Only the FOLLOW-UP list is touched here; Procedure and Watch sections are not.
+    # Wrapped so a de-dupe hiccup can NEVER break the sheet — on any error we fall
+    # back to the full, un-deduped list.
+    try:
+        if combined is not None and len(combined):
+            _c = combined.copy().reset_index(drop=True)
+
+            def _norm_name(v):
+                return " ".join(str(v or "").strip().lower().split())
+
+            def _grp_key(row):
+                mob = str(row.get("FU_Mobile_Clean", "") or "").strip()
+                nm = _norm_name(row.get("FU_Name_Raw", ""))
+                dg = str(row.get("Diagnosis", "") or "").strip().lower()
+                if mob and mob.lower() not in ("", "nan", "none"):
+                    return ("M", mob, nm, dg)     # real mobile → mobile+name+diagnosis
+                return ("N", nm)                  # no mobile → name only
+
+            def _due_sort(v):
+                d = parse_date(v)
+                return d or date(1900, 1, 1)
+
+            _reinstated_ids = set(reinstate_note.keys()) if reinstate_note else set()
+
+            _keep_idx = []
+            _seen = {}
+            for _i, _row in _c.iterrows():
+                _k = _grp_key(_row)
+                _fid = str(_row.get("Followup_ID", ""))
+                _is_reins = _fid in _reinstated_ids
+                _due = _due_sort(_row.get("Due_Date"))
+                if _k not in _seen:
+                    _seen[_k] = (_i, _due, _is_reins)
+                    continue
+                _pi, _pdue, _pr = _seen[_k]
+                # reinstated always beats non-reinstated; else newer Due_Date wins
+                if _is_reins and not _pr:
+                    _seen[_k] = (_i, _due, _is_reins)
+                elif _is_reins == _pr and _due > _pdue:
+                    _seen[_k] = (_i, _due, _is_reins)
+                # otherwise keep the incumbent
+            _keep_idx = [v[0] for v in _seen.values()]
+            combined = _c.loc[_keep_idx].reset_index(drop=True)
+    except Exception:
+        pass  # a de-dupe hiccup must never break the sheet — keep full list
+
+
     r = 4
     r = section_header(r, "1.  FOLLOW-UP CALLS  —  due today, overdue & upcoming", NAVY)
     r = write_rows(r, fu_records(combined, notes_override=reinstate_note))
