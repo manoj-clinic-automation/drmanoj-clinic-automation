@@ -49,6 +49,16 @@ function OL_col_(H, names) {
   }
   return -1;
 }
+/** True when the "Handled By" value is a generic placeholder rather than a real
+ *  agent's name. Used at the outcome-row build step: if the outcome was filed
+ *  under a generic label AND we matched a real call, we borrow the real caller
+ *  name from the call log. Blank counts as generic. (S94 fix — this helper was
+ *  referenced on line ~333 but never defined, which broke the Today outcome view.) */
+function isGenericAgent_(name) {
+  var n = String(name || '').trim().toLowerCase();
+  if (!n) return true;
+  return (n === 'staff' || n === 'doctor' || n === 'unknown' || n === 'agent' || n === 'system');
+}
 /** 'When' cells may come back as Date objects OR strings — normalise both. */
 function OL_whenParts_(v) {
   if (v instanceof Date) {
@@ -305,7 +315,6 @@ function getOutcomeLog(key, day) {
       var mob = String(cell(row, ix.mobile) || '').replace(/\D/g, '');
       var ph  = mob.length >= 10 ? mob.slice(-10) : '';
       var by  = String(cell(row, ix.by) || '').trim() || 'Unknown';
-      byStaff[by] = (byStaff[by] || 0) + 1;
 
       var cid = String(cell(row, ix.cid) || '').trim();
       if (!cid && ph && pmap[ph]) cid = String(pmap[ph].clinicId || '');
@@ -330,6 +339,9 @@ function getOutcomeLog(key, day) {
       } else if (day === 'today' && ph && missedToday[ph]) {
         callState = 'missed';
       }
+
+      if (match && match.agent && isGenericAgent_(by)) by = match.agent;   // borrow real caller from the call log
+      byStaff[by] = (byStaff[by] || 0) + 1;
 
       rows.push({
         rowIndex: r + 1,                                  // 1-based sheet row
