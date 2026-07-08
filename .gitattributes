@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# D164: CRLF in a .py uploaded via WinSCP Binary lands \r on the VPS. Pin to LF.
+*.py text eol=lf
