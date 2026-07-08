@@ -633,7 +633,7 @@
 <script>
   var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
   var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
-  var PAGE_BUILD = 'v18.18 · S57: stale-list top-bar guard (matches email sentinel) + WhatsApp tap-to-call';
+  var PAGE_BUILD = 'v18.19 · S124: duration-gate FAIL-OPEN + gate state persists across reloads (D156)';
   var acPrevIds = null;    // v1.1: ids seen last poll, to flash genuinely-new calls
   var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
   var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
@@ -1566,7 +1566,12 @@
     if(mi<0||mi>11) return String(s);
     return parseInt(m[3],10)+' '+mo[mi]+' '+m[1].slice(2);
   }
-  /* ---- Duration gate (D77): an outcome unlocks only after a MEASURED connected call ----
+  /* ---- Duration gate (D77, amended D156 v18.19) ----
+     An outcome unlocks after a MEASURED connected call. If the call CANNOT be measured within
+     3 minutes (webhook down, vendor slow, no reference_id), the gate FAILS OPEN and the outcome
+     unlocks anyway with an "unverified" banner. A call measured as NOT connected still blocks.
+     Original D77 note follows.
+     ---- Duration gate (D77): an outcome unlocks only after a MEASURED connected call ----
      Replaces the Session-52 self-declared "Talked" tap. When a follow-up call is placed we
      capture that call's reference_id, then poll the server (getCallDuration -> Call_Durations,
      written in real time by the VPS call-webhook receiver). Only a call that BRIDGED, was
@@ -1574,29 +1579,67 @@
      Anything else -> "didn't connect / couldn't confirm", no outcome. Fail-safe by default. */
   var fuCalled   = {};   // rid -> 1     : a call was placed for this tile today (persisted per-day)
   var fuRefId    = {};   // rid -> refId : that call's reference_id, to match Call_Durations (persisted)
-  var fuTalked   = {};   // rid -> 1     : MEASURED connected >= threshold (this session) -> outcome unlocks
-  var fuMissed   = {};   // rid -> {talk,status} : MEASURED not-connected / too short (this session)
-  var fuTimeout  = {};   // rid -> 1     : gave up waiting for the result (webhook hiccup) — fail-safe
-  var fuChecking = {};   // rid -> 1     : currently polling for this call's result
+  var fuPlacedAt = {};   // rid -> epoch ms the call was placed (v18.19: persisted -> the 3-min
+                         //          timeout is measured from the CALL, not from the page load)
+  var fuTalked   = {};   // rid -> 1     : MEASURED connected >= threshold -> outcome unlocks (persisted)
+  var fuMissed   = {};   // rid -> {talk,status} : MEASURED not-connected / too short (persisted)
+  var fuTimeout  = {};   // rid -> 1     : gave up waiting for the result (webhook hiccup) (persisted)
+  var fuChecking = {};   // rid -> 1     : currently polling for this call's result (session only)
   var fuPollT    = {};   // rid -> setTimeout handle
   var FU_MIN_TALK        = 15;         // display copy; the real gate is server-side (CC_GATE_MIN_TALK)
   var FU_POLL_EVERY_MS   = 6000;       // how often to ask the server
   var FU_POLL_TIMEOUT_MS = 180000;     // stop after 3 minutes with no result
+
+  /* v18.19 (D156) — WHY THIS CHANGED.
+     Before, only fuCalled + fuRefId were persisted. The three RESULT states lived in page
+     memory. So after any reload a called tile rendered "Checking the call..." again and
+     restarted a fresh 3-minute timer -> for anyone who refreshes, the spinner was permanent.
+     Worse, a call that came back without a reference_id was persisted as CALLED WITH NO REF:
+     fuResumePolls skipped it silently, nothing ever timed it out, and the tile spun forever
+     across every reload until localStorage was cleared by hand.
+     Now: every state persists, the timeout is measured from the call, and every no-ref path
+     fails safe. The day key is LOCAL (IST) rather than UTC, which also flushes the old
+     stuck entries once, on first load. */
+  function fuDayKey(){
+    var d=new Date();
+    return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+  }
   (function(){
     try{
       var raw=JSON.parse(localStorage.getItem('dashFuCalled')||'{}');
-      var today=new Date().toISOString().slice(0,10);
-      if(raw && raw.date===today){ if(raw.ids) fuCalled=raw.ids; if(raw.refs) fuRefId=raw.refs; }
-    }catch(e){ fuCalled={}; fuRefId={}; }
+      if(raw && raw.date===fuDayKey()){
+        if(raw.ids)     fuCalled   = raw.ids;
+        if(raw.refs)    fuRefId    = raw.refs;
+        if(raw.placed)  fuPlacedAt = raw.placed;
+        if(raw.talked)  fuTalked   = raw.talked;
+        if(raw.missed)  fuMissed   = raw.missed;
+        if(raw.timeout) fuTimeout  = raw.timeout;
+      }
+    }catch(e){ fuCalled={}; fuRefId={}; fuPlacedAt={}; fuTalked={}; fuMissed={}; fuTimeout={}; }
   })();
   function fuPersistCalled(){
-    try{ localStorage.setItem('dashFuCalled', JSON.stringify({date:new Date().toISOString().slice(0,10), ids:fuCalled, refs:fuRefId})); }catch(e){}
+    try{
+      localStorage.setItem('dashFuCalled', JSON.stringify({
+        date: fuDayKey(), ids: fuCalled, refs: fuRefId, placed: fuPlacedAt,
+        talked: fuTalked, missed: fuMissed, timeout: fuTimeout
+      }));
+    }catch(e){}
   }
-  function fuMarkCalled(rid, refId){ fuCalled[rid]=1; if(refId) fuRefId[rid]=refId; fuPersistCalled(); }
+  function fuMarkCalled(rid, refId){
+    fuCalled[rid]=1;
+    if(refId) fuRefId[rid]=refId;
+    fuPlacedAt[rid]=Date.now();
+    fuPersistCalled();
+  }
   function fuStopPoll(rid){ if(fuPollT[rid]){ clearTimeout(fuPollT[rid]); delete fuPollT[rid]; } delete fuChecking[rid]; }
+  /* how long ago was this tile's call placed? no stamp -> treat as already expired (fail safe) */
+  function fuElapsed(rid){ var t=fuPlacedAt[rid]; return t ? (Date.now()-t) : (FU_POLL_TIMEOUT_MS+1); }
+  function fuSetTalked(rid){  fuStopPoll(rid); fuTalked[rid]=1;  fuPersistCalled(); fuRerenderTile(rid); }
+  function fuSetMissed(rid, talk, status){ fuStopPoll(rid); fuMissed[rid]={talk:(talk||0), status:(status||'')}; fuPersistCalled(); fuRerenderTile(rid); }
+  function fuSetTimeout(rid){ fuStopPoll(rid); fuTimeout[rid]=1; fuPersistCalled(); fuRerenderTile(rid); }
   function fuClearCalled(rid){
     fuStopPoll(rid);
-    delete fuCalled[rid]; delete fuRefId[rid]; delete fuTalked[rid];
+    delete fuCalled[rid]; delete fuRefId[rid]; delete fuPlacedAt[rid]; delete fuTalked[rid];
     delete fuMissed[rid]; delete fuTimeout[rid];
     fuPersistCalled();
   }
@@ -1608,7 +1651,8 @@
       if(bar){ bar.classList.add('need'); bar.scrollIntoView({behavior:'smooth',block:'center'}); }
       showToast('Your login is not linked to an agent — ask the doctor.'); return;
     }
-    fuStopPoll(rid); delete fuTalked[rid]; delete fuMissed[rid]; delete fuTimeout[rid];   // fresh attempt
+    fuStopPoll(rid); delete fuTalked[rid]; delete fuMissed[rid]; delete fuTimeout[rid];
+    delete fuPlacedAt[rid]; fuPersistCalled();                                            // fresh attempt
     showToast('Calling… '+CALLER_NAME+'\u2019s phone rings first (a few seconds), then the patient.');
     google.script.run
       .withSuccessHandler(function(res){
@@ -1616,7 +1660,7 @@
           showToast('\ud83d\udcde Ringing '+CALLER_NAME+' — answer your phone; the patient will be connected.');
           fuMarkCalled(rid, res.reference_id||'');
           if(res.reference_id){ fuRerenderTile(rid); fuStartPoll(rid); }
-          else { fuTimeout[rid]=1; fuRerenderTile(rid); }   // no ref -> cannot gate -> fail-safe
+          else { fuSetTimeout(rid); }   // no ref -> cannot gate -> fail-safe (v18.19: now persisted)
         } else {
           showToast('Call not placed: '+((res&&res.reason)||'unknown error'));
         }
@@ -1627,25 +1671,26 @@
   // poll the server for THIS call's measured result until we get one, or time out
   function fuStartPoll(rid){
     if(fuPollT[rid]) return;                 // already polling
-    var ref=fuRefId[rid]; if(!ref) return;
+    var ref=fuRefId[rid];
+    if(!ref){ fuSetTimeout(rid); return; }                        // v18.19: never spin without a ref
+    if(fuElapsed(rid) > FU_POLL_TIMEOUT_MS){ fuSetTimeout(rid); return; }   // the call is long past
     fuChecking[rid]=1; delete fuTimeout[rid];
     fuRerenderTile(rid);
-    var started=Date.now();
     (function tick(){
       google.script.run
         .withSuccessHandler(function(res){
           if(res && res.ok && res.found){
-            fuStopPoll(rid);
-            if(res.allowOutcome){ fuTalked[rid]=1; }
-            else { fuMissed[rid]={talk:(res.talk||0), status:(res.status||'')}; }
-            fuRerenderTile(rid);
+            if(res.allowOutcome){ fuSetTalked(rid); }
+            else { fuSetMissed(rid, res.talk, res.status); }
             return;
           }
-          if(Date.now()-started > FU_POLL_TIMEOUT_MS){ fuStopPoll(rid); fuTimeout[rid]=1; fuRerenderTile(rid); return; }
+          // v18.19: elapsed is measured from when the CALL was placed, so a page reload
+          // cannot restart the 3-minute clock and resurrect the spinner.
+          if(fuElapsed(rid) > FU_POLL_TIMEOUT_MS){ fuSetTimeout(rid); return; }
           fuPollT[rid]=setTimeout(tick, FU_POLL_EVERY_MS);
         })
         .withFailureHandler(function(){
-          if(Date.now()-started > FU_POLL_TIMEOUT_MS){ fuStopPoll(rid); fuTimeout[rid]=1; fuRerenderTile(rid); return; }
+          if(fuElapsed(rid) > FU_POLL_TIMEOUT_MS){ fuSetTimeout(rid); return; }
           fuPollT[rid]=setTimeout(tick, FU_POLL_EVERY_MS);
         })
         .getCallDuration(DASH_KEY, ref);
@@ -1655,7 +1700,10 @@
   function fuResumePolls(){
     for(var rid in fuCalled){
       if(!fuCalled.hasOwnProperty(rid)) continue;
-      if(fuRefId[rid] && !fuTalked[rid] && !fuMissed[rid] && !fuTimeout[rid] && !fuPollT[rid]){ fuStartPoll(rid); }
+      if(fuTalked[rid] || fuMissed[rid] || fuTimeout[rid] || fuPollT[rid]) continue;  // already settled
+      if(!fuRefId[rid]){ fuSetTimeout(rid); continue; }        // v18.19: was a silent skip -> spun forever
+      if(fuElapsed(rid) > FU_POLL_TIMEOUT_MS){ fuSetTimeout(rid); continue; }
+      fuStartPoll(rid);
     }
   }
   function fuRerenderTile(rid){
@@ -1834,8 +1882,22 @@
                   (mtalk>0?(' \u2014 patient talked '+mtalk+'s (need '+FU_MIN_TALK+'s)'):' \u2014 not answered')+'</div>'+
                 recallNoAns;
     } else if(timedout){
-      // couldn't confirm the call within the window -> fail-safe, no outcome
-      fuRight = '<div class="fu-checking warn">\u23f3 Couldn\u2019t confirm the call \u2014 please Call again</div>'+recallNoAns;
+      // v18.19 (D156) FAIL OPEN. We could not MEASURE this call - the webhook may be down, or the
+      // vendor may simply be slow. The staff member was on the phone regardless. Never let a
+      // verification problem stop someone recording what a patient said: on 06-08 Jul 2026 a silent
+      // webhook 403 blocked outcome logging for two clinic days. The outcome saves unverified; the
+      // background reconciler (Call_Feed + recordings + the AI judge) settles whether it was real.
+      // NOTE: this is only the COULDN'T-MEASURE case. A call we DID measure as not-connected
+      // (see the 'missed' branch above) still blocks the outcome, exactly as D77 intended.
+      fuRight = '<div class="fu-checking warn">\u26a0\ufe0f Couldn\u2019t verify this call automatically \u2014 you can still log the outcome</div>'+
+                '<select class="fu-out" id="fuout_'+rid+'" onchange="fuOnOutcome(\''+rid+'\')">'+fuOptions('')+'</select>'+
+                '<div class="fu-extra" id="fuextra_'+rid+'"></div>'+
+                '<div class="fu-actions">'+
+                  '<button class="fu-save" id="fusave_'+rid+'" disabled onclick="fuSave(\''+rid+'\')">Save</button>'+
+                  '<button class="fu-recall" onclick="fuDoCall(\''+rid+'\',\''+esc(it.mobile)+'\')" title="Call again">\u21bb Call again</button>'+
+                  '<button class="fu-noans" id="funoans_'+rid+'" onclick="fuNoAnswer(\''+rid+'\')">\ud83d\udcf5 No answer</button>'+
+                '</div>'+
+                '<div class="fu-msg" id="fumsg_'+rid+'"></div>';
     } else {
       // called, waiting for the measured result (polling)
       fuRight = '<div class="fu-checking">\u23f3 Checking the call\u2026 the outcome unlocks once it connects</div>'+recallNoAns;
