@@ -26,10 +26,16 @@ v2.0  --  Session 125  --  DUAL-KEY ACCEPTANCE + REJECTION VISIBILITY
   Also: a startup sanity check that shouts if the configured secret contains
   whitespace, an '=', or is implausibly long. On 07-Jul-2026 CALLHOOK_SECRET
   held 61 characters -- the real 12-char key with `FU_UPLOAD_SECRET=<frag>`
-  run onto the end of it by a lost newline. This check would have caught that
-  the moment a worker read the file, instead of after two clinic days.
-  (It was NOT caused by `sed`; `sed -i '17s'` was the S94 repair that removed
-  it. That misattribution stood in the incident report for two sessions.)
+  appended to it. Composition confirmed: 12 + 17 + 32 = 61, non-alphanumerics
+  `@ _ _ =` in that order. MECHANISM UNKNOWN. It was a DUPLICATION, not a
+  deletion: the separate FU_UPLOAD_SECRET line survives intact in the 07-Jul
+  .env backup, and a lost newline would have consumed it. So it was NOT a lost
+  newline, and it was NOT `sed` -- `sed -i '17s'` was the S94 repair that
+  REMOVED the run-on. Two wrong causes have been recorded for these 61
+  characters already (incident report v1: `sed`; S125 correction: lost
+  newline). Record no third until something proves it. This check would have
+  caught the value the moment a worker read the file, instead of after two
+  clinic days.
 
 WHAT IT DOES
   A tiny always-on web service. MyOperator POSTs each call-lifecycle event here
