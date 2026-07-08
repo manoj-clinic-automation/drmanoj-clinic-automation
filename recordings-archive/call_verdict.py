@@ -10,10 +10,25 @@ WHAT THIS DOES
   calls (Status=done) that don't yet have a verdict, downloads each call's
   transcript text from the restricted Drive folder, sends the TRANSCRIPT ONLY
   to Claude Haiku with a fixed classification prompt, receives a structured
-  verdict, then SEPARATELY fuzzy-matches the staff's claimed outcome from
-  "Followup_Outcomes" (mobile + time window) and mechanically compares:
+  verdict, then SEPARATELY matches the staff's claimed outcome from
+  "Followup_Outcomes" and mechanically compares:
   Match / Mismatch / Partial / Unclear / No claim logged. One row per call is
   written to a "Call_Verdicts" tab in the DOCTOR-ONLY "Call Audit" sheet.
+
+SESSION 123 REDESIGN (this version)
+  1. CLAIM JOIN — the old ±45-min window matched 0/15 real calls because
+     staff file outcomes in MORNING BATCHES, hours after the call. The join
+     now pairs on the patient's phone number over a whole-day forward window
+     (call time -> next-morning batch); two calls to one number pair in
+     call-time order; each row gets a Match Confidence (unique/ordered/none).
+  2. ENRICHED ROW — full patient number, a Recording Link (joined from the
+     Stage-1 Call_Recordings tab), Match Confidence, and a name/Clinic-ID
+     fallback so even an unmatched call carries an identity (training KB).
+  3. JUDGE ONCE, FILL LATER — a call is sent to the AI only once. When the
+     staff's outcome lands later, the row's claim/verdict cells are UPDATED
+     in place (no second AI call). The doctor's own columns are never touched.
+     This lets the AI verdict + flags reach the doctor the SAME day while the
+     staff-vs-AI diff fills itself in whenever the claim is filed.
 
   This is Stage 3 of 4 (recording archive -> transcription -> AI verdict ->
   dashboard UI). v1 is CLASSIFY-AND-FLAG ONLY: it never sends messages, never
@@ -164,11 +179,21 @@ AI_MAX_TOKENS = 700
 AI_TIMEOUT_S = 120
 AI_RETRIES = 2                   # per call, on transport/5xx errors
 
-# Claim-matching window: an outcome filed from 5 min BEFORE call start
-# (clock skew safety) to 45 min AFTER counts as "about this call".
-# Staff file right after hanging up; 45 min is generous. Nearest wins.
-CLAIM_WINDOW_BEFORE_S = 5 * 60
-CLAIM_WINDOW_AFTER_S = 45 * 60
+# --- Claim-matching window (REDESIGNED Session 123) ------------------------
+# The old ±45-min window assumed staff file an outcome right after hanging up.
+# They DON'T — they clear outcomes in morning batches, so a filed outcome
+# usually lands MANY HOURS after its call (which is why the first real run
+# matched 0/15). New rule: match on the patient's PHONE NUMBER, accepting an
+# outcome filed from just before the call through to the next morning's batch.
+# Calls can't leak past ~01:00 (Stage-1 downloads at 02:00), so a call and its
+# outcome can never be confused with the NEXT day's calls. Earliest-unclaimed
+# -in-window wins; two calls to one number are paired in call-time order.
+CLAIM_SKEW_BEFORE_S = 10 * 60          # 10 min before the call (clock-skew safety)
+CLAIM_MAX_FORWARD_S = 28 * 3600        # forward to the next-morning batch filing
+
+# Recording link (Session 123): joined from the Stage-1 Call_Recordings tab.
+RECORD_TAB = "Call_Recordings"
+DRIVE_FILE_VIEW = "https://drive.google.com/file/d/{}/view"
 
 # --- Answer vocabularies: frozen from the LIVE dashboard (S125-126) --------
 VOCAB_OUTGOING = [
@@ -221,13 +246,14 @@ FLAG_KEYS = ["flag_postop", "flag_complaint", "flag_urgent",
              "flag_surgery", "flag_clinical", "flag_conduct"]
 
 VERDICT_HEADER = [
-    "Date", "Time", "Direction", "Number (last-4)", "Agent",
+    "Date", "Time", "Direction", "Patient Number", "Agent",
     "Patient Name", "Clinic ID", "Duration",
-    "Claimed Outcome", "AI Outcome", "Verdict", "Outcome TRUE/FALSE",
+    "Claimed Outcome", "AI Outcome", "Verdict", "Match Confidence",
+    "Outcome TRUE/FALSE",
     "AI Reason", "Evidence", "Spoke With", "Confidence",
     "Flag PostOp", "Flag Complaint", "Flag Urgent",
     "Flag Surgery", "Flag Clinical", "Flag Conduct", "Conduct Note",
-    "Transcript Link", "Join Key", "Status", "Error",
+    "Recording Link", "Transcript Link", "Join Key", "Status", "Error",
     "Judged At", "Prompt Ver", "Model",
     "Doctor Flag", "Doctor Note", "Final Outcome",
 ]
@@ -322,18 +348,118 @@ def build_claim_index(outcome_rows):
     return idx
 
 
-def match_claim(claim_index, phone10, start_unix):
-    """Nearest outcome row for this mobile filed within the window. None if none."""
-    if not phone10 or start_unix is None:
+def build_identity_index(outcome_rows):
+    """{mobile_last10: {'Patient':.., 'Clinic ID':..}} — last non-blank wins.
+    Fallback so a call with NO matched claim still carries a name / Clinic ID
+    (needed for the training-KB completeness the owner asked for, S123)."""
+    idx = {}
+    for r in outcome_rows:
+        digits = "".join(ch for ch in str(r.get("Mobile", "")) if ch.isdigit())
+        if len(digits) < 10:
+            continue
+        m10 = digits[-10:]
+        cur = idx.setdefault(m10, {"Patient": "", "Clinic ID": ""})
+        name = str(r.get("Patient", "")).strip()
+        cid = str(r.get("Clinic ID", "")).strip()
+        if name:
+            cur["Patient"] = name
+        if cid:
+            cur["Clinic ID"] = cid
+    return idx
+
+
+def build_recording_index(record_rows):
+    """{join_key: recording_view_link} from the Stage-1 Call_Recordings tab.
+    Prefers an existing link column; else builds one from the Drive File ID."""
+    idx = {}
+    for r in record_rows:
+        jk = str(r.get("Join Key", "")).strip()
+        if not jk:
+            continue
+        link = str(r.get("Drive Link", "")
+                   or r.get("Recording Drive Link", "")).strip()
+        if not link:
+            fid = str(r.get("Drive File ID", "")).strip()
+            if fid:
+                link = DRIVE_FILE_VIEW.format(fid)
+        if link:
+            idx[jk] = link
+    return idx
+
+
+def duration_to_seconds(dur_str):
+    """'0:52' / '1:02:03' -> seconds. Blank/bad -> None."""
+    ds = str(dur_str or "").strip()
+    if not ds:
         return None
-    best, best_gap = None, None
-    for w, row in claim_index.get(phone10, []):
-        delta = w - start_unix
-        if -CLAIM_WINDOW_BEFORE_S <= delta <= CLAIM_WINDOW_AFTER_S:
-            gap = abs(delta)
-            if best_gap is None or gap < best_gap:
-                best, best_gap = row, gap
-    return best
+    try:
+        total = 0
+        for p in ds.split(":"):
+            total = total * 60 + int(p)
+        return total
+    except ValueError:
+        return None
+
+
+def assign_claims(call_list, claim_index):
+    """Whole-day, phone-keyed claim assignment (REDESIGNED S123).
+
+    call_list  : [(mobile10, call_start_unix, join_key), ...] — ALL of the
+                 day's calls, so multi-call pairing is stable.
+    claim_index: {mobile10: [(when_unix, row_dict), ...]} sorted by when.
+    Returns    : {join_key: (claim_row_or_None, confidence)} where confidence
+                 is 'unique'  (1 call + 1 candidate claim -> trustworthy),
+                    'ordered' (competition; paired by call-time order -> glance),
+                    'none'    (no claim filed -> the safe 'No claim logged').
+
+    For each number: sort its calls by start time; walk them in order; each
+    call takes the EARLIEST not-yet-taken claim that falls in its window
+    [start - skew, start + forward]. That both fixes the batch-filing lag and
+    keeps two calls to the same number from grabbing the same claim.
+    """
+    by_mobile = {}
+    for m10, s, jk in call_list:
+        if m10 and s is not None and jk:
+            by_mobile.setdefault(m10, []).append((s, jk))
+    result = {}
+    for m10, calls in by_mobile.items():
+        calls.sort(key=lambda t: t[0])
+        claims = list(claim_index.get(m10, []))      # (when, row), time-sorted
+        consumed = [False] * len(claims)
+        n_calls = len(calls)
+        for s, jk in calls:
+            lo, hi = s - CLAIM_SKEW_BEFORE_S, s + CLAIM_MAX_FORWARD_S
+            pick = None
+            for i, (w, _row) in enumerate(claims):
+                if consumed[i]:
+                    continue
+                if lo <= w <= hi:
+                    pick = i
+                    break                            # earliest unclaimed in window
+            if pick is None:
+                result[jk] = (None, "none")
+                continue
+            consumed[pick] = True
+            if n_calls == 1:
+                in_window = sum(1 for (w, _r) in claims if lo <= w <= hi)
+                conf = "unique" if in_window == 1 else "ordered"
+            else:
+                conf = "ordered"
+            result[jk] = (claims[pick][1], conf)
+    return result
+
+
+def resolve_identity(claim_row, identity_index, phone10):
+    """Patient name + Clinic ID: prefer the matched claim, else fall back to
+    the number's past outcomes so unmatched calls still carry an identity."""
+    claim_row = claim_row or {}
+    name = str(claim_row.get("Patient", "")).strip()
+    cid = str(claim_row.get("Clinic ID", "")).strip()
+    if (not name or not cid) and phone10:
+        fb = (identity_index or {}).get(phone10, {})
+        name = name or str(fb.get("Patient", "")).strip()
+        cid = cid or str(fb.get("Clinic ID", "")).strip()
+    return name, cid
 
 
 def compare_outcomes(claimed, ai_outcome):
@@ -432,22 +558,23 @@ def validate_ai_outcome(d, direction):
     return d
 
 
-def assemble_verdict_row(trec, claim_row, ai, verdict, tf, status, error,
-                         model_name):
-    """One Call_Verdicts row, in VERDICT_HEADER order."""
+def assemble_verdict_row(trec, claim_row, ai, verdict, tf, confidence,
+                         status, error, model_name,
+                         phone10, patient_name, clinic_id, recording_link):
+    """One Call_Verdicts row, in VERDICT_HEADER order (enriched S123)."""
     yn = lambda b: "YES" if b else ""
     claim_row = claim_row or {}
     ai = ai or {}
     return [
         trec.get("Date", ""), trec.get("Time", ""), trec.get("Direction", ""),
-        trec.get("Number (last-4)", ""),
+        phone10 or "",
         claim_row.get("Handled By", ""),
-        claim_row.get("Patient", ""),
-        claim_row.get("Clinic ID", ""),
+        patient_name,
+        clinic_id,
         trec.get("Duration", ""),
         claim_row.get("Outcome", ""),
         ai.get("ai_outcome", ""),
-        verdict, tf,
+        verdict, confidence, tf,
         ai.get("ai_reason", "")[:300],
         (ai.get("evidence", "")[:200]
          + (f"  [{ai.get('evidence_speaker')}]" if ai.get("evidence") else "")),
@@ -456,6 +583,7 @@ def assemble_verdict_row(trec, claim_row, ai, verdict, tf, status, error,
         yn(ai.get("flag_urgent")), yn(ai.get("flag_surgery")),
         yn(ai.get("flag_clinical")), yn(ai.get("flag_conduct")),
         ai.get("conduct_note", "")[:200],
+        recording_link or "",
         trec.get("Transcript Drive Link", ""),
         trec.get("Join Key", ""),
         status, (error or "")[:200],
@@ -530,9 +658,37 @@ def ensure_verdict_tab(audit_spreadsheet):
     return ws
 
 
-def load_done_keys(ws_verdicts):
-    rows = ws_verdicts.get_all_records()
-    return {r.get("Join Key") for r in rows if r.get("Status") == "done"}
+COL = {name: i for i, name in enumerate(VERDICT_HEADER)}   # 0-based column map
+
+
+def verify_verdict_header(ws_verdicts):
+    """Fail-safe (S123): refuse to append onto an out-of-date tab layout.
+    True if the sheet's header row matches VERDICT_HEADER exactly."""
+    try:
+        head = ws_verdicts.row_values(1)
+    except Exception:
+        head = []
+    return head == VERDICT_HEADER
+
+
+def build_existing_map(ws_verdicts):
+    """{join_key: (sheet_row_number, record_dict)} for every existing row.
+    row_number is 1-based INCLUDING the header, so data starts at row 2.
+    Lets us judge a call ONCE and later fill in the claim without re-judging."""
+    values = ws_verdicts.get_all_values()
+    out = {}
+    if not values:
+        return out
+    header = values[0]
+    jk_col = header.index("Join Key") if "Join Key" in header else None
+    for n, row in enumerate(values[1:], start=2):
+        rec = {header[i]: (row[i] if i < len(row) else "")
+               for i in range(len(header))}
+        jk = (row[jk_col] if (jk_col is not None and jk_col < len(row))
+              else rec.get("Join Key", ""))
+        if jk:
+            out[jk] = (n, rec)
+    return out
 
 
 def download_transcript_text(drive_service, file_id):
@@ -573,23 +729,52 @@ def selftest():
     check("unknown direction -> union vocab",
           set(vocab_for_direction("unknown")) == set(VOCAB_OUTGOING) | set(VOCAB_INCOMING))
 
-    # 8-10: claim matching
-    rows = [
-        {"Mobile": "919358001234", "When": "2026-07-06 16:40:00",
-         "Outcome": "coming", "Handled By": "Shivani", "Patient": "Test A", "Clinic ID": "101"},
-        {"Mobile": "9358001234", "When": "2026-07-06 18:00:00",
-         "Outcome": "problem", "Handled By": "Alisha", "Patient": "Test A", "Clinic ID": "101"},
-        {"Mobile": "9000000000", "When": "2026-07-06 16:35:00",
-         "Outcome": "dikha_chuke", "Handled By": "Manoj B", "Patient": "Test B", "Clinic ID": "202"},
+    # 8-17: claim matching (REDESIGNED S123 — whole-day, phone-keyed, ordered)
+    # The core fix: a call at 16:00 whose outcome the staff files the NEXT
+    # MORNING at 10:00 must still match (the old +45-min window failed it).
+    call_A = int(datetime.datetime(2026, 7, 6, 16, 0, tzinfo=IST).timestamp())
+    call_A2 = int(datetime.datetime(2026, 7, 6, 16, 30, tzinfo=IST).timestamp())
+    outcome_rows = [
+        {"Mobile": "919358001234", "When": "2026-07-07 10:00:00",   # next-morning batch
+         "Outcome": "coming", "Handled By": "Shivani",
+         "Patient": "Test A", "Clinic ID": "101"},
+        {"Mobile": "9358001234", "When": "2026-07-07 10:05:00",     # 2nd claim, same number
+         "Outcome": "problem", "Handled By": "Alisha",
+         "Patient": "Test A", "Clinic ID": "101"},
+        {"Mobile": "9000000000", "When": "2026-07-06 16:35:00",     # same-evening filing
+         "Outcome": "dikha_chuke", "Handled By": "Manoj B",
+         "Patient": "Test B", "Clinic ID": "202"},
     ]
-    idx = build_claim_index(rows)
-    call_start = int(datetime.datetime(2026, 7, 6, 16, 30, tzinfo=IST).timestamp())
-    m = match_claim(idx, "9358001234", call_start)
-    check("claim match picks nearest in window", m and m["Outcome"] == "coming")
-    check("claim match ignores wrong mobile",
-          match_claim(idx, "1111111111", call_start) is None)
-    far = int(datetime.datetime(2026, 7, 6, 9, 0, tzinfo=IST).timestamp())
-    check("claim outside window -> None", match_claim(idx, "9358001234", far) is None)
+    idx = build_claim_index(outcome_rows)
+    jkA, jkA2 = "9358001234_%d" % call_A, "9358001234_%d" % call_A2
+    calls = [("9358001234", call_A, jkA),
+             ("9358001234", call_A2, jkA2),
+             ("1111111111", call_A, "1111111111_%d" % call_A)]
+    asg = assign_claims(calls, idx)
+    check("next-morning claim NOW MATCHES (the batch-filing fix)",
+          asg[jkA][0] and asg[jkA][0]["Outcome"] == "coming")
+    check("two calls to one number pair in order (2nd call -> 2nd claim)",
+          asg[jkA2][0] and asg[jkA2][0]["Outcome"] == "problem")
+    check("competition -> 'ordered' confidence", asg[jkA][1] == "ordered")
+    check("no claim for this number -> (None, 'none')",
+          asg["1111111111_%d" % call_A] == (None, "none"))
+    solo = assign_claims([("9000000000", call_A, "9000000000_solo")], idx)
+    check("single call + single candidate claim -> 'unique'",
+          solo["9000000000_solo"][1] == "unique")
+    late = build_claim_index([{"Mobile": "9358001234",
+                               "When": "2026-07-08 12:00:00", "Outcome": "coming"}])
+    check("claim beyond the forward window -> none",
+          assign_claims([("9358001234", call_A, "k")], late)["k"] == (None, "none"))
+    ident = build_identity_index(outcome_rows)
+    nm, cid = resolve_identity(None, ident, "9000000000")
+    check("identity fallback fills name/ID for an unmatched call",
+          nm == "Test B" and cid == "202")
+    rec_idx = build_recording_index([{"Join Key": "k1", "Drive File ID": "FID9"}])
+    check("recording link built from Drive File ID",
+          rec_idx.get("k1", "").endswith("/FID9/view"))
+    check("duration parses mm:ss and hh:mm:ss",
+          duration_to_seconds("0:52") == 52 and duration_to_seconds("1:02:03") == 3723)
+    rows = outcome_rows  # reused by the row-assembly test below
 
     # 11-15: comparison table
     check("Match", compare_outcomes("coming", "coming") == ("Match", "TRUE"))
@@ -620,17 +805,24 @@ def selftest():
                                **{k: False for k in FLAG_KEYS}}, "outgoing")
     check("off-list answer forced to UNCLEAR", off["ai_outcome"] == UNCLEAR)
 
-    # 19-21: row assembly
+    # row assembly (enriched S123 signature)
     trec = {"Date": "2026-07-06", "Time": "16:30", "Direction": "outgoing",
-            "Number (last-4)": "1234", "Duration": "0:52",
-            "Join Key": "9358001234_1751871234",
+            "Duration": "0:52", "Join Key": "9358001234_1751871234",
             "Transcript Drive Link": "https://drive.example/x"}
-    row = assemble_verdict_row(trec, rows[0], d, "Match", "TRUE", "done", "",
-                               DEFAULT_MODEL)
+    row = assemble_verdict_row(trec, rows[0], d, "Match", "TRUE", "unique",
+                               "done", "", DEFAULT_MODEL,
+                               "9358001234", "Test A", "101",
+                               "https://drive.example/rec")
     check("row length == header length", len(row) == len(VERDICT_HEADER))
-    check("row carries agent from claim", row[VERDICT_HEADER.index("Agent")] == "Shivani")
-    check("doctor columns blank",
-          row[-3:] == ["", "", ""])
+    check("row carries FULL patient number",
+          row[VERDICT_HEADER.index("Patient Number")] == "9358001234")
+    check("row carries agent from claim",
+          row[VERDICT_HEADER.index("Agent")] == "Shivani")
+    check("row carries match confidence",
+          row[VERDICT_HEADER.index("Match Confidence")] == "unique")
+    check("row carries recording link",
+          row[VERDICT_HEADER.index("Recording Link")] == "https://drive.example/rec")
+    check("doctor columns blank", row[-3:] == ["", "", ""])
 
     # 22-23: prompt sanity
     sp = build_system_prompt()
@@ -695,59 +887,88 @@ def main():
         sys.exit(f"ERROR: {TRANSCRIPT_TAB} is empty. Exiting (code 5).")
 
     # --- read Followup_Outcomes (tracker); failure degrades, never stalls ---
-    claim_index = {}
+    claim_index, identity_index = {}, {}
     try:
         ws_out = tracker.worksheet(OUTCOMES_TAB)
-        claim_index = build_claim_index(ws_out.get_all_records())
+        outcome_rows = ws_out.get_all_records()
+        claim_index = build_claim_index(outcome_rows)
+        identity_index = build_identity_index(outcome_rows)
     except Exception as e:
-        print(f"WARN: cannot read {OUTCOMES_TAB} ({e}); all verdicts this run "
-              f"will show 'No claim logged'.", flush=True)
+        print(f"WARN: cannot read {OUTCOMES_TAB} ({e}); verdicts this run will "
+              f"show 'No claim logged' and may lack a name.", flush=True)
 
-    # --- open doctor-only sheet + resumability ---
+    # --- read Call_Recordings (tracker) for recording links; best-effort -----
+    recording_index = {}
+    try:
+        ws_rec = tracker.worksheet(RECORD_TAB)
+        recording_index = build_recording_index(ws_rec.get_all_records())
+    except Exception as e:
+        print(f"WARN: cannot read {RECORD_TAB} ({e}); recording links blank "
+              f"this run.", flush=True)
+
+    # --- open doctor-only sheet; verify layout; map existing rows ------------
     try:
         audit = gc.open_by_key(audit_id)
         ws_v = ensure_verdict_tab(audit)
-        done_keys = load_done_keys(ws_v)
     except Exception as e:
         sys.exit(f"ERROR: cannot open doctor-only audit sheet: {e}. Exiting (code 5).")
+    if not verify_verdict_header(ws_v):
+        sys.exit(
+            f"ERROR: the '{VERDICT_TAB}' tab has an OLD column layout. This "
+            f"version adds columns (Patient Number, Match Confidence, "
+            f"Recording Link). Please DELETE or RENAME the '{VERDICT_TAB}' tab "
+            f"in the doctor-only sheet, then re-run — it is recreated with the "
+            f"new layout. No existing row is touched. Exiting (code 5).")
+    existing = build_existing_map(ws_v)
 
-    todo = [r for r in trans_rows
-            if r.get("Status") == "done"
-            and r.get("Transcript Drive File ID")
-            and r.get("Join Key")
-            and r.get("Join Key") not in done_keys]
+    # --- pair the whole day's calls to claims UP FRONT (redesigned join) -----
+    scope_rows = [r for r in trans_rows
+                  if r.get("Status") == "done" and r.get("Join Key")]
     if args.date:
-        todo = [r for r in todo if str(r.get("Date", "")).strip() == args.date]
-    if args.limit:
-        todo = todo[: args.limit]
+        scope_rows = [r for r in scope_rows
+                      if str(r.get("Date", "")).strip() == args.date]
+    call_list = []
+    for r in scope_rows:
+        p10, s = split_join_key(r.get("Join Key", ""))
+        call_list.append((p10, s, r.get("Join Key", "")))
+    assignment = assign_claims(call_list, claim_index)
 
-    print(f"{len(todo)} transcribed call(s) awaiting a verdict"
-          f"{' for ' + args.date if args.date else ''}."
-          f"{'  [dry-run: nothing will be written]' if args.dry_run else ''}", flush=True)
-    if not todo:
+    # --- split into: judge-new / re-match (claim landed later) / settled -----
+    to_judge, to_rematch = [], []
+    for r in scope_rows:
+        jk = r.get("Join Key", "")
+        if not r.get("Transcript Drive File ID"):
+            continue
+        if jk not in existing:
+            to_judge.append(r)
+        elif str(existing[jk][1].get("Status", "")).strip() != "done":
+            to_judge.append(r)                        # a prior FAILED row -> retry
+        elif not str(existing[jk][1].get("Claimed Outcome", "")).strip():
+            to_rematch.append(r)                      # judged, still no claim -> try to fill
+        # else: fully settled -> skip
+    if args.limit:
+        to_judge = to_judge[: args.limit]             # --limit caps costly AI calls only
+
+    tag = "  [dry-run: nothing will be written]" if args.dry_run else ""
+    print(f"{len(to_judge)} to judge, {len(to_rematch)} to re-match"
+          f"{' for ' + args.date if args.date else ''}.{tag}", flush=True)
+    if not to_judge and not to_rematch:
         return
 
     system_prompt = build_system_prompt()
-    n_ok = n_fail = 0
-    for i, trec in enumerate(todo, 1):
-        key = trec.get("Join Key", "")
-        phone10, start_unix = split_join_key(key)
-        direction = normalise_direction(trec.get("Direction"))
-        dur = None
-        ds = str(trec.get("Duration", "")).strip()
-        if ds:
-            parts = ds.split(":")
-            try:
-                dur = 0
-                for p in parts:
-                    dur = dur * 60 + int(p)
-            except ValueError:
-                dur = None
+    n_ok = n_fail = n_upd = 0
 
-        print(f"[{i}/{len(todo)}] {trec.get('Date')} {trec.get('Time')} "
+    # ----- NEW calls: run the AI judge once, then append a full row ----------
+    for i, trec in enumerate(to_judge, 1):
+        jk = trec.get("Join Key", "")
+        phone10, _start = split_join_key(jk)
+        direction = normalise_direction(trec.get("Direction"))
+        dur = duration_to_seconds(trec.get("Duration"))
+        claim_row, confidence = assignment.get(jk, (None, "none"))
+
+        print(f"[judge {i}/{len(to_judge)}] {trec.get('Date')} {trec.get('Time')} "
               f"{direction} {mask(phone10)} …", flush=True)
 
-        claim_row = match_claim(claim_index, phone10, start_unix)
         status, error, ai, verdict, tf = "done", "", None, "", ""
         try:
             text = download_transcript_text(drive, trec["Transcript Drive File ID"])
@@ -758,22 +979,57 @@ def main():
                 (claim_row or {}).get("Outcome", ""), ai["ai_outcome"])
             flags_on = [k for k in FLAG_KEYS if ai.get(k)]
             print(f"      AI={ai['ai_outcome']}  claim="
-                  f"{(claim_row or {}).get('Outcome', '(none)')}  -> {verdict}"
+                  f"{(claim_row or {}).get('Outcome', '(none)')}  "
+                  f"[{confidence}] -> {verdict}"
                   f"{'  FLAGS: ' + ','.join(f[5:] for f in flags_on) if flags_on else ''}",
                   flush=True)
             n_ok += 1
         except Exception as e:
             status, error = "FAILED", str(e)
-            verdict, tf = "", ""
-            print(f"      FAILED: {error[:150]}", flush=True)
+            verdict, tf, confidence = "", "", "none"
+            print(f"      FAILED: {str(e)[:150]}", flush=True)
             n_fail += 1
 
+        name, cid = resolve_identity(claim_row, identity_index, phone10)
+        rec_link = recording_index.get(jk, "")
         if not args.dry_run:
             row = assemble_verdict_row(trec, claim_row, ai, verdict, tf,
-                                       status, error, model_name)
+                                       confidence, status, error, model_name,
+                                       phone10, name, cid, rec_link)
             ws_v.append_row(row, value_input_option="USER_ENTERED")
 
-    print(f"\nDone. {n_ok} judged, {n_fail} failed"
+    # ----- ALREADY-JUDGED calls: fill the claim/verdict if it landed now -----
+    for trec in to_rematch:
+        jk = trec.get("Join Key", "")
+        phone10, _start = split_join_key(jk)
+        claim_row, confidence = assignment.get(jk, (None, "none"))
+        if not claim_row:
+            continue                                  # still no claim; leave the row as-is
+        row_num, rec = existing[jk]
+        verdict, tf = compare_outcomes(
+            claim_row.get("Outcome", ""), str(rec.get("AI Outcome", "")).strip())
+        name, cid = resolve_identity(claim_row, identity_index, phone10)
+        updates = {
+            "Agent": claim_row.get("Handled By", ""),
+            "Claimed Outcome": claim_row.get("Outcome", ""),
+            "Verdict": verdict,
+            "Match Confidence": confidence,
+            "Outcome TRUE/FALSE": tf,
+        }
+        if not str(rec.get("Patient Name", "")).strip():
+            updates["Patient Name"] = name
+        if not str(rec.get("Clinic ID", "")).strip():
+            updates["Clinic ID"] = cid
+        print(f"[update] {trec.get('Date')} {trec.get('Time')} {mask(phone10)} "
+              f"claim now={claim_row.get('Outcome', '')} [{confidence}] -> {verdict}",
+              flush=True)
+        if not args.dry_run:
+            cells = [gspread.Cell(row_num, COL[col] + 1, val)
+                     for col, val in updates.items()]
+            ws_v.update_cells(cells, value_input_option="USER_ENTERED")
+        n_upd += 1
+
+    print(f"\nDone. {n_ok} judged, {n_fail} failed, {n_upd} claim-updated"
           f"{' (dry-run: nothing written)' if args.dry_run else ''}.", flush=True)
 
 
