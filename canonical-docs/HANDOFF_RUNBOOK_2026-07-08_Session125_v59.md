@@ -181,4 +181,38 @@ Hindi SPELLING corrections in `vitals_page.html` LIB strings · Step 7 new-patie
 
 **D164 — `.env` is never edited by line number, and its contents are validated at startup.** `sed -i '<N>s|…'` is prohibited: position-dependent, unverifiable after the fact, mangles escapes. Use `awk` + `ENVIRON` or `printf` to append. **Correction to the original rationale:** the `sed` did *not* create the 61-character run-on — that was a lost newline, and the `sed` was S94's repair. The rule survives on its own merits, not on that story. WinSCP transfers of `.env` and `.py` must be **Binary**, never Text — a real instance of the same invisible-character class. The receiver now warns at startup if its secret contains whitespace, an `=`, or exceeds 40 characters, which would have caught the run-on the moment a worker read it.
 
-**D165 — Masked key labels must be encoding-normalised before comparison.** An md5 label of a wire-format key and of the same key in literal form are different strings. Any tool comparing labels across sources must `unquote()` first. Recorded because it will otherwise be rediscovered at 2
+**D165 — Masked key labels must be encoding-normalised before comparison.** An md5 label of a wire-format key and of the same key in literal form are different strings. Any tool comparing labels across sources must `unquote()` first. Recorded because it will otherwise be rediscovered at 2am, and nearly was.
+
+---
+
+## §5 — THE ROTATION PROCEDURE (D162) — read before touching `.env`
+
+Four steps, four restarts, no downtime possible. At no point can a mismatch stop the clinic.
+
+1. Copy the **current** key into `CALLHOOK_SECRET_PREV` as well, by appending a line with `printf`, never `sed`. Restart. Nothing changes — both variables hold the same value, both are accepted. The startup line will say `previous=SAME AS CURRENT (rotation not started; harmless)`.
+2. Put the **new** key into `CALLHOOK_SECRET`. Restart. Deliveries keep arriving on the old key, each one logging `WARN: request accepted on the PREVIOUS key (key_…)`. The startup line will say `ROTATION IN PROGRESS`.
+3. Update the **MyOperator panel** to the new key. The WARN lines stop. Verify across a full clinic day, per the S124 hardened verification standard: one real call **and** a re-check at least an hour later.
+4. Clear `CALLHOOK_SECRET_PREV`. Restart. Rotation complete.
+
+Before each restart: `file`, `grep -c $'\r'`, `py_compile`, `--selftest`. After each restart: read the startup line and confirm the key label is the one you intended.
+
+Choose a new key with **no `@`** and no characters that percent-encode. That removes the encoding trap at the source, and it was the right instinct in S94 — only the execution was wrong.
+
+---
+
+## §6 — A NOTE ON THE MASTER KB
+
+`Clinic_Master_KB_SystemsRegister_v1.48.md` is 107 KB. It was **not** re-emitted as a full file this session.
+
+The project protocol is *full-file replacements, never diffs to hand-edit* — a rule written for code, where a partial file is a broken program. For a 107 KB canonical document, re-emitting from a summary risks silent, unnoticeable loss of material that has no other home, which is a worse failure than a diff. `KB_APPEND_Session125.md` is therefore an **append-ready block**: a new §S125 section, four D-series entries, §12 state replacements, and a changelog line. Paste it in and bump the version to v1.49.
+
+If you would rather have a full v1.49 file, say so at the start of the next session and it will be built from the v1.48 source directly, with a byte-count check before and after.
+
+---
+
+## §7 — SESSION HYGIENE NOTES
+
+- The `.bak` taken during this session (`call_hook_capture.py.bak_<timestamp>`) was created **after** the file had already been replaced. **It is a copy of v2, not v1.** It is not a rollback point. The original v1 (15,617 bytes, 03-Jul) exists in the cold kit and in GitHub.
+- The 07-Jul `.env` backup, `/root/wa/.env.bak_20260707_162509`, is **forensically valuable** — it is the only surviving artefact of the §94.1 corruption. Do not delete it. Its `CALLHOOK_SECRET` line contains a real (old) key; treat the file as a secret.
+- The current key appears in a chat transcript. That is the reason rotation is item 1, not item 6.
+
