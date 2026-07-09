@@ -3,3 +3,5 @@
 
 # D164: CRLF in a .py uploaded via WinSCP Binary lands \r on the VPS. Pin to LF.
 *.py text eol=lf
+*.py text eol=lf
+*.sh text eol=lf
