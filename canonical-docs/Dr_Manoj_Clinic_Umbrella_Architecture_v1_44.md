@@ -1,4 +1,4 @@
-# Dr. Manoj Clinic — Umbrella Architecture · v1.43 (CONSOLIDATED)
+# Dr. Manoj Clinic — Umbrella Architecture · v1.44 (CONSOLIDATED)
 
 **Owner: Dr. Manoj Agarwal · Bareilly · Maintained with: Claude**
 
@@ -665,4 +665,32 @@ Session 131 recommended folding the **Fault → Action Register** into the Diagn
 
 ---
 
-**END OF UMBRELLA ARCHITECTURE v1.43. §19 is the last section. If §19 is absent, this file is truncated.**
+## §20 — Session 132: the button that never fired, and the four absences
+
+**F-8 is closed.** The incoming `Log outcome ▾` button was dead for **every** patient the system
+recognised, since Session 129 at the latest. Fix B removes the cause rather than the symptom: **the
+patient packet never enters the markup.** A page-level map holds it; the button carries a slot id.
+This is the structural cure F-10 prescribed for all twenty-four fragile escape sites, applied to the
+first one. Two `JSON.parse` catches die with it — **including the catch that would have reported F-8
+and instead hid it.**
+
+**Architectural note.** The dashboard now has one place where patient identity lives on the client
+(`IN_PAT`), rebuilt on every render, absent from the HTML source. Every future tile should follow it.
+*Stop passing data through markup, and half the audit's finding list has nowhere left to live.*
+
+**MyOperator is cleared (D120).** Both WABA endpoints answer; a template reached the doctor's handset.
+The outage ran 05 Jul 01:19 → at latest 09 Jul 16:53, on a relay that has not restarted since 26 June.
+**Nothing on the clinic's side changed, so nothing on the clinic's side can prevent a recurrence.**
+The vendor question is the recovery, not the failure.
+
+**The record's own failure mode, now measured.** S131 committed three lineage errors. S132 committed
+four more of the same species — a grep miscalibrated to its artefact (twice), a repo folder name used
+as a disk path, and a two-line `.gitignore` characterised as an eighty-two-line one. **D190 and D201
+already forbid all four.** The rule exists; it is not being executed. **An artefact is read before it
+is characterised — and a grep, a path and a filename are not artefacts. They only feel like evidence.**
+
+**D204** re-states **D113** as intent: **no auto-responder exists.** Lane 1 is empty and stays empty
+until a fault earns promotion (D112). During an outage, nobody waits for a restart.
+
+
+**END OF UMBRELLA ARCHITECTURE v1.44. §20 is the last section. If §19 is absent, this file is truncated.**

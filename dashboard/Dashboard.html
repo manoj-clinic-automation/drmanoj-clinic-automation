@@ -633,7 +633,7 @@
 <script>
   var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
   var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
-  var PAGE_BUILD = 'v18.19 · S124: duration-gate FAIL-OPEN + gate state persists across reloads (D156)';
+  var PAGE_BUILD = 'v18.20 · S132: F-8 Fix B — patient packet out of button markup; L1260 + L1364 catches removed (F-14)';
   var acPrevIds = null;    // v1.1: ids seen last poll, to flash genuinely-new calls
   var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
   var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
@@ -900,6 +900,7 @@
     if(!p.length){ box.className=''; box.innerHTML='<div class="empty">✅ All clear — no callbacks pending.</div>'; }
     else{
       box.className='list';
+      IN_PAT = {};   // Fix B: stale slots cannot outlive a render
       box.innerHTML=p.map(function(e,i){
         var chips='';
         if(e.priority) chips+='<span class="chip prio">PRIORITY</span>';
@@ -909,7 +910,7 @@
         var triedLine = t ? '<div class="tried">↗ Outgoing not replied'+(t.count>1?(' '+t.count):'')+' ('+esc(t.times)+')</div>' : '';
         var inId='in_'+esc(String(e.number))+'_'+i;
         var known = !!(e.patient && (e.patient.name || e.patient.dx));
-        var pj = e.patient ? jsq(JSON.stringify({name:e.patient.name||'',uid:e.patient.uid||'',last:e.patient.last||'',dx:e.patient.dx||''})) : '{}';
+        IN_PAT[inId] = e.patient ? {name:e.patient.name||'',uid:e.patient.uid||'',last:e.patient.last||'',dx:e.patient.dx||''} : {};
         return '<div class="row'+(e.priority?' prio':'')+'">'+
                  '<div class="info">'+
                    '<div class="num-big"><a href="tel:'+tel(e.number)+'">'+esc(e.number)+'</a></div>'+
@@ -920,7 +921,7 @@
                  '</div>'+
                  '<div class="chips">'+chips+
                    '<button class="call" onclick="placeCall(\''+esc(e.number)+'\')">Call</button>'+
-                   '<button class="logbtn" onclick="inOpen(\''+inId+'\',\''+esc(e.number)+'\','+(known?'true':'false')+',\''+pj+'\')">Log outcome ▾</button>'+
+                   '<button class="logbtn" onclick="inOpen(\''+inId+'\',\''+esc(e.number)+'\','+(known?'true':'false')+')">Log outcome ▾</button>'+
                  '</div>'+
                '</div>';
       }).join('');
@@ -1206,6 +1207,10 @@
    * Everything stays hidden behind "Log outcome ▾"; controls unfold downward.
    * ==================================================================== */
   // reasons a KNOWN patient might call in (clinical ones * auto-escalate)
+  // F-8 / Fix B: the patient packet lives here, keyed by slot id.
+  // It is NEVER written into button markup. Rebuilt on every render.
+  var IN_PAT = {};
+
   var IN_REASONS = [
     ['', '— why did they call? —'],
     ['appointment', 'Appointment — book / reschedule / cancel'],
@@ -1254,12 +1259,10 @@
   function inDateNeeded(code){ return code==='appointment_booked' || code==='will_come'; }
 
   // open the guided card for one incoming row
-  function inOpen(slotId, number, known, patientJson){
+  function inOpen(slotId, number, known){
     var slot=document.getElementById(slotId); if(!slot) return;
     if(slot.innerHTML){ slot.innerHTML=''; return; }   // toggle closed if already open
-    var pat={}; try{ pat=JSON.parse(patientJson||'{}'); }catch(e){}
     slot.dataset.number=number; slot.dataset.known=known?'1':'';
-    slot.dataset.pat=patientJson||'{}';
     var html='<div class="in-card">';
     if(known){
       // Case A: known patient -> straight to reason + resolution
@@ -1361,7 +1364,7 @@
     var number=slot.dataset.number||'';
     var known=slot.dataset.known==='1';
     var identity=slot.dataset.identity||(known?'known':'');
-    var pat={}; try{ pat=JSON.parse(slot.dataset.pat||'{}'); }catch(e){}
+    var pat = IN_PAT[slotId] || {};   // Fix B: no parse, so no catch
     var g=function(id){ var el=document.getElementById(slotId+'_'+id); return el?el.value:''; };
     var p={ phone:number, identity:identity,
             name: g('name') || pat.name || '',

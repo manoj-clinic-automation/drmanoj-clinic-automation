@@ -1,4 +1,4 @@
-# Clinic Master KB / Systems Register — v1.57 (CONSOLIDATED)
+# Clinic Master KB / Systems Register — v1.58 (CONSOLIDATED)
 
 **Dr. Manoj Agarwal Clinic · Bareilly · Owner: Dr. Manoj Agarwal · Maintained with: Claude**
 
@@ -1830,6 +1830,18 @@ new-patient reconciliation (dovetails with agenda item 2) · living Clinic Data 
 
 ## CHANGELOG
 
+- **v1.58 — 10 Jul 2026 (Session 132, FULL EOS — one live file changed: `Dashboard.html` → v18.20):**
+  Adds **§S132**. **F-8 CLOSED** — Fix B built from the verified export, eight anchored edits,
+  seventeen lines, `node --check` clean, the broken handler reproduced in node before deploy and
+  verified live on two known-patient tiles. **F-14's two `JSON.parse` catches removed** (L1260, L1364);
+  `catch(e){}` 16 → 14; L1128 is A-3's whole remainder. **Block E's *stop embedding patient data in
+  button markup* delivered.** **MyOperator cleared** — both endpoints 200, template delivered to the
+  handset, outage window documented (05 Jul 01:19 → 09 Jul 16:53, service unrestarted since 26 Jun).
+  **Tracker reconciled against the repo**: 38/40 identical; `push_followups_today.py` identical across
+  three sources. Decision **D204** (D113 is intent, not fact). Findings **F-27, F-29, F-30, F-31**;
+  **F-26 and F-28 WITHDRAWN**. Four assertions made from unread artefacts, all four wrong (§S132.6).
+  Next free decision number: **D205**.
+
 - **v1.57 — 09 Jul 2026 (Session 131, consolidation pass 3 — still NO live code touched):** Adds **§S131.15–.17**, **D203**, **F-24**, **F-25**, and the backfill of **D112–D115**. 🛑 **The Register was NOT retired, and §S131.12's recommendation to retire it was WRONG.** Diagnostics §M1 states: *"The single brain = `Fault_Action_Register` (**D114**)."* Folding it away would have overturned a decision the assistant had not read — because **D112–D115 all sit in the D1–D120 hole (F-22)** and §M1 is their only definition. **That would have been the fourth lineage error of this session.** It was caught only because the document was read before it was retired. 🔴 **F-24 — the Register describes an auto-responder that does not exist.** Nine faults are marked `AUTO→ESC` with *"System does: `systemctl restart call-api`"* — but the live watchman is, in Diagnostics §L2's own words, *"**Read-only** — reports only; **never starts/stops/changes a service**."* It *names* the restart command in an alert; it has never run one. **D113 — *"the watchman IS the Lane-1 responder"* — states intent as fact.** §4 of the same Register lists that responder as **Deliverable 2, unbuilt. Not one row of the Register is live-and-acting.** *During an outage, a session reading §2.1 would wait for a restart that never comes.* 🔴 **F-25 — six `CALLHOOK_*` codes have been detecting since S125 with no lane and no procedure**, violating the Register's own rule 4 (*"every alert names its procedure"*). All six laned in Register **v2.0 §2.5**, every one ESCALATE-ONLY or ASSISTED. ✅ **D203 — detection and response are separate documents with a stated boundary:** Diagnostics *defines and detects* a fault code; the Register *lanes* it; **neither restates the other.** This preserves D114 and ends the "two writers, one table" appearance. 🧱 **`Fault_Action_Register_v2_0.md`** — self-contained; §1, §2.1–§2.4, §3, §4, §5 verbatim, **0 lines lost**; the twenty-five-version-dead source-of-truth line corrected; the front page that said *"nothing here is built"* over a body marking three detectors LIVE replaced by a **per-row status column**; §5's Q1 and Q2 **closed by what shipped** (09:00 IST; ntfy + Gmail) — the document was never told. **No rule, lane or procedure was altered.** 📚 **D112–D115 restored** (§S131.16) — with §S131.13's eleven, **fifteen of the missing D1–D120 are now in this document.** 🗄️ **Historical archive:** seven superseded documents and eight non-system files removed from the working set, **archived to the cold kit under `historical/` and to the repo.** Nothing deleted. **Kept deliberately:** `4.json`, the `Verdict_Review` CSV (the only evidence behind the calibration argument), and `MyOperator_Call_API_Master_Reference` — which held the answer to D200 when nothing else did. ⚠️ Recorded, not fixed: the Register's `WA_TOKEN_AGING` procedure points at `SOP_WhatsApp_Token.md`, **which has never been written. A procedure that points at a document nobody wrote is not a procedure.** Next free decision number: **D204.**
 
 - **v1.56 — 09 Jul 2026 (Session 131, EOS-light consolidation pass 2 — still NO live code touched):** Adds **§S131.12–.14**, **D202**, **F-21, F-22, F-23**, overturn markers on **D153** and **D157**, and the recovery of **eleven decisions this KB has never held**. 📚 **Two of the seven documents `START_HERE` calls canonical were stumps.** `Call_Console_Evolution_Spec_v1_6` held §J and §K alone and opened by cross-referencing a `§G` that existed nowhere; `Diagnostics_..._v1_7` began at `§NEW-D`. Both broke the **S100 policy stated in this document's own header** — applied to the KB in S100 and never to the specs. **Git had v1.1 and v1.6 only; across 62 commits, v1.2–v1.5 were never committed. Drive had v1.5.** All were recovered intact from the owner's cold-backup zips; three independent copies of v1.5 agree byte-for-byte. **Nothing was lost, and the four-month backup discipline is the only reason.** 🔴 **F-22 — this document has never carried D1–D120.** The index of every KB ever written runs **D121→D188**. **D68, D78, D80, D81 have zero mentions in 246 KB of canonical text**; D77 and D82 appear only inside D156's phrase *"amends D77/D82"*. **The KB amends decisions it does not contain.** 💸 **What the hole cost, measured: four designs made in S131 had already been made in Sessions 25–54** — D200 (per-call recording + processing-lag retry, Call Console v1.1 §12, S25); **Axis 1 CONTACT, the AI judge's entire purpose** (D62/D77 — *"dead-air lies … caught post-hoc by the AI-verdict layer"*); the **three-attempt cap** (D78 — and it **conflicts** with D195: D78 fires a WABA template and snoozes, D195 goes to the doctor; **neither is built**); and **`wrong_number` → doctor** (D68, verbatim). ↩️ **F-19 WITHDRAWN.** `call_hook_capture.py` L385 skipping non-OBD calls is **D80, as built, Session 54** — *"Skips incoming / non-OBD calls"* — not a defect. Reclassified as a **scope change** against D80. **Third lineage error of S131**, same cause as F-8's and D200's: a decision characterised without reading the document that made it, because that document was a fragment. **F-20 survives** — D68 *escalates* `asked_not_to_call`; nothing ever *suppressed* it. Escalation is not suppression, and `Do_Not_Call` (D194) is the suppression D68 implied. 🔴 **F-21** — the S25 backlog item reached no backlog. 🔴 **F-23** — `Diagnostics_v1_7` swore *"carries forward v1.6 unchanged"* and **abridged §NEW-D/F/G, dropping sixteen lines**, including the Session-94 evidence behind the verification standard (*"the fix was dead seven minutes later; the panel had reverted"*). **It kept the rule and deleted the reason.** 🧱 **Three consolidations, each asserted line-by-line to lose nothing:** `Call_Console_Evolution_Spec_v2_0.md` (v1.1–v1.6, **0 lines lost**), `Diagnostics_Surveillance_System_Spec_v2_0.md` (v1.1–v1.7, **0 lines lost**; three sections all named `§NEW` renamed §L1/§L2/§L3 per D178; v1.6's full originals restored as §M2–§M4), and `INCIDENT_2026-07-08_CALLHOOK_403_v5_CONSOLIDATED.md` (v2+v3+v4 → §1–§16, **0 lines lost**; **v4's false status line — "MITIGATED, rotation in progress" — corrected; the rotation has been PARKED since S128**). ⛔ **D153 and D157 now carry overturn markers** — the false principle had survived inside this document, unmarked, in three places. ✅ **D202 minted: a decision lives in the KB index, or it does not live.** *One writer per table*, applied to the record. Corollaries: carry the md5 of what you name (D188, D201); **no canonical document may be a delta** (F-23). Next free decision number: **D203.**
@@ -2724,4 +2736,192 @@ written** — recorded, not fixed), `Frontend_Dashboard_Documentation`, and `END
 
 
 
-**END OF MASTER KB v1.57. §S131 is the last section, and §S131.17 is its last subsection. The CHANGELOG sits above it and its `v1.38` entry is that section's last line. If any of these is absent, this file is truncated and must not be used as canonical.**
+
+## §S132 — F-8 KILLED; MyOperator CLEARED; and four absences asserted from unread artefacts
+
+**Session type: FULL EOS — one live file changed.** `Dashboard.html` → **v18.20**, deployed as a new
+version of the existing deployment (`/exec` unchanged). No server `.gs` file. No D34 waiver spent.
+No VPS service edited. Three read-only diagnostic scripts were added to `/root/wa`.
+
+### S132.0 — The record was verified, and the mirror was not the project
+
+Phase 0 hashed all ten canonical artefacts against the opener's table. **Nine matched exactly.** The
+Runbook was absent from the assistant's file mirror and was uploaded. Then the Umbrella disappeared
+from the mirror entirely, while the **project-knowledge search index returned its contents on demand.**
+
+**The assistant's file mirror is a snapshot taken at conversation start; the search index is live.** An
+absence asserted from the mirror is an absence asserted from a stale disk. **D201 already says this —
+"an assertion of absence is verified by exhausting every place the thing could be" — and the mirror is
+one place, not every place.** The Umbrella was verified instead against the repo copy
+(`b1c6c414…`, byte-identical to the table). *Recorded so that no future session mistakes a mirror lag
+for a lost file.*
+
+Repo `dashboard/WebApp.gs` re-hashed: **`276dc197…`**, both setters present. **F-17 confirmed open.**
+
+### S132.1 — A-000 answered. D204.
+
+The owner delegated the technical call and it was answered **(a) — re-state D113 as intent.**
+Fault Register **v2.0 had already defused most of F-24** at the top of §2 (the 🟡 banner and §0.4's
+status table). What remained is that **D113 is still stated as fact in Diagnostics §M1 — its only
+definition.** Corrected in Diagnostics **v2.1**; the Register's "System does" column re-labelled per
+**D178** in **v2.1**. **Lane 1 remains empty. Deliverable 2 is not scheduled** (D112: promotion is a
+logged decision, and no fault has earned one).
+
+### S132.2 — F-8 IS DEAD
+
+Built from the verified export (`Dashboard.html` md5 `034529a1…`), eight anchored edits, every anchor
+asserted unique, **seventeen lines changed and nothing else.**
+
+- `IN_PAT` — a page-level map keyed by slot id, rebuilt on every render.
+- **L912** stashes the packet in the map instead of stringifying it into markup.
+- **L923** the button now carries `(slotId, digits, boolean)` and **nothing else**.
+- **L1260** the dead `JSON.parse` and its `catch(e){}` — *the catch that would have reported F-8 is the
+  catch that hid it* — **deleted.** `pat` was parsed there and never used.
+- **L1262** `slot.dataset.pat` — **deleted.** No packet reaches the DOM.
+- **L1364** `inSave` reads `IN_PAT[slotId]`. **The second `JSON.parse` catch dies with it.**
+
+`catch(e){}` in `Dashboard.html`: **16 → 14.** L1128 (`openThread`) survives — **that is A-3's whole
+remainder now.**
+
+**Proved before deploy, not asserted.** The live escapers were re-implemented in node against a patient
+named `Ram D'Souza`. The old attribute closes at the first `"` and the browser receives
+`inOpen('in_9812345678_0','9812345678',true,'{` — **which does not compile**, exactly as Audit v1.2
+predicted in S129. The new one compiles. `node --check` clean on the embedded script.
+
+**Verified live, on two tiles.** `8218401104` (Neeta Agarwal, ID ZROVL43590) and `9411222492` both
+opened straight to **Reason → Resolution**, skipping *"Who is this?"*. **That skip is the proof:** it
+only happens when `known === true` reaches `inOpen` — the code path that had never once executed. A
+third tile (`1409801539`, *"Not in patient list"*) opened the identify-caller card, confirming the
+unknown path is undisturbed. Nothing was saved. **D190's two `non_patient` rows are undisturbed.**
+
+**Closed by this fix:** F-8 · F-14's two JSON catches · Block E's *"stop embedding patient data in
+button markup"* · the first of F-10's twenty-four fragile sites — **structurally, by removing the data,
+not by improving the escaper.**
+
+**Still true, and expected:** the tile does not clear. **Nothing in this project has ever written
+`Callbacks_Today.Staff Status`.** That is D195, and it waits on A-1.
+
+### S132.3 — MyOperator: cleared, with a defensible timeline
+
+Ticket 653584 had run five days on a request for *"a screenshot of the error"* — of a server-to-server
+API call, which has no screen.
+
+Three probes were built (all read-only or dry-run-by-default, all token-guarded: the token is read from
+`.env`, used, and never printed; each output is scanned for the token and destroyed if found):
+`waba_probe.sh` · `waba_template_test.py` · `waba_recovery_window.sh`.
+
+| Fact | Evidence |
+|---|---|
+| `GET /chat/templates` → **200** | 10 Jul 18:46 IST. 14 templates returned |
+| `POST /chat/messages` → **200 Accepted** | 10 Jul 19:04 IST. `message_id c9130529-…` |
+| Template **delivered to the handset** | 19:06 IST, rendered correctly with both buttons |
+| Outage began | 05 Jul 01:19 IST — `AuthorizerConfigurationException`, request id `eb82db53…` |
+| Next attempt after the failure | **09 Jul 16:53:05** — `sent=True http=200` |
+| `wa-send-api.service` `ActiveEnterTimestamp` | **26 Jun 20:56 IST — unrestarted throughout** |
+
+**Nothing on the clinic's side changed. It cannot have.** The journal holds 9,115 lines from 05 Jul
+alone, so the silence between 05 and 09 Jul is an **absence verified by exhaustion**, not lost evidence:
+**no send was attempted.** The relay logs failures as loudly as successes (`_log()` is unconditional).
+
+`wa_approve.py` started **05 Jul 01:05:10**. The owner emailed support **fourteen minutes later.** He was
+approving follow-up templates when they began failing. **`waba.py` is the tracker's send arm and it does
+call the public API** — so the outage did reach the patient-facing path, and the ticket's impact claim
+stands. **D120 is, on today's evidence, not a live fault.** A fault that heals without explanation
+returns without warning: the recovery window is the question to put to the vendor.
+
+### S132.4 — The tracker reconciled against the repo, file by file
+
+`C:\followup_tracker_local_test_kit\local_test_kit\followup_tracker` vs `followup-tracker/` in the repo.
+
+- **38 of 40 code files byte-identical.** **0 files in the repo that are not on the PC.**
+- Differ: `patient_mirror_log.txt` (a log) and `python test_send.py` (a stray file whose name contains a
+  space). Neither is code that runs.
+- **`push_followups_today.py` is identical across three sources** — PC manifest, owner's upload, and repo:
+  **16,600 bytes · 428 lines · md5 `fc0a731d38482eb90b7d2def135c92b6`.** `Do_Not_Call` may be built on it.
+
+**The repo is an honest mirror of the tracker.** It is *not* an honest mirror of `dashboard/` (F-17) or
+`wa-send/` (F-27).
+
+### S132.5 — FINDINGS
+
+- **F-27 — the repo's `wa-send/wa_send_api.py` is not the deployed file.** The live journal prints
+  `send <n> open=… sent=… logged=True http=200`. **`logged=` appears nowhere in the repo file**
+  (`19253232…`). A later version runs and was never committed. **Same class as F-17**, different folder.
+
+- **F-29 — Runbook v69 §3 was never re-based when v67–v69 folded in.** It names *"KB v1.54 · 239,175
+  bytes / 2,311 lines"* (artefact: v1.57, 277,634 / 2,727), *"Runbook → this file, **v66**"*,
+  *"Umbrella → **v1_41**"*, and *"Next free: **D202**"* (D202 and D203 were both minted). §0 and §2 were
+  correct. **Only the section whose job is to say where we stopped was wrong** — D172's own field.
+
+- **F-30 — `watch_and_push_followups.py` exists on one Windows desktop and nowhere else.** 8,439 bytes.
+  It is the auto-push watcher under Task Scheduler, and it has a live incident to its name
+  (`INCIDENT_2026-07-01_FOLLOWUPS_WATCHER_NOT_RUNNING`). Uncommitted, with
+  `start_followup_watcher.bat` and `SETUP_followup_watcher_autostart.txt`. **The script that pushes the
+  morning worklist is backed up nowhere but that disk.** Precisely the shape of the S131 spec recovery.
+
+- **F-31 — `.gitignore` cannot untrack what git already tracks.** `attendance/att_config.py` is in the
+  **public** repo. The repo's own `.gitignore` names it twice: *"holds the attendance dashboard password
+  + SECRET_KEY — NEVER commit."* Git ignores that rule for tracked files.
+  **Nothing is exposed today** — established by comparing credential *values* by hash, never printing one:
+
+  | | live (VPS) | public repo |
+  |---|---|---|
+  | `DASHBOARD_PASSWORD` | 12 chars, `db8972d2…` | 20 chars, `1f502ef8…` — **the shipped placeholder, `# <-- CHANGE THIS`** |
+  | `SMTP_PASS` | 16 chars (real) | **empty** |
+  | `SECRET_KEY` | 64 chars | **absent** |
+
+  **The danger is prospective.** The day anyone copies the live file into that folder, `git add` will
+  take it **without complaint**. The warning is written and it will not fire. Cure:
+  `git rm --cached attendance/att_config.py`, commit, rename the template `att_config.example.py`.
+  **The rest of the rule held:** no `.env`, no `*.csv`, no service-account key anywhere in 326 repo
+  entries — verified against the published tarball, not against the rule that claims to protect it.
+
+- ⛔ **F-26 WITHDRAWN.** *"`wa_send_api.py` logs no send outcome."* It logs every outcome. The claim came
+  from a `grep` for `" 200` and `status.*200` against a file that writes `http=200`. **A check
+  miscalibrated to its artefact reports the artefact's absence (D177).**
+- ⛔ **F-28 WITHDRAWN.** *"The template send path is unlogged."* `wa_approve.py` writes a CSV
+  (`Timestamp, Mode, Kind, Key, Name, Mobile, Template…`) and its stdout and stderr both go to
+  `/root/wa/wa_approve.out`. Asserted from a `grep` for the wrong words.
+
+*(Both entries are retained above per D175, as the record of the error.)*
+
+### S132.6 — THE SESSION'S OWN FAILURE MODE, COUNTED
+
+**Four assertions were made from artefacts that had not been read, and all four were wrong:**
+
+1. **F-26** — the relay's log format, guessed instead of read.
+2. **F-28** — the approval path's logging, guessed instead of read.
+3. **`/root/wa/wa-send/wa_send.py`** — a **repo folder name** used as a **disk path**. It does not exist.
+4. **F-31, first draft** — the *tracker folder's* two-line `.gitignore` was read, and a conclusion drawn
+   about the *repo's* eighty-two-line one. Two folders. Two files. One characterised as the other.
+
+**S131 recorded three lineage errors and wrote D190, D201 and D202 about them. S132 committed four more
+of the same species, in a session that opened by reciting the rule.** The rule is not the defect. **The
+defect is that a grep, a path, and a filename all feel like evidence and none of them is.**
+
+> **An artefact is read before it is characterised. A mirror is not the project. A repo path is not a
+> disk path. A `grep` that cannot match is not a search.** No new decision is minted: **D190 and D201
+> already cover every one of these.** They were violated, not absent.
+
+### S132.7 — DECISION D204 — FULL TEXT
+
+- **D204 — D113 is an intent, not a fact. No auto-responder exists, and none is scheduled.**
+  The S61 watchman **detects and alerts**. It prints `systemctl restart <svc>` inside the alert text and
+  **has never executed one.** D113's *"the S61 watchman **IS** the Lane-1 service responder"* describes
+  **Deliverable 2, which is unbuilt.** Every `AUTO→ESC` row in the Fault Register means, today: *you are
+  told; a human restarts.* **Lane 1 stays empty.** Per **D112**, promotion into Lane 1 is a logged
+  decision and **no fault has earned one** — no service in this clinic has been observed dying
+  unattended. Deliverable 2 will be scheduled the day a journal shows one that does.
+  **During an outage, do not wait for a restart.** Parents: **D112, D113, D114.** Raised as **F-24**.
+
+### S132.8 — WHAT THIS SESSION DID NOT DO
+
+`Do_Not_Call` was not built, though its input file is now verified. **A bereaved family can still be
+called tomorrow.** F-18 untouched. A-3's remainder (L1128) untouched. A-5 untouched. F-2's sixteen
+server catches untouched and still unclassified (**A-6**). The rotation stayed parked and was not raised.
+
+**A-00, A-0 and A-1 remain unanswered, and every server-side item is behind A-1.**
+
+
+
+**END OF MASTER KB v1.58. §S132 is the last section, and §S132.8 is its last subsection. §S131 sits immediately above it. The CHANGELOG's newest entry is `v1.58`. If any of these is absent, this file is truncated and must not be used as canonical.**
