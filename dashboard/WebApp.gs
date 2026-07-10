@@ -44,15 +44,10 @@ var WA_SNIPPET_MAX    = 90;       // characters of message text to keep
 var WA_SEND_URL = 'https://followup.dr-manoj.in/wa-send';   // relay base (NOT a secret)
 var CALL_URL    = 'https://followup.dr-manoj.in/call';      // OBD click-to-call relay (NOT a secret)
 
-/** Optional one-time helpers: set the access keys from the editor. */
-function setDashboardKey(k) {
-  PropertiesService.getScriptProperties().setProperty('DASH_KEY', String(k || ''));
-  Logger.log('DASH_KEY (full access) set.');
-}
-function setStaffKey(k) {
-  PropertiesService.getScriptProperties().setProperty('STAFF_KEY', String(k || ''));
-  Logger.log('STAFF_KEY (read-only) set.');
-}
+/* D189 (S130): setDashboardKey / setStaffKey removed. They were ungated top-level
+   functions, callable by any anonymous browser via google.script.run, and each
+   overwrote a master access key. Nothing called them. Set DASH_KEY / STAFF_KEY in
+   Project Settings > Script Properties. D34 suspended for this deletion only. */
 
 /**
  * ACCESS MODEL (server-enforced, not cosmetic):

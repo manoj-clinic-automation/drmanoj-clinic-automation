@@ -10,7 +10,13 @@
 #
 # It is a deliberate TWIN of push_patient_mirror.py — same safety model:
 #   - Reads the workbook READ-ONLY. Never writes to your local file.
-#   - Pushes UP only (local -> cloud). Never reads the sheet back.
+#   - Pushes UP only (local -> cloud), with ONE deliberate exception (D194):
+#     during a LIVE push it READS the "Do_Not_Call" tab of the same sheet and
+#     drops any worklist row whose mobile is listed there, BEFORE writing.
+#     That tab is maintained by humans in the sheet; this script never writes
+#     or creates it. If the tab is missing you get a loud warning every run;
+#     if the tab exists but cannot be read, the push STOPS (never push a list
+#     that skipped the do-not-call check).
 #   - Replace-only: rewrites each tab fresh every run.
 #   - Refuses to push an empty Call Sheet (so a bad export can't wipe the list).
 #   - Console output MASKS phone numbers. The full 10-digit number is written
@@ -63,6 +69,7 @@ KEY_DIR = BASE_DIR
 # The Clinic Callback Tracker sheet + the two tabs the dashboard reads.
 SHEET_ID       = "1USjArkqIdrE9hIqerghms76STatM5XTbSW_a9I3klo0"
 TAB_TODAY      = "Followups_Today"
+TAB_DNC        = "Do_Not_Call"     # human-maintained; this script READS it only
 TAB_SETTLED    = "Followups_Settled"
 # =============================================================================
 
@@ -332,6 +339,46 @@ def read_settled(wb):
     return out
 
 
+# ------------------------------ Do-Not-Call ----------------------------------
+def fetch_dnc_set(sh):
+    """Read the human-maintained Do_Not_Call tab. Return a set of clean
+    10-digit numbers. Safety contract (Decision D194):
+      - tab MISSING            -> loud warning, empty set (push continues)
+      - tab present, read FAILS-> STOP the push (never skip the check silently)
+      - a row whose Phone cell can't be normalized -> reported (masked), skipped
+    This is the ONLY place the script reads the sheet, and it never writes
+    or creates this tab."""
+    import gspread
+    try:
+        ws = sh.worksheet(TAB_DNC)
+    except gspread.WorksheetNotFound:
+        print("\n*** WARNING: no '%s' tab exists in the sheet. ***" % TAB_DNC)
+        print("*** The do-not-call filter is INACTIVE until you create it.  ***")
+        return set()
+    try:
+        col = ws.col_values(1)                     # column A = Phone
+    except Exception as e:
+        print("\nSTOP: could not read the '%s' tab (%s)." % (TAB_DNC, type(e).__name__))
+        print("Refusing to push a worklist that skipped the do-not-call check.")
+        print("Fix the connection (or the tab) and run again.")
+        sys.exit(1)
+    dnc, bad = set(), 0
+    for v in col[1:]:                              # skip the header row
+        v = str(v or "").strip()
+        if not v:
+            continue
+        p = normalize_phone(v)
+        if p:
+            dnc.add(p)
+        else:
+            bad += 1
+            print("   Do_Not_Call: could not read a number ending '%s' - row skipped,"
+                  " please fix it in the sheet." % mask_phone(v))
+    print("Do-not-call list loaded  : %d number(s)%s"
+          % (len(dnc), ("  (%d unreadable row(s) ignored)" % bad) if bad else ""))
+    return dnc
+
+
 # --------------------------------- write ------------------------------------
 def write_tab(sh, title, headers, rows):
     import gspread
@@ -398,6 +445,8 @@ def main():
 
     if not push:
         print("\nThis was a PREVIEW - nothing was written.")
+        print("(The Do_Not_Call filter runs at push time; listed numbers")
+        print(" will be removed from the worklist before it is written.)")
         print("If it looks right, run again with:  --push")
         return
 
@@ -417,6 +466,18 @@ def main():
     print("\nUsing key file: " + os.path.basename(keys[0]))
     gc = gspread.service_account(filename=keys[0])
     sh = gc.open_by_key(SHEET_ID)
+
+    # ---- Do-not-call filter (Decision D194) --------------------------------
+    dnc = fetch_dnc_set(sh)
+    if dnc:
+        kept = [r for r in today if r[4] not in dnc]
+        dropped = [r for r in today if r[4] in dnc]
+        if dropped:
+            print("Do-not-call filter removed %d row(s):" % len(dropped))
+            for r in dropped:
+                print("   - %s (%s)" % (r[3], mask_phone(r[4])))
+        today = kept
+
     write_tab(sh, TAB_TODAY, TODAY_HEADERS, today)
     write_tab(sh, TAB_SETTLED, SETTLED_HEADERS, settled)
     print("\nDONE. Wrote %d worklist rows to '%s' and %d to '%s'. (Replace-only.)"

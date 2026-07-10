@@ -1,0 +1,92 @@
+========================================================================
+ONE-TIME SETUP — make the follow-up auto-push watcher start at login
+========================================================================
+Dr. Manoj Agarwal Clinic · Session 19 · 30 Jun 2026
+
+You are doing this ONCE. After this, the watcher starts by itself every
+time you log into this PC, and auto-pushes today's follow-ups whenever you
+process the tracker. Nothing to type each day.
+
+------------------------------------------------------------------------
+WHAT GOES WHERE
+------------------------------------------------------------------------
+Two files must sit in your tracker folder:
+
+   C:\followup_tracker_local_test_kit\local_test_kit\followup_tracker\
+
+   1. watch_and_push_followups.py   <- the watcher (already saved + tested)
+   2. start_followup_watcher.bat    <- the launcher (save it here too)
+
+(The push script push_followups_today.py and the .json key are already in
+this same folder — good.)
+
+------------------------------------------------------------------------
+STEP 1 — Save the launcher
+------------------------------------------------------------------------
+Save  start_followup_watcher.bat  into the tracker folder above (same place
+as watch_and_push_followups.py).
+
+------------------------------------------------------------------------
+STEP 2 — Test the launcher once (double-click it)
+------------------------------------------------------------------------
+Double-click  start_followup_watcher.bat.
+A window titled "Follow-up Auto-Push Watcher" should open and show:
+   Follow-up auto-push watcher STARTED.
+   Watching: ...\outputs
+Because today's file is already marked as pushed, it will stay quiet (it
+will NOT push again). That is correct.
+
+Leave this window open — it is the watcher running. You can MINIMIZE it.
+(Closing the window stops the watcher.)
+
+------------------------------------------------------------------------
+STEP 3 — Make it start automatically at login
+------------------------------------------------------------------------
+a) Press  Windows key + R   (the Run box opens)
+b) Type exactly:   shell:startup
+   then press Enter.
+   -> This opens your personal Startup folder. Anything in here runs
+      automatically when you log in.
+
+c) Now create a shortcut to the launcher IN that Startup folder:
+   - Go to the tracker folder
+     (C:\followup_tracker_local_test_kit\local_test_kit\followup_tracker)
+   - RIGHT-CLICK  start_followup_watcher.bat  ->  Show more options (if on
+     Windows 11)  ->  "Create shortcut".
+   - A file "start_followup_watcher.bat - Shortcut" appears.
+   - CUT that shortcut (Ctrl+X) and PASTE it (Ctrl+V) into the Startup
+     folder you opened in step (b).
+
+That's it. From the next login onward, the watcher launches by itself.
+
+------------------------------------------------------------------------
+OPTIONAL — start it minimized
+------------------------------------------------------------------------
+If you'd rather it not show a window each login:
+   - In the Startup folder, right-click the shortcut -> Properties
+   - "Run:" dropdown -> choose "Minimized" -> OK.
+The watcher still runs; the window just starts minimized in the taskbar.
+
+------------------------------------------------------------------------
+HOW TO CHECK IT'S WORKING (any day)
+------------------------------------------------------------------------
+- Look for the "Follow-up Auto-Push Watcher" window/taskbar item.
+- Or open the log file in the tracker folder:
+     watch_followups.log
+  The latest lines tell you the last detect/push and the time.
+
+------------------------------------------------------------------------
+HOW TO TURN IT OFF
+------------------------------------------------------------------------
+- For now: close the watcher window.
+- Permanently (stop auto-start): delete the shortcut from the Startup
+  folder (Windows+R -> shell:startup -> delete the shortcut).
+
+------------------------------------------------------------------------
+FALLBACK (if the watcher is ever not running)
+------------------------------------------------------------------------
+Everything still works manually — the habit you already know:
+   cd "C:\followup_tracker_local_test_kit\local_test_kit\followup_tracker"
+   python push_followups_today.py --push
+
+========================================================================
