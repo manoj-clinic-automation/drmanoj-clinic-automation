@@ -12,11 +12,13 @@ make me read exit codes.
 
 Read first, before anything else
 
-`Clinic_Master_KB_SystemsRegister_v1_56.md` — canonical; WINS on any conflict.
-  (264,788 bytes · 2,580 lines · CR 0 · md5 `601c7689…`. §S131 incl. §S131.12–.14. D191–D202.
+`Clinic_Master_KB_SystemsRegister_v1_57.md` — canonical; WINS on any conflict.
+  (277,634 bytes · 2,727 lines · CR 0 · md5 `949b3f6c…`. §S131 incl. §S131.12–.14. D191–D202.
    F-17–F-23, with **F-19 WITHDRAWN**. Next free: **D203**.)
   ⚠️ **Its decisions index has never carried D1–D120 (F-22).** Eleven are restored in §S131.13.
-`HANDOFF_RUNBOOK_2026-07-09_Session131_v68.md` — §0 what happened, §2 backlog. **A-00 is new.**
+`HANDOFF_RUNBOOK_2026-07-09_Session131_v69.md` — §0 what happened, §2 backlog. **A-000 and A-00 are new.**
+`Fault_Action_Register_v2_0.md` — **kept, not retired (D114).** Read its §0.2 before trusting any
+  "System does" cell. **Not one row is live-and-acting.**
 `AI_Review_Layer_Design_Spec_v1_1_S131.md` — **the build order is §10.** Read it before you
   propose anything. Every item is tagged NOW / PROVISION / LATER and priced.
 `Frontend_Dashboard_Documentation_v1_S130.md` — the whole front end. Read before touching
@@ -54,11 +56,15 @@ Rotation — still PARKED. Do not open with a status check. Raise only if I do.
 D195 (Session 131) **disagree** about what happens on the third failed attempt. D78 fires a WABA
 template and snoozes; D195 sends the case to me. Neither is built. **Reconcile them with me first.**
 
-**Three things S131 got wrong, so you don't repeat them.**
+**A-000 — DO NOT WAIT FOR A RESTART.** The Fault Register marks nine faults `AUTO→ESC`. **No
+auto-responder exists.** The watchman is read-only. F-24.
+
+**Four things S131 got wrong, so you don't repeat them.**
 (1) It called F-8's blast radius *"wider than the audit's headline."* The audit said it in S129.
 (2) It presented D200 as a finding. The Call Console spec recorded it in **Session 25**.
 (3) It raised **F-19** as a defect. It is **D80, as built, Session 54** — *"skips incoming / non-OBD
 calls."* **Withdrawn.**
+(4) It recommended retiring the Fault Register. **D114 makes it the single brain.** Caught in time.
 All three have one cause: **a decision characterised without reading the document that made it.**
 Read the document. A document is an artefact.
 
