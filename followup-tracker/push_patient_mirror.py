@@ -12,6 +12,9 @@
 #     so a bad/empty file can never wipe the mirror with nothing.
 #   - Only the needed columns travel up: phone, name, diagnosis, age,
 #     gender, last visit, UID, and the numeric Clinic ID. (Less PHI, faster.)
+#   - S135 (F-34/D208): one row per PATIENT (keyed by Patient UID). The old
+#     one-row-per-PHONE collapse hid every family member after the first on a
+#     shared mobile and corrupted the dashboard's Clinic ID / last-visit.
 #
 # SESSION 30 CHANGE:
 #   - Added a dedicated "Clinic_Specific_Id" output column so the numeric
@@ -145,16 +148,25 @@ def load_rows():
             bad_phone += 1
             continue
 
-        seen[phone] = [
+        # S135 (F-34/D208): key by PATIENT UID, never by phone. The old
+        # per-phone collapse kept ONE family member per shared mobile, so the
+        # dashboard painted that member's Clinic ID and last-visit date onto
+        # every relative on the same phone (incident 11-Jul-2026: Raj Rani
+        # shown with Ekta's ID and Ekta's last-visit date). Every registered
+        # patient now travels up as their own row; shared mobiles therefore
+        # appear on several rows, and the dashboard (v18.22+) matches each
+        # follow-up row to its own patient by name.
+        uid = cell("Patient UID")
+        seen[uid if uid else phone] = [
             phone,
             cell("Patient Name"),
             cell("Diagnosis"),
             cell("Age"),
             cell("Gender"),
             cell("Last Visit"),
-            cell("Patient UID"),
+            uid,
             cell("Clinic_Specific_Id"),
-        ]  # keep last occurrence per phone
+        ]  # keep last occurrence per PATIENT (UID)
 
     return list(seen.values()), bad_phone
 

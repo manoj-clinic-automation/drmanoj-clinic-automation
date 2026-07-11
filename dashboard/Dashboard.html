@@ -501,6 +501,7 @@
       <span class="bld">· <span id="build">—</span></span>
       <span class="sep">· next <b id="count">—</b>s</span>
       <button class="btn" id="refresh" onclick="poll(true)">↻ Refresh</button>
+      <button class="btn" id="signout" onclick="doSignOut()" title="Forget the key on this device">Sign out</button>
     </div>
   </header>
 
@@ -633,7 +634,7 @@
 <script>
   var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
   var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
-  var PAGE_BUILD = 'v18.20 · S132: F-8 Fix B — patient packet out of button markup; L1260 + L1364 catches removed (F-14)';
+  var PAGE_BUILD = 'v18.23 · S135b: review SEND BACK returns tiles to staff (S35 loop closed); + F-34 name-aware enrichment';
   var acPrevIds = null;    // v1.1: ids seen last poll, to flash genuinely-new calls
   var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
   var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
@@ -1126,7 +1127,7 @@
           var slot=document.getElementById('rslot_'+i);
           if(slot){ slot.innerHTML='<div class="reply"><div class="reply-status ok">\u2705 Reply sent.</div></div>'; }
           openReplyId=null; replyOpen=false;
-          try{ openThread(number, msg); }catch(e){}
+          try{ openThread(number, msg); }catch(e){ console.error('openThread failed after send (reply WAS sent):', e); }
         } else {
           var why=(res&&res.reason)?res.reason:'Not sent.';
           setReplyStatus(i,'\u26d4 '+why,'warn');
@@ -1429,9 +1430,27 @@
                     close_followup:1, not_interested:1, treatment_elsewhere:1,
                     wrong_number:1, asked_not_to_call:1 };
   var fuData = null;   // last getFollowups result, so save handlers can read row details
+  var fuReviewSB = []; // S135b: review-console SEND BACK tiles (S35 loop closer)
   var fuLastVisits = {};   // v1.1 Slice 2: mobile(last10) -> last-visit date (additive)
   var fuRecordings = {};   // v1.1 Slice 2b: mobile(last10) -> {fileId,date} of most recent archived call
   var fuClinicIds  = {};   // v18.1 (D52): mobile(last10) -> numeric Clinic ID from Patient_Master
+  /* ---- S135 (F-34/D208): name-aware lookup for shared family mobiles ----
+     Server map keys: phone10 (unique mobile) OR phone10+'|'+normalised-name
+     (shared mobile). ''+present = shared, no safe match -> show verify marker. */
+  function fuNorm(s){
+    return String(s||'').toLowerCase()
+      .replace(/[^a-z0-9\u0900-\u097F ]+/g,' ')
+      .replace(/\s+/g,' ').trim();
+  }
+  function fuKeyM(it){ var d=String((it&&it.mobile)||'').replace(/\D/g,''); return d.length>=10 ? d.slice(-10) : d; }
+  function fuLookup(map, it){
+    map = map || {};
+    var m = fuKeyM(it); if(!m) return {val:'', shared:false};
+    var k = m + '|' + fuNorm(it && it.name);
+    if (Object.prototype.hasOwnProperty.call(map, k)) { var v = map[k] || ''; return {val:v, shared: v===''}; }
+    var pv = map[m]; if (pv === undefined && it && it.mobile && String(it.mobile) !== m) pv = map[it.mobile];
+    return {val: pv || '', shared:false};
+  }
   var olDay = 'today';     // v18.2 review console: which day is being reviewed
   var olRows = {};         // v18.2: last-loaded pending rows by key (for actions)
 
@@ -1458,6 +1477,10 @@
       .withSuccessHandler(function(res){ if(res&&res.ok){ fuClinicIds=res.map||{}; if(fuData) renderFollowups(fuData); } })
       .withFailureHandler(function(){})
       .getFollowupClinicIds(DASH_KEY);
+    google.script.run
+      .withSuccessHandler(function(res){ if(res&&res.ok){ fuReviewSB=res.items||[]; if(fuData) renderFollowups(fuData); } })
+      .withFailureHandler(function(){})
+      .getReviewSendbacks(DASH_KEY);
     if(DASH_ROLE==='full'){
       google.script.run
         .withSuccessHandler(function(d){ if(!escEditing()) renderEscalations(d); })
@@ -1507,6 +1530,37 @@
 
   function renderFollowups(d){
     fuData = d;
+    /* S135b (S35 loop closer): merge review-console SEND BACKs into the
+       'Sent back by doctor' band. Idempotent — strips its own previous
+       injections first, so repeated re-renders of the same object are safe. */
+    if (d && !d.error) {
+      d.today = (d.today || []).filter(function(x){ return !(x && x._rsb); });
+      var _g = d.bySection || {};
+      Object.keys(_g).forEach(function(s){
+        _g[s] = (_g[s] || []).filter(function(x){ return !(x && x._rsb); });
+        if (!_g[s].length) delete _g[s];
+      });
+      d.bySection = _g;
+      if (d.counts && d._sbBase === undefined) d._sbBase = (d.counts.open || 0);
+      var _have = {};
+      d.today.forEach(function(x){ if (x && x.key) _have[String(x.key)] = 1; });
+      var _inj = [];
+      (fuReviewSB || []).forEach(function(it){
+        if (!it || !it.key) return;
+        if (_have[String(it.key)]) return;   /* already on the list (e.g. escalation send-back) — keep that tile */
+        _inj.push(it);
+      });
+      if (_inj.length) {
+        d.today = _inj.concat(d.today);
+        var _ng = {};
+        _ng['Sent back by doctor'] = _inj.concat(d.bySection['Sent back by doctor'] || []);
+        Object.keys(d.bySection).forEach(function(s){
+          if (s !== 'Sent back by doctor') _ng[s] = d.bySection[s];
+        });
+        d.bySection = _ng;
+      }
+      if (d.counts) d.counts.open = (d._sbBase || 0) + _inj.length;
+    }
     var box=document.getElementById('fuToday');
     var sbox=document.getElementById('fuSettled');
     if(!box) return;
@@ -1823,10 +1877,12 @@
     var noAnsBtn = it.mobile
       ? '<button class="fu-noans" id="funoans_'+rid+'"'+(snoozed?' disabled':'')+' onclick="fuNoAnswer(\''+rid+'\')">No answer</button>'
       : '';
-    var lvStr = (it.mobile && fuLastVisits[it.mobile]) ? fuLastVisits[it.mobile] : '';
+    var lvStr = fuLookup(fuLastVisits, it).val;                                   /* S135 F-34: name-aware */
     var lvLine = lvStr ? ('<div class="fu-lv">Last visit '+esc(fmtDMY(lvStr))+'</div>') : '';
-    var cidStr = (it.mobile && fuClinicIds[it.mobile]) ? fuClinicIds[it.mobile] : '';
-    var cidChip = cidStr ? ('<span class="ac-cid">ID '+esc(cidStr)+'</span>') : '';
+    var cidR = fuLookup(fuClinicIds, it);                                         /* S135 F-34: name-aware */
+    var cidStr = cidR.val;
+    var cidChip = cidStr ? ('<span class="ac-cid">ID '+esc(cidStr)+'</span>')
+                : (cidR.shared ? '<span class="ac-cid" title="Shared family mobile \u2014 verify the Clinic ID in Docterz">ID \u26a0 verify</span>' : '');
     var recInfo = (it.mobile && fuRecordings[it.mobile]) ? fuRecordings[it.mobile] : null;
     var recBtn  = recInfo ? ('<button class="fu-rec" onclick="playArchived(\''+jsq(recInfo.fileId)+'\',\'furecslot_'+rid+'\',this)">\ud83c\udfa7 Last call'+(recInfo.date?(' \u00b7 '+esc(fmtDMY(recInfo.date))):'')+'</button>') : '';
     var recSlot = recInfo ? ('<div class="fu-recslot" id="furecslot_'+rid+'"></div>') : '';
@@ -1953,8 +2009,8 @@
       section:it?it.section:'',
       diagnosis: it?it.diagnosis:'',
       outcome: code, source:'', days:'', expected:'', detail:'',
-      clinicId: (it && it.mobile && fuClinicIds[it.mobile]) ? fuClinicIds[it.mobile] : '',
-      lastVisit:(it && it.mobile && fuLastVisits[it.mobile]) ? fuLastVisits[it.mobile] : ''
+      clinicId: fuLookup(fuClinicIds, it).val,   /* S135 F-34: name-aware */
+      lastVisit: fuLookup(fuLastVisits, it).val
     };
     if(FU_NEEDS_DATE[code]){ var dt=document.getElementById('fudate_'+rid); payload.expected=dt?dt.value:''; }
     if(FU_IS_MED[code]){
@@ -2003,8 +2059,8 @@
     var payload={
       rowKey: rid, name: it?it.name:'', mobile: it?it.mobile:'', section: it?it.section:'',
       diagnosis: it?it.diagnosis:'', outcome:'no_answer', source:'', days:'', expected:'', detail:'',
-      clinicId: (it && it.mobile && fuClinicIds[it.mobile]) ? fuClinicIds[it.mobile] : '',
-      lastVisit:(it && it.mobile && fuLastVisits[it.mobile]) ? fuLastVisits[it.mobile] : ''
+      clinicId: fuLookup(fuClinicIds, it).val,   /* S135 F-34: name-aware */
+      lastVisit: fuLookup(fuLastVisits, it).val
     };
     if(btn){ btn.disabled=true; btn.textContent='\u2026'; }
     google.script.run
@@ -2024,10 +2080,10 @@
     box.className='list';
     box.innerHTML=list.map(function(it){
       var rid=esc(String(it.key||''));
-      var cidStr=(it.mobile && fuClinicIds[it.mobile]) ? fuClinicIds[it.mobile] : '';
-      var lvStr =(it.mobile && fuLastVisits[it.mobile]) ? fuLastVisits[it.mobile] : '';
+      var cidR=fuLookup(fuClinicIds,it); var cidStr=cidR.val;                    /* S135 F-34: name-aware */
+      var lvStr =fuLookup(fuLastVisits,it).val;
       var meta=[];
-      if(cidStr) meta.push('ID '+esc(cidStr));
+      if(cidStr) meta.push('ID '+esc(cidStr)); else if(cidR.shared) meta.push('ID \u26a0 verify');
       if(it.diagnosis) meta.push(esc(it.diagnosis));
       if(lvStr) meta.push('last visit '+esc(lvStr));
       if(it.due) meta.push('due '+esc(it.due));
@@ -2059,8 +2115,8 @@
       rowKey: rid, name: it?it.name:'', mobile: it?it.mobile:'', section: it?it.section:'',
       diagnosis: it?it.diagnosis:'', outcome: UN_CODE[action]||'', source:'', days:'', expected:'',
       detail: 'Doctor: '+(UN_WORD[action]||action),
-      clinicId: (it && it.mobile && fuClinicIds[it.mobile]) ? fuClinicIds[it.mobile] : '',
-      lastVisit:(it && it.mobile && fuLastVisits[it.mobile]) ? fuLastVisits[it.mobile] : ''
+      clinicId: fuLookup(fuClinicIds, it).val,   /* S135 F-34: name-aware */
+      lastVisit: fuLookup(fuLastVisits, it).val
     };
     var card=document.getElementById('uncard_'+rid);
     var acts=card?card.querySelectorAll('button'):[];
@@ -2711,6 +2767,7 @@
   function applyAccess(k, role){
     DASH_KEY=k; DASH_ROLE=role;
     try{ localStorage.setItem('clinicDashKey', k); }catch(e){}   // remember on this device
+    try{ localStorage.removeItem('clinicSignedOut'); }catch(e){}  // F-11: explicit login re-arms auto-login
     var escSec=document.getElementById('secEscal'); if(escSec) escSec.style.display=(role==='full')?'':'none';
     var unSec=document.getElementById('secUnreach'); if(unSec) unSec.style.display=(role==='full')?'':'none';
     var olSec=document.getElementById('secOutLog'); if(olSec) olSec.style.display=(role==='full')?'':'none';
@@ -2727,11 +2784,20 @@
       .withFailureHandler(function(){ showLogin(false); })
       .getAccess(k);
   }
+  function doSignOut(){                                       // F-11 / A-4 (S134)
+    try{ localStorage.removeItem('clinicDashKey'); }catch(e){} // forget the key on this device
+    try{ localStorage.setItem('clinicSignedOut','1'); }catch(e){} // and ignore any ?k= still in the URL
+    DASH_KEY=''; DASH_ROLE='none';
+    if(window.__tick){ clearInterval(window.__tick); window.__tick=null; }
+    showLogin(false);
+  }
   function doLogin(){ var v=document.getElementById('pin').value.trim(); if(v) tryKey(v, true); }
 
   (function(){ var p=document.getElementById('pin'); if(p) p.addEventListener('keydown',function(e){ if(e.key==='Enter') doLogin(); }); })();
   // read ?k= from the REAL page URL via Apps Script's URL API (sandbox-safe), else the remembered key
   google.script.url.getLocation(function(loc){
+    var signedOut=false; try{ signedOut=(localStorage.getItem('clinicSignedOut')==='1'); }catch(e){}
+    if(signedOut){ showLogin(false); return; }  // F-11: after Sign out, ?k= and the stored key are both ignored
     var k=''; try{ k=(loc&&loc.parameter&&loc.parameter.k)?String(loc.parameter.k):''; }catch(e){}
     if(!k){ try{ k=localStorage.getItem('clinicDashKey')||''; }catch(e){} }
     if(k) tryKey(k, false); else showLogin(false);

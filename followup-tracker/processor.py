@@ -1478,6 +1478,18 @@ def parse_consultation_report(filepath: str) -> tuple[pd.DataFrame, str]:
         df["Had_Procedure"] = ""
     # Drop rows with no Patient_UID
     df = df[df["Patient_UID"].notna() & (df["Patient_UID"] != "")].reset_index(drop=True)
+    # S135: footer/junk guard — only UID-shaped rows may enter the pipeline.
+    # The old consultation report's footer leaked payment-mode summary rows
+    # ("Credit Card" / "Cash" / totals) into the visit ledger on 09-Jul-2026;
+    # a real Docterz Patient UID is 8-14 uppercase letters/digits with no
+    # spaces, so anything else here is export furniture, never a patient.
+    _uid_ok = df["Patient_UID"].str.fullmatch(r"[A-Z0-9]{8,14}", na=False)
+    _junk = int((~_uid_ok).sum())
+    if _junk:
+        print(f"  [guard] dropped {_junk} non-patient footer row(s) from "
+              f"{Path(filepath).name}: "
+              + "; ".join(df.loc[~_uid_ok, "Patient_UID"].astype(str).tolist()))
+        df = df[_uid_ok].reset_index(drop=True)
     return df, log_date
 
 # ── Step 2: Update Patient Master from consultation report ────────────────────
@@ -1624,12 +1636,32 @@ def resolve_identity(mobile_clean: str, name_raw: str, master: pd.DataFrame):
 
     if len(matches) == 1:
         row = matches.iloc[0]
+        # S135 (F-34 family): a unique mobile match used to return "High" with NO
+        # name check, so a mobile typo in Docterz silently attached the wrong
+        # identity to the ledger. Now the name is always compared; a disagreement
+        # keeps the match (the mobile is still the best evidence) but demotes to
+        # "Medium" with a visible Identity_Issue, and — deliberately — loses the
+        # mobile-based diagnosis fallback, which is exactly what is unsafe when
+        # the names disagree. "Medium" still passes every issuance filter, so no
+        # patient drops off the call sheets because of this check.
+        _score = name_match_score(
+            str(name_raw).strip().lower(), str(row["Patient_Name"]).lower()
+        )
+        if _score >= 0.7:
+            return (
+                row["Patient_UID"],
+                row["Clinic_Specific_Id"],
+                row["Patient_Name"],
+                "High",
+                ""
+            )
         return (
             row["Patient_UID"],
             row["Clinic_Specific_Id"],
             row["Patient_Name"],
-            "High",
-            ""
+            "Medium",
+            f"Name differs from registered owner of this mobile "
+            f"({row['Patient_Name']}) — verify before contacting"
         )
 
     # Shared mobile (family/attendant) — try name matching

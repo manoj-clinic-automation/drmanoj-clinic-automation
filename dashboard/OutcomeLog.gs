@@ -491,3 +491,64 @@ function OL_SELFTEST() {
   Logger.log('Call_Recordings rows: ' + (rec ? rec.getLastRow() - 1 : 'NO TAB'));
   Logger.log('Call_Transcripts rows: ' + (tx ? tx.getLastRow() - 1 : 'NO TAB'));
 }
+
+
+/* ===========================================================================
+ * S135 — SESSION-35 LOOP CLOSER (F-35/D209 candidate)
+ * ---------------------------------------------------------------------------
+ * getReviewSendbacks(key): the review console's SEND BACK verdicts finally
+ * drive the worklist. Reads Followup_Outcomes (READ-ONLY — Followup_Outcomes'
+ * one writer stays WebApp.gs saveFollowupOutcome; the review columns' one
+ * writer stays reviewOutcome above). For every follow-up Key whose LATEST
+ * 'Doctor Review' = 'SEND BACK', a tile in the exact Session-52 sent-back
+ * shape is returned, carrying the doctor's note. The tile retires when:
+ *   - staff log ANY newer outcome on that Key (fuLastOutcomeEpochByKey_), or
+ *   - the doctor re-reviews the row to APPROVED (overwrites the verdict).
+ * Any valid key may call this — staff must see their send-backs.
+ * The page (v18.23) merges these into the 'Sent back by doctor' band.
+ * ========================================================================= */
+function getReviewSendbacks(key) {
+  try {
+    if (dashRole_(key) === 'none') return { ok: false, error: 'Not authorized.' };
+    var ss = fuSheet_();
+    if (!ss) return { ok: true, items: [] };
+    var rows = fuReadObjects_(ss, OL_TAB);
+    if (!rows.length) return { ok: true, items: [] };
+
+    // latest SEND BACK verdict per follow-up key
+    var latest = {};
+    rows.forEach(function (o) {
+      if (String(o['doctor review'] || '').trim().toUpperCase() !== 'SEND BACK') return;
+      var k = String(o['key'] || '').trim();
+      if (!k) return;
+      var rw = dateVal_(o['reviewed when']);
+      if (!rw) return;
+      if (!latest[k] || rw > latest[k]._rw) { o._rw = rw; latest[k] = o; }
+    });
+
+    var lastOut = fuLastOutcomeEpochByKey_(ss);
+    var tz = Session.getScriptTimeZone();
+    var items = [];
+    Object.keys(latest).forEach(function (k) {
+      var o = latest[k];
+      if (lastOut[k] && lastOut[k] > o._rw) return;   // staff acted after the review -> retired
+      var mob = String(o['mobile'] || '').replace(/\D/g, '').slice(-10);
+      items.push({
+        key: k, section: 'Sent back by doctor', pr: '',
+        name: String(o['patient'] || '').trim(), mobile: mob,
+        diagnosis: '', due: '', od: '', status: 'Sent back',
+        retry: '', naCount: 0, snoozeUntil: '', attempts: [],
+        docNote: String(o['doctor note'] || '').trim(),
+        outcomeReason: (String(o['outcome'] || '').trim()
+          + (String(o['detail'] || '').trim() ? ' \u2014 ' + String(o['detail']).trim() : '')),
+        filedBy: String(o['handled by'] || '').trim(),
+        filedWhen: Utilities.formatDate(new Date(o._rw), tz, 'h:mm a, d MMM'),
+        callTime: '', callDur: '', callDate: '', callAgent: '', callState: 'none',
+        _rsb: true
+      });
+    });
+    return { ok: true, items: items };
+  } catch (err) {
+    return { ok: false, error: String(err && err.message ? err.message : err) };
+  }
+}

@@ -7,6 +7,13 @@
  * Updated Session 31 · 02 Jul 2026 — v1.2: adds getFollowupClinicIds (D52) —
  *   phone→Clinic ID enrichment for follow-up rows, cloning the S27 last-visit
  *   pattern. Purely additive; no existing function changed.
+ * Updated Session 135 · 11 Jul 2026 — v1.3 (F-34/D208): shared-family-mobile fix.
+ *   getFollowupClinicIds + getFollowupLastVisits are now NAME-AWARE: on a mobile
+ *   shared by several registered patients, each follow-up row is matched to its
+ *   own patient by name (token overlap ≥ 0.7, mirroring the PC resolver). No
+ *   confident match -> the entry is blank and the page shows a verify marker,
+ *   never another family member's ID. Unique mobiles keep the legacy plain key,
+ *   so an already-open (stale) page degrades to blank — never to a wrong ID.
  * Spec: Call_Console_Evolution_Spec v1.1, §5 + §7 Step 1.
  * Session 27 fix: clinicId now reads the NUMERIC 'Clinic_Specific_Id' column
  *   IF a Clinic_Specific_Id column exists in Patient_Master; blank otherwise.
@@ -199,28 +206,8 @@ function CC_SELFTEST() {
  * Scoped to today's follow-up mobiles only -> small payload, not the whole patient DB.
  */
 function getFollowupLastVisits(key) {
-  try {
-    if (dashRole_(key) === 'none') return { ok: false, error: 'Not authorized.' };
-    var ss = cc_openSheet_();
-    var sh = ss.getSheetByName('Followups_Today');   // FU_TAB_TODAY (read-only here)
-    if (!sh) return { ok: true, map: {} };
-    var vals = sh.getDataRange().getValues();
-    if (vals.length < 2) return { ok: true, map: {} };
-    var H = cc_lc_(vals[0]);
-    var iMob = cc_col_(H, ['mobile', 'phone number', 'mobile number', 'phone', 'number']);
-    if (iMob < 0) return { ok: true, map: {} };
-    var pmap = cc_patientMap_();     // phone10 -> {name, clinicId, diagnosis, lastVisit}
-    var out = {};
-    for (var r = 1; r < vals.length; r++) {
-      var ph = cc_last10_(iMob < vals[r].length ? vals[r][iMob] : '');
-      if (!ph || out[ph] !== undefined) continue;
-      var pinfo = pmap[ph];
-      out[ph] = (pinfo && pinfo.lastVisit) ? pinfo.lastVisit : '';
-    }
-    return { ok: true, map: out };
-  } catch (err) {
-    return { ok: false, error: String(err && err.message ? err.message : err) };
-  }
+  // S135 (F-34/D208): delegates to the name-aware enricher; see cc_fuEnrich_.
+  return cc_fuEnrich_(key, 'lastVisit');
 }
 
 
@@ -235,28 +222,8 @@ function getFollowupLastVisits(key) {
  * numeric Clinic_Specific_Id is present (graceful blank otherwise).
  */
 function getFollowupClinicIds(key) {
-  try {
-    if (dashRole_(key) === 'none') return { ok: false, error: 'Not authorized.' };
-    var ss = cc_openSheet_();
-    var sh = ss.getSheetByName('Followups_Today');   // read-only here
-    if (!sh) return { ok: true, map: {} };
-    var vals = sh.getDataRange().getValues();
-    if (vals.length < 2) return { ok: true, map: {} };
-    var H = cc_lc_(vals[0]);
-    var iMob = cc_col_(H, ['mobile', 'phone number', 'mobile number', 'phone', 'number']);
-    if (iMob < 0) return { ok: true, map: {} };
-    var pmap = cc_patientMap_();     // phone10 -> {name, clinicId, diagnosis, lastVisit}
-    var out = {};
-    for (var r = 1; r < vals.length; r++) {
-      var ph = cc_last10_(iMob < vals[r].length ? vals[r][iMob] : '');
-      if (!ph || out[ph] !== undefined) continue;
-      var pinfo = pmap[ph];
-      out[ph] = (pinfo && pinfo.clinicId) ? pinfo.clinicId : '';
-    }
-    return { ok: true, map: out };
-  } catch (err) {
-    return { ok: false, error: String(err && err.message ? err.message : err) };
-  }
+  // S135 (F-34/D208): delegates to the name-aware enricher; see cc_fuEnrich_.
+  return cc_fuEnrich_(key, 'clinicId');
 }
 
 
@@ -512,6 +479,99 @@ function cc_sheetValues_(tabName) {
 }
 
 /** Patient_Master -> { phone10: {name, clinicId, diagnosis} } */
+/* ---------------------------------------------------------------------------
+ * S135 (F-34/D208) \u2014 name-aware follow-up enrichment for shared family mobiles
+ * ---------------------------------------------------------------------------
+ * Root cause fixed here: cc_patientMap_() keeps ONE patient per mobile
+ * ("first wins"), so on a shared family mobile every follow-up row inherited
+ * the FIRST registered family member's Clinic ID and last-visit date
+ * (incident 11-Jul-2026: Raj Rani shown with Ekta's ID). This block matches
+ * each follow-up row to its OWN patient by name. Map keys:
+ *   phone10                -> value   (only when the mobile has ONE patient)
+ *   phone10 + '|' + name   -> value   (shared mobile, name matched; '' = no
+ *                                      confident match -> page shows a verify
+ *                                      marker instead of a wrong ID)
+ * cc_patientMap_() itself is untouched \u2014 the incoming-call tiles still use it,
+ * where caller-ID alone is all we can ever have.
+ * ------------------------------------------------------------------------- */
+function cc_normName_(s) {
+  return String(s || '').toLowerCase()
+    .replace(/[^a-z0-9\u0900-\u097F ]+/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+}
+function cc_nameScore_(a, b) {   // token overlap / max tokens (mirrors the PC resolver)
+  var ta = String(a || '').split(' ').filter(String);
+  var tb = String(b || '').split(' ').filter(String);
+  if (!ta.length || !tb.length) return 0;
+  var setB = {}; for (var i = 0; i < tb.length; i++) setB[tb[i]] = true;
+  var ov = 0; for (var j = 0; j < ta.length; j++) { if (setB[ta[j]]) ov++; }
+  return ov / Math.max(ta.length, tb.length);
+}
+function cc_patientMultiMap_() {   // phone10 -> ARRAY of every patient on that mobile
+  var map = {};
+  try {
+    var vals = cc_sheetValues_(CC_TAB_PATIENT);
+    if (vals.length < 2) return map;
+    var H = cc_lc_(vals[0]);
+    var iPhone = cc_col_(H, ['mobile', 'phone number', 'mobile number', 'phone', 'number', 'phone10']);
+    var iName  = cc_col_(H, ['patient name', 'name']);
+    var iId    = cc_col_(H, ['clinic_specific_id', 'clinic specific id', 'clinic id', 'clinic_id', 'patient id']);
+    var iLast  = cc_col_(H, ['last visit', 'consultation date', 'last seen', 'seen']);
+    if (iPhone < 0) return map;
+    for (var r = 1; r < vals.length; r++) {
+      var row = vals[r];
+      var ph = cc_last10_(iPhone < row.length ? row[iPhone] : '');
+      if (!ph) continue;
+      if (!map[ph]) map[ph] = [];
+      map[ph].push({
+        name:      (iName >= 0 && iName < row.length) ? String(row[iName]).trim() : '',
+        clinicId:  (iId   >= 0 && iId   < row.length) ? String(row[iId]).trim()   : '',
+        lastVisit: (iLast >= 0 && iLast < row.length) ? cc_dateStr_(row[iLast])    : ''
+      });
+    }
+  } catch (e) {}
+  return map;
+}
+function cc_fuEnrich_(key, field) {   // shared engine for ClinicIds + LastVisits
+  try {
+    if (dashRole_(key) === 'none') return { ok: false, error: 'Not authorized.' };
+    var ss = cc_openSheet_();
+    var sh = ss.getSheetByName('Followups_Today');   // read-only here
+    if (!sh) return { ok: true, map: {} };
+    var vals = sh.getDataRange().getValues();
+    if (vals.length < 2) return { ok: true, map: {} };
+    var H = cc_lc_(vals[0]);
+    var iMob  = cc_col_(H, ['mobile', 'phone number', 'mobile number', 'phone', 'number']);
+    var iName = cc_col_(H, ['patient name', 'name']);
+    if (iMob < 0) return { ok: true, map: {} };
+    var mmap = cc_patientMultiMap_();
+    var out = {};
+    for (var r = 1; r < vals.length; r++) {
+      var row = vals[r];
+      var ph = cc_last10_(iMob < row.length ? row[iMob] : '');
+      if (!ph) continue;
+      var cands = mmap[ph] || [];
+      if (cands.length === 1) {                       // unique mobile: legacy plain key
+        if (out[ph] === undefined) out[ph] = (cands[0][field] || '');
+        continue;
+      }
+      var rowName = cc_normName_(iName >= 0 && iName < row.length ? row[iName] : '');
+      var k = ph + '|' + rowName;
+      if (out[k] !== undefined) continue;
+      if (!cands.length || !rowName) { out[k] = ''; continue; }
+      var best = null, bestScore = 0;
+      for (var c = 0; c < cands.length; c++) {
+        var s = cc_nameScore_(rowName, cc_normName_(cands[c].name));
+        if (s > bestScore) { bestScore = s; best = cands[c]; }
+      }
+      out[k] = (best && bestScore >= 0.7) ? (best[field] || '') : '';
+    }
+    return { ok: true, map: out };
+  } catch (err) {
+    return { ok: false, error: String(err && err.message ? err.message : err) };
+  }
+}
+
 function cc_patientMap_() {
   var map = {};
   try {
