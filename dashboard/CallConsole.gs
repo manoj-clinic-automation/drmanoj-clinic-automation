@@ -14,6 +14,21 @@
  *   confident match -> the entry is blank and the page shows a verify marker,
  *   never another family member's ID. Unique mobiles keep the legacy plain key,
  *   so an already-open (stale) page degrades to blank — never to a wrong ID.
+ * Updated Session 136 · 11 Jul 2026 — v1.5 (same day, deploy 3): F-4 dead code
+ *   REMOVED (logOutcome + cc_ensureOutcomesTab_ + the Outcomes_Log constants —
+ *   called by nothing, tab never created, appended PHI to a ledger nobody read);
+ *   D183 ADDED: sweepUnloggedCalls() — 21:30 digest to the doctor of every call,
+ *   both directions, that ended the day without an outcome. installSweepTrigger()
+ *   / removeSweepTrigger() are run once by the OWNER from the editor (D206).
+ * Updated Session 136 · 11 Jul 2026 — v1.4 (Block C): quota + one-clock layer.
+ *   ADDS ONLY — no existing function changed. getDashboardBundle(key, opts)
+ *   returns everything the page shows in ONE server trip, behind a shared
+ *   45-second CacheService entry (six devices -> one set of sheet reads).
+ *   getCallDurationFast() reads only the LAST 200 rows of Call_Durations
+ *   (the old whole-tab poll re-read everything every 6s). cc_todayIST_()
+ *   is the ONE CLOCK: the server's IST date rides in every bundle; the page
+ *   computes no dates (closes F-5 + F-13). cc_qcBump_() counts full builds
+ *   per day into Script Property QC_BUNDLE_BUILDS for Health.gs (§4-Q3).
  * Spec: Call_Console_Evolution_Spec v1.1, §5 + §7 Step 1.
  * Session 27 fix: clinicId now reads the NUMERIC 'Clinic_Specific_Id' column
  *   IF a Clinic_Specific_Id column exists in Patient_Master; blank otherwise.
@@ -35,9 +50,9 @@
  *   getAllCallsToday(key, force)  — every call today (both directions, all
  *                                   statuses), patient-enriched, newest first.
  *   getAgentIdentity(key)         — { name, ext } for the logged-in agent.
- *   logOutcome(key, payload)      — appends one row to the Outcomes_Log tab
- *                                   (the permanent Excel replacement). Creates
- *                                   the tab + header on first use.
+ *   logOutcome                    — REMOVED v1.5 (F-4): dead ledger, public
+ *                                   writer, called by nothing since Step 2
+ *                                   shipped a different save path.
  *
  * SAFE EXTERNAL CALLS (confirmed present in this project):
  *   fetchCallsBetween_(startDate, endDate)   — MyOperator.gs (returns enriched
@@ -63,15 +78,9 @@ var CC_SHEET_ID_PROP = 'SHEET_ID';   // Script Property holding the spreadsheet 
 var CC_SHEET_ID_FALLBACK = '1USjArkqIdrE9hIqerghms76STatM5XTbSW_a9I3klo0';
 var CC_TAB_PATIENT   = 'Patient_Master';
 var CC_TAB_AGENTS    = 'Agents';
-var CC_TAB_OUTCOMES  = 'Outcomes_Log';
 var CC_TAB_DURATIONS = 'Call_Durations';   // D77: PHI-clean call-facts feed (VPS receiver writes it)
 var CC_GATE_MIN_TALK = 15;                 // D77: seconds of PATIENT talk-time to unlock an outcome
 
-var CC_OUTCOMES_HEADER = [
-  'Timestamp', 'Agent Name', 'Ext', 'Direction', 'Number (last-4)',
-  'Patient Name', 'Clinic ID', 'Outcome', 'Notes', 'Call Duration',
-  'Recording filename'
-];
 
 // ===========================================================================
 // PUBLIC ENTRY POINTS  (callable from the page via google.script.run)
@@ -120,55 +129,6 @@ function getAgentIdentity(key) {
   }
 }
 
-/**
- * Append ONE outcome row to Outcomes_Log (the permanent activity record / Excel
- * replacement). The agent is resolved SERVER-SIDE from `key`; the page never
- * supplies the agent. The phone number is stored masked (last-4 only).
- *
- * payload (all optional except outcome):
- *   { direction, number, patientName, clinicId, outcome, notes,
- *     durationSec, recording }
- * Returns { ok:true } or { ok:false, error }.
- */
-function logOutcome(key, payload) {
-  try {
-    if (dashRole_(key) === 'none') {
-      return { ok: false, error: 'Not authorized. Please sign in again.' };
-    }
-    payload = payload || {};
-    if (!String(payload.outcome || '').trim()) {
-      return { ok: false, error: 'No outcome given.' };
-    }
-
-    var info = agentInfoForKey_(key) || {};
-    var ss = cc_openSheet_();
-    var sh = cc_ensureOutcomesTab_(ss);
-
-    var row = [
-      Utilities.formatDate(new Date(), CC_TZ, 'yyyy-MM-dd HH:mm:ss'),
-      info.name || '',
-      info.ext || '',
-      cc_dir_(payload.direction),
-      cc_last4_(payload.number),
-      String(payload.patientName || ''),
-      String(payload.clinicId || ''),
-      String(payload.outcome || ''),
-      String(payload.notes || ''),
-      cc_mmss_(cc_int_(payload.durationSec)),
-      String(payload.recording || '')
-    ];
-    sh.appendRow(row);
-    return { ok: true };
-  } catch (err) {
-    return { ok: false, error: String(err && err.message ? err.message : err) };
-  }
-}
-
-/**
- * Editor-only self test (safe). Run from the Apps Script editor, then read
- * View -> Execution log. Prints counts + one sample row. Writes NOTHING and
- * prints no secrets / no full numbers.
- */
 function CC_SELFTEST() {
   var sp = PropertiesService.getScriptProperties();
   var key = (sp.getProperty('DASH_KEY') || sp.getProperty('SECRET_KEY') || '').trim();
@@ -195,7 +155,7 @@ function CC_SELFTEST() {
       Logger.log('clinic-id header match index: %s (0-based; column B = 1). Using column %s.', ix, (ix<0?1:ix));
     }
   } catch (e) { Logger.log('header diagnostic error: %s', e); }
-  Logger.log('Outcomes_Log will be created on first logOutcome() call. No write done here.');
+  Logger.log('logOutcome removed v1.5 (F-4); no outcome ledger exists in this file.');
 }
 
 
@@ -645,23 +605,6 @@ function cc_agentName_(s, amap) {
   return '';
 }
 
-function cc_ensureOutcomesTab_(ss) {
-  var sh = ss.getSheetByName(CC_TAB_OUTCOMES);
-  if (!sh) {
-    sh = ss.insertSheet(CC_TAB_OUTCOMES);
-    sh.appendRow(CC_OUTCOMES_HEADER);
-    return sh;
-  }
-  // ensure a header exists on an empty tab
-  if (sh.getLastRow() === 0) sh.appendRow(CC_OUTCOMES_HEADER);
-  return sh;
-}
-
-// ===========================================================================
-// SMALL UTILITIES
-// ===========================================================================
-
-/** Start/end Date for "today" in clinic time (Asia/Kolkata). */
 function cc_todayBounds_() {
   var now = new Date();
   var ymd = Utilities.formatDate(now, CC_TZ, 'yyyy-MM-dd');
@@ -732,4 +675,268 @@ function cc_mmss_(sec) {
   var m = Math.floor(sec / 60);
   var s = sec % 60;
   return m + ':' + (s < 10 ? '0' + s : '' + s);
+}
+// ===========================================================================
+// BLOCK C (Session 136) — one clock + quota load (F-5/F-13 + F-6/F-12)
+// ===========================================================================
+// Everything below is ADDITIVE. The old per-function endpoints still exist and
+// still answer, so an already-open (stale) page keeps working until reloaded.
+
+var CC_BUNDLE_TTL_S = 45;      // shared cache lifetime, seconds (< the 60s page refresh)
+var CC_DUR_WINDOW   = 200;     // bounded poll: last N data rows of Call_Durations
+var CC_QC_PROP      = 'QC_BUNDLE_BUILDS';   // daily build counter for Health.gs
+
+/** THE one clock: today's date in IST, as the server sees it. */
+function cc_todayIST_() {
+  return Utilities.formatDate(new Date(), CC_TZ, 'yyyy-MM-dd');
+}
+
+/**
+ * getDashboardBundle(key, opts) -> ONE trip carrying everything the page
+ * shows each minute: dash stats, follow-ups + all three enrichment maps,
+ * send-backs, today's calls, freshness — plus escalations + outcome log on
+ * the doctor's key. opts = { force:bool, olDay:'today'|'yyyy-MM-dd' }.
+ *
+ * QUOTA MODEL: the assembled payload is cached per ROLE for CC_BUNDLE_TTL_S
+ * seconds, so six open devices share ONE set of sheet reads instead of six.
+ * force=true (Refresh button / post-save) bypasses AND REFILLS the cache, so
+ * a just-saved outcome is what every other device sees next.
+ * The staff cache and the full cache are separate keys — a staff login can
+ * never be served the doctor's escalations or outcome log.
+ * Fail-safe: any cache error falls through to a plain build; a build error
+ * returns { ok:false, error } and the page shows "Reconnecting…".
+ */
+function getDashboardBundle(key, opts) {
+  try {
+    var role = dashRole_(key);
+    if (role === 'none') return { ok: false, error: 'Not authorized. Please sign in again.' };
+    opts = opts || {};
+    var force = !!opts.force;
+    var olDay = String(opts.olDay || 'today');
+    var cacheable = (olDay === 'today');           // reviewing an OLD day is never cached
+    var cKey = 'CC_BUNDLE_' + role + '_' + olDay;
+    var cache = null;
+    try { cache = CacheService.getScriptCache(); } catch (e0) { cache = null; }
+    if (cache && cacheable && !force) {
+      try {
+        var hit = cache.get(cKey);
+        if (hit) {
+          var got = JSON.parse(hit);
+          got.cached = true;
+          got.todayIST = cc_todayIST_();           // the clock is NEVER served stale
+          return got;
+        }
+      } catch (e1) { /* fall through to a fresh build */ }
+    }
+    var out = {
+      ok: true,
+      cached: false,
+      todayIST: cc_todayIST_(),
+      role: role,
+      dash:       getDashboardData(key, force),
+      followups:  getFollowups(key),
+      lastVisits: getFollowupLastVisits(key),
+      recordings: getFollowupRecordings(key),
+      clinicIds:  getFollowupClinicIds(key),
+      sendbacks:  getReviewSendbacks(key),
+      allCalls:   getAllCallsToday(key, force),
+      freshness:  getFollowupFreshness(key)
+    };
+    if (role === 'full') {
+      out.escalations = getEscalations(key);
+      out.outcomeLog  = getOutcomeLog(key, olDay);
+    }
+    if (cache && cacheable) {
+      try { cache.put(cKey, JSON.stringify(out), CC_BUNDLE_TTL_S); }
+      catch (e2) { /* payload over the 100KB cache limit -> simply not cached */ }
+    }
+    cc_qcBump_();
+    return out;
+  } catch (err) {
+    return { ok: false, error: String(err && err.message ? err.message : err) };
+  }
+}
+
+/**
+ * Daily counter of FULL bundle builds (each build = ~11 whole/bounded tab
+ * reads). Read by Health.gs §4b. Rolls itself over at the IST midnight;
+ * yesterday's total survives one day in prevDate/prevBuilds so the 08:00
+ * report can print it. A counter failure must never break the board.
+ */
+function cc_qcBump_() {
+  try {
+    var sp = PropertiesService.getScriptProperties();
+    var today = cc_todayIST_();
+    var cur = {};
+    try { cur = JSON.parse(sp.getProperty(CC_QC_PROP) || '{}') || {}; } catch (e) { cur = {}; }
+    if (cur.date !== today) {
+      cur = { date: today, builds: 0, prevDate: cur.date || '', prevBuilds: cur.builds || 0 };
+    }
+    cur.builds = (cur.builds || 0) + 1;
+    sp.setProperty(CC_QC_PROP, JSON.stringify(cur));
+  } catch (e3) { /* never block the board over a counter */ }
+}
+
+/**
+ * getCallDurationFast(key, clientRefId) — the bounded twin of
+ * getCallDuration(). Same contract, same gate, same fail-safe — but it reads
+ * only the LAST CC_DUR_WINDOW data rows of Call_Durations instead of the
+ * whole tab. Safe because the VPS receiver APPENDS: today's call is always
+ * within the last rows. Not found in the window -> { found:false }, exactly
+ * what the old function returns while the row hasn't landed yet; the page's
+ * own 3-minute timeout (unchanged) still bounds the wait.
+ */
+function getCallDurationFast(key, clientRefId) {
+  try {
+    if (dashRole_(key) === 'none') return { ok: false, error: 'Not authorized.' };
+    var ref = String(clientRefId || '').trim();
+    if (!ref) return { ok: true, found: false };
+    var ss = cc_openSheet_();
+    var sh = ss ? ss.getSheetByName(CC_TAB_DURATIONS) : null;
+    if (!sh) return { ok: true, found: false };
+    var lastRow = sh.getLastRow(), lastCol = sh.getLastColumn();
+    if (lastRow < 2 || lastCol < 1) return { ok: true, found: false };
+    var H = cc_lc_(sh.getRange(1, 1, 1, lastCol).getValues()[0]);
+    var iRef  = cc_col_(H, ['client_ref_id', 'client ref id', 'clientrefid']);
+    var iStat = cc_col_(H, ['status']);
+    var iRes  = cc_col_(H, ['customer_result', 'customer result']);
+    var iTalk = cc_col_(H, ['customer_talk_duration', 'customer talk duration', 'talk_duration']);
+    if (iRef < 0) return { ok: true, found: false };
+    var n = Math.min(CC_DUR_WINDOW, lastRow - 1);
+    var vals = sh.getRange(lastRow - n + 1, 1, n, lastCol).getValues();
+    var hit = null;
+    for (var r = vals.length - 1; r >= 0; r--) {           // newest matching row wins
+      if (String(vals[r][iRef] || '').trim() === ref) { hit = vals[r]; break; }
+    }
+    if (!hit) return { ok: true, found: false };
+    var status = (iStat >= 0) ? String(hit[iStat] || '').trim().toLowerCase() : '';
+    var cres   = (iRes  >= 0) ? String(hit[iRes]  || '').trim().toLowerCase() : '';
+    var talk   = (iTalk >= 0) ? cc_int_(hit[iTalk]) : 0;
+    var allow  = (status === 'bridged') && (cres === 'answered') && (talk >= CC_GATE_MIN_TALK);
+    return { ok: true, found: true, status: status, customerResult: cres, talk: talk, allowOutcome: allow };
+  } catch (err) {
+    return { ok: false, error: String(err && err.message ? err.message : err) };
+  }
+}
+// ===========================================================================
+// D183 (Session 136, deploy 3) — NOTHING ENDS THE DAY UNLOGGED
+// ===========================================================================
+// At 21:30 IST the doctor receives ONE digest: every call today, BOTH
+// directions, whose number has no outcome row filed today. Read-only — it
+// writes nothing, moves no tile, and a failure sends nothing rather than
+// something wrong. Names on shared family mobiles are NOT guessed (D208):
+// the digest says '(shared family mobile)' instead of naming a relative.
+// The trigger is installed ONCE, BY THE OWNER, from the editor (D206):
+// run installSweepTrigger() — or removeSweepTrigger() to disarm.
+
+function sweepUnloggedCalls() {
+  try {
+    var today = cc_todayIST_();
+
+    // -- 1. today's calls, both directions (same source as the dashboard) ---
+    var raw = [];
+    try {
+      var b = dayBounds_(0);
+      raw = fetchCallsBetween_(b.start, b.end) || [];
+    } catch (e0) { raw = []; }
+
+    // -- 2. numbers with an outcome filed TODAY (Followup_Outcomes) ---------
+    var logged = {};
+    try {
+      var ss = cc_openSheet_();
+      var sh = ss ? ss.getSheetByName('Followup_Outcomes') : null;
+      if (sh && sh.getLastRow() > 1) {
+        var vals = sh.getDataRange().getValues();
+        var H = cc_lc_(vals[0]);
+        var iWhen = cc_col_(H, ['when']);
+        var iMob  = cc_col_(H, ['mobile']);
+        for (var r = 1; r < vals.length; r++) {
+          if (cc_sweepDay_(iWhen >= 0 ? vals[r][iWhen] : '') !== today) continue;
+          var mo = cc_last10_(iMob >= 0 ? vals[r][iMob] : '');
+          if (mo) logged[mo] = 1;
+        }
+      }
+    } catch (e1) { /* unreadable outcomes -> everything unlogged is still true */ }
+
+    // -- 3. group unlogged calls by number ----------------------------------
+    var multi = {};
+    try { multi = cc_patientMultiMap_() || {}; } catch (e2) { multi = {}; }
+    var pmap = {};
+    try { pmap = cc_patientMap_() || {}; } catch (e3) { pmap = {}; }
+
+    var byNum = {}, order = [], totalCalls = 0;
+    for (var i = 0; i < raw.length; i++) {
+      var s = raw[i] || {};
+      var ph = cc_last10_(cc_pick_(s, ['phone10', 'caller_number_raw', 'caller_number', 'number']));
+      if (!ph || logged[ph]) continue;
+      var startUnix = cc_int_(cc_pick_(s, ['start_time', 'synced_time', 'time']));
+      var dirRaw = String(cc_pick_(s, ['direction', 'type', 'call_type']) || '');
+      var dir = (dirRaw.toLowerCase().indexOf('out') >= 0) ? 'OUT' : 'IN ';
+      var missed = (typeof s.is_missed === 'boolean') ? s.is_missed
+                 : (String(cc_pick_(s, ['status', 'call_status'])) === '2');
+      if (!byNum[ph]) {
+        var famList = multi[ph];
+        var nm = (famList && famList.length > 1) ? '(shared family mobile)'
+               : ((pmap[ph] && pmap[ph].name) ? pmap[ph].name : 'not in patient list');
+        byNum[ph] = { name: nm, items: [] };
+        order.push(ph);
+      }
+      byNum[ph].items.push(dir + ' ' +
+        (startUnix ? Utilities.formatDate(new Date(startUnix * 1000), CC_TZ, 'HH:mm') : '--:--') +
+        (missed ? ' missed' : ' connected'));
+      totalCalls++;
+    }
+
+    // -- 4. compose + send ---------------------------------------------------
+    var subject, body;
+    if (!order.length) {
+      subject = '\u2705 Every call logged today \u2014 ' + today;
+      body = 'Unlogged-call sweep (D183), 21:30 IST.\n\n' +
+             'Every number that called or was called today has an outcome row.\n' +
+             (raw.length ? ('Calls seen today: ' + raw.length + '.\n')
+                         : 'No calls found for today (also worth a look if the clinic was open).\n');
+    } else {
+      subject = '\ud83d\udccb ' + order.length + ' number(s), ' + totalCalls +
+                ' call(s) ended today UNLOGGED \u2014 ' + today;
+      var lines = [];
+      var cap = Math.min(order.length, 60);
+      for (var k = 0; k < cap; k++) {
+        var ph2 = order[k], e = byNum[ph2];
+        lines.push('\u2026' + ph2.slice(-4) + '  ' + e.name + '\n      ' + e.items.join(' \u00b7 '));
+      }
+      if (order.length > cap) lines.push('\u2026 and ' + (order.length - cap) + ' more numbers.');
+      body = 'Unlogged-call sweep (D183), 21:30 IST \u2014 both directions.\n' +
+             'A number is UNLOGGED when no outcome row was filed for it today.\n\n' +
+             lines.join('\n') + '\n\n' +
+             'Log them from the dashboard (Today\u2019s calls \u2192 Log outcome), or let\n' +
+             'them ride \u2014 this mail is a mirror, it moves nothing.\n';
+    }
+    if (typeof healthAlert_ === 'function') healthAlert_(order.length > 0, subject, body);
+    return { ok: true, numbers: order.length, calls: totalCalls };
+  } catch (err) {
+    return { ok: false, error: String(err && err.message ? err.message : err) };
+  }
+}
+
+/** yyyy-MM-dd of an outcome 'When' cell (Date, ISO string, or blank). */
+function cc_sweepDay_(v) {
+  if (v instanceof Date) return Utilities.formatDate(v, CC_TZ, 'yyyy-MM-dd');
+  var s = String(v == null ? '' : v).trim();
+  var m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+  return m ? m[1] : '';
+}
+
+/** OWNER runs this ONCE from the editor (D206). Idempotent. */
+function installSweepTrigger() {
+  removeSweepTrigger();
+  ScriptApp.newTrigger('sweepUnloggedCalls').timeBased()
+    .atHour(21).nearMinute(30).everyDays(1).create();
+  Logger.log('sweepUnloggedCalls armed daily ~21:30 IST.');
+}
+function removeSweepTrigger() {
+  var ts = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < ts.length; i++) {
+    if (ts[i].getHandlerFunction() === 'sweepUnloggedCalls') ScriptApp.deleteTrigger(ts[i]);
+  }
+  Logger.log('sweepUnloggedCalls trigger(s) removed.');
 }

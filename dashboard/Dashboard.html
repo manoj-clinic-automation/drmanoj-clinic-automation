@@ -268,6 +268,7 @@
   .wa-chat-btn:active{transform:translateY(1px)}
   .wa-call-btn{flex:none;border:1px solid #1a7f37;background:#e9f7ee;color:#1a7f37;font-weight:800;font-size:12px;padding:4px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;margin-left:6px}
   .wa-call-btn:active{transform:translateY(1px)}
+  .wa-callline{font-size:12px;color:#1a7f37;margin-top:5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   /* --- sign-in overlay --- */
   #loginOverlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(180deg,#eef2f8,#e7ecf5);display:flex;align-items:center;justify-content:center;padding:20px}
   .login-box{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 18px rgba(16,24,40,.08);padding:28px 22px;width:100%;max-width:360px;text-align:center}
@@ -633,8 +634,10 @@
 <button id="toTop" onclick="scrollTop_()" title="Back to top" aria-label="Back to top">▲</button>
 <script>
   var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
+  var TODAY_IST = '';   // Block C (S136): the SERVER's date (IST), set by every bundle — the page computes no dates (F-5/F-13)
+  var waCallMap = {};   // S136b: phone10 -> newest OUTGOING call today — feeds the call line on WhatsApp tiles (built from the bundle; zero extra reads)
   var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
-  var PAGE_BUILD = 'v18.23 · S135b: review SEND BACK returns tiles to staff (S35 loop closed); + F-34 name-aware enrichment';
+  var PAGE_BUILD = 'v18.25 · S136b: F-36 name-aware escalation cards · WA tiles show today\u2019s call (who/when/duration/recording)';
   var acPrevIds = null;    // v1.1: ids seen last poll, to flash genuinely-new calls
   var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
   var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
@@ -986,6 +989,7 @@
                      '<button class="wa-chat-btn" onclick="openThread(\''+jsq(m.number)+'\')">Chat</button>'+(inbound ? '<button class="wa-call-btn" onclick="waCall(\''+jsq(m.number)+'\',\''+jsq(m.name||'')+'\')">\ud83d\udcde Call</button>' : '')+(DASH_ROLE==='full' ? '<button class="wa-reply-btn" onclick="openReply('+i+',\''+jsq(m.number)+'\',this)">Reply</button>' : '')+
                    '</div>'+
                    '<div class="wa-msg" id="wamsg_'+i+'">'+msg+'</div>'+
+                   waCallLine(m,i)+
                  '</div>'+
                  '<div class="reply-slot" id="rslot_'+i+'"></div>'+
                '</div>';
@@ -1460,38 +1464,12 @@
     }).join('');
   }
 
-  function pollFollowups(){
-    google.script.run
-      .withSuccessHandler(function(d){ renderFollowups(d); })
-      .withFailureHandler(function(){ /* leave last view; never break the page */ })
-      .getFollowups(DASH_KEY);
-    google.script.run
-      .withSuccessHandler(function(res){ if(res&&res.ok){ fuLastVisits=res.map||{}; if(fuData) renderFollowups(fuData); } })
-      .withFailureHandler(function(){})
-      .getFollowupLastVisits(DASH_KEY);
-    google.script.run
-      .withSuccessHandler(function(res){ if(res&&res.ok){ fuRecordings=res.map||{}; if(fuData) renderFollowups(fuData); } })
-      .withFailureHandler(function(){})
-      .getFollowupRecordings(DASH_KEY);
-    google.script.run
-      .withSuccessHandler(function(res){ if(res&&res.ok){ fuClinicIds=res.map||{}; if(fuData) renderFollowups(fuData); } })
-      .withFailureHandler(function(){})
-      .getFollowupClinicIds(DASH_KEY);
-    google.script.run
-      .withSuccessHandler(function(res){ if(res&&res.ok){ fuReviewSB=res.items||[]; if(fuData) renderFollowups(fuData); } })
-      .withFailureHandler(function(){})
-      .getReviewSendbacks(DASH_KEY);
-    if(DASH_ROLE==='full'){
-      google.script.run
-        .withSuccessHandler(function(d){ if(!escEditing()) renderEscalations(d); })
-        .withFailureHandler(function(){})
-        .getEscalations(DASH_KEY);
-      google.script.run
-        .withSuccessHandler(function(d){ renderOutcomeLog(d); })
-        .withFailureHandler(function(){})
-        .getOutcomeLog(DASH_KEY, olDay);
-    }
-  }
+  /* Block C (S136): the five separate follow-up fetches are retired — they now
+     arrive inside getDashboardBundle. This name survives because three save
+     handlers call it to refresh the board IMMEDIATELY after a write; force=true
+     bypasses AND refills the shared cache, so the saved tile updates at once,
+     on this device and on every other one's next tick. */
+  function pollFollowups(){ poll(true); }
 
   /* ---- follow-up band ordering + per-device collapse memory (Session 29) ---- */
   // Calling order: Due Today, Grace Period, Actionable Missed Follow-Up, Probable
@@ -1658,7 +1636,8 @@
      fails safe. The day key is LOCAL (IST) rather than UTC, which also flushes the old
      stuck entries once, on first load. */
   function fuDayKey(){
-    var d=new Date();
+    if (TODAY_IST) return TODAY_IST;   // Block C (S136): the ONE clock — server IST (F-5/F-13)
+    var d=new Date();                  // pre-first-refresh fallback only (page just loaded)
     return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
   }
   (function(){
@@ -1750,7 +1729,7 @@
           if(fuElapsed(rid) > FU_POLL_TIMEOUT_MS){ fuSetTimeout(rid); return; }
           fuPollT[rid]=setTimeout(tick, FU_POLL_EVERY_MS);
         })
-        .getCallDuration(DASH_KEY, ref);
+        .getCallDurationFast(DASH_KEY, ref);   /* Block C (S136): last-200-rows read, not the whole tab */
     })();
   }
   // resume polling any called-but-unresolved tile (e.g. the page was reloaded mid-call)
@@ -1854,7 +1833,7 @@
       html+='<div class="fp-sec">'+esc(sec)+' \u2014 total '+t+' / <b>'+dn+'</b> done</div>';
     });
     var when=(d&&d.updated)?esc(d.updated):'';
-    var today=fmtDMY(new Date().toISOString().slice(0,10));
+    var today=fmtDMY(fuDayKey());   /* Block C (S136): F-13 closed — the last UTC date line, retired */
     html+='<div class="fp-when">'+(when?('as of '+when+' \u00b7 '):'')+esc(today)+'</div>';
     box.innerHTML=html;
     box.style.display='block';
@@ -2147,8 +2126,20 @@
     if(!open.length){ box.className=''; box.innerHTML='<div class="muted-note">No open escalations. 👍</div>'; return; }
     box.className='list';
     box.innerHTML=open.map(function(e){
+      /* F-36 (S136b): the escalation row's ID/last-visit were baked in at save
+         time (possibly pre-F-34) or phone-key-filled by WebApp — on a shared
+         family mobile that paints the WRONG relative. Same cure as the six
+         S135 sites: the name-aware maps win; a shared mobile with no confident
+         match shows 'ID \u26a0 verify' — a blank beats a confident wrong ID
+         (D208). Only if the maps know nothing of this mobile at all does the
+         stored value still show (patients outside the mirror). */
+      var _fc=fuLookup(fuClinicIds,{mobile:e.mobile,name:e.name});
+      var _fl=fuLookup(fuLastVisits,{mobile:e.mobile,name:e.name});
+      var _cid=_fc.val || (_fc.shared ? '' : String(e.clinicId||''));
+      var _cidWarn=(!_cid && (_fc.shared||_fl.shared));
+      var _lv=_fl.val || (_fl.shared ? '' : String(e.lastVisit||''));
       var meta=[];
-      if(e.lastVisit) meta.push('Last visit '+esc(fmtDMY(e.lastVisit)));
+      if(_lv) meta.push('Last visit '+esc(fmtDMY(_lv)));
       if(e.diagnosis) meta.push(esc(e.diagnosis));
       if(e.mobile)    meta.push('\ud83d\udcde '+esc(e.mobile));
       var callLine='';
@@ -2176,7 +2167,7 @@
       return '<div class="fu-row fu-esc" id="esc_'+e.rowIndex+'">'+
                '<div class="info">'+
                  '<div class="reason">'+esc(e.reason||'Escalation')+'</div>'+
-                 '<div class="fu-name" style="font-size:14px">'+esc(e.name||'(no name)')+(e.clinicId?(' <span class="ac-cid">ID '+esc(e.clinicId)+'</span>'):'')+'</div>'+
+                 '<div class="fu-name" style="font-size:14px">'+esc(e.name||'(no name)')+(_cid?(' <span class="ac-cid">ID '+esc(_cid)+'</span>'):(_cidWarn?' <span class="ac-cid" title="Shared family mobile \u2014 verify the Clinic ID in Docterz">ID \u26a0 verify</span>':''))+'</div>'+
                  (e.detail?('<div class="dx">'+esc(e.detail)+'</div>'):'')+
                  '<div class="meta2">'+meta.join(' \u00b7 ')+'</div>'+
                  callLine + outLine +
@@ -2544,12 +2535,7 @@
     return false;
   }
   /* ---------- Today's calls (live stream) — v1.1 Slice 1 (display-only) ---------- */
-  function pollAllCalls(){
-    google.script.run
-      .withSuccessHandler(function(res){ renderAllCalls(res); })
-      .withFailureHandler(function(){ /* leave last view; never break the page */ })
-      .getAllCallsToday(DASH_KEY, false);
-  }
+  /* Block C (S136): pollAllCalls retired — today's calls arrive inside getDashboardBundle. */
   function acDirBadge(dir){
     return (dir==='outgoing') ? '<span class="ac-dir out">\u25b2 OUT</span>'
                               : '<span class="ac-dir in">\u25bc IN</span>';
@@ -2580,6 +2566,36 @@
                acStatusBadge(c.status)+ rec +
              '</div>'+
            '</div>';
+  }
+  /* S136b: WhatsApp-tile call visibility. A call placed from a WA tile goes
+     through the SAME dialler as every other outgoing call (triggerCall/OBD) and
+     already lands in Today's calls — it was only the WA tile that never showed
+     it. These two helpers close that: the newest outgoing call TODAY for each
+     number is shown on its WA tile — who called, when, duration (or 'not
+     connected'), and the recording. Built from data already in the bundle. */
+  function waBuildCallMap(calls){
+    waCallMap={};
+    for(var wi=0; wi<calls.length; wi++){
+      var wc=calls[wi]||{};
+      if(wc.direction!=='outgoing') continue;
+      var wp=String(wc.id||'').split('_')[0];
+      if(!wp || wp.length<10) continue;
+      if(!waCallMap[wp] || (wc.startUnix||0)>(waCallMap[wp].startUnix||0)) waCallMap[wp]=wc;
+    }
+  }
+  function waCallLine(m, i){
+    var d10=String((m&&m.number)||'').replace(/\D/g,'');
+    d10=(d10.length>=10)?d10.slice(-10):d10;
+    var c=d10?waCallMap[d10]:null;
+    if(!c) return '';
+    var bits='\ud83d\udcde Called'
+      +(c.agent?(' by '+esc(c.agent)):'')
+      +(c.time?(' \u00b7 '+esc(c.time)):'')
+      +((c.status==='missed')?' \u00b7 <b>not connected</b>':(c.duration?(' \u00b7 '+esc(c.duration)):''));
+    var rec=c.recording
+      ? ('<button class="fu-rec" onclick="playRec(\''+jsq(c.recording)+'\',\'warec_'+i+'\',this)">\ud83c\udfa7 Rec</button><div class="fu-recslot" id="warec_'+i+'"></div>')
+      : '';
+    return '<div class="wa-callline">'+bits+rec+'</div>';
   }
   function renderAllCalls(res){
     var box=document.getElementById('allCalls');
@@ -2613,30 +2629,53 @@
   function poll(force){
     var btn=document.getElementById('refresh'); btn.disabled=true; btn.textContent='Updating…';
     google.script.run
-      .withSuccessHandler(function(d){ if(d&&d.error&&/authoriz/i.test(d.error)){ reset(btn); showLogin(true); return; } render(d); reset(btn); })
+      .withSuccessHandler(function(b){ applyBundle(b, !!force); reset(btn); })
       .withFailureHandler(function(err){ showBanner('Reconnecting… ('+((err&&err.message)||err)+')'); reset(btn); })
-      .getDashboardData(DASH_KEY, !!force);
-    if(force || !fuEditing()) pollFollowups();   // refresh the follow-up loop too (unless mid-edit)
-    pollAllCalls();                              // v1.1: refresh today's live call stream
-    checkFreshness();                            // v18.18 (S57): stale-list top-bar guard
+      .getDashboardBundle(DASH_KEY, { force: !!force, olDay: olDay });
+  }
+  /* Block C (S136): ONE server trip per refresh instead of ~9. The bundle is
+     cached 45s on the server per role, so all open devices share one set of
+     sheet reads. Every render below keeps its old guard: follow-ups are not
+     repainted mid-edit, escalations are not repainted mid-edit, and a failed
+     bundle leaves the last good view untouched behind the Reconnecting banner. */
+  function applyBundle(b, force){
+    if(!b || b.ok!==true){
+      var em=(b&&b.error)?String(b.error):'no data';
+      if(/authoriz/i.test(em)){ showLogin(true); return; }
+      showBanner('Reconnecting… ('+em+')'); return;
+    }
+    if(b.todayIST) TODAY_IST=b.todayIST;                       // the ONE clock (F-5/F-13)
+    if(b.allCalls && b.allCalls.ok) waBuildCallMap(b.allCalls.calls||[]);   // S136b: BEFORE render(), so WA tiles see today's calls on the same paint
+    if(b.dash){
+      if(b.dash.error && /authoriz/i.test(b.dash.error)){ showLogin(true); return; }
+      render(b.dash);
+    }
+    if(force || !fuEditing()){
+      if(b.lastVisits && b.lastVisits.ok) fuLastVisits=b.lastVisits.map||{};
+      if(b.recordings && b.recordings.ok) fuRecordings=b.recordings.map||{};
+      if(b.clinicIds  && b.clinicIds.ok)  fuClinicIds =b.clinicIds.map||{};
+      if(b.sendbacks  && b.sendbacks.ok)  fuReviewSB  =b.sendbacks.items||[];
+      if(b.followups) renderFollowups(b.followups);
+    }
+    if(DASH_ROLE==='full'){
+      if(b.escalations && !escEditing()) renderEscalations(b.escalations);
+      if(b.outcomeLog) renderOutcomeLog(b.outcomeLog);
+    }
+    if(b.allCalls) renderAllCalls(b.allCalls);
+    applyFreshness(b.freshness);
   }
   /* ---- v18.18 (S57): stale-list guard — same truth as the email sentinel ---- */
-  function checkFreshness(){
+  function applyFreshness(r){
     if(DASH_ROLE==='none') return;
-    google.script.run
-      .withSuccessHandler(function(r){
-        var bar=document.getElementById('staleBar'); if(!bar) return;
-        if(r && r.ok && r.stale){
-          bar.innerHTML='\u26A0\uFE0F This may be YESTERDAY\u2019S list \u2014 today\u2019s follow-ups have not reached the board.'+
-            '<span class="sb-sub">Newest date on the board: '+esc(r.newestDue||'\u2014')+' (today is '+esc(r.today||'')+'). '+
-            'On the clinic laptop, run the follow-up push \u2014 or ask the doctor.</span>';
-          bar.classList.add('show'); document.body.classList.add('stale-on');
-        } else {
-          bar.classList.remove('show'); document.body.classList.remove('stale-on');
-        }
-      })
-      .withFailureHandler(function(){ /* a broken guard must never block the board */ })
-      .getFollowupFreshness(DASH_KEY);
+    var bar=document.getElementById('staleBar'); if(!bar) return;
+    if(r && r.ok && r.stale){
+      bar.innerHTML='\u26A0\uFE0F This may be YESTERDAY\u2019S list \u2014 today\u2019s follow-ups have not reached the board.'+
+        '<span class="sb-sub">Newest date on the board: '+esc(r.newestDue||'\u2014')+' (today is '+esc(r.today||'')+'). '+
+        'On the clinic laptop, run the follow-up push \u2014 or ask the doctor.</span>';
+      bar.classList.add('show'); document.body.classList.add('stale-on');
+    } else {
+      bar.classList.remove('show'); document.body.classList.remove('stale-on');
+    }
   }
   function reset(btn){ btn.disabled=false; btn.textContent='↻ Refresh'; left=REFRESH_SECONDS; }
 
@@ -2751,6 +2790,7 @@
     poll(false);
     if(!window.__tick){
       window.__tick = setInterval(function(){
+        if(document.hidden){ return; }   // Block C (S136): a hidden tab spends no quota; resumes below
         // don't auto-refresh while a recording is playing or a reply is being typed
         if((activeAudio && !activeAudio.paused) || replyOpen){ left=REFRESH_SECONDS;
           document.getElementById('count').textContent=left; return; }
@@ -2758,6 +2798,13 @@
         document.getElementById('count').textContent=left; if(left===0) poll(false); },1000);
     }
   }
+  // Block C (S136): the moment a hidden tab is brought back, refresh at once
+  document.addEventListener('visibilitychange', function(){
+    if(!document.hidden && DASH_KEY && DASH_ROLE && DASH_ROLE!=='none'){
+      left=REFRESH_SECONDS;
+      try{ poll(false); }catch(e){}
+    }
+  });
   function showLogin(isErr){
     var o=document.getElementById('loginOverlay'); if(o) o.style.display='flex';
     var er=document.getElementById('loginErr'); if(er) er.style.display=isErr?'block':'none';

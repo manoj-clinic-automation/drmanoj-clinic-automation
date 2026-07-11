@@ -1,5 +1,5 @@
 /**
-* Health.gs  v2.2 — daily HEARTBEAT health report (Session 128)
+* Health.gs  v2.3 — daily HEARTBEAT health report (Session 128; +§4b quota headroom, Session 136)
  * -----------------------------------------------------------------------------
  * WHY v2 EXISTS  (v1 shipped 09-Jul 10:23 and was wrong twice)
  *
@@ -171,6 +171,33 @@ function dailyHealthReport() {
       lines.push('  Yesterday  ' + rev.yesterday + '   (still reachable in the dashboard)');
       lines.push('  Older      ' + rev.older + '   aged out of the review UI. NOT a queue.');
       if (rev.undated) lines.push('  Undated    ' + rev.undated + '   unreadable "when" \u2014 not counted above.');
+    }
+
+    // --- 4b. Quota headroom (Block C, S136) — closes audit §4-Q3 -------------
+    // One "build" = one full assembly of the dashboard bundle (~11 tab reads),
+    // shared by ALL devices for 45 seconds. Counter written by Callconsole.gs
+    // (cc_qcBump_ -> Script Property QC_BUNDLE_BUILDS). Advisory threshold:
+    // a normal clinic day should sit far below 1,000 builds; above 2,000
+    // something is polling too hard and this report says so BEFORE the quota
+    // wall arrives mid-clinic.
+    lines.push('');
+    lines.push('QUOTA HEADROOM (dashboard reads)');
+    var qc = null;
+    try { qc = JSON.parse(sp.getProperty('QC_BUNDLE_BUILDS') || 'null'); } catch (eq) { qc = null; }
+    if (!qc || !qc.date) {
+      lines.push('  UNKNOWN \u2014 no counter yet (appears after the first bundled refresh).');
+    } else {
+      var qYd = hrYesterday_(tz);
+      var qYB = null;
+      if (qc.prevDate === qYd) qYB = qc.prevBuilds;
+      else if (qc.date === qYd) qYB = qc.builds;   // nothing has run yet today
+      if (qYB === null) {
+        lines.push('  Yesterday  UNKNOWN \u2014 counter has no entry for ' + qYd + '.');
+      } else {
+        lines.push('  Yesterday  ' + qYB + ' full builds (\u2248 ' + (qYB * 11) + ' sheet reads, all devices combined).');
+        if (qYB > 2000) problems.push('dashboard read volume high (' + qYB + ' builds yesterday)');
+      }
+      if (qc.date === today) lines.push('  Today so far  ' + qc.builds + ' builds.');
     }
 
     // --- 5. Send -------------------------------------------------------------
