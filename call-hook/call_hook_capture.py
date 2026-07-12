@@ -3,6 +3,37 @@
 call_hook_capture.py - MyOperator call-webhook receiver for Dr. Manoj Agarwal Clinic.
 PHASE B (the "duration gate", D77): passive capture PLUS a PHI-clean Call_Durations feed.
 
+v3.0.1 --  Session 138  --  GRID-WIDTH FIX for the phone10 self-heal
+  One change: _connect_store() calls ws.add_cols(1) before writing the new
+  header cell. The live tab was created exactly 13 columns wide; writing N1
+  into a 13-column grid is a 400 ("exceeds grid limits") -- hit on the first
+  v3.0 restart, 11-Jul-2026 23:34. Raw log lost nothing; the companion
+  backfill_call_durations.py replays it.
+
+v3.0  --  Session 138  --  INCOMING CALLS CAPTURED (scope change against D80)
+  Changed from v2.0 in exactly three places; the secret gate, raw/reject
+  logging, upsert mechanics and the OBD path are untouched.
+
+    1. extract_record() now ALSO accepts category == "incoming". The row is
+       keyed on a synthetic first-column value "IN-<session_id>" (payload.id,
+       present in both call.end and call.summary, so the two events for one
+       call still collapse to a single row). The "IN-" prefix cannot collide
+       with an OBD client_ref_id (those are always phone-timestamp shaped).
+       An incoming event with no session id is raw-logged and skipped, never
+       guessed. Owner decision, Session 138.
+
+    2. NEW final column "phone10": the caller's last-10-digit number, filled
+       for INCOMING rows only (OBD rows leave it blank -- their ref already
+       carries the number our own dialer stamped). Owner decision, Session
+       138, superseding the "tab holds no phone number" rule below for
+       incoming rows: without the number an incoming row can join to nothing.
+       The receiver self-heals the live tab's header (adds "phone10" once,
+       at the end) because this script is the tab's only writer.
+
+    3. Everything that is not "obd with client_ref_id" or "incoming with a
+       session id" (oneway / callback / webcall / otp / malformed) is still
+       raw-logged only, exactly as before.
+
 v2.0  --  Session 125  --  DUAL-KEY ACCEPTANCE + REJECTION VISIBILITY
   Changed from v1 (03-Jul-2026) in exactly three places, all inside the secret
   gate. Capture, extraction, upsert, and the Sheet path are untouched.
@@ -45,6 +76,9 @@ WHAT IT DOES
        client_ref_id is present), it UPSERTS one row into the "Call_Durations"
        tab of the Clinic Callback Tracker, keyed on client_ref_id, so call.end
        and call.summary for the same call collapse to a single row.
+    3. (v3) If it is an INCOMING call (category == "incoming" with a session
+       id), it UPSERTS one row the same way, keyed "IN-<session_id>", with the
+       caller's 10-digit number in the new "phone10" column.
 
   The dashboard (Phase C) will read that tab after a call to decide whether an
   outcome may be logged: it compares the CUSTOMER leg's talk_duration against a
@@ -57,8 +91,14 @@ WHY client_ref_id (not ref_id)
   `session_id` are stored too, as backups.
 
 PHI / PRIVACY (important)
-  - The Call_Durations tab holds NO phone number -- only ref-ids, status,
-    durations, recording filename, timestamps. Patient identity stays out of it.
+  - OBD rows hold NO dedicated phone column -- only ref-ids, status, durations,
+    recording filename, timestamps. (The client_ref_id our own dialer stamps
+    does begin with the number; that predates this file.)
+  - INCOMING rows (v3, owner decision S138) DO carry the caller's last-10
+    number in the final "phone10" column: it is the only possible join key to
+    patient / verdict / dashboard. No caller NAME is ever written -- identity
+    is resolved at viewing time against Patient_Master, never at capture time.
+    The tab lives in the same restricted spreadsheet as Patient_Master.
   - The raw .jsonl log DOES contain numbers (it is the vendor's raw push) -> the
     folder is owner-only (700) and each file 600, exactly like wa_receiver.
   - The reject log holds NO body and NO key -- only an md5[:6] label of the key
@@ -185,6 +225,7 @@ HEADER = [
     "total_duration", "customer_result", "customer_talk_duration",
     "customer_ring_duration", "recording_filename",
     "ended_at_ist", "captured_at_ist", "source_event",
+    "phone10",                     # v3: incoming rows only; OBD rows blank
 ]
 
 app = Flask(__name__)
@@ -372,25 +413,51 @@ def _find_sa_key():
 # --------------------------------------------------------------------------
 # pure extraction (no network -> easy to unit-test)
 # --------------------------------------------------------------------------
+def last10(raw):
+    """Last 10 digits of any phone-shaped value ('+919876543210' -> '9876543210').
+    Shorter-than-10 digit strings are returned as-is; blank stays blank."""
+    digits = "".join(ch for ch in str(raw or "") if ch.isdigit())
+    return digits[-10:] if len(digits) >= 10 else digits
+
+
 def extract_record(body, source_event=""):
-    """Map a raw webhook body to a Call_Durations record, or None if this is
-    not one of our outbound OBD calls (then it is raw-logged only)."""
+    """Map a raw webhook body to a Call_Durations record, or None if it is
+    neither one of our outbound OBD calls nor an incoming call with a session
+    id (then it is raw-logged only).
+
+    Row key (column A, still called client_ref_id):
+      OBD      -> the client_ref_id our own dialer stamped (unchanged).
+      incoming -> "IN-<session_id>"  (payload.id; same in call.end and
+                  call.summary, so the pair still collapses to one row).
+    phone10: filled for incoming only (caller's last-10); blank for OBD.
+    """
     if not isinstance(body, dict):
         return None
     p = body.get("payload") if isinstance(body.get("payload"), dict) else body
 
     category = str(p.get("category", "")).lower()
     client_ref_id = str(p.get("client_ref_id", "") or "").strip()
-    # Only our own outbound OBD calls carry a client_ref_id we can join on.
-    if category != "obd" or not client_ref_id:
-        return None
 
-    # customer leg = the patient side; prefer the one with the most talk time.
+    # customer leg = the patient/caller side; prefer the most talk time.
     legs = p.get("legs") if isinstance(p.get("legs"), list) else []
     cust = [l for l in legs if isinstance(l, dict)
             and str(l.get("type", "")).lower() == "customer"]
     cust.sort(key=lambda l: (l.get("talk_duration") or 0), reverse=True)
     leg = cust[0] if cust else {}
+
+    phone10 = ""
+    if category == "obd" and client_ref_id:
+        pass                                     # our outbound call, key in hand
+    elif category == "incoming":
+        session_id = str(p.get("id", "") or body.get("session_id", "") or "").strip()
+        if not session_id:
+            return None                          # cannot key it; raw log keeps it
+        client_ref_id = "IN-" + session_id
+        phone10 = last10(p.get("customer_number")
+                         or body.get("customer_identifier")
+                         or leg.get("phone_number") or "")
+    else:
+        return None                              # oneway/callback/webcall/otp/etc.
 
     def _num(v):
         return "" if v is None else v
@@ -409,6 +476,7 @@ def extract_record(body, source_event=""):
         "ended_at_ist": to_ist_iso(p.get("ended_at", "")),
         "captured_at_ist": datetime.datetime.now(IST).strftime("%Y-%m-%dT%H:%M:%S") + "+05:30",
         "source_event": source_event or str(body.get("event_type", "") or ""),
+        "phone10": phone10,
     }
 
 
@@ -438,6 +506,21 @@ def _connect_store():
         # write/repair header if the first row isn't ours (empty or partial)
         if not header:
             ws.batch_update([{"range": "A1", "values": [HEADER]}], value_input_option="RAW")
+        elif ("phone10" not in [h.strip().lower() for h in header]
+              and header[0].strip().lower() == "client_ref_id"
+              and len(header) < 26):
+            # v3 self-heal: the pre-v3 tab lacks the final column. This script
+            # is the tab's only writer, so it adds the one header cell itself.
+            # v3.0.1: the tab was CREATED 13 columns wide, so the grid must be
+            # widened first -- writing N1 into a 13-column grid is a 400 error
+            # ("exceeds grid limits", seen live 11-Jul-2026 23:34).
+            if getattr(ws, "col_count", 0) and ws.col_count < len(header) + 1:
+                ws.add_cols(1)
+                log("grid widened to %d columns" % (len(header) + 1))
+            col_letter = chr(ord("A") + len(header))          # 13 cols -> "N"
+            ws.batch_update([{"range": "%s1" % col_letter, "values": [["phone10"]]}],
+                            value_input_option="RAW")
+            log("header self-heal: added 'phone10' at column %s" % col_letter)
     # build the client_ref_id -> row-number index (col A, skip header)
     index = {}
     try:
@@ -526,8 +609,11 @@ def call_hook():
             except Exception:           # one reconnect retry on token/network blips
                 _store["ws"] = None
                 action, r = upsert(rec)
-        log("call %s -> row %d (%s, cust_talk=%s, status=%s)" % (
-            action, r, event_type, rec.get("customer_talk_duration"), rec.get("status")))
+        ph = rec.get("phone10", "")
+        log("call %s -> row %d (%s, cat=%s, cust_talk=%s, status=%s%s)" % (
+            action, r, event_type, rec.get("category"),
+            rec.get("customer_talk_duration"), rec.get("status"),
+            (", caller=...%s" % ph[-4:]) if ph else ""))
         return jsonify(ok=True, captured=True, event=event_type, sheet=action, row=r), 200
     except Exception as e:              # noqa: BLE001
         log("sheet write failed (kept in raw log):", e)
@@ -540,7 +626,7 @@ def call_hook():
 # Best-effort: never raises, so a missing key/network can't stop the service.
 # --------------------------------------------------------------------------
 def _startup_connect():
-    log("Phase B receiver v2 (dual-key). raw logs: %s" % RAW_DIR)
+    log("Phase B receiver v3 (dual-key + incoming capture). raw logs: %s" % RAW_DIR)
     log("reject logs: %s" % REJECT_DIR)
 
     if SECRET and SECRET_PREV:
@@ -676,15 +762,55 @@ def _selftest():
         check("reject log has no body", all("body" not in r_ for r_ in rows))
     globals()["REJECT_DIR"] = prev_dir
 
-    # -- untouched behaviour: extraction is byte-for-byte the old logic -------
+    # -- OBD behaviour unchanged ----------------------------------------------
     body = {"payload": {"category": "obd", "client_ref_id": "R1", "status": "answered",
                         "duration": 42, "legs": [{"type": "customer", "talk_duration": 30,
                                                   "ring_duration": 5, "result": "answered"}]}}
     rec = extract_record(body, "call.end")
     check("extract still works", rec["client_ref_id"] == "R1" and rec["customer_talk_duration"] == 30)
-    check("non-obd still skipped", extract_record({"payload": {"category": "inbound"}}) is None)
-    check("no client_ref_id skipped", extract_record({"payload": {"category": "obd"}}) is None)
-    check("row order preserved", record_to_row(rec)[0] == "R1" and len(record_to_row(rec)) == 13)
+    check("obd phone10 stays blank", rec["phone10"] == "")
+    check("unknown category skipped", extract_record({"payload": {"category": "oneway"}}) is None)
+    check("obd without client_ref_id skipped", extract_record({"payload": {"category": "obd"}}) is None)
+    check("row order preserved", record_to_row(rec)[0] == "R1" and len(record_to_row(rec)) == 14)
+    check("phone10 is the last column", HEADER[-1] == "phone10" and record_to_row(rec)[-1] == "")
+
+    # -- v3: incoming capture (shape of the real §9.3 body) --------------------
+    inc = {"event_type": "call.summary", "session_id": "15.1776144484.2922",
+           "customer_identifier": "+919876543210",
+           "payload": {"id": "15.1776144484.2922", "direction": "incoming",
+                       "customer_number": "+919876543210", "status": "bridged",
+                       "category": "incoming", "duration": 82,
+                       "recording_filename": "abc-v2.mp3",
+                       "legs": [{"type": "customer", "result": "connected",
+                                 "talk_duration": 82, "phone_number": "+919876543210"},
+                                {"type": "agent", "result": "answered",
+                                 "talk_duration": 26}]}}
+    ri = extract_record(inc, "call.summary")
+    check("incoming captured", ri is not None)
+    check("incoming key is IN-<session_id>", ri["client_ref_id"] == "IN-15.1776144484.2922")
+    check("incoming phone10 last-10", ri["phone10"] == "9876543210")
+    check("incoming customer leg read", ri["customer_talk_duration"] == 82
+          and ri["customer_result"] == "connected")
+    check("incoming recording kept", ri["recording_filename"] == "abc-v2.mp3")
+    check("IN- prefix cannot look like an OBD ref", not ri["client_ref_id"][0].isdigit())
+    check("call.end same session -> same key",
+          extract_record({"payload": {"id": "15.1776144484.2922",
+                                      "category": "incoming"}}, "call.end")["client_ref_id"]
+          == ri["client_ref_id"])
+    check("incoming without session id skipped",
+          extract_record({"payload": {"category": "incoming", "status": "missed"}}) is None)
+    # fallback order: payload.customer_number -> top customer_identifier -> leg
+    check("phone falls back to customer_identifier",
+          extract_record({"customer_identifier": "+919111111111",
+                          "payload": {"id": "s1", "category": "incoming"}})["phone10"]
+          == "9111111111")
+    check("phone falls back to customer leg",
+          extract_record({"payload": {"id": "s2", "category": "incoming",
+                                      "legs": [{"type": "customer",
+                                                "phone_number": "09222222222"}]}})["phone10"]
+          == "9222222222")
+    check("last10 strips country code", last10("+919876543210") == "9876543210")
+    check("last10 blank stays blank", last10("") == "" and last10(None) == "")
 
     print("selftest: %d/%d passed" % (passed, passed + failed))
     return 0 if failed == 0 else 1
