@@ -3,6 +3,19 @@
 call_hook_capture.py - MyOperator call-webhook receiver for Dr. Manoj Agarwal Clinic.
 PHASE B (the "duration gate", D77): passive capture PLUS a PHI-clean Call_Durations feed.
 
+v3.1   --  Session 140  --  PIPELINE KICK (D200 at-hangup chain)
+
+  Changed from v3.0.1 in exactly ONE place: after the raw log, a call.end /
+  call.summary event drops a tiny ".kick" file into the pipeline queue
+  directory (default /root/wa/recordings-archive/pipeline_queue). The
+  call_pipeline_worker.py service watches that directory and runs the three
+  existing stage scripts (archive -> transcription -> verdict) minutes after
+  hangup. The kick is best-effort inside its own try/except: a full disk, a
+  missing directory, or any other failure is logged and swallowed -- the
+  webhook reply and the Sheet upsert are UNTOUCHED, and the nightly batch
+  runs remain the guaranteed floor. Gate, capture, extraction, upsert: all
+  byte-identical to v3.0.1.
+
 v3.0.1 --  Session 138  --  GRID-WIDTH FIX for the phone10 self-heal
   One change: _connect_store() calls ws.add_cols(1) before writing the new
   header cell. The live tab was created exactly 13 columns wide; writing N1
@@ -210,6 +223,8 @@ SA_KEY      = os.environ.get("CALLHOOK_SA_KEY", "").strip() \
     or os.environ.get("WA_SA_KEY", "").strip()
 TAB         = os.environ.get("CALLHOOK_TAB", "Call_Durations").strip() or "Call_Durations"
 SCOPES      = ["https://www.googleapis.com/auth/spreadsheets"]
+QUEUE_DIR   = os.environ.get("CALLHOOK_QUEUE_DIR", "").strip() \
+    or "/root/wa/recordings-archive/pipeline_queue"   # v3.1 pipeline kicks
 IST         = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
 
 # A secret longer than this is almost certainly a corrupted .env line, not a key.
@@ -366,6 +381,32 @@ def raw_log(payload, event_type=""):
             pass
     except Exception as e:              # noqa: BLE001
         log("raw_log failed:", e)
+
+
+def pipeline_kick(event_type):
+    """v3.1 (D200): tell the pipeline worker a call just ended.
+
+    Drops a tiny json kick file into QUEUE_DIR. Only call.end and
+    call.summary kick (both, deliberately: the worker coalesces, so a double
+    kick is free, and if MyOperator ever sends only one of the pair for some
+    call class we still run). BEST-EFFORT: any failure is logged and
+    swallowed; this function must never affect the webhook path."""
+    try:
+        et = str(event_type or "").lower()
+        if ("end" not in et) and ("summary" not in et):
+            return
+        os.makedirs(QUEUE_DIR, exist_ok=True)
+        now = datetime.datetime.now(IST)
+        name = os.path.join(QUEUE_DIR, "%s_%s.kick"
+                            % (now.strftime("%Y%m%d%H%M%S%f"),
+                               os.urandom(3).hex()))
+        with open(name, "w", encoding="utf-8") as f:
+            json.dump({"ts": now.timestamp(), "event": et, "due": 0}, f)
+    except Exception as e:              # noqa: BLE001
+        try:
+            log("pipeline_kick failed (harmless, nightly sweep covers):", e)
+        except Exception:               # noqa: BLE001
+            pass
 
 
 def to_ist_iso(ts):
@@ -597,6 +638,7 @@ def call_hook():
                          or (payload.get("payload", {}) or {}).get("event_type") or "")
 
     raw_log(payload, event_type)        # ALWAYS keep the raw copy first
+    pipeline_kick(event_type)           # v3.1: best-effort, never raises
 
     # best-effort PHI-clean upsert; never let a failure break the webhook
     try:
@@ -720,6 +762,31 @@ def _selftest():
     writes = sum(1 for _ in range(1000) if _reject_should_write()[0])
     check("throttle writes first 500", writes == REJECT_LOG_FULL_UPTO + 5)
     check("counter kept counting", _reject_count["n"] == 1000)
+
+    # -- v3.1 pipeline kick ---------------------------------------------------
+    import tempfile
+    global QUEUE_DIR
+    _qd_save = QUEUE_DIR
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            QUEUE_DIR = os.path.join(td, "q")
+            pipeline_kick("call.end")
+            check("kick written on call.end",
+                  len(glob.glob(os.path.join(QUEUE_DIR, "*.kick"))) == 1)
+            pipeline_kick("call.summary")
+            check("kick written on call.summary",
+                  len(glob.glob(os.path.join(QUEUE_DIR, "*.kick"))) == 2)
+            pipeline_kick("call.ivr")
+            check("no kick on other events",
+                  len(glob.glob(os.path.join(QUEUE_DIR, "*.kick"))) == 2)
+            QUEUE_DIR = os.path.join(td, "cant\x00make")  # unmakeable -> swallowed
+            try:
+                pipeline_kick("call.end")
+                check("kick failure is swallowed", True)
+            except Exception:           # noqa: BLE001
+                check("kick failure is swallowed", False)
+    finally:
+        QUEUE_DIR = _qd_save
 
     # -- the gate, end to end, through Flask ---------------------------------
     # reset the throttle: the test above left the counter at 1000, which would

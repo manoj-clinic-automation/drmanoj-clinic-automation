@@ -1,0 +1,14 @@
+[Unit]
+Description=Clinic call pipeline worker (D200 at-hangup chain, S140)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/wa/recordings-archive
+ExecStart=/root/wa/venv/bin/python3 /root/wa/recordings-archive/call_pipeline_worker.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

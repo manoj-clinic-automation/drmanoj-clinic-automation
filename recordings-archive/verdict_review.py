@@ -190,7 +190,7 @@ SEC_MISMATCH = "mismatch"
 SEC_AI_ONLY = "ai_only"
 SEC_UNCLEAR = "unclear"
 SEC_MATCH = "match"
-SEC_INCOMING_NOCLAIM = "incoming_noclaim"   # correct by D153 — not shown
+SEC_INCOMING_NOCLAIM = "incoming_noclaim"   # RETIRED S140 (D153 overturned by D190/K-2); kept so old counts never KeyError
 SEC_SUSPECT = "suspect_join"                # see classify_section
 SEC_FLAGGED = "flagged"                     # see placement_section
 SEC_ERROR = "error"                         # judge errored — counted only
@@ -270,25 +270,48 @@ def mask_phone(number):
 # ---------------------------------------------------------------------------
 # Pure logic — everything below here is covered by --selftest
 # ---------------------------------------------------------------------------
+# --- S140 (F-18 retired): staff DO file incoming outcomes now (K-2) --------
+# A claim on an incoming call is NORMAL. The only remaining wrong-join
+# signal (D158/G-4) is a LEGACY OUTGOING dropdown code bound to an incoming
+# call: those codes are follow-up statements staff could not have made
+# about an incoming conversation. K-era codes (k_*, in_*, no_answer),
+# `problem` (incoming button 5 delegates through it) and the shared
+# `cant_communicate` are legitimate on incoming.
+LEGACY_OUTGOING_SUSPECT = {
+    "coming", "out_of_town", "on_medication", "dikha_chuke",
+    "close_followup", "not_interested", "treatment_elsewhere",
+    "wrong_number", "asked_not_to_call",
+}
+
+def normalise_claim(code):
+    """Canonical form for the SUSPECT test only: k_* codes stay k_* here —
+    aliasing k_coming to coming would make a legitimate K-2 incoming tap
+    look like a legacy outgoing code (caught by selftest, S140)."""
+    c = "".join(ch if (ch.isalnum() or ch == "_") else "_"
+                for ch in str(code or "").strip().lower())
+    if c.startswith("in_"):
+        c = c[3:]
+    return c
+
+
 def classify_section(row):
     """Which section does one Call_Verdicts row belong in?
 
-    Rules (in order):
+    Rules (in order; REWRITTEN S140 — D153 retired, F-18 closed):
       * a row the judge could not process at all -> error (counted, not shown)
-      * INCOMING call that somehow carries a staff claim -> SUSPECT JOIN.
-        D153 established that staff never file outcomes for incoming calls, so
-        a claim on an incoming call cannot be a staff statement about that
-        call.  It is the phone-keyed forward-window join binding a LATER
-        outgoing follow-up outcome to this incoming call.  Scoring it as a
-        Mismatch would blame staff for a join artefact and would poison the
-        training corpus.  Caught here, before any verdict is trusted.
+      * INCOMING call whose claim is a LEGACY OUTGOING dropdown code ->
+        SUSPECT JOIN. Since K-2 (S140) staff file incoming outcomes
+        legitimately (k_*, in_*, no_answer, problem), so an incoming claim is
+        NORMAL — the only remaining wrong-join signal (D158/G-4) is an
+        outgoing-only follow-up code bound to an incoming call: that claim
+        almost certainly belongs to a later outgoing call to the same number.
       * Mismatch or Partial                      -> the Mismatch section
         (Partial is a SOFTENED mismatch, e.g. dikha_chuke vs close_followup;
          it is still training material, so it belongs on a card, labelled.)
-      * No claim logged + INCOMING               -> not shown.  D153: staff
-        never file outcomes for incoming calls, so this is correct, not a gap.
-      * No claim logged + OUTGOING + a real AI outcome -> 'AI logged, staff didn't'
-      * No claim logged + OUTGOING + no usable AI outcome -> Unclear
+      * No claim logged (EITHER direction) + a real AI outcome ->
+        'AI logged, staff didn't'. D153's "correct by design" excuse for
+        incoming is gone: an unlogged incoming conversation is a real gap.
+      * No claim logged + no usable AI outcome   -> Unclear
       * Unclear, or the AI answered UNCLEAR      -> Unclear
       * Match                                    -> the collapsed Matches list
       * anything unrecognised                    -> Unclear (fail visible, not silent)
@@ -303,13 +326,12 @@ def classify_section(row):
     ai_out = str(row.get("AI Outcome", "")).strip()
     has_claim = bool(str(row.get("Claimed Outcome", "")).strip())
 
-    if direction.startswith("in") and has_claim:
+    if (direction.startswith("in") and has_claim
+            and normalise_claim(row.get("Claimed Outcome")) in LEGACY_OUTGOING_SUSPECT):
         return SEC_SUSPECT
     if verdict in ("mismatch", "partial"):
         return SEC_MISMATCH
     if verdict == "no claim logged":
-        if direction.startswith("in"):
-            return SEC_INCOMING_NOCLAIM
         if ai_out and ai_out != UNCLEAR:
             return SEC_AI_ONLY
         return SEC_UNCLEAR
@@ -559,7 +581,8 @@ def direction_counts(rows):
 
 
 def match_rate(counts):
-    """Match rate over OUTGOING-WITH-CLAIM only (D153).  '—' when nothing to
+    """Match rate over EVERY judged claim, both directions (S140; staff
+    file incoming outcomes since K-2).  '—' when nothing to
     measure.  Mismatch here includes Partial, deliberately: a Partial is not a
     clean match and should not flatter the number.  Suspect joins are excluded
     entirely — they are not evidence about staff accuracy either way."""
@@ -655,10 +678,8 @@ def render_summary(g, counts, dirs, tstats, window_days, today, generated_at):
     g.summary_rows.append(g.add("Suspect joins (do not train on these)",
                                 str(counts[SEC_SUSPECT])))
     g.summary_rows.append(g.add("Matches (collapsed below)", str(counts[SEC_MATCH])))
-    g.summary_rows.append(g.add("Match rate (outgoing with a claim)", rate,
+    g.summary_rows.append(g.add("Match rate (all judged claims)", rate,
                                 "Partial counts against the rate, not for it."))
-    g.summary_rows.append(g.add("Incoming calls, no claim", str(counts[SEC_INCOMING_NOCLAIM]),
-                                "Correct by design — staff do not log incoming calls (D153)."))
     g.summary_rows.append(g.add("Calls in window: outgoing / incoming",
                                 f"{dirs['outgoing']} outgoing   ·   {dirs['incoming']} incoming"
                                 + (f"   ·   {dirs['other']} unrecognised direction"
@@ -704,9 +725,10 @@ def render_card(g, row, transcript_text, transcript_error, prefill):
 
     if classify_section(row) == SEC_SUSPECT:
         g.add("⚠  SUSPECT JOIN",
-              "A claim is attached to an INCOMING call. Staff do not file "
-              "outcomes for incoming calls (D153), so this claim almost "
-              "certainly belongs to a LATER outgoing call to the same number. "
+              "An OUTGOING-only follow-up code is attached to an INCOMING "
+              "call. Staff could not have filed that code about this "
+              "conversation, so it almost certainly belongs to a LATER "
+              "outgoing call to the same number (D158). "
               "Treat the verdict as meaningless. Do not train on this row.")
 
     g.add("When", f"{row.get('Date','')}   {row.get('Time','')}")
@@ -1003,15 +1025,27 @@ def selftest():
           classify_section(dict(base, Verdict="Partial", Direction="outgoing")) == SEC_MISMATCH)
     check("match -> match",
           classify_section(dict(base, Verdict="Match", Direction="outgoing")) == SEC_MATCH)
-    check("incoming no-claim -> not shown",
+    check("incoming no-claim with AI outcome -> a REAL gap (S140, D153 retired)",
+          classify_section(dict(base, Verdict="No claim logged", Direction="incoming",
+                                **{"AI Outcome": "will_come"})) == SEC_AI_ONLY)
+    check("incoming no-claim without AI outcome -> unclear (symmetric with outgoing)",
           classify_section(dict(base, Verdict="No claim logged", Direction="incoming"))
-          == SEC_INCOMING_NOCLAIM)
-    check("incoming WITH a claim -> suspect join, not mismatch",
+          == SEC_UNCLEAR)
+    check("incoming claim in incoming vocab is NORMAL, verdict stands (S140)",
           classify_section(dict(base, Verdict="Mismatch", Direction="incoming",
-                                **{"Claimed Outcome": "resolved_on_call"})) == SEC_SUSPECT)
-    check("incoming with a claim beats even a Match verdict",
+                                **{"Claimed Outcome": "resolved_on_call"})) == SEC_MISMATCH)
+    check("K-code claim on incoming is NORMAL, Match stands (S140)",
           classify_section(dict(base, Verdict="Match", Direction="incoming",
-                                **{"Claimed Outcome": "no_action"})) == SEC_SUSPECT)
+                                **{"Claimed Outcome": "k_coming"})) == SEC_MATCH)
+    check("in_-prefixed claim on incoming is NORMAL (S140)",
+          classify_section(dict(base, Verdict="Match", Direction="incoming",
+                                **{"Claimed Outcome": "in_no_action"})) == SEC_MATCH)
+    check("legacy OUTGOING code on incoming -> suspect join (D158 signal kept)",
+          classify_section(dict(base, Verdict="Mismatch", Direction="incoming",
+                                **{"Claimed Outcome": "coming"})) == SEC_SUSPECT)
+    check("legacy outgoing code on incoming beats even a Match verdict",
+          classify_section(dict(base, Verdict="Match", Direction="incoming",
+                                **{"Claimed Outcome": "dikha_chuke"})) == SEC_SUSPECT)
     check("outgoing WITH a claim is never a suspect join",
           classify_section(dict(base, Verdict="Mismatch", Direction="outgoing",
                                 **{"Claimed Outcome": "coming"})) == SEC_MISMATCH)
@@ -1110,14 +1144,15 @@ def selftest():
               dict(base, Verdict="No claim logged", Direction="incoming")]
     counts = summarise_counts(sample)
     check("counts match", counts[SEC_MATCH] == 3 and counts[SEC_MISMATCH] == 1)
-    check("counts incoming", counts[SEC_INCOMING_NOCLAIM] == 1)
+    check("incoming no-claim now counted as a visible section, never dropped (S140)",
+          counts[SEC_INCOMING_NOCLAIM] == 0 and counts[SEC_UNCLEAR] == 1)
     rate, judged = match_rate(counts)
     check("match rate 3/4 75%", rate == "3/4  (75%)" and judged == 4)
     check("match rate empty", match_rate(summarise_counts([]))[0] == "—")
 
     # A suspect join must not move the match rate in either direction.
     poisoned = sample + [dict(base, Verdict="Mismatch", Direction="incoming",
-                              **{"Claimed Outcome": "resolved_on_call"})]
+                              **{"Claimed Outcome": "coming"})]   # legacy code = still suspect (S140)
     pc = summarise_counts(poisoned)
     check("suspect join counted separately", pc[SEC_SUSPECT] == 1)
     check("suspect join does not touch the match rate",
@@ -1136,9 +1171,9 @@ def selftest():
                             **{"Flag Clinical": "YES"})
     check("a flagged INCOMING call is drawn, not dropped",
           placement_section(flagged_incoming) == SEC_FLAGGED)
-    check("an unflagged incoming no-claim is still dropped",
+    check("an unflagged incoming no-claim is DRAWN as unclear, never dropped (S140)",
           placement_section(dict(base, Verdict="No claim logged",
-                                 Direction="incoming")) == SEC_INCOMING_NOCLAIM)
+                                 Direction="incoming")) == SEC_UNCLEAR)
     check("an error row is never promoted to flagged",
           placement_section({"Status": "error", "Error": "x",
                              "Flag Urgent": "YES"}) == SEC_ERROR)
@@ -1207,7 +1242,7 @@ def selftest():
 
     # --- the suspect-join banner --------------------------------------------
     g4 = Grid()
-    suspect = dict(row, Direction="incoming", **{"Claimed Outcome": "resolved_on_call"})
+    suspect = dict(row, Direction="incoming", **{"Claimed Outcome": "coming"})
     render_card(g4, suspect, "kuch baat hui", None, {})
     check("suspect card carries the warning banner",
           any("SUSPECT JOIN" in r[COL_LABEL] for r in g4.rows))

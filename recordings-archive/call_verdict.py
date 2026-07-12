@@ -4,6 +4,16 @@ call_verdict.py — Stage 3 of the Staff Call Audit project: the AI judge.
 Dr. Manoj Agarwal Clinic, Bareilly. Session 128. Decision D149 (design locked
 Sessions 122-127; D62 is the parent decision from Session 24).
 
+UPDATED Session 140 (12 Jul 2026) — the K-era claim vocabulary:
+  K-1/K-2 one-tap buttons (Dashboard v18.28) write NEW claim codes into
+  Followup_Outcomes: `k_coming` / `k_not_coming` / `k_call_again` (source=K),
+  `no_answer` (button 4 + the old snooze path), and incoming codes prefixed
+  `in_` (e.g. `in_appointment_booked`). The AI's answer vocabulary is
+  UNCHANGED (frozen S125-126) — only the COMPARISON now normalises staff
+  claims and understands the K buttons' "what next" meaning groups
+  (Console Spec §K.6.1: the AI says what HAPPENED; the buttons say what
+  NEXT — exact equality is impossible by design for three of them).
+
 WHAT THIS DOES
   Runs after Stage 2 (call_transcription.py, 03:00 IST). Reads the
   "Call_Transcripts" tab of the Clinic Callback Tracker, finds transcribed
@@ -242,6 +252,33 @@ PARTIAL_PAIRS = {
     frozenset(("enquiry_only", "resolved_on_call")),
 }
 
+# --- S140: staff-claim normalisation (K-1/K-2 one-tap codes) ---------------
+# `in_` prefix (saveIncomingOutcome) maps 1:1 onto VOCAB_INCOMING once
+# stripped. `k_coming` is the button spelling of `coming`. The remaining
+# K codes are "what next" statements, compared through meaning GROUPS.
+CLAIM_ALIAS = {"k_coming": "coming"}
+
+def normalise_claim(code):
+    c = "".join(ch if (ch.isalnum() or ch == "_") else "_"
+                for ch in str(code or "").strip().lower())
+    if c.startswith("in_"):
+        c = c[3:]
+    return CLAIM_ALIAS.get(c, c)
+
+# claim -> AI outcomes that COUNT AS A MATCH (both directions, because K-2
+# puts the same buttons on incoming calls for known patients)
+CLAIM_EQUIV = {
+    "k_not_coming": {"not_interested", "treatment_elsewhere",
+                     "close_followup", "no_action"},
+    "k_call_again": {"on_medication", "out_of_town", "needs_callback"},
+    "no_answer":    {"cant_communicate"},
+    "problem":      {"escalated"},
+}
+# claim -> AI outcomes that count as PARTIAL (softened, still shown)
+CLAIM_PARTIAL = {
+    "k_call_again": {"coming", "will_come"},
+}
+
 FLAG_KEYS = ["flag_postop", "flag_complaint", "flag_urgent",
              "flag_surgery", "flag_clinical", "flag_conduct"]
 
@@ -463,16 +500,24 @@ def resolve_identity(claim_row, identity_index, phone10):
 
 
 def compare_outcomes(claimed, ai_outcome):
-    """Mechanical comparison. Returns (verdict, true_false_cell)."""
-    c = str(claimed or "").strip()
+    """Mechanical comparison. Returns (verdict, true_false_cell).
+    S140: the staff claim is NORMALISED first (in_ prefix, k_ aliases) and
+    the K buttons' meaning groups count as Match/Partial — the AI's own
+    vocabulary is untouched."""
+    c_raw = str(claimed or "").strip()
     a = str(ai_outcome or "").strip()
     if a == UNCLEAR or not a:
         return "Unclear", ""
-    if not c:
+    if not c_raw:
         return "No claim logged", ""
+    c = normalise_claim(c_raw)
     if a == c:
         return "Match", "TRUE"
+    if a in CLAIM_EQUIV.get(c, ()):
+        return "Match", "TRUE"
     if frozenset((a, c)) in PARTIAL_PAIRS:
+        return "Partial", ""
+    if a in CLAIM_PARTIAL.get(c, ()):
         return "Partial", ""
     return "Mismatch", "FALSE"
 
@@ -728,6 +773,26 @@ def selftest():
           and normalise_direction("INCOMING") == "incoming")
     check("unknown direction -> union vocab",
           set(vocab_for_direction("unknown")) == set(VOCAB_OUTGOING) | set(VOCAB_INCOMING))
+
+    # S140: K-era claim normalisation + meaning groups
+    check("in_ prefix strips to incoming vocab",
+          compare_outcomes("in_appointment_booked", "appointment_booked") == ("Match", "TRUE"))
+    check("k_coming aliases to coming",
+          compare_outcomes("k_coming", "coming") == ("Match", "TRUE"))
+    check("k_coming vs will_come never silently matches",
+          compare_outcomes("k_coming", "will_come")[0] in ("Mismatch", "Partial"))
+    check("k_not_coming group matches not_interested",
+          compare_outcomes("k_not_coming", "not_interested") == ("Match", "TRUE"))
+    check("k_call_again group matches on_medication",
+          compare_outcomes("k_call_again", "on_medication") == ("Match", "TRUE"))
+    check("k_call_again vs coming is Partial",
+          compare_outcomes("k_call_again", "coming") == ("Partial", ""))
+    check("no_answer claim matches cant_communicate",
+          compare_outcomes("no_answer", "cant_communicate") == ("Match", "TRUE"))
+    check("problem claim matches escalated (incoming button 5)",
+          compare_outcomes("problem", "escalated") == ("Match", "TRUE"))
+    check("k_not_coming vs coming is a real Mismatch",
+          compare_outcomes("k_not_coming", "coming") == ("Mismatch", "FALSE"))
 
     # 8-17: claim matching (REDESIGNED S123 — whole-day, phone-keyed, ordered)
     # The core fix: a call at 16:00 whose outcome the staff files the NEXT
