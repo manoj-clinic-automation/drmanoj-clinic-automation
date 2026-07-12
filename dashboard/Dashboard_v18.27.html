@@ -1,0 +1,2988 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    /* DARK THEME — Session 16. Same variable names; dark values. */
+    --bg:#0e1320; --bg2:#0b1019; --card:#1a2232; --ink:#f2f5fa; --muted:#9fb0c8; --line:#2b3650;
+    --brand:#6fa8ff; --brand2:#4ad07f;
+    --accent:#4f9dff; --accent-soft:#16263f; --accent-line:#2d456e;
+    --danger:#ff6b5e; --danger-soft:#371a18; --danger-line:#5e2a26;
+    --ok:#43d27f; --ok-soft:#16301f; --ok-line:#26573a;
+    --warn:#f0a83c; --warn-soft:#332512; --warn-line:#5c4423;
+    --wa:#34c6a4; --wa-soft:#14302a; --wa-line:#235448;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 6px 20px rgba(0,0,0,.45);
+    --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);background-attachment:fixed;font-size:16px;
+    color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  .wrap{max-width:1120px;margin:0 auto;padding:18px 16px 48px}
+
+  /* ---------- top brand bar ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:14px 18px;margin-bottom:16px}
+  .brand{display:flex;align-items:center;gap:13px;min-width:0}
+  .mark{width:42px;height:42px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--brand) 0%,var(--brand2) 100%);
+    box-shadow:0 3px 8px rgba(21,69,126,.28)}
+  .brandtext{min-width:0}
+  .bname{font-size:19px;font-weight:800;letter-spacing:-.01em;line-height:1.15}
+  .bsub{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:13px;font-weight:600;margin-top:2px}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);
+    box-shadow:0 0 0 0 rgba(24,138,78,.5);animation:pulse 2.2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(24,138,78,.45)}70%{box-shadow:0 0 0 8px rgba(24,138,78,0)}100%{box-shadow:0 0 0 0 rgba(24,138,78,0)}}
+  .meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;color:var(--muted);font-size:12.5px}
+  .meta b{color:var(--ink)}
+  .meta .sep{opacity:.5}
+  .bld{color:var(--muted);font-size:11px;opacity:.75}
+  .btn{border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--accent);font-weight:700;
+    padding:8px 14px;border-radius:10px;cursor:pointer;font-size:13px;transition:filter .12s ease}
+  .btn:hover{filter:brightness(.97)} .btn:active{transform:translateY(1px)}
+  .btn:disabled{opacity:.6;cursor:default}
+
+  .banner{display:none;background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line);
+    border-radius:12px;padding:9px 13px;font-size:13px;margin-bottom:14px;font-weight:600}
+
+  /* ---------- KPI tiles ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:6px}
+  .kpi.tap{cursor:pointer;transition:transform .12s ease,box-shadow .12s ease}
+  .kpi.tap:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.10)}
+  .kpi.tap:active{transform:translateY(0)}
+  .kpi{position:relative;overflow:hidden;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);padding:15px 17px;box-shadow:var(--shadow-sm)}
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);opacity:.85}
+  .kpi .lbl{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+  .kpi .num{font-size:46px;font-weight:800;line-height:1.05;margin-top:6px;letter-spacing:-.02em}
+  .kpi .sub{font-size:12px;color:var(--muted);margin-top:3px}
+  .kpi.hero::before{background:var(--accent)}
+  .kpi.hero{background:linear-gradient(180deg,#16263f 0%,var(--card) 60%);border-color:var(--accent-line)}
+  .kpi.hero .num{color:var(--accent)}
+  .kpi.alarm::before{background:var(--danger)}
+  .kpi.alarm{background:linear-gradient(180deg,#371a18 0%,var(--card) 60%);border-color:var(--danger-line)}
+  .kpi.alarm .num{color:var(--danger)}
+
+  /* ---------- collapsible sections ---------- */
+  section.sec{margin:20px 0 0}
+  .sechead{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;
+    font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);
+    font-weight:800;margin:0 0 12px;padding:2px 0}
+  .sechead .caret{font-size:11px;color:var(--muted);transition:transform .15s ease;display:inline-block;
+    width:18px;height:18px;line-height:18px;text-align:center;background:var(--line);border-radius:6px}
+  section.sec:not(.collapsed) .sechead .caret{transform:rotate(90deg)}
+  section.sec.collapsed .secbody{display:none}
+  .cnt{font-size:14px;font-weight:800;color:var(--muted);text-transform:none;letter-spacing:0;
+    background:var(--line);border-radius:999px;padding:2px 10px;min-width:24px;text-align:center}
+  .cnt.alarm{background:var(--danger);color:#fff}
+  .muted-note{color:var(--muted);font-size:15px;padding:10px 4px;background:var(--card);border:1px dashed var(--line);
+    border-radius:12px;text-align:center}
+
+  .list{display:flex;flex-direction:column;gap:11px}
+  .row{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--line);
+    border-radius:14px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px;
+    box-shadow:var(--shadow-sm);transition:box-shadow .14s ease,transform .14s ease}
+  .row.prio{border-left-color:var(--danger);background:linear-gradient(90deg,#2a1a18 0%,var(--card) 40%)}
+  .row.done{border-left-color:var(--ok);background:linear-gradient(90deg,#16261c 0%,var(--card) 40%)}
+  .row .info{min-width:0;flex:1}
+  .num-big{font-size:26px;font-weight:800;letter-spacing:.3px}
+  .num-big a{color:inherit;text-decoration:none;border-bottom:2px solid transparent}
+  .num-big a:hover{border-bottom-color:var(--accent-line)}
+  .row .when{color:var(--muted);font-size:13px;margin-top:3px}
+  .row .when .ag{color:var(--ink);font-weight:700}
+  .tried{color:#b25e00;font-size:12.5px;margin-top:3px;font-weight:600}
+  .ctx{font-size:14px;margin-top:6px;font-weight:600}
+  .ctx .nm{color:var(--ink)}
+  .ctx .dx{color:var(--accent);font-weight:600}
+  .ctx .un{color:var(--muted);font-weight:500;font-style:italic}
+  .ctx .more{color:var(--muted);font-weight:500}
+  .wa-line{margin-top:7px;font-size:13px;color:var(--wa);background:var(--wa-soft);
+    border:1px solid var(--wa-line);border-radius:9px;padding:6px 10px;display:inline-block;max-width:100%}
+  .wa-line b{font-weight:800}
+
+  .chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+  .chip{font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap;letter-spacing:.02em}
+  .chip.prio{background:var(--danger);color:#fff}
+  .chip.after{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line)}
+  .chip.att{background:#eef1f6;color:#475467}
+  .chip.ok{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line)}
+  .call{background:var(--ok);color:#fff;border:none;font-weight:800;padding:10px 18px;border-radius:10px;
+    text-decoration:none;font-size:14px;white-space:nowrap;box-shadow:0 2px 6px rgba(24,138,78,.25)}
+  .call:active{transform:translateY(1px)}
+  .rec{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);font-weight:800;
+    padding:9px 15px;border-radius:10px;text-decoration:none;font-size:13.5px;white-space:nowrap;cursor:pointer}
+  .rec:disabled{opacity:.6;cursor:default}
+  .recslot audio{width:100%;margin-top:10px;height:40px;display:block}
+
+  .empty{background:var(--ok-soft);border:1px solid var(--ok-line);color:var(--ok);
+    border-radius:14px;padding:24px;text-align:center;font-size:18px;font-weight:800}
+
+  .handled{display:flex;flex-wrap:wrap;gap:8px}
+  .htag{background:var(--card);border:1px solid var(--line);color:var(--muted);border-radius:999px;
+    padding:6px 12px;font-size:13px;box-shadow:var(--shadow-sm)}
+
+  .wa-feed{display:flex;flex-direction:column;gap:9px}
+  .wa-item{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:10px 14px;
+    display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow-sm)}
+  .wa-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .wa-head .arr{font-weight:800;font-size:13px;flex:none}
+  .wa-head .arr.in{color:var(--wa)} .wa-head .arr.out{color:var(--muted)}
+  .wa-head .who{font-weight:700;flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+  .wa-head .tm{color:var(--muted);font-size:12px;white-space:nowrap;flex:none}
+  .wa-msg{color:var(--ink);overflow-wrap:anywhere;word-break:break-word;white-space:pre-wrap;line-height:1.45}
+  .wa-full{display:none}
+  .wa-media-img{max-width:170px;max-height:170px;border-radius:10px;display:block;margin:4px 0;cursor:zoom-in;border:1px solid var(--line,#dcdce3)}
+  .wa-media-vid{max-width:230px;border-radius:10px;display:block;margin:4px 0}
+  .wa-media-aud{width:230px;max-width:100%;margin:6px 0;display:block}
+  .wa-media-doc{display:inline-block;margin:4px 0;padding:7px 13px;border-radius:9px;background:rgba(0,0,0,.06);color:var(--ink);text-decoration:none;font-weight:600;font-size:13px}
+  .wa-media-doc:hover{background:rgba(0,0,0,.12)}
+  .bub .wa-media-img{max-width:150px;max-height:150px}
+  .bub.out .wa-media-doc{background:rgba(255,255,255,.25);color:#fff}
+  .wa-more{color:var(--wa);font-weight:800;cursor:pointer;white-space:nowrap;margin-left:6px;font-size:13px}
+
+  /* WhatsApp reply composer (free text, 24h-window guarded) */
+  .wa-entry{display:flex;flex-direction:column}
+  .wa-reply-btn{flex:none;border:1px solid var(--wa-line);background:var(--wa-soft);color:var(--wa);
+    font-weight:800;font-size:12px;padding:4px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}
+  .wa-reply-btn:active{transform:translateY(1px)}
+  .reply{background:var(--wa-soft);border:1px solid var(--wa-line);border-top:none;
+    border-radius:0 0 11px 11px;padding:10px 14px;margin-top:-3px}
+  .reply-status{font-size:12.5px;font-weight:700;margin-bottom:8px;color:var(--wa)}
+  .reply-status.ok{color:var(--ok)} .reply-status.warn{color:var(--warn)}
+  .reply-text{width:100%;border:1px solid var(--wa-line);border-radius:9px;padding:9px 11px;font-size:14px;
+    font-family:inherit;resize:vertical;min-height:60px;background:#fff;color:#1d2733;color-scheme:light}
+  .reply-text:disabled{background:#f4f6f9;color:var(--muted)}
+  .reply-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;flex-wrap:wrap}
+  .reply-count{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .reply-actions{display:flex;gap:8px}
+  .reply-send{padding:8px 18px;font-size:13.5px}
+  .reply-cancel{padding:8px 14px}
+
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm)}
+  th,td{padding:11px 15px;text-align:left;font-size:14px;border-top:1px solid var(--line)}
+  th{background:#f6f8fc;color:#5a6a7d;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;
+    font-weight:800;border-top:none}
+  tbody tr:nth-child(even) td{background:rgba(255,255,255,.03)}
+  td.n,th.n{text-align:center}
+  td .nm-cell{font-weight:700}
+
+  .foot{color:var(--muted);font-size:12px;margin-top:26px;text-align:center;line-height:1.6}
+
+  /* custom audio player — drawn by us so it shows the same on every Android,
+     portrait or landscape (the native player collapses in narrow portrait) */
+  .player{display:flex;align-items:center;gap:10px;margin-top:10px;background:var(--accent-soft);
+    border:1px solid var(--accent-line);border-radius:11px;padding:8px 12px}
+  .pbtn{flex:none;width:40px;height:40px;border-radius:50%;border:none;background:var(--accent);color:#fff;
+    font-size:15px;cursor:pointer;line-height:1;box-shadow:0 2px 6px rgba(27,110,243,.3)}
+  .pbtn:active{transform:translateY(1px)}
+  .pseek{flex:1;min-width:80px;height:26px;accent-color:var(--accent);cursor:pointer}
+  .ptime{flex:none;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;
+    white-space:nowrap;min-width:78px;text-align:right}
+
+  /* Clinic Team — expandable member cards */
+  .tm-card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-sm);margin-bottom:10px;overflow:hidden}
+  .tm-head{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:13px 16px;flex-wrap:wrap}
+  .tm-head .caret{font-size:11px;color:var(--muted);width:18px;height:18px;line-height:18px;text-align:center;
+    background:#eef1f6;border-radius:6px;transition:transform .15s ease;flex:none}
+  .tm-card:not(.collapsed) .tm-head .caret{transform:rotate(90deg)}
+  .tm-card.collapsed .tm-body{display:none}
+  .tm-name{font-weight:800;font-size:15px}
+  .tm-stats{color:var(--muted);font-size:12.5px;flex:1;min-width:150px}
+  .tm-recs{font-size:12px;font-weight:800;color:var(--accent);background:var(--accent-soft);
+    border:1px solid var(--accent-line);border-radius:999px;padding:2px 11px;white-space:nowrap}
+  .tm-body{border-top:1px solid var(--line);padding:4px 16px 10px}
+  .tm-call{padding:11px 0;border-top:1px solid var(--line)}
+  .tm-call:first-child{border-top:none}
+  .tm-cinfo{font-size:14px}
+  .tm-cinfo b{font-weight:800}
+  .tm-when{color:var(--muted);font-size:12.5px}
+  .tm-dir{font-size:12px;font-weight:800;margin-right:4px}
+  .tm-dir.in{color:var(--wa)} .tm-dir.out{color:var(--accent)}
+  .tm-call .rec{margin-top:9px;display:inline-block}
+  .norec{color:var(--muted);font-size:12px;margin-top:9px;display:inline-block}
+
+  @media (hover:hover){
+    .row:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+  }
+  @media (max-width:760px){
+    .wrap{padding:14px 12px 40px}
+    .kpis{grid-template-columns:repeat(2,1fr);gap:10px}
+    .kpi{padding:13px 14px}
+    .kpi .num{font-size:33px}
+    .num-big{font-size:21px}
+    .row{flex-wrap:wrap;align-items:flex-start}
+    .chips{justify-content:flex-start;width:100%;margin-top:4px}
+    .call{flex:1;text-align:center;padding:12px 18px}
+    .rec{flex:1;text-align:center;padding:11px 15px}
+    .meta{width:100%;justify-content:space-between}
+    /* follow-up & incoming rows: stack the outcome controls full-width, and
+       use >=16px fonts so iOS doesn't auto-zoom when a dropdown/field is tapped */
+    .fu-row{flex-wrap:wrap}
+    .fu-right{min-width:0;width:100%;align-items:stretch}
+    select.fu-out,select.fu-sub,input.fu-in{font-size:16px}
+    .in-card select,.in-card input{font-size:16px}
+  }
+  /* WhatsApp conversation thread (modal) */
+  #threadOverlay{position:fixed;inset:0;z-index:9000;background:rgba(16,24,40,.45);display:none;align-items:flex-end;justify-content:center}
+  #threadOverlay.show{display:flex}
+  /* v18.17 (S57) WhatsApp call-confirm dialog — custom, no browser URL header */
+  #waCallOverlay{position:fixed;inset:0;z-index:9100;background:rgba(16,24,40,.45);display:none;align-items:center;justify-content:center;padding:20px}
+  #waCallOverlay.show{display:flex}
+  .wc-box{background:#fff;color:#1d2733;width:100%;max-width:360px;border-radius:16px;padding:20px 18px;box-shadow:0 12px 40px rgba(16,24,40,.35);color-scheme:light}
+  .wc-title{font-size:18px;font-weight:800;margin-bottom:12px}
+  .wc-who{font-size:16px;line-height:1.45;background:#f4f7fb;border:1px solid #e3ebf6;border-radius:11px;padding:11px 13px;margin-bottom:12px;word-break:break-word}
+  .wc-who .wc-last4{color:#6b7684;font-weight:600;font-size:14px}
+  .wc-note{font-size:13px;color:#5a6472;margin-bottom:16px}
+  .wc-actions{display:flex;gap:10px;justify-content:flex-end}
+  .wc-cancel{border:1px solid #cfd8e6;background:#fff;color:#3a4656;font-weight:700;font-size:15px;padding:10px 18px;border-radius:11px;cursor:pointer}
+  .wc-go{border:1px solid #1a7f37;background:#1a7f37;color:#fff;font-weight:800;font-size:15px;padding:10px 20px;border-radius:11px;cursor:pointer}
+  .wc-cancel:active,.wc-go:active{transform:translateY(1px)}
+  .thread-box{background:var(--bg);width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;border-radius:18px 18px 0 0;box-shadow:0 -6px 24px rgba(16,24,40,.18);overflow:hidden}
+  @media(min-width:560px){#threadOverlay{align-items:center}.thread-box{border-radius:18px}}
+  .thread-head{display:flex;align-items:center;gap:10px;padding:13px 16px;background:var(--wa);color:#fff;flex:none}
+  .thread-head .t-name{font-weight:800;font-size:15px;flex:1;min-width:0;overflow-wrap:anywhere}
+  .thread-head .t-close{background:rgba(255,255,255,.18);border:none;color:#fff;font-size:20px;font-weight:800;width:32px;height:32px;border-radius:50%;cursor:pointer;line-height:1;flex:none}
+  .thread-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#ece5dd}
+  .bub{max-width:82%;padding:8px 11px;border-radius:12px;font-size:14px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+  .bub .bt{display:block;font-size:11px;color:#6b7a8d;margin-top:4px;text-align:right}
+  .bub.in{align-self:flex-start;background:#fff;color:#1d2733;border-top-left-radius:3px}
+  .bub.out{align-self:flex-end;background:#d9fdd3;color:#0b2e23;border-top-right-radius:3px}
+  .bub.out .bt{color:#3b6b57}
+  .thread-empty{color:#5a6a7d;text-align:center;font-size:13px;margin:auto;padding:24px}
+  .thread-foot{flex:none;border-top:1px solid var(--line);background:var(--card);padding:10px 12px}
+  .thread-status{font-size:12.5px;font-weight:700;margin-bottom:7px;color:var(--wa)}
+  .thread-status.ok{color:var(--ok)} .thread-status.warn{color:var(--warn)}
+  .thread-compose{display:flex;gap:8px;align-items:flex-end}
+  .thread-compose textarea{flex:1;border:1px solid var(--wa-line);border-radius:10px;padding:9px 11px;font-size:14px;font-family:inherit;resize:none;min-height:42px;max-height:140px;background:#fff;color:#1d2733;color-scheme:light}
+  .thread-compose textarea:disabled{background:#f4f6f9;color:var(--muted)}
+  .thread-send{padding:10px 16px;font-size:14px}
+  .wa-chat-btn{flex:none;border:1px solid var(--wa-line);background:#fff;color:var(--wa);font-weight:800;font-size:12px;padding:4px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}
+  .wa-chat-btn:active{transform:translateY(1px)}
+  .wa-call-btn{flex:none;border:1px solid #1a7f37;background:#e9f7ee;color:#1a7f37;font-weight:800;font-size:12px;padding:4px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;margin-left:6px}
+  .wa-call-btn:active{transform:translateY(1px)}
+  .wa-callline{font-size:12px;color:#1a7f37;margin-top:5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  /* --- sign-in overlay --- */
+  #loginOverlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(180deg,#eef2f8,#e7ecf5);display:flex;align-items:center;justify-content:center;padding:20px}
+  .login-box{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 18px rgba(16,24,40,.08);padding:28px 22px;width:100%;max-width:360px;text-align:center}
+  .login-logo{font-size:19px;font-weight:800;color:#15457e}
+  .login-sub{color:#667085;font-size:13px;margin-top:3px;margin-bottom:18px}
+  .login-err{display:none;color:var(--danger);background:var(--danger-soft);border:1px solid var(--danger-line);border-radius:10px;padding:9px;font-size:13px;font-weight:700;margin-bottom:14px}
+  #loginOverlay input{width:100%;border:1px solid #cfe0fd;border-radius:11px;padding:13px 14px;font-size:16px;text-align:center;outline:none;background:#fff;color:#1d2733;color-scheme:light}
+  #loginOverlay input:focus{border-color:#1b6ef3}
+  .login-hint{color:#667085;font-size:12.5px;margin-top:14px;line-height:1.5}
+  /* Who-is-calling bar + call toast (click-to-call) */
+  .callerbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#eef7f0;border:1px solid #cfe9d8;
+    border-radius:12px;padding:10px 14px;margin:0 0 14px}
+  .callerbar label{font-weight:800;font-size:14px;color:#1d2733}
+  .callerbar select{font-size:15px;padding:8px 12px;border:1px solid #bcd;border-radius:9px;background:#fff;color:#1d2733;color-scheme:light;min-width:190px}
+  .callerhint{font-size:12.5px;color:#41566d}
+  .callerbar.need{background:var(--danger-soft);border-color:var(--danger-line)}
+  .callerwho{font-weight:800;font-size:15px;color:#1d2733}
+  #callToast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);max-width:92%;
+    background:#102a43;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;
+    box-shadow:0 6px 22px rgba(16,24,40,.28);z-index:9999;opacity:0;pointer-events:none;transition:opacity .2s}
+  #callToast.show{opacity:1}
+  /* D66: today's follow-up progress (section-wise) shown in the card header */
+  .fu-progress{background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:12px;
+    padding:10px 13px;margin:0 0 12px}
+  .fu-progress .fp-top{font-weight:800;font-size:14.5px;color:var(--ink);margin-bottom:4px}
+  .fu-progress .fp-sec{font-size:12.5px;color:var(--muted);padding:2px 0 2px 12px}
+  .fu-progress .fp-sec b{color:var(--brand2)}
+  .fu-progress .fp-when{font-size:11.5px;color:var(--muted);margin-top:6px;opacity:.85}
+  /* D66: UNDO toast (vanish-on-file) */
+  #fuUndoToast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);max-width:92%;
+    display:flex;align-items:center;gap:12px;background:#0d2a1c;color:#eafff3;
+    padding:11px 14px 11px 18px;border:1px solid var(--ok-line);border-radius:12px;font-size:14px;font-weight:600;
+    box-shadow:0 6px 22px rgba(0,0,0,.4);z-index:9999;opacity:0;pointer-events:none;transition:opacity .2s}
+  #fuUndoToast.show{opacity:1;pointer-events:auto}
+  #fuUndoToast .fu-ut-msg{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
+  #fuUndoToast .fu-ut-undo{border:1px solid var(--ok-line);background:var(--ok-soft);color:var(--ok);
+    font-weight:800;border-radius:9px;padding:7px 12px;cursor:pointer;font-size:13px;flex:0 0 auto}
+  /* ---------- follow-up call loop (v16) ---------- */
+  .fu-secband{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--brand);background:var(--accent-soft);border:1px solid var(--accent-line);
+    border-radius:8px;padding:4px 9px;margin:10px 0 6px;display:inline-block}
+  /* collapsible follow-up bands (Session 29, Decision D47) */
+  .fu-band{margin:10px 0 6px}
+  .fu-bandhead{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;
+    font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--brand);background:var(--accent-soft);border:1px solid var(--accent-line);
+    border-radius:8px;padding:6px 10px}
+  .fu-bandhead .fu-caret{font-size:11px;transition:transform .15s;display:inline-block}
+  .fu-band:not(.collapsed) .fu-bandhead .fu-caret{transform:rotate(90deg)}
+  .fu-band.collapsed .fu-bandbody{display:none}
+  .fu-bandbody{margin-top:8px}
+  .fu-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:11px 13px;margin-bottom:8px;box-shadow:var(--shadow-sm)}
+  .fu-row.retry{border-color:var(--warn-line);background:var(--warn-soft)}
+  .fu-row .dx{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .fu-row .fu-lv{font-size:12px;color:var(--muted);margin-top:2px}
+  .fu-rec{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);font-weight:700;font-size:12px;padding:5px 10px;border-radius:8px;cursor:pointer;margin-top:5px}
+  .fu-recslot{margin-top:6px}
+  .fu-row .due{font-size:12px;color:var(--muted);margin-top:2px}
+  .fu-row .due b{color:var(--danger)}
+  /* v18.4 (2A) missed-call snooze + button */
+  .fu-row.snoozed{opacity:.6}
+  .fu-na{font-size:12px;color:var(--muted);margin-top:3px}
+  .fu-na.snooze{color:#b06a2c;font-weight:700}
+  .fu-noans{background:#fff3e6;color:#8a4b12;border:1px solid #e6c39a;font-weight:700;
+    font-size:12.5px;padding:6px 11px;border-radius:8px;cursor:pointer}
+  .fu-noans:disabled{opacity:.5;cursor:default}
+  /* v18.4 (2B) doctor Unreachable — review cards */
+  .un-card{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;
+    background:var(--card);border:1px solid var(--warn-line);background:var(--warn-soft);
+    border-radius:12px;padding:11px 13px;margin-bottom:8px;box-shadow:var(--shadow-sm)}
+  .un-att{font-size:12px;color:#8a4b12;margin-top:3px;font-weight:600}
+  .un-acts{display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:150px}
+  .un-acts button{font-weight:700;font-size:12.5px;padding:6px 11px;border-radius:8px;cursor:pointer;border:1px solid}
+  .un-retry{background:#e8f1ff;color:#1c4587;border-color:#b6cff5}
+  .un-pause{background:#f3f0e6;color:#6b5d1d;border-color:#ddd19a}
+  .un-remove{background:#fde8e8;color:#7a1c1c;border-color:#e6a8a8}
+  .un-acts button:disabled{opacity:.5;cursor:default}
+  .fu-pr{display:inline-block;min-width:20px;text-align:center;font-weight:800;font-size:11px;
+    color:#fff;background:var(--brand);border-radius:6px;padding:1px 5px;margin-right:6px}
+  .fu-name{font-weight:800;font-size:15px;color:var(--ink)}
+  .fu-right{display:flex;flex-direction:column;gap:6px;align-items:flex-end;min-width:160px}
+  .fu-retrytag{font-size:11px;font-weight:800;color:var(--warn);text-transform:uppercase;letter-spacing:.04em}
+  select.fu-out,select.fu-sub,input.fu-in{font-size:13px;padding:6px 8px;border:1px solid var(--line);
+    border-radius:8px;background:#fff;color:#1d2733;color-scheme:light;width:100%;box-sizing:border-box}
+  /* dropdown option list — force readable dark text on a white list in EVERY
+     browser and OS (fixes options that were invisible on dark-mode phones/PCs) */
+  select option,select optgroup{background:#fff;color:#1d2733;color-scheme:light}
+  .fu-extra{display:flex;flex-direction:column;gap:5px;width:100%}
+  .fu-actions{display:flex;gap:6px;width:100%}
+  .fu-actions .call{flex:0 0 auto}
+  .fu-save{flex:1;border:1px solid var(--ok-line);background:var(--ok-soft);color:var(--ok);
+    font-weight:800;border-radius:9px;padding:7px 10px;cursor:pointer;font-size:13px}
+  .fu-save:disabled{opacity:.5;cursor:default}
+  .fu-msg{font-size:12px;margin-top:3px}
+  .fu-msg.ok{color:var(--ok)} .fu-msg.warn{color:var(--warn)}
+  .fu-esc{border-left:4px solid var(--danger)}
+  .fu-esc .reason{font-weight:800;color:var(--danger);font-size:13px}
+  .fu-esc .meta2{font-size:12px;color:var(--muted);margin-top:2px}
+  .fu-esc .meta2.nocall{color:#b06a2c;font-weight:600}
+  .fu-settledrow{display:flex;justify-content:space-between;gap:10px;font-size:13px;
+    padding:7px 11px;border-bottom:1px solid var(--line)}
+  .fu-settledrow .o{color:var(--ok);font-weight:700}
+  /* ---------- incoming-call outcome flow (v17) ---------- */
+  .logbtn{border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--accent);
+    font-weight:700;border-radius:9px;padding:7px 11px;cursor:pointer;font-size:13px;margin-left:6px}
+  .in-slot{margin-top:9px}
+  .in-card{background:#fff;border:1px solid var(--accent-line);border-radius:12px;padding:11px;margin-top:8px;
+    box-shadow:var(--shadow-sm)}
+  .in-card .step{margin-bottom:8px}
+  .in-card label{display:block;font-size:11.5px;font-weight:700;color:#5a6a7d;
+    text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+  .in-card select,.in-card input{width:100%;box-sizing:border-box;font-size:14px;padding:9px 10px;
+    border:1px solid var(--line);border-radius:9px;background:#fff;color:#1d2733;color-scheme:light}
+  .in-card .row2{display:flex;gap:8px}.in-card .row2>*{flex:1}
+  .in-actions{display:flex;gap:8px;margin-top:6px}
+  .in-actions .savebtn{flex:1;border:1px solid var(--ok-line);background:var(--ok-soft);color:var(--ok);
+    font-weight:800;border-radius:10px;padding:10px;cursor:pointer;font-size:14px}
+  .in-actions .savebtn:disabled{opacity:.45}
+  .in-actions .cancel{border:1px solid var(--line);background:#fff;color:#5a6a7d;
+    border-radius:10px;padding:10px 14px;cursor:pointer;font-size:14px}
+  .in-msg{font-size:12.5px;margin-top:6px}.in-msg.ok{color:var(--ok)}.in-msg.warn{color:var(--warn)}
+  .in-urgent{background:var(--danger-soft);border:1px solid var(--danger-line);border-left:5px solid var(--danger);
+    color:#7a1c12;font-weight:700;font-size:13.5px;border-radius:8px;padding:9px 11px;margin-bottom:9px}
+
+  /* ---- Today's calls (live stream) — v1.1 §4.4 (Slice 1, dark theme) ---- */
+  @keyframes acflash{0%{box-shadow:0 0 0 0 rgba(240,168,60,.55)}70%{box-shadow:0 0 0 9px rgba(240,168,60,0)}100%{box-shadow:0 0 0 0 rgba(240,168,60,0)}}
+  .ac-row{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow-sm)}
+  .ac-row.ac-new{animation:acflash 1s ease-out 3;border-color:var(--warn-line)}
+  .ac-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ac-time{font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+  .ac-name{font-weight:700;color:var(--ink)}
+  .ac-cid{font-size:12px;color:var(--muted)}
+  /* ---- doctor's outcome review console (v18.2) ---- */
+  .ol-topbar{display:flex;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
+  .ol-day{padding:6px 14px;border-radius:16px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:13px;cursor:pointer}
+  .ol-day.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .ol-hint{font-size:12px;color:var(--muted)}
+  .ol-row{position:relative}
+  .ol-call{font-size:12px;color:var(--muted)}
+  .ol-nocall{color:#e0a84f;font-weight:600}
+  .ol-filed{font-size:13px;margin-top:2px}
+  .ol-extra{font-size:12px;color:var(--muted)}
+  .ol-chip{display:inline-block;font-size:11px;border-radius:10px;padding:1px 8px;margin-left:6px;vertical-align:middle}
+  .ol-chip.settle{background:#1d4d2b;color:#9fe0b0}
+  .ol-chip.retry{background:#4d3a1d;color:#e0c99f}
+  .ol-chip.escalate{background:#4d1d1d;color:#e09f9f}
+  .ol-norec{display:inline-block;font-size:11px;border-radius:10px;padding:1px 8px;margin-left:8px;
+            vertical-align:middle;background:#3a2a2a;color:#e0b5a8;border:1px solid #5a3d3d}
+  .ol-note{width:100%;max-width:340px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:#fff;color:#1d2733;font-size:13px}
+  .ol-acts{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}
+  .ol-approve{background:#1d7a3a;color:#fff;border:0;border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer}
+  .ol-sendback{background:transparent;color:#e0a84f;border:1px solid #e0a84f;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
+  .fu-note{width:100%;box-sizing:border-box;margin-top:6px;padding:6px 8px;font-size:13px;background:#1c1f26;color:#e8eaed;border:1px solid #3a3f4b;border-radius:8px;color-scheme:dark}
+  .fu-note::placeholder{color:#8a90a0}
+  .fu-docnote{margin-top:6px;font-size:13px;font-weight:600;color:#e0a84f;background:#2a2415;border-left:3px solid #e0a84f;border-radius:6px;padding:6px 9px}
+  .fu-sbmeta{margin-top:4px;font-size:12px;color:#aab1c0}
+  .fu-sbmeta.nocall{color:#e0a84f;font-weight:600}
+  .fu-talked{background:#14532d;color:#d7f5e3;border:none;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer}
+  .fu-recall{margin-top:6px;background:transparent;color:#9aa4b2;border:1px solid #3a3f4b;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
+  .fu-hint{margin-top:6px;font-size:11px;color:#8a90a0;font-style:italic}
+  /* v18.16 (D77) duration-gate states */
+  .fu-checking{color:#d9b24a;background:#2a2410;border:1px solid #4a3d15;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;margin-bottom:6px}
+  .fu-checking.warn{color:#ffad46;background:#3a2a12;border-color:#6a4a1c}
+  .fu-missed{color:var(--danger);background:var(--danger-soft);border:1px solid var(--danger-line);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;margin-bottom:6px}
+  .ol-notesave{background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer}
+  .ol-tx{display:none;white-space:pre-wrap;background:#10151c;border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;font-size:12.5px;line-height:1.5;max-height:280px;overflow:auto}
+  .ol-approveall{float:right;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:2px 10px;font-size:12px;cursor:pointer}
+  .ol-done{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(20,90,45,.88);border-radius:10px;color:#fff;font-size:17px;font-weight:600;z-index:2}
+  .ac-dir{font-size:11px;font-weight:800;border-radius:6px;padding:2px 6px}
+  .ac-dir.in{color:var(--ok);background:var(--ok-soft)}
+  .ac-dir.out{color:var(--accent);background:var(--accent-soft)}
+  .ac-row .dx{font-size:12.5px;color:var(--accent);font-weight:600;margin-top:3px}
+  .ac-lv{font-size:12px;color:var(--muted);margin-top:2px}
+  .ac-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:12.5px;color:var(--muted)}
+  .ac-ag{font-weight:600;color:var(--ink)}
+  .ac-dur{font-variant-numeric:tabular-nums;color:var(--muted)}
+  .ac-st{font-size:11px;font-weight:800;border-radius:6px;padding:2px 6px}
+  .ac-st.ok{color:var(--ok);background:var(--ok-soft)}
+  .ac-st.missed{color:var(--danger);background:var(--danger-soft)}
+  .ac-rec{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);font-weight:700;padding:6px 12px;border-radius:9px;cursor:pointer}
+  .ac-play{margin-top:6px}
+
+  /* ---- Floating back-to-top (§4.8) ---- */
+  #toTop{position:fixed;right:18px;bottom:18px;z-index:8000;display:none;
+    width:46px;height:46px;border-radius:50%;border:1px solid var(--accent-line);
+    background:var(--accent-soft);color:var(--accent);font-size:20px;font-weight:800;
+    cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.35);align-items:center;justify-content:center;line-height:1}
+  #toTop.show{display:flex}
+  #toTop:active{transform:translateY(1px)}
+  /* v18.18 (S57) stale-list top bar — loud, fixed, impossible to miss */
+  #staleBar{position:fixed;top:0;left:0;right:0;z-index:9500;display:none;
+    background:#b3261e;color:#fff;padding:11px 16px;font-size:14px;font-weight:700;
+    line-height:1.4;text-align:center;box-shadow:0 3px 12px rgba(0,0,0,.35)}
+  #staleBar.show{display:block}
+  #staleBar .sb-sub{display:block;font-weight:600;font-size:12.5px;opacity:.95;margin-top:2px}
+  body.stale-on .wrap{padding-top:60px}
+.k-toggle{margin-left:10px;font-size:12px;padding:2px 8px;border-radius:10px;background:#e3e3e3;color:#555;cursor:pointer}
+.k-toggle.on{background:#0a7d32;color:#fff}
+.k-comp{margin-left:8px;font-size:12px;color:#0a7d32;font-weight:600}
+.k-btns{display:flex;flex-wrap:wrap;gap:6px}
+.k-btn{padding:10px 12px;border:0;border-radius:10px;background:#1668c9;color:#fff;font-size:15px;cursor:pointer;line-height:1.2}
+.k-btn.K_NO_CONTACT{background:#b25c00}.k-btn.K_TO_DOCTOR{background:#8e2ca0}
+.k-btn.hot{outline:3px solid #ffb84d}
+.k-undo{margin-top:6px;padding:8px 12px;border:0;border-radius:10px;background:#444;color:#fff;cursor:pointer}
+.k-done{font-weight:600;color:#0a7d32;margin-bottom:4px}
+.k-snz{color:#b25c00;font-weight:600}.k-note{margin-top:6px}
+</style>
+</head>
+<body>
+<div id="staleBar" role="alert"></div>
+<div id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">Dr Manoj Agarwal Clinic</div>
+    <div class="login-sub">Callback Dashboard</div>
+    <div class="login-err" id="loginErr">Incorrect key — kripya dobara daalein.</div>
+    <input id="pin" type="password" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Access key / एक्सेस की">
+    <button onclick="doLogin()">Open Dashboard / खोलें</button>
+    <div class="login-hint">Clinic staff: apni access key daalein.<br>Yeh device aapko yaad rakhega.</div>
+  </div>
+</div>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22">
+          <path fill="#fff" d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.3 1.1.4 2.4.6 3.6.6.6 0 1 .5 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.5-1 1-1h3.6c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4.1.8-.3 1.1l-2.3 2.1z"/>
+        </svg>
+      </span>
+      <div class="brandtext">
+        <div class="bname">Dr Manoj Agarwal Clinic</div>
+        <div class="bsub"><span class="dot" id="dot"></span> Callback Dashboard · Live</div>
+      </div>
+    </div>
+    <div class="meta">
+      <span id="dateLabel">—</span>
+      <span class="sep">·</span>
+      <span>Updated <b id="updated">—</b></span>
+      <span class="bld">· <span id="build">—</span></span>
+      <span class="sep">· next <b id="count">—</b>s</span>
+      <button class="btn" id="refresh" onclick="poll(true)">↻ Refresh</button>
+      <button class="btn" id="signout" onclick="doSignOut()" title="Forget the key on this device">Sign out</button>
+    </div>
+  </header>
+
+  <div class="banner" id="banner"></div>
+
+  <!-- KPI tiles: always visible -->
+  <div class="kpis">
+    <div class="kpi hero tap" onclick="goToSection('pending')" title="Go to callbacks needed"><div class="lbl">Awaiting callback</div><div class="num" id="k_await">—</div><div class="sub">need a call now</div></div>
+    <div class="kpi tap" id="k_missed_card" onclick="goToSection('pending')" title="Go to missed callers"><div class="lbl">Incoming missed</div><div class="num" id="k_missed">—</div><div class="sub" id="k_rate">—</div></div>
+    <div class="kpi tap" onclick="goToSection('agents')" title="Go to clinic team"><div class="lbl">Total calls today</div><div class="num" id="k_total">—</div><div class="sub" id="k_incoming">—</div></div>
+    <div class="kpi tap" id="kpi_wa" onclick="goToWA()" title="Go to WhatsApp chats"><div class="lbl">WhatsApp (48h)</div><div class="num" id="k_wa">—</div><div class="sub">tap to view chats ↓</div></div>
+    <div class="kpi tap" id="kpi_fu" onclick="goToSection('fuToday')" title="Go to today's follow-up calls"><div class="lbl">Follow-ups due</div><div class="num" id="k_fu">—</div><div class="sub" id="k_fu_sub">tap to call ↓</div></div>
+  </div>
+
+  <!-- Who is calling? — sets which agent's mobile rings & who the call is logged under -->
+  <div class="callerbar" id="callerbar">
+    <span class="callerwho">📞 Calling as: <b id="callerName">…</b></span>
+    <span class="callerhint" id="callerhint"></span>
+  </div>
+
+  <!-- Today's calls (live stream, newest first): v1.1 §4.4 — collapsed by default -->
+  <section class="sec" data-key="allcalls" data-default="collapsed">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Today's calls <span class="cnt" id="allCallsCnt">0</span></h2>
+    <div class="secbody"><div id="allCalls" class="list"></div></div>
+  </section>
+
+  <!-- Needs a callback now: open by default -->
+  <section class="sec" data-key="pending" data-default="open">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Needs a callback now <span class="cnt" id="pendingCnt">0</span></h2>
+    <div class="secbody"><div id="pending" class="list"></div></div>
+  </section>
+
+  <!-- Resolved callbacks: open by default -->
+  <section class="sec" data-key="resolved" data-default="open">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Resolved callbacks <span class="cnt" id="resolvedCnt">0</span></h2>
+    <div class="secbody"><div id="resolved" class="list"></div></div>
+  </section>
+
+  <!-- Today's follow-up calls: open by default -->
+  <section class="sec" data-key="fuToday" data-default="open">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Today's follow-up calls <span class="cnt" id="fuTodayCnt">0</span><span class="k-toggle" id="kToggle" onclick="event.stopPropagation();kToggleUI()"></span><span class="k-comp" id="kComp"></span></h2>
+    <div class="secbody"><div id="fuProgress" class="fu-progress" style="display:none"></div><div id="fuToday" class="list"></div></div>
+  </section>
+
+  <!-- Escalations (doctor key only; shown by applyAccess): collapsed by default -->
+  <section class="sec" data-key="fuEscal" data-default="collapsed" id="secEscal" style="display:none">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Escalations — for you to resolve <span class="cnt" id="fuEscalCnt">0</span></h2>
+    <div class="secbody"><div id="fuEscal" class="list"></div></div>
+  </section>
+
+  <!-- Unreachable — review (doctor key only; 3-strike follow-up tiles): open by default -->
+  <section class="sec" data-key="fuUnreach" id="secUnreach" style="display:none">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Unreachable — review <span class="cnt" id="fuUnreachCnt">0</span></h2>
+    <div class="secbody"><div id="fuUnreach" class="list"></div></div>
+  </section>
+
+  <!-- K-1 (S139): 3rd-strike WhatsApp sent today (doctor, read-only; D215) -->
+  <section class="sec" data-key="kStrikes" id="secKStrikes" style="display:none">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> 3rd-strike WhatsApp sent today <span class="cnt" id="kStrikesCnt">0</span></h2>
+    <div class="secbody"><div id="kStrikes" class="list"></div></div>
+  </section>
+
+  <!-- Doctor's outcome review console (doctor key only; shown by applyAccess): collapsed by default -->
+  <section class="sec" data-key="outLog" data-default="collapsed" id="secOutLog" style="display:none">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Outcome review — your console <span class="cnt" id="outLogCnt">0</span></h2>
+    <div class="secbody">
+      <div class="ol-topbar">
+        <button class="ol-day active" id="olDayToday" onclick="olSetDay('today')">Today</button>
+        <button class="ol-day" id="olDayYest" onclick="olSetDay('yesterday')">Yesterday</button>
+        <span class="ol-hint" id="olHint"></span>
+      </div>
+      <div id="outLogTally" class="muted-note" style="display:none;text-align:left"></div>
+      <div id="outLogLinkWrap" style="margin:0 0 10px"></div>
+      <div id="outLog" class="list"></div>
+    </div>
+  </section>
+
+  <!-- Settled follow-ups (read-only history): collapsed by default -->
+  <section class="sec" data-key="fuSettled" data-default="collapsed">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Settled follow-ups <span class="cnt" id="fuSettledCnt">0</span></h2>
+    <div class="secbody"><div id="fuSettled" class="list"></div></div>
+  </section>
+
+  <!-- Recent WhatsApp: open by default -->
+  <section class="sec" data-key="whatsapp" data-default="open">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Recent WhatsApp <span class="cnt" id="waCnt">0</span></h2>
+    <div class="secbody"><div id="waFeed" class="wa-feed"></div></div>
+  </section>
+
+  <!-- Handled today (staff-marked): collapsed by default -->
+  <section class="sec" data-key="handled" data-default="collapsed">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Handled today <span class="cnt" id="handledCnt">0</span></h2>
+    <div class="secbody"><div id="handled" class="handled"></div></div>
+  </section>
+
+  <!-- Agent activity: collapsed by default -->
+  <section class="sec" data-key="agents" data-default="collapsed">
+    <h2 class="sechead" onclick="toggleSec(this)"><span class="caret">▸</span> Clinic Team <span class="cnt" id="agentsCnt">0</span></h2>
+    <div class="secbody"><div id="agentsWrap"></div></div>
+  </section>
+
+  <div class="foot">Live from the clinic IVR logs · patient details matched from Patient_Master · WhatsApp from WA_Inbox.<br>
+    Callers marked Done / Booked / Called / Reached move to Handled. Resolved callbacks are detected automatically when a missed caller later connects.</div>
+</div>
+
+<div id="threadOverlay" onclick="if(event.target===this)closeThread()">
+  <div class="thread-box">
+    <div class="thread-head">
+      <span class="t-name" id="threadName">Conversation</span>
+      <button class="t-close" onclick="closeThread()" aria-label="Close">×</button>
+    </div>
+    <div class="thread-body" id="threadBody"></div>
+    <div class="thread-foot" id="threadFoot" style="display:none">
+      <div class="thread-status" id="threadStatus"></div>
+      <div class="thread-compose">
+        <textarea id="threadText" rows="1" maxlength="4000" placeholder="Type a reply…" disabled></textarea>
+        <button class="call thread-send" id="threadSend" disabled>Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="callToast"></div>
+<div id="fuUndoToast"></div>
+<div id="waCallOverlay" onclick="if(event.target===this)waCallCancel()">
+  <div class="wc-box">
+    <div class="wc-title">📞 Call this patient?</div>
+    <div class="wc-who" id="waCallWho"></div>
+    <div class="wc-note">Your phone rings first, then the patient is connected.</div>
+    <div class="wc-actions">
+      <button class="wc-cancel" onclick="waCallCancel()">Cancel</button>
+      <button class="wc-go" onclick="waCallGo()">📞 Call</button>
+    </div>
+  </div>
+</div>
+<button id="toTop" onclick="scrollTop_()" title="Back to top" aria-label="Back to top">▲</button>
+<script>
+  var REFRESH_SECONDS = 60, left = REFRESH_SECONDS, lastOk = null;
+  var TODAY_IST = '';   // Block C (S136): the SERVER's date (IST), set by every bundle — the page computes no dates (F-5/F-13)
+  var waCallMap = {};   // S136b: phone10 -> newest OUTGOING call today — feeds the call line on WhatsApp tiles (built from the bundle; zero extra reads)
+  var DASH_KEY = '', DASH_ROLE = 'none';   // access key + role (full | staff | none)
+  var PAGE_BUILD = 'v18.27 · S139: F-10 cure + K-1 one-tap staff UI (SK.6, parallel run)';
+  var acPrevIds = null;    // v1.1: ids seen last poll, to flash genuinely-new calls
+  var recUrls = {};        // slotId -> Blob URL, so we can revoke before replaying
+  var activeAudio = null;  // currently-playing <audio>, used to defer auto-refresh
+  var replyOpen = false, openReplyId = null;  // a WhatsApp reply composer is open
+  var teamOpen = {};       // remembered expanded Clinic Team members
+  try{ teamOpen = JSON.parse(localStorage.getItem('dashTeamOpen')||'{}'); }catch(e){ teamOpen={}; }
+
+  /* ---- collapsible sections (remembered per device) ---- */
+  function toggleSec(head){
+    head.parentNode.classList.toggle('collapsed');
+    saveSecState();
+  }
+  function goToSection(key){
+    var sec=document.querySelector('section.sec[data-key="'+key+'"]');
+    if(!sec) return;
+    sec.classList.remove('collapsed');
+    saveSecState();
+    var head=sec.querySelector('.sechead')||sec;
+    head.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  function goToWA(){
+    var sec=document.querySelector('section.sec[data-key="whatsapp"]');
+    if(!sec) return;
+    sec.classList.remove('collapsed');   // ensure the chats are visible
+    saveSecState();
+    var head=sec.querySelector('.sechead')||sec;
+    head.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  function saveSecState(){
+    try{
+      var st={};
+      var secs=document.querySelectorAll('section.sec');
+      for(var i=0;i<secs.length;i++){ st[secs[i].getAttribute('data-key')] = secs[i].classList.contains('collapsed')?1:0; }
+      localStorage.setItem('dashSecState', JSON.stringify(st));
+    }catch(e){}
+  }
+  function applySecState(){
+    var saved={};
+    try{ saved = JSON.parse(localStorage.getItem('dashSecState')||'{}'); }catch(e){ saved={}; }
+    var secs=document.querySelectorAll('section.sec');
+    for(var i=0;i<secs.length;i++){
+      var s=secs[i], k=s.getAttribute('data-key');
+      var def = s.getAttribute('data-default')==='collapsed';
+      var coll = (k in saved) ? !!saved[k] : def;
+      s.classList.toggle('collapsed', coll);
+    }
+  }
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function digits(n){ return String(n||'').replace(/\D/g,''); }
+  function tel(n){ var d=digits(n); return d.length===10 ? '+91'+d : '+'+d; }
+
+  // --- inbound media rendering (images / PDFs / audio / video) -------------
+  // The receiver stores MyOperator's public S3 link in the message cell for
+  // media messages. Detect such a link and render it instead of raw text.
+  var WA_MEDIA_HOST=/(myop-chat-prod|amazonaws\.com\/media)/i;
+  var WA_MEDIA_TYPES={image:1,document:1,video:1,audio:1,sticker:1,voice:1};
+  function isMediaUrl(u,type){
+    u=String(u==null?'':u).trim();
+    if(!/^https?:\/\//i.test(u)) return false;
+    if(type && WA_MEDIA_TYPES[String(type).toLowerCase()]) return true;
+    return WA_MEDIA_HOST.test(u);
+  }
+  function mediaKind(u,type){
+    type=String(type||'').toLowerCase();
+    if(type==='image'||type==='sticker') return 'image';
+    if(type==='video') return 'video';
+    if(type==='audio'||type==='voice') return 'audio';
+    if(type==='document') return 'doc';
+    var b=String(u||'').split('?')[0].toLowerCase();
+    if(/\.(jpg|jpeg|png|gif|webp|bmp|heic)$/.test(b)) return 'image';
+    if(/\.(mp4|mov|webm|3gp|mkv)$/.test(b)) return 'video';
+    if(/\.(mp3|ogg|oga|m4a|aac|opus|amr|wav)$/.test(b)) return 'audio';
+    return 'doc';
+  }
+  function mediaHtml(u,type){
+    var safe=esc(String(u||'').trim());
+    var k=mediaKind(u,type);
+    if(k==='image'){
+      return '<a class="wa-media-imgwrap" href="'+safe+'" target="_blank" rel="noopener">'+
+             '<img class="wa-media-img" src="'+safe+'" loading="lazy" alt="image"></a>';
+    }
+    if(k==='video'){
+      return '<video class="wa-media-vid" src="'+safe+'" controls preload="metadata"></video>';
+    }
+    if(k==='audio'){
+      return '<audio class="wa-media-aud" src="'+safe+'" controls preload="metadata"></audio>';
+    }
+    var lbl=/\.pdf(\?|$)/i.test(String(u||'')) ? 'View PDF' : 'Open file';
+    return '<a class="wa-media-doc" href="'+safe+'" target="_blank" rel="noopener">'+lbl+'</a>';
+  }
+  function jsq(s){ return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+  // F-10 CURE (v18.26, S139): opaque data refs — no data value ever enters element markup.
+  // dref(v) stores v and returns a key like 'd17' ([a-z0-9] only, safe in any quoting context);
+  // dget(k) reads it back inside the handler call. Map dedupes by value, so memory is bounded
+  // by distinct on-screen values and keys stay stable across re-renders.
+  var DREF={n:0,map:{},rev:{}};
+  function dref(v){ v=String(v==null?'':v);
+    if(Object.prototype.hasOwnProperty.call(DREF.rev,v)) return DREF.rev[v];
+    var k='d'+(++DREF.n); DREF.map[k]=v; DREF.rev[v]=k; return k; }
+  function dget(k){ return Object.prototype.hasOwnProperty.call(DREF.map,k)?DREF.map[k]:''; }
+
+  function patientLine(p){
+    if(!p || (!p.name && !p.dx)){ return '<div class="ctx"><span class="un">Not in patient list</span></div>'; }
+    var bits=[];
+    if(p.name){ var ag=[]; if(p.age) ag.push(p.age); if(p.sex) ag.push(p.sex.charAt(0).toUpperCase());
+      bits.push('<span class="nm">'+esc(p.name)+(ag.length?(' · '+esc(ag.join('/'))):'')+'</span>'); }
+    if(p.dx)  bits.push('<span class="dx">'+esc(p.dx)+'</span>');
+    if(p.uid) bits.push('<span class="more">ID '+esc(p.uid)+'</span>');
+    if(p.last)bits.push('<span class="more">last visit '+esc(p.last)+'</span>');
+    if(p.more)bits.push('<span class="more">+'+p.more+' more on this no.</span>');
+    return '<div class="ctx">'+bits.join(' · ')+'</div>';
+  }
+  function waLine(w){
+    if(!w) return '';
+    var dir = w.dir==='out' ? 'we replied' : 'patient sent';
+    return '<div class="wa-line">💬 <b>WhatsApp</b> ('+esc(dir)+', '+esc(w.time)+
+           (w.count>1?(' · '+w.count+' msgs'):'')+'): '+esc(w.text)+'</div>';
+  }
+  function setCnt(id, n, alarm){
+    var el=document.getElementById(id); if(!el) return;
+    el.textContent = n;
+    el.className = 'cnt' + (alarm && n>0 ? ' alarm' : '');
+  }
+
+  /* ---- convert a base64 data: URI to a Blob URL (mobile browsers stream this
+          reliably, where a big data: URI shows no player) ---- */
+  function dataUriToBlobUrl(dataUri){
+    try{
+      var comma = dataUri.indexOf(',');
+      if(comma < 0) return null;
+      var header = dataUri.substring(5, comma);            // e.g. "audio/mpeg;base64"
+      var isB64  = /;base64/i.test(header);
+      var mime   = (header.split(';')[0] || 'audio/mpeg');
+      var raw    = dataUri.substring(comma + 1);
+      var bytes;
+      if(isB64){
+        var bin = atob(raw);
+        bytes = new Uint8Array(bin.length);
+        for(var i=0;i<bin.length;i++){ bytes[i] = bin.charCodeAt(i); }
+      } else {
+        var txt = decodeURIComponent(raw);
+        bytes = new Uint8Array(txt.length);
+        for(var j=0;j<txt.length;j++){ bytes[j] = txt.charCodeAt(j); }
+      }
+      return URL.createObjectURL(new Blob([bytes], {type: mime}));
+    }catch(e){ return null; }
+  }
+
+  function fmtT(s){ s=Math.max(0,Math.floor(s||0)); var m=Math.floor(s/60), ss=s%60; return m+':'+(ss<10?'0':'')+ss; }
+
+  /* Our own audio player (play button + progress bar + time). Native <audio>
+     controls collapse to almost nothing on Android Chrome in portrait; this does not. */
+  function mountPlayer(slot, url){
+    slot.innerHTML='';
+    var wrap=document.createElement('div'); wrap.className='player';
+    var btn=document.createElement('button'); btn.type='button'; btn.className='pbtn'; btn.textContent='▶';
+    var seek=document.createElement('input'); seek.type='range'; seek.className='pseek';
+    seek.min=0; seek.max=1000; seek.step=1; seek.value=0;
+    var tl=document.createElement('span'); tl.className='ptime'; tl.textContent='0:00 / 0:00';
+    var au=document.createElement('audio'); au.preload='metadata'; au.setAttribute('playsinline',''); au.src=url;
+    wrap.appendChild(btn); wrap.appendChild(seek); wrap.appendChild(tl); wrap.appendChild(au);
+    slot.appendChild(wrap);
+
+    var seeking=false;
+    function dur(){ return isFinite(au.duration)?au.duration:0; }
+    function showTime(){ tl.textContent=fmtT(au.currentTime)+' / '+fmtT(dur()); }
+    function showSeek(){ var d=dur(); seek.value = d ? Math.round(au.currentTime/d*1000) : 0; }
+    btn.addEventListener('click', function(){
+      if(au.paused){ var p=au.play(); if(p&&p.catch)p.catch(function(){}); } else { au.pause(); }
+    });
+    au.addEventListener('play',  function(){ btn.textContent='⏸'; activeAudio=au; });
+    au.addEventListener('pause', function(){ btn.textContent='▶'; if(activeAudio===au) activeAudio=null; });
+    au.addEventListener('ended', function(){ btn.textContent='▶'; seek.value=0; showTime(); if(activeAudio===au) activeAudio=null; });
+    au.addEventListener('loadedmetadata', function(){ showTime(); showSeek(); });
+    au.addEventListener('timeupdate', function(){ if(!seeking){ showSeek(); } showTime(); });
+    seek.addEventListener('input',  function(){ seeking=true; var d=dur(); if(d) tl.textContent=fmtT(d*seek.value/1000)+' / '+fmtT(d); });
+    seek.addEventListener('change', function(){ var d=dur(); if(d) au.currentTime=d*seek.value/1000; seeking=false; });
+    return au;
+  }
+
+  /* expand/collapse one Clinic Team member; remembered across refreshes */
+  function toggleTeam(head, name){
+    var card=head.parentNode;
+    while(card && (' '+card.className+' ').indexOf(' tm-card ')<0){ card=card.parentNode; }
+    if(!card) return;
+    card.classList.toggle('collapsed');
+    if(card.classList.contains('collapsed')) delete teamOpen[name]; else teamOpen[name]=1;
+    try{ localStorage.setItem('dashTeamOpen', JSON.stringify(teamOpen)); }catch(e){}
+  }
+
+  function playRec(file, slotId, btn){
+    if(!file){ return; }
+    var label = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Loading…';
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.dataUri){
+          var slot = document.getElementById(slotId);
+          if(slot){
+            if(recUrls[slotId]){ try{ URL.revokeObjectURL(recUrls[slotId]); }catch(e){} }
+            var url = dataUriToBlobUrl(res.dataUri) || res.dataUri;   // Blob URL for mobile
+            recUrls[slotId] = url;
+            var au = mountPlayer(slot, url);
+            var pr = au.play();                      // desktop auto-starts; mobile shows the player to tap
+            if(pr && pr.catch){ pr.catch(function(){}); }
+          }
+          btn.style.display = 'none';
+        } else {
+          btn.disabled = false; btn.textContent = label;
+          showBanner('Could not load recording'+(res&&res.error?(': '+res.error):'.'));
+        }
+      })
+      .withFailureHandler(function(err){
+        btn.disabled = false; btn.textContent = label;
+        showBanner('Could not load recording: '+((err&&err.message)||err));
+      })
+      .getRecordingAudio(DASH_KEY, file);
+  }
+
+  /* ---- play an ARCHIVED recording (from Drive) — used by follow-up 🎧 (Slice 2b) ---- */
+  function playArchived(fileId, slotId, btn){
+    if(!fileId){ return; }
+    var label = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Loading…';
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.dataUri){
+          var slot = document.getElementById(slotId);
+          if(slot){
+            if(recUrls[slotId]){ try{ URL.revokeObjectURL(recUrls[slotId]); }catch(e){} }
+            var url = dataUriToBlobUrl(res.dataUri) || res.dataUri;
+            recUrls[slotId] = url;
+            var au = mountPlayer(slot, url);
+            var pr = au.play(); if(pr && pr.catch){ pr.catch(function(){}); }
+          }
+          btn.style.display = 'none';
+        } else {
+          btn.disabled = false; btn.textContent = label;
+          showBanner('Could not load recording'+(res&&res.error?(': '+res.error):'.'));
+        }
+      })
+      .withFailureHandler(function(err){
+        btn.disabled = false; btn.textContent = label;
+        showBanner('Could not load recording: '+((err&&err.message)||err));
+      })
+      .getArchivedRecordingAudio(DASH_KEY, fileId);
+  }
+
+  function render(d){
+    if(d && d.error){ showBanner('Could not refresh: '+d.error); return; }
+    hideBanner(); lastOk=d;
+    openReplyId=null; replyOpen=false;   // composers are rebuilt empty below
+
+    document.getElementById('dateLabel').textContent = d.dateLabel||'';
+    document.getElementById('updated').textContent = d.updated||'';
+
+    var k=d.kpis||{};
+    document.getElementById('k_await').textContent=k.awaiting;
+    document.getElementById('k_missed').textContent=k.missed;
+    document.getElementById('k_rate').textContent=(k.missedRate||0)+'% of incoming';
+    document.getElementById('k_total').textContent=k.total;
+    document.getElementById('k_incoming').textContent=(k.incoming||0)+' incoming · '+(k.resolved||0)+' resolved';
+    document.getElementById('k_wa').textContent=(k.waCount||0);
+
+    document.getElementById('k_await').closest('.kpi').className='kpi hero'+(k.awaiting>0?' alarm':'');
+    document.getElementById('k_missed_card').className='kpi'+(k.missed>0?' alarm':'');
+
+    // pending (missed, awaiting) — attempts + times; no agent/duration (never answered)
+    var p=d.pending||[], box=document.getElementById('pending');
+    setCnt('pendingCnt', p.length, true);
+    if(!p.length){ box.className=''; box.innerHTML='<div class="empty">✅ All clear — no callbacks pending.</div>'; }
+    else{
+      box.className='list';
+      IN_PAT = {};   // Fix B: stale slots cannot outlive a render
+      box.innerHTML=p.map(function(e,i){
+        var chips='';
+        if(e.priority) chips+='<span class="chip prio">PRIORITY</span>';
+        if(e.afterHours) chips+='<span class="chip after">after-hours</span>';
+        var when=e.times?('Incoming missed'+(e.attempts>1?(' '+e.attempts):'')+' ('+esc(e.times)+')'):('Incoming missed ('+esc(e.lastCall)+')');
+        var t=e.triedOut;
+        var triedLine = t ? '<div class="tried">↗ Outgoing not replied'+(t.count>1?(' '+t.count):'')+' ('+esc(t.times)+')</div>' : '';
+        var inId='in_'+esc(String(e.number))+'_'+i;
+        var known = !!(e.patient && (e.patient.name || e.patient.dx));
+        IN_PAT[inId] = e.patient ? {name:e.patient.name||'',uid:e.patient.uid||'',last:e.patient.last||'',dx:e.patient.dx||''} : {};
+        return '<div class="row'+(e.priority?' prio':'')+'">'+
+                 '<div class="info">'+
+                   '<div class="num-big"><a href="tel:'+tel(e.number)+'">'+esc(e.number)+'</a></div>'+
+                   '<div class="when">'+when+'</div>'+
+                   triedLine+
+                   patientLine(e.patient)+ waLine(e.wa)+
+                   '<div class="in-slot" id="'+inId+'"></div>'+
+                 '</div>'+
+                 '<div class="chips">'+chips+
+                   '<button class="call" onclick="placeCall(dget(\''+dref(e.number)+'\'))">Call</button>'+
+                   '<button class="logbtn" onclick="inOpen(dget(\''+dref(inId)+'\'),dget(\''+dref(e.number)+'\'),'+(known?'true':'false')+')">Log outcome ▾</button>'+
+                 '</div>'+
+               '</div>';
+      }).join('');
+    }
+
+    // resolved callbacks — agent + time + duration + attempts
+    var rc=d.resolved||[], rbox=document.getElementById('resolved');
+    setCnt('resolvedCnt', rc.length, false);
+    if(!rc.length){ rbox.className=''; rbox.innerHTML='<div class="muted-note">No resolved callbacks yet today.</div>'; }
+    else{
+      rbox.className='list';
+      rbox.innerHTML=rc.map(function(e,i){
+        var when=esc(e.how||'Connected')+
+                 (e.agent?(' by <span class="ag">'+esc(e.agent)+'</span>'):'')+
+                 (e.time?(' · '+esc(e.time)):'')+
+                 (e.durationSec>0?(' · talk '+esc(e.duration)):'');
+        var chips='<span class="chip att">'+e.attempts+' attempt'+(e.attempts>1?'s':'')+'</span>'+
+                  '<span class="chip ok">resolved</span>';
+        var recId='rec_'+esc(String(e.number))+'_'+i;
+        var recBtn = e.recFile
+          ? '<button class="rec" onclick="playRec(dget(\''+dref(e.recFile)+'\'),dget(\''+dref(recId)+'\'),this)">▶ Recording</button>'
+          : '';
+        return '<div class="row done">'+
+                 '<div class="info">'+
+                   '<div class="num-big"><a href="tel:'+tel(e.number)+'">'+esc(e.number)+'</a></div>'+
+                   '<div class="when">'+when+'</div>'+
+                   patientLine(e.patient)+
+                   '<div class="recslot" id="'+recId+'"></div>'+
+                 '</div>'+
+                 '<div class="chips">'+chips+recBtn+'<button class="call" onclick="placeCall(dget(\''+dref(e.number)+'\'))">Call</button></div>'+
+               '</div>';
+      }).join('');
+    }
+
+    // recent WhatsApp feed
+    var w=d.recentWA||[];
+    setCnt('waCnt', w.length, false);
+    var waBox=document.getElementById('waFeed');
+    if(!w.length){ waBox.className=''; waBox.innerHTML='<div class="muted-note">No WhatsApp messages in the last 48 hours.</div>'; }
+    else{
+      waBox.className='wa-feed';
+      waBox.innerHTML=w.map(function(m,i){
+        var inbound=m.dir!=='out';
+        var who=m.name?esc(m.name):esc(m.number);
+        var full=(m.full!=null?m.full:m.text);
+        var truncated=(full && m.text && full.length>m.text.length);
+        var msg;
+        if(isMediaUrl(full, m.type)){
+          msg=mediaHtml(full, m.type);
+        } else {
+          msg='<span class="wa-short">'+esc(m.text)+'</span>'+
+              (truncated?('<span class="wa-full">'+esc(full)+'</span>'+
+                          '<span class="wa-more" onclick="toggleMsg('+i+')">more</span>'):'');
+        }
+        return '<div class="wa-entry">'+
+                 '<div class="wa-item">'+
+                   '<div class="wa-head">'+
+                     '<span class="arr '+(inbound?'in':'out')+'">'+(inbound?'▸ from':'we →')+'</span>'+
+                     '<span class="who">'+who+'</span>'+
+                     '<span class="tm">'+esc(m.time)+'</span>'+
+                     '<button class="wa-chat-btn" onclick="openThread(dget(\''+dref(m.number)+'\'))">Chat</button>'+(inbound ? '<button class="wa-call-btn" onclick="waCall(dget(\''+dref(m.number)+'\'),dget(\''+dref(m.name||'')+'\'))">\ud83d\udcde Call</button>' : '')+(DASH_ROLE==='full' ? '<button class="wa-reply-btn" onclick="openReply('+i+',dget(\''+dref(m.number)+'\'),this)">Reply</button>' : '')+
+                   '</div>'+
+                   '<div class="wa-msg" id="wamsg_'+i+'">'+msg+'</div>'+
+                   waCallLine(m,i)+
+                 '</div>'+
+                 '<div class="reply-slot" id="rslot_'+i+'"></div>'+
+               '</div>';
+      }).join('');
+    }
+
+    // handled (staff-marked done)
+    var h=d.handled||[];
+    setCnt('handledCnt', h.length, false);
+    var hBox=document.getElementById('handled');
+    if(!h.length){ hBox.className=''; hBox.innerHTML='<div class="muted-note">Nothing marked done by staff yet today.</div>'; }
+    else{
+      hBox.className='handled';
+      hBox.innerHTML=h.map(function(e){
+        var nm=(e.patient&&e.patient.name)?(esc(e.patient.name)+' · '):'';
+        return '<span class="htag">'+nm+esc(e.number)+' · '+esc(e.staffStatus||'done')+'</span>';
+      }).join('');
+    }
+
+    // Clinic Team — expandable per member; each connected call has its own ▶ Recording
+    var a=d.agents||[];
+    setCnt('agentsCnt', a.length, false);
+    var tw=document.getElementById('agentsWrap');
+    if(!a.length){ tw.innerHTML='<div class="muted-note">No team activity yet today.</div>'; }
+    else{
+      tw.innerHTML = a.map(function(x,idx){
+        var calls=x.calls||[];
+        var recs=calls.filter(function(c){return c.recFile;}).length;
+        var coll = teamOpen[x.name] ? '' : ' collapsed';
+        var head='<div class="tm-head" onclick="toggleTeam(this,dget(\''+dref(x.name)+'\'))">'+
+                   '<span class="caret">▸</span>'+
+                   '<span class="tm-name">'+esc(x.name)+'</span>'+
+                   '<span class="tm-stats">'+(x.answered||0)+' answered · '+(x.talkMin||0)+' min talk · '+(x.callbacks||0)+' callbacks</span>'+
+                   '<span class="tm-recs">'+recs+' ▶</span>'+
+                 '</div>';
+        var body = calls.length ? calls.map(function(c,ci){
+            var recId='tcall_'+idx+'_'+ci;
+            var dirTxt = c.dir==='out' ? '📤 outgoing' : '📥 incoming';
+            var who = c.patient ? esc(c.patient) : esc(c.number);
+            var sub = c.patient ? (' · '+esc(c.number)) : '';
+            var recBtn = c.recFile
+              ? '<button class="rec" onclick="playRec(dget(\''+dref(c.recFile)+'\'),dget(\''+dref(recId)+'\'),this)">▶ Recording</button>'
+              : '<span class="norec">no recording</span>';
+            return '<div class="tm-call">'+
+                     '<div class="tm-cinfo">'+
+                       '<span class="tm-dir '+(c.dir==='out'?'out':'in')+'">'+dirTxt+'</span> '+
+                       '<b>'+who+'</b>'+sub+
+                       '<span class="tm-when"> · '+esc(c.time)+' · talk '+esc(c.dur)+'</span>'+
+                     '</div>'+
+                     recBtn+
+                     '<div class="recslot" id="'+recId+'"></div>'+
+                   '</div>';
+          }).join('') : '<div class="muted-note" style="margin:8px 0 4px">No connected calls today.</div>';
+        return '<div class="tm-card'+coll+'">'+head+'<div class="tm-body">'+body+'</div></div>';
+      }).join('');
+    }
+  }
+
+  /* ---- expand / collapse a long WhatsApp message in the feed ---- */
+  function toggleMsg(i){
+    var box=document.getElementById('wamsg_'+i); if(!box) return;
+    var sh=box.querySelector('.wa-short'), fu=box.querySelector('.wa-full'), mo=box.querySelector('.wa-more');
+    if(!fu) return;
+    var showFull = (getComputedStyle(fu).display==='none');   // currently hidden -> show it
+    sh.style.display = showFull?'none':'inline';
+    fu.style.display = showFull?'inline':'none';
+    if(mo) mo.textContent = showFull?'less':'more';
+  }
+
+  /* ---- WhatsApp free-text reply (24h-window guarded via the VPS relay) ---- */
+  function setReplyStatus(i, msg, kind){
+    var el=document.getElementById('rst_'+i); if(!el) return;
+    el.textContent=msg; el.className='reply-status '+(kind||'');
+  }
+  function closeReply(){
+    if(openReplyId){
+      var slot=document.getElementById(openReplyId);
+      if(slot){ slot.innerHTML=''; slot.removeAttribute('data-open'); slot.removeAttribute('data-window'); }
+    }
+    openReplyId=null; replyOpen=false;
+  }
+  function openReply(i, number, btn){
+    if(DASH_ROLE!=='full') return;                                       // staff cannot reply
+    var slot=document.getElementById('rslot_'+i);
+    if(!slot) return;
+    if(slot.getAttribute('data-open')==='1'){ closeReply(); return; }   // tap again = close
+    if(openReplyId){ closeReply(); }                                     // only one open at a time
+    openReplyId='rslot_'+i; replyOpen=true; slot.setAttribute('data-open','1');
+    slot.innerHTML =
+      '<div class="reply">'+
+        '<div class="reply-status" id="rst_'+i+'">Checking 24-hour window\u2026</div>'+
+        '<textarea class="reply-text" id="rtx_'+i+'" rows="3" maxlength="4000" placeholder="Type a reply\u2026" disabled></textarea>'+
+        '<div class="reply-bar">'+
+          '<span class="reply-count" id="rc_'+i+'">0 / 4000</span>'+
+          '<span class="reply-actions">'+
+            '<button class="btn reply-cancel" onclick="closeReply()">Cancel</button>'+
+            '<button class="call reply-send" id="rsend_'+i+'" disabled>Send</button>'+
+          '</span>'+
+        '</div>'+
+      '</div>';
+    var tx=document.getElementById('rtx_'+i), rc=document.getElementById('rc_'+i), sb=document.getElementById('rsend_'+i);
+    tx.addEventListener('input', function(){
+      rc.textContent = tx.value.length+' / 4000';
+      sb.disabled = !(slot.getAttribute('data-window')==='open' && tx.value.trim().length>0);
+      tx.style.height='auto'; tx.style.height=Math.min(tx.scrollHeight,220)+'px';   // auto-grow, capped
+    });
+    sb.addEventListener('click', function(){ doSendReply(i, number); });
+    google.script.run
+      .withSuccessHandler(function(res){ applyWindow(i, slot, res); })
+      .withFailureHandler(function(err){ setReplyStatus(i,'\u26a0 Could not check window: '+((err&&err.message)||err),'warn'); })
+      .checkWindow(DASH_KEY, number);
+  }
+  function applyWindow(i, slot, res){
+    var tx=document.getElementById('rtx_'+i), sb=document.getElementById('rsend_'+i);
+    if(res && res.window_open){
+      slot.setAttribute('data-window','open');
+      var hrs=(res.hours_since!=null)?(' \u00b7 last message '+res.hours_since+'h ago'):'';
+      setReplyStatus(i,'\u2705 Window open \u2014 free reply allowed'+hrs+'.','ok');
+      if(tx){ tx.disabled=false; try{ tx.focus(); }catch(e){} }
+    } else {
+      slot.setAttribute('data-window','closed');
+      var why=(res&&res.reason)?res.reason:'24-hour window closed.';
+      setReplyStatus(i,'\u26d4 '+why+' Use an approved template instead.','warn');
+      if(tx) tx.disabled=true;
+      if(sb) sb.disabled=true;
+    }
+  }
+  function doSendReply(i, number){
+    var tx=document.getElementById('rtx_'+i), sb=document.getElementById('rsend_'+i);
+    if(!tx) return;
+    var msg=tx.value.trim();
+    if(!msg) return;
+    var last4=String(number).replace(/\D/g,'').slice(-4);
+    if(!confirm('Send WhatsApp to \u2026'+last4+'?\n\n'+msg)) return;
+    sb.disabled=true; sb.textContent='Sending\u2026'; tx.disabled=true;
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.sent){
+          var slot=document.getElementById('rslot_'+i);
+          if(slot){ slot.innerHTML='<div class="reply"><div class="reply-status ok">\u2705 Reply sent.</div></div>'; }
+          openReplyId=null; replyOpen=false;
+          try{ openThread(number, msg); }catch(e){ console.error('openThread failed after send (reply WAS sent):', e); }
+        } else {
+          var why=(res&&res.reason)?res.reason:'Not sent.';
+          setReplyStatus(i,'\u26d4 '+why,'warn');
+          if(tx) tx.disabled=false;
+          if(sb){ sb.disabled=false; sb.textContent='Send'; }
+        }
+      })
+      .withFailureHandler(function(err){
+        setReplyStatus(i,'\u26a0 Send failed: '+((err&&err.message)||err),'warn');
+        if(tx) tx.disabled=false;
+        if(sb){ sb.disabled=false; sb.textContent='Send'; }
+      })
+      .sendReply(DASH_KEY, number, msg);
+  }
+
+  function showBanner(m){ var b=document.getElementById('banner'); b.textContent=m; b.style.display='block';
+    document.getElementById('dot').style.background='var(--warn)'; }
+  function hideBanner(){ document.getElementById('banner').style.display='none';
+    document.getElementById('dot').style.background='var(--ok)'; }
+
+  /* ---- Click-to-call: agent is BOUND to the login (server-enforced) ---- */
+  var CALLER_NAME = '';   // set from getAccess on login; '' = not linked to an agent
+  function setCaller(name){
+    CALLER_NAME = name || '';
+    var b=document.getElementById('callerName'), h=document.getElementById('callerhint'), bar=document.getElementById('callerbar');
+    if(b) b.textContent = CALLER_NAME || '\u26a0 login not linked to an agent';
+    if(CALLER_NAME){ if(bar) bar.classList.remove('need'); if(h) h.textContent='Your phone rings first on each Call, then the patient.'; }
+    else { if(bar) bar.classList.add('need'); if(h) h.textContent='Ask the doctor to link your login — calling is disabled.'; }
+  }
+  /* v18.17 (Session 57): tap-to-call from the WhatsApp feed.
+   * Tap 1 = a custom in-page confirm dialog (NO browser URL header, unlike native confirm()).
+   * Tap 2 (Call) = reuse the proven live placeCall path (agent rings first, then patient).
+   * No new server code: placeCall -> triggerCall handles the OBD + duration-gate binding. */
+  var _waCallNum=null;
+  function waCall(number, name){
+    var n=String(number||'');
+    if(!n){ showToast('No number on this message to call.'); return; }
+    _waCallNum=n;
+    var digits=n.replace(/\D/g,'');
+    var last4=digits.slice(-4);
+    var nm=String(name||'').trim();
+    var whoLine = nm ? ('<b>'+esc(nm)+'</b><br>'+esc(digits)) : ('<b>'+esc(digits)+'</b>');
+    var body=document.getElementById('waCallWho');
+    if(body) body.innerHTML = whoLine + '<span class="wc-last4"> (\u2026'+esc(last4)+')</span>';
+    var o=document.getElementById('waCallOverlay'); if(o) o.classList.add('show');
+  }
+  function waCallCancel(){ _waCallNum=null; var o=document.getElementById('waCallOverlay'); if(o) o.classList.remove('show'); }
+  function waCallGo(){
+    var n=_waCallNum; _waCallNum=null;
+    var o=document.getElementById('waCallOverlay'); if(o) o.classList.remove('show');
+    if(n) placeCall(n);
+  }
+  function placeCall(number){
+    if(DASH_ROLE==='none') return;
+    if(!CALLER_NAME){
+      var bar=document.getElementById('callerbar');
+      if(bar){ bar.classList.add('need'); bar.scrollIntoView({behavior:'smooth',block:'center'}); }
+      showToast('Your login is not linked to an agent — ask the doctor.'); return;
+    }
+    showToast('Calling… '+CALLER_NAME+'\'s phone will ring first (a few seconds), then the patient.');
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.accepted){ showToast('\ud83d\udcde Ringing '+CALLER_NAME+' — answer your phone; the patient will be connected.'); }
+        else { showToast('Call not placed: '+((res&&res.reason)||'unknown error')); }
+      })
+      .withFailureHandler(function(e){ showToast('Call error: '+(e&&e.message?e.message:e)); })
+      .triggerCall(DASH_KEY, String(number||''), String(number||''));
+  }
+  var _toastT=null;
+  function showToast(msg){
+    var t=document.getElementById('callToast'); if(!t) return;
+    t.textContent=msg; t.classList.add('show');
+    if(_toastT) clearTimeout(_toastT);
+    _toastT=setTimeout(function(){ t.classList.remove('show'); }, 6000);
+  }
+  /* ====================================================================
+   * INCOMING-CALL OUTCOME FLOW (v17) — guided, one step at a time (Option A)
+   * Everything stays hidden behind "Log outcome ▾"; controls unfold downward.
+   * ==================================================================== */
+  // reasons a KNOWN patient might call in (clinical ones * auto-escalate)
+  // F-8 / Fix B: the patient packet lives here, keyed by slot id.
+  // It is NEVER written into button markup. Rebuilt on every render.
+  var IN_PAT = {};
+
+  var IN_REASONS = [
+    ['', '— why did they call? —'],
+    ['appointment', 'Appointment — book / reschedule / cancel'],
+    ['reports', 'Reports — ready?'],
+    ['pharmacy', 'Pharmacy / medicines'],
+    ['xray', 'X-ray — availability'],
+    ['billing', 'Billing / payment'],
+    ['post_op', 'Post-op / recovery concern *'],
+    ['new_symptom', 'New symptom / problem *'],
+    ['info', 'Directions / timings / info'],
+    ['wants_doctor', 'Wants to speak to doctor *'],
+    ['other', 'Other']
+  ];
+  var IN_RESOLUTIONS = [
+    ['', '— how did it end? —'],
+    ['resolved_on_call', 'Resolved on call'],
+    ['appointment_booked', 'Appointment booked'],
+    ['info_given_will_act', 'Info given, will act'],
+    ['needs_callback', 'Needs callback (stays on list)'],
+    ['escalated', 'Escalate to doctor'],
+    ['cant_communicate', "Couldn't communicate (stays)"]
+  ];
+  // lighter outcome set for new / non-patient callers
+  var IN_NEW_OUTCOMES = [
+    ['', '— outcome —'],
+    ['appointment_booked', 'Appointment booked'],
+    ['will_come', 'Will come / considering'],
+    ['enquiry_only', 'Info given / enquiry only'],
+    ['needs_callback', 'Needs callback (stays)'],
+    ['escalated', 'Escalate to doctor'],
+    ['no_action', 'No action / not relevant']
+  ];
+  var IN_CHANNELS = [
+    ['', '(optional) how did they hear?'],
+    ['gmb', 'Google / GMB'],
+    ['referral', 'Referral'],
+    ['hoarding', 'Hoarding / banner'],
+    ['app', 'Clinic app'],
+    ['family', 'Family / friend'],
+    ['online', 'Online / social'],
+    ['other', 'Other']
+  ];
+  function inOpts(arr, sel){
+    return arr.map(function(o){ return '<option value="'+o[0]+'"'+(o[0]===sel?' selected':'')+'>'+esc(o[1])+'</option>'; }).join('');
+  }
+  function inDateNeeded(code){ return code==='appointment_booked' || code==='will_come'; }
+
+  // open the guided card for one incoming row
+  function inOpen(slotId, number, known){
+    var slot=document.getElementById(slotId); if(!slot) return;
+    if(slot.innerHTML){ slot.innerHTML=''; return; }   // toggle closed if already open
+    slot.dataset.number=number; slot.dataset.known=known?'1':'';
+    var html='<div class="in-card">';
+    if(known){
+      // Case A: known patient -> straight to reason + resolution
+      html+= inKnownBlock(slotId);
+    } else {
+      // unknown number -> ask identity first
+      html+='<div class="step"><label>Who is this?</label>'+
+            '<select onchange="inIdentity(dget(\''+dref(slotId)+'\'),this.value)">'+
+              '<option value="">— identify caller —</option>'+
+              '<option value="existing_new_number">Existing patient — new number</option>'+
+              '<option value="new_patient">New patient enquiry</option>'+
+              '<option value="surgery_enquiry">\ud83d\udea8 Doctor/urgent \u2014 surgery, fracture, accident, severe pain</option>'+
+              '<option value="non_patient">Not a patient</option>'+
+            '</select></div>'+
+            '<div id="'+slotId+'_body"></div>';
+    }
+    html+='<div class="in-msg" id="'+slotId+'_msg"></div></div>';
+    slot.innerHTML=html;
+  }
+
+  // the known-patient (also existing-patient-new-number after linking) block
+  function inKnownBlock(slotId){
+    return '<div class="step"><label>Reason for call</label>'+
+             '<select id="'+slotId+'_reason" onchange="inKnownCheck(dget(\''+dref(slotId)+'\'))">'+inOpts(IN_REASONS,'')+'</select></div>'+
+           '<div class="step"><label>Resolution</label>'+
+             '<select id="'+slotId+'_reso" onchange="inKnownCheck(dget(\''+dref(slotId)+'\'))">'+inOpts(IN_RESOLUTIONS,'')+'</select></div>'+
+           '<div class="step" id="'+slotId+'_datewrap" style="display:none"><label>Date</label>'+
+             '<input type="date" id="'+slotId+'_date"></div>'+
+           inActions(slotId);
+  }
+  function inActions(slotId){
+    return '<div class="in-actions">'+
+             '<button class="savebtn" id="'+slotId+'_save" disabled onclick="inSave(dget(\''+dref(slotId)+'\'))">Save outcome</button>'+
+             '<button class="cancel" onclick="document.getElementById(dget(\''+dref(slotId)+'\')).innerHTML=\'\'">Cancel</button>'+
+           '</div>';
+  }
+
+  // identity chosen for an unknown number -> render the right sub-block
+  function inIdentity(slotId, identity){
+    var body=document.getElementById(slotId+'_body'); if(!body) return;
+    var slot=document.getElementById(slotId); slot.dataset.identity=identity;
+    if(identity==='existing_new_number'){
+      body.innerHTML='<div class="step"><label>Patient name</label><input id="'+slotId+'_name" placeholder="Type the patient\u2019s name"></div>'+
+                     '<div class="step"><label>Clinic ID (optional)</label><input id="'+slotId+'_cid" placeholder="If they know it"></div>'+
+                     inKnownBlock(slotId);
+      // wire the name field to enable Save logic too
+    } else if(identity==='surgery_enquiry'){
+      // URGENT path: surgery / fracture / accident / severe pain.
+      // Always escalates (server-side). Keep it lean: a clear call-the-doctor
+      // banner, an optional name, and the outcome. No "how did they hear?".
+      body.innerHTML='<div class="in-urgent">\ud83d\udea8 Call Doctor urgently \u2014 then log the outcome below.</div>'+
+                     '<div class="step"><label>Patient name (if given)</label><input id="'+slotId+'_name" placeholder="Optional \u2014 helps the doctor"></div>'+
+                     '<div class="step"><label>Outcome</label><select id="'+slotId+'_reso" onchange="inNewCheck(dget(\''+dref(slotId)+'\'))">'+inOpts(IN_NEW_OUTCOMES,'')+'</select></div>'+
+                     '<div class="step" id="'+slotId+'_datewrap" style="display:none"><label>Date</label><input type="date" id="'+slotId+'_date"></div>'+
+                     inActions(slotId);
+    } else if(identity==='new_patient'){
+      var forWhom = '<div class="step"><label>Appointment is for</label><select id="'+slotId+'_for"><option value="self">Themselves</option><option value="other">Someone else</option></select></div>';
+      var channel = '<div class="step"><label>How did they hear? (optional)</label><select id="'+slotId+'_chan">'+inOpts(IN_CHANNELS,'')+'</select></div>';
+      body.innerHTML=forWhom+channel+
+                     '<div class="step"><label>Outcome</label><select id="'+slotId+'_reso" onchange="inNewCheck(dget(\''+dref(slotId)+'\'))">'+inOpts(IN_NEW_OUTCOMES,'')+'</select></div>'+
+                     '<div class="step" id="'+slotId+'_datewrap" style="display:none"><label>Date</label><input type="date" id="'+slotId+'_date"></div>'+
+                     inActions(slotId);
+    } else if(identity==='non_patient'){
+      body.innerHTML='<div class="step"><label>Type</label><select id="'+slotId+'_np">'+
+                       '<option value="vendor">Vendor / supplier / sales</option>'+
+                       '<option value="marketing">Marketing / spam</option>'+
+                       '<option value="admin">Administrative / official</option>'+
+                       '<option value="wrong">Wrong number</option>'+
+                       '<option value="attendant">Attendant / family of a patient</option>'+
+                       '<option value="other">Other</option></select></div>'+
+                     '<div class="step"><label>Outcome</label><select id="'+slotId+'_reso" onchange="inNewCheck(dget(\''+dref(slotId)+'\'))">'+
+                       '<option value="">— outcome —</option>'+
+                       '<option value="enquiry_only">Info given</option>'+
+                       '<option value="no_action">No action / not relevant</option>'+
+                       '<option value="needs_callback">Needs callback (stays)</option>'+
+                       '<option value="cant_communicate">Couldn\'t communicate (stays)</option></select></div>'+
+                     inActions(slotId);
+    } else { body.innerHTML=''; }
+  }
+
+  function inKnownCheck(slotId){
+    var reason=(document.getElementById(slotId+'_reason')||{}).value||'';
+    var reso=(document.getElementById(slotId+'_reso')||{}).value||'';
+    var dw=document.getElementById(slotId+'_datewrap');
+    if(dw) dw.style.display = inDateNeeded(reso) ? '' : 'none';
+    var save=document.getElementById(slotId+'_save');
+    if(save) save.disabled = !(reason && reso);
+  }
+  function inNewCheck(slotId){
+    var reso=(document.getElementById(slotId+'_reso')||{}).value||'';
+    var dw=document.getElementById(slotId+'_datewrap');
+    if(dw) dw.style.display = inDateNeeded(reso) ? '' : 'none';
+    var save=document.getElementById(slotId+'_save');
+    if(save) save.disabled = !reso;
+  }
+
+  function inSave(slotId){
+    var slot=document.getElementById(slotId); if(!slot) return;
+    var number=slot.dataset.number||'';
+    var known=slot.dataset.known==='1';
+    var identity=slot.dataset.identity||(known?'known':'');
+    var pat = IN_PAT[slotId] || {};   // Fix B: no parse, so no catch
+    var g=function(id){ var el=document.getElementById(slotId+'_'+id); return el?el.value:''; };
+    var p={ phone:number, identity:identity,
+            name: g('name') || pat.name || '',
+            clinicId: g('cid') || pat.uid || '',
+            lastVisit: pat.last || '',
+            reason: g('reason') || g('np') || '',
+            resolution: g('reso'),
+            expected: g('date'),
+            channel: g('chan'),
+            forWhom: g('for'),
+            detail: '' };
+    if(!p.resolution){ inMsg(slotId,'Pick how the call ended.','warn'); return; }
+    var save=document.getElementById(slotId+'_save'); if(save){ save.disabled=true; save.textContent='Saving…'; }
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.ok){
+          var verb = res.settle==='escalate' ? 'saved & escalated to doctor'
+                   : (res.settle==='retry' ? 'saved — stays for callback' : 'saved');
+          inMsg(slotId, '✓ Outcome '+verb+'.','ok');
+          setTimeout(function(){ var s=document.getElementById(slotId); if(s) s.innerHTML=''; }, 1400);
+        } else {
+          if(save){ save.disabled=false; save.textContent='Save outcome'; }
+          inMsg(slotId, 'Not saved: '+((res&&res.reason)||'error'),'warn');
+        }
+      })
+      .withFailureHandler(function(err){
+        if(save){ save.disabled=false; save.textContent='Save outcome'; }
+        inMsg(slotId, 'Error: '+((err&&err.message)||err),'warn');
+      })
+      .saveIncomingOutcome(DASH_KEY, p);
+  }
+  function inMsg(slotId, text, kind){
+    var m=document.getElementById(slotId+'_msg'); if(!m) return;
+    m.textContent=text; m.className='in-msg '+(kind||'');
+  }
+
+  /* ====================================================================
+   * FOLLOW-UP CALL LOOP (v16) — worklist, outcome capture, escalations
+   * ==================================================================== */
+  var FU_OUTCOMES = [
+    { code:'',                    label:'— mark outcome —' },
+    { code:'coming',              label:'Coming / will visit' },
+    { code:'out_of_town',         label:'Out of town' },
+    { code:'on_medication',       label:'On medication' },
+    { code:'cant_communicate',    label:"Connected but couldn't communicate" },
+    { code:'dikha_chuke',         label:'Already visited (dikha chuke)' },
+    { code:'problem',             label:'Problem / needs attention' },
+    { code:'close_followup',      label:'Close follow-up · treatment complete' },
+    { code:'not_interested',      label:'Not interested' },
+    { code:'treatment_elsewhere', label:'Treatment elsewhere' },
+    { code:'wrong_number',        label:'Wrong number' },
+    { code:'asked_not_to_call',   label:'Asked not to call' }
+  ];
+  // which outcomes need extra fields
+  var FU_NEEDS_DATE = { coming:1, out_of_town:1 };
+  var FU_IS_MED     = { on_medication:1 };
+  // D66: outcomes that LEAVE the worklist -> the tile vanishes on Save.
+  // Exact mirror of WebApp.gs FU_SETTLING + FU_ESCALATING (staff codes only).
+  // Anything NOT listed here (only 'cant_communicate') stays on the list for a
+  // callback, exactly as before.
+  var FU_VANISH = { coming:1, out_of_town:1, on_medication:1, dikha_chuke:1, problem:1,
+                    close_followup:1, not_interested:1, treatment_elsewhere:1,
+                    wrong_number:1, asked_not_to_call:1 };
+  var fuData = null;   // last getFollowups result, so save handlers can read row details
+  var fuReviewSB = []; // S135b: review-console SEND BACK tiles (S35 loop closer)
+  var fuLastVisits = {};   // v1.1 Slice 2: mobile(last10) -> last-visit date (additive)
+  var fuRecordings = {};   // v1.1 Slice 2b: mobile(last10) -> {fileId,date} of most recent archived call
+  var fuClinicIds  = {};   // v18.1 (D52): mobile(last10) -> numeric Clinic ID from Patient_Master
+  /* ---- S135 (F-34/D208): name-aware lookup for shared family mobiles ----
+     Server map keys: phone10 (unique mobile) OR phone10+'|'+normalised-name
+     (shared mobile). ''+present = shared, no safe match -> show verify marker. */
+  function fuNorm(s){
+    return String(s||'').toLowerCase()
+      .replace(/[^a-z0-9\u0900-\u097F ]+/g,' ')
+      .replace(/\s+/g,' ').trim();
+  }
+  function fuKeyM(it){ var d=String((it&&it.mobile)||'').replace(/\D/g,''); return d.length>=10 ? d.slice(-10) : d; }
+  function fuLookup(map, it){
+    map = map || {};
+    var m = fuKeyM(it); if(!m) return {val:'', shared:false};
+    var k = m + '|' + fuNorm(it && it.name);
+    if (Object.prototype.hasOwnProperty.call(map, k)) { var v = map[k] || ''; return {val:v, shared: v===''}; }
+    var pv = map[m]; if (pv === undefined && it && it.mobile && String(it.mobile) !== m) pv = map[it.mobile];
+    return {val: pv || '', shared:false};
+  }
+  var olDay = 'today';     // v18.2 review console: which day is being reviewed
+  var olRows = {};         // v18.2: last-loaded pending rows by key (for actions)
+
+  function fuOptions(sel){
+    return FU_OUTCOMES.map(function(o){
+      return '<option value="'+o.code+'"'+(o.code===sel?' selected':'')+'>'+esc(o.label)+'</option>';
+    }).join('');
+  }
+
+  /* Block C (S136): the five separate follow-up fetches are retired — they now
+     arrive inside getDashboardBundle. This name survives because three save
+     handlers call it to refresh the board IMMEDIATELY after a write; force=true
+     bypasses AND refills the shared cache, so the saved tile updates at once,
+     on this device and on every other one's next tick. */
+  function pollFollowups(){ poll(true); }
+
+  /* ---- follow-up band ordering + per-device collapse memory (Session 29) ---- */
+  // Calling order: Due Today, Grace Period, Actionable Missed Follow-Up, Probable
+  // Dropout, Procedure, then any contact-problem bands (Invalid Mobile / Identity
+  // Unresolved) alphabetically at the bottom. Matching is prefix-based so it is
+  // robust to spacing/case coming from the sheet.
+  var FU_BAND_ORDER = ['sent back by doctor','due today','grace period','actionable missed follow-up','probable dropout','procedure'];
+  function fuBandRank(sec){
+    var k=String(sec||'').toLowerCase().trim();
+    for(var i=0;i<FU_BAND_ORDER.length;i++){ if(k.indexOf(FU_BAND_ORDER[i])===0) return i; }
+    return 90;   // everything else (contact-problem bands) sinks to the bottom
+  }
+  function fuOrderedSections(names){
+    return names.slice().sort(function(a,b){
+      var ra=fuBandRank(a), rb=fuBandRank(b);
+      if(ra!==rb) return ra-rb;
+      return String(a).localeCompare(String(b));   // stable, alpha within same rank
+    });
+  }
+  // v18.3: only the single highest-priority band that has patients is open by
+  // default; every other band header stays visible but renders collapsed. Any
+  // band the user opens/closes by hand is remembered on this device and wins.
+  var fuBandState = {};
+  try{ fuBandState = JSON.parse(localStorage.getItem('dashFuBands')||'{}'); }catch(e){ fuBandState={}; }
+  function fuBandOpen(key, defOpen){
+    if(Object.prototype.hasOwnProperty.call(fuBandState, key)) return !!fuBandState[key];
+    return !!defOpen;
+  }
+  function toggleFuBand(head){
+    var band=head.parentNode;
+    band.classList.toggle('collapsed');
+    var sec=band.getAttribute('data-fuband');
+    fuBandState[sec] = !band.classList.contains('collapsed');
+    try{ localStorage.setItem('dashFuBands', JSON.stringify(fuBandState)); }catch(e){}
+  }
+
+  function renderFollowups(d){
+    fuData = d;
+    /* S135b (S35 loop closer): merge review-console SEND BACKs into the
+       'Sent back by doctor' band. Idempotent — strips its own previous
+       injections first, so repeated re-renders of the same object are safe. */
+    if (d && !d.error) {
+      d.today = (d.today || []).filter(function(x){ return !(x && x._rsb); });
+      var _g = d.bySection || {};
+      Object.keys(_g).forEach(function(s){
+        _g[s] = (_g[s] || []).filter(function(x){ return !(x && x._rsb); });
+        if (!_g[s].length) delete _g[s];
+      });
+      d.bySection = _g;
+      if (d.counts && d._sbBase === undefined) d._sbBase = (d.counts.open || 0);
+      var _have = {};
+      d.today.forEach(function(x){ if (x && x.key) _have[String(x.key)] = 1; });
+      var _inj = [];
+      (fuReviewSB || []).forEach(function(it){
+        if (!it || !it.key) return;
+        if (_have[String(it.key)]) return;   /* already on the list (e.g. escalation send-back) — keep that tile */
+        _inj.push(it);
+      });
+      if (_inj.length) {
+        d.today = _inj.concat(d.today);
+        var _ng = {};
+        _ng['Sent back by doctor'] = _inj.concat(d.bySection['Sent back by doctor'] || []);
+        Object.keys(d.bySection).forEach(function(s){
+          if (s !== 'Sent back by doctor') _ng[s] = d.bySection[s];
+        });
+        d.bySection = _ng;
+      }
+      if (d.counts) d.counts.open = (d._sbBase || 0) + _inj.length;
+    }
+    var box=document.getElementById('fuToday');
+    var sbox=document.getElementById('fuSettled');
+    if(!box) return;
+    if(d && d.error){ box.innerHTML='<div class="empty">Could not load follow-ups: '+esc(d.error)+'</div>'; return; }
+    var counts=(d&&d.counts)||{open:0,retry:0,settled:0};
+    fuRenderProgress(d);                                     // D66: section-wise total / done header
+    var openShown=Math.max(0,(counts.open||0)-fuPendingCount());
+    setCnt('fuTodayCnt', openShown, openShown>0);
+    // KPI tile
+    var kfu=document.getElementById('k_fu'); if(kfu) kfu.textContent=openShown;
+    var kfus=document.getElementById('k_fu_sub');
+    if(kfus) kfus.textContent=(counts.settled||0)+' settled · '+(counts.retry||0)+' retry';
+
+    var groups=(d&&d.bySection)||{};
+    var secNames=Object.keys(groups);
+    if(!secNames.length){ box.className=''; box.innerHTML='<div class="empty">✅ No follow-up calls pending — list is clear (or not yet pushed today).</div>'; }
+    else{
+      box.className='list';
+      var html='';
+      var fuOrdered = fuOrderedSections(secNames);
+      var fuTopSec = fuOrdered.length ? fuOrdered[0] : '';
+      fuOrdered.forEach(function(sec){
+        var open = fuBandOpen(sec, sec===fuTopSec);
+        var rows='', shown=0;
+        groups[sec].forEach(function(it){ if(fuPending[String(it.key)]) return; rows+=fuRowHtml(it); shown++; });
+        if(!shown) return;   // whole band is momentarily pending -> hide it this cycle
+        html+='<div class="fu-band'+(open?'':' collapsed')+'" data-fuband="'+esc(sec)+'">'+
+                '<div class="fu-bandhead" onclick="toggleFuBand(this)">'+
+                  '<span class="fu-caret">▸</span>'+esc(sec)+' · '+shown+
+                '</div>'+
+                '<div class="fu-bandbody">'+rows+'</div>'+
+              '</div>';
+      });
+      box.innerHTML=html;
+    }
+
+    // settled (read-only)
+    var s=(d&&d.settled)||[];
+    setCnt('fuSettledCnt', s.length, false);
+    if(!s.length){ sbox.className=''; sbox.innerHTML='<div class="muted-note">No settled follow-ups recorded.</div>'; }
+    else{
+      sbox.className='list';
+      sbox.innerHTML=s.map(function(e){
+        return '<div class="fu-settledrow"><span><b>'+esc(e.patient||'')+'</b>'+
+               (e.clinicId?(' · '+esc(e.clinicId)):'')+(e.due?(' · due '+esc(e.due)):'')+'</span>'+
+               '<span class="o">'+esc(e.outcome||'')+(e.by?(' · '+esc(e.by)):'')+(e.when?(' · '+esc(e.when)):'')+'</span></div>';
+      }).join('');
+    }
+    renderUnreachable((d&&d.unreachable)||[]);
+    try{ fuResumePolls(); }catch(e){}     // v18.16 (D77): resume any call still awaiting its measured result
+  }
+
+  // format an ISO date (yyyy-mm-dd) as "22 Jun 26"; pass anything else through unchanged
+  function fmtDMY(s){
+    if(!s) return '';
+    var m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(!m) return String(s);
+    var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var mi=parseInt(m[2],10)-1;
+    if(mi<0||mi>11) return String(s);
+    return parseInt(m[3],10)+' '+mo[mi]+' '+m[1].slice(2);
+  }
+  /* ---- Duration gate (D77, amended D156 v18.19) ----
+     An outcome unlocks after a MEASURED connected call. If the call CANNOT be measured within
+     3 minutes (webhook down, vendor slow, no reference_id), the gate FAILS OPEN and the outcome
+     unlocks anyway with an "unverified" banner. A call measured as NOT connected still blocks.
+     Original D77 note follows.
+     ---- Duration gate (D77): an outcome unlocks only after a MEASURED connected call ----
+     Replaces the Session-52 self-declared "Talked" tap. When a follow-up call is placed we
+     capture that call's reference_id, then poll the server (getCallDuration -> Call_Durations,
+     written in real time by the VPS call-webhook receiver). Only a call that BRIDGED, was
+     ANSWERED by the patient, and had >= FU_MIN_TALK talk-seconds unlocks the outcome dropdown.
+     Anything else -> "didn't connect / couldn't confirm", no outcome. Fail-safe by default. */
+  var fuCalled   = {};   // rid -> 1     : a call was placed for this tile today (persisted per-day)
+  var fuRefId    = {};   // rid -> refId : that call's reference_id, to match Call_Durations (persisted)
+  var fuPlacedAt = {};   // rid -> epoch ms the call was placed (v18.19: persisted -> the 3-min
+                         //          timeout is measured from the CALL, not from the page load)
+  var fuTalked   = {};   // rid -> 1     : MEASURED connected >= threshold -> outcome unlocks (persisted)
+  var fuMissed   = {};   // rid -> {talk,status} : MEASURED not-connected / too short (persisted)
+  var fuTimeout  = {};   // rid -> 1     : gave up waiting for the result (webhook hiccup) (persisted)
+  var fuChecking = {};   // rid -> 1     : currently polling for this call's result (session only)
+  var fuPollT    = {};   // rid -> setTimeout handle
+  var FU_MIN_TALK        = 15;         // display copy; the real gate is server-side (CC_GATE_MIN_TALK)
+  var FU_POLL_EVERY_MS   = 6000;       // how often to ask the server
+  var FU_POLL_TIMEOUT_MS = 180000;     // stop after 3 minutes with no result
+
+  /* v18.19 (D156) — WHY THIS CHANGED.
+     Before, only fuCalled + fuRefId were persisted. The three RESULT states lived in page
+     memory. So after any reload a called tile rendered "Checking the call..." again and
+     restarted a fresh 3-minute timer -> for anyone who refreshes, the spinner was permanent.
+     Worse, a call that came back without a reference_id was persisted as CALLED WITH NO REF:
+     fuResumePolls skipped it silently, nothing ever timed it out, and the tile spun forever
+     across every reload until localStorage was cleared by hand.
+     Now: every state persists, the timeout is measured from the call, and every no-ref path
+     fails safe. The day key is LOCAL (IST) rather than UTC, which also flushes the old
+     stuck entries once, on first load. */
+  function fuDayKey(){
+    if (TODAY_IST) return TODAY_IST;   // Block C (S136): the ONE clock — server IST (F-5/F-13)
+    var d=new Date();                  // pre-first-refresh fallback only (page just loaded)
+    return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+  }
+  (function(){
+    try{
+      var raw=JSON.parse(localStorage.getItem('dashFuCalled')||'{}');
+      if(raw && raw.date===fuDayKey()){
+        if(raw.ids)     fuCalled   = raw.ids;
+        if(raw.refs)    fuRefId    = raw.refs;
+        if(raw.placed)  fuPlacedAt = raw.placed;
+        if(raw.talked)  fuTalked   = raw.talked;
+        if(raw.missed)  fuMissed   = raw.missed;
+        if(raw.timeout) fuTimeout  = raw.timeout;
+      }
+    }catch(e){ fuCalled={}; fuRefId={}; fuPlacedAt={}; fuTalked={}; fuMissed={}; fuTimeout={}; }
+  })();
+  function fuPersistCalled(){
+    try{
+      localStorage.setItem('dashFuCalled', JSON.stringify({
+        date: fuDayKey(), ids: fuCalled, refs: fuRefId, placed: fuPlacedAt,
+        talked: fuTalked, missed: fuMissed, timeout: fuTimeout
+      }));
+    }catch(e){}
+  }
+  function fuMarkCalled(rid, refId){
+    fuCalled[rid]=1;
+    if(refId) fuRefId[rid]=refId;
+    fuPlacedAt[rid]=Date.now();
+    fuPersistCalled();
+  }
+  function fuStopPoll(rid){ if(fuPollT[rid]){ clearTimeout(fuPollT[rid]); delete fuPollT[rid]; } delete fuChecking[rid]; }
+  /* how long ago was this tile's call placed? no stamp -> treat as already expired (fail safe) */
+  function fuElapsed(rid){ var t=fuPlacedAt[rid]; return t ? (Date.now()-t) : (FU_POLL_TIMEOUT_MS+1); }
+  function fuSetTalked(rid){  fuStopPoll(rid); fuTalked[rid]=1;  fuPersistCalled(); fuRerenderTile(rid); }
+  function fuSetMissed(rid, talk, status){ fuStopPoll(rid); fuMissed[rid]={talk:(talk||0), status:(status||'')}; fuPersistCalled(); fuRerenderTile(rid); }
+  function fuSetTimeout(rid){ fuStopPoll(rid); fuTimeout[rid]=1; fuPersistCalled(); fuRerenderTile(rid); }
+  function fuClearCalled(rid){
+    fuStopPoll(rid);
+    delete fuCalled[rid]; delete fuRefId[rid]; delete fuPlacedAt[rid]; delete fuTalked[rid];
+    delete fuMissed[rid]; delete fuTimeout[rid];
+    fuPersistCalled();
+  }
+  // place a follow-up call, CAPTURE its reference_id, then poll for the measured result
+  function fuDoCall(rid, number){
+    if(DASH_ROLE==='none') return;
+    if(!CALLER_NAME){
+      var bar=document.getElementById('callerbar');
+      if(bar){ bar.classList.add('need'); bar.scrollIntoView({behavior:'smooth',block:'center'}); }
+      showToast('Your login is not linked to an agent — ask the doctor.'); return;
+    }
+    fuStopPoll(rid); delete fuTalked[rid]; delete fuMissed[rid]; delete fuTimeout[rid];
+    delete fuPlacedAt[rid]; fuPersistCalled();                                            // fresh attempt
+    showToast('Calling… '+CALLER_NAME+'\u2019s phone rings first (a few seconds), then the patient.');
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.accepted){
+          showToast('\ud83d\udcde Ringing '+CALLER_NAME+' — answer your phone; the patient will be connected.');
+          fuMarkCalled(rid, res.reference_id||'');
+          if(res.reference_id){ fuRerenderTile(rid); fuStartPoll(rid); }
+          else { fuSetTimeout(rid); }   // no ref -> cannot gate -> fail-safe (v18.19: now persisted)
+        } else {
+          showToast('Call not placed: '+((res&&res.reason)||'unknown error'));
+        }
+      })
+      .withFailureHandler(function(e){ showToast('Call error: '+(e&&e.message?e.message:e)); })
+      .triggerCall(DASH_KEY, String(number||''), String(number||''));   // base unchanged (PHI swap deferred)
+  }
+  // poll the server for THIS call's measured result until we get one, or time out
+  function fuStartPoll(rid){
+    if(fuPollT[rid]) return;                 // already polling
+    var ref=fuRefId[rid];
+    if(!ref){ fuSetTimeout(rid); return; }                        // v18.19: never spin without a ref
+    if(fuElapsed(rid) > FU_POLL_TIMEOUT_MS){ fuSetTimeout(rid); return; }   // the call is long past
+    fuChecking[rid]=1; delete fuTimeout[rid];
+    fuRerenderTile(rid);
+    (function tick(){
+      google.script.run
+        .withSuccessHandler(function(res){
+          if(res && res.ok && res.found){
+            if(res.allowOutcome){ fuSetTalked(rid); }
+            else { fuSetMissed(rid, res.talk, res.status); }
+            return;
+          }
+          // v18.19: elapsed is measured from when the CALL was placed, so a page reload
+          // cannot restart the 3-minute clock and resurrect the spinner.
+          if(fuElapsed(rid) > FU_POLL_TIMEOUT_MS){ fuSetTimeout(rid); return; }
+          fuPollT[rid]=setTimeout(tick, FU_POLL_EVERY_MS);
+        })
+        .withFailureHandler(function(){
+          if(fuElapsed(rid) > FU_POLL_TIMEOUT_MS){ fuSetTimeout(rid); return; }
+          fuPollT[rid]=setTimeout(tick, FU_POLL_EVERY_MS);
+        })
+        .getCallDurationFast(DASH_KEY, ref);   /* Block C (S136): last-200-rows read, not the whole tab */
+    })();
+  }
+  // resume polling any called-but-unresolved tile (e.g. the page was reloaded mid-call)
+  function fuResumePolls(){
+    for(var rid in fuCalled){
+      if(!fuCalled.hasOwnProperty(rid)) continue;
+      if(fuTalked[rid] || fuMissed[rid] || fuTimeout[rid] || fuPollT[rid]) continue;  // already settled
+      if(!fuRefId[rid]){ fuSetTimeout(rid); continue; }        // v18.19: was a silent skip -> spun forever
+      if(fuElapsed(rid) > FU_POLL_TIMEOUT_MS){ fuSetTimeout(rid); continue; }
+      fuStartPoll(rid);
+    }
+  }
+  function fuRerenderTile(rid){
+    var it=null;
+    if(fuData && fuData.today){ for(var i=0;i<fuData.today.length;i++){ if(String(fuData.today[i].key)===String(rid)){ it=fuData.today[i]; break; } } }
+    if(!it) return;
+    var el=document.getElementById('furow_'+rid);
+    if(el && el.parentNode){ var tmp=document.createElement('div'); tmp.innerHTML=fuRowHtml(it); var nw=tmp.firstChild; if(nw) el.parentNode.replaceChild(nw, el); }
+  }
+
+  /* ==== K-1 ONE-TAP STAFF UI (S139; Console Spec SK.6) ====================
+     Parallel surface (SK.6.6): per-device toggle, old dropdown flow untouched
+     and always available. Five buttons, wording locked verbatim (D214).
+     Undo, never confirm (10 s, D97). 3-day snooze after the 3rd cumulative
+     miss (D215/D216); server fires the WABA. Staff never see the AI. */
+  var K_LABELS={K_COMING:'\u092e\u0930\u0940\u091c\u093c \u0906 \u0930\u0939\u0947 \u0939\u0948\u0902',
+                K_NOT_COMING:'\u0928\u0939\u0940\u0902 \u0906\u090f\u0901\u0917\u0947',
+                K_CALL_AGAIN:'\u092c\u093e\u0924 \u0939\u0941\u0908 \u2014 \u092b\u093f\u0930 call \u0915\u0930\u0928\u093e',
+                K_NO_CONTACT:'\u092c\u093e\u0924 \u0928\u0939\u0940\u0902 \u0939\u094b \u092a\u093e\u0908',
+                K_TO_DOCTOR:'\u0921\u0949\u0915\u094d\u091f\u0930 \u0915\u094b \u0926\u093f\u0916\u093e\u0928\u093e \u0939\u0948'};
+  var K_ORDER=['K_COMING','K_NOT_COMING','K_CALL_AGAIN','K_NO_CONTACT','K_TO_DOCTOR'];
+  var kMissTotals={}, kPending={}, kWake={};
+  function kOn(){ try{ return localStorage.getItem('K_UI')==='on'; }catch(e){ return false; } }
+  function kToggleUI(){ try{ localStorage.setItem('K_UI', kOn()?'off':'on'); }catch(e){}
+    kPaintToggle(); if(typeof fuData!=='undefined' && fuData) renderFollowups(fuData); }
+  function kPaintToggle(){ var t=document.getElementById('kToggle'); if(!t) return;
+    t.textContent = kOn()?'\u26a1 One-tap: ON':'\u26a1 One-tap: OFF';
+    t.className='k-toggle'+(kOn()?' on':''); }
+  function kMiss(rid){ return kMissTotals[String(rid)]||{n:0,lastT:0}; }
+  function kSnoozedNow(rid){ var m=kMiss(rid);
+    if(m.n<3 || !m.lastT || kWake[rid]) return false;
+    return Date.now() < (Number(m.lastT)+3*24*3600*1000); }
+  function kWakeNow(rid){ kWake[rid]=1; fuRerenderTile(rid); }
+  function kBtns(rid, mode){
+    var codes = (mode==='noContact') ? ['K_NO_CONTACT'] : K_ORDER;
+    var h='<div class="k-btns">';
+    codes.forEach(function(c){
+      h+='<button class="k-btn '+c+(mode==='noContact'?' hot':'')+'" onclick="kTap(dget(\''+dref(rid)+'\'),\''+c+'\')">'+K_LABELS[c]+'</button>';
+    });
+    if(mode==='noContact'){
+      var it=fuFindToday(rid)||{};
+      h+='<button class="fu-recall" onclick="fuDoCall(dget(\''+dref(rid)+'\'),dget(\''+dref(it.mobile||'')+'\'))">\u21bb \u092b\u093f\u0930 call \u0915\u0930\u0947\u0902</button>';
+    }
+    h+='</div><div class="k-note"><input class="fu-in" id="knote_'+rid+'" placeholder="note (optional)"></div>'+
+       '<div class="fu-msg" id="fumsg_'+rid+'"></div>';
+    return h;
+  }
+  function kPendingHtml(rid){ var p=kPending[rid]; if(!p) return '';
+    return '<div class="k-done">'+esc(K_LABELS[p.code]||p.code)+'</div>'+
+           '<button class="k-undo" onclick="kUndo(dget(\''+dref(rid)+'\'))">\u21a9\ufe0e \u092c\u0926\u0932\u0947\u0902 <span id="kundosec_'+rid+'">'+p.left+'</span></button>'; }
+  function kTap(rid, code){
+    if(kPending[rid]) return;
+    var note=(document.getElementById('knote_'+rid)||{}).value||'';
+    kPending[rid]={ code:code, note:note, left:10,
+      t:setTimeout(function(){ kCommit(rid); }, 10000) };
+    fuRerenderTile(rid);
+    (function tickU(){ var p=kPending[rid]; if(!p) return;
+      var el=document.getElementById('kundosec_'+rid); if(el) el.textContent=p.left;
+      if(p.left<=0) return; p.left--; setTimeout(tickU,1000); })();
+  }
+  function kUndo(rid){ var p=kPending[rid]; if(p){ clearTimeout(p.t); delete kPending[rid]; }
+    fuRerenderTile(rid); }
+  function kCommit(rid){
+    var p=kPending[rid]; if(!p) return; delete kPending[rid];
+    var it=fuFindToday(rid)||{};
+    var payload={ rowKey:String(rid), kcode:p.code, note:p.note,
+      name:it.name||'', mobile:it.mobile||'', section:it.section||'',
+      diagnosis:it.diagnosis||'',
+      clinicId:(typeof fuLookup==='function'?fuLookup(fuClinicIds,it).val:''),
+      lastVisit:(typeof fuLookup==='function'?fuLookup(fuLastVisits,it).val:''),
+      due:it.due||'' };
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.ok){
+          if(p.code==='K_NO_CONTACT'){ var m=kMiss(rid);
+            m.n=(res.missCount!=null?res.missCount:(m.n+1)); m.lastT=Date.now();
+            kMissTotals[String(rid)]=m; }
+          pollFollowups();
+        } else { showToast('Not saved: '+((res&&res.reason)||'error')); fuRerenderTile(rid); }
+      })
+      .withFailureHandler(function(e){ showToast('Error: '+((e&&e.message)||e)); fuRerenderTile(rid); })
+      .saveKOutcome(DASH_KEY, payload);
+  }
+  function kRenderComp(b){
+    var el=document.getElementById('kComp'); if(!el) return;
+    try{
+      if(!kOn() || !CALLER_NAME){ el.textContent=''; return; }
+      var made=0, calls=(b.allCalls&&b.allCalls.calls)||[];
+      for(var i=0;i<calls.length;i++){ var a=String(calls[i].agent||'').toLowerCase();
+        if(a && a===String(CALLER_NAME).toLowerCase()) made++; }
+      var logged=(b.kLogged&&b.kLogged[CALLER_NAME])||0;
+      el.textContent='\u0906\u091c: '+logged+'/'+made;
+    }catch(e){ el.textContent=''; }
+  }
+  function kRenderStrikes(list){
+    var sec=document.getElementById('secKStrikes'), box=document.getElementById('kStrikes');
+    if(!sec||!box) return;
+    list=list||[];
+    sec.style.display = list.length ? '' : 'none';
+    setCnt('kStrikesCnt', list.length, list.length>0);
+    box.innerHTML = list.length ? list.map(function(s){
+      return '<div class="fu-row"><div class="info"><div class="fu-name">'+esc(s.name||'')+'</div>'+
+             '<div class="when">'+esc(s.when||'')+' \u00b7 '+esc(String(s.tries||''))+' tries \u00b7 WhatsApp '+(s.sent?'sent \u2713':'NOT sent \u26a0')+'</div>'+
+             '</div></div>'; }).join('') : '';
+  }
+
+  /* ---- D66: vanish-on-file + 10-second UNDO + section-wise progress ---- */
+  function fuFindToday(rid){
+    if(fuData && fuData.today){ for(var i=0;i<fuData.today.length;i++){ if(String(fuData.today[i].key)===String(rid)){ return fuData.today[i]; } } }
+    return null;
+  }
+  var fuPending = {};        // rid -> { payload, timerId, section, name } during the undo window
+  var FU_UNDO_MS = 10000;    // how long the write is held so UNDO can cancel it
+  function fuPendingCount(){ var n=0; for(var k in fuPending){ if(fuPending.hasOwnProperty(k)) n++; } return n; }
+  function fuPendingInSection(sec){ var n=0; for(var k in fuPending){ if(fuPending.hasOwnProperty(k) && fuPending[k].section===sec) n++; } return n; }
+
+  // remove the tile now; hold the actual write for the undo window
+  function fuVanishAndDefer(rid, it, payload){
+    var sec=(it&&it.section)||payload.section||'Follow-up';
+    var nm =(it&&it.name)||payload.name||'Patient';
+    var row=document.getElementById('furow_'+rid);
+    if(row && row.parentNode){ row.parentNode.removeChild(row); }
+    var timerId=setTimeout(function(){ fuCommit(rid); }, FU_UNDO_MS);
+    fuPending[rid]={ payload:payload, timerId:timerId, section:sec, name:nm };
+    if(fuData) fuRenderProgress(fuData);      // tick the "done" count up immediately
+    fuShowUndo(rid, nm);
+  }
+  // the deferred write actually reaches the sheet here
+  function fuCommit(rid){
+    var p=fuPending[rid]; if(!p) return;
+    google.script.run
+      .withSuccessHandler(function(res){
+        delete fuPending[rid];
+        if(!(res && res.ok)){ showToast('Could not save '+(p.name||'')+' \u2014 it will reappear on the list.'); }
+        pollFollowups();
+      })
+      .withFailureHandler(function(){
+        delete fuPending[rid];
+        showToast('Save failed for '+(p.name||'')+' \u2014 it will reappear on the list.');
+        pollFollowups();
+      })
+      .saveFollowupOutcome(DASH_KEY, p.payload);
+  }
+  // cancel a pending write and bring the tile back exactly as it was
+  function fuUndo(rid){
+    var p=fuPending[rid]; if(!p) return;
+    clearTimeout(p.timerId);
+    delete fuPending[rid];
+    fuHideUndo();
+    if(fuData){ renderFollowups(fuData); }     // tile returns (never written) + counter re-ticks
+  }
+  var _fuUndoT=null, _fuUndoTick=null;
+  function fuShowUndo(rid, name){
+    var t=document.getElementById('fuUndoToast'); if(!t) return;
+    var secs=Math.round(FU_UNDO_MS/1000);
+    t.innerHTML='<span class="fu-ut-msg">\u2713 '+esc(name)+' filed</span>'+
+                '<button class="fu-ut-undo" onclick="fuUndo(dget(\''+dref(rid)+'\'))">UNDO <span id="fuUtSec">'+secs+'</span></button>';
+    t.classList.add('show');
+    if(_fuUndoT) clearTimeout(_fuUndoT);
+    if(_fuUndoTick) clearInterval(_fuUndoTick);
+    var n=secs;
+    _fuUndoTick=setInterval(function(){ n--; var s=document.getElementById('fuUtSec'); if(s) s.textContent=(n>0?n:0); if(n<=0){ clearInterval(_fuUndoTick); } }, 1000);
+    _fuUndoT=setTimeout(function(){ fuHideUndo(); }, FU_UNDO_MS);
+  }
+  function fuHideUndo(){
+    var t=document.getElementById('fuUndoToast'); if(t) t.classList.remove('show');
+    if(_fuUndoTick){ clearInterval(_fuUndoTick); _fuUndoTick=null; }
+    if(_fuUndoT){ clearTimeout(_fuUndoT); _fuUndoT=null; }
+  }
+  // section-wise progress line in the follow-up card header
+  function fuRenderProgress(d){
+    var box=document.getElementById('fuProgress'); if(!box) return;
+    var counts=(d&&d.counts)||{open:0,retry:0,settled:0};
+    var sectionDone=(d&&d.sectionDone)||{};
+    var groups=(d&&d.bySection)||{};
+    var pend=fuPendingCount();
+    var totalN=(counts.open||0)+(counts.settled||0);
+    if(totalN<=0){ box.style.display='none'; box.innerHTML=''; return; }
+    var doneN=(counts.settled||0)+pend;
+    var html='<div class="fp-top">Today\u2019s follow-up calls \u2014 total '+totalN+' / '+doneN+' done</div>';
+    var secNames=Object.keys(groups).filter(function(s){ return String(s).toLowerCase().indexOf('sent back')!==0; });
+    fuOrderedSections(secNames).forEach(function(sec){
+      var openSec=(groups[sec]||[]).length;
+      var doneSec=sectionDone[sec]||0;
+      var t=openSec+doneSec;
+      var dn=doneSec+fuPendingInSection(sec);
+      html+='<div class="fp-sec">'+esc(sec)+' \u2014 total '+t+' / <b>'+dn+'</b> done</div>';
+    });
+    var when=(d&&d.updated)?esc(d.updated):'';
+    var today=fmtDMY(fuDayKey());   /* Block C (S136): F-13 closed — the last UTC date line, retired */
+    html+='<div class="fp-when">'+(when?('as of '+when+' \u00b7 '):'')+esc(today)+'</div>';
+    box.innerHTML=html;
+    box.style.display='block';
+  }
+
+  function fuRowHtml(it){
+    var rid=esc(String(it.key||('r'+Math.random())));
+    var prChip = it.pr ? '<span class="fu-pr">'+esc(it.pr)+'</span>' : '';
+    var dueLine = it.due ? ('<div class="due">Due '+esc(it.due)+(it.od&&String(it.od)!=='0'?(' · <b>'+esc(it.od)+'d overdue</b>'):'')+'</div>') : '';
+    var retryTag = it.retry ? '<div class="fu-retrytag">⟳ retry — '+esc(it.retry)+'</div>' : '';
+    // v18.4 (2A): missed-call snooze + try counter
+    var naCount = it.naCount||0;
+    var snoozed = !!it.snoozeUntil;
+    var naLine = snoozed
+      ? ('<div class="fu-na snooze">\u23f3 No answer — retry after '+esc(it.snoozeUntil)+' · try '+naCount+'/3</div>')
+      : (naCount>0 ? ('<div class="fu-na">\u260e tried '+naCount+'/3</div>') : '');
+    var callBtn = (it.mobile && !snoozed) ? '<button class="call" onclick="placeCall(dget(\''+dref(it.mobile)+'\'))">Call</button>'
+                : (it.mobile ? '<button class="call" disabled title="snoozed until '+esc(it.snoozeUntil||'')+'">Call</button>'
+                             : '<button class="call" disabled title="no valid mobile">Call</button>');
+    var noAnsBtn = it.mobile
+      ? '<button class="fu-noans" id="funoans_'+rid+'"'+(snoozed?' disabled':'')+' onclick="fuNoAnswer(dget(\''+dref(rid)+'\'))">No answer</button>'
+      : '';
+    var lvStr = fuLookup(fuLastVisits, it).val;                                   /* S135 F-34: name-aware */
+    var lvLine = lvStr ? ('<div class="fu-lv">Last visit '+esc(fmtDMY(lvStr))+'</div>') : '';
+    var cidR = fuLookup(fuClinicIds, it);                                         /* S135 F-34: name-aware */
+    var cidStr = cidR.val;
+    var cidChip = cidStr ? ('<span class="ac-cid">ID '+esc(cidStr)+'</span>')
+                : (cidR.shared ? '<span class="ac-cid" title="Shared family mobile \u2014 verify the Clinic ID in Docterz">ID \u26a0 verify</span>' : '');
+    var recInfo = (it.mobile && fuRecordings[it.mobile]) ? fuRecordings[it.mobile] : null;
+    var recBtn  = recInfo ? ('<button class="fu-rec" onclick="playArchived(dget(\''+dref(recInfo.fileId)+'\'),dget(\''+dref('furecslot_'+rid)+'\'),this)">\ud83c\udfa7 Last call'+(recInfo.date?(' \u00b7 '+esc(fmtDMY(recInfo.date))):'')+'</button>') : '';
+    var recSlot = recInfo ? ('<div class="fu-recslot" id="furecslot_'+rid+'"></div>') : '';
+    // sent-back tiles carry the original outcome (+ agent + timestamp) and the matched call
+    var sbCtx='';
+    if(it.section==='Sent back by doctor'){
+      recBtn=''; recSlot='';   // hide the generic last-call; show the specific matched call instead
+      var oc=[];
+      if(it.outcomeReason) oc.push('\ud83d\udccb '+esc(it.outcomeReason));
+      if(it.filedBy)       oc.push('by '+esc(it.filedBy));
+      if(it.filedWhen)     oc.push(esc(it.filedWhen));
+      if(oc.length) sbCtx+='<div class="fu-sbmeta">'+oc.join(' \u00b7 ')+'</div>';
+      if(it.callState==='connected' && it.callTime){
+        sbCtx+='<div class="fu-sbmeta">\ud83d\udcde '+(it.callDate?esc(it.callDate)+' \u00b7 ':'')+esc(it.callTime)+(it.callDur?' \u00b7 '+esc(it.callDur):'')+(it.callAgent?' \u00b7 '+esc(it.callAgent):'')+'</div>';
+      } else if(it.callState==='missed'){
+        sbCtx+='<div class="fu-sbmeta nocall">\ud83d\udcf5 missed call \u2014 no recording</div>';
+      } else {
+        sbCtx+='<div class="fu-sbmeta nocall">\ud83d\udeab no call recorded</div>';
+      }
+    }
+    // ---- Duration gate (D77): the outcome dropdown unlocks only on a measured connected call ----
+    var called   = !!fuCalled[rid];
+    var talked   = !!fuTalked[rid];      // MEASURED connected >= threshold
+    var missed   = !!fuMissed[rid];      // MEASURED not-connected / too short
+    var timedout = !!fuTimeout[rid];     // couldn't confirm (fail-safe)
+    var mtalk    = (missed && fuMissed[rid]) ? (fuMissed[rid].talk||0) : 0;
+    var callTapBtn = it.mobile
+      ? (snoozed
+          ? '<button class="call" disabled title="snoozed until '+esc(it.snoozeUntil||'')+'">Call</button>'
+          : '<button class="call" onclick="fuDoCall(dget(\''+dref(rid)+'\'),dget(\''+dref(it.mobile)+'\'))">Call</button>')
+      : '<button class="call" disabled title="no valid mobile">Call</button>';
+    // shared "try again" controls for the not-yet-connected states
+    var recallNoAns =
+      '<div class="fu-actions">'+
+        '<button class="fu-recall" onclick="fuDoCall(dget(\''+dref(rid)+'\'),dget(\''+dref(it.mobile)+'\'))" title="Call again">\u21bb Call again</button>'+
+        '<button class="fu-noans" id="funoans_'+rid+'" onclick="fuNoAnswer(dget(\''+dref(rid)+'\'))">\ud83d\udcf5 No answer</button>'+
+      '</div>'+
+      '<div class="fu-msg" id="fumsg_'+rid+'"></div>';
+    var fuRight;
+    if(kOn() && kSnoozedNow(rid) && !kPending[rid]){
+      /* K-1 3-day snooze band (D216): visible, never hidden (SF) */
+      fuRight = '<div class="k-snz">\ud83d\udcf5 \u0938\u092e\u094d\u092a\u0930\u094d\u0915 \u0928\u0939\u0940\u0902 \u2014 '+kMiss(rid).n+' \u092a\u094d\u0930\u092f\u093e\u0938</div>'+
+                '<div class="fu-actions"><button class="fu-recall" onclick="kWakeNow(dget(\''+dref(rid)+'\'))">\u0905\u092d\u0940 \u092b\u093f\u0930 try \u0915\u0930\u0947\u0902</button></div>';
+    } else if(snoozed){
+      fuRight = '<div class="fu-actions">'+callTapBtn+'</div>';
+    } else if(!called){
+      fuRight = '<div class="fu-actions">'+callTapBtn+'</div>'+
+                '<div class="fu-hint">Call first, then log the outcome</div>';
+    } else if(talked){
+      // MEASURED connected: K-1 five buttons when One-tap is ON (SK.6.2); else the old dropdown
+      if(kOn()){ fuRight = kPending[rid] ? kPendingHtml(rid) : kBtns(rid,'full'); } else
+      fuRight = '<select class="fu-out" id="fuout_'+rid+'" onchange="fuOnOutcome(\''+rid+'\')">'+fuOptions('')+'</select>'+
+                '<div class="fu-extra" id="fuextra_'+rid+'"></div>'+
+                '<div class="fu-actions">'+
+                  '<button class="fu-save" id="fusave_'+rid+'" disabled onclick="fuSave(dget(\''+dref(rid)+'\'))">Save</button>'+
+                '</div>'+
+                '<div class="fu-msg" id="fumsg_'+rid+'"></div>';
+    } else if(missed){
+      // MEASURED not connected: K-1 shows the one honest choice, pre-highlighted (SK.6.2)
+      if(kOn()){ fuRight = kPending[rid] ? kPendingHtml(rid)
+        : ('<div class="fu-missed">\ud83d\udcf5 Call didn\u2019t connect</div>'+kBtns(rid,'noContact')); } else
+      fuRight = '<div class="fu-missed">\ud83d\udcf5 Call didn\u2019t connect'+
+                  (mtalk>0?(' \u2014 patient talked '+mtalk+'s (need '+FU_MIN_TALK+'s)'):' \u2014 not answered')+'</div>'+
+                recallNoAns;
+    } else if(timedout){
+      // v18.19 (D156) FAIL OPEN. We could not MEASURE this call - the webhook may be down, or the
+      // vendor may simply be slow. The staff member was on the phone regardless. Never let a
+      // verification problem stop someone recording what a patient said: on 06-08 Jul 2026 a silent
+      // webhook 403 blocked outcome logging for two clinic days. The outcome saves unverified; the
+      // background reconciler (Call_Feed + recordings + the AI judge) settles whether it was real.
+      // NOTE: this is only the COULDN'T-MEASURE case. A call we DID measure as not-connected
+      // (see the 'missed' branch above) still blocks the outcome, exactly as D77 intended.
+      if(kOn()){ fuRight = kPending[rid] ? kPendingHtml(rid)
+        : ('<div class="fu-checking warn">\u26a0\ufe0f Couldn\u2019t verify this call automatically</div>'+kBtns(rid,'full')); } else
+      fuRight = '<div class="fu-checking warn">\u26a0\ufe0f Couldn\u2019t verify this call automatically \u2014 you can still log the outcome</div>'+
+                '<select class="fu-out" id="fuout_'+rid+'" onchange="fuOnOutcome(\''+rid+'\')">'+fuOptions('')+'</select>'+
+                '<div class="fu-extra" id="fuextra_'+rid+'"></div>'+
+                '<div class="fu-actions">'+
+                  '<button class="fu-save" id="fusave_'+rid+'" disabled onclick="fuSave(dget(\''+dref(rid)+'\'))">Save</button>'+
+                  '<button class="fu-recall" onclick="fuDoCall(dget(\''+dref(rid)+'\'),dget(\''+dref(it.mobile)+'\'))" title="Call again">\u21bb Call again</button>'+
+                  '<button class="fu-noans" id="funoans_'+rid+'" onclick="fuNoAnswer(dget(\''+dref(rid)+'\'))">\ud83d\udcf5 No answer</button>'+
+                '</div>'+
+                '<div class="fu-msg" id="fumsg_'+rid+'"></div>';
+    } else {
+      // called, waiting for the measured result (polling)
+      fuRight = '<div class="fu-checking">\u23f3 Checking the call\u2026 the outcome unlocks once it connects</div>'+recallNoAns;
+    }
+    return '<div class="fu-row'+(it.retry?' retry':'')+(snoozed?' snoozed':'')+'" id="furow_'+rid+'">'+
+             '<div class="info">'+
+               '<div class="fu-name">'+prChip+esc(it.name||'(no name)')+(cidChip?(' '+cidChip):'')+'</div>'+
+               (it.docNote?('<div class="fu-docnote">\ud83d\udc68\u200d\u2695\ufe0f Doctor: '+esc(it.docNote)+'</div>'):'')+
+               sbCtx +
+               (it.diagnosis?('<div class="dx">'+esc(it.diagnosis)+'</div>'):'')+
+               lvLine +
+               recBtn + recSlot +
+               dueLine + retryTag + naLine +
+             '</div>'+
+             '<div class="fu-right">'+fuRight+'</div>'+
+           '</div>';
+  }
+
+  // show/hide the extra fields when an outcome is chosen; enable Save
+  function fuOnOutcome(rid){
+    var sel=document.getElementById('fuout_'+rid);
+    var extra=document.getElementById('fuextra_'+rid);
+    var save=document.getElementById('fusave_'+rid);
+    var code=sel?sel.value:'';
+    var h='';
+    if(FU_NEEDS_DATE[code]){
+      h='<input class="fu-in" type="date" id="fudate_'+rid+'" title="Expected date">';
+    } else if(FU_IS_MED[code]){
+      h='<select class="fu-sub" id="fumed_'+rid+'">'+
+          '<option value="here">Medicine from here</option>'+
+          '<option value="outside">Medicine from outside</option>'+
+        '</select>'+
+        '<input class="fu-in" type="number" min="0" id="fudays_'+rid+'" placeholder="Days\u2019 supply (e.g. 30)">';
+    }
+    if(extra) extra.innerHTML=h;
+    if(save) save.disabled = !code;
+  }
+
+  function fuSave(rid){
+    var sel=document.getElementById('fuout_'+rid);
+    var code=sel?sel.value:''; if(!code) return;
+    var save=document.getElementById('fusave_'+rid);
+    var msg=document.getElementById('fumsg_'+rid);
+    // pull the row's patient details from the last fuData snapshot
+    var it=fuFindToday(rid);
+    var payload={
+      rowKey: rid,
+      name:   it?it.name:'',
+      mobile: it?it.mobile:'',
+      section:it?it.section:'',
+      diagnosis: it?it.diagnosis:'',
+      outcome: code, source:'', days:'', expected:'', detail:'',
+      clinicId: fuLookup(fuClinicIds, it).val,   /* S135 F-34: name-aware */
+      lastVisit: fuLookup(fuLastVisits, it).val
+    };
+    if(FU_NEEDS_DATE[code]){ var dt=document.getElementById('fudate_'+rid); payload.expected=dt?dt.value:''; }
+    if(FU_IS_MED[code]){
+      var ms=document.getElementById('fumed_'+rid); payload.source=ms?ms.value:'';
+      var dd=document.getElementById('fudays_'+rid); payload.days=dd?dd.value:'';
+    }
+
+    // D66: an outcome that LEAVES the worklist -> vanish now, write after the undo window.
+    if(FU_VANISH[code]){ fuVanishAndDefer(rid, it, payload); return; }
+
+    // "Connected but couldn't communicate" stays on the list -> write immediately, as before.
+    if(save){ save.disabled=true; save.textContent='Saving…'; }
+    if(msg){ msg.textContent=''; msg.className='fu-msg'; }
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(save) save.textContent='Save';
+        if(res && res.ok){
+          if(res.settle==='retry'){
+            if(msg){ msg.textContent='Saved — stays on list for callback.'; msg.className='fu-msg warn'; }
+            if(save) save.disabled=false;
+          } else {
+            var row=document.getElementById('furow_'+rid);
+            if(row){ row.style.transition='opacity .4s'; row.style.opacity='0.35'; }
+            if(msg){ msg.textContent='Saved.'; msg.className='fu-msg ok'; }
+          }
+        } else {
+          if(save) save.disabled=false;
+          if(msg){ msg.textContent='Not saved: '+((res&&res.reason)||'error'); msg.className='fu-msg warn'; }
+        }
+      })
+      .withFailureHandler(function(err){
+        if(save){ save.disabled=false; save.textContent='Save'; }
+        if(msg){ msg.textContent='Error: '+((err&&err.message)||err); msg.className='fu-msg warn'; }
+      })
+      .saveFollowupOutcome(DASH_KEY, payload);
+  }
+
+  // v18.4 (2A): mark a follow-up call as "No answer" -> logs a missed attempt;
+  // the tile snoozes for 1 hour and exits to the doctor after 3 tries.
+  function fuNoAnswer(rid){
+    fuClearCalled(rid);
+    var it=null;
+    if(fuData && fuData.today){ for(var i=0;i<fuData.today.length;i++){ if(String(fuData.today[i].key)===String(rid)){ it=fuData.today[i]; break; } } }
+    var btn=document.getElementById('funoans_'+rid);
+    var msg=document.getElementById('fumsg_'+rid);
+    var payload={
+      rowKey: rid, name: it?it.name:'', mobile: it?it.mobile:'', section: it?it.section:'',
+      diagnosis: it?it.diagnosis:'', outcome:'no_answer', source:'', days:'', expected:'', detail:'',
+      clinicId: fuLookup(fuClinicIds, it).val,   /* S135 F-34: name-aware */
+      lastVisit: fuLookup(fuLastVisits, it).val
+    };
+    if(btn){ btn.disabled=true; btn.textContent='\u2026'; }
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.ok){ pollFollowups(); }
+        else { if(btn){ btn.disabled=false; btn.textContent='No answer'; } if(msg){ msg.textContent='Not saved: '+((res&&res.reason)||'error'); msg.className='fu-msg warn'; } }
+      })
+      .withFailureHandler(function(err){ if(btn){ btn.disabled=false; btn.textContent='No answer'; } if(msg){ msg.textContent='Error: '+((err&&err.message)||err); msg.className='fu-msg warn'; } })
+      .saveFollowupOutcome(DASH_KEY, payload);
+  }
+
+  /* ---- v18.4 (2B): doctor's "Unreachable — review" band (3-strike tiles) ---- */
+  function renderUnreachable(list){
+    var box=document.getElementById('fuUnreach'); if(!box) return;
+    setCnt('fuUnreachCnt', list.length, list.length>0);
+    if(!list.length){ box.className=''; box.innerHTML='<div class="muted-note">No unreachable patients right now. \ud83d\udc4d</div>'; return; }
+    box.className='list';
+    box.innerHTML=list.map(function(it){
+      var rid=esc(String(it.key||''));
+      var cidR=fuLookup(fuClinicIds,it); var cidStr=cidR.val;                    /* S135 F-34: name-aware */
+      var lvStr =fuLookup(fuLastVisits,it).val;
+      var meta=[];
+      if(cidStr) meta.push('ID '+esc(cidStr)); else if(cidR.shared) meta.push('ID \u26a0 verify');
+      if(it.diagnosis) meta.push(esc(it.diagnosis));
+      if(lvStr) meta.push('last visit '+esc(lvStr));
+      if(it.due) meta.push('due '+esc(it.due));
+      var att=(it.attempts||[]).map(function(a){ return esc(a.t||'')+(a.by?(' \u00b7 '+esc(a.by)):''); }).join('  |  ');
+      return '<div class="un-card" id="uncard_'+rid+'">'+
+               '<div class="info">'+
+                 '<div class="fu-name">'+esc(it.name||'(no name)')+'</div>'+
+                 (meta.length?('<div class="dx">'+meta.join(' \u00b7 ')+'</div>'):'')+
+                 '<div class="un-att">3 missed attempts'+(att?(' \u2014 '+att):'')+'</div>'+
+                 '<div class="fu-msg" id="unmsg_'+rid+'"></div>'+
+               '</div>'+
+               '<div class="fu-right">'+
+                 '<div class="un-acts">'+
+                   '<button class="un-retry"  onclick="unreachAction(dget(\''+dref(rid)+'\'),\'retry\',this)">Retry tomorrow</button>'+
+                   '<button class="un-pause"  onclick="unreachAction(dget(\''+dref(rid)+'\'),\'pause\',this)">Pause</button>'+
+                   '<button class="un-remove" onclick="unreachAction(dget(\''+dref(rid)+'\'),\'remove\',this)">Remove</button>'+
+                 '</div>'+
+               '</div>'+
+             '</div>';
+    }).join('');
+  }
+  var UN_CODE = { retry:'unreach_retry', pause:'unreach_pause', remove:'unreach_remove' };
+  var UN_WORD = { retry:'Retry set for tomorrow', pause:'Paused', remove:'Removed' };
+  function unreachAction(rid, action, btn){
+    var it=null;
+    if(fuData && fuData.unreachable){ for(var i=0;i<fuData.unreachable.length;i++){ if(String(fuData.unreachable[i].key)===String(rid)){ it=fuData.unreachable[i]; break; } } }
+    var msg=document.getElementById('unmsg_'+rid);
+    var payload={
+      rowKey: rid, name: it?it.name:'', mobile: it?it.mobile:'', section: it?it.section:'',
+      diagnosis: it?it.diagnosis:'', outcome: UN_CODE[action]||'', source:'', days:'', expected:'',
+      detail: 'Doctor: '+(UN_WORD[action]||action),
+      clinicId: fuLookup(fuClinicIds, it).val,   /* S135 F-34: name-aware */
+      lastVisit: fuLookup(fuLastVisits, it).val
+    };
+    var card=document.getElementById('uncard_'+rid);
+    var acts=card?card.querySelectorAll('button'):[];
+    for(var j=0;j<acts.length;j++){ acts[j].disabled=true; }
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.ok){
+          if(card){ card.style.transition='opacity .4s'; card.style.opacity='0.35'; }
+          if(msg){ msg.textContent=(UN_WORD[action]||action)+'.'; msg.className='fu-msg ok'; }
+          setTimeout(pollFollowups, 600);
+        } else {
+          for(var j2=0;j2<acts.length;j2++){ acts[j2].disabled=false; }
+          if(msg){ msg.textContent='Not saved: '+((res&&res.reason)||'error'); msg.className='fu-msg warn'; }
+        }
+      })
+      .withFailureHandler(function(err){
+        for(var j3=0;j3<acts.length;j3++){ acts[j3].disabled=false; }
+        if(msg){ msg.textContent='Error: '+((err&&err.message)||err); msg.className='fu-msg warn'; }
+      })
+      .saveFollowupOutcome(DASH_KEY, payload);
+  }
+
+  /* ---- Escalations (doctor key only) ---- */
+  function renderEscalations(d){
+    var box=document.getElementById('fuEscal'); if(!box) return;
+    var open=(d&&d.open)||[];
+    setCnt('fuEscalCnt', open.length, open.length>0);
+    if(!open.length){ box.className=''; box.innerHTML='<div class="muted-note">No open escalations. 👍</div>'; return; }
+    box.className='list';
+    box.innerHTML=open.map(function(e){
+      /* F-36 (S136b): the escalation row's ID/last-visit were baked in at save
+         time (possibly pre-F-34) or phone-key-filled by WebApp — on a shared
+         family mobile that paints the WRONG relative. Same cure as the six
+         S135 sites: the name-aware maps win; a shared mobile with no confident
+         match shows 'ID \u26a0 verify' — a blank beats a confident wrong ID
+         (D208). Only if the maps know nothing of this mobile at all does the
+         stored value still show (patients outside the mirror). */
+      var _fc=fuLookup(fuClinicIds,{mobile:e.mobile,name:e.name});
+      var _fl=fuLookup(fuLastVisits,{mobile:e.mobile,name:e.name});
+      var _cid=_fc.val || (_fc.shared ? '' : String(e.clinicId||''));
+      var _cidWarn=(!_cid && (_fc.shared||_fl.shared));
+      var _lv=_fl.val || (_fl.shared ? '' : String(e.lastVisit||''));
+      var meta=[];
+      if(_lv) meta.push('Last visit '+esc(fmtDMY(_lv)));
+      if(e.diagnosis) meta.push(esc(e.diagnosis));
+      if(e.mobile)    meta.push('\ud83d\udcde '+esc(e.mobile));
+      var callLine='';
+      if(e.callState==='connected' && e.callTime){
+        callLine='<div class="meta2">\ud83d\udcde Call '+(e.callDate?(esc(e.callDate)+' \u00b7 '):'')+esc(e.callTime)+(e.callDur?(' \u00b7 '+esc(e.callDur)):'')+'</div>';
+      } else if(e.callState==='missed'){
+        callLine='<div class="meta2 nocall">\ud83d\udcf5 Missed call \u2014 no recording</div>';
+      } else if(e.callState==='noarchive'){
+        callLine='<div class="meta2 nocall">\u2014 No recording archived for this call</div>';
+      } else {
+        callLine='<div class="meta2 nocall">\u2014 No call recorded for this patient</div>';
+      }
+      var outLine  = '<div class="meta2">Outcome'+(e.by?(' '+esc(e.by)):'')+(e.raised?(' \u00b7 '+esc(e.raised)):'')+'</div>';
+      var recBtn='', recSlot='';
+      if(e.rec && e.rec.kind==='myop'){
+        recBtn='<button class="fu-rec" onclick="playRec(dget(\''+dref(e.rec.ref)+'\'),\'escrec_'+e.rowIndex+'\',this)">\ud83c\udfa7 Recording</button>';
+        recSlot='<div class="fu-recslot" id="escrec_'+e.rowIndex+'"></div>';
+      } else if(e.rec && e.rec.kind==='drive'){
+        recBtn='<button class="fu-rec" onclick="playArchived(dget(\''+dref(e.rec.ref)+'\'),\'escrec_'+e.rowIndex+'\',this)">\ud83c\udfa7 Recording</button>';
+        recSlot='<div class="fu-recslot" id="escrec_'+e.rowIndex+'"></div>';
+      }
+      var txBtn = e.tx?('<button class="fu-rec" id="esctxbtn_'+e.rowIndex+'" onclick="escTx(\'esc'+e.rowIndex+'\',dget(\''+dref(e.tx)+'\'),this)">\ud83d\udcc4 Transcript \u25be</button>'):'';
+      var txSlot = e.tx?('<div class="ol-tx" id="oltx_esc'+e.rowIndex+'"></div>'):'';
+      var callBtn = e.mobile ? '<button class="call" onclick="placeCall(dget(\''+dref(e.mobile)+'\'))">Call</button>' : '';
+      return '<div class="fu-row fu-esc" id="esc_'+e.rowIndex+'">'+
+               '<div class="info">'+
+                 '<div class="reason">'+esc(e.reason||'Escalation')+'</div>'+
+                 '<div class="fu-name" style="font-size:14px">'+esc(e.name||'(no name)')+(_cid?(' <span class="ac-cid">ID '+esc(_cid)+'</span>'):(_cidWarn?' <span class="ac-cid" title="Shared family mobile \u2014 verify the Clinic ID in Docterz">ID \u26a0 verify</span>':''))+'</div>'+
+                 (e.detail?('<div class="dx">'+esc(e.detail)+'</div>'):'')+
+                 '<div class="meta2">'+meta.join(' \u00b7 ')+'</div>'+
+                 callLine + outLine +
+                 recBtn+txBtn+recSlot+txSlot+
+               '</div>'+
+               '<div class="fu-right">'+
+                 '<select class="fu-out" id="escres_'+e.rowIndex+'">'+
+                   '<option value="">— resolve as —</option>'+
+                   '<option value="Completed treatment">Completed treatment</option>'+
+                   '<option value="Dropped out">Dropped out</option>'+
+                   '<option value="Will follow up">Will follow up</option>'+
+                   '<option value="Other">Other</option>'+
+                 '</select>'+
+                 '<input class="fu-note" id="escnote_'+e.rowIndex+'" placeholder="Note for staff (optional)\u2026">'+
+                 '<div class="fu-actions">'+callBtn+
+                   '<button class="ol-sendback" onclick="sendBackEsc('+e.rowIndex+')">\ud83d\udd04 Send back to staff</button>'+
+                   '<button class="fu-save" onclick="resolveEsc('+e.rowIndex+')">Resolve</button>'+
+                 '</div>'+
+                 '<div class="fu-msg" id="escmsg_'+e.rowIndex+'"></div>'+
+               '</div>'+
+             '</div>';
+    }).join('');
+    // v18.7: keep any open escalation transcript expanded across the auto-refresh (manual fold)
+    Object.keys(escTxOpen).forEach(function(rid){
+      if(escTxOpen[rid] && escTxCache[rid]!=null){
+        var sl=document.getElementById('oltx_'+rid);
+        if(sl){ sl.textContent=escTxCache[rid]; sl.style.display='block'; }
+      }
+    });
+  }
+
+  // v18.7: escalation transcript with MANUAL fold — loads once, then stays open
+  // across the follow-up auto-refresh until the doctor taps to close it.
+  var escTxCache = {};   // rid -> transcript text (once loaded)
+  var escTxOpen  = {};   // rid -> currently expanded?
+  function escTx(rid, fileId, btn){
+    var slot=document.getElementById('oltx_'+rid); if(!slot) return;
+    if(escTxCache[rid]!=null){
+      escTxOpen[rid]=!escTxOpen[rid];
+      slot.textContent=escTxCache[rid];
+      slot.style.display=escTxOpen[rid]?'block':'none';
+      if(btn) btn.textContent=escTxOpen[rid]?'\ud83d\udcc4 Transcript \u25b4':'\ud83d\udcc4 Transcript \u25be';
+      return;
+    }
+    if(btn){ btn.disabled=true; btn.textContent='\u23f3 Loading\u2026'; }
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(btn) btn.disabled=false;
+        if(res && res.ok){
+          escTxCache[rid]=res.text||'';
+          escTxOpen[rid]=true;
+          slot.textContent=escTxCache[rid];
+          slot.style.display='block';
+          if(btn) btn.textContent='\ud83d\udcc4 Transcript \u25b4';
+        } else {
+          if(btn) btn.textContent='\ud83d\udcc4 Transcript \u25be';
+          showBanner('Could not load transcript'+(res&&res.error?(': '+res.error):'.'));
+        }
+      })
+      .withFailureHandler(function(err){
+        if(btn){ btn.disabled=false; btn.textContent='\ud83d\udcc4 Transcript \u25be'; }
+        showBanner('Could not load transcript: '+((err&&err.message)||err));
+      })
+      .getTranscriptText(DASH_KEY, fileId);
+  }
+
+  /* ---- Doctor's outcome review console (v18.2, doctor key only) ---- */
+  // Outcome shown EXACTLY as staff filed it: same label table as the staff
+  // dropdown, plus incoming-call codes; unknown codes are humanised.
+  var OL_IN_LABELS = {
+    in_resolved_on_call:'Incoming · resolved on call', resolved_on_call:'Resolved on call',
+    in_appointment_booked:'Incoming · appointment booked', appointment_booked:'Appointment booked',
+    in_info_given:'Incoming · info given', in_info_given_will_act:'Incoming · info given, will act',
+    info_given_will_act:'Info given, will act', in_needs_callback:'Incoming · needs callback',
+    needs_callback:'Needs callback', in_escalated:'Incoming · escalated to doctor',
+    escalated:'Escalated to doctor', in_cant_communicate:"Incoming · couldn't communicate",
+    in_will_come:'Incoming · will come / considering', will_come:'Will come / considering',
+    in_enquiry_only:'Incoming · enquiry only', enquiry_only:'Info given / enquiry only',
+    in_no_action:'Incoming · no action', no_action:'No action / not relevant',
+    in_not_relevant:'Incoming · not relevant'
+  };
+  function olLabel(code){
+    code=String(code||'').trim().toLowerCase();
+    if(!code) return '—';
+    for(var i=0;i<FU_OUTCOMES.length;i++){ if(FU_OUTCOMES[i].code===code) return FU_OUTCOMES[i].label; }
+    if(OL_IN_LABELS[code]) return OL_IN_LABELS[code];
+    return code.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
+  }
+  function olSetDay(d){
+    olDay=(d==='yesterday')?'yesterday':'today';
+    var bt=document.getElementById('olDayToday'), by=document.getElementById('olDayYest');
+    if(bt) bt.className='ol-day'+(olDay==='today'?' active':'');
+    if(by) by.className='ol-day'+(olDay==='yesterday'?' active':'');
+    var box=document.getElementById('outLog');
+    if(box) box.innerHTML='<div class="muted-note">Loading '+olDay+'…</div>';
+    google.script.run
+      .withSuccessHandler(function(d2){ renderOutcomeLog(d2); })
+      .withFailureHandler(function(){})
+      .getOutcomeLog(DASH_KEY, olDay);
+  }
+  function olEditing(){
+    var a=document.activeElement;
+    if(a && a.classList && a.classList.contains('ol-note')) return true;
+    var ins=document.querySelectorAll('input.ol-note');
+    for(var i=0;i<ins.length;i++){
+      var rid=ins[i].id.replace('olnote_','');
+      var saved=(olRows[rid]&&olRows[rid].note)||'';
+      if(ins[i].value!==saved) return true;   // unsaved edit — protect it
+    }
+    return false;
+  }
+  function renderOutcomeLog(d){
+    var box=document.getElementById('outLog'); if(!box) return;
+    if(olEditing()) return;   // never blow away a half-typed doctor note
+    var tallyBox=document.getElementById('outLogTally');
+    var linkWrap=document.getElementById('outLogLinkWrap');
+    var hint=document.getElementById('olHint');
+    if(d && d.error){
+      setCnt('outLogCnt', 0, false);
+      box.className=''; box.innerHTML='<div class="muted-note">Could not load: '+esc(d.error)+'</div>';
+      if(tallyBox) tallyBox.style.display='none';
+      return;
+    }
+    var rows=(d&&d.rows)||[];
+    olRows={};
+    rows.forEach(function(e){ olRows[String(e.rowIndex)]=e; });
+    setCnt('outLogCnt', rows.length, rows.length>0);
+    if(hint) hint.textContent = (d&&d.day==='today')
+      ? 'Transcripts ready tomorrow after 3 AM · recordings play via live link'
+      : 'Archived recordings + transcripts';
+    if(linkWrap){
+      linkWrap.innerHTML=(d&&d.sheetUrl)
+        ? '<a class="rec" href="'+esc(d.sheetUrl)+'" target="_blank" rel="noopener">Open full sheet ↗</a>' : '';
+    }
+    if(tallyBox){
+      var tally=(d&&d.tally)||[];
+      if(tally.length || (d&&d.reviewedCount)){
+        tallyBox.style.display='';
+        tallyBox.innerHTML='<b>'+esc((d&&d.dateLabel)||'')+':</b> '+rows.length+' awaiting your review · '+
+          ((d&&d.reviewedCount)||0)+' already reviewed'+
+          (tally.length?(' — '+tally.map(function(x){return esc(x.by)+' '+x.n;}).join(' · ')):'');
+      } else { tallyBox.style.display='none'; tallyBox.innerHTML=''; }
+    }
+    if(!rows.length){
+      box.className='';
+      box.innerHTML='<div class="muted-note">✅ Nothing awaiting review for '+esc((d&&d.dateLabel)||'this day')+'.</div>';
+      return;
+    }
+    // group by the band frozen at save-time; same order as the staff list
+    var groups={};
+    rows.forEach(function(e){ var s=e.section||'Other'; (groups[s]||(groups[s]=[])).push(e); });
+    var html='';
+    var olOrdered = fuOrderedSections(Object.keys(groups));
+    var olTopSec = olOrdered.length ? olOrdered[0] : '';
+    olOrdered.forEach(function(sec){
+      var open=fuBandOpen('ol:'+sec, sec===olTopSec);
+      var items=groups[sec];
+      var ids=items.map(function(e){return String(e.rowIndex);}).join(',');
+      var rowsHtml=''; items.forEach(function(e){ rowsHtml+=olRowHtml(e); });
+      html+='<div class="fu-band'+(open?'':' collapsed')+'" data-fuband="ol:'+esc(sec)+'">'+
+              '<div class="fu-bandhead" onclick="toggleFuBand(this)">'+
+                '<span class="fu-caret">▸</span>'+esc(sec)+' · '+items.length+
+                '<button class="ol-approveall" onclick="event.stopPropagation();olApproveBand(dget(\''+dref(ids)+'\'),this)">Approve all</button>'+
+              '</div>'+
+              '<div class="fu-bandbody">'+rowsHtml+'</div>'+
+            '</div>';
+    });
+    box.className='list';
+    box.innerHTML=html;
+  }
+  function olRowHtml(e){
+    var rid=esc(String(e.rowIndex));
+    var cid=e.clinicId?('<span class="ac-cid">ID '+esc(e.clinicId)+'</span>'):'';
+    var lv=e.lastVisit?('<div class="fu-lv">Last visit '+esc(fmtDMY(e.lastVisit))+'</div>'):'';
+    var cst=e.callState||(e.callTime?'connected':'nocall');
+    var noRec=(cst==='connected' && !e.rec)?('<span class="ol-norec" title="No recording to review for this call">\ud83d\udcf5 no recording</span>'):'';
+    var call;
+    if(cst==='connected' && e.callTime){
+      call='<span class="ol-call">📞 call '+(e.callDate?(esc(e.callDate)+' · '):'')+esc(e.callTime)+(e.callDur?(' · '+esc(e.callDur)):'')+'</span>';
+    } else if(cst==='missed'){
+      call='<span class="ol-call ol-nocall">📵 missed call — no recording</span>';
+    } else {
+      call='<span class="ol-call ol-nocall">🚫 no call made</span>';
+    }
+    var filed=olLabel(e.code);
+    var extras=[];
+    if(e.source) extras.push(e.source==='here'?'medicine from here':(e.source==='outside'?'medicine from outside':e.source));
+    if(e.days) extras.push(e.days+' days\u2019 supply');
+    if(e.expected) extras.push('expected '+e.expected);
+    if(e.detail) extras.push('\u201c'+e.detail+'\u201d');
+    var chip=e.settle?('<span class="ol-chip '+esc(e.settle)+'">'+esc(e.settle==='settle'?'settled':(e.settle==='escalate'?'escalated':'retry'))+'</span>'):'';
+    var recBtn='', recSlot='';
+    if(e.rec && e.rec.kind==='myop'){
+      recBtn='<button class="fu-rec" onclick="playRec(dget(\''+dref(e.rec.ref)+'\'),\'olrec_'+rid+'\',this)">\ud83c\udfa7 Recording</button>';
+      recSlot='<div class="fu-recslot" id="olrec_'+rid+'"></div>';
+    } else if(e.rec && e.rec.kind==='drive'){
+      recBtn='<button class="fu-rec" onclick="playArchived(dget(\''+dref(e.rec.ref)+'\'),\'olrec_'+rid+'\',this)">\ud83c\udfa7 Recording</button>';
+      recSlot='<div class="fu-recslot" id="olrec_'+rid+'"></div>';
+    }
+    var txBtn=e.tx?('<button class="fu-rec" onclick="olTx(\''+rid+'\',dget(\''+dref(e.tx)+'\'),this)">\ud83d\udcc4 Transcript \u25be</button>'):'';
+    var txSlot=e.tx?('<div class="ol-tx" id="oltx_'+rid+'"></div>'):'';
+    return '<div class="fu-row ol-row" id="olrow_'+rid+'">'+
+             '<div class="info">'+
+               '<div class="fu-name">'+esc(e.patient||'(no name)')+(cid?(' '+cid):'')+
+                 (e.last4?(' <span class="ol-call">\u2026'+esc(e.last4)+'</span>'):'')+'</div>'+
+               lv +
+               '<div>'+call+noRec+'</div>'+
+               '<div class="ol-filed"><b>'+esc(filed)+'</b>'+chip+'</div>'+
+               (extras.length?('<div class="ol-extra">'+esc(extras.join(' · '))+'</div>'):'')+
+               '<div class="ol-extra">by '+esc(e.by||'')+' · saved '+(e.date?(esc(e.date)+' · '):'')+esc(e.time||'')+'</div>'+
+               recBtn+txBtn+recSlot+txSlot+
+             '</div>'+
+             '<div class="fu-right">'+
+               '<input class="ol-note" id="olnote_'+rid+'" placeholder="Your note (optional)" value="'+esc(e.note||'')+'">'+
+               '<div class="ol-acts">'+
+                 '<button class="ol-approve" onclick="olReview(\''+rid+'\',\'approve\',this)">\u2713 Approve</button>'+
+                 '<button class="ol-sendback" onclick="olReview(\''+rid+'\',\'sendback\',this)">\u21a9 Send back</button>'+
+                 '<button class="ol-notesave" onclick="olReview(\''+rid+'\',\'note\',this)" title="Save note only">\ud83d\udcbe</button>'+
+               '</div>'+
+               '<div class="fu-msg" id="olmsg_'+rid+'"></div>'+
+             '</div>'+
+           '</div>';
+  }
+  function olTx(rid, fileId, btn){
+    var slot=document.getElementById('oltx_'+rid); if(!slot) return;
+    if(slot.dataset.loaded){
+      slot.style.display=(slot.style.display==='block')?'none':'block';
+      return;
+    }
+    if(btn){ btn.disabled=true; btn.textContent='\u23f3 Loading\u2026'; }
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(btn){ btn.disabled=false; btn.textContent='\ud83d\udcc4 Transcript \u25be'; }
+        if(res && res.ok){
+          slot.textContent=res.text||'';
+          slot.dataset.loaded='1';
+          slot.style.display='block';
+        } else {
+          showBanner('Could not load transcript'+(res&&res.error?(': '+res.error):'.'));
+        }
+      })
+      .withFailureHandler(function(err){
+        if(btn){ btn.disabled=false; btn.textContent='\ud83d\udcc4 Transcript \u25be'; }
+        showBanner('Could not load transcript: '+((err&&err.message)||err));
+      })
+      .getTranscriptText(DASH_KEY, fileId);
+  }
+  function olReview(rid, action, btn){
+    var e=olRows[rid]; if(!e) return;
+    var noteEl=document.getElementById('olnote_'+rid);
+    var msg=document.getElementById('olmsg_'+rid);
+    if(btn) btn.disabled=true;
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(btn) btn.disabled=false;
+        if(res && res.ok){
+          if(action==='note'){
+            if(msg){ msg.textContent='Note saved.'; msg.className='fu-msg ok'; }
+            if(noteEl && olRows[rid]) olRows[rid].note=noteEl.value;
+            return;
+          }
+          var row=document.getElementById('olrow_'+rid);
+          if(row){
+            var ov=document.createElement('div'); ov.className='ol-done';
+            ov.textContent=(action==='approve')?'\u2713 Approved':'\u21a9 Sent back to staff';
+            row.appendChild(ov);
+            setTimeout(function(){
+              row.style.transition='opacity .4s'; row.style.opacity='0';
+              setTimeout(function(){
+                if(row.parentNode) row.parentNode.removeChild(row);
+                delete olRows[rid];
+                var n=Object.keys(olRows).length;
+                setCnt('outLogCnt', n, n>0);
+              },420);
+            },900);
+          }
+        } else {
+          if(msg){ msg.textContent='Not saved: '+((res&&res.reason)||'error'); msg.className='fu-msg warn'; }
+        }
+      })
+      .withFailureHandler(function(err){
+        if(btn) btn.disabled=false;
+        if(msg){ msg.textContent='Error: '+((err&&err.message)||err); msg.className='fu-msg warn'; }
+      })
+      .reviewOutcome(DASH_KEY, { rowIndex:e.rowIndex, fp:e.fp, action:action,
+                                 note:(noteEl?noteEl.value:'') });
+  }
+  function olApproveBand(idsCsv, btn){
+    var ids=String(idsCsv||'').split(',').filter(function(x){return x && olRows[x];});
+    if(!ids.length) return;
+    if(!confirm('Approve all '+ids.length+' outcomes in this band?')) return;
+    if(btn){ btn.disabled=true; btn.textContent='\u23f3'; }
+    var items=ids.map(function(x){ return { rowIndex:olRows[x].rowIndex, fp:olRows[x].fp }; });
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(btn){ btn.disabled=false; btn.textContent='Approve all'; }
+        if(res && res.ok){
+          ids.forEach(function(x){
+            var row=document.getElementById('olrow_'+x);
+            if(row && row.parentNode) row.parentNode.removeChild(row);
+            delete olRows[x];
+          });
+          var n=Object.keys(olRows).length;
+          setCnt('outLogCnt', n, n>0);
+          if(res.failed) showBanner(res.failed+' rows could not be approved \u2014 refresh and retry.');
+        } else {
+          showBanner('Approve-all failed'+(res&&res.reason?(': '+res.reason):'.'));
+        }
+      })
+      .withFailureHandler(function(err){
+        if(btn){ btn.disabled=false; btn.textContent='Approve all'; }
+        showBanner('Approve-all error: '+((err&&err.message)||err));
+      })
+      .reviewOutcomeBatch(DASH_KEY, items);
+  }
+
+  // don't wipe a half-typed escalation note / resolution on the auto-refresh
+  function escEditing(){
+    var ns=document.querySelectorAll('input.fu-note');
+    for(var i=0;i<ns.length;i++){ if(ns[i].value && ns[i].value.trim()) return true; }
+    var sels=document.querySelectorAll('select[id^="escres_"]');
+    for(var j=0;j<sels.length;j++){ if(sels[j].value) return true; }
+    return false;
+  }
+
+  function resolveEsc(rowIndex){
+    var sel=document.getElementById('escres_'+rowIndex);
+    var res=sel?sel.value:''; var msg=document.getElementById('escmsg_'+rowIndex);
+    if(!res){ if(msg){ msg.textContent='Pick a resolution first.'; msg.className='fu-msg warn'; } return; }
+    var noteEl=document.getElementById('escnote_'+rowIndex);
+    var note=noteEl?noteEl.value.trim():'';
+    if(note) res=res+' \u2014 '+note;
+    google.script.run
+      .withSuccessHandler(function(r){
+        if(r && r.ok){
+          var row=document.getElementById('esc_'+rowIndex);
+          if(row){ row.style.transition='opacity .4s'; row.style.opacity='0.3'; }
+          if(msg){ msg.textContent='Resolved: '+esc(res); msg.className='fu-msg ok'; }
+        } else if(msg){ msg.textContent='Not saved: '+((r&&r.reason)||'error'); msg.className='fu-msg warn'; }
+      })
+      .withFailureHandler(function(err){ if(msg){ msg.textContent='Error: '+((err&&err.message)||err); msg.className='fu-msg warn'; } })
+      .resolveEscalation(DASH_KEY, rowIndex, res);
+  }
+
+  // send an escalation back to the staff worklist with the doctor's note
+  function sendBackEsc(rowIndex){
+    var noteEl=document.getElementById('escnote_'+rowIndex);
+    var note=noteEl?noteEl.value.trim():''; var msg=document.getElementById('escmsg_'+rowIndex);
+    google.script.run
+      .withSuccessHandler(function(r){
+        if(r && r.ok){
+          var row=document.getElementById('esc_'+rowIndex);
+          if(row){ row.style.transition='opacity .4s'; row.style.opacity='0.3'; }
+          if(msg){ msg.textContent='\ud83d\udd04 Sent back to staff'+(note?(': '+esc(note)):''); msg.className='fu-msg ok'; }
+        } else if(msg){ msg.textContent='Not saved: '+((r&&r.reason)||'error'); msg.className='fu-msg warn'; }
+      })
+      .withFailureHandler(function(err){ if(msg){ msg.textContent='Error: '+((err&&err.message)||err); msg.className='fu-msg warn'; } })
+      .sendBackToStaff(DASH_KEY, rowIndex, note);
+  }
+
+  function fuEditing(){
+    // don't blow away a half-entered outcome on auto-refresh
+    var sels=document.querySelectorAll('select.fu-out');
+    for(var i=0;i<sels.length;i++){ if(sels[i].value) return true; }
+    return false;
+  }
+  /* ---------- Today's calls (live stream) — v1.1 Slice 1 (display-only) ---------- */
+  /* Block C (S136): pollAllCalls retired — today's calls arrive inside getDashboardBundle. */
+  function acDirBadge(dir){
+    return (dir==='outgoing') ? '<span class="ac-dir out">\u25b2 OUT</span>'
+                              : '<span class="ac-dir in">\u25bc IN</span>';
+  }
+  function acStatusBadge(st){
+    return (st==='missed') ? '<span class="ac-st missed">missed</span>'
+                           : '<span class="ac-st ok">connected</span>';
+  }
+  function acRowHtml(c, isNew){
+    var rid  = esc(String(c.id || ('c'+Math.random())));
+    var name = esc(c.name || 'Unknown');
+    var cid  = c.clinicId ? ('<span class="ac-cid">ID '+esc(c.clinicId)+'</span>') : '';
+    var dx   = c.diagnosis ? ('<div class="dx">'+esc(c.diagnosis)+'</div>') : '';
+    var lv   = c.lastVisit ? ('<div class="ac-lv">Last visit '+esc(c.lastVisit)+'</div>') : '';
+    var rec  = c.recording
+      ? ('<button class="ac-rec" id="acrec_'+rid+'" onclick="playRec(dget(\''+dref(c.recording)+'\'),dget(\''+dref('acplay_'+rid)+'\'),this)">\ud83c\udfa7 Rec</button>'
+         + '<div id="acplay_'+rid+'" class="ac-play"></div>')
+      : '';
+    return '<div class="ac-row'+(isNew?' ac-new':'')+'" id="acrow_'+rid+'">'+
+             '<div class="ac-top">'+
+               '<span class="ac-time">'+esc(c.time||'')+'</span>'+
+               acDirBadge(c.direction)+
+               '<span class="ac-name">'+name+'</span>'+ cid +
+             '</div>'+ dx + lv +
+             '<div class="ac-meta">'+
+               (c.agent ? ('<span class="ac-ag">'+esc(c.agent)+'</span>') : '')+
+               '<span class="ac-dur">'+esc(c.duration||'')+'</span>'+
+               acStatusBadge(c.status)+ rec +
+             '</div>'+
+           '</div>';
+  }
+  /* S136b: WhatsApp-tile call visibility. A call placed from a WA tile goes
+     through the SAME dialler as every other outgoing call (triggerCall/OBD) and
+     already lands in Today's calls — it was only the WA tile that never showed
+     it. These two helpers close that: the newest outgoing call TODAY for each
+     number is shown on its WA tile — who called, when, duration (or 'not
+     connected'), and the recording. Built from data already in the bundle. */
+  function waBuildCallMap(calls){
+    waCallMap={};
+    for(var wi=0; wi<calls.length; wi++){
+      var wc=calls[wi]||{};
+      if(wc.direction!=='outgoing') continue;
+      var wp=String(wc.id||'').split('_')[0];
+      if(!wp || wp.length<10) continue;
+      if(!waCallMap[wp] || (wc.startUnix||0)>(waCallMap[wp].startUnix||0)) waCallMap[wp]=wc;
+    }
+  }
+  function waCallLine(m, i){
+    var d10=String((m&&m.number)||'').replace(/\D/g,'');
+    d10=(d10.length>=10)?d10.slice(-10):d10;
+    var c=d10?waCallMap[d10]:null;
+    if(!c) return '';
+    var bits='\ud83d\udcde Called'
+      +(c.agent?(' by '+esc(c.agent)):'')
+      +(c.time?(' \u00b7 '+esc(c.time)):'')
+      +((c.status==='missed')?' \u00b7 <b>not connected</b>':(c.duration?(' \u00b7 '+esc(c.duration)):''));
+    var rec=c.recording
+      ? ('<button class="fu-rec" onclick="playRec(dget(\''+dref(c.recording)+'\'),\'warec_'+i+'\',this)">\ud83c\udfa7 Rec</button><div class="fu-recslot" id="warec_'+i+'"></div>')
+      : '';
+    return '<div class="wa-callline">'+bits+rec+'</div>';
+  }
+  function renderAllCalls(res){
+    var box=document.getElementById('allCalls');
+    if(!box) return;
+    if(!res || res.ok!==true){
+      var em=(res&&res.error)?esc(res.error):"Could not load today's calls.";
+      setCnt('allCallsCnt',0,false);
+      box.className=''; box.innerHTML='<div class="empty">'+em+'</div>';
+      return;
+    }
+    var calls=res.calls||[];
+    setCnt('allCallsCnt', calls.length, false);
+    var seen={}; for(var i=0;i<calls.length;i++){ seen[calls[i].id]=1; }
+    var firstLoad=(acPrevIds===null);
+    if(!calls.length){
+      box.className=''; box.innerHTML='<div class="empty">No calls yet today.</div>';
+    } else {
+      box.className='list';
+      box.innerHTML=calls.map(function(c){
+        var isNew=(!firstLoad && acPrevIds && !acPrevIds[c.id]);
+        return acRowHtml(c, isNew);
+      }).join('');
+      setTimeout(function(){
+        var ns=document.querySelectorAll('#allCalls .ac-new');
+        for(var j=0;j<ns.length;j++){ ns[j].classList.remove('ac-new'); }
+      }, 3000);
+    }
+    acPrevIds=seen;
+  }
+
+  function poll(force){
+    var btn=document.getElementById('refresh'); btn.disabled=true; btn.textContent='Updating…';
+    google.script.run
+      .withSuccessHandler(function(b){ applyBundle(b, !!force); reset(btn); })
+      .withFailureHandler(function(err){ showBanner('Reconnecting… ('+((err&&err.message)||err)+')'); reset(btn); })
+      .getDashboardBundle(DASH_KEY, { force: !!force, olDay: olDay });
+  }
+  /* Block C (S136): ONE server trip per refresh instead of ~9. The bundle is
+     cached 45s on the server per role, so all open devices share one set of
+     sheet reads. Every render below keeps its old guard: follow-ups are not
+     repainted mid-edit, escalations are not repainted mid-edit, and a failed
+     bundle leaves the last good view untouched behind the Reconnecting banner. */
+  function applyBundle(b, force){
+    if(!b || b.ok!==true){
+      var em=(b&&b.error)?String(b.error):'no data';
+      if(/authoriz/i.test(em)){ showLogin(true); return; }
+      showBanner('Reconnecting… ('+em+')'); return;
+    }
+    if(b.todayIST) TODAY_IST=b.todayIST;                       // the ONE clock (F-5/F-13)
+    if(b.allCalls && b.allCalls.ok) waBuildCallMap(b.allCalls.calls||[]);   // S136b: BEFORE render(), so WA tiles see today's calls on the same paint
+    if(b.dash){
+      if(b.dash.error && /authoriz/i.test(b.dash.error)){ showLogin(true); return; }
+      render(b.dash);
+    }
+    if(force || !fuEditing()){
+      if(b.lastVisits && b.lastVisits.ok) fuLastVisits=b.lastVisits.map||{};
+      if(b.recordings && b.recordings.ok) fuRecordings=b.recordings.map||{};
+      if(b.clinicIds  && b.clinicIds.ok)  fuClinicIds =b.clinicIds.map||{};
+      if(b.sendbacks  && b.sendbacks.ok)  fuReviewSB  =b.sendbacks.items||[];
+      if(b.followups) renderFollowups(b.followups);
+    }
+    if(DASH_ROLE==='full'){
+      if(b.escalations && !escEditing()) renderEscalations(b.escalations);
+      if(b.outcomeLog) renderOutcomeLog(b.outcomeLog);
+    }
+    if(b.missTotals) kMissTotals=b.missTotals;               /* K-1: cross-day counter */
+    kRenderComp(b);                                           /* K-1: completion chip */
+    if(DASH_ROLE==='full') kRenderStrikes(b.kStrikes||[]);    /* K-1: doctor band */
+    if(b.allCalls) renderAllCalls(b.allCalls);
+    applyFreshness(b.freshness);
+  }
+  /* ---- v18.18 (S57): stale-list guard — same truth as the email sentinel ---- */
+  function applyFreshness(r){
+    if(DASH_ROLE==='none') return;
+    var bar=document.getElementById('staleBar'); if(!bar) return;
+    if(r && r.ok && r.stale){
+      bar.innerHTML='\u26A0\uFE0F This may be YESTERDAY\u2019S list \u2014 today\u2019s follow-ups have not reached the board.'+
+        '<span class="sb-sub">Newest date on the board: '+esc(r.newestDue||'\u2014')+' (today is '+esc(r.today||'')+'). '+
+        'On the clinic laptop, run the follow-up push \u2014 or ask the doctor.</span>';
+      bar.classList.add('show'); document.body.classList.add('stale-on');
+    } else {
+      bar.classList.remove('show'); document.body.classList.remove('stale-on');
+    }
+  }
+  function reset(btn){ btn.disabled=false; btn.textContent='↻ Refresh'; left=REFRESH_SECONDS; }
+
+  /* ---- Floating back-to-top (§4.8) ---- */
+  function scrollTop_(){ window.scrollTo({top:0, behavior:'smooth'}); }
+  window.addEventListener('scroll', function(){
+    var b=document.getElementById('toTop'); if(!b) return;
+    if(window.scrollY > 320) b.classList.add('show'); else b.classList.remove('show');
+  }, {passive:true});
+
+  /* ---- WhatsApp conversation thread (per number) ---- */
+  var threadNumber = '';
+  function closeThread(){
+    var o=document.getElementById('threadOverlay'); if(o) o.classList.remove('show');
+    threadNumber=''; if(!openReplyId) replyOpen=false;   // resume auto-refresh if no inline composer open
+  }
+  function setThreadStatus(msg, kind){
+    var el=document.getElementById('threadStatus'); if(!el) return;
+    el.textContent=msg||''; el.className='thread-status '+(kind||'');
+  }
+  function renderThread(msgs){
+    var body=document.getElementById('threadBody');
+    if(!msgs || !msgs.length){ body.innerHTML='<div class="thread-empty">No messages yet for this number.</div>'; return; }
+    body.innerHTML = msgs.map(function(m){
+      var cls=(m.dir==='out')?'out':'in';
+      var meta=esc(m.time)+((m.dir==='out'&&m.status)?(' \u00b7 '+esc(m.status)):'');
+      var content=isMediaUrl(m.text, m.type)?mediaHtml(m.text, m.type):esc(m.text);
+      return '<div class="bub '+cls+'">'+content+'<span class="bt">'+meta+'</span></div>';
+    }).join('');
+    body.scrollTop=body.scrollHeight;
+  }
+  function openThread(number, optimisticText){
+    var num=digits(number); if(num.length<10) return;
+    threadNumber=num; replyOpen=true;                    // pause auto-refresh while open
+    var o=document.getElementById('threadOverlay'); if(o) o.classList.add('show');
+    var nm='';
+    try{ (lastOk&&lastOk.recentWA||[]).forEach(function(x){ if(digits(x.number)===num && x.name) nm=x.name; }); }catch(e){}
+    document.getElementById('threadName').textContent = nm || ('Conversation \u00b7 '+num);
+    document.getElementById('threadBody').innerHTML='<div class="thread-empty">Loading\u2026</div>';
+    document.getElementById('threadFoot').style.display = (DASH_ROLE==='full')?'block':'none';
+    setThreadStatus('','');
+    var tx=document.getElementById('threadText'), sb=document.getElementById('threadSend');
+    if(tx){ tx.value=''; tx.disabled=true; tx.removeAttribute('data-window'); }
+    if(sb){ sb.disabled=true; sb.textContent='Send'; }
+    google.script.run
+      .withSuccessHandler(function(res){
+        var msgs=(res&&res.messages)?res.messages:[];
+        if(optimisticText){
+          var has=msgs.some(function(m){ return m.dir==='out' && m.text===optimisticText; });
+          if(!has) msgs=msgs.concat([{time:'just now',dir:'out',type:'text',text:optimisticText,status:'sent'}]);
+        }
+        renderThread(msgs);
+        if(DASH_ROLE==='full') enableThreadCompose(num);
+      })
+      .withFailureHandler(function(err){
+        document.getElementById('threadBody').innerHTML='<div class="thread-empty">Could not load: '+esc((err&&err.message)||err)+'</div>';
+      })
+      .getThread(DASH_KEY, num);
+  }
+  function enableThreadCompose(num){
+    var tx=document.getElementById('threadText'), sb=document.getElementById('threadSend');
+    if(!tx||!sb) return;
+    setThreadStatus('Checking 24-hour window\u2026','');
+    tx.oninput=function(){
+      tx.style.height='auto'; tx.style.height=Math.min(tx.scrollHeight,140)+'px';
+      sb.disabled = !(tx.getAttribute('data-window')==='open' && tx.value.trim().length>0);
+    };
+    sb.onclick=function(){ threadSendNow(num); };
+    google.script.run
+      .withSuccessHandler(function(res){
+        if(res && res.window_open){
+          tx.setAttribute('data-window','open'); tx.disabled=false; try{ tx.focus(); }catch(e){}
+          var hrs=(res.hours_since!=null)?(' \u00b7 last message '+res.hours_since+'h ago'):'';
+          setThreadStatus('\u2705 Window open \u2014 free reply allowed'+hrs+'.','ok');
+        } else {
+          tx.setAttribute('data-window','closed'); tx.disabled=true; sb.disabled=true;
+          setThreadStatus('\u26d4 '+((res&&res.reason)||'24-hour window closed.')+' Use an approved template instead.','warn');
+        }
+      })
+      .withFailureHandler(function(err){ setThreadStatus('\u26a0 Could not check window: '+((err&&err.message)||err),'warn'); })
+      .checkWindow(DASH_KEY, num);
+  }
+  function threadSendNow(num){
+    var tx=document.getElementById('threadText'), sb=document.getElementById('threadSend');
+    if(!tx) return;
+    var msg=tx.value.trim(); if(!msg) return;
+    var last4=String(num).slice(-4);
+    if(!confirm('Send WhatsApp to \u2026'+last4+'?\n\n'+msg)) return;
+    sb.disabled=true; sb.textContent='Sending\u2026'; tx.disabled=true;
+    google.script.run
+      .withSuccessHandler(function(res){
+        sb.textContent='Send';
+        if(res && res.sent){
+          setThreadStatus('\u2705 Reply sent.','ok');
+          openThread(num, msg);                         // refresh thread incl. the sent message
+        } else {
+          tx.disabled=false; sb.disabled=false;
+          setThreadStatus('\u26d4 '+((res&&res.reason)||'Not sent.'),'warn');
+        }
+      })
+      .withFailureHandler(function(err){
+        tx.disabled=false; sb.disabled=false; sb.textContent='Send';
+        setThreadStatus('\u26a0 Send failed: '+((err&&err.message)||err),'warn');
+      })
+      .sendReply(DASH_KEY, num, msg);
+  }
+
+  // ---- startup is gated behind sign-in ----
+  function startDashboard(){
+    document.getElementById('build').textContent = PAGE_BUILD;
+    kPaintToggle();
+    applySecState();
+    poll(false);
+    if(!window.__tick){
+      window.__tick = setInterval(function(){
+        if(document.hidden){ return; }   // Block C (S136): a hidden tab spends no quota; resumes below
+        // don't auto-refresh while a recording is playing or a reply is being typed
+        if((activeAudio && !activeAudio.paused) || replyOpen){ left=REFRESH_SECONDS;
+          document.getElementById('count').textContent=left; return; }
+        left--; if(left<0)left=0;
+        document.getElementById('count').textContent=left; if(left===0) poll(false); },1000);
+    }
+  }
+  // Block C (S136): the moment a hidden tab is brought back, refresh at once
+  document.addEventListener('visibilitychange', function(){
+    if(!document.hidden && DASH_KEY && DASH_ROLE && DASH_ROLE!=='none'){
+      left=REFRESH_SECONDS;
+      try{ poll(false); }catch(e){}
+    }
+  });
+  function showLogin(isErr){
+    var o=document.getElementById('loginOverlay'); if(o) o.style.display='flex';
+    var er=document.getElementById('loginErr'); if(er) er.style.display=isErr?'block':'none';
+    var p=document.getElementById('pin'); if(p){ try{ p.focus(); }catch(_){} }
+  }
+  function hideLogin(){ var o=document.getElementById('loginOverlay'); if(o) o.style.display='none'; }
+  function applyAccess(k, role){
+    DASH_KEY=k; DASH_ROLE=role;
+    try{ localStorage.setItem('clinicDashKey', k); }catch(e){}   // remember on this device
+    try{ localStorage.removeItem('clinicSignedOut'); }catch(e){}  // F-11: explicit login re-arms auto-login
+    var escSec=document.getElementById('secEscal'); if(escSec) escSec.style.display=(role==='full')?'':'none';
+    var unSec=document.getElementById('secUnreach'); if(unSec) unSec.style.display=(role==='full')?'':'none';
+    var olSec=document.getElementById('secOutLog'); if(olSec) olSec.style.display=(role==='full')?'':'none';
+    hideLogin(); startDashboard();
+  }
+  function tryKey(k, isLoginAttempt){
+    google.script.run
+      .withSuccessHandler(function(a){
+        var role=(a&&a.role)?a.role:'none';
+        if(role==='none'){ showLogin(isLoginAttempt); return; }
+        setCaller(a&&a.agentName);
+        applyAccess(k, role);
+      })
+      .withFailureHandler(function(){ showLogin(false); })
+      .getAccess(k);
+  }
+  function doSignOut(){                                       // F-11 / A-4 (S134)
+    try{ localStorage.removeItem('clinicDashKey'); }catch(e){} // forget the key on this device
+    try{ localStorage.setItem('clinicSignedOut','1'); }catch(e){} // and ignore any ?k= still in the URL
+    DASH_KEY=''; DASH_ROLE='none';
+    if(window.__tick){ clearInterval(window.__tick); window.__tick=null; }
+    showLogin(false);
+  }
+  function doLogin(){ var v=document.getElementById('pin').value.trim(); if(v) tryKey(v, true); }
+
+  (function(){ var p=document.getElementById('pin'); if(p) p.addEventListener('keydown',function(e){ if(e.key==='Enter') doLogin(); }); })();
+  // read ?k= from the REAL page URL via Apps Script's URL API (sandbox-safe), else the remembered key
+  google.script.url.getLocation(function(loc){
+    var signedOut=false; try{ signedOut=(localStorage.getItem('clinicSignedOut')==='1'); }catch(e){}
+    if(signedOut){ showLogin(false); return; }  // F-11: after Sign out, ?k= and the stored key are both ignored
+    var k=''; try{ k=(loc&&loc.parameter&&loc.parameter.k)?String(loc.parameter.k):''; }catch(e){}
+    if(!k){ try{ k=localStorage.getItem('clinicDashKey')||''; }catch(e){} }
+    if(k) tryKey(k, false); else showLogin(false);
+  });
+</script>
+</body>
+</html>
