@@ -86,6 +86,7 @@ import datetime
 import hashlib
 import io
 import os
+import random
 import re
 import sys
 
@@ -110,7 +111,11 @@ REVIEW_TAB = "Verdict_Review"      # this script is the only writer
 DOCTOR_TAB = "Doctor_Verdicts"     # this script is the only writer
 
 DEFAULT_WINDOW_DAYS = 7
-BUILD_VERSION = "verdict_review v1.3 (S124, D155)"
+BUILD_VERSION = "verdict_review v3 (S143, D240)"
+
+# --- D240: forced cards — referee sittings + the daily spot-check drip ------
+FORCE_FILE_DEFAULT = "/root/wa/recordings-archive/force_keys.txt"
+SPOTCHECK_COUNT = 2
 
 # The EXACT Call_Verdicts header, copied from call_verdict.py (S123 layout).
 # If this does not match the live tab, we refuse to run.  A silently-changed
@@ -194,10 +199,12 @@ SEC_INCOMING_NOCLAIM = "incoming_noclaim"   # RETIRED S140 (D153 overturned by D
 SEC_SUSPECT = "suspect_join"                # see classify_section
 SEC_FLAGGED = "flagged"                     # see placement_section
 SEC_ERROR = "error"                         # judge errored — counted only
+SEC_FORCED = "forced"                       # D240: drawn on request, above everything
 
 CARD_SECTIONS = [SEC_FLAGGED, SEC_MISMATCH, SEC_AI_ONLY, SEC_UNCLEAR, SEC_SUSPECT]
 
 SECTION_TITLES = {
+    SEC_FORCED:   "0.  REFEREE / SPOT-CHECK  —  answer these. Answered ones collapse to a line.",
     SEC_FLAGGED:  "1.  FLAGGED  —  clinical / safety review. Read these first.",
     SEC_MISMATCH: "2.  MISMATCH  —  staff said one thing, the AI heard another",
     SEC_AI_ONLY:  "3.  AI LOGGED AN OUTCOME  —  staff filed nothing",
@@ -410,6 +417,52 @@ def _neg_time(t):
     if not m:
         return 0
     return -(int(m.group(1)) * 60 + int(m.group(2)))
+
+
+# ---------------------------------------------------------------------------
+# D240 — forced cards (referee sittings) + the daily spot-check drip
+# ---------------------------------------------------------------------------
+def parse_force_file(text):
+    """force_keys.txt -> ordered, de-duplicated Join Key list.
+    One key per line; blank lines and '#' comments ignored; FILE ORDER is kept
+    (the owner works his referee workbook top to bottom)."""
+    keys, seen = [], set()
+    for line in (text or "").splitlines():
+        k = line.split("#", 1)[0].strip()
+        if k and k not in seen:
+            seen.add(k)
+            keys.append(k)
+    return keys
+
+
+def is_answered(prefill_entry):
+    """A card counts as answered once a dropdown outcome exists (note optional).
+    Answered forced keys collapse to a line and are never asked twice."""
+    return bool(str((prefill_entry or {}).get("outcome", "")).strip())
+
+
+def pick_spotchecks(rows, prefill, exclude, today, n=SPOTCHECK_COUNT):
+    """The daily D237 drip: up to n clean MATCH calls drawn as full cards.
+
+    ONE DECIDER (owner decision, S143): this script picks and marks them; the
+    digest only reads the tab and reports what it finds — the two scripts can
+    never disagree about which calls are today's spot-checks.
+
+    Pool rules: placement == match (a flagged or suspect row already gets a
+    card elsewhere and must never draw twice) · never a call the doctor has
+    already answered · never a key already in the forced list.  Seeded by the
+    date, so every run on the same day picks the same calls."""
+    pool = []
+    for r in rows:
+        jk = str(r.get("Join Key", "")).strip()
+        if (jk and jk not in exclude
+                and placement_section(r) == SEC_MATCH
+                and not is_answered(prefill.get(jk))):
+            pool.append(r)
+    pool.sort(key=lambda r: str(r.get("Join Key", "")).strip())
+    rng = random.Random(f"spotcheck-{today.isoformat()}")
+    picks = pool if len(pool) <= n else rng.sample(pool, n)
+    return sorted(picks, key=sort_key)
 
 
 def vocab_for_direction(direction):
@@ -659,7 +712,8 @@ class Grid:
         return len(self.rows) - 1
 
 
-def render_summary(g, counts, dirs, tstats, window_days, today, generated_at):
+def render_summary(g, counts, dirs, tstats, window_days, today, generated_at,
+                   forced_info=None):
     rate, judged = match_rate(counts)
     start = today - datetime.timedelta(days=window_days - 1)
     r = g.add("CALL VERDICT REVIEW",
@@ -694,6 +748,22 @@ def render_summary(g, counts, dirs, tstats, window_days, today, generated_at):
         g.summary_rows.append(g.add("Rows the judge could not process",
                                     str(counts[SEC_ERROR]),
                                     "Check the Error column in Call_Verdicts."))
+    if forced_info:
+        g.summary_rows.append(g.add(
+            "REFEREE cards (drawn on request)",
+            f"{forced_info['referee_open']} open   ·   "
+            f"{forced_info['referee_done']} already answered",
+            "Top band. The band shrinks as you answer — nothing is asked twice."))
+        if forced_info.get("missing"):
+            g.summary_rows.append(g.add(
+                "Force keys NOT FOUND", str(forced_info["missing"]),
+                "Named in the top band and in the run log — never dropped silently."))
+        if forced_info.get("spots"):
+            g.summary_rows.append(g.add(
+                "Today's spot-checks",
+                "   ·   ".join(forced_info["spots"]),
+                "Clean matches to confirm — the daily calibration drip (D237). "
+                "The digest reads this line."))
     g.add("")
     g.add("")
 
@@ -792,6 +862,54 @@ def render_match_line(g, row):
           f"{str(row.get('Patient Name','')).strip()}",
           f"both said: {str(row.get('AI Outcome','')).strip()}",
           str(row.get("Match Confidence", "")).strip())
+
+
+def render_answered_line(g, row, prefill_entry):
+    """A forced key the doctor has ALREADY answered: one line, no editable
+    cell.  This is what makes a referee sitting resumable across days."""
+    note = str((prefill_entry or {}).get("note", "")).strip()
+    g.add(f"\u2713 answered   {row.get('Date','')} {row.get('Time','')}",
+          f"{mask_phone(row.get('Patient Number'))}   "
+          f"{str(row.get('Patient Name','')).strip()}",
+          f"your verdict: {str((prefill_entry or {}).get('outcome','')).strip()}"
+          + (f"   \u00b7   {note}" if note else ""))
+
+
+def render_forced_band(g, forced_rows, spot_rows, prefill, fetched,
+                       missing_keys, today):
+    """The D240 band: referee keys in FILE ORDER, then today's spot-checks.
+    Exempt from every per-section cap by construction — it never passes
+    through by_section.  Returns the number of open (editable) cards drawn."""
+    render_section_header(g, SEC_FORCED, len(forced_rows) + len(spot_rows))
+    open_cards = 0
+    if missing_keys:
+        g.add("\u26a0  keys not found",
+              f"{len(missing_keys)} supplied key(s) match no row in Call_Verdicts: "
+              + ", ".join(key_token(k) for k in missing_keys[:10])
+              + ("\u2026" if len(missing_keys) > 10 else ""),
+              "Check force_keys.txt \u2014 each line must be an exact Join Key. "
+              "Full keys are in the run log, never on this exportable tab.")
+    for row in forced_rows:
+        jk = str(row.get("Join Key", "")).strip()
+        pf = prefill.get(jk, {})
+        if is_answered(pf):
+            render_answered_line(g, row, pf)
+            continue
+        text, err = fetched.get(jk, ("", "transcript not fetched"))
+        render_card(g, row, text, err, pf)
+        open_cards += 1
+    for row in spot_rows:
+        jk = str(row.get("Join Key", "")).strip()
+        g.add("\u2605  TODAY'S SPOT-CHECK",
+              f"{today.isoformat()} \u2014 a clean MATCH drawn for the daily "
+              "calibration drip (D237). Confirm or overturn it like any other card.")
+        text, err = fetched.get(jk, ("", "transcript not fetched"))
+        render_card(g, row, text, err, prefill.get(jk, {}))
+        open_cards += 1
+    if not forced_rows and not spot_rows:
+        g.add("", "(no forced keys and no spot-check candidates today)")
+    g.add("")
+    return open_cards
 
 
 # ---------------------------------------------------------------------------
@@ -1327,6 +1445,98 @@ def selftest():
     check("this script never names Call_Verdicts as a write target",
           VERDICT_TAB not in (REVIEW_TAB, DOCTOR_TAB))
 
+    # --- D240: forced band + spot-check drip --------------------------------
+    check("forced section has a title", SEC_FORCED in SECTION_TITLES)
+    check("banner is honest (F-40 cured)",
+          "v3" in BUILD_VERSION and "S143" in BUILD_VERSION)
+    check("parse_force_file order + dedupe + comments",
+          parse_force_file("k1\n# note\nk2  # trailing\n\nk1\nk3")
+          == ["k1", "k2", "k3"])
+    check("parse_force_file empty", parse_force_file("") == [])
+    check("parse_force_file None", parse_force_file(None) == [])
+    check("is_answered", is_answered({"outcome": "coming"})
+          and not is_answered({}) and not is_answered(None)
+          and not is_answered({"outcome": "  ", "note": "n"}))
+
+    spool = [dict(base, Verdict="Match", Direction="outgoing",
+                  **{"Join Key": f"93580012{i:02d}_17833228{i:02d}",
+                     "Date": "2026-07-12", "Time": f"10:{i:02d}"})
+             for i in range(20)]
+    d13 = datetime.date(2026, 7, 13)
+    p1 = pick_spotchecks(spool, {}, set(), d13)
+    p2 = pick_spotchecks(spool, {}, set(), d13)
+    check("spotchecks deterministic for a date",
+          [r["Join Key"] for r in p1] == [r["Join Key"] for r in p2]
+          and len(p1) == 2)
+    ansd = {p1[0]["Join Key"]: {"outcome": "coming", "note": ""}}
+    p4 = pick_spotchecks(spool, ansd, set(), d13)
+    check("spotchecks never pick an answered call",
+          p1[0]["Join Key"] not in [r["Join Key"] for r in p4] and len(p4) == 2)
+    only = spool[19]["Join Key"]
+    p5 = pick_spotchecks(spool, {},
+                         {r["Join Key"] for r in spool[:19]}, d13)
+    check("spotchecks never duplicate a forced key",
+          [r["Join Key"] for r in p5] == [only])
+    check("small pool: takes what exists, never crashes",
+          len(pick_spotchecks(spool[:1], {}, set(), d13)) == 1)
+    check("spotchecks: a mismatch is never a candidate",
+          pick_spotchecks([dict(base, Verdict="Mismatch",
+                                Direction="outgoing",
+                                **{"Join Key": "x_1"})], {}, set(), d13) == [])
+    check("spotchecks: a flagged match is never a candidate (it has a card already)",
+          pick_spotchecks([dict(base, Verdict="Match", Direction="outgoing",
+                                **{"Join Key": "x_2", "Flag Surgery": "YES"})],
+                          {}, set(), d13) == [])
+
+    frow = dict(base, Verdict="Match", Direction="outgoing",
+                **{"Join Key": "9358001234_1783322828", "Date": "2026-07-10",
+                   "Time": "11:00", "AI Outcome": "coming",
+                   "Claimed Outcome": "coming"})
+    fdone = dict(frow, **{"Join Key": "9358005678_1783322999"})
+    pfx = {"9358005678_1783322999": {"outcome": "coming", "note": "ok"}}
+    gf = Grid()
+    n_open = render_forced_band(
+        gf, [frow, fdone], [], pfx,
+        {"9358001234_1783322828": ("Ji main aa raha hoon", None)},
+        ["9111122233_1700000000"], d13)
+    check("forced band: the open card gets exactly one answer cell",
+          len(gf.response_rows) == 1 and n_open == 1)
+    check("forced band: a MATCH forced key gets a FULL card (the v2 gap, cured)",
+          any(r[COL_MACHINE_MARK] == MARKER_RESPONSE for r in gf.rows))
+    check("forced band: an answered key collapses to a line, no editable cell",
+          any("\u2713 answered" in r[COL_LABEL] for r in gf.rows))
+    check("forced band: missing keys are named, never silently dropped",
+          any("keys not found" in r[COL_LABEL] for r in gf.rows))
+    check("forced band: a raw Join Key (phone) never lands on the sheet",
+          not any("9111122233" in "".join(map(str, r)) for r in gf.rows))
+    check("forced band header uses the forced title",
+          any(SECTION_TITLES[SEC_FORCED] in str(r[COL_LABEL]) for r in gf.rows))
+
+    gs2 = Grid()
+    n_spot = render_forced_band(
+        gs2, [], [frow], {},
+        {"9358001234_1783322828": ("Ji main aa raha hoon", None)}, [], d13)
+    check("spot-check card carries the star banner and an answer cell",
+          any("SPOT-CHECK" in str(r[COL_LABEL]) for r in gs2.rows)
+          and n_spot == 1 and len(gs2.response_rows) == 1)
+    ge = Grid()
+    check("empty band renders a friendly line, zero answer cells",
+          render_forced_band(ge, [], [], {}, {}, [], d13) == 0
+          and len(ge.response_rows) == 0
+          and any("no forced keys" in str(r[COL_VAL]) for r in ge.rows))
+
+    g6 = Grid()
+    render_summary(g6, summarise_counts(sample), direction_counts(sample),
+                   {"empty": 0, "missing": 0}, 7, today, "2026-07-13 21:00:00",
+                   {"referee_open": 3, "referee_done": 2, "missing": 1,
+                    "spots": ["******1234 2026-07-12 10:00 (coming)"]})
+    check("summary carries the spot-check line (the digest reads this label)",
+          any("Today's spot-checks" in str(r[COL_LABEL]) for r in g6.rows))
+    check("summary carries the referee open/answered counts",
+          any("REFEREE" in str(r[COL_LABEL]) for r in g6.rows))
+    check("summary without forced_info is unchanged (old call shape still works)",
+          not any("REFEREE" in str(r[COL_LABEL]) for r in g3.rows))
+
     print(f"\nSELFTEST: {passed} passed, {failed} failed "
           f"({passed + failed} checks)")
     return 0 if failed == 0 else 1
@@ -1345,6 +1555,13 @@ def main():
                     help=f"rolling window in days (default {DEFAULT_WINDOW_DAYS})")
     ap.add_argument("--no-transcripts", action="store_true",
                     help="skip transcript download and row-groups")
+    ap.add_argument("--force-file", default=None,
+                    help="file of Join Keys to force-draw as full cards "
+                         f"(when omitted, {FORCE_FILE_DEFAULT} is used IF it exists)")
+    ap.add_argument("--force-keys", default="",
+                    help="comma-separated Join Keys to force-draw (added to the file's)")
+    ap.add_argument("--no-spotchecks", action="store_true",
+                    help="skip the daily 2 spot-check cards (D240 escape hatch)")
     args = ap.parse_args()
 
     if args.selftest:
@@ -1429,12 +1646,51 @@ def main():
     for k, v in harvested.items():
         prefill[k] = v
 
+    # ---- D240: resolve the forced key list (referee sitting) ----------------
+    if args.force_file and not os.path.exists(args.force_file):
+        sys.exit(f"ERROR: --force-file {args.force_file} does not exist. "
+                 "Exiting (code 5).")
+    force_path = args.force_file or (FORCE_FILE_DEFAULT
+                                     if os.path.exists(FORCE_FILE_DEFAULT) else None)
+    force_keys = []
+    if force_path:
+        with open(force_path, "r", encoding="utf-8") as fh:
+            force_keys = parse_force_file(fh.read())
+        print(f"Force file: {force_path} \u2014 {len(force_keys)} key(s).")
+    for k in parse_force_file(args.force_keys.replace(",", "\n")):
+        if k not in force_keys:
+            force_keys.append(k)
+
+    forced_rows, missing_keys = [], []
+    for k in force_keys:
+        row = verdict_by_key.get(k)   # ALL rows: a referee key may pre-date the window
+        if row is not None:
+            forced_rows.append(row)
+        else:
+            missing_keys.append(k)
+    if missing_keys:
+        print(f"  WARNING: {len(missing_keys)} forced key(s) match no row in "
+              f"'{VERDICT_TAB}': {', '.join(missing_keys)}")
+
+    spot_rows = [] if args.no_spotchecks else pick_spotchecks(
+        rows, prefill,
+        {str(r.get("Join Key", "")).strip() for r in forced_rows}, today)
+    n_done = sum(1 for r in forced_rows
+                 if is_answered(prefill.get(str(r.get("Join Key", "")).strip())))
+    print(f"Forced band: {len(forced_rows)} referee key(s) "
+          f"({n_done} already answered), {len(spot_rows)} spot-check(s)"
+          + (f", {len(missing_keys)} key(s) NOT FOUND" if missing_keys else "") + ".")
+
     # ---- STEP 2: build the new grid (still nothing destroyed) --------------
     counts = summarise_counts(rows)
     dirs = direction_counts(rows)
     by_section = {s: [] for s in (SEC_FLAGGED, SEC_MISMATCH, SEC_AI_ONLY,
                                   SEC_UNCLEAR, SEC_SUSPECT, SEC_MATCH)}
+    drawn_forced = {str(r.get("Join Key", "")).strip()
+                    for r in forced_rows + spot_rows}
     for r in rows:
+        if str(r.get("Join Key", "")).strip() in drawn_forced:
+            continue   # D240: one call, one answer cell \u2014 never drawn twice
         s = placement_section(r)
         if s in by_section:
             by_section[s].append(r)
@@ -1492,11 +1748,42 @@ def main():
                 tstats["missing"] += 1
             elif not str(text).strip():
                 tstats["empty"] += 1
+    # D240: the forced band's OPEN cards need transcripts too (answered lines
+    # do not \u2014 skipping them is what makes a shrinking band cheap to redraw).
+    band_card_rows = [r for r in forced_rows
+                      if not is_answered(prefill.get(
+                          str(r.get("Join Key", "")).strip()))] + spot_rows
+    for row in band_card_rows:
+        jk = str(row.get("Join Key", "")).strip()
+        if jk in fetched:
+            continue
+        text, err = transcript_for(row)
+        fetched[jk] = (text, err)
+        if err:
+            tstats["missing"] += 1
+        elif not str(text).strip():
+            tstats["empty"] += 1
     print(f"Transcripts: {len(fetched) - tstats['empty'] - tstats['missing']} usable, "
           f"{tstats['empty']} empty, {tstats['missing']} unavailable.")
 
+    spots_desc = [f"{mask_phone(r.get('Patient Number'))} "
+                  f"{r.get('Date','')} {r.get('Time','')} "
+                  f"({str(r.get('AI Outcome','')).strip()})" for r in spot_rows]
+    forced_info = None
+    if force_keys or spot_rows or missing_keys:
+        forced_info = {"referee_open": len(forced_rows) - n_done,
+                       "referee_done": n_done,
+                       "missing": len(missing_keys),
+                       "spots": spots_desc}
+
     g = Grid()
-    render_summary(g, counts, dirs, tstats, args.days, today, generated_at)
+    render_summary(g, counts, dirs, tstats, args.days, today, generated_at,
+                   forced_info)
+    open_forced = render_forced_band(g, forced_rows, spot_rows, prefill,
+                                     fetched, missing_keys, today)
+    if forced_rows or spot_rows:
+        print(f"  \u00b7 forced band: {open_forced} open card(s), "
+              f"{n_done} answered line(s).")
     for section in CARD_SECTIONS:
         render_section_header(g, section, len(by_section[section]))
         if not by_section[section]:

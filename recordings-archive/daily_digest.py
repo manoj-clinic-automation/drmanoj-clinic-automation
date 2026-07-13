@@ -14,7 +14,7 @@ TWO MODES
              awaiting-verdict), then a short "needs attention" list.
              No AI call. Zero rupees.
   --digest   21:30 IST full digest: day-in-one-line, the day's numbers,
-             worst-first review list with recording links, 2 random MATCH
+             worst-first review list with recording links, the day's 2 MATCH
              spot-checks for the doctor to referee (D237 drip; answers land
              in Verdict_Review -> Doctor_Verdicts and count toward D191),
              at most ONE data-backed suggestion. One small AI call (Haiku)
@@ -83,14 +83,13 @@ import datetime
 import html
 import json
 import os
-import random
 import re
 import smtplib
 import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-BUILD_VERSION = "v1.2.1-S142"
+BUILD_VERSION = "v1.3-S143"
 ENV_PATH = "/root/wa/.env"
 IST = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
 
@@ -116,7 +115,8 @@ AI_TIMEOUT_S = 60
 
 REVIEW_LIST_CAP = 12          # worst-first list, 21:30
 MORNING_LIST_CAP = 40         # all-morning-calls list, 11:00
-SPOT_CHECKS = 2               # random MATCH cards per day (D237 drip)
+REVIEW_TAB = "Verdict_Review"           # read-only here; verdict_review.py owns it
+SPOTLINE_LABEL = "Today's spot-checks"  # the summary row v3 writes (D240)
 MIN_TALK_S = 15               # below this, a "conversation" is a blip
 PIPELINE_GRACE_MIN = 30       # age before a missing transcript is suspicious
 D191_TARGET = 100             # doctor-refereed cards target
@@ -357,14 +357,16 @@ def bucket_counts(vrows):
     return c
 
 
-def pick_spot_checks(match_rows, day_str, n=SPOT_CHECKS):
-    """Deterministic-per-day random pick of MATCH rows (rerun = same picks)."""
-    if not match_rows:
-        return []
-    rng = random.Random("spot-" + day_str)
-    pool = list(match_rows)
-    rng.shuffle(pool)
-    return pool[:n]
+def find_spotcheck_line(values):
+    """v1.3 (S143): the digest no longer picks its own spot-checks.
+    verdict_review.py v3 is the ONE DECIDER — it picks, marks the cards in the
+    top band, and writes a summary row labelled "Today's spot-checks".  This
+    reads that row from the tab's first rows.  Returns "" when absent (e.g. the
+    21:00 redraw has not run), and the email then simply points at the band."""
+    for r in values or []:
+        if r and str(r[0]).strip() == SPOTLINE_LABEL:
+            return str(r[1]).strip() if len(r) > 1 else ""
+    return ""
 
 
 def worst_first(vrows, cap=REVIEW_LIST_CAP):
@@ -535,20 +537,18 @@ def build_digest_email(day_disp, summary_line, c, staff_logged, review, spots,
             cells))
 
     parts.append(h_section("Your 2 spot-checks (30 seconds each)"))
-    if not spots:
-        parts.append("<p>No MATCH calls available to spot-check today.</p>")
+    if spots:
+        parts.append("<p><b>%s</b></p>" % esc(spots))
+        parts.append("<p>Their full cards — transcript, evidence and "
+                     "\u25b6 listen link — are the \u2605 TODAY'S SPOT-CHECK "
+                     "cards at the TOP of the <b>Verdict_Review</b> tab. "
+                     "Your answers are what count toward the accuracy gate — "
+                     "the machine agreeing with itself never does (D237).</p>")
     else:
-        cells = []
-        for r in spots:
-            cells.append([str(r.get("Time", "")).strip(), who(r),
-                          str(r.get("AI Outcome", "")).strip() or "—",
-                          link(r.get("Recording Link", ""), "🎧 listen")])
-        parts.append(render_table(["Time", "Patient", "Both said", "Recording"],
-                                  cells))
-        parts.append("<p>Listen, then answer the matching card in the "
-                     "<b>Verdict_Review</b> tab. Your answers are what count "
-                     "toward the accuracy gate — the machine agreeing with "
-                     "itself never does (D237).</p>")
+        parts.append("<p>The review tab has not marked today's spot-checks "
+                     "yet (its 21:00 redraw may not have run). Open "
+                     "<b>Verdict_Review</b> — any open card in the top band "
+                     "counts just the same.</p>")
 
     parts.append(h_section("One suggestion"))
     parts.append("<p>%s</p>" % esc(suggestion or "No suggestion today."))
@@ -635,7 +635,11 @@ def collect(day_str):
             p["_reason"], p["_alert"] = reason, alert
             d_today.append(p)
     o_today = [r for r in outcomes if parse_when(r.get("When", ""))[0] == day_str]
-    return v_today, d_today, o_today, len(doctor)
+    try:
+        vr_head = audit.worksheet(REVIEW_TAB).get_values("A1:B30")
+    except Exception:                                          # tab absent / first run
+        vr_head = []
+    return v_today, d_today, o_today, len(doctor), find_spotcheck_line(vr_head)
 
 
 # ---------------------------------------------------------------------------
@@ -724,7 +728,7 @@ def run_pulse(dry_run):
     now = datetime.datetime.now(IST)
     day_str = now.strftime("%Y-%m-%d")
     day_disp = now.strftime("%a %d %b %Y")
-    v_today, d_pending, _o_today, refereed = collect(day_str)
+    v_today, d_pending, _o_today, refereed, _spot = collect(day_str)
 
     attention = []
     for p_ in d_pending:
@@ -765,15 +769,13 @@ def run_digest(dry_run):
     now = datetime.datetime.now(IST)
     day_str = now.strftime("%Y-%m-%d")
     day_disp = now.strftime("%a %d %b %Y")
-    v_today, d_pending, o_today, refereed = collect(day_str)
+    v_today, d_pending, o_today, refereed, spot_line = collect(day_str)
     lost = [p for p in d_pending if p.get("_alert")]
 
     c = bucket_counts(v_today)
     staff_logged = len(o_today)
     review = worst_first(v_today)
-    spots = pick_spot_checks(
-        [r for r in v_today if str(r.get("Verdict", "")).strip() == V_MATCH],
-        day_str)
+    spots = spot_line   # v1.3: verdict_review v3 decided; we only report
 
     ai_sum, ai_sug, ai_note = ai_summary_and_suggestion(
         c, staff_logged, sorted({lab for lab, _ in review}))
@@ -877,14 +879,17 @@ def selftest():
     check("buckets unknown verdict -> other",
           bucket_counts([{"Verdict": "??", "Direction": ""}])["other"] == 1)
 
-    # -- spot checks -----------------------------------------------------------
-    pool = [{"Join Key": str(i)} for i in range(10)]
-    p1 = pick_spot_checks(pool, "2026-07-13")
-    p2 = pick_spot_checks(pool, "2026-07-13")
-    check("spot picks n=2", len(p1) == 2)
-    check("spot deterministic per day", p1 == p2)
-    check("spot empty pool", pick_spot_checks([], "x") == [])
-    check("spot pool of 1", len(pick_spot_checks(pool[:1], "x")) == 1)
+    # -- spot checks (v1.3: read the tab's line; verdict_review decides) --------
+    grid = [["CALL VERDICT REVIEW", "x"], ["Generated", "y"],
+            [SPOTLINE_LABEL, "******1234 2026-07-12 10:00 (coming)"], [""]]
+    check("spot line found", find_spotcheck_line(grid)
+          == "******1234 2026-07-12 10:00 (coming)")
+    check("spot line absent -> empty", find_spotcheck_line(
+          [["CALL VERDICT REVIEW", "x"]]) == "")
+    check("spot line empty grid", find_spotcheck_line([]) == ""
+          and find_spotcheck_line(None) == "")
+    check("spot line short row tolerated",
+          find_spotcheck_line([[SPOTLINE_LABEL]]) == "")
 
     # -- pad / keys / join (v1.1 dry-run fixes) ----------------------------------
     check("pad_time 8:58", pad_time("8:58") == "08:58")
@@ -997,10 +1002,17 @@ def selftest():
     body2 = build_pulse_email("Mon", [], [], [], 0)
     check("pulse empty morning line", "No calls captured yet" in body2)
     check("pulse empty attention", "Nothing actionable" in body2)
-    dg = build_digest_email("Mon", "line", c, 4, [("URGENT", vt)], [vt],
+    dg = build_digest_email("Mon", "line", c, 4, [("URGENT", vt)],
+                            "******1234 2026-07-12 10:00 (coming)",
                             "do X", 7, "")
     check("digest has listen link", 'href="https://drive.google.com' in dg)
     check("digest has spot section", "spot-checks" in dg)
+    check("digest carries the tab's spot line verbatim",
+          "******1234 2026-07-12 10:00 (coming)" in dg)
+    dg0 = build_digest_email("Mon", "line", c, 4, [("URGENT", vt)], "",
+                             "do X", 7, "")
+    check("no spot line -> points at the band, never invents picks",
+          "top band" in dg0)
     check("digest has suggestion", "do X" in dg)
     check("bad link not rendered as anchor",
           link("javascript:x", "t") == "t")
