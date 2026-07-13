@@ -4,6 +4,13 @@ call_verdict.py — Stage 3 of the Staff Call Audit project: the AI judge.
 Dr. Manoj Agarwal Clinic, Bareilly. Session 128. Decision D149 (design locked
 Sessions 122-127; D62 is the parent decision from Session 24).
 
+UPDATED Session 141 (12 Jul 2026, v2.1) — F-21 WRITE FIX:
+  Sheets' append "table detection" was landing EVERY new verdict on top
+  of row 61 instead of below the data — each write erased the previous
+  one, and ~500 judged rows were silently lost on 12-Jul. New rows now
+  go to an EXPLICIT computed row; the header write is explicit too; and
+  PROMPT_VERSION is finally bumped (v2 rows were mislabelled v1.0-S128).
+
 UPDATED Session 140 (12 Jul 2026) — the K-era claim vocabulary:
   K-1/K-2 one-tap buttons (Dashboard v18.28) write NEW claim codes into
   Followup_Outcomes: `k_coming` / `k_not_coming` / `k_call_again` (source=K),
@@ -165,7 +172,7 @@ build = None
 MediaIoBaseDownload = None
 requests = None
 
-PROMPT_VERSION = "v1.0-S128"
+PROMPT_VERSION = "v2.1-S141"
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -698,7 +705,8 @@ def ensure_verdict_tab(audit_spreadsheet):
     except gspread.exceptions.WorksheetNotFound:
         ws = audit_spreadsheet.add_worksheet(title=VERDICT_TAB, rows=2000,
                                              cols=len(VERDICT_HEADER))
-        ws.append_row(VERDICT_HEADER, value_input_option="RAW")
+        ws.update(range_name="A1", values=[VERDICT_HEADER],
+                  value_input_option="RAW")      # explicit cell (F-21, S141)
         print(f"  (created sheet tab '{VERDICT_TAB}' in the doctor-only sheet)", flush=True)
     return ws
 
@@ -1023,6 +1031,16 @@ def main():
     system_prompt = build_system_prompt()
     n_ok = n_fail = n_upd = 0
 
+    # --- F-21 (S141): never trust Sheets append-detection again. Compute
+    #     the true last data row ONCE, write every new verdict to an
+    #     EXPLICIT range, and advance the counter locally.
+    next_row = 0
+    if to_judge and not args.dry_run:
+        next_row = len(ws_v.get_all_values()) + 1
+        short = next_row + len(to_judge) - 1 - ws_v.row_count
+        if short > 0:
+            ws_v.add_rows(short)
+
     # ----- NEW calls: run the AI judge once, then append a full row ----------
     for i, trec in enumerate(to_judge, 1):
         jk = trec.get("Join Key", "")
@@ -1061,7 +1079,9 @@ def main():
             row = assemble_verdict_row(trec, claim_row, ai, verdict, tf,
                                        confidence, status, error, model_name,
                                        phone10, name, cid, rec_link)
-            ws_v.append_row(row, value_input_option="USER_ENTERED")
+            ws_v.update(range_name=f"A{next_row}", values=[row],
+                        value_input_option="USER_ENTERED")   # F-21: explicit row
+            next_row += 1
 
     # ----- ALREADY-JUDGED calls: fill the claim/verdict if it landed now -----
     for trec in to_rematch:
