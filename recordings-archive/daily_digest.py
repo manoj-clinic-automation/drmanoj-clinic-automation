@@ -36,6 +36,10 @@ DATA SOURCES (read-only)
   Tracker sheet (TRACKER_SHEET_ID .. default the Clinic Callback Tracker)
      Call_Durations    -- every captured call (hook v3.x, 14 cols)
      Followup_Outcomes -- every staff tap/log (18 cols)
+  Flag Investigator results (read-only; a JSON file, NOT a sheet)
+     flag_investigator_results.json -- the D239 Investigator's rolling
+     recording-gap ledger. The 21:30 digest QUOTES its never_recorded /
+     missed_no_conversation split instead of recomputing it (B1, S146).
 
 DELIVERY
   Gmail SMTP (smtp.gmail.com:587 STARTTLS), FROM the clinic account,
@@ -50,6 +54,8 @@ ENV (/root/wa/.env -- same loader pattern as the other stages)
   DIGEST_TO            (optional; default drmanojkragarwal@gmail.com)
   ANTHROPIC_API_KEY    (optional; digest-mode AI line. Absent = fallback.)
   AI_DIGEST_MODEL      (optional; default claude-haiku-4-5)
+  FLAG_RESULTS_FILE    (optional; Flag Investigator results path; default
+                        /root/wa/recordings-archive/flag_investigator_results.json)
 
 EXIT CODES
   0 sent / dry-run OK      2 config error      3 send failure
@@ -59,6 +65,14 @@ CRON (installed at S142)
   30 21 * * * /root/wa/venv/bin/python3 /root/wa/recordings-archive/daily_digest.py --digest >> /root/wa/recordings-archive/digest_cron.log 2>&1
 
 Version history
+  v1.5-S146  B1: the 21:30 digest now READS flag_investigator_results.json
+             (the D239 Flag Investigator) and quotes its rolling
+             never_recorded vs missed_no_conversation split in a new
+             "Recording health" section -- ONE source of truth, no recompute.
+             Fails LOUD: a missing / unreadable / stale (>20 h old) results
+             file is SAID so, never shown as a silent zero. Read-only; writes
+             nothing (D236). The same-day per-call "no recording today" alert
+             is unchanged (a different, faster signal -- kept deliberately).
   v1.4-S145  F-44: the "talked, no recording" fault detector now also reads
              the call's top-level status. A call MyOperator marks
              missed/voicemail is labelled "missed -- no recording expected"
@@ -94,7 +108,7 @@ import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-BUILD_VERSION = "v1.4-S145"
+BUILD_VERSION = "v1.5-S146"
 ENV_PATH = "/root/wa/.env"
 IST = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
 
@@ -128,6 +142,12 @@ PIPELINE_GRACE_MIN = 30       # age before a missing transcript is suspicious
 # no recording exists or is expected -- never a "lost conversation" alert.
 MISSED_STATUSES = ("missed", "voicemail")
 D191_TARGET = 100             # doctor-refereed cards target
+
+# Flag Investigator (D239) results file -- READ-ONLY. B1 (S146): the 21:30
+# digest quotes the Investigator's rolling recording-gap split from here
+# instead of recomputing it. Same env-var name the Investigator itself uses.
+DEFAULT_FLAG_RESULTS = "/root/wa/recordings-archive/flag_investigator_results.json"
+FLAG_STALE_HOURS = 20         # older than this => "not updated today"; say so, hide the numbers
 
 # Verdict vocabulary as call_verdict.py writes it (verified from the artefact).
 V_MATCH = "Match"
@@ -441,6 +461,83 @@ def digest_subject(day_disp, c):
 
 
 # ---------------------------------------------------------------------------
+# Flag Investigator results -> one recording-health line (B1, S146)
+# PURE: no I/O here, so this is fully selftested. The file read lives below
+# in load_flag_results(). Everything here FAILS LOUD -- a missing, unreadable
+# or stale file is SAID so in plain words, never shown as a silent zero.
+# ---------------------------------------------------------------------------
+def _parse_iso_ist(s):
+    """'2026-07-14T20:00:15+05:30' -> aware IST datetime, or None."""
+    s = str(s).strip()
+    if len(s) < 19 or s[4] != "-" or s[10] != "T":
+        return None
+    try:
+        naive = datetime.datetime.strptime(s[:19], "%Y-%m-%dT%H:%M:%S")
+    except ValueError:
+        return None
+    return naive.replace(tzinfo=IST)
+
+
+def summarise_flag_results(payload, now_ist, stale_hours=FLAG_STALE_HOURS):
+    """Turn the Flag Investigator's results dict into a single digest line +
+    normalised fields. `payload` is the loaded JSON dict, or None when the file
+    is missing/unreadable.
+      state: 'missing' | 'unreadable' | 'stale' | 'ok'   ('ok' iff numbers shown)
+    """
+    if payload is None:
+        return {"ok": False, "state": "missing", "escalate": False,
+                "never_recorded_7d": None, "missed_no_conversation": None,
+                "line": ("Recording-gap check: the Flag Investigator results "
+                         "file is missing or unreadable — recording-gap numbers "
+                         "are unavailable today (has the Investigator run?).")}
+
+    counts = payload.get("counts") or {}
+    updated = str(payload.get("updated_ist", "")).strip()
+    never7 = payload.get("never_recorded_7d")
+    missed = counts.get("missed_no_conversation", 0)
+    thr = payload.get("never_recorded_threshold")
+    escalate = bool(payload.get("escalate_lokesh"))
+    dt = _parse_iso_ist(updated)
+    age_h = (now_ist - dt).total_seconds() / 3600.0 if dt is not None else None
+
+    base = {"ok": False, "state": "ok", "escalate": escalate,
+            "never_recorded_7d": never7, "missed_no_conversation": missed,
+            "never_recorded_threshold": thr, "updated_ist": updated,
+            "age_hours": age_h}
+
+    if age_h is None or never7 is None:
+        base["state"] = "unreadable"
+        base["line"] = ("Recording-gap check: the Flag Investigator file could "
+                        "not be read cleanly (no timestamp or count) — today's "
+                        "recording-gap numbers are not shown.")
+        return base
+    if age_h > stale_hours:
+        base["state"] = "stale"
+        base["line"] = ("Recording-gap check: the Flag Investigator last "
+                        "updated %s (%.0f h ago) — it may not have run today, "
+                        "so today's recording-gap numbers are not shown."
+                        % (updated, age_h))
+        return base
+
+    # fresh & readable -> quote the numbers
+    base["ok"] = True
+    if never7 == 0:
+        head = ("Recording-gap check (rolling 7 days, via the Flag "
+                "Investigator, as of %s): 0 genuine never-recorded — every "
+                "connected call's recording is present" % updated)
+    else:
+        head = ("Recording-gap check (rolling 7 days, via the Flag "
+                "Investigator, as of %s): %d genuine never-recorded"
+                % (updated, never7))
+    line = head + " · %d missed (no recording expected — not a fault)." % int(missed or 0)
+    if escalate:
+        line += (" ⚠ Escalation to Lokesh is ON (%s ≥ %s genuine gaps in 7 days)."
+                 % (never7, thr))
+    base["line"] = line
+    return base
+
+
+# ---------------------------------------------------------------------------
 # HTML rendering (tables kept simple; every value escaped)
 # ---------------------------------------------------------------------------
 CSS = "font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#222;"
@@ -522,7 +619,7 @@ def build_pulse_email(day_disp, judged_today, pending_rows, attention, refereed)
 
 
 def build_digest_email(day_disp, summary_line, c, staff_logged, review, spots,
-                       suggestion, refereed, ai_note=""):
+                       suggestion, refereed, ai_note="", recording_line=""):
     parts = ['<div style="%s">' % CSS]
     parts.append(h_section("The day in one line"))
     parts.append("<p><b>%s</b></p>" % esc(summary_line))
@@ -534,6 +631,10 @@ def build_digest_email(day_disp, summary_line, c, staff_logged, review, spots,
         [[str(c["in"] + c["out"]), str(c["in"]), str(c["out"]), str(staff_logged),
           str(c[V_MATCH]), str(c[V_MISMATCH]), str(c[V_PARTIAL]),
           str(c[V_NOCLAIM]), str(c[V_UNCLEAR]), str(c["flagged"])]]))
+
+    if recording_line:
+        parts.append(h_section("Recording health"))
+        parts.append("<p>%s</p>" % esc(recording_line))
 
     parts.append(h_section("Worst first — listen to these (%d)" % len(review)))
     if not review:
@@ -582,6 +683,18 @@ def html_to_text(h):
 # ---------------------------------------------------------------------------
 # Live reads (gspread) -- imports deferred so --selftest runs anywhere
 # ---------------------------------------------------------------------------
+def load_flag_results(path):
+    """Read the Flag Investigator's results JSON. Returns the parsed dict, or
+    None if the file is absent or unreadable. READ-ONLY; never raises -- the
+    digest must still go out even if the Investigator file is broken."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else None
+    except (OSError, ValueError):
+        return None
+
+
 def get_sheets_client():
     import gspread
     from google.oauth2.service_account import Credentials
@@ -784,6 +897,10 @@ def run_digest(dry_run):
     day_disp = now.strftime("%a %d %b %Y")
     v_today, d_pending, o_today, refereed, spot_line = collect(day_str)
     lost = [p for p in d_pending if p.get("_alert")]
+    # B1 (S146): quote the Flag Investigator's rolling recording-gap split
+    # (one source of truth), instead of recomputing it. Read-only; fail-loud.
+    flag = summarise_flag_results(
+        load_flag_results(env("FLAG_RESULTS_FILE", DEFAULT_FLAG_RESULTS)), now)
 
     c = bucket_counts(v_today)
     staff_logged = len(o_today)
@@ -811,7 +928,8 @@ def run_digest(dry_run):
                       % (len(lost), lines, suggestion))
     subject = digest_subject(day_disp, c)
     body = build_digest_email(day_disp, summary, c, staff_logged, review, spots,
-                              suggestion, refereed, ai_note)
+                              suggestion, refereed, ai_note,
+                              recording_line=flag["line"])
     send_email(subject, body, dry_run)
 
 
@@ -1036,6 +1154,48 @@ def selftest():
           link("javascript:x", "t") == "t")
     txt = html_to_text(dg)
     check("plaintext non-empty, no tags", len(txt) > 50 and "<td" not in txt)
+
+    # -- flag investigator results (B1, S146): read, don't recompute ------------
+    fr_ok = summarise_flag_results(
+        {"updated_ist": "2026-07-13T09:00:00+05:30", "never_recorded_7d": 0,
+         "never_recorded_threshold": 3, "escalate_lokesh": False,
+         "counts": {"missed_no_conversation": 5}}, NOW)
+    check("flag fresh 0-gap -> ok, phrased clean, missed shown",
+          fr_ok["ok"] and fr_ok["state"] == "ok"
+          and "0 genuine never-recorded" in fr_ok["line"]
+          and "5 missed (no recording expected" in fr_ok["line"])
+    fr_esc = summarise_flag_results(
+        {"updated_ist": "2026-07-13T09:00:00+05:30", "never_recorded_7d": 3,
+         "never_recorded_threshold": 3, "escalate_lokesh": True,
+         "counts": {"missed_no_conversation": 2}}, NOW)
+    check("flag escalation surfaced with Lokesh + count",
+          fr_esc["ok"] and "3 genuine never-recorded" in fr_esc["line"]
+          and "Lokesh" in fr_esc["line"])
+    fr_missing = summarise_flag_results(None, NOW)
+    check("flag missing -> loud, not a zero",
+          (not fr_missing["ok"]) and fr_missing["state"] == "missing"
+          and "unavailable" in fr_missing["line"])
+    fr_stale = summarise_flag_results(
+        {"updated_ist": "2026-07-12T05:30:00+05:30", "never_recorded_7d": 0,
+         "never_recorded_threshold": 3, "escalate_lokesh": False,
+         "counts": {}}, NOW)
+    check("flag stale (>20h) -> numbers withheld, said so",
+          (not fr_stale["ok"]) and fr_stale["state"] == "stale"
+          and "not shown" in fr_stale["line"])
+    fr_bad = summarise_flag_results(
+        {"updated_ist": "junk", "never_recorded_7d": 0, "counts": {}}, NOW)
+    check("flag unreadable timestamp -> unreadable state",
+          (not fr_bad["ok"]) and fr_bad["state"] == "unreadable")
+    check("load_flag_results missing path -> None (never raises)",
+          load_flag_results("/no/such/flag_results_xyz.json") is None)
+    dgf = build_digest_email("Mon", "line", c, 4, [("URGENT", vt)],
+                             "", "do X", 7, "", fr_ok["line"])
+    check("digest renders Recording health section when line given",
+          "Recording health" in dgf and "never-recorded" in dgf)
+    dgn = build_digest_email("Mon", "line", c, 4, [("URGENT", vt)],
+                             "", "do X", 7, "", "")
+    check("digest omits Recording health when no line (back-compat)",
+          "Recording health" not in dgn)
 
     # -- construction guarantees ------------------------------------------------
     src = open(os.path.abspath(__file__), encoding="utf-8").read()
