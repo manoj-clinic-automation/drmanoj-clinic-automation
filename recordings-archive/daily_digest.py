@@ -59,6 +59,11 @@ CRON (installed at S142)
   30 21 * * * /root/wa/venv/bin/python3 /root/wa/recordings-archive/daily_digest.py --digest >> /root/wa/recordings-archive/digest_cron.log 2>&1
 
 Version history
+  v1.4-S145  F-44: the "talked, no recording" fault detector now also reads
+             the call's top-level status. A call MyOperator marks
+             missed/voicemail is labelled "missed -- no recording expected"
+             (NOT an alert) -- its ring/hold seconds are no longer mistaken
+             for a conversation.
   v1.2-S142  owner-directed, same day: every unjudged call now carries an
              automatic REASON (not answered / too short / in pipeline /
              transcribed-verdict due / "talked, no recording"). The last one
@@ -89,7 +94,7 @@ import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-BUILD_VERSION = "v1.3-S143"
+BUILD_VERSION = "v1.4-S145"
 ENV_PATH = "/root/wa/.env"
 IST = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
 
@@ -119,6 +124,9 @@ REVIEW_TAB = "Verdict_Review"           # read-only here; verdict_review.py owns
 SPOTLINE_LABEL = "Today's spot-checks"  # the summary row v3 writes (D240)
 MIN_TALK_S = 15               # below this, a "conversation" is a blip
 PIPELINE_GRACE_MIN = 30       # age before a missing transcript is suspicious
+# F-44: top-level (webhook) status values that mean nobody actually talked, so
+# no recording exists or is expected -- never a "lost conversation" alert.
+MISSED_STATUSES = ("missed", "voicemail")
 D191_TARGET = 100             # doctor-refereed cards target
 
 # Verdict vocabulary as call_verdict.py writes it (verified from the artefact).
@@ -287,6 +295,11 @@ def classify_pending(dur_row, now_ist, t_pe, t_phone_min):
         talk = int(float(str(dur_row.get("customer_talk_duration", "")).strip() or 0))
     except (ValueError, TypeError):
         talk = 0
+    status = str(dur_row.get("status", "")).strip().lower()
+    if status in MISSED_STATUSES:
+        # F-44: provider marked this missed/voicemail. Ring/hold seconds are
+        # not a conversation and no recording is expected -- never an alert.
+        return "missed — no recording expected", False
     if result == "not_answered" or (talk <= 0 and result not in ("connected", "answered")):
         return "not answered", False
     if talk < MIN_TALK_S:
@@ -949,6 +962,11 @@ def selftest():
                           NOW, [], {})
     check("classify LOST CONVERSATION alert",
           r5[1] and "no recording" in r5[0])
+    # F-44: same call, but MyOperator marked it missed -> NOT an alert
+    r5b = dict(mk("connected", "40", "2026-07-13T09:37:00+05:30"), status="missed")
+    r5b_out = classify_pending(r5b, NOW, [], {})
+    check("classify provider-missed -> not an alert",
+          r5b_out[1] is False and "no recording expected" in r5b_out[0])
     r6 = classify_pending(mk("connected", "101",
                              "2026-07-13T09:37:00+05:30", ref="IN-xyz",
                              phone="9000000002"),

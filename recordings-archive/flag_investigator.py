@@ -1,7 +1,20 @@
 #!/usr/bin/env python3
 """
-flag_investigator.py  —  D239 Flag Investigator (v1.1, Session 144)
+flag_investigator.py  —  D239 Flag Investigator (v1.2, Session 145)
 Dr. Manoj Agarwal Clinic, Bareilly.
+
+  v1.2 (F-44): a provider-missed call is no longer mislabelled "never
+  recorded". MyOperator counts a call's clock from the first ring, so a
+  missed call can still show tens of "talk" seconds -- but it never has a
+  recording, and that is correct, not a fault. Two guards now use
+  MyOperator's own status instead of the duration alone:
+    - is_lost_candidate() drops any Call_Durations row whose top-level
+      status is "missed"/"voicemail" before it can become a candidate.
+    - diagnose() gives Search-Logs status "2" its own outcome,
+      "missed_no_conversation" (no recording expected), and restricts
+      "never_recorded" to status "1" with a blank filename -- i.e. the
+      provider says the call CONNECTED yet produced no recording. That
+      genuine subset is the only thing the Lokesh threshold now counts.
 
   v1.1 (F-43): the self-heal kick is now gated on the durable per-call
   "kicked" flag, not on an outcome transition. v1 gated on the transition
@@ -28,11 +41,17 @@ WHAT THIS DOES
       day is reported with the exact one-line re-run command instead of being
       auto-run — see the v1 BOUNDARY note below.)
 
-    * NEVER RECORDED — the provider log exists but has no recording
-      (status "2" / blank filename): the call genuinely was never recorded on
-      MyOperator's side. Nothing to heal. It is LABELLED and COUNTED. If 3 or
-      more never-recorded calls pile up inside a rolling 7 days, the results
-      file raises the "take this to Lokesh" flag (D239 default threshold).
+    * NEVER RECORDED — the provider says the call CONNECTED (status "1") yet
+      produced NO recording (blank filename). Nothing to heal; this is the
+      one genuine provider gap. It is LABELLED and COUNTED. If 3 or more of
+      these pile up inside a rolling 7 days, the results file raises the
+      "take this to Lokesh" flag (D239 default threshold).
+
+    * MISSED, NO CONVERSATION -- the provider marks the call missed
+      (status "2"): nobody answered, so no recording ever existed and none
+      was expected. This is NOT a fault (F-44): it used to be mislabelled
+      "never recorded" and inflated the Lokesh count. It is labelled
+      "missed_no_conversation", surfaced for visibility, and NOT counted.
 
     * NO PROVIDER LOG — we have a Call_Durations row but MyOperator's search
       returns nothing matching it. Rare; surfaced as an anomaly, not counted
@@ -131,6 +150,10 @@ DEFAULT_QUEUE_DIR = "/root/wa/recordings-archive/pipeline_queue"
 DEFAULT_RESULTS = "/root/wa/recordings-archive/flag_investigator_results.json"
 
 CONNECTED_RESULTS = ("connected", "answered")   # customer_result values that mean "talked"
+# Top-level (webhook) status values that mean "nobody actually talked": no
+# recording exists or is expected. Same truth the Apps Script gate uses
+# (status == "bridged" is a real conversation; these are not). F-44.
+MISSED_STATUSES = ("missed", "voicemail")
 PRUNE_DAYS = 30                                 # drop ledger entries older than this
 
 
@@ -234,6 +257,11 @@ def is_lost_candidate(row, now_ist, grace_min, min_talk):
     connected, real talk time, no recording yet, and past the pipeline grace."""
     if str(row.get("recording_filename", "") or "").strip():
         return False, "has recording"
+    status = str(row.get("status", "") or "").strip().lower()
+    if status in MISSED_STATUSES:
+        # F-44: provider marked this missed/voicemail. Any "talk" seconds are
+        # ring/hold time, not a conversation; no recording exists or is due.
+        return False, "provider marked it %s -- no conversation" % status
     result = str(row.get("customer_result", "") or "").strip().lower()
     talk = to_sec(row.get("customer_talk_duration", ""))
     if result == "not_answered":
@@ -322,13 +350,27 @@ def match_hit(row, hits, tol_min=6):
 
 def diagnose(row, hits):
     """(outcome, detail, provider_filename). outcome in
-    recoverable | never_recorded | no_provider_log."""
+    recoverable | never_recorded | missed_no_conversation | no_provider_log.
+
+    F-44: Search-Logs status "1" = answered, "2" = missed. A missed call never
+    has a recording and none is expected, so it is NOT "never recorded" -- it
+    gets its own outcome and is not counted toward the Lokesh threshold.
+    "never_recorded" now means only the genuine gap: the provider says the
+    call CONNECTED (status "1") yet carries no filename."""
     h = match_hit(row, hits)
     if h is None:
         return "no_provider_log", "no matching call in MyOperator search", ""
-    if h["status"] == "1" and h["filename"]:
+    status = str(h["status"] or "").strip()
+    if status == "2":
+        return ("missed_no_conversation",
+                "provider marks this a missed call (status 2) -- no recording expected", "")
+    if status == "1" and h["filename"]:
         return "recoverable", "recording exists at provider (status 1)", h["filename"]
-    return "never_recorded", "provider log present, no recording (status %s)" % (h["status"] or "?"), ""
+    if status == "1":
+        return ("never_recorded",
+                "provider says connected (status 1) but produced no recording", "")
+    return ("no_provider_log",
+            "provider log present, unrecognised status %s" % (status or "?"), "")
 
 
 # ---------------------------------------------------------------------------
@@ -709,6 +751,15 @@ def _selftest():
     not_ans = dict(lost, customer_result="not_answered", customer_talk_duration="0")
     check("not candidate: not answered", not is_lost_candidate(not_ans, now, 25, 10)[0])
 
+    # F-44: a provider-missed row is never a candidate, even with "talk" seconds.
+    missed_row = dict(lost, status="missed", customer_result="connected",
+                      customer_talk_duration="40")
+    check("not candidate: provider status missed", not is_lost_candidate(missed_row, now, 25, 10)[0])
+    vmail_row = dict(lost, status="voicemail", customer_talk_duration="40")
+    check("not candidate: provider status voicemail", not is_lost_candidate(vmail_row, now, 25, 10)[0])
+    bridged_row = dict(lost, status="bridged")
+    check("still a candidate when status bridged", is_lost_candidate(bridged_row, now, 25, 10)[0])
+
     fresh = dict(lost, ended_at_ist="2026-07-13T14:50:00+05:30")   # 10 min before 15:00
     check("not candidate: inside grace", not is_lost_candidate(fresh, now, 25, 10)[0])
 
@@ -724,26 +775,37 @@ def _selftest():
     hit_rec = {"_source": {"id": "8333", "caller_number_raw": "919876500011",
                            "start_time": 1000, "duration": "00:00:33",
                            "status": "1", "filename": "rec_8333.mp3"}}
-    hit_norec = {"_source": {"id": "7777", "caller_number_raw": "919812345678",
-                             "start_time": 2000, "duration": "00:00:19",
-                             "status": "2", "filename": ""}}
+    hit_missed = {"_source": {"id": "7777", "caller_number_raw": "919812345678",
+                              "start_time": 2000, "duration": "00:00:19",
+                              "status": "2", "filename": ""}}
+    hit_conn_norec = {"_source": {"id": "6666", "caller_number_raw": "919800000066",
+                                  "start_time": 3000, "duration": "00:00:22",
+                                  "status": "1", "filename": ""}}
     eh = enrich_hit(hit_rec)
     check("enrich status", eh["status"] == "1")
     check("enrich filename", eh["filename"] == "rec_8333.mp3")
     check("enrich ids", "8333" in eh["ids"])
     check("enrich end_unix", eh["end_unix"] == 1033)
 
-    hits = [enrich_hit(hit_rec), enrich_hit(hit_norec)]
+    hits = [enrich_hit(hit_rec), enrich_hit(hit_missed), enrich_hit(hit_conn_norec)]
     check("match by id", match_hit(lost, hits) is not None and match_hit(lost, hits)["filename"] == "rec_8333.mp3")
 
     o, _det, fn = diagnose(lost, hits)
     check("diagnose recoverable", o == "recoverable" and fn == "rec_8333.mp3")
 
-    lost_nr = {"client_ref_id": "IN-7777", "session_id": "7777", "phone10": "9812345678",
-               "customer_result": "connected", "customer_talk_duration": "19",
-               "recording_filename": "", "ended_at_ist": "2026-07-13T13:33:00+05:30"}
+    # status 2 hit -> missed_no_conversation (F-44), NOT never_recorded
+    lost_missed = {"client_ref_id": "IN-7777", "session_id": "7777", "phone10": "9812345678",
+                   "customer_result": "connected", "customer_talk_duration": "19",
+                   "recording_filename": "", "ended_at_ist": "2026-07-13T13:33:00+05:30"}
+    om, _dm, _fm = diagnose(lost_missed, hits)
+    check("diagnose missed_no_conversation (status 2)", om == "missed_no_conversation")
+
+    # status 1 + blank filename -> the genuine never_recorded
+    lost_nr = {"client_ref_id": "IN-6666", "session_id": "6666", "phone10": "9800000066",
+               "customer_result": "connected", "customer_talk_duration": "22",
+               "recording_filename": "", "ended_at_ist": "2026-07-13T13:40:00+05:30"}
     o2, _d2, _f2 = diagnose(lost_nr, hits)
-    check("diagnose never_recorded", o2 == "never_recorded")
+    check("diagnose never_recorded (status 1, no file)", o2 == "never_recorded")
 
     lost_nolog = dict(lost, session_id="NOPE", client_ref_id="IN-NOPE", phone10="9000000000")
     o3, _d3, _f3 = diagnose(lost_nolog, hits)
@@ -783,6 +845,15 @@ def _selftest():
                            "outcome": "never_recorded", "detail": "", "provider_filename": ""}, now)
     check("weekly never_recorded = 3", weekly_never_recorded(led, now, 7) == 3)
     check("threshold escalates at 3", weekly_never_recorded(led, now, 7) >= 3)
+
+    # F-44: a missed_no_conversation entry must NOT count toward never_recorded/7d
+    upsert_entry(led, {"key": "miss1", "date": today, "time": "12:00",
+                       "phone_last4": "3330", "talk_sec": 40, "direction": "incoming",
+                       "outcome": "missed_no_conversation", "detail": "", "provider_filename": ""}, now)
+    check("missed_no_conversation not counted in never_recorded 7d",
+          weekly_never_recorded(led, now, 7) == 3)
+    check("missed_no_conversation appears in summary counts",
+          summarise(led).get("missed_no_conversation") == 1)
 
     old = {"key": "old1", "date": "2026-06-01", "time": "10:00", "phone_last4": "9999",
            "talk_sec": 50, "direction": "incoming", "outcome": "never_recorded",
