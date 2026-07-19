@@ -1,0 +1,20 @@
+# GutLog systemd unit (reconstructed from the live server, Session 62).
+# Live copy on the VPS: /etc/systemd/system/gutlog.service
+# Install a fresh box with:
+#   cp gutlog.service.example /etc/systemd/system/gutlog.service
+#   systemctl daemon-reload && systemctl enable --now gutlog
+
+[Unit]
+Description=GutLog personal health diary (Flask/gunicorn)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/gutlog
+ExecStart=/root/gutlog/venv/bin/gunicorn -w 2 -b 127.0.0.1:8020 app:app
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

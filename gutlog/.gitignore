@@ -1,0 +1,21 @@
+# --- GutLog runtime data: NEVER commit ---
+health3.db
+health3.db.secret
+*.db
+*.db-journal
+*.db.secret
+uploads/
+
+# secrets / backups
+*.bak
+GUTLOG_SECRET
+
+# python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# os / editor
+.DS_Store
+*.swp
