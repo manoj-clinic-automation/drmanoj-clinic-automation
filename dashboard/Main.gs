@@ -8,7 +8,7 @@
  *   testSummaryEmailNow() (Monitor.gs)    — send ONE summary email now
  *   testMorningNow()      — run yesterday's report now
  *   setupTriggers()       — install all time triggers (run once)
- *   removeTriggers()      — uninstall them
+ *   removeTriggers()      — uninstall ONLY Main's three (D206; never touches other files' triggers)
  *
  * Triggers call: runIntradayDigest(), runSummaryEmail(), runMorningReport()
  */
@@ -93,7 +93,15 @@ function setupTriggers() {
              CFG.INTRADAY_HOURS.length, CFG.EMAIL_HOURS.length, Session.getScriptTimeZone());
 }
 
-/** Remove every trigger this script owns. */
+/** Remove ONLY the triggers Main.gs owns (D206). Other files' triggers
+ *  (dailyHealthReport, rebuildCallFeed, sendFollowupSummary, checkFollowupListFresh)
+ *  are NEVER touched — each file cleans up after itself, like removeHealthTrigger. */
 function removeTriggers() {
-  ScriptApp.getProjectTriggers().forEach(function (t) { ScriptApp.deleteTrigger(t); });
+  var MINE = { runIntradayDigest: 1, runSummaryEmail: 1, runMorningReport: 1 };
+  var all = ScriptApp.getProjectTriggers(), n = 0;
+  for (var i = 0; i < all.length; i++) {
+    if (MINE[all[i].getHandlerFunction()] === 1) { ScriptApp.deleteTrigger(all[i]); n++; }
+  }
+  Logger.log('removeTriggers: removed %s of Main\'s own trigger(s); all others untouched.', n);
+  return 'removed ' + n + ' trigger(s) (Main.gs owns runIntradayDigest / runSummaryEmail / runMorningReport only)';
 }
