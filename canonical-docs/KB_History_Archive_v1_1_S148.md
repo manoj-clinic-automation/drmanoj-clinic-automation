@@ -3939,6 +3939,46 @@ The owner supplied the conversion/behaviour windows for the D241 #10 insight, ca
 
 ---
 
+## §S147 — 19 Jul 2026 (Session 147, FULL EOS — one repo code push [`Main.gs`]; the knowledge base restructured)
+
+> **Backfilled at S149** from `HANDOFF_RUNBOOK_2026-07-19_Session147_v85.md` §0 and `D247_Canonical_Data_Management_S147.md` — deliberately, from those two artefacts, not reconstructed from memory. §S148 flagged this gap; this section closes it. (Placed between §S146 and §S148 in session order.)
+
+**Type.** Knowledge-base restructure. The problem solved: the canonical docs had grown huge and were read in full at the start and rewritten in full at the end of every session — the dominant per-session cost. One repo code push (`Main.gs`); no other live/VPS code touched, no `.env`, nothing restarted.
+
+**D247 minted — a three-tier canonical system + the KB split.** Every canonical doc is tagged **Tier 0** (session loop — read at start, rewritten at end), **Tier 1** (reference — hash-verified at start, read only if the session's task touches it, rewritten only if changed), or **Tier 2** (frozen — hash-verified only, never read in the loop, changed only by explicit owner waiver + a version bump). This **clarifies** D202/S100 (still one consolidated file per doc, no delta chain) — it does not repeal it.
+
+**The KB split — the one big one-time surgery.** The monolithic `Clinic_Master_KB_SystemsRegister_v1.72` (~4,300 lines, md5 `27b72639…`) became two consolidated single files, neither a delta chain:
+- **`KB_Register_v2.0`** (md5 `651c254b…`, ~490 lines) — current state only: systems register, a one-line decision index, a one-line finding index, current live-file versions + md5s, and the backlog. Rides the loop. Authority on what is true NOW.
+- **`KB_History_Archive_v1.0`** (md5 `44681d05…`) — every `§S###` narrative and every full D/F text, carried over VERBATIM. Out of the loop; opened on demand. Authority on what HAPPENED.
+- **Proof nothing was lost:** every source line 1→4307 was assigned to exactly one file; **0 of ~3,500 content lines dropped**. Three self-checks tried to pass while wrong — a newline off-by-one that blinded its own check, plus two dedupe checks fooled by mis-computed sets — and each was caught by an artefact-level second check. A live demonstration of *"a check that cannot fail is not a check."*
+
+**Decisions index completed.** D121→D246 indexed in the Register; the 45 previously-undefined decisions (D189–D218, D225–D239) were authored from their full text in the Archive, never from memory.
+
+**`CANONICAL_MANIFEST.md` created** — the linchpin every Phase 0 verifies (all tiers by md5; read Tier 0 only). If a doc is not a row in it, it does not carry forward.
+
+**`END_OF_SESSION_PROMPT_v4`** (md5 `9fa2be50…`) — the tier-aware close-out: append to the Archive, update the Register, maintain the manifest. No more whole-KB rewrites.
+
+**Frozen-product dossiers (Tier 2) built / adopted:**
+- **Attendance** (`attendance/`) — dossier `efc17e19…`, folder digest `dc12f4a0…`.
+- **Nutrition / Diet write-path** (`clinic_writer/`) — dossier `3b869d0e…`, folder digest `df0b0c34…`; frozen **as-is** (a Hindi-spelling tidy would be waiver-gated).
+- **Callback Tracker core** (`dashboard/`) — dossier `7e445ff0…`, live project digest `e4fd4512…`. Freeze split **confirmed**: the write-path core is frozen (`WebApp.gs` D34 + Config / MyOperator / Netting / Sheets / Main + manifest + the Sheet); the Console / Dashboard / Health / Outcome UI stays an **active Tier-1 subsystem** (`Call_Console_Evolution_Spec`, `Frontend_Dashboard_Documentation`).
+- **WABA templates** — adopted (`WABA_Approved_Templates_v1_S137`, `63dd1883…`).
+- **`SYSTEM_DOC_COVERAGE_MAP_S147`** — every subsystem → its authoritative doc, plus the three consolidation-candidate gaps (Follow-up Tracker · Call-hook family · WhatsApp API family).
+
+**Consent HTML reclassified** — removed from the frozen set; it now lives inside the in-development **Surgical Estimate tool** (not yet in GitHub). Its dossier/freeze is deferred until that tool ships. Tier 2 is therefore **four** products, not five.
+
+**Repo code push.** The live `Main.gs` (D206: `removeTriggers()` scoped to Main's own three triggers) was pushed over the stale pre-D206 repo copy. Live-vs-repo verified: all other `dashboard/` files already matched.
+
+### DECISION D247 — FULL TEXT
+
+- **D247 — Canonical Data Management: tiers, the Register/Archive split, and frozen-product dossiers.**
+  **Why.** The KB (`Clinic_Master_KB_SystemsRegister`, v1.72, ~4,300 lines) was append-only: every session it gained a `§S###` narrative, a top-of-file consolidation note, and the full text of that session's decisions, and shed nothing. The dominant per-session cost was reading the whole project history at start and rewriting all of it at end. D202/S100 ("one consolidated file, no delta chain") stopped *fragile* delta chains but had produced one file that behaved like an ever-growing delta chain glued together.
+  **Ruling.** (1) **Register / Archive split** — the KB becomes two consolidated single files: the **KB Register** (current state only — the systems register, a one-line decision index D1…D246, a one-line finding index, current live-file versions + md5s, and the backlog; authority on what is true NOW; rides the loop) and the **KB History Archive** (append-only — every `§S###` narrative and every full D/F text, carried over verbatim, nothing dropped per D172; authority on what HAPPENED; out of the loop, opened on demand). Both remain consolidated single files; neither is a delta chain. This **clarifies** D202/S100, it does not repeal it. (2) **Three tiers** — every canonical doc is tagged Tier 0/1/2 in `CANONICAL_MANIFEST.md`: Tier 0 read at start + rewritten at end; Tier 1 hash-verified at start, read only if touched, rewritten only if changed; Tier 2 hash-verified at start, never read in the loop, never rewritten, changed only by an explicit owner waiver (D34 discipline) + a version bump. (3) **Frozen products get a dossier + a ledger** — each frozen product has exactly one canonical as-built dossier (the deep-reference doc); the FROZEN ledger is a thin index, one row per product (name · dossier file · artefact location · artefact md5 · frozen-as-of S/D · waiver rule); dossier weight matches product weight. (4) **Phase 0 verifies the manifest by md5 for ALL tiers but reads only Tier 0** — integrity is proven for everything (cheap — hash compare only); context is spent only on the hot set. (5) **Authority order (unchanged in spirit)** — "the KB wins if anything disagrees" now reads: the **Register** wins on current state; the **Archive** wins on history; the two cannot conflict (the Archive is dated history and asserts nothing about *now*). **Provenance (binding):** every md5 in the manifest is computed from the live artefact at freeze/version time (D172/D188) — no hash is ever assumed; a dossier for a not-yet-documented product is built from the live artefact, never from memory. **Relates to:** clarifies D202/S100 · extends D34 (freeze-by-waiver) to the frozen-product set · parents D223/D236/D246 (the three-product lineage).
+
+**Live file versions after S147:** unchanged from §S146.5 — no live/VPS Python was touched this session; the only code change was the repo `Main.gs` push (D206). **Next free at S147 close: D248 · F-45 · Session 148.**
+
+---
+
 ## §S148 — 19 Jul 2026 (Session 148, FULL EOS — GitHub repo changed; canonical docs changed; NO live/VPS code touched)
 
 **Type.** Documentation + repo-hygiene. No VPS code, no `.env`, nothing restarted. One GitHub commit (the repo trim). Canonical project-knowledge docs changed: the evergreen START-HERE template (v4→v5), `CANONICAL_MANIFEST.md`, and — at this close — this Archive and the KB Register.
@@ -3973,4 +4013,34 @@ The owner supplied the conversion/behaviour windows for the D241 #10 insight, ca
 
 ---
 
-**END OF KB HISTORY ARCHIVE v1.1. §S148 is the last section; §S146 sits above it (the S147 restructure narrative is recorded in HANDOFF_RUNBOOK v85 §0 and `D247_Canonical_Data_Management_S147.md`, and is flagged in §S148 for backfill into this Archive). If §S148 or this marker is absent, this file is truncated and must not be used as canonical.**
+## §S149 — 19 Jul 2026 (Session 149, EOS-light — documentation + repo-hygiene; NO live/VPS code touched)
+
+**Type.** Documentation / repo-hygiene close-out. No VPS code, no `.env`, nothing restarted. All work built and verified offline; the GitHub pushes are **owed** (produce-then-push — the assistant is read-only, the owner pushes). Canonical project-knowledge docs changed at this close: `CANONICAL_MANIFEST.md`, `Fault_Action_Register_v2_1.md`, `KB_Register` (v2.1 → **v2.2**, housekeeping), this Archive, and (repo-only) `README_CANONICAL_SET.md`.
+
+**Phase 0.** Every carried Tier-1/Tier-2 row (16 docs) hash-verified against the manifest — **zero drift**. The Tier-0 loop rows, however, had **drifted**: the manifest still named the S148-*open* set (`START_HERE_SESSION_148`, `KB_Register` v2.0, `HANDOFF_RUNBOOK` v85) because the S148-*close* update to the manifest was never made. Corrected this session.
+
+**Backlog resolved.**
+- **Items 1 & 2 (push API card / WABA dossier) — found ALREADY DONE.** Both are in the GitHub mirror and **byte-for-byte identical** to project knowledge and their manifest pins (`68c4fc34…`, `63dd1883…`). The "absent from repo" backlog was stale — the same stale-record family the project keeps catching. Struck, not re-pushed.
+- **Item 4 — F-45 RESOLVED.** `Fault_Action_Register` was titled v2.1 with a changelog that stopped at v2.0. The missing v2.1 row was added, documenting §0.35 / **D204 (S132)**: the Lane-1 auto-responder does not exist and is not scheduled; D113 reclassified as intent-not-fact; the `System does` column reads "once Deliverable 2 exists" (D178). No lane, procedure or rule changed. `fde74c…` → `3bfeac72…`; re-pinned.
+- **Item 6 — §S147 backfilled** into this Archive (the block above), written from `HANDOFF_RUNBOOK` v85 §0 (pulled back from the repo archive) + `D247_Canonical_Data_Management_S147.md` — deliberately, from those artefacts, not from memory; every md5 fingerprint cross-checked against the manifest. `44681d05…` → re-pinned.
+- **Item 3 — README refreshed.** The repo `README_CANONICAL_SET.md` was stuck at Session 125 (KB v1.48, Umbrella v1.36, Runbook v59, referencing the retired `KB_APPEND_Session125`). Rewritten to the post-restructure tiered model; it now carries no version numbers and defers to the manifest, so it cannot rot on a bump.
+- **Item 5 — Phase-2 repo tidy produced.** `Repo_Trim_Phase2_S149.ps1` (dry-run default, `git mv`, collision-guarded, no auto-commit — the S148 pattern) archives **38** unambiguously-superseded files: 3 `canonical-docs/` stragglers the S148 trim could not catch (`KB_Register_v2_0_S147`, `KB_History_Archive_v1_0_S147`, `START_HERE_SESSION_148` — their successors did not exist when that trim ran) + 35 historical `docs/` files. It **holds 12** live/uncertain clinic + reference docs (the clinic manuals — Troubleshooting Runbook, Staff/Doctor Manuals, Wall Cards, Hinglish Call-Desk Companion — plus four inventories/briefs and two context docs) for an owner ruling, rather than wildcard-sweeping them: the documented "don't bury a live file" rule (the S148 Maintenance-SOP near-miss).
+
+**Manifest.** Regenerated to S149: Tier-0 rows corrected to the live set; FAR + this Archive re-pinned; jobs 1–2 recorded verified-already-done; a README companion note added.
+
+**Method.** Every edit was an assert-once anchor with full collateral-change reversal verification (the FAR reverses to the byte-identical original; the Archive reverses to its pre-edit self). All hashes computed from the live artefact, never assumed (D172/D188).
+
+**Findings.** **F-45 RESOLVED.** No new finding raised. **No decision minted** — the work was hygiene, not a new architectural choice; **D248 stays free.**
+
+**Carried forward:**
+- **GitHub pushes owed** (produce-then-push): the corrected FAR, updated Archive, refreshed README, regenerated manifest overwrite their `canonical-docs/` paths; then run the Phase-2 tidy; then commit + push.
+- **The 12 held `docs/` files** need an owner ruling (current vs superseded) before they can be archived.
+- ~~Register housekeeping~~ **DONE at this close:** the Register bumped **v2.1 → v2.2** — findings line advanced (F-45 RESOLVED, next free F-46) and **D247 added to its decisions index** (was in the header only). No other Register content changed.
+- **Insight Harvest items · D223 doctor-portal gist tile** — carried, unchanged.
+- **Live-systems Track 2** (untouched by this arc): WABA sends blocked on the MyOperator authorizer fault (D120, Lokesh); `wa_approve` still nohup-not-systemd; key rotations overdue.
+
+**Next free decision number: D248. Next free finding number: F-46.**
+
+---
+
+**END OF KB HISTORY ARCHIVE v1.1. §S149 is the last section; §S148, §S147 (backfilled at S149 from HANDOFF_RUNBOOK v85 §0 + `D247_Canonical_Data_Management_S147.md`) and §S146 sit above it. If §S149 or this marker is absent, this file is truncated and must not be used as canonical.**

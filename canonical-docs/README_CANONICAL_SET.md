@@ -1,37 +1,49 @@
-# canonical-docs/ — current governing set
+# canonical-docs/ — current governing set (post-restructure, D247)
 
-These are the fully-consolidated single-file masters. **The Master KB wins on any conflict.**
+This folder is the GitHub **mirror** of the project's canonical documents. **Live systems and
+project knowledge are canonical (D160); this repo is the mirror** — it can lag, and where it
+disagrees, project knowledge / the live artefact wins.
 
-- `Clinic_Master_KB_SystemsRegister_v1_48.md` — Master KB / Systems Register (decisions through D161; next free **D166**).
-- `Dr_Manoj_Clinic_Umbrella_Architecture_v1_36.md` — Umbrella Architecture.
-- `HANDOFF_RUNBOOK_2026-07-08_Session125_v59.md` — latest Handoff Runbook.
-- `Diagnostics_Surveillance_System_Spec_v1_7.md` — latest Diagnostics & Surveillance Spec.
-- `Call_Console_Evolution_Spec_v1_6.md` — Call Console design spec.
-- `INCIDENT_2026-07-08_CALLHOOK_403_RECURRENCE.md` — incident report, **v2**. Rewritten in place at S125; v1 is in git history and its errors are quoted before they are corrected.
+> **The single source of truth for *what is canonical and current* is `CANONICAL_MANIFEST.md`** —
+> it lists every canonical doc, its tier, and its md5. This README deliberately does **not** name
+> document versions, so it cannot go stale on a version bump (the fault that retired the old
+> README and START-HERE v4). To know the current set and hashes, read the manifest.
 
-Policy (owner directive, S100): canonical docs are single consolidated files — never delta chains.
+## How the set is organised (D247)
 
-Older delta/base versions (KB v1.7–v1.41, Umbrella v1.2–v1.30) remain in `docs/` as historical archive.
+The knowledge base is split into two consolidated single files (neither a delta chain — S100/D202):
+
+- **KB Register** — *current state only*: the systems register, one-line decision + finding
+  indexes, current live-file versions + md5s, and the backlog. **Authority on what is true NOW.**
+- **KB History Archive** — *append-only*: every `§S###` session narrative and every full decision /
+  finding text, verbatim. **Authority on what HAPPENED.** Opened on demand.
+
+Every canonical doc is tagged in the manifest by **tier**:
+
+- **Tier 0 — session loop:** the manifest, the current `START_HERE_SESSION_###`, the KB Register,
+  the latest `HANDOFF_RUNBOOK`, and any open incident. Read at the start of every session.
+- **Tier 1 — reference:** the KB History Archive, the specs (Umbrella · Call Console Evolution ·
+  Diagnostics & Surveillance · Frontend Dashboard · Maintenance-SOP · AI Verdict Layer Master), the
+  API quick-reference, the Fault → Action Register, and closed incident reports. Hash-verified every
+  session; read only when a task touches them.
+- **Tier 2 — frozen products:** one as-built **dossier** per frozen product (`dossiers/`), plus the
+  FROZEN ledger in the manifest. Hash-verified only; never edited without an explicit owner waiver
+  (D34) + a version bump.
+
+## Layout
+
+- `CANONICAL_MANIFEST.md` — the linchpin (tiers + hashes). Read this first.
+- the Tier-0 and Tier-1 docs — flat in this folder.
+- `dossiers/` — the Tier-2 frozen-product dossiers.
+- `archive/` — every superseded version. When a doc is bumped, its predecessor is moved here
+  (standing rule since the S148 trim); git history + the KB History Archive preserve everything.
+
+## Policy
+
+- Canonical docs are **single consolidated files**, never delta chains (S100 / D202, clarified by D247).
+- Phase 0 every session: verify **every** manifest row by md5 (all tiers); a mismatch halts work
+  until reconciled (D172/D188). A filename is not provenance.
 
 ---
-
-## ⚠️ Pending, as of Session 125 — the KB is one version behind its own decisions
-
-`KB_APPEND_Session125.md` is an **append block**, not a canonical doc. It holds the §S125 section, decisions **D162–D165**, three §12 state replacements, and a changelog row for **v1.49**.
-
-Why an append block and not a full file: the Master KB is 107 KB, and re-emitting it from a summary risks silently dropping material that has no other home. That is a worse failure than a paste, and an invisible one. The reasoning is in the block's own §0.
-
-**To close this out:** paste the four sections into `Clinic_Master_KB_SystemsRegister_v1_48.md`, save as `_v1_49.md`, delete `KB_APPEND_Session125.md`, and update the first line of this README. Until then, **`v1_48.md` plus `KB_APPEND_Session125.md` together are the KB**, and D162–D165 are live decisions that the KB file does not yet mention.
-
----
-
-## Version history of this set
-
-| Doc | Was (S124) | Now (S125) |
-|---|---|---|
-| Master KB | v1.48 | v1.48 **+ append block** (v1.49 pending) |
-| Umbrella Architecture | v1.36 | v1.36 — unchanged |
-| Handoff Runbook | v58 (Session 124) | **v59 (Session 125)** |
-| Diagnostics & Surveillance Spec | v1.6 | **v1.7** |
-| Call Console Evolution Spec | v1.6 | v1.6 — unchanged |
-| Incident, 08-Jul callhook 403 | v1 | **v2 (rewritten in place)** |
+*README refreshed at Session 149 to the post-restructure tiered model. It carries no version numbers
+by design — the manifest is authoritative for the doc set and hashes.*

@@ -1,0 +1,1 @@
+S149 close: housekeeping finished — Register v2.2 (F-46, D247 indexed), FAR v2.1 changelog fixed (F-45), Archive S147 backfilled + S149 appended, README + manifest regenerated, runbook v87 + START_HERE_150; archive 41 superseded docs (pure renames)
