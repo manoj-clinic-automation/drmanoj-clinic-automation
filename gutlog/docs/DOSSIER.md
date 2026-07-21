@@ -2,7 +2,7 @@
 title: "GutLog v3 - Reference Dossier"
 subtitle: "Personal health diary - sole reference document"
 author: "Built for Dr. Manoj Agarwal"
-date: "19 July 2026"
+date: "21 July 2026"
 toc: true
 toc-depth: 3
 geometry: margin=2.2cm
@@ -70,9 +70,15 @@ future analysis is a single query, with no "pre-v3" special cases.
   No build step, no framework beyond Flask, no external JS/CSS at runtime.
 - **SQLite.** A single `health3.db` file beside the app. The schema is created
   on first run; `_migrate()` adds any later columns idempotently.
-- **Auth.** Single password (set on first run), hashed with Werkzeug. Session
-  cookie is HTTPOnly + SameSite=Lax, and Secure in production. Five wrong
-  attempts trigger a 60-second lockout.
+- **Auth.** Single login password (set on first run), hashed with Werkzeug.
+  Session cookie is HTTPOnly + SameSite=Lax, and Secure in production. Five wrong
+  attempts trigger a 60-second lockout. A **session epoch** (random token in
+  `settings.auth_epoch`, copied into each session at login and re-checked on
+  every request) lets the owner **change the password** and **sign out all
+  other devices** from the in-app Account page - no restart, no data touched.
+  A separate **owner key** (`settings.owner_hash`, Werkzeug-hashed) gates every
+  Account action, so a person who knows only the login password can use the
+  diary but can neither change the password nor lock anyone out.
 - **Serving.** gunicorn (2 workers) binds `127.0.0.1:8020`; OpenLiteSpeed
   reverse-proxies `health.dr-manoj.in` (TLS) to it. Runs under systemd as
   `gutlog.service`.
@@ -163,7 +169,7 @@ are capped (usually 500 chars). Symptoms are stored pipe-joined in `days.syms`.
 
 | Table | Columns |
 |---|---|
-| **settings** | key, value  *(holds `pw_hash`, `seeded_v3`)* |
+| **settings** | key, value  *(holds `pw_hash`, `seeded_v3`, `auth_epoch`, `owner_hash`)* |
 | **days** | day (PK), syms, pain, pain_site, bristol, stools, tea, coffee, sleep, walk, treadmill, meditation, notes, updated |
 | **library** | id, cat, item (unique), portion, protein, kcal, fibre, fodmap, status, tags, fav, note, created |
 | **meals** | id, day, mtime, slot, items (JSON snapshot), protein, kcal, fibre, fscore, notes, created |
@@ -241,12 +247,14 @@ Triglycerides (12 mo), CRP (on flare - no fixed due date).
 
 \newpage
 
-# 7. API reference (33 routes)
+# 7. API reference (34 routes)
 
 **Auth / pages**
 
 - `GET/POST /setup` - first-run password creation
 - `GET/POST /login`, `GET /logout`
+- `GET/POST /account` - owner-key-gated: change password, sign out all other
+  devices, create/rotate the owner key (login required)
 - `GET /` - the single-page app (login required)
 
 **Day & summary**
@@ -332,6 +340,24 @@ Triglycerides (12 mo), CRP (on flare - no fixed due date).
   UUID filenames; served only to an authenticated session.
 - `/api/delete/<table>/<id>` accepts a whitelist of tables only.
 - Single-user tool; there is no multi-account or role system by design.
+- **Account management** (`/account`, login required, **owner-key gated**):
+  change the login password, **sign out all other devices**, and create or
+  rotate the owner key. Every action requires the owner key (`owner_hash`) -
+  a private second secret, separate from the login password. So even someone
+  who knows the login password cannot change it or lock the app; only the owner
+  can. Password change and "sign out others" both rotate `settings.auth_epoch`,
+  which invalidates every existing session on every device while keeping the
+  acting device signed in. This replaces the old need to delete
+  `health3.db.secret` and restart over SSH. None of these actions read or write
+  diary data.
+- **Owner key setup & recovery.** The owner key is set once, on the first visit
+  to `/account` (a "Create your owner key" screen). Do this immediately after
+  deploy - whoever sets it first owns it. If forgotten, reset it server-side
+  (root): write a new `owner_hash` into `settings`, or
+  `DELETE FROM settings WHERE key='owner_hash'` to re-expose the create screen.
+  No restart needed; settings are read live.
+- Deploying the epoch build logs every device out **once** (pre-existing
+  sessions carry no epoch); a single re-login re-stamps them.
 
 \newpage
 
@@ -398,6 +424,23 @@ secret logs sessions out but loses no data.
   half water, no sugar.
 - **v3.0.1 patch:** temperature field (auto-migrated), richer gut-pain sites,
   Back episode group.
+- **v3.1.0 - Account & multi-device sign-out.** Added an in-app Account page
+  (`/account`) to change the password and sign out all other devices, driven by
+  a new `settings.auth_epoch` token checked in `login_required`. Chosen over the
+  prior SSH-only method (delete the session secret + restart) so the owner can
+  self-serve; keeps the acting device signed in, touches no diary data, and
+  reuses the existing Werkzeug hashing. Trade-off accepted: one forced re-login
+  on the first deploy.
+- **v3.2.0 - Owner-key lock on the Account page.** Added a second secret
+  (`settings.owner_hash`) that gates every Account action - change password,
+  sign out others, and rotate the owner key itself. The login password now only
+  unlocks the diary; it no longer authorises control actions. This guarantees
+  that only the owner can change the password or lock the app, even if the login
+  password is shared or leaks - directly answering the "someone else changes it
+  and forgets it" risk. Owner key is set once on first `/account` visit;
+  forgotten-key recovery is a server-side `owner_hash` reset (owner is root).
+  Deliberately *not* full multi-user: data is still a single shared diary; true
+  per-user isolation remains a future v4.
 
 # 15. Known open items & ideas
 

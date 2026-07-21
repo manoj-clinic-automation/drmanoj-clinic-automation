@@ -248,11 +248,44 @@ def now_hm(): return datetime.now().strftime("%H:%M")
 def today(): return date.today().isoformat()
 
 # ------------------------------------------------------------------ auth
+# Session epoch: a token stored in settings and copied into each session on
+# login. login_required requires the two to match, so rotating the token
+# (rotate_epoch) instantly invalidates every existing session on every device
+# WITHOUT changing SECRET_KEY or restarting. No data is touched.
+def auth_epoch():
+    ep = setting("auth_epoch")
+    if not ep:
+        ep = secrets.token_hex(16)
+        set_setting("auth_epoch", ep)
+    return ep
+
+def rotate_epoch():
+    """Sign out all devices by invalidating every existing session."""
+    ep = secrets.token_hex(16)
+    set_setting("auth_epoch", ep)
+    return ep
+
+def stamp_session():
+    """Mark THIS session as logged in on the current epoch."""
+    session.permanent = True
+    session["ok"] = True
+    session["ep"] = auth_epoch()
+
+def owner_set():
+    """True once an owner key has been created."""
+    return bool(setting("owner_hash"))
+
+def owner_ok(key):
+    """True only for the correct owner key. Gates all Account controls."""
+    h = setting("owner_hash")
+    return bool(h) and check_password_hash(h, key or "")
+
 def login_required(f):
     @wraps(f)
     def w(*a, **k):
         if not setting("pw_hash"): return redirect(url_for("setup"))
-        if not session.get("ok"): return redirect(url_for("login"))
+        if not session.get("ok") or session.get("ep") != auth_epoch():
+            return redirect(url_for("login"))
         return f(*a, **k)
     return w
 
@@ -266,7 +299,7 @@ def setup():
         elif pw != request.form.get("pw2", ""): err = "Passwords do not match."
         else:
             set_setting("pw_hash", generate_password_hash(pw))
-            session.permanent = True; session["ok"] = True
+            stamp_session()
             return redirect(url_for("home"))
     return render_template_string(AUTH_PAGE, mode="setup", err=err)
 
@@ -279,7 +312,7 @@ def login():
             err = "Too many attempts. Wait a minute."
         elif check_password_hash(setting("pw_hash"), request.form.get("pw", "")):
             _failed.update(count=0, until=0.0)
-            session.permanent = True; session["ok"] = True
+            stamp_session()
             return redirect(url_for("home"))
         else:
             _failed["count"] += 1
@@ -291,6 +324,71 @@ def login():
 @app.route("/logout")
 def logout():
     session.clear(); return redirect(url_for("login"))
+
+@app.route("/account", methods=["GET", "POST"])
+@login_required
+def account():
+    msg = err = ""
+    have_owner = owner_set()
+    if request.method == "POST":
+        action = request.form.get("action", "")
+
+        # One-time: create the owner key (only possible while none exists).
+        if action == "set_owner":
+            if have_owner:
+                err = "Owner key is already set."
+            else:
+                k, k2 = request.form.get("okey", ""), request.form.get("okey2", "")
+                if len(k) < 8:
+                    err = "Owner key must be at least 8 characters."
+                elif k != k2:
+                    err = "Owner keys do not match."
+                else:
+                    set_setting("owner_hash", generate_password_hash(k))
+                    have_owner = True
+                    msg = ("Owner key set. From now on only this key can change the "
+                           "password or sign out devices.")
+
+        # Every control below REQUIRES the owner key on each attempt.
+        elif not have_owner:
+            err = "Create the owner key first."
+        elif not owner_ok(request.form.get("owner", "")):
+            err = "Owner key is wrong."
+
+        elif action == "password":
+            new, new2 = request.form.get("new", ""), request.form.get("new2", "")
+            also = request.form.get("signout_others")  # checkbox, on by default
+            if len(new) < 8:
+                err = "New password must be at least 8 characters."
+            elif new != new2:
+                err = "New passwords do not match."
+            else:
+                set_setting("pw_hash", generate_password_hash(new))
+                if also:
+                    rotate_epoch()          # invalidate every other device
+                stamp_session()             # keep THIS device signed in
+                msg = ("Password changed. All other devices have been signed out."
+                       if also else "Password changed.")
+
+        elif action == "logout_others":
+            rotate_epoch()                  # drop all sessions...
+            stamp_session()                 # ...except this one
+            msg = "All other devices have been signed out."
+
+        elif action == "change_owner":
+            nk, nk2 = request.form.get("nokey", ""), request.form.get("nokey2", "")
+            if len(nk) < 8:
+                err = "New owner key must be at least 8 characters."
+            elif nk != nk2:
+                err = "New owner keys do not match."
+            else:
+                set_setting("owner_hash", generate_password_hash(nk))
+                msg = "Owner key changed."
+
+        else:
+            err = "Unknown request."
+
+    return render_template_string(ACCOUNT_PAGE, msg=msg, err=err, have_owner=owner_set())
 
 # ------------------------------------------------------------------ helpers
 def J(): return request.get_json(force=True)
@@ -755,6 +853,112 @@ background:linear-gradient(135deg,#0B6E6E,#12907C);color:#fff;cursor:pointer}
 <button>Unlock</button>{% endif %}
 </form></body></html>"""
 
+# ------------------------------------------------------------------ account page
+ACCOUNT_PAGE = """<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B6E6E"><title>GutLog - Account</title>
+<style>
+:root{--ink:#1D2F33;--teal:#0B6E6E;--teal2:#12907C;--bg:#EFF5F2;--card:#fff;
+--line:#D5E3DD;--muted:#5B7370;--err:#B3372A;--ok:#2E7D32;--amber:#C8860A;
+--grad:linear-gradient(135deg,#0B6E6E,#12907C)}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);background:var(--bg);
+font:16px/1.5 -apple-system,"Segoe UI",Roboto,sans-serif;
+padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;background:var(--grad);color:#fff;
+padding:calc(12px + env(safe-area-inset-top)) 16px 12px;display:flex;align-items:center;gap:10px;
+box-shadow:0 2px 14px rgba(8,79,79,.25)}
+header h1{font-size:19px;margin:0;font-weight:800;letter-spacing:-.4px}
+header h1 b{color:#FFD98A}
+header a{margin-left:auto;color:#fff;opacity:.9;font-size:13.5px;text-decoration:none}
+main{padding:16px 14px 0;max-width:520px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin:0 0 14px;
+box-shadow:0 1px 2px rgba(29,47,51,.05)}
+h2{font-size:16px;margin:0 0 4px;letter-spacing:-.2px}
+.sub{margin:0 0 14px;color:var(--muted);font-size:13.5px}
+label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);
+text-transform:uppercase;letter-spacing:.6px;margin:0 0 6px}
+input[type=password]{width:100%;padding:12px 13px;font-size:16px;border:1.5px solid var(--line);
+border-radius:11px;margin-bottom:12px}
+input:focus{outline:2px solid var(--teal);border-color:var(--teal)}
+.chk{display:flex;align-items:flex-start;gap:9px;margin:2px 0 14px;font-size:14px;color:var(--ink)}
+.chk input{width:18px;height:18px;margin-top:2px}
+button{width:100%;padding:13px;font-size:15.5px;font-weight:700;border:0;border-radius:11px;
+background:var(--grad);color:#fff;cursor:pointer}
+button.warn{background:#fff;color:var(--err);border:1.5px solid var(--err)}
+.msg{padding:11px 13px;border-radius:11px;font-size:14px;margin:0 0 14px}
+.msg.ok{background:#E6F3E9;color:var(--ok);border:1px solid #BFE0C7}
+.msg.err{background:#FBEDEC;color:var(--err);border:1px solid #F0CDC9}
+.note{font-size:12.5px;color:var(--muted);margin:10px 0 0;line-height:1.45}
+</style></head><body>
+<header><h1>Gut<b>Log</b> - Account</h1><a href="/">&larr; Back to diary</a></header>
+<main>
+{% if msg %}<div class="msg ok">{{msg}}</div>{% endif %}
+{% if err %}<div class="msg err">{{err}}</div>{% endif %}
+
+{% if not have_owner %}
+<form class="card" method="post">
+  <input type="hidden" name="action" value="set_owner">
+  <h2>Create your owner key</h2>
+  <p class="sub">The owner key is a second, private secret - separate from the
+    login password. From now on, only someone with this key can change the
+    password or sign out devices. Set it now, keep it to yourself, and don't
+    share it. This is a one-time step.</p>
+  <label>Owner key</label>
+  <input type="password" name="okey" autocomplete="new-password" placeholder="Owner key (8+ characters)">
+  <label>Repeat owner key</label>
+  <input type="password" name="okey2" autocomplete="new-password" placeholder="Repeat owner key">
+  <button type="submit">Set owner key</button>
+  <p class="note">Make it different from the diary's login password. If you ever
+    forget it, it can only be reset from the server.</p>
+</form>
+{% else %}
+
+<form class="card" method="post">
+  <input type="hidden" name="action" value="password">
+  <h2>Change password</h2>
+  <p class="sub">Sets a new unlock password for the diary. Requires your owner key.</p>
+  <label>Owner key</label>
+  <input type="password" name="owner" autocomplete="off" placeholder="Your owner key">
+  <label>New password</label>
+  <input type="password" name="new" autocomplete="new-password" placeholder="New password (8+ characters)">
+  <label>Repeat new password</label>
+  <input type="password" name="new2" autocomplete="new-password" placeholder="Repeat new password">
+  <div class="chk">
+    <input type="checkbox" name="signout_others" id="so" value="1" checked>
+    <label for="so" style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--ink);margin:0">
+      Also sign out all other devices (recommended)</label>
+  </div>
+  <button type="submit">Change password</button>
+</form>
+
+<form class="card" method="post">
+  <input type="hidden" name="action" value="logout_others">
+  <h2>Sign out other devices</h2>
+  <p class="sub">Signs out every phone, tablet, or browser currently logged in -
+    except the one you are using now. No password change, nothing lost.
+    Requires your owner key.</p>
+  <label>Owner key</label>
+  <input type="password" name="owner" autocomplete="off" placeholder="Your owner key">
+  <button type="submit" class="warn">Sign out all other devices</button>
+  <p class="note">Use this if you handed the URL to someone, lost a device, or
+    just want a clean slate. Everyone else will need the password to get back in.</p>
+</form>
+
+<form class="card" method="post">
+  <input type="hidden" name="action" value="change_owner">
+  <h2>Change owner key</h2>
+  <p class="sub">Rotate the owner key itself. Requires the current one.</p>
+  <label>Current owner key</label>
+  <input type="password" name="owner" autocomplete="off" placeholder="Current owner key">
+  <label>New owner key</label>
+  <input type="password" name="nokey" autocomplete="new-password" placeholder="New owner key (8+ characters)">
+  <label>Repeat new owner key</label>
+  <input type="password" name="nokey2" autocomplete="new-password" placeholder="Repeat new owner key">
+  <button type="submit">Change owner key</button>
+</form>
+{% endif %}
+</main></body></html>"""
+
 # ------------------------------------------------------------------ app page
 APP_PAGE = r"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -901,7 +1105,7 @@ padding:5px 13px;font-weight:800;font-size:13px;cursor:pointer}
 </style></head><body>
 <header><h1>Gut<b>Log</b></h1><span class="v">v3</span>
 <span class="day"><span id="hdrDay"></span><br><span class="streak" id="hdrStreak"></span></span>
-<a href="/logout">Lock</a></header>
+<a href="/account">Account</a><a href="/logout">Lock</a></header>
 <div class="toast" id="toast" role="status"></div>
 <main>
 
