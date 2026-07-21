@@ -174,6 +174,24 @@ small.k{color:var(--muted)}
 .consent-out .place-date{display:flex;justify-content:space-between;margin:14px 0 6px;font-size:13px}
 .consent-out .field{border-bottom:1px solid #999;min-height:22px;margin:8px 0;font-size:13px}
 .consent-out .field-label{color:var(--muted);font-size:12px}
+.cs-continuity{font-size:13.5px;line-height:1.8;margin:16px 0 4px;padding:8px 10px;border:1px solid #ccc;background:#fafafa}
+.cs-attest{margin-top:20px;padding:10px 12px;border:1px solid #bbb;background:#fbfbf7;font-size:13px;line-height:1.7}
+.cs-attest-line{margin-top:10px}
+.cs-doc{width:100%;border-collapse:collapse}.cs-doc td{padding:0}
+/* v4 unified letterhead header (repeats on every printed page); per-page footer removed */
+.cs-rhead{border-bottom:1.5px solid #333;padding-bottom:6px;margin-bottom:12px;font-family:system-ui,Arial,sans-serif}
+.cs-rhead .t1{font-size:15px;font-weight:bold;text-align:center;color:#1a1a1a}
+.cs-rhead .t2{font-size:11px;color:#333;text-align:center;margin-top:1px}
+.cs-rhead .t3{font-size:11px;color:#555;margin-top:5px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px dotted #bbb;padding-top:4px}
+.cs-rhead .t3 b{color:#333}
+/* v4 end signature blocks (two side-by-side, each with a dashed signing box) */
+.endsigs{display:flex;gap:16px;margin-top:14px}
+.endsig{flex:1;border:1px solid #999;padding:8px 10px;page-break-inside:avoid}
+.sig-box{border:1px dashed #888;height:64px;border-radius:3px;position:relative;margin-bottom:8px;background:#fcfcfc}
+.sig-box::after{content:"हस्ताक्षर / अंगूठे का निशान";position:absolute;bottom:3px;right:6px;font-size:9px;color:#aaa;font-family:system-ui,Arial,sans-serif}
+/* v4 doctor dashed signing box inside the attestation */
+.cs-attest .dr-box{border:1px dashed #888;height:56px;border-radius:3px;margin-top:8px;max-width:280px;position:relative;background:#fff}
+.cs-attest .dr-box::after{content:"हस्ताक्षर";position:absolute;bottom:3px;right:6px;font-size:9px;color:#aaa;font-family:system-ui,Arial,sans-serif}
 @media print{
   #printArea .docprint{font-family:Georgia,'Times New Roman',serif;color:#000}
   #printArea .docprint h2{text-align:center;margin:0 0 6px}
@@ -183,6 +201,9 @@ small.k{color:var(--muted)}
   #printArea .docprint ul{margin-left:18px}
   #printArea .docprint .field{border-bottom:1px solid #000;min-height:24px;margin:10px 0}
   #printArea .docprint .place-date{display:flex;justify-content:space-between;margin:14px 0}
+  #printArea .docprint .cs-doc thead{display:table-header-group}
+  #printArea .docprint .cs-doc td,#printArea .docprint .cs-doc th{border:none;padding:0}
+  @page{ @bottom-center{ content:"पृष्ठ " counter(page) " / " counter(pages); font-family:Georgia,serif; font-size:10px; color:#666; } }
 }
 
 </style>
@@ -423,7 +444,7 @@ function printEstimate(data){
     '<tr class="ptot"><td>Total (approx)</td><td class="r">'+rupee(data.total)+'</td></tr></tbody></table>'+
     '<div class="pnote">This is an estimate only. The final amount may vary with the actual length of stay, operative findings, implant make selected, and any additional care required.</div>'+
     '<div class="pfoot">Dr. Manoj Agarwal Clinic &middot; Bareilly &middot; drmanojagarwal.com</div>';
-  window.print();
+  printWithTitle('Estimate_'+((data.id||'').replace(/[^A-Za-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'x')+'_'+new Date().toISOString().slice(0,10));
 }
 function rupee(n){ return '₹'+Math.round(n).toLocaleString('en-IN'); }
 function toast(t){ const el=document.getElementById('toast'); el.textContent=t; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),1900); }
@@ -942,7 +963,28 @@ function otText(){
  if(prep)t+='OT prep: '+prep+'\n';
  return t;
 }
-function printDoc(html){ const pa=document.getElementById('printArea'); pa.innerHTML=html; window.print(); }
+function docBaseName(){
+ var nm=(gv('c_name')||'').replace(/[^A-Za-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+ var cid=(typeof pbSel!=='undefined'&&pbSel&&pbSel.Clinic_Specific_Id)?String(pbSel.Clinic_Specific_Id).replace(/[^A-Za-z0-9]+/g,'-'):'';
+ var d=new Date().toISOString().slice(0,10);
+ var parts=[]; if(nm)parts.push(nm); if(cid)parts.push(cid); parts.push(d);
+ return parts.join('_')||d;
+}
+function printWithTitle(fname){
+ var prev=document.title; document.title=fname||prev;
+ function restore(){ document.title=prev; window.removeEventListener('afterprint',restore); }
+ window.addEventListener('afterprint',restore);
+ window.print();
+}
+function csPrintHTML(){
+ var m=csLastMeta||{};
+ var who=[]; if(m.relm&&m.reln&&m.reln!=='[___]') who.push(m.relm+' '+m.reln); if(m.res) who.push('निवासी '+m.res);
+ var t3left='मरीज: <b>'+(m.name||'')+'</b>'+(m.age?(' ('+m.age+' वर्ष)'):'')+(who.length?(' · '+who.join(' · ')):'');
+ var head='<div class="cs-rhead"><div class="t1">ऑपरेशन की सहमति (Surgical Consent)</div><div class="t2">Dr. Manoj Agarwal · M.S. (Ortho) · धन्वन्तरी तोमर अस्पताल, रामपुर बाग, बरेली</div><div class="t3"><span>'+t3left+'</span><span>दिनांक: '+(m.date||'')+'</span></div></div>';
+ var body=document.getElementById('cs_out').innerHTML;
+ return '<div class="docprint"><table class="cs-doc"><thead><tr><td>'+head+'</td></tr></thead><tbody><tr><td>'+body+'</td></tr></tbody></table></div>';
+}
+function printDoc(html,docType){ const pa=document.getElementById('printArea'); pa.innerHTML=html; printWithTitle((docType?docType+'_':'')+docBaseName()); }
 function otPrint(){
  const c=caseHeader(); const proc=OT_PROCS.find(function(p){return p.k===otState.proc;});
  let rows=''; let n=0;
@@ -956,7 +998,7 @@ function otPrint(){
   '<table><thead><tr><th class="r" style="width:34px">#</th><th>Item</th><th class="r" style="width:60px">Qty</th></tr></thead><tbody>'+rows+'</tbody></table>'+
   (impl?('<div style="margin-top:10px;font-size:13px"><b>Implants:</b> '+escapeHtml(impl)+'</div>'):'')+
   (prep?('<div style="font-size:13px"><b>OT prep:</b> '+escapeHtml(prep)+'</div>'):'')+
-  '</div>');
+  '</div>','OT-List');
 }
 
 /* ----- peri-op templates ----- */
@@ -964,7 +1006,7 @@ const TPL_PREOP='PRE-OP ORDERS \u2014 Dr. Manoj Agarwal\nCase: ____   Side: ____
 const TPL_POSTOP='POST-OP ORDERS \u2014 Dr. Manoj Agarwal\nPost-op day: 0\n\nMonitoring: vitals 2-hourly; check dressing/drain; limb elevation; distal circulation.\nIV fluids: NS / DNS / RL as advised.\nStandard ward medicines:\n- IV cannula 20/18 + easy-fix\n- Inj Pantop OD\n- Inj Vinbactum DS BD\n- Inj Vintob 80 (as advised)\n- Inj Dynapar / Tramadol SOS\n- Inj Butrum 1 mg\n- Inj Ondem SOS\nAnalgesia: ____\nWatch: pain, bleeding, urine output.\nDiet: sips \u2192 soft once fully awake.\nPhysio / mobilisation: ____';
 const TPL_OPNOTE='OPERATIVE NOTES \u2014 Dr. Manoj Agarwal\nDiagnosis: ____\nProcedure: ____   Side: ____\nAnaesthesia: spinal / GA\nPosition: ____   Tourniquet: ____ (time ____)\nFindings: ____\nImplant: ____ (make / size)\nSteps: ____\nClosure: ____   Blood loss: ~____ ml\nPost-op X-ray: ____\nPlan: ____\nSurgeon: Dr. Manoj Agarwal (M.S. Ortho)';
 function docText(id){ return caseTag()+document.getElementById(id).value; }
-function docPrint(id,title){ printDoc('<div class="docprint"><h2>'+title+'</h2><pre style="white-space:pre-wrap;font-family:inherit;font-size:14px;margin:0">'+escapeHtml(docText(id))+'</pre></div>'); }
+function docPrint(id,title){ printDoc('<div class="docprint"><h2>'+title+'</h2><pre style="white-space:pre-wrap;font-family:inherit;font-size:14px;margin:0">'+escapeHtml(docText(id))+'</pre></div>', title.replace(/\s+/g,'-')); }
 /* ===== Consent engine v2 — built from Dr. Agarwal's own consent library ===== */
 /* Tokens: {P}=हमारे/हमारी मरीज {NAME} {AGE} {RELM} {RELN} {RES} {SIDE} {PART} {BONE} {DUR} {CH} */
 var CS_CONSULT='इसके लिए हमने धन्वन्तरी तोमर अस्पताल, रामपुर बाग, बरेली में डॉ. मनोज अग्रवाल, हड्डी रोग विशेषज्ञ, से परामर्श लिया है। उन्होंने हमें हमारे मरीज की चोट और उसके इलाज के बारे में आसान और साफ़ भाषा में समझाया है और बताया है कि इसका बेहतर इलाज ऑपरेशन के द्वारा है।';
@@ -1086,15 +1128,25 @@ var CS_COMORB=[
 ];
 var CS_ADDONS=[
  ['openinj','खुली चोट (घाव)','चोट के साथ घाव खुला भी है; हमें बता दिया गया है कि खुली चोट में घाव और हड्डी के इन्फेक्शन की संभावना सामान्य से अधिक रहती है, इसलिए घाव की सफाई और दवाइयों का पूरा ध्यान रखा जाएगा।'],
- ['ayush','आयुष्मान — इम्प्लांट सीमा','हमें बता दिया गया है कि आयुष्मान भारत योजना के पैकेज में जो रॉड/इम्प्लांट शामिल होता है, उपचार उसी के अनुसार किया जाएगा; पैकेज की सीमाओं के बाहर के इम्प्लांट या सामग्री का चयन योजना में संभव नहीं होता।'],
+ ['ayush','आयुष्मान — इम्प्लांट सीमा','हमें बता दिया गया है कि इलाज आयुष्मान भारत योजना के उपचार पैकेज के अनुसार किया जाएगा; पैकेज की सीमाओं के बाहर के इम्प्लांट या सामग्री इस योजना में संभव नहीं होता।'],
  ['sugarunc','शुगर अनियंत्रित','हमारे मरीज की शुगर अभी कंट्रोल में नहीं है; ऑपरेशन से पहले इंसुलिन/दवाओं द्वारा शुगर कंट्रोल की जाएगी — यह काम फिजिशियन डॉक्टर देखेंगे, यह हमें बता दिया गया है।'],
  ['anaes','एनेस्थीसिया — विस्तृत','बेहोशी (एनेस्थीसिया) के जोखिमों के बारे में भी हमें बता दिया गया है — जैसे दवा से रिएक्शन, सांस लेने में दिक्कत, ब्लड प्रेशर का घटना-बढ़ना, दिल से संबंधित समस्या, और अत्यंत दुर्लभ स्थिति में जान का खतरा; एनेस्थीसिया के डॉक्टर पूरे समय मरीज की निगरानी रखते हैं।'],
  ['delay','पुरानी चोट / देरी से इलाज','यह चोट कुछ पुरानी है; हमें बता दिया गया है कि देरी के कारण हड्डी जोड़ने में अतिरिक्त कठिनाई हो सकती है और नतीजा आने में समय लग सकता है।'],
  ['blood','खून चढ़ाने की संभावना','जरूरत पड़ने पर मरीज को खून (blood) चढ़ाने की आवश्यकता भी पड़ सकती है, जिसकी सहमति भी हम देते हैं।'],
  ['minor','मरीज नाबालिग','मरीज नाबालिग है; माता-पिता/अभिभावक के नाते, सभी पहलू समझकर, हम अपनी जिम्मेदारी पर यह सहमति दे रहे हैं।'],
- ['emerg','आपात निर्णय की अनुमति','इलाज के दौरान किसी भी आपात स्थिति में डॉक्टर जो उचित समझें, वह करने की अनुमति भी हम देते हैं।']
+ ['emerg','आपात निर्णय की अनुमति','इलाज के दौरान किसी भी आपात स्थिति में डॉक्टर जो उचित समझें, वह करने की अनुमति भी हम देते हैं।'],
+ ['implantsel','इम्प्लांट का चयन — समझाया गया','__IMPLANT__'],
+ ['readaloud','अंगूठा — पढ़कर सुनाया गया','__READALOUD__'],
+ ['records','फोटो / रिकॉर्ड की सहमति','इलाज के दौरान ली गई क्लिनिकल फोटो व रिकॉर्ड का उपयोग इलाज, दस्तावेज़ीकरण एवं शिक्षण हेतु किया जा सकता है (मरीज की पहचान गुप्त रखते हुए), जिसकी सहमति भी हम देते हैं।']
 ];
+var CS_READALOUD='यह सहमति-पत्र हस्ताक्षरकर्ता को उनकी भाषा में पढ़कर व समझाकर सुनाया गया; भली-भाँति समझने के बाद उन्होंने अपनी सहमति से अंगूठे का निशान/हस्ताक्षर किया। पढ़कर सुनाने वाले का नाम: ____________';
+var CS_BLOOD_LINKED='उपरोक्त स्थिति को देखते हुए, आवश्यकता पड़ने पर मरीज को खून (blood) चढ़ाने की ज़रूरत भी पड़ सकती है, जिसकी सहमति भी हम देते हैं।';
 var CS_HR_TAIL='इन परिस्थितियों के कारण ऑपरेशन के समय व बाद में सामान्य खतरों के अलावा विशेष खतरे भी रहते हैं, जिसके कारण यथासंभव प्रयास के बावजूद कभी कभी मरीज की गंभीर हालत, और दुर्लभ स्थिति में मृत्यु तक, ऑपरेशन के समय अथवा बाद में हो सकती है। डॉक्टर साहब और उनकी टीम पूरी सतर्कता और देखभाल रखेंगे — यह भरोसा हमें दिया गया है, और इस जोखिम को समझते हुए भी हम ऑपरेशन करवाना चाहते हैं।';
+var CS_IMPLANT_FIX='हमें विभिन्न प्रकार के इम्प्लांट ( हड्डी जोड़ने में लगने वाले रॉड , प्लेट , बोल्ट वगेरह ) के बारे में बता दिया गया है और उनसे जुड़ी कमियाँ और खूबियाँ भी अच्छी तरह समझा दी गई हैं। अच्छी तरह से सोचने के बाद जो इम्प्लांट चुना गया है वह हमारी पूरी जानकारी में है, और उसी को लगवाने की हमारी पूरी सहमति है।';
+var CS_IMPLANT_JOINT='हमें जोड़ बदलने में लगने वाले इम्प्लांट (नए जोड़) के अलग-अलग प्रकार — जैसे सीमेंट वाला या बिना सीमेंट वाला, तथा अलग-अलग गुणवत्ता के जोड़ — के बारे में बता दिया गया है, और उनसे जुड़ी कमियाँ और खूबियाँ भी अच्छी तरह समझा दी गई हैं। यह भी बताया गया है कि यह जोड़ कई वर्षों तक अच्छी तरह काम करता है, फिर भी समय के साथ कभी-कभी घिसाव या ढीलेपन की स्थिति में आगे चलकर दोबारा ऑपरेशन की आवश्यकता पड़ सकती है। अच्छी तरह से सोचने के बाद जो जोड़ चुना गया है वह हमारी पूरी जानकारी में है, और उसी को लगवाने की हमारी पूरी सहमति है।';
+var CS_CONTINUITY='यह सहमति-पत्र कुल ______ पृष्ठों में है। इसके सभी पृष्ठ हमने पढ़/सुनकर समझे हैं और प्रत्येक पृष्ठ पर अपने हस्ताक्षर/निशान किए हैं।';
+var CS_ATTEST='उपरोक्त सभी बातें मरीज व परिजन को उनकी भाषा में समझाकर, उनके प्रश्नों के उत्तर देकर, यह सहमति ली गई है।<div class="cs-attest-line">व्याख्या करने वाले चिकित्सक: <b>Dr. Manoj Agarwal (M.S. Ortho)</b> — हस्ताक्षर: ____________ &nbsp; दिनांक/समय: ____________</div>';
+var csLastMeta=null;
 
 function csRenderPickers(){
  var ps=document.getElementById('cs_proc'); ps.innerHTML='';
@@ -1124,39 +1176,61 @@ async function csGenerate(){
   P:(g==='f'?'हमारी मरीज':'हमारे मरीज'),
   NAME:c.name||'[नाम]', AGE:c.age||'[उम्र]',
   RELM:(relm==='—'?'':relm), RELN:(relm==='—'?'':(gv('cs_relname')||'[___]')),
-  RES:(gv('cs_res')?(', निवासी '+gv('cs_res')):''),
+  RES:'',
   SIDE:c.side||'[सीधे/बाएँ]', PART:c.part||'[अंग]', PART2:'[कोहनी/घुटने के ऊपर/नीचे]',
-  BONE:c.bone?('('+c.bone+')'):'', DUR:pickSel('cs_dur')||'[कुछ दिन पहले]'
+  BONE:c.bone?('('+c.bone+')'):'', DUR:pickSel('cs_dur')||''
  };
  if(csLatin(v.NAME)) v.NAME=await csHindi(v.NAME);
  if(csLatin(v.RELN)&&v.RELN!=='[___]') v.RELN=await csHindi(v.RELN);
+ if(csLatin(v.SIDE)) v.SIDE=await csHindi(v.SIDE);
+ if(csLatin(v.PART)) v.PART=await csHindi(v.PART);
+ if(csLatin(v.DUR))  v.DUR =await csHindi(v.DUR);
+ var _res=gv('cs_res'); if(_res){ if(csLatin(_res)) _res=await csHindi(_res); v.RES=', निवासी '+_res; }
  var paras=[];
+ var _add=function(val){ return !!document.querySelector('input[name=csadd][value='+val+']:checked'); };
+ var _anaesDetailed=_add('anaes'), _implantTick=_add('implantsel'), _isArthro=['thr','tkr','hemi'].indexOf(proc.k)>=0;
+ var _blood=_add('blood'), _anemia=!!document.querySelector('input[name=cshr][value=anemia]:checked'), _linkBlood=(_anemia&&_blood);
  paras.push(csFill(proc.o,v));
  if(proc.c){ var ci=parseInt(document.getElementById('cs_choice').value)||0; paras.push(csFill(proc.c.opts[ci][1],v)); }
- if(proc.d) paras.push(csFill(proc.d,v));
- var risk=CS_UNDERSTOOD+' '+proc.r.map(function(s){return csFill(s,v);}).join(' ')+' '+CS_REASSURE+' '+CS_INFECT+' '+CS_ANAES+' '+CS_NOGUAR;
+ if(proc.d && !(_implantTick && _isArthro)) paras.push(csFill(proc.d,v));
+ var risk=CS_UNDERSTOOD+' '+proc.r.map(function(s){return csFill(s,v);}).join(' ')+' '+CS_REASSURE+' '+CS_INFECT+(_anaesDetailed?'':' '+CS_ANAES)+' '+CS_NOGUAR;
  paras.push(risk);
  var hr=[].slice.call(document.querySelectorAll('input[name=cshr]:checked')).map(function(e){return e.value;});
  if(hr.length){
    var bits=hr.map(function(id){ var m=CS_COMORB.find(function(x){return x[0]===id;}); return m?m[2]:''; }).filter(Boolean);
    var lead='डॉक्टर साहब ने हमें अच्छी तरह समझा दिया है कि '+bits.join(', और ')+'। ';
    paras.push(lead+CS_HR_TAIL);
+   if(_linkBlood) paras.push(CS_BLOOD_LINKED);
  }
+ var readAloud='';
  [].slice.call(document.querySelectorAll('input[name=csadd]:checked')).forEach(function(e){
-   var m=CS_ADDONS.find(function(x){return x[0]===e.value;}); if(m) paras.push(m[2]);
+   var m=CS_ADDONS.find(function(x){return x[0]===e.value;}); if(!m) return;
+   if(e.value==='implantsel'){ paras.push((['thr','tkr','hemi'].indexOf(proc.k)>=0)?CS_IMPLANT_JOINT:CS_IMPLANT_FIX); return; }
+   if(e.value==='readaloud'){ readAloud=CS_READALOUD; return; }
+   if(e.value==='blood' && _linkBlood){ return; }
+   paras.push(m[2]);
  });
  paras.push(CS_CLOSE);
+ if(readAloud) paras.push(readAloud);
  var d=new Date();
- var html='<h2 class="title">ऑपरेशन की सहमति (Surgical Consent)</h2><p class="cl">Dr. Manoj Agarwal · M.S. (Ortho) · धन्वन्तरी तोमर अस्पताल, रामपुर बाग, बरेली</p>';
- paras.forEach(function(p){ html+='<p>'+p+'</p>'; });
- html+='<div class="place-date"><span><b>दिनांक:</b> '+d.toLocaleDateString('en-GB')+'</span><span><b>स्थान:</b> बरेली</span></div>';
+ var html='';
+ paras.forEach(function(p){ html+='<p>'+p.replace(/\s{2,}/g,' ').trim()+'</p>'; });
+ html+='<div class="cs-continuity">'+CS_CONTINUITY+'</div>';
+ html+='<div class="endsigs">';
  for(var i=1;i<=2;i++){
-  html+='<div class="place-date" style="margin-top:14px"><span><b>हस्ताक्षर / अंगूठे का निशान ('+(i===1?'गवाह सहित परिजन':'गवाह')+' '+i+')</b></span><span>दिनांक __________</span></div>'
+  html+='<div class="endsig">'
+   +'<div class="sig-box"></div>'
    +'<div class="field"><span class="field-label">नाम:</span></div>'
    +'<div class="field"><span class="field-label">मरीज से संबंध:</span></div>'
    +'<div class="field"><span class="field-label">पिता का नाम:</span></div>'
-   +'<div class="field"><span class="field-label">पूरा पता / मोबाइल:</span></div>';
+   +'<div class="field"><span class="field-label">पूरा पता:</span></div>'
+   +'<div class="field"></div>'
+   +'<div class="field"><span class="field-label">मोबाइल नं.:</span></div>'
+   +'</div>';
  }
+ html+='</div>';
+ html+='<div class="cs-attest">'+CS_ATTEST+'<div class="dr-box"></div></div>';
+ csLastMeta={name:v.NAME,age:v.AGE,relm:v.RELM,reln:v.RELN,res:_res||'',date:d.toLocaleDateString('en-GB')};
  document.getElementById('cs_out').innerHTML=html;
  document.getElementById('cs_out').style.display='block';
  document.getElementById('cs_acts').style.display='block';
@@ -1206,7 +1280,7 @@ async function csGenerate(){
  // consent
  document.getElementById('cs_gen').onclick=function(){ Promise.resolve(csGenerate()).then(function(){ document.getElementById('cs_out').scrollIntoView({behavior:'smooth',block:'nearest'}); }); };
  document.getElementById('cs_cp').onclick=function(){ copyText(document.getElementById('cs_out').innerText); };
- document.getElementById('cs_pr').onclick=function(){ printDoc('<div class="docprint">'+document.getElementById('cs_out').innerHTML+'</div>'); };
+ document.getElementById('cs_pr').onclick=function(){ printDoc(csPrintHTML(),'Consent'); };
 
  // peri-op docs
  function wire(pfx,tpl,title){
@@ -1282,7 +1356,7 @@ function caseBundle(){
   if(!pbOnline()){
     var blob=new Blob([JSON.stringify(b,null,1)],{type:'application/json'});
     var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-    a.download=((b.patient.uid||b.patient.name||'case').replace(/[^A-Za-z0-9_-]+/g,'_'))+'_'+new Date().toISOString().slice(0,10)+'_case.json';
+    a.download='CasePack_'+docBaseName()+'.json';
     a.click(); msg.textContent='Downloaded (offline mode) — clinic PC par cases\\inbox\\ me daal dijiye.'; return;
   }
   if(!b.patient.uid && !confirm('Koi patient link nahin hua (UID blank). Phir bhi save karein?')) return;
