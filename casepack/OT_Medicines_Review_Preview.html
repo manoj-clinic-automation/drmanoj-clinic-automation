@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OT Medicines — Review Preview (read-only)</title>
+<style>
+  :root{--line:#d8d2c6;--muted:#6b6459;--mark:#fff3bf;--absent:#fdecea;--head:#f4f1ea}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin:0;background:#faf8f4;color:#232019}
+  .wrap{max-width:980px;margin:0 auto;padding:14px}
+  h1{font-size:19px;margin:6px 0 2px}
+  .sub{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+  .callouts{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:13.5px;margin-bottom:12px}
+  .callouts b{color:#8a3b12}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+  select{font-size:14px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  label.ck{font-size:13.5px;display:flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:13.5px}
+  th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:var(--head);font-size:12.5px;position:sticky;top:0}
+  td.q{text-align:center;width:72px;white-space:nowrap}
+  td.src{color:var(--muted);font-size:11.5px;width:90px}
+  td.absent{background:var(--absent);color:#b02a20;text-align:center;font-weight:600}
+  tr.marked td{background:var(--mark)!important}
+  tr:hover td{cursor:pointer}
+  .legend{font-size:12px;color:var(--muted);margin:8px 0}
+  .bar{display:flex;gap:8px;margin:12px 0}
+  button{font-size:13.5px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}
+  button.primary{background:#2b4d3a;color:#fff;border-color:#2b4d3a}
+  #notesOut{width:100%;min-height:90px;font-family:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:8px;box-sizing:border-box}
+  .opt{color:var(--muted);font-size:11px;border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-left:4px}
+  @media print{.controls,.bar,#notesOut,.legend{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>OT Medicines — Review Preview</h1>
+  <div class="sub">Read-only. Data copied verbatim from casepack_page.html (post-Termin-fix, 21 Jul 2026). Nothing here changes the live tool.</div>
+
+  <div class="callouts">
+    <b>Current as of final build 2026-07-21b (md5 82e41230…).</b> Data below matches the shipped casepack_page.html exactly:
+    two-slot antibiotics · Infiltration-kit toggle · Ayushman gloves ortho ×6 · both Chromics in base ·
+    Upper limb &amp; Clavicle carry block pair (Lox ADR + Anawin plain) and drop the spinal kit (Anawin Heavy + LP needle 26).
+  </div>
+
+  <div class="controls">
+    <select id="proc"></select>
+    <select id="abx1" title="Antibiotic 1"></select>
+    <select id="abx2" title="Antibiotic 2"></select>
+    <label class="ck"><input type="checkbox" id="ga"> Under GA</label>
+    <label class="ck"><input type="checkbox" id="viral"> Viral +ve</label>
+    <label class="ck"><input type="checkbox" id="infil"> Infiltration kit</label>
+  </div>
+  <div class="legend">Tap any row to mark it for change (yellow). Red — = item absent on that tier. "Source" shows which rule adds the item.</div>
+
+  <table id="tbl">
+    <thead><tr><th>#</th><th>Item</th><th>Ayushman</th><th>Paying</th><th>TPA</th><th>Source</th></tr></thead>
+    <tbody id="tb"></tbody>
+  </table>
+
+  <div class="bar">
+    <button class="primary" id="copyBtn">Copy marked items</button>
+    <button id="clearBtn">Clear marks</button>
+    <button onclick="window.print()">Print</button>
+  </div>
+  <textarea id="notesOut" placeholder="Marked items appear here — add your instructions next to each, then copy the whole box back to Claude."></textarea>
+</div>
+
+<script>
+/* ===== DATA — verbatim from casepack_page.html ===== */
+const OT_ABX1=['Inj Vinbactum DS','Inj Vintaz 4.5 g'];
+const OT_ABX2=['Inj Amikacin 500 mg','Inj Vintob 80 mg'];
+const OT_BASE=[
+ {i:'NS 1 L (plastic)',q:1},{i:'DNS / RL 1 L',q:1},{i:'Viggo 20',q:1},{i:'Canofix',q:1},{i:'IV set',q:1},
+ {i:'LP needle 26',q:1},{i:'Anawin Heavy (spinal)',q:1},
+ {i:'Syringe 10 ml',q:5},{i:'Syringe 5 ml',q:5},{i:'DW 5 ml',q:5},
+ {i:'Betadine scrub',q:1},{i:'Betadine lotion',q:1},{i:'Bandage 6"',q:6},{i:'Transpore 2"',q:1},
+ {i:'Ethilon 3336',q:1},{i:'Chromic 1-0 (RB)',q:1},{i:'Chromic No.1 (RB)',q:1},{i:'Vicryl VP2352',q:1},
+ {i:'Butrum 2 mg',q:1},{i:'Tramazac 2 ml',q:1},{i:'Dynapar',q:1},{i:'Periset',q:1},{i:'Mizolam',q:1}
+];
+const OT_GLOVE={ayush:{i:'Gloves ortho No.7',q:6},pay:{i:'Gloves ortho No.7',q:6},tpa:{i:'Gloves ortho No.7',q:8}};
+const OT_TIER={
+ ayush:{name:'Ayushman (lean)',add:[],drop:['Transpore 2"','Vicryl VP2352']},
+ pay:{name:'Paying',add:[],drop:[]},
+ tpa:{name:'TPA (rich)',add:[{i:'Iodrape / IO drape large',q:1},{i:'Cling drape (Surgiwear)',q:1},{i:'Large sheet (Surgiwear)',q:2},{i:'Ioban',q:1},{i:'Sterilium 500 ml',q:1},{i:'Gown',q:3}],drop:[]}
+};
+const OT_GA=[{i:'Profol (propofol)',q:2},{i:'Glycopyrrolate',q:5},{i:'Atropine',q:5},{i:'Primacort 100',q:2},{i:'Avil',q:2},{i:'Termin',q:1}];
+const OT_INFIL=[{i:'Supacef 750 (local infiltration)',q:1}];
+const OT_VIRAL=[{i:'Viral barrier kit',q:1},{i:'Mops',q:5},{i:'Plain sheet',q:2},{i:'Plain towel',q:2},{i:'Gown',q:5}];
+const OT_PROCS=[
+ {k:'generic',n:'Generic ortho (base only)',add:[]},
+ {k:'lowerlimb',n:'Lower limb',add:[{i:'RL 1 L (extra)',q:1}]},
+ {k:'upperlimb',n:'Upper limb',add:[{i:'Inj Lox 2% ADR',q:1},{i:'Inj Anawin (plain)',q:1}],drop:['Anawin Heavy (spinal)','LP needle 26']},
+ {k:'clavicle',n:'Clavicle',add:[{i:'Ethibond No.5',q:1},{i:'Inj Lox 2% ADR',q:1},{i:'Inj Anawin (plain)',q:1}],drop:['Anawin Heavy (spinal)','LP needle 26']},
+ {k:'thr',n:'THR \u2014 Total Hip Replacement',add:[
+   {i:'NS/RL 1 L (extra)',q:1},{i:'Romovac-16',q:1},{i:'Ethibond No.5',q:1},{i:'Ropivacaine (Themis)',q:2},
+   {i:'Hip U-drape',q:1},{i:'Stockinette 8 cm',q:1},{i:'Cement gun',q:1},{i:'Pulse lavage',q:1},{i:'Ioban 22\u00d717',q:1},{i:'Suction set',q:1},{i:'Skin stapler',q:1}
+ ]},
+ {k:'tkr',n:'TKR \u2014 Total Knee Replacement',add:[
+   {i:'Epidural kit 18',q:1},{i:'IO drape large',q:1},{i:'Romovac 16',q:1},{i:'Skin stapler',q:1},{i:'Vaccu suction',q:1},{i:'Ethibond No.5',q:1}
+ ]},
+ {k:'acl',n:'Arthroscopy / ACL',add:[
+   {i:'NS 3 L (irrigation)',q:3},{i:'TURP set',q:1},{i:'Camera cover',q:1},{i:'Cling drape (Surgiwear)',q:1},{i:'Ethibond No.5',q:1}
+ ]},
+ {k:'implantrem',n:'Implant removal (minimal)',add:[]}
+];
+
+/* ===== Build one tier's list — same order/logic as the live tool ===== */
+function buildTier(tierKey, procKey, abx1, abx2, ga, viral, infil){
+  const tier=OT_TIER[tierKey];
+  let rows=OT_BASE.map(function(x){return {i:x.i,q:x.q,src:'base'};});
+  rows.splice(5,0,{i:abx1,q:1,src:'antibiotic 1'},{i:abx2,q:1,src:'antibiotic 2'});
+  rows.push({i:OT_GLOVE[tierKey].i,q:OT_GLOVE[tierKey].q,src:'glove ('+tierKey+')'});
+  tier.add.forEach(function(x){rows.push({i:x.i,q:x.q,src:'tier: TPA'});});
+  const proc=OT_PROCS.find(function(p){return p.k===procKey;});
+  proc.add.forEach(function(x){rows.push({i:x.i,q:x.q,opt:x.opt,src:'proc'});});
+  if(infil) OT_INFIL.forEach(function(x){rows.push({i:x.i,q:x.q,src:'Infil kit'});});
+  if(ga) OT_GA.forEach(function(x){rows.push({i:x.i,q:x.q,src:'GA'});});
+  if(viral) OT_VIRAL.forEach(function(x){rows.push({i:x.i,q:x.q,src:'Viral+'});});
+  rows=rows.filter(function(r){return tier.drop.indexOf(r.i)<0 && (proc.drop||[]).indexOf(r.i)<0;});
+  return rows;
+}
+
+/* ===== Render comparison ===== */
+const marks={};
+function render(){
+  const procKey=document.getElementById('proc').value;
+  const abx1=document.getElementById('abx1').value;
+  const abx2=document.getElementById('abx2').value;
+  const ga=document.getElementById('ga').checked;
+  const viral=document.getElementById('viral').checked;
+  const infil=document.getElementById('infil').checked;
+  const A=buildTier('ayush',procKey,abx1,abx2,ga,viral,infil);
+  const P=buildTier('pay',procKey,abx1,abx2,ga,viral,infil);
+  const T=buildTier('tpa',procKey,abx1,abx2,ga,viral,infil);
+  /* union: Paying order first (full base), then TPA-only, then anything else */
+  const seen={},union=[];
+  function pushU(r){ if(!seen[r.i]){seen[r.i]=true;union.push({i:r.i,opt:r.opt,src:r.src});} }
+  P.forEach(pushU); T.forEach(pushU); A.forEach(pushU);
+  function qOf(list,name){const f=list.find(function(r){return r.i===name;});return f?f.q:null;}
+  const tb=document.getElementById('tb'); tb.innerHTML='';
+  union.forEach(function(u,idx){
+    const qa=qOf(A,u.i), qp=qOf(P,u.i), qt=qOf(T,u.i);
+    const tr=document.createElement('tr');
+    if(marks[u.i]) tr.className='marked';
+    function cell(q){return q===null?'<td class="q absent">—</td>':'<td class="q">'+q+'</td>';}
+    tr.innerHTML='<td>'+(idx+1)+'</td><td>'+u.i+(u.opt?'<span class="opt">optional</span>':'')+'</td>'
+      +cell(qa)+cell(qp)+cell(qt)+'<td class="src">'+u.src+'</td>';
+    tr.onclick=function(){marks[u.i]=!marks[u.i];render();updateNotes();};
+    tb.appendChild(tr);
+  });
+}
+function updateNotes(){
+  const names=Object.keys(marks).filter(function(k){return marks[k];});
+  const box=document.getElementById('notesOut');
+  if(!names.length){box.value='';return;}
+  box.value='OT LIST — CHANGES REQUESTED ('+document.getElementById('proc').selectedOptions[0].textContent+')\n'
+    +names.map(function(n,i){return (i+1)+'. '+n+' — ';}).join('\n');
+}
+document.getElementById('copyBtn').onclick=function(){
+  updateNotes();
+  const box=document.getElementById('notesOut');
+  box.select(); document.execCommand('copy');
+};
+document.getElementById('clearBtn').onclick=function(){for(const k in marks)delete marks[k];render();updateNotes();};
+
+/* init */
+const psel=document.getElementById('proc');
+OT_PROCS.forEach(function(p){const o=document.createElement('option');o.value=p.k;o.textContent=p.n;psel.appendChild(o);});
+psel.value='thr';
+const asel1=document.getElementById('abx1');
+OT_ABX1.forEach(function(a){const o=document.createElement('option');o.value=a;o.textContent=a;asel1.appendChild(o);});
+const asel2=document.getElementById('abx2');
+OT_ABX2.forEach(function(a){const o=document.createElement('option');o.value=a;o.textContent=a;asel2.appendChild(o);});
+psel.onchange=render; asel1.onchange=render; asel2.onchange=render;
+document.getElementById('ga').onchange=render;
+document.getElementById('viral').onchange=render;
+document.getElementById('infil').onchange=render;
+render();
+</script>
+</body>
+</html>

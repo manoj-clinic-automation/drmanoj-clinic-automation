@@ -340,15 +340,17 @@ small.k{color:var(--muted)}
     </div>
     <div class="pctx"><select id="ot_proc" class="full"></select></div>
     <div class="pctx">
-      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:8px 10px">Antibiotic <select id="ot_abx" style="border:none;flex:1"></select></label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:8px 10px">Antibiotic 1 <select id="ot_abx1" style="border:none;flex:1"></select></label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:8px 10px">Antibiotic 2 <select id="ot_abx2" style="border:none;flex:1"></select></label>
       <div class="otopts" style="align-self:center">
         <label><input type="checkbox" id="ot_ga"> Under GA</label>
         <label><input type="checkbox" id="ot_viral"> Viral +ve</label>
+        <label><input type="checkbox" id="ot_infil"> Infiltration kit</label>
       </div>
     </div>
     <div class="casehint">Every quantity is editable. Add rows for extras. Implants &amp; case prep are write-in below.</div>
     <div id="otRows"></div>
-    <div class="otadd"><input id="ot_newi" placeholder="Add item…"><input id="ot_newq" type="number" placeholder="Qty" style="max-width:78px"><button class="cbtn ghost" id="ot_addbtn">Add</button></div>
+    <div class="otadd"><input id="ot_newi" list="ot_cat" placeholder="Add item… (pick or type new)"><datalist id="ot_cat"></datalist><input id="ot_newq" type="number" placeholder="Qty" style="max-width:78px"><button class="cbtn ghost" id="ot_addbtn">Add</button></div>
     <div class="writein"><label>Implants (case prep — write in)</label><textarea id="ot_impl" placeholder="e.g. PFN 2-screw; distal tibia LCP 8-hole + screws…"></textarea></div>
     <div class="writein"><label>Case-specific OT prep (write in)</label><textarea id="ot_prep" placeholder="e.g. traction table, C-arm, tourniquet, lateral position…"></textarea></div>
     <div style="margin-top:10px">
@@ -471,7 +473,7 @@ document.getElementById('stay').addEventListener('input',e=>{state.stay=e.target
 document.getElementById('hr').addEventListener('change',e=>{state.hr=e.target.checked;render();});
 insSel.addEventListener('change',e=>{state.ins=e.target.value;render();});
 
-function match(hay,q){ if(!q)return true; q=q.toLowerCase().trim(); return q.split(/\s+/).every(t=>hay.toLowerCase().indexOf(t)>=0); }
+function match(hay,q){ if(!q)return true; q=q.toLowerCase().trim(); const h=hay.toLowerCase(); return q.split(/\s+/).every(t=>h.indexOf(t)>=0||(t.length>3&&t.slice(-1)==='s'&&h.indexOf(t.slice(0,-1))>=0)); }
 
 const CASH_CHIPS=['knee','hip','tibia','clavicle','radius','pfn','bipolar','thr'];
 const AYUSH_CHIPS=['hip','knee','spine','femur','tibia','humerus','hand','foot','arthroscopy'];
@@ -890,31 +892,34 @@ function caseHeader(){ return {name:gv('c_name'),age:gv('c_age'),side:pickSel('c
 function caseTag(){ const c=caseHeader(); const bits=[c.side,c.part,c.bone].filter(Boolean).join(' '); let h=''; if(c.name){h='['+c.name+(c.age?(' \u00b7 '+c.age+'y'):'')+(bits?(' \u00b7 '+bits):'')+']\n';} return h; }
 
 /* ----- OT medicine list data ----- */
-const OT_ABX=['Vinbactum DS','Amikacin 500 mg','Tazar 4.5','Genticyn 80','Acrovin 500'];
+const OT_ABX1=['Inj Vinbactum DS','Inj Vintaz 4.5 g'];
+const OT_ABX2=['Inj Amikacin 500 mg','Inj Vintob 80 mg'];
+const OT_INFIL=[{i:'Supacef 750 (local infiltration)',q:1}];
+/* catalogue-only items: offered in the Add-item dropdown, never auto-added */
+const OT_EXTRA=[];
 const OT_BASE=[
  {i:'NS 1 L (plastic)',q:1},{i:'DNS / RL 1 L',q:1},{i:'Viggo 20',q:1},{i:'Canofix',q:1},{i:'IV set',q:1},
  {i:'LP needle 26',q:1},{i:'Anawin Heavy (spinal)',q:1},
  {i:'Syringe 10 ml',q:5},{i:'Syringe 5 ml',q:5},{i:'DW 5 ml',q:5},
  {i:'Betadine scrub',q:1},{i:'Betadine lotion',q:1},{i:'Bandage 6"',q:6},{i:'Transpore 2"',q:1},
- {i:'Ethilon 3336',q:1},{i:'Chromic 1-0 (RB)',q:1},{i:'Vicryl VP2352',q:1},
+ {i:'Ethilon 3336',q:1},{i:'Chromic 1-0 (RB)',q:1},{i:'Chromic No.1 (RB)',q:1},{i:'Vicryl VP2352',q:1},
  {i:'Butrum 2 mg',q:1},{i:'Tramazac 2 ml',q:1},{i:'Dynapar',q:1},{i:'Periset',q:1},{i:'Mizolam',q:1}
 ];
-const OT_GLOVE={ayush:{i:'Gloves No.7 (white)',q:4},pay:{i:'Gloves ortho No.7',q:6},tpa:{i:'Gloves ortho No.7',q:8}};
+const OT_GLOVE={ayush:{i:'Gloves ortho No.7',q:6},pay:{i:'Gloves ortho No.7',q:6},tpa:{i:'Gloves ortho No.7',q:8}};
 const OT_TIER={
  ayush:{name:'Ayushman (lean)',add:[],drop:['Transpore 2"','Vicryl VP2352']},
  pay:{name:'Paying',add:[],drop:[]},
  tpa:{name:'TPA (rich)',add:[{i:'Iodrape / IO drape large',q:1},{i:'Cling drape (Surgiwear)',q:1},{i:'Large sheet (Surgiwear)',q:2},{i:'Ioban',q:1},{i:'Sterilium 500 ml',q:1},{i:'Gown',q:3}],drop:[]}
 };
-const OT_GA=[{i:'Profol (propofol)',q:2},{i:'Glycopyrrolate',q:5},{i:'Atropine',q:5},{i:'Mephentine',q:1},{i:'Primacort 100',q:2},{i:'Avil',q:2},{i:'Termin',q:1}];
+const OT_GA=[{i:'Profol (propofol)',q:2},{i:'Glycopyrrolate',q:5},{i:'Atropine',q:5},{i:'Primacort 100',q:2},{i:'Avil',q:2},{i:'Termin',q:1}];
 const OT_VIRAL=[{i:'Viral barrier kit',q:1},{i:'Mops',q:5},{i:'Plain sheet',q:2},{i:'Plain towel',q:2},{i:'Gown',q:5}];
 const OT_PROCS=[
  {k:'generic',n:'Generic ortho (base only)',add:[]},
  {k:'lowerlimb',n:'Lower limb',add:[{i:'RL 1 L (extra)',q:1}]},
- {k:'upperlimb',n:'Upper limb',add:[]},
- {k:'clavicle',n:'Clavicle',add:[{i:'Ethibond No.5',q:1}]},
+ {k:'upperlimb',n:'Upper limb',add:[{i:'Inj Lox 2% ADR',q:1},{i:'Inj Anawin (plain)',q:1}],drop:['Anawin Heavy (spinal)','LP needle 26']},
+ {k:'clavicle',n:'Clavicle',add:[{i:'Ethibond No.5',q:1},{i:'Inj Lox 2% ADR',q:1},{i:'Inj Anawin (plain)',q:1}],drop:['Anawin Heavy (spinal)','LP needle 26']},
  {k:'thr',n:'THR \u2014 Total Hip Replacement',add:[
    {i:'NS/RL 1 L (extra)',q:1},{i:'Romovac-16',q:1},{i:'Ethibond No.5',q:1},{i:'Ropivacaine (Themis)',q:2},
-   {i:'Supacef 750 (local infiltration)',q:1,opt:true},
    {i:'Hip U-drape',q:1},{i:'Stockinette 8 cm',q:1},{i:'Cement gun',q:1},{i:'Pulse lavage',q:1},{i:'Ioban 22\u00d717',q:1},{i:'Suction set',q:1},{i:'Skin stapler',q:1}
  ]},
  {k:'tkr',n:'TKR \u2014 Total Knee Replacement',add:[
@@ -925,19 +930,20 @@ const OT_PROCS=[
  ]},
  {k:'implantrem',n:'Implant removal (minimal)',add:[]}
 ];
-let otState={tier:'pay',proc:'generic',abx:OT_ABX[0],ga:false,viral:false,rows:[]};
+let otState={tier:'pay',proc:'generic',abx1:OT_ABX1[0],abx2:OT_ABX2[0],ga:false,viral:false,infil:false,rows:[]};
 
 function otBuild(){
  const tier=OT_TIER[otState.tier];
  let rows=OT_BASE.map(function(x){return {i:x.i,q:x.q};});
- rows.splice(5,0,{i:otState.abx,q:1});
+ rows.splice(5,0,{i:otState.abx1,q:1},{i:otState.abx2,q:1});
  rows.push({i:OT_GLOVE[otState.tier].i,q:OT_GLOVE[otState.tier].q});
  tier.add.forEach(function(x){rows.push({i:x.i,q:x.q});});
  const proc=OT_PROCS.find(function(p){return p.k===otState.proc;});
  proc.add.forEach(function(x){rows.push({i:x.i,q:x.q,opt:x.opt});});
+ if(otState.infil) OT_INFIL.forEach(function(x){rows.push({i:x.i,q:x.q});});
  if(otState.ga) OT_GA.forEach(function(x){rows.push({i:x.i,q:x.q});});
  if(otState.viral) OT_VIRAL.forEach(function(x){rows.push({i:x.i,q:x.q});});
- rows=rows.filter(function(r){return tier.drop.indexOf(r.i)<0;});
+ rows=rows.filter(function(r){return tier.drop.indexOf(r.i)<0 && (proc.drop||[]).indexOf(r.i)<0;});
  return rows;
 }
 function otPaint(){
@@ -953,10 +959,10 @@ function otPaint(){
 function otRebuild(){ otState.rows=otBuild(); otPaint(); }
 function otText(){
  const c=caseHeader(); const proc=OT_PROCS.find(function(p){return p.k===otState.proc;});
- let t='Dr. Manoj Agarwal \u2014 OT Medicine List\n'+OT_TIER[otState.tier].name+' \u00b7 '+proc.n+(otState.ga?' \u00b7 GA':'')+(otState.viral?' \u00b7 Viral+':'')+'\n';
+ let t='Dr. Manoj Agarwal \u2014 OT Medicine List\n'+OT_TIER[otState.tier].name+' \u00b7 '+proc.n+(otState.ga?' \u00b7 GA':'')+(otState.viral?' \u00b7 Viral+':'')+(otState.infil?' \u00b7 Infil kit':'')+'\n';
  if(c.name)t+='Patient: '+c.name+(c.age?(' \u00b7 '+c.age+'y'):'')+'\n';
  const bits=[c.side,c.part,c.bone].filter(Boolean).join(' '); if(bits)t+=bits+'\n';
- t+='Antibiotic: '+otState.abx+'\n\u2014\n'; let n=0;
+ t+='Antibiotics: '+otState.abx1+' + '+otState.abx2+'\n\u2014\n'; let n=0;
  otState.rows.forEach(function(r){n++;t+=n+'. '+r.i+' \u2014 '+r.q+'\n';});
  const impl=gv('ot_impl'),prep=gv('ot_prep');
  if(impl)t+='\u2014\nImplants: '+impl+'\n';
@@ -992,9 +998,9 @@ function otPrint(){
  const impl=gv('ot_impl'),prep=gv('ot_prep'); const bits=[c.side,c.part,c.bone].filter(Boolean).join(' ');
  printDoc('<div class="docprint"><h2>OT Medicine List</h2>'+
   '<div style="text-align:center;font-size:12px;margin-bottom:8px">Dr. Manoj Agarwal \u00b7 Dhanwantari Tomer Hospital, Bareilly</div>'+
-  '<div style="font-size:13px;margin-bottom:4px"><b>'+OT_TIER[otState.tier].name+'</b> \u00b7 '+escapeHtml(proc.n)+(otState.ga?' \u00b7 GA':'')+(otState.viral?' \u00b7 Viral+':'')+(c.name?(' &nbsp;|&nbsp; <b>'+escapeHtml(c.name)+'</b>'+(c.age?(' ('+escapeHtml(c.age)+'y)'):'')):'')+'</div>'+
+  '<div style="font-size:13px;margin-bottom:4px"><b>'+OT_TIER[otState.tier].name+'</b> \u00b7 '+escapeHtml(proc.n)+(otState.ga?' \u00b7 GA':'')+(otState.viral?' \u00b7 Viral+':'')+(otState.infil?' \u00b7 Infil kit':'')+(c.name?(' &nbsp;|&nbsp; <b>'+escapeHtml(c.name)+'</b>'+(c.age?(' ('+escapeHtml(c.age)+'y)'):'')):'')+'</div>'+
   (bits?('<div style="font-size:13px;margin-bottom:4px">'+escapeHtml(bits)+'</div>'):'')+
-  '<div style="font-size:13px;margin-bottom:6px">Antibiotic: <b>'+escapeHtml(otState.abx)+'</b></div>'+
+  '<div style="font-size:13px;margin-bottom:6px">Antibiotics: <b>'+escapeHtml(otState.abx1)+' + '+escapeHtml(otState.abx2)+'</b></div>'+
   '<table><thead><tr><th class="r" style="width:34px">#</th><th>Item</th><th class="r" style="width:60px">Qty</th></tr></thead><tbody>'+rows+'</tbody></table>'+
   (impl?('<div style="margin-top:10px;font-size:13px"><b>Implants:</b> '+escapeHtml(impl)+'</div>'):'')+
   (prep?('<div style="font-size:13px"><b>OT prep:</b> '+escapeHtml(prep)+'</div>'):'')+
@@ -1241,7 +1247,18 @@ async function csGenerate(){
  const cm=document.getElementById('caseModal');
  // populate selects once
  const psel=document.getElementById('ot_proc'); OT_PROCS.forEach(function(p){var o=document.createElement('option');o.value=p.k;o.textContent=p.n;psel.appendChild(o);});
- const asel=document.getElementById('ot_abx'); OT_ABX.forEach(function(a){var o=document.createElement('option');o.value=a;o.textContent=a;asel.appendChild(o);});
+ const asel=document.getElementById('ot_abx1'); OT_ABX1.forEach(function(a){var o=document.createElement('option');o.value=a;o.textContent=a;asel.appendChild(o);});
+ const asel2=document.getElementById('ot_abx2'); OT_ABX2.forEach(function(a){var o=document.createElement('option');o.value=a;o.textContent=a;asel2.appendChild(o);});
+ (function(){ /* item catalogue for Add-item dropdown: union of every OT data source + OT_EXTRA */
+   var cat=document.getElementById('ot_cat'), seen={};
+   function add(n){ if(n&&!seen[n]){seen[n]=1; var o=document.createElement('option'); o.value=n; cat.appendChild(o);} }
+   OT_BASE.forEach(function(x){add(x.i);}); OT_ABX1.forEach(add); OT_ABX2.forEach(add);
+   Object.keys(OT_GLOVE).forEach(function(k){add(OT_GLOVE[k].i);});
+   Object.keys(OT_TIER).forEach(function(k){OT_TIER[k].add.forEach(function(x){add(x.i);});});
+   OT_PROCS.forEach(function(p){p.add.forEach(function(x){add(x.i);});});
+   OT_GA.forEach(function(x){add(x.i);}); OT_VIRAL.forEach(function(x){add(x.i);}); OT_INFIL.forEach(function(x){add(x.i);});
+   OT_EXTRA.forEach(add);
+ })();
  csRenderPickers();
 
  // context persistence
@@ -1269,9 +1286,11 @@ async function csGenerate(){
  // OT controls
  document.getElementById('otTier').addEventListener('click',function(e){ const b=e.target.closest('button'); if(!b)return; otState.tier=b.dataset.t; [].forEach.call(document.querySelectorAll('#otTier button'),function(x){x.classList.toggle('on',x===b);}); otRebuild(); });
  psel.onchange=function(){ otState.proc=psel.value; otRebuild(); };
- asel.onchange=function(){ otState.abx=asel.value; otRebuild(); };
+ asel.onchange=function(){ otState.abx1=asel.value; otRebuild(); };
+ asel2.onchange=function(){ otState.abx2=asel2.value; otRebuild(); };
  document.getElementById('ot_ga').onchange=function(e){ otState.ga=e.target.checked; otRebuild(); };
  document.getElementById('ot_viral').onchange=function(e){ otState.viral=e.target.checked; otRebuild(); };
+ document.getElementById('ot_infil').onchange=function(e){ otState.infil=e.target.checked; otRebuild(); };
  document.getElementById('ot_addbtn').onclick=function(){ const it=gv('ot_newi'); const q=parseInt(document.getElementById('ot_newq').value)||1; if(!it){toast('Item name?');return;} otState.rows.push({i:it,q:q}); document.getElementById('ot_newi').value=''; document.getElementById('ot_newq').value=''; otPaint(); };
  document.getElementById('ot_wa').onclick=function(){ waShare(otText()); };
  document.getElementById('ot_cp').onclick=function(){ copyText(otText()); };
@@ -1342,7 +1361,7 @@ function caseBundle(){
   saved_at:new Date().toISOString(),
   patient:{ uid:pbSel?pbSel.Patient_UID:'', clinic_id:pbSel?pbSel.Clinic_Specific_Id:'', name:gv('c_name'), age:gv('c_age'), side:gv('c_side'), part:gv('c_part'), bone:gv('c_bone') },
   estimate_latest: logs.length?logs[0]:null,
-  ot:{ tier:otState.tier, proc:otState.proc, abx:otState.abx, ga:otState.ga, viral:otState.viral, rows:otState.rows, implants:gv('ot_impl'), prep:gv('ot_prep'), text:otText() },
+  ot:{ tier:otState.tier, proc:otState.proc, abx1:otState.abx1, abx2:otState.abx2, ga:otState.ga, viral:otState.viral, infil:otState.infil, rows:otState.rows, implants:gv('ot_impl'), prep:gv('ot_prep'), text:otText() },
   consent:{ proc:(document.getElementById('cs_proc')||{}).value||'', html:(document.getElementById('cs_out')||{}).innerHTML||'' },
   preop:gv('preop_tx')?document.getElementById('preop_tx').value:'',
   postop:document.getElementById('postop_tx').value||'',
