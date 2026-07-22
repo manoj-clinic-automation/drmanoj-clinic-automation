@@ -2,7 +2,7 @@
 
 **Bareilly · maintained with Claude · governs the canonical document set (D247).**
 
-**STATUS: prepared at S149 close — becomes fully canonical when the owner installs this set (project-knowledge swaps + GitHub push, per the S149 install/push runbook).** The restructure (D247 + KB split) is live: `KB_Register` + `KB_History_Archive` replaced the retired monolith `Clinic_Master_KB_SystemsRegister_v1.72` (md5 `27b72639…`) in the session loop, alongside EOS prompt v4 and the four frozen-product dossiers. This manifest is the linchpin Phase 0 verifies. *(The whole S149 set installs together — until it does, project knowledge still holds the pre-S149 copies.)*
+**STATUS: prepared at S149 close — becomes fully canonical when the owner installs this set (project-knowledge swaps + GitHub push, per the S149 install/push runbook).** **The S150 EOS deltas (Register v2.3, Archive v1.2, Nutrition dossier v1.1, Runbook v88, START_HERE_SESSION_151, this manifest) fold into that same pending install — install them together.** The restructure (D247 + KB split) is live: `KB_Register` + `KB_History_Archive` replaced the retired monolith `Clinic_Master_KB_SystemsRegister_v1.72` (md5 `27b72639…`) in the session loop, alongside EOS prompt v4 and the four frozen-product dossiers. This manifest is the linchpin Phase 0 verifies. *(The whole S149 set installs together — until it does, project knowledge still holds the pre-S149 copies.)*
 
 > **Phase 0 read rule (every session).** Verify **every** row below by md5 (cheap — hash compare only). **Read into context only Tier 0.** Tier 1 is opened on demand when the session's task touches it. Tier 2 is hash-verified but never read in the loop and never edited without an explicit waiver (D34 discipline). *A row whose md5 does not match halts work until reconciled (D172/D188). If a "pending" item looks done, verify it against reality first.*
 
@@ -13,16 +13,16 @@
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
 | `CANONICAL_MANIFEST.md` | S149 | *(self — recomputed last, each EOS)* | this file; the linchpin |
-| `START_HERE_SESSION_150` | S150 | `c1dbbe7b06a3934b50d6dfccc6a77e7d` | entry point; regenerated every close-out (was `START_HERE_SESSION_149`) |
-| `KB_Register` | v2.2 | `6870b51fefb45e7b924067e24968f1c5` | current state; from v1.72 (`27b72639…`). **v2.1→v2.2 (S149 housekeeping):** findings line advanced (F-45 RESOLVED, next free F-46); D247 added to its decisions index. |
-| `HANDOFF_RUNBOOK` | v87 (S149) | `d0e2e5b3e692db702337831f80080e8e` | §0 what happened · §2 live backlog (was v86) |
+| `START_HERE_SESSION_151` | S151 | `830cb5c4bc151ec96e60ba4410347f2a` | entry point; regenerated every close-out (was `START_HERE_SESSION_150`) |
+| `KB_Register` | v2.3 | `63440a8114403e66eeb7af5f08746586` | current state; from v1.72 (`27b72639…`). **v2.2→v2.3 (S150):** D248 indexed (clinic_writer waiver); Tier-2 state note added; findings line at F-46. |
+| `HANDOFF_RUNBOOK` | v88 (S150) | `6eba948c13b7c23d76741a5c4e91f09b` | §0 what happened · §2 live backlog (was v87); file `HANDOFF_RUNBOOK_2026-07-22_Session150_v88.md` |
 | active incident | — | — | **only while open**; none open (F-44 closed) |
 
 ## Tier 1 — reference (hash-verified · read only if touched · rewrite only if changed)
 
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
-| `KB_History_Archive` | v1.1 | `15196ec30d18af846f55fea12b1a6f39` | all history, verbatim; from v1.72 (`27b72639…`). **§S147 backfilled + §S149 appended (S149)** → re-pinned (was `44681d05…`). |
+| `KB_History_Archive` | v1.2 | `68b2f52b8aa766a82da80cecf0fb6c4b` | all history, verbatim; from v1.72 (`27b72639…`). **§S150 appended (S150)** → re-pinned (was `15196ec3…`). |
 | `Dr_Manoj_Clinic_Umbrella_Architecture` | v1.58 | `728cc64950502011ff220e1249e488ce` | strategy + decisions log |
 | `Call_Console_Evolution_Spec` | v2.4 | `63978d982d1f8037f728023d15a01328` | dashboard-as-dialer (active) |
 | `Frontend_Dashboard_Documentation` | v4 (S140) | `02ef929b75aa77ec071c903705335375` | dashboard still evolving |
@@ -43,7 +43,7 @@ Each frozen product has one canonical **dossier**; this is the FROZEN ledger. **
 |---|---|---|---|---|---|---|
 | WABA templates | `WABA_Approved_Templates_v1_S137.md` **(adopted)** | `63dd1883ed6677bc96620c087fc1d154` | MyOperator panel — 14 approved | compute at freeze | S147 / D247 | Meta re-approval + bump |
 | Attendance system | `Attendance_System_Dossier_v1_S147.md` **✓ built** | `efc17e190b980d3c678d1f634060052e` | `attendance/` folder + VPS deploy | `dc12f4a0f9cb921b4cf2ce7c579aae16` (folder digest) | S147 / D247 | explicit waiver + bump |
-| Nutrition/Diet (`clinic_writer`) | `Nutrition_Diet_clinic_writer_Dossier_v1_S147.md` **✓ built** | `3b869d0e110b9539349716141e499c35` | `clinic_writer/` folder + PC `D:\clinic_writer\` | `df0b0c340fd0930c49bbc7437437262f` (folder digest) | S147 / D247 (as-is; Hindi-spelling tidy = waiver) | explicit waiver + bump |
+| Nutrition/Diet (`clinic_writer`) | `Nutrition_Diet_clinic_writer_Dossier_v1_1_S150.md` **✓ built** | `6900ff40d43da0013f6ea81c3c31a0e4` | `clinic_writer/` folder + PC `D:\clinic_writer\` | `fcedae30…` (`vitals_page.html` v28; **folder digest `df0b0c34…` recompute owed at install**) | S147 / D247; **waiver exercised S150 / D248** | explicit waiver + bump |
 | Callback Tracker **core** | `Callback_Tracker_Core_Dossier_v1_S147.md` **✓ built** *(scope pending confirm)* | `7e445ff04f086af0fdce656b1eae5dc1` | live Apps Script project (`WebApp.gs` D34 + core `.gs`) + Sheet `1USj…klo0` | `e4fd4512522c2e2723cb50690b92c5e8` (live project digest) | S147 / D247 | explicit waiver (D34) + bump |
 
 **Deferred — NOT frozen (future Tier 2 candidate):**
@@ -73,8 +73,19 @@ Each frozen product has one canonical **dossier**; this is the FROZEN ledger. **
 - **Repo-mirror backlog resolved / verified:** `API_QUICK_REFERENCE_CARD.md` + `WABA_Approved_Templates_v1_S137.md` were already in the mirror and byte-identical (md5s match these pins) — struck, not re-pushed. `README_CANONICAL_SET.md` refreshed.
 - **Repo tidy (Phase 2):** `Repo_Trim_Phase2_S149.ps1` produced — archives 38 superseded docs (3 canonical-docs stragglers + 35 historical `docs/`); **12 live/uncertain clinic + reference docs held** for owner confirmation.
 - **Register v2.1 → v2.2 (housekeeping closed):** findings line advanced (F-45 RESOLVED → next free F-46); D247 added to its decisions index. **§S149 appended to the Archive; runbook v87 + `START_HERE_SESSION_150` generated.** No decision minted.
-- **Next free: D248 · F-46 · Session 150.**
+- **Next free: D249 · F-46 · Session 151.**
 
 ---
 
-**END OF CANONICAL_MANIFEST — S149.**
+### S150 changelog (this close-out)
+- **Tier-2 waiver exercised (D248):** `clinic_writer` unfrozen for one owner-approved batch, then re-frozen. `vitals_page.html` **v26 → v28** (md5 `fcedae303b620f3e5199f4b1e4766510`), installed live on `D:\clinic_writer\`: Hindi spelling tidy (closes the dossier caveat) · exercise library 126 → 128 · PIVD stop-rule · bottle-roll dose · Excel `Diet_Chart` ported as an optional printable **diet-aware** diet sheet (no shopping list) · a **screen-only** comfort theme (print byte-identical). Engine/app/ledger schemas untouched.
+- **Nutrition dossier → v1.1** (`6900ff40d43da0013f6ea81c3c31a0e4`): caveat closed, v28 recorded, folder-digest recompute owed at install.
+- **Tier-0 rows bumped:** `KB_Register` v2.2 → **v2.3** (`63440a8114403e66eeb7af5f08746586`, D248 indexed); `HANDOFF_RUNBOOK` v87 → **v88** (`6eba948c13b7c23d76741a5c4e91f09b`); `START_HERE_SESSION_150` → **`START_HERE_SESSION_151`** (`830cb5c4bc151ec96e60ba4410347f2a`).
+- **Archive:** **§S150 appended** → **v1.2** (`68b2f52b8aa766a82da80cecf0fb6c4b`); re-pinned (was `15196ec3…`).
+- **No new finding** (the `cond`-scope slip was self-introduced during the build and fixed before delivery — a lesson, not a fault). **No architectural decision beyond the waiver D248.**
+- **Owed at install (S151):** recompute the `clinic_writer/` folder digest on the installed folder and re-pin it here + in the dossier (one file changed; the specific `vitals_page.html` md5 is the pinned truth meanwhile). The S149-owed doc install/push + the 12 held `docs/` files still stand.
+- **Next free: D249 · F-46 · Session 151.**
+
+---
+
+**END OF CANONICAL_MANIFEST — S150.**
