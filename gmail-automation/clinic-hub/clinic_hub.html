@@ -1,0 +1,111 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clinic Tools — Dr. Manoj Agarwal</title>
+<style>
+:root{--bg:#0f1b2d;--card:#16263d;--bd:#2a3f5c;--tx:#e8eef7;--dim:#8fa3bd;--acc:#3b82f6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding:0 0 40px}
+header{text-align:center;padding:34px 16px 8px}
+header .ey{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+header h1{font-size:26px;margin:4px 0 2px}
+header .sub{font-size:13px;color:var(--dim)}
+.grid{max-width:760px;margin:28px auto 0;padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:620px){.grid{grid-template-columns:1fr}}
+a.card{display:block;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:20px 18px 16px;text-decoration:none;color:var(--tx);transition:transform .12s,border-color .12s}
+a.card:hover{transform:translateY(-3px);border-color:var(--acc)}
+.ic{font-size:30px;margin-bottom:10px}
+.nm{font-size:17px;font-weight:700;margin-bottom:3px}
+.ds{font-size:12.5px;color:var(--dim);line-height:1.5;min-height:38px}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:11.5px;color:var(--dim)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px;background:#64748b}
+.dot.up{background:#22c55e;box-shadow:0 0 6px #22c55e}
+.dot.file{background:#38bdf8}
+.addr{font-family:Consolas,monospace;font-size:10.5px;opacity:.75}
+.hint{font-size:10.5px;color:#6b8099;margin-top:6px}
+.legend{max-width:760px;margin:26px auto 0;padding:0 16px;font-size:12px;color:var(--dim);text-align:center}
+.legend .dot{margin:0 3px 0 10px}
+footer{text-align:center;margin-top:30px;font-size:11px;color:#5a6f8c}
+</style></head><body>
+
+<header>
+ <div class="ey">Dr. Manoj Agarwal Clinic · Bareilly</div>
+ <h1>Clinic Tools</h1>
+ <div class="sub">Local PC workbench — nothing here touches the internet</div>
+</header>
+
+<div class="grid">
+
+ <a class="card" href="http://127.0.0.1:5058/case" target="_blank" rel="noopener">
+  <div class="ic">🦴</div>
+  <div class="nm">Surgical Case Pack</div>
+  <div class="ds">Estimate · OT medicine list · pre/post-op orders · Hindi consent · case save</div>
+  <div class="foot"><span><span class="dot" id="d5058"></span><span id="t5058">checking…</span></span><span class="addr">127.0.0.1:5058/case</span></div>
+ </a>
+
+ <a class="card" href="http://127.0.0.1:5000/" target="_blank" rel="noopener">
+  <div class="ic">📞</div>
+  <div class="nm">Follow-up Tracker</div>
+  <div class="ds">Docterz CSV upload → next-day call list for the caller team</div>
+  <div class="foot"><span><span class="dot" id="d5000"></span><span id="t5000">checking…</span></span><span class="addr">127.0.0.1:5000</span></div>
+  <div class="hint">Start via your daily tracker routine (open_tracker.bat) — it also archives old CSVs.</div>
+ </a>
+
+ <a class="card" href="http://127.0.0.1:5057/vitals" target="_blank" rel="noopener">
+  <div class="ic">🩺</div>
+  <div class="nm">Vitals &amp; Plan</div>
+  <div class="ds">Vitals entry and diet / nutrition planning</div>
+  <div class="foot"><span><span class="dot" id="d5057"></span><span id="t5057">checking…</span></span><span class="addr">127.0.0.1:5057/vitals</span></div>
+ </a>
+
+ <a class="card" href="GMB_Review_Assist_DrManojAgarwal.html" target="_blank" rel="noopener">
+  <div class="ic">⭐</div>
+  <div class="nm">GMB Review Assist</div>
+  <div class="ds">Compose patient review drafts — Short / Medium / Long, 3 languages, WhatsApp share</div>
+  <div class="foot"><span><span class="dot file"></span>Always ready (file)</span><span class="addr">local file</span></div>
+ </a>
+
+
+ <a class="card" href="http://127.0.0.1:5059/" target="_blank" rel="noopener">
+  <div class="ic">💳</div>
+  <div class="nm">CC Statements → Tally</div>
+  <div class="ds">Decrypt statement PDFs · All_Transactions.xlsx · tally_entries.csv for Hemant · one-click run</div>
+  <div class="foot"><span><span class="dot" id="d5059"></span><span id="t5059">checking…</span></span><span class="addr">127.0.0.1:5059</span></div>
+  <div class="hint">Auto-runs once daily when the hub starts — button inside for on-demand runs.</div>
+ </a>
+
+</div>
+
+<div class="legend">
+ <span class="dot up"></span> running · <span class="dot"></span> not started (start it, then click) · <span class="dot file"></span> plain file, no server needed
+</div>
+
+<footer>clinic_hub.html · offline · opens tools in new tabs · old .bat files remain as fallback</footer>
+
+<script>
+var PORTS=[
+ {p:5058,u:'http://127.0.0.1:5058/case'},
+ {p:5000,u:'http://127.0.0.1:5000/'},
+ {p:5057,u:'http://127.0.0.1:5057/vitals'},
+ {p:5059,u:'http://127.0.0.1:5059/'}
+];
+function setState(p,up,unknown){
+ var d=document.getElementById('d'+p),t=document.getElementById('t'+p);
+ if(!d||!t)return;
+ if(unknown){d.className='dot';t.textContent='status n/a';return;}
+ d.className=up?'dot up':'dot';
+ t.textContent=up?'Running':'Not started';
+}
+function check(entry){
+ try{
+  var ctl=new AbortController();
+  var timer=setTimeout(function(){ctl.abort();},1500);
+  fetch(entry.u,{mode:'no-cors',cache:'no-store',signal:ctl.signal})
+   .then(function(){clearTimeout(timer);setState(entry.p,true,false);})
+   .catch(function(){clearTimeout(timer);setState(entry.p,false,false);});
+ }catch(e){setState(entry.p,false,true);}
+}
+function checkAll(){PORTS.forEach(check);}
+checkAll();
+setInterval(checkAll,5000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden)checkAll();});
+</script>
+</body></html>
