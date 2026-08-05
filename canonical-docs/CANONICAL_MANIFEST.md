@@ -13,16 +13,16 @@
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
 | `CANONICAL_MANIFEST.md` | S149 | *(self — recomputed last, each EOS)* | this file; the linchpin |
-| `START_HERE_SESSION_151` | S151 | `830cb5c4bc151ec96e60ba4410347f2a` | entry point; regenerated every close-out (was `START_HERE_SESSION_150`) |
-| `KB_Register` | v2.3 | `63440a8114403e66eeb7af5f08746586` | current state; from v1.72 (`27b72639…`). **v2.2→v2.3 (S150):** D248 indexed (clinic_writer waiver); Tier-2 state note added; findings line at F-46. |
-| `HANDOFF_RUNBOOK` | v88 (S150) | `6eba948c13b7c23d76741a5c4e91f09b` | §0 what happened · §2 live backlog (was v87); file `HANDOFF_RUNBOOK_2026-07-22_Session150_v88.md` |
+| `START_HERE_SESSION_152` | S152 | `199d39a438b9b4447421ee21c23f1883` | entry point; regenerated every close-out (was `START_HERE_SESSION_151`) |
+| `KB_Register` | v2.4 | `a8fee1a4ff7c4219f1d8182cefa84785` | current state; from v1.72 (`27b72639…`). **v2.2→v2.3 (S150):** D248 indexed (clinic_writer waiver); Tier-2 state note added; findings line at F-46. |
+| `HANDOFF_RUNBOOK` | v89 (S151) | `1d21546ba845899c1bec562c162ed905` | §0 what happened · §2 live backlog (was v88); file `HANDOFF_RUNBOOK_2026-08-05_Session151_v89.md` |
 | active incident | — | — | **only while open**; none open (F-44 closed) |
 
 ## Tier 1 — reference (hash-verified · read only if touched · rewrite only if changed)
 
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
-| `KB_History_Archive` | v1.2 | `68b2f52b8aa766a82da80cecf0fb6c4b` | all history, verbatim; from v1.72 (`27b72639…`). **§S150 appended (S150)** → re-pinned (was `15196ec3…`). |
+| `KB_History_Archive` | v1.3 | `68109ea651c91060fd0e0ba68a9a889d` | all history, verbatim; from v1.72 (`27b72639…`). **§S150 appended (S150)** → re-pinned (was `15196ec3…`). |
 | `Dr_Manoj_Clinic_Umbrella_Architecture` | v1.58 | `728cc64950502011ff220e1249e488ce` | strategy + decisions log |
 | `Call_Console_Evolution_Spec` | v2.4 | `63978d982d1f8037f728023d15a01328` | dashboard-as-dialer (active) |
 | `Frontend_Dashboard_Documentation` | v4 (S140) | `02ef929b75aa77ec071c903705335375` | dashboard still evolving |
@@ -42,7 +42,7 @@ Each frozen product has one canonical **dossier**; this is the FROZEN ledger. **
 | Product | Dossier | Dossier md5 | Artefact (the live thing) | Artefact md5 | Frozen | Waiver |
 |---|---|---|---|---|---|---|
 | WABA templates | `WABA_Approved_Templates_v1_S137.md` **(adopted)** | `63dd1883ed6677bc96620c087fc1d154` | MyOperator panel — 14 approved | compute at freeze | S147 / D247 | Meta re-approval + bump |
-| Attendance system | `Attendance_System_Dossier_v1_S147.md` **✓ built** | `efc17e190b980d3c678d1f634060052e` | `attendance/` folder + VPS deploy | `dc12f4a0f9cb921b4cf2ce7c579aae16` (folder digest) | S147 / D247 | explicit waiver + bump |
+| Attendance system | `Attendance_System_Dossier_v1_1_S151.md` **✓ built** | `6525e2c8298db2ea02000245ebd498e7` | `attendance/` folder + VPS deploy + `att_month_report.py` (additive, S151) | `dc12f4a0f9cb921b4cf2ce7c579aae16` (10-file frozen-core digest; 11-file re-pin owed at repo commit) | S151 / D251 | frozen core: explicit waiver + bump; additive report layer sanctioned S151 |
 | Nutrition/Diet (`clinic_writer`) | `Nutrition_Diet_clinic_writer_Dossier_v1_1_S150.md` **✓ built** | `6900ff40d43da0013f6ea81c3c31a0e4` | `clinic_writer/` folder + PC `D:\clinic_writer\` | `fcedae30…` (`vitals_page.html` v28; **folder digest `df0b0c34…` recompute owed at install**) | S147 / D247; **waiver exercised S150 / D248** | explicit waiver + bump |
 | Callback Tracker **core** | `Callback_Tracker_Core_Dossier_v1_S147.md` **✓ built** *(scope pending confirm)* | `7e445ff04f086af0fdce656b1eae5dc1` | live Apps Script project (`WebApp.gs` D34 + core `.gs`) + Sheet `1USj…klo0` | `e4fd4512522c2e2723cb50690b92c5e8` (live project digest) | S147 / D247 | explicit waiver (D34) + bump |
 
@@ -89,3 +89,11 @@ Each frozen product has one canonical **dossier**; this is the FROZEN ledger. **
 ---
 
 **END OF CANONICAL_MANIFEST — S150.**
+
+### S151 EOS (05 Aug 2026, FULL — one new live VPS file)
+**S151 canonical filenames (Phase-0 mapping):** `KB_Register_v2_4_S151.md` · `KB_History_Archive_v1_3_S151.md` · `HANDOFF_RUNBOOK_2026-08-05_Session151_v89.md` · `START_HERE_SESSION_152.md` · `Attendance_System_Dossier_v1_1_S151.md` · this `CANONICAL_MANIFEST.md`.
+- **Tier-0 rows bumped:** `KB_Register` v2.3 → **v2.4** (`a8fee1a4ff7c4219f1d8182cefa84785`, D249–D251 indexed; F-46); `HANDOFF_RUNBOOK` v88 → **v89** (`1d21546ba845899c1bec562c162ed905`); `START_HERE_SESSION_151` → **`START_HERE_SESSION_152`** (`199d39a438b9b4447421ee21c23f1883`).
+- **Archive:** **§S151 appended** → **v1.3** (`68109ea651c91060fd0e0ba68a9a889d`); re-pinned (was `68b2f52b…`).
+- **Tier-1:** Attendance dossier v1 → **v1.1** (`6525e2c8298db2ea02000245ebd498e7`) — `att_month_report.py` (`c925198895ea146b37a0c69b0ef85b6b`) pinned as an ADDITIVE salary-report layer; frozen 10-file core byte-unchanged; folder-digest re-pin owed at the repo commit. All other Tier-1 unchanged.
+- **Live additions:** VPS `att_month_report.py` (`c9251988…`) · `staff_master.csv` rebuilt (`f8f3a23908d2007ccdc1bd9af5e87725`, 12 salaried staff).
+- Notion catch-up owed (connector absent S151). **Next free: D252 · F-47 · Session 152.**
