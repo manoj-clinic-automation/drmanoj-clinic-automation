@@ -13,16 +13,16 @@
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
 | `CANONICAL_MANIFEST.md` | S149 | *(self — recomputed last, each EOS)* | this file; the linchpin |
-| `START_HERE_SESSION_154` | S154 | `e08ef431fb99fea2947385ae2fd6b6ae` | entry point; regenerated every close-out (was `START_HERE_SESSION_153`) |
-| `KB_Register` | v2.6 | `5cab7efcd268c25469f0970d52273804` | current state; from v1.72 (`27b72639…`). **v2.5→v2.6 (S153):** D256 indexed; F-47/F-48 minted; att_month_report v2.4-installed/v2.5-pending + staff_master v2 + notice v6 pinned. |
-| `HANDOFF_RUNBOOK` | v91 (S153) | `c7758ec4468e76622074470d7056baee` | §0 what happened · §2 live backlog (was v90); file `HANDOFF_RUNBOOK_2026-08-07_Session153_v91.md` |
+| `START_HERE_SESSION_156` | S156 | `541e0f6eab406336be72ab65c078a5c5` | entry point; regenerated every close-out (was `START_HERE_SESSION_155`) |
+| `KB_Register` | v2.8 | `c96ab2b7735f0b54735d78438d6095c3` | current state; from v1.72 (`27b72639…`). **v2.7→v2.8 (S155):** D258 indexed; F-50 minted+fixed; F-49 closed by ruling; ledger v2.4 + digest re-pins recorded; stale Archive pointer fixed. |
+| `HANDOFF_RUNBOOK` | v93 (S155) | `a34795223903c4516e4a24069f667a0e` | §0 what happened · §2 live backlog (was v92); file `HANDOFF_RUNBOOK_2026-08-07_Session155_v93.md` |
 | active incident | — | — | **only while open**; none open (F-44 closed) |
 
 ## Tier 1 — reference (hash-verified · read only if touched · rewrite only if changed)
 
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
-| `KB_History_Archive` | v1.5 | `591fd4bbd2797103865e6cfc733bbe57` | all history, verbatim; from v1.72 (`27b72639…`). **§S153 appended (S153)** → re-pinned (was `fbe348a4…`); pure-append proven by prefix hash. |
+| `KB_History_Archive` | v1.7 | `3cd2d9408aba2bfe90f0c5515495dfd2` | all history, verbatim; from v1.72 (`27b72639…`). **§S155 appended (S155)** → re-pinned (was `2eaf4f9b…`); pure-append proven by prefix hash. |
 | `Dr_Manoj_Clinic_Umbrella_Architecture` | v1.58 | `728cc64950502011ff220e1249e488ce` | strategy + decisions log |
 | `Call_Console_Evolution_Spec` | v2.4 | `63978d982d1f8037f728023d15a01328` | dashboard-as-dialer (active) |
 | `Frontend_Dashboard_Documentation` | v4 (S140) | `02ef929b75aa77ec071c903705335375` | dashboard still evolving |
@@ -42,8 +42,8 @@ Each frozen product has one canonical **dossier**; this is the FROZEN ledger. **
 | Product | Dossier | Dossier md5 | Artefact (the live thing) | Artefact md5 | Frozen | Waiver |
 |---|---|---|---|---|---|---|
 | WABA templates | `WABA_Approved_Templates_v1_S137.md` **(adopted)** | `63dd1883ed6677bc96620c087fc1d154` | MyOperator panel — 14 approved | compute at freeze | S147 / D247 | Meta re-approval + bump |
-| Attendance system | `Attendance_System_Dossier_v1_2_S153.md` **✓ built** (v1.2 folded the S153 report layer at close-out) | `bf19179181c553777e4cc8e3834bc754` | `attendance/` folder + VPS deploy + `att_month_report.py` (additive report layer: **v2.4 `608f2a90…` INSTALLED · v2.5 `e64cad19…` delivered, install pending**, S153; S151 v1 `c9251988…` superseded) | `dc12f4a0f9cb921b4cf2ce7c579aae16` (10-file frozen-core digest byte-unchanged S153; folder re-pin owed at repo commit) | S151 / D251 | frozen core: explicit waiver + bump; additive report layer sanctioned S151, extended S153 (owner-directed) |
-| Nutrition/Diet (`clinic_writer`) | `Nutrition_Diet_clinic_writer_Dossier_v1_1_S150.md` **✓ built** | `6900ff40d43da0013f6ea81c3c31a0e4` | `clinic_writer/` folder + PC `D:\clinic_writer\` | `fcedae30…` (`vitals_page.html` v28; **folder digest `df0b0c34…` recompute owed at install**) | S147 / D247; **waiver exercised S150 / D248** | explicit waiver + bump |
+| Attendance system | `Attendance_System_Dossier_v1_2_S153.md` **✓ built** (v1.2 folded the S153 report layer at close-out) | `bf19179181c553777e4cc8e3834bc754` | `attendance/` folder + VPS deploy + `att_month_report.py` (additive report layer: **v2.5 `e64cad19…` INSTALLED + July-verified S154**; v2.4 `608f2a90…`, S151 v1 `c9251988…` superseded). Companion (non-core) files S154: `build_staff_master.py` v2 `9fe81d7b…` (owner PC), Staff Ledger app `staff_ledger.py` **v2.4 `74dac84eb15f5172478a97066f56c99d` (S155, selftest 123 — D258 single home for all staff money incl. Darpan loan)** (VPS, own systemd — a separate live system tracked in the Register, not part of this frozen product) | 10-file frozen-core digest `dc12f4a0…` byte-unchanged; **full-folder re-pin DONE S155: `c4c9c83f44fbbbb39609047671e77d60`** (11 files; recipe `md5sum attendance/* \| sort \| md5sum`, rediscovered+proven S155) | S151 / D251 | frozen core: explicit waiver + bump; additive report layer sanctioned S151, extended S153 (owner-directed) |
+| Nutrition/Diet (`clinic_writer`) | `Nutrition_Diet_clinic_writer_Dossier_v1_1_S150.md` **✓ built** | `6900ff40d43da0013f6ea81c3c31a0e4` | `clinic_writer/` folder + PC `D:\clinic_writer\` | `fcedae30…` (`vitals_page.html` v28; **folder digest re-pinned S155: `1b4f0f2299cd6c9e72b6d04f45847556`**, repo confirmed at v28, was `df0b0c34…`) | S147 / D247; **waiver exercised S150 / D248** | explicit waiver + bump |
 | Callback Tracker **core** | `Callback_Tracker_Core_Dossier_v1_S147.md` **✓ built** *(scope pending confirm)* | `7e445ff04f086af0fdce656b1eae5dc1` | live Apps Script project (`WebApp.gs` D34 + core `.gs`) + Sheet `1USj…klo0` | `e4fd4512522c2e2723cb50690b92c5e8` (live project digest) | S147 / D247 | explicit waiver (D34) + bump |
 
 **Deferred — NOT frozen (future Tier 2 candidate):**
@@ -116,3 +116,25 @@ Each frozen product has one canonical **dossier**; this is the FROZEN ledger. **
 - **D256** consolidated attendance computation rules (full text Archive §S153); **F-47** double-punch artefact; **F-48** shadow-write / diff-audit rule.
 - **Carried:** folder-digest re-pins (attendance at repo commit; clinic_writer) · Phase-2 trim ruling · wa_approve verify-first · key rotations · WABA/Lokesh · **Notion catch-up S151–S153** · **cold kit DUE**.
 - **Next free: D257 · F-49 · Session 154.**
+
+### S154 EOS (07 Aug 2026, FULL — Staff Ledger maker-checker LIVE (D257); workbook v4; builder v2; v2.5 install verified; F-49 gitignore gate)
+**S154 canonical filenames (Phase-0 mapping):** `KB_Register_v2_7_S154.md` · `KB_History_Archive_v1_6_S154.md` · `HANDOFF_RUNBOOK_2026-08-07_Session154_v92.md` · `START_HERE_SESSION_155.md` · this `CANONICAL_MANIFEST.md`.
+- **Tier-0 rows bumped:** `KB_Register` v2.6 → **v2.7** (`284ee8c8f5c4f8e768f964d846ec32b2`, D257 indexed, F-49 minted); `HANDOFF_RUNBOOK` v91 → **v92** (`19f3b385a456c8002911a12713140953`); `START_HERE_SESSION_154` → **`START_HERE_SESSION_155`** (`d776bfd45b3c5a7b82533d0d219e9c3d`).
+- **Archive:** **§S154 appended** → **v1.6** (`2eaf4f9b072bf7159cb899e9762a9b64`); re-pinned (was `591fd4bb…`); pure append proven by prefix-hash equality.
+- **Tier-2 Attendance row updated (no waiver — frozen 10-file core byte-untouched):** `att_month_report.py` **v2.5 `e64cad19…` INSTALLED S154** (md5 + selftest + July rerun + browser verified). Companion files noted: `build_staff_master.py` v2, `staff_ledger.py` v1.2 (separate live system, Register-tracked).
+- **New live VPS system (D257, Register-pinned, NOT a manifest row):** Staff Ledger — `staff_ledger.py` v1.2 `478c02984dbb30a330375e3f5899ff97`, `staff-ledger.service`, OpenLiteSpeed `/ledger` context (vhost backup `/root/vhost.conf.BACKUP_S154`), live at `attendance.dr-manoj.in/ledger`; data `/root/staff_ledger/` F-31.
+- **Owner-side pins (F-31, Register only):** `Salary_System_2026.xlsx` v4 as-delivered `a8625fd810477765dd9b6dd2678e7d86` (+2 roster columns, installed); round-trip proof: builder v2 output byte-identical to installed `staff_master.csv` `3b1ebcb1…` on sandbox AND owner PC. Docs shipped: `Staff_Master_Update_SOP_v1_S154.docx` `36352247…`, `Staff_Ledger_Briefing_v1_S154.docx` `cf07e468…`.
+- **F-49 (gate on the owed repo commit):** `.gitignore attendance/staff_master.csv` BEFORE committing; then commit att_month_report v2.5 + build_staff_master v2 + staff_ledger v1.2.
+- **Cold kit REBUILT this EOS** (`DrManoj_Clinic_FULL_Handoff_Session154_2026-08-07.zip`). Notion catch-up owed S151–S154 (connector absent again).
+- **Next free: D258 · F-50 · Session 155.**
+### S155 EOS (07 Aug 2026, FULL — Staff Ledger v2.4; D258 minted+EXECUTED; Darpan loan migrated live; repo trim pushed; digest recipe documented)
+**S155 canonical filenames (Phase-0 mapping):** `KB_Register_v2_8_S155.md` · `KB_History_Archive_v1_7_S155.md` · `HANDOFF_RUNBOOK_2026-08-07_Session155_v93.md` · `START_HERE_SESSION_156.md` · this `CANONICAL_MANIFEST.md`.
+- **Tier-0 rows bumped:** `KB_Register` v2.7 → **v2.8** (`c96ab2b7735f0b54735d78438d6095c3`, D258 indexed, F-50 minted+fixed, F-49 closed-by-ruling); `HANDOFF_RUNBOOK` v92 → **v93** (`a34795223903c4516e4a24069f667a0e`); `START_HERE_SESSION_155` → **`START_HERE_SESSION_156`** (`541e0f6eab406336be72ab65c078a5c5`).
+- **Archive:** **§S155 appended** → **v1.7** (`3cd2d9408aba2bfe90f0c5515495dfd2`); re-pinned (was `2eaf4f9b…`); pure append proven by prefix-hash equality (+10,029 chars).
+- **Digest re-pins DONE (recipe documented S155):** attendance full-folder **`c4c9c83f…`** (11 files) · clinic_writer **`1b4f0f22…`** (v28 confirmed in repo). Frozen cores byte-untouched.
+- **Live system:** `staff_ledger.py` v1.2 → **v2.4 `74dac84e…`** (five verified installs, selftest 123). **D258 executed:** Darpan loan migrated + rupee-verified; `close 2026-07` run (loan 179,000); workbook Darpan sheets RETIRED; workbook canonical home → VPS `/root/clinic_salary/` (`a0e3b038…`, test perk removed).
+- **Repo:** Phase-2 trim commit pushed + HEAD-verified (docs/ → 6 kept, 4 archived, 2 dupes removed). Owed: staff_ledger v2.4 + canonical-docs mirror refresh (this S155 set + ~15 root strays).
+- Notion absent 5th session (catch-up S151–S155). Cold kit rebuilt this EOS.
+- **Next free: D259 · F-51 · Session 156.** **S156 TOP (owner mandate): full backend salary automation.**
+
+- **Post-close amendment (same evening, owner-directed):** `START_HERE_SESSION_155` re-issued with the Darpan money-routing ruling (D258 candidate: loan machinery = workbook; day-to-day entries incl. Darpan = Staff Ledger via doctor DIRECT login; per-staff backend ledger) + a per-staff statement-view build task; re-pinned `d776bfd4…` → `a537565e7475f63c5d6fc74114c0e0aa`. Sunday roster print artefact shipped: `Sunday_Roster_SepDec2026_v1_S154.docx` `b06fac335b6a195e3dce76e40a5bb541` (D253 dates Sep–Dec computed; 29-Nov = 5th Sunday). Manifest self-hash recomputed.
