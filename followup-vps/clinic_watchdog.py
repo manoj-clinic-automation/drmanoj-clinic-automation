@@ -58,9 +58,11 @@ SERVICES = [
     ("call-api.service",                 "Click-to-call relay",              "systemctl restart call-api"),
     ("call-hook.service",                "Call-outcome webhook capture",     "systemctl restart call-hook"),
     ("clinic-portal.service",            "Clinic launcher portal",           "systemctl restart clinic-portal"),
+    ("gutlog.service", "GutLog health diary (web)", "systemctl restart gutlog"),
     ("clinic-followup-receiver.service", "Follow-up workbook receiver",      "systemctl restart clinic-followup-receiver"),
     ("attendance-dashboard.service",     "Attendance dashboard (web view)",  "systemctl restart attendance-dashboard"),
     ("attlistener.service",              "Attendance device capture",        "systemctl restart attlistener"),
+    ("staff-ledger.service",             "Staff ledger (salary/money app)",  "systemctl restart staff-ledger"),
 ]
 
 # Where the watchman keeps its small memory of what it already alerted about,

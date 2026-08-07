@@ -28,6 +28,25 @@ v2.0 (S155, D258): ALL staff money — structured loans included — lives here.
   close, never enterable by hand. Ledger file stays append-only jsonl; old rows
   need no migration (new keys default absent).
 
+v3.0 (S156, D259): FULL BACKEND SALARY (owner mandate) + F-51 UI safety batch.
+  + /salary page (checker-only): reads the attendance report's own output files
+    (salary_inputs / deductions_extras / review CSVs from att_month_report.py,
+    never re-deriving its policy math), pulls the three paper loops on-screen
+    (informed-absence flags, EARLY_BIG genuine rulings, OT approval, plus
+    Darpan outstation-day adjustment), combines them with the ledger's closed
+    adjustments for the month and each base salary, and shows the full NET
+    table. One APPROVE (confirmation dialog) locks the month: per-staff
+    SALARY_PAID system rows append to the ledger and salary_final_<month>.csv
+    is written. A locked month can never be silently recomputed; a wrong
+    salary is corrected NEXT month by an OTHER adjustment (accounting-honest).
+  + F-51: the contra button now goes through a server-side CONFIRM page that
+    shows the exact row being reversed; the Skip button asks for confirmation;
+    reversed pairs (row + its contra) display greyed as one visual unit; the
+    statement groups rows under bold month headers (an April skip can no
+    longer read as July).
+  Frozen attendance core still untouched; att_month_report.py untouched (its
+  outputs are the interface). Ledger file stays append-only jsonl.
+
 Commands
 --------
   /root/wa/venv/bin/python3 staff_ledger.py serve                 # run web app (systemd)
@@ -49,11 +68,14 @@ Environment (all optional):
 import os, sys, json, csv, hashlib, secrets, datetime, tempfile, getpass, urllib.request
 
 # ---------------------------------------------------------------- constants --
-APP_VERSION = "2.4-S155"
+APP_VERSION = "3.1-S156"
 LEDGER_DIR  = os.environ.get("LEDGER_DIR", "/root/staff_ledger")
 STAFF_CSV   = os.environ.get("STAFF_CSV", "/root/staff_master.csv")
 PORT        = int(os.environ.get("LEDGER_PORT", "8043"))
 NTFY_URL    = os.environ.get("NTFY_URL", "").strip()
+ATT_BASE    = os.environ.get("ATT_BASE", "/root")          # att_month_report.py home + its outputs
+ATT_REPORT  = os.environ.get("ATT_REPORT", "/root/att_month_report.py")
+VENV_PY     = os.environ.get("VENV_PY", "/root/wa/venv/bin/python3")
 URL_PREFIX  = "/ledger"
 
 # Rate card (owner-ruled S154). Amounts in Rs. sign: +1 credit to staff, -1 debit.
@@ -74,13 +96,15 @@ CATEGORIES = {
     "LOAN_INTEREST":     ("Loan interest (auto)",      None, False, -1, False),
     "LOAN_CAPITALISE":   ("Interest capitalised on skip", None, False, +1, False),
     "LOAN_SKIP":         ("Instalment skipped",        None, False,  0, False),
+    "SALARY_PAID":       ("Salary paid (monthly, auto)", None, False, +1, False),
 }
 INTEREST_RS   = 1000     # D250: flat per month while an interest-bearing balance is open
 SKIPS_PER_FY  = 2        # D250: skips per Indian financial year (Apr-Mar)
-SYSTEM_CATS   = {"ADVANCE_INSTALMENT","LOAN_INTEREST","LOAN_CAPITALISE","LOAN_SKIP"}
+SYSTEM_CATS   = {"ADVANCE_INSTALMENT","LOAN_INTEREST","LOAN_CAPITALISE","LOAN_SKIP",
+                 "SALARY_PAID"}
 # rupees that are NOT salary money (cash / balance-side events) — excluded from
 # the close CSV summary AND from the statement's running salary net, identically:
-SALARY_EXCLUDED = {"ADVANCE_ISSUE","LOAN_CAPITALISE","LOAN_SKIP","PERK"}
+SALARY_EXCLUDED = {"ADVANCE_ISSUE","LOAN_CAPITALISE","LOAN_SKIP","PERK","SALARY_PAID"}
 # F-50 (S155): a role's powers are EXPLICIT lists — never "everything in
 # CATEGORIES", which silently grew when system categories were added in v2.0.
 ROLE_CATS = {
@@ -352,6 +376,26 @@ def open_advances():
     out.sort(key=lambda a: (not a["interest"], a["issue"]["date_from"], a["issue"]["ts_entry"]))
     return out
 
+def month_adjustments(rows, month):
+    """Per-staff {credit,debit,leave_days} over APPROVED rows stamped
+    closed_month==month, excluding SALARY_EXCLUDED — the ONE rule set shared by
+    the close CSV and the salary engine (they can never disagree)."""
+    per = {}
+    for r in rows:
+        if r.get("closed_month") != month or r["status"] != "APPROVED":
+            continue
+        if r["category"] in SALARY_EXCLUDED:
+            continue
+        d = per.setdefault(r["staff"], {"credit": 0, "debit": 0, "leave_days": 0})
+        if r["category"] == "LEAVE_APPROVED":
+            d["leave_days"] += r["days"]
+        elif r["amount"] >= 0:
+            d["credit"] += r["amount"]
+        else:
+            d["debit"] += -r["amount"]
+    return per
+
+
 def close_month(users, checker, month):
     """month = 'YYYY-MM'. Generates ADVANCE_INSTALMENT rows, marks rows closed,
     writes approved_adjustments_<month>.csv. Idempotent: refuses a re-close."""
@@ -418,15 +462,7 @@ def close_month(users, checker, month):
             and r["status"] == "APPROVED"]
     # 3. per-staff summary + detail CSV
     out = _p(f"approved_adjustments_{month}.csv")
-    per = {}
-    for r in take:
-        if r["category"] in SALARY_EXCLUDED:  # cash / balance-side events, not salary
-            continue
-        d = per.setdefault(r["staff"], {"credit":0,"debit":0,"leave_days":0})
-        if r["category"] == "LEAVE_APPROVED":
-            d["leave_days"] += r["days"]
-        elif r["amount"] >= 0: d["credit"] += r["amount"]
-        else: d["debit"] += -r["amount"]
+    per = month_adjustments(take, month)   # shared rule set (salary engine uses it too)
     with open(out, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow([f"APPROVED ADJUSTMENTS {month}",
@@ -616,9 +652,380 @@ def build_statement(staff, month=None):
     return {"lines": lines, "net": net, "months": months, "advances": advs,
             "fy_skips": len(skips), "summary": summary}
 
+
+# ------------------------------------------------------------ salary engine --
+# D259 (S156): the VPS computes salaries end-to-end. This engine NEVER
+# re-derives attendance policy math — it reads att_month_report.py's OWN output
+# files (salary_inputs / deductions_extras CSVs) as the interface, adds the
+# on-screen rulings (informed flags, EARLY_BIG genuine, OT approval, Darpan
+# outstation), folds in the ledger's closed adjustments for the month
+# (month_adjustments — the same rule set as the close CSV) and each base
+# salary from staff_master.csv, and emits the NET table. Approval appends
+# SALARY_PAID system rows (locking the month) + salary_final_<month>.csv.
+
+import re as _re2, subprocess as _sp
+
+def _att(name):
+    return os.path.join(ATT_BASE, name)
+
+def salary_locked(month, rows=None):
+    """True once APPROVED SALARY_PAID rows exist for this month."""
+    return any(r["category"] == "SALARY_PAID" and r["status"] == "APPROVED"
+               and r.get("closed_month") == month
+               for r in (rows or load_ledger()))
+
+def ledger_closed(month, rows=None):
+    return any(r.get("closed_month") == month
+               for r in (rows or load_ledger()))
+
+def staff_bases():
+    """{name: base_salary} for active staff (staff_master.csv)."""
+    out = {}
+    try:
+        with open(STAFF_CSV, encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                if r.get("active", "Y").strip().upper() != "Y":
+                    continue
+                try:
+                    out[r["name"]] = float(r.get("base_salary") or 0)
+                except ValueError:
+                    out[r["name"]] = 0.0
+    except FileNotFoundError:
+        pass
+    return out
+
+def load_salary_inputs(month):
+    """Rows of salary_inputs_<month>.csv (att_month_report's summary) or None."""
+    try:
+        with open(_att(f"salary_inputs_{month}.csv"), encoding="utf-8") as f:
+            return list(csv.DictReader(f))
+    except FileNotFoundError:
+        return None
+
+def load_earlybig(month):
+    """EARLY_BIG rows from deductions_extras_<month>.csv, with the report's OWN
+    would-be amount parsed from its note (never re-derived here). Fail-loud if
+    the pattern is missing — a silent 0 would under-deduct."""
+    out = []
+    try:
+        with open(_att(f"deductions_extras_{month}.csv"), encoding="utf-8") as f:
+            for r in csv.reader(f):
+                if len(r) >= 6 and r[2] == "EARLY_BIG":
+                    m = _re2.search(r"would be Rs\.([0-9.]+) if confirmed", r[5])
+                    if not m:
+                        raise ValueError(
+                            f"EARLY_BIG note format changed in deductions_extras_{month}.csv "
+                            f"(no would-be amount): {r[5]!r} — refusing to guess")
+                    out.append({"name": r[0], "date": r[1], "minutes": r[3],
+                                "rs": float(m.group(1)), "note": r[5]})
+    except FileNotFoundError:
+        pass
+    return out
+
+def load_review(month):
+    """review_<month>.csv rows (informed flags) or None if not yet created."""
+    try:
+        with open(_att(f"review_{month}.csv"), encoding="utf-8") as f:
+            return list(csv.DictReader(f))
+    except FileNotFoundError:
+        return None
+
+def save_review(month, rows):
+    """Write the informed flags back — same columns att_month_report reads."""
+    path = _att(f"review_{month}.csv")
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["user_id", "name", "date", "type", "informed"])
+        for r in rows:
+            w.writerow([r["user_id"], r["name"], r["date"], r["type"],
+                        "N" if str(r.get("informed", "Y")).strip().upper() == "N" else "Y"])
+
+def run_att_report(month):
+    """Re-run att_month_report.py <month> (it re-reads the review file).
+    Returns (ok, output_tail)."""
+    try:
+        r = _sp.run([VENV_PY, ATT_REPORT, month], capture_output=True,
+                    text=True, timeout=180, cwd=ATT_BASE)
+        tail = ((r.stdout or "") + ("\n" + r.stderr if r.stderr else "")).strip()[-1500:]
+        return r.returncode == 0, tail
+    except Exception as e:
+        return False, f"could not run the attendance report: {e}"
+
+def load_rulings(month):
+    """Owner rulings for the month: earlybig approvals, OT approved Rs,
+    Darpan outstation days. Absent file = nothing ruled yet."""
+    try:
+        with open(_p(f"salary_rulings_{month}.json"), encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {"earlybig": {}, "ot": {}, "outstation": {}}
+
+def save_rulings(month, d):
+    os.makedirs(LEDGER_DIR, exist_ok=True)
+    tmp = _p(f"salary_rulings_{month}.json.tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(d, f, indent=1)
+    os.replace(tmp, _p(f"salary_rulings_{month}.json"))
+    os.chmod(_p(f"salary_rulings_{month}.json"), 0o600)
+
+def compute_salary(month):
+    """Assemble the month's NET per staff. Returns (table_rows, token, problems).
+    token = md5 over every input byte that fed the numbers — APPROVE carries it
+    and the server recomputes; any drift refuses the approval (no silent
+    recompute). problems = human-readable blockers (missing files etc.)."""
+    problems = []
+    inputs = load_salary_inputs(month)
+    if inputs is None:
+        return [], "", [f"salary_inputs_{month}.csv not found — run the attendance report first"]
+    bases = staff_bases()
+    rows_l = load_ledger()
+    if not ledger_closed(month, rows_l):
+        problems.append(f"ledger month {month} is not closed yet — loan instalments and "
+                        f"adjustments are missing until 'close {month}' runs")
+    adj = month_adjustments(rows_l, month)
+    eb = load_earlybig(month)
+    rul = load_rulings(month)
+    table = []
+    hasher = hashlib.md5()
+    try:
+        hasher.update(open(_att(f"salary_inputs_{month}.csv"), "rb").read())
+    except FileNotFoundError:
+        pass
+    hasher.update(json.dumps(rul, sort_keys=True).encode())
+    hasher.update(json.dumps(adj, sort_keys=True).encode())
+    hasher.update(json.dumps(sorted(bases.items())).encode())
+    for r in inputs:
+        name = r["Name"]
+        base = bases.get(name)
+        if base is None:
+            problems.append(f"{name} is in the attendance report but not in staff_master.csv")
+            base = 0.0
+        f = lambda k: float(r.get(k) or 0)
+        ded_marks  = f("Ded: marks Rs")
+        ded_early  = f("Ded: early-dep Rs")
+        fine_uninf = f("Fine: uninformed Rs")
+        fine_exc   = f("Fine: excess-absent Rs")
+        inc_rs     = f("Incentive Rs")
+        ot_cand    = f("OT candidate Rs")
+        absent     = int(f("Absent"))
+        # Darpan-style outstation: those days were DUTY, not absence — the
+        # excess-absent fine recomputes on (absent - outstation); everything
+        # else is untouched (mark those dates informed=Y in the review loop).
+        outst = int(rul.get("outstation", {}).get(name, 0) or 0)
+        fine_exc_adj = fine_exc
+        if outst:
+            outst = min(outst, absent)
+            fine_exc_adj = float(max(0, (absent - outst) - 3) * 100)
+        # EARLY_BIG: only rows the owner ruled Genuine=Y deduct, at the
+        # report's own would-be amount.
+        eb_rs = 0.0
+        eb_mine = [e for e in eb if e["name"] == name]
+        for e in eb_mine:
+            k = f'{name}|{e["date"]}'
+            if rul.get("earlybig", {}).get(k, {}).get("genuine"):
+                eb_rs += e["rs"]
+        eb_rs = round(eb_rs, 2)
+        # OT: pays ONLY what the owner approved on screen (default 0 — an
+        # unapproved candidate never pays), capped at the candidate amount.
+        ot_ok = min(float(rul.get("ot", {}).get(name, 0) or 0), ot_cand)
+        ot_ok = max(0.0, round(ot_ok, 2))
+        a = adj.get(name, {"credit": 0, "debit": 0, "leave_days": 0})
+        net = round(base + inc_rs + ot_ok + a["credit"]
+                    - ded_marks - ded_early - fine_uninf - fine_exc_adj
+                    - eb_rs - a["debit"])          # owner ruling: nearest rupee
+        table.append({
+            "name": name, "base": base, "absent": absent, "outstation": outst,
+            "ded_marks": ded_marks, "ded_early": ded_early,
+            "fine_uninf": fine_uninf, "fine_exc": fine_exc_adj,
+            "earlybig_rs": eb_rs, "earlybig_n": len(eb_mine),
+            "ot_cand": ot_cand, "ot_ok": ot_ok,
+            "inc": inc_rs, "adj_cr": a["credit"], "adj_db": a["debit"],
+            "leave_days": a["leave_days"], "net": net,
+            "incentive_tier": r.get("Incentive", ""),
+        })
+        hasher.update(json.dumps(table[-1], sort_keys=True).encode())
+    token = hasher.hexdigest()
+    return table, token, problems
+
+
+def build_salary_html(month, table, locked=False, stamp=""):
+    """The month's FULL salary report. The owner's vetted attendance HTML
+    (salary_inputs_<month>.html: first-page punch grid, legends, EARLY_BIG
+    sheet, collapsible per-staff money logs) is read VERBATIM and a FINAL
+    SALARY section is spliced in before </body> in the same design language:
+    a printable final table + screen-only collapsible per-staff breakdowns
+    (every ledger line with narration, rulings as applied, NET). If the
+    attendance HTML is absent, a standalone minimal page is produced."""
+    from html import escape as _esc
+    rows_l = load_ledger()
+    rul = load_rulings(month)
+    eb = load_earlybig(month)
+    banner = (f'<p style="color:#2f8f4e;font-weight:bold">APPROVED &amp; LOCKED '
+              f'&mdash; {_esc(stamp)}</p>' if locked else
+              '<p style="color:#c0392b;font-weight:bold">PREVIEW &mdash; not '
+              'approved; numbers move with the inputs</p>')
+    tot = sum(t["net"] for t in table)
+    h = ("<tr><th>staff</th><th>base</th><th>+incentive</th><th>+OT appr.</th>"
+         "<th>+ledger cr</th><th>&minus;marks</th><th>&minus;early</th>"
+         "<th>&minus;early-big</th><th>&minus;fines</th><th>&minus;ledger db</th>"
+         "<th>NET Rs</th></tr>")
+    b = ""
+    for t in table:
+        fines = t["fine_uninf"] + t["fine_exc"]
+        cls = "net-pos" if t["net"] >= 0 else "net-neg"
+        b += (f"<tr><td>{_esc(t['name'])}"
+              + (f" <small>({t['outstation']} outstation)</small>" if t["outstation"] else "")
+              + f"</td><td>{t['base']:g}</td><td>{t['inc']:g}</td><td>{t['ot_ok']:g}</td>"
+              f"<td>{t['adj_cr']:g}</td><td>{t['ded_marks']:g}</td>"
+              f"<td>{t['ded_early']:g}</td><td>{t['earlybig_rs']:g}</td>"
+              f"<td>{fines:g}</td><td>{t['adj_db']:g}</td>"
+              f'<td><span class="{cls}"><b>{t["net"]}</b></span></td></tr>')
+    final_tbl = (f'<table><tr>{h[4:-5]}</tr>{b}'
+                 f'<tr><td colspan="10" style="text-align:right"><b>TOTAL PAYOUT'
+                 f'</b></td><td><b>Rs {tot}</b></td></tr></table>')
+    # per-staff collapsible breakdown (screen-only, matches the money-log style)
+    details = ""
+    for t in table:
+        nm = t["name"]
+        inner = f"<p><b>Base salary: Rs {t['base']:g}</b></p><table>"
+        inner += "<tr><th>line</th><th>date / detail</th><th>Rs</th></tr>"
+        if t["inc"]:
+            inner += (f"<tr><td>Incentive ({_esc(t['incentive_tier'])})</td>"
+                      f"<td>attendance report</td><td>+{t['inc']:g}</td></tr>")
+        if t["ot_cand"] or t["ot_ok"]:
+            inner += (f"<tr><td>Overtime</td><td>candidate Rs {t['ot_cand']:g} "
+                      f"&rarr; APPROVED</td><td>+{t['ot_ok']:g}</td></tr>")
+        if t["ded_marks"]:
+            inner += (f"<tr><td>Late-marks deduction</td><td>attendance report"
+                      f"</td><td>&minus;{t['ded_marks']:g}</td></tr>")
+        if t["ded_early"]:
+            inner += (f"<tr><td>Early-departure deduction</td><td>&le;120 min, "
+                      f"auto</td><td>&minus;{t['ded_early']:g}</td></tr>")
+        for e in [x for x in eb if x["name"] == nm]:
+            g = rul.get("earlybig", {}).get(f'{nm}|{e["date"]}', {}).get("genuine")
+            inner += (f"<tr><td>Big early exit</td><td>{e['date']} &middot; "
+                      f"{_esc(e['minutes'])} &middot; ruled "
+                      f"<b>{'GENUINE — deducted' if g else 'not genuine — waived'}</b>"
+                      f"</td><td>{('&minus;' + format(e['rs'], 'g')) if g else '0'}</td></tr>")
+        if t["fine_uninf"]:
+            inner += (f"<tr><td>Uninformed-absence fine</td><td>register-checked"
+                      f"</td><td>&minus;{t['fine_uninf']:g}</td></tr>")
+        if t["fine_exc"] or t["outstation"]:
+            note = (f"absent {t['absent']} &minus; {t['outstation']} outstation"
+                    if t["outstation"] else f"absent {t['absent']}")
+            inner += (f"<tr><td>Excess-absence fine</td><td>{note}</td>"
+                      f"<td>&minus;{t['fine_exc']:g}</td></tr>")
+        led = [r for r in rows_l if r["staff"] == nm and r["status"] == "APPROVED"
+               and r.get("closed_month") == month and r["category"] != "SALARY_PAID"]
+        for r in sorted(led, key=lambda x: (x["date_from"], x["ts_entry"])):
+            lab = CATEGORIES.get(r["category"], [r["category"]])[0]
+            excl = r["category"] in SALARY_EXCLUDED
+            amt = ("record only" if excl else
+                   (("+" if r["amount"] >= 0 else "&minus;") + str(abs(r["amount"]))))
+            grey = ' style="color:#999"' if excl else ""
+            inner += (f"<tr{grey}>"
+                      f"<td>Ledger: {_esc(lab)}</td>"
+                      f"<td>{r['date_from']} &middot; {_esc(r.get('narration',''))} "
+                      f"<small>{_esc(r['maker'])}&rarr;{_esc(r.get('checker',''))}"
+                      f"</small></td><td>{amt}</td></tr>")
+        if t["leave_days"]:
+            inner += (f"<tr><td>Approved leave</td><td>{t['leave_days']} day(s)"
+                      f"</td><td>record only</td></tr>")
+        inner += (f'<tr><td colspan="2" style="text-align:right"><b>NET (nearest '
+                  f'rupee)</b></td><td><b>Rs {t["net"]}</b></td></tr></table>')
+        details += (f"<details><summary><b>{_esc(nm)}</b> &mdash; NET Rs "
+                    f"{t['net']}</summary><div class='rev'>{inner}</div></details>\n")
+    section = f"""
+<div style="page-break-before:always"></div>
+<h2>FINAL SALARY &mdash; {month}</h2>
+{banner}
+{final_tbl}
+<p><small>NET = base + incentive + approved OT + ledger credits &minus; late-marks
+&minus; early-departure &minus; genuine big-early-exits &minus; fines &minus; ledger
+debits (advances/loan instalments/ad-hoc), rounded to the nearest rupee. Every
+figure traces to the attendance report above or a ledger entry below.</small></p>
+<div class="noprint">
+<h3>Per-staff breakdown &mdash; tap a name to expand</h3>
+{details}
+</div>
+"""
+    try:
+        base_html = open(_att(f"salary_inputs_{month}.html"), encoding="utf-8").read()
+        if "</body>" in base_html:
+            return base_html.replace("</body>", section + "</body>", 1)
+    except FileNotFoundError:
+        pass
+    return ("<!doctype html><html><head><meta charset='utf-8'>"
+            "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+            f"<title>Salary {month}</title><style>"
+            "body{font-family:Arial;margin:8mm} table{border-collapse:collapse}"
+            "td,th{border:1px solid #999;padding:3px 6px;font-size:10pt}"
+            ".net-pos{color:#2f8f4e}.net-neg{color:#c0392b}"
+            "details{margin:1mm 0} summary{cursor:pointer}"
+            "@media print{.noprint{display:none}}"
+            "</style></head><body>"
+            f"<p><b>Note:</b> attendance HTML for {month} was not found; this is "
+            "the salary layer alone.</p>" + section + "</body></html>")
+
+def approve_salary(users, checker, month, token):
+    """LOCK the month: verify nothing drifted since the previewed table, then
+    append one SALARY_PAID system row per staff + write salary_final_<month>.csv.
+    Refused if already locked, if the ledger month is not closed, or if any
+    input changed since preview (token mismatch)."""
+    if users[checker]["role"] != "checker":
+        raise PermissionError("only a checker approves salary")
+    rows_l = load_ledger()
+    if salary_locked(month, rows_l):
+        raise ValueError(f"salary for {month} is already approved and locked")
+    table, tok_now, problems = compute_salary(month)
+    if problems:
+        raise ValueError("cannot approve: " + "; ".join(problems))
+    if not table:
+        raise ValueError("nothing to approve")
+    if tok_now != token:
+        raise ValueError("the inputs changed since you previewed this table — "
+                         "review the fresh numbers and approve again")
+    for t in table:
+        append_ledger({
+            "id": secrets.token_hex(6), "ts_entry": now(), "maker": "SYSTEM",
+            "staff": t["name"], "category": "SALARY_PAID",
+            "date_from": month, "date_to": month, "days": 0,
+            "amount": int(t["net"]), "instalment": None,
+            "narration": (f"salary {month}: base {int(t['base'])}"
+                          f" +inc {t['inc']} +OT {t['ot_ok']}"
+                          f" +adj_cr {t['adj_cr']} -marks {t['ded_marks']}"
+                          f" -early {t['ded_early']} -earlybig {t['earlybig_rs']}"
+                          f" -fines {t['fine_uninf'] + t['fine_exc']}"
+                          f" -adj_db {t['adj_db']}"),
+            "self_flag": False, "direct": True, "status": "APPROVED",
+            "checker": checker, "ts_decision": now(),
+            "contra_of": "", "closed_month": month, "interest": False,
+        })
+    out = _p(f"salary_final_{month}.csv")
+    with open(out, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow([f"FINAL SALARY {month}", f"approved {now()} by {checker}"])
+        w.writerow(["staff", "base_Rs", "incentive_Rs", "OT_approved_Rs",
+                    "ledger_credits_Rs", "ded_marks_Rs", "ded_early_Rs",
+                    "ded_earlybig_Rs", "fine_uninformed_Rs", "fine_excess_absent_Rs",
+                    "ledger_debits_Rs", "NET_Rs", "leave_days", "outstation_days"])
+        for t in table:
+            w.writerow([t["name"], t["base"], t["inc"], t["ot_ok"], t["adj_cr"],
+                        t["ded_marks"], t["ded_early"], t["earlybig_rs"],
+                        t["fine_uninf"], t["fine_exc"], t["adj_db"], t["net"],
+                        t["leave_days"], t["outstation"]])
+    os.chmod(out, 0o600)
+    html_out = _p(f"salary_final_{month}.html")
+    with open(html_out, "w", encoding="utf-8") as f:
+        f.write(build_salary_html(month, table, locked=True,
+                                  stamp=f"{now()} by {checker}"))
+    os.chmod(html_out, 0o600)
+    return out, len(table)
+
 # ------------------------------------------------------------------ web app --
 def create_app():
     from flask import Flask, request, redirect, session, abort
+    from html import escape as html_esc
     app = Flask(__name__)
     skf = _p("secret_key")
     os.makedirs(LEDGER_DIR, exist_ok=True)
@@ -646,7 +1053,8 @@ def create_app():
             if role == "checker":
                 links += [f'<a href="{URL_PREFIX}/pending"><b>Pending</b></a>',
                           f'<a href="{URL_PREFIX}/book">Full ledger</a>',
-                          f'<a href="{URL_PREFIX}/advances">Advances</a>']
+                          f'<a href="{URL_PREFIX}/advances">Advances</a>',
+                          f'<a href="{URL_PREFIX}/salary"><b>Salary</b></a>']
             links.append(f'<a href="{URL_PREFIX}/logout">Logout ({u})</a>')
             nav = "<p>" + " · ".join(links) + "</p>"
         return f"""<!doctype html><html><head><meta charset="utf-8">
@@ -661,6 +1069,8 @@ input,select,textarea{{font-size:16px;padding:6px;margin:3px 0;width:100%;box-si
 button{{font-size:16px;padding:8px 18px;margin:4px 2px;border:0;border-radius:6px;cursor:pointer}}
 .ok{{background:#2f8f4e;color:#fff}} .no{{background:#c0392b;color:#fff}}
 .card{{background:#fff;border:1px solid #ccd;border-radius:8px;padding:10px;margin:8px 0}}
+.rev{{color:#999;background:#f1f1f1}} .rev td{{text-decoration:line-through}}
+.mhead{{background:#1f3864;color:#fff;font-weight:bold}}
 .amt-c{{color:#2f8f4e;font-weight:bold}} .amt-d{{color:#c0392b;font-weight:bold}}
 small{{color:#666}}</style></head><body><h2>Staff Ledger</h2>{nav}{body}
 <p><small>v{APP_VERSION} · append-only · corrections by contra entry only</small></p>
@@ -877,6 +1287,31 @@ small{{color:#666}}</style></head><body><h2>Staff Ledger</h2>{nav}{body}
 
     @app.route(URL_PREFIX + "/contra", methods=["POST"])
     def contra():
+        # F-51 step 1: SHOW what would be reversed; nothing is appended here.
+        u, users = user()
+        if not u: return redirect(URL_PREFIX + "/login")
+        rid = request.form["id"].strip()
+        narr = request.form.get("narration", "").strip()
+        o = next((r for r in load_ledger() if r["id"] == rid), None)
+        if not o:
+            return page("Contra", f"<p style='color:red'>no row with id {rid}</p>", u)
+        body = f"""<div class="card"><b>Confirm the reversal</b><br><br>
+        You are about to CONTRA this entry:<br>
+        <b>{o['staff']}</b> · {CATEGORIES.get(o['category'],[o['category']])[0]}
+        · <b>Rs {o['amount']}</b> · {o['date_from']}<br>
+        <small>{o.get('narration','')}</small><br><br>
+        A new opposite entry of <b>Rs {-o['amount']}</b> will be appended.
+        Nothing is deleted; both rows stay on record, netting to zero.<br><br>
+        <form method="post" action="{URL_PREFIX}/contra2" style="display:inline">
+          <input type="hidden" name="id" value="{rid}">
+          <input type="hidden" name="narration" value="{narr}">
+          <button class="no">YES — reverse this entry</button></form>
+        <a href="{URL_PREFIX}/book"><button type="button">Cancel</button></a></div>"""
+        return page("Confirm contra", body, u)
+
+    @app.route(URL_PREFIX + "/contra2", methods=["POST"])
+    def contra2():
+        # F-51 step 2: the confirmed append.
         u, users = user()
         if not u: return redirect(URL_PREFIX + "/login")
         try:
@@ -905,7 +1340,10 @@ small{{color:#666}}</style></head><body><h2>Staff Ledger</h2>{nav}{body}
                            f"""<form method="post" action="{URL_PREFIX}/skip" style="margin-top:4px">
                            <input type="hidden" name="id" value="{iid}">
                            <input type="month" name="month" value="{nxt}"
-                                  style="width:auto"> <button class="no">Skip this month
+                                  style="width:auto"> <button class="no"
+                           onclick="return confirm('Skip a loan month for {a['issue']['staff']}? '
+                             + 'Nothing recovers and Rs {INTEREST_RS} capitalises onto the loan. '
+                             + 'This cannot be undone by hand.')">Skip this month
                            (Rs {INTEREST_RS} capitalises)</button></form>""")
             body += (f"<div class='card'><b>{a['issue']['staff']}</b> — advance "
                      f"Rs {a['issue']['amount']} ({a['issue']['date_from']}){tag}<br>"
@@ -977,8 +1415,14 @@ small{{color:#666}}</style></head><body><h2>Staff Ledger</h2>{nav}{body}
         h = ("<tr><th>date</th><th>item</th><th>note</th><th>credit Rs</th>"
              "<th>debit Rs</th><th>running net Rs</th></tr>")
         b = ""
+        rev = _reversed_ids(load_ledger())
+        last_m = None
         for ln in st["lines"]:
             r = ln["row"]
+            this_m = (r.get("date_from") or "")[:7]
+            if this_m and this_m != last_m:
+                b += f"<tr class='mhead'><td colspan='6'>{this_m}</td></tr>"
+                last_m = this_m
             label = CATEGORIES.get(r["category"], [r["category"]])[0]
             if ln["counted"]:
                 cr = r["amount"] if r["amount"] > 0 else ""
@@ -991,6 +1435,10 @@ small{{color:#666}}</style></head><body><h2>Staff Ledger</h2>{nav}{body}
                 cr = db = ""
                 netc = f"<small>({why})</small>"
                 style = " style='color:#999'"
+            if r["id"] in rev:
+                style = " class='rev'"
+                netc = "<small>reversed</small>" if not ln["counted"] else netc
+                label += " <small>(reversed)</small>"
             b += (f"<tr{style}><td>{r['date_from']}</td><td>{label}"
                   + (f" <small>Rs {r['amount']}</small>" if not ln["counted"]
                      and r["amount"] else "")
@@ -1009,14 +1457,339 @@ small{{color:#666}}</style></head><body><h2>Staff Ledger</h2>{nav}{body}
                 + f"<table>{h}{b}</table>" + note)
         return page("Statement", body, u)
 
+
+    # ---------------------------------------------------- salary (D259) -----
+    def _ck_only():
+        u, users = user()
+        if not u: return None, None
+        if users[u]["role"] != "checker": abort(403)
+        return u, users
+
+    @app.route(URL_PREFIX + "/salary")
+    def salary():
+        u, users = _ck_only()
+        if not u: return redirect(URL_PREFIX + "/login")
+        month = request.args.get("m", "").strip() or datetime.date.today().strftime("%Y-%m")
+        try:
+            datetime.date.fromisoformat(month + "-01")
+        except ValueError:
+            return page("Salary", "<p style='color:red'>bad month</p>", u)
+        msg = request.args.get("msg", "")
+        msg_html = (f"<p style='color:green'>{html_esc(msg)}</p>" if msg else "")
+        rows_l = load_ledger()
+        locked = salary_locked(month, rows_l)
+        closed = ledger_closed(month, rows_l)
+        inputs = load_salary_inputs(month)
+        review = load_review(month)
+        rul = load_rulings(month)
+        eb = load_earlybig(month) if inputs is not None else []
+
+        head = f"""<div class="card"><form method="get">
+          <label>Month</label><input type="month" name="m" value="{month}" style="width:auto">
+          <button class="ok">Show</button></form></div>"""
+
+        if locked:
+            table, _tok, _pr = compute_salary(month)
+            body = (head + f"<h3>Salary {month} — <span style='color:#2f8f4e'>"
+                    f"APPROVED &amp; LOCKED</span></h3>"
+                    + _salary_table(table)
+                    + f"<p><a href='{URL_PREFIX}/salary/report?m={month}' target='_blank'>"
+                    f"<button class='ok' type='button'>Open FULL report (grid + "
+                    f"breakdowns)</button></a></p>"
+                    + f"<p><small>This month is locked. A wrong figure is corrected "
+                    f"NEXT month with an 'Other adjustment' entry — locked months are "
+                    f"never recomputed. File: salary_final_{month}.csv on the VPS.</small></p>")
+            return page("Salary", msg_html + body, u)
+
+        steps = []
+        # step 1 — attendance report present?
+        if inputs is None:
+            steps.append(f"""<div class="card"><b>1 · Attendance report</b><br>
+              salary_inputs_{month}.csv not found.<br>
+              <form method="post" action="{URL_PREFIX}/salary/recompute">
+              <input type="hidden" name="m" value="{month}">
+              <button class="ok" onclick="return confirm('Run the attendance report for {month} now?')">
+              Run attendance report for {month}</button></form></div>""")
+        else:
+            steps.append(f"""<div class="card"><b>1 · Attendance report</b> — found
+              ({len(inputs)} staff). <form method="post" style="display:inline"
+              action="{URL_PREFIX}/salary/recompute"><input type="hidden" name="m" value="{month}">
+              <button onclick="return confirm('Re-run the attendance report for {month}? It re-reads the informed flags below.')">
+              Re-run (after editing flags)</button></form></div>""")
+
+        # step 2 — informed flags (review file) on screen
+        if review is None:
+            steps.append("<div class='card'><b>2 · Informed flags</b><br>"
+                         "The review file appears after the first attendance run.</div>")
+        else:
+            rws = ""
+            for i, r in enumerate(review):
+                inf = str(r.get("informed", "Y")).strip().upper() != "N"
+                rws += (f"<tr><td>{html_esc(r['name'])}</td><td>{r['date']}</td>"
+                        f"<td>{r['type']}</td><td>"
+                        f"<select name='inf_{i}'>"
+                        f"<option value='Y'{' selected' if inf else ''}>Y — informed</option>"
+                        f"<option value='N'{' selected' if not inf else ''}>N — NOT informed</option>"
+                        f"</select><input type='hidden' name='key_{i}' "
+                        f"value='{html_esc(r['user_id'])}|{html_esc(r['name'])}|{r['date']}|{r['type']}'>"
+                        f"</td></tr>")
+            steps.append(f"""<div class="card"><b>2 · Informed flags</b> — check against the
+              reception register. N = uninformed (Rs 50 fine on an absence; +1 mark on a
+              60-min late). Keep Darpan's OUTSTATION dates as Y.<br>
+              <form method="post" action="{URL_PREFIX}/salary/review">
+              <input type="hidden" name="m" value="{month}">
+              <input type="hidden" name="n" value="{len(review)}">
+              <table><tr><th>staff</th><th>date</th><th>event</th><th>informed?</th></tr>
+              {rws}</table>
+              <button class="ok">Save flags</button>
+              <small> — then press Re-run above so the fines recompute.</small>
+              </form></div>""")
+
+        # step 3 — EARLY_BIG rulings on screen
+        if eb:
+            rws = ""
+            for e in eb:
+                k = f'{e["name"]}|{e["date"]}'
+                g = rul.get("earlybig", {}).get(k, {}).get("genuine", False)
+                rws += (f"<tr><td>{html_esc(e['name'])}</td><td>{e['date']}</td>"
+                        f"<td>{html_esc(e['minutes'])}</td><td>Rs {e['rs']}</td>"
+                        f"<td><select name='eb_{html_esc(k)}'>"
+                        f"<option value='N'{'' if g else ' selected'}>N — not genuine (no deduction)</option>"
+                        f"<option value='Y'{' selected' if g else ''}>Y — genuine (deduct Rs {e['rs']})</option>"
+                        f"</select></td></tr>")
+            steps.append(f"""<div class="card"><b>3 · Big early-exit rulings</b> — rule
+              against the physical register (never machine-applied).<br>
+              <form method="post" action="{URL_PREFIX}/salary/rulings">
+              <input type="hidden" name="m" value="{month}"><input type="hidden" name="part" value="eb">
+              <table><tr><th>staff</th><th>date</th><th>early by</th><th>would deduct</th><th>ruling</th></tr>
+              {rws}</table><button class="ok">Save rulings</button></form></div>""")
+        elif inputs is not None:
+            steps.append("<div class='card'><b>3 · Big early-exit rulings</b> — none this month. 👍</div>")
+
+        # step 4 — OT approval + Darpan outstation
+        if inputs is not None:
+            rws, outst_rows = "", ""
+            for r in inputs:
+                cand = float(r.get("OT candidate Rs") or 0)
+                nm = r["Name"]
+                if cand > 0:
+                    cur = rul.get("ot", {}).get(nm, 0)
+                    rws += (f"<tr><td>{html_esc(nm)}</td><td>Rs {cand}</td>"
+                            f"<td><input type='number' step='0.01' min='0' max='{cand}' "
+                            f"name='ot_{html_esc(nm)}' value='{cur}' style='width:8em'>"
+                            f"<small> (0 = not approved; max {cand})</small></td></tr>")
+                if int(float(r.get("Absent") or 0)) > 0:
+                    cur_o = rul.get("outstation", {}).get(nm, 0)
+                    outst_rows += (f"<tr><td>{html_esc(nm)}</td>"
+                                   f"<td>{int(float(r.get('Absent') or 0))}</td>"
+                                   f"<td><input type='number' min='0' name='os_{html_esc(nm)}' "
+                                   f"value='{cur_o}' style='width:6em'></td></tr>")
+            ot_tbl = (f"<table><tr><th>staff</th><th>candidate</th><th>approve Rs</th></tr>{rws}</table>"
+                      if rws else "<p>No OT candidates. </p>")
+            os_tbl = (f"<table><tr><th>staff</th><th>absent days</th><th>of which OUTSTATION"
+                      f" (clinic duty outside)</th></tr>{outst_rows}</table>" if outst_rows else "")
+            steps.append(f"""<div class="card"><b>4 · OT approval &amp; outstation days</b><br>
+              OT pays ONLY what you approve here (unapproved candidates pay nothing).
+              Outstation days were duty, not absence — they reduce the excess-absent fine.<br>
+              <form method="post" action="{URL_PREFIX}/salary/rulings">
+              <input type="hidden" name="m" value="{month}"><input type="hidden" name="part" value="ot">
+              {ot_tbl}{os_tbl}<button class="ok">Save</button></form></div>""")
+
+        # step 5 — ledger close
+        if closed:
+            steps.append(f"<div class='card'><b>5 · Ledger close</b> — {month} is closed "
+                         f"(adjustments + loan instalments captured). ✔</div>")
+        else:
+            steps.append(f"""<div class="card"><b>5 · Ledger close</b> — NOT yet closed.
+              The close computes loan instalments and stamps every approved adjustment
+              into {month}. Run it once, after all of the month's entries are in.<br>
+              <form method="post" action="{URL_PREFIX}/salary/close">
+              <input type="hidden" name="m" value="{month}">
+              <button class="no" onclick="return confirm('Close ledger month {month}? Loan instalments will be generated. A month closes only once.')">
+              Run monthly close for {month}</button></form></div>""")
+
+        # step 6 — the table + approve
+        table, token, problems = compute_salary(month)
+        if problems:
+            steps.append("<div class='card'><b>6 · Salary table</b><br>" +
+                         "".join(f"<p style='color:#c0392b'>• {html_esc(x)}</p>" for x in problems)
+                         + "</div>")
+        if table and not problems:
+            total = sum(t["net"] for t in table)
+            steps.append(f"""<div class="card"><b>6 · Salary table — PREVIEW</b>
+              {_salary_table(table)}
+              <p><b>Total payout: Rs {total}</b> · {len(table)} staff ·
+              <a href='{URL_PREFIX}/salary/report?m={month}' target='_blank'>
+              <button type='button'>Open FULL report (grid + breakdowns)</button></a></p>
+              <form method="post" action="{URL_PREFIX}/salary/approve">
+              <input type="hidden" name="m" value="{month}">
+              <input type="hidden" name="token" value="{token}">
+              <button class="ok" onclick="return confirm('APPROVE salary for {month}: Rs {total} across {len(table)} staff? This LOCKS the month — it cannot be recomputed. Corrections happen next month by adjustment entry.')">
+              APPROVE &amp; LOCK {month}</button></form>
+              <small>Approval appends one salary line per staff to the ledger and writes
+              salary_final_{month}.csv. If any input changes between this preview and your
+              press, the approval refuses and shows fresh numbers.</small></div>""")
+
+        return page("Salary", msg_html + head + f"<h3>Salary {month}</h3>" + "".join(steps), u)
+
+    def _salary_table(table):
+        h = ("<tr><th>staff</th><th>base</th><th>+inc</th><th>+OT</th><th>+ledger cr</th>"
+             "<th>-marks</th><th>-early</th><th>-early-big</th><th>-fines</th>"
+             "<th>-ledger db</th><th><b>NET Rs</b></th></tr>")
+        b = ""
+        for t in table:
+            fines = t["fine_uninf"] + t["fine_exc"]
+            b += (f"<tr><td>{html_esc(t['name'])}"
+                  + (f" <small>({t['outstation']} outstation)</small>" if t["outstation"] else "")
+                  + f"</td><td>{t['base']:g}</td>"
+                  f"<td class='amt-c'>{t['inc']:g}</td><td class='amt-c'>{t['ot_ok']:g}</td>"
+                  f"<td class='amt-c'>{t['adj_cr']:g}</td>"
+                  f"<td class='amt-d'>{t['ded_marks']:g}</td><td class='amt-d'>{t['ded_early']:g}</td>"
+                  f"<td class='amt-d'>{t['earlybig_rs']:g}</td><td class='amt-d'>{fines:g}</td>"
+                  f"<td class='amt-d'>{t['adj_db']:g}</td>"
+                  f"<td><b>{t['net']}</b></td></tr>")
+        return f"<table>{h}{b}</table>"
+
+    @app.route(URL_PREFIX + "/salary/report")
+    def salary_report():
+        u, users = _ck_only()
+        if not u: return redirect(URL_PREFIX + "/login")
+        m = request.args.get("m", "").strip()
+        try:
+            datetime.date.fromisoformat(m + "-01")
+        except Exception:
+            return page("Salary report", "<p style='color:red'>bad month</p>", u)
+        rows_l = load_ledger()
+        locked = salary_locked(m, rows_l)
+        stamp = ""
+        if locked:
+            sp = [r for r in rows_l if r["category"] == "SALARY_PAID"
+                  and r.get("closed_month") == m and r["status"] == "APPROVED"]
+            if sp: stamp = f"{sp[0]['ts_decision']} by {sp[0]['checker']}"
+        table, _tok, problems = compute_salary(m)
+        if not table:
+            return page("Salary report",
+                        "<p style='color:red'>" + html_esc("; ".join(problems) or
+                        "no data") + "</p>", u)
+        return build_salary_html(m, table, locked=locked, stamp=stamp)
+
+    @app.route(URL_PREFIX + "/salary/review", methods=["POST"])
+    def salary_review():
+        u, users = _ck_only()
+        if not u: return redirect(URL_PREFIX + "/login")
+        m = request.form["m"]
+        n = int(request.form["n"])
+        rows = []
+        for i in range(n):
+            key = request.form.get(f"key_{i}", "")
+            parts = key.split("|")
+            if len(parts) != 4: continue
+            rows.append({"user_id": parts[0], "name": parts[1], "date": parts[2],
+                         "type": parts[3], "informed": request.form.get(f"inf_{i}", "Y")})
+        save_review(m, rows)
+        return redirect(URL_PREFIX + f"/salary?m={m}&msg=Flags saved — now press Re-run.")
+
+    @app.route(URL_PREFIX + "/salary/recompute", methods=["POST"])
+    def salary_recompute():
+        u, users = _ck_only()
+        if not u: return redirect(URL_PREFIX + "/login")
+        m = request.form["m"]
+        if salary_locked(m):
+            return page("Salary", "<p style='color:red'>month locked</p>", u)
+        ok, tail = run_att_report(m)
+        msg = ("Attendance report re-ran OK." if ok
+               else "Attendance report FAILED — nothing changed.")
+        body = (f"<p>{msg}</p><pre style='background:#fff;border:1px solid #ccd;"
+                f"padding:8px;white-space:pre-wrap'>{html_esc(tail)}</pre>"
+                f"<p><a href='{URL_PREFIX}/salary?m={m}'>back to Salary {m}</a></p>")
+        return page("Salary", body, u)
+
+    @app.route(URL_PREFIX + "/salary/rulings", methods=["POST"])
+    def salary_rulings():
+        u, users = _ck_only()
+        if not u: return redirect(URL_PREFIX + "/login")
+        m = request.form["m"]
+        if salary_locked(m):
+            return page("Salary", "<p style='color:red'>month locked</p>", u)
+        rul = load_rulings(m)
+        part = request.form.get("part", "")
+        if part == "eb":
+            eb = {}
+            for k, v in request.form.items():
+                if k.startswith("eb_"):
+                    eb[k[3:]] = {"genuine": v == "Y"}
+            rul["earlybig"] = eb
+        elif part == "ot":
+            ot, os_ = rul.get("ot", {}), rul.get("outstation", {})
+            for k, v in request.form.items():
+                if k.startswith("ot_"):
+                    try: ot[k[3:]] = max(0.0, float(v or 0))
+                    except ValueError: pass
+                elif k.startswith("os_"):
+                    try: os_[k[3:]] = max(0, int(float(v or 0)))
+                    except ValueError: pass
+            rul["ot"], rul["outstation"] = ot, os_
+        save_rulings(m, rul)
+        return redirect(URL_PREFIX + f"/salary?m={m}&msg=Saved.")
+
+    @app.route(URL_PREFIX + "/salary/close", methods=["POST"])
+    def salary_close():
+        u, users = _ck_only()
+        if not u: return redirect(URL_PREFIX + "/login")
+        m = request.form["m"]
+        try:
+            out, n = close_month(users, u, m)
+            msg = f"Closed {m}: {n} rows."
+        except Exception as e:
+            return page("Salary", f"<p style='color:red'>close failed: {html_esc(str(e))}</p>"
+                        f"<p><a href='{URL_PREFIX}/salary?m={m}'>back</a></p>", u)
+        return redirect(URL_PREFIX + f"/salary?m={m}&msg={msg}")
+
+    @app.route(URL_PREFIX + "/salary/approve", methods=["POST"])
+    def salary_approve():
+        u, users = _ck_only()
+        if not u: return redirect(URL_PREFIX + "/login")
+        m = request.form["m"]
+        try:
+            out, n = approve_salary(users, u, m, request.form.get("token", ""))
+        except Exception as e:
+            return page("Salary", f"<p style='color:red'>NOT approved: {html_esc(str(e))}</p>"
+                        f"<p><a href='{URL_PREFIX}/salary?m={m}'>back</a></p>", u)
+        return redirect(URL_PREFIX + f"/salary?m={m}&msg=APPROVED and locked: {n} staff.")
+
+    def _reversed_ids(all_rows):
+        """F-51 void-pair display: ids of approved rows that a matching approved
+        contra reverses, PLUS those contra ids — greedily one contra per
+        original (handles chains: a contra of a contra pairs the same way)."""
+        done = set()
+        by_target = {}
+        for r in all_rows:
+            if (r["status"] == "APPROVED" and r.get("contra_of")
+                    and r["category"] not in SYSTEM_CATS):
+                by_target.setdefault(r["contra_of"], []).append(r)
+        amounts = {r["id"]: r["amount"] for r in all_rows}
+        for tgt, contras in by_target.items():
+            if tgt not in amounts:
+                continue
+            for c in contras:
+                if tgt in done or c["id"] in done:
+                    continue
+                if c["amount"] == -amounts[tgt]:
+                    done.add(tgt); done.add(c["id"])
+                    break
+        return done
+
     def _table(rows, show_id=False):
         h = ("<tr>" + ("<th>id</th>" if show_id else "")
              + "<th>staff</th><th>category</th><th>dates</th><th>Rs</th>"
                "<th>status</th><th>maker→checker</th><th>note</th></tr>")
+        rev = _reversed_ids(load_ledger())
         b = ""
         for r in rows:
             cls = "amt-c" if r["amount"] >= 0 else "amt-d"
             row_cls = " class='self'" if r.get("self_flag") else ""
+            if r["id"] in rev:
+                row_cls = " class='rev'" 
             dates = r["date_from"] + ("" if r["date_to"] in ("", r["date_from"])
                                       else "→" + r["date_to"])
             b += (f"<tr{row_cls}>" + (f"<td><small>{r['id']}</small></td>" if show_id else "")
@@ -1024,7 +1797,8 @@ small{{color:#666}}</style></head><body><h2>Staff Ledger</h2>{nav}{body}
                   f"<td>{CATEGORIES.get(r['category'],[r['category']])[0]}"
                   + ("<span class='direct'> ·direct</span>" if r.get("direct") else "") + "</td>"
                   f"<td>{dates}</td><td class='{cls}'>{r['amount']}</td>"
-                  f"<td>{r['status']}{('·'+r['closed_month']) if r.get('closed_month') else ''}</td>"
+                  f"<td>{('REVERSED' if r['id'] in rev else r['status'])}"
+                  f"{('·'+r['closed_month']) if r.get('closed_month') else ''}</td>"
                   f"<td><small>{r['maker']}→{r.get('checker','')}</small></td>"
                   f"<td><small>{r.get('narration','')}</small></td></tr>")
         return f"<table>{h}{b}</table>"
@@ -1458,8 +2232,278 @@ def selftest():
     pgpm = clm2.get(URL_PREFIX + "/").data.decode()
     ck('"loan": 2000' not in pgpm, "maker form carries NO balances")
 
+
+    # ================= v3.0 (S156): salary engine + F-51 =====================
+    global ATT_BASE
+    _t4 = tempfile.mkdtemp(); LEDGER_DIR = _t4
+    _att_t = tempfile.mkdtemp(); ATT_BASE = _att_t
+    save_users(users); users = load_users()
+    # synthetic staff master WITH base salaries (F-31: synthetic only)
+    with open(STAFF_CSV, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["user_id","name","active","base_salary"])
+        w.writerow([1,"Alpha","Y",9000]); w.writerow([2,"Beta","Y",12000])
+        w.writerow([3,"Gamma","Y",6000])
+    YM = "2026-08"
+    # synthetic att_month_report outputs (the interface files, exact headers)
+    def _w_inputs(rows):
+        heads = ["Name","Group","Present","Absent","Late marks","Late days",
+                 "Late minutes","Grace days used",">=60min days","Early-dep minutes",
+                 "No-out-punch days","Early-big days","Deduction half-days",
+                 "Ded: marks Rs","Ded: early-dep Rs","Fine: uninformed Rs",
+                 "Fine: excess-absent Rs","OT cand. minutes","OT candidate Rs",
+                 "Incentive","Incentive Rs","Net Rs","Months over cap (yr)",
+                 "Habitual flag","Absent dates"]
+        with open(os.path.join(ATT_BASE, f"salary_inputs_{YM}.csv"), "w",
+                  newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=heads); w.writeheader()
+            for r in rows: w.writerow(r)
+    def _row(name, **kw):
+        base = {h: 0 for h in ["Present","Absent","Late marks","Late days",
+                "Late minutes","Grace days used",">=60min days","Early-dep minutes",
+                "No-out-punch days","Early-big days","Deduction half-days",
+                "Ded: marks Rs","Ded: early-dep Rs","Fine: uninformed Rs",
+                "Fine: excess-absent Rs","OT cand. minutes","OT candidate Rs",
+                "Incentive Rs","Net Rs","Months over cap (yr)"]}
+        base.update({"Name": name, "Group": "A", "Incentive": "-",
+                     "Habitual flag": "", "Absent dates": ""})
+        base.update(kw); return base
+    _w_inputs([
+        _row("Alpha", **{"Absent": 6, "Fine: excess-absent Rs": 300,
+                         "Ded: marks Rs": 500, "OT candidate Rs": 200}),
+        _row("Beta",  **{"Incentive": "FULL", "Incentive Rs": 400,
+                         "Ded: early-dep Rs": 50}),
+        _row("Gamma", **{"Fine: uninformed Rs": 100}),
+    ])
+    with open(os.path.join(ATT_BASE, f"deductions_extras_{YM}.csv"), "w",
+              newline="", encoding="utf-8") as f:
+        w = csv.writer(f); w.writerow(["name","date","item","minutes","Rs","note"])
+        w.writerow(["Alpha","2026-08-12","EARLY_BIG","219 min",0.0,
+                    "would be Rs.148.7 if confirmed — last punch 15:20"])
+        w.writerow(["Alpha","2026-08-20","EARLY_BIG","100 min",0.0,
+                    "would be Rs.70.0 if confirmed — last punch 16:00"])
+        w.writerow(["Beta","2026-08-05","EARLY_DEP","60 min",25.0,"left early"])
+    with open(os.path.join(ATT_BASE, f"review_{YM}.csv"), "w",
+              newline="", encoding="utf-8") as f:
+        w = csv.writer(f); w.writerow(["user_id","name","date","type","informed"])
+        w.writerow([1,"Alpha","2026-08-03","ABSENT","Y"])
+        w.writerow([3,"Gamma","2026-08-04","LATE60","N"])
+    # interface loaders
+    inp = load_salary_inputs(YM)
+    ck(inp is not None and len(inp) == 3, "salary_inputs loads (3 staff)")
+    eb = load_earlybig(YM)
+    ck(len(eb) == 2 and eb[0]["rs"] == 148.7 and eb[1]["rs"] == 70.0,
+       "EARLY_BIG rows parsed with the report's own would-be amounts")
+    rv = load_review(YM)
+    ck(rv is not None and len(rv) == 2, "review file loads")
+    rv[0]["informed"] = "N"; save_review(YM, rv)
+    rv2 = load_review(YM)
+    ck(rv2[0]["informed"] == "N" and rv2[1]["informed"] == "N",
+       "review round-trips through save_review")
+    bs = staff_bases()
+    ck(bs == {"Alpha": 9000.0, "Beta": 12000.0, "Gamma": 6000.0}, "bases load")
+    # fail-loud on a mangled EARLY_BIG note
+    with open(os.path.join(ATT_BASE, f"deductions_extras_{YM}.csv"), "a",
+              newline="", encoding="utf-8") as f:
+        csv.writer(f).writerow(["Gamma","2026-08-09","EARLY_BIG","90 min",0.0,"format drifted"])
+    try:
+        load_earlybig(YM); ck(False, "mangled EARLY_BIG note must fail")
+    except ValueError: ck(True, "EARLY_BIG note drift fails loud, never guesses 0")
+    # restore the good file
+    with open(os.path.join(ATT_BASE, f"deductions_extras_{YM}.csv"), "w",
+              newline="", encoding="utf-8") as f:
+        w = csv.writer(f); w.writerow(["name","date","item","minutes","Rs","note"])
+        w.writerow(["Alpha","2026-08-12","EARLY_BIG","219 min",0.0,
+                    "would be Rs.148.7 if confirmed — last punch 15:20"])
+        w.writerow(["Alpha","2026-08-20","EARLY_BIG","100 min",0.0,
+                    "would be Rs.70.0 if confirmed — last punch 16:00"])
+    # ledger events for the month, then close
+    ad = make_entry(users, "doc", "Alpha", "FINE_ADHOC", "2026-08-10","2026-08-10",0,"250","broke a splint")
+    nd = make_entry(users, "doc", "Beta", "NIGHT_DUTY", "2026-08-11","2026-08-12",2,"0","")
+    # compute BEFORE close must flag the problem
+    t0, tok0, pr0 = compute_salary(YM)
+    ck(pr0 and "not closed" in pr0[0], "compute names the un-closed ledger month")
+    close_month(users, "doc", YM)
+    # rulings: EARLY_BIG one genuine one not; OT partial approve; outstation
+    rul = load_rulings(YM)
+    rul["earlybig"] = {"Alpha|2026-08-12": {"genuine": True},
+                       "Alpha|2026-08-20": {"genuine": False}}
+    rul["ot"] = {"Alpha": 150.0}          # of the 200 candidate
+    rul["outstation"] = {"Alpha": 4}      # 6 absent -> 2 effective -> fine 0
+    save_rulings(YM, rul)
+    table, token, problems = compute_salary(YM)
+    ck(not problems, f"no problems after close (got {problems})")
+    T = {t["name"]: t for t in table}
+    # Alpha: 9000 +0 inc +150 OT +0 cr -500 marks -0 early -148.7 eb
+    #        -(0 uninf + 0 excess-after-outstation) -250 adj_db = 8251.3 -> 8251
+    ck(T["Alpha"]["fine_exc"] == 0.0,
+       "outstation 4 of 6 absents -> excess fine recomputes to 0")
+    ck(T["Alpha"]["earlybig_rs"] == 148.7, "only the Genuine=Y EARLY_BIG deducts")
+    ck(T["Alpha"]["ot_ok"] == 150.0, "OT pays the approved 150, not the 200 candidate")
+    ck(T["Alpha"]["adj_db"] == 250, "ledger ad-hoc fine folded in from the close")
+    ck(T["Alpha"]["net"] == 8251, f"Alpha net rounds to the rupee (got {T['Alpha']['net']})")
+    # Beta: 12000 +400 inc +400 night -50 early = 12750
+    ck(T["Beta"]["adj_cr"] == 400 and T["Beta"]["net"] == 12750,
+       f"Beta net with night duty + incentive (got {T['Beta']['net']})")
+    # Gamma: 6000 -100 uninformed = 5900
+    ck(T["Gamma"]["net"] == 5900, "Gamma net")
+    # OT approval can never exceed the candidate
+    rul["ot"]["Alpha"] = 9999.0; save_rulings(YM, rul)
+    t2, tok2, _ = compute_salary(YM)
+    ck({x["name"]: x for x in t2}["Alpha"]["ot_ok"] == 200.0,
+       "OT approval capped at the candidate amount")
+    rul["ot"]["Alpha"] = 150.0; save_rulings(YM, rul)
+    table, token, _ = compute_salary(YM)
+    # approve gates
+    try:
+        approve_salary(users, "mfull", YM, token); ck(False, "maker approve must fail")
+    except PermissionError: ck(True, "salary approval is checker-only")
+    try:
+        approve_salary(users, "doc", YM, "stale-token"); ck(False, "stale token must fail")
+    except ValueError: ck(True, "drifted inputs refuse the approval (token check)")
+    out4, n4 = approve_salary(users, "doc", YM, token)
+    ck(n4 == 3 and os.path.exists(out4), "approve writes salary_final CSV for 3 staff")
+    ck(salary_locked(YM), "month locks on approval")
+    sp = [r for r in load_ledger() if r["category"] == "SALARY_PAID"]
+    ck(len(sp) == 3 and all(r["maker"] == "SYSTEM" and r["closed_month"] == YM
+                            for r in sp), "3 SALARY_PAID system rows, month-stamped")
+    ck({r["staff"]: r["amount"] for r in sp}["Alpha"] == 8251,
+       "SALARY_PAID amount = the rounded net")
+    try:
+        approve_salary(users, "doc", YM, token); ck(False, "second approve must fail")
+    except ValueError: ck(True, "a locked month refuses re-approval")
+    # SALARY_PAID is a system category: never hand-entered, never hand-contra'd
+    try:
+        make_entry(users, "doc", "Alpha", "SALARY_PAID", "2026-08-31","",0,"9999","x")
+        ck(False, "hand SALARY_PAID must fail")
+    except PermissionError: ck(True, "SALARY_PAID cannot be hand-entered (F-50)")
+    try:
+        make_contra(users, "doc", sp[0]["id"], "oops")
+        ck(False, "contra of SALARY_PAID must fail")
+    except ValueError: ck(True, "SALARY_PAID rows are never contra'd by hand")
+    # statement: salary line visible but OUTSIDE the adjustments net
+    stA = build_statement("Alpha")
+    ck(any(l["row"]["category"] == "SALARY_PAID" for l in stA["lines"]),
+       "salary line appears in the statement")
+    ck(all(not l["counted"] for l in stA["lines"]
+           if l["row"]["category"] == "SALARY_PAID"),
+       "salary line stays outside the adjustments running net")
+    # ---- F-51 web checks ----------------------------------------------------
+    app = create_app(); cl = app.test_client()
+    cl.post(URL_PREFIX + "/login", data={"u":"doc","p":"pw"})
+    # contra two-step: step 1 shows the row and appends NOTHING
+    n_before = len(load_ledger())
+    r1 = cl.post(URL_PREFIX + "/contra", data={"id": ad["id"], "narration": "test"})
+    ck(b"Confirm the reversal" in r1.data and b"250" in r1.data,
+       "contra step 1 shows the target row + amount")
+    ck(len(load_ledger()) == n_before, "contra step 1 appends nothing (F-51)")
+    r2 = cl.post(URL_PREFIX + "/contra2", data={"id": ad["id"], "narration": "test"})
+    ck(r2.status_code == 302 and len(load_ledger()) == n_before + 1,
+       "contra step 2 performs the append")
+    # void-pair display: the fine and its contra both grey out
+    bk = cl.get(URL_PREFIX + "/book").data.decode()
+    ck(bk.count("REVERSED") >= 2, "book shows both rows of the pair as REVERSED")
+    stp = cl.get(URL_PREFIX + "/statement?staff=Alpha").data.decode()
+    ck("(reversed)" in stp, "statement greys the reversed pair")
+    ck("class='mhead'" in stp, "statement carries month header rows (F-51)")
+    # skip button carries a confirm
+    pgadv2 = cl.get(URL_PREFIX + "/advances").data.decode()
+    ck("return confirm(" in pgadv2 or "No open advances" in pgadv2,
+       "skip button asks for confirmation")
+    # salary page renders locked view; approve route refuses when locked
+    pgsl = cl.get(URL_PREFIX + f"/salary?m={YM}").data.decode()
+    ck("APPROVED" in pgsl and "LOCKED" in pgsl, "salary page shows the locked month")
+    ra = cl.post(URL_PREFIX + "/salary/approve", data={"m": YM, "token": "x"})
+    ck(b"NOT approved" in ra.data, "web approve refuses a locked month")
+    # maker fenced off the whole salary surface
+    clm3 = app.test_client(); clm3.post(URL_PREFIX + "/login", data={"u":"mfull","p":"pw"})
+    ck(clm3.get(URL_PREFIX + "/salary").status_code == 403, "maker blocked from /salary")
+    ck(clm3.post(URL_PREFIX + "/salary/approve", data={"m": YM, "token": "x"}).status_code == 403,
+       "maker blocked from salary approve")
+    ck(clm3.post(URL_PREFIX + "/salary/close", data={"m": YM}).status_code == 403,
+       "maker blocked from salary close")
+    # review + rulings routes round-trip through the web
+    YM2 = "2026-09"
+    _sv = os.path.join(ATT_BASE, f"review_{YM2}.csv")
+    with open(_sv, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f); w.writerow(["user_id","name","date","type","informed"])
+        w.writerow([2,"Beta","2026-09-02","ABSENT","Y"])
+    rr = cl.post(URL_PREFIX + "/salary/review",
+                 data={"m": YM2, "n": "1", "key_0": "2|Beta|2026-09-02|ABSENT",
+                       "inf_0": "N"})
+    ck(rr.status_code == 302 and load_review(YM2)[0]["informed"] == "N",
+       "web review save writes the informed flag")
+    rr2 = cl.post(URL_PREFIX + "/salary/rulings",
+                  data={"m": YM2, "part": "ot", "ot_Beta": "120", "os_Beta": "2"})
+    r_l = load_rulings(YM2)
+    ck(rr2.status_code == 302 and r_l["ot"]["Beta"] == 120.0
+       and r_l["outstation"]["Beta"] == 2, "web rulings save OT + outstation")
+
+
+    # ---- v3.1: full salary report (splice into the vetted attendance HTML) --
+    # synthetic attendance HTML standing in for the owner's vetted artefact
+    with open(os.path.join(ATT_BASE, f"salary_inputs_{YM}.html"), "w",
+              encoding="utf-8") as f:
+        f.write("<!doctype html><html><head><style>.noprint{}</style></head>"
+                "<body><h1>GRID-MARKER-2026-08</h1>"
+                "<details><summary>legend</summary>vetted</details>"
+                "</body></html>")
+    tableR, tokR, prR = compute_salary(YM)
+    htm = build_salary_html(YM, tableR, locked=True, stamp="teststamp by doc")
+    ck("GRID-MARKER-2026-08" in htm, "report preserves the vetted attendance HTML verbatim")
+    ck("FINAL SALARY" in htm and "TOTAL PAYOUT" in htm, "final section spliced in")
+    ck(htm.index("GRID-MARKER-2026-08") < htm.index("FINAL SALARY"),
+       "grid page stays FIRST; salary section follows")
+    ck(htm.count("</body>") == 1, "splice keeps one body close")
+    ck("<details><summary><b>Alpha</b>" in htm, "per-staff collapsible breakdown present")
+    ck("APPROVED &amp; LOCKED" in htm and "teststamp" in htm, "locked banner + stamp")
+    ck("GENUINE — deducted" in htm and "not genuine — waived" in htm,
+       "both EARLY_BIG rulings narrated as applied")
+    ck("broke a splint" in htm, "ledger narration appears in the breakdown")
+    ck("outstation" in htm, "outstation adjustment narrated")
+    htm_p = build_salary_html(YM, tableR, locked=False)
+    ck("PREVIEW" in htm_p and "APPROVED &amp; LOCKED" not in htm_p,
+       "unlocked report carries the PREVIEW banner")
+    # fallback when the attendance HTML is absent
+    os.rename(os.path.join(ATT_BASE, f"salary_inputs_{YM}.html"),
+              os.path.join(ATT_BASE, f"HOLD_{YM}.html"))
+    htm_f = build_salary_html(YM, tableR)
+    ck("was not found" in htm_f and "FINAL SALARY" in htm_f,
+       "standalone fallback when attendance HTML is missing")
+    os.rename(os.path.join(ATT_BASE, f"HOLD_{YM}.html"),
+              os.path.join(ATT_BASE, f"salary_inputs_{YM}.html"))
+    # approve wrote the frozen HTML file earlier this test run?  YM was approved
+    # BEFORE the html existed — so write it now via a fresh approval on YM3.
+    ck(os.path.exists(_p(f"salary_final_{YM}.csv")), "final CSV still on disk")
+    # web route: checker sees the report; maker fenced
+    r_rep = cl.get(URL_PREFIX + f"/salary/report?m={YM}")
+    ck(r_rep.status_code == 200 and b"FINAL SALARY" in r_rep.data
+       and b"GRID-MARKER-2026-08" in r_rep.data, "report route serves the full report")
+    ck(b"APPROVED" in r_rep.data, "route shows the locked banner for the locked month")
+    ck(clm3.get(URL_PREFIX + f"/salary/report?m={YM}").status_code == 403,
+       "maker blocked from the report route")
+    # approve writes the HTML artefact: fresh month end-to-end
+    YM3 = "2026-10"
+    _w_inputs2 = list(csv.DictReader(open(os.path.join(ATT_BASE, f"salary_inputs_{YM}.csv"),
+                                          encoding="utf-8")))
+    with open(os.path.join(ATT_BASE, f"salary_inputs_{YM3}.csv"), "w",
+              newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=list(_w_inputs2[0].keys()))
+        w.writeheader(); w.writerows(_w_inputs2)
+    with open(os.path.join(ATT_BASE, f"salary_inputs_{YM3}.html"), "w",
+              encoding="utf-8") as f:
+        f.write("<html><body><h1>GRID-OCT</h1></body></html>")
+    close_month(users, "doc", YM3)
+    t3, tk3, pr3 = compute_salary(YM3)
+    ck(not pr3, "YM3 computes clean")
+    approve_salary(users, "doc", YM3, tk3)
+    ck(os.path.exists(_p(f"salary_final_{YM3}.html")), "approve writes the HTML report")
+    htm3 = open(_p(f"salary_final_{YM3}.html"), encoding="utf-8").read()
+    ck("GRID-OCT" in htm3 and "APPROVED &amp; LOCKED" in htm3,
+       "frozen report = vetted grid + locked salary layer")
+
     print(f"SELFTEST PASSED — {ok[0]} maker-checker, rate-card, advance, loan, "
-          f"skip, statement and web checks OK")
+          f"skip, statement, salary, report and F-51 checks OK")
 
 # ------------------------------------------------------------------ main -----
 if __name__ == "__main__":
