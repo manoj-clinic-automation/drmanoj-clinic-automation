@@ -13,16 +13,16 @@
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
 | `CANONICAL_MANIFEST.md` | S149 | *(self — recomputed last, each EOS)* | this file; the linchpin |
-| `START_HERE_SESSION_152` | S152 | `199d39a438b9b4447421ee21c23f1883` | entry point; regenerated every close-out (was `START_HERE_SESSION_151`) |
-| `KB_Register` | v2.4 | `a8fee1a4ff7c4219f1d8182cefa84785` | current state; from v1.72 (`27b72639…`). **v2.2→v2.3 (S150):** D248 indexed (clinic_writer waiver); Tier-2 state note added; findings line at F-46. |
-| `HANDOFF_RUNBOOK` | v89 (S151) | `1d21546ba845899c1bec562c162ed905` | §0 what happened · §2 live backlog (was v88); file `HANDOFF_RUNBOOK_2026-08-05_Session151_v89.md` |
+| `START_HERE_SESSION_154` | S154 | `e08ef431fb99fea2947385ae2fd6b6ae` | entry point; regenerated every close-out (was `START_HERE_SESSION_153`) |
+| `KB_Register` | v2.6 | `5cab7efcd268c25469f0970d52273804` | current state; from v1.72 (`27b72639…`). **v2.5→v2.6 (S153):** D256 indexed; F-47/F-48 minted; att_month_report v2.4-installed/v2.5-pending + staff_master v2 + notice v6 pinned. |
+| `HANDOFF_RUNBOOK` | v91 (S153) | `c7758ec4468e76622074470d7056baee` | §0 what happened · §2 live backlog (was v90); file `HANDOFF_RUNBOOK_2026-08-07_Session153_v91.md` |
 | active incident | — | — | **only while open**; none open (F-44 closed) |
 
 ## Tier 1 — reference (hash-verified · read only if touched · rewrite only if changed)
 
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
-| `KB_History_Archive` | v1.3 | `68109ea651c91060fd0e0ba68a9a889d` | all history, verbatim; from v1.72 (`27b72639…`). **§S150 appended (S150)** → re-pinned (was `15196ec3…`). |
+| `KB_History_Archive` | v1.5 | `591fd4bbd2797103865e6cfc733bbe57` | all history, verbatim; from v1.72 (`27b72639…`). **§S153 appended (S153)** → re-pinned (was `fbe348a4…`); pure-append proven by prefix hash. |
 | `Dr_Manoj_Clinic_Umbrella_Architecture` | v1.58 | `728cc64950502011ff220e1249e488ce` | strategy + decisions log |
 | `Call_Console_Evolution_Spec` | v2.4 | `63978d982d1f8037f728023d15a01328` | dashboard-as-dialer (active) |
 | `Frontend_Dashboard_Documentation` | v4 (S140) | `02ef929b75aa77ec071c903705335375` | dashboard still evolving |
@@ -42,7 +42,7 @@ Each frozen product has one canonical **dossier**; this is the FROZEN ledger. **
 | Product | Dossier | Dossier md5 | Artefact (the live thing) | Artefact md5 | Frozen | Waiver |
 |---|---|---|---|---|---|---|
 | WABA templates | `WABA_Approved_Templates_v1_S137.md` **(adopted)** | `63dd1883ed6677bc96620c087fc1d154` | MyOperator panel — 14 approved | compute at freeze | S147 / D247 | Meta re-approval + bump |
-| Attendance system | `Attendance_System_Dossier_v1_1_S151.md` **✓ built** | `6525e2c8298db2ea02000245ebd498e7` | `attendance/` folder + VPS deploy + `att_month_report.py` (additive, S151) | `dc12f4a0f9cb921b4cf2ce7c579aae16` (10-file frozen-core digest; 11-file re-pin owed at repo commit) | S151 / D251 | frozen core: explicit waiver + bump; additive report layer sanctioned S151 |
+| Attendance system | `Attendance_System_Dossier_v1_2_S153.md` **✓ built** (v1.2 folded the S153 report layer at close-out) | `bf19179181c553777e4cc8e3834bc754` | `attendance/` folder + VPS deploy + `att_month_report.py` (additive report layer: **v2.4 `608f2a90…` INSTALLED · v2.5 `e64cad19…` delivered, install pending**, S153; S151 v1 `c9251988…` superseded) | `dc12f4a0f9cb921b4cf2ce7c579aae16` (10-file frozen-core digest byte-unchanged S153; folder re-pin owed at repo commit) | S151 / D251 | frozen core: explicit waiver + bump; additive report layer sanctioned S151, extended S153 (owner-directed) |
 | Nutrition/Diet (`clinic_writer`) | `Nutrition_Diet_clinic_writer_Dossier_v1_1_S150.md` **✓ built** | `6900ff40d43da0013f6ea81c3c31a0e4` | `clinic_writer/` folder + PC `D:\clinic_writer\` | `fcedae30…` (`vitals_page.html` v28; **folder digest `df0b0c34…` recompute owed at install**) | S147 / D247; **waiver exercised S150 / D248** | explicit waiver + bump |
 | Callback Tracker **core** | `Callback_Tracker_Core_Dossier_v1_S147.md` **✓ built** *(scope pending confirm)* | `7e445ff04f086af0fdce656b1eae5dc1` | live Apps Script project (`WebApp.gs` D34 + core `.gs`) + Sheet `1USj…klo0` | `e4fd4512522c2e2723cb50690b92c5e8` (live project digest) | S147 / D247 | explicit waiver (D34) + bump |
 
@@ -97,3 +97,22 @@ Each frozen product has one canonical **dossier**; this is the FROZEN ledger. **
 - **Tier-1:** Attendance dossier v1 → **v1.1** (`6525e2c8298db2ea02000245ebd498e7`) — `att_month_report.py` (`c925198895ea146b37a0c69b0ef85b6b`) pinned as an ADDITIVE salary-report layer; frozen 10-file core byte-unchanged; folder-digest re-pin owed at the repo commit. All other Tier-1 unchanged.
 - **Live additions:** VPS `att_month_report.py` (`c9251988…`) · `staff_master.csv` rebuilt (`f8f3a23908d2007ccdc1bd9af5e87725`, 12 salaried staff).
 - Notion catch-up owed (connector absent S151). **Next free: D252 · F-47 · Session 152.**
+
+### S152 EOS (06 Aug 2026, FULL — no VPS/live code; owner-side salary-workbook product change; three policies locked, one drafted)
+**S152 canonical filenames (Phase-0 mapping):** `KB_Register_v2_5_S152.md` · `KB_History_Archive_v1_4_S152.md` · `HANDOFF_RUNBOOK_2026-08-06_Session152_v90.md` · `START_HERE_SESSION_153.md` · this `CANONICAL_MANIFEST.md`.
+- **Numbering correction recorded (D172):** the S152 chat labelled its decisions D251–D254; canonical mints are **D252–D255** (D249–D251 were spent at S151). Notice filenames carry the wrong D-prefixes — cosmetic (D188).
+- **Tier-0 rows bumped:** `KB_Register` v2.4 → **v2.5** (`c61d25d28288c6016527428c6b8fd266`, D252–D255 indexed); `HANDOFF_RUNBOOK` v89 → **v90** (`f6d2fb50afa6608c11766ad410b492cb`); `START_HERE_SESSION_152` → **`START_HERE_SESSION_153`** (`9996a15592378ee9bd1358af3589eef8`).
+- **Archive:** **§S152 appended** → **v1.4** (`fbe348a4d9ddf6962df3a7741872016f`); re-pinned (was `68109ea6…`).
+- **Tier-1/Tier-2 documentation unchanged** (no spec touched; no waiver exercised). **Owner-side product change, F-31 non-repo, pinned in the Register only:** `Salary_System_2026.xlsx` v3 (Darpan-integrated, as-delivered `3dfe5bea7a559740fc239323ecc85319`, owner-installed); `Darpan_Loan_System_v2_3.xlsx` RETIRED; attendance notice v5 FINAL `f2de5527385800c3122cd0209d32fb67` (print artefact, posting pending).
+- **Carried:** attendance-dossier folder-digest re-pin (report script now in the repo, owner-done) · clinic_writer digest re-pin · `wa_approve` systemd **verify-first** (record conflict logged S152) · Notion catch-up **S151+S152**.
+- **Next free: D256 · F-47 · Session 153.**
+
+### S153 EOS (07 Aug 2026, FULL — attendance report layer v2→v2.5; notice v6; staff_master v2 installed; frozen core untouched)
+**S153 canonical filenames (Phase-0 mapping):** `KB_Register_v2_6_S153.md` · `KB_History_Archive_v1_5_S153.md` · `HANDOFF_RUNBOOK_2026-08-07_Session153_v91.md` · `START_HERE_SESSION_154.md` · this `CANONICAL_MANIFEST.md`.
+- **Tier-0 rows bumped:** `KB_Register` v2.5 → **v2.6** (`5cab7efcd268c25469f0970d52273804`, D256 indexed, F-47/F-48 minted); `HANDOFF_RUNBOOK` v90 → **v91** (`c7758ec4468e76622074470d7056baee`); `START_HERE_SESSION_153` → **`START_HERE_SESSION_154`** (`e08ef431fb99fea2947385ae2fd6b6ae`).
+- **Archive:** **§S153 appended** → **v1.5** (`591fd4bbd2797103865e6cfc733bbe57`); re-pinned (was `fbe348a4…`); pure append proven by prefix-hash equality.
+- **Tier-2 Attendance row updated (no waiver needed — additive layer sanctioned S151, owner-directed S153):** `att_month_report.py` **v2.4 `608f2a90bf9ff65f196ac4f2f13c00bb` INSTALLED on VPS + July-verified; v2.5 `e64cad19d135618dec1413553e6bdc80` delivered, INSTALL PENDING** (first backlog item). `staff_master.csv` v2 **`3b1ebcb1e339fdcdb8b47389ee206108` INSTALLED** (+sunday_group/+minutes_exempt; workbook + `build_staff_master.py` columns owed). Frozen 10-file core byte-unchanged. **Dossier → v1.2 `bf19179181c553777e4cc8e3834bc754` (folded at close-out; supersedes v1.1 `6525e2c8…`).**
+- **Owner print artefacts (Register-pinned, non-repo):** attendance notice **v6 FINAL `b29dfa1317024d1d622d79d6de6f5c17`** (PDF `ca8216b3…`) supersedes v5; `Staff_Rate_Card_v2_S153.xlsx` `8e9cf6462d63b9d229bcbf973d25f88c` (F-31 home `D:\clinic_salary\`).
+- **D256** consolidated attendance computation rules (full text Archive §S153); **F-47** double-punch artefact; **F-48** shadow-write / diff-audit rule.
+- **Carried:** folder-digest re-pins (attendance at repo commit; clinic_writer) · Phase-2 trim ruling · wa_approve verify-first · key rotations · WABA/Lokesh · **Notion catch-up S151–S153** · **cold kit DUE**.
+- **Next free: D257 · F-49 · Session 154.**
