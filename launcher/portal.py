@@ -4,6 +4,8 @@ portal.py  —  Doctor + Manager Clinic Launcher Portal  (now the SSO broker)
 ===========================================================================
 Dr. Manoj Agarwal Clinic, Bareilly.  Session 19 · 30 Jun 2026.
 SSO broker wiring added Session 158 (portal SSO, step 1).
+Session 159: Group D (Clinic-PC-only local tiles) + personal tiles, both doctor-only,
+with a PC-marker so the local tiles show only on the clinic PC's own browser.
 
 ONE self-contained Flask app at followup.dr-manoj.in/portal.
 
@@ -71,6 +73,25 @@ except Exception:
 if not SSO_SECRET:
     SSO_SECRET = os.environ.get("CLINIC_SSO_SECRET", "")
 
+# Personal-account tile targets (Drive folder / sheet). These are capability URLs,
+# so they live ONLY in portal_config.py (chmod 600, gitignored) or env — never in
+# this committed file and never in the repo (ruling S159, F-31 family). Blank -> the
+# tile renders as MANUAL until you fill the value in portal_config.py.
+try:
+    _CFG = cfg
+except NameError:
+    _CFG = None
+
+
+def _cfg_get(name, default=""):
+    v = getattr(_CFG, name, None) if _CFG is not None else None
+    return v if v else os.environ.get(name, default)
+
+
+CC_SAVER_URL      = _cfg_get("CC_SAVER_URL")
+INBOX_JANITOR_URL = _cfg_get("INBOX_JANITOR_URL")
+GMB_HTML_PATH     = _cfg_get("GMB_HTML_PATH", "/root/portal/gmb.html")
+
 STORE = clinic_users.DEFAULT_STORE if _SSO_LIBS else None
 
 app = Flask(__name__)
@@ -131,6 +152,10 @@ TILES = [
      "url": "https://docs.google.com/spreadsheets/d/1AnJWDJsAwtgkfFCQNwLzi6lqPPAfGwd-4TUZkuzrZH8",
      "roles": ["doctor"]},
 
+    {"icon": "\u2B50", "name": "GMB Review Assist",
+     "desc": "Google review composer \u00b7 any device", "live": True,
+     "url": "/portal/gmb", "roles": ["doctor"]},
+
     # --- HELD / MANUAL (doctor only) --------------------------------------
     {"icon": "\U0001F9FE", "name": "Revenue Reconciler",
      "desc": "Local \u2014 pending VPS hosting", "live": False, "url": "", "roles": ["doctor"]},
@@ -142,6 +167,36 @@ TILES = [
      "desc": "Manual \u2014 open Excel for now", "live": False, "url": "", "roles": ["doctor"]},
     {"icon": "\U0001F957", "name": "Nutrition / Physio",
      "desc": "Manual \u2014 open Excel for now", "live": False, "url": "", "roles": ["doctor"]},
+
+    # ===================== CLINIC PC ONLY  (Group D) ========================
+    # These open localhost apps that resolve ONLY on the clinic PC itself, so
+    # they are shown ONLY on a browser marked as the clinic PC (see /portal/mark-pc).
+    # No probing -> immune to Chrome's localhost restrictions. Plain links.
+    {"icon": "\U0001F9E0", "name": "Follow-up Tracker",
+     "desc": "Docterz \u2192 call list \u00b7 Clinic PC", "live": True,
+     "url": "http://localhost:5000", "roles": ["doctor"], "pc_only": True},
+
+    {"icon": "\U0001FA7A", "name": "Vitals & Plan",
+     "desc": "clinic_writer v28 \u00b7 Clinic PC", "live": True,
+     "url": "http://localhost:5057", "roles": ["doctor"], "pc_only": True},
+
+    {"icon": "\U0001F4CB", "name": "Surgical Case Pack",
+     "desc": "Pre-surgical paperwork \u00b7 Clinic PC", "live": True,
+     "url": "http://localhost:5058", "roles": ["doctor"], "pc_only": True},
+
+    {"icon": "\U0001F9FE", "name": "CC Statements \u2192 Tally",
+     "desc": "Statement conversion \u00b7 Clinic PC", "live": True,
+     "url": "http://localhost:5059", "roles": ["doctor"], "pc_only": True},
+
+    # ===================== PERSONAL  (doctor only) =========================
+    # Targets come from portal_config.py (git-ignored). Blank -> shows MANUAL.
+    {"icon": "\U0001F4C7", "name": "CC Statement Saver",
+     "desc": "Card statements \u2192 Drive", "live": bool(CC_SAVER_URL),
+     "url": CC_SAVER_URL, "roles": ["doctor"]},
+
+    {"icon": "\U0001F9F9", "name": "Inbox Janitor",
+     "desc": "Payment register & renewals", "live": bool(INBOX_JANITOR_URL),
+     "url": INBOX_JANITOR_URL, "roles": ["doctor"]},
 ]
 
 # ---------------------------------------------------------------------------
@@ -167,6 +222,25 @@ def _is_trusted(req) -> bool:
     if not tok or not TOKEN_SEED:
         return False
     return hmac.compare_digest(tok, _expected_device_token())
+
+
+# --- clinic-PC marker (gates the Group D local-tool tiles) -----------------
+PC_COOKIE = "clinic_portal_pc"
+
+
+def _pc_token() -> str:
+    """Marker a browser must carry to be treated as THE clinic PC.
+    Derived from the same server seed as device-trust, so rotating the seed
+    (or 'forget all devices') also clears the clinic-PC marking."""
+    return hmac.new(TOKEN_SEED.encode("utf-8"),
+                    b"clinic-pc-device", hashlib.sha256).hexdigest()
+
+
+def _is_clinic_pc(req) -> bool:
+    tok = req.cookies.get(PC_COOKIE, "")
+    if not tok or not TOKEN_SEED:
+        return False
+    return hmac.compare_digest(tok, _pc_token())
 
 
 # --- SSO broker helpers ----------------------------------------------------
@@ -253,6 +327,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
 .tag.l{background:rgba(34,197,94,.15);color:#86efac}
 .tag.h{background:rgba(91,113,132,.25);color:#b8c7d6}
 .foot{margin-top:26px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.pcmark{margin-top:16px;text-align:center;font-size:12px;color:var(--muted)}
+.pcmark a{color:var(--blue);text-decoration:none}
+.pcmark a:hover{text-decoration:underline}
 .forget{background:none;border:1px solid var(--line);color:var(--muted);
  font-size:12px;padding:9px 16px;border-radius:10px;cursor:pointer}
 .forget:hover{border-color:#7f1d1d;color:#fca5a5}
@@ -320,7 +397,7 @@ PORTAL_HTML = PAGE_HEAD + """
   </div>
   <div class="grid">
   {% for t in tiles %}
-    {% if role in t.roles %}
+    {% if role in t.roles and (not t.pc_only or pc) %}
     {% if t.live %}
       <a class="tile live" href="{{ t.url }}" target="_blank" rel="noopener">
         <div class="ic">{{ t.icon }}</div>
@@ -351,6 +428,26 @@ PORTAL_HTML = PAGE_HEAD + """
     </form>
     {% endif %}
   </div>
+  {% if role == 'doctor' %}
+  <div class="pcmark">
+    {% if pc %}
+      <span>\U0001F5A5\uFE0F Clinic-PC tools are shown on this device.</span>
+      <a href="/portal/unmark-pc">Not the clinic PC?</a>
+    {% else %}
+      <a href="/portal/mark-pc">\U0001F5A5\uFE0F Is this the clinic PC? Show PC-only tools</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div></body></html>
+"""
+
+PC_MARKED_HTML = PAGE_HEAD + """
+<div class="login">
+  <h1>{{ '\U0001F5A5\uFE0F Clinic PC set' if on else 'Cleared' }}</h1>
+  <p>{% if on %}The Clinic-PC-only tools are now visible on this device.
+     Tap a tile to open a local tool.{% else %}
+     This device no longer shows the Clinic-PC-only tools.{% endif %}</p>
+  <a class="note" href="/portal">Back to the portal</a>
 </div></body></html>
 """
 
@@ -375,7 +472,8 @@ def home():
     who = _sso_user(request)
     role = who["role"] if who else "doctor"
     return render_template_string(PORTAL_HTML, tiles=TILES,
-                                  sso=_sso_ready(), who=who, role=role)
+                                  sso=_sso_ready(), who=who, role=role,
+                                  pc=_is_clinic_pc(request))
 
 
 @app.route("/portal/login", methods=["GET", "POST"])
@@ -478,6 +576,42 @@ def health():
     mode = "broker" if _sso_ready() else ("legacy" if _config_ok() else "unconfigured")
     return {"service": "portal", "status": "ok" if ready else "unconfigured",
             "mode": mode}, (200 if ready else 503)
+
+
+@app.route("/portal/mark-pc")
+@login_required
+def mark_pc():
+    """Visit ONCE in the clinic PC's own browser to reveal the Clinic-PC-only
+    tiles on that device. Sets a signed marker cookie (path=/portal)."""
+    resp = make_response(render_template_string(PC_MARKED_HTML, on=True))
+    resp.set_cookie(PC_COOKIE, _pc_token(),
+                    max_age=10 * 365 * 24 * 3600,
+                    secure=True, httponly=True, samesite="Lax", path="/portal")
+    return resp
+
+
+@app.route("/portal/unmark-pc")
+@login_required
+def unmark_pc():
+    """Undo mark-pc (e.g. if the wrong device was marked)."""
+    resp = make_response(render_template_string(PC_MARKED_HTML, on=False))
+    resp.delete_cookie(PC_COOKIE, path="/portal")
+    return resp
+
+
+@app.route("/portal/gmb")
+@login_required
+def gmb():
+    """Serve the GMB Review Assist page from the VPS. It is a static, self-contained
+    HTML page (no patient data, all client-side), so it is served as-is behind login,
+    reachable on any device. Read per-request so the page can be updated without a
+    code change (just replace the file)."""
+    try:
+        with open(GMB_HTML_PATH, "r", encoding="utf-8") as f:
+            return f.read()
+    except Exception:
+        return ("GMB page not installed. Place the HTML file at "
+                + GMB_HTML_PATH), 503
 
 
 def _rotate_seed_in_config(new_seed: str) -> bool:
