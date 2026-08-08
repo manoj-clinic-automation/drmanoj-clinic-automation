@@ -118,6 +118,32 @@ ROLE_CATS = {
 # ------------------------------------------------------------------ storage --
 def _p(name): return os.path.join(LEDGER_DIR, name)
 
+# --- Clinic SSO (portal broker) acceptance -- Step 5, Session 158 ----------
+# The ledger accepts a valid portal `clinic_sso` cookie as login. SSO proves
+# only WHO you are; the ledger's own users.json still decides WHAT you may do
+# (maker vs checker) -- so a manager can never gain checker powers via SSO. The
+# ledger's own username/password login stays the permanent fallback. If the
+# portal secret can't be read, the shim is INERT (own login only).
+_PORTAL_DIR = os.environ.get("CLINIC_PORTAL_DIR", "/root/portal")
+try:
+    if _PORTAL_DIR not in sys.path:
+        sys.path.insert(0, _PORTAL_DIR)
+    import clinic_sso as _sso
+    import portal_config as _pcfg
+    _SSO_SECRET = getattr(_pcfg, "CLINIC_SSO_SECRET", None)
+except Exception:
+    _sso = None
+    _SSO_SECRET = None
+_SSO_STORE = os.path.join(_PORTAL_DIR, "clinic_users.json")
+
+
+def _sso_epoch():
+    try:
+        with open(_SSO_STORE) as f:
+            return int(json.load(f).get("epoch", 1))
+    except Exception:
+        return None
+
 def load_users():
     try:
         with open(_p("users.json"), encoding="utf-8") as f: return json.load(f)
@@ -1034,12 +1060,38 @@ def create_app():
         os.chmod(skf, 0o600)
     app.secret_key = open(skf).read().strip()
 
+    def _sso_user(users):
+        # A valid portal clinic_sso cookie -> a ledger username (or None).
+        # SSO = authentication; the ledger's own role governs authorization.
+        if not _sso or not _SSO_SECRET:
+            return None
+        tok = request.cookies.get(_sso.COOKIE_NAME)
+        if not tok:
+            return None
+        try:
+            data = _sso.verify_token(tok, _SSO_SECRET, current_epoch=_sso_epoch())
+        except Exception:
+            data = None
+        if not data:
+            return None
+        uname = (data.get("user") or "").strip().lower()
+        rec = users.get(uname)
+        if not rec or not rec.get("active", True):
+            return None
+        # F-31 guardrail: an SSO *manager* must NEVER resolve to a ledger *checker*.
+        if data.get("role") == "manager" and rec.get("role") == "checker":
+            return None
+        return uname
+
     def user():
         u = session.get("u")
         users = load_users()
-        if not u or u not in users or not users[u].get("active", True):
-            return None, users
-        return u, users
+        if u and u in users and users[u].get("active", True):
+            return u, users
+        su = _sso_user(users)          # no valid ledger session -> try portal SSO
+        if su:
+            return su, users
+        return None, users
 
     def page(title, body, u=None):
         nav = ""

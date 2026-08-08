@@ -1,32 +1,28 @@
 #!/usr/bin/env python3
 """
-portal.py  —  Doctor-only Clinic Launcher Portal
-================================================
+portal.py  —  Doctor + Manager Clinic Launcher Portal  (now the SSO broker)
+===========================================================================
 Dr. Manoj Agarwal Clinic, Bareilly.  Session 19 · 30 Jun 2026.
+SSO broker wiring added Session 158 (portal SSO, step 1).
 
-ONE self-contained Flask app. Serves a single private launcher page at
-followup.dr-manoj.in/portal with PIN login + indefinite device-trust.
-It LINKS to existing tools only — it touches no other live system.
+ONE self-contained Flask app at followup.dr-manoj.in/portal.
+
+TWO MODES — the file decides at runtime, so this change is safe + reversible:
+  * LEGACY (default)  : the original PIN login + device-trust. IDENTICAL to before.
+  * BROKER (SSO)      : active ONLY when BOTH a CLINIC_SSO_SECRET is configured AND
+                        at least one user exists in the clinic user store. Then login
+                        is username + password (per-user identity + role), and a signed
+                        `clinic_sso` cookie scoped to .dr-manoj.in is issued so the other
+                        clinic apps (attendance / ledger / asset — later steps) trust it.
+  Until you set the secret and seed a user, this file behaves EXACTLY like the old one.
 
 --------------------------------------------------------------------------
-FAILURE MAP  (per D19 discipline)
---------------------------------------------------------------------------
-External dependencies: NONE for the page itself. Tiles open other systems
-  in a new tab; if a target system is down, only that tile's link fails —
-  the portal still loads. No tile can crash the portal.
-Secrets used (from portal_config.py / env, NEVER hardcoded):
-  - PORTAL_PIN_HASH   : salted hash of the PIN (never the PIN itself)
-  - PORTAL_PIN_SALT   : random salt for the hash
-  - PORTAL_TOKEN_SEED : server secret; rotating it = "forget all devices"
-Fault behaviours:
-  - Missing config        -> app refuses to start with a clear message (fail safe)
-  - Bad/again PIN         -> generic "wrong PIN" (no lockout, no info leak)
-  - Tampered/old cookie   -> treated as logged-out -> PIN screen
-  - "Forget all devices"  -> rotates PORTAL_TOKEN_SEED -> all cookies invalid
-Fallbacks:
-  - Portal down entirely  -> every tool remains reachable at its own URL
-                             (this app is a convenience layer, not a gatekeeper
-                              for the underlying tools).
+Secrets (from portal_config.py / env, NEVER hardcoded):
+  - PORTAL_PIN_HASH / PORTAL_PIN_SALT / PORTAL_TOKEN_SEED  (legacy PIN + device trust)
+  - CLINIC_SSO_SECRET   : shared HMAC secret for the SSO token. MUST be identical on
+                          every clinic app that later trusts the cookie. env/config only.
+Clinic users + roles live in the store file (clinic_users.py; default /root/portal/clinic_users.json,
+  chmod 600, gitignored). Adding lab / Manoj Bhati / Sanjeevni later = one admin command.
 --------------------------------------------------------------------------
 
 Run (VPS):
@@ -45,21 +41,37 @@ from flask import (
     Flask, request, redirect, make_response, render_template_string, abort
 )
 
+# --- SSO broker libraries (optional import: if absent, the portal still runs legacy PIN) ---
+try:
+    import clinic_sso
+    import clinic_users
+    _SSO_LIBS = True
+except Exception:
+    _SSO_LIBS = False
+
 # ---------------------------------------------------------------------------
 # CONFIG  — real values come from portal_config.py on the VPS (chmod 600),
 # or environment variables. NOTHING secret is hardcoded here.
 # ---------------------------------------------------------------------------
 try:
     import portal_config as cfg          # VPS-only file, gitignored
-    PIN_HASH   = getattr(cfg, "PORTAL_PIN_HASH", "")
-    PIN_SALT   = getattr(cfg, "PORTAL_PIN_SALT", "")
-    TOKEN_SEED = getattr(cfg, "PORTAL_TOKEN_SEED", "")
+    PIN_HASH    = getattr(cfg, "PORTAL_PIN_HASH", "")
+    PIN_SALT    = getattr(cfg, "PORTAL_PIN_SALT", "")
+    TOKEN_SEED  = getattr(cfg, "PORTAL_TOKEN_SEED", "")
     COOKIE_NAME = getattr(cfg, "PORTAL_COOKIE_NAME", "clinic_portal_device")
+    SSO_SECRET  = getattr(cfg, "CLINIC_SSO_SECRET", "")
 except Exception:
-    PIN_HASH   = os.environ.get("PORTAL_PIN_HASH", "")
-    PIN_SALT   = os.environ.get("PORTAL_PIN_SALT", "")
-    TOKEN_SEED = os.environ.get("PORTAL_TOKEN_SEED", "")
+    PIN_HASH    = os.environ.get("PORTAL_PIN_HASH", "")
+    PIN_SALT    = os.environ.get("PORTAL_PIN_SALT", "")
+    TOKEN_SEED  = os.environ.get("PORTAL_TOKEN_SEED", "")
     COOKIE_NAME = os.environ.get("PORTAL_COOKIE_NAME", "clinic_portal_device")
+    SSO_SECRET  = os.environ.get("CLINIC_SSO_SECRET", "")
+
+# env can always supplement a config file that predates the SSO secret
+if not SSO_SECRET:
+    SSO_SECRET = os.environ.get("CLINIC_SSO_SECRET", "")
+
+STORE = clinic_users.DEFAULT_STORE if _SSO_LIBS else None
 
 app = Flask(__name__)
 
@@ -68,57 +80,68 @@ app = Flask(__name__)
 # No rebuild needed; just edit this list and restart the service.
 # ---------------------------------------------------------------------------
 TILES = [
-    # --- LIVE NOW (reachable by URL) ---------------------------------------
-    {"icon": "📞", "name": "Call Tracker",
-     "desc": "Calls, follow-ups, dashboard",
-     "live": True,
-     "url": "https://script.google.com/macros/s/AKfycbyoQ5R3yvFC0B8arOnVWo4002BFfBGIVM2cBwpaMwUM4GaYw7d89jk1U_g38Ht0omcF/exec"},
+    # ============================ DOCTOR + shared ============================
+    {"icon": "\U0001F4DE", "name": "Call Tracker",
+     "desc": "Calls, follow-ups, dashboard", "live": True,
+     "url": "https://script.google.com/macros/s/AKfycbyoQ5R3yvFC0B8arOnVWo4002BFfBGIVM2cBwpaMwUM4GaYw7d89jk1U_g38Ht0omcF/exec",
+     "roles": ["doctor"]},
 
-    {"icon": "👥", "name": "Attendance & Salary",
-     "desc": "Punches, monthly salary, advances",
-     "live": True,
-     "url": "http://93.127.195.49:8042"},
+    {"icon": "\U0001F465", "name": "Attendance",
+     "desc": "Punches & monthly report", "live": True,
+     "url": "https://attendance.dr-manoj.in",
+     "roles": ["doctor", "manager"]},
 
-    {"icon": "💳", "name": "UPI Reconciliation",
-     "desc": "Clinic / pharmacy / lab vs bank",
-     "live": True,
-     "url": "https://docs.google.com/spreadsheets/d/1rwxrqAiLh9xBLezZLe7VqBWeCn3FRf_GZqOAEZi-oWc"},
+    {"icon": "\U0001F4BC", "name": "Salary & Ledger",
+     "desc": "Staff money, salary, approvals", "live": True,
+     "url": "https://attendance.dr-manoj.in/ledger",
+     "roles": ["doctor"]},
 
-    {"icon": "🚗", "name": "Vehicle Tracking",
-     "desc": "Track360 — 2 vehicles",
-     "live": True,
-     "url": "https://docs.google.com/spreadsheets/d/1rwxrqAiLh9xBLezZLe7VqBWeCn3FRf_GZqOAEZi-oWc/edit?gid=762286425#gid=762286425"},
+    {"icon": "\U0001F5C2\uFE0F", "name": "Staff Ledger \u2014 Entry",
+     "desc": "Enter staff money events", "live": True,
+     "url": "https://attendance.dr-manoj.in/ledger",
+     "roles": ["manager"]},
 
-    {"icon": "📈", "name": "Monthly Accounting",
-     "desc": "Department-wise monthly summaries",
-     "live": True,
-     "url": "https://docs.google.com/spreadsheets/d/13eJo58J7G8n846mGlyv-pHpDILQnCrK-8ZZekyi1Hrg"},
+    {"icon": "\U0001F4E6", "name": "Asset Register",
+     "desc": "Clinic assets & AMC", "live": True,
+     "url": "https://assets.dr-manoj.in",
+     "roles": ["doctor", "manager"]},
 
-    {"icon": "💰", "name": "Daily Collections",
-     "desc": "Staff daily entry sheet",
-     "live": True,
-     "url": "https://docs.google.com/spreadsheets/d/1AnJWDJsAwtgkfFCQNwLzi6lqPPAfGwd-4TUZkuzrZH8"},
+    {"icon": "\U0001F4F1", "name": "WhatsApp Approvals",
+     "desc": "\u26A0 blocked \u2014 vendor (Lokesh)", "live": True,
+     "url": "https://followup.dr-manoj.in/wa-approve",
+     "roles": ["doctor"]},
 
-    # --- HELD / MANUAL (flip to live when hosted) --------------------------
-    {"icon": "🧾", "name": "Revenue Reconciler",
-     "desc": "Local — pending VPS hosting",
-     "live": False, "url": ""},
+    {"icon": "\U0001F4B3", "name": "UPI Reconciliation",
+     "desc": "Clinic / pharmacy / lab vs bank", "live": True,
+     "url": "https://docs.google.com/spreadsheets/d/1rwxrqAiLh9xBLezZLe7VqBWeCn3FRf_GZqOAEZi-oWc",
+     "roles": ["doctor"]},
 
-    {"icon": "🦴", "name": "Ayushman Finder",
-     "desc": "Local — pending hosting",
-     "live": False, "url": ""},
+    {"icon": "\U0001F697", "name": "Vehicle Tracking",
+     "desc": "Track360 \u2014 2 vehicles", "live": True,
+     "url": "https://docs.google.com/spreadsheets/d/1rwxrqAiLh9xBLezZLe7VqBWeCn3FRf_GZqOAEZi-oWc/edit?gid=762286425#gid=762286425",
+     "roles": ["doctor"]},
 
-    {"icon": "📱", "name": "WABA Send",
-     "desc": "Held — pending hosting + verify-gate",
-     "live": False, "url": ""},
+    {"icon": "\U0001F4C8", "name": "Monthly Accounting",
+     "desc": "Department-wise monthly summaries", "live": True,
+     "url": "https://docs.google.com/spreadsheets/d/13eJo58J7G8n846mGlyv-pHpDILQnCrK-8ZZekyi1Hrg",
+     "roles": ["doctor"]},
 
-    {"icon": "📋", "name": "Surgical Estimate",
-     "desc": "Manual — open Excel for now",
-     "live": False, "url": ""},
+    {"icon": "\U0001F4B0", "name": "Daily Collections",
+     "desc": "Staff daily entry sheet", "live": True,
+     "url": "https://docs.google.com/spreadsheets/d/1AnJWDJsAwtgkfFCQNwLzi6lqPPAfGwd-4TUZkuzrZH8",
+     "roles": ["doctor"]},
 
-    {"icon": "🥗", "name": "Nutrition / Physio",
-     "desc": "Manual — open Excel for now",
-     "live": False, "url": ""},
+    # --- HELD / MANUAL (doctor only) --------------------------------------
+    {"icon": "\U0001F9FE", "name": "Revenue Reconciler",
+     "desc": "Local \u2014 pending VPS hosting", "live": False, "url": "", "roles": ["doctor"]},
+    {"icon": "\U0001F9B4", "name": "Ayushman Finder",
+     "desc": "Local \u2014 pending hosting", "live": False, "url": "", "roles": ["doctor"]},
+    {"icon": "\U0001F4F1", "name": "WABA Send",
+     "desc": "Held \u2014 pending hosting + verify-gate", "live": False, "url": "", "roles": ["doctor"]},
+    {"icon": "\U0001F4CB", "name": "Surgical Estimate",
+     "desc": "Manual \u2014 open Excel for now", "live": False, "url": "", "roles": ["doctor"]},
+    {"icon": "\U0001F957", "name": "Nutrition / Physio",
+     "desc": "Manual \u2014 open Excel for now", "live": False, "url": "", "roles": ["doctor"]},
 ]
 
 # ---------------------------------------------------------------------------
@@ -146,17 +169,53 @@ def _is_trusted(req) -> bool:
     return hmac.compare_digest(tok, _expected_device_token())
 
 
+# --- SSO broker helpers ----------------------------------------------------
+def _sso_ready() -> bool:
+    """BROKER mode is active only when the secret is set AND a user exists."""
+    if not _SSO_LIBS or not SSO_SECRET:
+        return False
+    try:
+        return len(clinic_users.list_users(STORE)) > 0
+    except Exception:
+        return False
+
+
+def _sso_user(req):
+    """Return {user, role, ...} if a valid SSO cookie is present, else None."""
+    if not _sso_ready():
+        return None
+    tok = req.cookies.get(clinic_sso.COOKIE_NAME, "")
+    if not tok:
+        return None
+    try:
+        return clinic_sso.verify_token(tok, SSO_SECRET,
+                                       current_epoch=clinic_users.get_epoch(STORE))
+    except Exception:
+        return None
+
+
+def _authed(req) -> bool:
+    """Logged in via a valid SSO cookie OR a trusted device (transition-safe)."""
+    return (_sso_user(req) is not None) or _is_trusted(req)
+
+
 def login_required(view):
     @wraps(view)
     def wrapper(*a, **k):
-        if _is_trusted(request):
+        if _authed(request):
             return view(*a, **k)
         return redirect("/portal/login")
     return wrapper
 
 
 def _config_ok() -> bool:
+    """Legacy PIN config present. (Broker mode does not need this.)"""
     return bool(PIN_HASH and PIN_SALT and TOKEN_SEED)
+
+
+def _usable() -> bool:
+    """The portal can serve if EITHER the PIN is configured OR broker mode is ready."""
+    return _config_ok() or _sso_ready()
 
 # ---------------------------------------------------------------------------
 # PAGE TEMPLATES (inline; mobile-first; no external assets)
@@ -193,7 +252,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
 .tag{align-self:flex-start;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;margin-top:auto}
 .tag.l{background:rgba(34,197,94,.15);color:#86efac}
 .tag.h{background:rgba(91,113,132,.25);color:#b8c7d6}
-.foot{margin-top:26px;display:flex;justify-content:center}
+.foot{margin-top:26px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
 .forget{background:none;border:1px solid var(--line);color:var(--muted);
  font-size:12px;padding:9px 16px;border-radius:10px;cursor:pointer}
 .forget:hover{border-color:#7f1d1d;color:#fca5a5}
@@ -201,13 +260,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
 .login{max-width:340px;margin:9vh auto 0;text-align:center;padding:0 16px}
 .login h1{font-size:20px;color:#fff;margin:0 0 4px}
 .login p{font-size:13px;color:var(--muted);margin:0 0 22px}
-.login input{width:100%;font-size:22px;text-align:center;letter-spacing:.3em;
+.login input{width:100%;font-size:20px;text-align:center;letter-spacing:.06em;
  padding:14px;border:2px solid var(--blue);border-radius:12px;background:#0b1b29;
- color:#fff;outline:none}
+ color:#fff;outline:none;margin-bottom:10px}
+.login input.pin{font-size:22px;letter-spacing:.3em}
 .login input:focus{border-color:#60a5fa}
-.login button{width:100%;margin-top:14px;font-size:16px;font-weight:600;padding:13px;
+.login button{width:100%;margin-top:6px;font-size:16px;font-weight:600;padding:13px;
  border:none;border-radius:12px;background:var(--blue);color:#fff;cursor:pointer}
 .login button:active{transform:scale(.99)}
+.pwwrap{position:relative;margin-bottom:10px}
+.pwwrap #pw{margin-bottom:0;padding-right:66px}
+.login .eye{position:absolute;right:6px;top:0;height:100%;display:flex;align-items:center;background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:0 10px;width:auto;margin:0}
 .err{color:#fca5a5;font-size:13px;margin-top:12px;min-height:18px}
 .note{color:var(--muted);font-size:11px;margin-top:22px}
 </style></head><body>
@@ -218,7 +281,7 @@ LOGIN_HTML = PAGE_HEAD + """
   <h1>Clinic Portal</h1>
   <p>Private access — enter PIN</p>
   <form method="POST" action="/portal/login" autocomplete="off">
-    <input name="pin" type="password" inputmode="numeric" autofocus
+    <input class="pin" name="pin" type="password" inputmode="numeric" autofocus
            placeholder="• • • •" aria-label="PIN">
     <button type="submit">Unlock</button>
   </form>
@@ -228,14 +291,36 @@ LOGIN_HTML = PAGE_HEAD + """
 </div></body></html>
 """
 
+USERPASS_HTML = PAGE_HEAD + """
+<div class="login">
+  <h1>Clinic Portal</h1>
+  <p>Sign in — one login for all your clinic apps</p>
+  <form method="POST" action="/portal/login" autocomplete="off">
+    <input name="user" type="text" autocapitalize="none" autocorrect="off" autofocus
+           placeholder="username" aria-label="Username">
+    <div class="pwwrap">
+      <input id="pw" name="password" type="password" placeholder="password" aria-label="Password">
+      <button type="button" class="eye" aria-label="Show or hide password"
+              onclick="var p=document.getElementById('pw');var h=p.type==='password';p.type=h?'text':'password';this.textContent=h?'hide':'show';">show</button>
+    </div>
+    <button type="submit">Sign in</button>
+  </form>
+  <div class="err">{{ error or "" }}</div>
+  <div class="note">Signing in here signs you in to Attendance, Ledger and Asset too.
+   Each app also keeps its own login as a fallback.</div>
+</div></body></html>
+"""
+
 PORTAL_HTML = PAGE_HEAD + """
 <div class="wrap">
   <div class="head">
     <h1>🏥 Clinic Portal</h1>
-    <span class="sub">Dr. Manoj Agarwal · Advanced Orthopaedic Surgery Centre</span>
+    {% if who %}<span class="sub">Signed in as {{ who.user }} ({{ who.role }})</span>
+    {% else %}<span class="sub">Dr. Manoj Agarwal · Advanced Orthopaedic Surgery Centre</span>{% endif %}
   </div>
   <div class="grid">
   {% for t in tiles %}
+    {% if role in t.roles %}
     {% if t.live %}
       <a class="tile live" href="{{ t.url }}" target="_blank" rel="noopener">
         <div class="ic">{{ t.icon }}</div>
@@ -251,13 +336,20 @@ PORTAL_HTML = PAGE_HEAD + """
         <span class="tag h">MANUAL</span>
       </div>
     {% endif %}
+    {% endif %}
   {% endfor %}
   </div>
   <div class="foot">
     <form method="POST" action="/portal/forget"
-          onsubmit="return confirm('Sign out EVERY device? Everyone will need the PIN again.');">
+          onsubmit="return confirm('Sign out EVERY device? Everyone will need to log in again.');">
       <button class="forget" type="submit">Forget all devices</button>
     </form>
+    {% if sso %}
+    <form method="POST" action="/portal/signout-all"
+          onsubmit="return confirm('Sign out of ALL clinic apps everywhere? You and anyone signed in will have to log in again.');">
+      <button class="forget" type="submit">Sign out everywhere (all apps)</button>
+    </form>
+    {% endif %}
   </div>
 </div></body></html>
 """
@@ -276,20 +368,51 @@ CONFIG_ERROR_HTML = PAGE_HEAD + """
 @app.route("/portal")
 @app.route("/portal/")
 def home():
-    if not _config_ok():
+    if not _usable():
         return render_template_string(CONFIG_ERROR_HTML), 503
-    if not _is_trusted(request):
+    if not _authed(request):
         return redirect("/portal/login")
-    return render_template_string(PORTAL_HTML, tiles=TILES)
+    who = _sso_user(request)
+    role = who["role"] if who else "doctor"
+    return render_template_string(PORTAL_HTML, tiles=TILES,
+                                  sso=_sso_ready(), who=who, role=role)
 
 
 @app.route("/portal/login", methods=["GET", "POST"])
 def login():
-    if not _config_ok():
+    if not _usable():
         return render_template_string(CONFIG_ERROR_HTML), 503
-    if _is_trusted(request):
+    if _authed(request):
         return redirect("/portal")
     error = ""
+
+    # --- BROKER MODE: username + password -> SSO cookie --------------------
+    if _sso_ready():
+        if request.method == "POST":
+            user = (request.form.get("user") or "").strip()
+            pw = (request.form.get("password") or "")
+            role = None
+            try:
+                role = clinic_users.verify_password(STORE, user, pw)
+            except Exception:
+                role = None
+            if role:
+                resp = make_response(redirect("/portal"))
+                # 1) the SSO cookie -- rides to every .dr-manoj.in clinic app
+                token = clinic_sso.make_token(user, role,
+                                              clinic_users.get_epoch(STORE), SSO_SECRET)
+                resp.set_cookie(clinic_sso.COOKIE_NAME, token, **clinic_sso.cookie_kwargs())
+                # 2) the device-trust cookie -- keeps the portal's own access identical to before
+                resp.set_cookie(
+                    COOKIE_NAME, _expected_device_token(),
+                    max_age=10 * 365 * 24 * 3600,
+                    secure=True, httponly=True, samesite="Lax", path="/portal",
+                )
+                return resp
+            error = "Wrong username or password."
+        return render_template_string(USERPASS_HTML, error=error)
+
+    # --- LEGACY MODE: PIN (unchanged) -------------------------------------
     if request.method == "POST":
         pin = (request.form.get("pin") or "").strip()
         if pin and hmac.compare_digest(_hash_pin(pin), PIN_HASH):
@@ -310,7 +433,7 @@ def login():
 def forget():
     """
     'Forget all devices' — for a lost/stolen device.
-    We rotate the server seed in portal_config.py so EVERY existing cookie
+    We rotate the server seed in portal_config.py so EVERY existing device cookie
     becomes invalid at once. Requires write access to the config file.
     If we cannot write the file, we at least clear THIS device and tell the
     doctor to rotate PORTAL_TOKEN_SEED manually.
@@ -325,11 +448,36 @@ def forget():
     return resp
 
 
+@app.route("/portal/signout-all", methods=["POST"])
+@login_required
+def signout_all():
+    """
+    BROKER: 'Sign out everywhere (all apps)'. Bumps the shared SSO epoch so every
+    clinic_sso token issued so far is rejected by every app at once, and clears the
+    SSO cookie on this device. Device-trust for the portal is also dropped here.
+    """
+    if _sso_ready():
+        try:
+            clinic_users.bump_epoch(STORE)
+        except Exception:
+            pass
+    resp = make_response(redirect("/portal/login"))
+    if _SSO_LIBS:
+        try:
+            resp.set_cookie(clinic_sso.COOKIE_NAME, "", **clinic_sso.clear_cookie_kwargs())
+        except Exception:
+            pass
+    resp.delete_cookie(COOKIE_NAME, path="/portal")
+    return resp
+
+
 @app.route("/portal/health")
 def health():
     """Simple health probe for the future Diagnostics system."""
-    status = "ok" if _config_ok() else "unconfigured"
-    return {"service": "portal", "status": status}, (200 if _config_ok() else 503)
+    ready = _usable()
+    mode = "broker" if _sso_ready() else ("legacy" if _config_ok() else "unconfigured")
+    return {"service": "portal", "status": "ok" if ready else "unconfigured",
+            "mode": mode}, (200 if ready else 503)
 
 
 def _rotate_seed_in_config(new_seed: str) -> bool:

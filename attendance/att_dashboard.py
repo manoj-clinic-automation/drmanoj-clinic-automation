@@ -22,6 +22,52 @@ import att_core as core
 
 app = Flask(__name__)
 
+
+# --- Clinic SSO (portal broker) acceptance -- Step 3, Session 158 ----------
+# If the visitor already holds a valid `clinic_sso` cookie from the portal, let
+# them in with NO second login. This app's own `att_session` cookie and its
+# HTTP Basic-Auth stay as the permanent fallback. If the portal secret can't be
+# read for any reason, the shim is INERT and attendance behaves exactly as
+# before -- so this addition cannot break existing access.
+import os as _os
+import sys as _sys
+import json as _json
+
+_PORTAL_DIR = _os.environ.get("CLINIC_PORTAL_DIR", "/root/portal")
+try:
+    if _PORTAL_DIR not in _sys.path:
+        _sys.path.insert(0, _PORTAL_DIR)
+    import clinic_sso as _sso
+    import portal_config as _pcfg
+    _SSO_SECRET = getattr(_pcfg, "CLINIC_SSO_SECRET", None)
+except Exception:
+    _sso = None
+    _SSO_SECRET = None
+_SSO_STORE = _os.path.join(_PORTAL_DIR, "clinic_users.json")
+
+
+def _sso_epoch():
+    try:
+        with open(_SSO_STORE) as f:
+            return int(_json.load(f).get("epoch", 1))
+    except Exception:
+        return None
+
+
+def sso_ok():
+    """True iff a valid, current portal clinic_sso cookie is present."""
+    if not _sso or not _SSO_SECRET:
+        return False
+    tok = request.cookies.get(_sso.COOKIE_NAME)
+    if not tok:
+        return False
+    try:
+        return _sso.verify_token(tok, _SSO_SECRET,
+                                 current_epoch=_sso_epoch()) is not None
+    except Exception:
+        return False
+
+
 # ---- session cookie (signed, no external library) -------------------------
 COOKIE_NAME = "att_session"
 COOKIE_MAX_AGE = 60 * 60 * 24 * 30  # 30 days
@@ -54,7 +100,10 @@ def basic_ok():
 
 
 def authed():
-    # accept EITHER a valid session cookie OR HTTP Basic Auth (fallback)
+    # accept a portal clinic_sso cookie (SSO), OR this app's own session
+    # cookie, OR HTTP Basic Auth -- the last two remain the fallback.
+    if sso_ok():
+        return True
     if token_valid(request.cookies.get(COOKIE_NAME)):
         return True
     return basic_ok()
