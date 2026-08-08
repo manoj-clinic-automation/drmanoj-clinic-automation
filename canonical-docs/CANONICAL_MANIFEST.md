@@ -2,7 +2,7 @@
 
 **Bareilly · maintained with Claude · governs the canonical document set (D247).**
 
-**STATUS: prepared at S149 close — becomes fully canonical when the owner installs this set (project-knowledge swaps + GitHub push, per the S149 install/push runbook).** **The S150–S156 EOS deltas (through Register v2.9, Archive v1.8, Runbook v94, START_HERE_SESSION_157, Fault Register v2.2, this manifest, plus live VPS code staff_ledger v3.1 + watchdog) fold into the same pending doc install/GitHub push — install/commit them together.** The restructure (D247 + KB split) is live: `KB_Register` + `KB_History_Archive` replaced the retired monolith `Clinic_Master_KB_SystemsRegister_v1.72` (md5 `27b72639…`) in the session loop, alongside EOS prompt v4 and the four frozen-product dossiers. This manifest is the linchpin Phase 0 verifies. *(The whole S149 set installs together — until it does, project knowledge still holds the pre-S149 copies.)*
+**STATUS: prepared at S149 close — becomes fully canonical when the owner installs this set (project-knowledge swaps + GitHub push, per the S149 install/push runbook).** **The S150–S157 EOS deltas (through Register v3.0, Archive v1.9, Runbook v95, START_HERE_SESSION_158, Fault Register v2.3, the four new S157 docs, this manifest, plus live VPS code staff_ledger v3.1 + watchdog) fold into the same pending doc install/GitHub push — install/commit them together.** The restructure (D247 + KB split) is live: `KB_Register` + `KB_History_Archive` replaced the retired monolith `Clinic_Master_KB_SystemsRegister_v1.72` (md5 `27b72639…`) in the session loop, alongside EOS prompt v4 and the four frozen-product dossiers. This manifest is the linchpin Phase 0 verifies. *(The whole S149 set installs together — until it does, project knowledge still holds the pre-S149 copies.)*
 
 > **Phase 0 read rule (every session).** Verify **every** row below by md5 (cheap — hash compare only). **Read into context only Tier 0.** Tier 1 is opened on demand when the session's task touches it. Tier 2 is hash-verified but never read in the loop and never edited without an explicit waiver (D34 discipline). *A row whose md5 does not match halts work until reconciled (D172/D188). If a "pending" item looks done, verify it against reality first.*
 
@@ -12,17 +12,17 @@
 
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
-| `CANONICAL_MANIFEST.md` | S149 | *(self — recomputed last, each EOS)* | this file; the linchpin |
-| `START_HERE_SESSION_157` | S157 | `ad3ab2a8797671dc5a8c5bea680edb46` | entry point; regenerated every close-out (was `START_HERE_SESSION_156`) |
-| `KB_Register` | v2.9 | `a5b38555f42aa4f2556ee1a1550b6c20` | current state; from v1.72 (`27b72639…`). **v2.8→v2.9 (S156):** D259 indexed; F-51/F-52/F-53 minted; salary system v3.1 + watchdog live-state recorded; Archive pointer → v1.8. |
-| `HANDOFF_RUNBOOK` | v94 (S156) | `66b8735e36a3c0749535ee592b65a8d1` | §0 what happened · §2 live backlog (was v93); file `HANDOFF_RUNBOOK_2026-08-07_Session156_v94.md` |
+| `CANONICAL_MANIFEST.md` | S157 | *(self — recomputed last, each EOS)* | this file; the linchpin |
+| `START_HERE_SESSION_158` | S158 | `0051adb72f07562b42eeacc5febbd5a5` | entry point; regenerated every close-out (was `START_HERE_SESSION_157`) |
+| `KB_Register` | v3.0 | `f7f1c985b2263e2acaba299bed885573` | current state; from v1.72 (`27b72639…`). **v2.8→v2.9 (S156):** D259 indexed; F-51/F-52/F-53 minted; salary system v3.1 + watchdog live-state recorded; Archive pointer → v1.8. |
+| `HANDOFF_RUNBOOK` | v95 (S157) | `d64417525b6cf5389e57487213fa669d` | §0 what happened · §2 live backlog (was v94); file `HANDOFF_RUNBOOK_2026-08-07_Session157_v95.md` |
 | active incident | — | — | **only while open**; none open (F-44 closed) |
 
 ## Tier 1 — reference (hash-verified · read only if touched · rewrite only if changed)
 
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
-| `KB_History_Archive` | v1.8 | `5fad707422c3ce46ad655d3ad149f14b` | all history, verbatim; from v1.72 (`27b72639…`). **§S156 appended (S156)** → re-pinned (was `3cd2d940…`); pure-append proven by prefix hash (+10,709 chars). |
+| `KB_History_Archive` | v1.9 | `f885596a8c8455d11fc39ef505ed93b7` | all history, verbatim; from v1.72 (`27b72639…`). **§S156 appended (S156)** → re-pinned (was `3cd2d940…`); pure-append proven by prefix hash (+10,709 chars). |
 | `Dr_Manoj_Clinic_Umbrella_Architecture` | v1.58 | `728cc64950502011ff220e1249e488ce` | strategy + decisions log |
 | `Call_Console_Evolution_Spec` | v2.4 | `63978d982d1f8037f728023d15a01328` | dashboard-as-dialer (active) |
 | `Frontend_Dashboard_Documentation` | v4 (S140) | `02ef929b75aa77ec071c903705335375` | dashboard still evolving |
@@ -31,7 +31,11 @@
 | `API_QUICK_REFERENCE_CARD` | — | `68c4fc344bf74caaea706149cd22e64c` | small + stable. **In the repo since S148** (`canonical-docs/`, byte-identical to project knowledge — verified S149). |
 | `AI_Verdict_Layer_Master` | v1 (S145) | `bd4b67f6810cd2316eb58dfe6bf180cd` | Product B analytics |
 | `Clinic_Callback_Tracker_AppsScript_Audit` | v1.9 | `41dd9fd6b607e59e15e3e646b775d640` | **unfinished audit** (Pass 4 not started); reference only — NOT the frozen dossier |
-| `Fault_Action_Register` | v2.2 | `9b969149a4559d44d92c29eff64f9633` | **v2.2 (S156):** §7 Later-Findings index added (F-45..F-53; full text in the Archive); F-51/F-52/F-53 recorded; no lane/procedure changed; re-pinned (was `3bfeac72…`). Push refreshed file to the GitHub mirror. |
+| `Fault_Action_Register` | v2.3 | `c45d5a55b0330a1144eaae5ac99d75ee` | **v2.2 (S156):** §7 Later-Findings index added (F-45..F-53; full text in the Archive); F-51/F-52/F-53 recorded; no lane/procedure changed; re-pinned (was `3bfeac72…`). Push refreshed file to the GitHub mirror. |
+| `Clinic_Estate_Master_Inventory` | v1.7 (S157) | `3668a9150d1c88017e46861c615aab3e` | **NEW S157.** Complete reconciled cross-project app+service estate; supersedes S63-era App_Service_Register for the automation core (D260). |
+| `Clinic_Portal_SSO_Architecture` | v1 (S157) | `0c843bb64d579205d8c64946721c10f6` | **NEW S157.** SSO broker + shared verify-shim; `.dr-manoj.in` cookie; app logins as fallback (D261). |
+| `Clinic_Portal_Build_Plan` | v1 (S157) | `3d6468cb4927d5d77d7a7d687ffabfe7` | **NEW S157.** Doctor/manager tile rosters + per-app selection; local apps = PC-only group (D262). |
+| `Salary_System_KB` | v1 (S157) | `71bb915dff0dac26fe20192b91cd3940` | **NEW S157.** Staff Ledger + backend salary automation reference (D263); system only, F-31. |
 | `END_OF_SESSION_PROMPT` | v4 | `9fa2be50c527865982f195d347ab0283` | the close-out routine |
 | `INCIDENT_2026-07-14_…_F44` (closed) | — | `774898e80fac3e006d80e8c2f77488e6` | history; consult on demand |
 
@@ -151,3 +155,11 @@ Each frozen product has one canonical **dossier**; this is the FROZEN ledger. **
 ---
 
 - **Post-close amendment (same evening, owner-directed):** `START_HERE_SESSION_155` re-issued with the Darpan money-routing ruling (D258 candidate: loan machinery = workbook; day-to-day entries incl. Darpan = Staff Ledger via doctor DIRECT login; per-staff backend ledger) + a per-staff statement-view build task; re-pinned `d776bfd4…` → `a537565e7475f63c5d6fc74114c0e0aa`. Sunday roster print artefact shipped: `Sunday_Roster_SepDec2026_v1_S154.docx` `b06fac335b6a195e3dce76e40a5bb541` (D253 dates Sep–Dec computed; 29-Nov = 5th Sunday). Manifest self-hash recomputed.
+
+---
+
+### S157 EOS delta (07 Aug 2026 · documentation & design only — NO live code; no GitHub commit)
+**S157 canonical filenames (Phase-0 mapping):** `KB_Register_v3_0_S157.md` · `KB_History_Archive_v1_9_S157.md` · `HANDOFF_RUNBOOK_2026-08-07_Session157_v95.md` · `START_HERE_SESSION_158.md` · `Fault_Action_Register_v2_3.md` · `Clinic_Estate_Master_Inventory_v1.md` · `Clinic_Portal_SSO_Architecture_v1.md` · `Clinic_Portal_Build_Plan_v1_S157.md` · `Salary_System_KB_v1_S157.md` · this `CANONICAL_MANIFEST.md`.
+- **Tier-0 rows bumped:** `KB_Register` v2.9 → **v3.0** (`f7f1c985b2263e2acaba299bed885573`, §S157 block; D260–D263 minted, D259 backfilled; F-54/55/56); `HANDOFF_RUNBOOK` v94 → **v95** (`d64417525b6cf5389e57487213fa669d`); `START_HERE_SESSION_157` → **`START_HERE_SESSION_158`** (`0051adb72f07562b42eeacc5febbd5a5`).
+- **Tier-1:** `KB_History_Archive` v1.8 → **v1.9** (`f885596a8c8455d11fc39ef505ed93b7`, §S157 appended); `Fault_Action_Register` v2.2 → **v2.3** (`c45d5a55b0330a1144eaae5ac99d75ee`, F-54/55/56). **Four new Tier-1 docs registered:** Estate Inventory v1.7 (`3668a915…`), Portal SSO Architecture v1 (`0c843bb6…`), Portal Build Plan v1 (`3d6468cb…`), Salary System KB v1 (`71bb915d…`). All other Tier-1 unchanged: Umbrella, Call Console Spec, Frontend Dashboard, Diagnostics Spec, Maintenance-SOP, API Quick-Ref, AI Verdict Master, Callback Tracker Audit. Tier-2 untouched (no waiver).
+- **No live code, no incident.** Cold kit `DrManoj_Estate_ColdKit_S157.zip` built (sanitized: patient files + F-31 + keys removed; service-account key to rotate). Next free: **D264 · F-57.**
