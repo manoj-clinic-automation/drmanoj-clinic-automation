@@ -197,7 +197,61 @@ TILES = [
     {"icon": "\U0001F9F9", "name": "Inbox Janitor",
      "desc": "Payment register & renewals", "live": bool(INBOX_JANITOR_URL),
      "url": INBOX_JANITOR_URL, "roles": ["doctor"]},
+
+    # ================== PERSONAL HEALTH CLUSTER (doctor only) ===============
+    # Own subdomains, each with its OWN login (owner-key). Link-tiles: clicking
+    # opens the app's own sign-in. Public hostnames -> no secret, inline URLs.
+    {"icon": "\U0001F48A", "name": "RxGuard",
+     "desc": "Prescription safety \u00b7 own login", "live": True,
+     "url": "https://rx.dr-manoj.in", "roles": ["doctor"]},
+
+    {"icon": "\U0001F34E", "name": "GutLog",
+     "desc": "Gut & diet log \u00b7 own login", "live": True,
+     "url": "https://health.dr-manoj.in", "roles": ["doctor"]},
+
+    {"icon": "\U0001F4AA", "name": "FitLog",
+     "desc": "Fitness log \u00b7 own login", "live": True,
+     "url": "https://fit.dr-manoj.in", "roles": ["doctor"]},
 ]
+
+# ---------------------------------------------------------------------------
+# TILE GROUPING  — sectioned, mobile-friendly layout. Sections with no tile
+# visible to the current role/PC are dropped entirely (see _visible_sections).
+# ---------------------------------------------------------------------------
+GROUP_ORDER = ["Clinic", "Money & Accounts", "Clinic PC tools",
+               "Personal", "Health", "Coming soon"]
+
+_TILE_GROUP = {
+    "Call Tracker": "Clinic", "Attendance": "Clinic", "Asset Register": "Clinic",
+    "WhatsApp Approvals": "Clinic", "GMB Review Assist": "Clinic",
+    "Salary & Ledger": "Money & Accounts", "Staff Ledger \u2014 Entry": "Money & Accounts",
+    "UPI Reconciliation": "Money & Accounts", "Monthly Accounting": "Money & Accounts",
+    "Daily Collections": "Money & Accounts", "Vehicle Tracking": "Money & Accounts",
+    "Follow-up Tracker": "Clinic PC tools", "Vitals & Plan": "Clinic PC tools",
+    "Surgical Case Pack": "Clinic PC tools", "CC Statements \u2192 Tally": "Clinic PC tools",
+    "CC Statement Saver": "Personal", "Inbox Janitor": "Personal",
+    "RxGuard": "Health", "GutLog": "Health", "FitLog": "Health",
+    "Revenue Reconciler": "Coming soon", "Ayushman Finder": "Coming soon",
+    "WABA Send": "Coming soon", "Surgical Estimate": "Coming soon",
+    "Nutrition / Physio": "Coming soon",
+}
+# Every tile must map to a known group (fail loud at import, not silently mis-place).
+for _t in TILES:
+    assert _t["name"] in _TILE_GROUP, "ungrouped tile: " + _t["name"]
+    _t["group"] = _TILE_GROUP[_t["name"]]
+assert set(_TILE_GROUP.values()) <= set(GROUP_ORDER), "group not in GROUP_ORDER"
+
+def _visible_sections(role, pc):
+    """Ordered [(label, [tiles])] for this role/pc; empty sections dropped."""
+    out = []
+    for _g in GROUP_ORDER:
+        _items = [t for t in TILES
+                  if t.get("group") == _g
+                  and role in t["roles"]
+                  and (not t.get("pc_only") or pc)]
+        if _items:
+            out.append((_g, _items))
+    return out
 
 # ---------------------------------------------------------------------------
 # AUTH HELPERS
@@ -312,6 +366,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
  flex-wrap:wrap;gap:8px;margin:8px 0 18px}
 .head h1{font-size:18px;margin:0;color:#fff;letter-spacing:-.01em}
 .head .sub{font-size:12px;color:var(--muted)}
+.sec{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+ color:var(--muted);margin:24px 2px 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.sec:first-of-type{margin-top:6px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;
  padding:16px 14px;box-shadow:var(--shadow);text-decoration:none;color:var(--ink);
@@ -350,6 +407,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
 .login .eye{position:absolute;right:6px;top:0;height:100%;display:flex;align-items:center;background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:0 10px;width:auto;margin:0}
 .err{color:#fca5a5;font-size:13px;margin-top:12px;min-height:18px}
 .note{color:var(--muted);font-size:11px;margin-top:22px}
+@media(max-width:480px){
+ .wrap{padding:14px 12px 36px}
+ .grid{grid-template-columns:repeat(2,1fr);gap:10px}
+ .tile{padding:14px 12px;min-height:96px}
+ .tile .nm{font-size:14px}
+ .tile .ic{font-size:24px}
+ .head h1{font-size:17px}
+}
 </style></head><body>
 """
 
@@ -395,9 +460,10 @@ PORTAL_HTML = PAGE_HEAD + """
     {% if who %}<span class="sub">Signed in as {{ who.user }} ({{ who.role }})</span>
     {% else %}<span class="sub">Dr. Manoj Agarwal · Advanced Orthopaedic Surgery Centre</span>{% endif %}
   </div>
+  {% for label, items in sections %}
+  <div class="sec">{{ label }}</div>
   <div class="grid">
-  {% for t in tiles %}
-    {% if role in t.roles and (not t.pc_only or pc) %}
+  {% for t in items %}
     {% if t.live %}
       <a class="tile live" href="{{ t.url }}" target="_blank" rel="noopener">
         <div class="ic">{{ t.icon }}</div>
@@ -413,9 +479,9 @@ PORTAL_HTML = PAGE_HEAD + """
         <span class="tag h">MANUAL</span>
       </div>
     {% endif %}
-    {% endif %}
   {% endfor %}
   </div>
+  {% endfor %}
   <div class="foot">
     <form method="POST" action="/portal/forget"
           onsubmit="return confirm('Sign out EVERY device? Everyone will need to log in again.');">
@@ -471,9 +537,11 @@ def home():
         return redirect("/portal/login")
     who = _sso_user(request)
     role = who["role"] if who else "doctor"
-    return render_template_string(PORTAL_HTML, tiles=TILES,
+    pc = _is_clinic_pc(request)
+    return render_template_string(PORTAL_HTML,
+                                  sections=_visible_sections(role, pc),
                                   sso=_sso_ready(), who=who, role=role,
-                                  pc=_is_clinic_pc(request))
+                                  pc=pc)
 
 
 @app.route("/portal/login", methods=["GET", "POST"])
