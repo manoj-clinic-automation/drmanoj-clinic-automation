@@ -361,6 +361,15 @@ CREATE TABLE IF NOT EXISTS leave_sanction (       -- grid step 2 (D284): a conti
     checker_user TEXT, checker_ts TEXT,
     status TEXT NOT NULL DEFAULT 'draft'           -- draft | approved | cancelled
 );
+
+CREATE TABLE IF NOT EXISTS earlybig_ruling (       -- S163: register-owned big early-exit verdicts
+    ym        TEXT NOT NULL,                        -- YYYY-MM
+    staff     TEXT NOT NULL,                        -- staff name (matches the attendance report)
+    ebdate    TEXT NOT NULL,                        -- YYYY-MM-DD of the early exit
+    verdict   TEXT NOT NULL DEFAULT 'waived',       -- genuine | waived  (only genuine deducts)
+    ruled_by  TEXT, ruled_ts TEXT,
+    PRIMARY KEY (ym, staff, ebdate)
+);
 """
 
 # columns that may be missing on a DB created by an earlier build -> add in place
@@ -2328,6 +2337,7 @@ SALARY_PAGE_HTML = """<!doctype html><meta charset="utf-8">
     <button class="pill" type="submit">View</button>
   </form>
   <span class="note">signed in as {{ who.user }} ({{ who.role }})</span>
+  <a class="pill" href="{{ prefix }}/salary/earlybig?ym={{ ym }}">&#9201; Early-big{% if eb_unruled %} &middot; {{ eb_unruled }} to rule{% endif %}</a>
 </div>
 
 {% if msg %}<div class="lockcard {{ msg_kind }}">{{ msg }}</div>{% endif %}
@@ -2371,6 +2381,24 @@ SALARY_PAGE_HTML = """<!doctype html><meta charset="utf-8">
 {% elif ended and not lock_role %}
   <div class="lockcard info">All dates approved. Locking the official run is doctor-only.</div>
 {% endif %}
+
+{{ body|safe }}
+"""
+
+
+EARLYBIG_PAGE_HTML = """<!doctype html><meta charset="utf-8">
+<title>Big early-exit rulings &mdash; {{ ym }}</title><style>{{ css|safe }}
+.btnbar{display:flex;gap:12px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.btnbar a,.btnbar button{cursor:pointer}</style>
+<div class="btnbar">
+  <a class="pill" href="{{ prefix }}/salary?ym={{ ym }}">&larr; Salary</a>
+  <form method="GET" action="{{ prefix }}/salary/earlybig" style="display:flex;gap:6px;align-items:center;margin:0">
+    <label class="note">Month <input type="month" name="ym" value="{{ ym }}"
+      style="background:#0b1b29;border:1px solid #24344a;color:#fff;border-radius:6px;padding:4px"></label>
+    <button class="pill" type="submit">View</button>
+  </form>
+  <span class="note">signed in as {{ who.user }} ({{ who.role }})</span>
+</div>
 
 {{ body|safe }}
 """
@@ -2450,6 +2478,14 @@ def _render_salary(ym, u, msg="", msg_kind="block"):
             total, complete = _salary.total_payout(rows)
         except Exception as e:
             body = "<div class='warn'>Could not build report: %s</div>" % html.escape(str(e))
+    eb_unruled = 0
+    if _SALARY_OK:
+        try:
+            eb_unruled = _salary.earlybig_unruled(
+                _salary.earlybig_events(ym, SALARY_ATT_DIR),
+                _salary.load_register_earlybig(ym, DB_PATH))
+        except Exception:
+            eb_unruled = 0
     con = get_db()
     blk = approval_blockers(con, ym)
     lr = con.execute("SELECT * FROM locked_run WHERE ym=?", (ym,)).fetchone()
@@ -2467,7 +2503,7 @@ def _render_salary(ym, u, msg="", msg_kind="block"):
         SALARY_PAGE_HTML, who=u, prefix=APP_PREFIX, ym=ym, css=css, body=body,
         blockers=blk, locked=(lr if is_locked else None), can_lock=can_lock,
         ended=ended, complete=complete, total_fmt=total_fmt, lock_role=lock_role,
-        msg=msg, msg_kind=msg_kind)
+        eb_unruled=eb_unruled, msg=msg, msg_kind=msg_kind)
 
 
 @app.route(APP_PREFIX + "/salary")
@@ -2546,6 +2582,76 @@ def salary_unlock():
     con.commit()
     con.close()
     return redirect(APP_PREFIX + "/salary?ym=" + ym)
+
+
+# --- Big early-exit rulings (D288 / S163): the register's own ruling screen, so
+# the ledger salary page can be retired. VIEW+RULE = salary cap (Manoj + Bhawna);
+# a locked month is read-only. The engine READS these verdicts; this app is the
+# sole writer of earlybig_ruling.
+@app.route(APP_PREFIX + "/salary/earlybig")
+@require("salary")
+def salary_earlybig():
+    u = current_user(request)
+    ym = (request.args.get("ym") or _default_salary_ym()).strip()
+    if not _valid_ym(ym):
+        ym = _default_salary_ym()
+    css = _salary._CSS if _SALARY_OK else ""
+    if not _SALARY_OK:
+        body = "<div class='warn'>Salary engine unavailable on this server.</div>"
+    else:
+        try:
+            events = _salary.earlybig_events(ym, SALARY_ATT_DIR)
+        except Exception:
+            events = None
+        verdicts = _salary.load_register_earlybig(ym, DB_PATH)
+        con = get_db()
+        lr = con.execute("SELECT status FROM locked_run WHERE ym=?", (ym,)).fetchone()
+        con.close()
+        locked = bool(lr and lr["status"] == "locked")
+        body = _salary.render_earlybig_html(ym, events, verdicts, locked, APP_PREFIX)
+    return render_template_string(EARLYBIG_PAGE_HTML, who=u, prefix=APP_PREFIX,
+                                  ym=ym, css=css, body=body)
+
+
+@app.route(APP_PREFIX + "/salary/earlybig", methods=["POST"])
+@require("salary")
+def salary_earlybig_save():
+    u = current_user(request)
+    ym = (request.form.get("ym") or "").strip()
+    if not _valid_ym(ym):
+        return redirect(APP_PREFIX + "/salary/earlybig")
+    if not _SALARY_OK:
+        return redirect(APP_PREFIX + "/salary/earlybig?ym=" + ym)
+    con = get_db()
+    lr = con.execute("SELECT status FROM locked_run WHERE ym=?", (ym,)).fetchone()
+    if lr and lr["status"] == "locked":
+        con.close()
+        return redirect(APP_PREFIX + "/salary/earlybig?ym=" + ym)
+    con.executescript(_salary.EARLYBIG_SCHEMA)      # idempotent: table may predate --init
+    try:                                            # only accept real events this month
+        valid = set("%s|%s" % (e["name"], e["date"])
+                    for e in _salary.earlybig_events(ym, SALARY_ATT_DIR))
+    except Exception:
+        valid = set()
+    for k, v in request.form.items():
+        if not k.startswith("eb_"):
+            continue
+        key = k[3:]
+        if key not in valid:
+            continue
+        staff, _sep, ebdate = key.partition("|")
+        verdict = "genuine" if v == "genuine" else "waived"
+        prev = con.execute("SELECT verdict FROM earlybig_ruling WHERE ym=? AND staff=? "
+                           "AND ebdate=?", (ym, staff, ebdate)).fetchone()
+        con.execute("INSERT OR REPLACE INTO earlybig_ruling"
+                    "(ym,staff,ebdate,verdict,ruled_by,ruled_ts) VALUES(?,?,?,?,?,?)",
+                    (ym, staff, ebdate, verdict, u["user"], _now()))
+        if (prev["verdict"] if prev else None) != verdict:
+            _audit(con, "earlybig", "%s|%s|%s" % (ym, staff, ebdate), "rule",
+                   (prev["verdict"] if prev else ""), verdict, u["user"])
+    con.commit()
+    con.close()
+    return redirect(APP_PREFIX + "/salary/earlybig?ym=" + ym)
 
 
 @app.route(APP_PREFIX + "/health")
