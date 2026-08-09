@@ -108,9 +108,12 @@ SALARY_EXCLUDED = {"ADVANCE_ISSUE","LOAN_CAPITALISE","LOAN_SKIP","PERK","SALARY_
 # F-50 (S155): a role's powers are EXPLICIT lists — never "everything in
 # CATEGORIES", which silently grew when system categories were added in v2.0.
 ROLE_CATS = {
-    "maker_full":    ["NIGHT_DUTY","FINE_UNIFORM","FINE_ICARD","LEAVE_APPROVED",
-                      "ICARD_REPLACEMENT","ADVANCE_ISSUE"],
-    "maker_limited": ["LEAVE_APPROVED","FINE_UNIFORM","FINE_ICARD"],
+    # S162 (D286): approved-leave + uniform/i-card fines moved to the Staff Register
+    # (daily grid + sanctioned-leave range). maker_full (Shavez/manager) keeps his
+    # ledger-only money work; maker_limited (Alisha/Shivani/receptionist) has nothing
+    # left to enter here. Checker (doctor) keeps the full list as a backstop.
+    "maker_full":    ["NIGHT_DUTY","ICARD_REPLACEMENT","ADVANCE_ISSUE"],
+    "maker_limited": [],
     "checker":       ["NIGHT_DUTY","FINE_UNIFORM","FINE_ICARD","LEAVE_APPROVED",
                       "ICARD_REPLACEMENT","ADVANCE_ISSUE","FINE_ADHOC","PERK","OTHER"],
 }
@@ -1161,6 +1164,17 @@ small{{color:#666}}</style></head><body><h2>Staff Ledger</h2>{nav}{body}
         if not u: return redirect(URL_PREFIX + "/login")
         cats = ROLE_CATS[users[u]["role"]]
         is_checker = users[u]["role"] == "checker"
+        if not cats:
+            # maker_limited (receptionist): leaves & fines now live in the Staff Register.
+            body = ("<div class=\"card\"><b>Leaves &amp; fines have moved to the Staff "
+                    "Register.</b><p>Approved leave, uniform fine and I-card fine are now "
+                    "recorded in the <b>Staff Register</b> \u2014 the daily grid and the "
+                    "sanctioned-leave range \u2014 pending checker approval there. There is "
+                    "nothing to enter on this page.</p><p><a href=\"https://attendance.dr-"
+                    "manoj.in/register\" style=\"display:inline-block;background:#2f8f4e;"
+                    "color:#fff;padding:8px 18px;border-radius:6px;text-decoration:none\">"
+                    "Open the Staff Register &rarr;</a></p></div>")
+            return page("New entry", body, u)
         msg = ""
         if request.method == "POST":
             try:
@@ -1910,11 +1924,11 @@ def selftest():
     # rate card computations
     r = make_entry(users, "mfull", "Alpha", "NIGHT_DUTY", "2026-08-02","2026-08-03",2,"0","")
     ck(r["amount"] == 400 and r["status"] == "PENDING", "night 2d=+400 pending")
-    r2 = make_entry(users, "mlim", "Alpha", "FINE_UNIFORM", "2026-08-04","2026-08-06",3,"0","")
+    r2 = make_entry(users, "doc", "Alpha", "FINE_UNIFORM", "2026-08-04","2026-08-06",3,"0","")
     ck(r2["amount"] == -60, "uniform 3d=-60")
-    r3 = make_entry(users, "mlim", "Alpha", "FINE_ICARD", "2026-08-04","2026-08-04",1,"0","")
-    ck(r3["amount"] == -20, "icard 1d=-20")
-    rl = make_entry(users, "mlim", "Beta", "LEAVE_APPROVED", "2026-08-10","2026-08-11",2,"0","")
+    r3 = make_entry(users, "mfull", "Gamma", "ICARD_REPLACEMENT", "2026-08-04","2026-08-04",0,"0","lost")
+    ck(r3["amount"] == -100, "replacement -100 (pending, drives the reject flow)")
+    rl = make_entry(users, "doc", "Beta", "LEAVE_APPROVED", "2026-08-10","2026-08-11",2,"0","")
     ck(rl["amount"] == 0 and rl["days"] == 2, "leave 0Rs 2d")
     # permissions
     try:
@@ -1929,6 +1943,18 @@ def selftest():
         make_entry(users, "doc", "Alpha", "FINE_ADHOC", "2026-08-01","2026-08-01",0,"500","")
         ck(False, "adhoc without narration must fail")
     except ValueError: ck(True, "ad-hoc narration required")
+    # S162 (D286): approved-leave + uniform/i-card fines moved to the Staff Register
+    for badcat in ("LEAVE_APPROVED", "FINE_UNIFORM", "FINE_ICARD"):
+        try:
+            make_entry(users, "mlim", "Alpha", badcat, "2026-08-01","2026-08-01",1,"0","")
+            ck(False, f"maker_limited {badcat} must now fail")
+        except PermissionError:
+            ck(True, f"maker_limited blocked from {badcat} (now in the register)")
+        try:
+            make_entry(users, "mfull", "Alpha", badcat, "2026-08-01","2026-08-01",1,"0","")
+            ck(False, f"maker_full {badcat} must now fail")
+        except PermissionError:
+            ck(True, f"maker_full blocked from {badcat} (now in the register)")
     ra = make_entry(users, "doc", "Alpha", "FINE_ADHOC", "2026-08-01","2026-08-01",0,"500","misbehaviour")
     ck(ra["amount"] == -500 and ra["status"] == "APPROVED" and ra["direct"], "doctor direct adhoc -500")
     # self flag
@@ -1938,9 +1964,7 @@ def selftest():
     rr = make_entry(users, "mfull", "Gamma", "ICARD_REPLACEMENT", "2026-08-07","2026-08-07",0,"0","lost")
     ck(rr["amount"] == -100, "replacement -100")
     decide(users, "doc", r["id"], True)
-    decide(users, "doc2", r2["id"], True)
-    decide(users, "doc", r3["id"], False)          # rejected
-    decide(users, "doc", rl["id"], True)
+    decide(users, "doc", r3["id"], False)          # rejected (pending maker entry)
     decide(users, "doc", rs["id"], True)
     decide(users, "doc", rr["id"], True)
     got = {x["id"]: x for x in load_ledger()}
@@ -2007,19 +2031,23 @@ def selftest():
     cl2 = app.test_client()
     cl2.post(URL_PREFIX + "/login", data={"u":"mlim","p":"pw"})
     ck(cl2.get(URL_PREFIX + "/pending").status_code == 403, "maker blocked from pending page")
+    # S162 (D286): maker_limited (receptionist) New-entry now redirects to the Staff Register
+    pgx = cl2.get(URL_PREFIX + "/").data.decode()
+    ck("moved to the Staff Register" in pgx and 'name="category"' not in pgx,
+       "maker_limited sees the register redirect, not an entry form")
     r = cl2.post(URL_PREFIX + "/", data={"staff":"Alpha","category":"FINE_UNIFORM",
                                          "date_from":"2026-09-01","date_to":"2026-09-02",
                                          "narration":""})
-    ck(b"Saved" in r.data and b"-40" in r.data.replace(b"Rs ", b"Rs"), "web entry uniform 2d saved")
-    r = cl2.post(URL_PREFIX + "/", data={"staff":"Alpha","category":"NIGHT_DUTY",
-                                         "date_from":"2026-09-01","date_to":"2026-09-01",
-                                         "narration":""})
-    ck(b"NOT saved" in r.data or r.status_code == 403, "web blocks out-of-role category")
-    # adaptive form: role-scoped metadata + dynamic narration handling
-    pg = cl2.get(URL_PREFIX + "/").data.decode()
-    ck('"FINE_UNIFORM"' in pg and '"FINE_ADHOC"' not in pg,
-       "limited maker's form metadata excludes doctor-only categories")
-    ck("Narration (optional)" in pg and "refresh()" in pg, "adaptive form script present")
+    ck("moved to the Staff Register" in r.data.decode() and b"Saved" not in r.data,
+       "maker_limited cannot POST a fine (redirect shown, nothing saved)")
+    # maker_full keeps a working form, but without the migrated categories
+    clm2 = app.test_client()
+    clm2.post(URL_PREFIX + "/login", data={"u":"mfull","p":"pw"})
+    pgm = clm2.get(URL_PREFIX + "/").data.decode()
+    ck('"NIGHT_DUTY"' in pgm and '"FINE_UNIFORM"' not in pgm
+       and '"LEAVE_APPROVED"' not in pgm and '"FINE_ADHOC"' not in pgm,
+       "maker_full form keeps money categories, not leave/uniform/i-card/adhoc")
+    ck("Narration (optional)" in pgm and "refresh()" in pgm, "adaptive form script present")
     pgd = cl.get(URL_PREFIX + "/").data.decode()
     ck('"FINE_ADHOC"' in pgd and '"narr_req": true' in pgd,
        "doctor form carries adhoc with narr_req=true")
