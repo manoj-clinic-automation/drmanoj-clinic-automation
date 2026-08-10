@@ -36,6 +36,7 @@ Reverse proxy maps  followup.dr-manoj.in/portal  ->  127.0.0.1:8090
 
 import os
 import json
+import datetime
 import hmac
 import hashlib
 import secrets
@@ -105,6 +106,11 @@ app = Flask(__name__)
 # ---------------------------------------------------------------------------
 TILES = [
     # ============================ DOCTOR + shared ============================
+    {"icon": "\U0001F4CA", "name": "Clinic Gist",
+     "desc": "Live bird's-eye \u2014 calls, pipeline, pending", "live": True,
+     "url": "/portal/gist", "gist": True,
+     "roles": ["doctor"]},
+
     {"icon": "\U0001F4DE", "name": "Call Tracker",
      "desc": "Calls, follow-ups, dashboard", "live": True,
      "url": "https://script.google.com/macros/s/AKfycbyoQ5R3yvFC0B8arOnVWo4002BFfBGIVM2cBwpaMwUM4GaYw7d89jk1U_g38Ht0omcF/exec",
@@ -241,6 +247,7 @@ GROUP_ORDER = ["Clinic", "Money & Accounts", "Clinic PC tools",
                "Personal", "Health", "Coming soon", "Admin"]
 
 _TILE_GROUP = {
+    "Clinic Gist": "Clinic",
     "Call Tracker": "Clinic", "Attendance": "Clinic", "Asset Register": "Clinic",
     "WhatsApp Approvals": "Clinic", "GMB Review Assist": "Clinic",
     "Staff Register": "Clinic",
@@ -551,7 +558,7 @@ PORTAL_HTML = PAGE_HEAD + """
       <a class="tile live" href="{{ t.url }}" target="_blank" rel="noopener">
         <div class="ic">{{ t.icon }}</div>
         <div class="nm">{{ t.name }}</div>
-        <div class="ds"{% if t.review_counts %} data-review-counts{% endif %}>{{ t.desc }}</div>
+        <div class="ds"{% if t.review_counts %} data-review-counts{% endif %}{% if t.gist %} data-gist-summary{% endif %}>{{ t.desc }}</div>
         <span class="tag l">OPEN</span>
       </a>
     {% else %}
@@ -600,6 +607,25 @@ PORTAL_HTML = PAGE_HEAD + """
      if(!d||typeof d.to_enter==='undefined')return;
      var s='\u270D\uFE0F '+d.to_enter+' to enter';
      if(d.show_approve)s+=' \u00B7 \u2705 '+d.to_approve+' to approve';
+     el.textContent=s;
+   })
+   .catch(function(){});
+})();
+/* Clinic Gist tile: one-line live summary from the same JSON the page renders.
+   Client-side so the portal never waits on the file; if unreadable the tile keeps
+   its static description. */
+(function(){
+  var el=document.querySelector('[data-gist-summary]');
+  if(!el)return;
+  fetch('/portal/gist-data',{credentials:'same-origin'})
+   .then(function(r){return r.ok?r.json():null;})
+   .then(function(d){
+     if(!d||!d.ok||!d.gist)return;
+     var g=d.gist, c=g.calls||{};
+     var s='\U0001F4DE '+(c.in_today||0)+' in \u00b7 '+(c.out_today||0)+' out';
+     if(typeof g.unfiled_outcomes==='number')s+=' \u00b7 '+g.unfiled_outcomes+' pending';
+     if(g.pipeline&&g.pipeline.escalate_lokesh)s+=' \u00b7 \u26A0';
+     if(d.stale)s+=' (stale)';
      el.textContent=s;
    })
    .catch(function(){});
@@ -993,6 +1019,174 @@ def gmb():
     except Exception:
         return ("GMB page not installed. Place the HTML file at "
                 + GMB_HTML_PATH), 503
+
+
+# ===========================================================================
+# D223 GIST TILE  --  the doctor's bird's-eye. Reads /root/wa/portal_gist.json
+# (built by portal_gist.py on its own cron) and RENDERS it. The portal never
+# computes (D236); it only reads. A missing or stale file is SAID so on the page,
+# never shown as a fake zero (fail-loud carries through to the UI).
+# ===========================================================================
+GIST_JSON_PATH = _cfg_get("PORTAL_GIST_JSON", "/root/wa/portal_gist.json")
+_IST_TZ = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
+
+
+def _read_gist(path=None):
+    """Parse the gist json. Returns the dict, or None on any failure."""
+    try:
+        with open(path or GIST_JSON_PATH, "r", encoding="utf-8") as fh:
+            d = json.load(fh)
+        return d if isinstance(d, dict) else None
+    except Exception:
+        return None
+
+
+def _gist_view(path=None, now=None):
+    """Read the gist + decorate with freshness. Always returns a render-safe dict:
+      {ok, stale, age_min, gist}.  ok=False when the file is unreadable."""
+    d = _read_gist(path)
+    if d is None:
+        return {"ok": False, "stale": True, "age_min": None, "gist": None}
+    stale_after = d.get("stale_after_min", 45)
+    age_min, stale = None, True
+    try:
+        gen = datetime.datetime.fromisoformat(d.get("generated_ist", ""))
+        cur = now or datetime.datetime.now(gen.tzinfo or _IST_TZ)
+        age_min = int((cur - gen).total_seconds() // 60)
+        stale = age_min > stale_after
+    except Exception:
+        pass
+    return {"ok": True, "stale": stale, "age_min": age_min, "gist": d}
+
+
+def _is_doctor(req) -> bool:
+    """Mirror home(): a trusted device with no SSO user is treated as the doctor."""
+    who = _sso_user(req)
+    role = who["role"] if who else "doctor"
+    return role == "doctor"
+
+
+def doctor_required(view):
+    @wraps(view)
+    def wrapper(*a, **k):
+        if not _authed(request):
+            return redirect("/portal/login")
+        if not _is_doctor(request):
+            abort(403)
+        return view(*a, **k)
+    return wrapper
+
+
+GIST_HTML = PAGE_HEAD + """
+<style>
+.gcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+.gmetrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:6px}
+.gbig{font-size:25px;font-weight:700;color:#fff;line-height:1.15}
+.glabel{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.gsub{font-size:12px;color:var(--muted);margin-top:5px}
+.gbanner{border-radius:12px;padding:10px 14px;font-size:13px;margin:6px 0 14px}
+.gbanner.warn{background:rgba(234,179,8,.14);color:#fde68a;border:1px solid rgba(234,179,8,.35)}
+.gbanner.bad{background:rgba(239,68,68,.14);color:#fecaca;border:1px solid rgba(239,68,68,.4)}
+.gpill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px}
+.gpill.ok{background:rgba(34,197,94,.16);color:#86efac}
+.gpill.bad{background:rgba(239,68,68,.18);color:#fca5a5}
+.gpill.mut{background:rgba(91,113,132,.25);color:#b8c7d6}
+.gfoot{margin-top:22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.gnote{font-size:11px;color:var(--muted)}
+</style>
+<div class="wrap">
+  <div class="head">
+    <h1>\U0001F4CA Clinic Gist</h1>
+    <span class="sub">Live bird's-eye \u00b7 read-only</span>
+  </div>
+
+  {% if not v.ok %}
+    <div class="gbanner bad">The gist data could not be read yet \u2014 numbers are withheld
+      (never shown as zero). It rebuilds every 30 min; check back shortly.</div>
+    <div class="gfoot"><a class="forget" href="/portal">&larr; Back to portal</a></div>
+  {% else %}
+    {% if v.stale %}
+      <div class="gbanner warn">\u26A0 Stale \u2014 last built {{ v.age_min }} min ago
+        (fresh under {{ g.stale_after_min }} min). The builder may not have run; treat with caution.</div>
+    {% endif %}
+    {% if not g.sources_ok %}
+      <div class="gbanner warn">Some sources were unreadable this run \u2014 affected numbers are blank, not zero.
+        {% for n in g.notes %}{% if 'verdict_awaiting_referee' not in n %}<div class="gnote">\u2022 {{ n }}</div>{% endif %}{% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="gmetrics">
+      <div class="gcard">
+        <div class="glabel">Calls today</div>
+        {% if g.calls %}
+          <div class="gbig">{{ g.calls.in_today }} in \u00b7 {{ g.calls.out_today }} out</div>
+          <div class="gsub">Last 7 days: {{ g.calls.in_7d }} in \u00b7 {{ g.calls.out_7d }} out</div>
+        {% else %}<div class="gbig">\u2014</div><div class="gsub">unavailable</div>{% endif %}
+      </div>
+
+      <div class="gcard">
+        <div class="glabel">Recording health (7d)</div>
+        {% if g.pipeline %}
+          {% if g.pipeline.escalate_lokesh %}
+            <div class="gbig">\u26A0 {{ g.pipeline.never_recorded_7d }}</div>
+            <div class="gsub"><span class="gpill bad">Escalate to Lokesh</span></div>
+          {% elif g.pipeline.never_recorded_7d > 0 %}
+            <div class="gbig">{{ g.pipeline.never_recorded_7d }} losses</div>
+            <div class="gsub">genuine provider recording losses</div>
+          {% else %}
+            <div class="gbig">\u2713 0 losses</div>
+            <div class="gsub"><span class="gpill ok">healthy</span> \u00b7 {{ g.pipeline.missed_7d }} missed (no recording expected)</div>
+          {% endif %}
+        {% else %}<div class="gbig">\u2014</div><div class="gsub">unavailable</div>{% endif %}
+      </div>
+
+      <div class="gcard">
+        <div class="glabel">Callbacks awaiting staff</div>
+        {% if g.unfiled_outcomes is not none %}
+          <div class="gbig">{{ g.unfiled_outcomes }}</div>
+          <div class="gsub">open in Callbacks_Today, not yet actioned</div>
+        {% else %}<div class="gbig">\u2014</div><div class="gsub">unavailable</div>{% endif %}
+      </div>
+
+      <div class="gcard">
+        <div class="glabel">3rd-strike numbers (7d)</div>
+        {% if g.third_strikes_7d is not none %}
+          <div class="gbig">{{ g.third_strikes_7d }}</div>
+          <div class="gsub">reached 3 WhatsApp strikes (don't-call risk)</div>
+        {% else %}<div class="gbig">\u2014</div><div class="gsub">unavailable</div>{% endif %}
+      </div>
+
+      <div class="gcard">
+        <div class="glabel">Verdict cards awaiting referee</div>
+        <div class="gbig"><span class="gpill mut">coming soon</span></div>
+        <div class="gsub">wires in when the AI-verdict store is bound</div>
+      </div>
+    </div>
+
+    <div class="gfoot">
+      <span class="gnote">{% if v.age_min is not none %}Updated {{ v.age_min }} min ago{% else %}Update time unknown{% endif %}
+        \u00b7 auto-refreshes every 30 min</span>
+      <a class="forget" href="/portal">&larr; Back to portal</a>
+    </div>
+  {% endif %}
+</div></body></html>
+"""
+
+
+@app.route("/portal/gist-data")
+@doctor_required
+def gist_data():
+    resp = make_response(json.dumps(_gist_view()))
+    resp.headers["Content-Type"] = "application/json"
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+@app.route("/portal/gist")
+@doctor_required
+def gist_page():
+    v = _gist_view()
+    return render_template_string(GIST_HTML, v=v, g=(v.get("gist") or {}))
 
 
 def _rotate_seed_in_config(new_seed: str) -> bool:
