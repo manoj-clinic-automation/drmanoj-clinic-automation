@@ -300,10 +300,8 @@ def load_register(ym, db_path=None):
                     "disc_used": 0, "fest_used": 0, "fest_prior_fy": 0,
                     "late_not_informed": 0, "leave_dates": set()}
 
-    rowcount = 0
     for r in con.execute(
             "SELECT * FROM daily_register WHERE reg_date>=? AND reg_date<=?", (lo, hi)):
-        rowcount += 1
         sid = r["staff_id"]
         a = agg.get(sid)
         if a is None:
@@ -332,8 +330,22 @@ def load_register(ym, db_path=None):
         if r["staff_id"] in agg:
             agg[r["staff_id"]]["fest_prior_fy"] = r["c"]
 
+    # F-67 (S164): coverage = the month was CAPTURED (day-review approved), NOT
+    # whether any daily_register exception row exists. With minimal-input front-end
+    # entry a clean OR a plain-absent day writes no daily_register row (absence is the
+    # biometric's job), so exception-count coverage silently skipped the base/30
+    # C-model cut on a genuinely captured month. Key off the checker's existing
+    # one-click: day_review.status='approved' (staff_register.date_status() agrees).
+    # A stray DRAFT row does NOT count -- the live 2026-07 draft row must not flip
+    # July to covered, so ledger parity is preserved. Table missing (legacy /
+    # pre-register months) -> not covered -> False.
+    covered = False
+    if con.execute("SELECT 1 FROM sqlite_master WHERE type='table' "
+                   "AND name='day_review'").fetchone() is not None:
+        covered = con.execute(
+            "SELECT COUNT(*) FROM day_review WHERE status='approved' "
+            "AND reg_date>=? AND reg_date<=?", (lo, hi)).fetchone()[0] > 0
     con.close()
-    covered = rowcount > 0
     return agg, staff, covered
 
 
@@ -923,11 +935,16 @@ def _selftest():
         outstation_nights INTEGER DEFAULT 0, extra_duty INTEGER DEFAULT 0,
         ot_permitted INTEGER DEFAULT 0);
       CREATE TABLE festival_day(fest_date TEXT PRIMARY KEY, name TEXT, clinic_closed INTEGER DEFAULT 0);
+      CREATE TABLE day_review(reg_date TEXT PRIMARY KEY, state TEXT DEFAULT 'exceptions',
+        maker_user TEXT, maker_ts TEXT, checker_user TEXT, checker_ts TEXT,
+        override_user TEXT, override_ts TEXT, override_note TEXT,
+        status TEXT DEFAULT 'draft');
     """)
     # base 30000 -> day 1000
     con.execute("INSERT INTO staff VALUES(1,'Tester','2000-01-01',NULL,30000,0,1,1)")
     con.execute("INSERT INTO staff VALUES(2,'Clean','2000-01-01',NULL,30000,0,0,0)")
     con.execute("INSERT INTO staff VALUES(3,'July','2000-01-01',NULL,30000,0,0,0)")
+    con.execute("INSERT INTO staff VALUES(4,'Captured','2000-01-01',NULL,30000,0,0,0)")
     con.commit(); con.close()
 
     def att_csv(dirp, ym, rows):
@@ -953,6 +970,11 @@ def _selftest():
     con.execute("INSERT INTO daily_register(reg_date,staff_id,outstation_nights) VALUES('2026-08-06',1,3)")
     con.execute("INSERT INTO daily_register(reg_date,staff_id,leave_kind,absence_type) "
                 "VALUES('2026-08-05',2,'discretionary','leave_sanctioned')")
+    # F-67: coverage now comes from an APPROVED day-review, not from the exception
+    # rows above. Seed the checker sign-off the front-end would have written.
+    con.execute("INSERT INTO day_review(reg_date,state,status,maker_user,maker_ts,"
+                "checker_user,checker_ts) VALUES('2026-08-15','exceptions','approved',"
+                "'alisha','2026-08-15T18:00','shavez','2026-08-15T18:05')")
     con.commit(); con.close()
 
     att_csv(tmp, "2026-08", [
@@ -997,6 +1019,13 @@ def _selftest():
 
     # ---- CASE B: JULY, register NOT covered (no grid rows) -------------------
     # uniform/i-card live in the LEDGER; C-model must NOT apply; conservation holds.
+    # F-67 landmine: the live DB carries ONE stray 2026-07 day_review row at
+    # status='draft'. A DRAFT must NOT count as covered, or July flips covered and
+    # the proven parity breaks. Seed it and prove July stays uncovered.
+    con = sqlite3.connect(dbp)
+    con.execute("INSERT INTO day_review(reg_date,state,status) "
+                "VALUES('2026-07-01','all_clear','draft')")
+    con.commit(); con.close()
     att_csv(tmp, "2026-07", [
         # July: 4 absents -> excess-absence fine already = (4-3)*100 = 100 in the CSV
         ["July", "0", "0", "0", "100", "0", "FULL", "800", "4",
@@ -1029,6 +1058,37 @@ def _selftest():
     #   - fine_exc - adj_db.  adj here: +200 night, -40 dress, -20 icard -> cr 200, db 60.
     old_net = 30000 + 800 + 200 - 100 - 60           # = 30840
     assert j["final_net"] + j["incentive_pot"] == old_net, (j["final_net"], old_net)
+
+    # ---- CASE E (F-67): CAPTURED month, genuine absences, ZERO exception rows -
+    # The exact hole: the month is register-CAPTURED (an APPROVED day-review exists)
+    # but the minimal-input front-end logged no daily_register row -- the absents come
+    # only from the biometric-fed attendance CSV. Coverage MUST be True and the
+    # base/30 C-model cut MUST fire. On the pre-fix engine covered would be False
+    # (no exception rows) and base30_ded would be 0 -> silent overpayment.
+    con = sqlite3.connect(dbp)
+    con.execute("INSERT INTO day_review(reg_date,state,status,maker_user,maker_ts,"
+                "checker_user,checker_ts) VALUES('2026-09-01','all_clear','approved',"
+                "'alisha','2026-09-01T18:00','shavez','2026-09-01T18:05')")
+    con.commit(); con.close()
+    att_csv(tmp, "2026-09", [
+        # Captured: 4 genuine absents from the biometric feed, no logged exception.
+        ["Captured", "0", "0", "0", "0", "0", "FULL", "0", "4",
+         "2026-09-10 2026-09-11 2026-09-12 2026-09-13"],
+    ])
+    sep_led = [{"staff": "Captured", "category": "NIGHT_DUTY", "amount": 0,
+                "status": "APPROVED", "closed_month": "2026-09"}]   # marks month closed
+    rowsE, probE, _ = build_report(
+        "2026-09", db_path=dbp, att_dir=tmp, ledger_rows=sep_led,
+        rulings={"earlybig": {}, "ot": {}, "outstation": {}}, earlybig=[], bases={})
+    probE = [p for p in probE if "shadow" not in p]
+    assert not probE, probE
+    cap = {x["name"]: x for x in rowsE}["Captured"]
+    assert cap["covered"] is True                    # captured via day_review approve
+    assert cap["genuine_absent"] == 4 and cap["C"] == 4 and cap["extra_days"] == 2
+    assert cap["deduct_days"] == 2 and cap["base30_ded"] == 2000.0   # F-67: cut fires
+    assert cap["fine_exc"] == 100.0                  # re-derived in covered mode
+    # net = 30000 - 100(excess-absent) - 2000(base30) = 27900
+    assert cap["final_net"] == 27900, cap["final_net"]
 
     # ---- CASE C: ledger unreachable -> incomplete, unlockable ---------------
     rows3, prob3, _ = build_report(
@@ -1097,7 +1157,8 @@ def _selftest():
 
     print("SELFTEST OK -- standalone net (attendance + grid C-model + ledger fold), "
           "OT removed, incentive->pot, uniform/i-card per-month source, C-model gated "
-          "on coverage, ledger-fold excludes uniform/i-card, JULY CONSERVATION "
+          "on day-review coverage (F-67: approve, not exception rows), ledger-fold "
+          "excludes uniform/i-card, JULY CONSERVATION "
           "(new + pot == old), fold-excluded PERK, incomplete-when-ledger-absent, "
           "register-owned EARLY-BIG (events parse + fail-loud, verdict overlay wins, "
           "deducts per register ruling, screen render), html render.")

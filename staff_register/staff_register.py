@@ -44,6 +44,7 @@ import os
 import sys
 import csv
 import io
+import json
 import html
 import uuid
 import hmac
@@ -55,6 +56,7 @@ from functools import wraps
 
 from flask import (
     Flask, request, redirect, session, render_template_string, send_file, abort,
+    make_response,
 )
 
 # ---------------------------------------------------------------------------
@@ -149,7 +151,9 @@ except Exception:
 CHECKER_USERS   = set(_cfg("SR_CHECKER_USERS", "shavez").split(","))
 MAKER_USERS     = set(_cfg("SR_MAKER_USERS", "alisha,shivani").split(","))
 OVERRIDE_USERS  = set(x for x in _cfg("SR_OVERRIDE_USERS", "").split(",") if x)
-INACTIVE_MAKERS = set(x for x in _cfg("SR_INACTIVE_MAKERS", "shivani").split(",") if x)
+# S164: Shivani activated -> no inactive makers by default. Add usernames via
+# SR_INACTIVE_MAKERS (env or staff_register_config) to re-park a maker later.
+INACTIVE_MAKERS = set(x for x in _cfg("SR_INACTIVE_MAKERS", "").split(",") if x)
 DOC_CUSTODIANS  = set(_cfg("SR_DOC_CUSTODIANS", "shavez").split(","))
 DELETER_USERS   = set(_cfg("SR_DELETER_USERS", "manoj").split(","))   # delete = manoj only
 # Stage B (D283): salary VIEW allowlist + APPROVE&LOCK allowlist (username-gated, role-independent).
@@ -1365,6 +1369,7 @@ REGISTER_HTML = HEAD + """
   {% endif %}
 
   <div class="bar" style="margin-top:18px">
+    {% if caps.check %}<a class="btn ghost" href="{{ prefix }}/review" target="_blank" rel="noopener">&#128449; Pending review &middot; &#9997;&#65039; {{ review_to_enter }} to enter &middot; &#9989; {{ review_to_approve }} to approve</a>{% endif %}
     {% if caps.maker %}<a class="btn ghost" href="{{ prefix }}/staff" target="_blank" rel="noopener">👤 Staff records</a>{% endif %}
     {% if caps.maker %}<a class="btn ghost" href="{{ prefix }}/leave" target="_blank" rel="noopener">🌴 Sanctioned leave</a>{% endif %}
     {% if caps.salary %}<a class="btn ghost" href="{{ prefix }}/salary" target="_blank" rel="noopener">💰 Salary reconciliation</a>{% endif %}
@@ -1914,6 +1919,12 @@ def home():
     festival_name = fest["name"] if fest else ""
     can_approve = can_check_approve(con, d, u["user"], u["caps"]["override"]) \
         if u["caps"]["check"] else False
+    # pending-review tile counts (checkers/override only; makers don't see the tile)
+    if u["caps"]["check"]:
+        _rc = review_board(con, _today()[:7], u["user"], u["caps"]["override"], True)
+        r_enter, r_approve = _rc["to_enter"], _rc["to_approve"]
+    else:
+        r_enter = r_approve = 0
     con.close()
     dt = datetime.datetime.strptime(d, "%Y-%m-%d").date()
     prev = (dt - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
@@ -1923,6 +1934,7 @@ def home():
         staff=dec, rows=rows, status=status, holiday=holiday, all_clear=all_clear,
         holiday_name=holiday_name, festival_name=festival_name, bio_ok=bio_ok,
         can_approve=can_approve, prefix=APP_PREFIX,
+        review_to_enter=r_enter, review_to_approve=r_approve,
         msg=request.args.get("m", ""), msgcls=request.args.get("c", "ok"))
 
 
@@ -1948,10 +1960,16 @@ def save():
 def approve():
     u = current_user(request)
     d = request.form.get("d", _today())
+    back = request.form.get("back", "")
     try:
         approve_date(d, u["user"], u["caps"]["override"])
+        if back == "review":
+            return redirect(APP_PREFIX + "/review?ym=%s&m=Approved+%s&c=ok" % (d[:7], d))
         return redirect(APP_PREFIX + "/?d=%s&m=Approved+%s&c=ok" % (d, d))
     except (PermissionError, ValueError) as e:
+        if back == "review":
+            return redirect(APP_PREFIX + "/review?ym=%s&m=%s&c=err"
+                            % (d[:7], str(e).replace(" ", "+")))
         return redirect(APP_PREFIX + "/?d=%s&m=%s&c=err" % (d, str(e).replace(" ", "+")))
 
 
@@ -2460,6 +2478,153 @@ def approval_blockers(con, ym):
             "approved": approved}
 
 
+def _ym_shift(ym, delta):
+    """ym +/- delta months, wrapping year. 'YYYY-MM' in, 'YYYY-MM' out."""
+    y, m = int(ym[:4]), int(ym[5:7])
+    m += delta
+    while m < 1:
+        m += 12; y -= 1
+    while m > 12:
+        m -= 12; y += 1
+    return "%04d-%02d" % (y, m)
+
+
+def review_board(con, ym, actor=None, is_override=False, can_check=False):
+    """Pending-review board for ym. Reuses approval_blockers for the authoritative
+    buckets (so the board and the salary lock can never disagree), decorates each
+    draft (checker-pending) date with the maker stamp + per-date approve-eligibility
+    (D272 self-approve guard), and splits maker-pending into due-now (<= today) vs
+    upcoming (future). Read-only."""
+    blk = approval_blockers(con, ym)          # {missing, draft, required, approved}
+    today = _today()
+    draft = []
+    for d in blk["draft"]:
+        r = review_row(con, d)
+        draft.append({
+            "d": d,
+            "state": (r["state"] if r else "exceptions"),
+            "maker_user": (r["maker_user"] if r else ""),
+            "maker_ts": (r["maker_ts"] if r else ""),
+            "can_approve": bool(can_check and can_check_approve(con, d, actor, is_override)),
+        })
+    due = [d for d in blk["missing"] if d <= today]       # maker-pending, due now
+    upcoming = [d for d in blk["missing"] if d > today]   # future -> not nagged
+    return {"ym": ym, "draft": draft, "to_approve": len(draft),
+            "due": due, "to_enter": len(due), "upcoming": len(upcoming),
+            "approved": blk["approved"], "required": blk["required"]}
+
+
+REVIEW_PAGE_HTML = HEAD + """
+<div class="wrap">
+  <div class="head">
+    <h1>Pending review &mdash; {{ ym }}</h1>
+    <div class="sub">&#9997;&#65039; {{ bd.to_enter }} to enter &middot; &#9989; {{ bd.to_approve }} to approve</div>
+  </div>
+  {% if msg %}<div class="msg {{ msgcls }}">{{ msg }}</div>{% endif %}
+  <div class="datebar">
+    <a href="{{ prefix }}/review?ym={{ prev_ym }}">&#9664; {{ prev_ym }}</a>
+    <a href="{{ prefix }}/review?ym={{ next_ym }}">{{ next_ym }} &#9654;</a>
+    <a href="{{ prefix }}/">&#128197; Daily register</a>
+    {% if caps.salary %}<a href="{{ prefix }}/salary?ym={{ ym }}">&#128176; Salary</a>{% endif %}
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 8px;font-size:15px;color:#fff">&#9989; Awaiting approval
+      <span class="pill draft">{{ bd.to_approve }}</span></h2>
+    {% if bd.draft %}
+    <div class="tblwrap"><table>
+      <tr><th>Date</th><th>Entry</th><th>Entered by</th><th></th></tr>
+      {% for x in bd.draft %}
+      <tr>
+        <td class="nm"><a href="{{ prefix }}/?d={{ x.d }}" style="color:#93c5fd;text-decoration:none">{{ x.d }}</a></td>
+        <td>{% if x.state=='all_clear' %}All clear{% else %}Exceptions{% endif %}</td>
+        <td>{{ x.maker_user or "&mdash;" }}{% if x.maker_ts %}<span class="gate"> &middot; {{ x.maker_ts }}</span>{% endif %}</td>
+        <td>
+          {% if x.can_approve %}
+          <form method="POST" action="{{ prefix }}/approve" style="margin:0">
+            <input type="hidden" name="d" value="{{ x.d }}">
+            <input type="hidden" name="back" value="review">
+            <button class="btn green" type="submit" style="padding:7px 14px;font-size:13px">Approve</button>
+          </form>
+          {% elif caps.check %}<span class="note">you entered &mdash; needs another checker/override</span>
+          {% else %}<span class="gate">a checker approves</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table></div>
+    {% else %}<div class="note">Nothing waiting for approval. &#9989;</div>{% endif %}
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 8px;font-size:15px;color:#fff">&#9997;&#65039; Not yet entered
+      <span class="pill empty">{{ bd.to_enter }}</span></h2>
+    {% if bd.due %}
+    <div class="bar" style="margin-top:4px">
+      {% for d in bd.due %}<a class="btn ghost" href="{{ prefix }}/?d={{ d }}" style="padding:7px 12px;font-size:13px">{{ d }}</a>{% endfor %}
+    </div>
+    <div class="note">These days have no entry yet &mdash; a maker must record them (or mark all-clear).</div>
+    {% else %}<div class="note">Every day up to today is entered.</div>{% endif %}
+    {% if bd.upcoming %}<div class="note">{{ bd.upcoming }} upcoming day(s) not yet due.</div>{% endif %}
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 8px;font-size:15px;color:#fff">Progress</h2>
+    <div class="note">Approved <b style="color:#86efac">{{ bd.approved }}</b> of {{ bd.required }}
+      working day(s) this month (clinic-closed holidays excluded).{% if bd.to_approve==0 and bd.to_enter==0 %} Month is clear.{% endif %}</div>
+  </div>
+
+  <div class="foot"><a href="{{ prefix }}/">&larr; Back to the daily register</a></div>
+</div></body></html>
+"""
+
+
+@app.route(APP_PREFIX + "/review", methods=["GET"])
+@require("maker")
+def review_view():
+    u = current_user(request)
+    ym = (request.args.get("ym") or "")
+    try:
+        datetime.date(int(ym[:4]), int(ym[5:7]), 1)
+    except Exception:
+        ym = _today()[:7]
+    con = get_db()
+    bd = review_board(con, ym, u["user"], u["caps"]["override"], u["caps"]["check"])
+    con.close()
+    return render_template_string(
+        REVIEW_PAGE_HTML, who=u, caps=u["caps"], prefix=APP_PREFIX, ym=ym,
+        prev_ym=_ym_shift(ym, -1), next_ym=_ym_shift(ym, 1), bd=bd,
+        msg=request.args.get("m", ""), msgcls=request.args.get("c", "ok"))
+
+
+# The portal (followup) reads the current-month review counts for its Staff Register
+# tile. Cross-origin GET with credentials -> echo the one allowed origin (ACAC=true
+# forbids '*'). show_approve is decided HERE by role, so a maker never receives the
+# approve count -- one brain for the maker/checker/override display rule.
+REVIEW_COUNTS_ORIGINS = {"https://followup.dr-manoj.in"}
+
+
+@app.route(APP_PREFIX + "/review/counts", methods=["GET"])
+@require("maker")
+def review_counts():
+    u = current_user(request)
+    con = get_db()
+    bd = review_board(con, _today()[:7], u["user"], u["caps"]["override"], u["caps"]["check"])
+    con.close()
+    show_approve = bool(u["caps"]["check"])
+    payload = {"ym": bd["ym"], "role": u["role"], "to_enter": bd["to_enter"],
+               "to_approve": (bd["to_approve"] if show_approve else 0),
+               "show_approve": show_approve}
+    resp = make_response(json.dumps(payload))
+    resp.headers["Content-Type"] = "application/json"
+    resp.headers["Cache-Control"] = "no-store"
+    origin = request.headers.get("Origin", "")
+    if origin in REVIEW_COUNTS_ORIGINS:
+        resp.headers["Access-Control-Allow-Origin"] = origin
+        resp.headers["Access-Control-Allow-Credentials"] = "true"
+        resp.headers["Vary"] = "Origin"
+    return resp
+
+
 def _render_salary(ym, u, msg="", msg_kind="block"):
     """Build the salary page: engine preview body + Stage-B lock controls, for user u."""
     ym = (ym or _default_salary_ym()).strip()
@@ -2896,6 +3061,25 @@ def _selftest():
     r = c4.get(APP_PREFIX + "/staff/5")
     assert b"Documents" in r.data and b"Delete" not in r.data, "bhawna must NOT see delete (manoj only)"
     assert c.get(APP_PREFIX + "/health").status_code == 200
+    # ---- pending-review board (S164, F-63) ----
+    save_maker(_today(), True, {}, "alisha")           # fresh all-clear DRAFT for today
+    _rv = _today()[:7]
+    rB = c3.get(APP_PREFIX + "/review?ym=" + _rv)       # shavez (checker) did NOT enter it
+    assert rB.status_code == 200 and b"Pending review" in rB.data
+    assert _today().encode() in rB.data, "today's draft must show on the board"
+    assert b">Approve<" in rB.data, "checker sees an approve control for a maker's draft"
+    rM = c2.get(APP_PREFIX + "/review?ym=" + _rv)       # alisha (maker): board visible...
+    assert rM.status_code == 200 and b"Pending review" in rM.data
+    assert b">Approve<" not in rM.data, "maker sees no approve control"
+    # counts endpoint (portal tile source): role decides show_approve; CORS echo
+    rC = c3.get(APP_PREFIX + "/review/counts",
+                headers={"Origin": "https://followup.dr-manoj.in"})   # shavez=checker
+    assert rC.status_code == 200
+    jC = json.loads(rC.data)
+    assert jC["show_approve"] is True and "to_approve" in jC and "to_enter" in jC
+    assert rC.headers.get("Access-Control-Allow-Origin") == "https://followup.dr-manoj.in"
+    rCm = c2.get(APP_PREFIX + "/review/counts")                       # alisha=maker
+    assert rCm.status_code == 200 and json.loads(rCm.data)["show_approve"] is False
     # ---- grid step 2 (D284): sanctioned-leave range ----
     add_leave_sanction(1, "2026-09-10", "2026-09-12", "bhawna", "trip", "alisha")
     con = get_db()
@@ -2916,7 +3100,8 @@ def _selftest():
     print("SELFTEST OK — all-clear, exceptions, Arjun (D276), late+approver, "
           "leave+festival (D278), nullification, issuance add/approve/pause/close gate, "
           "doc vault + profile + degree/council + derived summary, delete = manoj-only, "
-          "docs hidden from maker (D274), D272 guard, approve/reverse, holiday, leave-range (D284), routes 200.")
+          "docs hidden from maker (D274), D272 guard, approve/reverse, holiday, leave-range (D284), "
+          "pending-review board (S164), routes 200.")
     return True
 
 

@@ -35,9 +35,12 @@ Reverse proxy maps  followup.dr-manoj.in/portal  ->  127.0.0.1:8090
 """
 
 import os
+import json
 import hmac
 import hashlib
 import secrets
+import urllib.request
+import urllib.parse
 from functools import wraps
 from flask import (
     Flask, request, redirect, make_response, render_template_string, abort
@@ -113,8 +116,9 @@ TILES = [
      "roles": ["doctor", "manager", "staff"]},
 
     {"icon": "\U0001F4C5", "name": "Staff Register",
-     "desc": "Daily attendance, leave, fines", "live": True,
-     "url": "https://attendance.dr-manoj.in/register",
+     "desc": "Pending review \u2014 entries & approvals", "live": True,
+     "url": "https://attendance.dr-manoj.in/register/review",
+     "review_counts": True,
      "roles": ["doctor", "manager", "staff"]},
 
     {"icon": "\U0001F4B0", "name": "Salary \u2014 approve & lock",
@@ -136,6 +140,11 @@ TILES = [
      "desc": "Clinic assets & AMC", "live": True,
      "url": "https://assets.dr-manoj.in",
      "roles": ["doctor", "manager"]},
+
+    {"icon": "\U0001F511", "name": "Manage Users",
+     "desc": "Logins: add, role, password, active, remove", "live": True,
+     "url": "https://followup.dr-manoj.in/portal/users",
+     "roles": []},   # manoj-only: shown via USER_TILE_EXTRA + guarded by the route
 
     {"icon": "\U0001F4F1", "name": "WhatsApp Approvals",
      "desc": "\u26A0 blocked \u2014 vendor (Lokesh)", "live": True,
@@ -229,7 +238,7 @@ TILES = [
 # visible to the current role/PC are dropped entirely (see _visible_sections).
 # ---------------------------------------------------------------------------
 GROUP_ORDER = ["Clinic", "Money & Accounts", "Clinic PC tools",
-               "Personal", "Health", "Coming soon"]
+               "Personal", "Health", "Coming soon", "Admin"]
 
 _TILE_GROUP = {
     "Call Tracker": "Clinic", "Attendance": "Clinic", "Asset Register": "Clinic",
@@ -246,6 +255,7 @@ _TILE_GROUP = {
     "Revenue Reconciler": "Coming soon", "Ayushman Finder": "Coming soon",
     "WABA Send": "Coming soon", "Surgical Estimate": "Coming soon",
     "Nutrition / Physio": "Coming soon",
+    "Manage Users": "Admin",
 }
 # Every tile must map to a known group (fail loud at import, not silently mis-place).
 for _t in TILES:
@@ -263,6 +273,7 @@ USER_TILE_MASK = {
 }
 USER_TILE_EXTRA = {
     "shavez": {"Asset Register"},
+    "manoj": {"Manage Users"},
 }
 
 
@@ -374,6 +385,48 @@ def _config_ok() -> bool:
 def _usable() -> bool:
     """The portal can serve if EITHER the PIN is configured OR broker mode is ready."""
     return _config_ok() or _sso_ready()
+
+
+# --- user-admin gate (manoj-only: the portal's who-can-touch-everyone screen) ------
+USER_ADMINS = set(x.strip().lower() for x in
+                  _cfg_get("PORTAL_USER_ADMINS", "manoj").split(",") if x.strip())
+
+
+def _is_user_admin(req) -> bool:
+    w = _sso_user(req)
+    return bool(w and (w.get("user") or "").lower() in USER_ADMINS)
+
+
+def user_admin_required(view):
+    @wraps(view)
+    def wrapper(*a, **k):
+        if not _authed(request):
+            return redirect("/portal/login")
+        if not _is_user_admin(request):
+            abort(403)
+        return view(*a, **k)
+    return wrapper
+
+
+def _active_doctors(rows):
+    return [r for r in rows if r.get("role") == "doctor" and r.get("active")]
+
+
+def _admin_guard(action, target, me):
+    """'' if the (de)activate/delete action is allowed, else an error string. Blocks
+    self-lockout and removing the last active doctor -- admin access can't be bricked."""
+    target = (target or "").strip().lower()
+    if not target:
+        return "no user specified"
+    if action in ("deactivate", "delete") and target == (me or "").strip().lower():
+        return "you cannot %s your own account" % action
+    if action in ("deactivate", "delete"):
+        rows = clinic_users.list_users(STORE)
+        row = next((r for r in rows if r["user"] == target), None)
+        if row and row.get("role") == "doctor" and row.get("active"):
+            if len(_active_doctors(rows)) <= 1:
+                return "cannot %s the last active doctor" % action
+    return ""
 
 # ---------------------------------------------------------------------------
 # PAGE TEMPLATES (inline; mobile-first; no external assets)
@@ -498,7 +551,7 @@ PORTAL_HTML = PAGE_HEAD + """
       <a class="tile live" href="{{ t.url }}" target="_blank" rel="noopener">
         <div class="ic">{{ t.icon }}</div>
         <div class="nm">{{ t.name }}</div>
-        <div class="ds">{{ t.desc }}</div>
+        <div class="ds"{% if t.review_counts %} data-review-counts{% endif %}>{{ t.desc }}</div>
         <span class="tag l">OPEN</span>
       </a>
     {% else %}
@@ -534,6 +587,24 @@ PORTAL_HTML = PAGE_HEAD + """
     {% endif %}
   </div>
   {% endif %}
+<script>
+/* Fill the Staff Register tile with live pending counts from the register.
+   Client-side so the portal never waits on the register; if it is unreachable
+   the tile keeps its static description. Same-site cookie carries the SSO. */
+(function(){
+  var el=document.querySelector('[data-review-counts]');
+  if(!el)return;
+  fetch('/portal/review-counts',{credentials:'same-origin'})
+   .then(function(r){return r.ok?r.json():null;})
+   .then(function(d){
+     if(!d||typeof d.to_enter==='undefined')return;
+     var s='\u270D\uFE0F '+d.to_enter+' to enter';
+     if(d.show_approve)s+=' \u00B7 \u2705 '+d.to_approve+' to approve';
+     el.textContent=s;
+   })
+   .catch(function(){});
+})();
+</script>
 </div></body></html>
 """
 
@@ -552,6 +623,100 @@ CONFIG_ERROR_HTML = PAGE_HEAD + """
   <h1>Setup needed</h1>
   <p>The portal is installed but not configured yet.<br>
   Run the one-time setup to set the PIN and secrets.</p>
+</div></body></html>
+"""
+
+USERS_HTML = PAGE_HEAD + """
+<style>
+.u-tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+.u-tbl th,.u-tbl td{border-bottom:1px solid var(--line);padding:8px 8px;text-align:left;vertical-align:middle}
+.u-tbl th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.u-tbl td.u{font-weight:600;white-space:nowrap}
+.upill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px}
+.upill.on{background:rgba(34,197,94,.16);color:#86efac}
+.upill.off{background:rgba(239,68,68,.16);color:#fca5a5}
+.upill.you{background:rgba(59,130,246,.18);color:#93c5fd;margin-left:6px}
+.acts{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
+.acts form{margin:0}
+.ibtn{font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);
+ background:var(--card);color:var(--ink);cursor:pointer}
+.ibtn.danger:hover{border-color:#7f1d1d;color:#fca5a5}
+.ibtn.go{background:var(--blue);border-color:var(--blue);color:#fff}
+.ibtn:disabled{opacity:.4;cursor:not-allowed}
+.ucard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0}
+.ucard h2{font-size:14px;color:#fff;margin:0 0 10px}
+.fld{display:inline-flex;flex-direction:column;gap:3px;margin:0 10px 8px 0}
+.fld label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.fld input,.fld select,.acts select{background:#0b1b29;border:1px solid var(--line);color:#fff;border-radius:8px;padding:8px 8px;font-size:13px}
+.msg{padding:9px 12px;border-radius:10px;margin:10px 0;font-size:13px}
+.msg.ok{background:rgba(34,197,94,.14);color:#bbf7d0}.msg.err{background:rgba(239,68,68,.14);color:#fecaca}
+.role{min-width:104px}
+</style>
+<div class="wrap">
+  <div class="head">
+    <h1>\U0001F511 Manage users</h1>
+    <span class="sub">Signed in as {{ who.user }} &middot; logins &amp; roles for all clinic apps</span>
+  </div>
+  {% if msg %}<div class="msg {{ msgcls }}">{{ msg }}</div>{% endif %}
+
+  <div class="ucard">
+    <h2>Add a login</h2>
+    <form method="POST" action="/portal/users/add" class="acts">
+      <div class="fld"><label>Username</label><input name="user" autocapitalize="none" autocorrect="off" required></div>
+      <div class="fld"><label>Role</label>
+        <select name="role" class="role">{% for r in roles %}<option value="{{ r }}">{{ r }}</option>{% endfor %}</select></div>
+      <div class="fld"><label>Password (min 6)</label><input name="password" type="password" required></div>
+      <button class="ibtn go" type="submit">Add user</button>
+    </form>
+  </div>
+
+  <div class="ucard">
+    <h2>Users</h2>
+    <table class="u-tbl">
+      <tr><th>User</th><th>Role</th><th>Status</th><th>Since</th><th>Actions</th></tr>
+      {% for u in users %}
+      <tr>
+        <td class="u">{{ u.user }}{% if u.user == who.user %}<span class="upill you">you</span>{% endif %}</td>
+        <td>
+          <form method="POST" action="/portal/users/role" class="acts">
+            <input type="hidden" name="user" value="{{ u.user }}">
+            <select name="role" class="role">{% for r in roles %}<option value="{{ r }}"{% if r==u.role %} selected{% endif %}>{{ r }}</option>{% endfor %}</select>
+            <button class="ibtn" type="submit">Set</button>
+          </form>
+        </td>
+        <td>{% if u.active %}<span class="upill on">active</span>{% else %}<span class="upill off">off</span>{% endif %}</td>
+        <td style="color:var(--muted);font-size:12px">{{ u.created[:10] }}</td>
+        <td>
+          <div class="acts">
+            {% if u.active %}
+            <form method="POST" action="/portal/users/active" onsubmit="return confirm('Deactivate {{ u.user }}? They will be unable to sign in.');">
+              <input type="hidden" name="user" value="{{ u.user }}"><input type="hidden" name="active" value="0">
+              <button class="ibtn danger" type="submit"{% if u.user==who.user %} disabled title="cannot deactivate yourself"{% endif %}>Deactivate</button>
+            </form>
+            {% else %}
+            <form method="POST" action="/portal/users/active">
+              <input type="hidden" name="user" value="{{ u.user }}"><input type="hidden" name="active" value="1">
+              <button class="ibtn go" type="submit">Activate</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="/portal/users/passwd"
+                  onsubmit="var p=prompt('New password for {{ u.user }} (min 6):');if(!p)return false;this.password.value=p;return true;">
+              <input type="hidden" name="user" value="{{ u.user }}"><input type="hidden" name="password" value="">
+              <button class="ibtn" type="submit">Reset password</button>
+            </form>
+            <form method="POST" action="/portal/users/delete" onsubmit="return confirm('DELETE {{ u.user }} permanently? This removes their login.');">
+              <input type="hidden" name="user" value="{{ u.user }}">
+              <button class="ibtn danger" type="submit"{% if u.user==who.user %} disabled title="cannot delete yourself"{% endif %}>Delete</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    <div class="note">Deactivating blocks future sign-ins. Sessions already open end when they expire or via "Sign out everywhere". App powers (maker / checker) are set inside each app, not here.</div>
+  </div>
+
+  <div class="foot"><a class="forget" href="/portal">&larr; Back to portal</a></div>
 </div></body></html>
 """
 
@@ -674,6 +839,124 @@ def health():
     mode = "broker" if _sso_ready() else ("legacy" if _config_ok() else "unconfigured")
     return {"service": "portal", "status": "ok" if ready else "unconfigured",
             "mode": mode}, (200 if ready else 503)
+
+
+# Same-origin source for the Staff Register tile's pending counts. The browser hits
+# THIS (followup origin, no CORS); we fetch the register server-side over localhost,
+# forwarding the caller's SSO cookie, and pass its JSON straight through. Any failure
+# -> {} so the tile keeps its static text; the portal never waits on / depends on the
+# register being up. Register local addr overridable via portal_config.
+REGISTER_COUNTS_URL = _cfg_get(
+    "REGISTER_COUNTS_URL", "http://127.0.0.1:8044/register/review/counts")
+
+
+@app.route("/portal/review-counts")
+@login_required
+def review_counts_proxy():
+    out = "{}"
+    try:
+        req = urllib.request.Request(REGISTER_COUNTS_URL)
+        ck = request.headers.get("Cookie", "")
+        if ck:
+            req.add_header("Cookie", ck)
+        with urllib.request.urlopen(req, timeout=2) as r:
+            if getattr(r, "status", 200) == 200:
+                out = r.read().decode("utf-8", "replace")
+    except Exception:
+        out = "{}"
+    resp = make_response(out)
+    resp.headers["Content-Type"] = "application/json"
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+# --- USER MANAGEMENT (manoj-only) -----------------------------------------------
+def _users_redir(msg, ok=True):
+    return redirect("/portal/users?m=%s&c=%s"
+                    % (urllib.parse.quote(msg), "ok" if ok else "err"))
+
+
+def _render_users(msg="", msgcls="ok"):
+    if not _SSO_LIBS or not STORE:
+        return render_template_string(CONFIG_ERROR_HTML), 503
+    who = _sso_user(request)
+    users = clinic_users.list_users(STORE)
+    roles = clinic_users.load_store(STORE).get("roles", [])
+    return render_template_string(USERS_HTML, who=who, users=users, roles=roles,
+                                  msg=msg, msgcls=msgcls)
+
+
+@app.route("/portal/users")
+@user_admin_required
+def users_admin():
+    return _render_users(request.args.get("m", ""), request.args.get("c", "ok"))
+
+
+@app.route("/portal/users/add", methods=["POST"])
+@user_admin_required
+def users_add():
+    user = request.form.get("user", ""); role = request.form.get("role", "")
+    pw = request.form.get("password", "")
+    try:
+        clinic_users.add_user(STORE, user, role, pw)
+        return _users_redir("added %s (%s)" % (user.strip().lower(), role))
+    except ValueError as e:
+        return _users_redir(str(e), ok=False)
+
+
+@app.route("/portal/users/role", methods=["POST"])
+@user_admin_required
+def users_role():
+    user = request.form.get("user", ""); role = request.form.get("role", "")
+    try:
+        clinic_users.set_role(STORE, user, role)
+        return _users_redir("role of %s set to %s" % (user.strip().lower(), role))
+    except ValueError as e:
+        return _users_redir(str(e), ok=False)
+
+
+@app.route("/portal/users/passwd", methods=["POST"])
+@user_admin_required
+def users_passwd():
+    user = request.form.get("user", ""); pw = request.form.get("password", "")
+    try:
+        clinic_users.set_password(STORE, user, pw)
+        return _users_redir("password reset for %s" % user.strip().lower())
+    except ValueError as e:
+        return _users_redir(str(e), ok=False)
+
+
+@app.route("/portal/users/active", methods=["POST"])
+@user_admin_required
+def users_active():
+    user = request.form.get("user", "")
+    active = request.form.get("active", "1") == "1"
+    me = (_sso_user(request) or {}).get("user", "")
+    if not active:
+        err = _admin_guard("deactivate", user, me)
+        if err:
+            return _users_redir(err, ok=False)
+    try:
+        clinic_users.set_active(STORE, user, active)
+        return _users_redir("%s %s" % ("activated" if active else "deactivated",
+                                       user.strip().lower()))
+    except ValueError as e:
+        return _users_redir(str(e), ok=False)
+
+
+@app.route("/portal/users/delete", methods=["POST"])
+@user_admin_required
+def users_delete():
+    user = request.form.get("user", "")
+    me = (_sso_user(request) or {}).get("user", "")
+    err = _admin_guard("delete", user, me)
+    if err:
+        return _users_redir(err, ok=False)
+    try:
+        clinic_users.del_user(STORE, user)
+        return _users_redir("deleted %s" % user.strip().lower())
+    except ValueError as e:
+        return _users_redir(str(e), ok=False)
 
 
 @app.route("/portal/mark-pc")
