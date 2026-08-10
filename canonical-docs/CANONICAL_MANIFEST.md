@@ -2,7 +2,7 @@
 
 **Bareilly · maintained with Claude · governs the canonical document set (D247).**
 
-**STATUS: canonical — current at S165.** This regeneration closes a Phase-0 gap: the manifest had been left at **S161** while the S162–S164 EOS updated every other Tier-0/Tier-1 doc in project knowledge, so Phase 0 had no current linchpin to verify against. Every row below is pinned from a **live md5 recomputed this session (S165)**; the 20 unchanged Tier-1/Tier-2 docs were re-hashed and all matched their prior pins (no drift). The S162/S163/S164 EOS deltas are appended below the S149–S161 history. **Register-pinned live code is NOT a manifest row** (F-31 keeps salary DATA out): current live `salary_engine.py 5514918…`, `staff_register.py cef76859…`, `portal.py 4b75ee7b…`, `staff_ledger.py 92665b64`, `att_month_report.py v2.5 e64cad19…` — the code lives on the VPS + GitHub, tracked in the KB Register.
+**STATUS: canonical — current at S166.** (S166 = a design/vetting close: D297 Call-Intelligence Console signed & build-ready — NO live code changed; the five session-loop docs were regenerated and re-pinned from live md5 this EOS, all other rows re-hashed and matched.) This regeneration closes a Phase-0 gap: the manifest had been left at **S161** while the S162–S164 EOS updated every other Tier-0/Tier-1 doc in project knowledge, so Phase 0 had no current linchpin to verify against. Every row below is pinned from a **live md5 recomputed this session (S165)**; the 20 unchanged Tier-1/Tier-2 docs were re-hashed and all matched their prior pins (no drift). The S162/S163/S164 EOS deltas are appended below the S149–S161 history. **Register-pinned live code is NOT a manifest row** (F-31 keeps salary DATA out): current live `salary_engine.py 5514918…`, `staff_register.py cef76859…`, `portal.py 4b75ee7b…`, `staff_ledger.py 92665b64`, `att_month_report.py v2.5 e64cad19…` — the code lives on the VPS + GitHub, tracked in the KB Register.
 
 > **Phase 0 read rule (every session).** Verify **every** row below by md5 (cheap — hash compare only). **Read into context only Tier 0.** Tier 1 is opened on demand when the session's task touches it. Tier 2 is hash-verified but never read in the loop and never edited without an explicit waiver (D34 discipline). *A row whose md5 does not match halts work until reconciled (D172/D188). If a "pending" item looks done, verify it against reality first.*
 
@@ -12,17 +12,17 @@
 
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
-| `CANONICAL_MANIFEST.md` | S165 | *(self — recomputed last, each EOS)* | this file; the linchpin |
-| `START_HERE_SESSION_166` | S165 | `703c6e6d83e328b027ca30c8af90c255` | entry point; regenerated every close-out (S162–S165 entry files are superseded) |
-| `KB_Register` | v3.8 | `32656c8ca41640bc8791df2a92523ed6` | current state; from v1.72 (`27b72639…`). **S162 → v3.5** (Stage-B lock + biometric grid + portal tiles; D283–D288; F-65). **S163 → v3.6** (standalone register salary, July-proven; D289–D290; F-66/F-67). **S164 → v3.7** (F-67 fix keys off approved capture; pending-review board; Shivani maker; portal user admin; consolidated dossier; D291–D294; F-67 closed / F-68; Archive ptr → v1.16; Fault ptr → v2.10). **S165 → v3.8** (§S165 STATE; D223 gist delivered — D295–D296; F-69/F-70; Archive ptr → v1.17; Fault ptr → v2.11). |
-| `HANDOFF_RUNBOOK` | v103 (S165) | `c96c30ca0c46729eca4f91c26b316c23` | §0 what happened · §2 live backlog — ⭐NEXT-SESSION TOP TASKS block at head; file `HANDOFF_RUNBOOK_2026-08-10_Session165_v103.md` |
+| `CANONICAL_MANIFEST.md` | S166 | *(self — recomputed last, each EOS)* | this file; the linchpin |
+| `START_HERE_SESSION_167` | S166 | `56285511da024f9b51a438095a99866d` | entry point; regenerated every close-out (S162–S166 entry files are superseded) |
+| `KB_Register` | v3.9 | `8b19f288b25b8fbe2ebfd1d5cb136133` | current state; from v1.72 (`27b72639…`). **S162 → v3.5** (Stage-B lock + biometric grid + portal tiles; D283–D288; F-65). **S163 → v3.6** (standalone register salary, July-proven; D289–D290; F-66/F-67). **S164 → v3.7** (F-67 fix keys off approved capture; pending-review board; Shivani maker; portal user admin; consolidated dossier; D291–D294; F-67 closed / F-68; Archive ptr → v1.16; Fault ptr → v2.10). **S165 → v3.8** (§S165 STATE; D223 gist delivered — D295–D296; F-69/F-70; Archive ptr → v1.17; Fault ptr → v2.11). **S166 → v3.9** (§S166 STATE; D297 Call-Console signed — build-ready v4; F-71; Archive ptr → v1.18; Fault ptr → v2.12). |
+| `HANDOFF_RUNBOOK` | v104 (S166) | `4c914a4b333b26d51a2b72b0f7e7d051` | §0 what happened · §2 live backlog — ⭐NEXT-SESSION TOP TASK = BUILD D297 Stage A; file `HANDOFF_RUNBOOK_2026-08-10_Session166_v104.md` |
 | active incident | — | — | **only while open**; none open |
 
 ## Tier 1 — reference (hash-verified · read only if touched · rewrite only if changed)
 
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
-| `KB_History_Archive` | v1.17 | `392648eeed000c18a12f641446e69edc` | all history, verbatim; from v1.72 (`27b72639…`). §S162–§S165 appended; §S165 is last; END-marker present (truncation guard). Pure-append proven at each EOS. |
+| `KB_History_Archive` | v1.18 | `16f2f33778b11e08a025fdbc039e2ca8` | all history, verbatim; from v1.72 (`27b72639…`). §S162–§S166 appended; §S166 is last; END-marker present (truncation guard). Pure-append proven at each EOS. |
 | `Dr_Manoj_Clinic_Umbrella_Architecture` | v1.58 | `728cc64950502011ff220e1249e488ce` | strategy + decisions log |
 | `Call_Console_Evolution_Spec` | v2.4 | `63978d982d1f8037f728023d15a01328` | dashboard-as-dialer (active) |
 | `Frontend_Dashboard_Documentation` | v4 (S140) | `02ef929b75aa77ec071c903705335375` | dashboard still evolving |
@@ -31,7 +31,8 @@
 | `API_QUICK_REFERENCE_CARD` | — | `68c4fc344bf74caaea706149cd22e64c` | small + stable; in the repo `canonical-docs/` (byte-identical) |
 | `AI_Verdict_Layer_Master` | v1 (S145) | `bd4b67f6810cd2316eb58dfe6bf180cd` | Product B analytics |
 | `Clinic_Callback_Tracker_AppsScript_Audit` | v1.9 | `41dd9fd6b607e59e15e3e646b775d640` | unfinished audit (Pass 4 not started); reference only — NOT the frozen dossier |
-| `Fault_Action_Register` | v2.11 | `b5415e9e941247da87830f1c264844ed` | findings register (F-##). **v2.8 (S162)** F-65; **v2.9 (S163)** F-66/F-67; **v2.10 (S164)** F-67 CLOSED + F-68; **v2.11 (S165)** F-69 + F-70. §0–§6 lanes unchanged. |
+| `Fault_Action_Register` | v2.12 | `00fde2ccded7aa1aa4dcebabe696a511` | findings register (F-##). **v2.8 (S162)** F-65; **v2.9 (S163)** F-66/F-67; **v2.10 (S164)** F-67 CLOSED + F-68; **v2.11 (S165)** F-69 + F-70; **v2.12 (S166)** F-71. §0–§6 lanes unchanged. |
+| `D297_Call_Console_Contract_v4_FINAL` | S166 | `42991579f3c20cbd4f512131e58c22f9` | **signed, build-ready** Call-Intelligence Console contract + Appendix A verified ground truth (schemas·Sheet IDs·Join Key·credential·GAS/tracker port map·recording sizes) + rubric/security appendices. Tier 1 — opened at the D297 build. |
 | `Clinic_Estate_Master_Inventory` | v1.7 (S157) | `3668a9150d1c88017e46861c615aab3e` | reconciled cross-project app+service estate (D260) |
 | `Clinic_Portal_SSO_Architecture` | v1 (S157) | `0c843bb64d579205d8c64946721c10f6` | SSO broker + shared verify-shim (D261) |
 | `Clinic_Portal_Build_Plan` | v1 (S157) | `3d6468cb4927d5d77d7a7d687ffabfe7` | tile rosters + per-app selection (D262) |
@@ -220,6 +221,8 @@ Each frozen product has one canonical **dossier**; this is the FROZEN ledger. **
 
 ### S165 EOS (10 Aug 2026, FULL — D223 gist tile delivered (new `portal_gist.py` + `portal.py` replaced, cron armed); manifest regenerated S161→S164→S165; Darpan ruled in-salary; F-69/F-70)
 **S165 canonical filenames (Phase-0 mapping):** `KB_Register_v3_8_S165.md` · `KB_History_Archive_v1_17_S165.md` · `HANDOFF_RUNBOOK_2026-08-10_Session165_v103.md` · `START_HERE_SESSION_166.md` · `Fault_Action_Register_v2_11.md` · this `CANONICAL_MANIFEST.md`. (Salary/Attendance Dossier **unchanged** — no salary work this session.)
+
+**S166 canonical filenames (Phase-0 mapping):** `KB_Register_v3_9_S166.md` · `KB_History_Archive_v1_18_S166.md` · `HANDOFF_RUNBOOK_2026-08-10_Session166_v104.md` · `START_HERE_SESSION_167.md` · `Fault_Action_Register_v2_12.md` · `D297_Call_Console_Contract_v4_FINAL.md` (new Tier-1) · this `CANONICAL_MANIFEST.md`. (Salary/Attendance Dossier **unchanged** — no salary work this session.)
 - **Tier-0 bumps (md5s verified live this EOS):** `KB_Register` v3.7 → **v3.8** (`32656c8ca41640bc8791df2a92523ed6`; §S165 STATE; D295–D296; F-69/F-70); `HANDOFF_RUNBOOK` v102 → **v103** (`c96c30ca0c46729eca4f91c26b316c23`); `START_HERE_SESSION_165` → **`START_HERE_SESSION_166`** (`703c6e6d83e328b027ca30c8af90c255`).
 - **Tier-1 bumps:** `KB_History_Archive` v1.16 → **v1.17** (`392648eeed000c18a12f641446e69edc`; §S165 pure-append, END-marker present); `Fault_Action_Register` v2.10 → **v2.11** (`b5415e9e941247da87830f1c264844ed`; F-69 + F-70). Salary/Attendance Dossier and all other Tier-1/2 rows **unchanged** (re-hashed clean).
 - **Live VPS code (Register-pinned, NOT manifest rows; F-31):** **NEW** `portal_gist.py` **`55e111d71e95032c21234ae540a49431`** (`/root/wa/`; sole writer of `portal_gist.json`; cron `*/30 9-20 IST`; read-only sources) · `portal.py` **`4b75ee7b…` → `f0655abd3221d64daf07441270488344`** (doctor-only Clinic Gist tile + `/portal/gist` + `/portal/gist-data`, read-only over the JSON, doctor-gated, fail-loud/stale-aware). All others unchanged. Repo commit owed (code + canonical-docs mirror S162–S165).
@@ -227,4 +230,7 @@ Each frozen product has one canonical **dossier**; this is the FROZEN ledger. **
 
 ---
 
-**END OF CANONICAL_MANIFEST — S165.**
+### §S166 delta (design/vetting — NO live code changed)
+D297 **Call-Intelligence Console** designed, vetted and **signed** — a 14-track program (call log · staff performance · two-way net-missed threads · latency mining · referee-in-console · digest→portal · transcript-cached-VPS-side · judge quality-grading · marketing marks · send-back · lead-conversion · no-show · **revenue**) that rehomes the retiring GAS Callback-Tracker dashboard in the VPS portal. Grounded by live probe (two Sheets, Join Key `{phone10}_{call_start_unix}`, one SA reads both; the follow-up tracker already pushes `Followups_Today`/`Patient_Master`). The build-ready **v4 contract** (`42991579f3c20cbd4f512131e58c22f9`) is added as a Tier-1 doc and carries all verified ground truth in Appendix A. F-71 raised (an uploaded PC zip carried PHI + `.secret_key`/`.env`; code-only read, nothing committed; rotation check owed). **No live code, config or trigger changed** — live-file versions unchanged from S165. Bumped: KB_Register v3.8→v3.9 · Runbook v103→v104 · Archive v1.17→v1.18 · Fault v2.11→v2.12 · START_HERE 166→167. New Tier-1: D297 contract. Next free: **D298 · F-72 · Session 167**. Next-session top task: **BUILD D297 Stage A** off the v4 contract.
+
+**END OF CANONICAL_MANIFEST — S166.**
