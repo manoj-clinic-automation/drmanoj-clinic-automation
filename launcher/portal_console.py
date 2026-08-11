@@ -58,6 +58,14 @@ AUDIT_SHEET_ID   = "1rq9VvB5L94EmmZbiUwase9HBLsJ3htispYLd1rHjSRQ"   # Call Audit
 READONLY_SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
 DEFAULT_DB   = "/root/wa/console.db"
+REVIEWS_DB   = "/root/wa/console_reviews.db"   # W2: portal-owned persistent store (read-only here)
+SENDBACK_TAB = "Dr_Manoj_Call_List"            # W2: builder-owned tab in the TRACKER sheet
+FOLLOWUPS_TAB = "Followups_Today"              # W2: optional feed (pushed by the PC tracker)
+REC_CACHE_DIR = "/root/wa/rec_cache"           # W3 Item 8: local recording cache (PHI, gitignored)
+REC_CACHE_CAP = 1024 * 1024 * 1024             # 1 GB hard cap (60 days ~0.30 GB per Appendix A)
+REC_CACHE_DAYS = 60
+# W2 Track N: a followup row counts as SEEN when its status/outcome reads any of these
+_SEEN_WORDS = ("visited", "came", "done", "settled", "closed", "seen", "arrived", "completed")
 ENV_CANDIDATES = ["/root/wa/recordings-archive/.env", "/root/wa/.env"]
 SA_ENV_KEYS  = ["GOOGLE_SA_KEY", "WA_SA_KEY"]
 
@@ -109,6 +117,7 @@ TABS = {
         },
         "optional": {
             "recording_link":      ["recording link", "recordinglink", "link"],
+            "drive_file_id":       ["drive file id", "drivefileid"],
         },
     },
     "Call_Verdicts": {
@@ -130,6 +139,8 @@ TABS = {
             "verdict":         ["verdict"],
             "match_confidence":["match confidence"],
             "outcome_tf":      ["outcome true/false", "outcome truefalse", "outcometruefalse"],
+            "ai_reason":       ["ai reason", "aireason"],          # rev5 Item 3
+            "evidence":        ["evidence"],                       # rev5 Item 3
             "spoke_with":      ["spoke with"],
             "flag_postop":     ["flag postop"],
             "flag_complaint":  ["flag complaint"],
@@ -328,6 +339,68 @@ def parse_ts(s):
     return dt
 
 
+# --- W2 Track N: pure helpers (offline-testable) --------------------------
+_FU_ALIASES = {
+    "phone": ["mobile", "phone", "phone10", "number", "patient number", "mobile number"],
+    "name":  ["patient name", "name", "patient"],
+    "due":   ["due date", "date", "follow up date", "followup date", "visit date"],
+    "status":["status", "outcome", "result", "visited", "remark", "remarks"],
+}
+
+def fu_resolve_header(header):
+    """Loose name-based discovery for the Followups_Today feed. Returns
+    {field: col_index} for whatever it finds; 'phone' + 'due' are the minimum
+    for a usable feed."""
+    normed = [norm_header(h) for h in header]
+    out = {}
+    for field, aliases in _FU_ALIASES.items():
+        for a in aliases:
+            na = norm_header(a)
+            if na in normed:
+                out[field] = normed.index(na)
+                break
+    return out
+
+def fu_is_seen(status_raw):
+    s = (status_raw or "").strip().lower()
+    return any(w in s for w in _SEEN_WORDS)
+
+def build_no_shows(conn, fu_header, fu_rows, today_iso):
+    """no_shows = follow-up rows due BEFORE today whose status does not read as
+    seen. Close-the-loop columns come from the calls spine: attempts AFTER the
+    due date, last agent (call_agent), whether any was answered."""
+    res = fu_resolve_header(fu_header or [])
+    if "phone" not in res or "due" not in res:
+        return {"found": False, "resolved": res, "rows": 0}
+    n = 0
+    for row in fu_rows:
+        def cell(f):
+            i = res.get(f)
+            return (row[i].strip() if i is not None and i < len(row) else "")
+        phone = norm_phone10(cell("phone"))
+        due = cell("due")[:10]
+        if not phone or not due or due >= today_iso:
+            continue
+        if fu_is_seen(cell("status")):
+            continue
+        cb = conn.execute(
+            "SELECT COUNT(*), MAX(ended_at_ist), MAX(answered) FROM calls "
+            "WHERE phone10=? AND substr(ended_at_ist,1,10)>?", (phone, due)).fetchone()
+        try:            # call_agent exists only after the Stage-2a myop layer
+            agent = conn.execute(
+                "SELECT ca.agent FROM call_agent ca JOIN calls c ON c.join_key=ca.join_key "
+                "WHERE c.phone10=? AND substr(c.ended_at_ist,1,10)>? "
+                "ORDER BY c.ended_at_ist DESC LIMIT 1", (phone, due)).fetchone()
+        except sqlite3.OperationalError:
+            agent = None
+        conn.execute("INSERT INTO no_shows VALUES (?,?,?,?,?,?,?,?)",
+                     (phone, cell("name"), due, cell("status"),
+                      cb[0] or 0, (cb[1] or "")[:16], (agent[0] if agent else ""),
+                      1 if (cb[2] or 0) == 1 else 0))
+        n += 1
+    return {"found": True, "resolved": res, "rows": n}
+
+
 def unjudged_reason(has_join_key, has_recording, verdict):
     """Why a call carries no usable AI verdict.  None => judged fine."""
     if verdict is None:
@@ -367,6 +440,7 @@ CREATE TABLE verdicts (
   join_key TEXT, date TEXT, time TEXT, direction TEXT, patient_number TEXT,
   agent TEXT, patient_name TEXT, clinic_id TEXT, duration TEXT,
   claimed_outcome TEXT, not_filed INTEGER, ai_outcome TEXT, verdict TEXT,
+  ai_reason TEXT, evidence TEXT,
   match_confidence TEXT, outcome_tf TEXT, spoke_with TEXT,
   flag_postop TEXT, flag_complaint TEXT, flag_urgent TEXT, flag_surgery TEXT,
   flag_clinical TEXT, flag_conduct TEXT, conduct_note TEXT,
@@ -376,7 +450,7 @@ CREATE TABLE verdicts (
 );
 CREATE INDEX ix_verdicts_jk ON verdicts(join_key);
 
-CREATE TABLE recordings (myoperator_filename TEXT, join_key TEXT, recording_link TEXT);
+CREATE TABLE recordings (myoperator_filename TEXT, join_key TEXT, recording_link TEXT, drive_file_id TEXT);
 CREATE INDEX ix_rec_fn ON recordings(myoperator_filename);
 
 CREATE TABLE transcripts (join_key TEXT, transcribed_at TEXT, text TEXT, drive_file_id TEXT);
@@ -413,6 +487,11 @@ CREATE TABLE latency (
 
 CREATE TABLE unjudged (id INTEGER PRIMARY KEY AUTOINCREMENT, join_key TEXT, phone10 TEXT, reason TEXT);
 
+CREATE TABLE no_shows (
+  phone10 TEXT, name TEXT, due_date TEXT, status_raw TEXT,
+  cb_attempts INTEGER, cb_last_ts TEXT, cb_last_agent TEXT, cb_reached INTEGER
+);
+
 CREATE TABLE meta (k TEXT PRIMARY KEY, v TEXT);
 """
 
@@ -430,8 +509,8 @@ def load_recordings(conn, rows):
     for d in rows:
         fn = (d.get("myoperator_filename") or "").strip()
         jk = (d.get("join_key") or "").strip()
-        conn.execute("INSERT INTO recordings VALUES (?,?,?)",
-                     (fn, jk, d.get("recording_link", "")))
+        conn.execute("INSERT INTO recordings VALUES (?,?,?,?)",
+                     (fn, jk, d.get("recording_link", ""), d.get("drive_file_id", "")))
         if fn and valid_join_key(jk):
             index.setdefault(fn, jk)
     return index
@@ -475,16 +554,18 @@ def load_verdicts(conn, rows):
         conn.execute(
             "INSERT INTO verdicts (join_key,date,time,direction,patient_number,agent,"
             "patient_name,clinic_id,duration,claimed_outcome,not_filed,ai_outcome,"
-            "verdict,match_confidence,outcome_tf,spoke_with,flag_postop,flag_complaint,"
+            "verdict,ai_reason,evidence,"
+            "match_confidence,outcome_tf,spoke_with,flag_postop,flag_complaint,"
             "flag_urgent,flag_surgery,flag_clinical,flag_conduct,conduct_note,"
             "recording_link,transcript_link,status,error,judged_at,prompt_ver,model,"
             "doctor_flag,doctor_note,final_outcome) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (d.get("join_key", ""), d.get("date", ""), d.get("time", ""),
              d.get("direction", ""), d.get("patient_number", ""), d.get("agent", ""),
              d.get("patient_name", ""), d.get("clinic_id", ""), d.get("duration", ""),
              claimed, 1 if claimed == "" else 0, d.get("ai_outcome", ""),
-             d.get("verdict", ""), d.get("match_confidence", ""), d.get("outcome_tf", ""),
+             d.get("verdict", ""), d.get("ai_reason", ""), d.get("evidence", ""),
+             d.get("match_confidence", ""), d.get("outcome_tf", ""),
              d.get("spoke_with", ""), d.get("flag_postop", ""), d.get("flag_complaint", ""),
              d.get("flag_urgent", ""), d.get("flag_surgery", ""), d.get("flag_clinical", ""),
              d.get("flag_conduct", ""), d.get("conduct_note", ""), d.get("recording_link", ""),
@@ -649,7 +730,7 @@ def write_meta(conn, headers_by_tab, counts):
     def setk(k, v):
         conn.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", (k, json.dumps(v) if not isinstance(v, str) else v))
     setk("built_at", datetime.now().isoformat(timespec="seconds"))
-    setk("builder", "portal_console.py A1 (D297 Stage A)")
+    setk("builder", "portal_console.py A1 (D297 Stage A, rev5-i3)")
     setk("row_counts", counts)
     setk("source_headers", headers_by_tab)
     wm = conn.execute("SELECT MAX(ended_at_ist) FROM calls").fetchone()[0]
@@ -748,7 +829,123 @@ def read_live_tabs(env_path=None):
             tabdata[tab] = ([], [])
         else:
             tabdata[tab] = (values[0], values[1:])
-    return tabdata
+    return tabdata, books
+
+
+def read_followups_optional(books):
+    """W2 Track N: OPTIONAL read of the Followups_Today feed. Never halts the
+    build -- absence is recorded honestly in meta (D236) and the page says so."""
+    try:
+        ws = books[TRACKER].worksheet(FOLLOWUPS_TAB)
+        values = ws.get_all_values()
+        if not values:
+            return [], []
+        return values[0], values[1:]
+    except Exception:
+        return None, None
+
+
+def push_send_backs(books, reviews_db_path=REVIEWS_DB):
+    """W2 Item 6: rewrite the builder-OWNED '%s' tab in the TRACKER sheet from
+    the OPEN send_backs in the portal-owned reviews db (read-only here; the
+    portal is that db's sole writer, this builder is the tab's sole writer --
+    D235 kept on both sides). Full-replace each build = idempotent.
+    Numbers go to the STAFF sheet in full (they must dial them).""" % SENDBACK_TAB
+    if not os.path.exists(reviews_db_path):
+        return {"pushed": None, "note": "reviews db absent"}
+    try:
+        rconn = sqlite3.connect("file:%s?mode=ro" % reviews_db_path, uri=True)
+        rows = rconn.execute(
+            "SELECT sent_at, phone10, patient, reason FROM send_backs "
+            "WHERE status='open' ORDER BY sent_at DESC").fetchall()
+        rconn.close()
+    except Exception as e:
+        return {"pushed": None, "note": "reviews db unreadable: %s" % e}
+    try:
+        book = books[TRACKER]
+        try:
+            ws = book.worksheet(SENDBACK_TAB)
+        except Exception:
+            ws = book.add_worksheet(title=SENDBACK_TAB, rows=200, cols=6)
+        payload = [["Call list from Dr Manoj  (auto-updated; act on OPEN rows)"],
+                   ["Sent at", "Phone", "Patient", "Reason from Dr Manoj"]]
+        payload += [[r[0], r[1], r[2], r[3]] for r in rows]
+        ws.clear()
+        ws.update(payload, "A1")
+        return {"pushed": len(rows), "note": "ok"}
+    except Exception as e:
+        return {"pushed": None, "note": "sheet push failed: %s" % e}
+
+
+def rec_cache_prune(cache_dir, cap_bytes):
+    """W3 pure helper: delete OLDEST cached recordings until total <= cap.
+    Never touches Drive. Returns (kept_bytes, deleted_count)."""
+    files = []
+    try:
+        for fn in os.listdir(cache_dir):
+            p = os.path.join(cache_dir, fn)
+            if os.path.isfile(p):
+                files.append((os.path.getmtime(p), os.path.getsize(p), p))
+    except FileNotFoundError:
+        return (0, 0)
+    total = sum(s for _, s, _ in files)
+    deleted = 0
+    for _, s, p in sorted(files):                 # oldest first
+        if total <= cap_bytes:
+            break
+        try:
+            os.remove(p); total -= s; deleted += 1
+        except OSError:
+            pass
+    return (total, deleted)
+
+
+def download_drive_bytes(service, file_id):
+    from googleapiclient.http import MediaIoBaseDownload
+    import io
+    req = service.files().get_media(fileId=file_id)      # READ-ONLY
+    buf = io.BytesIO()
+    dl = MediaIoBaseDownload(buf, req)
+    done = False
+    while not done:
+        _, done = dl.next_chunk()
+    return buf.getvalue()
+
+
+def rec_cache_pull(conn, service, cache_dir=REC_CACHE_DIR, days=REC_CACHE_DAYS,
+                   cap_bytes=REC_CACHE_CAP):
+    """W3 Item 8: pull recent recordings Drive -> local cache so the portal can
+    stream them in-page. Drive is NEVER deleted (owner keeps the archive);
+    the local cache is capped and oldest-pruned. Per-file failures never kill
+    the build."""
+    os.makedirs(cache_dir, exist_ok=True)
+    cutoff = (datetime.now(IST) - timedelta(days=days)).strftime("%Y-%m-%d")
+    rows = conn.execute(
+        "SELECT DISTINCT c.join_key, r.drive_file_id FROM calls c "
+        "JOIN recordings r ON r.join_key=c.join_key "
+        "WHERE c.join_key<>'' AND r.drive_file_id<>'' "
+        "AND substr(c.ended_at_ist,1,10)>=?", (cutoff,)).fetchall()
+    pulled = errors = have = 0
+    for jk, fid in rows:
+        if not valid_join_key(jk):
+            continue
+        path = os.path.join(cache_dir, jk + ".mp3")
+        if os.path.exists(path):
+            have += 1
+            continue
+        try:
+            data = download_drive_bytes(service, fid)
+            tmp = path + ".tmp"
+            with open(tmp, "wb") as f:
+                f.write(data)
+            os.replace(tmp, path)
+            pulled += 1
+        except Exception as e:
+            errors += 1
+            print("  [rec] %s error: %s" % (fid, type(e).__name__))
+    kept, deleted = rec_cache_prune(cache_dir, cap_bytes)
+    return {"window": len(rows), "already": have, "pulled": pulled,
+            "errors": errors, "kept_mb": round(kept / 1048576.0, 1), "pruned": deleted}
 
 
 # ---------------------------------------------------------------------------
@@ -1194,7 +1391,7 @@ def _print_summary(counts, headers_by_tab, reconcile, conn):
 
 def cmd_dry_run(env_path, with_myop=False, days=3, with_tr=False, tr_limit=None, cache_path=DEFAULT_CACHE):
     print("D297 Stage A -- DRY RUN (read-only; NO Sheet writes; console.db NOT written)")
-    tabdata = read_live_tabs(env_path)
+    tabdata, books = read_live_tabs(env_path)
     conn = sqlite3.connect(":memory:")
     counts, headers = transform(conn, tabdata)
     reconcile = reconcile_net_missed(conn)
@@ -1219,7 +1416,7 @@ def cmd_dry_run(env_path, with_myop=False, days=3, with_tr=False, tr_limit=None,
 
 def cmd_build(env_path, db_path, with_myop=False, days=3, with_tr=False, tr_limit=None, cache_path=DEFAULT_CACHE):
     print("D297 Stage A -- BUILD -> %s" % db_path)
-    tabdata = read_live_tabs(env_path)
+    tabdata, books = read_live_tabs(env_path)
     tmp = db_path + ".tmp"
     if os.path.exists(tmp):
         os.remove(tmp)
@@ -1233,12 +1430,32 @@ def cmd_build(env_path, db_path, with_myop=False, days=3, with_tr=False, tr_limi
     if with_tr or os.path.exists(cache_path):
         cache_conn = open_cache(cache_path)
         if with_tr:
-            res = transcript_backpull(conn, cache_conn, get_drive_service(env_path), limit=tr_limit)
+            drive = get_drive_service(env_path)
+            res = transcript_backpull(conn, cache_conn, drive, limit=tr_limit)
             print("-- A3 transcript back-pull: needing=%s pulled=%s errors=%s --"
                   % (res["needing"], res["pulled"], res["errors"]))
+            rc = rec_cache_pull(conn, drive)
+            print("-- W3 rec cache: window=%s already=%s pulled=%s errors=%s kept=%sMB pruned=%s --"
+                  % (rc["window"], rc["already"], rc["pulled"], rc["errors"],
+                     rc["kept_mb"], rc["pruned"]))
         filled = merge_transcript_cache(conn, cache_conn)
         cache_conn.close()
         print("-- A3 transcripts merged from cache: %s row(s) now carry text --" % filled)
+    # --- W2 Track N: optional Followups feed -> no_shows table (fail-loud honest) ---
+    fu_h, fu_r = read_followups_optional(books)
+    if fu_h is None:
+        fu_meta = {"found": False, "resolved": {}, "rows": 0, "note": "tab absent/unreadable"}
+    else:
+        fu_meta = build_no_shows(conn, fu_h, fu_r,
+                                 datetime.now(IST).strftime("%Y-%m-%d"))
+    conn.execute("INSERT OR REPLACE INTO meta VALUES ('followups_feed', ?)",
+                 (json.dumps(fu_meta),))
+    print("-- W2 no-shows: feed_found=%s rows=%s resolved=%s --"
+          % (fu_meta.get("found"), fu_meta.get("rows"), fu_meta.get("resolved")))
+    # --- W2 Item 6: push open send-backs to the staff sheet tab ---
+    sb = push_send_backs(books)
+    print("-- W2 send-back push: %s (%s) --" % (sb.get("pushed"), sb.get("note")))
+    conn.commit()
     conn.close()
     os.replace(tmp, db_path)               # atomic; readers never see a half-built db
     print("\nBUILD complete. console.db written atomically at %s" % db_path)
@@ -1286,10 +1503,10 @@ def _fixtures():
             [["R1", JK_A], ["R2", JK_B]],   # R3 intentionally absent (unmatched)
         ),
         "Call_Verdicts": (
-            ["Join Key", "Agent", "Claimed Outcome", "Verdict", "Status", "Judged At", "Patient Name"],
+            ["Join Key", "Agent", "Claimed Outcome", "Verdict", "Status", "Judged At", "Patient Name", "AI Reason", "Evidence"],
             [
-                [JK_A, "Shavez", "k_coming", "TRUE", "done", D0 + " 10:10:00", "AAA"],
-                [JK_B, "Alisha", "",         "",     "done", D0 + " 11:20:00", "BBB"],  # NOT FILED + judge pending
+                [JK_A, "Shavez", "k_coming", "TRUE", "done", D0 + " 10:10:00", "AAA", "patient confirmed visit", "\"main aa raha hoon\""],
+                [JK_B, "Alisha", "",         "",     "done", D0 + " 11:20:00", "BBB", "", ""],  # NOT FILED + judge pending
             ],
         ),
         "Call_Transcripts": (
@@ -1348,6 +1565,35 @@ def cmd_selftest():
           scalar("SELECT not_filed FROM verdicts WHERE join_key=?", (k["JK_B"],)) == 1)
     check("filed verdict not flagged NOT FILED",
           scalar("SELECT not_filed FROM verdicts WHERE join_key=?", (k["JK_A"],)) == 0)
+    check("rev5: AI Reason carried into verdicts",
+          scalar("SELECT ai_reason FROM verdicts WHERE join_key=?", (k["JK_A"],)) == "patient confirmed visit")
+    check("rev5: Evidence carried into verdicts",
+          "aa raha hoon" in (scalar("SELECT evidence FROM verdicts WHERE join_key=?", (k["JK_A"],)) or ""))
+    # --- W2 Track N: no-show builder units (offline) ---
+    fu_h = ["Junk", "Mobile Number", "Patient Name", "Due Date", "Status"]
+    fu_r = [["x", "9000000001", "AAA", k["D0"], "Visited"],          # seen -> excluded
+            ["x", "9000000002", "CCC", k["D0"], "booked"],           # due, not seen -> NO-SHOW
+            ["x", "9000000003", "BBB", "2999-06-01", ""]]            # future -> excluded
+    fu_meta = build_no_shows(conn, fu_h, fu_r, "2999-01-02")
+    check("W2 no-shows: header discovered (phone+due+status)",
+          fu_meta["found"] and {"phone", "due", "status"} <= set(fu_meta["resolved"]))
+    check("W2 no-shows: exactly the unseen past-due row kept",
+          fu_meta["rows"] == 1 and
+          scalar("SELECT COUNT(*) FROM no_shows WHERE phone10='9000000002'") == 1
+          and scalar("SELECT COUNT(*) FROM no_shows WHERE phone10='9000000001'") == 0)
+    check("W2 no-shows: seen-word matcher", fu_is_seen("Pt visited ok") and not fu_is_seen("will come"))
+    # --- W3 Item 8: recording-cache units (offline) ---
+    import tempfile
+    td = tempfile.mkdtemp()
+    for i, (name, size, age) in enumerate([("old.mp3", 600, 100), ("mid.mp3", 500, 50), ("new.mp3", 400, 1)]):
+        p = os.path.join(td, name)
+        open(p, "wb").write(b"x" * size)
+        os.utime(p, (1700000000 - age, 1700000000 - age))
+    kept, deleted = rec_cache_prune(td, 1000)
+    check("W3 prune: oldest deleted first, cap respected",
+          deleted == 1 and kept == 900 and not os.path.exists(os.path.join(td, "old.mp3")))
+    check("W3 recordings carry drive_file_id (fixture header discovery tolerant)",
+          "drive_file_id" in [r[1] for r in conn.execute("PRAGMA table_info(recordings)")])
     # --- ported Netting.gs net-missed rule ---
     check("net-missed OPEN: two incoming misses, no connect",
           scalar("SELECT net_missed_open FROM conversations WHERE phone10=?", (k["P_OPEN2"],)) == 1)

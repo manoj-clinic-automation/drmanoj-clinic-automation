@@ -45,7 +45,7 @@ import urllib.request
 import urllib.parse
 from functools import wraps
 from flask import (
-    Flask, request, redirect, make_response, render_template_string, abort
+    Flask, request, redirect, make_response, render_template_string, abort, send_file
 )
 
 # --- SSO broker libraries (optional import: if absent, the portal still runs legacy PIN) ---
@@ -1216,6 +1216,65 @@ def gist_page():
 import re as _re
 
 CONSOLE_DB_PATH   = _cfg_get("PORTAL_CONSOLE_DB", "/root/wa/console.db")
+# --- W2 (Items 5+6): the PERSISTENT doctor-review store. console.db is rebuilt
+# atomically every cron fire, so reviews/send-backs must live OUTSIDE it. This
+# portal is the SOLE writer of console_reviews.db (D235); the builder reads it
+# read-only to push open send-backs to the staff sheet tab.
+REVIEWS_DB_PATH   = _cfg_get("PORTAL_REVIEWS_DB", "/root/wa/console_reviews.db")
+REVIEW_VOCAB      = ["Coming", "Came", "Not coming", "Call again",
+                     "Wrong claim by staff", "Spam / marketing", "Other"]
+REC_CACHE_PATH    = _cfg_get("PORTAL_REC_CACHE", "/root/wa/rec_cache")
+SPAM_OUTCOME      = "Spam / marketing"
+
+
+def _spam_phones():
+    """W3 Track M: phones I have marked Spam/marketing (disposition vocabulary).
+    join_key = {phone10}_{unix} -> prefix. Fail-soft empty set."""
+    out = set()
+    try:
+        conn = _reviews_conn()
+        for (jk,) in conn.execute(
+                "SELECT join_key FROM dispositions WHERE final_outcome=?", (SPAM_OUTCOME,)):
+            if "_" in (jk or ""):
+                out.add(jk.split("_", 1)[0])
+        conn.close()
+    except Exception:
+        pass
+    return out
+
+
+def _reviews_conn():
+    """RW connection; creates the schema on first use (portal owns it)."""
+    conn = sqlite3.connect(REVIEWS_DB_PATH, timeout=5)
+    conn.executescript(
+        "CREATE TABLE IF NOT EXISTS dispositions ("
+        " join_key TEXT PRIMARY KEY, final_outcome TEXT, note TEXT,"
+        " refereed_by TEXT, refereed_at TEXT);"
+        "CREATE TABLE IF NOT EXISTS send_backs ("
+        " id INTEGER PRIMARY KEY AUTOINCREMENT, join_key TEXT, phone10 TEXT,"
+        " patient TEXT, reason TEXT, sent_by TEXT, sent_at TEXT,"
+        " status TEXT DEFAULT 'open');"
+        "CREATE INDEX IF NOT EXISTS ix_sb_jk ON send_backs(join_key);")
+    return conn
+
+
+def _reviews_maps():
+    """{join_key: disposition-dict}, {join_key: open-send-back-dict} for overlay.
+    Fail-soft: any error -> empty maps, page still renders."""
+    disp, sb = {}, {}
+    try:
+        conn = _reviews_conn()
+        for jk, fo, note, ts in conn.execute(
+                "SELECT join_key, final_outcome, note, refereed_at FROM dispositions"):
+            disp[jk] = {"final_outcome": fo or "", "note": note or "", "at": (ts or "")[:16]}
+        for jk, reason, ts, st in conn.execute(
+                "SELECT join_key, reason, sent_at, status FROM send_backs "
+                "WHERE status='open'"):
+            sb[jk] = {"reason": reason or "", "at": (ts or "")[:16], "status": st}
+        conn.close()
+    except Exception:
+        pass
+    return disp, sb
 CONSOLE_STALE_MIN = int(_cfg_get("PORTAL_CONSOLE_STALE_MIN", "25") or "25")
 
 _FLAG_COLS = {"postop": "flag_postop", "complaint": "flag_complaint",
@@ -1300,6 +1359,7 @@ def _console_filters(args):
 # bare column come from that same row -> MAX(id) = newest verdict per join_key).
 _DV = ("(SELECT join_key, MAX(id) AS _vid, patient_number, patient_name, agent, "
        "clinic_id, duration, claimed_outcome, not_filed, ai_outcome, verdict, "
+       "ai_reason, evidence, judged_at, "
        "outcome_tf, match_confidence, spoke_with, conduct_note, status, error, "
        "doctor_flag, doctor_note, final_outcome, recording_link, flag_postop, "
        "flag_complaint, flag_urgent, flag_surgery, flag_clinical, flag_conduct "
@@ -1339,6 +1399,10 @@ _LOG_COLS = (
     "COALESCE(p.diagnosis,'') AS diagnosis, "
     "COALESCE(v.claimed_outcome,'') AS claimed, COALESCE(v.not_filed,0) AS not_filed, "
     "COALESCE(v.ai_outcome,'') AS ai_outcome, COALESCE(v.verdict,'') AS verdict, "
+    "COALESCE(v.ai_reason,'') AS ai_reason, COALESCE(v.evidence,'') AS evidence, "
+    "COALESCE(v.judged_at,'') AS judged_at, "
+    "(SELECT t2.transcribed_at FROM transcripts t2 WHERE t2.join_key=c.join_key "
+    " AND c.join_key<>'' LIMIT 1) AS tx_at, "
     "COALESCE(v.outcome_tf,'') AS otf, COALESCE(v.agent,'') AS in_agent, v._vid AS vmatch, "
     "COALESCE(v.status,'') AS vstatus, COALESCE(v.error,'') AS verror, "
     "COALESCE(v.doctor_flag,'') AS doctor_flag, COALESCE(v.doctor_note,'') AS doctor_note, "
@@ -1361,6 +1425,37 @@ _LOG_LIMIT = 500
 
 def _truthy(val):
     return (val or "").strip() not in _FALSEY
+
+
+def _parse_any_ts(s):
+    """Best-effort timestamp parse (rev5). Strips tz (F-72 kin), tries the formats
+    the pipeline actually writes. Returns datetime or None -- NEVER raises."""
+    from datetime import datetime as _dt
+    s = (s or "").strip()
+    if not s:
+        return None
+    if len(s) > 6 and (s[-6] in "+-") and s[-3] == ":":   # ...+05:30
+        s = s[:-6]
+    s = s.replace("T", " ").strip()
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%d/%m/%Y %H:%M:%S", "%d/%m/%Y %H:%M"):
+        try:
+            return _dt.strptime(s, fmt)
+        except ValueError:
+            continue
+    return None
+
+
+def _lag_min(a, b):
+    """Whole minutes from a->b, or None. Negative clamped to 0 (clock skew)."""
+    if a is None or b is None:
+        return None
+    d = (b - a).total_seconds() / 60.0
+    return int(d) if d >= 0 else 0
+
+
+def _hhmm(ts):
+    dt = _parse_any_ts(ts)
+    return dt.strftime("%H:%M") if dt else (ts or "")
 
 
 def _log_row(r):
@@ -1388,9 +1483,17 @@ def _log_row(r):
     elif has_verdict:
         ai_state, ai_text = "noout", ((r["verdict"] or "").strip() or "no outcome")
     elif has_jk:
-        ai_state, ai_text = "pending", "pending"
+        # rev5 Item 3: name WHY it is pending, per row
+        ai_state = "pending"
+        ai_text = "judge pending" if (r["tx_at"] or "").strip() else "awaiting transcript"
     else:
         ai_state, ai_text = "na", ""
+    # --- rev5 Item 3: pipeline times + lags for this row ---
+    t_call = _parse_any_ts(r["ended_at_ist"])
+    t_tx = _parse_any_ts(r["tx_at"])
+    t_j = _parse_any_ts(r["judged_at"])
+    lag_tx = _lag_min(t_call, t_tx)
+    lag_judge = _lag_min(t_call, t_j)
     # --- your review (doctor) ---
     fo = (r["final_outcome"] or "").strip(); dn = (r["doctor_note"] or "").strip()
     df = (r["doctor_flag"] or "").strip()
@@ -1405,12 +1508,35 @@ def _log_row(r):
         "claimed": r["claimed"] or "", "not_filed": (r["not_filed"] == 1),
         "ai_outcome": ai, "verdict": r["verdict"] or "", "otf": r["otf"] or "",
         "ai_state": ai_state, "ai_text": ai_text,
+        "ai_reason": (r["ai_reason"] or "").strip(), "evidence": (r["evidence"] or "").strip(),
+        "tx_at": _hhmm(r["tx_at"]), "judged_at": _hhmm(r["judged_at"]),
+        "lag_tx": lag_tx, "lag_judge": lag_judge,
         "doctor_note": dn, "reviewed": reviewed, "review_text": review_text,
         "conduct_note": (r["conduct_note"] or "").strip(),
         "has_jk": has_jk, "has_verdict": has_verdict,
         "flags": flags, "rec_link": r["rec_link"] or "",
         "tx_text": tx_text, "has_tx": bool(tx_text), "join_key": r["join_key"] or "",
     }
+
+
+def _overlay_reviews(rows, disp, sb):
+    """W2: my persistent review + open-send-back state onto rendered rows.
+    My disposition WINS over any sheet-side doctor columns."""
+    for r in rows:
+        jk = r.get("join_key") or ""
+        d = disp.get(jk)
+        if d:
+            r["reviewed"] = True
+            r["review_text"] = d["final_outcome"] or "reviewed"
+            r["my_note"] = d["note"]
+            r["my_review_at"] = d["at"]
+        else:
+            r["my_note"] = ""; r["my_review_at"] = ""
+        s = sb.get(jk)
+        r["sent_back"] = bool(s)
+        r["sb_reason"] = s["reason"] if s else ""
+        r["self_review"] = (r.get("agent") or "").startswith("Dr Manoj")
+    return rows
 
 
 def _group_by_day(rows):
@@ -1434,8 +1560,13 @@ def _log_where(f, exclude=None):
         elif f["answered"] == "missed":
             w.append("c.answered=0")
         elif f["answered"] == "netmissed":
-            w.append("c.direction='In' AND c.answered=0 AND c.phone10 IN "
-                     "(SELECT phone10 FROM conversations WHERE net_missed_open=1)")
+            spam = _spam_phones()
+            cl = ("c.direction='In' AND c.answered=0 AND c.phone10 IN "
+                  "(SELECT phone10 FROM conversations WHERE net_missed_open=1)")
+            if spam:
+                cl += " AND c.phone10 NOT IN (%s)" % ",".join(["?"] * len(spam))
+                p.extend(sorted(spam))
+            w.append(cl)
     if f["agent"] and exclude != "agent":
         w.append(_AGENT_EXPR + "=?"); p.append(f["agent"])
     if f["flag"] and exclude != "flag" and f["flag"] in _FLAG_COLS:
@@ -1490,9 +1621,14 @@ def _facets(conn, f):
     base_w, base_p = _log_where(f, exclude="answered")
     fac["answered"]["answered"] = _count(conn, base_w + " AND c.answered=1", base_p)
     fac["answered"]["missed"] = _count(conn, base_w + " AND c.answered=0", base_p)
-    fac["answered"]["netmissed"] = _count(
-        conn, base_w + " AND c.direction='In' AND c.answered=0 AND c.phone10 IN "
-        "(SELECT phone10 FROM conversations WHERE net_missed_open=1)", base_p)
+    spam = _spam_phones()
+    nm_cl = (" AND c.direction='In' AND c.answered=0 AND c.phone10 IN "
+             "(SELECT phone10 FROM conversations WHERE net_missed_open=1)")
+    nm_p = list(base_p)
+    if spam:
+        nm_cl += " AND c.phone10 NOT IN (%s)" % ",".join(["?"] * len(spam))
+        nm_p.extend(sorted(spam))
+    fac["answered"]["netmissed"] = _count(conn, base_w + nm_cl, nm_p)
     aw, ap = _log_where(f, exclude="agent")
     for nm in _agent_names(conn):
         fac["agent"][nm] = _count(conn, aw + " AND " + _AGENT_EXPR + "=?", ap + [nm])
@@ -1634,18 +1770,47 @@ CONSOLE_HTML = PAGE_HEAD + """
     {% if r.ai_state=='ok' %}<span class="pillv U">{{ r.ai_text }}</span>
     {% elif r.ai_state=='error' %}<span class="pillv F">error</span> <span class="muted">{{ r.ai_text }}</span>
     {% elif r.ai_state=='noout' %}<span class="pillv mut">{{ r.ai_text }}</span>
-    {% elif r.ai_state=='pending' %}<span class="muted">pending judgement</span>
+    {% elif r.ai_state=='pending' %}<span class="muted">{{ r.ai_text }}</span>
     {% else %}\u2014{% endif %}
     <span class="dlab">Your review</span>
-    {% if r.reviewed %}<span class="pillv T">{{ r.review_text or 'reviewed' }}</span>{% else %}<span class="muted">not reviewed</span>{% endif %}
+    {% if r.reviewed %}<span class="pillv T">{{ r.review_text or 'reviewed' }}</span>{% if r.my_review_at %}<span class="muted sm">{{ r.my_review_at }}</span>{% endif %}{% else %}<span class="muted">not reviewed</span>{% endif %}
+    {% if r.sent_back %}<span class="sbbadge">SENT BACK</span>{% endif %}
+    {% if r.self_review %}<span class="warnbadge">\u26A0 self-review (own call)</span>{% endif %}
   </div>
+  {% if r.ai_reason or r.evidence %}<div class="drow"><span class="dlab">AI reason</span><span>{{ r.ai_reason or '\u2014' }}</span>{% if r.evidence %}<span class="dlab">Evidence</span><span class="evq">&ldquo;{{ r.evidence }}&rdquo;</span>{% endif %}</div>{% endif %}
+  {% if r.tx_at or r.judged_at %}<div class="drow"><span class="dlab">Pipeline</span><span class="muted sm">{% if r.tx_at %}transcribed {{ r.tx_at }}{% if r.lag_tx is not none %} (+{{ r.lag_tx }}m){% endif %}{% endif %}{% if r.judged_at %} \u00b7 judged {{ r.judged_at }}{% if r.lag_judge is not none %} (+{{ r.lag_judge }}m after call){% endif %}{% endif %}</span></div>{% endif %}
   {% if r.flags %}<div class="drow"><span class="dlab">Flags</span>{% for fl in r.flags %}<span class="flag">{{ fl }}</span>{% endfor %}</div>{% endif %}
   {% if r.doctor_note %}<div class="drow"><span class="dlab">My note</span><span class="muted">{{ r.doctor_note }}</span></div>{% endif %}
   <div class="drow">
-    {% if r.rec_link %}<a class="lnk" href="{{ r.rec_link }}" target="_blank" rel="noopener">\u25B6 recording</a>{% endif %}
-    {% if not r.rec_link and r.state=='Answered' %}<span class="muted">no recording link</span>{% endif %}
+    {% if r.join_key and r.rec_link %}
+      <audio class="recplayer" controls preload="none" src="/portal/rec/{{ r.join_key }}"></audio>
+      <a class="lnk sm" href="{{ r.rec_link }}" target="_blank" rel="noopener">Drive</a>
+    {% elif r.rec_link %}<a class="lnk" href="{{ r.rec_link }}" target="_blank" rel="noopener">\u25B6 recording</a>
+    {% elif r.state=='Answered' %}<span class="muted">no recording link</span>{% endif %}
   </div>
   {% if r.tx_text %}<div class="txbox"><b>Transcript</b><br>{{ r.tx_text }}</div>{% endif %}
+  {% if r.join_key %}
+  <div class="actrow">
+    <form method="POST" action="/portal/console/review" class="actform">
+      <input type="hidden" name="join_key" value="{{ r.join_key }}">
+      <input type="hidden" name="ret" value="{{ full_qs }}">
+      <select name="final_outcome">
+        <option value="">\u2014 my verdict \u2014</option>
+        {% for v in vocab %}<option value="{{ v }}" {{ 'selected' if r.review_text==v else '' }}>{{ v }}</option>{% endfor %}
+      </select>
+      <input type="text" name="note" placeholder="note (optional)" value="{{ r.my_note }}">
+      <button class="btn sm" type="submit">Save review</button>
+    </form>
+    <form method="POST" action="/portal/console/sendback" class="actform">
+      <input type="hidden" name="join_key" value="{{ r.join_key }}">
+      <input type="hidden" name="phone10" value="{{ r.phone10 }}">
+      <input type="hidden" name="patient" value="{{ r.name }}">
+      <input type="hidden" name="ret" value="{{ full_qs }}">
+      <input type="text" name="reason" placeholder="reason for staff to call again" value="{{ r.sb_reason }}">
+      <button class="btn sm alt" type="submit">{{ 'Update send-back' if r.sent_back else 'Send back to staff' }}</button>
+    </form>
+  </div>
+  {% endif %}
 </div>
 {% endmacro %}
 
@@ -1655,9 +1820,12 @@ CONSOLE_HTML = PAGE_HEAD + """
   <span class="st {{ r.state }}">{{ r.state }}</span>
   <span class="mono numw">{{ r.phone10 or '\u2014' }}</span>
   <span class="namew">{{ r.name or '\u2014' }}</span>
+  {% if r.clinic_id %}<span class="ctx sm">ID {{ r.clinic_id }}</span>{% endif %}
+  {% if r.diagnosis %}<span class="ctx dx sm">{{ r.diagnosis }}</span>{% endif %}
+  {% if r.last_visit %}<span class="ctx sm">last {{ r.last_visit }}</span>{% endif %}
   <span class="agw">{{ r.agent or '\u2014' }}</span>
   {% if r.not_filed %}<span class="amber">NOT FILED</span>{% endif %}
-  {% if r.ai_state=='ok' %}<span class="pillv U">{{ r.ai_text }}</span>{% elif r.ai_state=='pending' %}<span class="muted sm">pending</span>{% elif r.ai_state=='error' %}<span class="pillv F">err</span>{% endif %}
+  {% if r.ai_state=='ok' %}<span class="pillv U">{{ r.ai_text }}</span>{% elif r.ai_state=='pending' %}<span class="muted sm">{{ r.ai_text }}</span>{% elif r.ai_state=='error' %}<span class="pillv F">err</span>{% endif %}
   {% if r.reviewed %}<span class="pillv T sm">reviewed</span>{% endif %}
   {% if r.has_tx %}<span class="txmark">tx</span>{% endif %}
 {% endmacro %}
@@ -1689,6 +1857,18 @@ CONSOLE_HTML = PAGE_HEAD + """
 .pillv.U{background:rgba(59,130,246,.16);color:#93c5fd}.pillv.mut{background:rgba(91,113,132,.25);color:#b8c7d6}
 .flag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:6px;margin:1px 2px 1px 0;background:rgba(239,68,68,.14);color:#fca5a5}
 .txmark{font-size:10px;font-weight:700;color:#86efac;background:rgba(34,197,94,.12);padding:1px 6px;border-radius:6px}
+.ctx{font-size:10.5px;color:var(--muted);background:rgba(91,113,132,.18);padding:1px 7px;border-radius:6px}
+.ctx.dx{color:#c7d2fe;background:rgba(99,102,241,.14)}
+.evq{color:#fde68a;font-style:italic}
+.sbbadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(234,88,12,.2);color:#fdba74}
+.warnbadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(239,68,68,.18);color:#fca5a5}
+.actrow{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;padding-top:8px;border-top:1px dashed rgba(39,75,102,.6)}
+.actform{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.actform select,.actform input[type=text]{background:#0b1b29;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px}
+.actform input[type=text]{min-width:200px}
+.btn.sm{padding:6px 12px;font-size:12px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer}
+.btn.sm.alt{background:rgba(234,88,12,.85)}
+.recplayer{height:32px;max-width:340px;vertical-align:middle}
 /* day + call rows */
 details.day{margin-bottom:8px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:rgba(22,50,74,.35)}
 details.day>summary{cursor:pointer;list-style:none;padding:11px 14px;font-weight:700;font-size:13px;color:#fff;background:var(--card);display:flex;gap:12px;align-items:center}
@@ -1734,7 +1914,7 @@ table.log td{padding:8px;border-bottom:1px solid rgba(39,75,102,.5);vertical-ali
       (fresh under {{ stale_min }} min). The refresh cron may not have run; treat with caution.</div>{% endif %}
 
     <div class="tabs">
-      {% for key,lbl in [('log','Call log'),('threads','Conversations'),('staff','Staff'),('leads','New leads')] %}
+      {% for key,lbl in [('log','Call log'),('threads','Conversations'),('staff','Staff'),('leads','New leads'),('noshows','No-shows'),('pipe','Pipeline')] %}
         <a class="{{ 'on' if view==key else '' }}" href="/portal/console?view={{key}}&{{ base_qs }}">{{ lbl }}</a>
       {% endfor %}
       <a href="/portal" style="margin-left:auto">&larr; Portal</a>
@@ -1752,7 +1932,7 @@ table.log td{padding:8px;border-bottom:1px solid rgba(39,75,102,.5);vertical-ali
           <option value="">All</option>
           <option value="answered"  {{ 'selected' if f.answered=='answered' else '' }}>Answered ({{ fac.answered.get('answered',0) }})</option>
           <option value="missed"    {{ 'selected' if f.answered=='missed' else '' }}>Missed ({{ fac.answered.get('missed',0) }})</option>
-          <option value="netmissed" {{ 'selected' if f.answered=='netmissed' else '' }}>Net-missed open ({{ fac.answered.get('netmissed',0) }})</option>
+          <option value="netmissed" {{ 'selected' if f.answered=='netmissed' else '' }}>Net-missed open calls ({{ fac.answered.get('netmissed',0) }})</option>
         </select></label>
         <label>Agent<select name="agent" onchange="ff.submit()">
           <option value="">All</option>
@@ -1823,12 +2003,121 @@ table.log td{padding:8px;border-bottom:1px solid rgba(39,75,102,.5);vertical-ali
         </details>
       {% endfor %}
       {% if not leads %}<div class="muted" style="padding:18px">No new leads in range.</div>{% endif %}
+
+    {% elif view=='noshows' %}
+      <div class="summ">Appointment booked, not visited \u2014 tomorrow's calling work \u00b7 plus your open send-backs.
+        <a class="lnk" style="margin-left:12px" href="/portal/console/reviews.csv">\u2B07 my reviews (training CSV)</a></div>
+      {% if sb_open %}
+        <h3 style="font-size:13px;margin:10px 0 6px">Call list from Dr Manoj \u2014 open ({{ sb_open|length }})</h3>
+        <table class="log" style="max-width:900px"><thead><tr><th>Sent</th><th>Reason</th><th>Join key</th><th></th></tr></thead><tbody>
+        {% for s in sb_open %}<tr><td class="mono">{{ s.at }}</td><td>{{ s.reason }}</td><td class="mono muted sm">{{ s.join_key }}</td>
+          <td><form method="POST" action="/portal/console/sendback/resolve" style="margin:0">
+            <input type="hidden" name="join_key" value="{{ s.join_key }}">
+            <input type="hidden" name="ret" value="view=noshows">
+            <button class="btn sm" type="submit">Resolve</button></form></td></tr>{% endfor %}
+        </tbody></table>
+      {% endif %}
+      {% if spam_list %}
+        <h3 style="font-size:13px;margin:14px 0 6px">Block list \u2014 marked Spam / marketing ({{ spam_list|length }})</h3>
+        <div class="summ">Excluded from New-leads and net-missed. Locking the number itself is a MyOperator-panel action.</div>
+        <div style="margin-bottom:10px">{% for p in spam_list %}<span class="ctx" style="margin:2px">{{ p }}</span>{% endfor %}</div>
+      {% endif %}
+      <h3 style="font-size:13px;margin:14px 0 6px">Appointment booked, not visited</h3>
+      {% if noshows and noshows.feed and noshows.feed.found %}
+        <table class="log"><thead><tr><th>Due</th><th>Patient</th><th>Number</th><th>Status noted</th><th>Called since?</th><th>Last attempt</th><th>By</th><th>Reached?</th></tr></thead><tbody>
+        {% for n in noshows.rows %}<tr>
+          <td class="mono">{{ n.due_date }}</td><td>{{ n.name or '\u2014' }}</td>
+          <td class="mono">{{ n.phone10 }}</td><td class="muted">{{ n.status_raw or '\u2014' }}</td>
+          <td class="mono">{{ n.cb_attempts }}</td><td class="mono">{{ n.cb_last_ts or '\u2014' }}</td>
+          <td>{{ n.cb_last_agent or '\u2014' }}</td>
+          <td>{% if n.cb_reached %}<span class="okbadge">yes</span>{% elif n.cb_attempts %}<span class="netbadge">no</span>{% else %}\u2014{% endif %}</td>
+        </tr>{% endfor %}
+        {% if not noshows.rows %}<tr><td class="muted" colspan="8">No booked-not-visited rows \U0001F389</td></tr>{% endif %}
+        </tbody></table>
+      {% else %}
+        <div class="cbanner warn">The Followups_Today feed was not found/usable at the last build \u2014 the no-show list cannot be computed. Feed state: {{ noshows.feed if noshows else 'unknown' }}. (Honest absence, not zeros \u2014 D236.)</div>
+      {% endif %}
+
+    {% elif view=='pipe' %}
+      <div class="summ">Pipeline health \u2014 how fast a call becomes a transcript and a verdict, and exactly why anything is unjudged.</div>
+      {% if pipe %}
+        {% if pipe.nm_calls is not none %}<div class="cbanner warn" style="background:rgba(59,130,246,.10);color:#93c5fd;border-color:rgba(59,130,246,.3)">Net-missed open: <b>{{ pipe.nm_threads }}</b> patient threads \u00b7 <b>{{ pipe.nm_calls }}</b> missed calls inside them. The filter chip counts calls; the builder reports threads \u2014 both are correct.</div>{% endif %}
+        {% if pipe.lat %}<table class="log" style="max-width:520px"><thead><tr><th>Judge lag (call \u2192 verdict)</th><th>Median</th><th>p90</th><th>Max</th></tr></thead>
+        <tbody><tr><td class="muted">{{ pipe.lat.n }} judged calls</td><td class="mono">{{ pipe.lat.median }} min</td><td class="mono">{{ pipe.lat.p90 }} min</td><td class="mono">{{ pipe.lat.max }} min</td></tr></tbody></table>{% else %}<div class="muted">No latency rows yet.</div>{% endif %}
+        <h3 style="font-size:13px;margin:16px 0 6px">Why calls are unjudged</h3>
+        <table class="log" style="max-width:420px"><tbody>
+        {% for reason, n in pipe.reasons %}<tr><td>{{ reason }}</td><td class="mono">{{ n }}</td></tr>{% endfor %}
+        {% if not pipe.reasons %}<tr><td class="muted">nothing unjudged</td></tr>{% endif %}
+        </tbody></table>
+        <h3 style="font-size:13px;margin:16px 0 6px">Judge-pending backlog (oldest first)</h3>
+        <table class="log" style="max-width:560px"><tbody>
+        {% for jk, ts in pipe.backlog %}<tr><td class="mono">{{ ts }}</td><td class="mono muted sm">{{ jk }}</td></tr>{% endfor %}
+        {% if not pipe.backlog %}<tr><td class="muted">no judge-pending backlog</td></tr>{% endif %}
+        </tbody></table>
+      {% endif %}
     {% endif %}
 
     <div class="summ" style="margin-top:16px">Built {{ m.built_at or 'unknown' }}{% if m.age_min is not none %} \u00b7 {{ m.age_min }} min ago{% endif %}.</div>
   {% endif %}
 </div></body></html>
 """
+
+
+def _query_pipeline(conn):
+    """rev5 Item 3: the pipeline/latency mini-view. Read-only over latency,
+    unjudged, conversations, calls. Fail-soft: any missing table -> empty dict
+    section, page still renders (D236)."""
+    out = {"lat": None, "reasons": [], "backlog": [], "nm_calls": None, "nm_threads": None}
+    def _q(sql, args=()):
+        try:
+            return conn.execute(sql, args).fetchall()
+        except Exception:
+            return []
+    # latency percentiles (minutes) over rows that have a judge lag
+    lags = sorted(x[0] for x in _q(
+        "SELECT lag_judge_call FROM latency WHERE lag_judge_call IS NOT NULL") if x[0] is not None)
+    if lags:
+        def pct(p):
+            i = min(len(lags) - 1, max(0, int(round(p * (len(lags) - 1)))))
+            return round(lags[i] / 60.0, 1)   # latency lags are seconds -> minutes
+        out["lat"] = {"n": len(lags), "median": pct(0.5), "p90": pct(0.9),
+                      "max": round(lags[-1] / 60.0, 1)}
+    # reasons-not-judged counts
+    out["reasons"] = _q("SELECT reason, COUNT(*) FROM unjudged GROUP BY reason ORDER BY 2 DESC")
+    # judge-pending backlog with call age (oldest first)
+    out["backlog"] = _q(
+        "SELECT u.join_key, c.ended_at_ist FROM unjudged u "
+        "JOIN calls c ON c.join_key=u.join_key "
+        "WHERE u.reason='judge pending' ORDER BY c.ended_at_ist ASC LIMIT 25")
+    # net-missed: calls vs threads, labelled (the 139-vs-109 fix)
+    r = _q("SELECT COUNT(*) FROM calls c WHERE c.direction='In' AND c.answered=0 "
+           "AND c.phone10 IN (SELECT phone10 FROM conversations WHERE net_missed_open=1)")
+    out["nm_calls"] = r[0][0] if r else None
+    r = _q("SELECT COUNT(*) FROM conversations WHERE net_missed_open=1")
+    out["nm_threads"] = r[0][0] if r else None
+    return out
+
+
+def _query_noshows(conn):
+    """W2 Track N: booked-but-not-seen rows + the feed's honest discovery state."""
+    out = {"feed": None, "rows": []}
+    try:
+        import json as _json
+        m = conn.execute("SELECT v FROM meta WHERE k='followups_feed'").fetchone()
+        out["feed"] = _json.loads(m[0]) if m else None
+    except Exception:
+        out["feed"] = None
+    try:
+        out["rows"] = [dict(zip(
+            ("phone10", "name", "due_date", "status_raw", "cb_attempts",
+             "cb_last_ts", "cb_last_agent", "cb_reached"), r))
+            for r in conn.execute(
+                "SELECT phone10,name,due_date,status_raw,cb_attempts,cb_last_ts,"
+                "cb_last_agent,cb_reached FROM no_shows "
+                "ORDER BY due_date DESC, name LIMIT 200")]
+    except Exception:
+        out["rows"] = []
+    return out
 
 
 def _console_base_qs(f, drop=()):
@@ -1843,34 +2132,168 @@ def _console_base_qs(f, drop=()):
     return _up.urlencode(pairs)
 
 
+@app.route("/portal/rec/<join_key>")
+@doctor_required
+def console_rec(join_key):
+    """W3 Item 8: serve a recording in-page. Local cache first (Range-capable
+    for seeking); uncached -> 302 to its Drive link (old behaviour preserved);
+    unknown -> 404. join_key strictly validated before any path use."""
+    import re as _re
+    if not _re.fullmatch(r"\d{6,12}_\d{6,14}", join_key or ""):
+        abort(404)
+    path = os.path.join(REC_CACHE_PATH, join_key + ".mp3")
+    if os.path.isfile(path):
+        return send_file(path, mimetype="audio/mpeg", conditional=True)
+    conn = _console_conn()
+    if conn is not None:
+        try:
+            row = conn.execute(
+                "SELECT recording_link FROM recordings WHERE join_key=? "
+                "AND recording_link<>'' LIMIT 1", (join_key,)).fetchone()
+        finally:
+            conn.close()
+        if row and row[0]:
+            return redirect(row[0])
+    abort(404)
+
+
+@app.route("/portal/console/review", methods=["POST"])
+@doctor_required
+def console_review():
+    """W2 Item 5: idempotent upsert of MY final verdict (the AI-training label)."""
+    jk = (request.form.get("join_key") or "").strip()
+    fo = (request.form.get("final_outcome") or "").strip()
+    note = (request.form.get("note") or "").strip()
+    ret = request.form.get("ret") or "view=log"
+    if jk and (fo or note):
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        conn = _reviews_conn()
+        conn.execute(
+            "INSERT INTO dispositions (join_key,final_outcome,note,refereed_by,refereed_at) "
+            "VALUES (?,?,?,'manoj',?) "
+            "ON CONFLICT(join_key) DO UPDATE SET final_outcome=excluded.final_outcome,"
+            " note=excluded.note, refereed_at=excluded.refereed_at",
+            (jk, fo, note, now))
+        conn.commit(); conn.close()
+    return redirect("/portal/console?" + ret)
+
+
+@app.route("/portal/console/sendback", methods=["POST"])
+@doctor_required
+def console_sendback():
+    """W2 Item 6: send a call back to staff with a reason. One OPEN send-back
+    per join_key (a second send updates the reason -- idempotent)."""
+    jk = (request.form.get("join_key") or "").strip()
+    phone = (request.form.get("phone10") or "").strip()
+    patient = (request.form.get("patient") or "").strip()
+    reason = (request.form.get("reason") or "").strip()
+    ret = request.form.get("ret") or "view=log"
+    if jk and reason:
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        conn = _reviews_conn()
+        cur = conn.execute("SELECT id FROM send_backs WHERE join_key=? AND status='open'", (jk,))
+        row = cur.fetchone()
+        if row:
+            conn.execute("UPDATE send_backs SET reason=?, sent_at=? WHERE id=?",
+                         (reason, now, row[0]))
+        else:
+            conn.execute(
+                "INSERT INTO send_backs (join_key,phone10,patient,reason,sent_by,sent_at,status) "
+                "VALUES (?,?,?,?,'manoj',?,'open')", (jk, phone, patient, reason, now))
+        conn.commit(); conn.close()
+    return redirect("/portal/console?" + ret)
+
+
+@app.route("/portal/console/sendback/resolve", methods=["POST"])
+@doctor_required
+def console_sendback_resolve():
+    jk = (request.form.get("join_key") or "").strip()
+    ret = request.form.get("ret") or "view=noshows"
+    if jk:
+        conn = _reviews_conn()
+        conn.execute("UPDATE send_backs SET status='done' WHERE join_key=? AND status='open'", (jk,))
+        conn.commit(); conn.close()
+    return redirect("/portal/console?" + ret)
+
+
+@app.route("/portal/console/reviews.csv")
+@doctor_required
+def console_reviews_csv():
+    """W2 Item 5: THE training export -- my label beside the AI's, with the
+    transcript. One place, one file (doctor-gated, PHI stays on the VPS)."""
+    import csv as _csv, io as _io
+    buf = _io.StringIO(); w = _csv.writer(buf)
+    w.writerow(["Join Key", "Date", "Time", "Number", "Staff", "Claimed Outcome",
+                "AI Outcome", "AI Reason", "Evidence", "Doctor Final", "Doctor Note",
+                "Refereed At", "Transcript"])
+    disp, _ = _reviews_maps()
+    conn = _console_conn()
+    if conn is not None and disp:
+        try:
+            qmarks = ",".join(["?"] * len(disp))
+            sql = (_LOG_COLS + _LOG_FROM +
+                   "WHERE c.join_key IN (%s) ORDER BY c.ended_at_ist DESC" % qmarks)
+            for r in conn.execute(sql, list(disp.keys())):
+                row = _log_row(r); d = disp.get(row["join_key"], {})
+                w.writerow([row["join_key"], row["date"], row["time"], row["phone10"],
+                            row["agent"], row["claimed"], row["ai_outcome"],
+                            row["ai_reason"], row["evidence"],
+                            d.get("final_outcome", ""), d.get("note", ""), d.get("at", ""),
+                            row["tx_text"]])
+        finally:
+            conn.close()
+    resp = make_response(buf.getvalue())
+    resp.headers["Content-Type"] = "text/csv; charset=utf-8"
+    resp.headers["Content-Disposition"] = "attachment; filename=doctor_reviews_training.csv"
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
 @app.route("/portal/console")
 @doctor_required
 def console_page():
     f = _console_filters(request.args)
-    view = f["view"] if f["view"] in ("log", "threads", "staff", "leads") else "log"
+    view = f["view"] if f["view"] in ("log", "threads", "staff", "leads", "pipe", "noshows") else "log"
     m = _console_meta()
     ctx = dict(m=m, f=f, view=view, stale_min=CONSOLE_STALE_MIN, agents=[],
                fac={"direction": {}, "answered": {}, "agent": {}},
                flag_opts=[(k, _FLAG_LABEL[k]) for k in _FLAG_COLS],
                day_groups=[], total=0, more=False, limit=_LOG_LIMIT,
-               convs=[], staff=[], leads=[],
+               convs=[], staff=[], leads=[], pipe=None, noshows=None, sb_open=[], spam_list=[],
+               vocab=REVIEW_VOCAB,
                base_qs=_console_base_qs(f), full_qs=_console_base_qs(f) + "&view=" + view)
     if m["ok"]:
         conn = _console_conn()
         if conn is not None:
             try:
+                disp, sbm = _reviews_maps()
+                spam = _spam_phones()
+                ctx["spam_list"] = sorted(spam)
                 ctx["agents"] = _agent_names(conn)
                 ctx["fac"] = _facets(conn, f)
                 if view == "log":
                     rows, more = _query_log(conn, f)
+                    _overlay_reviews(rows, disp, sbm)
                     ctx["day_groups"] = _group_by_day(rows)
                     ctx["total"] = len(rows); ctx["more"] = more
                 elif view == "threads":
                     ctx["convs"] = _query_conversations(conn, f)
+                    for cv in ctx["convs"]:
+                        _overlay_reviews(cv.get("legs", []), disp, sbm)
                 elif view == "staff":
                     ctx["staff"] = _query_staff(conn, f)
                 elif view == "leads":
-                    ctx["leads"] = _query_leads(conn, f)
+                    ctx["leads"] = [l for l in _query_leads(conn, f)
+                                    if l.get("phone10") not in spam]     # W3 Track M
+                    for l in ctx["leads"]:
+                        _overlay_reviews(l.get("legs", []), disp, sbm)
+                elif view == "pipe":
+                    ctx["pipe"] = _query_pipeline(conn)
+                elif view == "noshows":
+                    ctx["noshows"] = _query_noshows(conn)
+                    ctx["sb_open"] = sorted(
+                        ({"join_key": k, **v} for k, v in sbm.items()),
+                        key=lambda x: x["at"], reverse=True)
             finally:
                 conn.close()
     return render_template_string(CONSOLE_HTML, **ctx)
@@ -1886,7 +2309,8 @@ def console_csv():
     buf = _io.StringIO(); w = _csv.writer(buf)
     w.writerow(["Date", "Time", "Direction", "State", "Number", "Name", "Diagnosis",
                 "Last Visit", "Clinic ID", "Duration_s", "Staff", "Claimed Outcome",
-                "Not Filed", "AI Verdict", "AI State", "Your Review", "Flags",
+                "Not Filed", "AI Verdict", "AI State", "AI Reason", "Evidence",
+                "Transcribed At", "Judged At", "Judge Lag Min", "Your Review", "Flags",
                 "Recording Link", "Has Transcript", "Join Key"])
     if conn is not None:
         try:
@@ -1896,6 +2320,8 @@ def console_csv():
                             r["name"], r["diagnosis"], r["last_visit"], r["clinic_id"],
                             r["duration"], r["agent"], r["claimed"],
                             "YES" if r["not_filed"] else "", r["ai_text"], r["ai_state"],
+                            r["ai_reason"], r["evidence"], r["tx_at"], r["judged_at"],
+                            r["lag_judge"] if r["lag_judge"] is not None else "",
                             r["review_text"] if r["reviewed"] else "", "; ".join(r["flags"]),
                             r["rec_link"], "YES" if r["has_tx"] else "", r["join_key"]])
         finally:
