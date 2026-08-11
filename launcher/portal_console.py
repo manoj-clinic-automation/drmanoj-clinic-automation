@@ -911,6 +911,81 @@ def apply_myop_correction(conn, connected_phones):
     return corrected
 
 
+def _recv_ky(src):
+    """The staff who RECEIVED/made the call = the _us entry with vl=='received';
+    its ky is the MyOperator UserId. (proved 100% vs Agents.UserId, S168 probe)."""
+    for u in (src.get("_us") or []):
+        if str(u.get("vl")) == "received":
+            return str(u.get("ky") or "")
+    return ""
+
+
+def build_call_agent(conn, sources):
+    """D297 Stage-2a agent backfill (S168). Stamp each answered call with the
+    staff who handled it, from /search `_us[received].ky -> Agents.UserId -> name`.
+    Match to our calls by exact join key {phone10}_{start_time}, then same-number
+    nearest start within PROX seconds (our recording start can differ from the
+    /search start by a few seconds). Additive table; the console prefers it over
+    the sparse verdict.agent (D246 -- new table, no rework). Incoming-missed has
+    no `received` entry -> correctly left blank."""
+    uid2name = {}
+    for uid, name in conn.execute(
+            "SELECT userid, name FROM agents WHERE TRIM(COALESCE(userid,''))<>''"):
+        uid2name[(uid or "").strip()] = (name or "").strip()
+    exact, by_phone = {}, {}
+    for s in sources:
+        ky = _recv_ky(s)
+        if not ky:
+            continue
+        name = uid2name.get(ky, "")
+        if not name:
+            continue
+        ph = myop_phone(s)
+        try:
+            st = int(s.get("start_time") or 0)
+        except (ValueError, TypeError):
+            st = 0
+        if not ph or not st:
+            continue
+        dept = (s.get("department_name") or "").strip()
+        exact["%s_%s" % (ph, st)] = (name, dept)
+        by_phone.setdefault(ph, []).append((st, name, dept))
+    for v in by_phone.values():
+        v.sort()
+    PROX = 90
+    conn.execute("DROP TABLE IF EXISTS call_agent")
+    conn.execute("CREATE TABLE call_agent (join_key TEXT PRIMARY KEY, agent TEXT, "
+                 "department TEXT, matched_how TEXT)")
+    exact_n = prox_n = 0
+    for (jk,) in conn.execute("SELECT join_key FROM calls WHERE join_key<>''"):
+        hit = exact.get(jk); how = "exact"
+        if not hit:
+            parts = jk.split("_", 1)
+            jph = parts[0]
+            try:
+                jst = int(parts[1]) if len(parts) > 1 else 0
+            except ValueError:
+                jst = 0
+            best, bestd = None, PROX + 1
+            for (st, name, dept) in by_phone.get(jph, ()):
+                d = abs(st - jst)
+                if d < bestd:
+                    bestd, best = d, (name, dept)
+            if best and bestd <= PROX:
+                hit, how = best, "prox"
+        if hit:
+            conn.execute("INSERT OR REPLACE INTO call_agent VALUES (?,?,?,?)",
+                         (jk, hit[0], hit[1], how))
+            if how == "exact":
+                exact_n += 1
+            else:
+                prox_n += 1
+    conn.commit()
+    total = conn.execute("SELECT COUNT(*) FROM calls WHERE join_key<>''").fetchone()[0]
+    return {"exact": exact_n, "prox": prox_n, "tagged": exact_n + prox_n,
+            "calls_with_jk": total, "search_agent_keys": len(exact)}
+
+
 def myop_reconcile_layer(conn, token, days):
     today = datetime.now(IST).date()
     dates = [(today - timedelta(days=i)).isoformat() for i in range(max(1, days))][::-1]
@@ -931,6 +1006,7 @@ def myop_reconcile_layer(conn, token, days):
         rows.append((d, prov, auth, delta))
     before = conn.execute("SELECT COUNT(*) FROM conversations WHERE net_missed_open=1").fetchone()[0]
     corrected = apply_myop_correction(conn, myop_connected_phones(sources))
+    call_agent = build_call_agent(conn, sources)          # S168 Stage-2a
     conn.execute("DROP TABLE IF EXISTS myop_daily")
     conn.execute("CREATE TABLE myop_daily (date TEXT, myop_net_missed INTEGER, "
                  "daily_summary TEXT, delta INTEGER)")
@@ -939,7 +1015,8 @@ def myop_reconcile_layer(conn, token, days):
                  (dates[0] + ".." + dates[-1],))
     conn.commit()
     return {"rows": rows, "hits": len(hits), "window": dates[0] + ".." + dates[-1],
-            "before_open": before, "after_open": before - corrected, "corrected": corrected}
+            "before_open": before, "after_open": before - corrected, "corrected": corrected,
+            "call_agent": call_agent}
 
 
 def _print_myop(res):
@@ -953,6 +1030,15 @@ def _print_myop(res):
           % (match, len(res["rows"])))
     print("  net-missed-OPEN corrected by MyOperator connects: %s   (%s -> %s)"
           % (res["corrected"], res["before_open"], res["after_open"]))
+    ca = res.get("call_agent")
+    if ca:
+        print("  -- Stage-2a agent backfill (/search _us received -> Agents.UserId) --")
+        print("     calls with a join key: %s   search agent-keys: %s"
+              % (ca["calls_with_jk"], ca["search_agent_keys"]))
+        print("     tagged with a staff agent: %s  (exact %s + proximity %s)"
+              % (ca["tagged"], ca["exact"], ca["prox"]))
+        pct = (100.0 * ca["tagged"] / ca["calls_with_jk"]) if ca["calls_with_jk"] else 0
+        print("     coverage of recorded calls in this window: %.0f%%" % pct)
 
 
 def _require_myop_token(env_path):

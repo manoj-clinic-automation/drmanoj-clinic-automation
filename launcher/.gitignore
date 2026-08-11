@@ -1,0 +1,6 @@
+# F-31 / F-49 — PHI / salary-bearing stores: NEVER commit (built on the VPS at /root/wa/)
+console.db
+*.tmp
+console.db.tmp
+transcript_cache.db
+rec_cache/
