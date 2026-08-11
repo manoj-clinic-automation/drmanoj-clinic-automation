@@ -1,0 +1,344 @@
+# FAULT → ACTION REGISTER — v2.12 (CONSOLIDATED, SELF-CONTAINED)
+## Advanced Orthopaedic Surgery Centre, Bareilly
+**Owner: Dr. Manoj Agarwal · Maintained with: Claude**
+**Drafted Session 63 · Re-based Session 131, 09 July 2026. Supersedes v1 entirely.**
+
+**Source of truth: `Clinic_Master_KB_SystemsRegister_v1_58.md` · `Diagnostics_Surveillance_System_Spec_v2_0.md` · `HANDOFF_RUNBOOK_..._Session131_v69.md`. The KB wins on any conflict.**
+
+---
+
+## §0 — WHAT THIS DOCUMENT IS, AND WHAT CHANGED
+
+**This document is the single brain for RESPONSE.** Every fault → its lane → what the system does →
+the exact procedure when a human is needed. **That is `D114`, and it stands.** It was considered for
+retirement in Session 131 and **kept**: the Diagnostics Spec answers *"how do we detect it?"*; this
+register answers *"what happens when it fires?"* They are not duplicates.
+
+### §0.1 — The writer boundary (D203)
+
+> **`Diagnostics_Surveillance_System_Spec` defines a fault code and how it is detected.**
+> **This register assigns that code a lane and a procedure.**
+> **A code is defined once, and laned once. Neither document restates the other.**
+
+Where this register lists a code, it does so **to lane it**, never to redefine it. Where the
+Diagnostics spec names a lane, it is quoting this register.
+
+### §0.2 — Three things v1 said that were not true
+
+**1. Its source-of-truth line was twenty-five versions dead.** v1 cited *"Master KB v1.30 ·
+Diagnostics Spec v1.4 · Runbook Session 62 (v42)."* Current: **KB v1.57 · Diagnostics v2.0 ·
+Runbook v69.**
+
+**2. Its front page and its body contradicted each other.** The header read *"THIS IS A DESIGN
+DOCUMENT — nothing here is built or armed yet"* while §2.1 was titled *"S61 watchman, **LIVE**"* and
+§2.3 *"Apps Script sentinel, **LIVE**"*. Both were partly right and the reader could not tell which:
+**the detectors are live; the responder is not.** Every table below now carries that distinction
+explicitly.
+
+**3. F-24 — the register describes an auto-responder that does not exist.**
+Nine faults in §2.1 are marked **AUTO→ESC**, *"System does: `systemctl restart call-api`; re-check;
+alert."* But the live watchman (Diagnostics **§L2**) is, in its own words:
+
+> *"**Read-only** — reports only; **never starts/stops/changes a service.**"*
+
+It **names** the restart command inside an alert. It has never run one. And §M1's **D113** —
+*"The S61 watchman **IS** the Lane-1 service responder"* — states a design intent as a fact. §4 of
+this very document lists that responder as **Deliverable 2, unbuilt.**
+
+> **This is not academic.** During an outage, a session reading v1's §2.1 would wait for a restart
+> that never comes. **Every "System does" cell below is now marked with what actually happens today.**
+
+### §0.3 — Codes detected but never laned
+
+Session 125 built the `CALLHOOK_*` detector family. **Six of its codes have never appeared in this
+register.** They are laned in **§2.5** below.
+
+**And the two documents name the same fault differently:** Diagnostics §L2 registers
+`VPS_SERVICE_DOWN` and `WATCHDOG_SELF_FAIL`; this register lanes nine per-service codes
+(`VPS_CALL_RELAY_DOWN`, `VPS_WA_RELAY_DOWN`, …). **Both are correct and neither is wrong** — the
+detector emits one code with the service name attached; this register lanes the response per service.
+Recorded here so nobody "fixes" one to match the other.
+
+---
+
+## §0.35 — D204: THE RESPONDER DOES NOT EXIST, AND IS NOT SCHEDULED *(new in v2.1)*
+
+**D204 (Session 132).** F-24 is answered. **D113 is an intent, not a fact.** The S61 watchman detects and
+alerts; it prints `systemctl restart <svc>` inside the alert and **has never run one.** Deliverable 2 is
+**unbuilt and unscheduled.** Per **D112**, promotion into Lane 1 is a logged decision, and **no fault has
+earned one** — no service here has been observed dying unattended.
+
+> **Every `AUTO→ESC` row below means, today: you are told, and a human restarts.**
+> **During an outage, do not wait for a restart. Read the journal.**
+
+The `System does` column throughout §2 is therefore to be read as **`System does — once Deliverable 2
+exists`**. Its present tense is a label that misdescribes its contents (**D178**), and it stays only
+because rewriting nine tables would risk the procedures they carry. **This paragraph is the label.**
+
+---
+
+## §0.4 — READ THE STATUS COLUMN BEFORE YOU TRUST A ROW
+
+| Marker | Meaning |
+|---|---|
+| 🟢 **DETECTOR LIVE · RESPONDER LIVE** | The system detects it *and* acts. |
+| 🟡 **DETECTOR LIVE · RESPONDER NOT BUILT** | You are told. **Nothing is done for you.** The "System does" cell describes Deliverable 2, which does not exist. |
+| ⚪ **NEITHER BUILT** | Reserved. Detection not built. |
+
+**As of Session 131, not one row is 🟢.** The Lane-1 auto-responder has never been built. Everything
+live is **detect-and-alert**.
+
+---
+
+## 1. The two lanes (the whole safety model)
+
+Every fault is assigned to exactly one lane.
+
+### LANE 1 — NARROW-AUTO (system fixes it by itself)
+The system detects the fault, runs a **proven-safe, idempotent** fix, re-checks, and reports
+*"detected X → ran fix → confirmed healthy"* (or, if the fix didn't work, hands it to Lane 2).
+
+**A fault qualifies for Lane 1 ONLY if its fix is:**
+- **Idempotent** — safe to run twice with no harm, and
+- **Proven harmless** — we have watched this exact action behave, and
+- **Non-destructive** — it never deletes data, never touches PHI, never touches the MyOperator panel, never rotates a token.
+
+**Starting Lane 1 deliberately TINY — only these two actions:**
+| Action | Why it's safe |
+|---|---|
+| Restart a dead always-on service (`systemctl restart <svc>`) | systemd handles it cleanly; this is exactly what the S61 watchman already does, proven over weeks. |
+| Re-run the follow-up push (`systemctl start clinic-followup-push.service`) | Replace-only / harmless — owner-confirmed it re-writes the same rows. |
+
+Nothing else is Lane 1 until we deliberately **promote** it after watching it behave.
+**Promoting a fault to Lane 1 is a decision, logged like any other.**
+
+### LANE 2 — ASSISTED / STEPWISE (human-confirmed, session-driven)
+For everything not in Lane 1, the system **never acts blindly**. It escalates to the doctor
+(ntfy + Gmail) with the fault and a pointer to its procedure below. The doctor then handles
+it **exactly like a coding session** — Claude presents one slice (fault → proposed action →
+exact command), the doctor confirms, it runs, reports back, next slice. **No consequential
+action ever runs without an explicit confirmation.**
+
+> **How Lane 2 works in practice (Option 2a — agreed S63):** the background program only ever
+> *detects and escalates* for Lane 2 — it takes no action itself. The stepwise "assistant"
+> is Claude in a session, scripted by this register. This keeps the *acting-on-the-live-clinic*
+> code surface as small as possible (just the two Lane-1 actions).
+
+### The third response type inside Lane 2: AUTO-THEN-ESCALATE
+Some faults get the Lane-1 fix **tried once**, and if the service does **not** recover, they
+escalate to Lane 2 with the manual procedure. (This is already how the watchman behaves:
+restart once → if still down, shout.) Marked below as **AUTO→ESC**.
+
+---
+
+---
+
+> 🟡 **§2.1, §2.2, §2.3 — DETECTOR LIVE · RESPONDER NOT BUILT.** The watchman, the timer-freshness
+> checker and the Apps Script sentinel all **detect and alert**. None of them restarts anything. Read
+> every *"System does"* cell below as *"System **will** do, once Deliverable 2 is built."* Today the
+> alert names the command and **you or Claude run it.**
+>
+> ⚪ **§2.4 — NEITHER BUILT**, except `WA_TOKEN_AGING` (still ESCALATE-ONLY, still overdue).
+
+## 2. THE REGISTER — every current & reserved fault
+
+Columns: **Fault code · Detected by · Lane · What the system does · If human needed: the procedure.**
+
+### 2.1 Always-on service liveness (S61 watchman, LIVE)
+
+| Fault code | Lane | System does | Procedure if it doesn't self-recover |
+|---|---|---|---|
+| `VPS_CALL_RELAY_DOWN` (:8097 dialer) | **AUTO→ESC** | `systemctl restart call-api`; re-check; alert | 1. `systemctl status call-api -l` + `journalctl -u call-api -n 80`. 2. If Python traceback → fix cause (build session), don't loop-restart. 3. Fallback: staff dial in MyOperator panel directly. Contact: Lokesh for panel. |
+| `VPS_WA_RELAY_DOWN` (:8096 send) | **AUTO→ESC** | restart `wa-send-api`; re-check; alert | Same shape. Fallback: panel-native WhatsApp automations still fire independently. |
+| `VPS_WA_RECEIVER_DOWN` (:8095 inbound) | **AUTO→ESC** | restart `wa-receiver`; re-check; alert | If it won't start: `journalctl -u wa-receiver -n 80`. Effect while down: WA_Inbox stops filling → dashboard WhatsApp feed empty. |
+| `call-hook.service` down (:8098) | **AUTO→ESC** | restart `call-hook`; re-check; alert | While down: `Call_Durations` stops → duration gate can't unlock. Degrade-safe by design (won't retry-storm). |
+| `clinic-portal.service` down (:8099) | **AUTO→ESC** | restart; re-check; alert | Staff launcher down; low urgency. Log check if repeats. |
+| `clinic-followup-receiver` down (:8100) | **AUTO→ESC** | restart; re-check; alert | Catcher for the PC workbook. While down, the PC hook can't deliver — see follow-up faults. |
+| `wa-notifier` down | **AUTO→ESC** | restart; re-check; alert | ntfy name-alerts stop; not patient-facing. |
+| `attendance-dashboard` down (:8042) | **AUTO→ESC** | restart; re-check; alert | Attendance view down; staff record on paper; Secureye buffers punches. Non-clinical. |
+| `attlistener` down | **AUTO→ESC** | restart; re-check; alert | Punches not recorded live; device buffers and syncs on recovery. |
+
+### 2.2 Timer-job freshness (S62 checker, heartbeats LIVE, checker arms next)
+
+| Fault code | Lane | System does | Procedure if human needed |
+|---|---|---|---|
+| `FOLLOWUPS_PUSH_MISSED_RUN` (CRITICAL) | **AUTO→ESC** | `systemctl start clinic-followup-push.service`; re-check heartbeat; alert | If heartbeat still stale after re-run → the **input** is missing. Check `clinic-followup-receiver` up + did Shavez run the Docterz export? Fallback: staff use last good list. |
+| `RECORDING_ARCHIVE_MISSED_RUN` (WARNING) | **ASSISTED** | alert only — **NOT auto-run** | Overnight job; never confirmed harmless to run off-schedule. Stepwise: read `journalctl -u call-recording-archive -n 80` first → only then decide to `systemctl start` it. |
+| `TRANSCRIPTION_MISSED_RUN` (WARNING) | **ASSISTED** | alert only — **NOT auto-run** | Same as above for `call-transcription`. Read log before acting. |
+
+### 2.3 Follow-up list freshness (Apps Script sentinel, LIVE)
+
+| Fault code | Lane | System does | Procedure if human needed |
+|---|---|---|---|
+| `FOLLOWUPS_LIST_STALE` / `FOLLOWUPS_NOT_LOADED` (CRITICAL) | **ASSISTED** | email you (sentinel) | 1. `cat /root/wa/heartbeats/followup-push.hb` — old? 2. Re-run push (safe). 3. Still empty → Docterz export missing (Shavez) or catcher down. |
+| `FOLLOWUPS_DATE_MALFORMED` | **ASSISTED** | email you | Build-session fix — malformed due-dates in source; do not auto-touch data. |
+
+### 2.4 Reserved / planned (in surveillance register; detection not all built yet)
+
+| Fault code | Lane | System does | Procedure |
+|---|---|---|---|
+| `WA_TOKEN_AGING` (warn 80d → crit 90d) | **ESCALATE-ONLY** | alert only — **NEVER auto-acted** | Follow `SOP_WhatsApp_Token.md` exactly. HIGH RISK. Coordinate with Lokesh BEFORE rotating. |
+| `PATIENT_MASTER_STALE` (WARNING) | **AUTO→ESC** | re-run `push_patient_mirror.py`; re-check | If still stale → source/service issue; read log. |
+| `CALL_FEED_STALE` (WARNING) | **ASSISTED** | alert only | Known under-reporting (D61); investigate in build session. |
+| `REVENUE_STALE` (WARNING) | **ASSISTED** | alert only | Reconciler live-state unconfirmed (see stub SOP). Verify before acting. |
+| `DISK_SPACE_LOW` (planned maint. job) | **ESCALATE-ONLY** | alert only — **NEVER auto-delete** | Stepwise review of what's filling disk before removing anything. Deleting is never auto. |
+| `LOG_ROTATION_OVERDUE` (planned maint. job) | **AUTO** (once built+proven) | prune per policy; report | Candidate for Lane-1 promotion *after* the prune is proven idempotent. Starts ASSISTED. |
+| `BACKUP_MISSING` (planned maint. job) | **ESCALATE-ONLY** | alert only | A missing backup is never "fixed" automatically — you're told, you act. |
+
+---
+
+
+### 2.5 The `call-hook` 403 family (S125 detector LIVE · responder NOT BUILT) — **NEW in v2.0**
+
+> These six codes were minted with the detector in Session 125 and **have never had a lane.**
+> Detection: `Diagnostics_Surveillance_System_Spec_v2_0.md` **§L5**. Full incident:
+> `INCIDENT_2026-07-08_CALLHOOK_403_v5_CONSOLIDATED.md`.
+
+| Fault code | Lane | System does | Procedure if human needed |
+|---|---|---|---|
+| `CALLHOOK_SECRET_MISMATCH_403` (CRITICAL) | **ESCALATE-ONLY** | alert only — **NEVER auto-acted** | A secret mismatch is a key problem, not a service problem. **Never restart, never rotate automatically.** Read `INCIDENT_..._v5` §16 first. **Dual-key acceptance (D162) means a mismatch no longer causes an outage** — it means one key is stale. Coordinate with Lokesh before touching the MyOperator panel. |
+| `CALLHOOK_MULTIPLE_KEYS` (WARNING) | **ESCALATE-ONLY** | alert only | More than one key seen in the access log. Expected *during* a rotation; unexpected otherwise. Check `rotate_callhook.sh status`. **The rotation is PARKED (S128).** |
+| `CALLHOOK_403_EARLIER_TODAY` (WARNING) | **ASSISTED** | alert only | Deliveries were refused earlier today and are being accepted now. Read the access log before concluding it is healed. **D163's rejection logging exists precisely so this is visible.** |
+| `CALLHOOK_NO_ACCEPTED_TODAY` (CRITICAL) | **ESCALATE-ONLY** | alert only | Zero accepted deliveries today. On a clinic day this is an outage. **`Call_Durations` stops → the duration gate cannot unlock → but it FAILS OPEN (D156), so staff can still file.** Diagnose; do not restart blindly. |
+| `CALLHOOK_SILENT` (WARNING) | **ASSISTED** | alert only | No deliveries at all — accepted or refused. Distinguish *"no calls happened"* from *"the webhook is unplugged."* **Absence of coverage is not absence of events (§M5).** |
+| `CALLHOOK_RAWLOG_MISSING` (WARNING) | **ASSISTED** | alert only | The raw `.jsonl` is missing. The receiver 403s **before** `raw_log()`, so a missing raw log and a refused delivery look identical from inside. Read the OpenLiteSpeed access log. |
+
+**None of these is ever Lane 1.** A key, a panel, or a vendor is on the other end of every one of
+them, and **rule 3 of §3 forbids the responder from touching any of the three.**
+
+
+---
+
+## 3. Rules that keep the responder sturdy (non-negotiable)
+
+1. **One action per fault per outage.** Never restart-storm. Anti-spam state file, one alert
+   per outage, recovery note on return. (Same DNA as watchman + checker.)
+2. **Fail-loud.** If the responder itself errors, it shouts (ntfy+Gmail) — never dies silent.
+3. **Read-only except the whitelisted Lane-1 actions.** The program's *only* write-actions are
+   the exact `systemctl` commands in the Lane-1 list. It has no code path that deletes,
+   edits data, touches PHI, or calls the MyOperator panel.
+4. **Every alert names its procedure.** An alert is never just "X is down" — it carries the
+   fault code, which maps here to the exact steps.
+5. **Promotion is a logged decision.** Moving a fault ESCALATE→AUTO happens only after we've
+   watched it behave, and is recorded as a D-decision.
+6. **Log every action.** Plain log on the VPS; the daily report (deliverable 3) summarises it.
+
+---
+
+---
+
+## 4. What gets built from this register (order)
+
+- **Deliverable 2 — narrow auto-responder:** generalises the watchman's restart to the Lane-1
+  list above (2 actions), AUTO→ESC behaviour for the service faults. Small, offline-tested,
+  armed only with owner OK.
+- **Deliverable 3 — maintenance jobs + daily health report:** the `DISK_SPACE_LOW`,
+  `LOG_ROTATION_OVERDUE`, `BACKUP_MISSING`, `WA_TOKEN_AGING` detectors, plus a once-daily
+  "everything healthy / here's what I auto-fixed today" summary to phone+email (so health is
+  positively confirmed, not just silence-unless-broken).
+
+---
+
+---
+
+## 5. Open questions for the owner (to resolve before building deliverable 2)
+1. **Daily report timing** — what time should the once-a-day health summary land? (Suggest
+   ~8 AM IST so it's the first thing you see, after the overnight jobs have run.)
+2. **Report channel** — Gmail email, ntfy push, or both? (Suggest both: ntfy one-liner +
+   Gmail with the detail.)
+3. **Log-prune policy** — how many days of logs to keep before pruning? (Suggest 30 days;
+   this decides whether `LOG_ROTATION_OVERDUE` can ever become Lane-1 AUTO.)
+
+
+### §5.1 — Two of these three are now CLOSED (S131)
+
+| | v1's question | Answer, from what shipped |
+|---|---|---|
+| **Q1** | Daily report timing? | **CLOSED — 09:00 IST.** `Health.gs` emails ✅/not-✅ every morning. Its *absence* is the fault. |
+| **Q2** | Report channel? | **CLOSED — both.** `clinic_health_report.py` (Diagnostics §L4, D115): **ntfy one-liner + Gmail detail.** |
+| **Q3** | Log-prune policy — how many days? | **STILL OPEN.** This decides whether `LOG_ROTATION_OVERDUE` can ever be promoted to Lane 1. The suggestion of 30 days stands and has never been ruled on. |
+
+*v1 suggested ~8 AM. What shipped is 09:00 IST. The document was never told.*
+
+
+---
+
+## §6 — WHAT THIS REGISTER STILL OWES
+
+- **Deliverable 2, the narrow auto-responder, has never been built.** Every `AUTO→ESC` and `AUTO` cell
+  above is a promise, not a behaviour. **F-24.**
+- **D113 must be re-stated or retired.** *"The S61 watchman IS the Lane-1 service responder"* is not
+  true of the watchman that exists. It is either a design intent (say so) or a decision to build
+  (schedule it).
+- **Q3 — the log-prune policy** — is the last open question from S63.
+- **The Maintenance & SOP project does not exist.** `SOP_WhatsApp_Token.md`, referenced under
+  `WA_TOKEN_AGING`, has never been written. **A procedure that points at a document nobody wrote is
+  not a procedure.**
+
+---
+
+## CHANGELOG
+
+| Version | Date | Change |
+|---|---|---|
+| **v2.12** | **Session 166** | **§7 extended — F-71 recorded** (D297 design/vetting session; full text KB History Archive §S166). F-71 = an uploaded follow-up-tracker zip carried PHI + `.secret_key`/`.env` (kin F-56); code-only read, nothing committed, rotation check owed. No surveillance fault code, lane, procedure or rule added or altered; §0–§6 unchanged. |
+| **v2.11** | **Session 165** | **§7 extended — F-69, F-70 recorded** (D223 gist-tile build session; full text KB History Archive §S165). F-69 = `Call_Feed` dead since Apr (writer stopped); F-70 = Callback Tracker Core Dossier lags the live Sheet (diagnosis column + tab inventory). No surveillance fault code, lane, procedure or rule added or altered; §0–§6 unchanged. |
+| **v2.10** | **Session 164** | **§7 extended — F-67 CLOSED, F-68 recorded** (salary coverage fix + pending-review board + Shivani maker + portal user admin session; full text KB History Archive §S164). F-67 fix shipped (coverage keys off `day_review` approved capture, D291); F-68 = same-origin-proxy pattern for cross-app widgets. No surveillance fault code, lane, procedure or rule added or altered; §0–§6 unchanged. |
+| **v2.9** | **Session 161** | **§7 extended — F-64 recorded** (Staff Register onboarding + Salary Engine Stage A session; full text KB History Archive §S161). No surveillance fault code, lane, procedure or rule added or altered; §0–§6 unchanged. |
+| **v2.6** | **Session 160** | **§7 extended — F-62, F-63 recorded** (Case Pack → VPS decision + portal health-tiles/layout session; full text KB History Archive §S160). No surveillance fault code, lane, procedure or rule added or altered; §0–§6 unchanged. |
+| **v2.4** | **Session 158** | **§7 extended — F-57, F-58 recorded** (SSO-portal build + Notion catch-up session; full text in KB History Archive §S158). No surveillance fault code, lane, procedure or rule added or altered; §0–§6 unchanged. |
+| **v2.3** | **Session 157** | **§7 extended — F-54, F-55, F-56 recorded** (documentation/design session; full text in KB History Archive §S157). Title line corrected v2.1→v2.3 (it had lagged behind the v2.2 body — the F-45 title-lag family). No surveillance fault code, lane, procedure or rule added or altered; §0–§6 unchanged. |
+| **v2.2** | **Session 156** | **§7 added — a Later-Findings index (F-45..F-53)** so the register is aware of the process/build findings minted from S149 on (full text lives in the KB History Archive per that era's pattern). **F-51/F-52/F-53 recorded** (S156). No surveillance fault code, lane, procedure or rule was added or altered; §0–§6 are unchanged from v2.1. |
+| **v2.1** | **Session 132** *(row backfilled S149 per F-45; the v2.1 bump left no changelog entry — the same stale-record family caught at v1.71/§S131/§S143. Day not re-derived from the artefact; session is verified: D204 = S132)* | **§0.35 added — D204 (Session 132): F-24 is answered.** The Lane-1 auto-responder **does not exist and is not scheduled**; **D113** ("the S61 watchman IS the Lane-1 responder") is reclassified as **intent, not fact**. The watchman prints `systemctl restart <svc>` inside its alerts but **has never run one** — Deliverable 2 is unbuilt, and per **D112** no fault has earned Lane-1 promotion. So every `AUTO→ESC` row reads, today: *you are told, and a human restarts; during an outage do not wait for a restart — read the journal.* The `System does` column is relabelled **"System does — once Deliverable 2 exists"** (**D178**: its present tense misdescribes its contents). **No lane, procedure or rule was altered; §1–§6 are unchanged from v2.0.** |
+| **v2.0** | **09 Jul 2026 (Session 131)** | **RE-BASED, self-contained, status-true.** **Not retired** — `D114` makes this the single brain for response, and Session 131 confirmed it after nearly retiring it without reading D114. **D203** states the writer boundary: Diagnostics *defines and detects* a fault code; this register *lanes* it; neither restates the other. **F-24 raised:** v1's §2.1 described an auto-responder (`systemctl restart …`) that **does not exist** — the live watchman is read-only and *"never starts/stops/changes a service."* Every table now carries a status marker; **not one row is 🟢.** Source-of-truth line corrected (was KB v1.30 · Diagnostics v1.4 · Runbook v42 — twenty-five versions dead). **§2.5 added:** the six `CALLHOOK_*` codes, detected since Session 125 and never laned. §5's Q1 and Q2 **closed** by what shipped (09:00 IST; ntfy + Gmail). **§1, §2.1–§2.4, §3, §4 and §5 are reproduced verbatim; no rule, lane or procedure was altered.** |
+| v1 | 04 Jul 2026 (Session 63) | First draft. Two lanes, the register, the six sturdiness rules, the build order, three open questions. Its header said *"nothing here is built or armed yet"* while its body marked three detectors LIVE. |
+
+---
+
+## §7 — LATER FINDINGS INDEX (F-45+, recorded in full in the KB History Archive)
+
+Findings from S149 onward are minted and described in full in their session's Archive `§S###` block; this index keeps the register aware of them. They are process/build/discipline findings, not new surveillance fault codes, so they add no lane or detector here.
+
+| F-## | Session | One line | Full text |
+|---|---|---|---|
+| F-45 | S149 | Fault-Register v2.1 bump left no CHANGELOG row (stale-record family) — backfilled | Archive §S149 |
+| F-46 | S151 | Salary column printed in-chat (header-keyed mask beaten by a title row) → whitelist-only mask rule | Archive §S151 |
+| F-47 | S153 | Double-punch artefact: arrival double-punch, no out-punch — classify pairs before money math | Archive §S153 |
+| F-48 | S153 | Shadow-write / diff-audit rule for owner-side workbook edits | Archive §S153 |
+| F-49 | S154→S155 | Salary CSV in the git working tree → blanket `*.csv` gitignore IS the gate (CLOSED by ruling S155) | Archive §S154/§S155 |
+| F-50 | S155 | Derived-everything role powers (`list(CATEGORIES.keys())`) → **a role's powers are an explicit allow-list**; every power-set gets a negative selftest | Archive §S155 |
+| **F-51** | **S156** | One-tap irreversible ledger appends (contra/skip) → confirm step + void-pair display; **fixed same session** | Archive §S156 |
+| **F-52** | **S156** | Repo copy of a live op-script silently stale vs the VPS (gutlog missing) — **build from the md5-verified live copy, never the repo mirror** (reinforces D160) | Archive §S156 |
+| **F-53** | **S156** | Compile/selftest on a NEWER Python than the deployment target proves nothing — **VPS-Python (3.11) compile + selftest mandatory before delivery** | Archive §S156 |
+| **F-54** | **S157** | `App_Service_Register_v1` carried a 07-Aug file date over **Session-63-era** content (missing the asset app, staff-ledger, the salary stack) — a "date/filename is not provenance" trap (D188); reconcile against the live KB/manifest, not the artefact that looks current | Archive §S157 |
+| **F-55** | **S157** | The `drmanoj-clinic-automation` **GitHub JSON repo-dump is partial** — the export tool truncated (binary `attendance.zip` ate the budget), silently omitting `staff_ledger`, `wa-diagnostics`, `revenue-reconciliation`, `plan-tool`; use the **live repo** (codeload tarball / raw), never a dump assumed complete | Archive §S157 |
+| **F-56** | **S157** | Uploaded PC "code" zips carried **live credentials (GCP service-account key, `.env`, `.secret_key`) + PHI + F-31 salary data** even after "most data files" were deleted → sanitize whole `data/`/`output/`/archive dirs + keys before aggregating anything for reuse; **the service-account key that rode through must be ROTATED** | Archive §S157 |
+| **F-57** | **S158** | Notion catch-up scope taken from OUR records (claimed S150) not the live target (actually S147) — the real gap was S148–S156. **Scope a catch-up from where the external system actually is**, not from where we think we left it (reinforces D188/D260). (The 7-session "Notion absent" streak also had a mechanical cause: connector toggled OFF per-chat.) | Archive §S158 |
+| **F-62** | **S160** | “Audit the artefact, not the label” — a doc filed **Surgical Case Pack** as “Website/SEO”, hiding that it is a **local PHI store** (case bundles+consents+ledger, off-Drive by design). Classify a component from its CODE/data-flow, not a doc's category tag (kin D188/F-54). | Archive §S160 |
+| **F-63** | **S160** | The portal **`pc`-NameError reached production** — `py_compile` + an isolated Jinja render both passed, but the **wired route was never exercised** (the name existed only as a render kwarg). DELIVERY GATE for any live Flask change: a **test-client hit on the ACTUAL route** (200 + expected content), not just compile + isolated render. | Archive §S160 |
+| **F-64** | **S161** | Reusing live code from another app: `staff_ledger.py` **code** lives at `/root/staff_ledger.py` while its **data** dir is the separate `/root/staff_ledger/` — importing the ledger's `compute_salary` from the register app required adding `/root` **and** `/root/portal` to `sys.path` (guarded). A same-named dir next to a module is not the module's location; put the module's parent on the path. Diagnosed via a `ModuleNotFoundError` surfaced by a temporary error-carrying module global. | Archive §S161 |
+| **F-58** | **S158** | Flask's **test client ignores a manually-set `Cookie` header** (it manages its own cookie jar) — a valid SSO token gave a false-negative auth until switched to the client's `set_cookie` jar. Smoke-test cookie auth via `set_cookie`/`test_request_context`, never a raw header. | Archive §S158 |
+
+| **F-59** | **S159** | Chrome refuses ports **5060/5061 (SIP)** as **ERR_UNSAFE_PORT** from every context (address bar or tile); `curl`/CLI ignore the restricted-port list, so the server looks healthy while the browser fails. Avoid Chrome's restricted ports for localhost tiles; when curl works but the browser won't open, suspect ERR_UNSAFE_PORT first. | Archive §S159 |
+| **F-60** | **S159** | VPS filesystem is **case-sensitive**: `GMB.html` ≠ `gmb.html` — a path-based read fails with the app's own "not installed" message though the file is present. The filename's case must match what the code opens (kin of D188). | Archive §S159 |
+| **F-61** | **S159** | Pasting a fenced code block's **language label** (```` ```python ````) into a live config put a bare `python` token in `portal_config.py` → `NameError` → whole config unreadable → portal "Setup needed" (secrets intact). Paste only lines BETWEEN the fences; diagnose a sudden "unconfigured" via `python -c "import portal_config"`. | Archive §S159 |
+
+| **F-65** | **S162** | A new SQLite table needs the app's `--init` (migration) run **BEFORE** `systemctl restart`, or the page that queries it 500s. The Stage-B lock page queries `locked_run`; installing the code without `--init` → table missing → 500. Standing rule: when a delivery adds/alters a table, run `--init` before restart AND md5-check the file so a truncated/placeholder copy is caught. (First miss's root cause: a literal `PYBIN` placeholder in the runbook meant the venv `--init` never ran — always paste the real `/root/wa/venv/bin/python3`, never a placeholder.) | Archive §S162 |
+| **F-66** | **S163** | **WinSCP silently put the WRONG bytes under a filename — twice** — during the S163 install: the "salary engine" was uploaded but the local save was actually `staff_register.py`, so `salary_engine.py` on the VPS held the register file (`md5 = ded3ae8f…`, the register's hash) though its name looked right; a later `mv`/upload shuffle also **deleted the live `staff_register.py`** (service went to `activating`/down). The **md5 gate caught the wrong bytes before any restart**, and both files were restored from the `.bak-S163eb` timestamped backups — no mis-paid run, contained downtime. Standing discipline reinforced: (a) **always keep a timestamped backup before install** (`cp file{,.bak-SNNN}`), it is the instant rollback; (b) **upload with a `.new` suffix, md5-verify the file IN PLACE, then `mv` into position** — never overwrite a live file with unverified bytes; (c) a filename is not provenance (D188) — trust only the hash. | Archive §S163 |
+| **F-67** | **S163** | **Coverage detection keys off the wrong table.** `salary_engine.load_register()` sets `covered = (daily_register rowcount > 0)`, but `daily_register` only holds EXCEPTION rows — a month the register genuinely captured (day_review approved daily) but with zero logged exceptions would be mis-flagged **uncovered**, skipping the C-model base÷30 cuts on genuine absences (an under-deduction). The correct signal is **day_review capture** for the month, not exception rows. Latent (August is currently uncovered for a legitimate reason — no daily entry yet), but MUST be fixed before any register-captured month is paid. Fix + selftest were the S164 top task. **CLOSED S164 (D291):** `covered` now keys off `day_review` `status='approved'` capture (not exception rows); `salary_engine.py 5514918067243e3f39e7074144ee7db4`, selftest **CASE E** added, July parity re-verified ₹1,07,447. | Archive §S163/§S164 |
+
+| **F-68** | **S164** | **Cross-origin credentialed fetch through OpenLiteSpeed is fragile.** The portal Staff-Register tile fetched the register's `/register/review/counts` from the browser and got nothing — OLS's reverse proxy strips/omits the `Origin`/CORS headers a credentialed cross-origin `fetch` needs, so the browser blocks the response. Pattern: don't fetch another app's origin from the browser — add a **same-origin proxy** on the calling app that server-side calls the target over localhost (here portal `GET /portal/review-counts` → `REGISTER_COUNTS_URL` = `127.0.0.1:8044/register/review/counts`, SSO cookie forwarded, 2s timeout, empty `{}` on failure). Apply to any future cross-app widget. | Archive §S164 |
+
+| **F-69** | **S165** | **`Call_Feed` dead since 28 Apr 2026.** While binding the gist's call-volume source, `Call_Feed` (the name-free feed the Follow-Up Tracker reads; written by `CallField`/`CallFeed.gs`) was found frozen at April — 2,971 rows, newest 27–28 Apr, **0 today** — its writer stopped ~3.5 months ago. Volume was rebound to the live `Call_Durations` (1,648 rows, 79 today; `category` incoming/obd, window `ended_at_ist`, probe excluded). The Follow-Up Tracker reads `Call_Feed`, so its incoming/outgoing reconciliation is likely silently degraded since April — find and restart the `Call_Feed` writer. | Archive §S165 |
+| **F-70** | **S165** | **The Callback Tracker Core Dossier lags the live Sheet (doc-not-provenance, D160/D188).** The dossier frames diagnosis as Docterz-side, but `Patient_Master` carries a live **Diagnosis** column (present for most patients) and `Followups_Today`/`Followup_Escalations` carry it too — the console's diagnosis column is buildable now, not Docterz-blocked. The dossier also lacks the real tab inventory (there is **no** "Escalations" tab; 3rd-strikes live in `K_Strikes.Tries`; the Sheet has 19 tabs incl. `Daily_Summary`, `Agents`, `Followup_Outcomes`). Owner corrected the assistant from the live Sheet. Dossier update owed. | Archive §S165 |
+
+| **F-71** | **S166** | **An uploaded PC zip carried PHI + secrets (kin F-56).** The `followup_tracker.zip` shared to ground the D297 conversion/no-show design included `patient_master.csv`, `patient_diagnosis.csv` (PHI), revenue ledgers, and `.secret_key` + `.env` (secrets). Handled correctly: **code-only** extraction, **nothing committed** to any repo or kit, **no data printed** (numbers masked in chat). Standing rule reinforced: PC uploads must be **code-only** (drop `data/`). **Action:** treat the shared `.secret_key`/`.env` as potentially exposed → rotation check (kin F-56 service-account-key rotation). | Archive §S166 |
+
+| **F-72** | **S167** | **Mixed tz-aware/naive datetime subtraction crashed the console builder.** `portal_console.py`'s first live dry-run died in `build_latency` — `TypeError: can't subtract offset-naive and offset-aware datetimes`: one timestamp column parses tz-aware (an ISO string carrying `+05:30`), another naive, and subtracting the two raises. Fix: `parse_ts` strips `tzinfo` so every parsed time is one **naive IST wall clock** (all sources are IST); a genuine cross-zone source would then surface as a ~constant offset in the latency stats, not a silent wrong lag (F-41 lineage). RULE: normalise datetimes to one tz stance before arithmetic; unit-test with an aware+naive mix. | Archive §S167 |
+| **F-73** | **S167** | **Two live files disagreed on the MyOperator `/search` `status` vocabulary.** `Netting.gs`/`MyOperator.gs` (which produce `Daily_Summary`) read `status` as **numeric** (`status==2`=missed); the VPS sibling `flag_investigator.py` reads it as **strings** (`"missed"/"voicemail"/"bridged"`). Encoding the A2b reconcile on the wrong one would silently mis-count net-missed. Resolved by a **read-only live probe** (`--myop-probe`): the API returns numeric `status` `{1,2}` + `event` `{1,2}` — **numeric wins**; `Netting.gs` is authoritative. RULE: when two live sources disagree on a field's encoding, PROBE the live source before encoding a rule — do not pick by the file's recency or apparent authority (kin D160/D188). | Archive §S167 |
+
+*Next free finding: F-74.*
+
+---
+
+**END OF FAULT → ACTION REGISTER v2.13 — §7 and the CHANGELOG are the last sections. If either is absent, this file is truncated and must not be used as canonical.**
