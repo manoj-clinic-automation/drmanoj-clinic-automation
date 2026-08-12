@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-daily_digest.py -- v1.0-S142 -- D236 digest layer (Dr. Manoj Agarwal Clinic)
+daily_digest.py -- v1.6-S171 -- D236 digest layer (Dr. Manoj Agarwal Clinic)
 
 WHAT THIS IS
   The doctor's two daily emails, built from data the pipeline already writes.
@@ -14,9 +14,10 @@ TWO MODES
              awaiting-verdict), then a short "needs attention" list.
              No AI call. Zero rupees.
   --digest   21:30 IST full digest: day-in-one-line, the day's numbers,
-             worst-first review list with recording links, the day's 2 MATCH
-             spot-checks for the doctor to referee (D237 drip; answers land
-             in Verdict_Review -> Doctor_Verdicts and count toward D191),
+             worst-first review list with recording links, a Referee-corner
+             pointer to the portal console (S171 Track G: the doctor referees
+             there; dispositions in console_reviews.db count toward D191
+             alongside the legacy Doctor_Verdicts rows),
              at most ONE data-backed suggestion. One small AI call (Haiku)
              writes the summary line + suggestion from AGGREGATE COUNTS ONLY
              -- no names, no numbers, no transcripts ever leave the sheet.
@@ -65,6 +66,10 @@ CRON (installed at S142)
   30 21 * * * /root/wa/venv/bin/python3 /root/wa/recordings-archive/daily_digest.py --digest >> /root/wa/recordings-archive/digest_cron.log 2>&1
 
 Version history
+  v1.6-S171  Track G repoint (D297 cutover step b): Verdict_Review is no
+             longer read anywhere; spot-check drip replaced by the Referee
+             corner pointing at the portal console; refereed count =
+             Doctor_Verdicts + console_reviews.db dispositions (fail-soft).
   v1.5-S146  B1: the 21:30 digest now READS flag_investigator_results.json
              (the D239 Flag Investigator) and quotes its rolling
              never_recorded vs missed_no_conversation split in a new
@@ -134,8 +139,7 @@ AI_TIMEOUT_S = 60
 
 REVIEW_LIST_CAP = 12          # worst-first list, 21:30
 MORNING_LIST_CAP = 40         # all-morning-calls list, 11:00
-REVIEW_TAB = "Verdict_Review"           # read-only here; verdict_review.py owns it
-SPOTLINE_LABEL = "Today's spot-checks"  # the summary row v3 writes (D240)
+REVIEWS_DB = "/root/wa/console_reviews.db"   # portal-owned referee store (read-only here, S171)
 MIN_TALK_S = 15               # below this, a "conversation" is a blip
 PIPELINE_GRACE_MIN = 30       # age before a missing transcript is suspicious
 # F-44: top-level (webhook) status values that mean nobody actually talked, so
@@ -390,18 +394,6 @@ def bucket_counts(vrows):
     return c
 
 
-def find_spotcheck_line(values):
-    """v1.3 (S143): the digest no longer picks its own spot-checks.
-    verdict_review.py v3 is the ONE DECIDER — it picks, marks the cards in the
-    top band, and writes a summary row labelled "Today's spot-checks".  This
-    reads that row from the tab's first rows.  Returns "" when absent (e.g. the
-    21:00 redraw has not run), and the email then simply points at the band."""
-    for r in values or []:
-        if r and str(r[0]).strip() == SPOTLINE_LABEL:
-            return str(r[1]).strip() if len(r) > 1 else ""
-    return ""
-
-
 def worst_first(vrows, cap=REVIEW_LIST_CAP):
     """Rows needing the doctor, safety-first, capped."""
     tagged = []
@@ -618,7 +610,7 @@ def build_pulse_email(day_disp, judged_today, pending_rows, attention, refereed)
     return "".join(parts)
 
 
-def build_digest_email(day_disp, summary_line, c, staff_logged, review, spots,
+def build_digest_email(day_disp, summary_line, c, staff_logged, review,
                        suggestion, refereed, ai_note="", recording_line=""):
     parts = ['<div style="%s">' % CSS]
     parts.append(h_section("The day in one line"))
@@ -650,19 +642,13 @@ def build_digest_email(day_disp, summary_line, c, staff_logged, review, spots,
             ["Time", "Why", "Patient", "Staff logged", "AI heard", "Recording"],
             cells))
 
-    parts.append(h_section("Your 2 spot-checks (30 seconds each)"))
-    if spots:
-        parts.append("<p><b>%s</b></p>" % esc(spots))
-        parts.append("<p>Their full cards — transcript, evidence and "
-                     "\u25b6 listen link — are the \u2605 TODAY'S SPOT-CHECK "
-                     "cards at the TOP of the <b>Verdict_Review</b> tab. "
-                     "Your answers are what count toward the accuracy gate — "
-                     "the machine agreeing with itself never does (D237).</p>")
-    else:
-        parts.append("<p>The review tab has not marked today's spot-checks "
-                     "yet (its 21:00 redraw may not have run). Open "
-                     "<b>Verdict_Review</b> — any open card in the top band "
-                     "counts just the same.</p>")
+    parts.append(h_section("Referee corner (30 seconds a card)"))
+    parts.append("<p>Referee today's calls in the <b>portal console</b> — "
+                 "worst-first, with transcript, evidence and \u25b6 listen "
+                 "inline: <a href=\"https://followup.dr-manoj.in/portal/console\">"
+                 "followup.dr-manoj.in/portal/console</a>. Your saved reviews "
+                 "are what count toward the accuracy gate — the machine "
+                 "agreeing with itself never does (D237).</p>")
 
     parts.append(h_section("One suggestion"))
     parts.append("<p>%s</p>" % esc(suggestion or "No suggestion today."))
@@ -715,6 +701,19 @@ def read_tab(book, tab):
     return rows_as_dicts(ws.get_all_values())
 
 
+def console_reviews_count(path=REVIEWS_DB):
+    """S171: my referee answers now land in the portal console (dispositions
+    table, console_reviews.db). Read-only, fail-soft: absent db -> 0."""
+    try:
+        import sqlite3
+        conn = sqlite3.connect("file:%s?mode=ro" % path, uri=True)
+        n = conn.execute("SELECT COUNT(*) FROM dispositions").fetchone()[0]
+        conn.close()
+        return int(n or 0)
+    except Exception:
+        return 0
+
+
 def collect(day_str):
     """One pass over the four tabs -> everything both emails need."""
     gc = get_sheets_client()
@@ -761,11 +760,10 @@ def collect(day_str):
             p["_reason"], p["_alert"] = reason, alert
             d_today.append(p)
     o_today = [r for r in outcomes if parse_when(r.get("When", ""))[0] == day_str]
-    try:
-        vr_head = audit.worksheet(REVIEW_TAB).get_values("A1:B30")
-    except Exception:                                          # tab absent / first run
-        vr_head = []
-    return v_today, d_today, o_today, len(doctor), find_spotcheck_line(vr_head)
+    # S171 Track G: Verdict_Review is no longer read anywhere in this script --
+    # the doctor referees in the portal console; those dispositions live in the
+    # portal-owned reviews db and count toward D191 alongside the legacy sheet.
+    return v_today, d_today, o_today, len(doctor) + console_reviews_count()
 
 
 # ---------------------------------------------------------------------------
@@ -854,7 +852,7 @@ def run_pulse(dry_run):
     now = datetime.datetime.now(IST)
     day_str = now.strftime("%Y-%m-%d")
     day_disp = now.strftime("%a %d %b %Y")
-    v_today, d_pending, _o_today, refereed, _spot = collect(day_str)
+    v_today, d_pending, _o_today, refereed = collect(day_str)
 
     attention = []
     for p_ in d_pending:
@@ -895,7 +893,7 @@ def run_digest(dry_run):
     now = datetime.datetime.now(IST)
     day_str = now.strftime("%Y-%m-%d")
     day_disp = now.strftime("%a %d %b %Y")
-    v_today, d_pending, o_today, refereed, spot_line = collect(day_str)
+    v_today, d_pending, o_today, refereed = collect(day_str)
     lost = [p for p in d_pending if p.get("_alert")]
     # B1 (S146): quote the Flag Investigator's rolling recording-gap split
     # (one source of truth), instead of recomputing it. Read-only; fail-loud.
@@ -905,7 +903,6 @@ def run_digest(dry_run):
     c = bucket_counts(v_today)
     staff_logged = len(o_today)
     review = worst_first(v_today)
-    spots = spot_line   # v1.3: verdict_review v3 decided; we only report
 
     ai_sum, ai_sug, ai_note = ai_summary_and_suggestion(
         c, staff_logged, sorted({lab for lab, _ in review}))
@@ -927,7 +924,7 @@ def run_digest(dry_run):
                       "look before anything else. | %s"
                       % (len(lost), lines, suggestion))
     subject = digest_subject(day_disp, c)
-    body = build_digest_email(day_disp, summary, c, staff_logged, review, spots,
+    body = build_digest_email(day_disp, summary, c, staff_logged, review,
                               suggestion, refereed, ai_note,
                               recording_line=flag["line"])
     send_email(subject, body, dry_run)
@@ -1010,17 +1007,18 @@ def selftest():
     check("buckets unknown verdict -> other",
           bucket_counts([{"Verdict": "??", "Direction": ""}])["other"] == 1)
 
-    # -- spot checks (v1.3: read the tab's line; verdict_review decides) --------
-    grid = [["CALL VERDICT REVIEW", "x"], ["Generated", "y"],
-            [SPOTLINE_LABEL, "******1234 2026-07-12 10:00 (coming)"], [""]]
-    check("spot line found", find_spotcheck_line(grid)
-          == "******1234 2026-07-12 10:00 (coming)")
-    check("spot line absent -> empty", find_spotcheck_line(
-          [["CALL VERDICT REVIEW", "x"]]) == "")
-    check("spot line empty grid", find_spotcheck_line([]) == ""
-          and find_spotcheck_line(None) == "")
-    check("spot line short row tolerated",
-          find_spotcheck_line([[SPOTLINE_LABEL]]) == "")
+    # -- S171 Track G: referee count now reads the portal reviews db ----------
+    import tempfile as _tf, sqlite3 as _sq
+    check("console_reviews_count: absent db -> 0",
+          console_reviews_count("/nonexistent/db.sqlite") == 0)
+    _tp = os.path.join(_tf.mkdtemp(), "r.db")
+    _cn = _sq.connect(_tp)
+    _cn.execute("CREATE TABLE dispositions (join_key TEXT PRIMARY KEY,"
+                " final_outcome TEXT, note TEXT, refereed_by TEXT, refereed_at TEXT)")
+    _cn.execute("INSERT INTO dispositions VALUES ('a_1','Coming','','manoj','t')")
+    _cn.execute("INSERT INTO dispositions VALUES ('b_2','Came','','manoj','t')")
+    _cn.commit(); _cn.close()
+    check("console_reviews_count: counts dispositions", console_reviews_count(_tp) == 2)
 
     # -- pad / keys / join (v1.1 dry-run fixes) ----------------------------------
     check("pad_time 8:58", pad_time("8:58") == "08:58")
@@ -1139,16 +1137,13 @@ def selftest():
     check("pulse empty morning line", "No calls captured yet" in body2)
     check("pulse empty attention", "Nothing actionable" in body2)
     dg = build_digest_email("Mon", "line", c, 4, [("URGENT", vt)],
-                            "******1234 2026-07-12 10:00 (coming)",
                             "do X", 7, "")
     check("digest has listen link", 'href="https://drive.google.com' in dg)
-    check("digest has spot section", "spot-checks" in dg)
-    check("digest carries the tab's spot line verbatim",
-          "******1234 2026-07-12 10:00 (coming)" in dg)
-    dg0 = build_digest_email("Mon", "line", c, 4, [("URGENT", vt)], "",
-                             "do X", 7, "")
-    check("no spot line -> points at the band, never invents picks",
-          "top band" in dg0)
+    check("S171: digest has Referee corner", "Referee corner" in dg)
+    check("S171: referee corner points at the portal console",
+          "portal/console" in dg)
+    check("S171: Verdict_Review no longer mentioned anywhere in the email",
+          "Verdict_Review" not in dg)
     check("digest has suggestion", "do X" in dg)
     check("bad link not rendered as anchor",
           link("javascript:x", "t") == "t")
@@ -1189,11 +1184,11 @@ def selftest():
     check("load_flag_results missing path -> None (never raises)",
           load_flag_results("/no/such/flag_results_xyz.json") is None)
     dgf = build_digest_email("Mon", "line", c, 4, [("URGENT", vt)],
-                             "", "do X", 7, "", fr_ok["line"])
+                             "do X", 7, "", fr_ok["line"])
     check("digest renders Recording health section when line given",
           "Recording health" in dgf and "never-recorded" in dgf)
     dgn = build_digest_email("Mon", "line", c, 4, [("URGENT", vt)],
-                             "", "do X", 7, "", "")
+                             "do X", 7, "", "")
     check("digest omits Recording health when no line (back-compat)",
           "Recording health" not in dgn)
 

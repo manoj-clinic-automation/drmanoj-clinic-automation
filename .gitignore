@@ -85,4 +85,7 @@ console.db.tmp
 transcript_cache.db
 console_reviews.db
 rec_cache/
+*.tmp
+attendance/staff_master.csv
+
 

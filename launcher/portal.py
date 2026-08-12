@@ -1364,8 +1364,9 @@ _DV = ("(SELECT join_key, MAX(id) AS _vid, patient_number, patient_name, agent, 
        "doctor_flag, doctor_note, final_outcome, recording_link, flag_postop, "
        "flag_complaint, flag_urgent, flag_surgery, flag_clinical, flag_conduct "
        "FROM verdicts WHERE join_key<>'' GROUP BY join_key)")
-_DP = ("(SELECT phone10, MAX(rowid) AS _pid, name, diagnosis, last_visit, "
-       "patient_uid, clinic_id FROM patients WHERE phone10<>'' GROUP BY phone10)")
+_DP = ("(SELECT phone10, MAX(rowid) AS _pid, name, diagnosis, age, gender, "
+       "last_visit, patient_uid, clinic_id FROM patients WHERE phone10<>'' "
+       "GROUP BY phone10)")
 
 # Displayed number: phone10 if present, else the join-key prefix (Join Key =
 # {phone10}_{unix}) -- recovers the blank OUTBOUND numbers.
@@ -1396,7 +1397,8 @@ _LOG_COLS = (
     "c.join_key, c.recording_filename, " + _DPHONE + " AS phone_disp, "
     "COALESCE(v.patient_number,'') AS vnum, "
     "COALESCE(NULLIF(v.patient_name,''), p.name, '') AS name, "
-    "COALESCE(p.diagnosis,'') AS diagnosis, "
+    "COALESCE(p.diagnosis,'') AS diagnosis, p._pid AS pid, "
+    "COALESCE(p.age,'') AS age, COALESCE(p.gender,'') AS gender, "
     "COALESCE(v.claimed_outcome,'') AS claimed, COALESCE(v.not_filed,0) AS not_filed, "
     "COALESCE(v.ai_outcome,'') AS ai_outcome, COALESCE(v.verdict,'') AS verdict, "
     "COALESCE(v.ai_reason,'') AS ai_reason, COALESCE(v.evidence,'') AS evidence, "
@@ -1503,6 +1505,10 @@ def _log_row(r):
         "date": date, "time": time, "direction": direction, "state": state,
         "phone10": number, "name": r["name"] or "",
         "diagnosis": r["diagnosis"] or "", "duration": r["total_duration"] or "",
+        "dur_h": _dur_h(r["total_duration"]),
+        "age": (r["age"] or "").strip(), "gender": (r["gender"] or "").strip(),
+        "agesex": "/".join(x for x in ((r["age"] or "").strip(),
+                                       (r["gender"] or "").strip()[:1].upper()) if x),
         "agent": agent, "last_visit": r["last_visit"] or "",
         "clinic_id": r["clinic_id"] or "", "patient_uid": r["patient_uid"] or "",
         "claimed": r["claimed"] or "", "not_filed": (r["not_filed"] == 1),
@@ -1514,6 +1520,7 @@ def _log_row(r):
         "doctor_note": dn, "reviewed": reviewed, "review_text": review_text,
         "conduct_note": (r["conduct_note"] or "").strip(),
         "has_jk": has_jk, "has_verdict": has_verdict,
+        "in_master": r["pid"] is not None,
         "flags": flags, "rec_link": r["rec_link"] or "",
         "tx_text": tx_text, "has_tx": bool(tx_text), "join_key": r["join_key"] or "",
     }
@@ -1648,8 +1655,12 @@ def _query_conversations(conn, f):
     sql = ("SELECT cv.phone10, cv.attempts, cv.miss_attempts, cv.any_connected, "
            "cv.net_missed_open, cv.first_ts, cv.last_ts, cv.last_direction, "
            "cv.last_status, cv.last_agent, COALESCE(p.name,'') AS name, "
-           "COALESCE(p.diagnosis,'') AS diagnosis FROM conversations cv "
-           "LEFT JOIN patients p ON p.phone10=cv.phone10 AND cv.phone10<>'' "
+           "COALESCE(p.diagnosis,'') AS diagnosis, "
+           "COALESCE(p.age,'') AS age, COALESCE(p.gender,'') AS gender, "
+           "COALESCE(p.clinic_id,'') AS clinic_id, "
+           "COALESCE(p.last_visit,'') AS last_visit, "
+           "p._pid AS pid FROM conversations cv "
+           "LEFT JOIN " + _DP + " p ON p.phone10=cv.phone10 AND cv.phone10<>'' "
            + where + " ORDER BY cv.net_missed_open DESC, cv.last_ts DESC LIMIT 400")
     convs = []
     for r in conn.execute(sql, p):
@@ -1658,7 +1669,12 @@ def _query_conversations(conn, f):
         d0, t0 = _split_dt(r["first_ts"]); d1, t1 = _split_dt(r["last_ts"])
         convs.append({
             "phone10": r["phone10"] or "", "name": r["name"] or "",
-            "diagnosis": r["diagnosis"] or "", "attempts": r["attempts"],
+            "diagnosis": r["diagnosis"] or "",
+            "agesex": "/".join(x for x in ((r["age"] or "").strip(),
+                                           (r["gender"] or "").strip()[:1].upper()) if x),
+            "in_master": r["pid"] is not None,
+            "clinic_id": r["clinic_id"] or "", "last_visit": r["last_visit"] or "",
+            "attempts": r["attempts"],
             "miss_attempts": r["miss_attempts"], "any_connected": r["any_connected"],
             "net_open": r["net_missed_open"], "first_ts": (d0 + " " + t0).strip(),
             "last_ts": (d1 + " " + t1).strip(), "last_agent": r["last_agent"] or "",
@@ -1751,10 +1767,188 @@ def _query_leads(conn, f):
     return leads
 
 
-CONSOLE_HTML = PAGE_HEAD + """
+# ---- S171 v3: GAS outcome vocabularies (verbatim, GAS_Outcome_Vocabularies_v1) ----
+HI_OUTCOME = {
+    "coming": "\u092e\u0930\u0940\u091c\u093c \u0906 \u0930\u0939\u0947 \u0939\u0948\u0902",
+    "will_come": "\u092e\u0930\u0940\u091c\u093c \u0906 \u0930\u0939\u0947 \u0939\u0948\u0902",
+    "k_coming": "\u092e\u0930\u0940\u091c\u093c \u0906 \u0930\u0939\u0947 \u0939\u0948\u0902",
+    "not_coming": "\u0928\u0939\u0940\u0902 \u0906\u090f\u0901\u0917\u0947",
+    "k_not_coming": "\u0928\u0939\u0940\u0902 \u0906\u090f\u0901\u0917\u0947",
+    "call_again": "\u092c\u093e\u0924 \u0939\u0941\u0908 \u2014 \u092b\u093f\u0930 call \u0915\u0930\u0928\u093e",
+    "k_call_again": "\u092c\u093e\u0924 \u0939\u0941\u0908 \u2014 \u092b\u093f\u0930 call \u0915\u0930\u0928\u093e",
+    "needs_callback": "\u092c\u093e\u0924 \u0939\u0941\u0908 \u2014 \u092b\u093f\u0930 call \u0915\u0930\u0928\u093e",
+    "no_answer": "\u092c\u093e\u0924 \u0928\u0939\u0940\u0902 \u0939\u094b \u092a\u093e\u0908",
+    "no_contact": "\u092c\u093e\u0924 \u0928\u0939\u0940\u0902 \u0939\u094b \u092a\u093e\u0908",
+    "problem": "\u0921\u0949\u0915\u094d\u091f\u0930 \u0915\u094b \u0926\u093f\u0916\u093e\u0928\u093e \u0939\u0948",
+    "escalated": "\u0921\u0949\u0915\u094d\u091f\u0930 \u0915\u094b \u0926\u093f\u0916\u093e\u0928\u093e \u0939\u0948",
+    "to_doctor": "\u0921\u0949\u0915\u094d\u091f\u0930 \u0915\u094b \u0926\u093f\u0916\u093e\u0928\u093e \u0939\u0948",
+    "appointment_booked": "Appointment booked",
+    "enquiry_only": "\u091c\u093e\u0928\u0915\u093e\u0930\u0940 \u0926\u0947 \u0926\u0940",
+    "info_given_will_act": "\u091c\u093e\u0928\u0915\u093e\u0930\u0940 \u0926\u0947 \u0926\u0940",
+    "no_action": "\u0915\u093e\u092e \u0915\u093e \u0928\u0939\u0940\u0902",
+}
+
+
+def _hi_out(code):
+    """Outcome code -> the staff's own button word (fallback: code as-is)."""
+    c = (code or "").strip().lower()
+    return HI_OUTCOME.get(c, code or "")
+
+
+def _rl_sig(jk):
+    """Short HMAC for the staff recording-only link /portal/rl/<jk>/<sig>."""
+    import hmac as _hmac, hashlib as _hl
+    key = (app.secret_key or "portal").encode() if isinstance(app.secret_key, str) else (app.secret_key or b"portal")
+    return _hmac.new(key, ("rl:" + (jk or "")).encode(), _hl.sha256).hexdigest()[:16]
+
+
+def _ns_tries(conn, rows):
+    """Attach the due-day calling efforts to each no-show row.
+    tries = [{t,agent,ok}] for calls on/after the due date; tries_h = compact line."""
+    phones = sorted({(r.get("phone10") or "").strip() for r in rows
+                     if (r.get("phone10") or "").strip()})
+    if not phones:
+        return
+    qm = ",".join(["?"] * len(phones))
+    by = {}
+    try:
+        for ph, ts, ans, ag in conn.execute(
+                "SELECT c.phone10, c.ended_at_ist, c.answered, COALESCE(ca.agent,'') "
+                "FROM calls c LEFT JOIN call_agent ca ON ca.join_key=c.join_key "
+                "AND c.join_key<>'' "
+                "WHERE c.direction='Out' AND c.phone10 IN (%s) "
+                "ORDER BY c.ended_at_ist" % qm, phones):
+            by.setdefault(ph, []).append((ts or "", int(ans or 0), (ag or "").strip()))
+    except Exception:
+        return
+    for r in rows:
+        due = (str(r.get("due_date") or ""))[:10]
+        out = []
+        for ts, ans, ag in by.get((r.get("phone10") or "").strip(), []):
+            if due and ts[:10] >= due:
+                out.append({"t": ts[11:16], "d": ts[:10], "agent": ag or "\u2014",
+                            "ok": bool(ans)})
+        r["tries"] = out
+        r["tries_h"] = " \u00b7 ".join(
+            "%s %s %s" % (t["t"], (t["agent"].split()[0] if t["agent"] != "\u2014" else "?"),
+                          "\u2713" if t["ok"] else "\u2717") for t in out[:4])
+
+
+def _staff_week(conn, disp, end_day=None):
+    """agents x last-7-days matrix + the per-agent per-day row lists.
+    Returns (days [iso newest-first], matrix {agent:{iso:{...}}}, rows_by {(agent,iso):[rows]})."""
+    end = end_day or datetime.datetime.now().strftime("%Y-%m-%d")
+    try:
+        d0 = datetime.date.fromisoformat(end)
+    except Exception:
+        d0 = datetime.date.today()
+    days = [(d0 - datetime.timedelta(days=i)).isoformat() for i in range(7)]
+    rows = [_log_row(r) for r in conn.execute(
+        _LOG_COLS + _LOG_FROM +
+        "WHERE substr(c.ended_at_ist,1,10)>=? AND substr(c.ended_at_ist,1,10)<=? "
+        "ORDER BY c.ended_at_ist DESC", (days[-1], days[0]))]
+    matrix, rows_by = {}, {}
+    for r in rows:
+        ag = (r.get("agent") or "").strip()
+        if not ag:
+            continue
+        iso = (r.get("date") or "")[:10]
+        if iso not in days:
+            continue
+        m = matrix.setdefault(ag, {}).setdefault(iso, dict(
+            total=0, answered=0, filed=0, mismatch=0, flags=0, myrev=0))
+        m["total"] += 1
+        if r.get("state") == "Answered":
+            m["answered"] += 1
+        if (r.get("claimed") or "").strip():
+            m["filed"] += 1
+        if (r.get("verdict") or "").strip() == "Mismatch":
+            m["mismatch"] += 1
+        if r.get("flags"):
+            m["flags"] += 1
+        if r.get("join_key") in disp:
+            m["myrev"] += 1
+        rows_by.setdefault((ag, iso), []).append(r)
+    for ag, dd in matrix.items():
+        for iso, m in dd.items():
+            m["pct"] = int(round(100.0 * m["filed"] / m["total"])) if m["total"] else 0
+    return days, matrix, rows_by
+
+
+def _coach_data(conn, day, disp, sbm):
+    """Per-agent coaching sheet data for one day: stats, lessons, not-filed."""
+    rows = [_log_row(r) for r in conn.execute(
+        _LOG_COLS + _LOG_FROM +
+        "WHERE substr(c.ended_at_ist,1,10)=? ORDER BY c.ended_at_ist", (day,))]
+    _overlay_reviews(rows, disp, sbm)
+    agents = {}
+    for r in rows:
+        ag = (r.get("agent") or "").strip()
+        if not ag:
+            continue
+        a = agents.setdefault(ag, dict(agent=ag, total=0, answered=0, filed=0,
+                                       lessons=[], notfiled=[]))
+        a["total"] += 1
+        if r.get("state") == "Answered":
+            a["answered"] += 1
+        claimed = (r.get("claimed") or "").strip()
+        if claimed:
+            a["filed"] += 1
+        correct = (r.get("review_text") or "").strip() or (r.get("ai_outcome") or "").strip()
+        mism = ((r.get("verdict") or "").strip() == "Mismatch") or (
+            (r.get("review_text") or "").strip() and claimed and
+            _hi_out(r["review_text"]) != _hi_out(claimed))
+        if claimed and correct and mism and r.get("join_key"):
+            a["lessons"].append(dict(
+                time=r.get("time") or "", name=(r.get("name") or "").strip(),
+                phone=r.get("phone10") or "",
+                filed_h=_hi_out(claimed), correct_h=_hi_out(correct),
+                why=(r.get("doctor_note") or "").strip() or (r.get("ai_reason") or "").strip(),
+                quote=(r.get("evidence") or "").strip(),
+                jk=r["join_key"], sig=_rl_sig(r["join_key"])))
+        if r.get("not_filed") and r.get("state") == "Answered":
+            a["notfiled"].append("%s %s" % (r.get("time") or "",
+                                            (r.get("name") or r.get("phone10") or "").strip()))
+    for a in agents.values():
+        a["pct"] = int(round(100.0 * a["filed"] / a["total"])) if a["total"] else 0
+    return sorted(agents.values(), key=lambda x: -x["total"])
+
+
+def _dur_h(sec):
+    """seconds -> m:ss for the row player."""
+    try:
+        s = int(str(sec).strip() or 0)
+    except Exception:
+        return ""
+    return "%d:%02d" % (s // 60, s % 60) if s > 0 else ""
+
+
+def _date_label(iso):
+    """YYYY-MM-DD -> '12 Aug (Tue)'; fail-soft to raw."""
+    try:
+        d = datetime.datetime.strptime((iso or "")[:10], "%Y-%m-%d")
+        return d.strftime("%d %b (%a)")
+    except Exception:
+        return iso or "\u2014"
+
+
+def _group_by_iso(rows, key):
+    """Group dict-rows by ISO date of rows[key][:10], newest first.
+    Returns [(label, iso, rows)]."""
+    groups = {}
+    for r in rows:
+        iso = (str(r.get(key) or ""))[:10]
+        groups.setdefault(iso, []).append(r)
+    out = []
+    for iso in sorted(groups, reverse=True):
+        out.append((_date_label(iso), iso, groups[iso]))
+    return out
+
+
+ROW_SHARED = """
 {% macro detail(r) %}
 <div class="detail">
-  <div class="dname"><b>{{ r.name or 'Unknown caller' }}</b>{% if r.diagnosis %} \u00b7 <span class="dx">{{ r.diagnosis }}</span>{% endif %}</div>
+  <div class="dname"><b>{{ r.name or 'Unknown caller' }}</b>{% if r.agesex %} \u00b7 {{ r.agesex }}{% endif %}{% if r.diagnosis %} \u00b7 <span class="dx">{{ r.diagnosis }}</span>{% elif not r.in_master %} \u00b7 <span class="ctx miss">not in patient master</span>{% else %} \u00b7 <span class="ctx" style="opacity:.75">no dx in master</span>{% endif %}</div>
   <div class="dmeta">
     <span class="mono">{{ r.phone10 or '\u2014' }}</span>
     {% if r.clinic_id %}\u00b7 ID {{ r.clinic_id }}{% endif %}
@@ -1815,22 +2009,16 @@ CONSOLE_HTML = PAGE_HEAD + """
 {% endmacro %}
 
 {% macro rowsummary(r) %}
-  <span class="mono">{{ r.time }}</span>
-  <span class="dir {{ r.direction }}">{{ r.direction }}</span>
-  <span class="st {{ r.state }}">{{ r.state }}</span>
-  <span class="mono numw">{{ r.phone10 or '\u2014' }}</span>
-  <span class="namew">{{ r.name or '\u2014' }}</span>
-  {% if r.clinic_id %}<span class="ctx sm">ID {{ r.clinic_id }}</span>{% endif %}
-  {% if r.diagnosis %}<span class="ctx dx sm">{{ r.diagnosis }}</span>{% endif %}
-  {% if r.last_visit %}<span class="ctx sm">last {{ r.last_visit }}</span>{% endif %}
-  <span class="agw">{{ r.agent or '\u2014' }}</span>
-  {% if r.not_filed %}<span class="amber">NOT FILED</span>{% endif %}
-  {% if r.ai_state=='ok' %}<span class="pillv U">{{ r.ai_text }}</span>{% elif r.ai_state=='pending' %}<span class="muted sm">{{ r.ai_text }}</span>{% elif r.ai_state=='error' %}<span class="pillv F">err</span>{% endif %}
-  {% if r.reviewed %}<span class="pillv T sm">reviewed</span>{% endif %}
-  {% if r.has_tx %}<span class="txmark">tx</span>{% endif %}
+  <span class="tc"><span class="t {{ 'inok' if r.direction=='In' and r.state=='Answered' else ('inmiss' if r.direction=='In' else ('outok' if r.state=='Answered' else 'outmiss')) }}"><svg class="ic"><use href="#i-{{ 'in' if r.direction=='In' else 'out' }}"/></svg>{{ r.time }}</span><span class="u">{{ 'answered' if r.state=='Answered' else 'missed' }}</span></span>
+  <span class="rec">{% if r.join_key and r.rec_link %}<button type="button" class="pbtn" data-jk="{{ r.join_key }}" onclick="event.preventDefault();event.stopPropagation();rowPlay(this)"><svg class="ic s"><use href="#i-play"/></svg></button><span class="pdur">{{ r.dur_h }}</span>{% elif r.dur_h %}<span class="pdur">{{ r.dur_h }}</span>{% else %}<span class="pdur">\u2014</span>{% endif %}</span>
+  <span class="idc">{% if r.name %}<span class="nm">{{ r.name }}</span><span class="sub">{{ r.phone10 }}{% if r.agesex %} \u00b7 {{ r.agesex }}{% endif %}{% if r.clinic_id %} \u00b7 <b>{{ r.clinic_id }}</b>{% endif %}</span>{% else %}<span class="nm mono">{{ r.phone10 or '\u2014' }}</span>{% if not r.in_master %}<span class="sub warn">not in patient master</span>{% endif %}{% endif %}</span>
+  <span class="dxc">{% if r.diagnosis %}<span class="d1">{{ r.diagnosis }}</span>{% elif not r.in_master %}<span class="d1 mut">\u2014</span>{% else %}<span class="d1 mut">no dx in master</span>{% endif %}{% if r.last_visit %}<span class="d2">{{ r.last_visit }}</span>{% endif %}</span>
+  <span class="agc">{{ r.agent or '\u2014' }}</span>
+  <span class="sig"><span class="l1">{% for fl in r.flags %}<span class="chip flagc"><svg class="ic s"><use href="#i-flag"/></svg>{{ fl }}</span>{% endfor %}{% if r.verdict=='Mismatch' %}<span class="chip flagc">MISMATCH</span>{% endif %}{% if r.not_filed %}<span class="chip amberc">NOT FILED</span>{% endif %}{% if r.sent_back %}<span class="chip sbc">SENT BACK</span>{% endif %}{% if r.has_tx %}<span class="chip infoc">tx</span>{% endif %}</span><span class="l2">{% if r.ai_state=='ok' %}<b>AI:</b> {{ r.ai_text }}{% elif r.ai_state=='pending' %}<b>AI:</b> {{ r.ai_text }}{% endif %}{% if r.claimed %} \u00b7 <b>staff:</b> {{ hi_out(r.claimed) }}{% endif %}</span></span>
+  <span class="act" onclick="event.preventDefault();event.stopPropagation()">{% if r.join_key %}<form method="POST" action="/portal/console/review" style="margin:0;flex:1;display:flex"><input type="hidden" name="join_key" value="{{ r.join_key }}"><input type="hidden" name="ret" value="{{ full_qs }}"><select name="final_outcome" onchange="this.form.submit()"><option value="">{{ r.review_text or 'review\u2026' }}</option>{% for v in vocab %}<option value="{{ v }}" {{ 'selected' if r.review_text==v else '' }}>{{ v }}</option>{% endfor %}</select></form><form method="POST" action="/portal/console/sendback" style="margin:0" onsubmit="var x=prompt('Reason for staff to call again', this.reason.value||''); if(!x) return false; this.reason.value=x; return true;"><input type="hidden" name="join_key" value="{{ r.join_key }}"><input type="hidden" name="phone10" value="{{ r.phone10 }}"><input type="hidden" name="patient" value="{{ r.name }}"><input type="hidden" name="ret" value="{{ full_qs }}"><input type="hidden" name="reason" value="{{ r.sb_reason }}"><button class="abtn sb2" type="submit" title="Send back to staff"><svg class="ic"><use href="#i-back"/></svg></button></form>{% endif %}{% if r.phone10 %}<a class="abtn callb" href="tel:+91{{ r.phone10 }}" title="Call {{ r.phone10 }}"><svg class="ic"><use href="#i-call"/></svg></a>{% endif %}</span>
 {% endmacro %}
 <style>
-.cwrap{max-width:1180px}
+.cwrap{max-width:1780px}
 .cbanner{border-radius:12px;padding:10px 14px;font-size:13px;margin:6px 0 14px}
 .cbanner.warn{background:rgba(234,179,8,.14);color:#fde68a;border:1px solid rgba(234,179,8,.35)}
 .cbanner.bad{background:rgba(239,68,68,.14);color:#fecaca;border:1px solid rgba(239,68,68,.4)}
@@ -1846,19 +2034,47 @@ CONSOLE_HTML = PAGE_HEAD + """
 .filt .clr{background:none;border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:9px 14px;font-size:13px;text-decoration:none}
 .csvbtn{margin-left:auto;background:none;border:1px solid var(--green);color:#86efac;border-radius:9px;padding:9px 14px;font-size:13px;text-decoration:none;font-weight:600}
 .summ{font-size:12px;color:var(--muted);margin:2px 2px 10px}
-.muted{color:var(--muted)} .sm{font-size:10px} .mono{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)} .sm{font-size:12px} .mono{font-variant-numeric:tabular-nums}
 .lnk{color:#93c5fd;text-decoration:none;font-size:12.5px}.lnk:hover{text-decoration:underline}
 .dir{font-weight:700;font-size:11px;padding:2px 7px;border-radius:6px}
 .dir.In{background:rgba(59,130,246,.16);color:#93c5fd}.dir.Out{background:rgba(91,113,132,.22);color:#cbd5e1}
 .st{font-size:11px;font-weight:600}.st.Answered{color:#86efac}.st.Missed{color:#fca5a5}
-.amber{background:rgba(234,179,8,.16);color:#fde68a;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px}
-.pillv{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px}
+.amber{background:rgba(234,179,8,.16);color:#fde68a;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:10px}
+.pillv{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:10px}
 .pillv.T{background:rgba(34,197,94,.16);color:#86efac}.pillv.F{background:rgba(239,68,68,.16);color:#fca5a5}
 .pillv.U{background:rgba(59,130,246,.16);color:#93c5fd}.pillv.mut{background:rgba(91,113,132,.25);color:#b8c7d6}
-.flag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:6px;margin:1px 2px 1px 0;background:rgba(239,68,68,.14);color:#fca5a5}
-.txmark{font-size:10px;font-weight:700;color:#86efac;background:rgba(34,197,94,.12);padding:1px 6px;border-radius:6px}
+.flag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:10px;margin:1px 2px 1px 0;background:rgba(239,68,68,.14);color:#fca5a5}
+.txmark{font-size:11px;font-weight:700;color:#86efac;background:rgba(34,197,94,.12);padding:2px 7px;border-radius:10px}
+/* w8 universal grid */
+.gwrap{--cols:78px 96px minmax(230px,1.5fr) minmax(160px,1.1fr) 96px minmax(200px,1.4fr) minmax(250px,320px);font-size:13.5px}
+.hdr{display:grid;grid-template-columns:var(--cols);gap:10px;padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:6}
+details.callrow>summary,details.conv>summary{display:grid;grid-template-columns:var(--cols);gap:10px;align-items:center;padding:10px 14px}
+details.callrow>summary:hover,details.conv>summary:hover{background:rgba(59,130,246,.06)}
+.arr{font-size:15px;font-weight:800;margin-right:4px}
+.arr.inok{color:#4ade80}.arr.inmiss{color:#f87171}.arr.out{color:#93c5fd}.arr.outmiss{color:#fca5a5}
+.tcell{font-size:13.5px}
+.pbtn{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:rgba(59,130,246,.14);color:#bfdbfe;font-size:12px;cursor:pointer;line-height:1}
+.pbtn:hover{background:rgba(59,130,246,.28)}
+.pdur{font-size:12.5px;color:var(--muted);margin-left:5px;font-variant-numeric:tabular-nums}
+.idc{display:flex;flex-direction:column;gap:1px;min-width:0}
+.idc .nm{font-size:15px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idc .sub{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idc .sub b{color:#93c5fd;font-weight:700}
+.dxc{display:flex;flex-direction:column;gap:2px;min-width:0}
+.dxc .d1{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dxc .d2{font-size:12px;color:var(--muted)}
+.agc{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sigc{display:flex;gap:3px;flex-wrap:wrap;align-items:center;min-width:0}
+.actc{display:flex;gap:5px;align-items:center}
+.actc select{background:#0b1b29;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:6px 8px;font-size:13px;flex:1;min-width:0;max-width:170px}
+.abtn{width:34px;height:32px;border-radius:8px;border:1px solid var(--line);background:rgba(234,179,8,.12);color:#fde68a;font-size:13px;cursor:pointer}
+.abtn:hover{background:rgba(234,179,8,.25)}
+.hot{background:rgba(249,115,22,.18);color:#fdba74;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px}
+.mobile-scroll{overflow-x:auto}
+.mobile-scroll .hdr,.mobile-scroll details.callrow>summary,.mobile-scroll details.conv>summary{min-width:880px}
 .ctx{font-size:10.5px;color:var(--muted);background:rgba(91,113,132,.18);padding:1px 7px;border-radius:6px}
 .ctx.dx{color:#c7d2fe;background:rgba(99,102,241,.14)}
+.ctx.miss{color:#fca5a5;background:rgba(239,68,68,.12)}
 .evq{color:#fde68a;font-style:italic}
 .sbbadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(234,88,12,.2);color:#fdba74}
 .warnbadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(239,68,68,.18);color:#fca5a5}
@@ -1869,13 +2085,14 @@ CONSOLE_HTML = PAGE_HEAD + """
 .btn.sm{padding:6px 12px;font-size:12px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer}
 .btn.sm.alt{background:rgba(234,88,12,.85)}
 .recplayer{height:32px;max-width:340px;vertical-align:middle}
+.rowplayer{height:26px;max-width:230px}
 /* day + call rows */
 details.day{margin-bottom:8px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:rgba(22,50,74,.35)}
 details.day>summary{cursor:pointer;list-style:none;padding:11px 14px;font-weight:700;font-size:13px;color:#fff;background:var(--card);display:flex;gap:12px;align-items:center}
 details.day>summary::-webkit-details-marker{display:none}
 details.day>summary .dcount{font-size:11px;color:var(--muted);font-weight:600;margin-left:auto}
 details.callrow{border-top:1px solid rgba(39,75,102,.5)}
-details.callrow>summary{cursor:pointer;list-style:none;padding:8px 14px;display:flex;flex-wrap:wrap;gap:9px;align-items:center;font-size:12.5px}
+
 details.callrow>summary::-webkit-details-marker{display:none}
 details.callrow[open]>summary{background:rgba(59,130,246,.07)}
 details.callrow:hover>summary{background:rgba(59,130,246,.05)}
@@ -1883,7 +2100,7 @@ details.callrow:hover>summary{background:rgba(59,130,246,.05)}
 /* conversation / lead groups */
 details.conv{background:var(--card);border:1px solid var(--line);border-radius:11px;margin-bottom:8px}
 details.conv[open]{border-color:var(--blue)}
-details.conv>summary{cursor:pointer;list-style:none;padding:11px 13px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:12.5px}
+
 details.conv>summary::-webkit-details-marker{display:none}
 .netbadge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(239,68,68,.16);color:#fca5a5}
 .okbadge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(34,197,94,.16);color:#86efac}
@@ -1899,6 +2116,108 @@ table.log{width:100%;border-collapse:collapse;font-size:12.5px}
 table.log th{text-align:left;color:var(--muted);font-weight:700;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;padding:8px;border-bottom:1px solid var(--line)}
 table.log td{padding:8px;border-bottom:1px solid rgba(39,75,102,.5);vertical-align:top}
 </style>
+<style>
+/* ===== V3 (S171): type scale + capped width + one grid, everywhere ===== */
+:root{--f-lg:15px;--f-md:13px;--f-sm:12px;--f-xs:11px}
+.cwrap{max-width:1480px}
+.gwrap{--cols:74px 84px minmax(200px,1.2fr) minmax(140px,.9fr) 88px minmax(170px,1fr) 226px;
+ background:rgba(11,27,41,.35);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.hdr{display:grid;grid-template-columns:var(--cols);gap:10px;padding:8px 16px;font-size:var(--f-xs);font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:6}
+details.day>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:14px;font-weight:700;color:#fff;background:rgba(22,50,74,.8);border-bottom:1px solid var(--line)}
+details.day>summary::-webkit-details-marker{display:none}
+details.day>summary .chev{transition:transform .15s}
+details.day[open]>summary .chev{transform:rotate(90deg)}
+details.day>summary .dcount{margin-left:auto;font-size:var(--f-sm);color:var(--muted);font-weight:600}
+details.callrow,details.conv{border-bottom:1px solid rgba(39,75,102,.45);border-top:none}
+details.callrow>summary,details.conv>summary{cursor:pointer;list-style:none;display:grid;grid-template-columns:var(--cols);gap:10px;align-items:center;padding:10px 16px;min-height:54px}
+details.callrow>summary::-webkit-details-marker,details.conv>summary::-webkit-details-marker{display:none}
+details.callrow>summary:hover,details.conv>summary:hover{background:rgba(59,130,246,.06)}
+details.callrow[open]>summary,details.conv[open]>summary{background:rgba(59,130,246,.09)}
+.ic{width:15px;height:15px;vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ic.s{width:13px;height:13px}
+.tc{display:flex;flex-direction:column;gap:2px}
+.tc .t{font-size:var(--f-md);font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:5px;color:#fff}
+.tc .u{font-size:var(--f-xs);color:var(--muted)}
+.t.inok{color:#4ade80}.t.inmiss{color:#f87171}.t.outok{color:#93c5fd}.t.outmiss{color:#fca5a5}
+.rec{display:flex;align-items:center;gap:7px}
+.pbtn{width:30px;height:30px;border-radius:50%;border:1px solid rgba(59,130,246,.5);background:rgba(59,130,246,.15);color:#bfdbfe;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:none;font-size:0}
+.pbtn:hover{background:rgba(59,130,246,.32)}
+.pdur{font-size:var(--f-sm);color:var(--muted);font-variant-numeric:tabular-nums}
+.idc{display:flex;flex-direction:column;gap:2px;min-width:0}
+.idc .nm{font-size:var(--f-lg);font-weight:650;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idc .sub{font-size:var(--f-sm);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idc .sub b{color:#93c5fd;font-weight:700}
+.idc .sub.warn{color:#fca5a5}
+.dxc{display:flex;flex-direction:column;gap:2px;min-width:0}
+.dxc .d1{font-size:var(--f-md);color:#c7d2fe;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dxc .d1.mut{color:var(--muted)}
+.dxc .d2{font-size:var(--f-xs);color:var(--muted)}
+.agc{font-size:var(--f-md);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sig{display:flex;flex-direction:column;gap:4px;min-width:0}
+.sig .l1{display:flex;gap:4px;flex-wrap:wrap}
+.sig .l2{font-size:var(--f-sm);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sig .l2 b{color:#c7d2fe;font-weight:600}
+.chip{font-size:var(--f-xs);font-weight:700;padding:2.5px 8px;border-radius:7px;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.chip.flagc{background:rgba(239,68,68,.15);color:#fca5a5}
+.chip.amberc{background:rgba(234,179,8,.16);color:#fde68a}
+.chip.okc{background:rgba(34,197,94,.15);color:#86efac}
+.chip.infoc{background:rgba(59,130,246,.15);color:#93c5fd}
+.chip.hotc{background:rgba(249,115,22,.2);color:#fdba74}
+.chip.sbc{background:rgba(168,85,247,.18);color:#d8b4fe}
+.act{display:flex;gap:6px;align-items:center}
+.act select{background:#0b1b29;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:6px 8px;font-size:var(--f-sm);flex:1;min-width:0;max-width:118px}
+.abtn{width:34px;height:32px;border-radius:9px;border:1px solid var(--line);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:none;background:transparent;text-decoration:none}
+.abtn.sb2{background:rgba(234,179,8,.1);color:#fde68a}.abtn.sb2:hover{background:rgba(234,179,8,.25)}
+.abtn.callb{background:rgba(34,197,94,.1);color:#86efac}.abtn.callb:hover{background:rgba(34,197,94,.25)}
+.xcard{background:rgba(11,27,41,.6);border-top:1px solid var(--line);padding:14px 16px 16px;display:grid;gap:10px}
+.xrow{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:var(--f-md)}
+.xlab{font-size:var(--f-xs);font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);min-width:86px}
+.summ{font-size:var(--f-md)}
+table.log{font-size:var(--f-md)}
+table.log th{font-size:10.5px}
+.detail{font-size:var(--f-md)}
+.dname{font-size:var(--f-lg)}
+.recplayer{height:36px;max-width:420px}
+.mobile-scroll{overflow-x:visible}
+@media(max-width:1000px){.gwrap{overflow-x:auto}.hdr,details.callrow>summary,details.conv>summary{min-width:980px}}
+</style>
+<svg style="display:none"><defs>
+<symbol id="i-in" viewBox="0 0 24 24"><path d="M17 7 7 17M7 9v8h8"/></symbol>
+<symbol id="i-out" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
+<symbol id="i-call" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.9.5 2.8.7a2 2 0 0 1 1.7 2z"/></symbol>
+<symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15V4s1.5-1 4-1 4 2 7 2 4-1 4-1v11s-1.5 1-4 1-4-2-7-2-4 1-4 1zM4 22v-7"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+<symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 21h16"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></symbol>
+</defs></svg>
+<script>
+var _pa=null,_pb=null;
+function _pico(b,p){ b.innerHTML='<svg class="ic s"><use href="#i-'+(p?'pause':'play')+'"/></svg>'; }
+function rowPlay(b){
+  if(_pb===b&&_pa){ if(_pa.paused){_pa.play();_pico(b,1);}else{_pa.pause();_pico(b,0);} return; }
+  if(_pa){ _pa.pause(); if(_pb)_pico(_pb,0); }
+  _pa=new Audio("/portal/rec/"+b.dataset.jk); _pb=b;
+  _pa.play().catch(function(){ b.textContent="\u26A0"; });
+  _pico(b,1);
+  _pa.onended=function(){ _pico(b,0); };
+}
+function copyText(id,btn){
+  var el=document.getElementById(id); if(!el) return;
+  var t=el.innerText||el.textContent;
+  (navigator.clipboard&&navigator.clipboard.writeText(t)||Promise.reject()).then(
+    function(){ if(btn){var o=btn.innerHTML;btn.innerHTML='\u2713 copied';setTimeout(function(){btn.innerHTML=o;},1500);} },
+    function(){ var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+      if(btn){var o=btn.innerHTML;btn.innerHTML='\u2713 copied';setTimeout(function(){btn.innerHTML=o;},1500);} });
+}
+</script>
+"""
+
+CONSOLE_HTML = PAGE_HEAD + ROW_SHARED + """
+
 <div class="wrap cwrap">
   <div class="head">
     <h1>\U0001F4DE Call Console</h1>
@@ -1917,6 +2236,7 @@ table.log td{padding:8px;border-bottom:1px solid rgba(39,75,102,.5);vertical-ali
       {% for key,lbl in [('log','Call log'),('threads','Conversations'),('staff','Staff'),('leads','New leads'),('noshows','No-shows'),('pipe','Pipeline')] %}
         <a class="{{ 'on' if view==key else '' }}" href="/portal/console?view={{key}}&{{ base_qs }}">{{ lbl }}</a>
       {% endfor %}
+      <a class="" href="/portal/digest">Digest</a>
       <a href="/portal" style="margin-left:auto">&larr; Portal</a>
     </div>
 
@@ -1952,7 +2272,9 @@ table.log td{padding:8px;border-bottom:1px solid rgba(39,75,102,.5);vertical-ali
     </form>
 
     {% if view=='log' %}
-      <div class="summ">{{ total }} calls{% if more %} \u2014 showing newest {{ limit }}; narrow filters or export CSV for all{% endif %}. Click a day, then a call, to expand.</div>
+      <div class="summ">{{ total }} calls{% if more %} \u2014 showing newest {{ limit }}; narrow filters or export CSV for all{% endif %}. Tap a day, then a row, to expand transcript & AI detail.</div>
+      <div class="gwrap mobile-scroll">
+      <div class="hdr"><span>call</span><span>rec</span><span>patient</span><span>dx \u00b7 visit</span><span>staff</span><span>signals</span><span>my review \u00b7 actions</span></div>
       {% for day, drows in day_groups %}
         <details class="day" {% if loop.first %}open{% endif %}>
           <summary>{{ day }}<span class="dcount">{{ drows|length }} calls</span></summary>
@@ -1961,47 +2283,81 @@ table.log td{padding:8px;border-bottom:1px solid rgba(39,75,102,.5);vertical-ali
           {% endfor %}
         </details>
       {% endfor %}
+      </div>
       {% if not day_groups %}<div class="muted" style="padding:18px">No calls match these filters.</div>{% endif %}
 
     {% elif view=='threads' %}
-      <div class="summ">{{ convs|length }} conversations (net-missed-open first). Click to expand attempts.</div>
-      {% for cv in convs %}
-        <details class="conv">
-          <summary>
-            {% if cv.net_open %}<span class="netbadge">NET-MISSED</span>{% elif cv.any_connected %}<span class="okbadge">connected</span>{% endif %}
-            <span class="mono" style="font-weight:600">{{ cv.phone10 }}</span>
-            <span>{{ cv.name or 'Unknown' }}</span><span class="muted">{{ cv.diagnosis or '' }}</span>
-            <span class="muted" style="margin-left:auto">{{ cv.attempts }} attempts \u00b7 {{ cv.miss_attempts }} missed \u00b7 last {{ cv.last_ts }}{% if cv.last_agent %} \u00b7 {{ cv.last_agent }}{% endif %}</span>
-          </summary>
-          {% for lg in cv.legs %}{{ detail(lg) }}{% endfor %}
+      <div class="summ">{{ convs|length }} conversations \u00b7 grouped by last-try date \u00b7 net-missed first within a day. Expand for attempts.</div>
+      <div class="gwrap mobile-scroll">
+      <div class="hdr"><span>call</span><span>rec</span><span>patient</span><span>dx \u00b7 visit</span><span>staff</span><span>signals</span><span>my review \u00b7 actions</span></div>
+      {% for lbl, iso, cvs in conv_groups %}
+        <details class="day" {% if loop.first %}open{% endif %}>
+          <summary>{{ lbl }}<span class="dcount">{{ cvs|length }} conversations</span></summary>
+          {% for cv in cvs %}
+          <details class="conv">
+            <summary>
+              <span class="tc"><span class="t {{ 'inok' if cv.any_connected else 'inmiss' }}"><svg class="ic"><use href="#i-in"/></svg>{{ cv.last_ts[11:16] }}</span><span class="u">last try</span></span>
+              <span class="tc"><span class="t">{{ cv.attempts }} tries</span><span class="u">{{ cv.miss_attempts }} missed</span></span>
+              <span class="idc">{% if cv.name %}<span class="nm">{{ cv.name }}</span><span class="sub">{{ cv.phone10 }}{% if cv.agesex %} \u00b7 {{ cv.agesex }}{% endif %}{% if cv.clinic_id %} \u00b7 <b>{{ cv.clinic_id }}</b>{% endif %}</span>{% else %}<span class="nm mono">{{ cv.phone10 }}</span>{% if not cv.in_master %}<span class="sub warn">not in patient master</span>{% endif %}{% endif %}</span>
+              <span class="dxc">{% if cv.diagnosis %}<span class="d1">{{ cv.diagnosis }}</span>{% elif not cv.in_master %}<span class="d1 mut">\u2014</span>{% else %}<span class="d1 mut">no dx in master</span>{% endif %}{% if cv.last_visit %}<span class="d2">{{ cv.last_visit }}</span>{% endif %}</span>
+              <span class="agc">{{ cv.last_agent or '\u2014' }}</span>
+              <span class="sig"><span class="l1">{% if cv.net_open %}<span class="chip flagc"><svg class="ic s"><use href="#i-flag"/></svg>NET-MISSED</span>{% elif cv.any_connected %}<span class="chip okc">connected</span>{% endif %}</span><span class="l2">{% if cv.net_open %}nobody has reached this caller yet{% elif cv.miss_attempts %}reached after {{ cv.miss_attempts }} miss(es){% else %}all attempts answered{% endif %}</span></span>
+              <span class="tc"><span class="u">expand for attempts <svg class="ic s"><use href="#i-chev"/></svg></span></span>
+            </summary>
+            {% for lg in cv.legs %}{{ detail(lg) }}{% endfor %}
+          </details>
+          {% endfor %}
         </details>
       {% endfor %}
+      </div>
       {% if not convs %}<div class="muted" style="padding:18px">No conversations match.</div>{% endif %}
 
     {% elif view=='staff' %}
-      <div class="summ">Per-agent{% if f.frm or f.to %} ({{ f.frm or '\u2026' }} to {{ f.to or '\u2026' }}){% endif %}. Click an agent to filter the log.</div>
-      <table class="log"><thead><tr><th>Agent</th><th>In answered</th><th>Out attempts</th><th>Handled</th><th>Not filed</th><th>Verdict TRUE</th><th>Verdict FALSE</th><th>Flags</th></tr></thead><tbody>
-      {% for s in staff %}<tr>
-        <td><a class="lnk" href="/portal/console?view=log&agent={{ s.agent|urlencode }}">{{ s.agent }}</a></td>
-        <td class="mono">{{ s.in_handled }}</td><td class="mono">{{ s.out_attempts }}</td>
-        <td class="mono">{{ s.in_handled + s.out_attempts }}</td>
-        <td class="mono">{% if s.not_filed %}<span class="amber">{{ s.not_filed }}</span>{% else %}0{% endif %}</td>
-        <td class="mono">{{ s.vtrue }}</td><td class="mono">{{ s.vfalse }}</td><td class="mono">{{ s.flags }}</td>
+      <div class="summ">Week at a glance \u00b7 cell = answered/total \u00b7 filed % \u2014 tap a date header to open that day \u00b7 <a class="lnk" href="/portal/console/staffreport?day={{ wk_sd }}">\U0001F4CB Daily coaching report \u2192</a></div>
+      <div class="gwrap" style="padding:12px 16px;margin-bottom:10px">
+      <table class="log"><thead><tr><th>agent</th>{% for d in wk_days %}<th><a class="lnk" href="/portal/console?view=staff&sd={{ d }}">{{ d[5:] }}</a></th>{% endfor %}</tr></thead><tbody>
+      {% for ag in wk_agents %}<tr><td><a class="lnk" href="/portal/console?view=log&agent={{ ag|urlencode }}">{{ ag }}</a></td>
+        {% for d in wk_days %}{% set m = wk_matrix.get(ag, {}).get(d) %}<td class="mono">{% if m %}{{ m.answered }}/{{ m.total }} \u00b7 <span class="{{ 'ok' if m.pct>=85 else ('amber' if m.pct>=70 else 'netbadge') }}" style="background:none;padding:0">{{ m.pct }}%</span>{% if m.mismatch %} \u00b7 <span class="amber" style="background:none;padding:0">{{ m.mismatch }}\u26A0</span>{% endif %}{% else %}\u2014{% endif %}</td>{% endfor %}
       </tr>{% endfor %}
       </tbody></table>
+      </div>
+      <div class="gwrap mobile-scroll">
+      <div class="hdr"><span>call</span><span>rec</span><span>patient</span><span>dx \u00b7 visit</span><span>staff</span><span>signals</span><span>my review \u00b7 actions</span></div>
+      {% for ag in wk_agents %}{% set m = wk_matrix.get(ag, {}).get(wk_sd) %}{% if m %}
+        <details class="day" {% if loop.first %}open{% endif %}>
+          <summary><svg class="ic chev"><use href="#i-chev"/></svg>{{ wk_sd[5:] }} \u2014 {{ ag }} \u00b7 {{ m.total }} calls \u00b7 {{ m.filed }} filed ({{ m.pct }}%) \u00b7 {{ m.mismatch }} mismatch \u00b7 {{ m.myrev }} reviewed by me<span class="dcount">{{ m.flags }} flag(s)</span></summary>
+          {% for r in wk_rows.get(ag ~ '|' ~ wk_sd, []) %}
+            <details class="callrow"><summary>{{ rowsummary(r) }}</summary>{{ detail(r) }}</details>
+          {% endfor %}
+        </details>
+      {% endif %}{% endfor %}
+      </div>
+      {% if not wk_agents %}<div class="muted" style="padding:18px">No attributed calls in the last 7 days.</div>{% endif %}
 
     {% elif view=='leads' %}
-      <div class="summ">{{ leads|length }} unknown incoming numbers (not in Patient_Master) \u2014 first-time enquiries (D243). Click to expand attempts.</div>
-      {% for l in leads %}
-        <details class="conv">
-          <summary>
-            {% if l.answered %}<span class="okbadge">reached</span>{% else %}<span class="netbadge">not reached</span>{% endif %}
-            <span class="mono" style="font-weight:600">{{ l.phone10 }}</span>
-            <span class="muted" style="margin-left:auto">{{ l.attempts }} attempt(s) \u00b7 first {{ l.first_seen }} \u00b7 latest {{ l.last_seen }}{% if l.last_agent %} \u00b7 {{ l.last_agent }}{% endif %}</span>
-          </summary>
-          {% for lg in l.legs %}{{ detail(lg) }}{% endfor %}
+      <div class="summ">{{ leads|length }} unknown incoming numbers (not in Patient_Master) \u2014 first-time enquiries (D243). \U0001F525 = worth chasing \u00b7 grouped by latest attempt.</div>
+      <div class="gwrap mobile-scroll">
+      <div class="hdr"><span>call</span><span>rec</span><span>patient</span><span>dx \u00b7 visit</span><span>staff</span><span>signals</span><span>my review \u00b7 actions</span></div>
+      {% for lbl, iso, ls in lead_groups %}
+        <details class="day" {% if loop.first %}open{% endif %}>
+          <summary>{{ lbl }}<span class="dcount">{{ ls|length }} leads</span></summary>
+          {% for l in ls %}
+          <details class="conv">
+            <summary>
+              <span class="tc"><span class="t {{ 'inok' if l.answered else 'inmiss' }}"><svg class="ic"><use href="#i-in"/></svg>{{ l.last_seen[11:16] }}</span><span class="u">latest</span></span>
+              <span class="tc"><span class="t">{{ l.attempts }} tr{{ 'y' if l.attempts==1 else 'ies' }}</span></span>
+              <span class="idc"><span class="nm mono">{{ l.phone10 }}</span><span class="sub warn">not in patient master</span></span>
+              <span class="dxc"><span class="d1 mut">\u2014</span></span>
+              <span class="agc">{{ l.last_agent or '\u2014' }}</span>
+              <span class="sig"><span class="l1">{% if l.hot %}<span class="chip hotc">\U0001F525 HOT</span>{% endif %}{% if l.answered %}<span class="chip okc">reached</span>{% else %}<span class="chip amberc">not reached</span>{% endif %}</span><span class="l2">{% if l.hot %}worth chasing \u00b7 {% endif %}call back to convert</span></span>
+              <span class="tc"><span class="u">expand for attempts <svg class="ic s"><use href="#i-chev"/></svg></span></span>
+            </summary>
+            {% for lg in l.legs %}{{ detail(lg) }}{% endfor %}
+          </details>
+          {% endfor %}
         </details>
       {% endfor %}
+      </div>
       {% if not leads %}<div class="muted" style="padding:18px">No new leads in range.</div>{% endif %}
 
     {% elif view=='noshows' %}
@@ -2024,16 +2380,41 @@ table.log td{padding:8px;border-bottom:1px solid rgba(39,75,102,.5);vertical-ali
       {% endif %}
       <h3 style="font-size:13px;margin:14px 0 6px">Appointment booked, not visited</h3>
       {% if noshows and noshows.feed and noshows.feed.found %}
-        <table class="log"><thead><tr><th>Due</th><th>Patient</th><th>Number</th><th>Status noted</th><th>Called since?</th><th>Last attempt</th><th>By</th><th>Reached?</th></tr></thead><tbody>
-        {% for n in noshows.rows %}<tr>
-          <td class="mono">{{ n.due_date }}</td><td>{{ n.name or '\u2014' }}</td>
-          <td class="mono">{{ n.phone10 }}</td><td class="muted">{{ n.status_raw or '\u2014' }}</td>
-          <td class="mono">{{ n.cb_attempts }}</td><td class="mono">{{ n.cb_last_ts or '\u2014' }}</td>
-          <td>{{ n.cb_last_agent or '\u2014' }}</td>
-          <td>{% if n.cb_reached %}<span class="okbadge">yes</span>{% elif n.cb_attempts %}<span class="netbadge">no</span>{% else %}\u2014{% endif %}</td>
-        </tr>{% endfor %}
-        {% if not noshows.rows %}<tr><td class="muted" colspan="8">No booked-not-visited rows \U0001F389</td></tr>{% endif %}
-        </tbody></table>
+        {% if ns_banner %}
+        <div class="cbanner {{ 'bad' if ns_banner.x else 'warn' }}" style="{{ 'background:rgba(34,197,94,.12);color:#86efac;border-color:rgba(34,197,94,.35)' if not ns_banner.x else '' }}">
+          Due-date calling: <b>{{ ns_banner.x }}</b> of <b>{{ ns_banner.y }}</b> no-shows have had <b>NO call since due</b> \u00b7 <b>{{ ns_banner.z }}</b> reached.
+        </div>
+        {% endif %}
+        <div class="gwrap mobile-scroll">
+        <div class="hdr"><span>due</span><span>calls</span><span>patient</span><span>dx \u00b7 visit</span><span>called by</span><span>status \u00b7 accountability</span><span></span></div>
+        {% for lbl, iso, ns in ns_groups %}
+          <details class="day" {% if loop.first %}open{% endif %}>
+            <summary>due {{ lbl }}<span class="dcount">{{ ns|length }} patients</span></summary>
+            {% for n in ns %}
+            <details class="conv">
+              <summary>
+                <span class="tc"><span class="t">{{ n.due_h }}</span><span class="u">due date</span></span>
+                <span class="tc"><span class="t">{{ n.cb_attempts }}</span><span class="u">since due</span></span>
+                <span class="idc">{% if n.name %}<span class="nm">{{ n.name }}</span><span class="sub">{{ n.phone10 }}{% if n.agesex %} \u00b7 {{ n.agesex }}{% endif %}{% if n.clinic_id %} \u00b7 <b>{{ n.clinic_id }}</b>{% endif %}</span>{% else %}<span class="nm mono">{{ n.phone10 }}</span>{% endif %}</span>
+                <span class="dxc">{% if n.diagnosis %}<span class="d1" style="color:#c7d2fe">{{ n.diagnosis }}</span>{% elif not n.in_master %}<span class="d1" style="color:#fca5a5">not in master</span>{% else %}<span class="d1 muted">no dx in master</span>{% endif %}{% if n.lv_h %}<span class="d2">last {{ n.lv_h }}</span>{% endif %}</span>
+                <span class="idc"><span class="agc">{{ n.cb_last_agent or '\u2014' }}</span>{% if n.last_h %}<span class="sub">{{ n.last_h }}</span>{% endif %}</span>
+                <span class="sig"><span class="l1">{% if not n.cb_attempts %}<span class="chip flagc"><svg class="ic s"><use href="#i-flag"/></svg>NO CALL SINCE DUE</span>{% elif n.cb_reached %}<span class="chip okc">reached{% if n.tries %} on try {{ n.tries|length }}{% endif %}</span>{% else %}<span class="chip amberc">tried \u00b7 not reached</span>{% endif %}{% if n.status_raw %}<span class="chip infoc" title="status noted in tracker">{{ n.status_raw }}</span>{% endif %}</span><span class="l2">{% if n.tries_h %}{{ n.tries_h }}{% else %}protocol: due-day morning + 30 min + 1 hr \u2014 none made yet{% endif %}</span></span>
+                <span class="act">{% if n.phone10 %}<a class="abtn callb" href="tel:+91{{ n.phone10 }}" title="Call now"><svg class="ic"><use href="#i-call"/></svg></a>{% endif %}</span>
+              </summary>
+              {% if n.tries %}
+              <div class="xcard">
+                <div class="xrow"><span class="xlab">Due-day efforts</span><span>morning \u2192 +30 min \u2192 +1 hr (max 3), then the patient surfaces on the Callback Tracker action sheet.</span></div>
+                <table class="log" style="max-width:520px"><thead><tr><th>try</th><th>date</th><th>time</th><th>caller</th><th>result</th></tr></thead><tbody>
+                {% for t in n.tries %}<tr><td class="mono">{{ loop.index }}</td><td class="mono">{{ t.d[5:] }}</td><td class="mono">{{ t.t }}</td><td>{{ t.agent }}</td><td>{% if t.ok %}<span class="chip okc">reached</span>{% else %}<span class="chip flagc">no answer</span>{% endif %}</td></tr>{% endfor %}
+                </tbody></table>
+              </div>
+              {% endif %}
+            </details>
+            {% endfor %}
+          </details>
+        {% endfor %}
+        </div>
+        {% if not noshows.rows %}<div class="muted" style="padding:18px">No booked-not-visited rows \U0001F389</div>{% endif %}
       {% else %}
         <div class="cbanner warn">The Followups_Today feed was not found/usable at the last build \u2014 the no-show list cannot be computed. Feed state: {{ noshows.feed if noshows else 'unknown' }}. (Honest absence, not zeros \u2014 D236.)</div>
       {% endif %}
@@ -2059,7 +2440,8 @@ table.log td{padding:8px;border-bottom:1px solid rgba(39,75,102,.5);vertical-ali
 
     <div class="summ" style="margin-top:16px">Built {{ m.built_at or 'unknown' }}{% if m.age_min is not none %} \u00b7 {{ m.age_min }} min ago{% endif %}.</div>
   {% endif %}
-</div></body></html>
+</div>
+</body></html>
 """
 
 
@@ -2110,14 +2492,45 @@ def _query_noshows(conn):
     try:
         out["rows"] = [dict(zip(
             ("phone10", "name", "due_date", "status_raw", "cb_attempts",
-             "cb_last_ts", "cb_last_agent", "cb_reached"), r))
+             "cb_last_ts", "cb_last_agent", "cb_reached",
+             "diagnosis", "clinic_id", "last_visit", "age", "gender", "pid"), r))
             for r in conn.execute(
-                "SELECT phone10,name,due_date,status_raw,cb_attempts,cb_last_ts,"
-                "cb_last_agent,cb_reached FROM no_shows "
-                "ORDER BY due_date DESC, name LIMIT 200")]
+                "SELECT n.phone10,n.name,n.due_date,n.status_raw,n.cb_attempts,"
+                "n.cb_last_ts,n.cb_last_agent,n.cb_reached,"
+                "COALESCE(p.diagnosis,''),COALESCE(p.clinic_id,''),"
+                "COALESCE(p.last_visit,''),COALESCE(p.age,''),COALESCE(p.gender,''),"
+                "p._pid "
+                "FROM no_shows n LEFT JOIN " + _DP + " p ON p.phone10=n.phone10 "
+                "ORDER BY n.due_date DESC, n.name LIMIT 200")]
+        for r in out["rows"]:                       # S171: human display, fail-soft
+            r["due_h"] = _ns_date_h(r["due_date"])
+            r["last_h"] = _ns_ts_h(r["cb_last_ts"])
+            r["lv_h"] = _ns_date_h(r["last_visit"])
+            r["agesex"] = "/".join(x for x in ((r["age"] or "").strip(),
+                                               (r["gender"] or "").strip()[:1].upper()) if x)
+            r["in_master"] = r.get("pid") is not None
     except Exception:
         out["rows"] = []
     return out
+
+
+def _ns_date_h(iso):
+    """ISO 'YYYY-MM-DD' -> '11-Aug-2026' for the no-show table. Fail-soft:
+    anything unparseable (incl. pre-S171 truncated values) is shown as-is."""
+    try:
+        return datetime.datetime.strptime((iso or "").strip(),
+                                          "%Y-%m-%d").strftime("%d-%b-%Y")
+    except Exception:
+        return (iso or "").strip()
+
+
+def _ns_ts_h(ts):
+    """'2026-07-31 18:19' (or pre-S171 '...T18:19') -> '31-Jul 18:19'. Fail-soft."""
+    t = (ts or "").replace("T", " ").strip()
+    try:
+        return datetime.datetime.strptime(t, "%Y-%m-%d %H:%M").strftime("%d-%b %H:%M")
+    except Exception:
+        return t
 
 
 def _console_base_qs(f, drop=()):
@@ -2132,12 +2545,10 @@ def _console_base_qs(f, drop=()):
     return _up.urlencode(pairs)
 
 
-@app.route("/portal/rec/<join_key>")
-@doctor_required
-def console_rec(join_key):
-    """W3 Item 8: serve a recording in-page. Local cache first (Range-capable
-    for seeking); uncached -> 302 to its Drive link (old behaviour preserved);
-    unknown -> 404. join_key strictly validated before any path use."""
+def _serve_rec(join_key):
+    """Serve a recording: local cache first (Range-capable), else 302 to Drive,
+    else 404. join_key strictly validated before any path use. UNDECORATED --
+    called by the doctor route AND the signed staff link (S171)."""
     import re as _re
     if not _re.fullmatch(r"\d{6,12}_\d{6,14}", join_key or ""):
         abort(404)
@@ -2155,6 +2566,12 @@ def console_rec(join_key):
         if row and row[0]:
             return redirect(row[0])
     abort(404)
+
+
+@app.route("/portal/rec/<join_key>")
+@doctor_required
+def console_rec(join_key):
+    return _serve_rec(join_key)
 
 
 @app.route("/portal/console/review", methods=["POST"])
@@ -2216,6 +2633,373 @@ def console_sendback_resolve():
     return redirect("/portal/console?" + ret)
 
 
+
+# ---------------------------------------------------------------------------
+# S171 Track G: /portal/digest -- the 11:00 pulse + 21:30 digest, LIVE from
+# console.db (D297 §11). Read-only. Fail-loud on stale/missing db (D236).
+# Severity ordering ported verbatim from daily_digest.py (URGENT > POST-OP >
+# CLINICAL > SURGERY > COMPLAINT > CONDUCT > MISMATCH), cap 12.
+# ---------------------------------------------------------------------------
+_DG_SEV = [("flag_urgent", "URGENT"), ("flag_postop", "POST-OP"),
+           ("flag_clinical", "CLINICAL"), ("flag_surgery", "SURGERY"),
+           ("flag_complaint", "COMPLAINT"), ("flag_conduct", "CONDUCT")]
+_DG_BUCKETS = ("Match", "Mismatch", "Partial", "No claim logged", "Unclear")
+_DG_CAP = 12
+
+
+def _query_digest(conn, day):
+    """Everything the digest page shows, from console.db, for one ISO day."""
+    out = {"day": day, "calls": {}, "buckets": {}, "flagged": 0, "other": 0,
+           "filed": 0, "not_filed": 0, "worst": [], "unjudged": [],
+           "nm_open": None, "judged": 0}
+    def q(sql, args=()):
+        try:
+            return conn.execute(sql, args).fetchall()
+        except Exception:
+            return []
+    r = q("SELECT COUNT(*),"
+          " SUM(CASE WHEN direction='In' THEN 1 ELSE 0 END),"
+          " SUM(CASE WHEN direction='Out' THEN 1 ELSE 0 END),"
+          " SUM(CASE WHEN answered=1 THEN 1 ELSE 0 END),"
+          " SUM(CASE WHEN answered=0 THEN 1 ELSE 0 END) "
+          "FROM calls WHERE substr(ended_at_ist,1,10)=?", (day,))
+    if r:
+        t, i, o, a, m = r[0]
+        out["calls"] = {"total": t or 0, "in": i or 0, "out": o or 0,
+                        "answered": a or 0, "missed": m or 0}
+    vrows = q("SELECT verdict, claimed_outcome, ai_outcome, time, patient_name,"
+              " patient_number, recording_link, join_key, not_filed,"
+              " flag_urgent, flag_postop, flag_clinical, flag_surgery,"
+              " flag_complaint, flag_conduct "
+              "FROM verdicts WHERE date=?", (day,))
+    buckets = {b: 0 for b in _DG_BUCKETS}
+    other = flagged = filed = notf = 0
+    tagged = []
+    flag_jks = []
+    for r in vrows:
+        (verdict, claimed, ai, tm, pname, pnum, rlink, jk, nf,
+         fu, fp, fcl, fs, fc, fcon) = r
+        v = (verdict or "").strip()
+        if v in buckets:
+            buckets[v] += 1
+        elif v:
+            other += 1
+        fvals = {"flag_urgent": fu, "flag_postop": fp, "flag_clinical": fcl,
+                 "flag_surgery": fs, "flag_complaint": fc, "flag_conduct": fcon}
+        anyflag = any(_truthy(x) for x in fvals.values())
+        if anyflag:
+            flagged += 1
+            if (jk or "").strip():
+                flag_jks.append(jk.strip())
+        if (claimed or "").strip():
+            filed += 1
+        if nf == 1:
+            notf += 1
+        sev = None
+        for rank, (col, label) in enumerate(_DG_SEV):
+            if _truthy(fvals[col]):
+                sev = (rank, label)
+                break
+        if sev is None and v == "Mismatch":
+            sev = (len(_DG_SEV), "MISMATCH")
+        if sev is not None:
+            tagged.append((sev[0], (tm or ""), {
+                "time": (tm or "").strip(), "why": sev[1],
+                "name": (pname or "").strip(), "phone": (pnum or "").strip(),
+                "claimed": (claimed or "").strip(), "ai": (ai or "").strip(),
+                "join_key": (jk or "").strip()}))
+    tagged.sort(key=lambda t: (t[0], t[1]))
+    out["worst"] = [t[2] for t in tagged[:_DG_CAP]]
+    out["buckets"] = buckets
+    out["other"], out["flagged"] = other, flagged
+    out["filed"], out["not_filed"] = filed, notf
+    out["judged"] = len(vrows)
+    out["unjudged"] = q(
+        "SELECT u.reason, COUNT(*) FROM unjudged u JOIN calls c "
+        "ON c.join_key=u.join_key WHERE substr(c.ended_at_ist,1,10)=? "
+        "GROUP BY u.reason ORDER BY 2 DESC", (day,))
+    r = q("SELECT COUNT(*) FROM conversations WHERE net_missed_open=1")
+    out["nm_open"] = r[0][0] if r else None
+    # S171 digest v2: time span of the day's calls
+    r = q("SELECT MIN(substr(ended_at_ist,12,5)), MAX(substr(ended_at_ist,12,5)) "
+          "FROM calls WHERE substr(ended_at_ist,1,10)=?", (day,))
+    out["span"] = (r[0][0] or "", r[0][1] or "") if r else ("", "")
+    # unique callers, named vs number-only
+    r = q("SELECT COUNT(DISTINCT c.phone10), "
+          "COUNT(DISTINCT CASE WHEN p._pid IS NOT NULL THEN c.phone10 END) "
+          "FROM calls c LEFT JOIN " + _DP + " p ON p.phone10=c.phone10 "
+          "WHERE substr(c.ended_at_ist,1,10)=? AND c.phone10<>''", (day,))
+    tot, named = (r[0] if r else (0, 0))
+    out["callers"] = {"total": tot or 0, "named": named or 0,
+                      "unknown": (tot or 0) - (named or 0)}
+    # funnel: answered -> transcribed -> judged
+    r = q("SELECT COUNT(*) FROM calls c JOIN transcripts t ON t.join_key=c.join_key "
+          "WHERE substr(c.ended_at_ist,1,10)=? AND c.answered=1 "
+          "AND COALESCE(t.text,'')<>''", (day,))
+    out["tx_n"] = r[0][0] if r else 0
+    # net-missed split: last 7 days vs older
+    try:
+        d7 = (datetime.date.fromisoformat(day) - datetime.timedelta(days=7)).isoformat()
+    except Exception:
+        d7 = day
+    r = q("SELECT SUM(CASE WHEN substr(last_ts,1,10)>=? THEN 1 ELSE 0 END), "
+          "SUM(CASE WHEN substr(last_ts,1,10)<? THEN 1 ELSE 0 END) "
+          "FROM conversations WHERE net_missed_open=1", (d7, d7))
+    out["nm7"], out["nm_old"] = ((r[0][0] or 0, r[0][1] or 0) if r else (0, 0))
+    out["flag_jks"] = flag_jks
+    c = out["calls"]
+    cl = out.get("callers") or {}
+    bits = ["%d attempts (%d in / %d out)" % (c.get("total", 0), c.get("in", 0),
+                                              c.get("out", 0)),
+            "%d callers (%d patients / %d unknown)" % (cl.get("total", 0),
+                                                       cl.get("named", 0),
+                                                       cl.get("unknown", 0)),
+            "%d answered \u2192 %d transcribed \u2192 %d judged" % (
+                c.get("answered", 0), out.get("tx_n", 0), out["judged"]),
+            "%d staff-filed" % out["filed"]]
+    if buckets["Mismatch"]:
+        bits.append("%d mismatch" % buckets["Mismatch"])
+    if flagged:
+        bits.append("%d safety-flagged" % flagged)
+    if buckets["No claim logged"]:
+        bits.append("%d calls nobody logged" % buckets["No claim logged"])
+    out["oneline"] = " \u00b7 ".join(bits) + "."
+    return out
+
+
+DIGEST_HTML = PAGE_HEAD + ROW_SHARED + """
+<style>
+.summ{font-size:13px}
+table.log{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0 14px}
+table.log th{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+ color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+table.log td{padding:7px 8px;border-bottom:1px solid rgba(39,75,102,.4)}
+.dgsec{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+ color:var(--muted);margin:22px 2px 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.dgbig{font-size:16px;color:#fff;font-weight:600;margin:4px 0 10px;line-height:1.5}
+details.dgx{border:1px solid var(--line);border-radius:12px;margin:8px 0;background:rgba(22,50,74,.35)}
+details.dgx>summary{cursor:pointer;list-style:none;padding:11px 14px;font-weight:700;font-size:13.5px;color:#fff}
+details.dgx>summary::-webkit-details-marker{display:none}
+details.dgx>summary:after{content:" \u25BE";color:var(--muted)}
+</style>
+<div class="wrap cwrap">
+  <div class="head"><h1>\U0001F4EF Daily digest \u2014 live</h1>
+    <span class="sub">{{ d.day }} \u00b7 <a class="lnk" href="/portal/console">\u2190 Console</a></span></div>
+
+  {% if not m.ok %}<div class="cbanner bad">console.db unavailable \u2014 {{ m.err }}</div>{% else %}
+  {% if m.stale %}<div class="cbanner warn">Data is {{ m.age_min }} min old (last build {{ m.built }}). Cron runs 9\u201321 IST.</div>{% endif %}
+
+  <div class="dgsec">The day in one line \u00b7 {{ d.span[0] or '\u2014' }} \u2192 {{ d.span[1] or '\u2014' }}</div>
+  <div class="dgbig">{{ d.oneline }}</div>
+
+  <div class="dgsec">Pulse \u00b7 {{ d.span[0] or '\u2014' }} \u2192 {{ d.span[1] or '\u2014' }}</div>
+  <table class="log" style="max-width:640px"><thead><tr><th>Attempts</th><th>Callers</th><th>In</th><th>Out</th><th>Answered</th><th>Transcribed</th><th>Judged</th></tr></thead>
+  <tbody><tr><td class="mono">{{ d.calls.get('total',0) }}</td><td class="mono">{{ d.callers.total }} <span class="muted sm">({{ d.callers.named }}p/{{ d.callers.unknown }}?)</span></td>
+  <td class="mono">{{ d.calls.get('in',0) }}</td><td class="mono">{{ d.calls.get('out',0) }}</td>
+  <td class="mono">{{ d.calls.get('answered',0) }}</td><td class="mono">{{ d.tx_n }}</td><td class="mono">{{ d.judged }}</td></tr></tbody></table>
+  {% if d.unjudged %}<div class="summ">Awaiting a verdict: {% for rs, n in d.unjudged %}{{ rs }} \u00d7 {{ n }}{{ '' if loop.last else ' \u00b7 ' }}{% endfor %}</div>
+  {% else %}<div class="summ">Nothing awaiting a verdict today. \u2705</div>{% endif %}
+  <div class="summ">Net-missed open threads: <b>{{ d.nm7 }}</b> in the last 7 days
+    \u2014 <a class="lnk" href="/portal/console?view=threads&answered=netmissed">work the list</a>
+    {% if d.nm_old %}\u00b7 plus <b>{{ d.nm_old }}</b> older <a class="lnk" href="/portal/console?view=threads&answered=netmissed">(review backlog)</a>{% endif %}</div>
+
+  <div class="dgsec">Numbers (judged calls)</div>
+  <table class="log" style="max-width:760px"><thead><tr><th>Match</th><th>Mismatch</th><th>Partial</th><th>Nobody logged</th><th>Unclear</th><th>Flagged</th><th>Staff filed</th><th>NOT FILED</th></tr></thead>
+  <tbody><tr><td class="mono">{{ d.buckets.get('Match',0) }}</td><td class="mono">{{ d.buckets.get('Mismatch',0) }}</td>
+  <td class="mono">{{ d.buckets.get('Partial',0) }}</td><td class="mono">{{ d.buckets.get('No claim logged',0) }}</td>
+  <td class="mono">{{ d.buckets.get('Unclear',0) }}</td><td class="mono">{{ d.flagged }}</td>
+  <td class="mono">{{ d.filed }}</td><td class="mono">{{ d.not_filed }}</td></tr></tbody></table>
+
+  {% if d.flag_rows %}
+  <details class="dgx"><summary>Safety-flagged today ({{ d.flag_rows|length }}) \u2014 listen here</summary>
+    <div class="gwrap mobile-scroll">
+    <div class="hdr"><span>call</span><span>rec</span><span>patient</span><span>dx \u00b7 visit</span><span>staff</span><span>signals</span><span>my review \u00b7 actions</span></div>
+    {% for r in d.flag_rows %}<details class="callrow"><summary>{{ rowsummary(r) }}</summary>{{ detail(r) }}</details>{% endfor %}
+    </div>
+  </details>
+  {% endif %}
+
+  <div class="dgsec">Worst first \u2014 listen to these ({{ d.worst_rows|length }})</div>
+  {% if d.worst_rows %}
+  <div class="gwrap mobile-scroll">
+  <div class="hdr"><span>call</span><span>rec</span><span>patient</span><span>dx \u00b7 visit</span><span>staff</span><span>signals</span><span>my review \u00b7 actions</span></div>
+  {% for r in d.worst_rows %}<details class="callrow"><summary>{{ rowsummary(r) }}</summary>{{ detail(r) }}</details>{% endfor %}
+  </div>
+  {% else %}<div class="summ">Nothing severity-tagged today. \u2705</div>{% endif %}
+
+  <div class="dgsec">Referee corner</div>
+  <div class="summ">You have saved <b>{{ refereed }}</b> review(s) \u2014 they count toward the accuracy gate (D237/D191).</div>
+  {% if d.ref_rows %}
+  <details class="dgx"><summary>My latest reviews ({{ d.ref_rows|length }}) \u2014 inline</summary>
+    <div class="gwrap mobile-scroll">
+    <div class="hdr"><span>call</span><span>rec</span><span>patient</span><span>dx \u00b7 visit</span><span>staff</span><span>signals</span><span>my review \u00b7 actions</span></div>
+    {% for r in d.ref_rows %}<details class="callrow"><summary>{{ rowsummary(r) }}</summary>{{ detail(r) }}</details>{% endfor %}
+    </div>
+  </details>
+  {% endif %}
+
+  <div class="summ" style="margin-top:18px">Built {{ m.built }} \u00b7 {{ m.age_min }} min ago \u00b7 emails at 11:00 / 21:30 continue unchanged.</div>
+  {% endif %}
+</div></body></html>
+"""
+
+
+def _rows_by_jks(conn, jks):
+    """Full universal-row dicts for a list of join_keys (order preserved)."""
+    jks = [j for j in (jks or []) if j]
+    if not jks:
+        return []
+    qm = ",".join(["?"] * len(jks))
+    rows = [_log_row(r) for r in conn.execute(
+        _LOG_COLS + _LOG_FROM + "WHERE c.join_key IN (%s)" % qm, jks)]
+    by = {r["join_key"]: r for r in rows}
+    return [by[j] for j in jks if j in by]
+
+
+@app.route("/portal/digest")
+@doctor_required
+def portal_digest():
+    day = (request.args.get("day") or "").strip()
+    if not _re.fullmatch(r"\d{4}-\d{2}-\d{2}", day or ""):
+        day = datetime.datetime.now().strftime("%Y-%m-%d")
+    m = _console_meta()
+    d = {"day": day, "oneline": "", "calls": {}, "buckets": {}, "flagged": 0,
+         "filed": 0, "not_filed": 0, "worst": [], "unjudged": [],
+         "nm_open": None, "judged": 0}
+    refereed = 0
+    if m["ok"]:
+        conn = _console_conn()
+        if conn is not None:
+            try:
+                d = _query_digest(conn, day)
+                disp, sbm = _reviews_maps()
+                d["worst_rows"] = _rows_by_jks(
+                    conn, [w.get("join_key") for w in d.get("worst", [])])
+                d["flag_rows"] = _rows_by_jks(conn, d.get("flag_jks", []))
+                ref_jks = [k for k, v in sorted(disp.items(),
+                           key=lambda kv: kv[1].get("at", ""), reverse=True)][:15]
+                d["ref_rows"] = _rows_by_jks(conn, ref_jks)
+                for lst in (d["worst_rows"], d["flag_rows"], d["ref_rows"]):
+                    _overlay_reviews(lst, disp, sbm)
+            finally:
+                conn.close()
+        try:
+            rc = _reviews_conn()
+            refereed = rc.execute("SELECT COUNT(*) FROM dispositions").fetchone()[0]
+            rc.close()
+        except Exception:
+            refereed = 0
+    return render_template_string(DIGEST_HTML, hi_out=_hi_out, m=m, d=d, refereed=refereed,
+                                  stale_min=CONSOLE_STALE_MIN,
+                                  vocab=REVIEW_VOCAB, full_qs="view=log")
+
+
+STAFFREPORT_HTML = PAGE_HEAD + ROW_SHARED + """
+<style>
+.coach{background:rgba(11,27,41,.35);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:0 0 14px}
+.coach h2{font-size:15px;margin:0 0 4px;color:#fff}
+.coach .st{font-size:var(--f-md);color:var(--muted);margin-bottom:10px}
+.lesson{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:8px 0;font-size:var(--f-md)}
+.lesson b.bad{color:#fca5a5}.lesson b.good{color:#86efac}
+.lesson .q{font-style:italic;color:#fde68a}
+.wabox{background:#0b1b29;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;line-height:1.8;white-space:pre-wrap;margin-top:10px}
+.rbar{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}
+.rbtn{font-size:var(--f-sm);font-weight:600;padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:inline-flex;gap:6px;align-items:center;text-decoration:none}
+.rbtn:hover{border-color:var(--blue)}
+@media print{body{background:#fff;color:#111}.coach{border-color:#bbb;background:#fff;page-break-after:always}
+ .coach h2,.lesson,.st{color:#111}.lesson{border-color:#ccc}.lesson b.bad{color:#b91c1c}.lesson b.good{color:#15803d}
+ .lesson .q{color:#555}.rbar,.wabox,.tabs,.head .sub a{display:none}}
+</style>
+<div class="wrap cwrap">
+  <div class="head"><h1>\U0001F4CB Staff coaching report</h1>
+    <span class="sub">{{ day }} \u00b7 <a class="lnk" href="/portal/console?view=staff">\u2190 Staff tab</a></span></div>
+  <div class="rbar">
+    <a class="rbtn" href="/portal/console/staffreport?day={{ day }}&fmt=csv"><svg class="ic s"><use href="#i-dl"/></svg>CSV</a>
+    <button class="rbtn" onclick="window.print()"><svg class="ic s"><use href="#i-print"/></svg>Print / PDF</button>
+  </div>
+  {% if not agents %}<div class="summ">No attributed calls for {{ day }}.</div>{% endif %}
+  {% for a in agents %}
+  <div class="coach">
+    <h2>{{ a.agent }}</h2>
+    <div class="st">{{ a.total }} calls \u00b7 {{ a.answered }} answered \u00b7 {{ a.filed }} filed ({{ a.pct }}%) \u00b7 {{ a.lessons|length }} to review</div>
+    {% for L in a.lessons %}
+    <div class="lesson">
+      <div><b>{{ loop.index }}) {{ L.time }} \u00b7 {{ L.name or L.phone }}</b> <span class="muted mono sm">({{ L.phone }})</span></div>
+      <div>\u0906\u092a\u0928\u0947 \u0926\u0930\u094d\u091c \u0915\u093f\u092f\u093e: <b class="bad">{{ L.filed_h }} \u274C</b> \u2003 \u0938\u0939\u0940 outcome: <b class="good">{{ L.correct_h }} \u2705</b></div>
+      {% if L.why %}<div>\u0915\u094d\u092f\u094b\u0902: {{ L.why }}</div>{% endif %}
+      {% if L.quote %}<div>\u092e\u0930\u0940\u091c\u093c \u0915\u0947 \u0936\u092c\u094d\u0926: <span class="q">"{{ L.quote }}"</span></div>{% endif %}
+      <div>\U0001F3A7 <a class="lnk" href="/portal/rl/{{ L.jk }}/{{ L.sig }}">\u0938\u0941\u0928\u0947\u0902 (recording)</a></div>
+    </div>
+    {% endfor %}
+    {% if a.notfiled %}<div class="lesson" style="border-color:rgba(234,179,8,.4)">\u26A0\uFE0F \u0906\u091c \u0926\u0930\u094d\u091c \u0928\u0939\u0940\u0902 \u0939\u0941\u0908\u0902: {{ a.notfiled|length }} \u0915\u0949\u0932 ({{ a.notfiled|join(' \u00b7 ') }})</div>{% endif %}
+    <div class="rbar"><button class="rbtn" onclick="copyText('wa_{{ loop.index }}', this)"><svg class="ic s"><use href="#i-copy"/></svg>Copy WhatsApp ({{ a.agent.split(' ')[0] }})</button></div>
+    <div class="wabox" id="wa_{{ loop.index }}">\U0001F4CB {{ a.agent }} \u2014 {{ day_h }}
+\u0906\u091c: {{ a.total }} \u0915\u0949\u0932 \u00b7 {{ a.answered }} \u0909\u0920\u0940\u0902 \u00b7 {{ a.filed }} \u0926\u0930\u094d\u091c ({{ a.pct }}%) \u00b7 {{ a.lessons|length }} \u0938\u0941\u0927\u093e\u0930 \u0915\u0947 \u0932\u093f\u090f
+{% if a.lessons %}
+\U0001F3A7 \u0938\u0941\u0928\u0915\u0930 \u0938\u0940\u0916\u0947\u0902 \u2014 \u0939\u0930 recording \u091c\u093c\u0930\u0942\u0930 \u0938\u0941\u0928\u0947\u0902:
+{% for L in a.lessons %}
+{{ loop.index }}) {{ L.time }} \u00b7 {{ L.name or L.phone }} ({{ L.phone }})
+   \u0906\u092a\u0928\u0947 \u0926\u0930\u094d\u091c \u0915\u093f\u092f\u093e: {{ L.filed_h }} \u274C
+   \u0938\u0939\u0940 outcome: {{ L.correct_h }} \u2705{% if L.why %}
+   \u0915\u094d\u092f\u094b\u0902: {{ L.why }}{% endif %}{% if L.quote %}
+   \u092e\u0930\u0940\u091c\u093c \u0915\u0947 \u0936\u092c\u094d\u0926: "{{ L.quote }}"{% endif %}
+   \U0001F3A7 \u0938\u0941\u0928\u0947\u0902: {{ base }}/portal/rl/{{ L.jk }}/{{ L.sig }}
+{% endfor %}{% endif %}{% if a.notfiled %}
+\u26A0\uFE0F \u0906\u091c \u0926\u0930\u094d\u091c \u0928\u0939\u0940\u0902 \u0939\u0941\u0908\u0902: {{ a.notfiled|length }} \u0915\u0949\u0932 ({{ a.notfiled|join(' \u00b7 ') }}){% endif %}
+\u0939\u0930 \u0915\u0949\u0932 \u0926\u0930\u094d\u091c \u0915\u0930\u0947\u0902 \u2014 \u0907\u0938\u0940 \u0938\u0947 \u0939\u092e \u0938\u092c \u092c\u0947\u0939\u0924\u0930 \u0939\u094b\u0924\u0947 \u0939\u0948\u0902 \U0001F44D</div>
+  </div>
+  {% endfor %}
+</div></body></html>
+"""
+
+
+@app.route("/portal/console/staffreport")
+@doctor_required
+def console_staffreport():
+    """S171 v3: the daily per-staff coaching report (page + Hindi WhatsApp + CSV)."""
+    day = (request.args.get("day") or "").strip()
+    if not _re.fullmatch(r"\d{4}-\d{2}-\d{2}", day or ""):
+        day = datetime.datetime.now().strftime("%Y-%m-%d")
+    agents = []
+    conn = _console_conn()
+    if conn is not None:
+        try:
+            disp, sbm = _reviews_maps()
+            agents = _coach_data(conn, day, disp, sbm)
+        finally:
+            conn.close()
+    if (request.args.get("fmt") or "") == "csv":
+        import csv as _csv, io as _io
+        buf = _io.StringIO(); w = _csv.writer(buf)
+        w.writerow(["Agent", "Calls", "Answered", "Filed", "Filed %",
+                    "Lessons", "Not filed"])
+        for a in agents:
+            w.writerow([a["agent"], a["total"], a["answered"], a["filed"],
+                        a["pct"], len(a["lessons"]), len(a["notfiled"])])
+        resp = make_response("\ufeff" + buf.getvalue())
+        resp.headers["Content-Type"] = "text/csv; charset=utf-8"
+        resp.headers["Content-Disposition"] = \
+            "attachment; filename=staff_report_%s.csv" % day
+        return resp
+    try:
+        day_h = datetime.datetime.strptime(day, "%Y-%m-%d").strftime("%a, %d %b")
+    except Exception:
+        day_h = day
+    return render_template_string(STAFFREPORT_HTML, agents=agents, day=day,
+                                  day_h=day_h, hi_out=_hi_out,
+                                  base="https://followup.dr-manoj.in")
+
+
+@app.route("/portal/rl/<jk>/<sig>")
+def portal_rec_link(jk, sig):
+    """Staff recording-only link: HMAC-signed, serves the MP3 (or Drive redirect).
+    No portal session needed; the signature is the credential; nothing else reachable."""
+    import hmac as _hmac
+    if not _hmac.compare_digest(sig or "", _rl_sig(jk)):
+        return ("link invalid", 403)
+    return _serve_rec(jk)
+
+
 @app.route("/portal/console/reviews.csv")
 @doctor_required
 def console_reviews_csv():
@@ -2242,7 +3026,7 @@ def console_reviews_csv():
                             row["tx_text"]])
         finally:
             conn.close()
-    resp = make_response(buf.getvalue())
+    resp = make_response("\ufeff" + buf.getvalue())   # S171: BOM so Excel renders Hindi
     resp.headers["Content-Type"] = "text/csv; charset=utf-8"
     resp.headers["Content-Disposition"] = "attachment; filename=doctor_reviews_training.csv"
     resp.headers["Cache-Control"] = "no-store"
@@ -2260,6 +3044,8 @@ def console_page():
                flag_opts=[(k, _FLAG_LABEL[k]) for k in _FLAG_COLS],
                day_groups=[], total=0, more=False, limit=_LOG_LIMIT,
                convs=[], staff=[], leads=[], pipe=None, noshows=None, sb_open=[], spam_list=[],
+               conv_groups=[], lead_groups=[], ns_groups=[], ns_banner=None,
+               wk_days=[], wk_matrix={}, wk_rows={}, wk_agents=[], wk_sd='',
                vocab=REVIEW_VOCAB,
                base_qs=_console_base_qs(f), full_qs=_console_base_qs(f) + "&view=" + view)
     if m["ok"]:
@@ -2280,22 +3066,55 @@ def console_page():
                     ctx["convs"] = _query_conversations(conn, f)
                     for cv in ctx["convs"]:
                         _overlay_reviews(cv.get("legs", []), disp, sbm)
+                    ctx["conv_groups"] = _group_by_iso(ctx["convs"], "last_ts")
                 elif view == "staff":
                     ctx["staff"] = _query_staff(conn, f)
+                    disp2, sbm2 = _reviews_maps()
+                    sd = (request.args.get("sd") or "").strip()
+                    if not _re.fullmatch(r"\d{4}-\d{2}-\d{2}", sd):
+                        sd = datetime.datetime.now().strftime("%Y-%m-%d")
+                    wk_days, wk_matrix, wk_rows = _staff_week(conn, disp2, sd)
+                    for lst in wk_rows.values():
+                        _overlay_reviews(lst, disp2, sbm2)
+                    ctx["wk_days"], ctx["wk_matrix"], ctx["wk_sd"] = wk_days, wk_matrix, sd
+                    ctx["wk_agents"] = sorted(wk_matrix.keys())
+                    ctx["wk_rows"] = {"%s|%s" % k: v for k, v in wk_rows.items()}
                 elif view == "leads":
                     ctx["leads"] = [l for l in _query_leads(conn, f)
                                     if l.get("phone10") not in spam]     # W3 Track M
                     for l in ctx["leads"]:
                         _overlay_reviews(l.get("legs", []), disp, sbm)
+                        legs = l.get("legs", [])
+                        try:
+                            mx = max([int(str(g.get("duration") or 0) or 0)
+                                      for g in legs] or [0])
+                        except Exception:
+                            mx = 0
+                        ait = " ".join((g.get("ai_text") or "") for g in legs).lower()
+                        l["hot"] = bool((l.get("answered") and mx >= 45)
+                                        or l.get("attempts", 0) >= 2
+                                        or "book" in ait or "come" in ait)
+                    ctx["leads"].sort(key=lambda x: (not x.get("hot"), ), )
+                    ctx["lead_groups"] = [
+                        (lbl, iso, sorted(rs, key=lambda x: not x.get("hot")))
+                        for lbl, iso, rs in _group_by_iso(ctx["leads"], "last_seen")]
                 elif view == "pipe":
                     ctx["pipe"] = _query_pipeline(conn)
                 elif view == "noshows":
                     ctx["noshows"] = _query_noshows(conn)
+                    _nr = (ctx["noshows"] or {}).get("rows") or []
+                    _ns_tries(conn, _nr)
+                    ctx["ns_groups"] = _group_by_iso(_nr, "due_date")
+                    ctx["ns_banner"] = {
+                        "y": len(_nr),
+                        "x": sum(1 for n in _nr if not n.get("cb_attempts")),
+                        "z": sum(1 for n in _nr if n.get("cb_reached"))}
                     ctx["sb_open"] = sorted(
                         ({"join_key": k, **v} for k, v in sbm.items()),
                         key=lambda x: x["at"], reverse=True)
             finally:
                 conn.close()
+    ctx["hi_out"] = _hi_out
     return render_template_string(CONSOLE_HTML, **ctx)
 
 
@@ -2308,7 +3127,7 @@ def console_csv():
     conn = _console_conn()
     buf = _io.StringIO(); w = _csv.writer(buf)
     w.writerow(["Date", "Time", "Direction", "State", "Number", "Name", "Diagnosis",
-                "Last Visit", "Clinic ID", "Duration_s", "Staff", "Claimed Outcome",
+                "Age", "Sex", "Last Visit", "Clinic ID", "Duration_s", "Staff", "Claimed Outcome",
                 "Not Filed", "AI Verdict", "AI State", "AI Reason", "Evidence",
                 "Transcribed At", "Judged At", "Judge Lag Min", "Your Review", "Flags",
                 "Recording Link", "Has Transcript", "Join Key"])
@@ -2317,7 +3136,7 @@ def console_csv():
             rows, _ = _query_log(conn, f, limit=None)
             for r in rows:
                 w.writerow([r["date"], r["time"], r["direction"], r["state"], r["phone10"],
-                            r["name"], r["diagnosis"], r["last_visit"], r["clinic_id"],
+                            r["name"], r["diagnosis"], r["age"], r["gender"], r["last_visit"], r["clinic_id"],
                             r["duration"], r["agent"], r["claimed"],
                             "YES" if r["not_filed"] else "", r["ai_text"], r["ai_state"],
                             r["ai_reason"], r["evidence"], r["tx_at"], r["judged_at"],
@@ -2326,7 +3145,7 @@ def console_csv():
                             r["rec_link"], "YES" if r["has_tx"] else "", r["join_key"]])
         finally:
             conn.close()
-    resp = make_response(buf.getvalue())
+    resp = make_response("\ufeff" + buf.getvalue())   # S171: BOM so Excel renders Hindi
     resp.headers["Content-Type"] = "text/csv; charset=utf-8"
     resp.headers["Content-Disposition"] = "attachment; filename=call_console.csv"
     resp.headers["Cache-Control"] = "no-store"

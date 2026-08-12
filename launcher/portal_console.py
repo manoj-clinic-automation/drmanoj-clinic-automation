@@ -54,13 +54,16 @@ from datetime import datetime, timedelta, timezone
 # ---------------------------------------------------------------------------
 TRACKER_SHEET_ID = "1USjArkqIdrE9hIqerghms76STatM5XTbSW_a9I3klo0"   # Clinic Callback Tracker
 AUDIT_SHEET_ID   = "1rq9VvB5L94EmmZbiUwase9HBLsJ3htispYLd1rHjSRQ"   # Call Audit (Doctor Only)
+ENRICH_SHEET_ID  = "1uTzTatn-9sxDl-uNS6rn8b_YhqgR3lE8wxLEqNi6x6g"   # S171 P2: taxonomy patient master (dx/age/sex)
 
 READONLY_SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
 DEFAULT_DB   = "/root/wa/console.db"
-REVIEWS_DB   = "/root/wa/console_reviews.db"   # W2: portal-owned persistent store (read-only here)
-SENDBACK_TAB = "Dr_Manoj_Call_List"            # W2: builder-owned tab in the TRACKER sheet
 FOLLOWUPS_TAB = "Followups_Today"              # W2: optional feed (pushed by the PC tracker)
+# (S171: SENDBACK_TAB + push_send_backs removed. F-76 withdrawn -- send-backs
+#  live in the portal-owned console_reviews.db on the VPS; the sheet is no
+#  longer a write target. Staff read send-backs in the portal; a nightly
+#  Drive backup of the db is a separate task, not a sheet push.)
 REC_CACHE_DIR = "/root/wa/rec_cache"           # W3 Item 8: local recording cache (PHI, gitignored)
 REC_CACHE_CAP = 1024 * 1024 * 1024             # 1 GB hard cap (60 days ~0.30 GB per Appendix A)
 REC_CACHE_DAYS = 60
@@ -86,6 +89,7 @@ IST              = timezone(timedelta(hours=5, minutes=30))
 # ---------------------------------------------------------------------------
 TRACKER = "tracker"
 AUDIT   = "audit"
+ENRICH  = "enrich"      # S171 P2: optional taxonomy patient master
 
 TABS = {
     "Call_Durations": {
@@ -361,9 +365,116 @@ def fu_resolve_header(header):
                 break
     return out
 
+_ENRICH_ALIASES = {
+    "phone":       ["Mobile_Clean", "Mobile", "Phone10", "Phone"],
+    "diagnosis":   ["Standardized_Diagnosis", "Diagnosis"],
+    "age":         ["Age"],
+    "gender":      ["Sex", "Gender"],
+    "name":        ["Patient_Name", "Name"],
+    "patient_uid": ["Patient_UID"],
+    "clinic_id":   ["Clinic_Specific_Id", "Clinic ID"],
+}
+
+_DX_PLACEHOLDERS = ("", "no diagnosis recorded")
+
+
+def en_resolve_header(header):
+    """S171 P2: loose name-based discovery for the enrichment sheet."""
+    normed = [norm_header(h) for h in header]
+    out = {}
+    for field, aliases in _ENRICH_ALIASES.items():
+        for a in aliases:
+            na = norm_header(a)
+            if na in normed:
+                out[field] = normed.index(na)
+                break
+    return out
+
+
+def apply_patient_enrich(conn, header, rows):
+    """S171 P2: overlay dx/age/sex from the taxonomy master onto `patients`.
+    Patient_Master stays primary -- ONLY EMPTY fields are filled; phones the
+    master does not know are inserted. Standardized_Diagnosis is used (the raw
+    column is unfit for display); its 'No Diagnosis Recorded' placeholder is
+    stored as empty, not as a fake diagnosis (D236). Pure + selftested."""
+    res = en_resolve_header(header or [])
+    if "phone" not in res or not ({"diagnosis", "age", "gender"} & set(res)):
+        return {"found": False, "resolved": res, "rows": 0}
+    n = updated = inserted = no_phone = 0
+    for row in rows:
+        def cell(f):
+            i = res.get(f)
+            return (row[i].strip() if i is not None and i < len(row) else "")
+        phone = norm_phone10(cell("phone"))
+        if not phone:
+            no_phone += 1
+            continue
+        dx = cell("diagnosis")
+        if dx.strip().lower() in _DX_PLACEHOLDERS:
+            dx = ""
+        age, gender = cell("age"), cell("gender")
+        exists = conn.execute("SELECT 1 FROM patients WHERE phone10=? LIMIT 1",
+                              (phone,)).fetchone()
+        if exists:
+            conn.execute(
+                "UPDATE patients SET "
+                "diagnosis=CASE WHEN TRIM(COALESCE(diagnosis,''))='' THEN ? ELSE diagnosis END,"
+                "age=CASE WHEN TRIM(COALESCE(age,''))='' THEN ? ELSE age END,"
+                "gender=CASE WHEN TRIM(COALESCE(gender,''))='' THEN ? ELSE gender END "
+                "WHERE phone10=?", (dx, age, gender, phone))
+            updated += 1
+        else:
+            conn.execute("INSERT INTO patients VALUES (?,?,?,?,?,?,?,?)",
+                         (phone, cell("name"), dx, age, gender, "",
+                          cell("patient_uid"), cell("clinic_id")))
+            inserted += 1
+        n += 1
+    return {"found": True, "resolved": res, "rows": n, "updated": updated,
+            "inserted": inserted, "no_phone": no_phone}
+
+
+def read_enrich_optional(books):
+    """S171 P2: OPTIONAL read of the taxonomy master. Never halts the build --
+    absence / not-yet-shared is reported honestly (D236). Picks the worksheet
+    whose header carries the phone + at least one enrichment field."""
+    try:
+        sh = books.get(ENRICH)
+        if sh is None:
+            return None, None
+        for ws in sh.worksheets():
+            header = ws.row_values(1)
+            res = en_resolve_header(header)
+            if "phone" in res and ({"diagnosis", "age", "gender"} & set(res)):
+                values = ws.get_all_values()
+                if values:
+                    return values[0], values[1:]
+        return None, None
+    except Exception:
+        return None, None
+
+
 def fu_is_seen(status_raw):
     s = (status_raw or "").strip().lower()
     return any(w in s for w in _SEEN_WORDS)
+
+_FU_DATE_FMTS = ("%Y-%m-%d", "%d-%b-%Y", "%d/%m/%Y", "%d-%m-%Y", "%d %b %Y")
+
+def fu_parse_due(s):
+    """Feed due-date -> ISO 'YYYY-MM-DD', or None if unparseable (S171).
+    The live feed writes DD-Mon-YYYY (11 chars); the old [:10] slice chopped
+    the year's last digit AND made every string comparison against ISO 'today'
+    and ISO call timestamps semantically wrong. Normalising to ISO once here
+    makes storage, ordering and the calls-since-due window all correct."""
+    s = (s or "").strip()
+    if not s:
+        return None
+    tok = s.split()[0]
+    for f in _FU_DATE_FMTS:
+        try:
+            return datetime.strptime(tok, f).strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+    return None
 
 def build_no_shows(conn, fu_header, fu_rows, today_iso):
     """no_shows = follow-up rows due BEFORE today whose status does not read as
@@ -372,13 +483,15 @@ def build_no_shows(conn, fu_header, fu_rows, today_iso):
     res = fu_resolve_header(fu_header or [])
     if "phone" not in res or "due" not in res:
         return {"found": False, "resolved": res, "rows": 0}
-    n = 0
+    n, bad_due = 0, 0
     for row in fu_rows:
         def cell(f):
             i = res.get(f)
             return (row[i].strip() if i is not None and i < len(row) else "")
         phone = norm_phone10(cell("phone"))
-        due = cell("due")[:10]
+        due = fu_parse_due(cell("due"))          # S171: ISO or None, never a stump
+        if cell("due") and due is None:
+            bad_due += 1                          # honest count, not silence (D236)
         if not phone or not due or due >= today_iso:
             continue
         if fu_is_seen(cell("status")):
@@ -395,10 +508,11 @@ def build_no_shows(conn, fu_header, fu_rows, today_iso):
             agent = None
         conn.execute("INSERT INTO no_shows VALUES (?,?,?,?,?,?,?,?)",
                      (phone, cell("name"), due, cell("status"),
-                      cb[0] or 0, (cb[1] or "")[:16], (agent[0] if agent else ""),
+                      cb[0] or 0, (cb[1] or "")[:16].replace("T", " "),
+                      (agent[0] if agent else ""),
                       1 if (cb[2] or 0) == 1 else 0))
         n += 1
-    return {"found": True, "resolved": res, "rows": n}
+    return {"found": True, "resolved": res, "rows": n, "bad_due": bad_due}
 
 
 def unjudged_reason(has_join_key, has_recording, verdict):
@@ -811,8 +925,13 @@ def _open_clients(env_path=None):
                          (SA_ENV_KEYS, env_path or ENV_CANDIDATES, sa_path))
     creds = Credentials.from_service_account_file(sa_path, scopes=READONLY_SCOPES)
     gc = gspread.authorize(creds)
-    return {TRACKER: gc.open_by_key(TRACKER_SHEET_ID),
-            AUDIT:   gc.open_by_key(AUDIT_SHEET_ID)}
+    books = {TRACKER: gc.open_by_key(TRACKER_SHEET_ID),
+             AUDIT:   gc.open_by_key(AUDIT_SHEET_ID)}
+    try:                                    # S171 P2: optional third book
+        books[ENRICH] = gc.open_by_key(ENRICH_SHEET_ID)
+    except Exception:
+        books[ENRICH] = None                # unshared/absent -> said, not fatal
+    return books
 
 
 def read_live_tabs(env_path=None):
@@ -843,38 +962,6 @@ def read_followups_optional(books):
         return values[0], values[1:]
     except Exception:
         return None, None
-
-
-def push_send_backs(books, reviews_db_path=REVIEWS_DB):
-    """W2 Item 6: rewrite the builder-OWNED '%s' tab in the TRACKER sheet from
-    the OPEN send_backs in the portal-owned reviews db (read-only here; the
-    portal is that db's sole writer, this builder is the tab's sole writer --
-    D235 kept on both sides). Full-replace each build = idempotent.
-    Numbers go to the STAFF sheet in full (they must dial them).""" % SENDBACK_TAB
-    if not os.path.exists(reviews_db_path):
-        return {"pushed": None, "note": "reviews db absent"}
-    try:
-        rconn = sqlite3.connect("file:%s?mode=ro" % reviews_db_path, uri=True)
-        rows = rconn.execute(
-            "SELECT sent_at, phone10, patient, reason FROM send_backs "
-            "WHERE status='open' ORDER BY sent_at DESC").fetchall()
-        rconn.close()
-    except Exception as e:
-        return {"pushed": None, "note": "reviews db unreadable: %s" % e}
-    try:
-        book = books[TRACKER]
-        try:
-            ws = book.worksheet(SENDBACK_TAB)
-        except Exception:
-            ws = book.add_worksheet(title=SENDBACK_TAB, rows=200, cols=6)
-        payload = [["Call list from Dr Manoj  (auto-updated; act on OPEN rows)"],
-                   ["Sent at", "Phone", "Patient", "Reason from Dr Manoj"]]
-        payload += [[r[0], r[1], r[2], r[3]] for r in rows]
-        ws.clear()
-        ws.update(payload, "A1")
-        return {"pushed": len(rows), "note": "ok"}
-    except Exception as e:
-        return {"pushed": None, "note": "sheet push failed: %s" % e}
 
 
 def rec_cache_prune(cache_dir, cap_bytes):
@@ -1441,6 +1528,18 @@ def cmd_build(env_path, db_path, with_myop=False, days=3, with_tr=False, tr_limi
         filled = merge_transcript_cache(conn, cache_conn)
         cache_conn.close()
         print("-- A3 transcripts merged from cache: %s row(s) now carry text --" % filled)
+    # --- S171 P2: optional patient enrichment (taxonomy master, second source) ---
+    en_h, en_r = read_enrich_optional(books)
+    if en_h is None:
+        en_meta = {"found": False, "rows": 0, "note": "sheet absent or not shared with the SA"}
+    else:
+        en_meta = apply_patient_enrich(conn, en_h, en_r)
+    conn.execute("INSERT OR REPLACE INTO meta VALUES ('patient_enrich', ?)",
+                 (json.dumps(en_meta),))
+    print("-- P2 patient enrich: found=%s rows=%s updated=%s inserted=%s no_phone=%s%s --"
+          % (en_meta.get("found"), en_meta.get("rows", 0), en_meta.get("updated", 0),
+             en_meta.get("inserted", 0), en_meta.get("no_phone", 0),
+             (" (%s)" % en_meta["note"]) if en_meta.get("note") else ""))
     # --- W2 Track N: optional Followups feed -> no_shows table (fail-loud honest) ---
     fu_h, fu_r = read_followups_optional(books)
     if fu_h is None:
@@ -1450,11 +1549,11 @@ def cmd_build(env_path, db_path, with_myop=False, days=3, with_tr=False, tr_limi
                                  datetime.now(IST).strftime("%Y-%m-%d"))
     conn.execute("INSERT OR REPLACE INTO meta VALUES ('followups_feed', ?)",
                  (json.dumps(fu_meta),))
-    print("-- W2 no-shows: feed_found=%s rows=%s resolved=%s --"
-          % (fu_meta.get("found"), fu_meta.get("rows"), fu_meta.get("resolved")))
-    # --- W2 Item 6: push open send-backs to the staff sheet tab ---
-    sb = push_send_backs(books)
-    print("-- W2 send-back push: %s (%s) --" % (sb.get("pushed"), sb.get("note")))
+    print("-- W2 no-shows: feed_found=%s rows=%s bad_due=%s resolved=%s --"
+          % (fu_meta.get("found"), fu_meta.get("rows"),
+             fu_meta.get("bad_due", 0), fu_meta.get("resolved")))
+    # (S171: sheet push of send-backs removed -- F-76 withdrawn, reviews db is
+    #  canonical on the VPS; staff act on send-backs in the portal.)
     conn.commit()
     conn.close()
     os.replace(tmp, db_path)               # atomic; readers never see a half-built db
@@ -1573,15 +1672,41 @@ def cmd_selftest():
     fu_h = ["Junk", "Mobile Number", "Patient Name", "Due Date", "Status"]
     fu_r = [["x", "9000000001", "AAA", k["D0"], "Visited"],          # seen -> excluded
             ["x", "9000000002", "CCC", k["D0"], "booked"],           # due, not seen -> NO-SHOW
-            ["x", "9000000003", "BBB", "2999-06-01", ""]]            # future -> excluded
+            ["x", "9000000003", "BBB", "2999-06-01", ""],            # future -> excluded
+            ["x", "9000000004", "DDD", "02-Jan-1999", "booked"],     # S171: feed's real format -> kept, ISO stored
+            ["x", "9000000005", "EEE", "notadate", "booked"]]        # S171: junk date -> skipped + counted
     fu_meta = build_no_shows(conn, fu_h, fu_r, "2999-01-02")
     check("W2 no-shows: header discovered (phone+due+status)",
           fu_meta["found"] and {"phone", "due", "status"} <= set(fu_meta["resolved"]))
-    check("W2 no-shows: exactly the unseen past-due row kept",
-          fu_meta["rows"] == 1 and
+    check("W2 no-shows: exactly the unseen past-due rows kept",
+          fu_meta["rows"] == 2 and
           scalar("SELECT COUNT(*) FROM no_shows WHERE phone10='9000000002'") == 1
           and scalar("SELECT COUNT(*) FROM no_shows WHERE phone10='9000000001'") == 0)
+    check("S171 no-shows: DD-Mon-YYYY due normalised to ISO in storage",
+          scalar("SELECT due_date FROM no_shows WHERE phone10='9000000004'") == "1999-01-02")
+    check("S171 no-shows: unparseable due skipped AND counted (bad_due)",
+          fu_meta.get("bad_due") == 1 and
+          scalar("SELECT COUNT(*) FROM no_shows WHERE phone10='9000000005'") == 0)
     check("W2 no-shows: seen-word matcher", fu_is_seen("Pt visited ok") and not fu_is_seen("will come"))
+    # --- S171 P2: patient-enrichment units (offline) ---
+    en_h = ["Patient_UID", "Clinic_Specific_Id", "Patient_Name", "Age", "Sex",
+            "Mobile_Clean", "Diagnosis_Raw", "Standardized_Diagnosis"]
+    en_r = [["U1", "9001", "AAA", "55", "M", "9000000001", "raw junk", "Knee Osteoarthritis"],
+            ["U2", "9002", "Newly Known", "40", "F", "9000000777", "x", "Lumbar Radiculopathy"],
+            ["U3", "9003", "No Phone", "33", "M", "", "x", "Y"],
+            ["U4", "9004", "Placeholder Dx", "61", "F", "9000000778", "", "No Diagnosis Recorded"]]
+    en_meta = apply_patient_enrich(conn, en_h, en_r)
+    check("P2 enrich: header discovered (phone + fields)", en_meta["found"])
+    check("P2 enrich: existing diagnosis NOT overwritten (Patient_Master wins)",
+          scalar("SELECT diagnosis FROM patients WHERE phone10='9000000001'") == "Knee OA")
+    check("P2 enrich: empty age/sex filled on existing patient",
+          scalar("SELECT age FROM patients WHERE phone10='9000000001'") == "55"
+          and scalar("SELECT gender FROM patients WHERE phone10='9000000001'") == "M")
+    check("P2 enrich: unknown phone inserted with standardized dx",
+          scalar("SELECT diagnosis FROM patients WHERE phone10='9000000777'") == "Lumbar Radiculopathy")
+    check("P2 enrich: no-phone counted; placeholder dx stored empty (D236)",
+          en_meta["no_phone"] == 1
+          and scalar("SELECT diagnosis FROM patients WHERE phone10='9000000778'") == "")
     # --- W3 Item 8: recording-cache units (offline) ---
     import tempfile
     td = tempfile.mkdtemp()
