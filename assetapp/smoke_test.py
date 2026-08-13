@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Smoke tests — Asset Register v1.0.0. Run: python smoke_test.py"""
+"""Smoke tests — Asset Register v1.4.2 (grouped Entity->Zone index). Run: python smoke_test.py"""
 import os, sys, io, tempfile, shutil
 
 TMP = tempfile.mkdtemp(prefix="assetapp_test_")
 os.environ["ASSETS_DB"] = os.path.join(TMP, "test.db")
 os.environ["ASSETS_UPLOADS"] = os.path.join(TMP, "uploads")
 
-import app as A
+import asset_register as A
 A.init_db()
 
 passed = failed = 0
@@ -121,24 +121,91 @@ check("epoch bump redirects to login", r.status_code == 302)
 check("manager session invalidated", mgr.get("/assets").status_code == 302)
 check("owner session invalidated", owner.get("/assets").status_code == 302)
 
-print("STEP 9: built-in scanner")
-# re-login (epoch was bumped in step 8)
+print("STEP 9: scanner shell renders + carries config (not the old inline JS)")
 login(owner, "manoj", "change-me-manoj")
 login(mgr, "manager", "change-me-manager")
 r = owner.get(f"/scan/asset/{aid}")
-check("scan page renders for asset", r.status_code == 200 and b"Drag the four corners" in r.data)
-check("pages render as real HTML, not escaped text", b'<div class=card' in r.data and b"&lt;div" not in r.data)
-check("scan page carries jsPDF + warp code", b"jspdf" in r.data and b"Heckbert" in r.data)
+check("scan page renders for asset", r.status_code == 200)
+check("mounts the widget div", b"id=scanroot" in r.data)
+check("loads the shared widget script (cache-busted)", b"/scan/widget.js?v=" in r.data)
+check("carries jsPDF cdn", b"jspdf" in r.data)
+check("injects SCANNER_CONFIG", b"SCANNER_CONFIG" in r.data)
+check("config points at the upload route", b"/files/upload" in r.data and b"uploadUrl" in r.data)
+check("config carries a nameBase default", b"nameBase" in r.data)
+check("shell HTML is real, not escaped", b"<div id=scanroot>" in r.data and b"&lt;div" not in r.data)
+check("hide_price asset -> config marks sensitive", b'"sensitive"' in r.data)
 r = mgr.get(f"/scan/staff/{sid}")
 check("scan page renders for staff (manager)", r.status_code == 200)
+check("non-sensitive staff scan has no sensitive flag", b'"sensitive"' not in r.data)
 check("scan on unknown entity 404", owner.get("/scan/vehicle/1").status_code == 404)
-# hide_price asset: scan page should default sensitive flag
-r = owner.get(f"/scan/asset/{aid}")
-check("hide_price asset scan defaults sensitive", b"append('sensitive','1')" in r.data)
+r = owner.get("/scan/draft/0")
+check("draft scan renders", r.status_code == 200 and b"scanroot" in r.data)
+
+print("STEP 10: shared widget served from disk + still accepts uploads")
+r = anon.get("/scan/widget.js")
+check("widget.js served (public, 200)", r.status_code == 200)
+check("widget.js content-type is javascript", "javascript" in r.headers.get("Content-Type", ""))
+check("widget.js keeps warp + live-camera logic", b"Heckbert" in r.data and b"getUserMedia" in r.data)
+check("widget.js has the 1A features", b"composeIdCard" in r.data and b"Add whole image" in r.data
+      and b"batch" in r.data.lower())
 r = mgr.post("/files/upload", data={"entity": "asset", "entity_id": str(aid),
-    "file": (io.BytesIO(b"%PDF-1.4 scanpdf"), "scan_2026-07-24.pdf")},
+    "file": (io.BytesIO(b"%PDF-1.4 scanpdf"), "Fuji_2026-08-13.pdf")},
     content_type="multipart/form-data")
-check("scanner-style pdf upload accepted", r.status_code == 302)
+check("scanner-style pdf upload still accepted", r.status_code == 302)
+
+print("STEP 11: Phase A taxonomy backbone + backfill (dry-run / apply / idempotent)")
+db = A.sqlite3.connect(os.environ["ASSETS_DB"])
+ents = [r[0] for r in db.execute("SELECT name FROM entities ORDER BY sort")]
+check("3 entities seeded", ents == ["Dr Manoj Clinic", "NK Pathology", "Personal"], str(ents))
+check("zones seeded (>=20)", db.execute("SELECT COUNT(*) FROM zones").fetchone()[0] >= 20)
+acols = {r[1] for r in db.execute("PRAGMA table_info(assets)")}
+check("assets gained entity_id + zone_id", "entity_id" in acols and "zone_id" in acols)
+db.close()
+A.migrate_taxonomy(apply=False)
+db = A.sqlite3.connect(os.environ["ASSETS_DB"])
+check("dry-run leaves rows unclassified", db.execute("SELECT COUNT(*) FROM assets WHERE entity_id IS NULL").fetchone()[0] > 0)
+db.close()
+A.migrate_taxonomy(apply=True)
+db = A.sqlite3.connect(os.environ["ASSETS_DB"]); db.row_factory = A.sqlite3.Row
+check("apply classifies every asset", db.execute("SELECT COUNT(*) FROM assets WHERE entity_id IS NULL").fetchone()[0] == 0)
+row = db.execute("SELECT en.name e FROM assets a JOIN entities en ON en.id=a.entity_id WHERE a.id=?", (aid,)).fetchone()
+check("Clinic asset -> Dr Manoj Clinic", row and row["e"] == "Dr Manoj Clinic", str(row and row["e"]))
+db.close()
+n, unmapped = A.migrate_taxonomy(apply=True)
+check("re-apply is a no-op (idempotent)", n == 0 and not unmapped)
+r = owner.get("/assets")
+check("asset index groups under entity headers", b"Dr Manoj Clinic" in r.data and b"<details" in r.data)
+check("asset index shows a zone group", b"Unassigned" in r.data)
+
+print("STEP 12: admin — password set-and-reveal, generate, token masked + rotate")
+r = owner.post("/admin", data={"action":"reset_pw","uid":"3","new":"temppass123"}, follow_redirects=True)
+check("typed password revealed once", b"temppass123" in r.data and b"shown once" in r.data)
+r = owner.post("/admin", data={"action":"reset_pw","uid":"3","gen":"1"}, follow_redirects=True)
+check("generated password revealed", b"is now:" in r.data)
+r = owner.get("/admin")
+check("token not printed bare (masked in <details>)", b"<details>" in r.data and b"Show API token" in r.data)
+check("rotate-token control present", b"rotate_token" in r.data)
+db = A.sqlite3.connect(os.environ["ASSETS_DB"])
+tok_before = db.execute("SELECT value FROM settings WHERE key='api_token'").fetchone()[0]; db.close()
+owner.post("/admin", data={"action":"rotate_token"}, follow_redirects=True)
+db = A.sqlite3.connect(os.environ["ASSETS_DB"])
+tok_after = db.execute("SELECT value FROM settings WHERE key='api_token'").fetchone()[0]; db.close()
+check("rotate actually changes the token", tok_before != tok_after)
+r = mgr.get("/admin")
+check("manager still blocked from admin (403/redirect)", r.status_code in (302,403))
+
+print("STEP 13: Phase C grouped index (entity->zone, scope, search)")
+r = owner.get("/assets")
+check("grouped: entity summary present", b"<summary" in r.data and b"Dr Manoj Clinic" in r.data)
+check("grouped: zone nested under entity", b"Unassigned" in r.data)
+check("grouped: the asset appears in its group", b"Fuji DR X-Ray" in r.data)
+r2 = mgr.get("/assets")
+check("manager sees the general (Clinic) group", r2.status_code == 200 and b"Dr Manoj Clinic" in r2.data)
+check("manager does NOT see Personal (owner-only) group", b"Personal" not in r2.data)
+r3 = owner.get("/assets?q=Fuji")
+check("search still works inside grouping", b"Fuji DR X-Ray" in r3.data and b"clear" in r3.data)
+r4 = owner.get("/assets?q=zzznomatchzzz")
+check("empty search shows the no-match line", b"No assets" in r4.data)
 
 print(f"\n{'='*40}\nRESULT: {passed} passed, {failed} failed")
 shutil.rmtree(TMP, ignore_errors=True)

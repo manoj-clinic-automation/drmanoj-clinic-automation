@@ -23,9 +23,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from markupsafe import Markup
 from werkzeug.utils import secure_filename
 
-APP_VERSION = "1.2.0"
+APP_VERSION = "1.4.2"
 DB_PATH = os.environ.get("ASSETS_DB", os.path.join(os.path.dirname(__file__), "assets.db"))
 UPLOAD_DIR = os.environ.get("ASSETS_UPLOADS", os.path.join(os.path.dirname(__file__), "uploads"))
+SCANNER_JS_PATH = os.path.join(os.path.dirname(__file__), "scanner_widget.js")  # shared scanner widget (Stage 1A)
 ALLOWED_EXT = {"pdf", "jpg", "jpeg", "png", "webp", "heic", "doc", "docx"}
 THRESHOLD_DEFAULT = 60  # days; per-expiry override supported
 SARVAM_API_KEY = os.environ.get("SARVAM_API_KEY", "").strip()
@@ -56,6 +57,14 @@ CREATE TABLE IF NOT EXISTS users(
 CREATE TABLE IF NOT EXISTS locations(
   id INTEGER PRIMARY KEY, name TEXT UNIQUE NOT NULL,
   visibility TEXT NOT NULL DEFAULT 'general' CHECK(visibility IN('general','owner_only')));
+CREATE TABLE IF NOT EXISTS entities(
+  id INTEGER PRIMARY KEY, name TEXT UNIQUE NOT NULL,
+  visibility TEXT NOT NULL DEFAULT 'general' CHECK(visibility IN('general','owner_only')),
+  sort INTEGER NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS zones(
+  id INTEGER PRIMARY KEY, entity_id INTEGER NOT NULL REFERENCES entities(id),
+  name TEXT NOT NULL, sort INTEGER NOT NULL DEFAULT 0,
+  UNIQUE(entity_id, name));
 CREATE TABLE IF NOT EXISTS assets(
   id INTEGER PRIMARY KEY, name TEXT NOT NULL,
   location_id INTEGER NOT NULL REFERENCES locations(id),
@@ -103,6 +112,29 @@ CATEGORIES = ["Lab Equipment", "Medical Equipment", "Electrical (Battery/Inverte
 STATUSES = ["Active", "Under Repair", "Retired", "Sold"]
 CONTRACT_TYPES = ["None", "Warranty only", "AMC", "CMC"]
 
+# --- Phase A taxonomy (D-pending): 3 owning entities x per-entity zones ---
+ENTITY_SEED = [("Dr Manoj Clinic", "general", 1),
+               ("NK Pathology",    "general", 2),
+               ("Personal",        "owner_only", 3)]
+ZONE_SEED = {
+    "Dr Manoj Clinic": ["Unassigned", "Reception", "Consultation", "X-ray/Imaging",
+                        "Minor OT/Procedure", "Physiotherapy", "Pharmacy",
+                        "Waiting/Common", "Power/Backup", "IT/Network"],
+    "NK Pathology":    ["Unassigned", "Sample collection", "Lab bench/Analysers",
+                        "Reagent store", "Reception", "Power/Backup", "IT"],
+    "Personal":        ["Unassigned", "Dr Manoj", "Dr Bhawna", "Home",
+                        "Vehicle", "Devices", "Documents/Licences"],
+}
+# old location name -> (entity name, zone name); backfill is refused if any live
+# location is absent here (fail-loud, D236) so nothing is silently miscategorised.
+LOC_TAXONOMY_MAP = {
+    "Clinic":               ("Dr Manoj Clinic", "Unassigned"),
+    "NK Path":              ("NK Pathology",    "Unassigned"),
+    "Personal - Dr Manoj":  ("Personal",        "Dr Manoj"),
+    "Personal - Dr Bhawna": ("Personal",        "Dr Bhawna"),
+    "Home (Shared)":        ("Personal",        "Home"),
+}
+
 def migrate(db):
     """Additive column migration for databases created before v1.2.0.
     CREATE TABLE IF NOT EXISTS cannot add columns to an existing table."""
@@ -111,12 +143,82 @@ def migrate(db):
         db.execute("ALTER TABLE attachments ADD COLUMN document_text TEXT")
     if "ocr_status" not in cols:
         db.execute("ALTER TABLE attachments ADD COLUMN ocr_status TEXT NOT NULL DEFAULT 'pending'")
+    acols = {r[1] for r in db.execute("PRAGMA table_info(assets)")}
+    if "entity_id" not in acols:
+        db.execute("ALTER TABLE assets ADD COLUMN entity_id INTEGER")   # -> entities(id)
+    if "zone_id" not in acols:
+        db.execute("ALTER TABLE assets ADD COLUMN zone_id INTEGER")     # -> zones(id)
+
+def seed_taxonomy(db):
+    """Idempotent: seed the 3 entities + their zones if not present.
+    Runs on every restart; guarded by COUNT so it seeds once, then no-ops.
+    Never deletes or renames — only inserts missing rows."""
+    if db.execute("SELECT COUNT(*) FROM entities").fetchone()[0] == 0:
+        for name, vis, srt in ENTITY_SEED:
+            db.execute("INSERT INTO entities(name,visibility,sort) VALUES(?,?,?)", (name, vis, srt))
+    ent = {r[1]: r[0] for r in db.execute("SELECT id,name FROM entities")}
+    for ename, zones in ZONE_SEED.items():
+        eid = ent.get(ename)
+        if not eid:
+            continue
+        for i, zname in enumerate(zones):
+            db.execute("INSERT OR IGNORE INTO zones(entity_id,name,sort) VALUES(?,?,?)",
+                       (eid, zname, i))
+
+def migrate_taxonomy(apply=False):
+    """One-time backfill of assets.entity_id/zone_id from the old location.
+    Dry-run by default (prints the plan, changes nothing). --apply commits.
+    Idempotent (only touches rows where entity_id IS NULL). Fail-loud: refuses
+    to apply if any live location is missing from LOC_TAXONOMY_MAP."""
+    init_db()  # guarantees tables + seed
+    db = sqlite3.connect(DB_PATH); db.row_factory = sqlite3.Row
+    ent = {r["name"]: r["id"] for r in db.execute("SELECT id,name FROM entities")}
+    zmap = {(r["entity_id"], r["name"]): r["id"]
+            for r in db.execute("SELECT id,entity_id,name FROM zones")}
+    rows = db.execute("""SELECT a.id aid, l.name loc FROM assets a
+                         JOIN locations l ON l.id=a.location_id
+                         WHERE a.entity_id IS NULL""").fetchall()
+    plan, unmapped, updates = {}, {}, []
+    for r in rows:
+        loc = r["loc"]
+        if loc not in LOC_TAXONOMY_MAP:
+            unmapped[loc] = unmapped.get(loc, 0) + 1
+            continue
+        en, zn = LOC_TAXONOMY_MAP[loc]
+        eid = ent[en]; zid = zmap[(eid, zn)]
+        plan[(en, zn)] = plan.get((en, zn), 0) + 1
+        updates.append((eid, zid, r["aid"]))
+    total_assets = db.execute("SELECT COUNT(*) FROM assets").fetchone()[0]
+    already = db.execute("SELECT COUNT(*) FROM assets WHERE entity_id IS NOT NULL").fetchone()[0]
+    print("=== TAXONOMY BACKFILL %s ===" % ("APPLY" if apply else "DRY-RUN"))
+    print("assets total: %d | already classified: %d | to backfill now: %d"
+          % (total_assets, already, len(updates)))
+    for (en, zn), n in sorted(plan.items()):
+        print("  %-18s / %-16s <- %d" % (en, zn, n))
+    if unmapped:
+        print("  !! UNMAPPED LOCATIONS (backfill will be REFUSED):")
+        for loc, n in unmapped.items():
+            print("     %r  x%d" % (loc, n))
+    if apply:
+        if unmapped:
+            print("REFUSED: unmapped locations present. Fix LOC_TAXONOMY_MAP first. Nothing changed.")
+        elif updates:
+            db.executemany("UPDATE assets SET entity_id=?, zone_id=? WHERE id=?", updates)
+            db.commit()
+            print("APPLIED: %d rows updated." % len(updates))
+        else:
+            print("Nothing to do (all rows already classified).")
+    else:
+        print("(dry-run: nothing changed. Re-run with --apply to commit.)")
+    db.close()
+    return len(updates), unmapped
 
 def init_db(seed=True):
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     db = sqlite3.connect(DB_PATH)
     db.executescript(SCHEMA)
     migrate(db)
+    seed_taxonomy(db)
     cur = db.execute("SELECT COUNT(*) c FROM users")
     if seed and cur.fetchone()[0] == 0:
         for u, d, r, p in [("manoj", "Dr Manoj", "owner", "change-me-manoj"),
@@ -446,36 +548,65 @@ def dashboard():
 @app.route("/assets")
 @login_required
 def assets_list():
+    """Grouped index (Phase C): Entity -> Zone -> assets, collapsible.
+    Visibility gate + search unchanged; unclassified assets group last so they
+    are never hidden."""
     where, params = visible_assets_where()
     q = request.args.get("q", "").strip()
-    # doc_hit reports THAT an attached document matched, never WHAT matched.
-    # Sensitive document text is searchable but its content is never rendered —
-    # the asset appears with price and files suppressed exactly as elsewhere.
     doc_sub = ("(SELECT COUNT(*) FROM attachments at WHERE at.entity='asset' "
                "AND at.entity_id=a.id AND at.document_text LIKE ?)")
+    cols = ("a.*, l.name loc_name, en.name ent_name, en.sort ent_sort, "
+            "zn.name zone_name, zn.sort zone_sort")
+    joins = ("FROM assets a JOIN locations l ON l.id=a.location_id "
+             "LEFT JOIN entities en ON en.id=a.entity_id LEFT JOIN zones zn ON zn.id=a.zone_id")
     if q:
-        sql = (f"SELECT a.*, l.name loc_name, {doc_sub} doc_hit "
-               f"FROM assets a JOIN locations l ON l.id=a.location_id WHERE {where}")
+        sql = f"SELECT {cols}, {doc_sub} doc_hit {joins} WHERE {where}"
         params = [f"%{q}%"] + params
         sql += (" AND (a.name LIKE ? OR a.vendor LIKE ? OR a.serial_no LIKE ?"
                 " OR EXISTS(SELECT 1 FROM attachments at2 WHERE at2.entity='asset'"
                 " AND at2.entity_id=a.id AND at2.document_text LIKE ?))")
         params += [f"%{q}%"] * 4
     else:
-        sql = (f"SELECT a.*, l.name loc_name, 0 doc_hit "
-               f"FROM assets a JOIN locations l ON l.id=a.location_id WHERE {where}")
+        sql = f"SELECT {cols}, 0 doc_hit {joins} WHERE {where}"
     sql += " ORDER BY a.name"
     rows = get_db().execute(sql, params).fetchall()
+
+    # group entity -> zone, preserving admin sort order; NULLs (unclassified) last
+    groups = {}
+    for a in rows:
+        en = a["ent_name"] or "Unclassified"
+        es = a["ent_sort"] if a["ent_sort"] is not None else 9999
+        zn = a["zone_name"] or "\u2014"
+        zs = a["zone_sort"] if a["zone_sort"] is not None else 9999
+        g = groups.setdefault(en, {"sort": es, "zones": {}, "count": 0})
+        g["count"] += 1
+        z = g["zones"].setdefault(zn, {"sort": zs, "rows": []})
+        z["rows"].append(a)
+    ordered = []
+    for en, g in sorted(groups.items(), key=lambda kv: (kv[1]["sort"], kv[0])):
+        zones = [(zn, z["rows"]) for zn, z in
+                 sorted(g["zones"].items(), key=lambda kv: (kv[1]["sort"], kv[0]))]
+        ordered.append((en, g["count"], zones))
+
     return page("""<h2>Assets</h2>
 <form method=get style="margin-bottom:10px"><input name=q value="{{q}}" placeholder="search name / vendor / serial / document text" style="max-width:320px"> <button class="btn small">Search</button></form>
 <p><a class=btn href="{{url_for('asset_edit')}}">+ Add asset</a>
-<a class="btn small" href="{{url_for('drafts_list')}}">📷 Scan first (Drafts)</a></p>
-<table><tr><th>Name</th><th>Location</th><th>Category</th><th>Status</th><th>Contract</th></tr>
-{% for a in rows %}<tr><td><a href="{{url_for('asset_view',aid=a['id'])}}">{{a['name']}}</a>
-{% if a['hidden'] %}<span class=muted>(hidden)</span>{% endif %}
-{% if a['doc_hit'] %}<br><span class=muted>↳ matched in attached document</span>{% endif %}</td>
-<td>{{a['loc_name']}}</td><td>{{a['category']}}</td><td>{{a['status']}}</td><td>{{a['contract_type']}}</td></tr>
-{% endfor %}</table>""", rows=rows, q=q)
+<a class="btn small" href="{{url_for('drafts_list')}}">\U0001F4F7 Scan first (Drafts)</a></p>
+{% if q %}<p class=muted>Matches for \u201c{{q}}\u201d \u00b7 <a href="{{url_for('assets_list')}}">clear</a></p>{% endif %}
+{% for ent_name, ent_count, zones in ordered %}
+<details open><summary style="font-size:16px;font-weight:bold;cursor:pointer;padding:8px 0;color:#1f3864">{{ent_name}} <span class=muted>({{ent_count}})</span></summary>
+{% for zone_name, zrows in zones %}
+<details open style="margin:0 0 8px 12px"><summary style="cursor:pointer;padding:4px 0;font-weight:bold">{{zone_name}} <span class=muted>({{zrows|length}})</span></summary>
+<table style="margin:4px 0 6px"><tr><th>Name</th><th>Category</th><th>Status</th><th>Contract</th></tr>
+{% for a in zrows %}<tr><td><a href="{{url_for('asset_view',aid=a['id'])}}">{{a['name']}}</a>{% if a['hidden'] %} <span class=muted>(hidden)</span>{% endif %}{% if a['doc_hit'] %}<br><span class=muted>\u21b3 matched in attached document</span>{% endif %}</td>
+<td>{{a['category']}}</td><td>{{a['status']}}</td><td>{{a['contract_type']}}</td></tr>
+{% endfor %}</table>
+</details>
+{% endfor %}
+</details>
+{% endfor %}
+{% if not ordered %}<p class=muted>No assets{{' match your search' if q else ''}}.</p>{% endif %}""",
+        ordered=ordered, q=q)
 
 def locations_for_user():
     if is_owner():
@@ -935,307 +1066,73 @@ def staff_view(sid):
 <button class="btn small">Upload</button></form></div>""", s=s, exp=exp, atts=atts)
 
 # ---------------------------------------------------------------- built-in scanner
-SCAN_TPL = """<h2>📷 Scan document → {{ename}}</h2>
-<div class=card>
-<p><button type=button class=btn id=opencam onclick="openCam()">📷 Open camera</button>
-<span class=muted style="margin:0 8px">or</span>
-<label class="btn small" style="margin:0">Choose a photo
-<input type=file id=cam accept="image/*" capture="environment" style="display:none"></label></p>
-<div id=camwrap style="display:none">
-  <video id=vid playsinline autoplay muted style="max-width:100%;border:1px solid #999;background:#000"></video>
-  <p><button type=button class=btn onclick="shoot()">● Capture</button>
-     <button type=button class="btn small" onclick="closeCam()">Cancel</button>
-     <select id=camsel style="max-width:220px;display:none"></select></p>
-</div>
-<div id=stage style="display:none">
-  <div style="position:relative;display:inline-block;touch-action:none">
-    <canvas id=cv style="max-width:100%;border:1px solid #999"></canvas>
-    <canvas id=ov style="position:absolute;left:0;top:0;max-width:100%"></canvas>
-    <canvas id=loupe width=150 height=150 style="position:absolute;top:8px;right:8px;
-      border:3px solid #1f9dff;border-radius:75px;background:#fff;display:none;pointer-events:none"></canvas>
-  </div>
-  <p class=muted>Drag a <b>round corner</b> handle, or drag a <b>square edge</b> handle (or the line itself)
-  to move a whole side at once. A magnifier appears while you drag.</p>
-  <label><input type=checkbox id=bw checked style="width:auto"> Document mode (B&W contrast boost)</label>
-  <p><button type=button class=btn onclick="addPage()">✔ Add page</button>
-     <button type=button class="btn small" onclick="resetCorners()">↺ Reset outline</button>
-     <button type=button class="btn small" onclick="resetShot()">↺ Retake</button></p>
-</div>
-<div id=pages></div>
-<p><button type=button class=btn id=finish onclick="finish()" disabled>💾 Save as PDF & attach</button>
-   <span id=msg class=muted></span></p>
-</div>
+SCAN_TPL = """<script>window.SCANNER_CONFIG = {{ config|tojson }};</script>
+<div id=scanroot></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-var srcImg=null, corners=[], drag=null, last=null, done=[], stream=null;
-var cv=document.getElementById('cv'), ov=document.getElementById('ov');
-var ctx=cv.getContext('2d'), octx=ov.getContext('2d');
-function say(t){document.getElementById('msg').textContent=t;}
-function loadImage(src){
-  var img=new Image();
-  img.onload=function(){
-    var s=Math.min(1,1400/Math.max(img.width,img.height));
-    cv.width=ov.width=Math.round(img.width*s); cv.height=ov.height=Math.round(img.height*s);
-    ctx.drawImage(img,0,0,cv.width,cv.height); srcImg=img;
-    var mx=cv.width*0.08,my=cv.height*0.08;
-    corners=[[mx,my],[cv.width-mx,my],[cv.width-mx,cv.height-my],[mx,cv.height-my]];
-    document.getElementById('stage').style.display='block'; drawOverlay();
-    document.getElementById('stage').scrollIntoView({behavior:'smooth',block:'nearest'});
-  };
-  img.onerror=function(){say('Could not read that image.');};
-  img.src=src;
-}
-document.getElementById('cam').addEventListener('change',function(e){
-  var f=e.target.files[0]; if(!f)return;
-  loadImage(URL.createObjectURL(f));
-});
-// Live camera. Works on desktop webcams too — the capture= attribute never did.
-function camSupported(){
-  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-}
-function openCam(){
-  if(!camSupported()){
-    say('This browser has no camera access (needs https). Use "Choose a photo".');return;}
-  var want={video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1440}},audio:false};
-  navigator.mediaDevices.getUserMedia(want).then(startStream).catch(function(){
-    navigator.mediaDevices.getUserMedia({video:true,audio:false}).then(startStream).catch(function(err){
-      say('Camera unavailable ('+(err&&err.name?err.name:'error')+'). Use "Choose a photo" instead.');
-    });
-  });
-}
-function startStream(st){
-  stream=st;
-  var v=document.getElementById('vid');
-  v.srcObject=st; v.play();
-  document.getElementById('camwrap').style.display='block';
-  document.getElementById('opencam').textContent='📷 Camera on';
-  say('');
-  listCams();
-}
-function listCams(){
-  if(!navigator.mediaDevices.enumerateDevices)return;
-  navigator.mediaDevices.enumerateDevices().then(function(ds){
-    var cams=ds.filter(function(d){return d.kind==='videoinput';});
-    if(cams.length<2)return;
-    var sel=document.getElementById('camsel');
-    sel.innerHTML='';
-    cams.forEach(function(c,i){
-      var o=document.createElement('option');o.value=c.deviceId;
-      o.textContent=c.label||('Camera '+(i+1));sel.appendChild(o);});
-    sel.style.display='inline-block';
-    sel.onchange=function(){
-      stopStream();
-      navigator.mediaDevices.getUserMedia({video:{deviceId:{exact:sel.value}},audio:false})
-        .then(function(st){stream=st;document.getElementById('vid').srcObject=st;});
-    };
-  }).catch(function(){});
-}
-function shoot(){
-  var v=document.getElementById('vid');
-  if(!v.videoWidth){say('Camera still starting — try again in a second.');return;}
-  var c=document.createElement('canvas');
-  c.width=v.videoWidth;c.height=v.videoHeight;
-  c.getContext('2d').drawImage(v,0,0,c.width,c.height);
-  loadImage(c.toDataURL('image/jpeg',0.92));
-  closeCam();
-}
-function stopStream(){if(stream){stream.getTracks().forEach(function(t){t.stop();});stream=null;}}
-function closeCam(){
-  stopStream();
-  document.getElementById('camwrap').style.display='none';
-  document.getElementById('opencam').textContent='📷 Open camera';
-}
-window.addEventListener('pagehide',stopStream);
-window.addEventListener('beforeunload',stopStream);
-if(!camSupported()){
-  document.getElementById('opencam').style.display='none';
-}
-// canvas pixels per on-screen pixel. The canvas is up to 1400px wide but may be
-// displayed at 350px, so every hit radius must be scaled or the grab zone shrinks
-// to a few real pixels — which is what made corner dragging feel unreliable.
-function kScale(){var r=ov.getBoundingClientRect();return r.width?ov.width/r.width:1;}
-function mid(i){var a=corners[i],b=corners[(i+1)%4];return [(a[0]+b[0])/2,(a[1]+b[1])/2];}
-function clampPt(p){return [Math.max(0,Math.min(ov.width,p[0])),Math.max(0,Math.min(ov.height,p[1]))];}
-function drawOverlay(){
-  var k=kScale();
-  octx.clearRect(0,0,ov.width,ov.height);
-  // shade everything outside the quad so the crop is obvious
-  octx.save();
-  octx.beginPath();octx.rect(0,0,ov.width,ov.height);
-  octx.moveTo(corners[0][0],corners[0][1]);
-  for(var i=3;i>=0;i--){octx.lineTo(corners[i][0],corners[i][1]);}
-  octx.closePath();
-  octx.fillStyle='rgba(0,0,0,.35)';octx.fill('evenodd');
-  octx.restore();
-  // outline
-  octx.strokeStyle='#1f9dff';octx.lineWidth=Math.max(2,3*k);octx.beginPath();
-  octx.moveTo(corners[0][0],corners[0][1]);
-  for(var i=1;i<5;i++){var p=corners[i%4];octx.lineTo(p[0],p[1]);}
-  octx.stroke();
-  // edge handles (squares) — drag a whole side
-  for(var i=0;i<4;i++){
-    var m=mid(i),h=11*k;
-    octx.fillStyle=(drag&&drag.type==='e'&&drag.i===i)?'#ff9500':'rgba(31,157,255,.9)';
-    octx.fillRect(m[0]-h,m[1]-h,h*2,h*2);
-    octx.strokeStyle='#fff';octx.lineWidth=Math.max(1,2*k);
-    octx.strokeRect(m[0]-h,m[1]-h,h*2,h*2);
-  }
-  // corner handles (circles) — drag one point
-  corners.forEach(function(p,i){
-    octx.fillStyle=(drag&&drag.type==='c'&&drag.i===i)?'#ff9500':'rgba(31,157,255,.9)';
-    octx.beginPath();octx.arc(p[0],p[1],15*k,0,7);octx.fill();
-    octx.strokeStyle='#fff';octx.lineWidth=Math.max(1,2*k);octx.stroke();
-  });
-}
-function evPos(e){
-  var r=ov.getBoundingClientRect(), t=(e.touches&&e.touches[0])?e.touches[0]:e;
-  return [(t.clientX-r.left)*ov.width/r.width,(t.clientY-r.top)*ov.height/r.height];
-}
-function d2(a,b){return (a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1]);}
-function segD2(p,a,b){
-  var vx=b[0]-a[0],vy=b[1]-a[1],L=vx*vx+vy*vy;
-  if(!L)return d2(p,a);
-  var t=Math.max(0,Math.min(1,((p[0]-a[0])*vx+(p[1]-a[1])*vy)/L));
-  return d2(p,[a[0]+t*vx,a[1]+t*vy]);
-}
-function hitTest(p){
-  var k=kScale(), rc=Math.pow(26*k,2), re=Math.pow(22*k,2), rl=Math.pow(16*k,2), i;
-  for(i=0;i<4;i++){ if(d2(p,corners[i])<rc) return {type:'c',i:i}; }   // corners win ties
-  for(i=0;i<4;i++){ if(d2(p,mid(i))<re) return {type:'e',i:i}; }
-  for(i=0;i<4;i++){ if(segD2(p,corners[i],corners[(i+1)%4])<rl) return {type:'e',i:i}; }
-  return null;
-}
-// An edge moves perpendicular to itself, so a side stays straight and parallel
-// instead of skewing when your finger wanders along it.
-function moveEdge(i,dx,dy){
-  var a=corners[i], b=corners[(i+1)%4];
-  var ex=b[0]-a[0], ey=b[1]-a[1], L=Math.hypot(ex,ey)||1;
-  var nx=-ey/L, ny=ex/L, d=dx*nx+dy*ny;
-  corners[i]=clampPt([a[0]+nx*d,a[1]+ny*d]);
-  corners[(i+1)%4]=clampPt([b[0]+nx*d,b[1]+ny*d]);
-}
-function showLoupe(p){
-  var L=document.getElementById('loupe'), lc=L.getContext('2d'), z=3.2, s=L.width/z;
-  lc.clearRect(0,0,L.width,L.height);
-  lc.drawImage(cv,p[0]-s/2,p[1]-s/2,s,s,0,0,L.width,L.height);
-  lc.strokeStyle='#1f9dff';lc.lineWidth=1.5;
-  lc.beginPath();
-  lc.moveTo(L.width/2-12,L.height/2);lc.lineTo(L.width/2+12,L.height/2);
-  lc.moveTo(L.width/2,L.height/2-12);lc.lineTo(L.width/2,L.height/2+12);
-  lc.stroke();
-  // keep the magnifier away from the finger
-  var rightHalf = p[0] > ov.width/2;
-  L.style.right = rightHalf ? 'auto' : '8px';
-  L.style.left  = rightHalf ? '8px'  : 'auto';
-  L.style.display='block';
-}
-function hideLoupe(){document.getElementById('loupe').style.display='none';}
-function resetCorners(){
-  var mx=ov.width*0.08,my=ov.height*0.08;
-  corners=[[mx,my],[ov.width-mx,my],[ov.width-mx,ov.height-my],[mx,ov.height-my]];
-  drawOverlay();
-}
-function down(e){
-  var p=evPos(e); drag=hitTest(p);
-  if(drag){last=p;e.preventDefault();drawOverlay();showLoupe(p);}
-}
-function move(e){
-  if(!drag)return; e.preventDefault();
-  var p=evPos(e);
-  if(drag.type==='c'){corners[drag.i]=clampPt(p);}
-  else{moveEdge(drag.i,p[0]-last[0],p[1]-last[1]);}
-  last=p; drawOverlay(); showLoupe(p);
-}
-function up(){if(drag){drag=null;hideLoupe();drawOverlay();}}
-ov.addEventListener('mousedown',down);ov.addEventListener('mousemove',move);addEventListener('mouseup',up);
-ov.addEventListener('touchstart',down,{passive:false});ov.addEventListener('touchmove',move,{passive:false});
-ov.addEventListener('touchend',up);ov.addEventListener('touchcancel',up);
-function warp(){
-  // Heckbert unit-square -> quad homography, inverse-sampled
-  var c=corners,x0=c[0][0],y0=c[0][1],x1=c[1][0],y1=c[1][1],x2=c[2][0],y2=c[2][1],x3=c[3][0],y3=c[3][1];
-  var W=Math.round((Math.hypot(x1-x0,y1-y0)+Math.hypot(x2-x3,y2-y3))/2);
-  var H=Math.round((Math.hypot(x3-x0,y3-y0)+Math.hypot(x2-x1,y2-y1))/2);
-  var s=Math.min(1,1600/Math.max(W,H));W=Math.max(50,Math.round(W*s));H=Math.max(50,Math.round(H*s));
-  var dx1=x1-x2,dx2=x3-x2,dx3=x0-x1+x2-x3,dy1=y1-y2,dy2=y3-y2,dy3=y0-y1+y2-y3,a,b,cc,d,e,f,g,h;
-  if(Math.abs(dx3)<1e-9&&Math.abs(dy3)<1e-9){a=x1-x0;b=x3-x0;cc=x0;d=y1-y0;e=y3-y0;f=y0;g=0;h=0;}
-  else{var den=dx1*dy2-dx2*dy1;g=(dx3*dy2-dx2*dy3)/den;h=(dx1*dy3-dx3*dy1)/den;
-    a=x1-x0+g*x1;b=x3-x0+h*x3;cc=x0;d=y1-y0+g*y1;e=y3-y0+h*y3;f=y0;}
-  var sd=ctx.getImageData(0,0,cv.width,cv.height).data,sw=cv.width,sh=cv.height;
-  var out=document.createElement('canvas');out.width=W;out.height=H;
-  var oc=out.getContext('2d'),od=oc.createImageData(W,H),D=od.data,k=0;
-  for(var r=0;r<H;r++){var v=r/H;
-    for(var q=0;q<W;q++){var u=q/W,w=g*u+h*v+1;
-      var X=Math.round((a*u+b*v+cc)/w),Y=Math.round((d*u+e*v+f)/w);
-      if(X>=0&&Y>=0&&X<sw&&Y<sh){var si=(Y*sw+X)*4;D[k]=sd[si];D[k+1]=sd[si+1];D[k+2]=sd[si+2];}
-      else{D[k]=D[k+1]=D[k+2]=255;}
-      D[k+3]=255;k+=4;}}
-  if(document.getElementById('bw').checked){
-    var hist=new Array(256).fill(0),n=W*H;
-    for(var i=0;i<D.length;i+=4){var gy=Math.round(.3*D[i]+.59*D[i+1]+.11*D[i+2]);D[i]=gy;hist[gy]++;}
-    var lo=0,hi=255,acc=0;
-    for(var i=0;i<256;i++){acc+=hist[i];if(acc>n*0.05){lo=i;break;}}
-    acc=0;for(var i=255;i>=0;i--){acc+=hist[i];if(acc>n*0.05){hi=i;break;}}
-    var rng=Math.max(1,hi-lo);
-    for(var i=0;i<D.length;i+=4){var gv=Math.max(0,Math.min(255,Math.round((D[i]-lo)*255/rng)));
-      D[i]=D[i+1]=D[i+2]=gv;}}
-  oc.putImageData(od,0,0);
-  return out;
-}
-function addPage(){
-  var out=warp();done.push(out.toDataURL('image/jpeg',0.85));
-  var t=document.createElement('img');t.src=done[done.length-1];
-  t.style.cssText='height:90px;border:1px solid #999;margin:3px';
-  document.getElementById('pages').appendChild(t);
-  document.getElementById('finish').disabled=false;resetShot();
-}
-function resetShot(){document.getElementById('stage').style.display='none';
-  document.getElementById('cam').value='';}
-function finish(){
-  var msg=document.getElementById('msg');
-  var blob,fname;
-  if(window.jspdf){
-    var pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4'});
-    done.forEach(function(du,i){
-      if(i>0)pdf.addPage();
-      var im=new Image();im.src=du;
-      var pw=210-16,ph=297-16,ratio=im.height/im.width||1.4;
-      var w=pw,h=pw*ratio;if(h>ph){h=ph;w=ph/ratio;}
-      pdf.addImage(du,'JPEG',8,8,w,h);});
-    blob=pdf.output('blob');fname='scan_'+new Date().toISOString().slice(0,10)+'.pdf';
-  }else{ // CDN unreachable: fall back to first page as JPEG
-    var bin=atob(done[0].split(',')[1]),arr=new Uint8Array(bin.length);
-    for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
-    blob=new Blob([arr],{type:'image/jpeg'});
-    fname='scan_'+new Date().toISOString().slice(0,10)+'.jpg';
-    msg.textContent='PDF library unreachable — saved page 1 as JPEG. ';
-  }
-  var fd=new FormData();
-  fd.append('entity','{{entity}}');fd.append('entity_id','{{eid}}');
-  fd.append('file',blob,fname);
-  {% if sensitive_default %}fd.append('sensitive','1');{% endif %}
-  msg.textContent='Uploading…';
-  fetch('{{url_for("file_upload")}}',{method:'POST',body:fd}).then(function(r){
-    if(r.ok){window.location='{{back}}';}else{msg.textContent='Upload failed ('+r.status+')';}
-  }).catch(function(){msg.textContent='Upload failed (network)';});
-}
-</script>
-<p><a href="{{back}}">← back without saving</a></p>"""
+<script src="{{ widget_url }}"></script>
+<noscript><p class=card>This scanner needs JavaScript enabled.</p></noscript>"""
+
+def _widget_version():
+    try:
+        return int(os.path.getmtime(SCANNER_JS_PATH))
+    except OSError:
+        return 0
+
+@app.route("/scan/widget.js")
+def scanner_widget_js():
+    """Serve the shared scanner widget from disk (edit-and-drop, cache-busted by ?v=mtime)."""
+    if not os.path.exists(SCANNER_JS_PATH):
+        abort(404)
+    resp = send_file(SCANNER_JS_PATH, mimetype="application/javascript")
+    resp.headers["Cache-Control"] = "no-cache"
+    return resp
+
+def _name_stem(s, fallback):
+    """ASCII-safe filename stem mirroring secure_filename, so the default shown
+    to the user matches what the server will store."""
+    out = []
+    for ch in (s or "").strip():
+        if (ch.isalnum() and ord(ch) < 128) or ch in "._-":
+            out.append(ch)
+        else:
+            out.append("_")
+    r = "".join(out).strip("._-")
+    while "__" in r:
+        r = r.replace("__", "_")
+    return r or fallback
+
+def _scan_config(entity, eid, ename, back, sensitive_default, name_base):
+    fields = {"entity": entity, "entity_id": str(eid)}
+    if sensitive_default:
+        fields["sensitive"] = "1"
+    return {
+        "title": "Scan \u2192 " + ename,
+        "uploadUrl": url_for("file_upload"),
+        "fileField": "file",
+        "uploadFields": fields,
+        "nameBase": name_base,
+        "backUrl": back,
+        "allowIdCard": True,
+        "allowBatch": True,
+    }
 
 @app.route("/scan/<entity>/<int:eid>")
 @login_required
 def scan_page(entity, eid):
+    widget_url = url_for("scanner_widget_js") + "?v=" + str(_widget_version())
     if entity == "asset":
         a = asset_or_403(eid)
-        return page(SCAN_TPL, entity="asset", eid=eid, ename=a["name"],
-                    back=url_for("asset_view", aid=eid),
-                    sensitive_default=bool(a["hide_price"]))
+        cfg = _scan_config("asset", eid, a["name"], url_for("asset_view", aid=eid),
+                           bool(a["hide_price"]), _name_stem(a["name"], "asset"))
+        return page(SCAN_TPL, config=cfg, widget_url=widget_url)
     if entity == "staff":
         s = staff_or_403(eid)
-        return page(SCAN_TPL, entity="staff", eid=eid, ename=s["name"],
-                    back=url_for("staff_view", sid=eid), sensitive_default=False)
+        cfg = _scan_config("staff", eid, s["name"], url_for("staff_view", sid=eid),
+                           False, _name_stem(s["name"], "staff"))
+        return page(SCAN_TPL, config=cfg, widget_url=widget_url)
     if entity == "draft":
-        return page(SCAN_TPL, entity="draft", eid=0, ename="Drafts",
-                    back=url_for("drafts_list"), sensitive_default=False)
+        cfg = _scan_config("draft", 0, "Drafts", url_for("drafts_list"), False, "Draft")
+        return page(SCAN_TPL, config=cfg, widget_url=widget_url)
     abort(404)
 
 # ---------------------------------------------------------------- admin (owner)
@@ -1251,13 +1148,24 @@ def admin():
                         "owner_only" if request.form.get("owner_only") else "general"))
         elif act == "reset_pw":
             uid = request.form.get("uid", type=int)
-            new = request.form.get("new", "")
-            if len(new) >= 8:
+            urow = db.execute("SELECT username FROM users WHERE id=?", (uid,)).fetchone()
+            if request.form.get("gen"):
+                new = secrets.token_urlsafe(9)          # strong, readable, ~12 chars
+            else:
+                new = request.form.get("new", "")
+            if urow and len(new) >= 8:
                 db.execute("UPDATE users SET password_hash=? WHERE id=?",
                            (generate_password_hash(new), uid))
-                flash("Password reset.")
+                # passwords are stored ONE-WAY (hash); we reveal the value ONCE here
+                # so you always know what you just set. It cannot be retrieved later.
+                flash("Password for %s is now:  %s   \u2014 shown once, copy it now."
+                      % (urow["username"], new))
             else:
-                flash("Min 8 characters.")
+                flash("Min 8 characters (or tick \u2018generate\u2019).")
+        elif act == "rotate_token":
+            db.execute("UPDATE settings SET value=? WHERE key='api_token'",
+                       (secrets.token_urlsafe(24),))
+            flash("API token rotated \u2014 update the WhatsApp cron with the new token.")
         db.commit()
         return redirect(url_for("admin"))
     users = db.execute("SELECT id,username,display_name,role FROM users").fetchall()
@@ -1274,9 +1182,16 @@ def admin():
 <input type=hidden name=action value=reset_pw><input type=hidden name=uid value={{u['id']}}>
 <b>{{u['display_name']}}</b> <span class=muted>{{u['username']}} / {{u['role']}}</span>
 <input type=password name=new placeholder="new password" style="max-width:180px">
-<button class="btn small">Reset</button></form>{% endfor %}</div>
+<label style="display:inline"><input type=checkbox name=gen style="width:auto"> generate strong</label>
+<button class="btn small">Set &amp; reveal</button></form>{% endfor %}
+<p class=muted>Passwords are stored one-way (hashed) \u2014 they cannot be read back.
+The value you set is shown once here, so you always control every login. Forgot one? Set a new one.</p></div>
 <div class=card><h4>WhatsApp integration</h4>
-<p class=muted>Cron endpoint (JSON of amber/red items): <code>/api/due?token={{token}}</code></p></div>
+<p class=muted>Cron endpoint (JSON of amber/red items). The token is a secret \u2014 kept hidden below so it is not on screen by default.</p>
+<details><summary class=muted style="cursor:pointer">Show API token</summary>
+<p><code>/api/due?token={{token}}</code></p></details>
+<form method=post style="margin-top:6px"><input type=hidden name=action value=rotate_token>
+<button class="btn small danger" onclick="return confirm('Rotate the API token? The current WhatsApp cron stops working until you update it with the new token.')">Rotate token</button></form></div>
 <div class=card><h4>Document text (OCR)</h4>
 <p>Sarvam key configured: <b>{{'yes' if ocr_key else 'no'}}</b></p>
 <table><tr><th>Status</th><th>Documents</th></tr>
@@ -1316,5 +1231,9 @@ def api_due():
 
 # ---------------------------------------------------------------- main
 if __name__ == "__main__":
-    init_db()
-    app.run(debug=True, port=8030)
+    import sys
+    if "--migrate-taxonomy" in sys.argv:
+        migrate_taxonomy(apply=("--apply" in sys.argv))
+    else:
+        init_db()
+        app.run(debug=True, port=8030)

@@ -6,16 +6,23 @@ Numbered steps. One action per step. ✓ marks a verification checkpoint.
 
 ## A. Routine update (replacing `app.py` with a new version)
 
-1. Run the test suite locally first: `python3 smoke_test.py` → expect `41 passed, 0 failed`.
+1. Run the test suite locally first: `python3 smoke_test.py` → expect `74 passed, 0 failed`.
 2. SSH: back up the database before touching anything —
    `cp /root/assetapp/assets.db /root/backups/assets_pre_update_$(date +%F).db`
-3. WinSCP: drag the new `app.py` into `/root/assetapp/`, overwriting the old one. **Full-file replacement only — never partial pastes.**
+3. WinSCP: drag the new `asset_register.py` (and `scanner_widget.js` when changed) into `/root/assetapp/`. **Full-file replacement only.** Compile-gate first: `python3 -m py_compile asset_register.py`. Keep a `.bak` of the old file.
 4. SSH: `systemctl restart assetapp`
 5. SSH: `systemctl status assetapp --no-pager` → ✓ **active (running)**
 6. SSH: `curl -s http://127.0.0.1:8030/login | grep -o "Sign in"` → ✓ prints `Sign in` twice
 7. Browser: load https://assets.dr-manoj.in, sign in, open one asset → ✓ page renders normally
 
 **Never** upload or overwrite `assets.db` or anything in `uploads/`.
+
+### A.1 Schema / data migrations (v1.4.0+)
+- Schema (new tables/columns) auto-applies on restart — `init_db()` runs on import and is idempotent (`CREATE IF NOT EXISTS` + guarded `migrate()`). No separate `--init` needed.
+- **Data** migrations are explicit and dry-run-first. Taxonomy backfill:
+  - `cd /root/assetapp && python3 asset_register.py --migrate-taxonomy`  (dry-run, changes nothing — prints the plan)
+  - `python3 asset_register.py --migrate-taxonomy --apply`  (commits; idempotent; refuses if any live location is unmapped in `LOC_TAXONOMY_MAP`)
+- Use the **system `python3`** (the one gunicorn runs), not the `/root/wa` venv.
 
 ---
 
@@ -36,7 +43,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=/root/assetapp
-ExecStart=/usr/local/bin/gunicorn -w 2 -b 127.0.0.1:8030 app:app
+ExecStart=/usr/local/bin/gunicorn -w 2 -b 127.0.0.1:8030 asset_register:app
 Restart=always
 User=root
 

@@ -1,0 +1,39 @@
+assetapp: taxonomy backbone, shared scanner, grouped index, admin hardening (S173)
+
+Session 173. Four increments, all installed and verified live on assets.dr-manoj.in.
+Live entrypoint is asset_register.py (asset_register:app); app.py is dead and removed.
+
+v1.3.0  Shared super-scanner
+  - Extract the inline scanner into a reusable, config-driven scanner_widget.js
+    served from disk (cache-busted by mtime). /scan is now a thin shell that
+    injects window.SCANNER_CONFIG. Same widget reusable by Casepack next.
+  - Multipage PDF; JPEG->PDF (gallery multi-select + no-crop add); editable
+    per-app default filename; per-page delete + retake; ID-card mode (front+back
+    on one A4); batch mode (each scan = own auto-named renamable file).
+  - Live camera + device picker, edge/corner handles, loupe, Heckbert warp,
+    jsPDF + JPEG fallback carried verbatim.
+
+v1.4.0  Taxonomy backbone + migration
+  - New entities (Dr Manoj Clinic / NK Pathology / Personal, each with default
+    visibility) and per-entity zones (24 seeded); assets.entity_id + zone_id.
+  - Idempotent seeding in init_db(). Backfill CLI:
+      python3 asset_register.py --migrate-taxonomy [--apply]
+    dry-run default, idempotent, fail-loud (refuses on any unmapped location).
+  - Applied live: 49 assets classified (Clinic 37 / NK Path 11 / Personal 1).
+    Old location_id kept as shadow (nothing lost).
+
+v1.4.1  Admin hardening
+  - Set & reveal password (typed or generate-strong; shown once).
+  - WhatsApp API token masked behind a collapse + Rotate-token button.
+
+v1.4.2  Grouped index
+  - /assets rewritten as a collapsible Entity -> Zone -> assets view (pure
+    details/summary, no JS). Search filters within groups; unclassified last;
+    manager scope preserved. Only assets_list() changed.
+
+Also: CHANGELOG backfilled with v1.2.0 (reconstructed from the live source, which
+shipped between sessions uncatalogued); DEPLOY corrected (asset_register:app, smoke
+count 74, migration section added); NEXT_BUILD.md added (full redesign resume point).
+
+Tests: 74/74. No secrets, DB, or uploads in this commit (.gitignore enforced).
+Removes: app.py (dead v1.1.0 entrypoint).

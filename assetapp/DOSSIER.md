@@ -1,8 +1,8 @@
 # DOSSIER — Asset Register
 
 **System name:** Asset Register
-**Version:** v1.1.0
-**Status:** Live in production
+**Version:** v1.4.2
+**Status:** Live in production (Session 173: scanner v1.3.0, taxonomy v1.4.0, admin v1.4.1, grouped index v1.4.2)
 **Created:** 23–24 July 2026
 **Owner:** Dr Manoj (personal Google account for backups; VPS-hosted)
 **URL:** https://assets.dr-manoj.in
@@ -37,7 +37,7 @@ The system exists for two reasons:
 
 ## 3. Architecture
 
-- **Single-file Flask app** (`app.py`), SQLite database, server-side rendered HTML. No build step, no JS framework, no external runtime dependencies beyond Flask + gunicorn.
+- **Flask app entrypoint `asset_register.py`** (systemd runs `asset_register:app`; the old `app.py` is dead). Shares one disk-served `scanner_widget.js`. SQLite database, server-side rendered HTML. No build step, no JS framework, no external runtime dependencies beyond Flask + gunicorn.
 - **Storage is VPS-primary.** Database and uploaded files live on the VPS, inside the app's permission gates. Google Drive is used for **backup only** (encrypted archive), never for live file storage.
   - *Rationale (24 Jul 2026):* storing live files in Drive would place them outside the app's role system — Drive links are reachable by anyone holding them, defeating the `hide_price` rule. Google's durability is obtained through backup, not through live storage.
 - **Roles are designed in, not retrofitted.** Two roles (`owner`, `manager`), three user identities.
