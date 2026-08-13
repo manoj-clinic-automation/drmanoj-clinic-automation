@@ -1,0 +1,13 @@
+# ADD THESE TO .gitignore BEFORE COMMITTING (F-31/F-49 — never commit PHI/secrets).
+# New this session (S172):
+casepack/
+wa_portal/wa_portal_sends.csv
+followups/
+# Pre-existing (must already be present):
+console.db
+console.db.tmp
+*.tmp
+transcript_cache.db
+console_reviews.db
+rec_cache/
+portal_config.py

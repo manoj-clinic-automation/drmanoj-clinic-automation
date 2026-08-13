@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Send WhatsApp — Dr. Manoj Agarwal Clinic</title>
+<style>
+:root{--bg:#263433;--card:#2F3E3D;--ink:#E7EEEC;--muted:#9DB0AC;--line:#3D4F4D;--wa:#25D366;--warn:#E0B36A}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-size:16px}
+.wrap{max-width:640px;margin:0 auto;padding:16px 12px 60px}
+h1{font-size:20px;margin:0 0 2px}.sub{color:var(--muted);font-size:13px;margin-bottom:12px}
+.dry{background:rgba(224,179,106,.14);color:var(--warn);border-radius:10px;padding:9px 12px;font-size:13px;margin:8px 0}
+.search{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font-size:16px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;cursor:pointer}
+.row .nm{font-weight:700}.row .mu{color:var(--muted);font-size:12.5px;margin-top:2px}
+.row .go{color:var(--wa);font-weight:700;font-size:13px;white-space:nowrap}
+.blank{background:transparent;color:var(--wa);border:1px solid var(--wa);border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;margin:10px 0}
+.empty{color:var(--muted);text-align:center;padding:24px 10px}
+</style></head><body>
+<div class="wrap">
+  <h1>Send WhatsApp</h1>
+  <div class="sub">Approved templates \u00b7 from clinic number 9358008080</div>
+  <div id="dry"></div>
+  <input class="search" id="q" placeholder="Search patient by name / mobile / clinic ID" autocomplete="off">
+  <button class="blank" id="blank">Compose without a patient</button>
+  <div id="res"><div class="empty">Type at least 2 letters to find a patient.</div></div>
+</div>
+<script>document.write('<scr'+'ipt src="/portal/wa/widget.js?t='+Date.now()+'"><\/scr'+'ipt>');</script>
+<script>
+fetch('/portal/wa/templates').then(function(r){return r.json();}).then(function(j){
+  if(j.dry)document.getElementById('dry').innerHTML='<div class="dry">\u26a0 TEST MODE is ON — messages are logged but not actually sent.</div>';
+});
+var q=document.getElementById('q'),res=document.getElementById('res'),tmr=null;
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function mask(p){var d=(''+p).replace(/\D/g,'');return d.length>=4?'\u2022\u2022\u2022\u2022'+d.slice(-4):'';}
+q.addEventListener('input',function(){clearTimeout(tmr);tmr=setTimeout(run,220);});
+function run(){
+  var v=q.value.trim();if(v.length<2){res.innerHTML='<div class="empty">Type at least 2 letters.</div>';return;}
+  fetch('/portal/wa/search?q='+encodeURIComponent(v)).then(function(r){return r.json();}).then(function(j){
+    if(!j.ok){res.innerHTML='<div class="empty">'+esc(j.error||'search error')+'</div>';return;}
+    if(!j.matches.length){res.innerHTML='<div class="empty">No match.</div>';return;}
+    res.innerHTML=j.matches.map(function(m){
+      return '<div class="row" data-p="'+esc(m.phone)+'" data-n="'+esc(m.name)+'">'
+        +'<div><div class="nm">'+esc(m.name||'—')+'</div>'
+        +'<div class="mu">'+esc([m.age,m.sex].filter(Boolean).join('/'))
+        +(m.clinic_id?' \u00b7 ID '+esc(m.clinic_id):'')+' \u00b7 '+mask(m.phone)+'</div></div>'
+        +'<div class="go">WhatsApp \u2192</div></div>';
+    }).join('');
+    Array.prototype.forEach.call(res.querySelectorAll('.row'),function(el){
+      el.onclick=function(){WAWidget.open({phone:el.getAttribute('data-p'),name:el.getAttribute('data-n')});};
+    });
+  });
+}
+document.getElementById('blank').onclick=function(){WAWidget.open({});};
+</script></body></html>

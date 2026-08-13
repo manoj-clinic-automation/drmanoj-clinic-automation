@@ -1,0 +1,164 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Follow-up WhatsApps — Dr. Manoj Agarwal Clinic</title>
+<style>
+:root{--bg:#263433;--card:#2F3E3D;--ink:#E7EEEC;--muted:#9DB0AC;--line:#3D4F4D;--wa:#25D366;--warn:#E0B36A;--blue:#4E88B8;--low:#E39A96}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-size:15px}
+.wrap{max-width:820px;margin:0 auto;padding:14px 10px 90px}
+h1{font-size:20px;margin:0 0 2px}.sub{color:var(--muted);font-size:12.5px;margin-bottom:10px}
+.dry{background:rgba(224,179,106,.14);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:12.5px;margin:8px 0}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:10px 0;overflow:hidden}
+.sechead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.sechead h3{margin:0;font-size:15px}
+.sechead .cnt{color:var(--muted);font-size:12px}
+.selall{font-size:12px;color:var(--blue);cursor:pointer;white-space:nowrap}
+.secbody{display:none;padding:0 8px 8px}
+.sec.open .secbody{display:block}
+.row{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);padding:9px 6px}
+.row.n{opacity:.5}
+.row input[type=checkbox]{width:20px;height:20px;flex:none}
+.rc{flex:1;min-width:0}
+.rc .nm{font-weight:600;font-size:14px}
+.rc .mu{color:var(--muted);font-size:12px;margin-top:1px}
+.od{display:inline-block;font-size:10.5px;font-weight:700;border-radius:10px;padding:1px 7px;margin-left:6px}
+.od.due{background:rgba(78,136,184,.18);color:var(--blue)}
+.od.miss{background:rgba(224,179,106,.16);color:var(--warn)}
+.od.drop{background:rgba(227,154,150,.16);color:var(--low)}
+.tsel{background:#26332F;color:var(--ink);border:1px solid var(--line);border-radius:8px;font-size:12px;padding:6px 6px;max-width:150px}
+.res{font-size:15px;width:20px;text-align:center;flex:none}
+.foot{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.foot .n{font-size:13px;color:var(--muted)}
+.send{background:var(--wa);color:#053;border:none;border-radius:10px;padding:11px 18px;font-size:15px;font-weight:800;cursor:pointer}
+.send:disabled{opacity:.5;cursor:default}
+.empty{color:var(--muted);text-align:center;padding:26px 10px}
+.toast{position:fixed;bottom:74px;left:50%;transform:translateX(-50%);background:#12201F;color:#fff;padding:10px 16px;border-radius:20px;font-size:13px;max-width:88%;text-align:center;z-index:40}
+</style></head><body>
+<div class="wrap">
+  <h1>Follow-up WhatsApps</h1>
+  <div class="sub" id="sub">Loading today's follow-up list…</div>
+  <div id="dry"></div>
+  <div id="body"><div class="empty">Loading…</div></div>
+</div>
+<div class="foot"><span class="n" id="cnt">0 selected</span>
+  <button class="send" id="send" disabled>Send selected</button></div>
+
+<script>
+var FAM=[]; // follow-up template options {name,title}
+var DATA=null;
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function toast(m){var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove();},4500);}
+function odClass(od){if(od==null)return '';if(od>10)return 'drop';if(od>=4)return 'miss';return 'due';}
+function valuesFor(tpl,r){var n=r.name,d=r.date_fmt,od=r.od;
+  if(tpl==='drmanoj_post_visit')return {"1":n};
+  if(tpl==='drmanoj_followup_dropout')return {"1":n,"2":d,"3":(od==null?'':String(od))};
+  return {"1":n,"2":d};}
+
+Promise.all([
+  fetch('/portal/wa/templates').then(function(r){return r.json();}),
+  fetch('/portal/wa/followups/data').then(function(r){return r.json();})
+]).then(function(a){
+  var tj=a[0], dj=a[1];
+  FAM=(tj.templates||[]).filter(function(t){return t.name.indexOf('drmanoj_')===0;})
+        .map(function(t){return {name:t.name,title:t.title};});
+  DATA=dj;
+  if(!dj.ok){document.getElementById('body').innerHTML='<div class="empty">'+esc(dj.error||'could not load list')+'</div>';
+    document.getElementById('sub').textContent='';return;}
+  if(dj.dry)document.getElementById('dry').innerHTML='<div class="dry">\u26a0 TEST MODE is ON — messages are logged but not actually sent.</div>';
+  document.getElementById('sub').textContent='From '+esc(dj.file)+' \u00b7 tap a section to expand \u00b7 tick patients to message';
+  render(dj);
+});
+
+var DISP=[];
+function tierSplit(dj){
+  var out=[];
+  dj.sections.forEach(function(sec){
+    if(/FOLLOW/i.test(sec.name)){
+      var tiers=[
+        {name:'Due today',t:function(od){return od!=null&&od<=0;}},
+        {name:'Grace \u00b7 1\u20133 days',t:function(od){return od>=1&&od<=3;}},
+        {name:'Actionable Missed \u00b7 4\u201310 days',t:function(od){return od>=4&&od<=10;}},
+        {name:'Dropout \u00b7 10+ days',t:function(od){return od!=null&&od>10;}}
+      ];
+      tiers.forEach(function(tt){
+        var rows=sec.rows.filter(function(r){return tt.t(r.od);});
+        if(rows.length)out.push({name:tt.name,rows:rows});
+      });
+      var nod=sec.rows.filter(function(r){return r.od==null;});
+      if(nod.length)out.push({name:sec.name+' \u00b7 no date',rows:nod});
+    } else { out.push({name:sec.name,rows:sec.rows}); }
+  });
+  return out;
+}
+function render(dj){
+  var body=document.getElementById('body'); body.innerHTML='';
+  DISP=tierSplit(dj);
+  DISP.forEach(function(sec,si){
+    var send=sec.rows.filter(function(r){return r.sendable;}).length;
+    var el=document.createElement('div'); el.className='sec'+(si===0?' open':'');
+    var optbase=FAM.map(function(f){return '<option value="'+esc(f.name)+'">'+esc(f.title)+'</option>';}).join('');
+    var rowsHTML=sec.rows.map(function(r,ri){
+      if(!r.sendable){
+        return '<div class="row n"><input type="checkbox" disabled>'
+          +'<div class="rc"><div class="nm">'+esc(r.name||'\u2014')+'</div>'
+          +'<div class="mu">'+esc(r.phone_mask)+' \u00b7 '+esc(r.status||'not template-sendable')+'</div></div></div>';
+      }
+      var oc=(r.od>10?'drop':(r.od>=4?'miss':'due'));
+      return '<div class="row" data-si="'+si+'" data-ri="'+ri+'">'
+        +'<input type="checkbox" class="cb">'
+        +'<div class="rc"><div class="nm">'+esc(r.name)
+        +'<span class="od '+oc+'">'+(r.od>10?('OD '+r.od):(r.od+'d'))+'</span></div>'
+        +'<div class="mu">'+esc(r.phone_mask)+' \u00b7 due '+esc(r.date_fmt||r.date_raw||'')+'</div></div>'
+        +'<select class="tsel">'+optbase+'</select>'
+        +'<span class="res"></span></div>';
+    }).join('');
+    el.innerHTML='<div class="sechead"><div><h3>'+esc(sec.name)+'</h3>'
+      +'<div class="cnt">'+sec.rows.length+' rows \u00b7 '+send+' can WhatsApp</div></div>'
+      +(send?'<span class="selall">Select all</span>':'')+'</div>'
+      +'<div class="secbody">'+ (rowsHTML||'<div class="empty">none</div>') +'</div>';
+    body.appendChild(el);
+    el.querySelectorAll('.row[data-si]').forEach(function(rw){
+      var r=DISP[rw.getAttribute('data-si')].rows[rw.getAttribute('data-ri')];
+      var sel=rw.querySelector('.tsel'); if(sel&&r.template)sel.value=r.template;
+    });
+    el.querySelector('.sechead').addEventListener('click',function(e){
+      if(e.target.classList.contains('selall'))return; el.classList.toggle('open');});
+    var sa=el.querySelector('.selall');
+    if(sa)sa.addEventListener('click',function(e){e.stopPropagation();
+      var cbs=el.querySelectorAll('.cb');var anyOff=Array.prototype.some.call(cbs,function(c){return !c.checked;});
+      cbs.forEach(function(c){c.checked=anyOff;});count();});
+  });
+  body.querySelectorAll('.cb').forEach(function(c){c.addEventListener('change',count);});
+  count();
+}
+function selected(){
+  var out=[];
+  document.querySelectorAll('.row[data-si]').forEach(function(rw){
+    var cb=rw.querySelector('.cb'); if(!cb||!cb.checked)return;
+    var r=DISP[rw.getAttribute('data-si')].rows[rw.getAttribute('data-ri')];
+    var tpl=rw.querySelector('.tsel').value;
+    out.push({sn:r.sn,name:r.name,phone:r.phone,template:tpl,values:valuesFor(tpl,r),_rw:rw});
+  });
+  return out;
+}
+function count(){var n=selected().length;
+  document.getElementById('cnt').textContent=n+' selected';
+  document.getElementById('send').disabled=(n===0);}
+document.getElementById('send').onclick=function(){
+  var items=selected(); if(!items.length)return;
+  var dry=DATA.dry;
+  if(!confirm((dry?'[TEST] ':'')+'Send '+items.length+' follow-up WhatsApp'+(items.length>1?'s':'')+' from the clinic number?'))return;
+  var b=document.getElementById('send'); b.disabled=true; b.textContent='Sending…';
+  var payload={items:items.map(function(i){return {sn:i.sn,name:i.name,phone:i.phone,template:i.template,values:i.values};})};
+  fetch('/portal/wa/followups/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    .then(function(r){return r.json();}).then(function(j){
+      if(!j.ok){toast('\u274c '+(j.error||'send failed'));b.disabled=false;b.textContent='Send selected';return;}
+      var bySn={}; j.results.forEach(function(x){bySn[x.sn]=x;});
+      items.forEach(function(i){var res=bySn[i.sn]; var cell=i._rw.querySelector('.res');
+        if(res&&res.ok){cell.textContent='\u2705';i._rw.querySelector('.cb').checked=false;}
+        else{cell.textContent='\u274c';cell.title=(res&&res.error)||'failed';}});
+      toast((j.dry?'TEST — ':'')+'Sent '+j.sent+' of '+j.total);
+      b.disabled=false; b.textContent='Send selected'; count();
+    }).catch(function(){toast('\u274c network error');b.disabled=false;b.textContent='Send selected';});
+};
+</script></body></html>
