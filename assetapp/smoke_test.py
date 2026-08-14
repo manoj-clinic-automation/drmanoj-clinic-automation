@@ -6,6 +6,27 @@ TMP = tempfile.mkdtemp(prefix="assetapp_test_")
 os.environ["ASSETS_DB"] = os.path.join(TMP, "test.db")
 os.environ["ASSETS_UPLOADS"] = os.path.join(TMP, "uploads")
 
+# A-D21: arm the REAL SSO shim with a stub portal (set BEFORE the app import).
+# The stub verify_token speaks "user|role|epoch" tokens so tests can mint any
+# role; the app-side mapping code under test is the genuine article.
+PORTAL = os.path.join(TMP, "portal")
+os.makedirs(PORTAL, exist_ok=True)
+open(os.path.join(PORTAL, "clinic_sso.py"), "w").write(
+    'COOKIE_NAME = "clinic_sso"\n'
+    'def verify_token(tok, secret, current_epoch=None):\n'
+    '    if secret != "test-secret":\n'
+    '        return None\n'
+    '    try:\n'
+    '        u, r, e = tok.split("|")\n'
+    '    except Exception:\n'
+    '        return None\n'
+    '    if current_epoch is not None and int(e) != int(current_epoch):\n'
+    '        return None\n'
+    '    return {"user": u, "role": r}\n')
+open(os.path.join(PORTAL, "portal_config.py"), "w").write('CLINIC_SSO_SECRET = "test-secret"\n')
+open(os.path.join(PORTAL, "clinic_users.json"), "w").write('{"epoch": 1}\n')
+os.environ["CLINIC_PORTAL_DIR"] = PORTAL
+
 import asset_register as A
 A.init_db()
 
@@ -503,7 +524,7 @@ check("D expiring-soon surfaces near expiry", b"Expiring soon" in r.data and b"1
 r=owner.get("/purchases?item=VIDAS TSH")
 check("D rate history renders", b"Rate history" in r.data and b"3780" in r.data)
 check("D consumption qty shown", b"total quantity" in r.data)
-check("D bills owner-only (manager 403)", mgr.get("/bills").status_code==403)
+check("D bills open to checker (manager 200; A-D21)", mgr.get("/bills").status_code==200)
 check("D purchases owner-only (manager 403)", mgr.get("/purchases").status_code==403)
 r=owner.post(f"/bills/{bid}/delete", follow_redirects=True)
 check("D bill delete works", b"Bill deleted." in r.data)
@@ -550,7 +571,446 @@ _bid=_db.execute("SELECT id FROM bills WHERE bill_no='SRC1'").fetchone()["id"]; 
 check("E bill_view links the scan", b"scan3.pdf" in owner.get(f"/bills/{_bid}").data)
 _rf=owner.get(f"/bills/{_bid}/file")
 check("E bill_file serves scan (owner)", _rf.status_code==200 and _rf.data.startswith(b"%PDF"))
-check("E bill_file owner-only", mgr.get(f"/bills/{_bid}/file").status_code==403)
+check("E bill_file open to checker (manager 200; A-D21)", mgr.get(f"/bills/{_bid}/file").status_code==200)
+
+print("STEP 19: A-D20 date-normalisation + bill->asset bridge + consumable renewals")
+
+# 19a: _norm_date unit checks (day-first, textual, 2-digit year, passthrough, preserve)
+check("norm ISO passthrough", A._norm_date("2026-07-06") == "2026-07-06")
+check("norm DD.MM.YYYY day-first", A._norm_date("06.07.2026") == "2026-07-06")
+check("norm DD-MM-YYYY day-first", A._norm_date("06-07-2026") == "2026-07-06")
+check("norm DD/MM/YY 2-digit yr", A._norm_date("06/07/26") == "2026-07-06")
+check("norm day>12 disambiguates", A._norm_date("13/07/2026") == "2026-07-13")
+check("norm 2nd>12 -> M/D", A._norm_date("07/13/2026") == "2026-07-13")
+check("norm textual 12-Nov-26", A._norm_date("12-Nov-26") == "2026-11-12")
+check("norm textual 1 Jan 2025", A._norm_date("1 Jan 2025") == "2025-01-01")
+check("norm YYYY-MM -> first", A._norm_date("2026-11") == "2026-11-01")
+check("norm MMM YYYY -> first", A._norm_date("Nov 2026") == "2026-11-01")
+check("norm empty/None -> None", A._norm_date("") is None and A._norm_date(None) is None)
+check("norm unparseable preserved", A._norm_date("see note") == "see note")
+
+# 19b: dates normalised ON SAVE (bill_date + item expiry)
+r = owner.post("/bills/new", data={"kind":"Consumable","vendor":"NormVendor","bill_no":"NRM1",
+    "bill_date":"06.07.2026",
+    "it_name":["Gauze"],"it_pack":["10"],"it_qty":["5"],"it_rate":["20"],"it_amount":["100"],
+    "it_make":[""],"it_model":[""],"it_serial":[""],"it_batch":["B7"],"it_expiry":["12-Nov-26"],
+    "it_hsn":[""]}, follow_redirects=True)
+check("A-D20 bill saved (mixed-format dates)", b"Bill saved with 1 line item" in r.data)
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"]); _db.row_factory = A.sqlite3.Row
+_brow = _db.execute("SELECT id,bill_date FROM bills WHERE bill_no='NRM1'").fetchone()
+check("bill_date stored ISO on save", _brow["bill_date"] == "2026-07-06", str(_brow["bill_date"]))
+_irow = _db.execute("SELECT expiry FROM bill_items WHERE bill_id=?", (_brow["id"],)).fetchone()
+check("item expiry stored ISO on save", _irow["expiry"] == "2026-11-12", str(_irow["expiry"]))
+_db.close()
+
+# 19c: startup normalise_dates migration self-heals legacy rows, idempotently
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"])
+_db.execute("UPDATE bills SET bill_date='31.12.2025' WHERE bill_no='NRM1'")
+_db.execute("UPDATE bill_items SET expiry='01/06/27' WHERE bill_id="
+            "(SELECT id FROM bills WHERE bill_no='NRM1')")
+_db.commit()
+_n1 = A.normalise_dates(_db); _db.commit()
+check("migration rewrote the legacy rows", _n1 >= 2, f"n={_n1}")
+_n2 = A.normalise_dates(_db); _db.commit()
+check("migration idempotent (0 on clean pass)", _n2 == 0, f"n={_n2}")
+_db.row_factory = A.sqlite3.Row
+_chk = _db.execute("SELECT bill_date FROM bills WHERE bill_no='NRM1'").fetchone()["bill_date"]
+check("legacy bill_date now ISO", _chk == "2025-12-31", _chk)
+_db.close()
+
+# 19d: bill -> asset bridge: prefill, save, two-way link, renewal seed
+r = owner.post("/bills/new", data={"kind":"Asset","vendor":"AssetVendor","bill_no":"AST1",
+    "bill_date":"2026-07-06",
+    "it_name":["Portable Ultrasound"],"it_pack":[""],"it_qty":["1"],"it_rate":["275000"],
+    "it_amount":["275000"],"it_make":["Sonosite"],"it_model":["Edge II"],
+    "it_serial":["SN-ULTRA-9"],"it_batch":[""],"it_expiry":["2028-07-06"],"it_hsn":[""]},
+    follow_redirects=True)
+check("bridge asset bill saved", b"Bill saved with 1 line item" in r.data)
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"]); _db.row_factory = A.sqlite3.Row
+_ab = _db.execute("SELECT id FROM bills WHERE bill_no='AST1'").fetchone()["id"]
+_it = _db.execute("SELECT id FROM bill_items WHERE bill_id=?", (_ab,)).fetchone()["id"]
+_db.close()
+r = owner.get(f"/bills/{_ab}")
+check("bill_view offers +asset link", f"bill_item={_it}".encode() in r.data)
+r = owner.get(f"/assets/new?bill_item={_it}")
+check("bridge prefill name", b'value="Portable Ultrasound"' in r.data)
+check("bridge prefill vendor", b'value="AssetVendor"' in r.data)
+check("bridge prefill serial", b'value="SN-ULTRA-9"' in r.data)
+check("bridge prefill hidden link", f'name=bill_item_id value="{_it}"'.encode() in r.data)
+check("bridge blocks manager (403)", mgr.get(f"/assets/new?bill_item={_it}").status_code == 403)
+r = owner.post("/assets/new", data=dict(
+    name="Portable Ultrasound", location_id="2", category="Medical Equipment",
+    status="Active", contract_type="None", vendor="AssetVendor",
+    serial_no="SN-ULTRA-9", price="275000", bill_item_id=str(_it), threshold_days="60"),
+    follow_redirects=False)
+check("bridge asset created", r.status_code == 302)
+_newid = int(r.headers["Location"].rstrip("/").split("/")[-1])
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"]); _db.row_factory = A.sqlite3.Row
+check("asset.bill_id linked",
+      _db.execute("SELECT bill_id FROM assets WHERE id=?", (_newid,)).fetchone()["bill_id"] == _ab)
+check("bill_item.asset_id linked",
+      _db.execute("SELECT asset_id FROM bill_items WHERE id=?", (_it,)).fetchone()["asset_id"] == _newid)
+_seed = _db.execute("SELECT due_date FROM expiries WHERE entity='asset' AND entity_id=? "
+                    "AND label='Item expiry'", (_newid,)).fetchone()
+check("renewal seeded from item expiry", _seed and _seed["due_date"] == "2028-07-06",
+      str(_seed and _seed["due_date"]))
+_db.close()
+check("bill_view shows linked marker", f"#{_newid}".encode() in owner.get(f"/bills/{_ab}").data)
+check("asset_view shows from-bill backlink", f"/bills/{_ab}".encode() in owner.get(f"/assets/{_newid}").data)
+
+# 19e: consumable expiry surfaces in /renewals (owner only)
+import datetime as _dt
+_soon = (_dt.date.today() + _dt.timedelta(days=20)).isoformat()
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"])
+_bid2 = _db.execute("INSERT INTO bills(kind,vendor,bill_no,bill_date) "
+                    "VALUES('Consumable','ExpVendor','EXP1','2026-07-01')").lastrowid
+_db.execute("INSERT INTO bill_items(bill_id,item_name,expiry,batch) VALUES(?,?,?,?)",
+            (_bid2, "Lignocaine vials", _soon, "LOT9"))
+_db.commit(); _db.close()
+r = owner.get("/renewals")
+check("renewals shows consumables (owner)",
+      b"Consumables expiring" in r.data and b"Lignocaine vials" in r.data)
+r = mgr.get("/renewals")
+check("renewals hides consumables from manager", b"Consumables expiring" not in r.data)
+
+print("STEP 20: A-D21 reception intake + maker-checker bills + vendor directory")
+
+def sso_client(user, role, epoch=1):
+    c = A.app.test_client()
+    tok = "%s|%s|%d" % (user, role, epoch)
+    try:
+        c.set_cookie("clinic_sso", tok)                      # Werkzeug >= 2.3
+    except TypeError:
+        c.set_cookie("localhost", "clinic_sso", tok)         # older signature
+    return c
+
+# fresh authed clients for this step (earlier ones were epoch-invalidated, and
+# STEP 12 rotated the manager's password to a generated value -- reset it first)
+owner = A.app.test_client(); login(owner, "manoj", "change-me-manoj")
+owner.post("/admin", data={"action": "reset_pw", "uid": "3", "new": "step20-pass"},
+           follow_redirects=True)
+mgr = A.app.test_client(); login(mgr, "manager", "step20-pass")
+
+# --- 20a: SSO role map, positive + FAIL-CLOSED ---
+al = sso_client("alisha", "staff")
+r = al.get("/intake")
+check("SSO staff -> reception reaches intake", r.status_code == 200 and b"stamp number" in r.data)
+check("reception dashboard redirects to intake",
+      al.get("/").status_code == 302 and "/intake" in al.get("/").headers.get("Location", ""))
+for pth in ("/assets", "/bills", "/renewals", "/vendors", "/admin", "/purchases",
+            "/staff", "/drafts", "/account", "/bills/new"):
+    check("reception 403 on %s" % pth, al.get(pth).status_code == 403)
+dr = sso_client("manoj", "doctor")
+check("SSO doctor -> owner (sees Admin)", b"Admin" in dr.get("/").data)
+mg2 = sso_client("shavez", "manager")
+check("SSO manager -> manager (no Admin, has Purchases)",
+      b"Admin" not in mg2.get("/").data and b"Purchases" in mg2.get("/").data)
+unk = sso_client("eve", "auditor")
+check("unknown SSO role fail-closed (login redirect)", unk.get("/assets").status_code == 302)
+stale = sso_client("alisha", "staff", epoch=0)
+check("stale SSO epoch rejected (login redirect)", stale.get("/intake").status_code == 302)
+
+# --- 20b: intake round-trip + stamp slips + own-only visibility ---
+r = al.post("/intake/submit", data={"bill": (io.BytesIO(b"%PDF-1.4 intake1"), "recbill1.pdf"),
+                                    "note": "2 boxes"},
+            content_type="multipart/form-data", follow_redirects=False)
+check("reception submit redirects to slip", r.status_code == 302 and "/intake/slip/" in r.headers["Location"])
+_slip1 = int(r.headers["Location"].rstrip("/").split("/")[-1])
+r = al.get("/intake/slip/%d" % _slip1)
+check("slip shows a stamp number", r.status_code == 200 and b"B-0" in r.data and b"Alisha" in r.data)
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"]); _db.row_factory = A.sqlite3.Row
+_b1 = _db.execute("SELECT * FROM bills WHERE id=?", (_slip1,)).fetchone()
+check("intake bill is a draft", _b1["status"] == "draft")
+check("intake bill carries submitter + time", _b1["submitted_by"] == "Alisha" and bool(_b1["submitted_at"]))
+check("intake bill carries the scan", bool(_b1["source_stored"]))
+_stamp1 = _b1["stamp_no"]
+_db.close()
+sh = sso_client("shivani", "staff")
+r = sh.post("/intake/submit", data={"bill": (io.BytesIO(b"%PDF-1.4 intake2"), "recbill2.pdf")},
+            content_type="multipart/form-data", follow_redirects=False)
+_slip2 = int(r.headers["Location"].rstrip("/").split("/")[-1])
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"]); _db.row_factory = A.sqlite3.Row
+_stamp2 = _db.execute("SELECT stamp_no FROM bills WHERE id=?", (_slip2,)).fetchone()["stamp_no"]
+_db.close()
+check("stamps are distinct + monotonic", _stamp1 != _stamp2 and _stamp2 > _stamp1)
+r = al.get("/intake")
+check("reception sees ONLY own submissions",
+      _stamp1.encode() in r.data and _stamp2.encode() not in r.data)
+check("reception cannot open the bill itself", al.get("/bills/%d" % _slip1).status_code == 403)
+check("reception cannot view another's slip", al.get("/intake/slip/%d" % _slip2).status_code == 403)
+
+# --- 20c: background Sarvam fill (direct call; fills only what's empty) ---
+_fake = {"vendor": "Aastha Medical Cares", "vendor_phone": "9876543210",
+         "vendor_email": "sales@aastha.example", "bill_no": "811", "bill_date": "06.07.2026",
+         "total_amount": 3969,
+         "items": [{"item_name": "VIDAS TSH-30400", "quantity": 1, "rate": 3780,
+                    "batch": "1011672290", "expiry": "12-Nov-26"}]}
+_realS = A.SARVAM
+class _StubS:
+    @staticmethod
+    def available(): return True
+    @staticmethod
+    def extract(path, **k): return _fake, "done"
+A.SARVAM = _StubS
+A._bg_extract(_slip1, "unused-path")
+A.SARVAM = _realS
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"]); _db.row_factory = A.sqlite3.Row
+_b1 = _db.execute("SELECT * FROM bills WHERE id=?", (_slip1,)).fetchone()
+check("bg fill: header fields set", _b1["vendor"] == "Aastha Medical Cares" and _b1["bill_no"] == "811")
+check("bg fill: date normalised to ISO", _b1["bill_date"] == "2026-07-06")
+check("bg fill: vendor contact captured", _b1["vendor_phone"] == "9876543210")
+_it1 = _db.execute("SELECT * FROM bill_items WHERE bill_id=?", (_slip1,)).fetchall()
+check("bg fill: items inserted, expiry ISO", len(_it1) == 1 and _it1[0]["expiry"] == "2026-11-12")
+_db.execute("UPDATE bills SET vendor='HandTyped' WHERE id=?", (_slip1,)); _db.commit(); _db.close()
+A.SARVAM = _StubS; A._bg_extract(_slip1, "unused-path"); A.SARVAM = _realS
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"]); _db.row_factory = A.sqlite3.Row
+check("bg fill never clobbers checker edits",
+      _db.execute("SELECT vendor FROM bills WHERE id=?", (_slip1,)).fetchone()["vendor"] == "HandTyped")
+check("bg fill never duplicates items",
+      _db.execute("SELECT COUNT(*) FROM bill_items WHERE bill_id=?", (_slip1,)).fetchone()[0] == 1)
+_db.execute("UPDATE bills SET vendor='Aastha Medical Cares' WHERE id=?", (_slip1,))
+_db.commit(); _db.close()
+
+# --- 20d: approval lanes (Consumable=manager; Asset=doctor only) + reject ---
+r = mgr.get("/bills")
+check("manager sees pending badge", b"pending" in r.data and _stamp1.encode() in r.data)
+r = mgr.post("/bills/%d/approve" % _slip1, follow_redirects=True)
+check("manager approves Consumable draft", b"approved" in r.data)
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"]); _db.row_factory = A.sqlite3.Row
+_b1 = _db.execute("SELECT * FROM bills WHERE id=?", (_slip1,)).fetchone()
+check("approval recorded (by/at)", _b1["status"] == "approved" and _b1["approved_by"] == "Manager")
+check("vendor auto-upserted on approve",
+      _db.execute("SELECT phone FROM vendors WHERE name='Aastha Medical Cares'").fetchone()["phone"] == "9876543210")
+_db.close()
+# Asset-kind lane: manager stages, cannot approve; doctor can
+r = mgr.post("/bills/new", data={"kind": "Asset", "vendor": "MedEquip Co", "bill_no": "AK1",
+    "bill_date": "2026-08-01", "it_name": ["ECG Machine"], "it_pack": [""], "it_qty": ["1"],
+    "it_rate": ["55000"], "it_amount": ["55000"], "it_make": [""], "it_model": [""],
+    "it_serial": ["ECG-77"], "it_batch": [""], "it_expiry": [""], "it_hsn": [""]},
+    follow_redirects=True)
+check("manager Asset bill lands as draft", b"sent for doctor approval" in r.data)
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"]); _db.row_factory = A.sqlite3.Row
+_ak = _db.execute("SELECT id FROM bills WHERE bill_no='AK1'").fetchone()["id"]
+_db.close()
+check("manager CANNOT approve Asset-kind (403)",
+      mgr.post("/bills/%d/approve" % _ak).status_code == 403)
+check("manager CANNOT reject Asset-kind (403)",
+      mgr.post("/bills/%d/reject" % _ak).status_code == 403)
+r = owner.post("/bills/%d/approve" % _ak, follow_redirects=True)
+check("doctor approves Asset-kind", b"approved" in r.data)
+# reject flow (void, stamp retained, never reused)
+r = sh.post("/intake/submit", data={"bill": (io.BytesIO(b"%PDF-1.4 rej"), "rej.pdf")},
+            content_type="multipart/form-data", follow_redirects=False)
+_rj = int(r.headers["Location"].rstrip("/").split("/")[-1])
+r = mgr.post("/bills/%d/reject" % _rj, data={"reason": "duplicate bill"}, follow_redirects=True)
+check("manager rejects Consumable draft", b"rejected" in r.data)
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"]); _db.row_factory = A.sqlite3.Row
+_rjrow = _db.execute("SELECT * FROM bills WHERE id=?", (_rj,)).fetchone()
+check("reject is a void (stamp + reason kept)",
+      _rjrow["status"] == "rejected" and bool(_rjrow["stamp_no"]) and _rjrow["reject_reason"] == "duplicate bill")
+_db.close()
+r = owner.post("/bills/new", data={"kind": "Consumable", "vendor": "SeqVendor", "bill_no": "SEQ1",
+    "bill_date": "2026-08-02", "it_name": ["x"], "it_pack": [""], "it_qty": ["1"], "it_rate": ["1"],
+    "it_amount": ["1"], "it_make": [""], "it_model": [""], "it_serial": [""], "it_batch": [""],
+    "it_expiry": [""], "it_hsn": [""]}, follow_redirects=True)
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"]); _db.row_factory = A.sqlite3.Row
+_seq = _db.execute("SELECT stamp_no FROM bills WHERE bill_no='SEQ1'").fetchone()["stamp_no"]
+_db.close()
+check("stamp never reused after reject", _seq > _rjrow["stamp_no"])
+
+# --- 20e: drafts excluded from analytics + bridge until approved ---
+import datetime as _dt2
+_soon2 = (_dt2.date.today() + _dt2.timedelta(days=15)).isoformat()
+r = mgr.post("/bills/new", data={"kind": "Asset", "vendor": "DraftVend", "bill_no": "DRX1",
+    "bill_date": "2026-08-03", "it_name": ["Suction Unit"], "it_pack": [""], "it_qty": ["1"],
+    "it_rate": ["9000"], "it_amount": ["9000"], "it_make": [""], "it_model": [""],
+    "it_serial": ["SU-5"], "it_batch": [""], "it_expiry": [_soon2], "it_hsn": [""]},
+    follow_redirects=True)
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"]); _db.row_factory = A.sqlite3.Row
+_dx = _db.execute("SELECT id FROM bills WHERE bill_no='DRX1'").fetchone()["id"]
+_dxit = _db.execute("SELECT id FROM bill_items WHERE bill_id=?", (_dx,)).fetchone()["id"]
+_db.close()
+check("draft item absent from purchases expiring-soon", b"Suction Unit" not in owner.get("/purchases").data)
+check("draft item absent from renewals consumables", b"Suction Unit" not in owner.get("/renewals?all=1").data)
+check("draft bill offers no + asset link", b"bill_item=%d" % _dxit not in owner.get("/bills/%d" % _dx).data)
+check("bridge prefill refused for draft item (403)",
+      owner.get("/assets/new?bill_item=%d" % _dxit).status_code == 403)
+owner.post("/bills/%d/approve" % _dx, follow_redirects=True)
+check("approved: bridge prefill now opens",
+      owner.get("/assets/new?bill_item=%d" % _dxit).status_code == 200)
+check("approved: item in renewals consumables", b"Suction Unit" in owner.get("/renewals?all=1").data)
+
+# --- 20f: draft edit + kind-flip changes the lane ---
+r = sh.post("/intake/submit", data={"bill": (io.BytesIO(b"%PDF-1.4 flip"), "flip.pdf")},
+            content_type="multipart/form-data", follow_redirects=False)
+_fl = int(r.headers["Location"].rstrip("/").split("/")[-1])
+r = mgr.post("/bills/%d/edit" % _fl, data={"kind": "Asset", "vendor": "FlipVend", "bill_no": "FLP1",
+    "bill_date": "2026-08-04", "it_name": ["Autoclave"], "it_pack": [""], "it_qty": ["1"],
+    "it_rate": ["30000"], "it_amount": ["30000"], "it_make": [""], "it_model": [""],
+    "it_serial": [""], "it_batch": [""], "it_expiry": [""], "it_hsn": [""]},
+    follow_redirects=True)
+check("manager completes a draft (edit saves)", b"Draft updated" in r.data)
+check("kind-flip moved it to the doctor lane (manager approve 403)",
+      mgr.post("/bills/%d/approve" % _fl).status_code == 403)
+check("approved bills are not editable",
+      b"Only draft bills" in mgr.get("/bills/%d/edit" % _slip1, follow_redirects=True).data)
+
+# --- 20g: vendor directory + contacts on the asset page ---
+r = mgr.get("/vendors")
+check("vendors page lists upserted vendor", r.status_code == 200 and b"Aastha Medical Cares" in r.data)
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"]); _db.row_factory = A.sqlite3.Row
+_vid = _db.execute("SELECT id FROM vendors WHERE name='Aastha Medical Cares'").fetchone()["id"]
+_db.close()
+r = mgr.post("/vendors/%d" % _vid, data={"act": "addc", "person_name": "Rakesh Kumar",
+    "crole": "engineer", "cphone": "9000000001", "cemail": "rakesh@aastha.example"},
+    follow_redirects=True)
+check("add engineer contact", b"Rakesh Kumar" in r.data)
+r = mgr.post("/vendors/%d" % _vid, data={"act": "addc", "person_name": "S Gupta",
+    "crole": "service manager", "cphone": "9000000002"}, follow_redirects=True)
+check("add service-manager contact", b"S Gupta" in r.data and b"service manager" in r.data)
+r = owner.post("/assets/new", data=dict(name="VIDAS Analyser", location_id="2",
+    category="Lab Equipment", status="Active", contract_type="AMC",
+    provider="Aastha Medical Cares", vendor="Aastha Medical Cares",
+    renewal_date="2027-01-01", threshold_days="60"), follow_redirects=False)
+_va = int(r.headers["Location"].rstrip("/").split("/")[-1])
+r = owner.get("/assets/%d" % _va)
+check("asset page shows service contacts inline",
+      b"Service contacts" in r.data and b"Rakesh Kumar" in r.data and b"S Gupta" in r.data)
+_db = A.sqlite3.connect(os.environ["ASSETS_DB"]); _db.row_factory = A.sqlite3.Row
+_cid = _db.execute("SELECT id FROM vendor_contacts WHERE person_name='Rakesh Kumar'").fetchone()["id"]
+_db.close()
+mgr.post("/vendors/%d" % _vid, data={"act": "offc", "cid": str(_cid)}, follow_redirects=True)
+r = owner.get("/assets/%d" % _va)
+check("deactivated contact leaves the asset page",
+      b"Rakesh Kumar" not in r.data and b"S Gupta" in r.data)
+check("reception still 403 on vendors after all this", al.get("/vendors/%d" % _vid).status_code == 403)
+
+print("STEP 21: A-D22 intake camera input (split camera + photo/PDF; either field works)")
+_g = al.get("/intake").data
+check("intake shows a camera-capture control",
+      b"name=bill_cam" in _g and b"capture=environment" in _g)
+check("intake shows a photo/PDF fallback control",
+      b"name=bill_file" in _g and b".pdf" in _g)
+check("old mixed camera+PDF single input removed",
+      b'name=bill accept="image/*,.pdf" capture' not in _g)
+check("camera control is a labelled button with filename feedback",
+      b"Take a photo of the bill" in _g and b"cam_st" in _g and b"_pick(" in _g)
+r = al.post("/intake/submit", data={"bill_cam": (io.BytesIO(b"%PDF-1.4 cam"), "cam.jpg")},
+            content_type="multipart/form-data", follow_redirects=False)
+check("intake accepts the camera field",
+      r.status_code == 302 and "/intake/slip/" in r.headers.get("Location", ""))
+r = al.post("/intake/submit", data={"bill_file": (io.BytesIO(b"%PDF-1.4 file"), "saved.pdf")},
+            content_type="multipart/form-data", follow_redirects=False)
+check("intake accepts the photo/PDF field",
+      r.status_code == 302 and "/intake/slip/" in r.headers.get("Location", ""))
+r = al.post("/intake/submit", data={"bill": (io.BytesIO(b"%PDF-1.4 legacy"), "legacy.pdf")},
+            content_type="multipart/form-data", follow_redirects=False)
+check("intake still accepts the legacy 'bill' field",
+      r.status_code == 302 and "/intake/slip/" in r.headers.get("Location", ""))
+r = al.post("/intake/submit", data={"note": "no file here"},
+            content_type="multipart/form-data", follow_redirects=False)
+check("intake with no file returns to intake, not a slip",
+      r.status_code == 302 and "/intake/slip/" not in r.headers.get("Location", ""))
+
+print("STEP 22: A-D23 OCR status + Re-read button + no-blank-approve guard")
+import sqlite3 as _sq
+_ADB = os.environ["ASSETS_DB"]
+def _bill(bid):
+    d = _sq.connect(_ADB); d.row_factory = _sq.Row
+    r = d.execute("SELECT * FROM bills WHERE id=?", (bid,)).fetchone(); d.close(); return r
+def _nit(bid):
+    d = _sq.connect(_ADB)
+    n = d.execute("SELECT COUNT(*) FROM bill_items WHERE bill_id=?", (bid,)).fetchone()[0]
+    d.close(); return n
+_cols = {row[1] for row in _sq.connect(_ADB).execute("PRAGMA table_info(bills)")}
+check("bills gained ocr_status column", "ocr_status" in _cols)
+
+# a fresh reception draft; Sarvam is OFF in the harness, so it stays blank + NULL
+r = sh.post("/intake/submit", data={"bill": (io.BytesIO(b"%PDF-1.4 ad23a"), "ad23a.pdf")},
+            content_type="multipart/form-data", follow_redirects=False)
+_bk = int(r.headers["Location"].rstrip("/").split("/")[-1])
+_b = _bill(_bk)
+check("intake draft blank + ocr_status NULL when Sarvam off",
+      (_b["ocr_status"] in (None, "")) and not _b["vendor"] and _nit(_bk) == 0)
+
+# _bg_extract now records a terminal status AND fills a blank bill (recovery path)
+_realS = A.SARVAM
+class _StubS2:
+    @staticmethod
+    def available(): return True
+    @staticmethod
+    def extract(path, **k):
+        return ({"vendor": "Shri Ram Enterprise", "bill_no": "SRE/1", "bill_date": "2026-08-10",
+                 "total_amount": 1500, "items": [{"item_name": "Gauze", "quantity": 2, "rate": 750}]}, "done")
+A.SARVAM = _StubS2
+_st = A._bg_extract(_bk, os.path.join(A.UPLOAD_DIR, _b["source_stored"]))
+A.SARVAM = _realS
+_b = _bill(_bk)
+check("re-read fills a blank bill (recovery)", _b["vendor"] == "Shri Ram Enterprise" and _nit(_bk) == 1)
+check("re-read records ocr_status='read'", _b["ocr_status"] == "read" and _st == "read")
+
+# a genuinely blank scan -> 'empty'
+_realS = A.SARVAM
+class _StubEmpty:
+    @staticmethod
+    def available(): return True
+    @staticmethod
+    def extract(path, **k): return ({}, "done")
+r = sh.post("/intake/submit", data={"bill": (io.BytesIO(b"%PDF-1.4 blankscan"), "blankscan.pdf")},
+            content_type="multipart/form-data", follow_redirects=False)
+_be = int(r.headers["Location"].rstrip("/").split("/")[-1])
+A.SARVAM = _StubEmpty
+_st = A._bg_extract(_be, os.path.join(A.UPLOAD_DIR, _bill(_be)["source_stored"]))
+A.SARVAM = _realS
+check("unreadable scan records ocr_status='empty'", _st == "empty" and _bill(_be)["ocr_status"] == "empty")
+
+# extract error -> 'failed'
+_realS = A.SARVAM
+class _StubBoom:
+    @staticmethod
+    def available(): return True
+    @staticmethod
+    def extract(path, **k): raise RuntimeError("api down")
+A.SARVAM = _StubBoom
+_st = A._bg_extract(_bk, "unused")
+A.SARVAM = _realS
+check("extract error records ocr_status='failed'", _st == "failed" and _bill(_bk)["ocr_status"] == "failed")
+
+# reread route guards: no scan, and Sarvam off
+r = mgr.post("/bills/new", data={"kind": "Consumable", "vendor": "NoScanVend", "bill_no": "NS1",
+    "bill_date": "2026-08-05", "it_name": ["x"], "it_pack": [""], "it_qty": ["1"], "it_rate": ["1"],
+    "it_amount": ["1"], "it_make": [""], "it_model": [""], "it_serial": [""], "it_batch": [""],
+    "it_expiry": [""], "it_hsn": [""]}, follow_redirects=True)
+_d = _sq.connect(_ADB); _d.row_factory = _sq.Row
+_ns = _d.execute("SELECT id FROM bills WHERE bill_no='NS1'").fetchone()["id"]; _d.close()
+check("reread with no scan is handled gracefully",
+      b"No scan" in mgr.post("/bills/%d/reread" % _ns, follow_redirects=True).data)
+check("reread with Sarvam off tells the checker to type it in",
+      b"configured" in mgr.post("/bills/%d/reread" % _bk, follow_redirects=True).data)
+
+# reread route happy path: Sarvam on (stub), bg stubbed to no-op so 'reading' is observable
+_realbg = A._bg_extract
+A._bg_extract = lambda *a, **k: None
+A.SARVAM = _StubS2
+r = mgr.post("/bills/%d/reread" % _bk, follow_redirects=False)
+check("reread launches + redirects to the bill",
+      r.status_code == 302 and ("/bills/%d" % _bk) in r.headers["Location"])
+check("reread marks the bill 'reading'", _bill(_bk)["ocr_status"] == "reading")
+r = mgr.get("/bills/%d" % _bk)
+check("bill_view shows the reading badge", b"reading the bill" in r.data)
+check("bill_view offers Re-read with Sarvam", b"Re-read with Sarvam" in r.data)
+A._bg_extract = _realbg
+A.SARVAM = _realS
+
+# no-blank-approve guard
+r = sh.post("/intake/submit", data={"bill": (io.BytesIO(b"%PDF-1.4 blankappr"), "blankappr.pdf")},
+            content_type="multipart/form-data", follow_redirects=False)
+_blk = int(r.headers["Location"].rstrip("/").split("/")[-1])
+r = mgr.post("/bills/%d/approve" % _blk, follow_redirects=True)
+check("blank bill approve blocked without confirm",
+      b"no vendor, total, or items" in r.data and _bill(_blk)["status"] == "draft")
+r = mgr.post("/bills/%d/approve" % _blk, data={"confirm_blank": "1"}, follow_redirects=True)
+check("blank bill approves only with explicit confirm", _bill(_blk)["status"] == "approved")
 
 print(f"\n{'='*40}\nRESULT: {passed} passed, {failed} failed")
 shutil.rmtree(TMP, ignore_errors=True)

@@ -23,7 +23,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from markupsafe import Markup
 from werkzeug.utils import secure_filename
 
-APP_VERSION = "1.8.1"   # A.4 + Phase D ledger + Phase E Sarvam extract + scan shadow-flatten; v1.8.1: assets index grouped by LOCATION + Supplier/Serial/Purchased columns
+APP_VERSION = "1.10.3"  # A-D23: OCR is no longer silent -- bills carry an ocr_status (reading/read/empty/failed) shown on the draft + pending list; a "Re-read with Sarvam" button re-runs extraction on the stored scan (recovers reads lost to a restart/race, non-clobber); approving a blank bill (no vendor/total/items) now requires an explicit confirm. Folds in v1.10.2 intake button polish.
 DB_PATH = os.environ.get("ASSETS_DB", os.path.join(os.path.dirname(__file__), "assets.db"))
 UPLOAD_DIR = os.environ.get("ASSETS_UPLOADS", os.path.join(os.path.dirname(__file__), "uploads"))
 SCANNER_JS_PATH = os.path.join(os.path.dirname(__file__), "scanner_widget.js")  # shared scanner widget (Stage 1A)
@@ -49,6 +49,21 @@ try:
     import sarvam_ocr as SARVAM
 except Exception:
     SARVAM = None   # app runs fine without it; extraction just isn't offered
+
+# A-D21: app-local extract schema = the shared bill schema + vendor contact
+# fields (GST invoice headers usually carry phone/email). The SHARED module is
+# deliberately untouched (A-D16); extract() accepts a custom schema.
+ASSET_BILL_SCHEMA = None
+if SARVAM is not None:
+    try:
+        import copy as _copy
+        ASSET_BILL_SCHEMA = _copy.deepcopy(SARVAM.DEFAULT_BILL_SCHEMA)
+        ASSET_BILL_SCHEMA["properties"]["vendor_phone"] = {
+            "type": "string", "description": "supplier phone / mobile number from the bill header"}
+        ASSET_BILL_SCHEMA["properties"]["vendor_email"] = {
+            "type": "string", "description": "supplier email address from the bill header"}
+    except Exception:
+        ASSET_BILL_SCHEMA = None
 
 app = Flask(__name__)
 
@@ -139,6 +154,16 @@ CREATE TABLE IF NOT EXISTS bill_items(
   bill_id INTEGER NOT NULL REFERENCES bills(id),
   item_name TEXT NOT NULL, pack_size TEXT, quantity REAL, rate REAL, amount REAL,
   make TEXT, model TEXT, serial_no TEXT, batch TEXT, expiry TEXT, hsn TEXT);
+CREATE TABLE IF NOT EXISTS vendors(
+  id INTEGER PRIMARY KEY, name TEXT UNIQUE NOT NULL,
+  phone TEXT, email TEXT, address TEXT, gstin TEXT, notes TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')));
+CREATE TABLE IF NOT EXISTS vendor_contacts(
+  id INTEGER PRIMARY KEY, vendor_id INTEGER NOT NULL REFERENCES vendors(id),
+  person_name TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'engineer'
+    CHECK(role IN('engineer','service manager','sales','accounts','other')),
+  phone TEXT, email TEXT, notes TEXT, active INTEGER NOT NULL DEFAULT 1);
 """
 
 CATEGORIES = ["Lab Equipment", "Medical Equipment", "Electrical (Battery/Inverter/Stabilizer)",
@@ -211,6 +236,7 @@ def migrate(db):
         ("pm_count",        "ALTER TABLE assets ADD COLUMN pm_count INTEGER"),
         ("pay_ref",         "ALTER TABLE assets ADD COLUMN pay_ref TEXT"),
         ("pay_date",        "ALTER TABLE assets ADD COLUMN pay_date TEXT"),
+        ("bill_id",         "ALTER TABLE assets ADD COLUMN bill_id INTEGER"),  # A-D20 bill->asset bridge
     ]:
         if _col not in acols:
             db.execute(_ddl)
@@ -225,6 +251,30 @@ def migrate(db):
     ]:
         if _sc not in scols:
             db.execute(_sddl)
+    # A-D20 bill->asset bridge: back-reference from a bill line item to its asset
+    bicols = {r[1] for r in db.execute("PRAGMA table_info(bill_items)")}
+    if "asset_id" not in bicols:
+        db.execute("ALTER TABLE bill_items ADD COLUMN asset_id INTEGER")
+    # A-D21 reception intake + maker-checker: bill workflow/provenance columns.
+    # DEFAULT 'approved' deliberately GRANDFATHERS every pre-existing bill
+    # (all owner-entered to date); new drafts set status explicitly.
+    bcols = {r[1] for r in db.execute("PRAGMA table_info(bills)")}
+    for _bc, _bddl in [
+        ("stamp_no",      "ALTER TABLE bills ADD COLUMN stamp_no TEXT"),
+        ("status",        "ALTER TABLE bills ADD COLUMN status TEXT NOT NULL DEFAULT 'approved'"),
+        ("submitted_by",  "ALTER TABLE bills ADD COLUMN submitted_by TEXT"),
+        ("submitted_at",  "ALTER TABLE bills ADD COLUMN submitted_at TEXT"),
+        ("approved_by",   "ALTER TABLE bills ADD COLUMN approved_by TEXT"),
+        ("approved_at",   "ALTER TABLE bills ADD COLUMN approved_at TEXT"),
+        ("reject_reason", "ALTER TABLE bills ADD COLUMN reject_reason TEXT"),
+        ("vendor_phone",  "ALTER TABLE bills ADD COLUMN vendor_phone TEXT"),
+        ("vendor_email",  "ALTER TABLE bills ADD COLUMN vendor_email TEXT"),
+        # A-D23: makes the OCR read visible. NULL = not applicable (manual bill /
+        # no scan); 'reading' while the extract runs; then 'read' / 'empty' / 'failed'.
+        ("ocr_status",    "ALTER TABLE bills ADD COLUMN ocr_status TEXT"),
+    ]:
+        if _bc not in bcols:
+            db.execute(_bddl)
 
 def seed_taxonomy(db):
     """Idempotent: seed the 3 entities + their zones if not present.
@@ -254,6 +304,46 @@ def seed_picklists(db):
         for r in db.execute(q).fetchall():
             db.execute("INSERT OR IGNORE INTO pick_lists(kind,value,sort) VALUES(?,?,0)",
                        (_kind, (r[0] or "").strip()))
+
+def seed_vendors(db):
+    """A-D21: idempotent one-way seed of the vendors directory from the existing
+    vendor pick-list (name-only rows; INSERT OR IGNORE, never deletes/renames)."""
+    for r in db.execute("SELECT value FROM pick_lists WHERE kind='vendor' AND active=1").fetchall():
+        nm = (r[0] or "").strip()
+        if nm:
+            db.execute("INSERT OR IGNORE INTO vendors(name) VALUES(?)", (nm,))
+
+def upsert_vendor(db, name, phone=None, email=None):
+    """A-D21: ensure a vendors row for `name`; fill phone/email only if empty
+    (never overwrites checker-entered data). Returns vendor id or None."""
+    name = (name or "").strip()
+    if not name:
+        return None
+    db.execute("INSERT OR IGNORE INTO vendors(name) VALUES(?)", (name,))
+    row = db.execute("SELECT id, phone, email FROM vendors WHERE name=?", (name,)).fetchone()
+    if row is None:
+        return None
+    vid = row[0]
+    if phone and not row[1]:
+        db.execute("UPDATE vendors SET phone=? WHERE id=?", (str(phone).strip(), vid))
+    if email and not row[2]:
+        db.execute("UPDATE vendors SET email=? WHERE id=?", (str(email).strip(), vid))
+    return vid
+
+def next_stamp(db):
+    """A-D21: monotonic bill stamp number (B-0001, B-0002, ...). Counter lives in
+    settings('stamp_seq'); numbers are NEVER reused -- a rejected bill keeps its
+    stamp forever (void-pair discipline)."""
+    row = db.execute("SELECT value FROM settings WHERE key='stamp_seq'").fetchone()
+    n = int(row[0]) + 1 if row else 1
+    if row:
+        db.execute("UPDATE settings SET value=? WHERE key='stamp_seq'", (str(n),))
+    else:
+        db.execute("INSERT INTO settings(key,value) VALUES('stamp_seq',?)", (str(n),))
+    return "B-%04d" % n
+
+def _now_ist():
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 
 def migrate_taxonomy(apply=False):
     """One-time backfill of assets.entity_id/zone_id from the old location.
@@ -303,6 +393,86 @@ def migrate_taxonomy(apply=False):
     db.close()
     return len(updates), unmapped
 
+# ---------------------------------------------------------------- date normalisation (A-D20)
+_MONTHS_ABBR = {m: i for i, m in enumerate(
+    ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"], start=1)}
+
+def _norm_date(s):
+    """Tolerantly normalise a human-entered date to ISO YYYY-MM-DD (A-D20 keystone).
+      - None / empty            -> None
+      - already ISO YYYY-MM-DD  -> unchanged
+      - YYYY-MM / YYYY/M        -> first of that month (YYYY-MM-01)
+      - DD.MM.YYYY / DD-MM-YYYY / DD/MM/YYYY (2- or 4-digit year) -> ISO, DAY-FIRST
+      - 12-Nov-26 / 12 Nov 2026 / 1 Jan 2025                      -> ISO
+      - Nov 2026 / Nov-2026                                       -> first of month
+    Ambiguous numeric DD/MM is read DAY-FIRST (Indian convention). A non-empty value
+    that matches nothing is returned stripped-but-UNCHANGED, so no data is ever lost."""
+    if s is None:
+        return None
+    s = str(s).strip()
+    if not s:
+        return None
+    # already a full ISO date
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", s):
+        return s
+    # YYYY-MM  (or YYYY/M) -> first of month
+    m = re.fullmatch(r"(\d{4})[-/](\d{1,2})", s)
+    if m:
+        mo = int(m.group(2))
+        if 1 <= mo <= 12:
+            return "%04d-%02d-01" % (int(m.group(1)), mo)
+        return s
+    # numeric D[sep]M[sep]Y  (sep = . - /)
+    m = re.fullmatch(r"(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{2,4})", s)
+    if m:
+        a, b, ys = int(m.group(1)), int(m.group(2)), m.group(3)
+        y = int(ys) + (2000 if len(ys) == 2 else 0)
+        if a > 12 and b <= 12:          # a must be the day
+            day, mon = a, b
+        elif b > 12 and a <= 12:        # b must be the day (US-style M/D)
+            day, mon = b, a
+        elif a <= 12 and b <= 12:       # ambiguous -> day-first
+            day, mon = a, b
+        else:
+            return s                    # both > 12: not a date we understand
+        try:
+            return datetime.date(y, mon, day).isoformat()
+        except ValueError:
+            return s
+    # textual month: 12-Nov-26 | 12 Nov 2026 | 1 Jan 2025
+    m = re.fullmatch(r"(\d{1,2})[ \-/]([A-Za-z]{3,})[ \-/](\d{2,4})", s)
+    if m:
+        mon = _MONTHS_ABBR.get(m.group(2)[:3].lower())
+        ys = m.group(3); y = int(ys) + (2000 if len(ys) == 2 else 0)
+        if mon:
+            try:
+                return datetime.date(y, mon, int(m.group(1))).isoformat()
+            except ValueError:
+                return s
+        return s
+    # MMM YYYY -> first of month (Nov 2026 / Nov-2026)
+    m = re.fullmatch(r"([A-Za-z]{3,})[ \-/](\d{4})", s)
+    if m:
+        mon = _MONTHS_ABBR.get(m.group(1)[:3].lower())
+        if mon:
+            return "%04d-%02d-01" % (int(m.group(2)), mon)
+    return s   # unrecognised: preserve exactly, lose nothing
+
+def normalise_dates(db):
+    """Idempotent, self-healing: rewrite any non-ISO bills.bill_date /
+    bill_items.expiry to ISO. Only UPDATEs rows that actually change, so a clean
+    DB does zero writes -- safe to run on every boot (init_db) and re-runnable."""
+    n = 0
+    for tbl, col in (("bills", "bill_date"), ("bill_items", "expiry")):
+        for r in db.execute("SELECT id, %s FROM %s WHERE %s IS NOT NULL AND TRIM(%s)<>''"
+                            % (col, tbl, col, col)).fetchall():
+            rid, old = r[0], r[1]
+            new = _norm_date(old)
+            if new and new != old:
+                db.execute("UPDATE %s SET %s=? WHERE id=?" % (tbl, col), (new, rid))
+                n += 1
+    return n
+
 def init_db(seed=True):
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     db = sqlite3.connect(DB_PATH)
@@ -310,6 +480,8 @@ def init_db(seed=True):
     migrate(db)
     seed_taxonomy(db)
     seed_picklists(db)
+    seed_vendors(db)      # A-D21: vendor directory seeded from the vendor pick-list
+    normalise_dates(db)   # A-D20: self-heal any non-ISO bill_date / expiry (idempotent)
     cur = db.execute("SELECT COUNT(*) c FROM users")
     if seed and cur.fetchone()[0] == 0:
         for u, d, r, p in [("manoj", "Dr Manoj", "owner", "change-me-manoj"),
@@ -378,8 +550,13 @@ def _sso_epoch():
 
 
 def _sso_user():
-    """A valid portal clinic_sso cookie -> a local asset user row (or None).
-    doctor -> an active 'owner' row; manager -> an active 'manager' row.
+    """A valid portal clinic_sso cookie -> a local asset user (or None).
+    A-D21 explicit, FAIL-CLOSED role map:
+        doctor  -> an active local 'owner' row
+        manager -> an active local 'manager' row
+        staff   -> a synthetic 'reception' user (no local row, no local password;
+                   the portal is their only door -- epoch bump cuts them off)
+        anything else -> None (no SSO entry; the app's own login is the fallback)
     Prefers a same-username local row when that row's role agrees."""
     if not _sso or not _SSO_SECRET:
         return None
@@ -392,10 +569,21 @@ def _sso_user():
         data = None
     if not data:
         return None
-    asset_role = "owner" if data.get("role") == "doctor" else "manager"
+    sso_role = (data.get("role") or "").strip().lower()
+    uname = (data.get("user") or "").strip().lower()
+    if sso_role == "staff":
+        if not uname:
+            return None
+        return {"id": None, "username": uname, "display_name": uname.title(),
+                "role": "reception", "active": 1}
+    if sso_role == "doctor":
+        asset_role = "owner"
+    elif sso_role == "manager":
+        asset_role = "manager"
+    else:
+        return None   # fail-closed: unrecognised role gets no SSO access
     db = get_db()
     row = None
-    uname = (data.get("user") or "").strip().lower()
     if uname:
         row = db.execute("SELECT * FROM users WHERE lower(username)=? AND active=1",
                          (uname,)).fetchone()
@@ -419,12 +607,21 @@ def current_user():
     # no valid asset session -> accept a portal clinic_sso cookie (Step 4 SSO)
     return _sso_user()
 
+# A-D21: the ONLY endpoints a reception user may reach. Everything else 403s
+# server-side, regardless of what the UI shows. Fail-closed by construction:
+# a new route is reception-blocked unless deliberately added here.
+RECEPTION_OK = {"intake", "intake_submit", "intake_slip", "login", "logout"}
+
 def login_required(f):
     @functools.wraps(f)
     def w(*a, **k):
         u = current_user()
         if not u:
             return redirect(url_for("login", next=request.path))
+        if u["role"] == "reception" and request.endpoint not in RECEPTION_OK:
+            if request.endpoint == "dashboard":
+                return redirect(url_for("intake"))   # friendly landing, not a 403
+            abort(403)
         g.user = u
         return f(*a, **k)
     return w
@@ -436,6 +633,20 @@ def owner_required(f):
         if not u:
             return redirect(url_for("login", next=request.path))
         if u["role"] != "owner":
+            abort(403)
+        g.user = u
+        return f(*a, **k)
+    return w
+
+def checker_required(f):
+    """A-D21: bills lane -- owner OR manager (the checkers). Reception and any
+    other role are refused server-side."""
+    @functools.wraps(f)
+    def w(*a, **k):
+        u = current_user()
+        if not u:
+            return redirect(url_for("login", next=request.path))
+        if u["role"] not in ("owner", "manager"):
             abort(403)
         g.user = u
         return f(*a, **k)
@@ -537,15 +748,17 @@ button:hover,.btn:hover{background:#31506c}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
 </style></head><body>
 <header><div><b>🗂 Asset Register</b> <span class=muted style="color:#9fb3d9">v{{version}}</span></div>
-<nav>{% if user %}<a href="{{url_for('dashboard')}}">Dashboard</a>
+<nav>{% if user %}{% if user['role']=='reception' %}<a href="{{url_for('intake')}}">Scan purchase</a>
+<a href="{{url_for('logout')}}">Logout</a>{% else %}<a href="{{url_for('dashboard')}}">Dashboard</a>
 <a href="{{url_for('assets_list')}}">Assets</a>
 <a href="{{url_for('renewals')}}">Renewals</a>
 <a href="{{url_for('drafts_list')}}">Drafts</a>
 <a href="{{url_for('staff_list')}}">Staff</a>
-{% if user['role']=='owner' %}<a href="{{url_for('bills_list')}}">Purchases</a>{% endif %}
+{% if user['role'] in ('owner','manager') %}<a href="{{url_for('bills_list')}}">Purchases</a>{% endif %}
+{% if user['role'] in ('owner','manager') %}<a href="{{url_for('vendors_list')}}">Vendors</a>{% endif %}
 {% if user['role']=='owner' %}<a href="{{url_for('admin')}}">Admin</a>{% endif %}
 <a href="{{url_for('account')}}">{{user['display_name']}}</a>
-<a href="{{url_for('logout')}}">Logout</a>{% endif %}</nav></header>
+<a href="{{url_for('logout')}}">Logout</a>{% endif %}{% endif %}</nav></header>
 <main>{% with m=get_flashed_messages() %}{% for f in m %}<div class=flash>{{f}}</div>{% endfor %}{% endwith %}
 {{body}}</main></body></html>"""
 
@@ -802,10 +1015,22 @@ def renewals():
         es = r["ent_sort"] if r["ent_sort"] is not None else 9999
         groups.setdefault(en, {"sort": es, "items": []})["items"].append((r, st, days))
     ordered = sorted(groups.items(), key=lambda kv: (kv[1]["sort"], kv[0]))
+    # A-D20: consumable expiries from the purchase ledger, surfaced here too (owner only)
+    consum = []
+    if is_owner():
+        for r in db.execute(
+                "SELECT bi.item_name, bi.batch, bi.expiry, b.vendor, b.id bid "
+                "FROM bill_items bi JOIN bills b ON b.id=bi.bill_id "
+                "WHERE b.status='approved' AND bi.expiry IS NOT NULL "
+                "AND TRIM(bi.expiry)<>'' ORDER BY bi.expiry").fetchall():
+            st, days = due_state(r["expiry"], THRESHOLD_DEFAULT)
+            if not show_all and not st:
+                continue
+            consum.append((r, st, days))
     return page("""<h2>Renewals &amp; warranties</h2>
 <p class=muted>{{ 'All upcoming' if show_all else 'Due soon (amber / overdue)' }} \u00b7
 {% if show_all %}<a href="{{url_for('renewals')}}">due soon only</a>{% else %}<a href="{{url_for('renewals', all=1)}}">show all upcoming</a>{% endif %}</p>
-{% if not ordered %}<p class=muted>Nothing {{'to show.' if show_all else 'due soon. All clear.'}}</p>{% endif %}
+{% if not ordered and not consum %}<p class=muted>Nothing {{'to show.' if show_all else 'due soon. All clear.'}}</p>{% endif %}
 {% for ent_name, g in ordered %}
 <div class=card><h3 style="color:#1f3864">{{ent_name}} <span class=muted>({{g['items']|length}})</span></h3>
 <table><tr><th>Asset</th><th>What</th><th>Due</th><th>Status</th></tr>
@@ -814,7 +1039,15 @@ def renewals():
 <td>{{r['label']}}</td><td>{{r['due_date']}}</td>
 <td>{% if state %}<span class="badge {{state}}">{{'overdue' if days<0 else (days|string)+' days'}}</span>{% elif days is not none %}<span class=muted>{{days}} days</span>{% else %}<span class=muted>\u2014</span>{% endif %}</td>
 </tr>{% endfor %}</table></div>
-{% endfor %}""", ordered=ordered, show_all=bool(show_all))
+{% endfor %}
+{% if consum %}<div class=card><h3 style="color:#1f3864">Consumables expiring <span class=muted>({{consum|length}})</span></h3>
+<table><tr><th>Item</th><th>Batch</th><th>Expiry</th><th>Status</th><th>Vendor</th></tr>
+{% for r,state,days in consum %}<tr class="{{state}}">
+<td><a href="{{url_for('bill_view',bid=r['bid'])}}">{{r['item_name']}}</a></td>
+<td>{{r['batch'] or '\u2014'}}</td><td>{{r['expiry']}}</td>
+<td>{% if state %}<span class="badge {{state}}">{{'expired' if days<0 else (days|string)+' days'}}</span>{% elif days is not none %}<span class=muted>{{days}} days</span>{% else %}<span class=muted>\u2014</span>{% endif %}</td>
+<td>{{r['vendor'] or '\u2014'}}</td></tr>{% endfor %}</table></div>{% endif %}""",
+        ordered=ordered, show_all=bool(show_all), consum=consum)
 
 
 def locations_for_user():
@@ -894,9 +1127,10 @@ FORM_TEMPLATE = """<h2>{{'Edit' if a else 'New'}} asset</h2>
 <div class=muted>This document attaches to the asset when you save.</div></div>{% endif %}
 <div class=card><form method=post>
 {% if draft %}<input type=hidden name=draft_id value={{draft['id']}}>{% endif %}
+{% if pf.get('bill_item_id') %}<input type=hidden name=bill_item_id value="{{pf['bill_item_id']}}">{% endif %}
 <label>Kind</label>
 <select name=kind id=kind>{% for k in kinds %}<option value="{{k}}" {{'selected' if (a and a['kind']==k) or (not a and k=='Asset')}} {{'disabled' if k!='Asset'}}>{{k}}{{' (Phase D)' if k!='Asset'}}</option>{% endfor %}</select>
-<label>Name*</label><input name=name value="{{a['name'] if a else ''}}" required>
+<label>Name*</label><input name=name value="{{a['name'] if a else pf.get('name','')}}" required>
 <label>Entity</label>
 <select name=entity_id id=entity onchange="fillZones()">{% for e in ents %}<option value="{{e['id']}}" {{'selected' if a and a['entity_id']==e['id']}}>{{e['name']}}{{' 🔒' if e['visibility']=='owner_only'}}</option>{% endfor %}</select>
 <label>Zone <span class=muted>(area within the entity, e.g. Reception, OT)</span></label><select name=zone_id id=zone></select>
@@ -905,12 +1139,12 @@ FORM_TEMPLATE = """<h2>{{'Edit' if a else 'New'}} asset</h2>
 <div style="display:flex;gap:6px;max-width:420px">
 <select name=purchase_month id=pmonth style="flex:1">{% for mv,ml in months %}<option value="{{mv}}" {{'selected' if pm==mv}}>{{ml}}</option>{% endfor %}</select>
 <select name=purchase_year id=pyear style="flex:1"><option value="">— year —</option>{% for y in years %}<option {{'selected' if py==y}}>{{y}}</option>{% endfor %}</select></div>
-{% if not a or can_price %}<label>Purchase price (₹)</label><input type=number step=0.01 name=price oninput="emiRecalc()" value="{{a['price'] or '' if a else ''}}">{% endif %}
+{% if not a or can_price %}<label>Purchase price (₹)</label><input type=number step=0.01 name=price oninput="emiRecalc()" value="{{a['price'] or '' if a else pf.get('price','')}}">{% endif %}
 <label>Vendor</label>
 <select onchange="if(this.value){document.getElementById('vendor_in').value=this.value}" style="max-width:200px"><option value="">— pick existing —</option>{% for v in vendors %}<option>{{v}}</option>{% endfor %}</select>
-<input id=vendor_in name=vendor placeholder="or type a new vendor" value="{{a['vendor'] or '' if a else ''}}">
+<input id=vendor_in name=vendor placeholder="or type a new vendor" value="{{a['vendor'] or '' if a else pf.get('vendor','')}}">
 <label>Vendor phone</label><input name=vendor_phone value="{{a['vendor_phone'] or '' if a else ''}}">
-<label>Serial / model no.</label><input name=serial_no value="{{a['serial_no'] or '' if a else ''}}">
+<label>Serial / model no.</label><input name=serial_no value="{{a['serial_no'] or '' if a else pf.get('serial_no','')}}">
 <label>Status</label><select name=status>{% for s in sts %}<option {{'selected' if a and a['status']==s}}>{{s}}</option>{% endfor %}</select>
 <hr><label style="font-weight:bold;color:#1f3864">Contract / warranty</label>
 <label>Contract type</label><select name=contract_type id=ctype onchange="ctypeChange()">{% for c in cts %}<option {{'selected' if a and a['contract_type']==c}}>{{c}}</option>{% endfor %}</select>
@@ -950,7 +1184,7 @@ FORM_TEMPLATE = """<h2>{{'Edit' if a else 'New'}} asset</h2>
 <div class=muted id=emiend></div></div>{% endif %}
 {% if not a %}<hr><label>Make identical copies <span class=muted>(one form -> N separate records, for bulk-bought items; max {{max_copies}})</span></label>
 <input type=number name=make_copies value=1 min=1 max={{max_copies}} style="max-width:120px">{% endif %}
-<label>Notes</label><textarea name=notes rows=3>{{a['notes'] or '' if a else ''}}</textarea>
+<label>Notes</label><textarea name=notes rows=3>{{a['notes'] or '' if a else pf.get('notes','')}}</textarea>
 {% if is_owner %}<label><input type=checkbox name=hidden style="width:auto" {{'checked' if a and a['hidden']}}> Hide entire asset from manager</label>
 <label><input type=checkbox name=hide_price style="width:auto" {{'checked' if a and a['hide_price']}}> Hide price & invoices from manager</label>{% endif %}
 <br><button>Save</button></form></div>
@@ -1160,6 +1394,21 @@ def asset_edit(aid=None):
                               sensitive,ocr_status,uploaded_by) VALUES('asset',?,?,?,?,?,?)""",
                            (new_id, d["stored_name"], d["orig_name"], sens, st, d["created_by"]))
                 db.execute("DELETE FROM drafts WHERE id=?", (did,))
+            # A-D20 bill->asset bridge: two-way link + seed a renewal from the item expiry
+            _bi_id = f.get("bill_item_id", type=int)
+            if _bi_id and not a and is_owner():
+                bi = db.execute("SELECT bi.bill_id, bi.expiry, b.status bstatus FROM bill_items bi "
+                                "JOIN bills b ON b.id=bi.bill_id WHERE bi.id=?", (_bi_id,)).fetchone()
+                if bi and bi["bstatus"] == "approved":
+                    db.execute("UPDATE assets SET bill_id=? WHERE id=?", (bi["bill_id"], new_id))
+                    db.execute("UPDATE bill_items SET asset_id=? WHERE id=?", (new_id, _bi_id))
+                    _exp = _norm_date(bi["expiry"])
+                    if _exp:
+                        _thr = int(f.get("threshold_days") or THRESHOLD_DEFAULT)
+                        db.execute("DELETE FROM expiries WHERE entity='asset' AND entity_id=? "
+                                   "AND label='Item expiry' AND resolved=0", (new_id,))
+                        db.execute("INSERT INTO expiries(entity,entity_id,label,due_date,threshold_days) "
+                                   "VALUES('asset',?,'Item expiry',?,?)", (new_id, _exp, _thr))
             db.commit()
             if not a and copies > 1:
                 flash("Created %d identical assets." % copies)
@@ -1173,7 +1422,34 @@ def asset_edit(aid=None):
     draft = None
     if not a and request.args.get("draft", type=int):
         draft = draft_or_403(request.args.get("draft", type=int))
-    py, pm = split_ym(a["purchase_date"]) if a else ("", "")
+    # A-D20 bill->asset bridge: pre-fill a NEW asset from a bill line item (owner only).
+    # Nothing is created here -- the owner reviews the form and Saves as normal.
+    pf = {}
+    _bi_date = None
+    _bi_id = request.args.get("bill_item", type=int)
+    if _bi_id and not a:
+        if not is_owner():
+            abort(403)
+        bi = db.execute("SELECT bi.*, b.vendor bvendor, b.bill_date bdate, b.status bstatus "
+                        "FROM bill_items bi JOIN bills b ON b.id=bi.bill_id WHERE bi.id=?",
+                        (_bi_id,)).fetchone()
+        if bi and bi["bstatus"] != "approved":
+            abort(403)   # A-D21: only APPROVED bills feed the bridge
+        if bi:
+            pf = {"bill_item_id": _bi_id,
+                  "name": bi["item_name"] or "",
+                  "vendor": bi["bvendor"] or "",
+                  "serial_no": bi["serial_no"] or "",
+                  "price": (bi["rate"] if bi["rate"] is not None else bi["amount"]) or ""}
+            _extra = []
+            for _lbl, _k in (("make", "make"), ("model", "model"),
+                             ("batch", "batch"), ("HSN", "hsn")):
+                if bi[_k]:
+                    _extra.append("%s %s" % (_lbl, bi[_k]))
+            if _extra:
+                pf["notes"] = "From bill: " + ", ".join(_extra)
+            _bi_date = _norm_date(bi["bdate"])
+    py, pm = split_ym(a["purchase_date"]) if a else (split_ym(_bi_date) if _bi_date else ("", ""))
     cy, cm = split_ym(a["coverage_start"]) if (a and a["coverage_start"]) else (py, pm)
     ey, em = split_ym(a["emi_start"]) if (a and a["emi_start"]) else ("", "")
     return page(FORM_TEMPLATE,
@@ -1183,7 +1459,7 @@ def asset_edit(aid=None):
         vendors=pick("vendor"), providers=pick("provider"),
         accounts=sorted(set(pick("bank") + pick("card"))),
         banks_json=Markup(_json.dumps(pick("bank"))), cards_json=Markup(_json.dumps(pick("card"))),
-        exp=exp, can_price=(a is None or can_see_price(a)), draft=draft,
+        exp=exp, can_price=(a is None or can_see_price(a)), draft=draft, pf=pf,
         py=py, pm=pm, cy=cy, cm=cm, ey=ey, em=em, max_copies=MAX_COPIES,
         thr=(next(iter(exp.values()))["threshold_days"] if exp else THRESHOLD_DEFAULT))
 
@@ -1231,6 +1507,19 @@ def asset_view(aid):
                 continue
             if is_image_name(row["orig_name"]):
                 img_ids.add(row["id"])
+    # A-D21: service contacts -- the provider's (preferred: they service it) or
+    # the vendor's directory entry, shown inline for the "who do I call" moment.
+    vconts, vcname = [], None
+    for nm in (a["provider"], a["vendor"]):
+        if not nm:
+            continue
+        vrow = db.execute("SELECT id,name FROM vendors WHERE name=?", (nm,)).fetchone()
+        if vrow:
+            vconts = db.execute("SELECT * FROM vendor_contacts WHERE vendor_id=? AND active=1 "
+                                "ORDER BY role, person_name", (vrow["id"],)).fetchall()
+            vcname = vrow["name"]
+            if vconts:
+                break
     return page("""<p><a class="btn small" href="{{url_for('assets_list')}}">← Assets</a></p>
 <h2>{{a['name']}}</h2>
 <p><a class="btn small" href="{{url_for('asset_edit',aid=a['id'])}}">Edit</a>
@@ -1241,12 +1530,18 @@ def asset_view(aid):
 <b>Purchased:</b> {{a['purchase_date'] or '—'}}
 {% if show_price %}<br><b>Price:</b> ₹{{'%.0f'|format(a['price']) if a['price'] else '—'}}{% endif %}</div>
 <div class=card><b>Vendor:</b> {{a['vendor'] or '—'}} {{a['vendor_phone'] or ''}}<br>
+{% if is_owner and a['bill_id'] %}<b>From bill:</b> <a href="{{url_for('bill_view',bid=a['bill_id'])}}">#{{a['bill_id']}}</a><br>{% endif %}
 <b>Contract:</b> {{a['contract_type']}}{% if a['provider'] %} — {{a['provider']}}{% endif %}
 {% if show_price and a['contract_cost'] %}<br><b>Contract cost:</b> ₹{{'%.0f'|format(a['contract_cost'])}}/yr{% endif %}
 {% if a['contract_period'] and a['contract_period'] not in ('none','custom') %}<br><b>Coverage:</b> {{a['contract_period']}}{% endif %}
 {% if a['pm_count'] %}<br><b>Preventive maint.:</b> {{pm_done}} of {{a['pm_count']}} done{% endif %}
 {% if show_price and a['payment_method'] %}<br><b>Paid via:</b> {{a['payment_method']}}{% if a['pay_account'] %} ({{a['pay_account']}}){% endif %}{% if a['payment_method']=='Cheque' and a['pay_ref'] %} · no. {{a['pay_ref']}}{% if a['pay_date'] %} dt {{a['pay_date']}}{% endif %}{% endif %}{% if a['payment_method']=='UPI' and a['pay_ref'] %} · ref {{a['pay_ref']}}{% endif %}{% if a['emi'] %} · EMI {{a['emi_count']}}×{% if a['emi_amount'] %}₹{{'%.0f'|format(a['emi_amount'])}}{% endif %}{% if a['emi_end'] %} → {{a['emi_end'][:7]}}{% endif %}{% endif %}{% endif %}</div></div>
 {% if a['notes'] %}<div class=card>{{a['notes']}}</div>{% endif %}
+{% if vconts %}<div class=card><h4>Service contacts <span class=muted>({{vcname}})</span></h4>
+{% for c in vconts %}<div style="margin-bottom:6px"><b>{{c['person_name']}}</b>
+<span class=muted>({{c['role']}})</span> · {{c['phone'] or ''}} {{c['email'] or ''}}
+{% if c['notes'] %}<span class=muted>· {{c['notes']}}</span>{% endif %}</div>{% endfor %}
+{% if is_owner or user['role']=='manager' %}<a class="btn small" href="{{url_for('vendors_list')}}">vendor directory</a>{% endif %}</div>{% endif %}
 <div class=card><h4>Dates to watch</h4>{% if not exp %}<span class=muted>none set</span>{% endif %}
 {% for e,state,days in exp %}<div>{{e['label']}}: <b>{{e['due_date']}}</b>
 {% if state %}<span class="badge {{state}}">{{'overdue' if days<0 else (days|string)+'d'}}</span>{% endif %}</div>{% endfor %}</div>
@@ -1315,7 +1610,7 @@ function svcConfirm(){
 }
 </script></div>""",
         a=a, exp=exp, logs=logs, atts=atts, show_price=show_price, pm_done=pm_done, img_ids=img_ids,
-        parts=parts, tstr=today().isoformat(),
+        parts=parts, tstr=today().isoformat(), vconts=vconts, vcname=vcname,
         ent_name=ent_name, zone_name=zone_name, today=today().isoformat())
 
 @app.route("/assets/<int:aid>/delete", methods=["POST"])
@@ -1647,38 +1942,47 @@ def _num(v):
         return None
 
 @app.route("/bills")
-@owner_required
+@checker_required
 def bills_list():
     db = get_db()
     q = request.args.get("q", "").strip()
     fk = request.args.get("kind", "").strip()
+    fs = request.args.get("status", "").strip()
     where, params = "1=1", []
     if q:
-        where += (" AND (b.vendor LIKE ? OR b.bill_no LIKE ? OR EXISTS("
+        where += (" AND (b.vendor LIKE ? OR b.bill_no LIKE ? OR b.stamp_no LIKE ? OR EXISTS("
                   "SELECT 1 FROM bill_items bi WHERE bi.bill_id=b.id AND bi.item_name LIKE ?))")
-        params += ["%" + q + "%"] * 3
+        params += ["%" + q + "%"] * 4
     if fk in ("Asset", "Consumable"):
         where += " AND b.kind=?"
         params.append(fk)
+    if fs in ("draft", "approved", "rejected"):
+        where += " AND b.status=?"
+        params.append(fs)
+    npend = db.execute("SELECT COUNT(*) FROM bills WHERE status='draft'").fetchone()[0]
     bills = db.execute(
         "SELECT b.*, u.display_name entered_by, "
         "(SELECT COUNT(*) FROM bill_items bi WHERE bi.bill_id=b.id) nitems "
         "FROM bills b LEFT JOIN users u ON u.id=b.created_by "
-        "WHERE " + where + " ORDER BY b.bill_date DESC, b.id DESC LIMIT 300", params).fetchall()
-    return page("""<h2>Purchases</h2>
+        "WHERE " + where + " ORDER BY (b.status='draft') DESC, b.bill_date DESC, b.id DESC LIMIT 300",
+        params).fetchall()
+    return page("""<h2>Purchases{% if npend %} <a href="{{url_for('bills_list',status='draft')}}" class="badge amber" style="text-decoration:none">{{npend}} pending</a>{% endif %}</h2>
 <form method=get style="margin-bottom:10px">
-<input name=q value="{{q}}" placeholder="vendor / bill no / item" style="max-width:230px">
+<input name=q value="{{q}}" placeholder="vendor / bill no / stamp / item" style="max-width:230px">
 <select name=kind onchange="this.form.submit()" style="width:auto;max-width:150px"><option value="">Kind: all</option><option {{'selected' if fk=='Consumable'}}>Consumable</option><option {{'selected' if fk=='Asset'}}>Asset</option></select>
-<button class="btn small">Search</button>{% if q or fk %} <a class="btn small" href="{{url_for('bills_list')}}">clear</a>{% endif %}</form>
+<select name=status onchange="this.form.submit()" style="width:auto;max-width:150px"><option value="">Status: all</option><option {{'selected' if fs=='draft'}}>draft</option><option {{'selected' if fs=='approved'}}>approved</option><option {{'selected' if fs=='rejected'}}>rejected</option></select>
+<button class="btn small">Search</button>{% if q or fk or fs %} <a class="btn small" href="{{url_for('bills_list')}}">clear</a>{% endif %}</form>
 <p><a class=btn href="{{url_for('bill_new')}}">+ New bill</a>
-<a class="btn small" href="{{url_for('purchases')}}">\U0001F4C8 Consumption &amp; rate history</a></p>
-<table><tr><th>Date</th><th>Vendor</th><th>Bill no</th><th>Kind</th><th>Items</th><th>Total</th></tr>
-{% for b in bills %}<tr><td>{{b['bill_date'] or '\u2014'}}</td>
+<a class="btn small" href="{{url_for('intake')}}">📷 Scan intake</a>
+{% if is_owner %}<a class="btn small" href="{{url_for('purchases')}}">\U0001F4C8 Consumption &amp; rate history</a>{% endif %}</p>
+<table><tr><th>Stamp</th><th>Status</th><th>Date</th><th>Vendor</th><th>Bill no</th><th>Kind</th><th>Items</th><th>Total</th></tr>
+{% for b in bills %}<tr class="{{'amber' if b['status']=='draft' else ('red' if b['status']=='rejected' else '')}}"><td>{{b['stamp_no'] or '\u2014'}}</td>
+<td>{{b['status']}}{% if b['ocr_status']=='reading' %} <span class=muted title="reading the bill">📖</span>{% elif b['ocr_status']=='empty' or b['ocr_status']=='failed' %} <span class=muted title="couldn't auto-read">⚠</span>{% endif %}</td><td>{{b['bill_date'] or '\u2014'}}</td>
 <td><a href="{{url_for('bill_view',bid=b['id'])}}">{{b['vendor'] or '(no vendor)'}}</a></td>
 <td>{{b['bill_no'] or '\u2014'}}</td><td>{{b['kind']}}</td><td>{{b['nitems']}}</td>
 <td>{{'\u20b9%.2f'|format(b['total_amount']) if b['total_amount'] is not none else '\u2014'}}</td></tr>{% endfor %}</table>
-{% if not bills %}<p class=muted>No bills{{' match' if q or fk else ' yet'}}. Add one with \u201c+ New bill\u201d.</p>{% endif %}""",
-        bills=bills, q=q, fk=fk)
+{% if not bills %}<p class=muted>No bills{{' match' if q or fk or fs else ' yet'}}. Add one with \u201c+ New bill\u201d.</p>{% endif %}""",
+        bills=bills, q=q, fk=fk, fs=fs, npend=npend)
 
 BILLFORM_TPL = """<h2>New bill</h2>
 <p><a class="btn small" href="{{url_for('bills_list')}}">← Purchases</a></p>
@@ -1690,6 +1994,8 @@ BILLFORM_TPL = """<h2>New bill</h2>
 <form method=post>
 <input type=hidden name=src_stored value="{{src.get('stored','')}}">
 <input type=hidden name=src_orig value="{{src.get('orig','')}}">
+<input type=hidden name=vendor_phone value="{{hdr.get('vendor_phone','')}}">
+<input type=hidden name=vendor_email value="{{hdr.get('vendor_email','')}}">
 <div class=card>
 <label>Kind</label><select name=kind style="width:auto"><option {{'selected' if hdr.get('kind')!='Asset'}}>Consumable</option><option {{'selected' if hdr.get('kind')=='Asset'}}>Asset</option></select>
 <label>Vendor</label><input name=vendor list=vendorlist value="{{hdr.get('vendor','')}}" placeholder="supplier">
@@ -1750,6 +2056,8 @@ def _map_bill(data):
                 return v
         return ""
     hdr["vendor"] = _cln(g("vendor", "supplier", "seller", "vendor_name"))
+    hdr["vendor_phone"] = _cln(g("vendor_phone", "phone", "contact", "mobile"))
+    hdr["vendor_email"] = _cln(g("vendor_email", "email"))
     hdr["bill_no"] = _cln(g("bill_no", "invoice_no", "invoice_number", "bill_number"))
     hdr["bill_date"] = _cln(g("bill_date", "invoice_date", "date"))
     ta = g("total_amount", "total", "grand_total", "amount")
@@ -1811,34 +2119,53 @@ def _save_bill_items(db, bid, f):
             (bid, nm, at("it_pack", i) or None, _num(at("it_qty", i)), _num(at("it_rate", i)),
              _num(at("it_amount", i)), at("it_make", i) or None, at("it_model", i) or None,
              at("it_serial", i) or None, at("it_batch", i) or None,
-             at("it_expiry", i) or None, at("it_hsn", i) or None))
+             _norm_date(at("it_expiry", i)), at("it_hsn", i) or None))
         n += 1
     return n
 
 @app.route("/bills/new", methods=["GET", "POST"])
-@owner_required
+@checker_required
 def bill_new():
     db = get_db()
     if request.method == "POST":
         f = request.form
         kind = f.get("kind") if f.get("kind") in ("Asset", "Consumable") else "Consumable"
+        # A-D21 approval lanes: owner-entered bills are self-approved; a manager
+        # self-approves Consumables (he IS the checker) but an Asset-kind bill
+        # goes to the doctor lane as a draft. Enforced again at /approve.
+        stamp = next_stamp(db)
+        if is_owner() or kind == "Consumable":
+            status, app_by, app_at = "approved", g.user["display_name"], _now_ist()
+        else:
+            status, app_by, app_at = "draft", None, None
+        vendor_nm = (f.get("vendor") or "").strip() or None
         cur = db.execute(
             "INSERT INTO bills(kind,vendor,bill_no,bill_date,total_amount,notes,"
-            "source_stored,source_orig,created_by) VALUES(?,?,?,?,?,?,?,?,?)",
-            (kind, (f.get("vendor") or "").strip() or None, (f.get("bill_no") or "").strip() or None,
-             f.get("bill_date") or None, _num(f.get("total_amount")),
+            "source_stored,source_orig,created_by,stamp_no,status,"
+            "submitted_by,submitted_at,approved_by,approved_at,vendor_phone,vendor_email)"
+            " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (kind, vendor_nm, (f.get("bill_no") or "").strip() or None,
+             _norm_date(f.get("bill_date")), _num(f.get("total_amount")),
              (f.get("notes") or "").strip() or None,
              (f.get("src_stored") or "").strip() or None, (f.get("src_orig") or "").strip() or None,
-             g.user["id"]))
+             g.user["id"], stamp, status,
+             g.user["display_name"], _now_ist(), app_by, app_at,
+             (f.get("vendor_phone") or "").strip() or None,
+             (f.get("vendor_email") or "").strip() or None))
         bid = cur.lastrowid
         n = _save_bill_items(db, bid, f)
+        if status == "approved":
+            upsert_vendor(db, vendor_nm, f.get("vendor_phone"), f.get("vendor_email"))
         db.commit()
-        flash("Bill saved with %d line item(s)." % n)
+        if status == "draft":
+            flash("Bill saved with %d line item(s) — stamp %s — sent for doctor approval (Asset-kind)." % (n, stamp))
+        else:
+            flash("Bill saved with %d line item(s) — stamp %s." % (n, stamp))
         return redirect(url_for("bill_view", bid=bid))
     return _bill_form_page()
 
 @app.route("/bills/extract", methods=["POST"])
-@owner_required
+@checker_required
 def bill_extract():
     fobj = request.files.get("bill")
     if not (fobj and fobj.filename and "." in fobj.filename):
@@ -1853,7 +2180,7 @@ def bill_extract():
     src = {"stored": stored, "orig": secure_filename(fobj.filename)}
     hdr, items = {}, []
     if _sarvam_on():
-        data, st = SARVAM.extract(os.path.join(UPLOAD_DIR, stored))
+        data, st = SARVAM.extract(os.path.join(UPLOAD_DIR, stored), schema=ASSET_BILL_SCHEMA)
         if st == "done" and data is not None:
             hdr, items = _map_bill(data)
             flash("Auto-filled from the scan — please review and correct before saving.")
@@ -1864,7 +2191,7 @@ def bill_extract():
     return _bill_form_page(hdr, items, src)
 
 @app.route("/bills/<int:bid>/file")
-@owner_required
+@checker_required
 def bill_file(bid):
     b = get_db().execute("SELECT source_stored, source_orig FROM bills WHERE id=?", (bid,)).fetchone()
     if not b or not b["source_stored"]:
@@ -1876,7 +2203,7 @@ def bill_file(bid):
                      mimetype=mimetypes.guess_type(b["source_orig"] or "")[0] or "application/octet-stream")
 
 @app.route("/bills/<int:bid>")
-@owner_required
+@checker_required
 def bill_view(bid):
     db = get_db()
     b = db.execute("SELECT b.*, u.display_name entered_by FROM bills b "
@@ -1884,24 +2211,49 @@ def bill_view(bid):
     if not b:
         abort(404)
     items = db.execute("SELECT * FROM bill_items WHERE bill_id=? ORDER BY id", (bid,)).fetchall()
-    return page("""<h2>Bill <span class=muted>{{b['bill_no'] or ''}}</span></h2>
+    blank = not (b["vendor"] or b["total_amount"] or items)
+    return page("""<h2>Bill <span class=muted>{{b['bill_no'] or ''}}</span>
+{% if b['stamp_no'] %}<span class=badge style="background:#3a5a78;color:#fff">{{b['stamp_no']}}</span>{% endif %}
+{% if b['status']=='draft' %}<span class="badge amber">PENDING</span>
+{% elif b['status']=='rejected' %}<span class="badge red">REJECTED</span>
+{% else %}<span class="badge green">approved</span>{% endif %}</h2>
 <p><a class="btn small" href="{{url_for('bills_list')}}">← Purchases</a>
-<form method=post action="{{url_for('bill_delete',bid=b['id'])}}" style="display:inline" onsubmit="return confirm('Delete this bill and all its items?')"><button class="btn small danger">Delete</button></form></p>
+{% if b['ocr_status']=='reading' %}<span class="badge amber">📖 reading the bill…</span>
+{% elif b['ocr_status']=='read' %}<span class="badge green">✓ auto-read</span>
+{% elif b['ocr_status']=='empty' %}<span class="badge amber">couldn't auto-read — type it in</span>
+{% elif b['ocr_status']=='failed' %}<span class="badge red">read failed — type it in</span>{% endif %}
+{% if sarvam_on and b['source_stored'] and b['status'] in ('draft','approved') %}<form method=post action="{{url_for('bill_reread',bid=b['id'])}}" style="display:inline"><button class="btn small">🔄 Re-read with Sarvam</button></form>{% endif %}
+{% if b['status']=='draft' %}<a class="btn small" href="{{url_for('bill_edit',bid=b['id'])}}">Complete / edit</a>
+{% if b['kind']!='Asset' or is_owner %}
+<form method=post action="{{url_for('bill_approve',bid=b['id'])}}" style="display:inline"
+ onsubmit="return confirm('{{ 'This bill has NO vendor, total or items - approve it EMPTY anyway?' if blank else 'Approve this bill?' }}')">{% if blank %}<input type=hidden name=confirm_blank value="1">{% endif %}<button class="btn small" style="background:#2e7d5b">Approve{{ ' anyway' if blank else '' }}</button></form>
+<form method=post action="{{url_for('bill_reject',bid=b['id'])}}" style="display:inline"
+ onsubmit="return confirm('Reject this bill? It stays on record.')">
+<input name=reason placeholder="reason" style="max-width:140px;display:inline">
+<button class="btn small danger">Reject</button></form>
+{% else %}<span class="badge amber">Asset-kind — doctor approval needed</span>{% endif %}
+{% endif %}
+{% if is_owner %}<form method=post action="{{url_for('bill_delete',bid=b['id'])}}" style="display:inline" onsubmit="return confirm('Delete this bill and all its items?')"><button class="btn small danger">Delete</button></form>{% endif %}</p>
 <div class=grid>
 <div class=card><b>Vendor:</b> {{b['vendor'] or '—'}}<br><b>Bill no:</b> {{b['bill_no'] or '—'}}<br>
 <b>Date:</b> {{b['bill_date'] or '—'}}<br><b>Kind:</b> {{b['kind']}}<br>
 <b>Total:</b> {{'₹%.2f'|format(b['total_amount']) if b['total_amount'] is not none else '—'}}</div>
-<div class=card>{% if b['notes'] %}{{b['notes']}}<br>{% endif %}<span class=muted>entered by {{b['entered_by']}} {{b['created_at'][:10]}}</span>
+<div class=card>{% if b['notes'] %}{{b['notes']}}<br>{% endif %}
+{% if b['submitted_by'] %}<span class=muted>submitted by <b>{{b['submitted_by']}}</b> {{b['submitted_at'] or ''}}</span><br>{% endif %}
+{% if b['approved_by'] %}<span class=muted>{{'rejected' if b['status']=='rejected' else 'approved'}} by <b>{{b['approved_by']}}</b> {{b['approved_at'] or ''}}</span><br>{% endif %}
+{% if b['reject_reason'] %}<span class=muted>reason: {{b['reject_reason']}}</span><br>{% endif %}
+<span class=muted>entered by {{b['entered_by'] or b['submitted_by'] or '—'}} {{b['created_at'][:10]}}</span>
 {% if b['source_stored'] %}<br>📄 <a href="{{url_for('bill_file',bid=b['id'])}}">{{b['source_orig'] or 'scanned bill'}}</a>{% endif %}</div></div>
 <div class=card><h4>Items</h4>
-<table><tr><th>Item</th><th>Pack</th><th>Qty</th><th>Rate</th><th>Amount</th><th>Details</th></tr>
+<table><tr><th>Item</th><th>Pack</th><th>Qty</th><th>Rate</th><th>Amount</th><th>Details</th><th>Asset</th></tr>
 {% for it in items %}<tr><td><a href="{{url_for('purchases')}}?item={{it['item_name']|urlencode}}">{{it['item_name']}}</a></td>
 <td>{{it['pack_size'] or '—'}}</td><td>{{it['quantity'] if it['quantity'] is not none else '—'}}</td>
 <td>{{'₹%.2f'|format(it['rate']) if it['rate'] is not none else '—'}}</td>
 <td>{{'₹%.2f'|format(it['amount']) if it['amount'] is not none else '—'}}</td>
-<td class=muted>{% if it['make'] %}{{it['make']}} {% endif %}{% if it['model'] %}{{it['model']}} {% endif %}{% if it['serial_no'] %}· s/n {{it['serial_no']}} {% endif %}{% if it['batch'] %}· batch {{it['batch']}} {% endif %}{% if it['expiry'] %}· exp {{it['expiry']}}{% endif %}{% if it['hsn'] %} · HSN {{it['hsn']}}{% endif %}</td></tr>{% endfor %}</table>
+<td class=muted>{% if it['make'] %}{{it['make']}} {% endif %}{% if it['model'] %}{{it['model']}} {% endif %}{% if it['serial_no'] %}· s/n {{it['serial_no']}} {% endif %}{% if it['batch'] %}· batch {{it['batch']}} {% endif %}{% if it['expiry'] %}· exp {{it['expiry']}}{% endif %}{% if it['hsn'] %} · HSN {{it['hsn']}}{% endif %}</td>
+<td>{% if it['asset_id'] %}<a href="{{url_for('asset_view',aid=it['asset_id'])}}">✓ #{{it['asset_id']}}</a>{% elif b['status']=='approved' and is_owner %}<a href="{{url_for('asset_edit', bill_item=it['id'])}}">+ asset</a>{% else %}<span class=muted>—</span>{% endif %}</td></tr>{% endfor %}</table>
 {% if not items %}<p class=muted>No line items on this bill.</p>{% endif %}</div>""",
-        b=b, items=items)
+        b=b, items=items, sarvam_on=_sarvam_on(), blank=blank)
 
 @app.route("/bills/<int:bid>/delete", methods=["POST"])
 @owner_required
@@ -1913,6 +2265,358 @@ def bill_delete(bid):
     flash("Bill deleted.")
     return redirect(url_for("bills_list"))
 
+# ---------------------------------------------------------------- A-D21: reception intake
+def _set_ocr_status(bid, s):
+    db = sqlite3.connect(DB_PATH)
+    try:
+        db.execute("UPDATE bills SET ocr_status=? WHERE id=?", (s, bid)); db.commit()
+    finally:
+        db.close()
+
+def _bg_extract(bid, path):
+    """Sarvam fill of a bill from its stored scan. OWN db connection (thread-safe).
+    Fills ONLY empty header fields and only adds items when none exist yet, so it
+    never clobbers checker edits. Records an ocr_status so the read is NEVER silent:
+    'read' (bill has data after reading), 'empty' (read OK but nothing found),
+    'failed' (extract errored / not done). Runs on drafts AND approved bills --
+    non-clobber makes that safe, and it lets a read lost to a restart be recovered."""
+    try:
+        data, st = SARVAM.extract(path, schema=ASSET_BILL_SCHEMA)
+        if st != "done" or data is None:
+            _set_ocr_status(bid, "failed"); return "failed"
+        hdr, items = _map_bill(data)
+        db = sqlite3.connect(DB_PATH); db.row_factory = sqlite3.Row
+        try:
+            b = db.execute("SELECT * FROM bills WHERE id=?", (bid,)).fetchone()
+            if not b:
+                return "failed"
+            sets, vals = [], []
+            for col, key, fn in (("vendor", "vendor", str), ("bill_no", "bill_no", str),
+                                 ("bill_date", "bill_date", _norm_date),
+                                 ("total_amount", "total_amount", _num),
+                                 ("vendor_phone", "vendor_phone", str),
+                                 ("vendor_email", "vendor_email", str)):
+                if not b[col] and hdr.get(key):
+                    v = fn(hdr[key])
+                    if v not in (None, ""):
+                        sets.append("%s=?" % col); vals.append(v)
+            if sets:
+                db.execute("UPDATE bills SET %s WHERE id=?" % ",".join(sets), (*vals, bid))
+            if items and db.execute("SELECT COUNT(*) FROM bill_items WHERE bill_id=?",
+                                    (bid,)).fetchone()[0] == 0:
+                for it in items:
+                    if not it.get("name"):
+                        continue
+                    db.execute(
+                        "INSERT INTO bill_items(bill_id,item_name,pack_size,quantity,rate,amount,"
+                        "make,model,serial_no,batch,expiry,hsn) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                        (bid, it["name"], it.get("pack") or None, _num(it.get("qty")),
+                         _num(it.get("rate")), _num(it.get("amount")), it.get("make") or None,
+                         it.get("model") or None, it.get("serial") or None, it.get("batch") or None,
+                         _norm_date(it.get("expiry")), it.get("hsn") or None))
+            # terminal status reflects the RESULTING bill state, so a re-read of an
+            # already-filled bill stays 'read' and a genuinely blank scan reads 'empty'.
+            b2 = db.execute("SELECT vendor, total_amount FROM bills WHERE id=?", (bid,)).fetchone()
+            nit = db.execute("SELECT COUNT(*) FROM bill_items WHERE bill_id=?", (bid,)).fetchone()[0]
+            status = "read" if (b2["vendor"] or b2["total_amount"] or nit) else "empty"
+            db.execute("UPDATE bills SET ocr_status=? WHERE id=?", (status, bid))
+            db.commit()
+            return status
+        finally:
+            db.close()
+    except Exception:
+        try:
+            _set_ocr_status(bid, "failed")
+        except Exception:
+            pass
+        return "failed"
+
+@app.route("/intake")
+@login_required
+def intake():
+    db = get_db()
+    me = g.user["display_name"]
+    if g.user["role"] == "reception":
+        mine = db.execute("SELECT id,stamp_no,submitted_at,status FROM bills "
+                          "WHERE submitted_by=? ORDER BY id DESC LIMIT 30", (me,)).fetchall()
+    else:
+        mine = db.execute("SELECT id,stamp_no,submitted_at,status,submitted_by FROM bills "
+                          "WHERE stamp_no IS NOT NULL ORDER BY id DESC LIMIT 30").fetchall()
+    return page("""<h2>Scan a new purchase bill</h2>
+<div class=card><p class=muted>Photograph the paper bill (or choose a saved photo / PDF).
+You'll get a <b>stamp number</b> — write it on the paper bill, then file it. That's all.</p>
+<form method=post action="{{url_for('intake_submit')}}" enctype=multipart/form-data>
+<label class=btn style="cursor:pointer;display:inline-block;position:relative">📷 Take a photo of the bill<input type=file name=bill_cam accept="image/*" capture=environment onchange="_pick(this,'cam_st')" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden"></label>
+<span id=cam_st class=muted style="margin-left:8px"></span>
+<br><br>
+<label class="btn small" style="cursor:pointer;display:inline-block;position:relative">📁 Choose a saved photo / PDF<input type=file name=bill_file accept="image/*,.pdf" onchange="_pick(this,'file_st')" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden"></label>
+<span id=file_st class=muted style="margin-left:8px"></span>
+<label>Note <span class=muted>(optional, e.g. "2 boxes, one bill")</span></label>
+<input name=note maxlength=120 style="max-width:280px">
+<br><button class=btn>Submit bill</button></form>
+<script>function _pick(i,s){var e=document.getElementById(s);e.textContent=i.files&&i.files.length?('\u2713 '+i.files[0].name):'';}</script></div>
+{% if mine %}<div class=card><h4>{{'My submissions' if user['role']=='reception' else 'Recent stamped submissions'}}</h4>
+<table><tr><th>Stamp</th><th>When</th><th>Status</th>{% if user['role']!='reception' %}<th>By</th><th></th>{% endif %}</tr>
+{% for b in mine %}<tr><td><b>{{b['stamp_no'] or '—'}}</b></td><td>{{b['submitted_at'] or '—'}}</td>
+<td>{{b['status']}}</td>
+{% if user['role']!='reception' %}<td>{{b['submitted_by'] or '—'}}</td>
+<td><a href="{{url_for('bill_view',bid=b['id'])}}">open</a></td>{% endif %}</tr>{% endfor %}</table></div>{% endif %}""",
+        mine=mine)
+
+@app.route("/intake/submit", methods=["POST"])
+@login_required
+def intake_submit():
+    # A-D22: intake now offers a camera input and a photo/PDF input; take whichever
+    # one actually carries a file. "bill" kept as a legacy/fallback field name.
+    fobj = None
+    for _k in ("bill_cam", "bill_file", "bill"):
+        _f = request.files.get(_k)
+        if _f and _f.filename and "." in _f.filename:
+            fobj = _f
+            break
+    if not fobj:
+        flash("No file received — try again.")
+        return redirect(url_for("intake"))
+    ext = fobj.filename.rsplit(".", 1)[1].lower()
+    if ext not in ALLOWED_EXT:
+        flash("File type not allowed.")
+        return redirect(url_for("intake"))
+    stored = "bill_%s.%s" % (secrets.token_hex(8), ext)
+    path = os.path.join(UPLOAD_DIR, stored)
+    fobj.save(path)
+    db = get_db()
+    stamp = next_stamp(db)
+    note = (request.form.get("note") or "").strip() or None
+    cur = db.execute(
+        "INSERT INTO bills(kind,notes,source_stored,source_orig,stamp_no,status,"
+        "submitted_by,submitted_at) VALUES('Consumable',?,?,?,?,'draft',?,?)",
+        (note, stored, secure_filename(fobj.filename), stamp,
+         g.user["display_name"], _now_ist()))
+    bid = cur.lastrowid
+    db.commit()
+    if _sarvam_on():
+        db.execute("UPDATE bills SET ocr_status='reading' WHERE id=?", (bid,)); db.commit()
+        import threading
+        threading.Thread(target=_bg_extract, args=(bid, path), daemon=True).start()
+    return redirect(url_for("intake_slip", bid=bid))
+
+@app.route("/intake/slip/<int:bid>")
+@login_required
+def intake_slip(bid):
+    b = get_db().execute("SELECT * FROM bills WHERE id=?", (bid,)).fetchone()
+    if not b or not b["stamp_no"]:
+        abort(404)
+    if g.user["role"] == "reception" and b["submitted_by"] != g.user["display_name"]:
+        abort(403)
+    return page("""<div class=card style="max-width:430px;margin:26px auto;text-align:center">
+<p class=muted>Write this number on the paper bill:</p>
+<div style="font-size:64px;font-weight:800;letter-spacing:3px;color:#1f3864">{{b['stamp_no']}}</div>
+<p><b>{{b['submitted_by']}}</b> · {{b['submitted_at']}}</p>
+<p class=muted>The bill has been sent for checking. You can hand the paper back now.</p>
+<a class=btn href="{{url_for('intake')}}">Scan another</a></div>""", b=b)
+
+# ---------------------------------------------------------------- A-D21: checker workflow
+def _bill_or_404(bid):
+    b = get_db().execute("SELECT b.*, u.display_name entered_by FROM bills b "
+                         "LEFT JOIN users u ON u.id=b.created_by WHERE b.id=?", (bid,)).fetchone()
+    if not b:
+        abort(404)
+    return b
+
+@app.route("/bills/<int:bid>/edit", methods=["GET", "POST"])
+@checker_required
+def bill_edit(bid):
+    db = get_db()
+    b = _bill_or_404(bid)
+    if b["status"] != "draft":
+        flash("Only draft bills can be edited.")
+        return redirect(url_for("bill_view", bid=bid))
+    if request.method == "POST":
+        f = request.form
+        kind = f.get("kind") if f.get("kind") in ("Asset", "Consumable") else "Consumable"
+        db.execute("UPDATE bills SET kind=?, vendor=?, bill_no=?, bill_date=?, total_amount=?,"
+                   " notes=?, vendor_phone=?, vendor_email=? WHERE id=?",
+                   (kind, (f.get("vendor") or "").strip() or None,
+                    (f.get("bill_no") or "").strip() or None, _norm_date(f.get("bill_date")),
+                    _num(f.get("total_amount")), (f.get("notes") or "").strip() or None,
+                    (f.get("vendor_phone") or "").strip() or None,
+                    (f.get("vendor_email") or "").strip() or None, bid))
+        db.execute("DELETE FROM bill_items WHERE bill_id=?", (bid,))   # draft: no asset links yet
+        n = _save_bill_items(db, bid, f)
+        db.commit()
+        flash("Draft updated (%d item(s))." % n)
+        return redirect(url_for("bill_view", bid=bid))
+    items = [{"name": it["item_name"] or "", "pack": it["pack_size"] or "",
+              "qty": it["quantity"] if it["quantity"] is not None else "",
+              "rate": it["rate"] if it["rate"] is not None else "",
+              "amount": it["amount"] if it["amount"] is not None else "",
+              "make": it["make"] or "", "model": it["model"] or "",
+              "serial": it["serial_no"] or "", "batch": it["batch"] or "",
+              "expiry": it["expiry"] or "", "hsn": it["hsn"] or ""}
+             for it in db.execute("SELECT * FROM bill_items WHERE bill_id=? ORDER BY id", (bid,))]
+    hdr = {"kind": b["kind"], "vendor": b["vendor"] or "", "bill_no": b["bill_no"] or "",
+           "bill_date": b["bill_date"] or "", "total_amount": b["total_amount"] or "",
+           "notes": b["notes"] or "", "vendor_phone": b["vendor_phone"] or "",
+           "vendor_email": b["vendor_email"] or ""}
+    return _bill_form_page(hdr, items, {"stored": b["source_stored"] or "",
+                                        "orig": b["source_orig"] or ""})
+
+@app.route("/bills/<int:bid>/approve", methods=["POST"])
+@checker_required
+def bill_approve(bid):
+    db = get_db()
+    b = _bill_or_404(bid)
+    if b["status"] != "draft":
+        flash("Only draft bills can be approved.")
+        return redirect(url_for("bill_view", bid=bid))
+    # A-D21 lane guard, enforced SERVER-SIDE independent of the UI:
+    # Consumable -> manager or owner; Asset-kind -> owner (doctor) ONLY.
+    if b["kind"] == "Asset" and not is_owner():
+        abort(403)
+    # A-D23: don't let a blank bill (no vendor, no total, no items) sail through by
+    # accident. The UI carries confirm_blank=1 only after an explicit "approve anyway".
+    nit = db.execute("SELECT COUNT(*) FROM bill_items WHERE bill_id=?", (bid,)).fetchone()[0]
+    if not (b["vendor"] or b["total_amount"] or nit) and request.form.get("confirm_blank") != "1":
+        flash("This bill has no vendor, total, or items yet — open \u201cComplete / edit\u201d to fill it, or use \u201cApprove anyway\u201d.")
+        return redirect(url_for("bill_view", bid=bid))
+    db.execute("UPDATE bills SET status='approved', approved_by=?, approved_at=? WHERE id=?",
+               (g.user["display_name"], _now_ist(), bid))
+    upsert_vendor(db, b["vendor"], b["vendor_phone"], b["vendor_email"])
+    db.commit()
+    flash("Bill %s approved." % (b["stamp_no"] or ("#%d" % bid)))
+    return redirect(url_for("bill_view", bid=bid))
+
+@app.route("/bills/<int:bid>/reread", methods=["POST"])
+@checker_required
+def bill_reread(bid):
+    """A-D23: re-run Sarvam on the bill's stored scan. Non-clobber (only fills
+    empty fields / items-if-none), so it is safe on draft OR approved bills and
+    recovers a read lost to a restart or a race. Launches the same background
+    fill and marks the bill 'reading'; the checker refreshes to see the result."""
+    db = get_db()
+    b = db.execute("SELECT id, source_stored, status FROM bills WHERE id=?", (bid,)).fetchone()
+    if not b:
+        abort(404)
+    if not b["source_stored"]:
+        flash("No scan is attached to this bill, so there is nothing to read.")
+        return redirect(url_for("bill_view", bid=bid))
+    if not _sarvam_on():
+        flash("Sarvam OCR isn't configured, so the bill can't be auto-read — type it in.")
+        return redirect(url_for("bill_view", bid=bid))
+    path = os.path.join(UPLOAD_DIR, b["source_stored"])
+    if not os.path.exists(path):
+        flash("The scanned file is missing on disk.")
+        return redirect(url_for("bill_view", bid=bid))
+    db.execute("UPDATE bills SET ocr_status='reading' WHERE id=?", (bid,)); db.commit()
+    import threading
+    threading.Thread(target=_bg_extract, args=(bid, path), daemon=True).start()
+    flash("Re-reading the bill with Sarvam — refresh this page in a few seconds.")
+    return redirect(url_for("bill_view", bid=bid))
+
+@app.route("/bills/<int:bid>/reject", methods=["POST"])
+@checker_required
+def bill_reject(bid):
+    db = get_db()
+    b = _bill_or_404(bid)
+    if b["status"] != "draft":
+        flash("Only draft bills can be rejected.")
+        return redirect(url_for("bill_view", bid=bid))
+    if b["kind"] == "Asset" and not is_owner():
+        abort(403)
+    db.execute("UPDATE bills SET status='rejected', approved_by=?, approved_at=?, reject_reason=? "
+               "WHERE id=?", (g.user["display_name"], _now_ist(),
+                              (request.form.get("reason") or "").strip() or None, bid))
+    db.commit()
+    flash("Bill %s rejected (kept on record)." % (b["stamp_no"] or ("#%d" % bid)))
+    return redirect(url_for("bills_list"))
+
+# ---------------------------------------------------------------- A-D21: vendor directory
+VENDOR_CONTACT_ROLES = ["engineer", "service manager", "sales", "accounts", "other"]
+
+@app.route("/vendors")
+@checker_required
+def vendors_list():
+    rows = get_db().execute(
+        "SELECT v.*, (SELECT COUNT(*) FROM vendor_contacts c WHERE c.vendor_id=v.id AND c.active=1) nc,"
+        " (SELECT COUNT(*) FROM bills b WHERE b.vendor=v.name AND b.status='approved') nbills"
+        " FROM vendors v ORDER BY v.name").fetchall()
+    return page("""<h2>Vendors</h2>
+<p class=muted>Grows automatically as bills are approved. Open a vendor to add contact people
+(engineers, service manager, sales).</p>
+<table><tr><th>Vendor</th><th>Phone</th><th>Email</th><th>Contacts</th><th>Bills</th></tr>
+{% for v in rows %}<tr><td><a href="{{url_for('vendor_view',vid=v['id'])}}">{{v['name']}}</a></td>
+<td>{{v['phone'] or '—'}}</td><td>{{v['email'] or '—'}}</td><td>{{v['nc']}}</td><td>{{v['nbills']}}</td></tr>{% endfor %}</table>
+{% if not rows %}<p class=muted>No vendors yet — they appear as bills are approved.</p>{% endif %}""",
+        rows=rows)
+
+@app.route("/vendors/<int:vid>", methods=["GET", "POST"])
+@checker_required
+def vendor_view(vid):
+    db = get_db()
+    v = db.execute("SELECT * FROM vendors WHERE id=?", (vid,)).fetchone()
+    if not v:
+        abort(404)
+    if request.method == "POST":
+        f = request.form
+        act = f.get("act")
+        if act == "save":
+            db.execute("UPDATE vendors SET phone=?, email=?, address=?, gstin=?, notes=? WHERE id=?",
+                       ((f.get("phone") or "").strip() or None, (f.get("email") or "").strip() or None,
+                        (f.get("address") or "").strip() or None, (f.get("gstin") or "").strip() or None,
+                        (f.get("notes") or "").strip() or None, vid))
+            db.commit(); flash("Vendor saved.")
+        elif act == "addc" and (f.get("person_name") or "").strip():
+            role = f.get("crole") if f.get("crole") in VENDOR_CONTACT_ROLES else "other"
+            db.execute("INSERT INTO vendor_contacts(vendor_id,person_name,role,phone,email,notes)"
+                       " VALUES(?,?,?,?,?,?)",
+                       (vid, f.get("person_name").strip(), role,
+                        (f.get("cphone") or "").strip() or None,
+                        (f.get("cemail") or "").strip() or None,
+                        (f.get("cnotes") or "").strip() or None))
+            db.commit(); flash("Contact added.")
+        elif act == "offc" and f.get("cid", type=int):
+            db.execute("UPDATE vendor_contacts SET active=0 WHERE id=? AND vendor_id=?",
+                       (f.get("cid", type=int), vid))
+            db.commit(); flash("Contact removed (kept on record).")
+        return redirect(url_for("vendor_view", vid=vid))
+    contacts = db.execute("SELECT * FROM vendor_contacts WHERE vendor_id=? AND active=1 "
+                          "ORDER BY role, person_name", (vid,)).fetchall()
+    bills = db.execute("SELECT id, stamp_no, bill_date, bill_no, total_amount, kind FROM bills "
+                       "WHERE vendor=? AND status='approved' ORDER BY bill_date DESC, id DESC LIMIT 40",
+                       (v["name"],)).fetchall()
+    return page("""<h2>{{v['name']}}</h2>
+<p><a class="btn small" href="{{url_for('vendors_list')}}">← Vendors</a></p>
+<div class=grid>
+<div class=card><h4>Details</h4><form method=post><input type=hidden name=act value=save>
+<label>Phone</label><input name=phone value="{{v['phone'] or ''}}">
+<label>Email</label><input name=email value="{{v['email'] or ''}}">
+<label>Address</label><input name=address value="{{v['address'] or ''}}">
+<label>GSTIN</label><input name=gstin value="{{v['gstin'] or ''}}">
+<label>Notes</label><input name=notes value="{{v['notes'] or ''}}">
+<br><button class="btn small">Save</button></form></div>
+<div class=card><h4>Contact people <span class=muted>(service engineers, manager…)</span></h4>
+{% for c in contacts %}<div style="margin-bottom:7px"><b>{{c['person_name']}}</b>
+<span class=muted>({{c['role']}})</span><br>{{c['phone'] or ''}} {{c['email'] or ''}}
+{% if c['notes'] %}<span class=muted>· {{c['notes']}}</span>{% endif %}
+<form method=post style="display:inline"><input type=hidden name=act value=offc>
+<input type=hidden name=cid value={{c['id']}}><button class="btn small danger">remove</button></form></div>
+{% endfor %}{% if not contacts %}<p class=muted>No contacts yet.</p>{% endif %}
+<hr><form method=post><input type=hidden name=act value=addc>
+<input name=person_name placeholder="name*" required style="max-width:170px">
+<select name=crole style="width:auto">{% for r in croles %}<option>{{r}}</option>{% endfor %}</select><br>
+<input name=cphone placeholder="phone" style="max-width:150px">
+<input name=cemail placeholder="email" style="max-width:190px">
+<input name=cnotes placeholder="note" style="max-width:170px">
+<button class="btn small">+ add contact</button></form></div></div>
+<div class=card><h4>Purchase history <span class=muted>(approved bills)</span></h4>
+<table><tr><th>Stamp</th><th>Date</th><th>Bill no</th><th>Kind</th><th>Total</th></tr>
+{% for b in bills %}<tr><td>{{b['stamp_no'] or '—'}}</td>
+<td><a href="{{url_for('bill_view',bid=b['id'])}}">{{b['bill_date'] or '—'}}</a></td>
+<td>{{b['bill_no'] or '—'}}</td><td>{{b['kind']}}</td>
+<td>{{'₹%.2f'|format(b['total_amount']) if b['total_amount'] is not none else '—'}}</td></tr>{% endfor %}</table>
+{% if not bills %}<p class=muted>No approved bills yet.</p>{% endif %}</div>""",
+        v=v, contacts=contacts, bills=bills, croles=VENDOR_CONTACT_ROLES)
+
 @app.route("/purchases")
 @owner_required
 def purchases():
@@ -1920,14 +2624,15 @@ def purchases():
     item = request.args.get("item", "").strip()
     soon = []
     for r in db.execute("SELECT bi.item_name, bi.batch, bi.expiry, b.vendor FROM bill_items bi "
-                        "JOIN bills b ON b.id=bi.bill_id WHERE bi.expiry IS NOT NULL AND bi.expiry<>'' "
+                        "JOIN bills b ON b.id=bi.bill_id WHERE b.status='approved' "
+                        "AND bi.expiry IS NOT NULL AND bi.expiry<>'' "
                         "ORDER BY bi.expiry"):
         st, days = due_state(r["expiry"], THRESHOLD_DEFAULT)
         if st:
             soon.append((r, st, days))
     if item:
         rows = db.execute("SELECT bi.*, b.vendor, b.bill_date, b.bill_no FROM bill_items bi "
-                          "JOIN bills b ON b.id=bi.bill_id WHERE bi.item_name=? "
+                          "JOIN bills b ON b.id=bi.bill_id WHERE b.status='approved' AND bi.item_name=? "
                           "ORDER BY b.bill_date, bi.id", (item,)).fetchall()
         rate_series = [r["rate"] for r in rows if r["rate"] is not None]
         drift = None
@@ -1937,7 +2642,7 @@ def purchases():
         frm = request.args.get("from", "").strip() or None
         to = request.args.get("to", "").strip() or None
         csql = ("SELECT COALESCE(SUM(bi.quantity),0) qty, COUNT(*) n FROM bill_items bi "
-                "JOIN bills b ON b.id=bi.bill_id WHERE bi.item_name=?")
+                "JOIN bills b ON b.id=bi.bill_id WHERE b.status='approved' AND bi.item_name=?")
         cp = [item]
         if frm:
             csql += " AND b.bill_date>=?"; cp.append(frm)
@@ -1963,9 +2668,10 @@ def purchases():
     items = db.execute(
         "SELECT bi.item_name name, COUNT(*) buys, COALESCE(SUM(bi.quantity),0) tot_qty, "
         "(SELECT bi2.rate FROM bill_items bi2 JOIN bills b2 ON b2.id=bi2.bill_id "
-        " WHERE bi2.item_name=bi.item_name ORDER BY b2.bill_date DESC, bi2.id DESC LIMIT 1) last_rate, "
+        " WHERE b2.status='approved' AND bi2.item_name=bi.item_name "
+        " ORDER BY b2.bill_date DESC, bi2.id DESC LIMIT 1) last_rate, "
         "MAX(b.bill_date) last_date FROM bill_items bi JOIN bills b ON b.id=bi.bill_id "
-        "GROUP BY bi.item_name ORDER BY last_date DESC").fetchall()
+        "WHERE b.status='approved' GROUP BY bi.item_name ORDER BY last_date DESC").fetchall()
     return page("""<h2>Consumption &amp; rate history</h2>
 <p><a class="btn small" href="{{url_for('bills_list')}}">\u2190 Purchases</a></p>
 {% if soon %}<div class=card><h4>Expiring soon</h4>
