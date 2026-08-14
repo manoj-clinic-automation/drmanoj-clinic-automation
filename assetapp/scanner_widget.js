@@ -64,7 +64,7 @@
           '<canvas id=loupe width=150 height=150 style="position:absolute;top:8px;right:8px;border:3px solid #1f9dff;border-radius:75px;background:#fff;display:none;pointer-events:none"></canvas>' +
         '</div>' +
         '<p class=muted>Drag a <b>round corner</b> or a <b>square edge</b> handle (or the line) to move a whole side. A magnifier appears while you drag.</p>' +
-        '<label><input type=checkbox id=bw checked style="width:auto"> Document mode (B&amp;W contrast boost)</label>' +
+        '<label><input type=checkbox id=bw checked style="width:auto"> Document mode (B&amp;W, flatten shadows + boost contrast)</label>' +
         '<p><button type=button class=btn id=addpage>\u2714 Add page</button>' +
            '<button type=button class="btn small" id=addwhole>\u2795 Add whole image (no crop)</button>' +
            '<button type=button class="btn small" id=resetcorners>\u21BA Reset outline</button>' +
@@ -272,6 +272,28 @@
   ov.addEventListener("touchstart",down,{passive:false}); ov.addEventListener("touchmove",move,{passive:false});
   ov.addEventListener("touchend",up); ov.addEventListener("touchcancel",up);
 
+  // ---------------------------------------------------------------- image enhance (A-D18)
+  // Flatten uneven lighting/shadows (common in phone bill photos) via integral-image
+  // local-mean normalization, then a global contrast stretch. Preserves grays (stamps,
+  // handwriting) far better than a global-only stretch -> cleaner OCR input.
+  function enhanceGray(D, W, H){
+    var Wp=W+1, integ=new Float64Array(Wp*(H+1)), x, y, i, p, gy;
+    for (y=0;y<H;y++){ var rowsum=0;
+      for (x=0;x<W;x++){ p=(y*W+x)*4; gy=0.3*D[p]+0.59*D[p+1]+0.11*D[p+2];
+        rowsum+=gy; integ[(y+1)*Wp+(x+1)]=integ[y*Wp+(x+1)]+rowsum; } }
+    var s=Math.max(15, Math.floor((W<H?W:H)/8)), half=s>>1;
+    var minv=1e9, maxv=-1e9, out=new Float32Array(W*H);
+    for (y=0;y<H;y++){ var y1=y-half<0?0:y-half, y2=y+half>=H?H-1:y+half;
+      for (x=0;x<W;x++){ var x1=x-half<0?0:x-half, x2=x+half>=W?W-1:x+half;
+        var cnt=(x2-x1+1)*(y2-y1+1);
+        var sum=integ[(y2+1)*Wp+(x2+1)]-integ[y1*Wp+(x2+1)]-integ[(y2+1)*Wp+x1]+integ[y1*Wp+x1];
+        var mean=sum/cnt; p=(y*W+x)*4; gy=0.3*D[p]+0.59*D[p+1]+0.11*D[p+2];
+        var norm=mean>0?(gy/mean)*200:gy; if(norm>255)norm=255;
+        out[y*W+x]=norm; if(norm<minv)minv=norm; if(norm>maxv)maxv=norm; } }
+    var rng=maxv-minv; if(rng<1)rng=1;
+    for (i=0;i<W*H;i++){ var g2=Math.round((out[i]-minv)*255/rng); if(g2<0)g2=0; if(g2>255)g2=255;
+      p=i*4; D[p]=D[p+1]=D[p+2]=g2; } }
+
   // ---------------------------------------------------------------- warp (verbatim v1.2.0)
   function warp(){
     // Heckbert unit-square -> quad homography, inverse-sampled
@@ -292,15 +314,7 @@
         if (X>=0 && Y>=0 && X<sw && Y<sh){ var si=(Y*sw+X)*4; D[k]=sd[si]; D[k+1]=sd[si+1]; D[k+2]=sd[si+2]; }
         else { D[k]=D[k+1]=D[k+2]=255; }
         D[k+3]=255; k+=4; } }
-    if ($("bw").checked){
-      var hist=new Array(256).fill(0), n=W*H;
-      for (var i=0;i<D.length;i+=4){ var gy=Math.round(.3*D[i]+.59*D[i+1]+.11*D[i+2]); D[i]=gy; hist[gy]++; }
-      var lo=0, hi=255, acc=0;
-      for (var lp=0;lp<256;lp++){ acc+=hist[lp]; if (acc>n*0.05){ lo=lp; break; } }
-      acc=0; for (var hp=255;hp>=0;hp--){ acc+=hist[hp]; if (acc>n*0.05){ hi=hp; break; } }
-      var rng=Math.max(1,hi-lo);
-      for (var j=0;j<D.length;j+=4){ var gv=Math.max(0,Math.min(255,Math.round((D[j]-lo)*255/rng)));
-        D[j]=D[j+1]=D[j+2]=gv; } }
+    if ($("bw").checked){ enhanceGray(D, W, H); }
     oc.putImageData(od,0,0); return out;
   }
   // whole-image, no perspective correction (for already-clean photos)
@@ -308,15 +322,8 @@
     var out=document.createElement("canvas"); out.width=cv.width; out.height=cv.height;
     out.getContext("2d").drawImage(cv,0,0);
     if ($("bw").checked){
-      var oc=out.getContext("2d"), od=oc.getImageData(0,0,out.width,out.height), D=od.data, n=out.width*out.height;
-      var hist=new Array(256).fill(0);
-      for (var i=0;i<D.length;i+=4){ var gy=Math.round(.3*D[i]+.59*D[i+1]+.11*D[i+2]); D[i]=gy; hist[gy]++; }
-      var lo=0, hi=255, acc=0;
-      for (var lp=0;lp<256;lp++){ acc+=hist[lp]; if (acc>n*0.05){ lo=lp; break; } }
-      acc=0; for (var hp=255;hp>=0;hp--){ acc+=hist[hp]; if (acc>n*0.05){ hi=hp; break; } }
-      var rng=Math.max(1,hi-lo);
-      for (var j=0;j<D.length;j+=4){ var gv=Math.max(0,Math.min(255,Math.round((D[j]-lo)*255/rng)));
-        D[j]=D[j+1]=D[j+2]=gv; }
+      var oc=out.getContext("2d"), od=oc.getImageData(0,0,out.width,out.height);
+      enhanceGray(od.data, out.width, out.height);
       oc.putImageData(od,0,0);
     }
     return out;
