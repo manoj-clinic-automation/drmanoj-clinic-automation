@@ -23,7 +23,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from markupsafe import Markup
 from werkzeug.utils import secure_filename
 
-APP_VERSION = "1.10.3"  # A-D23: OCR is no longer silent -- bills carry an ocr_status (reading/read/empty/failed) shown on the draft + pending list; a "Re-read with Sarvam" button re-runs extraction on the stored scan (recovers reads lost to a restart/race, non-clobber); approving a blank bill (no vendor/total/items) now requires an explicit confirm. Folds in v1.10.2 intake button polish.
+APP_VERSION = "1.11.0"  # A-D24: shadow-flatten SCANNER now drives reception intake (doc-mode -> one clean PDF -> one bill -> one stamp; the plain photo/PDF upload is kept as a fallback). CONSUMPTION/SPEND dashboards on /purchases (Indian-format spend total + this-month + spend-by-month + top-vendors bars) plus an owner spend tile on the dashboard. Legacy asset Supplier/Purchased now AUTO-BACKFILLS from the linked approved bill (startup sweep + on approve + on bridge, non-clobber). scanner_widget.js unchanged. Folds in v1.10.3.
 DB_PATH = os.environ.get("ASSETS_DB", os.path.join(os.path.dirname(__file__), "assets.db"))
 UPLOAD_DIR = os.environ.get("ASSETS_UPLOADS", os.path.join(os.path.dirname(__file__), "uploads"))
 SCANNER_JS_PATH = os.path.join(os.path.dirname(__file__), "scanner_widget.js")  # shared scanner widget (Stage 1A)
@@ -473,6 +473,42 @@ def normalise_dates(db):
                 n += 1
     return n
 
+def _backfill_asset_from_bill(db, asset_id, bill_id):
+    """A-D24: fill an asset's Supplier (vendor) / Purchased (purchase_date) from its
+    linked APPROVED bill, but ONLY where the asset field is still blank -- non-clobber
+    and idempotent. Returns how many fields were filled (0/1/2)."""
+    if not asset_id or not bill_id:
+        return 0
+    b = db.execute("SELECT vendor, bill_date, status FROM bills WHERE id=?", (bill_id,)).fetchone()
+    if not b or b["status"] != "approved":
+        return 0
+    a = db.execute("SELECT vendor, purchase_date FROM assets WHERE id=?", (asset_id,)).fetchone()
+    if not a:
+        return 0
+    sets, vals = [], []
+    if (not a["vendor"]) and b["vendor"]:
+        sets.append("vendor=?"); vals.append(b["vendor"])
+    if (not a["purchase_date"]) and b["bill_date"]:
+        sets.append("purchase_date=?"); vals.append(_norm_date(b["bill_date"]))
+    if sets:
+        db.execute("UPDATE assets SET %s WHERE id=?" % ",".join(sets), (*vals, asset_id))
+    return len(sets)
+
+def backfill_asset_supplier(db):
+    """A-D24 one-shot startup sweep: fill Supplier/Purchased on every bridged asset
+    whose value is still blank, from its linked approved bill. Idempotent (touches
+    only empties) so it is safe to run on every boot. Returns fields filled."""
+    filled = 0
+    for r in db.execute(
+        "SELECT a.id aid, a.bill_id bid FROM assets a JOIN bills b ON b.id=a.bill_id "
+        "WHERE a.bill_id IS NOT NULL AND b.status='approved' AND "
+        "((a.vendor IS NULL OR a.vendor='') OR (a.purchase_date IS NULL OR a.purchase_date=''))"
+    ).fetchall():
+        filled += _backfill_asset_from_bill(db, r["aid"], r["bid"])
+    if filled:
+        db.commit()
+    return filled
+
 def init_db(seed=True):
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     db = sqlite3.connect(DB_PATH)
@@ -482,6 +518,7 @@ def init_db(seed=True):
     seed_picklists(db)
     seed_vendors(db)      # A-D21: vendor directory seeded from the vendor pick-list
     normalise_dates(db)   # A-D20: self-heal any non-ISO bill_date / expiry (idempotent)
+    backfill_asset_supplier(db)  # A-D24: fill Supplier/Purchased on bridged assets (idempotent)
     cur = db.execute("SELECT COUNT(*) c FROM users")
     if seed and cur.fetchone()[0] == 0:
         for u, d, r, p in [("manoj", "Dr Manoj", "owner", "change-me-manoj"),
@@ -610,7 +647,8 @@ def current_user():
 # A-D21: the ONLY endpoints a reception user may reach. Everything else 403s
 # server-side, regardless of what the UI shows. Fail-closed by construction:
 # a new route is reception-blocked unless deliberately added here.
-RECEPTION_OK = {"intake", "intake_submit", "intake_slip", "login", "logout"}
+RECEPTION_OK = {"intake", "intake_submit", "intake_scan_submit", "intake_slip_last",
+                "intake_slip", "scanner_widget_js", "login", "logout"}
 
 def login_required(f):
     @functools.wraps(f)
@@ -716,6 +754,36 @@ def due_state(due_str, threshold):
     if delta <= threshold:
         return "amber", delta
     return "", delta
+
+# ---------------------------------------------------------------- A-D24 formatting
+def _inr(n):
+    """Indian-grouped rupee formatter: 130003 -> '1,30,003'. Returns '' for a
+    None/blank value so templates can show a dash instead of a stray number."""
+    try:
+        n = float(n)
+    except (TypeError, ValueError):
+        return ""
+    neg = n < 0
+    whole = int(round(abs(n)))
+    s = str(whole)
+    if len(s) > 3:
+        last3, rest, parts = s[-3:], s[:-3], []
+        while len(rest) > 2:
+            parts.insert(0, rest[-2:]); rest = rest[:-2]
+        if rest:
+            parts.insert(0, rest)
+        s = ",".join(parts) + "," + last3
+    return ("-" if neg else "") + s
+
+def _ym_human(ym):
+    """'2026-08' -> 'Aug 2026'; passes anything unparseable straight through."""
+    try:
+        y, m = str(ym).split("-")[:2]
+        return datetime.date(int(y), int(m), 1).strftime("%b %Y")
+    except Exception:
+        return ym
+
+app.jinja_env.filters["inr"] = _inr
 
 # ---------------------------------------------------------------- templates
 BASE = """<!doctype html><html><head><meta charset=utf-8>
@@ -857,9 +925,19 @@ def dashboard():
             due.append((r, state, days))
     counts = db.execute(f"""SELECT COUNT(*) c FROM assets a JOIN locations l ON l.id=a.location_id
                             WHERE {where}""").fetchone()["c"]
+    month_spend = 0
+    if is_owner():
+        _tym = datetime.date.today().strftime("%Y-%m")
+        month_spend = db.execute(
+            "SELECT COALESCE(SUM(total_amount),0) FROM bills WHERE status='approved' "
+            "AND substr(bill_date,1,7)=?", (_tym,)).fetchone()[0]
     return page("""<h2>Dashboard</h2>
 <div class=grid><div class=card><b>{{counts}}</b><br>assets visible to you</div>
-<div class=card><b>{{due|length}}</b><br>items needing attention</div></div>
+<div class=card><b>{{due|length}}</b><br>items needing attention</div>
+{% if is_owner %}<a class=card style="text-decoration:none;color:inherit" href="{{url_for('purchases')}}">
+<div class=muted>💰 Spend this month</div>
+<b style="font-size:22px;color:#2c4258">\u20b9{{month_spend|inr}}</b><br>
+<span class=muted>tap for consumption &amp; rate history</span></a>{% endif %}</div>
 <div class=card><h3>Renewals & expiries due</h3>
 {% if not due %}<p class=muted>Nothing amber or red. All clear.</p>{% else %}
 <table><tr><th>Item</th><th>What</th><th>Due</th><th>Status</th></tr>
@@ -867,7 +945,7 @@ def dashboard():
 <td>{% if r['kind']=='asset' %}<a href="{{url_for('asset_view',aid=r['entity_id'])}}">{{r['entity_name']}}</a>{% else %}{{r['entity_name']}} (staff){% endif %}</td>
 <td>{{r['label']}}</td><td>{{r['due_date']}}</td>
 <td><span class="badge {{state}}">{{'overdue' if days<0 else (days|string)+' days'}}</span></td>
-</tr>{% endfor %}</table>{% endif %}</div>""", due=due, counts=counts)
+</tr>{% endfor %}</table>{% endif %}</div>""", due=due, counts=counts, month_spend=month_spend)
 
 # ---------------------------------------------------------------- assets
 @app.route("/assets")
@@ -1402,6 +1480,7 @@ def asset_edit(aid=None):
                 if bi and bi["bstatus"] == "approved":
                     db.execute("UPDATE assets SET bill_id=? WHERE id=?", (bi["bill_id"], new_id))
                     db.execute("UPDATE bill_items SET asset_id=? WHERE id=?", (new_id, _bi_id))
+                    _backfill_asset_from_bill(db, new_id, bi["bill_id"])  # A-D24 non-clobber
                     _exp = _norm_date(bi["expiry"])
                     if _exp:
                         _thr = int(f.get("threshold_days") or THRESHOLD_DEFAULT)
@@ -2342,51 +2421,64 @@ def intake():
     else:
         mine = db.execute("SELECT id,stamp_no,submitted_at,status,submitted_by FROM bills "
                           "WHERE stamp_no IS NOT NULL ORDER BY id DESC LIMIT 30").fetchall()
-    return page("""<h2>Scan a new purchase bill</h2>
-<div class=card><p class=muted>Photograph the paper bill (or choose a saved photo / PDF).
-You'll get a <b>stamp number</b> — write it on the paper bill, then file it. That's all.</p>
-<form method=post action="{{url_for('intake_submit')}}" enctype=multipart/form-data>
+    scan_cfg = {
+        "title": "\U0001F4F7 Scan the bill",
+        "uploadUrl": url_for("intake_scan_submit"),
+        "fileField": "bill_scan",
+        "uploadFields": {},          # the Note is injected live by the page below
+        "nameBase": "bill",
+        "backUrl": url_for("intake_slip_last"),
+        "allowIdCard": False,        # a purchase bill is a document, not an ID card
+        "allowBatch": False,         # one bill -> one clean PDF -> one stamp slip
+    }
+    widget_url = url_for("scanner_widget_js") + "?v=" + str(_widget_version())
+    return page("""<h2>🧾 Scan a new purchase bill</h2>
+<div class=card><p class=muted>Photograph the paper bill — the scanner squares it up into a
+clean PDF (add more pages if the bill runs over). You'll get a <b>stamp number</b>; write it on
+the paper bill, then file it. That's all.</p>
+<label for=intake_note>Note <span class=muted>(optional, e.g. "2 boxes, one bill")</span></label>
+<input id=intake_note maxlength=120 style="max-width:300px"
+ oninput="if(window.SCANNER_CONFIG){window.SCANNER_CONFIG.uploadFields.note=this.value;}"></div>
+<script>window.SCANNER_CONFIG = {{ scan_cfg|tojson }};</script>
+<div id=scanroot></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="{{ widget_url }}"></script>
+<noscript><div class=card>The scanner needs JavaScript — please use the basic upload below.</div></noscript>
+<details class=card><summary style="cursor:pointer;color:#3a5a78;font-weight:600">📁 Basic upload (no scanner)</summary>
+<form method=post action="{{url_for('intake_submit')}}" enctype=multipart/form-data style="margin-top:12px">
 <label class=btn style="cursor:pointer;display:inline-block;position:relative">📷 Take a photo of the bill<input type=file name=bill_cam accept="image/*" capture=environment onchange="_pick(this,'cam_st')" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden"></label>
 <span id=cam_st class=muted style="margin-left:8px"></span>
 <br><br>
 <label class="btn small" style="cursor:pointer;display:inline-block;position:relative">📁 Choose a saved photo / PDF<input type=file name=bill_file accept="image/*,.pdf" onchange="_pick(this,'file_st')" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden"></label>
 <span id=file_st class=muted style="margin-left:8px"></span>
-<label>Note <span class=muted>(optional, e.g. "2 boxes, one bill")</span></label>
+<label>Note <span class=muted>(optional)</span></label>
 <input name=note maxlength=120 style="max-width:280px">
 <br><button class=btn>Submit bill</button></form>
-<script>function _pick(i,s){var e=document.getElementById(s);e.textContent=i.files&&i.files.length?('\u2713 '+i.files[0].name):'';}</script></div>
+<script>function _pick(i,s){var e=document.getElementById(s);e.textContent=i.files&&i.files.length?('\u2713 '+i.files[0].name):'';}</script></details>
 {% if mine %}<div class=card><h4>{{'My submissions' if user['role']=='reception' else 'Recent stamped submissions'}}</h4>
 <table><tr><th>Stamp</th><th>When</th><th>Status</th>{% if user['role']!='reception' %}<th>By</th><th></th>{% endif %}</tr>
 {% for b in mine %}<tr><td><b>{{b['stamp_no'] or '—'}}</b></td><td>{{b['submitted_at'] or '—'}}</td>
 <td>{{b['status']}}</td>
 {% if user['role']!='reception' %}<td>{{b['submitted_by'] or '—'}}</td>
 <td><a href="{{url_for('bill_view',bid=b['id'])}}">open</a></td>{% endif %}</tr>{% endfor %}</table></div>{% endif %}""",
-        mine=mine)
+        mine=mine, scan_cfg=scan_cfg, widget_url=widget_url)
 
-@app.route("/intake/submit", methods=["POST"])
-@login_required
-def intake_submit():
-    # A-D22: intake now offers a camera input and a photo/PDF input; take whichever
-    # one actually carries a file. "bill" kept as a legacy/fallback field name.
-    fobj = None
-    for _k in ("bill_cam", "bill_file", "bill"):
-        _f = request.files.get(_k)
-        if _f and _f.filename and "." in _f.filename:
-            fobj = _f
-            break
-    if not fobj:
-        flash("No file received — try again.")
-        return redirect(url_for("intake"))
+def _create_intake_bill(fobj, note):
+    """A-D24: shared reception-intake bill creation, used by BOTH the plain upload
+    form and the shadow-flatten scanner. Saves the scan, mints a stamp, inserts a
+    Consumable draft, and kicks the same background OCR. Returns the new bill id, or
+    None if the file was missing / an unsupported type. One writer, one code path."""
+    if not (fobj and fobj.filename and "." in fobj.filename):
+        return None
     ext = fobj.filename.rsplit(".", 1)[1].lower()
     if ext not in ALLOWED_EXT:
-        flash("File type not allowed.")
-        return redirect(url_for("intake"))
+        return None
     stored = "bill_%s.%s" % (secrets.token_hex(8), ext)
     path = os.path.join(UPLOAD_DIR, stored)
     fobj.save(path)
     db = get_db()
     stamp = next_stamp(db)
-    note = (request.form.get("note") or "").strip() or None
+    note = (note or "").strip() or None
     cur = db.execute(
         "INSERT INTO bills(kind,notes,source_stored,source_orig,stamp_no,status,"
         "submitted_by,submitted_at) VALUES('Consumable',?,?,?,?,'draft',?,?)",
@@ -2398,6 +2490,46 @@ def intake_submit():
         db.execute("UPDATE bills SET ocr_status='reading' WHERE id=?", (bid,)); db.commit()
         import threading
         threading.Thread(target=_bg_extract, args=(bid, path), daemon=True).start()
+    return bid
+
+@app.route("/intake/submit", methods=["POST"])
+@login_required
+def intake_submit():
+    # A-D22: camera input OR photo/PDF input; "bill" kept as a legacy field name.
+    fobj = None
+    for _k in ("bill_cam", "bill_file", "bill"):
+        _f = request.files.get(_k)
+        if _f and _f.filename and "." in _f.filename:
+            fobj = _f
+            break
+    bid = _create_intake_bill(fobj, request.form.get("note"))
+    if not bid:
+        flash("No usable file received — send a photo or a PDF and try again.")
+        return redirect(url_for("intake"))
+    return redirect(url_for("intake_slip", bid=bid))
+
+@app.route("/intake/scan_submit", methods=["POST"])
+@login_required
+def intake_scan_submit():
+    """A-D24: the shadow-flatten scanner posts each finished bill here. Creates the
+    bill exactly like the plain form, remembers it in the session, and returns a bare
+    200 -- the widget only checks r.ok, then navigates to backUrl (/intake/slip/last),
+    which shows the stamp for this submission."""
+    fobj = request.files.get("bill_scan") or request.files.get("bill_cam")
+    bid = _create_intake_bill(fobj, request.form.get("note"))
+    if not bid:
+        return ("no usable file", 400)
+    session["last_intake_bid"] = bid
+    return ("ok", 200)
+
+@app.route("/intake/slip/last")
+@login_required
+def intake_slip_last():
+    """A-D24: the scanner's fixed backUrl -- redirect to the slip for whatever bill
+    this reception session last submitted through the scanner."""
+    bid = session.get("last_intake_bid")
+    if not bid:
+        return redirect(url_for("intake"))
     return redirect(url_for("intake_slip", bid=bid))
 
 @app.route("/intake/slip/<int:bid>")
@@ -2482,6 +2614,8 @@ def bill_approve(bid):
     db.execute("UPDATE bills SET status='approved', approved_by=?, approved_at=? WHERE id=?",
                (g.user["display_name"], _now_ist(), bid))
     upsert_vendor(db, b["vendor"], b["vendor_phone"], b["vendor_email"])
+    for _r in db.execute("SELECT id FROM assets WHERE bill_id=?", (bid,)).fetchall():
+        _backfill_asset_from_bill(db, _r["id"], bid)  # A-D24: fill now-approved supplier/date
     db.commit()
     flash("Bill %s approved." % (b["stamp_no"] or ("#%d" % bid)))
     return redirect(url_for("bill_view", bid=bid))
@@ -2665,6 +2799,28 @@ def purchases():
 <button class="btn small">Apply</button></form>
 <p><b>{{'%g'|format(cons['qty'])}}</b> total quantity across <b>{{cons['n']}}</b> purchase(s){% if frm or to %} in range{% endif %}.</p></div>""",
             item=item, rows=rows, drift=drift, cons=cons, frm=frm, to=to)
+    # A-D24: spend analytics — approved bills only, Indian-format ₹, dependency-free bars
+    total_spend = db.execute(
+        "SELECT COALESCE(SUM(total_amount),0) FROM bills WHERE status='approved'").fetchone()[0]
+    this_ym = datetime.date.today().strftime("%Y-%m")
+    month_spend = db.execute(
+        "SELECT COALESCE(SUM(total_amount),0) FROM bills WHERE status='approved' "
+        "AND substr(bill_date,1,7)=?", (this_ym,)).fetchone()[0]
+    _sp = db.execute(
+        "SELECT substr(bill_date,1,7) ym, COALESCE(SUM(total_amount),0) amt, COUNT(*) n "
+        "FROM bills WHERE status='approved' AND total_amount IS NOT NULL "
+        "AND bill_date IS NOT NULL AND bill_date<>'' "
+        "GROUP BY substr(bill_date,1,7) ORDER BY ym DESC LIMIT 12").fetchall()
+    _smax = max([r["amt"] for r in _sp] + [0]) or 1
+    spend = [{"label": _ym_human(r["ym"]), "amt": r["amt"], "n": r["n"],
+              "pct": max(4, round(r["amt"] / _smax * 100))} for r in _sp]
+    _tv = db.execute(
+        "SELECT COALESCE(NULLIF(vendor,''),'(unknown)') v, COALESCE(SUM(total_amount),0) amt, "
+        "COUNT(*) n FROM bills WHERE status='approved' AND total_amount IS NOT NULL "
+        "GROUP BY COALESCE(NULLIF(vendor,''),'(unknown)') ORDER BY amt DESC LIMIT 8").fetchall()
+    _vmax = max([r["amt"] for r in _tv] + [0]) or 1
+    vends = [{"v": r["v"], "amt": r["amt"], "n": r["n"],
+              "pct": max(4, round(r["amt"] / _vmax * 100))} for r in _tv]
     items = db.execute(
         "SELECT bi.item_name name, COUNT(*) buys, COALESCE(SUM(bi.quantity),0) tot_qty, "
         "(SELECT bi2.rate FROM bill_items bi2 JOIN bills b2 ON b2.id=bi2.bill_id "
@@ -2672,8 +2828,24 @@ def purchases():
         " ORDER BY b2.bill_date DESC, bi2.id DESC LIMIT 1) last_rate, "
         "MAX(b.bill_date) last_date FROM bill_items bi JOIN bills b ON b.id=bi.bill_id "
         "WHERE b.status='approved' GROUP BY bi.item_name ORDER BY last_date DESC").fetchall()
-    return page("""<h2>Consumption &amp; rate history</h2>
+    return page("""<h2>💰 Consumption &amp; spend</h2>
 <p><a class="btn small" href="{{url_for('bills_list')}}">\u2190 Purchases</a></p>
+<div class=grid>
+ <div class=card><div class=muted>💰 Total approved spend</div>
+  <div style="font-size:26px;font-weight:700;color:#2c4258">\u20b9{{total_spend|inr}}</div></div>
+ <div class=card><div class=muted>📅 This month ({{this_month}})</div>
+  <div style="font-size:26px;font-weight:700;color:#2c4258">\u20b9{{month_spend|inr}}</div></div>
+</div>
+{% if spend %}<div class=card><h4>📈 Spend by month</h4>
+<table><tr><th>Month</th><th></th><th style="text-align:right">Amount</th></tr>
+{% for s in spend %}<tr><td style="white-space:nowrap">{{s.label}}</td>
+<td><div style="background:#3a5a78;height:15px;border-radius:4px;width:{{s.pct}}%;min-width:6px"></div></td>
+<td style="text-align:right;white-space:nowrap"><b>\u20b9{{s.amt|inr}}</b> <span class=muted>({{s.n}})</span></td></tr>{% endfor %}</table></div>{% endif %}
+{% if vends %}<div class=card><h4>🏪 Top vendors <span class=muted>(by approved spend)</span></h4>
+<table><tr><th>Vendor</th><th></th><th style="text-align:right">Amount</th></tr>
+{% for v in vends %}<tr><td>{{v.v}}</td>
+<td><div style="background:#2e7d5b;height:15px;border-radius:4px;width:{{v.pct}}%;min-width:6px"></div></td>
+<td style="text-align:right;white-space:nowrap"><b>\u20b9{{v.amt|inr}}</b> <span class=muted>({{v.n}})</span></td></tr>{% endfor %}</table></div>{% endif %}
 {% if soon %}<div class=card><h4>Expiring soon</h4>
 <table><tr><th>Item</th><th>Batch</th><th>Expiry</th><th></th><th>Vendor</th></tr>
 {% for r,st,days in soon %}<tr><td>{{r['item_name']}}</td><td>{{r['batch'] or '\u2014'}}</td>
@@ -2686,7 +2858,8 @@ def purchases():
 <td>{{'\u20b9%.2f'|format(it['last_rate']) if it['last_rate'] is not none else '\u2014'}}</td>
 <td>{{it['last_date'] or '\u2014'}}</td></tr>{% endfor %}</table>
 {% if not items %}<p class=muted>No line items yet. Add a bill to start tracking consumption and rate drift.</p>{% endif %}</div>""",
-        soon=soon, items=items)
+        soon=soon, items=items, total_spend=total_spend, month_spend=month_spend,
+        this_month=_ym_human(this_ym), spend=spend, vends=vends)
 
 # ---------------------------------------------------------------- built-in scanner
 SCAN_TPL = """<script>window.SCANNER_CONFIG = {{ config|tojson }};</script>

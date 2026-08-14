@@ -1012,6 +1012,85 @@ check("blank bill approve blocked without confirm",
 r = mgr.post("/bills/%d/approve" % _blk, data={"confirm_blank": "1"}, follow_redirects=True)
 check("blank bill approves only with explicit confirm", _bill(_blk)["status"] == "approved")
 
+print("STEP 23: A-D24 scanner-in-intake + spend dashboards + supplier backfill")
+owner = A.app.test_client(); login(owner, "manoj", "change-me-manoj")
+mgr = A.app.test_client(); login(mgr, "manager", "step20-pass")
+
+# 23a — intake now drives the shadow-flatten scanner (doc-mode) but keeps the fallback
+_ig = sh.get("/intake").data
+check("intake mounts the scanner widget", b"id=scanroot" in _ig)
+check("intake loads the shared widget script (cache-busted)", b"/scan/widget.js?v=" in _ig)
+check("intake scanner posts to scan_submit", b"/intake/scan_submit" in _ig)
+check("intake scanner locked to doc-mode (no batch, no id-card)",
+      b'"allowBatch": false' in _ig and b'"allowIdCard": false' in _ig)
+check("intake keeps the plain-upload fallback", b"name=bill_cam" in _ig and b"Basic upload" in _ig)
+check("intake still explains the stamp number", b"stamp number" in _ig)
+
+# 23b — scanner submit creates a bill, stashes it, and slip/last shows the stamp
+r = sh.post("/intake/scan_submit",
+            data={"bill_scan": (io.BytesIO(b"%PDF-1.4 scanbill"), "bill_2026-08-14.pdf"),
+                  "note": "scanned via widget"},
+            content_type="multipart/form-data")
+check("scan_submit returns a bare 200 (widget only checks r.ok)", r.status_code == 200)
+r = sh.get("/intake/slip/last", follow_redirects=False)
+check("slip/last redirects to the submitted bill's slip",
+      r.status_code == 302 and "/intake/slip/" in r.headers.get("Location", ""))
+_scan_bid = int(r.headers["Location"].rstrip("/").split("/")[-1])
+_sb = _bill(_scan_bid)
+check("scanned bill is a stamped Consumable draft",
+      _sb is not None and _sb["kind"] == "Consumable" and _sb["status"] == "draft"
+      and (_sb["stamp_no"] or "").startswith("B-"))
+check("scanned bill kept the note", _sb["notes"] == "scanned via widget")
+check("slip shows the stamp for the scanned bill",
+      _sb["stamp_no"].encode() in sh.get("/intake/slip/%d" % _scan_bid).data)
+check("scan_submit with no file is a clean 400",
+      sh.post("/intake/scan_submit", data={"note": "x"},
+              content_type="multipart/form-data").status_code == 400)
+
+# 23c — Supplier/Purchased backfill from the linked approved bill (non-clobber, idempotent)
+_bd = _sq.connect(_ADB); _bd.row_factory = _sq.Row
+_bd.execute("INSERT INTO bills(kind,vendor,bill_no,bill_date,total_amount,status) "
+            "VALUES('Asset','Backfill Traders','BF-1','2026-03-04',52000,'approved')")
+_bkbid = _bd.execute("SELECT id FROM bills WHERE bill_no='BF-1'").fetchone()["id"]
+_bd.execute("INSERT INTO assets(name,location_id,category,status,bill_id) "
+            "VALUES('Legacy Autoclave',2,'Medical Equipment','Active',?)", (_bkbid,))
+_bka = _bd.execute("SELECT id FROM assets WHERE name='Legacy Autoclave'").fetchone()["id"]
+_bd.execute("INSERT INTO assets(name,location_id,category,status,vendor,purchase_date,bill_id) "
+            "VALUES('Kept Supplier Asset',2,'Medical Equipment','Active','Original Vend','2020-01-01',?)",
+            (_bkbid,))
+_bkc = _bd.execute("SELECT id FROM assets WHERE name='Kept Supplier Asset'").fetchone()["id"]
+_bd.commit(); _bd.close()
+_bd = _sq.connect(_ADB); _bd.row_factory = _sq.Row
+A.backfill_asset_supplier(_bd)
+_a1 = _bd.execute("SELECT vendor,purchase_date FROM assets WHERE id=?", (_bka,)).fetchone()
+_a2 = _bd.execute("SELECT vendor,purchase_date FROM assets WHERE id=?", (_bkc,)).fetchone()
+_bd.close()
+check("backfill fills blank Supplier from the approved bill", _a1["vendor"] == "Backfill Traders")
+check("backfill fills blank Purchased from the approved bill", _a1["purchase_date"] == "2026-03-04")
+check("backfill never clobbers an existing Supplier", _a2["vendor"] == "Original Vend")
+check("backfill never clobbers an existing Purchased", _a2["purchase_date"] == "2020-01-01")
+_bd = _sq.connect(_ADB); _bd.row_factory = _sq.Row
+_n2 = A.backfill_asset_supplier(_bd); _bd.close()
+check("backfill is idempotent (second sweep fills 0)", _n2 == 0)
+
+# 23d — spend dashboards render (owner-only)
+_pg = owner.get("/purchases").data
+check("purchases shows total-spend card", b"Total approved spend" in _pg)
+check("purchases shows this-month card", b"This month" in _pg)
+check("purchases shows spend-by-month + top-vendors", b"Spend by month" in _pg and b"Top vendors" in _pg)
+check("purchases top-vendors lists the approved vendor", b"Backfill Traders" in _pg)
+check("purchases stays owner-only", al.get("/purchases").status_code == 403)
+
+# 23e — dashboard owner spend tile
+check("owner dashboard shows the spend tile", b"Spend this month" in owner.get("/").data)
+check("manager dashboard has no spend tile", b"Spend this month" not in mgr.get("/").data)
+
+# 23f — the Indian rupee formatter itself
+check("inr formats a lakh with Indian grouping", A._inr(130003) == "1,30,003")
+check("inr formats a crore with Indian grouping", A._inr(12345678) == "1,23,45,678")
+check("inr handles thousands / small / blank",
+      A._inr(52000) == "52,000" and A._inr(500) == "500" and A._inr(None) == "")
+
 print(f"\n{'='*40}\nRESULT: {passed} passed, {failed} failed")
 shutil.rmtree(TMP, ignore_errors=True)
 sys.exit(1 if failed else 0)
