@@ -29,6 +29,30 @@
 #    total, the day total stands and an exception opens for the difference.
 #
 #  Money is INTEGER PAISE. Stdlib only.
+#
+#  ---------------------------------------------------------------------------
+#  S180 — SALE RETURNS (credit notes).  Previously every row with an amount of
+#  zero or less was skipped outright:
+#
+#        if amount is None or amount <= 0:
+#            continue
+#
+#  That guard exists to throw away junk rows, and it must stay. But Marg writes
+#  a sale return as a NEGATIVE bill (CN00167  -1150.00), so it also threw away
+#  every refund — silently. The day then read as though no return had happened,
+#  and the named lines exceeded the real day total by the value of the returns.
+#
+#  It is now split into the two different things it was conflating:
+#      · no readable amount, or exactly zero  -> still junk, still skipped
+#      · a genuine negative                   -> a RETURN, kept and labelled
+#
+#  Returns are stored as a POSITIVE amount_p carrying a service of
+#  "<base>_return".  They are NOT stored as negative numbers, because
+#  sale_item.amount_p is declared CHECK (amount_p >= 0) — a deliberate
+#  invariant (amounts are magnitudes; direction is the row's type). Honouring
+#  it means no table rebuild on a live store holding real patient data; only
+#  the v_day_attribution view changes, to net the returns back out.
+#  See finance_migration_S180_returns.sql.
 # =============================================================================
 
 import csv
@@ -124,6 +148,34 @@ class AdapterUnavailable(Exception):
     """Raised when an adapter genuinely cannot run. We say so; we never fake it."""
 
 
+# A sale return is a real transaction, not a junk row. Adapters return the
+# MAGNITUDE in amount_p and say which direction it went in "kind".
+KIND_SALE = "sale"
+KIND_RETURN = "return"
+
+
+def classify_amount(amount_p):
+    """(magnitude, kind) — or (None, None) if the row carries no usable amount.
+
+    None and exactly zero are junk and stay rejected. A negative is a return."""
+    if amount_p is None or amount_p == 0:
+        return None, None
+    if amount_p < 0:
+        return -amount_p, KIND_RETURN
+    return amount_p, KIND_SALE
+
+
+def service_for(unit, kind):
+    """pharmacy | pharmacy_return | lab_test | lab_test_return"""
+    base = "lab_test" if unit == "lab" else "pharmacy"
+    return base + "_return" if kind == KIND_RETURN else base
+
+
+def signed(amount_p, kind):
+    """The value as it affects a day's money."""
+    return -amount_p if kind == KIND_RETURN else amount_p
+
+
 def adapter_csv(payload, colmap, config):
     """Column-mapped delimited text. This is the adapter Marg and Labmate exports
     will use — only their column map differs, which is why it is data, not code."""
@@ -166,8 +218,8 @@ def adapter_csv(payload, colmap, config):
             m = colmap.get(field, {})
             return apply_transform(row.get(c), m.get("transform"), cfg.get("date_format"))
 
-        amount = paise(get("amount"))
-        if amount is None or amount <= 0:
+        amount, kind = classify_amount(paise(get("amount")))
+        if amount is None:
             continue
         cid = (get("clinic_id") or "").strip() or None
         name = (get("patient_name") or "").strip() or None
@@ -179,7 +231,7 @@ def adapter_csv(payload, colmap, config):
                         bill_date=get("bill_date"),
                         clinic_id=cid, patient_name=name,
                         description=(get("description") or "").strip() or None,
-                        amount_p=amount,
+                        amount_p=amount, kind=kind,
                         mode=(get("mode") or "").strip().lower() or None,
                         confidence=conf, raw=json.dumps(row, ensure_ascii=False)[:2000]))
     return out
@@ -203,8 +255,8 @@ def adapter_manual(payload, colmap, config):
     """Typed lines: [{clinic_id, patient_name, amount, description, bill_no}]"""
     out = []
     for r in (payload or []):
-        amt = paise(r.get("amount"))
-        if amt is None or amt <= 0:
+        amt, kind = classify_amount(paise(r.get("amount")))
+        if amt is None:
             continue
         cid = (r.get("clinic_id") or "").strip() or None
         name = (r.get("patient_name") or "").strip() or None
@@ -214,7 +266,8 @@ def adapter_manual(payload, colmap, config):
         out.append(dict(bill_no=(r.get("bill_no") or "").strip() or None,
                         bill_date=r.get("bill_date"), clinic_id=cid, patient_name=name,
                         description=(r.get("description") or "").strip() or None,
-                        amount_p=amt, mode=(r.get("mode") or "").strip().lower() or None,
+                        amount_p=amt, kind=kind,
+                        mode=(r.get("mode") or "").strip().lower() or None,
                         confidence=1.0, raw=None))
     return out
 
@@ -314,14 +367,19 @@ def ingest_day(con, unit, business_date, adapter, payload, run_by="system",
     min_conf = float(_setting(con, "ingest.min_confidence", "0.70") or 0.70)
     accepted = review = total_p = 0
 
+    returns = 0
     for ln in lines:
+        kind = ln.get("kind") or KIND_SALE
         if ln["confidence"] < min_conf or (not ln["clinic_id"] and not ln["patient_name"]):
+            # sale_item_review carries no non-negative constraint, so a return
+            # is stored SIGNED here — that keeps v_day_attribution.in_review_p
+            # honest without needing a service marker on a free-text queue.
             con.execute(
                 "INSERT INTO sale_item_review (day_entry_id, ingest_batch_id, raw_text, "
                 "guess_clinic_id, guess_name, amount_p, confidence, status, reason) "
                 "VALUES (?,?,?,?,?,?,?, 'open', ?)",
                 (eid, batch_id, ln.get("raw"), ln.get("clinic_id"), ln.get("patient_name"),
-                 ln["amount_p"], ln["confidence"],
+                 signed(ln["amount_p"], kind), ln["confidence"],
                  "low confidence" if ln["confidence"] < min_conf else "no patient identified"))
             review += 1
             continue
@@ -331,12 +389,14 @@ def ingest_day(con, unit, business_date, adapter, payload, run_by="system",
             "description, amount_p, mode, source, source_ref, confidence) "
             "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
             (eid, batch_id, unit, pid,
-             "lab_test" if unit == "lab" else "pharmacy",
+             service_for(unit, kind),
              ln.get("description"), ln["amount_p"], ln.get("mode"),
              "ocr" if adapter == "sarvam_ocr" else ("tracker" if adapter == "tracker" else "manual"),
              ln.get("bill_no"), ln["confidence"]))
         accepted += 1
-        total_p += ln["amount_p"]
+        if kind == KIND_RETURN:
+            returns += 1
+        total_p += signed(ln["amount_p"], kind)
 
     if review and accepted:
         status = "partial"
@@ -348,7 +408,8 @@ def ingest_day(con, unit, business_date, adapter, payload, run_by="system",
     reconcile_day_attribution(con, unit, business_date, now)
     con.commit()
     return dict(ok=True, batch_id=batch_id, adapter=adapter, rows_read=len(lines),
-                accepted=accepted, review=review, attributed_p=total_p, status=status)
+                accepted=accepted, review=review, returns=returns,
+                attributed_p=total_p, status=status)
 
 
 def reconcile_day_attribution(con, unit, business_date, now=None):
@@ -424,6 +485,17 @@ def selftest(db_path="finance.db"):
     check("name only -> no id", split_clinic_id("Ramesh Kumar")[0] is None)
     check("id only -> no name", split_clinic_id("4471")[:2] == ("4471", None))
     check("blank is nothing", split_clinic_id("")[:2] == (None, None))
+
+    # S180 — sale returns must survive the junk filter that used to eat them
+    check("zero is still junk", classify_amount(0) == (None, None))
+    check("no amount is still junk", classify_amount(None) == (None, None))
+    check("a sale keeps its sign", classify_amount(115000) == (115000, KIND_SALE))
+    check("a negative is a RETURN", classify_amount(-115000) == (115000, KIND_RETURN))
+    check("return service medical", service_for("medical", KIND_RETURN) == "pharmacy_return")
+    check("return service lab", service_for("lab", KIND_RETURN) == "lab_test_return")
+    check("sale service unchanged", service_for("medical", KIND_SALE) == "pharmacy")
+    check("signed sale", signed(115000, KIND_SALE) == 115000)
+    check("signed return", signed(115000, KIND_RETURN) == -115000)
 
     check("paise plain", paise("1234") == 123400)
     check("paise decimal", paise("1234.50") == 123450)
@@ -509,6 +581,49 @@ def selftest(db_path="finance.db"):
     # sarvam is honestly unavailable here rather than silently empty
     res4 = ingest_day(con, "medical", date, "sarvam_ocr", "x", run_by="selftest")
     check("sarvam reports unavailable", (not res4["ok"]) and res4["error"])
+
+    # ------------------------------------------------------------------ S180
+    # Sale returns. These run LAST on purpose: ingest_day supersedes the earlier
+    # batch for a day and deletes what it produced, so anything asserted about
+    # the previous batches has to have been asserted already.
+    #
+    # A Marg export carrying a credit note, written the way Marg writes one.
+    # Before S180 the CN row was skipped outright and the day read as though no
+    # refund had happened.
+    marg_cn = ("Bill No,Bill Date,Customer,Particulars,Net Amt\n"
+               "A002966,13/08/2026,4471 Ramesh Kumar,Tab Calcium,1150.00\n"
+               "CN00167,13/08/2026,4471 Ramesh Kumar,Tab Calcium returned,-400.00\n"
+               "A002970,13/08/2026,Sunita Devi (5120),Knee cap,1000.00\n")
+    resr = ingest_day(con, "medical", date, "marg_export", marg_cn, run_by="selftest",
+                      source_ref="marg_returns.csv")
+    check("credit note is read, not skipped", resr["rows_read"] == 3)
+    check("credit note is accepted", resr["accepted"] == 3)
+    check("credit note counted as a return", resr["returns"] == 1)
+    check("return nets out of the attributed total",
+          resr["attributed_p"] == 115000 - 40000 + 100000)
+
+    kinds = {r[0]: r[1] for r in con.execute(
+        "SELECT source_ref, service FROM sale_item WHERE ingest_batch_id=?", (resr["batch_id"],))}
+    check("return row marked pharmacy_return", kinds.get("CN00167") == "pharmacy_return")
+    check("sale rows unchanged", kinds.get("A002966") == "pharmacy")
+
+    stored = con.execute("SELECT amount_p FROM sale_item WHERE source_ref='CN00167'").fetchone()[0]
+    check("return stored as a positive magnitude", stored == 40000)
+
+    view_p = con.execute("SELECT attributed_p FROM v_day_attribution WHERE unit='medical' "
+                         "AND business_date=?", (date,)).fetchone()[0]
+    check("the VIEW nets the return too (migration applied)",
+          view_p == 115000 - 40000 + 100000)
+
+    # a return nobody could put a name to still reaches the queue, signed
+    marg_anon = ("Bill No,Bill Date,Customer,Particulars,Net Amt\n"
+                 "CN00168,13/08/2026,,Returned,-77.00\n")
+    resa = ingest_day(con, "medical", date, "marg_export", marg_anon, run_by="selftest")
+    check("unidentified return is not silently dropped", resa["rows_read"] == 1)
+    check("unidentified return goes to review", resa["review"] == 1)
+    rv = con.execute("SELECT amount_p FROM sale_item_review WHERE ingest_batch_id=?",
+                     (resa["batch_id"],)).fetchone()[0]
+    check("review keeps the return signed", rv == -7700)
 
     con.close()
     try:

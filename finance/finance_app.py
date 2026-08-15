@@ -1262,12 +1262,20 @@ def api_resolve_line(rid):
     else:
         cid = (p.get("clinic_id") or "").strip() or finance_ingest.WALK_IN
         pid = finance_ingest.resolve_patient(con, cid, (p.get("name") or "").strip() or None)
+        # S180: a sale return sits in this queue with a NEGATIVE amount_p, because
+        # sale_item_review carries no non-negative constraint and a signed value
+        # keeps v_day_attribution.in_review_p honest. sale_item does have that
+        # constraint, so the sign has to be turned back into a magnitude plus a
+        # "_return" service on the way out — exactly as finance_ingest does on the
+        # way in. Without this, resolving a queued return raises IntegrityError.
+        amt_p = r["amount_p"] or 0
+        kind = finance_ingest.KIND_RETURN if amt_p < 0 else finance_ingest.KIND_SALE
         con.execute("INSERT INTO sale_item (day_entry_id, ingest_batch_id, unit, patient_ref_id, "
                     "service, description, amount_p, source, confidence, verified_by, verified_at) "
                     "VALUES (?,?,?,?,?,?,?, 'manual', 1.0, ?, ?)",
                     (r["day_entry_id"], r["ingest_batch_id"], UNIT, pid,
-                     "lab_test" if UNIT == "lab" else "pharmacy",
-                     p.get("description"), r["amount_p"], u["user"], now_iso()))
+                     finance_ingest.service_for(UNIT, kind),
+                     p.get("description"), abs(amt_p), u["user"], now_iso()))
         con.execute("UPDATE sale_item_review SET status='resolved', resolved_by=?, resolved_at=? "
                     "WHERE id=?", (u["user"], now_iso(), rid))
     d = con.execute("SELECT business_date FROM day_entry WHERE id=?", (r["day_entry_id"],)).fetchone()
@@ -2393,6 +2401,7 @@ def selftest():
     check("assigned line joins the spine", len(j["lines"]) == 3)
     check("review queue cleared", len(j["review"]) == 0)
 
+
     # a wrong file must fail loudly and leave good lines alone
     r = c.post("/finance/api/day/%s/ingest" % D1,
                json={"adapter": "marg_export", "payload": "Invoice,Name,Total\nX-1,foo,100\n"})
@@ -2409,6 +2418,41 @@ def selftest():
     pv = con.execute("SELECT COUNT(*) FROM v_patient_revenue").fetchone()[0]
     con.close()
     check("patient revenue spine populated", pv >= 3)
+
+    # ------------------------------------------------------------------ S180
+    # A sale return that nobody could name sits in the review queue with a
+    # NEGATIVE amount_p (finance_ingest keeps it signed so in_review_p stays
+    # honest). sale_item forbids negatives, so resolving one has to turn the
+    # sign back into a magnitude plus a "_return" service. Before that was
+    # handled, a checker resolving a queued return got an IntegrityError 500.
+    #
+    # THIS BLOCK RUNS LAST, AND MUST STAY LAST. Two reasons, both learned the
+    # hard way at S180:
+    #   · resolving the queued line ADDS a sale_item, and an earlier check
+    #     asserts the day still has exactly three lines;
+    #   · anything that calls /ingest supersedes the day's previous batch and
+    #     DELETES what it produced, so this inserts the queue row directly
+    #     instead of going through the adapter.
+    # Add new checks ABOVE this block, never below it.
+    _c2 = sqlite3.connect(DB_PATH)
+    _eid = _c2.execute("SELECT id FROM day_entry WHERE unit=? AND business_date=?",
+                       (UNIT, D1)).fetchone()[0]
+    _c2.execute("INSERT INTO sale_item_review (day_entry_id, raw_text, guess_name, amount_p, "
+                "confidence, status, reason) VALUES (?,?,?,?,?, 'open', ?)",
+                (_eid, '{"Bill No":"CN00168"}', None, -7700, 0.5, "no patient identified"))
+    _rid = _c2.execute("SELECT id FROM sale_item_review WHERE amount_p=-7700").fetchone()[0]
+    _c2.commit()
+    _c2.close()
+
+    r = c.post("/finance/api/review/%d/resolve" % _rid,
+               json={"action": "assign", "clinic_id": "6002", "name": "Returned goods"})
+    check("resolving a queued RETURN does not blow up", r.status_code == 200)
+    _c2 = sqlite3.connect(DB_PATH)
+    _row = _c2.execute("SELECT service, amount_p FROM sale_item WHERE patient_ref_id="
+                       "(SELECT id FROM patient_ref WHERE clinic_id='6002')").fetchone()
+    _c2.close()
+    check("resolved return becomes a return row", _row and _row[0] == "pharmacy_return")
+    check("resolved return is stored as a magnitude", _row and _row[1] == 7700)
 
     os.environ["FINANCE_DEV_ROLE"] = "maker"
 

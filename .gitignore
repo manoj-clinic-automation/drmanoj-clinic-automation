@@ -111,6 +111,11 @@ finance/backup.log
 finance/medical_legacy.csv
 finance/medical_*.csv
 finance/upi_statements/
+finance/marg_in/
+finance/*_bills.csv
+finance/*_items.csv
+finance/REPORT_1.XLS
+finance/REPORT_1.xls
 
 
 
