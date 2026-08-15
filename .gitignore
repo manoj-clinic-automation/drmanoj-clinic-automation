@@ -87,5 +87,30 @@ console_reviews.db
 rec_cache/
 *.tmp
 attendance/staff_master.csv
+# ---- Clinic Finance (S179) · PHI + money. MUST be in .gitignore BEFORE the
+# ---- first commit of finance_app.py, not after (F-31 / F-49).
+finance/finance.db
+finance/finance.db-wal
+finance/finance.db-shm
+finance/finance.db.bak*
+finance/scans/
+finance/exports/
+finance/access.log
+finance/medical_legacy.csv
+finance/medical_*.csv
+finance/finance.db
+finance/finance.db-wal
+finance/finance.db-shm
+finance/finance.db.bak*
+finance/finance.db.pre*
+finance/scans/
+finance/exports/
+finance/vendor/
+finance/access.log
+finance/backup.log
+finance/medical_legacy.csv
+finance/medical_*.csv
+finance/upi_statements/
+
 
 

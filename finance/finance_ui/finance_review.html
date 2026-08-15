@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<!-- finance_review.html · Sanjeevni Medicos — Review & Approve (CHECKER / doctor)
+     Session 179 · step B2 · redesigned B3b. Served from disk (D312). No CDN. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<title>Sanjeevni — Review &amp; Approve</title>
+<style>
+  :root{
+    --bg:#f4f6fa; --card:#fff; --ink:#0f172a; --ink2:#334155; --muted:#64748b;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --brand:#4f46e5; --brand-bg:#eef2ff;
+    --ok:#047857; --ok-bg:#ecfdf5; --ok-line:#a7f3d0;
+    --warn:#b45309; --warn-bg:#fffbeb; --warn-line:#fde68a;
+    --bad:#be123c; --bad-bg:#fff1f2; --bad-line:#fecdd3;
+    --pend:#0369a1; --pend-bg:#f0f9ff; --pend-line:#bae6fd;
+    --r:16px; --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.18);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+       -webkit-font-smoothing:antialiased}
+  svg.i{width:19px;height:19px;flex:0 0 19px;stroke:currentColor;fill:none;
+        stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  svg.i.lg{width:24px;height:24px;flex-basis:24px}
+  svg.i.sm{width:15px;height:15px;flex-basis:15px}
+
+  header{background:linear-gradient(160deg,#111c33,#0b1220);color:#fff;padding:16px 20px;
+         position:sticky;top:0;z-index:40;box-shadow:0 2px 14px rgba(11,18,32,.28)}
+  .hrow{display:flex;align-items:center;gap:11px;max-width:1040px;margin:0 auto}
+  .hicon{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.13);
+         display:flex;align-items:center;justify-content:center;flex:0 0 38px}
+  header h1{margin:0;font-size:18px;font-weight:660;letter-spacing:-.01em}
+  header .sub{font-size:12.5px;color:#94a3b8;margin-top:1px}
+
+  .wrap{max-width:1040px;margin:0 auto;padding:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+        padding:18px;margin-bottom:15px;box-shadow:var(--shadow)}
+  .ch{display:flex;align-items:center;gap:9px;margin:0 0 15px}
+  .ch .ci{width:30px;height:30px;border-radius:9px;background:var(--brand-bg);color:var(--brand);
+          display:flex;align-items:center;justify-content:center;flex:0 0 30px}
+  .ch h2{margin:0;font-size:14.5px;font-weight:660;color:var(--ink)}
+  .ch .sp{flex:1}
+
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px}
+  .kpi{border:1px solid var(--line);border-radius:13px;padding:13px;background:#fcfdff;
+       position:relative;overflow:hidden}
+  .kpi .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;
+          font-weight:640;display:flex;align-items:center;gap:6px}
+  .kpi .v{font-size:23px;font-weight:720;font-variant-numeric:tabular-nums;margin-top:5px;
+          letter-spacing:-.02em}
+  .kpi.alarm{border-color:var(--bad-line);background:var(--bad-bg)}
+  .kpi.alarm .k,.kpi.alarm .v{color:var(--bad)}
+
+  #monthGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}
+  .dow{font-size:11px;color:var(--muted);text-align:center;text-transform:uppercase;
+       letter-spacing:.06em;font-weight:640;padding-bottom:5px}
+  .cell{border:1px solid var(--line);border-radius:11px;padding:8px 6px;min-height:64px;
+        text-align:center;cursor:pointer;background:#fff;transition:transform .08s}
+  .cell:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+  .cell .d{font-size:13px;font-weight:680;color:var(--muted)}
+  .cell .a{font-size:11.5px;font-variant-numeric:tabular-nums;margin-top:4px;color:var(--ink2)}
+  .cell .dot{width:6px;height:6px;border-radius:50%;margin:5px auto 0;background:transparent}
+  .cell.approved{background:var(--ok-bg);border-color:var(--ok-line)}
+  .cell.approved .d{color:var(--ok)} .cell.approved .dot{background:var(--ok)}
+  .cell.locked{background:#f8fafc;border-color:var(--line)}
+  .cell.locked .dot{background:var(--line2)}
+  .cell.submitted{background:var(--pend-bg);border-color:var(--pend-line)}
+  .cell.submitted .d{color:var(--pend)} .cell.submitted .dot{background:var(--pend)}
+  .cell.missing{background:var(--bad-bg);border-color:var(--bad-line)}
+  .cell.missing .d{color:var(--bad)} .cell.missing .dot{background:var(--bad)}
+  .cell.future,.cell.pending{background:#fafbfc;color:#cbd5e1;cursor:default}
+  .cell.future:hover,.cell.pending:hover{transform:none;box-shadow:none}
+  .cell.blank{border:0;background:transparent;cursor:default}
+  .cell.blank:hover{transform:none;box-shadow:none}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:13px;font-size:12px;color:var(--muted)}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .legend i{width:9px;height:9px;border-radius:50%;display:block}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:10px 9px;border-bottom:1px solid var(--line)}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:640}
+  tr:last-child td{border-bottom:0}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  code{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;background:#f1f5f9;padding:2px 6px;
+       border-radius:5px;color:var(--ink2)}
+  .pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;
+        font-size:11.5px;font-weight:660}
+  .pill.high{background:var(--bad-bg);color:var(--bad)}
+  .pill.medium{background:var(--warn-bg);color:var(--warn)}
+  .pill.low{background:#f1f5f9;color:var(--muted)}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 17px;
+       border-radius:11px;border:0;font-size:14.5px;font-weight:660;cursor:pointer;
+       font-family:inherit}
+  .btn.primary{background:var(--ok);color:#fff;box-shadow:0 4px 14px -5px rgba(4,120,87,.6)}
+  .btn.primary:disabled{background:#cbd5e1;color:#f8fafc;box-shadow:none;cursor:not-allowed}
+  .btn.ghost{background:#fff;border:1.5px solid var(--line2);color:var(--ink2)}
+  .btn.ghost:hover{border-color:var(--brand);color:var(--brand)}
+  .btn.small{padding:7px 12px;font-size:13px;border-radius:9px}
+
+  .msg{padding:13px;border-radius:12px;font-size:14px;margin-bottom:15px;display:none;
+       gap:9px;align-items:flex-start}
+  .msg svg{flex:0 0 18px;margin-top:1px}
+  .msg.bad{background:var(--bad-bg);color:var(--bad);border:1px solid var(--bad-line);display:flex}
+  .msg.good{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-line);display:flex}
+
+  .nav{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .nav .ym{font-weight:680;font-size:16px;min-width:104px;text-align:center;
+           font-variant-numeric:tabular-nums}
+  .navbtn{width:34px;height:34px;border-radius:9px;border:1.5px solid var(--line2);background:#fff;
+          color:var(--ink2);cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .navbtn:hover{border-color:var(--brand);color:var(--brand)}
+  .note{font-size:12.5px;line-height:1.5;color:var(--muted);margin-top:12px;
+        display:flex;gap:7px;align-items:flex-start}
+  .note svg{width:14px;height:14px;flex:0 0 14px;margin-top:2px;opacity:.7}
+  .alarmnote{color:var(--bad);font-weight:600}
+  .alarmnote svg{opacity:1}
+  .backlink{display:flex;align-items:center;gap:6px;color:#cbd5e1;text-decoration:none;
+            font-size:13.5px;font-weight:600;padding:8px 12px;border-radius:9px;
+            background:rgba(255,255,255,.10);white-space:nowrap}
+  .backlink:hover{background:rgba(255,255,255,.18);color:#fff}
+  .acc{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden;
+       background:#fff}
+  .acc>.hd{display:flex;align-items:center;gap:11px;padding:12px 13px;cursor:pointer;
+           user-select:none}
+  .acc>.hd:hover{background:#fbfcfe}
+  .acc>.hd .dt{font-weight:680;font-variant-numeric:tabular-nums;min-width:96px}
+  .acc>.hd .amt{font-variant-numeric:tabular-nums;font-weight:650;min-width:104px;
+                text-align:right}
+  .acc>.hd .meta{flex:1;font-size:12.5px;color:var(--muted);min-width:0;
+                 overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .acc>.hd .chev{transition:transform .15s;color:var(--muted)}
+  .acc.open>.hd .chev{transform:rotate(90deg)}
+  .acc>.bd{display:none;border-top:1px solid var(--line);padding:14px 13px;background:#fcfdff}
+  .acc.open>.bd{display:block}
+  .scanlinks{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .scanlinks a{display:flex;align-items:center;gap:7px;padding:9px 12px;border-radius:10px;
+               border:1px solid var(--line2);background:#fff;color:var(--ink2);
+               text-decoration:none;font-size:13px;font-weight:640}
+  .scanlinks a:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-bg)}
+  .scanlinks a.ext{border-style:dashed}
+  .lines{margin-top:12px;font-size:13px}
+  .lines .l{display:flex;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line)}
+  .lines .l:last-child{border-bottom:0}
+  .lines .l .n{flex:1;color:var(--ink2)}
+  .lines .l .v{font-variant-numeric:tabular-nums;font-weight:640}
+  .dayrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:11px}
+  .dayrow .b{border:1px solid var(--line);border-radius:11px;padding:11px;background:#fcfdff}
+  .dayrow .b .k{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);
+                font-weight:640}
+  .dayrow .b .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:3px}
+</style>
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 8.3-8 9-4.8-.7-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l9.5 17H2.5L12 3z"/><path d="M12 10v4M12 17.5v.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h13a1 1 0 011 1v2"/><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 13h2"/></symbol>
+  <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 10l9-6 9 6M5 10v9M9 10v9M15 10v9M19 10v9M3 21h18"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M5 3v18l2-1.5L9 21l2-1.5L13 21l2-1.5L17 21l2-1.5V3l-2 1.5L15 3l-2 1.5L11 3 9 4.5 7 3 5 4.5z"/><path d="M9 9h6M9 13h6"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 001 1h12a1 1 0 001-1V8M10 12h4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v12M6 13l6 6 6-6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+</svg>
+
+<header>
+  <div class="hrow">
+    <div class="hicon"><svg class="i lg"><use href="#i-shield"/></svg></div>
+    <div style="flex:1">
+      <h1>Sanjeevni Medicos</h1>
+      <div class="sub">Review &amp; Approve &middot; <span id="whoami">…</span></div>
+    </div>
+    <a class="backlink" href="/portal">
+      <svg class="i"><use href="#i-left"/></svg>Portal</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="msg" id="msg"></div>
+
+  <div class="card">
+    <div class="ch"><div class="ci"><svg class="i"><use href="#i-pulse"/></svg></div><h2>Today</h2></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="note"><svg><use href="#i-lock"/></svg>
+      <span>Cash in hand is computed from the ledger. Nobody types it, and there is no
+        screen anywhere on which it can be edited.</span></div>
+    <div class="note" id="depositNote">—</div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ci"><svg class="i"><use href="#i-archive"/></svg></div>
+      <h2>Month close</h2></div>
+    <div id="closeState" class="note">—</div>
+    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn ghost small" id="btnCloseCheck" type="button">
+        <svg class="i sm"><use href="#i-check"/></svg>Check readiness</button>
+      <button class="btn ghost small" id="btnStatement" type="button">
+        <svg class="i sm"><use href="#i-receipt"/></svg>Enter soft-copy total</button>
+      <button class="btn primary small" id="btnFinalise" type="button" disabled>
+        <svg class="i sm"><use href="#i-archive"/></svg>Finalise month</button>
+    </div>
+    <div class="note"><svg><use href="#i-info"/></svg>
+      <span>Cash goes to the bank on the next trip, not at month end — so the drawer carries
+        into the next month and finalising records what carried. Finalising also retires that
+        month's scans to the connected Google Drive; the record of each file stays here
+        forever, only the local copy goes.</span></div>
+  </div>
+
+
+  <div class="card">
+    <div class="ch"><div class="ci"><svg class="i"><use href="#i-bank"/></svg></div>
+      <h2>Parked cash</h2></div>
+    <div id="parkedBox" class="note">—</div>
+    <table id="parkedTable" style="margin-top:6px"></table>
+    <div class="note"><svg><use href="#i-info"/></svg>
+      <span>A bank trip happens days after month end, so one deposit carries the closed
+        month's parked cash plus this month's takings. Enter only the <b>old month's</b>
+        share — the rest is this month's by definition. The deposit row itself is never
+        split, so it keeps matching the bank statement exactly.</span></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ci"><svg class="i"><use href="#i-wallet"/></svg></div>
+      <h2>Count the drawer</h2></div>
+    <div class="dayrow">
+      <div><label style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;
+        color:#64748b;font-weight:640;display:block;margin-bottom:5px">As at date</label>
+        <input type="date" id="coDate" style="width:100%;padding:10px;border:1.5px solid #cbd5e1;
+        border-radius:10px;font-family:inherit;font-size:15px"></div>
+      <div><label style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;
+        color:#64748b;font-weight:640;display:block;margin-bottom:5px">Counted (₹)</label>
+        <input type="tel" id="coAmt" inputmode="numeric" placeholder="0"
+        style="width:100%;padding:10px;border:1.5px solid #cbd5e1;border-radius:10px;
+        font-family:inherit;font-size:15px"></div>
+      <div><label style="font-size:11px;text-transform:uppercase;letter-spacing:.04em;
+        color:#64748b;font-weight:640;display:block;margin-bottom:5px">Note</label>
+        <input type="text" id="coNote" placeholder="why you counted"
+        style="width:100%;padding:10px;border:1.5px solid #cbd5e1;border-radius:10px;
+        font-family:inherit;font-size:15px"></div>
+    </div>
+    <div style="margin-top:13px">
+      <button class="btn primary" id="btnCutover" type="button">
+        <svg class="i sm"><use href="#i-check"/></svg>Record the count</button>
+    </div>
+    <div class="note"><svg><use href="#i-info"/></svg>
+      <span>The count is recorded as a fact; the gap between it and the computed ledger
+        becomes one approved adjustment with your name on it. It does <b>not</b> close the
+        legacy breaks — settling the balance and explaining the history are different
+        things.</span></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ci"><svg class="i"><use href="#i-cal"/></svg></div><h2>Month</h2>
+      <span class="sp"></span>
+      <button class="btn ghost small" id="btnExport" type="button">
+        <svg class="i sm"><use href="#i-down"/></svg>Export</button></div>
+    <div class="nav">
+      <button class="navbtn" id="prevM" type="button"><svg class="i"><use href="#i-left"/></svg></button>
+      <div class="ym" id="ymLabel">—</div>
+      <button class="navbtn" id="nextM" type="button"><svg class="i"><use href="#i-right"/></svg></button>
+    </div>
+    <div id="monthGrid"></div>
+    <div class="legend">
+      <span><i style="background:#047857"></i>Approved</span>
+      <span><i style="background:#0369a1"></i>Waiting for you</span>
+      <span><i style="background:#be123c"></i>Not filed</span>
+      <span><i style="background:#cbd5e1"></i>Locked</span>
+    </div>
+    <table style="margin-top:16px">
+      <tr><th>Days</th><th class="num">Sale</th><th class="num">Cash</th><th class="num">UPI</th>
+          <th class="num">Billed, no cash</th>
+          <th class="num">Expenses</th><th class="num">Deposited</th><th class="num">Adjustments</th></tr>
+      <tr id="monthTotals"><td>—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td>
+          <td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr>
+    </table>
+    <div class="note" id="ncBreak">—</div>
+  </div>
+
+  <div class="card" id="dayCard" style="display:none">
+    <div class="ch"><div class="ci"><svg class="i"><use href="#i-receipt"/></svg></div>
+      <h2>Day <span id="dayDate"></span></h2><span class="sp"></span>
+      <button class="navbtn" id="btnCloseDay" type="button"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="dayrow">
+      <div class="b"><div class="k">Opening (computed)</div><div class="v" id="dOpen">—</div></div>
+      <div class="b"><div class="k">Total sale</div><div class="v" id="dTotal">—</div></div>
+      <div class="b"><div class="k">Cash</div><div class="v" id="dCash">—</div></div>
+      <div class="b"><div class="k">UPI</div><div class="v" id="dUpi">—</div></div>
+      <div class="b"><div class="k">Billed, no cash</div><div class="v" id="dNoncash">—</div></div>
+      <div class="b"><div class="k">Cash actually received</div><div class="v" id="dCashReal">—</div></div>
+      <div class="b"><div class="k">Closing (computed)</div><div class="v" id="dClose">—</div></div>
+      <div class="b"><div class="k">Status</div><div class="v" id="dStatus" style="font-size:15px">—</div></div>
+    </div>
+    <div id="dayExtras" class="note"></div>
+    <div style="margin-top:15px">
+      <button class="btn primary" id="btnApprove" type="button">
+        <svg class="i sm"><use href="#i-check"/></svg>Approve this day</button>
+    </div>
+    <div class="note"><svg><use href="#i-info"/></svg>
+      <span>Approving is what posts any salary advance on this day to the Staff Ledger.
+        Entry alone never does.</span></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ci"><svg class="i"><use href="#i-receipt"/></svg></div>
+      <h2>Every day, open any time</h2><span class="sp"></span>
+      <select id="daysRange" style="padding:7px 10px;border:1.5px solid var(--line2);
+        border-radius:9px;font-family:inherit;font-size:13px;background:#fff">
+        <option value="60">Last 60 days</option>
+        <option value="30">Last 30 days</option>
+        <option value="180">Last 6 months</option>
+        <option value="400">Everything</option>
+      </select></div>
+    <div id="dayList"></div>
+    <div class="note"><svg><use href="#i-info"/></svg>
+      <span>Approving a day does not close it off — every day stays here, with its scans,
+        for as long as the record exists.</span></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ci"><svg class="i"><use href="#i-alert"/></svg></div>
+      <h2>Open exceptions</h2></div>
+    <table id="excTable">
+      <tr><th>Date</th><th>Kind</th><th>Severity</th><th class="num">Difference</th>
+          <th>Detail</th><th class="num">Shouts</th><th></th></tr>
+    </table>
+    <div class="note"><svg><use href="#i-info"/></svg>
+      <span>These keep shouting until closed. A missing day cannot be closed with a
+        sentence — it closes only when the day is actually filed.</span></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+var API = "/finance/api";
+var ym = new Date().toISOString().slice(0, 7);
+var selected = null;
+
+function $(id){ return document.getElementById(id); }
+function ic(n, cls){ return '<svg class="i ' + (cls || "") + '"><use href="#i-' + n + '"/></svg>'; }
+function show(kind, text){
+  var m = $("msg");
+  m.className = "msg " + kind;
+  m.innerHTML = ic(kind === "good" ? "check" : "alert") + "<span></span>";
+  m.querySelector("span").textContent = text;
+  if (kind === "good") setTimeout(function(){ m.className = "msg"; }, 4500);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function loadTile(){
+  fetch(API + "/tile").then(function(r){ return r.json(); }).then(function(j){
+    if (!j.ok) return;
+    var s = j.shouts || {};
+    var neg = String(j.cash_in_hand || "").indexOf("-") === 0;
+    var cards = [
+      ["clock",   "Last filed",                   j.last_filed || "—", false],
+      ["chart",   "That day's sale",              "₹" + (j.last_revenue || "—"), false],
+      ["wallet",  (j.cash_with && j.cash_with !== "not recorded")
+                    ? "Cash with " + j.cash_with : "Cash in hand",
+                  "₹" + (j.cash_in_hand || "—"), neg || !!j.deposit_due],
+      ["bank",    "Days since bank trip",
+                  (j.days_since_bank_deposit === null || j.days_since_bank_deposit === undefined)
+                    ? "—" : String(j.days_since_bank_deposit), !!j.bank_trip_due],
+      ["chart",   "Month to date",                "₹" + (j.month_to_date || "—"), false],
+      ["receipt", "Billed, no cash (MTD)",        "₹" + (j.noncash_month_to_date || "0.00"), false],
+      ["check",   "Awaiting your approval",       String(j.awaiting_approval || 0),
+                  (j.awaiting_approval || 0) > 0],
+      ["alert",   "Days not filed",               String(s.missing_days || 0),
+                  (s.missing_days || 0) > 0],
+      ["alert",   "Unexplained adjustments",      String(s.carry_forward || 0),
+                  (s.carry_forward || 0) > 0]
+    ];
+    $("kpis").innerHTML = cards.map(function(c){
+      return '<div class="kpi' + (c[3] ? " alarm" : "") + '"><div class="k">' +
+             ic(c[0], "sm") + c[1] + '</div><div class="v">' + c[2] + "</div></div>";
+    }).join("");
+
+    $("depositNote").innerHTML = ic("bank") + "<span></span>";
+    $("depositNote").querySelector("span").textContent = j.deposit_due
+      ? "Cash in hand is ₹" + j.cash_in_hand + ", over the ₹" + j.deposit_threshold +
+        " threshold — ₹" + j.deposit_excess + " should go to the bank."
+      : "Deposit threshold ₹" + j.deposit_threshold + " — not crossed.";
+    $("depositNote").className = j.deposit_due ? "note alarmnote" : "note";
+  });
+}
+
+function loadMonth(){
+  $("ymLabel").textContent = ym;
+  fetch(API + "/month/" + ym).then(function(r){ return r.json(); }).then(function(j){
+    if (!j.ok) return;
+    var g = $("monthGrid");
+    var dows = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    var html = dows.map(function(d){ return '<div class="dow">' + d + "</div>"; }).join("");
+    var first = new Date(j.days[0].date + "T00:00:00");
+    var lead = (first.getDay() + 6) % 7;
+    for (var i = 0; i < lead; i++) html += '<div class="cell blank"></div>';
+    j.days.forEach(function(d){
+      html += '<div class="cell ' + d.state + '" data-d="' + d.date + '">' +
+              '<div class="d">' + parseInt(d.date.slice(8), 10) + "</div>" +
+              '<div class="a">' + (d.revenue ? "₹" + d.revenue.split(".")[0] : "") + "</div>" +
+              '<div class="dot"></div></div>';
+    });
+    g.innerHTML = html;
+    g.querySelectorAll(".cell[data-d]").forEach(function(c){
+      c.onclick = function(){
+        var acc = document.querySelector('.acc[data-d="' + c.dataset.d + '"]');
+        if (acc){
+          if (!acc.classList.contains("open")){
+            acc.classList.add("open"); fillDay(acc, c.dataset.d);
+          }
+          acc.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else {
+          openDay(c.dataset.d);
+        }
+      }; });
+
+    var t = j.totals;
+    $("monthTotals").innerHTML =
+      "<td>" + t.days + "</td><td class='num'>₹" + t.revenue + "</td><td class='num'>₹" + t.cash +
+      "</td><td class='num'>₹" + t.upi + "</td><td class='num'>₹" + (t.noncash || "0.00") +
+      "</td><td class='num'>₹" + t.expenses +
+      "</td><td class='num'>₹" + t.deposited + "</td><td class='num'>₹" + t.adjustments + "</td>";
+
+    var HEADS = { home_medicine: "Home medicines", procedure_medicine: "Procedure medicines",
+                  other: "Other" };
+    $("ncBreak").innerHTML = ic("receipt") + "<span></span>";
+    $("ncBreak").querySelector("span").textContent =
+      (j.noncash_by_head && j.noncash_by_head.length)
+        ? "Billed without cash — " + j.noncash_by_head.map(function(h){
+            return (HEADS[h.head] || h.head) + " ₹" + h.amount + " (" + h.bills + " bills)";
+          }).join("   ·   ")
+        : "No bills raised without cash this month.";
+  });
+}
+
+function openDay(iso){
+  fetch(API + "/day/" + iso).then(function(r){ return r.json(); }).then(function(j){
+    if (!j.ok || !j.day.exists){ show("bad", iso + " — there is no entry for this day."); return; }
+    selected = iso;
+    var d = j.day;
+    $("dayCard").style.display = "block";
+    $("dayDate").textContent = iso;
+    $("dOpen").textContent = "₹" + d.opening;
+    $("dTotal").textContent = "₹" + d.total;
+    $("dCash").textContent = "₹" + d.cash;
+    $("dUpi").textContent = "₹" + d.upi;
+    $("dNoncash").textContent = "₹" + (d.noncash || "0.00");
+    $("dCashReal").textContent = "₹" + (d.cash_actually_received || d.cash);
+    $("dClose").textContent = "₹" + d.closing;
+    $("dStatus").textContent = d.status + (d.source === "legacy_sheet" ? " (imported)" : "");
+    var bits = [];
+    if ((d.expenses || []).length) bits.push(d.expenses.length + " expense line(s)");
+    if ((d.movements || []).length) bits.push(d.movements.length + " cash movement(s)");
+    if ((d.adjustments || []).length) bits.push(d.adjustments.length + " adjustment(s)");
+    if ((d.attachments || []).length) bits.push(d.attachments.length + " scan(s)");
+    (d.noncash_bills || []).forEach(function(b){
+      bits.push("bill " + b.bill_no + " ₹" + b.amount + " (" + b.head.replace(/_/g, " ") + ")"); });
+    $("dayExtras").innerHTML = ic("info") + "<span></span>";
+    $("dayExtras").querySelector("span").textContent = bits.join("  ·  ") || "No extra lines.";
+    $("btnApprove").disabled = (d.status !== "submitted" && d.status !== "draft");
+    $("dayCard").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+}
+
+function loadExceptions(){
+  fetch(API + "/exceptions").then(function(r){ return r.json(); }).then(function(j){
+    if (!j.ok) return;
+    var head = "<tr><th>Date</th><th>Kind</th><th>Severity</th><th class='num'>Difference</th>" +
+               "<th>Detail</th><th class='num'>Shouts</th><th></th></tr>";
+    var rows = (j.exceptions || []).map(function(e){
+      var act = e.kind === "missing_day"
+        ? '<span style="font-size:12px;color:#64748b">file the day</span>'
+        : '<button class="btn ghost small resolve" data-id="' + e.id + '">Explain</button>';
+      return "<tr><td>" + e.date + "</td><td><code>" + e.kind + "</code></td>" +
+             '<td><span class="pill ' + e.severity + '">' + e.severity + "</span></td>" +
+             "<td class='num'>" + (e.diff ? "₹" + e.diff : "") + "</td>" +
+             "<td>" + (e.detail || "") + "</td>" +
+             "<td class='num'>" + e.shouts + "</td><td>" + act + "</td></tr>";
+    }).join("");
+    $("excTable").innerHTML = head +
+      (rows || "<tr><td colspan='7' style='color:#047857'>Nothing open.</td></tr>");
+    $("excTable").querySelectorAll(".resolve").forEach(function(b){
+      b.onclick = function(){
+        var why = window.prompt("Why did this happen? (recorded against the day)");
+        if (!why || why.trim().length < 3) return;
+        fetch(API + "/exception/" + b.dataset.id + "/resolve", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ resolution: why })
+        }).then(function(r){ return r.json(); }).then(function(res){
+          if (res.ok){ show("good", "Recorded."); loadExceptions(); loadTile(); }
+          else show("bad", res.message || res.error);
+        });
+      };
+    });
+  });
+}
+
+
+
+var DOCLABEL = { sale_report: "Sale report", manual_copy: "Manual copy",
+                 orthotics_copy: "Orthotics copy", deposit_slip: "Deposit slip",
+                 legacy_medicine_copy: "Medicine copy (Drive)",
+                 legacy_implant_copy: "Implant copy (Drive)" };
+
+function loadDays(){
+  var n = $("daysRange").value;
+  fetch(API + "/days?days=" + n).then(function(r){ return r.json(); }).then(function(j){
+    if (!j.ok) return;
+    if (!j.days.length){ $("dayList").innerHTML =
+      "<div class='note'>No days in this range.</div>"; return; }
+    $("dayList").innerHTML = j.days.map(function(d){
+      var bits = [];
+      if (d.scans) bits.push(d.scans + " scan" + (d.scans > 1 ? "s" : ""));
+      if (d.bills) bits.push(d.bills + " bill" + (d.bills > 1 ? "s" : "") + " w/o cash");
+      if (d.adjustments) bits.push(d.adjustments + " adjustment" + (d.adjustments > 1 ? "s" : ""));
+      if (d.imported) bits.push("imported");
+      var pill = d.status === "submitted"
+        ? '<span class="pill medium">awaiting you</span>'
+        : (d.status === "approved" ? '<span class="pill low">approved</span>'
+        : (d.status === "draft" ? '<span class="pill medium">draft</span>'
+        : '<span class="pill low">' + d.status + "</span>"));
+      return '<div class="acc" data-d="' + d.date + '">' +
+        '<div class="hd">' +
+          '<svg class="i chev"><use href="#i-right"/></svg>' +
+          '<span class="dt">' + d.date + "</span>" + pill +
+          '<span class="meta">' + bits.join(" · ") + "</span>" +
+          '<span class="amt">₹' + d.revenue + "</span>" +
+        "</div><div class='bd'>loading…</div></div>";
+    }).join("");
+
+    $("dayList").querySelectorAll(".acc").forEach(function(acc){
+      acc.querySelector(".hd").onclick = function(){
+        var was = acc.classList.contains("open");
+        acc.classList.toggle("open");
+        if (!was) fillDay(acc, acc.dataset.d);
+      };
+    });
+  });
+}
+
+function fillDay(acc, iso){
+  var bd = acc.querySelector(".bd");
+  fetch(API + "/day/" + iso).then(function(r){ return r.json(); }).then(function(j){
+    if (!j.ok || !j.day.exists){ bd.textContent = "No entry."; return; }
+    var d = j.day, h = "";
+
+    h += '<div class="dayrow">' +
+      box("Opening (computed)", "₹" + d.opening) +
+      box("Total sale", "₹" + d.total) +
+      box("Cash", "₹" + d.cash) +
+      box("UPI", "₹" + d.upi) +
+      (d.noncash && d.noncash !== "0.00" ? box("Billed, no cash", "₹" + d.noncash) : "") +
+      (d.noncash && d.noncash !== "0.00"
+        ? box("Cash actually received", "₹" + d.cash_actually_received) : "") +
+      box("Closing (computed)", "₹" + d.closing) +
+      box("Status", d.status + (d.approved_by ? " · " + d.approved_by : "")) +
+      "</div>";
+
+    var L = "";
+    (d.noncash_bills || []).forEach(function(b){
+      L += line("Bill " + b.bill_no + " — " + b.head.replace(/_/g, " "), "₹" + b.amount); });
+    (d.expenses || []).forEach(function(e){
+      L += line("Expense — " + (e.category_fixed || e.category_text || "—"), "₹" + e.amount); });
+    (d.movements || []).forEach(function(m){
+      L += line((m.direction === "out" ? "Cash to " : "Cash back from ") +
+                m.party.replace(/_/g, " "), "₹" + m.amount); });
+    (d.adjustments || []).forEach(function(a){
+      L += line("Adjustment — " + a.reason, "₹" + a.amount); });
+    if (L) h += '<div class="lines">' + L + "</div>";
+
+    if ((d.attachments || []).length){
+      h += '<div class="scanlinks">' + d.attachments.map(function(a){
+        return '<a href="' + a.url + '" target="_blank" rel="noopener"' +
+               (a.external ? ' class="ext"' : "") + ">" +
+               '<svg class="i sm"><use href="#i-receipt"/></svg>' +
+               (DOCLABEL[a.doc_type] || a.doc_type) + "</a>";
+      }).join("") + "</div>";
+    } else {
+      h += '<div class="note"><svg><use href="#i-alert"/></svg><span>No scans on this day.</span></div>';
+    }
+
+    if (d.status === "submitted" || d.status === "draft"){
+      h += '<div style="margin-top:14px"><button class="btn primary small accApprove" ' +
+           'data-d="' + iso + '"><svg class="i sm"><use href="#i-check"/></svg>' +
+           "Approve this day</button></div>";
+    }
+    bd.innerHTML = h;
+    var ab = bd.querySelector(".accApprove");
+    if (ab) ab.onclick = function(){
+      doApprove(iso, function(){
+        fillDay(acc, iso); loadDays(); loadMonth(); loadTile(); loadExceptions();
+      });
+    };
+  });
+}
+function box(k, v){
+  return '<div class="b"><div class="k">' + k + '</div><div class="v">' + v + "</div></div>";
+}
+function line(n, v){
+  return '<div class="l"><span class="n">' + n + '</span><span class="v">' + v + "</span></div>";
+}
+
+function doApprove(iso, after){
+  function post(body){
+    return fetch(API + "/approve/" + iso, { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body || {}) }).then(function(r){ return r.json().then(
+        function(j){ return { s: r.status, j: j }; }); });
+  }
+  post({}).then(function(res){
+    if (res.s === 409 && res.j.error === "upi_mismatch"){
+      var okgo = window.confirm(
+        "BANK DISAGREES ON UPI FOR " + iso + "\n\n" +
+        "Bank settled : ₹" + res.j.bank + "\n" +
+        "Day entered  : ₹" + res.j.entered + "\n" +
+        "Difference   : ₹" + res.j.diff + "\n\n" +
+        "The bank is the arbiter. Approve anyway, over the mismatch?\n" +
+        "(Your acknowledgment is recorded against the day.)");
+      if (!okgo) return;
+      var note = window.prompt("Optional note for the record:", "") || "";
+      post({ acknowledge_upi: true, ack_note: note }).then(function(res2){
+        if (!res2.j.ok){ show("bad", res2.j.message || res2.j.error); return; }
+        show("good", iso + " approved over the UPI mismatch — acknowledgment recorded.");
+        if (after) after();
+      });
+      return;
+    }
+    if (!res.j.ok){ show("bad", res.j.message || res.j.error); return; }
+    var n = (res.j.salary_advances_pending_ledger || []).length;
+    show("good", iso + " approved." +
+      (n ? " " + n + " salary advance(s) queued for the Staff Ledger." : ""));
+    if (after) after();
+  });
+}
+
+function loadParked(){
+  fetch(API + "/parked").then(function(r){ return r.json(); }).then(function(j){
+    if (!j.ok) return;
+    var open = (j.months || []).filter(function(m){ return !m.settled; });
+    $("parkedBox").innerHTML = ic(open.length ? "alert" : "check") + "<span></span>";
+    $("parkedBox").querySelector("span").textContent = open.length
+      ? open.length + " closed month(s) still have cash in the drawer."
+      : "Nothing parked — every closed month has reached the bank.";
+    $("parkedBox").className = (j.ageing || []).length ? "note alarmnote" : "note";
+    if ((j.ageing || []).length){
+      $("parkedBox").querySelector("span").textContent +=
+        "  " + j.ageing.map(function(a){
+          return a.ym + " — " + a.outstanding + " sitting " + a.days + " days.";
+        }).join(" ");
+    }
+
+    var head = "<tr><th>Month</th><th class='num'>Parked</th><th class='num'>Reached bank</th>" +
+               "<th class='num'>Still in drawer</th><th></th></tr>";
+    var rows = (j.months || []).map(function(m){
+      var act = m.settled
+        ? '<span class="pill low">settled</span>'
+        : '<button class="btn ghost small allocate" data-ym="' + m.ym + '">Allocate a deposit</button>';
+      return "<tr><td>" + m.ym + "</td><td class='num'>₹" + m.parked +
+             "</td><td class='num'>₹" + m.cleared + "</td><td class='num'>₹" + m.outstanding +
+             "</td><td>" + act + "</td></tr>";
+    }).join("");
+    $("parkedTable").innerHTML = head +
+      (rows || "<tr><td colspan='5' style='color:#64748b'>No month finalised yet.</td></tr>");
+
+    $("parkedTable").querySelectorAll(".allocate").forEach(function(b){
+      b.onclick = function(){
+        var ym = b.dataset.ym;
+        var list = (j.bank_deposits || []).map(function(d, i){
+          return (i + 1) + ") " + d.date + "  ₹" + d.amount +
+                 (d.clears_ym ? "  [already clears " + d.clears_ym + " ₹" + d.clears_amount + "]" : "");
+        }).join("\n");
+        if (!list){ show("bad", "No bank deposits recorded yet."); return; }
+        var pick = window.prompt("Which deposit reached the bank?\n\n" + list +
+                                 "\n\nType the number:", "1");
+        if (!pick) return;
+        var d = (j.bank_deposits || [])[parseInt(pick, 10) - 1];
+        if (!d){ show("bad", "No such deposit."); return; }
+        var amt = window.prompt("Of that ₹" + d.amount + ", how much is " + ym +
+                                "'s parked cash?\nThe rest is treated as this month's.", "");
+        if (!amt) return;
+        fetch(API + "/deposit/" + d.id + "/clear", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ym: ym, amount: amt })
+        }).then(function(r){ return r.json(); }).then(function(res){
+          if (!res.ok){ show("bad", res.message || res.error); return; }
+          show("good", res.message + "  (₹" + res.remainder_current_month +
+               " of that deposit counts as this month's.)");
+          loadParked(); loadTile();
+        });
+      };
+    });
+  });
+}
+
+function doCutover(){
+  var d = $("coDate").value, a = $("coAmt").value;
+  if (!d){ show("bad", "Pick the date the count applies to."); return; }
+  if (!a){ show("bad", "Enter the counted amount."); return; }
+  if (!window.confirm("Record a counted drawer of ₹" + a + " as at " + d + "?\n\n" +
+                      "The difference from the computed ledger becomes one approved " +
+                      "adjustment in your name.")) return;
+  fetch(API + "/cutover", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ date: d, counted: a, note: $("coNote").value || "cash count" }) })
+    .then(function(r){ return r.json(); }).then(function(j){
+      if (!j.ok){ show("bad", j.message || j.error); return; }
+      show("good", "Counted ₹" + j.counted + " against a computed ₹" + j.computed +
+           " — adjustment ₹" + j.adjustment + ". " + j.legacy_breaks_still_open +
+           " legacy breaks remain open, deliberately.");
+      $("coAmt").value = ""; $("coNote").value = "";
+      loadTile(); loadMonth(); loadExceptions(); loadParked();
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  fetch(API + "/whoami").then(function(r){ return r.json(); }).then(function(j){
+    $("whoami").textContent = (j.user || "—") + " · " + (j.role || "—");
+  });
+  $("prevM").onclick = function(){
+    var d = new Date(ym + "-01T00:00:00"); d.setMonth(d.getMonth() - 1);
+    ym = d.toISOString().slice(0, 7); loadMonth(); };
+  $("nextM").onclick = function(){
+    var d = new Date(ym + "-01T00:00:00"); d.setMonth(d.getMonth() + 1);
+    ym = d.toISOString().slice(0, 7); loadMonth(); };
+  $("btnCloseDay").onclick = function(){ $("dayCard").style.display = "none"; };
+  $("btnExport").onclick = function(){
+    show("bad", "Month export (.xlsx / .pdf) arrives in B7, per entity."); };
+
+  $("btnCloseCheck").onclick = function(){
+    fetch(API + "/month/" + ym + "/close-check").then(function(r){ return r.json(); })
+      .then(function(j){
+        if (!j.ok){ show("bad", "Check failed."); return; }
+        var bits = ["Status: " + j.status, "system ₹" + j.system_total,
+                    j.statement_total ? "soft copy ₹" + j.statement_total +
+                      " (variance ₹" + j.variance + ")" : "soft copy not uploaded",
+                    "drawer ₹" + j.residual_cash, "policy: " + j.carry_policy];
+        if (j.blockers.length) bits.push("BLOCKERS — " + j.blockers.join("; "));
+        $("closeState").innerHTML = ic(j.ready ? "check" : "alert") + "<span></span>";
+        $("closeState").querySelector("span").textContent = bits.join("   ·   ");
+        $("closeState").className = j.ready ? "note" : "note alarmnote";
+        $("btnFinalise").disabled = false;   // override path exists; server still guards
+      });
+  };
+
+  $("btnStatement").onclick = function(){
+    var t = window.prompt("Total for " + ym + " as per the Sanjeevni sale register soft copy (₹)");
+    if (!t) return;
+    fetch(API + "/month/" + ym + "/statement", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: "sale_register", stated_total: t })
+    }).then(function(r){ return r.json(); }).then(function(j){
+      if (!j.ok){ show("bad", j.message || j.error); return; }
+      show(j.agrees ? "good" : "bad",
+        j.agrees ? "Soft copy agrees with the system exactly."
+                 : "Soft copy ₹" + j.statement_total + " vs system ₹" + j.system_total +
+                   " — variance ₹" + j.variance + ". This is now an open exception.");
+      $("btnCloseCheck").click(); loadExceptions();
+    });
+  };
+
+  $("btnFinalise").onclick = function(){
+    fetch(API + "/month/" + ym + "/close-check").then(function(r){ return r.json(); })
+      .then(function(chk){
+        var body = {};
+        if (!chk.ready){
+          var why = window.prompt("This month is not ready (" + chk.blockers.join("; ") +
+                                  ").\nType a reason to finalise anyway, or Cancel.");
+          if (!why) return;
+          body.override_reason = why;
+        }
+        if (chk.settlement_required){
+          var party = window.prompt("Drawer holds ₹" + chk.residual_cash +
+            " and this unit is set NOT to carry a balance forward.\n" +
+            "Where does it go? Type: bank, dr_manoj or dr_bhawna", "bank");
+          if (!party) return;
+          body.settlement = { party: party.trim() };
+        }
+        fetch(API + "/month/" + ym + "/finalise", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        }).then(function(r){ return r.json(); }).then(function(j){
+          if (!j.ok){ show("bad", j.message || j.error); return; }
+          show("good", ym + " finalised. " +
+            (j.carry_policy === "carry"
+              ? "₹" + j.cash_carried_forward + " carried into the next month."
+              : "Drawer now ₹" + j.cash_after_settlement + ".") +
+            " " + j.scans_queued_for_archive + " scans queued for Google Drive.");
+          loadTile(); loadMonth(); loadExceptions(); $("btnCloseCheck").click();
+        });
+      });
+  };
+
+  $("btnApprove").onclick = function(){
+    if (!selected) return;
+    doApprove(selected, function(){
+      openDay(selected); loadMonth(); loadTile(); loadExceptions();
+    });
+  };
+
+  $("btnCutover").onclick = doCutover;
+  $("coDate").value = new Date().toISOString().slice(0, 10);
+  $("coDate").max = new Date().toISOString().slice(0, 10);
+  $("daysRange").onchange = loadDays;
+  loadTile(); loadMonth(); loadExceptions(); loadParked(); loadDays();
+});
+</script>
+</body>
+</html>

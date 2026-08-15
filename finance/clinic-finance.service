@@ -1,0 +1,29 @@
+# /etc/systemd/system/clinic-finance.service
+# Clinic Finance — Sanjeevni Medicos daily sale module (S179)
+[Unit]
+Description=Clinic Finance (Sanjeevni daily sale)
+After=network.target
+[Service]
+Type=simple
+WorkingDirectory=/root/finance
+Environment=FINANCE_DB=/root/finance/finance.db
+Environment=FINANCE_UI_DIR=/root/finance/finance_ui
+Environment=FINANCE_SCAN_DIR=/root/finance/scans
+Environment=FINANCE_PORT=8106
+Environment=FINANCE_SSO_DIR=/root/portal
+Environment=FINANCE_PORTAL_LOGIN=/portal
+# SECURITY, and none of these lines is optional:
+#  * FINANCE_ALLOW_HEADER_AUTH is deliberately ABSENT. Setting it to 1 would let
+#    any request assert "X-Clinic-Role: checker" and approve its own entries.
+#    It exists solely so the module can be smoke-tested offline.
+#  * FINANCE_DEV_USER / FINANCE_DEV_ROLE are likewise absent — they would hand
+#    every visitor the same identity.
+#  * CLINIC_SSO_SECRET is NOT written here. The app reads it from the
+#    environment if present, otherwise from /root/portal/portal_config.py —
+#    the one place it already lives. No second copy of a secret.
+ExecStart=/usr/bin/python3 -m gunicorn --workers 2 --bind 127.0.0.1:8106 \
+          --timeout 90 --access-logfile /root/finance/access.log finance_app:app
+Restart=always
+RestartSec=5
+[Install]
+WantedBy=multi-user.target
