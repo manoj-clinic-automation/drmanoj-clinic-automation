@@ -1,11 +1,11 @@
-# EOS S181 — canonical docs · md5 (Phase-0 pins)
+# EOS S182 — canonical docs · md5 (Phase-0 pins)
 
-3af7657d91035923df3bb6d703b17872  CANONICAL_MANIFEST.md
-3fad5ed45c0a98cb63a9cf0a070e0396  START_HERE_SESSION_182.md
-df00d5c253c1f1cd6b2c0387d6b7dbe6  KB_Register_v5_3_S181.md
-61b2216107f38798287c258013475904  HANDOFF_RUNBOOK_2026-08-16_Session181close_v115.md
-8ef9bc8bdce233c03de60bdb75969dfd  KB_History_Archive_v1_29_S181.md
-7bcde8c98d62e6570f9995b7bbbd5166  Fault_Action_Register_v2_17.md
+89b880109779061f5bc957426461928c  CANONICAL_MANIFEST.md
+076e301b099b0ba91d7cbafa77f0f053  START_HERE_SESSION_183.md
+9506a0fe75020b79e7e75a67e81383f5  KB_Register_v5_4_S182.md
+5b871ab7099e1fe66b0ae462c19638e7  HANDOFF_RUNBOOK_2026-08-16_Session182close_v116.md
+7a673ac6e09abeb60642aa58367bf860  KB_History_Archive_v1_30_S182.md
+ff0f020a3b645cbfa65400a51448cf0f  Fault_Action_Register_v2_18.md
 631a2ba7ff907b98aadee89ac97d0412  KB_Asset_Register_v1_11_0_R_S181.md
 
 # note: the manifest's own md5 above is of the file as written at this close;
