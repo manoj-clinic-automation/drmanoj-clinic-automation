@@ -1,0 +1,5 @@
+KIT: KIT_2026-08-16_content_website_eos
+PROJECT: Patient Education Content System + Website Ops (drmanojagarwal.com)
+DATE: 2026-08-16 (IST)
+CONTENTS: session code + content masters + website ops docs + KB swap + cleanup
+DEPLOY: none to VPS this session (docs/content kit). Push to GitHub via scripts\push_kit.bat

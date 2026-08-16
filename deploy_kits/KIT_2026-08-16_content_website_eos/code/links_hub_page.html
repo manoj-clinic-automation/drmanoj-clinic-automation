@@ -1,0 +1,53 @@
+<!-- ============================================================
+  LINK HUB PAGE — drmanojagarwal.com/links
+  Purpose: the "link in bio" destination for Instagram/Facebook,
+  QR codes and anywhere only one link fits. Owns the rails.
+  Install: WordPress → Pages → Add New → title "Links" →
+  slug "links" → add an "Custom HTML" block → paste everything
+  below → publish. (Works in Elementor via HTML widget too.)
+  Rank Math: set to noindex if preferred (utility page).
+============================================================ -->
+<style>
+  .dmlinks{max-width:430px;margin:0 auto;padding:18px 16px 40px;font-family:'Open Sans',system-ui,sans-serif}
+  .dmlinks h1{font-family:Poppins,system-ui,sans-serif;font-size:1.35rem;color:#1A2B3C;text-align:center;margin:6px 0 2px}
+  .dmlinks .sub{text-align:center;color:#5a6b7b;font-size:.9rem;margin:0 0 18px}
+  .dmlinks a.btn{display:block;text-decoration:none;text-align:center;padding:14px 16px;margin:10px 0;border-radius:12px;font-weight:600;font-size:1rem;border:2px solid #1565C0;color:#1565C0;background:#fff;transition:.15s}
+  .dmlinks a.btn:hover{background:#eef4fb}
+  .dmlinks a.btn.primary{background:#1565C0;color:#fff}
+  .dmlinks a.btn.green{border-color:#43A047;color:#fff;background:#43A047}
+  .dmlinks .sec{margin:22px 0 6px;font-size:.8rem;letter-spacing:.08em;color:#8a97a5;text-transform:uppercase;text-align:center}
+  .dmlinks .foot{text-align:center;color:#8a97a5;font-size:.78rem;margin-top:26px;line-height:1.5}
+</style>
+
+<div class="dmlinks">
+  <h1>Dr. Manoj Agarwal</h1>
+  <p class="sub">Orthopaedic &amp; Joint Replacement Surgeon · Bareilly · 30+ Years of Experience</p>
+
+  <a class="btn primary" href="https://dr-manoj.in/book?utm_source=social&utm_medium=biolink">📅 Book an Appointment</a>
+  <a class="btn green" href="https://wa.me/919358008080?utm_source=social&utm_medium=biolink">💬 WhatsApp the Clinic</a>
+  <a class="btn" href="tel:+918065293652">📞 Call the Clinic</a>
+  <a class="btn" href="https://dr-manoj.in/map?utm_source=social&utm_medium=biolink">📍 Clinic Location (Google Maps)</a>
+
+  <div class="sec">Patient Guides — पूरी जानकारी</div>
+  <a class="btn" href="https://drmanojagarwal.com/knee-osteoarthritis-treatment/?utm_source=social&utm_medium=biolink">🦵 घुटने का दर्द — Knee Osteoarthritis</a>
+  <a class="btn" href="https://drmanojagarwal.com/low-back-pain-treatment/?utm_source=social&utm_medium=biolink">🧍 कमर दर्द — Low Back Pain</a>
+  <a class="btn" href="https://drmanojagarwal.com/cervical-spondylosis-neck-pain/?utm_source=social&utm_medium=biolink">💺 सर्वाइकल — Neck Pain</a>
+  <a class="btn" href="https://drmanojagarwal.com/sciatica-leg-pain-treatment/?utm_source=social&utm_medium=biolink">⚡ साइटिका — Sciatica</a>
+  <!-- Add one button per new blog on publish; keep max ~6, rotate to
+       newest/most-relevant. Older guides live on the blog index: -->
+  <a class="btn" href="https://drmanojagarwal.com/blog/?utm_source=social&utm_medium=biolink">📚 All Patient Guides</a>
+
+  <div class="sec">More</div>
+  <a class="btn" href="https://dr-manoj.in/app?utm_source=social&utm_medium=biolink">📱 Patient App (Android)</a>
+  <a class="btn" href="https://dr-manoj.in/save?utm_source=social&utm_medium=biolink">👤 Save Contact (vCard)</a>
+
+  <p class="foot">Dr. Manoj Agarwal Clinic · Rampur Garden, Bareilly<br>
+  Mon–Sat 10:00 AM – 1:30 PM · Emergency? Please call.<br>
+  For education only — not a substitute for consultation.</p>
+</div>
+<!-- CMS NOTES:
+  1. Blog buttons use final slugs from the publishing blocks — verify on publish.
+  2. IG bio → set to https://drmanojagarwal.com/links (once, forever).
+  3. QR posters can also point here for a general-purpose code.
+  4. UTM utm_medium=biolink separates bio traffic from shorts (utm_medium=shorts) in GA4.
+-->
