@@ -1,0 +1,8 @@
+829f4344df6e086510bb0fb6112ecb77  marg_report.py
+fa33ec8a6dfa0ee0b6af5613160f3394  marg_backfill.py
+9340675c9105f9d5e78cc37980494999  finance_migration_S183_marg_map.sql
+a890ef18d737e240bc82a09500e7afcc  install_m2a.sh
+df16de51e498e19178a0ed0bdc3c04e8  KIT_ID.txt
+cecd931b3941b2467cc2b4272a90e49a  DELIVERY_NOTE.md
+707688ced96f83416f1454f69e991ed9  deploy/push_kit.bat
+511434b8af2426415cdf51f49e85b0d4  deploy/vps_deploy.sh
