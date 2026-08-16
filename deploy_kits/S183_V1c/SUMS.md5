@@ -1,0 +1,8 @@
+ce36dbf10e7d5bbd5310507add41f3cb  verify_live_pins.py
+4cb0e107eed072cba685f6e26d5e153f  gen_live_pins.py
+58fd090c7414dc0ed2588e8461a89b02  live_pins.txt
+d7364c5dc60ed5472960ce957519ade1  install_v1c.sh
+df732323a33f94de3fd3059f371a377a  KIT_ID.txt
+2d776d409035c7275b8a9eedad558433  DELIVERY_NOTE.md
+707688ced96f83416f1454f69e991ed9  deploy/push_kit.bat
+511434b8af2426415cdf51f49e85b0d4  deploy/vps_deploy.sh
