@@ -1,0 +1,8 @@
+5282eba729226faee5c276e9f74927e7  finance_app.py.new
+854a8cd0f7d05f717d92da1c3d626364  finance_ui/finance_entry_clinic.html.new
+e0262d157c1b7c979531a8f53378c31d  finance_migration_S182_clinic.sql
+50023c23148ee9c26e4998f1838bf60e  install_c1a.sh
+8e178a62bb779aeb42ff0087898cc150  KIT_ID.txt
+511434b8af2426415cdf51f49e85b0d4  deploy/vps_deploy.sh
+0c4231f6173cf1961ffde80211161147  deploy/push_kit.bat
+783fffde7607df9454b4015bd14b6fa3  extras_docterz/docterz_report.py
