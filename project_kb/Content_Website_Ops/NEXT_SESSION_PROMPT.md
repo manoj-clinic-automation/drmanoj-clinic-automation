@@ -1,0 +1,9 @@
+# NEXT SESSION PROMPT — Content System & Website Ops (replace old END_OF_SESSION_PROMPT.md)
+State as of 2026-08-16: Template law rules 1–10 LOCKED (see Graphic_Content_Strategy + Blog01 v4 CMS notes). Blog01 Knee OA v4 = approved master. Batch 1 (back/neck/sciatica) v1 written, in Drive Doc "Batch 1 — DOCTOR EDIT COPY" awaiting phone review. Distribution: own-the-rails locked (WABA 3-phase primary; Docterz = prescription footer line only; social kit per blog; links hub page built for /links; Twitter parked). Graphics: strategy locked, Knee OA pilot NOT yet run (§8 order). TranslatePress free tier chosen, install AFTER audit fixes. Website: audit done, monitor script ready (remove .in redirect line), Step 5 edit sheet ready (backup first), joint session pending for login-gated items. NAP pack parked to end.
+START NEXT SESSION BY: (1) asking if Batch 1 review comments are ready → read Drive Doc incl. comments → sync to masters; (2) else offer: graphics pilot / joint website session / Batch 2 (frozen shoulder, sports injuries, AVN — AVN has no video script yet).
+Canonical files: GitHub deploy_kits/KIT_2026-08-16_content_website_eos/. Drive blog folder ID 1Rq-gJqaPgFecLQJEYEOTPRvf5krkoyzG.
+
+## PROTOCOL v2 (2026-08-16)
+Project-KB swap RETIRED. Canonical session state = Notion Clinic HQ session log (Claude appends at EOS, reads at session start). Full docs = GitHub deploy_kits/. Static project files in Claude project remain reference-only; no per-session swapping.
+
+PROTOCOL v3 ACTIVE since 2026-08-16: KB lives here in-repo; EOS placement done by Cowork session; user action = one push_kit double-click.
