@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<!-- finance_entry_clinic.html · Dr Manoj Agarwal Clinic — Daily Collection (MAKER / reception)
+     Session 182 · C1 slice 1 · contract S181_Clinic_Module_Build_Contract_C1.
+     Served from disk (D312). No CDN, no web font, no external image — every icon
+     is an inline SVG symbol, so the page works on a slow connection and offline.
+     Hindi-first: this screen is used by reception, on a phone.
+     ADDITIVE ARITHMETIC: the day = OPD + X-Ray + Procedure, each cash + UPI,
+     plus stray lines. Nothing is subtracted from anything. Opening cash is a
+     read-only display — there is no input and the server accepts none. -->
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<title>क्लिनिक — आज की एंट्री</title>
+<style>
+  :root{
+    --bg:#f4f6fa; --card:#fff; --ink:#0f172a; --ink2:#334155; --muted:#64748b;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --brand:#0e7490; --brand-dk:#155e75; --brand-bg:#ecfeff;
+    --ok:#047857; --ok-bg:#ecfdf5; --ok-line:#a7f3d0;
+    --warn:#b45309; --warn-bg:#fffbeb; --warn-line:#fde68a;
+    --bad:#be123c; --bad-bg:#fff1f2; --bad-line:#fecdd3;
+    --r:16px; --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.18);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+       padding-bottom:110px;-webkit-font-smoothing:antialiased}
+  svg.i{width:20px;height:20px;flex:0 0 20px;stroke:currentColor;fill:none;
+        stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  svg.i.lg{width:24px;height:24px;flex-basis:24px}
+
+  header{background:linear-gradient(160deg,#0f2a3a,#0b1220);color:#fff;
+         padding:16px 18px calc(16px + env(safe-area-inset-top,0)) 18px;
+         position:sticky;top:0;z-index:40;box-shadow:0 2px 14px rgba(11,18,32,.28)}
+  .hrow{display:flex;align-items:center;gap:11px;max-width:660px;margin:0 auto}
+  .hicon{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.13);
+         display:flex;align-items:center;justify-content:center;flex:0 0 38px}
+  header h1{margin:0;font-size:18px;font-weight:660;letter-spacing:-.01em}
+  header .sub{font-size:12.5px;color:#94a3b8;margin-top:1px}
+
+  .wrap{max-width:660px;margin:0 auto;padding:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+        padding:16px;margin-bottom:13px;box-shadow:var(--shadow)}
+  .ch{display:flex;align-items:center;gap:9px;margin:0 0 13px}
+  .ch .ci{width:30px;height:30px;border-radius:9px;background:var(--brand-bg);color:var(--brand);
+          display:flex;align-items:center;justify-content:center;flex:0 0 30px}
+  .ch h2{margin:0;font-size:14.5px;font-weight:660;letter-spacing:-.005em;color:var(--ink)}
+
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px;
+        letter-spacing:.02em}
+  input[type=text],input[type=date],input[type=tel],select{
+    width:100%;padding:13px 13px;font-size:16.5px;border:1.5px solid var(--line2);
+    border-radius:11px;background:#fff;color:var(--ink);font-family:inherit;
+    appearance:none;-webkit-appearance:none}
+  select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 7l5 5 5-5'/></svg>");
+         background-repeat:no-repeat;background-position:right 12px center;padding-right:38px}
+  input:focus,select:focus{outline:none;border-color:var(--brand);
+                           box-shadow:0 0 0 3.5px rgba(14,116,144,.14)}
+  input[readonly]{background:#f1f5f9;border-style:dashed;border-color:var(--line2);
+                  color:var(--ink2);font-weight:700}
+  .money{position:relative}
+  .money .rs{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);
+             font-size:19px;font-weight:600;pointer-events:none}
+  .money input{padding-left:32px}
+  .big{font-size:23px;font-weight:730;padding:14px 13px 14px 32px;
+       font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
+  .hint{font-size:12.5px;line-height:1.45;color:var(--muted);margin-top:7px;
+        display:flex;gap:6px;align-items:flex-start}
+  .hint svg{width:14px;height:14px;flex:0 0 14px;margin-top:2px;opacity:.7}
+  .sp{height:14px}
+  .svc{font-size:13px;font-weight:680;color:var(--brand-dk);margin:14px 0 8px;
+       display:flex;align-items:center;gap:7px}
+  .svc:first-of-type{margin-top:0}
+  .svc svg{width:16px;height:16px;flex:0 0 16px}
+
+  .calc{display:flex;justify-content:space-between;align-items:center;margin-top:12px;
+        padding:11px 13px;background:#f8fafc;border:1px solid var(--line);border-radius:11px}
+  .calc .k{font-size:13px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:7px}
+  .calc .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+  .calc.em{background:var(--brand-bg);border-color:#a5f3fc}
+  .calc.em .v{color:var(--brand-dk)}
+
+  .repeat{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:9px;
+          background:#fbfcfe;position:relative}
+  .rm{position:absolute;top:9px;right:9px;width:30px;height:30px;border-radius:8px;
+      background:#fff;border:1px solid var(--line);color:var(--muted);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;padding:0}
+  .rm:hover{color:var(--bad);border-color:var(--bad-line);background:var(--bad-bg)}
+  .add{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:11px;
+       border-radius:11px;border:1.5px dashed var(--line2);background:#fff;color:var(--brand);
+       font-size:14.5px;font-weight:650;cursor:pointer;font-family:inherit}
+  .add:hover{border-color:var(--brand);background:var(--brand-bg)}
+
+  .scan{display:flex;align-items:center;gap:11px;padding:13px;border:1.5px dashed var(--line2);
+        border-radius:12px;margin-bottom:9px;background:#fbfcfe}
+  .scan .si{width:34px;height:34px;border-radius:10px;background:#f1f5f9;color:var(--muted);
+            display:flex;align-items:center;justify-content:center;flex:0 0 34px}
+  .scan .nm{flex:1;font-size:14.5px;font-weight:640;min-width:0}
+  .scan .nm small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+  .scan button{padding:9px 15px;border-radius:9px;border:1.5px solid var(--line2);background:#fff;
+               font-size:13.5px;font-weight:650;cursor:pointer;font-family:inherit;color:var(--ink2);
+               display:flex;align-items:center;gap:6px}
+  .scan.done{border-style:solid;border-color:var(--ok-line);background:var(--ok-bg)}
+  .scan.done .si{background:#d1fae5;color:var(--ok)}
+  .scan.done button{border-color:var(--ok-line);color:var(--ok);background:#fff}
+
+  .msg{padding:13px;border-radius:12px;font-size:14px;line-height:1.45;margin-bottom:13px;
+       display:none;gap:9px;align-items:flex-start}
+  .msg svg{flex:0 0 18px;margin-top:1px}
+  .msg.bad{background:var(--bad-bg);color:var(--bad);border:1px solid var(--bad-line);display:flex}
+  .msg.good{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-line);display:flex}
+  .msg.warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-line);display:flex}
+
+  .shout{background:var(--bad-bg);border:1px solid var(--bad-line);border-radius:var(--r);
+         padding:14px;margin-bottom:13px}
+  .shout .sh{display:flex;align-items:center;gap:9px;color:var(--bad);font-weight:660;
+             font-size:14.5px;margin-bottom:4px}
+  .shout p{margin:0 0 10px;font-size:12.5px;color:#9f1239}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chips a{padding:7px 11px;background:#fff;border:1px solid var(--bad-line);border-radius:9px;
+           color:var(--bad);text-decoration:none;font-size:13px;font-weight:650;
+           font-variant-numeric:tabular-nums}
+  .chips a:hover{background:var(--bad);color:#fff;border-color:var(--bad)}
+
+  .total{border-radius:var(--r);padding:18px;margin-bottom:13px;text-align:center;
+         background:linear-gradient(160deg,#ecfdf5,#f0fdf4);border:1px solid var(--ok-line)}
+  .total .k{font-size:12.5px;font-weight:650;color:var(--ok);
+            letter-spacing:.03em;display:flex;align-items:center;justify-content:center;gap:7px}
+  .total .v{font-size:34px;font-weight:760;font-variant-numeric:tabular-nums;margin-top:5px;
+            letter-spacing:-.025em;color:#065f46}
+  .total .k2{font-size:12px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
+
+  .bar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.94);
+       backdrop-filter:blur(10px);border-top:1px solid var(--line);z-index:50;
+       padding:12px 14px calc(12px + env(safe-area-inset-bottom,0)) 14px}
+  .barin{max-width:660px;margin:0 auto;display:flex;gap:10px}
+  .btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:15px;
+       border-radius:12px;border:0;font-size:16px;font-weight:670;cursor:pointer;
+       font-family:inherit}
+  .btn.primary{background:var(--brand);color:#fff;box-shadow:0 4px 14px -4px rgba(14,116,144,.55)}
+  .btn.primary:disabled{background:#cbd5e1;color:#f8fafc;box-shadow:none;cursor:not-allowed}
+  .btn.ghost{background:#fff;border:1.5px solid var(--line2);color:var(--ink2);flex:0 0 42%}
+  .backlink{display:flex;align-items:center;gap:5px;color:#cbd5e1;text-decoration:none;
+            font-size:13px;font-weight:600;padding:8px 11px;border-radius:9px;
+            background:rgba(255,255,255,.10);white-space:nowrap}
+  .backlink:hover{background:rgba(255,255,255,.18);color:#fff}
+</style>
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-clinic" viewBox="0 0 24 24"><path d="M3 21h18M5 21V8l7-5 7 5v13"/><path d="M12 10v6M9 13h6"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0l-7.2-7.2a2 2 0 01-.6-1.4V4a1 1 0 011-1h8a2 2 0 011.4.6l7.4 7.4a2 2 0 010 2.4z"/><circle cx="7.5" cy="7.5" r="1.2"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></symbol>
+  <symbol id="i-xray" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 6v12M8 9h8M9 12h6M10 15h4"/></symbol>
+  <symbol id="i-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 00-5.6 5L4 16.4V20h3.6l5.1-5.1a4 4 0 005-5.6L15 12l-3-3 2.7-2.7z"/></symbol>
+  <symbol id="i-plusbox" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v8M8 12h8"/></symbol>
+  <symbol id="i-cam" viewBox="0 0 24 24"><path d="M4 7h3l2-2h6l2 2h3a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1z"/><circle cx="12" cy="13" r="3.6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l9.5 17H2.5L12 3z"/><path d="M12 10v4M12 17.5v.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h13a1 1 0 011 1v2"/><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 13h2"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3L10.5 13.5M21 3l-6.5 18-4-8-8-4L21 3z"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M5 3v18l2-1.5L9 21l2-1.5L13 21l2-1.5L17 21l2-1.5V3l-2 1.5L15 3l-2 1.5L11 3 9 4.5 7 3 5 4.5z"/><path d="M9 9h6M9 13h6"/></symbol>
+  <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 10l9-6 9 6M5 10v9M9 10v9M15 10v9M19 10v9M3 21h18"/></symbol>
+  <symbol id="i-upi" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 15h3"/></symbol>
+</svg>
+
+<header>
+  <div class="hrow">
+    <div class="hicon"><svg class="i lg"><use href="#i-clinic"/></svg></div>
+    <div style="flex:1">
+      <h1>आज की एंट्री</h1>
+      <div class="sub">Dr Manoj Agarwal Clinic &middot; <span id="whoami">…</span></div>
+    </div>
+    <a class="backlink" href="/portal">
+      <svg class="i"><use href="#i-back"/></svg>Portal</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- जो दिन नहीं भरे गए, वे यहीं टँगे रहते हैं जब तक भर न दिए जाएँ। -->
+  <div class="shout" id="shoutBox" style="display:none">
+    <div class="sh"><svg class="i"><use href="#i-alert"/></svg><span id="shoutTitle"></span></div>
+    <p>तारीख़ पर टैप करके वह दिन भर दें। जब तक हर दिन नहीं भरेगा, यह यहीं रहेगा।</p>
+    <div class="chips" id="shoutList"></div>
+  </div>
+
+  <div class="msg" id="depositMsg"></div>
+  <div class="msg" id="msg"></div>
+
+  <div class="card">
+    <div class="ch"><div class="ci"><svg class="i"><use href="#i-cal"/></svg></div><h2>कौन-सा दिन</h2></div>
+    <label for="bdate">तारीख़ (Date)</label>
+    <input type="date" id="bdate">
+    <div class="hint"><svg><use href="#i-info"/></svg>
+      <span>सिर्फ़ picker से चुनें — टाइप नहीं। आगे की तारीख़ नहीं चुनी जा सकती।</span></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ci"><svg class="i"><use href="#i-lock"/></svg></div><h2>पुरानी नक़दी (Opening)</h2></div>
+    <label for="opening">पिछले भरे दिन से चली आ रही नक़दी</label>
+    <!-- COMPUTED. readonly, no name attribute, never posted, never trusted from
+         the client (D313). No screen anywhere can change this figure. -->
+    <div class="money"><span class="rs">₹</span>
+      <input type="text" id="opening" class="big" readonly value="—"></div>
+    <div class="hint"><svg><use href="#i-info"/></svg>
+      <span>यह अपने आप आती है — इसे बदलने की कोई जगह कहीं नहीं है।</span></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ci"><svg class="i"><use href="#i-tag"/></svg></div><h2>आज की आमदनी</h2></div>
+
+    <div class="svc"><svg class="i"><use href="#i-user"/></svg>OPD</div>
+    <div class="row">
+      <div><label for="opd_cash">नक़द (Cash)</label>
+        <div class="money"><span class="rs">₹</span>
+        <input type="tel" id="opd_cash" class="big" inputmode="numeric" placeholder="0"></div></div>
+      <div><label for="opd_upi">UPI</label>
+        <div class="money"><span class="rs">₹</span>
+        <input type="tel" id="opd_upi" class="big" inputmode="numeric" placeholder="0"></div></div>
+    </div>
+
+    <div class="svc"><svg class="i"><use href="#i-xray"/></svg>X-Ray</div>
+    <div class="row">
+      <div><label for="xray_cash">नक़द (Cash)</label>
+        <div class="money"><span class="rs">₹</span>
+        <input type="tel" id="xray_cash" class="big" inputmode="numeric" placeholder="0"></div></div>
+      <div><label for="xray_upi">UPI</label>
+        <div class="money"><span class="rs">₹</span>
+        <input type="tel" id="xray_upi" class="big" inputmode="numeric" placeholder="0"></div></div>
+    </div>
+
+    <div class="svc"><svg class="i"><use href="#i-tool"/></svg>Procedure (प्रोसीजर)</div>
+    <div class="row">
+      <div><label for="proc_cash">नक़द (Cash)</label>
+        <div class="money"><span class="rs">₹</span>
+        <input type="tel" id="proc_cash" class="big" inputmode="numeric" placeholder="0"></div></div>
+      <div><label for="proc_upi">UPI</label>
+        <div class="money"><span class="rs">₹</span>
+        <input type="tel" id="proc_upi" class="big" inputmode="numeric" placeholder="0"></div></div>
+    </div>
+
+    <div class="calc"><span class="k"><svg class="i" style="width:16px;height:16px"><use href="#i-wallet"/></svg>कुल नक़द</span>
+      <span class="v" id="cashCalc">—</span></div>
+    <div class="calc"><span class="k"><svg class="i" style="width:16px;height:16px"><use href="#i-upi"/></svg>कुल UPI</span>
+      <span class="v" id="upiCalc">—</span></div>
+    <div class="calc em"><span class="k"><svg class="i" style="width:16px;height:16px"><use href="#i-tag"/></svg>दिन की कुल आमदनी</span>
+      <span class="v" id="dayTotal">—</span></div>
+    <div class="hint"><svg><use href="#i-info"/></svg>
+      <span>सब जुड़ता है: OPD + X-Ray + Procedure, नक़द + UPI। UPI अगली सुबह बैंक से अपने आप मिलाया जाता है।</span></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ci"><svg class="i"><use href="#i-plusbox"/></svg></div>
+      <h2>अलग से आया पैसा (stray)</h2></div>
+    <div id="strayList"></div>
+    <button class="add" id="addStray" type="button"><svg class="i"><use href="#i-plus"/></svg>एंट्री जोड़ें</button>
+    <div class="hint"><svg><use href="#i-info"/></svg>
+      <span>जो रक़म ऊपर के छह खानों में नहीं बैठती — पुराना बकाया, camp का पर्चा वग़ैरह।
+        हर लाइन का कारण लिखना ज़रूरी है। यह भी दिन के जोड़ में गिनी जाती है।</span></div>
+  </div>
+
+  <div class="total" id="closingBox">
+    <div class="k"><svg class="i" style="width:15px;height:15px"><use href="#i-wallet"/></svg>दिन के बाद नक़दी (Closing)</div>
+    <div class="v" id="closing">—</div>
+    <div class="k2" id="closingNote">पुरानी नक़दी + आज का नक़द</div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ci"><svg class="i"><use href="#i-cam"/></svg></div><h2>दो सबूत (register pages)</h2></div>
+    <div class="scan" data-doc="opd_register">
+      <div class="si"><svg class="i"><use href="#i-receipt"/></svg></div>
+      <div class="nm">OPD रजिस्टर का पेज<small>आज का पेज</small></div>
+      <button class="scanBtn" type="button"><svg class="i" style="width:16px;height:16px"><use href="#i-cam"/></svg>Scan</button>
+    </div>
+    <div class="scan" data-doc="xray_proc_register">
+      <div class="si"><svg class="i"><use href="#i-receipt"/></svg></div>
+      <div class="nm">X-Ray + Procedure रजिस्टर का पेज<small>आज का पेज</small></div>
+      <button class="scanBtn" type="button"><svg class="i" style="width:16px;height:16px"><use href="#i-cam"/></svg>Scan</button>
+    </div>
+    <div class="sp"></div>
+    <label for="scanReason">अगर कोई पेज नहीं लग पाया, तो कारण</label>
+    <input type="text" id="scanReason" placeholder="दोनों पेज लगे हों तो खाली छोड़ें">
+  </div>
+
+</div>
+
+<div class="bar"><div class="barin">
+  <button class="btn ghost" id="btnDraft" type="button"><svg class="i"><use href="#i-save"/></svg>ड्राफ़्ट सेव</button>
+  <button class="btn primary" id="btnSubmit" type="button"><svg class="i"><use href="#i-send"/></svg>सबमिट करें</button>
+</div></div>
+
+<script>
+"use strict";
+var API = "/finance/clinic/api";
+var FIELDS = ["opd_cash", "opd_upi", "xray_cash", "xray_upi", "proc_cash", "proc_upi"];
+var attached = {};          // doc_type -> true, set only by a real scanner upload
+var state = { opening_p: 0 };
+
+function $(id){ return document.getElementById(id); }
+function ic(n){ return '<svg class="i"><use href="#i-' + n + '"/></svg>'; }
+
+function money(p){
+  var s = (p < 0 ? "-" : "") + "₹";
+  p = Math.abs(p);
+  var w = Math.floor(p / 100), f = p % 100, t = String(w), out;
+  if (t.length > 3){
+    var head = t.slice(0, -3), tail = t.slice(-3);
+    out = head.replace(/(\d)(?=(\d\d)+$)/g, "$1,") + "," + tail;
+  } else out = t;
+  return s + out + "." + (f < 10 ? "0" : "") + f;
+}
+function paise(v){
+  v = String(v || "").trim().replace(/[, ₹]/g, "");
+  if (v === "") return 0;
+  if (!/^\d+(\.\d{1,2})?$/.test(v)) return null;      // typo guard, client side
+  return Math.round(parseFloat(v) * 100);
+}
+function show(kind, text){
+  var m = $("msg");
+  m.className = "msg " + kind;
+  m.innerHTML = ic(kind === "good" ? "check" : "alert") + "<span></span>";
+  m.querySelector("span").textContent = text;
+  if (kind === "good") setTimeout(function(){ m.className = "msg"; }, 4500);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ---- stray repeater --------------------------------------------------- */
+function rmBtn(){ return '<button class="rm" type="button" title="हटाएँ">' + ic("trash") + "</button>"; }
+
+function addStray(pre){
+  var d = document.createElement("div"); d.className = "repeat";
+  d.innerHTML = rmBtn() +
+    '<div class="row"><div><label>रक़म</label><div class="money"><span class="rs">₹</span>' +
+    '<input type="tel" class="stAmt" inputmode="numeric" placeholder="0"></div></div>' +
+    '<div><label>किस मद की</label><select class="stStream">' +
+    '<option value="opd">OPD</option>' +
+    '<option value="xray">X-Ray</option>' +
+    '<option value="procedure">Procedure</option></select></div></div>' +
+    '<div class="sp" style="height:9px"></div>' +
+    '<label>कैसे मिली</label><select class="stTender">' +
+    '<option value="cash">नक़द (Cash)</option>' +
+    '<option value="upi">UPI</option></select>' +
+    '<div class="sp" style="height:9px"></div>' +
+    '<label>कारण — ज़रूरी</label>' +
+    '<input type="text" class="stReason" placeholder="जैसे: पुराना बकाया, camp का पर्चा">';
+  $("strayList").appendChild(d);
+  if (pre){
+    d.querySelector(".stAmt").value = (pre.amount_p / 100).toFixed(2).replace(/\.00$/, "");
+    d.querySelector(".stStream").value = pre.stream;
+    d.querySelector(".stTender").value = pre.tender;
+    d.querySelector(".stReason").value = pre.reason || "";
+  }
+  d.querySelector(".rm").onclick = function(){ d.remove(); recompute(); };
+  d.addEventListener("input", recompute);
+  d.addEventListener("change", recompute);
+}
+
+/* ---- live totals: EVERYTHING ADDS ------------------------------------- */
+function recompute(){
+  var bad = false, cash = 0, upi = 0;
+  FIELDS.forEach(function(f){
+    var v = paise($(f).value);
+    if (v === null){ bad = true; return; }
+    if (f.slice(-4) === "cash") cash += v; else upi += v;
+  });
+  document.querySelectorAll("#strayList .repeat").forEach(function(r){
+    var v = paise(r.querySelector(".stAmt").value);
+    if (v === null){ bad = true; return; }
+    if (r.querySelector(".stTender").value === "cash") cash += v; else upi += v;
+    if (v > 0 && r.querySelector(".stReason").value.trim().length < 3) bad = true;
+  });
+  $("cashCalc").textContent = bad ? "?" : money(cash);
+  $("upiCalc").textContent = bad ? "?" : money(upi);
+  $("dayTotal").textContent = bad ? "?" : money(cash + upi);
+  $("closing").textContent = bad ? "?" : money(state.opening_p + cash);
+  $("btnSubmit").disabled = bad;
+}
+
+/* ---- load ------------------------------------------------------------- */
+function loadDay(iso){
+  fetch(API + "/day/" + iso).then(function(r){ return r.json(); }).then(function(j){
+    if (!j.ok){ show("bad", "वह दिन खुल नहीं पाया।"); return; }
+    state.opening_p = j.day.opening_p;
+    $("opening").value = money(j.day.opening_p).replace("₹", "");
+    attached = {};
+    document.querySelectorAll(".scan").forEach(function(box){
+      box.classList.remove("done");
+      box.querySelector("button").innerHTML =
+        '<svg class="i" style="width:16px;height:16px"><use href="#i-cam"/></svg>Scan';
+    });
+    (j.day.attachments || []).forEach(function(a){
+      if (!a.has_file) return;
+      attached[a.doc_type] = true;
+      var box = document.querySelector('.scan[data-doc="' + a.doc_type + '"]');
+      if (box){
+        box.classList.add("done");
+        box.querySelector("button").innerHTML =
+          '<svg class="i" style="width:16px;height:16px"><use href="#i-check"/></svg>फिर से';
+      }
+    });
+    FIELDS.forEach(function(f){ $(f).value = ""; });
+    $("strayList").innerHTML = "";
+    if (j.day.exists){
+      FIELDS.forEach(function(f){
+        var p = (j.day.cells || {})[f] || 0;
+        $(f).value = p ? (p / 100).toFixed(2).replace(/\.00$/, "") : "";
+      });
+      (j.day.strays || []).forEach(function(s){ addStray(s); });
+      if (j.day.status !== "draft"){
+        show("warn", "इस दिन की एंट्री पहले से है (" + j.day.status +
+          "). बदलाव करने पर पुरानी एंट्री रिकॉर्ड में रहती है।");
+      }
+    }
+    recompute();
+  });
+}
+
+function loadShouts(){
+  fetch(API + "/tile").then(function(r){ return r.json(); }).then(function(j){
+    if (!j.ok) return;
+    if (j.deposit_due){
+      var dm = $("depositMsg");
+      dm.className = "msg warn";
+      dm.innerHTML = ic("bank") + "<span></span>";
+      dm.querySelector("span").textContent = "नक़दी बढ़ गई है — ₹" + j.cash_in_hand +
+        " (सीमा ₹" + j.deposit_threshold + ")। ₹" + j.deposit_excess + " बैंक जाना चाहिए।";
+    }
+    fetch(API + "/exceptions").then(function(r){ return r.json(); }).then(function(e){
+      var miss = (e.exceptions || []).filter(function(x){ return x.kind === "missing_day"; });
+      if (!miss.length){ $("shoutBox").style.display = "none"; return; }
+      $("shoutBox").style.display = "block";
+      $("shoutTitle").textContent = miss.length + " दिन अभी भरे नहीं गए";
+      $("shoutList").innerHTML = miss.slice(0, 14).map(function(x){
+        return '<a href="#" data-d="' + x.date + '">' + x.date + "</a>"; }).join("");
+      $("shoutList").querySelectorAll("a").forEach(function(a){
+        a.onclick = function(ev){ ev.preventDefault();
+          $("bdate").value = a.dataset.d; loadDay(a.dataset.d); };
+      });
+    });
+  });
+}
+
+/* ---- save ------------------------------------------------------------- */
+function collect(action){
+  var body = { business_date: $("bdate").value, action: action,
+               missing_scan_reason: $("scanReason").value };
+  FIELDS.forEach(function(f){ body[f] = $(f).value; });
+  var strays = [];
+  document.querySelectorAll("#strayList .repeat").forEach(function(r){
+    var amt = r.querySelector(".stAmt").value;
+    if (!String(amt).trim()) return;
+    strays.push({ amount: amt, stream: r.querySelector(".stStream").value,
+                  tender: r.querySelector(".stTender").value,
+                  reason: r.querySelector(".stReason").value });
+  });
+  body.strays = strays;
+  return body;
+}
+
+function save(action, confirmed){
+  var body = collect(action);
+  if (!body.business_date){ show("bad", "पहले तारीख़ चुनें।"); return; }
+  if (confirmed) body.confirm_large = true;
+  fetch(API + "/day", { method: "POST", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body) })
+    .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }); })
+    .then(function(res){
+      var j = res.j;
+      if (!j.ok && j.error === "confirm_large" && !confirmed){
+        if (window.confirm(j.message + "\n\nरक़म सही है? OK दबाएँ तो सेव होगी।"))
+          save(action, true);
+        return;
+      }
+      if (!j.ok){ show("bad", j.message || j.error); return; }
+      show("good", action === "submit" ? "सबमिट हो गया — अब डॉक्टर की मंज़ूरी का इंतज़ार।"
+                                       : "ड्राफ़्ट सेव हो गया।");
+      (j.warnings || []).forEach(function(w){ show("warn", w); });
+      loadDay(body.business_date); loadShouts();
+    })
+    .catch(function(){ show("bad", "नेटवर्क की दिक़्क़त — फिर से कोशिश करें।"); });
+}
+
+/* ---- scanner ---------------------------------------------------------- */
+/* The clinic's existing widget is a full-page surface that mounts itself and
+   returns via backUrl — the SAME mechanism the medical entry uses. The day
+   must exist first (the upload attaches to it), so a draft is saved on the
+   way. Nothing here re-implements any of the widget. */
+function saveThenScan(doc){
+  var date = $("bdate").value;
+  if (!date){ show("bad", "पहले तारीख़ चुनें।"); return; }
+  var body = collect("draft");
+  fetch(API + "/day", { method: "POST", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body) })
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if (!j.ok){ show("bad", j.message || j.error); return; }
+      window.location = "/finance/clinic/scan/" + date + "/" + doc;
+    })
+    .catch(function(){ show("bad", "नेटवर्क की दिक़्क़त — फिर से कोशिश करें।"); });
+}
+
+/* ---- boot ------------------------------------------------------------- */
+document.addEventListener("DOMContentLoaded", function(){
+  fetch(API + "/whoami").then(function(r){ return r.json(); }).then(function(j){
+    $("whoami").textContent = j.user || "—";
+  });
+  var back = (location.search.match(/[?&]d=(\d{4}-\d{2}-\d{2})/) || [])[1];
+  var t = new Date();
+  $("bdate").value = back || t.toISOString().slice(0, 10);
+  $("bdate").max = t.toISOString().slice(0, 10);
+  $("bdate").addEventListener("change", function(){ loadDay($("bdate").value); });
+  $("addStray").onclick = function(){ addStray(); };
+  FIELDS.forEach(function(id){ $(id).addEventListener("input", recompute); });
+  $("btnDraft").onclick = function(){ save("draft"); };
+  $("btnSubmit").onclick = function(){ save("submit"); };
+  document.querySelectorAll(".scanBtn").forEach(function(b){
+    b.onclick = function(){ saveThenScan(b.closest(".scan").dataset.doc); };
+  });
+  loadDay($("bdate").value);
+  loadShouts();
+});
+</script>
+</body>
+</html>
