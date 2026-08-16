@@ -1,0 +1,44 @@
+# HANDOFF RUNBOOK — v117 (2026-08-16 · Session 183 close — the F-97 structural fix shipped; the Marg feed went live and backfilled 5 months; the Sanjeevni cash chain was reconciled from bank records and found whole)
+
+*Tier 0. §0 what happened · §1 mental models · §2 live backlog (⭐ top task at head) · §3 install discipline. Companion to KB Register v5.5 (state) + Archive v1.31 (history).*
+
+## §0 — WHAT HAPPENED LAST (S183 — FULL; a long session, three large threads)
+
+**Thread 1 — the F-97 structural fix is LIVE (D321).** `verify_live_pins.py` + a generated `live_pins.txt` now sit at `/root/deploy/` on the box; one command — `python3 /root/deploy/verify_live_pins.py` — hashes every pinned live file and returns MATCH / DRIFT / MISSING / UNTRACKED. Its **first run corrected nine Register rows**: eight files recorded one directory too high (**F-101** — the call-hook/verdict family lives in `/root/wa/call-hook/` and `/root/wa/recordings-archive/`, not `/root/wa/`) and one genuinely stale md5 (**F-102** — `call_hook_capture.py`, stale since 12 Jul, a second instance of F-97's class; receiver measured healthy). 31 of 31 reachable pins otherwise matched, zero drift. **F-100** fixed the publishing side: `push_kit.bat` v4 now refuses to commit if `.gitignore` silently drops a kit file (it dropped `live_pins.tsv` — renamed to `.txt`, no hole punched in the PHI guard). Kits S183_V1a→V1c; Register corrected to v5.5.
+
+**Thread 2 — the Marg pharmacy feed is LIVE and backfilled (⭐ was the S183 top task).** Kit **S183_M2a**: `marg_report.py` now reads `.xlsx` as well as `.xls` (staff save exports through Excel; the `.xls` path proven byte-identical, the `.xlsx` reader proven faithful by a round-trip); migration `S183_marg_map` activates the `marg_export` adapter (7-field column map); `marg_backfill.py` **v2** writes both `sale_item` and `sale_line_item`. **Backfilled 119 days, 1 Apr → 13 Aug: 3,044 bills, 15,574 drug lines, 982 attributed to 449 patients + 45 returns — and the money (`day_line`) was byte-identical before and after,** proving D313's "attribution never moves the books." The 5 not-filed days (Marg-only) refused harmlessly. A false-abort on Marg's zero-net procedure write-offs was caught by the offline test and fixed (F-87 lesson).
+
+**Thread 3 — the Sanjeevni cash chain is reconciled, and no money is missing.** The drawer showed an impossible −₹30,056. With the owner's bank statements it resolved completely: **ICICI (…312505) holds card/UPI only** (Darpan's declared UPI matches it T+1 — his discipline is confirmed good), and **all cash is swept to a Yes Bank account** as `CASH DEP-SELF-SANJEEVNI MEDICOS`. **16 verified cash deposits, ₹16,45,600 (9 Apr → 13 Aug), were unrecorded** — that was the entire "break." Reconciled: cash collected ₹17,98,033 − deposits ₹16,45,600 − expenses ₹84,442 = +₹67,991 drawer growth. Derived drawer ≈ **₹75k now** (after a ~₹40k correction for salary advances drawn from the drawer — see §2). **F-103** (no Yes Bank cash-deposit reconciliation) and **F-104** (backfill legacy-attribution noise) minted. **No live finance write was made this session** — the booking is S184.
+
+**Live now:** `marg_report.py` **`829f4344…`** · `marg_backfill.py` **`fa33ec8a…`** · migration `S183_marg_map` `9340675c…` · `/root/deploy/verify_live_pins.py` `ce36dbf1…`. Register-pinned corrections: the 8 call-hook/verdict paths + `call_hook_capture.py` `b8a1a293…`. **No incident.**
+
+## §1 — MENTAL MODELS WORTH CARRYING
+
+1. **A hash proves agreement with a record, not with reality (F-97/F-102).** The pin verifier exists because git and the Register agreed with each other and both were wrong. Always read a live file's md5 off the box before replacing it whole.
+2. **A wrong path hides a wrong hash (F-101).** A mis-recorded path turns a DRIFT into a MISSING, which reads as harmless. Verify the address with the same seriousness as the hash.
+3. **A green light is only green about the thing it checked.** The Marg files' arithmetic self-checks passed and I nearly concluded the data was sound — but they say nothing about the description column. Separately, `md5sum -c` proves integrity, never currency (F-88), and 48/48 proves nothing about whether PHI belongs in the set (F-96).
+4. **Attribution never moves the books (D313), and this session proved it at scale** — 119 days ingested, `day_line` byte-identical. This is what makes the Marg feed and any re-ingest safe.
+5. **A break in a ledger is often an unrecorded real movement, not a loss (F-103).** −₹30,056 was 16 real Yes Bank deposits nobody had told the system about. Before treating a negative as missing money, ask what legitimate movement is unrecorded.
+6. **The bank is the arbiter, and it cleared the human.** Darpan's UPI matched ICICI T+1; the cash matched Yes Bank. The person was never the problem — the missing reconciliation was.
+7. **Don't write to live financial books at the tail of a marathon.** The cash reconciliation was completed as read-only analysis; the booking was deliberately deferred to fresh runway. Nothing was missing, so there was no urgency to justify the risk.
+
+## §2 — LIVE BACKLOG
+
+⭐ **S184 top task — book the Sanjeevni cash correction, properly and gated.** (a) Record the **16 verified Yes Bank deposits** (₹16,45,600) as cash-out/bank-deposit movements — clears the carry-forward breaks + negative-cash exceptions structurally. (b) Record the **₹40k salary advances drawn from the drawer** (₹15k 9 Apr, ₹15k 30 May, ₹10k 18 Jun) as drawer outflows. (c) Set the **opening anchor** (~₹31k on 1 Apr, or Count-the-drawer to a confirmed physical count — expect ~₹75k). (d) Build the **Yes Bank cash-deposit reconciliation** (F-103) parallel to `finance_upi`, + a named "Yes Bank deposit" movement type. All via a tested, offline-rehearsed, gated migration — NEVER ad-hoc SQL. Sole reference: `S183_Sanjeevni_Cash_Reconciliation_YesBank`.
+
+**Then, in rough order:**
+1. **Reclassify legacy no-ID Marg bills to WALK-IN (F-104)** — clears the 118 `line_sum_vs_day_total` exceptions and empties the review queue of ~2,062 legacy items. Build + test offline, apply. No money affected.
+2. **PARKED for S184 (owner request):** check whether Darpan's **salary advances are recorded in the Google Sheet and his scanned copy**. The salary-advance ledger is being incorporated into the recently-built salary system (staff_register / staff_ledger). **July payable to Darpan = ₹10,000** (₹70k net earned Apr–Jul − ₹60k advances; loan deductions ₹5k Apr + ₹5k Jun already inside the net).
+3. **Darpan's daily catch-up (tomorrow, needs nothing above):** file **14 Aug** (cash ≈ ₹11,413, UPI ₹6,530 — UPI cross-checked to the bank), **15 Aug** (cash ≈ ₹3,926, UPI ₹4,925), mark **16 Aug closed**. Opening reads wrong until the deposits are booked, but the collections are correct and nothing is lost.
+4. **Build the daily Marg live flow (B4–B9):** the PC→VPS watcher (run by Shavez/reception, not Darpan — segregation of duty), the Marg-pre-filled entry form with **home-medicine auto-deduction** (Darpan deducts ₹ from cash today by hand — 2 spellings `HOME MEDISUN`/`HOME MEDICINE`, ₹24,413/5mo, must be a configurable list, excluded bills always shown), expenses/advances, the cash-position view, the bank-visit trigger, the returns display. Design: `S183_Sanjeevni_Daily_Cash_Design_and_Marg_Findings`.
+5. **F-97 structural fix, part 2** — the loaded-in-memory check (a file matching its pin ≠ the running process loaded it, S127) and the PC-side half of the pin verifier. Triage the 68 UNTRACKED live files the verifier found.
+6. **Ask Darpan:** nothing owed here now — the 11/14 Aug 100%-cash question is SETTLED (Marg UPI-recording gap, bank-confirmed).
+7. Carried: WABA go-live (F-82, vendor) · security rotations · console follow-ons.
+
+**Cold-kit count: 3 of 3–5** (took `KB_S183_close` this session — F-89 cadence met).
+
+## §3 — INSTALL DISCIPLINE (unchanged from v116, reinforced this session)
+
+The D317 kit chain stands; every S183 kit ran it (preflight → SUMS → KIT_ID → **live-file currency gate** → smoke BEFORE swap → backup → swap → migration → verify → honest red that restores). New this session and now standing: **`push_kit.bat` v4** refuses to publish a kit if `.gitignore` silently drops any file. **The pin verifier (`/root/deploy/verify_live_pins.py`) is the F-97 structural backstop** — run it at every open and close; the Register is corrected FROM the box, never the reverse. **Financial-book changes are gated migrations, offline-rehearsed against a throwaway `finance.db`, never ad-hoc SQL** (this is why the S183 cash booking was deferred to S184). Salary/PHI/`finance.db`/raw Marg exports never in repo or kit (F-31/F-49/D320); the repo is public by ruling. **EOS mechanics per D319:** the assistant writes the canonical set into project knowledge; the owner double-clicks the KB kit push and downloads the cold kit.
+
+**END OF HANDOFF RUNBOOK v117 (Session 183).**
