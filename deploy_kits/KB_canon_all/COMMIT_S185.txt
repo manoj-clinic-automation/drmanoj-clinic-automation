@@ -1,0 +1,23 @@
+S185 close: the canonical fold-in - three sessions of debt cleared in one pass
+
+- KB History Archive v1.30 -> v1.33: SS183 + SS184 + SS185 appended in
+  chronological order as one contiguous append; prefix proven byte-identical
+  to the 7a673ac6 pin (+21,183 chars)
+- Fault_Action_Register v2.18 -> v2.19: F-90..F-95 (S181, never applied),
+  F-100..F-104 (S183), F-105..F-106 (S184), F-107..F-108 (S185).
+  Section 7 index extended F-89 -> F-108; three new 7.1 blocks carry full text;
+  v2.18's missing changelog row reconstructed. Next free F-109.
+- KB Register v5.5 -> v5.6: D322 into the decisions index, F-105..F-108 into
+  the findings index, the two S184 migration markers, stale v5.4 H1 corrected.
+  finance_app.py advanced to the S184 build as an explicitly PARTIAL pin
+  (c66bec2b76...) - the full md5 was never recorded and was NOT invented.
+- CANONICAL_MANIFEST rebuilt (STATUS -> current at S185), MD5SUMS regenerated,
+  START_HERE_SESSION_186 promoted.
+- F-107: HANDOFF_RUNBOOK v118 and START_HERE_SESSION_185 were written to
+  project knowledge only at the S184 close, so the two Tier-0 docs Phase 0 must
+  read were the two it could not verify. Both filed here, hashed as delivered,
+  and pinned.
+- F-108: findings recorded in the KB Register were never applied to the Fault
+  Register, whose index had been stale at F-89 for four sessions.
+
+No live code or live data changed this session. No incident.
