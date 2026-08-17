@@ -49,23 +49,30 @@ INSERT INTO s186_f104_reviews
    WHERE e.unit='medical' AND r.status='open'
      AND NOT EXISTS (SELECT 1 FROM s186_f104_reviews b WHERE b.id = r.id);
 
+-- A RETURN IS A MAGNITUDE WITH ITS DIRECTION IN THE ROW'S TYPE (D314).
+-- sale_item_review stores a credit note as a NEGATIVE amount; sale_item has
+-- CHECK (amount_p >= 0) and carries returns as a positive magnitude with the
+-- service 'pharmacy_return', which v_day_attribution SUBTRACTS. The first build
+-- of this migration guarded on `amount_p > 0` and therefore skipped every credit
+-- note in silence -- 116 of 2,072 rows -- while the gate's projection had counted
+-- them. The verify caught it and the installer restored. Both sides now agree.
 INSERT INTO sale_item (day_entry_id, ingest_batch_id, unit, patient_ref_id, service,
                        description, amount_p, mode, source, source_ref, confidence,
                        verified_by, verified_at)
   SELECT r.day_entry_id, r.ingest_batch_id, 'medical',
          (SELECT id FROM patient_ref WHERE clinic_id='WALK-IN'),
-         'pharmacy',
+         CASE WHEN COALESCE(r.amount_p,0) < 0 THEN 'pharmacy_return' ELSE 'pharmacy' END,
          COALESCE(NULLIF(TRIM(r.raw_text),''), 'legacy bill, no clinic ID'),
-         r.amount_p, NULL, 'manual',
+         ABS(COALESCE(r.amount_p,0)), NULL, 'manual',
          'S186-F104-' || r.id, NULL, 'S186_W1a', datetime('now')
     FROM sale_item_review r
     JOIN day_entry e ON e.id = r.day_entry_id
-   WHERE e.unit='medical' AND r.status='open' AND COALESCE(r.amount_p,0) > 0
+   WHERE e.unit='medical' AND r.status='open'
      AND NOT EXISTS (SELECT 1 FROM sale_item s WHERE s.source_ref = 'S186-F104-' || r.id);
 
 UPDATE sale_item_review
    SET status='resolved', resolved_by='S186_W1a', resolved_at=datetime('now')
- WHERE status='open' AND COALESCE(amount_p,0) > 0
+ WHERE status='open'
    AND day_entry_id IN (SELECT id FROM day_entry WHERE unit='medical');
 
 -- ---- recompute the shout from the live view, do not assume it is now clean --

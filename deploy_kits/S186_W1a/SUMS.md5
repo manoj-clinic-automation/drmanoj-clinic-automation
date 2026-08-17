@@ -1,7 +1,7 @@
-156752fdc764ebf512f723ef9c9fbdfd  finance_migration_S186_walkin.sql
-eea29676428827ce077e27ab64074bf2  gate_f104.py
+747e47605c5d3532289902af511353af  finance_migration_S186_walkin.sql
+fdbf7a79d5d5235e2c6fbf3ac1dcee9a  gate_f104.py
 8243ce38baebac06169c353b14d100c6  install_w1a.sh
-883445ca3a0404899a75a55dea7f4ebb  KIT_ID.txt
+12e735d83757b8917e9de932d2847e83  KIT_ID.txt
 226b8a688f961bbbe1d2e52c228708c5  DELIVERY_NOTE.md
 ca83cf628107dc6416b82e40df323888  PUSH.bat
 707688ced96f83416f1454f69e991ed9  deploy/push_kit.bat

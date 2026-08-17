@@ -36,6 +36,14 @@ def snap(cx):
                            " ON e.id=r.day_entry_id WHERE e.unit='medical' AND r.status='open'"),
         "review_open_p": q("SELECT COALESCE(SUM(r.amount_p),0) FROM sale_item_review r JOIN day_entry e"
                            " ON e.id=r.day_entry_id WHERE e.unit='medical' AND r.status='open'"),
+        "review_neg":    q("SELECT COUNT(*) FROM sale_item_review r JOIN day_entry e"
+                           " ON e.id=r.day_entry_id WHERE e.unit='medical' AND r.status='open'"
+                           " AND COALESCE(r.amount_p,0) < 0"),
+        "review_zero":   q("SELECT COUNT(*) FROM sale_item_review r JOIN day_entry e"
+                           " ON e.id=r.day_entry_id WHERE e.unit='medical' AND r.status='open'"
+                           " AND COALESCE(r.amount_p,0) = 0"),
+        "walkin_returns": q("SELECT COUNT(*) FROM sale_item WHERE source_ref LIKE 'S186-F104-%'"
+                            " AND service LIKE '%_return'"),
         "walkin_items":  q("SELECT COUNT(*) FROM sale_item WHERE source_ref LIKE 'S186-F104-%'"),
         "sale_items":    q("SELECT COUNT(*) FROM sale_item WHERE unit='medical'"),
         "flagged":       q("SELECT COUNT(*) FROM recon_exception WHERE unit='medical'"
@@ -79,6 +87,9 @@ def precheck(cx):
     after, worse, days = project(cx)
     print("\n-- what this will do:")
     print("   open review rows        : %d   %s" % (s["review_open"], rs(s["review_open_p"])))
+    print("     of which CREDIT NOTES  : %d  (negative — they become pharmacy_return rows, D314)"
+          % s["review_neg"])
+    print("     of which zero-valued   : %d" % s["review_zero"])
     print("   days flagged NOW        : %d  (of %d medical days)" % (s["flagged"], days))
     print("   days flagged AFTER      : %d      <-- projected, before anything is written" % after)
     print("   tolerance in use        : %s per day" % rs(s["tol"]))
@@ -132,6 +143,12 @@ def verify(cx):
         a["flagged"] == cx.execute(
             "SELECT COUNT(*) FROM v_day_attribution WHERE unit='medical'"
             " AND ABS(day_total_p-attributed_p) > ?", (a["tol"],)).fetchone()[0])
+    chk("credit notes became *_return rows, not dropped and not negative",
+        a["walkin_returns"] == b["review_neg"],
+        "%d return rows for %d credit notes" % (a["walkin_returns"], b["review_neg"]))
+    chk("no S186 row violates the non-negative rule",
+        cx.execute("SELECT COUNT(*) FROM sale_item WHERE source_ref LIKE 'S186-F104-%'"
+                   " AND amount_p < 0").fetchone()[0] == 0)
     chk("marker written", a["marker"] == "applied")
     print("\n   review queue     : %d  ->  %d" % (b["review_open"], a["review_open"]))
     print("   days flagged     : %d  ->  %d" % (b["flagged"], a["flagged"]))
