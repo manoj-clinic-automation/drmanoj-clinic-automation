@@ -1,0 +1,7 @@
+26193778d9a12e81d013c08b7303f69a  finance_migration_S184_cash_correction.sql
+942d7e4a65605a07dbeedb7305d8fe89  gate_c1a.py
+6dfedf90990abe9ba3562f320f8b99b4  install_c1a.sh
+d0cfcabfea830f114920d1fc90dd4b4a  KIT_ID.txt
+6fdea3c3444444fb0b0613c88e0ec637  DELIVERY_NOTE.md
+707688ced96f83416f1454f69e991ed9  deploy/push_kit.bat
+511434b8af2426415cdf51f49e85b0d4  deploy/vps_deploy.sh
