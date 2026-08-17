@@ -4,8 +4,9 @@ Hi Claude. Continuing my clinic-automation project (**Session 187**).
 I'm Dr. Manoj Agarwal, orthopaedic surgeon, Advanced Orthopaedic Surgery Centre, Bareilly.
 Solo practice, older Hindi-first semi-urban patients.
 
-*(Session entry point regenerated at the S186 close. Follow `START_HERE_PROMPT_v5` = the project's
-custom instructions. This file carries the Phase-0 pointers current as of S186 and the S187 tasks.)*
+*(Session entry point regenerated at the S186 close, then **reissued after the S186 post-close correction**.
+Follow `START_HERE_PROMPT_v5` = the project's custom instructions. This file carries the Phase-0 pointers
+current as of the S186 post-close and the S187 tasks.)*
 
 **Working protocol:** plain language · ONE step at a time, wait for explicit confirmation · full-file
 replacements · ALL-CAPS = urgent · mask patient numbers to last-4, never print secrets · nothing live
@@ -17,11 +18,30 @@ asset + finance apps use system `/usr/bin/python3` (F-53); `/root/wa` + portal g
 
 ---
 
-## ✅ The canon is CURRENT. Nothing is owed.
+## The canon is CURRENT — after a post-close correction. One tool fix is owed.
 
-S186 folded itself in completely: **KB Register v5.11** · **KB History Archive v1.34** ·
-**Fault_Action_Register v2.20** · **HANDOFF_RUNBOOK v120** · manifest rebuilt. **The Fault Register has
-no owed append for the first time since S181.** Expect Phase 0 to be quiet.
+S186 folded itself in at the close, and then the close itself was found faulty. **Read this before
+Phase 0, because the previous version of this file promised a GREEN that did not happen.**
+
+The close was published and the first live-pin run came back **RED on one file** — `finance_workbench.html`,
+pinned to the superseded `S186_R2a` build while the box carried the newer `S186_I1a` one. **The box was
+right; the record was wrong** (F-118 — the first RED in this project caused by the record). Chasing it
+opened six more faults in the verification chain: the publish method could not publish a close-out at
+all (F-115); the manifest's own footer pinned the Register at a hash **no file in the repo carries**
+(F-116); the pin list attested to a manifest md5 that exists nowhere and the checker **printed that
+claim without testing it** (F-117); `MD5SUMS_ALL.txt` listed a file that is not on disk, so **the Phase-0
+command below exited non-zero** (F-119); three competing checksum files described one folder (F-120);
+and the new publisher's gate fired on deliberate ignores (F-121).
+
+All seven are fixed here. Current canon: **KB Register v5.12** · **KB History Archive v1.35** ·
+**Fault_Action_Register v2.21** · **HANDOFF_RUNBOOK v121** · manifest rebuilt from real bytes ·
+**`MD5SUMS_ALL.txt` is the folder's single checksum authority**, with an inverse check so every file is
+either listed or excluded for a stated reason. Everything retired went to `deploy_kits/_attic_S186/` —
+**moved, not deleted.**
+
+⭐ **OWED AT S187 (tool fix, ~3 lines):** `verify_live_pins.py` must **hash the manifest it names** and
+refuse when the md5 does not match, instead of printing `VERIFIED against the manifest … (md5 …)` on the
+strength of the word `yes`. That gap is F-117 and it is the reason a false attestation survived a close.
 
 ## Phase 0 — do this FIRST (verification before work)
 
@@ -36,19 +56,24 @@ cd /tmp && rm -rf kbv && git clone --depth 1 -q \
 *current*: extract every md5 in `CANONICAL_MANIFEST.md` and match it against real file hashes; the
 tokens matching no file are live-code pins, Tier-2 digests and the three D316 closed-as-lost rows.
 **Then the F-107 inverse check:** confirm every Tier-0 document you are about to read **has a manifest
-row** — the manifest catches a *wrong* row and is blind to a *missing* one.
+row** — the manifest catches a *wrong* row and is blind to a *missing* one. **And the F-119 inverse:**
+`md5sum -c` above must exit **0** — a WARNING about a listed file that could not be read is a FAIL, not
+a footnote, and it means the checksum file describes a folder that no longer exists.
 
 **Live code (D321) — owner-run on the box:**
 ```
 python3 /root/deploy/verify_live_pins.py
 ```
-It should read **GREEN** this session. If it says AMBER, its pin list was not regenerated at the S186
-close — say so rather than working around it (F-110).
+It should read **GREEN** this session — **42 match, 0 drift, 0 missing** — using the pin list from kit
+`S186_V1c`. If it is RED, read the drift **as evidence about the record first**, not as a problem with
+the box: that is how F-118 was found. If it is AMBER, the list was not regenerated against the manifest
+(F-110). If it prints `VERIFIED against the manifest` — remember that until the F-117 fix lands, that
+line is **unproved**; check the md5 it names against the real manifest yourself.
 
 1. Open **`CANONICAL_MANIFEST.md`** and verify every doc row by md5.
-2. Read into context only **Tier 0**: manifest, this file, **KB Register v5.11**,
-   **HANDOFF_RUNBOOK v120**. No open incident. Open S183/S184/S186 finance docs on demand.
-3. Confirm, then ask which backlog item to start (**Runbook v120 §2**).
+2. Read into context only **Tier 0**: manifest, this file, **KB Register v5.12**,
+   **HANDOFF_RUNBOOK v121**. No open incident. Open S183/S184/S186 finance docs on demand.
+3. Confirm, then ask which backlog item to start (**Runbook v121 §2** — item 0 is the owed tool fix).
 
 ## ⭐ S187 TASKS — owner's choice
 
