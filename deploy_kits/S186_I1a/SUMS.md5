@@ -1,0 +1,9 @@
+d04167a848e5d6f0baae19df014f70d4  finance_app.py.new
+1f730bcdf3c7044841cedc06833bc228  finance_ingest.py.new
+18c71e63e5f1790c07d7fa3df53cd24e  finance_ui/finance_workbench.html
+a9f6387e707bb2b0e4e53f53c08678ae  install_i1a.sh
+1aff061b64ed47edc1d114c2dd92fc72  KIT_ID.txt
+4121ab0808a62661c6fe7450c80d1f18  DELIVERY_NOTE.md
+ca83cf628107dc6416b82e40df323888  PUSH.bat
+707688ced96f83416f1454f69e991ed9  deploy/push_kit.bat
+511434b8af2426415cdf51f49e85b0d4  deploy/vps_deploy.sh
