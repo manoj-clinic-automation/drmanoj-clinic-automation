@@ -1,0 +1,7 @@
+ed95c5d42e920d256e36318ca1e03f43  finance_migration_S184_C2a_exceptions.sql
+aa5a9496d9b41d603f4c0d3bcaec5df8  gate_c2a.py
+04e877e6d9591924cd07cd8a0d24d7e1  install_c2a.sh
+6142ccb23964ca6276dadc28a0bf5021  KIT_ID.txt
+52af115d96e717584b282a6e2270d1ad  DELIVERY_NOTE.md
+707688ced96f83416f1454f69e991ed9  deploy/push_kit.bat
+511434b8af2426415cdf51f49e85b0d4  deploy/vps_deploy.sh
