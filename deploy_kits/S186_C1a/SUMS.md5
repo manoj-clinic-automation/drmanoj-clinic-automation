@@ -1,0 +1,7 @@
+48d49c0e37068f51d35d1a4f341a0768  finance_migration_S186_cash_close.sql
+33c53d2aae6bdf3b556a185b52729efd  gate_s186.py
+838e91f0365d4ebb401c7a5752fe1302  install_s186.sh
+95dfd249dce3ee13759ea3c97f0489f7  KIT_ID.txt
+707ef90c4a8c24abcb60d0a63b5cfcc1  DELIVERY_NOTE.md
+707688ced96f83416f1454f69e991ed9  deploy/push_kit.bat
+511434b8af2426415cdf51f49e85b0d4  deploy/vps_deploy.sh
