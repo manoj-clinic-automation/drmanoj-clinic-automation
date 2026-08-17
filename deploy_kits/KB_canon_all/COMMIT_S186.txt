@@ -1,0 +1,14 @@
+Session 186: cash chain closed by count, phantom deposit removed, six upgrades live
+
+- finance_app.py      -> d04167a848  (workbench, Yes Bank recon, custody, cash count, Marg upload)
+- finance_ingest.py   -> 1f730bcdf3  (F-114: clean anonymous line -> WALK-IN, not review)
+- finance_yesbank.py  NEW 5dcbdd3a41 (F-103: cash deposits reconciled against the bank, both ways)
+- finance_ui/finance_workbench.html NEW 45cb85b353
+- verify_live_pins.py -> ea3677b9fc  + gen_live_pins.py v1.1 (F-110, F-111)
+- migrations applied: S186_cash_close, S186_reserve_yesbank, S186_walkin
+- Kits: S186_V1a V1b C1a R1a R2a I1a W1a
+- Docs: Register v5.11, Archive v1.34, Fault Register v2.20, Runbook v120,
+        START_HERE 187, manifest rebuilt
+- Decisions: D323 (cash closed by count), D324 (kits written direct to the repo)
+- Findings: F-109 .. F-114, all appended the same session
+- Diagnostics: negative_cash 29->0, review queue 2072->0, line_sum_vs_day_total 120->4
