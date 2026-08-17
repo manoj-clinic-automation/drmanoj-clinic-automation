@@ -1,0 +1,8 @@
+a717c7deffa2ea0a20af21a227bc2f73  finance_migration_S186_reserve_yesbank.sql
+5dcbdd3a41360c96310929083524fc93  finance_yesbank.py
+f2c9a3e8dfdfb9a72718ae46efa1103a  install_r1a.sh
+d56ecbe9d94e9097bcaabce4896912a0  KIT_ID.txt
+d7f588458822cee07e09187e750deb8a  DELIVERY_NOTE.md
+ca83cf628107dc6416b82e40df323888  PUSH.bat
+707688ced96f83416f1454f69e991ed9  deploy/push_kit.bat
+511434b8af2426415cdf51f49e85b0d4  deploy/vps_deploy.sh
