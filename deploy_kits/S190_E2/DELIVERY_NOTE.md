@@ -68,10 +68,17 @@ is one settings row.
 ## Install
 
 ```
-cd /root/deploy && git pull
-cd drmanoj-clinic-automation/deploy_kits/S190_E2   # (path as pulled)
-bash install_e2.sh
+cd /root/deploy/repo && git pull
+bash /root/deploy/repo/deploy_kits/S190_E2/install_e2.sh
 ```
+
+**Kit v2 (same payloads, two corrections).** The first kit's currency gate carried a
+clinic-page hash whose tail was written from a truncated record prefix — a full value no
+file has ever had (the F-109/F-116 shape). The gate refused it against the true live
+`0c64fda2005e…`, proving the chain; the payloads were verified built on those exact live
+bytes and are UNCHANGED. This note's install path was also wrong (`/root/deploy` for
+`/root/deploy/repo`) — written from memory, not the record: the F-135 shape. Both owned
+in the session log.
 Expect: currency gate PASS (3 files) → old smoke 509/509 → staged 542/542 (+33) →
 swap → live 542/542. Any deviation restores byte-perfect and prints why.
 

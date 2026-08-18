@@ -74,7 +74,13 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 
 WANT_APP=5cb73ff83b591535053c7911026ecd8b       # S189_E1b
 WANT_PAGE=1c7d2dc3179f29e9de0b9fb0d77c6fe1      # S189_E1b
-WANT_CPAGE=0c64fda2eb26379f0f57155f22a7b45f     # S182_C2a
+WANT_CPAGE=0c64fda2005ea3cd6692aeb8fd3dc728     # S182_C2a — VERIFIED ON THE BOX
+# (kit v2: the first kit carried 0c64fda2eb26... here, a full hash written
+#  from a truncated record prefix -- the F-109/F-116 shape, in this file.
+#  The gate refused it against the true live value, which is the chain
+#  working. The PAYLOAD was always built on the live 0c64fda2005e... bytes;
+#  only this constant was wrong. Transcribed now from the owner's own
+#  md5sum run on the box, S190.)
 NEW_APP=02062855ccd97056c2be64ce04d606cb
 NEW_PAGE=f819bdf95de14fc331428cf6bea4c37e
 NEW_CPAGE=1c930a3ec71873ce774770dab524ba0e
