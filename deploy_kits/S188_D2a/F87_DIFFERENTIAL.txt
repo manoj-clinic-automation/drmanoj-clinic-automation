@@ -1,0 +1,34 @@
+============================================================================
+F-87 DIFFERENTIAL  ·  finance_entry.html  ·  S179 (8ec6ad49) -> S188_D2a
+A page-only rebuild: presentation moves, the contract does not.
+============================================================================
+
+element ids the script addresses — kept 23 of 24
+   REMOVED : depositMsg
+   ADDED   : barNote, mirrorBody, mirrorCard, mirrorStamp, toTop
+
+API paths called — kept 6 of 7
+   REMOVED : /tile
+
+querySelector targets — kept 8 of 8
+   REMOVED : (none)
+
+scanner doc types — kept 4 of 4
+   REMOVED : (none)
+
+repeater field classes — kept 15 of 15
+   REMOVED : (none)
+
+keys in the POSTed day payload — kept 11 of 11
+   REMOVED : (none)
+
+element ids in the markup — kept 42 of 43
+   REMOVED : depositMsg
+   ADDED   : barNote, mirrorBody, mirrorCard, mirrorStamp, s-bills, s-cash, s-check, s-day, s-exp, s-sale, s-scans, toTop
+
+============================================================================
+Declared in the build contract, and the ONLY removals above:
+  depositMsg  — the deposit banner element         (F-127)
+  /tile       — the unit-position fetch behind it  (F-127)
+VERDICT: CLEAN — nothing undeclared moved.
+============================================================================
