@@ -1,0 +1,35 @@
+==============================================================================
+F-87 DIFFERENTIAL · finance_entry.html · D2b (2c23b461) -> D2c
+Declared changes: the running opening/closing display is REMOVED (F-132);
+a 'Where the cash is' card is ADDED (F-132/F-133). Nothing else may move.
+==============================================================================
+
+element ids the script addresses — kept 26 of 28
+   REMOVED : closingBox, opening
+   ADDED   : whereBody
+
+API paths called — kept 6 of 6
+   REMOVED : (none)
+   ADDED   : /where-is-the-cash
+
+querySelector targets — kept 8 of 8
+   REMOVED : (none)
+
+scanner doc types — kept 4 of 4
+   REMOVED : (none)
+
+repeater field classes — kept 15 of 15
+   REMOVED : (none)
+
+keys in the POSTed day payload — kept 11 of 11
+   REMOVED : (none)
+
+element ids in the markup — kept 51 of 54
+   REMOVED : closing, closingBox, opening
+   ADDED   : s-where, whereBody
+
+==============================================================================
+The POSTed payload is untouched — the server's contract with this page is
+byte-identical; only what the page is TOLD has narrowed.
+VERDICT: CLEAN — every removal was declared.
+==============================================================================
