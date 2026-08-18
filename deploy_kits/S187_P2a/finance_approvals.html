@@ -1,0 +1,203 @@
+<!doctype html>
+<!-- finance_approvals.html · kit S187_D1a · Daily Flow v2 stage D1.
+     The checker's landing: every count is a link, every total expands to its
+     rows, every bill expands to its drug lines. Read-only except Approve,
+     which calls the existing guarded route (UPI mismatch still needs a
+     conscious acknowledgment). Darpan-facing screens untouched (stage D2). -->
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Approvals — Sanjeevni</title>
+<style>
+:root{--ink:#12213a;--mut:#5b6b85;--line:#dde4ee;--bg:#f4f6fa;--card:#fff;
+--ok:#1a7f37;--warn:#9a6700;--bad:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);
+font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1060px;margin:0 auto;padding:14px}
+h1{font-size:18px;margin:6px 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+padding:14px;margin:0 0 14px}
+.card h2{margin:0 0 10px;font-size:15px;letter-spacing:.02em}
+.hindi{color:var(--mut);font-weight:400}
+.mut{color:var(--mut)}.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.strip{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);border-radius:18px;padding:5px 12px;cursor:pointer;
+background:#fff;font-size:13px}
+.chip b{font-size:14px}
+.chip.zero{opacity:.55;cursor:default}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{color:var(--mut);text-align:left;font-weight:600;padding:5px 8px;border-bottom:1px solid var(--line)}
+td{padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+button{border:1px solid var(--line);background:#173d7a;color:#fff;border-radius:7px;
+padding:6px 12px;cursor:pointer}
+button.ghost{background:#fff;color:var(--ink)}
+.day-detail{background:#fafbfe;border:1px solid var(--line);border-radius:8px;
+padding:10px;margin:6px 0}
+.sec{margin:0 0 8px}
+.sec h3{font-size:13px;margin:0 0 4px;cursor:pointer}
+.sec h3 .tog{color:var(--mut);font-weight:400}
+.billrow{cursor:pointer}
+.items td{background:#f2f5fb;font-size:12px}
+.badge{display:inline-block;border-radius:5px;padding:1px 7px;font-size:12px;border:1px solid}
+.b-ok{color:var(--ok);border-color:#bbe3c5}.b-warn{color:var(--warn);border-color:#ead49a}
+.b-bad{color:var(--bad);border-color:#eec2bd}
+.note{color:var(--mut);font-size:12.5px;margin-top:8px}
+a{color:#173d7a}
+</style></head><body><div class="wrap">
+<h1>Sanjeevni <span class="hindi">&mdash; दिन की जाँच</span></h1>
+<div class="card" style="padding:10px 14px">
+  <b>Approvals</b> (this page) &nbsp;·&nbsp;
+  <a href="/finance/workbench"><b>Workbench</b></a> <span class="mut">— pushed Marg reports · Marg upload · Yes Bank · custody · drawer count</span> &nbsp;·&nbsp;
+  <a href="/finance/review"><b>Month</b></a> <span class="mut">— KPIs · day grid · month close</span>
+</div>
+
+<div class="card"><h2>Today</h2><div class="strip" id="strip">loading&hellip;</div>
+<div class="note">Every number above is a link to its rows below. A grey chip means zero — nothing waiting there.</div></div>
+
+<div class="card" id="pendCard"><h2>Days awaiting approval</h2><div id="pend">loading&hellip;</div>
+<div class="note">One day, one look, one click — expand a day to see everything about it: Darpan's figures,
+every Marg bill down to the drug lines, both banks, flags, scans. Approve from right here. A UPI mismatch
+still demands a conscious acknowledgment, exactly as before.</div></div>
+
+<div class="card" id="mmCard"><h2>Missing Marg exports</h2><div id="mm">loading&hellip;</div>
+<div class="note">Filed days with no successful Marg batch in the last 45 days — visible the same morning,
+not at month-end. Fix: reception re-runs + sends, or upload on the workbench.</div></div>
+
+<div class="card" id="exCard"><h2>Open exceptions</h2><div id="ex">loading&hellip;</div></div>
+
+<script>
+function $(i){return document.getElementById(i)}
+function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+var A=null, openDays={};
+
+function chip(label,n,target,badCls){
+  var z=(n===0||n==null||(Array.isArray(n)&&!n.length));
+  var v=Array.isArray(n)?n.length:n;
+  return '<span class="chip'+(z?' zero':'')+'" '+(z?'':'onclick="document.getElementById(\''+target+'\').scrollIntoView({behavior:\'smooth\'})"')+
+    '><b class="'+(z?'mut':badCls||'warn')+'">'+v+'</b> '+esc(label)+'</span>';
+}
+function load(){
+  fetch("/finance/api/approvals").then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){$("strip").textContent="could not load";return}
+    A=j;
+    $("strip").innerHTML=
+      chip("awaiting approval",j.pending,"pendCard","bad")+
+      chip("missing Marg exports",j.missing_marg,"mmCard","warn")+
+      chip("pushed reports waiting",j.pushes_pending,"mmCard","warn")+
+      chip("UPI mismatches",j.upi_mismatches,"exCard","bad")+
+      chip("variance days",j.variance_days,"exCard","bad")+
+      chip("review queue",j.review_open,"exCard","warn");
+    renderPending(); renderMM(); renderEx();
+  }).catch(function(){$("strip").textContent="could not load"});
+}
+function renderPending(){
+  var rows=A.pending||[];
+  if(!rows.length){$("pend").innerHTML='<span class="ok">Nothing waiting — every filed day is approved.</span>';return}
+  var h='<table><thead><tr><th>Date</th><th>Status</th><th>Entered by</th><th></th></tr></thead><tbody>';
+  rows.forEach(function(p){
+    h+='<tr><td>'+esc(p.date)+'</td><td>'+esc(p.status)+'</td><td>'+esc(p.entered_by||"")+'</td>'+
+       '<td><button class="ghost" onclick="toggleDay(\''+p.date+'\')">'+(openDays[p.date]?"close":"open")+'</button> '+
+       '<button onclick="approve(\''+p.date+'\')">Approve</button></td></tr>';
+    if(openDays[p.date]){h+='<tr><td colspan="4"><div class="day-detail" id="dd-'+p.date+'">loading&hellip;</div></td></tr>'}
+  });
+  $("pend").innerHTML=h+"</tbody></table>";
+  rows.forEach(function(p){ if(openDays[p.date]) fillDay(p.date) });
+}
+function toggleDay(d){ openDays[d]=!openDays[d]; renderPending() }
+function fillDay(d){
+  fetch("/finance/api/day/"+d+"/full").then(function(r){return r.json()}).then(function(j){
+    var el=$("dd-"+d); if(!el)return;
+    if(!j.ok){el.textContent="could not load "+d;return}
+    var day=j.day||{}, mg=j.marg||{}, ic=j.icici||{};
+    var h="";
+    h+='<div class="sec"><h3>Declared (Darpan) — total '+esc(day.total||"—")+'</h3>'+
+       '<div>cash '+esc(day.cash||"0")+' · UPI '+esc(day.upi||"0")+' · non-cash '+esc(day.noncash||"0")+
+       ' · opening '+esc(day.opening||"—")+' → closing '+esc(day.closing||"—")+'</div>';
+    if((day.expenses||[]).length){
+      h+='<table><thead><tr><th>Expense</th><th>Amount</th><th>Narration</th><th>Ledger</th></tr></thead><tbody>';
+      day.expenses.forEach(function(x){h+='<tr><td>'+esc(x.category_fixed||x.category_text||"")+
+        (x.staff_id?' <span class="mut">staff #'+x.staff_id+'</span>':'')+'</td><td>'+esc(x.amount)+'</td><td>'+esc(x.category_text||"")+
+        '</td><td>'+(x.ledger_posted?'<span class="ok">posted</span>':'<span class="mut">not posted</span>')+'</td></tr>'});
+      h+='</tbody></table>';}
+    if((day.attachments||[]).length){
+      h+='<div>scans: '+day.attachments.map(function(a){
+        return '<a href="'+a.url+'" target="_blank">'+esc(a.doc_type)+'</a>'}).join(" · ")+'</div>';}
+    h+='</div>';
+    h+='<div class="sec"><h3 onclick="tog(this)">Marg — '+(mg.present?('total '+esc(mg.total)+' · '+(mg.bills||[]).length+' bills · '+mg.item_lines+' drug lines'+
+       (mg.variance!=null?(' · variance '+esc(mg.variance)+(mg.variance_over_threshold?' <span class="badge b-bad">over ₹2,000</span>':' <span class="badge b-ok">within ₹2,000</span>')):'')):'<span class="bad">NO EXPORT for this day</span>')+
+       ' <span class="tog">[click to expand]</span></h3><div style="display:none">';
+    if(mg.present){
+      h+='<table><thead><tr><th>Bill</th><th>Patient</th><th>Mode</th><th>Amount</th></tr></thead><tbody>';
+      (mg.bills||[]).forEach(function(b,i){
+        h+='<tr class="billrow" onclick="var n=this.nextElementSibling; if(n&&n.className==\'items\')n.style.display=n.style.display==\'none\'?\'\':\'none\'">'+
+           '<td>'+esc(b.bill_no||"?")+(b.is_return?' <span class="badge b-warn">return</span>':'')+'</td>'+
+           '<td>'+esc(b.patient||"")+(b.clinic_id?' <span class="mut">#'+esc(b.clinic_id)+'</span>':'')+'</td>'+
+           '<td>'+esc(b.mode||"")+'</td><td>'+esc(b.amount)+'</td></tr>';
+        if((b.items||[]).length){
+          h+='<tr class="items" style="display:none"><td colspan="4"><table>';
+          b.items.forEach(function(it){h+='<tr><td>'+esc(it.item)+'</td><td>'+esc(it.pack||"")+'</td><td>'+esc(it.qty||"")+
+            '</td><td>'+esc(it.amount||"")+'</td><td class="mut">'+esc(it.batch||"")+' '+esc(it.expiry||"")+'</td></tr>'});
+          h+='</table></td></tr>';}
+      });
+      h+='</tbody></table>';}
+    h+='</div></div>';
+    h+='<div class="sec"><h3>Bank · ICICI UPI — '+(ic.present?('settled '+esc(ic.settled)+' ('+ic.txns+' txns) vs declared '+esc(ic.declared||"0")+
+       (ic.mismatch?(' <span class="badge b-bad">MISMATCH '+esc(ic.mismatch.diff)+' ('+esc(ic.mismatch.status)+')</span>'):' <span class="badge b-ok">matched</span>')):'<span class="mut">no statement for this day yet</span>')+'</h3></div>';
+    h+='<div class="sec"><h3>Bank · Yes Bank</h3><div>'+((j.yesbank||[]).length?
+       j.yesbank.map(function(y){return esc(y.deposit)+(y.is_cash?' <span class="mut">cash dep</span>':'')+' — <span class="mut">'+esc(y.desc||"").slice(0,60)+'</span>'}).join('<br>')
+       :'<span class="mut">no deposits on this date</span>')+'</div></div>';
+    if((j.flags||[]).length||(j.exceptions||[]).length||j.review_open){
+      h+='<div class="sec"><h3>Flags &amp; exceptions</h3><div>';
+      (j.flags||[]).forEach(function(f){h+='<span class="badge b-warn">'+esc(f.code)+'</span> '+esc(f.detail||"").slice(0,110)+'<br>'});
+      (j.exceptions||[]).forEach(function(x){h+='<span class="badge '+(x.status==='open'?'b-bad':'b-ok')+'">'+esc(x.kind)+' · '+esc(x.status)+'</span><br>'});
+      if(j.review_open)h+='<span class="badge b-warn">'+j.review_open+' review rows open</span>';
+      h+='</div></div>';}
+    h+='<div class="mut">entered by '+esc(day.entered_by||"—")+(day.approved_by?(' · approved by '+esc(day.approved_by)):'')+'</div>';
+    el.innerHTML=h;
+  });
+}
+function tog(h3){var d=h3.nextElementSibling; if(d)d.style.display=d.style.display==="none"?"":"none"}
+function approve(d,ack){
+  var body=ack?{acknowledge_upi:true,ack_note:ack}:{};
+  fetch("/finance/api/approve/"+d,{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(body)})
+    .then(function(r){return r.json().then(function(j){return {s:r.status,j:j}})})
+    .then(function(x){
+      var j=x.j||{};
+      if(x.s===409&&j.error==="upi_mismatch"){
+        var note=prompt("Bank settled "+j.bank+" but the day says "+j.entered+" (difference "+j.diff+").\n"+
+                        "Approve anyway? Type a short reason to acknowledge, or Cancel:");
+        if(note!==null)approve(d,note||"acknowledged");
+        return;
+      }
+      if(!j.ok){alert(j.message||j.error||"could not approve");return}
+      openDays[d]=false; load();
+    }).catch(function(){alert("network problem — nothing was approved")});
+}
+function renderMM(){
+  var h="";
+  if((A.missing_marg||[]).length){
+    h+='<div>'+A.missing_marg.map(function(d){return '<span class="badge b-warn">'+esc(d)+'</span>'}).join(" ")+'</div>';
+  }else{h+='<span class="ok">Every filed day in the last 45 days has its Marg export.</span>'}
+  if((A.pushes_pending||[]).length){
+    h+='<div style="margin-top:6px">pushed reports waiting on the <a href="/finance/workbench">workbench</a>: '+
+       A.pushes_pending.map(function(p){return esc(p.received_at)+" ("+esc(p.file||"")+")"}).join(" · ")+'</div>';}
+  if((A.marg_not_filed_flags||[]).length){
+    h+='<div class="note">flagged NOT-FILED at push/upload time: '+
+       A.marg_not_filed_flags.map(function(f){return esc(f.date)}).join(", ")+'</div>';}
+  $("mm").innerHTML=h;
+}
+function renderEx(){
+  var h="";
+  if((A.upi_mismatches||[]).length){
+    h+='<div><b>UPI mismatches (open):</b> '+A.upi_mismatches.map(function(m){
+      return '<span class="badge b-bad">'+esc(m.date)+' · '+esc(m.diff)+'</span>'}).join(" ")+'</div>';}
+  if((A.variance_days||[]).length){
+    h+='<div style="margin-top:6px"><b>Line-sum vs day-total (the ₹8,487 class):</b> '+
+       A.variance_days.map(function(v){return '<span class="badge b-bad">'+esc(v.date)+'</span>'}).join(" ")+
+       '<div class="note">live money hidden in identical shouts until S186 — these stay visible here until cleared</div></div>';}
+  if(A.review_open){h+='<div style="margin-top:6px"><b>Review queue:</b> '+A.review_open+' open rows</div>';}
+  if(!h)h='<span class="ok">No open exceptions.</span>';
+  $("ex").innerHTML=h;
+}
+load();
+</script></div></body></html>
