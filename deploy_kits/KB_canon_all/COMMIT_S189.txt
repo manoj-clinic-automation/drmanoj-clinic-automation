@@ -1,1 +1,1 @@
-S189 second fold — cash-custody build live (S189_W1a/W1b/C1a): F-137 closed, F-138 raised by an honest red and closed same day; Register v5.28; Fault Register v2.28; manifest rebuilt; pin list regenerated (A8).
+S189 third fold — expense menu live (S189_E1b, 488->509; E1a retired unlived, refused by its own gate); F-139+F-140 raised and closed same day; the 70k gate VERIFIED OPEN and its doc FILED; Register v5.29; Fault v2.29; manifest rebuilt; pin list regenerated (A8).

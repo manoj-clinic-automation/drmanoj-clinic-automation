@@ -51,3 +51,18 @@ python3 /root/deploy/verify_live_pins.py
 ```
 
 Expect **GREEN · match 43 · drift 0 · `source : VERIFIED ON THIS MACHINE`**.
+
+---
+
+## S189 THIRD FOLD — `live_pins_S189c.txt` supersedes both files above
+
+Regenerated from **KB Register v5.29** (`ef40881f3b68a355db34632128a08b74`),
+`register_pin_verified: yes`, 43 VPS + 12 BLIND. Carries the `S189_E1b` pins
+(`finance_app.py 5cb73ff8…` · `finance_entry.html 1c7d2dc3…`).
+
+```
+cp /root/deploy/repo/deploy_kits/KB_canon_S189/live_pins_S189c.txt /root/deploy/live_pins.txt
+python3 /root/deploy/verify_live_pins.py
+```
+
+Expect **GREEN · match 43 · drift 0 · `source : VERIFIED ON THIS MACHINE`**.
