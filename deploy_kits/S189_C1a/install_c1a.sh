@@ -34,7 +34,7 @@ set -u
 KIT_NAME="S189_C1a"
 DB=/root/finance/finance.db
 LIVE_APP=/root/finance/finance_app.py
-APP_MD5_EXPECTED=583092c015c37d97fc240d09637b5ea7    # the S189_W1a build
+APP_MD5_EXPECTED=41788368ec815b804d276df63c796575    # the S189_W1b build (F-138)
 PY=/usr/bin/python3
 SNAP=/tmp/s189_before.json
 export S189_SNAP="$SNAP"
@@ -56,10 +56,10 @@ md5sum -c SUMS.md5 \
 && LIVE_NOW="$(md5sum "$LIVE_APP" | awk '{print $1}')" \
 && { [ "$LIVE_NOW" = "$APP_MD5_EXPECTED" ] \
      || { echo "!! live finance_app.py is $LIVE_NOW, expected $APP_MD5_EXPECTED"; \
-          echo "   That is the S189_W1a build. Install S189_W1a first --"; \
-          echo "   without it the card still reads cash_movement and these rows"; \
-          echo "   would be written and never seen. Refusing."; exit 1; }; } \
-&& echo "   live app = 583092c015... (S189_W1a, reads custody)" \
+          echo "   That is the S189_W1b build. Install S189_W1b first -- its"; \
+          echo "   predecessor W1a carried the state-asserting F-137 checks"; \
+          echo "   (F-138) that refused this very migration on 18 Aug. Refusing."; exit 1; }; } \
+&& echo "   live app = 41788368ec... (S189_W1b: reads custody, delta checks)" \
 && echo "" \
 && echo "-- PRECHECK (read-only; nothing is written unless this is green)" \
 && "$PY" gate_s189.py "$DB" --precheck \
