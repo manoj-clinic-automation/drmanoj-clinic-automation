@@ -4,9 +4,10 @@ Hi Claude. Continuing my clinic-automation project (**Session 189**).
 I'm Dr. Manoj Agarwal, orthopaedic surgeon, Advanced Orthopaedic Surgery Centre, Bareilly.
 Solo practice, older Hindi-first semi-urban patients.
 
-*(Session entry point regenerated at the S188 close. Follow `START_HERE_PROMPT_v5` = the project's
-custom instructions. This file carries the Phase-0 pointers current as of the S188 close and the
-S189 tasks.)*
+*(Session entry point **REISSUED at the S188 post-close**. The first version was written at the
+close; the owner then opened Darpan's page as Darpan and one look reopened the session, producing
+F-132 and F-133 and a third kit. Follow `START_HERE_PROMPT_v5` = the project's custom instructions.
+These are the pointers current as of the post-close.)*
 
 **Working protocol:** plain language · ONE step at a time, wait for explicit confirmation · full-file
 replacements · ALL-CAPS = urgent · mask patient numbers to last-4, never print secrets — **a secret
@@ -23,11 +24,16 @@ projection down BEFORE measuring**, then install via the **D317 kit chain**, pub
 
 ## The canon is CURRENT, folded in AT the S188 close. Nothing is owed.
 
-Session 188 shipped **two kits** (Daily Flow v2 stage D2 — Darpan's mirror; and its F-129 fix) and
-folded everything in the same day: Archive **v1.37** (§S188) · Fault Register **v2.24**
-(F-127…F-131, five findings, all the session they were raised — **fourth consecutive clean close**) ·
-Register **v5.24** · Runbook **v123** · manifest rebuilt. **No decision minted** — S188 is the
-execution of D326.
+Session 188 shipped **three kits** — Daily Flow v2 stage D2 (Darpan's mirror), its F-129 fix, and
+then `S188_D2c` after the close, when the owner opened Darpan's page **as Darpan** and found the
+running unit balance sitting on it in 24px bold. Folded in the same day: Archive **v1.38**
+(§S188 + §S188-POST) · Fault Register **v2.25** (F-127…F-133 — **seven** findings, every one the
+session it was raised) · Register **v5.25** · Runbook **v124** · manifest rebuilt. **No decision
+minted** — S188 is the execution of D326.
+
+> **Read F-132 before writing any record this session.** "Already correctly scoped" was written into
+> a kit, a Register and a message to the owner without anyone reading the SQL behind it. The claim
+> was false for six hours and only a human looking at the actual screen caught it.
 
 ## Phase 0 — do this FIRST (verification before work)
 
@@ -51,13 +57,20 @@ Expect **GREEN with `source : VERIFIED`**. If AMBER, read its stated reason (usu
 or the pin list predates the close). If RED, the drift is evidence about the record first (F-118).
 
 1. Open **`CANONICAL_MANIFEST.md`** and verify every doc row by md5.
-2. Read into context only **Tier 0**: manifest, this file, **KB Register v5.24**,
-   **HANDOFF_RUNBOOK v123**. No open incident.
+2. Read into context only **Tier 0**: manifest, this file, **KB Register v5.25**,
+   **HANDOFF_RUNBOOK v124**. No open incident.
 3. Confirm, then ask which backlog item to start (**Runbook v123 §2**).
 
 ## ⭐ S189 TASKS
 
-**A. The two small ones first — both cheap, both closing findings raised at the S188 close.**
+**A0. F-133 — the ₹2 lakh question, and it is the owner's books rather than anyone's screen.**
+"Cash in hand" reads ₹2,05,198 because handovers to Dr Manoj and Dr Bhawna were **never entered as
+cash movements** — `cash_movement` holds nothing but 15 bank deposits, and `cash_custody_event` is
+empty. The ledger is overstated by whatever is genuinely with the two doctors and **no record exists
+to net it down**. Close it by entering the handovers retrospectively, or by a counted reconciliation
+of the kind S186 ran for the drawer. Until then Darpan's new card honestly reads zero and says why.
+
+**A. The two small ones next — both cheap, both closing findings raised at the S188 close.**
 **F-130:** add the design-fingerprint assertions (`--surface-page:#f3f2ee`, `id="toTop"`,
 `class="kick"`, the folded-help block) to the served-HTML checks for `approvals`, `workbench` and
 `review`; the entry page already has them. Until this lands, a page can silently revert its design
@@ -94,19 +107,19 @@ vendor) · F-92 · F-93 · the stray file named `followup-tracker/python test_se
 ## Where the truth lives
 
 - **`CANONICAL_MANIFEST.md`** — doc set / tiers / hashes. STATUS **current at S188 close**.
-- **KB Register v5.24** (now) · **KB History Archive v1.37** (history, §S65–§S188) ·
-  **Fault_Action_Register v2.24** (F-0 … F-131, next free **F-132**) · **HANDOFF_RUNBOOK v123**.
+- **KB Register v5.25** (now) · **KB History Archive v1.38** (history, §S65–§S188-POST) ·
+  **Fault_Action_Register v2.25** (F-0 … F-133, next free **F-134**) · **HANDOFF_RUNBOOK v124**.
 - **Live finance:** cash in hand **₹2,05,198** (→ ₹1,75,198 once Darpan's ₹30,000 is entered) ·
   `negative_cash` **0** · review queue **0** · **17 Aug unfiled with a Marg push staged** · 14/15 Aug
   draft · the branded **Sanjeevni Hub** at `/finance/approvals` is the owner's one page.
-- **Live pins:** `finance_app.py` `3a7086f851720dd161bc43c3c1fd45dd` · `finance_ui/finance_entry.html`
-  `2c23b461bdae5a4ed6a4c4ed4708b4f9` · `finance_approvals.html` `028255054662924713e03362c3976b05`
+- **Live pins:** `finance_app.py` `f06e139b7651329a72b08bbc5779077f` · `finance_ui/finance_entry.html`
+  `d3844bb96a1d496e5882cfbbb695cbf4` · `finance_approvals.html` `028255054662924713e03362c3976b05`
   (**verified on the box at S188**) · `portal.py` `bd4ed0a3b89659676e7e193998eeb1a9` ·
   `finance_workbench.html` `420f82c2846bc49d0d12ab5040d8c542` · checker/generator **v1.2**.
 
 **Connected sources:** Google Drive · Gmail · Notion · GitHub (`drmanoj-clinic-automation`, PUBLIC
 by D320) · ClickUp parked (D17). Patient data is NOT in this project.
 
-**Next free: D329 · F-132 · A-D25 · Session 189.** Cold-kit count **2 of 3–5**.
+**Next free: D329 · F-134 · A-D25 · Session 189.** Cold-kit count **2 of 3–5**.
 
-*START_HERE_SESSION_189 — regenerated at the S188 close. Supersedes START_HERE_SESSION_188.*
+*START_HERE_SESSION_189 — REISSUED at the S188 post-close; the close-time version is superseded and its bytes stand in the Archive record. Supersedes START_HERE_SESSION_188.*
