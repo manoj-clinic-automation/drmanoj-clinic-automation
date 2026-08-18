@@ -1,0 +1,29 @@
+============================================================================
+F-87 DIFFERENTIAL · finance_entry.html · D2a (a114ebc4) -> D2b (2c23b461)
+F-129 is a behaviour fix. The page gains ONE read-only note and nothing else.
+============================================================================
+
+element ids the script addresses — kept 28 of 28
+   REMOVED : (none)
+
+API paths called — kept 6 of 6
+   REMOVED : (none)
+
+querySelector targets — kept 8 of 8
+   REMOVED : (none)
+
+scanner doc types — kept 4 of 4
+   REMOVED : (none)
+
+repeater field classes — kept 15 of 15
+   REMOVED : (none)
+
+keys in the POSTed day payload — kept 11 of 11
+   REMOVED : (none)
+
+element ids in the markup — kept 54 of 54
+   REMOVED : (none)
+
+============================================================================
+VERDICT: CLEAN — nothing was removed at all.
+============================================================================
