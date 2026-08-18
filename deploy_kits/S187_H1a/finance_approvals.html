@@ -1,0 +1,430 @@
+<!doctype html>
+<!-- finance_approvals.html · kit S187_H1a · THE SANJEEVNI HUB.
+     Owner directive 18 Aug 2026: "this page shd become the sole place for any
+     Sanjeevni info and work for me." Marg work (upload · check-first · pushed
+     reports · apply) lives HERE now; the cash register, custody balances
+     (money with Dr Bhawna), the Entered·Marg·Bank month grid with day
+     drill-down, and orthotics all live HERE. The workbench remains for
+     Yes Bank statement upload, custody ENTRY and the drawer count; month
+     close remains on review. Every section reuses an existing guarded API —
+     the only new server surface this kit adds is /finance/api/orthotics. -->
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sanjeevni — Hub</title>
+<style>
+:root{--ink:#12213a;--mut:#5b6b85;--line:#dde4ee;--bg:#f4f6fa;--card:#fff;
+--ok:#1a7f37;--warn:#9a6700;--bad:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);
+font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1060px;margin:0 auto;padding:14px}
+h1{font-size:18px;margin:6px 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+padding:14px;margin:0 0 14px}
+.card h2{margin:0 0 10px;font-size:15px;letter-spacing:.02em}
+.hindi{color:var(--mut);font-weight:400}
+.mut{color:var(--mut)}.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.strip{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);border-radius:18px;padding:5px 12px;cursor:pointer;
+background:#fff;font-size:13px}
+.chip b{font-size:14px}
+.chip.zero{opacity:.55;cursor:default}
+.navrow{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.navrow a{border:1px solid var(--line);border-radius:8px;padding:5px 11px;background:#fff;
+text-decoration:none;color:#173d7a;font-size:13px;font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{color:var(--mut);text-align:left;font-weight:600;padding:5px 8px;border-bottom:1px solid var(--line)}
+td{padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+button{border:1px solid var(--line);background:#173d7a;color:#fff;border-radius:7px;
+padding:6px 12px;cursor:pointer}
+button.ghost{background:#fff;color:var(--ink)}
+input[type=file]{font-size:13px}
+input[type=text],input[type=month]{border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:13px}
+.day-detail{background:#fafbfe;border:1px solid var(--line);border-radius:8px;
+padding:10px;margin:6px 0}
+.sec{margin:0 0 8px}
+.sec h3{font-size:13px;margin:0 0 4px;cursor:pointer}
+.sec h3 .tog{color:var(--mut);font-weight:400}
+.billrow{cursor:pointer}
+.items td{background:#f2f5fb;font-size:12px}
+.badge{display:inline-block;border-radius:5px;padding:1px 7px;font-size:12px;border:1px solid}
+.b-ok{color:var(--ok);border-color:#bbe3c5}.b-warn{color:var(--warn);border-color:#ead49a}
+.b-bad{color:var(--bad);border-color:#eec2bd}
+.note{color:var(--mut);font-size:12.5px;margin-top:8px}
+.big{font-size:20px;font-weight:700}
+.dl{cursor:pointer;color:#173d7a;text-decoration:underline}
+a{color:#173d7a}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+</style></head><body><div class="wrap">
+<h1>Sanjeevni <span class="hindi">&mdash; एक ही जगह, पूरा काम</span></h1>
+<div class="navrow">
+  <a href="#stripCard">Today</a><a href="#margCard">Marg</a><a href="#pendCard">Approvals</a>
+  <a href="#cashCard">Cash register</a><a href="#custCard">Custody</a>
+  <a href="#monthCard">Month grid</a><a href="#orthoCard">Orthotics</a>
+  <a href="/finance/review">Month close ↗</a>
+  <a href="/finance/workbench">Yes Bank · drawer count ↗</a>
+</div>
+
+<div class="card" id="stripCard"><h2>Today</h2><div class="strip" id="strip">loading&hellip;</div>
+<div class="note">Every number is a link. Grey = zero, nothing waiting.</div></div>
+
+<div class="card" id="margCard"><h2>Marg <span class="hindi">&mdash; मार्ग रिपोर्ट, यहीं</span></h2>
+  <div class="row">
+    <input type="file" id="mgFile" accept=".xls,.xlsx">
+    <button class="ghost" id="mgCheck" onclick="mgSend(false)">Check first</button>
+    <button id="mgApply" onclick="mgSend(true)">Load into the books</button>
+    <span id="mgMsg" class="mut"></span>
+  </div>
+  <div id="mgOut" class="note"></div>
+  <div style="margin-top:10px"><b>Pushed reports</b> <span class="mut">— from the medical PC sender; nothing enters the books until you press Apply</span>
+  <div id="mpList" class="mut">loading&hellip;</div></div>
+  <div id="mm" class="note">loading&hellip;</div>
+  <div class="note">Export from Marg as <b>Bill wise sales statement</b>, <b>With Item Deta. = Yes</b>.
+  <b>Check first</b> writes nothing. The file is parsed and deleted on the server; a day not yet filed is
+  skipped and <b>flagged</b>, and a re-load of the same day supersedes it cleanly.</div>
+</div>
+
+<div class="card" id="pendCard"><h2>Days awaiting approval</h2><div id="pend">loading&hellip;</div>
+<div class="note">Expand a day for everything about it — Darpan's figures, every Marg bill to the drug
+lines, both banks, flags, scans — and approve right here. A UPI mismatch still demands a typed acknowledgment.</div></div>
+
+<div class="card" id="cashCard"><h2>Cash register <span class="hindi">&mdash; रोकड़</span> <span id="cashNow" class="big" style="float:right"></span></h2>
+  <div class="row"><span class="mut">show</span>
+    <button class="ghost" onclick="loadCash(30)">30 days</button>
+    <button class="ghost" onclick="loadCash(60)">60</button>
+    <button class="ghost" onclick="loadCash(90)">90</button></div>
+  <div id="cashTbl" style="margin-top:8px">loading&hellip;</div>
+  <div class="note">Opening → collected → expenses → closing, straight from the ledger view. Click a date
+  to open its full day. Adjustments and scan counts shown so nothing rides silently.</div></div>
+
+<div class="card" id="custCard"><h2>Cash custody <span class="hindi">&mdash; नकद किसके पास</span></h2>
+  <div id="custHeld" class="row" style="gap:16px">loading&hellip;</div>
+  <div id="custEv" style="margin-top:8px"></div>
+  <div class="note">Balances from the custody record (taken/carried marker included — D323). To record a
+  new handover or a drawer count, use the <a href="/finance/workbench">workbench</a>.</div></div>
+
+<div class="card" id="monthCard"><h2>Month — Entered · Marg · Bank</h2>
+  <div class="row"><input type="month" id="ymPick"><button class="ghost" onclick="loadMonth()">show</button>
+  <span id="monthTot" class="mut"></span></div>
+  <div id="monthTbl" style="margin-top:8px">loading&hellip;</div>
+  <div class="note">Three independent records of every day, side by side; gaps graded, never auto-applied
+  (D315). Click a date for its full day — bills, drug lines, banks, flags.</div></div>
+
+<div class="card" id="orthoCard"><h2>Orthotics <span class="hindi">&mdash; ऑर्थोटिक्स बिक्री</span></h2>
+  <div class="row"><span class="mut">item keywords (comma-separated):</span>
+    <input type="text" id="orthoVocab" size="40" placeholder="e.g. belt, brace, knee cap, collar, splint">
+    <button class="ghost" onclick="saveVocab()">save</button><span id="orthoMsg" class="mut"></span></div>
+  <div id="orthoOut" style="margin-top:8px">loading&hellip;</div>
+  <div class="note">Sales-side only, matched from the item lines by your keywords. Stock and reorder
+  arrive with the asset-app purchase-bill feed (your §8 ruling); until then, "last sold" and pace are
+  the honest reorder signal.</div></div>
+
+<div class="card" id="exCard"><h2>Open exceptions</h2><div id="ex">loading&hellip;</div></div>
+
+<script>
+function $(i){return document.getElementById(i)}
+function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+var A=null, openDays={}, openIn={};
+
+function chip(label,n,target,badCls){
+  var z=(n===0||n==null||(Array.isArray(n)&&!n.length));
+  var v=Array.isArray(n)?n.length:n;
+  return '<span class="chip'+(z?' zero':'')+'" '+(z?'':'onclick="document.getElementById(\''+target+'\').scrollIntoView({behavior:\'smooth\'})"')+
+    '><b class="'+(z?'mut':badCls||'warn')+'">'+v+'</b> '+esc(label)+'</span>';
+}
+function load(){
+  fetch("/finance/api/approvals").then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){$("strip").textContent="could not load";return}
+    A=j;
+    $("strip").innerHTML=
+      chip("awaiting approval",j.pending,"pendCard","bad")+
+      chip("missing Marg exports",j.missing_marg,"margCard","warn")+
+      chip("pushed reports waiting",j.pushes_pending,"margCard","warn")+
+      chip("UPI mismatches",j.upi_mismatches,"exCard","bad")+
+      chip("variance days",j.variance_days,"exCard","bad")+
+      chip("review queue",j.review_open,"exCard","warn");
+    renderPending(); renderMM(); renderEx();
+  }).catch(function(){$("strip").textContent="could not load"});
+  loadPushes(); loadCash(30); loadCustody(); initMonth(); loadOrtho();
+}
+
+/* ---------- Marg: direct upload (moved here from the workbench) ---------- */
+function mgSay(t,cls){var m=$("mgMsg");m.textContent=t||"";m.className=cls||"mut"}
+function mgSend(apply){
+  var f=$("mgFile").files[0];
+  if(!f){mgSay("choose the Marg export first","warn");return}
+  if(apply&&!confirm("Load this export into the books?"))return;
+  var fd=new FormData(); fd.append("file",f); fd.append("apply",apply?"1":"0");
+  mgSay(apply?"loading…":"checking…");
+  fetch("/finance/api/marg-upload",{method:"POST",body:fd})
+    .then(function(r){return r.json().then(function(j){return {s:r.status,j:j}})})
+    .then(function(x){
+      var j=x.j||{};
+      if(x.s!==200){mgSay(j.message||j.error||("failed ("+x.s+")"),"bad");
+        $("mgOut").innerHTML='<span class="bad">'+esc(j.message||j.error||"")+"</span>";return}
+      mgSay(apply?"loaded":"checked — nothing written","ok");
+      var h="<b>"+esc(j.title||"")+"</b><br>";
+      if(j.bills!=null){h+="bills "+j.bills+" · item lines "+j.item_lines+"<br>"}
+      (j.warnings||[]).forEach(function(w){h+='<span class="warn">'+esc(w)+"</span><br>"});
+      h+='<table style="margin-top:6px"><thead><tr><th>Date</th><th>Bills</th><th>Net</th><th>Filed</th></tr></thead><tbody>';
+      (j.days||[]).forEach(function(d){
+        h+="<tr><td>"+esc(d.date)+"</td><td>"+d.bills+"</td><td>"+esc(d.net)+"</td><td>"+
+           (d.filed?'<span class="ok">'+esc(d.status)+"</span>":'<span class="bad">NOT FILED</span>')+"</td></tr>"});
+      h+="</tbody></table>";
+      if(j.not_filed&&j.not_filed.length){h+='<div class="warn">skipped and FLAGGED (re-load once filed): '+j.not_filed.map(esc).join(", ")+"</div>"}
+      if(j.ingested&&j.ingested.length){h+='<div class="ok">ingested: '+j.ingested.map(function(d){
+        return d.date+" ("+d.bills+" bills, "+d.lines+" lines)"}).join(", ")+"</div>"}
+      if(j.aborted){h+='<div class="bad">ABORTED: '+esc(JSON.stringify(j.aborted))+"</div>"}
+      $("mgOut").innerHTML=h;
+      load();
+    }).catch(function(){mgSay("network problem","bad")});
+}
+
+/* ---------- Marg: pushed reports (moved here from the workbench) --------- */
+function loadPushes(){
+  fetch("/finance/api/marg-push/list").then(function(r){return r.json()})
+    .then(function(j){
+      var el=$("mpList");
+      if(!j.ok){el.textContent="could not load pushed reports";return}
+      var rows=j.pushes||[];
+      if(!rows.length){el.innerHTML='<span class="mut">none waiting — the sender on the medical PC has not pushed anything new</span>';return}
+      var h='<table><thead><tr><th>Received</th><th>File</th><th>Days</th><th>Bills</th><th>Status</th><th></th></tr></thead><tbody>';
+      rows.forEach(function(p){
+        var sv=p.survey||{}, days=(sv.survey||[]);
+        var dtxt=days.length?days.map(function(d){
+          return esc(d.date)+(d.filed?"":' <span class="bad">(not filed)</span>')}).join("<br>")
+          :(sv.error?'<span class="bad">'+esc(sv.error)+"</span>":"—");
+        var warns=(sv.warnings||[]).length?('<br><span class="warn">'+sv.warnings.map(esc).join("<br>")+'</span>'):"";
+        var st=p.status==="pending"?'<span class="warn">PENDING</span>'
+              :p.status==="applied"?'<span class="ok">applied '+esc(p.applied_at||"")+"</span>"
+              :'<span class="bad">'+esc(p.status)+"</span>";
+        h+="<tr><td>"+esc(p.received_at)+"</td><td>"+esc(p.file||"")+" <span class='mut'>"+esc(p.md5_8)+"</span></td>"+
+           "<td>"+dtxt+warns+"</td><td>"+(sv.bills!=null?sv.bills:"—")+"</td><td>"+st+"</td><td>"+
+           (p.status==="pending"?'<button onclick="mpApply('+p.id+')">Apply</button>':"")+
+           "</td></tr>"});
+      h+="</tbody></table>";
+      el.innerHTML=h;
+    }).catch(function(){$("mpList").textContent="could not load pushed reports"});
+}
+function mpApply(id){
+  if(!confirm("Load this pushed report into the books?"))return;
+  fetch("/finance/api/marg-push/apply",{method:"POST",
+    headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id})})
+    .then(function(r){return r.json().then(function(j){return {s:r.status,j:j}})})
+    .then(function(x){
+      var j=x.j||{};
+      var msg=j.ok?("applied: "+(j.ingested||[]).map(function(d){
+          return d.date+" ("+d.bills+" bills, "+d.lines+" lines)"}).join(", ")
+          +((j.still_not_filed||[]).length?" — still not filed, skipped: "+j.still_not_filed.join(", "):""))
+        :(j.aborted?("ABORTED on "+j.aborted.date+": "+JSON.stringify(j.aborted)):(j.message||j.error||"failed"));
+      alert(msg); load();
+    }).catch(function(){alert("apply failed — network")});
+}
+
+/* ---------------------------- approvals queue ---------------------------- */
+function renderPending(){
+  var rows=A.pending||[];
+  if(!rows.length){$("pend").innerHTML='<span class="ok">Nothing waiting — every filed day is approved.</span>';return}
+  var h='<table><thead><tr><th>Date</th><th>Status</th><th>Entered by</th><th></th></tr></thead><tbody>';
+  rows.forEach(function(p){
+    h+='<tr><td>'+esc(p.date)+'</td><td>'+esc(p.status)+'</td><td>'+esc(p.entered_by||"")+'</td>'+
+       '<td><button class="ghost" onclick="toggleDay(\''+p.date+'\')">'+(openDays[p.date]?"close":"open")+'</button> '+
+       '<button onclick="approve(\''+p.date+'\')">Approve</button></td></tr>';
+    if(openDays[p.date]){h+='<tr><td colspan="4"><div class="day-detail" id="dd-'+p.date+'">loading&hellip;</div></td></tr>'}
+  });
+  $("pend").innerHTML=h+"</tbody></table>";
+  rows.forEach(function(p){ if(openDays[p.date]) dayDetail(p.date,"dd-"+p.date) });
+}
+function toggleDay(d){ openDays[d]=!openDays[d]; renderPending() }
+
+/* ------------- the one Day Page renderer, reused by every card ----------- */
+function dayDetail(d, elId){
+  fetch("/finance/api/day/"+d+"/full").then(function(r){return r.json()}).then(function(j){
+    var el=$(elId); if(!el)return;
+    if(!j.ok){el.textContent="could not load "+d;return}
+    var day=j.day||{}, mg=j.marg||{}, ic=j.icici||{};
+    var h="";
+    h+='<div class="sec"><h3>Declared (Darpan) — total '+esc(day.total||"—")+'</h3>'+
+       '<div>cash '+esc(day.cash||"0")+' · UPI '+esc(day.upi||"0")+' · non-cash '+esc(day.noncash||"0")+
+       ' · opening '+esc(day.opening||"—")+' → closing '+esc(day.closing||"—")+'</div>';
+    if((day.expenses||[]).length){
+      h+='<table><thead><tr><th>Expense</th><th>Amount</th><th>Narration</th><th>Ledger</th></tr></thead><tbody>';
+      day.expenses.forEach(function(x){h+='<tr><td>'+esc(x.category_fixed||x.category_text||"")+
+        (x.staff_id?' <span class="mut">staff #'+x.staff_id+'</span>':'')+'</td><td>'+esc(x.amount)+'</td><td>'+esc(x.category_text||"")+
+        '</td><td>'+(x.ledger_posted?'<span class="ok">posted</span>':'<span class="mut">not posted</span>')+'</td></tr>'});
+      h+='</tbody></table>';}
+    if((day.attachments||[]).length){
+      h+='<div>scans: '+day.attachments.map(function(a){
+        return '<a href="'+a.url+'" target="_blank">'+esc(a.doc_type)+'</a>'}).join(" · ")+'</div>';}
+    h+='</div>';
+    h+='<div class="sec"><h3 onclick="tog(this)">Marg — '+(mg.present?('total '+esc(mg.total)+' · '+(mg.bills||[]).length+' bills · '+mg.item_lines+' drug lines'+
+       (mg.variance!=null?(' · variance '+esc(mg.variance)+(mg.variance_over_threshold?' <span class="badge b-bad">over ₹2,000</span>':' <span class="badge b-ok">within ₹2,000</span>')):'')):'<span class="bad">NO EXPORT for this day</span>')+
+       ' <span class="tog">[click to expand]</span></h3><div style="display:none">';
+    if(mg.present){
+      h+='<table><thead><tr><th>Bill</th><th>Patient</th><th>Mode</th><th>Amount</th></tr></thead><tbody>';
+      (mg.bills||[]).forEach(function(b){
+        h+='<tr class="billrow" onclick="var n=this.nextElementSibling; if(n&&n.className==\'items\')n.style.display=n.style.display==\'none\'?\'\':\'none\'">'+
+           '<td>'+esc(b.bill_no||"?")+(b.is_return?' <span class="badge b-warn">return</span>':'')+'</td>'+
+           '<td>'+esc(b.patient||"")+(b.clinic_id?' <span class="mut">#'+esc(b.clinic_id)+'</span>':'')+'</td>'+
+           '<td>'+esc(b.mode||"")+'</td><td>'+esc(b.amount)+'</td></tr>';
+        if((b.items||[]).length){
+          h+='<tr class="items" style="display:none"><td colspan="4"><table>';
+          b.items.forEach(function(it){h+='<tr><td>'+esc(it.item)+'</td><td>'+esc(it.pack||"")+'</td><td>'+esc(it.qty||"")+
+            '</td><td>'+esc(it.amount||"")+'</td><td class="mut">'+esc(it.batch||"")+' '+esc(it.expiry||"")+'</td></tr>'});
+          h+='</table></td></tr>';}
+      });
+      h+='</tbody></table>';}
+    h+='</div></div>';
+    h+='<div class="sec"><h3>Bank · ICICI UPI — '+(ic.present?('settled '+esc(ic.settled)+' ('+ic.txns+' txns) vs declared '+esc(ic.declared||"0")+
+       (ic.mismatch?(' <span class="badge b-bad">MISMATCH '+esc(ic.mismatch.diff)+' ('+esc(ic.mismatch.status)+')</span>'):' <span class="badge b-ok">matched</span>')):'<span class="mut">no statement for this day yet</span>')+'</h3></div>';
+    h+='<div class="sec"><h3>Bank · Yes Bank</h3><div>'+((j.yesbank||[]).length?
+       j.yesbank.map(function(y){return esc(y.deposit)+(y.is_cash?' <span class="mut">cash dep</span>':'')+' — <span class="mut">'+esc(y.desc||"").slice(0,60)+'</span>'}).join('<br>')
+       :'<span class="mut">no deposits on this date</span>')+'</div></div>';
+    if((j.flags||[]).length||(j.exceptions||[]).length||j.review_open){
+      h+='<div class="sec"><h3>Flags &amp; exceptions</h3><div>';
+      (j.flags||[]).forEach(function(f){h+='<span class="badge b-warn">'+esc(f.code)+'</span> '+esc(f.detail||"").slice(0,110)+'<br>'});
+      (j.exceptions||[]).forEach(function(x){h+='<span class="badge '+(x.status==='open'?'b-bad':'b-ok')+'">'+esc(x.kind)+' · '+esc(x.status)+'</span><br>'});
+      if(j.review_open)h+='<span class="badge b-warn">'+j.review_open+' review rows open</span>';
+      h+='</div></div>';}
+    h+='<div class="mut">entered by '+esc(day.entered_by||"—")+(day.approved_by?(' · approved by '+esc(day.approved_by)):'')+'</div>';
+    el.innerHTML=h;
+  });
+}
+function tog(h3){var d=h3.nextElementSibling; if(d)d.style.display=d.style.display==="none"?"":"none"}
+function drill(d, hostId){
+  var box=$(hostId);
+  if(openIn[hostId]===d){box.style.display="none";openIn[hostId]=null;return}
+  openIn[hostId]=d; box.style.display=""; box.innerHTML="loading "+esc(d)+"&hellip;";
+  dayDetail(d, hostId);
+}
+
+function approve(d,ack){
+  var body=ack?{acknowledge_upi:true,ack_note:ack}:{};
+  fetch("/finance/api/approve/"+d,{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(body)})
+    .then(function(r){return r.json().then(function(j){return {s:r.status,j:j}})})
+    .then(function(x){
+      var j=x.j||{};
+      if(x.s===409&&j.error==="upi_mismatch"){
+        var note=prompt("Bank settled "+j.bank+" but the day says "+j.entered+" (difference "+j.diff+").\n"+
+                        "Approve anyway? Type a short reason to acknowledge, or Cancel:");
+        if(note!==null)approve(d,note||"acknowledged");
+        return;
+      }
+      if(!j.ok){alert(j.message||j.error||"could not approve");return}
+      openDays[d]=false; load();
+    }).catch(function(){alert("network problem — nothing was approved")});
+}
+
+/* ------------------------------ cash register ---------------------------- */
+function loadCash(n){
+  fetch("/finance/api/days?days="+n).then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){$("cashTbl").textContent="could not load";return}
+    var rows=j.days||[];
+    if(rows.length){$("cashNow").textContent="in hand: "+rows[0].closing}
+    var h='<table><thead><tr><th>Date</th><th>Status</th><th>Revenue</th><th>Cash</th><th>UPI</th>'+
+          '<th>Non-cash</th><th>Closing</th><th>Scans</th><th>Adj</th></tr></thead><tbody>';
+    rows.forEach(function(d){
+      h+='<tr><td><span class="dl" onclick="drill(\''+d.date+'\',\'cashDrill\')">'+esc(d.date)+'</span>'+
+         (d.imported?' <span class="mut">(legacy)</span>':'')+'</td>'+
+         '<td>'+(d.status==="approved"||d.status==="locked"?'<span class="ok">'+esc(d.status)+'</span>':'<span class="warn">'+esc(d.status)+'</span>')+'</td>'+
+         '<td>'+esc(d.revenue)+'</td><td>'+esc(d.cash)+'</td><td>'+esc(d.upi)+'</td><td>'+esc(d.noncash)+'</td>'+
+         '<td><b>'+esc(d.closing)+'</b></td><td>'+d.scans+'</td><td>'+(d.adjustments||0)+'</td></tr>'});
+    h+='</tbody></table><div class="day-detail" id="cashDrill" style="display:none"></div>';
+    $("cashTbl").innerHTML=h;
+  }).catch(function(){$("cashTbl").textContent="could not load"});
+}
+
+/* -------------------------------- custody -------------------------------- */
+function loadCustody(){
+  fetch("/finance/api/custody").then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){$("custHeld").textContent="could not load";return}
+    var held=j.held||[];
+    var NAMES={dr_bhawna:"Dr Bhawna",drawer:"Drawer (Darpan)",counter:"Counter (Vinay)",dr_manoj:"Dr Manoj",bank:"In transit to bank"};
+    $("custHeld").innerHTML=held.length?held.map(function(x){
+      return '<span><span class="mut">'+esc(NAMES[x.party]||x.party)+'</span><br><span class="big">'+esc(x.held)+'</span></span>'}).join("")
+      :'<span class="mut">no custody balances recorded yet</span>';
+    var ev=(j.events||[]).slice(0,8);
+    $("custEv").innerHTML=ev.length?('<table><thead><tr><th>Date</th><th>From</th><th>To</th><th>Amount</th><th>Note</th></tr></thead><tbody>'+
+      ev.map(function(e){return '<tr><td>'+esc(e.date)+'</td><td>'+esc(NAMES[e.frm]||e.frm)+'</td><td>'+esc(NAMES[e.to]||e.to)+'</td><td>'+esc(e.amount)+
+        (e.month_end?' <span class="badge b-warn">'+esc(e.month_end)+'</span>':'')+'</td><td class="mut">'+esc(e.note||"")+'</td></tr>'}).join("")+
+      '</tbody></table>'):"";
+  }).catch(function(){$("custHeld").textContent="could not load"});
+}
+
+/* ------------------------------ month grid ------------------------------- */
+function initMonth(){
+  var t=new Date(); var ym=t.getFullYear()+"-"+("0"+(t.getMonth()+1)).slice(-2);
+  $("ymPick").value=ym; loadMonth();
+}
+function loadMonth(){
+  var ym=$("ymPick").value; if(!ym)return;
+  fetch("/finance/api/workbench/"+ym).then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){$("monthTbl").textContent="could not load";return}
+    var h='<table><thead><tr><th>Date</th><th>Status</th><th>Cash</th><th>UPI</th><th>Marg</th>'+
+          '<th>Gap</th><th>Bank dep</th><th>Closing</th><th>⚠</th></tr></thead><tbody>';
+    (j.days||[]).forEach(function(d){
+      h+='<tr><td><span class="dl" onclick="drill(\''+d.date+'\',\'monthDrill\')">'+esc(d.date)+'</span></td>'+
+         '<td>'+esc(d.status||"")+'</td><td>'+esc(d.entered_cash)+'</td><td>'+esc(d.entered_upi)+'</td>'+
+         '<td>'+(d.marg!=null?esc(d.marg):'<span class="mut">—</span>')+'</td>'+
+         '<td>'+(d.gap!=null?(esc(d.gap)+(d.gap_grade?' <span class="badge '+(d.gap_grade==="exact"?"b-ok":d.gap_grade==="likely"?"b-warn":"b-bad")+'">'+esc(d.gap_grade)+'</span>':'')):'<span class="mut">—</span>')+'</td>'+
+         '<td>'+(d.bank_deposit||'<span class="mut">—</span>')+'</td><td>'+esc(d.closing)+'</td>'+
+         '<td>'+(d.shouts?'<span class="bad">'+d.shouts+'</span>':'')+'</td></tr>'});
+    h+='</tbody></table><div class="day-detail" id="monthDrill" style="display:none"></div>';
+    $("monthTbl").innerHTML=h;
+    var t=j.totals||{};
+    $("monthTot").textContent=t.cash!=null?("totals — cash "+t.cash+" · upi "+t.upi+" · marg "+t.marg+" · bank "+t.bank):"";
+  }).catch(function(){$("monthTbl").textContent="could not load"});
+}
+
+/* -------------------------------- orthotics ------------------------------ */
+function loadOrtho(){
+  fetch("/finance/api/orthotics?days=90").then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){$("orthoOut").textContent="could not load";return}
+    $("orthoVocab").value=j.vocab||"";
+    if(!(j.vocab||"").trim()){
+      $("orthoOut").innerHTML='<span class="mut">Set the item keywords above (e.g. <i>belt, brace, knee cap, collar, splint, LS belt</i>) and save — the sales rollup appears here.</span>';return}
+    var h="";
+    if((j.items||[]).length){
+      h+='<table><thead><tr><th>Item</th><th>Times sold (90d)</th><th>Amount</th><th>Last sold</th></tr></thead><tbody>';
+      j.items.forEach(function(x){h+='<tr><td>'+esc(x.item)+'</td><td>'+x.times+'</td><td>'+esc(x.amount)+'</td><td>'+esc(x.last_sold)+'</td></tr>'});
+      h+='</tbody></table>';
+    } else h+='<span class="mut">no matching item lines in the last 90 days — check the keywords</span>';
+    $("orthoOut").innerHTML=h;
+  }).catch(function(){$("orthoOut").textContent="could not load"});
+}
+function saveVocab(){
+  $("orthoMsg").textContent="saving…";
+  fetch("/finance/api/orthotics",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({vocab:$("orthoVocab").value})})
+    .then(function(r){return r.json()}).then(function(j){
+      $("orthoMsg").textContent=j.ok?"saved":"failed"; loadOrtho();
+    }).catch(function(){$("orthoMsg").textContent="failed"});
+}
+
+/* -------------------------- missing marg / exceptions -------------------- */
+function renderMM(){
+  var h="";
+  if((A.missing_marg||[]).length){
+    h+='<div><b>Days with no Marg export:</b> '+A.missing_marg.map(function(d){return '<span class="badge b-warn">'+esc(d)+'</span>'}).join(" ")+'</div>';
+  }else{h+='<span class="ok">Every filed day in the last 45 days has its Marg export.</span>'}
+  if((A.marg_not_filed_flags||[]).length){
+    h+='<div class="note">flagged NOT-FILED at push/upload time: '+
+       A.marg_not_filed_flags.map(function(f){return esc(f.date)}).join(", ")+'</div>';}
+  $("mm").innerHTML=h;
+}
+function renderEx(){
+  var h="";
+  if((A.upi_mismatches||[]).length){
+    h+='<div><b>UPI mismatches (open):</b> '+A.upi_mismatches.map(function(m){
+      return '<span class="badge b-bad">'+esc(m.date)+' · '+esc(m.diff)+'</span>'}).join(" ")+'</div>';}
+  if((A.variance_days||[]).length){
+    h+='<div style="margin-top:6px"><b>Line-sum vs day-total (the ₹8,487 class):</b> '+
+       A.variance_days.map(function(v){return '<span class="badge b-bad dl" onclick="drill(\''+esc(v.date)+'\',\'exDrill\')">'+esc(v.date)+'</span>'}).join(" ")+
+       '<div class="note">live money hidden in identical shouts until S186 — click a date to open that day; these stay until cleared</div></div>';}
+  if(A.review_open){h+='<div style="margin-top:6px"><b>Review queue:</b> '+A.review_open+' open rows</div>';}
+  if(!h)h='<span class="ok">No open exceptions.</span>';
+  h+='<div class="day-detail" id="exDrill" style="display:none"></div>';
+  $("ex").innerHTML=h;
+}
+load();
+</script></div></body></html>
