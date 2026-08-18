@@ -66,3 +66,17 @@ python3 /root/deploy/verify_live_pins.py
 ```
 
 Expect **GREEN · match 43 · drift 0 · `source : VERIFIED ON THIS MACHINE`**.
+
+---
+
+## S189 CLOSE — `live_pins_S189close.txt` is the FINAL S189 list
+
+Regenerated from **KB Register v5.30** at the close (A8, after the manifest).
+`register_pin_verified: yes` · 43 VPS + 12 BLIND.
+
+```
+cp /root/deploy/repo/deploy_kits/KB_canon_S189/live_pins_S189close.txt /root/deploy/live_pins.txt
+python3 /root/deploy/verify_live_pins.py
+```
+
+Expect **GREEN · match 43 · drift 0 · `source : VERIFIED ON THIS MACHINE`** — the fifth of S189.
