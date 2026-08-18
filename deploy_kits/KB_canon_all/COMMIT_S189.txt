@@ -1,0 +1,1 @@
+S189 mid-session fold — kit S189_G1a live (F-130 closed); Register v5.27; Fault Register v2.27; manifest rebuilt (F-136 fixed in place); pin list regenerated.
