@@ -1,0 +1,12 @@
+Session 187: eight kits live + full close-out — provable attestation chain, B5 reception push, Daily Flow v2 D1, every seat's tile, the branded Sanjeevni Hub
+
+- S187_V1a: verify_live_pins.py + gen_live_pins.py v1.2 (F-117/F-122 closed structurally — attest the stable CURRENT-row pin, prove it on the box)
+- S187_M1a: B5 pushed Marg export (D325) — scoped stage-only FINANCE_MARG_TOKEN, marg_push_staging, checker-only apply; SEND_TO_CLINIC.bat + icon on the medical PC
+- S187_D1a: Daily Flow v2 stage D1 (D326) — /finance/api/day/<date>/full, /finance/api/approvals, /finance/approvals
+- S187_P1a/P1b/P2a: Sanjeevni tile → the Hub with live counts; F-125 caught by the P1a gate and fixed; Daily Sale + clinic tiles speak (392/392)
+- S187_H1a/H1c: the Sanjeevni Hub (one page for all Sanjeevni info and work, orthotics API) under Clinic Design Language v1, real Canva logo + "Dr. Manoj Agarwal Clinic" (400/400; H1b retired unlived)
+- PUBLISH_ALL.bat: the D328 default publisher (HEAD.lock refusal, scoped F-100 gate, real commit failures, origin-HEAD-verified success)
+- Docs: Register v5.22 · Archive v1.36 (§S187) · Fault Register v2.22 (F-122…F-126, no owed append) · Runbook v122 · START_HERE_188 · manifest rebuilt + de-duplicated · S186 F-113/cash-sheet docs filed (F-107) · S187 design contracts + Clinic_Design_Language_v1 pinned
+- F-123 executed: canonical-docs/ retired to deploy_kits/_attic_S187/ (moved, not deleted), its stale manifest renamed; exactly one CANONICAL_MANIFEST.md remains
+- Pin list regenerated from Register v5.22 against the rebuilt manifest (deploy_kits/KB_canon_S187close/) → first provable GREEN
+- Diagnostics: F-122 closed · F-123 fixed · F-124 fixed (PUSH.bat v2) · F-125 fixed (P1b) · F-126 rule standing (bash -n whole installer)
