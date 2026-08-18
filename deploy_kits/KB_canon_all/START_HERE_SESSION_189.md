@@ -53,11 +53,19 @@ manifest row. **And exactly ONE file in the clone may be named `CANONICAL_MANIFE
 ```
 python3 /root/deploy/verify_live_pins.py
 ```
-Expect **GREEN with `source : VERIFIED`**. If AMBER, read its stated reason (usually: pull the repo,
-or the pin list predates the close). If RED, the drift is evidence about the record first (F-118).
+Expect **GREEN with `source : VERIFIED`** — the pin list was regenerated from Register **v5.26** at
+the S188 final fold (`register_pin_verified: yes`, 43 VPS + 11 BLIND). **If it is still RED on
+`finance_app.py` / `finance_entry.html`, the owner has not yet copied the new list to
+`/root/deploy/live_pins.txt`** — that is the one manual step, not a fault. If AMBER, read its stated
+reason. If RED on anything else, the drift is evidence about the record first (F-118).
+
+> **F-134, and it now has a numbered step.** The S188 close rebuilt the manifest and skipped the pin
+> list, because `END_OF_SESSION_PROMPT_v4` had no A8. **v5 adds it.** At this session's close,
+> regenerate the pin list AFTER the manifest — a close that rebuilds the manifest and not the pin
+> list is not finished.
 
 1. Open **`CANONICAL_MANIFEST.md`** and verify every doc row by md5.
-2. Read into context only **Tier 0**: manifest, this file, **KB Register v5.25**,
+2. Read into context only **Tier 0**: manifest, this file, **KB Register v5.26**,
    **HANDOFF_RUNBOOK v124**. No open incident.
 3. Confirm, then ask which backlog item to start (**Runbook v123 §2**).
 
@@ -107,8 +115,9 @@ vendor) · F-92 · F-93 · the stray file named `followup-tracker/python test_se
 ## Where the truth lives
 
 - **`CANONICAL_MANIFEST.md`** — doc set / tiers / hashes. STATUS **current at S188 close**.
-- **KB Register v5.25** (now) · **KB History Archive v1.38** (history, §S65–§S188-POST) ·
-  **Fault_Action_Register v2.25** (F-0 … F-133, next free **F-134**) · **HANDOFF_RUNBOOK v124**.
+- **KB Register v5.26** (now) · **KB History Archive v1.39** (history, §S65–§S188-FINAL) ·
+  **Fault_Action_Register v2.26** (F-0 … F-134, next free **F-135**) · **HANDOFF_RUNBOOK v124** ·
+  **END_OF_SESSION_PROMPT v5** (step A8 added — F-134).
 - **Live finance:** cash in hand **₹2,05,198** (→ ₹1,75,198 once Darpan's ₹30,000 is entered) ·
   `negative_cash` **0** · review queue **0** · **17 Aug unfiled with a Marg push staged** · 14/15 Aug
   draft · the branded **Sanjeevni Hub** at `/finance/approvals` is the owner's one page.
@@ -120,6 +129,6 @@ vendor) · F-92 · F-93 · the stray file named `followup-tracker/python test_se
 **Connected sources:** Google Drive · Gmail · Notion · GitHub (`drmanoj-clinic-automation`, PUBLIC
 by D320) · ClickUp parked (D17). Patient data is NOT in this project.
 
-**Next free: D329 · F-134 · A-D25 · Session 189.** Cold-kit count **2 of 3–5**.
+**Next free: D329 · F-135 · A-D25 · Session 189.** Cold-kit count **2 of 3–5**.
 
-*START_HERE_SESSION_189 — REISSUED at the S188 post-close; the close-time version is superseded and its bytes stand in the Archive record. Supersedes START_HERE_SESSION_188.*
+*START_HERE_SESSION_189 — REISSUED TWICE: at the S188 post-close (F-132/F-133) and again at the S188 final fold (F-134). Earlier versions are superseded; their bytes stand in the Archive record. Supersedes START_HERE_SESSION_188.*
