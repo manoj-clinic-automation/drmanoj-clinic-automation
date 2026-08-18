@@ -34,3 +34,20 @@ Expect **GREEN**, with `source : VERIFIED ON THIS MACHINE`, and **43 match / 0 d
 
 The 76 untracked files and 11 unverifiable rows will still be listed. Neither is a failure — the
 untracked list is F-97 part 2, and reading it is what produced **F-136** this session.
+
+
+---
+
+## S189 SECOND FOLD — `live_pins_S189b.txt` supersedes the file above
+
+The pin moved twice after the first fold (`S189_W1a` → `S189_W1b`) and migration `S189_custody` was
+applied. Regenerated from **KB Register v5.28** (`741ecde44e4263f36a88c0baf0e45907`),
+`register_pin_verified: yes`, **43 VPS + 12 BLIND** (the applied custody migration is the new BLIND row
+— state, not a file).
+
+```
+cp /root/deploy/repo/deploy_kits/KB_canon_S189/live_pins_S189b.txt /root/deploy/live_pins.txt
+python3 /root/deploy/verify_live_pins.py
+```
+
+Expect **GREEN · match 43 · drift 0 · `source : VERIFIED ON THIS MACHINE`**.
