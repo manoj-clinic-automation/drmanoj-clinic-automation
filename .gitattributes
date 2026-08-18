@@ -2,6 +2,15 @@
 * text=auto
 
 # D164: CRLF in a .py uploaded via WinSCP Binary lands \r on the VPS. Pin to LF.
-*.py text eol=lf
-*.py text eol=lf
-*.sh text eol=lf
+# (The `*.py` line below appeared TWICE until S189 -- deduplicated here, and
+#  recorded rather than silently fixed. Harmless, but a rule stated twice is a
+#  rule nobody re-read.)
+*.py  text eol=lf
+*.sh  text eol=lf
+
+# S189: D164 stopped at .py and .sh. Every HTML kit since S179 has reached the
+# VPS correctly by Linux convention rather than by rule -- that is luck, not a
+# guarantee. `.new` is the extension every kit stages a replacement page under.
+*.html text eol=lf
+*.new  text eol=lf
+*.sql  text eol=lf

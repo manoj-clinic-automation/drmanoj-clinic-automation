@@ -1,0 +1,77 @@
+S189_G1a — DIFFERENTIAL VERIFICATION (F-87 / F-130)
+====================================================
+
+BUILT ON     f06e139b7651329a72b08bbc5779077f  (live finance_app.py, S188_D2c)
+             recovered from deploy_kits/S188_D2c/finance_app_D2c.py BY HASH,
+             not by filename (D188). The repo's finance/ tree is stale — its
+             finance_app.py is the S180 build (F-97 part 2).
+SHIPS        16faf98caa720a662316fa235a4b35b9
+
+SOURCE DIFF
+-----------
+ONE hunk. +35 lines, -0 lines. Inserted at new-file line 6657 of 6710,
+enclosing definition `def selftest():`, i.e. AFTER every route, view,
+helper and query in the file. Nothing removed. Nothing else edited.
+
+  6675 lines  ->  6710 lines
+
+RUNTIME IMPACT
+--------------
+NONE. The block executes only under `--selftest`. No route, no template,
+no SQL, no migration, no served byte is touched by this kit.
+
+OFFLINE REHEARSAL
+-----------------
+Workspace assembled entirely from LIVE bytes recovered by md5 (D188):
+  finance_app.py       f06e139b7651329a72b08bbc5779077f  S188_D2c
+  finance_ingest.py    1f730bcdf3c7044841cedc06833bc228  S186_I1a
+  finance_yesbank.py   5dcbdd3a41360c96310929083524fc93  S186_R1a
+  marg_report.py       829f4344df6e086510bb0fb6112ecb77  S183
+  finance_upi.py       3f5016f0c64f12b91ab55c18252705c1  S179
+  finance_returns.py   a46a87e65d951d59baeb9d86c9d8fe59  S180
+  finance_identity.py  81092e3ca18c9a85f1de06cc8055d967  S180
+  entry.html           d3844bb96a1d496e5882cfbbb695cbf4  S188_D2c
+  approvals.html       028255054662924713e03362c3976b05  S187_H1c
+  workbench.html       420f82c2846bc49d0d12ab5040d8c542  S187_M1a
+  review.html          ddd3d5f61fb2f41950b1a63aa3480650  S179
+  entry_clinic.html    0c64fda2005ea3cd6692aeb8fd3dc728  S181
+Store: dev_seed_smoke_db.py (the S188_D2a, F-128-corrected copy) plus the
+four ADDITIVE migrations, each hash-checked against its Register pin:
+  S182_clinic      bd2bb0ee5c58ac694ff1f741d70fee98   PIN MATCH
+  S182_c2          22c67f25b17e39faaaf66376df10c373   PIN MATCH
+  S183_marg_map    9340675c9105f9d5e78cc37980494999   PIN MATCH
+  S186_reserve_yesbank a717c7deffa2ea0a20af21a227bc2f73  (no Register pin;
+                        recorded as an applied marker only)
+No data-correcting migration was applied (S184_C1a, S184_C2a,
+S186_cash_close, S186_walkin all deliberately skipped — they act on real
+money and this store has none).
+
+  PROJECTION, written before measuring : 476/478  ->  480/482
+  MEASURED                             : 476/478  ->  480/482   HELD
+
+The two offline FAILs are the same two before and after, and both are
+artefacts of the seeded store, not of this change:
+  cutover leaves legacy breaks open
+  clearing the full parked amount settles the month
+The offline check TOTAL (478) equals the box's live total (478), which is
+what makes this rehearsal worth anything.
+
+WHAT THE FOUR NEW CHECKS ASSERT
+-------------------------------
+  /finance/entry      maker    v1 YES  — all four markers must be present
+  /finance/approvals  checker  v1 YES  — all four markers must be present
+  /finance/workbench  checker  v1 NO   — none of the four may appear
+  /finance/review     checker  v1 NO   — none of the four may appear
+
+Markers: --surface-page:#f3f2ee · id="toTop" · class="kick" · details class="help"
+
+NOTE ON THE BACKLOG INSTRUCTION (this is a finding, F-135)
+----------------------------------------------------------
+Runbook v124 §2 ⭐1 said: add the assertions to approvals, workbench and
+review. Surveyed on the real bytes before writing a line:
+  approvals  4/4 markers   — the instruction was right
+  workbench  0/4 markers   — S187_M1a, built BEFORE the design language
+  review     0/4 markers   — S179, untouched for nine sessions
+Two thirds of that instruction would have gone RED at its own gate. It was
+written at the S188 close without opening the files — the F-132 shape
+("already correctly scoped"), this time in the record rather than the code.
