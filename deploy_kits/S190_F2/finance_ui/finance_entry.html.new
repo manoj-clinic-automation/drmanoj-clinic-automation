@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<!-- finance_entry.html · Sanjeevni Medicos — Daily Sale (MAKER / pharmacy)
+     Session 188 · stage D2 (D326): SAVE → THE CHECK → FILE.
+     Rebuilt under Clinic Design Language v1 (the S187 default). Every element id
+     and every API path from the S179 page is preserved, with two deliberate,
+     declared removals: the deposit banner (#depositMsg) and its fetch of the
+     unit-position endpoint — the unit cash position was never the maker's to
+     see (F-127; that path is named in finance_app.py, never here, because the
+     smoke suite asserts the literal string is absent from this file).
+     Served from disk (D312). No CDN, no web font, no external image. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f3f2ee">
+<title>Daily Sale — Sanjeevni</title>
+<style>
+
+:root{
+  /* -------- Clinic Design Language v1 (see project doc) ------------------ */
+  --surface-page:#f3f2ee;      /* warm paper, easier than blue-grey */
+  --surface-1:#fbfaf8;         /* card */
+  --surface-2:#f5f4f0;         /* inset / zebra */
+  --line:#e6e3dc;
+  --text-1:#23272f;            /* primary ink — softened, not pure black */
+  --text-2:#5d6470;            /* secondary */
+  --text-3:#8a8f99;            /* muted */
+  --accent:#2a78d6;            /* series-1 blue: links, primary buttons */
+  --accent-ink:#1c5cab;
+  --good:#0ca30c; --good-bg:#e9f6e9;
+  --warn:#8a6100; --warn-bg:#fdf3d7;     /* dark text on tint: icon+label rule */
+  --bad:#b02a2a;  --bad-bg:#fbeaea;
+  --shadow:0 1px 3px rgba(35,39,47,.06);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:126px}
+body{margin:0;background:var(--surface-page);color:var(--text-1);
+font:15px/1.6 system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:660px;margin:0 auto;padding:18px 14px 120px}
+
+/* ------------------------------ sticky header --------------------------- */
+.hdr{position:sticky;top:0;z-index:50;background:var(--surface-1);
+border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+.hdr-in{max-width:660px;margin:0 auto;padding:10px 14px 0}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .mark{width:44px;height:44px;flex:0 0 44px;object-fit:contain}
+.brand .nm{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.brand .sub{font-size:12.5px;color:var(--text-2)}
+.tabs{display:flex;gap:2px;overflow-x:auto;margin-top:8px;-webkit-overflow-scrolling:touch}
+.tabs a{white-space:nowrap;padding:9px 13px;font-size:13.5px;font-weight:600;
+color:var(--text-2);text-decoration:none;border-bottom:3px solid transparent;border-radius:6px 6px 0 0}
+.tabs a:hover{color:var(--accent-ink);background:var(--surface-2)}
+.tabs a.ext{color:var(--text-3);font-weight:500}
+/* ------------------------------ cards ----------------------------------- */
+.card{background:var(--surface-1);border:1px solid var(--line);border-radius:12px;
+padding:18px;margin:0 0 16px;box-shadow:var(--shadow)}
+.card>h2{margin:0 0 12px;font-size:16px;letter-spacing:-.01em}
+.kick{display:block;font-size:11px;font-weight:700;letter-spacing:.09em;
+text-transform:uppercase;color:var(--text-3);margin-bottom:2px}
+.hindi{color:var(--text-3);font-weight:400;font-size:13px}
+.mut{color:var(--text-2)}.ok{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+/* ------------------------------ chips ----------------------------------- */
+.strip{display:flex;flex-wrap:wrap;gap:10px}
+.chip{border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer;
+background:var(--surface-1);font-size:13.5px;color:var(--text-2);min-width:120px;
+display:flex;flex-direction:column;gap:2px}
+.chip b{font-size:20px;font-variant-numeric:tabular-nums;line-height:1.1}
+.chip:hover{border-color:var(--accent)}
+.chip.zero{opacity:.5;cursor:default}
+.chip.zero:hover{border-color:var(--line)}
+/* ------------------------------ tables ---------------------------------- */
+.tblwrap{max-height:430px;overflow:auto;border:1px solid var(--line);border-radius:9px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+thead th{position:sticky;top:0;background:var(--surface-2);z-index:2}
+th{color:var(--text-2);text-align:left;font-weight:600;padding:8px 10px;
+border-bottom:1px solid var(--line);font-size:12.5px}
+td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:nth-child(even) td{background:var(--surface-2)}
+tbody tr:hover td{background:#eef3fb}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+td b{font-weight:650}
+/* ------------------------------ controls -------------------------------- */
+button{border:1px solid var(--accent-ink);background:var(--accent);color:#fff;
+border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13.5px;font-weight:600;min-height:38px}
+button:hover{background:var(--accent-ink)}
+button.ghost{background:var(--surface-1);color:var(--text-1);border-color:var(--line)}
+button.ghost:hover{border-color:var(--accent);color:var(--accent-ink);background:var(--surface-1)}
+input[type=file]{font-size:13.5px}
+input[type=text],input[type=month]{border:1px solid var(--line);border-radius:8px;
+padding:8px 11px;font-size:13.5px;background:#fff;min-height:38px}
+input:focus{outline:2px solid #b7d3f6;border-color:var(--accent)}
+/* ------------------------------ pieces ---------------------------------- */
+.day-detail{background:var(--surface-2);border:1px solid var(--line);border-radius:9px;
+padding:12px;margin:8px 0}
+.sec{margin:0 0 10px}
+.sec h3{font-size:13.5px;margin:0 0 5px;cursor:pointer}
+.sec h3 .tog{color:var(--text-3);font-weight:400;font-size:12px}
+.billrow{cursor:pointer}
+.items td{background:#eef1f6 !important;font-size:12.5px}
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:6px;
+padding:2px 8px;font-size:12px;font-weight:600;border:1px solid transparent}
+.b-ok{color:var(--good);background:var(--good-bg)}
+.b-warn{color:var(--warn);background:var(--warn-bg)}
+.b-bad{color:var(--bad);background:var(--bad-bg)}
+.note{color:var(--text-2);font-size:12.5px;margin-top:10px}
+details.help{margin-top:10px;font-size:12.5px;color:var(--text-2)}
+details.help summary{cursor:pointer;color:var(--text-3);font-weight:600;font-size:12px;
+letter-spacing:.04em;text-transform:uppercase}
+details.help div{padding:6px 0 0}
+.stat{display:flex;flex-direction:column;gap:2px;align-items:flex-end}
+.stat .lbl{font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)}
+.stat .val{font-size:26px;font-weight:750;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.held{display:flex;gap:26px;flex-wrap:wrap}
+.held .stat{align-items:flex-start}
+.held .stat .val{font-size:22px}
+.dl{cursor:pointer;color:var(--accent-ink);text-decoration:underline;text-underline-offset:2px}
+a{color:var(--accent-ink)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.h2row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+/* ------------------------------ back to top ------------------------------ */
+#toTop{position:fixed;right:18px;bottom:18px;width:46px;height:46px;border-radius:50%;
+background:var(--accent);color:#fff;border:none;font-size:19px;box-shadow:0 3px 10px rgba(35,39,47,.25);
+display:none;z-index:60;min-height:46px}
+#toTop.show{display:block}
+@media(max-width:640px){
+  .wrap{padding:12px 10px 90px}
+  .card{padding:14px 12px}
+  .chip{min-width:104px;padding:8px 11px}
+  .stat .val{font-size:22px}
+}
+
+/* --------------- entry-specific, on top of the shared system -------------- */
+svg.i{width:19px;height:19px;flex:0 0 19px;stroke:currentColor;fill:none;
+      stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+label{display:block;font-size:11.5px;font-weight:700;color:var(--text-3);margin-bottom:6px;
+      text-transform:uppercase;letter-spacing:.07em}
+input[type=date],input[type=tel],select{width:100%;padding:12px 12px;font-size:16px;
+      border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--text-1);
+      font-family:inherit;min-height:44px;appearance:none;-webkit-appearance:none}
+select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%235d6470' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 7l5 5 5-5'/></svg>");
+       background-repeat:no-repeat;background-position:right 12px center;padding-right:38px}
+.money{position:relative}
+.money .rs{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-3);
+           font-size:17px;font-weight:600;pointer-events:none}
+.money input{padding-left:30px}
+.big{font-size:24px;font-weight:750;padding:14px 12px 14px 30px;
+     font-variant-numeric:tabular-nums;letter-spacing:-.02em;text-align:right}
+.sp{height:14px}
+.hint{font-size:12.5px;line-height:1.5;color:var(--text-2);margin-top:7px;
+      display:flex;gap:6px;align-items:flex-start}
+.hint svg{width:14px;height:14px;flex:0 0 14px;margin-top:3px;opacity:.7}
+.calc{display:flex;justify-content:space-between;align-items:center;margin-top:12px;
+      padding:10px 12px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px}
+.calc .k{font-size:12.5px;color:var(--text-2);font-weight:600;display:flex;align-items:center;gap:7px}
+.calc .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.repeat{border:1px solid var(--line);border-radius:9px;padding:12px;margin-bottom:9px;
+        background:var(--surface-2);position:relative}
+.rm{position:absolute;top:8px;right:8px;width:32px;height:32px;min-height:32px;border-radius:7px;
+    background:var(--surface-1);border:1px solid var(--line);color:var(--text-2);padding:0;
+    display:flex;align-items:center;justify-content:center}
+.rm:hover{color:var(--bad);border-color:var(--bad);background:var(--bad-bg)}
+.add{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:11px;
+     border-radius:9px;border:1px dashed var(--line);background:var(--surface-1);
+     color:var(--accent-ink);font-size:14px;font-weight:650}
+.add:hover{border-color:var(--accent);background:var(--surface-2);color:var(--accent-ink)}
+.scan{display:flex;align-items:center;gap:11px;padding:12px;border:1px dashed var(--line);
+      border-radius:9px;margin-bottom:9px;background:var(--surface-2)}
+.scan .si{width:34px;height:34px;border-radius:8px;background:var(--surface-1);color:var(--text-3);
+          display:flex;align-items:center;justify-content:center;flex:0 0 34px;border:1px solid var(--line)}
+.scan .nm{flex:1;font-size:14px;font-weight:640;min-width:0}
+.scan .nm small{display:block;font-weight:400;color:var(--text-2);font-size:12px}
+.scan button{padding:8px 13px;font-size:13px}
+.scan.done{border-style:solid;border-color:var(--good);background:var(--good-bg)}
+.scan.done .si{color:var(--good)}
+.msg{padding:12px;border-radius:9px;font-size:13.5px;line-height:1.5;margin-bottom:14px;
+     display:none;gap:9px;align-items:flex-start;border:1px solid transparent}
+.msg svg{flex:0 0 17px;margin-top:2px}
+.msg.bad{background:var(--bad-bg);color:var(--bad);border-color:var(--bad);display:flex}
+.msg.good{background:var(--good-bg);color:var(--good);border-color:var(--good);display:flex}
+.msg.warn{background:var(--warn-bg);color:var(--warn);border-color:var(--warn);display:flex}
+.shout{background:var(--bad-bg);border:1px solid var(--bad);border-radius:12px;
+       padding:14px;margin-bottom:16px}
+.shout .sh{display:flex;align-items:center;gap:9px;color:var(--bad);font-weight:700;
+           font-size:14px;margin-bottom:3px}
+.shout p{margin:0 0 10px;font-size:12.5px;color:var(--bad)}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chips a{padding:7px 11px;background:var(--surface-1);border:1px solid var(--bad);border-radius:8px;
+         color:var(--bad);text-decoration:none;font-size:13px;font-weight:650;
+         font-variant-numeric:tabular-nums}
+.chips a:hover{background:var(--bad);color:#fff}
+/* F-132: the .total block and input[readonly] styling are removed with the
+   elements they dressed — the running-balance card and the closing-cash panel.
+   Dead CSS is a claim that something still exists. */
+/* F-132: the parked total is a summary line that opens to the names */
+#whereBody details{margin:0}
+#whereBody summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;
+  align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+#whereBody summary::-webkit-details-marker{display:none}
+#whereBody summary::after{content:"▸";color:var(--text-3);margin-left:6px}
+#whereBody details[open] summary::after{content:"▾"}
+#whereBody .parked-in{padding:2px 0 0 14px;border-left:2px solid var(--line);margin:4px 0 0 2px}
+#whereBody .parked-in .mrow:last-child{border-bottom:0}
+
+/* the D2 mirror: the machine's answer, shown only after he has committed his own */
+#mirrorCard{display:none}
+#mirrorCard.on{display:block}
+.mrow{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+      padding:11px 0;border-bottom:1px solid var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow .ml{font-size:13.5px;font-weight:650}
+.mrow .ml small{display:block;font-weight:400;color:var(--text-2);font-size:12.5px;margin-top:2px}
+.mrow .mv{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mrow .mv b{display:block;font-size:17px;font-weight:700}
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(251,250,248,.96);
+     backdrop-filter:blur(10px);border-top:1px solid var(--line);z-index:55;
+     padding:11px 14px calc(11px + env(safe-area-inset-bottom,0)) 14px}
+.barin{max-width:660px;margin:0 auto;display:flex;gap:10px}
+.barin button{flex:1;min-height:46px;font-size:15.5px;display:flex;align-items:center;
+              justify-content:center;gap:8px}
+.barin button.ghost{flex:0 0 42%}
+.barin button:disabled{background:var(--surface-2);color:var(--text-3);
+                       border-color:var(--line);cursor:not-allowed}
+.barnote{max-width:660px;margin:6px auto 0;font-size:12px;color:var(--text-2);text-align:center}
+#toTop{bottom:86px}
+</style>
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-shop" viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9M3 9h18M3 9v10a1 1 0 001 1h16a1 1 0 001-1V9M8 20v-6h8v6"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0l-7.2-7.2a2 2 0 01-.6-1.4V4a1 1 0 011-1h8a2 2 0 011.4.6l7.4 7.4a2 2 0 010 2.4z"/><circle cx="7.5" cy="7.5" r="1.2"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M5 3v18l2-1.5L9 21l2-1.5L13 21l2-1.5L17 21l2-1.5V3l-2 1.5L15 3l-2 1.5L11 3 9 4.5 7 3 5 4.5z"/><path d="M9 9h6M9 13h6"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M7 4L3 8l4 4M3 8h13a4 4 0 014 4M17 20l4-4-4-4M21 16H8a4 4 0 01-4-4"/></symbol>
+  <symbol id="i-cam" viewBox="0 0 24 24"><path d="M4 7h3l2-2h6l2 2h3a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1z"/><circle cx="12" cy="13" r="3.6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l9.5 17H2.5L12 3z"/><path d="M12 10v4M12 17.5v.01"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h13a1 1 0 011 1v2"/><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 13h2"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3L10.5 13.5M21 3l-6.5 18-4-8-8-4L21 3z"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 10l9-6 9 6M5 10v9M9 10v9M15 10v9M19 10v9M3 21h18"/></symbol>
+</svg>
+
+<div class="hdr"><div class="hdr-in">
+  <div class="brand">
+    <!-- LOGO: the clinic mark from Canva (dr manoj logo, DAHKiFFICC0),
+         diamond cropped, embedded as data-URI. Same bytes as the Hub (S187_H1c). -->
+    <img class="mark" alt="clinic logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAF8AAABgCAYAAAB7YK6NAAAppElEQVR42u19eZhV1ZXvb+29zzl3qrmKYiqqGAQcowLROBU4gWOcqpyiaU0a0+nBxHReTMdYFjHpJJ10d5LX9sNOWu0o0SIx0ShCjJY4R0FRUQgyVVHMUNOdzzl7r/fHuffWLSgQECjzvne/r77yk1v3nvPba/3WWr+19j6YPH4CT6hveGXq6NFVABQAAUA0NkJNHNfw31MmTOSJ9Q3PHjd2bCUAyv0My4sZ1MZNcl//3sItAsP3EgDQ0NAwZWJ9Q3ZSw3jdUFd3IQBMrKufN6lhvD+xvmHzpIbxfMz4CTxpbP0NNL6+/k1Lqum+77Ws7+ycdxxgfwD4AHjKlCkxL515Vkp5mjH6jHUdHa8BkAD0cABPBAaAb752Xa3NspENjwE4Ywssv+uMX70BAE1tTXJh80I9DOATANTX15cppvuM4eUbujp+3NjYqJYuXepPrKt/GYI+A8aDBmbxhs7OXxMATBxXvxFE64ygOzds2PBm7sMUAL++vr5BME/a0Nn5x9wX8NG+qxZuEa3UalqevDRC1WWtQtKtylKV0hJgw3AzPgC8lE35//TdWb96uaW9UbXOWupj+F8SgK6vr59qkXjFMGN9x8aqwmqNGzfuOIvES0KISgAwvv7puk0dtxe5kila2aMOfN6SW9qvr6aQfDJSYn8m1e+CDWvOXw9DOlGLtKc9N6Pn3tu44MFhXIBB1DyhtraaQqFnpVQn+b6+fX3nxv8AwBPr678pbBLtzLC0NndrbVYr2/qHifUNzx1TX39sDmyZ+xkWi1/YvFDf+ewVVRSSi5yI9ZlET9Y1mhmAJEARoIhA2aSrjWblRNQDd7dff0vrrKX+3PnTrOEITUUGa0w4XEEkjvF9b8H6zo0/BaDH19f/s5TqXppY39Dlg6/p6Oh4ffyI8bUixIuZUGYIszZu3NiZW0Vz9Dm+RRC1mpZXmyqlCC2yQuq0VDzrCyK1z78xzEIRS0uKbMq/ZZg9oMAW9aPrT5FCe+u7ulZOqq8/hUi8ZZi7BTN+1tHR8Xp9fX1ow44N2ymhGoWlTt64cWNHfvWGg2qIWk3L4qZKgr3ICqnT0h8BPACQIDKGYTxtnLB64K4Xrr95GD0g7wXUsaXj7fVdXStzVnU5CQHD5htCCGoZX19/a0dHRwaAXNu9tn/t2rX9w87xv/18OZU6TzkR+7R0POvTRwA/YGoktGYyvjZOxHrw7vYbbrr/tuVeC7eoYVwAMQ2wAMCQGGuMMRp4TjCzbUn1iwl1DZ8HoBuDLIeGk+Nb2j9fLkb6TzsR6zOpuHvAwBcWgIi0z6Q9AyuiHrrrxRs/10qtfkt743AtgFlewJNfkUIIxeJyAc3XGGNWAnodACwN3jR86eTrN5bC9p+yI/YZAcfjkAAjQWS0gfYNbEf+z90v3nj9MFOQBkChaPTXvtYrpRL/HqRE9fUhBLQzLK888F9/+fKSqCh9yola56T7swdt8fsKwtISLCQhm9I33TtzwYJhTkN5zJgxYx3L+hkV5fJiOIJrHvi/XzSntKqi6kknYjem+j86uB5c5sRGSEFSEmdT/o33zvrVo8O9AMVFFA0n8F9ub4pVllU9GYrYjenDDHwuBgijDWvNZEeth+964brmgILmDlcdIAAIGl6qmWe+3HZNrLYu9IQTUecmjwDwe9cBAkIJ46bcG+6d+WjbcNYBw6ICNrW1yVZqNcwcGVmnnrTC1rmpIwx8URBm4xthh+0F3176uatbZy0dtizo6Ft+W5tEc7Ounv/BqLHhXQsunrRgZhi7tatDUtDRYb5CDFDkZ1P6untnLni8hRtVKx1dDxBH2eQlmpv1+H9/tzZC9MwuM3nmr1fenOrO1GRCKgPDR+dyCjHAZ8sJy8fuar/+ilY6+h5w9Cy/jSWaSU+475URvlW1WNjhUzjZ63sIK0cksnPGL/DqyjbG0l4YR9MDpJIkBHlu2rvmOzN/9fu586dZ99+23Pt/x/Lb2nLArxih7epnhB0+xaTiPpNSFmXgmbDz+7U32+u6J6fCKn1UPUB7GsYYy46ohd9+4frL7r9tuXe0PICOgnkJEJlR81dX2xJLyI6calL9PoMUG4YggFhDwwIb7V4ycYHXULk2mnZDR9kDhCAi103rq++dteCpo5EFiSNu8URm1Pxl1bYSzwgnAB5EShEQsQiCAIaAZA9E0l607jq1qWdcX8g6ujFA+8Yws+1E5cK7Xrj+4qMhRRy5u8sF11E/WlZtq9JFwg5P16m4L4VQSdfgxuMqcGptBJvjbq7yEBBwwWQ5T6+9SexM1u52rCwMCz5aC+D7xhjNITusfnPXC9dffKQpiI6YxTc363H3vVtBjrNEONEZJtnng0iBOe/qaCi1ManCwUub4sh4gZ5HbOCzg4jsTV997M8RC6XCni9BxEeRgqQggUw25V353VmPLm5sb1FLZ7X6n3zwcxw/7r53K0QovIic8Okm2ecDpAAGAfA0o9QWePvzU7G+N4s5bWuR9Q3CSkAbBkEjayIYFd2QumLKQwokbD6KOqthNsoSgkikhJ+46q4zH19yJBbg8NJOSwB8/b+9XS5CztMUipwecLxQ+bVmBogAMOGrz3fhnAVrcObYGEbFbCRcHcQAlnBEEpv7x0de7LjItUTG8FEsSQSRcF0YW7mRvmxV2/h7f//ppbNa/caWw9uQOXyW39QmsbBZT5i/rMw4ZU+TEznTJPp9EFTQIcj3EgLrz2pGuSNw56drcfMJldie9HBR21rsSHqQRGBmEAwyOmzOb3g8dULt8mjaj9DRyIAMC4TtDLb3VyWfeeeycE9qRB95vZfs+M4Fr6GlXaF1lv/JsfwWFgXg7bKnhBM90yT7cxyfF/IGfhMBad/gf59fh5tPqERvVmPFjjQ8zUi4Jkg/c+tlCVe8uHGOsz0xMuMoF8x0hDlfIGyleM3WSam2P93g7O6vhpSmguzSp2u+1X4WWmf5aGk/LB4gD8vVziIz6Sevl+poxVMiHD3bJPt8IlK0l28FI2eCANdnhJXAqKiFuUs68dNlO3DTCVVomlqBhat74EiCIAGChs8huT0xypta846hIyS+MQACIWynzYpNp6QWv3dJCJDKkh4Z32ghZYSUdU34rJtfS82buQEt7QpLHzLDRzu54Drl56tKXNv+vXAijTrR6wNCAQwwDxh+Ee3kvzie1WiaUo6/PbUGY2IKFaEA158u24H7lu1AwtMIuj0GaS/Cp499NnFG/QvRtBcRdBjpJ4hDBFtl9etrP+O+svYc25auBJucpzFYG0OWLcCII5u8Yvt3z3seLazQSv7Rp52WIuAt60kRijbqZF8uuPIAyfCe9jWw6gzgqsnlOKE6VAAeAP5h+gjcenI1+rMaShAMExyVobe2nOlsT4xKWco7bPTDDAhBsGXGe37VuZmXP2wM2cqVgMnlZrlrFkKwdg2AEjjRJ0Z8q/180Up+O7M6uuC3sEArmVHzl0Vcy3pCRGIzdaI34PicAyPnxsF/8iDayaOvDaMrPqBhPbyyG9c/sQHzXt6KBe93QwmCNnlC0PA4bL++qZGJtQ5SpsNg8YJgiaz77Aez3eUdp0dDdobAQdG3N0UIwZ5rCBwTodAT5panzp9F5M+dv8w6OuDngX9ycyQcKX9CREpm6URg8bSXhfNe7EZFLOQowiMfdOPDnize2ZHGuzvTyGqDlhc3429OrcF/zqlH2jcFCcKRaWzYPTXS0TMp5ajsx7Z+IgFbpnX7mnOzKzbNiESsVNFnDr72vEkpJYSbdU13wovcNGfyE+/vTH72/tume3wIHkCHavHhSOXvRDh6QcDxA1kNF/E7MxetQ24ihQfoSICR9g2qQhI/mDkGl04sAwC8syONE2vCEARc9OgavNwZR2VYgY2GxyHUhjcmrzrxl8pAOTjE6otZIGSl8fr6M1MvfTgzHLbSZAwVrpXz15y72PykQU/aw8gSB3edN87cetoY4RnozT3ZpvHVod+2tLNqnXXgMUAcLPBjf/xqOByt+K2IxC7IW3wO9iKm3z/t0EAxg4xvcNXkclw6sQzaMAwDnxoRAG+Y8cvPTsBVUyuQcDWIBCzKYEu8PrSh+5iMIw/N+gPgU2bFplPjr6xrDIWsDJm9LL4oJRSErG/Qm/FxzUkj8PyXTsGtp40RxhhjCdDIUmvh+h2pptZZ5Le3H7gHiIMF3q4d+biIlF44wPEH72q8B+96ua0MmoM0dFfaR3tHHJ4BqsMK00dFoc0AAQhB8t1t06U25NFBcn8AfAbrdh6TfH7NbMdWnhiaDAK5WwigO+lhdKmDB687Fv9z/XFoqAzBNwwhhNAGCFlCjK8JP/bTpRvPnTWL/Jb2dnV4aCcHfP0D7SFh1z+uwiUX+Yken0CK8/zBA6nNgdIO5d7jaUZ1WOL5645BVVgh6Rnc+OQGPLGqGxcfU46QJDyzrg9hRYgqAZOrkH0tvKtPfCg1qmxrmeupAxLemAmW8tGbLM20Lb9JuiZsSfZgQIMoBhxYe8rV8LXBTaeOxN0X1KM2ZsNw4LsilzBIQch4xny/vYPmv7q1V3ruxZu/N+v1A6mE5QEAz5MWrXGEX/m4iJRerBO9PpFQXFi3vD3yoHLlo2iHQYWb7Mto/HFjHJ39Ljr7XYwpsTG21MbCVT3wmdFy9mgIAGt7MlBCgGDgcUhK8tITKlc7mm2iA5hwJAEYA/30yqu4J11jWyIblCqDdR0QgO60jwmVIdx35WR89eyxiNmyAHb+fqUgLNvUj8898j4teHMLO7Yd0UJcFZtx/UvJfz6v86MKMbV/4IWZ9JM1jum1FopIycUm3usTkeIcjIcS6vaknfytRG2B646rwOTKUAEMTzNOGhHB30wbgbPqSvBSZzwXDIkt4dH67sn26d7StG35Ua3378bMAiGV4qVrznO7eseHwyoJzYP3fChBSLoa2jC+OGMU7rmgHlURK+dtBCkImhmSCATCf7zShdbF65H2DEaUOMLzswbKruRw+KnK//WHS7pb9+8BYn8WP23um5YZYbXJaOllJj6Y43mPtDK4nMHwciG1oSGLrPzvrM+4Y8YITKkMwTDDzwXen1/SgL+ZVgPfcOEn2BVHJMlDIlvmdPWNSytyAd437zATHCuLjt3jU293nWaHrKBPTBiotqUg7E57qK9wsOD6Y/Gzz05CVcSCNhx4Q55miLA76eGWR1fhjic+BADEHAnPGIBIsJc1IKoUdvipqjufnbE/LWhv8FtaBFrB05YtUz2zqttkpOxyHe8pKqD2bWE8VEAZQtuhIpri3I1bguAbhmYGURB4lSCElYAg4NjqMM6oK0F/1oekvAMItW7XsYbZaOwn8goBuL7KLl17PkBCFmJSDgAC0Jv28bmTR+C5L56ES6ZWQnMQv/I0k6ecNzr7cf78t/Ho29tQHbEgBAqFYEBtQrCbMUSiilTomf0tgNgL+Hvu4Wnzl6vetdWPyWjpFTrZ6w1YPA0SoT6K8/dl8cVLSEHzAhv7XChBsIWAJMKutI9HP+gu8HBIEX46ux51pQ6yOvAAJTW2J8bYnu8kpORCer6nPGyLNL+75dTMjsToqCWy4KLvBgF9GY27zh2H+6+ajMqctcuctQdZWAD8w29txyW/eAcbujOojFgFD6W9YosQ7GU1gapIOM9UfW3RkAsgB1v8PdyIF+SOsWMfE5HSq3S8xyeQNbSt8yHQzr7TrDe2JhHPGqzancG6niy+vXQLfvDqViRcg1NHRhGxBMpCEovX9mF9bxaOFCAylHFDZlL1Go45cUcbCRqwCjADShqkvGj2D6sutUBSFQdmQYR4RuPOmXX4p5l1BQuWRSOsJsfxv1u5E7c+thq2EnBkXvbY3y4SEjBak1RRKPuKyKevez71z+dvRmO7QkcQhGWBFGfOxLTRy9WOcWN/JSOlVwdZDSmmoYA+VNrhwbSTK6QilsDPzq/Dp0aEQQRELYEz62Lo6PPw6Ae78frmJCQB//X2DrRv7IctKdgUDQNPW6qh4sPeyujumDZyEPkwBByV4RVbpmXX7jw+YssguwmoiJBwNU4fV4r7rzwGhgNuLx4dNjm1c1NPFs0Pvw8GYEmC5r19fM8oSHn9QvsaQsUg5ZXh029oTy84vwtNbRIfLGQFMAGgpoULaXnJjF+qaNk1ur/HIyIrwIf3Io087QyGck/aKf49kGoOfB5BEiPuGcwaV4Y5E0r3WsyUa5DxNe67qB7jyx109GWRcA3KHAFd4G0ySa/EJeI9wACkMEh7YW/Vtk9JJTWYKRdPCJIA3zBuOmVEAWgl9mqmQxDhZ692YXvCRXVEwdN7U2ghdcYQ3kAk2c9qoZwalvaiiq8tObfnx7NXooWFaGqDAJFZgRl3WhXV1+p4j4fc5q0BIebQhCLGPn2yQFGaGcdUONCG4eog4GoGXM2YM7EMz904FSfUhBG1BBKuKRIzqWBeac9x9vwiwwRLutjUU5/pTlbbSngACIYZPWkfPWkfJY7EtDGxAgXtee0yl3o+/2EPIpaE5kMTx4hIGi/jk+XUCKHaar+2JIpWsFjYTHrq411VhsXXdKrfYA91jmnvwEl7Bdi8Te8ZUnkP7uG9sh0BwqRyJ8ezA59pS4ItCTFbgBnozWr8ZnU3HEnI0S2oUFXnyYKKbxiA1uu7pxiQlIBhw4AkwpdmjETTCTUwDJQ4cl8jJACADd0ZbOrLwla0l4Y3GIEhaGdwCFCcSfgiUnqsFuJGgAICdF3vAhmJVbDnMijfQUVRTjOUvHoo2Q4NXhoOQF6yoR+70z5sGWQ6kgi//XMvVu0Oton5hlFmS1x6THlOYs4tXy4ehVTWHRToGRDCIOtF3K19Y20lfAgIirsaX5hWix9dNB53n1sHArAz4e8FXp6GmIHlXXEkshqSaJ8FI+1DNt8rySZBrH02TJcVKlxBop6UzSAyYJb7jaIHI5p9xN8zBwHs+c44mn63HpdPKkdlWGL51hQefHcXplSG8PvmSaiNWvA047uz6vDG5iTWdqfhSJE7igQIWUniwSkfS2GoL1WeSWZjthAG4GDhj6+N5GaDgIxv8NqmfpwyOgrfAEIWU0Xw88L63o+vyXMRj7AmItQX8nwuatvQoI/jIWkHh4F2BAFZwxgdtfDq5yaj7YoJOLEmjLRnMCpmYVKFg9W707joV2vw/s40LEmIWgIhRYNyawJz1EpU8R4KjYCP3nSl5epQiFgXrnR3yocQhKqIhboyB/+9bBsyvoElc0WeYXg6SC8/3JXGsx/2oMSRQdGFQ6SdvQqB4P8E/C64i7VHYBZcODSDC7zKH2HhB+MbxUuU8Q2+Mr0GY0tsAMB5DSU4r6EEALAz6WFnysf00VF8s70L54wrwaqdaby7PYVIcNQLG1gUstKpsnAPM1QoJ53mOyLwjdUPIBYsenDHy7fEQRiJiCVw3sRy/OSlLnzpt2vxr5dOQGVYFYofbRhf+/069GV8lOREtf17+j6yncF/wSDBAHUVwPck/ohUPEnKCrPn5mfKhkwV95dq0l4hlQak5D0uOqMZUypDuGxSeSGAMgDfBJz+t9NH4Asn1+C46hA6+12cOH8lCIxSW+aELiZtBKqj3YjayZCvLRAN7qwYI1LFHF7iSCz5sBd/3pnGlJowvjh9JJ5YtRu//WAXVu5I4pz6Upw0Koa0p/HYOzvxWkcfqiOqEHxpX7XMRxljwUUMk1TEhn8X0E4by86rG7aC8SMZLROg4jbY4aedPJ+mPIMZoyIosUVR5g84UsAShAnlDo6rDkEz49n1gZ5fERoAAgRoFhhd2ukq6auhOlokijO3gEriWY1vLNkITzNOqI2gMqSQ1QbrdqexZE0PfvbqZvz8ja3I+BozxpbA1Yy0l+8jHxjtDCFpgZk1ORHF6f7VivXDAJNCMwyYxbp7MG/SsRunypKKa3W81wOzBRBoCK77OLTDuYZLzBJY2hnHn7YmcdqoaOEd7Z1xjC2xcUxFoOE4kvDG5iSSrkFY0iA3F/D9+op1ikmJ3HwhDdZOdE3xd2tmxGyJFzv6cOGDK6GIsK47g5tPrsUXZozE9LGxQVmNrxmvdfbj9ic/xMbdmSDNPQDaGUJgMiQtycYkoPnm7T+enURTm1QFVr8HKLt/9029QkgZLbtGx3tyk8U4rLRTTGSjYxZ+smwnzhqTwqiYhfaOOBZ80I2GUht/vGEyyp2Aa285uRpPre2Fn8tuwMw+W1Qe6s7Ulmy1Pa32oJxAr7StrCAyLkjY+SQ9L2e8sy2JlKtx32WTcOv02iGTOyGAs8eXYd4F43HdI+8jpORebxqKdgYtCrOBUoKBNLuZK7t/fMGb+blWkeMBxj330PLbpvlj319/vU72PS5iFQrM/r5o59C0naCS7MtqfOGkSixumoQFlzXg2mMrcEptBJ39LlKuwbqeLP766Y3oyfiQgnDKyChKbQHfFAiOfK0woWq178h0yGgxhISvUGL3JyzpZveawSGCrxl/f/po3Dq9tiBl582GCmprsFhRR0KJQHCjfd7vELRjjIG0BEOk2E9/tvtHF/wRLe0KC5v1YFVz6VJGC0THPX9lJry67vG0lCeIWNnxnM14wODcf18V7t7rPrg4EwQkPYPPjI7g/1xYV9D3o5ZAeUgiZkv0ZX08cGkDKsMKdz6/GWWOxPy3duLNLYlCbs9EENDu2eP/YKKhjKONYNqDcoiIAO1+sO1Ttm8ci4qOiiMAnmHMO78eY8ucwoQCDWFNRIQvLFyN1duS8A3DEgJC5P5tyPZQoYA0pCzBoBS7mc92/8vsP+7Z1RpcUC1dygDE1n+8wUy4s/zx1LadJ8po2fGcTftBB3T/FS7tkeXm+7T5SxQEJDyNf2kcg2MqHLgmCGR5XWViuYMbjq/CqJiFUkfhe69uxW9W9eD9nWmErSAwCzA8E8KYkg2paWNeDfnsSALvAXxwAQK++vPOE7JpL+aIQJkhCoIfpABuPqUWY0rtIjmiOFNiCEH47vMd0IZxR+M4fGp0DG9tjsPzc71cHvqgUWYTAE9IC52+cvcPL3x2qHbi3p2s1laDFtDy6eRX9O9sNqn+38uSCsXMHzkM9FG0wwAsIry8OQnkMhtJhJRn8P6uNKQguDpoFy7fmoRhRnVUIWbL3I0SIABj2Bw/cjlLCYsN7+NaBGzpcmVkV9KwQnGoJADGoJC77/kJmgPgn1vbg3e3JvDgtcfi5mkj8a3zGnD/1VOhDWOfJRcbQzmqMX76ip3fn/2HffVxh+7htpJBC9Py22Z4VOY2mVT/0ypWrpBbgEOlHcMBxdy3YhdmL1yHe1/bhu+/vh2X/nodLl64Di90xmFLghKEkVELggie5mBcg/KFk4Oq6PZUQ8Va2zXOPkdGTCAXqIpwd9gYNnnTzg/GpnyNXUlvSAkkfy8/eGETThoVAzOQ9gw8zbjkuCr80/kN6EtryD2yLzAHHE+UJT91dfd+gN//0FQrGbQYsfbiyVkq86426f5FIlaumNnnfWga9BHuQAB8BkZEFD49KoKqkEJ5SMKShE39Lm5d1IFn1vejN6vRN4SYRcTwNfFxtSt0yHJDWtP+klo2kKK2ZLMbtD+oWAoFM9C+oW+vaza5wa0t/Vms2JzAKxv7QASEraCXrJlxxzl1aJxYhv60H+yiKWQ1lgBRmrz0FTu/f8Hij5rd2f/cztJWRguL7rnVfumlVzwOE5ouo2WTOZv2QULs3aMagvOLOmGSgN6swddn1OCbp9VixqgIpo+M4MKGEuxOa/yv00aiJ+3jlqc24ql1vbkBpYFvMGwhavVnGscvEkIIayDO7GMMlgCCMau2naRByiY2eY0ckghd/Vlce2INok6O1nKdNUGElzb0Y+F7O7CpN4vVO5I4e0I5orbMNV0Ip44pwWMrtgciHbMhqQRYZJDNXrnzB+cvwdz5Fv71Gv/jjQsGFCQ6bpmV8SzrKpOOL5axcgU2/uC2CA2hcRRJyQS4hjEqqnDlMWXwipontVEL/31xPeZMKMWUqhC2JX1kPC4KggwCw9MWptS8ly114iGtxX4VRSJmzQqloV5RHulxfaMK3SFmRsgS6OjNou29XYUm/uCUeECSeHTFDlz+wHvY1JuFEgEVHj8yhltmjEZfyjPSsgRDZFinrtr5w3OXoKVd4f7bPvL8hgOb1WwlA2bR1Twu7W7bdpVJJf4oi2LAgcirBIJnGCOjFupKbFgiaJZIIvRnA9XRzbWKIhbtNX7PpBCSqfTxI94SPjsCHz2eTMYASviRkSVdGW1EUIjlPtgYIKwEHnlnB7K+gcj1Y/ILPnVEBCWORFYb1MRsrNicQNMv30Nv2ofKNXS+dMYYU1MWEVkjMtKkr971vfOfwdxl1oFumDvwKWUKPKDra2ekk9x/hU7HnxOxsoIHDDWlzEXFmWFGSBLW9WXxzRe3YuWuDNZ0Z/GlJZsw/aHVeGdHGrYkTBsZQXU40O+LZGO42kFD5Z+TFZHdkb0r2n02DJiExLiKjQJsPNDAmuUr3fe2JbH4wx5QTsmkXHY8tszBxMowXD+QmSsiCu9uSeKWx1bB0wxmmHEVIdz06THZ7u09V++497xFmDvfwv3TD/jEkoPbEJeLAcmvjHKtc+c+bkk+XURKJxo34xNI7N2hHSoMAks2xvHqliQ29rn49Z97cGxVGFOqHLyxJYX2jjje2JLMzeYMVKTGsNvY8IxbEkrEtBYHvjGFBDkq5a7adqI2bIfAha0uQbHlG/RlNK49qSbI2YPvghKEdd1pvLihDxFbQGtG1JZ4e3McKdfn2VOrAEDMGBP+/PevOvbx55nVQ5dPP6j9WQe/MyUXA3b+3QmJ1La1l5tMol3GyhQXYgCw350pRPjpeWOw+JqJuH92HX55SQMWXNaAiyeU447nNuGfXtiMflcjV8yCYNhjB6NiXYlRpZuinrYP+CgAIpA2EjEnER1ZuiXjm6Jp5px0EHMkXtrYh+Wb4yCiwlQEAMyZXIlQUe/WN4zqqGX+87VtvHhdQgD42/KIs2Du/GXWLDr4jXGHticrtwDbvz472Z91P2vS8aUyWpaLATRkhSso4PS6EoUvn1yNEREFw8DFE0tRE1FwjcGXT61BeUgWUkzK5UvaB0+peYeVMCE+yE2IbBhCwJlYtcZozYb2cEhBhLRn8MCybQUzyfP/jLoSHFcbRcrTAWMZY5ikiDiK/+qXK64lovsa29vV/bdNP6TDkQ59N2IuCO/+4rFx2bP7cp1JviQKC7B3hctDjFwJAl7oTODDniwiSuBLp9QU0r1CtUk2YnZfckLFattnO5eJHxT87LOFcZXrQ2ErlTJkDbILnbP+p//cg87ebCB1cMD/jhK46oQaZDyGAHKSgciSn71me+vZbS3trJbOmjUMW0HzQZhZrL399H7Vay41qfirIlpalIYOph1LELanPPzuwz60dybwj+2bMXvhWlz35AbMXdyJWxZ15BqBVEgXPa1QV74+HXPiYV8PHgc8YOrxJcrDPdHRZZ0pT1uB1DBQNMOWhO1xF4+s2FEIxvms59pPjcDIEmU8lgJCZITnXbnj3lm/mzZ3mXUw+68OP/j5BWhqk2tvn9zPvclLTCb9ioiW5SphGrRjRVJw5sJfPdOJJ9f2oSqs8IuLxuHBi+uxeH0/XutK5EYBeQA6Y/yJlR8QSKhD3/zGTELax9a+z2yMT3uoaMYAUVvisXd3Ip7VECI3Es6MunKHLz9xJPdnTSKsM1ds+87Zz6ClXS2/f/rHPoft8Jy9sLBZo6lNdnz1lF7u6b/UZBKvybwH0ODmRMozuPP0Efi3c8fgm6fX4nPHVeLEmjB+c+UElDoSAyMgzAYWok48MyrWZWu2gUNFH0yesVFftT5cFupO+Bj8WYxAPlizM4UnPsgVXYZBwcy//mrjBFlj6aaNLY1Lps0/8Dz+6ICfX4AWFh1fPaXXpDOXmHTq9YCC8kE4uEvfMKbVRgp/9qetSTzXEcfudDAl4OdcnsDwjcSIyNZs2EqEc+klHZpzAtonhFW65JiaP6dyhycRF8Uik5sheuitHbkNEQCE0QDU+FI8sH3eOYtb2lktv236YTt58PAeYpMLwp1fPqnH1zsvMZn0GyJSqmC0Lp5/fGZDP3oyGi9vTuCCx9bix29sx4Pv7cb2lAdLUD7gktHEo0s6pCSjPv5JC4aNsOm4Ue8Ii9wEkyqQYl5eiNkSb27qx0sb+piIPAGhACxcuBB/fcVjbfKemYf3EVVH9Jivsf+1slJJewnZ4en5I2CYg2q30pHYEvdw/bEV+N45oxGzBS5qW4vlW5OIqEB993zlfnbqQ33jKjprsq7iA6pq90s+Ao5IZ594t2nH+t1T62xKcn7Ok3Nz+D0pl686oQa/vHYqAfgvAF/KZw50mM8aOzLHNzUHMaDrr0/ozsQTFxs3vUxESxUz+4Tg8T47Uj5GxizMO3sUwpbAvFe2Yk13Jj97D2YBW6a5PNQd0UF2/rENhQ0zhHROHvMmsdEZCDlo94E2xsRCNr3SmTDvbY23ENFcyh1vQkfgkLcjd3bWwmaNtja57fZTd2bjiYtNJvWWjJQEHbEcjGWORLkj8fD7u/Evf9qOsSV2LotnNqQQtRIJR6aJWYIOw8MsBDG52kZdZUfFqNKubs84CM40CZYGQpJUlp/IuNedNLp0HtraJDMTHaHT9Y7swWXNRQuQTM7RmdQKGSlRxrBvS4GOviy+uLgT/7OyG4uaJ2HpjZNxcm0Yad8ALBF14mTLLMxhPF3KaGYpKfrp+tdY+8aDEMTMBiSJhGTOpm7YefeZv56/jC1c26zpCB5reORPjStaAJl055hs+h0Rjikw+5YUePC93ZhQ7uDssTE88O5urN6dRUgRacOwhBshYutwniwo8gpp9brykaVbdnraYiEJJBWTl7lhW8vZC9HSrm6bTt6RfnLM0Tmyr7lZo43lhq+ctB3ZvjnsZd8V4ZjSxvijS2ws35bCTU9txD+2dwXaOlGuKGMJxuE91otAWjOURdHTxr+c9bXUEBYZN33Dlm+f9RgOYx7/yQAfAJopKMT+7rRt3B+fY9zMShGOKWL2t6d8PLOuDyW2gBJU1BfQumgI9PDdNDEyrsUTazeMOGbE6ngqKW7e/u2zHkNLu8JhzOM/OeAXBeHOO6Zv5WxytnGzKykcUwrsl+T6o8XTAByMKx5258/NXRnphKNzjn/q672tpzw8d/7co2bxwwN+UQzY9PfTtiCRuNC4mQ8oHFNaG13cDyACjFEemP3DeZWBzkPGiSiZ6vO+Ou/sh3/R0t6i7r/tfu9oQyEwHI/uyMWAzjumbzUZd7Zxs6tEJCYH5GhiQUBWOykD4RIdRosXwjgRJTNJ947vND7y723cJFuPwDnJBwo+D88CkEYby823f6rLzyTnsOeuEaFoMJzLgVia8mLk6pA4HKQfAB9YfDqe+ca8sxb8W0t7o2qmYXlqdAB+fX19CMPwOL6BBWiTW78yvdP1Uxeyl11LoahiQAv4SHklJVk/DEH6Yx1ml+d4J6JkNul+4zvnPPrD3MMJhg14ABAWaM2EcePOHe4YsO3vpnXA8y5k310rnagi1trTNvrd8rQQBodsIDngQzFbZuPZb7WeteCHRU+FGA6jo0Y0qol19T8RINIEcepwWkAhBvzDyRsonZitfW+dCIWkr6XYER9jCeMV7RM7SIuXpEMxS6b7Mne3nvOr730SHk68ZtQaG0R1hNzmO3wSXrknCtX9ZNlEWM6zHpWNHx/60+5LprSVuya0x6acA7B4QdqJWiodd++ed/Yj3/kEPZi+QDN6WALufoLwptunr7PcxGxpUp07MvUVGT+ckNIceB+LwSSgnZil0vHsvCLgNT5Br3yqyZ+YK2omjZZ2tf4rn/nQcjdfGM+Wb+rsmxhVSJsDCkkMBMDbKt2XuXfe2QtaWtobVevMpfoTdZ+fGIvfDwXZLTunnjH5md9dOHnxlHSajBD7WYEAeN+J2Sodd++dd9Yj327jJtmMhebwixR/iRXuQXhAU1ubdFtrVqez8rKU63SGo1KYfeyQYWZDAn6oxFHpvuz35531yLfb2ppkM30ygf9kW37u1djSopa2tvotrzSfIKWzxAqp0em4q1F81AUzpJLKjiik+7Lfn3fOgm9+ki3+LwZ8AGhqa5ILmxfqby1tGu+EQvOVLS+QSgw8/AaAm/J2aa3vvOeMBb9o4RbRilb+JAP/FwM+MPDUaABoffX6y5jEycYgRkSeIN5iMniyddYjXcXv+/+vw7kALS37jVFtbU3yL+l+/i9gle4PtF064QAAAABJRU5ErkJggg==">
+    <div style="flex:1;min-width:0">
+      <div class="nm">Daily Sale <span class="hindi">· दैनिक बिक्री</span></div>
+      <div class="sub">Advanced Orthopaedic Surgery Centre &middot; Sanjeevni Medicos
+        &middot; <span id="whoami">…</span></div>
+    </div>
+  </div>
+  <div class="tabs">
+    <a href="#s-day">Day</a>
+    <a href="#s-sale">Sale</a>
+    <a href="#s-bills">Bills</a>
+    <a href="#s-exp">Expenses</a>
+    <a href="#s-cash">Cash</a>
+    <a href="#s-where">Where</a>
+    <a href="#s-scans">Scans</a>
+    <a href="#s-check">The check</a>
+    <a class="ext" href="/portal">Portal ↗</a>
+  </div>
+</div></div>
+
+<div class="wrap">
+
+  <!-- Days not filed stay pinned here until they are actually filed. Never suppressed. -->
+  <div class="shout" id="shoutBox" style="display:none">
+    <div class="sh"><svg class="i"><use href="#i-alert"/></svg><span id="shoutTitle"></span></div>
+    <p>Tap a date to fill it in. These stay here until each day is entered.</p>
+    <div class="chips" id="shoutList"></div>
+  </div>
+
+  <div class="msg" id="msg"></div>
+
+  <div class="card" id="s-day">
+    <h2><span class="kick">Step 1</span>Which day <span class="hindi">· कौन सा दिन</span></h2>
+    <label for="bdate">Date</label>
+    <input type="date" id="bdate">
+    <div class="hint"><svg><use href="#i-info"/></svg>
+      <span>Picker only — no typing. Future dates cannot be chosen.</span></div>
+    <div class="sp"></div>
+    <label for="manned">Who ran the counter</label>
+    <select id="manned">
+      <option value="darpan">Darpan</option>
+      <option value="reserve">Someone else (reserve)</option>
+    </select>
+    <div class="hint" id="mannedHint"><svg><use href="#i-info"/></svg>
+      <span>Filled automatically from biometric attendance.</span></div>
+    <details class="help"><summary>How this works</summary><div>
+      You normally file yesterday, the next morning. The date box already starts on
+      yesterday for that reason. A day you have not filed yet stays listed in red at
+      the top of this page until it is done.</div></details>
+  </div>
+
+  <div class="card" id="s-where">
+    <h2><span class="kick">Not in the drawer</span>Where the cash is
+      <span class="hindi">· नकद कहाँ है</span></h2>
+    <div id="whereBody" class="mut">…</div>
+    <details class="help"><summary>How this works</summary><div>
+      <b>Parked</b> counts money handed to Dr Manoj or Dr Bhawna and not yet returned,
+      this financial year only (from 1 April). It is worked out from the
+      <b>Cash out / cash back</b> entries below — so it is only right if those entries
+      are made. <b>Bank</b> counts days since the last deposit, across years.</div></details>
+  </div>
+
+  <!-- F-132: the "Opening cash" card and the "Closing cash" block are GONE.
+       Both showed `v_cash_ledger`'s running total over ALL history, not this
+       day — the whole unit cash position, and not true of this seat's drawer
+       (most of it is parked with Dr Bhawna, D323). The carry-forward is still
+       COMPUTED on the server and still impossible to edit from any screen;
+       that is what made the 36 legacy breaks impossible, not the display. -->
+
+  <div class="card" id="s-sale">
+    <h2><span class="kick">Step 2</span>Today's sale <span class="hindi">· आज की बिक्री</span></h2>
+    <label for="total">Total sale</label>
+    <div class="money"><span class="rs">₹</span>
+      <input type="tel" id="total" class="big" inputmode="numeric" placeholder="0"></div>
+    <div class="sp"></div>
+    <label for="upi">UPI received</label>
+    <div class="money"><span class="rs">₹</span>
+      <input type="tel" id="upi" class="big" inputmode="numeric" placeholder="0"></div>
+    <div class="calc"><span class="k"><svg class="i" style="width:16px;height:16px"><use href="#i-wallet"/></svg>Cash sale</span>
+      <span class="v" id="cashCalc">—</span></div>
+    <details class="help"><summary>How this works</summary><div>
+      Enter what you counted. The bank's own UPI figure and the Marg report are
+      compared against these <b>after you save</b> — not before, so that the two
+      records stay independent.</div></details>
+  </div>
+
+  <div class="card" id="s-bills">
+    <h2><span class="kick">Full bill, no cash</span>Billed, no cash received</h2>
+    <div id="ncList"></div>
+    <button class="add" id="addNc" type="button"><svg class="i"><use href="#i-plus"/></svg>Add bill</button>
+    <div class="calc"><span class="k"><svg class="i" style="width:16px;height:16px"><use href="#i-wallet"/></svg>Cash actually received</span>
+      <span class="v" id="cashReal">—</span></div>
+    <details class="help"><summary>How this works</summary><div>
+      Home medicines and procedure medicines — the bill is raised in full but no cash
+      crosses the counter. Recording it here reduces today's cash automatically.</div></details>
+  </div>
+
+  <div class="card" id="s-exp">
+    <h2><span class="kick">Paid out of the drawer</span>Expenses <span class="hindi">· खर्च</span></h2>
+    <div id="expList"></div>
+    <button class="add" id="addExp" type="button"><svg class="i"><use href="#i-plus"/></svg>Add expense</button>
+  </div>
+
+  <div class="card" id="s-cash">
+    <h2><span class="kick">Money leaving or returning</span>Cash out / cash back</h2>
+    <div id="movList"></div>
+    <button class="add" id="addMov" type="button"><svg class="i"><use href="#i-plus"/></svg>Add entry</button>
+    <div class="hint"><svg><use href="#i-bank"/></svg>
+      <span>Bank, Dr Manoj, Dr Bhawna — both directions.</span></div>
+  </div>
+
+  <div class="card" id="s-scans">
+    <h2><span class="kick">Evidence</span>Three scans <span class="hindi">· तीन स्कैन</span></h2>
+    <div class="scan" data-doc="sale_report">
+      <div class="si"><svg class="i"><use href="#i-receipt"/></svg></div>
+      <div class="nm">Day's sale report<small>from the billing software</small></div>
+      <button class="scanBtn ghost" type="button"><svg class="i" style="width:16px;height:16px"><use href="#i-cam"/></svg>Scan</button>
+    </div>
+    <div class="scan" data-doc="manual_copy">
+      <div class="si"><svg class="i"><use href="#i-receipt"/></svg></div>
+      <div class="nm">Manual copy page<small>today's page</small></div>
+      <button class="scanBtn ghost" type="button"><svg class="i" style="width:16px;height:16px"><use href="#i-cam"/></svg>Scan</button>
+    </div>
+    <div class="scan" data-doc="orthotics_copy">
+      <div class="si"><svg class="i"><use href="#i-receipt"/></svg></div>
+      <div class="nm">Orthotics copy<small>today's page</small></div>
+      <button class="scanBtn ghost" type="button"><svg class="i" style="width:16px;height:16px"><use href="#i-cam"/></svg>Scan</button>
+    </div>
+    <div class="sp"></div>
+    <label for="scanReason">Reason, if any scan is missing</label>
+    <input type="text" id="scanReason" style="width:100%"
+           placeholder="leave blank if all three are attached">
+    <details class="help"><summary>How this works</summary><div>
+      All three scans, or a reason written here — the day cannot be filed with
+      neither. A blank reason means "unknown", and unknown is never the same as zero.</div></details>
+  </div>
+
+  <!-- ============ STAGE D2: the machine's answer, AFTER his own ============ -->
+  <div class="card" id="mirrorCard">
+    <div class="h2row">
+      <h2 id="s-check"><span class="kick">Step 3 · after saving</span>The check
+        <span class="hindi">· मिलान</span></h2>
+      <span id="mirrorStamp"></span>
+    </div>
+    <div id="mirrorBody"></div>
+    <details class="help"><summary>How this works</summary><div>
+      This appears only after you save, so that what you counted and what the machine
+      counted stay two separate records. You may still correct a figure afterwards —
+      nothing is locked. If you do, the doctor simply sees a note that it was changed
+      after the check, which keeps the comparison honest.</div></details>
+  </div>
+
+</div>
+
+<button id="toTop" title="Back to top" type="button">↑</button>
+
+<div class="bar">
+  <div class="barin">
+    <button class="ghost" id="btnDraft" type="button"><svg class="i"><use href="#i-save"/></svg>Save</button>
+    <button id="btnSubmit" type="button" disabled><svg class="i"><use href="#i-send"/></svg>File day</button>
+  </div>
+  <div class="barnote" id="barNote">Save first — the check appears, then you can file.</div>
+</div>
+
+<script>
+"use strict";
+var API = "/finance/api";
+var attached = {};          // doc_type -> true, set only by a real scanner upload
+var state = { scanner: null, mirrorFor: null, mirror: null,
+              advMtd: null, advCeiling: null };   // F-132: no opening_p; D330: adv context
+
+function $(id){ return document.getElementById(id); }
+function ic(n){ return '<svg class="i"><use href="#i-' + n + '"/></svg>'; }
+function esc(s){ return String(s == null ? "" : s)
+  .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+/* Design Language v1: money displays through fmt() — trailing .00 stripped. */
+function fmt(s){ return String(s == null ? "" : s).replace(/\.00$/, ""); }
+function money(p){
+  var s = (p < 0 ? "-" : "") + "₹";
+  p = Math.abs(p);
+  var w = Math.floor(p / 100), f = p % 100, t = String(w), out;
+  if (t.length > 3){
+    var head = t.slice(0, -3), tail = t.slice(-3);
+    out = head.replace(/(\d)(?=(\d\d)+$)/g, "$1,") + "," + tail;
+  } else out = t;
+  return fmt(s + out + "." + (f < 10 ? "0" : "") + f);
+}
+function paise(v){
+  v = String(v || "").trim().replace(/[, ₹]/g, "");
+  if (v === "") return 0;
+  if (!/^\d+(\.\d{1,2})?$/.test(v)) return null;      // typo guard, client side
+  return Math.round(parseFloat(v) * 100);
+}
+function show(kind, text){
+  var m = $("msg");
+  m.className = "msg " + kind;
+  m.innerHTML = ic(kind === "good" ? "check" : "alert") + "<span></span>";
+  m.querySelector("span").textContent = text;
+  if (kind === "good") setTimeout(function(){ m.className = "msg"; }, 4500);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ---- repeaters ------------------------------------------------------- */
+function rmBtn(){ return '<button class="rm" type="button" title="Remove">' + ic("trash") + "</button>"; }
+
+function addNoncash(pre){
+  pre = pre || {};
+  var d = document.createElement("div"); d.className = "repeat";
+  d.innerHTML = rmBtn() +
+    '<label>Bill date</label><input type="date" class="ncDate" value="' + ($("bdate").value || "") + '">' +
+    '<div class="sp" style="height:9px"></div>' +
+    '<label>Head</label><select class="ncHead">' +
+    '<option value="home_medicine">Home medicine</option>' +
+    '<option value="procedure_medicine">Procedure medicine</option>' +
+    '<option value="other">Other</option></select>' +
+    '<div class="sp" style="height:9px"></div>' +
+    '<div class="row"><div style="flex:1"><label>Bill number</label>' +
+    '<input type="text" class="ncNo" style="width:100%" placeholder="e.g. H-101"></div>' +
+    '<div style="flex:1"><label>Amount</label><div class="money"><span class="rs">₹</span>' +
+    '<input type="tel" class="ncAmt" inputmode="numeric" placeholder="0"></div></div></div>' +
+    '<div class="ncExtra"></div>';
+  $("ncList").appendChild(d);
+  var head = d.querySelector(".ncHead"), extra = d.querySelector(".ncExtra");
+  function redraw(){
+    extra.innerHTML = head.value === "other"
+      ? '<div class="sp" style="height:9px"></div><label>What for</label>' +
+        '<input type="text" class="ncText" style="width:100%" placeholder="description">' : "";
+  }
+  head.addEventListener("change", redraw); redraw();
+  if (pre.amount_p !== undefined){
+    d.querySelector(".ncAmt").value = (pre.amount_p / 100).toFixed(2).replace(/\.00$/, "");
+    d.querySelector(".ncHead").value = pre.head || "other";
+    d.querySelector(".ncNo").value = pre.bill_no || "";
+    if (pre.bill_date) d.querySelector(".ncDate").value = pre.bill_date;
+    redraw();
+    var tx = d.querySelector(".ncText");
+    if (tx) tx.value = pre.head_text || "";
+  }
+  d.querySelector(".rm").onclick = function(){ d.remove(); recompute(); };
+  d.addEventListener("input", recompute);
+  d.addEventListener("change", recompute);
+}
+
+function newUid(){
+  /* the STABLE identity of an expense row (D330). It survives every re-save,
+     which is what the bill stays attached to. */
+  var a = new Uint8Array(8);
+  (window.crypto || {}).getRandomValues ? crypto.getRandomValues(a)
+    : a.forEach(function(_, i){ a[i] = Math.floor(Math.random() * 256); });
+  return "ex" + Array.prototype.map.call(a, function(b){
+    return ("0" + b.toString(16)).slice(-2); }).join("");
+}
+
+function addExpense(pre){
+  pre = pre || {};
+  var d = document.createElement("div"); d.className = "repeat";
+  d.dataset.uid = pre.uid || newUid();
+  d.dataset.evidence = pre.has_evidence ? "1" : "";
+  d.innerHTML = rmBtn() +
+    '<label>Amount</label><div class="money"><span class="rs">₹</span>' +
+    '<input type="tel" class="expAmt" inputmode="numeric" placeholder="0"></div>' +
+    '<div class="sp" style="height:9px"></div>' +
+    '<label>Category</label><select class="expCat">' +
+    '<option value="" disabled selected>Choose\u2026</option>' +
+    '<option value="salary_advance_self">My salary advance</option>' +
+    '<option value="home">Home expenses (personal / COD delivery)</option>' +
+    '<option value="other">Other expenses (write details)</option></select>' +
+    '<div class="expExtra"></div>';
+  $("expList").appendChild(d);
+  var cat = d.querySelector(".expCat"), extra = d.querySelector(".expExtra");
+  function redraw(keepText){
+    /* S189 (owner ruling + F-139): a salary advance is Darpan's own -- the
+       server decides whose row the money attributes to. D330: home and
+       other BOTH take details, and BOTH need the bill attached before the
+       day can be filed (photograph it when you pay; upload the photo here
+       when filing). The advance shows the month's running total against
+       the ceiling, BEFORE he types. */
+    if (cat.value === "salary_advance_self"){
+      var advLine = (state.advCeiling
+        ? "Taken this month " + (state.advMtd || "0.00") + " of " +
+          state.advCeiling + " max" +
+          (state.advLedger === false ? " (Sanjeevni book only \u2014 salary "
+            + "ledger unreachable)" : "") + ". "
+        : "");
+      extra.innerHTML = '<div class="hint">' + ic("info") + "<span>" + advLine +
+        "It posts to the Staff Ledger only when the doctor approves.</span></div>";
+    } else if (cat.value === "home" || cat.value === "other") {
+      extra.innerHTML =
+        '<div class="sp" style="height:9px"></div><label>Details</label>' +
+        '<input type="text" class="expText" style="width:100%" placeholder="write what this was">' +
+        '<div class="sp" style="height:9px"></div>' +
+        '<button type="button" class="expBill">' +
+        (d.dataset.evidence ? ic("check") + "Bill attached — replace"
+                            : ic("cam") + "Attach the bill (required to file)") +
+        "</button>";
+      var t = extra.querySelector(".expText");
+      if (keepText !== undefined) t.value = keepText;
+      extra.querySelector(".expBill").onclick = function(){
+        saveThenScanExpense(d.dataset.uid);
+      };
+    } else {
+      extra.innerHTML = "";
+    }
+  }
+  cat.addEventListener("change", function(){ redraw(); });
+  if (pre.category_fixed === "salary_advance"){ cat.value = "salary_advance_self"; }
+  else if (pre.category_kind === "home" || pre.category_kind === "other"){
+    cat.value = pre.category_kind;
+  }
+  redraw(pre.category_kind === "home" || pre.category_kind === "other"
+         ? (pre.category_text || "") : undefined);
+  if (pre.amount_p !== undefined){
+    d.querySelector(".expAmt").value = (pre.amount_p / 100).toFixed(2).replace(/\.00$/, "");
+  }
+  d.querySelector(".rm").onclick = function(){ d.remove(); recompute(); };
+  d.addEventListener("input", recompute);
+}
+
+function addMovement(pre){
+  pre = pre || {};
+  var d = document.createElement("div"); d.className = "repeat";
+  d.innerHTML = rmBtn() +
+    '<label>Amount</label><div class="money"><span class="rs">₹</span>' +
+    '<input type="tel" class="movAmt" inputmode="numeric" placeholder="0"></div>' +
+    '<div class="sp" style="height:9px"></div>' +
+    '<div class="row"><div style="flex:1"><label>To whom</label><select class="movParty">' +
+    '<option value="bank">Bank</option><option value="dr_manoj">Dr Manoj</option>' +
+    '<option value="dr_bhawna">Dr Bhawna</option><option value="other">Other</option>' +
+    '</select></div><div style="flex:1"><label>Direction</label><select class="movDir">' +
+    '<option value="out">Given out</option><option value="in">Received back</option>' +
+    "</select></div></div>" +
+    '<div class="sp" style="height:9px"></div>' +
+    '<label>Reference (what / to whom)</label>' +
+    '<input type="text" class="movRef" style="width:100%" placeholder="e.g. deposit slip no, or who took it">';
+  $("movList").appendChild(d);
+  if (pre.amount_p !== undefined){
+    d.querySelector(".movAmt").value = (pre.amount_p / 100).toFixed(2).replace(/\.00$/, "");
+    d.querySelector(".movParty").value = pre.party || "bank";
+    d.querySelector(".movDir").value = pre.direction || "out";
+    d.querySelector(".movRef").value = pre.reference || "";
+  }
+  d.querySelector(".rm").onclick = function(){ d.remove(); recompute(); };
+  d.addEventListener("input", recompute);
+  d.addEventListener("change", recompute);
+}
+
+/* ---- the file gate ---------------------------------------------------
+   Three scans, or a reason. Blank is UNKNOWN, and unknown is never zero. */
+function scansOk(){
+  var need = ["sale_report", "manual_copy", "orthotics_copy"];
+  for (var i = 0; i < need.length; i++) if (!attached[need[i]]) {
+    return String($("scanReason").value || "").trim().length > 0;
+  }
+  return true;
+}
+
+/* ---- live closing ---------------------------------------------------- */
+function recompute(){
+  var t = paise($("total").value), u = paise($("upi").value);
+  if (t === null || u === null){
+    $("cashCalc").textContent = "?"; $("closing").textContent = "?";
+    $("btnSubmit").disabled = true; return;
+  }
+  var cash = t - u;
+  $("cashCalc").textContent = cash < 0 ? "UPI exceeds total" : money(cash);
+
+  var nc = 0, bad = false;
+  document.querySelectorAll(".ncAmt").forEach(function(el){
+    var v = paise(el.value); if (v === null) bad = true; else nc += v; });
+  $("cashReal").textContent = bad ? "?" : money(Math.max(cash, 0) - nc);
+
+  var exp = 0;
+  document.querySelectorAll(".expAmt").forEach(function(el){
+    var v = paise(el.value); if (v === null) bad = true; else exp += v; });
+
+  document.querySelectorAll("#movList .repeat").forEach(function(r){
+    var v = paise(r.querySelector(".movAmt").value);
+    if (v === null){ bad = true; return; } });
+
+  /* F-132: the running drawer balance is no longer sent to this seat, so this
+     page cannot and does not compute a closing figure. The "would this take
+     the drawer negative" rule has ALWAYS been enforced on the server, which
+     refuses the save with `negative_cash` and says why — the client copy was
+     only ever a courtesy. Losing it costs one round trip in a rare case;
+     keeping it would have cost showing him the whole unit position daily. */
+  var mathOk = !((cash < 0) || bad || (nc > Math.max(cash, 0)));
+  var seen = state.mirrorFor === $("bdate").value;
+  $("btnSubmit").disabled = !(mathOk && seen && scansOk());
+  $("barNote").textContent =
+    !mathOk ? "The figures do not add up yet."
+    : !seen ? "Save first — the check appears, then you can file."
+    : !scansOk() ? "Attach the three scans, or write why one is missing."
+    : "Checked. You can file this day.";
+}
+
+/* ---- STAGE D2: the reveal -------------------------------------------
+   Requested only AFTER a save. The server refuses it for an unsaved day
+   anyway (409 not_saved) — this is the same rule, said twice. */
+function badge(kind, icon, text){
+  return '<span class="badge b-' + kind + '">' + icon + " " + esc(text) + "</span>";
+}
+function reveal(iso){
+  fetch(API + "/day/" + iso + "/mirror").then(function(r){
+    return r.json().then(function(j){ return { s: r.status, j: j }; });
+  }).then(function(res){
+    if (res.s === 409 || !res.j.ok){ $("mirrorCard").className = ""; recompute(); return; }
+    var j = res.j; state.mirrorFor = iso; state.mirror = j;
+    var h = "";
+
+    /* --- ICICI: pushed by the bank every morning, so this half always fires */
+    if (j.icici.present){
+      var okb = j.icici.match
+        ? badge("ok", "✓", "matches")
+        : badge("bad", "✗", "differs by " + fmt(j.icici.diff));
+      h += '<div class="mrow"><div class="ml">Bank UPI (ICICI)' +
+           "<small>" + esc(j.icici.txns) + " settled payments</small></div>" +
+           '<div class="mv"><b>' + fmt(j.icici.settled) + "</b>" + okb + "</div></div>";
+      h += '<div class="mrow"><div class="ml">You entered<small>UPI received</small></div>' +
+           '<div class="mv"><b>' + fmt(j.icici.declared) + "</b></div></div>";
+    } else {
+      h += '<div class="mrow"><div class="ml">Bank UPI (ICICI)' +
+           "<small>the bank statement for this day has not arrived</small></div>" +
+           '<div class="mv">' + badge("warn", "⏳", "not in yet") + "</div></div>";
+    }
+
+    /* --- Marg: three states, because "no comparison" has two causes and they
+           need two different people to act. */
+    if (j.marg.state === "applied"){
+      var vb = j.marg.over_threshold
+        ? badge("bad", "⚠", "off by " + fmt(j.marg.variance))
+        : badge("ok", "✓", "agrees");
+      h += '<div class="mrow"><div class="ml">Marg report' +
+           "<small>" + esc(j.marg.bills) + " bills</small></div>" +
+           '<div class="mv"><b>' + fmt(j.marg.total) + "</b>" + vb + "</div></div>";
+      h += '<div class="mrow"><div class="ml">You entered<small>total sale</small></div>' +
+           '<div class="mv"><b>' + fmt(j.declared.total) + "</b></div></div>";
+    } else if (j.marg.state === "staged_not_applied"){
+      h += '<div class="mrow"><div class="ml">Marg report' +
+           "<small>it has arrived from the counter — the doctor has not applied it " +
+           "yet, so there is nothing to compare against. Nothing for you to chase." +
+           '</small></div><div class="mv">' +
+           badge("warn", "⏳", "with the doctor") + "</div></div>";
+    } else {
+      h += '<div class="mrow"><div class="ml">Marg report' +
+           "<small>no report has been sent for this day. Ask the counter to run " +
+           "SEND TO CLINIC.</small></div>" +
+           '<div class="mv">' + badge("warn", "⚑", "not received") + "</div></div>";
+    }
+
+    /* --- his three scans */
+    var miss = j.scans.missing || [];
+    h += '<div class="mrow"><div class="ml">Scans<small>' +
+         (miss.length ? esc(miss.length) + " still missing" : "all three attached") +
+         "</small></div><div class=\"mv\">" +
+         (miss.length ? badge("warn", "⚑", "incomplete") : badge("ok", "✓", "complete")) +
+         "</div></div>";
+
+    /* --- days he still owes */
+    if ((j.owed_days || []).length){
+      h += '<div class="mrow"><div class="ml">Other days not filed<small>' +
+           esc((j.owed_days || []).join(", ")) + "</small></div>" +
+           '<div class="mv">' + badge("warn", "⚑", j.owed_days.length + " owed") +
+           "</div></div>";
+    }
+
+    /* F-129: a checker may look, but his look is not the maker's check and
+       arms nothing. Say so on the page, so the person reading it knows which
+       of the two things just happened. */
+    if (j.looking_as_maker === false){
+      h += '<div class="mrow"><div class="ml">You are looking as the doctor' +
+           "<small>this is not Darpan's check \u2014 nothing has been armed, and " +
+           "he will not be badged for anything he changes next.</small></div>" +
+           '<div class="mv">' + badge("ok", "\u2713", "read-only") + "</div></div>";
+    }
+
+    $("mirrorBody").innerHTML = h;
+    $("mirrorStamp").innerHTML = j.edited_after_reveal
+      ? badge("warn", "⚑", "changed after this check")
+      : "";
+    $("mirrorCard").className = "on";
+    recompute();
+  }).catch(function(){ /* fail-soft: never block filing on a display fetch */ });
+}
+
+/* ---- load ------------------------------------------------------------ */
+function loadDay(iso){
+  fetch(API + "/day/" + iso).then(function(r){ return r.json(); }).then(function(j){
+    if (!j.ok){ show("bad", "Could not load that day."); return; }
+    attached = {};
+    document.querySelectorAll(".scan").forEach(function(box){
+      box.classList.remove("done");
+      box.querySelector("button").innerHTML =
+        '<svg class="i" style="width:16px;height:16px"><use href="#i-cam"/></svg>Scan';
+    });
+    (j.day.attachments || []).forEach(function(a){
+      if (!a.has_file) return;
+      attached[a.doc_type] = true;
+      var box = document.querySelector('.scan[data-doc="' + a.doc_type + '"]');
+      if (box){
+        box.classList.add("done");
+        box.querySelector("button").innerHTML =
+          '<svg class="i" style="width:16px;height:16px"><use href="#i-check"/></svg>Rescan';
+      }
+    });
+    /* D330: the advance context, held for the inline line in the repeater */
+    state.advMtd = j.day.advance_mtd || null;
+    state.advCeiling = j.day.advance_ceiling || null;
+    state.advLedger = j.day.advance_ledger_included;
+    if (j.day.exists){
+      $("total").value = (j.day.total_p / 100).toFixed(2).replace(/\.00$/, "");
+      $("upi").value = (j.day.upi_p / 100).toFixed(2).replace(/\.00$/, "");
+      /* D330 / the draft-resave hazard, CLOSED: the page now refills every
+         repeater from the saved day, so what the screen shows is what the
+         next save sends. Before this, a re-opened day came back with these
+         three lists BLANK and a save deleted-and-rewrote them from the blank
+         screen -- expenses, movements and bills silently gone (recoverable
+         from day_revision, but wrong in the live books until noticed). */
+      $("expList").innerHTML = "";
+      $("movList").innerHTML = "";
+      $("ncList").innerHTML = "";
+      (j.day.expenses || []).forEach(function(e){ addExpense(e); });
+      (j.day.movements || []).forEach(function(m){ addMovement(m); });
+      (j.day.noncash_bills || []).forEach(function(b){ addNoncash(b); });
+      if (j.day.status !== "draft"){
+        show("warn", "This day already has an entry (" + j.day.status +
+          "). Any change keeps the earlier version on record.");
+      }
+      reveal(iso);                       // already declared — the check may stand
+    } else {
+      $("expList").innerHTML = "";
+      $("movList").innerHTML = "";
+      $("ncList").innerHTML = "";
+      state.mirrorFor = null; state.mirror = null;
+      $("mirrorCard").className = "";
+    }
+    recompute();
+  });
+}
+
+/* F-132 / F-133: what he is entitled to know about cash he cannot see.
+   The parked TOTAL is the summary line; it opens to the individual names.
+   A zero is rendered as an INSTRUCTION, never as a fact -- as at S188 not one
+   handover to either doctor has ever been recorded, which is exactly why the
+   drawer figure has been drifting upward. */
+function loadWhere(){
+  fetch(API + "/where-is-the-cash").then(function(r){ return r.json(); }).then(function(j){
+    if (!j.ok){ $("whereBody").textContent = "could not load"; return; }
+    var h = "";
+    if (j.any_recorded){
+      h += '<details><summary class="parked-sum"><span class="ml">Parked with Dr Manoj / Dr Bhawna' +
+           "<small>handed over and not yet returned \u00b7 this year, from " +
+           esc(j.fy_from) + "</small></span>" +
+           '<span class="mv"><b>' + fmt(j.parked_total) + "</b></span></summary>" +
+           '<div class="parked-in">';
+      (j.parked || []).forEach(function(p){
+        h += '<div class="mrow"><div class="ml">' + esc(p.name) + "</div>" +
+             '<div class="mv"><b>' + fmt(p.amount) + "</b></div></div>";
+      });
+      h += "</div></details>";
+    } else {
+      h += '<div class="mrow"><div class="ml">Parked with Dr Manoj / Dr Bhawna' +
+           "<small><b>Nothing has been recorded \u2014 not once.</b> If cash has gone to " +
+           "Dr Manoj or Dr Bhawna, enter it under <b>Cash out / cash back</b> below. " +
+           "Until it is entered, the books count that money as still sitting in the " +
+           "drawer.</small></div>" +
+           '<div class="mv">' + badge("warn", "\u26d1", "not recorded") + "</div></div>";
+    }
+    var b = j.bank || {};
+    if (b.days_since == null){
+      h += '<div class="mrow"><div class="ml">Last bank deposit' +
+           "<small>none recorded</small></div><div class=\"mv\">" +
+           badge("warn", "\u26d1", "none") + "</div></div>";
+    } else {
+      h += '<div class="mrow"><div class="ml">Last bank deposit<small>' +
+           esc(b.last_date) + " \u00b7 " + fmt(b.last_amount) + "</small></div>" +
+           '<div class="mv"><b>' + b.days_since + " days ago</b>" +
+           (b.overdue ? badge("bad", "\u26a0", "over " + b.threshold_days + " days")
+                      : badge("ok", "\u2713", "within " + b.threshold_days + " days")) +
+           "</div></div>";
+    }
+    $("whereBody").innerHTML = h;
+    $("whereBody").className = "";
+  }).catch(function(){ $("whereBody").textContent = "could not load"; });
+}
+
+function loadShouts(){
+  /* F-127: this used to fetch the unit-position endpoint as well, which handed
+     this page cash in hand, who is holding it, and month-to-date revenue — all
+     to render one deposit banner. The banner and the fetch are both gone and
+     that endpoint is the checker's now. What stays is what is genuinely his:
+     the days he has not filed.
+     (The path is deliberately not written out anywhere on this page: the smoke
+     suite asserts the literal string is absent, which is the bluntest and
+     therefore the most reliable way to stop it creeping back.) */
+  fetch(API + "/exceptions").then(function(r){ return r.json(); }).then(function(e){
+    var miss = (e.exceptions || []).filter(function(x){ return x.kind === "missing_day"; });
+    if (!miss.length){ $("shoutBox").style.display = "none"; return; }
+    $("shoutBox").style.display = "block";
+    $("shoutTitle").textContent = miss.length + " days are still not filed";
+    $("shoutList").innerHTML = miss.slice(0, 14).map(function(x){
+      return '<a href="#" data-d="' + esc(x.date) + '">' + esc(x.date) + "</a>"; }).join("");
+    $("shoutList").querySelectorAll("a").forEach(function(a){
+      a.onclick = function(ev){ ev.preventDefault();
+        $("bdate").value = a.dataset.d; loadDay(a.dataset.d); };
+    });
+  });
+}
+
+/* ---- save ------------------------------------------------------------ */
+function collect(action){
+  var bills = [];
+  document.querySelectorAll("#ncList .repeat").forEach(function(r){
+    var amt = r.querySelector(".ncAmt").value;
+    if (!String(amt).trim()) return;
+    var h = r.querySelector(".ncHead").value;
+    bills.push({ amount: amt, head: h, bill_no: r.querySelector(".ncNo").value,
+                 bill_date: r.querySelector(".ncDate").value,
+                 head_text: h === "other" ? ((r.querySelector(".ncText") || {}).value || "") : "" });
+  });
+  var exps = [];
+  document.querySelectorAll("#expList .repeat").forEach(function(r){
+    var amt = r.querySelector(".expAmt").value;
+    if (!String(amt).trim()) return;
+    var cat = r.querySelector(".expCat").value;
+    exps.push({ amount: amt, category: cat || null, uid: r.dataset.uid,
+                details: ((r.querySelector(".expText") || {}).value || "") });
+  });
+  var movs = [];
+  document.querySelectorAll("#movList .repeat").forEach(function(r){
+    var amt = r.querySelector(".movAmt").value;
+    if (!String(amt).trim()) return;
+    movs.push({ amount: amt, party: r.querySelector(".movParty").value,
+                direction: r.querySelector(".movDir").value,
+                reference: (r.querySelector(".movRef") || {}).value || "" });
+  });
+  return { business_date: $("bdate").value, total: $("total").value, upi: $("upi").value,
+           expenses: exps, movements: movs, noncash_bills: bills, action: action,
+           manned_by: null,
+           manned_source: $("manned").value === "darpan" ? "biometric" : "manual",
+           attached_docs: Object.keys(attached),
+           missing_scan_reason: $("scanReason").value };
+}
+
+function save(action){
+  var body = collect(action);
+  if (!body.business_date){ show("bad", "Choose a date first."); return; }
+  fetch(API + "/day", { method: "POST", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body) })
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if (!j.ok){ show("bad", j.message || j.error); return; }
+      show("good", action === "submit" ? "Filed — waiting for the doctor's approval."
+                                       : "Saved. The check is below.");
+      (j.warnings || []).forEach(function(w){ show("warn", w); });
+      loadDay(body.business_date); loadShouts(); loadWhere();
+    })
+    .catch(function(){ show("bad", "Network problem — please try again."); });
+}
+
+/* ---- scanner --------------------------------------------------------- */
+/* The clinic's existing widget is a full-page surface that mounts itself and
+   returns via backUrl — so we hand over to its own page rather than trying to
+   host it in a modal. The day must exist first (the upload attaches to it), so
+   we save a draft on the way. Nothing here re-implements any of the widget.
+   NOTE: this save carries the SAME figures, so it is not an edit after the
+   reveal — the server compares the money, not the fact of a save. */
+function saveThenScanExpense(uid){
+  /* D330: the bill attaches to a SAVED expense (the uid is its stable
+     identity), so save a draft on the way -- the same figures, so it is
+     not an edit after the reveal. */
+  var date = $("bdate").value;
+  if (!date){ show("bad", "Choose a date first."); return; }
+  var body = collect("draft");
+  fetch(API + "/day", { method: "POST", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body) })
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if (!j.ok){ show("bad", j.message || j.error); return; }
+      window.location = "/finance/scan-expense/" + date + "/" + uid;
+    })
+    .catch(function(){ show("bad", "Network problem — please try again."); });
+}
+
+function saveThenScan(doc){
+  var date = $("bdate").value;
+  if (!date){ show("bad", "Choose a date first."); return; }
+  var body = collect("draft");
+  fetch(API + "/day", { method: "POST", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body) })
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if (!j.ok){ show("bad", j.message || j.error); return; }
+      window.location = "/finance/scan/" + date + "/" + doc;
+    })
+    .catch(function(){ show("bad", "Network problem — please try again."); });
+}
+
+/* ---- boot ------------------------------------------------------------ */
+document.addEventListener("DOMContentLoaded", function(){
+  fetch(API + "/whoami").then(function(r){ return r.json(); }).then(function(j){
+    $("whoami").textContent = j.user || "—";
+  });
+  var back = (location.search.match(/[?&]d=(\d{4}-\d{2}-\d{2})/) || [])[1];
+  var y = new Date(Date.now() - 864e5);
+  $("bdate").value = back || y.toISOString().slice(0, 10);
+  $("bdate").max = new Date().toISOString().slice(0, 10);
+  $("bdate").addEventListener("change", function(){
+    state.mirrorFor = null; $("mirrorCard").className = "";
+    loadDay($("bdate").value);
+  });
+  $("addNc").onclick = addNoncash;
+  $("addExp").onclick = addExpense;
+  $("addMov").onclick = addMovement;
+  ["total", "upi"].forEach(function(id){ $(id).addEventListener("input", recompute); });
+  $("scanReason").addEventListener("input", recompute);
+  $("btnDraft").onclick = function(){ save("draft"); };
+  $("btnSubmit").onclick = function(){ save("submit"); };
+  document.querySelectorAll(".scanBtn").forEach(function(b){
+    b.onclick = function(){ saveThenScan(b.closest(".scan").dataset.doc); };
+  });
+  var tt = $("toTop");
+  tt.onclick = function(){ window.scrollTo({ top: 0, behavior: "smooth" }); };
+  window.addEventListener("scroll", function(){
+    tt.className = window.scrollY > 500 ? "show" : "";
+  });
+  loadDay($("bdate").value);
+  loadShouts();
+  loadWhere();
+});
+</script>
+</body>
+</html>
