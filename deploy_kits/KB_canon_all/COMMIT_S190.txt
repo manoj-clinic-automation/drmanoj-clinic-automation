@@ -1,0 +1,10 @@
+Session 190: D330+D331 executed, 8 kits live, the Rs 30,000 sitting closed, S190 close fold-in
+
+- Kits S190_E2 (v2), S190_SL2, S190_F2, S190_SL3, S190_F3 (v2), S190_F4, S190_F5, S190_SL4 —
+  all GREEN to exact projections (finance 509 -> 550, ledger 190 -> 218)
+- Live pins: finance_app.py 17e6b84c..., staff_ledger.py 470bb113...,
+  finance_entry.html bae2dd89..., finance_entry_clinic.html d4f7ddaa...
+- Signed contracts: S190_Expense_Menu_Redesign_D330.md, S190_Staff_Advance_Policy_D331.md
+- Docs: Archive v1.41 (S190 append), Register v5.37, Runbook v126, START_HERE_191,
+  CANONICAL_MANIFEST + MD5SUMS_ALL + KIT_ID rebuilt, live_pins_S190close.txt (A8)
+- Diagnostics: F-141 ruling deferred to S191 (six candidates recorded); Fault Register stays v2.29
