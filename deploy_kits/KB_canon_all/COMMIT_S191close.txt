@@ -1,0 +1,17 @@
+S191 CLOSE (19 Aug 2026) — the confirmation session folded in.
+
+D332 MINTED AND SIGNED — the Waiver, Defer & Repayment-Defined Advance layer
+(contract S191_Waiver_Capacity_Layer_D332_Design.md v3, filed + pinned).
+F-147..F-151 appended the session they were raised (Fault Register v2.31) —
+none found by a failure; all five found by confirming the staff advance system
+against the live box. July pre-policy over-deduction quantified (Rs 16,552.38 /
+twelve staff, F-150), remediated owner-side (sheet deliberately NOT in this
+public repo — F-31/D320).
+
+Register v5.38 -> v5.39 (reverse-application-proven) · Archive v1.41 -> v1.42
+(SS191 pure append, prefix byte-identical, +9,311) · Fault v2.30 -> v2.31 ·
+Runbook v127 · START_HERE_192 · manifest rebuilt · pin list regenerated LAST
+from v5.39 (A8). NO live code moved · NO live data changed · no pin changed.
+
+Owner residual: PUBLISH_ALL.bat double-click + on-box pin copy + verify
+(expect the thirteenth GREEN, match 43).
