@@ -1,0 +1,23 @@
+Session 191: the F-141..F-146 ruling; Fault Register v2.30, Register v5.38, manifest S191 fold
+
+- The six S190 candidates RULED: five numbers, one fold. F-141 (a gate constant whose tail was
+  composed from a narrative prefix - the E2 delivery note's wrong install path folded in as the
+  same fault's second instance) - F-142 (an installer's summary-reader took `tail -1` and read a
+  FAIL line as the verdict) - F-143 (the quota counter summed the S155 migration rows, years of
+  history dated Aug 2026, and would have refused Darpan's legitimate Rs 15,000) - F-144 (the
+  medical locked-day gate read the SSO broker role and refused THE DOCTOR) - F-145 (an edited
+  legacy day left the approvals queue while its money counted) - F-146 (a refusal that looked
+  like a save - the ONLY one left OPEN: the discipline stands, the UI fix is owed).
+- Docs: Fault_Action_Register v2.29 -> v2.30, KB_Register v5.37 -> v5.38, CANONICAL_MANIFEST
+  gains the S191 fold block and its STATUS line corrected (it still claimed "Fault Register
+  stays v2.29"). Both bumps proven ZERO-LOSS by reverse application onto the manifest's own
+  pins (b4c0e40c..., 62183676...).
+- A8: live_pins_S191.txt regenerated from Register v5.38, register_pin_verified: yes, 43 VPS +
+  12 BLIND. NO live pin moved this session - all 55 pin rows byte-identical to
+  live_pins_S190close.txt; only the header (source / source_md5 / session) changed.
+- MD5SUMS_ALL + KIT_ID rebuilt: 126 rows, `md5sum -c` exit 0 verified on the PC.
+- NO live code changed. NO decision minted (a ruling on existing findings is not a D-number);
+  next free stays D332 - F-147 - A-D25.
+- Surendra's Rs 8,000 left PENDING by owner ruling, surveyed on the box first; the finding that
+  unrejected it recovers IN FULL at its month's close is recorded in the manifest's S191 block.
+- Owed at the close: the Archive S191 append and the Runbook bump.
