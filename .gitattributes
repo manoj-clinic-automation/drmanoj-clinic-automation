@@ -14,3 +14,15 @@
 *.html text eol=lf
 *.new  text eol=lf
 *.sql  text eol=lf
+
+# S192: the same gap, one layer further out -- the files that GATE an install.
+# PUBLISH_ALL warned that `KIT_ID.txt` and `SUMS.md5` "will be replaced by CRLF
+# the next time Git touches it". A CRLF `SUMS.md5` makes `md5sum -c` read the
+# filename as `staff_ledger_X.py\r`, fail to find it, and turn a PERFECTLY GOOD
+# kit RED at gate [1/6] -- a halt that fires wrongly, which is worse than no
+# halt at all, because a halt that always fires gets waved through (D316).
+# `live_pins.txt` is read on the VPS by verify_live_pins.py for the same reason.
+# Nothing had broken when this was added: the warning was the finding.
+# Kin of F-100 (the .gitignore blanket that silently dropped a kit file).
+*.md5 text eol=lf
+*.txt text eol=lf
