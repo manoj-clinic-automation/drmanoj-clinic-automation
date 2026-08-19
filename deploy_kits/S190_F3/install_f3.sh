@@ -49,13 +49,22 @@ cp /root/finance/finance_ui/*.html $STAGE/finance_ui/
 cp /root/finance/*.py $STAGE/ 2>/dev/null; rm -f $STAGE/finance_app.py
 cp finance_app_F3.py $STAGE/finance_app.py
 cp /root/finance/finance.db $STAGE/finance.db
-R=$(cd $STAGE && python3 finance_app.py --selftest 2>&1 | tail -1)
-echo "      new app + LIVE pages : $R   (expect 545/547 — the two F3 checks)"
-echo "$R" | grep -q "545/547" || { rm -rf $STAGE
-  echo '*** RED: the reproduction did not reproduce. STOP.'; exit 1; }
+# NOTE (kit v2): when the suite has FAILs it prints them AFTER the summary
+# line, so `tail -1` returns a FAIL line, not the SMOKE fraction — the v1
+# gate stopped on its own harness bug (correctly: nothing was touched).
+# The check now greps the WHOLE output, the same way the offline proof did,
+# and additionally requires that BOTH fails name F3 and nothing else fails.
+RF=$(cd $STAGE && python3 finance_app.py --selftest 2>&1)
+RS=$(echo "$RF" | grep -m1 "SMOKE ")
+RN=$(echo "$RF" | grep -c "FAIL:")
+R3=$(echo "$RF" | grep -c "FAIL: F3")
+echo "      new app + LIVE pages : $RS   ($RN fails, $R3 naming F3; expect 545/547, 2, 2)"
+{ echo "$RS" | grep -q "545/547" && [ "$RN" = "2" ] && [ "$R3" = "2" ]; } || {
+  rm -rf $STAGE
+  echo '*** RED: the reproduction did not reproduce exactly. STOP.'; exit 1; }
 cp finance_ui/finance_entry.html.new $STAGE/finance_ui/finance_entry.html
 cp finance_ui/finance_entry_clinic.html.new $STAGE/finance_ui/finance_entry_clinic.html
-N=$(cd $STAGE && python3 finance_app.py --selftest 2>&1 | tail -1)
+N=$(cd $STAGE && python3 finance_app.py --selftest 2>&1 | grep -m1 "SMOKE ")
 rm -rf $STAGE
 echo "      new app + NEW pages  : $N"
 echo "$N" | grep -q "SMOKE 547/547" || { echo '*** RED. STOP.'; exit 1; }
