@@ -1,0 +1,23 @@
+Session 192: three D332 kits live, the gated money corrections executed, the KB freed
+
+- staff_ledger.py 470bb113 -> 0ed19495 -> 0279540e -> 44e39d6a (kits S192_SL5, SL6, SL7)
+    SL5  the D332 waiver instrument + policy-date settings + the F-151 wording fix   218 -> 240
+    SL6  the schedule lane (uneven distributions) + DEFER replacing SKIP + the
+         capacity rule (F-147) + loud defer surfaces                                 240 -> 274
+    SL7  the per-staff Perks view (F-149)                                            274 -> 287
+    Three installs, each landing first time on its stated number. No schema change,
+    no migration, no data write by any kit.
+- Live DATA (D332 section 6, owner's separate GO, after survey + dry run):
+    contra 10,000 / 15,000 / 5,000 (the August double-collection tripwire killed),
+    advance_pct Darpan 75 -> 50, ONE 20,000 SPECIAL on an 8/4/4/4 schedule (PENDING
+    on its signed application), a zero-rupee record narrating the July composition.
+- S192_F6 designed and deliberately NOT built: its smoke suite copies the live
+    finance.db and cannot run offline (F-87). Design filed; the seeded store is
+    S193's first task.
+- .gitattributes: *.md5 and *.txt pinned eol=lf (F-152 - a CRLF SUMS.md5 would
+    refuse a good kit at its own gate).
+- Docs: Register v5.40 (reverse-application-proven), Archive v1.43 (pure append,
+    786,212 bytes proven byte-identical), Fault Register v2.32 (F-147/149/150/151
+    CLOSED; F-152/153/154 minted), Runbook v128, START_HERE 193, manifest rebuilt,
+    live_pins_S192close.txt regenerated from v5.40 (A8), cold kit taken.
+- Diagnostics: no surveillance fault code added or altered.
