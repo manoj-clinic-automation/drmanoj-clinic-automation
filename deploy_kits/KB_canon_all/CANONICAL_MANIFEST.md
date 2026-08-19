@@ -58,7 +58,8 @@ is a halt that gets waved through, and then it protects nothing.
 | `START_HERE_SESSION_186` | S185 | `4adc2c646fbdf668882c2587498c8ec5` | superseded by 187/188. Carries the git-clone Phase 0, the F-88 cross-check, the **NEW inverse check (F-107)** — confirm every Tier-0 doc has a manifest row — the `verify_live_pins.py` live-code check (D321), and the S186 tasks (complete the partial pin; resolve the opening float). |
 | `START_HERE_SESSION_185` | S184 | `f65e76c2e270cabf522839ef25d4acbe` | superseded by 186. **FILED TO THE REPO AND PINNED AT THE S185 CLOSE (F-107)** — written to project knowledge only at the S184 close, so it was unverifiable at the S185 Phase 0; these are the bytes filed at S185 and they are canonical from here. |
 | `START_HERE_SESSION_184` | S183 | `18c2bf463ad53bd075683aebfba8f373` | superseded by 185/186. Carried the git-clone Phase 0 **and** the `python3 /root/deploy/verify_live_pins.py` live-code check (D321) |
-| `KB_Register` | **v5.35** | `b8dc2cb1683e8ca08bc3b36ad749f6cb` | **CURRENT.** **v5.35 (S190 fold 5):** kit `S190_F5` live — an edited legacy-sheet day re-becomes an app entry and surfaces in the approvals queue (owner-found on the 31-July day whose money counted while its row hid; smoke 549 → 550). The 31-July ₹10,000 filed and approved; cash ₹1,95,198. Zero loss proven onto the `fde2e11a…` pin. **The live-pin list is generated from THIS version** (A8). |
+| `KB_Register` | **v5.36** | `01567d7a5cabd55e2fc54f7b0ffd5d35` | **CURRENT.** **v5.36 (S190 fold 6):** kit `S190_SL4` live — the quota lane (owner ruling "A"): a quota advance (explicit `against_month` · not a loan · recover-fully instalment) recovers IN FULL at the first close ≥ its month, in its own lane beside the D250 waterfall — never queued behind the ₹3.59 lakh loan book. Ledger pin `3b09073a…` → `470bb113…`, selftest 214 → 218 (+4 exactly). Zero loss proven onto the `b8dc2cb1…` pin. **The live-pin list is generated from THIS version** (A8). |
+| `KB_Register` (pre-fold-6) | v5.35 | `b8dc2cb1683e8ca08bc3b36ad749f6cb` | superseded by v5.36; retained. **v5.35 (S190 fold 5):** **v5.35 (S190 fold 5):** kit `S190_F5` live — an edited legacy-sheet day re-becomes an app entry and surfaces in the approvals queue (owner-found on the 31-July day whose money counted while its row hid; smoke 549 → 550). The 31-July ₹10,000 filed and approved; cash ₹1,95,198. Zero loss proven onto the `fde2e11a…` pin. **The live-pin list is generated from THIS version** (A8). |
 | `KB_Register` (pre-fold-5) | v5.34 | `fde2e11ab71d957d4aa2bc625db0e077` | superseded by v5.35; retained. **v5.34 (S190 fold 4):** kit `S190_F4` live — the medical locked-day gate reads UNIT roles, never the SSO broker role (owner-found on the real 31-July screen; one functional line; smoke 547 → 549). Zero loss proven by reverse application onto the `34e31bd3…` pin. **The live-pin list is generated from THIS version** (A8). |
 | `KB_Register` (pre-fold-4) | v5.33 | `34e31bd3dba0956867efb2d651622bdd` | superseded by v5.34; retained. **v5.33 (S190 fold 3):** kits `S190_SL3` + `S190_F3` live — four pins as they moved (ledger `3b09073a…` 212→214 · finance app `7445d20d…` · entry `bae2dd89…` · clinic entry `d4f7ddaa…`, count-equal reproduction-proven on the box), the quota-from-the-install ruling, two toolchain gate refusals recorded. Zero loss proven by reverse application onto the `82738bd7…` pin. **The live-pin list is generated from THIS version** (A8). |
 | `KB_Register` (pre-fold-3) | v5.32 | `82738bd79ebe9e322aedc560d8e9cf9b` | superseded by v5.33; retained. **v5.32 (S190 fold 2):** D331 minted and executed — three pins recorded as they moved (`staff_ledger.py` `0408bbbe…` 190→212 · `finance_app.py` `ccc12afc…` · `finance_entry.html` `b411269f…` 542→547), the D331 decisions-index entry, §5.3 answered from the box's own CSV. Zero loss proven by reverse application onto the `468bf4ca…` pin. **The live-pin list is generated from THIS version** (A8). |
@@ -717,4 +718,43 @@ this `CANONICAL_MANIFEST.md`.
   Next free: **D332 · F-141 · A-D25.** Cold-kit count **3 of 3–5**.
 
 **END OF CANONICAL_MANIFEST — S190 FIFTH FOLD.**
+
+---
+
+### §S190-F SIXTH FOLD (19 Aug 2026 — kit `S190_SL4`: the quota lane; the sitting's advances recover THEMSELVES)
+
+**Still not a close.** The Archive §S190 append and the Runbook bump remain owed at the close.
+
+**Filenames — every token transcribed from the file it names:** `KB_Register_v5_36_S190.md`
+(`01567d7a5cabd55e2fc54f7b0ffd5d35`) · kit `S190_SL4` (KIT_ID `6b1a91898827399335801688a9099117`) ·
+this `CANONICAL_MANIFEST.md`.
+
+- **Tier-0:** Register v5.35 → **v5.36**, zero loss proven by reverse application onto the
+  `b8dc2cb1…` pin.
+- **The finding (owner, on Darpan's statement minutes after the three advances went in):**
+  ₹10,000 · ₹15,000 · ₹5,000 all read "(waiting for the loan to clear)" — the D250
+  waterfall queues every interest-free advance behind the loan book; right for legacy
+  tranches, wrong for a month's own salary money. **OWNER RULING "A":** the ledger's own
+  close recovers them — August's close takes ₹10,000 + ₹15,000, September's the ₹5,000;
+  no manual workbook squaring.
+- **The lane:** in `close_month()`, after the D331 eligibility filter, a QUOTA advance
+  (explicit `against_month` · `interest=False` · `instalment == amount`) recovers in full
+  in its own lane. A deliberately partial instalment opts back into the waterfall; a loan
+  Skip pauses ONLY the waterfall. Waterfall order and arithmetic byte-untouched. Statement
+  cards name the recovery month (first close ≥ the against-month — the July-attributed
+  ₹10,000 collects at the August close, July being already closed).
+- **Live VPS code:** `staff_ledger.py` `3b09073a…` → **`470bb1133046d9076de5a2edd413f66c`**
+  (kit `S190_SL4`, selftest **214 → 218, +4 exactly** — the sixteenth consecutive
+  projection). Backup `staff_ledger.py.bak_S190_SL4_20260819_101237`. Service active.
+- **Books state:** 14 & 15 Aug APPROVED by the owner. All three ledger advances in
+  (₹10,000 · 31 Jul · against Jul / ₹15,000 · 19 Aug · against Aug / ₹5,000 · 18 Aug ·
+  against Sep). Cash in hand ₹1,75,198 — the counted figure, verified on the live tile.
+- ⭐ **Ahead:** owner one-command (pin copy + verify, eleventh GREEN) · Darpan completes
+  17 & 18 Aug drafts (real figures + scans) → approve · Surendra ₹8,000 PENDING decision
+  (over his ₹5,200 ceiling; grandfathered entry) · **F-141: SIX candidates** (the
+  fabricated hash tail · the wrong install path · the tail-1 harness · the migration-dated
+  quota · the broker-role gate · the hidden-legacy queue) · EOS. Next free:
+  **D332 · F-141 · A-D25.** Cold-kit count **3 of 3–5**.
+
+**END OF CANONICAL_MANIFEST — S190 SIXTH FOLD.**
 
