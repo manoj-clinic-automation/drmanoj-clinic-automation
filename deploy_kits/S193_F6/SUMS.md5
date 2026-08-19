@@ -1,0 +1,6 @@
+acd7b538ec9476f86e243c73eec3d3fd  staff_ledger_S193.py
+9b1afe4f13bec91bc9bb83e8f818a76b  finance_app_S193.py
+fb460eb763069e4d97eaf36512d103c7  install_s193_f6.sh
+677c3fe039c824c4021ab993cbd28d65  dev/seed_live_shape.py
+b9822043b1f4b56aca32e7a012b557d1  dev/apply_ddl.py
+98fda6c628b4bc1dd6ab64ca31023e8f  dev/migrations_concat.sql
