@@ -119,3 +119,6 @@ finance/REPORT_1.xls
 
 
 
+
+# scratch: files staged for deletion via device bridge (device_bash cannot rm)
+/_to_delete/
