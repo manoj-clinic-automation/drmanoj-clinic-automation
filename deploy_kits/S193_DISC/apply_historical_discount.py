@@ -1,29 +1,32 @@
 #!/usr/bin/env python3
 # =====================================================================
-#  S193_DISC — historical discount backfill.
+#  S193_DISC — historical discount backfill (two-pass).
 #
 #  Fills sale_item.gross_p / sale_item.disc_p for bills already in the
-#  books, from historical_discount.csv (parsed from Dr Manoj's own Marg
-#  "Bill wise sales" exports, 2026-04-01 .. 2026-08-15).
+#  books, from historical_discount_data.py (parsed from Dr Manoj's own
+#  Marg "Bill wise sales" exports, 2026-04-01 .. 2026-08-15). NON-PHI:
+#  (bill_date, bill_no, gross_p, disc_p, net_p) only.
 #
-#  The CSV is NON-PHI: bill_date, bill_no, gross_p, disc_p, net_p only —
-#  no patient names, no phones, no clinic IDs.
+#  Two matching passes, per business_date, unit='medical':
+#    PASS 1 — exact:  sale_item.source_ref == bill_no
+#             (the Marg-push days, where the real bill number is stored).
+#    PASS 2 — by net amount:  the older days were backfilled (S186/F-104)
+#             with SYNTHETIC refs (e.g. 'S186-F104-576'), so the bill
+#             number isn't stored. But the rows carry the SAME net, in the
+#             SAME bill order. Pass 2 matches each remaining parsed bill to
+#             an UNCLAIMED stored row of the SAME net_p on that day, taking
+#             them in order (stored by source_ref, parsed by bill_no). Only
+#             ever matches equal net; unequal never touches.
 #
 #  SAFETY:
-#   * Matches on (source_ref == bill_no) AND (day's business_date) AND
-#     unit='medical'.  The parse had ZERO (date,bill_no) key clashes.
-#   * NEVER touches amount_p (the booked net) or any other column — it
-#     only writes gross_p/disc_p, which are pure added information.
-#   * Stores MAGNITUDES (abs), consistent with amount_p >= 0.
-#   * Idempotent: re-running writes the same values; reports a summary.
-#   * --dry (default) shows what WOULD change and writes nothing.
+#   * NEVER touches amount_p (booked net) or any column except gross_p/disc_p.
+#   * Stores MAGNITUDES (abs).  Idempotent (re-run writes the same values).
+#   * A stored row is claimed at most once (no double-assignment).
+#   * --dry (default) writes nothing and reports the breakdown.
 #     --apply performs the UPDATEs inside one transaction.
-#
-#  Usage:
-#     python3 apply_historical_discount.py --dry     # preview
-#     python3 apply_historical_discount.py --apply   # write
 # =====================================================================
 import os
+import re
 import sqlite3
 import sys
 
@@ -34,89 +37,104 @@ DB = os.environ.get("FINANCE_DB", "/root/finance/finance.db")
 UNIT = "medical"
 
 
-def load_csv():
-    # Data ships as a Python module (historical_discount_data.py) because the
-    # repo's .gitignore blocks *.csv (patient-data guard); this file is NON-PHI.
-    rows = []
+def _refkey(ref):
+    # natural sort: trailing number if present, else the string
+    m = re.search(r"(\d+)\s*$", ref or "")
+    return (int(m.group(1)) if m else 10 ** 12, ref or "")
+
+
+def load_rows():
+    by_day = {}
     for bill_date, bill_no, gross_p, disc_p, net_p in _hdd.ROWS:
-        rows.append({
-            "bill_date": bill_date.strip(),
+        by_day.setdefault(bill_date.strip(), []).append({
             "bill_no": bill_no.strip(),
             "gross_p": abs(int(gross_p)),
             "disc_p": abs(int(disc_p)),
             "net_p": abs(int(net_p)),
         })
-    return rows
+    return by_day
 
 
 def main():
     apply = "--apply" in sys.argv
-    rows = load_csv()
+    by_day = load_rows()
     con = sqlite3.connect(DB)
     con.row_factory = sqlite3.Row
 
-    # Guard: the columns must exist (migration must have run first).
     cols = {c["name"] for c in con.execute("PRAGMA table_info(sale_item)")}
     if "gross_p" not in cols or "disc_p" not in cols:
         print("*** sale_item is missing gross_p/disc_p — run the migration first. STOP.")
         sys.exit(2)
 
-    matched = 0
-    unmatched = 0
-    would_set = 0
-    already = 0
-    net_mismatch = 0
-    ambiguous = 0
-    examples_unmatched = []
-    examples_netmis = []
+    n_ref = n_amt = n_unmatched = n_already = 0
+    days_touched = set()
+    unmatched_ex = []
 
     con.execute("BEGIN")
-    for r in rows:
-        hits = con.execute(
-            "SELECT s.id, s.amount_p, s.gross_p, s.disc_p "
+    for day, bills in by_day.items():
+        stored = con.execute(
+            "SELECT s.id, s.source_ref, s.amount_p, s.gross_p, s.disc_p "
             "FROM sale_item s JOIN day_entry de ON de.id = s.day_entry_id "
-            "WHERE de.unit=? AND de.business_date=? AND s.source_ref=?",
-            (UNIT, r["bill_date"], r["bill_no"])).fetchall()
-        if not hits:
-            unmatched += 1
-            if len(examples_unmatched) < 8:
-                examples_unmatched.append((r["bill_date"], r["bill_no"]))
+            "WHERE de.unit=? AND de.business_date=?", (UNIT, day)).fetchall()
+        if not stored:
+            n_unmatched += len(bills)
+            if len(unmatched_ex) < 8:
+                unmatched_ex.append((day, "no rows in books"))
             continue
-        if len(hits) > 1:
-            ambiguous += 1
-        for h in hits:
-            matched += 1
-            if abs(h["amount_p"] or 0) != r["net_p"]:
-                net_mismatch += 1
-                if len(examples_netmis) < 8:
-                    examples_netmis.append(
-                        (r["bill_date"], r["bill_no"], h["amount_p"], r["net_p"]))
-            if h["gross_p"] == r["gross_p"] and h["disc_p"] == r["disc_p"]:
-                already += 1
+
+        claimed = set()
+        by_ref = {}
+        for r in stored:
+            by_ref.setdefault(r["source_ref"], r)
+
+        def do_set(row, bill):
+            nonlocal n_already
+            gp, dp = bill["gross_p"], bill["disc_p"]
+            if row["gross_p"] == gp and row["disc_p"] == dp:
+                n_already += 1
+            elif apply:
+                con.execute("UPDATE sale_item SET gross_p=?, disc_p=? WHERE id=?",
+                            (gp, dp, row["id"]))
+            days_touched.add(day)
+
+        # ---- PASS 1: exact bill_no == source_ref ----
+        leftover_bills = []
+        for b in bills:
+            r = by_ref.get(b["bill_no"])
+            if r is not None and r["id"] not in claimed:
+                claimed.add(r["id"]); n_ref += 1; do_set(r, b)
             else:
-                would_set += 1
-                if apply:
-                    con.execute(
-                        "UPDATE sale_item SET gross_p=?, disc_p=? WHERE id=?",
-                        (r["gross_p"], r["disc_p"], h["id"]))
+                leftover_bills.append(b)
+
+        # ---- PASS 2: by net amount, in order, among UNCLAIMED rows ----
+        pool = {}
+        for r in sorted((r for r in stored if r["id"] not in claimed), key=lambda r: _refkey(r["source_ref"])):
+            pool.setdefault(r["amount_p"], []).append(r)
+        for b in sorted(leftover_bills, key=lambda b: b["bill_no"]):
+            lst = pool.get(b["net_p"])
+            if lst:
+                r = lst.pop(0); claimed.add(r["id"]); n_amt += 1; do_set(r, b)
+            else:
+                n_unmatched += 1
+                if len(unmatched_ex) < 8:
+                    unmatched_ex.append((day, b["bill_no"], "net ₹%.2f" % (b["net_p"] / 100)))
+
     if apply:
         con.commit()
     else:
         con.rollback()
 
-    tot_disc = sum(r["disc_p"] for r in rows) / 100.0
+    total = sum(len(v) for v in by_day.values())
     print("=== historical discount backfill (%s) ===" % ("APPLY" if apply else "DRY-RUN"))
-    print("  csv rows            : %d  (total discount in file ₹ %.2f)" % (len(rows), tot_disc))
-    print("  matched sale_item   : %d" % matched)
-    print("  would set / updated : %d" % would_set)
-    print("  already correct     : %d" % already)
-    print("  unmatched bills     : %d  (not in the books for that date — expected for gaps)" % unmatched)
-    print("  ambiguous (>1 row)  : %d" % ambiguous)
-    print("  net differs (info)  : %d  (gross/disc still added; booked net untouched)" % net_mismatch)
-    if examples_unmatched:
-        print("  e.g. unmatched      :", examples_unmatched)
-    if examples_netmis:
-        print("  e.g. net differs    :", examples_netmis)
+    print("  parsed bills        : %d  across %d days" % (total, len(by_day)))
+    print("  matched by bill_no  : %d" % n_ref)
+    print("  matched by amount   : %d  (older backfilled days, synthetic refs)" % n_amt)
+    print("  TOTAL matched       : %d" % (n_ref + n_amt))
+    print("  already correct     : %d  (of the matched, needing no change)" % n_already)
+    print("  unmatched           : %d  (genuinely not in the books — real gaps)" % n_unmatched)
+    if unmatched_ex:
+        print("  e.g. unmatched      :", unmatched_ex)
+    print("  days that get values: %d" % len(days_touched))
     if not apply:
         print("  (dry-run — nothing written. Re-run with --apply to write.)")
     con.close()

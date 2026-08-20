@@ -3,5 +3,5 @@ d86745b70347f47127b2fa0f933ea364  finance_app_S193.py
 71993e5739eeb008c66862571e5addaa  finance_schema_S193.sql
 c0d7c13776cbbd4a30c35af261a98963  patch_disc_ingest.py
 095e9c7f8b4628f8ea17b7c8c7f1f829  patch_disc_hub.py
-5a2fc46eba3bf73d573c04ab05975e05  apply_historical_discount.py
+ec4d713a4d5b2055f5bf139c5a9f9eca  apply_historical_discount.py
 ed605f67c5ada592b714f0d5e74e5d5c  historical_discount_data.py
