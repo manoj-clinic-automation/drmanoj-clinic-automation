@@ -1,0 +1,10 @@
+[Unit]
+Description=Poll the clinic Gmail for query commands every 3 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=3min
+Unit=email-agent.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,8 @@
+[Unit]
+Description=Clinic Gmail read-only query agent (ping-pong)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /root/deploy/email_agent.py --once
