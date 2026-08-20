@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Sale · Sanjeevni</title>
+<!-- S194 ⭐1 — Daily Sale v2 (two-stage). A NEW page; /finance/entry stays as
+     the fallback. Same POST /finance/api/day contract as the proven page. -->
+<style>
+:root{
+  --surface-page:#f3f2ee;      /* warm paper — Clinic Design Language v1 */
+  --surface-card:#ffffff; --line:#e4e1d9; --ink:#22201c; --mut:#6b675e;
+  --brand:#1f6f5c; --brand-ink:#0e4335; --warn:#9a6a00; --bad:#a1362c;
+  --good:#1f6f5c; --chip:#eef4f1;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-page);color:var(--ink);
+  font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:0 14px 80px}
+header.bar{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;
+  padding:12px 14px;display:flex;align-items:center;gap:10px}
+header.bar b{font-size:17px;letter-spacing:.2px}
+header.bar .who{margin-left:auto;font-size:13px;opacity:.9}
+h2{font-size:16px;margin:0 0 4px}
+.kick{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--brand-ink);font-weight:700;margin-bottom:2px}
+.hindi{color:var(--mut);font-weight:400;font-size:13px}
+.card{background:var(--surface-card);border:1px solid var(--line);border-radius:12px;
+  padding:14px;margin:14px 0;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+label{display:block;font-size:13px;color:var(--mut);margin:8px 0 3px}
+input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;
+  font-size:15px;background:#fff;color:var(--ink)}
+.money{display:flex;align-items:center;gap:6px}
+.money .rs{color:var(--mut)}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.num{font-variant-numeric:tabular-nums}
+.stat{display:flex;justify-content:space-between;align-items:baseline;
+  padding:8px 0;border-bottom:1px dashed var(--line)}
+.stat .lbl{color:var(--mut);font-size:13px}.stat .val{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+button{font:inherit;cursor:pointer;border-radius:9px;border:1px solid var(--brand);
+  background:var(--brand);color:#fff;padding:11px 14px}
+button.ghost{background:#fff;color:var(--brand-ink)}
+button.big{width:100%;font-size:16px;font-weight:700;padding:14px}
+button[disabled]{opacity:.45;cursor:not-allowed}
+.repeat{border:1px dashed var(--line);border-radius:10px;padding:10px;margin:8px 0;position:relative}
+.rm{position:absolute;top:6px;right:6px;background:#fff;color:var(--bad);border-color:var(--line);padding:3px 8px}
+.scan{display:flex;align-items:center;gap:8px;margin:6px 0}
+.scan .nm{flex:1}
+.tick{color:var(--good);font-weight:700}
+.msg{margin:10px 0;padding:9px 11px;border-radius:9px;font-size:14px;display:none}
+.msg.show{display:block}
+.msg.good{background:#e7f2ee;color:var(--brand-ink)}
+.msg.bad{background:#faece9;color:var(--bad)}
+.msg.warn{background:#fbf3e0;color:var(--warn)}
+[data-stage="2"]{display:none}
+.mut{color:var(--mut);font-size:13px}
+details.help{margin-top:8px}
+details.help summary{cursor:pointer;color:var(--brand-ink);font-size:13px}
+details.help>div{font-size:13px;color:var(--mut);padding:6px 0}
+#toTop{position:fixed;right:14px;bottom:14px;display:none;border-radius:50%;width:44px;height:44px;padding:0}
+#toTop.show{display:block}
+.sep{border:0;border-top:1px solid var(--line);margin:14px 0}
+</style>
+</head>
+<body>
+<header class="bar"><b>Daily Sale</b><span class="hindi">· आज की बिक्री</span>
+  <span class="who" id="whoami">—</span></header>
+<div class="wrap">
+
+  <!-- transfer-only: record a hand-over WITHOUT filing a day -->
+  <div class="card" id="transferOnly">
+    <h2><span class="kick">Just moving cash</span>Transfer only <span class="hindi">· सिर्फ़ नकद भेजना</span></h2>
+    <p class="mut">Record a hand-over to the bank or a doctor without filing a whole day.</p>
+    <div class="row">
+      <div><label>Date</label><input type="date" id="toDate"></div>
+      <div><label>Amount</label><div class="money"><span class="rs">₹</span>
+        <input type="tel" id="toAmt" inputmode="numeric" placeholder="0"></div></div>
+    </div>
+    <div class="row">
+      <div><label>To / from</label><select id="toParty">
+        <option value="bank">Bank</option><option value="dr_bhawna">Dr Bhawna</option>
+        <option value="dr_manoj">Dr Manoj</option></select></div>
+      <div><label>Direction</label><select id="toDir">
+        <option value="out">Cash out (given)</option><option value="in">Cash back (returned)</option>
+      </select></div>
+    </div>
+    <label>Reference / note</label><input type="text" id="toRef" placeholder="e.g. deposited at Yes Bank">
+    <div style="height:9px"></div>
+    <button class="ghost" id="btnTransferOnly">Record this hand-over</button>
+    <details class="help"><summary>How this works</summary><div>
+      This adds a cash movement to that day and re-files it, so the drawer stays correct.
+      The day must already exist.</div></details>
+  </div>
+
+  <hr class="sep">
+
+  <!-- ============================ STAGE 1 ============================ -->
+  <div data-stage="1">
+    <div class="card">
+      <h2><span class="kick">Step 1</span>Which day <span class="hindi">· कौन सा दिन</span></h2>
+      <label>Date</label><input type="date" id="bdate">
+    </div>
+
+    <div class="card">
+      <h2><span class="kick">Step 2</span>Today's sale <span class="hindi">· आज की बिक्री</span></h2>
+      <div class="row">
+        <div><label>Total sale (₹)</label><div class="money"><span class="rs">₹</span>
+          <input type="tel" id="total" inputmode="numeric" placeholder="0"></div></div>
+        <div><label>Of that, UPI (₹)</label><div class="money"><span class="rs">₹</span>
+          <input type="tel" id="upi" inputmode="numeric" placeholder="0"></div></div>
+      </div>
+      <div class="stat"><span class="lbl">Cash (total − UPI)</span><span class="val num" id="cashShow">₹0</span></div>
+      <details class="help"><summary>How this works</summary><div>
+        Enter the day's total sale and how much of it came by UPI. Cash is worked out for you.</div></details>
+    </div>
+
+    <div class="card">
+      <h2><span class="kick">Paid out of the drawer</span>Expenses <span class="hindi">· खर्च</span></h2>
+      <div id="expList"></div>
+      <button class="ghost" id="addExp">+ Add an expense</button>
+    </div>
+
+    <div class="card">
+      <h2><span class="kick">Evidence</span>Three scans <span class="hindi">· तीन स्कैन</span></h2>
+      <div class="scan" data-doc="sale_report"><span class="nm">Marg sale report</span>
+        <span class="tick" data-tick="sale_report"></span>
+        <button class="ghost scanBtn" type="button">Scan / upload</button></div>
+      <div class="scan" data-doc="manual_copy"><span class="nm">Manual copy / register</span>
+        <span class="tick" data-tick="manual_copy"></span>
+        <button class="ghost scanBtn" type="button">Scan / upload</button></div>
+      <div class="scan" data-doc="orthotics_copy"><span class="nm">Orthotics / other</span>
+        <span class="tick" data-tick="orthotics_copy"></span>
+        <button class="ghost scanBtn" type="button">Scan / upload</button></div>
+      <label>If a scan is missing, say why</label>
+      <input type="text" id="scanReason" placeholder="e.g. printer down — will bring tomorrow">
+      <details class="help"><summary>How this works</summary><div>
+        Save first, then tap Scan — the scanner opens on its own page and comes back here.</div></details>
+    </div>
+
+    <div id="msg1" class="msg"></div>
+    <button class="big" id="btnSave">① Save</button>
+    <div style="height:10px"></div>
+    <button class="big" id="btnSubmit" disabled>② Submit for the doctor</button>
+    <p class="mut" id="submitHint">Save first — Submit unlocks once the day is saved.</p>
+  </div>
+
+  <!-- ============================ STAGE 2 ============================ -->
+  <div data-stage="2">
+    <div class="card">
+      <h2><span class="kick">Filed</span>Submitted <span class="hindi">· जमा हो गया</span></h2>
+      <div id="confirm" class="mut">—</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="kick">Where the money is</span>Cash &amp; drawer <span class="hindi">· नकद</span></h2>
+      <div class="stat"><span class="lbl">Cash this day</span><span class="val num" id="s2cash">—</span></div>
+      <div class="stat"><span class="lbl">Drawer now (Darpan)</span><span class="val num" id="s2drawer">—</span></div>
+      <div class="stat"><span class="lbl">Drawer after these transfers</span><span class="val num" id="s2after">—</span></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="kick">Move it out</span>Transfers <span class="hindi">· बैंक / डॉक्टर</span></h2>
+      <div id="movList"></div>
+      <button class="ghost" id="addMov">+ Add a transfer</button>
+    </div>
+
+    <div id="msg2" class="msg"></div>
+    <button class="big" id="btnFinal">Final submit — close the day</button>
+  </div>
+
+</div>
+<button id="toTop" title="Back to top" type="button">↑</button>
+<script>
+var API = "/finance/api";
+function $(i){ return document.getElementById(i); }
+function paise(v){ v = String(v==null?"":v).replace(/[, ]/g,""); var n = Math.round(parseFloat(v)*100); return isFinite(n)?n:0; }
+function money(p){ return "₹" + (p/100).toFixed(2).replace(/\.00$/,"").replace(/\B(?=(\d{3})+(?!\d))/g,","); }
+function show(box,kind,text){ var m=$(box); m.textContent=text||""; m.className="msg "+kind+(text?" show":""); }
+var attached = {};          // uid -> true, for scanned expense bills
+var saved = false;          // stage-1 saved?
+var lastDate = null;
+
+/* ---------- stage 1: money ---------- */
+function recompute(){
+  var cash = paise($("total").value) - paise($("upi").value);
+  $("cashShow").textContent = money(cash);
+  // any edit after a save re-locks Submit
+  lock();
+}
+function lock(){ saved=false; $("btnSubmit").disabled=true; $("submitHint").textContent="Save first — Submit unlocks once the day is saved."; }
+function unlock(){ saved=true; $("btnSubmit").disabled=false; $("submitHint").textContent="Saved. You can Submit for the doctor now."; }
+
+/* ---------- expenses ---------- */
+var uidSeq = 0;
+function newUid(){ uidSeq++; return "e" + Date.now().toString(36) + uidSeq; }
+function addExpense(pre){
+  pre = pre || {};
+  var d = document.createElement("div"); d.className="repeat"; d.dataset.uid = pre.uid || newUid();
+  d.innerHTML =
+    '<button class="rm" type="button">remove</button>' +
+    '<label>Amount</label><div class="money"><span class="rs">₹</span>' +
+    '<input type="tel" class="expAmt" inputmode="numeric" placeholder="0"></div>' +
+    '<label>Category</label><select class="expCat">' +
+    '<option value="" disabled selected>Choose…</option>' +
+    '<option value="salary_advance_self">My salary advance</option>' +
+    '<option value="home">Home expenses (personal / COD delivery)</option>' +
+    '<option value="other">Other expenses (write details)</option></select>' +
+    '<div class="expExtra"></div>';
+  $("expList").appendChild(d);
+  var cat=d.querySelector(".expCat"), extra=d.querySelector(".expExtra");
+  function redraw(){
+    if(cat.value==="home"||cat.value==="other"){
+      extra.innerHTML='<label>Details</label><input type="text" class="expText" placeholder="write what this was">'+
+        '<div style="height:8px"></div><button type="button" class="ghost expBill">Attach the bill (required)</button>';
+      extra.querySelector(".expBill").onclick=function(){ saveThenScanExpense(d.dataset.uid); };
+    } else if(cat.value==="salary_advance_self"){
+      extra.innerHTML='<p class="mut">Posts to the Staff Ledger only when the doctor approves.</p>';
+    } else { extra.innerHTML=""; }
+  }
+  cat.addEventListener("change",redraw);
+  d.querySelector(".rm").onclick=function(){ d.remove(); recompute(); };
+  d.addEventListener("input",recompute);
+  // restore category + details when repopulating a saved day (avoids a blank
+  // re-save wiping expenses — the D330 hazard)
+  if(pre.category_fixed==="salary_advance"){ cat.value="salary_advance_self"; redraw(); }
+  else if(pre.category_kind==="home"||pre.category_kind==="other"){
+    cat.value=pre.category_kind; redraw();
+    var _t=extra.querySelector(".expText"); if(_t&&pre.category_text) _t.value=pre.category_text;
+  }
+  if(pre.amount_p!==undefined) d.querySelector(".expAmt").value=(pre.amount_p/100).toFixed(2).replace(/\.00$/,"");
+}
+
+/* repopulate the form from a saved day (D330: what the screen shows is what
+   the next save sends — a blank re-save must never silently delete rows) */
+function loadDay(iso){
+  fetch(API+"/day/"+iso+"?_="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
+    if(!j||!j.ok){ return; }
+    var day=j.day||{};
+    attached={};
+    document.querySelectorAll(".scan .tick").forEach(function(t){ t.textContent=""; });
+    (day.attachments||[]).forEach(function(a){
+      if(!a.has_file) return;
+      attached[a.doc_type]=true;
+      var box=document.querySelector('.scan[data-doc="'+a.doc_type+'"] .tick');
+      if(box) box.textContent="✓ uploaded";
+    });
+    $("expList").innerHTML="";
+    if(day.exists){
+      $("total").value=(day.total_p/100).toFixed(2).replace(/\.00$/,"");
+      $("upi").value=(day.upi_p/100).toFixed(2).replace(/\.00$/,"");
+      (day.expenses||[]).forEach(function(e){ addExpense(e); });
+      recompute();
+      unlock();                                 // a saved day exists — Submit allowed
+      if(day.status && day.status!=="draft"){
+        show("msg1","warn","This day is already "+day.status+". Any change keeps the earlier version on record.");
+      }
+    } else { recompute(); }
+  }).catch(function(){});
+}
+
+/* ---------- transfers (stage 2) ---------- */
+function addMovement(pre){
+  pre = pre || {};
+  var d=document.createElement("div"); d.className="repeat";
+  d.innerHTML =
+    '<button class="rm" type="button">remove</button>' +
+    '<label>Amount</label><div class="money"><span class="rs">₹</span>' +
+    '<input type="tel" class="movAmt" inputmode="numeric" placeholder="0"></div>' +
+    '<div class="row"><div><label>To / from</label><select class="movParty">' +
+    '<option value="bank">Bank</option><option value="dr_bhawna">Dr Bhawna</option>' +
+    '<option value="dr_manoj">Dr Manoj</option></select></div>' +
+    '<div><label>Direction</label><select class="movDir">' +
+    '<option value="out">Cash out</option><option value="in">Cash back</option></select></div></div>' +
+    '<label>Reference</label><input type="text" class="movRef" placeholder="note">';
+  $("movList").appendChild(d);
+  d.querySelector(".rm").onclick=function(){ d.remove(); refreshDrawer(); };
+  d.addEventListener("input",refreshDrawer);
+}
+function collectMovements(){
+  var movs=[];
+  document.querySelectorAll("#movList .repeat").forEach(function(r){
+    var amt=r.querySelector(".movAmt").value; if(!String(amt).trim())return;
+    movs.push({amount:amt, party:r.querySelector(".movParty").value,
+               direction:r.querySelector(".movDir").value,
+               reference:(r.querySelector(".movRef")||{}).value||""});
+  });
+  return movs;
+}
+
+/* ---------- the shared POST body ---------- */
+function collect(action){
+  var exps=[];
+  document.querySelectorAll("#expList .repeat").forEach(function(r){
+    var amt=r.querySelector(".expAmt").value; if(!String(amt).trim())return;
+    exps.push({amount:amt, category:r.querySelector(".expCat").value||null, uid:r.dataset.uid,
+               details:((r.querySelector(".expText")||{}).value||"")});
+  });
+  return { business_date:$("bdate").value, total:$("total").value, upi:$("upi").value,
+           expenses:exps, movements:(action==="s2"?collectMovements():[]),
+           noncash_bills:[], action:(action==="s2"?"submit":action),
+           manned_by:null, manned_source:"manual",
+           attached_docs:Object.keys(attached), missing_scan_reason:$("scanReason").value };
+}
+
+function postDay(body){
+  return fetch(API+"/day",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(body)}).then(function(r){return r.json();});
+}
+
+/* ---------- stage 1 save / submit ---------- */
+function save(action){
+  var body=collect(action);
+  if(!body.business_date){ show("msg1","bad","Choose a date first."); return; }
+  postDay(body).then(function(j){
+    if(!j.ok){ show("msg1","bad",j.message||j.error); return; }
+    if(action==="submit"){ goStage2(body.business_date); return; }
+    unlock(); show("msg1","good","Saved. The check is below — then Submit.");
+    (j.warnings||[]).forEach(function(w){ show("msg1","warn",w); });
+  }).catch(function(){ show("msg1","bad","Network problem — please try again."); });
+}
+function saveThenScanExpense(uid){
+  var date=$("bdate").value; if(!date){ show("msg1","bad","Choose a date first."); return; }
+  postDay(collect("draft")).then(function(j){
+    if(!j.ok){ show("msg1","bad",j.message||j.error); return; }
+    window.location="/finance/scan-expense/"+date+"/"+uid;
+  });
+}
+function saveThenScan(doc){
+  var date=$("bdate").value; if(!date){ show("msg1","bad","Choose a date first."); return; }
+  postDay(collect("draft")).then(function(j){
+    if(!j.ok){ show("msg1","bad",j.message||j.error); return; }
+    window.location="/finance/scan/"+date+"/"+doc;
+  });
+}
+
+/* ---------- stage 2 ---------- */
+var s2cashP = 0, s2drawerP = 0;
+function goStage2(date){
+  lastDate=date;
+  document.querySelector('[data-stage="1"]').style.display="none";
+  document.querySelector('[data-stage="2"]').style.display="block";
+  $("confirm").textContent = date + " — submitted · Total " + $("total").value +
+     " · UPI " + $("upi").value;
+  window.scrollTo({top:0,behavior:"smooth"});
+  fetch(API+"/day/"+date+"?_="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
+    var day=(j&&j.day)||{}; s2cashP=day.cash_p||0;
+    $("s2cash").textContent=money(s2cashP);
+  });
+  refreshDrawer();
+}
+function refreshDrawer(){
+  fetch(API+"/cash-position?_="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
+    var drawer = (j&&(j.drawer_p!=null?j.drawer_p:(j.drawer&&j.drawer.amount_p)))||0;
+    s2drawerP=drawer; $("s2drawer").textContent=money(drawer);
+    computeAfter();
+  }).catch(function(){ $("s2drawer").textContent="—"; });
+}
+function computeAfter(){
+  var net=0;
+  collectMovements().forEach(function(m){ net += (m.direction==="in"?1:-1)*paise(m.amount); });
+  $("s2after").textContent=money(s2drawerP+net);
+}
+function finalSubmit(){
+  var body=collect("s2");
+  postDay(body).then(function(j){
+    if(!j.ok){ show("msg2","bad",j.message||j.error); return; }
+    show("msg2","good","Day closed — filed with "+collectMovements().length+" transfer(s). Waiting for the doctor.");
+    $("btnFinal").disabled=true;
+    refreshDrawer();
+  }).catch(function(){ show("msg2","bad","Network problem — please try again."); });
+}
+
+/* ---------- transfer-only ---------- */
+function transferOnly(){
+  var date=$("toDate").value; if(!date){ show("msg1","bad","Pick the date for this hand-over."); return; }
+  if(!String($("toAmt").value).trim()){ show("msg1","bad","Enter an amount."); return; }
+  fetch(API+"/day/"+date+"?_="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
+    var day=(j&&j.day)||{};
+    if(!day.exists){ show("msg1","bad","That day isn't filed yet — file it first, then move cash."); return; }
+    var body={ business_date:date, total:day.total, upi:day.upi, expenses:[],
+      movements:[{amount:$("toAmt").value, party:$("toParty").value,
+                  direction:$("toDir").value, reference:$("toRef").value||""}],
+      noncash_bills:[], action:(day.status==="draft"?"draft":"submit"),
+      manned_by:null, manned_source:"manual", attached_docs:[], missing_scan_reason:"" };
+    postDay(body).then(function(j2){
+      if(!j2.ok){ show("msg1","bad",j2.message||j2.error); return; }
+      show("msg1","good","Hand-over recorded on "+date+".");
+      $("toAmt").value=""; $("toRef").value="";
+    });
+  });
+}
+
+/* ---------- boot ---------- */
+document.addEventListener("DOMContentLoaded",function(){
+  fetch(API+"/whoami").then(function(r){return r.json();}).then(function(j){ $("whoami").textContent=j.user||"—"; }).catch(function(){});
+  var y=new Date(Date.now()-864e5).toISOString().slice(0,10);
+  var mx=new Date().toISOString().slice(0,10);
+  var back=(location.search.match(/[?&]d=(\d{4}-\d{2}-\d{2})/)||[])[1];   // returned from a scan
+  $("bdate").value=back||y; $("bdate").max=mx; $("toDate").value=y; $("toDate").max=mx;
+  $("addExp").onclick=function(){ addExpense(); };
+  $("addMov").onclick=function(){ addMovement(); };
+  ["total","upi"].forEach(function(id){ $(id).addEventListener("input",recompute); });
+  $("scanReason").addEventListener("input",lock);
+  $("bdate").addEventListener("change",function(){ loadDay($("bdate").value); });
+  $("btnSave").onclick=function(){ save("draft"); };
+  $("btnSubmit").onclick=function(){ save("submit"); };
+  $("btnFinal").onclick=finalSubmit;
+  $("btnTransferOnly").onclick=transferOnly;
+  document.querySelectorAll(".scanBtn").forEach(function(b){
+    b.onclick=function(){ saveThenScan(b.closest(".scan").dataset.doc); };
+  });
+  var tt=$("toTop"); tt.onclick=function(){ window.scrollTo({top:0,behavior:"smooth"}); };
+  window.addEventListener("scroll",function(){ tt.className=window.scrollY>500?"show":""; });
+  loadDay($("bdate").value);
+});
+</script>
+</body>
+</html>

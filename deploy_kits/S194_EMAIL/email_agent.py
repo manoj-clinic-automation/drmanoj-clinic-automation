@@ -103,9 +103,9 @@ def process_once(cfg):
     try:
         M.login(cfg["user"], cfg["app_password"])
         M.select("INBOX")
-        typ, data = M.search(None, "UNSEEN")
+        typ, data = M.search(None, '(UNSEEN SUBJECT "%s")' % cfg["subject_trigger"])
         ids = data[0].split() if data and data[0] else []
-        log("poll: %d unseen" % len(ids))
+        log("poll: %d command email(s) matching %r" % (len(ids), cfg["subject_trigger"]))
         handled = 0
         for num in ids:
             typ, md = M.fetch(num, "(RFC822)")
