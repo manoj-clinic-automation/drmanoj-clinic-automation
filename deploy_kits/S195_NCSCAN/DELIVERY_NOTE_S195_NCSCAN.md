@@ -17,7 +17,7 @@ per-bill 📎 Scan bill + ✓, Save→✓ Saved, Submit lists attachments, Trans
 
 Safety: currency-gated to S194E (d2863c30); backs up BOTH files; runs the app's
 own --selftest (all-green + not shrunk); restarts clinic-finance; auto-rolls-back
-BOTH on any red. New finance_app.py md5: 26befc86d15f51a62d8a8d5eba6dd9fc .
+BOTH on any red. New finance_app.py md5: f25ed48923a5647ba1f6111bad0737d3 .
 
 Install:
   cd /root/deploy/repo && git pull

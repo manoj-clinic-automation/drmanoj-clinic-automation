@@ -10,7 +10,7 @@
 #  (the compact page). No data change beyond additive DDL (a nullable column +
 #  a new table), created lazily.
 #
-#  Currency-gated to the live S194E build. Backs up BOTH files, runs the app's
+#  Currency-gated to the deployed S195_ENTRY build. Backs up BOTH files, runs the app's
 #  own --selftest (must stay ALL-GREEN and not shrink), restarts, and ROLLS
 #  BACK BOTH on any red.
 # =====================================================================
@@ -19,18 +19,18 @@ cd "$(dirname "$0")"
 FIN=/root/finance/finance_app.py
 HTML=/root/finance/finance_ui/finance_daily.html
 SVC=clinic-finance.service
-FIN_WANT=d2863c30ed0d3cc23126c7da13d9fe9b     # live = S194E
+FIN_WANT=85df28fea117f8fc977b319cdfe70631     # live = S195_ENTRY build
 
 echo "==============================================================="
 echo " S195_NCSCAN · no-payment bills + per-bill scan (Daily Sale v2)"
 echo "==============================================================="
 echo "[1/8] kit bytes"; md5sum -c SUMS.md5 || { echo '*** RED. STOP.'; exit 1; }
 
-echo "[2/8] currency gate (finance_app.py must be live S194E)"
+echo "[2/8] currency gate (finance_app.py must be live S195_ENTRY)"
 [ -f "$FIN" ] || { echo "*** RED: $FIN missing."; exit 1; }
 [ -f "$HTML" ] || { echo "*** RED: $HTML missing."; exit 1; }
 H=$(md5sum "$FIN"|cut -d' ' -f1); echo "      finance_app : $H"
-[ "$H" = "$FIN_WANT" ] || { echo "*** RED: finance_app is not S194E ($FIN_WANT). STOP. Tell Cowork this hash."; exit 1; }
+[ "$H" = "$FIN_WANT" ] || { echo "*** RED: finance_app is not the S195_ENTRY build ($FIN_WANT). STOP. Tell Cowork this hash."; exit 1; }
 
 echo "[3/8] baseline smoke"
 CUR=$(cd /root/finance && python3 finance_app.py --selftest 2>&1|grep -m1 "SMOKE "); echo "      $CUR"
