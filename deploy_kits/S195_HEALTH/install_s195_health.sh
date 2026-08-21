@@ -26,7 +26,7 @@ set -u
 cd "$(dirname "$0")"
 LIVE=/root/finance/finance_app.py
 SVC=clinic-finance.service
-WANT=f25ed48923a5647ba1f6111bad0737d3
+WANT=fe596b291219c2bdcc62448a23b795cc
 
 echo "==============================================================="
 echo " S195_HEALTH · system health page + tile warning"
@@ -38,7 +38,7 @@ echo "[2/8] currency gate"
 H=$(md5sum "$LIVE"|cut -d' ' -f1); echo "      finance_app : $H"
 [ "$H" = "$WANT" ] || { echo "*** RED: not the expected build ($WANT). STOP -- tell Cowork this hash."; exit 1; }
 
-echo "[3/8] baseline smoke  (KNOWN RED -- see below)"
+echo "[3/8] baseline smoke"
 CUR=$(cd /root/finance && python3 finance_app.py --selftest 2>&1|grep -m1 "SMOKE "); echo "      $CUR"
 CUR_T=$(echo "$CUR"|sed -n 's#.*SMOKE [0-9]*/\([0-9]*\).*#\1#p')
 CUR_OK=$(echo "$CUR"|sed -n 's#.*SMOKE \([0-9]*\)/[0-9]*.*#\1#p')

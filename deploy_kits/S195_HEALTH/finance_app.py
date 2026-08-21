@@ -8570,6 +8570,8 @@ def selftest():
 # =====================================================================
 
 HEALTH_BACKUP_DIR = os.environ.get("FINANCE_BACKUP_DIR", "/root/backups/finance")
+# Yesterday is not "missing" until reception has had the morning to file it.
+FILING_DUE_HOUR = int(os.environ.get("FINANCE_FILING_DUE_HOUR", "12"))
 
 
 def _health_state(con):
@@ -8620,7 +8622,12 @@ def _health_state(con):
             "SELECT business_date, status FROM day_entry WHERE unit=? "
             "AND business_date>=? AND business_date<?",
             (UNIT, since, today.isoformat()))}
-        missing, unapproved = [], []
+        # Reception files YESTERDAY during the morning round. Flagging it the
+        # moment midnight passes would show red every single night and teach
+        # everyone to ignore this page. Yesterday only counts as late after
+        # FILING_DUE_HOUR; before that it is simply today's job, not a fault.
+        missing, unapproved, due_today = [], [], None
+        yday = today - dt.timedelta(days=1)
         for i in range(1, 8):
             d = (today - dt.timedelta(days=i))
             iso = d.isoformat()
@@ -8628,13 +8635,19 @@ def _health_state(con):
                 continue
             st = have.get(iso)
             if st is None:
-                missing.append(iso)
+                if d == yday and dt.datetime.now().hour < FILING_DUE_HOUR:
+                    due_today = iso              # not late yet
+                else:
+                    missing.append(iso)
             elif st not in ("approved", "locked"):
                 unapproved.append("%s (%s)" % (iso, st))
         if missing:
             add("days", "Days filed", "bad",
                 "not filed: " + ", ".join(missing),
                 "Reception has not sent these days.")
+        elif due_today:
+            add("days", "Days filed", "ok",
+                "%s is today's job (due by %d:00)" % (due_today, FILING_DUE_HOUR))
         elif unapproved:
             add("days", "Days filed", "warn",
                 "waiting for you: " + ", ".join(unapproved),
