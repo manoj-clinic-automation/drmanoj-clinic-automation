@@ -8577,7 +8577,10 @@ FILING_DUE_HOUR = int(os.environ.get("FINANCE_FILING_DUE_HOUR", "12"))
 def _health_state(con):
     """Every check, worst-first. state is 'ok' | 'warn' | 'bad'."""
     checks = []
-    rank = {"ok": 0, "warn": 1, "bad": 2}
+    # "info" is shown but never counts as a problem. Flags are notes; if they
+    # drove the tile warning it would be lit permanently and stop meaning
+    # anything -- the page itself says they are not failures.
+    rank = {"ok": 0, "info": 0, "warn": 1, "bad": 2}
 
     def add(key, label, state, detail, hint=""):
         checks.append(dict(key=key, label=label, state=state, detail=detail, hint=hint))
@@ -8696,11 +8699,11 @@ def _health_state(con):
         if not rows:
             add("flags", "Flags (30 days)", "ok", "none raised")
         else:
-            add("flags", "Flags (30 days)", "warn",
+            add("flags", "Flags (30 days)", "info",
                 ", ".join("%s x%d" % (r["code"], r["c"]) for r in rows[:5]),
-                "Flags are notes, not failures — worth a look, not an alarm.")
+                "Notes, not failures — worth a look, not an alarm.")
     except Exception as ex:                                       # noqa: BLE001
-        add("flags", "Flags (30 days)", "warn", "could not be read (%s)" % ex)
+        add("flags", "Flags (30 days)", "info", "could not be read (%s)" % ex)
 
     # ---- 5. the books' own backup ------------------------------------------
     try:
@@ -8763,6 +8766,7 @@ def page_health():
         return redirect(PORTAL_LOGIN, code=302)
     h = _health_state(db())
     tone = {"ok": ("#1f6f5c", "#eaf2ef", "All clear"),
+            "info": ("#6b675e", "#f0efea", "All clear"),
             "warn": ("#9a6a00", "#fbf3e0", "Needs a look"),
             "bad": ("#a1362c", "#faece9", "Something is wrong")}
     col, wash, word = tone[h["worst"]]

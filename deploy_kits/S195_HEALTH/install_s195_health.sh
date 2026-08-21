@@ -26,7 +26,7 @@ set -u
 cd "$(dirname "$0")"
 LIVE=/root/finance/finance_app.py
 SVC=clinic-finance.service
-WANT=fe596b291219c2bdcc62448a23b795cc
+WANT=89ab3e8eeb6b527f9a8e82f47b4746c4
 
 echo "==============================================================="
 echo " S195_HEALTH · system health page + tile warning"
