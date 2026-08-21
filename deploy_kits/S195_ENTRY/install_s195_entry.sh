@@ -1,64 +1,58 @@
 #!/bin/bash
 # =====================================================================
-#  S195_ENTRY — retire the old Daily Sale page for stale/typed URLs
+#  S195_ENTRY — /finance/entry redirects to the live page
 #
-#  Makes /finance/entry redirect to the role's live page (maker ->
-#  /finance/daily v2, checker -> /finance/review). The OLD single-page
-#  entry stays reachable ONLY via /finance/entry?legacy=1. Nothing else
-#  in finance_app.py changes.
+#  Reception hitting the OLD /finance/entry URL directly (typed/bookmark)
+#  saw the outdated single-page screen. This makes /finance/entry redirect
+#  by role: maker -> /finance/daily (v2), checker -> /finance/review. The
+#  old page stays reachable ONLY via /finance/entry?legacy=1. The app's
+#  own selftest fetches that carry the old page's body were repointed to
+#  ?legacy=1 so SMOKE stays ALL-GREEN. ONE file: finance_app.py.
 #
-#  Currency-gated: only patches the exact live S194E file (md5
-#  d2863c30...). Backs up, compiles, restarts, smoke-tests, and ROLLS
-#  BACK automatically if the service does not come back healthy.
+#  Currency-gated to the live S194E build. Backs up, py_compiles, runs the
+#  built-in --selftest (must be ALL-GREEN and not shrink), restarts, and
+#  ROLLS BACK automatically on any red.
 # =====================================================================
 set -u
-DEPLOY=/root/deploy
-APP="$DEPLOY/finance_app.py"
-SVC=clinic-finance
-PORT=8106
-LIVE_MD5=d2863c30ed0d3cc23126c7da13d9fe9b
 cd "$(dirname "$0")"
+LIVE_FIN=/root/finance/finance_app.py
+SVC=clinic-finance.service
+FIN_WANT=d2863c30ed0d3cc23126c7da13d9fe9b     # live = S194E
 
-echo "[1/6] kit bytes"; md5sum -c SUMS.md5 || { echo '*** RED. STOP.'; exit 1; }
+echo "==============================================================="
+echo " S195_ENTRY · /finance/entry -> live page redirect"
+echo "==============================================================="
 
-echo "[2/6] currency gate — on-box finance_app.py must be the live S194E"
-[ -f "$APP" ] || { echo "*** RED: $APP missing."; exit 1; }
-GOT=$(md5sum "$APP" | awk '{print $1}')
-if [ "$GOT" != "$LIVE_MD5" ]; then
-  echo "*** RED: on-box finance_app.py md5 = $GOT, expected $LIVE_MD5."
-  echo "    The live app is not the version this patch was built against."
-  echo "    STOPPING so nothing is clobbered. Tell Cowork the md5 above."
-  exit 1
-fi
-echo "      OK ($GOT)"
+echo "[1/8] kit bytes"; md5sum -c SUMS.md5 || { echo '*** RED. STOP.'; exit 1; }
 
-echo "[3/6] backup + install"
-cp "$APP" "$APP.bak_s195_entry" && echo "      backup: $APP.bak_s195_entry"
-cp finance_app.py "$APP"
-python3 -c "import py_compile;py_compile.compile('$APP',doraise=True)" || {
-  echo '*** RED compile — rolling back'; cp "$APP.bak_s195_entry" "$APP"; exit 1; }
+echo "[2/8] currency gate"
+[ -f "$LIVE_FIN" ] || { echo "*** RED: $LIVE_FIN missing."; exit 1; }
+H=$(md5sum "$LIVE_FIN"|cut -d' ' -f1); echo "      finance_app : $H"
+[ "$H" = "$FIN_WANT" ] || { echo "*** RED: finance_app is not the S194E build (expected $FIN_WANT). STOP."; echo "   (tell Cowork this hash and it reissues.)"; exit 1; }
 
-echo "[4/6] restart $SVC"
-systemctl restart "$SVC"
-sleep 3
+echo "[3/8] baseline smoke (--selftest)"
+CUR=$(cd /root/finance && python3 finance_app.py --selftest 2>&1|grep -m1 "SMOKE "); echo "      $CUR"
+echo "$CUR"|grep -Eq "SMOKE ([0-9]+)/\1 " || { echo '*** RED: baseline not all-green. STOP.'; exit 1; }
+CUR_T=$(echo "$CUR"|sed -n 's#.*SMOKE [0-9]*/\([0-9]*\).*#\1#p')
 
-echo "[5/6] smoke"
-ACTIVE=$(systemctl is-active "$SVC" 2>/dev/null)
-H=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 8 "http://127.0.0.1:$PORT/finance/healthz" 2>/dev/null)
-E=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 8 "http://127.0.0.1:$PORT/finance/entry" 2>/dev/null)
-echo "      service=$ACTIVE  healthz=$H  entry=$E"
-OK=1
-[ "$ACTIVE" = "active" ] || OK=0
-case "$H" in 200|301|302|401|403) ;; *) OK=0;; esac   # app responding (not 000/5xx)
-case "$E" in 200|301|302|401|403) ;; *) OK=0;; esac
-if [ "$OK" != "1" ]; then
-  echo "*** RED smoke — rolling back to $APP.bak_s195_entry"
-  cp "$APP.bak_s195_entry" "$APP"; systemctl restart "$SVC"; sleep 2
-  echo "    rolled back. service now: $(systemctl is-active "$SVC")"
-  exit 1
-fi
+TS=$(date +%Y%m%d_%H%M%S); BK=/root/finance/_backup_S195_ENTRY_$TS; mkdir -p "$BK"
+echo "[4/8] backup -> $BK"; cp -p "$LIVE_FIN" "$BK/"
+rollback(){ echo "*** RED -- ROLLBACK."; cp -p "$BK/finance_app.py" "$LIVE_FIN"; systemctl restart $SVC; sleep 2; echo "   service: $(systemctl is-active $SVC)"; exit 1; }
 
-echo "[6/6] GREEN — /finance/entry now redirects to the role's live page."
-echo "      Old page still at /finance/entry?legacy=1 . Backup kept."
-echo "      Quick check in a browser as reception: open /finance/entry -> should"
-echo "      land on /finance/daily (v2)."
+echo "[5/8] swap finance_app.py"; cp finance_app.py "$LIVE_FIN" || rollback
+echo "[6/8] py_compile"; python3 -c "import py_compile; py_compile.compile('$LIVE_FIN',doraise=True); print('      OK')" || rollback
+
+echo "[7/8] new smoke — ALL-GREEN, not shrunk"
+NEW=$(cd /root/finance && python3 finance_app.py --selftest 2>&1|grep -m1 "SMOKE "); echo "      $NEW"
+echo "$NEW"|grep -Eq "SMOKE ([0-9]+)/\1 " || rollback
+NEW_T=$(echo "$NEW"|sed -n 's#.*SMOKE [0-9]*/\([0-9]*\).*#\1#p')
+[ "$NEW_T" -ge "$CUR_T" ] || { echo "*** RED: smoke shrank ($CUR_T -> $NEW_T)."; rollback; }
+
+echo "[8/8] restart + verify"; systemctl restart $SVC; sleep 2; systemctl is-active --quiet $SVC || rollback
+
+echo "==============================================================="
+echo " GREEN.  /finance/entry now redirects (maker->/finance/daily,"
+echo " checker->/finance/review).  Old page: /finance/entry?legacy=1 ."
+echo " finance_app.py $(md5sum $LIVE_FIN|cut -d' ' -f1)  smoke $NEW_T (was $CUR_T)"
+echo " Backup: $BK .  Pin the new md5."
+echo "==============================================================="

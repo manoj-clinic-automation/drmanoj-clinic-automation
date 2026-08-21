@@ -748,11 +748,10 @@ def page_root():
 
 @app.route("/finance/entry")
 def page_entry():
-    # S195: /finance/daily (the two-stage Daily Sale v2) is the live page.
-    # The old single-page entry is kept ONLY as an explicit escape hatch
-    # (/finance/entry?legacy=1). Any other hit is redirected to the page
-    # for the person's role, so a stale bookmark or a typed old URL never
-    # lands reception on the outdated screen again.
+    # S195: /finance/daily (Daily Sale v2) is the live page. The old single-
+    # page entry is kept ONLY as an explicit escape hatch (?legacy=1). Any
+    # other hit is redirected to the page for the person's role, so a stale
+    # bookmark or a typed old URL never lands reception on the old screen.
     if request.args.get("legacy") == "1":
         return send_from_directory(UI_DIR, "finance_entry.html")
     u = current_user()
@@ -5556,7 +5555,7 @@ def selftest():
     check("root lands checker on the review screen",
           'id="btnApprove"' in r.get_data(as_text=True))
 
-    r = c.get("/finance/entry")
+    r = c.get("/finance/entry?legacy=1")
     check("entry page 200", r.status_code == 200)
     html = r.get_data(as_text=True)
     # F-132: the opening/closing display is GONE. Both were `v_cash_ledger`
@@ -7834,7 +7833,7 @@ def selftest():
     # block's own saves produce, never the store's absolute state.
     os.environ["FINANCE_DEV_USER"] = _d2u or "selftest"
     os.environ["FINANCE_DEV_ROLE"] = "maker"
-    _eh = c.get("/finance/entry").get_data(as_text=True)
+    _eh = c.get("/finance/entry?legacy=1").get_data(as_text=True)
     for _cv, _cl in EXPENSE_MENU:
         check("E1a: the served page offers '%s'" % _cl, _cl in _eh)
     # careful: "Someone else (reserve)" legitimately exists in the
@@ -8167,7 +8166,7 @@ def selftest():
         _f4c.commit(); _f4c.close()
 
         # ---- the served page: refill wiring + the new menu + the bill button
-        _eh2 = c.get("/finance/entry").get_data(as_text=True)
+        _eh2 = c.get("/finance/entry?legacy=1").get_data(as_text=True)
         check("D330: the page refills expenses on load (the draft-resave "
               "hazard, closed)", "forEach(function(e){ addExpense(e); })" in _eh2)
         check("D330: the page refills movements and bills on load",
@@ -8269,7 +8268,7 @@ def selftest():
     _DESIGN_V1_MARKERS = ("--surface-page:#f3f2ee", 'id="toTop"',
                           'class="kick"', 'details class="help"')
     _DESIGN_V1_PAGES = (
-        ("/finance/entry",     "maker",   True),   # S188_D2a
+        ("/finance/entry?legacy=1", "maker",   True),   # S188_D2a
         ("/finance/approvals", "checker", True),   # S187_H1b / H1c
         ("/finance/workbench", "checker", False),  # S187_M1a -- pre-v1
         ("/finance/review",    "checker", False),  # S179     -- pre-v1
