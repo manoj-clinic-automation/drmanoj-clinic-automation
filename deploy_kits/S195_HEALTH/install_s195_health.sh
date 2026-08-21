@@ -38,10 +38,23 @@ echo "[2/8] currency gate"
 H=$(md5sum "$LIVE"|cut -d' ' -f1); echo "      finance_app : $H"
 [ "$H" = "$WANT" ] || { echo "*** RED: not the expected build ($WANT). STOP -- tell Cowork this hash."; exit 1; }
 
-echo "[3/8] baseline smoke"
+echo "[3/8] baseline smoke  (KNOWN RED -- see below)"
 CUR=$(cd /root/finance && python3 finance_app.py --selftest 2>&1|grep -m1 "SMOKE "); echo "      $CUR"
-echo "$CUR"|grep -Eq "SMOKE ([0-9]+)/\1 " || { echo '*** RED: baseline not all-green. STOP.'; exit 1; }
 CUR_T=$(echo "$CUR"|sed -n 's#.*SMOKE [0-9]*/\([0-9]*\).*#\1#p')
+CUR_OK=$(echo "$CUR"|sed -n 's#.*SMOKE \([0-9]*\)/[0-9]*.*#\1#p')
+# The live baseline is 570/573. Three checks assert a FROZEN non-cash total
+# ("350.00", exactly 2 heads) that only held while no real no-payment bills
+# existed. Darpan filed the first real ones on 20-08-2026, so they went red with
+# no code change -- the F-106 shape. This kit FIXES those three to assert the
+# rule instead of the snapshot, so we do NOT demand a green baseline here; we
+# demand a green result AFTER the swap, which is the stronger proof.
+if [ "$CUR_OK" != "$CUR_T" ]; then
+  echo "      baseline is red ($CUR_OK/$CUR_T). Expected -- the three frozen"
+  echo "      non-cash assertions. This kit fixes them; step 7 must come back"
+  echo "      ALL-GREEN or we roll back."
+  cd /root/finance && python3 finance_app.py --selftest 2>&1 | grep "FAIL:" | sed 's/^/        /'
+  cd - >/dev/null
+fi
 
 TS=$(date +%Y%m%d_%H%M%S); BK=/root/finance/_backup_S195_HEALTH_$TS; mkdir -p "$BK"
 echo "[4/8] backup -> $BK"; cp -p "$LIVE" "$BK/"
@@ -52,7 +65,7 @@ echo "[6/8] py_compile"; python3 -c "import py_compile; py_compile.compile('$LIV
 
 echo "[7/8] smoke — ALL-GREEN, not shrunk"
 NEW=$(cd /root/finance && python3 finance_app.py --selftest 2>&1|grep -m1 "SMOKE "); echo "      $NEW"
-echo "$NEW"|grep -Eq "SMOKE ([0-9]+)/\1 " || rollback
+echo "$NEW"|grep -Eq "SMOKE ([0-9]+)/\1 " || { echo "*** RED: still not all-green after the fix."; cd /root/finance && python3 finance_app.py --selftest 2>&1 | grep "FAIL:" | sed 's/^/        /'; rollback; }
 NEW_T=$(echo "$NEW"|sed -n 's#.*SMOKE [0-9]*/\([0-9]*\).*#\1#p')
 [ "$NEW_T" -ge "$CUR_T" ] || { echo "*** RED: smoke shrank ($CUR_T -> $NEW_T)."; rollback; }
 

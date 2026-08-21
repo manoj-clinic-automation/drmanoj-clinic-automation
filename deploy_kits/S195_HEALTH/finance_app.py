@@ -6033,14 +6033,23 @@ def selftest():
 
     r = c.get("/finance/api/month/%s" % D1[:7])
     j = r.get_json()
-    check("month reports non-cash total", j["totals"]["noncash"] == "350.00")
-    check("month breaks non-cash down by head", len(j["noncash_by_head"]) == 2)
+    # F-106 shape. These asserted the month's non-cash was EXACTLY this test's
+    # own 350.00 and exactly 2 heads -- true only while NO real no-payment bills
+    # existed anywhere. The first real ones were filed on 20-08-2026 (Rs 3,000)
+    # and all three checks went red without a line of code changing. Assert the
+    # RULE -- this day's bills are counted in the month -- not a frozen total.
+    _mnc_s = j["totals"]["noncash"]
+    _mnc_p = int(round(float(str(_mnc_s).replace(",", "")) * 100))
+    check("month reports non-cash total", _mnc_p >= 35000)
+    check("month breaks non-cash down by head", len(j["noncash_by_head"]) >= 2)
 
     os.environ["FINANCE_DEV_ROLE"] = "checker"          # F-127: checker-only now
     r = c.get("/finance/api/tile")
     j = r.get_json()
     check("tile tracks days since a bank trip", "days_since_bank_deposit" in j)
-    check("tile reports non-cash month to date", j["noncash_month_to_date"] == "350.00")
+    # stronger than the old frozen "350.00": the tile must AGREE with the month
+    # endpoint, which is the property that actually matters and cannot rot.
+    check("tile reports non-cash month to date", j["noncash_month_to_date"] == _mnc_s)
     os.environ["FINANCE_DEV_ROLE"] = "maker"
 
     # a correction keeps the old version verbatim
