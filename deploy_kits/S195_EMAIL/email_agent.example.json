@@ -1,0 +1,15 @@
+{
+  "user": "drmka.ortho@gmail.com",
+  "app_password": "<paste the 16-char Gmail app password here, keep the quotes>",
+  "trusted": ["drmanojkragarwal@gmail.com", "drmka.ortho@gmail.com"],
+  "subject_trigger": "Q:",
+  "done_label": "clinic-agent-done",
+  "imap_host": "imap.gmail.com",
+  "smtp_host": "smtp.gmail.com",
+  "smtp_port": 465,
+  "python": "/usr/bin/python3",
+  "dr_query": "/root/deploy/dr_query.py",
+  "max_reply_chars": 12000,
+  "cmd_timeout_s": 25,
+  "max_per_poll": 25
+}
