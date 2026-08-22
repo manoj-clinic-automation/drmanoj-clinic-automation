@@ -34,11 +34,42 @@ set GITNP=%GIT% --no-pager
 
 cd /d "%REPO_DIR%"
 
-if exist ".git\index.lock" (
-  echo !! .git\index.lock is present - another git is running, or a run died.
-  echo    Close GitHub Desktop, delete that file, then run this again.
-  pause & exit /b 1
-)
+REM ---- stale git lock sweep (S195) -----------------------------------------
+REM  A lock only means something while a git process is actually running. Left
+REM  behind by a crash -- or by a sandbox that cannot delete files -- it killed
+REM  every later publish and needed a hand fix each time. No git running + a
+REM  lock present = stale, cleared here and said out loud. Git running = real.
+set LOCKFOUND=
+if exist ".git\index.lock" set LOCKFOUND=1
+if exist ".git\HEAD.lock" set LOCKFOUND=1
+if exist ".git\config.lock" set LOCKFOUND=1
+if not defined LOCKFOUND goto :locks_clear
+
+tasklist /fi "IMAGENAME eq git.exe" 2>nul | find /i "git.exe" >nul
+if not errorlevel 1 goto :git_running
+
+echo    stale git lock found, and no git process is running - clearing it.
+if exist ".git\index.lock" del /f /q ".git\index.lock"
+if exist ".git\HEAD.lock" del /f /q ".git\HEAD.lock"
+if exist ".git\config.lock" del /f /q ".git\config.lock"
+set LOCKFOUND=
+if exist ".git\index.lock" set LOCKFOUND=1
+if exist ".git\HEAD.lock" set LOCKFOUND=1
+if defined LOCKFOUND goto :lock_stuck
+goto :locks_clear
+
+:lock_stuck
+echo !! the lock could not be removed - something still holds it.
+echo    Close GitHub Desktop / editors and run this again. NOTHING published.
+pause & exit /b 1
+
+:git_running
+echo !! a git lock exists AND a git process is running.
+echo    Close GitHub Desktop / any editor doing git, wait, then run this again.
+echo    NOTHING published.
+pause & exit /b 1
+
+:locks_clear
 
 echo Staging deploy_kits ...
 %GITNP% add deploy_kits >nul 2>&1 || ( echo !! git add FAILED & pause & exit /b 1 )

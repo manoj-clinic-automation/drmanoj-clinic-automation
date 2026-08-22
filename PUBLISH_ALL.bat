@@ -29,11 +29,45 @@ if not defined GIT ( echo !! git.exe not found & pause & exit /b 1 )
 
 cd /d "%REPO_DIR%"
 
-if exist ".git\HEAD.lock" (
-  echo !! .git\HEAD.lock exists - close GitHub Desktop / editors, then rename
-  echo    the lock ^(HEAD.lock.stale^) and run this again. NOTHING published.
-  pause & exit /b 1
-)
+REM ---- stale git lock sweep (S195) -----------------------------------------
+REM  A lock file only means something while a git process is actually running.
+REM  Left behind by a crash -- or by a sandbox that cannot delete files -- it
+REM  killed every later publish with "index.lock: File exists" and needed a
+REM  hand fix each time. Now: no git running + a lock present = stale, cleared
+REM  here and said out loud. Git running + a lock present = real, refuse.
+set LOCKFOUND=
+if exist ".git\index.lock" set LOCKFOUND=1
+if exist ".git\HEAD.lock" set LOCKFOUND=1
+if exist ".git\config.lock" set LOCKFOUND=1
+if exist ".git\shallow.lock" set LOCKFOUND=1
+if not defined LOCKFOUND goto :locks_clear
+
+tasklist /fi "IMAGENAME eq git.exe" 2>nul | find /i "git.exe" >nul
+if not errorlevel 1 goto :git_running
+
+echo    stale git lock found, and no git process is running - clearing it.
+if exist ".git\index.lock" del /f /q ".git\index.lock"
+if exist ".git\HEAD.lock" del /f /q ".git\HEAD.lock"
+if exist ".git\config.lock" del /f /q ".git\config.lock"
+if exist ".git\shallow.lock" del /f /q ".git\shallow.lock"
+set LOCKFOUND=
+if exist ".git\index.lock" set LOCKFOUND=1
+if exist ".git\HEAD.lock" set LOCKFOUND=1
+if defined LOCKFOUND goto :lock_stuck
+goto :locks_clear
+
+:lock_stuck
+echo !! the lock could not be removed - something still holds it.
+echo    Close GitHub Desktop / editors and run this again. NOTHING published.
+pause & exit /b 1
+
+:git_running
+echo !! a git lock exists AND a git process is running.
+echo    Close GitHub Desktop / any editor doing git, wait a moment, then run
+echo    this again. NOTHING published.
+pause & exit /b 1
+
+:locks_clear
 
 echo Checking what is pending...
 %GIT% add -A . || ( echo !! git add FAILED & pause & exit /b 1 )
