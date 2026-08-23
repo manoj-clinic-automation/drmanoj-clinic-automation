@@ -51,17 +51,31 @@ cp portal.py "$POR" || rollback
 echo "[6/8] py_compile"
 "$PY" -c "import py_compile; py_compile.compile('$POR',doraise=True); print('      portal OK')" || rollback
 
-echo "[7/8] restart + probes"
+echo "[7/8] restart"
 systemctl restart $PSVC || rollback
 sleep 2
 systemctl is-active --quiet $PSVC || rollback
-curl -s -o /dev/null -w "      /portal/health -> HTTP %{http_code}\n" -m 5 http://127.0.0.1:8090/portal/health
-C=$(curl -s -o /dev/null -w "%{http_code}" -m 5 http://127.0.0.1:8090/portal)
-echo "      /portal        -> HTTP $C (200 or 302-to-login both fine)"
-case "$C" in 200|302) ;; *) rollback ;; esac
+# informational only -- this box answers 301 to plain-HTTP probes on 8090
+# (measured at the v2 install, old AND new bytes alike; the S196 installer
+# printed the same and never gated on it). A code is printed, never judged.
+curl -s -o /dev/null -w "      /portal/health -> HTTP %{http_code} (informational)\n" -m 5 http://127.0.0.1:8090/portal/health || true
 
-echo "[8/8] the new page is the one being served"
-curl -s -m 5 http://127.0.0.1:8090/portal/login | grep -q "Clinic Portal" || rollback
+echo "[8/8] the INSTALLED bytes serve the new page (app render path, no network shape assumed)"
+"$PY" - <<'PYEOF' || rollback
+import importlib.util
+spec = importlib.util.spec_from_file_location("live_portal", "/root/portal/portal.py")
+m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+m._usable = lambda: True; m._authed = lambda r: True; m._sso_ready = lambda: True
+m._sso_user = lambda r: {"user": "manoj", "role": "doctor"}
+m._is_clinic_pc = lambda r: False
+with m.app.test_client() as c:
+    h = c.get("/portal").get_data(as_text=True)
+assert "--bg:#0f2233" in h, "dark scheme missing"
+assert 'id="toTop"' in h, "back-to-top missing"
+assert 'id="healthHero"' in h, "health hero missing"
+assert h.index('nm">Call Console<') < h.index('nm">Call Tracker<'), "tile order wrong"
+print("      installed bytes render the v2 home page OK")
+PYEOF
 
 echo "==============================================================="
 echo " GREEN.  portal.py $(md5of $POR)"
