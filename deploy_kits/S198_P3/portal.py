@@ -1,0 +1,3812 @@
+#!/usr/bin/env python3
+"""
+portal.py  —  Doctor + Manager Clinic Launcher Portal  (now the SSO broker)
+===========================================================================
+Dr. Manoj Agarwal Clinic, Bareilly.  Session 19 · 30 Jun 2026.
+SSO broker wiring added Session 158 (portal SSO, step 1).
+Session 159: Group D (Clinic-PC-only local tiles) + personal tiles, both doctor-only,
+with a PC-marker so the local tiles show only on the clinic PC's own browser.
+
+ONE self-contained Flask app at followup.dr-manoj.in/portal.
+
+TWO MODES — the file decides at runtime, so this change is safe + reversible:
+  * LEGACY (default)  : the original PIN login + device-trust. IDENTICAL to before.
+  * BROKER (SSO)      : active ONLY when BOTH a CLINIC_SSO_SECRET is configured AND
+                        at least one user exists in the clinic user store. Then login
+                        is username + password (per-user identity + role), and a signed
+                        `clinic_sso` cookie scoped to .dr-manoj.in is issued so the other
+                        clinic apps (attendance / ledger / asset — later steps) trust it.
+  Until you set the secret and seed a user, this file behaves EXACTLY like the old one.
+
+--------------------------------------------------------------------------
+Secrets (from portal_config.py / env, NEVER hardcoded):
+  - PORTAL_PIN_HASH / PORTAL_PIN_SALT / PORTAL_TOKEN_SEED  (legacy PIN + device trust)
+  - CLINIC_SSO_SECRET   : shared HMAC secret for the SSO token. MUST be identical on
+                          every clinic app that later trusts the cookie. env/config only.
+Clinic users + roles live in the store file (clinic_users.py; default /root/portal/clinic_users.json,
+  chmod 600, gitignored). Adding lab / Manoj Bhati / Sanjeevni later = one admin command.
+--------------------------------------------------------------------------
+
+Run (VPS):
+    /root/wa/venv/bin/python3 /root/portal/portal.py        # dev
+    gunicorn -b 127.0.0.1:8090 portal:app                   # prod (via systemd)
+
+Reverse proxy maps  followup.dr-manoj.in/portal  ->  127.0.0.1:8090
+"""
+
+import os
+import json
+import sqlite3
+import datetime
+import hmac
+import hashlib
+import secrets
+import urllib.request
+import urllib.parse
+from functools import wraps
+from flask import (
+    Flask, request, redirect, make_response, render_template_string, abort, send_file
+)
+
+# --- SSO broker libraries (optional import: if absent, the portal still runs legacy PIN) ---
+try:
+    import clinic_sso
+    import clinic_users
+    _SSO_LIBS = True
+except Exception:
+    _SSO_LIBS = False
+
+# ---------------------------------------------------------------------------
+# CONFIG  — real values come from portal_config.py on the VPS (chmod 600),
+# or environment variables. NOTHING secret is hardcoded here.
+# ---------------------------------------------------------------------------
+try:
+    import portal_config as cfg          # VPS-only file, gitignored
+    PIN_HASH    = getattr(cfg, "PORTAL_PIN_HASH", "")
+    PIN_SALT    = getattr(cfg, "PORTAL_PIN_SALT", "")
+    TOKEN_SEED  = getattr(cfg, "PORTAL_TOKEN_SEED", "")
+    COOKIE_NAME = getattr(cfg, "PORTAL_COOKIE_NAME", "clinic_portal_device")
+    SSO_SECRET  = getattr(cfg, "CLINIC_SSO_SECRET", "")
+except Exception:
+    PIN_HASH    = os.environ.get("PORTAL_PIN_HASH", "")
+    PIN_SALT    = os.environ.get("PORTAL_PIN_SALT", "")
+    TOKEN_SEED  = os.environ.get("PORTAL_TOKEN_SEED", "")
+    COOKIE_NAME = os.environ.get("PORTAL_COOKIE_NAME", "clinic_portal_device")
+    SSO_SECRET  = os.environ.get("CLINIC_SSO_SECRET", "")
+
+# env can always supplement a config file that predates the SSO secret
+if not SSO_SECRET:
+    SSO_SECRET = os.environ.get("CLINIC_SSO_SECRET", "")
+
+# Personal-account tile targets (Drive folder / sheet). These are capability URLs,
+# so they live ONLY in portal_config.py (chmod 600, gitignored) or env — never in
+# this committed file and never in the repo (ruling S159, F-31 family). Blank -> the
+# tile renders as MANUAL until you fill the value in portal_config.py.
+try:
+    _CFG = cfg
+except NameError:
+    _CFG = None
+
+
+def _cfg_get(name, default=""):
+    v = getattr(_CFG, name, None) if _CFG is not None else None
+    return v if v else os.environ.get(name, default)
+
+
+CC_SAVER_URL      = _cfg_get("CC_SAVER_URL")
+INBOX_JANITOR_URL = _cfg_get("INBOX_JANITOR_URL")
+# S198_P1 (owner): the Janitor's OUTPUT sheet ("Payment Register", personal
+# account). Capability URL -- portal_config.py or env ONLY (S159 ruling,
+# F-31 family). Blank -> the tile renders MANUAL until filled.
+PAYMENT_REGISTER_URL = _cfg_get("PAYMENT_REGISTER_URL")
+# S198_P2 (A3): clinic forms live ONLY on the box -- never in the PUBLIC
+# repo (D320). Adding a form = uploading it on /portal/forms (doctor).
+FORMS_DIR = os.environ.get("PORTAL_FORMS_DIR", "/root/portal/forms")
+GMB_HTML_PATH     = _cfg_get("GMB_HTML_PATH", "/root/portal/gmb.html")
+
+STORE = clinic_users.DEFAULT_STORE if _SSO_LIBS else None
+
+app = Flask(__name__)
+
+# ---------------------------------------------------------------------------
+# TILES  — flip "live": False -> True and fill "url" to light a tile up later.
+# No rebuild needed; just edit this list and restart the service.
+# ---------------------------------------------------------------------------
+TILES = [
+    # ============================ DOCTOR + shared ============================
+    {"icon": "\U0001F4CA", "name": "Clinic Gist",
+     "desc": "Live bird's-eye \u2014 calls, pipeline, pending", "live": True,
+     "url": "/portal/gist", "gist": True,
+     "roles": ["doctor"]},
+
+    {"icon": "\U0001F3A7", "name": "Call Console",
+     "desc": "Your view \u2014 calls \u00b7 staff \u00b7 leads \u00b7 coaching", "live": True,
+     "url": "/portal/console",
+     "roles": ["doctor"]},
+
+    {"icon": "\U0001F4DE", "name": "Call Tracker",
+     "desc": "Staff's working tracker (the Sheet app)", "live": True,
+     "url": "https://script.google.com/macros/s/AKfycbyoQ5R3yvFC0B8arOnVWo4002BFfBGIVM2cBwpaMwUM4GaYw7d89jk1U_g38Ht0omcF/exec",
+     "roles": ["doctor"]},
+
+    {"icon": "\u2B50", "name": "GMB Review Assist",
+     "desc": "Google review composer \u00b7 any device", "live": True,
+     "url": "/portal/gmb", "roles": ["doctor"]},
+
+
+    {"icon": "\U0001F4AC", "name": "Send WhatsApp",
+     "desc": "Approved templates \u00b7 clinic number \u00b7 any patient", "live": True,
+     "url": "/portal/wa",
+     "roles": ["doctor"]},
+
+    {"icon": "\U0001F4E3", "name": "Follow-up WhatsApps",
+     "desc": "Today's due list \u00b7 batch send by section", "live": True,
+     "url": "/portal/wa/followups",
+     "roles": ["doctor"]},
+
+    {"icon": "\U0001F4F1", "name": "WhatsApp Approvals",
+     "desc": "Vendor panel \u2014 active again", "live": True,
+     "url": "https://followup.dr-manoj.in/wa-approve",
+     "roles": ["doctor"]},
+
+    {"icon": "\U0001F4CB", "name": "Surgical Case Pack",
+     "desc": "Estimate \u00b7 OT list \u00b7 consent \u00b7 Ayushman", "live": True,
+     "url": "/portal/casepack",
+     "roles": ["doctor"]},
+
+    # S198_P2 (A3, owner rulings): everyone logged in prints/downloads;
+    # only a doctor adds/removes (upload on the page itself).
+    {"icon": "\U0001F5A8\uFE0F", "name": "Forms & Downloads",
+     "desc": "Clinic forms \u2014 print & download", "live": True,
+     "url": "/portal/forms", "roles": ["doctor", "manager", "staff"]},
+
+
+    {"icon": "\U0001F465", "name": "Attendance",
+     "desc": "Biometric punches \u2192 monthly report", "live": True,
+     "url": "https://attendance.dr-manoj.in",
+     "roles": ["doctor", "manager", "staff"]},
+
+    {"icon": "\U0001F4C5", "name": "Staff Register",
+     "desc": "Daily register \u2014 reads Attendance", "live": True,
+     "url": "https://attendance.dr-manoj.in/register/review",
+     "review_counts": True,
+     "roles": ["doctor", "manager", "staff"]},
+
+    {"icon": "\U0001F4B0", "name": "Salary \u2014 approve & lock",
+     "desc": "From Attendance + Ledger deductions", "live": True,
+     "url": "https://attendance.dr-manoj.in/register/salary",
+     "roles": ["doctor"]},
+
+    {"icon": "\U0001F5C2\uFE0F", "name": "Staff Ledger",
+     "desc": "Advances & loans \u2014 recovered at salary close", "live": True,
+     "url": "https://attendance.dr-manoj.in/ledger",
+     "roles": ["doctor"]},
+
+    {"icon": "\U0001F5C2\uFE0F", "name": "Staff Ledger \u2014 Entry",
+     "desc": "Enter staff money events", "live": True,
+     "url": "https://attendance.dr-manoj.in/ledger",
+     "roles": ["manager"]},
+
+    {"icon": "\U0001F4E6", "name": "Asset Register",
+     "desc": "Clinic assets & AMC", "live": True,
+     "url": "https://assets.dr-manoj.in",
+     "roles": ["doctor", "manager"]},
+
+    {"icon": "\U0001F4F7", "name": "Scan Purchase",
+     "desc": "Photograph a new bill \u2192 get a stamp number", "live": True,
+     "url": "https://assets.dr-manoj.in/intake",
+     "roles": ["staff", "manager"]},
+
+    {"icon": "\U0001F511", "name": "Manage Users",
+     "desc": "Logins: add, role, password, active, remove", "live": True,
+     "url": "https://followup.dr-manoj.in/portal/users",
+     "roles": []},   # manoj-only: shown via USER_TILE_EXTRA + guarded by the route
+
+
+    {"icon": "\U0001F4B3", "name": "UPI Sheet",
+     # S198_P1 (owner ruling): demoted -- medical+clinic UPI recon lives in
+     # the finance app since S195; this Sheet covers LAB + legacy and hosts
+     # the GAS push. The tile retires when the lab module lands on the VPS.
+     "desc": "Lab + legacy recon \u2014 retires when lab moves", "live": True,
+     "url": "https://docs.google.com/spreadsheets/d/1rwxrqAiLh9xBLezZLe7VqBWeCn3FRf_GZqOAEZi-oWc",
+     "roles": ["doctor"]},
+
+    {"icon": "\U0001F697", "name": "Vehicle Tracking",
+     "desc": "Track360 Sheet \u2014 VPS module planned", "live": True,
+     "url": "https://docs.google.com/spreadsheets/d/1rwxrqAiLh9xBLezZLe7VqBWeCn3FRf_GZqOAEZi-oWc/edit?gid=762286425#gid=762286425",
+     "roles": ["doctor"]},
+
+    {"icon": "\U0001F4C8", "name": "Monthly Accounting",
+     "desc": "Sheet + Form \u2014 fine for now, migrates later", "live": True,
+     "url": "https://docs.google.com/spreadsheets/d/13eJo58J7G8n846mGlyv-pHpDILQnCrK-8ZZekyi1Hrg",
+     "roles": ["doctor"]},
+
+
+
+    # --- Sanjeevni finance (S179) ------------------------------------------
+    {"icon": "\U0001F3EA", "name": "Daily Sale",
+     # S187_P2a: the maker's tile carries his own to-do line (days to file,
+     # today's status) via the same fail-soft client fetch pattern as the
+     # Sanjeevni and Staff Register tiles. The endpoint answers only a seated
+     # medical maker/checker; anyone else keeps the static text.
+     "desc": "Enter today's shop sale", "live": True,
+     "url": "/finance/entry",
+     "daily_sale_counts": True,
+     "roles": ["staff"]},
+    {"icon": "\U0001F4B5", "name": "Sanjeevni Medicos",
+     # S187_P1a: the tile now lands on the APPROVALS hub (one click, every
+     # section linked from there) instead of the review dead-end, and carries
+     # a live pending summary exactly like the Staff Register tile does. The
+     # counts are fetched client-side (data-sanjeevni-counts below) so the
+     # portal never waits on the finance app; if finance is down or the user
+     # is not the medical checker, the static text stands and nothing breaks.
+     "desc": "Approve days · Marg reports · month close", "live": True,
+     "url": "/finance/approvals",
+     "sanjeevni_counts": True,
+     "roles": ["doctor"]},
+
+    # --- Clinic finance (S182) ---------------------------------------------
+    # roles:[] on BOTH tiles - they appear only via USER_TILE_EXTRA below, because
+    # the clinic rosters are named people (unit_role), not a portal role. The
+    # /finance/clinic/* routes guard themselves; a tile is convenience, never
+    # authorisation (F-84). Wording here is the STATIC FALLBACK - the live label
+    # comes from clinic.tile.* via /finance/clinic/api/tile-meta (see the script
+    # at the foot of PORTAL_HTML), and the tile keeps this text if that is down.
+    {"icon": "\U0001F3E5", "name": "Daily Collection",
+     "desc": "\u0906\u091C \u0915\u0940 OPD / X-Ray / Procedure entry", "live": True,
+     "url": "/finance/clinic/entry", "clinic_meta": True,
+     "roles": []},
+    {"icon": "\U0001F9FE", "name": "Clinic",
+     "desc": "Review and approve the clinic day", "live": True,
+     "url": "/finance/clinic/review", "clinic_meta": True,
+     "roles": []},
+    # --- HELD / MANUAL (doctor only) --------------------------------------
+    # S198_P1 (owner rulings, 23-Aug): Ayushman Finder + Surgical Estimate
+    # live INSIDE the Case Pack; "WABA Send" is the Send WhatsApp tile;
+    # Nutrition/Physio is clinic_writer on the clinic PC (folded into the
+    # Vitals & Plan tile). Revenue Reconciler stays -- first in the
+    # local-PC -> VPS migration queue.
+    {"icon": "\U0001F9FE", "name": "Revenue Reconciler",
+     "desc": "Local PC \u2014 migrate first", "live": False, "url": "", "roles": ["doctor"]},
+
+    # ===================== CLINIC PC ONLY  (Group D) ========================
+    # These open localhost apps that resolve ONLY on the clinic PC itself, so
+    # they are shown ONLY on a browser marked as the clinic PC (see /portal/mark-pc).
+    # No probing -> immune to Chrome's localhost restrictions. Plain links.
+    {"icon": "\U0001F9E0", "name": "Follow-up Tracker",
+     "desc": "Docterz \u2192 call list \u00b7 Clinic PC", "live": True,
+     "url": "http://localhost:5000", "roles": ["doctor"], "pc_only": True},
+
+    {"icon": "\U0001FA7A", "name": "Vitals & Plan",
+     "desc": "clinic_writer \u2014 Vitals \u00b7 Nutrition \u00b7 Physio", "live": True,
+     "url": "http://localhost:5057", "roles": ["doctor"], "pc_only": True},
+
+    {"icon": "\U0001F4CB", "name": "Case Pack \u00b7 PC fallback",
+     "desc": "Keeps saved cases \u2014 until they reach the VPS", "live": True,
+     "url": "http://localhost:5058", "roles": ["doctor"], "pc_only": True},
+
+    {"icon": "\U0001F9FE", "name": "CC Statements \u2192 Tally",
+     "desc": "Statement conversion \u00b7 Clinic PC", "live": True,
+     "url": "http://localhost:5059", "roles": ["doctor"], "pc_only": True},
+
+    # ===================== PERSONAL  (doctor only) =========================
+    # Targets come from portal_config.py (git-ignored). Blank -> shows MANUAL.
+    {"icon": "\U0001F4C7", "name": "CC Statement Saver",
+     "desc": "Card statements \u2192 Drive", "live": bool(CC_SAVER_URL),
+     "url": CC_SAVER_URL, "roles": ["doctor"]},
+
+    {"icon": "\U0001F9F9", "name": "Inbox Janitor",
+     "desc": "Gmail housekeeper \u2014 rules & renewals", "live": bool(INBOX_JANITOR_URL),
+     "url": INBOX_JANITOR_URL, "roles": ["doctor"]},
+
+    # S198_P1 (owner): the Janitor's output -- ONE click to view/print/
+    # export/download (all native Sheet functions once open).
+    {"icon": "\U0001F4D2", "name": "Payment Register",
+     "desc": "Janitor's sheet \u2014 view \u00b7 print \u00b7 export", "live": bool(PAYMENT_REGISTER_URL),
+     "url": PAYMENT_REGISTER_URL, "roles": ["doctor"]},
+
+    # S198_P3 (owner priority): the Renewals Master v2 sheet -- the watch-list
+    # the Inbox Janitor's digest nags from. Plain spreadsheet URL, inline per
+    # the UPI-Sheet/Monthly-Accounting precedent (the sheet id already lives in
+    # the public repo's janitor source; access stays gated by Google login).
+    {"icon": "\U0001F5D3\uFE0F", "name": "Renewals",
+     "desc": "Master sheet \u2014 every renewal & due date", "live": True,
+     "url": "https://docs.google.com/spreadsheets/d/1OB70_Mapuugc33zkfFevwnrS0e8s1NdWzsrzJDqO38E",
+     "roles": ["doctor"]},
+
+    # ================== PERSONAL HEALTH CLUSTER (doctor only) ===============
+    # Own subdomains, each with its OWN login (owner-key). Link-tiles: clicking
+    # opens the app's own sign-in. Public hostnames -> no secret, inline URLs.
+    {"icon": "\U0001F48A", "name": "RxGuard",
+     "desc": "Prescription safety \u00b7 own login", "live": True,
+     "url": "https://rx.dr-manoj.in", "roles": ["doctor"]},
+
+    {"icon": "\U0001F34E", "name": "GutLog",
+     "desc": "Gut & diet log \u00b7 own login", "live": True,
+     "url": "https://health.dr-manoj.in", "roles": ["doctor"]},
+
+    {"icon": "\U0001F4AA", "name": "FitLog",
+     "desc": "Fitness log \u00b7 own login", "live": True,
+     "url": "https://fit.dr-manoj.in", "roles": ["doctor"]},
+]
+
+# ---------------------------------------------------------------------------
+# TILE GROUPING  — sectioned, mobile-friendly layout. Sections with no tile
+# visible to the current role/PC are dropped entirely (see _visible_sections).
+# ---------------------------------------------------------------------------
+GROUP_ORDER = ["Clinic", "Staff", "Money & Accounts", "Personal & Health",
+               "Clinic PC tools", "Admin"]
+
+_TILE_GROUP = {
+    "Clinic Gist": "Clinic",
+    "Call Console": "Clinic", "Call Tracker": "Clinic",
+    "Surgical Case Pack": "Clinic", "Send WhatsApp": "Clinic",
+    "Follow-up WhatsApps": "Clinic", "WhatsApp Approvals": "Clinic",
+    "GMB Review Assist": "Clinic", "Forms & Downloads": "Clinic",
+    "Asset Register": "Clinic", "Scan Purchase": "Clinic",
+    # S198_P1: the staff money/attendance apps are ONE connected family
+    # (attendance -> salary; ledger advances recovered at the salary close).
+    "Attendance": "Staff", "Staff Register": "Staff",
+    "Salary \u2014 approve & lock": "Staff", "Staff Ledger": "Staff",
+    "Staff Ledger \u2014 Entry": "Staff",
+    "UPI Sheet": "Money & Accounts", "Monthly Accounting": "Money & Accounts",
+    "Daily Sale": "Money & Accounts", "Sanjeevni Medicos": "Money & Accounts",
+    "Daily Collection": "Money & Accounts", "Clinic": "Money & Accounts",
+    "Vehicle Tracking": "Money & Accounts",
+    "CC Statement Saver": "Personal & Health", "Inbox Janitor": "Personal & Health",
+    "Payment Register": "Personal & Health",
+    "Renewals": "Personal & Health",
+    "RxGuard": "Personal & Health", "GutLog": "Personal & Health",
+    "FitLog": "Personal & Health",
+    # the local-PC -> VPS migration queue (owner, 23-Aug); rendered as a
+    # compact chip row by the template. pc_only gating unchanged.
+    "Follow-up Tracker": "Clinic PC tools", "Vitals & Plan": "Clinic PC tools",
+    "Case Pack \u00b7 PC fallback": "Clinic PC tools",
+    "CC Statements \u2192 Tally": "Clinic PC tools",
+    "Revenue Reconciler": "Clinic PC tools",
+    "Manage Users": "Admin",
+}
+# Every tile must map to a known group (fail loud at import, not silently mis-place).
+for _t in TILES:
+    assert _t["name"] in _TILE_GROUP, "ungrouped tile: " + _t["name"]
+    _t["group"] = _TILE_GROUP[_t["name"]]
+assert set(_TILE_GROUP.values()) <= set(GROUP_ORDER), "group not in GROUP_ORDER"
+
+# --- per-user tile overrides (D285) ----------------------------------------
+# MASK hides named tiles from a specific user even if their role would show them.
+# EXTRA grants named tiles to a specific user even if their role would not.
+# Names must match TILES["name"] byte-for-byte.
+USER_TILE_MASK = {
+    "bhawna": {"GMB Review Assist", "Vitals & Plan", "Surgical Case Pack", "Send WhatsApp", "Follow-up WhatsApps",
+               "Case Pack \u00b7 PC fallback",
+               "CC Statements \u2192 Tally", "Follow-up Tracker"},
+}
+USER_TILE_EXTRA = {
+    "shavez": {"Asset Register"},
+    "manoj": {"Manage Users"},
+}
+
+
+# S179: medical's checker is Dr Manoj alone, so Dr Bhawna should not see a
+# tile that would only refuse her.
+USER_TILE_MASK.setdefault("bhawna", set()).add("Sanjeevni Medicos")
+
+
+# S179: darpan is role=staff, which is shared. He only needs Daily Sale.
+USER_TILE_MASK.setdefault("darpan", set()).update({"Attendance", "Staff Register", "Scan Purchase"})
+
+
+# S182: the clinic module's REAL rosters, as seeded by migrations S182_clinic
+# (C1e) and S182_c2 (C2a) into unit_role. Shavez holds a clinic MAKER seat and
+# the middle-approver CHECKER seat, so he gets both tiles; self-verify stays
+# barred in code (D272). Kept as explicit grants, not roles, because "shavez"
+# is simultaneously portal-manager, medical maker, clinic maker and clinic
+# checker - a role-based tile would leak to every other staff login.
+for _u in ("shavez", "alisha", "shivani"):
+    USER_TILE_EXTRA.setdefault(_u, set()).add("Daily Collection")
+for _u in ("manoj", "bhawna", "shavez"):
+    USER_TILE_EXTRA.setdefault(_u, set()).add("Clinic")
+
+
+def _visible_sections(role, pc, user=""):
+    """Ordered [(label, [tiles])] for this role/pc/user; empty sections dropped.
+    A tile shows when the role matches OR the user is granted it (EXTRA), the user
+    is not masked from it (MASK), and PC-gating passes."""
+    mask = USER_TILE_MASK.get(user, set())
+    extra = USER_TILE_EXTRA.get(user, set())
+    out = []
+    for _g in GROUP_ORDER:
+        _items = [t for t in TILES
+                  if t.get("group") == _g
+                  and (role in t["roles"] or t["name"] in extra)
+                  and t["name"] not in mask
+                  and (not t.get("pc_only") or pc)]
+        if _items:
+            out.append((_g, _items))
+    return out
+
+# ---------------------------------------------------------------------------
+# AUTH HELPERS
+# ---------------------------------------------------------------------------
+def _hash_pin(pin: str) -> str:
+    """Salted SHA-256 of the PIN. The PIN itself is never stored or logged."""
+    return hashlib.sha256((PIN_SALT + pin).encode("utf-8")).hexdigest()
+
+
+def _expected_device_token() -> str:
+    """
+    The value a trusted device's cookie must contain.
+    Derived from the server seed; rotating the seed invalidates ALL devices
+    at once (that is exactly what "forget all devices" does).
+    """
+    return hmac.new(TOKEN_SEED.encode("utf-8"),
+                    b"trusted-device", hashlib.sha256).hexdigest()
+
+
+def _is_trusted(req) -> bool:
+    tok = req.cookies.get(COOKIE_NAME, "")
+    if not tok or not TOKEN_SEED:
+        return False
+    return hmac.compare_digest(tok, _expected_device_token())
+
+
+# --- clinic-PC marker (gates the Group D local-tool tiles) -----------------
+PC_COOKIE = "clinic_portal_pc"
+
+
+def _pc_token() -> str:
+    """Marker a browser must carry to be treated as THE clinic PC.
+    Derived from the same server seed as device-trust, so rotating the seed
+    (or 'forget all devices') also clears the clinic-PC marking."""
+    return hmac.new(TOKEN_SEED.encode("utf-8"),
+                    b"clinic-pc-device", hashlib.sha256).hexdigest()
+
+
+def _is_clinic_pc(req) -> bool:
+    tok = req.cookies.get(PC_COOKIE, "")
+    if not tok or not TOKEN_SEED:
+        return False
+    return hmac.compare_digest(tok, _pc_token())
+
+
+# --- SSO broker helpers ----------------------------------------------------
+def _sso_ready() -> bool:
+    """BROKER mode is active only when the secret is set AND a user exists."""
+    if not _SSO_LIBS or not SSO_SECRET:
+        return False
+    try:
+        return len(clinic_users.list_users(STORE)) > 0
+    except Exception:
+        return False
+
+
+def _sso_user(req):
+    """Return {user, role, ...} if a valid SSO cookie is present, else None."""
+    if not _sso_ready():
+        return None
+    tok = req.cookies.get(clinic_sso.COOKIE_NAME, "")
+    if not tok:
+        return None
+    try:
+        return clinic_sso.verify_token(tok, SSO_SECRET,
+                                       current_epoch=clinic_users.get_epoch(STORE))
+    except Exception:
+        return None
+
+
+def _authed(req) -> bool:
+    """Logged in via a valid SSO cookie OR a trusted device (transition-safe)."""
+    return (_sso_user(req) is not None) or _is_trusted(req)
+
+
+def login_required(view):
+    @wraps(view)
+    def wrapper(*a, **k):
+        if _authed(request):
+            return view(*a, **k)
+        return redirect("/portal/login")
+    return wrapper
+
+
+def _config_ok() -> bool:
+    """Legacy PIN config present. (Broker mode does not need this.)"""
+    return bool(PIN_HASH and PIN_SALT and TOKEN_SEED)
+
+
+def _usable() -> bool:
+    """The portal can serve if EITHER the PIN is configured OR broker mode is ready."""
+    return _config_ok() or _sso_ready()
+
+
+# --- user-admin gate (manoj-only: the portal's who-can-touch-everyone screen) ------
+USER_ADMINS = set(x.strip().lower() for x in
+                  _cfg_get("PORTAL_USER_ADMINS", "manoj").split(",") if x.strip())
+
+
+def _is_user_admin(req) -> bool:
+    w = _sso_user(req)
+    return bool(w and (w.get("user") or "").lower() in USER_ADMINS)
+
+
+def user_admin_required(view):
+    @wraps(view)
+    def wrapper(*a, **k):
+        if not _authed(request):
+            return redirect("/portal/login")
+        if not _is_user_admin(request):
+            abort(403)
+        return view(*a, **k)
+    return wrapper
+
+
+def _active_doctors(rows):
+    return [r for r in rows if r.get("role") == "doctor" and r.get("active")]
+
+
+def _admin_guard(action, target, me):
+    """'' if the (de)activate/delete action is allowed, else an error string. Blocks
+    self-lockout and removing the last active doctor -- admin access can't be bricked."""
+    target = (target or "").strip().lower()
+    if not target:
+        return "no user specified"
+    if action in ("deactivate", "delete") and target == (me or "").strip().lower():
+        return "you cannot %s your own account" % action
+    if action in ("deactivate", "delete"):
+        rows = clinic_users.list_users(STORE)
+        row = next((r for r in rows if r["user"] == target), None)
+        if row and row.get("role") == "doctor" and row.get("active"):
+            if len(_active_doctors(rows)) <= 1:
+                return "cannot %s the last active doctor" % action
+    return ""
+
+# ---------------------------------------------------------------------------
+# PAGE TEMPLATES (inline; mobile-first; no external assets)
+# ---------------------------------------------------------------------------
+PAGE_HEAD = """
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinic Portal</title>
+<style>
+:root{--bg:#0f2233;--card:#16324a;--ink:#eaf2fa;--muted:#9fb6cc;
+ --blue:#3b82f6;--green:#22c55e;--line:#274b66;--held:#5b7184;
+ --shadow:0 2px 10px rgba(0,0,0,.25)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+ background:var(--bg);color:var(--ink);line-height:1.4;min-height:100vh}
+.wrap{max-width:920px;margin:0 auto;padding:18px 16px 40px}
+.head{display:flex;align-items:baseline;justify-content:space-between;
+ flex-wrap:wrap;gap:8px;margin:8px 0 18px}
+.head h1{font-size:18px;margin:0;color:#fff;letter-spacing:-.01em}
+.head .sub{font-size:12px;color:var(--muted)}
+.sec{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+ color:var(--muted);margin:24px 2px 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.sec:first-of-type{margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;
+ padding:16px 14px;box-shadow:var(--shadow);text-decoration:none;color:var(--ink);
+ display:flex;flex-direction:column;gap:6px;min-height:104px;transition:transform .05s,border-color .1s}
+.tile:active{transform:scale(.98)}
+.tile.live{border-color:var(--blue)}
+.tile.live:hover{border-color:#60a5fa}
+.tile.held{opacity:.62;cursor:default}
+.tile .ic{font-size:26px;line-height:1}
+.tile .nm{font-size:15px;font-weight:600}
+.tile .ds{font-size:11.5px;color:var(--muted)}
+.tag{align-self:flex-start;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;margin-top:auto}
+.tag.l{background:rgba(34,197,94,.15);color:#86efac}
+.tag.h{background:rgba(91,113,132,.25);color:#b8c7d6}
+.foot{margin-top:26px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.pcmark{margin-top:16px;text-align:center;font-size:12px;color:var(--muted)}
+.pcmark a{color:var(--blue);text-decoration:none}
+.pcmark a:hover{text-decoration:underline}
+.forget{background:none;border:1px solid var(--line);color:var(--muted);
+ font-size:12px;padding:9px 16px;border-radius:10px;cursor:pointer}
+.forget:hover{border-color:#7f1d1d;color:#fca5a5}
+/* login */
+.login{max-width:340px;margin:9vh auto 0;text-align:center;padding:0 16px}
+.login h1{font-size:20px;color:#fff;margin:0 0 4px}
+.login p{font-size:13px;color:var(--muted);margin:0 0 22px}
+.login input{width:100%;font-size:20px;text-align:center;letter-spacing:.06em;
+ padding:14px;border:2px solid var(--blue);border-radius:12px;background:#0b1b29;
+ color:#fff;outline:none;margin-bottom:10px}
+.login input.pin{font-size:22px;letter-spacing:.3em}
+.login input:focus{border-color:#60a5fa}
+.login button{width:100%;margin-top:6px;font-size:16px;font-weight:600;padding:13px;
+ border:none;border-radius:12px;background:var(--blue);color:#fff;cursor:pointer}
+.login button:active{transform:scale(.99)}
+.pwwrap{position:relative;margin-bottom:10px}
+.pwwrap #pw{margin-bottom:0;padding-right:66px}
+.login .eye{position:absolute;right:6px;top:0;height:100%;display:flex;align-items:center;background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:0 10px;width:auto;margin:0}
+.err{color:#fca5a5;font-size:13px;margin-top:12px;min-height:18px}
+.note{color:var(--muted);font-size:11px;margin-top:22px}
+@media(max-width:480px){
+ .wrap{padding:14px 12px 36px}
+ .grid{grid-template-columns:repeat(2,1fr);gap:10px}
+ .tile{padding:14px 12px;min-height:96px}
+ .tile .nm{font-size:14px}
+ .tile .ic{font-size:24px}
+ .head h1{font-size:17px}
+}
+</style></head><body>
+"""
+
+LOGIN_HTML = PAGE_HEAD + """
+<div class="login">
+  <h1>Clinic Portal</h1>
+  <p>Private access — enter PIN</p>
+  <form method="POST" action="/portal/login" autocomplete="off">
+    <input class="pin" name="pin" type="password" inputmode="numeric" autofocus
+           placeholder="• • • •" aria-label="PIN">
+    <button type="submit">Unlock</button>
+  </form>
+  <div class="err">{{ error or "" }}</div>
+  <div class="note">This device will be remembered until you sign out
+   or use “Forget all devices”.</div>
+</div></body></html>
+"""
+
+USERPASS_HTML = PAGE_HEAD + """
+<div class="login">
+  <h1>Clinic Portal</h1>
+  <p>Sign in — one login for all your clinic apps</p>
+  <form method="POST" action="/portal/login" autocomplete="off">
+    <input name="user" type="text" autocapitalize="none" autocorrect="off" autofocus
+           placeholder="username" aria-label="Username">
+    <div class="pwwrap">
+      <input id="pw" name="password" type="password" placeholder="password" aria-label="Password">
+      <button type="button" class="eye" aria-label="Show or hide password"
+              onclick="var p=document.getElementById('pw');var h=p.type==='password';p.type=h?'text':'password';this.textContent=h?'hide':'show';">show</button>
+    </div>
+    <button type="submit">Sign in</button>
+  </form>
+  <div class="err">{{ error or "" }}</div>
+  <div class="note">Signing in here signs you in to Attendance, Ledger and Asset too.
+   Each app also keeps its own login as a fallback.</div>
+</div></body></html>
+"""
+
+# ---------------------------------------------------------------------------
+# S198_P1 — the HOME page's own head. The owner's ruling (23-Aug): the portal
+# KEEPS the dark scheme he finds friendly on the eyes; the warm-paper design
+# language stays on the finance pages. Same tokens as PAGE_HEAD, new compact
+# layout. Deliberately NOT a change to PAGE_HEAD: login, console, gist,
+# digest, staff-report and users pages are byte-untouched.
+# ---------------------------------------------------------------------------
+HOME_HEAD = """
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinic Portal</title>
+<style>
+:root{--bg:#0f2233;--card:#16324a;--card2:#122a3f;--ink:#eaf2fa;--muted:#9fb6cc;
+ --blue:#3b82f6;--green:#22c55e;--line:#274b66;--held:#5b7184;
+ --good-bg:rgba(34,197,94,.16);--good-ink:#86efac;
+ --warn-bg:rgba(251,191,36,.16);--warn-ink:#fcd34d;
+ --shadow:0 2px 10px rgba(0,0,0,.25)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+ background:var(--bg);color:var(--ink);line-height:1.5;min-height:100vh;
+ font-variant-numeric:tabular-nums}
+.topbar{position:sticky;top:0;z-index:5;background:#0c1c2b;
+ border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+.topin{max-width:1480px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:8px 20px}
+.topin img{width:40px;height:40px}
+.tname{font-size:16px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.tsub{font-size:11.5px;color:var(--muted)}
+.tright{margin-left:auto;font-size:12.5px;color:var(--muted)}
+.wrap{max-width:1480px;margin:0 auto;padding:12px 20px 40px}
+.strip{display:grid;grid-template-columns:minmax(320px,1.4fr) repeat(3,minmax(140px,1fr));gap:10px;margin:12px 0 4px}
+.hero{background:var(--card);border:1px solid var(--line);border-radius:12px;
+ padding:12px 16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;
+ text-decoration:none;color:var(--ink);transition:border-color .1s}
+.hero:hover{border-color:var(--blue)}
+.hstat{font-size:26px;line-height:1}
+.hero .hl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.hero .hv{font-size:14.5px;font-weight:600;color:#fff}
+.hero .badge{margin-left:auto;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.b-warn{background:var(--warn-bg);color:var(--warn-ink)}
+.b-good{background:var(--good-bg);color:var(--good-ink)}
+.chipbox{background:var(--card);border:1px solid var(--line);border-radius:12px;
+ padding:9px 14px;box-shadow:var(--shadow);text-decoration:none;color:var(--ink);
+ display:block;transition:border-color .1s}
+.chipbox:hover{border-color:var(--blue)}
+.chipbox .cv{font-size:21px;font-weight:700;color:#fff}
+.chipbox .cl{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.kick{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+ color:var(--muted);margin:16px 0 8px;display:flex;align-items:center;gap:10px}
+.kick::after{content:"";flex:1;height:1px;background:var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:8px}
+.tile{display:flex;align-items:center;gap:10px;background:var(--card);
+ border:1px solid var(--line);border-radius:10px;padding:9px 12px;min-height:54px;
+ box-shadow:var(--shadow);text-decoration:none;color:var(--ink);
+ transition:border-color .1s,transform .05s}
+.tile:hover{border-color:var(--blue)}
+.tile:active{transform:scale(.99)}
+.tile.held{opacity:.62;cursor:default}
+.tile .ic{font-size:20px;flex:0 0 auto;line-height:1}
+.tile .tx{min-width:0}
+.tile .nm{font-size:13.5px;font-weight:600;line-height:1.25;color:#fff}
+.tile .ds{font-size:11px;color:var(--muted);line-height:1.3}
+.tag{margin-left:auto;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.tag.h{background:rgba(91,113,132,.25);color:#b8c7d6}
+.mini{display:flex;flex-wrap:wrap;gap:8px}
+.mchip{font-size:12px;color:var(--muted);background:var(--card2);
+ border:1px solid var(--line);border-radius:16px;padding:6px 12px;text-decoration:none;display:inline-block}
+a.mchip:hover{border-color:var(--blue);color:var(--ink)}
+.mchip.held{opacity:.55}
+.foot{margin-top:26px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.pcmark{margin-top:16px;text-align:center;font-size:12px;color:var(--muted)}
+.pcmark a{color:var(--blue);text-decoration:none}
+.pcmark a:hover{text-decoration:underline}
+.forget{background:none;border:1px solid var(--line);color:var(--muted);
+ font-size:12px;padding:9px 16px;border-radius:10px;cursor:pointer}
+.forget:hover{border-color:#7f1d1d;color:#fca5a5}
+#toTop{position:fixed;right:18px;bottom:18px;width:46px;height:46px;border-radius:50%;
+ border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:20px;
+ cursor:pointer;display:none;z-index:9;box-shadow:var(--shadow)}
+#toTop:hover{border-color:var(--blue)}
+@media(max-width:900px){.strip{grid-template-columns:1fr 1fr}.hero{grid-column:1/-1}}
+@media(max-width:480px){.wrap{padding:10px 12px 36px}
+ .grid{grid-template-columns:repeat(2,1fr)}
+ .tile{flex-direction:column;align-items:flex-start;gap:6px;min-height:88px}
+ .tag{margin-left:0}}
+</style></head><body>
+"""
+
+PORTAL_HTML = HOME_HEAD + """
+<div class="topbar"><div class="topin">
+  <img alt="clinic logo" src="data:image/png;base64,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">
+  <div><div class="tname">Dr. Manoj Agarwal Clinic</div>
+  <div class="tsub">Advanced Orthopaedic Surgery Centre \u00b7 Portal</div></div>
+  {% if who %}<div class="tright">{{ who.user }} ({{ who.role }})</div>{% endif %}
+</div></div>
+<div class="wrap">
+  {% if role == 'doctor' %}
+  <div class="strip">
+    <a class="hero" href="/finance/health" target="_blank" rel="noopener" id="healthHero">
+      <span class="hstat">\U0001FA7A</span>
+      <div><div class="hl">Portal health</div>
+      <div class="hv" id="heroLine">Open the health page \u2192</div></div>
+      <span class="badge b-good" id="heroBadge" hidden></span>
+    </a>
+    <a class="chipbox" href="/finance/approvals" target="_blank" rel="noopener">
+      <div class="cv" id="chipSanj">\u2013</div><div class="cl">Sanjeevni to approve</div></a>
+    <a class="chipbox" href="https://attendance.dr-manoj.in/register/review" target="_blank" rel="noopener">
+      <div class="cv" id="chipReg">\u2013</div><div class="cl">Register to enter</div></a>
+    <a class="chipbox" href="/finance/review" target="_blank" rel="noopener">
+      <div class="cv" id="chipRev">\u2013</div><div class="cl">Review queue</div></a>
+  </div>
+  {% endif %}
+  {% for label, items in sections %}
+  <div class="kick">{{ label }}</div>
+  {% if label == 'Clinic PC tools' %}
+  <div class="mini">
+  {% for t in items %}
+    {% if t.live %}<a class="mchip" href="{{ t.url }}" target="_blank" rel="noopener">{{ t.icon }} {{ t.name }} \u00b7 {{ t.desc }}</a>
+    {% else %}<span class="mchip held" title="Not yet hosted">{{ t.icon }} {{ t.name }} \u00b7 {{ t.desc }}</span>{% endif %}
+  {% endfor %}
+  </div>
+  {% else %}
+  <div class="grid">
+  {% for t in items %}
+    {% if t.live %}
+      <a class="tile" href="{{ t.url }}" target="_blank" rel="noopener"{% if t.clinic_meta %} data-clinic-tile{% endif %}>
+        <div class="ic">{{ t.icon }}</div>
+        <div class="tx"><div class="nm">{{ t.name }}</div>
+        <div class="ds"{% if t.review_counts %} data-review-counts{% endif %}{% if t.gist %} data-gist-summary{% endif %}{% if t.sanjeevni_counts %} data-sanjeevni-counts{% endif %}{% if t.daily_sale_counts %} data-daily-sale-counts{% endif %}>{{ t.desc }}</div></div>
+      </a>
+    {% else %}
+      <div class="tile held" title="Not yet hosted">
+        <div class="ic">{{ t.icon }}</div>
+        <div class="tx"><div class="nm">{{ t.name }}</div>
+        <div class="ds">{{ t.desc }}</div></div>
+        <span class="tag h">MANUAL</span>
+      </div>
+    {% endif %}
+  {% endfor %}
+  </div>
+  {% endif %}
+  {% endfor %}
+  <div class="foot">
+    <form method="POST" action="/portal/forget"
+          onsubmit="return confirm('Sign out EVERY device? Everyone will need to log in again.');">
+      <button class="forget" type="submit">Forget all devices</button>
+    </form>
+    {% if sso %}
+    <form method="POST" action="/portal/signout-all"
+          onsubmit="return confirm('Sign out of ALL clinic apps everywhere? You and anyone signed in will have to log in again.');">
+      <button class="forget" type="submit">Sign out everywhere (all apps)</button>
+    </form>
+    {% endif %}
+  </div>
+  {% if role == 'doctor' %}
+  <div class="pcmark">
+    {% if pc %}
+      <span>\U0001F5A5\uFE0F Clinic-PC tools are shown on this device.</span>
+      <a href="/portal/unmark-pc">Not the clinic PC?</a>
+    {% else %}
+      <a href="/portal/mark-pc">\U0001F5A5\uFE0F Is this the clinic PC? Show PC-only tools</a>
+    {% endif %}
+  </div>
+  {% endif %}
+<button id="toTop" aria-label="Back to top" title="Back to top">\u2191</button>
+<script>
+/* S198_P1: the 46px floating back-to-top (the Console \u00a74.8 pattern
+   promoted to the home page; appears after 500px of scroll). */
+(function(){
+  var b=document.getElementById('toTop');
+  if(!b)return;
+  window.addEventListener('scroll',function(){
+    b.style.display=(window.scrollY>500)?'block':'none';
+  },{passive:true});
+  b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+})();
+/* S198_P1: the Portal Health hero + strip chips (doctor only -- the block is
+   not rendered for other roles). ONE fetch of the same checker-only
+   tile-summary the Sanjeevni tile uses; fail-soft: a non-checker doctor
+   (Dr Bhawna) or finance down leaves the static text and hides nothing. */
+(function(){
+  var hero=document.getElementById('healthHero');
+  if(!hero)return;
+  fetch('/finance/api/tile-summary',{credentials:'same-origin'})
+   .then(function(r){return r.ok?r.json():null;})
+   .then(function(d){
+     if(!d||!d.ok)return;
+     var line=document.getElementById('heroLine'),badge=document.getElementById('heroBadge');
+     if(d.health_line){line.textContent=d.health_line;badge.textContent='\u26A0 attention';badge.className='badge b-warn';}
+     else{line.textContent='All clear';badge.textContent='\u2714 OK';badge.className='badge b-good';}
+     badge.hidden=false;
+     var c=document.getElementById('chipSanj');
+     if(c&&typeof d.to_approve!=='undefined')c.textContent=d.to_approve;
+     c=document.getElementById('chipRev');
+     if(c&&typeof d.review!=='undefined')c.textContent=d.review;
+   })
+   .catch(function(){});
+})();
+/* Daily Sale tile: the maker's own to-do line (S187_P2a). Fail-soft: no
+   medical seat or finance down -> the static text stands. */
+(function(){
+  var el=document.querySelector('[data-daily-sale-counts]');
+  if(!el)return;
+  fetch('/finance/api/my-day-summary',{credentials:'same-origin'})
+   .then(function(r){return r.ok?r.json():null;})
+   .then(function(d){
+     if(!d||!d.ok)return;
+     var p=[];
+     if(d.to_file)p.push('\u270D\uFE0F '+d.to_file+' day'+(d.to_file>1?'s':'')+' to file');
+     p.push(d.today?('today: '+d.today):'today: not started');
+     /* S195: his own cash/UPI accuracy, from the only independent witness there
+        is (the bank). Says nothing when the bank could check no day at all --
+        there is nothing to claim then. */
+     var a=d.accuracy;
+     if(a&&a.checked){
+       p.push(a.differing
+         ? ('\u26A0 '+a.differing+' cash/UPI day'+(a.differing>1?'s':'')+' to fix')
+         : ('\u2714 cash/UPI matched '+a.matched+'/'+a.checked));
+     }
+     el.textContent=p.join(' \u00b7 ');
+   })
+   .catch(function(){});
+})();
+/* Sanjeevni tile: live pending summary from the finance app (S187_P1a).
+   Client-side, fail-soft: finance down or the viewer not the medical checker
+   -> the static description stands and nothing breaks. Same-site SSO cookie. */
+(function(){
+  var el=document.querySelector('[data-sanjeevni-counts]');
+  if(!el)return;
+  fetch('/finance/api/tile-summary',{credentials:'same-origin'})
+   .then(function(r){return r.ok?r.json():null;})
+   .then(function(d){
+     if(!d||!d.ok)return;
+     var p=[];
+     /* S196: the health headline FIRST -- after the 21-08 Marg-401 crisis the
+        health page existed but the tile stayed innocent-looking; this is the
+        wire. Null when all is well, one short line when something is wrong. */
+     if(d.health_line)p.push(d.health_line);
+     if(d.to_approve)p.push('\u2705 '+d.to_approve+' to approve');
+     if(d.marg_pushes)p.push('\U0001F4C4 '+d.marg_pushes+' Marg report'+(d.marg_pushes>1?'s':''));
+     if(d.missing_marg)p.push('\U0001F4ED '+d.missing_marg+' day'+(d.missing_marg>1?'s':'')+' no Marg');
+     if(d.exceptions)p.push('\u26A0 '+d.exceptions+' exception'+(d.exceptions>1?'s':''));
+     el.textContent=p.length?p.join(' \u00b7 '):'\u2714 all clear \u00b7 month close inside';
+   })
+   .catch(function(){});
+})();
+/* Fill the Staff Register tile with live pending counts from the register.
+   Client-side so the portal never waits on the register; if it is unreachable
+   the tile keeps its static description. Same-site cookie carries the SSO. */
+(function(){
+  var el=document.querySelector('[data-review-counts]');
+  if(!el)return;
+  fetch('/portal/review-counts',{credentials:'same-origin'})
+   .then(function(r){return r.ok?r.json():null;})
+   .then(function(d){
+     if(!d||typeof d.to_enter==='undefined')return;
+     var s='\u270D\uFE0F '+d.to_enter+' to enter';
+     if(d.show_approve)s+=' \u00B7 \u2705 '+d.to_approve+' to approve';
+     el.textContent=s;
+     /* S198_P1: the strip chip reads the same payload. */
+     var c=document.getElementById('chipReg');
+     if(c)c.textContent=d.to_enter;
+   })
+   .catch(function(){});
+})();
+/* Clinic Gist tile: one-line live summary from the same JSON the page renders.
+   Client-side so the portal never waits on the file; if unreadable the tile keeps
+   its static description. */
+(function(){
+  var el=document.querySelector('[data-gist-summary]');
+  if(!el)return;
+  fetch('/portal/gist-data',{credentials:'same-origin'})
+   .then(function(r){return r.ok?r.json():null;})
+   .then(function(d){
+     if(!d||!d.ok||!d.gist)return;
+     var g=d.gist, c=g.calls||{};
+     var s='\U0001F4DE '+(c.in_today||0)+' in \u00b7 '+(c.out_today||0)+' out';
+     if(typeof g.unfiled_outcomes==='number')s+=' \u00b7 '+g.unfiled_outcomes+' pending';
+     if(g.pipeline&&g.pipeline.escalate_lokesh)s+=' \u00b7 \u26A0';
+     if(d.stale)s+=' (stale)';
+     el.textContent=s;
+   })
+   .catch(function(){});
+})();
+/* Clinic finance tiles: the wording is a SETTING (clinic.tile.*), so the label
+   is fetched rather than duplicated here. tile-meta answers for the signed-in
+   person only - it returns the ONE tile matching their seat (checker wins when
+   somebody holds both), so we match on href and leave any other clinic tile on
+   its static text. Client-side, so the portal never waits on the finance app;
+   if finance is down or the user has no clinic seat, the tiles keep the text
+   rendered above and nothing breaks. */
+(function(){
+  var tiles=document.querySelectorAll('a[data-clinic-tile]');
+  if(!tiles.length)return;
+  fetch('/finance/clinic/api/tile-meta',{credentials:'same-origin'})
+   .then(function(r){return r.ok?r.json():null;})
+   .then(function(d){
+     if(!d||!d.ok||!d.href)return;
+     for(var i=0;i<tiles.length;i++){
+       var a=tiles[i];
+       if(a.getAttribute('href')!==d.href)continue;
+       var nm=a.querySelector('.nm'), ds=a.querySelector('.ds');
+       if(nm&&d.title)nm.textContent=d.title;
+       if(ds&&d.subtitle)ds.textContent=d.subtitle;
+     }
+   })
+   .catch(function(){});
+})();
+</script>
+</div></body></html>
+"""
+
+PC_MARKED_HTML = PAGE_HEAD + """
+<div class="login">
+  <h1>{{ '\U0001F5A5\uFE0F Clinic PC set' if on else 'Cleared' }}</h1>
+  <p>{% if on %}The Clinic-PC-only tools are now visible on this device.
+     Tap a tile to open a local tool.{% else %}
+     This device no longer shows the Clinic-PC-only tools.{% endif %}</p>
+  <a class="note" href="/portal">Back to the portal</a>
+</div></body></html>
+"""
+
+CONFIG_ERROR_HTML = PAGE_HEAD + """
+<div class="login">
+  <h1>Setup needed</h1>
+  <p>The portal is installed but not configured yet.<br>
+  Run the one-time setup to set the PIN and secrets.</p>
+</div></body></html>
+"""
+
+USERS_HTML = PAGE_HEAD + """
+<style>
+.u-tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+.u-tbl th,.u-tbl td{border-bottom:1px solid var(--line);padding:8px 8px;text-align:left;vertical-align:middle}
+.u-tbl th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.u-tbl td.u{font-weight:600;white-space:nowrap}
+.upill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px}
+.upill.on{background:rgba(34,197,94,.16);color:#86efac}
+.upill.off{background:rgba(239,68,68,.16);color:#fca5a5}
+.upill.you{background:rgba(59,130,246,.18);color:#93c5fd;margin-left:6px}
+.acts{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
+.acts form{margin:0}
+.ibtn{font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);
+ background:var(--card);color:var(--ink);cursor:pointer}
+.ibtn.danger:hover{border-color:#7f1d1d;color:#fca5a5}
+.ibtn.go{background:var(--blue);border-color:var(--blue);color:#fff}
+.ibtn:disabled{opacity:.4;cursor:not-allowed}
+.ucard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0}
+.ucard h2{font-size:14px;color:#fff;margin:0 0 10px}
+.fld{display:inline-flex;flex-direction:column;gap:3px;margin:0 10px 8px 0}
+.fld label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.fld input,.fld select,.acts select{background:#0b1b29;border:1px solid var(--line);color:#fff;border-radius:8px;padding:8px 8px;font-size:13px}
+.msg{padding:9px 12px;border-radius:10px;margin:10px 0;font-size:13px}
+.msg.ok{background:rgba(34,197,94,.14);color:#bbf7d0}.msg.err{background:rgba(239,68,68,.14);color:#fecaca}
+.role{min-width:104px}
+</style>
+<div class="wrap">
+  <div class="head">
+    <h1>\U0001F511 Manage users</h1>
+    <span class="sub">Signed in as {{ who.user }} &middot; logins &amp; roles for all clinic apps</span>
+  </div>
+  {% if msg %}<div class="msg {{ msgcls }}">{{ msg }}</div>{% endif %}
+
+  <div class="ucard">
+    <h2>Add a login</h2>
+    <form method="POST" action="/portal/users/add" class="acts">
+      <div class="fld"><label>Username</label><input name="user" autocapitalize="none" autocorrect="off" required></div>
+      <div class="fld"><label>Role</label>
+        <select name="role" class="role">{% for r in roles %}<option value="{{ r }}">{{ r }}</option>{% endfor %}</select></div>
+      <div class="fld"><label>Password (min 6)</label><input name="password" type="password" required></div>
+      <button class="ibtn go" type="submit">Add user</button>
+    </form>
+  </div>
+
+  <div class="ucard">
+    <h2>Users</h2>
+    <table class="u-tbl">
+      <tr><th>User</th><th>Role</th><th>Status</th><th>Since</th><th>Actions</th></tr>
+      {% for u in users %}
+      <tr>
+        <td class="u">{{ u.user }}{% if u.user == who.user %}<span class="upill you">you</span>{% endif %}</td>
+        <td>
+          <form method="POST" action="/portal/users/role" class="acts">
+            <input type="hidden" name="user" value="{{ u.user }}">
+            <select name="role" class="role">{% for r in roles %}<option value="{{ r }}"{% if r==u.role %} selected{% endif %}>{{ r }}</option>{% endfor %}</select>
+            <button class="ibtn" type="submit">Set</button>
+          </form>
+        </td>
+        <td>{% if u.active %}<span class="upill on">active</span>{% else %}<span class="upill off">off</span>{% endif %}</td>
+        <td style="color:var(--muted);font-size:12px">{{ u.created[:10] }}</td>
+        <td>
+          <div class="acts">
+            {% if u.active %}
+            <form method="POST" action="/portal/users/active" onsubmit="return confirm('Deactivate {{ u.user }}? They will be unable to sign in.');">
+              <input type="hidden" name="user" value="{{ u.user }}"><input type="hidden" name="active" value="0">
+              <button class="ibtn danger" type="submit"{% if u.user==who.user %} disabled title="cannot deactivate yourself"{% endif %}>Deactivate</button>
+            </form>
+            {% else %}
+            <form method="POST" action="/portal/users/active">
+              <input type="hidden" name="user" value="{{ u.user }}"><input type="hidden" name="active" value="1">
+              <button class="ibtn go" type="submit">Activate</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="/portal/users/passwd"
+                  onsubmit="var p=prompt('New password for {{ u.user }} (min 6):');if(!p)return false;this.password.value=p;return true;">
+              <input type="hidden" name="user" value="{{ u.user }}"><input type="hidden" name="password" value="">
+              <button class="ibtn" type="submit">Reset password</button>
+            </form>
+            <form method="POST" action="/portal/users/delete" onsubmit="return confirm('DELETE {{ u.user }} permanently? This removes their login.');">
+              <input type="hidden" name="user" value="{{ u.user }}">
+              <button class="ibtn danger" type="submit"{% if u.user==who.user %} disabled title="cannot delete yourself"{% endif %}>Delete</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    <div class="note">Deactivating blocks future sign-ins. Sessions already open end when they expire or via "Sign out everywhere". App powers (maker / checker) are set inside each app, not here.</div>
+  </div>
+
+  <div class="foot"><a class="forget" href="/portal">&larr; Back to portal</a></div>
+</div></body></html>
+"""
+
+# ---------------------------------------------------------------------------
+# ROUTES  (all under /portal so the reverse proxy is clean)
+# ---------------------------------------------------------------------------
+@app.route("/portal")
+@app.route("/portal/")
+def home():
+    if not _usable():
+        return render_template_string(CONFIG_ERROR_HTML), 503
+    if not _authed(request):
+        return redirect("/portal/login")
+    who = _sso_user(request)
+    # F-98: a trusted DEVICE is not an identity. Once broker mode is genuinely
+    # available, an unidentified caller is sent to sign in rather than being
+    # served the full doctor portal. When broker mode is NOT available the old
+    # device-trust path is untouched, so a config failure degrades to the
+    # previous behaviour instead of locking everyone out (D264, inert on failure).
+    if who is None and _sso_ready():
+        return redirect("/portal/login")
+    role = who["role"] if who else "doctor"
+    pc = _is_clinic_pc(request)
+    return render_template_string(PORTAL_HTML,
+                                  sections=_visible_sections(role, pc, who["user"] if who else ""),
+                                  sso=_sso_ready(), who=who, role=role,
+                                  pc=pc)
+
+
+@app.route("/portal/login", methods=["GET", "POST"])
+def login():
+    if not _usable():
+        return render_template_string(CONFIG_ERROR_HTML), 503
+    if _authed(request):
+        return redirect("/portal")
+    error = ""
+
+    # --- BROKER MODE: username + password -> SSO cookie --------------------
+    if _sso_ready():
+        if request.method == "POST":
+            user = (request.form.get("user") or "").strip()
+            pw = (request.form.get("password") or "")
+            role = None
+            try:
+                role = clinic_users.verify_password(STORE, user, pw)
+            except Exception:
+                role = None
+            if role:
+                resp = make_response(redirect("/portal"))
+                # 1) the SSO cookie -- rides to every .dr-manoj.in clinic app
+                token = clinic_sso.make_token(user, role,
+                                              clinic_users.get_epoch(STORE), SSO_SECRET)
+                resp.set_cookie(clinic_sso.COOKIE_NAME, token, **clinic_sso.cookie_kwargs())
+                # 2) the device-trust cookie -- keeps the portal's own access identical to before
+                resp.set_cookie(
+                    COOKIE_NAME, _expected_device_token(),
+                    max_age=10 * 365 * 24 * 3600,
+                    secure=True, httponly=True, samesite="Lax", path="/portal",
+                )
+                return resp
+            error = "Wrong username or password."
+        return render_template_string(USERPASS_HTML, error=error)
+
+    # --- LEGACY MODE: PIN (unchanged) -------------------------------------
+    if request.method == "POST":
+        pin = (request.form.get("pin") or "").strip()
+        if pin and hmac.compare_digest(_hash_pin(pin), PIN_HASH):
+            resp = make_response(redirect("/portal"))
+            # Indefinite remember: ~10 years. Secure + HttpOnly + SameSite.
+            resp.set_cookie(
+                COOKIE_NAME, _expected_device_token(),
+                max_age=10 * 365 * 24 * 3600,
+                secure=True, httponly=True, samesite="Lax", path="/portal",
+            )
+            return resp
+        error = "Wrong PIN. Try again."
+    return render_template_string(LOGIN_HTML, error=error)
+
+
+@app.route("/portal/forget", methods=["POST"])
+@login_required
+def forget():
+    """
+    'Forget all devices' — for a lost/stolen device.
+    We rotate the server seed in portal_config.py so EVERY existing device cookie
+    becomes invalid at once. Requires write access to the config file.
+    If we cannot write the file, we at least clear THIS device and tell the
+    doctor to rotate PORTAL_TOKEN_SEED manually.
+    """
+    new_seed = secrets.token_urlsafe(32)
+    rotated = _rotate_seed_in_config(new_seed)
+    resp = make_response(redirect("/portal/login"))
+    resp.delete_cookie(COOKIE_NAME, path="/portal")
+    if not rotated:
+        # Could not rewrite config; this device is signed out regardless.
+        pass
+    return resp
+
+
+@app.route("/portal/signout-all", methods=["POST"])
+@login_required
+def signout_all():
+    """
+    BROKER: 'Sign out everywhere (all apps)'. Bumps the shared SSO epoch so every
+    clinic_sso token issued so far is rejected by every app at once, and clears the
+    SSO cookie on this device. Device-trust for the portal is also dropped here.
+    """
+    if _sso_ready():
+        try:
+            clinic_users.bump_epoch(STORE)
+        except Exception:
+            pass
+    resp = make_response(redirect("/portal/login"))
+    if _SSO_LIBS:
+        try:
+            resp.set_cookie(clinic_sso.COOKIE_NAME, "", **clinic_sso.clear_cookie_kwargs())
+        except Exception:
+            pass
+    resp.delete_cookie(COOKIE_NAME, path="/portal")
+    return resp
+
+
+@app.route("/portal/health")
+def health():
+    """Simple health probe for the future Diagnostics system."""
+    ready = _usable()
+    mode = "broker" if _sso_ready() else ("legacy" if _config_ok() else "unconfigured")
+    return {"service": "portal", "status": "ok" if ready else "unconfigured",
+            "mode": mode}, (200 if ready else 503)
+
+
+# Same-origin source for the Staff Register tile's pending counts. The browser hits
+# THIS (followup origin, no CORS); we fetch the register server-side over localhost,
+# forwarding the caller's SSO cookie, and pass its JSON straight through. Any failure
+# -> {} so the tile keeps its static text; the portal never waits on / depends on the
+# register being up. Register local addr overridable via portal_config.
+REGISTER_COUNTS_URL = _cfg_get(
+    "REGISTER_COUNTS_URL", "http://127.0.0.1:8044/register/review/counts")
+
+
+@app.route("/portal/review-counts")
+@login_required
+def review_counts_proxy():
+    out = "{}"
+    try:
+        req = urllib.request.Request(REGISTER_COUNTS_URL)
+        ck = request.headers.get("Cookie", "")
+        if ck:
+            req.add_header("Cookie", ck)
+        with urllib.request.urlopen(req, timeout=2) as r:
+            if getattr(r, "status", 200) == 200:
+                out = r.read().decode("utf-8", "replace")
+    except Exception:
+        out = "{}"
+    resp = make_response(out)
+    resp.headers["Content-Type"] = "application/json"
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+# --- USER MANAGEMENT (manoj-only) -----------------------------------------------
+def _users_redir(msg, ok=True):
+    return redirect("/portal/users?m=%s&c=%s"
+                    % (urllib.parse.quote(msg), "ok" if ok else "err"))
+
+
+def _render_users(msg="", msgcls="ok"):
+    if not _SSO_LIBS or not STORE:
+        return render_template_string(CONFIG_ERROR_HTML), 503
+    who = _sso_user(request)
+    users = clinic_users.list_users(STORE)
+    roles = clinic_users.load_store(STORE).get("roles", [])
+    return render_template_string(USERS_HTML, who=who, users=users, roles=roles,
+                                  msg=msg, msgcls=msgcls)
+
+
+@app.route("/portal/users")
+@user_admin_required
+def users_admin():
+    return _render_users(request.args.get("m", ""), request.args.get("c", "ok"))
+
+
+@app.route("/portal/users/add", methods=["POST"])
+@user_admin_required
+def users_add():
+    user = request.form.get("user", ""); role = request.form.get("role", "")
+    pw = request.form.get("password", "")
+    try:
+        clinic_users.add_user(STORE, user, role, pw)
+        return _users_redir("added %s (%s)" % (user.strip().lower(), role))
+    except ValueError as e:
+        return _users_redir(str(e), ok=False)
+
+
+@app.route("/portal/users/role", methods=["POST"])
+@user_admin_required
+def users_role():
+    user = request.form.get("user", ""); role = request.form.get("role", "")
+    try:
+        clinic_users.set_role(STORE, user, role)
+        return _users_redir("role of %s set to %s" % (user.strip().lower(), role))
+    except ValueError as e:
+        return _users_redir(str(e), ok=False)
+
+
+@app.route("/portal/users/passwd", methods=["POST"])
+@user_admin_required
+def users_passwd():
+    user = request.form.get("user", ""); pw = request.form.get("password", "")
+    try:
+        clinic_users.set_password(STORE, user, pw)
+        return _users_redir("password reset for %s" % user.strip().lower())
+    except ValueError as e:
+        return _users_redir(str(e), ok=False)
+
+
+@app.route("/portal/users/active", methods=["POST"])
+@user_admin_required
+def users_active():
+    user = request.form.get("user", "")
+    active = request.form.get("active", "1") == "1"
+    me = (_sso_user(request) or {}).get("user", "")
+    if not active:
+        err = _admin_guard("deactivate", user, me)
+        if err:
+            return _users_redir(err, ok=False)
+    try:
+        clinic_users.set_active(STORE, user, active)
+        return _users_redir("%s %s" % ("activated" if active else "deactivated",
+                                       user.strip().lower()))
+    except ValueError as e:
+        return _users_redir(str(e), ok=False)
+
+
+@app.route("/portal/users/delete", methods=["POST"])
+@user_admin_required
+def users_delete():
+    user = request.form.get("user", "")
+    me = (_sso_user(request) or {}).get("user", "")
+    err = _admin_guard("delete", user, me)
+    if err:
+        return _users_redir(err, ok=False)
+    try:
+        clinic_users.del_user(STORE, user)
+        return _users_redir("deleted %s" % user.strip().lower())
+    except ValueError as e:
+        return _users_redir(str(e), ok=False)
+
+
+@app.route("/portal/mark-pc")
+@login_required
+def mark_pc():
+    """Visit ONCE in the clinic PC's own browser to reveal the Clinic-PC-only
+    tiles on that device. Sets a signed marker cookie (path=/portal)."""
+    resp = make_response(render_template_string(PC_MARKED_HTML, on=True))
+    resp.set_cookie(PC_COOKIE, _pc_token(),
+                    max_age=10 * 365 * 24 * 3600,
+                    secure=True, httponly=True, samesite="Lax", path="/portal")
+    return resp
+
+
+@app.route("/portal/unmark-pc")
+@login_required
+def unmark_pc():
+    """Undo mark-pc (e.g. if the wrong device was marked)."""
+    resp = make_response(render_template_string(PC_MARKED_HTML, on=False))
+    resp.delete_cookie(PC_COOKIE, path="/portal")
+    return resp
+
+
+@app.route("/portal/gmb")
+@login_required
+def gmb():
+    """Serve the GMB Review Assist page from the VPS. It is a static, self-contained
+    HTML page (no patient data, all client-side), so it is served as-is behind login,
+    reachable on any device. Read per-request so the page can be updated without a
+    code change (just replace the file)."""
+    try:
+        with open(GMB_HTML_PATH, "r", encoding="utf-8") as f:
+            return f.read()
+    except Exception:
+        return ("GMB page not installed. Place the HTML file at "
+                + GMB_HTML_PATH), 503
+
+
+# ===========================================================================
+# D223 GIST TILE  --  the doctor's bird's-eye. Reads /root/wa/portal_gist.json
+# (built by portal_gist.py on its own cron) and RENDERS it. The portal never
+# computes (D236); it only reads. A missing or stale file is SAID so on the page,
+# never shown as a fake zero (fail-loud carries through to the UI).
+# ===========================================================================
+GIST_JSON_PATH = _cfg_get("PORTAL_GIST_JSON", "/root/wa/portal_gist.json")
+_IST_TZ = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
+
+
+def _read_gist(path=None):
+    """Parse the gist json. Returns the dict, or None on any failure."""
+    try:
+        with open(path or GIST_JSON_PATH, "r", encoding="utf-8") as fh:
+            d = json.load(fh)
+        return d if isinstance(d, dict) else None
+    except Exception:
+        return None
+
+
+def _gist_view(path=None, now=None):
+    """Read the gist + decorate with freshness. Always returns a render-safe dict:
+      {ok, stale, age_min, gist}.  ok=False when the file is unreadable."""
+    d = _read_gist(path)
+    if d is None:
+        return {"ok": False, "stale": True, "age_min": None, "gist": None}
+    stale_after = d.get("stale_after_min", 45)
+    age_min, stale = None, True
+    try:
+        gen = datetime.datetime.fromisoformat(d.get("generated_ist", ""))
+        cur = now or datetime.datetime.now(gen.tzinfo or _IST_TZ)
+        age_min = int((cur - gen).total_seconds() // 60)
+        stale = age_min > stale_after
+    except Exception:
+        pass
+    return {"ok": True, "stale": stale, "age_min": age_min, "gist": d}
+
+
+def _is_doctor(req) -> bool:
+    """F-98: identity is PROVEN, never assumed.
+
+    Previously a trusted device with no SSO user was treated as the doctor, so a
+    browser still holding the legacy PIN-era device cookie reached every
+    @doctor_required surface — the Gist, the Call Console, the staff coaching
+    report. That is F-84's pattern (identity granted for convenience) sitting in
+    the SSO broker itself.
+
+    Now: if broker mode is available, only a verified SSO user with role=doctor
+    qualifies. If broker mode is NOT available, the legacy estate behaves exactly
+    as before, so this edit cannot remove existing access (D264).
+    """
+    who = _sso_user(req)
+    if who is not None:
+        return who.get("role") == "doctor"
+    return not _sso_ready()
+
+
+def doctor_required(view):
+    @wraps(view)
+    def wrapper(*a, **k):
+        if not _authed(request):
+            return redirect("/portal/login")
+        if not _is_doctor(request):
+            abort(403)
+        return view(*a, **k)
+    return wrapper
+
+
+# ---------------------------------------------------------------------------
+# SURGICAL CASE PACK (S172) — logic lives beside this file in
+# casepack_portal.py; the page HTML + all case files live under
+# /root/wa/casepack/ (PHI store — gitignored, F-31/F-49).
+# Owner-only: SSO user must be in PORTAL_CASEPACK_USERS (default manoj);
+# a trusted device with NO SSO user is the owner's legacy device -> allowed
+# (mirrors the _is_doctor transition rule).
+# ---------------------------------------------------------------------------
+CASEPACK_USERS = set(x.strip().lower() for x in
+                     _cfg_get("PORTAL_CASEPACK_USERS", "manoj").split(",") if x.strip())
+
+
+def _is_casepack_user(req) -> bool:
+    who = _sso_user(req)
+    if who is None:
+        return _is_trusted(req)
+    return (who.get("role") == "doctor" and
+            (who.get("user") or "").lower() in CASEPACK_USERS)
+
+
+def casepack_required(view):
+    @wraps(view)
+    def wrapper(*a, **k):
+        if not _authed(request):
+            return redirect("/portal/login")
+        if not _is_casepack_user(request):
+            abort(403)
+        return view(*a, **k)
+    return wrapper
+
+
+try:
+    import casepack_portal
+    casepack_portal.register(
+        app, casepack_required,
+        lambda: ((_sso_user(request) or {}).get("user") or "doctor"))
+    CASEPACK_IMPORT_ERR = ""
+except Exception as _cp_e:                      # fail loud on the page, never brick the portal
+    CASEPACK_IMPORT_ERR = str(_cp_e)
+
+    @app.route("/portal/casepack")
+    @login_required
+    def _casepack_broken():
+        return make_response(
+            "Surgical Case Pack failed to load: " + CASEPACK_IMPORT_ERR, 500)
+
+
+# ---------------------------------------------------------------------------
+# SHARED WHATSAPP SENDER (S172, Phase A) — one sender for the whole portal,
+# backed by MyOperator WABA (System B). Doctor-only for now (decision S172);
+# the GAS callback tracker's agent-reply hook is Phase B. Token + DRY flag come
+# from the portal env (MYOP_AUTH_TOKEN / PORTAL_WA_DRYRUN, default DRY).
+# ---------------------------------------------------------------------------
+WA_USERS = set(x.strip().lower() for x in
+               _cfg_get("PORTAL_WA_USERS", "manoj").split(",") if x.strip())
+
+
+def _is_wa_user(req) -> bool:
+    who = _sso_user(req)
+    if who is None:
+        return _is_trusted(req)
+    return (who.get("role") == "doctor" and
+            (who.get("user") or "").lower() in WA_USERS)
+
+
+def wa_required(view):
+    @wraps(view)
+    def wrapper(*a, **k):
+        if not _authed(request):
+            return redirect("/portal/login")
+        if not _is_wa_user(request):
+            abort(403)
+        return view(*a, **k)
+    return wrapper
+
+
+try:
+    import portal_wa
+    portal_wa.register(
+        app, wa_required,
+        lambda: ((_sso_user(request) or {}).get("user") or "doctor"),
+        _cfg_get)
+    WA_IMPORT_ERR = ""
+except Exception as _wa_e:
+    WA_IMPORT_ERR = str(_wa_e)
+
+    @app.route("/portal/wa")
+    @login_required
+    def _wa_broken():
+        return make_response("WhatsApp sender failed to load: " + WA_IMPORT_ERR, 500)
+
+
+try:
+    import portal_followups
+    portal_followups.register(
+        app, wa_required,
+        lambda: ((_sso_user(request) or {}).get("user") or "doctor"),
+        _cfg_get, portal_wa.send)
+    FU_IMPORT_ERR = ""
+except Exception as _fu_e:
+    FU_IMPORT_ERR = str(_fu_e)
+
+    @app.route("/portal/wa/followups")
+    @login_required
+    def _fu_broken():
+        return make_response("Follow-up batch failed to load: " + FU_IMPORT_ERR, 500)
+
+
+GIST_HTML = PAGE_HEAD + """
+<style>
+.gcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+.gmetrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:6px}
+.gbig{font-size:25px;font-weight:700;color:#fff;line-height:1.15}
+.glabel{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.gsub{font-size:12px;color:var(--muted);margin-top:5px}
+.gbanner{border-radius:12px;padding:10px 14px;font-size:13px;margin:6px 0 14px}
+.gbanner.warn{background:rgba(234,179,8,.14);color:#fde68a;border:1px solid rgba(234,179,8,.35)}
+.gbanner.bad{background:rgba(239,68,68,.14);color:#fecaca;border:1px solid rgba(239,68,68,.4)}
+.gpill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px}
+.gpill.ok{background:rgba(34,197,94,.16);color:#86efac}
+.gpill.bad{background:rgba(239,68,68,.18);color:#fca5a5}
+.gpill.mut{background:rgba(91,113,132,.25);color:#b8c7d6}
+.gfoot{margin-top:22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.gnote{font-size:11px;color:var(--muted)}
+</style>
+<div class="wrap">
+  <div class="head">
+    <h1>\U0001F4CA Clinic Gist</h1>
+    <span class="sub">Live bird's-eye \u00b7 read-only</span>
+  </div>
+
+  {% if not v.ok %}
+    <div class="gbanner bad">The gist data could not be read yet \u2014 numbers are withheld
+      (never shown as zero). It rebuilds every 30 min; check back shortly.</div>
+    <div class="gfoot"><a class="forget" href="/portal">&larr; Back to portal</a></div>
+  {% else %}
+    {% if v.stale %}
+      <div class="gbanner warn">\u26A0 Stale \u2014 last built {{ v.age_min }} min ago
+        (fresh under {{ g.stale_after_min }} min). The builder may not have run; treat with caution.</div>
+    {% endif %}
+    {% if not g.sources_ok %}
+      <div class="gbanner warn">Some sources were unreadable this run \u2014 affected numbers are blank, not zero.
+        {% for n in g.notes %}{% if 'verdict_awaiting_referee' not in n %}<div class="gnote">\u2022 {{ n }}</div>{% endif %}{% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="gmetrics">
+      <div class="gcard">
+        <div class="glabel">Calls today</div>
+        {% if g.calls %}
+          <div class="gbig">{{ g.calls.in_today }} in \u00b7 {{ g.calls.out_today }} out</div>
+          <div class="gsub">Last 7 days: {{ g.calls.in_7d }} in \u00b7 {{ g.calls.out_7d }} out</div>
+        {% else %}<div class="gbig">\u2014</div><div class="gsub">unavailable</div>{% endif %}
+      </div>
+
+      <div class="gcard">
+        <div class="glabel">Recording health (7d)</div>
+        {% if g.pipeline %}
+          {% if g.pipeline.escalate_lokesh %}
+            <div class="gbig">\u26A0 {{ g.pipeline.never_recorded_7d }}</div>
+            <div class="gsub"><span class="gpill bad">Escalate to Lokesh</span></div>
+          {% elif g.pipeline.never_recorded_7d > 0 %}
+            <div class="gbig">{{ g.pipeline.never_recorded_7d }} losses</div>
+            <div class="gsub">genuine provider recording losses</div>
+          {% else %}
+            <div class="gbig">\u2713 0 losses</div>
+            <div class="gsub"><span class="gpill ok">healthy</span> \u00b7 {{ g.pipeline.missed_7d }} missed (no recording expected)</div>
+          {% endif %}
+        {% else %}<div class="gbig">\u2014</div><div class="gsub">unavailable</div>{% endif %}
+      </div>
+
+      <div class="gcard">
+        <div class="glabel">Callbacks awaiting staff</div>
+        {% if g.unfiled_outcomes is not none %}
+          <div class="gbig">{{ g.unfiled_outcomes }}</div>
+          <div class="gsub">open in Callbacks_Today, not yet actioned</div>
+        {% else %}<div class="gbig">\u2014</div><div class="gsub">unavailable</div>{% endif %}
+      </div>
+
+      <div class="gcard">
+        <div class="glabel">3rd-strike numbers (7d)</div>
+        {% if g.third_strikes_7d is not none %}
+          <div class="gbig">{{ g.third_strikes_7d }}</div>
+          <div class="gsub">reached 3 WhatsApp strikes (don't-call risk)</div>
+        {% else %}<div class="gbig">\u2014</div><div class="gsub">unavailable</div>{% endif %}
+      </div>
+
+      <div class="gcard">
+        <div class="glabel">Verdict cards awaiting referee</div>
+        <div class="gbig"><span class="gpill mut">coming soon</span></div>
+        <div class="gsub">wires in when the AI-verdict store is bound</div>
+      </div>
+    </div>
+
+    <div class="gfoot">
+      <span class="gnote">{% if v.age_min is not none %}Updated {{ v.age_min }} min ago{% else %}Update time unknown{% endif %}
+        \u00b7 auto-refreshes every 30 min</span>
+      <a class="forget" href="/portal">&larr; Back to portal</a>
+    </div>
+  {% endif %}
+</div></body></html>
+"""
+
+
+@app.route("/portal/gist-data")
+@doctor_required
+def gist_data():
+    resp = make_response(json.dumps(_gist_view()))
+    resp.headers["Content-Type"] = "application/json"
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+@app.route("/portal/gist")
+@doctor_required
+def gist_page():
+    v = _gist_view()
+    return render_template_string(GIST_HTML, v=v, g=(v.get("gist") or {}))
+
+
+# ===========================================================================
+# S198_P2 (A3) — FORMS & DOWNLOADS. Blank clinic forms for printing.
+# ---------------------------------------------------------------------------
+# Files live at FORMS_DIR on the box ONLY (public-repo rule D320). The files
+# ARE the list — no database, no metadata to drift. Names are sanitised hard
+# (basename + charset allowlist + extension allowlist), so a crafted name can
+# never leave the folder. View/print/download = any logged-in identity;
+# add/remove = proven doctor (F-98 rule, the same gate the Gist uses).
+# ===========================================================================
+FORMS_ALLOWED_EXT = (".pdf", ".png", ".jpg", ".jpeg", ".docx", ".xlsx")
+FORMS_MAX_BYTES = 15 * 1024 * 1024
+_FORMS_ICON = {".pdf": "\U0001F4C4", ".png": "\U0001F5BC\uFE0F",
+               ".jpg": "\U0001F5BC\uFE0F", ".jpeg": "\U0001F5BC\uFE0F",
+               ".docx": "\U0001F4DD", ".xlsx": "\U0001F4CA"}
+
+
+def _forms_safe(name):
+    """A filename we will touch, or None. basename first, then an allowlist —
+    refusal is the default (F-84 ordering)."""
+    import re as _fre
+    base = os.path.basename(str(name or "")).strip()
+    if not base or base.startswith("."):
+        return None
+    if not _fre.match(r"^[A-Za-z0-9 ._()\-]{1,120}$", base):
+        return None
+    ext = os.path.splitext(base)[1].lower()
+    if ext not in FORMS_ALLOWED_EXT:
+        return None
+    return base
+
+
+def _forms_list():
+    try:
+        names = sorted(n for n in os.listdir(FORMS_DIR) if _forms_safe(n))
+    except FileNotFoundError:
+        return []
+    out = []
+    for n in names:
+        p = os.path.join(FORMS_DIR, n)
+        try:
+            st = os.stat(p)
+        except OSError:
+            continue
+        ext = os.path.splitext(n)[1].lower()
+        out.append(dict(name=n, icon=_FORMS_ICON.get(ext, "\U0001F4C4"),
+                        kb=max(1, st.st_size // 1024),
+                        day=datetime.date.fromtimestamp(st.st_mtime).isoformat()))
+    return out
+
+
+FORMS_HTML = HOME_HEAD + """
+<div class="topbar"><div class="topin">
+  <div class="tname">\U0001F5A8\uFE0F Forms &amp; Downloads</div>
+  <div class="tsub">print-ready clinic forms</div>
+  <div class="tright"><a href="/portal" style="color:var(--blue);text-decoration:none">\u2190 Portal</a></div>
+</div></div>
+<div class="wrap" style="max-width:760px">
+  {% if msg %}<div style="background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:10px 14px;margin:12px 0;color:var(--ink)">{{ msg }}</div>{% endif %}
+  {% if is_doctor %}
+  <div class="kick">Add a form</div>
+  <form method="POST" action="/portal/forms/upload" enctype="multipart/form-data"
+        style="background:var(--card);border:1px solid var(--line);border-radius:10px;
+        padding:12px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <input type="file" name="f" required accept=".pdf,.png,.jpg,.jpeg,.docx,.xlsx"
+           style="color:var(--muted);font-size:13px">
+    <button type="submit" style="background:var(--blue);color:#fff;border:none;
+      border-radius:9px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer">Upload</button>
+    <span style="font-size:11.5px;color:var(--muted)">PDF is best for printing \u00b7 max 15 MB \u00b7
+      a name already in the list is refused (delete it first)</span>
+  </form>
+  {% endif %}
+  <div class="kick">Forms ({{ forms|length }})</div>
+  {% if not forms %}<div style="color:var(--muted);font-size:13.5px">No forms yet.{% if is_doctor %}
+    Upload the first one above.{% endif %}</div>{% endif %}
+  {% for f in forms %}
+  <div style="display:flex;align-items:center;gap:12px;background:var(--card);
+       border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0">
+    <span style="font-size:22px">{{ f.icon }}</span>
+    <span style="min-width:0;flex:1"><span style="font-size:14px;font-weight:600;color:#fff">{{ f.name }}</span><br>
+      <span style="font-size:11.5px;color:var(--muted)">{{ f.kb }} KB \u00b7 {{ f.day }}</span></span>
+    <a href="/portal/forms/file/{{ f.name|urlencode }}" target="_blank" rel="noopener"
+       style="color:var(--blue);text-decoration:none;font-size:13px;font-weight:600">Open / Print</a>
+    <a href="/portal/forms/file/{{ f.name|urlencode }}?dl=1"
+       style="color:var(--muted);text-decoration:none;font-size:13px">Download</a>
+    {% if is_doctor %}
+    <form method="POST" action="/portal/forms/delete" style="margin:0"
+          onsubmit="return confirm('Remove {{ f.name }} from the portal?');">
+      <input type="hidden" name="name" value="{{ f.name }}">
+      <button type="submit" style="background:none;border:1px solid var(--line);color:var(--muted);
+        border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer">remove</button>
+    </form>
+    {% endif %}
+  </div>
+  {% endfor %}
+  <div style="margin-top:18px;font-size:12px;color:var(--muted)">Open / Print shows the form in a new
+  tab \u2014 print from there (Ctrl+P). Files live on the clinic server only.</div>
+</div></body></html>
+"""
+
+
+@app.route("/portal/forms")
+@login_required
+def forms_page():
+    return render_template_string(
+        FORMS_HTML, forms=_forms_list(), is_doctor=_is_doctor(request),
+        msg=request.args.get("m", "")[:200])
+
+
+@app.route("/portal/forms/file/<path:name>")
+@login_required
+def forms_file(name):
+    safe = _forms_safe(name)
+    if not safe:
+        abort(404)
+    path = os.path.join(FORMS_DIR, safe)
+    if not os.path.isfile(path):
+        abort(404)
+    return send_file(path, as_attachment=bool(request.args.get("dl")),
+                     download_name=safe)
+
+
+@app.route("/portal/forms/upload", methods=["POST"])
+@doctor_required
+def forms_upload():
+    f = request.files.get("f")
+    if f is None or not f.filename:
+        return redirect("/portal/forms?m=No file chosen.")
+    safe = _forms_safe(f.filename)
+    if not safe:
+        return redirect("/portal/forms?m=That file type or name is not allowed "
+                        "(pdf, png, jpg, docx, xlsx; plain names).")
+    os.makedirs(FORMS_DIR, exist_ok=True)
+    path = os.path.join(FORMS_DIR, safe)
+    if os.path.exists(path):
+        return redirect("/portal/forms?m=A form with that name already exists "
+                        "- remove it first if you want to replace it.")
+    data = f.read(FORMS_MAX_BYTES + 1)
+    if len(data) > FORMS_MAX_BYTES:
+        return redirect("/portal/forms?m=Too large (max 15 MB).")
+    with open(path, "wb") as out:
+        out.write(data)
+    return redirect("/portal/forms?m=Added %s." % safe)
+
+
+@app.route("/portal/forms/delete", methods=["POST"])
+@doctor_required
+def forms_delete():
+    safe = _forms_safe(request.form.get("name", ""))
+    path = os.path.join(FORMS_DIR, safe) if safe else ""
+    if not safe or not os.path.isfile(path):
+        return redirect("/portal/forms?m=Not found.")
+    os.remove(path)
+    return redirect("/portal/forms?m=Removed %s." % safe)
+
+
+# ===========================================================================
+# D297 CALL-INTELLIGENCE CONSOLE — Stage B1 page  [S168 rev2 -> S169 rev4]
+# ---------------------------------------------------------------------------
+# Reads /root/wa/console.db ONLY (built by portal_console.py, Stage A). Pure
+# READER: read-only sqlite, never writes, FAIL-LOUD/STALE-AWARE (D236) — a
+# missing/old db is SAID, never faked as zeros. Doctor-gated (D297 §3).
+# rev2 fixes (S168, from live-data probe): tz-stripped date+time; number
+# recovered from the join key / verdict when phone10 is blank (outbound);
+# name resolved on the recovered number; AI-outcome column (was TRUE/FALSE);
+# recording-link fallback via the recordings table; transcript text shown in
+# threads; agent dimension driven off the REAL attribution names in the data
+# (verdicts/outbound use full names like "Alisha Khan"; the roster is short).
+# rev4 (S169): agent resolution now reads the additive call_agent table
+# (portal_console.py Stage-2a, /search _us[received].ky -> Agents.UserId) FIRST,
+# then verdict.agent, then outbound -- so the TRUE handler shows on every
+# answered call (log, filter, facet, Staff tab). Precedence: call_agent >
+# verdict > outbound.
+# ===========================================================================
+import re as _re
+
+CONSOLE_DB_PATH   = _cfg_get("PORTAL_CONSOLE_DB", "/root/wa/console.db")
+# --- W2 (Items 5+6): the PERSISTENT doctor-review store. console.db is rebuilt
+# atomically every cron fire, so reviews/send-backs must live OUTSIDE it. This
+# portal is the SOLE writer of console_reviews.db (D235); the builder reads it
+# read-only to push open send-backs to the staff sheet tab.
+REVIEWS_DB_PATH   = _cfg_get("PORTAL_REVIEWS_DB", "/root/wa/console_reviews.db")
+REVIEW_VOCAB      = ["Coming", "Came", "Not coming", "Call again",
+                     "Wrong claim by staff", "Spam / marketing", "Other"]
+REC_CACHE_PATH    = _cfg_get("PORTAL_REC_CACHE", "/root/wa/rec_cache")
+SPAM_OUTCOME      = "Spam / marketing"
+
+
+def _spam_phones():
+    """W3 Track M: phones I have marked Spam/marketing (disposition vocabulary).
+    join_key = {phone10}_{unix} -> prefix. Fail-soft empty set."""
+    out = set()
+    try:
+        conn = _reviews_conn()
+        for (jk,) in conn.execute(
+                "SELECT join_key FROM dispositions WHERE final_outcome=?", (SPAM_OUTCOME,)):
+            if "_" in (jk or ""):
+                out.add(jk.split("_", 1)[0])
+        conn.close()
+    except Exception:
+        pass
+    return out
+
+
+def _reviews_conn():
+    """RW connection; creates the schema on first use (portal owns it)."""
+    conn = sqlite3.connect(REVIEWS_DB_PATH, timeout=5)
+    conn.executescript(
+        "CREATE TABLE IF NOT EXISTS dispositions ("
+        " join_key TEXT PRIMARY KEY, final_outcome TEXT, note TEXT,"
+        " refereed_by TEXT, refereed_at TEXT);"
+        "CREATE TABLE IF NOT EXISTS send_backs ("
+        " id INTEGER PRIMARY KEY AUTOINCREMENT, join_key TEXT, phone10 TEXT,"
+        " patient TEXT, reason TEXT, sent_by TEXT, sent_at TEXT,"
+        " status TEXT DEFAULT 'open');"
+        "CREATE INDEX IF NOT EXISTS ix_sb_jk ON send_backs(join_key);")
+    return conn
+
+
+def _reviews_maps():
+    """{join_key: disposition-dict}, {join_key: open-send-back-dict} for overlay.
+    Fail-soft: any error -> empty maps, page still renders."""
+    disp, sb = {}, {}
+    try:
+        conn = _reviews_conn()
+        for jk, fo, note, ts in conn.execute(
+                "SELECT join_key, final_outcome, note, refereed_at FROM dispositions"):
+            disp[jk] = {"final_outcome": fo or "", "note": note or "", "at": (ts or "")[:16]}
+        for jk, reason, ts, st in conn.execute(
+                "SELECT join_key, reason, sent_at, status FROM send_backs "
+                "WHERE status='open'"):
+            sb[jk] = {"reason": reason or "", "at": (ts or "")[:16], "status": st}
+        conn.close()
+    except Exception:
+        pass
+    return disp, sb
+CONSOLE_STALE_MIN = int(_cfg_get("PORTAL_CONSOLE_STALE_MIN", "25") or "25")
+
+_FLAG_COLS = {"postop": "flag_postop", "complaint": "flag_complaint",
+              "urgent": "flag_urgent", "surgery": "flag_surgery",
+              "clinical": "flag_clinical", "conduct": "flag_conduct"}
+_FLAG_LABEL = {"postop": "Post-op", "complaint": "Complaint", "urgent": "Urgent",
+               "surgery": "Surgery", "clinical": "Clinical", "conduct": "Conduct"}
+_FALSEY = ("", "0", "FALSE", "False", "false", "NO", "No", "no", "N", "n", "-")
+_TZ_RE = _re.compile(r'([+-]\d{2}:?\d{2}|Z)\s*$')
+
+
+def _split_dt(ts):
+    """'2026-07-03T16:52:03+05:30' -> ('2026-07-03', '16:52:03'). Strips the tz
+    offset the owner asked to remove; puts time in its own column."""
+    ts = (ts or "").strip()
+    if not ts:
+        return "", ""
+    ts = _TZ_RE.sub("", ts).strip().replace("T", " ")
+    parts = ts.split(" ", 1)
+    date = parts[0] if parts else ""
+    time = (parts[1].strip() if len(parts) > 1 else "")[:8]
+    return date, time
+
+
+def _console_conn():
+    try:
+        if not os.path.exists(CONSOLE_DB_PATH):
+            return None
+        conn = sqlite3.connect("file:%s?mode=ro" % CONSOLE_DB_PATH, uri=True)
+        conn.row_factory = sqlite3.Row
+        return conn
+    except Exception:
+        return None
+
+
+def _console_meta(conn=None):
+    own = False
+    if conn is None:
+        conn = _console_conn(); own = True
+    if conn is None:
+        return {"ok": False, "stale": True, "age_min": None, "built_at": "", "counts": {}}
+    try:
+        m = {r["k"]: r["v"] for r in conn.execute("SELECT k, v FROM meta")}
+        built = m.get("built_at", "")
+        age_min, stale = None, True
+        try:
+            gen = datetime.datetime.fromisoformat(_TZ_RE.sub("", built))
+            age_min = int((datetime.datetime.now() - gen).total_seconds() // 60)
+            stale = age_min > CONSOLE_STALE_MIN
+        except Exception:
+            pass
+        counts = {}
+        try:
+            counts = json.loads(m.get("row_counts", "{}"))
+        except Exception:
+            pass
+        return {"ok": True, "stale": stale, "age_min": age_min,
+                "built_at": built, "counts": counts}
+    except Exception:
+        return {"ok": False, "stale": True, "age_min": None, "built_at": "", "counts": {}}
+    finally:
+        if own:
+            conn.close()
+
+
+def _console_filters(args):
+    return {
+        "view": args.get("view", "log"),
+        "direction": args.get("direction", ""),
+        "answered": args.get("answered", ""),
+        "agent": args.get("agent", ""),
+        "flag": args.get("flag", ""),
+        "frm": args.get("from", ""),
+        "to": args.get("to", ""),
+        "q": (args.get("q", "") or "").strip(),
+    }
+
+
+# F-74: verdicts holds ALL rows (a re-judged call repeats its join_key) and
+# patients can repeat a phone10 -> a plain LEFT JOIN would MULTIPLY call rows.
+# These collapse to ONE row per key (SQLite: a single MAX() aggregate makes every
+# bare column come from that same row -> MAX(id) = newest verdict per join_key).
+_DV = ("(SELECT join_key, MAX(id) AS _vid, patient_number, patient_name, agent, "
+       "clinic_id, duration, claimed_outcome, not_filed, ai_outcome, verdict, "
+       "ai_reason, evidence, judged_at, "
+       "outcome_tf, match_confidence, spoke_with, conduct_note, status, error, "
+       "doctor_flag, doctor_note, final_outcome, recording_link, flag_postop, "
+       "flag_complaint, flag_urgent, flag_surgery, flag_clinical, flag_conduct "
+       "FROM verdicts WHERE join_key<>'' GROUP BY join_key)")
+_DP = ("(SELECT phone10, MAX(rowid) AS _pid, name, diagnosis, age, gender, "
+       "last_visit, patient_uid, clinic_id FROM patients WHERE phone10<>'' "
+       "GROUP BY phone10)")
+
+# Displayed number: phone10 if present, else the join-key prefix (Join Key =
+# {phone10}_{unix}) -- recovers the blank OUTBOUND numbers.
+_DPHONE = ("COALESCE(NULLIF(c.phone10,''), "
+           "CASE WHEN instr(c.join_key,'_')>1 "
+           "THEN substr(c.join_key,1,instr(c.join_key,'_')-1) ELSE '' END)")
+
+# Agent for a call (S169 rev4, Stage-2a): the TRUE handler.
+# Precedence: call_agent (real MyOperator handler, /search _us[received].ky ->
+#   Agents.UserId) > verdict.agent > outbound.agent (recovered number + same day).
+# call_agent is built by portal_console.py --with-myop-reconcile -- same build
+# guarantee as `conversations`; join_key = {phone10}_{unix}. Full attribution
+# names ("Alisha Khan"), NOT the short roster.
+_CA_AGENT  = ("(SELECT ca.agent FROM call_agent ca "
+              "WHERE ca.join_key=c.join_key AND c.join_key<>'')")
+_OUT_AGENT = ("(SELECT o.agent FROM outbound o "
+              "WHERE o.phone10=" + _DPHONE + " AND o.date=substr(c.ended_at_ist,1,10) LIMIT 1)")
+_AGENT_EXPR = ("COALESCE(NULLIF(" + _CA_AGENT + ",''), "
+               "NULLIF(v.agent,''), "
+               "NULLIF(" + _OUT_AGENT + ",''), '')")
+
+_LOG_FROM = ("FROM calls c "
+             "LEFT JOIN " + _DV + " v ON v.join_key=c.join_key AND c.join_key<>'' "
+             "LEFT JOIN " + _DP + " p ON p.phone10=" + _DPHONE + " AND " + _DPHONE + "<>'' ")
+
+_LOG_COLS = (
+    "SELECT c.id, c.ended_at_ist, c.direction, c.answered, c.total_duration, "
+    "c.join_key, c.recording_filename, " + _DPHONE + " AS phone_disp, "
+    "COALESCE(v.patient_number,'') AS vnum, "
+    "COALESCE(NULLIF(v.patient_name,''), p.name, '') AS name, "
+    "COALESCE(p.diagnosis,'') AS diagnosis, p._pid AS pid, "
+    "COALESCE(p.age,'') AS age, COALESCE(p.gender,'') AS gender, "
+    "COALESCE(v.claimed_outcome,'') AS claimed, COALESCE(v.not_filed,0) AS not_filed, "
+    "COALESCE(v.ai_outcome,'') AS ai_outcome, COALESCE(v.verdict,'') AS verdict, "
+    "COALESCE(v.ai_reason,'') AS ai_reason, COALESCE(v.evidence,'') AS evidence, "
+    "COALESCE(v.judged_at,'') AS judged_at, "
+    "(SELECT t2.transcribed_at FROM transcripts t2 WHERE t2.join_key=c.join_key "
+    " AND c.join_key<>'' LIMIT 1) AS tx_at, "
+    "COALESCE(v.outcome_tf,'') AS otf, COALESCE(v.agent,'') AS in_agent, v._vid AS vmatch, "
+    "COALESCE(v.status,'') AS vstatus, COALESCE(v.error,'') AS verror, "
+    "COALESCE(v.doctor_flag,'') AS doctor_flag, COALESCE(v.doctor_note,'') AS doctor_note, "
+    "COALESCE(v.final_outcome,'') AS final_outcome, COALESCE(v.conduct_note,'') AS conduct_note, "
+    "COALESCE(p.last_visit,'') AS last_visit, COALESCE(p.patient_uid,'') AS patient_uid, "
+    "COALESCE(NULLIF(p.clinic_id,''), v.clinic_id, '') AS clinic_id, "
+    "COALESCE(NULLIF(v.recording_link,''), "
+    " (SELECT recording_link FROM recordings rr WHERE rr.myoperator_filename=c.recording_filename LIMIT 1), '') AS rec_link, "
+    "(SELECT text FROM transcripts t WHERE t.join_key=c.join_key AND c.join_key<>'' LIMIT 1) AS tx_text, "
+    "COALESCE(v.flag_postop,'') AS f_postop, COALESCE(v.flag_complaint,'') AS f_complaint, "
+    "COALESCE(v.flag_urgent,'') AS f_urgent, COALESCE(v.flag_surgery,'') AS f_surgery, "
+    "COALESCE(v.flag_clinical,'') AS f_clinical, COALESCE(v.flag_conduct,'') AS f_conduct, "
+    "(SELECT o.agent FROM outbound o WHERE o.phone10=" + _DPHONE +
+    " AND o.date=substr(c.ended_at_ist,1,10) LIMIT 1) AS out_agent, "
+    + _AGENT_EXPR + " AS agent_res "
+)
+
+_LOG_LIMIT = 500
+
+
+def _truthy(val):
+    return (val or "").strip() not in _FALSEY
+
+
+def _parse_any_ts(s):
+    """Best-effort timestamp parse (rev5). Strips tz (F-72 kin), tries the formats
+    the pipeline actually writes. Returns datetime or None -- NEVER raises."""
+    from datetime import datetime as _dt
+    s = (s or "").strip()
+    if not s:
+        return None
+    if len(s) > 6 and (s[-6] in "+-") and s[-3] == ":":   # ...+05:30
+        s = s[:-6]
+    s = s.replace("T", " ").strip()
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%d/%m/%Y %H:%M:%S", "%d/%m/%Y %H:%M"):
+        try:
+            return _dt.strptime(s, fmt)
+        except ValueError:
+            continue
+    return None
+
+
+def _lag_min(a, b):
+    """Whole minutes from a->b, or None. Negative clamped to 0 (clock skew)."""
+    if a is None or b is None:
+        return None
+    d = (b - a).total_seconds() / 60.0
+    return int(d) if d >= 0 else 0
+
+
+def _hhmm(ts):
+    dt = _parse_any_ts(ts)
+    return dt.strftime("%H:%M") if dt else (ts or "")
+
+
+def _log_row(r):
+    direction = r["direction"] or "?"
+    agent = (r["agent_res"] or "")   # rev4: call_agent > verdict > outbound
+    flags = [_FLAG_LABEL[k] for k, col in
+             (("postop", "f_postop"), ("complaint", "f_complaint"), ("urgent", "f_urgent"),
+              ("surgery", "f_surgery"), ("clinical", "f_clinical"), ("conduct", "f_conduct"))
+             if _truthy(r[col])]
+    date, time = _split_dt(r["ended_at_ist"])
+    answered = r["answered"]
+    state = "Answered" if answered == 1 else ("Missed" if answered == 0 else "?")
+    number = r["phone_disp"] or r["vnum"] or ""
+    has_jk = bool((r["join_key"] or "").strip())
+    tx_text = (r["tx_text"] or "").strip()
+    # --- AI-verdict state (fixes the false "pending" flood) ---
+    ai = (r["ai_outcome"] or "").strip()
+    vstatus = (r["vstatus"] or "").strip().lower()
+    verror = (r["verror"] or "").strip()
+    has_verdict = r["vmatch"] is not None
+    if ai:
+        ai_state, ai_text = "ok", ai
+    elif has_verdict and (verror or vstatus in ("error", "failed", "err")):
+        ai_state, ai_text = "error", (verror or "error")
+    elif has_verdict:
+        ai_state, ai_text = "noout", ((r["verdict"] or "").strip() or "no outcome")
+    elif has_jk:
+        # rev5 Item 3: name WHY it is pending, per row
+        ai_state = "pending"
+        ai_text = "judge pending" if (r["tx_at"] or "").strip() else "awaiting transcript"
+    else:
+        ai_state, ai_text = "na", ""
+    # --- rev5 Item 3: pipeline times + lags for this row ---
+    t_call = _parse_any_ts(r["ended_at_ist"])
+    t_tx = _parse_any_ts(r["tx_at"])
+    t_j = _parse_any_ts(r["judged_at"])
+    lag_tx = _lag_min(t_call, t_tx)
+    lag_judge = _lag_min(t_call, t_j)
+    # --- your review (doctor) ---
+    fo = (r["final_outcome"] or "").strip(); dn = (r["doctor_note"] or "").strip()
+    df = (r["doctor_flag"] or "").strip()
+    reviewed = bool(fo or dn or df)
+    review_text = fo or df or ("noted" if dn else "")
+    return {
+        "date": date, "time": time, "direction": direction, "state": state,
+        "phone10": number, "name": r["name"] or "",
+        "diagnosis": r["diagnosis"] or "", "duration": r["total_duration"] or "",
+        "dur_h": _dur_h(r["total_duration"]),
+        "age": (r["age"] or "").strip(), "gender": (r["gender"] or "").strip(),
+        "agesex": "/".join(x for x in ((r["age"] or "").strip(),
+                                       (r["gender"] or "").strip()[:1].upper()) if x),
+        "agent": agent, "last_visit": r["last_visit"] or "",
+        "clinic_id": r["clinic_id"] or "", "patient_uid": r["patient_uid"] or "",
+        "claimed": r["claimed"] or "", "not_filed": (r["not_filed"] == 1),
+        "ai_outcome": ai, "verdict": r["verdict"] or "", "otf": r["otf"] or "",
+        "ai_state": ai_state, "ai_text": ai_text,
+        "ai_reason": (r["ai_reason"] or "").strip(), "evidence": (r["evidence"] or "").strip(),
+        "tx_at": _hhmm(r["tx_at"]), "judged_at": _hhmm(r["judged_at"]),
+        "lag_tx": lag_tx, "lag_judge": lag_judge,
+        "doctor_note": dn, "reviewed": reviewed, "review_text": review_text,
+        "conduct_note": (r["conduct_note"] or "").strip(),
+        "has_jk": has_jk, "has_verdict": has_verdict,
+        "in_master": r["pid"] is not None,
+        "flags": flags, "rec_link": r["rec_link"] or "",
+        "tx_text": tx_text, "has_tx": bool(tx_text), "join_key": r["join_key"] or "",
+    }
+
+
+def _overlay_reviews(rows, disp, sb):
+    """W2: my persistent review + open-send-back state onto rendered rows.
+    My disposition WINS over any sheet-side doctor columns."""
+    for r in rows:
+        jk = r.get("join_key") or ""
+        d = disp.get(jk)
+        if d:
+            r["reviewed"] = True
+            r["review_text"] = d["final_outcome"] or "reviewed"
+            r["my_note"] = d["note"]
+            r["my_review_at"] = d["at"]
+        else:
+            r["my_note"] = ""; r["my_review_at"] = ""
+        s = sb.get(jk)
+        r["sent_back"] = bool(s)
+        r["sb_reason"] = s["reason"] if s else ""
+        r["self_review"] = (r.get("agent") or "").startswith("Dr Manoj")
+    return rows
+
+
+def _group_by_day(rows):
+    """rows already ordered newest-first -> ordered [(date, [rows])], newest day first."""
+    out, idx = [], {}
+    for r in rows:
+        d = r["date"] or "(no date)"
+        if d not in idx:
+            idx[d] = len(out); out.append((d, []))
+        out[idx[d]][1].append(r)
+    return out
+
+
+def _log_where(f, exclude=None):
+    w, p = [], []
+    if f["direction"] and exclude != "direction":
+        w.append("c.direction=?"); p.append(f["direction"])
+    if f["answered"] and exclude != "answered":
+        if f["answered"] == "answered":
+            w.append("c.answered=1")
+        elif f["answered"] == "missed":
+            w.append("c.answered=0")
+        elif f["answered"] == "netmissed":
+            spam = _spam_phones()
+            cl = ("c.direction='In' AND c.answered=0 AND c.phone10 IN "
+                  "(SELECT phone10 FROM conversations WHERE net_missed_open=1)")
+            if spam:
+                cl += " AND c.phone10 NOT IN (%s)" % ",".join(["?"] * len(spam))
+                p.extend(sorted(spam))
+            w.append(cl)
+    if f["agent"] and exclude != "agent":
+        w.append(_AGENT_EXPR + "=?"); p.append(f["agent"])
+    if f["flag"] and exclude != "flag" and f["flag"] in _FLAG_COLS:
+        col = "v." + _FLAG_COLS[f["flag"]]
+        w.append("TRIM(COALESCE(%s,'')) NOT IN (%s)" % (col, ",".join(["?"] * len(_FALSEY))))
+        p.extend(_FALSEY)
+    if f["frm"] and exclude != "date":
+        w.append("substr(c.ended_at_ist,1,10)>=?"); p.append(f["frm"])
+    if f["to"] and exclude != "date":
+        w.append("substr(c.ended_at_ist,1,10)<=?"); p.append(f["to"])
+    if f["q"] and exclude != "q":
+        w.append("(" + _DPHONE + " LIKE ? OR COALESCE(v.patient_name,'') LIKE ? "
+                 "OR COALESCE(p.name,'') LIKE ? OR COALESCE(p.diagnosis,'') LIKE ?)")
+        like = "%" + f["q"] + "%"; p.extend([like, like, like, like])
+    return (" AND ".join(w) if w else "1=1"), p
+
+
+def _query_log(conn, f, limit=_LOG_LIMIT):
+    where, params = _log_where(f)
+    sql = _LOG_COLS + _LOG_FROM + "WHERE " + where + " ORDER BY c.ended_at_ist DESC"
+    if limit:
+        sql += " LIMIT %d" % (limit + 1)
+    rows = [_log_row(r) for r in conn.execute(sql, params)]
+    more = False
+    if limit and len(rows) > limit:
+        more = True; rows = rows[:limit]
+    return rows, more
+
+
+def _count(conn, where, params):
+    return conn.execute("SELECT COUNT(*) " + _LOG_FROM + "WHERE " + where, params).fetchone()[0]
+
+
+def _agent_names(conn):
+    """The agent dimension = the REAL attribution names present in the data
+    (call_agent + verdicts + outbound), not the short roster."""
+    names = set()
+    for (a,) in conn.execute("SELECT DISTINCT agent FROM verdicts WHERE TRIM(COALESCE(agent,''))<>''"):
+        names.add(a.strip())
+    for (a,) in conn.execute("SELECT DISTINCT agent FROM outbound WHERE TRIM(COALESCE(agent,''))<>''"):
+        names.add(a.strip())
+    for (a,) in conn.execute("SELECT DISTINCT agent FROM call_agent WHERE TRIM(COALESCE(agent,''))<>''"):
+        names.add(a.strip())
+    return sorted(names, key=lambda s: s.lower())
+
+
+def _facets(conn, f):
+    fac = {"direction": {}, "answered": {}, "agent": {}}
+    for val in ("In", "Out"):
+        w, p = _log_where(f, exclude="direction")
+        fac["direction"][val] = _count(conn, w + " AND c.direction=?", p + [val])
+    base_w, base_p = _log_where(f, exclude="answered")
+    fac["answered"]["answered"] = _count(conn, base_w + " AND c.answered=1", base_p)
+    fac["answered"]["missed"] = _count(conn, base_w + " AND c.answered=0", base_p)
+    spam = _spam_phones()
+    nm_cl = (" AND c.direction='In' AND c.answered=0 AND c.phone10 IN "
+             "(SELECT phone10 FROM conversations WHERE net_missed_open=1)")
+    nm_p = list(base_p)
+    if spam:
+        nm_cl += " AND c.phone10 NOT IN (%s)" % ",".join(["?"] * len(spam))
+        nm_p.extend(sorted(spam))
+    fac["answered"]["netmissed"] = _count(conn, base_w + nm_cl, nm_p)
+    aw, ap = _log_where(f, exclude="agent")
+    for nm in _agent_names(conn):
+        fac["agent"][nm] = _count(conn, aw + " AND " + _AGENT_EXPR + "=?", ap + [nm])
+    return fac
+
+
+def _query_conversations(conn, f):
+    w, p = [], []
+    if f["q"]:
+        w.append("(cv.phone10 LIKE ? OR COALESCE(p.name,'') LIKE ? OR COALESCE(p.diagnosis,'') LIKE ?)")
+        like = "%" + f["q"] + "%"; p.extend([like, like, like])
+    if f["frm"]:
+        w.append("substr(cv.last_ts,1,10)>=?"); p.append(f["frm"])
+    if f["to"]:
+        w.append("substr(cv.last_ts,1,10)<=?"); p.append(f["to"])
+    where = (" WHERE " + " AND ".join(w)) if w else ""
+    sql = ("SELECT cv.phone10, cv.attempts, cv.miss_attempts, cv.any_connected, "
+           "cv.net_missed_open, cv.first_ts, cv.last_ts, cv.last_direction, "
+           "cv.last_status, cv.last_agent, COALESCE(p.name,'') AS name, "
+           "COALESCE(p.diagnosis,'') AS diagnosis, "
+           "COALESCE(p.age,'') AS age, COALESCE(p.gender,'') AS gender, "
+           "COALESCE(p.clinic_id,'') AS clinic_id, "
+           "COALESCE(p.last_visit,'') AS last_visit, "
+           "p._pid AS pid FROM conversations cv "
+           "LEFT JOIN " + _DP + " p ON p.phone10=cv.phone10 AND cv.phone10<>'' "
+           + where + " ORDER BY cv.net_missed_open DESC, cv.last_ts DESC LIMIT 400")
+    convs = []
+    for r in conn.execute(sql, p):
+        legs = [_log_row(lr) for lr in conn.execute(
+            _LOG_COLS + _LOG_FROM + "WHERE c.phone10=? ORDER BY c.ended_at_ist ASC", [r["phone10"]])]
+        d0, t0 = _split_dt(r["first_ts"]); d1, t1 = _split_dt(r["last_ts"])
+        convs.append({
+            "phone10": r["phone10"] or "", "name": r["name"] or "",
+            "diagnosis": r["diagnosis"] or "",
+            "agesex": "/".join(x for x in ((r["age"] or "").strip(),
+                                           (r["gender"] or "").strip()[:1].upper()) if x),
+            "in_master": r["pid"] is not None,
+            "clinic_id": r["clinic_id"] or "", "last_visit": r["last_visit"] or "",
+            "attempts": r["attempts"],
+            "miss_attempts": r["miss_attempts"], "any_connected": r["any_connected"],
+            "net_open": r["net_missed_open"], "first_ts": (d0 + " " + t0).strip(),
+            "last_ts": (d1 + " " + t1).strip(), "last_agent": r["last_agent"] or "",
+            "legs": legs})
+    return convs
+
+
+def _query_staff(conn, f):
+    dw, dp = "", []
+    if f["frm"]:
+        dw += " AND substr(c.ended_at_ist,1,10)>=?"; dp.append(f["frm"])
+    if f["to"]:
+        dw += " AND substr(c.ended_at_ist,1,10)<=?"; dp.append(f["to"])
+    ow, op = "", []
+    if f["frm"]:
+        ow += " AND o.date>=?"; op.append(f["frm"])
+    if f["to"]:
+        ow += " AND o.date<=?"; op.append(f["to"])
+    rows = {}
+
+    def slot(name):
+        return rows.setdefault(name, {"agent": name, "in_handled": 0, "out_attempts": 0,
+                                      "not_filed": 0, "vtrue": 0, "vfalse": 0, "flags": 0})
+
+    for nm in _agent_names(conn):
+        slot(nm)
+    for r in conn.execute("SELECT " + _AGENT_EXPR + " AS a, COUNT(*) n FROM " + _DV + " v "
+                          "JOIN calls c ON c.join_key=v.join_key AND v.join_key<>'' "
+                          "WHERE c.direction='In' AND c.answered=1" + dw + " GROUP BY " + _AGENT_EXPR, dp):
+        if r["a"]:
+            slot(r["a"].strip())["in_handled"] = r["n"]
+    for r in conn.execute("SELECT " + _AGENT_EXPR + " AS a, COUNT(*) n FROM " + _DV + " v "
+                          "JOIN calls c ON c.join_key=v.join_key AND v.join_key<>'' "
+                          "WHERE c.direction='In' AND c.answered=1 AND COALESCE(v.not_filed,0)=1"
+                          + dw + " GROUP BY " + _AGENT_EXPR, dp):
+        if r["a"]:
+            slot(r["a"].strip())["not_filed"] = r["n"]
+    for r in conn.execute("SELECT agent AS a, COUNT(*) n FROM outbound o WHERE 1=1" + ow +
+                          " GROUP BY agent", op):
+        if r["a"]:
+            slot(r["a"].strip())["out_attempts"] = r["n"]
+    for r in conn.execute(
+            "SELECT " + _AGENT_EXPR + " AS a, "
+            "SUM(CASE WHEN UPPER(TRIM(COALESCE(v.outcome_tf,'')))='TRUE' THEN 1 ELSE 0 END) t, "
+            "SUM(CASE WHEN UPPER(TRIM(COALESCE(v.outcome_tf,'')))='FALSE' THEN 1 ELSE 0 END) f "
+            "FROM " + _DV + " v JOIN calls c ON c.join_key=v.join_key AND v.join_key<>'' "
+            "WHERE c.direction='In'" + dw + " GROUP BY " + _AGENT_EXPR, dp):
+        if r["a"]:
+            s = slot(r["a"].strip()); s["vtrue"] = r["t"] or 0; s["vfalse"] = r["f"] or 0
+    flagsql = " OR ".join("TRIM(COALESCE(v.%s,'')) NOT IN (%s)"
+                          % (col, ",".join(["?"] * len(_FALSEY))) for col in _FLAG_COLS.values())
+    fp = list(_FALSEY) * len(_FLAG_COLS)
+    for r in conn.execute("SELECT " + _AGENT_EXPR + " AS a, COUNT(*) n FROM " + _DV + " v "
+                          "JOIN calls c ON c.join_key=v.join_key AND v.join_key<>'' "
+                          "WHERE c.direction='In' AND (" + flagsql + ")" + dw +
+                          " GROUP BY " + _AGENT_EXPR, fp + dp):
+        if r["a"]:
+            slot(r["a"].strip())["flags"] = r["n"]
+    return sorted(rows.values(), key=lambda s: (s["in_handled"] + s["out_attempts"]), reverse=True)
+
+
+def _query_leads(conn, f):
+    w = ["c.direction='In'", _DPHONE + "<>''",
+         _DPHONE + " NOT IN (SELECT phone10 FROM patients WHERE phone10<>'')"]
+    p = []
+    if f["frm"]:
+        w.append("substr(c.ended_at_ist,1,10)>=?"); p.append(f["frm"])
+    if f["to"]:
+        w.append("substr(c.ended_at_ist,1,10)<=?"); p.append(f["to"])
+    if f["q"]:
+        w.append(_DPHONE + " LIKE ?"); p.append("%" + f["q"] + "%")
+    sql = ("SELECT " + _DPHONE + " AS ph, MIN(c.ended_at_ist) first_seen, "
+           "MAX(c.ended_at_ist) last_seen, COUNT(*) attempts, MAX(c.answered) any_answered "
+           "FROM calls c WHERE " + " AND ".join(w) +
+           " GROUP BY ph ORDER BY last_seen DESC LIMIT 400")
+    leads = []
+    for r in conn.execute(sql, p):
+        ph = r["ph"]
+        d0, t0 = _split_dt(r["first_seen"]); d1, t1 = _split_dt(r["last_seen"])
+        legs = [_log_row(lr) for lr in conn.execute(
+            _LOG_COLS + _LOG_FROM + "WHERE " + _DPHONE + "=? ORDER BY c.ended_at_ist ASC", [ph])]
+        last_agent = ""
+        for lg in reversed(legs):
+            if lg["agent"]:
+                last_agent = lg["agent"]; break
+        leads.append({"phone10": ph, "first_seen": (d0 + " " + t0).strip(),
+                      "last_seen": (d1 + " " + t1).strip(), "attempts": r["attempts"],
+                      "answered": (r["any_answered"] == 1), "last_agent": last_agent,
+                      "legs": legs})
+    return leads
+
+
+# ---- S171 v3: GAS outcome vocabularies (verbatim, GAS_Outcome_Vocabularies_v1) ----
+HI_OUTCOME = {
+    "coming": "\u092e\u0930\u0940\u091c\u093c \u0906 \u0930\u0939\u0947 \u0939\u0948\u0902",
+    "will_come": "\u092e\u0930\u0940\u091c\u093c \u0906 \u0930\u0939\u0947 \u0939\u0948\u0902",
+    "k_coming": "\u092e\u0930\u0940\u091c\u093c \u0906 \u0930\u0939\u0947 \u0939\u0948\u0902",
+    "not_coming": "\u0928\u0939\u0940\u0902 \u0906\u090f\u0901\u0917\u0947",
+    "k_not_coming": "\u0928\u0939\u0940\u0902 \u0906\u090f\u0901\u0917\u0947",
+    "call_again": "\u092c\u093e\u0924 \u0939\u0941\u0908 \u2014 \u092b\u093f\u0930 call \u0915\u0930\u0928\u093e",
+    "k_call_again": "\u092c\u093e\u0924 \u0939\u0941\u0908 \u2014 \u092b\u093f\u0930 call \u0915\u0930\u0928\u093e",
+    "needs_callback": "\u092c\u093e\u0924 \u0939\u0941\u0908 \u2014 \u092b\u093f\u0930 call \u0915\u0930\u0928\u093e",
+    "no_answer": "\u092c\u093e\u0924 \u0928\u0939\u0940\u0902 \u0939\u094b \u092a\u093e\u0908",
+    "no_contact": "\u092c\u093e\u0924 \u0928\u0939\u0940\u0902 \u0939\u094b \u092a\u093e\u0908",
+    "problem": "\u0921\u0949\u0915\u094d\u091f\u0930 \u0915\u094b \u0926\u093f\u0916\u093e\u0928\u093e \u0939\u0948",
+    "escalated": "\u0921\u0949\u0915\u094d\u091f\u0930 \u0915\u094b \u0926\u093f\u0916\u093e\u0928\u093e \u0939\u0948",
+    "to_doctor": "\u0921\u0949\u0915\u094d\u091f\u0930 \u0915\u094b \u0926\u093f\u0916\u093e\u0928\u093e \u0939\u0948",
+    "appointment_booked": "Appointment booked",
+    "enquiry_only": "\u091c\u093e\u0928\u0915\u093e\u0930\u0940 \u0926\u0947 \u0926\u0940",
+    "info_given_will_act": "\u091c\u093e\u0928\u0915\u093e\u0930\u0940 \u0926\u0947 \u0926\u0940",
+    "no_action": "\u0915\u093e\u092e \u0915\u093e \u0928\u0939\u0940\u0902",
+}
+
+
+def _hi_out(code):
+    """Outcome code -> the staff's own button word (fallback: code as-is)."""
+    c = (code or "").strip().lower()
+    return HI_OUTCOME.get(c, code or "")
+
+
+def _rl_sig(jk):
+    """Short HMAC for the staff recording-only link /portal/rl/<jk>/<sig>."""
+    import hmac as _hmac, hashlib as _hl
+    key = (app.secret_key or "portal").encode() if isinstance(app.secret_key, str) else (app.secret_key or b"portal")
+    return _hmac.new(key, ("rl:" + (jk or "")).encode(), _hl.sha256).hexdigest()[:16]
+
+
+def _ns_tries(conn, rows):
+    """Attach the due-day calling efforts to each no-show row.
+    tries = [{t,agent,ok}] for calls on/after the due date; tries_h = compact line."""
+    phones = sorted({(r.get("phone10") or "").strip() for r in rows
+                     if (r.get("phone10") or "").strip()})
+    if not phones:
+        return
+    qm = ",".join(["?"] * len(phones))
+    by = {}
+    try:
+        for ph, ts, ans, ag in conn.execute(
+                "SELECT c.phone10, c.ended_at_ist, c.answered, COALESCE(ca.agent,'') "
+                "FROM calls c LEFT JOIN call_agent ca ON ca.join_key=c.join_key "
+                "AND c.join_key<>'' "
+                "WHERE c.direction='Out' AND c.phone10 IN (%s) "
+                "ORDER BY c.ended_at_ist" % qm, phones):
+            by.setdefault(ph, []).append((ts or "", int(ans or 0), (ag or "").strip()))
+    except Exception:
+        return
+    for r in rows:
+        due = (str(r.get("due_date") or ""))[:10]
+        out = []
+        for ts, ans, ag in by.get((r.get("phone10") or "").strip(), []):
+            if due and ts[:10] >= due:
+                out.append({"t": ts[11:16], "d": ts[:10], "agent": ag or "\u2014",
+                            "ok": bool(ans)})
+        r["tries"] = out
+        r["tries_h"] = " \u00b7 ".join(
+            "%s %s %s" % (t["t"], (t["agent"].split()[0] if t["agent"] != "\u2014" else "?"),
+                          "\u2713" if t["ok"] else "\u2717") for t in out[:4])
+
+
+def _staff_week(conn, disp, end_day=None):
+    """agents x last-7-days matrix + the per-agent per-day row lists.
+    Returns (days [iso newest-first], matrix {agent:{iso:{...}}}, rows_by {(agent,iso):[rows]})."""
+    end = end_day or datetime.datetime.now().strftime("%Y-%m-%d")
+    try:
+        d0 = datetime.date.fromisoformat(end)
+    except Exception:
+        d0 = datetime.date.today()
+    days = [(d0 - datetime.timedelta(days=i)).isoformat() for i in range(7)]
+    rows = [_log_row(r) for r in conn.execute(
+        _LOG_COLS + _LOG_FROM +
+        "WHERE substr(c.ended_at_ist,1,10)>=? AND substr(c.ended_at_ist,1,10)<=? "
+        "ORDER BY c.ended_at_ist DESC", (days[-1], days[0]))]
+    matrix, rows_by = {}, {}
+    for r in rows:
+        ag = (r.get("agent") or "").strip()
+        if not ag:
+            continue
+        iso = (r.get("date") or "")[:10]
+        if iso not in days:
+            continue
+        m = matrix.setdefault(ag, {}).setdefault(iso, dict(
+            total=0, answered=0, filed=0, mismatch=0, flags=0, myrev=0))
+        m["total"] += 1
+        if r.get("state") == "Answered":
+            m["answered"] += 1
+        if (r.get("claimed") or "").strip():
+            m["filed"] += 1
+        if (r.get("verdict") or "").strip() == "Mismatch":
+            m["mismatch"] += 1
+        if r.get("flags"):
+            m["flags"] += 1
+        if r.get("join_key") in disp:
+            m["myrev"] += 1
+        rows_by.setdefault((ag, iso), []).append(r)
+    for ag, dd in matrix.items():
+        for iso, m in dd.items():
+            m["pct"] = int(round(100.0 * m["filed"] / m["total"])) if m["total"] else 0
+    return days, matrix, rows_by
+
+
+def _coach_data(conn, day, disp, sbm):
+    """Per-agent coaching sheet data for one day: stats, lessons, not-filed."""
+    rows = [_log_row(r) for r in conn.execute(
+        _LOG_COLS + _LOG_FROM +
+        "WHERE substr(c.ended_at_ist,1,10)=? ORDER BY c.ended_at_ist", (day,))]
+    _overlay_reviews(rows, disp, sbm)
+    agents = {}
+    for r in rows:
+        ag = (r.get("agent") or "").strip()
+        if not ag:
+            continue
+        a = agents.setdefault(ag, dict(agent=ag, total=0, answered=0, filed=0,
+                                       lessons=[], notfiled=[]))
+        a["total"] += 1
+        if r.get("state") == "Answered":
+            a["answered"] += 1
+        claimed = (r.get("claimed") or "").strip()
+        if claimed:
+            a["filed"] += 1
+        correct = (r.get("review_text") or "").strip() or (r.get("ai_outcome") or "").strip()
+        mism = ((r.get("verdict") or "").strip() == "Mismatch") or (
+            (r.get("review_text") or "").strip() and claimed and
+            _hi_out(r["review_text"]) != _hi_out(claimed))
+        if claimed and correct and mism and r.get("join_key"):
+            a["lessons"].append(dict(
+                time=r.get("time") or "", name=(r.get("name") or "").strip(),
+                phone=r.get("phone10") or "",
+                filed_h=_hi_out(claimed), correct_h=_hi_out(correct),
+                why=(r.get("doctor_note") or "").strip() or (r.get("ai_reason") or "").strip(),
+                quote=(r.get("evidence") or "").strip(),
+                jk=r["join_key"], sig=_rl_sig(r["join_key"])))
+        if r.get("not_filed") and r.get("state") == "Answered":
+            a["notfiled"].append("%s %s" % (r.get("time") or "",
+                                            (r.get("name") or r.get("phone10") or "").strip()))
+    for a in agents.values():
+        a["pct"] = int(round(100.0 * a["filed"] / a["total"])) if a["total"] else 0
+    return sorted(agents.values(), key=lambda x: -x["total"])
+
+
+def _dur_h(sec):
+    """seconds -> m:ss for the row player."""
+    try:
+        s = int(str(sec).strip() or 0)
+    except Exception:
+        return ""
+    return "%d:%02d" % (s // 60, s % 60) if s > 0 else ""
+
+
+def _date_label(iso):
+    """YYYY-MM-DD -> '12 Aug (Tue)'; fail-soft to raw."""
+    try:
+        d = datetime.datetime.strptime((iso or "")[:10], "%Y-%m-%d")
+        return d.strftime("%d %b (%a)")
+    except Exception:
+        return iso or "\u2014"
+
+
+def _group_by_iso(rows, key):
+    """Group dict-rows by ISO date of rows[key][:10], newest first.
+    Returns [(label, iso, rows)]."""
+    groups = {}
+    for r in rows:
+        iso = (str(r.get(key) or ""))[:10]
+        groups.setdefault(iso, []).append(r)
+    out = []
+    for iso in sorted(groups, reverse=True):
+        out.append((_date_label(iso), iso, groups[iso]))
+    return out
+
+
+ROW_SHARED = """
+{% macro detail(r) %}
+<div class="detail">
+  <div class="dname"><b>{{ r.name or 'Unknown caller' }}</b>{% if r.agesex %} \u00b7 {{ r.agesex }}{% endif %}{% if r.diagnosis %} \u00b7 <span class="dx">{{ r.diagnosis }}</span>{% elif not r.in_master %} \u00b7 <span class="ctx miss">not in patient master</span>{% else %} \u00b7 <span class="ctx" style="opacity:.75">no dx in master</span>{% endif %}</div>
+  <div class="dmeta">
+    <span class="mono">{{ r.phone10 or '\u2014' }}</span>
+    {% if r.clinic_id %}\u00b7 ID {{ r.clinic_id }}{% endif %}
+    {% if r.last_visit %}\u00b7 last visit {{ r.last_visit }}{% endif %}
+    \u00b7 <span class="dir {{ r.direction }}">{{ r.direction }}</span> <span class="st {{ r.state }}">{{ r.state }}</span>
+    {% if r.duration %}\u00b7 {{ r.duration }}s{% endif %}
+    \u00b7 staff: <b>{{ r.agent or '\u2014' }}</b>
+  </div>
+  <div class="drow">
+    <span class="dlab">Outcome</span>
+    {% if r.not_filed %}<span class="amber">NOT FILED</span>{% else %}{{ r.claimed or '\u2014' }}{% endif %}
+    <span class="dlab">AI verdict</span>
+    {% if r.ai_state=='ok' %}<span class="pillv U">{{ r.ai_text }}</span>
+    {% elif r.ai_state=='error' %}<span class="pillv F">error</span> <span class="muted">{{ r.ai_text }}</span>
+    {% elif r.ai_state=='noout' %}<span class="pillv mut">{{ r.ai_text }}</span>
+    {% elif r.ai_state=='pending' %}<span class="muted">{{ r.ai_text }}</span>
+    {% else %}\u2014{% endif %}
+    <span class="dlab">Your review</span>
+    {% if r.reviewed %}<span class="pillv T">{{ r.review_text or 'reviewed' }}</span>{% if r.my_review_at %}<span class="muted sm">{{ r.my_review_at }}</span>{% endif %}{% else %}<span class="muted">not reviewed</span>{% endif %}
+    {% if r.sent_back %}<span class="sbbadge">SENT BACK</span>{% endif %}
+    {% if r.self_review %}<span class="warnbadge">\u26A0 self-review (own call)</span>{% endif %}
+  </div>
+  {% if r.ai_reason or r.evidence %}<div class="drow"><span class="dlab">AI reason</span><span>{{ r.ai_reason or '\u2014' }}</span>{% if r.evidence %}<span class="dlab">Evidence</span><span class="evq">&ldquo;{{ r.evidence }}&rdquo;</span>{% endif %}</div>{% endif %}
+  {% if r.tx_at or r.judged_at %}<div class="drow"><span class="dlab">Pipeline</span><span class="muted sm">{% if r.tx_at %}transcribed {{ r.tx_at }}{% if r.lag_tx is not none %} (+{{ r.lag_tx }}m){% endif %}{% endif %}{% if r.judged_at %} \u00b7 judged {{ r.judged_at }}{% if r.lag_judge is not none %} (+{{ r.lag_judge }}m after call){% endif %}{% endif %}</span></div>{% endif %}
+  {% if r.flags %}<div class="drow"><span class="dlab">Flags</span>{% for fl in r.flags %}<span class="flag">{{ fl }}</span>{% endfor %}</div>{% endif %}
+  {% if r.doctor_note %}<div class="drow"><span class="dlab">My note</span><span class="muted">{{ r.doctor_note }}</span></div>{% endif %}
+  <div class="drow">
+    {% if r.join_key and r.rec_link %}
+      <audio class="recplayer" controls preload="none" src="/portal/rec/{{ r.join_key }}"></audio>
+      <a class="lnk sm" href="{{ r.rec_link }}" target="_blank" rel="noopener">Drive</a>
+    {% elif r.rec_link %}<a class="lnk" href="{{ r.rec_link }}" target="_blank" rel="noopener">\u25B6 recording</a>
+    {% elif r.state=='Answered' %}<span class="muted">no recording link</span>{% endif %}
+  </div>
+  {% if r.tx_text %}<div class="txbox"><b>Transcript</b><br>{{ r.tx_text }}</div>{% endif %}
+  {% if r.join_key %}
+  <div class="actrow">
+    <form method="POST" action="/portal/console/review" class="actform">
+      <input type="hidden" name="join_key" value="{{ r.join_key }}">
+      <input type="hidden" name="ret" value="{{ full_qs }}">
+      <select name="final_outcome">
+        <option value="">\u2014 my verdict \u2014</option>
+        {% for v in vocab %}<option value="{{ v }}" {{ 'selected' if r.review_text==v else '' }}>{{ v }}</option>{% endfor %}
+      </select>
+      <input type="text" name="note" placeholder="note (optional)" value="{{ r.my_note }}">
+      <button class="btn sm" type="submit">Save review</button>
+    </form>
+    <form method="POST" action="/portal/console/sendback" class="actform">
+      <input type="hidden" name="join_key" value="{{ r.join_key }}">
+      <input type="hidden" name="phone10" value="{{ r.phone10 }}">
+      <input type="hidden" name="patient" value="{{ r.name }}">
+      <input type="hidden" name="ret" value="{{ full_qs }}">
+      <input type="text" name="reason" placeholder="reason for staff to call again" value="{{ r.sb_reason }}">
+      <button class="btn sm alt" type="submit">{{ 'Update send-back' if r.sent_back else 'Send back to staff' }}</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% macro rowsummary(r) %}
+  <span class="tc"><span class="t {{ 'inok' if r.direction=='In' and r.state=='Answered' else ('inmiss' if r.direction=='In' else ('outok' if r.state=='Answered' else 'outmiss')) }}"><svg class="ic"><use href="#i-{{ 'in' if r.direction=='In' else 'out' }}"/></svg>{{ r.time }}</span><span class="u">{{ 'answered' if r.state=='Answered' else 'missed' }}</span></span>
+  <span class="rec">{% if r.join_key and r.rec_link %}<button type="button" class="pbtn" data-jk="{{ r.join_key }}" onclick="event.preventDefault();event.stopPropagation();rowPlay(this)"><svg class="ic s"><use href="#i-play"/></svg></button><span class="pdur">{{ r.dur_h }}</span>{% elif r.dur_h %}<span class="pdur">{{ r.dur_h }}</span>{% else %}<span class="pdur">\u2014</span>{% endif %}</span>
+  <span class="idc">{% if r.name %}<span class="nm">{{ r.name }}</span><span class="sub">{{ r.phone10 }}{% if r.agesex %} \u00b7 {{ r.agesex }}{% endif %}{% if r.clinic_id %} \u00b7 <b>{{ r.clinic_id }}</b>{% endif %}</span>{% else %}<span class="nm mono">{{ r.phone10 or '\u2014' }}</span>{% if not r.in_master %}<span class="sub warn">not in patient master</span>{% endif %}{% endif %}</span>
+  <span class="dxc">{% if r.diagnosis %}<span class="d1">{{ r.diagnosis }}</span>{% elif not r.in_master %}<span class="d1 mut">\u2014</span>{% else %}<span class="d1 mut">no dx in master</span>{% endif %}{% if r.last_visit %}<span class="d2">{{ r.last_visit }}</span>{% endif %}</span>
+  <span class="agc">{{ r.agent or '\u2014' }}</span>
+  <span class="sig"><span class="l1">{% for fl in r.flags %}<span class="chip flagc"><svg class="ic s"><use href="#i-flag"/></svg>{{ fl }}</span>{% endfor %}{% if r.verdict=='Mismatch' %}<span class="chip flagc">MISMATCH</span>{% endif %}{% if r.not_filed %}<span class="chip amberc">NOT FILED</span>{% endif %}{% if r.sent_back %}<span class="chip sbc">SENT BACK</span>{% endif %}{% if r.has_tx %}<span class="chip infoc">tx</span>{% endif %}</span><span class="l2">{% if r.ai_state=='ok' %}<b>AI:</b> {{ r.ai_text }}{% elif r.ai_state=='pending' %}<b>AI:</b> {{ r.ai_text }}{% endif %}{% if r.claimed %} \u00b7 <b>staff:</b> {{ hi_out(r.claimed) }}{% endif %}</span></span>
+  <span class="act" onclick="event.preventDefault();event.stopPropagation()">{% if r.join_key %}<form method="POST" action="/portal/console/review" style="margin:0;flex:1;display:flex"><input type="hidden" name="join_key" value="{{ r.join_key }}"><input type="hidden" name="ret" value="{{ full_qs }}"><select name="final_outcome" onchange="this.form.submit()"><option value="">{{ r.review_text or 'review\u2026' }}</option>{% for v in vocab %}<option value="{{ v }}" {{ 'selected' if r.review_text==v else '' }}>{{ v }}</option>{% endfor %}</select></form><form method="POST" action="/portal/console/sendback" style="margin:0" onsubmit="var x=prompt('Reason for staff to call again', this.reason.value||''); if(!x) return false; this.reason.value=x; return true;"><input type="hidden" name="join_key" value="{{ r.join_key }}"><input type="hidden" name="phone10" value="{{ r.phone10 }}"><input type="hidden" name="patient" value="{{ r.name }}"><input type="hidden" name="ret" value="{{ full_qs }}"><input type="hidden" name="reason" value="{{ r.sb_reason }}"><button class="abtn sb2" type="submit" title="Send back to staff"><svg class="ic"><use href="#i-back"/></svg></button></form>{% endif %}{% if r.phone10 %}<a class="abtn callb" href="tel:+91{{ r.phone10 }}" title="Call {{ r.phone10 }}"><svg class="ic"><use href="#i-call"/></svg></a>{% endif %}</span>
+{% endmacro %}
+<style>
+.cwrap{max-width:1780px}
+.cbanner{border-radius:12px;padding:10px 14px;font-size:13px;margin:6px 0 14px}
+.cbanner.warn{background:rgba(234,179,8,.14);color:#fde68a;border:1px solid rgba(234,179,8,.35)}
+.cbanner.bad{background:rgba(239,68,68,.14);color:#fecaca;border:1px solid rgba(239,68,68,.4)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 14px}
+.tabs a{font-size:13px;font-weight:600;padding:8px 14px;border-radius:10px;text-decoration:none;color:var(--muted);border:1px solid var(--line);background:var(--card)}
+.tabs a.on{color:#fff;border-color:var(--blue);background:rgba(59,130,246,.16)}
+.filt{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px}
+.filt .row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.filt label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted);font-weight:600}
+.filt select,.filt input{background:#0b1b29;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:13px;min-width:120px}
+.filt input[type=text]{min-width:190px}
+.filt .btn{background:var(--blue);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer}
+.filt .clr{background:none;border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:9px 14px;font-size:13px;text-decoration:none}
+.csvbtn{margin-left:auto;background:none;border:1px solid var(--green);color:#86efac;border-radius:9px;padding:9px 14px;font-size:13px;text-decoration:none;font-weight:600}
+.summ{font-size:12px;color:var(--muted);margin:2px 2px 10px}
+.muted{color:var(--muted)} .sm{font-size:12px} .mono{font-variant-numeric:tabular-nums}
+.lnk{color:#93c5fd;text-decoration:none;font-size:12.5px}.lnk:hover{text-decoration:underline}
+.dir{font-weight:700;font-size:11px;padding:2px 7px;border-radius:6px}
+.dir.In{background:rgba(59,130,246,.16);color:#93c5fd}.dir.Out{background:rgba(91,113,132,.22);color:#cbd5e1}
+.st{font-size:11px;font-weight:600}.st.Answered{color:#86efac}.st.Missed{color:#fca5a5}
+.amber{background:rgba(234,179,8,.16);color:#fde68a;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:10px}
+.pillv{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:10px}
+.pillv.T{background:rgba(34,197,94,.16);color:#86efac}.pillv.F{background:rgba(239,68,68,.16);color:#fca5a5}
+.pillv.U{background:rgba(59,130,246,.16);color:#93c5fd}.pillv.mut{background:rgba(91,113,132,.25);color:#b8c7d6}
+.flag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:10px;margin:1px 2px 1px 0;background:rgba(239,68,68,.14);color:#fca5a5}
+.txmark{font-size:11px;font-weight:700;color:#86efac;background:rgba(34,197,94,.12);padding:2px 7px;border-radius:10px}
+/* w8 universal grid */
+.gwrap{--cols:78px 96px minmax(230px,1.5fr) minmax(160px,1.1fr) 96px minmax(200px,1.4fr) minmax(250px,320px);font-size:13.5px}
+.hdr{display:grid;grid-template-columns:var(--cols);gap:10px;padding:8px 14px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:6}
+details.callrow>summary,details.conv>summary{display:grid;grid-template-columns:var(--cols);gap:10px;align-items:center;padding:10px 14px}
+details.callrow>summary:hover,details.conv>summary:hover{background:rgba(59,130,246,.06)}
+.arr{font-size:15px;font-weight:800;margin-right:4px}
+.arr.inok{color:#4ade80}.arr.inmiss{color:#f87171}.arr.out{color:#93c5fd}.arr.outmiss{color:#fca5a5}
+.tcell{font-size:13.5px}
+.pbtn{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:rgba(59,130,246,.14);color:#bfdbfe;font-size:12px;cursor:pointer;line-height:1}
+.pbtn:hover{background:rgba(59,130,246,.28)}
+.pdur{font-size:12.5px;color:var(--muted);margin-left:5px;font-variant-numeric:tabular-nums}
+.idc{display:flex;flex-direction:column;gap:1px;min-width:0}
+.idc .nm{font-size:15px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idc .sub{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idc .sub b{color:#93c5fd;font-weight:700}
+.dxc{display:flex;flex-direction:column;gap:2px;min-width:0}
+.dxc .d1{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dxc .d2{font-size:12px;color:var(--muted)}
+.agc{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sigc{display:flex;gap:3px;flex-wrap:wrap;align-items:center;min-width:0}
+.actc{display:flex;gap:5px;align-items:center}
+.actc select{background:#0b1b29;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:6px 8px;font-size:13px;flex:1;min-width:0;max-width:170px}
+.abtn{width:34px;height:32px;border-radius:8px;border:1px solid var(--line);background:rgba(234,179,8,.12);color:#fde68a;font-size:13px;cursor:pointer}
+.abtn:hover{background:rgba(234,179,8,.25)}
+.hot{background:rgba(249,115,22,.18);color:#fdba74;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px}
+.mobile-scroll{overflow-x:auto}
+.mobile-scroll .hdr,.mobile-scroll details.callrow>summary,.mobile-scroll details.conv>summary{min-width:880px}
+.ctx{font-size:10.5px;color:var(--muted);background:rgba(91,113,132,.18);padding:1px 7px;border-radius:6px}
+.ctx.dx{color:#c7d2fe;background:rgba(99,102,241,.14)}
+.ctx.miss{color:#fca5a5;background:rgba(239,68,68,.12)}
+.evq{color:#fde68a;font-style:italic}
+.sbbadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(234,88,12,.2);color:#fdba74}
+.warnbadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(239,68,68,.18);color:#fca5a5}
+.actrow{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;padding-top:8px;border-top:1px dashed rgba(39,75,102,.6)}
+.actform{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.actform select,.actform input[type=text]{background:#0b1b29;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px}
+.actform input[type=text]{min-width:200px}
+.btn.sm{padding:6px 12px;font-size:12px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer}
+.btn.sm.alt{background:rgba(234,88,12,.85)}
+.recplayer{height:32px;max-width:340px;vertical-align:middle}
+.rowplayer{height:26px;max-width:230px}
+/* day + call rows */
+details.day{margin-bottom:8px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:rgba(22,50,74,.35)}
+details.day>summary{cursor:pointer;list-style:none;padding:11px 14px;font-weight:700;font-size:13px;color:#fff;background:var(--card);display:flex;gap:12px;align-items:center}
+details.day>summary::-webkit-details-marker{display:none}
+details.day>summary .dcount{font-size:11px;color:var(--muted);font-weight:600;margin-left:auto}
+details.callrow{border-top:1px solid rgba(39,75,102,.5)}
+
+details.callrow>summary::-webkit-details-marker{display:none}
+details.callrow[open]>summary{background:rgba(59,130,246,.07)}
+details.callrow:hover>summary{background:rgba(59,130,246,.05)}
+.numw{min-width:96px}.namew{min-width:120px}.agw{min-width:90px;color:var(--muted)}
+/* conversation / lead groups */
+details.conv{background:var(--card);border:1px solid var(--line);border-radius:11px;margin-bottom:8px}
+details.conv[open]{border-color:var(--blue)}
+
+details.conv>summary::-webkit-details-marker{display:none}
+.netbadge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(239,68,68,.16);color:#fca5a5}
+.okbadge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(34,197,94,.16);color:#86efac}
+/* detail block (the one layout used everywhere) */
+.detail{padding:10px 14px 12px;border-top:1px solid rgba(39,75,102,.5);background:rgba(11,27,41,.4)}
+.dname{font-size:13.5px;margin-bottom:3px}.dname .dx{color:#c7d2fe;font-weight:600}
+.dmeta{font-size:12px;color:var(--muted);margin-bottom:7px}
+.drow{font-size:12.5px;margin:4px 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.dlab{font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-left:8px}
+.drow .dlab:first-child{margin-left:0}
+.txbox{font-size:12px;color:#cbd5e1;background:#0b1b29;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0 2px;line-height:1.5}
+table.log{width:100%;border-collapse:collapse;font-size:12.5px}
+table.log th{text-align:left;color:var(--muted);font-weight:700;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;padding:8px;border-bottom:1px solid var(--line)}
+table.log td{padding:8px;border-bottom:1px solid rgba(39,75,102,.5);vertical-align:top}
+</style>
+<style>
+/* ===== V3 (S171): type scale + capped width + one grid, everywhere ===== */
+:root{--f-lg:15px;--f-md:13px;--f-sm:12px;--f-xs:11px}
+.cwrap{max-width:1480px}
+.gwrap{--cols:74px 84px minmax(200px,1.2fr) minmax(140px,.9fr) 88px minmax(170px,1fr) 226px;
+ background:rgba(11,27,41,.35);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.hdr{display:grid;grid-template-columns:var(--cols);gap:10px;padding:8px 16px;font-size:var(--f-xs);font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:6}
+details.day>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:14px;font-weight:700;color:#fff;background:rgba(22,50,74,.8);border-bottom:1px solid var(--line)}
+details.day>summary::-webkit-details-marker{display:none}
+details.day>summary .chev{transition:transform .15s}
+details.day[open]>summary .chev{transform:rotate(90deg)}
+details.day>summary .dcount{margin-left:auto;font-size:var(--f-sm);color:var(--muted);font-weight:600}
+details.callrow,details.conv{border-bottom:1px solid rgba(39,75,102,.45);border-top:none}
+details.callrow>summary,details.conv>summary{cursor:pointer;list-style:none;display:grid;grid-template-columns:var(--cols);gap:10px;align-items:center;padding:10px 16px;min-height:54px}
+details.callrow>summary::-webkit-details-marker,details.conv>summary::-webkit-details-marker{display:none}
+details.callrow>summary:hover,details.conv>summary:hover{background:rgba(59,130,246,.06)}
+details.callrow[open]>summary,details.conv[open]>summary{background:rgba(59,130,246,.09)}
+.ic{width:15px;height:15px;vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ic.s{width:13px;height:13px}
+.tc{display:flex;flex-direction:column;gap:2px}
+.tc .t{font-size:var(--f-md);font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:5px;color:#fff}
+.tc .u{font-size:var(--f-xs);color:var(--muted)}
+.t.inok{color:#4ade80}.t.inmiss{color:#f87171}.t.outok{color:#93c5fd}.t.outmiss{color:#fca5a5}
+.rec{display:flex;align-items:center;gap:7px}
+.pbtn{width:30px;height:30px;border-radius:50%;border:1px solid rgba(59,130,246,.5);background:rgba(59,130,246,.15);color:#bfdbfe;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:none;font-size:0}
+.pbtn:hover{background:rgba(59,130,246,.32)}
+.pdur{font-size:var(--f-sm);color:var(--muted);font-variant-numeric:tabular-nums}
+.idc{display:flex;flex-direction:column;gap:2px;min-width:0}
+.idc .nm{font-size:var(--f-lg);font-weight:650;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idc .sub{font-size:var(--f-sm);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.idc .sub b{color:#93c5fd;font-weight:700}
+.idc .sub.warn{color:#fca5a5}
+.dxc{display:flex;flex-direction:column;gap:2px;min-width:0}
+.dxc .d1{font-size:var(--f-md);color:#c7d2fe;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dxc .d1.mut{color:var(--muted)}
+.dxc .d2{font-size:var(--f-xs);color:var(--muted)}
+.agc{font-size:var(--f-md);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sig{display:flex;flex-direction:column;gap:4px;min-width:0}
+.sig .l1{display:flex;gap:4px;flex-wrap:wrap}
+.sig .l2{font-size:var(--f-sm);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sig .l2 b{color:#c7d2fe;font-weight:600}
+.chip{font-size:var(--f-xs);font-weight:700;padding:2.5px 8px;border-radius:7px;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.chip.flagc{background:rgba(239,68,68,.15);color:#fca5a5}
+.chip.amberc{background:rgba(234,179,8,.16);color:#fde68a}
+.chip.okc{background:rgba(34,197,94,.15);color:#86efac}
+.chip.infoc{background:rgba(59,130,246,.15);color:#93c5fd}
+.chip.hotc{background:rgba(249,115,22,.2);color:#fdba74}
+.chip.sbc{background:rgba(168,85,247,.18);color:#d8b4fe}
+.act{display:flex;gap:6px;align-items:center}
+.act select{background:#0b1b29;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:6px 8px;font-size:var(--f-sm);flex:1;min-width:0;max-width:118px}
+.abtn{width:34px;height:32px;border-radius:9px;border:1px solid var(--line);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:none;background:transparent;text-decoration:none}
+.abtn.sb2{background:rgba(234,179,8,.1);color:#fde68a}.abtn.sb2:hover{background:rgba(234,179,8,.25)}
+.abtn.callb{background:rgba(34,197,94,.1);color:#86efac}.abtn.callb:hover{background:rgba(34,197,94,.25)}
+.xcard{background:rgba(11,27,41,.6);border-top:1px solid var(--line);padding:14px 16px 16px;display:grid;gap:10px}
+.xrow{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:var(--f-md)}
+.xlab{font-size:var(--f-xs);font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);min-width:86px}
+.summ{font-size:var(--f-md)}
+table.log{font-size:var(--f-md)}
+table.log th{font-size:10.5px}
+.detail{font-size:var(--f-md)}
+.dname{font-size:var(--f-lg)}
+.recplayer{height:36px;max-width:420px}
+.mobile-scroll{overflow-x:visible}
+@media(max-width:1000px){.gwrap{overflow-x:auto}.hdr,details.callrow>summary,details.conv>summary{min-width:980px}}
+</style>
+<svg style="display:none"><defs>
+<symbol id="i-in" viewBox="0 0 24 24"><path d="M17 7 7 17M7 9v8h8"/></symbol>
+<symbol id="i-out" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
+<symbol id="i-call" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.9.5 2.8.7a2 2 0 0 1 1.7 2z"/></symbol>
+<symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15V4s1.5-1 4-1 4 2 7 2 4-1 4-1v11s-1.5 1-4 1-4-2-7-2-4 1-4 1zM4 22v-7"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+<symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 21h16"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></symbol>
+</defs></svg>
+<script>
+var _pa=null,_pb=null;
+function _pico(b,p){ b.innerHTML='<svg class="ic s"><use href="#i-'+(p?'pause':'play')+'"/></svg>'; }
+function rowPlay(b){
+  if(_pb===b&&_pa){ if(_pa.paused){_pa.play();_pico(b,1);}else{_pa.pause();_pico(b,0);} return; }
+  if(_pa){ _pa.pause(); if(_pb)_pico(_pb,0); }
+  _pa=new Audio("/portal/rec/"+b.dataset.jk); _pb=b;
+  _pa.play().catch(function(){ b.textContent="\u26A0"; });
+  _pico(b,1);
+  _pa.onended=function(){ _pico(b,0); };
+}
+function copyText(id,btn){
+  var el=document.getElementById(id); if(!el) return;
+  var t=el.innerText||el.textContent;
+  (navigator.clipboard&&navigator.clipboard.writeText(t)||Promise.reject()).then(
+    function(){ if(btn){var o=btn.innerHTML;btn.innerHTML='\u2713 copied';setTimeout(function(){btn.innerHTML=o;},1500);} },
+    function(){ var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+      if(btn){var o=btn.innerHTML;btn.innerHTML='\u2713 copied';setTimeout(function(){btn.innerHTML=o;},1500);} });
+}
+</script>
+"""
+
+CONSOLE_HTML = PAGE_HEAD + ROW_SHARED + """
+
+<div class="wrap cwrap">
+  <div class="head">
+    <h1>\U0001F4DE Call Console</h1>
+    <span class="sub">D297 \u00b7 reads console.db \u00b7 doctor-only \u00b7 click any row to expand</span>
+  </div>
+
+  {% if not m.ok %}
+    <div class="cbanner bad">Console data could not be read yet \u2014 the builder may not have run,
+      or console.db is missing. Numbers are withheld, never shown as zero.</div>
+    <div class="tabs"><a href="/portal">&larr; Back to portal</a></div>
+  {% else %}
+    {% if m.stale %}<div class="cbanner warn">\u26A0 Stale \u2014 last built {{ m.age_min }} min ago
+      (fresh under {{ stale_min }} min). The refresh cron may not have run; treat with caution.</div>{% endif %}
+
+    <div class="tabs">
+      {% for key,lbl in [('log','Call log'),('threads','Conversations'),('staff','Staff'),('leads','New leads'),('noshows','No-shows'),('pipe','Pipeline')] %}
+        <a class="{{ 'on' if view==key else '' }}" href="/portal/console?view={{key}}&{{ base_qs }}">{{ lbl }}</a>
+      {% endfor %}
+      <a class="" href="/portal/digest">Digest</a>
+      <a href="/portal" style="margin-left:auto">&larr; Portal</a>
+    </div>
+
+    <form class="filt" method="GET" action="/portal/console" id="ff">
+      <input type="hidden" name="view" value="{{ view }}">
+      <div class="row">
+        <label>Direction<select name="direction" onchange="ff.submit()">
+          <option value="">All</option>
+          <option value="In"  {{ 'selected' if f.direction=='In' else '' }}>In ({{ fac.direction.get('In',0) }})</option>
+          <option value="Out" {{ 'selected' if f.direction=='Out' else '' }}>Out ({{ fac.direction.get('Out',0) }})</option>
+        </select></label>
+        <label>Answered<select name="answered" onchange="ff.submit()">
+          <option value="">All</option>
+          <option value="answered"  {{ 'selected' if f.answered=='answered' else '' }}>Answered ({{ fac.answered.get('answered',0) }})</option>
+          <option value="missed"    {{ 'selected' if f.answered=='missed' else '' }}>Missed ({{ fac.answered.get('missed',0) }})</option>
+          <option value="netmissed" {{ 'selected' if f.answered=='netmissed' else '' }}>Net-missed open calls ({{ fac.answered.get('netmissed',0) }})</option>
+        </select></label>
+        <label>Agent<select name="agent" onchange="ff.submit()">
+          <option value="">All</option>
+          {% for a in agents %}<option value="{{ a }}" {{ 'selected' if f.agent==a else '' }}>{{ a }} ({{ fac.agent.get(a,0) }})</option>{% endfor %}
+        </select></label>
+        <label>Flag<select name="flag" onchange="ff.submit()">
+          <option value="">Any</option>
+          {% for k,lbl in flag_opts %}<option value="{{ k }}" {{ 'selected' if f.flag==k else '' }}>{{ lbl }}</option>{% endfor %}
+        </select></label>
+        <label>From <input type="date" name="from" value="{{ f.frm }}"></label>
+        <label>To <input type="date" name="to" value="{{ f.to }}"></label>
+        <label>Search <input type="text" name="q" value="{{ f.q }}" placeholder="number / name / diagnosis"></label>
+        <button class="btn" type="submit">Apply</button>
+        <a class="clr" href="/portal/console?view={{ view }}">Clear</a>
+        <a class="csvbtn" href="/portal/console.csv?{{ full_qs }}">\u2B07 CSV</a>
+      </div>
+    </form>
+
+    {% if view=='log' %}
+      <div class="summ">{{ total }} calls{% if more %} \u2014 showing newest {{ limit }}; narrow filters or export CSV for all{% endif %}. Tap a day, then a row, to expand transcript & AI detail.</div>
+      <div class="gwrap mobile-scroll">
+      <div class="hdr"><span>call</span><span>rec</span><span>patient</span><span>dx \u00b7 visit</span><span>staff</span><span>signals</span><span>my review \u00b7 actions</span></div>
+      {% for day, drows in day_groups %}
+        <details class="day" {% if loop.first %}open{% endif %}>
+          <summary>{{ day }}<span class="dcount">{{ drows|length }} calls</span></summary>
+          {% for r in drows %}
+            <details class="callrow"><summary>{{ rowsummary(r) }}</summary>{{ detail(r) }}</details>
+          {% endfor %}
+        </details>
+      {% endfor %}
+      </div>
+      {% if not day_groups %}<div class="muted" style="padding:18px">No calls match these filters.</div>{% endif %}
+
+    {% elif view=='threads' %}
+      <div class="summ">{{ convs|length }} conversations \u00b7 grouped by last-try date \u00b7 net-missed first within a day. Expand for attempts.</div>
+      <div class="gwrap mobile-scroll">
+      <div class="hdr"><span>call</span><span>rec</span><span>patient</span><span>dx \u00b7 visit</span><span>staff</span><span>signals</span><span>my review \u00b7 actions</span></div>
+      {% for lbl, iso, cvs in conv_groups %}
+        <details class="day" {% if loop.first %}open{% endif %}>
+          <summary>{{ lbl }}<span class="dcount">{{ cvs|length }} conversations</span></summary>
+          {% for cv in cvs %}
+          <details class="conv">
+            <summary>
+              <span class="tc"><span class="t {{ 'inok' if cv.any_connected else 'inmiss' }}"><svg class="ic"><use href="#i-in"/></svg>{{ cv.last_ts[11:16] }}</span><span class="u">last try</span></span>
+              <span class="tc"><span class="t">{{ cv.attempts }} tries</span><span class="u">{{ cv.miss_attempts }} missed</span></span>
+              <span class="idc">{% if cv.name %}<span class="nm">{{ cv.name }}</span><span class="sub">{{ cv.phone10 }}{% if cv.agesex %} \u00b7 {{ cv.agesex }}{% endif %}{% if cv.clinic_id %} \u00b7 <b>{{ cv.clinic_id }}</b>{% endif %}</span>{% else %}<span class="nm mono">{{ cv.phone10 }}</span>{% if not cv.in_master %}<span class="sub warn">not in patient master</span>{% endif %}{% endif %}</span>
+              <span class="dxc">{% if cv.diagnosis %}<span class="d1">{{ cv.diagnosis }}</span>{% elif not cv.in_master %}<span class="d1 mut">\u2014</span>{% else %}<span class="d1 mut">no dx in master</span>{% endif %}{% if cv.last_visit %}<span class="d2">{{ cv.last_visit }}</span>{% endif %}</span>
+              <span class="agc">{{ cv.last_agent or '\u2014' }}</span>
+              <span class="sig"><span class="l1">{% if cv.net_open %}<span class="chip flagc"><svg class="ic s"><use href="#i-flag"/></svg>NET-MISSED</span>{% elif cv.any_connected %}<span class="chip okc">connected</span>{% endif %}</span><span class="l2">{% if cv.net_open %}nobody has reached this caller yet{% elif cv.miss_attempts %}reached after {{ cv.miss_attempts }} miss(es){% else %}all attempts answered{% endif %}</span></span>
+              <span class="tc"><span class="u">expand for attempts <svg class="ic s"><use href="#i-chev"/></svg></span></span>
+            </summary>
+            {% for lg in cv.legs %}{{ detail(lg) }}{% endfor %}
+          </details>
+          {% endfor %}
+        </details>
+      {% endfor %}
+      </div>
+      {% if not convs %}<div class="muted" style="padding:18px">No conversations match.</div>{% endif %}
+
+    {% elif view=='staff' %}
+      <div class="summ">Week at a glance \u00b7 cell = answered/total \u00b7 filed % \u2014 tap a date header to open that day \u00b7 <a class="lnk" href="/portal/console/staffreport?day={{ wk_sd }}">\U0001F4CB Daily coaching report \u2192</a></div>
+      <div class="gwrap" style="padding:12px 16px;margin-bottom:10px">
+      <table class="log"><thead><tr><th>agent</th>{% for d in wk_days %}<th><a class="lnk" href="/portal/console?view=staff&sd={{ d }}">{{ d[5:] }}</a></th>{% endfor %}</tr></thead><tbody>
+      {% for ag in wk_agents %}<tr><td><a class="lnk" href="/portal/console?view=log&agent={{ ag|urlencode }}">{{ ag }}</a></td>
+        {% for d in wk_days %}{% set m = wk_matrix.get(ag, {}).get(d) %}<td class="mono">{% if m %}{{ m.answered }}/{{ m.total }} \u00b7 <span class="{{ 'ok' if m.pct>=85 else ('amber' if m.pct>=70 else 'netbadge') }}" style="background:none;padding:0">{{ m.pct }}%</span>{% if m.mismatch %} \u00b7 <span class="amber" style="background:none;padding:0">{{ m.mismatch }}\u26A0</span>{% endif %}{% else %}\u2014{% endif %}</td>{% endfor %}
+      </tr>{% endfor %}
+      </tbody></table>
+      </div>
+      <div class="gwrap mobile-scroll">
+      <div class="hdr"><span>call</span><span>rec</span><span>patient</span><span>dx \u00b7 visit</span><span>staff</span><span>signals</span><span>my review \u00b7 actions</span></div>
+      {% for ag in wk_agents %}{% set m = wk_matrix.get(ag, {}).get(wk_sd) %}{% if m %}
+        <details class="day" {% if loop.first %}open{% endif %}>
+          <summary><svg class="ic chev"><use href="#i-chev"/></svg>{{ wk_sd[5:] }} \u2014 {{ ag }} \u00b7 {{ m.total }} calls \u00b7 {{ m.filed }} filed ({{ m.pct }}%) \u00b7 {{ m.mismatch }} mismatch \u00b7 {{ m.myrev }} reviewed by me<span class="dcount">{{ m.flags }} flag(s)</span></summary>
+          {% for r in wk_rows.get(ag ~ '|' ~ wk_sd, []) %}
+            <details class="callrow"><summary>{{ rowsummary(r) }}</summary>{{ detail(r) }}</details>
+          {% endfor %}
+        </details>
+      {% endif %}{% endfor %}
+      </div>
+      {% if not wk_agents %}<div class="muted" style="padding:18px">No attributed calls in the last 7 days.</div>{% endif %}
+
+    {% elif view=='leads' %}
+      <div class="summ">{{ leads|length }} unknown incoming numbers (not in Patient_Master) \u2014 first-time enquiries (D243). \U0001F525 = worth chasing \u00b7 grouped by latest attempt.</div>
+      <div class="gwrap mobile-scroll">
+      <div class="hdr"><span>call</span><span>rec</span><span>patient</span><span>dx \u00b7 visit</span><span>staff</span><span>signals</span><span>my review \u00b7 actions</span></div>
+      {% for lbl, iso, ls in lead_groups %}
+        <details class="day" {% if loop.first %}open{% endif %}>
+          <summary>{{ lbl }}<span class="dcount">{{ ls|length }} leads</span></summary>
+          {% for l in ls %}
+          <details class="conv">
+            <summary>
+              <span class="tc"><span class="t {{ 'inok' if l.answered else 'inmiss' }}"><svg class="ic"><use href="#i-in"/></svg>{{ l.last_seen[11:16] }}</span><span class="u">latest</span></span>
+              <span class="tc"><span class="t">{{ l.attempts }} tr{{ 'y' if l.attempts==1 else 'ies' }}</span></span>
+              <span class="idc"><span class="nm mono">{{ l.phone10 }}</span><span class="sub warn">not in patient master</span></span>
+              <span class="dxc"><span class="d1 mut">\u2014</span></span>
+              <span class="agc">{{ l.last_agent or '\u2014' }}</span>
+              <span class="sig"><span class="l1">{% if l.hot %}<span class="chip hotc">\U0001F525 HOT</span>{% endif %}{% if l.answered %}<span class="chip okc">reached</span>{% else %}<span class="chip amberc">not reached</span>{% endif %}</span><span class="l2">{% if l.hot %}worth chasing \u00b7 {% endif %}call back to convert</span></span>
+              <span class="tc"><span class="u">expand for attempts <svg class="ic s"><use href="#i-chev"/></svg></span></span>
+            </summary>
+            {% for lg in l.legs %}{{ detail(lg) }}{% endfor %}
+          </details>
+          {% endfor %}
+        </details>
+      {% endfor %}
+      </div>
+      {% if not leads %}<div class="muted" style="padding:18px">No new leads in range.</div>{% endif %}
+
+    {% elif view=='noshows' %}
+      <div class="summ">Appointment booked, not visited \u2014 tomorrow's calling work \u00b7 plus your open send-backs.
+        <a class="lnk" style="margin-left:12px" href="/portal/console/reviews.csv">\u2B07 my reviews (training CSV)</a></div>
+      {% if sb_open %}
+        <h3 style="font-size:13px;margin:10px 0 6px">Call list from Dr Manoj \u2014 open ({{ sb_open|length }})</h3>
+        <table class="log" style="max-width:900px"><thead><tr><th>Sent</th><th>Reason</th><th>Join key</th><th></th></tr></thead><tbody>
+        {% for s in sb_open %}<tr><td class="mono">{{ s.at }}</td><td>{{ s.reason }}</td><td class="mono muted sm">{{ s.join_key }}</td>
+          <td><form method="POST" action="/portal/console/sendback/resolve" style="margin:0">
+            <input type="hidden" name="join_key" value="{{ s.join_key }}">
+            <input type="hidden" name="ret" value="view=noshows">
+            <button class="btn sm" type="submit">Resolve</button></form></td></tr>{% endfor %}
+        </tbody></table>
+      {% endif %}
+      {% if spam_list %}
+        <h3 style="font-size:13px;margin:14px 0 6px">Block list \u2014 marked Spam / marketing ({{ spam_list|length }})</h3>
+        <div class="summ">Excluded from New-leads and net-missed. Locking the number itself is a MyOperator-panel action.</div>
+        <div style="margin-bottom:10px">{% for p in spam_list %}<span class="ctx" style="margin:2px">{{ p }}</span>{% endfor %}</div>
+      {% endif %}
+      <h3 style="font-size:13px;margin:14px 0 6px">Appointment booked, not visited</h3>
+      {% if noshows and noshows.feed and noshows.feed.found %}
+        {% if ns_banner %}
+        <div class="cbanner {{ 'bad' if ns_banner.x else 'warn' }}" style="{{ 'background:rgba(34,197,94,.12);color:#86efac;border-color:rgba(34,197,94,.35)' if not ns_banner.x else '' }}">
+          Due-date calling: <b>{{ ns_banner.x }}</b> of <b>{{ ns_banner.y }}</b> no-shows have had <b>NO call since due</b> \u00b7 <b>{{ ns_banner.z }}</b> reached.
+        </div>
+        {% endif %}
+        <div class="gwrap mobile-scroll">
+        <div class="hdr"><span>due</span><span>calls</span><span>patient</span><span>dx \u00b7 visit</span><span>called by</span><span>status \u00b7 accountability</span><span></span></div>
+        {% for lbl, iso, ns in ns_groups %}
+          <details class="day" {% if loop.first %}open{% endif %}>
+            <summary>due {{ lbl }}<span class="dcount">{{ ns|length }} patients</span></summary>
+            {% for n in ns %}
+            <details class="conv">
+              <summary>
+                <span class="tc"><span class="t">{{ n.due_h }}</span><span class="u">due date</span></span>
+                <span class="tc"><span class="t">{{ n.cb_attempts }}</span><span class="u">since due</span></span>
+                <span class="idc">{% if n.name %}<span class="nm">{{ n.name }}</span><span class="sub">{{ n.phone10 }}{% if n.agesex %} \u00b7 {{ n.agesex }}{% endif %}{% if n.clinic_id %} \u00b7 <b>{{ n.clinic_id }}</b>{% endif %}</span>{% else %}<span class="nm mono">{{ n.phone10 }}</span>{% endif %}</span>
+                <span class="dxc">{% if n.diagnosis %}<span class="d1" style="color:#c7d2fe">{{ n.diagnosis }}</span>{% elif not n.in_master %}<span class="d1" style="color:#fca5a5">not in master</span>{% else %}<span class="d1 muted">no dx in master</span>{% endif %}{% if n.lv_h %}<span class="d2">last {{ n.lv_h }}</span>{% endif %}</span>
+                <span class="idc"><span class="agc">{{ n.cb_last_agent or '\u2014' }}</span>{% if n.last_h %}<span class="sub">{{ n.last_h }}</span>{% endif %}</span>
+                <span class="sig"><span class="l1">{% if not n.cb_attempts %}<span class="chip flagc"><svg class="ic s"><use href="#i-flag"/></svg>NO CALL SINCE DUE</span>{% elif n.cb_reached %}<span class="chip okc">reached{% if n.tries %} on try {{ n.tries|length }}{% endif %}</span>{% else %}<span class="chip amberc">tried \u00b7 not reached</span>{% endif %}{% if n.status_raw %}<span class="chip infoc" title="status noted in tracker">{{ n.status_raw }}</span>{% endif %}</span><span class="l2">{% if n.tries_h %}{{ n.tries_h }}{% else %}protocol: due-day morning + 30 min + 1 hr \u2014 none made yet{% endif %}</span></span>
+                <span class="act">{% if n.phone10 %}<a class="abtn callb" href="tel:+91{{ n.phone10 }}" title="Call now"><svg class="ic"><use href="#i-call"/></svg></a>{% endif %}</span>
+              </summary>
+              {% if n.tries %}
+              <div class="xcard">
+                <div class="xrow"><span class="xlab">Due-day efforts</span><span>morning \u2192 +30 min \u2192 +1 hr (max 3), then the patient surfaces on the Callback Tracker action sheet.</span></div>
+                <table class="log" style="max-width:520px"><thead><tr><th>try</th><th>date</th><th>time</th><th>caller</th><th>result</th></tr></thead><tbody>
+                {% for t in n.tries %}<tr><td class="mono">{{ loop.index }}</td><td class="mono">{{ t.d[5:] }}</td><td class="mono">{{ t.t }}</td><td>{{ t.agent }}</td><td>{% if t.ok %}<span class="chip okc">reached</span>{% else %}<span class="chip flagc">no answer</span>{% endif %}</td></tr>{% endfor %}
+                </tbody></table>
+              </div>
+              {% endif %}
+            </details>
+            {% endfor %}
+          </details>
+        {% endfor %}
+        </div>
+        {% if not noshows.rows %}<div class="muted" style="padding:18px">No booked-not-visited rows \U0001F389</div>{% endif %}
+      {% else %}
+        <div class="cbanner warn">The Followups_Today feed was not found/usable at the last build \u2014 the no-show list cannot be computed. Feed state: {{ noshows.feed if noshows else 'unknown' }}. (Honest absence, not zeros \u2014 D236.)</div>
+      {% endif %}
+
+    {% elif view=='pipe' %}
+      <div class="summ">Pipeline health \u2014 how fast a call becomes a transcript and a verdict, and exactly why anything is unjudged.</div>
+      {% if pipe %}
+        {% if pipe.nm_calls is not none %}<div class="cbanner warn" style="background:rgba(59,130,246,.10);color:#93c5fd;border-color:rgba(59,130,246,.3)">Net-missed open: <b>{{ pipe.nm_threads }}</b> patient threads \u00b7 <b>{{ pipe.nm_calls }}</b> missed calls inside them. The filter chip counts calls; the builder reports threads \u2014 both are correct.</div>{% endif %}
+        {% if pipe.lat %}<table class="log" style="max-width:520px"><thead><tr><th>Judge lag (call \u2192 verdict)</th><th>Median</th><th>p90</th><th>Max</th></tr></thead>
+        <tbody><tr><td class="muted">{{ pipe.lat.n }} judged calls</td><td class="mono">{{ pipe.lat.median }} min</td><td class="mono">{{ pipe.lat.p90 }} min</td><td class="mono">{{ pipe.lat.max }} min</td></tr></tbody></table>{% else %}<div class="muted">No latency rows yet.</div>{% endif %}
+        <h3 style="font-size:13px;margin:16px 0 6px">Why calls are unjudged</h3>
+        <table class="log" style="max-width:420px"><tbody>
+        {% for reason, n in pipe.reasons %}<tr><td>{{ reason }}</td><td class="mono">{{ n }}</td></tr>{% endfor %}
+        {% if not pipe.reasons %}<tr><td class="muted">nothing unjudged</td></tr>{% endif %}
+        </tbody></table>
+        <h3 style="font-size:13px;margin:16px 0 6px">Judge-pending backlog (oldest first)</h3>
+        <table class="log" style="max-width:560px"><tbody>
+        {% for jk, ts in pipe.backlog %}<tr><td class="mono">{{ ts }}</td><td class="mono muted sm">{{ jk }}</td></tr>{% endfor %}
+        {% if not pipe.backlog %}<tr><td class="muted">no judge-pending backlog</td></tr>{% endif %}
+        </tbody></table>
+      {% endif %}
+    {% endif %}
+
+    <div class="summ" style="margin-top:16px">Built {{ m.built_at or 'unknown' }}{% if m.age_min is not none %} \u00b7 {{ m.age_min }} min ago{% endif %}.</div>
+  {% endif %}
+</div>
+</body></html>
+"""
+
+
+def _query_pipeline(conn):
+    """rev5 Item 3: the pipeline/latency mini-view. Read-only over latency,
+    unjudged, conversations, calls. Fail-soft: any missing table -> empty dict
+    section, page still renders (D236)."""
+    out = {"lat": None, "reasons": [], "backlog": [], "nm_calls": None, "nm_threads": None}
+    def _q(sql, args=()):
+        try:
+            return conn.execute(sql, args).fetchall()
+        except Exception:
+            return []
+    # latency percentiles (minutes) over rows that have a judge lag
+    lags = sorted(x[0] for x in _q(
+        "SELECT lag_judge_call FROM latency WHERE lag_judge_call IS NOT NULL") if x[0] is not None)
+    if lags:
+        def pct(p):
+            i = min(len(lags) - 1, max(0, int(round(p * (len(lags) - 1)))))
+            return round(lags[i] / 60.0, 1)   # latency lags are seconds -> minutes
+        out["lat"] = {"n": len(lags), "median": pct(0.5), "p90": pct(0.9),
+                      "max": round(lags[-1] / 60.0, 1)}
+    # reasons-not-judged counts
+    out["reasons"] = _q("SELECT reason, COUNT(*) FROM unjudged GROUP BY reason ORDER BY 2 DESC")
+    # judge-pending backlog with call age (oldest first)
+    out["backlog"] = _q(
+        "SELECT u.join_key, c.ended_at_ist FROM unjudged u "
+        "JOIN calls c ON c.join_key=u.join_key "
+        "WHERE u.reason='judge pending' ORDER BY c.ended_at_ist ASC LIMIT 25")
+    # net-missed: calls vs threads, labelled (the 139-vs-109 fix)
+    r = _q("SELECT COUNT(*) FROM calls c WHERE c.direction='In' AND c.answered=0 "
+           "AND c.phone10 IN (SELECT phone10 FROM conversations WHERE net_missed_open=1)")
+    out["nm_calls"] = r[0][0] if r else None
+    r = _q("SELECT COUNT(*) FROM conversations WHERE net_missed_open=1")
+    out["nm_threads"] = r[0][0] if r else None
+    return out
+
+
+def _query_noshows(conn):
+    """W2 Track N: booked-but-not-seen rows + the feed's honest discovery state."""
+    out = {"feed": None, "rows": []}
+    try:
+        import json as _json
+        m = conn.execute("SELECT v FROM meta WHERE k='followups_feed'").fetchone()
+        out["feed"] = _json.loads(m[0]) if m else None
+    except Exception:
+        out["feed"] = None
+    try:
+        out["rows"] = [dict(zip(
+            ("phone10", "name", "due_date", "status_raw", "cb_attempts",
+             "cb_last_ts", "cb_last_agent", "cb_reached",
+             "diagnosis", "clinic_id", "last_visit", "age", "gender", "pid"), r))
+            for r in conn.execute(
+                "SELECT n.phone10,n.name,n.due_date,n.status_raw,n.cb_attempts,"
+                "n.cb_last_ts,n.cb_last_agent,n.cb_reached,"
+                "COALESCE(p.diagnosis,''),COALESCE(p.clinic_id,''),"
+                "COALESCE(p.last_visit,''),COALESCE(p.age,''),COALESCE(p.gender,''),"
+                "p._pid "
+                "FROM no_shows n LEFT JOIN " + _DP + " p ON p.phone10=n.phone10 "
+                "ORDER BY n.due_date DESC, n.name LIMIT 200")]
+        for r in out["rows"]:                       # S171: human display, fail-soft
+            r["due_h"] = _ns_date_h(r["due_date"])
+            r["last_h"] = _ns_ts_h(r["cb_last_ts"])
+            r["lv_h"] = _ns_date_h(r["last_visit"])
+            r["agesex"] = "/".join(x for x in ((r["age"] or "").strip(),
+                                               (r["gender"] or "").strip()[:1].upper()) if x)
+            r["in_master"] = r.get("pid") is not None
+    except Exception:
+        out["rows"] = []
+    return out
+
+
+def _ns_date_h(iso):
+    """ISO 'YYYY-MM-DD' -> '11-Aug-2026' for the no-show table. Fail-soft:
+    anything unparseable (incl. pre-S171 truncated values) is shown as-is."""
+    try:
+        return datetime.datetime.strptime((iso or "").strip(),
+                                          "%Y-%m-%d").strftime("%d-%b-%Y")
+    except Exception:
+        return (iso or "").strip()
+
+
+def _ns_ts_h(ts):
+    """'2026-07-31 18:19' (or pre-S171 '...T18:19') -> '31-Jul 18:19'. Fail-soft."""
+    t = (ts or "").replace("T", " ").strip()
+    try:
+        return datetime.datetime.strptime(t, "%Y-%m-%d %H:%M").strftime("%d-%b %H:%M")
+    except Exception:
+        return t
+
+
+def _console_base_qs(f, drop=()):
+    import urllib.parse as _up
+    pairs = []
+    for k, key in (("direction", "direction"), ("answered", "answered"), ("agent", "agent"),
+                   ("flag", "flag"), ("frm", "from"), ("to", "to"), ("q", "q")):
+        if k in drop:
+            continue
+        if f.get(k, ""):
+            pairs.append((key, f[k]))
+    return _up.urlencode(pairs)
+
+
+def _serve_rec(join_key):
+    """Serve a recording: local cache first (Range-capable), else 302 to Drive,
+    else 404. join_key strictly validated before any path use. UNDECORATED --
+    called by the doctor route AND the signed staff link (S171)."""
+    import re as _re
+    if not _re.fullmatch(r"\d{6,12}_\d{6,14}", join_key or ""):
+        abort(404)
+    path = os.path.join(REC_CACHE_PATH, join_key + ".mp3")
+    if os.path.isfile(path):
+        return send_file(path, mimetype="audio/mpeg", conditional=True)
+    conn = _console_conn()
+    if conn is not None:
+        try:
+            row = conn.execute(
+                "SELECT recording_link FROM recordings WHERE join_key=? "
+                "AND recording_link<>'' LIMIT 1", (join_key,)).fetchone()
+        finally:
+            conn.close()
+        if row and row[0]:
+            return redirect(row[0])
+    abort(404)
+
+
+@app.route("/portal/rec/<join_key>")
+@doctor_required
+def console_rec(join_key):
+    return _serve_rec(join_key)
+
+
+@app.route("/portal/console/review", methods=["POST"])
+@doctor_required
+def console_review():
+    """W2 Item 5: idempotent upsert of MY final verdict (the AI-training label)."""
+    jk = (request.form.get("join_key") or "").strip()
+    fo = (request.form.get("final_outcome") or "").strip()
+    note = (request.form.get("note") or "").strip()
+    ret = request.form.get("ret") or "view=log"
+    if jk and (fo or note):
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        conn = _reviews_conn()
+        conn.execute(
+            "INSERT INTO dispositions (join_key,final_outcome,note,refereed_by,refereed_at) "
+            "VALUES (?,?,?,'manoj',?) "
+            "ON CONFLICT(join_key) DO UPDATE SET final_outcome=excluded.final_outcome,"
+            " note=excluded.note, refereed_at=excluded.refereed_at",
+            (jk, fo, note, now))
+        conn.commit(); conn.close()
+    return redirect("/portal/console?" + ret)
+
+
+@app.route("/portal/console/sendback", methods=["POST"])
+@doctor_required
+def console_sendback():
+    """W2 Item 6: send a call back to staff with a reason. One OPEN send-back
+    per join_key (a second send updates the reason -- idempotent)."""
+    jk = (request.form.get("join_key") or "").strip()
+    phone = (request.form.get("phone10") or "").strip()
+    patient = (request.form.get("patient") or "").strip()
+    reason = (request.form.get("reason") or "").strip()
+    ret = request.form.get("ret") or "view=log"
+    if jk and reason:
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        conn = _reviews_conn()
+        cur = conn.execute("SELECT id FROM send_backs WHERE join_key=? AND status='open'", (jk,))
+        row = cur.fetchone()
+        if row:
+            conn.execute("UPDATE send_backs SET reason=?, sent_at=? WHERE id=?",
+                         (reason, now, row[0]))
+        else:
+            conn.execute(
+                "INSERT INTO send_backs (join_key,phone10,patient,reason,sent_by,sent_at,status) "
+                "VALUES (?,?,?,?,'manoj',?,'open')", (jk, phone, patient, reason, now))
+        conn.commit(); conn.close()
+    return redirect("/portal/console?" + ret)
+
+
+@app.route("/portal/console/sendback/resolve", methods=["POST"])
+@doctor_required
+def console_sendback_resolve():
+    jk = (request.form.get("join_key") or "").strip()
+    ret = request.form.get("ret") or "view=noshows"
+    if jk:
+        conn = _reviews_conn()
+        conn.execute("UPDATE send_backs SET status='done' WHERE join_key=? AND status='open'", (jk,))
+        conn.commit(); conn.close()
+    return redirect("/portal/console?" + ret)
+
+
+
+# ---------------------------------------------------------------------------
+# S171 Track G: /portal/digest -- the 11:00 pulse + 21:30 digest, LIVE from
+# console.db (D297 §11). Read-only. Fail-loud on stale/missing db (D236).
+# Severity ordering ported verbatim from daily_digest.py (URGENT > POST-OP >
+# CLINICAL > SURGERY > COMPLAINT > CONDUCT > MISMATCH), cap 12.
+# ---------------------------------------------------------------------------
+_DG_SEV = [("flag_urgent", "URGENT"), ("flag_postop", "POST-OP"),
+           ("flag_clinical", "CLINICAL"), ("flag_surgery", "SURGERY"),
+           ("flag_complaint", "COMPLAINT"), ("flag_conduct", "CONDUCT")]
+_DG_BUCKETS = ("Match", "Mismatch", "Partial", "No claim logged", "Unclear")
+_DG_CAP = 12
+
+
+def _query_digest(conn, day):
+    """Everything the digest page shows, from console.db, for one ISO day."""
+    out = {"day": day, "calls": {}, "buckets": {}, "flagged": 0, "other": 0,
+           "filed": 0, "not_filed": 0, "worst": [], "unjudged": [],
+           "nm_open": None, "judged": 0}
+    def q(sql, args=()):
+        try:
+            return conn.execute(sql, args).fetchall()
+        except Exception:
+            return []
+    r = q("SELECT COUNT(*),"
+          " SUM(CASE WHEN direction='In' THEN 1 ELSE 0 END),"
+          " SUM(CASE WHEN direction='Out' THEN 1 ELSE 0 END),"
+          " SUM(CASE WHEN answered=1 THEN 1 ELSE 0 END),"
+          " SUM(CASE WHEN answered=0 THEN 1 ELSE 0 END) "
+          "FROM calls WHERE substr(ended_at_ist,1,10)=?", (day,))
+    if r:
+        t, i, o, a, m = r[0]
+        out["calls"] = {"total": t or 0, "in": i or 0, "out": o or 0,
+                        "answered": a or 0, "missed": m or 0}
+    vrows = q("SELECT verdict, claimed_outcome, ai_outcome, time, patient_name,"
+              " patient_number, recording_link, join_key, not_filed,"
+              " flag_urgent, flag_postop, flag_clinical, flag_surgery,"
+              " flag_complaint, flag_conduct "
+              "FROM verdicts WHERE date=?", (day,))
+    buckets = {b: 0 for b in _DG_BUCKETS}
+    other = flagged = filed = notf = 0
+    tagged = []
+    flag_jks = []
+    for r in vrows:
+        (verdict, claimed, ai, tm, pname, pnum, rlink, jk, nf,
+         fu, fp, fcl, fs, fc, fcon) = r
+        v = (verdict or "").strip()
+        if v in buckets:
+            buckets[v] += 1
+        elif v:
+            other += 1
+        fvals = {"flag_urgent": fu, "flag_postop": fp, "flag_clinical": fcl,
+                 "flag_surgery": fs, "flag_complaint": fc, "flag_conduct": fcon}
+        anyflag = any(_truthy(x) for x in fvals.values())
+        if anyflag:
+            flagged += 1
+            if (jk or "").strip():
+                flag_jks.append(jk.strip())
+        if (claimed or "").strip():
+            filed += 1
+        if nf == 1:
+            notf += 1
+        sev = None
+        for rank, (col, label) in enumerate(_DG_SEV):
+            if _truthy(fvals[col]):
+                sev = (rank, label)
+                break
+        if sev is None and v == "Mismatch":
+            sev = (len(_DG_SEV), "MISMATCH")
+        if sev is not None:
+            tagged.append((sev[0], (tm or ""), {
+                "time": (tm or "").strip(), "why": sev[1],
+                "name": (pname or "").strip(), "phone": (pnum or "").strip(),
+                "claimed": (claimed or "").strip(), "ai": (ai or "").strip(),
+                "join_key": (jk or "").strip()}))
+    tagged.sort(key=lambda t: (t[0], t[1]))
+    out["worst"] = [t[2] for t in tagged[:_DG_CAP]]
+    out["buckets"] = buckets
+    out["other"], out["flagged"] = other, flagged
+    out["filed"], out["not_filed"] = filed, notf
+    out["judged"] = len(vrows)
+    out["unjudged"] = q(
+        "SELECT u.reason, COUNT(*) FROM unjudged u JOIN calls c "
+        "ON c.join_key=u.join_key WHERE substr(c.ended_at_ist,1,10)=? "
+        "GROUP BY u.reason ORDER BY 2 DESC", (day,))
+    r = q("SELECT COUNT(*) FROM conversations WHERE net_missed_open=1")
+    out["nm_open"] = r[0][0] if r else None
+    # S171 digest v2: time span of the day's calls
+    r = q("SELECT MIN(substr(ended_at_ist,12,5)), MAX(substr(ended_at_ist,12,5)) "
+          "FROM calls WHERE substr(ended_at_ist,1,10)=?", (day,))
+    out["span"] = (r[0][0] or "", r[0][1] or "") if r else ("", "")
+    # unique callers, named vs number-only
+    r = q("SELECT COUNT(DISTINCT c.phone10), "
+          "COUNT(DISTINCT CASE WHEN p._pid IS NOT NULL THEN c.phone10 END) "
+          "FROM calls c LEFT JOIN " + _DP + " p ON p.phone10=c.phone10 "
+          "WHERE substr(c.ended_at_ist,1,10)=? AND c.phone10<>''", (day,))
+    tot, named = (r[0] if r else (0, 0))
+    out["callers"] = {"total": tot or 0, "named": named or 0,
+                      "unknown": (tot or 0) - (named or 0)}
+    # funnel: answered -> transcribed -> judged
+    r = q("SELECT COUNT(*) FROM calls c JOIN transcripts t ON t.join_key=c.join_key "
+          "WHERE substr(c.ended_at_ist,1,10)=? AND c.answered=1 "
+          "AND COALESCE(t.text,'')<>''", (day,))
+    out["tx_n"] = r[0][0] if r else 0
+    # net-missed split: last 7 days vs older
+    try:
+        d7 = (datetime.date.fromisoformat(day) - datetime.timedelta(days=7)).isoformat()
+    except Exception:
+        d7 = day
+    r = q("SELECT SUM(CASE WHEN substr(last_ts,1,10)>=? THEN 1 ELSE 0 END), "
+          "SUM(CASE WHEN substr(last_ts,1,10)<? THEN 1 ELSE 0 END) "
+          "FROM conversations WHERE net_missed_open=1", (d7, d7))
+    out["nm7"], out["nm_old"] = ((r[0][0] or 0, r[0][1] or 0) if r else (0, 0))
+    out["flag_jks"] = flag_jks
+    c = out["calls"]
+    cl = out.get("callers") or {}
+    bits = ["%d attempts (%d in / %d out)" % (c.get("total", 0), c.get("in", 0),
+                                              c.get("out", 0)),
+            "%d callers (%d patients / %d unknown)" % (cl.get("total", 0),
+                                                       cl.get("named", 0),
+                                                       cl.get("unknown", 0)),
+            "%d answered \u2192 %d transcribed \u2192 %d judged" % (
+                c.get("answered", 0), out.get("tx_n", 0), out["judged"]),
+            "%d staff-filed" % out["filed"]]
+    if buckets["Mismatch"]:
+        bits.append("%d mismatch" % buckets["Mismatch"])
+    if flagged:
+        bits.append("%d safety-flagged" % flagged)
+    if buckets["No claim logged"]:
+        bits.append("%d calls nobody logged" % buckets["No claim logged"])
+    out["oneline"] = " \u00b7 ".join(bits) + "."
+    return out
+
+
+DIGEST_HTML = PAGE_HEAD + ROW_SHARED + """
+<style>
+.summ{font-size:13px}
+table.log{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0 14px}
+table.log th{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+ color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+table.log td{padding:7px 8px;border-bottom:1px solid rgba(39,75,102,.4)}
+.dgsec{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+ color:var(--muted);margin:22px 2px 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.dgbig{font-size:16px;color:#fff;font-weight:600;margin:4px 0 10px;line-height:1.5}
+details.dgx{border:1px solid var(--line);border-radius:12px;margin:8px 0;background:rgba(22,50,74,.35)}
+details.dgx>summary{cursor:pointer;list-style:none;padding:11px 14px;font-weight:700;font-size:13.5px;color:#fff}
+details.dgx>summary::-webkit-details-marker{display:none}
+details.dgx>summary:after{content:" \u25BE";color:var(--muted)}
+</style>
+<div class="wrap cwrap">
+  <div class="head"><h1>\U0001F4EF Daily digest \u2014 live</h1>
+    <span class="sub">{{ d.day }} \u00b7 <a class="lnk" href="/portal/console">\u2190 Console</a></span></div>
+
+  {% if not m.ok %}<div class="cbanner bad">console.db unavailable \u2014 {{ m.err }}</div>{% else %}
+  {% if m.stale %}<div class="cbanner warn">Data is {{ m.age_min }} min old (last build {{ m.built }}). Cron runs 9\u201321 IST.</div>{% endif %}
+
+  <div class="dgsec">The day in one line \u00b7 {{ d.span[0] or '\u2014' }} \u2192 {{ d.span[1] or '\u2014' }}</div>
+  <div class="dgbig">{{ d.oneline }}</div>
+
+  <div class="dgsec">Pulse \u00b7 {{ d.span[0] or '\u2014' }} \u2192 {{ d.span[1] or '\u2014' }}</div>
+  <table class="log" style="max-width:640px"><thead><tr><th>Attempts</th><th>Callers</th><th>In</th><th>Out</th><th>Answered</th><th>Transcribed</th><th>Judged</th></tr></thead>
+  <tbody><tr><td class="mono">{{ d.calls.get('total',0) }}</td><td class="mono">{{ d.callers.total }} <span class="muted sm">({{ d.callers.named }}p/{{ d.callers.unknown }}?)</span></td>
+  <td class="mono">{{ d.calls.get('in',0) }}</td><td class="mono">{{ d.calls.get('out',0) }}</td>
+  <td class="mono">{{ d.calls.get('answered',0) }}</td><td class="mono">{{ d.tx_n }}</td><td class="mono">{{ d.judged }}</td></tr></tbody></table>
+  {% if d.unjudged %}<div class="summ">Awaiting a verdict: {% for rs, n in d.unjudged %}{{ rs }} \u00d7 {{ n }}{{ '' if loop.last else ' \u00b7 ' }}{% endfor %}</div>
+  {% else %}<div class="summ">Nothing awaiting a verdict today. \u2705</div>{% endif %}
+  <div class="summ">Net-missed open threads: <b>{{ d.nm7 }}</b> in the last 7 days
+    \u2014 <a class="lnk" href="/portal/console?view=threads&answered=netmissed">work the list</a>
+    {% if d.nm_old %}\u00b7 plus <b>{{ d.nm_old }}</b> older <a class="lnk" href="/portal/console?view=threads&answered=netmissed">(review backlog)</a>{% endif %}</div>
+
+  <div class="dgsec">Numbers (judged calls)</div>
+  <table class="log" style="max-width:760px"><thead><tr><th>Match</th><th>Mismatch</th><th>Partial</th><th>Nobody logged</th><th>Unclear</th><th>Flagged</th><th>Staff filed</th><th>NOT FILED</th></tr></thead>
+  <tbody><tr><td class="mono">{{ d.buckets.get('Match',0) }}</td><td class="mono">{{ d.buckets.get('Mismatch',0) }}</td>
+  <td class="mono">{{ d.buckets.get('Partial',0) }}</td><td class="mono">{{ d.buckets.get('No claim logged',0) }}</td>
+  <td class="mono">{{ d.buckets.get('Unclear',0) }}</td><td class="mono">{{ d.flagged }}</td>
+  <td class="mono">{{ d.filed }}</td><td class="mono">{{ d.not_filed }}</td></tr></tbody></table>
+
+  {% if d.flag_rows %}
+  <details class="dgx"><summary>Safety-flagged today ({{ d.flag_rows|length }}) \u2014 listen here</summary>
+    <div class="gwrap mobile-scroll">
+    <div class="hdr"><span>call</span><span>rec</span><span>patient</span><span>dx \u00b7 visit</span><span>staff</span><span>signals</span><span>my review \u00b7 actions</span></div>
+    {% for r in d.flag_rows %}<details class="callrow"><summary>{{ rowsummary(r) }}</summary>{{ detail(r) }}</details>{% endfor %}
+    </div>
+  </details>
+  {% endif %}
+
+  <div class="dgsec">Worst first \u2014 listen to these ({{ d.worst_rows|length }})</div>
+  {% if d.worst_rows %}
+  <div class="gwrap mobile-scroll">
+  <div class="hdr"><span>call</span><span>rec</span><span>patient</span><span>dx \u00b7 visit</span><span>staff</span><span>signals</span><span>my review \u00b7 actions</span></div>
+  {% for r in d.worst_rows %}<details class="callrow"><summary>{{ rowsummary(r) }}</summary>{{ detail(r) }}</details>{% endfor %}
+  </div>
+  {% else %}<div class="summ">Nothing severity-tagged today. \u2705</div>{% endif %}
+
+  <div class="dgsec">Referee corner</div>
+  <div class="summ">You have saved <b>{{ refereed }}</b> review(s) \u2014 they count toward the accuracy gate (D237/D191).</div>
+  {% if d.ref_rows %}
+  <details class="dgx"><summary>My latest reviews ({{ d.ref_rows|length }}) \u2014 inline</summary>
+    <div class="gwrap mobile-scroll">
+    <div class="hdr"><span>call</span><span>rec</span><span>patient</span><span>dx \u00b7 visit</span><span>staff</span><span>signals</span><span>my review \u00b7 actions</span></div>
+    {% for r in d.ref_rows %}<details class="callrow"><summary>{{ rowsummary(r) }}</summary>{{ detail(r) }}</details>{% endfor %}
+    </div>
+  </details>
+  {% endif %}
+
+  <div class="summ" style="margin-top:18px">Built {{ m.built }} \u00b7 {{ m.age_min }} min ago \u00b7 emails at 11:00 / 21:30 continue unchanged.</div>
+  {% endif %}
+</div></body></html>
+"""
+
+
+def _rows_by_jks(conn, jks):
+    """Full universal-row dicts for a list of join_keys (order preserved)."""
+    jks = [j for j in (jks or []) if j]
+    if not jks:
+        return []
+    qm = ",".join(["?"] * len(jks))
+    rows = [_log_row(r) for r in conn.execute(
+        _LOG_COLS + _LOG_FROM + "WHERE c.join_key IN (%s)" % qm, jks)]
+    by = {r["join_key"]: r for r in rows}
+    return [by[j] for j in jks if j in by]
+
+
+@app.route("/portal/digest")
+@doctor_required
+def portal_digest():
+    day = (request.args.get("day") or "").strip()
+    if not _re.fullmatch(r"\d{4}-\d{2}-\d{2}", day or ""):
+        day = datetime.datetime.now().strftime("%Y-%m-%d")
+    m = _console_meta()
+    d = {"day": day, "oneline": "", "calls": {}, "buckets": {}, "flagged": 0,
+         "filed": 0, "not_filed": 0, "worst": [], "unjudged": [],
+         "nm_open": None, "judged": 0}
+    refereed = 0
+    if m["ok"]:
+        conn = _console_conn()
+        if conn is not None:
+            try:
+                d = _query_digest(conn, day)
+                disp, sbm = _reviews_maps()
+                d["worst_rows"] = _rows_by_jks(
+                    conn, [w.get("join_key") for w in d.get("worst", [])])
+                d["flag_rows"] = _rows_by_jks(conn, d.get("flag_jks", []))
+                ref_jks = [k for k, v in sorted(disp.items(),
+                           key=lambda kv: kv[1].get("at", ""), reverse=True)][:15]
+                d["ref_rows"] = _rows_by_jks(conn, ref_jks)
+                for lst in (d["worst_rows"], d["flag_rows"], d["ref_rows"]):
+                    _overlay_reviews(lst, disp, sbm)
+            finally:
+                conn.close()
+        try:
+            rc = _reviews_conn()
+            refereed = rc.execute("SELECT COUNT(*) FROM dispositions").fetchone()[0]
+            rc.close()
+        except Exception:
+            refereed = 0
+    return render_template_string(DIGEST_HTML, hi_out=_hi_out, m=m, d=d, refereed=refereed,
+                                  stale_min=CONSOLE_STALE_MIN,
+                                  vocab=REVIEW_VOCAB, full_qs="view=log")
+
+
+STAFFREPORT_HTML = PAGE_HEAD + ROW_SHARED + """
+<style>
+.coach{background:rgba(11,27,41,.35);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:0 0 14px}
+.coach h2{font-size:15px;margin:0 0 4px;color:#fff}
+.coach .st{font-size:var(--f-md);color:var(--muted);margin-bottom:10px}
+.lesson{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:8px 0;font-size:var(--f-md)}
+.lesson b.bad{color:#fca5a5}.lesson b.good{color:#86efac}
+.lesson .q{font-style:italic;color:#fde68a}
+.wabox{background:#0b1b29;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;line-height:1.8;white-space:pre-wrap;margin-top:10px}
+.rbar{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}
+.rbtn{font-size:var(--f-sm);font-weight:600;padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:inline-flex;gap:6px;align-items:center;text-decoration:none}
+.rbtn:hover{border-color:var(--blue)}
+@media print{body{background:#fff;color:#111}.coach{border-color:#bbb;background:#fff;page-break-after:always}
+ .coach h2,.lesson,.st{color:#111}.lesson{border-color:#ccc}.lesson b.bad{color:#b91c1c}.lesson b.good{color:#15803d}
+ .lesson .q{color:#555}.rbar,.wabox,.tabs,.head .sub a{display:none}}
+</style>
+<div class="wrap cwrap">
+  <div class="head"><h1>\U0001F4CB Staff coaching report</h1>
+    <span class="sub">{{ day }} \u00b7 <a class="lnk" href="/portal/console?view=staff">\u2190 Staff tab</a></span></div>
+  <div class="rbar">
+    <a class="rbtn" href="/portal/console/staffreport?day={{ day }}&fmt=csv"><svg class="ic s"><use href="#i-dl"/></svg>CSV</a>
+    <button class="rbtn" onclick="window.print()"><svg class="ic s"><use href="#i-print"/></svg>Print / PDF</button>
+  </div>
+  {% if not agents %}<div class="summ">No attributed calls for {{ day }}.</div>{% endif %}
+  {% for a in agents %}
+  <div class="coach">
+    <h2>{{ a.agent }}</h2>
+    <div class="st">{{ a.total }} calls \u00b7 {{ a.answered }} answered \u00b7 {{ a.filed }} filed ({{ a.pct }}%) \u00b7 {{ a.lessons|length }} to review</div>
+    {% for L in a.lessons %}
+    <div class="lesson">
+      <div><b>{{ loop.index }}) {{ L.time }} \u00b7 {{ L.name or L.phone }}</b> <span class="muted mono sm">({{ L.phone }})</span></div>
+      <div>\u0906\u092a\u0928\u0947 \u0926\u0930\u094d\u091c \u0915\u093f\u092f\u093e: <b class="bad">{{ L.filed_h }} \u274C</b> \u2003 \u0938\u0939\u0940 outcome: <b class="good">{{ L.correct_h }} \u2705</b></div>
+      {% if L.why %}<div>\u0915\u094d\u092f\u094b\u0902: {{ L.why }}</div>{% endif %}
+      {% if L.quote %}<div>\u092e\u0930\u0940\u091c\u093c \u0915\u0947 \u0936\u092c\u094d\u0926: <span class="q">"{{ L.quote }}"</span></div>{% endif %}
+      <div>\U0001F3A7 <a class="lnk" href="/portal/rl/{{ L.jk }}/{{ L.sig }}">\u0938\u0941\u0928\u0947\u0902 (recording)</a></div>
+    </div>
+    {% endfor %}
+    {% if a.notfiled %}<div class="lesson" style="border-color:rgba(234,179,8,.4)">\u26A0\uFE0F \u0906\u091c \u0926\u0930\u094d\u091c \u0928\u0939\u0940\u0902 \u0939\u0941\u0908\u0902: {{ a.notfiled|length }} \u0915\u0949\u0932 ({{ a.notfiled|join(' \u00b7 ') }})</div>{% endif %}
+    <div class="rbar"><button class="rbtn" onclick="copyText('wa_{{ loop.index }}', this)"><svg class="ic s"><use href="#i-copy"/></svg>Copy WhatsApp ({{ a.agent.split(' ')[0] }})</button></div>
+    <div class="wabox" id="wa_{{ loop.index }}">\U0001F4CB {{ a.agent }} \u2014 {{ day_h }}
+\u0906\u091c: {{ a.total }} \u0915\u0949\u0932 \u00b7 {{ a.answered }} \u0909\u0920\u0940\u0902 \u00b7 {{ a.filed }} \u0926\u0930\u094d\u091c ({{ a.pct }}%) \u00b7 {{ a.lessons|length }} \u0938\u0941\u0927\u093e\u0930 \u0915\u0947 \u0932\u093f\u090f
+{% if a.lessons %}
+\U0001F3A7 \u0938\u0941\u0928\u0915\u0930 \u0938\u0940\u0916\u0947\u0902 \u2014 \u0939\u0930 recording \u091c\u093c\u0930\u0942\u0930 \u0938\u0941\u0928\u0947\u0902:
+{% for L in a.lessons %}
+{{ loop.index }}) {{ L.time }} \u00b7 {{ L.name or L.phone }} ({{ L.phone }})
+   \u0906\u092a\u0928\u0947 \u0926\u0930\u094d\u091c \u0915\u093f\u092f\u093e: {{ L.filed_h }} \u274C
+   \u0938\u0939\u0940 outcome: {{ L.correct_h }} \u2705{% if L.why %}
+   \u0915\u094d\u092f\u094b\u0902: {{ L.why }}{% endif %}{% if L.quote %}
+   \u092e\u0930\u0940\u091c\u093c \u0915\u0947 \u0936\u092c\u094d\u0926: "{{ L.quote }}"{% endif %}
+   \U0001F3A7 \u0938\u0941\u0928\u0947\u0902: {{ base }}/portal/rl/{{ L.jk }}/{{ L.sig }}
+{% endfor %}{% endif %}{% if a.notfiled %}
+\u26A0\uFE0F \u0906\u091c \u0926\u0930\u094d\u091c \u0928\u0939\u0940\u0902 \u0939\u0941\u0908\u0902: {{ a.notfiled|length }} \u0915\u0949\u0932 ({{ a.notfiled|join(' \u00b7 ') }}){% endif %}
+\u0939\u0930 \u0915\u0949\u0932 \u0926\u0930\u094d\u091c \u0915\u0930\u0947\u0902 \u2014 \u0907\u0938\u0940 \u0938\u0947 \u0939\u092e \u0938\u092c \u092c\u0947\u0939\u0924\u0930 \u0939\u094b\u0924\u0947 \u0939\u0948\u0902 \U0001F44D</div>
+  </div>
+  {% endfor %}
+</div></body></html>
+"""
+
+
+@app.route("/portal/console/staffreport")
+@doctor_required
+def console_staffreport():
+    """S171 v3: the daily per-staff coaching report (page + Hindi WhatsApp + CSV)."""
+    day = (request.args.get("day") or "").strip()
+    if not _re.fullmatch(r"\d{4}-\d{2}-\d{2}", day or ""):
+        day = datetime.datetime.now().strftime("%Y-%m-%d")
+    agents = []
+    conn = _console_conn()
+    if conn is not None:
+        try:
+            disp, sbm = _reviews_maps()
+            agents = _coach_data(conn, day, disp, sbm)
+        finally:
+            conn.close()
+    if (request.args.get("fmt") or "") == "csv":
+        import csv as _csv, io as _io
+        buf = _io.StringIO(); w = _csv.writer(buf)
+        w.writerow(["Agent", "Calls", "Answered", "Filed", "Filed %",
+                    "Lessons", "Not filed"])
+        for a in agents:
+            w.writerow([a["agent"], a["total"], a["answered"], a["filed"],
+                        a["pct"], len(a["lessons"]), len(a["notfiled"])])
+        resp = make_response("\ufeff" + buf.getvalue())
+        resp.headers["Content-Type"] = "text/csv; charset=utf-8"
+        resp.headers["Content-Disposition"] = \
+            "attachment; filename=staff_report_%s.csv" % day
+        return resp
+    try:
+        day_h = datetime.datetime.strptime(day, "%Y-%m-%d").strftime("%a, %d %b")
+    except Exception:
+        day_h = day
+    return render_template_string(STAFFREPORT_HTML, agents=agents, day=day,
+                                  day_h=day_h, hi_out=_hi_out,
+                                  base="https://followup.dr-manoj.in")
+
+
+@app.route("/portal/rl/<jk>/<sig>")
+def portal_rec_link(jk, sig):
+    """Staff recording-only link: HMAC-signed, serves the MP3 (or Drive redirect).
+    No portal session needed; the signature is the credential; nothing else reachable."""
+    import hmac as _hmac
+    if not _hmac.compare_digest(sig or "", _rl_sig(jk)):
+        return ("link invalid", 403)
+    return _serve_rec(jk)
+
+
+@app.route("/portal/console/reviews.csv")
+@doctor_required
+def console_reviews_csv():
+    """W2 Item 5: THE training export -- my label beside the AI's, with the
+    transcript. One place, one file (doctor-gated, PHI stays on the VPS)."""
+    import csv as _csv, io as _io
+    buf = _io.StringIO(); w = _csv.writer(buf)
+    w.writerow(["Join Key", "Date", "Time", "Number", "Staff", "Claimed Outcome",
+                "AI Outcome", "AI Reason", "Evidence", "Doctor Final", "Doctor Note",
+                "Refereed At", "Transcript"])
+    disp, _ = _reviews_maps()
+    conn = _console_conn()
+    if conn is not None and disp:
+        try:
+            qmarks = ",".join(["?"] * len(disp))
+            sql = (_LOG_COLS + _LOG_FROM +
+                   "WHERE c.join_key IN (%s) ORDER BY c.ended_at_ist DESC" % qmarks)
+            for r in conn.execute(sql, list(disp.keys())):
+                row = _log_row(r); d = disp.get(row["join_key"], {})
+                w.writerow([row["join_key"], row["date"], row["time"], row["phone10"],
+                            row["agent"], row["claimed"], row["ai_outcome"],
+                            row["ai_reason"], row["evidence"],
+                            d.get("final_outcome", ""), d.get("note", ""), d.get("at", ""),
+                            row["tx_text"]])
+        finally:
+            conn.close()
+    resp = make_response("\ufeff" + buf.getvalue())   # S171: BOM so Excel renders Hindi
+    resp.headers["Content-Type"] = "text/csv; charset=utf-8"
+    resp.headers["Content-Disposition"] = "attachment; filename=doctor_reviews_training.csv"
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+@app.route("/portal/console")
+@doctor_required
+def console_page():
+    f = _console_filters(request.args)
+    view = f["view"] if f["view"] in ("log", "threads", "staff", "leads", "pipe", "noshows") else "log"
+    m = _console_meta()
+    ctx = dict(m=m, f=f, view=view, stale_min=CONSOLE_STALE_MIN, agents=[],
+               fac={"direction": {}, "answered": {}, "agent": {}},
+               flag_opts=[(k, _FLAG_LABEL[k]) for k in _FLAG_COLS],
+               day_groups=[], total=0, more=False, limit=_LOG_LIMIT,
+               convs=[], staff=[], leads=[], pipe=None, noshows=None, sb_open=[], spam_list=[],
+               conv_groups=[], lead_groups=[], ns_groups=[], ns_banner=None,
+               wk_days=[], wk_matrix={}, wk_rows={}, wk_agents=[], wk_sd='',
+               vocab=REVIEW_VOCAB,
+               base_qs=_console_base_qs(f), full_qs=_console_base_qs(f) + "&view=" + view)
+    if m["ok"]:
+        conn = _console_conn()
+        if conn is not None:
+            try:
+                disp, sbm = _reviews_maps()
+                spam = _spam_phones()
+                ctx["spam_list"] = sorted(spam)
+                ctx["agents"] = _agent_names(conn)
+                ctx["fac"] = _facets(conn, f)
+                if view == "log":
+                    rows, more = _query_log(conn, f)
+                    _overlay_reviews(rows, disp, sbm)
+                    ctx["day_groups"] = _group_by_day(rows)
+                    ctx["total"] = len(rows); ctx["more"] = more
+                elif view == "threads":
+                    ctx["convs"] = _query_conversations(conn, f)
+                    for cv in ctx["convs"]:
+                        _overlay_reviews(cv.get("legs", []), disp, sbm)
+                    ctx["conv_groups"] = _group_by_iso(ctx["convs"], "last_ts")
+                elif view == "staff":
+                    ctx["staff"] = _query_staff(conn, f)
+                    disp2, sbm2 = _reviews_maps()
+                    sd = (request.args.get("sd") or "").strip()
+                    if not _re.fullmatch(r"\d{4}-\d{2}-\d{2}", sd):
+                        sd = datetime.datetime.now().strftime("%Y-%m-%d")
+                    wk_days, wk_matrix, wk_rows = _staff_week(conn, disp2, sd)
+                    for lst in wk_rows.values():
+                        _overlay_reviews(lst, disp2, sbm2)
+                    ctx["wk_days"], ctx["wk_matrix"], ctx["wk_sd"] = wk_days, wk_matrix, sd
+                    ctx["wk_agents"] = sorted(wk_matrix.keys())
+                    ctx["wk_rows"] = {"%s|%s" % k: v for k, v in wk_rows.items()}
+                elif view == "leads":
+                    ctx["leads"] = [l for l in _query_leads(conn, f)
+                                    if l.get("phone10") not in spam]     # W3 Track M
+                    for l in ctx["leads"]:
+                        _overlay_reviews(l.get("legs", []), disp, sbm)
+                        legs = l.get("legs", [])
+                        try:
+                            mx = max([int(str(g.get("duration") or 0) or 0)
+                                      for g in legs] or [0])
+                        except Exception:
+                            mx = 0
+                        ait = " ".join((g.get("ai_text") or "") for g in legs).lower()
+                        l["hot"] = bool((l.get("answered") and mx >= 45)
+                                        or l.get("attempts", 0) >= 2
+                                        or "book" in ait or "come" in ait)
+                    ctx["leads"].sort(key=lambda x: (not x.get("hot"), ), )
+                    ctx["lead_groups"] = [
+                        (lbl, iso, sorted(rs, key=lambda x: not x.get("hot")))
+                        for lbl, iso, rs in _group_by_iso(ctx["leads"], "last_seen")]
+                elif view == "pipe":
+                    ctx["pipe"] = _query_pipeline(conn)
+                elif view == "noshows":
+                    ctx["noshows"] = _query_noshows(conn)
+                    _nr = (ctx["noshows"] or {}).get("rows") or []
+                    _ns_tries(conn, _nr)
+                    ctx["ns_groups"] = _group_by_iso(_nr, "due_date")
+                    ctx["ns_banner"] = {
+                        "y": len(_nr),
+                        "x": sum(1 for n in _nr if not n.get("cb_attempts")),
+                        "z": sum(1 for n in _nr if n.get("cb_reached"))}
+                    ctx["sb_open"] = sorted(
+                        ({"join_key": k, **v} for k, v in sbm.items()),
+                        key=lambda x: x["at"], reverse=True)
+            finally:
+                conn.close()
+    ctx["hi_out"] = _hi_out
+    return render_template_string(CONSOLE_HTML, **ctx)
+
+
+@app.route("/portal/console.csv")
+@doctor_required
+def console_csv():
+    import csv as _csv
+    import io as _io
+    f = _console_filters(request.args)
+    conn = _console_conn()
+    buf = _io.StringIO(); w = _csv.writer(buf)
+    w.writerow(["Date", "Time", "Direction", "State", "Number", "Name", "Diagnosis",
+                "Age", "Sex", "Last Visit", "Clinic ID", "Duration_s", "Staff", "Claimed Outcome",
+                "Not Filed", "AI Verdict", "AI State", "AI Reason", "Evidence",
+                "Transcribed At", "Judged At", "Judge Lag Min", "Your Review", "Flags",
+                "Recording Link", "Has Transcript", "Join Key"])
+    if conn is not None:
+        try:
+            rows, _ = _query_log(conn, f, limit=None)
+            for r in rows:
+                w.writerow([r["date"], r["time"], r["direction"], r["state"], r["phone10"],
+                            r["name"], r["diagnosis"], r["age"], r["gender"], r["last_visit"], r["clinic_id"],
+                            r["duration"], r["agent"], r["claimed"],
+                            "YES" if r["not_filed"] else "", r["ai_text"], r["ai_state"],
+                            r["ai_reason"], r["evidence"], r["tx_at"], r["judged_at"],
+                            r["lag_judge"] if r["lag_judge"] is not None else "",
+                            r["review_text"] if r["reviewed"] else "", "; ".join(r["flags"]),
+                            r["rec_link"], "YES" if r["has_tx"] else "", r["join_key"]])
+        finally:
+            conn.close()
+    resp = make_response("\ufeff" + buf.getvalue())   # S171: BOM so Excel renders Hindi
+    resp.headers["Content-Type"] = "text/csv; charset=utf-8"
+    resp.headers["Content-Disposition"] = "attachment; filename=call_console.csv"
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+def _rotate_seed_in_config(new_seed: str) -> bool:
+    """
+    Best-effort rewrite of PORTAL_TOKEN_SEED in portal_config.py.
+    Returns True on success. Never raises.
+    """
+    global TOKEN_SEED
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        "portal_config.py")
+    try:
+        if not os.path.exists(path):
+            TOKEN_SEED = new_seed
+            return False
+        lines = open(path, "r", encoding="utf-8").read().splitlines()
+        out, found = [], False
+        for ln in lines:
+            if ln.strip().startswith("PORTAL_TOKEN_SEED"):
+                out.append(f'PORTAL_TOKEN_SEED = "{new_seed}"')
+                found = True
+            else:
+                out.append(ln)
+        if not found:
+            out.append(f'PORTAL_TOKEN_SEED = "{new_seed}"')
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("\n".join(out) + "\n")
+        TOKEN_SEED = new_seed
+        return True
+    except Exception:
+        TOKEN_SEED = new_seed   # in-memory rotation still invalidates devices
+        return False
+
+
+if __name__ == "__main__":
+    # Dev only. Production uses gunicorn (see systemd unit).
+    app.run(host="127.0.0.1", port=8090, debug=False)
