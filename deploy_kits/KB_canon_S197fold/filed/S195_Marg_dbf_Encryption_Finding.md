@@ -1,0 +1,38 @@
+# S195 finding — Marg `.dbf` encryption (Method A) — PARKED at owner request, crackable
+
+**Session 195 · 21 Aug 2026.** Method A = read Marg's FoxPro tables directly.
+Supported channels ruled out (owner confirmed with Marg tech team + web research):
+API Gateway is paid cloud only; no ODBC; **Tally XML = accounting only, NO item
+lines**. So item-level daily data must come from either the REPORT export
+(Method B, already working, has items) or decrypting the tables.
+
+## Encryption characterised (progress before parking)
+- Tables are year-extension VFP DBFs (`mdis.c18` bill header, `dis.c18` lines,
+  `subdis.c18`, `saletype`, `gledger`, `support`, `pro` item master, …),
+  **encrypted** via Marg `bsVault` → **Chilkat32.dll**.
+- Cipher = **global repeating-key XOR, key length 256 bytes** (NOT AES/RC4 —
+  256-byte autocorrelation period proves it). **CONFIRMED XOR**: using the DBF
+  header's known-zero bytes (offsets 12–27, 30–31) as the key there, the version
+  byte decrypts to **0x30** (valid VFP) and record length to **256** — both
+  correct. So it is genuinely breakable.
+- Why frequency analysis stalled: record columns are numeric/coded fields (e.g.
+  `dis` stores an item CODE → `pro.c18`, not the drug name), so they are NOT
+  space-padded — the "most-common byte = space" assumption fails on ~16/18 test
+  columns. Full key recovery needs **known-plaintext crib-dragging**: cross the
+  encrypted records against known values from a matching REPORT_x.XLS (bill nos,
+  amounts, dates) to recover the remaining key columns; or dump the 256-byte key
+  from `MARGWIN.EXE`/bsVault memory with a debugger on the Marg PC (one-time,
+  most reliable).
+- Research refs: XOR-KPA (Didier Stevens `xor-kpa`, NVISO), bsVault↔Chilkat
+  (Marg care #49348). Full detail + the 2 research agent reports in session log.
+
+## Status
+PARKED by owner 21 Aug to prioritise the AHK auto-generation + guard-and-send on
+the medical PC. Resume plan: crib-drag the 256-byte XOR key using REPORT_x.XLS as
+known plaintext, then decrypt all `*.c18` with the one key and read via dbfread.
+Encrypted sample tables remain under manojz `…\_to_delete\margdata` (gitignored).
+Meanwhile the daily item-level feed is served by Method B (report export + guard).
+
+*(S195 verdict superseded at the same session — see `S195_Marg_decrypt_partial_key.md`:
+the thorough attempt returned a decisive negative and remote decryption was RETIRED.
+This finding is retained for the characterisation and the debugger-route note.)*
