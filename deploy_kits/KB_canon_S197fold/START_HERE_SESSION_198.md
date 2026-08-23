@@ -11,20 +11,22 @@ pyflakes → I install; VPS python `/root/wa/venv/bin/python3` for the ledger).
 ## Phase 0 — verification before work (D247) — THE CANON IS WHOLE AGAIN
 
 1. Open `CANONICAL_MANIFEST.md` (Tier 0 · linchpin) and verify every row by md5. **The
-   S193–S196 fold-in is DONE (S197).** The four-session debt the last several START_HEREs
-   carried is cleared: Register **v5.41**, History Archive **v1.44**, Fault Register
-   **v2.33**, manifest rebuilt, `live_pins.txt` regenerated from v5.41. A clean Phase 0 is
-   now expected again — a mismatch is an incident once more, not the known debt.
-2. Read Tier 0 only: this file · KB Register v5.41 · HANDOFF_RUNBOOK v131 · any open
+   S193–S196 fold-in is DONE (S197).** The four-session debt is cleared: Register
+   **v5.42** (v5.41 + the F-169 pin correction), History Archive **v1.44**, Fault
+   Register **v2.34**, manifest rebuilt, `live_pins.txt` regenerated from v5.42. A clean
+   Phase 0 is expected again — a mismatch is an incident once more, not the known debt.
+2. Read Tier 0 only: this file · KB Register v5.42 · HANDOFF_RUNBOOK v131 · any open
    incident. Open Tier 1 on demand.
-3. **The `verify_live_pins.py` expectation:** GREEN, match 45, `source: VERIFIED` — the
-   first GREEN since S192 (the list had been stale four sessions and has now been
-   regenerated from v5.41). If the owner has not yet copied `live_pins_S197fold.txt` to
-   `/root/deploy/live_pins.txt`, that copy + one run is the residual.
+3. **The `verify_live_pins.py` expectation:** GREEN, match 45, `source: VERIFIED`. The
+   fold's FIRST list correctly went RED (drift 1) — `finance_entry.html` had been folded
+   at the S190 value while the box held the recorded S193_UX patch `92477b06…` (F-169,
+   record corrected from the box the same hour). The list now on the box must be
+   `live_pins_S197fold2.txt`, generated from v5.42.
 
 ## The live pins to trust (unchanged since the S196 close — S197 moved no code)
 
 - `finance_app.py` **`388c8ac0fdfecdee6029c0033b9b0ef8`** (smoke 668)
+- `finance_ui/finance_entry.html` **`92477b068c67e28661b049b7f3385708`** (S193_UX — the F-169 correction; the `?legacy=1` fallback page)
 - `portal.py` **`ee749cd9f3ac1294aab0d13ce069efc1`**
 - `staff_ledger.py` **`acd7b538ec9476f86e243c73eec3d3fd`**
 - `staff_register.py` **`9087954c8a4a891e8cdd848d6a9d48b2`** (v0.4)
@@ -34,7 +36,7 @@ pyflakes → I install; VPS python `/root/wa/venv/bin/python3` for the ledger).
 
 ## Next-free numbers
 
-**D335 · F-169 · A-D25 · Session 198.** (The Auditor mints AF-# only, in its own chat.)
+**D335 · F-170 · A-D25 · Session 198.** (The Auditor mints AF-# only, in its own chat.)
 
 ## The backlog (HANDOFF_RUNBOOK v131 §2 is authoritative)
 
