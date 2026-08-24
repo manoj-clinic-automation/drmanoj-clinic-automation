@@ -1,0 +1,15 @@
+# === Reverse proxy for STAFF REGISTER / SALARY (staff_register.py, port 8044) — Session 200, portal-PWA unification (phase 1a) ===
+extprocessor register_app {
+  type                    proxy
+  address                 127.0.0.1:8044
+  maxConns                100
+  pcKeepAliveTimeout      60
+  initTimeout             60
+  retryTimeout            0
+  respBuffer              0
+}
+context /register {
+  type                    proxy
+  handler                 register_app
+  addDefaultCharset       off
+}
