@@ -1,0 +1,12 @@
+Session 199: Salary Policy 2.0 + Month-End Flow & Lock Desk (D336+D337)
+
+- salary_policy.py NEW v1.3 (progressive minute-rate late pricing, 90 free min,
+  Improvement Hold 25/75, Diwali-pot incentive, all-settings engine)
+- staff_register.py v0.7 (scenario page, month-end flow + approvals + remarks,
+  Yes/No dress dropdowns, staff month view, LOCK DESK on the new engine)
+- salary_engine.py (F-174 exclusion-mirror fix; shadow/delta retired; dormant fallback)
+- att_scenario.py NEW v2 (three-system deduction scenario)
+- August dress migration executed (F-175; 88/74 -> 0, DB backed up)
+- Kits S199_SCEN1..3, SALFIX, FLOW1..3; canon: Register v5.44, Archive v1.46,
+  Fault v2.36 (F-174..F-177 all closed), Runbook v133, START_HERE_200, manifest,
+  live_pins_S199close.txt (A8)
