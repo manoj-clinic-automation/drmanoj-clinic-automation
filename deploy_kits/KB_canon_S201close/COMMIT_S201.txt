@@ -1,0 +1,25 @@
+Session 201: the Marg pipeline made whole — three kits, D347+D348, F-179..F-183
+
+- finance_app.py 2c99b2c6 -> d930b6b5 -> 024399775b -> 3f72e9ad (smoke 680 -> 693)
+    S201_A1FIX  business_date in days_payload; AF-2 closed, dead since S195   (+3)
+    S201_HEALTH month-vs-Marg compares like with like; "and N more" instead of
+                a silent [:5]; the no-clinic-ID bills get their own info row   (+7)
+    S201_UI     /finance/health under Clinic Design Language v1 and REGISTERED
+                in the F-130 table; nested <a> fixed (F-181)                   (+3)
+- manojz tooling: marg_gate.py (the outbox had no consumer - F-179), marg_rescan.py,
+  xlsx_stdlib.py (openpyxl dependency DELETED, not installed), medical_inventory.py,
+  medical_census.py, the .bat/.vbs double-click set; marg_router.py bbc50f91,
+  marg_watch.py 2076fe1d, signatures.json 3e9cbba0, PULL_FROM_MEDICAL.bat d64b636b
+- medical PC: medical_agent.py S201.11 69e60d77 - supervises the watcher, applies
+  kit files, NEVER updates itself, and now REPORTS its own drift by md5 (F-180)
+- Docs: Archive v1.48 (pure append, 860,641 prefix chars proven byte-identical),
+  Register v5.46, Fault Register v2.38 (F-179..F-183), Runbook v135,
+  START_HERE 202, CANONICAL_MANIFEST, live_pins_S201close.txt (A8)
+- END_OF_SESSION_PROMPT v6 -> v7: NEW step A10, the owner's living to-do is a
+  numbered close-out step (owner directive); A2 gains the four-line
+  self-reference check after the F-45 family went stale in four places
+- Decisions: D347 the medical-PC pipeline architecture; D348 sale bills without a
+  clinic ID ("variance" and "low confidence" retired; min_confidence closed by
+  measuring 192 bills rather than by owner judgement)
+- Diagnostics: AF-2 CLOSED. F-183 OPEN by choice (the backwards 0.60 tier and
+  single-digit clinic IDs, left for their own kit).

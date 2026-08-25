@@ -1,0 +1,3 @@
+# The manifest itself lives at the REPO ROOT and is not a member of this
+# folder; its md5 at this close is f77dd79e26e82fc54a7dc5bccc7da138.
+# SUMS covers exactly what is in this folder, so `md5sum -c` exits 0 (F-119).
