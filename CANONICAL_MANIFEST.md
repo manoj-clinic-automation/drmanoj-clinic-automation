@@ -59,7 +59,7 @@ is a halt that gets waved through, and then it protects nothing.
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
 | `CANONICAL_MANIFEST.md` | S179 | *(self — recomputed last, each EOS)* | this file; the linchpin |
-| `START_HERE_SESSION_202` | **S201 close** | `5dee680f338519305ecd4840a4b97672` | **CURRENT** entry point. Phase 0 = manifest md5 · F-88 · F-107 inverse · F-119 · F-123 · A8 (against Register **v5.46**) · `verify_live_pins.py` (expect GREEN against `live_pins_S201close.txt`; the S200 list shows drift on `finance_app.py`, which the box has right — F-134 shape). Carries the S201 narrative, the ⭐0 owner items (**pin-list copy · token rotation, THREE copies, never hand-copy** · Darpan SPECIAL · Pravesh 31-Aug · the July cash items · AF-3 · R9), **⭐1 the owner-prioritised `/ops` runbook surface with B2 as its honest prerequisite**, and next free **D349 · F-184**. |
+| `START_HERE_SESSION_202` | **S201 close** | `3cb0e1e53f312d446d095472abecd187` | **CURRENT** entry point. Phase 0 = manifest md5 · F-88 · F-107 inverse · F-119 · F-123 · A8 (against Register **v5.46**) · `verify_live_pins.py` (expect GREEN against `live_pins_S201close.txt`; the S200 list shows drift on `finance_app.py`, which the box has right — F-134 shape). Carries the S201 narrative, the ⭐0 owner items (**pin-list copy · token rotation, THREE copies, never hand-copy** · Darpan SPECIAL · Pravesh 31-Aug · the July cash items · AF-3 · R9), **⭐1 the owner-prioritised `/ops` runbook surface with B2 as its honest prerequisite**, and next free **D349 · F-184**. |
 | `START_HERE_SESSION_201` (pre-S201) | S200 close | `0a52c55fe2fd98b3f2782e1ef09bc7c4` | superseded by 202; retained. Was the **CURRENT** entry point. Phase 0 = manifest md5 · F-88 · F-107 · F-123 · A8 (against Register **v5.45**) · `verify_live_pins.py` (expect GREEN against `live_pins_S200close.txt`; the S199 list shows drift on the five moved files — F-134 shape). Carries the LOCKED-July state, AUGUST-go-live, the R9 verification owed, the ⭐0 owner items and next-free **D347 · F-179**. |
 | `START_HERE_SESSION_200` (pre-S200) | S199 close | `5b4eb77aed6cea35f0736d81d38c7967` | superseded by 201; retained. **CURRENT-at-S199** entry point. Phase 0 = manifest md5 check · F-88 · F-107 inverse · F-123 · the A8 source_md5 check (against Register **v5.44**) · `verify_live_pins.py` (expect GREEN against `live_pins_S199close.txt`; the S198 list would show RED drift on the moved salary-family files the box has right — the stale-list condition, not a fault). Carries the flow-is-live/preview state, the ⭐0 owner items (token rotation · Shivani · August advances · enforce_from) and next-free **D338 · F-178**. |
 | `START_HERE_SESSION_199` (pre-S199) | S198 close | `e53f22fe06cd4985a13bbe7c22d926ef` | superseded by 200; retained. Was the **CURRENT** entry point. Phase 0 = git-clone hash check · F-88 · F-107 inverse · F-123 · the A8 source_md5 check (against Register **v5.43**) · `verify_live_pins.py` (expect GREEN against `live_pins_S198close.txt`; the S197 list would show RED drift 3 on files the box has right — the stale-list condition, not a fault). Carries the D335 flagship instruction + the next-free numbers D336 · F-174. |
@@ -219,7 +219,7 @@ is a halt that gets waved through, and then it protects nothing.
 | `Clinic_Portal_SSO_Architecture` | v1 (S157) | `0c843bb64d579205d8c64946721c10f6` | SSO broker + shared verify-shim (D261) |
 | `Clinic_Portal_Build_Plan` | v1 (S157) | `3d6468cb4927d5d77d7a7d687ffabfe7` | tile rosters + per-app selection (D262) |
 | `Salary_Attendance_Master_Dossier` | v1 (S164) | `669917fcaca3fece3a3f6caa1899edbf` | **SOLE reference** for the salary + attendance + staff-daily-register machine. Supersedes `Attendance_System_Dossier_v1.2` (Tier-2 frozen row retained as integrity anchor), `Salary_System_KB_v1`, `Staff_Daily_Register_Dossier_v1.1` — all retained historical. |
-| `END_OF_SESSION_PROMPT` | **v7** | `231ffd46b79f936924fb3363d9c6aea5` | **CURRENT** close-out routine. **v7 adds step A10 (S201, owner directive): the owner's living `OWNER_TODO_LIVE.md` is refreshed and CONFIRMED as a hard numbered step.** It is the list he actually opens between sessions, and it is **deliberately un-manifested** (it edits continuously — hashing it would make Phase 0 fail by design), so nothing else checks it: **F-107's shape inverted — a document kept outside the register still needs an owner, and the routine is that owner.** A2 also gains an explicit four-line self-reference check (H1 · end-marker · how-to-use pointers · reserved next-free numbers) after the F-45 family went stale at four places in one close. Everything else is v6 unchanged. |
+| `END_OF_SESSION_PROMPT` | **v7** | `97f57d12f638de21d36327fd3cb3a364` | **CURRENT** close-out routine. **v7 adds step A10 (S201, owner directive): the owner's living `OWNER_TODO_LIVE.md` is refreshed and CONFIRMED as a hard numbered step.** It is the list he actually opens between sessions, and it is **deliberately un-manifested** (it edits continuously — hashing it would make Phase 0 fail by design), so nothing else checks it: **F-107's shape inverted — a document kept outside the register still needs an owner, and the routine is that owner.** A2 also gains an explicit four-line self-reference check (H1 · end-marker · how-to-use pointers · reserved next-free numbers) after the F-45 family went stale at four places in one close. Everything else is v6 unchanged. |
 | `END_OF_SESSION_PROMPT` (pre-A10) | v6 | `32b6092c4aebdf94712bbd9605159d1e` | superseded by v7; retained. **v6 added step A9 (S194)** — the Notion page-per-session log as a hard, URL-confirmed numbered step. **v6 adds step A9 (S194): the Notion page-per-session log is a hard, URL-confirmed numbered step** — it was silently skipped for closes 188–193 (same lesson as F-134/A8: narrative is not procedure). **Filed and pinned at the S197 fold** — the v6 routine had lived ONLY in project knowledge under a misnamed `_v5` file and was never in git (an open F-107 condition), now closed. Everything else is v5 unchanged. |
 | `END_OF_SESSION_PROMPT` (pre-A9) | v5 | `d2b6a22d0c195da311f8b6285f2cb375` | superseded by v6; retained. The genuine A0–A8 routine. **v5 added step A8 (F-134): regenerate the live-pin list AFTER the manifest.** |
 | `END_OF_SESSION_PROMPT` (pre-S188) | v4 | `9fa2be50c527865982f195d347ab0283` | superseded by v5; its §A ended at A7, which is F-134. |
@@ -1127,8 +1127,8 @@ this `CANONICAL_MANIFEST.md`.
 `KB_History_Archive_v1_48_S201.md` (`d17b2d26adb5a9e49f84e6b448231cc7`) ·
 `Fault_Action_Register_v2_38.md` (`9343b6fa8f4017e92652d54893d24f22`) ·
 `HANDOFF_RUNBOOK_2026-08-25_Session201close_v135.md` (`716c6f54329f43a56c7a1b78b3cc9392`) ·
-`START_HERE_SESSION_202.md` (`5dee680f338519305ecd4840a4b97672`) ·
-`END_OF_SESSION_PROMPT_v7.md` (`231ffd46b79f936924fb3363d9c6aea5`) ·
+`START_HERE_SESSION_202.md` (`3cb0e1e53f312d446d095472abecd187`) ·
+`END_OF_SESSION_PROMPT_v7.md` (`97f57d12f638de21d36327fd3cb3a364`) ·
 **NEW Tier-1:** `MARG_PIPELINE_MAINTENANCE_FLOW_v1.md` (`f02cd8bdbb9078ae51837534675e69cb`) ·
 this `CANONICAL_MANIFEST.md`.
 
@@ -1161,17 +1161,27 @@ this `CANONICAL_MANIFEST.md`.
 - **A8:** `live_pins_S201close.txt` regenerated from Register v5.46 — the owner copies it to
   `/root/deploy/live_pins.txt`; until then the S200 list shows drift on `finance_app.py`, which the
   box has right (the F-134 stale-list condition, not a fault).
-- **ONE CANDIDATE FINDING, recorded NOT minted (the S190 precedent): F-123 IS DRIFTING.** S187
-  retired the stale twin so that *exactly one* file named `CANONICAL_MANIFEST.md` existed in the
-  repo, and S191's Phase 0 confirmed it. **There are now FOUR bare-named copies** — the root plus a
-  snapshot in `KB_canon_all/`, `KB_canon_S198close/`, `KB_canon_S199close/` and
-  `KB_canon_S200close/`; **none of the three closes that added one flagged it**, and a strict F-123
-  check would now refuse. The content is fine — each is that close's honest snapshot; what eroded is
-  the rule, which is how `Diagnostics_v1_7` and the S131 stumps began. **This close deliberately did
-  not add a fifth:** `KB_canon_S201close/` carries no manifest copy, and its `SUMS_NOTE.txt` records
-  the root manifest's md5 instead so `md5sum -c` still exits 0 (F-119). The S187 remedy — rename each
-  to `.SNAPSHOT_S###` — is **not applied here**, because renaming four published files is the owner's
-  to authorise. Becomes **F-184** on his word.
+- **F-184 (S201) — THE CLOSE NEVER REFRESHED `deploy_kits/KB_canon_all/`, SO THE PIN CHECKER
+  COULD NOT PROVE ITS SOURCE.** `verify_live_pins.py` proves the pin list by looking in **exactly one
+  folder** — `repo/deploy_kits/KB_canon_all/` — for a file hashing to `source_md5`, and for the
+  `CANONICAL_MANIFEST.md` **beside it** pinning that same hash as CURRENT. **A per-close
+  `KB_canon_S###close/` folder does not satisfy it; the checker never looks there.** The S200 close
+  left that folder at Register **v5.44 (S199)** while pinning v5.45, so its run could only ever
+  return **AMBER (`register_not_in_repo`)** — every pinned file matching, the source unprovable.
+  The S201 run returned exactly that. **F-134's shape one folder over: a derived artefact must be
+  rebuilt in the same routine that changes its source.** Fixed structurally — `END_OF_SESSION_PROMPT`
+  v7 gains **step A8b** — and the S201 canon plus the missing **v5.45** were filed into that folder
+  at this close. *(Appended to the Fault Register at the S202 open — the register was already
+  published at v2.38 when this was found, and re-bumping it would have staled the pin list whose
+  verification produced the finding.)*
+- **WITHDRAWN AT THIS CLOSE — the F-123 candidate raised hours earlier was WRONG in the part that
+  mattered.** It flagged four bare-named `CANONICAL_MANIFEST.md` copies as rule-erosion.
+  **`KB_canon_all/CANONICAL_MANIFEST.md` is not drift — it is LOAD-BEARING**, and the F-117/F-122
+  proof cannot run without it. The claim was made before reading `verify_live_pins.py`: **the same
+  fault as reporting `vps_deploy.sh` broken off the stale repo copy earlier this session — a claim
+  about a mechanism, made without opening the mechanism.** The per-close snapshots remain a looser
+  question and are harmless; **there is no F-123 action owed by the owner.** Struck through rather
+  than deleted (F-23 discipline).
 - **Cold kit DUE** — 4 of 3–5 since S197. **Take it at the S202 close.**
 - ⭐ **S202, owner-prioritised: the `/ops` runbook surface**, with **B2 as its honest prerequisite**
   (the 60-second check's three files all live on manojz and the VPS cannot see them). Two rulings
