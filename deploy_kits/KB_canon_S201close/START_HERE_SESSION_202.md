@@ -16,6 +16,8 @@ Solo practice, older Hindi-first semi-urban patients.
 - For VPS python, always use `/root/wa/venv/bin/python3`.
 - **Always give me the COMPLETE path, and say which machine it is on.**
 - **Prefer ONE file I double-click over a sequence of GUI steps or a long console paste.**
+- **ALWAYS give me VPS commands as a copy block** — every time, no exceptions, never mixed into
+  prose and never combined with steps for another machine. **One block per machine.**
 
 ---
 
