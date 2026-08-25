@@ -1,0 +1,15 @@
+# === Reverse proxy for the STAFF LEDGER (staff_ledger.py, port 8043) — Session 200, portal-PWA unification (phase 2) ===
+extprocessor ledger_app {
+  type                    proxy
+  address                 127.0.0.1:8043
+  maxConns                100
+  pcKeepAliveTimeout      60
+  initTimeout             60
+  retryTimeout            0
+  respBuffer              0
+}
+context /ledger {
+  type                    proxy
+  handler                 ledger_app
+  addDefaultCharset       off
+}
