@@ -1,0 +1,18 @@
+Session 200: THE GO-LIVE SESSION — July LOCKED Rs 59,163 on the new engine; D338–D346; twelve kits; the PWA unified
+
+- deploy_kits/S200_R1  : staff_register v0.8 — D338 past-day presence correction
+- deploy_kits/S200_R2a : followup vhost += /register (append-only; live-drift-safe)
+- deploy_kits/S200_R2b : portal tiles same-origin (register)
+- deploy_kits/S200_R3  : fix-absents desk (D339) + Sheet-1 Sunday columns; register v0.9 + salary_policy
+- deploy_kits/S200_R4  : D339b — reason carried, corrections listed, audited UNDO; register v0.10
+- deploy_kits/S200_R5  : D346 go-live engine (salary_policy v1.4 · register v0.11 · att_month_report v2.7 roster-gated)
+- deploy_kits/S200_R5b : settings validator accepts the -1 derive sentinel
+- deploy_kits/S200_R6  : staff_ledger v3.3 — COVER_DUTY, settings-linked fine rates, dark mobile UI; salary_policy cover-credit read
+- deploy_kits/S200_R7  : approve-where-you-read; sheet strips; Darpan tranche filter fixed; fonts (NO money data in the kit — F-31 guard upheld)
+- deploy_kits/S200_R8  : followup vhost += /ledger; ledger tiles same-origin; salary_policy v1.6 back-buttons/month-nav
+- deploy_kits/S200_R9  : staff_ledger v3.4 — advances grouped/expandable; retired old salary lock DISARMED
+- deploy_kits/S200_R10 : salary_policy v1.7 — owner-record manual advances DEDUCT (sheet-4 truth)
+- deploy_kits/KB_canon_S200close/ : Register v5.45 · Archive v1.47 (§S200 append, prefix proven) ·
+  Fault v2.37 (F-178 OPEN) · Runbook v134 · START_HERE_201 · CANONICAL_MANIFEST · live_pins_S200close.txt (A8, register_pin_verified: yes)
+- Docs: Register/Archive/manifest updated; F-178 minted OPEN (mid-duty punch blindsight)
+- Diagnostics: no incident; eleven kits GREEN first pass on the box (R9 confirmation owed)
