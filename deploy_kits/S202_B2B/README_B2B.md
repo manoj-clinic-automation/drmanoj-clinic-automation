@@ -52,3 +52,16 @@ A selftest check now covers exactly that case, so it cannot regress.
 
 `https://followup.dr-manoj.in/finance/health` — the **Pipeline heartbeat** row should change from
 *"manojz has never posted a status"* to *"manojz reported N minutes ago"* within ten minutes.
+
+---
+
+## PLACED AND WIRED — 26-Aug-2026, S202
+
+- `pipeline_status.py` → `D:\Downloads\margsync\MargPull\` · md5 `51cf10c9f2543fcd48a61ee7f8faf51a`
+- `PULL_FROM_MEDICAL.bat` wired **after** the `END ... -- ok` stamp, so the status it posts includes
+  this run's own result. Backup kept beside it as `PULL_FROM_MEDICAL.bat.bak_before_B2B`;
+  CRLF line endings preserved and verified.
+- Its selftest passes from the installed location: **15 checks OK**.
+- A second robustness fix before placing: the heartbeat path is now **discovered** among H:, F: and
+  the local margsync mirror, newest-that-exists winning, and the payload reports **which** file it
+  read. A moved drive letter must degrade to "I could not read it", never to a silent green.

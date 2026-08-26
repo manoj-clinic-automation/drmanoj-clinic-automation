@@ -41,7 +41,17 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEF_ARCHIVE   = r"D:\Downloads\margsync\MargArchive"
 DEF_LASTPULL  = r"D:\Downloads\margsync\MargPull\_last_pull.txt"
-DEF_HEARTBEAT = r"H:\My Drive\Clinic Data Archive\FromMedical\heartbeat.txt"
+# The medical PC writes its heartbeat to Drive; manojz also mirrors the medical
+# SendToClinic folder. BOTH can carry it and either can be the fresher one, so
+# the newest that EXISTS wins rather than one hard-coded guess -- this script
+# cannot be allowed to report "no watcher section" just because a drive letter
+# moved. Reported out loud in the payload as heartbeat.from.
+DEF_HEARTBEATS = [
+    r"H:\My Drive\Clinic Data Archive\FromMedical\heartbeat.txt",
+    r"F:\My Drive\Clinic Data Archive\FromMedical\heartbeat.txt",
+    r"D:\Downloads\margsync\medical_SendToClinic\heartbeat.txt",
+]
+DEF_HEARTBEAT = DEF_HEARTBEATS[0]
 DEF_OFFSITE   = r"H:\My Drive\Clinic Data Archive\MargArchive"
 DEF_URL       = "https://followup.dr-manoj.in/finance/api/pipeline-status"
 DEF_TOKEN     = r"D:\Downloads\margsync\SendToClinic\token.txt"
@@ -166,8 +176,28 @@ def offsite_state(archive, mirror):
         return {}
 
 
+def pick_heartbeat(explicit):
+    """The newest heartbeat file that actually exists. A missing drive letter
+    must degrade to 'I could not read it', never to a silent green."""
+    cands = [explicit] if explicit else list(DEF_HEARTBEATS)
+    if explicit and explicit not in DEF_HEARTBEATS:
+        cands = [explicit] + list(DEF_HEARTBEATS)
+    best, bestm = None, None
+    for c in cands:
+        try:
+            m = os.path.getmtime(c)
+        except Exception:
+            continue
+        if bestm is None or m > bestm:
+            best, bestm = c, m
+    return best
+
+
 def gather(args):
-    w, hb, ign = heartbeat_state(args.heartbeat)
+    _hbp = pick_heartbeat(getattr(args, "heartbeat", None))
+    w, hb, ign = heartbeat_state(_hbp) if _hbp else ({}, {}, 0)
+    if _hbp:
+        hb["from"] = _hbp
     return {"source": "manojz",
             "at": datetime.datetime.now().isoformat(timespec="seconds"),
             "outbox": outbox_state(args.archive),
@@ -228,8 +258,11 @@ def selftest():
         fh.write("START 26-08-2026 01:00:00\nEND 26-08-2026 01:00:11 -- ok\n")
     ck(last_pull_state(lp)["ended_ok"] is True, "a clean pull is read as ok")
     ck(last_pull_state(os.path.join(t, "nope")) == {}, "a missing pull stamp is empty, not a crash")
+    ck(pick_heartbeat(os.path.join(t, "nope")) in (None, hb),
+       "a missing heartbeat path falls back rather than reporting a silent green")
     p = gather(argparse.Namespace(archive=arc, last_pull=lp, heartbeat=hb,
                                   offsite=os.path.join(t, "nope")))
+    ck(p["heartbeat"].get("from") == hb, "the payload says WHICH heartbeat it read")
     ck(p["source"] == "manojz" and "outbox" in p, "the payload assembles")
     ck(json.dumps(p) and "token" not in json.dumps(p).lower(),
        "the payload carries no token — it must never leave here")
@@ -241,7 +274,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="post manojz's view of the Marg pipeline")
     ap.add_argument("--archive", default=DEF_ARCHIVE)
     ap.add_argument("--last-pull", dest="last_pull", default=DEF_LASTPULL)
-    ap.add_argument("--heartbeat", default=DEF_HEARTBEAT)
+    ap.add_argument("--heartbeat", default=None)
     ap.add_argument("--offsite", default=DEF_OFFSITE)
     ap.add_argument("--url", default=DEF_URL)
     ap.add_argument("--token-file", default=DEF_TOKEN)

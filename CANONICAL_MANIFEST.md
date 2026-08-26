@@ -82,7 +82,8 @@ is a halt that gets waved through, and then it protects nothing.
 | `START_HERE_SESSION_186` | S185 | `4adc2c646fbdf668882c2587498c8ec5` | superseded by 187/188. Carries the git-clone Phase 0, the F-88 cross-check, the **NEW inverse check (F-107)** — confirm every Tier-0 doc has a manifest row — the `verify_live_pins.py` live-code check (D321), and the S186 tasks (complete the partial pin; resolve the opening float). |
 | `START_HERE_SESSION_185` | S184 | `f65e76c2e270cabf522839ef25d4acbe` | superseded by 186. **FILED TO THE REPO AND PINNED AT THE S185 CLOSE (F-107)** — written to project knowledge only at the S184 close, so it was unverifiable at the S185 Phase 0; these are the bytes filed at S185 and they are canonical from here. |
 | `START_HERE_SESSION_184` | S183 | `18c2bf463ad53bd075683aebfba8f373` | superseded by 185/186. Carried the git-clone Phase 0 **and** the `python3 /root/deploy/verify_live_pins.py` live-code check (D321) |
-| `KB_Register` | **v5.50** | `6d3528f510b175650bca8d36fe253bf9` | **CURRENT.** **v5.50 (S202, kit `S202_D349A` LIVE — D349 completed):** `difference_meaning()`, ONE definition of what a day's difference means, **classified from DATA never from its description text**; the exceptions card rebuilt as the owner's inline reconciliation table (each row closes where it is shown, through the EXISTING resolve endpoint — no new write path); **five harmless rows stopped hiding four genuinely unexplained ones**, including 12-Jun −8,487 open since S186; UPI rows gained direction + a Rs 241 net. Smoke **693 → 701, +8 exactly**, fail set byte-identical, harness rebuilt from live bytes only (S189 method, F-87). **v1 refused by its own gate at 698/701 — F-106 recurring**, reproduced offline on the unpatched app before anything changed, then made state-adaptive. Pins recorded as they moved (F-97): `finance_app.py` → **`eca3723ee5cc391abfbfb0747f375618`** · `finance_approvals.html` → **`89e02711061f473c5e2e118fe50aa1aa`**. Next free **D350 · F-188 · A-D25**. |
+| `KB_Register` | **v5.51** | `3ed8c49490f325d22d7b1c0f0d0f2ced` | **CURRENT.** **v5.51 (S202, kits `S202_B2A` + `S202_B2B` LIVE — B2, the pipeline heartbeat):** the VPS can finally see the four failure modes that happen on the owner's machines. Endpoint `POST /finance/api/pipeline-status` **reusing `FINANCE_MARG_TOKEN` — no fourth secret to rotate**; tables `pipeline_status` + `health_check_seen`; six checks; and the **NEVER-FIRED WITNESS** (AF-2 was born dead and showed green for five sessions). Smoke **701 → 713, +12 exactly**, fail set byte-identical. The manojz sender placed and wired after the END stamp. **Its first version was wrong and REAL DATA caught it** — counting files in `_outbox` would have alarmed forever because delivered files are kept by design; corrected to read the delivery state (0 pending, 10 kept — the outbox IS draining). Pin: `finance_app.py` → **`3576c013464be4fc89eb850d3b5f8ab9`**. Next free **D350 · F-188 · A-D25**. |
+| `KB_Register` (pre-v5.51) | v5.50 | `6d3528f510b175650bca8d36fe253bf9` | superseded by v5.51; retained. **v5.50 (S202, kit `S202_D349A` LIVE — D349 completed):** `difference_meaning()`, ONE definition of what a day's difference means, **classified from DATA never from its description text**; the exceptions card rebuilt as the owner's inline reconciliation table (each row closes where it is shown, through the EXISTING resolve endpoint — no new write path); **five harmless rows stopped hiding four genuinely unexplained ones**, including 12-Jun −8,487 open since S186; UPI rows gained direction + a Rs 241 net. Smoke **693 → 701, +8 exactly**, fail set byte-identical, harness rebuilt from live bytes only (S189 method, F-87). **v1 refused by its own gate at 698/701 — F-106 recurring**, reproduced offline on the unpatched app before anything changed, then made state-adaptive. Pins recorded as they moved (F-97): `finance_app.py` → **`eca3723ee5cc391abfbfb0747f375618`** · `finance_approvals.html` → **`89e02711061f473c5e2e118fe50aa1aa`**. Next free **D350 · F-188 · A-D25**. |
 | `KB_Register` (pre-v5.50) | v5.49 | `7146e03f1419c7f58ac94fe39bf2b519` | superseded by v5.50; retained. **v5.49 (S202, kit `S202_D349B` LIVE — D349's first build):** `advance_lane()`, ONE definition of which lane recovers an advance, shared by `close_month()` and the `/ledger/statement` card. Closes the two-copies drift that had the statement announcing full recovery for **every scheduled advance ever issued** — it told the owner Darpan's Rs 20,000 recovered in full when the close takes Rs 8,000. **Display-only: no close-behaviour change, no money moved.** Selftest 294 → **301, +7 exactly**, the new checks proven RED against the unfixed file. Live pin recorded AS IT MOVED (F-97): `/root/staff_ledger.py` `eaa305cb…` → **`9e764f807ad2012537c29fdb8ed6f124`**. Next free **D350 · F-187 · A-D25**. Reverse-application-proven onto the `1c411446…` pin. **The live-pin list is generated from THIS version** (A8). |
 | `KB_Register` (pre-v5.49) | v5.48 | `1c411446505cbe857d886a3bdae52869` | superseded by v5.49; retained. **v5.48 (S202 OPEN — the measurement pass):** **F-185** (patient data in the PUBLIC repo — 13 named patients WITH DIAGNOSES; **D320 was ruled on F-96's 7-mobiles/48-files count and the measured figure is 133 across ~190**; orphan files quarantined, live fixtures untouched, `phi_scan` gate added; **OPEN pending the owner's re-ruling**) and **F-186** (`margpull/signatures.json` drifted on manojz, BLIND to the checker; diffed, found better than the record, corrected FROM the box `1b21f3bf…` → **`3e9cbba0…`**, repo mirror synced) into the findings index; **the live-file table row corrected**; Fault-Register pointer → **v2.40**; lineage row; end marker. Next free **D349 · F-187 · A-D25**. Reverse-application-proven onto the `7331c56d…` pin. **The live-pin list is generated from THIS version** (A8). |
 | `KB_Register` (pre-v5.48) | v5.47 | `7331c56d1243a8d49b511c7036626c1b` | superseded by v5.48; retained. **v5.47 (S202 OPEN — housekeeping; NO live code, NO live data, NO pin moved):** F-184 into the findings index (appended and repaired the session it was reserved for); the Fault-Register pointer advanced to **v2.39**; **two stale clauses on the §How-to-use line corrected visibly** — it still pointed at `END_OF_SESSION_PROMPT` **v5** while v7 is current, and still trailed *"next free F-170"* (the S201 close fixed three pointers on that same line and left these two — the F-45 family surviving a partial correction of its own line); a v5.47 lineage row; end marker. Next free **D349 · F-185 · A-D25**. Reverse-application-proven onto the `b2971feb…` pin. **The live-pin list is generated from THIS version** (A8). |
@@ -1407,6 +1408,52 @@ this `CANONICAL_MANIFEST.md`.
   Next free **D350 · F-188 · A-D25 · Session 202**. **Cold kit still DUE.**
 
 **END OF CANONICAL_MANIFEST — S202d.**
+
+---
+
+### §S202e — B2 LIVE, BOTH HALVES (26 Aug 2026, Session 202 · the VPS can see the owner's machines)
+
+`KB_Register_v5_51_S202.md` (`3ed8c49490f325d22d7b1c0f0d0f2ced`) · this `CANONICAL_MANIFEST.md`.
+
+- **The gap B2 closes.** Every health check this server runs watches ARRIVAL AT THE VPS. Four of the
+  seven ways the Marg chain can fail happen entirely on the owner's machines — the watcher dies, the
+  pull stops, the outbox stops draining, the offsite silently stops — and **not one was visible
+  here**. F-179 is the proof: eleven verified reports undelivered for three days while capture,
+  routing and archiving all reported success.
+
+- **No fourth secret.** The endpoint reuses `FINANCE_MARG_TOKEN`. Rotation is the project's oldest
+  open item and that token already exists in three places; **a fourth thing to rotate is a cost paid
+  forever for a convenience used once.**
+
+- **The never-fired witness.** Any check that has not once left `ok` in 14+ days is now named. It does
+  not judge which are dead and which guard something that never breaks — it says the word *never* out
+  loud so a person can. **AF-2 was born dead at S195 and showed green for five sessions.**
+
+- **THE FIRST VERSION OF THE SENDER WAS WRONG, AND ONLY REAL DATA CAUGHT IT.** It counted FILES in
+  `_outbox` and reported *"10 waiting, oldest 192.8 hours"*. **Delivered files are deliberately KEPT
+  there** — the pipeline reference says so in as many words — so the check would have gone red on day
+  one and stayed red forever. **A false alarm is worse than no alarm: it teaches the owner to ignore
+  the light.** Corrected to read `marg_gate`'s own `_outbox_state.json`, the authority on what has
+  been delivered; the same data then reads **0 pending, 10 kept** — the outbox IS draining and
+  F-179's fix is working. A selftest check now covers exactly that case. **RULE: a monitor is proven
+  against the real thing it monitors, or it is not proven.**
+
+- **And a second guard added before placing it:** the heartbeat path is discovered across H:, F: and
+  the local mirror, newest-that-exists winning, with the payload reporting WHICH file it read — so a
+  moved drive letter degrades to *"could not read it"* and never to a silent green. That is the same
+  failure the never-fired witness exists to catch, designed out at the source.
+
+- **A LIVE FINDING, surfaced by the dry run on the owner's own machine:** the 10-minute pull FAILED at
+  **06:30 and again at 06:40** with *medical PC unreachable* — two consecutive cycles. Nothing is
+  lost, but nothing new can arrive while it persists. **This is exactly what B2 exists to surface, and
+  today it took a human opening a file on manojz and knowing to look.**
+
+- Smoke **701 → 713, +12 exactly**, projection written before measuring, fail set byte-identical
+  against both the pre- and post-migration databases. Next free **D350 · F-188 · A-D25**. **Cold kit
+  still DUE.**
+
+**END OF CANONICAL_MANIFEST — S202e.**
+
 
 
 
