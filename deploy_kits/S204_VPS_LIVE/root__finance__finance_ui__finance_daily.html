@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Sale · Sanjeevni</title>
+<!-- S194 ⭐1 Daily Sale v2 — S195 revision: no-payment bills entry (home
+     medicine / procedure / other), transfer-only moved to the bottom, optional
+     bill scan, "cash actually received" figure, "Other" transfer party. Same
+     POST /finance/api/day contract (noncash_bills was already backend-ready). -->
+<style>
+:root{
+  --surface-page:#f3f2ee; --surface-card:#ffffff; --line:#e4e1d9; --ink:#22201c; --mut:#6b675e;
+  --brand:#1f6f5c; --brand-ink:#0e4335; --warn:#9a6a00; --bad:#a1362c; --good:#1f6f5c; --chip:#eef4f1;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-page);color:var(--ink);
+  font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:0 12px 56px}
+header.bar{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;
+  padding:9px 13px;display:flex;align-items:center;gap:8px}
+header.bar b{font-size:16px;letter-spacing:.2px}
+header.bar .who{margin-left:auto;font-size:12px;opacity:.9}
+/* prominent live drawer strip */
+.drawer{position:sticky;top:37px;z-index:19;background:#fff;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;padding:7px 13px;box-shadow:0 2px 4px rgba(0,0,0,.05)}
+.drawer .dk{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;font-weight:700;line-height:1.2}
+.drawer .dk small{display:block;font-weight:400;letter-spacing:0;text-transform:none;color:var(--mut);font-size:11px}
+.drawer .dv{font-size:24px;font-weight:800;color:var(--brand-ink);font-variant-numeric:tabular-nums;line-height:1}
+h2{font-size:15px;margin:0 0 2px}
+.kick{display:block;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--brand-ink);font-weight:700;margin-bottom:1px}
+.hindi{color:var(--mut);font-weight:400;font-size:12px}
+.card{background:var(--surface-card);border:1px solid var(--line);border-radius:11px;
+  padding:11px;margin:10px 0;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.card>p.mut{margin:3px 0 6px}
+label{display:block;font-size:12px;color:var(--mut);margin:6px 0 2px}
+input,select{width:100%;padding:8px 9px;border:1px solid var(--line);border-radius:8px;
+  font-size:14px;background:#fff;color:var(--ink)}
+.money{display:flex;align-items:center;gap:5px}
+.money .rs{color:var(--mut)}
+.row{display:flex;gap:7px}.row>*{flex:1}
+.num{font-variant-numeric:tabular-nums}
+.stat{display:flex;justify-content:space-between;align-items:baseline;
+  padding:5px 0;border-bottom:1px dashed var(--line)}
+.stat .lbl{color:var(--mut);font-size:12px}.stat .val{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+.stat.big .val{color:var(--brand-ink);font-size:18px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--brand);
+  background:var(--brand);color:#fff;padding:9px 12px}
+button.ghost{background:#fff;color:var(--brand-ink)}
+button.big{width:100%;font-size:15px;font-weight:700;padding:12px}
+button[disabled]{opacity:.45;cursor:not-allowed}
+.repeat{border:1px dashed var(--line);border-radius:9px;padding:9px;margin:7px 0;position:relative}
+.rm{position:absolute;top:5px;right:5px;background:#fff;color:var(--bad);border-color:var(--line);padding:2px 7px;font-size:12px}
+.scan{display:flex;align-items:center;gap:8px;margin:5px 0}
+.scan .nm{flex:1}
+.tick{color:var(--good);font-weight:700;font-size:13px}
+.msg{margin:8px 0;padding:8px 10px;border-radius:8px;font-size:13px;display:none}
+.msg.show{display:block}
+.msg.good{background:#e7f2ee;color:var(--brand-ink)}
+.msg.bad{background:#faece9;color:var(--bad)}
+.msg.warn{background:#fbf3e0;color:var(--warn)}
+[data-stage="2"]{display:none}
+.mut{color:var(--mut);font-size:12px}
+details.help{margin-top:5px}
+details.help summary{cursor:pointer;color:var(--brand-ink);font-size:12px}
+details.help>div{font-size:12px;color:var(--mut);padding:5px 0}
+#toTop{position:fixed;right:12px;bottom:12px;display:none;border-radius:50%;width:42px;height:42px;padding:0}
+#toTop.show{display:block}
+.sep{border:0;border-top:1px solid var(--line);margin:11px 0}
+.faint{opacity:.85}
+.inline{display:flex;align-items:center;gap:10px}
+.inline .kick{margin:0;white-space:nowrap}
+.dateIn{max-width:180px}
+.okbadge{display:inline-block;background:#e7f2ee;color:var(--brand-ink);border:1px solid #bfe0d4;
+  border-radius:999px;padding:2px 10px;font-size:12px;font-weight:800;white-space:nowrap}
+.attrow{padding:4px 0;font-size:13px;display:flex;align-items:center;gap:8px;border-bottom:1px dashed var(--line)}
+.attrow:last-child{border-bottom:0}
+button.big.done{background:#12604e;border-color:#12604e}
+@media(max-width:480px){ .wrap{padding:0 10px 52px} .dateIn{max-width:150px} }
+</style>
+</head>
+<body>
+<header class="bar"><b>Daily Sale</b><span class="hindi">· आज की बिक्री</span>
+  <span class="who" id="whoami">darpan</span></header>
+<div class="drawer" id="drawerBar">
+  <span class="dk">Darpan's drawer<small>counter cash now · दराज़</small></span>
+  <span class="dv num" id="drawerTop">₹—</span>
+</div>
+<div class="wrap">
+
+  <!-- ============================ STAGE 1 ============================ -->
+  <div data-stage="1">
+    <!-- compact: day + sale in one card -->
+    <div class="card">
+      <div class="inline"><span class="kick">Day · दिन</span>
+        <input type="date" id="bdate" class="dateIn" max="2026-08-21"></div>
+      <div class="row" style="margin-top:7px">
+        <div><label>Total sale ₹</label><div class="money"><span class="rs">₹</span>
+          <input type="tel" id="total" inputmode="numeric" placeholder="0"></div></div>
+        <div><label>Of that, UPI ₹</label><div class="money"><span class="rs">₹</span>
+          <input type="tel" id="upi" inputmode="numeric" placeholder="0"></div></div>
+      </div>
+      <div class="stat"><span class="lbl">Cash (total − UPI)</span><span class="val num" id="cashShow">₹0</span></div>
+    </div>
+
+    <!-- restored from v1 (dropped in the v2 rewrite): bills raised with no cash -->
+    <div class="card">
+      <h2><span class="kick">Billed, no cash received</span>No-payment bills <span class="hindi">· बिना नकद बिल</span></h2>
+      <p class="mut">Home medicines and procedure medicines — the bill is raised in full but
+        <b>no cash</b> crosses the counter. Recording it here reduces today's cash automatically.</p>
+      <div id="ncList"></div>
+      <button class="ghost" id="addNc">+ Add a bill</button>
+      <div class="stat faint"><span class="lbl">No-payment bills total</span><span class="val num" id="ncShow">₹0</span></div>
+      <div class="stat big"><span class="lbl">Cash actually received</span>
+        <span class="val num" id="cashRealShow">₹0</span></div>
+      <details class="help"><summary>How this works</summary><div>
+        Pick the head (home medicine / procedure / other), the bill number and the amount. These are
+        checked so they never exceed the day's cash. Tap <b>Scan bill</b> on each one to attach it —
+        a ✓ shows right there once the scan is saved.</div></details>
+    </div>
+
+    <div class="card">
+      <h2><span class="kick">Paid out of the drawer</span>Expenses <span class="hindi">· खर्च</span></h2>
+      <div id="expList"></div>
+      <button class="ghost" id="addExp">+ Add an expense</button>
+    </div>
+
+    <div class="card">
+      <h2><span class="kick">Evidence</span>Scans <span class="hindi">· स्कैन</span></h2>
+      <div class="scan" data-doc="sale_report"><span class="nm">Marg sale report</span>
+        <span class="tick" data-tick="sale_report"></span>
+        <button class="ghost scanBtn" type="button">Scan / upload</button></div>
+      <div class="scan" data-doc="manual_copy"><span class="nm">Manual copy / register</span>
+        <span class="tick" data-tick="manual_copy"></span>
+        <button class="ghost scanBtn" type="button">Scan / upload</button></div>
+      <div class="scan" data-doc="orthotics_copy"><span class="nm">Orthotics / other</span>
+        <span class="tick" data-tick="orthotics_copy"></span>
+        <button class="ghost scanBtn" type="button">Scan / upload</button></div>
+      <label>If a scan is missing, say why</label>
+      <input type="text" id="scanReason" placeholder="e.g. printer down — will bring tomorrow">
+      <details class="help"><summary>How this works</summary><div>
+        Save first, then tap Scan — the scanner opens on its own page and comes back here.</div></details>
+    </div>
+
+    <div id="msg1" class="msg"></div>
+    <button class="big" id="btnSave">① Save</button>
+    <div style="height:10px"></div>
+    <button class="big" id="btnSubmit" disabled="">② Submit for the doctor</button>
+    <p class="mut" id="submitHint">Save first — Submit unlocks once the day is saved.</p>
+
+    <hr class="sep">
+
+    <!-- MOVED TO BOTTOM: transfer-only -->
+    <div class="card" id="transferOnly">
+      <h2><span class="kick">Just moving cash</span>Transfer only <span class="hindi">· सिर्फ़ नकद भेजना</span></h2>
+      <p class="mut">Record a hand-over to the bank or a doctor without filing a whole day.</p>
+      <div class="row">
+        <div><label>Date</label><input type="date" id="toDate" max="2026-08-21"></div>
+        <div><label>Amount</label><div class="money"><span class="rs">₹</span>
+          <input type="tel" id="toAmt" inputmode="numeric" placeholder="0"></div></div>
+      </div>
+      <div class="row">
+        <div><label>To / from</label><select id="toParty">
+          <option value="bank">Bank</option><option value="dr_bhawna">Dr Bhawna</option>
+          <option value="dr_manoj">Dr Manoj</option><option value="other">Other</option></select></div>
+        <div><label>Direction</label><select id="toDir">
+          <option value="out">Cash out (given)</option><option value="in">Cash back (returned)</option>
+        </select></div>
+      </div>
+      <label>Reference / note</label><input type="text" id="toRef" placeholder="e.g. deposited at Yes Bank">
+      <div style="height:9px"></div>
+      <button class="ghost" id="btnTransferOnly">Record this hand-over</button>
+      <details class="help"><summary>How this works</summary><div>
+        This adds a cash movement to that day and re-files it, so the drawer stays correct.
+        The day must already exist.</div></details>
+    </div>
+  </div>
+
+  <!-- ============================ STAGE 2 ============================ -->
+  <div data-stage="2">
+    <div class="card">
+      <h2><span class="kick">Filed</span>Submitted <span class="hindi">· जमा हो गया</span></h2>
+      <div id="confirm" class="mut">—</div>
+      <div id="attachList" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="kick">Where the money is</span>Cash &amp; drawer <span class="hindi">· नकद</span></h2>
+      <div class="stat"><span class="lbl">Cash this day</span><span class="val num" id="s2cash">—</span></div>
+      <div class="stat"><span class="lbl">Drawer now (Darpan)</span><span class="val num" id="s2drawer">—</span></div>
+      <div class="stat"><span class="lbl">Drawer after these transfers</span><span class="val num" id="s2after">—</span></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="kick">Move it out</span>Transfers <span class="hindi">· बैंक / डॉक्टर</span></h2>
+      <div id="movList"></div>
+      <button class="ghost" id="addMov">+ Add a transfer</button>
+    </div>
+
+    <div id="msg2" class="msg"></div>
+    <button class="big" id="btnFinal">Final submit — close the day</button>
+  </div>
+
+</div>
+<button id="toTop" title="Back to top" type="button" class="">↑</button>
+<script>
+var API = "/finance/api";
+function $(i){ return document.getElementById(i); }
+function paise(v){ v = String(v==null?"":v).replace(/[, ]/g,""); var n = Math.round(parseFloat(v)*100); return isFinite(n)?n:0; }
+function money(p){ return "₹" + (p/100).toFixed(2).replace(/\.00$/,"").replace(/\B(?=(\d{3})+(?!\d))/g,","); }
+function show(box,kind,text){ var m=$(box); m.textContent=text||""; m.className="msg "+kind+(text?" show":""); }
+var attached = {};
+var saved = false;
+var lastDate = null;
+var _isPreview = false;
+
+/* ---------- stage 1: money ---------- */
+function recompute(){
+  var cash = paise($("total").value) - paise($("upi").value);
+  $("cashShow").textContent = money(cash);
+  var nc = ncTotal();
+  $("ncShow").textContent = money(nc);
+  $("cashRealShow").textContent = money(cash - nc);
+  lock();
+}
+function lock(){ saved=false; $("btnSubmit").disabled=true;
+  var b=$("btnSave"); if(b){ b.innerHTML="① Save"; b.classList.remove("done"); }
+  $("submitHint").textContent="Save first — Submit unlocks once the day is saved."; }
+function unlock(){ saved=true; $("btnSubmit").disabled=false;
+  var b=$("btnSave"); if(b){ b.innerHTML="✓ Saved"; b.classList.add("done"); }
+  $("submitHint").textContent="Saved ✓ — now tap ② Submit for the doctor ↓"; }
+
+/* ---------- expenses ---------- */
+var uidSeq = 0;
+function newUid(){ uidSeq++; return "e" + Date.now().toString(36) + uidSeq; }
+function addExpense(pre){
+  pre = pre || {};
+  var d = document.createElement("div"); d.className="repeat"; d.dataset.uid = pre.uid || newUid();
+  d.innerHTML =
+    '<button class="rm" type="button">remove</button>' +
+    '<label>Amount</label><div class="money"><span class="rs">₹</span>' +
+    '<input type="tel" class="expAmt" inputmode="numeric" placeholder="0"></div>' +
+    '<label>Category</label><select class="expCat">' +
+    '<option value="" disabled selected>Choose…</option>' +
+    '<option value="salary_advance_self">My salary advance</option>' +
+    '<option value="home">Home expenses (personal / COD delivery)</option>' +
+    '<option value="other">Other expenses (write details)</option></select>' +
+    '<div class="expExtra"></div>';
+  $("expList").appendChild(d);
+  var cat=d.querySelector(".expCat"), extra=d.querySelector(".expExtra");
+  function redraw(){
+    if(cat.value==="home"||cat.value==="other"){
+      extra.innerHTML='<label>Details</label><input type="text" class="expText" placeholder="write what this was">'+
+        '<div style="height:8px"></div><button type="button" class="ghost expBill">Attach the bill (required)</button>';
+      extra.querySelector(".expBill").onclick=function(){ saveThenScanExpense(d.dataset.uid); };
+    } else if(cat.value==="salary_advance_self"){
+      extra.innerHTML='<p class="mut">Posts to the Staff Ledger only when the doctor approves.</p>';
+    } else { extra.innerHTML=""; }
+  }
+  cat.addEventListener("change",redraw);
+  d.querySelector(".rm").onclick=function(){ d.remove(); recompute(); };
+  d.addEventListener("input",recompute);
+  if(pre.category_fixed==="salary_advance"){ cat.value="salary_advance_self"; redraw(); }
+  else if(pre.category_kind==="home"||pre.category_kind==="other"){
+    cat.value=pre.category_kind; redraw();
+    var _t=extra.querySelector(".expText"); if(_t&&pre.category_text) _t.value=pre.category_text;
+  }
+  if(pre.amount_p!==undefined) d.querySelector(".expAmt").value=(pre.amount_p/100).toFixed(2).replace(/\.00$/,"");
+}
+
+/* ---------- no-payment bills (home medicine / procedure / other) ---------- */
+function addNoncash(pre){
+  pre = pre || {};
+  var d=document.createElement("div"); d.className="repeat";
+  d.innerHTML =
+    '<button class="rm" type="button">remove</button>' +
+    '<div class="row"><div><label>Bill date</label>' +
+    '<input type="date" class="ncDate" value="' + ($("bdate").value||"") + '" max="' + ($("bdate").max||"") + '"></div>' +
+    '<div><label>Head</label><select class="ncHead">' +
+    '<option value="" disabled selected>Choose…</option>' +
+    '<option value="home_medicine">Home medicine</option>' +
+    '<option value="procedure_medicine">Procedure medicine</option>' +
+    '<option value="other">Other</option></select></div></div>' +
+    '<div class="ncExtra"></div>' +
+    '<div class="row">' +
+    '<div><label>Bill number</label><input type="text" class="ncBill" placeholder="e.g. H-101"></div>' +
+    '<div><label>Amount</label><div class="money"><span class="rs">₹</span>' +
+    '<input type="tel" class="ncAmt" inputmode="numeric" placeholder="0"></div></div></div>' +
+    '<label>Note (optional)</label><input type="text" class="ncNote" placeholder="e.g. patient / what it was for">' +
+    '<div class="scan" style="margin-top:9px"><button type="button" class="ghost ncScan">📎 Scan bill</button>' +
+    '<span class="tick ncTick" style="margin-left:8px"></span></div>';
+  d.dataset.uid = pre.uid || newUid();
+  $("ncList").appendChild(d);
+  var head=d.querySelector(".ncHead"), extra=d.querySelector(".ncExtra");
+  function hredraw(){
+    if(head.value==="other"){
+      extra.innerHTML='<label>What for</label><input type="text" class="ncHeadText" placeholder="describe the bill head (required)">';
+    } else { extra.innerHTML=""; }
+  }
+  head.addEventListener("change",function(){ hredraw(); recompute(); });
+  d.querySelector(".rm").onclick=function(){ d.remove(); recompute(); };
+  d.addEventListener("input",recompute);
+  d.querySelector(".ncScan").onclick=function(){ scanNoncash(d.dataset.uid, d.querySelector(".ncTick")); };
+  if(pre.has_file){ d.querySelector(".ncTick").innerHTML='<span class="okbadge">✓ Scan saved</span>'; }
+  if(pre.head){ head.value=pre.head; hredraw();
+    if(pre.head==="other"){ var ht=extra.querySelector(".ncHeadText"); if(ht&&pre.head_text) ht.value=pre.head_text; } }
+  if(pre.bill_no) d.querySelector(".ncBill").value=pre.bill_no;
+  if(pre.amount_p!==undefined) d.querySelector(".ncAmt").value=(pre.amount_p/100).toFixed(2).replace(/\.00$/,"");
+  if(pre.note) d.querySelector(".ncNote").value=pre.note;
+}
+function ncTotal(){
+  var t=0; document.querySelectorAll("#ncList .repeat").forEach(function(r){ t+=paise(r.querySelector(".ncAmt").value); }); return t;
+}
+function collectNoncash(){
+  var out=[];
+  document.querySelectorAll("#ncList .repeat").forEach(function(r){
+    var amt=r.querySelector(".ncAmt").value; if(!String(amt).trim())return;
+    out.push({amount:amt, uid:r.dataset.uid, head:r.querySelector(".ncHead").value||null,
+              head_text:((r.querySelector(".ncHeadText")||{}).value||""),
+              bill_no:(r.querySelector(".ncBill").value||"").trim(),
+              bill_date:((r.querySelector(".ncDate")||{}).value||$("bdate").value),
+              note:((r.querySelector(".ncNote")||{}).value||"")});
+  });
+  return out;
+}
+
+/* repopulate the form from a saved day (D330: what the screen shows is what the
+   next save sends — a blank re-save must never silently delete rows) */
+function loadDay(iso){
+  fetch(API+"/day/"+iso+"?_="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
+    if(!j||!j.ok){ return; }
+    var day=j.day||{};
+    attached={};
+    document.querySelectorAll(".scan .tick").forEach(function(t){ t.textContent=""; });
+    (day.attachments||[]).forEach(function(a){
+      if(!a.has_file) return;
+      attached[a.doc_type]=true;
+      var box=document.querySelector('.scan[data-doc="'+a.doc_type+'"] .tick');
+      if(box) box.innerHTML='<span class="okbadge">✓ Uploaded</span>';
+    });
+    $("expList").innerHTML="";
+    $("ncList").innerHTML="";
+    if(day.exists){
+      $("total").value=(day.total_p/100).toFixed(2).replace(/\.00$/,"");
+      $("upi").value=(day.upi_p/100).toFixed(2).replace(/\.00$/,"");
+      (day.expenses||[]).forEach(function(e){ addExpense(e); });
+      (day.noncash_bills||[]).forEach(function(b){ addNoncash(b); });
+      recompute();
+      unlock();
+      if(day.status && day.status!=="draft"){
+        show("msg1","warn","This day is already "+day.status+". Any change keeps the earlier version on record.");
+      }
+    } else { recompute(); }
+  }).catch(function(){});
+}
+
+/* ---------- transfers (stage 2) ---------- */
+function addMovement(pre){
+  pre = pre || {};
+  var d=document.createElement("div"); d.className="repeat";
+  d.innerHTML =
+    '<button class="rm" type="button">remove</button>' +
+    '<label>Amount</label><div class="money"><span class="rs">₹</span>' +
+    '<input type="tel" class="movAmt" inputmode="numeric" placeholder="0"></div>' +
+    '<div class="row"><div><label>To / from</label><select class="movParty">' +
+    '<option value="bank">Bank</option><option value="dr_bhawna">Dr Bhawna</option>' +
+    '<option value="dr_manoj">Dr Manoj</option><option value="other">Other</option></select></div>' +
+    '<div><label>Direction</label><select class="movDir">' +
+    '<option value="out">Cash out</option><option value="in">Cash back</option></select></div></div>' +
+    '<label>Reference</label><input type="text" class="movRef" placeholder="note">';
+  $("movList").appendChild(d);
+  d.querySelector(".rm").onclick=function(){ d.remove(); refreshDrawer(); };
+  d.addEventListener("input",refreshDrawer);
+}
+function collectMovements(){
+  var movs=[];
+  document.querySelectorAll("#movList .repeat").forEach(function(r){
+    var amt=r.querySelector(".movAmt").value; if(!String(amt).trim())return;
+    movs.push({amount:amt, party:r.querySelector(".movParty").value,
+               direction:r.querySelector(".movDir").value,
+               reference:(r.querySelector(".movRef")||{}).value||""});
+  });
+  return movs;
+}
+
+/* ---------- the shared POST body ---------- */
+function collect(action){
+  var exps=[];
+  document.querySelectorAll("#expList .repeat").forEach(function(r){
+    var amt=r.querySelector(".expAmt").value; if(!String(amt).trim())return;
+    exps.push({amount:amt, category:r.querySelector(".expCat").value||null, uid:r.dataset.uid,
+               details:((r.querySelector(".expText")||{}).value||"")});
+  });
+  return { business_date:$("bdate").value, total:$("total").value, upi:$("upi").value,
+           expenses:exps, movements:(action==="s2"?collectMovements():[]),
+           noncash_bills:collectNoncash(), action:(action==="s2"?"submit":action),
+           manned_by:null, manned_source:"manual",
+           attached_docs:Object.keys(attached), missing_scan_reason:$("scanReason").value };
+}
+
+function postDay(body){
+  return fetch(API+"/day",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(body)}).then(function(r){return r.json();});
+}
+
+/* ---------- stage 1 save / submit ---------- */
+function save(action){
+  var body=collect(action);
+  if(!body.business_date){ show("msg1","bad","Choose a date first."); return; }
+  postDay(body).then(function(j){
+    if(!j.ok){ show("msg1","bad",j.message||j.error); return; }
+    if(action==="submit"){ goStage2(body.business_date); return; }
+    unlock(); refreshDrawerTop(); show("msg1","good","Saved. The check is below — then Submit.");
+    (j.warnings||[]).forEach(function(w){ show("msg1","warn",w); });
+  }).catch(function(){ show("msg1","bad","Network problem — please try again."); });
+}
+function saveThenScanExpense(uid){
+  var date=$("bdate").value; if(!date){ show("msg1","bad","Choose a date first."); return; }
+  postDay(collect("draft")).then(function(j){
+    if(!j.ok){ show("msg1","bad",j.message||j.error); return; }
+    window.location="/finance/scan-expense/"+date+"/"+uid;
+  });
+}
+/* per-bill scan for a no-payment bill: save the day (draft) so the bill+uid
+   exist, then open the same scanner widget; it returns here and the ✓ shows. */
+function scanNoncash(uid, tickEl){
+  if(_isPreview){ if(tickEl) tickEl.innerHTML='<span class="okbadge">✓ Scan saved</span>'; return; }
+  var date=$("bdate").value; if(!date){ show("msg1","bad","Choose a date first."); return; }
+  postDay(collect("draft")).then(function(j){
+    if(!j.ok){ show("msg1","bad",j.message||j.error); return; }
+    window.location="/finance/scan-noncash/"+date+"/"+uid;
+  }).catch(function(){ show("msg1","bad","Network problem — please try again."); });
+}
+function saveThenScan(doc){
+  var date=$("bdate").value; if(!date){ show("msg1","bad","Choose a date first."); return; }
+  postDay(collect("draft")).then(function(j){
+    if(!j.ok){ show("msg1","bad",j.message||j.error); return; }
+    window.location="/finance/scan/"+date+"/"+doc;
+  });
+}
+
+/* ---------- stage 2 ---------- */
+var s2cashP = 0, s2drawerP = 0;
+function headLabel(h){ return h==="home_medicine"?"home medicine":h==="procedure_medicine"?"procedure":h==="other"?"other":(h||""); }
+var DOC_LABEL = {sale_report:"Marg sale report", manual_copy:"Manual copy / register",
+                 orthotics_copy:"Orthotics / other"};
+function renderAttachments(day){
+  var L=[];
+  (day.attachments||[]).forEach(function(a){ if(a.has_file) L.push(DOC_LABEL[a.doc_type]||a.doc_type); });
+  (day.noncash_bills||[]).forEach(function(b){ if(b.has_file) L.push("Bill "+(b.bill_no||"—")+" · "+headLabel(b.head)); });
+  var el=$("attachList");
+  if(!el) return;
+  if(!L.length){ el.innerHTML='<div class="mut">No scans attached.</div>'; return; }
+  el.innerHTML='<div class="kick" style="margin-bottom:4px">Attachments ('+L.length+')</div>'+
+    L.map(function(x){ return '<div class="attrow"><span class="okbadge">✓</span><span>'+x+'</span></div>'; }).join("");
+}
+function goStage2(date){
+  lastDate=date;
+  document.querySelector('[data-stage="1"]').style.display="none";
+  document.querySelector('[data-stage="2"]').style.display="block";
+  $("confirm").textContent = date + " — submitted · Total " + $("total").value +
+     " · UPI " + $("upi").value;
+  window.scrollTo({top:0,behavior:"smooth"});
+  fetch(API+"/day/"+date+"?_="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
+    var day=(j&&j.day)||{}; s2cashP=day.cash_p||0;
+    $("s2cash").textContent=money(s2cashP);
+    renderAttachments(day);
+  });
+  refreshDrawer();
+}
+function drawerFromCashPos(j){ return (j&&(j.drawer_p!=null?j.drawer_p:(j.drawer&&j.drawer.amount_p))); }
+function refreshDrawerTop(){
+  fetch(API+"/cash-position?_="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
+    var d=drawerFromCashPos(j); if(d!=null) $("drawerTop").textContent=money(d);
+  }).catch(function(){});
+}
+function refreshDrawer(){
+  fetch(API+"/cash-position?_="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
+    var drawer = drawerFromCashPos(j); if(drawer==null) drawer=0;
+    s2drawerP=drawer; $("s2drawer").textContent=money(drawer);
+    $("drawerTop").textContent=money(drawer);
+    computeAfter();
+  }).catch(function(){ $("s2drawer").textContent="—"; });
+}
+function computeAfter(){
+  var net=0;
+  collectMovements().forEach(function(m){ net += (m.direction==="in"?1:-1)*paise(m.amount); });
+  $("s2after").textContent=money(s2drawerP+net);
+}
+function finalSubmit(){
+  var body=collect("s2");
+  postDay(body).then(function(j){
+    if(!j.ok){ show("msg2","bad",j.message||j.error); return; }
+    show("msg2","good","Day closed — filed with "+collectMovements().length+" transfer(s). Waiting for the doctor.");
+    $("btnFinal").disabled=true;
+    refreshDrawer();
+  }).catch(function(){ show("msg2","bad","Network problem — please try again."); });
+}
+
+/* ---------- transfer-only ---------- */
+function transferOnly(){
+  var date=$("toDate").value; if(!date){ show("msg1","bad","Pick the date for this hand-over."); return; }
+  if(!String($("toAmt").value).trim()){ show("msg1","bad","Enter an amount."); return; }
+  fetch(API+"/day/"+date+"?_="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
+    var day=(j&&j.day)||{};
+    if(!day.exists){ show("msg1","bad","That day isn't filed yet — file it first, then move cash."); return; }
+    var body={ business_date:date, total:day.total, upi:day.upi, expenses:[],
+      movements:[{amount:$("toAmt").value, party:$("toParty").value,
+                  direction:$("toDir").value, reference:$("toRef").value||""}],
+      noncash_bills:[], action:(day.status==="draft"?"draft":"submit"),
+      manned_by:null, manned_source:"manual", attached_docs:[], missing_scan_reason:"" };
+    postDay(body).then(function(j2){
+      if(!j2.ok){ show("msg1","bad",j2.message||j2.error); return; }
+      show("msg1","good","Hand-over recorded on "+date+".");
+      $("toAmt").value=""; $("toRef").value=""; refreshDrawerTop();
+    });
+  });
+}
+
+/* ---------- boot ---------- */
+document.addEventListener("DOMContentLoaded",function(){
+  fetch(API+"/whoami").then(function(r){return r.json();}).then(function(j){ $("whoami").textContent=j.user||"—"; }).catch(function(){});
+  var y=new Date(Date.now()-864e5).toISOString().slice(0,10);
+  var mx=new Date().toISOString().slice(0,10);
+  var back=(location.search.match(/[?&]d=(\d{4}-\d{2}-\d{2})/)||[])[1];
+  $("bdate").value=back||y; $("bdate").max=mx; $("toDate").value=y; $("toDate").max=mx;
+  $("addExp").onclick=function(){ addExpense(); };
+  $("addNc").onclick=function(){ addNoncash(); };
+  $("addMov").onclick=function(){ addMovement(); };
+  ["total","upi"].forEach(function(id){ $(id).addEventListener("input",recompute); });
+  $("scanReason").addEventListener("input",lock);
+  $("bdate").addEventListener("change",function(){ loadDay($("bdate").value); });
+  $("btnSave").onclick=function(){ save("draft"); };
+  $("btnSubmit").onclick=function(){ save("submit"); };
+  $("btnFinal").onclick=finalSubmit;
+  $("btnTransferOnly").onclick=transferOnly;
+  document.querySelectorAll(".scanBtn").forEach(function(b){
+    b.onclick=function(){ saveThenScan(b.closest(".scan").dataset.doc); };
+  });
+  var tt=$("toTop"); tt.onclick=function(){ window.scrollTo({top:0,behavior:"smooth"}); };
+  window.addEventListener("scroll",function(){ tt.className=window.scrollY>500?"show":""; });
+  loadDay($("bdate").value);
+  refreshDrawerTop();
+
+});
+</script>
+</body></html>

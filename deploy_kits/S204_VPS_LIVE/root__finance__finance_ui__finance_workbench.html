@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<!-- finance_workbench.html · Sanjeevni Medicos — Reconciliation workbench (CHECKER)
+     S186_R2a. Three sources on one screen: what was ENTERED, what MARG sold,
+     what the BANK received. It suggests; it never applies (D315). -->
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reconciliation — Sanjeevni</title>
+<style>
+:root{--ink:#12213a;--mut:#5b6b85;--line:#dde4ee;--bg:#f4f6fa;--card:#fff;
+      --ok:#0f7a3d;--warn:#a86b00;--bad:#b3261e;--acc:#1f3864}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+     font:15px/1.5 Arial,"Segoe UI",system-ui,sans-serif}
+header{background:var(--acc);color:#fff;padding:14px 18px}
+header h1{margin:0;font-size:19px}
+header .sub{opacity:.85;font-size:13px;margin-top:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+      padding:14px 16px;margin-bottom:14px}
+.card h2{margin:0 0 10px;font-size:15px;letter-spacing:.02em}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input,select,button{font:inherit;padding:8px 10px;border:1px solid var(--line);
+      border-radius:7px;background:#fff;color:inherit}
+button{background:var(--acc);color:#fff;border-color:var(--acc);cursor:pointer}
+button.ghost{background:#fff;color:var(--acc)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+th{background:#eef2f8;font-weight:700;font-size:13px}
+.mut{color:var(--mut)}.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad);font-weight:700}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;border:1px solid}
+.p-exact{color:var(--ok);border-color:var(--ok)}
+.p-likely{color:var(--warn);border-color:var(--warn)}
+.p-weak{color:var(--bad);border-color:var(--bad)}
+.note{font-size:13px;color:var(--mut);margin-top:8px}
+.k{display:inline-block;min-width:150px;color:var(--mut)}
+.hindi{color:var(--mut);font-size:13px}
+#msg{margin-left:8px;font-size:13px}
+</style></head><body>
+<header><h1>Reconciliation workbench</h1>
+<div class="sub">Sanjeevni Medicos &middot; Entered &middot; Marg &middot; Bank &mdash; side by side</div></header>
+<div class="wrap">
+
+  <div class="card">
+    <h2>Yes Bank cash deposits</h2>
+    <div class="row">
+      <input type="file" id="ybFile" accept=".csv,text/csv">
+      <button id="ybUp">Load statement</button>
+      <button class="ghost" id="ybRe">Re-check without loading</button>
+      <span id="msg" class="mut"></span>
+    </div>
+    <div id="ybOut" class="note"></div>
+    <div class="note">Every booked deposit is matched against the bank. A deposit the bank never
+      received is reported. A deposit booked where <b>no statement reaches</b> is reported as
+      <b>unevidenced</b> &mdash; never as a pass.</div>
+  </div>
+
+  <div class="card">
+    <h2>Marg item-wise report <span class="hindi">&mdash; मार्ग बिल रिपोर्ट</span></h2>
+    <div class="row">
+      <input type="file" id="mgFile" accept=".xls,.xlsx">
+      <button class="ghost" id="mgCheck">Check first</button>
+      <button id="mgApply">Load into the books</button>
+      <span id="mgMsg" class="mut"></span>
+    </div>
+    <div id="mgOut" class="note"></div>
+    <div class="note">Export from Marg as <b>Bill wise sales statement</b> with
+      <b>With Item Deta. = Yes</b>. <b>Check first</b> writes nothing &mdash; it shows every day in the
+      file, whether that day is filed, and what would be replaced. The file is never stored on the
+      server: it is parsed and discarded before the reply is sent.</div>
+    <div class="note">A day in the file that is <b>not filed yet</b> is skipped and <b>flagged</b>,
+      so it can be found later. A console line does not survive the run.</div>
+  </div>
+
+  <div class="card">
+    <h2>Pushed Marg reports <span class="hindi">&mdash; भेजी गई मार्ग रिपोर्ट</span></h2>
+    <div id="mpList" class="mut">loading&hellip;</div>
+    <div class="note">Reception sends the day's report from the medical PC with one double-click
+      (kit S187_M1a). The file is parsed and <b>deleted on arrival</b>; the parsed rows wait here and
+      <b>nothing enters the books until you press Apply</b>. An applied push has its stored rows
+      cleared. If two pending pushes cover the same day, apply the newer one &mdash; the older becomes
+      a harmless duplicate (the ingest supersedes by day).</div>
+  </div>
+
+  <div class="card">
+    <h2>Month</h2>
+    <div class="row">
+      <input type="month" id="ym">
+      <button id="load">Show</button>
+      <span class="mut" id="totals"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Entered &middot; Marg &middot; Bank</h2>
+    <div style="overflow-x:auto">
+      <table id="tbl"><thead><tr>
+        <th>Date</th><th>Status</th><th>Entered cash</th><th>Entered UPI</th>
+        <th>Marg sale</th><th>Gap</th><th>Bank deposit</th><th>Expense</th>
+        <th>Closing</th><th>Counted</th><th>Shouts</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+    <div class="note">A gap is <b>shown and graded</b>, never applied. Grading follows D315:
+      <span class="pill p-exact">exact</span>
+      <span class="pill p-likely">likely</span>
+      <span class="pill p-weak">weak</span>
+      &mdash; a human decides, always.</div>
+  </div>
+
+  <div class="card">
+    <h2>Drawer count</h2>
+    <div class="row">
+      <input type="date" id="ccDate">
+      <input type="text" id="ccAmt" placeholder="counted ₹ — leave blank if not counted" size="34">
+      <button id="ccSave">Record</button>
+    </div>
+    <div class="note">Blank is accepted and <b>flagged as UNKNOWN</b>. An uncounted drawer and an
+      empty drawer are different facts, and treating them the same is how a float stays hidden.</div>
+  </div>
+
+  <div class="card">
+    <h2>Cash custody <span class="hindi">&mdash; नकद किसके पास</span></h2>
+    <div class="row">
+      <input type="date" id="cuDate">
+      <select id="cuFrom"></select>
+      <span class="mut">&rarr;</span>
+      <select id="cuTo"></select>
+      <input type="text" id="cuAmt" placeholder="₹" size="10">
+      <select id="cuME">
+        <option value="">— not a month-end —</option>
+        <option value="taken">Month-end — taken / महीने का बचा हुआ — ले लिया</option>
+        <option value="carried">Month-end — carried forward / अगले महीने में</option>
+      </select>
+      <input type="text" id="cuNote" placeholder="note" size="20">
+      <button id="cuSave">Record</button>
+    </div>
+    <div id="held" class="note"></div>
+    <div id="people" class="note"></div>
+    <div class="note">The month-end marker is the field whose <b>absence</b> hid a float for five
+      months. Recording &ldquo;taken&rdquo; or &ldquo;carried&rdquo; is what stops that recurring.</div>
+  </div>
+
+  <div class="card">
+    <h2>Recent custody events</h2>
+    <div style="overflow-x:auto">
+      <table id="cuTbl"><thead><tr>
+        <th>Date</th><th>From &rarr; To</th><th>Amount</th><th>Month-end</th><th>Note</th><th>By</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+
+  <p class="note"><a href="/finance/">&larr; back to Sanjeevni</a></p>
+</div>
+<script>
+var PARTIES=[["counter","Counter / काउंटर"],["drawer","Drawer / गल्ला"],
+             ["dr_bhawna","Dr Bhawna / डॉ भावना"],["dr_manoj","Dr Manoj / डॉ मनोज"],
+             ["bank","Bank / बैंक"]];
+function $(i){return document.getElementById(i)}
+function say(t,cls){var m=$("msg");m.textContent=t||"";m.className=cls||"mut"}
+function esc(s){return (s==null?"":String(s)).replace(/[&<>]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
+function money(v){return v==null?'<span class="mut">—</span>':esc(v)}
+function fillParties(){PARTIES.forEach(function(p){
+  ["cuFrom","cuTo"].forEach(function(id){
+    var o=document.createElement("option");o.value=p[0];o.textContent=p[1];$(id).appendChild(o)})});
+  $("cuFrom").value="drawer";$("cuTo").value="dr_bhawna"}
+function today(){return new Date().toISOString().slice(0,10)}
+
+function loadMonth(){
+  var ym=$("ym").value; if(!ym){return}
+  say("loading…");
+  fetch("/finance/api/workbench/"+ym).then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){say(j.error||"failed","bad");return}
+    say("");
+    var tb=$("tbl").querySelector("tbody");tb.innerHTML="";
+    j.days.forEach(function(d){
+      var tr=document.createElement("tr");
+      var grade=d.gap_grade?'<span class="pill p-'+d.gap_grade+'">'+d.gap_grade+"</span>":"";
+      tr.innerHTML="<td>"+esc(d.date)+"</td><td class='mut'>"+esc(d.status)+"</td>"+
+        "<td>"+money(d.entered_cash)+"</td><td>"+money(d.entered_upi)+"</td>"+
+        "<td>"+money(d.marg)+"</td><td>"+money(d.gap)+" "+grade+"</td>"+
+        "<td>"+money(d.bank_deposit)+"</td><td>"+money(d.expense)+"</td>"+
+        "<td>"+money(d.closing)+"</td>"+
+        "<td>"+(d.counted==null?'<span class="mut">not counted</span>':esc(d.counted))+"</td>"+
+        "<td>"+(d.shouts?'<span class="bad">'+d.shouts+"</span>":'<span class="ok">0</span>')+"</td>";
+      tb.appendChild(tr)});
+    var t=j.totals;
+    $("totals").textContent="entered cash "+t.entered_cash+" · UPI "+t.entered_upi+
+      " · Marg "+t.marg+" · bank deposits "+t.bank_deposits;
+    renderCustody(j.custody)});
+}
+function renderCustody(cu){
+  if(!cu){return}
+  $("held").innerHTML=(cu.held&&cu.held.length)
+    ? "Held now: "+cu.held.map(function(h){return "<b>"+esc(h.party)+"</b> "+esc(h.held)}).join(" · ")
+    : '<span class="mut">No custody events recorded yet.</span>';
+  $("people").innerHTML=(cu.people||[]).map(function(p){
+    return esc(p.name)+' <span class="hindi">'+esc(p.hindi||"")+"</span> — "+esc(p.kind)+
+           " → "+esc(p.hands_to||"")}).join(" &nbsp;|&nbsp; ");
+}
+function loadCustody(){
+  fetch("/finance/api/custody").then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){return}
+    renderCustody(j);
+    var tb=$("cuTbl").querySelector("tbody");tb.innerHTML="";
+    (j.events||[]).forEach(function(e){
+      var tr=document.createElement("tr");
+      tr.innerHTML="<td>"+esc(e.date)+"</td><td>"+esc(e.frm)+" &rarr; "+esc(e.to)+"</td>"+
+        "<td>"+esc(e.amount)+"</td><td>"+(e.month_end?esc(e.month_end):'<span class="mut">—</span>')+
+        "</td><td>"+esc(e.note||"")+"</td><td class='mut'>"+esc(e.by||"")+"</td>";
+      tb.appendChild(tr)})});
+}
+function post(url,body,okmsg){
+  return fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){
+      return {s:r.status,j:j}})}).then(function(x){
+      if(x.s===200&&x.j.ok){say(okmsg,"ok")}else{say((x.j&&x.j.error)||("failed ("+x.s+")"),"bad")}
+      return x});
+}
+window.addEventListener("DOMContentLoaded",function(){
+  fillParties();
+  $("ym").value=today().slice(0,7);
+  $("ccDate").value=today(); $("cuDate").value=today();
+  $("load").onclick=loadMonth;
+  $("ccSave").onclick=function(){
+    post("/finance/api/cash-count",{date:$("ccDate").value,counted:$("ccAmt").value},
+         "drawer count recorded").then(function(x){
+      if(x.j&&x.j.flagged){say("recorded as NOT COUNTED (flagged), not as zero","warn")}
+      loadMonth()})};
+  $("cuSave").onclick=function(){
+    post("/finance/api/custody",{date:$("cuDate").value,from:$("cuFrom").value,
+      to:$("cuTo").value,amount:$("cuAmt").value,month_end:$("cuME").value,
+      note:$("cuNote").value},"custody recorded").then(function(){
+        $("cuAmt").value="";$("cuNote").value="";loadCustody()})};
+  $("ybUp").onclick=function(){
+    var f=$("ybFile").files[0]; if(!f){say("choose a statement file first","warn");return}
+    var fd=new FormData(); fd.append("file",f); say("loading…");
+    fetch("/finance/api/yesbank-statement",{method:"POST",body:fd})
+      .then(function(r){return r.json().then(function(j){return {s:r.status,j:j}})})
+      .then(function(x){ if(x.s!==200||!x.j.ok){
+          say((x.j&&x.j.message)||x.j.error||"rejected","bad");return}
+        say("loaded","ok"); showRecon(x.j.reconciled,x.j)})};
+  $("ybRe").onclick=function(){
+    say("checking…");
+    fetch("/finance/api/yesbank/reconcile").then(function(r){return r.json()})
+      .then(function(j){ if(!j.ok){say(j.error||"failed","bad");return}
+        say("checked","ok"); showRecon(j,null)})};
+  $("mgCheck").onclick=function(){mgSend(false)};
+  $("mgApply").onclick=function(){mgSend(true)};
+  loadMonth(); loadCustody(); loadPushes();
+});
+
+function loadPushes(){
+  fetch("/finance/api/marg-push/list").then(function(r){return r.json()})
+    .then(function(j){
+      var el=$("mpList");
+      if(!j.ok){el.textContent="could not load pushed reports";return}
+      var rows=j.pushes||[];
+      if(!rows.length){el.innerHTML='<span class="mut">none yet — the sender on the medical PC has not pushed anything</span>';return}
+      var h='<table><thead><tr><th>Received</th><th>File</th><th>Days</th><th>Bills</th>'+
+            "<th>Status</th><th></th></tr></thead><tbody>";
+      rows.forEach(function(p){
+        var sv=p.survey||{}, days=(sv.survey||[]);
+        var dtxt=days.length?days.map(function(d){
+          return esc(d.date)+(d.filed?"":' <span class="bad">(not filed)</span>')}).join("<br>")
+          :(sv.error?'<span class="bad">'+esc(sv.error)+"</span>":"—");
+        var st=p.status==="pending"?'<span class="warn">PENDING</span>'
+              :p.status==="applied"?'<span class="ok">applied '+esc(p.applied_at||"")+"</span>"
+              :'<span class="bad">'+esc(p.status)+"</span>";
+        h+="<tr><td>"+esc(p.received_at)+"</td><td>"+esc(p.file||"")+" <span class='mut'>"+esc(p.md5_8)+"</span></td>"+
+           "<td>"+dtxt+"</td><td>"+(sv.bills!=null?sv.bills:"—")+"</td><td>"+st+"</td><td>"+
+           (p.status==="pending"?'<button onclick="mpApply('+p.id+')">Apply</button>':"")+
+           "</td></tr>"});
+      h+="</tbody></table>";
+      el.innerHTML=h;
+    }).catch(function(){$("mpList").textContent="could not load pushed reports"});
+}
+function mpApply(id){
+  if(!confirm("Load this pushed report into the books?"))return;
+  fetch("/finance/api/marg-push/apply",{method:"POST",
+    headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id})})
+    .then(function(r){return r.json().then(function(j){return {s:r.status,j:j}})})
+    .then(function(x){
+      var j=x.j||{};
+      var msg=j.ok?("applied: "+(j.ingested||[]).map(function(d){
+          return d.date+" ("+d.bills+" bills, "+d.lines+" lines)"}).join(", ")
+          +((j.still_not_filed||[]).length?" — still not filed, skipped: "+j.still_not_filed.join(", "):""))
+        :(j.aborted?("ABORTED on "+j.aborted.date+": "+JSON.stringify(j.aborted)):(j.message||j.error||"failed"));
+      alert(msg); loadPushes(); if(typeof loadMonth==="function")loadMonth();
+    }).catch(function(){alert("apply failed — network")});
+}
+function mgSay(t,cls){var m=$("mgMsg");m.textContent=t||"";m.className=cls||"mut"}
+function mgSend(apply){
+  var f=$("mgFile").files[0];
+  if(!f){mgSay("choose the Marg export first","warn");return}
+  var fd=new FormData(); fd.append("file",f); fd.append("apply",apply?"1":"0");
+  mgSay(apply?"loading…":"checking…");
+  fetch("/finance/api/marg-upload",{method:"POST",body:fd})
+    .then(function(r){return r.json().then(function(j){return {s:r.status,j:j}})})
+    .then(function(x){
+      var j=x.j||{};
+      if(x.s!==200){mgSay(j.message||j.error||("failed ("+x.s+")"),"bad");
+        $("mgOut").innerHTML='<span class="bad">'+esc(j.message||j.error||"")+"</span>";return}
+      mgSay(apply?"loaded":"checked","ok");
+      var h="<b>"+esc(j.title||"")+"</b><br>";
+      if(j.bills!=null){h+="bills "+j.bills+" · item lines "+j.item_lines+"<br>"}
+      (j.warnings||[]).forEach(function(w){h+='<span class="warn">'+esc(w)+"</span><br>"});
+      h+='<table style="margin-top:8px"><thead><tr><th>Date</th><th>Bills</th><th>Net</th>'+
+         "<th>Filed</th><th>Existing bills</th><th>Existing lines</th></tr></thead><tbody>";
+      (j.days||[]).forEach(function(d){
+        h+="<tr><td>"+esc(d.date)+"</td><td>"+d.bills+"</td><td>"+esc(d.net)+"</td><td>"+
+           (d.filed?'<span class="ok">'+esc(d.status)+"</span>":'<span class="bad">NOT FILED</span>')+
+           "</td><td>"+d.existing_bills+"</td><td>"+d.existing_lines+"</td></tr>"});
+      h+="</tbody></table>";
+      if(j.not_filed&&j.not_filed.length){
+        h+='<div class="warn">skipped and FLAGGED (re-upload once filed): '+
+           j.not_filed.map(esc).join(", ")+"</div>"}
+      if(j.ingested&&j.ingested.length){
+        h+='<div class="ok" style="margin-top:6px">ingested: '+j.ingested.map(function(d){
+          return esc(d.date)+" — "+d.bills+" bills, "+d.lines+" lines, review "+d.review}).join(" · ")+"</div>"}
+      if(j.aborted){h+='<div class="bad">ABORTED on '+esc(j.aborted.date)+
+        (j.aborted.error?(": "+esc(j.aborted.error)):(" — adapter read "+j.aborted.read+" of "+j.aborted.expected))+
+        ". Nothing was left half-loaded.</div>"}
+      $("mgOut").innerHTML=h;
+      loadMonth();
+    });
+}
+
+function showRecon(r,meta){
+  if(!r){return}
+  function list(t,arr,cls){
+    if(!arr||!arr.length){return ""}
+    return '<div class="'+cls+'">'+t+": "+arr.map(function(a){
+      return esc(a.date)+" "+esc(a.amount)}).join(", ")+"</div>"}
+  var head = meta ? ("statement "+esc(meta.period[0])+" → "+esc(meta.period[1])+
+             " · account ****"+esc(meta.account)+" · "+meta.cash_deposits+
+             " cash deposits ("+esc(meta.cash_total)+")<br>") : "";
+  $("ybOut").innerHTML = head +
+    '<span class="ok">matched '+r.matched+" ("+esc(r.matched_total||"")+")</span>" +
+    list("NOT IN THE BANK — booked but never received",r.deposit_not_in_bank,"bad") +
+    list("UNEVIDENCED — no statement covers this date",r.deposit_unevidenced,"warn") +
+    list("IN THE BANK BUT NOT BOOKED",r.bank_deposit_not_booked,"bad");
+}
+</script></body></html>
