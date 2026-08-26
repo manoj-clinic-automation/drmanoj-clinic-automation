@@ -23,6 +23,12 @@
 #      the Staff Ledger and Darpan would appear to owe 40,000. The gate fails
 #      the install if that stamp is missing.
 #
+#  v2 (S202): the preflight demanded the sqlite3 BINARY, which this kit never
+#      invokes -- every DB operation goes through python's sqlite3 MODULE. v1 was
+#      refused on the box by its own gate. The refusal was correct; the
+#      REQUIREMENT was wrong. The printed rollback named that binary too, and
+#      now uses python. No payload byte changed between v1 and v2.
+#
 #  SHAPE (D317)  preflight -> SUMS -> live-code currency gate -> PRECHECK
 #                -> whole-db backup -> apply -> VERIFY -> auto-restore on red.
 # =============================================================================
@@ -41,7 +47,7 @@ echo "=============================================================="
 echo "  $KIT_NAME — recording the 17-Aug Rs 20,000 drawer advance"
 echo "=============================================================="
 
-for c in md5sum awk cp date sqlite3; do
+for c in md5sum awk cp date; do
   command -v "$c" >/dev/null 2>&1 || { echo "!! preflight: '$c' missing — refusing"; exit 1; }
 done
 [ -x "$PY" ] || { echo "!! preflight: $PY not executable — refusing"; exit 1; }
@@ -105,8 +111,9 @@ echo
 echo "  Check both:  https://followup.dr-manoj.in/finance/approvals"
 echo "               https://followup.dr-manoj.in/ledger/statement?staff=Darpan"
 echo
-echo "  To reverse:  sqlite3 $DB \\"
-echo "     \"DELETE FROM day_expense WHERE expense_uid='exS202darpan20k17aug';\""
-echo "     \"DELETE FROM setting WHERE key='migration.S202_darpan20k';\""
-echo "  or simply restore $BAK"
+echo "  To reverse (this box has no sqlite3 CLI -- use python, as the kit does):"
+echo "     $PY -c \"import sqlite3;c=sqlite3.connect('$DB');\\"
+echo "       c.execute(\\\"DELETE FROM day_expense WHERE expense_uid='exS202darpan20k17aug'\\\");\\"
+echo "       c.execute(\\\"DELETE FROM setting WHERE key='migration.S202_darpan20k'\\\");c.commit()\""
+echo "  or simply restore $BAK  (cp -f $BAK $DB)"
 echo "=============================================================="

@@ -23,7 +23,7 @@ USAGE
 
 An ALLOWLIST entry needs a stated reason. "It's fine" is not a reason.
 """
-import os, re, sys, json
+import os, re, subprocess, sys, json
 
 MOBILE  = re.compile(r'(?<!\d)[6-9]\d{9}(?!\d)')
 SECRET  = re.compile(r'(?i)(token|secret|api[_-]?key|password|passwd)\s*[:=]\s*[\'"][^\'"]{8,}')
@@ -51,12 +51,33 @@ def allowed(rel):
 def main():
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     findings, allowed_hits, distinct = [], 0, set()
-    for dp, dn, fn in os.walk(root):
-        dn[:] = [d for d in dn if d not in SKIP_DIR]
-        for f in sorted(fn):
-            p   = os.path.join(dp, f)
-            rel = os.path.relpath(p, root)
-            if os.path.splitext(f)[1].lower() not in SCAN_EXT:
+    # S202 CORRECTION -- THE BUG THIS TOOL SHIPPED WITH.
+    # v1 walked the FILESYSTEM. That is the wrong set: it sees files git is
+    # deliberately excluding, and reports them as public when they are not.
+    # It did exactly that on its first run -- flagged two .csv files holding 13
+    # named patients WITH DIAGNOSES as a public exposure, when `.gitignore`
+    # line 31 (`*.csv`) had always excluded them and NOT ONE .csv is tracked in
+    # this repository. The protection was working; the scanner was not looking
+    # at what "public" means.
+    # A scanner that reports what is public must ask GIT what is public.
+    # RULE (the same one this project keeps re-learning): a claim about a
+    # mechanism must be made by opening the mechanism.
+    try:
+        out = subprocess.run(["git", "--no-optional-locks", "ls-files"],
+                             cwd=root, capture_output=True, text=True, timeout=120)
+        if out.returncode != 0:
+            raise RuntimeError(out.stderr.strip() or "git ls-files failed")
+        rels = [r for r in out.stdout.split("\n") if r.strip()]
+    except Exception as exc:                      # noqa: BLE001 -- fail loud
+        print("!! cannot ask git what is tracked (%s)." % exc)
+        print("   REFUSING to fall back to a filesystem walk: it would report")
+        print("   ignored files as public and overstate the exposure.")
+        return 2
+    for rel in rels:
+            p = os.path.join(root, rel)
+            if not os.path.isfile(p):
+                continue
+            if os.path.splitext(rel)[1].lower() not in SCAN_EXT:
                 continue
             try:
                 t = open(p, encoding='utf-8', errors='replace').read()

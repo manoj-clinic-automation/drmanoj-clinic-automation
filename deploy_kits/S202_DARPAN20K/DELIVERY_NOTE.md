@@ -78,11 +78,34 @@ Darpan's ledger stays at Rs 20,000 owing, and the August close still collects Rs
 
 ## Reverse
 
+**The VPS has no `sqlite3` CLI** (found at install, see v2 below), so use python — the same
+route the kit itself uses:
+
 ```
-sqlite3 /root/finance/finance.db "DELETE FROM day_expense WHERE expense_uid='exS202darpan20k17aug'; DELETE FROM setting WHERE key='migration.S202_darpan20k';"
+/usr/bin/python3 -c "import sqlite3;c=sqlite3.connect('/root/finance/finance.db');c.execute(\"DELETE FROM day_expense WHERE expense_uid='exS202darpan20k17aug'\");c.execute(\"DELETE FROM setting WHERE key='migration.S202_darpan20k'\");c.commit()"
 ```
 
-or restore the `.bak_S202_DARPAN20K_*` the installer writes before touching anything.
+or restore the `.bak_S202_DARPAN20K_*` the installer writes before touching anything:
+`cp -f /root/finance/finance.db.bak_S202_DARPAN20K_<stamp> /root/finance/finance.db`
+
+## v1 → v2 — refused by its own gate, and the refusal was right
+
+**v1 was published and refused on the box at preflight step 1:** `!! preflight: 'sqlite3' missing`.
+
+**The gate was correct to stop; the REQUIREMENT was wrong.** The preflight demanded the `sqlite3`
+**binary**, which this kit never invokes — every database operation goes through python's `sqlite3`
+**module**. The requirement was copied from the S189 kit's preflight list without checking whether
+this kit needed it. The printed rollback named that binary too, and would have failed the same way.
+
+**Nothing was written to the database.** v1 stopped before the backup step, let alone the apply.
+
+**No payload byte changed between v1 and v2** — `finance_migration_S202_darpan20k.sql` and
+`gate_s202.py` hash identically in both. Only `install_s202.sh` moved: `sqlite3` dropped from the
+preflight, and the printed rollback switched to python.
+
+This is the third time in this project a kit v1 has been refused by its own gate on a toolchain
+fault rather than a payload fault (S190_E2, S190_F3), and the third time the box was left untouched.
+**Recorded rather than quietly re-published.**
 
 ## Not in this kit, deliberately
 
