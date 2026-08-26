@@ -1,0 +1,6 @@
+KIT=S204_C1
+WHAT=capture the live VPS bytes into the repo (D350 §4)
+FILE=capture_live_to_repo.py
+MD5=56e75b773104600e47a924e8b8a86a78
+BUILT=S204 · 26-Aug-2026 · offline, py_compile + pyflakes clean, red-proofed
+INSTALLS=nothing. It is a tool that is RUN on the VPS; it changes no live file.
