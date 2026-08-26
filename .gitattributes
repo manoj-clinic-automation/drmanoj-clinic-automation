@@ -26,3 +26,31 @@
 # Kin of F-100 (the .gitignore blanket that silently dropped a kit file).
 *.md5 text eol=lf
 *.txt text eol=lf
+
+# ---------------------------------------------------------------------------
+# S202 (F-152's family, one file class over — and the biggest one).
+# `.md` was NEVER pinned, and 192 of the 208 files in deploy_kits/KB_canon_all
+# are .md: every Register, Archive, Fault Register, manifest, START_HERE and
+# runbook. Under git's WINDOWS DEFAULT (core.autocrlf=true) each of them checks
+# out as CRLF and EVERY md5 changes — demonstrated on the live Register,
+# 3ed8c494... becomes 81e54f4d... — so Phase 0 would go RED on all 192 at once.
+#
+# It has never bitten only because manojz happens to have autocrlf=false: one
+# machine-local setting that nothing records, nothing checks and no document
+# mentions. THAT IS THE DISASTER-RECOVERY CASE. The cold kit exists so the canon
+# can be restored; restored onto a default Windows machine it would fail its own
+# verification entirely. F-89 already cost this project three lost documents.
+#
+# D164 stopped at *.py/*.sh. F-152 added *.md5/*.txt. Neither asked the inverse
+# question — WHAT ELSE IS UNPINNED — which is F-107's shape applied to file
+# classes instead of documents.
+#
+# .bat is pinned to CRLF, not LF: Windows batch files are CRLF by nature, the
+# live PULL_FROM_MEDICAL.bat is CRLF, and the as-wired copy is pinned at that.
+# ---------------------------------------------------------------------------
+*.md  text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.vbs text eol=crlf
+*.json text eol=lf
+*.gs  text eol=lf
