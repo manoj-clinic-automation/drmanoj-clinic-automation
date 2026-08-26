@@ -82,7 +82,8 @@ is a halt that gets waved through, and then it protects nothing.
 | `START_HERE_SESSION_186` | S185 | `4adc2c646fbdf668882c2587498c8ec5` | superseded by 187/188. Carries the git-clone Phase 0, the F-88 cross-check, the **NEW inverse check (F-107)** — confirm every Tier-0 doc has a manifest row — the `verify_live_pins.py` live-code check (D321), and the S186 tasks (complete the partial pin; resolve the opening float). |
 | `START_HERE_SESSION_185` | S184 | `f65e76c2e270cabf522839ef25d4acbe` | superseded by 186. **FILED TO THE REPO AND PINNED AT THE S185 CLOSE (F-107)** — written to project knowledge only at the S184 close, so it was unverifiable at the S185 Phase 0; these are the bytes filed at S185 and they are canonical from here. |
 | `START_HERE_SESSION_184` | S183 | `18c2bf463ad53bd075683aebfba8f373` | superseded by 185/186. Carried the git-clone Phase 0 **and** the `python3 /root/deploy/verify_live_pins.py` live-code check (D321) |
-| `KB_Register` | **v5.49** | `7146e03f1419c7f58ac94fe39bf2b519` | **CURRENT.** **v5.49 (S202, kit `S202_D349B` LIVE — D349's first build):** `advance_lane()`, ONE definition of which lane recovers an advance, shared by `close_month()` and the `/ledger/statement` card. Closes the two-copies drift that had the statement announcing full recovery for **every scheduled advance ever issued** — it told the owner Darpan's Rs 20,000 recovered in full when the close takes Rs 8,000. **Display-only: no close-behaviour change, no money moved.** Selftest 294 → **301, +7 exactly**, the new checks proven RED against the unfixed file. Live pin recorded AS IT MOVED (F-97): `/root/staff_ledger.py` `eaa305cb…` → **`9e764f807ad2012537c29fdb8ed6f124`**. Next free **D350 · F-187 · A-D25**. Reverse-application-proven onto the `1c411446…` pin. **The live-pin list is generated from THIS version** (A8). |
+| `KB_Register` | **v5.50** | `6d3528f510b175650bca8d36fe253bf9` | **CURRENT.** **v5.50 (S202, kit `S202_D349A` LIVE — D349 completed):** `difference_meaning()`, ONE definition of what a day's difference means, **classified from DATA never from its description text**; the exceptions card rebuilt as the owner's inline reconciliation table (each row closes where it is shown, through the EXISTING resolve endpoint — no new write path); **five harmless rows stopped hiding four genuinely unexplained ones**, including 12-Jun −8,487 open since S186; UPI rows gained direction + a Rs 241 net. Smoke **693 → 701, +8 exactly**, fail set byte-identical, harness rebuilt from live bytes only (S189 method, F-87). **v1 refused by its own gate at 698/701 — F-106 recurring**, reproduced offline on the unpatched app before anything changed, then made state-adaptive. Pins recorded as they moved (F-97): `finance_app.py` → **`eca3723ee5cc391abfbfb0747f375618`** · `finance_approvals.html` → **`89e02711061f473c5e2e118fe50aa1aa`**. Next free **D350 · F-188 · A-D25**. |
+| `KB_Register` (pre-v5.50) | v5.49 | `7146e03f1419c7f58ac94fe39bf2b519` | superseded by v5.50; retained. **v5.49 (S202, kit `S202_D349B` LIVE — D349's first build):** `advance_lane()`, ONE definition of which lane recovers an advance, shared by `close_month()` and the `/ledger/statement` card. Closes the two-copies drift that had the statement announcing full recovery for **every scheduled advance ever issued** — it told the owner Darpan's Rs 20,000 recovered in full when the close takes Rs 8,000. **Display-only: no close-behaviour change, no money moved.** Selftest 294 → **301, +7 exactly**, the new checks proven RED against the unfixed file. Live pin recorded AS IT MOVED (F-97): `/root/staff_ledger.py` `eaa305cb…` → **`9e764f807ad2012537c29fdb8ed6f124`**. Next free **D350 · F-187 · A-D25**. Reverse-application-proven onto the `1c411446…` pin. **The live-pin list is generated from THIS version** (A8). |
 | `KB_Register` (pre-v5.49) | v5.48 | `1c411446505cbe857d886a3bdae52869` | superseded by v5.49; retained. **v5.48 (S202 OPEN — the measurement pass):** **F-185** (patient data in the PUBLIC repo — 13 named patients WITH DIAGNOSES; **D320 was ruled on F-96's 7-mobiles/48-files count and the measured figure is 133 across ~190**; orphan files quarantined, live fixtures untouched, `phi_scan` gate added; **OPEN pending the owner's re-ruling**) and **F-186** (`margpull/signatures.json` drifted on manojz, BLIND to the checker; diffed, found better than the record, corrected FROM the box `1b21f3bf…` → **`3e9cbba0…`**, repo mirror synced) into the findings index; **the live-file table row corrected**; Fault-Register pointer → **v2.40**; lineage row; end marker. Next free **D349 · F-187 · A-D25**. Reverse-application-proven onto the `7331c56d…` pin. **The live-pin list is generated from THIS version** (A8). |
 | `KB_Register` (pre-v5.48) | v5.47 | `7331c56d1243a8d49b511c7036626c1b` | superseded by v5.48; retained. **v5.47 (S202 OPEN — housekeeping; NO live code, NO live data, NO pin moved):** F-184 into the findings index (appended and repaired the session it was reserved for); the Fault-Register pointer advanced to **v2.39**; **two stale clauses on the §How-to-use line corrected visibly** — it still pointed at `END_OF_SESSION_PROMPT` **v5** while v7 is current, and still trailed *"next free F-170"* (the S201 close fixed three pointers on that same line and left these two — the F-45 family surviving a partial correction of its own line); a v5.47 lineage row; end marker. Next free **D349 · F-185 · A-D25**. Reverse-application-proven onto the `b2971feb…` pin. **The live-pin list is generated from THIS version** (A8). |
 | `KB_Register` (pre-S202) | v5.46 | `b2971feb49dc8867744a0bc6bacf2627` | superseded by v5.47; retained. **v5.46 (S201 close): THE MARG PIPELINE MADE WHOLE** — `finance_app.py` moved three times in one session (`2c99b2c6…` → `d930b6b5…` → `024399775b…` → **`3f72e9ad16d915fe5ced45c4e28a2248`**, smoke 680→683→690→693), each pin recorded as it moved (F-97); **D347 + D348** into the decisions index; **F-179 … F-183** into the findings index (F-183 OPEN by choice); the how-to-use pointers, the end-marker and the reserved-decision line all corrected visibly (three F-45 instances from the S200 close); next free **D349 · F-184**; lineage row. Reverse-application-proven onto the `f754cba3…` pin. |
@@ -1354,6 +1355,59 @@ this `CANONICAL_MANIFEST.md`.
   from the five that are merely unattributed bills.
 
 **END OF CANONICAL_MANIFEST — S202c.**
+
+---
+
+### §S202d — D349 COMPLETED (26 Aug 2026, Session 202 · kit `S202_D349A` LIVE · no money path added)
+
+`KB_Register_v5_50_S202.md` (`6d3528f510b175650bca8d36fe253bf9`) · this `CANONICAL_MANIFEST.md`.
+
+- **The rule the owner asked for, on the finance side.** `difference_meaning()` — one definition,
+  **classified from DATA, never from the description text**, because a text parse would have been a
+  THIRD copy of the rule, drifting the moment anyone reworded it. Validated against the live rows
+  **before a line was written**: it splits them 5 parked / 4 look, matching the session's independent
+  analysis exactly.
+
+- **Five harmless rows were hiding four real ones.** The card mixed days whose only difference is
+  bills not yet matched to a patient — where **D313** means nothing is wrong — with genuinely
+  unexplained days, including **12-Jun at −8,487, negative, open since S186**. Now two tables, each
+  row closing where it is shown through the **existing** resolve endpoint (no second write path, a
+  reason still compulsory), and the harmless population folded into a `<details>`.
+
+- **The UPI rows now say which way the day went**, because the direction decides who is out of
+  pocket — *"the drawer was expected to hold Rs 30 that was never in it"*. Net **Rs 241** across eight
+  days, 4 short / 4 over. **The owner derived that himself; the page had never said it.**
+
+- **F-87 satisfied where S192 could not satisfy it.** The finance suite cannot run offline; at S192
+  that stopped a build outright. Here the harness was **rebuilt from live bytes only** — seven Python
+  modules and five UI pages, every one recovered **by md5, never by filename (D188)** — the S189
+  method. Smoke **693 → 701, +8 exactly**, projection written before measuring, fail set
+  byte-identical at 48 (the gap is `finance_entry.html`, whose live bytes exist only on the box —
+  F-169).
+
+- **v1 WAS REFUSED BY ITS OWN GATE AT 698/701, AND THE GATE WAS RIGHT.** Three D330 ceiling checks
+  build their fixture from the LIVE store and had assumed the month's advances leave room under
+  Darpan's Rs 15,000 ceiling. Kit `S202_DARPAN20K`, installed an hour earlier, recorded the Rs 20,000
+  that **genuinely left his drawer** — established by a **physical count** — so August went over the
+  ceiling, `_room_p` turned negative, and the test posted a negative rupee amount. **Reproduced
+  offline on the UNPATCHED app (645 → 642) purely by applying the migration, before anything was
+  changed.** **The books were correct and the test was wrong: F-106's exact words, recurring.**
+  Remedied state-adaptively with 3 checks in both branches so the total stays deterministic, and the
+  unexercisable boundary recorded out loud rather than silently skipped.
+
+- **An assistant fault, recorded not softened.** `S202_DARPAN20K`'s own smoke gate read
+  `grep -qiE "([0-9]+)/\1|all .*pass|OK"` — case-insensitive with a bare `OK`, which matches almost
+  any output and was **verified to accept 642/693**. Written properly it would have caught the
+  degraded suite at that install rather than an hour later. Same root as that kit's `sqlite3`
+  preflight: **a gate written by copying a previous kit's shape instead of asking what it must
+  prove.** This kit's gate demanded `701/701`, caught it, and restored both files — the argument for
+  exact-count gates, made at the assistant's expense. **Two findings owed at the close.**
+
+- **D349 is COMPLETE** (B: the ledger lane rule, S202_D349B · A: the finance difference rule, here).
+  Next free **D350 · F-188 · A-D25 · Session 202**. **Cold kit still DUE.**
+
+**END OF CANONICAL_MANIFEST — S202d.**
+
 
 
 
