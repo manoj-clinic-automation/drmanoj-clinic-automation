@@ -1,0 +1,6 @@
+# The date DAILY Marg sale-report coverage actually began (S202).
+# Before this date no daily export was produced, so a day without one is
+# pre-history, not a gap. Written because the picture must not GUESS when
+# coverage started -- on 26-Aug it guessed, and claimed 56 missing days.
+# Change this one line if the true start date is different.
+2026-08-17
