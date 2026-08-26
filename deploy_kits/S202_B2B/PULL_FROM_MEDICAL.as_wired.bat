@@ -65,7 +65,10 @@ if not defined PY ( python -c "import sys" >nul 2>&1 && set "PY=python" )
 if not defined PY (
   echo  PROBLEM: no working Python on this PC. Install Python 3, then re-run.
   echo END %DATE% %TIME% -- FAILED: no python>> "%HB%"
-  pause & exit /b 1
+  REM S202: was an UNGUARDED pause -- under the scheduled task (AUTO) it
+  REM would wait for a keypress that never comes and hold the cycle forever.
+  if /i not "%~1"=="AUTO" pause
+  exit /b 1
 )
 
 if not exist "%MEDICAL%\MARGERP\users" (
@@ -75,6 +78,10 @@ if not exist "%MEDICAL%\MARGERP\users" (
   echo.
   echo END %DATE% %TIME% -- FAILED: medical PC unreachable>> "%HB%"
   if /i not "%~1"=="AUTO" pause
+  REM B2 FIX (S202): report the FAILURE too. The first wiring put this call
+  REM on the SUCCESS path only, so the monitor could only ever report
+  REM success -- born dead, which is AF-2's own shape.
+  call :report
   exit /b 1
 )
 
@@ -178,7 +185,15 @@ echo END %DATE% %TIME% -- ok>> "%HB%"
 REM ---- B2 (S202): tell the clinic server what only THIS machine can see.
 REM      outbox drain, pull liveness, medical watcher, offsite lag.
 REM      It is a reporter: it can never fail this pull.
-python "%~dp0pipeline_status.py"
+call :report
 
 if /i not "%~1"=="AUTO" pause
+exit /b 0
+
+REM ---- B2 (S202): ONE reporter, called from every exit path ----------
+REM  It posts what only this machine can see. It must never fail the pull,
+REM  so it is guarded -- but its OUTPUT is NOT suppressed: a tool that
+REM  refuses must be able to say so.
+:report
+if defined PY "%PY%" "%~dp0pipeline_status.py"
 exit /b 0

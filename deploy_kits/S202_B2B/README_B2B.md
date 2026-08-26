@@ -65,3 +65,33 @@ A selftest check now covers exactly that case, so it cannot regress.
 - A second robustness fix before placing: the heartbeat path is now **discovered** among H:, F: and
   the local margsync mirror, newest-that-exists winning, and the payload reports **which** file it
   read. A moved drive letter must degrade to "I could not read it", never to a silent green.
+
+---
+
+## CORRECTED SAME DAY — the wiring was on the success path only
+
+**The first wiring was wrong in the way that matters most.** `PULL_FROM_MEDICAL.bat` exits early
+when the medical PC is unreachable:
+
+```
+echo END %DATE% %TIME% -- FAILED: medical PC unreachable>> "%HB%"
+exit /b 1
+```
+
+…and that exit is **before** the line I added. So the reporter ran only when the pull SUCCEEDED —
+**a monitor that could report success and nothing else.** Exactly the born-dead shape AF-2 had, and
+the shape the never-fired witness in B2A exists to catch. Built in B2A, then wired past in B2B.
+
+Found because the owner asked why a Marg report had not arrived and the sweep read
+`_last_pull.txt`: `FAILED: medical PC unreachable` at 06:30, 06:40 and 07:00 — three cycles that
+would have posted nothing.
+
+**Corrected:** one `:report` subroutine, called from **every** exit path (D349 — one rule, one
+place). Its output is deliberately NOT suppressed.
+
+**And a pre-existing hazard found beside it:** the no-python failure path had an **unguarded
+`pause`**. Under the scheduled task (`AUTO`) it would wait for a keypress that never comes and hold
+the pull cycle for ever. Guarded like every other pause in the file.
+
+**Note on the file:** it has MIXED line endings — some lines LF, some CRLF. The patch was applied
+line-by-line preserving each line's own ending rather than rewriting the file.
