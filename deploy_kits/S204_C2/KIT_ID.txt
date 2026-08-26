@@ -1,0 +1,8 @@
+KIT=S204_C2
+WHAT=the advance-ceiling fallback (75 -> 50) and the F-207 hardcoded ceiling literal
+FILE=finance_app.py
+MD5=70f799973a0f131c3f515407b2a8cd03
+REPLACES=7948cee0e00494bbee30de1c51d03d74  (the S203 live pin, captured by S204_C1)
+BUILT=S204 · 27-Aug-2026 · offline, from the LIVE bytes, py_compile + pyflakes clean,
+      reverse-application proven, red-proofed at predicate level
+SERVICE=clinic-finance  (restart after install)
