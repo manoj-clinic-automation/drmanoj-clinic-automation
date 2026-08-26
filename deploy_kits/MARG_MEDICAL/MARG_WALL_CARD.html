@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Marg — the one-page card</title>
+<style>
+  @page { size: A4; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Arial, Helvetica, sans-serif; color:#000;
+         background:#fff; margin:0; padding:8mm; font-size:10.2pt; line-height:1.32; }
+  h1 { font-size:17pt; margin:0 0 1mm; letter-spacing:-.3px; }
+  .sub { font-size:8.6pt; color:#333; margin:0 0 3mm; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:4mm; }
+  .box { border:1.6pt solid #000; border-radius:2mm; padding:3mm 3.5mm; break-inside:avoid; }
+  .box.wide { grid-column:1 / -1; }
+  .box h2 { font-size:10.5pt; margin:0 0 2mm; text-transform:uppercase; letter-spacing:.6px;
+            border-bottom:1pt solid #000; padding-bottom:1mm; }
+  .num { display:inline-block; width:5mm; font-weight:700; }
+  code, .p { font-family:Consolas,"Courier New",monospace; font-size:8.8pt;
+             background:#f0f0f0; padding:0 1mm; word-break:break-all; }
+  ul { margin:0; padding-left:5mm; } li { margin-bottom:1.2mm; }
+  table { width:100%; border-collapse:collapse; font-size:9pt; }
+  td { padding:.8mm 1mm; vertical-align:top; border-bottom:.5pt solid #bbb; }
+  td:first-child { font-weight:600; white-space:nowrap; padding-right:2mm; }
+  .warn { border:1.6pt solid #000; background:#000; color:#fff; padding:2mm 3mm;
+          border-radius:1mm; margin-top:2mm; font-size:9.2pt; }
+  .warn b { color:#fff; }
+  .big { font-size:11pt; font-weight:700; }
+  .foot { margin-top:3mm; font-size:8pt; color:#333; border-top:.8pt solid #000; padding-top:1.5mm; }
+  @media print { body { padding:0; } .box { border-width:1.2pt; } }
+</style></head><body>
+
+<h1>MARG — THE ONE-PAGE CARD</h1>
+<p class="sub">Sanjeevni Medicos · true as at 26 Aug 2026 · full detail in <code>MARG_MEDICAL_CURRENT.md</code></p>
+
+<div class="grid">
+
+  <div class="box wide">
+    <h2>Is it working? — 60 seconds, no login</h2>
+    <table>
+      <tr><td><span class="num">1</span>THE ANSWER</td>
+          <td><code>D:\Downloads\margsync\MARG_PICTURE.txt</code> &nbsp;(this PC)<br>
+              Look for <b>days with NO export = 0</b> and <b>exports NOT on server = 0</b>.</td></tr>
+      <tr><td><span class="num">2</span>THE MACHINE</td>
+          <td><code>H:\My Drive\Clinic Data Archive\FromMedical\heartbeat.txt</code><br>
+              <b>WATCHER : ALIVE</b> · captures today · <b>BACKUP</b> age.</td></tr>
+      <tr><td><span class="num">3</span>IGNORE</td>
+          <td><code>_last_pull.txt</code> — it says <b>ok</b> even when everything failed.</td></tr>
+    </table>
+  </div>
+
+  <div class="box">
+    <h2>Generating the report</h2>
+    <p style="margin:0 0 2mm">On the <b>MEDICAL PC</b>: Marg → Daily Reports → Sale Reports →
+       <b>BILL WISE STATEMENT</b></p>
+    <ul>
+      <li><b>Report Type = Detail</b> &nbsp;(Summary-1 loses the CASH column)</li>
+      <li><b>With Item Deta. = Yes</b></li>
+      <li><b>Day Total = Yes</b> · Less Cr/Dr Adj. = Yes</li>
+      <li>Report For = <code>2 Sale-S/R-Brk</code> · 80 Col · Disc.Bill Sign = <code>2-Bill+Item</code></li>
+      <li>Operator / mobiles blank · Single Party, Group, COMPNA = N</li>
+    </ul>
+    <p style="margin:2mm 0 0">Export screen: separator <b>Header</b> · heading <b>No/1</b> ·
+       data from line <b>5</b> · ends <b>0</b> · <b>Formated</b></p>
+    <div class="warn"><b>ONE DAY AT A TIME.</b> Month-to-date <i>with item detail</i> once
+      stopped at day 6 of 15 and said nothing. One business day per export.</div>
+  </div>
+
+  <div class="box">
+    <h2>After you click — do nothing</h2>
+    <ul>
+      <li>The watcher copies it in <b>seconds</b>.</li>
+      <li>The pull collects it within <b>10 minutes</b>.</li>
+      <li>It appears on the clinic server for <b>you to approve</b>.</li>
+      <li>Confirm with box 1 — not by watching Marg.</li>
+    </ul>
+    <h2 style="margin-top:3mm">Deep check — read only</h2>
+    <p style="margin:0">Double-click on the <b>MEDICAL PC</b>:<br>
+      <code>F:\My Drive\Clinic Data Archive\ToMedical\MEDICAL_CENSUS.bat</code></p>
+    <p style="margin:1.5mm 0 0">Changes nothing. Writes <code>CENSUS.txt</code> and
+      <code>BACKUP.txt</code> into <b>FromMedical</b>, which come back on their own.</p>
+  </div>
+
+  <div class="box">
+    <h2>Backup — the crown jewels</h2>
+    <ul>
+      <li>Take a Marg backup <b>every 2–3 days</b>. It lands on <b>E:\</b>.</li>
+      <li>The agent copies it off-site to Drive <b>by itself</b>, within the hour.</li>
+      <li>The heartbeat shouts after <b>3 days</b> without one.</li>
+      <li>Back up <b>last financial year</b> too — it is rarely done.</li>
+    </ul>
+    <div class="warn"><b>A RESTORE MUST GO INTO A NEW OR TEST COMPANY.</b> Never over the
+      live one. If the engineer says it can only restore over the live company —
+      <b>stop and ask first.</b></div>
+  </div>
+
+  <div class="box">
+    <h2>If something is wrong</h2>
+    <table>
+      <tr><td>Report<br>never came</td><td>Is the medical PC on and logged in? Nothing runs until someone logs in.</td></tr>
+      <tr><td>Nothing<br>new arriving</td><td>Check box 2 — is the watcher ALIVE? Then run the deep check.</td></tr>
+      <tr><td>A day<br>is missing</td><td>Generate that one day again in Marg. It is picked up automatically.</td></tr>
+      <tr><td>Numbers<br>look wrong</td><td><b>Marg is right for the day TOTAL only.</b> Its CASH column overstates cash — home-medicine bills are booked as cash and never collected.</td></tr>
+    </table>
+  </div>
+
+  <div class="box wide">
+    <p class="big" style="margin:0 0 1.5mm">Three things that are easy to get wrong</p>
+    <table>
+      <tr><td style="width:33%">Never trust <code>_last_pull.txt</code></td>
+          <td style="width:34%">Never export month-to-date with item detail</td>
+          <td>Never use Marg's CASH column as the cash figure</td></tr>
+    </table>
+  </div>
+
+</div>
+
+<p class="foot"><b>Send Claude:</b> <code>MARG_PICTURE.txt</code>, <code>heartbeat.txt</code>,
+and <code>BACKUP.txt</code> — those three answer almost everything.
+&nbsp;·&nbsp; Full reference: <code>D:\Downloads\margsync\MARG_MEDICAL_CURRENT.md</code>
+&nbsp;·&nbsp; Why it is like this: <code>MARG_MEDICAL_HISTORY.md</code></p>
+
+</body></html>
