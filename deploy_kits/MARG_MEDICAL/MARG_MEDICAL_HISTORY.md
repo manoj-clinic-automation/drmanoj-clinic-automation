@@ -3387,3 +3387,58 @@ Stated plainly, with where the author looked.
 every md5 computed with `md5sum` on this machine from the file it names, except where the text says
 "quoted" · nothing deleted · no manifest-pinned document edited · no banner rewritten · no `git`
 command run (F-131) · no token value read or printed · no patient identifier reproduced.*
+
+---
+
+## ENTRY 58 — S203, 26-Aug-2026 · THE CONSOLIDATION ITSELF
+
+Recorded because a change to the documentation is still a change, and this session found
+three separate faults that existed only because something was done and not written down.
+
+**What changed.** Sixty-nine Marg / medical-PC documents became **three**:
+`MARG_MEDICAL_CURRENT.md` (what is true now) · `MARG_MEDICAL_HISTORY.md` (this file) ·
+`MARG_WALL_CARD.html` (one printed page beside the medical PC). This is **D247's own
+pattern** — a small current register plus an append-only archive — applied at last to the
+one subsystem that never received it.
+
+**What was retired, and how.** Every source document was first copied into
+`deploy_kits/S203_MARG_CANON/` and hash-verified, then **pushed to GitHub** (commit
+`f94ff27a8b89f01363e62c9f800acd55ff4ff00d`, local == origin, committed bytes md5-matched
+against the working tree). Only then were **18 copies removed from project knowledge** —
+each one proven present in that commit first. **Moved and superseded, never deleted, on
+disk;** F-89 cost this project three canonical documents permanently.
+
+`S179_Sanjeevni_Medical_Module_Build_Contract_v1` was **on the retire list and was NOT
+retired**: its supposed successor does not exist anywhere in the repo, so the retirement
+rested on an unverifiable claim. Kept.
+
+**Three faults this consolidation found, all of them in our own record:**
+
+1. **The optimistic encryption note was asserted as current in a master reference.** It had
+   been superseded on 23-Aug by `S195_Marg_decrypt_partial_key.md` — a document that has
+   **never been in project knowledge**. Reading the Project alone found only the
+   optimistic version. Had it stood, it would have invited a wasted session.
+2. **Project knowledge was the stale store, not the repo** — the reverse of the assumption
+   the whole exercise was built on. Two documents exist in both stores and are not
+   byte-identical; in both cases the repo copy carried the superseding annotations, written
+   at the S197 fold and never sent back. **RULE: neither store is authoritative by
+   position. Compare by md5, never by where a file sits.**
+3. **The consolidation's own first draft lost three subjects** — the encryption verdict,
+   the money rule with V7's silent truncation, and the entire ingestion half — and a fourth
+   was missing until this archive was built: **S183's 119-day cross-check, which shows Marg
+   overstates cash by ₹1,32,375** because home-medicine bills are booked as cash and never
+   collected. That correction now sits in `MARG_MEDICAL_CURRENT.md` §4, layered against the
+   S179 parsing rule rather than replacing it.
+
+**The self-criticism worth keeping.** This session produced **thirteen new documents while
+consolidating away sixty-nine**. Each was justified in the moment; together they were the
+disease. They are retained in `S203_MARG_CANON/`, each stamped **WORKING PAPER — not a
+reference**, and the third rule in `MARG_MEDICAL/README.md` exists to stop it recurring:
+anything written to work something out is a working paper at birth and is folded here at
+the close. **Nothing becomes a permanent reference by accident.**
+
+**Also done this session, on the machines rather than in the documents:** the medical PC
+gained live pins for the first time (drift there had been undetectable by construction);
+the agent gained the offsite backup leg and the backup's age in every heartbeat; and the
+operational runbook sitting beside the pipeline on manojz was found to be one version
+stale — it did not carry the fix for the outage that produced it.

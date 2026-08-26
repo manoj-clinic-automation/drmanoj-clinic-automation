@@ -1,0 +1,154 @@
+{
+  "_README": [
+    "Signature registry for the Marg Report Router. ADDING A NEW REPORT TYPE IS A",
+    "DATA EDIT HERE -- no code change. Run 'marg_router.py --learn <file>' on a",
+    "sample and it prints a ready-to-paste block.",
+    "",
+    "Matching rule: title_regex AND header must BOTH match, else the file is",
+    "refused (a partial match is never parsed). Unknown files are quarantined,",
+    "never guessed at.",
+    "",
+    "Fields:",
+    "  type          short code, becomes the archive folder name",
+    "  variant       distinguishes layouts of the same report (DETAIL vs SUMMARY1)",
+    "  title_regex   matched against the title row (case-insensitive)",
+    "  header        expected column headers, in order; matched as a prefix",
+    "  deep_verify   'marg_report' = full arithmetic+truncation check (sale only)",
+    "                'structural'  = title/header/date agreement + clean end",
+    "  uploadable    true = a VERIFIED file is copied to the Outbox for sending",
+    "  end_marker    optional text that must appear near the end (completeness)"
+  ],
+  "signatures": [
+    {
+      "type": "SALE_BILLWISE",
+      "variant": "DETAIL",
+      "title_regex": "BILL\\s+WISE\\s+SALES\\s+STATEMENT",
+      "header": [
+        "BILL NO.",
+        "DESCRIPTION",
+        "D.R.",
+        "GROSS AMT.",
+        "DISCOUNT",
+        "TAX",
+        "DR/CR",
+        "NET AMT.",
+        "CASH"
+      ],
+      "deep_verify": "marg_report",
+      "uploadable": true,
+      "end_marker": "GRAND TOTAL"
+    },
+    {
+      "type": "SALE_BILLWISE",
+      "variant": "SUMMARY1",
+      "title_regex": "BILL\\s+WISE\\s+SALES\\s+STATEMENT",
+      "header": [
+        "BILL NO.",
+        "DESCRIPTION",
+        "BILL VALUE"
+      ],
+      "deep_verify": "structural",
+      "uploadable": false,
+      "note": "3-column variant: NO CASH column, so cash/UPI cannot be derived. Archived, never uploaded.",
+      "end_marker_note": "S201: NO end_marker -- no sample of this variant exists to derive one from, so truncation is NOT detected here. Do not guess one; capture a real export first."
+    },
+    {
+      "_comment": "S195: closing stock. Title carries the store name before the phrase, so the regex is store-agnostic. Dated by the AS ON date in its own title.",
+      "type": "STOCK_CLOSING",
+      "variant": "DEFAULT",
+      "title_regex": "CLOSING\\s+STOCK\\s+AS\\s+ON",
+      "header": [
+        "S.No. Description",
+        "Batch",
+        "Expiry",
+        "Stock Unit"
+      ],
+      "deep_verify": "structural",
+      "uploadable": false,
+      "end_marker": "TOTAL",
+      "end_marker_note": "S201: every Marg report of this type ends with this row, verified against every copy in the archive before adding. Without it a report that stopped mid-print filed as VERIFIED 'structural' and looked perfectly healthy."
+    },
+    {
+      "_comment": "S195: closing stock. Title carries the store name before the phrase, so the regex is store-agnostic. Dated by the AS ON date in its own title.",
+      "type": "STOCK_CLOSING",
+      "variant": "TOTALS",
+      "title_regex": "CLOSING\\s+STOCK\\s+AS\\s+ON",
+      "header": [
+        "S.No.",
+        "Description",
+        "Total Stock",
+        "Unit"
+      ],
+      "deep_verify": "structural",
+      "uploadable": false,
+      "note": "S201: the same CLOSING STOCK report emitted with four separate header cells instead of the merged 'S.No. Description' cell. Six real exports (2024-01 to 2026-08) were REFUSED over this one difference and could never be re-examined.",
+      "end_marker": "TOTAL",
+      "end_marker_note": "S201: every Marg report of this type ends with this row, verified against every copy in the archive before adding. Without it a report that stopped mid-print filed as VERIFIED 'structural' and looked perfectly healthy."
+    },
+    {
+      "_comment": "S195: stock expiring before a cutoff. The file's only dates are FUTURE expiries, so it is dated by its own file time (dating:file_mtime).",
+      "type": "STOCK_EXPIRY",
+      "variant": "DEFAULT",
+      "title_regex": "EXP\\.\\s+BEFORE",
+      "header": [
+        "S.No. Description",
+        "Batch",
+        "Expiry",
+        "Stock Unit"
+      ],
+      "deep_verify": "structural",
+      "uploadable": false,
+      "dating": "file_mtime",
+      "end_marker": "TOTAL",
+      "end_marker_note": "S201: every Marg report of this type ends with this row, verified against every copy in the archive before adding. Without it a report that stopped mid-print filed as VERIFIED 'structural' and looked perfectly healthy."
+    },
+    {
+      "_comment": "S195: supplier-wise purchase for a month. Dated by the FROM..TO range in its own title. Feeds the NEFT pre-fill eventually.",
+      "type": "PURCHASE_SUPPLIERWISE",
+      "variant": "DEFAULT",
+      "title_regex": "SUPPLIER\\s+WISE\\s+PURCHASE\\s+STATEMENT",
+      "header": [
+        "SUPPLIER NAME",
+        "DATE",
+        "BILL NO.",
+        "CASH",
+        "CREDIT"
+      ],
+      "deep_verify": "structural",
+      "uploadable": false,
+      "end_marker": "GRAND TOTAL",
+      "end_marker_note": "S201: every Marg report of this type ends with this row, verified against every copy in the archive before adding. Without it a report that stopped mid-print filed as VERIFIED 'structural' and looked perfectly healthy."
+    },
+    {
+      "_comment": "S195: bill-wise purchase for a month. Dated by the FROM..TO range in its title. With supplier-wise, this is the purchase data that will feed the NEFT pre-fill.",
+      "type": "PURCHASE_BILLWISE",
+      "variant": "DEFAULT",
+      "title_regex": "BILL\\s+WISE\\s+PURCHASE\\s+STATEMENT",
+      "header": [
+        "BILL NO.",
+        "PARTY NAME",
+        "CASH",
+        "CREDIT"
+      ],
+      "deep_verify": "structural",
+      "uploadable": false,
+      "end_marker": "TOTAL",
+      "end_marker_note": "S201: every Marg report of this type ends with this row, verified against every copy in the archive before adding. Without it a report that stopped mid-print filed as VERIFIED 'structural' and looked perfectly healthy."
+    }
+  ],
+  "_EXAMPLE_adding_a_new_type": {
+    "type": "STOCK_VALUATION",
+    "variant": "DEFAULT",
+    "title_regex": "STOCK\\s+VALUATION\\s+REPORT",
+    "header": [
+      "ITEM NAME",
+      "BATCH",
+      "QTY",
+      "RATE",
+      "VALUE"
+    ],
+    "deep_verify": "structural",
+    "uploadable": false,
+    "_howto": "Run --learn on a sample, paste the block into 'signatures', set type/variant. No code change."
+  }
+}
