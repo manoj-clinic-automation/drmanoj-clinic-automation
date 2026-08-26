@@ -2,7 +2,7 @@ bd4b67f6810cd2316eb58dfe6bf180cd  AI_Verdict_Layer_Master_v1_S145.md
 68c4fc344bf74caaea706149cd22e64c  API_QUICK_REFERENCE_CARD.md
 b4e349cbcf01547ff774a7c3c434bb21  AUDITOR_SEED_v1.md
 bf19179181c553777e4cc8e3834bc754  Attendance_System_Dossier_v1_2_S153.md
-e53279013883da8f39ce2c61073216bc  CANONICAL_MANIFEST.md
+d4e5fae0fc117263b59bb3376cc6ec04  CANONICAL_MANIFEST.md
 e24e95b8d59059e65378b44d9433127b  COMMIT_S189.txt
 d0b9e51b5310ba922cd87a58b623573c  COMMIT_S190.txt
 17fe28b58878b0c5a9bf7a83e3d7683f  COMMIT_S191.txt
@@ -51,6 +51,7 @@ bb33585ea2c775c3b4aa56d2f5949830  Fault_Action_Register_v2_34.md
 26bf427f34bb31feee15a82849cbf80b  Fault_Action_Register_v2_37.md
 9343b6fa8f4017e92652d54893d24f22  Fault_Action_Register_v2_38.md
 78f231a12c048bf666640f8ab5f60517  Fault_Action_Register_v2_39.md
+7a14604e3ab3dccfcf17ba363ec13a78  Fault_Action_Register_v2_40.md
 3393d527d7c4e65b6c0504f932babb12  Fault_Register_append_F82_F83_S177.md
 cce4009f373971fdadf8ed1f9b031d03  Fault_Register_append_F84_S179.md
 80a01080c74cea66fdb8b6acf337d2ca  Fault_Register_append_F85_F89_S180.md
@@ -134,6 +135,7 @@ cc4aefba717028fc55df79f921b44f68  KB_Register_v5_43_S198.md
 f754cba322cfe593910ab47ab24b4bd0  KB_Register_v5_45_S200.md
 b2971feb49dc8867744a0bc6bacf2627  KB_Register_v5_46_S201.md
 7331c56d1243a8d49b511c7036626c1b  KB_Register_v5_47_S202.md
+1c411446505cbe857d886a3bdae52869  KB_Register_v5_48_S202.md
 3cad79e6361c6e1777f3bc9db983770d  KB_Register_v5_5_S183.md
 bc4812168860dc7732d8902faa092f21  KB_Register_v5_6_S185.md
 4d603b727a91a7c782992f092fc949e3  MARG_INGESTION_REFERENCE_v1.md
@@ -198,4 +200,4 @@ e07ca9683aef1c4849c2381ee83f0441  live_pins_S191.txt
 80a63af5d1efe00d6f4707e53c5ec490  live_pins_S191close.txt
 83084d08817c62a8783c62a7cd6f7b25  live_pins_S192close.txt
 8301e4351060df3a1f2b27452cbe05a1  live_pins_S201close.txt
-631d956dcdeb23361a5c393d212f64cc  live_pins_S202open.txt
+9a4879e2ee053937a7acd7876af4830b  live_pins_S202open.txt
