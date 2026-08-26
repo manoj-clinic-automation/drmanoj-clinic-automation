@@ -45,3 +45,28 @@ Every file below was read from the running VPS and its md5 matched the pin in
 ## Gate allowlist entries used
 
 - `/root/finance/finance_app.py` — S204: the only secret-shaped literal is the smoke test's own placeholder CRON_TOKEN at the D204-era Docterz feed check -- a dummy assigned inside selftest(), not a credential. Verified by reading the line at S204.
+
+## ADDENDUM (S204) — RESTORE NOTE: THE EXECUTABLE BIT IS NOT IN THESE BYTES
+
+These copies travelled VPS → tarball → Windows (manojz) → git. **The Windows leg drops the
+executable bit.** Proven at the S204 install, in git's own words:
+
+```
+mode change 100755 => 100644  deploy_kits/S204_VPS_LIVE/root__deploy__email_agent.py
+mode change 100755 => 100644  deploy_kits/S204_VPS_LIVE/root__finance__finance_backup.sh
+```
+
+The BYTES are identical — every one of the 31 files still matches its live pin. Only the mode was
+lost. **`finance_backup.sh` is a shell script: restored from here it will not run until it is made
+executable again.**
+
+**Restoring either of these two:**
+
+```
+cp root__finance__finance_backup.sh /root/finance/finance_backup.sh && chmod +x /root/finance/finance_backup.sh
+cp root__deploy__email_agent.py     /root/deploy/email_agent.py     && chmod +x /root/deploy/email_agent.py
+```
+
+A hash cannot carry a permission. The pin list records neither mode nor ownership — so a rebuild
+that verifies GREEN on every hash can still produce a backup script that silently never runs.
+Recorded at S204 for D350 §4.
