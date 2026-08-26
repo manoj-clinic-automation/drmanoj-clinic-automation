@@ -93,3 +93,58 @@ systemctl restart clinic-finance.service
   close a row.
 - The four unexplained days are now **visible**, not diagnosed. 12-Jun's −8,487 has been open since
   S186 and still needs a person.
+
+---
+
+## v1 → v2: refused by its own gate, and the gate was right
+
+**v1 was installed and REFUSED at 698/701**, restoring both files cleanly. Three failures, all
+`D330` ceiling checks, none of them anything to do with D349:
+
+```
+FAIL: D330: an advance over the ceiling is REFUSED (got 400/not_a_number)
+FAIL: D330: the refusal shows the figures (taken=None ceiling=None)
+FAIL: D330: exactly-at-the-ceiling is allowed (else: not_a_number)
+```
+
+**Diagnosed by reproduction, not by argument.** Those checks build their fixture from the LIVE store:
+
+```python
+_room_p = _ceil_p_ - _oth_p - _led_p0     # ceiling − this month's other advances − ledger advances
+```
+
+Darpan's ceiling is Rs 15,000. Kit `S202_DARPAN20K`, installed an hour earlier, recorded the
+**Rs 20,000 that genuinely left his drawer on 17-Aug** — money established by a **physical count**.
+August's salary-advance total therefore went *over* the ceiling, `_room_p` turned **negative**, the
+test posted a negative rupee amount, and the endpoint correctly answered `not_a_number` instead of
+`advance_over_ceiling`.
+
+**Proven offline before touching anything:** the same three failures reproduce on the **UNPATCHED**
+app simply by applying the migration to a copy of the database — **645 → 642**. D349 was never
+involved.
+
+**The books were correct. The test was wrong.** F-106's exact words: *"a self-test that asserts a
+DATA STATE becomes a liability the instant the data is legitimately corrected."* Same remedy as
+`S184_F1b`: made state-adaptive, with **3 checks in both branches** so the total stays deterministic,
+and the unexercisable boundary case recorded out loud rather than silently skipped.
+
+Verified both ways: against the migrated database **701 with the three gone**; against the
+pre-migration database **701 with the fail set byte-identical to baseline**.
+
+## An assistant fault, recorded not softened
+
+**`S202_DARPAN20K`'s own smoke gate was near-vacuous.** It read:
+
+```bash
+grep -qiE "([0-9]+)/\1|all .*pass|OK"
+```
+
+`-i` plus a bare `OK` matches almost any output — it **accepts 642/693 without blinking**, which was
+verified. Had it been written properly, the degraded suite would have been caught at that install
+rather than an hour later. It is the same class of error as that kit's `sqlite3` preflight: a gate
+written by pattern-matching a previous kit instead of by asking what it must actually prove.
+
+**This kit's gate demanded `701/701` exactly, caught the problem, and restored both files.** That
+contrast is the whole argument for exact-count gates.
+
+Two findings for the close: the brittle D330 fixture (F-106 recurring), and the vacuous gate.

@@ -38,6 +38,19 @@
 #  reason; it books nothing. Any cash correction stays a separate deliberate
 #  entry.
 #
+#  v2 (S202): the FIRST install was REFUSED by this installer's own gate at
+#      698/701, and the gate was right. Three D330 ceiling checks build their
+#      fixture from the LIVE store and assumed the month's advances leave room
+#      under Darpan's Rs 15,000 ceiling. Kit S202_DARPAN20K had just recorded the
+#      Rs 20,000 that genuinely left his drawer -- money proven by a physical
+#      count -- so August went OVER the ceiling, _room_p turned NEGATIVE, and the
+#      test posted a negative rupee amount. The endpoint rightly answered
+#      not_a_number. THE BOOKS WERE CORRECT AND THE TEST WAS WRONG: F-106's exact
+#      shape, recurring. Reproduced offline (645 -> 642 on the UNPATCHED app,
+#      purely by applying the migration) before anything was changed, then the
+#      three checks were made state-adaptive -- 3 checks in BOTH branches, so the
+#      total stays deterministic. Nothing about D349 itself changed in v2.
+#
 #  PROVEN OFFLINE, on a harness rebuilt from LIVE BYTES ONLY (every module
 #  recovered by md5, D188 -- the S189 method, because F-87 forbids shipping into
 #  a suite that cannot be run):
@@ -51,7 +64,7 @@ APP=/root/finance/finance_app.py
 HTML=/root/finance/finance_ui/finance_approvals.html
 APP_MD5_EXPECTED=3f72e9ad16d915fe5ced45c4e28a2248
 HTML_MD5_EXPECTED=402fa7b263b86f75bfccc122f1a0ca37
-APP_MD5_NEW=7a1e9bade8f8187b701806dffe23f574
+APP_MD5_NEW=eca3723ee5cc391abfbfb0747f375618
 HTML_MD5_NEW=89e02711061f473c5e2e118fe50aa1aa
 PY=/usr/bin/python3
 SVC=clinic-finance.service

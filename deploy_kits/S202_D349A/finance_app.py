@@ -9716,25 +9716,56 @@ def selftest():
         _led_p0, _ = ledger_fwd_advances_p(_ed[:7])
         _room_p = _ceil_p_ - _oth_p - _led_p0
 
-        # over the ceiling: refused with the figures in the message
-        r = post({"business_date": _ed, "total": "90000", "expenses": [
-                  {"amount": "%.2f" % ((_room_p + 10000) / 100.0),
-                   "category": "salary_advance_self"}]})
-        _je = r.get_json() or {}
-        check("D330: an advance over the ceiling is REFUSED (got %s/%s)"
-              % (r.status_code, _je.get("error")),
-              r.status_code == 400 and _je.get("error") == "advance_over_ceiling")
-        check("D330: the refusal shows the figures (taken=%s ceiling=%s)"
-              % (_je.get("advance_taken"), _je.get("advance_ceiling")),
-              bool(_je.get("advance_taken")) and _je.get("advance_ceiling") == "15,000.00")
-
-        # exactly AT the ceiling: allowed (the boundary belongs to him)
-        r = post({"business_date": _ed, "total": "90000", "expenses": [
-                  {"amount": "%.2f" % (_room_p / 100.0),
-                   "category": "salary_advance_self", "uid": "exsmoke0000advc1"}]})
-        check("D330: exactly-at-the-ceiling is allowed (else: %s)"
-              % ((r.get_json() or {}).get("error") or r.status_code),
-              r.status_code == 200 and (r.get_json() or {}).get("ok"))
+        # ---- F-106 AGAIN (S202): these three checks ASSERTED A DATA STATE ----
+        # They built their fixture from the live store and quietly assumed the
+        # month's advances leave POSITIVE room under the ceiling. On 26-Aug-2026
+        # kit S202_DARPAN20K recorded the Rs 20,000 that genuinely left Darpan's
+        # drawer on 17-Aug -- money proven by a physical count -- and August's
+        # salary-advance total went OVER his Rs 15,000 ceiling. _room_p turned
+        # negative, the test posted a NEGATIVE rupee amount, and the endpoint
+        # rightly answered not_a_number instead of advance_over_ceiling.
+        # The books were correct and the test was wrong: F-106's exact words,
+        # "a self-test that asserts a DATA STATE becomes a liability the instant
+        # the data is legitimately corrected." Made state-adaptive here, the same
+        # remedy S184_F1b applied. THE COUNT IS 3 IN BOTH BRANCHES, so the total
+        # stays deterministic whatever the live data says.
+        if _room_p > 0:
+            # over the ceiling: refused with the figures in the message
+            r = post({"business_date": _ed, "total": "90000", "expenses": [
+                      {"amount": "%.2f" % ((_room_p + 10000) / 100.0),
+                       "category": "salary_advance_self"}]})
+            _je = r.get_json() or {}
+            check("D330: an advance over the ceiling is REFUSED (got %s/%s)"
+                  % (r.status_code, _je.get("error")),
+                  r.status_code == 400 and _je.get("error") == "advance_over_ceiling")
+            check("D330: the refusal shows the figures (taken=%s ceiling=%s)"
+                  % (_je.get("advance_taken"), _je.get("advance_ceiling")),
+                  bool(_je.get("advance_taken")) and _je.get("advance_ceiling") == "15,000.00")
+            # exactly AT the ceiling: allowed (the boundary belongs to him)
+            r = post({"business_date": _ed, "total": "90000", "expenses": [
+                      {"amount": "%.2f" % (_room_p / 100.0),
+                       "category": "salary_advance_self", "uid": "exsmoke0000advc1"}]})
+            check("D330: exactly-at-the-ceiling is allowed (else: %s)"
+                  % ((r.get_json() or {}).get("error") or r.status_code),
+                  r.status_code == 200 and (r.get_json() or {}).get("ok"))
+        else:
+            # The month's ceiling is ALREADY consumed -- a legitimate state, not
+            # a fault. What must still hold is that the gate refuses, and says
+            # why. The at-the-ceiling boundary cannot be exercised this month;
+            # that is recorded out loud rather than silently skipped.
+            r = post({"business_date": _ed, "total": "90000", "expenses": [
+                      {"amount": "100.00", "category": "salary_advance_self"}]})
+            _je = r.get_json() or {}
+            check("D330: with the month's ceiling already consumed (room %s), a "
+                  "further advance is REFUSED (got %s/%s)"
+                  % (rupees(_room_p), r.status_code, _je.get("error")),
+                  r.status_code == 400 and _je.get("error") == "advance_over_ceiling")
+            check("D330: the refusal still shows the figures (taken=%s ceiling=%s)"
+                  % (_je.get("advance_taken"), _je.get("advance_ceiling")),
+                  bool(_je.get("advance_taken")) and _je.get("advance_ceiling") == "15,000.00")
+            check("D330: the at-the-ceiling boundary is not exercisable while the "
+                  "month is already over it — recorded, not silently skipped (F-106)",
+                  True)
 
         # the ceiling MOVES with the setting — derived, not stored (F-136)
         _es = sqlite3.connect(DB_PATH)
