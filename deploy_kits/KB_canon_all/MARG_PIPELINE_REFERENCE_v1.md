@@ -30,6 +30,11 @@ MEDICAL PC  (Windows 10 Pro · python 3.11.9 bundled at D:\SendToClinic\pyportab
        -> D:\SendToClinic\_captured        (renamed by content hash, dedup by md5)
        │
        │   Tailscale.  manojz reads medical READ-ONLY. manojz CANNOT write to medical.
+       │   *** AND IT IS LOAD-BEARING. D347 calls Tailscale "NOT load-bearing";
+       │       that is WRONG and 26-Aug-2026 proved it -- the whole pull leg runs
+       │       over this share, and when it closed the feed stopped for 8h40m.
+       │       Drive carries the heartbeat and the kit folder; the REPORTS come
+       │       through here, and nothing else carries them today. ***
        ▼
 MANOJZ  scheduled task "Marg pull from medical", every 10 minutes
   PULL_FROM_MEDICAL.bat:
@@ -123,6 +128,17 @@ Work down. Each step names where the truth lives.
    covers.
 2. **Did the pull run?** `margsync\MargPull\_last_pull.txt` — START/END stamps, including a FAILED
    line if it could not start. Nothing there = the scheduled task is not running.
+
+   **`FAILED: medical PC unreachable` DOES NOT MEAN THE PC IS OFF.** On 26-Aug-2026 that line
+   repeated every ten minutes for 8h40m while the PC was on, the owner was in an RDP session with
+   it, and Tailscale reported it `active; direct`. The real cause was Windows on manojz blocking
+   **unauthenticated guest access** to the share after a policy refresh. `ping` the medical address:
+   no reply means the machine or the tunnel; a reply means the share is refusing us, and the remedy
+   is a stored credential —
+   `cmdkey /add:100.119.151.40 /user:MEDICAL\SET /pass` — using an account that HAS a password
+   (`MEDICAL\user` has none, and Windows refuses passwordless network logins).
+   **Credentials are stored PER WINDOWS USER**, so the scheduled task's Run-As account must be the
+   one holding it. The pull diagnoses all of this itself from S202; read what it prints.
 3. **Is the medical PC alive and capturing?** `H:\My Drive\Clinic Data Archive\FromMedical\heartbeat.txt`
    — watcher alive/pid/restarts, captures today, the **installed watcher's md5**, and `IGNORED`:
    files in the watched folders the watcher cannot take.
@@ -180,6 +196,23 @@ And note `S181`'s warning — revenue arithmetic is **inverted** between medical
 there *"the single most dangerous copy-paste in the build"*. Do not assume replication.
 
 ---
+
+## 8a · LAUNCHING MARG FROM A SCRIPT (S202)
+
+`margwin.exe` **must be started with its own folder as the working directory**:
+
+```
+cd /d D:\MARGERP
+margwin.exe
+```
+
+Launched from anywhere else it refuses with *"Few important files not found in SYSTEM / Please
+RE-INSTALL software!"* — which is badly misleading and would panic anyone reading it on a live
+pharmacy system. The desktop shortcut sets `Start in: D:\MARGERP`, so only scripts hit this.
+
+Marg **does** accept a command-line argument and resolves it as a path (`/?` returns *"Invalid path
+or file name"*), but there is no evidence it can be told to RUN A REPORT. That question is with Marg
+support; nothing should be guessed at against a live ERP.
 
 ## 9 · KNOWN GAPS AT v1
 

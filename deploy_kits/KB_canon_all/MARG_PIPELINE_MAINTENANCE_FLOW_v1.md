@@ -46,7 +46,15 @@ Three files answer it. **All three are on manojz. None needs a login.**
 1. _last_pull.txt -- is the 10-minute task running?
       no recent START      -> the scheduled task is not running.
                               Run MargPull\PULL_FROM_MEDICAL.bat by hand.
-      "FAILED: medical PC unreachable" -> medical is off, or Tailscale is down.
+      "FAILED: medical PC unreachable" -> DO NOT ASSUME THE PC IS OFF.
+                              On 26-Aug-2026 this ran every 10 minutes for
+                              8h40m while the PC was ON, the owner was in an
+                              RDP session with it, and Tailscale showed it
+                              "active; direct". The real cause was Windows
+                              blocking UNAUTHENTICATED GUEST ACCESS to the
+                              share. See "The pull says unreachable but the
+                              PC is on" below. The pull now diagnoses this
+                              itself (S202) -- read what it prints.
       "FAILED: no python"  -> tell Claude.
 2. heartbeat.txt -- is the medical PC capturing?
       older than ~10 min   -> the AGENT is not running on medical.
@@ -58,6 +66,57 @@ Three files answer it. **All three are on manojz. None needs a login.**
 3. Still nothing -> MargPull\MEDICAL_RECENT.bat
       lists EVERY file written on the medical PC in the last 3 days, any type.
       If Marg wrote nothing, nothing was exported. That is the answer.
+```
+
+### ▸ "The pull says unreachable but the medical PC is ON"
+
+**This is the 26-Aug-2026 fault. It cost 8h40m and every component was healthy.**
+
+```
+1. Is it the machine, or the share?   (the pull now answers this itself)
+      On manojz, in a Command Prompt:
+          ping 100.119.151.40
+      NO reply  -> the machine or the tunnel. Check the PC is on and that
+                   Tailscale is connected ON BOTH PCs:
+                       "C:\Program Files\Tailscale\tailscale.exe" status
+                   The medical line should read "active".
+      REPLY     -> the machine is fine. The SHARE is refusing us. Go to 2.
+
+2. Ask the share directly, on manojz:
+          dir \\100.119.151.40\DDrive\MARGERP\users
+      "...security policies block unauthenticated guest access"
+          -> THIS IS IT. Windows stopped allowing anonymous access to the
+             share. Nothing is broken; nothing was hacked.
+
+3. Fix it by AUTHENTICATING, on manojz:
+          cmdkey /add:100.119.151.40 /user:MEDICAL\SET /pass
+      It prompts for the password. MEDICAL\SET is used because it HAS a
+      password -- Windows refuses network logins for accounts without one,
+      and MEDICAL\user has none. Then re-test with the dir command above.
+
+4. CREDENTIALS ARE STORED PER WINDOWS USER.
+      If the manual dir works but the scheduled pull still fails, the task
+      runs as a different account than the one holding the credential:
+          schtasks /query /tn "Marg pull from medical" /fo list /v | findstr /i "Run As User"
+      It must be the account you ran cmdkey under.
+
+DO NOT re-enable insecure guest access to "fix" this. Forums recommend it.
+It switches off a protection that exists to stop a machine on the network
+reading shares without proving who it is -- on the PC holding patient
+records. The credential above takes a minute and keeps the protection.
+```
+
+### ▸ "Marg says: Few important files not found in SYSTEM / Please RE-INSTALL"
+
+```
+DO NOT RE-INSTALL. Nothing is broken.
+Marg was started with the wrong WORKING DIRECTORY. It must be launched
+from its own folder:
+      cd /d D:\MARGERP
+      margwin.exe
+The desktop shortcut does this for you (its "Start in" is D:\MARGERP).
+Only a script or a Command Prompt launched from elsewhere hits this,
+and the message it gives is badly misleading. (Found 26-Aug-2026.)
 ```
 
 ### ▸ "SEND_OUTBOX says REFUSED"
@@ -102,6 +161,17 @@ Fixed by `MargPull\FIX_POPUP.bat` (S201). If it returns, the scheduled task has
 been repointed at the batch again instead of `PULL_HIDDEN.vbs`.
 
 ---
+
+## 2a · TAILSCALE IS LOAD-BEARING — a correction to D347 (S202)
+
+**D347 records Tailscale as "a read-only D:-only view and NOT load-bearing." That is wrong, and
+26-Aug proved it.** The entire pull leg runs over the Tailscale share: manojz reads
+`\\100.119.151.40\DDrive` every ten minutes, and when that path closed, the feed stopped dead.
+Drive is the bidirectional channel for the heartbeat and the kit folder — that part of D347 stands —
+but the reports themselves travel by Tailscale, and nothing else carries them today.
+
+**Treat Tailscale as a critical dependency of the pharmacy revenue feed**, and check it first when
+nothing is arriving.
 
 ## 3 · ROUTINE MAINTENANCE — what to run, and when
 
