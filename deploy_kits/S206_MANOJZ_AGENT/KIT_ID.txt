@@ -1,0 +1,4 @@
+S206_MANOJZ_AGENT
+built 2026-08-27 attended on manojz
+pipeline heartbeat + silence alarm
+staged, NOT scheduled

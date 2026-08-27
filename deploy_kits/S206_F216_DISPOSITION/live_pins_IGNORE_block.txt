@@ -1,0 +1,27 @@
+# F-216 dispositions — IGNORE rows, drafted S206, AWAITING OWNER APPROVAL
+# Format verified against deploy_kits/S187_V1a/verify_live_pins.py load_pins():
+#   IGNORE<TAB>-<TAB><absolute path><TAB><why it is deliberately unpinned>
+# NO GLOBS. find_untracked() tests 'full in ignored' against a set of exact paths.
+IGNORE	-	/root/assetapp/asset_register_BACKUP_S158_pre_sso.py	superseded snapshot, kept on the box by design
+IGNORE	-	/root/assetapp/diag_sarvam.py	one-off diagnostic, never in the live loop
+IGNORE	-	/root/flow_2026-07_sheet1.html	generated render, re-made by the app that prints it
+IGNORE	-	/root/flow_2026-07_sheet2.html	generated render, re-made by the app that prints it
+IGNORE	-	/root/flow_2026-07_sheets34.html	generated render, re-made by the app that prints it
+IGNORE	-	/root/flow_2026-08_sheet1.html	generated render, re-made by the app that prints it
+IGNORE	-	/root/flow_2026-08_sheet2.html	generated render, re-made by the app that prints it
+IGNORE	-	/root/flow_2026-08_sheets34.html	generated render, re-made by the app that prints it
+IGNORE	-	/root/portal/portal_BACKUP_S139_pre_https.py	superseded snapshot, kept on the box by design
+IGNORE	-	/root/portal/portal_BACKUP_S158_pre_sso.py	superseded snapshot, kept on the box by design
+IGNORE	-	/root/portal/portal_BACKUP_S159_pre_groupD.py	superseded snapshot, kept on the box by design
+IGNORE	-	/root/salary_inputs_2026-07.html	generated render, re-made by the app that prints it
+IGNORE	-	/root/salary_inputs_2026-08.html	generated render, re-made by the app that prints it
+IGNORE	-	/root/scenario_2026-07.html	generated render, re-made by the app that prints it
+IGNORE	-	/root/scenario_2026-08.html	generated render, re-made by the app that prints it
+IGNORE	-	/root/selftest_grid.html	generated render, re-made by the app that prints it
+IGNORE	-	/root/staff_ledger_BACKUP_S158_pre_sso.py	superseded snapshot, kept on the box by design
+IGNORE	-	/root/staff_register/register_salary_2026-07.html	generated render, re-made by the app that prints it
+IGNORE	-	/root/wa/backfill_wa_media.py	one-off backfill, already run
+IGNORE	-	/root/wa/check_link.py	one-off diagnostic, never in the live loop
+IGNORE	-	/root/wa/peek_media.py	one-off diagnostic, never in the live loop
+IGNORE	-	/root/wa/recordings-archive/call_verdict_BACKUP_S123_pre_join_redesign.py	superseded snapshot, kept on the box by design
+IGNORE	-	/root/wa/waba_certainty.py	one-off diagnostic, never in the live loop

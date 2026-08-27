@@ -1,0 +1,16 @@
+44a4b26ef3f5a60c6336dabc85a29a22  build_report.py
+498305564676e13099cdaa2bd19ef039  item_ledger.py
+2ec179674ac15a43cbf47f0c15ed3637  load_archive.py
+46afe3d35dbad97b66817908bf83719f  load_fy.py
+0ae8f78de2f600ce623e7e5d6bb9c176  marg_purchase.py
+4ae5b82f9f3801c2d699bd4d60df5b11  marg_stock.py
+cd42c04be742898e0f22c451bffd0074  purchase_returns.py
+3e79f5b32b1e0d3d367bd75d02c4b657  sale_continuity.py
+faa6f509b9de2c0f9490cf4972208f1b  selftest_marg_purchase.py
+234ac0f5121ed9c7c68518c1914b4e15  selftest_marg_stock.py
+ebba7c45acbdae75c0218233dbcbbcd9  selftest_purchase_returns.py
+6d9145989c80f5593b3581e6eeacad34  selftest_sale_continuity.py
+4675fc95cf186f490d9b803ae0b7ecbd  selftest_units.py
+53329f43895995b8092398585025523a  units.py
+cde468a5cc13ca294e3db8f516b0c9ca  xlsx_sheet.py
+408898779aee1a4abcef74524f5234bd  README.md

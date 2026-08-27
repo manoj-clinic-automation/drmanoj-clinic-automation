@@ -1,0 +1,4 @@
+S206_F216_DISPOSITION
+built 2026-08-27 attended on manojz
+staged, not installed, not published
+contents are documents and one read-only verifier; nothing here installs anything
