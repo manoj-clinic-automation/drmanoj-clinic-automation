@@ -128,4 +128,47 @@ pusher cannot disagree about it.
 `patch_finance_app.py` **migrates** a server already carrying v2 rather than refusing it, and
 refuses a block that has been edited by hand rather than overwriting it.
 
+## v4 — the feed is computed, not exported
+
+**There is no daily closing-stock export, and there was never going to be one.** What arrives daily
+is the **sale report**, by next morning. Purchases arrive as a **date-range export when Amir visits**,
+and a purchase reaches these books *only* through that export — which is what makes the sum closed:
+
+```
+baseline stock + purchases − vendor returns − sales + credit notes = expected
+```
+
+`push_expected.py` is now the daily feed. `push_snapshot.py` is **not retired** — it is the
+**re-baseline** tool, run when a fresh full closing export is taken.
+
+### The join that makes it possible
+
+`PURCHASE ITEM WISE` carries supplier, bill number, item, batch, expiry, quantity — and **no date on
+any row.** `PURCHASE SUPPLIER WISE` carries supplier, **date**, bill number and amount. Joined on
+supplier plus bill number, every purchase line becomes datable, so a purchase already inside the
+baseline can be told from one after it.
+
+**So Amir exports both, over the same date range, every visit.** A purchase file that reaches past
+the baseline and whose bills cannot all be dated is **refused** — an undated purchase is either
+double-counted or lost, and there is no third option.
+
+### Measured against Marg itself
+
+`--crosscheck` computes the figure and then compares it with Marg's **own** closing export for the
+same date. That is the only independent test available, and it is the method that found three faults
+at S206.
+
+```
+baseline 26-Aug + 27-Aug sales, against Marg's own 27-Aug export
+  exact match   338 of 373
+  differ         35 items
+```
+
+**Every one of the 35 is a purchase entered on 27-Aug**, which no export covers yet. The tool reaches
+that conclusion itself, before sending anything, and says so three ways: purchases known only to
+26-Aug · 25 items computing below zero · and the named sale lines it could not tie to an item.
+
+**An item computing below zero is the sharpest signal in here.** Stock cannot be negative, so it is
+never "missing stock" — it is missing *purchase data*, and the message says exactly that.
+
 *S208_STOCK_LEDGER · 28-Aug-2026 · nothing live was touched by the session that built it.*

@@ -20,6 +20,10 @@ FILES    stock_app.py           the blueprint. S208: the snapshot route now
                                 route. THE PROOF S207 DID NOT HAVE
          push_snapshot.py       runs on MANOJZ. S208: sends X-Finance-Marg,
                                 and --verify proves the join without writing
+         push_expected.py       runs on MANOJZ. THE DAILY FEED. Computes
+                                baseline + purchases - returns - sales + credit
+                                notes, dating every purchase from the SUPPLIER
+                                WISE export, and refuses what it cannot date
          install_stock_ledger.sh  the gated installer
 PROVEN   44/44 · 14/14 · patch applied to the real 11,395-line finance_app.py:
          compiles, and revert is md5-identical (70f79997...) · the patcher
@@ -42,4 +46,19 @@ v3       28-Aug-2026, after the v2 install went GREEN and the push still got
          stock_app.init's default, so it cannot drift from what the pusher
          sends. patch_finance_app.py MIGRATES a server already carrying v2,
          and refuses a block that has been edited by hand.
+v4       28-Aug-2026, on the owner's correction. There IS no daily closing
+         stock export -- what arrives daily is the SALE report, and purchases
+         come as a date-range export when Amir visits. So the expected figure
+         is COMPUTED, not exported. push_snapshot.py is not retired: it is now
+         the RE-BASELINE tool, run when a fresh full closing export is taken.
+         PURCHASE ITEM WISE carries no date on any row; PURCHASE SUPPLIER WISE
+         carries supplier, date and bill number, so the two join and every
+         purchase becomes datable. A purchase file reaching past the baseline
+         whose bills cannot be dated is REFUSED -- an undated purchase is
+         either double-counted or lost, and there is no third option.
+MEASURED baseline 26-Aug + one day of sales, cross-checked against Marg's OWN
+         27-Aug closing export: 338 of 373 items EXACT. All 35 differences are
+         purchases entered on 27-Aug, which no export covers yet -- and the
+         tool says so itself, in three separate warnings, before anything is
+         sent.
 INSTALL  bash /root/deploy/vps_deploy.sh S208_STOCK_LEDGER
