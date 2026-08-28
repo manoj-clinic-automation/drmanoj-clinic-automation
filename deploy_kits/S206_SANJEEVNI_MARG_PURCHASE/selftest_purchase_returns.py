@@ -4,12 +4,37 @@ import sys, os, glob
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import marg_purchase as MP, purchase_returns as PR
 
-A = os.path.expanduser("~/mnt/Downloads/margsync/MargArchive")
+A = sys.argv[1] if len(sys.argv) > 1 else \
+    os.path.expanduser("~/mnt/Downloads/margsync/MargArchive")
 _f, _p = [], 0
 def ck(l, c, d=""):
     global _p
     if c: _p += 1; print("  ok   %s" % l)
     else: _f.append(l); print("  FAIL %s   %s" % (l, d))
+
+def _no_archive(what, archive, passed):
+    """Stop cleanly, and loudly, when the Marg archive is not reachable.
+
+    S207. Before this, three of the four selftests in this kit CRASHED at this
+    point when the Downloads folder was not connected -- a KeyError, an
+    IndexError, and a bare FAILED line. A traceback looks exactly like a real
+    regression, and a check that always looks broken is the one that gets
+    waved through (D316). It is not a regression: everything below here
+    asserts against the real Marg exports, and with no exports there is
+    nothing to assert.
+
+    Exit 2 = no data.  Exit 1 = a check genuinely failed.  Exit 0 = passed.
+    A runner can now tell the three apart.
+    """
+    print("")
+    print("  ARCHIVE NOT REACHABLE -- %s" % what)
+    print("  looked in: %s" % archive)
+    print("  %d data-free check(s) passed before this point." % passed)
+    print("")
+    print("  THIS IS NOT A CODE FAILURE. Connect the Downloads folder, or pass")
+    print("  the archive path as the first argument, and run it again.")
+    sys.exit(2)
+
 
 print("[1] the rule in isolation — excess is TWICE the return, never once")
 rows = [{"amount": 100.0, "item": "X", "bill": "900"},
@@ -28,6 +53,8 @@ ck("an unexplainable excess reports exact=False, not a guess", not e2 and r2 == 
 
 print("\n[3] against all five archived months")
 files = sorted(glob.glob(A + "/PURCHASE_ITEMWISE/*/*.XLS"))
+if not files:
+    _no_archive("no PURCHASE_ITEMWISE exports", A, _p)
 ck("five monthly exports present", len(files) == 5, str(len(files)))
 tot_ret = 0; closed = 0
 for p in files:

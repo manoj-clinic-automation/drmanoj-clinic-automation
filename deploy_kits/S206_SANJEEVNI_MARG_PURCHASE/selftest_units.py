@@ -9,6 +9,30 @@ def ck(l, c, d=""):
     if c: _p += 1; print("  ok   %s" % l)
     else: _f.append(l); print("  FAIL %s   %s" % (l, d))
 
+def _no_archive(what, archive, passed):
+    """Stop cleanly, and loudly, when the Marg archive is not reachable.
+
+    S207. Before this, three of the four selftests in this kit CRASHED at this
+    point when the Downloads folder was not connected -- a KeyError, an
+    IndexError, and a bare FAILED line. A traceback looks exactly like a real
+    regression, and a check that always looks broken is the one that gets
+    waved through (D316). It is not a regression: everything below here
+    asserts against the real Marg exports, and with no exports there is
+    nothing to assert.
+
+    Exit 2 = no data.  Exit 1 = a check genuinely failed.  Exit 0 = passed.
+    A runner can now tell the three apart.
+    """
+    print("")
+    print("  ARCHIVE NOT REACHABLE -- %s" % what)
+    print("  looked in: %s" % archive)
+    print("  %d data-free check(s) passed before this point." % passed)
+    print("")
+    print("  THIS IS NOT A CODE FAILURE. Connect the Downloads folder, or pass")
+    print("  the archive path as the first argument, and run it again.")
+    sys.exit(2)
+
+
 print("[1] strip-packed medicines read as strips + loose")
 ck("279 of 1*10 STRI -> 27 strips + 9 tabs",
    U.describe(279, "1*10", "STRI").startswith("27 strips + 9 tabs"), U.describe(279,"1*10","STRI"))
@@ -40,9 +64,13 @@ ck("an arm sling is described as pcs, not tabs",
    U.describe(4, "1*1", "TAB.") == "4 pcs", U.describe(4,"1*1","TAB."))
 
 print("\n[6] against the whole real stock file")
-A = os.path.expanduser("~/mnt/Downloads/margsync/MargArchive")
+A = sys.argv[1] if len(sys.argv) > 1 else \
+    os.path.expanduser("~/mnt/Downloads/margsync/MargArchive")
+_closing = sorted(glob.glob(A + "/STOCK_CLOSING/2026-08/*.XLS"))
+if not _closing:
+    _no_archive("no STOCK_CLOSING export for 2026-08", A, _p)
 w = None
-for p2 in sorted(glob.glob(A + "/STOCK_CLOSING/2026-08/*.XLS")):
+for p2 in _closing:
     r = MS.read_closing(p2)
     if r["store"] == "WHOLE STORES": w = r
 ck("whole-stores export loaded", w is not None)

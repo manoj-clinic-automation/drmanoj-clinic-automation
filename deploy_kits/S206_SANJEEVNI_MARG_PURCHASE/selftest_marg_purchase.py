@@ -37,13 +37,37 @@ def ck(label, cond, detail=""):
         print("  FAIL %s   %s" % (label, detail))
 
 
+def _no_archive(what, archive, passed):
+    """Stop cleanly, and loudly, when the Marg archive is not reachable.
+
+    S207. Before this, three of the four selftests in this kit CRASHED at this
+    point when the Downloads folder was not connected -- a KeyError, an
+    IndexError, and a bare FAILED line. A traceback looks exactly like a real
+    regression, and a check that always looks broken is the one that gets
+    waved through (D316). It is not a regression: everything below here
+    asserts against the real Marg exports, and with no exports there is
+    nothing to assert.
+
+    Exit 2 = no data.  Exit 1 = a check genuinely failed.  Exit 0 = passed.
+    A runner can now tell the three apart.
+    """
+    print("")
+    print("  ARCHIVE NOT REACHABLE -- %s" % what)
+    print("  looked in: %s" % archive)
+    print("  %d data-free check(s) passed before this point." % passed)
+    print("")
+    print("  THIS IS NOT A CODE FAILURE. Connect the Downloads folder, or pass")
+    print("  the archive path as the first argument, and run it again.")
+    sys.exit(2)
+
+
 print("selftest_marg_purchase — archive: %s" % ARCHIVE)
 
 files = sorted(glob.glob(os.path.join(ARCHIVE, "PURCHASE_ITEMWISE", "*", "*.XLS")))
 print("\n[1] the archive is where the queue says it is")
 ck("found PURCHASE_ITEMWISE exports", len(files) >= 5, "found %d" % len(files))
 if not files:
-    print("\nnothing to test against — stopping"); sys.exit(1)
+    _no_archive("no PURCHASE_ITEMWISE exports", ARCHIVE, _pass)
 
 print("\n[2] every archived month parses, and its own arithmetic closes")
 parsed = {}

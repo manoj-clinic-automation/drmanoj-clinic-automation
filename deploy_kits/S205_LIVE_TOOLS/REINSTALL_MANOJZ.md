@@ -177,7 +177,12 @@ A rebuild is verified, not hoped. In order:
 
 3.  cd /d D:\Downloads\margsync\MargPull
     python pipeline_status.py --selftest
-        -> PIPELINE_STATUS SELFTEST PASSED - 42 checks OK
+        -> PIPELINE_STATUS SELFTEST PASSED -- 45 checks OK
+           (this said "- 42 checks OK". Measured 28-Aug-2026 against the
+            captured pipeline_status.py: FORTY-FIVE, and a DOUBLE dash.
+            Do not match on the number -- it grows every time a check is
+            added, and a proof that goes red on an improvement gets waved
+            through. Match on "SELFTEST PASSED" and read the count.)
 
 4.  python pipeline_status.py --dry-run
         -> prints JSON and POSTS NOTHING. Read the "link" section: verdict

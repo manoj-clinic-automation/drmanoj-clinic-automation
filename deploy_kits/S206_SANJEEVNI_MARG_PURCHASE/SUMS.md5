@@ -6,11 +6,12 @@
 4ae5b82f9f3801c2d699bd4d60df5b11  marg_stock.py
 cd42c04be742898e0f22c451bffd0074  purchase_returns.py
 3e79f5b32b1e0d3d367bd75d02c4b657  sale_continuity.py
-faa6f509b9de2c0f9490cf4972208f1b  selftest_marg_purchase.py
-234ac0f5121ed9c7c68518c1914b4e15  selftest_marg_stock.py
-ebba7c45acbdae75c0218233dbcbbcd9  selftest_purchase_returns.py
+31387c11ca8655b6f6e6d77dce75adfb  selftest_marg_purchase.py
+a2620646c70701631f87e01bddfbc88a  selftest_marg_stock.py
+e0fdf8d37163359d2db4e90b37303950  selftest_purchase_returns.py
 6d9145989c80f5593b3581e6eeacad34  selftest_sale_continuity.py
-4675fc95cf186f490d9b803ae0b7ecbd  selftest_units.py
+690fca52ded49f573398cb573740c534  selftest_units.py
 53329f43895995b8092398585025523a  units.py
 cde468a5cc13ca294e3db8f516b0c9ca  xlsx_sheet.py
-408898779aee1a4abcef74524f5234bd  README.md
+1376eec4d53ce848fd5e1731e93ef0b9  README.md
+c029f684c7c66416c8a6aa8776e55b0a  KIT_ID.txt

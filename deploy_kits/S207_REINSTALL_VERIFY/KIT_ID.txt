@@ -1,0 +1,21 @@
+KIT      S207_REINSTALL_VERIFY
+BUILT    27-Aug-2026 IST, unattended session on manojz
+REV      S207.2 -- 28-Aug-2026 05:40 IST, after the first LIVE run
+QUEUE    UNATTENDED_QUEUE.md, item Q2
+PURPOSE  read-only VERIFY.bat per machine for the two S205 reinstall kits
+STATE    STAGED, NOT INSTALLED. Nothing live was touched. Not published to git.
+PROVEN   verify_manojz.py  py_compile OK, selftest 33 checks, 0 failures
+         verify_medical.py py_compile OK, selftest 41 checks, 0 failures
+         both run end to end against synthetic fixtures, pass and fail branches
+LIVE RUN verify_manojz.py against the real D:\Downloads\margsync -- checks 3, 5
+         and 6 exercised on real files. Check 6 CAUGHT A REAL FAULT on its
+         first live run: 2026-08-27 has no sale export.
+         verify_medical.py against the manojz mirror of D:\SendToClinic.
+S207.2   three defects the live run exposed, all fixed and covered by selftests:
+         1. the timestamp hard-coded "IST" and printed it on a UTC box
+         2. a heartbeat dated in the FUTURE (clock skew / mirror) read as fresh
+         3. IGNORED != 0 was a FAIL; the live machine reports 33 permanently,
+            so it is now a WARN that explains itself
+NOT      the two .bat wrappers have never been executed - no Windows in the
+PROVEN   session that wrote them. First run on manojz is their real test.
+         Checks 2 and 4 of verify_manojz need Windows SMB and are unexercised.
