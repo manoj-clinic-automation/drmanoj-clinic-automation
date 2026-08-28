@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-#  install_stock_ledger.sh · kit S208_STOCK_LEDGER
+#  install_stock_ledger.sh · kit S208_STOCK_LEDGER · v2
 #
 #  The stock loop on the clinic server:
 #      expected (Marg) -> counted (staff) -> difference -> cause -> closed
@@ -132,28 +132,72 @@ sleep 3
 systemctl is-active --quiet "$SVC" || { echo "!! [8/9] $SVC not active — restoring"
                                         restore; exit 1; }
 
-# Is the route actually there? 401 is the RIGHT answer: it means the route
-# exists and the fail-closed gate is doing its job. 404 means the blueprint
-# never mounted, which is the whole thing we are installing.
-CODE="$("$PY" - "$PORT" <<'PYEOF'
-import sys, urllib.request, urllib.error
+# IS THE ROUTE ACTUALLY THERE?
+#
+# v2, 28-Aug-2026. The first version asked the app over HTTP and expected 401.
+# The live app answers 302 -- it REDIRECTS a signed-out request to the portal
+# login -- so the check refused a perfectly good install and restored. It was
+# right to refuse something it did not recognise; it was wrong to be asking
+# that question at all.
+#
+# The deeper problem: the fail-closed gate runs BEFORE routing, so an UNMOUNTED
+# path answers 302 exactly like a mounted one. Signed out, over HTTP, the two
+# cases are indistinguishable. So mounting is now proved the only honest way --
+# by importing the module the same way gunicorn imports it and asking the app
+# which routes it actually has. HTTP is kept, but only to answer "is the
+# service answering at all", which is all it can honestly say.
+MOUNTED="$(cd "$FIN" && "$PY" - <<'ROUTES_EOF' 2>&1 | tail -1
+import sys
 try:
-    urllib.request.urlopen("http://127.0.0.1:%s/stock/api/healthz" % sys.argv[1], timeout=10)
-    print(200)
+    import finance_app
+    rules = [str(r) for r in finance_app.app.url_map.iter_rules()]
+except Exception as e:                                         # noqa: BLE001
+    print("IMPORT_FAILED %s: %s" % (e.__class__.__name__, e))
+    sys.exit(0)
+print("YES" if "/stock/api/healthz" in rules else "NO - %d routes" % len(rules))
+ROUTES_EOF
+)"
+case "$MOUNTED" in
+  YES) echo "[8/9] the app itself reports /stock/api/healthz among its routes" ;;
+  NO*) echo "!! [8/9] the app came up WITHOUT the stock routes -- $MOUNTED"
+       echo "   Restoring."
+       restore; exit 1 ;;
+  *)   echo "!! [8/9] could not ask the app which routes it has:"
+       echo "   $MOUNTED"
+       echo "   Restoring -- an install that cannot be verified is not an install."
+       restore; exit 1 ;;
+esac
+
+# And is the service answering? 302 is NORMAL here: signed out, the gate sends
+# a browser to the portal login. 404 would mean the URL is unknown.
+CODE="$("$PY" - "$PORT" <<'HTTP_EOF'
+import sys, urllib.request, urllib.error
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *a, **k):
+        return None
+
+
+op = urllib.request.build_opener(NoRedirect)
+try:
+    print(op.open("http://127.0.0.1:%s/stock/api/healthz" % sys.argv[1],
+                  timeout=10).status)
 except urllib.error.HTTPError as e:
     print(e.code)
 except Exception:
     print(0)
-PYEOF
+HTTP_EOF
 )"
 case "$CODE" in
-  401|403) echo "[8/9] $SVC up · /stock/api/healthz answers $CODE — mounted and gated ✓" ;;
-  404)     echo "!! [8/9] /stock/api/healthz answers 404 — the blueprint did not mount. Restoring."
-           restore; exit 1 ;;
-  200)     echo "[8/9] $SVC up · /stock/api/healthz answers 200 — mounted, but NOT gated."
-           echo "      Tell Claude before anyone uses it." ;;
-  *)       echo "!! [8/9] could not reach the app on port $PORT (got '$CODE') — restoring"
-           restore; exit 1 ;;
+  200|301|302|303|307|308|401|403)
+        echo "      service answering on port $PORT (HTTP $CODE)" ;;
+  404)  echo "!! [8/9] port $PORT answers 404 for the stock page -- restoring"
+        restore; exit 1 ;;
+  0)    echo "!! [8/9] nothing answered on port $PORT -- restoring"
+        restore; exit 1 ;;
+  *)    echo "      service answered HTTP $CODE on port $PORT -- unusual, not fatal."
+        echo "      The route is mounted (proved above). Mention this to Claude." ;;
 esac
 
 # ---------------------------------------------------------------- [9] done

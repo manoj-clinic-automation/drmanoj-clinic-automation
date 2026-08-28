@@ -92,4 +92,18 @@ The installer measures the existing smoke suite **before** it touches anything a
 file if that suite loses a single check, if the service does not come back, or if the route answers
 404.
 
+## v2 — what the first live run taught
+
+The first run reached step 8 and **restored**, exactly as designed. The check asked the app over
+HTTP and expected a 401; the live app answers **302**, redirecting a signed-out request to the
+portal login. Everything else had already passed: smoke **722 before and 722 after**, 44/44, 14/14.
+
+The real lesson is bigger than the missing status code. **The fail-closed gate runs before routing**,
+so a page that was never mounted answers 302 in exactly the same way as one that was. Signed out,
+over HTTP, the two cases cannot be told apart — so that check could never have proved what it
+claimed to prove, even with 302 in the list.
+
+**Step 8 now imports the module the same way gunicorn does and asks the app which routes it has.**
+HTTP is still called, but only to answer *"is the service answering at all"*.
+
 *S208_STOCK_LEDGER · 28-Aug-2026 · nothing live was touched by the session that built it.*

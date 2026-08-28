@@ -24,4 +24,13 @@ FILES    stock_app.py           the blueprint. S208: the snapshot route now
 PROVEN   44/44 · 14/14 · patch applied to the real 11,395-line finance_app.py:
          compiles, and revert is md5-identical (70f79997...) · the patcher
          REFUSES on the older finance/finance_app.py copy, as it should
+v2       28-Aug-2026, after the first live run. Step 8 asked the app over HTTP
+         and expected 401; the live app answers 302 -- it redirects a signed-out
+         request to the portal login -- so a good install was refused and
+         restored. Correct behaviour, wrong question: the fail-closed gate runs
+         BEFORE routing, so an UNMOUNTED path answers 302 too. Signed out, HTTP
+         cannot tell the two apart at all. Step 8 now imports the module the way
+         gunicorn does and asks the app which routes it has. HTTP is kept only
+         to answer "is it answering", which is all it can honestly say.
+         Nothing else changed; 44/44 and 14/14 re-run unchanged.
 INSTALL  bash /root/deploy/vps_deploy.sh S208_STOCK_LEDGER
