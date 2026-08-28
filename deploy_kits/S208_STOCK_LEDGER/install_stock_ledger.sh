@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-#  install_stock_ledger.sh · kit S208_STOCK_LEDGER · v2
+#  install_stock_ledger.sh · kit S208_STOCK_LEDGER · v3
 #
 #  The stock loop on the clinic server:
 #      expected (Marg) -> counted (staff) -> difference -> cause -> closed
@@ -154,11 +154,11 @@ try:
 except Exception as e:                                         # noqa: BLE001
     print("IMPORT_FAILED %s: %s" % (e.__class__.__name__, e))
     sys.exit(0)
-print("YES" if "/stock/api/healthz" in rules else "NO - %d routes" % len(rules))
+print("YES" if "/finance/stock/api/healthz" in rules else "NO - %d routes" % len(rules))
 ROUTES_EOF
 )"
 case "$MOUNTED" in
-  YES) echo "[8/9] the app itself reports /stock/api/healthz among its routes" ;;
+  YES) echo "[8/9] the app itself reports /finance/stock/api/healthz among its routes" ;;
   NO*) echo "!! [8/9] the app came up WITHOUT the stock routes -- $MOUNTED"
        echo "   Restoring."
        restore; exit 1 ;;
@@ -181,7 +181,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 op = urllib.request.build_opener(NoRedirect)
 try:
-    print(op.open("http://127.0.0.1:%s/stock/api/healthz" % sys.argv[1],
+    print(op.open("http://127.0.0.1:%s/finance/stock/api/healthz" % sys.argv[1],
                   timeout=10).status)
 except urllib.error.HTTPError as e:
     print(e.code)

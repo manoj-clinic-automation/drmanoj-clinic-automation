@@ -37,13 +37,32 @@ MOUNT = BEGIN + """
 # Two lines, and they must run at IMPORT time: gunicorn imports finance_app:app
 # and never reaches __main__. stock_app owns its own tables inside the same
 # finance.db, behind the same gate, in the same backup.
+#
+# The pages sit under /finance/stock, NOT /stock -- the web server proxies only
+# the /finance context to this app, so /stock answered 404 from the outside
+# while existing perfectly well inside. The prefix is stock_app.init's default,
+# defined in ONE place, so it cannot drift from what push_snapshot.py sends.
+import stock_app                                              # noqa: E402
+stock_app.init(app, db, require, unit=UNIT, marg_token=MARG_TOKEN)
+""" + END + "\n\n"
+
+# v2 mounted the same feature at /stock. That install went green and was still
+# unreachable: the proxy never forwarded it. These two constants exist so a
+# server already carrying v2 is MIGRATED rather than refused -- and so that a
+# block edited by hand is refused rather than silently overwritten.
+V2_MOUNT = BEGIN + """
+# Two lines, and they must run at IMPORT time: gunicorn imports finance_app:app
+# and never reaches __main__. stock_app owns its own tables inside the same
+# finance.db, behind the same gate, in the same backup.
 import stock_app                                              # noqa: E402
 stock_app.init(app, db, require, unit=UNIT, marg_token=MARG_TOKEN)
 """ + END + "\n\n"
 
 GATE_ANCHOR = '"/finance/api/pipeline-status")'
 GATE_PATCHED = ('"/finance/api/pipeline-status",\n'
-                '                            "/stock/api/snapshot")')
+                '                            "/finance/stock/api/snapshot")')
+GATE_V2 = ('"/finance/api/pipeline-status",\n'
+           '                            "/stock/api/snapshot")')
 
 MAIN_ANCHOR = '\nif __name__ == "__main__":'
 
@@ -78,6 +97,8 @@ def check(src):
     n = src.count(GATE_ANCHOR)
     if GATE_PATCHED in src:
         notes.append("  ok      the gate already lets the sender in")
+    elif GATE_V2 in src:
+        notes.append("  ok      the gate carries the v2 path — it will be moved")
     elif n != 1:
         ok = False
         notes.append("  REFUSE  the gate anchor occurs %d times, expected 1" % n)
@@ -91,16 +112,28 @@ def check(src):
     else:
         notes.append("  ok      the mount point is where it should be")
 
-    if BEGIN in src:
+    if MOUNT in src:
         notes.append("  ok      the stock ledger is already mounted")
+    elif V2_MOUNT in src:
+        notes.append("  ok      v2 is mounted at /stock — it will be moved to "
+                     "/finance/stock")
+    elif BEGIN in src:
+        ok = False
+        notes.append("  REFUSE  a stock-ledger block is present but matches "
+                     "neither version — it has been edited by hand")
     return ok, notes
 
 
 def apply(src):
-    if GATE_PATCHED not in src:
+    if GATE_V2 in src:                       # v2 -> v3: move the path
+        src = src.replace(GATE_V2, GATE_PATCHED)
+    elif GATE_PATCHED not in src:
         assert src.count(GATE_ANCHOR) == 1
         src = src.replace(GATE_ANCHOR, GATE_PATCHED)
-    if BEGIN not in src:
+    if V2_MOUNT in src:                      # v2 -> v3: swap the block
+        src = src.replace(V2_MOUNT, MOUNT)
+    elif MOUNT not in src:
+        assert BEGIN not in src, "an unrecognised block is present"
         assert src.count(MAIN_ANCHOR) == 1
         src = src.replace(MAIN_ANCHOR, "\n" + MOUNT + MAIN_ANCHOR.lstrip("\n"))
     return src
@@ -109,12 +142,14 @@ def apply(src):
 def revert(src):
     if GATE_PATCHED in src:
         src = src.replace(GATE_PATCHED, GATE_ANCHOR)
+    elif GATE_V2 in src:
+        src = src.replace(GATE_V2, GATE_ANCHOR)
     if BEGIN in src:
         # The EXACT inverse of apply(): remove the exact text apply() inserted,
         # so a patch-then-revert round trip is byte-identical. If the block has
         # been hand-edited it will not match, and we refuse rather than guess --
         # a revert that "tidies up" is how a file quietly loses a line.
-        block = MOUNT
+        block = MOUNT if MOUNT in src else V2_MOUNT
         if src.count(block) != 1:
             raise SystemExit("!! the mounted block has been edited by hand -- "
                              "refusing to remove it. Restore from the .bak "

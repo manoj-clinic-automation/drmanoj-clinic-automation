@@ -55,17 +55,17 @@ stock_app.init(app, db, require, unit="medical")
 c = app.test_client()
 
 print("[1] schema and health")
-r = c.get("/stock/api/healthz")
+r = c.get("/finance/stock/api/healthz")
 ck("healthz answers", r.status_code == 200, r.status_code)
 j = r.get_json()
 ck("it creates its own tables on first touch", j["ok"] and j["counts"] == 0)
 ck("the causes are published so the UI never invents one",
    "UNEXPLAINED" in j["causes"] and "EXPIRY" in j["causes"] and "BREAKAGE" in j["causes"])
 ck("calling it twice does not fall over on the schema",
-   c.get("/stock/api/healthz").status_code == 200)
+   c.get("/finance/stock/api/healthz").status_code == 200)
 
 print("\n[2] a count MUST be pinned to a bill")
-r = c.post("/stock/api/count", json={"marg_as_on": "2026-08-27", "items": [{"item": "X"}]})
+r = c.post("/finance/stock/api/count", json={"marg_as_on": "2026-08-27", "items": [{"item": "X"}]})
 ck("a count with no bill number is refused", r.status_code == 400, r.status_code)
 ck("and it says why", "pinned to a bill" in (r.get_json().get("message") or ""))
 
@@ -75,7 +75,7 @@ snap = {"as_on": "2026-08-27", "source": "STOCK_CLOSING_TOTALS", "items": [
     {"item": "ARSEODEO", "qty": 117, "packing": "1*10", "pack_size": 10, "rate_p": 1200},
     {"item": "ALGESIA CR", "qty": 0, "packing": "1*1", "pack_size": 1},
 ]}
-r = c.post("/stock/api/snapshot", json=snap)
+r = c.post("/finance/stock/api/snapshot", json=snap)
 ck("a maker may load a snapshot", r.status_code == 200, r.status_code)
 ck("three items landed", r.get_json()["items"] == 3)
 ck("nothing to reconcile yet", r.get_json()["reconciled"] == 0)
@@ -91,7 +91,7 @@ cnt = {"marg_as_on": "2026-08-27", "bill_no": "a003195", "bill_date": "2026-08-2
            {"item": "ALGESIA CR", "marg_qty": 0, "counted_qty": 5, "pack_size": 1,
             "counted_by": "Darpan", "entered_by": "Darpan"},
        ]}
-r = c.post("/stock/api/count", json=cnt)
+r = c.post("/finance/stock/api/count", json=cnt)
 ck("the count is accepted", r.status_code == 200, r.get_json())
 j = r.get_json()
 ck("three items recorded", j["items"] == 3)
@@ -115,16 +115,16 @@ ck("an item with no known rate is recorded anyway, unpriced",
    row2["value_p"] is None, row2["value_p"])
 
 print("\n[6] naming the door is the checker's job")
-r = c.get("/stock/api/open")
+r = c.get("/finance/stock/api/open")
 ck("both differences are open", r.get_json()["open"] == 2)
 DID = [x for x in r.get_json()["items"] if x["item"] == "ARSEODEO"][0]["id"]
 ROLE.update(user="darpan", roles=["maker"])
-r = c.post("/stock/api/diff/%d/cause" % DID, json={"cause": "EXPIRY"})
+r = c.post("/finance/stock/api/diff/%d/cause" % DID, json={"cause": "EXPIRY"})
 ck("a maker may NOT set the cause", r.status_code == 403, r.status_code)
 ROLE.update(user="drmanoj", roles=["checker"])
-r = c.post("/stock/api/diff/%d/cause" % DID, json={"cause": "nonsense"})
+r = c.post("/finance/stock/api/diff/%d/cause" % DID, json={"cause": "nonsense"})
 ck("an invented cause is refused", r.status_code == 400)
-r = c.post("/stock/api/diff/%d/cause" % DID,
+r = c.post("/finance/stock/api/diff/%d/cause" % DID,
            json={"cause": "expiry", "note": "removed 12-Aug, no voucher"})
 ck("a checker may, and case does not matter", r.status_code == 200, r.get_json())
 ck("it is stored with who and when",
@@ -136,7 +136,7 @@ later = {"as_on": "2026-08-28", "items": [
     {"item": "ARSEODEO", "qty": 23, "pack_size": 10},        # fixed in Marg
     {"item": "ALGESIA CR", "qty": 2, "pack_size": 1},        # partly fixed only
 ]}
-r = c.post("/stock/api/snapshot", json=later)
+r = c.post("/finance/stock/api/snapshot", json=later)
 ck("one difference closed by itself", r.get_json()["reconciled"] == 1, r.get_json())
 ck("the fixed one is reconciled",
    CON.execute("SELECT status FROM stock_diff WHERE item='ARSEODEO'"
@@ -147,10 +147,10 @@ ck("and it records WHICH export agreed",
 ck("a PARTLY fixed item stays open — 'closer' is not 'correct'",
    CON.execute("SELECT status FROM stock_diff WHERE item='ALGESIA CR'"
                ).fetchone()["status"] == "open")
-ck("only one difference is left open", c.get("/stock/api/open").get_json()["open"] == 1)
+ck("only one difference is left open", c.get("/finance/stock/api/open").get_json()["open"] == 1)
 
 print("\n[8] where the stock actually goes")
-r = c.get("/stock/api/losses")
+r = c.get("/finance/stock/api/losses")
 j = r.get_json()
 causes = {x["cause"]: x for x in j["by_cause"]}
 ck("the shortage is filed under EXPIRY", "EXPIRY" in causes, list(causes))
@@ -160,17 +160,17 @@ ck("the surplus is reported SEPARATELY, never netted off the loss",
    j["surplus"]["n"] == 1 and j["surplus"]["units"] == 5, j["surplus"])
 ck("ARSEODEO leads the by-item list", j["by_item"][0]["item"] == "ARSEODEO")
 ck("a date window filters it out",
-   c.get("/stock/api/losses?from=2027-01-01&to=2027-12-31"
+   c.get("/finance/stock/api/losses?from=2027-01-01&to=2027-12-31"
          ).get_json()["by_cause"] == [])
 
 print("\n[9] a second count on the same item builds the history")
-c.post("/stock/api/snapshot", json={"as_on": "2026-09-27", "items": [
+c.post("/finance/stock/api/snapshot", json={"as_on": "2026-09-27", "items": [
     {"item": "ARSEODEO", "qty": 40, "pack_size": 10, "rate_p": 1200}]})
-c.post("/stock/api/count", json={
+c.post("/finance/stock/api/count", json={
     "marg_as_on": "2026-09-27", "bill_no": "A004000", "bill_date": "2026-09-27",
     "items": [{"item": "ARSEODEO", "marg_qty": 40, "counted_qty": 31,
                "pack_size": 10, "counted_by": "Shavez", "entered_by": "Shavez"}]})
-j = c.get("/stock/api/losses").get_json()
+j = c.get("/finance/stock/api/losses").get_json()
 rep = {x["item"]: x["times"] for x in j["repeat_offenders"]}
 ck("ARSEODEO is now a repeat offender", rep.get("ARSEODEO") == 2, rep)
 ck("and the earlier reconciled loss is still counted in the totals",
@@ -187,33 +187,33 @@ stock_app.init(app2, db, require, unit="medical", marg_token=TOK)
 c2 = app2.test_client()
 ROLE.update(user=None, roles=[])                       # NOBODY is signed in
 
-r = c2.post("/stock/api/snapshot",
+r = c2.post("/finance/stock/api/snapshot",
             json={"as_on": "2026-10-01", "items": [{"item": "ACILOC 300", "qty": 77,
                                                     "pack_size": 20}]},
             headers={"X-Finance-Marg": TOK})
 ck("the sender's token loads a snapshot with nobody signed in",
    r.status_code == 200, r.status_code)
-r = c2.post("/stock/api/snapshot", json={"as_on": "2026-10-01", "items": [{"item": "X"}]},
+r = c2.post("/finance/stock/api/snapshot", json={"as_on": "2026-10-01", "items": [{"item": "X"}]},
             headers={"X-Finance-Marg": "wrong"})
 ck("a WRONG token is refused", r.status_code == 403, r.status_code)
-r = c2.post("/stock/api/snapshot", json={"as_on": "2026-10-01", "items": [{"item": "X"}]})
+r = c2.post("/finance/stock/api/snapshot", json={"as_on": "2026-10-01", "items": [{"item": "X"}]})
 ck("NO token and nobody signed in is refused", r.status_code == 403, r.status_code)
 
 # and it opens exactly one door -- this is the whole safety argument
-r = c2.post("/stock/api/count",
+r = c2.post("/finance/stock/api/count",
             json={"marg_as_on": "2026-10-01", "bill_no": "A1", "items": []},
             headers={"X-Finance-Marg": TOK})
 ck("the same token may NOT submit a count", r.status_code == 403, r.status_code)
-r = c2.post("/stock/api/diff/1/cause", json={"cause": "EXPIRY"},
+r = c2.post("/finance/stock/api/diff/1/cause", json={"cause": "EXPIRY"},
             headers={"X-Finance-Marg": TOK})
 ck("the same token may NOT name a cause", r.status_code == 403, r.status_code)
-r = c2.get("/stock/api/losses", headers={"X-Finance-Marg": TOK})
+r = c2.get("/finance/stock/api/losses", headers={"X-Finance-Marg": TOK})
 ck("the same token may NOT read the losses", r.status_code == 403, r.status_code)
 
 # and with no token configured, the header means nothing at all
 app3 = Flask(__name__)
 stock_app.init(app3, db, require, unit="medical")       # marg_token not set
-r = app3.test_client().post("/stock/api/snapshot",
+r = app3.test_client().post("/finance/stock/api/snapshot",
                             json={"as_on": "2026-10-01", "items": [{"item": "X"}]},
                             headers={"X-Finance-Marg": TOK})
 ck("with no token configured the header grants nothing", r.status_code == 403, r.status_code)

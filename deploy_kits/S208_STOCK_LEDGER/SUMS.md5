@@ -1,9 +1,9 @@
-404dcf2382db07fe735967feaceefd49  stock_app.py
+5e5246eaeb1c9875dda4c625bbf4fc42  stock_app.py
 df8ce7727c2b27f0feb7c2853320731c  stock_schema.sql
-638cadf0be618d5d838d387cc2b1de5d  patch_finance_app.py
-2752a932ad6934fd1e0e446a49e4815b  selftest_stock_app.py
-9dc05bdc3718d2901c5c298d5922d4ee  selftest_gate_join.py
-c3a2a378592b24072f6d27dd7594c430  push_snapshot.py
-3a922a8ce6a5dd2de85bcef2854dbd0c  install_stock_ledger.sh
-fec78dedbb756bc89851b99c655dbb74  README.md
-6ca088ca6fb667a459c27c1970eeabb4  KIT_ID.txt
+e64d5fb7c1ee40835f1b5797e1bf9903  patch_finance_app.py
+9b26a5e7c4a6e41355629679d8b472b5  selftest_stock_app.py
+7627e00189ae435f78c1869793c75d39  selftest_gate_join.py
+72205205230421e55e152c85838a0868  push_snapshot.py
+a06231ceabdd030f17f98875dc632b5e  install_stock_ledger.sh
+278ebbae2e1c754cda7b8d9eeb9cd81d  README.md
+533d08770d5834c2b1e1460034d9465a  KIT_ID.txt

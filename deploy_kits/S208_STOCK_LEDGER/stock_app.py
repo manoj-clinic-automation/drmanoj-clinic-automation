@@ -72,9 +72,17 @@ def ensure_schema(con):
     con.commit()
 
 
-def init(app, db_getter, require_fn, unit="medical", url_prefix="/stock",
-         marg_token=""):
+def init(app, db_getter, require_fn, unit="medical",
+         url_prefix="/finance/stock", marg_token=""):
     """Mount the blueprint. finance_app calls this once, after its own setup.
+
+    WHY THE PREFIX IS /finance/stock AND NOT /stock
+        The web server proxies exactly one context to this app -- /finance --
+        and nothing else. Mounted at /stock the pages existed inside the app
+        and answered 404 from the outside, because the request never reached
+        the app at all. Riding the existing /finance context needs no web
+        server change, no new config file, and no second thing to notice has
+        died. It also keeps the portal's SSO cookie in scope (F-68).
 
     marg_token is the pharmacy sender's token (FINANCE_MARG_TOKEN). It is
     injected so that /api/snapshot can be posted by the machine on manojz that

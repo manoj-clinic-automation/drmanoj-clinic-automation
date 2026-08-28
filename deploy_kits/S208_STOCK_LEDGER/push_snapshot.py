@@ -10,6 +10,11 @@ because nothing ever tells the server that Marg's numbers changed.
 
 Exit 0 sent (or dry-run) · 1 a real failure · 2 nothing to send / unreachable.
 
+S208 SECOND CORRECTION -- THE URL WAS OUTSIDE THE PROXY. /stock/... 404s from
+the outside: the web server proxies only /finance to this app, so the request
+never reached it. The ledger now lives at /finance/stock/... and needs no web
+server change at all.
+
 S208 CORRECTION -- THE HEADER WAS WRONG AND EVERY REAL RUN WOULD HAVE BEEN
 REFUSED. token.txt holds the MARG token (marg_gate.py and pipeline_status.py
 both send it as X-Finance-Marg). This script sent it as X-Finance-Cron, which
@@ -41,7 +46,7 @@ for rel in ("../S206_SANJEEVNI_MARG_PURCHASE", "../S205_LIVE_TOOLS/manojz"):
     sys.path.insert(0, os.path.abspath(os.path.join(HERE, rel)))
 
 DEF_ARCHIVE = r"D:\Downloads\margsync\MargArchive"
-DEF_URL = "https://followup.dr-manoj.in/stock/api/snapshot"
+DEF_URL = "https://followup.dr-manoj.in/finance/stock/api/snapshot"
 DEF_TOKEN_UNC = r"\\100.119.151.40\DDrive\SendToClinic\token.txt"
 DEF_TOKEN_CACHE = r"D:\Downloads\margsync\SendToClinic\token.txt"
 FILTERED_MAX = 200

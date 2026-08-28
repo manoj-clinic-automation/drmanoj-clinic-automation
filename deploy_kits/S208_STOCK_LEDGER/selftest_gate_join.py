@@ -123,7 +123,7 @@ stock_app.init(mini_app.app, mini_app.db, mini_app.require,
 c = mini_app.app.test_client()
 mini_app.SIGNED_IN["who"] = None
 
-r = c.post("/stock/api/snapshot",
+r = c.post("/finance/stock/api/snapshot",
            json={"as_on": "27-08-2026", "items": [{"item": "X", "qty": 1}]},
            headers={"X-Finance-Cron": TOK})       # the S207 header, S207 gate
 ck("the Marg token sent as X-Finance-Cron is refused 401 by the gate",
@@ -132,7 +132,7 @@ ck("and the route never ran — nothing was written",
    sqlite3.connect(os.environ["MINI_DB"]).execute(
        "SELECT count(*) FROM sqlite_master WHERE name='stock_snapshot'"
    ).fetchone()[0] == 0)
-r = c.post("/stock/api/snapshot", json={"as_on": "27-08-2026", "items": [{"item": "X"}]},
+r = c.post("/finance/stock/api/snapshot", json={"as_on": "27-08-2026", "items": [{"item": "X"}]},
            headers={"X-Finance-Marg": TOK})
 ck("even the RIGHT header is refused while the path is not allow-listed",
    r.status_code == 401, r.status_code)
@@ -148,12 +148,12 @@ c = mini_app.app.test_client()
 mini_app.SIGNED_IN["who"] = None
 
 print("\n[4] AFTER — the real header, the real gate, the real route")
-r = c.post("/stock/api/snapshot", json={"as_on": "", "items": []},
+r = c.post("/finance/stock/api/snapshot", json={"as_on": "", "items": []},
            headers={"X-Finance-Marg": TOK})
 ck("an EMPTY body answers 400 bad_request — what --verify checks for",
    r.status_code == 400 and r.get_json().get("error") == "bad_request",
    (r.status_code, r.get_json()))
-r = c.post("/stock/api/snapshot",
+r = c.post("/finance/stock/api/snapshot",
            json={"as_on": "27-08-2026", "source": "push_snapshot",
                  "items": [{"item": "ACILOC 300", "qty": 77, "pack_size": 20}]},
            headers={"X-Finance-Marg": TOK})
@@ -162,17 +162,17 @@ ck("a real snapshot is accepted with NOBODY signed in", r.status_code == 200,
 ck("and it landed", r.get_json().get("items") == 1)
 
 print("\n[5] the token still opens NOTHING else")
-for path, method in (("/stock/api/count", "post"), ("/stock/api/open", "get"),
-                     ("/stock/api/losses", "get"), ("/finance/api/anything", "get")):
+for path, method in (("/finance/stock/api/count", "post"), ("/finance/stock/api/open", "get"),
+                     ("/finance/stock/api/losses", "get"), ("/finance/api/anything", "get")):
     r = getattr(c, method)(path, json={}, headers={"X-Finance-Marg": TOK})
     ck("%-24s is still refused" % path, r.status_code in (401, 403), r.status_code)
 
 print("\n[6] a signed-in human is unaffected by any of this")
 mini_app.SIGNED_IN["who"] = ("drmanoj", "checker")
-ck("a checker may read the losses", c.get("/stock/api/losses").status_code == 200)
+ck("a checker may read the losses", c.get("/finance/stock/api/losses").status_code == 200)
 mini_app.SIGNED_IN["who"] = ("darpan", "maker")
 ck("a maker may load a snapshot",
-   c.post("/stock/api/snapshot",
+   c.post("/finance/stock/api/snapshot",
           json={"as_on": "28-08-2026", "items": [{"item": "ACILOC 300", "qty": 77}]}
           ).status_code == 200)
 

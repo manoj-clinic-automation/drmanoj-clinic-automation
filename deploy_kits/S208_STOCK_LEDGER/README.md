@@ -106,4 +106,26 @@ claimed to prove, even with 302 in the list.
 **Step 8 now imports the module the same way gunicorn does and asks the app which routes it has.**
 HTTP is still called, but only to answer *"is the service answering at all"*.
 
+## v3 — what the first GREEN install taught
+
+v2 installed cleanly: anchors ok, smoke **722 before and 722 after**, 44/44, 14/14, the app itself
+confirming `/stock/api/healthz` among its routes. Everything true, and the push still answered
+**404**.
+
+**The pages were inside the app and unreachable from outside it.** The web server proxies exactly
+one context to this application — `/finance` — and nothing else. `/stock/...` was answered by the
+web server, which has never heard of it, and the request never reached the app.
+
+**Three checks in a row were each correct and none of them covered the last hop.** The app knew its
+own routes. The gate knew its own tokens. Nobody asked the web server. Same family as the fault this
+kit was written to fix: *the tested path is not the live path*, one layer further out.
+
+The fix is not a new proxy rule — that would be a second thing to configure and a second thing to
+notice has died. **The ledger rides the `/finance` context that is already proven**, at
+`/finance/stock`. The prefix is defined once, as `stock_app.init`'s default, so the server and the
+pusher cannot disagree about it.
+
+`patch_finance_app.py` **migrates** a server already carrying v2 rather than refusing it, and
+refuses a block that has been edited by hand rather than overwriting it.
+
 *S208_STOCK_LEDGER · 28-Aug-2026 · nothing live was touched by the session that built it.*

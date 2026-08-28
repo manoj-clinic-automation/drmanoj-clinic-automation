@@ -33,4 +33,13 @@ v2       28-Aug-2026, after the first live run. Step 8 asked the app over HTTP
          gunicorn does and asks the app which routes it has. HTTP is kept only
          to answer "is it answering", which is all it can honestly say.
          Nothing else changed; 44/44 and 14/14 re-run unchanged.
+v3       28-Aug-2026, after the v2 install went GREEN and the push still got
+         404. The pages were mounted at /stock; the web server proxies ONE
+         context to this app -- /finance -- and nothing else, so the request
+         never reached the app at all. The ledger now lives at /finance/stock,
+         which needs NO web-server change and keeps the portal SSO cookie in
+         scope (F-68). The prefix is defined in exactly one place, in
+         stock_app.init's default, so it cannot drift from what the pusher
+         sends. patch_finance_app.py MIGRATES a server already carrying v2,
+         and refuses a block that has been edited by hand.
 INSTALL  bash /root/deploy/vps_deploy.sh S208_STOCK_LEDGER
