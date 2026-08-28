@@ -139,8 +139,24 @@ def parse_qty(cell, pack_size):
 
 
 def _sheet(path):
-    import xlrd
-    return xlrd.open_workbook(path).sheet_by_index(0)
+    """Open .xls OR .xlsx.
+
+    S207, 28-Aug-2026. This read .xls only, through xlrd, and xlrd 2.x dropped
+    .xlsx entirely -- so a stock export saved as .xlsx died with
+    "Excel xlsx file; not supported".
+
+    That is not a hypothetical. Marg saves its exports by driving Excel over
+    OLE, and when that channel fails ("Unable to save file, Problem in excel
+    ver saving!") the working fallback is to Save As from Excel by hand --
+    which produces .xlsx. So the format this could not read is exactly the
+    format that arrives on the days Marg is broken, which are the days the
+    reading matters most.
+
+    xlsx_sheet.open_sheet_any already solved this for the sale side. It is the
+    same fix, one module over -- and it was sitting unused here the whole time.
+    """
+    from xlsx_sheet import open_sheet_any
+    return open_sheet_any(path)
 
 
 def read_closing(path):

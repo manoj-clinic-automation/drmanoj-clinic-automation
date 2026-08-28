@@ -1,0 +1,15 @@
+KIT      S207_STOCK_VPS
+BUILT    28-Aug-2026 IST, attended session on manojz
+PURPOSE  the stock loop on the clinic server:
+         expected (Marg) -> counted (staff) -> difference -> cause -> closed
+STATE    STAGED, NOT INSTALLED. The VPS was not touched and no credential for
+         it exists in the session that built this, by design.
+FILES    stock_schema.sql        five tables, added to the EXISTING finance.db
+         stock_app.py           a Flask blueprint for finance_app.py
+         selftest_stock_app.py  37 checks against the real routes, temp db
+         push_snapshot.py       runs on MANOJZ; feeds the server the newest
+                                Marg stock so differences close by themselves
+PROVEN   selftest 37/37 first run · push_snapshot dry-run against the real
+         archive picks 27-08-2026, 376 items, 187 priced, and refuses the
+         81-row orthotics subset (F-235)
+INSTALL  two lines in finance_app.py, then restart. See README.md.

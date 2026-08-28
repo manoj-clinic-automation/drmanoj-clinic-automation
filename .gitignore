@@ -35,6 +35,18 @@
 *secret*
 *token*
 
+# ---- CONTACT NUMBERS: F-185. Never in this repository, in any format. ----
+# The PATIENT-DATA block below blocks .csv/.tsv/.xls/.xlsx and says nothing
+# about .json. On 28-Aug a kit shipped 18 real supplier numbers in a .json
+# inside deploy_kits and nothing would have stopped the next publish. Numbers
+# live in the config store beside the archive, never here.
+*phone*.json
+*phones*
+*contact*.json
+*contacts*
+*mobile*.json
+_config/
+
 # ---- PATIENT DATA: exports, mirrors, logs, recordings ----
 *.csv
 *.tsv

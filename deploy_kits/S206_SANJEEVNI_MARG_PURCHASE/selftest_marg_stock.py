@@ -94,15 +94,47 @@ closing = sorted(glob.glob(os.path.join(ARCHIVE, "STOCK_CLOSING", "2026-08", "*.
 if not closing:
     _no_archive("no STOCK_CLOSING export for 2026-08", ARCHIVE, _pass)
 print("\n[3] the four exports are four STORES, identified by title not filename")
-ck("four closing exports found", len(closing) == 4, "%d" % len(closing))
-stores = {}
-for p in closing:
-    rep = MS.read_closing(p)
-    stores[rep["store"]] = rep
+# S207, 28-Aug-2026. This block used to say `len(closing) == 4` and then throw
+# every export into one dict keyed by store. It assumed the month folder holds
+# exactly ONE set of four store exports. The morning a fresh WHOLE STORES for
+# 27-Aug arrived it held five, and four checks went red -- the identity test
+# comparing 27-Aug WHOLE against 26-Aug MAIN+DTH+SCRAP and reporting 83 items
+# "disagreeing". Nothing was wrong with the data or the reader: the test was
+# COUNTING FILES where it should have been READING DATES. A check that goes
+# red because the pharmacy exported its stock again is a check that gets waved
+# through, and then it is not a check (D316).
+FOUR = {"DTH", "MAIN STORE", "SCRAP STORE", "WHOLE STORES"}
+by_date = collections.defaultdict(dict)
+for _p in closing:
+    _rep = MS.read_closing(_p)
+    _key = _rep["store"]
+    _prev = by_date[_rep["as_on"]].get(_key)
+    # A FILTERED export (one category) carries the SAME store name and the
+    # SAME as-on date as the full one and is indistinguishable by filename.
+    # An orthotics-only export -- 81 rows claiming "WHOLE STORES" -- landed
+    # beside the real 377-row one on 28-Aug. Keep the larger, and say so:
+    # silently taking the smaller would understate the whole shop.
+    if _prev is not None:
+        big, small = (_rep, _prev) if len(_rep["rows"]) > len(_prev["rows"]) else (_prev, _rep)
+        print("     NOTE two exports claim %s / %s -- %d rows and %d rows. "
+              "Using the larger; the smaller looks like a FILTERED subset."
+              % (_key, _rep["as_on"], len(big["rows"]), len(small["rows"])))
+        by_date[_rep["as_on"]][_key] = big
+    else:
+        by_date[_rep["as_on"]][_key] = _rep
+
+_full = sorted(d for d, st in by_date.items() if FOUR <= set(st))
+ck("some as-on date carries all four store exports", bool(_full),
+   repr({d: sorted(st) for d, st in by_date.items()}))
+if not _full:
+    _no_archive("no single as-on date carries all four store exports", ARCHIVE, _pass)
+AS_ON = _full[-1]
+stores = by_date[AS_ON]
+print("     %d closing export(s), %d as-on date(s); testing the identity on %s"
+      % (len(closing), len(by_date), AS_ON))
 ck("stores are DTH / MAIN STORE / SCRAP STORE / WHOLE STORES",
-   set(stores) == {"DTH", "MAIN STORE", "SCRAP STORE", "WHOLE STORES"},
-   repr(sorted(stores)))
-ck("all four are 'as on' the same date",
+   FOUR <= set(stores), repr(sorted(stores)))
+ck("every store in that set is 'as on' the same date",
    len({r["as_on"] for r in stores.values()}) == 1,
    repr({s: r["as_on"] for s, r in stores.items()}))
 

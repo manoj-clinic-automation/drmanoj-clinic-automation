@@ -1,0 +1,109 @@
+<title>Sell This Batch First</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--ground:#F6F8F7;--surface:#FFF;--sunk:#EDF2F0;--ink:#15201E;--ink-2:#3D4B48;
+ --muted:#66756F;--line:#D9E2DF;--accent:#0E5C58;--on-accent:#FFF;
+ --now:#8C2F22;--now-bg:#FBE9E5;--soon:#8A5A12;--soon-bg:#FAF0DC;--watch:#0E5C58;--watch-bg:#DEEDEA;
+ --shadow:0 1px 2px rgba(15,40,36,.06),0 8px 24px -18px rgba(15,40,36,.3)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --ground:#0D1312;--surface:#151D1B;--sunk:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;
+ --muted:#869892;--line:#26332F;--accent:#63C2B6;--on-accent:#0D1312;
+ --now:#F0A091;--now-bg:#38211D;--soon:#DFAE62;--soon-bg:#33280F;--watch:#63C2B6;--watch-bg:#17322F;
+ --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px -18px rgba(0,0,0,.8)}}
+:root[data-theme="dark"]{--ground:#0D1312;--surface:#151D1B;--sunk:#1B2523;--ink:#E7EEEB;
+ --ink-2:#BCC9C5;--muted:#869892;--line:#26332F;--accent:#63C2B6;--on-accent:#0D1312;
+ --now:#F0A091;--now-bg:#38211D;--soon:#DFAE62;--soon-bg:#33280F;--watch:#63C2B6;--watch-bg:#17322F;
+ --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px -18px rgba(0,0,0,.8)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-size:16px;line-height:1.5;
+ font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:680px;margin:0 auto;padding:26px 14px 70px}
+h1{font-family:Archivo,sans-serif;font-weight:700;font-size:clamp(25px,6vw,34px);
+ letter-spacing:-.02em;line-height:1.08;margin:0 0 8px;text-wrap:balance}
+.lede{margin:0 0 4px;color:var(--ink-2)}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.13em;
+ text-transform:uppercase;color:var(--accent);margin:0 0 9px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0 6px}
+.stats div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px}
+.stats .v{font-family:Archivo,sans-serif;font-weight:700;font-size:22px;line-height:1;font-variant-numeric:tabular-nums}
+.stats .k{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;
+ text-transform:uppercase;color:var(--muted);margin-top:5px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:14px 0 4px;position:sticky;top:0;
+ background:var(--ground);z-index:5;border-bottom:1px solid var(--line);margin-bottom:12px}
+.chips button{font:inherit;font-size:13.5px;padding:7px 13px;border-radius:99px;cursor:pointer;
+ border:1px solid var(--line);background:var(--surface);color:var(--ink);white-space:nowrap}
+.chips button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+ padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.hd{display:flex;gap:12px;align-items:flex-start;margin-bottom:11px}
+.hd h3{font-family:Archivo,sans-serif;font-size:16.5px;font-weight:600;margin:0;flex:1;
+ letter-spacing:-.01em;overflow-wrap:anywhere}
+.stk{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:18px;text-align:right;
+ font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap}
+.stk small{display:block;font-size:9.5px;font-weight:400;color:var(--muted);
+ letter-spacing:.05em;text-transform:uppercase;margin-top:4px}
+.sell{display:grid;gap:3px;padding:11px 12px;border-radius:9px;
+ background:var(--watch-bg);border-left:3px solid var(--watch)}
+.card.now .sell{background:var(--now-bg);border-left-color:var(--now)}
+.card.soon .sell{background:var(--soon-bg);border-left-color:var(--soon)}
+.lbl{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;
+ text-transform:uppercase;color:var(--muted)}
+.bat{font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:600;overflow-wrap:anywhere}
+.exp{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-2)}
+.mo{font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:600;color:var(--watch)}
+.card.now .mo{color:var(--now)} .card.soon .mo{color:var(--soon)}
+.alts{margin-top:10px;padding-top:9px;border-top:1px dashed var(--line)}
+.alt{display:flex;gap:10px;align-items:baseline;font-family:"IBM Plex Mono",monospace;
+ font-size:12.5px;color:var(--muted);margin-top:4px}
+.alt .bt{overflow-wrap:anywhere}
+.warn{margin:10px 0 0;font-size:13px;color:var(--ink-2);padding:9px 11px;
+ background:var(--sunk);border-radius:8px}
+footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);
+ font-size:13px;max-width:64ch}
+footer code{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-2)}
+.hide{display:none!important}
+</style>
+<div class="wrap">
+<p class="eyebrow">Sanjeevni Medicos &middot; Marg stock as on __ASON__</p>
+<h1>Sell this batch first</h1>
+<p class="lede">Where an item has more than one batch on the shelf, the one that expires soonest
+goes out first. This is that list &mdash; nothing else needs deciding.</p>
+<div class="stats">
+  <div><div class="v">__N__</div><div class="k">items, 2+ batches</div></div>
+  <div><div class="v">__URGENT__</div><div class="k">under 6 months</div></div>
+  <div><div class="v">__WRONG__</div><div class="k">units gone wrong</div></div>
+</div>
+<div class="chips" id="chips">
+  <button type="button" data-f="all" aria-pressed="true">All</button>
+  <button type="button" data-f="6" aria-pressed="false">Under 6 months</button>
+  <button type="button" data-f="3" aria-pressed="false">Under 3 months</button>
+  <button type="button" data-f="w" aria-pressed="false">Going wrong now</button>
+</div>
+<div id="list">
+__ROWS__
+</div>
+<footer>
+<p><b>How this was worked out, and why it is evidence rather than a guess.</b> If a batch was sold
+<em>after</em> a given day, it was on the shelf that day. So a sale of a newer batch, while an older
+one was still selling, is a newer batch going out ahead of an older one &mdash; no model of opening
+stock is needed and none was used. Measured across <b>16,664</b> sale lines carrying a batch and an
+expiry, 1-Apr to 26-Aug-2026.</p>
+<p>Batches shown are those sold in the last two months, so the list reflects what is actually moving.
+An item whose only batch is the oldest is not here &mdash; there is nothing to decide.</p>
+</footer>
+</div>
+<script>
+const list=document.getElementById("list");
+document.getElementById("chips").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  [...b.parentNode.children].forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));
+  const f=b.dataset.f;
+  list.querySelectorAll(".card").forEach(c=>{
+    const m=+c.dataset.m, w=+c.dataset.w;
+    let show=true;
+    if(f==="6") show=m<=6; else if(f==="3") show=m<=3; else if(f==="w") show=w>0;
+    c.classList.toggle("hide",!show);
+  });
+});
+</script>

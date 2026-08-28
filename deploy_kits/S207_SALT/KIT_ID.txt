@@ -1,0 +1,13 @@
+KIT      S207_SALT
+BUILT    28-Aug-2026 IST
+PURPOSE  same-salt alternatives from Marg's SALT WISE ITEM LIST, filtered hard
+         and put to the doctor for approval before any staff page can use them
+STATE    STAGED. Reads the archive, writes one HTML. Nothing live touched.
+RUN      python3 salt_alternatives.py --selftest   11 checks, no data needed
+         python3 build_salt_page.py                writes SALT_ALTERNATIVES.html
+MEASURED 43 reprinted page-header rows skipped · 58 groups had an alternative ·
+         18 rejected (mixed pack forms, or too many brands for one molecule) ·
+         40 groups / 90 brands left for approval · ~1 in 10 of THOSE still wrong
+RULE     nothing reaches the counter until the doctor approves the pair.
+         These are medicines; a 90%-right list is a good review sheet and an
+         unacceptable thing to put in front of staff.

@@ -47,7 +47,9 @@ import subprocess
 import sys
 import time
 
-VERSION = "S207.1"
+VERSION = "S207.2"          # S207.1 -> .2 after the first live run:
+                            # the zone label, the future-dated heartbeat,
+                            # and IGNORED. Bump this WITH KIT_ID.txt.
 
 MARGPULL   = r"D:\Downloads\margsync\MargPull"
 LAST_PULL  = os.path.join(MARGPULL, "_last_pull.txt")

@@ -1,0 +1,147 @@
+<title>Same-Salt Alternatives</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--ground:#F6F8F7;--surface:#FFF;--sunk:#EDF2F0;--ink:#15201E;--ink-2:#3D4B48;
+ --muted:#66756F;--line:#D9E2DF;--accent:#0E5C58;--on-accent:#FFF;--flag:#8C2F22;--flag-bg:#FBE9E5;
+ --shadow:0 1px 2px rgba(15,40,36,.06),0 8px 24px -18px rgba(15,40,36,.3)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --ground:#0D1312;--surface:#151D1B;--sunk:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;
+ --line:#26332F;--accent:#63C2B6;--on-accent:#0D1312;--flag:#F0A091;--flag-bg:#38211D;
+ --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px -18px rgba(0,0,0,.8)}}
+:root[data-theme="dark"]{--ground:#0D1312;--surface:#151D1B;--sunk:#1B2523;--ink:#E7EEEB;
+ --ink-2:#BCC9C5;--muted:#869892;--line:#26332F;--accent:#63C2B6;--on-accent:#0D1312;
+ --flag:#F0A091;--flag-bg:#38211D;--shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px -18px rgba(0,0,0,.8)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-size:16px;line-height:1.5;
+ font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:26px 14px 90px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.13em;
+ text-transform:uppercase;color:var(--accent);margin:0 0 9px}
+h1{font-family:Archivo,sans-serif;font-weight:700;font-size:clamp(25px,6vw,34px);
+ letter-spacing:-.02em;line-height:1.08;margin:0 0 10px;text-wrap:balance}
+.lede{margin:0 0 10px;color:var(--ink-2);max-width:62ch}
+.warn{background:var(--flag-bg);border-left:3px solid var(--flag);border-radius:9px;
+ padding:14px 16px;margin:18px 0 22px}
+.warn b{display:block;margin-bottom:6px}
+.warn p{margin:0 0 8px;color:var(--ink-2);font-size:14.5px}
+.warn p:last-child{margin-bottom:0}
+.grp{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+ padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.grp.sus{border-left:3px solid var(--flag)}
+.grp.yes{border-color:var(--accent)}
+.grp.no{opacity:.5}
+.gh h3{font-family:Archivo,sans-serif;font-size:16px;font-weight:600;margin:0 0 4px;
+ letter-spacing:-.01em;overflow-wrap:anywhere}
+.flag{margin:0 0 8px;font-size:13.5px;color:var(--flag);font-weight:500}
+.grp ul{list-style:none;margin:8px 0 12px;padding:0;display:grid;gap:5px}
+.grp li{display:flex;gap:10px;align-items:baseline;padding:7px 10px;background:var(--sunk);
+ border-radius:7px;font-size:14.5px}
+.grp li b{flex:1;font-weight:500;overflow-wrap:anywhere}
+.grp li span{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);white-space:nowrap}
+.ga{display:flex;gap:7px}
+.ga button{font:inherit;font-size:13.5px;padding:10px 8px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--surface);color:var(--ink-2);flex:1}
+.ga button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.ga button[data-a="no"][aria-pressed="true"]{background:var(--flag);color:var(--on-accent);border-color:var(--flag)}
+h2{font-family:Archivo,sans-serif;font-size:19px;margin:32px 0 6px;letter-spacing:-.01em}
+.rej{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.rej ul{margin:0;padding-left:18px;font-size:14px}
+.rej li{margin-bottom:7px}
+.rej span{display:block;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)}
+footer{margin-top:32px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);
+ font-size:13px;max-width:66ch}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+ padding:10px 14px;z-index:20}
+.bar .in{max-width:720px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.bar .n{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--muted);flex:1}
+.bar button{font:inherit;font-weight:600;padding:11px 18px;border-radius:9px;cursor:pointer;
+ border:1px solid var(--accent);background:var(--accent);color:var(--on-accent)}
+.bar button[disabled]{opacity:.45;cursor:not-allowed}
+</style>
+<div class="wrap">
+<p class="eyebrow">Sanjeevni Medicos &middot; salt list &amp; stock as on __ASON__</p>
+<h1>Same-salt alternatives</h1>
+<p class="lede">When a stockist has none of a brand, another brand of the same molecule usually
+does the job. This is Marg&rsquo;s own salt list, filtered hard &mdash; <b>__NG__ groups, __NB__
+brands</b>.</p>
+
+<div class="warn">
+  <b>Read this before approving anything.</b>
+  <p>Marg&rsquo;s salt data is <b>not reliable</b>. The group headed <code>ETORICOXIB 60 + THIO 4</code>
+  really does contain an arm sling, a knee cap and a rib belt &mdash; checked against the raw cells,
+  not inferred. <b>__NR__ groups were thrown out</b> for mixing devices with tablets or listing more
+  brands of one molecule than a shop this size would stock, and <b>__NF__ reprinted page-header rows</b>
+  were skipped before that.</p>
+  <p>What is left is about nine in ten right. <b>Three that read wrong to me are marked in red</b> &mdash;
+  that is my reading, not a ruling.</p>
+  <p><b>Nothing here reaches the counter until you approve it.</b> A ninety-per-cent list is a good
+  thing for you to review once and the wrong thing to put in front of staff.</p>
+</div>
+
+__CARDS__
+
+<h2>Thrown out &mdash; and why</h2>
+<div class="rej"><ul>__REJ__</ul></div>
+
+<footer>
+<p>Quantities shown are what is on the shelf today, so an alternative that is itself out of stock is
+visible as such. Approvals are remembered and shared; they are what the order page will use when a
+stockist says they have none.</p>
+</footer>
+</div>
+<div class="bar"><div class="in"><span class="n" id="n">0 decided</span>
+<button id="share">Share</button></div></div>
+<script id="SHARED" type="application/json">__SHARED__</script>
+<script id="SKEL" type="text/plain">__SKEL__</script>
+<script>
+const KEY="sanj-salt-v1";
+let S=(()=>{try{return JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){return{}}})();
+if(!S.a) S.a={};
+let SHARED=(()=>{try{return JSON.parse(document.getElementById("SHARED").textContent||"{}")||{}}catch(e){return{}}})();
+if(!SHARED.a) SHARED.a={};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+function merged(){const o={};Object.keys(SHARED.a).forEach(k=>o[k]=SHARED.a[k]);
+  Object.keys(S.a).forEach(k=>{const a=o[k],b=S.a[k];if(!a||String(b.at||"")>=String(a.at||""))o[k]=b});return o}
+const unshared=()=>Object.keys(S.a).filter(k=>{const a=SHARED.a[k],b=S.a[k];
+  return !a||String(b.at||"")>String(a.at||"")});
+let ART=null,RO=false;
+function paint(){
+  const M=merged();
+  document.querySelectorAll(".grp[data-salt]").forEach(g=>{
+    const v=(M[g.dataset.salt]||{}).v;
+    g.classList.toggle("yes",v==="yes"); g.classList.toggle("no",v==="no");
+    g.querySelectorAll(".ga button").forEach(b=>b.setAttribute("aria-pressed",String(v===b.dataset.a)));
+  });
+  const total=document.querySelectorAll(".grp[data-salt]").length;
+  document.getElementById("n").textContent=Object.keys(M).length+" of "+total+" decided";
+  const sb=document.getElementById("share"), n=unshared().length;
+  if(RO){sb.textContent="View only";sb.disabled=true;}
+  else if(!ART){sb.textContent="On this device only";sb.disabled=true;}
+  else{sb.disabled=n===0;sb.textContent=n?("Share "+n):"Shared";}
+}
+document.querySelectorAll(".grp[data-salt] .ga button").forEach(b=>b.addEventListener("click",()=>{
+  const g=b.closest(".grp");
+  S.a[g.dataset.salt]={v:b.dataset.a,at:new Date().toISOString()};
+  save(); paint();
+}));
+(async()=>{try{ART=await claude.use("artifact")}catch(e){ART=null} paint()})();
+function buildDoc(next){
+  const b64=document.getElementById("SKEL").textContent.trim();
+  const skel=new TextDecoder().decode(Uint8Array.from(atob(b64),c=>c.charCodeAt(0)));
+  const j=JSON.stringify(next);
+  return skel.replace("__SHARED__",()=>j).replace("__SKEL__",()=>b64);
+}
+document.getElementById("share").addEventListener("click",async()=>{
+  const sb=document.getElementById("share");
+  if(!ART||RO||!unshared().length) return;
+  sb.disabled=true; sb.textContent="Sharing…";
+  const next={a:merged(),at:new Date().toISOString()};
+  try{ await ART.publish(buildDoc(next)); SHARED=next; paint(); }
+  catch(err){ const c=(err&&err.code)||"";
+    if(c==="conflict") sb.textContent="Someone else shared — reloading";
+    else if(c==="not_writer"||c==="not_granted"){RO=true;paint();}
+    else{sb.disabled=false;sb.textContent="Share failed — try again";}}
+});
+paint();
+</script>

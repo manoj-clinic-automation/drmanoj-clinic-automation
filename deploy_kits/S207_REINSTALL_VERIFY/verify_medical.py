@@ -43,7 +43,9 @@ import re
 import sys
 import time
 
-VERSION = "S207.1"
+VERSION = "S207.2"          # S207.1 -> .2 after the first live run:
+                            # the zone label, the future-dated heartbeat,
+                            # and IGNORED. Bump this WITH KIT_ID.txt.
 
 SENDTOCLINIC = r"D:\SendToClinic"
 HEARTBEAT    = os.path.join(SENDTOCLINIC, "heartbeat.txt")

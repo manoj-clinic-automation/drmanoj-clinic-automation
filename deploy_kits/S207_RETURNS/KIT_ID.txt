@@ -1,0 +1,7 @@
+KIT      : S207_RETURNS
+BUILT    : 2026-08-28 IST, Session 207, unattended
+PURPOSE  : the purchase-return lifecycle -- booked to credit note -- and the
+           expiry-driven list of what should go back.
+STATE    : STAGED. Nothing installed. Nothing published. The VPS was not touched.
+SELFTEST : selftest_returns_app.py  44 checks   (needs Flask)
+           selftest_returns_data.py 26 checks   (needs D:\Downloads connected)

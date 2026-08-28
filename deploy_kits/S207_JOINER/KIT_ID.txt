@@ -1,0 +1,8 @@
+KIT      : S207_JOINER
+BUILT    : 2026-08-28 IST, Session 207
+PURPOSE  : the formal system for adding a person to the clinic's systems, and
+           for removing one. Owner's ask: "a formal system of adding any one
+           into our system."
+STATE    : STAGED. Nothing installed. Nothing published. The VPS was not touched.
+SELFTEST : selftest_joiner_app.py   42 checks   (needs Flask)
+PAGE     : https://claude.ai/code/artifact/b395e8e4-e3dc-4a5e-be4c-17a10bab18bd

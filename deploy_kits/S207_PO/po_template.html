@@ -1,0 +1,342 @@
+<title>Today's Purchase Orders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--ground:#F6F8F7;--surface:#FFF;--sunk:#EDF2F0;--ink:#15201E;--ink-2:#3D4B48;
+ --muted:#66756F;--line:#D9E2DF;--accent:#0E5C58;--on-accent:#FFF;--ask:#8A5A12;--ask-bg:#FAF0DC;
+ --shadow:0 1px 2px rgba(15,40,36,.06),0 8px 24px -18px rgba(15,40,36,.3)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --ground:#0D1312;--surface:#151D1B;--sunk:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;
+ --line:#26332F;--accent:#63C2B6;--on-accent:#0D1312;--ask:#DFAE62;--ask-bg:#33280F;
+ --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px -18px rgba(0,0,0,.8)}}
+:root[data-theme="dark"]{--ground:#0D1312;--surface:#151D1B;--sunk:#1B2523;--ink:#E7EEEB;
+ --ink-2:#BCC9C5;--muted:#869892;--line:#26332F;--accent:#63C2B6;--on-accent:#0D1312;
+ --ask:#DFAE62;--ask-bg:#33280F;--shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px -18px rgba(0,0,0,.8)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-size:16px;line-height:1.5;
+ font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:26px 14px 70px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.13em;
+ text-transform:uppercase;color:var(--accent);margin:0 0 9px}
+h1{font-family:Archivo,sans-serif;font-weight:700;font-size:clamp(25px,6vw,34px);
+ letter-spacing:-.02em;line-height:1.08;margin:0 0 8px;text-wrap:balance}
+.lede{margin:0;color:var(--ink-2);max-width:62ch}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0 24px}
+.stats div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px}
+.stats .v{font-family:Archivo,sans-serif;font-weight:700;font-size:21px;line-height:1;
+ font-variant-numeric:tabular-nums}
+.stats .k{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;
+ text-transform:uppercase;color:var(--muted);margin-top:5px}
+.v{margin-bottom:14px}
+section.v{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+ padding:14px;box-shadow:var(--shadow)}
+.vh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.vh h2{font-family:Archivo,sans-serif;font-size:16.5px;font-weight:600;margin:0;flex:1;
+ letter-spacing:-.01em;overflow-wrap:anywhere}
+.cad{font-family:"IBM Plex Mono",monospace;font-size:11px;padding:2px 8px;border-radius:99px;
+ background:var(--sunk);color:var(--ink-2)}
+.tot{font-family:"IBM Plex Mono",monospace;font-weight:600;font-variant-numeric:tabular-nums}
+.lines{display:grid;gap:9px}
+.line{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:var(--surface)}
+.line.gone{opacity:.5}
+.line.gone .lh b,.line.gone .lo{text-decoration:line-through}
+.lh{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin-bottom:5px}
+.lh b{font-size:15.5px;overflow-wrap:anywhere}
+.lf{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-bottom:7px}
+.lf b{color:var(--ink-2);font-family:"IBM Plex Mono",monospace;font-weight:500}
+.lo{font-family:"IBM Plex Mono",monospace;font-size:15px;margin-bottom:9px}
+.lo b{font-size:18px;font-weight:600}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:420px}
+th{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+ color:var(--muted);font-weight:400;text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--line);font-size:14.5px}
+tr:last-child td{border-bottom:0}
+.n{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+.b{font-weight:600}
+.it{overflow-wrap:anywhere}
+.ss{font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--muted);
+ border:1px solid var(--line);border-radius:99px;padding:1px 5px;white-space:nowrap}
+.st{display:flex;gap:6px}
+.st button{font:inherit;font-size:13px;padding:9px 6px;border-radius:8px;cursor:pointer;
+ border:1px solid var(--line);background:var(--surface);color:var(--ink-2);flex:1;
+ white-space:nowrap}
+.st button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.st button.no[aria-pressed="true"]{background:var(--ask);color:var(--on-accent);border-color:var(--ask)}
+.part{width:100%;margin-top:7px;font:inherit;font-size:14px;padding:9px 11px;border-radius:8px;
+ border:1px solid var(--ask);background:var(--surface);color:var(--ink)}
+.short{margin-top:12px;padding:11px 13px;border-radius:9px;background:var(--ask-bg);
+ border-left:3px solid var(--ask);font-size:13.5px}
+.short b{display:block;margin-bottom:5px}
+.short ul{margin:0;padding-left:18px}
+.vfoot{display:flex;gap:8px;margin-top:11px}
+.vfoot .cp{margin-top:0;flex:1}
+.call{flex:0 0 auto;display:none;align-items:center;justify-content:center;text-decoration:none;
+ font-weight:600;padding:12px 18px;border-radius:9px;border:1px solid var(--accent);
+ color:var(--accent);background:var(--surface)}
+.call.on{display:flex}
+.tel{width:100%;margin-top:8px;font:inherit;font-size:13.5px;padding:9px 11px;border-radius:8px;
+ border:1px dashed var(--line);background:var(--surface);color:var(--ink)}
+.tel.has{border-style:solid;border-color:var(--accent)}
+.shr{margin-top:16px;width:100%;font:inherit;font-weight:600;
+ padding:12px;border-radius:9px;border:1px solid var(--accent);background:var(--accent);
+ color:var(--on-accent);cursor:pointer}
+.shr[disabled]{opacity:.45;cursor:not-allowed}
+.cp{margin-top:11px;width:100%;font:inherit;font-weight:600;padding:11px;border-radius:9px;
+ border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);cursor:pointer}
+h3{font-family:Archivo,sans-serif;font-size:19px;margin:30px 0 4px;letter-spacing:-.01em}
+.sub{margin:0 0 14px;color:var(--ink-2);max-width:62ch}
+.ask{background:var(--ask-bg);border-left:3px solid var(--ask);border-radius:9px;
+ padding:12px 14px;margin-bottom:9px}
+.ai{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.ai b{font-size:15px}
+.ai span{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-2)}
+.ask ul{margin:7px 0 0;padding-left:18px;font-size:13.5px;color:var(--ink-2)}
+.orph{display:grid;gap:8px}
+.orow{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+.orow.low{border-left:3px solid var(--ask)}
+.oh{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:7px}
+.oh b{font-size:15px;flex:1;overflow-wrap:anywhere}
+.oh span{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);white-space:nowrap}
+.oh .out{color:var(--ask);font-weight:600}
+.sup{width:100%;font:inherit;font-size:14px;padding:9px 11px;border-radius:8px;
+ border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.sup:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.guess{margin:0 0 8px;font-size:13.5px;color:var(--ink-2);padding:8px 10px;border-radius:8px;
+ background:var(--sunk);cursor:pointer}
+.guess span{color:var(--muted);font-size:12.5px}
+.guess.likely{border-left:3px solid var(--accent)}
+.guess.possible{border-left:3px solid var(--ask)}
+.guess.weak{border-left:3px solid var(--line)}
+.guess.none{cursor:default;border-left:3px solid var(--line)}
+.orow.named{border-color:var(--accent)}
+.orow.named .sup{border-color:var(--accent)}
+footer{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);
+ font-size:13px;max-width:66ch}
+footer code{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-2)}
+@media (max-width:560px){.orph ul{columns:1}}
+.hide{display:none !important}
+</style>
+<div class="wrap">
+<p class="eyebrow">Sanjeevni Medicos &middot; stock as on __ASON__</p>
+<h1>Today&rsquo;s purchase orders</h1>
+<p class="lede">One message per stockist, bundled to the cadence agreed at S206. Anything already
+holding enough cover is simply not here.</p>
+<p class="lede" style="margin-top:8px">Quantities are in <b>strips and tablets</b>, the way Marg
+writes them. Orders are rounded up to the box the shop usually buys in. If a stockist has none,
+tap <b>out of stock</b> &mdash; that item then needs another supplier, and it says so at the bottom.</p>
+<div class="stats">
+ <div><div class="v">__NV__</div><div class="k">stockists</div></div>
+ <div><div class="v">__NL__</div><div class="k">lines</div></div>
+ <div><div class="v">__NC__</div><div class="k">need a decision</div></div>
+</div>
+__CARDS__
+<h3>__NC__ lines need Dr Manoj&rsquo;s word</h3>
+<p class="sub">A quantity was worked out for each of these, and none of them is placed automatically.
+The reason is on every line.</p>
+__CONFIRM__
+<h3>Who sends us this?</h3>
+<p class="sub">These <b>__NO__</b> items sell, but nothing in the last five months says who supplies
+them &mdash; they were bought before that, or under another name. <b>Next time you order one, type the
+stockist&rsquo;s name here.</b> Once it is written down they join the order list on their own and nobody
+has to remember again.</p>
+<p class="sub"><b>The ones at the top are already out of stock or nearly.</b> Where Marg knows the
+company that makes it, the stockist who supplies that company&rsquo;s other items is offered as a
+guess &mdash; <b>tap it if it is right</b>, type over it if it is not.</p>
+<div class="orph" id="orph">__ORPH__</div>
+<div id="shortfall"></div>
+<button id="share" class="shr">Share</button>
+<footer>
+<p><b>The phone number is asked for once.</b> Whoever first needs to ring a stockist types it in;
+after that it is a tap to call, for everyone. The number is not held anywhere else &mdash; the vendor
+sheet has never come back &mdash; so the page collects it at the moment somebody actually wants it.</p>
+<p><b>No prices on this page, deliberately.</b> Quantities are what the counter and the stockist
+need; what it costs is Dr Manoj&rsquo;s business and is not printed where staff work.</p>
+<p><b>How the quantity is worked out.</b> <code>(daily rate &times; cover) &minus; on hand</code>,
+rounded up to whole strips. Cover is the vendor&rsquo;s cadence plus 2 days lead and 3 days safety,
+with 3 more for an item only one stockist carries. <b>Lead time is still a placeholder</b> until the
+vendor sheet comes back &mdash; it is the last unmeasured number in the model.</p>
+<p><b>What is deliberately not ordered.</b> Anything already above its cover. Anything unsold for
+60 days. Any line too small to be worth a handling, unless it is actually out of stock. And nothing where the daily rate
+comes from too few selling days, or from one big day &mdash; those ask instead.</p>
+</footer>
+</div>
+<script id="SHARED" type="application/json">__SHARED__</script>
+<script id="SKEL" type="text/plain">__SKEL__</script>
+<script>
+/* ---------- what the stockist actually supplied ----------
+   An item the stockist cannot send is the single commonest cause of a
+   stockout, and today it lives in somebody's head until the goods do not
+   arrive. Recorded here it becomes a fact with a name and a time on it, and
+   the next order can go to a different stockist instead of repeating the
+   request nobody could fill.
+
+   Same two-copy design as the count sheet: localStorage is the working copy
+   and is never lost; the shared copy moves only when somebody taps Share. */
+const KEY = "sanj-po-v1";
+let S = (() => { try { return JSON.parse(localStorage.getItem(KEY) || "{}") || {}; }
+                 catch (e) { return {}; } })();
+if (!S.e) S.e = {};
+if (!S.sup) S.sup = {};
+if (!S.tel) S.tel = {};
+let SHARED = (() => { try { return JSON.parse(document.getElementById("SHARED").textContent || "{}") || {}; }
+                      catch (e) { return {}; } })();
+if (!SHARED.e) SHARED.e = {};
+if (!SHARED.sup) SHARED.sup = {};
+if (!SHARED.tel) SHARED.tel = {};
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+function mergeMap(shared, mine) {
+  const o = {};
+  Object.keys(shared).forEach(k => o[k] = shared[k]);
+  Object.keys(mine).forEach(k => {
+    const a = o[k], b = mine[k];
+    if (!a || String(b.at || "") >= String(a.at || "")) o[k] = b;
+  });
+  return o;
+}
+const merged    = () => mergeMap(SHARED.e, S.e);
+const mergedSup = () => mergeMap(SHARED.sup, S.sup);
+const mergedTel = () => mergeMap(SHARED.tel, S.tel);
+function gap(shared, mine) {
+  return Object.keys(mine).filter(k => {
+    const a = shared[k], b = mine[k];
+    return !a || String(b.at || "") > String(a.at || "");
+  });
+}
+const unshared = () => gap(SHARED.e, S.e)
+  .concat(gap(SHARED.sup, S.sup)).concat(gap(SHARED.tel, S.tel));
+
+function setStatus(item, vendor, status) {
+  // Two states only. "Gave less" used to live here and it was wrong by design:
+  // a part supply is a fact for the purchase reconciliation to establish from
+  // the bill, not a number for a counter to type while a rep waits. Staff need
+  // the minimum flow -- ordered, or they had none.
+  if (status === "ok") delete S.e[item];
+  else S.e[item] = { v: vendor, s: status, at: new Date().toISOString() };
+  save(); paint();
+}
+
+function paint() {
+  const M = merged();
+  document.querySelectorAll(".line[data-item]").forEach(tr => {
+    const it = tr.dataset.item, e = M[it];
+    tr.classList.toggle("gone", !!e && e.s === "out");
+    tr.querySelectorAll(".st button").forEach(b =>
+      b.setAttribute("aria-pressed", String((e ? e.s : "ok") === b.dataset.s)));
+  });
+  // the shortfall list — what nobody could supply, and what came up short
+  const out = [];
+  Object.keys(M).forEach(k => {
+    const e = M[k];
+    if (e.s === "out") out.push(k + "  (" + e.v + ")");
+
+  });
+  // supplier names typed at the counter
+  const SUP = mergedSup();
+  document.querySelectorAll(".orow[data-item]").forEach(r => {
+    const nm = (SUP[r.dataset.item] || {}).n || "";
+    r.classList.toggle("named", !!nm);
+    const i = r.querySelector(".sup");
+    if (i && document.activeElement !== i) i.value = nm;
+  });
+  // vendor phone numbers, typed once by whoever needed to call first
+  const TEL = mergedTel();
+  document.querySelectorAll("section.v[data-vendor]").forEach(sec => {
+    const i0 = sec.querySelector(".tel");
+    // A number already known from Marg's purchase-party list is the default;
+    // anything typed here later wins over it.
+    const num = (TEL[sec.dataset.vendor] || {}).n || (i0 ? i0.defaultValue : "") || "";
+    const a = sec.querySelector(".call"), i = sec.querySelector(".tel");
+    a.classList.toggle("on", !!num);
+    if (num) a.href = "tel:" + num.replace(/[^0-9+]/g, "");
+    i.classList.toggle("has", !!num);
+    if (document.activeElement !== i) i.value = num;
+  });
+  const box = document.getElementById("shortfall");
+  box.innerHTML = (!out.length) ? "" :
+    '<div class="short"><b>Could not be supplied — needs another stockist</b><ul>' +
+    out.map(x => "<li>" + x + "</li>").join("") + "</ul></div>";
+  const n = unshared().length, sb = document.getElementById("share");
+  if (sb) {
+    if (READONLY) { sb.textContent = "View only"; sb.disabled = true; }
+    else if (!ART) { sb.textContent = "On this phone only"; sb.disabled = true; }
+    else { sb.disabled = n === 0; sb.textContent = n ? ("Share " + n) : "Shared"; }
+  }
+}
+
+document.querySelectorAll(".line[data-item]").forEach(tr => {
+  tr.querySelectorAll(".st button").forEach(b =>
+    b.addEventListener("click", () => setStatus(tr.dataset.item, tr.dataset.vendor, b.dataset.s)));
+});
+
+document.querySelectorAll(".orow[data-item]").forEach(r => {
+  const g = r.querySelector(".guess:not(.none)");
+  if (g && r.dataset.sug) g.addEventListener("click", () => {
+    const i = r.querySelector(".sup");
+    i.value = r.dataset.sug;
+    i.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  const i = r.querySelector(".sup");
+  if (!i) return;
+  i.addEventListener("input", () => {
+    const nm = i.value.trim();
+    if (nm) S.sup[r.dataset.item] = { n: nm, at: new Date().toISOString() };
+    else delete S.sup[r.dataset.item];
+    save(); paint();
+  });
+});
+
+document.querySelectorAll("section.v[data-vendor]").forEach(sec => {
+  const i = sec.querySelector(".tel");
+  if (!i) return;
+  i.addEventListener("input", () => {
+    const num = i.value.trim();
+    if (num) S.tel[sec.dataset.vendor] = { n: num, at: new Date().toISOString() };
+    else delete S.tel[sec.dataset.vendor];
+    save(); paint();
+  });
+});
+
+/* the order message carries only what is still wanted */
+document.querySelectorAll(".cp[data-lines]").forEach(b => b.addEventListener("click", async () => {
+  const M = merged();
+  const lines = JSON.parse(b.dataset.lines).filter(l => {
+    const e = M[l.i];
+    return !(e && e.s === "out");
+  }).map(l => {
+    return l.i + " : " + l.n + " strips";
+  });
+  const msg = "Sanjeevni Medicos — order\n" + lines.join("\n");
+  try { await navigator.clipboard.writeText(msg); b.textContent = lines.length ? "Copied" : "Nothing left to order"; }
+  catch (e) { b.textContent = "Could not copy"; }
+  setTimeout(() => b.textContent = "Copy this order", 1700);
+}));
+
+/* ---------- sharing ---------- */
+let ART = null, READONLY = false;
+(async () => { try { ART = await claude.use("artifact"); } catch (e) { ART = null; } paint(); })();
+
+function buildDoc(next) {
+  const b64 = document.getElementById("SKEL").textContent.trim();
+  const bin = atob(b64), bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  const skel = new TextDecoder().decode(bytes);
+  const json = JSON.stringify(next);
+  return skel.replace("__SHARED__", () => json).replace("__SKEL__", () => b64);
+}
+document.getElementById("share").addEventListener("click", async () => {
+  const sb = document.getElementById("share");
+  if (!ART || READONLY || !unshared().length) return;
+  sb.disabled = true; sb.textContent = "Sharing…";
+  const next = { e: merged(), sup: mergedSup(), tel: mergedTel(),
+                 at: new Date().toISOString() };
+  try { await ART.publish(buildDoc(next)); SHARED = next; paint(); }
+  catch (err) {
+    const c = (err && err.code) || "";
+    if (c === "conflict") sb.textContent = "Someone else shared — reloading";
+    else if (c === "not_writer" || c === "not_granted") { READONLY = true; paint(); }
+    else { sb.disabled = false; sb.textContent = "Share failed — try again"; }
+  }
+});
+paint();
+</script>

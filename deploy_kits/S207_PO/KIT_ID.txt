@@ -1,0 +1,11 @@
+KIT      S207_PO
+BUILT    28-Aug-2026 IST
+PURPOSE  the purchase order generator, implementing the cadence approved at
+         S206_CONSUMPTION_AND_ORDERING_CADENCE — plus quantity safety rails
+STATE    STAGED. Reads the archive, writes a plan and a page. Sends nothing.
+RUN      python3 po_engine.py --selftest       25 checks, no data needed
+         python3 selftest_po_build.py          18 checks against real data
+         python3 po_build.py --cap 60000       write po_plan.json
+         python3 po_page.py                    write the order page
+PROVEN   all six consumption rates match the figures measured independently at
+         S206 to 0.1/day, and the vendor count matches at 17

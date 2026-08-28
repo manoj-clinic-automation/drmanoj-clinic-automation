@@ -1,0 +1,11 @@
+KIT      S207_STOCK_CHECK
+BUILT    28-Aug-2026 IST, attended session on manojz
+PURPOSE  generates the staff stock-check page from the Marg archive
+STATE    STAGED, NOT INSTALLED. Reads the archive; writes one HTML into
+         D:\Downloads\margsync\_analysis\. Touches nothing live.
+RUN      python3 build_stock_check.py            (rebuild from latest exports)
+         python3 build_stock_check.py --selftest (14 checks, no data needed)
+EXITS    0 written · 1 real failure · 2 archive not reachable
+PROVEN   selftest 14/14 · driven end-to-end in a real browser at 390px and
+         360px: gate, 376-item list, OK path, strips+loose, batch capture,
+         report, no sideways scroll, no page errors

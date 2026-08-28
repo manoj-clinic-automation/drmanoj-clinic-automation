@@ -1,0 +1,14 @@
+KIT      : S207_SCANNER
+BUILT    : 2026-08-28 IST, Session 207
+PURPOSE  : scanner_widget v2 -- the three faults found by scanning a real
+           driving licence: no autocrop, camera hid the buttons, buttons too
+           small to hit.
+BASE     : assetapp/scanner_widget.js  md5 4fe8c89386a54ce90786823b53df55bc
+           (identical to the live VPS capture in S204_VPS_LIVE)
+STATE    : STAGED. The live file was NOT swapped. Nothing installed.
+TESTS    : t_detect.py  7 synthetic documents, ground truth known
+           t_hard.py    9 adversarial cases (tilt, shadow, vignette, finger...)
+           t_regress.py 37 checks -- every v1 feature, driven in a browser
+           t_layout.py  3 phone sizes, real fake camera stream
+CONTRACT : window.SCANNER_CONFIG unchanged. Drop-in for Asset Register and
+           Casepack alike.

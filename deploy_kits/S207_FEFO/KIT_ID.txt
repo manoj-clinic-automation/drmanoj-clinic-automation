@@ -1,0 +1,14 @@
+KIT      S207_FEFO
+BUILT    28-Aug-2026 IST
+PURPOSE  which batch Darpan should sell next, per item, and which batches
+         have been going out in the wrong order
+STATE    STAGED. Reads the archive; writes one HTML into _analysis\. Nothing live touched.
+RUN      python3 fefo_page.py
+BASIS    16,664 sale lines carrying a batch AND an expiry, 1-Apr -> 26-Aug-2026
+         (97.0% of all 17,177 lines). 112 items sold from more than one batch.
+FOUND    4,205 lines out of order = 27.0% of multi-batch sales, 14,924 units,
+         51 items. 64 items need a batch decision today; 6 expire within
+         6 months; SOLOPOSE 0.5 (168 units) expires next month.
+METHOD   evidence, not inference: if a batch was sold AFTER a given day it was
+         on the shelf that day, so a newer batch sold while an older one was
+         still selling is a proven out-of-order sale. No opening-stock model.
