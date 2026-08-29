@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marg corrections — cash → UPI</title>
+<style>
+ body{font:15px/1.5 system-ui,sans-serif;margin:0 auto;max-width:760px;
+      background:#f6f4f1;color:#1c1c1c;padding:12px}
+ h1{font-size:20px;margin:6px 0}
+ .sub{color:#777;font-size:13px;margin-bottom:12px}
+ .counts{display:flex;gap:16px;margin:10px 0}
+ .box{background:#fff;border:1px solid #e4e0da;border-radius:10px;padding:10px 16px}
+ .box .n{font-size:22px;font-weight:600}
+ table{border-collapse:collapse;width:100%;background:#fff;border-radius:10px;
+       font-size:14px}
+ td,th{padding:8px;border-bottom:1px solid #eee;text-align:left}
+ td.r{text-align:right;font-variant-numeric:tabular-nums}
+ th{background:#efece7}
+ .done{color:#2e6b34}
+ .btn{border:1px solid #2e6b34;color:#2e6b34;background:#fff;border-radius:8px;
+      padding:5px 10px;cursor:pointer}
+ select{font-size:15px;padding:5px;border-radius:8px}
+ .muted{color:#888;font-size:12px}
+</style>
+</head>
+<body>
+<h1>Marg corrections — cash → UPI</h1>
+<div class="sub">Bills the bank proves were UPI but were rung as cash. Fix the
+payment mode in Marg, then tick the row here. A tick records who and when.</div>
+<select id="month" onchange="load()"></select>
+<div class="counts">
+ <div class="box"><div class="n" id="pend">–</div>pending</div>
+ <div class="box"><div class="n done" id="corr">–</div>corrected</div>
+</div>
+<div id="list"></div>
+<script>
+const R=p=>p==null?"—":"₹"+(p/100).toLocaleString("en-IN",{minimumFractionDigits:2});
+async function tick(id){
+ if(!confirm("Marg mein mode UPI kar diya?"))return;
+ const r=await fetch("/finance/darpan/api/correction/"+id+"/tick",
+  {method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+ const j=await r.json();if(!j.ok)alert(j.message||j.error);load();
+}
+async function load(){
+ const m=document.getElementById("month").value;
+ const r=await fetch("/finance/darpan/api/corrections"+(m?"?month="+m:""));
+ const j=await r.json();if(!j.ok)return;
+ const sel=document.getElementById("month");
+ if(!sel.options.length){
+  for(const mm of j.months.length?j.months:[j.month]){
+   const o=document.createElement("option");o.value=o.textContent=mm;sel.add(o);}
+  sel.value=j.month;
+ }
+ document.getElementById("pend").textContent=j.pending;
+ document.getElementById("corr").textContent=j.corrected;
+ let h='<table><tr><th>date</th><th>bill</th><th style="text-align:right">amount</th>'+
+   '<th>bank ref</th><th>answered</th><th>status</th></tr>';
+ for(const x of j.rows){
+  h+='<tr><td>'+x.date+'</td><td><b>'+(x.bill||"?")+'</b></td>'+
+   '<td class="r">'+R(x.amount_p)+'</td><td>'+(x.rrn||"")+'</td>'+
+   '<td>'+(x.answered_by?x.answered_by+' · '+(x.answer||""):'<span class="muted">not yet</span>')+'</td>'+
+   '<td>'+(x.ticked_by?'<span class="done">✓ '+x.ticked_by+' · '+
+     (x.ticked_at||"").slice(0,16).replace("T"," ")+'</span>'
+     :'<button class="btn" onclick="tick('+x.id+')">done in Marg ✓</button>')+
+   '</td></tr>';
+ }
+ h+='</table>';
+ document.getElementById("list").innerHTML=h;
+}
+load();
+</script>
+</body>
+</html>

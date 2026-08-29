@@ -1,0 +1,34 @@
+KIT      S208_DARPAN
+BUILT    30-Aug-2026 IST (00:30-01:15), attended session on manojz —
+         Sprint 2 of the S208_SPRINT_PLAN
+PURPOSE  Darpan's exceptions-first day card + the owner's corrections page +
+         the duplicate-filing guard + the owner tools (flag dismiss, staged
+         reject, re-file grant) + the money-received-bill-later log
+DESIGN   owner spec §0d, final: evening = one number (drawer count,
+         mandatory); morning card in HIS convention -- day sale net of
+         returns w/ CN bills · UPI w/ matched bills · net cash = sale − UPI
+         − home − procedure · categories expandable to detail · bank MPR
+         collapsed on all days · exceptions, two taps each · drawer at Rs 50.
+         No-identity bills are NEVER Darpan's and never edited in Marg.
+STATE    STAGED, NOT INSTALLED. Requires S208_BANKMATCH installed first.
+FILES    darpan_app.py               the blueprint: card API, drawer,
+                                     exception answers, submit, corrections,
+                                     owner tools, the before_request
+                                     duplicate-filing guard
+         darpan_card.html            the staff page, Hindi-first, phone-first
+         darpan_corrections.html     the owner's tick-off page
+         patch_finance_app_darpan.py one block before __main__, idempotent,
+                                     byte-exactly reversible; leaves the
+                                     stock-ledger block alone
+         selftest_darpan.py          37 checks: the whole day walked on the
+                                     real 27-Aug shape
+         install_darpan.sh           the gated installer
+PROVEN   37/37 -- card assembly (net cash formula, categories, vocab match,
+         CN list, drawer parts), Rs 50 tolerance both sides, all five answer
+         paths incl. double-answer refusal, submit gating, corrections
+         tick + counts + double-tick refusal, the filing guard (refuse /
+         grant / spend), flag dismissal with mandatory reason, staged
+         rejection, audit rows -- PLUS the patch applied to a byte-exact
+         reproduction of the LIVE finance_app.py (S204_C2 + stock block,
+         md5 ada47c79...): compiles, both blocks coexist, revert byte-exact
+INSTALL  bash /root/deploy/vps_deploy.sh S208_DARPAN
