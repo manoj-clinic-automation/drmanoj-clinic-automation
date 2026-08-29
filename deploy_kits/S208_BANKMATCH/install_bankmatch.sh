@@ -46,7 +46,7 @@ echo "  $KIT_NAME — keep the bank detail, match it every morning"
 echo "=============================================================="
 
 # ---------------------------------------------------------------- [1] preflight
-for c in md5sum awk cp date systemctl sqlite3 crontab; do
+for c in md5sum awk cp date systemctl crontab; do
   command -v "$c" >/dev/null 2>&1 || { echo "!! [1/9] '$c' missing — refusing"; exit 1; }
 done
 [ -f "$UPI" ] || { echo "!! [1/9] $UPI not found — refusing"; exit 1; }
@@ -143,14 +143,24 @@ echo "[8/9] backfilling the transaction detail from the stored statements"
 ( cd "$FIN" && FINANCE_DB="$DB" FINANCE_UPI_DIR="$UPI_DIR" "$PY" finance_upi.py --backfill )
 
 echo "      seeding orthotics.vocab (only if empty)"
-VOCAB="$(cat "$HERE/ortho_vocab.txt")"
-HAVE="$(sqlite3 "$DB" "SELECT COALESCE(value,'') FROM setting WHERE key='orthotics.vocab'" 2>/dev/null || true)"
-if [ -z "$HAVE" ]; then
-  sqlite3 "$DB" "INSERT OR REPLACE INTO setting (key, value) VALUES ('orthotics.vocab', '$VOCAB')"
-  echo "      seeded: 31 keywords, from Marg's own orthopaedic category"
-else
-  echo "      already set — left exactly as it is"
-fi
+# v2: the sqlite3 COMMAND does not exist on this server (python's module
+# does) -- the first install refused at preflight over a convenience. Seed
+# through python instead, same rule: never overwrite a value already set.
+"$PY" - "$DB" "$HERE/ortho_vocab.txt" <<'PYEOF'
+import io, sqlite3, sys
+db, vf = sys.argv[1], sys.argv[2]
+vocab = io.open(vf, encoding="utf-8").read().strip()
+con = sqlite3.connect(db)
+row = con.execute("SELECT value FROM setting WHERE key='orthotics.vocab'").fetchone()
+if row and (row[0] or "").strip():
+    print("      already set -- left exactly as it is")
+else:
+    con.execute("INSERT OR REPLACE INTO setting (key, value) VALUES "
+                "('orthotics.vocab', ?)", (vocab,))
+    con.commit()
+    print("      seeded: 31 keywords, from Marg's own orthopaedic category")
+con.close()
+PYEOF
 
 echo "      first match, yesterday:"
 ( cd "$FIN" && FINANCE_DB="$DB" "$PY" bank_match.py --final ) || true
@@ -169,9 +179,8 @@ echo "=============================================================="
 echo "  GREEN. The bank detail is kept, the history is loaded, and the"
 echo "  matcher runs tomorrow at 09:45."
 echo
-echo "  See a day now:   sqlite3 $DB \"SELECT * FROM upi_match_day;\""
-echo "  A day's list:    sqlite3 $DB \"SELECT status,bill_no,txn_amount_p,rrn"
-echo "                   FROM upi_match WHERE business_date='2026-08-27';\""
+echo "  See any day:   cd $FIN && $PY bank_match.py --date 2026-08-27"
+echo "  The log:       tail $FIN/bank_match.log"
 echo
 echo "  Reverse:  cp -f $BAK $UPI && systemctl restart $SVC"
 echo "            (and: crontab -e, delete the three $MARK lines)"
