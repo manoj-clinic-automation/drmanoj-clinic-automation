@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-#  install_darpan.sh · kit S208_DARPAN — Sprint 2 on the clinic server
+#  install_darpan.sh · kit S208_DARPAN · v2 — Sprint 2 on the clinic server
 #
 #  WHAT THIS IS
 #      Darpan's day card, exceptions-first (owner spec §0d, 29-Aug-2026, final):
@@ -34,7 +34,6 @@ FIN=/root/finance
 APP="$FIN/finance_app.py"
 PY=/usr/bin/python3
 SVC=clinic-finance.service
-APP_MD5_EXPECTED=ada47c79e21f92772d960d5270e7eec0
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
 echo "=============================================================="
@@ -55,16 +54,21 @@ cd "$HERE" || exit 1
 md5sum -c SUMS.md5 >/dev/null 2>&1 || { echo "!! [2/8] kit SUMS mismatch — refusing"; exit 1; }
 echo "[2/8] kit integrity ok"
 
-# ---------------------------------------------------------------- [3] currency
-LIVE="$(md5sum "$APP" | awk '{print $1}')"
-if [ "$LIVE" != "$APP_MD5_EXPECTED" ]; then
-  echo "!! [3/8] LIVE-FILE CURRENCY GATE — refusing. finance_app.py is $LIVE,"
-  echo "   this kit was cut against $APP_MD5_EXPECTED (the S204_C2 file with"
-  echo "   the stock-ledger block installed). NOTHING WAS WRITTEN — tell"
-  echo "   Claude the md5 above."
-  exit 1
-fi
-echo "[3/8] live-file currency ok"
+# ---------------------------------------------------------------- [3] anchors
+# v2. The first run refused here because the md5 gate assumed the live file
+# was the S204_C2 copy plus the stock block -- it is not: the live file has
+# moved through installs this kit's builder never saw (it read 5bc29752...).
+# A fingerprint of a file's HISTORY is the wrong gate for a purely additive
+# patch. The right gate is the one the stock-ledger install used on this very
+# file and went green with: the patcher itself, which refuses unless every
+# anchor it needs occurs EXACTLY once and refuses any block it does not
+# recognise. Nothing is guessed; anything unexpected still stops the install.
+echo "[3/8] live finance_app.py is $(md5sum "$APP" | awk '{print $1}') -- gating on anchors"
+"$PY" "$HERE/patch_finance_app_darpan.py" --check "$APP" || {
+  echo "!! [3/8] the live finance_app.py is not the shape this patch expects."
+  echo "   NOTHING WAS WRITTEN. Send the lines above to Claude."
+  exit 1; }
+echo "      anchors ok — exactly one of each, no foreign block"
 
 # ---------------------------------------------------------------- [4] baseline
 echo "[4/8] measuring the CURRENT smoke suite before touching anything"
