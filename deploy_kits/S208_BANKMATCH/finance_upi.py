@@ -398,16 +398,35 @@ def selftest(db_path="finance.db"):
                         "AND status='open'").fetchone()[0]
         check("exception opened", n == 1)
 
-        # re-ingest (the .zip duplicate an hour later) must not duplicate anything
+        # re-ingest (the .zip duplicate an hour later) must not duplicate
+        # anything. S208 FIX: the original check counted ALL rows for the
+        # merchant and expected 2 -- true on 15-Aug-2026 when the ledger was
+        # two days old, false forever after, because the live db now holds
+        # weeks of real statements. A test that assumes an empty shop fails
+        # the moment the shop works (F-106). Measure the DELTA instead, and
+        # the per-day row counts, which upserting keeps at exactly one.
+        before = con.execute("SELECT COUNT(*) FROM upi_statement "
+                             "WHERE merchant_id=?", ("100000000312505",)).fetchone()[0]
         res2 = ingest_statement(con, "test_MPR_again.xlsx", blob, store_dir=None,
                                 now="2026-08-15T10:00:00")
-        n = con.execute("SELECT COUNT(*) FROM upi_statement WHERE merchant_id=?",
-                        ("100000000312505",)).fetchone()[0]
-        check("duplicate statement upserts, not duplicates", n == 2 and res2["ok"])
+        after = con.execute("SELECT COUNT(*) FROM upi_statement "
+                            "WHERE merchant_id=?", ("100000000312505",)).fetchone()[0]
+        perday = [con.execute(
+            "SELECT COUNT(*) FROM upi_statement WHERE merchant_id=? "
+            "AND statement_date=?", ("100000000312505", d)).fetchone()[0]
+            for d in ("2026-08-13", "2026-08-14")]
+        check("duplicate statement upserts, not duplicates",
+              res2["ok"] and after == before and perday == [1, 1])
+        check("re-ingest leaves each txn day with its own rows once",
+              con.execute("SELECT COUNT(*) FROM upi_txn WHERE merchant_id=? "
+                          "AND txn_date IN ('2026-08-13','2026-08-14')",
+                          ("100000000312505",)).fetchone()[0] == 3)
 
-        # no statement for a day -> None, silently (normal early state)
+        # no statement for a day -> None, silently (normal early state).
+        # S208 FIX: 2026-07-01 HAS a statement now (the backfill worked), so
+        # the probe date must be one no statement can ever exist for.
         check("no-statement day is not a fault",
-              reconcile_upi(con, "medical", "2026-07-01") is None)
+              reconcile_upi(con, "medical", "1999-01-01") is None)
 
         con.close()
         os.remove(tmp)
