@@ -1,0 +1,32 @@
+KIT      S208_LEDGER3
+BUILT    30-Aug-2026 ~01:20 IST, attended session on manojz —
+         Sprint 3 of the S208_SPRINT_PLAN
+PURPOSE  the frozen ledgers (Darpan / Dr Bhawna / owner) made diagnosable and
+         repairable + the owner perform/repair-transfer control + ONE
+         predicate for pendCard's "not filed" (the approved-vs-not-filed
+         contradiction)
+FINDING  reserve/manoj/drawer all read through v_cash_custody_balance — a
+         VIEW created only by the S186 migration, absent from the schema
+         file. If it is missing on the live db, all three ledgers freeze at
+         once while the drawer still falls (cash_movement is real) — exactly
+         the owner's 27-Aug complaint. ledger-check names this precisely
+         instead of guessing.
+STATE    STAGED, NOT INSTALLED. Requires S208_DARPAN on the server (currency-
+         gated on its exact bytes, md5 c787456d...).
+FILES    darpan_app.py            v2 of this project's own file: adds
+                                  ledger-check · ledger-repair-view ·
+                                  owner transfer (custody event, never money)
+         patch_finance_app_pend.py the one-clause pendCard patch; SOFT —
+                                  skips with a warning if the live text
+                                  drifted, never blocks the ledger tools
+         selftest_darpan.py       50 checks — the Sprint-2 walk plus the
+                                  ledger walk: transfer-out present, view
+                                  missing → named → repaired → Bhawna holds
+         install_ledger3.sh       the gated installer
+PROVEN   50/50 · pend patch round-trips byte-exact on the live-shape file and
+         its SQL proven on fixtures (a staged day drops out of missing_marg,
+         an uncovered day stays flagged) · patched file compiles
+NOT HERE review-page tiles + orthoCard UI — their live HTML exists only on
+         the box (F-169's shape); owner check first: the vocab seed may have
+         revived orthoCard by itself
+INSTALL  bash /root/deploy/vps_deploy.sh S208_LEDGER3
