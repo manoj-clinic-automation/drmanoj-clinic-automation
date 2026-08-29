@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Staff — jodna aur vidaai</title>
+<style>
+ body{font:15px/1.5 system-ui,sans-serif;margin:0 auto;max-width:720px;
+      background:#f6f4f1;color:#1c1c1c;padding:14px 14px 50px}
+ h1{font-size:20px;margin:6px 0 2px}
+ .sub{color:#777;font-size:13px;margin-bottom:12px}
+ .sec{background:#fff;border:1px solid #e4e0da;border-radius:10px;
+      margin:10px 0;padding:12px 14px}
+ .btn{display:inline-block;border:1px solid #bbb;border-radius:8px;
+      padding:9px 14px;margin:4px 6px 2px 0;background:#fafafa;font-size:15px;
+      cursor:pointer}
+ .btn.primary{background:#2e6b34;color:#fff;border-color:#2e6b34}
+ .btn.warn{border-color:#a8730a;color:#a8730a;background:#fffaf2}
+ input,select{font-size:15px;padding:7px;border:1px solid #bbb;border-radius:8px;
+      margin:3px 4px 3px 0}
+ .step{display:flex;gap:10px;align-items:flex-start;padding:9px 0;
+       border-bottom:1px solid #f0ede8}
+ .dot{width:26px;height:26px;border-radius:50%;flex:none;display:flex;
+      align-items:center;justify-content:center;font-size:14px;
+      background:#eee;color:#999;border:1px solid #ddd}
+ .dot.done{background:#2e6b34;color:#fff;border-color:#2e6b34}
+ .dot.next{background:#fff;border:2px solid #2e6b34;color:#2e6b34}
+ .lbl b{display:block;font-size:15px}
+ .lbl .muted{color:#888;font-size:12px}
+ .who{color:#2e6b34;font-size:12px}
+ .msgbox{white-space:pre-wrap;background:#f6f8f4;border:1px dashed #9c9;
+      border-radius:8px;padding:10px;font-size:14px;margin-top:6px}
+ .warnbox{background:#fff6ef;border-left:4px solid #a8730a;padding:8px 12px;
+      border-radius:6px;margin:8px 0;font-size:14px}
+ table{border-collapse:collapse;width:100%;font-size:14px}
+ td,th{padding:6px;border-bottom:1px solid #eee;text-align:left}
+ #msg{position:fixed;bottom:0;left:0;right:0;background:#1c1c1c;color:#fff;
+      padding:10px 14px;font-size:15px;display:none;white-space:pre-wrap}
+ .pill{font-size:12px;border-radius:20px;padding:2px 10px;background:#efece7}
+ .pill.exit{background:#fdeaea}
+</style>
+</head>
+<body>
+<h1>Staff — jodna aur vidaai</h1>
+<div class="sub">Har step register khud check karta hai — galat order par woh
+khud rok dega aur wajah batayega. Har tick par naam zaroori hai.</div>
+
+<div class="sec" id="home">
+ <button class="btn primary" onclick="openFlow('JOIN')">➕ Naya aadmi (Amir jaisa)</button>
+ <button class="btn warn" onclick="openFlow('EXIT')">🚪 Vidaai (Pravesh jaisa)</button>
+ <div id="pending" style="margin-top:10px"></div>
+ <details style="margin-top:8px"><summary class="sub">🔑 Password reset (owner)</summary>
+  <input id="rp_person" placeholder="kiska?">
+  <button class="btn" onclick="resetPw()">default par wapas</button>
+  <div id="rp_out" class="msgbox" style="display:none"></div>
+ </details>
+</div>
+
+<div class="sec" id="flow" style="display:none"></div>
+<div id="msg"></div>
+<script>
+const el=id=>document.getElementById(id);
+function toast(t){const m=el("msg");m.textContent=t;m.style.display="block";
+ setTimeout(()=>m.style.display="none",5000);}
+const API="/finance/staff/api";
+const MYNAME=()=>localStorage.getItem("staff_by")||"";
+async function post(u,b){const r=await fetch(u,{method:"POST",
+ headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});
+ const j=await r.json().catch(()=>({}));
+ if(!r.ok||!j.ok)throw(j.message||j.error||"nahin hua");return j;}
+function whoAmI(){
+ let w=MYNAME();
+ if(!w){w=prompt("Aapka naam? (har tick par yahi likha jayega)")||"";
+  if(w)localStorage.setItem("staff_by",w);}
+ return w;
+}
+
+async function loadPending(){
+ const r=await fetch(API+"/pending");const j=await r.json();if(!j.ok)return;
+ if(!j.records.length){el("pending").innerHTML=
+  '<span class="sub">Koi adhoora record nahin — sab poore ✓</span>';return;}
+ el("pending").innerHTML='<table><tr><th>kaun</th><th></th><th>ruka hua step</th>'+
+  '<th></th></tr>'+j.records.map(x=>'<tr><td><b>'+x.person+'</b></td>'+
+  '<td><span class="pill '+(x.kind==="EXIT"?"exit":"")+'">'+
+  (x.kind==="EXIT"?"vidaai":"jodna")+'</span></td><td>'+(x.waiting_on||"")+
+  (x.overdue?' <b style="color:#a8730a">⏰</b>':'')+'</td>'+
+  '<td><button class="btn" onclick="showRec(\''+x.ref+'\')">kholo</button></td>'+
+  '</tr>').join("")+'</table>';
+}
+
+async function openFlow(kind){
+ const person=prompt(kind==="JOIN"?"Naye aadmi ka poora naam?":"Kaun ja raha hai?");
+ if(!person)return;
+ const by=whoAmI(); if(!by)return;
+ let role="";
+ if(kind==="JOIN")role=prompt("Kaam kya hoga? (e.g. purchase, counter)")||"";
+ try{const j=await post(API+"/open",{person,kind,role,opened_by:by});
+  showRec(j.ref);}catch(e){toast(""+e);loadPending();}
+}
+
+async function showRec(ref){
+ const r=await fetch(API+"/record?ref="+encodeURIComponent(ref));
+ const j=await r.json(); if(!j.ok){toast(j.message||"record nahin mila");return;}
+ el("home").style.display="none";
+ const F=el("flow"); F.style.display="block";
+ let done=0; const total=j.steps.length;
+ let firstOpen=null;
+ for(const s of j.steps){ if(s.done_on)done++; else if(!firstOpen)firstOpen=s.step; }
+ let h='<button class="btn" onclick="goHome()">← wapas</button> '+
+  '<span class="pill '+(j.kind==="EXIT"?"exit":"")+'">'+
+  (j.kind==="EXIT"?"VIDAAI":"JODNA")+'</span> <b style="font-size:17px">'+
+  j.person+'</b> <span class="sub">'+ref+' · '+done+'/'+total+'</span>';
+ if(j.kind==="JOIN"&&j.username)
+  h+='<div class="sub">login: <b>'+j.username+'</b> · pehla password: <b>'+
+   j.username+'1234</b> (pehli login par badalna hoga)</div>';
+ for(const s of j.steps){
+  const isNext=(s.step===firstOpen)||(!s.done_on&&s.late_ok);
+  h+='<div class="step"><div class="dot '+(s.done_on?"done":(isNext?"next":""))+
+   '">'+(s.done_on?"✓":"")+'</div><div class="lbl" style="flex:1"><b>'+
+   s.label+'</b>'+(s.why?'<span class="muted">'+s.why+'</span>':'')+
+   (s.done_on?'<span class="who">✓ '+s.done_by+' · '+s.done_on+
+     (s.detail?' · '+s.detail:'')+'</span>':'')+
+   '</div>'+((!s.done_on&&isNext)?
+    ('<button class="btn primary" onclick="tick(\''+ref+'\',\''+s.step+
+     '\',\''+j.kind+'\')">ho gaya ✓</button>'):'')+'</div>';
+ }
+ if(j.kind==="JOIN")
+  h+='<button class="btn" style="margin-top:8px" onclick="waMsg(\''+ref+
+   '\')">📱 WhatsApp message dikhao</button><div id="wa"></div>';
+ F.innerHTML=h;
+}
+function goHome(){el("flow").style.display="none";el("home").style.display="block";
+ loadPending();}
+
+async function tick(ref,step,kind){
+ const by=whoAmI(); if(!by)return;
+ const body={ref,step,by};
+ if(step==="BIOMETRIC"){
+  try{const n=await fetch(API+"/next_code").then(r=>r.json());
+   var code=prompt("Emp Code? (register kehta hai agla: "+n.next_code+
+    " — kabhi purana code dobara nahin)\n"+n.rule, n.next_code);}catch(e){
+   var code=prompt("Emp Code?");}
+  if(!code)return; body.emp_code=code;
+ }
+ if(step==="DUES_SETTLED"||step==="ITEMS_RETURNED"){
+  const d=prompt("Ek line — kya settle/wapas hua?")||"";
+  if(d)body.detail=d;
+ }
+ try{await post(API+"/step",body);showRec(ref);}
+ catch(e){toast("Register ne roka:\n"+e);}
+}
+
+async function waMsg(ref){
+ const r=await fetch(API+"/message?ref="+encodeURIComponent(ref));
+ const j=await r.json();
+ el("wa").innerHTML=j.ok?'<div class="msgbox">'+j.text+'</div>':"";
+}
+
+async function resetPw(){
+ const person=el("rp_person").value.trim(); if(!person)return;
+ const by=whoAmI(); if(!by)return;
+ const reason=prompt("Wajah? (record par jayegi)")||"forgot";
+ try{const j=await post(API+"/reset_password",{person,by,reason});
+  el("rp_out").style.display="block";
+  el("rp_out").textContent="Naya (default) password: "+(j.password||"?")+
+   "\nPadh kar bata dijiye — kahin store nahin hota, pehli login par badlega.";
+ }catch(e){toast(""+e);}
+}
+loadPending();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+ff157c1ccbb11f2379c67d36db0077bc  joiner_app.py
+8bb6aeb99e758fba279d353cfa7990ee  joiner_schema.sql
+0fde34ca56cb6e0905b7ea7fb7475466  staff_pages.py
+9ff9fc48919f76cd86a35135c10b554b  staff_manage.html
+45a1857cb24db6ad77c5ce1b3696629e  seed_codes_from_vps.py
+bc328fbd4189ded6e37774dcf08029a5  selftest_joiner_app.py
+a2fe83ff4a26f040d16d9c0b8f4c47e6  selftest_staff_pages.py
+e21183db679b017285b3926740d7980e  patch_finance_app_staff.py
+9f7467273c21aee46869e28074088819  install_staff.sh
+b5f8b2746afed344c063559b5a338900  KIT_ID.txt

@@ -1,0 +1,32 @@
+KIT      S208_STAFF
+BUILT    30-Aug-2026 ~01:45 IST, attended session on manojz
+PURPOSE  the S207 joiner/exit register given an address and a face:
+         /finance/staff — "Naya aadmi (Amir jaisa)" and "Vidaai (Pravesh
+         jaisa)" as guided ladders, plus pending list, WhatsApp message,
+         next-Emp-Code with the never-reuse rule, and the owner password
+         reset (R10 — it was already inside the register)
+REUSED   joiner_app.py logic, joiner_schema.sql, selftest_joiner_app.py and
+         seed_codes_from_vps.py from S207_JOINER — per the owner's "all is
+         final and prepared already"
+TWO REAL DEFECTS FOUND by walking the prepared kit against the LIVE app's
+         shapes (neither could show in its own selftest, which used a
+         different require() signature):
+         1. require() returns a user DICT live; the register bound it into
+            SQL -> its FIRST /open would have crashed. Fixed by an adapter
+            (staff_pages.joiner_require); joiner_app untouched for this.
+         2. HARD_REQUIRES was kind-blind: an EXIT's final STAFF_MASTER
+            demanded BIOMETRIC, which exits do not have -> NO EXIT COULD
+            EVER COMPLETE. Pravesh's flow, exactly. ONE LINE in joiner_app
+            (S208.1); the original 65 checks still pass. Candidate F-239.
+STATE    STAGED, NOT INSTALLED.
+FILES    joiner_app.py (S208.1) · joiner_schema.sql · staff_pages.py ·
+         staff_manage.html · seed_codes_from_vps.py · selftest_joiner_app.py
+         (65) · selftest_staff_pages.py (23, live-shape walk of BOTH flows) ·
+         patch_finance_app_staff.py · install_staff.sh
+PROVEN   65/65 unchanged · 23/23 (Amir join end-to-end incl. out-of-order
+         refusal, next-code 34-over-33, STAFF_MASTER blocked till BIOMETRIC;
+         Pravesh exit end-to-end to COMPLETE; R10 reset amir1234; maker
+         refused) · triple-block patch proven on the reproduced live shape:
+         coexists with stock+darpan blocks, idempotent, revert byte-exact,
+         compiles
+INSTALL  bash /root/deploy/vps_deploy.sh S208_STAFF
