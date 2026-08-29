@@ -147,6 +147,17 @@ def init(app, db_getter, require_fn, unit="medical"):
     def _darpan_refile_guard():
         if request.path.rstrip("/") != "/finance/api/day" or request.method != "POST":
             return None
+        # THE SWITCH, and why it exists: the app's own filing flow saves a day
+        # through REPEATED posts -- an advance, a non-cash bill, a correction
+        # each re-save the same date. A guard that reads every re-save as "a
+        # second form" breaks the app (the smoke suite proved it: 722 -> 706).
+        # So the guard ships OFF and the owner turns it on -- once Darpan is
+        # on the day card and no longer files this form at all, a re-save IS
+        # a second form, and blocking it is finally true.
+        con0 = _db()
+        ensure_schema(con0)
+        if _setting(con0, "darpan.refile_guard", "0") != "1":
+            return None
         p = request.get_json(silent=True) or {}
         d = str(p.get("business_date") or "").strip()
         if not d:
@@ -507,6 +518,26 @@ def api_tick(mid):
 
 
 # -------------------------------------------------------------- owner tools
+@bp.route("/finance/darpan/api/guard", methods=["POST"])
+def api_guard():
+    """Owner switch for the duplicate-filing guard. OFF by default because the
+    old form's own flow re-saves a day many times; turn it ON when Darpan is
+    on the day card and the form is retired."""
+    u, err = _require("checker")
+    if err:
+        return err
+    con = _db()
+    ensure_schema(con)
+    if not _is_owner(con, u):
+        return jsonify(ok=False, error="owner_only"), 403
+    on = bool((request.get_json(silent=True) or {}).get("on"))
+    con.execute("INSERT OR REPLACE INTO setting (key, value) VALUES "
+                "('darpan.refile_guard', ?)", ("1" if on else "0",))
+    _audit(con, u["user"], "refile_guard", {"on": on})
+    con.commit()
+    return jsonify(ok=True, on=on)
+
+
 @bp.route("/finance/darpan/api/refile-grant", methods=["POST"])
 def api_refile_grant():
     u, err = _require("checker")

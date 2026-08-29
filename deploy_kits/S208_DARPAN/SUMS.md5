@@ -1,8 +1,8 @@
-80935116b8da41e8b93cc0dd13dc2fd8  darpan_app.py
+c787456ddd595150996f84e00fb1fd2f  darpan_app.py
 977cc93bb4ca81f9dcd16f5fdcf91710  darpan_card.html
 b3cfd86f2c13ee612dd02c5bb99328f5  darpan_corrections.html
 6c66c57379c761201c3241223d6bc295  patch_finance_app_darpan.py
-05fd9b64b2b266a0f8b087ee9b65790c  selftest_darpan.py
-9f4ea06af2fa3a66786104bf47554f99  install_darpan.sh
+8fab06a2b8bc4090c35bbf35062dd491  selftest_darpan.py
+2ba7908de0e69cde00a25758c364400c  install_darpan.sh
 2e65fb31f1000ad11bb9cd84563470dc  README.md
 15c0b875114a7a39bde68499c866ffd8  KIT_ID.txt

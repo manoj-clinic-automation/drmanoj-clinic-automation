@@ -106,10 +106,10 @@ echo "      five files copied and verified byte for byte"
   echo "!! [6/8] does not compile — restoring"; restore; exit 1; }
 
 OUT="$(cd "$FIN" && "$PY" selftest_darpan.py 2>&1)"
-echo "$OUT" | grep -qE "^37 passed, 0 failed" || {
-  echo "!! [6/8] the darpan selftest did not report 37 passed — restoring"
+echo "$OUT" | grep -qE "^40 passed, 0 failed" || {
+  echo "!! [6/8] the darpan selftest did not report 40 passed — restoring"
   echo "$OUT" | grep -E "FAIL|passed" | tail -8; restore; exit 1; }
-echo "[6/8] darpan selftest 37/37 ✓"
+echo "[6/8] darpan selftest 40/40 ✓"
 
 OUT="$(cd "$FIN" && "$PY" finance_app.py --selftest 2>&1)"
 N="$(echo "$OUT" | grep -oE 'SMOKE [0-9]+' | head -1 | awk '{print $2}')"
@@ -146,8 +146,12 @@ echo "=============================================================="
 echo "  GREEN. Two new pages, one guard:"
 echo "    staff  : https://followup.dr-manoj.in/finance/darpan"
 echo "    owner  : https://followup.dr-manoj.in/finance/darpan/corrections"
-echo "  A second form for an already-filed day is now refused — the grant"
-echo "  lives on your corrections page API (refile-grant)."
+echo "  THE DUPLICATE-FILING GUARD IS OFF (the old form re-saves a day many"
+echo "  times by design — the smoke suite proved blocking it breaks the app)."
+echo "  When Darpan moves onto the day card and stops using the old form,"
+echo "  turn it on — one call, owner-only, from a signed-in browser console:"
+echo "    fetch('/finance/darpan/api/guard',{method:'POST',headers:"
+echo "      {'Content-Type':'application/json'},body:'{\"on\":true}'})"
 echo
 echo "  Reverse:  cp -f $BAK $APP && systemctl restart $SVC"
 echo "=============================================================="

@@ -245,7 +245,16 @@ ck("double tick refused", c.post("/finance/darpan/api/correction/%d/tick" % mid,
 j = c.get("/finance/darpan/api/corrections?month=2026-08").get_json()
 ck("counts move", j["pending"] == 2 and j["corrected"] == 1)
 
-print("\n[7] the duplicate-filing guard")
+print("\n[7] the duplicate-filing guard — OFF by default, an owner switch")
+ROLE.update(user="darpan", roles=["maker"])
+r = c.post("/finance/api/day", json={"business_date": D, "x": 1})
+ck("guard OFF: a re-save passes untouched (the app's own flow survives)",
+   r.status_code == 200)
+ck("darpan cannot flip the switch", c.post("/finance/darpan/api/guard",
+   json={"on": True}).status_code == 403)
+ROLE.update(user="manoj", roles=["checker"])
+r = c.post("/finance/darpan/api/guard", json={"on": True})
+ck("the owner turns the guard ON", r.status_code == 200 and r.get_json()["on"])
 ROLE.update(user="darpan", roles=["maker"])
 r = c.post("/finance/api/day", json={"business_date": D, "x": 1})
 ck("a second form for a filed day is refused 403", r.status_code == 403
