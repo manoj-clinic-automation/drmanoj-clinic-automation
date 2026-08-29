@@ -1,0 +1,30 @@
+KIT      S208_BANKMATCH
+BUILT    29-Aug-2026 IST, attended session on manojz — Sprint 1 of the
+         S208_SPRINT_PLAN (project knowledge)
+PURPOSE  keep every bank transaction, match it to its sale bill each morning,
+         reconcile like-for-like, seed the orthotics vocabulary
+WHY      finance_upi v1 parsed every settled transaction and stored only the
+         daily total — so no page could ever show WHICH payment was WHICH
+         bill. Proven on the real 27-Aug: bank 11,170 vs entered 5,733;
+         decomposed to the rupee as 3 bills rung as cash (4,125) + 2 settled
+         payments with no bill (1,312). The owner's ruling: the bank is the
+         sole truth for everything that settles.
+STATE    STAGED, NOT INSTALLED. The VPS was not touched by the session that
+         built this.
+FILES    finance_upi.py         FULL replacement (v2) of the live file,
+                                md5 3f5016f0... — currency-gated. Adds
+                                upi_txn + store_txns + backfill_txns; the
+                                reconcile compares all-modes settled vs the
+                                day's whole non-cash (upi+card)
+         bank_match.py          NEW. The 09:45/15-min matcher; writes
+                                upi_match + upi_match_day; both feeds
+                                required; noon closes the day honestly
+         selftest_bankmatch.py  21 checks on the real 27-Aug shape, temp db
+         ortho_vocab.txt        31 keywords covering all 81 items of Marg's
+                                own orthopaedic category export
+         install_bankmatch.sh   the gated installer + cron
+PROVEN   21/21 matcher (incl. the real day: 5 agreed · 3 rung-as-cash ·
+         2 orphans, RRNs verified) · finance_upi parse selftest 9/9 ·
+         ingest of the REAL 28-Aug MPR: 10 txns kept with times, re-ingest
+         does not duplicate · vocabulary covers 81/81 names in 390 chars
+INSTALL  bash /root/deploy/vps_deploy.sh S208_BANKMATCH
