@@ -682,6 +682,89 @@ def api_transfer():
     return jsonify(ok=True, date=iso, frm=frm, to=to, amount_p=amt_p)
 
 
+# =====================================================================
+#  S208 Sprint 4 — the pipeline, one page, whole path
+#  medical PC -> manojz -> VPS -> matcher, each leg with its own evidence.
+#  Everything read-only; a missing table is REPORTED, never fatal.
+# =====================================================================
+@bp.route("/finance/pipeline")
+def page_pipeline():
+    u, err = _require("maker", "checker")
+    if err:
+        return err
+    return send_file(os.path.join(HERE, "pipeline_status.html"))
+
+
+@bp.route("/finance/darpan/api/pipeline")
+def api_pipeline():
+    u, err = _require("maker", "checker")
+    if err:
+        return err
+    con = _db()
+    out = {"ok": True, "at": now_iso(), "legs": {}}
+
+    def leg(name, fn):
+        try:
+            out["legs"][name] = fn()
+        except sqlite3.OperationalError as e:
+            out["legs"][name] = {"error": str(e)}
+
+    def _manojz():
+        r = con.execute("SELECT received_at, payload_json FROM pipeline_status "
+                        "WHERE source='manojz' ORDER BY id DESC LIMIT 1").fetchone()
+        if not r:
+            return {"posted": None,
+                    "note": "manojz has never posted a heartbeat here"}
+        try:
+            d = json.loads(r["payload_json"])
+        except ValueError:
+            d = {"broken": True}
+        d["posted"] = r["received_at"]
+        return d
+
+    def _pushes():
+        rows = [dict(r) for r in con.execute(
+            "SELECT id, received_at, filename_hint, status FROM marg_push_staging "
+            "WHERE unit=? ORDER BY id DESC LIMIT 8", (_unit,))]
+        pend = con.execute("SELECT COUNT(*) FROM marg_push_staging WHERE unit=? "
+                           "AND status='pending'", (_unit,)).fetchone()[0]
+        return {"recent": rows, "pending": pend}
+
+    def _days():
+        return [dict(r) for r in con.execute(
+            "SELECT business_date, status FROM day_entry WHERE unit=? "
+            "ORDER BY business_date DESC LIMIT 8", (_unit,))]
+
+    def _bank():
+        r = con.execute("SELECT MAX(statement_date) d, COUNT(*) n FROM "
+                        "upi_statement WHERE unit=?", (_unit,)).fetchone()
+        t = con.execute("SELECT COUNT(*) n, COUNT(DISTINCT txn_date) d FROM "
+                        "upi_txn WHERE unit=?", (_unit,)).fetchone()
+        return {"latest_statement": r["d"], "statements": r["n"],
+                "transactions": t["n"], "days_with_detail": t["d"]}
+
+    def _match():
+        return [dict(r) for r in con.execute(
+            "SELECT business_date, status, bank_p, n_agreed, n_cash, "
+            "n_bank_orphan, n_bill_orphan, run_at FROM upi_match_day "
+            "WHERE unit=? ORDER BY business_date DESC LIMIT 7", (_unit,))]
+
+    def _stock():
+        r = con.execute("SELECT MAX(as_on) d, COUNT(DISTINCT as_on) n FROM "
+                        "stock_snapshot").fetchone()
+        o = con.execute("SELECT COUNT(*) FROM stock_diff WHERE status='open'"
+                        ).fetchone()[0]
+        return {"latest_snapshot": r["d"], "snapshots": r["n"], "open_diffs": o}
+
+    leg("manojz_heartbeat", _manojz)
+    leg("marg_pushes", _pushes)
+    leg("filed_days", _days)
+    leg("bank", _bank)
+    leg("matcher", _match)
+    leg("stock", _stock)
+    return jsonify(**out)
+
+
 @bp.route("/finance/darpan/api/guard", methods=["POST"])
 def api_guard():
     """Owner switch for the duplicate-filing guard. OFF by default because the

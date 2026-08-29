@@ -34,7 +34,7 @@ APP="$FIN/finance_app.py"
 DAR="$FIN/darpan_app.py"
 PY=/usr/bin/python3
 SVC=clinic-finance.service
-DAR_MD5_EXPECTED=c787456ddd595150996f84e00fb1fd2f
+DAR_MD5_OK="c787456ddd595150996f84e00fb1fd2f"   # S208_DARPAN as shipped
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
 echo "=============================================================="
@@ -56,13 +56,14 @@ echo "[2/7] kit integrity ok"
 
 # ---------------------------------------------------------------- [3] currency
 LIVE="$(md5sum "$DAR" | awk '{print $1}')"
-if [ "$LIVE" != "$DAR_MD5_EXPECTED" ]; then
-  echo "!! [3/7] darpan_app.py on this server is $LIVE, expected"
-  echo "   $DAR_MD5_EXPECTED (the exact S208_DARPAN file). It has been edited"
-  echo "   since — NOTHING WAS WRITTEN; tell Claude the md5."
+KIT_DAR="$(md5sum "$HERE/darpan_app.py" | awk '{print $1}')"
+if [ "$LIVE" != "$DAR_MD5_OK" ] && [ "$LIVE" != "$KIT_DAR" ]; then
+  echo "!! [3/7] darpan_app.py on this server is $LIVE — neither the"
+  echo "   S208_DARPAN file ($DAR_MD5_OK) nor this kit's own. It has been"
+  echo "   edited by hand — NOTHING WAS WRITTEN; tell Claude the md5."
   exit 1
 fi
-echo "[3/7] darpan_app.py currency ok (this kit's own file, exact bytes)"
+echo "[3/7] darpan_app.py currency ok"
 
 # ---------------------------------------------------------------- [4] baseline
 echo "[4/7] measuring the CURRENT smoke suite before touching anything"
@@ -87,7 +88,7 @@ restore(){
   echo "   RESTORED both files and restarted $SVC."
 }
 
-for f in darpan_app.py selftest_darpan.py patch_finance_app_pend.py; do
+for f in darpan_app.py pipeline_status.html selftest_darpan.py patch_finance_app_pend.py; do
   cp -f "$HERE/$f" "$FIN/$f" || { echo "!! [5/7] copy of $f failed"; restore; exit 1; }
   A="$(md5sum "$HERE/$f" | awk '{print $1}')"; B="$(md5sum "$FIN/$f" | awk '{print $1}')"
   [ "$A" = "$B" ] || { echo "!! [5/7] $f did not land intact"; restore; exit 1; }
@@ -110,10 +111,10 @@ fi
 "$PY" -m py_compile "$APP" "$FIN/darpan_app.py" || {
   echo "!! [6/7] does not compile — restoring"; restore; exit 1; }
 OUT="$(cd "$FIN" && "$PY" selftest_darpan.py 2>&1)"
-echo "$OUT" | grep -qE "^50 passed, 0 failed" || {
-  echo "!! [6/7] selftest did not report 50 passed — restoring"
+echo "$OUT" | grep -qE "^56 passed, 0 failed" || {
+  echo "!! [6/7] selftest did not report 56 passed — restoring"
   echo "$OUT" | grep -E "FAIL|passed" | tail -8; restore; exit 1; }
-echo "[6/7] selftest 50/50 ✓"
+echo "[6/7] selftest 56/56 ✓"
 OUT="$(cd "$FIN" && "$PY" finance_app.py --selftest 2>&1)"
 N="$(echo "$OUT" | grep -oE 'SMOKE [0-9]+' | head -1 | awk '{print $2}')"
 if [ -z "${N:-}" ] || [ "$N" -lt "$BASE_N" ] || echo "$OUT" | grep -q "  FAIL:"; then
@@ -134,6 +135,7 @@ try:
 except Exception as e:                                         # noqa: BLE001
     print("IMPORT_FAILED %s: %s" % (e.__class__.__name__, e)); sys.exit(0)
 need = ["/finance/darpan/api/ledger-check", "/finance/darpan/api/transfer",
+        "/finance/pipeline", "/finance/darpan/api/pipeline",
         "/finance/darpan", "/finance/stock/api/healthz"]
 missing = [p for p in need if p not in rules]
 print("YES" if not missing else "MISSING " + " ".join(missing))
@@ -154,6 +156,12 @@ echo "  It names the fault. If it says the view is missing:"
 echo "    fetch('/finance/darpan/api/ledger-repair-view',{method:'POST',"
 echo "      headers:{'Content-Type':'application/json'},body:'{}'})"
 echo "  Then reload the cash-position page — the three ledgers should move."
+echo
+echo "  NEW: the whole-path pipeline page —"
+echo "    https://followup.dr-manoj.in/finance/pipeline"
+echo "  (Renaming the portal tile to 'Marg sales pipeline' and making this"
+echo "   the landing page is a portal setting — your action, or tell Claude"
+echo "   to inspect the portal code in a later session.)"
 echo
 echo "  Reverse:  cp -f $BAKD $DAR && cp -f $BAKA $APP && systemctl restart $SVC"
 echo "=============================================================="

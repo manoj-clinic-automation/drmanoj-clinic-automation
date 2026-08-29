@@ -1,6 +1,7 @@
-61107cbfa1315dbd47096b00393db08e  darpan_app.py
+8b1e06531bb61da0cb4bd3fc23ff32cf  darpan_app.py
+739d7dc69f7d06cbd8b4303a5d6c9a87  pipeline_status.html
 b0bdf609273a0a1a1173644a1963ef91  patch_finance_app_pend.py
-7fbad40802345f5720d56e2e4b83bdc4  selftest_darpan.py
-24a3e6f558fdc77b4ab916c7b9903ce7  install_ledger3.sh
+e1db5490bd247f486b72af0092ab1648  selftest_darpan.py
+17e30da2529eadfafc4e33679a8af780  install_ledger3.sh
 437f709b1a90d4aa0881130ac14ed8a5  README.md
-b23febc0fc5998d7fe21e1288cb86884  KIT_ID.txt
+622cd57d2c94281f115545ef159fc79e  KIT_ID.txt

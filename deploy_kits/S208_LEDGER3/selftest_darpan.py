@@ -75,6 +75,8 @@ CREATE TABLE upi_statement (merchant_id TEXT, unit TEXT, statement_date TEXT,
 CREATE TABLE upi_txn (id INTEGER PRIMARY KEY, merchant_id TEXT, unit TEXT,
   txn_date TEXT, amount_p INT, rrn TEXT, mode TEXT, txn_time TEXT,
   source_sha TEXT, ingested_at TEXT);
+CREATE TABLE pipeline_status (id INTEGER PRIMARY KEY, received_at TEXT,
+  source TEXT, payload_json TEXT);
 CREATE VIEW v_day_cash AS SELECT e.id day_entry_id, e.unit, e.business_date,
   COALESCE((SELECT SUM(l.amount_p) FROM day_line l WHERE l.day_entry_id=e.id
     AND l.mode='cash'),0) cash_in_p,
@@ -333,6 +335,27 @@ ROLE.update(user="darpan", roles=["maker"])
 ck("darpan cannot record an owner transfer", c.post(
     "/finance/darpan/api/transfer", json={"from": "drawer", "to": "dr_bhawna",
     "date": D, "amount": 100, "note": "x"}).status_code == 403)
+
+print("\n[10] Sprint 4 — the pipeline page")
+ROLE.update(user="darpan", roles=["maker"])
+CON.execute("INSERT INTO pipeline_status (received_at, source, payload_json) "
+            "VALUES ('2026-08-30T07:00:00','manojz','{\"pull\":\"ok\"}')")
+CON.commit()
+j = c.get("/finance/darpan/api/pipeline").get_json()
+ck("pipeline answers with all six legs", j["ok"] and
+   set(j["legs"]) == {"manojz_heartbeat", "marg_pushes", "filed_days",
+                      "bank", "matcher", "stock"}, sorted(j.get("legs", {})))
+ck("heartbeat leg carries the posted time",
+   j["legs"]["manojz_heartbeat"]["posted"].startswith("2026-08-30"))
+ck("bank leg counts the transactions",
+   j["legs"]["bank"]["transactions"] >= 10)
+ck("matcher leg shows the matched day",
+   any(x["business_date"] == D and x["status"] == "matched"
+       for x in j["legs"]["matcher"]))
+ck("a MISSING table is reported, not fatal (stock)",
+   "error" in j["legs"]["stock"])
+ck("the page itself is served",
+   c.get("/finance/pipeline").status_code == 200)
 
 print("\n%d passed, %d failed" % (_pass, len(_fail)))
 for f in _fail:

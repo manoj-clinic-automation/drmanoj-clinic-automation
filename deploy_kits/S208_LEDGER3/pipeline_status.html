@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marg sales pipeline</title>
+<style>
+ body{font:15px/1.5 system-ui,sans-serif;margin:0 auto;max-width:820px;
+      background:#f6f4f1;color:#1c1c1c;padding:14px}
+ h1{font-size:21px;margin:6px 0 2px}
+ .sub{color:#777;font-size:13px;margin-bottom:14px}
+ .path{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:12px 0;
+       font-size:14px}
+ .node{background:#fff;border:1px solid #e4e0da;border-radius:10px;
+       padding:8px 14px;text-align:center}
+ .node b{display:block;font-size:15px}
+ .arrow{color:#999;font-size:18px}
+ .ok{border-left:4px solid #2e6b34}.warn{border-left:4px solid #a8730a}
+ .bad{border-left:4px solid #b3261e}
+ .sec{background:#fff;border:1px solid #e4e0da;border-radius:10px;
+      margin:10px 0;padding:12px 14px}
+ .sec h2{font-size:15px;margin:0 0 6px}
+ table{border-collapse:collapse;width:100%;font-size:13px}
+ td,th{padding:4px 6px;border-bottom:1px solid #eee;text-align:left}
+ td.n{text-align:right;font-variant-numeric:tabular-nums}
+ .muted{color:#888;font-size:12px}
+ .err{color:#b3261e}
+</style>
+</head>
+<body>
+<h1>Marg sales pipeline</h1>
+<div class="sub">medical PC → manojz → this server → the morning matcher.
+Each leg with its own evidence, refreshed on load.</div>
+<div class="path" id="path"></div>
+<div id="legs"></div>
+<script>
+const R=p=>p==null?"—":"₹"+(p/100).toLocaleString("en-IN");
+async function load(){
+ const r=await fetch("/finance/darpan/api/pipeline");
+ const j=await r.json(); if(!j.ok)return;
+ const L=j.legs;
+ const nodes=[];
+ const hb=L.manojz_heartbeat||{};
+ nodes.push(["medical PC","exports Marg reports","ok"]);
+ nodes.push(["manojz",hb.posted?("heartbeat "+String(hb.posted).slice(0,16)):
+   (hb.error||hb.note||"no heartbeat"),hb.posted?"ok":"warn"]);
+ const bk=L.bank||{};
+ nodes.push(["this server",(bk.transactions||0)+" bank txns · "+
+   ((L.marg_pushes||{}).recent||[]).length+" recent pushes",
+   bk.error?"bad":"ok"]);
+ const m=(L.matcher||[])[0];
+ nodes.push(["matcher 09:45",m?(m.business_date+" · "+m.status):"not yet run",
+   !m?"warn":(m.status==="matched"||m.status==="no_business")?"ok":"warn"]);
+ document.getElementById("path").innerHTML=nodes.map(([t,d,c],i)=>
+  '<div class="node '+c+'"><b>'+t+'</b><span class="muted">'+d+'</span></div>'+
+  (i<nodes.length-1?'<span class="arrow">→</span>':'')).join("");
+
+ let h="";
+ h+='<div class="sec"><h2>Matcher — last 7 days</h2><table><tr><th>date</th>'+
+  '<th>status</th><th class="n">bank</th><th class="n">agreed</th>'+
+  '<th class="n">rung-as-cash</th><th class="n">orphans</th><th>run</th></tr>'+
+  (L.matcher||[]).map(x=>'<tr><td>'+x.business_date+'</td><td>'+x.status+
+   '</td><td class="n">'+R(x.bank_p)+'</td><td class="n">'+(x.n_agreed??"—")+
+   '</td><td class="n">'+(x.n_cash??"—")+'</td><td class="n">'+
+   ((x.n_bank_orphan||0)+(x.n_bill_orphan||0))+'</td><td class="muted">'+
+   String(x.run_at||"").slice(5,16)+'</td></tr>').join("")+'</table></div>';
+
+ const mp=L.marg_pushes||{};
+ h+='<div class="sec"><h2>Marg report imports — latest '+
+  ((mp.recent||[]).length)+' · pending '+(mp.pending??"?")+'</h2><table>'+
+  '<tr><th>received</th><th>file</th><th>status</th></tr>'+
+  (mp.recent||[]).map(x=>'<tr><td>'+String(x.received_at||"").slice(0,16)+
+   '</td><td>'+(x.filename_hint||"")+'</td><td>'+x.status+'</td></tr>')
+  .join("")+'</table></div>';
+
+ h+='<div class="sec"><h2>Bank detail</h2><div>'+ (bk.error?
+  '<span class="err">'+bk.error+'</span>' :
+  (bk.transactions+" transactions over "+bk.days_with_detail+
+   " days · latest statement "+(bk.latest_statement||"—")))+'</div></div>';
+
+ const st=L.stock||{};
+ h+='<div class="sec"><h2>Stock ledger</h2><div>'+(st.error?
+  '<span class="err">'+st.error+'</span>' :
+  ("latest snapshot "+(st.latest_snapshot||"—")+" · "+(st.snapshots||0)+
+   " snapshot(s) · open differences "+(st.open_diffs??"—")))+'</div></div>';
+
+ h+='<div class="sec"><h2>Filed days</h2><table><tr><th>date</th><th>status</th>'+
+  '</tr>'+(L.filed_days||[]).map(x=>'<tr><td>'+x.business_date+'</td><td>'+
+  x.status+'</td></tr>').join("")+'</table></div>';
+
+ document.getElementById("legs").innerHTML=h;
+}
+load();
+</script>
+</body>
+</html>

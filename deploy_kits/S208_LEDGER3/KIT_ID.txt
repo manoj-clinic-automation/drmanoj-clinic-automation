@@ -1,4 +1,4 @@
-KIT      S208_LEDGER3
+KIT      S208_LEDGER3 (v2: + Sprint 4 pipeline page)
 BUILT    30-Aug-2026 ~01:20 IST, attended session on manojz —
          Sprint 3 of the S208_SPRINT_PLAN
 PURPOSE  the frozen ledgers (Darpan / Dr Bhawna / owner) made diagnosable and
@@ -13,9 +13,12 @@ FINDING  reserve/manoj/drawer all read through v_cash_custody_balance — a
          instead of guessing.
 STATE    STAGED, NOT INSTALLED. Requires S208_DARPAN on the server (currency-
          gated on its exact bytes, md5 c787456d...).
-FILES    darpan_app.py            v2 of this project's own file: adds
+FILES    darpan_app.py            v3 of this project's own file: adds
                                   ledger-check · ledger-repair-view ·
-                                  owner transfer (custody event, never money)
+                                  owner transfer (custody event, never money) ·
+                                  /finance/pipeline + its API (Sprint 4)
+         pipeline_status.html     the whole-path page: medical PC -> manojz ->
+                                  server -> matcher, each leg with evidence
          patch_finance_app_pend.py the one-clause pendCard patch; SOFT —
                                   skips with a warning if the live text
                                   drifted, never blocks the ledger tools
@@ -23,7 +26,7 @@ FILES    darpan_app.py            v2 of this project's own file: adds
                                   ledger walk: transfer-out present, view
                                   missing → named → repaired → Bhawna holds
          install_ledger3.sh       the gated installer
-PROVEN   50/50 · pend patch round-trips byte-exact on the live-shape file and
+PROVEN   56/56 (adds the Sprint-4 pipeline legs) · pend patch round-trips byte-exact on the live-shape file and
          its SQL proven on fixtures (a staged day drops out of missing_marg,
          an uncovered day stays flagged) · patched file compiles
 NOT HERE review-page tiles + orthoCard UI — their live HTML exists only on
