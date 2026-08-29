@@ -246,14 +246,14 @@ def reconcile_upi(con, unit, business_date, now=None, tolerance_p=0):
 
     st = con.execute("SELECT parsed_total_p, txn_count FROM upi_statement "
                      "WHERE unit=? AND statement_date=?", (unit, business_date)).fetchone()
-    # S208: like for like. The bank column is EVERYTHING that settled on the
-    # machine -- UPI and card together -- so the entered side must be the
-    # day's whole non-cash, not UPI alone. Comparing all-modes settled against
-    # UPI-only entries manufactured a permanent phantom difference the day a
-    # card was ever swiped.
+    # S208 NOTE, decided by the app's own smoke suite: this comparison is
+    # UPI-only BY DESIGN (the C2 checks assert that card and razorpay never
+    # enter it), because card settles by a different rail. An S208 draft made
+    # it upi+card and the suite refused the install -- correctly. Like-for-
+    # like against everything that settles lives in bank_match.py, which
+    # matches the actual settled transactions bill by bill.
     day = con.execute(
-        "SELECT e.id, COALESCE(SUM(CASE WHEN l.mode IN ('upi','card') "
-        " THEN l.amount_p END),0) upi_p "
+        "SELECT e.id, COALESCE(SUM(CASE WHEN l.mode='upi' THEN l.amount_p END),0) upi_p "
         "FROM day_entry e LEFT JOIN day_line l ON l.day_entry_id=e.id "
         "WHERE e.unit=? AND e.business_date=? GROUP BY e.id", (unit, business_date)).fetchone()
 
