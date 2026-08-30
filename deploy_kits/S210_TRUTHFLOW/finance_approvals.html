@@ -1,0 +1,820 @@
+<!doctype html>
+<!-- finance_approvals.html · kit S187_H1b · THE SANJEEVNI HUB, design pass.
+     Owner directives 18 Aug 2026: less eyestrain · navigation always in reach
+     (sticky header tabs + a real back-to-top, not the tiny bottom link) ·
+     better formatting for a dense page · a clinic-branded header · and this
+     design language becomes the DEFAULT for all clinic pages (documented in
+     claude/Clinic_Design_Language_v1.md).
+     Method: the dataviz skill — color by ROLE via custom properties, status
+     colors reserved and always icon+label (never color alone), text wears
+     text tokens, tabular numerals right-aligned, recessive structure, notes
+     folded into <details> so the working surface stays calm.
+     ALL JavaScript logic and every element id/API path is IDENTICAL to H1a —
+     this kit changes presentation only. -->
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sanjeevni Hub — Dr. Manoj Agarwal Clinic</title>
+<style>
+:root{
+  /* -------- Clinic Design Language v1 (see project doc) ------------------ */
+  --surface-page:#f3f2ee;      /* warm paper, easier than blue-grey */
+  --surface-1:#fbfaf8;         /* card */
+  --surface-2:#f5f4f0;         /* inset / zebra */
+  --line:#e6e3dc;
+  --text-1:#23272f;            /* primary ink — softened, not pure black */
+  --text-2:#5d6470;            /* secondary */
+  --text-3:#8a8f99;            /* muted */
+  --accent:#2a78d6;            /* series-1 blue: links, primary buttons */
+  --accent-ink:#1c5cab;
+  --good:#0ca30c; --good-bg:#e9f6e9;
+  --warn:#8a6100; --warn-bg:#fdf3d7;     /* dark text on tint: icon+label rule */
+  --bad:#b02a2a;  --bad-bg:#fbeaea;
+  --shadow:0 1px 3px rgba(35,39,47,.06);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:118px}
+body{margin:0;background:var(--surface-page);color:var(--text-1);
+font:15px/1.6 system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:18px 18px 80px}
+
+/* ------------------------------ sticky header --------------------------- */
+.hdr{position:sticky;top:0;z-index:50;background:var(--surface-1);
+border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+.hdr-in{max-width:1080px;margin:0 auto;padding:10px 18px 0}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .mark{width:44px;height:44px;flex:0 0 44px;object-fit:contain}
+.brand .nm{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.brand .sub{font-size:12.5px;color:var(--text-2)}
+.tabs{display:flex;gap:2px;overflow-x:auto;margin-top:8px;-webkit-overflow-scrolling:touch}
+.tabs a{white-space:nowrap;padding:9px 13px;font-size:13.5px;font-weight:600;
+color:var(--text-2);text-decoration:none;border-bottom:3px solid transparent;border-radius:6px 6px 0 0}
+.tabs a:hover{color:var(--accent-ink);background:var(--surface-2)}
+.tabs a.ext{color:var(--text-3);font-weight:500}
+/* ------------------------------ cards ----------------------------------- */
+.card{background:var(--surface-1);border:1px solid var(--line);border-radius:12px;
+padding:18px;margin:0 0 16px;box-shadow:var(--shadow)}
+.card>h2{margin:0 0 12px;font-size:16px;letter-spacing:-.01em}
+.kick{display:block;font-size:11px;font-weight:700;letter-spacing:.09em;
+text-transform:uppercase;color:var(--text-3);margin-bottom:2px}
+.hindi{color:var(--text-3);font-weight:400;font-size:13px}
+.mut{color:var(--text-2)}.ok{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+/* ------------------------------ chips ----------------------------------- */
+.strip{display:flex;flex-wrap:wrap;gap:10px}
+.chip{border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer;
+background:var(--surface-1);font-size:13.5px;color:var(--text-2);min-width:120px;
+display:flex;flex-direction:column;gap:2px}
+.chip b{font-size:20px;font-variant-numeric:tabular-nums;line-height:1.1}
+.chip:hover{border-color:var(--accent)}
+.chip.zero{opacity:.5;cursor:default}
+.chip.zero:hover{border-color:var(--line)}
+/* ------------------------------ tables ---------------------------------- */
+.tblwrap{max-height:430px;overflow:auto;border:1px solid var(--line);border-radius:9px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+thead th{position:sticky;top:0;background:var(--surface-2);z-index:2}
+th{color:var(--text-2);text-align:left;font-weight:600;padding:8px 10px;
+border-bottom:1px solid var(--line);font-size:12.5px}
+td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:nth-child(even) td{background:var(--surface-2)}
+tbody tr:hover td{background:#eef3fb}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+td b{font-weight:650}
+/* ------------------------------ controls -------------------------------- */
+button{border:1px solid var(--accent-ink);background:var(--accent);color:#fff;
+border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13.5px;font-weight:600;min-height:38px}
+button:hover{background:var(--accent-ink)}
+button.ghost{background:var(--surface-1);color:var(--text-1);border-color:var(--line)}
+button.ghost:hover{border-color:var(--accent);color:var(--accent-ink);background:var(--surface-1)}
+input[type=file]{font-size:13.5px}
+input[type=text],input[type=month]{border:1px solid var(--line);border-radius:8px;
+padding:8px 11px;font-size:13.5px;background:#fff;min-height:38px}
+input:focus{outline:2px solid #b7d3f6;border-color:var(--accent)}
+/* ------------------------------ pieces ---------------------------------- */
+.day-detail{background:var(--surface-2);border:1px solid var(--line);border-radius:9px;
+padding:12px;margin:8px 0}
+.sec{margin:0 0 10px}
+.sec h3{font-size:13.5px;margin:0 0 5px;cursor:pointer}
+.sec h3 .tog{color:var(--text-3);font-weight:400;font-size:12px}
+.billrow{cursor:pointer}
+.items td{background:#eef1f6 !important;font-size:12.5px}
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:6px;
+padding:2px 8px;font-size:12px;font-weight:600;border:1px solid transparent}
+.b-ok{color:var(--good);background:var(--good-bg)}
+.b-warn{color:var(--warn);background:var(--warn-bg)}
+.b-bad{color:var(--bad);background:var(--bad-bg)}
+.note{color:var(--text-2);font-size:12.5px;margin-top:10px}
+details.help{margin-top:10px;font-size:12.5px;color:var(--text-2)}
+details.help summary{cursor:pointer;color:var(--text-3);font-weight:600;font-size:12px;
+letter-spacing:.04em;text-transform:uppercase}
+details.help div{padding:6px 0 0}
+.stat{display:flex;flex-direction:column;gap:2px;align-items:flex-end}
+.stat .lbl{font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)}
+.stat .val{font-size:26px;font-weight:750;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.held{display:flex;gap:26px;flex-wrap:wrap}
+.held .stat{align-items:flex-start}
+.held .stat .val{font-size:22px}
+.dl{cursor:pointer;color:var(--accent-ink);text-decoration:underline;text-underline-offset:2px}
+a{color:var(--accent-ink)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.h2row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+/* ------------------------------ back to top ------------------------------ */
+#toTop{position:fixed;right:18px;bottom:18px;width:46px;height:46px;border-radius:50%;
+background:var(--accent);color:#fff;border:none;font-size:19px;box-shadow:0 3px 10px rgba(35,39,47,.25);
+display:none;z-index:60;min-height:46px}
+#toTop.show{display:block}
+@media(max-width:640px){
+  .wrap{padding:12px 10px 90px}
+  .card{padding:14px 12px}
+  .chip{min-width:104px;padding:8px 11px}
+  .stat .val{font-size:22px}
+}
+</style></head><body>
+
+<div class="hdr"><div class="hdr-in">
+  <div class="brand">
+    <!-- LOGO: the clinic mark from Canva (dr manoj logo, DAHKiFFICC0),
+         diamond cropped, embedded as data-URI (S187_H1c). -->
+    <img class="mark" alt="clinic logo" src="data:image/png;base64,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">
+    <div>
+      <div class="nm">Dr. Manoj Agarwal Clinic <span class="hindi">· संजीवनी मेडिकोज़</span></div>
+      <div class="sub">Advanced Orthopaedic Surgery Centre · Sanjeevni Hub</div>
+    </div>
+  </div>
+  <nav class="tabs">
+    <a href="#stripCard">Today</a><a href="#margCard">Marg</a><a href="#pendCard">Approvals</a>
+    <a href="#cashCard">Cash</a><a href="#monthCard">Month</a>
+    <a href="#orthoCard">Orthotics</a><a href="#exCard">Exceptions</a>
+    <a href="#homeMedCard">Home med</a><a href="#reclassCard">Reclassified</a>
+    <a class="ext" href="/finance/review">Review &amp; month close ↗</a>
+    <a class="ext" href="/finance/workbench">Yes Bank · drawer ↗</a>
+    <a class="ext" href="/finance/darpan/corrections">Corrections ↗</a>
+    <a class="ext" href="/finance/pipeline">Pipeline ↗</a>
+    <a class="ext" href="/finance/staff">Staff ↗</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+
+<div class="card" id="stripCard"><h2><span class="kick">Right now</span>Today</h2>
+<div class="strip" id="strip">loading&hellip;</div>
+<div class="note">Every number is a link to its section. Faded = zero, nothing waiting.</div></div>
+
+<div class="card" id="margCard"><h2><span class="kick">Sales record</span>Marg <span class="hindi">— मार्ग रिपोर्ट</span></h2>
+  <div class="row">
+    <input type="file" id="mgFile" accept=".xls,.xlsx">
+    <button class="ghost" id="mgCheck" onclick="mgSend(false)">Check first</button>
+    <button id="mgApply" onclick="mgSend(true)">Load into the books</button>
+    <span id="mgMsg" class="mut"></span>
+  </div>
+  <div id="mgOut" class="note"></div>
+  <div style="margin-top:14px"><b>Pushed reports</b> <span class="mut">— from the medical PC; nothing enters the books until you press Apply</span>
+  <div id="mpList" class="mut" style="margin-top:6px">loading&hellip;</div></div>
+  <div id="mm" class="note">loading&hellip;</div>
+  <div id="cnBox" class="note"></div>
+  <div id="idBox" class="note"></div>
+  <details class="help"><summary>How this works</summary><div>
+  Export from Marg as <b>Bill wise sales statement</b> with <b>With Item Deta. = Yes</b>.
+  <b>Check first</b> writes nothing. The file is parsed and deleted on the server; a day not yet
+  filed is skipped and <b>flagged</b>; re-loading a day supersedes it cleanly.</div></details>
+</div>
+
+<!-- S194 ⭐2 -->
+<div class="card" id="homeMedCard"><h2><span class="kick">Billed to Home Medicine</span>Home-medicine sales <span class="hindi">— होम मेडिसिन</span></h2>
+  <div id="homeMed">loading&hellip;</div>
+  <details class="help"><summary>How this works</summary><div>
+  Bills Marg makes out to <b>Home Medicine / Home Medisun</b> are picked up automatically from the
+  sale export and shown here — no separate scan or manual entry needed.</div></details></div>
+
+<!-- S194 ⭐3 -->
+<div class="card" id="reclassCard"><h2><span class="kick">Cash ⇄ UPI</span>Reclassified bills <span class="hindi">— मोड बदला</span></h2>
+  <div id="reclass">loading&hellip;</div>
+  <details class="help"><summary>How this works</summary><div>
+  When a day is re-loaded from Marg and a bill's payment mode changed (cash↔UPI), the flip is logged
+  here — so counter conversions never pass silently.</div></details></div>
+
+<div class="card" id="pendCard"><h2><span class="kick">Your queue</span>Days awaiting approval</h2>
+<div id="pend">loading&hellip;</div>
+<details class="help"><summary>How this works</summary><div>
+Expand a day for everything about it — Darpan's figures, every Marg bill down to the drug lines,
+both banks, flags, scans — and approve right here. A UPI mismatch still demands a typed
+acknowledgment.</div></details></div>
+
+<div class="card" id="cashPosCard"><h2 style="cursor:pointer"><span class="cabToggle">▾ </span><span class="kick">Where the money is</span>Cash position <span class="hindi">— नकद कहाँ है</span></h2>
+  <div id="cashPos" class="held"><span class="mut">loading…</span></div>
+</div>
+<div class="card" id="cashCard">
+  <div class="h2row"><h2><span class="kick">The drawer</span>Cash register <span class="hindi">— रोकड़</span></h2>
+  <div class="stat"><span class="lbl">Cash in hand</span><span class="val" id="cashNow">—</span></div></div>
+  <div class="row"><span class="mut">show</span>
+    <button class="ghost" onclick="loadCash(30)">30 days</button>
+    <button class="ghost" onclick="loadCash(60)">60</button>
+    <button class="ghost" onclick="loadCash(90)">90</button></div>
+  <div id="cashTbl" style="margin-top:10px">loading&hellip;</div>
+  <details class="help"><summary>How this works</summary><div>
+  Opening → collected → expenses → closing, straight from the ledger view. Click a date to open
+  its full day. Adjustment and scan counts shown so nothing rides silently.</div></details></div>
+
+
+
+<div class="card" id="monthCard"><h2><span class="kick">Three records, side by side</span>Month — Entered · Marg · Bank</h2>
+  <div class="row"><input type="month" id="ymPick"><button class="ghost" onclick="loadMonth()">show</button>
+  <span id="monthTot" class="mut"></span></div>
+  <div id="monthTbl" style="margin-top:10px">loading&hellip;</div>
+  <details class="help"><summary>How this works</summary><div>
+  Darpan's entry, Marg's record and the bank, for every day; gaps graded, never auto-applied
+  (D315). Click a date for its full day.</div></details></div>
+
+<div class="card" id="orthoCard"><h2><span class="kick">Thin stock, quick reorder</span>Orthotics <span class="hindi">— ऑर्थोटिक्स</span></h2>
+  <div class="row"><span class="mut">item keywords:</span>
+    <input type="text" id="orthoVocab" size="42" placeholder="e.g. belt, brace, knee cap, collar, splint">
+    <button class="ghost" onclick="saveVocab()">save</button><span id="orthoMsg" class="mut"></span></div>
+  <div id="orthoOut" style="margin-top:10px">loading&hellip;</div>
+  <details class="help"><summary>How this works</summary><div>
+  Sales-side only, matched from the item lines by your keywords. Stock and true reorder arrive
+  with the asset-app purchase-bill feed (your ruling); until then, last-sold and pace are the
+  honest signal.</div></details></div>
+
+<div class="card" id="exCard"><h2><span class="kick">Reconcile here</span>Open differences</h2>
+<div id="ex">loading&hellip;</div></div>
+
+</div>
+<button id="toTop" title="back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">▲</button>
+
+<script>
+function $(i){return document.getElementById(i)}
+function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function fmt(s){return (s==null?"—":String(s)).replace(/\.00$/,"")}
+var A=null, openDays={}, openIn={};
+window.addEventListener("scroll",function(){
+  $("toTop").className=window.scrollY>500?"show":""});
+
+function chip(label,n,target,badCls){
+  var z=(n===0||n==null||(Array.isArray(n)&&!n.length));
+  var v=Array.isArray(n)?n.length:n;
+  return '<span class="chip'+(z?' zero':'')+'" '+(z?'':'onclick="document.getElementById(\''+target+'\').scrollIntoView({behavior:\'smooth\'})"')+
+    '><b class="'+(z?'mut':badCls||'warn')+'">'+v+'</b> '+esc(label)+'</span>';
+}
+function load(){
+  fetch("/finance/api/approvals").then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){$("strip").textContent="could not load";return}
+    A=j;
+    $("strip").innerHTML=
+      chip("awaiting approval",j.pending,"pendCard","bad")+
+      chip("missing Marg exports",j.missing_marg,"margCard","warn")+
+      chip("pushed reports waiting",j.pushes_pending,"margCard","warn")+
+      chip("bank vs entered",j.upi_rows,"exCard","warn")+
+      chip("needs you",j.differences_look,"exCard","bad")+
+      chip("awaiting patient names",j.differences_parked,"exCard","info")+
+      chip("review queue",j.review_open,"exCard","warn");
+    renderPending(); renderMM(); renderEx();
+  }).catch(function(){$("strip").textContent="could not load"});
+  loadPushes(); loadCash(30); loadCashPos(); initMonth(); loadOrtho();
+}
+
+/* ---------- Marg: direct upload ---------- */
+function mgSay(t,cls){var m=$("mgMsg");m.textContent=t||"";m.className=cls||"mut"}
+function mgSend(apply){
+  var f=$("mgFile").files[0];
+  if(!f){mgSay("choose the Marg export first","warn");return}
+  if(apply&&!confirm("Load this export into the books?"))return;
+  var fd=new FormData(); fd.append("file",f); fd.append("apply",apply?"1":"0");
+  mgSay(apply?"loading…":"checking…");
+  fetch("/finance/api/marg-upload",{method:"POST",body:fd})
+    .then(function(r){return r.json().then(function(j){return {s:r.status,j:j}})})
+    .then(function(x){
+      var j=x.j||{};
+      if(x.s!==200){mgSay(j.message||j.error||("failed ("+x.s+")"),"bad");
+        $("mgOut").innerHTML='<span class="bad">'+esc(j.message||j.error||"")+"</span>";return}
+      mgSay(apply?"loaded":"checked — nothing written","ok");
+      var h="<b>"+esc(j.title||"")+"</b><br>";
+      if(j.bills!=null){h+="bills "+j.bills+" · item lines "+j.item_lines+"<br>"}
+      (j.warnings||[]).forEach(function(w){h+='<span class="warn">'+esc(w)+"</span><br>"});
+      h+='<div class="tblwrap" style="margin-top:8px"><table><thead><tr><th>Date</th><th class="num">Bills</th><th class="num">Net</th><th>Filed</th></tr></thead><tbody>';
+      (j.days||[]).forEach(function(d){
+        h+="<tr><td>"+esc(d.date)+'</td><td class="num">'+d.bills+'</td><td class="num">'+fmt(d.net)+"</td><td>"+
+           (d.filed?'<span class="badge b-ok">✓ '+esc(d.status)+"</span>":'<span class="badge b-bad">✗ NOT FILED</span>')+"</td></tr>"});
+      h+="</tbody></table></div>";
+      if(j.not_filed&&j.not_filed.length){h+='<div class="warn" style="margin-top:6px">⚑ skipped and FLAGGED (re-load once filed): '+j.not_filed.map(esc).join(", ")+"</div>"}
+      if(j.ingested&&j.ingested.length){h+='<div class="ok" style="margin-top:6px">✓ ingested: '+j.ingested.map(function(d){
+        return d.date+" ("+d.bills+" bills, "+d.lines+" lines)"}).join(", ")+"</div>"}
+      if(j.aborted){h+='<div class="bad" style="margin-top:6px">✗ ABORTED: '+esc(JSON.stringify(j.aborted))+"</div>"}
+      $("mgOut").innerHTML=h;
+      load();
+    }).catch(function(){mgSay("network problem","bad")});
+}
+
+/* ---------- Marg: pushed reports ---------- */
+function loadPushes(){
+  fetch("/finance/api/marg-push/list").then(function(r){return r.json()})
+    .then(function(j){
+      var el=$("mpList");
+      if(!j.ok){el.textContent="could not load pushed reports";return}
+      var rows=j.pushes||[];
+      if(!rows.length){el.innerHTML='<span class="mut">none waiting — the sender on the medical PC has not pushed anything new</span>';return}
+      var h='<div class="tblwrap"><table><thead><tr><th>Received</th><th>File</th><th>Days</th><th class="num">Bills</th><th>Status</th><th></th></tr></thead><tbody>';
+      rows.forEach(function(p){
+        var sv=p.survey||{}, days=(sv.survey||[]);
+        var dtxt=days.length?days.map(function(d){
+          return esc(d.date)+(d.filed?"":' <span class="badge b-bad">not filed</span>')}).join("<br>")
+          :(sv.error?'<span class="bad">'+esc(sv.error)+"</span>":"—");
+        var warns=(sv.warnings||[]).length?('<br><span class="warn" style="font-size:12px">'+sv.warnings.map(esc).join("<br>")+'</span>'):"";
+        var _loaded=(p.ingested_count||0)>0;
+        var st=(p.status==="pending"&&p.applied_at)?'<span class="badge b-warn">⏳ waiting — its day is not FILED in the books yet (Apply loads bills into a filed day; it cannot create the day). File the day, then Apply again.</span>'
+              :p.status==="pending"?'<span class="badge b-warn">⏳ PENDING</span>'
+              :(p.status==="applied"&&_loaded)?'<span class="badge b-ok">✓ loaded '+esc((p.applied_at||"").slice(0,16))+"</span>"
+              :p.status==="applied"?'<span class="badge b-bad">⚠ loaded nothing — re-load from Marg</span>'
+              :'<span class="badge b-bad">'+esc(p.status)+"</span>";
+        h+="<tr><td>"+esc(p.received_at)+"</td><td>"+esc(p.file||"")+" <span class='mut'>"+esc(p.md5_8)+"</span></td>"+
+           "<td>"+dtxt+warns+'</td><td class="num">'+(sv.bills!=null?sv.bills:"—")+"</td><td>"+st+"</td><td>"+
+           (p.status==="pending"?'<button onclick="mpApply('+p.id+')">Apply</button> <button class="ghost" onclick="mpDismiss('+p.id+')">Remove</button>':"")+
+           "</td></tr>"});
+      h+="</tbody></table></div>";
+      el.innerHTML=h;
+    }).catch(function(){$("mpList").textContent="could not load pushed reports"});
+}
+function mpDismiss(id){
+  /* S210 -- the owner's 'remove report': a pending push ruled OUT leaves the
+     list for good. The server keeps the row and an audit entry; only the
+     replay payload is cleared, so it can never be applied by accident. */
+  var why=prompt("Why is this report being removed? (one line, kept in the audit)");
+  if(!why)return;
+  fetch("/finance/api/marg-push/dismiss",{method:"POST",
+    headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id,reason:why})})
+    .then(function(r){return r.json()})
+    .then(function(j){alert(j.ok?"removed":(j.message||j.error||"failed"));loadPushes();})
+    .catch(function(){alert("remove failed — network")});
+}
+
+function mpApply(id){
+  if(!confirm("Load this pushed report into the books?"))return;
+  fetch("/finance/api/marg-push/apply",{method:"POST",
+    headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id})})
+    .then(function(r){return r.text().then(function(t){var j;try{j=JSON.parse(t)}catch(e){j={ok:false,error:"HTTP "+r.status,message:"server error "+r.status+": "+t.slice(0,180)}}return {s:r.status,j:j}})})
+    .then(function(x){
+      var j=x.j||{};
+      var msg=j.ok?("applied: "+(j.ingested||[]).map(function(d){
+          return d.date+" ("+d.bills+" bills, "+d.lines+" lines)"}).join(", ")
+          +((j.still_not_filed||[]).length?" — still not filed, skipped: "+j.still_not_filed.join(", "):""))
+        :(j.aborted?("ABORTED on "+j.aborted.date+": "+JSON.stringify(j.aborted)):(j.message||j.error||"failed"));
+      alert(msg); load();
+    }).catch(function(e){alert("apply failed — could not reach the server at all ("+e+")")});
+}
+
+/* ---------------------------- approvals queue ---------------------------- */
+function renderPending(){
+  var rows=A.pending||[];
+  if(!rows.length){$("pend").innerHTML='<span class="ok">✓ Nothing waiting — every filed day is approved.</span>';return}
+  var h='<table><thead><tr><th>Date</th><th>Status</th><th>Entered by</th><th></th></tr></thead><tbody>';
+  rows.forEach(function(p){
+    h+='<tr><td>'+esc(p.date)+'</td><td><span class="badge b-warn">'+esc(p.status)+'</span></td><td>'+esc(p.entered_by||"")+'</td>'+
+       '<td><button class="ghost" onclick="toggleDay(\''+p.date+'\')">'+(openDays[p.date]?"close":"open")+'</button> '+
+       '<button onclick="approve(\''+p.date+'\')">Approve</button></td></tr>';
+    if(openDays[p.date]){h+='<tr><td colspan="4"><div class="day-detail" id="dd-'+p.date+'">loading&hellip;</div></td></tr>'}
+  });
+  $("pend").innerHTML=h+"</tbody></table>";
+  rows.forEach(function(p){ if(openDays[p.date]) dayDetail(p.date,"dd-"+p.date) });
+}
+function toggleDay(d){ openDays[d]=!openDays[d]; renderPending() }
+
+/* ------------- the one Day Page renderer, reused by every card ----------- */
+function dayDetail(d, elId){
+  fetch("/finance/api/day/"+d+"/full").then(function(r){return r.json()}).then(function(j){
+    var el=$(elId); if(!el)return;
+    if(!j.ok){el.textContent="could not load "+d;return}
+    var day=j.day||{}, mg=j.marg||{}, ic=j.icici||{};
+    var h="";
+    h+='<div class="sec"><h3>Declared (Darpan) — total '+fmt(day.total)+'</h3>'+
+       '<div>cash '+fmt(day.cash||"0")+' · UPI '+fmt(day.upi||"0")+' · non-cash '+fmt(day.noncash||"0")+
+       ' · opening '+fmt(day.opening)+' → closing '+fmt(day.closing)+'</div>';
+    if((day.expenses||[]).length){
+      h+='<table><thead><tr><th>Expense</th><th class="num">Amount</th><th>Narration</th><th>Ledger</th></tr></thead><tbody>';
+      day.expenses.forEach(function(x){h+='<tr><td>'+esc(x.category_fixed||x.category_text||"")+
+        (x.staff_id?' <span class="mut">staff #'+x.staff_id+'</span>':'')+'</td><td class="num">'+fmt(x.amount)+'</td><td>'+esc(x.category_text||"")+
+        '</td><td>'+(x.ledger_posted?'<span class="badge b-ok">✓ posted</span>':'<span class="mut">not posted</span>')+'</td></tr>'});
+      h+='</tbody></table>';}
+    if((day.attachments||[]).length){
+      h+='<div>scans: '+day.attachments.map(function(a){
+        return '<a href="'+a.url+'" target="_blank">'+esc(a.doc_type)+'</a>'}).join(" · ")+'</div>';}
+    h+='</div>';
+    h+='<div class="sec"><h3 onclick="tog(this)">Marg — '+(mg.present?('total '+fmt(mg.total)+' · '+(mg.bills||[]).length+' bills · '+mg.item_lines+' drug lines'+
+       (mg.variance!=null?(' · variance '+fmt(mg.variance)+(mg.variance_over_threshold?' <span class="badge b-bad">⚠ over ₹2,000</span>':' <span class="badge b-ok">✓ within ₹2,000</span>')):'')):'<span class="bad">✗ NO EXPORT for this day</span>')+
+       ' <span class="tog">[expand]</span></h3><div style="display:none">';
+    if(mg.present){
+      h+='<div class="tblwrap"><table><thead><tr><th>Bill</th><th>Patient</th><th>Mode</th><th class="num">Gross</th><th class="num">Disc</th><th class="num">Net</th></tr></thead><tbody>';
+      (mg.bills||[]).forEach(function(b){
+        h+='<tr class="billrow" onclick="var n=this.nextElementSibling; if(n&&n.className==\'items\')n.style.display=n.style.display==\'none\'?\'\':\'none\'">'+
+           '<td>'+esc(b.bill_no||"?")+(b.is_return?' <span class="badge b-warn">return</span>':'')+'</td>'+
+           '<td>'+esc(b.patient||"")+(b.clinic_id?' <span class="mut">#'+esc(b.clinic_id)+'</span>':'')+'</td>'+
+           '<td>'+esc(b.mode||"")+'</td><td class="num">'+(b.gross!=null?fmt(b.gross):"—")+'</td><td class="num">'+(b.disc?fmt(b.disc):"—")+'</td><td class="num">'+fmt(b.amount)+'</td></tr>';
+        if((b.items||[]).length){
+          h+='<tr class="items" style="display:none"><td colspan="6"><table>';
+          b.items.forEach(function(it){h+='<tr><td>'+esc(it.item)+'</td><td>'+esc(it.pack||"")+'</td><td>'+esc(it.qty||"")+
+            '</td><td class="num">'+fmt(it.amount)+'</td><td class="mut">'+esc(it.batch||"")+' '+esc(it.expiry||"")+'</td></tr>'});
+          h+='</table></td></tr>';}
+      });
+      h+='</tbody></table></div>';}
+    h+='</div></div>';
+    h+='<div class="sec"><h3>Bank · ICICI UPI — '+(ic.present?('settled '+fmt(ic.settled)+' ('+ic.txns+' txns) vs declared '+fmt(ic.declared||"0")+
+       (ic.mismatch?(' <span class="badge b-bad">⚠ MISMATCH '+fmt(ic.mismatch.diff)+' ('+esc(ic.mismatch.status)+')</span>'):' <span class="badge b-ok">✓ matched</span>')):'<span class="mut">no statement for this day yet</span>')+'</h3></div>';
+    h+='<div class="sec"><h3>Bank · Yes Bank</h3><div>'+((j.yesbank||[]).length?
+       j.yesbank.map(function(y){return fmt(y.deposit)+(y.is_cash?' <span class="mut">cash dep</span>':'')+' — <span class="mut">'+esc(y.desc||"").slice(0,60)+'</span>'}).join('<br>')
+       :'<span class="mut">no deposits on this date</span>')+'</div></div>';
+    if((j.flags||[]).length||(j.exceptions||[]).length||j.review_open){
+      h+='<div class="sec"><h3>Flags &amp; exceptions</h3><div>';
+      (j.flags||[]).forEach(function(f){h+='<span class="badge b-warn">⚑ '+esc(f.code)+'</span> '+esc(f.detail||"").slice(0,110)+'<br>'});
+      (j.exceptions||[]).forEach(function(x){h+='<span class="badge '+(x.status==='open'?'b-bad':'b-ok')+'">'+(x.status==='open'?'⚠ ':'✓ ')+esc(x.kind)+' · '+esc(x.status)+'</span><br>'});
+      if(j.review_open)h+='<span class="badge b-warn">'+j.review_open+' review rows open</span>';
+      h+='</div></div>';}
+    h+='<div class="mut">entered by '+esc(day.entered_by||"—")+(day.approved_by?(' · approved by '+esc(day.approved_by)):'')+'</div>';
+    el.innerHTML=h;
+  });
+}
+function tog(h3){var d=h3.nextElementSibling; if(d)d.style.display=d.style.display==="none"?"":"none"}
+function drill(d, hostId){
+  var box=$(hostId);
+  if(openIn[hostId]===d){box.style.display="none";openIn[hostId]=null;return}
+  openIn[hostId]=d; box.style.display=""; box.innerHTML="loading "+esc(d)+"&hellip;";
+  dayDetail(d, hostId);
+}
+
+function approve(d,ack){
+  var body=ack?{acknowledge_upi:true,ack_note:ack}:{};
+  fetch("/finance/api/approve/"+d,{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(body)})
+    .then(function(r){return r.json().then(function(j){return {s:r.status,j:j}})})
+    .then(function(x){
+      var j=x.j||{};
+      if(x.s===409&&j.error==="upi_mismatch"){
+        var note=prompt("Bank settled "+j.bank+" but the day says "+j.entered+" (difference "+j.diff+").\n"+
+                        "Approve anyway? Type a short reason to acknowledge, or Cancel:");
+        if(note!==null)approve(d,note||"acknowledged");
+        return;
+      }
+      if(!j.ok){alert(j.message||j.error||"could not approve");return}
+      openDays[d]=false; load();
+    }).catch(function(){alert("network problem — nothing was approved")});
+}
+
+/* ------------------------------ cash register ---------------------------- */
+function loadCash(n){
+  fetch("/finance/api/days?days="+n).then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){$("cashTbl").textContent="could not load";return}
+    var rows=j.days||[];
+    if(rows.length){$("cashNow").textContent=fmt(rows[0].closing)}
+    var h='<div class="tblwrap"><table><thead><tr><th>Date</th><th>Status</th><th class="num">Revenue</th><th class="num">Cash</th><th class="num">UPI</th>'+
+          '<th class="num">Non-cash</th><th class="num">Closing</th><th class="num">Scans</th><th class="num">Adj</th></tr></thead><tbody>';
+    rows.forEach(function(d){
+      h+='<tr><td><span class="dl" onclick="drill(\''+d.date+'\',\'cashDrill\')">'+esc(d.date)+'</span>'+
+         (d.imported?' <span class="mut">(legacy)</span>':'')+'</td>'+
+         '<td>'+(d.status==="approved"||d.status==="locked"?'<span class="badge b-ok">✓ '+esc(d.status)+'</span>':'<span class="badge b-warn">'+esc(d.status)+'</span>')+'</td>'+
+         '<td class="num">'+fmt(d.revenue)+'</td><td class="num">'+fmt(d.cash)+'</td><td class="num">'+fmt(d.upi)+'</td><td class="num">'+fmt(d.noncash)+'</td>'+
+         '<td class="num"><b>'+fmt(d.closing)+'</b></td><td class="num">'+d.scans+'</td><td class="num">'+(d.adjustments||0)+'</td></tr>'});
+    h+='</tbody></table></div><div class="day-detail" id="cashDrill" style="display:none"></div>';
+    $("cashTbl").innerHTML=h;
+  }).catch(function(){$("cashTbl").textContent="could not load"});
+}
+
+/* -------------------------------- custody -------------------------------- */
+function loadCashPos(){
+  /* S210_ONEMONEY -- ONE money card, ONE arithmetic.
+     Until S210 this page carried TWO answers to "who holds what": this card
+     (custody + hand-overs, correct) and a custody card below it (custody only),
+     disagreeing by Rs 1,21,982 on 30-Aug-2026. The custody card is REMOVED and
+     its event trail is folded into the per-person detail here. And the page now
+     says out loud how long it has been since money last reached the bank --
+     the alarm whose absence let Rs 3,20,340 sit unbanked for a month. */
+  fetch("/finance/api/cash-position?_="+(new Date()).getTime(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){$("cashPos").textContent="could not load";return}
+    var NM={dr_bhawna:"Dr Bhawna",drawer:"Drawer (Darpan)",counter:"Counter (Vinay)",dr_manoj:"Dr Manoj",bank:"Bank"};
+    function row(label,val,detailHtml){
+      return '<div class="custPerson" style="border-top:1px solid #eee">'+
+        '<div onclick="tog(this)" class="stat" style="cursor:pointer">'+
+        '<span class="lbl">'+label+' <span class="mut" style="font-weight:400">▸ tap</span></span>'+
+        '<span class="val">'+fmt(val)+'</span></div>'+
+        '<div style="display:none;padding-left:6px">'+detailHtml+'</div></div>';
+    }
+    function trailTable(list){
+      if(!list||!list.length)return '<div class="mut" style="padding:6px 2px">no recorded movements yet</div>';
+      return '<div class="tblwrap" style="margin:2px 0 6px"><table><thead><tr><th>Date</th><th>From</th><th>To</th><th class="num">Amount</th><th>Note</th></tr></thead><tbody>'+
+        list.map(function(e){return '<tr><td>'+esc(e.date)+'</td><td>'+esc(NM[e.frm]||e.frm)+'</td><td>'+esc(NM[e.to]||e.to)+'</td><td class="num">'+fmt(e.amount)+
+          (e.month_end?' <span class="badge b-warn">'+esc(e.month_end)+'</span>':'')+'</td><td class="mut">'+esc((e.note||"").slice(0,90))+'</td></tr>'}).join("")+'</tbody></table></div>';
+    }
+    /* S210 correction (owner-caught, 30-Aug): the server's reserve_detail /
+       manoj_detail ALREADY merge custody events and day-form hand-overs
+       (finance_app _cust). Merging custody events in again here duplicated
+       every custody row -- the 23,130 showed twice. One event, one table:
+       the server trail is rendered AS IS, and the drawer keeps its day
+       history only. */
+    /* the deposit-gap alarm */
+    var lastDep=j.last_bank_date||null, gapTxt, gapCls;
+    if(lastDep){
+      var gd=Math.floor(((new Date()).getTime()-(new Date(lastDep+"T00:00:00")).getTime())/86400000);
+      gapTxt=esc(lastDep)+" · "+gd+" days ago"; gapCls=(gd>15)?"b-bad":"b-ok";
+    }else{gapTxt="never recorded"; gapCls="b-bad";}
+    var days=(j.days||[]);
+    var drawerDetail='<div class="tblwrap" style="margin:2px 0 6px"><table><thead><tr><th>Date</th><th class="num">In drawer</th><th class="num">Unbanked</th></tr></thead><tbody>'+
+      days.map(function(d){return '<tr><td>'+esc(d.date)+'</td><td class="num">'+fmt(d.drawer)+'</td><td class="num">'+fmt(d.unbanked)+'</td></tr>'}).join("")+'</tbody></table></div>';
+    var deps=(j.bank_deposits||[]);
+    var depDetail=deps.length?('<div class="tblwrap" style="margin:2px 0 6px"><table><thead><tr><th>Date</th><th class="num">Amount</th><th>Ref</th></tr></thead><tbody>'+
+      deps.map(function(d){return '<tr><td>'+esc(d.date)+'</td><td class="num">'+fmt(d.amount)+'</td><td class="mut">'+esc(d.ref)+'</td></tr>'}).join("")+'</tbody></table></div>'):'<div class="mut" style="padding:6px 2px">no deposits recorded</div>';
+    $("cashPos").innerHTML=
+      '<div class="stat" style="margin-bottom:2px"><span class="lbl">Cash in the unit'+(j.as_of?' · as of '+esc(j.as_of):'')+'</span><span class="val">'+fmt(j.unbanked)+'</span></div>'+
+      '<div class="stat" style="margin-bottom:4px"><span class="lbl">Last bank deposit</span><span><span class="badge '+gapCls+'">'+gapTxt+'</span></span></div>'+
+      row("In Darpan’s drawer", j.drawer, drawerDetail)+
+      row("Parked · Dr Bhawna", j.reserve, trailTable(j.reserve_detail))+
+      row("Parked · Dr Manoj", j.with_manoj, trailTable(j.manoj_detail))+
+      row("Banked to date ("+esc(j.bank_count)+")", j.bank_deposited, depDetail)+
+      '<div class="mut" style="font-size:12px;margin-top:6px">Tap any line to expand · one arithmetic for the whole page (S210).</div>';
+  }).catch(function(){$("cashPos").textContent="could not load"});
+}
+
+/* ------------------------------ month grid ------------------------------- */
+function initMonth(){
+  var t=new Date(); var ym=t.getFullYear()+"-"+("0"+(t.getMonth()+1)).slice(-2);
+  $("ymPick").value=ym; loadMonth();
+}
+function loadMonth(){
+  var ym=$("ymPick").value; if(!ym)return;
+  fetch("/finance/api/workbench/"+ym).then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){$("monthTbl").textContent="could not load";return}
+    var h='<div class="tblwrap"><table><thead><tr><th>Date</th><th>Status</th><th class="num">Cash</th><th class="num">UPI</th><th class="num">Marg</th>'+
+          '<th class="num">Gap</th><th class="num">Bank dep</th><th class="num">Closing</th><th>⚠</th></tr></thead><tbody>';
+    (j.days||[]).forEach(function(d){
+      h+='<tr><td><span class="dl" onclick="drill(\''+d.date+'\',\'monthDrill\')">'+esc(d.date)+'</span></td>'+
+         '<td>'+esc(d.status||"")+'</td><td class="num">'+fmt(d.entered_cash)+'</td><td class="num">'+fmt(d.entered_upi)+'</td>'+
+         '<td class="num">'+(d.marg!=null?fmt(d.marg):'<span class="mut">—</span>')+'</td>'+
+         '<td class="num">'+(d.gap!=null?(fmt(d.gap)+(d.gap_grade?' <span class="badge '+(d.gap_grade==="exact"?"b-ok":d.gap_grade==="likely"?"b-warn":"b-bad")+'">'+esc(d.gap_grade)+'</span>':'')):'<span class="mut">—</span>')+'</td>'+
+         '<td class="num">'+(d.bank_deposit?fmt(d.bank_deposit):'<span class="mut">—</span>')+'</td><td class="num">'+fmt(d.closing)+'</td>'+
+         '<td>'+(d.shouts?'<span class="badge b-bad">⚠ '+d.shouts+'</span>':'')+'</td></tr>'});
+    h+='</tbody></table></div><div class="day-detail" id="monthDrill" style="display:none"></div>';
+    $("monthTbl").innerHTML=h;
+    var t=j.totals||{};
+    $("monthTot").textContent=t.cash!=null?("totals — cash "+fmt(t.cash)+" · upi "+fmt(t.upi)+" · marg "+fmt(t.marg)+" · bank "+fmt(t.bank)):"";
+  }).catch(function(){$("monthTbl").textContent="could not load"});
+}
+
+/* -------------------------------- orthotics ------------------------------ */
+function loadOrtho(){
+  fetch("/finance/api/orthotics?days=90").then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){$("orthoOut").textContent="could not load";return}
+    $("orthoVocab").value=j.vocab||"";
+    if(!(j.vocab||"").trim()){
+      $("orthoOut").innerHTML='<span class="mut">Set the item keywords above (e.g. <i>belt, brace, knee cap, collar, splint, LS belt</i>) and save — the sales rollup appears here.</span>';return}
+    var h="";
+    if((j.items||[]).length){
+      h+='<div class="tblwrap"><table><thead><tr><th>Item</th><th class="num">Times sold (90d)</th><th class="num">Amount</th><th>Last sold</th></tr></thead><tbody>';
+      j.items.forEach(function(x){h+='<tr><td>'+esc(x.item)+'</td><td class="num">'+x.times+'</td><td class="num">'+fmt(x.amount)+'</td><td>'+esc(x.last_sold)+'</td></tr>'});
+      h+='</tbody></table></div>';
+    } else h+='<span class="mut">no matching item lines in the last 90 days — check the keywords</span>';
+    $("orthoOut").innerHTML=h;
+  }).catch(function(){$("orthoOut").textContent="could not load"});
+}
+function saveVocab(){
+  $("orthoMsg").textContent="saving…";
+  fetch("/finance/api/orthotics",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({vocab:$("orthoVocab").value})})
+    .then(function(r){return r.json()}).then(function(j){
+      $("orthoMsg").textContent=j.ok?"saved":"failed"; loadOrtho();
+    }).catch(function(){$("orthoMsg").textContent="failed"});
+}
+
+/* -------------------------- missing marg / exceptions -------------------- */
+function renderMM(){
+  /* S208_CONSOLE (owner, 30-Aug): status is COMPUTED FRESH -- a data_flag is
+     a RECORD (F-113, kept on purpose) and was being read as live status,
+     which is exactly the confusion the owner named. One table, one verdict
+     per day, computed now; a flag on an OK day says STALE with its dismiss
+     right there. */
+  fetch("/finance/darpan/api/coverage?days=45").then(function(r){return r.json()})
+   .then(function(j){
+    if(!j.ok){$("mm").textContent="coverage: "+(j.message||j.error);return}
+    var bad=j.rows.filter(function(r){return r.verdict!=="OK"});
+    var ok =j.rows.filter(function(r){return r.verdict==="OK"});
+    var stale=ok.filter(function(r){return r.stale});
+    var h="";
+    if(!bad.length && !stale.length){
+      h='<span class="ok">✓ Every day is covered — filed, report in, applied. ('+
+        ok.length+' days checked, live)</span>';
+    }else{
+      h='<table><thead><tr><th>Date</th><th>Day filed</th><th>Marg report</th>'+
+        '<th>Status (computed now)</th><th></th></tr></thead><tbody>';
+      bad.concat(stale).forEach(function(r){
+        var v=r.verdict==="OK"?'<span class="ok">✓ OK</span>'
+            :'<span class="badge b-warn">'+esc(r.verdict)+'</span> <span class="mut">'+esc(r.hindi)+'</span>';
+        var act=(r.flags||[]).length && (r.stale||r.verdict==="OK")
+            ?'<a href="#" onclick="mmDismiss(\''+esc(r.date)+'\');return false">stale flag — remove ✕</a>'
+            :((r.flags||[]).length?'<span class="mut">flag stays till fixed</span>':"");
+        h+='<tr><td>'+esc(r.date)+'</td><td>'+esc(r.filed||"—")+'</td>'+
+           '<td>'+esc(r.export)+'</td><td>'+v+'</td><td>'+act+'</td></tr>';
+      });
+      h+='</tbody></table>';
+      if(ok.length) h+='<div class="mut" style="margin-top:6px">'+ok.length+
+        ' other day(s) fully covered — not listed.</div>';
+    }
+    $("mm").innerHTML=h;
+    loadCN(); loadIDs();
+  });
+}
+function loadCN(){
+  var box=document.getElementById("cnBox"); if(!box) return;
+  fetch("/finance/darpan/api/cn-detail").then(function(r){return r.json()})
+   .then(function(j){
+    if(!j.ok) return;
+    var head=j.count+" credit note(s) this month · ₹"+(j.total_p/100).toFixed(2)+
+      (j.pending_approval?' · <span class="badge b-warn">'+j.pending_approval+
+       ' return(s) NEED YOUR APPROVAL</span>':' · <span class="ok">all returns verified ✓</span>');
+    var h='<details><summary>'+head+' — open each to the last detail</summary>';
+    j.notes.forEach(function(n){
+      h+='<div style="margin:8px 0"><b>'+esc(n.bill||"?")+'</b> · '+esc(n.date)+
+         ' · ₹'+(n.amount_p/100).toFixed(2)+
+         (n.patient?' · <b>'+esc(n.patient.name||"")+'</b> ('+esc(n.patient.clinic_id||"")+')'
+                   :' · <span class="badge b-warn">patient not matched</span>')+
+         '<table><thead><tr><th>item</th>'+
+         '<th>qty</th><th>₹</th><th>batch</th><th>exp</th>'+
+         '<th>same patient bought it in</th><th></th></tr></thead><tbody>';
+      if(n.needs_approval){
+        var a=n.approval||{};
+        if(a.status==="pending")
+          h+='<div class="note" style="margin:4px 0"><span class="badge b-warn">⚠ NOT '+
+             'entertained without your approval — no traceable sale since 1-Apr-2026</span> '+
+             '<button onclick="cnDecide(\''+esc(n.bill)+'\',\'approved\')">I know this case — approve</button> '+
+             '<button class="ghost" onclick="cnDecide(\''+esc(n.bill)+'\',\'rejected\')">Reject — recover</button></div>';
+        else
+          h+='<div class="mut" style="margin:4px 0">'+(a.status==="approved"?"✓ approved":"✕ REJECTED")+
+             ' by '+esc(a.decided_by||"")+' · '+esc((a.decided_at||"").slice(0,16))+
+             (a.note?' · '+esc(a.note):'')+'</div>';
+      }
+      (n.lines||[]).forEach(function(l){
+        var m=(l.earlier_sales||[])[0];
+        h+='<tr><td>'+esc(l.item)+'</td><td>'+esc(l.qty||"")+'</td>'+
+           '<td>'+(l.amount_p!=null?(l.amount_p/100).toFixed(2):"")+'</td>'+
+           '<td>'+esc(l.batch||"")+'</td><td>'+esc(l.expiry||"")+'</td>'+
+           '<td>'+(m?('bill <b>'+esc(m.bill)+'</b> · '+esc(m.date)+
+                 (l.earlier_sales.length>1?' (+'+(l.earlier_sales.length-1)+' more)':''))
+                 :'<span class="mut">—</span>')+'</td>'+
+           '<td>'+(l.verified?'<span class="ok">✓ return verified — same patient\'s own sale</span>'
+                             :'<span class="badge b-warn">no earlier sale of this item to this patient — check</span>')+'</td></tr>';
+      });
+      if(!(n.lines||[]).length) h+='<tr><td colspan="7" class="mut">item lines not on this server for this bill</td></tr>';
+      h+='</tbody></table></div>';
+    });
+    h+='<div class="mut">A credit note is a SALES RETURN: it verifies against the same patient\'s own earlier sale bill — shown here. A row with no match is the one to ask about.</div></details>';
+    box.innerHTML=h;
+  });
+}
+function cnDecide(bill,decision){
+  var note="";
+  if(decision==="rejected"){note=window.prompt("Reject "+bill+" — why? (recorded, and the recovery follows)")||"";
+    if(note.trim().length<3)return;}
+  else{note=window.prompt("Approve "+bill+" — note (optional):","")||"";}
+  fetch("/finance/darpan/api/cn-approve",{method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({bill:bill,decision:decision,note:note})})
+   .then(function(r){return r.json()}).then(function(j){
+     if(!j.ok){alert(j.message||j.error);return}
+     loadCN();
+   });
+}
+function loadIDs(){
+  var box=document.getElementById("idBox"); if(!box) return;
+  box.innerHTML='<details><summary>Clinic-ID check — short IDs are often REAL old IDs</summary>'+
+    '<div style="margin:6px 0"><input id="idq" placeholder="e.g. 75,842" style="padding:6px">'+
+    ' <button class="ghost" onclick="idGo()">who is this?</button></div>'+
+    '<div id="idout" class="mut"></div>'+
+    '<div class="mut">Full patient master on this server (from the Followup Tracker) is the Sprint-5 feed; till then this answers from every patient already matched here.</div></details>';
+}
+function idGo(){
+  var q=(document.getElementById("idq").value||"").trim(); if(!q) return;
+  fetch("/finance/darpan/api/idlookup?ids="+encodeURIComponent(q))
+   .then(function(r){return r.json()}).then(function(j){
+    if(!j.ok) return;
+    document.getElementById("idout").innerHTML=j.results.map(function(x){
+      return "<b>"+esc(x.clinic_id)+"</b> → "+(x.known?'<span class="ok">'+esc(x.name)+' ✓ (a real patient — the 4-digit rule under-scored this)</span>':'<span class="badge b-warn">not known to this server</span>');
+    }).join("<br>");
+  });
+}
+/* D349 (S202): ONE rule decides what a difference MEANS; this card only
+   DISPLAYS what the server already decided. It never re-derives it, because a
+   second copy of a rule is how two screens disagree — which is exactly what
+   happened when S201 renamed this on /finance/health and this card kept saying
+   "variance".
+   And it separates the two populations. Five days whose only difference is
+   bills not yet matched to a patient were hiding four genuinely unexplained
+   ones — including a NEGATIVE row open since S186. Resolution happens HERE,
+   on the row, because the owner asked for "reconciliation there only as inbuilt
+   flow, no page hopping". */
+function mmDismiss(d){
+  var why=window.prompt("Remove the NOT-FILED flag for "+d+"?\nA reason is required and recorded:");
+  if(!why||why.trim().length<3) return;
+  fetch("/finance/darpan/api/dismiss-flag",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({date:d,code:"MARG_DAY_NOT_FILED",reason:why})})
+   .then(function(r){return r.json()}).then(function(j){
+     if(!j.ok){alert(j.message||j.error);return}
+     location.reload();
+   });
+}
+function exResolve(id,btn){
+  var box=document.getElementById("exr"+id);
+  var why=(box&&box.value||"").trim();
+  if(!why){ if(box){box.focus();box.placeholder="a reason is required — nothing closes without one";} return; }
+  btn.disabled=true; btn.textContent="…";
+  fetch("/finance/api/exception/"+id+"/resolve",
+        {method:"POST",headers:{"Content-Type":"application/json"},
+         body:JSON.stringify({resolution:why})})
+   .then(function(r){return r.json()})
+   .then(function(j){
+      if(j&&j.ok){ var tr=document.getElementById("exrow"+id);
+                   if(tr){tr.style.opacity=".4"; tr.querySelector(".exact").innerHTML='<span class="ok">✓ closed</span>';} load(); }
+      else { btn.disabled=false; btn.textContent="Close";
+             alert((j&&j.message)||"could not close this one"); }})
+   .catch(function(){btn.disabled=false;btn.textContent="Close";});
+}
+function exRowsTable(rows,showWhy){
+  var t='<div class="tw"><table><tr><th>day</th><th>amount</th><th>what it is</th>'
+       +'<th>close it here</th></tr>';
+  rows.forEach(function(d){
+    t+='<tr id="exrow'+d.id+'"><td><span class="dl" onclick="drill(\''+esc(d.date)+'\',\'exDrill\')">'
+      +esc(d.date)+'</span></td>'
+      +'<td style="text-align:right;font-variant-numeric:tabular-nums">'+fmt(d.diff)+'</td>'
+      +'<td>'+esc(d.label||"")+(showWhy&&d.why?'<div class="note">'+esc(d.why)+'</div>':'')
+      +(d.says?'<div class="note">'+esc(d.says)+'</div>':'')+'</td>'
+      +'<td class="exact"><input id="exr'+d.id+'" placeholder="reason" style="width:11em">'
+      +' <button onclick="exResolve('+d.id+',this)">Close</button></td></tr>';
+  });
+  return t+'</table></div>';
+}
+function renderEx(){
+  var h="", look=A.differences_look||[], parked=A.differences_parked||[],
+      upi=A.upi_rows||[];
+  /* 1. what actually needs a person */
+  if(look.length){
+    h+='<div style="margin-top:4px"><b>⚠ Needs you — '+look.length+' day(s)</b>'
+      +'<div class="note">Not explained by bills awaiting a patient name. '
+      +'These are the ones worth your time.</div>'+exRowsTable(look,true)+'</div>';
+  }
+  /* 2. the money differences between bank and what was typed */
+  if(upi.length){
+    var short=upi.filter(function(u){return u.direction==="maker_short"}),
+        over =upi.filter(function(u){return u.direction==="maker_holds_extra"});
+    h+='<div style="margin-top:12px"><b>Bank vs what was entered — '+upi.length+' day(s)</b>'
+      +'<div class="note">Net across all of them: <b>'+fmt(A.upi_net)+'</b>. '
+      +'A day short means the drawer was expected to hold money that was never '
+      +'in it — the maker covers that personally. '+short.length+' short, '
+      +over.length+' over.</div>'+exRowsTable(upi,false)+'</div>';
+  }
+  /* 3. the harmless population, folded away — present, not shouting */
+  if(parked.length){
+    var tot=0; parked.forEach(function(d){tot+=(d.diff_p||0)});
+    h+='<details style="margin-top:12px"><summary style="min-height:38px;cursor:pointer">'
+      +'ⓘ '+parked.length+' day(s) waiting for patient names — ₹'
+      +(tot/100).toLocaleString("en-IN",{minimumFractionDigits:2})+'</summary>'
+      +'<div class="note">Sale bills where no clinic ID was entered at the till '
+      +'(D348). The money is counted in FULL — only the patient name is missing, '
+      +'and these clear when the Docterz match runs. <b>Nothing is wrong here.</b></div>'
+      +exRowsTable(parked,false)+'</details>';
+  }
+  if(A.review_open){h+='<div class="note" style="margin-top:10px">Review queue: '+A.review_open+' open row(s).</div>';}
+  if(!h)h='<span class="ok">✓ No open exceptions.</span>';
+  h+='<div class="day-detail" id="exDrill" style="display:none"></div>';
+  $("ex").innerHTML=h;
+}
+/* S194 ⭐2 home-medicine sales, ⭐3 cash/UPI reclassifications */
+function loadHomeMed(){
+  fetch("/finance/api/home-medicine?_="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
+    if(!j||!j.ok){$("homeMed").innerHTML='<span class="mut">—</span>';return}
+    var h='<div class="held"><div class="stat"><span class="lbl">Home-medicine · last 30 days</span><span class="val">'+fmt(j.total)+'</span></div>'+
+          '<div class="stat"><span class="lbl">Bills</span><span class="val">'+j.count+'</span></div></div>';
+    if((j.days||[]).length){
+      h+='<div class="tblwrap" style="margin-top:8px"><table><thead><tr><th>Day</th><th class="num">Bills</th><th class="num">Amount</th></tr></thead><tbody>';
+      j.days.forEach(function(d){h+='<tr><td>'+esc(d.date)+'</td><td class="num">'+d.n+'</td><td class="num">'+fmt(d.amount)+'</td></tr>'});
+      h+='</tbody></table></div>';
+    }else{h+='<div class="note">No home-medicine bills in the last 30 days.</div>'}
+    $("homeMed").innerHTML=h;
+  }).catch(function(){$("homeMed").innerHTML='<span class="mut">could not load</span>'});
+}
+function loadReclass(){
+  fetch("/finance/api/reclassifications?_="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
+    if(!j||!j.ok){$("reclass").innerHTML='<span class="mut">—</span>';return}
+    if(!j.count){$("reclass").innerHTML='<span class="ok">✓ No cash/UPI reclassifications in the last 30 days.</span>';return}
+    var h='<div class="held"><div class="stat"><span class="lbl">Reclassified · last 30 days</span><span class="val">'+j.count+'</span></div></div>';
+    h+='<div class="tblwrap" style="margin-top:8px"><table><thead><tr><th>Day</th><th>Bill</th><th>Was</th><th>Now</th><th class="num">Amount</th></tr></thead><tbody>';
+    j.items.forEach(function(it){h+='<tr><td>'+esc(it.date)+'</td><td>'+esc(it.bill||"")+'</td><td>'+esc(it.from_mode||"")+'</td><td><b>'+esc(it.to_mode||"")+'</b></td><td class="num">'+fmt(it.amount)+'</td></tr>'});
+    h+='</tbody></table></div>';
+    $("reclass").innerHTML=h;
+  }).catch(function(){$("reclass").innerHTML='<span class="mut">could not load</span>'});
+}
+loadHomeMed(); loadReclass();
+load();
+/* S193_UX: make every card collapsible; noisy ones start collapsed. */
+(function(){
+  var st=document.createElement("style");
+  st.textContent=".card.collapsed > *:not(:first-child){display:none}.cabToggle{color:var(--text-3);font-weight:400;font-size:13px;margin-right:4px}";
+  document.head.appendChild(st);
+  document.querySelectorAll(".card").forEach(function(card){
+    var head=card.querySelector(".h2row")||card.querySelector("h2"); if(!head) return;
+    head.style.cursor="pointer";
+    var h=card.querySelector("h2")||head; var tag=document.createElement("span"); tag.className="cabToggle"; tag.textContent="\u25be "; h.insertBefore(tag,h.firstChild);
+    head.addEventListener("click",function(e){ var t=e.target.tagName; if(t==="A"||t==="BUTTON"||t==="INPUT"||t==="SELECT") return; var c=card.classList.toggle("collapsed"); tag.textContent=c?"\u25b8 ":"\u25be "; });
+  });
+  ["margCard","cashCard","monthCard","orthoCard","exCard","homeMedCard","reclassCard"].forEach(function(id){ var c=document.getElementById(id); if(c){ c.classList.add("collapsed"); var t=c.querySelector(".cabToggle"); if(t)t.textContent="\u25b8 "; } });
+})();
+</script></body></html>
