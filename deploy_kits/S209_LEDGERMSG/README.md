@@ -18,10 +18,14 @@ Both behaviours are right. Only the sentence is wrong.
 **One insertion, inside the read-only reporting function only.** When custody events
 exist for the date, that one sentence becomes:
 
-> "No cash_movement row for 2026-08-27 in the day ledger — and that is expected here: an
-> owner transfer IS recorded for this date, shown below. An owner transfer is a custody
-> record, not a day-ledger movement, so it never creates a cash_movement row. Nothing
-> further is needed."
+> "No cash_movement row for 2026-08-27, so the day ledger still counts this cash in the
+> drawer. Your override below records where it actually went — dated, signed, in the
+> custody record."
+
+**Corrected by the owner, S209:** an earlier draft said *"an owner transfer is a custody
+record, not a day-ledger movement"*. He was right to reject it — **it IS a cash movement in
+real life**, drawer to Dr Bhawna. The true statement is narrower: no row was written into
+that day's ledger. The wording now says only that.
 
 **With no custody event the original instruction is untouched** — it is correct there.
 No other message is altered. No write path, no schema, no query changed.

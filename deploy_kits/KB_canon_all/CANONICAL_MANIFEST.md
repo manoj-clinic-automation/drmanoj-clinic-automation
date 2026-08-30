@@ -1,3 +1,11 @@
+> **S209 CLOSE (30-Aug-2026):** Archive **v1.56** and Fault Register **v2.45**, both pure-append
+> with the prefix proven byte-identical. **D353** ratified the F-series fork (S197 rule, nothing
+> renumbered); **F-241 … F-246** minted in §7.2. Five of six red kit gates repaired with the reason
+> written inside each file; the sixth (**F-244**, `S195_A123`) left RED deliberately. Live pages moved:
+> `finance_approvals.html` `da82366c…`, `darpan_corrections.html` `f2f6f60e…`, `PUBLISH_ALL.bat`
+> `481e9b32…`. **OWED at this close, recorded not silent: the KB Register was NOT bumped to v5.60**
+> — its current-state rows still describe S208. Next free: **D354 · F-247 · Session 210**.
+
 # CANONICAL MANIFEST — Dr. Manoj Agarwal Clinic (Tier 0 · linchpin)
 
 **Bareilly · maintained with Claude · governs the canonical document set (D247).**
@@ -98,7 +106,7 @@ is a halt that gets waved through, and then it protects nothing.
 | `KB_Register_v5_57_S206` | **S206 close** | `da4cc8307875e425f80265c375d2a4d5` | **SUPERSEDED by v5.58 (S207 close)** — Tier-0 register. All four self-referential lines checked and updated. **v5.56 stood through the whole of S205 because that close never ran A2.** |
 | `KB_Register_v5_59_S208` | **S208 close** | `c047f17ac6e2226016f8140be16e1cc4` | **CURRENT** Tier-0 register. **Re-hashed the same hour it was published (was `f5230f42…`): the finance_app.py pin cell was completed in place from the owner's pasted `md5sum` — the one planned edit its own row announced.** The seven-kit close: the S208 live-file wave added (every pin from kit bytes, installs proven GREEN); `finance_app.py` DECLARED pin-pending — a blind row, never a stale pin. Three of the four self-referential lines were stale at v5.58 (routine v8, Runbook v140, next-free F-232) — corrected visibly. |
 | `KB_Register_v5_58_S207` | **S207 close** | `b52bb7fd6bc60018d481a9c76aa04938` | **SUPERSEDED by v5.59 (S208 close)** — Tier-0 register. Three of four self-referential lines stale, corrected visibly. |
-| `KB_History_Archive_v1_55_S208` | **S208 close** | `493442ec0324831f83d6b5097489ee51` | **CURRENT** Tier-1 history. §S208 appended; **pure append proven — all 954,346 bytes of v1.54 verified an identical prefix, +13,050.** Lives in `deploy_kits/KB_canon_all/`. |
+| `KB_History_Archive_v1_56_S209` | **S209 close** | `848b7679e2986f109f77d06124bab243` | **CURRENT** Tier-1 history. §S208 appended; **pure append proven — all 954,346 bytes of v1.54 verified an identical prefix, +13,050.** Lives in `deploy_kits/KB_canon_all/`. |
 | `KB_History_Archive_v1_54_S207` | **S207 close** | `d36db2eb117452d3e5a715cfcf7abace` | **SUPERSEDED by v1.55 (S208 close)** — Tier-1 history. §S207 appended; **pure append proven — the 944,999 bytes before v1.53's END marker hashed byte-identical, +9,347.** Lives in `deploy_kits/KB_canon_all/`, `D:\Downloads\ClaudeCowork\00_CANON_SNAPSHOT_S207\` and the cold-backup zips — **absence from project knowledge is not a failed row.** |
 | `KB_History_Archive_v1_52_S206` | **S206 close** | `87cdd56b5259793224754b0a47ee0dd3` | **SUPERSEDED by v1.54 (S207 close)** — Tier-1 history. §S206 appended; **pure append proven — the 927,836 bytes before v1.51's END marker verified byte-identical.** **§S205 IS ABSENT, recorded as a gap, not a truncation.** |
 | `HANDOFF_RUNBOOK_2026-08-27_Session206close_v140` | **S206 close** | `78b5b899e346f4ddbd83dc33e30bdb2e` | **SUPERSEDED by v141 (S207 close; this cell still read CURRENT at the S208 close — recorded, not silent)** — runbook. §0 S206 · §2 the close-time backlog snapshot (live truth is `OWNER_TODO_LIVE.md`). |
@@ -276,7 +284,8 @@ is a halt that gets waved through, and then it protects nothing.
 | `API_QUICK_REFERENCE_CARD` | — | `68c4fc344bf74caaea706149cd22e64c` | small + stable; in the repo `canonical-docs/` (byte-identical) |
 | `AI_Verdict_Layer_Master` | v1 (S145) | `bd4b67f6810cd2316eb58dfe6bf180cd` | Product B analytics |
 | `Clinic_Callback_Tracker_AppsScript_Audit` | v1.9 | `41dd9fd6b607e59e15e3e646b775d640` | unfinished audit (Pass 4 not started); reference only — NOT the frozen dossier |
-| `Fault_Action_Register` | **v2.44** | `823d48bb6ccd36db970612fb8f06d069` | **CURRENT** findings register (F-0 … F-217, next free **F-218**). **v2.44 (S205): F-213 … F-217 appended — every one found by measuring a record against the machine it describes, none by a failure. Four are the same shape: *a check that passes for a reason other than the one it names.* F-215 is the sharpest: the reinstall kit held pre-fix bytes and its own `md5sum -c` was GREEN.** **v2.43 (S204 close): F-207 … F-212 appended the session they were raised.** **v2.43 (S204 close): F-207 … F-212 appended the session they were raised — three the assistant's own.** F-207 the warning sixteen lines above the fault it forbids (FIXED) · **F-208 the audit convicting on re-keyed text** · **F-209 a pin is not a backup** · F-210 a hash cannot carry a permission · F-211 both stores stale in opposite directions · F-212 two publishers, one repo. §0–§6 unchanged. |
+| `Fault_Action_Register` | **v2.45** | `209fc8d1e7510808070e0829e6006e30` | **CURRENT** findings register. F-0 … F-246; **next free F-247**. S209 appended **§7.2** — D353 ratified the F-series fork (S197 rule, nothing renumbered) and minted **F-241 … F-246**. Pure append, the 378,789 bytes before the v2.44 end-marker proven byte-identical. **OWED: the §7 index rows and the text for F-220/221/222/227/231/236, which were ratified as NUMBERS only.** |
+| `Fault_Action_Register` (pre-S209) | v2.44 (S205 close) | `823d48bb6ccd36db970612fb8f06d069` | superseded by v2.45; retained. |
 | `Fault_Action_Register` (pre-S205) | v2.43 (S204 close) | `115d5c97ae2319cec7a4e64e813c10c2` | superseded by v2.44; retained. |
 | `Fault_Action_Register` (pre-S204) | v2.42 (S203 close) | `ef5cea3e11c997edc8cf3ef8f2bd7c8a` | superseded by v2.43; retained. |
 | `Fault_Action_Register` (pre-S203) | v2.41 | `4883e3bdf08cba92da7597448e00f2da` | superseded by v2.42; retained. Findings register (F-0 … F-193). **v2.41 (S202 close): F-187 … F-193 appended and F-185 CORRECTED.** Six of the nine are the assistant's own. Next free **F-194**. |

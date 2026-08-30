@@ -3,28 +3,26 @@
 patch_darpan_msg.py -- F-246: stop telling the owner to do what he has done.
 
 THE FAULT
-    api_ledger_check reports, for a date with no cash_movement row:
+    api_ledger_check told the owner: "the transfer-out was never saved into the
+    day. Record it as an owner transfer below." api_transfer writes to
+    cash_custody_event, so doing exactly that could never clear the message --
+    and it went on accusing him afterwards.
 
-        "NO cash_movement row for 2026-08-27 -- the transfer-out was never
-         saved into the day. Record it as an owner transfer below, with the
-         date, so the record exists with an audit trail."
-
-    api_transfer writes to cash_custody_event -- deliberately: an owner
-    transfer records CUSTODY, not a day-ledger movement. Its own docstring
-    says so. So recording the transfer can NEVER create a cash_movement row,
-    and the message stands there afterwards accusing the owner of not having
-    done it. He did it, correctly, and was told he had not.
+WHAT IS AND IS NOT CLAIMED (the owner's own correction, S209)
+    It IS a cash movement in real life: drawer -> Dr Bhawna. Calling it "not a
+    cash movement" was wrong. What is true is narrower: no row was written into
+    that day's ledger, so the DAY still counts the cash in the drawer, and the
+    custody record is where the override lives. The new sentence says exactly
+    that and nothing more.
 
 THE CHANGE
-    One insertion, in the READ-ONLY reporting function only. When custody
-    events exist for the date, that one sentence is rewritten to say what is
-    actually true. No write path, no schema, no other message touched.
+    One insertion, in the READ-ONLY reporting function only. No write path, no
+    schema, no query, no other message.
 
 SAFETY
-    anchored on an exact unique string · refuses if the anchor is missing or
-    appears more than once · already-patched is detected and skipped ·
-    timestamped backup · py_compile before it is left in place, and the
-    ORIGINAL is restored if compilation fails.
+    anchored on one exact string · refuses if absent or ambiguous · a previous
+    S209 block is REPLACED, so wording can be updated rather than stuck at v1 ·
+    timestamped backup · py_compile, with the original restored on failure.
 
 USAGE
     python3 patch_darpan_msg.py /root/finance/darpan_app.py
@@ -38,37 +36,43 @@ ANCHOR = ('    if not out["problems"]:\n'
           '        out["problems"].append(\n'
           '            "nothing structurally wrong found%s -- compare the rows above "')
 
-INSERT = '''    # ''' + MARK + ''' -- an owner transfer is a CUSTODY record, not a day-ledger
-    # movement, so recording one can never create a cash_movement row. The
-    # original sentence told the owner to do something that could not clear it,
-    # and then went on accusing him after he had done it correctly.
+INSERT = '''    # ''' + MARK + ''' -- the day ledger and the custody record answer
+    # different questions. This sentence used to prescribe a remedy that could
+    # not satisfy it, and then kept accusing the owner after he had done it.
     if out.get("custody_events"):
         _fixed = []
         for _p in out["problems"]:
             if "the transfer-out was never saved" in _p:
-                _p = ("No cash_movement row for %s in the day ledger -- and that "
-                      "is expected here: an owner transfer IS recorded for this "
-                      "date, shown below. An owner transfer is a custody record, "
-                      "not a day-ledger movement, so it never creates a "
-                      "cash_movement row. Nothing further is needed."
-                      % (iso or "this date"))
+                _p = ("No cash_movement row for %s, so the day ledger still "
+                      "counts this cash in the drawer. Your override below "
+                      "records where it actually went -- dated, signed, in the "
+                      "custody record." % (iso or "this date"))
             _fixed.append(_p)
         out["problems"] = _fixed
 
 '''
 
 
+def _strip_old(s):
+    """Remove a previously inserted S209 block so wording can be UPDATED.
+    Idempotence must not mean 'stuck on version one'."""
+    if MARK not in s or ANCHOR not in s:
+        return s
+    a = s.index(ANCHOR)
+    m = s.rfind("    # " + MARK, 0, a)
+    return s if m == -1 else s[:m] + s[a:]
+
+
 def patch_text(s):
-    """Return (new_text, status). status: patched | already | anchor_missing |
-    anchor_ambiguous"""
-    if MARK in s:
-        return s, "already"
+    """-> (new_text, status): patched | updated | anchor_missing | anchor_ambiguous"""
+    was = MARK in s
+    s = _strip_old(s)
     n = s.count(ANCHOR)
     if n == 0:
         return s, "anchor_missing"
     if n > 1:
         return s, "anchor_ambiguous"
-    return s.replace(ANCHOR, INSERT + ANCHOR), "patched"
+    return s.replace(ANCHOR, INSERT + ANCHOR), ("updated" if was else "patched")
 
 
 def selftest():
@@ -85,39 +89,39 @@ def selftest():
     body = "def f():\n" + ANCHOR + '\n            "x")\n'
     out, st = patch_text(body)
     check("a clean file is patched", st == "patched")
-    check("the insertion goes BEFORE the anchor, not after",
+    check("the block lands BEFORE the anchor",
           out.index(MARK) < out.index('if not out["problems"]'))
-    check("the patched file still compiles as Python",
-          compile(out, "<t>", "exec") is not None)
+    check("the patched file compiles", compile(out, "<t>", "exec") is not None)
 
     out2, st2 = patch_text(out)
-    check("running it twice is a no-op", st2 == "already" and out2 == out)
+    check("running again UPDATES rather than skipping", st2 == "updated")
+    check("running again does not duplicate the block",
+          out2.count("# " + MARK) == 1)
+    check("the updated file still compiles",
+          compile(out2, "<t>", "exec") is not None)
+    check("an update is byte-identical to a fresh patch", out2 == out)
 
     _, st3 = patch_text("def f():\n    pass\n")
-    check("a file without the anchor is REFUSED, not guessed at",
-          st3 == "anchor_missing")
-
+    check("no anchor -> REFUSED, not guessed at", st3 == "anchor_missing")
     _, st4 = patch_text(body + body)
-    check("two anchors are REFUSED as ambiguous", st4 == "anchor_ambiguous")
+    check("two anchors -> REFUSED as ambiguous", st4 == "anchor_ambiguous")
 
-    # the behaviour itself, run for real
     ns = {}
-    exec("def check(out, iso):\n" + INSERT + "    return out\n", ns)
-    with_ev = ns["check"]({"problems": ["NO cash_movement row for X -- the "
-                                        "transfer-out was never saved into the day."],
-                           "custody_events": [{"a": 1}]}, "2026-08-27")
-    check("with a custody event, the sentence is rewritten",
-          "expected here" in with_ev["problems"][0])
-    check("the rewritten sentence names the date",
-          "2026-08-27" in with_ev["problems"][0])
-    no_ev = ns["check"]({"problems": ["NO cash_movement row for X -- the "
-                                      "transfer-out was never saved into the day."],
-                         "custody_events": []}, "2026-08-27")
-    check("with NO custody event, the original instruction is left alone",
-          "never saved" in no_ev["problems"][0])
-    other = ns["check"]({"problems": ["some other problem"],
-                         "custody_events": [{"a": 1}]}, "2026-08-27")
-    check("no other message is touched", other["problems"] == ["some other problem"])
+    exec("def chk(out, iso):\n" + INSERT + "    return out\n", ns)
+    P = "NO cash_movement row for X -- the transfer-out was never saved into the day."
+    a = ns["chk"]({"problems": [P], "custody_events": [{"a": 1}]}, "2026-08-27")
+    check("with a transfer, the sentence is rewritten",
+          "still counts this cash in the drawer" in a["problems"][0])
+    check("the rewrite names the date", "2026-08-27" in a["problems"][0])
+    check("the rewrite does NOT claim it is not a cash movement",
+          "not a day-ledger movement" not in a["problems"][0])
+    check("the rewrite is short (under 220 chars)", len(a["problems"][0]) < 220)
+    b = ns["chk"]({"problems": [P], "custody_events": []}, "2026-08-27")
+    check("with no transfer, the original instruction survives",
+          "never saved" in b["problems"][0])
+    c = ns["chk"]({"problems": ["some other problem"],
+                   "custody_events": [{"a": 1}]}, "2026-08-27")
+    check("no other message is touched", c["problems"] == ["some other problem"])
 
     print("selftest: %d passed, %d failed" % (ok, bad))
     return 0 if bad == 0 else 1
@@ -135,14 +139,14 @@ def main(argv):
         return 2
     s = open(p, encoding="utf-8").read()
     new, st = patch_text(s)
-    if st == "already":
-        print("already patched -- nothing to do.")
-        return 0
-    if st != "patched":
+    if st not in ("patched", "updated"):
         print("!! REFUSING --", st)
-        print("   The live file does not carry the exact anchor this patch expects.")
-        print("   Nothing was changed. Send me the file rather than forcing it.")
+        print("   The live file does not carry the exact anchor expected.")
+        print("   Nothing was changed.")
         return 1
+    if new == s:
+        print("already at this wording -- nothing to do.")
+        return 0
     bak = "%s.bak_S209_F246_%s" % (p, datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
     shutil.copy2(p, bak)
     open(p, "w", encoding="utf-8").write(new)
@@ -153,7 +157,7 @@ def main(argv):
         print("!! compile FAILED -- original restored from", bak)
         print("  ", e)
         return 1
-    print("patched OK")
+    print("%s OK" % st)
     print("backup:", bak)
     return 0
 
