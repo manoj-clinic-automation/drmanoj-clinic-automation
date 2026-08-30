@@ -2,10 +2,10 @@
 # DO NOT HAND-EDIT the VPS rows. Change the Register, re-run the
 # generator. One authored source (D202).
 # source: KB_Register_v5_60_S210.md
-# source_md5: 27f184a5fce2c921f4fde83ed402de25
-# session: S210 close
+# source_md5: 206341f519c93e659b1a8f111ccb728f
+# session: S210 close (pins completed)
 # manifest: CANONICAL_MANIFEST.md
-# manifest_current_register_pin: 27f184a5fce2c921f4fde83ed402de25
+# manifest_current_register_pin: 206341f519c93e659b1a8f111ccb728f
 # register_pin_verified: yes
 # columns: kind <TAB> md5 <TAB> path-or-name <TAB> note
 #
@@ -13,6 +13,9 @@
 # BLIND  = listed every run as NOT verified; never counted as a pass
 # IGNORE = a live file deliberately not pinned; add by hand, with a reason
 
+VPS	e9b64d977102ac88da6f9cef442a46d7	/root/finance/finance_app.py	PIN COMPLETED IN PLACE the same hour the close published — the owner pasted the box's own md5sum (the S208 pre
+VPS	b694bfddf7766965b6552abbe341698e	/root/finance/darpan_app.py	PIN COMPLETED IN PLACE from the owner's paste — and REPRODUCED OFFLINE BYTE-FOR-BYTE: S208_CONSOLE base b92462
+VPS	eaee66da2d7df0e0162ac5380f41cf8a	/root/finance/marg_report.py	PIN COMPLETED IN PLACE from the owner's paste — and REPRODUCED OFFLINE BYTE-FOR-BYTE: the S193_DISC parser 641
 VPS	2521685e7564e3f4b592b621b3b76de4	/root/finance/finance_ui/finance_approvals.html	S210 (kits S210_ONEMONEY v2 → S210_MARGTIDY → S210_TRUTHFLOW → S210_APPLYFEEDBACK, final) — ONE money card (ex
 VPS	29f30ba8b91ae532c323fda67207b947	/root/finance/darpan_card.html	S210 (kits S210_DRAWERCARD → S210_HANDOVER) — "Drawer mein hona chahiye" + bank-jaana nudge + "🔁 Cash bhejna /
 VPS	5e5246eaeb1c9875dda4c625bbf4fc42	/root/finance/stock_app.py	S208 NEW (kit S208_STOCK_LEDGER; selftests 44 + 14 gate-join) — stock ledger blueprint at /finance/stock (the 
@@ -40,7 +43,6 @@ VPS	6cb83302b022ca3d46a53b32011a7ddd	/root/finance/finance_ingest.py	S194 — sn
 VPS	5dcbdd3a41360c96310929083524fc93	/root/finance/finance_yesbank.py	S186 NEW (kit S186_R1a) — the Yes Bank cash-deposit reconciler, the parallel to finance_upi and the close of F
 VPS	420f82c2846bc49d0d12ab5040d8c542	/root/finance/finance_ui/finance_workbench.html	S187 (kit S187_M1a) — adds the "Pushed Marg reports — awaiting your check" card: each staged push with its sur
 VPS	d4f7ddaa4c2151935bc81f1bf38c8945	/root/finance/finance_ui/finance_entry_clinic.html	S190 (kit S190_F3) — the same inline bill flow on the clinic expense rows.
-VPS	6411a57d4517e0a06a02e1045b354138	/root/finance/marg_report.py	S193 (kit S193_DISC) — gross/disc read into the bill CSV directly from the CSV row (never via ingest_column_ma
 VPS	a46a87e65d951d59baeb9d86c9d8fe59	/root/finance/finance_returns.py	S180 NEW — traces a credit note to its sale by patient, corroborated by the medicines returned; graded verdict
 VPS	9cec4e317590f845beda87881721cf69	/root/finance/finance_returns.sql	S180 NEW — additive: table sale_line_item + 4 indexes + 3 returns.* settings
 VPS	fa33ec8a6dfa0ee0b6af5613160f3394	/root/finance/marg_backfill.py	S183 v2 — RUN TO COMPLETION. Writes BOTH sale_item (bills) AND sale_line_item (drug lines) per day, clears lin
@@ -68,9 +70,6 @@ VPS	6e72373325f808b1d7eaeb99f51a7b14	/root/assetapp/smoke_test.py	S177 — 342/0
 VPS	4fe8c89386a54ce90786823b53df55bc	/root/assetapp/scanner_widget.js	S175 — unchanged since v1.8.1
 VPS	b1cc567b70b5e67c8c021fa22590babf	/root/shared/sarvam_ocr.py	S175 — shared OCR module
 
-BLIND	none	/root/finance/finance_app.py	S210 (FOUR anchor-gated patches over the S208 pin 8427c82e…: S210_MARGTIDY live filed-flags + dismiss route · 
-BLIND	none	/root/finance/darpan_app.py	S210 (kit S210_HANDOVER patch over the S208 pin b924626f…) — POST /finance/darpan/api/handover, five kinds inc
-BLIND	none	/root/finance/marg_report.py	S210 (kit S210_TRUTHFLOW words patch over the live pin 6411a57d…) — the C3 wording fix at source: D348 routing
 BLIND	none	/root/deploy/sweep_baseline.txt	S210 NEW (kit S210_SWEEP) — 78 accepted standing findings; the daily run alerts only on what is NEW.
 BLIND	847e41aa28396cbc1972d86895e816c6	PC-side kit deploy_kits\S208_STOCK_LEDGER\push_expected.py —	PC-side file -- not on this box
 BLIND	e4b78dd0381f9e118f61f94a5ac6cc7a	PC-side D:\Downloads\margsync\PUSH_STOCK_DAILY.bat	PC-side file -- not on this box
