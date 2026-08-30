@@ -469,11 +469,7 @@ function loadCashPos(){
      its event trail is folded into the per-person detail here. And the page now
      says out loud how long it has been since money last reached the bank --
      the alarm whose absence let Rs 3,20,340 sit unbanked for a month. */
-  Promise.all([
-    fetch("/finance/api/cash-position?_="+(new Date()).getTime(),{cache:"no-store"}).then(function(r){return r.json()}),
-    fetch("/finance/api/custody").then(function(r){return r.json()}).catch(function(){return {ok:false}})
-  ]).then(function(res){
-    var j=res[0]||{}, cj=(res[1]&&res[1].ok)?res[1]:{events:[]};
+  fetch("/finance/api/cash-position?_="+(new Date()).getTime(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
     if(!j.ok){$("cashPos").textContent="could not load";return}
     var NM={dr_bhawna:"Dr Bhawna",drawer:"Drawer (Darpan)",counter:"Counter (Vinay)",dr_manoj:"Dr Manoj",bank:"Bank"};
     function row(label,val,detailHtml){
@@ -489,13 +485,12 @@ function loadCashPos(){
         list.map(function(e){return '<tr><td>'+esc(e.date)+'</td><td>'+esc(NM[e.frm]||e.frm)+'</td><td>'+esc(NM[e.to]||e.to)+'</td><td class="num">'+fmt(e.amount)+
           (e.month_end?' <span class="badge b-warn">'+esc(e.month_end)+'</span>':'')+'</td><td class="mut">'+esc((e.note||"").slice(0,90))+'</td></tr>'}).join("")+'</tbody></table></div>';
     }
-    function custEv(p){return (cj.events||[]).filter(function(e){return e.frm===p||e.to===p})}
-    function mergedTrail(p,extra){
-      var rows=custEv(p).slice();
-      (extra||[]).forEach(function(e){rows.push({date:e.date,frm:e.frm,to:e.to,amount:e.amount,note:e.note||"hand-over (day form)"})});
-      rows.sort(function(a,b){return String(b.date||"").localeCompare(String(a.date||""))});
-      return trailTable(rows);
-    }
+    /* S210 correction (owner-caught, 30-Aug): the server's reserve_detail /
+       manoj_detail ALREADY merge custody events and day-form hand-overs
+       (finance_app _cust). Merging custody events in again here duplicated
+       every custody row -- the 23,130 showed twice. One event, one table:
+       the server trail is rendered AS IS, and the drawer keeps its day
+       history only. */
     /* the deposit-gap alarm */
     var lastDep=j.last_bank_date||null, gapTxt, gapCls;
     if(lastDep){
@@ -504,8 +499,7 @@ function loadCashPos(){
     }else{gapTxt="never recorded"; gapCls="b-bad";}
     var days=(j.days||[]);
     var drawerDetail='<div class="tblwrap" style="margin:2px 0 6px"><table><thead><tr><th>Date</th><th class="num">In drawer</th><th class="num">Unbanked</th></tr></thead><tbody>'+
-      days.map(function(d){return '<tr><td>'+esc(d.date)+'</td><td class="num">'+fmt(d.drawer)+'</td><td class="num">'+fmt(d.unbanked)+'</td></tr>'}).join("")+'</tbody></table></div>'+
-      '<div class="mut" style="margin:6px 0 2px">Hand-overs and clearings that touched the drawer</div>'+trailTable(custEv("drawer").concat(custEv("counter")));
+      days.map(function(d){return '<tr><td>'+esc(d.date)+'</td><td class="num">'+fmt(d.drawer)+'</td><td class="num">'+fmt(d.unbanked)+'</td></tr>'}).join("")+'</tbody></table></div>';
     var deps=(j.bank_deposits||[]);
     var depDetail=deps.length?('<div class="tblwrap" style="margin:2px 0 6px"><table><thead><tr><th>Date</th><th class="num">Amount</th><th>Ref</th></tr></thead><tbody>'+
       deps.map(function(d){return '<tr><td>'+esc(d.date)+'</td><td class="num">'+fmt(d.amount)+'</td><td class="mut">'+esc(d.ref)+'</td></tr>'}).join("")+'</tbody></table></div>'):'<div class="mut" style="padding:6px 2px">no deposits recorded</div>';
@@ -513,8 +507,8 @@ function loadCashPos(){
       '<div class="stat" style="margin-bottom:2px"><span class="lbl">Cash in the unit'+(j.as_of?' · as of '+esc(j.as_of):'')+'</span><span class="val">'+fmt(j.unbanked)+'</span></div>'+
       '<div class="stat" style="margin-bottom:4px"><span class="lbl">Last bank deposit</span><span><span class="badge '+gapCls+'">'+gapTxt+'</span></span></div>'+
       row("In Darpan’s drawer", j.drawer, drawerDetail)+
-      row("Parked · Dr Bhawna", j.reserve, mergedTrail("dr_bhawna", j.reserve_detail))+
-      row("Parked · Dr Manoj", j.with_manoj, mergedTrail("dr_manoj", j.manoj_detail))+
+      row("Parked · Dr Bhawna", j.reserve, trailTable(j.reserve_detail))+
+      row("Parked · Dr Manoj", j.with_manoj, trailTable(j.manoj_detail))+
       row("Banked to date ("+esc(j.bank_count)+")", j.bank_deposited, depDetail)+
       '<div class="mut" style="font-size:12px;margin-top:6px">Tap any line to expand · one arithmetic for the whole page (S210).</div>';
   }).catch(function(){$("cashPos").textContent="could not load"});

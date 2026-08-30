@@ -45,3 +45,21 @@ No restart — pages are read from disk on every request. Then one look at
 https://followup.dr-manoj.in/finance/approvals — the walk that proves it.
 
 *S210 · 30-Aug-2026 · base: S209_JSGATE/finance_approvals.FIXED.html (da82366c…), edits anchored and refused if ambiguous.*
+
+---
+
+## v2 — F-248: the first install showed every custody row TWICE (owner-caught, 30-Aug)
+
+**The fault was this kit's own.** The live server's `reserve_detail` / `manoj_detail` ALREADY
+merge custody events with day-form hand-overs (`finance_app.py _cust`). v1 read only the
+movement half of that function, modelled the endpoint wrong, merged custody events in a second
+time client-side — and its 15/15 walk PASSED, because the fixture was built from the same wrong
+model. A green walk proves the page against the fixture, never the fixture against the server.
+The owner's first live look found it in a minute.
+
+**v2:** the client renders the server trail AS IS (no second merge, custody fetch removed
+entirely — one request, not two), and the drawer's detail keeps its day history only, so every
+event appears in exactly ONE table. Re-walked against a fixture transcribed from the SERVER'S
+OWN code this time: 11/11, every amount exactly once, totals and the red 31-day badge unchanged.
+
+Install is the same one `\cp` line; the balances were never wrong — only the trail display.
