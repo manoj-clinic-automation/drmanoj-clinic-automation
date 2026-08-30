@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marg corrections — cash → UPI</title>
+<style>
+ body{font:15px/1.5 system-ui,sans-serif;margin:0 auto;max-width:760px;
+      background:#f6f4f1;color:#1c1c1c;padding:12px}
+ h1{font-size:20px;margin:6px 0}
+ .sub{color:#777;font-size:13px;margin-bottom:12px}
+ .counts{display:flex;gap:16px;margin:10px 0}
+ .box{background:#fff;border:1px solid #e4e0da;border-radius:10px;padding:10px 16px}
+ .box .n{font-size:22px;font-weight:600}
+ table{border-collapse:collapse;width:100%;background:#fff;border-radius:10px;
+       font-size:14px}
+ td,th{padding:8px;border-bottom:1px solid #eee;text-align:left}
+ td.r{text-align:right;font-variant-numeric:tabular-nums}
+ th{background:#efece7}
+ .done{color:#2e6b34}
+ .btn{border:1px solid #2e6b34;color:#2e6b34;background:#fff;border-radius:8px;
+      padding:5px 10px;cursor:pointer}
+ select{font-size:15px;padding:5px;border-radius:8px}
+ .muted{color:#888;font-size:12px}
+ .sec{margin-top:26px;padding-top:14px;border-top:2px solid #e4e0da}
+ .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+ input,textarea{font:15px system-ui,sans-serif;padding:6px;border:1px solid #ccc;
+      border-radius:8px}
+ textarea{width:100%;min-height:56px}
+ .warn{background:#fff6f965;border:1px solid #e8c9c9;border-radius:10px;
+      padding:10px;margin:8px 0}
+ .okbox{background:#f2f8f2;border:1px solid #cfe3cf;border-radius:10px;padding:10px}
+ .go{border:0;background:#2e6b34;color:#fff;border-radius:8px;padding:8px 14px;
+      cursor:pointer;font-size:15px}
+ .go[disabled]{background:#9bb59d;cursor:not-allowed}
+</style>
+</head>
+<body>
+<h1>Marg corrections — cash → UPI</h1>
+<div class="sub">Bills the bank proves were UPI but were rung as cash. Fix the
+payment mode in Marg, then tick the row here. A tick records who and when.</div>
+<select id="month" onchange="load()"></select>
+<div class="counts">
+ <div class="box"><div class="n" id="pend">–</div>pending</div>
+ <div class="box"><div class="n done" id="corr">–</div>corrected</div>
+</div>
+<div id="list"></div>
+<script>
+const R=p=>p==null?"—":"₹"+(p/100).toLocaleString("en-IN",{minimumFractionDigits:2});
+async function tick(id){
+ if(!confirm("Marg mein mode UPI kar diya?"))return;
+ const r=await fetch("/finance/darpan/api/correction/"+id+"/tick",
+  {method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+ const j=await r.json();if(!j.ok)alert(j.message||j.error);load();
+}
+async function load(){
+ const m=document.getElementById("month").value;
+ const r=await fetch("/finance/darpan/api/corrections"+(m?"?month="+m:""));
+ const j=await r.json();if(!j.ok)return;
+ const sel=document.getElementById("month");
+ if(!sel.options.length){
+  for(const mm of j.months.length?j.months:[j.month]){
+   const o=document.createElement("option");o.value=o.textContent=mm;sel.add(o);}
+  sel.value=j.month;
+ }
+ document.getElementById("pend").textContent=j.pending;
+ document.getElementById("corr").textContent=j.corrected;
+ let h='<table><tr><th>date</th><th>bill</th><th style="text-align:right">amount</th>'+
+   '<th>bank ref</th><th>answered</th><th>status</th></tr>';
+ for(const x of j.rows){
+  h+='<tr><td>'+x.date+'</td><td><b>'+(x.bill||"?")+'</b></td>'+
+   '<td class="r">'+R(x.amount_p)+'</td><td>'+(x.rrn||"")+'</td>'+
+   '<td>'+(x.answered_by?x.answered_by+' · '+(x.answer||""):'<span class="muted">not yet</span>')+'</td>'+
+   '<td>'+(x.ticked_by?'<span class="done">✓ '+x.ticked_by+' · '+
+     (x.ticked_at||"").slice(0,16).replace("T"," ")+'</span>'
+     :'<button class="btn" onclick="tick('+x.id+')">done in Marg ✓</button>')+
+   '</td></tr>';
+ }
+ h+='</table>';
+ document.getElementById("list").innerHTML=h;
+}
+load();
+</script>
+
+<div class="sec">
+<h1>Ledger check and owner transfer</h1>
+<div class="sub">For one date: what the books actually hold, and the control to
+record a transfer that never landed. A transfer here does NOT move money -- it
+records who handed cash to whom, dated, with your name on it.</div>
+
+<div class="row">
+  <label for="lcDate">Date</label>
+  <input type="date" id="lcDate">
+  <button class="go" id="lcBtn" onclick="ledgerCheck()">Check this date</button>
+</div>
+<div id="lcOut"></div>
+
+<h1 style="font-size:17px;margin-top:22px">Record an owner transfer</h1>
+<div class="row">
+  <label>From</label><select id="tFrom"></select>
+  <label>To</label><select id="tTo"></select>
+  <label>Amount</label><input id="tAmt" type="number" step="0.01" min="0.01" style="width:130px">
+  <label>Date</label><input id="tDate" type="date">
+</div>
+<div class="row">
+  <textarea id="tNote" placeholder="Why this transfer is being recorded. Required -- an owner transfer always says why."></textarea>
+</div>
+<div class="row">
+  <button class="go" id="tBtn" onclick="doTransfer()">Record transfer</button>
+  <span class="muted">Owner only. Every entry is written to the audit trail.</span>
+</div>
+<div id="tOut"></div>
+</div>
+
+<script>
+var PARTY = [["drawer","Drawer (Darpan)"],["counter","Counter (Vinay)"],
+             ["dr_bhawna","Dr Bhawna"],["dr_manoj","Dr Manoj"],["bank","Bank"]];
+function fillParties(){
+  var a=document.getElementById("tFrom"), b=document.getElementById("tTo");
+  for(var i=0;i<PARTY.length;i++){
+    var o1=document.createElement("option");o1.value=PARTY[i][0];o1.textContent=PARTY[i][1];a.add(o1);
+    var o2=document.createElement("option");o2.value=PARTY[i][0];o2.textContent=PARTY[i][1];b.add(o2);
+  }
+  a.value="drawer"; b.value="dr_bhawna";
+}
+function esc(s){ return String(s==null?"":s).replace(/[&<>]/g,function(c){
+  return c==="&"?"&amp;":(c==="<"?"&lt;":"&gt;"); }); }
+
+async function ledgerCheck(){
+  var d=document.getElementById("lcDate").value;
+  var out=document.getElementById("lcOut");
+  out.innerHTML='<span class="muted">checking...</span>';
+  try{
+    var r=await fetch("/finance/darpan/api/ledger-check"+(d?"?date="+d:""));
+    if(r.status===403){ out.innerHTML='<div class="warn">This control is owner only. '+
+      'You are signed in, but not as an owner.</div>'; return; }
+    var j=await r.json();
+    if(!j.ok){ out.innerHTML='<div class="warn">'+esc(j.message||j.error)+'</div>'; return; }
+    var h="";
+    if(j.problems && j.problems.length){
+      h+='<div class="warn"><b>What is wrong on this date</b><ul>';
+      for(var i=0;i<j.problems.length;i++) h+="<li>"+esc(j.problems[i])+"</li>";
+      h+="</ul></div>";
+    } else {
+      h+='<div class="okbox">No problem found for this date.</div>';
+    }
+    if(j.movements && j.movements.length){
+      h+='<p class="muted">Cash movements recorded on this date: '+j.movements.length+'</p>';
+    }
+    out.innerHTML=h;
+  }catch(e){ out.innerHTML='<div class="warn">Could not reach the server.</div>'; }
+}
+
+async function doTransfer(){
+  var btn=document.getElementById("tBtn"), out=document.getElementById("tOut");
+  var body={ from:document.getElementById("tFrom").value,
+             to:document.getElementById("tTo").value,
+             amount:document.getElementById("tAmt").value,
+             date:document.getElementById("tDate").value,
+             note:document.getElementById("tNote").value };
+  if(body.from===body.to){ out.innerHTML='<div class="warn">From and To are the same.</div>'; return; }
+  if(!body.note.trim()){ out.innerHTML='<div class="warn">Say why. An owner transfer always says why.</div>'; return; }
+  if(!body.date){ out.innerHTML='<div class="warn">Pick the date the cash actually moved.</div>'; return; }
+  if(!(parseFloat(body.amount)>0)){ out.innerHTML='<div class="warn">Amount must be more than zero.</div>'; return; }
+  var names={}; for(var i=0;i<PARTY.length;i++) names[PARTY[i][0]]=PARTY[i][1];
+  if(!confirm("Record "+body.amount+" from "+names[body.from]+" to "+names[body.to]+
+              " on "+body.date+"?\n\nThis is written to the audit trail with your name.")) return;
+  btn.disabled=true; out.innerHTML='<span class="muted">saving...</span>';
+  try{
+    var r=await fetch("/finance/darpan/api/transfer",
+      {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    var j=await r.json();
+    if(!j.ok){
+      out.innerHTML='<div class="warn">Not saved: '+esc(j.message||j.error)+'</div>';
+    } else {
+      out.innerHTML='<div class="okbox"><b>Recorded.</b> '+esc(j.date)+" -- "+
+        esc(names[j.frm]||j.frm)+" to "+esc(names[j.to]||j.to)+"</div>";
+      document.getElementById("tAmt").value=""; document.getElementById("tNote").value="";
+      document.getElementById("lcDate").value=j.date; ledgerCheck();
+    }
+  }catch(e){ out.innerHTML='<div class="warn">Could not reach the server. Nothing was saved.</div>'; }
+  btn.disabled=false;
+}
+
+fillParties();
+</script>
+</body>
+</html>
