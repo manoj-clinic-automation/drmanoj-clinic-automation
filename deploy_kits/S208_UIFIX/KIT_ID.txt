@@ -1,0 +1,14 @@
+KIT      S208_UIFIX
+BUILT    30-Aug-2026 ~02:45 IST — unattended block, via the assistant's own
+         browser signed in by the owner
+PURPOSE  finance_review.html: the nine KPI tiles become clickable doors
+         (the owner's exact complaint). finance_approvals.html: nav links to
+         Corrections/Pipeline/Staff + owner remove on NOT-FILED flags (the
+         2026-06-12 case), wired to the audited dismiss API.
+METHOD   live pages fetched in-browser from the server itself, patched with
+         exactly-once anchors IN the page, downloaded to manojz, sha256
+         verified both ends. Approvals LIVE md5 89e02711... matches what the
+         S202_D349A installer recorded as deployed — provenance proven.
+STATE    STAGED, NOT INSTALLED. Full-file replacements, currency-gated on the
+         captured LIVE md5s; no python, no restart.
+INSTALL  bash /root/deploy/vps_deploy.sh S208_UIFIX
