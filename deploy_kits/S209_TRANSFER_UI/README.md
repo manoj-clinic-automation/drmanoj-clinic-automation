@@ -55,7 +55,7 @@ git -C repo fetch --depth 1 origin main && git -C repo reset --hard origin/main
 cp -f /root/finance/darpan_corrections.html /root/finance/darpan_corrections.html.bak_S209
 cp -f repo/deploy_kits/S209_TRANSFER_UI/darpan_corrections.html /root/finance/
 md5sum /root/finance/darpan_corrections.html
-echo "expected:  20166ad097b10a9e886c21cec6dcc2b8"
+echo "expected:  f2f6f60ed57681c9fde7ddbbc4dc90d7"
 ```
 
 **No service restart** — the page is read from disk on every request.
@@ -63,3 +63,29 @@ Then open `/finance/darpan/corrections`, put **2026-08-27** in the date box, and
 27-Aug transfer can finally be recorded: drawer to dr_bhawna, 23130.
 
 *S209 · 30-Aug-2026 · nothing installed by this kit; it is one file and a copy command.*
+
+---
+
+## S209.2 — CANDIDATE F-246: the warning its own remedy cannot clear
+
+After the owner recorded the 27-Aug transfer exactly as instructed, the page still said
+**"NO cash_movement row for 2026-08-27 -- ... Record it as an owner transfer below"**.
+
+The entry had saved. The check reads a **different table**:
+
+- `api_ledger_check` problem 2 counts rows in `cash_movement` (joined to `day_entry`).
+- `api_transfer` writes to `cash_custody_event` — deliberately, because an owner transfer
+  records **custody**, not a day-ledger movement. Its own docstring says so.
+
+So the message prescribes a remedy that **cannot** satisfy the condition that produced it.
+Follow the instruction perfectly and the complaint remains — which reads, to the person
+who just did the work, as "it did not save".
+
+**Fixed here page-side, without touching live money code:** the check now displays the
+custody events for the date, and when the cash_movement warning is present alongside one,
+it says plainly that the two are different records and that the transfer IS saved.
+
+**The server-side wording still needs correcting** — the message should not tell the owner
+that recording a transfer will clear it. That is a `darpan_app.py` change and is left for
+a kit of its own, deliberately: it is live financial code and the page fix removes the
+confusion today.

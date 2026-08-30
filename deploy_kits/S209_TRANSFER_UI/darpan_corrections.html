@@ -115,6 +115,7 @@ records who handed cash to whom, dated, with your name on it.</div>
 <script>
 var PARTY = [["drawer","Drawer (Darpan)"],["counter","Counter (Vinay)"],
              ["dr_bhawna","Dr Bhawna"],["dr_manoj","Dr Manoj"],["bank","Bank"]];
+var NAME={}; for(var _i=0;_i<PARTY.length;_i++) NAME[PARTY[_i][0]]=PARTY[_i][1];
 function fillParties(){
   var a=document.getElementById("tFrom"), b=document.getElementById("tTo");
   for(var i=0;i<PARTY.length;i++){
@@ -137,12 +138,34 @@ async function ledgerCheck(){
     var j=await r.json();
     if(!j.ok){ out.innerHTML='<div class="warn">'+esc(j.message||j.error)+'</div>'; return; }
     var h="";
+    var hasMoveWarning=false;
     if(j.problems && j.problems.length){
+      for(var q=0;q<j.problems.length;q++){
+        if(String(j.problems[q]).indexOf("NO cash_movement row")>=0) hasMoveWarning=true;
+      }
       h+='<div class="warn"><b>What is wrong on this date</b><ul>';
       for(var i=0;i<j.problems.length;i++) h+="<li>"+esc(j.problems[i])+"</li>";
       h+="</ul></div>";
     } else {
       h+='<div class="okbox">No problem found for this date.</div>';
+    }
+    var ce = j.custody_events || [];
+    if(ce.length){
+      h+='<div class="okbox"><b>Owner transfers recorded on this date</b><table style="margin-top:6px">'+
+         '<tr><th>date</th><th>from</th><th>to</th><th style="text-align:right">amount</th><th>why</th></tr>';
+      for(var k=0;k<ce.length;k++){
+        var e=ce[k];
+        h+='<tr><td>'+esc(e.event_date)+'</td><td>'+esc(NAME[e.from_party]||e.from_party)+
+           '</td><td>'+esc(NAME[e.to_party]||e.to_party)+'</td><td class="r">'+R(e.amount_p)+
+           '</td><td>'+esc(e.note)+'</td></tr>';
+      }
+      h+='</table></div>';
+      if(hasMoveWarning){
+        h+='<div class="okbox"><b>Read the two together.</b> The warning above counts rows in the '+
+           'day-entry cash ledger. An owner transfer is written to the custody record instead -- a '+
+           'different table -- so recording one here can never clear that warning. The transfer IS '+
+           'saved: it is in the table just above, and in the audit trail. Candidate F-246.</div>';
+      }
     }
     if(j.movements && j.movements.length){
       h+='<p class="muted">Cash movements recorded on this date: '+j.movements.length+'</p>';
