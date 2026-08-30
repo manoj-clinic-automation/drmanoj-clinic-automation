@@ -1,4 +1,8 @@
-834df69708c1c1a11d1fcc7690ec5f53  CANONICAL_MANIFEST.md
+# S209 (30-Aug-2026): row corrected under the owner's delegation. The gate must state the truth, not be made green by moving files.
+# CANONICAL_MANIFEST.md was RENAMED to CANONICAL_MANIFEST.md.SNAPSHOT_S197 under F-123
+# (exactly one file may be named CANONICAL_MANIFEST.md). The bytes are
+# unchanged and were re-verified at S209 against this row's own hash.
+834df69708c1c1a11d1fcc7690ec5f53  CANONICAL_MANIFEST.md.SNAPSHOT_S197
 32b6092c4aebdf94712bbd9605159d1e  END_OF_SESSION_PROMPT_v6.md
 fc0a9d534101cc01d7beb0922d387e37  Fault_Action_Register_v2_33.md
 bb33585ea2c775c3b4aa56d2f5949830  Fault_Action_Register_v2_34.md

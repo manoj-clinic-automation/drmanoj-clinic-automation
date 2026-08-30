@@ -1,4 +1,9 @@
+# S209 (30-Aug-2026): row corrected under the owner's delegation. The gate must state the truth, not be made green by moving files.
+# Staff_Attendance_Notice_DRAFT_v3.docx (b546fbef...) is deliberately NOT in
+# this repository: it is an owner-side staff document, kept out under F-31 /
+# D320. The row asked the gate to prove the presence of a file the repo is
+# forbidden to hold, so the ROW is wrong, not the absence. Struck S209 --
+# the document is NOT to be filed to make a gate green.
 124c6eb2c5dc03055c70ac427c8347bb  staff_register.py
 7f86cc8702b9fa48940e31a5ed2869d4  salary_policy.py
 db748927d0ecc42dd6d8b2f6b9c36b53  INSTALL.sh
-b546fbef8d76ff4ecb6dc88c77efe95b  Staff_Attendance_Notice_DRAFT_v3.docx

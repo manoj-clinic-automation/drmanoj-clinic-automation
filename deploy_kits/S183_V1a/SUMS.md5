@@ -1,6 +1,12 @@
+# S209 (30-Aug-2026): row corrected under the owner's delegation. The gate must state the truth, not be made green by moving files.
+# live_pins.tsv (5812c5d98f6dae9b17d3906c40e19962) is LOST-SUPERSEDED.
+# Measured S209: no file anywhere in the repository carries those bytes.
+# It is a GENERATED artefact -- regenerated from the KB Register at every
+# close and superseded ~25 times since S183 -- so nothing depends on it.
+# Row struck rather than repointed at a different file (D188: a filename
+# is not provenance). Established pattern: START_HERE v6 at S208.
 13d4991d88d5fae1862525a748024ff7  verify_live_pins.py
 ba8b0a3b3e732be6eee7e10bf6822a5d  gen_live_pins.py
-5812c5d98f6dae9b17d3906c40e19962  live_pins.tsv
 6fb21e1b88e615ad616ce1520295fb35  install_v1a.sh
 fc35b6b1de0b9a7f5f84e4488cfffab8  KIT_ID.txt
 771226c567ef7d0052c8e8a738be7371  DELIVERY_NOTE.md

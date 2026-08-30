@@ -1,4 +1,8 @@
-3af7657d91035923df3bb6d703b17872  CANONICAL_MANIFEST.md
+# S209 (30-Aug-2026): row corrected under the owner's delegation. The gate must state the truth, not be made green by moving files.
+# CANONICAL_MANIFEST.md was RENAMED to CANONICAL_MANIFEST.md.SNAPSHOT_S181 under F-123
+# (exactly one file may be named CANONICAL_MANIFEST.md). The bytes are
+# unchanged and were re-verified at S209 against this row's own hash.
+3af7657d91035923df3bb6d703b17872  CANONICAL_MANIFEST.md.SNAPSHOT_S181
 7bcde8c98d62e6570f9995b7bbbd5166  Fault_Action_Register_v2_17.md
 61b2216107f38798287c258013475904  HANDOFF_RUNBOOK_2026-08-16_Session181close_v115.md
 631a2ba7ff907b98aadee89ac97d0412  KB_Asset_Register_v1_11_0_R_S181.md
@@ -7,4 +11,8 @@ df00d5c253c1f1cd6b2c0387d6b7dbe6  KB_Register_v5_3_S181.md
 7445c627e72a5863df3859d6d62543b1  README_KB_KIT.md
 3fad5ed45c0a98cb63a9cf0a070e0396  START_HERE_SESSION_182.md
 37d2a0cb3197b0a11ff82e879e03bf1a  KIT_ID.txt
-22c831da45fae58ffd104c60d54c1417  MD5SUMS.txt
+# S209: MD5SUMS.txt was edited in the same repair (its manifest row
+# repointed to the SNAPSHOT name), so this row moves with it. Recorded,
+# not silently adjusted -- SUMS.md5 gates MD5SUMS.txt, so one cannot
+# change without the other.
+bb308fda27852fd3fc2f0397785349de  MD5SUMS.txt
