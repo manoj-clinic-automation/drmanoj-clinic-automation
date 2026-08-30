@@ -1,0 +1,4 @@
+S210_RULEDWORDS_pycache/ — Python bytecode written by the assistant running the kit's
+selftest with plain python3 instead of python -B (the exact S207 failure PUBLISH_ALL.bat
+documents). Blocked the F-100 gate on 30-Aug. Pure cache; the source .py files are in the
+kit and in git. Safe to delete this whole _to_delete_S210 folder.
