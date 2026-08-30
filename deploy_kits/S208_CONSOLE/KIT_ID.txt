@@ -1,0 +1,23 @@
+KIT      S208_CONSOLE
+BUILT    30-Aug-2026 ~03:25 IST, on the owner's console spec ("status must be
+         the updated one, not stale; every section expandable to granular
+         level; this page is my console")
+FILES    darpan_app.py (v4: coverage / cn-detail / idlookup) ·
+         finance_approvals.html (v4: live coverage table replaces the two
+         confusing lines; CN drill-down = SALES-RETURN back-audit against the
+         SAME PATIENT'S earlier sale bill, owner-ruled 30-Aug; short-ID
+         checker) · selftest_darpan.py (74)
+STATE    STAGED, NOT INSTALLED. Currency-gated on the exact live md5s of both
+         files as this project installed them (8b1e0653 / b93eed72).
+SPRINT5  designed, next session: patient master pushed to the VPS (a GAS
+         push from the Followup Tracker, the VPS_Push_UPI pattern) so ID
+         scoring stops calling 3-digit veterans wrong; purchase-bill links
+         into cn-detail when the purchase pipeline lands.
+PROVEN   74/74 (incl. the return-approval queue: pending opens
+         itself, darpan cannot decide, rejection demands a reason, the
+         decision shows named+dated and pending drops to zero) — incl. all five coverage verdicts (OK / REPORT WAITING /
+         EXPORT MISSING / DAY NOT FILED / stale-flag-on-OK-day) · a CN traced
+         to ITS OWN PATIENT'S earlier bill A003217 and an item he never
+         bought flagged unverified ·
+         842 → NANHI DEVI, 75 honestly unknown · checker-only.
+INSTALL  bash /root/deploy/vps_deploy.sh S208_CONSOLE
