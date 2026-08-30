@@ -2,10 +2,10 @@
 # DO NOT HAND-EDIT the VPS rows. Change the Register, re-run the
 # generator. One authored source (D202).
 # source: KB_Register_v5_59_S208.md
-# source_md5: f5230f42eaa59696dd8386fe460ffe85
-# session: S208 close
+# source_md5: c047f17ac6e2226016f8140be16e1cc4
+# session: S208 close (pin completed)
 # manifest: CANONICAL_MANIFEST.md
-# manifest_current_register_pin: f5230f42eaa59696dd8386fe460ffe85
+# manifest_current_register_pin: c047f17ac6e2226016f8140be16e1cc4
 # register_pin_verified: yes
 # columns: kind <TAB> md5 <TAB> path-or-name <TAB> note
 #
@@ -13,6 +13,7 @@
 # BLIND  = listed every run as NOT verified; never counted as a pass
 # IGNORE = a live file deliberately not pinned; add by hand, with a reason
 
+VPS	8427c82e6441ce77d09ff94aa9f89977	/root/finance/finance_app.py	S208 (kits S208_STOCK_LEDGER · S208_DARPAN · S208_STAFF · S208_LEDGER3 patchers over the S204_C2 base 70f79997
 VPS	5e5246eaeb1c9875dda4c625bbf4fc42	/root/finance/stock_app.py	S208 NEW (kit S208_STOCK_LEDGER; selftests 44 + 14 gate-join) — stock ledger blueprint at /finance/stock (the 
 VPS	6ada9a3468cfd95a6eebf727753bfc89	/root/finance/bank_match.py	S208 NEW (kit S208_BANKMATCH; selftest 21, real 27-Aug shape) — the ALL-MODES bank-truth matcher (the bank sta
 VPS	21eb25560cbb4c5ac35adacf9d46f8d0	/root/finance/finance_upi.py	S208 (kit S208_BANKMATCH, v3) — adds upi_txn store (ensure_txn_schema/store_txns/backfill_txns + --backfill: 3
@@ -69,7 +70,6 @@ VPS	6e72373325f808b1d7eaeb99f51a7b14	/root/assetapp/smoke_test.py	S177 — 342/0
 VPS	4fe8c89386a54ce90786823b53df55bc	/root/assetapp/scanner_widget.js	S175 — unchanged since v1.8.1
 VPS	b1cc567b70b5e67c8c021fa22590babf	/root/shared/sarvam_ocr.py	S175 — shared OCR module
 
-BLIND	none	/root/finance/finance_app.py	S208 (kits S208_STOCK_LEDGER · S208_DARPAN · S208_STAFF · S208_LEDGER3 patchers over the S204_C2 base 70f79997
 BLIND	847e41aa28396cbc1972d86895e816c6	PC-side kit deploy_kits\S208_STOCK_LEDGER\push_expected.py —	PC-side file -- not on this box
 BLIND	e4b78dd0381f9e118f61f94a5ac6cc7a	PC-side D:\Downloads\margsync\PUSH_STOCK_DAILY.bat	PC-side file -- not on this box
 BLIND	6c864acaafdde95d61e3d373a060e8b2	PC-side D:\Downloads\margsync\_analysis\q1_analytics.py	PC-side file -- not on this box
