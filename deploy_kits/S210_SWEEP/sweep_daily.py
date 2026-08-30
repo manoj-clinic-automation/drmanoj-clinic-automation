@@ -16,14 +16,20 @@ USAGE (VPS):
     /root/wa/venv/bin/python3 sweep_daily.py /root/finance
     python3 sweep_daily.py --selftest
 """
-import os, re, subprocess, sys, tempfile
+import os, re, shutil, subprocess, sys, tempfile
+
+NODE = shutil.which("node")
 
 FETCH_RE = re.compile(r"""fetch\(\s*["'](/[^"'?]+)""")
 ROUTE_RE = re.compile(r"""@(?:app|bp)\.route\(\s*["'](/[^"']+)["']""")
 SCRIPT_RE = re.compile(r"<script[^>]*>(.*?)</script>", re.S | re.I)
 
 def js_ok(html_text):
-    """node --check on each script block; (ok, first_error)."""
+    """node --check on each script block; (ok, first_error). Where node is
+    absent (the VPS, 30-Aug) the check is SKIPPED, not faked: pages are
+    js_gated at build time on the PC, and the sweep says so once."""
+    if not NODE:
+        return True, ""
     for blk in SCRIPT_RE.findall(html_text):
         if not blk.strip():
             continue
@@ -59,6 +65,9 @@ def sweep(root):
             elif n.endswith(".py") and not n.startswith("sweep_"):
                 apps.append(p)
     routes, fetched, findings = [], {}, []
+    if not NODE:
+        findings.append("INFO       node absent on this box -- JS parse check "
+                        "skipped here; it runs at build time (js_gate on the PC)")
     for p in apps:
         try:
             routes += ROUTE_RE.findall(open(p, encoding="utf-8",
