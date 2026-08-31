@@ -37,7 +37,30 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "S206_SANJEEVNI_MARG_PURCHASE"))
 import xlsx_sheet  # noqa: E402
 
-ARCHIVE = os.path.expanduser("~/mnt/Downloads/margsync/MargArchive")
+# --- archive location -------------------------------------------------------
+# S212 FIX. This was hard-coded to "~/mnt/Downloads/margsync/MargArchive" --
+# the assistant's own sandbox mount. On manojz, where this actually runs, that
+# path does not exist, so the script could not start. Found at S212 by asking
+# where each kit runs rather than where it was written.
+#
+# The AUTHORITY is the MARG_ARCHIVE environment variable (or --archive where
+# the script takes arguments). The candidate list below is only a fallback, so
+# if these lists ever drift between kits it changes nothing -- the setting wins.
+def _find_archive():
+    env = os.environ.get("MARG_ARCHIVE")
+    if env:
+        return env
+    for c in (r"D:\Downloads\margsync\MargArchive",
+              os.path.expanduser("~/mnt/Downloads/margsync/MargArchive"),
+              os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "..", "..", "..", "Downloads", "margsync", "MargArchive")):
+        if os.path.isdir(c):
+            return os.path.abspath(c)
+    # Nothing found: return the Windows path so the error names the real place.
+    return r"D:\Downloads\margsync\MargArchive"
+# ---------------------------------------------------------------------------
+
+ARCHIVE = _find_archive()
 
 # Marg prints a whole-unit item as "4.0" and a strip-packed one as "27:9" IN THE
 # SAME COLUMN. This is the only shape a quantity may take; anything else is a
@@ -233,6 +256,67 @@ def read_suppliers(archive=ARCHIVE):
     return {k: sorted(v) for k, v in sup.items()}
 
 
+def expiry_family(archive=ARCHIVE):
+    """Which FAMILY each expiry export belongs to -- by its CONTENT, not its name.
+
+    S212 FIX, and it was hiding a real item.
+
+    Marg emits TWO different reports under one title: ALREADY-EXPIRED and
+    NEAR-EXPIRY. Their column headers are byte-identical, so the router files
+    both as STOCK_EXPIRY_DEFAULT and nothing downstream can tell them apart.
+    The grading below then asked "is this the newest expiry export?" -- and on
+    28-Aug three NEAR-EXPIRY exports landed, so the 23-Aug ALREADY-EXPIRED
+    export stopped being newest. VINBACTUM DS, 25 vials, expired 2/2025, the
+    one genuinely expired item in the shop and the one the owner ruled for
+    write-off under R6, silently dropped out of `current`.
+
+    The two families ARE distinguishable from content: an already-expired
+    report contains only rows whose expiry is at or before its own as-on date;
+    a near-expiry report contains rows expiring after it. That test works on
+    files already archived, needs no change to the router, and follows the
+    project's own rule -- a file is not identified by its name.
+
+    The router SHOULD also carry the operator's own filename through from
+    _spool so the two families are named apart at the door (G5). This function
+    is what makes the existing archive correct in the meantime, and it stays
+    correct afterwards.
+    """
+    fams = {}
+    for path in sorted(glob.glob(os.path.join(archive, "STOCK_EXPIRY", "*", "*"))):
+        stamp = os.path.basename(path)
+        as_on = expiry_date_of(stamp)
+        if not as_on:
+            continue
+        cut = (int(as_on[:4]), int(as_on[5:7]))
+        try:
+            sh = xlsx_sheet.open_sheet_any(path)
+        except Exception:
+            continue
+        future = past = 0
+        for r in range(sh.nrows):
+            for c in range(sh.ncols):
+                k = expiry_key(_txt(sh, r, c))
+                if k == (9999, 99):
+                    continue
+                if k > cut:
+                    future += 1
+                else:
+                    past += 1
+                break
+        fams[stamp] = "NEAR" if future > past else "EXPIRED"
+    return fams
+
+
+def newest_by_family(archive=ARCHIVE):
+    """The newest export date WITHIN each family. One list cannot age out another."""
+    out = {}
+    for stamp, fam in expiry_family(archive).items():
+        d = expiry_date_of(stamp)
+        if d and d > out.get(fam, ""):
+            out[fam] = d
+    return out
+
+
 def expiry_date_of(stamp):
     """The as-on date out of an expiry export's filename: ..._DEFAULT__2026-08-23__..."""
     m = re.search(r"__(\d{4}-\d{2}-\d{2})__", stamp or "")
@@ -300,6 +384,12 @@ def build(archive=ARCHIVE):
     """
     ex, st, sup = read_expiry(archive), read_stock(archive), read_suppliers(archive)
     newest = newest_expiry_date(archive)
+    # S212: current means "newest of ITS OWN family", never "newest overall".
+    fams = expiry_family(archive)
+    newest_fam = newest_by_family(archive)
+
+    def _is_current(seen_in):
+        return expiry_date_of(seen_in) == newest_fam.get(fams.get(seen_in, "NEAR"))
     bought = other_batches_bought(archive)
     current, stale, gone = [], [], []
     for (_, _), v in sorted(ex.items(), key=lambda kv: expiry_key(kv[1]["expiry"])):
@@ -310,18 +400,19 @@ def build(archive=ARCHIVE):
                "shelf": (s or {}).get("raw", ""), "unit": (s or {}).get("unit", ""),
                "vendors": sup.get(v["item"].upper(), []), "flagged": v["flagged"],
                "seen_in": v["seen_in"],
-               "evidence": ("current" if expiry_date_of(v["seen_in"]) == newest
-                            else "stale"),
+               "evidence": ("current" if _is_current(v["seen_in"]) else "stale"),
+               "family": fams.get(v["seen_in"], "NEAR"),
                "newer_batches": sorted(others)}
         if not s or s["zero"]:
             row["evidence"] = "gone"
             gone.append(row)
-        elif expiry_date_of(v["seen_in"]) == newest:
+        elif _is_current(v["seen_in"]):
             current.append(row)
         else:
             stale.append(row)
     return {"as_on": st["as_on"], "stock_file": st["file"],
             "stock_items": len(st["rows"]), "newest_expiry_date": newest,
+            "newest_by_family": newest_fam,
             "current": current, "stale": stale, "gone": gone,
             "held": current + stale,
             "expiry_files": sorted({v["seen_in"] for v in ex.values()})}

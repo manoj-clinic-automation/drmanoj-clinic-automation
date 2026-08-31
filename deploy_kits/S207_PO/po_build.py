@@ -10,7 +10,30 @@ import item_company as IC
 import ingest, packmap as PM, marg_stock as MS, marg_purchase as MP
 import resolve as RS
 
-A = os.path.expanduser("~/mnt/Downloads/margsync/MargArchive")
+# --- archive location -------------------------------------------------------
+# S212 FIX. This was hard-coded to "~/mnt/Downloads/margsync/MargArchive" --
+# the assistant's own sandbox mount. On manojz, where this actually runs, that
+# path does not exist, so the script could not start. Found at S212 by asking
+# where each kit runs rather than where it was written.
+#
+# The AUTHORITY is the MARG_ARCHIVE environment variable (or --archive where
+# the script takes arguments). The candidate list below is only a fallback, so
+# if these lists ever drift between kits it changes nothing -- the setting wins.
+def _find_archive():
+    env = os.environ.get("MARG_ARCHIVE")
+    if env:
+        return env
+    for c in (r"D:\Downloads\margsync\MargArchive",
+              os.path.expanduser("~/mnt/Downloads/margsync/MargArchive"),
+              os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "..", "..", "..", "Downloads", "margsync", "MargArchive")):
+        if os.path.isdir(c):
+            return os.path.abspath(c)
+    # Nothing found: return the Windows path so the error names the real place.
+    return r"D:\Downloads\margsync\MargArchive"
+# ---------------------------------------------------------------------------
+
+A = _find_archive()
 TODAY = dt.date(2026, 8, 28)
 
 

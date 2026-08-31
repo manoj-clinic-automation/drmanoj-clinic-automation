@@ -39,7 +39,17 @@ def main():
               .replace("__URGENT__", str(len(urgent))) \
               .replace("__WRONG__", "{:,}".format(wrong)) \
               .replace("__ASON__", d["as_on"])
-    out = os.path.expanduser("~/mnt/Downloads/margsync/_analysis/FEFO_CARD.html")
+    # S212 FIX: was hard-coded to the assistant's sandbox mount, so this could
+    # not write on manojz where it actually runs. MARG_ANALYSIS wins; the
+    # candidates are only a fallback.
+    out = os.environ.get("MARG_ANALYSIS_FEFO")
+    if not out:
+        for c in (r"D:\Downloads\margsync\_analysis",
+                  os.path.expanduser("~/mnt/Downloads/margsync/_analysis")):
+            if os.path.isdir(c):
+                out = os.path.join(c, "FEFO_CARD.html"); break
+        else:
+            out = os.path.join(r"D:\Downloads\margsync\_analysis", "FEFO_CARD.html")
     os.makedirs(os.path.dirname(out), exist_ok=True)
     io.open(out, "w", encoding="utf-8", newline="\n").write(html)
     print("%d items, %d urgent, %d bytes -> %s" % (len(cards), len(urgent), len(html), out))

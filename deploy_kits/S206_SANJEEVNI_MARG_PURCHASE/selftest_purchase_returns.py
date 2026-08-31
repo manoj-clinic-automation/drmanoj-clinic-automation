@@ -55,7 +55,10 @@ print("\n[3] against all five archived months")
 files = sorted(glob.glob(A + "/PURCHASE_ITEMWISE/*/*.XLS"))
 if not files:
     _no_archive("no PURCHASE_ITEMWISE exports", A, _p)
-ck("five monthly exports present", len(files) == 5, str(len(files)))
+# S212: assert the RULE, not the snapshot. This said "== 5" and went red the
+# day a legitimate sixth export arrived (28-29 Aug, Rs 6,313.80). A test that
+# breaks when the shop does normal work teaches people to ignore red.
+ck("at least the five founding monthly exports are present", len(files) >= 5, str(len(files)))
 tot_ret = 0; closed = 0
 for p in files:
     m = os.path.basename(os.path.dirname(p))
@@ -65,8 +68,9 @@ for p in files:
     ck("%s closes to its own GRAND TOTAL after correction" % m, rep["closes"],
        "net %.2f vs grand %.2f" % (rep["items_sum_net"], rep["grand_amount"]))
     ck("%s return detection was exact, not approximate" % m, rep["returns_exact"])
-ck("all five months close", closed == 5, str(closed))
-print("     five-month returns found: Rs %.2f" % tot_ret)
+ck("EVERY export closes to its own GRAND TOTAL", closed == len(files),
+   "%d of %d" % (closed, len(files)))
+print("     returns found across %d export(s): Rs %.2f" % (len(files), tot_ret))
 
 print("\n[4] JULY — the month the summary reports independently confirm")
 rep = PR.apply(MP.read_purchase(sorted(glob.glob(A + "/PURCHASE_ITEMWISE/2026-07/*.XLS"))[0]))
@@ -80,7 +84,13 @@ print("\n[5] the corrected five-month total")
 tot = 0
 for p in files:
     tot += PR.apply(MP.read_purchase(p))["grand_amount"]
-ck("grand totals sum to 2,051,598.88", abs(tot - 2051598.88) < 1.0, "%.2f" % tot)
+# S212: was a frozen figure for exactly five files. The invariant that actually
+# matters is that the parser's net equals Marg's own grand total on every file --
+# which the per-month checks above already prove. What is asserted here now is
+# that the founding five months are still fully accounted for, so the total can
+# only ever GROW as real exports arrive.
+ck("the total is at least the founding five months (it grows, never shrinks)",
+   tot >= 2051598.88 - 1.0, "%.2f" % tot)
 
 print("\n%d passed, %d failed" % (_p, len(_f)))
 for f in _f: print("  FAILED:", f)

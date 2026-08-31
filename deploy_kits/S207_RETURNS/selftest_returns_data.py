@@ -116,10 +116,23 @@ ck("'newest' is a DATE, not a filename -- two exports share 23-Aug and both coun
 ck("every row is graded current / stale / gone",
    all(r["evidence"] in ("current", "stale", "gone")
        for r in d["current"] + d["stale"] + d["gone"]))
-ck("current rows really do come from the newest date",
-   all(D.expiry_date_of(r["seen_in"]) == d["newest_expiry_date"] for r in d["current"]))
-ck("stale rows really do not",
-   all(D.expiry_date_of(r["seen_in"]) != d["newest_expiry_date"] for r in d["stale"]))
+# S212: "current" now means newest of ITS OWN FAMILY, not newest overall.
+# Marg emits ALREADY-EXPIRED and NEAR-EXPIRY under one title; when three
+# near-expiry exports landed on 28-Aug they aged out the 23-Aug expired list
+# and hid VINBACTUM DS. One family must never age out another.
+_fam = D.expiry_family()
+_nbf = d["newest_by_family"]
+ck("current rows come from the newest export OF THEIR OWN FAMILY",
+   all(D.expiry_date_of(r["seen_in"]) == _nbf.get(_fam.get(r["seen_in"], "NEAR"))
+       for r in d["current"]))
+ck("stale rows do not",
+   all(D.expiry_date_of(r["seen_in"]) != _nbf.get(_fam.get(r["seen_in"], "NEAR"))
+       for r in d["stale"]))
+ck("both families are actually present in the archive -- the collision is real",
+   set(_fam.values()) == {"EXPIRED", "NEAR"}, sorted(set(_fam.values())))
+ck("the ALREADY-EXPIRED family is not aged out by the NEAR-EXPIRY family",
+   _nbf.get("EXPIRED") and _nbf.get("NEAR") and _nbf["EXPIRED"] < _nbf["NEAR"],
+   "expired newest %s  vs  near newest %s" % (_nbf.get("EXPIRED"), _nbf.get("NEAR")))
 ck("VINBACTUM DS is graded CURRENT -- it came from the smaller of the two 23-Aug "
    "exports, and taking the newest FILENAME dropped it into stale",
    any(r["item"].upper().startswith("VINBACTUM") for r in d["current"]),

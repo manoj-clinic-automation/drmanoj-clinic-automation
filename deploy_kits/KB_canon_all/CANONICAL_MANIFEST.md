@@ -101,8 +101,10 @@ is a halt that gets waved through, and then it protects nothing.
 
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
-| `KB_Register_v5_60_S210` | **S210 close** | `206341f519c93e659b1a8f111ccb728f` | **CURRENT** Tier-0 register. THE MONEY MADE VISIBLE; pays S209's owed bump (that close's state carried inside it, recorded). Three live-file rows DECLARED pin-pending. All four self-referential lines checked; the Archive pointer had stood stale (v1.55) through S209 — corrected visibly. |
-| `KB_History_Archive_v1_57_S210` | **S210 close** | `fc79256171364cb12791f990f5856f71` | **CURRENT** Tier-1 history. §S210 appended; **pure append proven — the first 974,485 bytes byte-identical to v1.56, +6,456.** Lives in `deploy_kits/KB_canon_all/`. |
+| `KB_Register_v5_61_S212` | **S212 close** | `a40a57ecf7198317e2e29a101ab83354` | **CURRENT** Tier-0 register. §S212: no live file changed anywhere, so **no VPS pin moved** — the pin list is the proof. Eighteen faults minted; three kits staged; three repaired. Four self-referential lines checked. Next free D357 · F-265 · S213. |
+| `KB_Register_v5_60_S210` | S210 close (superseded at S212) | `206341f519c93e659b1a8f111ccb728f` | **CURRENT** Tier-0 register. THE MONEY MADE VISIBLE; pays S209's owed bump (that close's state carried inside it, recorded). Three live-file rows DECLARED pin-pending. All four self-referential lines checked; the Archive pointer had stood stale (v1.55) through S209 — corrected visibly. |
+| `KB_History_Archive_v1_59_S212` | **S212 close** | `931a0a6a2e6a96d7c3518838d092861f` | **CURRENT** Tier-1 history. §S211 and §S212 appended in one pass (S211 closed partially and left its own owed). **Pure append proven — the first 980,942 bytes byte-identical to v1.57, +11,212.** Lives in `deploy_kits/KB_canon_all/`. |
+| `KB_History_Archive_v1_57_S210` | S210 close (superseded at S212) | `fc79256171364cb12791f990f5856f71` | **CURRENT** Tier-1 history. §S210 appended; **pure append proven — the first 974,485 bytes byte-identical to v1.56, +6,456.** Lives in `deploy_kits/KB_canon_all/`. |
 | `HANDOFF_RUNBOOK_2026-08-30_Session210close_v143` | **S210 close** | `857e4a6407999fdfd610810c5d4bcc1f` | **CURRENT** runbook. §0 S210 · §2 close-time backlog snapshot (live truth `OWNER_TODO_LIVE.md`). |
 | `START_HERE_SESSION_211` | **S210 close** | `edaa1fb90041d194af1b92cef883818f` | **CURRENT** session entry point. Phase 0 connections-first; first acts: Pravesh exit check (31-Aug) · capture the three pending pins in one paste · the S210 candidate ruling. |
 | `END_OF_SESSION_PROMPT_v13` | **S210 (adopted at the S209 close-tail)** | *(project-side)* | **CURRENT** close-out routine — SELF-CONTAINED by owner ruling (v11/v12's "as v10" indirection pointed at a document not in project knowledge — F-107's shape in the routine itself). Supersedes v12 and v11 whole. |
@@ -154,7 +156,8 @@ is a halt that gets waved through, and then it protects nothing.
 | `START_HERE_SESSION_186` | S185 | `4adc2c646fbdf668882c2587498c8ec5` | superseded by 187/188. Carries the git-clone Phase 0, the F-88 cross-check, the **NEW inverse check (F-107)** — confirm every Tier-0 doc has a manifest row — the `verify_live_pins.py` live-code check (D321), and the S186 tasks (complete the partial pin; resolve the opening float). |
 | `START_HERE_SESSION_185` | S184 | `f65e76c2e270cabf522839ef25d4acbe` | superseded by 186. **FILED TO THE REPO AND PINNED AT THE S185 CLOSE (F-107)** — written to project knowledge only at the S184 close, so it was unverifiable at the S185 Phase 0; these are the bytes filed at S185 and they are canonical from here. |
 | `START_HERE_SESSION_184` | S183 | `18c2bf463ad53bd075683aebfba8f373` | superseded by 185/186. Carried the git-clone Phase 0 **and** the `python3 /root/deploy/verify_live_pins.py` live-code check (D321) |
-| `KB_Register` | **v5.60** | `206341f519c93e659b1a8f111ccb728f` | **CURRENT — S210 CLOSE (THE MONEY MADE VISIBLE).** D354 executed; nine kits owner-verified; pays S209's owed bump. Three live-file rows declared pin-pending (finance_app · darpan_app · marg_report — owner captures md5sums at the S211 open). |
+| `KB_Register` | **v5.61** | `a40a57ecf7198317e2e29a101ab83354` | **CURRENT — S212 CLOSE.** No live file changed; no pin moved. Eighteen faults minted (F-247…F-264), discharging the S211 twelve. |
+| `KB_Register` | v5.60 | `206341f519c93e659b1a8f111ccb728f` | superseded at S212 — S210 CLOSE (THE MONEY MADE VISIBLE).** D354 executed; nine kits owner-verified; pays S209's owed bump. Three live-file rows declared pin-pending (finance_app · darpan_app · marg_report — owner captures md5sums at the S211 open). |
 | `KB_Register` (superseded) | **v5.59** | `c047f17ac6e2226016f8140be16e1cc4` | **was CURRENT — S208 CLOSE (re-hashed same hour: the finance_app.py pin completed in place); stood CURRENT through S209, which never bumped the Register — recorded, not silent.** THE SEVEN-KIT NIGHT. |
 | `KB_Register` (superseded) | **v5.58** | `b52bb7fd6bc60018d481a9c76aa04938` | **was CURRENT — S207 CLOSE.** The session that built the pharmacy loop and was wrong three times in public. All four self-referential lines checked; **three of the four were STALE and were corrected visibly** (the How-to-use pointer still read Archive v1.52 after S206 bumped it to v1.53; the FINDINGS heading still said next free F-213 after F-213…F-217 were minted at S205; the END marker carried both). ⚠ **RECORDED, NOT FIXED: the previous pin in this row (`2fb704f0…`) did not match the v5.57 file in `KB_canon_all/` (`da4cc830…`) — two copies of one version with different bytes, and this row pinned the one the pin generator could not find. Reconcile at S208 (F-201 shape: neither store is authoritative by position).** |
 | `KB_Register` (superseded) | v5.56 | `ca020c2ff20bc05e07b78f2e492d1430` | **was CURRENT — S204 CLOSE.** The session that asked whether a pin is a backup. **D352** (Darpan's 75% exception retired; an exception belongs in a settings row, never a code fallback) indexed; **F-207 … F-212** added, three of the six the assistant's own; the live pin for `/root/finance/finance_app.py` **struck, not overwritten** (`7948cee0…` → `70f79997…`). **All four self-referential lines checked and all four correct at v5.55** — the first close in four with none found stale. Zero-loss proven: every non-blank line of v5.55 is present verbatim in v5.56 except the eight the edits touched, each carrying its old text forward. |
@@ -310,7 +313,8 @@ Full narrative: **Archive v1.57 §S210**. Highlights: position measured live (Da
 | `API_QUICK_REFERENCE_CARD` | — | `68c4fc344bf74caaea706149cd22e64c` | small + stable; in the repo `canonical-docs/` (byte-identical) |
 | `AI_Verdict_Layer_Master` | v1 (S145) | `bd4b67f6810cd2316eb58dfe6bf180cd` | Product B analytics |
 | `Clinic_Callback_Tracker_AppsScript_Audit` | v1.9 | `41dd9fd6b607e59e15e3e646b775d640` | unfinished audit (Pass 4 not started); reference only — NOT the frozen dossier |
-| `Fault_Action_Register` | **v2.45** | `209fc8d1e7510808070e0829e6006e30` | **CURRENT** findings register. F-0 … F-246; **next free F-247**. S209 appended **§7.2** — D353 ratified the F-series fork (S197 rule, nothing renumbered) and minted **F-241 … F-246**. Pure append, the 378,789 bytes before the v2.44 end-marker proven byte-identical. **OWED: the §7 index rows and the text for F-220/221/222/227/231/236, which were ratified as NUMBERS only.** |
+| `Fault_Action_Register` | **v2.46** | `607ae3fe195c0bedfaa1ba479578a60e` | **CURRENT** findings register. F-0 … F-264; **next free F-265**. S212 minted **F-247…F-258** (the twelve the owner ruled 30-Aug and S211 left owed) and **F-259…F-264** (measured at S212). Pure append, the 389,206 bytes before the v2.45 end-marker proven byte-identical, +8,760. |
+| `Fault_Action_Register` | v2.45 | `209fc8d1e7510808070e0829e6006e30` | **CURRENT** findings register. F-0 … F-246; **next free F-247**. S209 appended **§7.2** — D353 ratified the F-series fork (S197 rule, nothing renumbered) and minted **F-241 … F-246**. Pure append, the 378,789 bytes before the v2.44 end-marker proven byte-identical. **OWED: the §7 index rows and the text for F-220/221/222/227/231/236, which were ratified as NUMBERS only.** |
 | `Fault_Action_Register` (pre-S209) | v2.44 (S205 close) | `823d48bb6ccd36db970612fb8f06d069` | superseded by v2.45; retained. |
 | `Fault_Action_Register` (pre-S205) | v2.43 (S204 close) | `115d5c97ae2319cec7a4e64e813c10c2` | superseded by v2.44; retained. |
 | `Fault_Action_Register` (pre-S204) | v2.42 (S203 close) | `ef5cea3e11c997edc8cf3ef8f2bd7c8a` | superseded by v2.43; retained. |
@@ -1729,3 +1733,42 @@ this `CANONICAL_MANIFEST.md`.
 
 
 
+
+
+---
+
+# §S212 CLOSE — 31 August 2026
+
+**A survey-and-repair session. NOTHING WAS INSTALLED — not one file on the VPS, on manojz, or on
+the medical PC. Every VPS pin carried at v5.60 is re-asserted unchanged, and the pin list is the
+proof, because it did not move.**
+
+**Documents moved:** Archive **v1.57 → v1.59** (§S211 + §S212, prefix proven, +11,212 bytes) ·
+Fault Register **v2.45 → v2.46** (**F-247 … F-264**, prefix proven, +8,760) · KB Register
+**v5.60 → v5.61** · `START_HERE_SESSION_213` · `OWNER_TODO_LIVE` refreshed (un-manifested by
+design). **S211's entire close debt is discharged here.**
+
+**Kits staged, gates green, installed nowhere:** `S212_SUMP` (sale returns from the item lines —
+the union of `sale_line_item` and `sale_item`, because neither spine alone is complete) ·
+`S212_SUPERSEDE` (the archive double-count rule, specified at S206 Phase 0 and never built) ·
+`S212_LIVE_TOOLS` (the reinstall repair, **verified against the live source, not against its own
+sums**). Three PC kits repaired — `S207_PO`, `S207_RETURNS`, `S207_FEFO` were hard-coded to the
+assistant's sandbox mount and **could not run on manojz at all**. Four brittle selftests re-based
+from frozen snapshots to invariants.
+
+**Verification at this close: 234 selftest checks green, 0 failed. 1,071 gate rows green across
+186 kits, 0 red. F-185 clean on all 77 changed files. No git lock of any class.**
+
+**The four findings that justify the session.** A sale-returns card was found **already live** on
+the console, reading `sale_item` only — 63 of 179 returns (and it writes on a GET). The reinstall
+kit **cannot restore the medical PC**: its sender is the pre-AF-1 version that can blacklist a real
+sale report permanently, and four files are in no kit at all (F-259, F-260). **`finance.db` has no
+offsite backup** while the clinic CSVs get one nightly (F-261). And Marg's two expiry reports are
+indistinguishable, which had **silently hidden `VINBACTUM DS`** — the shop's entire expired
+exposure, ruled for write-off (F-262).
+
+**The rule this close is written under, paid for four times:** *a kit's `KIT_ID.txt` is not
+evidence of what is running; the live pin is, and the database is better.* Two kits declare
+"STAGED, NOT INSTALLED" while their bytes run on the VPS.
+
+**END OF CANONICAL_MANIFEST — S212 CLOSE.** Next free: **D357 · F-265 · Session 213**.

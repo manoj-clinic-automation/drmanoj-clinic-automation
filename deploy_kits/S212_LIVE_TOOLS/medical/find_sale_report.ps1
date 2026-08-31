@@ -1,0 +1,1 @@
+Get-ChildItem -Path "D:\MARGERP\users\*\report\REPORT*.XLS" -File -EA 0 | Sort-Object LastWriteTime -Descending | Where-Object { $t=[Text.Encoding]::GetEncoding(28591).GetString([IO.File]::ReadAllBytes($_.FullName)); ($t -match "BILL WISE SALES") -and ($t -match "GRAND TOTAL") } | Select-Object -First 1 -ExpandProperty FullName
