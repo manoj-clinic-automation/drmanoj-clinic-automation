@@ -10,6 +10,25 @@ import item_company as IC
 import ingest, packmap as PM, marg_stock as MS, marg_purchase as MP
 import resolve as RS
 
+
+# --- the S206 supersede rule (S212_SUPERSEDE, adopted S214) -----------------
+# Two exports of one period are not two datasets; the later (or wider)
+# replaces the earlier. Applied to FLOW reports only (sale / purchase):
+# snapshot reports (STOCK_CLOSING, STOCK_EXPIRY) keep their own F-235
+# largest-for-date pickers, where "latest stamp wins" would be the WRONG rule
+# -- a later category-filtered export must not beat the whole-shop one.
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "S212_SUPERSEDE")))
+import marg_effective as _ME_sup
+
+
+def _effective(paths):
+    """Flow-report file list with superseded exports removed, loudly."""
+    kept, superseded = _ME_sup.effective(sorted(paths))
+    for _p, _by in superseded:
+        print("  superseded export not counted: %s  (replaced by %s)"
+              % (os.path.basename(_p), os.path.basename(_by)))
+    return kept
+
 # --- archive location -------------------------------------------------------
 # S212 FIX. This was hard-coded to "~/mnt/Downloads/margsync/MargArchive" --
 # the assistant's own sandbox mount. On manojz, where this actually runs, that
@@ -101,7 +120,7 @@ def build(cap_p=None):
     cost, vspend = {}, collections.Counter()
     pq = collections.defaultdict(list)          # purchase quantities, per item
     vbills = collections.defaultdict(set)
-    for p in sorted(glob.glob(os.path.join(A, "PURCHASE_ITEMWISE", "*", "*.XLS"))):
+    for p in _effective(glob.glob(os.path.join(A, "PURCHASE_ITEMWISE", "*", "*.XLS"))):
         try:
             rep = MP.read_purchase(p)
         except Exception:

@@ -37,6 +37,25 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "S206_SANJEEVNI_MARG_PURCHASE"))
 import xlsx_sheet  # noqa: E402
 
+
+# --- the S206 supersede rule (S212_SUPERSEDE, adopted S214) -----------------
+# Two exports of one period are not two datasets; the later (or wider)
+# replaces the earlier. Applied to FLOW reports only (sale / purchase):
+# snapshot reports (STOCK_CLOSING, STOCK_EXPIRY) keep their own F-235
+# largest-for-date pickers, where "latest stamp wins" would be the WRONG rule
+# -- a later category-filtered export must not beat the whole-shop one.
+sys.path.insert(0, os.path.join(HERE, "..", "S212_SUPERSEDE"))
+import marg_effective as _ME_sup
+
+
+def _effective(paths):
+    """Flow-report file list with superseded exports removed, loudly."""
+    kept, superseded = _ME_sup.effective(sorted(paths))
+    for _p, _by in superseded:
+        print("  superseded export not counted: %s  (replaced by %s)"
+              % (os.path.basename(_p), os.path.basename(_by)))
+    return kept
+
 # --- archive location -------------------------------------------------------
 # S212 FIX. This was hard-coded to "~/mnt/Downloads/margsync/MargArchive" --
 # the assistant's own sandbox mount. On manojz, where this actually runs, that
@@ -242,7 +261,7 @@ def read_suppliers(archive=ARCHIVE):
     sys.path.insert(0, os.path.join(HERE, "..", "S206_SANJEEVNI_MARG_PURCHASE"))
     import marg_purchase as MP
     sup = {}
-    for p in sorted(glob.glob(os.path.join(archive, "PURCHASE_ITEMWISE", "*", "*"))):
+    for p in _effective(glob.glob(os.path.join(archive, "PURCHASE_ITEMWISE", "*", "*"))):
         try:
             rep = MP.read_purchase(p)
         except Exception:
@@ -343,7 +362,7 @@ def other_batches_bought(archive=ARCHIVE):
     sys.path.insert(0, os.path.join(HERE, "..", "S206_SANJEEVNI_MARG_PURCHASE"))
     import marg_purchase as MP
     out = {}
-    for p in sorted(glob.glob(os.path.join(archive, "PURCHASE_ITEMWISE", "*", "*"))):
+    for p in _effective(glob.glob(os.path.join(archive, "PURCHASE_ITEMWISE", "*", "*"))):
         try:
             rep = MP.read_purchase(p)
         except Exception:

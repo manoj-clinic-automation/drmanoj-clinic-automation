@@ -40,6 +40,25 @@ DEF_TOKEN_CACHE = r"D:\Downloads\margsync\SendToClinic\token.txt"
 FILTERED_MAX = 200
 
 
+# --- the S206 supersede rule (S212_SUPERSEDE, adopted S214) -----------------
+# Two exports of one period are not two datasets; the later (or wider)
+# replaces the earlier. Applied to FLOW reports only (sale / purchase):
+# snapshot reports (STOCK_CLOSING, STOCK_EXPIRY) keep their own F-235
+# largest-for-date pickers, where "latest stamp wins" would be the WRONG rule
+# -- a later category-filtered export must not beat the whole-shop one.
+sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..", "S212_SUPERSEDE")))
+import marg_effective as _ME_sup
+
+
+def _effective(paths):
+    """Flow-report file list with superseded exports removed, loudly."""
+    kept, superseded = _ME_sup.effective(sorted(paths))
+    for _p, _by in superseded:
+        print("  superseded export not counted: %s  (replaced by %s)"
+              % (os.path.basename(_p), os.path.basename(_by)))
+    return kept
+
+
 def read_token(unc=DEF_TOKEN_UNC, cache=DEF_TOKEN_CACHE):
     """Live copy first, cache second. Never printed, never logged, never
     returned in an error message."""
@@ -106,7 +125,7 @@ def rates(archive):
     """Last purchase rate per item, in paise per unit."""
     import marg_purchase as MP
     out = {}
-    for p in sorted(glob.glob(os.path.join(archive, "PURCHASE_ITEMWISE", "*", "*.XLS"))):
+    for p in _effective(glob.glob(os.path.join(archive, "PURCHASE_ITEMWISE", "*", "*.XLS"))):
         try:
             rep = MP.read_purchase(p)
         except Exception:

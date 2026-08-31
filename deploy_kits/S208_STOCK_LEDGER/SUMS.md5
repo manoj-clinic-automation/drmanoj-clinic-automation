@@ -4,7 +4,7 @@ e64d5fb7c1ee40835f1b5797e1bf9903  patch_finance_app.py
 9b26a5e7c4a6e41355629679d8b472b5  selftest_stock_app.py
 7627e00189ae435f78c1869793c75d39  selftest_gate_join.py
 72205205230421e55e152c85838a0868  push_snapshot.py
-847e41aa28396cbc1972d86895e816c6  push_expected.py
+14babf1bef81d1dfba74470b5bd19346  push_expected.py
 451427a6bbf38955465fe92d161039c7  upi_trace.py
 a06231ceabdd030f17f98875dc632b5e  install_stock_ledger.sh
 0d08a9028c981cc836b6b7d29d8accd2  README.md

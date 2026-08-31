@@ -242,7 +242,7 @@ def selftest(schema_path="finance_schema.sql", returns_sql="finance_returns.sql"
 
     ck("norm upper + collapse", norm_name(" ramesh   kumar ") == "RAMESH KUMAR")
     ck("norm drops punctuation", norm_name("R.K. Sharma") == "R K SHARMA")
-    ck("norm drops digits", norm_name("MANOSHA 6503") == "MANOSHA")
+    ck("norm drops digits", norm_name("TESTNAMEA 6503") == "TESTNAMEA")
     ck("norm of nothing", norm_name(None) == "")
 
     ck("distance identical", edit_distance_le1("SANJEEV", "SANJEEV"))

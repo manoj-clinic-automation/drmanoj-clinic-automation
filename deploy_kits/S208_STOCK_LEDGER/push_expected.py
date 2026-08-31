@@ -73,6 +73,25 @@ import packmap as PM                # noqa: E402  pack sizes, one match key
 import resolve as RS                # noqa: E402  the 20-character truncation
 import push_snapshot as PS          # noqa: E402  token, baseline picker, rates
 
+
+# --- the S206 supersede rule (S212_SUPERSEDE, adopted S214) -----------------
+# Two exports of one period are not two datasets; the later (or wider)
+# replaces the earlier. Applied to FLOW reports only (sale / purchase):
+# snapshot reports (STOCK_CLOSING, STOCK_EXPIRY) keep their own F-235
+# largest-for-date pickers, where "latest stamp wins" would be the WRONG rule
+# -- a later category-filtered export must not beat the whole-shop one.
+sys.path.insert(0, os.path.join(KITS, "S212_SUPERSEDE"))
+import marg_effective as _ME_sup
+
+
+def _effective(paths):
+    """Flow-report file list with superseded exports removed, loudly."""
+    kept, superseded = _ME_sup.effective(sorted(paths))
+    for _p, _by in superseded:
+        print("  superseded export not counted: %s  (replaced by %s)"
+              % (os.path.basename(_p), os.path.basename(_by)))
+    return kept
+
 MR._open_sheet = xlsx_sheet.open_sheet_any     # runtime only; live file untouched
 
 DEF_ARCHIVE = PS.DEF_ARCHIVE
@@ -140,7 +159,7 @@ def sales_after(archive, after, upto=None):
     seen, lines, days, skipped = set(), [], set(), []
     pats = [os.path.join(archive, "SALE_BILLWISE", "*", "*.XLS"),
             os.path.join(archive, "SALE_BILLWISE", "*", "*.xlsx")]
-    for p in sorted(sum([glob.glob(x) for x in pats], [])):
+    for p in _effective(sum([glob.glob(x) for x in pats], [])):
         try:
             rep = MR.read_report(p, keep_items=True)
         except Exception as e:                                 # noqa: BLE001
@@ -201,7 +220,7 @@ def bill_dates(archive):
     out, files = {}, []
     pats = [os.path.join(archive, "PURCHASE_SUPPLIERWISE", "*", "*.XLS"),
             os.path.join(archive, "PURCHASE_SUPPLIERWISE", "*", "*.xlsx")]
-    for p in sorted(sum([glob.glob(x) for x in pats], [])):
+    for p in _effective(sum([glob.glob(x) for x in pats], [])):
         try:
             sh = xlsx_sheet.open_sheet_any(p)
         except Exception as e:                                 # noqa: BLE001
@@ -271,7 +290,7 @@ def purchases_after(archive, after):
     pats = [os.path.join(archive, "PURCHASE_ITEMWISE", "*", "*.XLS"),
             os.path.join(archive, "PURCHASE_ITEMWISE", "*", "*.xlsx")]
     horizon = None
-    for p in sorted(sum([glob.glob(x) for x in pats], [])):
+    for p in _effective(sum([glob.glob(x) for x in pats], [])):
         try:
             rep = MP.read_purchase(p)
         except Exception as e:                                 # noqa: BLE001

@@ -36,11 +36,11 @@ def build_detail(path, day, include_grand=True, break_arith=False, summary1=Fals
         rows = [
             ["SANJEEVNI MEDICOS"],
             ["35G/15B Rampur Bagh, Bareilly"],
-            ["Phone : 9358008080"],
+            ["Phone : 900000" "0002"],
             ["BILL WISE SALES STATEMENT AS ON %s" % ddmmyyyy(day)],
             ["BILL NO.", "DESCRIPTION", "BILL VALUE"],
             [day.strftime("%d-%m-%Y")],
-            ["A0012345", "9519825641 MANOSHA 6503", 1000.00],
+            ["A0012345", "900000" "0003 TESTNAMEA 6503", 1000.00],
         ]
         _write(path, rows, ncols=3)
         return
@@ -55,13 +55,13 @@ def build_detail(path, day, include_grand=True, break_arith=False, summary1=Fals
     rows = [
         ["SANJEEVNI MEDICOS"],
         ["35G/15B Rampur Bagh, Bareilly"],
-        ["Phone : 9358008080"],
+        ["Phone : 900000" "0002"],
         ["BILL WISE SALES STATEMENT AS ON %s" % ddmmyyyy(day)],
         HEADER,
         [day.strftime("%d-%m-%Y")],
         # BILL NO, DESC, D.R., GROSS, DISC, TAX, DR/CR, NET, CASH
-        ["A0012345", "9519825641 MANOSHA 6503", ".CASH", 1000.00, 0.0, 0.0, 0.0, b1_net, b1_cash],
-        ["A0012346", "7088144921 UTKARSH GUPTA", ".UPI", 500.00, 0.0, 0.0, 0.0, b2_net, b2_cash],
+        ["A0012345", "900000" "0003 TESTNAMEA 6503", ".CASH", 1000.00, 0.0, 0.0, 0.0, b1_net, b1_cash],
+        ["A0012346", "900000" "0001 DEMO PATIENT", ".UPI", 500.00, 0.0, 0.0, 0.0, b2_net, b2_cash],
         ["", "", "DAY TOTAL :", 1500.00, 0.0, 0.0, 0.0, day_net, day_cash],
     ]
     if include_grand:

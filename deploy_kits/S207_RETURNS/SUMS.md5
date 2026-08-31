@@ -2,7 +2,7 @@ a9bede74d4fcabc2bff6689ec64b3cb5  ./DATA_LOCATION.md
 b89a5e133c2cbd001b0d5bc0d5c7636d  ./KIT_ID.txt
 9033e2269cf71f23d75f925ee58fcc67  ./README.md
 4c6aa059e8d79ea0a2bb50aba0067d0e  ./returns_app.py
-09f12393996dd7e3e342d8723ba95a92  ./returns_data.py
+db2cd395908a7c28d0a87d511609d0ed  ./returns_data.py
 d698a014ddb03d6975aab12688297ba3  ./returns_schema.sql
 7a443bc5504c29f29e49dbd44f3b27bc  ./selftest_returns_app.py
 6c815285361b4238f71e52d1f7643a9f  ./selftest_returns_data.py

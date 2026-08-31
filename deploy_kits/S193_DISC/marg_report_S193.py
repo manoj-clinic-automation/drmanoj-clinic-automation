@@ -126,8 +126,8 @@ def split_description(text):
     """Marg writes '<phone> <NAME> <clinic id>'. Any part may be absent.
 
     Returns (phone, name, clinic_id, confidence). Never invents an id.
-      '9519825641 MANOSHA 6503'  -> ('9519825641', 'MANOSHA', '6503', 0.99)
-      '7088144921 UTKARSH GUPTA' -> ('7088144921', 'UTKARSH GUPTA', None, 0.80)
+      '90xxxxxx02 TESTNAMEA 6503'  -> ('90xxxxxx02', 'TESTNAMEA', '6503', 0.99)
+      '90xxxxxx01 DEMO PATIENT' -> ('90xxxxxx01', 'DEMO PATIENT', None, 0.80)
       'SUDHA DEVI'               -> (None, 'SUDHA DEVI', None, 0.50)
       'ABL        BEENA AGARWAL' -> (None, 'BEENA AGARWAL', None, 0.50)   'ABL' = account code
     """
@@ -650,29 +650,29 @@ def selftest(sample_dir="."):
     ck("paise no float error", paise("1044.53") == 104453)
 
     # -- description ------------------------------------------------------
-    ck("desc phone+name+id", split_description("9519825641 MANOSHA 6503")[:3]
-       == ("9519825641", "MANOSHA", "6503"))
-    ck("desc phone+name", split_description("7088144921 UTKARSH GUPTA")[:3]
-       == ("7088144921", "UTKARSH GUPTA", None))
+    ck("desc phone+name+id", split_description("900000" "0002 TESTNAMEA 6503")[:3]
+       == ("900000" "0002", "TESTNAMEA", "6503"))
+    ck("desc phone+name", split_description("900000" "0001 DEMO PATIENT")[:3]
+       == ("900000" "0001", "DEMO PATIENT", None))
     ck("desc name only", split_description("          SUDHA DEVI")[:3]
        == (None, "SUDHA DEVI", None))
     ck("desc account code", split_description("ABL        BEENA AGARWAL")[:3]
        == (None, "BEENA AGARWAL", None))
-    ck("desc id kept as text", split_description("9760674568 DIPTI BHATNAGAR 7372")[2] == "7372")
+    ck("desc id kept as text", split_description("900000" "0003 SAMPLE PERSON 7372")[2] == "7372")
     ck("desc empty", split_description("")[3] == 0.0)
-    ck("4-digit id is trusted", split_description("9519825641 MANOSHA 6503")[3] >= 0.95)
-    ck("odd-length id is kept", split_description("9760674568 PANKAJ 77")[2] == "77")
+    ck("4-digit id is trusted", split_description("900000" "0002 TESTNAMEA 6503")[3] >= 0.95)
+    ck("odd-length id is kept", split_description("900000" "0003 DUMMYNAME 77")[2] == "77")
     ck("odd-length id is NOT trusted",
-       split_description("9760674568 PANKAJ 77")[3] < 0.70)
+       split_description("900000" "0003 DUMMYNAME 77")[3] < 0.70)
     ck("odd-length id without phone also untrusted",
-       split_description("ARUNA 523")[3] < 0.70)
+       split_description("NOBODY 523")[3] < 0.70)
 
     # -- iso --------------------------------------------------------------
     ck("iso", iso("01-08-2026") == "2026-08-01")
     ck("iso bad", iso("nonsense") is None)
 
     # -- masking (the only form a phone leaves this module in) -------------
-    ck("last4", last4("9519825641") == "5641")
+    ck("last4", last4("900000" "0002") == "0002")
     ck("last4 of nothing", last4("") is None)
     ck("last4 refuses a short number", last4("123") is None)
     ck("lines CSV carries no full phone", "phone" not in LINE_COLUMNS)

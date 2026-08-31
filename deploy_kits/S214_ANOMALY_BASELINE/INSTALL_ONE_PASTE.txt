@@ -1,0 +1,11 @@
+ONE PASTE, on the VPS, after the publish. (The paste does its own clone pull.)
+Does, in order: install the anomaly baseline tool (⭐1.6) → selftest 12 →
+build the baseline from the LIVE db → re-run to show NEW 0 → F-185 scrub of
+the two live files with backups → both selftests → print the four new md5s
+(these become the new pins at the close).
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits && \cp S214_ANOMALY_BASELINE/anomaly_baseline.py S214_ANOMALY_BASELINE/finance_item_anomaly.py S214_ANOMALY_BASELINE/selftest_anomaly_baseline.py S214_F185_FIX/fix_f185_fixtures.py /root/finance/ && cd /root/finance && /root/wa/venv/bin/python3 -B selftest_anomaly_baseline.py && /root/wa/venv/bin/python3 -B anomaly_baseline.py --db /root/finance/finance.db --rebuild && /root/wa/venv/bin/python3 -B anomaly_baseline.py --db /root/finance/finance.db && /root/wa/venv/bin/python3 -B fix_f185_fixtures.py /root/finance/marg_report.py /root/finance/finance_identity.py && /root/wa/venv/bin/python3 -B /root/finance/marg_report.py --selftest && /root/wa/venv/bin/python3 -B /root/finance/finance_identity.py && md5sum /root/finance/marg_report.py /root/finance/finance_identity.py /root/finance/anomaly_baseline.py /root/finance/finance_item_anomaly.py /root/finance/anomaly_baseline.txt
+
+Rollback: the F-185 backups are /root/finance/marg_report.py.bak_S214_F185 and
+/root/finance/finance_identity.py.bak_S214_F185; the anomaly tool is three new
+files plus anomaly_baseline.txt, delete them and nothing else changes.
