@@ -57,17 +57,34 @@ for r in rows:
                         (r["patient_ref_id"],)).fetchone()
         if p is not None and not (p["patient_uid"] or ""):
             stub += 1
-print("bills with NO patient link        : %d" % n_nolink)
-print("bills linked to WALK-IN           : %d" % n_walk)
-print("bills linked to a stub (no uid)   : %d" % stub)
-print("   -> these three ARE the counter gap. All zero means the counter left")
-print("      no gap in this period, which is a finding, not a bug.")
+ERA = G.IDENTITY_ERA_START
+def era(r): return "before" if r["bd"] < ERA else "after "
+cnt = collections.Counter()
+for r in rows:
+    kind = "return" if (r["service"] or "").endswith("_return") else "sale  "
+    if not r["patient_ref_id"]: cnt[(era(r), kind, "no link")] += 1
+    elif wid and r["patient_ref_id"] == wid: cnt[(era(r), kind, "WALK-IN")] += 1
+    else:
+        p = con.execute("SELECT patient_uid FROM patient_ref WHERE id=?",
+                        (r["patient_ref_id"],)).fetchone()
+        if p is not None and not (p["patient_uid"] or ""):
+            cnt[(era(r), kind, "stub, no uid")] += 1
+        else:
+            cnt[(era(r), kind, "master patient")] += 1
+print("%-7s %-7s %-16s %6s" % ("era", "kind", "linked to", "count"))
+for k in sorted(cnt):
+    print("%-7s %-7s %-16s %6d" % (k[0], k[1], k[2], cnt[k]))
+print()
+print("   the counter gap is the AFTER rows that are not a master patient.")
+print("   BEFORE %s the three identifiers were not being captured, so those" % ERA)
+print("   rows say nothing about the counter and are not counted anywhere.")
 print()
 
 print("=== THE DAY, SALES ONLY ===")
 print("%-12s %6s %8s %10s %10s   %12s" %
       ("date", "sales", "matched", "ambiguous", "unmatched", "sales total"))
 tot = collections.Counter()
+tot["pre_sales"] = 0; tot["post_sales"] = 0
 for d in days:
     r = G.day_report(con, d, "medical", exclude_returns=True)
     t = r["totals"]
@@ -75,12 +92,24 @@ for d in days:
     amt = sum(x["amount_p"] or 0 for x in day_sales)
     tot["sales"] += len(day_sales); tot["amt"] += amt
     for k in ("matched", "ambiguous", "unmatched"): tot[k] += t[k]
-    print("%-12s %6d %8d %10d %10d   %12.2f" %
-          (d, len(day_sales), t["matched"], t["ambiguous"], t["unmatched"], amt / 100.0))
+    if r.get("before_identity_era"):
+        print("%-12s %6d %8s %10s %10s   %12.2f   (before 18-Jun: not counted)" %
+              (d, len(day_sales), "-", "-", "-", amt / 100.0))
+        tot["pre_sales"] += len(day_sales)
+    else:
+        print("%-12s %6d %8d %10d %10d   %12.2f" %
+              (d, len(day_sales), t["matched"], t["ambiguous"], t["unmatched"],
+               amt / 100.0))
+        tot["post_sales"] += len(day_sales)
 print("-" * 70)
 print("%-12s %6d %8d %10d %10d   %12.2f" %
       ("TOTAL", tot["sales"], tot["matched"], tot["ambiguous"], tot["unmatched"],
        tot["amt"] / 100.0))
+print("   of which %d sales are before 18-Jun and NOT counted; %d are after."
+      % (tot["pre_sales"], tot["post_sales"]))
+chk = tot["matched"] + tot["ambiguous"] + tot["unmatched"]
+print("   check: matched+ambiguous+unmatched = %d, counted sales = %d %s"
+      % (chk, tot["post_sales"], "OK" if chk == tot["post_sales"] else "<-- MISMATCH"))
 print()
 print("=== PAYMENT, LATEST DAY -- units sanity-checked ===")
 p = G.payment_gaps(con, days[-1], "medical")
