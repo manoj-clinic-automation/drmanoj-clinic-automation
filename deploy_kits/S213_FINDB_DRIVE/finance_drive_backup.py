@@ -1,65 +1,79 @@
 #!/root/wa/venv/bin/python3
 # =============================================================================
-#  finance_drive_backup.py  ·  Session 213  ·  F-261
+#  finance_drive_backup.py  ·  Session 213  ·  F-261  ·  v2
 #
 #  THE OFF-BOX LEG OF THE finance.db BACKUP.
 #
 #  finance_backup.sh (S179, cron 5 1) already takes a VERIFIED local copy every
-#  night with sqlite3's own .backup and refuses to prune anything on a bad day.
-#  But every one of those copies sits on the SAME DISK as the original — its own
-#  closing comment says so. Meanwhile the clinic CSVs go to Google Drive every
-#  night and finance.db goes nowhere (F-261, found at S212).
+#  night and refuses to prune on a bad day. But every copy sits on the same
+#  disk as the original. Meanwhile the clinic CSVs reach Google Drive nightly
+#  and finance.db reaches nowhere (F-261, measured at S212).
 #
-#  This script closes that gap without a single new credential:
-#    * it reuses the Google SERVICE ACCOUNT the follow-up tracker already uses
-#      (gspread on this box) — the same JSON, the Drive API instead of Sheets
-#    * it takes the NEWEST copy finance_backup.sh produced tonight, re-verifies
-#      it opens and answers (integrity_check + day_entry count), gzips it, and
-#      uploads it to ONE Drive folder the owner shared with the service account
-#    * it verifies the upload by reading back Drive's own md5Checksum and
-#      comparing to the local gzip — an upload is not a backup until it matches
-#    * it keeps 30 dailies and one copy per month on Drive, and REFUSES to
-#      prune anything if tonight's upload did not verify (same stance as S179)
+#  v2 — WHY THIS SCRIPT UPDATES FILES INSTEAD OF CREATING THEM.
+#  v1 had the service account CREATE a new file per night. Proven wrong on the
+#  live box, 31-Aug-2026: HTTP 403 "Service Accounts do not have storage
+#  quota." Google no longer gives service accounts any storage of their own.
+#  What a zero-quota service account CAN still do is write new CONTENT into a
+#  file the owner already owns — the bytes then count against the OWNER's
+#  quota. So the design is now:
+#
+#    * two files exist in the shared folder, OWNED by drmka.ortho:
+#        finance_nightly.db.gz   overwritten every night
+#        finance_monthly.db.gz   overwritten on the first verified run of the
+#                                month; that head revision is PINNED (keep
+#                                forever), giving one immortal copy per month
+#    * history comes from Drive's own revision history: Drive keeps a file's
+#      previous versions ~30 days (pinned ones indefinitely), so the nightly
+#      file alone carries about a month of restore points
+#    * the 30 on-box dailies + 12 on-box monthlies of finance_backup.sh are
+#      unchanged and remain the first restore stop
+#
+#  Refusal stances, inherited from S179 and kept absolute:
+#    * a copy failing integrity_check, or with an empty day_entry, never
+#      leaves the box; nor does a copy older than 30 h (the 01:05 job is
+#      broken then — fix that, not this)
+#    * an update whose read-back md5 differs is FATAL and the monthly is not
+#      touched; the previous good version still sits in revision history
 #
 #  Modes:
-#    preflight  find the SA json, reach Drive, test-write the folder, report.
-#               Uploads one tiny file and deletes it. Touches nothing else.
+#    preflight  find the SA json, reach Drive, find both files, prove write
+#               access by a metadata-only touch (no content changed). Report.
 #    run        the nightly job.
-#    list       show what is on Drive in the folder. Read-only.
+#    list       what is in the folder + nightly revision count. Read-only.
 #
 #  Config:  /root/finance/drive_backup.conf   (KEY=VALUE, chmod 600)
-#    SA_JSON=/path/to/service_account.json    (preflight suggests one if absent)
-#    FOLDER_ID=<Drive folder id>              (the folder the owner shared)
+#    SA_JSON=/root/wa/patient-mirror-key.json
+#    FOLDER_ID=<folder id>
 #
 #  Cron (after the 01:05 local backup):
 #    40 1 * * *  /root/wa/venv/bin/python3 /root/finance/finance_drive_backup.py run >> /root/finance/drive_backup.log 2>&1
 #
-#  This file contains no patient data, no numbers, no secrets (F-185): the
-#  folder id and the json path live in the conf file on the VPS, never in git.
+#  No patient data, no numbers, no secrets in this file (F-185): ids and
+#  paths live in the conf on the VPS, never in git.
 # =============================================================================
 import gzip
 import hashlib
-import io
 import json
 import os
-import re
 import sqlite3
 import sys
 import tempfile
 import time
+import warnings
+
+warnings.filterwarnings("ignore", category=FutureWarning)   # google-auth py3.9 EOL noise
 
 CONF_PATH   = "/root/finance/drive_backup.conf"
 BACKUP_DIR  = "/root/backups/finance"          # where finance_backup.sh writes
-KEEP_DAILY  = 30                               # dailies kept on Drive
-KEEP_MONTHLY_DAYS = 400                        # monthlies kept on Drive
-MAX_BACKUP_AGE_H  = 30                         # newest local copy must be fresher
-DAILY_RE    = re.compile(r"^finance_\d{4}-\d{2}-\d{2}_\d{6}\.db\.gz$")
-MONTHLY_RE  = re.compile(r"^finance_monthly_\d{4}-\d{2}\.db\.gz$")
+NIGHTLY     = "finance_nightly.db.gz"
+MONTHLY     = "finance_monthly.db.gz"
+MAX_BACKUP_AGE_H = 30                          # newest local copy must be fresher
+PIN_WARN    = 180                              # Drive pins cap at 200/file
 
 SA_SEARCH = [
+    "/root/wa/patient-mirror-key.json",
     "/root/wa/service_account.json",
     "/root/wa/credentials.json",
-    "/root/wa/creds.json",
     "/root/.config/gspread/service_account.json",
 ]
 
@@ -84,16 +98,14 @@ def load_conf():
 def find_sa_json(conf):
     if conf.get("SA_JSON") and os.path.exists(conf["SA_JSON"]):
         return conf["SA_JSON"]
-    found = list(dict.fromkeys(p for p in SA_SEARCH if os.path.exists(p)))
-    # widen: any json under /root/wa that looks like a service account
+    found = [p for p in SA_SEARCH if os.path.exists(p)]
     try:
         for name in sorted(os.listdir("/root/wa")):
             if name.endswith(".json"):
                 p = os.path.join("/root/wa", name)
                 if p not in found:
                     try:
-                        j = json.load(open(p))
-                        if j.get("type") == "service_account":
+                        if json.load(open(p)).get("type") == "service_account":
                             found.append(p)
                     except Exception:
                         pass
@@ -110,7 +122,7 @@ def make_session(sa_json):
     return AuthorizedSession(creds)
 
 class Drive:
-    """The five Drive calls this job needs, and nothing else."""
+    """The six Drive calls this job needs, and nothing else."""
     API = "https://www.googleapis.com/drive/v3"
     UP  = "https://www.googleapis.com/upload/drive/v3"
 
@@ -124,24 +136,20 @@ class Drive:
 
     def about(self):
         r = self._ck(self.s.get(self.API + "/about",
-                                params={"fields": "user(emailAddress),storageQuota(limit,usage)"}),
-                     "about")
+                                params={"fields": "user(emailAddress)"}), "about")
         return r.json()
 
     def folder(self, folder_id):
         r = self._ck(self.s.get(self.API + "/files/" + folder_id,
-                                params={"fields": "id,name,mimeType",
-                                        "supportsAllDrives": "true"}),
-                     "folder get")
+                                params={"fields": "id,name,mimeType"}), "folder get")
         return r.json()
 
     def list(self, folder_id):
         files, token = [], None
         while True:
             params = {"q": "'%s' in parents and trashed=false" % folder_id,
-                      "fields": "nextPageToken,files(id,name,size,md5Checksum,createdTime)",
-                      "pageSize": "1000", "supportsAllDrives": "true",
-                      "includeItemsFromAllDrives": "true"}
+                      "fields": "nextPageToken,files(id,name,size,md5Checksum,description)",
+                      "pageSize": "1000"}
             if token:
                 params["pageToken"] = token
             r = self._ck(self.s.get(self.API + "/files", params=params), "list")
@@ -151,35 +159,46 @@ class Drive:
             if not token:
                 return files
 
-    def upload(self, folder_id, name, path):
-        """Resumable upload: initiate, then one streamed PUT of the file."""
-        meta = {"name": name, "parents": [folder_id]}
+    def update_content(self, file_id, path):
+        """Resumable content update of an EXISTING file (PATCH), streamed."""
         size = os.path.getsize(path)
-        r = self._ck(self.s.post(
-            self.UP + "/files?uploadType=resumable&supportsAllDrives=true"
-                      "&fields=id,name,size,md5Checksum",
+        r = self._ck(self.s.patch(
+            self.UP + "/files/%s?uploadType=resumable&fields=id,size,md5Checksum" % file_id,
             headers={"Content-Type": "application/json; charset=UTF-8",
                      "X-Upload-Content-Length": str(size)},
-            data=json.dumps(meta)), "upload initiate")
+            data=json.dumps({})), "update initiate")
         loc = r.headers.get("Location")
         if not loc:
-            raise RuntimeError("upload initiate returned no session URI")
+            raise RuntimeError("update initiate returned no session URI")
         with open(path, "rb") as f:
             r = self._ck(self.s.put(loc, data=f,
                                     headers={"Content-Length": str(size)}),
-                         "upload bytes")
+                         "update bytes")
+        return r.json()
+
+    def patch_meta(self, file_id, body):
+        r = self._ck(self.s.patch(self.API + "/files/" + file_id,
+                                  headers={"Content-Type": "application/json"},
+                                  params={"fields": "id,name,description"},
+                                  data=json.dumps(body)), "meta patch")
         return r.json()
 
     def get(self, file_id):
         r = self._ck(self.s.get(self.API + "/files/" + file_id,
-                                params={"fields": "id,name,size,md5Checksum",
-                                        "supportsAllDrives": "true"}),
+                                params={"fields": "id,name,size,md5Checksum,description"}),
                      "file get")
         return r.json()
 
-    def delete(self, file_id):
-        self._ck(self.s.delete(self.API + "/files/" + file_id,
-                               params={"supportsAllDrives": "true"}), "delete")
+    def revisions(self, file_id):
+        r = self._ck(self.s.get(self.API + "/files/%s/revisions" % file_id,
+                                params={"fields": "revisions(id,modifiedTime,keepForever)",
+                                        "pageSize": "1000"}), "revisions")
+        return r.json().get("revisions", [])
+
+    def pin_revision(self, file_id, rev_id):
+        self._ck(self.s.patch(self.API + "/files/%s/revisions/%s" % (file_id, rev_id),
+                              headers={"Content-Type": "application/json"},
+                              data=json.dumps({"keepForever": True})), "revision pin")
 
 # ---------------------------------------------------------------- verify ----
 def md5_file(path):
@@ -224,8 +243,18 @@ def gzip_to_tmp(src):
     os.chmod(tmp, 0o600)
     return tmp
 
+def find_slots(d, folder_id):
+    """Both owner-owned slot files, by exact name."""
+    files = {f["name"]: f for f in d.list(folder_id)}
+    missing = [n for n in (NIGHTLY, MONTHLY) if n not in files]
+    if missing:
+        die(13, "slot file(s) missing in the Drive folder:", ", ".join(missing),
+            "— they are owner-owned and must exist (created once from the owner's"
+            " account); the service account cannot create them (zero quota).")
+    return files[NIGHTLY], files[MONTHLY]
+
 # ----------------------------------------------------------------- modes ----
-def preflight(drive_cls=Drive, session_maker=make_session):
+def _connect(conf_required=True):
     conf = load_conf()
     sa = find_sa_json(conf)
     if not sa:
@@ -236,34 +265,37 @@ def preflight(drive_cls=Drive, session_maker=make_session):
             fh.write("SA_JSON=%s\nFOLDER_ID=\n" % sa)
         os.chmod(CONF_PATH, 0o600)
         log("wrote", CONF_PATH, "— FOLDER_ID is still blank")
+    fid = conf.get("FOLDER_ID")
+    if conf_required and not fid:
+        log("FOLDER_ID not set in %s yet." % CONF_PATH)
+        sys.exit(11)
+    return conf, sa, fid
+
+def preflight(drive_cls=Drive, session_maker=make_session):
+    conf, sa, fid = _connect(conf_required=False)
     email = json.load(open(sa)).get("client_email", "?")
     log("service account json:", sa)
     log("service account identity:", email)
     d = drive_cls(session_maker(sa))
     ab = d.about()
-    q = ab.get("storageQuota", {})
-    log("drive reachable as:", ab.get("user", {}).get("emailAddress", "?"),
-        "· quota used %s of %s" % (q.get("usage", "?"), q.get("limit", "unlimited")))
-    fid = conf.get("FOLDER_ID")
+    log("drive reachable as:", ab.get("user", {}).get("emailAddress", "?"))
     if not fid:
-        log("FOLDER_ID not set in %s yet." % CONF_PATH)
-        log("OWNER STEP: in Drive, create/choose a folder, share it with the")
-        log("identity above as Editor, and put its id in the conf file.")
+        log("OWNER STEP: share the folder with the identity above (Editor) and put"
+            " its id in", CONF_PATH)
         sys.exit(11)
     f = d.folder(fid)
     if f.get("mimeType") != "application/vnd.google-apps.folder":
         die(12, "FOLDER_ID is not a folder:", f)
     log("folder visible:", f.get("name"), "(%s)" % fid)
-    # prove writability with a tiny file, then remove it
-    fdt, tp = tempfile.mkstemp(suffix=".txt", prefix="findb_preflight_")
-    with os.fdopen(fdt, "w") as fh:
-        fh.write("finance_drive_backup preflight %s\n" % time.strftime("%F %T"))
-    try:
-        up = d.upload(fid, "PREFLIGHT_delete_me.txt", tp)
-        d.delete(up["id"])
-    finally:
-        os.unlink(tp)
-    log("test write + delete in the folder: OK")
+    nightly, monthly = find_slots(d, fid)
+    log("slot files found:", NIGHTLY, "(%s)" % nightly["id"], "·",
+        MONTHLY, "(%s)" % monthly["id"])
+    # prove WRITE access without touching content: a metadata-only description
+    # touch on the nightly slot. Content and revisions are unchanged by this.
+    stamp = "preflight write-test %s" % time.strftime("%F %T")
+    d.patch_meta(nightly["id"], {"description": (nightly.get("description") or "")
+                                 [:900] + " | " + stamp})
+    log("metadata write on", NIGHTLY, ": OK (content untouched)")
     nb = newest_local_backup()
     if nb:
         try:
@@ -280,90 +312,75 @@ def preflight(drive_cls=Drive, session_maker=make_session):
 
 def run(drive_cls=Drive, session_maker=make_session, now=None):
     now = now or time.localtime()
-    conf = load_conf()
-    sa = find_sa_json(conf)
-    if not sa:
-        die(10, "no service-account json — run preflight")
-    fid = conf.get("FOLDER_ID")
-    if not fid:
-        die(11, "FOLDER_ID not set — run preflight")
+    conf, sa, fid = _connect()
 
     src = newest_local_backup()
     if not src:
         die(20, "no local backup in", BACKUP_DIR, "— nothing to ship")
     age_h = (time.time() - os.path.getmtime(src)) / 3600.0
     if age_h > MAX_BACKUP_AGE_H:
-        die(21, "newest local backup is %.1f h old (%s) — finance_backup.sh "
-                "has not produced a fresh copy; NOT shipping a stale one"
+        die(21, "newest local backup is %.1f h old (%s) — finance_backup.sh has"
+                " not produced a fresh copy; NOT shipping a stale one"
                 % (age_h, os.path.basename(src)))
-    days = verify_db(src)          # raises on a bad copy — nothing uploads
+    days = verify_db(src)          # raises on a bad copy — nothing is shipped
     log("local copy verifies:", os.path.basename(src), "· %d day-entries" % days)
 
     tmp = gzip_to_tmp(src)
     try:
         local_md5 = md5_file(tmp)
-        name = os.path.basename(src) + ".gz"       # finance_<stamp>.db.gz
         d = drive_cls(session_maker(sa))
-        up = d.upload(fid, name, tmp)
-        got = d.get(up["id"])
+        nightly, monthly = find_slots(d, fid)
+
+        d.update_content(nightly["id"], tmp)
+        got = d.get(nightly["id"])
         if got.get("md5Checksum") != local_md5 or int(got.get("size", -1)) != os.path.getsize(tmp):
-            log("upload DID NOT VERIFY (drive md5 %s vs local %s) — deleting the"
-                " bad copy, pruning NOTHING" % (got.get("md5Checksum"), local_md5))
-            try:
-                d.delete(up["id"])
-            except Exception as ex:
-                log("could not delete the bad copy:", ex)
-            sys.exit(30)
-        log("shipped %s · %d bytes · md5 %s · verified by read-back"
-            % (name, os.path.getsize(tmp), local_md5))
+            die(30, "nightly update DID NOT VERIFY (drive md5 %s vs local %s) —"
+                    " monthly untouched; the previous good version is still in"
+                    " the file's revision history" % (got.get("md5Checksum"), local_md5))
+        desc = ("verified backup of %s · md5 %s · %d day-entries · shipped %s"
+                % (os.path.basename(src), local_md5, days, time.strftime("%F %T")))
+        d.patch_meta(nightly["id"], {"description": desc})
+        log("shipped -> %s · %d bytes · md5 %s · verified by read-back"
+            % (NIGHTLY, os.path.getsize(tmp), local_md5))
 
-        files = d.list(fid)
-
-        # one monthly copy, created on the first verified run of the month
+        # ---- monthly: first verified run of the month, pinned forever ------
         mtag = time.strftime("%Y-%m", now)
-        mname = "finance_monthly_%s.db.gz" % mtag
-        if not any(f["name"] == mname for f in files):
-            mu = d.upload(fid, mname, tmp)
-            mg = d.get(mu["id"])
+        mdesc = monthly.get("description") or ""
+        if ("month=%s" % mtag) not in mdesc:
+            d.update_content(monthly["id"], tmp)
+            mg = d.get(monthly["id"])
             if mg.get("md5Checksum") == local_md5:
-                log("kept monthly copy", mname)
-                mg = dict(mg); mg["name"] = mname; mg.setdefault("createdTime", "")
-                files.append(mg)
+                revs = d.revisions(monthly["id"])
+                if revs:
+                    try:
+                        d.pin_revision(monthly["id"], revs[-1]["id"])
+                        log("monthly copy for", mtag, "shipped and PINNED (kept forever)")
+                    except Exception as ex:
+                        log("WARNING: monthly shipped but pin failed:", ex)
+                pins = sum(1 for r in d.revisions(monthly["id"]) if r.get("keepForever"))
+                if pins >= PIN_WARN:
+                    log("WARNING: %d pinned revisions on %s — Drive caps at 200;"
+                        " plan a second monthly file" % (pins, MONTHLY))
+                d.patch_meta(monthly["id"],
+                             {"description": "month=%s · %s" % (mtag, desc)})
             else:
-                log("monthly copy did not verify — deleting it; the dailies stand")
-                try:
-                    d.delete(mu["id"])
-                except Exception as ex:
-                    log("could not delete bad monthly:", ex)
-
-        # prune — only reachable after tonight's upload verified
-        dailies = sorted((f for f in files if DAILY_RE.match(f["name"])),
-                         key=lambda f: f["name"])
-        for f in dailies[:-KEEP_DAILY] if len(dailies) > KEEP_DAILY else []:
-            d.delete(f["id"])
-            log("pruned daily", f["name"])
-        cutoff = time.strftime("%Y-%m", time.localtime(time.time() - KEEP_MONTHLY_DAYS * 86400))
-        for f in (f for f in files if MONTHLY_RE.match(f["name"])):
-            if f["name"][len("finance_monthly_"):len("finance_monthly_") + 7] < cutoff:
-                d.delete(f["id"])
-                log("pruned monthly", f["name"])
-
-        held = d.list(fid)
-        log("held on Drive: %d daily, %d monthly"
-            % (sum(1 for f in held if DAILY_RE.match(f["name"])),
-               sum(1 for f in held if MONTHLY_RE.match(f["name"]))))
+                log("WARNING: monthly update did not verify — its previous version"
+                    " still stands in revision history; the nightly above is good")
+        # ---- visibility ----------------------------------------------------
+        nrev = len(d.revisions(nightly["id"]))
+        log("held on Drive: %s (%d revisions ≈ restore points) · %s (monthly, pinned)"
+            % (NIGHTLY, nrev, MONTHLY))
     finally:
         os.unlink(tmp)
 
 def list_mode(drive_cls=Drive, session_maker=make_session):
-    conf = load_conf()
-    sa = find_sa_json(conf)
-    fid = conf.get("FOLDER_ID")
-    if not (sa and fid):
-        die(11, "conf incomplete — run preflight")
+    conf, sa, fid = _connect()
     d = drive_cls(session_maker(sa))
     for f in sorted(d.list(fid), key=lambda f: f["name"]):
-        log(f["name"], f.get("size", "?"), "bytes", f.get("md5Checksum", ""))
+        log(f["name"], f.get("size", "?"), "bytes", f.get("md5Checksum", ""),
+            "·", (f.get("description") or "")[:80])
+    n, _m = find_slots(d, fid)
+    log("nightly revisions:", len(d.revisions(n["id"])))
 
 def main(argv):
     mode = argv[1] if len(argv) > 1 else ""

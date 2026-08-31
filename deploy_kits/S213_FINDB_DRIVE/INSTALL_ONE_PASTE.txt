@@ -1,26 +1,23 @@
-S213_FINDB_DRIVE — install, one line at a time. Steps 1-2 after PUBLISH + deploy pull.
+S213_FINDB_DRIVE v2 — install, one line at a time. After PUBLISH + deploy pull.
 
-[VPS] 1 · put the file in place:
+Already done at S213 live install: folder FinanceDB_Backups shared to the service
+account; slot files finance_nightly.db.gz / finance_monthly.db.gz created from the
+owner's account; /root/finance/drive_backup.conf holds SA_JSON and FOLDER_ID.
+
+[VPS] 1 · deploy clone pull:
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main
+
+[VPS] 2 · put the file in place:
 \cp /root/deploy/repo/deploy_kits/S213_FINDB_DRIVE/finance_drive_backup.py /root/finance/finance_drive_backup.py
 
-[VPS] 2 · first preflight (finds the service account, writes the conf, prints the identity to share with):
+[VPS] 3 · preflight — must end "PREFLIGHT OK":
 /root/wa/venv/bin/python3 /root/finance/finance_drive_backup.py preflight
 
-[GUI] 3 · in Google Drive (drmka.ortho@gmail.com): create a folder named FinanceDB_Backups,
-        Share -> paste the service-account identity preflight printed -> Editor.
-        Copy the folder id (the part of the folder URL after /folders/).
-
-[VPS] 4 · put the folder id in the conf (replace PASTE_FOLDER_ID_HERE):
-sed -i 's|^FOLDER_ID=.*|FOLDER_ID=PASTE_FOLDER_ID_HERE|' /root/finance/drive_backup.conf
-
-[VPS] 5 · preflight again — must end "PREFLIGHT OK":
-/root/wa/venv/bin/python3 /root/finance/finance_drive_backup.py preflight
-
-[VPS] 6 · first real shipment, watched:
+[VPS] 4 · first real shipment, watched:
 /root/wa/venv/bin/python3 /root/finance/finance_drive_backup.py run
 
-[VPS] 7 · the nightly cron (01:40, after the 01:05 local backup):
+[VPS] 5 · the nightly cron (01:40, after the 01:05 local backup):
 (crontab -l 2>/dev/null; echo '40 1 * * * /root/wa/venv/bin/python3 /root/finance/finance_drive_backup.py run >> /root/finance/drive_backup.log 2>&1') | crontab -
 
-[VPS] 8 · confirm both cron lines exist:
+[VPS] 6 · confirm both cron lines exist:
 crontab -l | grep finance

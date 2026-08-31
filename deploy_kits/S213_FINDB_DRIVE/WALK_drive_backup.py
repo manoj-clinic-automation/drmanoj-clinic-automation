@@ -1,23 +1,28 @@
 #!/usr/bin/env python3
 # =============================================================================
-#  WALK_drive_backup.py · S213 · the LIVE-SHAPE walk for finance_drive_backup
+#  WALK_drive_backup.py · S213 · the LIVE-SHAPE walk for finance_drive_backup v2
 #
-#  Builds a real sqlite database, a real backup directory and a fake Drive that
-#  behaves like the real one (upload/list/get/delete, md5Checksum computed from
-#  the bytes actually received), then runs the REAL preflight/run functions
-#  through every path that matters:
+#  v2 walks the UPDATE-IN-PLACE design (the live box proved on 31-Aug-2026 that
+#  service accounts have zero storage quota, so the job now overwrites two
+#  owner-owned slot files instead of creating its own).
 #
-#   1  happy path: verify -> gzip -> upload -> read-back match -> monthly -> prune
-#   2  corrupt local copy            -> refuses BEFORE any upload
-#   3  upload that mangles bytes     -> refuses, deletes the bad copy, prunes NOTHING
-#   4  31 dailies on Drive           -> prunes exactly the oldest 1
-#   5  monthly already present       -> not duplicated
-#   6  stale local copy (>30 h)      -> refuses to ship it
-#   7  empty day_entry               -> refuses (an empty book is not a backup)
+#  A real sqlite database, a real backup dir, and a fake Drive that stores the
+#  bytes it actually receives, md5s them itself, and keeps a revision list per
+#  file. The REAL preflight/run functions are then driven through:
+#
+#   1  happy path: verify -> gzip -> update nightly -> read-back match ->
+#      description stamped -> monthly updated AND PINNED (first run of month)
+#   2  corrupt local copy      -> refuses BEFORE any network call
+#   3  mangled nightly update  -> exit 30, monthly untouched
+#   4  slot files missing      -> exit 13, names them
+#   5  second run same month   -> nightly gains a revision, monthly does NOT
+#   6  stale local copy (>30h) -> exit 21
+#   7  empty day_entry         -> refuses
+#   8  preflight               -> end-to-end OK, and content NOT touched
 #
 #  Run:  python -B WALK_drive_backup.py     (exits 0 with ALL WALK CHECKS PASS)
 # =============================================================================
-import gzip, hashlib, json, os, sqlite3, sys, tempfile, time, types
+import gzip, hashlib, json, os, sqlite3, sys, tempfile, time
 
 sys.dont_write_bytecode = True
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -29,38 +34,59 @@ def check(name, cond):
     CHECKS.append((name, bool(cond)))
     print("  [%s] %s" % ("ok " if cond else "FAIL", name))
 
-# ---- a Drive that keeps bytes in memory and computes real md5s --------------
 class FakeDrive:
-    def __init__(self, session=None, mangle_next_upload=False):
-        self.store = {}          # id -> dict(name,size,md5Checksum,bytes)
-        self.nid = 0
-        self.mangle = mangle_next_upload
+    """Owner-owned slot files with content, revisions and descriptions."""
+    def __init__(self, session=None):
+        self.files = {}      # id -> {name,bytes,description,revisions:[{id,keepForever}]}
+        self.calls = 0
+        self.mangle_next = False
         self.folder_id = "FOLDER1"
+    def _f(self, i): return self.files[i]
+    def seed(self, i, name):
+        self.files[i] = {"name": name, "bytes": b"placeholder", "description": "",
+                         "revisions": [{"id": "r0", "keepForever": False}]}
     def about(self):
-        return {"user": {"emailAddress": "sa@walk"}, "storageQuota": {"usage": "1", "limit": "9"}}
+        self.calls += 1
+        return {"user": {"emailAddress": "sa@walk"}}
     def folder(self, fid):
+        self.calls += 1
         return {"id": fid, "name": "FinanceDB_Backups",
                 "mimeType": "application/vnd.google-apps.folder"}
     def list(self, fid):
-        return [dict(id=k, name=v["name"], size=str(v["size"]),
-                     md5Checksum=v["md5Checksum"], createdTime=v.get("ct", ""))
-                for k, v in self.store.items()]
-    def upload(self, fid, name, path):
+        self.calls += 1
+        return [{"id": k, "name": v["name"], "size": str(len(v["bytes"])),
+                 "md5Checksum": hashlib.md5(v["bytes"]).hexdigest(),
+                 "description": v["description"]} for k, v in self.files.items()]
+    def update_content(self, i, path):
+        self.calls += 1
         data = open(path, "rb").read()
-        if self.mangle:
+        if self.mangle_next:
             data = data[:-1] + b"X"
-            self.mangle = False
-        self.nid += 1
-        i = "id%d" % self.nid
-        self.store[i] = {"name": name, "size": len(data),
-                         "md5Checksum": hashlib.md5(data).hexdigest()}
-        return {"id": i, "name": name}
+            self.mangle_next = False
+        f = self._f(i)
+        f["bytes"] = data
+        f["revisions"].append({"id": "r%d" % len(f["revisions"]), "keepForever": False})
+        return {"id": i}
+    def patch_meta(self, i, body):
+        self.calls += 1
+        self._f(i)["description"] = body.get("description", self._f(i)["description"])
+        return {"id": i}
     def get(self, i):
-        v = self.store[i]
-        return {"id": i, "name": v["name"], "size": str(v["size"]),
-                "md5Checksum": v["md5Checksum"]}
-    def delete(self, i):
-        del self.store[i]
+        self.calls += 1
+        v = self._f(i)
+        return {"id": i, "name": v["name"], "size": str(len(v["bytes"])),
+                "md5Checksum": hashlib.md5(v["bytes"]).hexdigest(),
+                "description": v["description"]}
+    def revisions(self, i):
+        self.calls += 1
+        return list(self._f(i)["revisions"])
+    def pin_revision(self, i, rid):
+        self.calls += 1
+        for r in self._f(i)["revisions"]:
+            if r["id"] == rid:
+                r["keepForever"] = True
+                return
+        raise RuntimeError("no such revision")
 
 # ---- a real database and a real backup dir ---------------------------------
 tmpd = tempfile.mkdtemp(prefix="walk_findb_")
@@ -70,6 +96,7 @@ M.CONF_PATH = os.path.join(tmpd, "drive_backup.conf")
 sa_path = os.path.join(tmpd, "sa.json")
 json.dump({"type": "service_account", "client_email": "walk-sa@example.iam"}, open(sa_path, "w"))
 open(M.CONF_PATH, "w").write("SA_JSON=%s\nFOLDER_ID=FOLDER1\n" % sa_path)
+M.SA_SEARCH = [sa_path]
 
 def make_db(path, days=5):
     c = sqlite3.connect(path)
@@ -78,29 +105,35 @@ def make_db(path, days=5):
                   [("2026-08-%02d" % (i + 1),) for i in range(days)])
     c.commit(); c.close()
 
-stamp = time.strftime("%Y-%m-%d_%H%M%S")
-src = os.path.join(M.BACKUP_DIR, "finance_%s.db" % stamp)
+src = os.path.join(M.BACKUP_DIR, "finance_%s.db" % time.strftime("%Y-%m-%d_%H%M%S"))
 make_db(src)
 
 fake = FakeDrive()
+fake.seed("N1", M.NIGHTLY)
+fake.seed("M1", M.MONTHLY)
 mk = lambda sa: None
 drv = lambda session: fake
 
-print("— 1 · happy path")
+print("— 1 · happy path (first run of the month)")
 M.run(drive_cls=drv, session_maker=mk)
-names = sorted(v["name"] for v in fake.store.values())
-check("daily shipped", any(n == os.path.basename(src) + ".gz" for n in names))
-check("monthly created", any(n.startswith("finance_monthly_") for n in names))
-gz_ids = [k for k, v in fake.store.items() if v["name"].endswith(".db.gz")]
-raw = gzip.decompress(b"")  # placeholder so gzip import is exercised
-check("drive md5 equals a real gzip of the verified copy", all(
-    fake.store[k]["md5Checksum"] for k in gz_ids))
+exp_md5 = hashlib.md5(fake.files["N1"]["bytes"]).hexdigest()
+real_gz_md5 = None
+with open(src, "rb") as fi:
+    raw = fi.read()
+check("nightly holds a gzip of the verified db",
+      gzip.decompress(fake.files["N1"]["bytes"]) == raw)
+check("monthly holds the same bytes",
+      fake.files["M1"]["bytes"] == fake.files["N1"]["bytes"])
+check("nightly description stamped", "verified backup" in fake.files["N1"]["description"])
+check("monthly head revision pinned",
+      fake.files["M1"]["revisions"][-1]["keepForever"] is True)
+check("monthly description carries month tag",
+      "month=%s" % time.strftime("%Y-%m") in fake.files["M1"]["description"])
 
-print("— 2 · corrupt local copy refuses before upload")
-bad = os.path.join(M.BACKUP_DIR, "finance_%s.db" % time.strftime("%Y-%m-%d_%H%M%S", time.localtime(time.time()+2)))
+print("— 2 · corrupt local copy refuses before any network call")
+bad = os.path.join(M.BACKUP_DIR, "finance_bad.db")
 open(bad, "wb").write(b"this is not a database")
-os.utime(bad, None)
-n_before = len(fake.store)
+calls_before = fake.calls
 rc = 0
 try:
     M.run(drive_cls=drv, session_maker=mk)
@@ -108,51 +141,44 @@ except SystemExit as e:
     rc = e.code
 except Exception:
     rc = "raised"
-check("refused (nonzero/raise)", rc != 0)
-check("nothing new on Drive", len(fake.store) == n_before)
+check("refused", rc != 0)
+check("zero Drive calls made", fake.calls == calls_before)
 os.unlink(bad)
 
-print("— 3 · mangled upload: refuse, delete bad copy, prune nothing")
+print("— 3 · mangled nightly update: exit 30, monthly untouched")
 os.utime(src, None)
-fake2 = FakeDrive(mangle_next_upload=True)
-# pre-load 31 dailies that would be pruned IF pruning ran
-for i in range(31):
-    fake2.nid += 1
-    fake2.store["pre%d" % i] = {"name": "finance_2026-07-%02d_010000.db.gz" % (i % 28 + 1),
-                                "size": 1, "md5Checksum": "0" * 32}
-n_pre = len(fake2.store)
+fake2 = FakeDrive(); fake2.seed("N1", M.NIGHTLY); fake2.seed("M1", M.MONTHLY)
+fake2.mangle_next = True
+m_bytes_before = fake2.files["M1"]["bytes"]
 rc = 0
 try:
     M.run(drive_cls=(lambda s: fake2), session_maker=mk)
 except SystemExit as e:
     rc = e.code
 check("exit 30 on read-back mismatch", rc == 30)
-check("bad copy deleted, nothing pruned", len(fake2.store) == n_pre)
+check("monthly untouched", fake2.files["M1"]["bytes"] == m_bytes_before)
+check("nightly description NOT stamped", fake2.files["N1"]["description"] == "")
 
-print("— 4 · prune keeps exactly KEEP_DAILY dailies")
-fake3 = FakeDrive()
-for i in range(31):
-    fake3.nid += 1
-    fake3.store["pre%d" % i] = {"name": "finance_2026-07-%02d_0100%02d.db.gz" % (i % 28 + 1, i % 60),
-                                "size": 1, "md5Checksum": "0" * 32}
-M.run(drive_cls=(lambda s: fake3), session_maker=mk)
-dailies = [v["name"] for v in fake3.store.values() if M.DAILY_RE.match(v["name"])]
-check("dailies on Drive == KEEP_DAILY", len(dailies) == M.KEEP_DAILY)
-check("the newest (tonight's) survived", os.path.basename(src) + ".gz" in dailies)
-check("the pruned ones were the oldest", min(dailies) > "finance_2026-07-01")
+print("— 4 · slot files missing: exit 13")
+fake3 = FakeDrive()   # empty folder
+rc = 0
+try:
+    M.run(drive_cls=(lambda s: fake3), session_maker=mk)
+except SystemExit as e:
+    rc = e.code
+check("exit 13 when slots absent", rc == 13)
 
-print("— 5 · monthly not duplicated")
-monthlies = [v["name"] for v in fake3.store.values() if M.MONTHLY_RE.match(v["name"])]
-before = len(monthlies)
-M.run(drive_cls=(lambda s: fake3), session_maker=mk)
-monthlies2 = [v["name"] for v in fake3.store.values() if M.MONTHLY_RE.match(v["name"])]
-check("still one monthly for this month", len(monthlies2) == before == 1)
+print("— 5 · second run, same month: nightly revises, monthly does not")
+n_rev = len(fake.files["N1"]["revisions"])
+m_rev = len(fake.files["M1"]["revisions"])
+os.utime(src, None)
+M.run(drive_cls=drv, session_maker=mk)
+check("nightly gained a revision", len(fake.files["N1"]["revisions"]) == n_rev + 1)
+check("monthly did not", len(fake.files["M1"]["revisions"]) == m_rev)
 
 print("— 6 · stale local copy refuses")
-old_stamp = time.strftime("%Y-%m-%d_%H%M%S", time.localtime(time.time() - 40 * 3600))
-stale = os.path.join(M.BACKUP_DIR, "finance_%s.db" % old_stamp)
-os.rename(src, stale)
-os.utime(stale, (time.time() - 40 * 3600,) * 2)
+stale_t = time.time() - 40 * 3600
+os.utime(src, (stale_t, stale_t))
 rc = 0
 try:
     M.run(drive_cls=drv, session_maker=mk)
@@ -161,7 +187,7 @@ except SystemExit as e:
 check("exit 21 on stale copy", rc == 21)
 
 print("— 7 · empty day_entry refuses")
-empty = os.path.join(M.BACKUP_DIR, "finance_%s.db" % time.strftime("%Y-%m-%d_%H%M%S"))
+empty = os.path.join(M.BACKUP_DIR, "finance_empty.db")
 c = sqlite3.connect(empty); c.execute("CREATE TABLE day_entry (d TEXT)"); c.commit(); c.close()
 rc = 0
 try:
@@ -171,9 +197,12 @@ except SystemExit as e:
 except RuntimeError:
     rc = "refused"
 check("refused the empty book", rc != 0)
+os.unlink(empty)
 
-os.unlink(empty)   # leave a clean, verifying newest for preflight
-print("— 8 · preflight walks its whole path")
+print("— 8 · preflight end-to-end, content untouched")
+os.utime(src, None)
+n_bytes = fake.files["N1"]["bytes"]
+n_revs = len(fake.files["N1"]["revisions"])
 rc = 0
 try:
     M.preflight(drive_cls=drv, session_maker=mk)
@@ -182,8 +211,9 @@ except SystemExit as e:
 except RuntimeError as e:
     rc = "raised:%s" % e
 check("preflight OK end-to-end", rc == 0)
-check("preflight test file was deleted again",
-      not any(v["name"] == "PREFLIGHT_delete_me.txt" for v in fake.store.values()))
+check("nightly content untouched by preflight",
+      fake.files["N1"]["bytes"] == n_bytes and len(fake.files["N1"]["revisions"]) == n_revs)
+check("write proven via description", "preflight write-test" in fake.files["N1"]["description"])
 
 fails = [n for n, ok in CHECKS if not ok]
 print()
