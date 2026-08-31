@@ -52,23 +52,69 @@ def _qty(raw):
     return None
 
 
-def audit_return(con, bill_no, patient_ref_id, business_date):
+LINE_COLS = ("seq, item_name, item_key, pack, qty_raw, amount_p, batch, expiry_ym, "
+             "bill_no, business_date")
+
+
+def find_return_lines(con, bill_no, business_date, amount_p=None):
+    """Find a return's item lines, by a LADDER, and say which rung found them.
+
+    Measured at S211: sale_line_item holds 186 return-flagged bills, sale_item
+    holds 179, and only 63 share a bill number -- yet the owner confirms all
+    sale data, bill-wise and item-wise, is uploaded to 29-Aug-2026. So the lines
+    are there under a DIFFERENT KEY, and an audit that only does an exact match
+    reports 116 real returns as unexaminable.
+
+    Each rung is weaker than the one above it, so the rung that succeeded is
+    returned with the lines. Nothing downstream may treat a rung-4 match as
+    though it were a rung-1 match.
+    """
+    b = str(bill_no or "").strip()
+    if b:
+        r = con.execute("SELECT %s FROM sale_line_item WHERE bill_no=? "
+                        "AND is_return=1 ORDER BY seq" % LINE_COLS, (b,)).fetchall()
+        if r:
+            return r, "bill number, flagged as a return"
+        r = con.execute("SELECT %s FROM sale_line_item WHERE bill_no=? ORDER BY seq"
+                        % LINE_COLS, (b,)).fetchall()
+        if r:
+            return r, "bill number (the return flag was not set on the lines)"
+        digits = re.sub(r"\D", "", b)
+        if len(digits) >= 3:
+            # the same bill under a different prefix -- CN00154 against 00154
+            r = con.execute(
+                "SELECT %s FROM sale_line_item WHERE is_return=1 "
+                "AND REPLACE(REPLACE(bill_no,'CN',''),'-','') LIKE ? ORDER BY seq"
+                % LINE_COLS, ("%" + digits,)).fetchall()
+            if r and len({x["bill_no"] for x in r}) == 1:
+                return r, "same digits under a different prefix (%s)" % r[0]["bill_no"]
+    if business_date and amount_p is not None:
+        # last rung: the same day, flagged a return, and the line amounts add up
+        # to this bill. Only accepted when exactly ONE bill fits.
+        cand = con.execute(
+            "SELECT bill_no, SUM(COALESCE(amount_p,0)) t FROM sale_line_item "
+            "WHERE is_return=1 AND business_date=? GROUP BY bill_no",
+            (business_date,)).fetchall()
+        fit = [c["bill_no"] for c in cand if abs((c["t"] or 0) - amount_p) <= 100]
+        if len(fit) == 1:
+            r = con.execute("SELECT %s FROM sale_line_item WHERE bill_no=? ORDER BY seq"
+                            % LINE_COLS, (fit[0],)).fetchall()
+            if r:
+                return r, "same day and the amounts agree (bill %s)" % fit[0]
+    return [], ""
+
+
+def audit_return(con, bill_no, patient_ref_id, business_date, amount_p=None):
     """One return bill, line by line. Never raises on data."""
-    lines = con.execute(
-        "SELECT seq, item_name, item_key, pack, qty_raw, amount_p, batch, expiry_ym "
-        "FROM sale_line_item WHERE bill_no=? AND is_return=1 ORDER BY seq",
-        (bill_no,)).fetchall()
-    if not lines:
-        # also try without the flag: some rows carry the return only in sale_item
-        lines = con.execute(
-            "SELECT seq, item_name, item_key, pack, qty_raw, amount_p, batch, expiry_ym "
-            "FROM sale_line_item WHERE bill_no=? ORDER BY seq", (bill_no,)).fetchall()
+    lines, line_source = find_return_lines(con, bill_no, business_date, amount_p)
     out = []
     flags = collections.Counter()
     if not lines:
-        return [], dict(no_item_detail=1), ("this return has NO item lines, so it "
-                                            "cannot be examined -- not the same "
-                                            "thing as a clean return")
+        return [], dict(no_item_detail=1), ("no item lines could be found for this "
+                                            "return, by bill number, by digits, or "
+                                            "by same-day amount -- so it cannot be "
+                                            "examined, which is NOT the same thing "
+                                            "as a clean return")
     for ln in lines:
         prior = con.execute(
             "SELECT l.bill_no, l.qty_raw, l.amount_p, l.business_date "
@@ -123,7 +169,7 @@ def audit_return(con, bill_no, patient_ref_id, business_date):
                                 ln["qty_raw"]))
             flags["qty_differs"] += 1
         out.append(row)
-    return out, dict(flags), ""
+    return out, dict(flags), ("lines found by: " + line_source) if line_source else ""
 
 
 def returns_for_day(con, business_date, unit="medical"):
@@ -139,7 +185,7 @@ def returns_for_day(con, business_date, unit="medical"):
     out, tally = [], collections.Counter()
     for r in rets:
         lines, flags, note = audit_return(con, r["bill"], r["patient_ref_id"],
-                                          business_date)
+                                          business_date, r["amount_p"])
         worst = ("NEVER BOUGHT" if flags.get("never_bought") else
                  "REFUNDED MORE THAN PAID" if flags.get("refund_exceeds") else
                  "RETURNED MORE THAN SOLD" if flags.get("qty_exceeds") else

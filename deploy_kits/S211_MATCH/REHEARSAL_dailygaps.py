@@ -154,6 +154,15 @@ def main():
     retbill("R3", 15000); ret("R3", "ITEMD", "1:0", 45000)          # refund > paid
     retbill("R4", 40000); ret("R4", "ITEMB", "5:0", 40000)          # qty > sold
     retbill("R5", 9000)                                             # no item lines
+    # THE KEY LADDER: the same return under a different prefix, and one findable
+    # only by same-day amount. Both are real shapes on the live box, where only
+    # 63 of 179 returns share a bill number with their lines.
+    retbill("CN00154", 7000)
+    ret("00154", "ITEMA", "1:0", 7000)                              # digits match
+    retbill("R7", 6500)
+    con.execute("INSERT INTO sale_line_item (business_date,bill_no,is_return,seq,"
+                "item_name,item_key,qty_raw,amount_p) "
+                "VALUES (?,?,1,1,?,?,?,?)", (DAY, "XQ-9", "ITEMA", "ITEMA", "1:0", 6500))
     con.execute("INSERT INTO upi_statement (merchant_id,unit,statement_date,"
                 "parsed_total_p,txn_count) VALUES ('M1','medical',?,12500,1)", (DAY,))
     # WHAT DARPAN DECLARED for the day -- this, not sale_item.mode, is what the
@@ -173,7 +182,7 @@ def main():
 
     r = G.day_report(con, DAY, "medical", ENV, punches, staff)
 
-    check("the day counted every bill", r["totals"]["bills"] == 17,
+    check("the day counted every bill", r["totals"]["bills"] == 19,
           str(r["totals"]))
     byref = {g["bill_no"]: g["verdict"] for g in r["identity_gaps"]}
     check("a bill linked at ingest to a MASTER patient is matched, not a gap",
@@ -239,8 +248,22 @@ def main():
           byr["R4"]["verdict"] == "RETURNED MORE THAN SOLD")
     check("a return with NO item lines is 'not examinable', never 'clean'",
           byr["R5"]["verdict"] == "not examinable" and byr["R5"]["note"])
+    check("a return under a DIFFERENT PREFIX is still found",
+          byr["CN00154"]["verdict"] != "not examinable"
+          and "different prefix" in (byr["CN00154"]["note"] or ""))
+    check("a return findable only by same-day amount is still found",
+          byr["R7"]["verdict"] != "not examinable"
+          and "amounts agree" in (byr["R7"]["note"] or ""))
+    check("  ...and every found return SAYS which rung found it",
+          all((x["note"] or "").startswith("lines found by:")
+              for x in rrows if x["verdict"] != "not examinable"))
+    # the property, not a count that goes stale: exactly one return is
+    # unexaminable, every return is tallied exactly once, and the tally sums to
+    # the number of returns on the day.
     check("  ...and the tally separates examinable from not",
-          rtal.get("not examinable") == 1 and rtal.get("ok") == 1)
+          rtal.get("not examinable") == 1
+          and sum(rtal.values()) == len(rrows)
+          and rtal.get("ok", 0) >= 1)
 
     drows, dtal = r["discounts"]
     byb = {x["bill"]: x for x in drows}

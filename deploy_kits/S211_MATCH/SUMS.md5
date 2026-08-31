@@ -1,8 +1,8 @@
 0700768afc475d43da5f24deb6e8fc38  finance_patient_match.py
 344fd5a0fd953c49dd2461e1f1d16430  finance_daily_gaps.py
-5eb72680e4f100744a621791cbb6c005  finance_returns_audit.py
+e69d390b99e6ba2fc05031c7194adf08  finance_returns_audit.py
 75dfa0719b9c21747cb02cd95455dfa0  REHEARSAL_match.py
-c4deb6ec19c81c030853d3a86e4af1cc  REHEARSAL_dailygaps.py
+717aaaaa73700149fdf3baddea480c37  REHEARSAL_dailygaps.py
 f17093067d0d5a09acaf5bf1a4d7c557  tally_recent.py
 cebfc9d5a1f14cfb58fa44e4ef0cf7a9  diagnose_identity_text.py
 99e32d03a9db8899a0b8335e0fc67f83  crosstab.py
@@ -13,5 +13,6 @@ bd741a27876ca9f4aec361d9db7dc5d4  validate_visit_rung.py
 2a95d5ebb49dae81838d74fe8b4de968  discount_table.py
 aebe45f5a7fd4ca674a10368cb276321  returns_probe.py
 18319a37073feacb8a6e6c85af557aae  returns_keyprobe.py
+46f54556f17fff793163b74de4d84300  returns_recovery.py
 d297d375de2b388c01ca084164f6cb9a  README.md
 5dcf80ae65a63fd108af3e1e39b80d2c  KIT_ID.txt
