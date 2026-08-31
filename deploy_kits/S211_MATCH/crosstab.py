@@ -10,6 +10,7 @@ import collections, os, sqlite3, sys
 sys.path.insert(0, "/root/finance")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) or ".")
 import finance_daily_gaps as G
+import finance_patient_match as M
 
 DB = os.environ.get("FINANCE_DB", "/root/finance/finance.db")
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 90
@@ -46,6 +47,24 @@ for d in days:
         continue
     gaps, tally = G.identity_gaps(con, d, "medical", None, exclude_returns=True)
     gapmap = {g["sale_item_id"]: g["verdict"] for g in gaps}
+    # identity_gaps only returns the GAPS, so a matched row is absent from it.
+    # Recover its exact verdict rather than collapsing every match into one
+    # bucket -- matched_clinic_id, matched_partial and matched_visit mean very
+    # different things, and lumping them is how the S211 crosstab flagged 194
+    # honest partial matches as impossible.
+    exact = {}
+    for rr in con.execute(
+            "SELECT s.id, s.description, s.patient_ref_id, s.service FROM sale_item s "
+            "JOIN day_entry dd ON dd.id=s.day_entry_id "
+            "WHERE dd.unit='medical' AND dd.business_date=?", (d,)).fetchall():
+        if (rr["service"] or "").endswith("_return"):
+            continue
+        if rr["id"] in gapmap:
+            exact[rr["id"]] = gapmap[rr["id"]]
+        elif (rr["description"] or "").strip():
+            exact[rr["id"]] = M.match_bill(con, rr["description"], d)["verdict"]
+        else:
+            exact[rr["id"]] = "matched (ingest link)"
     rows = con.execute(
         "SELECT s.id, s.patient_ref_id, s.service FROM sale_item s "
         "JOIN day_entry dd ON dd.id=s.day_entry_id "
@@ -53,13 +72,17 @@ for d in days:
     for r in rows:
         if (r["service"] or "").endswith("_return"):
             continue
-        v = gapmap.get(r["id"], "matched")
+        v = exact.get(r["id"], "matched (ingest link)")
         ct[(v, linked_to(r["patient_ref_id"]))] += 1
 
 print("\n%-18s %-16s %6s" % ("verdict", "linked to", "count"))
 for k in sorted(ct):
     flag = ""
-    if k[0] == "matched" and k[1] != "master patient":
+    # THE ONLY genuinely impossible cell: a CLINIC-ID match on a bill whose
+    # structured record carries an empty clinic_id. That was the 154-bill bug.
+    if k[0] == "matched_clinic_id" and k[1] == "WALK-IN":
+        flag = "   <-- THE OLD BUG, BACK"
+    if k[0] == "matched (ingest link)" and k[1] != "master patient":
         flag = "   <-- CANNOT BE RIGHT"
     print("%-18s %-16s %6d%s" % (k[0], k[1], ct[k], flag))
 print("\ntotal post-era sales counted: %d" % sum(ct.values()))
