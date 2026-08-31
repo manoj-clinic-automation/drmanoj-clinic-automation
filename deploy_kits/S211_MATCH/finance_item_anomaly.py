@@ -104,14 +104,19 @@ def item_norms(con, upto_date=None):
     if upto_date:
         q += " AND business_date <= ?"
         a = (upto_date,)
+    # amount_p IS THE RATE, not the line amount.
+    # Proved against the Marg archive at S211: of 88 items seen at more than one
+    # quantity, 71 print an IDENTICAL number every time -- PATOPAN DSR reads
+    # 100.00 whether the line is one loose tablet or four. Dividing it by the
+    # quantity (the first version of this module did) manufactured a spread that
+    # does not exist, and produced 345 false rate flags in thirty days.
     rates, qtys = collections.defaultdict(list), collections.defaultdict(list)
     for r in con.execute(q, a):
         u = units(r["qty_raw"], r["pack"])
-        if not u:
-            continue
-        qtys[r["item_key"]].append(u)
-        if u > 0 and r["amount_p"]:
-            rates[r["item_key"]].append(r["amount_p"] / float(u))
+        if u:
+            qtys[r["item_key"]].append(u)
+        if r["amount_p"]:
+            rates[r["item_key"]].append(float(r["amount_p"]))
     out = {}
     for k in set(list(rates) + list(qtys)):
         rl, ql = rates.get(k, []), qtys.get(k, [])
@@ -144,14 +149,11 @@ def scan_day(con, business_date, unit="medical", norms=None):
         u = units(r["qty_raw"], r["pack"])
         n = norms.get(r["item_key"]) or {}
         flags, detail = [], []
-        if u is None:
-            tally["quantity not comparable"] += 1
-            continue
         if n.get("n", 0) < MIN_HISTORY:
             tally["too little history to judge"] += 1
             continue
-        if n.get("rate") and u > 0 and r["amount_p"]:
-            rate = r["amount_p"] / float(u)
+        if n.get("rate") and r["amount_p"]:
+            rate = float(r["amount_p"])          # the printed rate, as-is
             if n["rate"] > 0:
                 dev = (rate - n["rate"]) / n["rate"]
                 mad = n.get("rate_mad") or 0.0
@@ -160,13 +162,19 @@ def scan_day(con, business_date, unit="medical", norms=None):
                 band = max(MAD_MULTIPLE * mad, RATE_FLOOR * n["rate"])
                 if abs(rate - n["rate"]) >= band:
                     flags.append("RATE OFF")
-                    detail.append("this line implies %.2f per unit; this item "
-                                  "usually goes at %.2f and has ranged %.2f to "
-                                  "%.2f (%+.0f%%)"
+                    detail.append("this line is rated %.2f; this item usually "
+                                  "rates %.2f and has ranged %.2f to %.2f "
+                                  "(%+.0f%%)"
                                   % (rate / 100.0, n["rate"] / 100.0,
                                      (n.get("rate_lo") or 0) / 100.0,
                                      (n.get("rate_hi") or 0) / 100.0, dev * 100))
-        if n.get("qty") and n["qty"] > 0 and u >= n["qty"] * QTY_MULTIPLE:
+        if u is None:
+            # informational, NOT a verdict bucket: the rate can still be judged,
+            # so counting it as a bucket would tally this line twice. Keys
+            # beginning with "_" are notes; the verdict buckets are disjoint and
+            # sum to the number of lines.
+            tally["_quantity not comparable"] += 1
+        elif n.get("qty") and n["qty"] > 0 and u >= n["qty"] * QTY_MULTIPLE:
             flags.append("QUANTITY HIGH")
             detail.append("%d units on one line; this item usually leaves in %g, "
                           "and its highest ever was %g"
@@ -179,7 +187,7 @@ def scan_day(con, business_date, unit="medical", norms=None):
             worst = "RATE OFF AND QUANTITY HIGH"
         tally[worst] += 1
         out.append(dict(bill=r["bill_no"], seq=r["seq"], item=r["item_name"],
-                        qty_raw=r["qty_raw"], units=u, amount_p=r["amount_p"],
+                        qty_raw=r["qty_raw"], units=u, rate_p=r["amount_p"],
                         name=r["name"] or "", clinic_id=r["clinic_id"] or "",
                         verdict=worst, detail=" | ".join(detail),
                         item_seen=n.get("n")))
