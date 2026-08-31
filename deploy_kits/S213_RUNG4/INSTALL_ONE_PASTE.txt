@@ -1,0 +1,15 @@
+S213_RUNG4 — measure FIRST, install only after reading the measurement.
+
+[VPS] 1 · after PUBLISH + deploy pull, the read-only measurement (paste its output back):
+python3 /root/deploy/repo/deploy_kits/S213_RUNG4/MEASURE_rung4.py /root/finance/finance.db
+
+-- STOP. The measurement is read together; the install below happens only on the owner's word. --
+
+[VPS] 2 · install (one file; the card and API pick it up on restart):
+\cp /root/deploy/repo/deploy_kits/S213_RUNG4/finance_returns_audit.py /root/finance/finance_returns_audit.py
+
+[VPS] 3 · restart and confirm:
+systemctl restart clinic-finance.service && sleep 3 && systemctl is-active clinic-finance.service
+
+[VPS] 4 · the new pin (paste back):
+md5sum /root/finance/finance_returns_audit.py
