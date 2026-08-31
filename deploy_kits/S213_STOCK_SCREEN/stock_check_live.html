@@ -1,0 +1,614 @@
+<title>Sanjeevni Stock Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#F6F8F7;--surface:#FFF;--surface-2:#EDF2F0;--sunk:#E3EAE7;
+  --ink:#15201E;--ink-2:#3D4B48;--muted:#66756F;--line:#D9E2DF;
+  --accent:#0E5C58;--on-accent:#FFF;--accent-soft:#D8E9E6;
+  --ok:#0E5C58;--diff:#8C3A2B;--diff-soft:#F6E3DF;--warn:#8A5A12;
+  --shadow:0 1px 2px rgba(15,40,36,.06),0 8px 24px -18px rgba(15,40,36,.3);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--sunk:#0A100F;
+  --ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;
+  --ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px -18px rgba(0,0,0,.8);
+}}
+:root[data-theme="dark"]{
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--sunk:#0A100F;
+  --ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;
+  --ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px -18px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+.wrap{max-width:720px;margin:0 auto;padding:0 14px 120px}
+.mono{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+h1{font-family:Archivo,sans-serif;font-weight:700;letter-spacing:-.02em;margin:0}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);padding:11px 15px}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
+.primary[disabled]{opacity:.4;cursor:not-allowed}
+input,select{font:inherit;padding:11px 12px;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);width:100%}
+label{display:block;font-size:13px;color:var(--muted);margin:0 0 5px;
+  font-family:"IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase}
+
+/* ---------- gate ---------- */
+#gate{padding:44px 0 0}
+#gate .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:24px 20px;box-shadow:var(--shadow)}
+#gate h1{font-size:27px;margin-bottom:8px}
+#gate .sub{color:var(--ink-2);margin:0 0 22px}
+.field{margin:0 0 16px}
+.why{font-size:13px;color:var(--muted);margin:6px 0 0}
+.who{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.who button{padding:13px 8px;font-weight:500}
+.who button:last-child{grid-column:1/-1}
+.who button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+
+/* ---------- top bar ---------- */
+#bar{position:sticky;top:0;z-index:20;background:var(--ground);
+  border-bottom:1px solid var(--line);padding:10px 0 9px;margin-bottom:10px}
+.barrow{display:flex;align-items:center;gap:10px}
+.barrow .t{font-family:Archivo,sans-serif;font-weight:600;font-size:16px;flex:1;min-width:0}
+.pill{font-family:"IBM Plex Mono",monospace;font-size:11.5px;padding:3px 8px;border-radius:99px;
+  background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.bar2{height:5px;background:var(--sunk);border-radius:99px;margin-top:8px;overflow:hidden}
+.bar2 i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .2s}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:9px 0 2px;-webkit-overflow-scrolling:touch}
+.chips button{padding:6px 11px;border-radius:99px;font-size:13px;white-space:nowrap}
+.chips button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+
+/* ---------- rows ---------- */
+.row{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  margin-bottom:8px;overflow:hidden}
+.row.ok{border-color:var(--accent-soft)}
+.row.bad{border-color:var(--diff)}
+.rtop{display:flex;gap:12px;align-items:flex-start;padding:12px 13px}
+.rmain{flex:1;min-width:0}
+.nm{font-weight:600;font-size:15.5px;line-height:1.25;overflow-wrap:anywhere}
+.sub2{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);margin-top:3px}
+.tag{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  padding:1px 6px;border-radius:99px;background:var(--surface-2);color:var(--ink-2);margin-left:6px}
+.exp{text-align:right;white-space:nowrap}
+.expq{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:16px}
+.expu{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted)}
+.acts{display:flex;gap:7px;padding:0 13px 12px}
+.acts button{flex:1;padding:12px 6px;font-weight:600;font-size:15px}
+.acts .yes[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.acts .no[aria-pressed="true"]{background:var(--diff);color:#fff;border-color:var(--diff)}
+:root[data-theme="dark"] .acts .no[aria-pressed="true"],
+:root:not([data-theme="light"]) .acts .no[aria-pressed="true"]{color:#0D1312}
+.entry{padding:0 13px 13px;border-top:1px dashed var(--line);margin-top:2px;padding-top:12px}
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.qgrid.one{grid-template-columns:1fr}
+.tot{margin-top:10px;font-family:"IBM Plex Mono",monospace;font-size:13.5px}
+.tot b{font-weight:600}
+.dv{color:var(--diff);font-weight:600}
+.dz{color:var(--ok);font-weight:600}
+.batch{margin-top:12px}
+.batch h4{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 7px;font-weight:400}
+.brow{display:grid;grid-template-columns:1fr 74px 74px;gap:7px;align-items:center;margin-bottom:7px}
+.bname{font-family:"IBM Plex Mono",monospace;font-size:12.5px;overflow-wrap:anywhere}
+.bexp{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted)}
+.empty{text-align:center;padding:44px 16px;color:var(--muted)}
+
+/* ---------- report ---------- */
+#report{padding-top:14px}
+.rep-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 18px}
+.stat div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px}
+.stat .v{font-family:Archivo,sans-serif;font-weight:700;font-size:24px;line-height:1;
+  font-variant-numeric:tabular-nums}
+.stat .k{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted);margin-top:5px}
+pre.out{background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:14px;
+  overflow-x:auto;font-family:"IBM Plex Mono",monospace;font-size:12px;line-height:1.5;
+  white-space:pre-wrap;overflow-wrap:anywhere;margin:0}
+.foot{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+  padding:10px 14px;display:flex;gap:8px;z-index:30}
+.foot .wrapf{max-width:720px;margin:0 auto;display:flex;gap:8px;width:100%}
+.foot button{flex:1}
+.hide{display:none !important}
+</style>
+
+<div class="wrap">
+
+<!-- ============ GATE ============ -->
+<section id="gate">
+  <div class="card">
+    <h1>Stock check</h1>
+    <p class="sub">Sanjeevni Medicos &middot; Marg stock as on <b id="ason" class="mono"></b></p>
+
+    <div class="field">
+      <label>Who counted the stock</label>
+      <div class="who" id="whoC"></div>
+      <input id="otherC" class="hide" type="text" placeholder="Name of the person counting"
+             style="margin-top:8px" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label>Who is entering it here</label>
+      <button type="button" id="same" style="width:100%;margin-bottom:8px">Same person</button>
+      <div class="who" id="whoE"></div>
+      <input id="otherE" class="hide" type="text" placeholder="Name of the person entering"
+             style="margin-top:8px" autocomplete="off">
+      <p class="why">Often the same person. When one calls the shelf out and another types,
+      say so &mdash; the report then shows both, and a difference can be asked about properly.</p>
+    </div>
+
+    <div class="field">
+      <label for="bill">Last sale bill number</label>
+      <input id="bill" type="text" inputmode="text" autocapitalize="characters" placeholder="A003195">
+      <p class="why">The count is pinned to this bill. Anything sold after it is not your problem &mdash;
+      that is what makes a mid&#8209;day count reconcile against tomorrow&rsquo;s report.</p>
+    </div>
+
+    <div class="field">
+      <label for="billdate">Date of that bill</label>
+      <input id="billdate" type="date">
+    </div>
+
+    <button class="primary" id="start" style="width:100%" disabled>Start counting</button>
+    <p class="why" id="resume"></p>
+  </div>
+</section>
+
+<!-- ============ COUNT ============ -->
+<section id="count" class="hide">
+  <div id="bar">
+    <div class="barrow">
+      <span class="t" id="ttl">Stock check</span>
+      <button type="button" class="pill" id="whopill" title="Change who is counting or entering"
+        style="border:1px solid var(--line);cursor:pointer"></button>
+      <span class="pill mono" id="prog">0 / 0</span>
+    </div>
+    <div class="bar2"><i id="progbar" style="width:0%"></i></div>
+    <div class="chips" id="chips">
+      <button type="button" data-f="todo" aria-pressed="true">To do</button>
+      <button type="button" data-f="stock" aria-pressed="false">Has stock</button>
+      <button type="button" data-f="nil" aria-pressed="false">Nil</button>
+      <button type="button" data-f="orth" aria-pressed="false">Orthotics</button>
+      <button type="button" data-f="diff" aria-pressed="false">Differences</button>
+      <button type="button" data-f="all" aria-pressed="false">All</button>
+    </div>
+  </div>
+  <div id="list"></div>
+</section>
+
+<!-- ============ REPORT ============ -->
+<section id="report" class="hide">
+  <div class="rep-h"><h1 style="font-size:24px">Count report</h1></div>
+  <p class="sub2 mono" id="repmeta"></p>
+  <div class="stat">
+    <div><div class="v" id="s1">0</div><div class="k">Counted</div></div>
+    <div><div class="v" id="s2">0</div><div class="k">Differences</div></div>
+    <div><div class="v" id="s3">0</div><div class="k">Not done</div></div>
+  </div>
+  <pre class="out" id="out"></pre>
+</section>
+
+<div class="foot hide" id="foot">
+  <div class="wrapf">
+    <button id="share">Send to ledger</button>
+    <button id="toReport">Report</button>
+    <button id="toCount" class="hide">Back to list</button>
+    <button class="primary" id="copy">Copy report</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+/* LIVE variant · S213 (F-245): served by stock_app at /finance/stock/page/count.
+   The artifact-era SHARED/SKEL self-publishing is gone; the ledger is the
+   shared copy now. localStorage remains the counter's own working copy --
+   never lost to a reload or a flat battery -- and "Send to ledger" is what
+   makes the count real: it POSTs /finance/stock/api/count, the endpoint that
+   raises the differences. */
+const DATA = __STOCK_DATA__;
+const KEY = "sanj-stock-live-v1";
+
+/* ---------- state ---------- */
+let S = load();
+
+/* ---------- the shared record ----------
+   Counts live in TWO places on purpose. localStorage is the counter's own
+   working copy and is never lost -- not to a reload, not to a conflict, not to
+   a flat battery. The shared copy is what everyone else can see, and it only
+   changes when somebody taps Share.
+
+   Merging is by timestamp, newest wins, per item. Two people counting the same
+   item is not a clash to resolve cleverly; the later count is the one taken,
+   and the report says who made it. */
+let SHARED = {e:{}};   // live page: the ledger is the shared copy, not this
+
+function merged(){
+  const out = {};
+  Object.keys(SHARED.e).forEach(k=>out[k]=SHARED.e[k]);
+  Object.keys(S.e).forEach(k=>{
+    const a=out[k], b=S.e[k];
+    if(!a || String(b.at||"") >= String(a.at||"")) out[k]=b;
+  });
+  return out;
+}
+function unshared(){ return Object.keys(S.e); }   // live page: local = unsent
+function load(){
+  try{ const r=localStorage.getItem(KEY); if(r) return JSON.parse(r); }catch(e){}
+  return {cby:"",eby:"",bill:"",billdate:"",started:"",e:{}};
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+
+/* ---------- units: PACK SIZE decides, never Marg's label ---------- */
+function isStrip(it){ return it.s > 1; }
+function fmt(units, it){
+  // STRIPS AND TABLETS -- Marg's own convention and the shop's. Marg writes a
+  // quantity as strips:tablets ("1:5" is one strip and five tablets), verified
+  // against a real BILL WISE SALES export. This said "+ 9 loose" before;
+  // "loose" is not the word anyone at the counter uses, and a fraction is
+  // never a fraction OF A STRIP because strip sizes differ.
+  // A NEGATIVE reads as a shortage, not as negative strips and negative
+  // tablets. Marg's own rule is that the sign covers the whole quantity --
+  // "-0:10" is minus ten, not plus ten -- so the sign belongs on the phrase,
+  // never inside it. This printed "-1 strip -3 tablets" until it was seen.
+  if(units < 0) return "short " + fmt(-units, it);
+  if(!isStrip(it)) return units + (Math.abs(units)===1 ? " pc" : " pcs");
+  const p=Math.trunc(units/it.s), l=units%it.s;
+  const bits=[];
+  if(p) bits.push(p + (Math.abs(p)===1 ? " strip" : " strips"));
+  if(l) bits.push(l + (Math.abs(l)===1 ? " tablet" : " tablets"));
+  return bits.length ? bits.join(" ") : "0 strips";
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+/* ---------- gate ---------- */
+document.getElementById("ason").textContent = DATA.as_on;
+const PEOPLE=["Darpan","Shavez","Amir","Alisha"];
+const bill=document.getElementById("bill"), bdate=document.getElementById("billdate"),
+      start=document.getElementById("start"), sameBtn=document.getElementById("same");
+
+function mkWho(box, other, get, set){
+  const el=document.getElementById(box), inp=document.getElementById(other);
+  PEOPLE.concat(["Someone else"]).forEach(nm=>{
+    const b=document.createElement("button");
+    b.type="button"; b.dataset.u=nm; b.textContent=nm; b.setAttribute("aria-pressed","false");
+    el.appendChild(b);
+  });
+  el.addEventListener("click",e=>{
+    const b=e.target.closest("button"); if(!b) return;
+    [...el.children].forEach(x=>x.setAttribute("aria-pressed", x===b?"true":"false"));
+    if(b.dataset.u==="Someone else"){
+      inp.classList.remove("hide"); set(inp.value.trim()); inp.focus();
+    } else { inp.classList.add("hide"); set(b.dataset.u); }
+    gateOk();
+  });
+  inp.addEventListener("input",()=>{ set(inp.value.trim()); gateOk(); });
+  return function paint(){
+    const v=get();
+    const known=PEOPLE.includes(v);
+    [...el.children].forEach(x=>x.setAttribute("aria-pressed",
+      (known ? x.dataset.u===v : x.dataset.u==="Someone else") ? "true":"false"));
+    if(v && !known){ inp.classList.remove("hide"); inp.value=v; }
+  };
+}
+const paintC=mkWho("whoC","otherC",()=>S.cby,v=>{S.cby=v;});
+const paintE=mkWho("whoE","otherE",()=>S.eby,v=>{S.eby=v;});
+
+// "Same person" is the common case on the floor -- one tap, not two journeys
+// through the same list.
+sameBtn.addEventListener("click",()=>{
+  if(!S.cby){ sameBtn.textContent="Pick who counted first"; setTimeout(()=>sameBtn.textContent="Same person",1400); return; }
+  S.eby=S.cby; paintE(); gateOk();
+});
+[bill,bdate].forEach(el=>el.addEventListener("input",gateOk));
+function gateOk(){
+  start.disabled = !(S.cby && S.eby && bill.value.trim() && bdate.value);
+}
+paintC(); paintE();
+bill.value=S.bill||""; bdate.value=S.billdate||""; gateOk();
+{
+  const n=Object.keys(S.e).length;
+  if(n) document.getElementById("resume").textContent =
+    n+" item"+(n===1?"":"s")+" already counted on this device. Starting again continues where you stopped.";
+}
+start.addEventListener("click",()=>{
+  S.bill=bill.value.trim().toUpperCase(); S.billdate=bdate.value;
+  if(!S.started) S.started=new Date().toISOString();
+  save(); showCount();
+});
+
+/* ---------- filters ---------- */
+let filter="todo";
+document.getElementById("chips").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  filter=b.dataset.f;
+  [...b.parentNode.children].forEach(x=>x.setAttribute("aria-pressed", x===b?"true":"false"));
+  render();
+});
+function visible(){
+  const M=merged();
+  return DATA.items.filter(it=>{
+    const e=M[it.n];
+    if(filter==="todo")  return !e;
+    if(filter==="stock") return it.q>0;
+    if(filter==="nil")   return it.q===0;
+    if(filter==="orth")  return it.o===1;
+    if(filter==="diff")  return e && e.c!==it.q;
+    return true;
+  });
+}
+
+/* ---------- render ---------- */
+const list=document.getElementById("list");
+function render(){
+  const done=Object.keys(merged()).length, tot=DATA.items.length;
+  document.getElementById("prog").textContent=done+" / "+tot;
+  document.getElementById("progbar").style.width=(100*done/tot).toFixed(1)+"%";
+  document.getElementById("whopill").textContent =
+    (S.cby===S.eby) ? S.cby : (S.cby+" \u2192 "+S.eby);
+  shareBadge();
+  const rows=visible();
+  list.innerHTML="";
+  if(!rows.length){
+    list.innerHTML='<p class="empty">Nothing here.'+(filter==="todo"?" Every item has been counted.":"")+'</p>';
+    return;
+  }
+  const frag=document.createDocumentFragment();
+  rows.forEach(it=>frag.appendChild(rowEl(it)));
+  list.appendChild(frag);
+}
+function rowEl(it){
+  const e=merged()[it.n];
+  const d=document.createElement("div");
+  d.className="row"+(e ? (e.c===it.q?" ok":" bad") : "");
+  const tag=it.o?'<span class="tag">orthotic</span>':"";
+  const bt=it.b.length>1?'<span class="tag">'+it.b.length+' batches</span>':"";
+  d.innerHTML=
+    '<div class="rtop"><div class="rmain"><div class="nm">'+esc(it.n)+tag+bt+'</div>'+
+      '<div class="sub2">'+esc(it.p==="1"?"1*1":it.p)+(it.u?" &middot; "+esc(it.u):"")+'</div></div>'+
+      '<div class="exp"><div class="expq">'+it.q+'</div><div class="expu">'+esc(fmt(it.q,it))+'</div></div></div>'+
+    '<div class="acts"><button type="button" class="yes" aria-pressed="'+(e&&e.c===it.q?"true":"false")+'">OK</button>'+
+      '<button type="button" class="no" aria-pressed="'+(e&&e.c!==it.q?"true":"false")+'">Not OK</button></div>'+
+    '<div class="entry hide"></div>';
+  const entry=d.querySelector(".entry");
+  d.querySelector(".yes").addEventListener("click",()=>{
+    S.e[it.n]={c:it.q,cby:S.cby,eby:S.eby,at:new Date().toISOString()}; save();
+    if(filter==="todo"){ d.remove(); bump(); } else render();
+  });
+  d.querySelector(".no").addEventListener("click",()=>{
+    // ALWAYS open, never toggle. It used to hide on a second tap, so a second
+    // press of "Not OK" made the boxes a counter had just filled disappear --
+    // the numbers were still saved, but from the shelf it looks like the app
+    // ate them. Found by driving the page, not by reading it.
+    if(entry.classList.contains("hide")) openEntry(entry,it,d);
+    else (entry.querySelector(".qs")||entry.querySelector(".ql")||{focus(){}}).focus();
+  });
+  if(e && e.c!==it.q) openEntry(entry,it,d,true);
+  return d;
+}
+function bump(){
+  const done=Object.keys(merged()).length, tot=DATA.items.length;
+  document.getElementById("prog").textContent=done+" / "+tot;
+  document.getElementById("progbar").style.width=(100*done/tot).toFixed(1)+"%";
+  shareBadge();
+  if(!list.children.length) render();
+}
+function openEntry(entry,it,rowdiv,silent){
+  const e=merged()[it.n]||{};
+  const strip=isStrip(it);
+  let html='<div class="qgrid'+(strip?"":" one")+'">';
+  if(strip){
+    html+='<div><label>Strips of '+it.s+'</label><input type="number" inputmode="numeric" min="0" class="qs" value="'+(e.st!=null?e.st:"")+'"></div>'+
+          '<div><label>Tablets</label><input type="number" inputmode="numeric" min="0" class="ql" value="'+(e.lo!=null?e.lo:"")+'"></div>';
+  } else {
+    html+='<div><label>Pieces</label><input type="number" inputmode="numeric" min="0" class="ql" value="'+(e.lo!=null?e.lo:"")+'"></div>';
+  }
+  html+='</div><div class="tot" id="t"></div>';
+  if(it.b.length>1){
+    html+='<div class="batch"><h4>Batches on record &mdash; count each if you can</h4>';
+    it.b.forEach((b,i)=>{
+      const bv=(e.bt&&e.bt[b[0]]!=null)?e.bt[b[0]]:"";
+      html+='<div class="brow"><div><div class="bname">'+esc(b[0])+'</div><div class="bexp">exp '+esc(b[1]||"?")+'</div></div>'+
+            '<input type="number" inputmode="numeric" min="0" class="bq" data-b="'+esc(b[0])+'" placeholder="qty" value="'+bv+'">'+
+            '<span class="bexp">'+(strip?"loose":"pcs")+'</span></div>';
+    });
+    html+='<div class="brow"><div><div class="bname">not on this list</div>'+
+          '<div class="bexp">a batch bought before 1-Apr, or unreadable</div></div>'+
+          '<input type="number" inputmode="numeric" min="0" class="bq" data-b="OTHER" placeholder="qty" value="'+
+          ((e.bt&&e.bt.OTHER!=null)?e.bt.OTHER:"")+'">'+
+          '<span class="bexp">'+(strip?"loose":"pcs")+'</span></div>';
+    html+='<p class="why" style="margin-top:2px">Marg does not hold a per&#8209;batch shelf figure, so there is no expected number to compare. These are the batches bought since 1&#8209;Apr; recording what you find makes the next count exact.</p></div>';
+  }
+  entry.innerHTML=html; entry.classList.remove("hide");
+  const qs=entry.querySelector(".qs"), ql=entry.querySelector(".ql"), t=entry.querySelector("#t");
+  function calc(){
+    // A shelf cannot hold less than nothing. The first dummy run typed
+    // "-1 strips" and the app reported "Counted -5" without a murmur.
+    const nn=v=>{ const n=parseInt(v,10); return (isNaN(n)||n<0)?0:n; };
+    const st=qs?nn(qs.value):0, lo=nn(ql.value);
+    const c=st*(qs?it.s:1)+lo, diff=c-it.q;
+    const bt={}; let bsum=0, bany=false;
+    entry.querySelectorAll(".bq").forEach(i=>{ const v=nn(i.value);
+      if(i.value.trim()!==""){ bt[i.dataset.b]=v; bsum+=v; bany=true; } });
+    let line='Counted <b>'+c+'</b> &middot; Marg <b>'+it.q+'</b> &middot; '+
+      (diff===0?'<span class="dz">matches</span>':'<span class="dv">'+(diff>0?"+":"")+diff+'</span>');
+    // If they counted by batch, the batches must add up to what they counted.
+    // Silently keeping two different numbers is how a count stops being one.
+    if(bany) line += c===bsum
+      ? '<br><span class="dz">batches add to '+bsum+'</span>'
+      : '<br><span class="dv">batches add to '+bsum+', not '+c+' — use the "not on this list" box</span>';
+    t.innerHTML=line;
+    S.e[it.n]={c:c,st:qs?st:null,lo:lo,cby:S.cby,eby:S.eby,at:new Date().toISOString(),bt:Object.keys(bt).length?bt:undefined};
+    save();
+    rowdiv.className="row"+(c===it.q?" ok":" bad");
+    rowdiv.querySelector(".yes").setAttribute("aria-pressed", c===it.q?"true":"false");
+    rowdiv.querySelector(".no").setAttribute("aria-pressed", c===it.q?"false":"true");
+    bump();
+  }
+  entry.querySelectorAll("input").forEach(i=>i.addEventListener("input",calc));
+  calc();
+  if(!silent && (qs||ql)) (qs||ql).focus();
+}
+
+/* ---------- report ---------- */
+function report(){
+  const diffs=[],notdone=[];
+  const M=merged();
+  DATA.items.forEach(it=>{
+    const e=M[it.n];
+    if(!e){ notdone.push(it); return; }
+    if(e.c!==it.q) diffs.push([it,e]);
+  });
+  const done=Object.keys(M).length;
+  document.getElementById("s1").textContent=done;
+  document.getElementById("s2").textContent=diffs.length;
+  document.getElementById("s3").textContent=notdone.length;
+  document.getElementById("repmeta").textContent=
+    (S.cby===S.eby ? S.cby : S.cby+" counted, "+S.eby+" entered")+
+    "  ·  after bill "+S.bill+" of "+S.billdate+"  ·  Marg stock as on "+DATA.as_on;
+  const L=[];
+  // Every line is kept under ~40 characters. The first version ran to 66 and
+  // scrolled off the right of a phone, taking the diff column with it.
+  L.push("SANJEEVNI STOCK CHECK");
+  L.push("counted by : "+S.cby);
+  if(S.eby!==S.cby) L.push("entered by : "+S.eby);
+  L.push("after bill : "+S.bill);
+  L.push("     dated : "+S.billdate);
+  L.push("marg stock : as on "+DATA.as_on);
+  L.push("counted    : "+done+" of "+DATA.items.length);
+  L.push("differences: "+diffs.length);
+  { const u=Object.keys(S.e).length;
+    if(u && !SENT) L.push("NOT YET SENT TO LEDGER: "+u); }
+  L.push("");
+  if(diffs.length){
+    L.push("DIFFERENCES — to reconcile in Marg");
+    L.push("");
+    // Two lines per item, not aligned columns. A 51-character table ran off
+    // the right of a phone and took the DIFF column -- the one thing anybody
+    // reads -- with it. Found by screenshotting the report at 390px, which is
+    // the width it will actually be read at.
+    diffs.sort((a,b)=>Math.abs(b[1].c-b[0].q)-Math.abs(a[1].c-a[0].q));
+    diffs.forEach(([it,e])=>{
+      const d=e.c-it.q;
+      L.push(it.n);
+      L.push("  marg "+it.q+"  found "+e.c+"  diff "+(d>0?"+":"")+d);
+      if(e.cby && e.cby!==S.cby) L.push("    counted by "+e.cby);
+      if(e.bt) Object.keys(e.bt).forEach(b=>L.push("    batch "+b+": "+e.bt[b]));
+    });
+  } else L.push("No differences found.");
+  if(notdone.length){
+    // The first dummy run pasted 368 item names into the report and made it
+    // unreadable. What a person needs is the number, and which of them still
+    // hold stock -- an uncounted NIL item is not the same risk as an
+    // uncounted item with 117 on the shelf.
+    const withstock=notdone.filter(i=>i.q>0);
+    L.push("");
+    L.push("NOT COUNTED: "+notdone.length+" of "+DATA.items.length);
+    L.push("  holding stock: "+withstock.length);
+    if(withstock.length && withstock.length<=30)
+      withstock.forEach(i=>L.push("    "+i.n));
+    else if(withstock.length)
+      L.push("  (use the 'Has stock' filter)");
+  }
+  document.getElementById("out").textContent=L.join("\n");
+}
+
+/* ---------- nav ---------- */
+function showCount(){
+  document.getElementById("gate").classList.add("hide");
+  document.getElementById("report").classList.add("hide");
+  document.getElementById("count").classList.remove("hide");
+  document.getElementById("foot").classList.remove("hide");
+  document.getElementById("toReport").classList.remove("hide");
+  document.getElementById("toCount").classList.add("hide");
+  render();
+}
+document.getElementById("toReport").addEventListener("click",()=>{
+  report();
+  document.getElementById("count").classList.add("hide");
+  document.getElementById("report").classList.remove("hide");
+  document.getElementById("toReport").classList.add("hide");
+  document.getElementById("toCount").classList.remove("hide");
+  window.scrollTo(0,0);
+});
+document.getElementById("toCount").addEventListener("click",showCount);
+// A shift can change halfway through 376 items. Tapping the names goes back to
+// the gate with every count kept -- so the next stretch is attributed to
+// whoever is actually holding the phone.
+document.getElementById("whopill").addEventListener("click",()=>{
+  document.getElementById("count").classList.add("hide");
+  document.getElementById("report").classList.add("hide");
+  document.getElementById("foot").classList.add("hide");
+  document.getElementById("gate").classList.remove("hide");
+  paintC(); paintE(); gateOk(); window.scrollTo(0,0);
+});
+/* ---------- send to the ledger ---------- */
+let SENT = null;   // {count_id, differences} after a successful send
+function shareBadge(){
+  const b=document.getElementById("share");
+  if(!b) return;
+  const n=Object.keys(S.e).length;
+  if(SENT){ b.disabled=true; b.textContent="Sent — count #"+SENT.count_id; return; }
+  b.disabled = n===0;
+  b.textContent = n ? ("Send to ledger ("+n+")") : "Send to ledger";
+}
+document.getElementById("share").addEventListener("click", async ()=>{
+  const b=document.getElementById("share");
+  const M=merged();
+  const names=Object.keys(M);
+  if(!names.length || SENT) return;
+  const notdone=DATA.items.length-names.length;
+  if(notdone>0 && !window.confirm(
+      notdone+" item(s) not counted. Send anyway?\n\nA partial count is "+
+      "recorded honestly as a partial count -- items not counted raise no "+
+      "difference."))
+    return;
+  b.disabled=true; b.textContent="Sending\u2026";
+  const byName={}; DATA.items.forEach(it=>byName[it.n]=it);
+  const items=names.map(k=>{
+    const e=M[k], it=byName[k]||{q:0,s:1,p:""};
+    return {item:k, marg_qty:it.q, counted_qty:e.c,
+            strips:e.st, loose:e.lo, pack_size:it.s, packing:it.p,
+            counted_by:e.cby, entered_by:e.eby, at:e.at,
+            batches:e.bt||null};
+  });
+  try{
+    const r=await fetch("/finance/stock/api/count",{method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({marg_as_on:DATA.as_on, bill_no:S.bill,
+        bill_date:S.billdate, started_at:S.started,
+        items_total:DATA.items.length, items:items})});
+    const j=await r.json();
+    if(!j.ok){ b.disabled=false; b.textContent="Send failed: "+(j.message||j.error); return; }
+    SENT=j;
+    // the ledger holds it now; the phone's working copy has served its purpose
+    S.e={}; save();
+    shareBadge();
+    alert("Recorded as count #"+j.count_id+".\n"+
+          j.differences+" difference(s) raised"+
+          (j.differences?" \u2014 the checker names each cause at\n/finance/stock/page/diffs":".")+
+          (j.marg_claim_mismatches&&j.marg_claim_mismatches.length
+            ? "\n\nNote: the server's Marg figure differed from this page's for "+
+              j.marg_claim_mismatches.length+" item(s); the server's figure was used."
+            : ""));
+  }catch(err){
+    b.disabled=false; b.textContent="Send failed \u2014 try again";
+  }
+});
+
+document.getElementById("copy").addEventListener("click",async e=>{
+  const txt=document.getElementById("out").textContent || (report(),document.getElementById("out").textContent);
+  try{ await navigator.clipboard.writeText(txt); e.target.textContent="Copied"; }
+  catch(err){ e.target.textContent="Select the text above"; }
+  setTimeout(()=>e.target.textContent="Copy report",1800);
+});
+</script>

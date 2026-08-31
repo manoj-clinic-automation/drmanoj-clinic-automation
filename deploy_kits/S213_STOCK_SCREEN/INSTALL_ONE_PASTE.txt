@@ -1,0 +1,26 @@
+S213_STOCK_SCREEN — install, one line at a time. After PUBLISH + deploy clone pull.
+
+[VPS] 1 · confirm the live stock_app is exactly the S208 bytes (must print OK):
+echo "5e5246eaeb1c9875dda4c625bbf4fc42  /root/finance/stock_app.py" | md5sum -c -
+
+[VPS] 2 · the three files:
+\cp /root/deploy/repo/deploy_kits/S213_STOCK_SCREEN/stock_app.py /root/finance/stock_app.py
+\cp /root/deploy/repo/deploy_kits/S213_STOCK_SCREEN/stock_check_live.html /root/finance/stock_check_live.html
+\cp /root/deploy/repo/deploy_kits/S213_STOCK_SCREEN/stock_diffs.html /root/finance/stock_diffs.html
+
+[VPS] 3 · restart and confirm:
+systemctl restart clinic-finance.service && sleep 3 && systemctl is-active clinic-finance.service
+
+[VPS] 4 · the new pins (paste back):
+md5sum /root/finance/stock_app.py /root/finance/stock_check_live.html /root/finance/stock_diffs.html
+
+LIVE-SHAPE WALK — a page load, signed in as checker or maker:
+
+https://followup.dr-manoj.in/finance/stock/page/count
+
+(it should show "Marg stock as on <date>" from the server's snapshot and the 376-item
+count list; after a test count is SENT, the differences appear at:)
+
+https://followup.dr-manoj.in/finance/stock/page/diffs
+
+Rollback: \cp /root/deploy/repo/deploy_kits/S208_STOCK_LEDGER/stock_app.py /root/finance/stock_app.py  (then restart)
