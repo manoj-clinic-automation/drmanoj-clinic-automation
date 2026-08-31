@@ -4,6 +4,15 @@ patch_finance_app_panel_r2.py -- S211 endpoint, r2 at S213: the returns and
 payment keys are no longer dropped at the jsonify (the S212/S213 finding --
 day_report() already computed both; the route threw them away).
 
+TWO PATHS, decided by what is live:
+  * fresh install -- the day-gaps route is absent: the whole r2 route is
+    inserted at the apply-route anchor (the original S211 mechanism).
+  * UPGRADE -- r1 is already live (found on the box at the S213 install,
+    31-Aug-2026: MARK 'S211 (day gaps api)' at line 3052; the register's
+    identity for finance_app.py was stale): the r1 jsonify is swapped for the
+    r2 one and the in-route mark is bumped, byte-anchored on r1's exact text.
+    A drifted r1 refuses.
+
     GET /finance/api/day-gaps?d=YYYY-MM-DD
 
 NO NEW PAGE. The owner's standing rule, recorded at S210 and repeated at S211:
@@ -72,14 +81,32 @@ def api_day_gaps():
 @app.route("/finance/api/marg-push/apply", methods=["POST"])'''
 
 
+R1_DOCLINE = """\"\"\"S211 (day gaps api) -- the two things the console has never had."""
+R2_DOCLINE = """\"\"\"S211 (day gaps api r2) -- the things the console has never had."""
+R1_JSONIFY = """    return jsonify(ok=True, date=d, counter=rep["counter"],
+                   totals=rep["totals"], gaps=rep["identity_gaps"],
+                   discounts=drows, dtally=dtal,
+                   era=rep.get("before_identity_era"))"""
+R2_JSONIFY = """    rrows, rsum = rep.get("returns", ([], {}))
+    return jsonify(ok=True, date=d, counter=rep["counter"],
+                   totals=rep["totals"], gaps=rep["identity_gaps"],
+                   discounts=drows, dtally=dtal,
+                   returns=rrows, returns_summary=rsum,
+                   payment=rep.get("payment"),
+                   era=rep.get("before_identity_era"))"""
+
+
 def patch_text(s):
     if MARK in s:
         return s, "already_patched"
     if '"/finance/api/day-gaps"' in s:
-        # the r1 endpoint (which drops returns/payment) is already installed --
-        # patching again would add a second route. r1 was never installed on
-        # the live box; if this fires, restore from the r1 backup first.
-        return s, "r1_already_installed_restore_first"
+        # r1 is live (proven on the box, 31-Aug-2026) -- UPGRADE it in place,
+        # byte-anchored on r1's exact jsonify and docstring line. Anything
+        # that has drifted from r1 refuses rather than guesses.
+        if s.count(R1_JSONIFY) != 1 or s.count(R1_DOCLINE) != 1:
+            return s, "r1_present_but_not_byte_exact -- read the live route first"
+        s2 = s.replace(R1_JSONIFY, R2_JSONIFY).replace(R1_DOCLINE, R2_DOCLINE)
+        return s2, "patched"
     n = s.count(ANCHOR)
     if n != 1:
         return s, ("anchor_missing" if n == 0 else "anchor_ambiguous")
@@ -113,6 +140,21 @@ def selftest():
     check("READ-ONLY: no write statement in the route",
           all(w not in NEW.upper() for w in ("INSERT INTO", "UPDATE ", "DELETE FROM",
                                              ".COMMIT()")))
+    r1_installed = ('x = 1' + chr(10) + 'def api_day_gaps():' + chr(10)
+                    + '    ' + R1_DOCLINE + '"""' + chr(10)
+                    + '    d = None; rep = {}; drows = []; dtal = {}' + chr(10)
+                    + '    # "/finance/api/day-gaps"' + chr(10)
+                    + R1_JSONIFY + chr(10))
+    up, stu = patch_text(r1_installed)
+    check("an r1-installed file UPGRADES in place", stu == "patched")
+    check("  the upgraded route carries returns and payment",
+          "returns=rrows" in up and 'payment=rep.get("payment")' in up)
+    check("  the upgraded route carries the r2 mark", MARK in up)
+    up2, stu2 = patch_text(up)
+    check("  the upgrade is idempotent", stu2 == "already_patched" and up2 == up)
+    _, stum = patch_text(r1_installed.replace("dtally=dtal,", "dtally=dtal ,"))
+    check("  a drifted r1 is refused, not guessed at",
+          stum.startswith("r1_present_but_not_byte_exact"))
     _, st3 = patch_text("def f():\\n    pass\\n")
     check("no anchor -> refused", st3 == "anchor_missing")
     print("\\nselftest: %d passed, %d failed" % (ok, bad))

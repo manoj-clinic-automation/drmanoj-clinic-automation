@@ -220,9 +220,17 @@ def marg_apply():
     return jsonify(ok=True)
 ''' % db_path
 open(os.path.join(tmp, "mini_finance_app.py"), "w").write(mini)
+# the LIVE box's path: r1 was found already installed (31-Aug) -- so walk the
+# UPGRADE: apply the original S211 patch first, then r2 on top of it.
+r1p = _find(os.path.join(KITS, "S211_PANEL", "patch_finance_app_panel.py"),
+            os.path.join(HERE, "patch_finance_app_panel.py"))
+r = subprocess.run([sys.executable, "-B", r1p, os.path.join(tmp, "mini_finance_app.py")],
+                   capture_output=True, text=True)
+check("r1 (the S211 patch) applies first, as on the live box",
+      r.returncode == 0 and "patched OK" in r.stdout)
 r = subprocess.run([sys.executable, "-B", os.path.join(HERE, "patch_finance_app_panel_r2.py"),
                     os.path.join(tmp, "mini_finance_app.py")], capture_output=True, text=True)
-check("r2 patch applies", r.returncode == 0 and "patched OK" in r.stdout)
+check("r2 patch UPGRADES the r1-installed file", r.returncode == 0 and "patched OK" in r.stdout)
 import mini_finance_app as F
 fc = F.app.test_client()
 jj = fc.get("/finance/api/day-gaps?d=" + M + "-20").get_json()
