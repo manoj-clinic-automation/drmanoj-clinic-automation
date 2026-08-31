@@ -1,0 +1,27 @@
+S213_RETURNS_CARD — install, one line at a time. After PUBLISH + deploy clone pull.
+Every path is written out in full (standing rule).
+
+[VPS] 1 · the engine (S212_SUMP) and the day-gaps report (S211_MATCH), four files:
+\cp /root/deploy/repo/deploy_kits/S212_SUMP/finance_money.py /root/finance/finance_money.py
+\cp /root/deploy/repo/deploy_kits/S212_SUMP/finance_returns_audit.py /root/finance/finance_returns_audit.py
+\cp /root/deploy/repo/deploy_kits/S211_MATCH/finance_daily_gaps.py /root/finance/finance_daily_gaps.py
+\cp /root/deploy/repo/deploy_kits/S211_MATCH/finance_patient_match.py /root/finance/finance_patient_match.py
+
+[VPS] 2 · the darpan patch (refuses unless the live file is exactly the S212-close pin):
+python3 /root/deploy/repo/deploy_kits/S213_RETURNS_CARD/patch_darpan_returns.py /root/finance/darpan_app.py
+
+[VPS] 3 · the day-gaps endpoint, r2 (returns/payment no longer dropped):
+python3 /root/deploy/repo/deploy_kits/S213_RETURNS_CARD/patch_finance_app_panel_r2.py /root/finance/finance_app.py
+
+[VPS] 4 · the page:
+\cp /root/deploy/repo/deploy_kits/S213_RETURNS_CARD/finance_approvals.html /root/finance/finance_ui/finance_approvals.html
+
+[VPS] 5 · restart and confirm:
+systemctl restart clinic-finance.service && sleep 3 && systemctl is-active clinic-finance.service
+
+[VPS] 6 · capture the new pins (paste the output back):
+md5sum /root/finance/darpan_app.py /root/finance/finance_app.py /root/finance/finance_ui/finance_approvals.html /root/finance/finance_money.py /root/finance/finance_returns_audit.py /root/finance/finance_daily_gaps.py /root/finance/finance_patient_match.py
+
+Then the LIVE-SHAPE check is one page load:
+https://followup.dr-manoj.in/finance/approvals
+(the SALE RETURNS card should name three populations and August's full count, not 3)
