@@ -48,9 +48,15 @@ CREATE TABLE upi_statement (id INTEGER PRIMARY KEY, merchant_id TEXT,
     unit TEXT, statement_date TEXT, parsed_total_p INTEGER, txn_count INTEGER);
 CREATE TABLE day_line (id INTEGER PRIMARY KEY, day_entry_id INTEGER NOT NULL,
     service TEXT NOT NULL, mode TEXT NOT NULL, amount_p INTEGER NOT NULL);
+CREATE TABLE sale_line_item (id INTEGER PRIMARY KEY, day_entry_id INTEGER,
+    unit TEXT, business_date TEXT NOT NULL, bill_no TEXT NOT NULL,
+    is_return INTEGER NOT NULL DEFAULT 0, seq INTEGER, item_name TEXT NOT NULL,
+    item_key TEXT NOT NULL, pack TEXT, qty_raw TEXT, amount_p INTEGER,
+    expiry_ym TEXT, batch TEXT);
 """
 
 DAY = "2026-08-26"
+OLD_SALE = "2026-08-20"
 OLD = "2026-05-01"
 
 
@@ -68,6 +74,7 @@ def main():
                      ("4473", "GEETA DEVI", fp_fam)])
     con.execute("INSERT INTO day_entry (id,unit,business_date) VALUES (1,'medical',?)", (DAY,))
     con.execute("INSERT INTO day_entry (id,unit,business_date) VALUES (2,'medical',?)", (OLD,))
+    con.execute("INSERT INTO day_entry (id,unit,business_date) VALUES (3,'medical',?)", (OLD_SALE,))
     bills = [
         # complete -> matched, must NOT appear as a gap
         (1, "9999999999 RAMESH KUMAR 4471", 50000, "cash", "A001"),
@@ -118,6 +125,35 @@ def main():
     con.execute("INSERT INTO sale_item (day_entry_id,unit,description,amount_p,mode,"
                 "source,source_ref,patient_ref_id) VALUES "
                 "(1,'medical','',33300,'cash','manual','B003',NULL)")
+    # ---- THE SUMP: five shapes of return -------------------------------
+    P = "(SELECT id FROM patient_ref WHERE clinic_id='5001')"
+    def sale(bill, key, qty, amt, d=OLD_SALE):
+        # the PARENT bill must exist too -- the lookup joins through sale_item to
+        # reach the patient, which is how it knows whose purchase it was.
+        con.execute("INSERT INTO sale_item (day_entry_id,unit,description,amount_p,"
+                    "mode,source,source_ref,service,patient_ref_id) VALUES "
+                    "(3,'medical','',?,'cash','manual',?,'pharmacy',%s)" % P,
+                    (amt, bill))
+        con.execute("INSERT INTO sale_line_item (business_date,bill_no,is_return,"
+                    "seq,item_name,item_key,qty_raw,amount_p) "
+                    "VALUES (?,?,0,1,?,?,?,?)", (d, bill, key, key, qty, amt))
+    def ret(bill, key, qty, amt):
+        con.execute("INSERT INTO sale_line_item (business_date,bill_no,is_return,"
+                    "seq,item_name,item_key,qty_raw,amount_p) "
+                    "VALUES (?,?,1,1,?,?,?,?)", (DAY, bill, key, key, qty, amt))
+    def retbill(bill, amt):
+        con.execute("INSERT INTO sale_item (day_entry_id,unit,description,amount_p,"
+                    "mode,source,source_ref,service,patient_ref_id) VALUES "
+                    "(1,'medical','',?,'cash','manual',?,'pharmacy_return',%s)" % P,
+                    (amt, bill))
+    sale("S1", "ITEMA", "1:0", 10000)
+    sale("S2", "ITEMB", "2:0", 20000)
+    sale("S3", "ITEMD", "1:0", 30000)
+    retbill("R1", 10000); ret("R1", "ITEMA", "1:0", 10000)          # clean
+    retbill("R2", 5000);  ret("R2", "ITEMC", "1:0", 5000)           # never bought
+    retbill("R3", 15000); ret("R3", "ITEMD", "1:0", 45000)          # refund > paid
+    retbill("R4", 40000); ret("R4", "ITEMB", "5:0", 40000)          # qty > sold
+    retbill("R5", 9000)                                             # no item lines
     con.execute("INSERT INTO upi_statement (merchant_id,unit,statement_date,"
                 "parsed_total_p,txn_count) VALUES ('M1','medical',?,12500,1)", (DAY,))
     # WHAT DARPAN DECLARED for the day -- this, not sale_item.mode, is what the
@@ -137,7 +173,7 @@ def main():
 
     r = G.day_report(con, DAY, "medical", ENV, punches, staff)
 
-    check("the day counted every bill", r["totals"]["bills"] == 12,
+    check("the day counted every bill", r["totals"]["bills"] == 17,
           str(r["totals"]))
     byref = {g["bill_no"]: g["verdict"] for g in r["identity_gaps"]}
     check("a bill linked at ingest to a MASTER patient is matched, not a gap",
@@ -190,6 +226,22 @@ def main():
     check("unreadable punches -> attribution PENDING, never a guess",
           r4["counter"]["seller"] is None and r4["counter"]["decided_by"] == "unknown")
 
+    rrows, rtal = r["returns"]
+    byr = {x["bill"]: x for x in rrows}
+    check("a clean return is clean", byr["R1"]["verdict"] == "ok")
+    check("an item the patient NEVER BOUGHT is the strongest signal",
+          byr["R2"]["verdict"] == "NEVER BOUGHT")
+    check("a refund LARGER than what was paid is caught",
+          byr["R3"]["verdict"] == "REFUNDED MORE THAN PAID")
+    check("  ...and it names the sale it was compared against",
+          "sold for 30000 paise" in byr["R3"]["lines"][0]["detail"])
+    check("returning MORE than was sold is caught",
+          byr["R4"]["verdict"] == "RETURNED MORE THAN SOLD")
+    check("a return with NO item lines is 'not examinable', never 'clean'",
+          byr["R5"]["verdict"] == "not examinable" and byr["R5"]["note"])
+    check("  ...and the tally separates examinable from not",
+          rtal.get("not examinable") == 1 and rtal.get("ok") == 1)
+
     drows, dtal = r["discounts"]
     byb = {x["bill"]: x for x in drows}
     check("a discount matching the sanction exactly is not a breach",
@@ -224,8 +276,14 @@ def main():
           and p["difference_p"] == 12500)
     check("cash bills that could account for the difference are SUGGESTED",
           any(c["amount_p"] == 12500 for c in p["could_account_for_it"]))
+    # NOT a magic number: the property is that suggesting changes nothing, so
+    # count before and after rather than hard-coding a total that goes stale
+    # every time the fixture grows -- which it just did, twice.
+    _before = con.execute("SELECT COUNT(*) c FROM sale_item WHERE mode='cash'").fetchone()["c"]
+    G.payment_gaps(con, DAY, "medical")
     check("  ...and nothing was changed by suggesting it",
-          con.execute("SELECT COUNT(*) c FROM sale_item WHERE mode='cash'").fetchone()["c"] == 13)
+          con.execute("SELECT COUNT(*) c FROM sale_item WHERE mode='cash'"
+                      ).fetchone()["c"] == _before)
 
     # the backfill boundary
     r5 = G.day_report(con, OLD, "medical", ENV, punches, staff)

@@ -364,6 +364,16 @@ def discount_rows(con, business_date, unit="medical"):
     return out, dict(tally)
 
 
+def _returns(con, business_date, unit):
+    """The sump. Imported lazily so the day report still works if the returns
+    module is not installed -- it says so rather than failing the whole page."""
+    try:
+        from finance_returns_audit import returns_for_day                # noqa: PLC0415
+    except ImportError:
+        return ([], {"module absent": 1})
+    return returns_for_day(con, business_date, unit)
+
+
 # ----------------------------------------------------------- the day
 
 def day_report(con, business_date, unit="medical", env=None,
@@ -385,4 +395,5 @@ def day_report(con, business_date, unit="medical", env=None,
                 totals=tally, identity_gaps=gaps,
                 payment=payment_gaps(con, business_date, unit),
                 discounts=discount_rows(con, business_date, unit),
+                returns=_returns(con, business_date, unit),
                 before_identity_era=era)
