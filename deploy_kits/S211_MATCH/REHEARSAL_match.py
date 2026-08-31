@@ -106,15 +106,26 @@ def main(argv):
     check("a clinic ID ALONE is a clean match, never parked", tried and hit == tried,
           "%d/%d" % (hit, tried))
 
-    # --- 4. a family mobile with no name -> ambiguous, never a pick
-    hit = tried = 0
+    # --- 4. a family mobile with no name -> ambiguous, UNLESS the records are
+    # one person. Measured on the real master: 75 of 716 family mobiles carry the
+    # same name on every record -- the owner's re-registration case, one human
+    # with several clinic IDs. Those are NOT ambiguous, and treating them as
+    # such is what made a 29-July bill unresolvable behind five candidate IDs.
+    amb = onep = tried = 0
     for g in shared[:200]:
         mob = mob_by_cid.get(g[0][0])
         if not mob: continue
         tried += 1
-        if V(mob) == "ambiguous": hit += 1
-    check("a FAMILY mobile with no name is AMBIGUOUS, never a pick",
-          tried and hit == tried, "%d/%d" % (hit, tried))
+        names = {M.norm_name(x[2]) for x in g}   # x[2] is the NAME; x[1] is the uid
+        v = V(mob)
+        if len(names) == 1:
+            onep += 1
+            if v.startswith("matched"): amb += 1
+        elif v == "ambiguous":
+            amb += 1
+    check("a real FAMILY mobile stays ambiguous; a re-registered ONE PERSON "
+          "resolves", amb == tried, "%d/%d (%d of them were one person)"
+          % (amb, tried, onep))
 
     # --- 5. a family mobile WITH the right name -> separated to one
     hit = tried = 0
@@ -126,15 +137,19 @@ def main(argv):
     # Not a fitted threshold. The SAFETY property is what matters: when the name
     # cannot separate relatives, the answer must be AMBIGUOUS -- never a pick.
     # The separation rate is reported as a measurement, not asserted.
+    # THE SAFETY PROPERTY, stated correctly: never a DIFFERENT PERSON. Resolving
+    # to a different clinic ID that names the same person on the same phone is
+    # not an error -- it is the re-registration case, and the clinic IDs are
+    # interchangeable until Docterz merges them.
     wrong = 0
     for g in shared[:200]:
         mob = mob_by_cid.get(g[0][0]); name = g[0][2]
         if not mob or not name: continue
         r = M.match_bill(con, "%s %s" % (mob, name), None, ENV)
-        if r["verdict"].startswith("matched") and r["patient"] \
-           and r["patient"]["clinic_id"] != g[0][0]:
-            wrong += 1
-    check("a family mobile NEVER resolves to the wrong relative", wrong == 0,
+        if r["verdict"].startswith("matched") and r["patient"]:
+            if M.norm_name(r["patient"]["name"]) != M.norm_name(name):
+                wrong += 1
+    check("a family mobile NEVER resolves to a DIFFERENT PERSON", wrong == 0,
           "%d wrong out of %d" % (wrong, tried))
     print("       (measurement, not a gate: the name separates %d of %d family "
           "mobiles; the rest stay ambiguous for a human to pick)" % (hit, tried))

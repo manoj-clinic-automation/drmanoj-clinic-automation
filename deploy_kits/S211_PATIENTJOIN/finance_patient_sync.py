@@ -56,6 +56,8 @@ MASTER_XLSX = "Patient_Master_Join.xlsx"
 VISITS_XLSX = "Visit_Ledger_Join.xlsx"
 
 ADDED_COLS = (("mobile_fp", "TEXT"), ("patient_uid", "TEXT"),
+              # the full number, on the owner's ruling of 31-Aug (reverses F-86)
+              ("mobile", "TEXT"),
               ("last_seen", "TEXT"), ("mobile_dup_count", "INTEGER"),
               # the SANCTIONED entitlements, so compliance can be CHECKED
               # rather than assumed: what this patient's consultation is
@@ -217,6 +219,7 @@ def sync_patients(con, rows, dry_run=False):
             v = str(r.get(k) or "").strip()
             return int(v) if v.lstrip("-").isdigit() else None
         new = (r.get("name") or "", r.get("mobile_last4") or "",
+               r.get("mobile") or "",
                r.get("mobile_fp") or "", r.get("patient_uid") or "",
                r.get("last_seen") or "",
                int(r.get("mobile_dup_count") or 0) if str(
@@ -224,24 +227,25 @@ def sync_patients(con, rows, dry_run=False):
                _int_or_none("admin_cc_p"), _int_or_none("admin_pd_pct"),
                _int_or_none("admin_bid_pct"), 1 if str(r.get("is_vip") or "").strip() else 0,
                r.get("concession_scheme") or "")
-        cur = con.execute("SELECT name, phone_last4, mobile_fp, patient_uid, "
+        cur = con.execute("SELECT name, phone_last4, mobile, mobile_fp, patient_uid, "
                           "last_seen, mobile_dup_count, admin_cc_p, admin_pd_pct, "
                           "admin_bid_pct, is_vip, concession_scheme FROM patient_ref "
                           "WHERE clinic_id=?", (cid,)).fetchone()
         if cur is None:
             if not dry_run:
                 con.execute(
-                    "INSERT INTO patient_ref (clinic_id, name, phone_last4, "
+                    "INSERT INTO patient_ref (clinic_id, name, phone_last4, mobile, "
                     "first_seen, mobile_fp, patient_uid, last_seen, "
                     "mobile_dup_count, admin_cc_p, admin_pd_pct, admin_bid_pct, "
                     "is_vip, concession_scheme) "
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                    (cid, new[0], new[1], r.get("first_seen") or "") + new[2:])
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (cid, new[0], new[1], new[2], r.get("first_seen") or "")
+                    + new[3:])
             c["inserted"] += 1
         elif tuple(cur) != new:
             if not dry_run:
                 con.execute(
-                    "UPDATE patient_ref SET name=?, phone_last4=?, mobile_fp=?, "
+                    "UPDATE patient_ref SET name=?, phone_last4=?, mobile=?, mobile_fp=?, "
                     "patient_uid=?, last_seen=?, mobile_dup_count=?, "
                     "admin_cc_p=?, admin_pd_pct=?, admin_bid_pct=?, is_vip=?, "
                     "concession_scheme=? WHERE clinic_id=?", new + (cid,))
@@ -369,21 +373,21 @@ def selftest():
         for r in rows: s.append(r)
         w.save(path)
 
-    MC = ["clinic_id","patient_uid","name","mobile_fp","mobile_last4",
+    MC = ["clinic_id","patient_uid","name","mobile_fp","mobile_last4","mobile",
           "mobile_dup_count","identity_status","first_seen","last_seen",
           "admin_cc_p","admin_pd_pct","admin_bid_pct","is_vip","concession_scheme"]
     VC = ["visit_id","visit_date","clinic_id","patient_uid","mobile_fp","had_procedure"]
     # two patients SHARE a fingerprint -- the family-mobile case, F-34
     wb(os.path.join(tmp, MASTER_XLSX), MC, [
-        ["4471","U1","RAMESH KUMAR","fp_aaa","3210","2","ok","2026-01-01","2026-08-01","50000","10","30","","Staff / Employee"],
-        ["4472","U2","SITA DEVI",    "fp_aaa","3210","2","ok","2026-02-01","2026-08-02","0","","","1",""],
-        ["9",   "U3","EARLY PATIENT","fp_bbb","1111","1","ok","2025-01-01","2026-07-01","","","","",""],
-        ["",    "U4","NO CLINIC ID", "fp_ccc","2222","1","ok","","","","","","",""],
-        ["4471","U1","RAMESH KUMAR","fp_aaa","3210","2","ok","","","","","","",""],
-        ["7001","U5","ANIL VERMA","fp_ddd","4444","1","ok","","","","","","",""],
-        ["7001","U6","SUNITA RANI","fp_eee","5555","1","ok","","","","","","",""],
-        ["8001","U7","KAVITA SINGH","fp_fff","6666","1","ok","","","","","","",""],
-        ["8002","U8","KAVITA SINGH","fp_fff","6666","1","ok","","","","","","",""],
+        ["4471","U1","RAMESH KUMAR","fp_aaa","3210","9999999999","2","ok","2026-01-01","2026-08-01","50000","10","30","","Staff / Employee"],
+        ["4472","U2","SITA DEVI",    "fp_aaa","3210","9999999999","2","ok","2026-02-01","2026-08-02","0","","","1",""],
+        ["9",   "U3","EARLY PATIENT","fp_bbb","1111","8888888888","1","ok","2025-01-01","2026-07-01","","","","",""],
+        ["",    "U4","NO CLINIC ID", "fp_ccc","2222","","1","ok","","","","","","",""],
+        ["4471","U1","RAMESH KUMAR","fp_aaa","3210","9999999999","2","ok","","","","","","",""],
+        ["7001","U5","ANIL VERMA","fp_ddd","4444","7777777777","1","ok","","","","","","",""],
+        ["7001","U6","SUNITA RANI","fp_eee","5555","6666666666","1","ok","","","","","","",""],
+        ["8001","U7","KAVITA SINGH","fp_fff","6666","9999999999","1","ok","","","","","","",""],
+        ["8002","U8","KAVITA SINGH","fp_fff","6666","9999999999","1","ok","","","","","","",""],
     ])
     wb(os.path.join(tmp, VISITS_XLSX), VC, [
         ["V1","2026-08-26","4471","U1","fp_aaa","Y"],
@@ -452,7 +456,7 @@ def selftest():
 
     # a patient vanishing from the export must NOT vanish from finance.db
     wb(os.path.join(tmp, MASTER_XLSX), MC,
-       [["4471","U1","RAMESH KUMAR","fp_aaa","3210","2","ok","2026-01-01","2026-08-01"]])
+       [["4471","U1","RAMESH KUMAR","fp_aaa","3210","9999999999","2","ok","2026-01-01","2026-08-01"]])
     run(db, tmp)
     con = sqlite3.connect(db); con.row_factory = sqlite3.Row
     check("a patient dropped from the export is KEPT in finance.db",

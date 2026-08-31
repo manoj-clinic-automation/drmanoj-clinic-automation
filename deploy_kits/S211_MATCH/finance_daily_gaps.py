@@ -29,9 +29,10 @@ import csv
 import os
 
 try:
-    from finance_patient_match import match_bill
+    from finance_patient_match import match_bill, read_bill_identity_json
 except ImportError:                                           # pragma: no cover
-    from .finance_patient_match import match_bill             # noqa: TID252
+    from .finance_patient_match import (match_bill,           # noqa: TID252
+                                        read_bill_identity_json)
 
 PUNCH_CSV = os.environ.get("SR_PUNCH_CSV", "/root/punches.csv")
 STAFF_CSV = os.environ.get("SR_STAFF_CSV", "/root/staff_master.csv")
@@ -200,7 +201,30 @@ def identity_gaps(con, business_date, unit="medical", env=None,
             tally["unmatched"] += 1
         if v.startswith("matched"):
             continue                                  # only gaps are listed
-        out.append(dict(bill_no=r["bill_no"], amount_p=r["amount_p"],
+        # THE ROW LABEL. `source_ref` is not always the bill number -- on some
+        # rows it carries an ingest reference like S186-F104-394, which is what
+        # the owner saw on his card. The structured record holds the real
+        # `bill_no`, so prefer it and fall back only when there is none.
+        ident = read_bill_identity_json(r["description"]) or {}
+        bill = (ident.get("bill_no") or "").strip() or r["bill_no"]
+        # name and number, so a row can be READ and the patient CALLED without
+        # opening anything. The number comes from the patient where one was
+        # resolved; otherwise the bill's own last four, shown as such.
+        nm = (ident.get("name") or "").strip()
+        mob = ""
+        pid = r["patient_ref_id"]
+        if pid:
+            pr = con.execute("SELECT name, mobile, phone_last4 FROM patient_ref "
+                             "WHERE id=?", (pid,)).fetchone()
+            if pr is not None:
+                nm = nm or (pr["name"] or "")
+                mob = (pr["mobile"] or "")
+                if not mob and (pr["phone_last4"] or ""):
+                    mob = "xxxxxx" + pr["phone_last4"]
+        if not mob and ident.get("last4"):
+            mob = "xxxxxx" + ident["last4"]
+        out.append(dict(bill_no=bill, name=nm, mobile=mob,
+                        amount_p=r["amount_p"],
                         mode=r["mode"], verdict=v,
                         entered=steps[0]["detail"] if steps else "",
                         candidates=cands, steps=steps,

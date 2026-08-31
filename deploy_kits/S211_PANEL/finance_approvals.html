@@ -394,7 +394,9 @@ function loadDayGaps(d){
              '<th class="num">Amount</th><th>Mode</th><th>Verdict</th></tr></thead><tbody>';
         g.forEach(function(x,i){
           h += '<tr onclick="gapToggle(\'gw'+i+'\',this)" style="cursor:pointer">'+
-               '<td class="gcar mut">&#9656;</td><td>'+esc(x.bill_no||"—")+'</td>'+
+               '<td class="gcar mut">&#9656;</td><td>'+esc(x.bill_no||"—")+
+               (x.name?' <span class="mut">'+esc(x.name)+'</span>':"")+
+               (x.mobile?' <span class="mut">'+esc(x.mobile)+'</span>':"")+'</td>'+
                '<td class="num">'+gapRs(x.amount_p)+'</td><td>'+esc(x.mode||"")+'</td>'+
                '<td>'+gapTag(x.verdict)+'</td></tr>'+
                '<tr id="gw'+i+'" style="display:none"><td></td><td colspan="4">'+

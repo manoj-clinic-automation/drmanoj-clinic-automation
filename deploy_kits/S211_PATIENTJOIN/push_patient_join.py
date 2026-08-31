@@ -63,7 +63,17 @@ VISITS_CSV = os.path.join(DATA_DIR, "visit_ledger.csv")
 MASTER_XLSX = "Patient_Master_Join.xlsx"
 VISITS_XLSX = "Visit_Ledger_Join.xlsx"
 
+# OWNER RULING, 31-Aug-2026: "why truncate the patient mobile number, it's for
+# clinic internal use, my console". This REVERSES F-86, which masked the number
+# to last-four deliberately. The full number now travels and is stored.
+#   * it is shown ONLY on the owner/checker card (the day-gaps endpoint requires
+#     the checker role, so Darpan's page cannot reach it)
+#   * the fingerprint is UNCHANGED and remains the matching key -- the full
+#     number adds nothing to matching, only to being able to read and dial it
+#   * the repository rule is untouched: NO_PHONE_NUMBERS.py still refuses any
+#     number into git, and has already caught this assistant twice
 MASTER_COLS = ["clinic_id", "patient_uid", "name", "mobile_fp", "mobile_last4",
+               "mobile",
                "mobile_dup_count", "identity_status", "first_seen", "last_seen",
                # the sanctioned entitlements, so the VPS can CHECK them:
                # CC = the consultation charge this patient is sanctioned for
@@ -198,6 +208,7 @@ def build_master(salt, path=None, diag_path=None):
                     _cell(r, "Patient_Name"),
                     fingerprint(m10, salt),
                     m10[-4:] if m10 else "",
+                    m10,
                     _cell(r, "Mobile_Duplicate_Count") or "0",
                     _cell(r, "Identity_Status"),
                     _cell(r, "First_Seen_Date"),
@@ -284,7 +295,9 @@ def selftest():
     check("the fingerprint does not contain the number",
           "9999999999" not in a and "3210" not in a[:8])
 
-    check("the master header is the shape the VPS expects", len(MASTER_COLS) == 14)
+    check("the master header is the shape the VPS expects", len(MASTER_COLS) == 15)
+    check("the full mobile now travels (owner ruling, reverses F-86)",
+          "mobile" in MASTER_COLS and "mobile_last4" in MASTER_COLS)
     check("a CC written as 5 means five hundred rupees", _cc_to_paise("5") == "50000")
     check("a CC written as 500 means the same", _cc_to_paise("500") == "50000")
     check("CC 0 is a FREE consultation, not a blank", _cc_to_paise("0") == "0")

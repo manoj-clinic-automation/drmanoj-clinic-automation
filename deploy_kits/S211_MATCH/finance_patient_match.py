@@ -231,19 +231,19 @@ def match_bill(con, text, business_date=None, env=None):
         if collide:
             steps.append(dict(step="by clinic ID",
                               detail="this ID names more than one patient - AMBIGUOUS"))
-            return _out("ambiguous", None, [dict(r) for r in hits], steps)
+            return _out("ambiguous", None, [dict(r) for r in hits], steps, con)
         if len(hits) == 1:
             steps.append(dict(step="by clinic ID", detail="1 patient found"))
             if ident["name"] and not names_agree(ident["name"], hits[0]["name"]):
                 steps.append(dict(step="name check",
                                   detail="the name on the bill does not agree - AMBIGUOUS"))
-                return _out("ambiguous", None, [dict(hits[0])], steps)
+                return _out("ambiguous", None, [dict(hits[0])], steps, con)
             if ident["name"]:
                 steps.append(dict(step="name check", detail="agrees (corroborates)"))
             return _out("matched_clinic_id", dict(hits[0]), [], steps)
         if len(hits) > 1:
             steps.append(dict(step="by clinic ID", detail="%d patients - AMBIGUOUS" % len(hits)))
-            return _out("ambiguous", None, [dict(r) for r in hits], steps)
+            return _out("ambiguous", None, [dict(r) for r in hits], steps, con)
         steps.append(dict(step="by clinic ID", detail="no patient with that ID"))
 
     # rung 2 -- whatever else was entered
@@ -255,7 +255,7 @@ def match_bill(con, text, business_date=None, env=None):
             if ident["name"] and not names_agree(ident["name"], hits[0]["name"]):
                 steps.append(dict(step="name check",
                                   detail="the name does not agree - AMBIGUOUS"))
-                return _out("ambiguous", None, [dict(hits[0])], steps)
+                return _out("ambiguous", None, [dict(hits[0])], steps, con)
             steps.append(dict(step="name check",
                               detail="agrees (corroborates)" if ident["name"] else "no name on the bill"))
             return _out("matched_partial", dict(hits[0]), [], steps)
@@ -280,7 +280,7 @@ def match_bill(con, text, business_date=None, env=None):
                     return _out("matched_partial", dict(narrowed[0]), [], steps)
                 steps.append(dict(step="name check",
                                   detail="relatives share this name - AMBIGUOUS"))
-            return _out("ambiguous", None, [dict(r) for r in hits], steps)
+            return _out("ambiguous", None, [dict(r) for r in hits], steps, con)
         steps.append(dict(step="by mobile", detail="no patient with that number"))
     elif ident["mobile"] and not s:
         steps.append(dict(step="by mobile",
@@ -303,7 +303,7 @@ def match_bill(con, text, business_date=None, env=None):
         if len(chosen) > 1:
             steps.append(dict(step="by last-4 + name",
                               detail="%d patients fit - AMBIGUOUS" % len(chosen)))
-            return _out("ambiguous", None, [dict(r) for r in chosen], steps)
+            return _out("ambiguous", None, [dict(r) for r in chosen], steps, con)
         steps.append(dict(step="by last-4 + name",
                           detail="%d patient(s) on those last four, none whose "
                                  "name agrees" % len(hits)))
@@ -331,7 +331,7 @@ def match_bill(con, text, business_date=None, env=None):
             steps.append(dict(step="visit record",
                               detail="%d patients who visited within %d days fit "
                                      "- AMBIGUOUS" % (len(fit), DATE_WINDOW_DAYS)))
-            return _out("ambiguous", None, [dict(r) for r in fit], steps)
+            return _out("ambiguous", None, [dict(r) for r in fit], steps, con)
         steps.append(dict(step="visit record",
                           detail="no visiting patient fits"
                                  if vis else "no visits within %d days"
@@ -345,6 +345,51 @@ def _has_table(con, name):
                             (name,)).fetchone())
 
 
-def _out(verdict, patient, candidates, steps):
+def collapse_to_people(con, cands):
+    """Several RECORDS are not several PEOPLE.
+
+    S211, owner-reported: a 29-July bill for one patient came back AMBIGUOUS with
+    five candidate clinic IDs -- 7666, 7772, 7683, 7779, 7770 -- all the same
+    person, re-registered five times. Docterz issues a fresh clinic ID on
+    re-registration, so the master holds one human under several IDs; the S211
+    join already found 137 such pairs and recorded them in
+    patient_merge_candidate.
+
+    An ambiguity rule that counts ROWS therefore refuses matches it should make.
+    This groups the candidates by WHO THEY ARE -- same mobile fingerprint and
+    the same name -- and returns the groups. One group means one person, however
+    many rows carry them.
+
+    It never merges anything. It reports that the records describe one person;
+    merging them is the owner's call and belongs on the Docterz side.
+    """
+    groups = {}
+    for c in cands:
+        row = con.execute("SELECT mobile_fp, name FROM patient_ref WHERE clinic_id=?",
+                          (c.get("clinic_id"),)).fetchone()
+        fp = (row["mobile_fp"] if row else "") or ""
+        nm = norm_name(row["name"] if row else c.get("name"))
+        groups.setdefault((fp, nm), []).append(c)
+    return list(groups.values())
+
+
+def _out(verdict, patient, candidates, steps, con=None):
+    """If a verdict is AMBIGUOUS only because one person holds several records,
+    it is not ambiguous. Checked here, once, so no rung can forget to."""
+    if verdict == "ambiguous" and con is not None and candidates and len(candidates) > 1:
+        groups = collapse_to_people(con, candidates)
+        if len(groups) == 1:
+            one = sorted(groups[0], key=lambda c: str(c.get("clinic_id")))[0]
+            steps.append(dict(step="same person, several records",
+                              detail="%d records, one person (clinic IDs %s) - "
+                                     "matched, and recorded as a merge candidate"
+                                     % (len(candidates),
+                                        ", ".join(str(c.get("clinic_id"))
+                                                  for c in candidates))))
+            steps.append(dict(step="verdict", detail="matched_partial"))
+            return dict(verdict="matched_partial", patient=one,
+                        candidates=candidates, steps=steps,
+                        merge_needed=[c.get("clinic_id") for c in candidates])
     steps.append(dict(step="verdict", detail=verdict))
-    return dict(verdict=verdict, patient=patient, candidates=candidates, steps=steps)
+    return dict(verdict=verdict, patient=patient, candidates=candidates,
+                steps=steps, merge_needed=[])

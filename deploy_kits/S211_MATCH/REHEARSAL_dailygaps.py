@@ -30,7 +30,8 @@ def check(name, cond, detail=""):
 SCHEMA = """
 CREATE TABLE patient_ref (id INTEGER PRIMARY KEY, clinic_id TEXT NOT NULL UNIQUE,
     name TEXT, phone_last4 TEXT, first_seen TEXT, merged_into INTEGER, note TEXT,
-    mobile_fp TEXT, patient_uid TEXT, last_seen TEXT, mobile_dup_count INTEGER,
+    mobile_fp TEXT, patient_uid TEXT, mobile TEXT, last_seen TEXT,
+    mobile_dup_count INTEGER,
     admin_cc_p INTEGER, admin_pd_pct INTEGER, admin_bid_pct INTEGER,
     is_vip INTEGER, concession_scheme TEXT);
 CREATE TABLE patient_visit (visit_id TEXT PRIMARY KEY, visit_date TEXT NOT NULL,
@@ -85,8 +86,8 @@ def main():
                 "source,source_ref) VALUES (2,'medical','PROSIJER',9900,'cash','manual','OLD1')")
     # THE REAL SHAPE OF A LIVE PHARMACY ROW, measured on the box at S211:
     # description EMPTY, patient_ref_id SET at ingest. Three cases.
-    con.execute("INSERT INTO patient_ref (clinic_id,name,mobile_fp,patient_uid) "
-                "VALUES ('5001','MASTER PATIENT','fp_zzz','U-REAL')")
+    con.execute("INSERT INTO patient_ref (clinic_id,name,mobile_fp,patient_uid,mobile) "
+                "VALUES ('5001','MASTER PATIENT','fp_zzz','U-REAL','9999999999')")
     con.execute("INSERT INTO patient_ref (clinic_id,name) VALUES ('5002','BILL STUB')")
     # THE SANCTIONED DISCOUNT CASES -- sanctioned 10%: exact, rounding, short,
     # none at all, and over.
@@ -106,10 +107,14 @@ def main():
                 "source,source_ref,patient_ref_id) VALUES "
                 "(1,'medical','',11100,'cash','manual','B001',"
                 "(SELECT id FROM patient_ref WHERE clinic_id='5001'))")
+    import json as _j
+    _rec = _j.dumps({"bill_date":"2026-08-26","bill_no":"A00742","clinic_id":"",
+                     "patient_name":"ZZQX UNKNOWNPERSON","phone_last4":"4321",
+                     "description":"","amount":"222.00","mode":"cash"})
     con.execute("INSERT INTO sale_item (day_entry_id,unit,description,amount_p,mode,"
                 "source,source_ref,patient_ref_id) VALUES "
-                "(1,'medical','',22200,'cash','manual','B002',"
-                "(SELECT id FROM patient_ref WHERE clinic_id='5002'))")
+                "(1,'medical',?,22200,'cash','manual','S186-F104-394',"
+                "(SELECT id FROM patient_ref WHERE clinic_id='5002'))", (_rec,))
     con.execute("INSERT INTO sale_item (day_entry_id,unit,description,amount_p,mode,"
                 "source,source_ref,patient_ref_id) VALUES "
                 "(1,'medical','',33300,'cash','manual','B003',NULL)")
@@ -138,7 +143,17 @@ def main():
     check("a bill linked at ingest to a MASTER patient is matched, not a gap",
           "B001" not in byref)
     check("a bill linked to a stub the bill itself created IS the counter gap",
-          byref.get("B002") == "unmatched")
+          byref.get("A00742") == "unmatched")
+    # THE OWNER'S CORRECTION: source_ref held S186-F104-394; the real bill number
+    # is in the structured record and that is what a row must show.
+    row742 = [g for g in r["identity_gaps"] if g["bill_no"] == "A00742"]
+    check("the row shows the REAL bill number, not the ingest reference",
+          len(row742) == 1 and not any(g["bill_no"] == "S186-F104-394"
+                                       for g in r["identity_gaps"]))
+    check("  ...and carries the patient name beside it",
+          row742 and row742[0]["name"] == "ZZQX UNKNOWNPERSON")
+    check("  ...and a number that can be dialled, or a masked one if not stored",
+          row742 and row742[0]["mobile"] == "xxxxxx4321")
     check("a bill never linked to anyone is the counter gap too",
           byref.get("B003") == "unmatched")
     check("  ...and each says WHY, in its own words",
