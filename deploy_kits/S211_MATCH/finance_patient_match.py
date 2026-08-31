@@ -32,6 +32,7 @@ looked up. The salt comes from the environment; without it, mobile matching is
 refused rather than silently skipped.
 """
 import hashlib
+import json
 import os
 import re
 import unicodedata
@@ -132,6 +133,39 @@ def names_agree(a, b):
     return False
 
 
+JSON_KEYS = ("clinic_id", "patient_name", "phone_last4", "bill_no", "bill_date")
+
+
+def read_bill_identity_json(text):
+    """The ingest stores what it EXTRACTED, as JSON -- not the counter's prose.
+
+    S211, found the hard way: `description` on an unresolved bill holds
+    {"bill_date":..., "bill_no":..., "clinic_id":..., "patient_name":...,
+     "phone_last4":..., "description":..., "amount":..., "mode":...}.
+    Parsing that blob as prose made a regex find digit runs inside `amount` and
+    `bill_date` and read them as clinic IDs -- 154 bills were matched to
+    patients on the strength of a stray number in a date. Read the fields.
+
+    Returns None when the text is not one of these records, so the prose reader
+    still handles anything else.
+    """
+    t = str(text or "").strip()
+    if not (t.startswith("{") and t.endswith("}")):
+        return None
+    try:
+        d = json.loads(t)
+    except ValueError:
+        return None
+    if not isinstance(d, dict) or not any(k in d for k in JSON_KEYS):
+        return None
+    return dict(clinic_id=str(d.get("clinic_id") or "").strip(),
+                mobile="",                       # the full number is NOT kept
+                last4=str(d.get("phone_last4") or "").strip(),
+                name=str(d.get("patient_name") or "").strip(),
+                bill_no=str(d.get("bill_no") or "").strip(),
+                raw="(structured record)")
+
+
 def read_bill_identity(text):
     """Pull whatever the counter actually typed out of the bill's description.
 
@@ -162,7 +196,8 @@ def read_bill_identity(text):
                 cid = tr.group(1)
                 rest = rest[:tr.start()]
     name = re.sub(r"\s+", " ", rest.strip(" -/:.,"))
-    return dict(clinic_id=cid, mobile=mobile, name=name, raw=raw)
+    return dict(clinic_id=cid, mobile=mobile, last4="", name=name,
+                bill_no="", raw=raw)
 
 
 # ---------------------------------------------------------------- the lookup
@@ -173,7 +208,7 @@ def _rows(con, sql, *a):
 
 def match_bill(con, text, business_date=None, env=None):
     """Return dict(verdict, patient, candidates, steps). Never raises on data."""
-    ident = read_bill_identity(text)
+    ident = read_bill_identity_json(text) or read_bill_identity(text)
     s = salt(env)
     steps = []
     fp = fingerprint(normalise_mobile(ident["mobile"]), s) if ident["mobile"] else ""
@@ -247,7 +282,30 @@ def match_bill(con, text, business_date=None, env=None):
         steps.append(dict(step="by mobile",
                           detail="REFUSED - no salt set, so no fingerprint was computed"))
 
-    if ident["name"] and not ident["clinic_id"] and not ident["mobile"]:
+    if ident.get("last4") and ident["name"]:
+        # LAST FOUR PLUS THE NAME. Never last4 alone: measured on the real
+        # master, 1,506 of 4,903 last-four values are shared by more than one
+        # number, so on its own it identifies nobody.
+        hits = _rows(con, "SELECT id, clinic_id, name FROM patient_ref "
+                          "WHERE phone_last4=?", ident["last4"])
+        fit = [r for r in hits if names_agree(ident["name"], r["name"])]
+        strict = [r for r in fit if given_name_agrees(ident["name"], r["name"])]
+        chosen = strict if len(strict) == 1 else fit
+        if len(chosen) == 1:
+            steps.append(dict(step="by last-4 + name",
+                              detail="%d patient(s) on those last four, the name "
+                                     "narrows it to 1" % len(hits)))
+            return _out("matched_partial", dict(chosen[0]), [], steps)
+        if len(chosen) > 1:
+            steps.append(dict(step="by last-4 + name",
+                              detail="%d patients fit - AMBIGUOUS" % len(chosen)))
+            return _out("ambiguous", None, [dict(r) for r in chosen], steps)
+        steps.append(dict(step="by last-4 + name",
+                          detail="%d patient(s) on those last four, none whose "
+                                 "name agrees" % len(hits)))
+
+    if ident["name"] and not ident["clinic_id"] and not ident["mobile"] \
+            and not ident.get("last4"):
         steps.append(dict(step="by name alone",
                           detail="a name alone is corroboration, never an identifier"))
 

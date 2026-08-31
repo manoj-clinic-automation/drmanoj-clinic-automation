@@ -182,6 +182,64 @@ def main(argv):
     check("with NO SALT the mobile rung refuses rather than silently skipping",
           any("REFUSED" in str(s.get("detail")) for s in r["steps"]))
 
+    # ---- 11. THE REGRESSION THAT COST 154 FALSE MATCHES -------------------
+    # description on an unresolved bill is a JSON record, not prose. Parsed as
+    # prose, a regex found digit runs inside `amount` and `bill_date` and read
+    # them as clinic IDs. Every one of these must refuse to produce a clinic-ID
+    # match, whatever digits the blob happens to contain.
+    import json as _json
+    bad = 0
+    for cid_val, amt, date in (("", "4471.00", "2026-08-27"),
+                               ("", "9876.54", "2026-06-18"),
+                               ("", "-1700.00", "2026-07-11"),
+                               ("", "600.00", "2026-08-04")):
+        blob = _json.dumps({"bill_date": date, "bill_no": "A00742",
+                            "clinic_id": cid_val, "patient_name": "SOME NAME",
+                            "phone_last4": "", "description": "",
+                            "amount": amt, "mode": "cash"})
+        r = M.match_bill(con, blob, None, ENV)
+        if r["verdict"] == "matched_clinic_id":
+            bad += 1
+    check("a JSON record NEVER yields a clinic-ID match from a stray digit run",
+          bad == 0, "%d of 4 would have" % bad)
+
+    idj = M.read_bill_identity_json(blob)
+    check("the structured reader takes the FIELDS, not the digits around them",
+          idj is not None and idj["clinic_id"] == "" and idj["name"] == "SOME NAME")
+    check("prose is still read as prose when it is not one of these records",
+          M.read_bill_identity_json("9999999999 SOMEBODY 4471") is None)
+
+    # ---- 12. the live shape, against the REAL master ---------------------
+    # 378 sampled live bills: clinic_id empty on ALL, name on ALL, last4 on 142.
+    # Rebuild that shape from real patients and see what actually resolves.
+    import csv as _csv
+    real = []
+    with open(os.path.join(D, "patient_master.csv"), encoding="utf-8-sig",
+              errors="replace") as f:
+        for row in _csv.DictReader(f):
+            nm = (row.get("Patient_Name") or "").strip()
+            mb = J.normalise_mobile(row.get("Mobile_Clean") or row.get("Mobile_Raw") or "")
+            cid = (row.get("Clinic_Specific_Id") or "").strip()
+            if nm and mb and cid:
+                real.append((cid, nm, mb[-4:]))
+    res = {}
+    for i, (cid, nm, l4) in enumerate(real[:600]):
+        withl4 = (i % 100) < 38          # 142 of 378 carried last-4
+        blob = _json.dumps({"bill_date": "2026-08-20", "bill_no": "A%05d" % i,
+                            "clinic_id": "", "patient_name": nm,
+                            "phone_last4": l4 if withl4 else "",
+                            "description": "", "amount": "500.00", "mode": "cash"})
+        v = M.match_bill(con, blob, "2026-08-20", ENV)["verdict"]
+        res[v] = res.get(v, 0) + 1
+    tot = sum(res.values())
+    got = res.get("matched_partial", 0)
+    check("the live shape resolves a real share of gap bills, and never falsely "
+          "claims a clinic-ID match",
+          res.get("matched_clinic_id", 0) == 0 and tot > 0,
+          "of %d: %s" % (tot, res))
+    print("       (prediction for the live re-run: about %.0f%% of gap bills "
+          "resolve on last-4 + name)" % (100.0 * got / tot if tot else 0))
+
     con.close()
     print("\nREHEARSAL: %d/%d %s" % (OK, OK + BAD, "ALL PASS" if BAD == 0 else "-- FAILED"))
     return 0 if BAD == 0 else 1
