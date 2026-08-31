@@ -51,7 +51,9 @@ def main():
     # 3 -- an ordinary line
     line(DAY, "B-OK", "OINT", "2:0", 5000)
     # 4 -- an item with no history to compare against
-    line(DAY, "B-RARE", "RAREITEM", "9:0", 900)
+    # thin history AND a moderate jump: below the extreme rule, so it is set
+    # aside rather than judged on a band that cannot be computed from two lines.
+    line(DAY, "B-RARE", "RAREITEM", "3:0", 900)
     # 5 -- a quantity that cannot be parsed, so no rate may be claimed
     # a partial strip with NO pack size recorded: strips and loose cannot be put
     # in the same terms, so no rate may be claimed.
@@ -69,6 +71,14 @@ def main():
     for i in range(12):
         line(HIST, "C%02d" % i, "COURSE", "%d:0" % (1 + i % 6), 4000, pack="1*15")
     line(DAY, "B-COURSE", "COURSE", "6:0", 4000, pack="1*15")   # 90 units, normal
+    # THE OWNER'S ACTUAL JUNE BILL, to the letter: an ointment sold ONCE before,
+    # at 1 unit, then billed at 20. Only one prior line, so the normal band
+    # cannot be computed -- and that is exactly why it was missed.
+    line(HIST, "OINT-MAY", "ENZOINT", "1.0", 10836, pack="5GM")
+    line(DAY, "B-ENZO", "ENZOINT", "20.0", 10836, pack="5GM")
+    # and a rare item at an ordinary quantity must stay quiet
+    line(HIST, "RARE-1", "RAREOINT", "1.0", 9000, pack="5GM")
+    line(DAY, "B-RAREOK", "RAREOINT", "2.0", 9000, pack="5GM")
     # LOOSE UNITS: a strip of 10 at 500 per unit. '0:5' is five singles, '1:0'
     # is a whole strip of ten -- and until the pack size was used, every partial
     # strip was thrown away as not comparable.
@@ -91,11 +101,21 @@ def main():
           by.get("B-BULK", {}).get("verdict") == "QUANTITY HIGH",
           "a bulk purchase must not be called a rate error")
     check("an ordinary line is not flagged at all", "B-OK" not in by)
+    check("THE OWNER'S REAL JUNE BILL is caught on ONE prior observation",
+          by.get("B-ENZO", {}).get("verdict") == "FAR BEYOND ANYTHING SEEN",
+          "20 units of an item that had sold once, at 1")
+    check("  ...and it says the history is thin, so it is not overread",
+          "thin history" in by.get("B-ENZO", {}).get("detail", ""))
+    check("  ...while a rare item at an ordinary quantity stays quiet",
+          "B-RAREOK" not in by)
     check("A MONTH'S COURSE of a drug that regularly sells in 90s is NOT flagged",
           "B-COURSE" not in by,
           "the median rule flagged 445 of these over five months")
-    check("an item with too little history is NOT judged", "B-RARE" not in by
-          and tally.get("too little history to judge") == 1)
+    # TWO of them now: the tablet with two prior lines, and the rare ointment
+    # sold at an ordinary quantity. Both are correctly set aside.
+    check("thin history and a MODERATE jump is set aside, not judged",
+          "B-RARE" not in by and "B-RAREOK" not in by
+          and tally.get("too little history to judge") == 2)
     # NOT the old assertion. Now that the rate is taken as printed, a line whose
     # QUANTITY cannot be expressed in single units can still have its RATE
     # judged -- the two signals are independent, and only the quantity one is
@@ -120,7 +140,7 @@ def main():
     # the VERDICT buckets are disjoint and sum to the number of lines; keys
     # beginning with "_" are notes and are counted separately on purpose.
     check("every line lands in exactly ONE verdict bucket",
-          sum(v for k, v in tally.items() if not k.startswith("_")) == 11,
+          sum(v for k, v in tally.items() if not k.startswith("_")) == 13,
           str(tally))
 
     # the median must not be moved by the outlier it is about to judge

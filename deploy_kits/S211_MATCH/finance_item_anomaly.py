@@ -36,6 +36,20 @@ import re
 import statistics
 
 MIN_HISTORY = int(os.environ.get("ITEM_MIN_HISTORY", "5"))
+
+# THE RARE-ITEM RULE, and it is the one that finds the owner's June bill.
+#
+# ENZOMAC OINTMENT sold four times in five months, every line 1.0 -- except
+# 30-Jun-2026, bill A001988, which billed 20. Before that day the item had ONE
+# prior sale, so MIN_HISTORY=5 set the line aside as "too little history to
+# judge" and the strongest signal in the whole dataset went unexamined.
+#
+# A twentyfold jump over everything an item has ever sold as does not need five
+# observations to be worth a look. It needs one. So: below MIN_HISTORY the
+# normal band is not computed at all, but a line far beyond ANY prior quantity
+# is still surfaced -- and labelled as resting on thin history, so nobody reads
+# more into it than it can carry.
+EXTREME_MULTIPLE = float(os.environ.get("ITEM_QTY_EXTREME", "8.0"))
 # THE QUANTITY YARDSTICK IS THE ITEM'S OWN CEILING, NOT ITS MEDIAN.
 #
 # S211, first real run: four times the median flagged 445 lines over five
@@ -171,7 +185,22 @@ def scan_day(con, business_date, unit="medical", norms=None):
         n = norms.get(r["item_key"]) or {}
         flags, detail = [], []
         if n.get("n", 0) < MIN_HISTORY:
-            tally["too little history to judge"] += 1
+            mx = n.get("qty_max")
+            if u and mx and mx > 0 and u >= mx * EXTREME_MULTIPLE:
+                tally["FAR BEYOND ANYTHING SEEN (thin history)"] += 1
+                out.append(dict(bill=r["bill_no"], seq=r["seq"],
+                                item=r["item_name"], qty_raw=r["qty_raw"],
+                                units=u, rate_p=r["amount_p"],
+                                name=r["name"] or "", clinic_id=r["clinic_id"] or "",
+                                verdict="FAR BEYOND ANYTHING SEEN",
+                                detail="%d units on one line. This item has sold "
+                                       "only %d time(s) before and never more "
+                                       "than %g -- thin history, so this is a "
+                                       "flag to look at, not a finding"
+                                       % (u, n.get("n", 0), mx),
+                                item_seen=n.get("n")))
+            else:
+                tally["too little history to judge"] += 1
             continue
         if n.get("rate") and r["amount_p"]:
             rate = float(r["amount_p"])          # the printed rate, as-is
