@@ -101,6 +101,67 @@ def counter_for_date(business_date, punch_csv=None, staff_csv=None,
 
 # ----------------------------------------------------------- the two gaps
 
+def _verdict_from_link(con, row):
+    """The verdict for a bill whose patient was already resolved at INGEST.
+
+    S211, corrected after measuring the live box: `sale_item.description` is
+    EMPTY on every real pharmacy row, and `patient_ref_id` is set on every one.
+    The Marg parser already extracts the clinic id and the name, and
+    finance_ingest.resolve_patient already links the bill to a patient_ref row.
+    Re-parsing the bill text here was solving a problem that had been solved
+    upstream years ago -- the S103-121 lesson: read the live code before
+    assuming a feature is missing.
+
+    So the question is not "who is this bill for", it is "is the patient it was
+    linked to a REAL one from the master, or a stub the bill itself created".
+
+      * no link at all               -> unmatched, the counter gap
+      * linked to a MASTER patient   -> matched (patient_uid arrives only from
+                                        the clinic PC's patient master)
+      * linked to a stub with no uid -> the bill named somebody who is not in
+                                        the master. Still the counter gap, and
+                                        the more interesting shape of it.
+      * the clinic id collides       -> ambiguous, never a clean match
+    """
+    pid = row["patient_ref_id"]
+    if not pid:
+        return _end("unmatched", [], [dict(step="link at ingest",
+                       detail="this bill was never linked to a patient")])
+    p = con.execute("SELECT clinic_id, name, patient_uid FROM patient_ref "
+                    "WHERE id=?", (pid,)).fetchone()
+    if p is None:
+        return _end("unmatched", [], [dict(step="link at ingest",
+                       detail="linked to a patient row that no longer exists")])
+    steps = [dict(step="link at ingest",
+                  detail="clinic ID %s" % (p["clinic_id"] or "(blank)"))]
+    if _has_table(con, "patient_id_collision") and con.execute(
+            "SELECT 1 FROM patient_id_collision WHERE clinic_id=?",
+            (p["clinic_id"],)).fetchone():
+        steps.append(dict(step="collision check",
+                          detail="this clinic ID names more than one patient"))
+        return _end("ambiguous", [dict(clinic_id=p["clinic_id"], name=p["name"])], steps)
+    if p["patient_uid"]:
+        steps.append(dict(step="patient master", detail="found - a real clinic patient"))
+        return _end("matched_clinic_id", [], steps)
+    steps.append(dict(step="patient master",
+                      detail="NOT found - the bill named somebody the master "
+                             "does not have"))
+    return _end("unmatched", [], steps)
+
+
+def _has_table(con, name):
+    return bool(con.execute("SELECT 1 FROM sqlite_master WHERE type='table' "
+                            "AND name=?", (name,)).fetchone())
+
+
+def _end(verdict, cands, steps):
+    """Every chain ends by naming its verdict, whichever path produced it. The
+    two paths disagreeing on their own shape is how a row ends up displayed
+    with half its working missing."""
+    steps.append(dict(step="verdict", detail=verdict))
+    return verdict, cands, steps
+
+
 def identity_gaps(con, business_date, unit="medical", env=None):
     """Every bill of the day, with its verdict and its working. Read-only."""
     rows = con.execute(
@@ -113,8 +174,13 @@ def identity_gaps(con, business_date, unit="medical", env=None):
     tally = dict(bills=0, matched=0, ambiguous=0, unmatched=0)
     for r in rows:
         tally["bills"] += 1
-        res = match_bill(con, r["description"], business_date, env)
-        v = res["verdict"]
+        if (r["description"] or "").strip():
+            # some paths DO carry the typed text; use it when it is there
+            res = match_bill(con, r["description"], business_date, env)
+            v, cands, steps = res["verdict"], res["candidates"], res["steps"]
+        else:
+            v, cands, steps = _verdict_from_link(con, r)
+            res = dict(steps=steps, candidates=cands)
         if v.startswith("matched"):
             tally["matched"] += 1
         elif v == "ambiguous":
@@ -125,8 +191,8 @@ def identity_gaps(con, business_date, unit="medical", env=None):
             continue                                  # only gaps are listed
         out.append(dict(bill_no=r["bill_no"], amount_p=r["amount_p"],
                         mode=r["mode"], verdict=v,
-                        entered=res["steps"][0]["detail"],
-                        candidates=res["candidates"], steps=res["steps"],
+                        entered=steps[0]["detail"] if steps else "",
+                        candidates=cands, steps=steps,
                         sale_item_id=r["id"]))
     return out, tally
 

@@ -79,6 +79,22 @@ def main():
                     (de, desc, amt, mode, ref))
     con.execute("INSERT INTO sale_item (day_entry_id,unit,description,amount_p,mode,"
                 "source,source_ref) VALUES (2,'medical','PROSIJER',9900,'cash','manual','OLD1')")
+    # THE REAL SHAPE OF A LIVE PHARMACY ROW, measured on the box at S211:
+    # description EMPTY, patient_ref_id SET at ingest. Three cases.
+    con.execute("INSERT INTO patient_ref (clinic_id,name,mobile_fp,patient_uid) "
+                "VALUES ('5001','MASTER PATIENT','fp_zzz','U-REAL')")
+    con.execute("INSERT INTO patient_ref (clinic_id,name) VALUES ('5002','BILL STUB')")
+    con.execute("INSERT INTO sale_item (day_entry_id,unit,description,amount_p,mode,"
+                "source,source_ref,patient_ref_id) VALUES "
+                "(1,'medical','',11100,'cash','manual','B001',"
+                "(SELECT id FROM patient_ref WHERE clinic_id='5001'))")
+    con.execute("INSERT INTO sale_item (day_entry_id,unit,description,amount_p,mode,"
+                "source,source_ref,patient_ref_id) VALUES "
+                "(1,'medical','',22200,'cash','manual','B002',"
+                "(SELECT id FROM patient_ref WHERE clinic_id='5002'))")
+    con.execute("INSERT INTO sale_item (day_entry_id,unit,description,amount_p,mode,"
+                "source,source_ref,patient_ref_id) VALUES "
+                "(1,'medical','',33300,'cash','manual','B003',NULL)")
     con.execute("INSERT INTO upi_statement (merchant_id,unit,statement_date,"
                 "parsed_total_p,txn_count) VALUES ('M1','medical',?,12500,1)", (DAY,))
     con.commit()
@@ -91,14 +107,28 @@ def main():
 
     r = G.day_report(con, DAY, "medical", ENV, punches, staff)
 
-    check("the day counted every bill", r["totals"]["bills"] == 4,
+    check("the day counted every bill", r["totals"]["bills"] == 7,
           str(r["totals"]))
+    byref = {g["bill_no"]: g["verdict"] for g in r["identity_gaps"]}
+    check("a bill linked at ingest to a MASTER patient is matched, not a gap",
+          "B001" not in byref)
+    check("a bill linked to a stub the bill itself created IS the counter gap",
+          byref.get("B002") == "unmatched")
+    check("a bill never linked to anyone is the counter gap too",
+          byref.get("B003") == "unmatched")
+    check("  ...and each says WHY, in its own words",
+          all(any("master" in str(st.get("detail","")).lower()
+                  or "never linked" in str(st.get("detail","")).lower()
+                  for st in g["steps"])
+              for g in r["identity_gaps"] if g["bill_no"] in ("B002","B003")))
     check("matched bills are NOT listed as gaps",
           all(g["verdict"] != "matched_clinic_id" for g in r["identity_gaps"])
-          and len(r["identity_gaps"]) == 2)
+          and len(r["identity_gaps"]) == 4)
     kinds = sorted(g["verdict"] for g in r["identity_gaps"])
-    check("the family mobile is AMBIGUOUS and the junk bill is the counter gap",
-          kinds == ["ambiguous", "unmatched"], str(kinds))
+    # one ambiguous (the family mobile) and three counter gaps: the junk bill,
+    # the bill linked to a stub, and the bill never linked at all.
+    check("the family mobile is AMBIGUOUS and the rest are counter gaps",
+          kinds == ["ambiguous", "unmatched", "unmatched", "unmatched"], str(kinds))
     check("a gap row carries its working, step by step",
           all(len(g["steps"]) >= 2 for g in r["identity_gaps"]))
     check("an ambiguous row shows the candidates rather than picking",
@@ -128,7 +158,7 @@ def main():
     check("cash bills that could account for the difference are SUGGESTED",
           any(c["amount_p"] == 12500 for c in p["could_account_for_it"]))
     check("  ...and nothing was changed by suggesting it",
-          con.execute("SELECT COUNT(*) c FROM sale_item WHERE mode='cash'").fetchone()["c"] == 5)
+          con.execute("SELECT COUNT(*) c FROM sale_item WHERE mode='cash'").fetchone()["c"] == 8)
 
     # the backfill boundary
     r5 = G.day_report(con, OLD, "medical", ENV, punches, staff)
