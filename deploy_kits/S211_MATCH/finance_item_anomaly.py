@@ -36,7 +36,18 @@ import re
 import statistics
 
 MIN_HISTORY = int(os.environ.get("ITEM_MIN_HISTORY", "5"))
-QTY_MULTIPLE = float(os.environ.get("ITEM_QTY_MULTIPLE", "4.0"))
+# THE QUANTITY YARDSTICK IS THE ITEM'S OWN CEILING, NOT ITS MEDIAN.
+#
+# S211, first real run: four times the median flagged 445 lines over five
+# months, almost all of them tablets at 90-120 units -- six strips of a 1*15
+# pack, which is a month's course and entirely normal. It also MISSED the one
+# case the owner already knew about. A rule that floods on the ordinary and
+# misses the known fault is worse than none.
+#
+# So a line is unusual when it exceeds what this item has EVER sold as. Ninety
+# tablets of a drug that regularly leaves in ninety is not news; twenty of
+# something that has never left in more than two is.
+QTY_OVER_CEILING = float(os.environ.get("ITEM_QTY_OVER_CEILING", "1.5"))
 
 # THE RATE TEST IS RELATIVE TO THE ITEM'S OWN SPREAD, not a fixed percentage.
 #
@@ -94,16 +105,21 @@ def units(qty_raw, pack=None):
     return None
 
 
-def item_norms(con, upto_date=None):
-    """Per item: the usual per-unit rate and the usual quantity, from its own
-    history. Median, not mean -- one 20-tube line must not move the yardstick
-    it is about to be measured against."""
+def item_norms(con, before_date=None):
+    """Per item: what it usually rates and how much of it usually leaves.
+
+    STRICTLY BEFORE the day being judged. S211: with the day included, the two
+    outlier lines being examined pushed the item's own ceiling up to their own
+    value and cleared themselves. A day is judged against the days before it,
+    never against itself -- and the median is used, not the mean, for the same
+    reason.
+    """
     q = ("SELECT item_key, qty_raw, pack, amount_p FROM sale_line_item "
          "WHERE is_return=0 AND amount_p IS NOT NULL")
     a = ()
-    if upto_date:
-        q += " AND business_date <= ?"
-        a = (upto_date,)
+    if before_date:
+        q += " AND business_date < ?"
+        a = (before_date,)
     # amount_p IS THE RATE, not the line amount.
     # Proved against the Marg archive at S211: of 88 items seen at more than one
     # quantity, 71 print an IDENTICAL number every time -- PATOPAN DSR reads
@@ -128,7 +144,12 @@ def item_norms(con, upto_date=None):
                       rate_lo=min(rl) if rl else None,
                       rate_hi=max(rl) if rl else None,
                       qty=statistics.median(ql) if ql else None,
-                      qty_max=max(ql) if ql else None)
+                      qty_max=max(ql) if ql else None,
+                      # the ceiling: the 95th percentile of what this item has
+                      # ever sold as, so one freak line does not raise the bar
+                      # for everything after it
+                      qty_p95=(sorted(ql)[min(len(ql) - 1,
+                               int(round(0.95 * (len(ql) - 1))))] if ql else None))
     return out
 
 
@@ -174,11 +195,14 @@ def scan_day(con, business_date, unit="medical", norms=None):
             # beginning with "_" are notes; the verdict buckets are disjoint and
             # sum to the number of lines.
             tally["_quantity not comparable"] += 1
-        elif n.get("qty") and n["qty"] > 0 and u >= n["qty"] * QTY_MULTIPLE:
+        elif n.get("qty_p95") and n["qty_p95"] > 0 \
+                and u >= n["qty_p95"] * QTY_OVER_CEILING:
             flags.append("QUANTITY HIGH")
             detail.append("%d units on one line; this item usually leaves in %g, "
-                          "and its highest ever was %g"
-                          % (u, n["qty"], n.get("qty_max") or 0))
+                          "its busiest lines are around %g, and its highest ever "
+                          "was %g"
+                          % (u, n.get("qty") or 0, n["qty_p95"],
+                             n.get("qty_max") or 0))
         if not flags:
             tally["looks normal"] += 1
             continue

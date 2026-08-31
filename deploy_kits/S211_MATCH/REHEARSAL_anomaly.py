@@ -63,6 +63,12 @@ def main():
     line(DAY, "B-ORTHO", "ORTHO", "1:0", 1550000)   # 30% off -- entirely normal
     line(DAY, "B-ORTHO2", "ORTHO", "1:0", 1740000)  # 1% off  -- also normal
     line(DAY, "B-ORTHO-BAD", "ORTHO", "1:0", 120000) # a tenth of any of them
+    # A MONTH'S COURSE must not be flagged: a tablet that regularly leaves in
+    # 90 units is not news at 90. This is the 445-false-flag case from the first
+    # real run, seeded so it can never come back.
+    for i in range(12):
+        line(HIST, "C%02d" % i, "COURSE", "%d:0" % (1 + i % 6), 4000, pack="1*15")
+    line(DAY, "B-COURSE", "COURSE", "6:0", 4000, pack="1*15")   # 90 units, normal
     # LOOSE UNITS: a strip of 10 at 500 per unit. '0:5' is five singles, '1:0'
     # is a whole strip of ten -- and until the pack size was used, every partial
     # strip was thrown away as not comparable.
@@ -85,6 +91,9 @@ def main():
           by.get("B-BULK", {}).get("verdict") == "QUANTITY HIGH",
           "a bulk purchase must not be called a rate error")
     check("an ordinary line is not flagged at all", "B-OK" not in by)
+    check("A MONTH'S COURSE of a drug that regularly sells in 90s is NOT flagged",
+          "B-COURSE" not in by,
+          "the median rule flagged 445 of these over five months")
     check("an item with too little history is NOT judged", "B-RARE" not in by
           and tally.get("too little history to judge") == 1)
     # NOT the old assertion. Now that the rate is taken as printed, a line whose
@@ -111,13 +120,15 @@ def main():
     # the VERDICT buckets are disjoint and sum to the number of lines; keys
     # beginning with "_" are notes and are counted separately on purpose.
     check("every line lands in exactly ONE verdict bucket",
-          sum(v for k, v in tally.items() if not k.startswith("_")) == 10,
+          sum(v for k, v in tally.items() if not k.startswith("_")) == 11,
           str(tally))
 
     # the median must not be moved by the outlier it is about to judge
     n = A.item_norms(con, DAY)["OINT"]
     check("one wrong line does not move the yardstick",
           n["rate"] == 5000.0, "median rate %.0f" % n["rate"])
+    check("  ...and the day being judged is EXCLUDED from its own yardstick",
+          n["qty_max"] == 2, "ceiling from earlier days only: %g" % n["qty_max"])
     check("the RATE is taken as printed, never divided by the quantity",
           "amount_p IS THE RATE" in open("finance_item_anomaly.py",
                                          encoding="utf-8").read())
