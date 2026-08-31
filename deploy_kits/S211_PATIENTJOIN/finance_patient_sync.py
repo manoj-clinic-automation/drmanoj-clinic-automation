@@ -70,8 +70,19 @@ CREATE TABLE IF NOT EXISTS patient_id_collision (
     kept_uid    TEXT,
     other_uid   TEXT,
     other_name  TEXT,
+    kind        TEXT,          -- same_person | DIFFERENT_PEOPLE
     first_noted TEXT,
     PRIMARY KEY (clinic_id, other_uid)
+)"""
+
+MERGE_DDL = """
+CREATE TABLE IF NOT EXISTS patient_merge_candidate (
+    mobile_fp   TEXT NOT NULL,
+    clinic_id_a TEXT NOT NULL,
+    clinic_id_b TEXT NOT NULL,
+    name_seen   TEXT,
+    first_noted TEXT,
+    PRIMARY KEY (clinic_id_a, clinic_id_b)
 )"""
 
 VISIT_DDL = """
@@ -123,14 +134,24 @@ def ensure_columns(con):
     con.execute("CREATE INDEX IF NOT EXISTS ix_visit_clinic ON patient_visit(clinic_id)")
     con.execute("CREATE INDEX IF NOT EXISTS ix_visit_fp ON patient_visit(mobile_fp)")
     con.execute(COLLISION_DDL)
+    have_col = {r[1] for r in con.execute("PRAGMA table_info(patient_id_collision)")}
+    if "kind" not in have_col:
+        con.execute("ALTER TABLE patient_id_collision ADD COLUMN kind TEXT")
+    con.execute(MERGE_DDL)
     return added
+
+
+def _same(a, b):
+    return (a or "").strip().upper() == (b or "").strip().upper()
 
 
 def sync_patients(con, rows, dry_run=False):
     c = dict(seen=0, no_clinic_id=0, inserted=0, updated=0, unchanged=0,
-             dup_in_file=0)
+             dup_in_file=0, dup_different_people=0, merge_candidates=0)
     seen_ids = set()
     seen_ids_uid = {}
+    seen_ids_kept = {}
+    by_person = {}
     for r in rows:
         c["seen"] += 1
         cid = (r.get("clinic_id") or "").strip()
@@ -144,16 +165,54 @@ def sync_patients(con, rows, dry_run=False):
             # dropped in silence -- it is recorded, and D355 matching has to
             # treat such an ID as AMBIGUOUS rather than as a clean match.
             c["dup_in_file"] += 1
+            # S211, after the owner's two-clinic ruling: NOT all collisions are
+            # equal, and only one kind is dangerous.
+            #   same_person      -- same name AND same mobile as the row we kept.
+            #                       One patient recorded twice. Benign: the
+            #                       person IS in the table. All 9 groups in the
+            #                       real master are this.
+            #   DIFFERENT_PEOPLE -- the name or the mobile differs. THIS is the
+            #                       two-clinic hazard actually happening: a real
+            #                       patient is being dropped, and any bill
+            #                       carrying that id could mean either of them.
+            kept = seen_ids_kept.get(cid, {})
+            same = (_same(kept.get("name"), r.get("name"))
+                    and _same(kept.get("mobile_fp"), r.get("mobile_fp")))
+            kind = "same_person" if same else "DIFFERENT_PEOPLE"
+            if not same:
+                c["dup_different_people"] += 1
             if not dry_run:
                 con.execute(
                     "INSERT OR IGNORE INTO patient_id_collision "
-                    "(clinic_id, kept_uid, other_uid, other_name, first_noted) "
-                    "VALUES (?,?,?,?,datetime('now','localtime'))",
+                    "(clinic_id, kept_uid, other_uid, other_name, kind, first_noted) "
+                    "VALUES (?,?,?,?,?,datetime('now','localtime'))",
                     (cid, seen_ids_uid.get(cid, ""), r.get("patient_uid") or "",
-                     r.get("name") or ""))
+                     r.get("name") or "", kind))
             continue
         seen_ids.add(cid)
         seen_ids_uid[cid] = r.get("patient_uid") or ""
+        seen_ids_kept[cid] = dict(name=r.get("name"), mobile_fp=r.get("mobile_fp"))
+        # ONE PERSON, TWO CLINIC IDS -- the owner runs two clinics and each
+        # issues its own id per patient. Same fingerprint AND same name under
+        # two different ids is one human whose history is split in half. The
+        # schema already anticipated this: patient_ref.merged_into exists to
+        # "de-dup without rewriting history". These are recorded as candidates;
+        # nothing is merged automatically, because merging is the owner's call.
+        fp, nm = r.get("mobile_fp") or "", (r.get("name") or "").strip().upper()
+        if fp and nm:
+            key = (fp, nm)
+            prev = by_person.get(key)
+            if prev and prev != cid:
+                a, b = sorted((prev, cid))
+                if not dry_run:
+                    con.execute(
+                        "INSERT OR IGNORE INTO patient_merge_candidate "
+                        "(mobile_fp, clinic_id_a, clinic_id_b, name_seen, first_noted) "
+                        "VALUES (?,?,?,?,datetime('now','localtime'))",
+                        (fp, a, b, r.get("name") or ""))
+                c["merge_candidates"] += 1
+            else:
+                by_person[key] = cid
         def _int_or_none(k):
             v = str(r.get(k) or "").strip()
             return int(v) if v.lstrip("-").isdigit() else None
@@ -247,8 +306,18 @@ def run(db_path=None, inbox=None, dry_run=False):
               % (pc["seen"], pc["inserted"], pc["updated"], pc["unchanged"],
                  pc["no_clinic_id"], pc["dup_in_file"]))
         ncol = con.execute("SELECT COUNT(*) c FROM patient_id_collision").fetchone()[0]
+        if pc["dup_different_people"]:
+            print("!! DANGER: %d collision(s) where the two rows are DIFFERENT "
+                  "PEOPLE - different name or different mobile under one clinic "
+                  "ID. A real patient has been dropped, and any bill carrying "
+                  "that ID is AMBIGUOUS. Look at patient_id_collision WHERE "
+                  "kind='DIFFERENT_PEOPLE'." % pc["dup_different_people"])
+        if pc["merge_candidates"]:
+            print("   %d patient(s) hold more than one clinic ID (the same person "
+                  "in both clinics). Recorded in patient_merge_candidate; nothing "
+                  "merged - that is your call." % pc["merge_candidates"])
         if pc["dup_in_file"]:
-            print("!! %d clinic ID(s) in this export name MORE THAN ONE patient. "
+            print("   %d clinic ID(s) in this export name MORE THAN ONE patient. "
                   "Kept the first; every collision is recorded in "
                   "patient_id_collision (%d on file). Such an ID is AMBIGUOUS, "
                   "not a clean match." % (pc["dup_in_file"], ncol))
@@ -310,7 +379,11 @@ def selftest():
         ["4472","U2","SITA DEVI",    "fp_aaa","3210","2","ok","2026-02-01","2026-08-02","0","","","1",""],
         ["9",   "U3","EARLY PATIENT","fp_bbb","1111","1","ok","2025-01-01","2026-07-01","","","","",""],
         ["",    "U4","NO CLINIC ID", "fp_ccc","2222","1","ok","","","","","","",""],
-        ["4471","U1","DUPLICATE ROW","fp_aaa","3210","2","ok","","","","","","",""],
+        ["4471","U1","RAMESH KUMAR","fp_aaa","3210","2","ok","","","","","","",""],
+        ["7001","U5","ANIL VERMA","fp_ddd","4444","1","ok","","","","","","",""],
+        ["7001","U6","SUNITA RANI","fp_eee","5555","1","ok","","","","","","",""],
+        ["8001","U7","KAVITA SINGH","fp_fff","6666","1","ok","","","","","","",""],
+        ["8002","U8","KAVITA SINGH","fp_fff","6666","1","ok","","","","","","",""],
     ])
     wb(os.path.join(tmp, VISITS_XLSX), VC, [
         ["V1","2026-08-26","4471","U1","fp_aaa","Y"],
@@ -342,6 +415,17 @@ def selftest():
           g("SELECT admin_cc_p a FROM patient_ref WHERE clinic_id='9'")["a"] is None)
     check("a colliding clinic id is RECORDED, not silently dropped",
           g("SELECT COUNT(*) c FROM patient_id_collision WHERE clinic_id='4471'")["c"] == 1)
+    check("  ...and a SAME-PERSON duplicate is marked benign",
+          g("SELECT kind k FROM patient_id_collision WHERE clinic_id='4471'")["k"]
+          == "same_person")
+    check("a collision between DIFFERENT PEOPLE is marked as the danger it is",
+          g("SELECT kind k FROM patient_id_collision WHERE clinic_id='7001'")["k"]
+          == "DIFFERENT_PEOPLE")
+    check("one person holding TWO clinic ids becomes a merge candidate",
+          g("SELECT COUNT(*) c FROM patient_merge_candidate WHERE clinic_id_a='8001' "
+            "AND clinic_id_b='8002'")["c"] == 1)
+    check("  ...and NOTHING is merged automatically - both rows stay",
+          g("SELECT COUNT(*) c FROM patient_ref WHERE clinic_id IN ('8001','8002')")["c"] == 2)
     check("F-34: two patients on ONE mobile are BOTH kept",
           g("SELECT COUNT(*) c FROM patient_ref WHERE mobile_fp='fp_aaa'")["c"] == 2)
     check("  ...so a lookup on that fingerprint is AMBIGUOUS, never a pick",
@@ -361,7 +445,7 @@ def selftest():
     # three: the seeded 4471, plus 4472 and 9. The blank clinic id and the
     # in-file duplicate were both refused, which is the point of the count.
     check("re-running inserts nothing new",
-          rc2 == 0 and con.execute("SELECT COUNT(*) c FROM patient_ref").fetchone()["c"] == 3)
+          rc2 == 0 and con.execute("SELECT COUNT(*) c FROM patient_ref").fetchone()["c"] == 6)
     check("re-running adds no duplicate visits",
           con.execute("SELECT COUNT(*) c FROM patient_visit").fetchone()["c"] == 2)
     con.close()
@@ -372,7 +456,7 @@ def selftest():
     run(db, tmp)
     con = sqlite3.connect(db); con.row_factory = sqlite3.Row
     check("a patient dropped from the export is KEPT in finance.db",
-          con.execute("SELECT COUNT(*) c FROM patient_ref").fetchone()["c"] == 3)
+          con.execute("SELECT COUNT(*) c FROM patient_ref").fetchone()["c"] == 6)
     check("  ...and the sale still points at its patient",
           con.execute("SELECT patient_ref_id p FROM sale_item").fetchone()["p"] == 1)
     con.close()
