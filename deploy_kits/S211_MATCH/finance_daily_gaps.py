@@ -24,6 +24,7 @@ Two kinds of gap, per the owner:
 Plus WHO WAS AT THE COUNTER, by his rule: Darpan's punch means Darpan, no punch
 means Vinay, and his own selector overrides both.
 """
+import collections
 import csv
 import os
 
@@ -207,6 +208,45 @@ def identity_gaps(con, business_date, unit="medical", env=None,
     return out, tally
 
 
+def declared_vs_bank(con, business_date, unit="medical"):
+    """Darpan's DECLARED day figure against what the bank settled.
+
+    S211, corrected by the owner: he types the day's UPI total himself and the
+    MPR is matched against THAT. It lives in `day_line` (service, mode, amount) --
+    not in `sale_item.mode`, which comes from the Marg export and which nobody
+    maintains. An earlier version of this module compared sale_item.mode to the
+    bank, found 'zero digital' on days the bank settled five figures, and
+    reported 133,514 rupees of disagreement. **That number was an artefact of
+    reading a field nobody fills.** Comparing the declared figure is the check
+    the system has actually run since S179.
+    """
+    d = con.execute(
+        "SELECT COALESCE(SUM(l.amount_p),0) p, COUNT(*) n FROM day_line l "
+        "JOIN day_entry e ON e.id=l.day_entry_id "
+        "WHERE e.unit=? AND e.business_date=? AND l.mode IN ('upi','card')",
+        (unit, business_date)).fetchone()
+    cash = con.execute(
+        "SELECT COALESCE(SUM(l.amount_p),0) p FROM day_line l "
+        "JOIN day_entry e ON e.id=l.day_entry_id "
+        "WHERE e.unit=? AND e.business_date=? AND l.mode='cash'",
+        (unit, business_date)).fetchone()
+    bank = con.execute(
+        "SELECT parsed_total_p p, txn_count n FROM upi_statement "
+        "WHERE unit=? AND statement_date=?", (unit, business_date)).fetchone()
+    bank_p = (bank["p"] or 0) if bank else None
+    return dict(declared_digital_p=d["p"], declared_lines=d["n"],
+                declared_cash_p=cash["p"],
+                bank_settled_p=bank_p,
+                bank_txn_count=(bank["n"] if bank else None),
+                difference_p=(None if bank_p is None else bank_p - d["p"]),
+                note=("no bank statement for this day yet" if bank_p is None else
+                      "the declared figure agrees with the bank"
+                      if bank_p == d["p"] else
+                      "the bank settled MORE than was declared"
+                      if bank_p > d["p"] else
+                      "MORE was declared than the bank settled"))
+
+
 def payment_gaps(con, business_date, unit="medical"):
     """The day's declared modes against what the bank actually settled.
 
@@ -238,6 +278,8 @@ def payment_gaps(con, business_date, unit="medical"):
                 "AND s.amount_p <= ? ORDER BY s.amount_p DESC LIMIT 25",
                 (unit, business_date, diff)):
             candidates.append(dict(bill_no=r["bill_no"], amount_p=r["amount_p"]))
+    # sale_item.mode is the MARG-side mode. It is kept here as a secondary
+    # signal only -- it is NOT what the day is judged on (see declared_vs_bank).
     return dict(modes=modes, bank_settled_p=bank_p,
                 bank_txn_count=(bank["n"] if bank else None),
                 entered_digital_p=entered_digital, difference_p=diff,
@@ -246,6 +288,56 @@ def payment_gaps(con, business_date, unit="medical"):
                       "the day agrees with the bank" if diff == 0 else
                       "the bank settled more than the bills declare" if diff > 0 else
                       "the bills declare more digital than the bank settled"))
+
+
+# ------------------------------------------------- the sanctioned discounts
+
+PD_ROUND_TOLERANCE_P = int(os.environ.get("PD_ROUND_TOLERANCE_P", "500"))
+
+
+def discount_rows(con, business_date, unit="medical"):
+    """Every sale to a patient holding a sanctioned pharmacy discount.
+
+    The owner's shape: sanctioned percent, amount given, did it match. Rounding
+    is EXEMPTED but RECORDED -- a row within tolerance still shows what it was,
+    it is simply not counted as a breach. The ones given MORE than sanctioned
+    are their own bucket, because a cluster at one percentage means a different
+    rule is being applied, and that is worth knowing.
+    """
+    rows = con.execute(
+        "SELECT s.source_ref bill, s.gross_p, s.disc_p, s.amount_p, "
+        "       p.admin_pd_pct pct, p.clinic_id, p.name "
+        "FROM sale_item s JOIN day_entry e ON e.id=s.day_entry_id "
+        "JOIN patient_ref p ON p.id=s.patient_ref_id "
+        "WHERE e.unit=? AND e.business_date=? "
+        "AND s.service NOT LIKE '%!_return' ESCAPE '!' "
+        "AND p.admin_pd_pct IS NOT NULL AND p.admin_pd_pct > 0 "
+        "ORDER BY s.source_ref", (unit, business_date)).fetchall()
+    out = []
+    tally = collections.Counter()
+    for r in rows:
+        g = r["gross_p"] or 0
+        given = r["disc_p"] or 0
+        want = int(round(g * r["pct"] / 100.0))
+        diff = given - want
+        if g == 0:
+            v = "no gross amount"
+        elif given == 0:
+            v = "none given"
+        elif abs(diff) <= PD_ROUND_TOLERANCE_P:
+            v = "matches"
+        elif diff < 0:
+            v = "short"
+        else:
+            v = "over"
+        tally[v] += 1
+        out.append(dict(bill=r["bill"], clinic_id=r["clinic_id"],
+                        sanctioned_pct=r["pct"], gross_p=g,
+                        sanctioned_p=want, given_p=given, diff_p=diff,
+                        given_pct=(round(100.0 * given / g, 1) if g else None),
+                        verdict=v,
+                        rounding_exempt=(v == "matches" and diff != 0)))
+    return out, dict(tally)
 
 
 # ----------------------------------------------------------- the day
@@ -265,6 +357,8 @@ def day_report(con, business_date, unit="medical", env=None,
     return dict(date=business_date, unit=unit,
                 counter=counter_for_date(business_date, punch_csv, staff_csv,
                                          override_seller),
+                declared=declared_vs_bank(con, business_date, unit),
                 totals=tally, identity_gaps=gaps,
                 payment=payment_gaps(con, business_date, unit),
+                discounts=discount_rows(con, business_date, unit),
                 before_identity_era=era)

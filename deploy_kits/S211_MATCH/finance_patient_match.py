@@ -38,6 +38,10 @@ import re
 import unicodedata
 
 SALT_ENV = "PATIENT_FP_SALT"
+# Adopted from revenue-reconciliation/reconcile_revenue.py (28-Jun, decision D11):
+# a pharmacy purchase follows a consultation by days, not hours, so the visit
+# match runs over a WINDOW. Same-day only was throwing the ledger away.
+DATE_WINDOW_DAYS = int(os.environ.get("DATE_WINDOW_DAYS", "3"))
 _DIGITS = re.compile(r"\D+")
 _MOBILE_IN_TEXT = re.compile(r"(?<!\d)([6-9]\d{9})(?!\d)")
 # a clinic id as the counter writes it: leading token of 1-8 digits, or in brackets
@@ -312,20 +316,26 @@ def match_bill(con, text, business_date=None, env=None):
     # rung 3 -- the visit record for that day
     if business_date and _has_table(con, "patient_visit"):
         vis = _rows(con,
-                    "SELECT p.id, p.clinic_id, p.name FROM patient_visit v "
+                    "SELECT DISTINCT p.id, p.clinic_id, p.name FROM patient_visit v "
                     "JOIN patient_ref p ON p.clinic_id = v.clinic_id "
-                    "WHERE v.visit_date = ?", business_date)
+                    "WHERE v.visit_date BETWEEN date(?, ?) AND date(?, ?)",
+                    business_date, "-%d days" % DATE_WINDOW_DAYS,
+                    business_date, "+%d days" % DATE_WINDOW_DAYS)
         fit = [r for r in vis if ident["name"] and names_agree(ident["name"], r["name"])]
         if len(fit) == 1:
             steps.append(dict(step="visit record",
-                              detail="1 patient visited that day and fits"))
+                              detail="1 patient visited within %d days and fits"
+                                     % DATE_WINDOW_DAYS))
             return _out("matched_visit", dict(fit[0]), [], steps)
         if len(fit) > 1:
             steps.append(dict(step="visit record",
-                              detail="%d patients who visited fit - AMBIGUOUS" % len(fit)))
+                              detail="%d patients who visited within %d days fit "
+                                     "- AMBIGUOUS" % (len(fit), DATE_WINDOW_DAYS)))
             return _out("ambiguous", None, [dict(r) for r in fit], steps)
         steps.append(dict(step="visit record",
-                          detail="no visiting patient fits" if vis else "no visits recorded that day"))
+                          detail="no visiting patient fits"
+                                 if vis else "no visits within %d days"
+                                 % DATE_WINDOW_DAYS))
 
     return _out("unmatched", None, [], steps)
 
