@@ -21,7 +21,7 @@ CREATE TABLE patient_ref (id INTEGER PRIMARY KEY, clinic_id TEXT, name TEXT);
 CREATE TABLE sale_item (id INTEGER PRIMARY KEY, source_ref TEXT, patient_ref_id INTEGER);
 CREATE TABLE sale_line_item (id INTEGER PRIMARY KEY, business_date TEXT NOT NULL,
   bill_no TEXT NOT NULL, is_return INTEGER NOT NULL DEFAULT 0, seq INTEGER,
-  item_name TEXT, item_key TEXT, qty_raw TEXT, amount_p INTEGER);
+  item_name TEXT, item_key TEXT, qty_raw TEXT, pack TEXT, amount_p INTEGER);
 """
 HIST, DAY = "2026-06-01", "2026-06-20"
 
@@ -30,10 +30,10 @@ def main():
     db = os.path.join(tmp, "f.db")
     con = sqlite3.connect(db); con.row_factory = sqlite3.Row; con.executescript(SCHEMA)
     con.execute("INSERT INTO patient_ref (id,clinic_id,name) VALUES (1,'4471','A PATIENT')")
-    def line(d, bill, key, qty, amt, ret=0, seq=1):
+    def line(d, bill, key, qty, amt, ret=0, seq=1, pack="1*1"):
         con.execute("INSERT INTO sale_line_item (business_date,bill_no,is_return,seq,"
-                    "item_name,item_key,qty_raw,amount_p) VALUES (?,?,?,?,?,?,?,?)",
-                    (d, bill, ret, seq, key, key, qty, amt))
+                    "item_name,item_key,qty_raw,pack,amount_p) VALUES (?,?,?,?,?,?,?,?,?)",
+                    (d, bill, ret, seq, key, key, qty, pack, amt))
         con.execute("INSERT OR IGNORE INTO sale_item (source_ref,patient_ref_id) "
                     "VALUES (?,1)", (bill,))
     # an ointment that leaves in ones and twos, at 5000 paise a tube
@@ -52,7 +52,9 @@ def main():
     # 4 -- an item with no history to compare against
     line(DAY, "B-RARE", "RAREITEM", "9:0", 8100)
     # 5 -- a quantity that cannot be parsed, so no rate may be claimed
-    line(DAY, "B-ODD", "OINT", "3:7", 15000)
+    # a partial strip with NO pack size recorded: strips and loose cannot be put
+    # in the same terms, so no rate may be claimed.
+    line(DAY, "B-ODD", "OINT", "3:7", 15000, pack="")
     # AN ORTHOTIC: high value, and a discount that legitimately ranges wide.
     # The owner's real figures: 22,000 MRP sold at 15,500; 17,600 given 600 off.
     for amt in (2200000, 1550000, 1760000, 1700000, 2000000, 1850000, 1600000):
@@ -60,6 +62,13 @@ def main():
     line(DAY, "B-ORTHO", "ORTHO", "1:0", 1550000)   # 30% off -- entirely normal
     line(DAY, "B-ORTHO2", "ORTHO", "1:0", 1740000)  # 1% off  -- also normal
     line(DAY, "B-ORTHO-BAD", "ORTHO", "1:0", 120000) # a tenth of any of them
+    # LOOSE UNITS: a strip of 10 at 500 per unit. '0:5' is five singles, '1:0'
+    # is a whole strip of ten -- and until the pack size was used, every partial
+    # strip was thrown away as not comparable.
+    for i in range(6):
+        line(HIST, "L%d" % i, "TABS", "1:0", 5000, pack="1*10")
+    line(DAY, "B-LOOSE", "TABS", "0:5", 2500, pack="1*10")   # 5 singles, right rate
+    line(DAY, "B-LOOSE-BAD", "TABS", "0:5", 250, pack="1*10")  # a tenth of it
     con.commit()
 
     rows, tally = A.scan_day(con, DAY)
@@ -77,7 +86,7 @@ def main():
     check("an ordinary line is not flagged at all", "B-OK" not in by)
     check("an item with too little history is NOT judged", "B-RARE" not in by
           and tally.get("too little history to judge") == 1)
-    check("a quantity that cannot be parsed claims NO rate", "B-ODD" not in by
+    check("a partial strip with NO pack size claims NO rate", "B-ODD" not in by
           and tally.get("quantity not comparable") == 1)
     check("an ORTHOTIC discounted 30% is NOT flagged -- its price legitimately "
           "ranges that far", "B-ORTHO" not in by)
@@ -86,8 +95,14 @@ def main():
           by.get("B-ORTHO-BAD", {}).get("verdict", "").startswith("RATE OFF"))
     check("  ...and the flag quotes the item's own observed range",
           "has ranged" in by.get("B-ORTHO-BAD", {}).get("detail", ""))
+    check("a PARTIAL STRIP is now comparable, not discarded",
+          tally.get("quantity not comparable", 0) == 1,
+          "only the genuinely unparseable one remains")
+    check("  ...and a loose sale at the right rate is not flagged", "B-LOOSE" not in by)
+    check("  ...but a loose sale at a tenth of the rate IS",
+          by.get("B-LOOSE-BAD", {}).get("verdict", "").startswith("RATE OFF"))
     check("the tally accounts for every line",
-          sum(tally.values()) == 8, str(tally))
+          sum(tally.values()) == 10, str(tally))
 
     # the median must not be moved by the outlier it is about to judge
     n = A.item_norms(con, DAY)["OINT"]

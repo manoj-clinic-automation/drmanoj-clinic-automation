@@ -55,17 +55,40 @@ MAD_MULTIPLE = float(os.environ.get("ITEM_MAD_MULTIPLE", "6.0"))
 RATE_FLOOR = float(os.environ.get("ITEM_RATE_FLOOR", "0.35"))   # when spread is 0
 
 
-def units(qty_raw):
-    """Marg prints 'strips:loose'. Returns a comparable unit count, or None.
+def pack_size(pack):
+    """Marg prints the pack as '1*10' -- ten units to a strip. Returns 10.
 
-    None rather than a guess: a rate computed from a misread quantity would
-    manufacture exactly the anomaly this module exists to find.
+    S211, found on the first real run: 2,330 of 3,247 lines were being thrown
+    away as 'quantity not comparable' because the loose part was non-zero. The
+    pack size is the divisor that makes '0:5' comparable to '1:0', and it was
+    sitting unused in its own column the whole time.
+    """
+    m = re.search(r"(\d+)\s*\*\s*(\d+)", str(pack or ""))
+    if m:
+        n = int(m.group(2))
+        return n if 0 < n <= 1000 else None
+    return None
+
+
+def units(qty_raw, pack=None):
+    """Marg prints 'strips:loose'. Returns the count in SINGLE UNITS, or None.
+
+    strips * pack_size + loose. Without a pack size a partial strip cannot be
+    expressed in the same terms as a whole one, so it returns None rather than
+    a guess: a rate computed from a misread quantity would manufacture exactly
+    the anomaly this module exists to find.
     """
     s = str(qty_raw or "").strip()
     m = re.fullmatch(r"(\d+)\s*[:\.]\s*(\d+)", s)
     if m:
         strips, loose = int(m.group(1)), int(m.group(2))
-        return strips if loose == 0 else None
+        if loose == 0:
+            ps = pack_size(pack)
+            return strips * ps if ps else strips
+        ps = pack_size(pack)
+        if ps:
+            return strips * ps + loose
+        return loose if strips == 0 else None
     if re.fullmatch(r"\d+", s):
         return int(s)
     return None
@@ -75,7 +98,7 @@ def item_norms(con, upto_date=None):
     """Per item: the usual per-unit rate and the usual quantity, from its own
     history. Median, not mean -- one 20-tube line must not move the yardstick
     it is about to be measured against."""
-    q = ("SELECT item_key, qty_raw, amount_p FROM sale_line_item "
+    q = ("SELECT item_key, qty_raw, pack, amount_p FROM sale_line_item "
          "WHERE is_return=0 AND amount_p IS NOT NULL")
     a = ()
     if upto_date:
@@ -83,7 +106,7 @@ def item_norms(con, upto_date=None):
         a = (upto_date,)
     rates, qtys = collections.defaultdict(list), collections.defaultdict(list)
     for r in con.execute(q, a):
-        u = units(r["qty_raw"])
+        u = units(r["qty_raw"], r["pack"])
         if not u:
             continue
         qtys[r["item_key"]].append(u)
@@ -108,7 +131,8 @@ def scan_day(con, business_date, unit="medical", norms=None):
     """Every sale line of the day, measured against its own item's history."""
     norms = norms if norms is not None else item_norms(con, business_date)
     rows = con.execute(
-        "SELECT l.bill_no, l.seq, l.item_name, l.item_key, l.qty_raw, l.amount_p, "
+        "SELECT l.bill_no, l.seq, l.item_name, l.item_key, l.qty_raw, l.pack, "
+        "       l.amount_p, "
         "       s.patient_ref_id, p.name, p.clinic_id "
         "FROM sale_line_item l "
         "LEFT JOIN sale_item s ON s.source_ref = l.bill_no "
@@ -117,7 +141,7 @@ def scan_day(con, business_date, unit="medical", norms=None):
         "ORDER BY l.bill_no, l.seq", (business_date,)).fetchall()
     out, tally = [], collections.Counter()
     for r in rows:
-        u = units(r["qty_raw"])
+        u = units(r["qty_raw"], r["pack"])
         n = norms.get(r["item_key"]) or {}
         flags, detail = [], []
         if u is None:

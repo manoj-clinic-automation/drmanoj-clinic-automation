@@ -1,10 +1,10 @@
 0700768afc475d43da5f24deb6e8fc38  finance_patient_match.py
 344fd5a0fd953c49dd2461e1f1d16430  finance_daily_gaps.py
 e69d390b99e6ba2fc05031c7194adf08  finance_returns_audit.py
-012695cef878b060db3b2aa02a72e761  finance_item_anomaly.py
+96e9503c3a8b20d02abfe953daf10798  finance_item_anomaly.py
 75dfa0719b9c21747cb02cd95455dfa0  REHEARSAL_match.py
 717aaaaa73700149fdf3baddea480c37  REHEARSAL_dailygaps.py
-aa8f62d14b96274e9b14f350785bd4eb  REHEARSAL_anomaly.py
+2d0366e420e591c364951fe5c1fe9bb4  REHEARSAL_anomaly.py
 f17093067d0d5a09acaf5bf1a4d7c557  tally_recent.py
 cebfc9d5a1f14cfb58fa44e4ef0cf7a9  diagnose_identity_text.py
 99e32d03a9db8899a0b8335e0fc67f83  crosstab.py
