@@ -153,6 +153,36 @@ def main():
           "amount_p IS THE RATE" in open("finance_item_anomaly.py",
                                          encoding="utf-8").read())
 
+    # ------------------------------------------------------------------
+    # THE CALLER'S MISTAKE, which this rehearsal used to be blind to.
+    # Three times in one session a probe computed the norms ONCE over the
+    # whole period and passed them to every day, putting each outlier
+    # inside its own yardstick. The library was right each time; the
+    # caller defeated it, and the rehearsal never noticed because it only
+    # ever exercised the library. So: exercise it the way the probes do.
+    # ------------------------------------------------------------------
+    import inspect
+    check("scan_day takes NO norms argument -- the door is gone",
+          "norms" not in inspect.signature(A.scan_day).parameters,
+          str(inspect.signature(A.scan_day)))
+
+    days = [r[0] for r in con.execute(
+        "SELECT DISTINCT business_date FROM sale_line_item ORDER BY 1")]
+    walked, wtally = [], {}
+    for d in days:                      # exactly the probes' loop
+        rr, tt = A.scan_day(con, d)
+        walked += rr
+        for k, v in tt.items(): wtally[k] = wtally.get(k, 0) + v
+    ez = [r for r in walked if r["bill"] == "B-ENZO"]
+    check("walking day by day, the 20-tube ointment still flags",
+          bool(ez) and ez[0]["verdict"].startswith("FAR BEYOND"),
+          "%d flagged rows over %d days" % (len(walked), len(days)))
+    check("  ...and every flagged row carries the yardstick it was judged by",
+          all(("usual_p95" in r and "usual_max" in r) for r in walked))
+    check("  ...so a caller can print 'usual' without ever touching norms",
+          bool(ez) and (ez[0].get("usual_max") or 0) == 1,
+          "usual for the ointment: highest ever %s" % (ez[0].get("usual_max") if ez else "?"))
+
     con.close()
     print("\nREHEARSAL: %d/%d %s" % (OK, OK + BAD, "ALL PASS" if BAD == 0 else "-- FAILED"))
     return 0 if BAD == 0 else 1

@@ -44,23 +44,17 @@ for k, v in tally.most_common():
 print("\n" + "=" * 74)
 print("THE QUANTITY OUTLIERS, worst first -- how many units against the usual")
 print("=" * 74)
-def excess(r):
-    n = norms.get(re.sub(r"\s+", " ", r["item"]).strip(), {})
-    return r["units"] or 0
 allrows.sort(key=lambda r: -(r["units"] or 0))
 print("%-11s %-28s %8s %10s  %s" % ("date","item","units","usual","verdict"))
 seen = 0
 for r in allrows:
     if "QUANTITY" not in r["verdict"]: continue
-    key = r["item"]
-    n = None
-    for k, v in norms.items():
-        if k == key: n = v; break
     seen += 1
     if seen > 25: break
     print("%-11s %-28s %8s %10s  %s" %
           (r["date"], str(r["item"])[:28], r["units"],
-           (("%g" % n["qty"]) if n and n.get("qty") else "?"), r["verdict"]))
+           (("%g" % r["usual_p95"]) if r.get("usual_p95") else "?"),
+           r["verdict"]))
 print("\nquantity outliers in total: %d"
       % sum(1 for r in allrows if "QUANTITY" in r["verdict"]))
 

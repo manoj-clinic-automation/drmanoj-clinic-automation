@@ -167,9 +167,20 @@ def item_norms(con, before_date=None):
     return out
 
 
-def scan_day(con, business_date, unit="medical", norms=None):
-    """Every sale line of the day, measured against its own item's history."""
-    norms = norms if norms is not None else item_norms(con, business_date)
+def scan_day(con, business_date, unit="medical"):
+    """Every sale line of the day, measured against its own item's history.
+
+    There is deliberately NO norms argument. Callers used to be allowed to
+    pass one in, and twice a caller computed it ONCE over the whole period
+    and handed the same yardstick to every day -- which puts each outlier
+    inside the ruler that is meant to catch it. That is how the 30-June
+    ointment line cleared itself: with its own four lines in view its
+    ceiling became 20, and 20 is not eight times 20. The only way to make
+    that mistake impossible was to remove the door. Each row now carries
+    the yardstick it was measured against (usual_*), so no caller ever
+    needs the norms table to explain a flag.
+    """
+    norms = item_norms(con, business_date)   # strictly days BEFORE this one
     rows = con.execute(
         "SELECT l.bill_no, l.seq, l.item_name, l.item_key, l.qty_raw, l.pack, "
         "       l.amount_p, "
@@ -198,6 +209,10 @@ def scan_day(con, business_date, unit="medical", norms=None):
                                        "than %g -- thin history, so this is a "
                                        "flag to look at, not a finding"
                                        % (u, n.get("n", 0), mx),
+                                usual_qty=n.get("qty"),
+                                usual_p95=n.get("qty_p95"),
+                                usual_max=mx,
+                                usual_rate_p=n.get("rate"),
                                 item_seen=n.get("n")))
             else:
                 tally["too little history to judge"] += 1
@@ -243,5 +258,9 @@ def scan_day(con, business_date, unit="medical", norms=None):
                         qty_raw=r["qty_raw"], units=u, rate_p=r["amount_p"],
                         name=r["name"] or "", clinic_id=r["clinic_id"] or "",
                         verdict=worst, detail=" | ".join(detail),
+                        usual_qty=n.get("qty"),
+                        usual_p95=n.get("qty_p95"),
+                        usual_max=n.get("qty_max"),
+                        usual_rate_p=n.get("rate"),
                         item_seen=n.get("n")))
     return out, dict(tally)
