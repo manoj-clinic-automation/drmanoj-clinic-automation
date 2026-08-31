@@ -1,12 +1,21 @@
 #!/usr/bin/env python3
-"""tally_recent.py -- read-only. Does the matcher work on REAL bills?
+"""tally_recent.py -- read-only. What is really in the day, and does 100% mean anything?
 
-Runs the D355 verdicts over the last N filed days and prints counts only.
-No patient name, no number, no bill text is printed. Writes nothing.
+Counts only. No name, no number, no bill text. Writes nothing.
+
+S211: the first version reported 126 bills at 100% matched, which is too clean to
+trust. Two things were wrong with the question it asked:
+  * SALES RETURNS were counted as bills. A return is not a sale.
+  * "matched" only ever meant "linked to a patient_ref row that has a uid". If
+    resolve_patient links every bill to something, and every clinic id in the
+    period happens to be in the master, nothing can ever fail -- a measure that
+    cannot fail is not a measure.
+So this splits sales from returns, and shows WHERE the gap could hide: bills on
+WALK-IN, bills linked to a stub, and whether sale_item holds one row per bill.
 """
-import os, sqlite3, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) or ".")
+import collections, os, sqlite3, sys
 sys.path.insert(0, "/root/finance")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) or ".")
 import finance_daily_gaps as G
 
 DB = os.environ.get("FINANCE_DB", "/root/finance/finance.db")
@@ -15,24 +24,71 @@ con = sqlite3.connect(DB); con.row_factory = sqlite3.Row
 days = [r[0] for r in con.execute(
     "SELECT business_date FROM day_entry WHERE unit='medical' "
     "ORDER BY business_date DESC LIMIT ?", (N,)).fetchall()]
-if not days:
-    print("no filed days found for unit 'medical'"); raise SystemExit(1)
-tot = dict(bills=0, matched=0, ambiguous=0, unmatched=0)
-print("%-12s %6s %8s %10s %10s   counter" % ("date","bills","matched","ambiguous","unmatched"))
-for d in sorted(days):
+days = sorted(days)
+q = ",".join("?" * len(days))
+
+rows = con.execute(
+    "SELECT s.*, d.business_date bd FROM sale_item s "
+    "JOIN day_entry d ON d.id=s.day_entry_id "
+    "WHERE d.unit='medical' AND d.business_date IN (%s)" % q, days).fetchall()
+
+print("=== WHAT IS ACTUALLY IN THESE %d DAYS ===" % len(days))
+print("sale_item rows                    : %d" % len(rows))
+print("by service                        :",
+      dict(collections.Counter(r["service"] for r in rows)))
+print("distinct bill numbers (source_ref): %d" % len({r["source_ref"] for r in rows}))
+print("   -> if that is far below the row count, a bill spans several rows")
+print()
+
+sales = [r for r in rows if not (r["service"] or "").endswith("_return")]
+rets = [r for r in rows if (r["service"] or "").endswith("_return")]
+print("SALES   %d      RETURNS %d" % (len(sales), len(rets)))
+print()
+
+print("=== WHERE COULD A GAP HIDE? ===")
+walkin = con.execute("SELECT id FROM patient_ref WHERE UPPER(clinic_id)='WALK-IN'").fetchone()
+wid = walkin["id"] if walkin else None
+n_walk = sum(1 for r in rows if wid and r["patient_ref_id"] == wid)
+n_nolink = sum(1 for r in rows if not r["patient_ref_id"])
+stub = 0
+for r in rows:
+    if r["patient_ref_id"]:
+        p = con.execute("SELECT patient_uid FROM patient_ref WHERE id=?",
+                        (r["patient_ref_id"],)).fetchone()
+        if p is not None and not (p["patient_uid"] or ""):
+            stub += 1
+print("bills with NO patient link        : %d" % n_nolink)
+print("bills linked to WALK-IN           : %d" % n_walk)
+print("bills linked to a stub (no uid)   : %d" % stub)
+print("   -> these three ARE the counter gap. All zero means the counter left")
+print("      no gap in this period, which is a finding, not a bug.")
+print()
+
+print("=== THE DAY, SALES ONLY ===")
+print("%-12s %6s %8s %10s %10s   %12s" %
+      ("date", "sales", "matched", "ambiguous", "unmatched", "sales total"))
+tot = collections.Counter()
+for d in days:
     r = G.day_report(con, d, "medical")
     t = r["totals"]
-    for k in tot: tot[k] += t[k]
-    c = r["counter"]
-    print("%-12s %6d %8d %10d %10d   %s (%s)"
-          % (d, t["bills"], t["matched"], t["ambiguous"], t["unmatched"],
-             c["seller"] or "pending", c["decided_by"]))
-print("-" * 66)
-pct = (100.0 * tot["matched"] / tot["bills"]) if tot["bills"] else 0
-print("%-12s %6d %8d %10d %10d   matched: %.1f%%"
-      % ("TOTAL", tot["bills"], tot["matched"], tot["ambiguous"], tot["unmatched"], pct))
-p = G.payment_gaps(con, sorted(days)[-1], "medical")
-print("\nlatest day payment check: entered digital %s | bank %s | difference %s"
-      % (p["entered_digital_p"], p["bank_settled_p"], p["difference_p"]))
-print("  ->", p["note"])
+    day_sales = [x for x in sales if x["bd"] == d]
+    amt = sum(x["amount_p"] or 0 for x in day_sales)
+    tot["sales"] += len(day_sales); tot["amt"] += amt
+    for k in ("matched", "ambiguous", "unmatched"): tot[k] += t[k]
+    print("%-12s %6d %8d %10d %10d   %12.2f" %
+          (d, len(day_sales), t["matched"], t["ambiguous"], t["unmatched"], amt / 100.0))
+print("-" * 70)
+print("%-12s %6d %8d %10d %10d   %12.2f" %
+      ("TOTAL", tot["sales"], tot["matched"], tot["ambiguous"], tot["unmatched"],
+       tot["amt"] / 100.0))
+print()
+print("=== PAYMENT, LATEST DAY -- units sanity-checked ===")
+p = G.payment_gaps(con, days[-1], "medical")
+for m, v in sorted(p["modes"].items()):
+    print("   mode %-8s %8.2f  over %d row(s)" % (m, v["paise"] / 100.0, v["bills"]))
+print("   bank settled      %s" %
+      ("%8.2f" % (p["bank_settled_p"] / 100.0) if p["bank_settled_p"] is not None else "none"))
+print("   difference        %s" %
+      ("%8.2f" % (p["difference_p"] / 100.0) if p["difference_p"] is not None else "n/a"))
+print("   ->", p["note"])
 con.close()
