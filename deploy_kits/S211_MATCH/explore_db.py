@@ -122,17 +122,18 @@ except Exception as e:
     print("returns audit not importable:", str(e)[:70])
 try:
     import finance_item_anomaly as IA
-    norms = IA.item_norms(con)
     days = [r[0] for r in q("SELECT DISTINCT business_date FROM sale_line_item "
                             "ORDER BY business_date DESC LIMIT 30")]
     t = collections.Counter()
     for d in days:
-        _rows, tt = IA.scan_day(con, d, "medical", norms)
+        # per day, strictly from earlier days -- never one global yardstick
+        _rows, tt = IA.scan_day(con, d, "medical")
         t.update(tt)
     print("\nITEM ANOMALY -- last %d days with item lines:" % len(days))
     for k, v in t.most_common(): print("   %-34s %6d" % (k, v))
+    nn = IA.item_norms(con)
     print("   items with enough history to judge : %d of %d" %
-          (sum(1 for v in norms.values() if v.get("n",0) >= IA.MIN_HISTORY), len(norms)))
+          (sum(1 for v in nn.values() if v.get("n",0) >= IA.MIN_HISTORY), len(nn)))
 except Exception as e:
     print("anomaly detector not importable:", str(e)[:70])
 con.close()

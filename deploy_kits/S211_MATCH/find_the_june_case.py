@@ -19,7 +19,6 @@ import finance_item_anomaly as IA
 DB = os.environ.get("FINANCE_DB", "/root/finance/finance.db")
 con = sqlite3.connect("file:%s?mode=ro" % DB, uri=True)
 con.row_factory = sqlite3.Row
-norms = IA.item_norms(con)
 days = [r[0] for r in con.execute(
     "SELECT DISTINCT business_date FROM sale_line_item ORDER BY business_date")]
 print("scanning %d days: %s .. %s\n" % (len(days), days[0], days[-1]))
@@ -27,7 +26,13 @@ print("scanning %d days: %s .. %s\n" % (len(days), days[0], days[-1]))
 allrows = []
 tally = collections.Counter()
 for d in days:
-    rows, t = IA.scan_day(con, d, "medical", norms)
+    # NORMS PER DAY, strictly from earlier days. Computing them ONCE over the
+    # whole period put every outlier inside its own yardstick -- which is how
+    # the 30-June ointment line cleared itself: with all four of its lines in
+    # view its ceiling became 20, and 20 is not eight times 20. Third time this
+    # exact mistake was made in one session; it is the caller's job too, not
+    # only item_norms'.
+    rows, t = IA.scan_day(con, d, "medical")
     tally.update(t)
     for r in rows:
         r["date"] = d
