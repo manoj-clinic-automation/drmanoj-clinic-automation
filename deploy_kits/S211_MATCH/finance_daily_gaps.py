@@ -162,14 +162,24 @@ def _end(verdict, cands, steps):
     return verdict, cands, steps
 
 
-def identity_gaps(con, business_date, unit="medical", env=None):
-    """Every bill of the day, with its verdict and its working. Read-only."""
+def identity_gaps(con, business_date, unit="medical", env=None,
+                  exclude_returns=False):
+    """Every bill of the day, with its verdict and its working. Read-only.
+
+    A SALES RETURN IS NOT A SALE. Counting the two together made the S211 tally
+    report more matches than there were sales, which is the sort of small lie
+    that makes a whole screen untrustworthy. Callers that are counting the
+    counter's work pass exclude_returns=True; the returns get their own
+    treatment in H3, tagged to the sale they reverse.
+    """
     rows = con.execute(
         "SELECT s.id, s.source_ref AS bill_no, s.description, s.amount_p, s.mode, "
-        "       s.disc_p, s.patient_ref_id "
+        "       s.disc_p, s.patient_ref_id, s.service "
         "FROM sale_item s JOIN day_entry d ON d.id = s.day_entry_id "
         "WHERE d.unit = ? AND d.business_date = ? "
         "ORDER BY s.source_ref, s.id", (unit, business_date)).fetchall()
+    if exclude_returns:
+        rows = [r for r in rows if not (r["service"] or "").endswith("_return")]
     out = []
     tally = dict(bills=0, matched=0, ambiguous=0, unmatched=0)
     for r in rows:
@@ -241,14 +251,16 @@ def payment_gaps(con, business_date, unit="medical"):
 # ----------------------------------------------------------- the day
 
 def day_report(con, business_date, unit="medical", env=None,
-               punch_csv=None, staff_csv=None, override_seller=None):
+               punch_csv=None, staff_csv=None, override_seller=None,
+               exclude_returns=False):
     if business_date < IDENTITY_ERA_START:
         gaps, tally = [], dict(bills=0, matched=0, ambiguous=0, unmatched=0)
         era = ("before %s the three identifiers were not being captured, so an "
                "unmatched bill here says nothing about the counter"
                % IDENTITY_ERA_START)
     else:
-        gaps, tally = identity_gaps(con, business_date, unit, env)
+        gaps, tally = identity_gaps(con, business_date, unit, env,
+                                    exclude_returns)
         era = None
     return dict(date=business_date, unit=unit,
                 counter=counter_for_date(business_date, punch_csv, staff_csv,

@@ -69,7 +69,7 @@ print("%-12s %6s %8s %10s %10s   %12s" %
       ("date", "sales", "matched", "ambiguous", "unmatched", "sales total"))
 tot = collections.Counter()
 for d in days:
-    r = G.day_report(con, d, "medical")
+    r = G.day_report(con, d, "medical", exclude_returns=True)
     t = r["totals"]
     day_sales = [x for x in sales if x["bd"] == d]
     amt = sum(x["amount_p"] or 0 for x in day_sales)
