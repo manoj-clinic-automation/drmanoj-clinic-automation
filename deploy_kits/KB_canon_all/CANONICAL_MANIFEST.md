@@ -1,3 +1,22 @@
+> **S214 CLOSE (01-Sep-2026, morning IST):** THE HEAVIEST SESSION YET — **⭐1.5 and ⭐1.6 DONE**
+> (the anomaly baseline frozen at **344** from the LIVE db, set md5 `b198731b…` == the offline
+> backup run, re-run NEW 0; the supersede rule adopted in four flow-report consumers, measured:
+> ZERO numbers changed today; snapshots left on F-235 pickers by recorded design) · **F-185 CLOSED
+> EVERYWHERE** (eight repo copies + two neighbours → runtime-assembled fixtures after the publish
+> gate rightly refused ten-digit fakes; live marg_report `eaee66da…`→`2eac81a2…` 38/38 ·
+> finance_identity `81092e3c…`→`56eba8b9…` 44/44, backups `.bak_S214_F185`) · **the Drive backup
+> PROVEN RESTORABLE** (gz md5 == its own label; used as the measurement bed) · **THE VAAPSI DESK
+> (D358) LIVE** at `/finance/returns/desk` — nine versions against the owner's live walks;
+> finance_app `e19c3f19…`→**`cf678dfc…`** (guarded mount, backup named); anomaly pins NEW
+> `5bac2bf0…`/`5ca8a9a4…`; desk file pins **DECLARED PENDING** (v9 staged; v3 verified
+> `7358fd3d…`/`985ca9a3…`; captured at the S215 open) · **the casepack v2 contract (D359) signed**,
+> CP-1 = S215 ⭐1 · the medical-PC session's **correct refusal** of a stale-mirror brief (the C:
+> watch root has existed since S201.7) · four fault candidates RECORDED, not minted (two the
+> assistant's own — the dead-tap v5 behind 45 green checks; the stale-mirror brief); Fault
+> Register stays v2.47 · **Archive v1.61** (pure append proven: first 998,776 bytes identical,
+> `ffad72bc…`) · **Register v5.63** (`ee57f9e3…`) · Runbook **v147** · **START_HERE_SESSION_215**.
+> Next free: **D360 · F-269 · Session 215.**
+
 > **S213 CLOSE (31-Aug-2026, night):** THE DECIDED ORDER WENT LIVE — **⭐1.1–⭐1.4 in one evening,
 > each measured**: F-261 CLOSED (`finance.db` → Drive nightly, update-in-place after the live 403
 > proved service accounts hold ZERO quota — F-265) · the RETURNS CARD on the sump (owner's page:
@@ -118,15 +137,19 @@ is a halt that gets waved through, and then it protects nothing.
 
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
-| `KB_Register_v5_62_S213` | **S213 close** | `9ba150ac275c612614b4765135000ea1` | **CURRENT** Tier-0 register. §S213: ⭐1.1–⭐1.4 LIVE in one session — eleven pins moved/created, every one verified against kit bytes; F-265…F-268 minted; D357 recorded. ⚠ its own H1 found stale at v5.61 (F-45 family) — corrected of record in §S213, not silently. Next free D358 · F-269 · S214. |
+| `KB_Register_v5_63_S214` | **S214 close** | `ee57f9e32a8d98f1df2b5ec5043bb788` | **CURRENT** Tier-0 register. §S214: ⭐1.5+⭐1.6 done · F-185 closed everywhere · D358/D359 minted · desk pins DECLARED PENDING · four fault candidates recorded, F-269 unchanged. Next free D360 · F-269 · S215. |
+| `KB_Register_v5_62_S213` (superseded) | **S213 close** | `9ba150ac275c612614b4765135000ea1` | was CURRENT Tier-0 register. §S213: ⭐1.1–⭐1.4 LIVE in one session — eleven pins moved/created, every one verified against kit bytes; F-265…F-268 minted; D357 recorded. ⚠ its own H1 found stale at v5.61 (F-45 family) — corrected of record in §S213, not silently. Next free D358 · F-269 · S214. |
 | `KB_Register_v5_61_S212` | S212 close (superseded at S213) | `a40a57ecf7198317e2e29a101ab83354` | Tier-0 register. §S212: no live file changed anywhere, so **no VPS pin moved** — the pin list is the proof. Eighteen faults minted; three kits staged; three repaired. Four self-referential lines checked. Next free D357 · F-265 · S213. |
 | `KB_Register_v5_60_S210` | S210 close (superseded at S212) | `206341f519c93e659b1a8f111ccb728f` | **CURRENT** Tier-0 register. THE MONEY MADE VISIBLE; pays S209's owed bump (that close's state carried inside it, recorded). Three live-file rows DECLARED pin-pending. All four self-referential lines checked; the Archive pointer had stood stale (v1.55) through S209 — corrected visibly. |
-| `KB_History_Archive_v1_60_S213` | **S213 close** | `cb55762881668909336a2ce5eebe5bba` | **CURRENT** Tier-1 history. §S213 appended. **Pure append proven — the first 992,154 bytes byte-identical to v1.59, +6,622 → 998,776.** Lives in `deploy_kits/KB_canon_all/`. |
+| `KB_History_Archive_v1_61_S214` | **S214 close** | `ffad72bc90d27c0a8bb48941f063b971` | **CURRENT** Tier-1 history. §S214 appended. **Pure append proven — the first 998,776 bytes byte-identical to v1.60, +12,951 → 1,011,727.** Lives in `deploy_kits/KB_canon_all/`. |
+| `KB_History_Archive_v1_60_S213` (superseded) | **S213 close** | `cb55762881668909336a2ce5eebe5bba` | was CURRENT Tier-1 history. §S213 appended. **Pure append proven — the first 992,154 bytes byte-identical to v1.59, +6,622 → 998,776.** Lives in `deploy_kits/KB_canon_all/`. |
 | `KB_History_Archive_v1_59_S212` | S212 close (superseded at S213) | `931a0a6a2e6a96d7c3518838d092861f` | Tier-1 history. §S211 and §S212 appended in one pass (S211 closed partially and left its own owed). **Pure append proven — the first 980,942 bytes byte-identical to v1.57, +11,212.** Lives in `deploy_kits/KB_canon_all/`. |
 | `KB_History_Archive_v1_57_S210` | S210 close (superseded at S212) | `fc79256171364cb12791f990f5856f71` | **CURRENT** Tier-1 history. §S210 appended; **pure append proven — the first 974,485 bytes byte-identical to v1.56, +6,456.** Lives in `deploy_kits/KB_canon_all/`. |
-| `HANDOFF_RUNBOOK_2026-08-31_Session213close_v146` | **S213 close** | `1b17b9225d736d85cdc65b6e2f8e4f8e` | **CURRENT** runbook. §0 the four-lives-in-one-evening session · §2 backlog snapshot (live truth `OWNER_TODO_LIVE.md`). *(v144 and v145 were project-side only and are superseded with v143.)* |
+| `HANDOFF_RUNBOOK_2026-09-01_Session214close_v147` | **S214 close** | `9c81516dde117ab908327e69a268f3f7` | **CURRENT** runbook. §0 the S214 narrative · §2 backlog: CP-1 is ⭐1, desk kit 2 is ⭐2. |
+| `HANDOFF_RUNBOOK_2026-08-31_Session213close_v146` (superseded) | **S213 close** | `1b17b9225d736d85cdc65b6e2f8e4f8e` | was CURRENT runbook. §0 the four-lives-in-one-evening session · §2 backlog snapshot (live truth `OWNER_TODO_LIVE.md`). *(v144 and v145 were project-side only and are superseded with v143.)* |
 | `HANDOFF_RUNBOOK_2026-08-30_Session210close_v143` | S210 close (superseded at S213) | `857e4a6407999fdfd610810c5d4bcc1f` | runbook. §0 S210 · §2 close-time backlog snapshot (live truth `OWNER_TODO_LIVE.md`). |
-| `START_HERE_SESSION_214` | **S213 close** | `91ac576462fe372eb314da615cdcba29` | **CURRENT** session entry point. Opens on the S213 wave table (eleven pins, do not rebuild); Phase 0 connections-first; remaining order ⭐1.5 `marg_effective` · ⭐1.6 the anomaly baseline; D357 park honoured. |
+| `START_HERE_SESSION_215` | **S214 close** | `7c1b4990fc26e8f65818baf1d788dd52` | **CURRENT** session entry point. Opens on the S214 wave; FIRST ACTION = capture the two pending desk pins; ⭐1 = CP-1 (D359). |
+| `START_HERE_SESSION_214` (superseded) | **S213 close** | `91ac576462fe372eb314da615cdcba29` | was CURRENT session entry point. Opens on the S213 wave table (eleven pins, do not rebuild); Phase 0 connections-first; remaining order ⭐1.5 `marg_effective` · ⭐1.6 the anomaly baseline; D357 park honoured. |
 | `START_HERE_SESSION_211` | S210 close (superseded at S213; SESSION_212/213 were project-side and are superseded with it) | `edaa1fb90041d194af1b92cef883818f` | session entry point. Phase 0 connections-first; first acts: Pravesh exit check (31-Aug) · capture the three pending pins in one paste · the S210 candidate ruling. |
 | `END_OF_SESSION_PROMPT_v13` | **S210 (adopted at the S209 close-tail)** | *(project-side)* | **CURRENT** close-out routine — SELF-CONTAINED by owner ruling (v11/v12's "as v10" indirection pointed at a document not in project knowledge — F-107's shape in the routine itself). Supersedes v12 and v11 whole. |
 | `END_OF_SESSION_PROMPT_v9` | **S206 close** | `e9224abdb94dec15d13dc4a950f2543f` | **SUPERSEDED by v10 (S207 close)** — close-out routine. **A12 added** — the `D:\Downloads\ClaudeCowork\` folder, its Drive mirror, the four-store ownership rule, and a required report of how full project knowledge is. Supersedes v8. |
@@ -177,7 +200,8 @@ is a halt that gets waved through, and then it protects nothing.
 | `START_HERE_SESSION_186` | S185 | `4adc2c646fbdf668882c2587498c8ec5` | superseded by 187/188. Carries the git-clone Phase 0, the F-88 cross-check, the **NEW inverse check (F-107)** — confirm every Tier-0 doc has a manifest row — the `verify_live_pins.py` live-code check (D321), and the S186 tasks (complete the partial pin; resolve the opening float). |
 | `START_HERE_SESSION_185` | S184 | `f65e76c2e270cabf522839ef25d4acbe` | superseded by 186. **FILED TO THE REPO AND PINNED AT THE S185 CLOSE (F-107)** — written to project knowledge only at the S184 close, so it was unverifiable at the S185 Phase 0; these are the bytes filed at S185 and they are canonical from here. |
 | `START_HERE_SESSION_184` | S183 | `18c2bf463ad53bd075683aebfba8f373` | superseded by 185/186. Carried the git-clone Phase 0 **and** the `python3 /root/deploy/verify_live_pins.py` live-code check (D321) |
-| `KB_Register` | **v5.62** | `9ba150ac275c612614b4765135000ea1` | **CURRENT — S213 CLOSE.** ⭐1.1–⭐1.4 live; eleven pins moved/created, all kit-byte-verified; F-265…F-268; D357. Next free D358 · F-269. |
+| `KB_Register` | **v5.63** | `ee57f9e32a8d98f1df2b5ec5043bb788` | **CURRENT — S214 CLOSE.** ⭐1.5+⭐1.6 done; F-185 closed everywhere; D358/D359; desk pins DECLARED PENDING; four candidates await ruling. Next free D360 · F-269. |
+| `KB_Register` (pre-S214) | v5.62 | `9ba150ac275c612614b4765135000ea1` | superseded at the S214 close; retained. |
 | `KB_Register` | v5.61 | `a40a57ecf7198317e2e29a101ab83354` | superseded at S213 — S212 CLOSE.** No live file changed; no pin moved. Eighteen faults minted (F-247…F-264), discharging the S211 twelve. |
 | `KB_Register` | v5.60 | `206341f519c93e659b1a8f111ccb728f` | superseded at S212 — S210 CLOSE (THE MONEY MADE VISIBLE).** D354 executed; nine kits owner-verified; pays S209's owed bump. Three live-file rows declared pin-pending (finance_app · darpan_app · marg_report — owner captures md5sums at the S211 open). |
 | `KB_Register` (superseded) | **v5.59** | `c047f17ac6e2226016f8140be16e1cc4` | **was CURRENT — S208 CLOSE (re-hashed same hour: the finance_app.py pin completed in place); stood CURRENT through S209, which never bumped the Register — recorded, not silent.** THE SEVEN-KIT NIGHT. |
