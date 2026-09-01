@@ -135,9 +135,19 @@ def init(app, db_getter, require_fn, unit="medical",
 
 
 # ------------------------------------------------------------------ helpers
+V8_COLS = (("settle_state", "TEXT NOT NULL DEFAULT 'pending'"),
+           ("settle_by", "TEXT"), ("settle_at", "TEXT"),
+           ("settle_bill_no", "TEXT"), ("status", "TEXT NOT NULL DEFAULT 'ok'"),
+           ("void_reason", "TEXT"), ("void_by", "TEXT"), ("void_at", "TEXT"))
+
+
 def _con():
     con = _db()
     con.executescript(SCHEMA)
+    have = {r[1] for r in con.execute("PRAGMA table_info(return_visit)")}
+    for col, ddl in V8_COLS:
+        if col not in have:
+            con.execute("ALTER TABLE return_visit ADD COLUMN %s %s" % (col, ddl))
     return con
 
 
@@ -510,10 +520,13 @@ def api_slip():
     lines_in = b.get("lines") or []
     if not lines_in:
         return jsonify(ok=False, error="no_lines"), 400
-    closure = (b.get("closure") or "").lower()
+    # v8 (owner's ruling, 01-Sep night): ALL money stays at the medical sales
+    # counter. The desk issues the slip; settlement is recorded there via
+    # /api/slip/settle. closure is accepted for backward compatibility but
+    # every new slip starts pending.
+    closure = (b.get("closure") or "nothing").lower()
     if closure not in ("cash", "adjust", "nothing"):
-        return jsonify(ok=False, error="closure_required",
-                       message="cash, adjust ya nothing (sab RED) chahiye"), 400
+        closure = "nothing"
     con = _con()
     today = _today()
     pid = b.get("patient_ref_id")
@@ -571,13 +584,6 @@ def api_slip():
             verdict=want, accepted=accepted, reasons=reasons,
             computed_verdict=v, overridden=overridden, bills=bills_txt))
 
-    if closure == "cash" and refund_p > 0 and not (b.get("cash_paid_by") or "").strip():
-        return jsonify(ok=False, error="payer_required",
-                       message="cash kisne diya -- naam zaroori hai"), 400
-    if closure == "adjust" and refund_p > 0 and not (b.get("adjust_bill_no") or "").strip():
-        return jsonify(ok=False, error="bill_required",
-                       message="naye bill ka number zaroori hai"), 400
-
     flags = _visit_flags(con, pid, refund_p, judged, today)
     slip_no = _next_slip_no(con, today)
     cur = con.execute(
@@ -605,6 +611,103 @@ def api_slip():
                    lines=judged, business_date=today, staff=who)
 
 
+@bp.route("/api/slip/settle", methods=["POST"])
+def api_settle():
+    """The medical sales counter settles a slip: cash (payer named) or
+    adjust (new bill no). One tap; logged with who and when."""
+    u, err = _auth()
+    if err:
+        return err
+    b = request.get_json(silent=True) or {}
+    slip_no = (b.get("slip_no") or "").strip()
+    how = (b.get("how") or "").lower()
+    con = _con()
+    v = con.execute("SELECT * FROM return_visit WHERE slip_no=?",
+                    (slip_no,)).fetchone()
+    if not v:
+        return jsonify(ok=False, error="no_such_slip"), 404
+    if v["status"] == "void":
+        return jsonify(ok=False, error="slip_void",
+                       message="yeh parchi Cancel ho chuki hai"), 400
+    if v["settle_state"] != "pending":
+        return jsonify(ok=False, error="already_settled"), 400
+    if how == "cash":
+        payer = (b.get("cash_paid_by") or "").strip()
+        if not payer:
+            return jsonify(ok=False, error="payer_required",
+                           message="cash kisne diya -- naam zaroori hai"), 400
+        con.execute("UPDATE return_visit SET settle_state='cash', "
+                    "cash_paid_by=?, settle_by=?, settle_at=? WHERE id=?",
+                    (payer, str((u or {}).get("user") or ""),
+                     datetime.datetime.now().isoformat(timespec="seconds"),
+                     v["id"]))
+    elif how == "adjust":
+        bill = (b.get("adjust_bill_no") or "").strip()
+        if not bill:
+            return jsonify(ok=False, error="bill_required",
+                           message="naye bill ka number zaroori hai"), 400
+        con.execute("UPDATE return_visit SET settle_state='adjust', "
+                    "adjust_bill_no=?, settle_by=?, settle_at=? WHERE id=?",
+                    (bill, str((u or {}).get("user") or ""),
+                     datetime.datetime.now().isoformat(timespec="seconds"),
+                     v["id"]))
+    else:
+        return jsonify(ok=False, error="how_required",
+                       message="cash ya adjust chahiye"), 400
+    con.commit()
+    return jsonify(ok=True, slip_no=slip_no, settle_state=how)
+
+
+VOID_REASONS = ("matra_galat", "dawa_galat", "raqam_galat",
+                "irada_badla", "anya")
+
+
+@bp.route("/api/slip/void", methods=["POST"])
+def api_void():
+    """Cancel a slip -- crossed out in ink, never deleted (the house rule).
+
+    Staff: SAME DAY and only while UN-SETTLED (owner's rulings, 01-Sep).
+    Once money moved at the counter, or the day has passed, cancelling
+    needs a checker (the owner). A voided slip stops expecting a Marg
+    credit note; the kit-2 matcher skips it."""
+    u, err = _auth()
+    if err:
+        return err
+    b = request.get_json(silent=True) or {}
+    slip_no = (b.get("slip_no") or "").strip()
+    reason = (b.get("reason") or "").strip()
+    note = (b.get("note") or "").strip()
+    if reason not in VOID_REASONS:
+        return jsonify(ok=False, error="reason_required",
+                       message="Cancel ki wajah chuniye"), 400
+    con = _con()
+    v = con.execute("SELECT * FROM return_visit WHERE slip_no=?",
+                    (slip_no,)).fetchone()
+    if not v:
+        return jsonify(ok=False, error="no_such_slip"), 404
+    if v["status"] == "void":
+        return jsonify(ok=False, error="already_void"), 400
+    roles = set((u or {}).get("roles") or [])
+    is_checker = "checker" in roles
+    if not is_checker:
+        if v["business_date"] != _today():
+            return jsonify(ok=False, error="not_today",
+                           message="purani parchi -- doctor sahab hi Cancel "
+                                   "kar sakte hain"), 403
+        if v["settle_state"] != "pending":
+            return jsonify(ok=False, error="settled",
+                           message="raqam ka nipTaan ho chuka -- doctor sahab "
+                                   "hi Cancel kar sakte hain"), 403
+    con.execute("UPDATE return_visit SET status='void', void_reason=?, "
+                "void_by=?, void_at=?, match_state='cancelled' WHERE id=?",
+                (reason + ((" | " + note) if note else ""),
+                 str((u or {}).get("user") or ""),
+                 datetime.datetime.now().isoformat(timespec="seconds"),
+                 v["id"]))
+    con.commit()
+    return jsonify(ok=True, slip_no=slip_no, status="void")
+
+
 @bp.route("/api/slips")
 def api_slips():
     """The day's slips (reprint + owner view). ?d=YYYY-MM-DD, default today;
@@ -614,7 +717,7 @@ def api_slips():
         return err
     con = _con()
     if request.args.get("open"):
-        vs = con.execute("SELECT * FROM return_visit WHERE match_state='open' "
+        vs = con.execute("SELECT * FROM return_visit WHERE match_state='open' AND status!='void' "
                          "ORDER BY business_date DESC, id DESC LIMIT 200").fetchall()
     else:
         d = request.args.get("d") or _today()
@@ -630,7 +733,8 @@ def api_slips():
             patient_label=v["patient_label"], closure=v["closure"],
             adjust_bill_no=v["adjust_bill_no"], cash_paid_by=v["cash_paid_by"],
             refund_p=v["refund_p"], flags=json.loads(v["flags"] or "[]"),
-            match_state=v["match_state"],
+            match_state=v["match_state"], settle_state=v["settle_state"],
+            status=v["status"],
             lines=[dict(item_name=l["item_name"], qty_text=l["qty_text"],
                         amount_p=l["amount_p"], verdict=l["verdict"],
                         accepted=bool(l["accepted"]),

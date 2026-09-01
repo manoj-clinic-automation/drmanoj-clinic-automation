@@ -55,10 +55,32 @@ def main():
         pg.wait_for_selector(".tag.sel")
         assert "15 गोली" in pg.inner_text("#ilist")
         assert "net" in pg.inner_text("#barTxt")
+        # v8: qty cap -- billed item bought 20, typing 50 is refused with guidance
+        pg.click("#ilist .item")            # remove (was selected)
+        pg.wait_for_timeout(100)
+        pg.click("#ilist .item")            # re-open qty box
+        pg.wait_for_selector("input[id^=qb_]")
+        pg.fill("input[id^=qb_]", "50")
+        pg.click(".okb")
+        assert pg.input_value("input[id^=qb_]") == "", "cap did not clear the box"
+        ph = pg.get_attribute("input[id^=qb_]", "placeholder")
+        assert "20" in ph, "cap guidance missing: " + str(ph)
+        pg.fill("input[id^=qb_]", "15"); pg.click(".okb")
+        pg.wait_for_selector(".tag.sel")
+        # selections panel edit (v7) still present
+        assert "15 गोली" in pg.inner_text("#sellist")
         pg.click("#barBtn")
         assert "1 पत्ता + 5 गोली" in pg.inner_text("#cart")
+        assert "medical sales counter" in pg.inner_text("#p3"), "counter note missing"
+        assert pg.locator("#mCash").count() == 0, "money buttons should be gone"
         pg.focus("#cart input[type=number]")
         assert pg.input_value("#cart input[type=number]") == ""
+        # v7 panel edit
+        pg.click("#st2")
+        pg.click("#sellist .qty button")            # minus
+        assert "14 गोली" in pg.inner_text("#sellist"), pg.inner_text("#sellist")
+        # qty in the bill line is visually distinct (bold ink, not dim)
+        assert pg.locator("#ilist .sub b").count() >= 1, "inline qty not distinct"
         assert errs == [], errs
         print("RENDER TEST PASS -- browser-driven, zero page errors")
         b.close()

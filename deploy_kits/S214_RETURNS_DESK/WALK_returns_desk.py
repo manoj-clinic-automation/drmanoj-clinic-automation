@@ -108,7 +108,7 @@ def main():
                   unit_p=it["unit_p"], amount_p=it["unit_p"], condition="opened")]
     j = c.post("/finance/returns/desk/api/slip", json=dict(
         patient_ref_id=pid, patient_label="WALK", lines=lines,
-        closure="cash", cash_paid_by="alisha")).get_json()
+        closure="nothing")).get_json()
     check("item-first slip saves on real data", j.get("ok") is True,
           "slip %s" % j.get("slip_no"))
     ln0 = j.get("lines", [{}])[0]

@@ -1,4 +1,23 @@
-# S214_RETURNS_DESK — the counter return flow, "Vaapsi Desk" (kit 1 of 2, v6)
+# S214_RETURNS_DESK — the counter return flow, "Vaapsi Desk" (kit 1 of 2, v8)
+
+**v8 — the money-flow ruling (owner, 01-Sep night):** ALL cash stays at
+the medical sales counter. The desk only verifies meds and prints the slip
+("यह पर्ची medical sales counter पर दिखाएँ"); settlement is recorded on the
+slip in the list with one tap — नक़द (payer dropdown) or Adjust (bill no) —
+by whoever handles it at the counter. **Qty cap:** billed medicines refuse
+more than the purchased total, with guidance to the बिना बिल path (which
+still yellow-flags) — "accepting more than purchased" can never happen
+silently again. **Cancel करें:** dropdown reason (मात्रा/दवा/रक़म ग़लत ·
+इरादा बदला · अन्य), same-day, un-settled only for staff — settled or older
+slips need the checker; voided slips stay in the book marked Cancel, leave
+the CN-pending list, and reprint stamped. No prompt() anywhere — inline
+mini-forms only.
+
+**v7:** the "बिना बिल" box moves to the TOP of the medicines page; a
+"चुनी हुई दवाएँ" panel sits on the same page — every selection with an
+editable qty stepper and ✕, live net bar — staff see and fix everything
+here, then tap next; the inline bill qty is typographically distinct (bold
+ink) from the dim bill/date text. Render test extended to click all of it.
 
 **v6 — clean rewrite after v5's dead-tap bug:** no search box over the
 billed list (it IS the list — compact two-line rows, most patients fit one
@@ -81,7 +100,7 @@ ready for it.
 
 ## Proof so far
 
-Selftest **31/31** (sandbox; v2 — the unit_role CHECK is now IN the synthetic schema and the seeder is exercised against it, after the first install was rightly refused by that constraint). Walk **14/14 on the restored 31-Aug backup**: real patient, 14 medicines
+Selftest **40/40** (sandbox; v2 — the unit_role CHECK is now IN the synthetic schema and the seeder is exercised against it, after the first install was rightly refused by that constraint). Walk **14/14 on the restored 31-Aug backup**: real patient, 14 medicines
 aggregated and priced in the picker, the server allocated a real bill to
 the return, mixed slip saved (GREEN accepted + opened RED refused and
 FILED), source db untouched.

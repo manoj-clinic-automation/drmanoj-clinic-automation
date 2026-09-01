@@ -132,7 +132,7 @@ def main():
     ]
     r = c.post("/finance/returns/desk/api/slip", json=dict(
         patient_ref_id=1, patient_label="RAM TEST", lines=lines,
-        closure="cash", cash_paid_by="alisha"))
+        closure="nothing"))
     j = r.get_json()
     check("slip saves", j.get("ok") is True)
     v = {(l["item_name"], l["condition"]): l for l in j["lines"]}
@@ -150,39 +150,53 @@ def main():
         patient_ref_id=1, patient_label="RAM TEST",
         lines=[dict(item_key="good", item_name="GOOD TAB", units=50,
                     unit_p=1000, condition="sealed")],
-        closure="adjust", adjust_bill_no="B7"))
+        closure="nothing"))
     j = r.get_json()
     check("returning more than ever bought flags qty_over_bought, accepted",
           j["lines"][0]["verdict"] == "YELLOW"
           and "qty_over_bought" in j["lines"][0]["reasons"])
 
     r = c.post("/finance/returns/desk/api/slip", json=dict(
-        lines=[dict(item_name="X", units=1, amount_p=1000, condition="sealed")],
-        closure="cash"))
-    check("cash without a named payer is refused", r.status_code == 400)
+        lines=[dict(item_name="X", units=1, amount_p=1000, condition="sealed")]))
+    first_slip = r.get_json()["slip_no"]
+    check("slip saves with NO money choice (v8: counter settles)",
+          r.get_json()["ok"] is True)
+    r = c.post("/finance/returns/desk/api/slip/settle",
+               json=dict(slip_no=first_slip, how="cash"))
+    check("settle cash without a named payer is refused", r.status_code == 400)
+    r = c.post("/finance/returns/desk/api/slip/settle",
+               json=dict(slip_no=first_slip, how="cash", cash_paid_by="shivani"))
+    check("counter settles cash, payer logged", r.get_json()["ok"] is True)
+    r = c.post("/finance/returns/desk/api/slip/settle",
+               json=dict(slip_no=first_slip, how="cash", cash_paid_by="x"))
+    check("double settlement refused", r.status_code == 400)
+    r = c.post("/finance/returns/desk/api/slip/void",
+               json=dict(slip_no=first_slip, reason="matra_galat"))
+    check("staff cannot Cancel a SETTLED slip (owner's rule)",
+          r.status_code == 403)
 
     r = c.post("/finance/returns/desk/api/slip", json=dict(
         patient_ref_id=1, patient_label="RAM TEST",
         lines=[dict(item_name="Y", units=1, amount_p=1000, condition="sealed")],
-        closure="adjust", adjust_bill_no="B9"))
+        closure="nothing"))
     check("bill-not-traced line is YELLOW and accepted",
           r.get_json()["lines"][0]["verdict"] == "YELLOW")
     r = c.post("/finance/returns/desk/api/slip", json=dict(
         patient_ref_id=1, patient_label="RAM TEST",
         lines=[dict(item_name="Z", units=1, amount_p=1000, condition="sealed")],
-        closure="cash", cash_paid_by="shivani"))
+        closure="nothing"))
     check("3rd visit in 30 days flags frequent_returner",
           "frequent_returner" in r.get_json()["flags"])
     r = c.post("/finance/returns/desk/api/slip", json=dict(
         patient_ref_id=1, patient_label="RAM TEST",
         lines=[dict(item_name="BIG", units=1, amount_p=250000, condition="sealed")],
-        closure="cash", cash_paid_by="darpan"))
+        closure="nothing"))
     check("Rs 2,500 refund flags big_refund, never blocks",
           r.get_json()["ok"] and "big_refund" in r.get_json()["flags"])
 
     r = c.get("/finance/returns/desk/api/slips")
     j = r.get_json()
-    check("the day's slips list back (5 saved)", len(j["slips"]) == 5)
+    check("the day's slips list back (6 saved)", len(j["slips"]) == 6)
     check("every slip is filed open for the CN matcher",
           all(s["match_state"] == "open" for s in j["slips"]))
     con = sqlite3.connect(dbp)
@@ -199,6 +213,25 @@ def main():
     rc2 = SEED.main(dbp)
     n2 = con.execute("SELECT COUNT(*) FROM unit_role").fetchone()[0]
     check("seeder is idempotent", rc2 == 0 and n2 == n)
+
+    r = c.post("/finance/returns/desk/api/slip", json=dict(
+        patient_ref_id=1, patient_label="RAM TEST",
+        lines=[dict(item_name="V", units=1, amount_p=500, condition="sealed")]))
+    vslip = r.get_json()["slip_no"]
+    r = c.post("/finance/returns/desk/api/slip/void", json=dict(slip_no=vslip))
+    check("Cancel without a reason from the list is refused", r.status_code == 400)
+    r = c.post("/finance/returns/desk/api/slip/void",
+               json=dict(slip_no=vslip, reason="irada_badla"))
+    check("same-day un-settled slip Cancels", r.get_json()["ok"] is True)
+    r = c.post("/finance/returns/desk/api/slip/void",
+               json=dict(slip_no=vslip, reason="anya"))
+    check("double Cancel refused", r.status_code == 400)
+    r = c.post("/finance/returns/desk/api/slip/settle",
+               json=dict(slip_no=vslip, how="cash", cash_paid_by="a"))
+    check("a Cancelled slip cannot be settled", r.status_code == 400)
+    r = c.get("/finance/returns/desk/api/slips?open=1")
+    check("Cancelled slips leave the CN-pending list",
+          all(x["slip_no"] != vslip for x in r.get_json()["slips"]))
 
     app2 = make_app(dbp, user="lab_person", roles=("labmaker",))
     r = app2.test_client().get("/finance/returns/desk/api/slips")
