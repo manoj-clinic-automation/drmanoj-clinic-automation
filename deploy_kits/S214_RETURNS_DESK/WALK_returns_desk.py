@@ -93,24 +93,31 @@ def main():
     b = with_lines[0]
     l = b["lines"][0]
 
-    lines = [dict(item_name=l["item_name"], item_key=l["item_key"], qty_units=1,
-                  sale_bill_no=b["bill_no"], sale_date=b["sale_date"],
-                  expiry_ym=l["expiry_ym"], rate_p=l["rate_p"],
-                  amount_p=l["rate_p"] or 100, condition="sealed"),
-             dict(item_name=l["item_name"], item_key=l["item_key"], qty_units=1,
-                  sale_bill_no=b["bill_no"], sale_date=b["sale_date"],
-                  expiry_ym=l["expiry_ym"], rate_p=l["rate_p"],
-                  amount_p=l["rate_p"] or 100, condition="opened")]
+    j = c.get("/finance/returns/desk/api/items?pid=%d" % pid).get_json()
+    its = j.get("items", [])
+    check("items picker aggregates the patient's medicines", len(its) >= 2,
+          "%d medicines" % len(its))
+    priced = [i for i in its if i.get("unit_p") and i.get("item_key")]
+    check("items carry per-unit price guesses", bool(priced),
+          "%d of %d priced" % (len(priced), len(its)))
+    it = priced[0]
+
+    lines = [dict(item_key=it["item_key"], item_name=it["item_name"], units=1,
+                  unit_p=it["unit_p"], amount_p=it["unit_p"], condition="sealed"),
+             dict(item_key=it["item_key"], item_name=it["item_name"], units=1,
+                  unit_p=it["unit_p"], amount_p=it["unit_p"], condition="opened")]
     j = c.post("/finance/returns/desk/api/slip", json=dict(
         patient_ref_id=pid, patient_label="WALK", lines=lines,
         closure="cash", cash_paid_by="alisha")).get_json()
-    check("mixed slip saves on real data", j.get("ok") is True,
+    check("item-first slip saves on real data", j.get("ok") is True,
           "slip %s" % j.get("slip_no"))
+    ln0 = j.get("lines", [{}])[0]
+    check("the SERVER allocated a real bill to the return",
+          bool(ln0.get("sale_bill_no")), str(ln0.get("sale_bill_no")))
     vs = [x["verdict"] for x in j.get("lines", [])]
-    check("sealed real line accepted, opened refused",
+    check("sealed accepted, opened refused",
           vs and vs[0] in ("GREEN", "YELLOW") and vs[1] == "RED", str(vs))
-    check("refund = accepted line only",
-          j.get("refund_p") == (l["rate_p"] or 100))
+    check("refund = accepted line only", j.get("refund_p") == it["unit_p"])
 
     j2 = c.get("/finance/returns/desk/api/slips").get_json()
     check("the slip lists under today", len(j2.get("slips", [])) == 1)

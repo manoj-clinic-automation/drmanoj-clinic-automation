@@ -6,255 +6,289 @@
 <title>वापसी डेस्क — Sanjeevni</title>
 <style>
 :root{--bg:#0e1b1e;--card:#14262b;--line:#1f3a41;--ink:#e8f1f2;--dim:#9db4b8;
---teal:#2aa198;--green:#2e9e5b;--red:#c0392b;--amber:#b58900}
+--teal:#2aa198;--green:#2e9e5b;--red:#c0392b}
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);
-font:16px/1.45 system-ui,'Noto Sans Devanagari',sans-serif;padding-bottom:90px}
-h1{font-size:20px;margin:0} .wrap{max-width:860px;margin:0 auto;padding:12px}
-.top{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;
-background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-.badge{color:var(--dim);font-size:13px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
-padding:12px;margin:12px 0}
-input,select,button{font:inherit;border-radius:10px;border:1px solid var(--line)}
-input,select{background:#0b1517;color:var(--ink);padding:12px;width:100%}
-button{cursor:pointer;padding:12px 16px;background:var(--teal);color:#04282c;
-border:none;font-weight:700}
-button.ghost{background:transparent;color:var(--teal);border:1px solid var(--teal)}
-button.mini{padding:6px 10px;font-size:14px}
-.plist button,.bill .ln{width:100%;text-align:left;margin:6px 0}
-.bill{border:1px solid var(--line);border-radius:10px;margin:8px 0;overflow:hidden}
-.bill>.bh{padding:10px 12px;background:#0f2024;display:flex;justify-content:space-between;
-cursor:pointer;font-weight:600}
-.bill .ln{display:flex;justify-content:space-between;align-items:center;background:none;
-color:var(--ink);border:none;border-top:1px solid var(--line);padding:10px 12px;border-radius:0}
-.bill .ln:active{background:#123036}
-.dim{color:var(--dim);font-size:13px} .amt{font-variant-numeric:tabular-nums}
-.slip-line{display:flex;justify-content:space-between;align-items:center;gap:8px;
-border-top:1px solid var(--line);padding:10px 0}
-.v-ok{color:var(--green);font-weight:700}.v-no{color:var(--red);font-weight:700}
-.qty{display:flex;align-items:center;gap:6px}
-.qty button{padding:6px 12px;background:#0b1517;color:var(--ink);border:1px solid var(--line)}
-.cond{font-size:13px;padding:6px 10px;border-radius:16px;border:1px solid var(--line);
-background:#0b1517;color:var(--ink);cursor:pointer}
+font:17px/1.45 system-ui,'Noto Sans Devanagari',sans-serif;padding-bottom:120px}
+.wrap{max-width:760px;margin:0 auto;padding:10px}
+.steps{position:sticky;top:0;z-index:8;display:flex;gap:6px;background:var(--bg);
+padding:10px;border-bottom:1px solid var(--line)}
+.steps button{flex:1;padding:10px 4px;border-radius:10px;border:1px solid var(--line);
+background:var(--card);color:var(--dim);font-weight:700;font-size:15px}
+.steps button.on{background:var(--teal);color:#04282c;border-color:var(--teal)}
+.steps button:disabled{opacity:.45}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+padding:14px;margin:12px 0}
+input,select{font:inherit;border-radius:10px;border:1px solid var(--line);
+background:#0b1517;color:var(--ink);padding:14px;width:100%}
+button{font:inherit;border-radius:10px;cursor:pointer}
+.big{width:100%;padding:14px;background:var(--teal);color:#04282c;border:none;
+font-weight:800;font-size:18px}
+.ghost{background:transparent;color:var(--teal);border:1px solid var(--teal);padding:10px 14px}
+.item{display:flex;justify-content:space-between;align-items:center;width:100%;
+text-align:left;background:none;color:var(--ink);border:none;
+border-top:1px solid var(--line);padding:14px 6px}
+.item:active{background:#123036}
+.item.inCart{background:#0f2e26}
+.dim{color:var(--dim);font-size:14px}
+.tag{font-size:13px;border:1px solid var(--line);border-radius:14px;padding:2px 10px;color:var(--dim)}
+.redtxt{color:#ff9d8f}
+.cartline{border-top:1px solid var(--line);padding:12px 0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.qty{display:flex;align-items:center;gap:4px}
+.qty button{width:52px;height:48px;font-size:22px;background:#0b1517;color:var(--ink);
+border:1px solid var(--line)}
+.qty input{width:76px;text-align:center;padding:10px 4px;font-size:18px}
+.cond{font-size:14px;padding:8px 12px;border-radius:18px;border:1px solid var(--line);
+background:#0b1517;color:var(--ink)}
 .cond.bad{background:#3a1512;border-color:var(--red);color:#ffb4a8}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0c2a2f;border-top:2px solid var(--teal);
+padding:12px;z-index:9}
+.bar .row{max-width:760px;margin:0 auto}
 .total{font-size:20px;font-weight:800}
-.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);
-border-top:1px solid var(--line);padding:10px 12px;display:flex;gap:10px;z-index:6}
-.bar button{flex:1;font-size:17px}
-.hide{display:none !important}
-.note{font-size:13px;color:var(--dim);margin-top:6px}
-.redwhy{color:#ffb4a8;font-size:13px}
+.hide{display:none!important}
+.overlay{position:fixed;inset:0;background:rgba(5,15,17,.92);z-index:20;display:flex;
+flex-direction:column;align-items:center;justify-content:center;gap:14px;font-size:20px}
+.spin{width:44px;height:44px;border:5px solid var(--line);border-top-color:var(--teal);
+border-radius:50%;animation:r 1s linear infinite}
+@keyframes r{to{transform:rotate(360deg)}}
 #printArea{display:none}
-@media print{ body{background:#fff;color:#000;padding:0}
- body>*{display:none !important} #printArea{display:block !important;color:#000;
- font:14px/1.5 system-ui,'Noto Sans Devanagari',sans-serif;padding:6mm}
- #printArea h2{margin:0 0 2mm} #printArea table{width:100%;border-collapse:collapse}
- #printArea td,#printArea th{border:1px solid #444;padding:4px 6px;text-align:left}
-}
+@media print{body{background:#fff;padding:0}body>*{display:none!important}
+#printArea{display:block!important;color:#000;font:14px/1.5 system-ui,'Noto Sans Devanagari',sans-serif;padding:6mm}
+#printArea table{width:100%;border-collapse:collapse}
+#printArea td,#printArea th{border:1px solid #444;padding:4px 6px;text-align:left}
+#printArea .foot{font-size:12px;border-top:1px solid #444;margin-top:4mm;padding-top:2mm}}
 </style>
 </head>
 <body>
-<div class="top"><h1>वापसी डेस्क <span class="dim">Sanjeevni</span></h1>
-<span class="badge" id="who"></span></div>
+<div class="steps">
+ <button id="st1" class="on" onclick="go(1)">१ मरीज</button>
+ <button id="st2" disabled onclick="go(2)">२ दवाएँ</button>
+ <button id="st3" disabled onclick="go(3)">३ पर्ची</button>
+ <button class="ghost" style="flex:0 0 auto" onclick="resetAll()">↺</button>
+</div>
 <div class="wrap">
 
-<div class="card" id="step1">
- <b>1 · मरीज खोजें</b>
- <input id="q" placeholder="नाम / क्लिनिक ID / फ़ोन के आख़िरी 4 अंक" autocomplete="off">
- <div class="plist" id="plist"></div>
- <button class="ghost" id="noRec" style="margin-top:8px">बिना रिकॉर्ड के आगे बढ़ें →</button>
+<div id="p1">
+ <div class="card">
+  <input id="q" placeholder="नाम / क्लिनिक ID / फ़ोन के आख़िरी 4 अंक" autocomplete="off">
+  <div id="plist"></div>
+ </div>
+ <div class="card">
+  <div class="row"><b>आज की पर्चियाँ</b><button class="ghost" onclick="loadSlips()">↻</button></div>
+  <div id="todaySlips" class="dim">—</div>
+ </div>
 </div>
 
-<div class="card hide" id="step2">
- <div style="display:flex;justify-content:space-between;align-items:center">
-  <b>2 · पुराने बिल — <span id="pname"></span></b>
-  <button class="mini ghost" onclick="reset()">↺ नया मरीज</button></div>
- <div id="bills"></div>
- <button class="ghost mini" id="manualAdd" style="margin-top:8px">+ बिना बिल वाला आइटम जोड़ें</button>
+<div id="p2" class="hide">
+ <div class="card">
+  <div class="row"><b id="pname"></b><button class="ghost" onclick="go(1)">↩ पीछे</button></div>
+  <input id="f" placeholder="दवा का नाम टाइप करें… (मरीज की दवा देख कर)" autocomplete="off">
+  <div id="ilist"></div>
+  <button class="ghost" style="margin-top:10px;width:100%" onclick="addManual()">+ लिस्ट में नहीं है (बिना बिल)</button>
+ </div>
 </div>
 
-<div class="card hide" id="step3">
- <b>3 · वापसी पर्ची</b>
- <div id="slipLines"></div>
- <div style="display:flex;justify-content:space-between;margin-top:10px">
-  <span>वापसी रक़म</span><span class="total" id="refund">₹0</span></div>
- <div style="margin-top:10px">
-  <div style="display:flex;gap:8px">
-   <button class="ghost" id="mCash">💵 नक़द वापसी</button>
-   <button class="ghost" id="mAdj">🧾 नई ख़रीद में समायोजन</button>
+<div id="p3" class="hide">
+ <div class="card">
+  <div class="row"><b>पर्ची — <span id="pname2"></span></b>
+  <button class="ghost" onclick="go(2)">↩ और दवा</button></div>
+  <div id="cart"></div>
+  <div class="row" style="margin-top:8px"><span>कुल वापसी (अंदाज़न)</span>
+   <span class="total" id="tot">₹0</span></div>
+ </div>
+ <div class="card">
+  <b>रक़म कैसे लौटेगी?</b>
+  <div class="row" style="margin-top:8px;gap:8px">
+   <button class="ghost" style="flex:1" id="mCash" onclick="mode('cash')">💵 नक़द वापसी</button>
+   <button class="ghost" style="flex:1" id="mAdj" onclick="mode('adjust')">🧾 Adjust (नई ख़रीद में)</button>
   </div>
-  <div id="cashBox" class="hide" style="margin-top:8px">
+  <div id="cashBox" class="hide" style="margin-top:10px">
    <select id="payer"><option value="">नक़द किसने दिया — चुनें</option>
    <option>alisha</option><option>shivani</option><option>darpan</option>
    <option>shavez</option><option>manoj</option></select></div>
-  <div id="adjBox" class="hide" style="margin-top:8px">
+  <div id="adjBox" class="hide" style="margin-top:10px">
    <input id="adjBill" placeholder="नए बिल का नंबर (Marg)"></div>
+  <div class="dim" id="msg" style="margin-top:8px"></div>
  </div>
- <div class="note" id="saveMsg"></div>
-</div>
-
-<div class="card">
- <div style="display:flex;justify-content:space-between;align-items:center">
- <b>आज की पर्चियाँ</b><button class="mini ghost" onclick="loadSlips()">↻</button></div>
- <div id="todaySlips" class="dim">—</div>
 </div>
 </div>
 
-<div class="bar hide" id="saveBar">
- <button id="saveBtn">✔ पर्ची बनाएँ और प्रिंट करें</button>
+<div class="bar hide" id="bar">
+ <div class="row">
+  <span id="barTxt" class="total">0 दवाएँ</span>
+  <button class="big" style="width:auto;padding:14px 22px" id="barBtn" onclick="barGo()">आगे →</button>
+ </div>
 </div>
+
+<div class="overlay hide" id="ov"><div class="spin"></div>
+ <div>प्रोसेस हो रहा है…<br><span class="dim">बिल मिलाए जा रहे हैं</span></div></div>
 
 <div id="printArea"></div>
 
 <script>
 "use strict";
-const USER = __DESK_USER__;
-document.getElementById('who').textContent = USER + ' · ' + new Date().toLocaleDateString('hi-IN');
-const API = location.pathname.replace(/\/$/,'') + '/api';
-const HI = {expired:'दवा एक्सपायर हो चुकी है', damaged_or_opened:'पैकिंग खुली/ख़राब है',
+const USER=__DESK_USER__;
+const API=location.pathname.replace(/\/$/,'')+'/api';
+const HI={expired:'दवा expiry निकल चुकी है',damaged_or_opened:'पैकिंग खुली/ख़राब है',
  not_ours:'हमारे यहाँ की नहीं है'};
-let patient=null, bills=[], slip=[], closure='';
-
+const POLICY='वापसी नियम: हर दवा उसकी बिक्री की तारीख़ से 2 महीने के अंदर, सील बंद हालत में वापस/बदली जा सकती है। खुली, ख़राब या expiry निकली दवा वापस नहीं हो सकती।<br>निवेदन: वापसी हो तो आख़िरी ख़रीद की दवाएँ तुरंत लौटाएँ — पुरानी ख़रीदों की दवाएँ रोक कर बाद में एक साथ लौटाना आगे संभव नहीं हो पाएगा।';
+let patient=null, items=[], cart=[], closure='';
 const $=id=>document.getElementById(id);
-const rupee=p=>'₹'+(p/100).toLocaleString('en-IN',{maximumFractionDigits:2});
+const rupee=p=>'₹'+((p||0)/100).toLocaleString('en-IN',{maximumFractionDigits:2});
 
-$('q').addEventListener('input', async e=>{
+function go(n){
+ ['p1','p2','p3'].forEach((p,i)=>$(p).classList.toggle('hide',i!==n-1));
+ [1,2,3].forEach(i=>$('st'+i).classList.toggle('on',i===n));
+ window._step=n; drawBar();
+}
+function resetAll(){patient=null;items=[];cart=[];closure='';$('q').value='';
+ $('plist').innerHTML='';$('st2').disabled=true;$('st3').disabled=true;
+ $('payer').value='';$('adjBill').value='';$('msg').textContent='';go(1);loadSlips();}
+
+$('q').addEventListener('input',async e=>{
  const q=e.target.value.trim(); if(q.length<2){$('plist').innerHTML='';return;}
- const r=await fetch(API+'/search?q='+encodeURIComponent(q)); const j=await r.json();
+ const j=await (await fetch(API+'/search?q='+encodeURIComponent(q))).json();
  $('plist').innerHTML=(j.patients||[]).map(p=>
-  `<button class="ghost" onclick='pick(${JSON.stringify(JSON.stringify(p))})'>
-   ${p.name||'—'} <span class="dim">· ${p.clinic_id||''} ${p.last4?('· ***'+p.last4):''}</span></button>`).join('')
-  ||'<div class="dim">कोई नहीं मिला — नाम बदल कर देखें, या बिना रिकॉर्ड के बढ़ें</div>';
+  `<button class="item" onclick='pick(${JSON.stringify(JSON.stringify(p))})'>
+   <span>${p.name||'—'}<br><span class="dim">${p.clinic_id||''} ${p.last4?('· ***'+p.last4):''}</span></span>
+   <span class="tag">चुनें</span></button>`).join('')
+  ||'<div class="dim" style="padding:8px">कोई नहीं मिला</div>';
 });
 
 window.pick=async s=>{
- patient=JSON.parse(s); $('pname').textContent=patient.name||('ID '+patient.id);
- $('step1').classList.add('hide'); $('step2').classList.remove('hide');
- const r=await fetch(API+'/history?pid='+patient.id); const j=await r.json();
- bills=j.bills||[]; renderBills();
+ patient=JSON.parse(s);
+ $('pname').textContent=patient.name||('ID '+patient.id);
+ $('pname2').textContent=patient.name||'';
+ $('st2').disabled=false; go(2); $('f').value=''; $('ilist').innerHTML='<div class="dim">लोड हो रही है…</div>';
+ const j=await (await fetch(API+'/items?pid='+patient.id)).json();
+ items=j.items||[]; drawItems('');
+ $('f').focus();
 };
-$('noRec').onclick=()=>{ patient=null; $('pname').textContent='बिना रिकॉर्ड';
- $('step1').classList.add('hide'); $('step2').classList.remove('hide');
- bills=[]; renderBills(); addManual(); };
-$('manualAdd').onclick=()=>addManual();
+$('f').addEventListener('input',e=>drawItems(e.target.value.trim().toLowerCase()));
 
-function renderBills(){
- $('bills').innerHTML = bills.length? bills.map((b,bi)=>
-  `<div class="bill"><div class="bh" onclick="tog(${bi})">
-    <span>${b.bill_no} <span class="dim">· ${b.sale_date||''} ${b.days_ago!=null?('· '+b.days_ago+' दिन पहले'):''}</span></span>
-    <span class="amt">${rupee(b.amount_p||0)}</span></div>
-   <div id="bl${bi}" class="hide">${b.lines.map((l,li)=>
-    `<button class="ln" onclick="addLine(${bi},${li})">
-      <span>${l.item_name}<br><span class="dim">${l.qty_raw||''} ${l.expiry_ym?('· exp '+l.expiry_ym):''}
-      ${l.expired?'<span class="redwhy"> · एक्सपायर्ड</span>':''}
-      ${l.already_returned?('<span class="dim"> · '+l.already_returned+' पहले वापसी</span>'):''}</span></span>
-      <span class="amt dim">${l.rate_p?rupee(l.rate_p):''}</span></button>`).join('')}</div></div>`).join('')
-  : '<div class="dim">इस मरीज का कोई बिल यहाँ दर्ज नहीं — बिना बिल वाला आइटम जोड़ें।</div>';
+function inCart(k){return cart.some(c=>c.key===k);}
+function drawItems(q){
+ const list=items.filter(it=>!q||String(it.item_name).toLowerCase().includes(q));
+ $('ilist').innerHTML=list.slice(0,40).map(it=>{
+  const k=it.item_key||it.item_name;
+  return `<button class="item ${inCart(k)?'inCart':''}" onclick='tapItem(${JSON.stringify(JSON.stringify(it))})'>
+   <span>${it.item_name}${it.last_expired?' <span class="redtxt">· expiry निकली</span>':''}<br>
+    <span class="dim">कुल ${it.bought_units||'?'} ली · आख़िरी ${it.last_date||''}</span></span>
+   <span class="tag">${inCart(k)?'✔ जुड़ी':'+ जोड़ें'}</span></button>`;}).join('')
+  ||'<div class="dim" style="padding:8px">इस नाम की कोई ख़रीद नहीं — नीचे "बिना बिल" से जोड़ें</div>';
 }
-window.tog=bi=>$('bl'+bi).classList.toggle('hide');
-
-window.addLine=(bi,li)=>{
- const b=bills[bi], l=b.lines[li];
- slip.push({item_name:l.item_name,item_key:l.item_key,qty_units:1,
-  sale_bill_no:b.bill_no,sale_date:b.sale_date,expiry_ym:l.expiry_ym,
-  rate_p:l.rate_p,amount_p:l.rate_p||0,condition:'sealed'});
- drawSlip();
+window.tapItem=s=>{
+ const it=JSON.parse(s); const k=it.item_key||it.item_name;
+ if(inCart(k)){cart=cart.filter(c=>c.key!==k);}
+ else cart.push({key:k,item_key:it.item_key,item_name:it.item_name,units:1,
+  unit_p:it.unit_p||0,amount_p:it.unit_p||0,pack_n:it.pack_n,condition:'sealed'});
+ drawItems($('f').value.trim().toLowerCase()); drawBar();
 };
 function addManual(){
- const name=prompt('आइटम का नाम?'); if(!name)return;
- const amt=Number(prompt('वापसी रक़म ₹ (एक यूनिट की)?')||0);
- slip.push({item_name:name,qty_units:1,rate_p:Math.round(amt*100),
-  amount_p:Math.round(amt*100),condition:'sealed'});
- drawSlip();
+ const name=prompt('दवा का नाम?'); if(!name)return;
+ const amt=Number(prompt('एक यूनिट की क़ीमत ₹?')||0);
+ cart.push({key:'M'+Date.now(),item_key:null,item_name:name,units:1,
+  unit_p:Math.round(amt*100),amount_p:Math.round(amt*100),pack_n:null,condition:'sealed'});
+ drawBar();
 }
 
-function localJudge(l){
- const today=new Date().toISOString().slice(0,7);
- if(l.condition!=='sealed') return ['RED','damaged_or_opened'];
- if(l.expiry_ym && today>l.expiry_ym) return ['RED','expired'];
- return ['OK',''];
-}
-function drawSlip(){
- $('step3').classList.remove('hide'); $('saveBar').classList.remove('hide');
- let total=0;
- $('slipLines').innerHTML=slip.map((l,i)=>{
-  const [v,why]=localJudge(l);
-  if(v!=='RED') total+=l.amount_p;
-  return `<div class="slip-line">
-   <div><b>${l.item_name}</b><br><span class="dim">${l.sale_bill_no?('बिल '+l.sale_bill_no+' · '):''}
-     ${l.sale_date||''}</span>
-   ${v==='RED'?`<br><span class="redwhy">वापसी नहीं — ${HI[why]||why}</span>`:''}</div>
-   <div style="text-align:right">
-    <div class="qty">
-     <button onclick="qty(${i},-1)">−</button><span>${l.qty_units}</span>
-     <button onclick="qty(${i},1)">+</button>
-     <span class="cond ${l.condition!=='sealed'?'bad':''}" onclick="cond(${i})">
-      ${l.condition==='sealed'?'सील बंद':'खुला/ख़राब'}</span>
-     <button class="mini" style="background:#0b1517;color:var(--dim)" onclick="del(${i})">✕</button></div>
-    <div class="amt ${v==='RED'?'v-no':'v-ok'}">${v==='RED'?'नहीं ली':rupee(l.amount_p)}</div>
-   </div></div>`;}).join('');
- $('refund').textContent=rupee(total);
- window._refund=total;
-}
-window.qty=(i,d)=>{const l=slip[i];l.qty_units=Math.max(1,(l.qty_units||1)+d);
- l.amount_p=(l.rate_p||0)*l.qty_units; drawSlip();};
-window.cond=i=>{slip[i].condition=slip[i].condition==='sealed'?'opened':'sealed';drawSlip();};
-window.del=i=>{slip.splice(i,1);drawSlip();};
+function conv(c){ if(!c.pack_n||c.units<c.pack_n) return c.units+' यूनिट';
+ const s=Math.floor(c.units/c.pack_n), l=c.units%c.pack_n;
+ return c.units+' = '+s+' पत्ता'+(l?(' + '+l):''); }
 
-$('mCash').onclick=()=>{closure='cash';$('cashBox').classList.remove('hide');
- $('adjBox').classList.add('hide');$('mCash').style.background='var(--teal)';
- $('mCash').style.color='#04282c';$('mAdj').style.background='';$('mAdj').style.color='';};
-$('mAdj').onclick=()=>{closure='adjust';$('adjBox').classList.remove('hide');
- $('cashBox').classList.add('hide');$('mAdj').style.background='var(--teal)';
- $('mAdj').style.color='#04282c';$('mCash').style.background='';$('mCash').style.color='';};
+function drawCart(){
+ $('cart').innerHTML=cart.map((c,i)=>`<div class="cartline">
+  <div class="row"><b>${c.item_name}</b>
+   <button class="ghost" style="padding:6px 12px" onclick="rm(${i})">✕ हटाएँ</button></div>
+  <div class="row" style="margin-top:8px">
+   <div class="qty">
+    <button onclick="q(${i},-1)">−</button>
+    <input type="number" min="1" value="${c.units}" onchange="qset(${i},this.value)">
+    <button onclick="q(${i},1)">+</button></div>
+   <button class="cond ${c.condition!=='sealed'?'bad':''}" onclick="cond(${i})">
+    ${c.condition==='sealed'?'सील बंद ✔':'खुला/ख़राब'}</button></div>
+  <div class="row" style="margin-top:6px"><span class="dim">${conv(c)}</span>
+   <span>${c.condition!=='sealed'?'<span class="redtxt">वापसी नहीं होगी</span>':rupee(c.amount_p)}</span></div>
+ </div>`).join('')||'<div class="dim">कोई दवा नहीं चुनी</div>';
+ const tot=cart.filter(c=>c.condition==='sealed').reduce((a,c)=>a+c.amount_p,0);
+ $('tot').textContent=rupee(tot); window._tot=tot;
+}
+window.rm=i=>{cart.splice(i,1);drawCart();drawBar();};
+window.q=(i,d)=>{const c=cart[i];c.units=Math.max(1,c.units+d);
+ c.amount_p=c.unit_p*c.units;drawCart();};
+window.qset=(i,v)=>{const c=cart[i];c.units=Math.max(1,parseInt(v)||1);
+ c.amount_p=c.unit_p*c.units;drawCart();};
+window.cond=i=>{cart[i].condition=cart[i].condition==='sealed'?'opened':'sealed';drawCart();};
 
-$('saveBtn').onclick=async ()=>{
- if(!slip.length)return;
- if(window._refund>0 && !closure){$('saveMsg').textContent='नक़द या समायोजन चुनें';return;}
+function drawBar(){
+ const n=cart.length;
+ if(window._step===1||n===0){$('bar').classList.add('hide');return;}
+ $('bar').classList.remove('hide');
+ if(window._step===2){$('barTxt').textContent=n+' दवाएँ चुनीं';
+  $('barBtn').textContent='पर्ची बनाएँ →';}
+ else{const tot=cart.filter(c=>c.condition==='sealed').reduce((a,c)=>a+c.amount_p,0);
+  $('barTxt').textContent=n+' दवाएँ · '+rupee(tot);
+  $('barBtn').textContent='✔ पक्का करें और प्रिंट';}
+}
+window.barGo=()=>{ if(window._step===2){$('st3').disabled=false;drawCart();go(3);}
+ else save(); };
+function mode(m){closure=m;
+ $('cashBox').classList.toggle('hide',m!=='cash');
+ $('adjBox').classList.toggle('hide',m!=='adjust');
+ $('mCash').style.background=m==='cash'?'var(--teal)':'';
+ $('mCash').style.color=m==='cash'?'#04282c':'';
+ $('mAdj').style.background=m==='adjust'?'var(--teal)':'';
+ $('mAdj').style.color=m==='adjust'?'#04282c':'';}
+
+async function save(){
+ if(!cart.length)return;
+ if(window._tot>0&&!closure){$('msg').textContent='पहले चुनें: नक़द या Adjust';return;}
+ if(window._tot>0&&closure==='cash'&&!$('payer').value){$('msg').textContent='नक़द किसने दिया — चुनें';return;}
+ if(window._tot>0&&closure==='adjust'&&!$('adjBill').value.trim()){$('msg').textContent='नए बिल का नंबर लिखें';return;}
+ $('ov').classList.remove('hide');
  const body={patient_ref_id:patient?patient.id:null,
   patient_label:patient?(patient.name+(patient.clinic_id?(' · '+patient.clinic_id):'')):'बिना रिकॉर्ड',
-  lines:slip, closure:window._refund>0?closure:'nothing',
-  cash_paid_by:$('payer').value, adjust_bill_no:$('adjBill').value};
- $('saveBtn').disabled=true; $('saveMsg').textContent='सेव हो रही है…';
+  lines:cart.map(c=>({item_key:c.item_key,item_name:c.item_name,units:c.units,
+   unit_p:c.unit_p,amount_p:c.amount_p,condition:c.condition})),
+  closure:window._tot>0?closure:'nothing',
+  cash_paid_by:$('payer').value,adjust_bill_no:$('adjBill').value.trim()};
  try{
   const r=await fetch(API+'/slip',{method:'POST',
    headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   const j=await r.json();
-  if(!j.ok){$('saveMsg').textContent='रुका: '+(j.message||j.error);$('saveBtn').disabled=false;return;}
-  $('saveMsg').textContent='पर्ची '+j.slip_no+' सेव हुई ✔';
-  printSlip(j, body); loadSlips();
-  setTimeout(reset, 400);
- }catch(e){$('saveMsg').textContent='सर्वर से जवाब नहीं — दोबारा दबाएँ';$('saveBtn').disabled=false;}
-};
+  $('ov').classList.add('hide');
+  if(!j.ok){$('msg').textContent='रुका: '+(j.message||j.error);return;}
+  printSlip(j,body); resetAll();
+ }catch(e){$('ov').classList.add('hide');
+  $('msg').textContent='सर्वर से जवाब नहीं — दोबारा दबाएँ';}
+}
 
-function printSlip(j, body){
- const rows=j.lines.map(l=>`<tr><td>${l.item_name}</td><td>${l.qty_text||l.qty_units||''}</td>
+function printSlip(j,body){
+ const rows=j.lines.map(l=>`<tr><td>${l.item_name}<br><span style="font-size:11px">
+   ${l.bills?('बिल: '+l.bills):''}</span></td>
+  <td>${l.qty_text||l.qty_units}</td>
   <td>${l.accepted?rupee(l.amount_p):'—'}</td>
-  <td>${l.accepted?'ली गई':('नहीं ली — '+(HI[(l.reasons||[])[0]]|| 'देखें'))}</td></tr>`).join('');
+  <td>${l.accepted?'ली गई ✔':('नहीं ली — '+(HI[(l.reasons||[])[0]]||''))}</td></tr>`).join('');
  $('printArea').innerHTML=`<h2>Sanjeevni Medicos — वापसी पर्ची</h2>
-  <p>पर्ची: <b>${j.slip_no}</b> · तारीख़: ${j.business_date} · स्टाफ: ${j.staff}<br>
+  <p>पर्ची <b>${j.slip_no}</b> · ${j.business_date} · स्टाफ: ${j.staff}<br>
   मरीज: ${body.patient_label||''}</p>
   <table><tr><th>दवा</th><th>मात्रा</th><th>रक़म</th><th>फ़ैसला</th></tr>${rows}</table>
-  <p><b>कुल वापसी: ${rupee(j.refund_p)}</b> ·
-   ${body.closure==='cash'?('नक़द — '+(body.cash_paid_by||'')):
-     body.closure==='adjust'?('नई ख़रीद बिल '+(body.adjust_bill_no||'')+' में समायोजित'):'कोई रक़म नहीं'}</p>
-  <p style="font-size:12px">यह पर्ची संभाल कर रखें। Marg क्रेडिट नोट उसी दिन बनेगा।</p>`;
+  <p><b>कुल वापसी: ${rupee(j.refund_p)}</b> —
+   ${body.closure==='cash'?('नक़द (' +(body.cash_paid_by||'')+' ने दी)'):
+     body.closure==='adjust'?('नए बिल '+(body.adjust_bill_no||'')+' में adjust'):'कोई रक़म नहीं'}</p>
+  <div class="foot">${POLICY}</div>`;
  window.print();
 }
 
 async function loadSlips(){
- try{
-  const r=await fetch(API+'/slips'); const j=await r.json();
+ try{const j=await (await fetch(API+'/slips')).json();
   $('todaySlips').innerHTML=(j.slips||[]).map(s=>
-   `<div class="slip-line"><div><b>${s.slip_no}</b> <span class="dim">· ${s.patient_label||''} · ${s.staff}</span></div>
-    <div class="amt">${rupee(s.refund_p)}</div></div>`).join('')||'—';
+   `<div class="row cartline"><span><b>${s.slip_no}</b><br>
+    <span class="dim">${s.patient_label||''} · ${s.staff}</span></span>
+    <span>${rupee(s.refund_p)}</span></div>`).join('')||'—';
  }catch(e){}
 }
-function reset(){patient=null;bills=[];slip=[];closure='';
- $('step1').classList.remove('hide');$('step2').classList.add('hide');
- $('step3').classList.add('hide');$('saveBar').classList.add('hide');
- $('q').value='';$('plist').innerHTML='';$('saveBtn').disabled=false;$('saveMsg').textContent='';}
-loadSlips();
+window._step=1; loadSlips();
 </script>
 </body>
 </html>

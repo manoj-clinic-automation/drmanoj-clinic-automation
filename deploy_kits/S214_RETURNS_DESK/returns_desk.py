@@ -1,7 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-returns_desk.py -- S214: the counter return flow ("Vaapsi Desk").
+returns_desk.py -- S214 v2: the counter return flow ("Vaapsi Desk"), ITEM-FIRST.
+
+V2 (the owner's live walk, 01-Sep): staff never navigate bills. One picker
+lists everything the patient ever bought; quantities are typed in the
+product's OWN units (goli, tube) with the strip conversion shown; the
+BACKEND allocates returned units to the actual bills (newest purchase
+first -- the allocation that favours the patient), judges, files, and hands
+back the finished slip. Bills appear only on the slip, as evidence. The
+slip prints decisions and refusal reasons ONLY (ruling "a"); internal flags
+stay internal; a standing policy footer states the 2-month window, measured
+per medicine from its own sale date.
 
 WHY (the owner, 01-Sep-2026, his rulings verbatim in the design record)
     Return rejections are a pain point and escalate to arguments. So the desk
@@ -182,6 +192,46 @@ def _next_slip_no(con, business_date):
     return "R-%s-%04d" % (ym, n + 1)
 
 
+PACK_RE = re.compile(r"(\d+)\s*\*\s*(\d+)")
+
+
+def _pack_n(pack):
+    """'1*10' -> 10 units per strip; None when unreadable."""
+    m = PACK_RE.search(str(pack or ""))
+    if m:
+        n = int(m.group(2))
+        return n if 0 < n <= 1000 else None
+    return None
+
+
+def _units_sold(qty_raw, pack):
+    """Marg 'strips:loose' -> single units (the S211 anomaly-module rule)."""
+    sr = str(qty_raw or "").strip()
+    m = re.fullmatch(r"(\d+)\s*[:.]\s*(\d+)", sr)
+    if m:
+        strips, loose = int(m.group(1)), int(m.group(2))
+        ps = _pack_n(pack)
+        if ps:
+            return strips * ps + loose
+        return loose if strips == 0 else (strips if loose == 0 else None)
+    if re.fullmatch(r"\d+", sr):
+        return int(sr)
+    return None
+
+
+def _per_unit_p(rate_p, qty_raw, pack):
+    """Best-guess price of ONE unit. A strip-form line's printed rate is the
+    strip's; a whole-unit line's is the unit's. Editable on screen -- this is
+    a default, never an assertion."""
+    if not rate_p:
+        return 0
+    sr = str(qty_raw or "").strip()
+    ps = _pack_n(pack)
+    if ps and re.fullmatch(r"\d+\s*[:.]\s*\d+", sr):
+        return int(round(rate_p / ps))
+    return int(rate_p)
+
+
 # ------------------------------------------------------------------ verdicts
 def judge_line(con, line, business_date, patient_ref_id):
     """The one place a line becomes a colour. Returns (verdict, reasons).
@@ -335,6 +385,74 @@ def api_history():
     return jsonify(ok=True, patient_ref_id=pid, bills=out, today=today)
 
 
+@bp.route("/api/items")
+def api_items():
+    """Everything this patient ever bought, ONE row per medicine -- the v2
+    picker. Bills stay in the backend; they resurface only on the slip."""
+    _u, err = _auth()
+    if err:
+        return err
+    try:
+        pid = int(request.args.get("pid") or 0)
+    except ValueError:
+        pid = 0
+    if not pid:
+        return jsonify(ok=False, error="pid_required"), 400
+    con = _con()
+    today = _today()
+    rows = con.execute(
+        "SELECT l.item_key, l.item_name, l.qty_raw, l.pack, l.amount_p, "
+        "       l.expiry_ym, l.business_date, l.bill_no "
+        "FROM sale_line_item l JOIN sale_item s ON s.source_ref = l.bill_no "
+        "WHERE s.patient_ref_id=? AND l.is_return=0 "
+        "ORDER BY l.business_date DESC, l.seq", (pid,)).fetchall()
+    agg = {}
+    for r in rows:
+        k = r["item_key"] or r["item_name"]
+        a = agg.setdefault(k, dict(
+            item_key=r["item_key"], item_name=r["item_name"], bought_units=0,
+            unreadable_qty=False, last_date=r["business_date"],
+            last_expiry=r["expiry_ym"], pack_n=_pack_n(r["pack"]),
+            unit_p=_per_unit_p(r["amount_p"], r["qty_raw"], r["pack"]),
+            n_bills=set()))
+        u = _units_sold(r["qty_raw"], r["pack"])
+        if u is None:
+            a["unreadable_qty"] = True
+        else:
+            a["bought_units"] += u
+        a["n_bills"].add(r["bill_no"])
+    out = []
+    for a in agg.values():
+        a["n_bills"] = len(a["n_bills"])
+        a["last_expired"] = _expired(a["last_expiry"], today)
+        out.append(a)
+    out.sort(key=lambda x: x["last_date"] or "", reverse=True)
+    return jsonify(ok=True, items=out, today=today)
+
+
+def _allocate(con, pid, item_key, units_wanted):
+    """Give the returned units their bills, NEWEST purchase first -- the
+    allocation that favours the patient (newest = least late). Returns
+    (chunks, sold_total); each chunk carries the sale line it drew from."""
+    rows = con.execute(
+        "SELECT l.bill_no, l.business_date, l.qty_raw, l.pack, l.amount_p, "
+        "       l.expiry_ym "
+        "FROM sale_line_item l JOIN sale_item s ON s.source_ref = l.bill_no "
+        "WHERE s.patient_ref_id=? AND l.item_key=? AND l.is_return=0 "
+        "ORDER BY l.business_date DESC, l.seq", (pid, item_key)).fetchall()
+    chunks, left, sold_total = [], units_wanted, 0
+    for r in rows:
+        u = _units_sold(r["qty_raw"], r["pack"]) or 0
+        sold_total += u
+        if left > 0 and u > 0:
+            take = min(left, u)
+            chunks.append(dict(bill_no=r["bill_no"], sale_date=r["business_date"],
+                               units=take, expiry_ym=r["expiry_ym"],
+                               rate_p=r["amount_p"], pack=r["pack"]))
+            left -= take
+    return chunks, sold_total, left
+
+
 @bp.route("/api/slip", methods=["POST"])
 def api_slip():
     """Create one slip. The page proposes; THIS recomputes and records."""
@@ -357,28 +475,54 @@ def api_slip():
 
     judged, refund_p = [], 0
     for ln in lines_in:
-        v, reasons = judge_line(con, ln, today, pid)
+        units = ln.get("units") or ln.get("qty_units") or 1
+        try:
+            units = max(1, int(units))
+        except (TypeError, ValueError):
+            units = 1
+        item_key = ln.get("item_key")
+        chunks, sold_total, unmatched = ([], 0, units)
+        if pid and item_key:
+            chunks, sold_total, unmatched = _allocate(con, pid, item_key, units)
+        newest = chunks[0] if chunks else {}
+        pack_n = _pack_n(newest.get("pack")) if newest else None
+        unit_p = int(ln.get("unit_p") or
+                     (_per_unit_p(newest.get("rate_p"), "1:0", newest.get("pack"))
+                      if pack_n else (newest.get("rate_p") or 0)))
+        amt = ln.get("amount_p")
+        amt = int(amt) if amt not in (None, "") else unit_p * units
+        jl = dict(ln)
+        jl.update(sale_bill_no=newest.get("bill_no"),
+                  sale_date=newest.get("sale_date"),
+                  expiry_ym=newest.get("expiry_ym") or ln.get("expiry_ym"),
+                  qty_units=units, sold_units=sold_total or None)
+        v, reasons = judge_line(con, jl, today, pid)
+        if unmatched > 0 and chunks:
+            reasons = sorted(set(reasons + ["qty_over_bought"]))
+            if v == "GREEN":
+                v = "YELLOW"
         want = (ln.get("verdict") or v).upper()
-        overridden = 0
-        if want != v:
-            # staff may accept a computed RED (their eyes beat our data on
-            # physical condition ONLY when the reason is data-side) or refuse
-            # a GREEN; either way it is recorded, never silent.
-            overridden = 1
+        if want not in ("GREEN", "YELLOW", "RED"):
+            want = v
+        overridden = 1 if want != v else 0
         accepted = 1 if want in ("GREEN", "YELLOW") else 0
-        amt = int(ln.get("amount_p") or 0)
         if accepted:
             refund_p += amt
+        bills_txt = ", ".join("%s (%s)" % (c["bill_no"], c["sale_date"])
+                              for c in chunks[:3])
+        conv = ""
+        if pack_n:
+            strips, loose = divmod(units, pack_n)
+            conv = ("%d पत्ता + %d" % (strips, loose)) if strips else str(units)
         judged.append(dict(
             item_name=str(ln.get("item_name") or "").strip() or "item",
-            item_key=ln.get("item_key"), qty_units=ln.get("qty_units"),
-            qty_text=str(ln.get("qty_text") or ln.get("qty_units") or ""),
-            sale_bill_no=ln.get("sale_bill_no"), sale_date=ln.get("sale_date"),
-            expiry_ym=ln.get("expiry_ym"), rate_p=ln.get("rate_p"),
+            item_key=item_key, qty_units=units,
+            qty_text=str(ln.get("qty_text") or conv or units),
+            sale_bill_no=jl["sale_bill_no"], sale_date=jl["sale_date"],
+            expiry_ym=jl.get("expiry_ym"), rate_p=unit_p,
             amount_p=amt, condition=(ln.get("condition") or "sealed").lower(),
-            verdict=want if want in ("GREEN", "YELLOW", "RED") else v,
-            accepted=accepted, reasons=reasons, computed_verdict=v,
-            overridden=overridden))
+            verdict=want, accepted=accepted, reasons=reasons,
+            computed_verdict=v, overridden=overridden, bills=bills_txt))
 
     if closure == "cash" and refund_p > 0 and not (b.get("cash_paid_by") or "").strip():
         return jsonify(ok=False, error="payer_required",

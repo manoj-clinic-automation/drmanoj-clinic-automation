@@ -1,0 +1,10 @@
+V2 UPDATE — one paste on the VPS, after the publish. The desk is already
+mounted and the roles seeded; this replaces only the two desk files, proves
+them on the box, and restarts. Pin check: finance_app must be the S214
+mounted bytes (cf678dfc...).
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && echo "cf678dfc3f99c60f88d560afab6736ed  /root/finance/finance_app.py" | md5sum -c - && \cp /root/deploy/repo/deploy_kits/S214_RETURNS_DESK/returns_desk.py /root/deploy/repo/deploy_kits/S214_RETURNS_DESK/returns_desk.html /root/deploy/repo/deploy_kits/S214_RETURNS_DESK/selftest_returns_desk.py /root/deploy/repo/deploy_kits/S214_RETURNS_DESK/WALK_returns_desk.py /root/finance/ && cd /root/finance && python3 -B selftest_returns_desk.py && \cp /root/finance/finance.db /tmp/fin_desk_walk2.db && python3 -B WALK_returns_desk.py --db /tmp/fin_desk_walk2.db && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active clinic-finance.service && md5sum /root/finance/returns_desk.py /root/finance/returns_desk.html
+
+Then reload https://followup.dr-manoj.in/finance/returns/desk and walk it
+again: the medicine picker should open straight after the patient, with the
+selection bar pinned at the bottom.

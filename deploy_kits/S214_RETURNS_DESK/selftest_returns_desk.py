@@ -100,20 +100,24 @@ def main():
     dead = [l for l in b001["lines"] if l["item_key"] == "dead"][0]
     check("an expired sold line is marked expired in history", dead["expired"] is True)
 
-    # the slip: one GREEN, one RED(expired), one YELLOW(late), one RED(opened)
+    r = c.get("/finance/returns/desk/api/items?pid=1")
+    j = r.get_json()
+    keys = {i["item_key"]: i for i in j["items"]}
+    check("items API aggregates one row per medicine", len(j["items"]) == 3)
+    check("bought units converted through the pack (0:2 of 1*10 = 2)",
+          keys["good"]["bought_units"] == 2)
+    check("items carry a per-unit price guess", keys["good"]["unit_p"] > 0)
+
+    # v2 slip: ITEM-level lines; the SERVER allocates bills
     lines = [
-        dict(item_name="GOOD TAB", item_key="good", qty_units=1, sale_bill_no="B001",
-             sale_date=RECENT, expiry_ym=GOOD_EXP, rate_p=10000, amount_p=10000,
-             condition="sealed"),
-        dict(item_name="DEAD OINT", item_key="dead", qty_units=1, sale_bill_no="B001",
-             sale_date=RECENT, expiry_ym=DEAD_EXP, rate_p=5000, amount_p=5000,
-             condition="sealed"),
-        dict(item_name="OLD SYRUP", item_key="old", qty_units=1, sale_bill_no="B000",
-             sale_date=OLD, expiry_ym=GOOD_EXP, rate_p=30000, amount_p=30000,
-             condition="sealed"),
-        dict(item_name="GOOD TAB", item_key="good", qty_units=1, sale_bill_no="B001",
-             sale_date=RECENT, expiry_ym=GOOD_EXP, rate_p=10000, amount_p=10000,
-             condition="opened"),
+        dict(item_key="good", item_name="GOOD TAB", units=1, unit_p=1000,
+             amount_p=1000, condition="sealed"),
+        dict(item_key="dead", item_name="DEAD OINT", units=1, unit_p=5000,
+             amount_p=5000, condition="sealed"),
+        dict(item_key="old", item_name="OLD SYRUP", units=1, unit_p=30000,
+             amount_p=30000, condition="sealed"),
+        dict(item_key="good", item_name="GOOD TAB", units=1, unit_p=1000,
+             amount_p=1000, condition="opened"),
     ]
     r = c.post("/finance/returns/desk/api/slip", json=dict(
         patient_ref_id=1, patient_label="RAM TEST", lines=lines,
@@ -122,42 +126,52 @@ def main():
     check("slip saves", j.get("ok") is True)
     v = {(l["item_name"], l["condition"]): l for l in j["lines"]}
     check("clean recent item is GREEN", v[("GOOD TAB", "sealed")]["verdict"] == "GREEN")
+    check("the SERVER found its bill", v[("GOOD TAB", "sealed")]["sale_bill_no"] == "B001")
     check("expired item is RED", v[("DEAD OINT", "sealed")]["verdict"] == "RED")
     check("opened item is RED", v[("GOOD TAB", "opened")]["verdict"] == "RED")
     check(">60-day return is YELLOW, accepted",
           v[("OLD SYRUP", "sealed")]["verdict"] == "YELLOW"
           and v[("OLD SYRUP", "sealed")]["accepted"] == 1)
-    check("refund counts ONLY accepted lines (10000+30000)", j["refund_p"] == 40000)
+    check("refund counts ONLY accepted lines (1000+30000)", j["refund_p"] == 31000)
     check("late flag on the visit", "late_over_2_months" in j["flags"])
     check("slip number minted", j["slip_no"].startswith("R-"))
+    r = c.post("/finance/returns/desk/api/slip", json=dict(
+        patient_ref_id=1, patient_label="RAM TEST",
+        lines=[dict(item_key="good", item_name="GOOD TAB", units=50,
+                    unit_p=1000, condition="sealed")],
+        closure="adjust", adjust_bill_no="B7"))
+    j = r.get_json()
+    check("returning more than ever bought flags qty_over_bought, accepted",
+          j["lines"][0]["verdict"] == "YELLOW"
+          and "qty_over_bought" in j["lines"][0]["reasons"])
 
     r = c.post("/finance/returns/desk/api/slip", json=dict(
-        lines=[dict(item_name="X", qty_units=1, amount_p=1000, condition="sealed")],
+        lines=[dict(item_name="X", units=1, amount_p=1000, condition="sealed")],
         closure="cash"))
     check("cash without a named payer is refused", r.status_code == 400)
 
     r = c.post("/finance/returns/desk/api/slip", json=dict(
         patient_ref_id=1, patient_label="RAM TEST",
-        lines=[dict(item_name="Y", qty_units=1, amount_p=1000, condition="sealed")],
+        lines=[dict(item_name="Y", units=1, amount_p=1000, condition="sealed")],
         closure="adjust", adjust_bill_no="B9"))
     check("bill-not-traced line is YELLOW and accepted",
           r.get_json()["lines"][0]["verdict"] == "YELLOW")
     r = c.post("/finance/returns/desk/api/slip", json=dict(
         patient_ref_id=1, patient_label="RAM TEST",
-        lines=[dict(item_name="Z", qty_units=1, amount_p=1000, condition="sealed")],
+        lines=[dict(item_name="Z", units=1, amount_p=1000, condition="sealed")],
         closure="cash", cash_paid_by="shivani"))
     check("3rd visit in 30 days flags frequent_returner",
           "frequent_returner" in r.get_json()["flags"])
     r = c.post("/finance/returns/desk/api/slip", json=dict(
         patient_ref_id=1, patient_label="RAM TEST",
-        lines=[dict(item_name="BIG", qty_units=1, amount_p=250000, condition="sealed")],
+        lines=[dict(item_name="BIG", units=1, amount_p=250000, condition="sealed")],
         closure="cash", cash_paid_by="darpan"))
     check("Rs 2,500 refund flags big_refund, never blocks",
           r.get_json()["ok"] and "big_refund" in r.get_json()["flags"])
 
     r = c.get("/finance/returns/desk/api/slips")
     j = r.get_json()
-    check("the day's slips list back (4 saved)", len(j["slips"]) == 4)
+    check("the day's slips list back (5 saved)", len(j["slips"]) == 5)
     check("every slip is filed open for the CN matcher",
           all(s["match_state"] == "open" for s in j["slips"]))
     con = sqlite3.connect(dbp)

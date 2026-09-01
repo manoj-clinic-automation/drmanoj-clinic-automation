@@ -1,4 +1,16 @@
-# S214_RETURNS_DESK — the counter return flow, "Vaapsi Desk" (kit 1 of 2)
+# S214_RETURNS_DESK — the counter return flow, "Vaapsi Desk" (kit 1 of 2, v2)
+
+**v2 — the owner's live walk, same evening:** ITEM-FIRST. Staff never touch
+bills: one picker of everything the patient ever bought, quantities in the
+product's OWN units with the strip conversion shown, a stepper (१ मरीज →
+२ दवाएँ → ३ पर्ची) with no dead ends, the selection always visible in a
+fixed bottom bar, and the BACKEND allocating returned units to real bills
+(newest purchase first — the allocation that favours the patient) behind a
+प्रोसेस-हो-रहा-है prompt. Bills resurface only on the printed slip, as
+evidence. Ruling (a): the slip carries decisions + refusal reasons only;
+internal flags stay internal; a two-line policy footer states the 2-month
+window (per medicine, from ITS OWN sale date) and the request to return
+promptly from the latest purchase. समायोजन → "Adjust (नई ख़रीद में)".
 
 **STAGED, NOT INSTALLED.** Design signed by the owner 01-Sep-2026
 (`03_WORKING_PAPERS\S214\S214_COUNTER_FLOW_DESIGN_DRAFT.md` — his rulings +
@@ -41,9 +53,10 @@ ready for it.
 
 ## Proof so far
 
-Selftest **22/22** (sandbox; v2 — the unit_role CHECK is now IN the synthetic schema and the seeder is exercised against it, after the first install was rightly refused by that constraint). Walk **11/11 on the restored 31-Aug backup**:
-real patient with 16 bills, full history with lines, mixed slip saved
-(GREEN accepted + opened RED refused and FILED), source db untouched.
+Selftest **27/27** (sandbox; v2 — the unit_role CHECK is now IN the synthetic schema and the seeder is exercised against it, after the first install was rightly refused by that constraint). Walk **14/14 on the restored 31-Aug backup**: real patient, 14 medicines
+aggregated and priced in the picker, the server allocated a real bill to
+the return, mixed slip saved (GREEN accepted + opened RED refused and
+FILED), source db untouched.
 
 ## Install
 
