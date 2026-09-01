@@ -1,0 +1,9 @@
+S216_CP11_TONE - CP-1.1 step 4: flow, tone, language switch - 01-Sep-2026
+Base page: 62d472fd... (smart, currently LIVE)
+Out  page: 63b2cba4... (full row in SUMS.md5)
+PAGE ONLY. casepack_portal.py unchanged (3146bdbf...).
+CHANGES CONSENT WORDING - source: D:\Downloads\CONSENT_TONE_S216_FOR_YOUR_PEN.txt
+md5 21cf41e9... (owner's own Parts B, C, D).
+Part A prose APPROVED by the owner in chat, 01-Sep-2026: "polio excellent work".
+Gates: selftest 32/32 - render 18/18 - guard 19/19 - contrast 9/9
+       - naming 14/14 - back 12/12 - smart 21/21 - tone 16/16.
