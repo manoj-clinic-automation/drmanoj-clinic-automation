@@ -1,0 +1,15 @@
+PASTE 1, on the VPS, after the publish. Guards on the live pins (refuses on
+drift), backs up, installs both pages, adds the statement-health route,
+closes the legacy rows (owner-delegated), restarts, prints the new pins.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S217_HUB_FINAL && test "$(md5sum /root/finance/finance_ui/finance_approvals.html | cut -d' ' -f1)" = "71522939800724c8d2e354742abd0701" && test "$(md5sum /root/finance/darpan_card.html | cut -d' ' -f1)" = "29f30ba8b91ae532c323fda67207b947" && \cp /root/finance/finance_ui/finance_approvals.html /root/finance/finance_ui/finance_approvals.html.bak_S217 && \cp /root/finance/darpan_card.html /root/finance/darpan_card.html.bak_S217 && \cp finance_approvals.html /root/finance/finance_ui/finance_approvals.html && \cp darpan_card.html /root/finance/darpan_card.html && \cp patch_finance_app_stmt_health.py legacy_sweep.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_finance_app_stmt_health.py && /root/wa/venv/bin/python3 -B /root/finance/legacy_sweep.py --apply && systemctl restart clinic-finance.service && sleep 2 && journalctl -u clinic-finance.service --since "-1 min" --no-pager | tail -4 && md5sum /root/finance/finance_ui/finance_approvals.html /root/finance/darpan_card.html /root/finance/finance_app.py /root/finance/finance_daily_gaps.py
+
+If the first test fails the paste stops having changed NOTHING — the live page
+drifted from its pin; say so in the chat and nothing more is attempted.
+
+STEP 2 (Gmail script, your browser): open the clinic Gmail's Apps Script
+project ("UPI push"), open the VPS_Push_UPI file, select all, paste the whole
+of VPS_Push_UPI.gs from this kit over it, save, run setupUpiPush() once, then
+run verifyUpiPush() and paste its log line back into the chat.
+
+Rollback (pages): \cp the .bak_S217 files back and restart clinic-finance.

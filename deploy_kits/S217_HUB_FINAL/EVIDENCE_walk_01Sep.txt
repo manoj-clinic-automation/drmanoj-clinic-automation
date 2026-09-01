@@ -1,0 +1,21 @@
+Offline LIVE-SHAPE walk of the S217 hub (Chromium, real bytes, stubbed APIs
+carrying the day's real shapes) — 0 console errors across two runs.
+
+Sub-agent screen readings (screenshots never enter the main conversation):
+RUN 1: alert bar prominent above all cards (bank-statement warn, Docterz info,
+  latest-filed line) · "Needs you, by name" list with working targets · nested
+  bills sub-table renders inside the parked row without breaking the outer
+  table · phone masked xxxxxx4321 · Hindi renders correctly everywhere.
+  Two defects found: nav clipped at right edge; doubled ▾ caret on Cash
+  position card. Returns card missed by the screenshot scroll position.
+RUN 2 (after fixes): nav wraps, nothing clipped — PASS. Returns card present
+  with month picker (August), "45 return(s) · 26 NEED YOU" — PASS. No doubled
+  caret anywhere in frame.
+
+Server route rehearsed against the real 01-Sep backup with today's live shape
+(31-Aug filed, no statement): attention = statement-missing warn + Docterz
+pending for 2026-08-31; latest_filed names darpan 19:05 / approved 20:10;
+drawer_inflated = true.
+
+legacy_sweep rehearsed on a DB copy: closes every pre-17-Aug open row
+(03-May 34,245 included; the 28-Aug 5,688 flag is post-cutoff and STAYS).

@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sanjeevni — din ka card</title>
+<style>
+ body{font:16px/1.45 system-ui,sans-serif;margin:0;background:#f6f4f1;color:#1c1c1c;
+      max-width:560px;margin:0 auto;padding:10px 12px 60px}
+ h1{font-size:19px;margin:8px 0 2px}
+ .sub{color:#777;font-size:13px;margin-bottom:10px}
+ .sec{background:#fff;border:1px solid #e4e0da;border-radius:10px;margin:10px 0;
+      padding:12px 14px}
+ .row{display:flex;justify-content:space-between;align-items:baseline}
+ .k{color:#555}.v{font-weight:600;font-variant-numeric:tabular-nums;font-size:18px}
+ details{margin-top:6px}summary{color:#3c6ac2;font-size:14px;cursor:pointer}
+ table{border-collapse:collapse;width:100%;font-size:14px;margin-top:6px}
+ td,th{padding:4px 6px;border-bottom:1px solid #eee;text-align:left}
+ td.n{text-align:right;font-variant-numeric:tabular-nums}
+ .ex{border-left:4px solid #b3261e}
+ .btn{display:inline-block;border:1px solid #bbb;border-radius:8px;padding:9px 14px;
+      margin:4px 6px 2px 0;background:#fafafa;font-size:15px;cursor:pointer}
+ .btn.primary{background:#2e6b34;color:#fff;border-color:#2e6b34}
+ .btn.warn{background:#fff3f2;border-color:#b3261e;color:#b3261e}
+ .big{width:100%;font-size:22px;padding:10px;border:1px solid #bbb;border-radius:8px;
+      box-sizing:border-box;text-align:right}
+ .ok{color:#2e6b34;font-weight:600}.bad{color:#b3261e;font-weight:600}
+ .muted{color:#888;font-size:13px}
+ input[type=date]{font-size:15px;padding:6px;border:1px solid #bbb;border-radius:8px}
+ #msg{position:fixed;bottom:0;left:0;right:0;background:#1c1c1c;color:#fff;
+      padding:10px 14px;font-size:15px;display:none}
+</style>
+</head>
+<body>
+<h1>Sanjeevni — din ka card</h1>
+<div class="sub">
+ <input type="date" id="pick"> <span id="stat"></span>
+</div>
+<div id="card"></div>
+
+<div class="sec" id="drawerSec">
+ <div id="upiWait" style="display:none;background:#fdf3d7;color:#7a5600;border:1px solid #ecd9a0;border-radius:8px;padding:10px 12px;margin:0 0 8px;font-size:15px;line-height:1.55">⚠ बैंक से UPI रिपोर्ट अभी नहीं आई है। दिन में बाद में दोबारा देखें — तब तक नीचे दराज़ की रक़म <b>बढ़ी हुई</b> दिख सकती है।</div>
+ <div class="row"><span class="k">💰 Drawer mein hona chahiye</span><span class="v" id="expDrawer">—</span></div>
+ <div class="muted" id="expAsOf"></div>
+ <div class="muted" id="bankGap"></div>
+ <details><summary>roz ka hisaab</summary><div id="drawerDays"></div></details>
+</div>
+
+<div class="sec" id="handoverSec">
+ <div class="row"><span class="k">🔁 Cash bhejna / wapas lena</span></div>
+ <div class="muted">Jab bhi cash drawer se jaaye ya wapas aaye, YAHIN likhiye — usi waqt.</div>
+ <select id="hoKind" class="big" style="text-align:left;font-size:17px">
+  <option value="bank">🏦 Bank mein jama kiya</option>
+  <option value="to_bhawna">➡ Dr Bhawna madam ko diya</option>
+  <option value="to_manoj">➡ Dr Manoj sir ko diya</option>
+  <option value="back_bhawna">⬅ Dr Bhawna madam se wapas mila</option>
+  <option value="back_manoj">⬅ Dr Manoj sir se wapas mila</option>
+ </select>
+ <input class="big" id="hoAmt" inputmode="numeric" placeholder="₹" style="margin-top:6px">
+ <button class="btn primary" onclick="saveHandover()">Likh dijiye</button>
+ <span id="hoMsg" class="muted"></span>
+</div>
+
+<div class="sec" id="tonight">
+ <div class="row"><span class="k">🌙 Aaj shaam ki ginti (drawer)</span></div>
+ <div class="muted">Dukaan band karte waqt drawer ka poora cash giniye aur yahan
+ likhiye. Bas yehi ek cheez roz likhni hai.</div>
+ <input class="big" id="count" inputmode="numeric" placeholder="₹">
+ <button class="btn primary" onclick="saveCount()">Ginti save kijiye</button>
+</div>
+<div id="msg"></div>
+<script>
+const R=p=>p==null?"—":"₹"+(p/100).toLocaleString("en-IN",{minimumFractionDigits:2});
+const el=id=>document.getElementById(id);
+function toast(t){const m=el("msg");m.textContent=t;m.style.display="block";
+ setTimeout(()=>m.style.display="none",3500);}
+function yest(){const d=new Date(Date.now()-864e5);return d.toISOString().slice(0,10);}
+let DATE=yest();
+el("pick").value=DATE;
+el("pick").onchange=()=>{DATE=el("pick").value;load();};
+
+async function post(u,b){const r=await fetch(u,{method:"POST",
+ headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});
+ const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok)throw(j.message||"nahin hua");
+ return j;}
+
+async function saveCount(){
+ const v=parseFloat(el("count").value.replace(/[^\d.]/g,""));
+ if(!(v>=0))return toast("Amount samajh nahin aaya");
+ try{await post("/finance/darpan/api/drawer",
+   {date:new Date().toISOString().slice(0,10),counted_p:Math.round(v*100)});
+   toast("Ginti save ho gayi. Shukriya!");el("count").value="";}
+ catch(e){toast(""+e);}
+}
+
+async function answer(id,ans){
+ let body={answer:ans};
+ if(ans==="attach_bill"){const b=prompt("Kaunsa bill number?");if(!b)return;
+   body.bill_no=b;}
+ if(ans==="not_upi"||ans==="dont_know"){body.note=prompt("Ek line mein: kya hua?")||"";}
+ try{await post("/finance/darpan/api/exception/"+id+"/answer",body);load();}
+ catch(e){toast(""+e);}
+}
+
+async function submitDay(){
+ try{const j=await post("/finance/darpan/api/submit",{date:DATE});
+   toast(j.status==="verified"?"Din verify ho gaya ✓":"Doctor sahab ko bhej diya");
+   load();}
+ catch(e){toast(""+e);}
+}
+
+function sec(html){return '<div class="sec">'+html+'</div>';}
+function tbl(rows,cols){if(!rows.length)return'<div class="muted">kuch nahin</div>';
+ return '<table>'+rows.map(r=>'<tr>'+cols.map(c=>
+  '<td class="'+(c.n?'n':'')+'">'+(c.f?c.f(r):r[c.k]??"")+'</td>').join("")+
+  '</tr>').join("")+'</table>';}
+
+async function load(){
+ const r=await fetch("/finance/darpan/api/card?date="+DATE);
+ const j=await r.json();
+ if(!j.ok){el("card").innerHTML=sec("load nahin hua");return;}
+ el("stat").textContent=j.day_status==="verified"?"✓ verified":
+   j.day_status==="escalated"?"⚠ doctor sahab ke paas":"";
+ let h="";
+
+ h+=sec('<div class="row"><span class="k">1 · Din ki sale (returns ke baad)</span>'+
+  '<span class="v">'+R(j.sale.day_sale_p)+'</span></div>'+
+  '<details><summary>CN bills ('+j.sale.cn_bills.length+') — '+R(j.sale.returned_p)+
+  '</summary>'+tbl(j.sale.cn_bills,[{k:"bill"},{k:"amount_p",n:1,f:x=>R(x.amount_p)}])+
+  '</details>');
+
+ h+=sec('<div class="row"><span class="k">2 · UPI</span><span class="v">'+
+  R(j.upi.total_p)+'</span></div>'+
+  '<details><summary>kaunse bills ('+j.upi.bills.length+')</summary>'+
+  tbl(j.upi.bills,[{k:"bill"},{k:"amount_p",n:1,f:x=>R(x.amount_p)},{k:"rrn"}])+
+  '</details>');
+
+ h+=sec('<div class="row"><span class="k">3 · Net cash <span class="muted">'+
+  '(sale − UPI − ghar − procedure)</span></span><span class="v">'+
+  R(j.net_cash_p)+'</span></div>');
+
+ const cats=[["Ghar ki dawa",j.categories.home,"bills"],
+             ["Procedure ki dawa",j.categories.procedure,"bills"],
+             ["Orthotics",j.categories.orthotics,"items"]];
+ h+=sec('<span class="k">4 · Categories</span>'+cats.map(([nm,c,kind])=>
+  '<details><summary>'+nm+' — '+R(c.total_p)+'</summary>'+
+  (kind==="bills"?tbl(c.bills,[{k:"bill"},{k:"amount_p",n:1,f:x=>R(x.amount_p)}])
+   :tbl(c.items,[{k:"item"},{k:"qty"},{k:"amount_p",n:1,f:x=>R(x.amount_p)}]))+
+  '</details>').join(""));
+
+ const bday=j.bank.day||{};
+ h+=sec('<details><summary><span class="k">5 · Bank (MPR)</span> — '+
+  R(bday.bank_p)+' · '+(bday.bank_n??"—")+' payment</summary>'+
+  tbl(j.bank.txns,[{k:"time"},{k:"mode"},{k:"amount_p",n:1,f:x=>R(x.amount_p)},
+  {k:"rrn"}])+'</details>');
+
+ if(j.exceptions.length){
+  h+='<div class="sec ex"><span class="k">6 · Sawaal ('+j.exceptions.length+
+   ') — sirf yeh dekhne hain</span>';
+  for(const e of j.exceptions){
+   if(e.kind==="cash")
+    h+='<div style="margin-top:10px"><b>Bill '+e.bill+' — '+R(e.txn_amount_p)+
+     '</b><div class="muted">Bank kehta hai yeh UPI se aaya (ref '+e.rrn+
+     '), par cash mein likha gaya.</div>'+
+     '<button class="btn primary" onclick="answer('+e.id+',\'was_upi\')">Haan, UPI tha</button>'+
+     '<button class="btn warn" onclick="answer('+e.id+',\'not_upi\')">Nahin / pata nahin</button></div>';
+   else if(e.kind==="bank_orphan")
+    h+='<div style="margin-top:10px"><b>'+R(e.txn_amount_p)+' bank mein aaya'+
+     (e.time?' ('+e.time+')':'')+'</b><div class="muted">Kis bill ka paisa hai? (ref '+
+     e.rrn+')</div>'+
+     '<button class="btn" onclick="answer('+e.id+',\'attach_bill\')">Bill batao</button>'+
+     '<button class="btn" onclick="answer('+e.id+',\'advance\')">Advance — bill baad mein</button>'+
+     '<button class="btn warn" onclick="answer('+e.id+',\'dont_know\')">Pata nahin</button></div>';
+   else
+    h+='<div style="margin-top:10px"><b>Bill '+e.bill+' — '+R(e.bill_amount_p)+
+     ' UPI likha hai</b><div class="muted">par bank mein kuch nahin aaya.</div>'+
+     '<button class="btn warn" onclick="answer('+e.id+',\'dont_know\')">Doctor sahab ko bhejo</button></div>';
+  }
+  h+='</div>';
+ }else{
+  h+=sec('<span class="ok">6 · Koi sawaal nahin — sab match ho gaya ✓</span>');
+ }
+
+ const d=j.drawer;
+ if(d.counted_p==null)
+  h+=sec('<span class="k">7 · Drawer</span> <span class="bad">— kal shaam ki '+
+   'ginti nahin hui</span>');
+ else if(!d.show)
+  h+=sec('<span class="k">7 · Drawer</span> <span class="ok">— ginti sahi hai ✓ '+
+   '('+R(d.counted_p)+')</span>');
+ else{
+  h+=sec('<span class="k">7 · Drawer</span> <span class="bad">— fark '+
+   R(d.gap_p)+'</span><div class="muted">Gina: '+R(d.counted_p)+' · hona tha: '+
+   R(d.expected_p)+'</div>'+(d.parts?
+   '<details><summary>hisaab</summary><table>'+
+   '<tr><td>kal ka closing</td><td class="n">'+R(d.parts.opening_p)+'</td></tr>'+
+   '<tr><td>+ cash sale</td><td class="n">'+R(d.parts.cash_in_p)+'</td></tr>'+
+   '<tr><td>− ghar/procedure bills</td><td class="n">'+R(d.parts.noncash_p)+'</td></tr>'+
+   '<tr><td>− kharcha</td><td class="n">'+R(d.parts.expense_p)+'</td></tr>'+
+   '<tr><td>− bahar gaya</td><td class="n">'+R(d.parts.cash_out_p)+'</td></tr>'+
+   '<tr><td>+ wapas aaya</td><td class="n">'+R(d.parts.cash_back_p)+'</td></tr>'+
+   '</table></details>':''));
+ }
+
+ if(j.day_status==="open")
+  h+='<button class="btn primary" style="width:100%;font-size:17px;padding:12px" '+
+   'onclick="submitDay()">Sab theek hai — din verify kijiye ✓</button>';
+
+ el("card").innerHTML=h;
+}
+load();
+
+/* S210_DRAWERCARD -- Darpan sees what his drawer SHOULD hold, from the same
+   /finance/api/cash-position the owner console reads: one arithmetic, both
+   screens (the endpoint itself says it serves maker and checker alike).
+   The expected figure is AS OF the last filed day -- evening counts include
+   today's takings, so the two are shown side by side, never auto-compared. */
+async function loadDrawer(){
+ try{
+  const r=await fetch("/finance/api/cash-position?_="+Date.now(),{cache:"no-store"});
+  const j=await r.json();
+  if(!j.ok){el("expDrawer").textContent="load nahin hua";return;}
+  el("expDrawer").textContent="₹"+String(j.drawer||"—").replace(/\.00$/,"");
+  el("expAsOf").textContent="(" + (j.as_of||"") + " tak ke hisaab se — aaj ki sale ismein nahin hai)";
+  if(j.last_bank_date){
+   const gd=Math.floor((Date.now()-new Date(j.last_bank_date+"T00:00:00").getTime())/864e5);
+   el("bankGap").innerHTML="Aakhri bank deposit: "+j.last_bank_date+" · "+
+     (gd>15?'<span class="bad">'+gd+" din pehle ⚠ bank jaana hai</span>"
+           :'<span class="ok">'+gd+" din pehle ✓</span>");
+  }else{
+   el("bankGap").innerHTML='<span class="bad">koi bank deposit record mein nahin ⚠</span>';
+  }
+  const days=(j.days||[]).slice(0,14);
+  el("drawerDays").innerHTML=days.length?
+   '<table><tr><th>din</th><th class="n">drawer</th><th class="n">total (bank ke bahar)</th></tr>'+
+   days.map(d=>'<tr><td>'+d.date+'</td><td class="n">₹'+String(d.drawer).replace(/\.00$/,"")+
+     '</td><td class="n">₹'+String(d.unbanked).replace(/\.00$/,"")+'</td></tr>').join("")+'</table>'
+   :'<div class="muted">koi din nahin</div>';
+ }catch(e){el("expDrawer").textContent="load nahin hua";}
+}
+loadDrawer();
+
+/* S217 -- jab tak bank ki UPI report nahin aayi, drawer ka figure bada dikhta
+   hai. Server bataata hai (statement-health, maker+checker); yeh sirf dikhata
+   hai. Fail-soft: agar route na mile to koi shor nahin. */
+(async function(){
+ try{
+  const r=await fetch("/finance/api/statement-health?_="+Date.now(),{cache:"no-store"});
+  const j=await r.json();
+  if(j&&j.ok&&j.drawer_inflated){el("upiWait").style.display="block";}
+ }catch(e){}
+})();
+
+/* S210_HANDOVER -- the three routes out of the drawer and the RETURN leg,
+   recorded where the cash actually moves: at the counter, by Darpan. */
+async function saveHandover(){
+ const v=parseFloat(el("hoAmt").value.replace(/[^\d.]/g,""));
+ if(!(v>0))return toast("Amount samajh nahin aaya");
+ const kind=el("hoKind").value;
+ const names={bank:"Bank jama",to_bhawna:"Dr Bhawna ko",to_manoj:"Dr Manoj ko",
+              back_bhawna:"Dr Bhawna se wapas",back_manoj:"Dr Manoj se wapas"};
+ if(!confirm(names[kind]+" \u20b9"+v+" \u2014 theek hai?"))return;
+ try{
+  const j=await post("/finance/darpan/api/handover",{kind:kind,amount:v});
+  toast("Likh diya \u2713 ("+j.anchor_date+")");el("hoAmt").value="";loadDrawer();
+ }catch(e){toast(""+e);}
+}
+</script>
+</body>
+</html>
