@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>वापसी डेस्क — Sanjeevni</title>
+<style>
+:root{--bg:#0e1b1e;--card:#14262b;--line:#1f3a41;--ink:#e8f1f2;--dim:#9db4b8;
+--teal:#2aa198;--green:#2e9e5b;--red:#c0392b;--amber:#b58900}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);
+font:16px/1.45 system-ui,'Noto Sans Devanagari',sans-serif;padding-bottom:90px}
+h1{font-size:20px;margin:0} .wrap{max-width:860px;margin:0 auto;padding:12px}
+.top{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;
+background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.badge{color:var(--dim);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+padding:12px;margin:12px 0}
+input,select,button{font:inherit;border-radius:10px;border:1px solid var(--line)}
+input,select{background:#0b1517;color:var(--ink);padding:12px;width:100%}
+button{cursor:pointer;padding:12px 16px;background:var(--teal);color:#04282c;
+border:none;font-weight:700}
+button.ghost{background:transparent;color:var(--teal);border:1px solid var(--teal)}
+button.mini{padding:6px 10px;font-size:14px}
+.plist button,.bill .ln{width:100%;text-align:left;margin:6px 0}
+.bill{border:1px solid var(--line);border-radius:10px;margin:8px 0;overflow:hidden}
+.bill>.bh{padding:10px 12px;background:#0f2024;display:flex;justify-content:space-between;
+cursor:pointer;font-weight:600}
+.bill .ln{display:flex;justify-content:space-between;align-items:center;background:none;
+color:var(--ink);border:none;border-top:1px solid var(--line);padding:10px 12px;border-radius:0}
+.bill .ln:active{background:#123036}
+.dim{color:var(--dim);font-size:13px} .amt{font-variant-numeric:tabular-nums}
+.slip-line{display:flex;justify-content:space-between;align-items:center;gap:8px;
+border-top:1px solid var(--line);padding:10px 0}
+.v-ok{color:var(--green);font-weight:700}.v-no{color:var(--red);font-weight:700}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{padding:6px 12px;background:#0b1517;color:var(--ink);border:1px solid var(--line)}
+.cond{font-size:13px;padding:6px 10px;border-radius:16px;border:1px solid var(--line);
+background:#0b1517;color:var(--ink);cursor:pointer}
+.cond.bad{background:#3a1512;border-color:var(--red);color:#ffb4a8}
+.total{font-size:20px;font-weight:800}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);
+border-top:1px solid var(--line);padding:10px 12px;display:flex;gap:10px;z-index:6}
+.bar button{flex:1;font-size:17px}
+.hide{display:none !important}
+.note{font-size:13px;color:var(--dim);margin-top:6px}
+.redwhy{color:#ffb4a8;font-size:13px}
+#printArea{display:none}
+@media print{ body{background:#fff;color:#000;padding:0}
+ body>*{display:none !important} #printArea{display:block !important;color:#000;
+ font:14px/1.5 system-ui,'Noto Sans Devanagari',sans-serif;padding:6mm}
+ #printArea h2{margin:0 0 2mm} #printArea table{width:100%;border-collapse:collapse}
+ #printArea td,#printArea th{border:1px solid #444;padding:4px 6px;text-align:left}
+}
+</style>
+</head>
+<body>
+<div class="top"><h1>वापसी डेस्क <span class="dim">Sanjeevni</span></h1>
+<span class="badge" id="who"></span></div>
+<div class="wrap">
+
+<div class="card" id="step1">
+ <b>1 · मरीज खोजें</b>
+ <input id="q" placeholder="नाम / क्लिनिक ID / फ़ोन के आख़िरी 4 अंक" autocomplete="off">
+ <div class="plist" id="plist"></div>
+ <button class="ghost" id="noRec" style="margin-top:8px">बिना रिकॉर्ड के आगे बढ़ें →</button>
+</div>
+
+<div class="card hide" id="step2">
+ <div style="display:flex;justify-content:space-between;align-items:center">
+  <b>2 · पुराने बिल — <span id="pname"></span></b>
+  <button class="mini ghost" onclick="reset()">↺ नया मरीज</button></div>
+ <div id="bills"></div>
+ <button class="ghost mini" id="manualAdd" style="margin-top:8px">+ बिना बिल वाला आइटम जोड़ें</button>
+</div>
+
+<div class="card hide" id="step3">
+ <b>3 · वापसी पर्ची</b>
+ <div id="slipLines"></div>
+ <div style="display:flex;justify-content:space-between;margin-top:10px">
+  <span>वापसी रक़म</span><span class="total" id="refund">₹0</span></div>
+ <div style="margin-top:10px">
+  <div style="display:flex;gap:8px">
+   <button class="ghost" id="mCash">💵 नक़द वापसी</button>
+   <button class="ghost" id="mAdj">🧾 नई ख़रीद में समायोजन</button>
+  </div>
+  <div id="cashBox" class="hide" style="margin-top:8px">
+   <select id="payer"><option value="">नक़द किसने दिया — चुनें</option>
+   <option>alisha</option><option>shivani</option><option>darpan</option>
+   <option>shavez</option><option>manoj</option></select></div>
+  <div id="adjBox" class="hide" style="margin-top:8px">
+   <input id="adjBill" placeholder="नए बिल का नंबर (Marg)"></div>
+ </div>
+ <div class="note" id="saveMsg"></div>
+</div>
+
+<div class="card">
+ <div style="display:flex;justify-content:space-between;align-items:center">
+ <b>आज की पर्चियाँ</b><button class="mini ghost" onclick="loadSlips()">↻</button></div>
+ <div id="todaySlips" class="dim">—</div>
+</div>
+</div>
+
+<div class="bar hide" id="saveBar">
+ <button id="saveBtn">✔ पर्ची बनाएँ और प्रिंट करें</button>
+</div>
+
+<div id="printArea"></div>
+
+<script>
+"use strict";
+const USER = __DESK_USER__;
+document.getElementById('who').textContent = USER + ' · ' + new Date().toLocaleDateString('hi-IN');
+const API = location.pathname.replace(/\/$/,'') + '/api';
+const HI = {expired:'दवा एक्सपायर हो चुकी है', damaged_or_opened:'पैकिंग खुली/ख़राब है',
+ not_ours:'हमारे यहाँ की नहीं है'};
+let patient=null, bills=[], slip=[], closure='';
+
+const $=id=>document.getElementById(id);
+const rupee=p=>'₹'+(p/100).toLocaleString('en-IN',{maximumFractionDigits:2});
+
+$('q').addEventListener('input', async e=>{
+ const q=e.target.value.trim(); if(q.length<2){$('plist').innerHTML='';return;}
+ const r=await fetch(API+'/search?q='+encodeURIComponent(q)); const j=await r.json();
+ $('plist').innerHTML=(j.patients||[]).map(p=>
+  `<button class="ghost" onclick='pick(${JSON.stringify(JSON.stringify(p))})'>
+   ${p.name||'—'} <span class="dim">· ${p.clinic_id||''} ${p.last4?('· ***'+p.last4):''}</span></button>`).join('')
+  ||'<div class="dim">कोई नहीं मिला — नाम बदल कर देखें, या बिना रिकॉर्ड के बढ़ें</div>';
+});
+
+window.pick=async s=>{
+ patient=JSON.parse(s); $('pname').textContent=patient.name||('ID '+patient.id);
+ $('step1').classList.add('hide'); $('step2').classList.remove('hide');
+ const r=await fetch(API+'/history?pid='+patient.id); const j=await r.json();
+ bills=j.bills||[]; renderBills();
+};
+$('noRec').onclick=()=>{ patient=null; $('pname').textContent='बिना रिकॉर्ड';
+ $('step1').classList.add('hide'); $('step2').classList.remove('hide');
+ bills=[]; renderBills(); addManual(); };
+$('manualAdd').onclick=()=>addManual();
+
+function renderBills(){
+ $('bills').innerHTML = bills.length? bills.map((b,bi)=>
+  `<div class="bill"><div class="bh" onclick="tog(${bi})">
+    <span>${b.bill_no} <span class="dim">· ${b.sale_date||''} ${b.days_ago!=null?('· '+b.days_ago+' दिन पहले'):''}</span></span>
+    <span class="amt">${rupee(b.amount_p||0)}</span></div>
+   <div id="bl${bi}" class="hide">${b.lines.map((l,li)=>
+    `<button class="ln" onclick="addLine(${bi},${li})">
+      <span>${l.item_name}<br><span class="dim">${l.qty_raw||''} ${l.expiry_ym?('· exp '+l.expiry_ym):''}
+      ${l.expired?'<span class="redwhy"> · एक्सपायर्ड</span>':''}
+      ${l.already_returned?('<span class="dim"> · '+l.already_returned+' पहले वापसी</span>'):''}</span></span>
+      <span class="amt dim">${l.rate_p?rupee(l.rate_p):''}</span></button>`).join('')}</div></div>`).join('')
+  : '<div class="dim">इस मरीज का कोई बिल यहाँ दर्ज नहीं — बिना बिल वाला आइटम जोड़ें।</div>';
+}
+window.tog=bi=>$('bl'+bi).classList.toggle('hide');
+
+window.addLine=(bi,li)=>{
+ const b=bills[bi], l=b.lines[li];
+ slip.push({item_name:l.item_name,item_key:l.item_key,qty_units:1,
+  sale_bill_no:b.bill_no,sale_date:b.sale_date,expiry_ym:l.expiry_ym,
+  rate_p:l.rate_p,amount_p:l.rate_p||0,condition:'sealed'});
+ drawSlip();
+};
+function addManual(){
+ const name=prompt('आइटम का नाम?'); if(!name)return;
+ const amt=Number(prompt('वापसी रक़म ₹ (एक यूनिट की)?')||0);
+ slip.push({item_name:name,qty_units:1,rate_p:Math.round(amt*100),
+  amount_p:Math.round(amt*100),condition:'sealed'});
+ drawSlip();
+}
+
+function localJudge(l){
+ const today=new Date().toISOString().slice(0,7);
+ if(l.condition!=='sealed') return ['RED','damaged_or_opened'];
+ if(l.expiry_ym && today>l.expiry_ym) return ['RED','expired'];
+ return ['OK',''];
+}
+function drawSlip(){
+ $('step3').classList.remove('hide'); $('saveBar').classList.remove('hide');
+ let total=0;
+ $('slipLines').innerHTML=slip.map((l,i)=>{
+  const [v,why]=localJudge(l);
+  if(v!=='RED') total+=l.amount_p;
+  return `<div class="slip-line">
+   <div><b>${l.item_name}</b><br><span class="dim">${l.sale_bill_no?('बिल '+l.sale_bill_no+' · '):''}
+     ${l.sale_date||''}</span>
+   ${v==='RED'?`<br><span class="redwhy">वापसी नहीं — ${HI[why]||why}</span>`:''}</div>
+   <div style="text-align:right">
+    <div class="qty">
+     <button onclick="qty(${i},-1)">−</button><span>${l.qty_units}</span>
+     <button onclick="qty(${i},1)">+</button>
+     <span class="cond ${l.condition!=='sealed'?'bad':''}" onclick="cond(${i})">
+      ${l.condition==='sealed'?'सील बंद':'खुला/ख़राब'}</span>
+     <button class="mini" style="background:#0b1517;color:var(--dim)" onclick="del(${i})">✕</button></div>
+    <div class="amt ${v==='RED'?'v-no':'v-ok'}">${v==='RED'?'नहीं ली':rupee(l.amount_p)}</div>
+   </div></div>`;}).join('');
+ $('refund').textContent=rupee(total);
+ window._refund=total;
+}
+window.qty=(i,d)=>{const l=slip[i];l.qty_units=Math.max(1,(l.qty_units||1)+d);
+ l.amount_p=(l.rate_p||0)*l.qty_units; drawSlip();};
+window.cond=i=>{slip[i].condition=slip[i].condition==='sealed'?'opened':'sealed';drawSlip();};
+window.del=i=>{slip.splice(i,1);drawSlip();};
+
+$('mCash').onclick=()=>{closure='cash';$('cashBox').classList.remove('hide');
+ $('adjBox').classList.add('hide');$('mCash').style.background='var(--teal)';
+ $('mCash').style.color='#04282c';$('mAdj').style.background='';$('mAdj').style.color='';};
+$('mAdj').onclick=()=>{closure='adjust';$('adjBox').classList.remove('hide');
+ $('cashBox').classList.add('hide');$('mAdj').style.background='var(--teal)';
+ $('mAdj').style.color='#04282c';$('mCash').style.background='';$('mCash').style.color='';};
+
+$('saveBtn').onclick=async ()=>{
+ if(!slip.length)return;
+ if(window._refund>0 && !closure){$('saveMsg').textContent='नक़द या समायोजन चुनें';return;}
+ const body={patient_ref_id:patient?patient.id:null,
+  patient_label:patient?(patient.name+(patient.clinic_id?(' · '+patient.clinic_id):'')):'बिना रिकॉर्ड',
+  lines:slip, closure:window._refund>0?closure:'nothing',
+  cash_paid_by:$('payer').value, adjust_bill_no:$('adjBill').value};
+ $('saveBtn').disabled=true; $('saveMsg').textContent='सेव हो रही है…';
+ try{
+  const r=await fetch(API+'/slip',{method:'POST',
+   headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const j=await r.json();
+  if(!j.ok){$('saveMsg').textContent='रुका: '+(j.message||j.error);$('saveBtn').disabled=false;return;}
+  $('saveMsg').textContent='पर्ची '+j.slip_no+' सेव हुई ✔';
+  printSlip(j, body); loadSlips();
+  setTimeout(reset, 400);
+ }catch(e){$('saveMsg').textContent='सर्वर से जवाब नहीं — दोबारा दबाएँ';$('saveBtn').disabled=false;}
+};
+
+function printSlip(j, body){
+ const rows=j.lines.map(l=>`<tr><td>${l.item_name}</td><td>${l.qty_text||l.qty_units||''}</td>
+  <td>${l.accepted?rupee(l.amount_p):'—'}</td>
+  <td>${l.accepted?'ली गई':('नहीं ली — '+(HI[(l.reasons||[])[0]]|| 'देखें'))}</td></tr>`).join('');
+ $('printArea').innerHTML=`<h2>Sanjeevni Medicos — वापसी पर्ची</h2>
+  <p>पर्ची: <b>${j.slip_no}</b> · तारीख़: ${j.business_date} · स्टाफ: ${j.staff}<br>
+  मरीज: ${body.patient_label||''}</p>
+  <table><tr><th>दवा</th><th>मात्रा</th><th>रक़म</th><th>फ़ैसला</th></tr>${rows}</table>
+  <p><b>कुल वापसी: ${rupee(j.refund_p)}</b> ·
+   ${body.closure==='cash'?('नक़द — '+(body.cash_paid_by||'')):
+     body.closure==='adjust'?('नई ख़रीद बिल '+(body.adjust_bill_no||'')+' में समायोजित'):'कोई रक़म नहीं'}</p>
+  <p style="font-size:12px">यह पर्ची संभाल कर रखें। Marg क्रेडिट नोट उसी दिन बनेगा।</p>`;
+ window.print();
+}
+
+async function loadSlips(){
+ try{
+  const r=await fetch(API+'/slips'); const j=await r.json();
+  $('todaySlips').innerHTML=(j.slips||[]).map(s=>
+   `<div class="slip-line"><div><b>${s.slip_no}</b> <span class="dim">· ${s.patient_label||''} · ${s.staff}</span></div>
+    <div class="amt">${rupee(s.refund_p)}</div></div>`).join('')||'—';
+ }catch(e){}
+}
+function reset(){patient=null;bills=[];slip=[];closure='';
+ $('step1').classList.remove('hide');$('step2').classList.add('hide');
+ $('step3').classList.add('hide');$('saveBar').classList.add('hide');
+ $('q').value='';$('plist').innerHTML='';$('saveBtn').disabled=false;$('saveMsg').textContent='';}
+loadSlips();
+</script>
+</body>
+</html>

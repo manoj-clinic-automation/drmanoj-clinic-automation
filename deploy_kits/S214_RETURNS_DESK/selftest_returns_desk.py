@@ -1,0 +1,175 @@
+#!/usr/bin/env python3
+"""selftest for S214_RETURNS_DESK -- invariants on a SYNTHETIC db + a real
+Flask app, driving the real routes with a fake require(). No frozen real
+snapshot (the S212 rule)."""
+import datetime
+import json
+import os
+import sqlite3
+import sys
+import tempfile
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import returns_desk as RD                                     # noqa: E402
+from flask import Flask                                       # noqa: E402
+
+PASS = FAIL = 0
+
+
+def check(name, ok):
+    global PASS, FAIL
+    print("%s  %s" % ("PASS" if ok else "FAIL", name))
+    PASS, FAIL = PASS + ok, FAIL + (not ok)
+
+
+TODAY = datetime.date.today()
+OLD = (TODAY - datetime.timedelta(days=90)).isoformat()
+RECENT = (TODAY - datetime.timedelta(days=5)).isoformat()
+GOOD_EXP = "%04d-%02d" % (TODAY.year + 1, TODAY.month)
+DEAD_EXP = "2024-01"
+
+
+def build_db(path):
+    con = sqlite3.connect(path)
+    con.executescript("""
+    CREATE TABLE patient_ref (id INTEGER PRIMARY KEY, clinic_id TEXT, name TEXT,
+      phone_last4 TEXT, first_seen TEXT, merged_into INTEGER, note TEXT);
+    CREATE TABLE sale_item (id INTEGER PRIMARY KEY, patient_ref_id INT,
+      source_ref TEXT, amount_p INT, mode TEXT, gross_p INT, disc_p INT);
+    CREATE TABLE sale_line_item (id INTEGER PRIMARY KEY, business_date TEXT,
+      bill_no TEXT, is_return INT DEFAULT 0, seq INT, item_name TEXT,
+      item_key TEXT, pack TEXT, qty_raw TEXT, amount_p INT, expiry_ym TEXT,
+      batch TEXT);
+    CREATE TABLE setting (key TEXT PRIMARY KEY, value TEXT, note TEXT);
+    CREATE TABLE unit_role (id INTEGER PRIMARY KEY, unit TEXT, username TEXT,
+      role TEXT, active INT, note TEXT);
+    """)
+    con.execute("INSERT INTO patient_ref VALUES (1,'C-101','RAM TEST','1234',NULL,NULL,NULL)")
+    con.execute("INSERT INTO sale_item (patient_ref_id,source_ref,amount_p,mode) "
+                "VALUES (1,'B001',50000,'cash')")
+    con.execute("INSERT INTO sale_item (patient_ref_id,source_ref,amount_p,mode) "
+                "VALUES (1,'B000',30000,'cash')")
+    rows = [
+        (RECENT, "B001", 0, 1, "GOOD TAB", "good", "1*10", "0:2", 10000, GOOD_EXP),
+        (RECENT, "B001", 0, 2, "DEAD OINT", "dead", "", "1.0", 5000, DEAD_EXP),
+        (OLD,    "B000", 0, 1, "OLD SYRUP", "old", "", "1.0", 30000, GOOD_EXP),
+    ]
+    con.executemany("INSERT INTO sale_line_item (business_date,bill_no,is_return,"
+                    "seq,item_name,item_key,pack,qty_raw,amount_p,expiry_ym) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?)", rows)
+    con.commit()
+    con.close()
+
+
+def make_app(db_path, user="alisha", roles=("returns",)):
+    app = Flask(__name__)
+
+    def db():
+        con = sqlite3.connect(db_path)
+        con.row_factory = sqlite3.Row
+        return con
+
+    def require(*want, unit="medical"):
+        if set(roles) & set(want):
+            return {"user": user, "roles": sorted(roles)}, None
+        from flask import jsonify
+        return None, (jsonify(ok=False, error="not_permitted"), 403)
+
+    RD.init(app, db, require, unit="medical")
+    return app
+
+
+def main():
+    tmp = tempfile.mkdtemp(prefix="desk_selftest_")
+    dbp = os.path.join(tmp, "t.db")
+    build_db(dbp)
+    app = make_app(dbp)
+    c = app.test_client()
+
+    r = c.get("/finance/returns/desk/api/search?q=RAM")
+    check("search finds the patient by name", r.get_json()["patients"][0]["id"] == 1)
+    r = c.get("/finance/returns/desk/api/search?q=1234")
+    check("search finds by phone last-4", len(r.get_json()["patients"]) == 1)
+
+    r = c.get("/finance/returns/desk/api/history?pid=1")
+    j = r.get_json()
+    check("history returns EVERY bill, not the last one", len(j["bills"]) == 2)
+    b001 = [b for b in j["bills"] if b["bill_no"] == "B001"][0]
+    dead = [l for l in b001["lines"] if l["item_key"] == "dead"][0]
+    check("an expired sold line is marked expired in history", dead["expired"] is True)
+
+    # the slip: one GREEN, one RED(expired), one YELLOW(late), one RED(opened)
+    lines = [
+        dict(item_name="GOOD TAB", item_key="good", qty_units=1, sale_bill_no="B001",
+             sale_date=RECENT, expiry_ym=GOOD_EXP, rate_p=10000, amount_p=10000,
+             condition="sealed"),
+        dict(item_name="DEAD OINT", item_key="dead", qty_units=1, sale_bill_no="B001",
+             sale_date=RECENT, expiry_ym=DEAD_EXP, rate_p=5000, amount_p=5000,
+             condition="sealed"),
+        dict(item_name="OLD SYRUP", item_key="old", qty_units=1, sale_bill_no="B000",
+             sale_date=OLD, expiry_ym=GOOD_EXP, rate_p=30000, amount_p=30000,
+             condition="sealed"),
+        dict(item_name="GOOD TAB", item_key="good", qty_units=1, sale_bill_no="B001",
+             sale_date=RECENT, expiry_ym=GOOD_EXP, rate_p=10000, amount_p=10000,
+             condition="opened"),
+    ]
+    r = c.post("/finance/returns/desk/api/slip", json=dict(
+        patient_ref_id=1, patient_label="RAM TEST", lines=lines,
+        closure="cash", cash_paid_by="alisha"))
+    j = r.get_json()
+    check("slip saves", j.get("ok") is True)
+    v = {(l["item_name"], l["condition"]): l for l in j["lines"]}
+    check("clean recent item is GREEN", v[("GOOD TAB", "sealed")]["verdict"] == "GREEN")
+    check("expired item is RED", v[("DEAD OINT", "sealed")]["verdict"] == "RED")
+    check("opened item is RED", v[("GOOD TAB", "opened")]["verdict"] == "RED")
+    check(">60-day return is YELLOW, accepted",
+          v[("OLD SYRUP", "sealed")]["verdict"] == "YELLOW"
+          and v[("OLD SYRUP", "sealed")]["accepted"] == 1)
+    check("refund counts ONLY accepted lines (10000+30000)", j["refund_p"] == 40000)
+    check("late flag on the visit", "late_over_2_months" in j["flags"])
+    check("slip number minted", j["slip_no"].startswith("R-"))
+
+    r = c.post("/finance/returns/desk/api/slip", json=dict(
+        lines=[dict(item_name="X", qty_units=1, amount_p=1000, condition="sealed")],
+        closure="cash"))
+    check("cash without a named payer is refused", r.status_code == 400)
+
+    r = c.post("/finance/returns/desk/api/slip", json=dict(
+        patient_ref_id=1, patient_label="RAM TEST",
+        lines=[dict(item_name="Y", qty_units=1, amount_p=1000, condition="sealed")],
+        closure="adjust", adjust_bill_no="B9"))
+    check("bill-not-traced line is YELLOW and accepted",
+          r.get_json()["lines"][0]["verdict"] == "YELLOW")
+    r = c.post("/finance/returns/desk/api/slip", json=dict(
+        patient_ref_id=1, patient_label="RAM TEST",
+        lines=[dict(item_name="Z", qty_units=1, amount_p=1000, condition="sealed")],
+        closure="cash", cash_paid_by="shivani"))
+    check("3rd visit in 30 days flags frequent_returner",
+          "frequent_returner" in r.get_json()["flags"])
+    r = c.post("/finance/returns/desk/api/slip", json=dict(
+        patient_ref_id=1, patient_label="RAM TEST",
+        lines=[dict(item_name="BIG", qty_units=1, amount_p=250000, condition="sealed")],
+        closure="cash", cash_paid_by="darpan"))
+    check("Rs 2,500 refund flags big_refund, never blocks",
+          r.get_json()["ok"] and "big_refund" in r.get_json()["flags"])
+
+    r = c.get("/finance/returns/desk/api/slips")
+    j = r.get_json()
+    check("the day's slips list back (4 saved)", len(j["slips"]) == 4)
+    check("every slip is filed open for the CN matcher",
+          all(s["match_state"] == "open" for s in j["slips"]))
+    con = sqlite3.connect(dbp)
+    nred = con.execute("SELECT COUNT(*) FROM return_line WHERE accepted=0").fetchone()[0]
+    check("refused lines are FILED, not vanished", nred == 2)
+
+    app2 = make_app(dbp, user="lab_person", roles=("labmaker",))
+    r = app2.test_client().get("/finance/returns/desk/api/slips")
+    check("a login without the desk roles is refused", r.status_code == 403)
+
+    print("\n%d passed, %d failed" % (PASS, FAIL))
+    return 1 if FAIL else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

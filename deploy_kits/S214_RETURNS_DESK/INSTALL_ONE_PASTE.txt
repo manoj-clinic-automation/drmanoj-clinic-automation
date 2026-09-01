@@ -1,0 +1,19 @@
+ONE PASTE, on the VPS, after the publish. Does, in order: clone pull →
+live-pin check (refuses if finance_app.py is not the S213 bytes) → copy the
+six kit files → selftest 20 on the box → seed the desk roles → guarded mount
+→ live-shape walk on a /tmp copy of the real db → service restart → the new
+pins (paste the output back).
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && echo "e19c3f199cea4761fca7b984bfa0daf2  /root/finance/finance_app.py" | md5sum -c - && \cp /root/deploy/repo/deploy_kits/S214_RETURNS_DESK/returns_desk.py /root/deploy/repo/deploy_kits/S214_RETURNS_DESK/returns_desk.html /root/deploy/repo/deploy_kits/S214_RETURNS_DESK/seed_desk_roles.py /root/deploy/repo/deploy_kits/S214_RETURNS_DESK/patch_finance_app_returns_desk.py /root/deploy/repo/deploy_kits/S214_RETURNS_DESK/selftest_returns_desk.py /root/deploy/repo/deploy_kits/S214_RETURNS_DESK/WALK_returns_desk.py /root/finance/ && cd /root/finance && python3 -B selftest_returns_desk.py && python3 -B seed_desk_roles.py /root/finance/finance.db && python3 -B patch_finance_app_returns_desk.py /root/finance/finance_app.py && \cp /root/finance/finance.db /tmp/fin_desk_walkcopy.db && python3 -B WALK_returns_desk.py --db /tmp/fin_desk_walkcopy.db && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active clinic-finance.service && md5sum /root/finance/finance_app.py /root/finance/returns_desk.py /root/finance/returns_desk.html
+
+THEN THE HUMAN WALK — open, signed in (you, or reception once they try it):
+
+https://followup.dr-manoj.in/finance/returns/desk
+
+Search a real patient, tick one item, mark it khula/damaged, watch it refuse
+with the reason, delete the line, close the tab WITHOUT saving — first real
+slip should be a real return.
+
+Rollback: \cp the printed finance_app.py.bak_S214_desk_* back over
+/root/finance/finance_app.py and restart; the two new tables are additive
+and harmless.
