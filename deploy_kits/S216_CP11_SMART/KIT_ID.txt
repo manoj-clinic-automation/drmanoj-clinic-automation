@@ -1,0 +1,7 @@
+S216_CP11_SMART - CP-1.1 step 3 (auto-select) + step 5 (transliteration) - 01-Sep-2026
+Base page: 7de1f5c3... (back-nav, currently LIVE)
+Out  page: 62d472fd... (full row in SUMS.md5)
+PAGE ONLY. casepack_portal.py unchanged (3146bdbf...).
+No consent WORDING changed - the tone pass (step 4) is drafted for the owner, not installed.
+Gates: selftest 32/32 - render 17/17 - guard 19/19 - contrast 9/9
+       - naming 14/14 - back 12/12 - smart 21/21.
