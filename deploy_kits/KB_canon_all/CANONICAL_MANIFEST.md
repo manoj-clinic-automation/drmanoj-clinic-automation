@@ -17,6 +17,8 @@
 > `ffad72bc…`) · **Register v5.63** (`ee57f9e3…`) · Runbook **v147** · **START_HERE_SESSION_215**.
 > Next free: **D360 · F-269 · Session 215.**
 
+> **S215 OPEN (01-Sep-2026 · pin fold, record only):** the two DECLARED-PENDING desk pins completed in place in Register v5.63 from the owner’s post-close paste — returns_desk.py `afc8b0d0…` · returns_desk.html `32c4b8cc…`, both == the v9 kit bytes; Register re-pinned in the rows below; pins regenerated as `live_pins_S215open.txt`. No live file touched.
+
 > **S213 CLOSE (31-Aug-2026, night):** THE DECIDED ORDER WENT LIVE — **⭐1.1–⭐1.4 in one evening,
 > each measured**: F-261 CLOSED (`finance.db` → Drive nightly, update-in-place after the live 403
 > proved service accounts hold ZERO quota — F-265) · the RETURNS CARD on the sump (owner's page:
@@ -137,7 +139,7 @@ is a halt that gets waved through, and then it protects nothing.
 
 | Doc | Version | md5 | Notes |
 |---|---|---|---|
-| `KB_Register_v5_63_S214` | **S214 close** | `ee57f9e32a8d98f1df2b5ec5043bb788` | **CURRENT** Tier-0 register. §S214: ⭐1.5+⭐1.6 done · F-185 closed everywhere · D358/D359 minted · desk pins DECLARED PENDING · four fault candidates recorded, F-269 unchanged. Next free D360 · F-269 · S215. |
+| `KB_Register_v5_63_S214` | **S214 close** | `78a447388b223faf943e71e63d9874b8` | **CURRENT** Tier-0 register. §S214: ⭐1.5+⭐1.6 done · F-185 closed everywhere · D358/D359 minted · desk pins captured at the S215 open · four fault candidates recorded, F-269 unchanged. Next free D360 · F-269 · S215. |
 | `KB_Register_v5_62_S213` (superseded) | **S213 close** | `9ba150ac275c612614b4765135000ea1` | was CURRENT Tier-0 register. §S213: ⭐1.1–⭐1.4 LIVE in one session — eleven pins moved/created, every one verified against kit bytes; F-265…F-268 minted; D357 recorded. ⚠ its own H1 found stale at v5.61 (F-45 family) — corrected of record in §S213, not silently. Next free D358 · F-269 · S214. |
 | `KB_Register_v5_61_S212` | S212 close (superseded at S213) | `a40a57ecf7198317e2e29a101ab83354` | Tier-0 register. §S212: no live file changed anywhere, so **no VPS pin moved** — the pin list is the proof. Eighteen faults minted; three kits staged; three repaired. Four self-referential lines checked. Next free D357 · F-265 · S213. |
 | `KB_Register_v5_60_S210` | S210 close (superseded at S212) | `206341f519c93e659b1a8f111ccb728f` | **CURRENT** Tier-0 register. THE MONEY MADE VISIBLE; pays S209's owed bump (that close's state carried inside it, recorded). Three live-file rows DECLARED pin-pending. All four self-referential lines checked; the Archive pointer had stood stale (v1.55) through S209 — corrected visibly. |
@@ -200,7 +202,7 @@ is a halt that gets waved through, and then it protects nothing.
 | `START_HERE_SESSION_186` | S185 | `4adc2c646fbdf668882c2587498c8ec5` | superseded by 187/188. Carries the git-clone Phase 0, the F-88 cross-check, the **NEW inverse check (F-107)** — confirm every Tier-0 doc has a manifest row — the `verify_live_pins.py` live-code check (D321), and the S186 tasks (complete the partial pin; resolve the opening float). |
 | `START_HERE_SESSION_185` | S184 | `f65e76c2e270cabf522839ef25d4acbe` | superseded by 186. **FILED TO THE REPO AND PINNED AT THE S185 CLOSE (F-107)** — written to project knowledge only at the S184 close, so it was unverifiable at the S185 Phase 0; these are the bytes filed at S185 and they are canonical from here. |
 | `START_HERE_SESSION_184` | S183 | `18c2bf463ad53bd075683aebfba8f373` | superseded by 185/186. Carried the git-clone Phase 0 **and** the `python3 /root/deploy/verify_live_pins.py` live-code check (D321) |
-| `KB_Register` | **v5.63** | `ee57f9e32a8d98f1df2b5ec5043bb788` | **CURRENT — S214 CLOSE.** ⭐1.5+⭐1.6 done; F-185 closed everywhere; D358/D359; desk pins DECLARED PENDING; four candidates await ruling. Next free D360 · F-269. |
+| `KB_Register` | **v5.63** | `78a447388b223faf943e71e63d9874b8` | **CURRENT — S214 CLOSE.** ⭐1.5+⭐1.6 done; F-185 closed everywhere; D358/D359; desk pins captured at the S215 open; four candidates await ruling. Next free D360 · F-269. |
 | `KB_Register` (pre-S214) | v5.62 | `9ba150ac275c612614b4765135000ea1` | superseded at the S214 close; retained. |
 | `KB_Register` | v5.61 | `a40a57ecf7198317e2e29a101ab83354` | superseded at S213 — S212 CLOSE.** No live file changed; no pin moved. Eighteen faults minted (F-247…F-264), discharging the S211 twelve. |
 | `KB_Register` | v5.60 | `206341f519c93e659b1a8f111ccb728f` | superseded at S212 — S210 CLOSE (THE MONEY MADE VISIBLE).** D354 executed; nine kits owner-verified; pays S209's owed bump. Three live-file rows declared pin-pending (finance_app · darpan_app · marg_report — owner captures md5sums at the S211 open). |

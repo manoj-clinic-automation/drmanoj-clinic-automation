@@ -1,0 +1,1 @@
+S215_CP1 · 01-Sep-2026 · Surgical Casepack v2 stage CP-1 (D359) · replaces casepack_portal.py + casepack_page.html on the VPS, named backups, no schema change

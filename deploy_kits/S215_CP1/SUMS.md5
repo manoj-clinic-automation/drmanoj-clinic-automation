@@ -1,0 +1,11 @@
+3146bdbfc710dd00a12ef584e327ab0a  casepack_portal.py
+903b915e837c6e06b5b19a833af79c09  casepack_page.html
+cef57dba01ea5ee1083d900f935c5043  cp1_wiring.js
+2462378176bcd17285736fa3b499a9ae  patches_page.py
+f0d61360aae4e074662414bf06e074ed  selftest_casepack.py
+c83c58527a0ec2b2552b8bb26b6718d2  RENDER_TEST_casepack.py
+3ba0d16c885e04490df32147cfbab543  install_cp1.sh
+413c48cd6477394de4844f189560c101  INSTALL_ONE_PASTE.txt
+a135ed6f0be1f67ea24bca7fe74a1652  README.md
+8f942989e1365e3669ca49272cb020e3  KIT_ID.txt
+e0d5098d4a682dd7ad7b7360d6508437  gate_S215_CP1.py

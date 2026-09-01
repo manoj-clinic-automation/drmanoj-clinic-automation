@@ -1,0 +1,1 @@
+cd /root/deploy/repo && git pull && bash deploy_kits/S215_CP1/install_cp1.sh

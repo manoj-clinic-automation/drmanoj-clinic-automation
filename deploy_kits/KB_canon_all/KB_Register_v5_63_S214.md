@@ -151,8 +151,8 @@
 | `/root/finance/finance_identity.py` | `56eba8b97440a831714325313122d967` | **S214** (kit `S214_F185_FIX`) — was `81092e3c…`; name fixture scrubbed, 44/44; now byte-identical to the repo copy. |
 | `/root/finance/anomaly_baseline.py` | `5bac2bf09575a97d36bfae47ede56a6e` | **S214 NEW** (kit `S214_ANOMALY_BASELINE`; selftest 12/12 on the box) — ⭐1.6: the 344-flag standing set frozen from the LIVE db (set md5 `b198731b…`, == the offline backup run); re-run NEW 0. |
 | `/root/finance/finance_item_anomaly.py` | `5ca8a9a42e4d4cd894fc01632f8a4ae7` | **S214 NEW on the box** — the S211_MATCH definition installed unchanged; pinned by use. |
-| `/root/finance/returns_desk.py` | *(DECLARED PENDING — no file md5; v9 staged, v3 was live-verified `7358fd3d…`; the owner captures `md5sum` at the S215 open or in the S214 close paste)* | **S214 NEW** (kit `S214_RETURNS_DESK` v9) — the Vaapsi Desk module (D358). |
-| `/root/finance/returns_desk.html` | *(DECLARED PENDING — no file md5; v9 staged, v3 was live-verified `985ca9a3…`; captured with the row above)* | **S214 NEW** — the desk page; browser render test gates every change. |
+| `/root/finance/returns_desk.py` | `afc8b0d04214e2fd32b2d4b781cc60b4` *(pin completed in place at the S215 open, S208 precedent — value from the owner’s post-close paste, deploy clone `39e7cf1`, verified == the v9 kit bytes on manojz)* | **S214 NEW** (kit `S214_RETURNS_DESK` v9) — the Vaapsi Desk module (D358). |
+| `/root/finance/returns_desk.html` | `32c4b8ccd0ce51f54f9f5bb2bbdabc1c` *(pin completed in place at the S215 open — captured with the row above, verified == the v9 kit bytes)* | **S214 NEW** — the desk page; browser render test gates every change. |
 
 **S213 wave — the decided order live (VPS `/root/finance/`; installed 31-Aug-2026 by the owner, every pin verified against kit bytes the same hour; full notes in §S213 at the foot of this file):**
 | File | md5 | live as of |
@@ -1420,7 +1420,7 @@ each verified HEAD==origin.
 | **next-free numbers** | **D360 · F-269 · Session 215** (F-269 unchanged: this session's four candidates are RECORDED, not minted — the owner rules) |
 
 ## CURRENT LIVE FILE VERSIONS — THE S214 WAVE
-The consolidated table above carries the full S214 wave (finance_app `cf678dfc…` · marg_report `2eac81a2…` · finance_identity `56eba8b9…` · anomaly_baseline `5bac2bf0…` NEW · finance_item_anomaly `5ca8a9a4…` NEW · returns_desk.py/.html **DECLARED PENDING** — v9 staged, v3 live-verified `7358fd3d…`/`985ca9a3…`; the owner's close paste or the S215 open captures the final md5s). New additive store in finance.db: `return_visit` / `return_line` (+ settlement/void columns); `unit_role` gained three `viewer` rows (alisha · shivani · shavez — the Vaapsi Desk pass and nothing else). PC-side: `push_expected.py` re-pinned `14babf1b…` (⭐1.5 adoption; PUSH_STOCK_DAILY stays parked).
+The consolidated table above carries the full S214 wave (finance_app `cf678dfc…` · marg_report `2eac81a2…` · finance_identity `56eba8b9…` · anomaly_baseline `5bac2bf0…` NEW · finance_item_anomaly `5ca8a9a4…` NEW · returns_desk.py `afc8b0d0…` · returns_desk.html `32c4b8cc…` — captured from the owner’s post-close paste, pins completed in place at the S215 open). New additive store in finance.db: `return_visit` / `return_line` (+ settlement/void columns); `unit_role` gained three `viewer` rows (alisha · shivani · shavez — the Vaapsi Desk pass and nothing else). PC-side: `push_expected.py` re-pinned `14babf1b…` (⭐1.5 adoption; PUSH_STOCK_DAILY stays parked).
 
 ## DOCUMENT VERSIONS THAT DID CHANGE
 
