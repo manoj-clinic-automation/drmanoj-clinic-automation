@@ -1,1 +1,3 @@
-S206 close (fold) · 2026-08-27 18:03 IST · Archive v1.53 with §S205 folded in; Register v5.57; START_HERE 207; EOS v9
+S216 close · 01-Sep-2026 · Archive v1.63 · Register v5.65 · Runbook v149 · START_HERE 217 · EOS v13
+Fault Register stays v2.47 (five S216 candidates recorded, owner rules).
+Pins: live_pins_S216close.txt — register_pin_verified: yes, 68 VPS rows.
