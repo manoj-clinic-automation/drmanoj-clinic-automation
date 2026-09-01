@@ -1,0 +1,6 @@
+S216_STEPPER_BACK - a way back from stage 2 - 01-Sep-2026
+Base page: af850a87... (ayushman names, currently LIVE)
+Out  page: 7de1f5c3... (full row in SUMS.md5)
+PAGE ONLY. casepack_portal.py unchanged (3146bdbf...).
+Gates: selftest 32/32 - render 17/17 - guard 19/19 - contrast 9/9
+       - naming 14/14 - back navigation 12/12 (at 900, 560 and 420px).
