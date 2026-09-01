@@ -1,10 +1,11 @@
 6024d97476f86fc3c72687282f013eec  returns_desk.py
-aa0bb7a04e757ae9771218c7fe67f741  returns_desk.html
+6aac112bb435b15078726c2e20d5aa11  returns_desk.html
 dbb2c7660d06c93f2ca5e85999e4afe5  seed_desk_roles.py
 a305f3154e1de4ec18d4e2f90b7cc8e7  patch_finance_app_returns_desk.py
 7bb1d413a554c25ed592205a50e3919a  selftest_returns_desk.py
 9d5cebc16523c11d5b3367d21469d765  WALK_returns_desk.py
-099cb996ed3b242b0ed0d94e544cbf1e  README.md
+2ceeb887a9b69287da2381b1baa09f08  RENDER_TEST_returns_desk.py
+07aa9236c55cbf11b2c7f1bcb4594464  README.md
 acd56d8417b9650641abee8fc36f2c89  KIT_ID.txt
 ed39930b0c2d2f8781d323789b9736f9  INSTALL_ONE_PASTE.txt
 eac967270d2b59501363a740793810b7  INSTALL_V2_ONE_PASTE.txt

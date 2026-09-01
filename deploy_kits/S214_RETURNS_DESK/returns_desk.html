@@ -7,48 +7,55 @@
 <style>
 :root{--bg:#0e1b1e;--card:#14262b;--line:#1f3a41;--ink:#e8f1f2;--dim:#9db4b8;
 --teal:#2aa198;--green:#2e9e5b;--red:#c0392b}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);
-font:17px/1.45 system-ui,'Noto Sans Devanagari',sans-serif;padding-bottom:120px}
-.wrap{max-width:760px;margin:0 auto;padding:10px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font:16px/1.4 system-ui,'Noto Sans Devanagari',sans-serif;padding-bottom:110px}
+.wrap{max-width:760px;margin:0 auto;padding:8px}
 .steps{position:sticky;top:0;z-index:8;display:flex;gap:6px;background:var(--bg);
-padding:10px;border-bottom:1px solid var(--line)}
-.steps button{flex:1;padding:10px 4px;border-radius:10px;border:1px solid var(--line);
-background:var(--card);color:var(--dim);font-weight:700;font-size:15px}
+padding:8px;border-bottom:1px solid var(--line)}
+.steps button{flex:1;padding:9px 4px;border-radius:10px;border:1px solid var(--line);
+background:var(--card);color:var(--dim);font-weight:700;font-size:14px}
 .steps button.on{background:var(--teal);color:#04282c;border-color:var(--teal)}
 .steps button:disabled{opacity:.45}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;
-padding:14px;margin:12px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+padding:10px;margin:10px 0}
 input,select{font:inherit;border-radius:10px;border:1px solid var(--line);
-background:#0b1517;color:var(--ink);padding:14px;width:100%}
+background:#0b1517;color:var(--ink);padding:12px;width:100%}
 button{font:inherit;border-radius:10px;cursor:pointer}
-.big{width:100%;padding:14px;background:var(--teal);color:#04282c;border:none;
-font-weight:800;font-size:18px}
-.ghost{background:transparent;color:var(--teal);border:1px solid var(--teal);padding:10px 14px}
-.item{display:flex;justify-content:space-between;align-items:center;width:100%;
-text-align:left;background:none;color:var(--ink);border:none;
-border-top:1px solid var(--line);padding:14px 6px}
-.item:active{background:#123036}
-.item.inCart{background:#0f2e26}
-.dim{color:var(--dim);font-size:14px}
-.tag{font-size:13px;border:1px solid var(--line);border-radius:14px;padding:2px 10px;color:var(--dim)}
+.ghost{background:transparent;color:var(--teal);border:1px solid var(--teal);padding:9px 12px}
+.item{display:flex;justify-content:space-between;align-items:center;gap:6px;width:100%;
+border-top:1px solid var(--line);padding:9px 2px}
+.item .l{min-width:0;flex:1}
+.item .nm{font-weight:600}
+.item .sub{color:var(--dim);font-size:13px;line-height:1.35}
+.item.inCart{background:#0f2e26;border-radius:8px;padding-left:6px}
+.tag{font-size:13px;border:1px solid var(--teal);border-radius:14px;padding:5px 11px;
+color:var(--teal);white-space:nowrap;background:none}
+.tag.sel{background:#0f2e26;color:var(--ink);border-color:var(--line)}
 .redtxt{color:#ff9d8f}
-.cartline{border-top:1px solid var(--line);padding:12px 0}
+.qtybox{display:flex;gap:5px;align-items:center}
+.qtybox input{width:82px;text-align:center;padding:10px 4px;font-size:17px}
+.qtybox .okb{background:var(--teal);color:#04282c;border:none;padding:10px 14px;font-weight:800}
+.cartline{border-top:1px solid var(--line);padding:9px 0}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .qty{display:flex;align-items:center;gap:4px}
-.qty button{width:52px;height:48px;font-size:22px;background:#0b1517;color:var(--ink);
+.qty button{width:46px;height:44px;font-size:20px;background:#0b1517;color:var(--ink);
 border:1px solid var(--line)}
-.qty input{width:76px;text-align:center;padding:10px 4px;font-size:18px}
-.cond{font-size:14px;padding:8px 12px;border-radius:18px;border:1px solid var(--line);
+.qty input{width:70px;text-align:center;padding:9px 4px;font-size:17px}
+.cond{font-size:13px;padding:7px 11px;border-radius:16px;border:1px solid var(--line);
 background:#0b1517;color:var(--ink)}
 .cond.bad{background:#3a1512;border-color:var(--red);color:#ffb4a8}
-.bar{position:fixed;left:0;right:0;bottom:0;background:#0c2a2f;border-top:2px solid var(--teal);
-padding:12px;z-index:9}
-.bar .row{max-width:760px;margin:0 auto}
-.total{font-size:20px;font-weight:800}
+.total{font-size:19px;font-weight:800}
+.dim{color:var(--dim);font-size:13px}
 .hide{display:none!important}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0c2a2f;border-top:2px solid var(--teal);
+padding:10px 12px;z-index:9}
+.bar .row{max-width:760px;margin:0 auto}
+.bar button{background:var(--teal);color:#04282c;border:none;font-weight:800;
+font-size:17px;padding:13px 20px}
 .overlay{position:fixed;inset:0;background:rgba(5,15,17,.92);z-index:20;display:flex;
-flex-direction:column;align-items:center;justify-content:center;gap:14px;font-size:20px}
-.spin{width:44px;height:44px;border:5px solid var(--line);border-top-color:var(--teal);
+flex-direction:column;align-items:center;justify-content:center;gap:14px;font-size:19px}
+.spin{width:42px;height:42px;border:5px solid var(--line);border-top-color:var(--teal);
 border-radius:50%;animation:r 1s linear infinite}
 @keyframes r{to{transform:rotate(360deg)}}
 #printArea{display:none}
@@ -82,11 +89,13 @@ border-radius:50%;animation:r 1s linear infinite}
 <div id="p2" class="hide">
  <div class="card">
   <div class="row"><b id="pname"></b><button class="ghost" onclick="go(1)">↩ पीछे</button></div>
-  <input id="f" placeholder="दवा का नाम टाइप करें… (मरीज की दवा देख कर)" autocomplete="off">
   <div id="ilist"></div>
-  <button class="ghost" style="margin-top:10px;width:100%" onclick="$('catbox').classList.toggle('hide');$('cf').focus()">+ बिना बिल की दवा (दुकान के रिकॉर्ड से)</button>
+  <button class="ghost" style="margin-top:8px;width:100%"
+   onclick="document.getElementById('catbox').classList.toggle('hide');document.getElementById('cf').focus()">
+   + बिना बिल की दवा (दुकान के रिकॉर्ड से)</button>
   <div id="catbox" class="hide" style="margin-top:8px">
-   <input id="cf" placeholder="दवा का नाम टाइप करें…" autocomplete="off" oninput="catSearch(this.value.trim().toLowerCase())">
+   <input id="cf" placeholder="दवा का नाम टाइप करें…" autocomplete="off"
+    oninput="catSearch(this.value.trim().toLowerCase())">
    <div id="catlist"></div>
   </div>
  </div>
@@ -119,8 +128,8 @@ border-radius:50%;animation:r 1s linear infinite}
 
 <div class="bar hide" id="bar">
  <div class="row">
-  <span id="barTxt" class="total">0 दवाएँ</span>
-  <button class="big" style="width:auto;padding:14px 22px" id="barBtn" onclick="barGo()">आगे →</button>
+  <span id="barTxt" class="total">—</span>
+  <button id="barBtn" onclick="barGo()">आगे →</button>
  </div>
 </div>
 
@@ -131,226 +140,254 @@ border-radius:50%;animation:r 1s linear infinite}
 
 <script>
 "use strict";
-const USER=__DESK_USER__;
-const API=location.pathname.replace(/\/$/,'')+'/api';
-const HI={expired:'दवा expiry निकल चुकी है',damaged_or_opened:'पैकिंग खुली/ख़राब है',
+var USER=__DESK_USER__;
+var API=location.pathname.replace(/\/$/,'')+'/api';
+var HI={expired:'दवा expiry निकल चुकी है',damaged_or_opened:'पैकिंग खुली/ख़राब है',
  not_ours:'हमारे यहाँ की नहीं है'};
-const POLICY='वापसी नियम: हर दवा उसकी बिक्री की तारीख़ से 2 महीने के अंदर, सील बंद हालत में वापस/बदली जा सकती है। खुली, ख़राब या expiry निकली दवा वापस नहीं हो सकती।<br>निवेदन: वापसी हो तो आख़िरी ख़रीद की दवाएँ तुरंत लौटाएँ — पुरानी ख़रीदों की दवाएँ रोक कर बाद में एक साथ लौटाना आगे संभव नहीं हो पाएगा।';
-let patient=null, items=[], cart=[], closure='';
-const $=id=>document.getElementById(id);
-const rupee=p=>'₹'+((p||0)/100).toLocaleString('en-IN',{maximumFractionDigits:2});
+var POLICY='वापसी नियम: हर दवा उसकी बिक्री की तारीख़ से 2 महीने के अंदर, सील बंद हालत में वापस/बदली जा सकती है। खुली, ख़राब या expiry निकली दवा वापस नहीं हो सकती।<br>निवेदन: वापसी हो तो आख़िरी ख़रीद की दवाएँ तुरंत लौटाएँ — पुरानी ख़रीदों की दवाएँ रोक कर बाद में एक साथ लौटाना आगे संभव नहीं हो पाएगा।';
+var patient=null, items=[], cart=[], closure='', openKey=null, pend={}, step=1;
 
-function go(n){
- ['p1','p2','p3'].forEach((p,i)=>$(p).classList.toggle('hide',i!==n-1));
- [1,2,3].forEach(i=>$('st'+i).classList.toggle('on',i===n));
- window._step=n; drawBar();
-}
-function resetAll(){patient=null;items=[];cart=[];closure='';$('q').value='';
- $('plist').innerHTML='';$('st2').disabled=true;$('st3').disabled=true;
- $('payer').value='';$('adjBill').value='';$('msg').textContent='';go(1);loadSlips();}
-
-$('q').addEventListener('input',async e=>{
- const q=e.target.value.trim(); if(q.length<2){$('plist').innerHTML='';return;}
- const j=await (await fetch(API+'/search?q='+encodeURIComponent(q))).json();
- $('plist').innerHTML=(j.patients||[]).map(p=>
-  `<button class="item" onclick='pick(${JSON.stringify(JSON.stringify(p))})'>
-   <span>${p.name||'—'}<br><span class="dim">${p.clinic_id||''} ${p.last4?('· ***'+p.last4):''}</span></span>
-   <span class="tag">चुनें</span></button>`).join('')
-  ||'<div class="dim" style="padding:8px">कोई नहीं मिला</div>';
-});
-
-window.pick=async s=>{
- patient=JSON.parse(s);
- $('pname').textContent=patient.name||('ID '+patient.id);
- $('pname2').textContent=patient.name||'';
- $('st2').disabled=false; go(2); $('f').value=''; $('ilist').innerHTML='<div class="dim">लोड हो रही है…</div>';
- const j=await (await fetch(API+'/items?pid='+patient.id)).json();
- items=j.items||[]; drawItems('');
- $('f').focus();
-};
-$('f').addEventListener('input',e=>drawItems(e.target.value.trim().toLowerCase()));
-
-function inCart(k){return cart.some(c=>c.key===k);}
-function cartOf(k){return cart.find(c=>c.key===k);}
-let openQty=null;   // item key whose qty box is open
-function drawItems(q){
- const list=items.filter(it=>!q||String(it.item_name).toLowerCase().includes(q));
- $('ilist').innerHTML=list.slice(0,40).map(it=>row(it,false)).join('')
-  ||'<div class="dim" style="padding:8px">इस नाम की बिल में कोई दवा नहीं — नीचे "बिना बिल" से लें</div>';
- if(openQty!==null){const el=document.getElementById('qty_'+cssk(openQty));if(el)el.focus();}
-}
-async function catSearch(q){
- if(q.length<2){$('catlist').innerHTML='';return;}
- $('catlist').innerHTML='<div class="dim" style="padding:6px">खोज रही है…</div>';
- try{
-  const j=await (await fetch(API+'/catalog?q='+encodeURIComponent(q))).json();
-  $('catlist').innerHTML=(j.items||[]).map(it=>row(it,true)).join('')
-   ||'<div class="dim" style="padding:6px">रिकॉर्ड में नहीं मिली</div>';
-  if(openQty!==null){const e2=document.getElementById('qty_'+cssk(openQty));if(e2)e2.focus();}
- }catch(e){}
-}
+function $(id){return document.getElementById(id);}
+function rupee(p){return '₹'+((p||0)/100).toLocaleString('en-IN',{maximumFractionDigits:2});}
+function cssk(k){return String(k).replace(/[^a-zA-Z0-9]/g,'_');}
+function billShort(b){return String(b||'').replace(/^A0*/,'');}
 function unitWord(name){
- const n=String(name||'').toUpperCase();
+ var n=String(name||'').toUpperCase();
  if(/\bTAB/.test(n))return 'गोली';
  if(/\bCAP/.test(n))return 'कैप्सूल';
- if(/SYR|SUSP|SOLN|SOLUTION|DROP|ORAL LIQ/.test(n))return 'शीशी';
+ if(/SYR|SUSP|SOLN|SOLUTION|DROP/.test(n))return 'शीशी';
  if(/OINT|GEL\b|CREAM|LOTION/.test(n))return 'ट्यूब';
  if(/\bINJ|VIAL|AMP/.test(n))return 'इंजेक्शन';
  if(/SPRAY/.test(n))return 'स्प्रे';
  if(/POWDER|SACHET/.test(n))return 'पाउच';
  return 'नग';
 }
-const cssk=k=>String(k).replace(/[^a-zA-Z0-9]/g,'_');
-function row(it,fromCat){
- const k=it.item_key||it.item_name; const c=cartOf(k);
- const bills=(it.bills||[]).map(b=>b.bill_no+' '+(b.date||'').slice(5)+(b.units?(' · '+b.units+' '+unitWord(it.item_name)):'')+(b.disc_pct?(' · '+b.disc_pct+'% छूट'):'')).join('<br>');
- const price=it.unit_net_p??it.unit_p;
- let priceTxt;
- if(it.pack_n){
-  const sp=price*it.pack_n, smrp=(it.unit_p||0)*it.pack_n;
-  priceTxt=(it.discounted?`net ${rupee(sp)} <s style="opacity:.6">${rupee(smrp)}</s>`:rupee(sp))
-   +` / पत्ता (${it.pack_n} ${unitWord(it.item_name)})`;
- }else{
-  priceTxt=(it.discounted?`net ${rupee(price)} <s style="opacity:.6">${rupee(it.unit_p)}</s>`:rupee(price))+' / '+unitWord(it.item_name);
- }
- let right;
- if(openQty===k){
-  right=`<span class="qty"><input type="number" id="qty_${cssk(k)}" inputmode="numeric"
-    placeholder="कितनी?" style="width:90px" onkeydown="if(event.key==='Enter')confQty('${cssk(k)}')">
-   <button style="background:var(--teal);color:#04282c;border:none;padding:10px 14px;font-weight:800"
-    onclick="confQty('${cssk(k)}')">✔</button></span>`;
- }else if(c){
-  right=`<span class="tag" style="background:#0f2e26;color:var(--ink)">✔ ${c.units} ${unitWord(c.item_name)}</span>`;
- }else{
-  right=`<span class="tag">+ जोड़ें</span>`;
- }
- return `<div class="item ${c?'inCart':''}" onclick="tapRow(${JSON.stringify(JSON.stringify(it))},${fromCat})">
-  <span>${it.item_name}${it.last_expired?' <span class="redtxt">· expiry निकली</span>':''}<br>
-   <span class="dim">${fromCat?('बिना बिल · '+priceTxt):(priceTxt+(bills?('<br>'+bills):''))}</span></span>
-  ${right}</div>`;
-}
-window._pend={};
-window.tapRow=(sit,fromCat)=>{
- const it=JSON.parse(sit); const k=it.item_key||it.item_name;
- if(cartOf(k)){cart=cart.filter(c=>c.key!==k);openQty=null;}
- else{openQty=k;window._pend[k]=Object.assign({fromCat:fromCat},it);}
- drawItems($('f').value.trim().toLowerCase()); drawBar();
-};
-window.confQty=ck=>{
- const k=Object.keys(window._pend).find(x=>cssk(x)===ck)||openQty;
- const el=document.getElementById('qty_'+ck);
- const n=Math.max(1,parseInt(el&&el.value)||0);
- if(!n){el&&el.focus();return;}
- const it=window._pend[k];
- const up=(it.unit_net_p??it.unit_p)||0;
- cart.push({key:k,item_key:it.item_key,item_name:it.item_name,units:n,
-  unit_p:it.unit_p||0,unit_net_p:up,amount_p:up*n,pack_n:it.pack_n,
-  condition:'sealed',mrp_p:it.unit_p||0});
- openQty=null;
- drawItems($('f').value.trim().toLowerCase()); drawBar();
-};
-function conv(c){ const w=unitWord(c.item_name);
- if(!c.pack_n||c.units<c.pack_n) return c.units+' '+w;
- const s=Math.floor(c.units/c.pack_n), l=c.units%c.pack_n;
- return c.units+' '+w+' = '+s+' पत्ता'+(l?(' + '+l+' '+w):''); }
+function cartOf(k){for(var i=0;i<cart.length;i++)if(cart[i].key===k)return cart[i];return null;}
 
-function drawCart(){
- $('cart').innerHTML=cart.map((c,i)=>`<div class="cartline">
-  <div class="row"><b>${c.item_name}</b>
-   <button class="ghost" style="padding:6px 12px" onclick="rm(${i})">✕ हटाएँ</button></div>
-  <div class="row" style="margin-top:8px">
-   <div class="qty">
-    <button onclick="q(${i},-1)">−</button>
-    <input type="number" inputmode="numeric" value="${c.units}" data-prev="${c.units}"
-     onfocus="this.dataset.prev=this.value;this.value=''"
-     onblur="if(this.value==='')this.value=this.dataset.prev"
-     onchange="qset(${i},this.value)">
-    <button onclick="q(${i},1)">+</button></div>
-   <button class="cond ${c.condition!=='sealed'?'bad':''}" onclick="cond(${i})">
-    ${c.condition==='sealed'?'सील बंद ✔':'खुला/ख़राब'}</button></div>
-  <div class="row" style="margin-top:6px"><span class="dim">${conv(c)}
-    ${c.mrp_p&&c.unit_net_p<c.mrp_p?('· MRP '+rupee(c.mrp_p*c.units)+' → net'):''}</span>
-   <span>${c.condition!=='sealed'?'<span class="redtxt">वापसी नहीं होगी</span>':rupee(c.amount_p)}</span></div>
- </div>`).join('')||'<div class="dim">कोई दवा नहीं चुनी</div>';
- const tot=cart.filter(c=>c.condition==='sealed').reduce((a,c)=>a+c.amount_p,0);
- $('tot').textContent=rupee(tot); window._tot=tot; drawBar();
+function go(n){
+ ['p1','p2','p3'].forEach(function(p,i){$(p).classList.toggle('hide',i!==n-1);});
+ [1,2,3].forEach(function(i){$('st'+i).classList.toggle('on',i===n);});
+ step=n; drawBar();
 }
-window.rm=i=>{cart.splice(i,1);drawCart();drawBar();};
-window.q=(i,d)=>{const c=cart[i];c.units=Math.max(1,c.units+d);
- c.amount_p=(c.unit_net_p||c.unit_p)*c.units;drawCart();};
-window.qset=(i,v)=>{const c=cart[i];c.units=Math.max(1,parseInt(v)||1);
- c.amount_p=(c.unit_net_p||c.unit_p)*c.units;drawCart();};
-window.cond=i=>{cart[i].condition=cart[i].condition==='sealed'?'opened':'sealed';drawCart();};
+function resetAll(){patient=null;items=[];cart=[];closure='';openKey=null;pend={};
+ $('q').value='';$('plist').innerHTML='';$('st2').disabled=true;$('st3').disabled=true;
+ $('payer').value='';$('adjBill').value='';$('msg').textContent='';
+ $('catbox').classList.add('hide');$('cf').value='';$('catlist').innerHTML='';
+ go(1);loadSlips();}
+
+$('q').addEventListener('input',function(e){
+ var q=e.target.value.trim(); if(q.length<2){$('plist').innerHTML='';return;}
+ fetch(API+'/search?q='+encodeURIComponent(q)).then(function(r){return r.json();})
+ .then(function(j){
+  $('plist').innerHTML=(j.patients||[]).map(function(p){
+   return '<div class="item" onclick=\'pick('+JSON.stringify(JSON.stringify(p))+')\'>'
+    +'<span class="l"><span class="nm">'+(p.name||'—')+'</span><br>'
+    +'<span class="sub">'+(p.clinic_id||'')+(p.last4?(' · ***'+p.last4):'')+'</span></span>'
+    +'<span class="tag">चुनें</span></div>';}).join('')
+   ||'<div class="dim" style="padding:8px">कोई नहीं मिला</div>';
+ });
+});
+
+function pick(s){
+ patient=JSON.parse(s);
+ $('pname').textContent=patient.name||('ID '+patient.id);
+ $('pname2').textContent=patient.name||'';
+ $('st2').disabled=false; go(2);
+ $('ilist').innerHTML='<div class="dim" style="padding:8px">लोड हो रही है…</div>';
+ fetch(API+'/items?pid='+patient.id).then(function(r){return r.json();})
+ .then(function(j){items=j.items||[];drawItems();});
+}
+
+function priceTxt(it){
+ var p=(it.unit_net_p!=null?it.unit_net_p:it.unit_p)||0;
+ var w=unitWord(it.item_name);
+ if(it.pack_n){
+  var sp=p*it.pack_n, smrp=(it.unit_p||0)*it.pack_n;
+  return (it.discounted?('net '+rupee(sp)+' <s style="opacity:.6">'+rupee(smrp)+'</s>')
+          :rupee(sp))+' / पत्ता ('+it.pack_n+' '+w+')';
+ }
+ return (it.discounted?('net '+rupee(p)+' <s style="opacity:.6">'+rupee(it.unit_p)+'</s>')
+         :rupee(p))+' / '+w;
+}
+function billsTxt(it){
+ return (it.bills||[]).map(function(b){
+  return billShort(b.bill_no)+' '+String(b.date||'').slice(5)
+   +(b.units?(' · '+b.units):'')+(b.disc_pct?(' · '+b.disc_pct+'%'):'');
+ }).join('  |  ');
+}
+function row(it,fromCat){
+ var k=it.item_key||it.item_name, c=cartOf(k), right;
+ if(openKey===k){
+  right='<span class="qtybox"><input type="number" id="qb_'+cssk(k)+'" inputmode="numeric"'
+   +' placeholder="कितनी?" onkeydown="if(event.key===\'Enter\')confQty()">'
+   +'<button class="okb" onclick="event.stopPropagation();confQty()">✔</button></span>';
+ }else if(c){
+  right='<span class="tag sel">✔ '+c.units+' '+unitWord(c.item_name)+'</span>';
+ }else{
+  right='<span class="tag">+ जोड़ें</span>';
+ }
+ var sub=fromCat?('बिना बिल · '+priceTxt(it))
+               :(priceTxt(it)+(it.bills&&it.bills.length?('<br>'+billsTxt(it)):''));
+ return '<div class="item'+(c?' inCart':'')+'" onclick=\'tapRow('
+  +JSON.stringify(JSON.stringify(it))+','+(fromCat?'true':'false')+')\'>'
+  +'<span class="l"><span class="nm">'+it.item_name
+  +(it.last_expired?' <span class="redtxt">· expiry निकली</span>':'')+'</span><br>'
+  +'<span class="sub">'+sub+'</span></span>'+right+'</div>';
+}
+function drawItems(){
+ $('ilist').innerHTML=items.map(function(it){return row(it,false);}).join('')
+  ||'<div class="dim" style="padding:8px">इस मरीज की कोई ख़रीद दर्ज नहीं — नीचे "बिना बिल" से लें</div>';
+ focusQty();
+}
+function catSearch(q){
+ if(q.length<2){$('catlist').innerHTML='';return;}
+ $('catlist').innerHTML='<div class="dim" style="padding:6px">खोज रही है…</div>';
+ fetch(API+'/catalog?q='+encodeURIComponent(q)).then(function(r){return r.json();})
+ .then(function(j){
+  $('catlist').innerHTML=(j.items||[]).map(function(it){return row(it,true);}).join('')
+   ||'<div class="dim" style="padding:6px">रिकॉर्ड में नहीं मिली</div>';
+  focusQty();
+ }).catch(function(){});
+}
+function focusQty(){
+ if(openKey!==null){var el=$('qb_'+cssk(openKey));if(el)el.focus();}
+}
+function redraw(){
+ drawItems();
+ if(!$('catbox').classList.contains('hide'))
+  catSearch(($('cf').value||'').trim().toLowerCase());
+ drawBar();
+}
+function tapRow(sit,fromCat){
+ var it=JSON.parse(sit), k=it.item_key||it.item_name;
+ if(cartOf(k)){cart=cart.filter(function(c){return c.key!==k;});openKey=null;}
+ else{openKey=k;pend[k]=it;}
+ redraw();
+}
+function confQty(){
+ if(openKey===null)return;
+ var k=openKey, el=$('qb_'+cssk(k));
+ var n=parseInt(el&&el.value,10);
+ if(!n||n<1){if(el)el.focus();return;}
+ var it=pend[k]||{};
+ var up=(it.unit_net_p!=null?it.unit_net_p:it.unit_p)||0;
+ cart.push({key:k,item_key:it.item_key||null,item_name:it.item_name||String(k),
+  units:n,unit_p:it.unit_p||0,unit_net_p:up,amount_p:up*n,
+  pack_n:it.pack_n||null,mrp_p:it.unit_p||0,condition:'sealed'});
+ openKey=null;
+ redraw();
+}
+
+function conv(c){
+ var w=unitWord(c.item_name);
+ if(!c.pack_n||c.units<c.pack_n)return c.units+' '+w;
+ var s=Math.floor(c.units/c.pack_n), l=c.units%c.pack_n;
+ return c.units+' '+w+' = '+s+' पत्ता'+(l?(' + '+l+' '+w):'');
+}
+function drawCart(){
+ $('cart').innerHTML=cart.map(function(c,i){
+  return '<div class="cartline">'
+   +'<div class="row"><b>'+c.item_name+'</b>'
+   +'<button class="ghost" style="padding:5px 11px" onclick="rm('+i+')">✕</button></div>'
+   +'<div class="row" style="margin-top:7px"><div class="qty">'
+   +'<button onclick="qd('+i+',-1)">−</button>'
+   +'<input type="number" inputmode="numeric" value="'+c.units+'" data-prev="'+c.units+'"'
+   +' onfocus="this.dataset.prev=this.value;this.value=\'\'"'
+   +' onblur="if(this.value===\'\')this.value=this.dataset.prev"'
+   +' onchange="qset('+i+',this.value)"><button onclick="qd('+i+',1)">+</button></div>'
+   +'<button class="cond'+(c.condition!=='sealed'?' bad':'')+'" onclick="cond('+i+')">'
+   +(c.condition==='sealed'?'सील बंद ✔':'खुला/ख़राब')+'</button></div>'
+   +'<div class="row" style="margin-top:5px"><span class="dim">'+conv(c)
+   +(c.mrp_p&&c.unit_net_p<c.mrp_p?(' · MRP '+rupee(c.mrp_p*c.units)+' → net'):'')+'</span>'
+   +'<span>'+(c.condition!=='sealed'?'<span class="redtxt">वापसी नहीं होगी</span>':rupee(c.amount_p))
+   +'</span></div></div>';}).join('')
+  ||'<div class="dim">कोई दवा नहीं चुनी</div>';
+ var tot=netTotal();
+ $('tot').textContent=rupee(tot); drawBar();
+}
+function netTotal(){
+ var t=0;for(var i=0;i<cart.length;i++)if(cart[i].condition==='sealed')t+=cart[i].amount_p;
+ return t;
+}
+function rm(i){cart.splice(i,1);drawCart();}
+function qd(i,d){var c=cart[i];c.units=Math.max(1,c.units+d);
+ c.amount_p=(c.unit_net_p||c.unit_p)*c.units;drawCart();}
+function qset(i,v){var c=cart[i];c.units=Math.max(1,parseInt(v,10)||1);
+ c.amount_p=(c.unit_net_p||c.unit_p)*c.units;drawCart();}
+function cond(i){cart[i].condition=cart[i].condition==='sealed'?'opened':'sealed';drawCart();}
 
 function drawBar(){
- const n=cart.length;
- if(window._step===1||n===0){$('bar').classList.add('hide');return;}
+ var n=cart.length;
+ if(step===1||n===0){$('bar').classList.add('hide');return;}
  $('bar').classList.remove('hide');
- const tot=cart.filter(c=>c.condition==='sealed').reduce((a,c)=>a+c.amount_p,0);
- if(window._step===2){$('barTxt').textContent=n+' दवाएँ · net '+rupee(tot);
-  $('barBtn').textContent='पर्ची बनाएँ →';}
- else{$('barTxt').textContent=n+' दवाएँ · net '+rupee(tot);
-  $('barBtn').textContent='✔ पक्का करें और प्रिंट';}
+ $('barTxt').textContent=n+' दवाएँ · net '+rupee(netTotal());
+ $('barBtn').textContent=(step===2)?'पर्ची बनाएँ →':'✔ पक्का करें और प्रिंट';
 }
-window.barGo=()=>{ if(window._step===2){$('st3').disabled=false;drawCart();go(3);}
- else save(); };
+function barGo(){
+ if(step===2){$('st3').disabled=false;drawCart();go(3);}
+ else save();
+}
 function mode(m){closure=m;
  $('cashBox').classList.toggle('hide',m!=='cash');
  $('adjBox').classList.toggle('hide',m!=='adjust');
- $('mCash').style.background=m==='cash'?'var(--teal)':'';
- $('mCash').style.color=m==='cash'?'#04282c':'';
- $('mAdj').style.background=m==='adjust'?'var(--teal)':'';
- $('mAdj').style.color=m==='adjust'?'#04282c':'';}
+ $('mCash').style.background=(m==='cash')?'var(--teal)':'';
+ $('mCash').style.color=(m==='cash')?'#04282c':'';
+ $('mAdj').style.background=(m==='adjust')?'var(--teal)':'';
+ $('mAdj').style.color=(m==='adjust')?'#04282c':'';}
 
-async function save(){
+function save(){
  if(!cart.length)return;
- if(window._tot>0&&!closure){$('msg').textContent='पहले चुनें: नक़द या Adjust';return;}
- if(window._tot>0&&closure==='cash'&&!$('payer').value){$('msg').textContent='नक़द किसने दिया — चुनें';return;}
- if(window._tot>0&&closure==='adjust'&&!$('adjBill').value.trim()){$('msg').textContent='नए बिल का नंबर लिखें';return;}
+ var tot=netTotal();
+ if(tot>0&&!closure){$('msg').textContent='पहले चुनें: नक़द या Adjust';return;}
+ if(tot>0&&closure==='cash'&&!$('payer').value){$('msg').textContent='नक़द किसने दिया — चुनें';return;}
+ if(tot>0&&closure==='adjust'&&!$('adjBill').value.trim()){$('msg').textContent='नए बिल का नंबर लिखें';return;}
  $('ov').classList.remove('hide');
- const body={patient_ref_id:patient?patient.id:null,
-  patient_label:patient?(patient.name+(patient.clinic_id?(' · '+patient.clinic_id):'')):'बिना रिकॉर्ड',
-  lines:cart.map(c=>({item_key:c.item_key,item_name:c.item_name,units:c.units,
-   unit_p:c.unit_net_p||c.unit_p,amount_p:c.amount_p,condition:c.condition})),
-  closure:window._tot>0?closure:'nothing',
+ var body={patient_ref_id:patient?patient.id:null,
+  patient_label:patient?((patient.name||'')+(patient.clinic_id?(' · '+patient.clinic_id):'')):'बिना रिकॉर्ड',
+  lines:cart.map(function(c){return {item_key:c.item_key,item_name:c.item_name,
+   units:c.units,unit_p:c.unit_net_p||c.unit_p,amount_p:c.amount_p,condition:c.condition};}),
+  closure:tot>0?closure:'nothing',
   cash_paid_by:$('payer').value,adjust_bill_no:$('adjBill').value.trim()};
- try{
-  const r=await fetch(API+'/slip',{method:'POST',
-   headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  const j=await r.json();
+ fetch(API+'/slip',{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify(body)})
+ .then(function(r){return r.json();})
+ .then(function(j){
   $('ov').classList.add('hide');
   if(!j.ok){$('msg').textContent='रुका: '+(j.message||j.error);return;}
   printSlip(j,body); resetAll();
- }catch(e){$('ov').classList.add('hide');
-  $('msg').textContent='सर्वर से जवाब नहीं — दोबारा दबाएँ';}
+ })
+ .catch(function(){$('ov').classList.add('hide');
+  $('msg').textContent='सर्वर से जवाब नहीं — दोबारा दबाएँ';});
 }
 
 function printSlip(j,body){
- const rows=j.lines.map(l=>`<tr><td>${l.item_name}<br><span style="font-size:11px">
-   ${l.bills?('बिल: '+l.bills):''}</span></td>
-  <td>${l.qty_text||l.qty_units}</td>
-  <td>${l.accepted?rupee(l.amount_p):'—'}</td>
-  <td>${l.accepted?'ली गई ✔':('नहीं ली — '+(HI[(l.reasons||[])[0]]||''))}</td></tr>`).join('');
- $('printArea').innerHTML=`<h2>Sanjeevni Medicos — वापसी पर्ची</h2>
-  <p>पर्ची <b>${j.slip_no}</b> · ${j.business_date} · स्टाफ: ${j.staff}<br>
-  मरीज: ${body.patient_label||''}</p>
-  <table><tr><th>दवा</th><th>मात्रा</th><th>रक़म</th><th>फ़ैसला</th></tr>${rows}</table>
-  <p><b>कुल वापसी: ${rupee(j.refund_p)}</b> —
-   ${body.closure==='cash'?('नक़द (' +(body.cash_paid_by||'')+' ने दी)'):
-     body.closure==='adjust'?('नए बिल '+(body.adjust_bill_no||'')+' में adjust'):'कोई रक़म नहीं'}</p>
-  <div class="foot">${POLICY}</div>`;
+ var rows=j.lines.map(function(l){
+  return '<tr><td>'+l.item_name+'<br><span style="font-size:11px">'
+   +(l.bills?('बिल: '+l.bills):'')+'</span></td>'
+   +'<td>'+(l.qty_text||l.qty_units)+'</td>'
+   +'<td>'+(l.accepted?rupee(l.amount_p):'—')+'</td>'
+   +'<td>'+(l.accepted?'ली गई ✔':('नहीं ली — '+(HI[(l.reasons||[])[0]]||'')))+'</td></tr>';}).join('');
+ $('printArea').innerHTML='<h2>Sanjeevni Medicos — वापसी पर्ची</h2>'
+  +'<p>पर्ची <b>'+j.slip_no+'</b> · '+j.business_date+' · स्टाफ: '+j.staff+'<br>'
+  +'मरीज: '+(body.patient_label||'')+'</p>'
+  +'<table><tr><th>दवा</th><th>मात्रा</th><th>रक़म</th><th>फ़ैसला</th></tr>'+rows+'</table>'
+  +'<p><b>कुल वापसी: '+rupee(j.refund_p)+'</b> — '
+  +(body.closure==='cash'?('नक़द ('+(body.cash_paid_by||'')+' ने दी)'):
+    body.closure==='adjust'?('नए बिल '+(body.adjust_bill_no||'')+' में adjust'):'कोई रक़म नहीं')
+  +'</p><div class="foot">'+POLICY+'</div>';
  window.print();
 }
 
-async function loadSlips(){
- try{const j=await (await fetch(API+'/slips')).json();
-  $('todaySlips').innerHTML=(j.slips||[]).map(s=>
-   `<div class="row cartline"><span><b>${s.slip_no}</b><br>
-    <span class="dim">${s.patient_label||''} · ${s.staff}</span></span>
-    <span>${rupee(s.refund_p)}</span></div>`).join('')||'—';
- }catch(e){}
+function loadSlips(){
+ fetch(API+'/slips').then(function(r){return r.json();})
+ .then(function(j){
+  $('todaySlips').innerHTML=(j.slips||[]).map(function(s){
+   return '<div class="row cartline"><span><b>'+s.slip_no+'</b><br>'
+    +'<span class="dim">'+(s.patient_label||'')+' · '+s.staff+'</span></span>'
+    +'<span>'+rupee(s.refund_p)+'</span></div>';}).join('')||'—';
+ }).catch(function(){});
 }
-window._step=1; loadSlips();
+loadSlips();
 </script>
 </body>
 </html>

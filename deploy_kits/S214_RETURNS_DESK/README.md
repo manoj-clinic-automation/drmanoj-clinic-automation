@@ -1,4 +1,14 @@
-# S214_RETURNS_DESK — the counter return flow, "Vaapsi Desk" (kit 1 of 2, v5)
+# S214_RETURNS_DESK — the counter return flow, "Vaapsi Desk" (kit 1 of 2, v6)
+
+**v6 — clean rewrite after v5's dead-tap bug:** no search box over the
+billed list (it IS the list — compact two-line rows, most patients fit one
+screen); bill numbers without the A00 prefix; bill line reads "3238 08-12 ·
+20 · 10%" (qty bare — the counting word already sits beside the rate); the
+whole flow proven in a REAL headless browser (`RENDER_TEST_returns_desk.py`,
+sandbox-only) — the missing proof layer that let v5 ship with dead taps:
+node-clean syntax and 45 green server checks, and no browser had ever
+clicked the page. That test now gates every desk page change. FAULT
+CANDIDATE (assistant's own) recorded for the close.
 
 **v5:** the counting word follows the medicine — गोली / कैप्सूल / शीशी /
 ट्यूब / इंजेक्शन / स्प्रे / पाउच, read from the item's own name (नग when it
