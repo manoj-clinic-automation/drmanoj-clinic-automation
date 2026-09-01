@@ -1,0 +1,12 @@
+1e4d25d4ac6fa41729653527616b6299  casepack_page.html
+3146bdbfc710dd00a12ef584e327ab0a  casepack_portal.py
+cb6cc5bb3949ed8b07035166ab1baccd  patches_cp11_guard.py
+f0d61360aae4e074662414bf06e074ed  selftest_casepack.py
+c83c58527a0ec2b2552b8bb26b6718d2  RENDER_TEST_casepack.py
+f5f80443b5db5474cd27f4068cc40077  GUARD_WALK_cp11.py
+cbf9df539e671f60b85c133fa329244f  REVERSE_PROOF_cp11.py
+96bbc128bde1b24a1e89a2e70b90aec8  install_cp11.sh
+961b5eeb85b9d8fb336e357e66d22559  INSTALL_ONE_PASTE.txt
+96562cd7bb64a2fe5597158501984646  README.md
+54fa0bc32987869f4ec9eccb22614749  KIT_ID.txt
+3e00ef928af067ecf8dbde33a972658c  gate_S216_CP11.py

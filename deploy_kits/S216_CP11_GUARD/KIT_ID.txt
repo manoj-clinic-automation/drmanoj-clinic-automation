@@ -1,0 +1,5 @@
+S216_CP11_GUARD - CP-1.1 step 1, the wrong-opening guard - 01-Sep-2026
+Base page: casepack_page.html 903b915e… (S215 live pin)
+Out page:  casepack_page.html 1e4d25d4… (full row in SUMS.md5)
+PAGE ONLY. casepack_portal.py unchanged (3146bdbf…).
+Gates: selftest 32/32 - render 17/17 - guard walk 19/19 - reverse proof RED on the old page.
