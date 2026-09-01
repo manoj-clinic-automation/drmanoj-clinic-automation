@@ -34,14 +34,14 @@ ready for it.
 |---|---|
 | `returns_desk.py` | blueprint; `init(app, db, require, unit)` — the S208 stock_app pattern; owns `return_visit`/`return_line` (additive, lazy) |
 | `returns_desk.html` | the counter page + print-format slip |
-| `seed_desk_roles.py` | idempotent `unit_role` rows: alisha/shivani/shavez get role `returns` on medical (grants the desk and nothing else); darpan (maker) and manoj (checker) already pass |
+| `seed_desk_roles.py` | idempotent `unit_role` rows: alisha/shivani/shavez get role `viewer` on medical — the schema's CHECK allows only maker/checker/viewer, and no other finance route accepts viewer, so it grants the desk and nothing else; darpan (maker) and manoj (checker) already pass |
 | `patch_finance_app_returns_desk.py` | guarded mount into the live finance_app.py — exact anchors, singleton checks, backup, py_compile with restore-on-red |
 | `selftest_returns_desk.py` | 20 invariant checks, synthetic db, real routes |
 | `WALK_returns_desk.py` | the live-shape walk on a THROWAWAY COPY of a real finance.db (refuses the real book by name); 11 checks |
 
 ## Proof so far
 
-Selftest **20/20** (sandbox). Walk **11/11 on the restored 31-Aug backup**:
+Selftest **22/22** (sandbox; v2 — the unit_role CHECK is now IN the synthetic schema and the seeder is exercised against it, after the first install was rightly refused by that constraint). Walk **11/11 on the restored 31-Aug backup**:
 real patient with 16 bills, full history with lines, mixed slip saved
 (GREEN accepted + opened RED refused and FILED), source db untouched.
 

@@ -57,7 +57,7 @@ def main():
         return con
 
     def require(*want, unit="medical"):
-        if {"returns"} & set(want):
+        if {"viewer"} & set(want):
             return {"user": "alisha", "roles": ["returns"]}, None
         from flask import jsonify
         return None, (jsonify(ok=False), 403)

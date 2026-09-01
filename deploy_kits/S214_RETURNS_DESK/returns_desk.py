@@ -65,7 +65,7 @@ _db = None          # callable -> sqlite3 connection (finance_app's db())
 _require = None     # finance_app's require(role)
 _unit = "medical"
 
-DESK_ROLES = ("returns", "maker", "checker")
+DESK_ROLES = ("viewer", "maker", "checker")
 LATE_DAYS = 60                  # the 2-month courtesy line (owner: stays)
 NEAR_EXPIRY_MONTHS = 1
 BIG_REFUND_P = 200000           # Rs 2,000 -- flag, never block (default D1)
@@ -136,9 +136,11 @@ def _auth():
 
     The owner's list -- reception (alisha, shivani), fallbacks darpan and
     shavez, plus himself -- lives where every other permission lives:
-    `unit_role` rows. Reception carries the dedicated role `returns`, which
-    grants THIS desk and nothing else (require("maker") elsewhere still
-    refuses them); makers and checkers can always work the desk. Seeded by
+    `unit_role` rows. Reception carries role `viewer` on the medical unit:
+    the schema's CHECK allows only maker/checker/viewer (the first install
+    attempt invented a fourth word and the constraint refused it -- rightly),
+    and NO other finance route accepts viewer, so it grants THIS desk and
+    nothing else; makers and checkers can always work the desk. Seeded by
     seed_desk_roles.py at install -- visible rows, not code."""
     u, err = _require(*DESK_ROLES)
     if err:

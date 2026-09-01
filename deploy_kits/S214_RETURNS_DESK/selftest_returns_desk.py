@@ -43,7 +43,8 @@ def build_db(path):
       batch TEXT);
     CREATE TABLE setting (key TEXT PRIMARY KEY, value TEXT, note TEXT);
     CREATE TABLE unit_role (id INTEGER PRIMARY KEY, unit TEXT, username TEXT,
-      role TEXT, active INT, note TEXT);
+      role TEXT NOT NULL CHECK (role IN ('maker','checker','viewer')),
+      active INT, note TEXT);
     """)
     con.execute("INSERT INTO patient_ref VALUES (1,'C-101','RAM TEST','1234',NULL,NULL,NULL)")
     con.execute("INSERT INTO sale_item (patient_ref_id,source_ref,amount_p,mode) "
@@ -62,7 +63,7 @@ def build_db(path):
     con.close()
 
 
-def make_app(db_path, user="alisha", roles=("returns",)):
+def make_app(db_path, user="alisha", roles=("viewer",)):
     app = Flask(__name__)
 
     def db():
@@ -162,6 +163,17 @@ def main():
     con = sqlite3.connect(dbp)
     nred = con.execute("SELECT COUNT(*) FROM return_line WHERE accepted=0").fetchone()[0]
     check("refused lines are FILED, not vanished", nred == 2)
+
+    import seed_desk_roles as SEED
+    rc = SEED.main(dbp)
+    con = sqlite3.connect(dbp)
+    n = con.execute("SELECT COUNT(*) FROM unit_role WHERE role='viewer' "
+                    "AND active=1").fetchone()[0]
+    check("seeder writes schema-legal viewer rows (the CHECK lesson)",
+          rc == 0 and n == 3)
+    rc2 = SEED.main(dbp)
+    n2 = con.execute("SELECT COUNT(*) FROM unit_role").fetchone()[0]
+    check("seeder is idempotent", rc2 == 0 and n2 == n)
 
     app2 = make_app(dbp, user="lab_person", roles=("labmaker",))
     r = app2.test_client().get("/finance/returns/desk/api/slips")
