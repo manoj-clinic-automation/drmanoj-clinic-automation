@@ -22,6 +22,8 @@ HTML = open(__file__.replace("RENDER_TEST_returns_desk.py",
                              "returns_desk.html")).read() \
     .replace("__DESK_USER__", '"alisha"')
 ITEMS = [dict(item_key="k1", item_name="GEMCAL XT TABLETS", bought_units=20,
+              cap_units=18, returned_units=2,
+              returns=[dict(src="CN", date="2026-08-20", units=2)],
               last_date="2026-08-12", last_expiry="2027-05", pack_n=10,
               unit_p=1701, unit_net_p=1531, discounted=True, n_bills=2,
               bills=[dict(bill_no="A003238", date="2026-08-12", units=20,
@@ -60,11 +62,15 @@ def main():
         pg.wait_for_timeout(100)
         pg.click("#ilist .item")            # re-open qty box
         pg.wait_for_selector("input[id^=qb_]")
+        body2 = pg.inner_text("#ilist")
+        assert "· 20" in body2, "total billed missing by the name"
+        assert "CN" in body2 and "2 वापस" in body2, "previous-return line missing"
         pg.fill("input[id^=qb_]", "50")
         pg.click(".okb")
         assert pg.input_value("input[id^=qb_]") == "", "cap did not clear the box"
-        ph = pg.get_attribute("input[id^=qb_]", "placeholder")
-        assert "20" in ph, "cap guidance missing: " + str(ph)
+        w = pg.inner_text("[id^=warn_]")
+        assert "18" in w and "बिना बिल" in w, "loud warning missing: " + w
+        assert pg.locator("[id^=warn_]").is_visible()
         pg.fill("input[id^=qb_]", "15"); pg.click(".okb")
         pg.wait_for_selector(".tag.sel")
         # selections panel edit (v7) still present

@@ -51,10 +51,13 @@ def build_db(path):
                 "VALUES (1,'B001',45000,'cash',50000,5000)")
     con.execute("INSERT INTO sale_item (patient_ref_id,source_ref,amount_p,mode) "
                 "VALUES (1,'B000',30000,'cash')")
+    con.execute("INSERT INTO sale_item (patient_ref_id,source_ref,amount_p,mode) "
+                "VALUES (1,'CN001',-30000,'cash')")
     rows = [
         (RECENT, "B001", 0, 1, "GOOD TAB", "good", "1*10", "0:2", 10000, GOOD_EXP),
         (RECENT, "B001", 0, 2, "DEAD OINT", "dead", "", "1.0", 5000, DEAD_EXP),
         (OLD,    "B000", 0, 1, "OLD SYRUP", "old", "", "1.0", 30000, GOOD_EXP),
+        (RECENT, "CN001", 1, 1, "OLD SYRUP", "old", "", "1.0", 30000, GOOD_EXP),
     ]
     con.executemany("INSERT INTO sale_line_item (business_date,bill_no,is_return,"
                     "seq,item_name,item_key,pack,qty_raw,amount_p,expiry_ym) "
@@ -109,6 +112,12 @@ def main():
     check("items carry a per-unit price guess", keys["good"]["unit_p"] > 0)
     check("net unit price honours the bill's own discount (10% off 1000 -> 900)",
           keys["good"]["unit_net_p"] == 900 and keys["good"]["discounted"])
+    check("a Marg credit note reduces the returnable cap (bought 1 - CN 1 = 0)",
+          keys["old"]["cap_units"] == 0 and keys["old"]["returned_units"] == 1)
+    check("previous returns listed with source and date",
+          keys["old"]["returns"] and keys["old"]["returns"][0]["src"] == "CN")
+    check("an untouched item's cap equals its bought units",
+          keys["good"]["cap_units"] == keys["good"]["bought_units"])
     check("items carry their bills inline",
           keys["good"]["bills"] and keys["good"]["bills"][0]["bill_no"] == "B001")
     check("bill entries carry purchased qty and the discount given",
@@ -232,6 +241,11 @@ def main():
     r = c.get("/finance/returns/desk/api/slips?open=1")
     check("Cancelled slips leave the CN-pending list",
           all(x["slip_no"] != vslip for x in r.get_json()["slips"]))
+
+    j = c.get("/finance/returns/desk/api/items?pid=1").get_json()
+    good_now = {i["item_key"]: i for i in j["items"]}["good"]
+    check("accepted desk slips reduce the cap on the next visit",
+          good_now["cap_units"] < good_now["bought_units"])
 
     app2 = make_app(dbp, user="lab_person", roles=("labmaker",))
     r = app2.test_client().get("/finance/returns/desk/api/slips")

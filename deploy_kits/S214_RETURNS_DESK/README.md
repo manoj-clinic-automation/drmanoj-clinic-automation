@@ -1,4 +1,13 @@
-# S214_RETURNS_DESK — the counter return flow, "Vaapsi Desk" (kit 1 of 2, v8)
+# S214_RETURNS_DESK — the counter return flow, "Vaapsi Desk" (kit 1 of 2, v9)
+
+**v9 — previous returns close the loop:** the returnable cap is now
+bought − already returned, counting BOTH earlier desk slips and credit
+notes already booked in Marg for this patient; past returns show under the
+item as their own "CN date · qty" lines; the total billed sits next to the
+product name (screen only, never printed); and an over-cap attempt raises a
+LOUD red banner with the arithmetic ("बिल में 20 — पहले वापस 2 — अधिकतम
+18") telling staff to inform the patient verbally and use बिना बिल if they
+argue — which yellow-flags to the owner.
 
 **v8 — the money-flow ruling (owner, 01-Sep night):** ALL cash stays at
 the medical sales counter. The desk only verifies meds and prints the slip
@@ -100,7 +109,7 @@ ready for it.
 
 ## Proof so far
 
-Selftest **40/40** (sandbox; v2 — the unit_role CHECK is now IN the synthetic schema and the seeder is exercised against it, after the first install was rightly refused by that constraint). Walk **14/14 on the restored 31-Aug backup**: real patient, 14 medicines
+Selftest **44/44** (sandbox; v2 — the unit_role CHECK is now IN the synthetic schema and the seeder is exercised against it, after the first install was rightly refused by that constraint). Walk **14/14 on the restored 31-Aug backup**: real patient, 14 medicines
 aggregated and priced in the picker, the server allocated a real bill to
 the return, mixed slip saved (GREEN accepted + opened RED refused and
 FILED), source db untouched.

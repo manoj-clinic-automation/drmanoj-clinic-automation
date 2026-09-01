@@ -23,7 +23,7 @@ input,select{font:inherit;border-radius:10px;border:1px solid var(--line);
 background:#0b1517;color:var(--ink);padding:12px;width:100%}
 button{font:inherit;border-radius:10px;cursor:pointer}
 .ghost{background:transparent;color:var(--teal);border:1px solid var(--teal);padding:9px 12px}
-.item{display:flex;justify-content:space-between;align-items:center;gap:6px;width:100%;
+.item{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px;width:100%;
 border-top:1px solid var(--line);padding:9px 2px}
 .item .l{min-width:0;flex:1}
 .item .nm{font-weight:600}
@@ -214,22 +214,31 @@ function billsTxt(it){
 }
 function row(it,fromCat){
  var k=it.item_key||it.item_name, c=cartOf(k), right;
+ var warn='';
  if(openKey===k){
   right='<span class="qtybox"><input type="number" id="qb_'+cssk(k)+'" inputmode="numeric"'
    +' placeholder="कितनी?" onkeydown="if(event.key===\'Enter\')confQty()">'
    +'<button class="okb" onclick="event.stopPropagation();confQty()">✔</button></span>';
+  warn='<div id="warn_'+cssk(k)+'" class="hide" style="flex-basis:100%;background:#3a1512;'
+   +'border:1px solid var(--red);border-radius:8px;color:#ffb4a8;font-size:15px;'
+   +'padding:8px 10px;margin-top:6px"></div>';
  }else if(c){
   right='<span class="tag sel">✔ '+c.units+' '+unitWord(c.item_name)+'</span>';
  }else{
   right='<span class="tag">+ जोड़ें</span>';
  }
+ var rets=(it.returns||[]).map(function(r){
+  return '<span class="redtxt">'+(r.src==='CN'?'CN':'पर्ची')+' '
+   +String(r.date||'').slice(5)+' · '+r.units+' वापस</span>';}).join('  |  ');
  var sub=fromCat?('बिना बिल · '+priceTxt(it))
-               :(priceTxt(it)+(it.bills&&it.bills.length?('<br>'+billsTxt(it)):''));
+               :(priceTxt(it)+(it.bills&&it.bills.length?('<br>'+billsTxt(it)):'')
+                 +(rets?('<br>'+rets):''));
  return '<div class="item'+(c?' inCart':'')+'" onclick=\'tapRow('
   +JSON.stringify(JSON.stringify(it))+','+(fromCat?'true':'false')+')\'>'
   +'<span class="l"><span class="nm">'+it.item_name
+  +((!fromCat&&it.bought_units)?' <b style="color:var(--teal)">· '+it.bought_units+'</b>':'')
   +(it.last_expired?' <span class="redtxt">· expiry निकली</span>':'')+'</span><br>'
-  +'<span class="sub">'+sub+'</span></span>'+right+'</div>';
+  +'<span class="sub">'+sub+'</span></span>'+right+warn+'</div>';
 }
 function drawItems(){
  $('ilist').innerHTML=items.map(function(it){return row(it,false);}).join('')
@@ -283,7 +292,9 @@ function tapRow(sit,fromCat){
  else{openKey=k;pend[k]=it;}
  redraw();
 }
-function capOf(it){return (it&&it.bought_units&&it.item_key)?it.bought_units:0;}
+function capOf(it){if(!it||!it.item_key)return 0;
+ if(it.cap_units!=null)return it.cap_units;
+ return it.bought_units||0;}
 function confQty(){
  if(openKey===null)return;
  var k=openKey, el=$('qb_'+cssk(k));
@@ -293,7 +304,11 @@ function confQty(){
  var cap=capOf(it);
  if(cap&&n>cap){
   el.value='';
-  el.placeholder='ख़रीद कुल '+cap+' — ज़्यादा "बिना बिल" से';
+  var w=$('warn_'+cssk(k));
+  if(w){var b=it.bought_units||0, r=it.returned_units||0;
+   w.innerHTML='⚠ बिल में कुल <b>'+b+'</b>'+(r?(' — पहले वापस <b>'+r+'</b>'):'')
+    +' — अधिकतम <b>'+cap+'</b> ही ली जा सकती हैं। मरीज को बताएँ; बहस हो तो "बिना बिल" से लें।';
+   w.classList.remove('hide');}
   el.focus();return;
  }
  var up=(it.unit_net_p!=null?it.unit_net_p:it.unit_p)||0;

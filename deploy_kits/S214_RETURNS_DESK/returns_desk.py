@@ -368,6 +368,8 @@ def api_history():
         "GROUP BY s.source_ref ORDER BY sale_date DESC", (pid,)).fetchall()
     out = []
     for b in bills:
+        if not b["sale_date"] and (b["amount_p"] or 0) <= 0:
+            continue        # a credit-note ref is not a purchase bill
         lines = con.execute(
             "SELECT seq, item_name, item_key, qty_raw, pack, amount_p, "
             "       expiry_ym, business_date FROM sale_line_item "
@@ -440,8 +442,36 @@ def api_items():
             a["bills"].append(dict(bill_no=r["bill_no"], date=r["business_date"],
                                    units=u, disc_pct=pct))
         a["n_bills"].add(r["bill_no"])
+    # PREVIOUS RETURNS reduce what is returnable (v9, the owner's question
+    # "does it find any previous sales returns also" -- it does now):
+    #   * desk slips: accepted lines of non-void visits for this patient;
+    #   * Marg credit notes: is_return=1 lines on this patient's own refs.
+    desk_ret = {}
+    for r in con.execute(
+            "SELECT rl.item_key, SUM(COALESCE(rl.qty_units,0)) u, "
+            "       MAX(rv.business_date) d "
+            "FROM return_line rl JOIN return_visit rv ON rv.id=rl.visit_id "
+            "WHERE rv.patient_ref_id=? AND rl.accepted=1 "
+            "AND COALESCE(rv.status,'ok')!='void' AND rl.item_key IS NOT NULL "
+            "GROUP BY rl.item_key", (pid,)):
+        desk_ret[r["item_key"]] = (int(r["u"] or 0), r["d"])
+    marg_ret = {}
+    for r in con.execute(
+            "SELECT l.item_key, l.qty_raw, l.pack, l.business_date "
+            "FROM sale_line_item l JOIN sale_item s ON s.source_ref=l.bill_no "
+            "WHERE s.patient_ref_id=? AND l.is_return=1", (pid,)):
+        u = _units_sold(r["qty_raw"], r["pack"]) or 0
+        k = r["item_key"]
+        pu, pd = marg_ret.get(k, (0, None))
+        marg_ret[k] = (pu + u, max(pd or "", r["business_date"] or ""))
     out = []
     for a in agg.values():
+        k = a["item_key"]
+        du, dd = desk_ret.get(k, (0, None))
+        mu, md = marg_ret.get(k, (0, None))
+        a["returned_units"] = du + mu
+        a["returns"] = ([dict(src="CN", date=md, units=mu)] if mu else []) +                        ([dict(src="slip", date=dd, units=du)] if du else [])
+        a["cap_units"] = max(0, (a["bought_units"] or 0) - a["returned_units"])
         # NET price: the newest bill's own recorded discount ratio applied to
         # the per-unit rate -- the owner's rule: refund what was PAID, not MRP.
         ratio = 1.0
