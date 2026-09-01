@@ -1,0 +1,6 @@
+S216_AYUSH_NAMES - readable Ayushman package names - 01-Sep-2026
+Base page: 3cac3904... (S216 step 2, currently LIVE)
+Out  page: af850a87... (full row in SUMS.md5)
+PAGE ONLY, DISPLAY ONLY. casepack_portal.py unchanged (3146bdbf...).
+The government claim strings hpkg/hproc are untouched and still printed verbatim.
+Gates: selftest 32/32 - render 17/17 - guard 19/19 - contrast 9/9 - naming 14/14.
