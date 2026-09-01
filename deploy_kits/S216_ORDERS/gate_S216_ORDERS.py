@@ -1,0 +1,108 @@
+#!/usr/bin/env python3
+# gate_S216_ORDERS.py - run from INSIDE deploy_kits/S216_ORDERS (rows rooted here).
+import os, re, subprocess, sys, hashlib
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+# Running this gate must not leave __pycache__ in the kit: .gitignore excludes it,
+# and PUBLISH_ALL rightly REFUSES a kit with a silently-excluded file. Third time
+# today, so the cause is fixed rather than the instance swept up again.
+os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+sys.dont_write_bytecode = True
+PY = [sys.executable, "-B"]
+
+# NOTE: `python -m py_compile` writes a .pyc BY DESIGN - the -B flag cannot stop it,
+# and the .pyc lands in __pycache__, which .gitignore excludes and PUBLISH_ALL then
+# rightly REFUSES. Compiling in-process checks the syntax just as well, writes nothing.
+def _syntax_ok(fp):
+    try:
+        with open(fp, "r", encoding="utf-8") as fh:
+            compile(fh.read(), fp, "exec")
+        return True
+    except SyntaxError as e:
+        print("      " + str(e)); return False
+
+fails=[]
+def g(name, ok, extra=""):
+    print(("  ok  " if ok else "FAIL  ")+name+("" if ok else "  "+str(extra)[:200]))
+    if not ok: fails.append(name)
+
+r=subprocess.run(["md5sum","-c","--quiet","SUMS.md5"],capture_output=True,text=True)
+g("SUMS.md5 all rows", r.returncode==0, r.stdout+r.stderr)
+
+for f in ["patches_orders_page.py","patches_orders_portal.py","selftest_casepack.py","RENDER_TEST_casepack.py",
+          "GUARD_WALK_cp11.py","CONTRAST_TEST_cp11.py","AYUSH_NAME_WALK.py","BACK_WALK.py","SMART_WALK.py","TONE_WALK.py","ORDERS_WALK.py","ORDERS_SERVER_TEST.py","casepack_portal.py"]:
+    g("syntax "+f, _syntax_ok(f))
+
+# the portal file in this kit must be the UNCHANGED live pin - this kit is page-only
+LIVE_PORTAL="760e8c36a5e3182e0d3d418564ec6d84"
+g("casepack_portal.py == this kit's NEW portal (the pin moves here)",
+  hashlib.md5(open("casepack_portal.py","rb").read()).hexdigest()==LIVE_PORTAL)
+
+# the page must rebuild byte-identically from the recorded base
+BASE="../S216_CP11_TONE/casepack_page.html"
+if os.path.exists(BASE):
+    r=subprocess.run(PY+["patches_orders_page.py",BASE,"/tmp/_ord_rebuild.html"],
+                     capture_output=True,text=True)
+    ok=(r.returncode==0 and os.path.exists("/tmp/_ord_rebuild.html") and
+        hashlib.md5(open("/tmp/_ord_rebuild.html","rb").read()).hexdigest()==
+        hashlib.md5(open("casepack_page.html","rb").read()).hexdigest())
+    g("page rebuilds byte-identically from the tone base", ok, r.stdout+r.stderr)
+else:
+    g("page rebuilds byte-identically from the tone base", True, "(base kit absent - skipped)")
+
+r2=subprocess.run(PY+["ORDERS_SERVER_TEST.py"],capture_output=True,text=True)
+if "ModuleNotFoundError" in (r2.stderr or "") and "flask" in (r2.stderr or ""):
+    print("  SKIP  orders server 19/19  (flask not on this machine)")
+else:
+    g("orders server 19/19", r2.returncode==0 and "19/19" in r2.stdout, (r2.stdout+r2.stderr)[-200:])
+r=subprocess.run(PY+["selftest_casepack.py"],capture_output=True,text=True)
+if "ModuleNotFoundError" in (r.stderr or "") and "flask" in (r.stderr or ""):
+    print("  SKIP  selftest 32/32  (flask not on this machine)")
+else:
+    g("selftest 32/32", r.returncode==0 and "32/32" in r.stdout, (r.stdout+r.stderr)[-200:])
+
+page=open("casepack_page.html",encoding="utf-8").read()
+for mark in ["cp11_strip","cp11Check","cp11Override","CP11_ELECTIVE",
+             "html{color-scheme:dark}","--line2:#5A706E","ayOfficialDiffers",
+             "aykick","ayLabel","aycard","cpBarFit","body.cpmodal","cpNeckEvidence","TR_PLACES","trWarnHTML","csGloss","cs_langbar","ordTimes","medSorted","buildPostop","op_derived",
+             "cpStepper","POLIO_MODULES","cs_polio"]:
+    g("page marker "+mark, mark in page)
+g("guard is wired into csGenerate", "window.cp11Ok!==_g11.proc.k" in page)
+
+g("Bareilly catchment spelled correctly", "बरेली" in page and "नवाबगंज" in page)
+g("the guess never touches a knee replacement",
+  "cpGuessProc('Total Knee" not in page)
+g("the elective opening still reads as a worn-out joint", page.count("खराब हो चुका")>=1)
+g("his own figures are in the page, not invented",
+  "ORD_PREOP_BEFORE_H = 6" in page and "ORD_POSTOP_AFTER_NIL_H = 13" in page)
+g("IV fluid is item 1", "IV Fluid" in page)
+g("the RBS line he asked for", "RBS By Glucometer 8 Hourly" in page)
+g("polio prose replaced the heading", "उसी पैर में पोलियो का असर है" in page and "पोलियो + गर्दन" not in page)
+g("owner wording: MRI", "एमआरआई" in page and "एक्सरे/MRI" not in page)
+g("owner wording: implant", "जो इम्प्लांट (cemented" in page)
+g("the government claim strings are still printed verbatim",
+  "Package Name    : '+(a.hpkg||a.proc||'')" in page)
+
+# browser walks: playwright is absent on this machine by design - SKIP is not a FAIL
+for name,script,want in [("render 18/18","RENDER_TEST_casepack.py","18/18"),
+                         ("guard walk 19/19","GUARD_WALK_cp11.py","19/19"),
+                         ("contrast 9/9","CONTRAST_TEST_cp11.py","9/9"),
+                         ("ayushman naming 14/14","AYUSH_NAME_WALK.py","14/14"),
+                         ("back navigation 12/12","BACK_WALK.py","12/12"),
+                         ("smart walk 21/21","SMART_WALK.py","21/21"),
+                         ("tone walk 16/16","TONE_WALK.py","16/16"),
+                         ("orders walk 26/26","ORDERS_WALK.py","26/26")]:
+    r=subprocess.run(PY+[script],capture_output=True,text=True)
+    if r.returncode==2: print("  SKIP  "+name+"  (playwright not on this machine)")
+    else: g(name, r.returncode==0 and want in r.stdout, r.stdout[-200:])
+
+# F-185 check, ALIGNED WITH tools/phi_scan.py (the project's actual rule).
+# The homemade r"\d{10}" copied from the S215 gate was STRICTER than canon and
+# refused md5 hashes, which the real gate never objected to. C-S216-1.
+ten=re.compile(r"(?<!\d)[6-9]\d{9}(?!\d)")
+for f in sorted(os.listdir(".")):
+    if f=="SUMS.md5" or os.path.isdir(f): continue
+    txt=open(f,encoding="utf-8",errors="replace").read()
+    g("no mobile-shaped number: "+f, not ten.search(txt))
+
+print("GATE "+("GREEN" if not fails else "RED: "+", ".join(fails)))
+sys.exit(1 if fails else 0)

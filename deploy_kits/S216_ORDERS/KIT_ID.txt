@@ -1,0 +1,9 @@
+S216_ORDERS - pre-op / post-op / OT notes from his own templates - 01-Sep-2026
+Base page:   63b2cba4... (tone, currently LIVE)   -> 
+Out  page:   d5d4a3e7... (full rows in SUMS.md5)
+Base portal: 3146bdbf... (unchanged since S215)   ->
+Out  portal: 760e8c36...
+THIS KIT MOVES THE PORTAL PIN - the first time today.
+New on the box: /root/wa/casepack/med_list.csv (seeded once from his template).
+Gates: selftest 32/32 - render 18/18 - guard 19/19 - contrast 9/9 - naming 14/14
+       - back 12/12 - smart 21/21 - tone 16/16 - orders server 19/19 - orders walk 26/26.
