@@ -1,0 +1,4 @@
+S215 sweep. Contents: __pycache__ from this session's py_compile runs on kit S215_CP1
+(S215_CP1_pycache/). Bytecode only — every .py source survives in
+D:\dr-manoj-git\drmanoj-clinic-automation\deploy_kits\S215_CP1\ (SUMS.md5 green) and in
+GitHub after the S215 publish. Safe to delete whole.
