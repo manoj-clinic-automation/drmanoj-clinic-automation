@@ -1,0 +1,8 @@
+Rehearsal on a copy of the 01-Sep nightly backup (a stub unmatched bill added
+to 29-Aug so the crashing line actually executes):
+
+UNPATCHED (pinned 344fd5a0 bytes) crashes as on the box:
+  OperationalError no such column: mobile
+PATCHED ok: {'bills': 17, 'matched': 16, 'ambiguous': 0, 'unmatched': 1}
+  gap row: {'name': 'STUB PATIENT', 'mobile': 'xxxxxx1234', 'verdict': 'unmatched'}
+Patch idempotency: second run prints "already patched ... nothing to do".

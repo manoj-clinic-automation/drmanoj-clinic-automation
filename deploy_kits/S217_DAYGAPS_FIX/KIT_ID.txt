@@ -1,0 +1,1 @@
+S217_DAYGAPS_FIX v1 · 01-Sep-2026 · the CounterGaps 500 (no such column: mobile)

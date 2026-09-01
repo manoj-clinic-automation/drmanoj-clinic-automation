@@ -1,0 +1,8 @@
+ONE PASTE, on the VPS, after the publish. Patches finance_daily_gaps.py
+(anchored, backed up, compile-checked), restarts the service, and proves the
+route answers 200-shaped JSON instead of the 500.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && \cp /root/deploy/repo/deploy_kits/S217_DAYGAPS_FIX/patch_daily_gaps_mobile.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_daily_gaps_mobile.py && systemctl restart clinic-finance.service && sleep 2 && journalctl -u clinic-finance.service --since "-1 min" --no-pager | tail -5
+
+Rollback: \cp the printed .bak_S217_mobile_<stamp> back over
+/root/finance/finance_daily_gaps.py and restart clinic-finance.service.
