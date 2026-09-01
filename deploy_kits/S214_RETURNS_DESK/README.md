@@ -1,4 +1,12 @@
-# S214_RETURNS_DESK — the counter return flow, "Vaapsi Desk" (kit 1 of 2, v2)
+# S214_RETURNS_DESK — the counter return flow, "Vaapsi Desk" (kit 1 of 2, v3)
+
+**v3 — the owner's second live walk:** qty asked the MOMENT a medicine is
+tapped (blank box, smallest unit, ✔ to add); every number box blanks on tap;
+the bottom bar shows the running NET total at every step; refunds use the
+NET price from the sale bill's own recorded discount (MRP struck through on
+screen); each medicine row carries its bill numbers + dates inline; "not in
+list" is a type-ahead over the whole shop's records with the price fetched
+(no typing prompts); stepper digits 1/2/3.
 
 **v2 — the owner's live walk, same evening:** ITEM-FIRST. Staff never touch
 bills: one picker of everything the patient ever bought, quantities in the
@@ -53,7 +61,7 @@ ready for it.
 
 ## Proof so far
 
-Selftest **27/27** (sandbox; v2 — the unit_role CHECK is now IN the synthetic schema and the seeder is exercised against it, after the first install was rightly refused by that constraint). Walk **14/14 on the restored 31-Aug backup**: real patient, 14 medicines
+Selftest **30/30** (sandbox; v2 — the unit_role CHECK is now IN the synthetic schema and the seeder is exercised against it, after the first install was rightly refused by that constraint). Walk **14/14 on the restored 31-Aug backup**: real patient, 14 medicines
 aggregated and priced in the picker, the server allocated a real bill to
 the return, mixed slip saved (GREEN accepted + opened RED refused and
 FILED), source db untouched.

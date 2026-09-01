@@ -47,8 +47,8 @@ def build_db(path):
       active INT, note TEXT);
     """)
     con.execute("INSERT INTO patient_ref VALUES (1,'C-101','RAM TEST','1234',NULL,NULL,NULL)")
-    con.execute("INSERT INTO sale_item (patient_ref_id,source_ref,amount_p,mode) "
-                "VALUES (1,'B001',50000,'cash')")
+    con.execute("INSERT INTO sale_item (patient_ref_id,source_ref,amount_p,mode,gross_p,disc_p) "
+                "VALUES (1,'B001',45000,'cash',50000,5000)")
     con.execute("INSERT INTO sale_item (patient_ref_id,source_ref,amount_p,mode) "
                 "VALUES (1,'B000',30000,'cash')")
     rows = [
@@ -107,6 +107,14 @@ def main():
     check("bought units converted through the pack (0:2 of 1*10 = 2)",
           keys["good"]["bought_units"] == 2)
     check("items carry a per-unit price guess", keys["good"]["unit_p"] > 0)
+    check("net unit price honours the bill's own discount (10% off 1000 -> 900)",
+          keys["good"]["unit_net_p"] == 900 and keys["good"]["discounted"])
+    check("items carry their bills inline",
+          keys["good"]["bills"] and keys["good"]["bills"][0]["bill_no"] == "B001")
+    r = c.get("/finance/returns/desk/api/catalog?q=syr")
+    cat = r.get_json()["items"]
+    check("catalog type-ahead finds shop items by fragment, priced",
+          any(i["item_key"] == "old" and i["unit_p"] > 0 for i in cat))
 
     # v2 slip: ITEM-level lines; the SERVER allocates bills
     lines = [

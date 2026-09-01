@@ -1,4 +1,4 @@
-V2 UPDATE — one paste on the VPS, after the publish. The desk is already
+V2/V3 UPDATE (same line works for every files-only desk update) — one paste on the VPS, after the publish. The desk is already
 mounted and the roles seeded; this replaces only the two desk files, proves
 them on the box, and restarts. Pin check: finance_app must be the S214
 mounted bytes (cf678dfc...).

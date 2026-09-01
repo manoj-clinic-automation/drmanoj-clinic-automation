@@ -406,6 +406,10 @@ def api_items():
         "FROM sale_line_item l JOIN sale_item s ON s.source_ref = l.bill_no "
         "WHERE s.patient_ref_id=? AND l.is_return=0 "
         "ORDER BY l.business_date DESC, l.seq", (pid,)).fetchall()
+    disc = {r["source_ref"]: (r["amount_p"], r["gross_p"], r["disc_p"])
+            for r in con.execute(
+                "SELECT source_ref, amount_p, gross_p, disc_p FROM sale_item "
+                "WHERE patient_ref_id=? AND source_ref IS NOT NULL", (pid,))}
     agg = {}
     for r in rows:
         k = r["item_key"] or r["item_name"]
@@ -414,20 +418,60 @@ def api_items():
             unreadable_qty=False, last_date=r["business_date"],
             last_expiry=r["expiry_ym"], pack_n=_pack_n(r["pack"]),
             unit_p=_per_unit_p(r["amount_p"], r["qty_raw"], r["pack"]),
-            n_bills=set()))
+            bills=[], n_bills=set()))
         u = _units_sold(r["qty_raw"], r["pack"])
         if u is None:
             a["unreadable_qty"] = True
         else:
             a["bought_units"] += u
+        if r["bill_no"] not in a["n_bills"] and len(a["bills"]) < 3:
+            a["bills"].append(dict(bill_no=r["bill_no"], date=r["business_date"]))
         a["n_bills"].add(r["bill_no"])
     out = []
     for a in agg.values():
+        # NET price: the newest bill's own recorded discount ratio applied to
+        # the per-unit rate -- the owner's rule: refund what was PAID, not MRP.
+        ratio = 1.0
+        if a["bills"]:
+            net_g = disc.get(a["bills"][0]["bill_no"])
+            if net_g and net_g[1]:
+                ratio = max(0.0, min(1.0, (net_g[0] or net_g[1]) / net_g[1]))
+        a["unit_net_p"] = int(round(a["unit_p"] * ratio))
+        a["discounted"] = a["unit_net_p"] < a["unit_p"]
         a["n_bills"] = len(a["n_bills"])
         a["last_expired"] = _expired(a["last_expiry"], today)
         out.append(a)
     out.sort(key=lambda x: x["last_date"] or "", reverse=True)
     return jsonify(ok=True, items=out, today=today)
+
+
+@bp.route("/api/catalog")
+def api_catalog():
+    """Type-ahead over the WHOLE shop's sold-item records -- the v3 "not in
+    list" path. Price fetched from the newest sale line; no typing prompts."""
+    _u, err = _auth()
+    if err:
+        return err
+    q = (request.args.get("q") or "").strip().lower()
+    if len(q) < 2:
+        return jsonify(ok=True, items=[])
+    con = _con()
+    rows = con.execute(
+        "SELECT item_key, item_name, MAX(business_date) last_date "
+        "FROM sale_line_item WHERE is_return=0 AND lower(item_name) LIKE ? "
+        "GROUP BY item_key ORDER BY last_date DESC LIMIT 20",
+        ("%" + q + "%",)).fetchall()
+    out = []
+    for r in rows:
+        nl = con.execute(
+            "SELECT qty_raw, pack, amount_p, expiry_ym FROM sale_line_item "
+            "WHERE item_key=? AND is_return=0 ORDER BY business_date DESC "
+            "LIMIT 1", (r["item_key"],)).fetchone()
+        up = _per_unit_p(nl["amount_p"], nl["qty_raw"], nl["pack"]) if nl else 0
+        out.append(dict(item_key=r["item_key"], item_name=r["item_name"],
+                        last_date=r["last_date"], unit_p=up, unit_net_p=up,
+                        pack_n=_pack_n(nl["pack"]) if nl else None))
+    return jsonify(ok=True, items=out)
 
 
 def _allocate(con, pid, item_key, units_wanted):
