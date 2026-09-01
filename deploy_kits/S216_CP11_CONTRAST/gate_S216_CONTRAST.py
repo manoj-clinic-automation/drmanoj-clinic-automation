@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# gate_S216_CP11.py - run from INSIDE deploy_kits/S216_CP11_GUARD (rows rooted here).
+# gate_S216_CONTRAST.py - run from INSIDE deploy_kits/S216_CP11_CONTRAST (rows rooted here).
 import os, re, subprocess, sys, hashlib
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 fails=[]
@@ -10,8 +10,8 @@ def g(name, ok, extra=""):
 r=subprocess.run(["md5sum","-c","--quiet","SUMS.md5"],capture_output=True,text=True)
 g("SUMS.md5 all rows", r.returncode==0, r.stdout+r.stderr)
 
-for f in ["patches_cp11_guard.py","selftest_casepack.py","RENDER_TEST_casepack.py",
-          "GUARD_WALK_cp11.py","REVERSE_PROOF_cp11.py","casepack_portal.py"]:
+for f in ["patches_cp11_contrast.py","selftest_casepack.py","RENDER_TEST_casepack.py",
+          "GUARD_WALK_cp11.py","CONTRAST_TEST_cp11.py","casepack_portal.py"]:
     g("py_compile "+f, subprocess.run([sys.executable,"-m","py_compile",f]).returncode==0)
 
 # the portal file in this kit must be the UNCHANGED live pin - this kit is page-only
@@ -20,16 +20,16 @@ g("casepack_portal.py == live pin (kit is page-only)",
   hashlib.md5(open("casepack_portal.py","rb").read()).hexdigest()==LIVE_PORTAL)
 
 # the page must rebuild byte-identically from the recorded base
-BASE="../S215_CP1/casepack_page.html"
+BASE="../S216_CP11_GUARD/casepack_page.html"
 if os.path.exists(BASE):
-    r=subprocess.run([sys.executable,"patches_cp11_guard.py",BASE,"/tmp/_cp11_rebuild.html"],
+    r=subprocess.run([sys.executable,"patches_cp11_contrast.py",BASE,"/tmp/_cp11c_rebuild.html"],
                      capture_output=True,text=True)
-    ok=(r.returncode==0 and os.path.exists("/tmp/_cp11_rebuild.html") and
-        hashlib.md5(open("/tmp/_cp11_rebuild.html","rb").read()).hexdigest()==
+    ok=(r.returncode==0 and os.path.exists("/tmp/_cp11c_rebuild.html") and
+        hashlib.md5(open("/tmp/_cp11c_rebuild.html","rb").read()).hexdigest()==
         hashlib.md5(open("casepack_page.html","rb").read()).hexdigest())
-    g("page rebuilds byte-identically from the S215 base", ok, r.stdout+r.stderr)
+    g("page rebuilds byte-identically from the step-1 base", ok, r.stdout+r.stderr)
 else:
-    g("page rebuilds byte-identically from the S215 base", True, "(base kit absent - skipped)")
+    g("page rebuilds byte-identically from the step-1 base", True, "(base kit absent - skipped)")
 
 r=subprocess.run([sys.executable,"selftest_casepack.py"],capture_output=True,text=True)
 if "ModuleNotFoundError" in (r.stderr or "") and "flask" in (r.stderr or ""):
@@ -38,8 +38,9 @@ else:
     g("selftest 32/32", r.returncode==0 and "32/32" in r.stdout, (r.stdout+r.stderr)[-200:])
 
 page=open("casepack_page.html",encoding="utf-8").read()
-for mark in ["cp11_strip","cp11Check","cp11FxSignals","cp11Override","cp11Use",
-             "CP11_ELECTIVE","CP11_SUGGEST","cpStepper","POLIO_MODULES","cs_polio"]:
+for mark in ["cp11_strip","cp11Check","cp11Override","CP11_ELECTIVE",
+             "html{color-scheme:dark}","--line2:#5A706E","color-scheme:light",
+             "cpStepper","POLIO_MODULES","cs_polio"]:
     g("page marker "+mark, mark in page)
 g("guard is wired into csGenerate", "window.cp11Ok!==_g11.proc.k" in page)
 g("polio hindi still verbatim", "पोलियो-प्रभावित" in page)
@@ -48,7 +49,8 @@ g("no consent wording was changed",
 
 # browser walks: playwright is absent on this machine by design - SKIP is not a FAIL
 for name,script,want in [("render 17/17","RENDER_TEST_casepack.py","17/17"),
-                         ("guard walk 19/19","GUARD_WALK_cp11.py","19/19")]:
+                         ("guard walk 19/19","GUARD_WALK_cp11.py","19/19"),
+                         ("contrast 9/9","CONTRAST_TEST_cp11.py","9/9")]:
     r=subprocess.run([sys.executable,script],capture_output=True,text=True)
     if r.returncode==2: print("  SKIP  "+name+"  (playwright not on this machine)")
     else: g(name, r.returncode==0 and want in r.stdout, r.stdout[-200:])

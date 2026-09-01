@@ -1,0 +1,1 @@
+cd /root/deploy/repo && git pull && bash deploy_kits/S216_CP11_CONTRAST/install_contrast.sh

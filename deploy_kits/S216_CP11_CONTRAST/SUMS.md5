@@ -1,0 +1,12 @@
+3cac3904db706a399f44ddab91d971e7  casepack_page.html
+3146bdbfc710dd00a12ef584e327ab0a  casepack_portal.py
+da362b48f748a4cfdffcb0206bde8cb9  patches_cp11_contrast.py
+f0d61360aae4e074662414bf06e074ed  selftest_casepack.py
+c83c58527a0ec2b2552b8bb26b6718d2  RENDER_TEST_casepack.py
+f5f80443b5db5474cd27f4068cc40077  GUARD_WALK_cp11.py
+e22d547d4bb03f4c202c970c121e05b7  CONTRAST_TEST_cp11.py
+3ade5c24ed2837111a04c69472abbf55  install_contrast.sh
+c736175d06856af256afffc6c9cd9436  INSTALL_ONE_PASTE.txt
+c83de3e351c44f9f0b9c2d9f20782ea5  README.md
+549d5bf983628114abeb81d8a5f2a90d  KIT_ID.txt
+f707c946929e530b534e4527d56bf04b  gate_S216_CONTRAST.py

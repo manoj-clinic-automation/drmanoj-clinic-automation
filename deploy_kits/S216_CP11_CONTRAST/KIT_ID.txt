@@ -1,0 +1,6 @@
+S216_CP11_CONTRAST - CP-1.1 step 2, the dropdown contrast - 01-Sep-2026
+Base page: 1e4d25d4... (S216 step-1 guard, currently LIVE)
+Out  page: 3cac3904... (full row in SUMS.md5)
+PAGE ONLY, CSS ONLY. casepack_portal.py unchanged (3146bdbf...).
+Gates: selftest 32/32 - render 17/17 - guard walk 19/19 - contrast 9/9.
+Reverse proof: the same contrast test scores 3/9 on the live page.
