@@ -1,0 +1,88 @@
+== fixture rows now: 9 day(s) ==
+   medical 2026-08-14 x1
+   medical 2026-08-16 x1
+   medical 2026-08-19 x1
+   medical 2026-08-20 x1
+   medical 2026-08-21 x1
+   medical 2026-08-23 x1
+   medical 2026-08-25 x1
+   medical 2026-08-26 x1
+   medical 2026-08-28 x1
+== store dir: /tmp/store (1 files) ==
+== BEFORE ==
+unit     day             statement     txn-store  verdict
+clinic   2026-08-01     16 /13250.00    16 /13250.00  ok
+clinic   2026-08-02      2 /1700.00     2 /1700.00  ok
+clinic   2026-08-03      6 /4500.00     6 /4500.00  ok
+clinic   2026-08-04      6 /5200.00     6 /5200.00  ok
+clinic   2026-08-05      8 /8300.00     8 /8300.00  ok
+clinic   2026-08-06      6 /3200.00     6 /3200.00  ok
+clinic   2026-08-07      5 /3500.00     5 /3500.00  ok
+clinic   2026-08-08      2 /1200.00     2 /1200.00  ok
+clinic   2026-08-10      8 /5000.00     8 /5000.00  ok
+clinic   2026-08-11      7 /6200.00     7 /6200.00  ok
+clinic   2026-08-12      6 /5900.00     6 /5900.00  ok
+clinic   2026-08-13      7 /5800.00     7 /5800.00  ok
+clinic   2026-08-14      5 /2700.00     5 /2700.00  ok
+clinic   2026-08-15      4 /3000.00     4 /3000.00  ok
+clinic   2026-08-17      7 /5100.00     7 /5100.00  ok
+clinic   2026-08-18      5 /3900.00     5 /3900.00  ok
+clinic   2026-08-19      7 /4600.00     7 /4600.00  ok
+clinic   2026-08-20      3 /1800.00     3 /1800.00  ok
+clinic   2026-08-21      6 /5600.00     6 /5600.00  ok
+clinic   2026-08-22      9 /5300.00     9 /5300.00  ok
+clinic   2026-08-24      5 /3900.00     5 /3900.00  ok
+clinic   2026-08-25      2 /1200.00     2 /1200.00  ok
+clinic   2026-08-26     11 /6500.00    11 /6500.00  ok
+clinic   2026-08-27      8 /7300.00     8 /7300.00  ok
+clinic   2026-08-28      7 /4900.00     7 /4900.00  ok
+clinic   2026-08-29      6 /3500.00     6 /3500.00  ok
+lab      2026-08-01      4 /4750.00     4 /4750.00  ok
+lab      2026-08-03      3 /3950.00     3 /3950.00  ok
+lab      2026-08-04      3 /5200.00     3 /5200.00  ok
+lab      2026-08-05      4 /5560.00     4 /5560.00  ok
+lab      2026-08-06      3 /2950.00     3 /2950.00  ok
+lab      2026-08-10      5 /6610.00     5 /6610.00  ok
+lab      2026-08-11      3 /5200.00     3 /5200.00  ok
+lab      2026-08-12      8 /13130.00     8 /13130.00  ok
+lab      2026-08-13      2 / 600.00     2 / 600.00  ok
+lab      2026-08-15      4 /5400.00     4 /5400.00  ok
+lab      2026-08-17      2 /2950.00     2 /2950.00  ok
+lab      2026-08-18      4 /2990.00     4 /2990.00  ok
+lab      2026-08-19     10 /11140.00    10 /11140.00  ok
+lab      2026-08-20      6 /5320.00     6 /5320.00  ok
+lab      2026-08-21      5 /7565.00     5 /7565.00  ok
+lab      2026-08-22      3 /2950.00     3 /2950.00  ok
+lab      2026-08-25      2 /3050.00     2 /3050.00  ok
+lab      2026-08-26      2 /1100.00     2 /1100.00  ok
+lab      2026-08-27      3 /5740.00     3 /5740.00  ok
+lab      2026-08-28      1 /1365.00     1 /1365.00  ok
+medical  2026-08-01     14 /11966.00    14 /11966.00  ok
+medical  2026-08-02      2 /1625.00     2 /1625.00  ok
+medical  2026-08-03      7 /6690.00     7 /6690.00  ok
+medical  2026-08-04      6 /3464.00     6 /3464.00  ok
+medical  2026-08-05     10 /9974.00    10 /9974.00  ok
+medical  2026-08-06     10 /10809.00    10 /10809.00  ok
+medical  2026-08-07      6 /7119.00     6 /7119.00  ok
+medical  2026-08-08     11 /7268.00    11 /7268.00  ok
+medical  2026-08-10     10 /14463.00    10 /14463.00  ok
+medical  2026-08-11      6 /8728.00     6 /8728.00  ok
+medical  2026-08-12     12 /12026.00    12 /12026.00  ok
+medical  2026-08-13     13 /10565.00    13 /10565.00  ok
+medical  2026-08-14      8 /6530.00     1 / 999.00  STILL SHORT
+medical  2026-08-15      3 /4925.00     3 /4925.00  ok
+medical  2026-08-17     13 /10071.00    13 /10071.00  ok
+medical  2026-08-18     10 /6707.00    10 /6707.00  ok
+medical  2026-08-19     11 /28996.00     1 / 999.00  STILL SHORT
+medical  2026-08-20      7 /8194.00     1 / 999.00  STILL SHORT
+medical  2026-08-21     13 /12268.00     1 / 999.00  STILL SHORT
+medical  2026-08-22      9 /7043.00     9 /7043.00  ok
+medical  2026-08-24      4 /5399.00     4 /5399.00  ok
+medical  2026-08-25      3 /2669.00     1 / 999.00  STILL SHORT
+medical  2026-08-26      8 /8638.00     1 / 999.00  STILL SHORT
+medical  2026-08-27     10 /11170.00    10 /11170.00  ok
+medical  2026-08-28      9 /6687.00     1 / 999.00  STILL SHORT
+medical  2026-08-29      4 / 971.00     4 / 971.00  ok
+
+DRY-RUN ONLY. Re-run with --apply to repair.
+---- (dry-run against the untouched 01-Sep nightly backup; the --apply rehearsal on a COPY opened exactly one new flag: 28-Aug bank 6687.00 vs entered 999.00, and honestly reported the damaged days STILL SHORT because the rehearsal store held no real statement files. On the VPS the real store restores them.)
