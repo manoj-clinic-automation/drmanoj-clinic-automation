@@ -111,6 +111,9 @@ def main():
           keys["good"]["unit_net_p"] == 900 and keys["good"]["discounted"])
     check("items carry their bills inline",
           keys["good"]["bills"] and keys["good"]["bills"][0]["bill_no"] == "B001")
+    check("bill entries carry purchased qty and the discount given",
+          keys["good"]["bills"][0]["units"] == 2
+          and keys["good"]["bills"][0]["disc_pct"] == 10)
     r = c.get("/finance/returns/desk/api/catalog?q=syr")
     cat = r.get_json()["items"]
     check("catalog type-ahead finds shop items by fragment, priced",

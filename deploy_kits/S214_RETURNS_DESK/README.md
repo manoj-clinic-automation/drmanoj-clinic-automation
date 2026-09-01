@@ -1,4 +1,14 @@
-# S214_RETURNS_DESK — the counter return flow, "Vaapsi Desk" (kit 1 of 2, v3)
+# S214_RETURNS_DESK — the counter return flow, "Vaapsi Desk" (kit 1 of 2, v5)
+
+**v5:** the counting word follows the medicine — गोली / कैप्सूल / शीशी /
+ट्यूब / इंजेक्शन / स्प्रे / पाउच, read from the item's own name (नग when it
+doesn't say). No "यूनिट" anywhere staff reads.
+
+**v4 — third walk:** price shown as RATE PER STRIP ("₹170 / पत्ता — 10
+गोली") wherever the pack is known; each inline bill entry carries the
+purchased qty AND the discount given on that bill; the picker holds ONLY the
+patient's billed medicines — the whole-shop type-ahead sits behind its own
+"+ बिना बिल" button, price still fetched, still no prompts.
 
 **v3 — the owner's second live walk:** qty asked the MOMENT a medicine is
 tapped (blank box, smallest unit, ✔ to add); every number box blanks on tap;
@@ -61,7 +71,7 @@ ready for it.
 
 ## Proof so far
 
-Selftest **30/30** (sandbox; v2 — the unit_role CHECK is now IN the synthetic schema and the seeder is exercised against it, after the first install was rightly refused by that constraint). Walk **14/14 on the restored 31-Aug backup**: real patient, 14 medicines
+Selftest **31/31** (sandbox; v2 — the unit_role CHECK is now IN the synthetic schema and the seeder is exercised against it, after the first install was rightly refused by that constraint). Walk **14/14 on the restored 31-Aug backup**: real patient, 14 medicines
 aggregated and priced in the picker, the server allocated a real bill to
 the return, mixed slip saved (GREEN accepted + opened RED refused and
 FILED), source db untouched.

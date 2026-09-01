@@ -84,7 +84,11 @@ border-radius:50%;animation:r 1s linear infinite}
   <div class="row"><b id="pname"></b><button class="ghost" onclick="go(1)">↩ पीछे</button></div>
   <input id="f" placeholder="दवा का नाम टाइप करें… (मरीज की दवा देख कर)" autocomplete="off">
   <div id="ilist"></div>
-  <div class="dim" style="margin-top:8px">लिस्ट में नहीं? — बस नाम टाइप करते जाएँ, दुकान के रिकॉर्ड से मिल जाएगी</div>
+  <button class="ghost" style="margin-top:10px;width:100%" onclick="$('catbox').classList.toggle('hide');$('cf').focus()">+ बिना बिल की दवा (दुकान के रिकॉर्ड से)</button>
+  <div id="catbox" class="hide" style="margin-top:8px">
+   <input id="cf" placeholder="दवा का नाम टाइप करें…" autocomplete="off" oninput="catSearch(this.value.trim().toLowerCase())">
+   <div id="catlist"></div>
+  </div>
  </div>
 </div>
 
@@ -171,45 +175,58 @@ function cartOf(k){return cart.find(c=>c.key===k);}
 let openQty=null;   // item key whose qty box is open
 function drawItems(q){
  const list=items.filter(it=>!q||String(it.item_name).toLowerCase().includes(q));
- let html=list.slice(0,40).map(it=>row(it,false)).join('');
- if(q.length>=2&&list.length<3){
-  html+='<div class="dim" style="padding:8px 6px;border-top:1px solid var(--line)">दुकान के रिकॉर्ड से (बिना बिल):</div>'
-   +'<div id="catrows" class="dim" style="padding:4px 6px">खोज रही है…</div>';
-  fetchCat(q);
- }
- $('ilist').innerHTML=html||'<div class="dim" style="padding:8px">टाइप करते जाएँ…</div>';
+ $('ilist').innerHTML=list.slice(0,40).map(it=>row(it,false)).join('')
+  ||'<div class="dim" style="padding:8px">इस नाम की बिल में कोई दवा नहीं — नीचे "बिना बिल" से लें</div>';
  if(openQty!==null){const el=document.getElementById('qty_'+cssk(openQty));if(el)el.focus();}
 }
-async function fetchCat(q){
+async function catSearch(q){
+ if(q.length<2){$('catlist').innerHTML='';return;}
+ $('catlist').innerHTML='<div class="dim" style="padding:6px">खोज रही है…</div>';
  try{
   const j=await (await fetch(API+'/catalog?q='+encodeURIComponent(q))).json();
-  const el=document.getElementById('catrows'); if(!el)return;
-  const mine=new Set(items.map(i=>i.item_key||i.item_name));
-  const rows=(j.items||[]).filter(it=>!mine.has(it.item_key||it.item_name));
-  el.outerHTML=rows.map(it=>row(it,true)).join('')||'<div class="dim" style="padding:4px 6px">रिकॉर्ड में भी नहीं</div>';
+  $('catlist').innerHTML=(j.items||[]).map(it=>row(it,true)).join('')
+   ||'<div class="dim" style="padding:6px">रिकॉर्ड में नहीं मिली</div>';
   if(openQty!==null){const e2=document.getElementById('qty_'+cssk(openQty));if(e2)e2.focus();}
  }catch(e){}
+}
+function unitWord(name){
+ const n=String(name||'').toUpperCase();
+ if(/\bTAB/.test(n))return 'गोली';
+ if(/\bCAP/.test(n))return 'कैप्सूल';
+ if(/SYR|SUSP|SOLN|SOLUTION|DROP|ORAL LIQ/.test(n))return 'शीशी';
+ if(/OINT|GEL\b|CREAM|LOTION/.test(n))return 'ट्यूब';
+ if(/\bINJ|VIAL|AMP/.test(n))return 'इंजेक्शन';
+ if(/SPRAY/.test(n))return 'स्प्रे';
+ if(/POWDER|SACHET/.test(n))return 'पाउच';
+ return 'नग';
 }
 const cssk=k=>String(k).replace(/[^a-zA-Z0-9]/g,'_');
 function row(it,fromCat){
  const k=it.item_key||it.item_name; const c=cartOf(k);
- const bills=(it.bills||[]).map(b=>b.bill_no+' '+(b.date||'').slice(5)).join(' · ');
+ const bills=(it.bills||[]).map(b=>b.bill_no+' '+(b.date||'').slice(5)+(b.units?(' · '+b.units+' '+unitWord(it.item_name)):'')+(b.disc_pct?(' · '+b.disc_pct+'% छूट'):'')).join('<br>');
  const price=it.unit_net_p??it.unit_p;
- const priceTxt=it.discounted?`net ${rupee(it.unit_net_p)} <s style="opacity:.6">${rupee(it.unit_p)}</s>`:rupee(price);
+ let priceTxt;
+ if(it.pack_n){
+  const sp=price*it.pack_n, smrp=(it.unit_p||0)*it.pack_n;
+  priceTxt=(it.discounted?`net ${rupee(sp)} <s style="opacity:.6">${rupee(smrp)}</s>`:rupee(sp))
+   +` / पत्ता (${it.pack_n} ${unitWord(it.item_name)})`;
+ }else{
+  priceTxt=(it.discounted?`net ${rupee(price)} <s style="opacity:.6">${rupee(it.unit_p)}</s>`:rupee(price))+' / '+unitWord(it.item_name);
+ }
  let right;
  if(openQty===k){
   right=`<span class="qty"><input type="number" id="qty_${cssk(k)}" inputmode="numeric"
-    placeholder="मात्रा" style="width:90px" onkeydown="if(event.key==='Enter')confQty('${cssk(k)}')">
+    placeholder="कितनी?" style="width:90px" onkeydown="if(event.key==='Enter')confQty('${cssk(k)}')">
    <button style="background:var(--teal);color:#04282c;border:none;padding:10px 14px;font-weight:800"
     onclick="confQty('${cssk(k)}')">✔</button></span>`;
  }else if(c){
-  right=`<span class="tag" style="background:#0f2e26;color:var(--ink)">✔ ${c.units} यूनिट</span>`;
+  right=`<span class="tag" style="background:#0f2e26;color:var(--ink)">✔ ${c.units} ${unitWord(c.item_name)}</span>`;
  }else{
   right=`<span class="tag">+ जोड़ें</span>`;
  }
  return `<div class="item ${c?'inCart':''}" onclick="tapRow(${JSON.stringify(JSON.stringify(it))},${fromCat})">
   <span>${it.item_name}${it.last_expired?' <span class="redtxt">· expiry निकली</span>':''}<br>
-   <span class="dim">${bills?('बिल: '+bills+' · '):''}${fromCat?'बिना बिल · ':''}${priceTxt}/यूनिट</span></span>
+   <span class="dim">${fromCat?('बिना बिल · '+priceTxt):(priceTxt+(bills?('<br>'+bills):''))}</span></span>
   ${right}</div>`;
 }
 window._pend={};
@@ -232,9 +249,10 @@ window.confQty=ck=>{
  openQty=null;
  drawItems($('f').value.trim().toLowerCase()); drawBar();
 };
-function conv(c){ if(!c.pack_n||c.units<c.pack_n) return c.units+' यूनिट';
+function conv(c){ const w=unitWord(c.item_name);
+ if(!c.pack_n||c.units<c.pack_n) return c.units+' '+w;
  const s=Math.floor(c.units/c.pack_n), l=c.units%c.pack_n;
- return c.units+' = '+s+' पत्ता'+(l?(' + '+l):''); }
+ return c.units+' '+w+' = '+s+' पत्ता'+(l?(' + '+l+' '+w):''); }
 
 function drawCart(){
  $('cart').innerHTML=cart.map((c,i)=>`<div class="cartline">

@@ -425,7 +425,10 @@ def api_items():
         else:
             a["bought_units"] += u
         if r["bill_no"] not in a["n_bills"] and len(a["bills"]) < 3:
-            a["bills"].append(dict(bill_no=r["bill_no"], date=r["business_date"]))
+            dg = disc.get(r["bill_no"])
+            pct = int(round(100.0 * dg[2] / dg[1])) if dg and dg[1] and dg[2] else 0
+            a["bills"].append(dict(bill_no=r["bill_no"], date=r["business_date"],
+                                   units=u, disc_pct=pct))
         a["n_bills"].add(r["bill_no"])
     out = []
     for a in agg.values():
