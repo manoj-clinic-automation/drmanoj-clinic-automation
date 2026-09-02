@@ -114,6 +114,35 @@ accurate detections kept : 6 of 6
 confident-WRONG boxes    : 6  ->  0
 ```
 
+## v2.3 — page presets, and the overshoot that made them necessary
+The owner scanned a bill in the asset app: *"vertically its very much extra area captured."*
+That was **the fallback, not the detector** — when the aspect gate refuses, the outline it hands
+back was the guide rectangle, and I had sized that at a fixed 80% of the frame. A guide sized by
+guesswork overshoots the moment the bill sits smaller than the guess. His fix was better than
+mine: *"how about adding a button for a5 size with medical bill button name?"*
+
+**On the review screen** — where you can see the photo, not before the shot where a preset is
+only a promise — there is now a row: **Medical bill (A5) · A4 · Strip · Free**. Tapping one
+*finds the paper* (the brightest large region in the frame) and lays a rectangle of that shape
+over it. One nudge instead of four drags.
+
+`Free` is not decoration. >95% of purchase bills are half A4; the day one is not, a preset
+without an escape is an obstacle. The choice is remembered, because reception scans a pile at a
+time and choosing the same shape twenty times is the friction that gets a tool abandoned.
+
+**Measured (`t_presets.py`), bills drawn at four positions and sizes:**
+```
+bill half the frame, centred   225,300,450,638  ->  225,299,450,639   1.00x area
+bill small, high in the frame  280,120,340,482  ->  280,120,341,484   1.01x
+bill three-quarters            135,180,630,893  ->  135,179,630,894   1.00x
+bill off to the left            60,300,420,596  ->   60,300,420,596   1.00x
+```
+Within a pixel, at the bill's own size — not 80% of the frame.
+
+*The harness got this wrong first: it sized the photo canvas but not the overlay, so the fit ran
+against an overlay of the wrong size and every case failed. Recorded because a test that fails
+for its own reasons is indistinguishable from a broken feature until you look.*
+
 ## Install / rollback
 `INSTALL_ONE_PASTE.txt`. Rollback is a single `\cp` of the timestamped backup — no
 restart, nothing else to undo.

@@ -195,6 +195,18 @@
         '<div class="btnrow stack">' +
           '<button type=button class=btn id=addpage>\u2714 Add this page</button>' +
         '</div>' +
+        // S219 -- PAGE PRESETS, on the review screen rather than the aim screen.
+        // Before the shot a preset is a promise; after it you can see the photo,
+        // tap the shape and have the outline land on it -- one nudge instead of
+        // four drags. "Free" is not decoration: >95% of purchase bills are half
+        // A4, and the day one is not, a preset without an escape is an obstacle.
+        '<p class=muted style="margin:8px 0 4px">Snap the outline to a page size:</p>' +
+        '<div class="btnrow" id=presetrow>' +
+          '<button type=button class="btn small preset" data-ar="0.7048" id=preA5>Medical bill (A5)</button>' +
+          '<button type=button class="btn small preset" data-ar="0.7071" id=preA4>A4</button>' +
+          '<button type=button class="btn small preset" data-ar="0.35" id=preStrip>Strip</button>' +
+          '<button type=button class="btn small preset" data-ar="0" id=preFree>Free</button>' +
+        '</div>' +
         '<div class="btnrow">' +
           '<button type=button class="btn small" id=addwhole>\u2795 Add whole image</button>' +
           '<button type=button class="btn small" id=resetcorners>Reset outline</button>' +
@@ -665,6 +677,72 @@
     L.style.right = rightHalf ? "auto" : "8px"; L.style.left = rightHalf ? "8px" : "auto";
     L.style.display = "block"; }
   function hideLoupe(){ $("loupe").style.display = "none"; }
+  // S219 -- where is the paper?  Not "what shape is it" (that is what the
+  // detector argues with the printing about) but simply: which part of the
+  // frame is bright.  Paper is the brightest large thing in a photograph of a
+  // bill on a desk, and its bounding box is enough to place a rectangle of a
+  // KNOWN shape.  Falls back to null when the answer is not obvious, and the
+  // caller then centres the shape instead.
+  function contentBox(canvas){
+    try {
+      var sc = Math.min(1, 320 / Math.max(canvas.width, canvas.height));
+      var w = Math.max(24, Math.round(canvas.width * sc)),
+          h = Math.max(24, Math.round(canvas.height * sc));
+      var c = document.createElement("canvas"); c.width = w; c.height = h;
+      var g = c.getContext("2d"); g.drawImage(canvas, 0, 0, w, h);
+      var D = g.getImageData(0, 0, w, h).data, i, x, y, v;
+      var lum = new Float32Array(w * h), mx = 0, sum = 0;
+      for (i = 0; i < w * h; i++) {
+        v = 0.3 * D[i*4] + 0.59 * D[i*4+1] + 0.11 * D[i*4+2];
+        lum[i] = v; sum += v; if (v > mx) mx = v;
+      }
+      var mean = sum / (w * h);
+      // halfway between the average of the scene and its brightest point: above
+      // this is paper, below it is desk. Deliberately crude -- it only has to
+      // find WHERE the paper is, not trace its edge.
+      var thr = (mean + mx) / 2;
+      var x0 = w, y0 = h, x1 = -1, y1 = -1, n = 0;
+      for (y = 0; y < h; y++) for (x = 0; x < w; x++) {
+        if (lum[y*w+x] >= thr) { n++;
+          if (x < x0) x0 = x; if (x > x1) x1 = x;
+          if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      }
+      if (n < w * h * 0.03 || x1 <= x0 || y1 <= y0) return null;
+      var k = 1 / sc;
+      return [x0 * k, y0 * k, (x1 - x0 + 1) * k, (y1 - y0 + 1) * k];
+    } catch (e) { return null; }
+  }
+
+  // Place a rectangle of aspect `ar` over the paper: same centre, big enough to
+  // cover what was found, clamped to the image.  ar of 0 means "leave it alone".
+  function fitAspect(ar){
+    if (!ar) return;
+    var W = ov.width, H = ov.height;
+    var box = contentBox(cv);
+    var cxp, cyp, w, h;
+    if (box) {
+      cxp = box[0] + box[2] / 2; cyp = box[1] + box[3] / 2;
+      w = box[2]; h = w / ar;
+      if (h < box[3]) { h = box[3]; w = h * ar; }   // cover it in both directions
+    } else {
+      cxp = W / 2; cyp = H / 2; w = W * 0.75; h = w / ar;
+      if (h > H * 0.75) { h = H * 0.75; w = h * ar; }
+    }
+    if (w > W) { w = W; h = w / ar; }
+    if (h > H) { h = H; w = h * ar; }
+    var L = Math.max(0, Math.min(W - w, cxp - w / 2));
+    var T = Math.max(0, Math.min(H - h, cyp - h / 2));
+    corners = [[L, T], [L + w, T], [L + w, T + h], [L, T + h]];
+    try { localStorage.setItem("scanPresetAR", String(ar)); } catch (e) {}
+    drawOverlay();
+  }
+
+  // exposed for the same reason autoDetect is: so a test can assert where the
+  // outline actually lands, instead of a human squinting at it.
+  window.__scannerFit = function(ar){ fitAspect(ar); return corners; };
+  window.__scannerContentBox = function(){ return contentBox(cv); };
+  window.__scannerCorners = function(){ return corners; };
+
   function resetCorners(){
     // S219: with a size prior, an unconfident detection falls back to the
     // EXPECTED PAGE rather than a fixed 8% inset. The inset is the wrong shape
@@ -684,6 +762,17 @@
     if (drag.type==="c"){ corners[drag.i]=clampPt(p); } else { moveEdge(drag.i, p[0]-last[0], p[1]-last[1]); }
     last=p; drawOverlay(); showLoupe(p); }
   function up(){ if (drag){ drag=null; hideLoupe(); drawOverlay(); } }
+  // S219: the preset row. Remembering the last one used matters more than it
+  // looks -- reception scans a run of bills at a time, and choosing the same
+  // shape twenty times is the kind of small friction that gets a tool dropped.
+  Array.prototype.forEach.call(document.querySelectorAll("#presetrow .preset"), function(btn){
+    btn.addEventListener("click", function(){
+      var ar = parseFloat(this.getAttribute("data-ar")) || 0;
+      if (!ar) { try { localStorage.removeItem("scanPresetAR"); } catch (e) {} return; }
+      fitAspect(ar);
+      say("Outline snapped to " + (this.textContent || "the page") + " \u2014 drag a corner if it needs nudging.");
+    });
+  });
   ov.addEventListener("mousedown",down); ov.addEventListener("mousemove",move); addEventListener("mouseup",up);
   ov.addEventListener("touchstart",down,{passive:false}); ov.addEventListener("touchmove",move,{passive:false});
   ov.addEventListener("touchend",up); ov.addEventListener("touchcancel",up);
