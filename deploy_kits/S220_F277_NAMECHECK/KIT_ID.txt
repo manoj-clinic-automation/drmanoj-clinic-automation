@@ -1,0 +1,3 @@
+S220_F277_NAMECHECK · built 02-Sep-2026 · Session 220 · F-277 (the ingest name-check)
+Targets (S219-close pins): finance_ingest 6cb83302 · finance_returns_audit 200e4d1c · darpan_app f4161c7d · finance_approvals.html 735c7958
+Proven offline: selftest 60/60 · live-shape walk 12/12 through the real ingest_day on a copy of the live db.

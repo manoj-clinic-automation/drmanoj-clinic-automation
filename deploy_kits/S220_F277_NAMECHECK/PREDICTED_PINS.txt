@@ -1,0 +1,8 @@
+# S220_F277_NAMECHECK -- pins PREDICTED OFFLINE by applying the four patchers to the
+# S219-close live bytes (ingest 6cb83302 · audit 200e4d1c · darpan f4161c7d · hub 735c7958,
+# the audit/darpan/hub reproduced from the S218 bases + the four S219 M7 patchers, md5-proven).
+# The owner's md5sum at INSTALL step 8 must read exactly these.
+d5ff50ade372552d8b569114abee9107  /root/finance/finance_ingest.py
+d693c0b4064acae8edc7876ef6dffe11  /root/finance/finance_returns_audit.py
+f2ac3b17c0df01936b4705feeedb7f00  /root/finance/darpan_app.py
+9f579dc6554e1d4ab8d4176d59ffe6cd  /root/finance/finance_ui/finance_approvals.html

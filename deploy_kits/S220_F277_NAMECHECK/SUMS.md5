@@ -1,0 +1,11 @@
+98a98830a84a319e930bf32fdb358d39  patch_audit_disputed_s220.py
+ecf6db1e43509c22c54d31b04dd19955  patch_darpan_disputed_s220.py
+ae591e98ce45a89f33ca7638e514836e  patch_hub_disputed_s220.py
+51028af1aef7db44e7581c325fc54ec9  patch_ingest_namecheck_s220.py
+8c01e1b66396869f577062d6a5aad938  selftest_namecheck_s220.py
+16ffcdfa7a0b72c9a38f630109a0d150  walk_namecheck_s220.py
+66ed4591c176e3092280c457f33d88f0  INSTALL.txt
+3d6ac2809040e73d99293124b0f7b701  INSTALL_ONE_PASTE.txt
+66cc260490e4acdd0bf21ea2276808c3  KIT_ID.txt
+fa87b8f8f68efd46aba6768d7ff50b44  PREDICTED_PINS.txt
+17382fe5489df70b25baa42534a2c3c5  README.md

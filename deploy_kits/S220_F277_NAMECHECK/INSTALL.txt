@@ -1,0 +1,20 @@
+S220_F277_NAMECHECK -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  0  copy the SIX kit .py files into /root/finance/  (the one-paste block is in the chat)
+  1  /root/wa/venv/bin/python3 -B /root/finance/patch_ingest_namecheck_s220.py
+  2  /root/wa/venv/bin/python3 -B /root/finance/patch_audit_disputed_s220.py
+  3  /root/wa/venv/bin/python3 -B /root/finance/patch_darpan_disputed_s220.py
+  4  /root/wa/venv/bin/python3 -B /root/finance/patch_hub_disputed_s220.py
+  5  /root/wa/venv/bin/python3 -B /root/finance/selftest_namecheck_s220.py     (expect: ALL GREEN)
+  6  /root/wa/venv/bin/python3 -B /root/finance/walk_namecheck_s220.py         (expect: WALK GREEN)
+  7  systemctl restart clinic-finance.service
+  8  md5sum /root/finance/finance_ingest.py /root/finance/finance_returns_audit.py /root/finance/darpan_app.py /root/finance/finance_ui/finance_approvals.html
+
+Steps 5 and 6 run on a COPY of finance.db in /tmp -- they never touch the live database.
+Step 8 must print the four PREDICTED PINS in PREDICTED_PINS.txt. If any differs, say so; nothing else.
+
+Every patcher refuses and changes nothing unless its anchor matches exactly
+once, keeps a timestamped .bak beside the file, and restores it if the result
+will not compile. Re-running any of them says "already patched" and stops.
+The ingest patch creates the `identity_dispute` table on first use; no
+migration step. Rolling back = restore the four .bak files and restart.
