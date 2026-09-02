@@ -1,0 +1,10 @@
+ONE PASTE, on the VPS, after the publish. Backs up v1, installs v2, verifies the
+md5 landed, and shows both apps still serving the file. NO service restart is
+needed: both read the widget from disk per request and cache-bust on its mtime.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && \cp -p /root/assetapp/scanner_widget.js /root/assetapp/scanner_widget.js.bak_S219_v1_$(date +%Y%m%d-%H%M%S) && \cp /root/deploy/repo/deploy_kits/S219_SCANNER_V2/scanner_widget.js /root/assetapp/scanner_widget.js && md5sum /root/assetapp/scanner_widget.js && ls -l /root/assetapp/scanner_widget.js*
+
+Expect: bd5f481da3e735d14573431904c3d99a
+
+Rollback (one line): \cp the printed .bak_S219_v1_<stamp> back over
+/root/assetapp/scanner_widget.js -- nothing else to undo, no restart.

@@ -1,0 +1,5 @@
+S219_SCANNER_V2 v1 · 02-Sep-2026 · scanner_widget v2 FINALISED and deployed everywhere.
+Replaces /root/assetapp/scanner_widget.js (v1 4fe8c89386a54ce90786823b53df55bc, live since S175)
+with bd5f481da3e735d14573431904c3d99a. ONE file, SEVEN live surfaces: asset-register intake +
+the five finance scan surfaces + casepack. No host page changes, no service restart, caches
+self-bust (both apps version the URL by the file's mtime).

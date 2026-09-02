@@ -1,0 +1,11 @@
+8047badeb5371cc4c43b33502bd2ba70  ./BASELINE.md5
+21c482c0701c8e294622c38d309f91a1  ./INSTALL_ONE_PASTE.txt
+2e1e876af4df8c4bac56f39b8f8095f1  ./KIT_ID.txt
+858fdd10733bbc6c18b8352c6fc62f69  ./README.md
+6546399eb2be79bb127143a729c62139  ./host.html
+bd5f481da3e735d14573431904c3d99a  ./scanner_widget.js
+2edb6693a1b78fb6f07967ac6f4ed09f  ./t_detect.py
+8e610f0f7fea7b49babc7dbcd53ad504  ./t_hard.py
+2fee44b90cc963dfba853be0527a401b  ./t_layout.py
+d703d755ab166508390c2a838ff1b983  ./t_liveconfig.py
+c1a849dac9751a2abcdb3a0279a05571  ./t_regress.py

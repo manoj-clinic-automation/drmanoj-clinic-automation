@@ -1,0 +1,4 @@
+S219_MARG_SIGNATURES v1 · 02-Sep-2026 · M2 — three report types taught to the
+manojz router: PURCHASE_BILLITEMWISE · SALE_RETURN · SALE_BOOK. A DATA edit to
+signatures.json; marg_router.py is UNCHANGED (781e5ff66d4eca6b6ed4703bf692fb46).
+Installed and rescanned on manojz the same day; MargArchive\_UNKNOWN is now empty.

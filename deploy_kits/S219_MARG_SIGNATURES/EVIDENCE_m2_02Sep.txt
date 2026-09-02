@@ -1,0 +1,85 @@
+S219_MARG_SIGNATURES — EVIDENCE, 02-Sep-2026, run on manojz
+======================================================================
+
+READ THIS FIRST — why the move count is 6 here and was 3 before install.
+The proof was FIRST run before anything changed and reported exactly three
+moves out of 101 spreadsheets (98 unchanged, 0 unreadable, PROVEN). It is
+re-run below AFTER the install and rescan, so each of the three reports is now
+seen twice: once in its new type folder and once as the quarantine copy that
+`--tidy` moved into `_rescued\`. Same three reports, two copies each. The
+verdict lines that matter are unchanged: every move is UNKNOWN -> IDENTIFIED,
+nothing already classified moved, and every end_marker is proven in its own file.
+
+
+A · THE PROOF, old registry in force vs the proposed one
+    (router bytes identical to live; only signatures.json differs)
+
+signatures: 8 in force  ->  11 proposed (+3)
+spreadsheets found in the archive: 104
+
+--- 1 · FILES WHOSE VERDICT MOVES
+    PURCHASE_BILLITEMWISE/2026-08/PURCHASE_BILLITEMWISE_DEFAULT__2026-08-28_to_2026-08-31__20260901-144904__5d0e7222.XLS
+        BILL/ITEM WISE PURCHASE STATEMENT FROM 28-08-2026 TO  UNKNOWN/- -> IDENTIFIED/PURCHASE_BILLITEMWISE
+    SALE_BOOK/2026-06/SALE_BOOK_AS_ON__2026-06-08__20260609-123715__9bf5c008.xlsx
+        SALE AS ON 08-06-2026                                 UNKNOWN/- -> IDENTIFIED/SALE_BOOK
+    SALE_RETURN/2026-08/SALE_RETURN_DEFAULT__2026-08-01_to_2026-08-31__20260901-165054__4f78d1bf.XLS
+        SALE RETURN FROM 01-08-2026 TO 31-08-2026             UNKNOWN/- -> IDENTIFIED/SALE_RETURN
+    _rescued/_UNKNOWN__2026-06-08__20260609-123715__9bf5c008.xlsx
+        SALE AS ON 08-06-2026                                 UNKNOWN/- -> IDENTIFIED/SALE_BOOK
+    _rescued/_UNKNOWN__2026-08-01_to_2026-08-31__20260901-165054__4f78d1bf.XLS
+        SALE RETURN FROM 01-08-2026 TO 31-08-2026             UNKNOWN/- -> IDENTIFIED/SALE_RETURN
+    _rescued/_UNKNOWN__2026-08-28_to_2026-08-31__20260901-144904__5d0e7222.XLS
+        BILL/ITEM WISE PURCHASE STATEMENT FROM 28-08-2026 TO  UNKNOWN/- -> IDENTIFIED/PURCHASE_BILLITEMWISE
+
+    unchanged: 98   moved: 6   unreadable: 0
+
+--- 2 · EVERY NEW TYPE'S end_marker, CHECKED IN ITS OWN SAMPLE
+    PURCHASE_BILLITEMWISE      end_marker 'TOTAL'        present in its own file: True
+        (a sibling's 'Digital Purchase' would have said: False)
+        (a sibling's 'GRAND TOTAL'      would have said: False)
+    SALE_BOOK                  end_marker 'TOTAL'        present in its own file: True
+        (a sibling's 'Digital Purchase' would have said: True)
+        (a sibling's 'GRAND TOTAL'      would have said: False)
+    SALE_RETURN                end_marker 'TOTAL'        present in its own file: True
+        (a sibling's 'Digital Purchase' would have said: False)
+        (a sibling's 'GRAND TOTAL'      would have said: False)
+    SALE_BOOK                  end_marker 'TOTAL'        present in its own file: True
+        (a sibling's 'Digital Purchase' would have said: True)
+        (a sibling's 'GRAND TOTAL'      would have said: False)
+    SALE_RETURN                end_marker 'TOTAL'        present in its own file: True
+        (a sibling's 'Digital Purchase' would have said: False)
+        (a sibling's 'GRAND TOTAL'      would have said: False)
+    PURCHASE_BILLITEMWISE      end_marker 'TOTAL'        present in its own file: True
+        (a sibling's 'Digital Purchase' would have said: False)
+        (a sibling's 'GRAND TOTAL'      would have said: False)
+
+--- 3 · VERDICT
+    every move is UNKNOWN -> IDENTIFIED : True
+    no file already classified moved    : True
+    every end_marker proven in its file : True
+    types newly reachable               : PURCHASE_BILLITEMWISE, SALE_BOOK, SALE_RETURN
+
+    PROVEN — safe to install
+
+
+B · THE RESCAN, dry run then applied (marg_rescan.py, S201 Part 0)
+
+   before: MargArchive\_UNKNOWN held 3 reports
+   dry run said: rescued 3 · still not a report 12
+   --apply    : 3 index rows corrected, dated index backup written
+   --tidy     : 3 quarantine copies proven and moved to _rescued\
+   after : MargArchive\_UNKNOWN holds 0 files
+
+   new type folders now on disk:
+     SALE_RETURN/2026-08/SALE_RETURN_DEFAULT__2026-08-01_to_2026-08-31__20260901-165054__4f78d1bf.XLS
+     PURCHASE_BILLITEMWISE/2026-08/PURCHASE_BILLITEMWISE_DEFAULT__2026-08-28_to_2026-08-31__20260901-144904__5d0e7222.XLS
+     SALE_BOOK/2026-06/SALE_BOOK_AS_ON__2026-06-08__20260609-123715__9bf5c008.xlsx
+
+C · THE TWELVE STILL REFUSED — none is a standard report
+     empty titles ×4 · 'test' ×1 · 'LIST OF ITEMS' ×3 · 'SALT WISE ITEM LIST' ×1
+     · 'SAISUN PHARMA PVT. L …' ×1 · two stock exports whose title matches
+     STOCK_CLOSING but whose columns do not (the router refusing loudly).
+
+D · ROUTER UNCHANGED
+     marg_router.py 781e5ff66d4eca6b6ed4703bf692fb46
+     == the repo copy in deploy_kits/S203_R1/ — this kit changed DATA only.

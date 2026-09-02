@@ -1,0 +1,25 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name=viewport content="width=device-width,initial-scale=1">
+<style>
+/* the host stylesheet, copied from assetapp/app.py so the test sees what staff see */
+body{font-family:system-ui,Arial;margin:0;background:#f4f6fb;color:#222}
+main{padding:12px}
+.card{background:#fff;border:1px solid #d5deee;border-radius:6px;padding:12px;margin-bottom:12px}
+button,.btn{background:#1f3864;color:#fff;border:0;padding:8px 16px;border-radius:4px;cursor:pointer;text-decoration:none;display:inline-block;font-size:14px}
+.btn.small{padding:3px 9px;font-size:12px}
+.muted{color:#888;font-size:12px}
+header{background:#1f3864;color:#fff;padding:10px 12px}
+</style></head><body>
+<header><b>Asset Register</b></header>
+<main><div id=scanroot></div></main>
+<script>
+window.jspdf = { jsPDF: function(){ return {
+  addImage:function(){}, addPage:function(){}, save:function(){},
+  output:function(){ return new Blob(["pdf"],{type:"application/pdf"}); },
+  internal:{pageSize:{getWidth:function(){return 210;},getHeight:function(){return 297;}}}
+}; } };
+window.SCANNER_CONFIG = { title:"Scan document", uploadUrl:"/files/upload",
+  fileField:"file", uploadFields:{entity:"asset"}, nameBase:"Test", backUrl:"/" };
+</script>
+<script src="scanner_widget.js"></script>
+</body></html>
