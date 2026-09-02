@@ -1,0 +1,6 @@
+ONE PASTE on the VPS after the publish. Guards the live portal pin, patches,
+restarts clinic-portal, prints the new md5.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && test "$(md5sum /root/portal/portal.py | cut -d' ' -f1)" = "24ea2c0b44bad08fbce71908a5019ecc" && \cp /root/deploy/repo/deploy_kits/S218_PORTAL_TILE/patch_portal_vaapsi_tile.py /root/portal/ && /root/wa/venv/bin/python3 -B /root/portal/patch_portal_vaapsi_tile.py && systemctl restart clinic-portal.service && sleep 2 && systemctl is-active clinic-portal.service && md5sum /root/portal/portal.py
+
+Rollback: \cp $(ls -t /root/portal/portal.py.bak_S218_tile_* | head -1) /root/portal/portal.py && systemctl restart clinic-portal.service
