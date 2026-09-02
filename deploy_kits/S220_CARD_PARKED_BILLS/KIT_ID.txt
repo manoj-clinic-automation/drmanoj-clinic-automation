@@ -1,0 +1,2 @@
+S220_CARD_PARKED_BILLS · built 02-Sep-2026 23:00 IST · Session 220 · F-282b the parked bills expand (bill · naam · ID · last4 · ₹)
+Targets: darpan_app ee0e8a8f · darpan_card fb129eee. Proven offline: selftest 6/6 · render 4/4. Pins predicted: c740456e · a0bc0c4c.

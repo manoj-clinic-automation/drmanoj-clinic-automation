@@ -1,0 +1,3 @@
+# S220_CARD_PARKED_BILLS -- pins PREDICTED OFFLINE on the day-total-truth bytes (darpan_app ee0e8a8f · darpan_card fb129eee).
+c740456ed6b3e941307016d10f9f04c2  /root/finance/darpan_app.py
+a0bc0c4ce448d1ad0e0a21dd971fa0f1  /root/finance/darpan_card.html
