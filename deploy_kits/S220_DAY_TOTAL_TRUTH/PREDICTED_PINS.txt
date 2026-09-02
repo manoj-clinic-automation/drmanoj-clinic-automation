@@ -1,0 +1,6 @@
+# S220_DAY_TOTAL_TRUTH -- pins. darpan_app and darpan_card PREDICTED OFFLINE on the live bytes
+# (7357eccc / fa6f0a86). finance_app.py: the live bytes (a57980c2 at the S219 close) are not held
+# offline; its anchor is the guard and its new pin is DECLARED PENDING -- read back at install.
+ee0e8a8f2be5d76d4ef1075877aec9d6  /root/finance/darpan_app.py
+fb129eee429d36ebe86e0487e7076c22  /root/finance/darpan_card.html
+(pending)                          /root/finance/finance_app.py

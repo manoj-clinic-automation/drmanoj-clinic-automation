@@ -1,0 +1,2 @@
+S220_DAY_TOTAL_TRUTH · built 02-Sep-2026 22:50 IST · Session 220 · F-281 (Marg total adds returns) · F-282 (parked bills vanish from both day screens)
+Targets: darpan_app 7357eccc · darpan_card fa6f0a86 · finance_app by anchor (a57980c2 at S219 close). Proven offline: selftest 9/9 · render 4/4.
