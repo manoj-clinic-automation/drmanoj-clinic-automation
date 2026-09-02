@@ -1,0 +1,8 @@
+35ad7595031a2ff7d1f9c3f2abc59e1d  finance_returns_escalate.py
+d0d1b4fcc18bb7cdb852e6b7dca89d5a  patch_darpan_m7_s219.py
+11cc44790f81488ee86b774627bb74df  patch_finance_app_escalate_s219.py
+7763581dab521ae61ee4e632ac43bfd5  patch_hub_m7_s219.py
+66148b154e049bd24457e93b4c16393d  patch_returns_stubguard_s219.py
+2e91f95796e3151278118c612c56237c  selftest_returns_m7.py
+305d41995cc37b2fad41700ca0162cda  README.md
+21957930a0d01cbbf5f866266131cfc4  INSTALL.txt

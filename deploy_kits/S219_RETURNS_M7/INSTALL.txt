@@ -1,0 +1,15 @@
+S219_RETURNS_M7 -- install order. ONE LINE AT A TIME.
+
+  1  /root/wa/venv/bin/python3 -B /root/finance/patch_returns_stubguard_s219.py
+  2  /root/wa/venv/bin/python3 -B /root/finance/patch_darpan_m7_s219.py
+  3  /root/wa/venv/bin/python3 -B /root/finance/patch_hub_m7_s219.py
+  4  /root/wa/venv/bin/python3 -B /root/finance/patch_finance_app_escalate_s219.py
+  5  systemctl restart clinic-finance.service
+
+finance_returns_escalate.py must be copied to /root/finance/ BEFORE step 4.
+Step 4 is safe without it (both hooks become no-ops), but the escalation only
+works once it is there.
+
+Every patcher refuses and changes nothing unless its anchor matches exactly
+once, keeps a timestamped .bak beside the file, and restores it if the result
+will not compile. Re-running any of them says "already patched" and stops.
