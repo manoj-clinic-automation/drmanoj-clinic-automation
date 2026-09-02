@@ -1,0 +1,4 @@
+# S220_INTENT_SCORER -- pins PREDICTED OFFLINE on the owner-English bytes (darpan_app 44ed9a5e · hub dac5a86d).
+7357eccc7e597914a9200b812a0bcdbb  /root/finance/darpan_app.py
+e1652297a1ed5b81a0fcfedd2662f047  /root/finance/finance_ui/finance_approvals.html
+6f11548ac520e240fc1871c513aab59c  /root/finance/finance_intent.py   (NEW file, == kit bytes)

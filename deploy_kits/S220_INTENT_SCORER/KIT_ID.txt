@@ -1,0 +1,3 @@
+S220_INTENT_SCORER · built 02-Sep-2026 · Session 220 · finance_intent.py (NEW) + owner-only endpoint + card block
+Targets (owner-English bytes): darpan_app 44ed9a5e · finance_approvals.html dac5a86d
+Proven offline: selftest 13/13 on a copy of the live db · browser render 9/9 · pins predicted.
