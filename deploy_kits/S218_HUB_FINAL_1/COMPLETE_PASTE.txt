@@ -1,0 +1,6 @@
+The first install stopped at the patch (its guard refused; the pages were
+already in place). This paste FINISHES it: pulls the corrected patch, applies
+it, dry-runs heal, arms the half-hourly heal cron, restarts, prints pins.
+No pin guards here - the pages were already replaced by the first paste.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && \cp /root/deploy/repo/deploy_kits/S218_HUB_FINAL_1/patch_finance_app_s218.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_finance_app_s218.py && /root/wa/venv/bin/python3 -B /root/finance/finance_heal.py --dry-run && (crontab -l 2>/dev/null | grep -q finance_heal || (crontab -l 2>/dev/null; echo "*/30 8-21 * * * /root/wa/venv/bin/python3 -B /root/finance/finance_heal.py >>/root/finance/heal.log 2>&1") | crontab -) && systemctl restart clinic-finance.service && sleep 2 && journalctl -u clinic-finance.service --since "-1 min" --no-pager | tail -4 && md5sum /root/finance/finance_ui/finance_approvals.html /root/finance/darpan_card.html /root/finance/finance_ui/finance_entry.html /root/finance/finance_app.py /root/finance/finance_heal.py
