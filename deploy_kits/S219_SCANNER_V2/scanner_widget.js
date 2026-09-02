@@ -151,7 +151,7 @@
           '<button type=button class=btn id=addpage>\u2714 Add this page</button>' +
         '</div>' +
         '<div class="btnrow">' +
-          '<button type=button class="btn small" id=addwhole>Whole image</button>' +
+          '<button type=button class="btn small" id=addwhole>\u2795 Add whole image</button>' +
           '<button type=button class="btn small" id=resetcorners>Reset outline</button>' +
           '<button type=button class="btn small" id=retake>Retake</button>' +
         '</div>' +

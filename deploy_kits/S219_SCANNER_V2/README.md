@@ -72,6 +72,18 @@ improvement on v1, which was a fixed inset — wrong in **every** case by constr
 synthetic. The honest next step is one real scan on a real phone after install; if it
 disappoints, rollback is one line and the corners still drag exactly as they do today.
 
+## v2.1 — one label restored, and why it matters
+The asset app's **own** smoke suite greps the widget for `"Add whole image"`. v2 had
+shortened that button to `"Whole image"` during the 44px layout work, so with v2 installed
+the app's suite ran **341 passed / 1 failed** — a red on a live system that is not a fault,
+which is the "amber that is normal" this project refuses to leave lying around. The feature
+was never gone (`id=addwhole` is in both versions and `t_regress` drives it); only its name
+was. The label is now `➕ Add whole image` — descriptive again, still shorter than v1's
+`➕ Add whole image (no crop)`, and every layout assertion still passes.
+
+With this and the pharmacy-lane patch the app's suite is **342 passed, 0 failed** — the same
+342/0 recorded against this app at S177.
+
 ## Install / rollback
 `INSTALL_ONE_PASTE.txt`. Rollback is a single `\cp` of the timestamped backup — no
 restart, nothing else to undo.

@@ -1,0 +1,5 @@
+S219_PHARMA_LANE v1 · 02-Sep-2026 · M3 / PP0-lite — the pharmacy lane on the existing
+bill intake. Eleven anchored changes to /root/assetapp/asset_register.py
+(0cd8fc3bfe8d39322c6162a41124bddf). Reception picks the lane; a pharmacy bill is stored
+kind='Pharmacy', status='captured' — a witness, never an approval item. Nothing is sent
+anywhere, no table is added, no purchase figure is read or written.

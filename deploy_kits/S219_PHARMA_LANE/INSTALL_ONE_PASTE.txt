@@ -1,0 +1,10 @@
+ONE PASTE, on the VPS, after the publish. Applies the eleven anchored changes
+(exact-once asserted, backed up, compile-checked with restore-on-failure),
+restarts the asset app and shows the log.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && \cp /root/deploy/repo/deploy_kits/S219_PHARMA_LANE/patch_pharma_lane_s219.py /root/assetapp/ && python3 -B /root/assetapp/patch_pharma_lane_s219.py && systemctl restart assetapp.service && sleep 2 && systemctl is-active assetapp.service && journalctl -u assetapp.service --since "-1 min" --no-pager | tail -4
+
+If any anchor does not match exactly once the patcher REFUSES and changes nothing.
+
+Rollback: \cp the printed .bak_S219_pharma_<stamp> back over
+/root/assetapp/asset_register.py and restart assetapp.service.
