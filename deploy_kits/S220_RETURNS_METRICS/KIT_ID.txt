@@ -1,0 +1,3 @@
+S220_RETURNS_METRICS · built 02-Sep-2026 · Session 220 · the gist line + examinable % / flagged %
+Targets (large-gate bytes): darpan_app b24ecef3 · finance_approvals.html 8b2a8348
+Proven offline: selftest 11/11 on a copy of the live db · browser render 8/8 · two pins predicted.

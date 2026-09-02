@@ -1,0 +1,4 @@
+# S220_RETURNS_METRICS -- pins PREDICTED OFFLINE on the large-gate bytes read back at 22:06
+# (darpan_app b24ecef3 · finance_approvals.html 8b2a8348). The owner's md5sum must read these.
+94bffba20784d0adc8235a67277155ab  /root/finance/darpan_app.py
+dac5a86d1350ba4df16374ad147a901e  /root/finance/finance_ui/finance_approvals.html
