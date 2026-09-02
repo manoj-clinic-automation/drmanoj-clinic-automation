@@ -1,0 +1,6 @@
+# S220_LARGE_RETURN_GATE -- pins PREDICTED OFFLINE by applying the three patchers to the
+# current live bytes (darpan_app f2ac3b17 · finance_returns_escalate 35ad7595 · hub 9f579dc6,
+# the F-277 bytes read back from the box at 21:30 IST). The owner's md5sum must read exactly these.
+b24ecef3f4613d2f2c2f93e01adad4c4  /root/finance/darpan_app.py
+c4864500d2efbd03c9c6a1e350eaf1b5  /root/finance/finance_returns_escalate.py
+8b2a8348e821a7b3549c6e61fb2ae364  /root/finance/finance_ui/finance_approvals.html
