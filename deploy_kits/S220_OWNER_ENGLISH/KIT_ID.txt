@@ -1,0 +1,2 @@
+S220_OWNER_ENGLISH · built 02-Sep-2026 · Session 220 · owner-facing API text in English
+Target: darpan_app 94bffba2 (metrics bytes). Proven offline: selftest 11/11. One pin predicted: 44ed9a5efee131fb8595a6fe45320d78

@@ -1,0 +1,2 @@
+# S220_OWNER_ENGLISH -- pin PREDICTED OFFLINE on the metrics bytes (darpan_app 94bffba2).
+44ed9a5efee131fb8595a6fe45320d78  /root/finance/darpan_app.py
