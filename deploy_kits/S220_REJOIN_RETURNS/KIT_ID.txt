@@ -1,0 +1,2 @@
+S220_REJOIN_RETURNS · built 02-Sep-2026 · Session 220 · the 17 split returns since 18-Jun
+Proven offline: selftest 13/13 on a copy of the live db; dry-run 17/0/0 cross-checked against the Marg register.

@@ -1,0 +1,5 @@
+ONE PASTE on the VPS after the publish. Copies the tool, proves it on a COPY of the db, prints the
+dry-run table for your eyes, and APPLIES only if the dry run says exactly 17 unique / 0 / 0.
+No restart needed (data only). The backup is taken beside finance.db before anything is written.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S220_REJOIN_RETURNS && md5sum -c SUMS.md5 --quiet && \cp rejoin_returns_s220.py selftest_rejoin_s220.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/selftest_rejoin_s220.py | tail -1 && /root/wa/venv/bin/python3 -B /root/finance/rejoin_returns_s220.py | tee /tmp/rejoin_dry.txt | tail -22 && grep -q "^pairs: 17 unique   unpaired: 0   ambiguous: 0$" /tmp/rejoin_dry.txt && /root/wa/venv/bin/python3 -B /root/finance/rejoin_returns_s220.py --apply | tail -4
