@@ -142,6 +142,14 @@ finance/REPORT_1.xls
 
 # scratch: files staged for deletion via device bridge (device_bash cannot rm)
 /_to_delete/
+# S219: the per-session sweep folders only. Each carries a WHY_SAFE.txt
+# naming every surviving copy; _to_delete_S219 alone is 3.8 MB of scratch.
+# NOTE: timestamped canon backups (CANONICAL_MANIFEST.md.bak_S###) are NOT
+# ignored -- this project commits them (the S203 one is tracked), and an
+# ignore rule for them was added and removed at S219 after the publish gate
+# refused: a file silently excluded is exactly what that gate exists to stop.
+/_to_delete_S*/
+
 
 # S218: the staff-cards registry is names+URLs only (no PHI, no secrets) and must publish
 !deploy_kits/*/cards_registry.json
