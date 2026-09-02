@@ -1189,7 +1189,7 @@ function walkRender(){
   }
   var st=WALK[WI];
   box.className="walkCard "+(st.sev||"warn");
-  var h='<span class="prog">'+(WI+1)+' of '+WALK.length+'</span><h3>'+esc(st.title)+'</h3>';
+  var h='<span class="prog dl" onclick="walkIndex()" title="see every step">'+(WI+1)+' of '+WALK.length+' ▾</span><h3>'+esc(st.title)+'</h3>';
   h+='<div class="body">'+esc(st.body||"")+'</div>';
   h+='<div class="walkNav">';
   if(st.approve_date)h+='<button onclick="approve(\''+esc(st.approve_date)+'\');walkNext()">Approve</button>';
@@ -1203,6 +1203,19 @@ function walkRender(){
   box.innerHTML=h;
 }
 function walkNext(){WI++;walkRender()}
+function walkIndex(){
+  var box=$("walkBox"); box.className="walkCard info";
+  var dots={bad:"🔴",warn:"🟡",info:"🔵"};
+  var h='<h3>All steps ('+WALK.length+')</h3><div class="body">';
+  WALK.forEach(function(st,i){
+    h+='<div style="padding:6px 0;border-bottom:1px solid var(--line)">'+
+       (dots[st.sev]||"")+' <span class="dl" onclick="WI='+i+';walkRender()">'+
+       (i+1)+'. '+esc(st.title)+'</span>'+(i===WI?' <span class="mut">◂ you are here</span>':'')+'</div>';
+  });
+  h+='</div><div class="walkNav"><button class="ghost" onclick="walkRender()">◂ Back to step</button>'+
+     '<button class="ghost" onclick="walkClose()">✕ Close walk</button></div>';
+  box.innerHTML=h;
+}
 function walkResolve(id){
   var why=($("wreason")&&$("wreason").value||"").trim();
   if(!why){$("wreason").placeholder="a reason is required";return}
