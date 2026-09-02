@@ -1,0 +1,2 @@
+S220_FULL_MOBILE · built 02-Sep-2026 23:10 IST · Session 220 · the full mobile travels with a parked bill (owner ruling; D356 extended)
+Targets: marg_report 2eac81a2 · darpan_app c740456e · darpan_card a0bc0c4c. Proven offline: kit selftest 6/6 · marg_report selftest 40/40. Pins predicted.

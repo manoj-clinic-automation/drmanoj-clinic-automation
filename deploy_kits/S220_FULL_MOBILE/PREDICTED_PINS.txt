@@ -1,0 +1,4 @@
+# S220_FULL_MOBILE -- pins PREDICTED OFFLINE (marg_report 2eac81a2 · darpan_app c740456e · darpan_card a0bc0c4c).
+f9370dde648f629461d4efac2b4805af  /root/finance/marg_report.py
+43abdd582974dfe19b3f9580811b8c89  /root/finance/darpan_app.py
+aeb4fd7df924b4953561b2645dff3a5f  /root/finance/darpan_card.html
