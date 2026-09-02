@@ -1,0 +1,3 @@
+S219_MARG_AUTOAPPLY v1 · 02-Sep-2026 · M1 — Marg auto-apply: the second order,
+the apply summary (bill range · total · UPI per Marg · CN count), and the
+bill-range continuity flag. Anchored to live finance_app.py 80c2323a82de81de17093df78b0a3139.

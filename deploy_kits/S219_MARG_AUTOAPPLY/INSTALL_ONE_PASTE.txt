@@ -1,0 +1,14 @@
+ONE PASTE, on the VPS, after the publish. Pulls the deploy clone, copies the
+patcher in, applies the four anchored changes (exact-once asserted, backed up,
+compile-checked with restore-on-failure), restarts the service and shows the log.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && \cp /root/deploy/repo/deploy_kits/S219_MARG_AUTOAPPLY/patch_marg_autoapply_s219.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_marg_autoapply_s219.py && systemctl restart clinic-finance.service && sleep 2 && journalctl -u clinic-finance.service --since "-1 min" --no-pager | tail -5
+
+If any anchor does not match exactly once the patcher REFUSES and changes
+nothing — that refusal text is the finding, not a problem to work around.
+
+Rollback: \cp the printed .bak_S219_m1_<stamp> back over
+/root/finance/finance_app.py and restart clinic-finance.service.
+
+To silence or sharpen the gap flag later, without touching code:
+  marg.bill_gap_min   (default 10; measured floor, see README)

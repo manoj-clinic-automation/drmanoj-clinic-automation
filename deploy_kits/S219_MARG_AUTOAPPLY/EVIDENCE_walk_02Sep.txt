@@ -1,0 +1,34 @@
+S219_MARG_AUTOAPPLY — the live-shape walk, 02-Sep-2026, on manojz against the real /root/finance/finance.db
+(copied from the box the same morning; the walk works on a COPY in a temp dir outside the mount and writes nothing)
+
+$ python3 -B selftest_marg_autoapply.py finance_app.py   # the PATCHED live bytes
+
+38/38 checks passed
+SELFTEST GREEN
+
+$ python3 -B walk_marg_autoapply.py finance_app.py finance.db
+days carrying Marg bills: 135  (2026-04-01 .. 2026-09-01)
+
+--- 1 · THE SUMMARY on the last 10 such days
+    (net is cross-checked against the day's own sale_item sum)
+    ok  2026-08-21: bills A3101-A3135, CN173-CN174 | total Rs 49,181.00 | UPI per Marg Rs 0.00 | 2 credit note(s)
+    ok  2026-08-22: bills A3136-A3159, CN175-CN175 | total Rs 21,965.00 | UPI per Marg Rs 2,986.00 | 1 credit note(s)
+    ok  2026-08-24: bills A3160-A3177, CN176-CN179 | total Rs 12,964.00 | UPI per Marg Rs 2,502.00 | 4 credit note(s)
+    ok  2026-08-25: bills A3178-A3194 | total Rs 18,478.00 | UPI per Marg Rs 0.00 | 0 credit note(s)
+    ok  2026-08-26: bills A3195-A3215, CN180-CN182 | total Rs 15,959.00 | UPI per Marg Rs 2,668.00 | 3 credit note(s)
+    ok  2026-08-27: bills A3216-A3249, CN183-CN187 | total Rs 37,349.00 | UPI per Marg Rs 5,733.00 | 5 credit note(s)
+    ok  2026-08-28: bills A3250-A3263 | total Rs 15,397.00 | UPI per Marg Rs 5,512.00 | 0 credit note(s)
+    ok  2026-08-29: bills A3264-A3286, CN188-CN191 | total Rs 16,977.00 | UPI per Marg Rs 1,275.00 | 4 credit note(s)
+    ok  2026-08-31: bills A3287-A3320, CN192-CN193 | total Rs 40,172.00 | UPI per Marg Rs 4,163.00 | 2 credit note(s)
+    ok  2026-09-01: bills A3321-A3330, CN194-CN196 | total Rs 4,493.00 | UPI per Marg Rs 513.00 | 3 credit note(s)
+    net agrees on 10 day(s), disagrees on 0
+
+--- 2 · THE CONTINUITY CHECK over ALL history (rolled back)
+    days walked           : 135
+    gap flags it WOULD raise: 0
+
+    VERDICT: quiet on real history -- ships as a flag
+
+--- 3 · nothing was written
+    MARG_BILL_RANGE_GAP rows in the copy after rollback: 0
+    (the live database was only ever read, and only to copy it)
