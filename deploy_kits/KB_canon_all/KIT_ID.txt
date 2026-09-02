@@ -1,3 +1,3 @@
-S217/218 close (folded at the S219 open) · 02-Sep-2026 · Archive v1.64 · Register v5.66 · Fault Register v2.48 (F-269…F-275) · Runbook v150 · START_HERE 219 · EOS v13
-Pins: live_pins_S218close.txt — register_pin_verified: yes, 70 VPS rows (nine moved/created, read from the box).
-MD5SUMS_ALL.txt rows: 298 (everything except itself and this file; v139/v144/v145 one-store runbooks filed at the S219 open) · md5 da27ee62ec311321e3cd12b6ead9599f
+S220 close · 02-Sep-2026 (late evening) · Archive v1.66 · Register v5.68 · Fault Register v2.50 (F-277 closed; F-280…F-285) · Runbook v152 · START_HERE 221 · EOS v13
+Pins: live_pins_S220close.txt — register_pin_verified: yes, 72 VPS rows (nine moved/created, read from the box; finance_intent.py NEW).
+MD5SUMS_ALL.txt: every regular file in this folder except itself (this file included).
