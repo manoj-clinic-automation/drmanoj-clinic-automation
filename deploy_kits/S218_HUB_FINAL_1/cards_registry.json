@@ -1,0 +1,9 @@
+{"cards": [
+ {"name": "Din ka card — Daily Sale", "url": "/finance/daily", "users": "Darpan", "purpose": "Din ki entry: cash/UPI, kharche, scan, din file karna"},
+ {"name": "Drawer card", "url": "/finance/darpan", "users": "Darpan", "purpose": "Drawer ka hisaab, cash bhejna/wapas lena, custody"},
+ {"name": "Corrections desk", "url": "/finance/darpan/corrections", "users": "Amir", "purpose": "UPI/CASH galat mode ki sudhaar-list — Marg mein theek karke tick"},
+ {"name": "Stock count", "url": "/finance/stock/page/count", "users": "Stock staff", "purpose": "Haath se stock ginti; expected server Marg se batata hai"},
+ {"name": "Stock differences", "url": "/finance/stock/page/diffs", "users": "Owner + stock staff", "purpose": "Ginti vs Marg ka antar, karan ke saath band hota hai"},
+ {"name": "Vaapsi desk — Sale returns", "url": "/finance/returns/desk", "users": "Reception", "purpose": "Sale return ki entry aur parchi"},
+ {"name": "Staff register", "url": "/register", "users": "Sab staff", "purpose": "Hajiri, punch, present-request"}
+]}

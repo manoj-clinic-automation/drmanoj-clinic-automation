@@ -1,0 +1,13 @@
+S218_HUB_FINAL_1 — offline LIVE-SHAPE walk, 02-Sep-2026 (Chromium, real bytes,
+stubbed APIs in the day's real shapes). 0 console errors.
+Sub-agent screen readings: green Docterz-current banner · Walk button · walk
+overlay steps 1-2 (honest bank-vs-entered wording with corrected split; flag
+step with Recheck) · Bank MPR card with per-unit tables + CSV button · review
+queue · NO Hindi anywhere on the page. One fix applied after reading: overlay
+z-index over the sticky header.
+Server rehearsal against the real backup DB (t3.db copy): statement-health v2
+(counts + green line) · walk 36 steps (holiday rows excluded; on the live box
+far fewer — legacy sweep already closed the old rows) · mpr-day (28-Aug:
+medical/clinic/lab) · review-list 86 rows · cards 7 · finance_heal APPLY:
+rechecked 24, healed 14 (missing_day 28+29-Aug, nine MARG_DAY_NOT_FILED
+ghosts), second run healed 0 (idempotent).

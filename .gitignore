@@ -142,3 +142,6 @@ finance/REPORT_1.xls
 
 # scratch: files staged for deletion via device bridge (device_bash cannot rm)
 /_to_delete/
+
+# S218: the staff-cards registry is names+URLs only (no PHI, no secrets) and must publish
+!deploy_kits/*/cards_registry.json
