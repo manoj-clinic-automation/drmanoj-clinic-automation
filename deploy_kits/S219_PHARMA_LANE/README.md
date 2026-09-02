@@ -47,6 +47,15 @@ intake, a real database, the real routes. **22/22**, including:
 And the app's own suite: **`smoke_test.py` 342 passed, 0 failed** — the same 342/0 recorded
 against this app at S177, so nothing else moved.
 
+## The lane declares the page size (added after the first real scan)
+Choosing "Pharmacy purchase" now also tells the scanner it is looking at a **half-A4** page —
+the owner measured >95% of purchase bills at that size. It is set and cleared on the same
+`uploadFields` road the Note has always used, so the widget needed no change to receive it.
+Shipped as `patch_lane_sizeprior_s219.py`, a DELTA on the installed lane rather than a re-run
+of the main patcher: a patcher that quietly re-applies itself is how a file gets patched twice.
+Proven by round-trip — the box's own bytes (`e7a68a13…`) plus the delta land on exactly the
+same file the from-scratch path produces.
+
 ## Boundaries held
 Sends nothing. Touches no Marg data. Reads and writes no purchase figure. Adds no table.
 **August purchase data stays provisional** under the owner's 02-Sep hold — this captures only

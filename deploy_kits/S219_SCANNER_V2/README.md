@@ -84,6 +84,36 @@ was. The label is now `➕ Add whole image` — descriptive again, still shorter
 With this and the pharmacy-lane patch the app's suite is **342 passed, 0 failed** — the same
 342/0 recorded against this app at S177.
 
+## v2.2 — the scanner is told the page size (the owner's idea, and the right one)
+He tried a real half-A4 bill and autocrop did not fire. Measured (`t_fillframe.py`), the cause
+was not the background: **a page of print offers a rectangle every bit as convincing as the
+paper**, and which one wins depends on the printed content. He then supplied the fact that
+settles it — **>95% of pharmacy purchase bills are half A4** — so the scanner no longer has to
+guess the shape it is looking for.
+
+Opt-in, via `SCANNER_CONFIG`: `expectAspect` (0.7048 for A5), `expectLabel`, `expectTol`.
+**Absent for every caller that does not set it, so nothing running today changes** — proven by
+re-running all five suites and the app's own 342 checks with no prior set.
+
+Three effects, in order of value:
+1. **A framing hint while aiming** — keep some desk visible, fill about three quarters. That is
+   not politeness: the detector fits the desk from a ring round the frame, so if the paper
+   reaches the edges there is no desk left to fit.
+2. **An aspect gate** — a candidate that is not the expected page is refused. The text block
+   never is: margins make it wider and shorter.
+3. **A better fallback** — an unconfident detection now hands back the *expected page*, in the
+   right proportion, instead of a fixed 8% inset that is the wrong shape for a bill.
+
+`expectTol` defaults to **0.15, measured not chosen**: the text blocks this rejects came out at
+0.82 and 0.59 against a page of 0.705 — 0.16 away — while a page tilted 8° is only 0.09 away and
+13° is 0.15. So it rejects the printing and still accepts a bill laid down crooked.
+
+**Result (`t_sizeprior.py`), same sweep with and without the prior:**
+```
+accurate detections kept : 6 of 6
+confident-WRONG boxes    : 6  ->  0
+```
+
 ## Install / rollback
 `INSTALL_ONE_PASTE.txt`. Rollback is a single `\cp` of the timestamped backup — no
 restart, nothing else to undo.

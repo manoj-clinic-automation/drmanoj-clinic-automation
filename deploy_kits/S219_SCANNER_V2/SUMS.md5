@@ -1,11 +1,13 @@
 8047badeb5371cc4c43b33502bd2ba70  ./BASELINE.md5
-fdd2d820a3081781419cd52928198159  ./INSTALL_ONE_PASTE.txt
-37ae1910950260a7317512b993613633  ./KIT_ID.txt
-d947baccf8ef6ad208e9e7b5ca4a1f8d  ./README.md
+8d93601776d884fc258459e74485d5f2  ./INSTALL_ONE_PASTE.txt
+53f4e95e10d690226120a891a38753dd  ./KIT_ID.txt
+5ad9f0687bfa2d243265113df18ad422  ./README.md
 6546399eb2be79bb127143a729c62139  ./host.html
-df0b773141edbd6469bfb26e7e14deca  ./scanner_widget.js
+9b56c8ad8d4a31369ac876f586898614  ./scanner_widget.js
 2edb6693a1b78fb6f07967ac6f4ed09f  ./t_detect.py
+ffeaef82f429648fa38481fac04f8ae0  ./t_fillframe.py
 8e610f0f7fea7b49babc7dbcd53ad504  ./t_hard.py
 2fee44b90cc963dfba853be0527a401b  ./t_layout.py
 d703d755ab166508390c2a838ff1b983  ./t_liveconfig.py
 c1a849dac9751a2abcdb3a0279a05571  ./t_regress.py
+07fd6faf2d50e05d84a2632779d111df  ./t_sizeprior.py

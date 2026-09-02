@@ -52,6 +52,44 @@
   var allowId = CFG.allowIdCard !== false;
   var allowBatch = CFG.allowBatch !== false;
 
+  // S219 -- THE SIZE PRIOR (opt-in; absent for every caller that does not set it,
+  // so nothing that works today changes).
+  //
+  // The owner measured it: >95% of pharmacy purchase bills are HALF A4. A page
+  // of print offers the detector a rectangle every bit as convincing as the
+  // paper, and which one wins turns out to depend on the printed content -- so
+  // telling it what shape to expect removes the ambiguity instead of trying to
+  // out-think the pixels. A5 is 148x210mm, aspect 0.705 portrait.
+  //
+  // expectAspect  width/height of the page we expect (0.705 for half A4)
+  // expectLabel   what to call it on screen
+  // expectTol     how far off that ratio may be. Default 0.15, and that number
+  //               is measured, not chosen: the text blocks this exists to reject
+  //               came out at 0.82 and 0.59 against a page of 0.705 -- 0.16 away
+  //               -- while an axis-aligned box round a page tilted 8 degrees is
+  //               only 0.09 away, and 13 degrees 0.15. So 0.15 rejects the
+  //               printing and still accepts a bill laid down a little crooked;
+  //               beyond that the user gets the guide, which is no worse than
+  //               the inset they get today.
+  var wantAR = parseFloat(CFG.expectAspect) || 0;
+  var wantTol = parseFloat(CFG.expectTol) || 0.15;
+  var wantLbl = CFG.expectLabel || "";
+  function arOK(w, h){
+    if (!wantAR || w <= 0 || h <= 0) return true;      // no prior -> judge nothing
+    var a = w / h;
+    var d = Math.min(Math.abs(a - wantAR) / wantAR,
+                     Math.abs(a - 1 / wantAR) * wantAR);   // portrait OR landscape
+    return d <= wantTol;
+  }
+  // The rectangle we ask the user to fill: the expected shape, inset enough to
+  // leave the margin the surface fit needs in order to see the desk at all.
+  function guideRect(W, H){
+    if (!wantAR) return null;
+    var m = 0.80, w = W * m, h = w / wantAR;
+    if (h > H * m) { h = H * m; w = h * wantAR; }
+    return [(W - w) / 2, (H - h) / 2, w, h];
+  }
+
   var root = document.getElementById("scanroot");
   if (!root) { return; }
 
@@ -132,6 +170,13 @@
 
       '<div id=camwrap style="display:none">' +
         '<video id=vid playsinline autoplay muted></video>' +
+        // S219: framing advice, shown only when a page size is expected. The
+        // margin is not politeness -- the detector fits the desk from a ring
+        // around the frame, so if the paper reaches the edges there is no desk
+        // left to fit, and it locks onto the printing instead.
+        (wantAR ? '<p id=guidehint class=muted style="margin:6px 0 0">Lay the ' +
+          esc(wantLbl || 'bill') + ' flat and keep a little desk visible all ' +
+          'the way round \u2014 fill about three quarters of the screen.</p>' : '') +
         '<div id=cambar class="btnrow">' +
           '<button type=button class=btn id=shootbtn style="flex:2 1 60%">\u25CF Capture</button>' +
           '<button type=button class="btn small" id=cancelcam>Cancel</button>' +
@@ -456,6 +501,13 @@
       var L = Math.max(0, cx[0] * k2), R = Math.min(W, (cx[1] + 1) * k2);
       var T = Math.max(0, cy[0] * k2), Bm = Math.min(H, (cy[1] + 1) * k2);
       if (R - L < 8 || Bm - T < 8) return null;
+      // S219 -- the size prior has the last word. A text block inside a bill is
+      // not the shape of the bill: margins make it wider and shorter. So a
+      // candidate that is not the page we came for is refused, and the caller
+      // falls back to the guide rectangle -- which is the right SHAPE in roughly
+      // the right place, and one drag from correct. Without a prior this is a
+      // no-op and every existing caller behaves exactly as before.
+      if (!arOK(R - L, Bm - T)) return null;
       return [[L, T], [R, T], [R, Bm], [L, Bm]];
     } catch (e) { return null; }
   }
@@ -613,7 +665,18 @@
     L.style.right = rightHalf ? "auto" : "8px"; L.style.left = rightHalf ? "8px" : "auto";
     L.style.display = "block"; }
   function hideLoupe(){ $("loupe").style.display = "none"; }
-  function resetCorners(){ var mx=ov.width*0.08, my=ov.height*0.08;
+  function resetCorners(){
+    // S219: with a size prior, an unconfident detection falls back to the
+    // EXPECTED PAGE rather than a fixed 8% inset. The inset is the wrong shape
+    // for a half-A4 bill, so it always needed four drags; the guide needs at
+    // most a nudge.
+    var g = guideRect(ov.width, ov.height);
+    if (g) {
+      corners = [[g[0], g[1]], [g[0] + g[2], g[1]],
+                 [g[0] + g[2], g[1] + g[3]], [g[0], g[1] + g[3]]];
+      drawOverlay(); return;
+    }
+    var mx=ov.width*0.08, my=ov.height*0.08;
     corners=[[mx,my],[ov.width-mx,my],[ov.width-mx,ov.height-my],[mx,ov.height-my]]; drawOverlay(); }
   function down(e){ var p=evPos(e); drag=hitTest(p);
     if (drag){ last=p; e.preventDefault(); drawOverlay(); showLoupe(p); } }
