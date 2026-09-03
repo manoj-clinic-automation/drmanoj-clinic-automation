@@ -1,0 +1,54 @@
+S223_DOCTERZ_READER -- the selftest, run offline against REAL exports before any paste.
+
+METHOD: Drive is stubbed with eight real Staff_Action_Today workbooks (06-Jul to 03-Sep 2026).
+Everything else is the code that will run on the box: the parse, the schema, the upsert, the
+same-date tiebreaker and the idempotence check. Ground truth for 19-Aug and 02-Sep comes from
+the working paper and from tonight's independent proof against the RAW Docterz exports.
+
+-- 1  first run: every file parses and lands --------------------------
+Drive: 8 day files in the folder
+  Staff_Action_Today_2026-07-07.xlsx     -> 2026-07-06  Rs 20500    35 lines
+  Staff_Action_Today_2026-07-21.xlsx     -> 2026-07-20  Rs 16500    28 lines   [the sheet's own cash+online Rs 17100 does not equal its own total Rs 16500 (difference Rs 600)]
+  Staff_Action_Today_2026-07-30.xlsx     -> 2026-07-29  Rs 8400     14 lines   [the sheet's own cash+online Rs 9000 does not equal its own total Rs 8400 (difference Rs 600)]
+  Staff_Action_Today_2026-08-19.xlsx     -> 2026-08-18  Rs 16300    26 lines   [the sheet's own cash+online Rs 15700 does not equal its own total Rs 16300 (difference Rs 600)]
+  Staff_Action_Today_2026-08-20.xlsx     -> 2026-08-19  Rs 16400    26 lines   [the sheet's own cash+online Rs 15800 does not equal its own total Rs 16400 (difference Rs 600)]
+  Staff_Action_Today_2026-09-02.xlsx     -> 2026-09-01  Rs 7200      9 lines
+  Staff_Action_Today_2026-09-03.xlsx     -> 2026-09-02  Rs 20900    27 lines
+  Staff_Action_Today_2026-09-04.xlsx     -> 2026-09-03  Rs 16800    28 lines
+read 8, skipped 0 unchanged, failed 0; clinic_day_revenue now holds 8 days
+  PASS  exit code 0 (nothing failed)
+  PASS  one row per file (8 files -> 8 days)
+
+-- 2  the figures are the ROWS, not the sheet (D367) -------------------
+  PASS  total = consultations + x-ray + procedures, every day   [[]]
+  PASS  the tender split accounts for EVERY rupee of the row total   [[]]
+  PASS  ground truth 2026-08-19 = Rs 16400   [got Rs 16400]
+  PASS  ground truth 2026-09-02 = Rs 20900   [got Rs 20900]
+
+-- 3  F-93 phantoms are dropped, and counted -------------------------
+  PASS  no day stores a phantom as a concession case
+  PASS  phantoms were seen and counted on the recent days   [{'2026-07-06': 0, '2026-07-20': 3, '2026-07-29': 3, '2026-08-18': 3, '2026-08-19': 3, '2026-09-01': 3, '2026-09-02': 3, '2026-09-03': 3}]
+
+-- 4  the sheet's own disagreement is RECORDED, never shown -----------
+  PASS  days where the sheet contradicts itself carry a note
+       2026-07-20  the sheet's own cash+online Rs 17100 does not equal its own total Rs 16500 (difference Rs 600)
+       2026-07-29  the sheet's own cash+online Rs 9000 does not equal its own total Rs 8400 (difference Rs 600)
+       2026-08-18  the sheet's own cash+online Rs 15700 does not equal its own total Rs 16300 (difference Rs 600)
+       2026-08-19  the sheet's own cash+online Rs 15800 does not equal its own total Rs 16400 (difference Rs 600)
+  PASS  no note mentions a patient, an id or a mobile
+
+-- 5  idempotence and the same-date tiebreaker -----------------------
+Drive: 8 day files in the folder
+read 0, skipped 8 unchanged, failed 0; clinic_day_revenue now holds 8 days
+  PASS  a second run changes nothing (unchanged files are skipped)
+Drive: 2 day files in the folder
+  Staff_Action_Today_2026-09-04.xlsx     -> 2026-09-03  Rs 16800    28 lines
+  Staff_Action_Today_2026-09-04.xlsx     -> 2026-09-03  Rs 16800    28 lines
+read 2, skipped 0 unchanged, failed 0; clinic_day_revenue now holds 8 days
+  PASS  of two exports of one date, the LATER-taken one is the row kept   [('2027-01-01T00:00:00Z',)]
+
+-- 6  no identifier reached the database -----------------------------
+  PASS  no 10-digit mobile-shaped number anywhere in the table
+  PASS  no Docterz patient-UID shape (10 uppercase letters+digits) anywhere
+
+GREEN  14 checks, 0 failed

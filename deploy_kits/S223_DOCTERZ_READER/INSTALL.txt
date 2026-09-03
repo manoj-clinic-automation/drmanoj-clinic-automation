@@ -1,0 +1,21 @@
+S223_DOCTERZ_READER -- install, on the VPS.
+
+STEP 1 (once) -- openpyxl, if it is not already there:
+
+/root/wa/venv/bin/pip install openpyxl
+
+STEP 2 -- the kit, one paste:
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S223_DOCTERZ_READER && md5sum -c SUMS.md5 --quiet && \cp docterz_day.py docterz_ingest.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/docterz_ingest.py --dry-run
+
+That is a DRY RUN: it reads every workbook in Drive, parses it, prints one line per day, and
+writes nothing. Read the output. Then, to actually fill the table:
+
+/root/wa/venv/bin/python3 -B /root/finance/docterz_ingest.py
+
+STEP 3 -- once it looks right, a nightly refresh (the tracker's file lands in the morning):
+
+(crontab -l 2>/dev/null; echo "25 9 * * * /root/wa/venv/bin/python3 -B /root/finance/docterz_ingest.py >> /root/finance/logs/docterz_ingest.log 2>&1") | crontab -
+
+Creates/updates ONE table, clinic_day_revenue. It touches nothing else in finance.db, and it
+writes nothing to Drive -- the service account is read-only by scope.
