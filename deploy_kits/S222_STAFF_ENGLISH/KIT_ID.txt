@@ -1,0 +1,17 @@
+S222_STAFF_ENGLISH · built 03-Sep-2026 · Session 222 · the owner's instruction, twice
+
+"remove words jodna, vidaai, with proper english ones" → "make it all englsh flow"
+
+The staff console at /finance/staff is the OWNER'S page (checker-only), so it goes English with
+the rest of his screens. 47 strings. Words only — no id, class, route, function or logic moves.
+
+Target: /root/finance/staff_manage.html   adcbefee -> eb4e415d   (no restart)
+Whole-file swap, not a patcher: 47 anchors would be 47 ways to refuse for no benefit, and the
+repository holds the exact live bytes. The installer verifies the from-pin, backs up, writes,
+re-hashes, and restores on any mismatch.
+
+D366 IS KEPT: the WhatsApp message a new joiner receives is composed by the server
+(joiner_app.api_message) and stays HINDI — he is the one who reads it. Untouched here.
+
+PROVEN: RENDER GREEN 23/23 — headless chromium re-running every flow on the English page, plus
+two new checks: no romanised Hindi left anywhere in the file, and the page declares lang="en".

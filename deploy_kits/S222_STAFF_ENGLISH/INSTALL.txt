@@ -1,0 +1,18 @@
+S222_STAFF_ENGLISH -- install. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  1  /root/wa/venv/bin/python3 -B /root/deploy/repo/deploy_kits/S222_STAFF_ENGLISH/install_english_s222.py
+  2  md5sum /root/finance/staff_manage.html      (must read eb4e415de611f027c05929338f256a59)
+  3  hard-reload the page (Ctrl+F5):  https://followup.dr-manoj.in/finance/staff
+
+NO RESTART. The page is read from disk on every request.
+The installer runs from inside the repo folder -- it takes the English page from beside itself,
+so there is nothing to copy first.
+
+WHAT CHANGES: every word on your staff console. jodna -> join, vidaai -> exit, kholo -> open,
+kaun -> who, haalat -> status, "ho gaya" -> done, and the login line reads plain English in all
+three of its states.
+
+WHAT DOES NOT: the WhatsApp message a new joiner receives. It is composed by the server and
+stays HINDI, because he is the one who reads it. That is D366, not an omission.
+
+ROLLING BACK = restore the .bak_S222_english_* file beside the page. No restart for that either.

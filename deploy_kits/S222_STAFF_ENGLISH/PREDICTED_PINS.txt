@@ -1,0 +1,12 @@
+# S222_STAFF_ENGLISH -- a whole-file swap, so the pin is not predicted, it is SHIPPED.
+#
+# The installer refuses unless the live page is the S222_JOINER_ALLRECS result
+# (adcbefeee6da6e5c13856a2baf9d3afe) and unless the English file beside it hashes to the
+# value below; after writing it re-hashes and restores the backup on any mismatch.
+#
+# The owner's md5sum after installing must read exactly:
+eb4e415de611f027c05929338f256a59  /root/finance/staff_manage.html
+#
+# NOT CHANGED: /root/finance/joiner_app.py stays 1ebab9190a33ee9e1691508e818a7c45.
+# The Hindi WhatsApp message lives in that file (api_message) and is untouched BY DESIGN --
+# a staff member reads it.

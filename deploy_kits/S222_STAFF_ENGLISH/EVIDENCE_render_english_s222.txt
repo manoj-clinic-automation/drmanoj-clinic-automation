@@ -1,0 +1,38 @@
+-- 0  what is under test ------------------------------------------
+  PASS  joiner_app carries the S222 ALL RECORDS route
+  PASS  the page carries the sab-record button
+  PASS  the page no longer states the password unconditionally
+  PASS  NO romanised Hindi is left in the owner console   [[]]
+  PASS  the page declares itself English
+
+-- 1  THE FAULT HE HIT: a finished record is unreachable ---------
+  PASS  the pending list says there is nothing unfinished
+  PASS  AMIR is NOT in the pending list
+
+-- 2  SAB RECORD: the closed one is there, and opens -------------
+  PASS  AMIR SOHAIL is listed
+  PASS  his record reads 6/6
+  PASS  it is marked complete
+  PASS  the still-open one is listed too
+  PASS  his record page opened
+  PASS  no javascript error
+
+-- 3  THE PASSWORD IS TRIED, NOT ASSERTED ------------------------
+  PASS  it says the login exists
+  PASS  it names the role from the store
+  PASS  it says the password ACTUALLY WORKS   [✅ login amir exists (staff) · password amir1234 works right now — he must change it at first login]
+
+-- 4  CHANGE THE PASSWORD BEHIND ITS BACK ------------------------
+  PASS  it no longer claims the password works
+  PASS  it warns that the printed password does NOT sign in   [✅ login amir exists (staff)
+⚠️ amir1234 does NOT sign in — the password has been changed since. Fine if you know the new one; otherwise use Password reset below]
+  PASS  it still says the login itself exists
+  PASS  no javascript error
+
+-- 5  SEARCH, and the missing-login path still warns -------------
+  PASS  search narrows to the one asked for
+  PASS  a joiner with no login still gets the warning, not credentials   [⚠️ This login has NOT been created. Nobody can sign in as nobody. Create it before you read a password out to him.
+🔑 Cre]
+  PASS  no javascript error
+
+RENDER GREEN -- 23 passed, 0 failed
