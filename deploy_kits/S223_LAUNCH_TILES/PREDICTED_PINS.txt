@@ -1,0 +1,8 @@
+S223_LAUNCH_TILES -- predicted pins (LF, VPS-side; F-294)
+
+/root/portal/portal.py          d15acef3fcb0237563475968c2eec921  ->  2cfd2f62a1c46671f0facf04c1c9e774
+/root/portal/tile_grants.json   2150b3e12b8d7048be5415c346709f8b  ->  bfdf40dd4bde510010ae358e5c432bcb
+finance.db setting              returns.desk_users: + bhawna  (appended, nobody removed)
+
+Restart: clinic-portal, once, after both files are in place (portal.py changed).
+The desk-users row and tile_grants.json are both read per request.

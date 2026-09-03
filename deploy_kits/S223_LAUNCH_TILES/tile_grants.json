@@ -1,0 +1,79 @@
+{
+  "_note": "S223 - the launch tile set, per the owner's rulings at the S223 open. CHANGES FROM v1: (1) darpan's mask is GONE - he sees the same operational layer as everyone else. (2) Daily Sale, Vaapsi Desk and the NEW Stock Check tile are granted BY NAME here; in portal.py they carry roles ['doctor'] only. That is deliberate: if this file is ever missing or malformed, staff lose those three money screens (fail closed) and the doctor keeps everything (never locked out). Everything else - Scan Purchase, Staff Register, Attendance, Forms & Downloads - is untouched and stays on the staff role. This file decides what a person is SHOWN. It grants no access: every server-side gate, including returns.desk_users and the medical unit_role, is unchanged and still decides what they may reach.",
+  "version": 3,
+  "users": {
+    "alisha": {
+      "extra": [
+        "Daily Collection",
+        "Stock Check",
+        "Vaapsi Desk"
+      ]
+    },
+    "bhawna": {
+      "mask": [
+        "CC Statements → Tally",
+        "Case Pack · PC fallback",
+        "Follow-up Tracker",
+        "Follow-up WhatsApps",
+        "GMB Review Assist",
+        "Sanjeevni Medicos",
+        "Send WhatsApp",
+        "Surgical Case Pack",
+        "Vitals & Plan"
+      ],
+      "extra": [
+        "Clinic",
+        "Daily Sale",
+        "Stock Check",
+        "Vaapsi Desk"
+      ]
+    },
+    "manoj": {
+      "extra": [
+        "Clinic",
+        "Daily Sale",
+        "Manage Users",
+        "Stock Check",
+        "Vaapsi Desk"
+      ]
+    },
+    "shavez": {
+      "extra": [
+        "Asset Register",
+        "Clinic",
+        "Daily Collection",
+        "Stock Check",
+        "Vaapsi Desk"
+      ]
+    },
+    "shivani": {
+      "extra": [
+        "Daily Collection",
+        "Stock Check",
+        "Vaapsi Desk"
+      ]
+    },
+    "darpan": {
+      "extra": [
+        "Daily Sale",
+        "Stock Check",
+        "Vaapsi Desk"
+      ]
+    },
+    "amir": {
+      "extra": [
+        "Stock Check"
+      ]
+    }
+  },
+  "defaults": {
+    "_note": "Section order. DISPLAY ONLY - it grants nothing and hides nothing. The owner's ruling of 03-Sep: the work someone does most sits highest, attendance lowest because it is personal. Sections not named keep their place after those that are.",
+    "groups_by_role": {
+      "staff": [
+        "Clinic",
+        "Money & Accounts",
+        "Staff"
+      ]
+    }
+  }
+}

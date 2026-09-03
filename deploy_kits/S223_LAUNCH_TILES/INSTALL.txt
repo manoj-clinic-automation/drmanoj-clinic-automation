@@ -1,0 +1,10 @@
+S223_LAUNCH_TILES -- ONE PASTE, on the VPS. Order inside the line is not optional.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S223_LAUNCH_TILES && md5sum -c SUMS.md5 --quiet && \cp patch_portal_launch_tiles_s223.py install_launch_tiles_s223.py tile_grants.json /root/portal/ && \cp add_bhawna_desk_s223.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/portal/patch_portal_launch_tiles_s223.py && /root/wa/venv/bin/python3 -B /root/portal/install_launch_tiles_s223.py && /root/wa/venv/bin/python3 -B /root/finance/add_bhawna_desk_s223.py /root/finance/finance.db && systemctl restart clinic-portal && sleep 3 && md5sum /root/portal/portal.py /root/portal/tile_grants.json
+
+Expect:
+  portal.py         2cfd2f62a1c46671f0facf04c1c9e774
+  tile_grants.json  bfdf40dd4bde510010ae358e5c432bcb
+  returns.desk_users  ... ,bhawna
+
+Every step gates on the pin it expects and refuses rather than guessing.

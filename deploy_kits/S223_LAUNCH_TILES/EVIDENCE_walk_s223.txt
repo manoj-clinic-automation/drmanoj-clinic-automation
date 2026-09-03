@@ -1,0 +1,52 @@
+S223_LAUNCH_TILES -- the walk, run offline before the paste.
+
+METHOD: portal.py's OWN _visible_sections() was executed -- not a re-implementation -- out of a
+BYTE-EXACT reproduction of the live file. The base S204_VPS_LIVE copy (24ea2c0b) was run through
+the S218 vaapsi patcher, the S222 entry patcher, the S222 scan-tile patcher and the S222 grants
+patcher, reproducing d15acef3fcb0237563475968c2eec921 -- the pin the box printed at 23:07 IST on
+03-Sep. Every user x role x PC combination was then walked before and after.
+
+WHAT THE WALK CAUGHT that reading did not: with the grants file removed, darpan lost Attendance,
+Staff Register and Scan Purchase again -- because the S179 mask is compiled into portal.py as the
+fallback. The kit gained a fourth edit to strike it there too. Without the walk, a lost grants
+file would have silently reinstated a mask the owner had just ruled away.
+-- 1  what each person's STAFF view becomes -------------------------
+   manoj    +['Stock Check']  -[]
+   bhawna   +['Stock Check']  -[]
+   darpan   +['Attendance', 'Scan Purchase', 'Staff Register', 'Stock Check']  -[]
+   shavez   +['Stock Check']  -['Daily Sale']
+   alisha   +['Stock Check']  -['Daily Sale']
+   shivani  +['Stock Check']  -['Daily Sale']
+   amir     +['Stock Check']  -['Daily Sale', 'Vaapsi Desk']
+   nobody   +[]  -['Daily Sale', 'Vaapsi Desk']
+
+-- 2  the owner's own view (doctor) ---------------------------------
+   manoj    +['Daily Sale', 'Stock Check']  -[]
+   bhawna   +['Daily Sale', 'Stock Check']  -[]
+
+-- 3  the rulings, checked one by one -------------------------------
+  PASS  Daily Sale: darpan yes
+  PASS  Daily Sale: manoj and bhawna yes
+  PASS  Daily Sale: NOBODY else -- alisha/shavez/shivani/amir/new all lose it
+  PASS  Stock Check: alisha, shavez, shivani, darpan, amir
+  PASS  Stock Check: manoj and bhawna
+  PASS  Stock Check: not a new staff login by default
+  PASS  Vaapsi Desk: only the four on the desk list (+ the doctors)
+  PASS  Vaapsi Desk: dr bhawna yes
+  PASS  Forms & Downloads: every staff login
+  PASS  Staff Register + Attendance: every staff login
+  PASS  Scan Purchase: untouched, every staff login
+
+-- 4  FAIL-SAFE: grants file gone ----------------------------------
+  PASS  staff lose the three money screens (fail CLOSED)
+  PASS  the doctor keeps all three (never locked out)
+  PASS  staff keep Forms, Attendance, Staff Register, Scan Purchase
+
+-- 5  the launch view, in full -------------------------------------
+   darpan   staff: ['Attendance', 'Daily Sale', 'Forms & Downloads', 'Scan Purchase', 'Staff Register', 'Stock Check', 'Vaapsi Desk']
+   alisha   staff: ['Attendance', 'Daily Collection', 'Forms & Downloads', 'Scan Purchase', 'Staff Register', 'Stock Check', 'Vaapsi Desk']
+   amir     staff: ['Attendance', 'Forms & Downloads', 'Scan Purchase', 'Staff Register', 'Stock Check']
+   nobody   staff: ['Attendance', 'Forms & Downloads', 'Scan Purchase', 'Staff Register']
+
+GREEN  12 checks, 0 failed
+
