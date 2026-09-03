@@ -1,0 +1,10 @@
+# S221_NIGHTLY -- two machines, so two lists.
+#
+# ON MANOJZ (the repo copy IS the live copy for these; they run from the kit folder):
+1110af8693c96a5ce8c95b48c9c29488  deploy_kits\S208_STOCK_LEDGER\push_snapshot.py   (was 72205205)
+#   and, outside the repo, on D:\Downloads\margsync\ :
+#     PUSH_STOCK_NIGHTLY.bat   NEW
+#     PUSH_STOCK_DAILY.bat     v2, already in place (baseline pinned 02-09-2026)
+#
+# ON THE VPS:
+45113d085f492d660f0cbe0201835047  /root/finance/stock_drift.html   (was 4985f1cb)

@@ -1,0 +1,21 @@
+S221_NIGHTLY -- two machines. ONE LINE AT A TIME.
+
+ON MANOJZ (after the publish):
+  1  cd /d D:\dr-manoj-git\drmanoj-clinic-automation\deploy_kits\S208_STOCK_LEDGER && python -B patch_snapshot_latest_s221.py
+  2  the two .bat files are already written to D:\Downloads\margsync\ -- nothing to copy
+  3  register the nightly job (ONE line, in an ADMIN command prompt):
+     schtasks /create /tn "Clinic stock nightly" /tr "D:\Downloads\margsync\PUSH_STOCK_NIGHTLY.bat" /sc daily /st 22:30 /rl highest /f
+
+ON THE VPS:
+  4  \cp /root/deploy/repo/deploy_kits/S221_NIGHTLY/stock_drift.html /root/finance/
+  5  systemctl restart clinic-finance.service
+  6  md5sum /root/finance/stock_drift.html      -> 45113d085f492d660f0cbe0201835047
+
+THE ROUTINE FROM TONIGHT:
+  after closing, export TWO reports from Marg -- the day's SALE report and the CLOSING STOCK.
+  Drop them where you always do. The sale report sends itself. At 22:30 the nightly job sends
+  the stock figure and the computed figure, and the drift page has a comparable day.
+  Purchases are a third report, only when Amir visits.
+
+IF YOU EXPORT THE STOCK TWICE IN ONE DAY: the LATER one wins, which is what step 1 fixes.
+Before it, two full exports of the same date were separated by filesystem order.

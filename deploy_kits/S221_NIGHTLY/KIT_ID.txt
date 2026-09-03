@@ -1,0 +1,8 @@
+S221_NIGHTLY · built 03-Sep-2026 · Session 221 · one job a night, and a page that says when a feed stops
+push_snapshot.py 72205205 -> 1110af86  (same-date tiebreaker: the LATEST-taken full export wins)
+stock_drift.html 4985f1cb -> 45113d08  (feed health: "NOT RECEIVED for N days")
+PUSH_STOCK_NIGHTLY.bat NEW on manojz -- runs Marg's figure then the computed one, both logged,
+and neither can report success without having sent.
+Proven: the tiebreaker exercised on the three real 02-Sep filenames, and against a late
+category-filtered export (which still loses, F-235 intact). Drift page re-rendered in chromium:
+RENDER 35/35, and the health banner read back correctly on a seeded feed.
