@@ -68,12 +68,34 @@ CREATE TABLE IF NOT EXISTS clinic_register_day (
 """
 
 
-def init(app, db_getter, require_fn, audit_fn=None, unit="clinic", url_prefix=""):
-    global _db, _require, _audit, _unit
-    _db, _require, _audit, _unit = db_getter, require_fn, audit_fn, unit
-    con = db_getter()
+_schema_done = False
+
+
+def _ensure(con):
+    """Create the table on FIRST USE, inside a request -- never at import.
+
+    THIS COST AN OUTAGE. The first version of init() called db_getter() to create the table while
+    the module was being imported. finance_app's db() lives on flask.g, which only exists inside an
+    application context, so it raised at import, the import failed, and gunicorn went down with it:
+    the whole finance app 503'd, not just this screen.
+
+    stock_app has done it correctly since S213 -- `ensure_schema(con)` at the top of each route,
+    never in init(). Its init() was read for the MOUNT signature and not for this, which is reading
+    half a pattern and assuming the other half.
+    """
+    global _schema_done
+    if _schema_done:
+        return
     con.executescript(SCHEMA)
     con.commit()
+    _schema_done = True
+
+
+def init(app, db_getter, require_fn, audit_fn=None, unit="clinic", url_prefix=""):
+    """Mount only. It touches no database and opens no connection: at import time there is no
+    application context to open one in."""
+    global _db, _require, _audit, _unit
+    _db, _require, _audit, _unit = db_getter, require_fn, audit_fn, unit
     app.register_blueprint(bp, url_prefix=url_prefix)
     return bp
 
@@ -219,6 +241,7 @@ def register_index():
     if err:
         return _shell("Register", _denied())
     con = _db()
+    _ensure(con)
     days = [r[0] for r in con.execute(
         "SELECT business_date FROM clinic_day_revenue ORDER BY business_date DESC LIMIT 45")]
     if not days:
@@ -257,6 +280,7 @@ def register_card(date):
     if not _iso_ok(date):
         return _shell("Register", '<div class="card"><h2>Not a date.</h2></div>')
     con = _db()
+    _ensure(con)
     msg = ""
     if request.method == "POST":
         vals, bad = {}, []

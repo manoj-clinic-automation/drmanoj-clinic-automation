@@ -1,11 +1,15 @@
 S223_REGISTER_CARD -- the render test, run before the paste.
 
-METHOD: the real blueprint on a real Flask app over a real database built by the real ingester.
-This is a WRITE screen, so the test posts real forms and reads the database back, then reads the
-delivered HTML. F-185: this file was scanned for identifiers before it was committed.
+METHOD: a real Flask app, a real database, real form posts. The db getter RAISES outside an
+application context, exactly as finance_app's does -- see section 0, and see the incident in
+the README. F-185: scanned for identifiers before committing.
+
+-- 0  init() must not touch the database -----------------------------
+  PASS  init() completed with NO application context, exactly as gunicorn imports it
+  PASS  and it created NO table yet -- nothing ran at import time
 
 -- 1  the schema and the gate ---------------------------------------
-  PASS  the table was created on init
+  PASS  the table is created on FIRST REQUEST instead
   PASS  the list renders for a clinic maker
   PASS  someone off the clinic desk is refused, with no money on the page
   PASS  and cannot POST either
@@ -53,4 +57,4 @@ delivered HTML. F-185: this file was scanned for identifiers before it was commi
 -- 7  F-185 ----------------------------------------------------------
   PASS  no patient name or id is asked for or shown
 
-GREEN  35 checks, 0 failed
+GREEN  37 checks, 0 failed

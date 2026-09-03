@@ -43,12 +43,29 @@ def _require(*roles, unit="clinic"):
 AUD = []
 def _audit(con, table, row_id, action, before=None, after=None, who=""):
     AUD.append((table, row_id, action, who))
+# THE DB GETTER MUST BEHAVE LIKE THE REAL ONE. finance_app's db() lives on flask.g and RAISES
+# outside an application context. The first version of this test handed the module a plain
+# connector that worked anywhere, so init() calling db() passed here and 503'd the whole finance
+# app on the box. That is F-286 exactly: a walk that supplies its own scaffolding proves the
+# scaffolding. This getter now refuses outside a request, like the real one.
+from flask import has_app_context
+def _db_like_the_box():
+    if not has_app_context():
+        raise RuntimeError("Working outside of application context")
+    return _db()
+
 app = Flask(__name__)
-CR.init(app, _db, _require, _audit, unit="clinic", url_prefix="")
+CR.init(app, _db_like_the_box, _require, _audit, unit="clinic", url_prefix="")
 cl = app.test_client()
 
-print("-- 1  the schema and the gate ---------------------------------------")
-ck("the table was created on init", bool(_db().execute(
+print("-- 0  init() must not touch the database -----------------------------")
+ck("init() completed with NO application context, exactly as gunicorn imports it", True)
+ck("and it created NO table yet -- nothing ran at import time", not bool(_db().execute(
+    "SELECT 1 FROM sqlite_master WHERE type='table' AND name='clinic_register_day'").fetchone()))
+
+print("\n-- 1  the schema and the gate ---------------------------------------")
+cl.get("/finance/clinic/register")
+ck("the table is created on FIRST REQUEST instead", bool(_db().execute(
     "SELECT 1 FROM sqlite_master WHERE type='table' AND name='clinic_register_day'").fetchone()))
 ck("the list renders for a clinic maker", cl.get("/finance/clinic/register").status_code == 200)
 ROLE["who"] = "nobody"

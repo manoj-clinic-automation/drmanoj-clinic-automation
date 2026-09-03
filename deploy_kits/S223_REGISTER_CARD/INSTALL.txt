@@ -1,7 +1,13 @@
-S223_REGISTER_CARD -- ONE PASTE, on the VPS. S223_CLINIC_DAY must be live first (the patcher refuses otherwise).
+S223_REGISTER_CARD -- ONE PASTE. It CANNOT leave the finance app down.
 
-git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S223_REGISTER_CARD && md5sum -c SUMS.md5 --quiet && \cp clinic_register.py patch_finance_app_register_s223.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_finance_app_register_s223.py && systemctl restart clinic-finance.service && sleep 4 && systemctl is-active clinic-finance.service && md5sum /root/finance/finance_app.py
+The line below installs, restarts, and then CHECKS the service came back. If it did not, it
+restores the previous finance_app.py by itself and restarts again. You end up either with the
+register live, or exactly where you started -- never at a 503.
 
-Expect  1a79f7c0adb5bb4f778dd8d5aa6cf298  and  active
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S223_REGISTER_CARD && md5sum -c SUMS.md5 --quiet && \cp clinic_register.py patch_finance_app_register_s223.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_finance_app_register_s223.py && systemctl restart clinic-finance.service && sleep 5 && (systemctl is-active --quiet clinic-finance.service && echo "UP -- register live" && md5sum /root/finance/finance_app.py || (echo "DID NOT COME BACK -- ROLLING BACK BY ITSELF"; ls -t /root/finance/finance_app.py.bak_S223_register_* | head -1 | xargs -I{} \cp {} /root/finance/finance_app.py; systemctl restart clinic-finance.service; sleep 4; systemctl is-active clinic-finance.service; md5sum /root/finance/finance_app.py; journalctl -u clinic-finance.service -n 12 --no-pager | tail -12))
+
+GOOD:  "UP -- register live"  and  1a79f7c0adb5bb4f778dd8d5aa6cf298
+BAD :  "ROLLING BACK BY ITSELF", then "active" and fd478faf9fb8142234554564feb24ed8, plus the
+       last twelve log lines so the cause is in front of you rather than needing a second paste.
 
 Then:  https://followup.dr-manoj.in/finance/clinic/register
