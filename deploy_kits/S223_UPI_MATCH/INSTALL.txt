@@ -1,5 +1,17 @@
-S223_UPI_MATCH -- a REPORT, not a build. It reads and prints. It writes nothing, anywhere.
+S223_UPI_MATCH -- the clinic UPI check.
 
-git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S223_UPI_MATCH && md5sum -c SUMS.md5 --quiet && \cp clinic_upi_report.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/clinic_upi_report.py --days 45
+STEP 1 -- look before writing. This writes NOTHING:
 
-Nothing is installed and no service is restarted. Paste back what it prints.
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S223_UPI_MATCH && md5sum -c SUMS.md5 --quiet && \cp clinic_upi_check.py clinic_upi_report.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/clinic_upi_check.py --days 60
+
+STEP 2 -- once the table reads right, file them as exceptions (this one WRITES to recon_exception):
+
+/root/wa/venv/bin/python3 -B /root/finance/clinic_upi_check.py --days 60 --write
+
+STEP 3 -- make it a standing check. It re-decides every day in the window on every run, so a day
+that later agrees is CLOSED by the next run, not left shouting (F-275):
+
+(crontab -l 2>/dev/null; echo "40 9 * * * /root/wa/venv/bin/python3 -B /root/finance/clinic_upi_check.py --days 60 --write >> /root/finance/logs/clinic_upi_check.log 2>&1") | crontab -
+
+It touches ONE table, recon_exception, and only rows with kind='docterz_vs_upi' and unit='clinic'.
+It never edits a day, a bill, a line or a tender. Everything else in finance.db is read-only to it.
