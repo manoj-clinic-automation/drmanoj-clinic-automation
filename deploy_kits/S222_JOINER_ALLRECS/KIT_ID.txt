@@ -1,0 +1,28 @@
+S222_JOINER_ALLRECS · built 03-Sep-2026 · Session 222 · ⭐1-3b — BOTH FOUND BY THE OWNER, LIVE
+
+Two faults, minutes apart, in the kit that had just gone in. Both are mine.
+
+1  A FINISHED RECORD WAS UNREACHABLE. The staff page lists pending() — WHERE status !=
+   'COMPLETE'. Amir's record is COMPLETE at 6/6, so the page said "Koi adhoora record nahin"
+   and offered no way to open him at all. The login check S222 had just built FOR HIM had
+   nowhere to appear. Fix: GET /api/all (read only, open and closed) + a "Sab record" button
+   with a search box.
+
+2  A GREEN TICK WAS ASSERTED, NOT TESTED. His check came back exists:true, role:staff — he had
+   made the login himself at /portal/users at 10:30. So the page would have drawn a tick and
+   printed `amir1234` as the password, while knowing nothing about whether that is the password
+   he set, or whether the man has since changed it as the page itself tells him to. That is
+   F-295 again, one size smaller. Fix: the status route now TRIES the password
+   (verify_password) and reports three states — works / does not work / could not be checked.
+   The route is also gated to checker, since it now answers "does the default password open
+   this account".
+
+Targets (live pins):
+  /root/finance/joiner_app.py      c879eafe -> 1ebab919   (RESTART needed — python)
+  /root/finance/staff_manage.html  f9c01552 -> adcbefee   (no restart)
+Both patchers REFUSE unless S222_JOINER_LOGIN is already in.
+
+PROVEN OFFLINE, on the owner's exact live shape (login present, amir1234 valid):
+RENDER GREEN 21/21 — chromium finding the finished record through "Sab record", opening it,
+reading "password amir1234 abhi chalta hai", then the password changed behind its back and the
+same screen switching to "amir1234 se login NAHIN hota".

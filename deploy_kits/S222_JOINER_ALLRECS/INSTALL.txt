@@ -1,0 +1,22 @@
+S222_JOINER_ALLRECS -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  0  copy the TWO patchers into /root/finance/   (the paste block is in the chat)
+  1  /root/wa/venv/bin/python3 -B /root/finance/patch_joiner_allrecs_s222.py
+  2  /root/wa/venv/bin/python3 -B /root/finance/patch_staffpage_allrecs_s222.py
+  3  systemctl restart clinic-finance.service
+  4  md5sum /root/finance/joiner_app.py /root/finance/staff_manage.html
+
+S222_JOINER_LOGIN MUST BE IN FIRST. Both patchers check for its exact result and refuse
+otherwise, changing nothing.
+
+AFTERWARDS, on https://followup.dr-manoj.in/finance/staff :
+  tap 📋 Sab record — every record now, finished ones included.
+  open AMIR SOHAIL, and the login line will say one of three TESTED things:
+     · password amir1234 abhi chalta hai            <- it was tried, and it worked
+     · amir1234 se login NAHIN hota                 <- it was tried, and it did not
+     · password jaancha nahin ja saka               <- it could not be tried; nothing claimed
+
+The middle line is not a fault to report -- it means the password has been changed since, which
+is what the page asks him to do. It tells you so instead of printing a password that is wrong.
+
+ROLLING BACK = restore the two .bak_S222_allrecs_* files and restart.
