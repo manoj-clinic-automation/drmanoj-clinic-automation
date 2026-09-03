@@ -13,6 +13,8 @@ import docterz_ingest as ING
 import clinic_register as CR
 
 F, N = [], []
+def _h(iso):
+    return CR._human(iso)
 def ck(l, c, d=""):
     N.append(l); print("  %s  %s%s" % ("PASS" if c else "FAIL", l, ("   [%s]" % d) if d else ""))
     if not c: F.append(l)
@@ -67,7 +69,9 @@ print("\n-- 1  the schema and the gate ---------------------------------------")
 cl.get("/finance/clinic/register")
 ck("the table is created on FIRST REQUEST instead", bool(_db().execute(
     "SELECT 1 FROM sqlite_master WHERE type='table' AND name='clinic_register_day'").fetchone()))
-ck("the list renders for a clinic maker", cl.get("/finance/clinic/register").status_code == 200)
+# the entry point now REDIRECTS to the next unfilled day (minimum taps), so follow it
+ck("the entry point answers for a clinic maker",
+   cl.get("/finance/clinic/register", follow_redirects=True).status_code == 200)
 ROLE["who"] = "nobody"
 d = cl.get("/finance/clinic/register/%s" % DAY).get_data(as_text=True)
 ck("someone off the clinic desk is refused, with no money on the page",
@@ -157,6 +161,83 @@ ck("and that it accuses nobody", "never accuses anyone" in flat)
 print("\n-- 7  F-185 ----------------------------------------------------------")
 ck("no patient name or id is asked for or shown",
    "Patient" not in h and not re.search(r"[6-9]\d{9}", h))
+
+print("\n-- 8  the owner's changes of 04-Sep ----------------------------------")
+# dressing + physio
+big = {"cons_cash_p":"1000","cons_upi_p":"0","cons_card_p":"0","xray_cash_p":"0","xray_upi_p":"0",
+       "xray_card_p":"0","proc_cash_p":"0","proc_upi_p":"0","proc_card_p":"0",
+       "dress_cash_p":"300","dress_upi_p":"200","dress_card_p":"0",
+       "physio_cash_p":"700","physio_upi_p":"400"}
+cl.post("/finance/clinic/register/%s" % DAY, data=big)
+w = _db()
+rr = w.execute("SELECT * FROM clinic_register_day WHERE business_date=?", (DAY,)).fetchone()
+pr = w.execute("SELECT * FROM clinic_physio_day WHERE business_date=?", (DAY,)).fetchone()
+ck("dressing is stored on its own line", rr["dress_cash_p"] == 30000 and rr["dress_upi_p"] == 20000)
+ck("physio went to its OWN table, not the register table", pr is not None
+   and pr["cash_p"] == 70000 and pr["upi_p"] == 40000)
+ck("physio is not a column of the register table", "physio_cash_p" not in rr.keys())
+t = CR.three_way(_db(), DAY)
+ck("dressing CLUBS into the register totals (1000+300 cash, 0+200 upi)",
+   t["r_cash"] == 130000 and t["r_upi"] == 20000)
+h = cl.get("/finance/clinic/register/%s" % DAY).get_data(as_text=True)
+ck("the card shows a Dressing row", "Dressing" in h)
+ck("and says it counts with Procedures", "counts with Procedures" in h)
+ck("the card shows a Physiotherapy row", "Physiotherapy" in h)
+ck("physio has no card box -- cash and UPI only, as asked",
+   h.count("physio_cash_p") == 1 and h.count("physio_upi_p") == 1 and "physio_card_p" not in h)
+
+print("\n-- 8b  physio is OUT of the bank arithmetic --------------------------")
+w2 = _db()
+doc2 = CR.docterz_day(w2, DAY)
+w2.execute("UPDATE clinic_register_day SET cons_upi_p=?, xray_upi_p=0, proc_upi_p=0, dress_upi_p=0 "
+           "WHERE business_date=?", (doc2["upi"], DAY))
+w2.execute("UPDATE clinic_physio_day SET upi_p=? WHERE business_date=?", (77700, DAY))
+w2.execute("DELETE FROM upi_txn")
+w2.execute("INSERT INTO upi_txn (unit,txn_date,amount_p,mode) VALUES ('clinic',?,?,'UPI')",
+           (DAY, doc2["upi"]))
+w2.commit()
+t2 = CR.three_way(_db(), DAY)
+ck("with physio present on its own channel, all three still AGREE",
+   t2["verdict"] == "all agree", "%s (physio was Rs 777)" % t2["verdict"])
+h2 = cl.get("/finance/clinic/register/%s" % DAY).get_data(as_text=True)
+ck("the screen says physio is on its own channel and not in the bank line",
+   "own UPI channel" in h2 and "not in the bank line" in h2)
+ck("and it never claims the bank line includes physio", "includes physio" not in h2)
+
+print("\n-- 9  minimum taps, and a filled day disappears ----------------------")
+r = cl.get("/finance/clinic/register")
+ck("the entry point REDIRECTS straight to a day, it does not show a list first",
+   r.status_code in (301, 302), str(r.status_code))
+lst = cl.get("/finance/clinic/register/list").get_data(as_text=True)
+ck("the filled day is still reachable from 'all days'", DAY[8:10] in lst or _h(DAY) in lst)
+todo = cl.get("/finance/clinic/register", follow_redirects=True).get_data(as_text=True)
+ck("the filled day is NOT offered again as something to fill",
+   ("Days still to fill" not in todo) or (CR._human(DAY) not in
+    todo.split("Days still to fill")[-1].split("</table>")[0]))
+
+print("\n-- 10  clearing an accidental save -----------------------------------")
+h = cl.post("/finance/clinic/register/%s" % DAY, data={"clear": "yes"}).get_data(as_text=True)
+ck("it says it cleared", "Cleared." in h)
+ck("the register row is gone",
+   _db().execute("SELECT COUNT(*) c FROM clinic_register_day WHERE business_date=?",
+                 (DAY,)).fetchone()["c"] == 0)
+ck("the physio row went with it",
+   _db().execute("SELECT COUNT(*) c FROM clinic_physio_day WHERE business_date=?",
+                 (DAY,)).fetchone()["c"] == 0)
+ck("the removal was audited", any(a[2] == "delete" for a in AUD))
+
+print("\n-- 11  readable on a phone -------------------------------------------")
+h = cl.get("/finance/clinic/register/%s" % DAY).get_data(as_text=True)
+import re as _re
+sizes = [float(x) for x in _re.findall(r"font-size:\s*([0-9.]+)px", h)]
+ck("no font on the page is under 15px (smallest is %spx)" % (min(sizes) if sizes else "n/a"),
+   sizes and min(sizes) >= 15)
+ck("the entry boxes have a real border, not a hairline", "border:2px solid #5b6b76" in h)
+ck("tap targets are at least 54px tall", "min-height:54px" in h)
+ck("the page is not on stark white", "--bg:#dfe5e9" in h)
+ck("it has a phone breakpoint", "@media (max-width:620px)" in h)
+ck("the viewport allows zooming (never disable it)", "maximum-scale=5" in h
+   and "user-scalable=no" not in h)
 
 print("\n%s  %d checks, %d failed" % ("RED" if F else "GREEN", len(N), len(F)))
 sys.exit(1 if F else 0)

@@ -48,9 +48,17 @@ _require = None
 _audit = None
 _unit = "clinic"
 
-SECTIONS = (("cons", "Consultation"), ("xray", "X-ray"), ("proc", "Procedures"))
+SECTIONS = (("cons", "Consultation"), ("xray", "X-ray"), ("proc", "Procedures"),
+            ("dress", "Dressing"))
 TENDERS = (("cash", "Cash"), ("upi", "UPI"), ("card", "Card"))
 FIELDS = ["%s_%s_p" % (s, t) for s, _ in SECTIONS for t, _ in TENDERS]
+
+# Physiotherapy is kept at reception, is NOT a Docterz billing head, and -- the owner confirmed on
+# 04-Sep -- takes its UPI on a SEPARATE CHANNEL. So it settles on its own rail and never reaches
+# the clinic merchant feed. It lives in its own table, is shown on its own line, and is kept OUT
+# of the bank arithmetic entirely: folding it in would invent a difference on every day physio
+# took a payment. It is a fifth money channel, and like card it cannot be reconciled here.
+PHYSIO_FIELDS = ["physio_cash_p", "physio_upi_p"]
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS clinic_register_day (
@@ -61,11 +69,27 @@ CREATE TABLE IF NOT EXISTS clinic_register_day (
   xray_card_p INTEGER NOT NULL DEFAULT 0,
   proc_cash_p INTEGER NOT NULL DEFAULT 0, proc_upi_p INTEGER NOT NULL DEFAULT 0,
   proc_card_p INTEGER NOT NULL DEFAULT 0,
+  dress_cash_p INTEGER NOT NULL DEFAULT 0, dress_upi_p INTEGER NOT NULL DEFAULT 0,
+  dress_card_p INTEGER NOT NULL DEFAULT 0,
+  note TEXT NOT NULL DEFAULT '', entered_by TEXT NOT NULL DEFAULT '',
+  entered_at TEXT NOT NULL DEFAULT '', updated_by TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS clinic_physio_day (
+  business_date TEXT PRIMARY KEY,
+  cash_p INTEGER NOT NULL DEFAULT 0,
+  upi_p  INTEGER NOT NULL DEFAULT 0,
   note TEXT NOT NULL DEFAULT '', entered_by TEXT NOT NULL DEFAULT '',
   entered_at TEXT NOT NULL DEFAULT '', updated_by TEXT NOT NULL DEFAULT '',
   updated_at TEXT NOT NULL DEFAULT ''
 );
 """
+
+# The dressing columns arrived after the table did, so an existing box needs them added.
+MIGRATE = ["ALTER TABLE clinic_register_day ADD COLUMN dress_cash_p INTEGER NOT NULL DEFAULT 0",
+           "ALTER TABLE clinic_register_day ADD COLUMN dress_upi_p INTEGER NOT NULL DEFAULT 0",
+           "ALTER TABLE clinic_register_day ADD COLUMN dress_card_p INTEGER NOT NULL DEFAULT 0"]
 
 
 _schema_done = False
@@ -87,6 +111,11 @@ def _ensure(con):
     if _schema_done:
         return
     con.executescript(SCHEMA)
+    for stmt in MIGRATE:
+        try:
+            con.execute(stmt)
+        except Exception:                        # noqa: BLE001
+            pass                                 # the column is already there; that is the norm
     con.commit()
     _schema_done = True
 
@@ -142,6 +171,13 @@ def _paise(v):
 
 def register_row(con, d):
     return con.execute("SELECT * FROM clinic_register_day WHERE business_date=?", (d,)).fetchone()
+
+
+def physio_row(con, d):
+    try:
+        return con.execute("SELECT * FROM clinic_physio_day WHERE business_date=?", (d,)).fetchone()
+    except Exception:                            # noqa: BLE001
+        return None
 
 
 def docterz_day(con, d):
@@ -200,12 +236,18 @@ def three_way(con, d):
     """The three records of one day, and which two agree. It states; it does not accuse."""
     reg = register_row(con, d)
     doc = docterz_day(con, d)
+    phy = physio_row(con, d)
     bank, bank_known = bank_upi(con, d)
     r_cash = r_upi = r_card = None
     if reg is not None:
-        r_cash = reg["cons_cash_p"] + reg["xray_cash_p"] + reg["proc_cash_p"]
-        r_upi = reg["cons_upi_p"] + reg["xray_upi_p"] + reg["proc_upi_p"]
-        r_card = reg["cons_card_p"] + reg["xray_card_p"] + reg["proc_card_p"]
+        # DRESSING clubs into PROCEDURES -- the owner's ruling. It is entered and stored on its
+        # own line so the counter's register is reproduced exactly, and added here because that
+        # is the head Docterz bills it under.
+        r_cash = sum(reg["%s_cash_p" % s] for s, _ in SECTIONS)
+        r_upi = sum(reg["%s_upi_p" % s] for s, _ in SECTIONS)
+        r_card = sum(reg["%s_card_p" % s] for s, _ in SECTIONS)
+    p_cash = phy["cash_p"] if phy is not None else None
+    p_upi = phy["upi_p"] if phy is not None else None
     verdict, why = "", ""
     if reg is None:
         verdict, why = "not entered", "the register has not been filled in for this day"
@@ -216,7 +258,13 @@ def three_way(con, d):
         why = ("the bank statement for this date has not arrived. Register and Docterz %s on UPI."
                % ("agree" if r_upi == doc["upi"] else "do NOT agree"))
     else:
-        rd, rb, db_ = r_upi == doc["upi"], r_upi == bank, doc["upi"] == bank
+        # PHYSIO IS NOT IN THIS COMPARISON. The owner, 04-Sep: "physio seperate upi channel used."
+        # It settles on its own rail, so it never reaches the clinic merchant feed -- adding it to
+        # our side would manufacture a difference on every day physio took a UPI payment. It is
+        # recorded, shown on its own line, and left out of the arithmetic.
+        rd = r_upi == doc["upi"]
+        rb = r_upi == bank
+        db_ = doc["upi"] == bank
         if rd and rb:
             verdict, why = "all agree", "all three records agree on UPI"
         elif rd:
@@ -230,13 +278,16 @@ def three_way(con, d):
                                                 "Most likely the register total was written wrong.")
         else:
             verdict, why = "all differ", "all three differ — this day needs a person, not a formula"
-    return dict(reg=reg, doc=doc, bank=bank, bank_known=bank_known,
-                r_cash=r_cash, r_upi=r_upi, r_card=r_card, verdict=verdict, why=why)
+    return dict(reg=reg, doc=doc, phy=phy, bank=bank, bank_known=bank_known,
+                r_cash=r_cash, r_upi=r_upi, r_card=r_card,
+                p_cash=p_cash, p_upi=p_upi, verdict=verdict, why=why)
 
 
 # ---------------------------------------------------------------- pages
 @bp.route("/finance/clinic/register")
 def register_index():
+    """MINIMUM TAPS: this does not show a list first. It opens the most recent day that has not
+    been filled in, because that is what the person opening it came to do. The list is underneath."""
     u, err = _require("maker", "checker", unit=_unit)
     if err:
         return _shell("Register", _denied())
@@ -246,30 +297,56 @@ def register_index():
         "SELECT business_date FROM clinic_day_revenue ORDER BY business_date DESC LIMIT 45")]
     if not days:
         today = dt.date.today()
-        days = [(today - dt.timedelta(days=i)).isoformat() for i in range(30)]
-    body = ["""<div class="card"><h2>Daily register — which days are done</h2>
-      <p class="mut">Tap a day to enter what the physical register says. Nine numbers, under a
-      minute. Nothing here asks for a patient or a bill.</p>
-      <table class="grid"><thead><tr><th>Day</th><th class="r">Register</th>
-      <th class="r">Docterz</th><th class="r">Bank UPI</th><th>Status</th><th></th></tr></thead>
-      <tbody>"""]
+        days = [(today - dt.timedelta(days=i)).isoformat() for i in range(21)]
+    done = {r[0] for r in con.execute("SELECT business_date FROM clinic_register_day")}
+    todo = [d for d in days if d not in done]
+    if todo:
+        return redirect("/finance/clinic/register/%s" % todo[0])
+    return _shell("Daily register", _list_html(con, days, only_todo=True))
+
+
+@bp.route("/finance/clinic/register/list")
+def register_list():
+    u, err = _require("maker", "checker", unit=_unit)
+    if err:
+        return _shell("Register", _denied())
+    con = _db()
+    _ensure(con)
+    days = [r[0] for r in con.execute(
+        "SELECT business_date FROM clinic_day_revenue ORDER BY business_date DESC LIMIT 45")]
+    return _shell("Daily register", _list_html(con, days, only_todo=False))
+
+
+def _list_html(con, days, only_todo=True):
+    """A DONE DAY DISAPPEARS. The owner's instruction: the list is a to-do, not an archive, so a
+    day that has been filled leaves it. `all days` brings the finished ones back when someone
+    needs to correct one."""
+    done = {r[0] for r in con.execute("SELECT business_date FROM clinic_register_day")}
+    if only_todo:
+        days = [d for d in days if d not in done]
+        if not days:
+            return """<div class="card"><h2>Nothing left to fill</h2>
+              <p>Every day the clinic has a record for has been entered. Well done.</p>
+              <p class="navrow"><a class="btn" href="/finance/clinic/register/list">see all days</a>
+              </p></div>"""
+    body = ['<div class="card"><h2>%s</h2>' % ("Days still to fill" if only_todo else "Every day"),
+            """<table class="grid"><thead><tr><th>Day</th><th class="r">Register</th>
+      <th>Status</th><th></th></tr></thead><tbody>"""]
     for d in days:
         t = three_way(con, d)
         reg_tot = None if t["reg"] is None else (t["r_cash"] + t["r_upi"] + t["r_card"])
-        doc_tot = (t["doc"]["cash"] + t["doc"]["upi"] + t["doc"]["card"] + t["doc"]["other"]
-                   if t["doc"]["known"] else None)
         body.append(
-            "<tr class='%s'><td class='d'>%s</td><td class='r'>%s</td><td class='r'>%s</td>"
-            "<td class='r'>%s</td><td><span class='pill %s'>%s</span></td>"
+            "<tr><td class='d'>%s</td><td class='r'>%s</td>"
+            "<td><span class='pill %s'>%s</span></td>"
             "<td class='noprint'><a class='btn' href='/finance/clinic/register/%s'>%s</a></td></tr>"
-            % ("done" if t["reg"] is not None else "todo", _human(d),
-               _r(reg_tot) if reg_tot is not None else "—",
-               _r(doc_tot) if doc_tot is not None else "—",
-               _r(t["bank"]) if t["bank_known"] else "not arrived",
+            % (_human(d), _r(reg_tot) if reg_tot is not None else "—",
                t["verdict"].replace(" ", "_"), _esc(t["verdict"] or "—"), d,
-               "edit" if t["reg"] is not None else "fill"))
-    body.append("</tbody></table></div>")
-    return _shell("Daily register", "".join(body))
+               "edit" if t["reg"] is not None else "FILL"))
+    body.append("</tbody></table>")
+    body.append('<p class="navrow noprint"><a class="btn" href="/finance/clinic/register/%s">%s</a>'
+                '</p></div>' % ("list" if only_todo else "", "all days" if only_todo
+                                else "back to what is left"))
+    return "".join(body)
 
 
 @bp.route("/finance/clinic/register/<date>", methods=["GET", "POST"])
@@ -283,98 +360,148 @@ def register_card(date):
     _ensure(con)
     msg = ""
     if request.method == "POST":
-        vals, bad = {}, []
-        for f in FIELDS:
-            p, e = _paise(request.form.get(f))
-            if e:
-                bad.append("%s: %s" % (f.replace("_p", "").replace("_", " "), e))
-            else:
-                vals[f] = p
-        if bad:
-            # NOTHING is written when any field is wrong. A part-saved money row is worse than
-            # an unsaved one, because it looks finished.
-            msg = ("<div class='bad'>Nothing was saved. Fix these and submit again:<br>%s</div>"
-                   % "<br>".join(_esc(b) for b in bad))
-        else:
-            now = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        now = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        who = u.get("user", "")
+        if request.form.get("clear") == "yes":
+            # An empty day saved by accident is worse than an unfilled one: it looks answered.
+            # One tap undoes it, and the removal is audited like any other change.
             before = register_row(con, date)
-            note = (request.form.get("note") or "").strip()[:300]
-            if before is None:
-                con.execute("INSERT INTO clinic_register_day (business_date, %s, note, "
-                            "entered_by, entered_at, updated_by, updated_at) VALUES (?,%s,?,?,?,?,?)"
-                            % (",".join(FIELDS), ",".join("?" * len(FIELDS))),
-                            [date] + [vals[f] for f in FIELDS] + [note, u.get("user", ""), now,
-                                                                  u.get("user", ""), now])
-            else:
-                con.execute("UPDATE clinic_register_day SET %s, note=?, updated_by=?, updated_at=? "
-                            "WHERE business_date=?"
-                            % ",".join("%s=?" % f for f in FIELDS),
-                            [vals[f] for f in FIELDS] + [note, u.get("user", ""), now, date])
+            con.execute("DELETE FROM clinic_register_day WHERE business_date=?", (date,))
+            con.execute("DELETE FROM clinic_physio_day WHERE business_date=?", (date,))
             con.commit()
-            if _audit:
+            if _audit and before is not None:
                 try:
-                    _audit(con, "clinic_register_day", date,
-                           "update" if before is not None else "insert",
-                           before=({k: before[k] for k in FIELDS} if before is not None else None),
-                           after=vals, who=u.get("user", ""))
+                    _audit(con, "clinic_register_day", date, "delete",
+                           before={k: before[k] for k in FIELDS}, after=None, who=who)
                     con.commit()
-                except Exception:                       # noqa: BLE001
+                except Exception:                # noqa: BLE001
                     pass
-            msg = "<div class='ok'>Saved. %s</div>" % _esc(three_way(con, date)["why"])
+            msg = ("<div class='ok'>Cleared. This day is back to not entered, and the removal is "
+                   "in the audit log.</div>")
+        else:
+            vals, bad = {}, []
+            for f in FIELDS + PHYSIO_FIELDS:
+                p, e = _paise(request.form.get(f))
+                if e:
+                    bad.append("%s — %s" % (f.replace("_p", "").replace("_", " "), e))
+                else:
+                    vals[f] = p
+            if bad:
+                msg = ("<div class='bad'><b>Nothing was saved.</b><br>Fix these and press Save "
+                       "again:<br>%s</div>" % "<br>".join(_esc(x) for x in bad))
+            else:
+                note = (request.form.get("note") or "").strip()[:300]
+                before = register_row(con, date)
+                if before is None:
+                    con.execute("INSERT INTO clinic_register_day (business_date, %s, note, "
+                                "entered_by, entered_at, updated_by, updated_at) "
+                                "VALUES (?,%s,?,?,?,?,?)"
+                                % (",".join(FIELDS), ",".join("?" * len(FIELDS))),
+                                [date] + [vals[f] for f in FIELDS] + [note, who, now, who, now])
+                else:
+                    con.execute("UPDATE clinic_register_day SET %s, note=?, updated_by=?, "
+                                "updated_at=? WHERE business_date=?"
+                                % ",".join("%s=?" % f for f in FIELDS),
+                                [vals[f] for f in FIELDS] + [note, who, now, date])
+                pb = physio_row(con, date)
+                if pb is None:
+                    con.execute("INSERT INTO clinic_physio_day (business_date, cash_p, upi_p, "
+                                "entered_by, entered_at, updated_by, updated_at) "
+                                "VALUES (?,?,?,?,?,?,?)",
+                                (date, vals["physio_cash_p"], vals["physio_upi_p"],
+                                 who, now, who, now))
+                else:
+                    con.execute("UPDATE clinic_physio_day SET cash_p=?, upi_p=?, updated_by=?, "
+                                "updated_at=? WHERE business_date=?",
+                                (vals["physio_cash_p"], vals["physio_upi_p"], who, now, date))
+                con.commit()
+                if _audit:
+                    try:
+                        _audit(con, "clinic_register_day", date,
+                               "update" if before is not None else "insert",
+                               before=({k: before[k] for k in FIELDS}
+                                       if before is not None else None),
+                               after=vals, who=who)
+                        con.commit()
+                    except Exception:            # noqa: BLE001
+                        pass
+                msg = "<div class='ok'><b>Saved.</b> %s</div>" % _esc(three_way(con, date)["why"])
     return _shell("Register — %s" % _human(date), _card_html(con, date, u, msg))
 
 
 def _card_html(con, date, u, msg):
     reg = register_row(con, date)
+    phy = physio_row(con, date)
     t = three_way(con, date)
+
+    def box(name, val):
+        v = "" if not val else "%d" % int(round(val / 100.0))
+        return ("<td><input name='%s' value='%s' inputmode='numeric' pattern='[0-9]*' "
+                "autocomplete='off' class='amt'></td>" % (name, _esc(v)))
+
     rows = []
-    for s, slabel in SECTIONS:
-        cells = []
-        for tn, tlabel in TENDERS:
-            f = "%s_%s_p" % (s, tn)
-            v = "" if reg is None else ("" if not reg[f] else "%d" % int(round(reg[f] / 100.0)))
-            cells.append("<td><input name='%s' value='%s' inputmode='numeric' "
-                         "autocomplete='off' class='amt'></td>" % (f, _esc(v)))
-        rows.append("<tr><th class='sec'>%s</th>%s</tr>" % (slabel, "".join(cells)))
+    for sec, label in SECTIONS:
+        cells = "".join(box("%s_%s_p" % (sec, tn), None if reg is None else reg["%s_%s_p" % (sec, tn)])
+                        for tn, _ in TENDERS)
+        extra = " <span class='hint'>(counts with Procedures)</span>" if sec == "dress" else ""
+        rows.append("<tr><th class='sec'>%s%s</th>%s</tr>" % (label, extra, cells))
+
+    phys = ("<tr><th class='sec'>Physiotherapy</th>%s%s<td class='none'>—</td></tr>"
+            % (box("physio_cash_p", None if phy is None else phy["cash_p"]),
+               box("physio_upi_p", None if phy is None else phy["upi_p"])))
+
     who = ""
     if reg is not None:
-        who = ("<p class='mut'>last saved by <b>%s</b> at %s%s</p>"
+        who = ("<p class='mut'>last saved by <b>%s</b> at %s</p>"
                % (_esc(reg["updated_by"] or reg["entered_by"]),
-                  _esc(reg["updated_at"] or reg["entered_at"]),
-                  (" · first entered by %s" % _esc(reg["entered_by"]))
-                  if reg["entered_by"] and reg["entered_by"] != reg["updated_by"] else ""))
-    form = """
-      <div class="card"><h2>%s — what the register says</h2>
+                  _esc(reg["updated_at"] or reg["entered_at"])))
+    clear = ""
+    if reg is not None:
+        clear = ("<form method='post' class='clearf' "
+                 "onsubmit='return confirm(\"Clear this day completely?\")'>"
+                 "<input type='hidden' name='clear' value='yes'>"
+                 "<button type='submit' class='clear'>Clear this day</button></form>")
+    return """
+      <div class="card"><h2>%s</h2>
+        <p class="mut">What the counter register says. Leave a box empty for nothing.</p>
         %s
         <form method="post">
         <table class="grid entry"><thead><tr><th></th><th>Cash</th><th>UPI</th><th>Card</th>
-          </tr></thead><tbody>%s</tbody></table>
-        <p class="mut">Leave a box empty for nothing. Put 0 only if you mean a real zero.</p>
-        <p><label class="mut">Note (optional)</label><br>
-           <input name="note" class="note" value="%s" maxlength="300"></p>
-        <button type="submit" class="save">Save the day</button>
-        <a class="btn" href="/finance/clinic/register">back to the list</a>
-        </form>%s
-      </div>""" % (_human(date), msg,
-                   "".join(rows), _esc("" if reg is None else (reg["note"] or "")), who)
-    return form + _compare_html(t, date)
+          </tr></thead><tbody>%s
+          <tr class="sep"><td colspan="4">kept separately at reception</td></tr>
+          %s</tbody></table>
+        <p><label class="mut" for="note">Note (optional)</label><br>
+           <input id="note" name="note" class="note" value="%s" maxlength="300"></p>
+        <button type="submit" class="save">Save this day</button>
+        </form>
+        %s%s
+        <p class="noprint navrow"><a class="btn" href="/finance/clinic/register">next unfilled day</a>
+        <a class="btn" href="/finance/clinic/register/list">all days</a>
+        <a class="btn" href="/finance/clinic/day/%s">the day&#8217;s entries</a></p>
+      </div>%s""" % (_human(date), msg, "".join(rows), phys,
+                     _esc("" if reg is None else (reg["note"] or "")), clear, who,
+                     date, _compare_html(t, date))
 
 
 def _compare_html(t, date):
     doc, bank = t["doc"], t["bank"]
+
     def line(label, reg_v, doc_v, bank_v, note=""):
         return ("<tr><th class='sec'>%s</th><td class='r'>%s</td><td class='r'>%s</td>"
                 "<td class='r'>%s</td><td class='mut'>%s</td></tr>"
                 % (label, _r(reg_v) if reg_v is not None else "—",
                    _r(doc_v) if doc_v is not None else "—",
                    _r(bank_v) if bank_v is not None else "—", note))
+
+    upi_note = "" if t["bank_known"] else "statement not arrived"
     body = [line("Cash", t["r_cash"], doc["cash"] if doc["known"] else None, None,
                  "no bank feed exists for cash"),
             line("UPI", t["r_upi"], doc["upi"] if doc["known"] else None,
-                 bank if t["bank_known"] else None,
-                 "" if t["bank_known"] else "statement not arrived"),
+                 bank if t["bank_known"] else None, upi_note),
             line("Card", t["r_card"], doc["card"] if doc["known"] else None, None,
-                 "the bank feed carries no card at all")]
+                 "the bank feed carries no card"),
+            line("Physiotherapy", t["p_upi"] if t["p_upi"] is not None else None, None, None,
+                 "its own UPI channel — not in the bank line above")]
     return """
       <div class="card"><h2>The three records, side by side</h2>
         <table class="grid"><thead><tr><th></th><th class="r">Register</th>
@@ -384,9 +511,7 @@ def _compare_html(t, date):
         <p class="mut">This screen states what the three records say. It does not decide who is
         right, and it never accuses anyone. Where two agree and one differs, that is the one to
         look at first.</p>
-        <p class="noprint"><a class="btn" href="/finance/clinic/day/%s">the day's entries</a></p>
-      </div>""" % ("".join(body), t["verdict"].replace(" ", "_"),
-                   _esc(t["why"]), date)
+      </div>""" % ("".join(body), t["verdict"].replace(" ", "_"), _esc(t["why"]))
 
 
 def _denied():
@@ -395,38 +520,65 @@ def _denied():
 
 
 def _shell(title, body):
+    """LARGE TYPE, HIGH CONTRAST, VISIBLE BOXES. The owner, 04-Sep: "your smallest font is very eye
+    straining for me, background hurts the eyes, boxes are barely visible."
+
+    So: nothing on this screen is below 16px, the body sits on a soft grey rather than a bright
+    white, every input has a 2px border and a 54px tap target, and the type is near-black on warm
+    off-white. It is used on a phone, at the counter, early in the morning."""
     return """<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
 <title>%s</title><style>
-:root{--ink:#111;--mut:#666;--line:#dcdcdc;--accent:#1F4E79;--soft:#eef4fb}
+:root{--ink:#14181c;--mut:#3c464e;--line:#8a9aa6;--accent:#14456e;--paper:#fffdf7;--bg:#dfe5e9;
+      --entry:#fffbe6}
 *{box-sizing:border-box}
-body{margin:0;padding:14px;font:15px/1.55 "Segoe UI",system-ui,-apple-system,sans-serif;
- color:var(--ink);background:#fafafa}
-h1{font-size:18px;margin:0 0 8px;color:var(--accent)}h2{font-size:15px;margin:0 0 8px}
-.card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;margin:0 0 12px}
-.mut{color:var(--mut);font-size:13px}
-table.grid{width:100%%;border-collapse:collapse;font-size:14px}
-.grid th,.grid td{border:1px solid var(--line);padding:7px 8px}
-.grid thead th{background:var(--soft);font-size:13px}
-.r{text-align:right;white-space:nowrap}.d{white-space:nowrap}
-.sec{text-align:left;background:#fafafa;width:34%%}
-.entry input.amt{width:100%%;font:16px "Segoe UI",system-ui,sans-serif;padding:9px 8px;
- border:1px solid #bbb;border-radius:6px;text-align:right}
-.entry input.amt:focus{border-color:var(--accent);outline:2px solid #cfe0f2}
-.note{width:100%%;padding:8px;border:1px solid #bbb;border-radius:6px;font:14px inherit}
-button.save{background:var(--accent);color:#fff;border:0;border-radius:6px;padding:11px 20px;
- font-size:15px;cursor:pointer;margin-right:10px}
-a.btn{display:inline-block;border:1px solid var(--accent);color:var(--accent);border-radius:6px;
- padding:5px 12px;text-decoration:none;font-size:13px}
-.ok{background:#e8f3e8;border-left:4px solid #2e7d32;padding:9px 12px;margin-bottom:10px}
-.bad{background:#fdecea;border-left:4px solid #c62828;padding:9px 12px;margin-bottom:10px}
-.pill{font-size:12px;padding:2px 8px;border-radius:10px;background:#eee;white-space:nowrap}
-.pill.all_agree{background:#e8f3e8}.pill.not_entered{background:#f4f4f4;color:#777}
-.pill.docterz_differs,.pill.register_differs,.pill.all_differ{background:#fdecea}
-.pill.bank_differs,.pill.waiting_bank{background:#fff5e0}
-.verdict{font-weight:600;margin:10px 0 4px}
-tr.todo .d{font-weight:700}
-@media print{@page{size:A4 portrait;margin:12mm}.noprint{display:none!important}
- body{background:#fff;padding:0}.card{border:none;padding:0}}
+body{margin:0;padding:14px;background:var(--bg);color:var(--ink);
+ font:18px/1.6 "Segoe UI",system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%%}
+h1{font-size:23px;margin:0 0 12px;color:var(--accent);font-weight:700}
+h2{font-size:20px;margin:0 0 10px;color:var(--accent)}
+.card{background:var(--paper);border:2px solid var(--line);border-radius:10px;padding:16px;
+ margin:0 0 16px}
+.mut{color:var(--mut);font-size:16px}
+.hint{color:var(--mut);font-size:15px;font-weight:400}
+table.grid{width:100%%;border-collapse:collapse;font-size:18px}
+.grid th,.grid td{border:2px solid var(--line);padding:10px}
+.grid thead th{background:#cfdae3;font-size:17px;color:var(--ink)}
+.r{text-align:right;white-space:nowrap}.d{white-space:nowrap;font-weight:600}
+.sec{text-align:left;background:#eef2f5;width:33%%;font-size:18px}
+.none{text-align:center;color:var(--mut)}
+tr.sep td{background:#eef2f5;color:var(--mut);font-size:16px;text-align:center;padding:8px}
+.entry input.amt{width:100%%;min-height:54px;font-size:22px;padding:10px 12px;
+ border:2px solid #5b6b76;border-radius:8px;text-align:right;background:var(--entry);color:var(--ink)}
+.entry input.amt:focus{border-color:var(--accent);background:#fff;outline:3px solid #9dc0e0}
+.note{width:100%%;min-height:50px;padding:10px;border:2px solid #5b6b76;border-radius:8px;
+ font-size:18px;background:var(--entry)}
+button.save{background:var(--accent);color:#fff;border:0;border-radius:9px;padding:16px 26px;
+ font-size:20px;font-weight:600;cursor:pointer;width:100%%;margin-top:6px}
+button.clear{background:var(--paper);color:#8c2f2f;border:2px solid #8c2f2f;border-radius:9px;
+ padding:11px 18px;font-size:17px;cursor:pointer}
+.clearf{margin-top:14px}
+a.btn{display:inline-block;border:2px solid var(--accent);color:var(--accent);border-radius:9px;
+ padding:11px 16px;text-decoration:none;font-size:17px;margin:6px 8px 0 0;background:var(--paper)}
+.navrow{margin-top:14px}
+.ok{background:#dff0d8;border-left:6px solid #2c6e2f;padding:13px 15px;margin-bottom:14px;
+ font-size:18px}
+.bad{background:#fadbd8;border-left:6px solid #9c2a20;padding:13px 15px;margin-bottom:14px;
+ font-size:18px}
+.pill{font-size:16px;padding:4px 11px;border-radius:12px;background:#e3e8eb;white-space:nowrap;
+ border:1px solid var(--line)}
+.pill.all_agree{background:#dff0d8}.pill.not_entered{background:#eceff1;color:var(--mut)}
+.pill.docterz_differs,.pill.register_differs,.pill.all_differ{background:#fadbd8}
+.pill.bank_differs,.pill.waiting_bank{background:#fdeecd}
+.verdict{font-weight:700;margin:14px 0 6px;font-size:19px}
+@media (max-width:620px){
+ body{padding:10px;font-size:19px}
+ .card{padding:12px}
+ .grid th,.grid td{padding:8px 6px}
+ .sec{width:30%%;font-size:17px}
+ .entry input.amt{font-size:23px;min-height:58px}
+ a.btn{display:block;text-align:center;margin:10px 0 0}
+}
+@media print{@page{size:A4 portrait;margin:12mm}.noprint,form{display:none!important}
+ body{background:#fff;padding:0;font-size:12pt}.card{border:none;padding:0}}
 </style></head><body><h1>Dr. Manoj Agarwal Clinic — daily register</h1>
 %s</body></html>""" % (_esc(title), body)

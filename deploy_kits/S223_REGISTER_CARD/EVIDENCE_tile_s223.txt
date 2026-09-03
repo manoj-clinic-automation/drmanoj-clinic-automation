@@ -1,0 +1,63 @@
+S223_REGISTER_CARD -- the tile walk, run offline before the paste.
+
+portal.py's OWN _visible_sections(), out of a byte-exact reproduction of the live file, over
+every user x role x PC, before and after. Section 1 enumerates names against roles that do not
+exist (there is no 'amir as doctor' login) on purpose: a tile that could leak through a role
+would show there. Section 2 is the answer.
+
+-- 1  every change, over 48 combinations ----------------------------
+     alisha   role=doctor   pc=False  +['Daily Register']  -[]
+     alisha   role=doctor   pc=True   +['Daily Register']  -[]
+     alisha   role=manager  pc=False  +['Daily Register']  -[]
+     alisha   role=manager  pc=True   +['Daily Register']  -[]
+     alisha   role=staff    pc=False  +['Daily Register']  -[]
+     alisha   role=staff    pc=True   +['Daily Register']  -[]
+     amir     role=doctor   pc=False  +['Daily Register']  -[]
+     amir     role=doctor   pc=True   +['Daily Register']  -[]
+     bhawna   role=doctor   pc=False  +['Daily Register']  -[]
+     bhawna   role=doctor   pc=True   +['Daily Register']  -[]
+     bhawna   role=manager  pc=False  +['Daily Register']  -[]
+     bhawna   role=manager  pc=True   +['Daily Register']  -[]
+     bhawna   role=staff    pc=False  +['Daily Register']  -[]
+     bhawna   role=staff    pc=True   +['Daily Register']  -[]
+     darpan   role=doctor   pc=False  +['Daily Register']  -[]
+     darpan   role=doctor   pc=True   +['Daily Register']  -[]
+     manoj    role=doctor   pc=False  +['Daily Register']  -[]
+     manoj    role=doctor   pc=True   +['Daily Register']  -[]
+     manoj    role=manager  pc=False  +['Daily Register']  -[]
+     manoj    role=manager  pc=True   +['Daily Register']  -[]
+     manoj    role=staff    pc=False  +['Daily Register']  -[]
+     manoj    role=staff    pc=True   +['Daily Register']  -[]
+     nobody   role=doctor   pc=False  +['Daily Register']  -[]
+     nobody   role=doctor   pc=True   +['Daily Register']  -[]
+     shavez   role=doctor   pc=False  +['Daily Register']  -[]
+     shavez   role=doctor   pc=True   +['Daily Register']  -[]
+     shavez   role=manager  pc=False  +['Daily Register']  -[]
+     shavez   role=manager  pc=True   +['Daily Register']  -[]
+     shavez   role=staff    pc=False  +['Daily Register']  -[]
+     shavez   role=staff    pc=True   +['Daily Register']  -[]
+     shivani  role=doctor   pc=False  +['Daily Register']  -[]
+     shivani  role=doctor   pc=True   +['Daily Register']  -[]
+     shivani  role=manager  pc=False  +['Daily Register']  -[]
+     shivani  role=manager  pc=True   +['Daily Register']  -[]
+     shivani  role=staff    pc=False  +['Daily Register']  -[]
+     shivani  role=staff    pc=True   +['Daily Register']  -[]
+  PASS  the only thing gained anywhere is Daily Register
+  PASS  nothing is lost anywhere
+
+-- 2  the owner's list, exactly -------------------------------------
+  PASS  the tile reaches exactly the five he named, and nobody else   [got ['alisha', 'bhawna', 'manoj', 'shavez', 'shivani'], wanted ['alisha', 'bhawna', 'manoj', 'shavez', 'shivani']]
+  PASS  the owner and Dr Bhawna have it as doctors
+  PASS  darpan does NOT have it (he was not on the list)
+  PASS  amir does NOT have it
+  PASS  a brand-new staff login does NOT have it
+
+-- 3  fail-safe: grants file gone -----------------------------------
+  PASS  no staff login sees it without the grants file (fail CLOSED)
+  PASS  the owner still sees it without the grants file (never locked out)
+
+-- 4  where it lands ------------------------------------------------
+     manoj   doctor  [Money & Accounts] UPI Sheet, Vehicle Tracking, Monthly Accounting, Daily Sale, Vaapsi Desk, Stock Check, Corrections, Day Revenue, Daily Register, Sanjeevni Medicos, Clinic
+     shavez  staff   [Money & Accounts] Vaapsi Desk, Stock Check, Day Revenue, Daily Register, Daily Collection, Clinic
+
+GREEN  8 checks, 0 failed

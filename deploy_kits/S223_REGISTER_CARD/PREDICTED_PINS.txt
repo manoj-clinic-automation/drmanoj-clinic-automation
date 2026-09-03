@@ -1,8 +1,12 @@
 S223_REGISTER_CARD -- predicted pins (LF, VPS-side; F-294)
 
-/root/finance/finance_app.py       fd478faf9fb8142234554564feb24ed8  ->  1a79f7c0adb5bb4f778dd8d5aa6cf298
-/root/finance/clinic_register.py                              NEW  ->  (see SUMS.md5)
+/root/finance/finance_app.py     fd478faf9fb8142234554564feb24ed8  ->  1a79f7c0adb5bb4f778dd8d5aa6cf298
+/root/finance/clinic_register.py                            NEW  ->  (see SUMS.md5)
+/root/portal/portal.py           e2f907527113588e7ce8287d678525a1  ->  302e7459ff342d7a4481f814dcc855c5
+/root/portal/tile_grants.json    aaa12fec2b089bf68c1292b7d9e72c4b  ->  08828cb1bcc0642a097ca1da32033bc1
 
-Creates ONE new table on import: clinic_register_day. It writes only that table, and every save
-goes through the app's own audit() -- who, when, and what changed.
-Restart: clinic-finance.service.
+TABLES CREATED, on first request and never at import: clinic_register_day (with the dressing
+columns) and clinic_physio_day. An existing clinic_register_day gains its three dressing columns
+by ALTER, and an ALTER that has already run is ignored rather than treated as an error.
+
+Restarts: clinic-finance.service and clinic-portal.

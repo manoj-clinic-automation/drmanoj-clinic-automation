@@ -1,8 +1,8 @@
 S223_REGISTER_CARD -- the render test, run before the paste.
 
-METHOD: a real Flask app, a real database, real form posts. The db getter RAISES outside an
-application context, exactly as finance_app's does -- see section 0, and see the incident in
-the README. F-185: scanned for identifiers before committing.
+A real Flask app, a real database, real form posts. The db getter RAISES outside an application
+context exactly as finance_app's does -- see section 0 and the incident in the README.
+F-185: scanned for identifiers before committing.
 
 -- 0  init() must not touch the database -----------------------------
   PASS  init() completed with NO application context, exactly as gunicorn imports it
@@ -10,7 +10,7 @@ the README. F-185: scanned for identifiers before committing.
 
 -- 1  the schema and the gate ---------------------------------------
   PASS  the table is created on FIRST REQUEST instead
-  PASS  the list renders for a clinic maker
+  PASS  the entry point answers for a clinic maker
   PASS  someone off the clinic desk is refused, with no money on the page
   PASS  and cannot POST either
   PASS  nothing was written by the refused POST
@@ -57,4 +57,38 @@ the README. F-185: scanned for identifiers before committing.
 -- 7  F-185 ----------------------------------------------------------
   PASS  no patient name or id is asked for or shown
 
-GREEN  37 checks, 0 failed
+-- 8  the owner's changes of 04-Sep ----------------------------------
+  PASS  dressing is stored on its own line
+  PASS  physio went to its OWN table, not the register table
+  PASS  physio is not a column of the register table
+  PASS  dressing CLUBS into the register totals (1000+300 cash, 0+200 upi)
+  PASS  the card shows a Dressing row
+  PASS  and says it counts with Procedures
+  PASS  the card shows a Physiotherapy row
+  PASS  physio has no card box -- cash and UPI only, as asked
+
+-- 8b  physio is OUT of the bank arithmetic --------------------------
+  PASS  with physio present on its own channel, all three still AGREE   [all agree (physio was Rs 777)]
+  PASS  the screen says physio is on its own channel and not in the bank line
+  PASS  and it never claims the bank line includes physio
+
+-- 9  minimum taps, and a filled day disappears ----------------------
+  PASS  the entry point REDIRECTS straight to a day, it does not show a list first   [302]
+  PASS  the filled day is still reachable from 'all days'
+  PASS  the filled day is NOT offered again as something to fill
+
+-- 10  clearing an accidental save -----------------------------------
+  PASS  it says it cleared
+  PASS  the register row is gone
+  PASS  the physio row went with it
+  PASS  the removal was audited
+
+-- 11  readable on a phone -------------------------------------------
+  PASS  no font on the page is under 15px (smallest is 15.0px)
+  PASS  the entry boxes have a real border, not a hairline
+  PASS  tap targets are at least 54px tall
+  PASS  the page is not on stark white
+  PASS  it has a phone breakpoint
+  PASS  the viewport allows zooming (never disable it)
+
+GREEN  61 checks, 0 failed

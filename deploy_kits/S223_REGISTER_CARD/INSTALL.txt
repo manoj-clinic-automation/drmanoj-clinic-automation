@@ -1,13 +1,15 @@
 S223_REGISTER_CARD -- ONE PASTE. It CANNOT leave the finance app down.
 
-The line below installs, restarts, and then CHECKS the service came back. If it did not, it
-restores the previous finance_app.py by itself and restarts again. You end up either with the
-register live, or exactly where you started -- never at a 503.
+It installs, restarts, then CHECKS the service came back. If it did not, it restores the previous
+finance_app.py by itself, restarts, and prints the log. You end up with the register live, or
+exactly where you started -- never at a 503.
 
-git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S223_REGISTER_CARD && md5sum -c SUMS.md5 --quiet && \cp clinic_register.py patch_finance_app_register_s223.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_finance_app_register_s223.py && systemctl restart clinic-finance.service && sleep 5 && (systemctl is-active --quiet clinic-finance.service && echo "UP -- register live" && md5sum /root/finance/finance_app.py || (echo "DID NOT COME BACK -- ROLLING BACK BY ITSELF"; ls -t /root/finance/finance_app.py.bak_S223_register_* | head -1 | xargs -I{} \cp {} /root/finance/finance_app.py; systemctl restart clinic-finance.service; sleep 4; systemctl is-active clinic-finance.service; md5sum /root/finance/finance_app.py; journalctl -u clinic-finance.service -n 12 --no-pager | tail -12))
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S223_REGISTER_CARD && md5sum -c SUMS.md5 --quiet && \cp clinic_register.py patch_finance_app_register_s223.py /root/finance/ && \cp patch_portal_register_tile_s223.py tile_grants.json /root/portal/ && /root/wa/venv/bin/python3 -B /root/finance/patch_finance_app_register_s223.py && /root/wa/venv/bin/python3 -B /root/portal/patch_portal_register_tile_s223.py && systemctl restart clinic-finance.service && systemctl restart clinic-portal && sleep 5 && (systemctl is-active --quiet clinic-finance.service && echo "UP -- register live" && md5sum /root/finance/finance_app.py /root/portal/portal.py /root/portal/tile_grants.json || (echo "FINANCE DID NOT COME BACK -- ROLLING IT BACK BY ITSELF"; ls -t /root/finance/finance_app.py.bak_S223_register_* | head -1 | xargs -I{} \cp {} /root/finance/finance_app.py; systemctl restart clinic-finance.service; sleep 4; systemctl is-active clinic-finance.service; md5sum /root/finance/finance_app.py; journalctl -u clinic-finance.service -n 12 --no-pager | tail -12))
 
-GOOD:  "UP -- register live"  and  1a79f7c0adb5bb4f778dd8d5aa6cf298
-BAD :  "ROLLING BACK BY ITSELF", then "active" and fd478faf9fb8142234554564feb24ed8, plus the
-       last twelve log lines so the cause is in front of you rather than needing a second paste.
+GOOD:  "UP -- register live", then
+       finance_app.py     1a79f7c0adb5bb4f778dd8d5aa6cf298
+       portal.py          302e7459ff342d7a4481f814dcc855c5
+       tile_grants.json   08828cb1bcc0642a097ca1da32033bc1
 
-Then:  https://followup.dr-manoj.in/finance/clinic/register
+Then close the app fully and reopen: the tile is 📒 Daily Register, in Money & Accounts beside
+Day Revenue. Tapping it opens the next day that still needs filling.
