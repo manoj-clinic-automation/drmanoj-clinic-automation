@@ -1,0 +1,12 @@
+S221_AMIR_ACCESS · built 03-Sep-2026 · Session 221 · Amir can work, and only work
+darpan_app.py 43abdd58 -> c98f0c24   ·   stock_app.py 74825031 -> 4e929d0b
+THE FAULT: his own corrections desk required `checker` -- the owner's approval role. The
+stock pages required `maker` -- which IS the day's money entry. He would have logged in on
+his next visit and been refused by both.
+THE FIX: seven endpoints accept `viewer`, the scoped role Reception already holds for the
+Vaapsi desk. One unit_role row for amir. Nothing else moves.
+Both patchers REFUSE and restore if a money route has moved: api_transfer, api_ledger_check,
+api_cause, api_diff_decision, api_rate, api_voucher, api_drift, api_losses, _snapshot_auth
+are each verified still closed to a viewer before the patch is kept.
+Proven: WALK 29/29 -- what opens for him, what refuses him, that the owner keeps everything,
+and that a stranger gets nothing. The S221_PURCHASE_DUE walk still passes 75/75 on the new bytes.

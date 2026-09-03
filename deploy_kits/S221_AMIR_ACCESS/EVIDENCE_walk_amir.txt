@@ -1,0 +1,30 @@
+  PASS  the patched stock app is under test
+  PASS  the Vaapsi desk is mounted for this walk
+  PASS  AMIR CAN OPEN: the stock count screen
+  PASS  AMIR CAN OPEN: the stock differences list
+  PASS  AMIR CAN OPEN: the open-differences data
+  PASS  AMIR CAN OPEN: the audit finding index
+  PASS  AMIR CAN OPEN: the audit finding page
+  PASS  AMIR CAN OPEN: the Vaapsi desk
+  PASS  AMIR CAN SUBMIT a finished count
+  PASS  AMIR IS REFUSED: name the cause of a difference
+  PASS  AMIR IS REFUSED: rule on a difference (write off / recover)
+  PASS  AMIR IS REFUSED: set a price
+  PASS  AMIR IS REFUSED: record a Marg voucher
+  PASS  AMIR IS REFUSED: see the drift page
+  PASS  AMIR IS REFUSED: see the drift data
+  PASS  AMIR IS REFUSED: see the losses report
+  PASS  AMIR CAN answer a difference line (evidence, never a verdict)
+  PASS  the owner can still: name the cause of a difference
+  PASS  the owner can still: rule on a difference (write off / recover)
+  PASS  the owner can still: set a price
+  PASS  the owner can still: record a Marg voucher
+  PASS  the owner can still: see the drift page
+  PASS  the owner can still: see the drift data
+  PASS  the owner can still: see the losses report
+  PASS  a stranger is refused: the stock count screen
+  PASS  a stranger is refused: the stock differences list
+  PASS  a stranger is refused: the open-differences data
+  PASS  a stranger is refused: the audit finding index
+  PASS  a stranger is refused: the audit finding page
+WALK GREEN -- 29 passed, 0 failed

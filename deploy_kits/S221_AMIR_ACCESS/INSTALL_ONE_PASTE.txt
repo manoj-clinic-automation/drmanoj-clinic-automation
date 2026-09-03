@@ -1,0 +1,11 @@
+ONE PASTE on the VPS after the publish. Guards both pins, patches, seeds the role, runs
+the walk with its EXIT CODE CHECKED, then stops so you can read it.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S221_AMIR_ACCESS && md5sum -c SUMS.md5 --quiet && test "$(md5sum /root/finance/darpan_app.py | cut -d' ' -f1)" = "43abdd582974dfe19b3f9580811b8c89" && test "$(md5sum /root/finance/stock_app.py | cut -d' ' -f1)" = "748250310ddae328e18db9ba504c21cd" && \cp patch_darpan_viewer_s221.py patch_stock_viewer_s221.py seed_amir_role_s221.py walk_amir_access_s221.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_darpan_viewer_s221.py && /root/wa/venv/bin/python3 -B /root/finance/patch_stock_viewer_s221.py && /root/wa/venv/bin/python3 -B /root/finance/seed_amir_role_s221.py /root/finance/finance.db && /root/wa/venv/bin/python3 -B /root/finance/walk_amir_access_s221.py > /tmp/walk_amir.txt; echo "WALK EXIT=$?"; tail -2 /tmp/walk_amir.txt; grep -c '^  FAIL' /tmp/walk_amir.txt
+
+WALK EXIT must be 0 and the FAIL count 0. Only then:
+
+systemctl restart clinic-finance.service && sleep 2 && md5sum /root/finance/darpan_app.py /root/finance/stock_app.py
+
+Expected:  c98f0c2422d7943d09933a39e886ff63  /root/finance/darpan_app.py
+           4e929d0bd34af068bb4fb82eabe92dff  /root/finance/stock_app.py

@@ -1,0 +1,5 @@
+# S221_AMIR_ACCESS -- pins PREDICTED OFFLINE.
+# darpan_app.py: the S219-close base f4161c7d walked through ALL EIGHT S220 patchers,
+#   every intermediate matching its recorded pin, ending at the live 43abdd58 -- then this kit.
+c98f0c2422d7943d09933a39e886ff63  /root/finance/darpan_app.py     (was 43abdd58)
+4e929d0bd34af068bb4fb82eabe92dff  /root/finance/stock_app.py      (was 74825031)

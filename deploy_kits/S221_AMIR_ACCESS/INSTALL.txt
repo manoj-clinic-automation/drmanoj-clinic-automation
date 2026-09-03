@@ -1,0 +1,26 @@
+S221_AMIR_ACCESS -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  0  copy the kit .py files into /root/finance/  (the one-paste block is in the chat)
+  1  /root/wa/venv/bin/python3 -B /root/finance/patch_darpan_viewer_s221.py
+  2  /root/wa/venv/bin/python3 -B /root/finance/patch_stock_viewer_s221.py
+  3  /root/wa/venv/bin/python3 -B /root/finance/seed_amir_role_s221.py /root/finance/finance.db
+  4  /root/wa/venv/bin/python3 -B /root/finance/walk_amir_access_s221.py  (expect WALK GREEN 29/29)
+  5  systemctl restart clinic-finance.service
+  6  md5sum /root/finance/darpan_app.py /root/finance/stock_app.py
+
+Step 3 writes ONE row to the live database: amir -> viewer on the medical unit. It is
+idempotent and prints the whole medical unit afterwards. It is the only live write here.
+Step 4 runs on a COPY of finance.db.
+Step 6 must print the two PREDICTED PINS.
+
+WHAT AMIR CAN DO AFTERWARDS, and it is all he can do:
+  his corrections desk -- read the list, tick what he has fixed in Marg
+  the stock count screen, and submit a count
+  the stock differences list -- see what his count produced
+  the Vaapsi desk, and answer a line on an audit finding
+HE STILL CANNOT: file or approve a day, touch the drawer, move money between ledgers,
+set a price, name the cause of a difference, or rule on one. Each of those is walked.
+
+KNOWN AND DELIBERATE: the corrections page also draws the owner's ledger-check and
+transfer controls. They remain checker-only and will refuse him if tapped. Hiding them
+for non-checkers needs a page change and is recorded as a follow-up, not done here.
