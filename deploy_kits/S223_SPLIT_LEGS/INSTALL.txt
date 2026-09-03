@@ -1,0 +1,21 @@
+S223_SPLIT_LEGS -- the PC side is ALREADY DONE. One paste left, on the VPS.
+
+STEP 1 -- the clinic PC.  ALREADY RUN, 04-Sep-2026 ~03:59 IST, over the 79 retained exports:
+  103 split bills across 61 days, Rs 1,77,999 in 206 legs, no unrecognised token.
+  It wrote ONE new file:  <tracker>\outputs\Day_Tenders.csv   (206 rows, 16.8 KB)
+  Nothing else on that PC was touched -- not the tracker's code, not its database, not its ledgers.
+  Drive syncs that folder, so the file reaches Drive by itself.
+  To re-run it later (after new exports arrive):   python push_day_tenders.py
+
+STEP 2 -- the VPS, one paste:
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S223_SPLIT_LEGS && md5sum -c SUMS.md5 --quiet && \cp docterz_ingest.py finance_clinic_day.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/docterz_ingest.py && systemctl restart clinic-finance.service && sleep 3 && md5sum /root/finance/finance_clinic_day.py
+
+Expect a line reading "split legs: 206 legs across 61 days, from Day_Tenders.csv".
+
+If it says "no Day_Tenders.csv in the folder -- skipped", Drive has not finished syncing yet.
+That is not an error: every day figure is unaffected and the split lines simply read
+"Split Payment" with no breakup, exactly as they do today. Re-run the same ingest line later.
+
+Then open any day with a split on it -- 19-Aug-2026 is the one with the Rs 600 Wallet leg:
+  https://followup.dr-manoj.in/finance/clinic/day/2026-08-19
