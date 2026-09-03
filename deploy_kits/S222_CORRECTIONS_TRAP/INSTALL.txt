@@ -1,0 +1,20 @@
+S222_CORRECTIONS_TRAP -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  0  copy patch_corrections_hide_s222.py into /root/finance/  (the paste block is in the chat)
+  1  /root/wa/venv/bin/python3 -B /root/finance/patch_corrections_hide_s222.py
+  2  md5sum /root/finance/darpan_corrections.html      (must read 26b1defeb0333fb8642a7abf95a93e5b)
+  3  open the page yourself and HARD-reload it (Ctrl+F5). The ledger check and the transfer
+     control must still be there. If they are not, restore the .bak and tell me.
+
+NO RESTART. This is a page file, read from disk on every request -- a reload is all it takes.
+The patcher refuses unless the file is f2f6f60ed57681c9fde7ddbbc4dc90d7 and unless both its
+anchors match exactly once, keeps a timestamped .bak, and refuses if the script tags come out
+unbalanced. Re-running says "already patched".
+
+WHAT CHANGES
+  Amir opens /finance/darpan/corrections and sees his corrections list, and nothing else.
+  You open the same page and see exactly what you see today.
+  Nobody's permissions changed. Both controls were checker-only before this and still are;
+  this only stops a viewer being SHOWN two controls whose only answer to him is no.
+
+ROLLING BACK = restore the .bak_S222_trap_* file beside the page. No restart for that either.

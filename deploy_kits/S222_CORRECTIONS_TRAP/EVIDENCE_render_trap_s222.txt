@@ -1,0 +1,26 @@
+-- 1  AS AMIR (the server answers 403) ---------------------------
+  PASS  the ledger-check / transfer block is NOT on his screen
+  PASS  the words 'Record an owner transfer' are not visible
+  PASS  the words 'Ledger check' are not visible
+  PASS  his own corrections list IS still there
+  PASS  the corrections table rendered
+  PASS  no javascript error
+
+-- 2  AS THE OWNER (the server answers 200) ----------------------
+  PASS  the block IS on his screen
+  PASS  'Ledger check and owner transfer' is visible
+  PASS  'Record an owner transfer' is visible
+  PASS  the Record transfer button is there
+  PASS  the Check this date button is there
+  PASS  his corrections list is still there too
+  PASS  no javascript error
+
+-- 3  THE FAIL-OPEN, on a route that is not there at all ---------
+  PASS  a non-403 answer shows the block (fail-open)
+  PASS  no javascript error
+
+-- 4  AND THE SERVER IS STILL THE REAL GATE ----------------------
+  PASS  this kit changed no server file
+  PASS  the block starts hidden in the markup, so a viewer never sees a flash
+
+RENDER GREEN -- 17 passed, 0 failed

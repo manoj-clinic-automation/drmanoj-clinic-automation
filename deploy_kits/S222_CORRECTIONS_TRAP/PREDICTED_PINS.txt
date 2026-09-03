@@ -1,0 +1,11 @@
+# S222_CORRECTIONS_TRAP -- predicted from the EXACT live bytes.
+#
+# The box was read at the S222 open: /root/finance/darpan_corrections.html is
+# f2f6f60ed57681c9fde7ddbbc4dc90d7, byte-identical to the repo's
+# deploy_kits/S209_TRANSFER_UI/darpan_corrections.html. The patcher was applied to those
+# bytes and REFUSES to run against anything else.
+#
+# The owner's md5sum after the patch must read exactly this:
+26b1defeb0333fb8642a7abf95a93e5b  /root/finance/darpan_corrections.html
+#
+# NOT CHANGED by this kit, and there is no restart: darpan_app.py stays c98f0c24...

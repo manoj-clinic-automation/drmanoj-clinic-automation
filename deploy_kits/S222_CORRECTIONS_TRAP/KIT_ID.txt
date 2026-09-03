@@ -1,0 +1,20 @@
+S222_CORRECTIONS_TRAP · built 03-Sep-2026 · Session 222 · ⭐1-2 part A
+
+"They refuse him safely; a control that refuses is a trap." -- the owner, S221 close.
+
+Hides the ledger-check and owner-transfer block on the corrections page from anyone the
+server will not let use it. ONE file, and it is a PAGE -- no server file is touched, no route
+changes, no permission changes. The server was and remains the real gate.
+
+Target (live pin): /root/finance/darpan_corrections.html  f2f6f60e -> 26b1defe
+  ⚠ f2f6f60e… is what the BOX reads. The Register's pin table still names b3cfd86f… (the S208
+  bytes). That row is STALE -- confirmed at this session's open, written up in
+  S222_DARPAN_CORRECTIONS_PIN_CONFLICT.md, and corrected at this close.
+
+The page asks the server "may I run the ledger check?" instead of guessing at a role: that
+route is checker-only and S221's own patcher verified it still is. 403 -> stays hidden.
+Anything else, INCLUDING AN ERROR -> shown, deliberately, so a bad connection can never rob
+the owner of his own control.
+
+PROVEN OFFLINE on the exact live bytes: RENDER GREEN 17/17 -- headless chromium loading the
+patched page three times, as a refused viewer, as the owner, and against a broken route.
