@@ -1,0 +1,56 @@
+S223_REGISTER_CARD -- the render test, run before the paste.
+
+METHOD: the real blueprint on a real Flask app over a real database built by the real ingester.
+This is a WRITE screen, so the test posts real forms and reads the database back, then reads the
+delivered HTML. F-185: this file was scanned for identifiers before it was committed.
+
+-- 1  the schema and the gate ---------------------------------------
+  PASS  the table was created on init
+  PASS  the list renders for a clinic maker
+  PASS  someone off the clinic desk is refused, with no money on the page
+  PASS  and cannot POST either
+  PASS  nothing was written by the refused POST
+
+-- 2  a bad number REFUSES, and saves nothing ------------------------
+  PASS  it says nothing was saved
+  PASS  it names BOTH bad fields
+  PASS  the database is still empty — no half-save
+
+-- 3  a good save ----------------------------------------------------
+  PASS  it saved
+  PASS  rupees became paise
+  PASS  a blank box became a real zero
+  PASS  who and when are recorded
+  PASS  the save was audited
+  PASS  it says it saved
+  PASS  the card comes back filled in, not blank
+
+-- 4  editing the same day updates, never duplicates -----------------
+  PASS  still exactly one row for the day
+  PASS  the change took
+  PASS  the first entry's author is kept
+  PASS  the edit was audited as an update
+
+-- 5  the three-way verdict, each branch -----------------------------
+  PASS  all three agree -> 'all agree'
+  PASS  register+docterz agree, bank differs -> points at the FEED
+  PASS  register+bank agree, docterz differs -> points at the ENTRY
+  PASS  all three differ -> asks for a person
+  PASS  no statement yet -> 'waiting_bank', never shown as zero
+  PASS  the page says the statement has not arrived rather than printing 0
+
+-- 6  it never accuses ------------------------------------------------
+  PASS  the page never says 'shortage'
+  PASS  the page never says 'cash short'
+  PASS  the page never says 'is short'
+  PASS  the page never says 'money is missing'
+  PASS  the page never says 'theft'
+  PASS  the page never says 'fraud'
+  PASS  the page never says 'you are responsible'
+  PASS  it says plainly that it does not decide who is right
+  PASS  and that it accuses nobody
+
+-- 7  F-185 ----------------------------------------------------------
+  PASS  no patient name or id is asked for or shown
+
+GREEN  35 checks, 0 failed

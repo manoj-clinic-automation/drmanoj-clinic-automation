@@ -1,0 +1,8 @@
+S223_REGISTER_CARD -- predicted pins (LF, VPS-side; F-294)
+
+/root/finance/finance_app.py       fd478faf9fb8142234554564feb24ed8  ->  1a79f7c0adb5bb4f778dd8d5aa6cf298
+/root/finance/clinic_register.py                              NEW  ->  (see SUMS.md5)
+
+Creates ONE new table on import: clinic_register_day. It writes only that table, and every save
+goes through the app's own audit() -- who, when, and what changed.
+Restart: clinic-finance.service.

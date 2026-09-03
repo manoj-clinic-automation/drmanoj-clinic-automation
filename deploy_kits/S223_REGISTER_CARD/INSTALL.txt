@@ -1,0 +1,7 @@
+S223_REGISTER_CARD -- ONE PASTE, on the VPS. S223_CLINIC_DAY must be live first (the patcher refuses otherwise).
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S223_REGISTER_CARD && md5sum -c SUMS.md5 --quiet && \cp clinic_register.py patch_finance_app_register_s223.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_finance_app_register_s223.py && systemctl restart clinic-finance.service && sleep 4 && systemctl is-active clinic-finance.service && md5sum /root/finance/finance_app.py
+
+Expect  1a79f7c0adb5bb4f778dd8d5aa6cf298  and  active
+
+Then:  https://followup.dr-manoj.in/finance/clinic/register
