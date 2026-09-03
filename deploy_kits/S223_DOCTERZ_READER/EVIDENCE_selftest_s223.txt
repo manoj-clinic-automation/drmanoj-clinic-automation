@@ -3,7 +3,7 @@ S223_DOCTERZ_READER -- the selftest, run offline against REAL exports before any
 METHOD: Drive is stubbed with eight real Staff_Action_Today workbooks (06-Jul to 03-Sep 2026).
 Everything else is the code that will run on the box: the parse, the schema, the upsert, the
 same-date tiebreaker and the idempotence check. Ground truth for 19-Aug and 02-Sep comes from
-the working paper and from tonight's independent proof against the RAW Docterz exports.
+the working paper and from the independent proof against the RAW Docterz exports.
 
 -- 1  first run: every file parses and lands --------------------------
 Drive: 8 day files in the folder
@@ -52,3 +52,12 @@ read 2, skipped 0 unchanged, failed 0; clinic_day_revenue now holds 8 days
   PASS  no Docterz patient-UID shape (10 uppercase letters+digits) anywhere
 
 GREEN  14 checks, 0 failed
+
+-- 7  gateway-reference normalisation (added after the box's own dry run found two) ----
+  PASS  'Online Payment pay_TVSzKeESCXc04L'        -> 'Online Payment'
+  PASS  'Split Payment pay_T2A9dAiNHCb5PG'         -> 'Split Payment'
+  PASS  'Cash'                                     -> 'Cash'
+  PASS  'Debit Card'                               -> 'Debit Card'
+  PASS  'Online Payment'                           -> 'Online Payment'
+  PASS  'Patient APP'                              -> 'Patient APP'
+  PASS  'Online Payment  pay_ABCDEF123 '           -> 'Online Payment'

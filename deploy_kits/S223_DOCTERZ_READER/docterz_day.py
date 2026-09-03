@@ -30,6 +30,13 @@ columns it walks past. It NEVER returns them, stores them, or logs them. Only co
 """
 import re
 
+# A payment-gateway reference is sometimes appended to the mode, e.g.
+# "Online Payment pay_XXXXXXXX". It is the SAME tender; the reference is a receipt id.
+# This is not cosmetic: the one row seen carrying it (29-Aug-2026, Rs 1,400) is exactly the
+# row Docterz's OWN footer drops, which is why D367 rules the lines the truth and the footer
+# a cross-check. The reference is stripped for the bucket and recorded in the note.
+_GATEWAY = re.compile(r"\s+(?:pay|order|txn|ref)[_-][A-Za-z0-9]{6,}\s*$", re.I)
+
 BANNERS = {
     "consult": "PAID CONSULTATIONS",
     "xray": "X-RAY",
@@ -113,7 +120,7 @@ def parse_day_revenue(ws):
         return out
 
     # -- the money blocks, computed from their own lines --------------------------------
-    streams, tender, unknown_modes = {}, {}, set()
+    streams, tender, unknown_modes, gateway_refs = {}, {}, set(), set()
     for key in ("consult", "xray", "proc"):
         amt_col, mode_col = SHAPE[key]
         n = total = 0
@@ -125,10 +132,14 @@ def parse_day_revenue(ws):
                 continue
             n += 1
             total += p
-            m = _s(r[mode_col - 1]) or "(blank)"
+            raw_mode = _s(r[mode_col - 1]) or "(blank)"
+            m = _GATEWAY.sub("", raw_mode).strip() or raw_mode
+            if m != raw_mode:
+                gateway_refs.add(m)
             tender[m] = tender.get(m, 0) + p
             if _norm(m) not in ("cash", "online payment", "debit card", "credit card",
-                                "net banking", "patient app", "wallet", "split payment"):
+                                "net banking", "patient app", "wallet", "split payment",
+                                "(blank)"):
                 unknown_modes.add(m)
         streams[key] = {"count": n, "amount_p": total}
 
@@ -175,6 +186,10 @@ def parse_day_revenue(ws):
                      % (_r(declared), _r(said["total_p"]), _r(abs(declared - said["total_p"]))))
     if unknown_modes:
         notes.append("unrecognised payment mode(s): %s" % ", ".join(sorted(unknown_modes)))
+    if gateway_refs:
+        notes.append("a gateway reference was appended to the mode on this day (%s) -- counted "
+                     "under the plain tender; this is the shape Docterz's own footer drops"
+                     % ", ".join(sorted(gateway_refs)))
     if "proc" not in at and streams["proc"]["count"] == 0:
         pass                                     # a day with no procedures has no block. normal.
 
