@@ -1,0 +1,5 @@
+S223_DAY_PAGE_EDITS -- ONE PASTE. One file, one restart. No patcher, no pin to guard.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S223_DAY_PAGE_EDITS && md5sum -c SUMS.md5 --quiet && \cp finance_clinic_day.py /root/finance/ && systemctl restart clinic-finance.service && sleep 3 && md5sum /root/finance/finance_clinic_day.py
+
+Then reload the day page. Hard-refresh if the browser holds the old CSS: Ctrl-Shift-R.

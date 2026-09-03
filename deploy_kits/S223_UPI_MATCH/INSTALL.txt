@@ -1,0 +1,5 @@
+S223_UPI_MATCH -- a REPORT, not a build. It reads and prints. It writes nothing, anywhere.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S223_UPI_MATCH && md5sum -c SUMS.md5 --quiet && \cp clinic_upi_report.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/clinic_upi_report.py --days 45
+
+Nothing is installed and no service is restarted. Paste back what it prints.
