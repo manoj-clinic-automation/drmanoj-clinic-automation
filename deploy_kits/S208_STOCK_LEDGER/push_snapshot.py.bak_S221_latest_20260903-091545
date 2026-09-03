@@ -106,21 +106,8 @@ def newest_full(archive):
             cands.append((os.path.basename(p), r))
     if not cands:
         return None, []
-
-    # S221 LATEST WINS -- the third tiebreaker.
-    # Two FULL exports of the same date have equal row counts, so max() used to
-    # keep whichever glob listed first: the winner was decided by filesystem
-    # order. The capture stamp is in the filename, so use it. A shelf counted
-    # after the last bill supersedes one counted at midday.
-    # Row count is still compared FIRST, so the F-235 guard stands: a
-    # category-filtered subset cannot win by being late.
-    def _taken(name):
-        parts = str(name).split("__")
-        return parts[2] if len(parts) > 2 else ""
-
     best_name, best = max(cands, key=lambda c: (as_on_key(c[1].get("as_on")),
-                                                len(c[1]["rows"]),
-                                                _taken(c[0])))
+                                                len(c[1]["rows"])))
     bk = as_on_key(best.get("as_on"))
     rejected = [(n, len(r["rows"])) for n, r in cands
                 if n != best_name and as_on_key(r.get("as_on")) == bk]

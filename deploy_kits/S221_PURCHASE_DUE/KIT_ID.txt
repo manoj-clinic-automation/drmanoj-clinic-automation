@@ -1,0 +1,10 @@
+S221_PURCHASE_DUE · built 03-Sep-2026 · Session 221 · his arrival becomes the ask
+stock_app.py c627e440 -> 74825031   ·   stock_drift.html ffe7333c
+THE RULE: purchases are known to PUR_TO (push_expected already stamps it, and since
+S221_TWO_PRICES every source is kept) · he was last here on LAST_VISIT (punches.csv,
+read-only, the way staff_register reads it) · LAST_VISIT > PUR_TO = he came and the
+export did not.
+READ-ONLY. No money, no status, no table, no coupling to the register's database.
+Who the purchase person is lives in `setting` -> purchase.staff_id (default 101, Amir).
+Proven: WALK 75/75 -- every branch, including a deleted and a corrupt punch feed, both of
+which must fail soft rather than read as "he did not come". Browser-checked on the page.

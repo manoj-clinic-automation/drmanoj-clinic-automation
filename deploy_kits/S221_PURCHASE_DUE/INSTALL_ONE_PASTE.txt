@@ -1,0 +1,11 @@
+ONE PASTE on the VPS after the publish. Guards the pin, patches, drops the page in, runs
+the walk with its EXIT CODE CHECKED, then stops so you can read it.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S221_PURCHASE_DUE && md5sum -c SUMS.md5 --quiet && test "$(md5sum /root/finance/stock_app.py | cut -d' ' -f1)" = "c627e440ac8ebe2a867c93fc8eaa19d4" && \cp patch_purchase_due_s221.py walk_purchase_due_s221.py /root/finance/ && \cp stock_drift.html /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_purchase_due_s221.py && /root/wa/venv/bin/python3 -B /root/finance/walk_purchase_due_s221.py > /tmp/walk_pd.txt; echo "WALK EXIT=$?"; tail -2 /tmp/walk_pd.txt; grep -c '^  FAIL' /tmp/walk_pd.txt
+
+WALK EXIT must be 0 and the FAIL count 0. Only then:
+
+systemctl restart clinic-finance.service && sleep 2 && md5sum /root/finance/stock_app.py /root/finance/stock_drift.html
+
+Expected:  748250310ddae328e18db9ba504c21cd  /root/finance/stock_app.py
+           ffe7333c4c3b09f04ba0958126a2c7fe  /root/finance/stock_drift.html

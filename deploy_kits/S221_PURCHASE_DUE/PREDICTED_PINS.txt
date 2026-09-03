@@ -1,0 +1,4 @@
+# S221_PURCHASE_DUE -- pins PREDICTED OFFLINE. Base reproduced and md5-proven first:
+#   S213 83b0a1b0 + FINDING + TWO_PRICES = c627e440 (what is live), then this patcher.
+748250310ddae328e18db9ba504c21cd  /root/finance/stock_app.py
+ffe7333c4c3b09f04ba0958126a2c7fe  /root/finance/stock_drift.html

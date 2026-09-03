@@ -1,0 +1,19 @@
+S221_PURCHASE_DUE -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  0  copy the kit files into /root/finance/  (the one-paste block is in the chat)
+  1  /root/wa/venv/bin/python3 -B /root/finance/patch_purchase_due_s221.py
+  2  \cp /root/deploy/repo/deploy_kits/S221_PURCHASE_DUE/stock_drift.html /root/finance/
+  3  /root/wa/venv/bin/python3 -B /root/finance/walk_purchase_due_s221.py  (expect WALK GREEN 75/75)
+  4  systemctl restart clinic-finance.service
+  5  md5sum /root/finance/stock_app.py /root/finance/stock_drift.html
+
+Step 3 runs on a COPY of finance.db and its own temporary punch feed. It never touches
+the live database and never reads /root/punches.csv.
+
+WHAT YOU WILL SEE ON THE DRIFT PAGE:
+  today, before the computed push has run, it will say no purchase date has reached the
+  server yet. That is correct. From tomorrow morning it fills in by itself.
+
+TO CHANGE WHO THE PURCHASE PERSON IS (it is data, not code):
+  UPDATE setting SET value='<staff id>' WHERE key='purchase.staff_id';
+  Absent, it uses 101 -- the Emp Code issued to Amir Sohail on 03-Sep-2026.
