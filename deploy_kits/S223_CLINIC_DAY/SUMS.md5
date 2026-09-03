@@ -1,0 +1,11 @@
+5703e99a7a583c505300dc6d63157c2f  finance_clinic_day.py
+7aaabe595970a6739c3119fcd97f6e3c  patch_finance_app_clinicday_s223.py
+4691a9b9b8d6d21baa83b637368dee6b  patch_portal_dayrevenue_tile_s223.py
+aaa12fec2b089bf68c1292b7d9e72c4b  tile_grants.json
+e537b1eb9294d79e6253713607cfd685  walk_dayrevenue_tile_s223.py
+c3343f0224804f1c2ecd8955a4a6ea7e  RENDER_TEST_clinic_day_s223.py
+6d467aa96df213d64fb71a821761b3bd  EVIDENCE_walk_tile_s223.txt
+556af7736f86bf14a81239ab99f16e54  EVIDENCE_render_s223.txt
+cb6a8b00438c6dc882cce1a54f6b0bcc  PREDICTED_PINS.txt
+7490ba38f1c71150cadc4c5edaa78df2  INSTALL.txt
+e76bf9509e8cfb980ada0f967c6973f6  README.md

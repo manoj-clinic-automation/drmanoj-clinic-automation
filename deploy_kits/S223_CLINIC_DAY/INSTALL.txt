@@ -1,0 +1,14 @@
+S223_CLINIC_DAY -- ONE PASTE, on the VPS.
+
+PRECONDITIONS, both already live: S223_DOCTERZ_READER (the table must exist and have days in it)
+and S223_CORRECTIONS_TILE (portal.py must be at fbd4029b). Both patchers refuse otherwise.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S223_CLINIC_DAY && md5sum -c SUMS.md5 --quiet && \cp finance_clinic_day.py patch_finance_app_clinicday_s223.py /root/finance/ && \cp patch_portal_dayrevenue_tile_s223.py tile_grants.json /root/portal/ && /root/wa/venv/bin/python3 -B /root/finance/patch_finance_app_clinicday_s223.py && /root/wa/venv/bin/python3 -B /root/portal/patch_portal_dayrevenue_tile_s223.py && systemctl restart clinic-finance.service && systemctl restart clinic-portal && sleep 4 && md5sum /root/finance/finance_app.py /root/portal/portal.py /root/portal/tile_grants.json && curl -s -o /dev/null -w "clinic/day -> %{http_code}\n" https://followup.dr-manoj.in/finance/clinic/day
+
+Expect:
+  finance_app.py    fd478faf9fb8142234554564feb24ed8
+  portal.py         e2f907527113588e7ce8287d678525a1
+  tile_grants.json  aaa12fec2b089bf68c1292b7d9e72c4b
+  clinic/day -> 302   (the SSO redirect -- signed out, that is the CORRECT answer)
+
+Then open it signed in:  https://followup.dr-manoj.in/finance/clinic/day

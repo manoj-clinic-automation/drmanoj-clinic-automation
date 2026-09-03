@@ -1,0 +1,65 @@
+S223_CLINIC_DAY -- the tile walk, run offline before the paste.
+
+METHOD: portal.py's OWN _visible_sections() executed out of a byte-exact reproduction of the
+live file, over every user x role x PC, before and after the patch.
+
+NOTE ON READING SECTION 1: the walk enumerates every NAME against every ROLE, including
+combinations that do not exist -- there is no 'amir as doctor' login. That is deliberate: if a
+tile could ever leak through a role, the walk shows it. What matters is section 2.
+
+-- 1  every change, over 48 combinations ----------------------------
+     alisha   role=doctor   pc=False  +['Day Revenue']  -[]
+     alisha   role=doctor   pc=True   +['Day Revenue']  -[]
+     alisha   role=manager  pc=False  +['Day Revenue']  -[]
+     alisha   role=manager  pc=True   +['Day Revenue']  -[]
+     alisha   role=staff    pc=False  +['Day Revenue']  -[]
+     alisha   role=staff    pc=True   +['Day Revenue']  -[]
+     amir     role=doctor   pc=False  +['Day Revenue']  -[]
+     amir     role=doctor   pc=True   +['Day Revenue']  -[]
+     bhawna   role=doctor   pc=False  +['Day Revenue']  -[]
+     bhawna   role=doctor   pc=True   +['Day Revenue']  -[]
+     bhawna   role=manager  pc=False  +['Day Revenue']  -[]
+     bhawna   role=manager  pc=True   +['Day Revenue']  -[]
+     bhawna   role=staff    pc=False  +['Day Revenue']  -[]
+     bhawna   role=staff    pc=True   +['Day Revenue']  -[]
+     darpan   role=doctor   pc=False  +['Day Revenue']  -[]
+     darpan   role=doctor   pc=True   +['Day Revenue']  -[]
+     manoj    role=doctor   pc=False  +['Day Revenue']  -[]
+     manoj    role=doctor   pc=True   +['Day Revenue']  -[]
+     manoj    role=manager  pc=False  +['Day Revenue']  -[]
+     manoj    role=manager  pc=True   +['Day Revenue']  -[]
+     manoj    role=staff    pc=False  +['Day Revenue']  -[]
+     manoj    role=staff    pc=True   +['Day Revenue']  -[]
+     nobody   role=doctor   pc=False  +['Day Revenue']  -[]
+     nobody   role=doctor   pc=True   +['Day Revenue']  -[]
+     shavez   role=doctor   pc=False  +['Day Revenue']  -[]
+     shavez   role=doctor   pc=True   +['Day Revenue']  -[]
+     shavez   role=manager  pc=False  +['Day Revenue']  -[]
+     shavez   role=manager  pc=True   +['Day Revenue']  -[]
+     shavez   role=staff    pc=False  +['Day Revenue']  -[]
+     shavez   role=staff    pc=True   +['Day Revenue']  -[]
+     shivani  role=doctor   pc=False  +['Day Revenue']  -[]
+     shivani  role=doctor   pc=True   +['Day Revenue']  -[]
+     shivani  role=manager  pc=False  +['Day Revenue']  -[]
+     shivani  role=manager  pc=True   +['Day Revenue']  -[]
+     shivani  role=staff    pc=False  +['Day Revenue']  -[]
+     shivani  role=staff    pc=True   +['Day Revenue']  -[]
+  PASS  the only thing gained anywhere is Day Revenue
+  PASS  nothing is lost anywhere
+
+-- 2  the owner's list, exactly -------------------------------------
+  PASS  the tile reaches exactly the five he named, and nobody else   [got ['alisha', 'bhawna', 'manoj', 'shavez', 'shivani'], wanted ['alisha', 'bhawna', 'manoj', 'shavez', 'shivani']]
+  PASS  the owner and Dr Bhawna have it as doctors
+  PASS  darpan does NOT have it (he was not on the list)
+  PASS  amir does NOT have it
+  PASS  a brand-new staff login does NOT have it
+
+-- 3  fail-safe: grants file gone -----------------------------------
+  PASS  no staff login sees it without the grants file (fail CLOSED)
+  PASS  the owner still sees it without the grants file (never locked out)
+
+-- 4  where it lands ------------------------------------------------
+     manoj   doctor  [Money & Accounts] UPI Sheet, Vehicle Tracking, Monthly Accounting, Daily Sale, Vaapsi Desk, Stock Check, Corrections, Day Revenue, Sanjeevni Medicos, Clinic
+     shavez  staff   [Money & Accounts] Vaapsi Desk, Stock Check, Day Revenue, Daily Collection, Clinic
+
+GREEN  8 checks, 0 failed

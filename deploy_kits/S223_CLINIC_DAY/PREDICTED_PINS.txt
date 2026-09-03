@@ -1,0 +1,15 @@
+S223_CLINIC_DAY -- predicted pins (LF, VPS-side; F-294)
+
+/root/finance/finance_app.py    f7dd9e57231454c17bcb4687d38165ca  ->  fd478faf9fb8142234554564feb24ed8
+/root/finance/finance_clinic_day.py                          NEW  ->  (see SUMS.md5)
+/root/portal/portal.py          fbd4029b3dec43cb9586950b80b15fc1  ->  e2f907527113588e7ce8287d678525a1
+/root/portal/tile_grants.json   bfdf40dd4bde510010ae358e5c432bcb  ->  aaa12fec2b089bf68c1292b7d9e72c4b
+
+HOW THE finance_app FROM-PIN WAS ESTABLISHED, since nothing in any store held those bytes:
+  S217/218 live capture  80c2323a82de81de17093df78b0a3139   (Downloads/_live_S219/finance_app.py)
+    -> S219_MARG_AUTOAPPLY            b42b1f08a7bb9b11f212f33f577d142d
+    -> S219_RETURNS_M7                a57980c29c9838aedc1a41ef55f484f5   == the S219 close pin
+    -> S220_DAY_TOTAL_TRUTH           f7dd9e57231454c17bcb4687d38165ca   == the S220 close pin
+Every intermediate matched its recorded pin. The patcher is anchored on bytes that were read.
+
+RESTARTS: clinic-finance.service (finance_app changed) and clinic-portal (portal.py changed).

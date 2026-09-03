@@ -1,0 +1,49 @@
+S223_CLINIC_DAY -- the RENDER test, run before the paste.
+
+METHOD: the real blueprint mounted on a real Flask app, over a real sqlite database filled by
+the real ingester from eight real workbooks, and the page requested over HTTP. Assertions are
+on the bytes a browser would receive -- not on the source. F-289: a wrong code point rendered
+as a Devanagari letter and passed every text-level check; only a renderer proves a page.
+
+-- 0  fill the store with the real ingester --------------------------
+Drive: 8 day files in the folder
+  Staff_Action_Today_2026-07-07.xlsx     -> 2026-07-06  Rs 20500    35 lines
+  Staff_Action_Today_2026-07-21.xlsx     -> 2026-07-20  Rs 16500    28 lines   [the sheet's own cash+online Rs 17100 does not equal its own total Rs 16500 (difference Rs 600)]
+  Staff_Action_Today_2026-07-30.xlsx     -> 2026-07-29  Rs 8400     14 lines   [the sheet's own cash+online Rs 9000 does not equal its own total Rs 8400 (difference Rs 600)]
+  Staff_Action_Today_2026-08-19.xlsx     -> 2026-08-18  Rs 16300    26 lines   [the sheet's own cash+online Rs 15700 does not equal its own total Rs 16300 (difference Rs 600)]
+  Staff_Action_Today_2026-08-20.xlsx     -> 2026-08-19  Rs 16400    26 lines   [the sheet's own cash+online Rs 15800 does not equal its own total Rs 16400 (difference Rs 600)]
+  Staff_Action_Today_2026-09-02.xlsx     -> 2026-09-01  Rs 7200      9 lines
+  Staff_Action_Today_2026-09-03.xlsx     -> 2026-09-02  Rs 20900    27 lines
+  Staff_Action_Today_2026-09-04.xlsx     -> 2026-09-03  Rs 16800    28 lines
+read 8, skipped 0 unchanged, failed 0; clinic_day_revenue now holds 8 days
+  PASS  ingest ran clean
+
+-- 1  the page renders, and the gate is real -------------------------
+  PASS  HTTP 200 for a clinic checker   [200]
+  PASS  it is a complete HTML document
+  PASS  someone with no clinic role is refused, in words not a stack trace
+  PASS  the refusal leaks no money at all
+
+-- 2  the numbers on the page ARE the numbers in the table -----------
+  PASS  the newest day's total appears on the page (Rs 16,800)
+  PASS  the month footer total is the sum of its own days (Rs 44,900 over 3 days)
+  PASS  every day of that month has a row
+
+-- 3  D367: the sheet's own figures are NOWHERE on the page ----------
+  PASS  on days where the sheet DISAGREES with the lines, the sheet's figure is not shown (3 such figures in this month)   [[]]
+  PASS  the word 'variance' never reaches the reader
+
+-- 4  print and PDF ---------------------------------------------------
+  PASS  a Print / Save as PDF control exists
+  PASS  the print stylesheet hides the navigation
+  PASS  no <script> tag anywhere -- nothing to fail silently
+
+-- 5  the empty and missing cases say so ------------------------------
+  PASS  a month with no data says so instead of showing zero
+  PASS  with no table at all the page is empty and says so, not a 500
+
+-- 6  F-185 ----------------------------------------------------------
+  PASS  no mobile-shaped number on the page
+  PASS  no Docterz patient-UID shape on the page
+
+GREEN  16 checks, 0 failed
