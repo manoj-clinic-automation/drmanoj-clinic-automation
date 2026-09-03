@@ -1,0 +1,28 @@
+ * Serving Flask app 'RENDER_TEST_jaankari_s221'
+  PASS  no javascript error on load
+  PASS  every request the page made returned 2xx (favicon aside)
+  PASS  the jaankari card is VISIBLE (not just present in the html)
+  PASS  it says answering changes no money
+  PASS  the dispute question is on screen
+  PASS  the FULL mobile is on screen (D363)
+  PASS  the spot-count question is on screen
+  PASS  the identity-needed question is on screen too
+  PASS  its rupee value is shown the way he reads money
+  PASS  no score, verdict, ratio or percentage is shown to him
+  PASS  the button 'यह सही है' is rendered
+  PASS  the button 'बिल ढूँढ़ो' is rendered
+  PASS  the button 'पता नहीं' is rendered
+  PASS  after the tap the dispute row LEAVES his list
+  PASS  and he is thanked
+  PASS  still no javascript error after the tap
+  PASS  tapping 'bill dhoondho' on an identity row clears it too
+  PASS  after the count the spot row LEAVES his list too
+  PASS  no javascript error at any point
+  PASS  no failed request at any point (favicon aside)
+  PASS  the browser's three taps wrote exactly three evidence rows
+  PASS  the identity tap recorded 'find_bill'
+  PASS  the tap recorded 'ok' for the dispute
+  PASS  the typed count reached the record as 7
+  PASS  the dispute is STILL OPEN after a real human tap
+  PASS  the spot check is STILL DUE after a real typed count
+RENDER GREEN -- 26 passed, 0 failed

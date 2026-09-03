@@ -1,0 +1,30 @@
+S221_JAANKARI -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  0  copy the THREE kit files into /root/finance/  (the one-paste block is in the chat)
+  1  /root/wa/venv/bin/python3 -B /root/finance/patch_desk_jaankari_s221.py
+  2  /root/wa/venv/bin/python3 -B /root/finance/patch_deskpage_jaankari_s221.py
+  3  /root/wa/venv/bin/python3 -B /root/finance/walk_jaankari_s221.py     (expect: WALK GREEN)
+  4  systemctl restart clinic-finance.service
+  5  md5sum /root/finance/returns_desk.py /root/finance/returns_desk.html
+
+Step 3 runs on a COPY of finance.db in /tmp -- it never touches the live database.
+Step 5 must print the two PREDICTED PINS. If either differs, say so; nothing else.
+
+RENDER_TEST_jaankari_s221.py does NOT run on the box -- the VPS has no browser. It ran
+offline against these exact bytes; EVIDENCE_render_s221.txt is its output and
+EVIDENCE_render_s221.png is the screen it photographed.
+
+Both patchers refuse and change nothing unless their anchors match exactly once, keep a
+timestamped .bak beside the file, and (the .py one) restore it if the result will not
+compile. Re-running either says "already patched". The page patcher additionally refuses
+if the script tags come out unbalanced. The `jaankari_answer` table is created by the
+desk's own schema on first use; no migration step. Rolling back = restore the two .bak
+files and restart.
+
+WHAT DARPAN SEES AFTER THE RESTART: one new card on the desk he already uses, only when
+there is something to ask. It hides itself when there is nothing. Nothing he taps there
+moves money, re-attaches a patient, closes a dispute or completes a spot count.
+
+ONE SETTING, IF YOU EVER WANT THE BACKLOG WORKED (it is deliberately NOT the default):
+  returns.act_from = 2026-06-18   -> opens ~22 historical WALK-IN returns onto his list.
+  Absent, the code uses 2026-09-02: the day the identity machinery went live. D361.

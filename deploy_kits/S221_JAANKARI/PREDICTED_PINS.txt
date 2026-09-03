@@ -1,0 +1,7 @@
+# S221_JAANKARI -- pins PREDICTED OFFLINE by applying the two patchers to the
+# S214-close live bytes, which the repo kit S214_RETURNS_DESK holds byte-identical
+# to the live pins (verified before building: returns_desk.py afc8b0d0...,
+# returns_desk.html 32c4b8cc... -- no reproduction chain was needed).
+# The owner's md5sum at INSTALL step 5 must read exactly these.
+1dc1fd6229e74c60e0eceb4a14db8aeb  /root/finance/returns_desk.py
+6d98e1b076d14ad0c70a200406e901b1  /root/finance/returns_desk.html

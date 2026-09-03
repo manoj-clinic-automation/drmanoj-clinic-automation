@@ -1,0 +1,7 @@
+S221_JAANKARI · built 03-Sep-2026 · Session 221 · star-1-1 (Darpan's Hindi list)
+Targets (live pins): returns_desk.py afc8b0d0 -> 1dc1fd62 · returns_desk.html 32c4b8cc -> 6d98e1b0
+Proven offline: live-shape walk 31/31 through the REAL blueprint on a copy of the live db --
+including the ruling itself as a measurement: EXACTLY ONE TABLE CHANGED (jaankari_answer).
+Plus RENDER 22/22: headless chromium on a 390px phone screen actually tapping the buttons
+(the standing rule for this page since S214 shipped it with dead taps).
+Two live files. No other file moves. Nothing on this page can act.

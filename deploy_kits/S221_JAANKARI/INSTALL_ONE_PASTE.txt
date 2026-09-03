@@ -1,0 +1,11 @@
+ONE PASTE on the VPS after the publish. Guards both current pins, patches, runs the walk on a
+COPY of the db, restarts, prints the two new pins.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S221_JAANKARI && md5sum -c SUMS.md5 --quiet && test "$(md5sum /root/finance/returns_desk.py | cut -d' ' -f1)" = "afc8b0d04214e2fd32b2d4b781cc60b4" && test "$(md5sum /root/finance/returns_desk.html | cut -d' ' -f1)" = "32c4b8ccd0ce51f54f9f5bb2bbdabc1c" && \cp patch_desk_jaankari_s221.py patch_deskpage_jaankari_s221.py walk_jaankari_s221.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_desk_jaankari_s221.py && /root/wa/venv/bin/python3 -B /root/finance/patch_deskpage_jaankari_s221.py && /root/wa/venv/bin/python3 -B /root/finance/walk_jaankari_s221.py | tail -1 && systemctl restart clinic-finance.service && sleep 2 && journalctl -u clinic-finance.service --since "-1 min" --no-pager | tail -1 && md5sum /root/finance/returns_desk.py /root/finance/returns_desk.html
+
+Expected at the end:  WALK GREEN -- 31 passed, 0 failed
+                      1dc1fd6229e74c60e0eceb4a14db8aeb  /root/finance/returns_desk.py
+                      6d98e1b076d14ad0c70a200406e901b1  /root/finance/returns_desk.html
+
+If either pin guard fails, the live file is not what this kit was built on and NOTHING has been
+changed -- say so and stop. If the walk is not GREEN, restore the two .bak files and stop.

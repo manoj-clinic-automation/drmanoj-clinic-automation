@@ -1,0 +1,32 @@
+  PASS  the patched desk is the one under test
+  PASS  the WALK-IN return population is real, not seeded (0 rows since 2026-09-02)
+  PASS  the desk page still serves
+  PASS  the page carries the jaankari card
+  PASS  the page loads the list on open
+  PASS  the page still carries the three-step flow it had before
+  PASS  the list endpoint answers
+  PASS  it answers ok
+  PASS  the seeded dispute is on the list
+  PASS  the seeded spot count is on the list
+  PASS  the identity list matches the real WALK-IN population
+  PASS  D361 -- it does NOT reach into the accepted past (121 older rows left alone)
+  PASS  the dispute names both names
+  PASS  the FULL mobile is beside the name (D363)
+  PASS  he is shown no score, verdict, ratio or flag anywhere in the payload
+  PASS  an answer is accepted
+  PASS  a spot COUNT is accepted
+  PASS  an answer that is not one of the four is REFUSED
+  PASS  an invented list name is REFUSED
+  PASS  the answered dispute now carries his answer
+  PASS  it records WHO answered
+  PASS  the count he gave is recorded as its value
+  PASS  EXACTLY ONE TABLE CHANGED, and it is jaankari_answer
+  PASS  the dispute is STILL OPEN -- his answer did not close it
+  PASS  the spot check is STILL DUE -- the owner still taps counted
+  PASS  exactly the two good answers were written (the two bad ones wrote nothing)
+  PASS  changing his mind keeps BOTH answers -- the table is evidence, not state
+  PASS  the latest answer is the one shown
+  PASS  the slips endpoint is untouched and still answers
+  PASS  patient search is untouched and still answers
+  PASS  with nothing to ask, every list is empty (the card hides itself)
+WALK GREEN -- 31 passed, 0 failed
