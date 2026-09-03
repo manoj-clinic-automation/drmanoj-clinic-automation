@@ -1,0 +1,7 @@
+# S221_TWO_PRICES -- pins PREDICTED OFFLINE. Base reproduced first and md5-proven:
+#   S213 stock_app.py 83b0a1b0  +  patch_stock_finding_s221.py  =  ed2f76ef (what is live now)
+#   then this kit's patcher                                      =  c627e440
+# The owner's md5sum at INSTALL step 7 must read exactly these.
+c627e440ac8ebe2a867c93fc8eaa19d4  /root/finance/stock_app.py
+99bf7a7841b8f281f37da0823fbe691d  /root/finance/stock_finding.html
+4985f1cb1605257c58c9a33c662a1aed  /root/finance/stock_drift.html

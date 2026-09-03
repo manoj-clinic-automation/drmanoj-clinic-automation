@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock drift — computed vs Marg</title>
+<style>
+:root{--ink:#1a1a1a;--muted:#5b5b5b;--line:#d9d9d9;--bg:#fafafa;--warn:#8a5300;
+      --bad:#8c1d18;--ok:#14532d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+     font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;
+      margin-bottom:14px}
+h1{font-size:19px;margin:0 0 4px}
+h2{font-size:16px;margin:0 0 8px}
+.muted{color:var(--muted);font-size:13.5px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left}
+th{font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.bad{color:var(--bad)}.ok{color:var(--ok)}.warn{color:var(--warn)}
+.spark{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:var(--muted)}
+.note{border-left:3px solid var(--warn);padding:9px 12px;background:#fffaf1;
+      border-radius:0 8px 8px 0}
+</style></head>
+<body><div class="wrap">
+
+<div class="card">
+  <h1>Stock drift — what we computed against what Marg says</h1>
+  <div class="muted">One row per item. A gap of the <b>same size on every run</b> is
+    arithmetic — a bug in the computation. A gap that appears <b>after weeks of
+    agreement</b> is the shelf. Only a series can tell them apart, which is why every
+    pushed figure is kept instead of compared and thrown away.</div>
+  <div id="warn" class="note" style="margin-top:10px;display:none"></div>
+</div>
+
+<div class="card">
+  <h2>Items</h2>
+  <div style="overflow-x:auto"><table><thead><tr>
+    <th>Item</th><th class="n">Runs</th><th class="n">Agreed</th><th class="n">Differed</th>
+    <th class="n">Last gap</th><th>Recent</th><th>Reading</th>
+  </tr></thead><tbody id="rows"><tr><td colspan="7" class="muted">loading…</td></tr>
+  </tbody></table></div>
+</div>
+
+<div class="card">
+  <h2>Feeds received</h2>
+  <div class="muted">A day can only be compared when <b>both</b> feeds arrived for it.</div>
+  <div style="overflow-x:auto;margin-top:8px"><table><thead><tr>
+    <th>As on</th><th>Source</th><th class="n">Items</th><th>First</th><th>Last</th>
+  </tr></thead><tbody id="feeds"></tbody></table></div>
+</div>
+
+</div>
+<script>
+var API=location.pathname.replace(/\/page\/drift\/?$/,"");
+function $(i){return document.getElementById(i);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+fetch(API+"/api/drift").then(function(r){return r.json();}).then(function(j){
+  if(!j.ok){$("rows").innerHTML='<tr><td colspan="7">'+esc(j.message||j.error)+"</td></tr>";return;}
+  $("feeds").innerHTML=(j.feeds||[]).map(function(f){
+    return "<tr><td>"+esc(f.as_on)+"</td><td>"+esc(f.source)+'</td><td class="n">'
+      +f.items+"</td><td>"+esc(f.first)+"</td><td>"+esc(f.last)+"</td></tr>";
+  }).join("")||'<tr><td colspan="5" class="muted">Nothing has been pushed yet.</td></tr>';
+  if(!j.comparable){
+    $("warn").style.display="block";
+    $("warn").innerHTML="<b>No day has both feeds yet, so nothing can be compared.</b> "
+      +"Marg's export gives what Marg thinks; <code>push_expected.py</code> gives what the "
+      +"books compute. Until the second one runs daily, this page has nothing to say — and "
+      +"that is the honest state, not an error.";
+  }
+  $("rows").innerHTML=(j.items||[]).map(function(i){
+    var cls=i.disagreed?(i.verdict.indexOf("SAME")>=0?"bad":"warn"):"ok";
+    return "<tr><td>"+esc(i.item)+'</td><td class="n">'+i.runs+'</td><td class="n">'
+      +i.agreed+'</td><td class="n">'+i.disagreed+'</td><td class="n">'+i.last
+      +'</td><td class="spark">'+(i.deltas||[]).join(" ")+'</td><td class="'+cls+'">'
+      +esc(i.verdict)+"</td></tr>";
+  }).join("")||'<tr><td colspan="7" class="muted">Nothing comparable yet.</td></tr>';
+}).catch(function(e){
+  $("rows").innerHTML='<tr><td colspan="7">'+esc(""+e)+"</td></tr>";});
+</script>
+</body></html>

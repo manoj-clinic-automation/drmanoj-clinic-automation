@@ -1,0 +1,9 @@
+S221_TWO_PRICES · built 03-Sep-2026 · Session 221 · the mislabelled money column, corrected
+Targets: stock_app.py ed2f76ef -> c627e440 · stock_finding.html REPLACED · stock_drift.html NEW
+WHY: the live document's "at MRP" column was the LAST PURCHASE RATE. Mine, caught before any
+count existed. Corrected, and a real MRP added from the item's own strip rate (returns_desk's
+own rule) -- MRP/cost median 1.40 over 147 items, 2 below cost.
+ALSO: stock_feed, append-only. push_expected and push_snapshot post to the SAME endpoint and
+stock_snapshot is last-write-wins, so the two figures for one shelf overwrite each other. The
+walk proves the collision and proves the log survives it.
+Proven offline: WALK 63/63 · RENDER 35/35 (chromium, owner + counter + the drift page).

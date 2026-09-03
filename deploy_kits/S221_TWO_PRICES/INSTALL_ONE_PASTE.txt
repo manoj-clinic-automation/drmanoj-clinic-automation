@@ -1,0 +1,12 @@
+ONE PASTE on the VPS after the publish. Guards the current pin, patches, drops both pages in,
+runs the walk with its EXIT CODE CHECKED, then stops so you can read it before the restart.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S221_TWO_PRICES && md5sum -c SUMS.md5 --quiet && test "$(md5sum /root/finance/stock_app.py | cut -d' ' -f1)" = "ed2f76efdb90f9ee9b40d644de2598b4" && \cp patch_stock_prices_s221.py walk_stock_prices_s221.py /root/finance/ && \cp stock_finding.html stock_drift.html /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_stock_prices_s221.py && /root/wa/venv/bin/python3 -B /root/finance/walk_stock_prices_s221.py > /tmp/walk_tp.txt; echo "WALK EXIT=$?"; tail -2 /tmp/walk_tp.txt; grep -c '^  FAIL' /tmp/walk_tp.txt
+
+WALK EXIT must be 0 and the FAIL count must be 0. Only then:
+
+systemctl restart clinic-finance.service && sleep 2 && md5sum /root/finance/stock_app.py /root/finance/stock_finding.html /root/finance/stock_drift.html
+
+Expected:  c627e440ac8ebe2a867c93fc8eaa19d4  /root/finance/stock_app.py
+           99bf7a7841b8f281f37da0823fbe691d  /root/finance/stock_finding.html
+           4985f1cb1605257c58c9a33c662a1aed  /root/finance/stock_drift.html

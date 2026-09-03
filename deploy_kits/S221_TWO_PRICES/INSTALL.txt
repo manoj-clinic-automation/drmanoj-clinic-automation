@@ -1,0 +1,24 @@
+S221_TWO_PRICES -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  0  copy the kit files into /root/finance/  (the one-paste block is in the chat)
+  1  /root/wa/venv/bin/python3 -B /root/finance/patch_stock_prices_s221.py
+  2  \cp /root/deploy/repo/deploy_kits/S221_TWO_PRICES/stock_finding.html /root/finance/
+  3  \cp /root/deploy/repo/deploy_kits/S221_TWO_PRICES/stock_drift.html /root/finance/
+  4  /root/wa/venv/bin/python3 -B /root/finance/walk_stock_prices_s221.py  (expect WALK GREEN 63/63)
+  5  systemctl restart clinic-finance.service
+  6  open  https://followup.dr-manoj.in/finance/stock/page/drift
+  7  md5sum /root/finance/stock_app.py /root/finance/stock_finding.html /root/finance/stock_drift.html
+
+Step 4 runs on a COPY of finance.db in /tmp -- it never touches the live database.
+Step 6 will say no day can be compared yet. That is correct until push_expected.py runs.
+Step 7 must print the three PREDICTED PINS. If any differs, say so; nothing else.
+
+The patcher refuses unless all seven anchors match exactly once, keeps a timestamped .bak,
+and restores it if the result will not compile. Re-running says "already patched".
+`stock_feed` is created lazily on the first push. Rolling back = restore the .bak, put back
+the previous stock_finding.html, delete stock_drift.html, restart.
+
+AFTER THIS, THE DAILY PUSH CAN BE UN-PARKED SAFELY:
+  D:\dr-manoj-git\drmanoj-clinic-automation\deploy_kits\S208_STOCK_LEDGER\  (via
+  D:\Downloads\margsync\PUSH_STOCK_DAILY.bat on the medical PC, mid-morning)
+Until this kit is in, running it risks the two feeds overwriting each other silently.

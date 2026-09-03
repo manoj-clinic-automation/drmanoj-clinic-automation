@@ -1,0 +1,37 @@
+ * Serving Flask app 'RENDER_TEST_prices_s221'
+  PASS  no javascript error on the document
+  PASS  the finding is titled and numbered
+  PASS  it names the Marg export it was counted against
+  PASS  it names the people who counted and wrote
+  PASS  the seal is shown and reads as unchanged
+  PASS  it states the basis in words, on the document itself
+  PASS  the document now says where the MRP figure comes from
+  PASS  and where the cost figure comes from
+  PASS  the old claim that cost is unavailable is GONE
+  PASS  the coverage of the two prices is stated on the page
+  PASS  the shortage at cost still shows (Rs 20.00 for 8 units at Rs 2.50)
+  PASS  an item with NEITHER price has its own block, outside every total
+  PASS  and the block says why -- never bought, never sold
+  PASS  it says in plain words that nothing is deducted
+  PASS  the owner is offered the three decisions
+  PASS  and they are real buttons, three per valued line
+  PASS  the owner is NOT offered the staff's reason buttons
+  PASS  after the tap the line reads 'written off'
+  PASS  and the written-off total is no longer zero
+  PASS  a Written off list appeared
+  PASS  still no javascript error
+  PASS  the page carries a print stylesheet
+  PASS  the buttons are marked not-to-print
+  PASS  there are signature lines for the hard copy
+  PASS  the counter gets the SAME document
+  PASS  the counter is offered the reasons, in Hindi
+  PASS  the counter is offered NO decision button at all
+  PASS  but he is offered the reason buttons
+  PASS  his answer appears on the line with his name
+  PASS  no javascript error on the phone view
+  PASS  the drift page renders
+  PASS  no javascript error on it
+  PASS  with nothing to compare it SAYS so, rather than showing an empty table
+  PASS  it explains the difference between a bug and a shelf, in words
+  PASS  the browser's clicks wrote exactly one decision and one answer
+RENDER GREEN -- 35 passed, 0 failed
