@@ -1,0 +1,5 @@
+S223_CORRECTIONS_TILE -- ONE PASTE, on the VPS. Install S223_LAUNCH_TILES FIRST (F-298).
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S223_CORRECTIONS_TILE && md5sum -c SUMS.md5 --quiet && \cp patch_portal_corrections_tile_s223.py /root/portal/ && /root/wa/venv/bin/python3 -B /root/portal/patch_portal_corrections_tile_s223.py && systemctl restart clinic-portal && sleep 3 && md5sum /root/portal/portal.py
+
+Expect  fbd4029b3dec43cb9586950b80b15fc1

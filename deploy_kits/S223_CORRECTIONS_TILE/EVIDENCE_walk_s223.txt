@@ -1,0 +1,40 @@
+S223_CORRECTIONS_TILE -- the walk, run offline before the paste.
+
+METHOD: portal.py's own _visible_sections() executed out of the patched file, over every
+user x role x PC, against the same file before the patch.
+
+NOTE ON READING SECTION 1: the walk enumerates every NAME against every ROLE, including
+combinations that do not exist -- there is no "darpan as doctor" login. It is written that way
+on purpose: if a tile could ever leak through a role, the walk shows it. What matters is that
+every changed row is a doctor session and no staff or manager session anywhere gains the tile.
+-- 1  who changes (48 combinations) ---------------------------------
+     alisha   role=doctor   pc=False  +['Corrections']  -[]
+     alisha   role=doctor   pc=True   +['Corrections']  -[]
+     amir     role=doctor   pc=False  +['Corrections']  -[]
+     amir     role=doctor   pc=True   +['Corrections']  -[]
+     bhawna   role=doctor   pc=False  +['Corrections']  -[]
+     bhawna   role=doctor   pc=True   +['Corrections']  -[]
+     darpan   role=doctor   pc=False  +['Corrections']  -[]
+     darpan   role=doctor   pc=True   +['Corrections']  -[]
+     manoj    role=doctor   pc=False  +['Corrections']  -[]
+     manoj    role=doctor   pc=True   +['Corrections']  -[]
+     nobody   role=doctor   pc=False  +['Corrections']  -[]
+     nobody   role=doctor   pc=True   +['Corrections']  -[]
+     shavez   role=doctor   pc=False  +['Corrections']  -[]
+     shavez   role=doctor   pc=True   +['Corrections']  -[]
+     shivani  role=doctor   pc=False  +['Corrections']  -[]
+     shivani  role=doctor   pc=True   +['Corrections']  -[]
+  PASS  every change is a doctor session
+  PASS  the only thing gained anywhere is Corrections
+  PASS  nothing is lost anywhere
+  PASS  no staff or manager session sees it
+  PASS  the owner sees it on the phone
+
+-- 2  fail-safe: grants file gone ----------------------------------
+  PASS  the owner still sees it with no grants file
+  PASS  no staff session sees it with no grants file
+
+-- 3  the owner's Money & Accounts section, after -------------------
+     [Money & Accounts] UPI Sheet, Vehicle Tracking, Monthly Accounting, Daily Sale, Vaapsi Desk, Stock Check, Corrections, Sanjeevni Medicos, Clinic
+
+GREEN  7 checks, 0 failed

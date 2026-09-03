@@ -1,0 +1,6 @@
+S223_CORRECTIONS_TILE -- predicted pins (LF, VPS-side; F-294)
+
+/root/portal/portal.py   2cfd2f62a1c46671f0facf04c1c9e774  ->  fbd4029b3dec43cb9586950b80b15fc1
+
+CHAINED on S223_LAUNCH_TILES. Refuses on any other from-pin.
+tile_grants.json is NOT touched. Restart clinic-portal once.
