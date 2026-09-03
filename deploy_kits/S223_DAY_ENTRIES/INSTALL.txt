@@ -1,0 +1,12 @@
+S223_DAY_ENTRIES -- ONE PASTE, on the VPS.
+
+No patcher. finance_app.py and portal.py do NOT change -- the mount and the tile are already
+there. Three module files are replaced and the reader is re-run with --all so the new per-entry
+table fills for all 68 days already stored.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S223_DAY_ENTRIES && md5sum -c SUMS.md5 --quiet && \cp docterz_day.py docterz_ingest.py finance_clinic_day.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/docterz_ingest.py --all && systemctl restart clinic-finance.service && sleep 3 && md5sum /root/finance/finance_clinic_day.py /root/finance/docterz_day.py
+
+The --all pass re-reads all 71 workbooks from Drive; it takes a couple of minutes. Expect the
+last line to read "...now holds 68 days and about 2,300 lines".
+
+Then open a day: https://followup.dr-manoj.in/finance/clinic/day  and click any date.
