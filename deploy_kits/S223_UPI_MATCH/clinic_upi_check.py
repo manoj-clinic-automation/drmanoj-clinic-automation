@@ -162,6 +162,17 @@ def main():
                       "not missing money. Re-run push_day_tenders.py on the clinic PC before "
                       "reading anything into this day." % (abs(diff) // 100, f["unresolved"] // 100))
             sev = "low"
+        elif bank == 0 and ours > 0:
+            # A THIRD state, and it is not the Razorpay one. The clinic plainly took online money
+            # and the feed has not a single transaction for that date -- that is a statement that
+            # never arrived or never ingested, not money that went missing. Measured over the
+            # first 59 days: five such days, all in June and early July.
+            detail = ("the bank feed has NO clinic transaction at all for this date, while our "
+                      "lines show Rs %d of online money. That is a MISSING STATEMENT, not missing "
+                      "money -- check whether the MPR for this date was ever received and "
+                      "ingested. Nothing should be read into the amount until it is."
+                      % (ours // 100))
+            sev = "medium"
         elif diff > 0:
             detail = ("bank UPI is Rs %d ABOVE what the Docterz lines call online. The likely "
                       "cause is a bill paid by UPI and rung at the counter as CASH -- in which "
@@ -169,7 +180,8 @@ def main():
                       "about the same amount, which is what to check at the drawer. Card is not "
                       "in this comparison: the ICICI feed carries none." % (diff // 100))
         else:
-            detail = ("our lines are Rs %d ABOVE the bank UPI feed -- the opposite direction, and "
+            detail = ("our lines are Rs %d ABOVE the bank UPI feed, which HAS transactions for "
+                      "this date -- the opposite direction, and "
                       "the uncommon one. Two known causes, neither a loss: a RAZORPAY portal "
                       "consultation (it is in Docterz, settles to Yes Bank, and never appears in "
                       "the MPR), or this day's statement not yet ingested. Check the Razorpay "
