@@ -1,0 +1,29 @@
+S222_JOINER_FORMS · built 03-Sep-2026 · Session 222 · the owner's instruction on the joiner screen
+
+"Clicking on new joiner and exit buttons opens a small prompt. It is not contextual. The new
+joiner should open a form... the exit lever should open the page where we can select from the
+staff and then proceed."
+
+IT WAS NOT ONLY A UI COMPLAINT. `/api/open` has ALWAYS accepted the employment type, the list of
+authorities and a chosen username — they are in its signature and its validation, and
+AUTHORITIES is a documented eight-item list. A prompt() can only ask one thing at a time, so the
+page never asked. EVERY JOIN SINCE S208 WAS FILED AS "FULLTIME" WITH NO AUTHORITIES AT ALL. The
+register was built to capture the shape of a person's job at DECIDED; the screen in front of it
+threw that away, silently, for fourteen sessions.
+
+  NEW JOINER  → a form: name · job · employment · portal login · what he may do · opened by.
+                Employment and the authority list are READ FROM THE REGISTER, never hard-coded.
+  EXIT        → a picker of real people, from the portal logins and the register. NOTHING IS
+                TYPED — a typed leaver's name is how one person becomes two records in
+                attendance and in salary, which is the failure this register exists to stop.
+                Anyone with an exit already open shows as in progress and cannot be started twice.
+  HOME        → "👥 All logins": every portal login, role and state, so this page is the one
+                place a person is looked up.
+
+Targets (live pins):
+  /root/finance/joiner_app.py      1ebab919 -> d3f4c802   (RESTART — python)
+  /root/finance/staff_manage.html  eb4e415d -> 8300adab   (no restart)
+
+PROVEN: RENDER GREEN 30/30 — chromium filling the form, and then THE DATABASE READ BACK to prove
+employment=BIWEEKLY and three authorities actually landed; the exit picker offering five real
+people with no text box on the screen; and one exit started, then refused a second time.

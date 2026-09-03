@@ -1,0 +1,9 @@
+# S222_JOINER_FORMS -- predicted from the exact live bytes of both files.
+#
+# The server patcher refuses unless joiner_app.py is 1ebab9190a33ee9e1691508e818a7c45.
+# The page installer refuses unless staff_manage.html is eb4e415de611f027c05929338f256a59
+# (the S222_STAFF_ENGLISH result), and re-hashes after writing, restoring on any mismatch.
+#
+# The owner's md5sum after installing must read exactly:
+d3f4c802182c386daf644953bf215595  /root/finance/joiner_app.py
+8300adab775d7e7918c7ed9d07344901  /root/finance/staff_manage.html

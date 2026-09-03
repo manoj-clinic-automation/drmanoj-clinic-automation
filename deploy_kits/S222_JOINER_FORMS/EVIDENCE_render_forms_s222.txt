@@ -1,0 +1,54 @@
+-- 0  what is under test ------------------------------------------
+  PASS  joiner_app carries the S222 FORMS routes
+  PASS  the page carries the joiner form
+  PASS  the old two-prompt openFlow is gone
+
+-- 1  ALL LOGINS on the home screen ------------------------------
+  PASS  every login in the store is listed   [login	role	state	created
+alisha	staff	active	2026-09-03
+amir	staff	active	2026-09-03
+darpa]
+  PASS  their state is shown
+  PASS  it points at the portal's own page for add/remove
+
+-- 2  NEW JOINER IS A FORM, NOT A CHAIN OF PROMPTS ---------------
+  PASS  no dialog was raised   [[]]
+  PASS  the form has a full name field
+  PASS  the form has a job field
+  PASS  the form has a portal login field
+  PASS  the form has a opened by field
+  PASS  employment choices came from the register   [3]
+  PASS  the authorities list came from the register (8 of them)   [['expiry_check', 'purchase_entry', 'purchase_order', 'reception', 'returns', 'salt_fix', 'self', 'stock_count']]
+  PASS  'purchase_order' is offered
+
+-- 3  FILL IT, AND THE VALUES MUST REACH THE DATABASE ------------
+  PASS  the login was derived from the first name   [zahir]
+  PASS  his record opened
+  PASS  no dialog was raised anywhere in the join   [[]]
+  PASS  EMPLOYMENT was recorded (the prompts always lost this)   [BIWEEKLY]
+  PASS  the AUTHORITIES were recorded (the prompts always lost these)   [purchase_order,self,stock_count]
+  PASS  the job was recorded   [purchase]
+  PASS  the username was recorded   [zahir]
+  PASS  no javascript error
+
+-- 4  EXIT IS A PICKER: nothing is typed -------------------------
+  PASS  no dialog was raised   [[]]
+  PASS  the real people are offered   [who	login	
+alisha staff	alisha	start exit
+amir staff	amir	start exit
+darpan staff	darpan	start exit
+]
+  PASS  there is no free-text name box on this screen
+  PASS  each of them has a 'start exit' button   [6]
+
+-- 5  START ONE, AND IT SHOWS AS IN PROGRESS ---------------------
+  PASS  the exit ladder opened for him
+  PASS  he now reads as an exit in progress   [who	login	
+alisha staff	alisha	start exit
+amir staff	amir	start exit
+darpan staff	darpan	start exit
+shavez staff	shavez	]
+  PASS  and cannot be started twice   [5]
+  PASS  no javascript error at any point
+
+RENDER GREEN -- 30 passed, 0 failed

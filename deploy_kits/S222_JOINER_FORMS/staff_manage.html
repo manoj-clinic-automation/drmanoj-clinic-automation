@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Staff — joining and leaving</title>
+<style>
+ body{font:15px/1.5 system-ui,sans-serif;margin:0 auto;max-width:720px;
+      background:#f6f4f1;color:#1c1c1c;padding:14px 14px 50px}
+ h1{font-size:20px;margin:6px 0 2px}
+ .sub{color:#777;font-size:13px;margin-bottom:12px}
+ .sec{background:#fff;border:1px solid #e4e0da;border-radius:10px;
+      margin:10px 0;padding:12px 14px}
+ .btn{display:inline-block;border:1px solid #bbb;border-radius:8px;
+      padding:9px 14px;margin:4px 6px 2px 0;background:#fafafa;font-size:15px;
+      cursor:pointer}
+ .btn.primary{background:#2e6b34;color:#fff;border-color:#2e6b34}
+ .btn.warn{border-color:#a8730a;color:#a8730a;background:#fffaf2}
+ input,select{font-size:15px;padding:7px;border:1px solid #bbb;border-radius:8px;
+      margin:3px 4px 3px 0}
+ .step{display:flex;gap:10px;align-items:flex-start;padding:9px 0;
+       border-bottom:1px solid #f0ede8}
+ .dot{width:26px;height:26px;border-radius:50%;flex:none;display:flex;
+      align-items:center;justify-content:center;font-size:14px;
+      background:#eee;color:#999;border:1px solid #ddd}
+ .dot.done{background:#2e6b34;color:#fff;border-color:#2e6b34}
+ .dot.next{background:#fff;border:2px solid #2e6b34;color:#2e6b34}
+ .lbl b{display:block;font-size:15px}
+ .lbl .muted{color:#888;font-size:12px}
+ .who{color:#2e6b34;font-size:12px}
+ .msgbox{white-space:pre-wrap;background:#f6f8f4;border:1px dashed #9c9;
+      border-radius:8px;padding:10px;font-size:14px;margin-top:6px}
+ .warnbox{background:#fff6ef;border-left:4px solid #a8730a;padding:8px 12px;
+      border-radius:6px;margin:8px 0;font-size:14px}
+ table{border-collapse:collapse;width:100%;font-size:14px}
+ td,th{padding:6px;border-bottom:1px solid #eee;text-align:left}
+ #msg{position:fixed;bottom:0;left:0;right:0;background:#1c1c1c;color:#fff;
+      padding:10px 14px;font-size:15px;display:none;white-space:pre-wrap}
+ .pill{font-size:12px;border-radius:20px;padding:2px 10px;background:#efece7}
+ .pill.exit{background:#fdeaea}
+ h2{font-size:18px;margin:12px 0 2px}
+ .muted{color:#8a8378;font-size:12px}
+ .fld{margin:10px 0}
+ .fld>label{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+      color:#8a8378;margin-bottom:4px}
+ .fld input{width:100%;box-sizing:border-box;margin:0}
+ .opts{display:flex;flex-direction:column;gap:2px}
+ .opt{display:block;padding:7px 9px;border:1px solid #e8e4de;border-radius:8px;
+      font-size:14px;margin:2px 0;cursor:pointer;background:#fcfbf9}
+ .opt input{margin-right:8px}
+ .row2{display:flex;flex-wrap:wrap;gap:6px}
+ .row2 .opt{flex:1 1 30%;text-align:center}
+</style>
+</head>
+<body>
+<h1>Staff — joining and leaving</h1>
+<div class="sub">The register checks every step itself — out of order it will stop
+you and say why. Every tick needs a name against it.</div>
+
+<div class="sec" id="home">
+ <button class="btn primary" onclick="openFlow('JOIN')">➕ New joiner</button>
+ <button class="btn warn" onclick="openFlow('EXIT')">🚪 Exit / leaver</button>
+ <div id="pending" style="margin-top:10px"></div>
+ <!-- S222 ALL RECORDS -- pending shows only what is unfinished; a finished
+      record still has to be openable, or the login check on the record page
+      can never be run on the people who are already joined. -->
+ <div style="margin-top:10px">
+  <button class="btn" onclick="loadAll()">📋 All records (completed too)</button>
+  <input id="allq" placeholder="name or ref" style="max-width:150px"
+         onkeyup="if(event.key==='Enter')loadAll()">
+ </div>
+ <div id="allrecs" style="margin-top:8px"></div>
+ <div style="margin-top:10px">
+  <button class="btn" onclick="loadLogins()">👥 All logins</button>
+ </div>
+ <div id="logins" style="margin-top:8px"></div>
+ <details style="margin-top:8px"><summary class="sub">🔑 Password reset (owner)</summary>
+  <input id="rp_person" placeholder="whose?">
+  <button class="btn" onclick="resetPw()">reset to default</button>
+  <div id="rp_out" class="msgbox" style="display:none"></div>
+ </details>
+</div>
+
+<div class="sec" id="flow" style="display:none"></div>
+<div id="msg"></div>
+<script>
+const el=id=>document.getElementById(id);
+function toast(t){const m=el("msg");m.textContent=t;m.style.display="block";
+ setTimeout(()=>m.style.display="none",5000);}
+const API="/finance/staff/api";
+const MYNAME=()=>localStorage.getItem("staff_by")||"";
+async function post(u,b){const r=await fetch(u,{method:"POST",
+ headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});
+ const j=await r.json().catch(()=>({}));
+ if(!r.ok||!j.ok)throw(j.message||j.error||"did not work");return j;}
+function whoAmI(){
+ let w=MYNAME();
+ if(!w){w=prompt("Your name? (this is recorded against every tick)")||"";
+  if(w)localStorage.setItem("staff_by",w);}
+ return w;
+}
+
+/* ---- S222 ALL RECORDS ---------------------------------------------------
+   Every record, open and closed. Read only -- it opens the same record page
+   the pending list opens. */
+async function loadAll(){
+ const q=(el("allq").value||"").trim();
+ const box=el("allrecs");
+ box.innerHTML='<span class="sub">looking…</span>';
+ let j=null;
+ try{ j=await fetch(API+"/all"+(q?"?q="+encodeURIComponent(q):"")).then(r=>r.json()); }
+ catch(e){ j=null; }
+ if(!j||!j.ok){ box.innerHTML='<span class="sub">could not load the list</span>'; return; }
+ if(!j.records.length){ box.innerHTML='<span class="sub">no matching record</span>'; return; }
+ box.innerHTML='<table><tr><th>who</th><th></th><th>steps</th><th>status</th>'+
+  '<th></th></tr>'+j.records.map(x=>'<tr><td><b>'+x.person+'</b>'+
+  (x.username?' <span class="sub">'+x.username+'</span>':'')+'</td>'+
+  '<td><span class="pill '+(x.kind==="EXIT"?"exit":"")+'">'+
+  (x.kind==="EXIT"?"exit":"join")+'</span></td>'+
+  '<td>'+x.done+'/'+x.total+'</td>'+
+  '<td>'+(x.complete?'<span style="color:#2e6b34">complete ✓</span>':
+    '<span style="color:#a8730a">'+x.status+'</span>')+'</td>'+
+  '<td><button class="btn" onclick="showRec(\''+x.ref+'\')">open</button></td>'+
+  '</tr>').join("")+'</table>';
+}
+
+async function loadPending(){
+ const r=await fetch(API+"/pending");const j=await r.json();if(!j.ok)return;
+ if(!j.records.length){el("pending").innerHTML=
+  '<span class="sub">Nothing unfinished — all complete ✓</span>';return;}
+ el("pending").innerHTML='<table><tr><th>who</th><th></th><th>waiting on</th>'+
+  '<th></th></tr>'+j.records.map(x=>'<tr><td><b>'+x.person+'</b></td>'+
+  '<td><span class="pill '+(x.kind==="EXIT"?"exit":"")+'">'+
+  (x.kind==="EXIT"?"exit":"join")+'</span></td><td>'+(x.waiting_on||"")+
+  (x.overdue?' <b style="color:#a8730a">⏰</b>':'')+'</td>'+
+  '<td><button class="btn" onclick="showRec(\''+x.ref+'\')">open</button></td>'+
+  '</tr>').join("")+'</table>';
+}
+
+/* ---- S222 FORMS -------------------------------------------------------------
+   Joining somebody is rare and consequential, so it gets a FORM. /api/open has
+   always accepted the employment type, the authorities and a chosen username --
+   a prompt() can only ask one thing at a time, so the page never asked, and
+   every join since S208 was filed as FULLTIME with no authorities at all.
+
+   Leaving is the opposite shape: nothing to type, because the person already
+   exists. Typing a leaver's name free-hand is how one person becomes two
+   records, in attendance and in salary -- the exact failure this register was
+   built to stop. */
+
+async function openFlow(kind){
+ return kind==="JOIN" ? joinForm() : exitPicker();
+}
+
+async function loadLogins(){
+ const box=el("logins");
+ box.innerHTML='<span class="sub">reading the portal user store…</span>';
+ let j=null;
+ try{ j=await fetch(API+"/logins").then(r=>r.json()); }catch(e){ j=null; }
+ if(!j||!j.ok){ box.innerHTML='<span class="sub">could not read the logins</span>'; return; }
+ if(!j.store_readable){
+  box.innerHTML='<div class="warnbox">The portal user store could not be read — '+
+   (j.why||"")+'</div>'; return; }
+ if(!j.logins.length){ box.innerHTML='<span class="sub">no logins in the store</span>'; return; }
+ box.innerHTML='<table><tr><th>login</th><th>role</th><th>state</th><th>created</th></tr>'+
+  j.logins.map(x=>'<tr><td><b>'+x.user+'</b></td><td>'+(x.role||"")+'</td>'+
+   '<td>'+(x.active?'<span style="color:#2e6b34">active</span>':
+     '<span style="color:#a8730a">disabled</span>')+'</td>'+
+   '<td class="muted">'+String(x.created||"").slice(0,10)+'</td></tr>').join("")+
+  '</table><div class="sub" style="margin-top:6px">Add, disable or remove a login on '+
+  'the portal\'s own page — <a href="https://followup.dr-manoj.in/portal/users" '+
+  'target="_blank" rel="noopener">Manage Users</a></div>';
+}
+
+async function joinForm(){
+ /* No prompt to open the form: the "Opened by" field IS the ask, and a dialog
+    before a form is a dialog for nothing. */
+ const by=MYNAME();
+ let meta={};
+ try{ meta=await fetch(API+"/authorities").then(r=>r.json()); }catch(e){ meta={}; }
+ const emps=(meta&&meta.employment)||["FULLTIME"];
+ const auths=(meta&&meta.authorities)||[];
+ el("home").style.display="none";
+ const F=el("flow"); F.style.display="block";
+ let h='<button class="btn" onclick="goHome()">← back</button>'+
+  '<h2>New joiner</h2>'+
+  '<div class="sub">Filled once, at the start. All of this goes on his record, and '+
+  'none of it has to be asked again.</div>'+
+  '<div class="fld"><label>Full name</label>'+
+  '<input id="jf_name" placeholder="as the roster spells it" oninput="jfUser()"></div>'+
+  '<div class="fld"><label>Job</label>'+
+  '<input id="jf_role" placeholder="purchase · counter · reception"></div>'+
+  '<div class="fld"><label>Employment</label><div class="row2">';
+ emps.forEach(function(e,i){
+  h+='<label class="opt"><input type="radio" name="jf_e" value="'+e+'"'+
+     (i===0?' checked':'')+'>'+e.toLowerCase()+'</label>';
+ });
+ h+='</div></div>'+
+  '<div class="fld"><label>Portal login</label>'+
+  '<input id="jf_user" placeholder="made from the first name" '+
+  'oninput="this.dataset.touched=1"></div>';
+ if(auths.length){
+  h+='<div class="fld"><label>What he may do</label><div class="opts">';
+  auths.forEach(function(a){
+   h+='<label class="opt"><input type="checkbox" class="jf_a" value="'+a.key+'"'+
+      (a.key==="self"?' checked':'')+'><b>'+a.key.replace(/_/g," ")+'</b>'+
+      '<span class="muted"> — '+a.label+'</span></label>';
+  });
+  h+='</div></div>';
+ } else {
+  h+='<div class="warnbox">The register did not return its list of authorities, so '+
+     'none can be ticked here. He can still be joined; set them later.</div>';
+ }
+ h+='<div class="fld"><label>Opened by</label><input id="jf_by" value="'+
+  by.replace(/"/g,"&quot;")+'"></div>'+
+  '<div id="jf_out"></div>'+
+  '<button class="btn primary" onclick="jfCreate()">Create the record</button> '+
+  '<button class="btn" onclick="goHome()">Cancel</button>';
+ F.innerHTML=h;
+}
+
+function jfUser(){
+ const u=el("jf_user"); if(!u||u.dataset.touched) return;
+ const n=(el("jf_name").value||"").trim().split(/\s+/)[0]||"";
+ u.value=n.toLowerCase().replace(/[^a-z0-9]/g,"");
+}
+
+async function jfCreate(){
+ const out=el("jf_out");
+ const person=(el("jf_name").value||"").trim();
+ if(!person){ out.innerHTML='<div class="warnbox">A full name is needed.</div>'; return; }
+ const by=(el("jf_by").value||"").trim();
+ if(!by){ out.innerHTML='<div class="warnbox">Who is opening this?</div>'; return; }
+ localStorage.setItem("staff_by",by);
+ const sel=document.querySelector('input[name=jf_e]:checked');
+ const body={person:person, kind:"JOIN", opened_by:by,
+             role:(el("jf_role").value||"").trim(),
+             employment:(sel?sel.value:"FULLTIME"),
+             authorities:Array.prototype.slice.call(
+               document.querySelectorAll(".jf_a:checked")).map(function(x){return x.value;})};
+ const user=(el("jf_user").value||"").trim();
+ if(user) body.username=user;
+ out.innerHTML='<span class="sub">creating…</span>';
+ try{
+  const j=await post(API+"/open",body);
+  if(j.username_warning) toast(j.username_warning);
+  showRec(j.ref);
+ }catch(e){ out.innerHTML='<div class="warnbox">'+e+'</div>'; }
+}
+
+async function exitPicker(){
+ /* Nothing is asked to LOOK at the list. The name is asked once, at the moment
+    somebody is actually chosen. */
+ el("home").style.display="none";
+ const F=el("flow"); F.style.display="block";
+ F.innerHTML='<button class="btn" onclick="goHome()">← back</button>'+
+  '<h2>Who is leaving?</h2>'+
+  '<div class="sub">Choose the person — never type a name. A typed name makes one '+
+  'person two records, in attendance and in salary, and stopping that is why this '+
+  'register exists.</div><div id="xp" class="sub">reading…</div>';
+ let lg=null, all=null;
+ try{ lg=await fetch(API+"/logins").then(r=>r.json()); }catch(e){}
+ try{ all=await fetch(API+"/all").then(r=>r.json()); }catch(e){}
+ const recs=(all&&all.records)||[];
+ const openExit={}, doneExit={}, people={};
+ recs.forEach(function(r){
+  const k=String(r.person).toLowerCase();
+  if(r.kind==="EXIT"){ (r.complete?doneExit:openExit)[k]=r.ref; return; }
+  people[k]={name:r.person, user:r.username||"", role:r.role||""};
+ });
+ ((lg&&lg.logins)||[]).forEach(function(u){
+  let hit=null;
+  for(const k in people) if((people[k].user||"").toLowerCase()===u.user.toLowerCase()) hit=k;
+  if(hit){ people[hit].login=u; return; }
+  people[u.user.toLowerCase()]={name:u.user, user:u.user, role:u.role||"", login:u};
+ });
+ const keys=Object.keys(people).sort();
+ if(!keys.length){
+  el("xp").innerHTML='<div class="warnbox">Nobody found — neither the register nor the '+
+   'portal user store returned a person.</div>'; return; }
+ let h='<table><tr><th>who</th><th>login</th><th></th></tr>';
+ keys.forEach(function(k){
+  const p=people[k], lk=String(p.name).toLowerCase();
+  h+='<tr><td><b>'+p.name+'</b>'+(p.role?' <span class="muted">'+p.role+'</span>':'')+
+   '</td><td>'+(p.user||'<span class="muted">none</span>')+
+   (p.login&&!p.login.active?' <span style="color:#a8730a">disabled</span>':'')+'</td><td>';
+  if(openExit[lk]) h+='<button class="btn" onclick="showRec(\''+openExit[lk]+
+    '\')">exit in progress — open</button>';
+  else if(doneExit[lk]) h+='<span class="muted">already left</span>';
+  /* The name goes in a DATA ATTRIBUTE and the handler is attached after render.
+     Inlining it into onclick="" broke on the first quote it met -- a person's
+     name is content, and content does not belong in an attribute that is also
+     code. */
+  else h+='<button class="btn warn" data-person="'+attrEsc(p.name)+
+    '">start exit</button>';
+  h+='</td></tr>';
+ });
+ el("xp").innerHTML=h+'</table>';
+ Array.prototype.forEach.call(
+  document.querySelectorAll('#xp button[data-person]'),
+  function(b){ b.onclick=function(){ xpStart(b.getAttribute("data-person")); }; });
+}
+
+function attrEsc(s){
+ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;")
+   .replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+async function xpStart(person){
+ const by=whoAmI(); if(!by) return;
+ try{ const j=await post(API+"/open",{person:person, kind:"EXIT", opened_by:by});
+  showRec(j.ref); }
+ catch(e){ toast(""+e); }
+}
+
+async function showRec(ref){
+ const r=await fetch(API+"/record?ref="+encodeURIComponent(ref));
+ const j=await r.json(); if(!j.ok){toast(j.message||"record not found");return;}
+ el("home").style.display="none";
+ const F=el("flow"); F.style.display="block";
+ let done=0; const total=j.steps.length;
+ let firstOpen=null;
+ for(const s of j.steps){ if(s.done_on)done++; else if(!firstOpen)firstOpen=s.step; }
+ let h='<button class="btn" onclick="goHome()">← back</button> '+
+  '<span class="pill '+(j.kind==="EXIT"?"exit":"")+'">'+
+  (j.kind==="EXIT"?"EXIT":"JOIN")+'</span> <b style="font-size:17px">'+
+  j.person+'</b> <span class="sub">'+ref+' · '+done+'/'+total+'</span>';
+ /* S222 star-1-3 -- this line used to STATE a login and a password that
+    nothing had created. It now says only what the server confirms. */
+ if(j.kind==="JOIN"&&j.username)
+  h+='<div class="sub" id="loginState">login: <b>'+j.username+
+   '</b> · <span style="color:#999">checking…</span></div>';
+ for(const s of j.steps){
+  const isNext=(s.step===firstOpen)||(!s.done_on&&s.late_ok);
+  h+='<div class="step"><div class="dot '+(s.done_on?"done":(isNext?"next":""))+
+   '">'+(s.done_on?"✓":"")+'</div><div class="lbl" style="flex:1"><b>'+
+   s.label+'</b>'+(s.why?'<span class="muted">'+s.why+'</span>':'')+
+   (s.done_on?'<span class="who">✓ '+s.done_by+' · '+s.done_on+
+     (s.detail?' · '+s.detail:'')+'</span>':'')+
+   '</div>'+((!s.done_on&&isNext)?
+    ('<button class="btn primary" onclick="tick(\''+ref+'\',\''+s.step+
+     '\',\''+j.kind+'\')">done ✓</button>'):'')+'</div>';
+ }
+ if(j.kind==="JOIN")
+  h+='<button class="btn" style="margin-top:8px" onclick="waMsg(\''+ref+
+   '\')">📱 Show WhatsApp message</button><div id="wa"></div>';
+ F.innerHTML=h;
+ if(j.kind==="JOIN"&&j.username) checkLogin(ref);          /* S222 star-1-3 */
+}
+function goHome(){el("flow").style.display="none";el("home").style.display="block";
+ loadPending();}
+
+async function tick(ref,step,kind){
+ const by=whoAmI(); if(!by)return;
+ const body={ref,step,by};
+ if(step==="BIOMETRIC"){
+  try{const n=await fetch(API+"/next_code").then(r=>r.json());
+   var code=prompt("Emp Code? (the register says the next one is "+n.next_code+
+    " — a used code is never reissued)\n"+n.rule, n.next_code);}catch(e){
+   var code=prompt("Emp Code?");}
+  if(!code)return; body.emp_code=code;
+ }
+ if(step==="DUES_SETTLED"||step==="ITEMS_RETURNED"){
+  const d=prompt("One line — what was settled / returned?")||"";
+  if(d)body.detail=d;
+ }
+ try{await post(API+"/step",body);showRec(ref);}
+ catch(e){toast("The register refused:\n"+e);}
+}
+
+async function waMsg(ref){
+ const r=await fetch(API+"/message?ref="+encodeURIComponent(ref));
+ const j=await r.json();
+ if(!j.ok){ el("wa").innerHTML=""; return; }
+ /* S222 star-1-3 -- the message was composed and shown with NO WAY TO SEND IT.
+    wa.me with no number: WhatsApp opens with the text already typed and you
+    choose the person from your own contacts. No number is written into this
+    page, the database, the repository or the box (F-185). */
+ el("wa").innerHTML='<div class="msgbox">'+j.text+'</div>'+
+  '<a class="btn primary" style="margin-top:8px" target="_blank" rel="noopener" '+
+  'href="https://wa.me/?text='+encodeURIComponent(j.text)+
+  '">📤 Send on WhatsApp</a>';
+}
+
+/* ---- S222 star-1-3: F-295, the login that was never created ---------------
+   The page no longer asserts a login. It asks. */
+async function checkLogin(ref){
+ const box=el("loginState"); if(!box) return;
+ let j=null;
+ try{ j=await fetch(API+"/portal_user?ref="+encodeURIComponent(ref))
+        .then(r=>r.json()); }catch(e){ j=null; }
+ if(!j||!j.ok){
+  box.innerHTML='login: <span style="color:#999">could not be checked</span>'; return; }
+ if(!j.store_readable){
+  box.innerHTML='login: <b>'+j.username+'</b> · <span style="color:#999">'+
+   'the portal user store could not be read</span>'; return; }
+ if(j.exists&&j.active){
+  let t='✅ login <b>'+j.username+'</b> exists'+
+   (j.role?' ('+j.role+')':'');
+  if(j.password_works===true)
+   t+=' · password <b>'+j.password+'</b> works right now — '+
+      'he must change it at first login';
+  else if(j.password_works===false)
+   t+='<div class="warnbox" style="margin-top:6px">⚠️ <b>'+j.password+
+      '</b> does <b>NOT</b> sign in — the password has been changed since. '+
+      'Fine if you know the new one; otherwise use <b>Password reset</b> '+
+      'below to put it back to default.</div>';
+  else
+   t+=' · <span style="color:#999">password could not be checked</span>';
+  box.innerHTML=t; return; }
+ if(j.exists&&!j.active){
+  box.innerHTML='⚠️ login <b>'+j.username+'</b> exists but is <b>DISABLED</b> — '+
+   'enable it from the portal'; return; }
+ box.innerHTML='<div class="warnbox">⚠️ <b>This login has NOT been created.</b> '+
+  'Nobody can sign in as <b>'+j.username+'</b>. Create it before you read '+
+  'a password out to him.</div>'+
+  '<button class="btn warn" style="margin-top:8px" onclick="makeLogin(\''+ref+
+  '\')">🔑 Create login</button>';
+}
+
+/* The role is CHOSEN FROM THE STORE'S OWN LIST, shown as buttons -- not typed
+   into a prompt() and not hard-coded here. Two reasons: a role this page
+   invented would be refused by the store anyway, and on a phone a native
+   prompt is a bad way to pick one of three fixed words. */
+async function makeLogin(ref){
+ const box=el("loginState"); if(!box) return;
+ let j=null;
+ try{ j=await fetch(API+"/portal_user?ref="+encodeURIComponent(ref))
+        .then(r=>r.json()); }catch(e){ j=null; }
+ const roles=(j&&j.roles)||[];
+ if(!roles.length){ toast("No roles found in the portal store — nothing was created"); return; }
+ let h='<div class="warnbox">Choose a role — <b>'+j.username+'</b>\'s login will be '+
+  'created with it:</div><div id="rolePick" style="margin-top:8px">';
+ for(const r of roles)
+  h+='<button class="btn" style="margin-right:6px" onclick="doMakeLogin(\''+ref+
+   '\',\''+r+'\')">'+r+'</button>';
+ h+='</div>';
+ box.innerHTML=h;
+}
+
+async function doMakeLogin(ref,role){
+ const by=whoAmI(); if(!by) return;
+ const pick=el("rolePick");
+ if(pick) pick.innerHTML='<span style="color:#999">creating…</span>';
+ try{
+  const k=await post(API+"/portal_user/create",{ref,role,by});
+  toast(k.message||"Login created");
+ }catch(e){ toast(""+e); }
+ checkLogin(ref);
+}
+
+async function resetPw(){
+ const person=el("rp_person").value.trim(); if(!person)return;
+ const by=whoAmI(); if(!by)return;
+ const reason=prompt("Reason? (goes on the record)")||"forgot";
+ try{const j=await post(API+"/reset_password",{person,by,reason});
+  el("rp_out").style.display="block";
+  el("rp_out").textContent="New (default) password: "+(j.password||"?")+
+   "\nRead it out to him — it is stored nowhere, and it must be changed at first login.";
+ }catch(e){toast(""+e);}
+}
+loadPending();
+</script>
+</body>
+</html>

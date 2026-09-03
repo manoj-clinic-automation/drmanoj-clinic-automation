@@ -1,0 +1,24 @@
+S222_JOINER_FORMS -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  1  \cp /root/deploy/repo/deploy_kits/S222_JOINER_FORMS/patch_joiner_forms_s222.py /root/finance/
+  2  /root/wa/venv/bin/python3 -B /root/finance/patch_joiner_forms_s222.py
+  3  /root/wa/venv/bin/python3 -B /root/deploy/repo/deploy_kits/S222_JOINER_FORMS/install_forms_s222.py
+  4  systemctl restart clinic-finance.service
+  5  md5sum /root/finance/joiner_app.py /root/finance/staff_manage.html
+
+Step 4 is needed for step 2 (python). Step 3 alone would not need it.
+
+AFTERWARDS, on https://followup.dr-manoj.in/finance/staff :
+  "➕ New joiner" opens a FORM. Fill it once — the employment type and what he may do are
+  recorded on his record from the first moment, which has never happened before on this system.
+  "🚪 Exit / leaver" opens a LIST of real people. Tap one. Nothing is typed.
+  "👥 All logins" shows every portal login, its role and whether it is active.
+
+WHAT IS STILL A PROMPT, and deliberately: the Emp Code at the biometric step, the one-line
+detail on dues/items at an exit, and the reason on a password reset. Each is a single value
+asked at the moment it is needed, which is what a prompt is actually good for.
+
+NOT DONE YET, and it needs one line from you (see the chat): pointing the portal's Manage Users
+tile at this page. /root/portal/portal.py is the file that gates every login in the clinic and
+its live bytes are in no store -- I will not edit it blind. Step 5 of the paste reads its md5 so
+the change can be built against the real file.
