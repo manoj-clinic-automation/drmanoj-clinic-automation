@@ -1,0 +1,21 @@
+S222_AMIR_JOINER -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  0  copy close_amir_joiner_s222.py into /root/finance/   (the paste block is in the chat)
+  1  /root/wa/venv/bin/python3 -B /root/finance/close_amir_joiner_s222.py
+  2  read what it says, then run it again with --apply (and --first-login-attested if the
+     answer to its one question is yes)
+
+Step 1 WRITES NOTHING. It prints the record, which of the six steps are done, and whether
+Amir is actually in the staff master. That report decides what step 2 looks like:
+
+  * if it says "will tick : CREDENTIALS_SENT, FIRST_LOGIN, STAFF_MASTER" -- one --apply run
+    closes him at 6/6.
+  * if it says STAFF_MASTER is refused because he is NOT in staff_master.csv -- the staff
+    master has not been rebuilt since his enrolment. Rebuild it first; the tick is meaningless
+    otherwise, and a false tick there is the exact hole this register exists to close.
+  * if it refuses FIRST_LOGIN -- only you can answer whether Amir has actually signed in once.
+    Nothing on the box records it.
+
+Nothing here restarts a service and nothing here changes a pin.
+Rolling back is not needed -- but if a tick was wrong, the step row can be cleared and the
+record reopened; every tick also left a `joiner_event` row saying when and by whom.

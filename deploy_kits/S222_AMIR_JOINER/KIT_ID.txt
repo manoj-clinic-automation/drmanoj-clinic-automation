@@ -1,0 +1,24 @@
+S222_AMIR_JOINER · built 03-Sep-2026 · Session 222 · ⭐1-2 part B (close Amir's joiner record)
+
+WHAT IT DOES. Ticks the steps still open on Amir's JOIN record, through joiner_app's OWN
+blocked_by() / steps_for() / done_steps() -- so ordering, LATE_OK and HARD_REQUIRES bind
+exactly as they do on the live page, and the COMPLETE transition happens the same way.
+
+NO LIVE CODE MOVES. No file is patched. No pin changes. It writes rows in `joiner_step`,
+`joiner_event` and `joiner`, and nothing else.
+
+REPORTS BY DEFAULT. --apply writes. Re-running says "already 6/6".
+
+IT REFUSES TO SIGN OFF WHAT IT CANNOT SEE:
+  STAFF_MASTER   -- refused unless Amir is ACTUALLY IN staff_master.csv (Emp Code first,
+                    then the name). That step's own words are "the person appears".
+  FIRST_LOGIN    -- nothing on the box records a last login, so it is an attestation, not a
+                    measurement. Refused unless --first-login-attested is passed.
+  CREDENTIALS_SENT -- an attestation too, but one the owner made at the S221 close; his words
+                    go into the step's detail so the register stays honest about what kind of
+                    evidence each tick carries.
+
+PROVEN OFFLINE: SELFTEST GREEN 21/21 against the REAL joiner_schema.sql and the REAL
+joiner_app.py, running the close script as a subprocess exactly as the box will --
+report-only, partial apply, both refusals, the close at 6/6, and a no-op re-run.
+(The selftest needs flask, so it runs on the box or in the workspace, not in a bare shell.)

@@ -1,0 +1,34 @@
+-- 1  REPORT ONLY writes nothing -------------------------------
+  PASS  it reports 3/6
+  PASS  it says REPORT ONLY
+  PASS  FIRST_LOGIN is refused without the attestation
+  PASS  nothing was written
+
+-- 2  --apply ticks only what is honest -------------------------
+  PASS  CREDENTIALS_SENT is ticked (the owner's own attestation)
+  PASS  STAFF_MASTER is NOT ticked
+  PASS  the record is not closed
+  PASS  exactly one step was written
+
+-- 3  STAFF_MASTER refuses while he is not in the file ----------
+  PASS  the staff master check says NOT FOUND
+  PASS  FIRST_LOGIN ticks once attested
+  PASS  STAFF_MASTER still refused
+  PASS  still not 6/6
+
+-- 4  rebuild the staff master, and it closes -------------------
+  PASS  the staff master check says FOUND
+  PASS  STAFF_MASTER ticks
+  PASS  the record closes at 6/6
+  PASS  the register says COMPLETE
+
+-- 5  re-running changes nothing --------------------------------
+  PASS  it says already 6/6
+  PASS  still 6/6 and COMPLETE
+
+-- 6  every tick carries the kind of evidence behind it ---------
+  PASS  CREDENTIALS_SENT is marked an attestation
+  PASS  FIRST_LOGIN says plainly it is not a measurement
+  PASS  STAFF_MASTER says it was VERIFIED
+
+SELFTEST GREEN  21 checks, 0 failed
