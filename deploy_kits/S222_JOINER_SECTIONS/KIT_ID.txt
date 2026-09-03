@@ -1,0 +1,46 @@
+S222_JOINER_SECTIONS · built 03-Sep-2026 · Session 222 · the owner's punch-list on the joiner form
+
+EVERY POINT HE MADE, AND WHAT THE KB SAID WHEN I WENT LOOKING
+
+ 1  Back went to this page's own home, and the browser's Back re-ran ?flow= and reopened the
+    screen he was leaving. Now: "← Manage users" straight back to the portal, and ?flow= is
+    stripped from the address bar so Back leaves the app.
+ 2  "as the roster spells it" — meaningless for a NEW joiner. Now "e.g. Amir Sohail".
+ 3  Job is CHOSEN from chips (setting `joiner.jobs`, plus every job already on a record, so the
+    list grows itself), with an "other…" escape.
+ 4  Employment is chips, and a new kind can be ADDED from the page — setting
+    `joiner.employment_kinds`, with the code tuple as the fallback. /api/open validates against
+    the same list, so a kind added here is a kind that works.
+ 5  The login is derived from the first name AND checked: a second Amir is offered `amir2`
+    before anything collides, and the page says why.
+ 6  "What he may do" is now FOUR SECTIONS BY SYSTEM, each collapsible, with a running summary
+    of everything chosen. Two of the four have no tick boxes at all, and that is the finding:
+
+    SCAN APP — access is NOT grantable from here. asset_register.py maps the portal role
+      straight through (staff -> reception, doctor -> owner, manager -> manager, anything else
+      -> no access, fail-closed) and A-D21 fixes what a reception user may reach:
+      intake, intake_submit, intake_scan_submit, intake_slip_last, intake_slip,
+      scanner_widget_js, login, logout -- "everything else 403s server-side, regardless of what
+      the UI shows." So a staff login scans a bill, submits it and takes the slip. Nothing more,
+      and nothing this page could add. A tick box would have been a lie.
+
+    ATTENDANCE & SALARY — mostly not grantable either. D337: staff already see their OWN month
+      and may raise remarks. D334: they may request present when the machine has no punch.
+      D338: past-day correction is approver-only. F-31: SALARY IS DOCTOR-ONLY and can never be
+      given to staff. The one real choice is `self`, whose label has always read "(no money)".
+
+ 7  Asked to look for more of the same, two were found and fixed: the Emp Code was a browser
+    dialog on the step that decides whether a man is visible to attendance at all -- now a
+    field on the page, prefilled with the register's next free code and carrying the
+    never-reissue warning in its own words; and Password reset asked the owner to TYPE whose,
+    which is the same fault as typing a leaver -- now a picker of real logins with a reason box.
+
+    ONE prompt is left in the whole page: "Your name?", asked once per browser and stored.
+
+Targets (live pins):
+  /root/finance/joiner_app.py      d3f4c802 -> 3e213e4d   (RESTART — python)
+  /root/finance/staff_manage.html  7bc51dfa -> 71540e8c   (no restart)
+
+PROVEN: SECTIONS GREEN, 8 sections of checks in a real browser — the back link, the chips, the
+amir2 suggestion, the four systems with the scan-app note one click away, the running summary,
+the database read back after the create, the Emp Code panel with no dialog, and the reset picker.

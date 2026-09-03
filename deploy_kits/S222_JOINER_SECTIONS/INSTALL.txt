@@ -1,0 +1,20 @@
+S222_JOINER_SECTIONS -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  1  \cp /root/deploy/repo/deploy_kits/S222_JOINER_SECTIONS/patch_joiner_sections_s222.py /root/finance/
+  2  /root/wa/venv/bin/python3 -B /root/finance/patch_joiner_sections_s222.py
+  3  /root/wa/venv/bin/python3 -B /root/deploy/repo/deploy_kits/S222_JOINER_SECTIONS/install_sections_s222.py
+  4  systemctl restart clinic-finance.service
+  5  md5sum /root/finance/joiner_app.py /root/finance/staff_manage.html
+
+TWO NEW SETTINGS, BOTH FAIL-SAFE AND BOTH OPTIONAL:
+  joiner.jobs              the jobs offered as chips. Absent -> purchase, counter, reception,
+                           pharmacy, housekeeping, PLUS every job already used on a record.
+  joiner.employment_kinds  the employment types. Absent -> FULLTIME, PARTTIME, BIWEEKLY.
+                           "+ add a kind" on the form writes this row; blank it and the code's
+                           own list comes back.
+Neither has to be created. Both change nothing until they hold something.
+
+AFTERWARDS: portal -> Manage users -> Add a new joiner. Nothing is typed that could be chosen,
+"back" returns you to Manage users, and the four systems open one at a time. Two of them have no
+tick boxes -- read what they say instead; that is where the scan app's real limit and the
+attendance/salary rulings are written down.

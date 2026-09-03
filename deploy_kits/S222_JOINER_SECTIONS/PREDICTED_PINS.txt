@@ -1,0 +1,10 @@
+# S222_JOINER_SECTIONS -- predicted from the exact live bytes of both files.
+# The server patcher refuses unless joiner_app.py is d3f4c802182c386daf644953bf215595.
+# The page installer refuses unless staff_manage.html is 7bc51dfa3b9d652e7073c1c4c8e7d01f
+# (the S222_PORTAL_ENTRY result) and re-hashes after writing, restoring on any mismatch.
+#
+# The owner's md5sum after installing must read exactly:
+3e213e4dfd4171eb4cf3bbcd0538025b  /root/finance/joiner_app.py
+71540e8c610b02636d08ae7d0739df1d  /root/finance/staff_manage.html
+#
+# NOT CHANGED: /root/portal/portal.py stays c89ffa9f619712929c2b81d6e1d98c17.

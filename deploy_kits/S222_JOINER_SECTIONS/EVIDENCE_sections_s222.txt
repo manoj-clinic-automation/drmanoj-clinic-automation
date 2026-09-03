@@ -1,0 +1,52 @@
+-- 1  BACK GOES BACK TO MANAGE USERS, and the loop is gone -------
+  PASS  the address bar no longer carries ?flow (browser Back leaves the app)   [http://127.0.0.1:8779/finance/staff/]
+  PASS  back is a link to Manage users   [← Manage users]
+  PASS  it points at the portal   [https://followup.dr-manoj.in/portal/users]
+  PASS  the exit picker's back goes there too
+
+-- 2  NOTHING IS TYPED THAT COULD BE CHOSEN ----------------------
+  PASS  jobs are chips, from the register   [['purchase', 'counter', 'reception', 'pharmacy', 'housekeeping', 'other…']]
+  PASS  and there is an 'other…' escape
+  PASS  employment is chips   [['fulltime', 'parttime', 'biweekly']]
+  PASS  a new kind can be added
+  PASS  the confusing 'as the roster spells it' hint is gone
+
+-- 3  A SECOND AMIR GETS amir2 -----------------------------------
+  PASS  the login was bumped, not collided   [amir2]
+  PASS  and it says why   [amir is already taken — offering amir2]
+
+-- 4  FOUR SECTIONS, AND TWO OF THEM TELL THE TRUTH INSTEAD ------
+  PASS  four systems are shown   [['Sanjeevni — Marg & pharmacy 6 to choose', 'Front desk 1 to choose', 'Attendance & salary 1 to choose', 'Scan app — bills nothing to choose']]
+  PASS  Marg holds the six pharmacy powers
+  PASS  the scan app section has NO tick boxes
+  PASS  it says the scan app comes with the login   [Scan app — bills nothing to choose
+Comes with the portal login, not from this pa]
+  PASS  it names the A-D21 limit
+  PASS  attendance says salary is never shown to staff
+  PASS  attendance names the own-month and present-request rulings
+
+-- 5  THE RUNNING SUMMARY ----------------------------------------
+  PASS  it names the job, the employment and the powers   [purchase — fulltime — purchase order · self]
+
+-- 6  IT STILL RECORDS WHAT IT SHOWS -----------------------------
+  PASS  employment   [BIWEEKLY]
+  PASS  job   [purchase]
+  PASS  authorities   [purchase_order,self]
+  PASS  username   [amir2]
+  PASS  no dialog was raised in the whole join   [[]]
+
+-- 7  THE EMP CODE IS A FIELD, NOT A DIALOG ----------------------
+  PASS  an Emp Code panel opened on the page
+  PASS  no dialog   [[]]
+  PASS  it is prefilled with the register's next code   [1]
+  PASS  it carries the never-reuse warning IN ITS OWN WORDS   [EMP CODE FROM THE DEVICE
+A code is never reissued. Reusing one makes two people share a history in attendance ]
+  PASS  and the register's own rule about gaps as well
+  PASS  the code reached the record   [1]
+
+-- 8  PASSWORD RESET PICKS A PERSON ------------------------------
+  PASS  the logins are offered, not typed   [['choose a login…', 'alisha', 'amir', 'darpan', 'shavez', 'shivani']]
+  PASS  there is a reason field on the page
+  PASS  no javascript error at any point
+
+SECTIONS GREEN -- 0 failed
