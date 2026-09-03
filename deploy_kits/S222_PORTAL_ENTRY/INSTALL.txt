@@ -1,0 +1,18 @@
+S222_PORTAL_ENTRY -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  1  \cp /root/deploy/repo/deploy_kits/S222_PORTAL_ENTRY/patch_portal_users_entry_s222.py /root/portal/
+  2  /root/wa/venv/bin/python3 -B /root/portal/patch_portal_users_entry_s222.py
+  3  /root/wa/venv/bin/python3 -B /root/deploy/repo/deploy_kits/S222_PORTAL_ENTRY/install_entry_s222.py
+  4  systemctl restart clinic-portal
+  5  md5sum /root/portal/portal.py /root/finance/staff_manage.html
+
+STEP 4 RESTARTS THE LOGIN SYSTEM. It takes a second and existing sessions survive it -- the SSO
+token is signed, not held in memory, and the user store is a file read per request. If the portal
+does not come back, restore the .bak_S222_entry_* file beside portal.py and restart again; that
+file is the byte-for-byte original and the patcher wrote it before touching anything.
+
+AFTERWARDS: portal -> 🔑 Manage users. A new card sits at the top, above "Add a login":
+  ➕ Add a new joiner    -> lands ON the joiner form
+  🚪 Exit a leaver       -> lands ON the picker of real people
+  📋 All staff records   -> the whole register
+The user table and everything you do on it are exactly as they were.

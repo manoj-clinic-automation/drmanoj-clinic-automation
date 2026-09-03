@@ -1,0 +1,14 @@
+# S222_PORTAL_ENTRY -- predicted from EXACT live bytes of both files.
+#
+# portal.py was not read from the box and did not need to be: its live bytes were REPRODUCED,
+#   S204_VPS_LIVE/root__portal__portal.py  24ea2c0b44bad08fbce71908a5019ecc
+#     + S218_PORTAL_TILE/patch_portal_vaapsi_tile.py
+#     = 16bfd590e2e422bb81bb8b6ad6e84eae      <- the pin the box printed, 03-Sep-2026
+# and the patcher refuses against anything else. This also settles portal.py's own provenance:
+# the repository CAN reconstruct it, which is worth recording -- darpan_app.py still cannot.
+#
+# The owner's md5sum after installing must read exactly:
+c89ffa9f619712929c2b81d6e1d98c17  /root/portal/portal.py
+7bc51dfa3b9d652e7073c1c4c8e7d01f  /root/finance/staff_manage.html
+#
+# NOT CHANGED: /root/finance/joiner_app.py stays d3f4c802182c386daf644953bf215595.

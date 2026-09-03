@@ -1,0 +1,26 @@
+S222_PORTAL_ENTRY · built 03-Sep-2026 · Session 222 · the flow starts at Manage Users
+
+"I go to the portal. I click upon manage users. Then I see all the users. There, the option
+should be there, add new joiner, exit leaver. And from there, it should flow."
+
+One card at the top of /portal/users — Add a new joiner · Exit a leaver · All staff records —
+and the staff page reads ?flow= so those links LAND on the form and on the picker, not on a
+screen with a button that opens them. Nothing is removed from Manage Users; the user table, the
+add-a-login form and every action on it are untouched.
+
+THE LIVE BYTES OF portal.py WERE PROVEN BEFORE IT WAS TOUCHED. It gates every login in the
+clinic and the repository's copy is stale (d74aa3f9 against a live 16bfd590). The real file was
+reproduced exactly, offline:
+    S204_VPS_LIVE/root__portal__portal.py  24ea2c0b  +  S218_PORTAL_TILE's patcher  =  16bfd590
+which is the pin the box printed on 03-Sep. The patch was written against those bytes, so its
+new pin is predicted, not hoped for.
+
+Targets (live pins):
+  /root/portal/portal.py           16bfd590 -> c89ffa9f   (RESTART clinic-portal)
+  /root/finance/staff_manage.html  8300adab -> 7bc51dfa   (no restart)
+
+PROVEN: the patched USERS_HTML re-rendered through Jinja with a real user row — all three links
+present, "Add a login" and the table intact, three cards where there were two. Then chromium on
+both entry URLs: ?flow=join lands on the form with its eight authorities; ?flow=exit lands on the
+picker with real people and no text box; no flag is still the ordinary home screen. And the full
+joiner-forms gate re-run on the same page: RENDER GREEN 30/30, unchanged.
