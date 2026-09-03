@@ -1,0 +1,9 @@
+# S221_CARDS_SCOPED -- pin PREDICTED OFFLINE by applying the patcher to the live
+# bytes of darpan_card.html, reproduced from the S218 base fa6f0a86... + the three
+# S220 card patchers, EVERY INTERMEDIATE MATCHING ITS RECORDED PIN:
+#   fa6f0a86 -> DAY_TOTAL fb129eee -> PARKED_BILLS a0bc0c4c -> FULL_MOBILE aeb4fd7d (= the live pin)
+# The owner's md5sum at INSTALL step 6 must read exactly this.
+4a31f14eb19ca752c6b6fea1f430eb8d  /root/finance/darpan_card.html
+
+# cards_registry.json is DATA, replaced wholesale rather than patched:
+ded2f66ee49eea994a8ced574b98ac96  /root/finance/cards_registry.json

@@ -1,0 +1,13 @@
+ONE PASTE on the VPS after the publish. Guards the current card pin, patches, drops the new
+registry in, runs the CORRECTED walk for this morning's kit, restarts, prints both new pins.
+The walk's exit code is checked properly this time -- no `| tail -1` (F-142).
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S221_CARDS_SCOPED && md5sum -c SUMS.md5 --quiet && test "$(md5sum /root/finance/darpan_card.html | cut -d' ' -f1)" = "aeb4fd7df924b4953561b2645dff3a5f" && \cp patch_card_myjobs_s221.py walk_jaankari_s221_v2.py /root/finance/ && \cp cards_registry.json /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_card_myjobs_s221.py && /root/wa/venv/bin/python3 -B /root/finance/walk_jaankari_s221_v2.py > /tmp/walk_v2.txt; echo "WALK EXIT=$?"; tail -2 /tmp/walk_v2.txt; grep -c '^  FAIL' /tmp/walk_v2.txt
+
+Read those three lines before going on. WALK EXIT must be 0 and the FAIL count must be 0.
+Only then, the restart and the pins:
+
+systemctl restart clinic-finance.service && sleep 2 && md5sum /root/finance/darpan_card.html /root/finance/cards_registry.json
+
+Expected:  4a31f14eb19ca752c6b6fea1f430eb8d  /root/finance/darpan_card.html
+           ded2f66ee49eea994a8ced574b98ac96  /root/finance/cards_registry.json

@@ -1,0 +1,7 @@
+S221_CARDS_SCOPED · built 03-Sep-2026 · Session 221 · B6 rev 2 (the owner's "b ok")
+Target (live pin): darpan_card.html aeb4fd7d -> 4a31f14e   ·   plus cards_registry.json (data)
+Also carries: walk_jaankari_s221_v2.py -- the corrected S221_JAANKARI walk (v1 left sealed,
+the C-S216-1 precedent). Run v2 from now on.
+Proven offline: RENDER 19/19 in headless chromium at 390px, judged as a DIFFERENTIAL against
+the UNPATCHED live card so a stub's own gaps cannot be read as this change's faults (F-87).
+ONE live file changes. No server code. No restart needed for the data file.

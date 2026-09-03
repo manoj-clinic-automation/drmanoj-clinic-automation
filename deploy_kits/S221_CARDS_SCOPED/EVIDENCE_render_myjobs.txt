@@ -1,0 +1,24 @@
+ * Serving Flask app 'RENDER_TEST_myjobs_s221'
+ * Serving Flask app 'RENDER_TEST_myjobs_s221'
+  PASS  the BASELINE card really is the unpatched one (it still shows the directory)
+  PASS  this change introduces NO javascript error the live card did not already have (1 pre-existing, stub-caused)
+  PASS  the section is headed as HIS WORK, not as a directory
+  PASS  the old directory heading is GONE
+  PASS  the old 'kaun: ... kaam: ...' line is gone
+  PASS  his own card is offered: Din ka card
+  PASS  his own card is offered: Vaapsi desk
+  PASS  his own card is offered: Stock count
+  PASS  his own card is offered: Staff register
+  PASS  Amir's corrections desk is NOT on his page
+  PASS  Stock COUNT is on his page (owner, 03-Sep: 'might need 2 persons')
+  PASS  but stock DIFFERENCES is not -- that list is the others plus you
+  PASS  the page he is standing on is not offered back to him
+  PASS  the buttons are real links to the real routes
+  PASS  no link to a page that is not his
+ * Serving Flask app 'RENDER_TEST_myjobs_s221'
+  PASS  fail-safe: a registry with no `who` shows him everything, not nothing
+  PASS  even then, the page he is on is still left out
+  PASS  no NEW javascript error in the fail-safe path
+ * Serving Flask app 'RENDER_TEST_myjobs_s221'
+  PASS  an empty registry renders no section at all
+RENDER GREEN -- 19 passed, 0 failed

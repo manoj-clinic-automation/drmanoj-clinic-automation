@@ -1,0 +1,10 @@
+{"_note": "S221 -- `who` is the DISPLAY audience of a card: which people see its button on their own page. It is NOT permission. Permission stays where it has always been: each page's own require() and the unit_role rows. Ownership below is the owner's ruling of 03-Sep-2026. A card with no `who` shows on the owner's hub directory and on nobody's staff page, so it is visible to fix rather than lost.",
+ "cards": [
+ {"name": "Din ka card — Daily Sale", "url": "/finance/daily", "users": "Darpan", "who": ["darpan"], "purpose": "Din ki entry: cash/UPI, kharche, scan, din file karna"},
+ {"name": "Drawer card", "url": "/finance/darpan", "users": "Darpan", "who": ["darpan"], "purpose": "Drawer ka hisaab, cash bhejna/wapas lena, custody"},
+ {"name": "Corrections desk", "url": "/finance/darpan/corrections", "users": "Amir", "who": ["amir"], "purpose": "UPI/CASH galat mode ki sudhaar-list — Marg mein theek karke tick"},
+ {"name": "Stock count", "url": "/finance/stock/page/count", "users": "Darpan, Alisha, Shivani, Shavez, Amir", "who": ["darpan", "alisha", "shivani", "shavez", "amir"], "purpose": "Haath se stock ginti (do log: ek gine, ek likhe); expected server Marg se batata hai"},
+ {"name": "Stock differences", "url": "/finance/stock/page/diffs", "users": "Alisha, Shivani, Shavez, Amir + Dr Manoj", "who": ["alisha", "shivani", "shavez", "amir", "manoj"], "purpose": "Ginti vs Marg ka antar, karan ke saath band hota hai"},
+ {"name": "Vaapsi desk — Sale returns", "url": "/finance/returns/desk", "users": "Darpan, Shavez, Alisha, Shivani", "who": ["darpan", "shavez", "alisha", "shivani"], "purpose": "Sale return ki entry aur parchi"},
+ {"name": "Staff register", "url": "/register", "users": "Sab staff", "who": ["all"], "purpose": "Hajiri, punch, present-request"}
+]}
