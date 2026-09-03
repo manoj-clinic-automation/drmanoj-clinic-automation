@@ -1,0 +1,6 @@
+# S221_D355_LADDER -- pin PREDICTED OFFLINE by applying the patcher to the
+# S220-close live bytes of finance_ingest.py (d5ff50ade372552d8b569114abee9107,
+# itself reproduced offline from the S219-close base 6cb83302 + the S220 F-277
+# patcher and md5-proven against the live pin before a line of this kit was written).
+# The owner's md5sum at INSTALL step 5 must read exactly this.
+747b4a506042b95c862f3eafc74608f3  /root/finance/finance_ingest.py

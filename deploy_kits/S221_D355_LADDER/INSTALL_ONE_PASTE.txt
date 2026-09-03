@@ -1,0 +1,11 @@
+ONE PASTE on the VPS after the publish. Guards the current pin, patches, runs both
+proofs (the refusals and the live-shape walk), restarts, prints the new pin.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S221_D355_LADDER && md5sum -c SUMS.md5 --quiet && test "$(md5sum /root/finance/finance_ingest.py | cut -d' ' -f1)" = "d5ff50ade372552d8b569114abee9107" && \cp patch_ingest_ladder_s221.py selftest_ladder_s221.py walk_ladder_s221.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_ingest_ladder_s221.py && cd /root/finance && /root/wa/venv/bin/python3 -B /root/finance/selftest_ladder_s221.py | tail -1 && /root/wa/venv/bin/python3 -B /root/finance/walk_ladder_s221.py | tail -1 && systemctl restart clinic-finance.service && sleep 2 && journalctl -u clinic-finance.service --since "-1 min" --no-pager | tail -1 && md5sum /root/finance/finance_ingest.py
+
+Expected at the end:  ALL GREEN -- 23 passed, 0 failed
+                      WALK GREEN -- 32 passed, 0 failed
+                      747b4a506042b95c862f3eafc74608f3  /root/finance/finance_ingest.py
+
+If the pin guard fails, the live file is not d5ff50ad and NOTHING has been changed --
+say so and stop. If the walk is not GREEN, restore the .bak the patcher wrote and stop.

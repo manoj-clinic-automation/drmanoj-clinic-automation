@@ -1,0 +1,6 @@
+S221_D355_LADDER · built 02-Sep-2026 · Session 221 · F-283 (the D355 ladder at ingest)
+Target (S220-close pin): finance_ingest d5ff50ad  ->  predicted 747b4a50
+Proven offline: selftest 23/23 (the refusals) · live-shape walk 32/32 through the real
+ingest_day on a copy of the live db, on a PLAIN connection, incl. a 33-row cross-check
+of this kit's last-four rung against finance_patient_match.match_bill().
+Touches ONE live file. No other file moves. No screen changes.

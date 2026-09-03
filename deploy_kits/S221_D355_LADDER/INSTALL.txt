@@ -1,0 +1,22 @@
+S221_D355_LADDER -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  0  copy the THREE kit .py files into /root/finance/  (the one-paste block is in the chat)
+  1  /root/wa/venv/bin/python3 -B /root/finance/patch_ingest_ladder_s221.py
+  2  /root/wa/venv/bin/python3 -B /root/finance/selftest_ladder_s221.py     (expect: ALL GREEN)
+  3  /root/wa/venv/bin/python3 -B /root/finance/walk_ladder_s221.py         (expect: WALK GREEN)
+  4  systemctl restart clinic-finance.service
+  5  md5sum /root/finance/finance_ingest.py
+
+Steps 2 and 3 run on a COPY of finance.db in /tmp -- they never touch the live database.
+Step 5 must print the PREDICTED PIN in PREDICTED_PINS.txt. If it differs, say so; nothing else.
+
+The patcher refuses and changes nothing unless all five of its anchors match exactly
+once, keeps a timestamped .bak beside the file, and restores it if the result will not
+compile. Re-running it says "already patched" and stops. The `identity_resolution`
+table and the `v_entry_discipline` view are created on first use; no migration step.
+Rolling back = restore the .bak and restart.
+
+WHAT CHANGES ON THE FIRST EXPORT AFTER THE RESTART: bills that used to park for want
+of a clinic ID are named by the ladder and counted in the day as ordinary sales. The
+day's TOTAL does not move -- parked money already counted (F-282) -- but the split
+between "attributed" and "in review" does, and that is the point.
