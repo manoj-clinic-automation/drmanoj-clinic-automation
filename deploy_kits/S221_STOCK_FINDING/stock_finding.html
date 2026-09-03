@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock difference — audit finding</title>
+<style>
+:root{--ink:#1a1a1a;--muted:#5b5b5b;--line:#d9d9d9;--bg:#fafafa;--warn:#8a5300;
+      --bad:#8c1d18;--ok:#14532d;--chip:#f0f0f0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+     font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;
+      padding:14px;margin-bottom:14px}
+h1{font-size:19px;margin:0 0 2px}
+h2{font-size:16px;margin:18px 0 8px}
+.muted{color:var(--muted);font-size:13.5px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spread{justify-content:space-between}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;
+      vertical-align:top}
+th{font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+button{font:inherit;padding:7px 11px;border:1px solid var(--line);background:#fff;
+       border-radius:8px;cursor:pointer}
+button.p{background:var(--ink);color:#fff;border-color:var(--ink)}
+button.sm{padding:4px 8px;font-size:13px}
+input,select{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.kv{border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:#fff}
+.kv b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.kv span{color:var(--muted);font-size:12.5px}
+.chip{display:inline-block;background:var(--chip);border-radius:999px;
+      padding:1px 9px;font-size:12.5px}
+.bad{color:var(--bad)}.ok{color:var(--ok)}.warn{color:var(--warn)}
+.seal{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+.hide{display:none}
+.note{border-left:3px solid var(--warn);padding:8px 11px;background:#fffaf1;
+      border-radius:0 8px 8px 0;margin:10px 0}
+@media print{
+  body{background:#fff}
+  .noprint{display:none!important}
+  .card{border:none;padding:0;margin:0 0 16px}
+  .wrap{max-width:none;padding:0}
+  table{font-size:11.5px}
+  .sign{display:block!important;margin-top:26px}
+  .sign div{display:inline-block;width:30%;border-top:1px solid #000;
+            margin:34px 3% 0 0;padding-top:5px;font-size:12px}
+}
+.sign{display:none}
+</style></head>
+<body>
+<div class="wrap">
+
+<div class="card noprint" id="pick">
+  <div class="row spread"><b>Stock findings</b>
+    <button class="sm" onclick="loadList()">↻</button></div>
+  <div id="list" class="muted">loading…</div>
+</div>
+
+<div id="doc" class="hide">
+
+  <div class="card">
+    <div class="row spread">
+      <div>
+        <h1>Stock difference — audit finding <span id="fno"></span></h1>
+        <div class="muted" id="sub"></div>
+      </div>
+      <button class="p noprint" onclick="window.print()">Print</button>
+    </div>
+    <div class="grid" style="margin-top:12px">
+      <div class="kv"><span>Counted against Marg export</span><b id="ason"></b></div>
+      <div class="kv"><span>Counted / written by</span><b id="who" style="font-size:15px"></b></div>
+      <div class="kv"><span>Submitted</span><b id="subat" style="font-size:15px"></b></div>
+      <div class="kv"><span>Items counted</span><b id="icount"></b></div>
+    </div>
+    <div class="muted seal" style="margin-top:10px" id="seal"></div>
+    <div class="note" id="basis"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Where it stands</h2>
+    <div class="grid">
+      <div class="kv"><span>Short, at MRP</span><b class="bad" id="tShort"></b></div>
+      <div class="kv"><span>Written off</span><b id="tWO"></b></div>
+      <div class="kv"><span>Marked for recovery</span><b id="tRec"></b></div>
+      <div class="kv"><span>Explained — no loss</span><b class="ok" id="tExp"></b></div>
+      <div class="kv"><span>Not yet decided</span><b class="warn" id="tUnd"></b></div>
+    </div>
+    <div class="muted" style="margin-top:9px">Recovery is <b>logged only</b> — an amount
+      marked here is not deducted from anybody's pay by this system.</div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">The differences</h2>
+    <div style="overflow-x:auto"><table id="tbl"><thead><tr>
+      <th>Item</th><th class="n">Marg</th><th class="n">Counted</th><th class="n">Diff</th>
+      <th class="n">At MRP</th><th class="n">At cost</th>
+      <th>Staff's reason</th><th>Decision</th><th class="noprint">—</th>
+    </tr></thead><tbody id="rows"></tbody></table></div>
+  </div>
+
+  <div class="card hide" id="uvCard">
+    <h2 style="margin-top:0" class="warn">No rate — not in any total above</h2>
+    <div class="muted">Marg's export carries no rate for these items, so the loss cannot be
+      put in rupees. They are listed here rather than dropped. Type a rate and the line
+      is valued at once.</div>
+    <div style="overflow-x:auto;margin-top:8px"><table><thead><tr>
+      <th>Item</th><th class="n">Marg</th><th class="n">Counted</th><th class="n">Diff</th>
+      <th class="noprint">Rate per unit (₹)</th>
+    </tr></thead><tbody id="uvRows"></tbody></table></div>
+  </div>
+
+  <div class="card hide" id="recCard">
+    <h2 style="margin-top:0">Marked for recovery</h2>
+    <table><thead><tr><th>Item</th><th>From</th><th class="n">Amount</th><th>State</th>
+      </tr></thead><tbody id="recRows"></tbody></table>
+  </div>
+
+  <div class="card hide" id="woCard">
+    <h2 style="margin-top:0">Written off</h2>
+    <table><thead><tr><th>Item</th><th class="n">Value at MRP</th></tr></thead>
+      <tbody id="woRows"></tbody></table>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Marg correction vouchers</h2>
+    <div class="muted">A write-off is not finished until Marg agrees. Record the stock
+      adjustment voucher here, and keep the scan with it.</div>
+    <table style="margin-top:8px"><thead><tr><th>Voucher</th><th>Date</th><th>Note</th>
+      <th>Scan kept at</th></tr></thead><tbody id="vRows"></tbody></table>
+    <div class="row noprint" style="margin-top:10px">
+      <input id="vNo" placeholder="voucher no" style="max-width:150px">
+      <input id="vDate" type="date" style="max-width:170px">
+      <input id="vNote" placeholder="note (optional)" style="flex:1;min-width:140px">
+      <input id="vScan" placeholder="scan kept at" style="max-width:180px">
+      <button onclick="addVoucher()">Record</button>
+    </div>
+  </div>
+
+  <div class="sign">
+    <div>Counted by</div><div>Written by</div><div>Seen by</div>
+  </div>
+</div>
+</div>
+
+<script>
+/* The blueprint is mounted at /finance/stock, not /stock -- and a hard-coded
+   prefix here is exactly how S209 lost four hours. Derive it from the page's
+   own address instead, so the page cannot disagree with where it is served. */
+var API=location.pathname.replace(/\/page\/finding\/?$/,""), F=null, CID=null;
+function $(i){return document.getElementById(i);}
+/* Money on an audit document always carries its paise. toLocaleString drops
+   trailing zeros unless told not to, and "Rs 20" against "Rs 20.00" in the same
+   column is how a reader loses trust in a total. */
+function R(p){if(p===null||p===undefined)return "—";
+  return "₹"+(p/100).toLocaleString("en-IN",
+    {minimumFractionDigits:2,maximumFractionDigits:2});}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function qs(k){var m=new RegExp("[?&]"+k+"=([^&]*)").exec(location.search);
+  return m?decodeURIComponent(m[1]):null;}
+
+function loadList(){
+ fetch(API+"/api/findings").then(function(r){return r.json();}).then(function(j){
+  if(!j.ok){$("list").textContent="—";return;}
+  if(!j.findings.length){$("list").textContent=
+    "No stock count has been submitted yet.";return;}
+  $("list").innerHTML=j.findings.map(function(f){
+    return '<div style="padding:6px 0;border-top:1px solid #eee">'
+      +'<a href="?id='+f.count_id+'"><b>'+esc(f.finding_no)+'</b></a> · '
+      +esc(f.sealed_at||"")+' · '+f.lines+' difference(s) · '
+      +esc(f.items_counted||0)+' items · by '+esc(f.submitted_by||"—")+'</div>';
+  }).join("");
+ }).catch(function(){$("list").textContent="—";});
+}
+
+function load(cid){
+ fetch(API+"/api/finding/"+cid).then(function(r){return r.json();}).then(function(j){
+  if(!j.ok){alert(j.message||j.error);return;}
+  F=j;CID=cid;render();
+ }).catch(function(e){alert(""+e);});
+}
+
+function render(){
+ var f=F.finding,t=F.totals;
+ $("doc").className="";
+ $("pick").className="card noprint hide";
+ $("fno").textContent=f.no;
+ $("sub").textContent="Counted "+(f.started_at||"")+" → submitted "+(f.submitted_at||"")
+   +" · bill "+(f.bill_no||"—")+" of "+(f.bill_date||"—");
+ $("ason").textContent=f.marg_as_on||"—";
+ $("who").textContent=(f.counted_by.join(", ")||"—")+"  /  "+(f.entered_by.join(", ")||"—");
+ $("subat").textContent=(f.submitted_by||"—");
+ $("icount").textContent=(f.items_counted||0)+" of "+(f.items_total||0);
+ $("seal").innerHTML="Sealed "+esc(f.sealed_at)+" · seal "+esc(f.seal.slice(0,12))+"…"
+   +(f.seal_ok?' <span class="ok">✓ the counted quantities are unchanged since sealing</span>'
+              :' <span class="bad">⚠ A COUNTED QUANTITY HAS CHANGED SINCE SEALING</span>')
+   +' <span class="muted">(the seal covers the quantities; a value may be filled in later)</span>';
+ $("basis").innerHTML="<b>Recovery is valued at MRP</b> (the owner's ruling of 03-Sep-2026)."
+   +" The <i>at cost</i> column is deliberately empty: purchase prices are not in the system"
+   +" yet, and a cost figure invented from a margin would not be a cost. It is backfilled"
+   +" when the purchase tables land.";
+ $("tShort").textContent=R(t.short_p);
+ $("tWO").textContent=R(t.written_off_p);
+ $("tRec").textContent=R(t.to_recover_p)+(t.settled_p?(" (+"+R(t.settled_p)+" settled)"):"");
+ $("tExp").textContent=R(t.explained_p);
+ $("tUnd").textContent=R(t.undecided_p)+" · "+t.undecided_lines+" line(s)";
+
+ $("rows").innerHTML=F.lines.map(lineRow).join("")||
+   '<tr><td colspan="9" class="muted">No differences — the count agreed with Marg.</td></tr>';
+ if(F.unvalued.length){
+   $("uvCard").className="card";
+   $("uvRows").innerHTML=F.unvalued.map(function(l){
+     return "<tr><td>"+esc(l.item)+'</td><td class="n">'+l.marg_qty+'</td><td class="n">'
+       +l.counted_qty+'</td><td class="n">'+l.diff+'</td>'
+       +'<td class="noprint"><input id="rt_'+l.id+'" style="width:90px" '
+       +'inputmode="decimal" placeholder="per unit"> '
+       +(F.you.may_decide?'<button class="sm" onclick="setRate(\''+esc(l.item)
+         +'\','+l.id+')">set</button>':'')+'</td></tr>';
+   }).join("");
+ }
+ if(F.recovery.length){
+   $("recCard").className="card";
+   $("recRows").innerHTML=F.recovery.map(function(r){
+     return "<tr><td>"+esc(r.item)+"</td><td>"+esc(r.person||"—")+'</td><td class="n">'
+       +R(r.amount_p)+"</td><td>"+esc(r.state)+"</td></tr>";}).join("");
+ }
+ if(F.writeoffs.length){
+   $("woCard").className="card";
+   $("woRows").innerHTML=F.writeoffs.map(function(r){
+     return "<tr><td>"+esc(r.item)+'</td><td class="n">'+R(-r.value_p)+"</td></tr>";}).join("");
+ }
+ $("vRows").innerHTML=F.vouchers.map(function(v){
+   return "<tr><td>"+esc(v.voucher_no)+"</td><td>"+esc(v.voucher_date)+"</td><td>"
+     +esc(v.note||"—")+"</td><td>"+esc(v.scan_ref||"—")+"</td></tr>";}).join("")
+   ||'<tr><td colspan="4" class="muted">None recorded yet.</td></tr>';
+}
+
+function lineRow(l){
+ var dec=l.decision?('<span class="chip">'+esc(F.decision_labels[l.decision.decision]
+        ||l.decision.decision)+"</span>"
+        +(l.decision.recover_from?('<div class="muted">'+esc(l.decision.recover_from)
+          +" · "+R(l.decision.recover_p)+"</div>"):"")):'<span class="warn">—</span>';
+ var ans=l.answer?(esc(l.answer.label)+'<div class="muted">'+esc(l.answer.note||"")
+        +" — "+esc(l.answer.answered_by)+"</div>"):'<span class="muted">—</span>';
+ var act="";
+ if(F.you.may_decide){
+   act='<button class="sm" onclick="decide('+l.id+',\'WRITE_OFF\')">write off</button> '
+      +'<button class="sm" onclick="decide('+l.id+',\'RECOVER\')">recover</button> '
+      +'<button class="sm" onclick="decide('+l.id+',\'EXPLAINED\')">no loss</button>';
+ }else{
+   act=Object.keys(F.reasons).map(function(k){
+     return '<button class="sm" onclick="answer('+l.id+',\''+k+'\')">'
+       +esc(F.reasons[k])+"</button>";}).join(" ");
+ }
+ return "<tr><td>"+esc(l.item)+'</td><td class="n">'+l.marg_qty+'</td><td class="n">'
+   +l.counted_qty+'</td><td class="n">'+l.diff+'</td><td class="n">'
+   +R(l.value_p===null?null:-l.value_p)+'</td><td class="n">—</td><td>'+ans+"</td><td>"
+   +dec+'</td><td class="noprint">'+act+"</td></tr>";
+}
+
+function post(u,b){return fetch(API+u,{method:"POST",
+  headers:{"Content-Type":"application/json"},body:JSON.stringify(b)})
+  .then(function(r){return r.json();});}
+
+function decide(id,d){
+ var body={decision:d};
+ if(d==="RECOVER"){
+   var who=prompt("Recover from whom?");
+   if(!who)return;
+   body.recover_from=who;
+   var amt=prompt("Amount in rupees (blank = the MRP value of the shortage)");
+   if(amt!==null&&String(amt).trim()!=="")
+     body.recover_p=Math.round(parseFloat(amt)*100);
+ }
+ post("/api/diff/"+id+"/decision",body).then(function(j){
+   if(!j.ok){alert(j.message||j.error);return;}load(CID);});
+}
+function answer(id,reason){
+ post("/api/diff/"+id+"/answer",{reason:reason}).then(function(j){
+   if(!j.ok){alert(j.message||j.error);return;}load(CID);});
+}
+function setRate(item,id){
+ var v=$("rt_"+id);var r=v?String(v.value).trim():"";
+ if(r===""){if(v)v.focus();return;}
+ post("/api/rate",{item:item,rate_p:Math.round(parseFloat(r)*100)}).then(function(j){
+   if(!j.ok){alert(j.message||j.error);return;}load(CID);});
+}
+function addVoucher(){
+ var b={count_id:CID,voucher_no:$("vNo").value.trim(),
+        voucher_date:$("vDate").value.trim(),note:$("vNote").value.trim(),
+        scan_ref:$("vScan").value.trim()};
+ if(!b.voucher_no||!b.voucher_date){alert("Voucher number and date are needed.");return;}
+ post("/api/voucher",b).then(function(j){
+   if(!j.ok){alert(j.message||j.error);return;}
+   $("vNo").value="";$("vNote").value="";$("vScan").value="";load(CID);});
+}
+
+var id=qs("id");
+if(id){load(parseInt(id,10));}else{loadList();}
+</script>
+</body></html>

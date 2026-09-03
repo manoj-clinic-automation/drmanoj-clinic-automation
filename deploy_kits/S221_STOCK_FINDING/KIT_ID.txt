@@ -1,0 +1,11 @@
+S221_STOCK_FINDING · built 03-Sep-2026 · Session 221 · the stock difference as an audit finding
+Target (live pin): stock_app.py 83b0a1b0 -> ed2f76ef   ·   stock_finding.html NEW 8123a1cc
+Owner's rulings executed: D-a recover at MRP · D-b unvalued never in a total, re-valued on a
+typed rate or the next export · D-c LOG ONLY, no ledger anywhere · D-d line closes, recovery
+amount stays open · vouchers recorded with dates · cost column empty until M3.
+Proven offline: WALK 52/52 through the REAL blueprint on a copy of the live db -- including
+"marking a recovery touched NO ledger, advance, salary, staff or cash table" as a measurement,
+and the seal detecting a quantity altered behind the app's back.
+Plus RENDER 27/27: headless chromium, the document opened as the OWNER and as the COUNTER,
+real clicks, print stylesheet and signature lines checked.
+TWO live files (one of them new). Nothing else moves.

@@ -1,0 +1,7 @@
+# S221_STOCK_FINDING -- pins PREDICTED OFFLINE. The live stock files are BYTE-IDENTICAL
+# to the repo copies in deploy_kits/S213_STOCK_SCREEN (verified before building:
+# stock_app.py 83b0a1b0..., stock_diffs.html 3f6a87b2..., stock_check_live.html
+# 298005a2...), so no reproduction chain was needed.
+# The owner's md5sum at INSTALL step 6 must read exactly these.
+ed2f76efdb90f9ee9b40d644de2598b4  /root/finance/stock_app.py
+8123a1ccf5c3bcefc7a8365927fd9885  /root/finance/stock_finding.html

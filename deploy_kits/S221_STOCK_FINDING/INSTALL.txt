@@ -1,0 +1,28 @@
+S221_STOCK_FINDING -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  0  copy the kit files into /root/finance/  (the one-paste block is in the chat)
+  1  /root/wa/venv/bin/python3 -B /root/finance/patch_stock_finding_s221.py
+  2  \cp /root/deploy/repo/deploy_kits/S221_STOCK_FINDING/stock_finding.html /root/finance/
+  3  /root/wa/venv/bin/python3 -B /root/finance/walk_stock_finding_s221.py   (expect WALK GREEN 52/52)
+  4  systemctl restart clinic-finance.service
+  5  open  https://followup.dr-manoj.in/finance/stock/page/finding
+  6  md5sum /root/finance/stock_app.py /root/finance/stock_finding.html
+
+Step 3 runs on a COPY of finance.db in /tmp -- it never touches the live database.
+Step 5 will say "No stock count has been submitted yet." That is correct: nothing here has
+ever seen a real count, and it stays unproven until one happens.
+Step 6 must print the two PREDICTED PINS. If either differs, say so; nothing else.
+
+RENDER_TEST_finding_s221.py does NOT run on the box (no browser). It ran offline against
+these exact bytes; EVIDENCE_render_finding.txt is its output.
+
+The patcher refuses and changes nothing unless all four anchors match exactly once, keeps a
+timestamped .bak, and restores it if the result will not compile. Re-running says "already
+patched". The four new tables are created lazily on first use; no migration step.
+Rolling back = restore the .bak, delete stock_finding.html, restart.
+
+WHAT IS NOT IN THIS BUILD, deliberately:
+  * no ledger posting of any kind -- a recovery is LOGGED, never deducted (your D-c)
+  * no Marg integration -- the voucher is recorded by number and date, and the scan is kept
+    wherever you keep it, named in the `scan kept at` field, until Marg can export vouchers
+  * no cost figures -- the column is there and empty until the M3 purchase tables land

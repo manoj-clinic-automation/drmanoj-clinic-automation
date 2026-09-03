@@ -1,0 +1,53 @@
+  PASS  the patched stock app is the one under test
+  PASS  the export loads
+  PASS  the count submits
+  PASS  three differences were raised, the agreeing item raised none
+  PASS  THE FINDING IS SEALED AT SUBMIT, and numbered
+  PASS  the document composes
+  PASS  the seal verifies against the rows as they stand
+  PASS  it names the Marg export it was counted against
+  PASS  it names BOTH the counters and the writer
+  PASS  it carries the date and time it was sealed
+  PASS  the basis is stated as MRP (the owner's D-a)
+  PASS  the VALUED differences are the two with a rate
+  PASS  the UNVALUED one is listed separately, not dropped
+  PASS  the shortage totals correctly at MRP (Rs 38.00)
+  PASS  the unvalued line is NOT inside that total
+  PASS  the cost column is present and honestly empty (M3 backfills it)
+  PASS  a staff answer is accepted
+  PASS  an invented reason is REFUSED
+  PASS  STAFF CANNOT RULE ON A LINE -- the decision is the checker's alone
+  PASS  his answer shows on the line, with his name
+  PASS  and it changed no number
+  PASS  the seal still verifies after the staff have worked it
+  PASS  the owner can mark a recovery
+  PASS  marking a recovery changed ONLY the decision table and the line's status
+  PASS  NO ledger, advance, salary, staff or cash table was touched -- nothing is deducted by this code
+  PASS  the amount defaults to the MRP value of the shortage (Rs 20.00)
+  PASS  D-d: the LINE is closed
+  PASS  D-d: the recovery AMOUNT stays open
+  PASS  it appears on the recovery list, against the person named
+  PASS  and in the total marked for recovery
+  PASS  a write-off lands in its own total (Rs 18.00)
+  PASS  and on its own list
+  PASS  nothing is left undecided among the valued lines
+  PASS  a recovery on a line with NO RATE is REFUSED, not guessed at
+  PASS  a rate can be typed in
+  PASS  and it re-valued the waiting line
+  PASS  the line has moved out of the unvalued block
+  PASS  its value is right (4 x Rs 5.00 = Rs 20.00)
+  PASS  THE SEAL STILL HOLDS after a late re-valuation -- it covers the counted quantities, not the price, which may legitimately be filled in later
+  PASS  but a COUNTED QUANTITY altered behind the app's back IS detected
+  PASS  and the seal comes back when the tampering is undone
+  PASS  a later export with the missing rate re-values it by itself
+  PASS  the Marg correction voucher is recorded, with its date
+  PASS  it appears on the document
+  PASS  with the place the scan is kept
+  PASS  the document page serves
+  PASS  it is printable
+  PASS  it says in words that recovery is logged only
+  PASS  the older screens still serve
+  PASS  the losses report is untouched and still answers
+  PASS  a re-count makes a NEW finding, it does not overwrite the old one
+  PASS  the first finding still says exactly what it said
+WALK GREEN -- 52 passed, 0 failed
