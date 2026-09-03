@@ -1,4 +1,4 @@
-walking on a COPY: /tmp/walk_s222_111ptk_g/finance.db
+walking on a COPY: /tmp/walk_s222_61d4m7fn/finance.db
 
 -- 0  what is under test ------------------------------------------
   PASS  the file under test is the LIVE one   [/tmp/s222walk/fin/returns_desk.py]
@@ -60,9 +60,9 @@ walking on a COPY: /tmp/walk_s222_111ptk_g/finance.db
   PASS  with the row DELETED, amir reaches the desk again   [200 None]
 
 -- 8  AMIR KEEPS WHAT S221 GAVE HIM -------------------------------
-  NOTE  could not walk his corrections desk: No module named 'darpan_app'
-  NOTE  could not walk the stock count screen: No module named 'stock_app'
+  NOTE  could not walk the stock screens: No module named 'stock_app'
+  NOTE  could not walk the corrections desk: No module named 'darpan_app'
 
 WALK GREEN  36/36
-  NOTE:   could not walk his corrections desk (No module named 'darpan_app') -- check it by hand
-  NOTE:   could not walk the stock count screen (No module named 'stock_app') -- check it by hand
+  NOTE:   could not walk the stock screens (No module named 'stock_app') -- check by hand
+  NOTE:   could not walk the corrections desk (No module named 'darpan_app') -- check by hand

@@ -14,6 +14,9 @@ Database: ONE row in `setting`. No role is added or removed; Amir keeps everythi
 PROVEN OFFLINE, on the live bytes reproduced exactly (see PREDICTED_PINS.txt):
   SELFTEST GREEN 26/26  -- the truth table through the real _auth()
   WALK     GREEN 36/36  -- every desk route as Amir, the four still in, and the
-                           fail-safe demonstrated by blanking and deleting the row
+                           fail-safe demonstrated by blanking and deleting the row.
+                           §8 (what Amir KEEPS) can only run on the box; v1 guessed
+                           its two paths and produced a FALSE FAIL there. Corrected
+                           from S221's own walk -- see INSTALL_RERUN_ONE_PASTE.txt
   RENDER   GREEN 26/26  -- headless chromium opening the patched desk and tapping
                            through it (the standing rule for this page since S214)

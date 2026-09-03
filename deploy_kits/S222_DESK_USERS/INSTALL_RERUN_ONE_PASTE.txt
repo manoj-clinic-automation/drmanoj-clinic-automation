@@ -1,0 +1,38 @@
+S222 -- RE-RUN THE WALK after the v1 §8 correction. ONE PASTE on the VPS.
+
+WHY THIS EXISTS. The install of 03-Sep-2026 11:59 IST applied cleanly and the box read the
+predicted pin 3296eca0f65d4396e61cfa80e11bee26 exactly. The walk then came back RED 36/37 on
+one line -- "amir still opens the stock count screen" -- and that line was WRONG. §8 of the
+walk (the courtesy section: what this kit must NOT take away from Amir) was the one section
+that could not run in the workspace, because stock_app and darpan_app are not there. So it
+shipped with a GUESSED route and a GUESSED init signature:
+
+    guessed   /finance/stock/count          real  /finance/stock/page/count
+    guessed   darpan_app.init(..., url_prefix=...)   real  darpan_app.init(app, db, require, unit=)
+
+Flask answered 404 for a path that does not exist, and the walk read 404 as "he lost the
+screen". Nothing about the stock count changed; nothing was ever wrong on the box. The paths
+and signatures are now copied from S221's own walk_amir_access_s221.py, which uses them daily.
+
+The service was NOT restarted (the walk exited 1 and the chain stopped), so the box is still
+serving the OLD returns_desk.py. The patched file is on disk, the setting row is seeded, and
+both the patcher and the seeder are idempotent -- re-running them says "already patched" and
+"already set". Only the walk needs to move.
+
+PASTE 1 -- pull, guard on the NEW pin, copy the walk only, re-run it:
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S222_DESK_USERS && md5sum -c SUMS.md5 --quiet && test "$(md5sum /root/finance/returns_desk.py | cut -d' ' -f1)" = "3296eca0f65d4396e61cfa80e11bee26" && \cp walk_desk_users_s222.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/walk_desk_users_s222.py > /tmp/walk_s222b.txt; echo "WALK EXIT=$?"; tail -8 /tmp/walk_s222b.txt; grep -c '^  FAIL' /tmp/walk_s222b.txt
+
+Expect WALK GREEN 40/40 -- 36 as before, plus the four §8 checks that can only run here:
+the stock count screen, the differences list, the open-differences data, and his corrections
+desk, all still 200 for Amir. WALK EXIT must be 0 and the FAIL count 0.
+
+PASTE 2 -- only after that:
+
+systemctl restart clinic-finance.service && sleep 2 && md5sum /root/finance/returns_desk.py /root/finance/returns_desk.html
+
+Expected:  3296eca0f65d4396e61cfa80e11bee26  /root/finance/returns_desk.py
+           6d98e1b076d14ad0c70a200406e901b1  /root/finance/returns_desk.html
+
+If §8 fails AGAIN, that is a real finding and the restart waits: send me the four §8 lines,
+which now print the exact path and status code beside each.

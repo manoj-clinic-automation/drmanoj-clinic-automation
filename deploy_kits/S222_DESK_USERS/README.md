@@ -75,9 +75,21 @@ a reproduction is not a box read, and **A0 stands**.
 
 Everything else S221 gave him: his corrections desk, the stock count screen, the differences
 list, the audit finding, and answering a difference line. **No role is added or removed** —
-this kit writes one `setting` row and nothing else. The walk's §8 re-opens both of his other
-screens as him; in the workspace those two modules are not present, so **that pair is proven on
-the box, at install, and nowhere else**. Said here rather than left in a NOTE nobody reads.
+this kit writes one `setting` row and nothing else. The walk's §8 re-opens his other screens as
+him; in the workspace those two modules are not present, so **that section is proven on the box,
+at install, and nowhere else**.
+
+**And that is exactly where it bit.** §8 shipped with a *guessed* route (`/finance/stock/count`;
+the real one is `/finance/stock/page/count`) and a *guessed* init signature (`darpan_app.init`
+takes no `url_prefix`). On the box Flask answered **404 for a path that does not exist**, and the
+walk read 404 as *"he lost the screen"* — **`WALK RED 36/37`, on a screen this kit never touched.**
+The install stopped at the walk, correctly, and nothing was restarted.
+
+The lesson is the section's own: **a check you cannot run is a check you cannot trust.** The three
+gates that could run offline were exact — the box read the predicted pin `3296eca0…` to the
+character — and the one section that could not run offline was the one that shipped a guess. The
+paths and signatures are now taken from `walk_amir_access_s221.py`, which exercises them daily,
+and every §8 line prints its path and status code so a future failure names itself.
 
 ## Files
 

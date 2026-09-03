@@ -183,25 +183,38 @@ def main():
        "%s %s" % (c, j.get("error")))
 
     print("\n-- 8  AMIR KEEPS WHAT S221 GAVE HIM -------------------------------")
-    # the corrections desk and the stock count are NOT touched by this kit; the
-    # walk proves it rather than asserting it.
-    for mod, prefix, path, label in (
-            ("darpan_app", "/finance/darpan", "/corrections", "his corrections desk"),
-            ("stock_app", "/finance/stock", "/count", "the stock count screen")):
-        try:
-            M = __import__(mod)
-            a2 = Flask(mod)
-            try:
-                M.init(a2, _db, _require, unit="medical", url_prefix=prefix)
-            except TypeError:
-                M.init(a2, _db, _require, unit="medical", url_prefix=prefix,
-                       marg_token="t")
-            as_("amir")
-            r = a2.test_client().get(prefix + path)
-            ck("amir still opens %s" % label, r.status_code == 200, str(r.status_code))
-        except Exception as ex:
-            NOTES.append("could not walk %s (%s) -- check it by hand" % (label, ex))
-            print("  NOTE  could not walk %s: %s" % (label, ex))
+    # These two are NOT touched by this kit, and the walk proves it rather than
+    # asserting it. THE PATHS AND SIGNATURES BELOW ARE S221's OWN, copied from
+    # walk_amir_access_s221.py -- v1 of this walk GUESSED them ("/finance/stock/count",
+    # and a url_prefix darpan_app does not take), could not run this section
+    # offline, and so shipped a guess to the box, where it produced a FALSE FAIL
+    # on a screen nothing had changed. Recorded here, not quietly corrected.
+    as_("amir")
+    try:
+        import stock_app as SA
+        a2 = Flask("s222_stock")
+        SA.init(a2, _db, _require, unit="medical",
+                url_prefix="/finance/stock", marg_token="t")
+        c2 = a2.test_client()
+        for path, label in (("/finance/stock/page/count", "the stock count screen"),
+                            ("/finance/stock/page/diffs", "the stock differences list"),
+                            ("/finance/stock/api/open", "the open-differences data")):
+            r = c2.get(path)
+            ck("amir still opens %s" % label, r.status_code == 200,
+               "%s -> %s" % (path, r.status_code))
+    except Exception as ex:
+        NOTES.append("could not walk the stock screens (%s) -- check by hand" % ex)
+        print("  NOTE  could not walk the stock screens: %s" % ex)
+    try:
+        import darpan_app as DA
+        a3 = Flask("s222_darpan")
+        DA.init(a3, _db, _require, unit="medical")
+        r = a3.test_client().get("/finance/darpan/corrections")
+        ck("amir still opens his corrections desk", r.status_code == 200,
+           "/finance/darpan/corrections -> %s" % r.status_code)
+    except Exception as ex:
+        NOTES.append("could not walk the corrections desk (%s) -- check by hand" % ex)
+        print("  NOTE  could not walk the corrections desk: %s" % ex)
 
     shutil.rmtree(tmp, ignore_errors=True)
     n = len(PASSED) + len(FAILED)
