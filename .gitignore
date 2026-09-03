@@ -153,3 +153,9 @@ finance/REPORT_1.xls
 
 # S218: the staff-cards registry is names+URLs only (no PHI, no secrets) and must publish
 !deploy_kits/*/cards_registry.json
+
+# S222: the per-person TILE GRANTS file, same shape and same reasoning -- logins and tile
+# names only, no PHI, no secrets, no numbers. It is the file that took per-person tiles out
+# of portal.py, so it has to ship with its kit or the kit installs nothing. Checked before
+# this line was added: six logins, sixteen tile names, and the only digits in it are "2026".
+!deploy_kits/*/tile_grants.json

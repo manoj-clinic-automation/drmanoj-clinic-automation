@@ -1,0 +1,41 @@
+S222_SCANAPP_INAPP · built 03-Sep-2026 · Session 222 · the scan app stops throwing staff out
+
+THE OWNER: "Unlike attendance, do all what is possible for the Scan app part."
+
+WHAT WAS WRONG. The portal PWA's scope is "/" on followup.dr-manoj.in, so a tile pointing at
+another host opens with browser chrome and the staff member is dropped OUT of the app. Only two
+staff tiles did that. Attendance is parked by him (its app pulls punches from the biometric
+machine). This is the other: "Scan Purchase — photograph a new bill, get a stamp number", which
+is what reception does all day, pointing at assets.dr-manoj.in.
+
+WHY THE PROVEN S200 PATTERN DID NOT TRANSFER, and this is the finding. S200 brought the staff
+register in with ONE LiteSpeed context because that app's routes were already namespaced
+(/register/...). The scan app's routes are FLAT: /, /login, /intake, /bills, /assets, /files,
+/scan, /drafts, /staff, /vendors, /renewals, /purchases, /admin, /account, /api/due. Ten route
+families. One context cannot cover them; ten would claim ten top-level paths on the portal's own
+domain — including /assets, which means a different thing to each app. So the APP learns the
+prefix instead, in nine lines of WSGI.
+
+WHAT IT DOES. One process, both shapes. assets.dr-manoj.in keeps working exactly as today; the
+same app also answers under /scanapp, and Flask's url_for/redirects come back prefixed on their
+own. Nothing moves. No port changes. The subdomain is not retired.
+
+Targets (live pins):
+  /root/assetapp/asset_register.py  958c7fb7 -> 71bd3277   (restart assetapp.service)
+  /root/portal/portal.py            c89ffa9f -> 23824f92   (restart clinic-portal)
+  followup vhost                    ONE appended block, backed up, auto-rolled-back on failure
+
+THE LIVE BYTES WERE REPRODUCED BEFORE ANYTHING WAS TOUCHED:
+  repo assetapp/asset_register.py 0cd8fc3b + S219_PHARMA_LANE's patcher = 958c7fb7, the live pin.
+
+PROVEN OFFLINE — PREFIX GREEN, the REAL app imported and asked:
+  the root shape unchanged on six route families, status code for status code;
+  the prefixed shape identical on all six; url_for prefixed under the prefix and NOT at the root;
+  and A-D21 shown untouched — RECEPTION_OK still exactly its eight endpoints, the new health
+  route deliberately NOT among them, and dashboard/bills/assets still refused.
+
+THE VHOST INSTALLER IS S200_R2a's, WHICH HAS RUN ON THIS FILE, with the port DISCOVERED instead
+of hard-coded: it asks each candidate for the /healthz this patch adds, refuses if none answers,
+refuses if /scanapp/healthz does not answer on that backend, refuses if any existing path is
+already down, backs up, appends, restarts, probes /scanapp /portal /finance /register — and
+restores the backup and restarts again if any of them fails.

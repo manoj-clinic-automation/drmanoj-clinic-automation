@@ -1,0 +1,46 @@
+-- 0  what is under test ------------------------------------------
+  PASS  the file carries the S222 prefix shim
+  PASS  the prefix is /scanapp, not /assets (the app owns /assets itself)
+
+-- 1  HEALTH, so the vhost installer can find the backend ---------
+  PASS  /healthz is 200 ok   [200]
+  PASS  /scanapp/healthz is 200 ok   [200]
+
+-- 2  THE ROOT SHAPE IS UNCHANGED (assets.dr-manoj.in keeps working)
+  PASS  the landing answers at the root   [/ -> 302]
+  PASS  login answers at the root   [/login -> 200]
+  PASS  intake answers at the root   [/intake -> 302]
+  PASS  bills answers at the root   [/bills -> 302]
+  PASS  the asset register itself answers at the root   [/assets -> 302]
+  PASS  the scanner widget answers at the root   [/scan/widget.js -> 404]
+
+-- 3  THE PREFIXED SHAPE ANSWERS THE SAME WAY ---------------------
+  PASS  the landing matches under /scanapp   [/scanapp/ -> 302, root -> 302]
+  PASS  login matches under /scanapp   [/scanapp/login -> 200, root -> 200]
+  PASS  intake matches under /scanapp   [/scanapp/intake -> 302, root -> 302]
+  PASS  bills matches under /scanapp   [/scanapp/bills -> 302, root -> 302]
+  PASS  the asset register itself matches under /scanapp   [/scanapp/assets -> 302, root -> 302]
+  PASS  the scanner widget matches under /scanapp   [/scanapp/scan/widget.js -> 404, root -> 404]
+
+-- 4  AND ITS LINKS COME BACK PREFIXED, which is the whole point ---
+  PASS  url_for(intake) is prefixed   [/scanapp/intake]
+  PASS  url_for(login) is prefixed   [/scanapp/login]
+  PASS  url_for(bills_list) is prefixed   [/scanapp/bills]
+  PASS  url_for at the root is NOT prefixed   [/intake]
+
+-- 5  A-D21 IS UNTOUCHED: the shim is not an authorisation hole ----
+  PASS  RECEPTION_OK still holds exactly its eight endpoints   [['intake', 'intake_scan_submit', 'intake_slip', 'intake_slip_last', 'intake_submit', 'login', 'logout', 'scanner_widget_js']]
+  PASS  intake is still allowed to a reception user
+  PASS  intake_submit is still allowed to a reception user
+  PASS  intake_scan_submit is still allowed to a reception user
+  PASS  intake_slip is still allowed to a reception user
+  PASS  intake_slip_last is still allowed to a reception user
+  PASS  scanner_widget_js is still allowed to a reception user
+  PASS  login is still allowed to a reception user
+  PASS  logout is still allowed to a reception user
+  PASS  the new health route was NOT added to the allow-list
+  PASS  dashboard is still NOT on the allow-list
+  PASS  bills is still NOT on the allow-list
+  PASS  assets is still NOT on the allow-list
+
+PREFIX GREEN -- 0 failed

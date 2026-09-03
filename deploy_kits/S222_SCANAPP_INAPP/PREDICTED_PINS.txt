@@ -1,0 +1,16 @@
+# S222_SCANAPP_INAPP -- predicted from EXACT live bytes of both files.
+#
+# asset_register.py was not read from the box: its live bytes were REPRODUCED,
+#   repo assetapp/asset_register.py            0cd8fc3bfe8d39322c6162a41124bddf
+#     + deploy_kits/S219_PHARMA_LANE/patch_pharma_lane_s219.py
+#     = 958c7fb71d716ae82d50efa77ac0fbdc        <- the live pin in the Register
+# and the patcher refuses against anything else. That settles this file's provenance too:
+# the repository CAN reconstruct it. darpan_app.py still cannot.
+#
+# The owner's md5sum after installing must read exactly:
+71bd32777b69e375e41576c7aeb7eb1d  /root/assetapp/asset_register.py
+23824f92988621a38c1ae0cd7fb1314c  /root/portal/portal.py
+#
+# The vhost has no pin -- it is an APPEND to a live config whose repo mirror is drifted
+# ("append-managed; never replace"). Its guarantee is the installer's own backup and
+# auto-rollback, not a hash.

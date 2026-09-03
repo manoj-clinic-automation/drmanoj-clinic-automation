@@ -1,0 +1,17 @@
+# === Reverse proxy for the SCAN APP (asset_register.py) — Session 222, portal-PWA unification ===
+# Modelled on the S200_R2a /register block, which has run on this vhost since Session 200.
+# The app answers at its own root on assets.dr-manoj.in as well; nothing is retired here.
+extprocessor scanapp {
+  type                    proxy
+  address                 127.0.0.1:__PORT__
+  maxConns                100
+  pcKeepAliveTimeout      60
+  initTimeout             60
+  retryTimeout            0
+  respBuffer              0
+}
+context /scanapp {
+  type                    proxy
+  handler                 scanapp
+  addDefaultCharset       off
+}

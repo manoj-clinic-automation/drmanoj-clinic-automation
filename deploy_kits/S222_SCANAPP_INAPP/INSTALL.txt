@@ -1,0 +1,27 @@
+S222_SCANAPP_INAPP -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+THE ORDER MATTERS: the app must answer /scanapp BEFORE the vhost points anything at it.
+
+  1  \cp /root/deploy/repo/deploy_kits/S222_SCANAPP_INAPP/patch_assetapp_prefix_s222.py /root/assetapp/
+  2  /root/wa/venv/bin/python3 -B /root/assetapp/patch_assetapp_prefix_s222.py
+  3  systemctl restart assetapp.service
+  4  bash /root/deploy/repo/deploy_kits/S222_SCANAPP_INAPP/INSTALL_S222_scanapp.sh
+  5  \cp /root/deploy/repo/deploy_kits/S222_SCANAPP_INAPP/patch_portal_scanapp_tiles_s222.py /root/portal/
+  6  /root/wa/venv/bin/python3 -B /root/portal/patch_portal_scanapp_tiles_s222.py
+  7  systemctl restart clinic-portal
+  8  md5sum /root/assetapp/asset_register.py /root/portal/portal.py
+
+STEP 4 IS THE ONE THAT TOUCHES THE WEB SERVER. It refuses rather than guesses at every point:
+no backend answering /healthz -> refuse · the prefix not live on that backend -> refuse ·
+any existing path already down -> refuse. It backs the vhost up, appends, restarts, and probes
+/scanapp /portal /finance /register. If ANY of those fails it restores the backup, restarts
+again, and prints the recheck. It cannot leave the site half-changed.
+
+If the backend listens somewhere unusual, step 4 takes ASSET_PORT=<port> in front of it.
+
+AFTERWARDS: on the phone, open the app and tap 📷 Scan Purchase. It should stay INSIDE the app
+window — no address bar appearing, no browser tab. Photograph a bill, take the stamp number.
+Then check assets.dr-manoj.in still opens normally in a browser; it is untouched.
+
+ROLLING BACK: restore the .bak_S222_* file beside each of the two .py files and restart their
+services; for the vhost, restore the .bak_S222_scanapp_* file and run
+/usr/local/lsws/bin/lswsctrl restart.

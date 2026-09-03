@@ -1,0 +1,26 @@
+-- 0  what is under test ------------------------------------------
+  PASS  portal.py carries the S222 grants reader
+  PASS  the code dicts are STILL there as the fallback
+
+-- 1  WITHOUT the file: the code dicts still rule -------------------
+  PASS  the portal renders with no grants file at all
+
+-- 2  WITH the seed: MEMBERSHIP identical for every user x role -----
+  PASS  no tile appeared or disappeared for ANYONE (48 combinations)   [[]]
+
+-- 3  ORDER: untouched for doctor/manager, reordered for staff ------
+  PASS  doctor and manager see the same order as before
+  PASS  Clinic (where Scan Purchase lives) is first for staff   [['Clinic', 'Money & Accounts', 'Staff']]
+  PASS  Staff (attendance, register) sits LAST for them   [['Clinic', 'Money & Accounts', 'Staff']]
+
+-- 4  THE FAIL-SAFES ------------------------------------------------
+  PASS  malformed file -> exactly the code behaviour
+  PASS  a file with no users map -> exactly the code behaviour
+  PASS  deleted file -> exactly the code behaviour
+
+-- 5  AND IT ACTUALLY GRANTS AND MASKS FROM THE FILE ----------------
+  PASS  a doctor/manager tile granted in the FILE reaches Amir
+  PASS  and no other staff login got it
+  PASS  a mask in the FILE hides a tile
+
+GRANTS GREEN -- 0 failed

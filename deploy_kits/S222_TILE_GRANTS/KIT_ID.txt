@@ -1,0 +1,36 @@
+S222_TILE_GRANTS · built 03-Sep-2026 · Session 222 · per-person tiles stop being source code
+
+THE OWNER: "staff get same, but with their own required tiles… place the apps contextually and
+the ones needed more at higher level… attendance section is at lowest level as its for personal
+use."
+
+None of that was possible while the answer lived in Python — and it was not one dict but FIVE
+places, built up imperatively: the two base dicts, an S179 mask for bhawna, an S179 mask for
+darpan, and two S182 loops. Giving one person one tile meant edit, publish, restart the login
+system.
+
+They collapse into ONE json file read per request. The code dicts STAY, as the fallback: a
+missing, malformed or shapeless file means the portal behaves exactly as it does today. A grants
+file that cannot be read must never be why somebody's tiles vanish.
+
+Section ORDER is now per role and per person, which is the second half of what he asked for.
+DISPLAY ONLY — it grants nothing and hides nothing. Seeded to his ruling for staff: Clinic
+(where Scan Purchase lives) first, then Money & Accounts, and Staff — attendance and the
+register — LAST, because it is personal.
+
+Targets (live pins):
+  /root/portal/portal.py   23824f92 -> d15acef3   (restart clinic-portal)
+  /root/portal/tile_grants.json   NEW — reproduces 03-Sep behaviour exactly
+
+PROVEN: GRANTS GREEN. The gate walks EVERY user x EVERY role x PC on and off — 48 combinations —
+with the file and without it, and asserts not one tile appears or disappears for anyone. Plus
+all three fail-safes, and that the file really can grant a tile to one person without leaking it
+to another.
+
+⚠ ONE RULING OWED, SURFACED AND NOT FIXED. The seed keeps this because the kit changes nothing:
+    darpan: mask = Attendance, Staff Register, Scan Purchase
+    # S179: darpan is role=staff, which is shared. He only needs Daily Sale.
+That reason is dead — he has his own login and his own phone, the owner said so on 03-Sep, and
+the owner also ruled that everyone gets the staff register scoped to themselves. DARPAN, WHO
+DOES MORE ON THIS SYSTEM THAN ANYONE, IS THE ONE PERSON WHO CANNOT SEE HIS OWN ATTENDANCE, HIS
+OWN REGISTER, OR SCAN A BILL. Removing it is three deletions in the json once he says so.

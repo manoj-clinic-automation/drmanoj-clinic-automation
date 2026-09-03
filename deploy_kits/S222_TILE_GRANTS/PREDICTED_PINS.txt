@@ -1,0 +1,9 @@
+# S222_TILE_GRANTS -- predicted from the exact live bytes of portal.py.
+# The patcher refuses unless portal.py is 23824f92988621a38c1ae0cd7fb1314c
+# (the S222_SCANAPP_INAPP result).
+#
+# The owner's md5sum after installing must read exactly:
+d15acef3fcb0237563475968c2eec921  /root/portal/portal.py
+#
+# tile_grants.json is NEW and has no "from" pin. Its md5 as shipped is in SUMS.md5;
+# it is meant to be EDITED afterwards, so its hash is not pinned to anything.

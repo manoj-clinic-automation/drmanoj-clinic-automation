@@ -1,0 +1,22 @@
+S222_TILE_GRANTS -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  1  \cp /root/deploy/repo/deploy_kits/S222_TILE_GRANTS/tile_grants.json /root/portal/
+  2  \cp /root/deploy/repo/deploy_kits/S222_TILE_GRANTS/patch_portal_grants_s222.py /root/portal/
+  3  /root/wa/venv/bin/python3 -B /root/portal/patch_portal_grants_s222.py
+  4  systemctl restart clinic-portal
+  5  md5sum /root/portal/portal.py
+
+THE FILE GOES FIRST, on purpose: between step 3 and step 4 nothing has changed anyway, and after
+the restart the file is already there to be read. If it were missing the portal would simply use
+the dicts — which is the same behaviour — so neither order can break anything.
+
+AFTERWARDS, on your own phone nothing changes. On a STAFF phone the sections come in a new
+order: what they scan and sell first, attendance last. Nobody gains or loses a tile.
+
+TO GIVE SOMEBODY A TILE FROM NOW ON — no deploy, no restart:
+  edit /root/portal/tile_grants.json, add the name under that login's "extra", save.
+  The portal picks it up on the next page load.
+  "mask" hides one the same way. Names must match the tile's name exactly.
+
+TO UNDO EVERYTHING: delete /root/portal/tile_grants.json. The portal falls straight back to the
+dicts compiled into portal.py, which are untouched and still there.

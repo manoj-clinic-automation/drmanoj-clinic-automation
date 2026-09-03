@@ -1,0 +1,62 @@
+{
+  "_note": "S222 - per-person tiles, moved out of portal.py. THIS SEED REPRODUCES THE BEHAVIOUR OF 03-Sep-2026 EXACTLY, including darpan's mask, whose stated reason ('role=staff is shared') is stale and awaits the owner's ruling. Delete or blank this file and the portal falls back to the dicts compiled into portal.py.",
+  "version": 1,
+  "users": {
+    "alisha": {
+      "extra": [
+        "Daily Collection"
+      ]
+    },
+    "bhawna": {
+      "mask": [
+        "CC Statements → Tally",
+        "Case Pack · PC fallback",
+        "Follow-up Tracker",
+        "Follow-up WhatsApps",
+        "GMB Review Assist",
+        "Sanjeevni Medicos",
+        "Send WhatsApp",
+        "Surgical Case Pack",
+        "Vitals & Plan"
+      ],
+      "extra": [
+        "Clinic"
+      ]
+    },
+    "darpan": {
+      "mask": [
+        "Attendance",
+        "Scan Purchase",
+        "Staff Register"
+      ]
+    },
+    "manoj": {
+      "extra": [
+        "Clinic",
+        "Manage Users"
+      ]
+    },
+    "shavez": {
+      "extra": [
+        "Asset Register",
+        "Clinic",
+        "Daily Collection"
+      ]
+    },
+    "shivani": {
+      "extra": [
+        "Daily Collection"
+      ]
+    }
+  },
+  "defaults": {
+    "_note": "Section order. DISPLAY ONLY - it grants nothing and hides nothing. The owner's ruling of 03-Sep: the work someone does most sits highest, attendance lowest because it is personal. Sections not named keep their place after those that are.",
+    "groups_by_role": {
+      "staff": [
+        "Clinic",
+        "Money & Accounts",
+        "Staff"
+      ]
+    }
+  }
+}
