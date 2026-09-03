@@ -1,0 +1,19 @@
+S222_DESK_USERS · built 03-Sep-2026 · Session 222 · star-1-1 (F-296, the Vaapsi desk over-grant)
+
+WHAT IT CLOSES. `viewer` IS the Vaapsi desk's key and has been since S214, so the S221 grant
+that gave Amir the corrections desk and the stock count also handed a purchase man cash
+refunds. The owner caught it at the close; the S221 walk had recorded it as a PASS.
+
+WHAT IT DOES. One opt-in setting, `returns.desk_users`, read at the desk's single door.
+SET -> only those logins plus any maker/checker. UNSET OR BLANK -> nothing changes at all.
+
+Target (live pin): /root/finance/returns_desk.py  1dc1fd62 -> 3296eca0
+Live files: ONE. /root/finance/returns_desk.html is NOT touched; its pin does not move.
+Database: ONE row in `setting`. No role is added or removed; Amir keeps everything else.
+
+PROVEN OFFLINE, on the live bytes reproduced exactly (see PREDICTED_PINS.txt):
+  SELFTEST GREEN 26/26  -- the truth table through the real _auth()
+  WALK     GREEN 36/36  -- every desk route as Amir, the four still in, and the
+                           fail-safe demonstrated by blanking and deleting the row
+  RENDER   GREEN 26/26  -- headless chromium opening the patched desk and tapping
+                           through it (the standing rule for this page since S214)

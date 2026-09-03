@@ -1,0 +1,15 @@
+ONE PASTE on the VPS after the publish. It reads the current pin aloud (that is the box
+read the PENDING row needs), guards on it, copies, patches, seeds, and runs the walk with
+its EXIT CODE CHECKED -- then stops so you can read it.
+
+md5sum /root/finance/returns_desk.py && git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S222_DESK_USERS && md5sum -c SUMS.md5 --quiet && test "$(md5sum /root/finance/returns_desk.py | cut -d' ' -f1)" = "1dc1fd6229e74c60e0eceb4a14db8aeb" && \cp patch_desk_users_s222.py seed_desk_users_s222.py walk_desk_users_s222.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_desk_users_s222.py && /root/wa/venv/bin/python3 -B /root/finance/seed_desk_users_s222.py /root/finance/finance.db && /root/wa/venv/bin/python3 -B /root/finance/walk_desk_users_s222.py > /tmp/walk_s222.txt; echo "WALK EXIT=$?"; tail -4 /tmp/walk_s222.txt; grep -c '^  FAIL' /tmp/walk_s222.txt
+
+WALK EXIT must be 0 and the FAIL count 0. Only then, the second paste:
+
+systemctl restart clinic-finance.service && sleep 2 && md5sum /root/finance/returns_desk.py /root/finance/returns_desk.html
+
+Expected:  3296eca0f65d4396e61cfa80e11bee26  /root/finance/returns_desk.py
+           6d98e1b076d14ad0c70a200406e901b1  /root/finance/returns_desk.html
+
+If the FIRST md5sum does not read 1dc1fd6229e74c60e0eceb4a14db8aeb the whole chain stops
+before it copies anything, and nothing on the box has changed. Send me the line it printed.

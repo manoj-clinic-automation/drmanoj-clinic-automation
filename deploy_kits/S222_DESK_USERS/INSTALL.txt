@@ -1,0 +1,41 @@
+S222_DESK_USERS -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  0  copy the THREE kit .py files into /root/finance/   (the one-paste block is in the chat)
+  1  md5sum /root/finance/returns_desk.py                (must read 1dc1fd6229e74c60e0eceb4a14db8aeb)
+  2  /root/wa/venv/bin/python3 -B /root/finance/patch_desk_users_s222.py
+  3  /root/wa/venv/bin/python3 -B /root/finance/seed_desk_users_s222.py /root/finance/finance.db
+  4  /root/wa/venv/bin/python3 -B /root/finance/walk_desk_users_s222.py    (expect WALK GREEN)
+  5  systemctl restart clinic-finance.service
+  6  md5sum /root/finance/returns_desk.py /root/finance/returns_desk.html
+
+Step 1 is not ceremony. It is the box read that PROMOTES the PENDING row for this file in
+live_pins_S221close.txt -- the S221 close held it as an 8-char prefix only, and A0 forbids
+writing a hash from memory. Step 6 promotes the .html row the same way; that file is not
+touched by this kit and must read the SAME pin before and after.
+
+Step 3 writes ONE row to the live database: setting `returns.desk_users`. It never
+overwrites an existing row. It touches no role, so Amir keeps his corrections desk, his
+stock count and his differences list exactly as S221 left them.
+Step 4 runs on a COPY of finance.db and never touches the live one.
+
+WHAT CHANGES AT THE RESTART
+  Amir opens /finance/returns/desk and is refused, in Hindi, on every route -- the page and
+  all eleven APIs, not just the front door.
+  Darpan, Shavez, Alisha and Shivani see no difference whatsoever.
+  You see no difference: a checker is never on the list and never needs to be.
+  Any viewer you grant IN FUTURE is out of the desk by default. That is the fault this
+  closes -- the desk now asks "are you one of them?", not merely "are you a viewer?".
+
+THE FAIL-SAFE, AND IT IS DELIBERATE
+  Blank the setting row, or delete it, and the gate is OFF -- every viewer reaches the desk
+  again, exactly as before this kit. A database error while reading it also ALLOWS. This
+  gate exists to keep a purchase man out of a cash-refund screen; it must never be the
+  reason your counter stops working at eight in the evening. The walk proves this by
+  blanking and then deleting the row and re-walking, not by claiming it.
+
+ROLLING BACK = restore the .bak_S222_deskusers_* file beside returns_desk.py and restart.
+Re-running the patcher says "already patched". Re-running the seeder says "already set".
+
+RENDER: returns_desk.html is byte-unchanged, and the standing browser gate for this page
+was re-run anyway against the patched server file -- EVIDENCE_render_s222.txt, 26/26, a
+real headless chromium tapping the Hindi card. The VPS has no browser; it ran offline.

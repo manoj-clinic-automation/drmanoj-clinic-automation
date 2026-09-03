@@ -1,0 +1,18 @@
+# S222_DESK_USERS -- pins PREDICTED OFFLINE, and the reproduction chain that earns it.
+#
+# The repo kit S214_RETURNS_DESK holds returns_desk.py at afc8b0d04214e2fd32b2d4b781cc60b4,
+# which is the S214-close live pin. Applying the repo's own S221 patcher to those bytes
+# reproduces 1dc1fd6229e74c60e0eceb4a14db8aeb -- EXACTLY the live pin recorded at the S221
+# close. The offline copy is therefore byte-identical to what is on the box, and the S222
+# patcher was applied to that.
+#
+# The same chain also reproduces returns_desk.html at 6d98e1b076d14ad0c70a200406e901b1.
+# Both were carried as PENDING 8-char prefixes in live_pins_S221close.txt. This is a
+# REPRODUCTION, not a box read -- A0 still wants one md5sum from the box before those two
+# rows are promoted from PENDING to VPS. The install's step 1 and step 6 supply it.
+#
+# The owner's md5sum at INSTALL step 6 must read exactly this:
+3296eca0f65d4396e61cfa80e11bee26  /root/finance/returns_desk.py
+#
+# UNCHANGED, and must still read the same afterwards:
+6d98e1b076d14ad0c70a200406e901b1  /root/finance/returns_desk.html

@@ -1,0 +1,48 @@
+patched  /sessions/rcw-01xwvfqpkla98kdltmz9qkxr/tmp/s222_desk_rpjv82iy/returns_desk.py
+backup   /sessions/rcw-01xwvfqpkla98kdltmz9qkxr/tmp/s222_desk_rpjv82iy/returns_desk.py.bak_S222_deskusers_20260903-061442
+NEW PIN  6544142aad1af6e84dd026ca3aaa2710   <-- this is the line the close records (A0: never from memory)
+anchor A applied (the gate)
+anchor B applied (the stale sentence corrected)
+next     seed the names, then the walk
+
+-- 1  UNSET: nothing changes (the owner's constraint) ------------
+  PASS  unset: amir reaches the desk
+  PASS  unset: alisha reaches the desk
+  PASS  unset: shivani reaches the desk
+  PASS  unset: shavez reaches the desk
+  PASS  unset: darpan reaches the desk
+  PASS  unset: manoj reaches the desk
+  PASS  unset: ghost reaches the desk
+
+-- 2  BLANK is also unset ----------------------------------------
+  PASS  blank: amir reaches the desk
+  PASS  spaces: amir reaches the desk
+
+-- 3  SET: the desk is named -------------------------------------
+  PASS  AMIR IS REFUSED
+  PASS  amir's refusal is not_desk_user/403
+  PASS  alisha still reaches the desk
+  PASS  shivani still reaches the desk
+  PASS  shavez still reaches the desk
+  PASS  darpan still reaches the desk
+  PASS  manoj (checker, NOT in the list) reaches the desk
+  PASS  ghost (a future viewer, not listed) IS REFUSED
+
+-- 4  the owner may type the row any way he likes -----------------
+  PASS  case and spacing tolerated: alisha in
+  PASS  case and spacing tolerated: shavez in
+  PASS  case and spacing tolerated: amir still out
+
+-- 5  a maker is never locked out by the list ---------------------
+  PASS  darpan (maker) reaches the desk
+  PASS  manoj (checker) reaches the desk
+  PASS  alisha (viewer, not listed) is refused
+
+-- 6  a broken database ALLOWS (deliberate, see the header) -------
+  PASS  db error: alisha reaches the desk
+  PASS  db error: amir reaches the desk
+
+-- 7  a caller who is not even a viewer is still refused first ----
+  PASS  outsider gets not_permitted (not not_desk_user)
+
+SELFTEST GREEN  26 checks, 0 failed

@@ -1,0 +1,12 @@
+d8b8f54b0f43426fa7d68e368aafcfe5  EVIDENCE_render_s222.txt
+74bd70721ff734912303efff820771ff  EVIDENCE_selftest_s222.txt
+014fd6f6eec828a63b80fd1c63a980d2  EVIDENCE_walk_s222.txt
+1acaddc9c11536be71fd0020519b76d1  INSTALL.txt
+28f6c29b348c61de2a19742b4f02fb5f  INSTALL_ONE_PASTE.txt
+2ab6bdd9c3d154c75f9b9464b07563d3  KIT_ID.txt
+b6df66c4cd6b8625acc68c6f2585779e  PREDICTED_PINS.txt
+ea4b85551f7c85c6900aa33eac412152  README.md
+0b93ce46f6f687a5a77fa5a4d9b6da5a  patch_desk_users_s222.py
+859e6d1d41a5038b554dcc0b9dff1710  seed_desk_users_s222.py
+12bb5402572cd0e76a5e00c4a42ed40f  selftest_desk_users_s222.py
+a13fd72c52cc14586349cd21455e92fc  walk_desk_users_s222.py

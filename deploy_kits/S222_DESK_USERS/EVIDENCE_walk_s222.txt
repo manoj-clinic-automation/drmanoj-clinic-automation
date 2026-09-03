@@ -1,0 +1,68 @@
+walking on a COPY: /tmp/walk_s222_111ptk_g/finance.db
+
+-- 0  what is under test ------------------------------------------
+  PASS  the file under test is the LIVE one   [/tmp/s222walk/fin/returns_desk.py]
+  PASS  it carries the S222 gate
+  PASS  it still carries the S221 jaankari lists
+  PASS  _auth() is still the only door   [_require(*DESK_ROLES) appears 1 times]
+
+-- 1  the list, as the live database holds it ---------------------
+      returns.desk_users = 'darpan,shavez,alisha,shivani'
+  PASS  the owner's list names darpan
+  PASS  the owner's list names shavez
+  PASS  the owner's list names alisha
+  PASS  the owner's list names shivani
+  PASS  the list does NOT name amir
+
+-- 2  the roles, as the live database holds them ------------------
+      alisha     viewer
+      amir       viewer
+      darpan     maker
+      manoj      checker
+      shavez     viewer
+      shivani    viewer
+  PASS  amir carries viewer on the medical unit (the S221 grant is intact)
+
+-- 3  AS AMIR: every desk route must refuse -----------------------
+  PASS  amir refused GET (the page)   [403 not_desk_user]
+  PASS  amir refused GET /   [403 not_desk_user]
+  PASS  amir refused GET /api/search?q=ab   [403 not_desk_user]
+  PASS  amir refused GET /api/history?pid=1   [403 not_desk_user]
+  PASS  amir refused GET /api/items?pid=1   [403 not_desk_user]
+  PASS  amir refused GET /api/catalog?q=ab   [403 not_desk_user]
+  PASS  amir refused GET /api/slips   [403 not_desk_user]
+  PASS  amir refused GET /api/jaankari   [403 not_desk_user]
+  PASS  amir refused POST /api/slip   [403 not_desk_user]
+  PASS  amir refused POST /api/slip/settle   [403 not_desk_user]
+  PASS  amir refused POST /api/slip/void   [403 not_desk_user]
+  PASS  amir refused POST /api/jaankari/answer   [403 not_desk_user]
+
+-- 4  AS THE FOUR: the desk still opens ---------------------------
+  PASS  darpan opens the desk   [200 None]
+  PASS  darpan reads the slips list   [200 None]
+  PASS  shavez opens the desk   [200 None]
+  PASS  shavez reads the slips list   [200 None]
+  PASS  alisha opens the desk   [200 None]
+  PASS  alisha reads the slips list   [200 None]
+  PASS  shivani opens the desk   [200 None]
+  PASS  shivani reads the slips list   [200 None]
+
+-- 5  the owner is never on a list --------------------------------
+  PASS  a checker not named in the list opens the desk   [200 None]
+  PASS  a maker not named in the list opens the desk   [200 None]
+
+-- 6  A FUTURE VIEWER IS OUT BY DEFAULT ---------------------------
+  PASS  a viewer granted tomorrow does NOT get the desk   [403 not_desk_user]
+
+-- 7  THE FAIL-SAFE, PROVEN ON THE COPY ---------------------------
+  PASS  with the row BLANK, amir reaches the desk again (nothing changed)   [200 None]
+  PASS  with the row BLANK, alisha reaches the desk   [200 None]
+  PASS  with the row DELETED, amir reaches the desk again   [200 None]
+
+-- 8  AMIR KEEPS WHAT S221 GAVE HIM -------------------------------
+  NOTE  could not walk his corrections desk: No module named 'darpan_app'
+  NOTE  could not walk the stock count screen: No module named 'stock_app'
+
+WALK GREEN  36/36
+  NOTE:   could not walk his corrections desk (No module named 'darpan_app') -- check it by hand
+  NOTE:   could not walk the stock count screen (No module named 'stock_app') -- check it by hand
