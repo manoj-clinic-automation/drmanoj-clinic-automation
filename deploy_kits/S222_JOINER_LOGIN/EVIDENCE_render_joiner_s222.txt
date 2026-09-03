@@ -1,0 +1,35 @@
+-- 0  what is under test ------------------------------------------
+  PASS  joiner_app carries the S222 routes
+  PASS  the page carries the S222 script
+  PASS  the page no longer asserts a password unconditionally
+
+-- 1  NO LOGIN YET: the page must warn, not print credentials ----
+  PASS  it says the login does not exist yet
+  PASS  it does NOT print the old 'pehla password' claim
+  PASS  the 'login banao' button is on screen
+  PASS  no javascript error
+
+-- 2  TAP IT: the role list comes from the store, not from code --
+  PASS  the choices offered are the STORE's own roles   [['doctor', 'manager', 'staff']]
+  PASS  the line now says the login exists
+  PASS  and names the role it was given
+  PASS  no javascript error
+
+-- 3  THE PROOF F-295 NEVER HAD: sign in as him ------------------
+  PASS  clinic_users.verify_password() accepts the printed password   [manager]
+  PASS  the store now holds exactly one user   [[{'user': 'zahir', 'role': 'manager', 'active': True, 'created': '2026-09-03T07:21:16', 'note': ''}]]
+  PASS  a backup of the store was taken beside it   [['clinic_users.py', 'clinic_users.json', 'clinic_users.json.bak_S222_20260903-072116']]
+
+-- 4  THE WHATSAPP MESSAGE FINALLY HAS SOMEWHERE TO GO -----------
+  PASS  a send link is rendered
+  PASS  it is a wa.me link
+  PASS  the message text is in it
+  PASS  NO phone number is in the link (F-185)
+  PASS  no javascript error
+
+-- 5  A DISABLED LOGIN READS AS DISABLED, NOT AS A TICK ----------
+  PASS  it says BAND
+  PASS  it does not claim the login is ready
+  PASS  no javascript error
+
+RENDER GREEN -- 22 passed, 0 failed

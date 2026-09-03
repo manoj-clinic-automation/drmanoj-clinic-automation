@@ -1,0 +1,28 @@
+S222_JOINER_LOGIN -- install order. ONE LINE AT A TIME. Use \cp to bypass the alias.
+
+  0  copy the TWO patchers into /root/finance/   (the paste block is in the chat)
+  1  /root/wa/venv/bin/python3 -B /root/finance/patch_joiner_portaluser_s222.py
+  2  /root/wa/venv/bin/python3 -B /root/finance/patch_staffpage_login_s222.py
+  3  systemctl restart clinic-finance.service
+  4  md5sum /root/finance/joiner_app.py /root/finance/staff_manage.html
+
+Step 3 IS needed -- joiner_app.py is python. staff_manage.html alone would not need it.
+Step 4 must print the two PREDICTED PINS.
+
+THE FIRST THING TO DO AFTERWARDS, and it is the whole point:
+  open /finance/staff, open AMIR's record, and read the login line.
+  It will now say one of three true things instead of one false one.
+  If it says the login does not exist -- that is the S221 fault, finally visible. Tap
+  "login banao", choose his role, and the page will create it and then sign in as him to
+  prove it. Then tap the WhatsApp button and send him the message.
+
+WHAT THE CREATE ROUTE WILL NOT DO
+  It will not invent a role -- it offers only the roles your own user store lists.
+  It will not touch a login that already exists.
+  It will not write without copying /root/portal/clinic_users.json beside itself first.
+  It will not report success on a login that cannot sign in -- if verify_password refuses,
+  the store is put back and the route says so.
+
+ROLLING BACK = restore the two .bak_S222_* files beside their originals and restart. If a
+login was created and you want it gone, the portal's own page removes it:
+  https://followup.dr-manoj.in/portal/users

@@ -1,0 +1,13 @@
+# S222_JOINER_LOGIN -- predicted from EXACT live bytes.
+#
+# Both repo copies in deploy_kits/S208_STAFF/ were verified byte-identical to the live pins
+# before building: joiner_app.py ff157c1ccbb11f2379c67d36db0077bc and staff_manage.html
+# 9ff9fc48919f76cd86a35135c10b554b. Each patcher REFUSES to run against anything else.
+#
+# The owner's md5sum after the patches must read exactly these:
+c879eafe1c05996be8b700a530995427  /root/finance/joiner_app.py
+f9c01552795a6bb350940550ea81a431  /root/finance/staff_manage.html
+#
+# NOT CHANGED by this kit, and each must still read as it does today:
+#   /root/finance/staff_pages.py   0fde34ca56cb6e0905b7ea7fb7475466
+#   /root/portal/clinic_users.py   2e85a7c85d047d400b0417e7aca9f3b7

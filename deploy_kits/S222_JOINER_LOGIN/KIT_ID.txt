@@ -1,0 +1,26 @@
+S222_JOINER_LOGIN · built 03-Sep-2026 · Session 222 · ⭐1-3 (F-295)
+
+THE FAULT. The joiner page printed "login: amir · pehla password: amir1234" for every new
+person -- both halves invented in the browser from the first name, and NOTHING anywhere had
+created that account. The owner read it out to Amir and the portal refused him, in front of him.
+
+THE FIX, in that order: the page stops asserting and starts asking; then it can create.
+  GET  /finance/staff/api/portal_user          read only -- does this login exist? is it active?
+  POST /finance/staff/api/portal_user/create   checker only -- creates it, and PROVES it by
+                                               calling verify_password() before reporting success
+And the WhatsApp message, which had no way to be sent, gets a wa.me link with NO number in it.
+
+Targets (live pins):
+  /root/finance/joiner_app.py      ff157c1c -> c879eafe   (RESTART needed -- python)
+  /root/finance/staff_manage.html  9ff9fc48 -> f9c01552   (no restart -- send_file per request)
+NOT TOUCHED: clinic_users.py, portal.py, staff_pages.py, finance_app.py.
+
+THE OWNER'S RULING, S222: the finance service may write the portal's login store. That is the
+one file gating every login in the clinic, so the create route reads the store first, refuses a
+role the store does not list, copies the store beside itself, uses the portal's OWN add_user
+(atomic tmp+rename), then signs in as the man -- and restores the backup if that sign-in fails.
+
+PROVEN OFFLINE on the exact live bytes: RENDER GREEN 22/22 -- headless chromium warning on a
+missing login, choosing a role from the store's real list, creating it, and then
+clinic_users.verify_password() accepting the printed password. That last check is the proof
+F-295 never had.
