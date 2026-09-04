@@ -2,10 +2,10 @@
 # DO NOT HAND-EDIT the VPS rows. Change the Register, re-run the
 # generator. One authored source (D202).
 # source: KB_Register_v5_73_S225.md
-# source_md5: 928f16e0539e85a7b76b17943293d44a
+# source_md5: e000d3eed19982014abe2b1149d71ae8
 # session: S225 open
 # manifest: CANONICAL_MANIFEST.md
-# manifest_current_register_pin: 928f16e0539e85a7b76b17943293d44a
+# manifest_current_register_pin: e000d3eed19982014abe2b1149d71ae8
 # register_pin_verified: yes
 # columns: kind <TAB> md5 <TAB> path-or-name <TAB> note
 #
@@ -16,8 +16,8 @@
 VPS	7bc591151553344e80d1e034a8f176d6	/root/portal/portal.py	S225 (kit S225_STAFF_ORDER, patch patch_portal_staff_order_s225.py, over S224 d2803804…) — READ BACK, a pass; 
 VPS	07af4daa579776a357ea6d71ec6bd1f2	/root/portal/tile_grants.json	S225 v8 (kit S225_STAFF_ORDER, over v7 578702a5…) — READ BACK, a pass. Order Medicines granted to amir, shavez
 VPS	713bdf3a9c1a8dafe076be1feb32219a	/root/finance/finance_clinic_day.py	S225 (kit S225_DAY_MPR_LINE, anchor patch over S223 dceb79a0…) — READ BACK 15:38 IST, a pass; predicted = box 
-VPS	92aee1979811733cf24adfecaaf5419a	/root/finance/purchase_app.py	S225 rev 11 (kit S225_SALTS, over rev 10 85cad151…) — READ BACK ~19:05 IST, a pass; predicted = box; probe-cop
 VPS	802577112e6db82bcf763d142efcd00c	/root/staff_ledger.py	S225 v3.6-S225-LOANS-D374, rev 3 (kit S225_LOANS_VIEW, over rev 2 e2a10ee6…, over rev 1 e5910152…, over S202 9
+VPS	ed5aa92631b9e87466d9942cb5ead14c	/root/finance/purchase_app.py	S225 rev 11b (kit S225_SALTS, over rev 11 92aee197…) — READ BACK 19:45 IST, a pass; predicted = box. The owner
 VPS	0aa211fb4c04041d85cbf58c6825eb42	/root/finance/finance_app.py	S224 — READ BACK, a pass. Three patches in one day, each after the # --- S224_MARG_PURCHASES end --- anchor: 1
 VPS	a61af74a1be41b879771af8977d2d9a5	/root/finance/stock_app.py	S224 (kit S224_DIFFS_ROLE_FIX, over S221 4e929d0b…) — READ BACK, a pass. _has_role(u, role) looks in roles and
 VPS	fb3726553d4aec43b6b231014aba5a55	/root/finance/stock_diffs.html	S224 (kit S224_DIFFS_ROLE_FIX, over S213 3f6a87b2…) — READ BACK, a pass. Checker: the eight cause buttons + no

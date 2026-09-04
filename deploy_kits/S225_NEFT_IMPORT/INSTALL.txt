@@ -1,0 +1,15 @@
+S225_NEFT_IMPORT -- one-time import of already-verified NEFT vendor bank details into the phone book.
+Per the owner's ruling of 04-Sep-2026 (S225_OWNER_RULINGS_04SEP.md, item 5): existing bank details are
+already accepted -- this import writes them as VERIFIED directly, not through the app's normal
+doctor-click gate (a machine can never grant that status on its own -- D370 -- so this import does it
+once, explicitly, dated, attributed to the ruling, and stops there; nothing about the app's own
+verify button changes).
+
+Never inserts a new vendor. Only fills bank fields for vendors already in the phone book. Anything
+not matched is reported, not guessed.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S225_NEFT_IMPORT && md5sum -c SUMS.md5 --quiet && /root/wa/venv/bin/python3 -B selftest_neft_import.py && /root/wa/venv/bin/python3 -B import_neft_bank.py --csv /root/finance/_import/neft_bank_export_S225.csv
+
+Then, only after reading that dry-run report:
+
+/root/wa/venv/bin/python3 -B /root/deploy/repo/deploy_kits/S225_NEFT_IMPORT/import_neft_bank.py --csv /root/finance/_import/neft_bank_export_S225.csv --apply --delete-source
