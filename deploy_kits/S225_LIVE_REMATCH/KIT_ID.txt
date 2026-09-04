@@ -1,0 +1,9 @@
+S225_LIVE_REMATCH · built 04-Sep-2026 · Session 225 · rev 9 of purchase_app.py: the cross-check is live; received stock is in transit
+Target: /root/finance/purchase_app.py dabf1df3 (rev 8) -> 30ff5a3dbdb90e3d601c0bd7797b13aa (rev 9, full-file replacement; nothing else touched)
+Owner (spec §6; S225 ruling): "internal cross verification from Sarvam-extracted bills and Marg purchase entries should run in
+        background, to update the next purchase order" -- "Sarvam: live, not nightly" -- "received-but-not-yet-in-Marg quantities count
+        as stock-in-transit for the reorder engine".
+Builds: a push that stores bills or lines re-matches at once; the hub and scan-links pages re-match on opening whenever the scans have
+        changed since the last match (fingerprint in setting purchase.rematch_seen; nothing moved = nothing done); quantities RECEIVED on
+        an order within 14 days with no Marg purchase line yet from that stockist count as stock for the engine, named in the reasons.
+Proven offline: selftest_live_rematch.py 311/311 (everything before as regression + 6). Install per F-321 (probe copy).

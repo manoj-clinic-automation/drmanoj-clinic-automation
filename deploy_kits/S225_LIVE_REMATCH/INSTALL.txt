@@ -1,0 +1,9 @@
+S225_LIVE_REMATCH -- the scan-vs-bill cross-check goes LIVE (rev 9 of the purchase app); received stock counts as in transit.
+
+ONE LINE on the VPS, same shape as S225_ARRIVAL (F-321: the walk runs on a probe copy; the live folder is written only after
+it is green). Rolls back BY PIN (to the rev-8 backup dabf1df3) if the service does not return.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S225_LIVE_REMATCH && md5sum -c SUMS.md5 --quiet && rm -rf /tmp/s225lr_probe && mkdir -p /tmp/s225lr_probe && \cp -r /root/finance/*.py /root/finance/*.sql /tmp/s225lr_probe/ && (\cp -r /root/finance/finance_ui /tmp/s225lr_probe/ 2>/dev/null; true) && \cp purchase_app.py walk_live_gate_s225.py /tmp/s225lr_probe/ && FIN_DIR=/tmp/s225lr_probe FIN_DB=/root/finance/finance.db /root/wa/venv/bin/python3 -B /tmp/s225lr_probe/walk_live_gate_s225.py && \cp /root/finance/purchase_app.py /root/finance/purchase_app.py.bak_S225lr_$(date +%Y%m%d-%H%M%S) && \cp purchase_app.py /root/finance/ && systemctl restart clinic-finance.service && sleep 3 && (systemctl is-active --quiet clinic-finance.service && echo "UP -- live cross-check" && curl -s localhost:8106/finance/purchase/api/healthz && echo && md5sum /root/finance/purchase_app.py || (echo "SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; md5sum /root/finance/purchase_app.py.bak_S225lr_* | awk '$1=="dabf1df3b7166139749907147dfd8ce9"{print $2}' | head -1 | xargs -I{} \cp {} /root/finance/purchase_app.py; systemctl restart clinic-finance.service; sleep 4; systemctl is-active clinic-finance.service; md5sum /root/finance/purchase_app.py; journalctl -u clinic-finance.service -n 12 --no-pager | tail -12))
+
+Expected pin: 30ff5a3dbdb90e3d601c0bd7797b13aa. Then open the hub -- the scan links are matched the moment you open it:
+https://followup.dr-manoj.in/finance/purchase/page/hub

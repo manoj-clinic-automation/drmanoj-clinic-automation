@@ -1,0 +1,2 @@
+# S225_LIVE_REMATCH -- predicted. A0: the close records what the box prints.
+/root/finance/purchase_app.py   30ff5a3dbdb90e3d601c0bd7797b13aa   (rev 9; full-file copy)
