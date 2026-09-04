@@ -1,0 +1,10 @@
+85cad1514c5297a970b088edd40776a5  purchase_app.py
+18e8b0b2ea94e2209622979608b79a50  purchase_schema.sql
+41d68148fc3aa461da30a9eb4053b649  marg_purchase_rows.py
+7b9b6fabfe417ed3b449964144278054  walk_newitems_gate_s225.py
+24bb69e28e0c8ef20a450065e0ae9a1b  selftest_new_items.py
+569f63300ffa1bbcb4d51972beee4539  INSTALL.txt
+a5503cbc7eef5b3621cf883cf9529f8f  README.md
+e1cca15b2f73d49c246494d8737afb47  KIT_ID.txt
+d986434f0ad752c992723163b239f792  PREDICTED_PINS.txt
+528e5688f83b433a1a3a53b67c7bed6c  EVIDENCE_selftest_s225_r10.txt

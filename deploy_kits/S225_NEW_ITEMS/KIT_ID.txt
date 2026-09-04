@@ -1,0 +1,7 @@
+S225_NEW_ITEMS · built 04-Sep-2026 · Session 225 · rev 10 of purchase_app.py: new medicines recorded and highlighted (spec §6)
+Target: /root/finance/purchase_app.py 30ff5a3d (rev 9) -> 85cad1514c5297a970b088edd40776a5 (rev 10, full-file replacement; table purchase_new_item created on first request)
+Owner (spec §6): "new medicines added should be recorded and highlighted to me".
+Builds: an item first seen this month in a purchase line, or in the newest stock snapshot without ever being in an earlier one, is logged
+        ONCE (first seen · where · stockist · packing); the hub shows "N new medicines this month" with the list. The earliest snapshot on the
+        server is the baseline -- nothing in it is new. Salt mapping status waits for the salt list (§8 item 6), said so on the card.
+Proven offline: selftest_new_items.py 316/316. Install per F-321.

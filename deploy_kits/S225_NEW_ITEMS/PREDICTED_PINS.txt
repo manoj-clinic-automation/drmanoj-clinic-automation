@@ -1,0 +1,2 @@
+# S225_NEW_ITEMS -- predicted. A0: the close records what the box prints.
+/root/finance/purchase_app.py   85cad1514c5297a970b088edd40776a5   (rev 10; full-file copy)

@@ -2,10 +2,10 @@
 # DO NOT HAND-EDIT the VPS rows. Change the Register, re-run the
 # generator. One authored source (D202).
 # source: KB_Register_v5_73_S225.md
-# source_md5: b6b00634ff5ef733a41ea7f04b39cd6b
+# source_md5: 138986042549cd89d77909fdd49b39bd
 # session: S225 open
 # manifest: CANONICAL_MANIFEST.md
-# manifest_current_register_pin: b6b00634ff5ef733a41ea7f04b39cd6b
+# manifest_current_register_pin: 138986042549cd89d77909fdd49b39bd
 # register_pin_verified: yes
 # columns: kind <TAB> md5 <TAB> path-or-name <TAB> note
 #
@@ -17,7 +17,7 @@ VPS	7bc591151553344e80d1e034a8f176d6	/root/portal/portal.py	S225 (kit S225_STAFF
 VPS	07af4daa579776a357ea6d71ec6bd1f2	/root/portal/tile_grants.json	S225 v8 (kit S225_STAFF_ORDER, over v7 578702a5…) — READ BACK, a pass. Order Medicines granted to amir, shavez
 VPS	e5910152602e1b5a635819bad08355b7	/root/staff_ledger.py	S225 v3.5-S225-LOANS, rev 1 (kit S225_LOANS_VIEW, over S202_D349B 9e764f80…) — READ BACK 14:44 IST, a pass; pr
 VPS	713bdf3a9c1a8dafe076be1feb32219a	/root/finance/finance_clinic_day.py	S225 (kit S225_DAY_MPR_LINE, anchor patch over S223 dceb79a0…) — READ BACK 15:38 IST, a pass; predicted = box 
-VPS	dabf1df3b7166139749907147dfd8ce9	/root/finance/purchase_app.py	S225 rev 8 (kit S225_ARRIVAL, over rev 7b e4e5a75b… (S225_PHONEBOOK), over rev 6 c6f187ac…) — READ BACK ~16:20
+VPS	30ff5a3dbdb90e3d601c0bd7797b13aa	/root/finance/purchase_app.py	S225 rev 9 (kit S225_LIVE_REMATCH, over rev 8 dabf1df3…) — READ BACK ~16:40 IST, a pass; predicted = box; prob
 VPS	0aa211fb4c04041d85cbf58c6825eb42	/root/finance/finance_app.py	S224 — READ BACK, a pass. Three patches in one day, each after the # --- S224_MARG_PURCHASES end --- anchor: 1
 VPS	a61af74a1be41b879771af8977d2d9a5	/root/finance/stock_app.py	S224 (kit S224_DIFFS_ROLE_FIX, over S221 4e929d0b…) — READ BACK, a pass. _has_role(u, role) looks in roles and
 VPS	fb3726553d4aec43b6b231014aba5a55	/root/finance/stock_diffs.html	S224 (kit S224_DIFFS_ROLE_FIX, over S213 3f6a87b2…) — READ BACK, a pass. Checker: the eight cause buttons + no
