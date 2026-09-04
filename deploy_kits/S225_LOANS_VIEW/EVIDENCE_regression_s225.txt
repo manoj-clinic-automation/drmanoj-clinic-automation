@@ -1,0 +1,1 @@
+SELFTEST PASSED — 301 maker-checker, rate-card, advance, loan, skip, statement, salary, report, F-51 and D332/SL5+SL6+SL7 checks OK

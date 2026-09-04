@@ -1,0 +1,11 @@
+S225_LOANS_VIEW — the Loans view (D371) on the staff ledger.
+
+ONE LINE on the VPS. It pulls the repo, checks the kit, refuses unless the live staff_ledger.py is the pinned 9e764f80,
+runs BOTH selftests in an isolated probe dir (the live store is never opened), backs up, installs, restarts
+staff-ledger.service, checks it is active, and walks /ledger/loans (must answer 302 behind the login). Any failure
+restores the backup by itself. Nothing in the ledger data changes; the close is untouched.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S225_LOANS_VIEW && bash install_s225_loans.sh
+
+The last md5sum line it prints is the pin the close records. Then open:
+https://followup.dr-manoj.in/ledger/loans

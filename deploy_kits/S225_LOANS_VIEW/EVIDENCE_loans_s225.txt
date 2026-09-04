@@ -1,0 +1,37 @@
+  PASS  a scheduled advance is stored with its 3 steps
+  PASS  the maker's advance is PENDING
+  PASS  three people in the view (Alpha, Beta, Gamma)
+  PASS  Alpha: two tranches, loan first
+  PASS  Alpha loan: recovered 2000, balance 8000, due 2000 this month, 4 months left, lane loan
+  PASS  Alpha free advance WAITS behind the loan (D250): due 0, says so
+  PASS  Alpha outstanding 11000, falling due 2000
+  PASS  Beta: the reversed advance is NOT a tranche, counted as 1 corrected entry
+  PASS  Beta schedule: next Rs 5000 in 2026-09, 3 months left, balance 13000
+  PASS  Beta 'how' names the schedule
+  PASS  in October the schedule's due is the FIRST unpaid step (5000, since Sep never recovered) -- never a silent skip
+  PASS  after a DEFER for 2026-09: due 0 this month, flagged deferred, the defer month listed
+  PASS  Gamma: no tranche, 1 awaiting approval, nothing outstanding
+  PASS  staff filter narrows the view
+  PASS  a fully recovered tranche is listed as recovered (open=False, balance 0, last paid 2026-09) and sorted last
+  PASS  signed out -> login redirect
+  PASS  checker page 200 with everyone
+  PASS  checker page shows 'the clean view'
+  PASS  checker page shows 'how it recovers'
+  PASS  checker page shows 'next collection'
+  PASS  checker page shows 'falling due'
+  PASS  checker page shows 'outstanding <b>Rs 8000</b>'
+  PASS  checker page shows 'agreed schedule'
+  PASS  checker page shows '1 awaiting approval'
+  PASS  checker page shows '1 corrected entry not counted'
+  PASS  checker page shows 'D349'
+  PASS  system/contra rows are NOT listed as lines (no 'close 2026-08', no 'entered twice')
+  PASS  checker filter to Beta: Alpha absent
+  PASS  nav carries Loans for the checker
+  PASS  a linked maker sees ONLY her own (Beta), titled My loans, no picker
+  PASS  an unlinked maker is told to ask for a relink
+  PASS  entry form has the schedule textarea
+  PASS  a scheduled advance saved through the FORM carries its 2 steps
+  PASS  a schedule that does not add up is REFUSED and nothing saved
+  PASS  APP_VERSION bumped
+
+35 PASS  0 FAIL
