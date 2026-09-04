@@ -1,0 +1,12 @@
+7d4947fd8606801d94e341c23d5e7be6  KIT_ID.txt
+789b86098e8bc69884d207bc8d6c3309  README.md
+932ec4085effc4ac15feeaaed794518b  VERIFIED_AGAINST_LIVE.md
+47641a9381a1bbffd074d6a7af435a9d  deploy_kits/S208_STOCK_LEDGER/push_expected.py
+212c37a2e94dcbd9ac4ee537b61fd9f3  margsync/MargPull/PULL_WATCHDOG.bat
+36a0db97d8be357fba4a1d0cf42ed6e5  margsync/MargPull/marg_rescan.py
+fb32045c563b9fc64a7ce0fe8e9ef6e6  margsync/MargPull/marg_router.py
+f0eb9f40a0cd06875aba107b12151a73  margsync/MargPull/pull_watchdog.py
+c0a3726861f861012b22bf765227c671  margsync/MargPull/signatures.json
+7b8d0370486cb13a877d0968f7f31bbe  margsync/PUSH_PURCHASES_NOW.bat
+73a0635ba6164ec8da8c8f61de9d3210  margsync/PUSH_STOCK_DAILY.bat
+99d05e3f7f05d472413c864d1665ccea  margsync/PUSH_STOCK_NIGHTLY.bat
