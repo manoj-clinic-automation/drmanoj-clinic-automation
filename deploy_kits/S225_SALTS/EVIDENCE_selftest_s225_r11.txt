@@ -1,4 +1,4 @@
-S225 selftest (S224 regression + staff page) on <home>/tmp/s224_2_3cc6d0
+S225 selftest (S224 regression + staff page) on <home>/tmp/s224_de6058b8
   PASS  healthz answers without auth
   PASS  August BILLWISE export is in the archive
   PASS  BILLWISE parser: rows sum to Marg's TOTAL row
@@ -315,24 +315,28 @@ S225 selftest (S224 regression + staff page) on <home>/tmp/s224_2_3cc6d0
   PASS  running again logs nothing more (idempotent, a row is written once)
   PASS  the log says where each was first seen, with the stockist for the bought one
   PASS  the hub shows the New items card with the count and both names
-  PASS  push_salts reads the REAL work list: rename 3 · create 38 · change 77 · waiting 7 · cleanup 1 = 126; 196 names
-  PASS  the work list rides the vendors door: all tasks stored, nothing kept yet
+  PASS  push_salts reads the REAL work list: rename 2 (the note line is not a task) · create 38 · change 77 · waiting 7 · cleanup 1 = 125; 196 names
+  PASS  push_salts finds and reads Marg's fresh SALT WISE ITEM LIST (04-Sep): ~375 items
+  PASS  the work list AND Marg's list ride the vendors door: all tasks stored, nothing kept yet, Marg items stored
+  PASS  a note line (no second column) is not stored as a task
   PASS  the direct /api/salts door works too; a wrong token -> 401
   PASS  sheet 4 'Already correct' is NOT a task (68 items not asked again)
   PASS  amir is refused before the setting names him (fail-closed)
   PASS  amir opens the work list: five sections in order, Download Excel, Print A4, 0 of N done; nav shows Salt list
   PASS  amir sees 'waits for Dr Manoj' on the waiting rows, no answer box
+  PASS  the Marg says column is there, with the list's date and 'Marg: not yet' / 'Marg: done' chips and the current salt on waiting rows
+  PASS  on the real lists Marg confirms exactly the 2 changes + 1 create done as at 04-Sep (3 in all)
   PASS  amir ticks a change row DONE: recorded with his name, audited
   PASS  amir cannot answer a waiting row (doctor only)
   PASS  the doctor sees the answer box with the salt datalist on the waiting rows
   PASS  the doctor answers a waiting row: saved with his name, the name joins the list
   PASS  an answer on a non-waiting row is refused (409); an empty answer 400; unknown id 404
   PASS  a later push keeps the tick and the answer (kept=2), overwrites neither
-  PASS  the page now reads 1 of N done, the done row struck through, the answer shown in green
+  PASS  the page now reads 1 of N ticked, the done row struck through, the answer shown in green
   PASS  Excel download: a zip, spreadsheet content type
   PASS    openpyxl opens it: 5 sheets, the change sheet has header + 77 rows, the DONE mark is in it, the waiting sheet carries the doctor's answer
   PASS  A4 PDF renders with the five sections and [x] / [ ] marks
   PASS  darpan (not named) cannot open the list, the Excel or the PDF
   PASS  signed out -> 401
 
-335 PASS  0 FAIL
+339 PASS  0 FAIL

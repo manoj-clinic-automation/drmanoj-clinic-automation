@@ -1,3 +1,3 @@
 # S225_SALTS -- predicted. A0: the close records what the box prints.
-/root/finance/purchase_app.py   92aee1979811733cf24adfecaaf5419a   (rev 11; full-file copy)
+/root/finance/purchase_app.py   ed5aa92631b9e87466d9942cb5ead14c   (rev 11b; full-file copy)
 # manojz: push_salts.py is run in place from the kit folder (hashed at the close).

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-purchase_app.py -- S224: Marg's purchases, on the box.  (rev 11, S225, 04-Sep-2026)
+purchase_app.py -- S224: Marg's purchases, on the box.  (rev 11b, S225, 04-Sep-2026)
 
 REV 11 (S225) -- AMIR'S SALT WORK LIST, SERVER-SIDE (spec §6: "Amir's salt correction list should be
     available as Excel download with him and me, and A4 print also"). The owner's answers of 28-Aug
@@ -9,6 +9,9 @@ REV 11 (S225) -- AMIR'S SALT WORK LIST, SERVER-SIDE (spec §6: "Amir's salt corr
     push_salts.py (manojz) sends D:\Downloads\Sanjeevni_Salt_Fix_for_Amir.xlsx once; /page/salts is
     where Amir ticks each row DONE (his name, the time) and the doctor answers the 7 waiting rows;
     a later push never un-ticks or overwrites. Excel and A4 come from the record (/salts.xlsx, .pdf).
+    11b (19:30): a fresh Marg SALT WISE ITEM LIST is pushed too (purchase_salt_marg) and every task shows
+    what MARG SAYS -- done / not yet / the item's current salt -- beside Amir's tick; a note line that
+    the rename sheet carried is not a task and is dropped.
 
 REV 10 (S225) -- NEW ITEMS, RECORDED AND HIGHLIGHTED (spec §6: "new medicines added should be recorded
     and highlighted to me"). An item first seen this month in a purchase line, or in the newest stock
@@ -516,6 +519,9 @@ def api_vendors():
         _ensure_salts(con)
         sn, sk = _store_salts(con, dict(tasks=b["salt_tasks"], salts=b.get("salts"), source_md5=b.get("source_md5")))
         extra = dict(salts_stored=sn, salt_kept=sk)
+    if isinstance(b.get("marg_items"), list) and b.get("marg_items"):      # 11b: Marg's own salt list rides it too
+        _ensure_salts(con)
+        extra["marg_items"] = _store_marg_salts(con, b)
     return jsonify(ok=True, stored=n, **extra)
 
 
@@ -2897,7 +2903,51 @@ def _ensure_salts(con):
         pushed_at  TEXT,
         UNIQUE(section, a))""")
     con.execute("CREATE TABLE IF NOT EXISTS purchase_salt_name (salt TEXT PRIMARY KEY)")
+    con.execute("""CREATE TABLE IF NOT EXISTS purchase_salt_marg (
+        item_norm TEXT PRIMARY KEY, item TEXT NOT NULL, salt TEXT NOT NULL, as_on TEXT NOT NULL, source_md5 TEXT)""")
+    con.execute("DELETE FROM purchase_salt_task WHERE section IN ('rename','create','change') AND (b IS NULL OR b='')")   # 11b: note lines are not tasks
     con.commit()
+
+
+def _store_marg_salts(con, b):
+    """The fresh SALT WISE ITEM LIST from Marg: item -> salt, as on a date. Replaces the previous list whole."""
+    rows = b.get("marg_items")
+    if not isinstance(rows, list) or not rows:
+        return 0
+    as_on = str(b.get("marg_as_on") or dt.date.today().isoformat())[:10]
+    con.execute("DELETE FROM purchase_salt_marg")
+    n = 0
+    for r in rows:
+        if not isinstance(r, dict) or not str(r.get("item") or "").strip() or not str(r.get("salt") or "").strip():
+            continue
+        con.execute("INSERT OR REPLACE INTO purchase_salt_marg (item_norm,item,salt,as_on,source_md5) VALUES (?,?,?,?,?)",
+                    (norm(r["item"]), str(r["item"]).strip()[:120], str(r["salt"]).strip().upper()[:120], as_on, str(b.get("marg_md5") or "")[:32]))
+        n += 1
+    _audit(con, "push_salts", "salts_marg", str(b.get("marg_md5") or "")[:8], dict(items=n, as_on=as_on))
+    con.commit()
+    return n
+
+
+def _marg_says(con, task, marg, salts_present):
+    """One honest word from Marg's own list for a task: what it shows today."""
+    if not marg:
+        return ("", "")
+    sec, a, b = task["section"], (task["a"] or "").upper(), (task["b"] or "").upper()
+    if sec == "rename":
+        if b in salts_present and a not in salts_present:
+            return ("done", "renamed")
+        return ("not yet", "old name still in Marg" if a in salts_present else "neither name in Marg")
+    if sec == "create":
+        return ("done", "salt exists") if a in salts_present else ("not yet", "salt not in Marg")
+    if sec == "change":
+        now = marg.get(norm(a))
+        if now is None:
+            return ("", "item not in Marg's list")
+        return ("done", "now " + now) if now == (task["c"] or "").upper() else ("not yet", "still " + now)
+    if sec == "waiting":
+        now = marg.get(norm(a))
+        return ("", "Marg has it under " + now) if now else ("", "item not in Marg's list")
+    return ("", "")
 
 
 def _salt_allowed(u, con):
@@ -2922,6 +2972,8 @@ def _store_salts(con, b):
         if not isinstance(tsk, dict) or tsk.get("section") not in [s[0] for s in SALT_SECTIONS] or not str(tsk.get("a") or "").strip():
             continue
         sec, a = tsk["section"], str(tsk["a"]).strip()[:160]
+        if sec in ("rename", "create", "change") and not str(tsk.get("b") or "").strip():
+            continue                                                  # 11b: a note line, not a task
         row = con.execute("SELECT done, answer FROM purchase_salt_task WHERE section=? AND a=?", (sec, a)).fetchone()
         if row and (row[0] or (row[1] or "")):
             kept += 1
@@ -2945,13 +2997,16 @@ def api_salts():
     if err:
         return err
     b = request.get_json(silent=True) or {}
-    if not isinstance(b.get("tasks"), list) or not b.get("tasks"):
-        return jsonify(ok=False, error="malformed", reason="tasks must be a non-empty list"), 400
+    if not (isinstance(b.get("tasks"), list) and b.get("tasks")) and not (isinstance(b.get("marg_items"), list) and b.get("marg_items")):
+        return jsonify(ok=False, error="malformed", reason="tasks or marg_items must be a non-empty list"), 400
     con = _db()
     _ensure(con)
     _ensure_salts(con)
-    n, kept = _store_salts(con, b)
-    return jsonify(ok=True, stored=n, kept=kept)
+    n = kept = 0
+    if isinstance(b.get("tasks"), list) and b.get("tasks"):
+        n, kept = _store_salts(con, b)
+    m = _store_marg_salts(con, b)
+    return jsonify(ok=True, stored=n, kept=kept, marg_items=m)
 
 
 @bp.route("/api/salt_task", methods=["POST"])
@@ -3019,8 +3074,11 @@ def page_salts():
     tasks = _salt_tasks(con)
     names = [r[0] for r in con.execute("SELECT salt FROM purchase_salt_name ORDER BY salt")]
     dl = "".join("<option value=\"%s\">" % _esc(s) for s in names)
+    marg = {r[0]: r[1] for r in con.execute("SELECT item_norm, salt FROM purchase_salt_marg")}
+    marg_as_on = con.execute("SELECT MAX(as_on) FROM purchase_salt_marg").fetchone()[0] if marg else None
+    salts_present = set(marg.values())
     cards = []
-    total = done_n = 0
+    total = done_n = marg_done = 0
     for key, title, cols in SALT_SECTIONS:
         rows = [tk for tk in tasks if tk["section"] == key]
         if not rows:
@@ -3035,18 +3093,24 @@ def page_salts():
                     if doctor else '<span class="muted">waits for Dr Manoj</span>')
             else:
                 third = _esc(tk["c"] or "")
-            trs.append('<tr%s><td class="noprint"><input type="checkbox"%s onchange="saltDone(%d,this)"></td><td>%s</td><td>%s</td><td>%s</td>'
+            ms, mtxt = _marg_says(con, tk, marg, salts_present)
+            if ms == "done":
+                marg_done += 1
+            mcell = ('<span class="chip ok">Marg: done</span>' if ms == "done" else ('<span class="chip warn">Marg: not yet</span>' if ms == "not yet" else "")) + \
+                    ((' <small class="muted">%s</small>' % _esc(mtxt)) if mtxt else "")
+            trs.append('<tr%s><td class="noprint"><input type="checkbox"%s onchange="saltDone(%d,this)"></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>'
                        '<td><small class="muted">%s</small></td></tr>'
-                       % (' class="done"' if tk["done"] else "", " checked" if tk["done"] else "", tk["id"], _esc(tk["a"]), _esc(tk["b"] or ""), third,
+                       % (' class="done"' if tk["done"] else "", " checked" if tk["done"] else "", tk["id"], _esc(tk["a"]), _esc(tk["b"] or ""), third, mcell,
                           ("done by %s · %s" % (_esc(tk["done_by"] or ""), _esc(_hhmm_ist_full(tk["done_at"] or "")))) if tk["done"] else ""))
-        cards.append('<div class="card"><h2>%s <span class="chip">%d / %d done</span></h2><div class="scroll"><table><tr><th class="noprint">Done</th><th>%s</th><th>%s</th><th>%s</th><th></th></tr>%s</table></div></div>'
-                     % (_esc(title), d, len(rows), _esc(cols[0]), _esc(cols[1]), _esc(cols[2]), "".join(trs)))
+        cards.append('<div class="card"><h2>%s <span class="chip">%d / %d ticked</span></h2><div class="scroll"><table><tr><th class="noprint">Done</th><th>%s</th><th>%s</th><th>%s</th><th>Marg says%s</th><th></th></tr>%s</table></div></div>'
+                     % (_esc(title), d, len(rows), _esc(cols[0]), _esc(cols[1]), _esc(cols[2]), (" <small>(list of %s)</small>" % _esc(_human(marg_as_on))) if marg_as_on else "", "".join(trs)))
     body = ('<h1>Salt corrections — Amir\'s work list</h1><div class="muted">Dr Manoj\'s answers of 28-Aug, as a list to work through in order. '
-            '<b>%d of %d done.</b> Tick a row when it is done in Marg — your name and the time are recorded. '
+            '<b>%d of %d ticked</b>%s. Tick a row when it is done in Marg — your name and the time are recorded; the <b>Marg says</b> column is '
+            'Marg\'s own salt list, read back, so a tick and Marg can be compared. '
             '<a href="%s/salts.xlsx"><button class="sm noprint">Download Excel</button></a> '
             '<a href="%s/salts.pdf" target="_blank"><button class="sm noprint">Print A4</button></a></div>'
             '<datalist id="salts">%s</datalist>%s<style>tr.done td{color:var(--muted);text-decoration:line-through} tr.done td:first-child,tr.done td:last-child{text-decoration:none}</style>'
-            % (done_n, total, prefix, prefix, dl,
+            % (done_n, total, (" · <b>Marg confirms %d</b> done in its list of %s" % (marg_done, _esc(_human(marg_as_on)))) if marg_as_on else " (no Marg list pushed yet)", prefix, prefix, dl,
                "".join(cards) or '<div class="card muted">Nothing pushed yet — run push_salts.py on manojz.</div>'))
     return _page("Salt corrections", body, SALT_JS)
 

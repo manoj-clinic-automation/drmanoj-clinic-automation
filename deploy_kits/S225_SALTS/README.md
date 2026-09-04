@@ -15,3 +15,5 @@ only three doors to the manojz token, so the list rides the vendors door — `fi
 **Proof:** `selftest_salts.py` **335/335** on the real work list — the push (126 rows, sections counted), the fail-closed page, Amir's tick,
 the doctor's answer (and Amir refused it), the kept-state rule on a second push, the Excel re-read by openpyxl (5 sheets, 77-row change
 sheet with the DONE mark), the A4 PDF with [x]/[ ] marks, and the refusals. Install per F-321.
+
+**Rev 11b — the owner's fresh Marg export, evaluated before finalising.** Marg's own *SALT WISE ITEM LIST* (04-Sep, 375 items) is pushed alongside the work list and every row shows **Marg says** — done / not yet / the item's current salt — so Amir's tick and Marg's truth sit side by side (Marg confirms 3 done as at 04-Sep: 2 changes, 1 create). The router does not know this export's signature yet, so it lands in `_REFUSED`; `push_salts.py` finds it there by shape. A note line the rename sheet carried is no longer a task.

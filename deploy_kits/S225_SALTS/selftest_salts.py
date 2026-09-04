@@ -1019,12 +1019,19 @@ if os.path.exists(FX):
     tasks_x = PS.read_tasks(FX); names_x = PS.read_names(NX)
     by = {}
     for tk in tasks_x: by[tk["section"]] = by.get(tk["section"], 0) + 1
-    ck("push_salts reads the REAL work list: rename 3 · create 38 · change 77 · waiting 7 · cleanup 1 = 126; 196 names", by == dict(rename=3, create=38, change=77, waiting=7, cleanup=1) and 190 <= len(names_x) <= 200, str(by))
+    ck("push_salts reads the REAL work list: rename 2 (the note line is not a task) · create 38 · change 77 · waiting 7 · cleanup 1 = 125; 196 names", by == dict(rename=2, create=38, change=77, waiting=7, cleanup=1) and 190 <= len(names_x) <= 200, str(by))
+    MX = PS.find_marg_salt_list(os.path.expanduser("~/mnt/Downloads/margsync/MargArchive/_REFUSED"))
+    marg_x, marg_as_on = PS.read_marg_salt_list(MX) if MX else ([], None)
+    ck("push_salts finds and reads Marg's fresh SALT WISE ITEM LIST (04-Sep): ~375 items", MX is not None and 300 <= len(marg_x) <= 450 and marg_as_on == "2026-09-04", "%s %d" % (MX, len(marg_x)))
 else:
     tasks_x = [dict(section="change", seq=i, a="ZZ ITEM %d" % i, b="OLD", c="NEW") for i in range(3)] + [dict(section="waiting", seq=1, a="ZZ WAIT", b="OLD", c="")]
     names_x = ["SALT A"]; ck("(work list not on this machine -- synthetic)", True)
-r = cl.post(P + "/api/vendors", json=dict(pairs={}, salt_tasks=tasks_x, salts=names_x, source_md5="a" * 32), headers=H)
-ck("the work list rides the vendors door: all tasks stored, nothing kept yet", r.status_code == 200 and r.get_json()["salts_stored"] == len(tasks_x) and r.get_json()["salt_kept"] == 0, str(r.get_json()))
+    marg_x = [dict(item="ZZ ITEM 0", salt="NEW"), dict(item="ZZ ITEM 1", salt="OLD"), dict(item="ZZ WAIT", salt="OLD")]; marg_as_on = "2026-09-04"
+r = cl.post(P + "/api/vendors", json=dict(pairs={}, salt_tasks=tasks_x, salts=names_x, source_md5="a" * 32, marg_items=marg_x, marg_as_on=marg_as_on, marg_md5="c" * 32), headers=H)
+ck("the work list AND Marg's list ride the vendors door: all tasks stored, nothing kept yet, Marg items stored", r.status_code == 200 and r.get_json()["salts_stored"] == len(tasks_x) and r.get_json()["salt_kept"] == 0 and r.get_json()["marg_items"] == len(marg_x), str(r.get_json()))
+# a note line pushed as a task is dropped on the server
+r = cl.post(P + "/api/salts", json=dict(tasks=[dict(section="rename", seq=9, a="A NOTE LINE, NOT A TASK", b="", c="")]), headers=H)
+ck("a note line (no second column) is not stored as a task", q1("SELECT COUNT(*) FROM purchase_salt_task WHERE a='A NOTE LINE, NOT A TASK'") == 0)
 ck("the direct /api/salts door works too; a wrong token -> 401", cl.post(P + "/api/salts", json=dict(tasks=tasks_x[:2]), headers=H).status_code == 200 and cl.post(P + "/api/salts", json=dict(tasks=tasks_x[:2]), headers={"X-Finance-Marg": "nope"}).status_code == 401)
 ck("sheet 4 'Already correct' is NOT a task (68 items not asked again)", q1("SELECT COUNT(*) FROM purchase_salt_task") == len(tasks_x) and not any("correct" == s for (s,) in q("SELECT DISTINCT section FROM purchase_salt_task")))
 as_("amir", "staff", {"viewer"})
@@ -1033,8 +1040,12 @@ c = sqlite3.connect(DB); c.execute("INSERT OR REPLACE INTO setting (key, value) 
 r = cl.get(P + "/page/salts"); sp = r.get_data(as_text=True)
 ck("amir opens the work list: five sections in order, Download Excel, Print A4, 0 of N done; nav shows Salt list",
    r.status_code == 200 and "Rename these salts first" in sp and "Create these salt names" in sp and "Change the salt on these items" in sp and "Waiting on Dr Manoj" in sp and "Cleanups" in sp
-   and "Download Excel" in sp and "Print A4" in sp and ("<b>0 of %d done.</b>" % len(tasks_x)) in sp and "Salt list</a>" in sp)
+   and "Download Excel" in sp and "Print A4" in sp and ("<b>0 of %d ticked</b>" % len(tasks_x)) in sp and "Salt list</a>" in sp)
 ck("amir sees 'waits for Dr Manoj' on the waiting rows, no answer box", "waits for Dr Manoj" in sp and 'id="ans' not in sp)
+ck("the Marg says column is there, with the list's date and 'Marg: not yet' / 'Marg: done' chips and the current salt on waiting rows",
+   "Marg says" in sp and "Marg: not yet" in sp and "Marg: done" in sp and "Marg has it under" in sp and "Marg confirms" in sp)
+if os.path.exists(FX):
+    ck("on the real lists Marg confirms exactly the 2 changes + 1 create done as at 04-Sep (3 in all)", "<b>Marg confirms 3</b>" in sp, _re.search(r"Marg confirms \d+", sp).group(0) if _re.search(r"Marg confirms \d+", sp) else "none")
 first_change = q1("SELECT id FROM purchase_salt_task WHERE section='change' ORDER BY seq LIMIT 1")
 r = cl.post(P + "/api/salt_task", json=dict(action="done", id=first_change, done=True))
 ck("amir ticks a change row DONE: recorded with his name, audited", r.status_code == 200 and q("SELECT done, done_by FROM purchase_salt_task WHERE id=?", first_change)[0][:] == (1, "amir") and q1("SELECT COUNT(*) FROM purchase_audit WHERE action='salt_done'") == 1)
@@ -1051,7 +1062,7 @@ ck("an answer on a non-waiting row is refused (409); an empty answer 400; unknow
 r = cl.post(P + "/api/vendors", json=dict(pairs={}, salt_tasks=tasks_x, salts=names_x, source_md5="b" * 32), headers=H)
 ck("a later push keeps the tick and the answer (kept=2), overwrites neither", r.get_json()["salt_kept"] == 2 and q1("SELECT done FROM purchase_salt_task WHERE id=?", first_change) == 1 and q1("SELECT answer FROM purchase_salt_task WHERE id=?", wait_id) == "ZZ DOCTOR SALT")
 sp3 = cl.get(P + "/page/salts").get_data(as_text=True)
-ck("the page now reads 1 of N done, the done row struck through, the answer shown in green", ("<b>1 of %d done.</b>" % len(tasks_x)) in sp3 and 'class="done"' in sp3 and 'ZZ DOCTOR SALT</b>' in sp3)
+ck("the page now reads 1 of N ticked, the done row struck through, the answer shown in green", ("<b>1 of %d ticked</b>" % len(tasks_x)) in sp3 and 'class="done"' in sp3 and 'ZZ DOCTOR SALT</b>' in sp3)
 r = cl.get(P + "/salts.xlsx"); x = r.get_data()
 ck("Excel download: a zip, spreadsheet content type", r.status_code == 200 and x[:2] == b"PK" and "spreadsheetml" in r.headers["Content-Type"])
 try:
