@@ -165,6 +165,11 @@ for role, roles in (("doctor", {"checker"}), ("maker", {"maker"}), ("viewer", {"
         bad = [w for w in NOT_FOR.get(role, {}).get(page, []) if w in h]
         ck("%s: shows nothing this role may not use" % tag, not bad, "found " + ", ".join(bad))
         links = set(re.findall(r'href="(/finance/purchase/[^"]+)"', h))
+        # rev 3 (the owner's find): a link or the JS base that forgets the mount prefix 404s at the
+        # portal root. Every own href and const P must start with /finance/purchase.
+        bare = re.findall(r'href="(/(?:page|api)/[^"]*)"', h) + re.findall(r"const P=(\"[^\"]*\")", h)
+        bare = [b for b in bare if not b.strip('"').startswith("/finance/purchase")]
+        ck("%s: every own link carries the mount prefix (rev 3)" % tag, not bare, ", ".join(bare))
         dead = [l for l in links if cl.get(l).status_code != 200]
         ck("%s: every internal link answers 200" % tag, not dead, ", ".join(dead))
 WHO.update(user="manoj", roles={"checker"})

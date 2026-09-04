@@ -212,7 +212,9 @@ ck("item-wise GROSS sum of the lines == the two exports' totals (gross is stored
 ck("item-wise NET sum of the lines == the two exports' net (rev 2: this is the money the pages show)",
    q1("SELECT SUM(net_amount_p) FROM purchase_line") == sum(x["net_amount_p"] or 0 for x in iw1["rows"] + iw2["rows"]))
 
-BI = one("PURCHASE_BILLITEMWISE/2026-08/*.XLS")
+# rev 3: pinned to the 28-31 Aug fixture. The owner's 04-Sep full-month bill/item-wise export now sits
+# beside it and would otherwise be picked first, closing the very gap these checks exist to exercise.
+BI = one("PURCHASE_BILLITEMWISE/2026-08/*_2026-08-28_to_2026-08-31__*.XLS")
 bi = R.payload(BI, "BILLITEMWISE")
 ck("BILLITEMWISE parser: rows sum to its TOTAL", sum(x["amount_p"] or 0 for x in bi["rows"]) == bi["grand_amount_p"])
 r = push(bi)

@@ -53,7 +53,6 @@ _db = None
 _require = None
 _unit = "medical"
 _marg_token = ""
-_url_prefix = "/finance/purchase"   # rev 3: bp.url_prefix is None when the prefix is given at register time (F-292 family)
 _assets_db = "/root/assetapp/assets.db"
 _assets_url = "https://assets.dr-manoj.in"
 _schema_done = False
@@ -70,8 +69,7 @@ FEED_DAYS_FOR_TRUST = 28
 def init(app, db_getter, require_fn, unit="medical", url_prefix="/finance/purchase",
          marg_token="", assets_db=None, assets_url=None):
     """Mount only. Opens no connection: at import there is no app context to open one in."""
-    global _db, _require, _unit, _marg_token, _assets_db, _assets_url, _url_prefix
-    _url_prefix = url_prefix or ""
+    global _db, _require, _unit, _marg_token, _assets_db, _assets_url
     _db, _require, _unit = db_getter, require_fn, unit
     _marg_token = marg_token or ""
     _assets_db = assets_db or os.environ.get("ASSETS_DB", _assets_db)
@@ -1362,7 +1360,7 @@ function copyText(id){
 
 
 def _page(title, body, extra_js=""):
-    prefix = request.script_root + _url_prefix
+    prefix = request.script_root + (bp.url_prefix or "")
     nav = ('<nav class="noprint muted"><a href="%s/page/hub">Hub</a>'
            '<a href="%s/page/scans">Scan links</a><a href="%s/page/orders">Orders</a>'
            '<a href="/finance/stock/page/drift">Stock check</a></nav>' % (prefix, prefix, prefix))
@@ -1427,7 +1425,7 @@ def page_hub():
         return err
     con = _db()
     _ensure(con)
-    prefix = request.script_root + _url_prefix
+    prefix = request.script_root + (bp.url_prefix or "")
     rows = []
     for m in _months(con):
         s = _month_summary(con, m)
@@ -1604,7 +1602,7 @@ def page_scans():
         return err
     con = _db()
     _ensure(con)
-    prefix = request.script_root + _url_prefix
+    prefix = request.script_root + (bp.url_prefix or "")
     acon = _assets_con()
     if acon is None:
         return _page("Scan links", '<h1>Scan links</h1><div class="card"><div class="warn">asset app not '

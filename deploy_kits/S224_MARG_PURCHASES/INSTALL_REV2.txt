@@ -11,7 +11,7 @@ git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo
 
 GOOD:  "UP -- purchases rev 2 live", then a healthz line like {"exports":15,"last_received":"...","ok":true},
        then exactly this md5 line:
-ca517371ed4c10d6bb1a2407faba78c1  /root/finance/purchase_app.py
+2a6d5ca03644d59aebb7142a36014f44  /root/finance/purchase_app.py
 
 Then reload the hub (https://followup.dr-manoj.in/finance/purchase/page/hub): item-wise is now NET, each month shows Agree / Differ / No lines and a one-line verdict.
 Expected on the first screen: July Rs 4,76,393 vs Rs 4,77,396 (101 agree, 2 differ = the two purchase returns);
