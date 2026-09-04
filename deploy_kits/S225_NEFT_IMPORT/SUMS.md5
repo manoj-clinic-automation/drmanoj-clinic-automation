@@ -1,2 +1,4 @@
 1a7cb20399ec8cdb5748c9725cd1e472  import_neft_bank.py
 1c8f1e959487daec5a328934b21fbce9  selftest_neft_import.py
+199f439a73d978b680ea9ffe0a8b7933  verify_lengths_s225.py
+23a86d938002ce5b1a4529e3c36b6dcf  length_manifest_S225.txt
