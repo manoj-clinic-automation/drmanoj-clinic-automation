@@ -1,0 +1,9 @@
+S225_SNAPSHOT_ON_CAPTURE · built 04-Sep-2026 · Session 225 · §8 item 7: the stock snapshot pushed on capture (manojz)
+Files (placed in D:\Downloads\margsync\MargPull\ ; record copy here): snapshot_on_capture.py · SNAPSHOT_ON_CAPTURE.bat
+Owner: "latest stock report doesn't seem to be applied" (S224); spec §7/§8-7 "push the stock snapshot on capture, not only at 22:30".
+What it does: every 15 min, the newest VERIFIED whole-store STOCK_CLOSING export (TOTALS/DEFAULT; never ORTHOTICS/SUBSET) in
+        MargArchive\index.csv that this tool has not pushed before -> runs the S208 kit's push_snapshot.py exactly as the nightly does
+        (push_snapshot keeps the F-235 rules; this decides only WHEN); marker file per md5; a refusal is logged and retried; nothing
+        writes to Marg or the archive. The nightly at 22:30 is unchanged and remains the sweep.
+Proven offline on the REAL index.csv: picks the 03-Sep export (374 items, 41ecfbd8); pushes once and is silent after; a REFUSING push
+        leaves no marker. Registered by ONE PowerShell line, allowed on battery (F-314).

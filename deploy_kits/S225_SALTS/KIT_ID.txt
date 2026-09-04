@@ -1,0 +1,10 @@
+S225_SALTS · built 04-Sep-2026 · Session 225 · rev 11 of purchase_app.py: Amir's salt WORK LIST server-side (spec §6, §8 item 6)
+Target: /root/finance/purchase_app.py 85cad151 (rev 10) -> 92aee1979811733cf24adfecaaf5419a (rev 11); finance.db setting purchase.salt_users=amir (seed);
+        tables purchase_salt_item / purchase_salt_name on first request. manojz: push_salts.py (this kit, run in place) sends the S207 WORK LIST
+        D:\Downloads\Sanjeevni_Salt_Fix_for_Amir.xlsx (built from the owner's answers of 28-Aug) once, through the vendors door.
+Owner (spec §6): "Amir's salt correction list should be available as Excel download with him and me, and A4 print also".
+Builds: /page/salts -- the work list in five sections (rename 3 · create 38 · change 77 · waiting 7 · cleanup 1); Amir ticks each row
+        DONE (his name, the time, audited); the doctor answers the 7 waiting rows from the 196-name list; a later push never un-ticks or
+        overwrites. The 68 'already correct' items are NOT asked again -- the owner: 196 is a big task for a human, and repetitive for no reason. /salts.xlsx (a stdlib-written workbook Excel opens) and /salts.pdf (A4, clinic_day_pdf's writer).
+        The finance front gate opens only push/vendors/feed to the token, so the salts ride the vendors door -- finance_app.py untouched.
+Proven offline: selftest_salts.py 335/335 on the REAL work list (openpyxl re-reads the produced Excel). Install per F-321.

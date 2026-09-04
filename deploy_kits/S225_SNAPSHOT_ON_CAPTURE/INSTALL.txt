@@ -1,0 +1,13 @@
+S225_SNAPSHOT_ON_CAPTURE -- push the Marg stock snapshot when it is captured, not only at 22:30 (§8 item 7).
+
+Runs ON MANOJZ. The two files are already placed in D:\Downloads\margsync\MargPull\ by the assistant (this kit is the
+record copy). ONE line registers the scheduled task -- in PowerShell (not cmd), as the logged-in user, ALLOWED ON BATTERY
+(F-314: schtasks-created tasks start only on AC and slept the pull three times):
+
+IN A POWERSHELL WINDOW (Start -> type PowerShell), paste this bare line -- NOT wrapped in powershell -Command, which
+expands the $ variables before the command runs (the first attempt at S225 failed exactly so):
+
+$a=New-ScheduledTaskAction -Execute 'D:\Downloads\margsync\MargPull\SNAPSHOT_ON_CAPTURE.bat'; $t=New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 15) -RepetitionDuration (New-TimeSpan -Days 3650); $s=New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Minutes 10); Register-ScheduledTask -TaskName 'MargSnapshotOnCapture' -Action $a -Trigger $t -Settings $s -Force | Out-Null; Get-ScheduledTask -TaskName 'MargSnapshotOnCapture' | Select-Object TaskName,State
+
+The first run (within a minute) pushes the 03-Sep closing export that arrived at 03:10 and has been waiting for tonight.
+Its log:  D:\Downloads\margsync\_analysis\snapshot_on_capture_log.txt
