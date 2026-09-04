@@ -68,7 +68,7 @@ Environment (all optional):
 import os, sys, json, csv, hashlib, secrets, datetime, tempfile, getpass, urllib.request
 
 # ---------------------------------------------------------------- constants --
-APP_VERSION = "3.5.1-S225-LOANS"
+APP_VERSION = "3.6-S225-LOANS-D374"
 LEDGER_DIR  = os.environ.get("LEDGER_DIR", "/root/staff_ledger")
 # D331: the shared clinic scan widget (camera + gallery, verified on the box
 # S190) and the jspdf it needs — both served read-only by this app.
@@ -367,15 +367,17 @@ def decide(users, checker, row_id, approve: bool):
     r = rows[row_id]
     if r["status"] != "PENDING":
         raise ValueError("row is not pending")
-    # D331: an above-ceiling advance cannot be APPROVED until the signed
-    # written application (Dr Manoj / Dr Bhawna) is on file. No escape hatch
-    # — the D330 evidence rule, mirrored. Rejection needs no application.
+    # D331 said an above-ceiling advance could not be APPROVED until the signed
+    # written application was on file. D374 (S225, the owner, 04-Sep-2026: "make it
+    # optional for me, I can add it later") AMENDS that: the checker may approve
+    # first and attach later. The row then carries application_owed=True, every
+    # screen that shows the advance says "application owed", and save_application()
+    # clears it. The evidence is still required; only its timing moved.
+    patch = {"status": "APPROVED" if approve else "REJECTED",
+             "checker": checker, "ts_decision": now()}
     if approve and r.get("special") and not application_on_file(row_id):
-        raise ValueError("an above-ceiling (SPECIAL) advance needs the signed "
-                         "written application uploaded first — open the row "
-                         "and attach it, then approve")
-    update_row(row_id, {"status": "APPROVED" if approve else "REJECTED",
-                        "checker": checker, "ts_decision": now()})
+        patch["application_owed"] = True
+    update_row(row_id, patch)
 
 def make_contra(users, maker, orig_id, narration):
     rows = {r["id"]: r for r in load_ledger()}
@@ -513,7 +515,7 @@ def save_application(row_id, blob, who):
         f.write(blob)
     os.chmod(application_path(row_id), 0o600)
     update_row(row_id, {"application_sha": sha, "application_by": who,
-                        "application_at": now()})
+                        "application_at": now(), "application_owed": False})
     return sha
 
 
@@ -897,6 +899,7 @@ def loans_view(rows=None, month=None, staff=None):
                             (int(math.ceil(bal / float(a["instalment"]))) if bal > 0 and a["instalment"] else 0),
              "defers": stt["defers"], "deferred_now": deferred_now, "due_this_month": due,
              "last_paid": last_paid, "narration": r.get("narration") or "",
+             "app_owed": bool(r.get("special")) and not application_on_file(r["id"]),
              "against_month": r.get("against_month") or ""}
         out.setdefault(st, {"staff": st, "tranches": [], "pending": 0, "outstanding": 0, "due": 0,
                             "reversed": 0})["tranches"].append(t)
@@ -937,7 +940,8 @@ def loans_html(view, role, checker_pick=None, names=None):
     for d in view["staff"]:
         rows_html = ""
         for t in d["tranches"]:
-            kind = ("interest loan" if t["interest"] else "advance") + (" · SPECIAL" if t["special"] else "")
+            kind = (("interest loan" if t["interest"] else "advance") + (" · SPECIAL" if t["special"] else "")
+                    + (" · <b style='color:#f87171'>application owed</b>" if t.get("app_owed") else ""))
             if t["open"]:
                 if t["deferred_now"]:
                     nxt = "<b style='color:#f87171'>deferred this month</b>"
@@ -2083,8 +2087,10 @@ small{{color:var(--muted)}}
                 if row.get("special"):
                     msg_extra = (f"<p style='color:#b45309'><b>SPECIAL advance saved "
                                  f"PENDING.</b> <a href='{URL_PREFIX}/application/"
-                                 f"{row['id']}'>Upload the signed application now</a> "
-                                 f"— it cannot be approved without it.</p>")
+                                 f"{row['id']}'>Upload the signed application now</a>, "
+                                 f"or approve it on <a href='{URL_PREFIX}/pending'>Pending</a> and "
+                                 f"attach the application later — it stays marked "
+                                 f"<b>application owed</b> until you do (D374).</p>")
                 else:
                     msg_extra = ""
                 amt = row["amount"]
@@ -2457,7 +2463,7 @@ small{{color:var(--muted)}}
                 sp_note = (" · <b style='color:#b45309'>SPECIAL</b> "
                            + (f"<a href='{URL_PREFIX}/application/{iid}/file'>📄 application</a>"
                               if application_on_file(iid)
-                              else "<b style='color:red'>application missing</b>"))
+                              else f"<b style='color:red'>application owed</b> — <a href='{URL_PREFIX}/application/{iid}'>attach it</a>"))
             # ---- SL6 (D332): schedule state + loud defers -----------------
             stt = schedule_state(a["issue"], nxt)
             sched_note = ""
@@ -4058,12 +4064,12 @@ def selftest():
     ck(r32["special"] and r32["status"] == "PENDING" and not r32["direct"],
        "D331: a checker's own SPECIAL advance still goes PENDING (gate unskippable)")
 
-    # the application gate at approve
-    try:
-        decide(users, "doc2", r32["id"], True)
-        ck(False, "D331: approving a special advance without the application must refuse")
-    except ValueError as e:
-        ck("application" in str(e), "D331: approve refused until the application is on file")
+    # the application gate at approve -- D374 (S225): approve first, attach later, marked owed
+    decide(users, "doc2", r32["id"], True)
+    _r32a = {r["id"]: r for r in load_ledger()}[r32["id"]]
+    ck(_r32a["status"] == "APPROVED" and _r32a.get("application_owed") is True,
+       "D374: a SPECIAL advance approves without the application and is marked application_owed")
+    update_row(r32["id"], {"status": "PENDING", "checker": "", "ts_decision": ""})   # back to PENDING for the rest of the D331 checks
     try:
         save_application(r31["id"], b"%PDF-1.4 x", "mfull")
         ck(False, "D331: an ordinary advance takes no application")
@@ -4071,8 +4077,8 @@ def selftest():
         ck(True, "D331: save_application refuses a non-special row")
     _sha = save_application(r32["id"], b"%PDF-1.4 signed application", "mfull")
     _r32b = {r["id"]: r for r in load_ledger()}[r32["id"]]
-    ck(application_on_file(r32["id"]) and _r32b.get("application_sha") == _sha,
-       "D331: the application stores and its sha lands in the row")
+    ck(application_on_file(r32["id"]) and _r32b.get("application_sha") == _sha and _r32b.get("application_owed") is False,
+       "D331/D374: the application stores, its sha lands in the row, and application_owed clears")
     decide(users, "doc2", r32["id"], True)
     _r32c = {r["id"]: r for r in load_ledger()}[r32["id"]]
     ck(_r32c["status"] == "APPROVED",

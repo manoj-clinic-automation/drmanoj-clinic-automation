@@ -1,6 +1,9 @@
 #!/bin/bash
 # =============================================================================
 #  install_s225_loans.sh · kit S225_LOANS_VIEW rev 2 — D371: the Loans view, and the
+#  REV 3 (15:10 IST, D374 — the owner: 'make it optional for me, I can add it later'): a SPECIAL advance may be
+#  APPROVED before its signed application is attached; the row is marked application_owed, every screen
+#  says 'application owed', and attaching it clears the mark. Currency gate moved to rev 2's pin e2a10ee6.
 #  REV 2 (14:55 IST): the 'current position' box on the New-entry page was a light box with
 #  light text (unreadable, pre-existing since S200) -- now the theme's dark card with a blue
 #  edge, and it links to the Loans view. Currency gate moved to rev 1's pin e5910152.
@@ -27,10 +30,10 @@
 #  selftest_loans_view_s225.py 35/35 on a synthetic ledger through the real app.
 # =============================================================================
 set -u
-KIT_NAME="S225_LOANS_VIEW_r2"
+KIT_NAME="S225_LOANS_VIEW_r3"
 LIVE=/root/staff_ledger.py
-LIVE_MD5_EXPECTED=e5910152602e1b5a635819bad08355b7
-NEW_MD5_EXPECTED=e2a10ee63c34eb441ac5dadf83ec079c
+LIVE_MD5_EXPECTED=e2a10ee63c34eb441ac5dadf83ec079c
+NEW_MD5_EXPECTED=802577112e6db82bcf763d142efcd00c
 PY=/root/wa/venv/bin/python3
 SVC=staff-ledger.service
 PROBE=/tmp/s225loans_probe
@@ -60,10 +63,10 @@ if ! { echo "$OUT" | grep -q "SELFTEST PASSED" && echo "$OUT" | grep -qE "(^|[^0
   echo "!! [5/9] the new file did NOT report 301 — refusing, nothing installed"; echo "$OUT" | tail -8; exit 1
 fi
 OUT2="$(cd "$PROBE" && "$PY" -B selftest_loans_view_s225.py 2>&1)"
-if ! echo "$OUT2" | grep -q "35 PASS  0 FAIL"; then
-  echo "!! [5/9] the loans selftest did NOT report 35/35 on the box — refusing, nothing installed"; echo "$OUT2" | grep -v "^  PASS" | tail -12; exit 1
+if ! echo "$OUT2" | grep -q "36 PASS  0 FAIL"; then
+  echo "!! [5/9] the loans selftest did NOT report 36/36 on the box — refusing, nothing installed"; echo "$OUT2" | grep -v "^  PASS" | tail -12; exit 1
 fi
-echo "[5/9] new file: module selftest 301 ✓ (unchanged) · loans selftest 35/35 ✓"
+echo "[5/9] new file: module selftest 301 ✓ (unchanged) · loans selftest 36/36 ✓"
 BAK="${LIVE}.bak_${KIT_NAME}_$(date +%Y%m%d_%H%M%S)"
 cp -f "$LIVE" "$BAK" || { echo "!! [6/9] backup failed — refusing"; exit 1; }
 echo "[6/9] backup: $BAK"

@@ -1,0 +1,10 @@
+S225_PHONEBOOK · built 04-Sep-2026 · Session 225 · rev 7 of purchase_app.py: the stockist phone book, and the owner's rounding in the engine
+Target: /root/finance/purchase_app.py c6f187ac (rev 6, live 14:03) -> 0b77cc53df7299ce622f8fcc7eafaea2 (rev 7, full-file replacement; finance_app.py, portal.py, tile_grants.json UNTOUCHED)
+        finance.db: setting purchase.phonebook_users = manoj,darpan,shavez (seed, idempotent); purchase_vendor_contact gains
+        phone2 + five bank fields + bank_status/verified_by/verified_at + source/added_by (ALTER on first request, never in the schema file)
+Rulings applied (owner, 04-Sep): phone book for him, Darpan, Shavez (fail-closed allow-list) · two numbers per stockist · bank fields
+        server-side only (F-185/F-31) · only he verifies, new and modified · existing bank details accepted as they stand ("it's for the
+        future part") · a server edit is never overwritten by the nightly manojz push · "no corrections done here??" -> the rounding to
+        10 strips then tens now lives in the ENGINE, so the doctor's Orders page, the copy text, the staff page and the WhatsApp agree.
+Proven offline: selftest_phonebook.py 290/290 (S224 + rev-6 selftests as regression + 27 phone-book/engine checks, real archive).
+The live-shape walk (walk_phonebook_gate_s225.py) runs ON THE BOX inside the install line, before the restart.

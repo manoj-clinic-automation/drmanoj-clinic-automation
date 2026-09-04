@@ -1,0 +1,11 @@
+0b77cc53df7299ce622f8fcc7eafaea2  purchase_app.py
+18e8b0b2ea94e2209622979608b79a50  purchase_schema.sql
+41d68148fc3aa461da30a9eb4053b649  marg_purchase_rows.py
+eda5bc927bf8aca8df22899309dc3c1f  walk_phonebook_gate_s225.py
+cff9d4e7b603c48110a213667814a9dd  seed_phonebook_users_s225.py
+a674a379599c6961fb8f0c7bfc2505ad  selftest_phonebook.py
+95abb31b990ab6ca1fc4fb9afb2a28d3  INSTALL.txt
+79979d6c1d0014ee332d1558a6b4e8d1  README.md
+8ef7d488c8b2aead18f08afb6b0ef78b  KIT_ID.txt
+f18fa21b64676322b2f9c384c8d8b3bf  PREDICTED_PINS.txt
+2e239b72190378aac5f99dff364b116f  EVIDENCE_selftest_s225_r7.txt

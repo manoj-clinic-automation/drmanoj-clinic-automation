@@ -2,10 +2,10 @@
 # DO NOT HAND-EDIT the VPS rows. Change the Register, re-run the
 # generator. One authored source (D202).
 # source: KB_Register_v5_73_S225.md
-# source_md5: df243d9f1072a046b0f331a2eceb8d99
+# source_md5: 4b44178b5e380a54e778bd1eee05c367
 # session: S225 open
 # manifest: CANONICAL_MANIFEST.md
-# manifest_current_register_pin: df243d9f1072a046b0f331a2eceb8d99
+# manifest_current_register_pin: 4b44178b5e380a54e778bd1eee05c367
 # register_pin_verified: yes
 # columns: kind <TAB> md5 <TAB> path-or-name <TAB> note
 #
@@ -16,6 +16,7 @@
 VPS	c6f187ac90eed90b3564aab45cd76b9a	/root/finance/purchase_app.py	S225 rev 6 (kit S225_STAFF_ORDER, over S224 rev 5 6366edb5…) — READ BACK, a pass; predicted = box. Full-file r
 VPS	7bc591151553344e80d1e034a8f176d6	/root/portal/portal.py	S225 (kit S225_STAFF_ORDER, patch patch_portal_staff_order_s225.py, over S224 d2803804…) — READ BACK, a pass; 
 VPS	07af4daa579776a357ea6d71ec6bd1f2	/root/portal/tile_grants.json	S225 v8 (kit S225_STAFF_ORDER, over v7 578702a5…) — READ BACK, a pass. Order Medicines granted to amir, shavez
+VPS	e5910152602e1b5a635819bad08355b7	/root/staff_ledger.py	S225 v3.5-S225-LOANS, rev 1 (kit S225_LOANS_VIEW, over S202_D349B 9e764f80…) — READ BACK 14:44 IST, a pass; pr
 VPS	0aa211fb4c04041d85cbf58c6825eb42	/root/finance/finance_app.py	S224 — READ BACK, a pass. Three patches in one day, each after the # --- S224_MARG_PURCHASES end --- anchor: 1
 VPS	a61af74a1be41b879771af8977d2d9a5	/root/finance/stock_app.py	S224 (kit S224_DIFFS_ROLE_FIX, over S221 4e929d0b…) — READ BACK, a pass. _has_role(u, role) looks in roles and
 VPS	fb3726553d4aec43b6b231014aba5a55	/root/finance/stock_diffs.html	S224 (kit S224_DIFFS_ROLE_FIX, over S213 3f6a87b2…) — READ BACK, a pass. Checker: the eight cause buttons + no
@@ -92,7 +93,6 @@ VPS	f85a4b0663ee0028c967cefec716bd12	/root/staff_register/staff_register.py	S200
 VPS	bedd468ee7b89b8f0c130d215a42b6d1	/root/staff_register/salary_engine.py	S199 — the F-174 fix (SALARY_EXCLUDED mirror re-aligned with the D332 ledger set) + the Old(shadow)/Delta colu
 VPS	7c0cfb940df2b542d1c4eb849ee3f924	/root/staff_register/salary_policy.py	S200 v1.7 (kits S200_R3→R5→R5b→R6→R7→R8→R10) — Sunday columns · the D346 go-live rules (derived Sunday weight 
 VPS	4dcd19bc02675a07cf0a77fadff6605b	/root/att_scenario.py	NEW S199 v2 (kits S199_SCEN1→SCEN3) — the three-system deduction scenario (old-as-practiced · ramp · strict), 
-VPS	9e764f807ad2012537c29fdb8ed6f124	/root/staff_ledger.py	S200 v3.4-SL7 (kits S200_R6→R9; selftest 294) — COVER_DUTY (₹200/day credit, narration compulsory) · uniform/I
 VPS	0184cb139907ee11adcc78c1ecab2daa	/root/att_month_report.py	S200 (kit S200_R5; D341b) — the D253 roster era GATED behind ATT_ROSTER_FROM (default 2099-01; its selftest pi
 VPS	01ca6591a74ec8009bf9748fb7f480c2	/root/wa/clinic_watchdog.py	S156 — 11 services
 VPS	6e72373325f808b1d7eaeb99f51a7b14	/root/assetapp/smoke_test.py	S177 — 342/0

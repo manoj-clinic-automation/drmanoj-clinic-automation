@@ -1,5 +1,5 @@
 S225_LOANS_VIEW · built 04-Sep-2026 · Session 225 · D371: the Loans view — the truth about advances, without the noise
-Target: /root/staff_ledger.py 9e764f80 (S202_D349B, v3.4-S200-SL7) -> e2a10ee63c34eb441ac5dadf83ec079c (v3.5.1-S225-LOANS, rev 2; rev 1 e5910152 was live 14:44-), full-file replacement; staff-ledger.service
+Target: /root/staff_ledger.py 9e764f80 (S202_D349B, v3.4-S200-SL7) -> 802577112e6db82bcf763d142efcd00c (v3.6-S225-LOANS-D374, rev 3; rev 1 e5910152 live 14:44, rev 2 e2a10ee6 live 14:50), full-file replacement; staff-ledger.service
 Ruling (owner, 04-Sep-2026 ~14:00 IST): "the data should clearly display actual loans — tranches with details and instalments
         due — and the ledger should be clear of the extra entries, as we don't cancel any; then only we can plan which view to
         share with staff on their PWA."
@@ -9,3 +9,6 @@ Proven offline: module selftest 301/301 (unchanged); selftest_loans_view_s225.py
         re-runs both on the box in isolation, then walks /ledger/loans live (302 behind the login) before saying GREEN.
 REV 2 (14:55 IST, owner: 'please fix the box content visibility'): the 'current position' box on the New-entry page — light
         background with the theme's light text, unreadable since S200 — is now the dark card with a blue edge, and links to Loans.
+REV 3 (15:10 IST, D374 — owner: 'make it optional for me, I can add it later'): a SPECIAL (above-ceiling) advance may be APPROVED
+        before its signed application is attached — the row is marked application_owed, Advances and Loans say 'application owed'
+        with an attach link, and attaching it clears the mark. Amends D331's timing, not its evidence rule.

@@ -32,6 +32,7 @@
   PASS  entry form has the schedule textarea
   PASS  a scheduled advance saved through the FORM carries its 2 steps
   PASS  a schedule that does not add up is REFUSED and nothing saved
+  PASS  D374: a SPECIAL advance approved before its application shows 'application owed' on Loans
   PASS  APP_VERSION bumped
 
-35 PASS  0 FAIL
+36 PASS  0 FAIL

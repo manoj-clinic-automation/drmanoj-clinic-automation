@@ -30,3 +30,5 @@ that does not add up. The install script re-runs both on the box in isolation an
 **Not in this kit:** entering the August advances (Surendra ₹13,000 with plan; Darpan ₹15,000) — those are the doctor's
 entries on the New-entry page, the ledger's own maker-checker path · Parvesh's exit (the register's last-working date; the
 ledger has no final-settlement concept — recorded as owed design) · the staff PWA view (after he has seen this one).
+
+**Rev 3 — D374 (owner, 04-Sep 15:05):** *"make it optional for me, I can add it later."* A SPECIAL advance can now be approved on Pending before its signed application is uploaded; it carries **application owed** on Advances and Loans (with an attach link) until the PDF is attached, which clears the mark. D331's evidence rule stands; its timing moved.

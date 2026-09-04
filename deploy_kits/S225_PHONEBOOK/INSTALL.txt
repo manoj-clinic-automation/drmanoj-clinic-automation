@@ -1,0 +1,12 @@
+S225_PHONEBOOK -- the stockist phone book (rev 7 of the purchase app), and the rounding rule in the engine.
+
+ONE LINE on the VPS. Pulls the repo, checks the kit, backs up and copies purchase_app.py rev 7 beside finance_app.py,
+RUNS THE LIVE-SHAPE WALK on a copy of the db through the real gate (stops before any restart if a check fails),
+seeds the editors setting (manoj, darpan, shavez -- left alone if already there), restarts clinic-finance, checks it
+came back, prints the pin. Rolls back by itself if the service does not return. Nothing else is touched.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S225_PHONEBOOK && md5sum -c SUMS.md5 --quiet && \cp /root/finance/purchase_app.py /root/finance/purchase_app.py.bak_S225pb_$(date +%Y%m%d-%H%M%S) && \cp purchase_app.py walk_phonebook_gate_s225.py seed_phonebook_users_s225.py /root/finance/ && FIN_DIR=/root/finance /root/wa/venv/bin/python3 -B /root/finance/walk_phonebook_gate_s225.py && FINANCE_DB=/root/finance/finance.db /root/wa/venv/bin/python3 -B /root/finance/seed_phonebook_users_s225.py && systemctl restart clinic-finance.service && sleep 3 && (systemctl is-active --quiet clinic-finance.service && echo "UP -- phone book live" && curl -s localhost:8106/finance/purchase/api/healthz && echo && md5sum /root/finance/purchase_app.py || (echo "SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; ls -t /root/finance/purchase_app.py.bak_S225pb_* | head -1 | xargs -I{} \cp {} /root/finance/purchase_app.py; systemctl restart clinic-finance.service; sleep 4; systemctl is-active clinic-finance.service; md5sum /root/finance/purchase_app.py; journalctl -u clinic-finance.service -n 12 --no-pager | tail -12))
+
+The md5 line at the end is the pin the close records (A0). Expected: see PREDICTED_PINS.txt.
+Then open (you, Darpan, Shavez):
+https://followup.dr-manoj.in/finance/purchase/page/book

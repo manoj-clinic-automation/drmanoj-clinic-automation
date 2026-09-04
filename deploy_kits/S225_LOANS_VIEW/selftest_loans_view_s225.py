@@ -101,7 +101,12 @@ ck("a scheduled advance saved through the FORM carries its 2 steps", len(new) ==
 r = cl.post("/ledger/", data=dict(category="ADVANCE_ISSUE", staff="Gamma", date_from="2026-09-04", date_to="2026-09-04", amount="6000", narration="bad",
                                   instalment="", against_month="", schedule="2026-10:1000"), follow_redirects=True)
 ck("a schedule that does not add up is REFUSED and nothing saved", "must match" in r.get_data(as_text=True) and len([x for x in SL.load_ledger() if x["narration"] == "bad"]) == 0)
-ck("APP_VERSION bumped", SL.APP_VERSION == "3.5.1-S225-LOANS")
+# D374: an approved SPECIAL advance with no application on file shows "application owed" on Loans
+SL.append_ledger(dict(SL.load_ledger()[0], id="spx1", staff="Alpha", category="ADVANCE_ISSUE", amount=4000, instalment=1000, status="APPROVED",
+                      special=True, application_owed=True, interest=False, schedule=None, contra_of="", date_from="2026-09-03", against_month="2026-09", narration="special, paper later"))
+h5 = cl.get("/ledger/loans?m=" + M + "&staff=Alpha").get_data(as_text=True)
+ck("D374: a SPECIAL advance approved before its application shows 'application owed' on Loans", "application owed" in h5 and "SPECIAL" in h5)
+ck("APP_VERSION bumped", SL.APP_VERSION == "3.6-S225-LOANS-D374")
 print("\n%d PASS  %d FAIL" % (len(P), len(F)))
 for f in F: print("  FAILED: " + f)
 sys.exit(1 if F else 0)
