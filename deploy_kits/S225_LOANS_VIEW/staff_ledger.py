@@ -68,7 +68,7 @@ Environment (all optional):
 import os, sys, json, csv, hashlib, secrets, datetime, tempfile, getpass, urllib.request
 
 # ---------------------------------------------------------------- constants --
-APP_VERSION = "3.5-S225-LOANS"
+APP_VERSION = "3.5.1-S225-LOANS"
 LEDGER_DIR  = os.environ.get("LEDGER_DIR", "/root/staff_ledger")
 # D331: the shared clinic scan widget (camera + gallery, verified on the box
 # S190) and the jspdf it needs — both served read-only by this app.
@@ -2161,7 +2161,7 @@ small{{color:var(--muted)}}
           skips on the Advances page)</label></div>
         <div id="f_narr"><label id="l_narr">Narration (optional)</label>
           <textarea name="narration" rows="2"></textarea></div>
-        <div id="staffpos" class="card" style="display:none;background:#eef4ff"></div>
+        <div id="staffpos" class="card" style="display:none;border-color:#3b82f6;background:#1b3b57"></div>
         <div id="preview" style="font-weight:bold;margin:6px 0"></div>
         <button class="ok">Save entry</button></form>
         <small>Rate-card categories compute their own amount — no typing.
@@ -2185,7 +2185,7 @@ small{{color:var(--muted)}}
             + "typed here. To skip a loan month use the <a href='{URL_PREFIX}/advances'>"
             + "Advances page</a> Skip button (never a Rs 0 entry). Full history: "
             + "<a href='{URL_PREFIX}/statement?staff=" + encodeURIComponent(stf.value) + "'>"
-            + "Statement</a>.</small>";
+            + "Statement</a> · every loan, tranche by tranche: <a href='{URL_PREFIX}/loans?staff=" + encodeURIComponent(stf.value) + "'>Loans</a>.</small>";
         }}
         stf.addEventListener("change", staffpos);
         staffpos();

@@ -1,6 +1,9 @@
 #!/bin/bash
 # =============================================================================
-#  install_s225_loans.sh · kit S225_LOANS_VIEW — D371: the Loans view, and the
+#  install_s225_loans.sh · kit S225_LOANS_VIEW rev 2 — D371: the Loans view, and the
+#  REV 2 (14:55 IST): the 'current position' box on the New-entry page was a light box with
+#  light text (unreadable, pre-existing since S200) -- now the theme's dark card with a blue
+#  edge, and it links to the Loans view. Currency gate moved to rev 1's pin e5910152.
 #  schedule field on the entry form.
 #
 #  THE OWNER, 04-Sep-2026: "staff advance ledger has all entries and it's confusing,
@@ -24,10 +27,10 @@
 #  selftest_loans_view_s225.py 35/35 on a synthetic ledger through the real app.
 # =============================================================================
 set -u
-KIT_NAME="S225_LOANS_VIEW"
+KIT_NAME="S225_LOANS_VIEW_r2"
 LIVE=/root/staff_ledger.py
-LIVE_MD5_EXPECTED=9e764f807ad2012537c29fdb8ed6f124
-NEW_MD5_EXPECTED=e5910152602e1b5a635819bad08355b7
+LIVE_MD5_EXPECTED=e5910152602e1b5a635819bad08355b7
+NEW_MD5_EXPECTED=e2a10ee63c34eb441ac5dadf83ec079c
 PY=/root/wa/venv/bin/python3
 SVC=staff-ledger.service
 PROBE=/tmp/s225loans_probe

@@ -1,8 +1,8 @@
-e5910152602e1b5a635819bad08355b7  staff_ledger.py
-dc325ec9f59a014c834afd503b88d74b  selftest_loans_view_s225.py
-85a84eea66f33584e1df927bf4921086  install_s225_loans.sh
+e2a10ee63c34eb441ac5dadf83ec079c  staff_ledger.py
+9e7484f8cb2309fa80487e1ae59b0601  selftest_loans_view_s225.py
+ec8c5922103784e5cb07252c0031cb5f  install_s225_loans.sh
 3d37e1eb2d85767652c02ec81b1f2c9b  INSTALL.txt
 a72d884404c3dce0f134cc63bfaf7fd5  README.md
-b09e71f12fb3aaf548cb78f5bb091277  KIT_ID.txt
+9428f75e709032caf72352526bbe97b7  KIT_ID.txt
 e27b711755ced14e354cd65e9b6491ef  EVIDENCE_loans_s225.txt
 40346cca18b277f25a6fc03a8351fae9  EVIDENCE_regression_s225.txt

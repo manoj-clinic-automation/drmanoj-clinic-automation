@@ -101,7 +101,7 @@ ck("a scheduled advance saved through the FORM carries its 2 steps", len(new) ==
 r = cl.post("/ledger/", data=dict(category="ADVANCE_ISSUE", staff="Gamma", date_from="2026-09-04", date_to="2026-09-04", amount="6000", narration="bad",
                                   instalment="", against_month="", schedule="2026-10:1000"), follow_redirects=True)
 ck("a schedule that does not add up is REFUSED and nothing saved", "must match" in r.get_data(as_text=True) and len([x for x in SL.load_ledger() if x["narration"] == "bad"]) == 0)
-ck("APP_VERSION bumped", SL.APP_VERSION == "3.5-S225-LOANS")
+ck("APP_VERSION bumped", SL.APP_VERSION == "3.5.1-S225-LOANS")
 print("\n%d PASS  %d FAIL" % (len(P), len(F)))
 for f in F: print("  FAILED: " + f)
 sys.exit(1 if F else 0)
