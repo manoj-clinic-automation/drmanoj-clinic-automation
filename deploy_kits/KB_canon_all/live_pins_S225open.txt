@@ -2,10 +2,10 @@
 # DO NOT HAND-EDIT the VPS rows. Change the Register, re-run the
 # generator. One authored source (D202).
 # source: KB_Register_v5_73_S225.md
-# source_md5: 4b44178b5e380a54e778bd1eee05c367
+# source_md5: a8f6e14be69d85dc1907556ab2a01243
 # session: S225 open
 # manifest: CANONICAL_MANIFEST.md
-# manifest_current_register_pin: 4b44178b5e380a54e778bd1eee05c367
+# manifest_current_register_pin: a8f6e14be69d85dc1907556ab2a01243
 # register_pin_verified: yes
 # columns: kind <TAB> md5 <TAB> path-or-name <TAB> note
 #
@@ -17,6 +17,7 @@ VPS	c6f187ac90eed90b3564aab45cd76b9a	/root/finance/purchase_app.py	S225 rev 6 (k
 VPS	7bc591151553344e80d1e034a8f176d6	/root/portal/portal.py	S225 (kit S225_STAFF_ORDER, patch patch_portal_staff_order_s225.py, over S224 d2803804…) — READ BACK, a pass; 
 VPS	07af4daa579776a357ea6d71ec6bd1f2	/root/portal/tile_grants.json	S225 v8 (kit S225_STAFF_ORDER, over v7 578702a5…) — READ BACK, a pass. Order Medicines granted to amir, shavez
 VPS	e5910152602e1b5a635819bad08355b7	/root/staff_ledger.py	S225 v3.5-S225-LOANS, rev 1 (kit S225_LOANS_VIEW, over S202_D349B 9e764f80…) — READ BACK 14:44 IST, a pass; pr
+VPS	713bdf3a9c1a8dafe076be1feb32219a	/root/finance/finance_clinic_day.py	S225 (kit S225_DAY_MPR_LINE, anchor patch over S223 dceb79a0…) — READ BACK 15:38 IST, a pass; predicted = box 
 VPS	0aa211fb4c04041d85cbf58c6825eb42	/root/finance/finance_app.py	S224 — READ BACK, a pass. Three patches in one day, each after the # --- S224_MARG_PURCHASES end --- anchor: 1
 VPS	a61af74a1be41b879771af8977d2d9a5	/root/finance/stock_app.py	S224 (kit S224_DIFFS_ROLE_FIX, over S221 4e929d0b…) — READ BACK, a pass. _has_role(u, role) looks in roles and
 VPS	fb3726553d4aec43b6b231014aba5a55	/root/finance/stock_diffs.html	S224 (kit S224_DIFFS_ROLE_FIX, over S213 3f6a87b2…) — READ BACK, a pass. Checker: the eight cause buttons + no
@@ -25,7 +26,6 @@ VPS	77e754e9b072eb78033affd5e8505b2a	/root/finance/returns_desk.html	S224 (kit S
 VPS	518affe983e02a266f943bced48e9c35	/root/finance/clinic_day_pdf.py	S224 NEW (kit S224_DAY_REVENUE_PDF) — READ BACK, a pass. GET /finance/clinic/share (302 to yesterday's share p
 VPS	a0e740ce745230bcd7cada69e0428648	/root/finance/bank_mpr_status.py	S224 NEW (kit S224_BANK_MPR_STATUS) — READ BACK, a pass. /finance/clinic/bank/mpr/<date> (+ ?json=1) and /fina
 VPS	93a31e68234df066776b7b80ef65ffbd	/root/finance/clinic_register.py	S224 post-close — THE DRAWER COUNT IS LIVE. Read back from the box 04-Sep 13:05; folded here at the S225 open.
-VPS	dceb79a06e71f7e35150c69e1f5dd175	/root/finance/finance_clinic_day.py	S223 — READ BACK FROM THE BOX 04-Sep-2026 13:05, A PASS — promoted at the S225 open from live_pins_S224close_R
 VPS	e939235ee5d37bcbf21ce2c5c4de1f01	/root/finance/docterz_day.py	S223 — READ BACK FROM THE BOX 04-Sep-2026 13:05, A PASS — promoted at the S225 open from live_pins_S224close_R
 VPS	80bf760dd6103504776964c58d876f17	/root/finance/docterz_ingest.py	S223 — READ BACK FROM THE BOX 04-Sep-2026 13:05, A PASS — promoted at the S225 open from live_pins_S224close_R
 VPS	33d9a7bd4d83c4a62388e485523e9640	/root/finance/clinic_upi_check.py	S225 open, 13:28 IST — REINSTALLED and READ BACK, a pass; F-320 CLOSED. The owner re-ran the kit's STEP 1 copy

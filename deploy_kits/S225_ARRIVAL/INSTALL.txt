@@ -1,0 +1,12 @@
+S225_ARRIVAL -- when the goods arrive (rev 8 of the purchase app).
+
+ONE LINE on the VPS. Pulls the repo, checks the kit, builds a PROBE copy of /root/finance in /tmp (F-321: the walk
+never touches the live folder), walks the new file there through the real gate on a copy of the db, and ONLY THEN
+backs up and copies purchase_app.py rev 8 into /root/finance, restarts clinic-finance, checks it came back, prints
+the pin. Rolls back BY PIN (to the rev-7b backup e4e5a75b) if the service does not return.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S225_ARRIVAL && md5sum -c SUMS.md5 --quiet && rm -rf /tmp/s225ar_probe && mkdir -p /tmp/s225ar_probe && \cp -r /root/finance/*.py /root/finance/*.sql /tmp/s225ar_probe/ && (\cp -r /root/finance/finance_ui /tmp/s225ar_probe/ 2>/dev/null; true) && \cp purchase_app.py walk_arrival_gate_s225.py /tmp/s225ar_probe/ && FIN_DIR=/tmp/s225ar_probe FIN_DB=/root/finance/finance.db /root/wa/venv/bin/python3 -B /tmp/s225ar_probe/walk_arrival_gate_s225.py && \cp /root/finance/purchase_app.py /root/finance/purchase_app.py.bak_S225ar_$(date +%Y%m%d-%H%M%S) && \cp purchase_app.py /root/finance/ && systemctl restart clinic-finance.service && sleep 3 && (systemctl is-active --quiet clinic-finance.service && echo "UP -- arrival flow live" && curl -s localhost:8106/finance/purchase/api/healthz && echo && md5sum /root/finance/purchase_app.py || (echo "SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; md5sum /root/finance/purchase_app.py.bak_S225ar_* | awk '$1=="e4e5a75bd3a5b5b2c4f1f48eb15835d7"{print $2}' | head -1 | xargs -I{} \cp {} /root/finance/purchase_app.py; systemctl restart clinic-finance.service; sleep 4; systemctl is-active clinic-finance.service; md5sum /root/finance/purchase_app.py; journalctl -u clinic-finance.service -n 12 --no-pager | tail -12))
+
+Expected pin: dabf1df3b7166139749907147dfd8ce9. Requires rev 7b (e4e5a75b) live first -- the walk imports the probe copy, so the order of installs
+does not break anything, but the rollback pin assumes 7b. Then open the staff page:
+https://followup.dr-manoj.in/finance/purchase/page/staff

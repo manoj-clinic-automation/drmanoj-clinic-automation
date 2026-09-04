@@ -1,0 +1,11 @@
+S225_ARRIVAL · built 04-Sep-2026 · Session 225 · rev 8 of purchase_app.py: when the goods arrive (spec §4)
+Target: /root/finance/purchase_app.py e4e5a75b (rev 7b) -> dabf1df3b7166139749907147dfd8ce9 (rev 8, full-file replacement; nothing else touched)
+        columns on first request: purchase_order_line.supplied/short · purchase_order.received_at/received_by/sent_by
+Owner (spec §4, 04-Sep 11:45): "on arrival they simply tap to acknowledge" · "if qty is different, they enter the supplied one" ·
+        "option to mark if stockist is short of a medicine" (carries into the next order) · "bill scan button at contextual place(s)".
+Builds: Arrived (one tap) / Different (supplied per line, Short tick) on every SENT order of the staff page -> RECEIVED by that person,
+        audited; less-than-asked is a short even without the tick; a short line rides into the next reorder plan (rounded, 'carried')
+        until re-ordered from that stockist or 45 days; RECEIVED orders show Scan the bill (/scanapp/intake) with the note to type.
+        Pre-filling the scan itself needs the asset app -- owed, not here.
+Proven offline: selftest_arrival.py 305/305 (S224 + rev 6 + rev 7 as regression + 13 arrival checks, real archive).
+Install pattern per F-321: the walk runs on a PROBE copy in /tmp; the live folder is written only after it is green.

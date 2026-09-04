@@ -1,0 +1,2 @@
+# S225_ARRIVAL -- predicted. A0: the close records what the box prints.
+/root/finance/purchase_app.py   dabf1df3b7166139749907147dfd8ce9   (rev 8; full-file copy)
