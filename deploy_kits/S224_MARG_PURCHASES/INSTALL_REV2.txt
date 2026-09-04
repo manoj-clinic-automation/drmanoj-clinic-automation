@@ -1,0 +1,25 @@
+S224_MARG_PURCHASES -- REV 2 (gross -> net). ONE PASTE. Touches /root/finance/purchase_app.py ONLY.
+finance_app.py, portal.py, tile_grants.json and the schema are NOT touched; no pin you typed at rev 1 changes.
+
+It refreshes the repo, verifies the kit, keeps the live rev-1 file as purchase_app.py.bak_S224r1 (made once,
+never overwritten), copies rev 2 in, restarts the finance app and CHECKS it came back. If it did not, it puts
+rev 1 back by itself and restarts again. You end up on rev 2, or exactly where you were -- never at a 503.
+
+THE PASTE (one line):
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S224_MARG_PURCHASES && md5sum -c SUMS.md5 --quiet && ([ -f /root/finance/purchase_app.py.bak_S224r1 ] || \cp /root/finance/purchase_app.py /root/finance/purchase_app.py.bak_S224r1) && \cp purchase_app.py /root/finance/purchase_app.py && systemctl restart clinic-finance.service && sleep 3 && (systemctl is-active --quiet clinic-finance.service && echo "UP -- purchases rev 2 live" && curl -s localhost:8106/finance/purchase/api/healthz && echo && md5sum /root/finance/purchase_app.py || (echo "FINANCE DID NOT COME BACK -- ROLLING BACK TO REV 1 BY ITSELF"; \cp /root/finance/purchase_app.py.bak_S224r1 /root/finance/purchase_app.py; systemctl restart clinic-finance.service; sleep 4; systemctl is-active clinic-finance.service; md5sum /root/finance/purchase_app.py; journalctl -u clinic-finance.service -n 12 --no-pager | tail -12))
+
+GOOD:  "UP -- purchases rev 2 live", then a healthz line like {"exports":15,"last_received":"...","ok":true},
+       then exactly this md5 line:
+ca517371ed4c10d6bb1a2407faba78c1  /root/finance/purchase_app.py
+
+Then reload the hub (https://followup.dr-manoj.in/finance/purchase/page/hub): item-wise is now NET, each month shows Agree / Differ / No lines and a one-line verdict.
+Expected on the first screen: July Rs 4,76,393 vs Rs 4,77,396 (101 agree, 2 differ = the two purchase returns);
+August Rs 3,54,879 vs Rs 2,81,007 (64 agree, 1 differs, 19 bills without item lines -- export item-wise 01-31 Aug once);
+September Rs 72,438 vs Rs 72,437 (all 11 agree; the doctor can finalise).
+
+OPTIONAL (proves the gate on the box, touches no live file):
+FIN_DIR=/root/finance /root/wa/venv/bin/python3 -B /root/finance/walk_purchase_gate_s224.py
+
+ROLLBACK BY HAND (one line):
+\cp /root/finance/purchase_app.py.bak_S224r1 /root/finance/purchase_app.py && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active clinic-finance.service

@@ -207,8 +207,10 @@ n_lines = q1("SELECT COUNT(*) FROM purchase_line")
 ck("lines stored == ITEMWISE rows", n_lines == iw1["n_rows"] + iw2["n_rows"])
 ck("EVERY ITEMWISE line was dated from its bill", q1("SELECT COUNT(*) FROM purchase_line WHERE bill_date IS NULL") == 0)
 ck("every line's month is August", q1("SELECT COUNT(*) FROM purchase_line WHERE month!='2026-08'") == 0)
-ck("item-wise sum of the lines == the two exports' totals",
+ck("item-wise GROSS sum of the lines == the two exports' totals (gross is stored, labelled)",
    q1("SELECT SUM(amount_p) FROM purchase_line") == sum(x["amount_p"] or 0 for x in iw1["rows"] + iw2["rows"]))
+ck("item-wise NET sum of the lines == the two exports' net (rev 2: this is the money the pages show)",
+   q1("SELECT SUM(net_amount_p) FROM purchase_line") == sum(x["net_amount_p"] or 0 for x in iw1["rows"] + iw2["rows"]))
 
 BI = one("PURCHASE_BILLITEMWISE/2026-08/*.XLS")
 bi = R.payload(BI, "BILLITEMWISE")
@@ -237,12 +239,25 @@ ck("July bills == its BILLWISE rows", q1("SELECT COUNT(*) FROM purchase_bill WHE
 with app.test_request_context():
     s = PA._month_summary(_db(), "2026-08")
 ck("August summary: bill-wise == Marg TOTAL", s["billwise_p"] == bw["grand_amount_p"])
-_iw = q1("SELECT SUM(amount_p) FROM purchase_line WHERE month='2026-08' AND line_type='ITEMWISE'")
-_bi = q1("SELECT SUM(amount_p) FROM purchase_line WHERE month='2026-08' AND line_type='BILLITEMWISE'")
-ck("August summary: item-wise = ITEMWISE lines + BILLITEMWISE only for bills with no ITEMWISE line",
-   _iw < s["itemwise_p"] <= _iw + _bi)
-ck("August is provisional and cannot finalise (ITEMWISE does not yet cover the whole month)",
-   s["status"]["status"] == "provisional" and not s["can_finalise"] and any("differs" in x for x in s["reasons"]))
+_all_net = q1("SELECT SUM(net_amount_p) FROM purchase_line WHERE month='2026-08'")
+_all_gross = q1("SELECT SUM(amount_p) FROM purchase_line WHERE month='2026-08'")
+# the rev-2 dedupe, recomputed here by hand: per (supplier, bill) keep the export with the later stamp
+_best = {}
+for _r in q("SELECT l.supplier_norm s, l.bill_no b, e.export_stamp st, l.source_md5 m, SUM(l.net_amount_p) n "
+            "FROM purchase_line l JOIN purchase_export e ON e.md5=l.source_md5 WHERE l.month='2026-08' "
+            "AND e.superseded_by IS NULL GROUP BY 1,2,3,4"):
+    if (_r["s"], _r["b"]) not in _best or (_r["st"], _r["m"]) > _best[(_r["s"], _r["b"])][0]:
+        _best[(_r["s"], _r["b"])] = ((_r["st"], _r["m"]), _r["n"])
+_dedup_net = sum(v[1] for v in _best.values())
+ck("August summary: item-wise is NET, not gross (rev 2)", s["itemwise_p"] < _all_gross and s["itemwise_p"] != _all_gross)
+ck("August summary: bills that ITEMWISE 28-29 and BILLITEMWISE 28-31 BOTH carry are counted ONCE (later stamp wins)",
+   s["itemwise_p"] == _dedup_net and _dedup_net < _all_net, "%s vs %s (all %s)" % (s["itemwise_p"], _dedup_net, _all_net))
+_bi_lines = q("SELECT supplier_norm FROM purchase_line WHERE line_type='BILLITEMWISE'")
+ck("BILLITEMWISE lines that arrived BEFORE their bill were linked to it once the bill came (rev 2)",
+   all(r[0] for r in _bi_lines) and not s["orphans"], str(len(s["orphans"])))
+ck("August is provisional and cannot finalise (bills without item lines, one that differs)",
+   s["status"]["status"] == "provisional" and not s["can_finalise"] and any("differs" in x for x in s["reasons"])
+   and any("no item-wise lines" in x for x in s["reasons"]))
 as_("manoj", "doctor", {"checker"})
 r = cl.get(P + "/page/hub")
 h = r.get_data(as_text=True)
@@ -442,7 +457,95 @@ ck("hub counts the open order", "<b>1</b><span>open orders" in cl.get(P + "/page
 ck("order create and status are audited", q1("SELECT COUNT(*) FROM purchase_audit WHERE action LIKE 'order_%'") == 2)
 ck("the order book shows the order with its status", "#1" in cl.get(P + "/page/orders").get_data(as_text=True))
 
-# ------------------------------------------------------------- 13. fail closed
+# ------------------------------------------------------------- 13. REV 2: net vs gross, per-bill buckets, the gap
+as_("manoj", "doctor", {"checker"})
+for pat, typ in (("PURCHASE_SUPPLIERWISE/2026-07/*.XLS", "SUPPLIERWISE"), ("PURCHASE_BILLWISE/2026-08/*_2026-08-01_to_2026-08-29__*.XLS", "BILLWISE"),
+                 ("PURCHASE_BILLWISE/2026-09/*.XLS", "BILLWISE")):
+    f = one(pat)
+    ck("archive holds %s" % typ + " " + pat.split("/")[1], bool(f))
+    push(R.payload(f, typ))
+push(R.payload(one("PURCHASE_ITEMWISE/2026-09/*.XLS"), "ITEMWISE", MP.read_purchase))
+with app.test_request_context():
+    sj, sa, ss = (PA._month_summary(_db(), m) for m in ("2026-07", "2026-08", "2026-09"))
+ck("July: item-wise NET == 47739566 paise (Rs 4,77,395.66, the S212 record)", sj["itemwise_p"] == 47739566, str(sj["itemwise_p"]))
+ck("July: bill-wise == Rs 4,76,393", sj["billwise_p"] == 47639300, str(sj["billwise_p"]))
+ck("July: no bill without lines, no line set without a bill", not sj["no_lines"] and not sj["orphans"])
+ck("July: the DIFFERS bucket holds <= 2 bills (the two purchase returns)", 0 < len(sj["differ"]) <= 2, str(len(sj["differ"])))
+ck("July: 101 of 103 bills AGREE", len(sj["agree"]) == 101 and len(sj["bills"]) == 103, "%d/%d" % (len(sj["agree"]), len(sj["bills"])))
+ck("July: each DIFFERS bill carries the 'purchase return?' hint (item-wise > bill-wise)",
+   all(x["hint"].startswith("purchase return") for x in sj["differ"]))
+ck("July: the refusal NAMES the differing bills", not sj["can_finalise"] and all(x["bill"]["bill_no"] in " ".join(sj["reasons"]) for x in sj["differ"]))
+ck("September: item-wise NET == 7243737 paise (Rs 72,437.37)", ss["itemwise_p"] == 7243737, str(ss["itemwise_p"]))
+ck("September: bill-wise == Rs 72,438 and all 11 bills AGREE within Rs 1",
+   ss["billwise_p"] == 7243800 and len(ss["agree"]) == 11 == len(ss["bills"]) and not ss["differ"] and not ss["no_lines"])
+ck("September CAN finalise on the rev-2 rule", ss["can_finalise"], str(ss["reasons"]))
+ck("August: reports the 27-Aug gap as NO ITEM LINES (item-wise export missing for that date)",
+   "2026-08-27" in sa["gap_dates"] and any("27-Aug" in x and "no item-wise lines" in x for x in sa["reasons"]))
+ck("August: the hub verdict names the gap and the one-line fix", "27-Aug" in sa["story"] and "export item-wise 01-31 Aug once" in sa["story"])
+ck("August: agree + differ + no-lines == bills", len(sa["agree"]) + len(sa["differ"]) + len(sa["no_lines"]) == len(sa["bills"]))
+hub = cl.get(P + "/page/hub").get_data(as_text=True)
+ck("hub shows Item-wise (net), Agree / Differ / No lines columns and the verdict line",
+   "Item-wise (net)" in hub and ">Agree<" in hub and ">Differ<" in hub and ">No lines<" in hub and "export item-wise 01-31 Aug once" in hub)
+ck("hub July item-wise is the NET figure", "477,396" in hub and "508,062" not in hub)
+ck("hub September shows Rs 72,437 net beside Rs 72,438 bill-wise", "72,437" in hub and "72,438" in hub)
+mj = cl.get(P + "/page/month/2026-07").get_data(as_text=True)
+ck("July month page lists the DIFFERS bucket with the hint and a gross column labelled gross",
+   "Bills that differ from their item lines (2)" in mj and "purchase return?" in mj and "Item-wise (gross)" in mj)
+ma = cl.get(P + "/page/month/2026-08").get_data(as_text=True)
+ck("August month page lists the NO ITEM LINES bucket, each row saying which date's export is missing",
+   "Bills with no item lines (%d)" % len(sa["no_lines"]) in ma and ma.count("item-wise export missing for 27-Aug") >= 1)
+# the finalise rule, on a synthetic month far from the real data:
+#   bill 801 agrees; 802 differs by Rs 5 (net below bill-wise); 803 has no lines at all
+jun_bills = [dict(bill_date="2025-06-1%d" % i, bill_no=str(801 + i), supplier="ZZREV2 STOCKIST          BAREILLY", cash_p=0, credit_p=200000)
+             for i in range(3)]
+def _ln(bno, net, gross, stamp_item="ZZREV2 ITEM"):
+    return dict(bill_no=bno, bill_date=None, supplier="ZZREV2 STOCKIST          BAREILLY", item=stamp_item + " " + bno, packing="1*10",
+                batch="B", expiry="1/28", tax=0, qty=10, free=None, rate_p=gross // 10, discount_pct=0, amount_p=gross, net_rate_p=net // 10,
+                net_amount_p=net, loose_qty=100, purchase_rate_p=gross // 10, direction="PURCHASE")
+push(dict(type="BILLWISE", md5="c" * 32, file="jun_bw.XLS", period_from="2025-06-01", period_to="2025-06-30", export_stamp="20250701-090000",
+          n_rows=3, grand_amount_p=600000, rows=jun_bills))
+push(dict(type="ITEMWISE", md5="d" * 32, file="jun_iw.XLS", period_from="2025-06-01", period_to="2025-06-30", export_stamp="20250701-090100",
+          n_rows=2, grand_amount_p=0, rows=[_ln("801", 200000, 220000), _ln("802", 199500, 220000)]))
+with app.test_request_context():
+    s6 = PA._month_summary(_db(), "2025-06")
+ck("synthetic: item-wise is NET (399500), never gross (440000)", s6["itemwise_p"] == 399500, str(s6["itemwise_p"]))
+ck("synthetic: buckets are 1 agree / 1 differs / 1 no lines", (len(s6["agree"]), len(s6["differ"]), len(s6["no_lines"])) == (1, 1, 1))
+ck("synthetic: the DIFFERS hint for net < bill-wise is not 'purchase return'", not s6["differ"][0]["hint"].startswith("purchase return"))
+r = cl.post(P + "/api/finalise", json=dict(month="2025-06"))
+rs = " ".join(r.get_json().get("reasons") or [])
+ck("finalise refused: names the no-lines bill 803 AND the differing bill 802", r.status_code == 409 and "803" in rs and "802" in rs and "12-Jun" in rs)
+# a later BILLITEMWISE export (a different type, so it coexists) carries 803's lines and a corrected 802 that now agrees
+push(dict(type="BILLITEMWISE", md5="e" * 32, file="jun_bi.XLS", period_from="2025-06-01", period_to="2025-06-30", export_stamp="20250702-090000",
+          n_rows=2, grand_amount_p=0, rows=[dict(_ln("803", 200000, 200000), supplier=""), dict(_ln("802", 200000, 210000), supplier="")]))
+with app.test_request_context():
+    s6 = PA._month_summary(_db(), "2025-06")
+ck("synthetic: supplier-less BILLITEMWISE lines found their bills by (bill no, date)", not s6["orphans"] and not s6["no_lines"])
+ck("synthetic: for 802 the LATER export's lines replaced the earlier ITEMWISE set -- it now AGREES, counted once",
+   len(s6["agree"]) == 3 and not s6["differ"] and s6["itemwise_p"] == 600000, "%s %s" % (s6["itemwise_p"], s6["reasons"]))
+ck("synthetic: the month can finalise", s6["can_finalise"], str(s6["reasons"]))
+# now the CORRECT-verdict path: make 801 differ by Rs 5 through a later ITEMWISE (same period: supersedes the first ITEMWISE)
+push(dict(type="ITEMWISE", md5="f" * 32, file="jun_iw2.XLS", period_from="2025-06-01", period_to="2025-06-30", export_stamp="20250703-090000",
+          n_rows=1, grand_amount_p=0, rows=[_ln("801", 199500, 220000)]))
+with app.test_request_context():
+    s6 = PA._month_summary(_db(), "2025-06")
+ck("synthetic: 801 now DIFFERS by Rs 5 and the month is refused, naming 801",
+   len(s6["differ"]) == 1 and s6["differ"][0]["bill"]["bill_no"] == "801" and not s6["can_finalise"] and "801" in " ".join(s6["reasons"]))
+b801 = q1("SELECT id FROM purchase_bill WHERE bill_no='801' AND month='2025-06'")
+cl.post(P + "/api/verdict", json=dict(bill_id=b801, verdict="CORRECT"))
+with app.test_request_context():
+    s6 = PA._month_summary(_db(), "2025-06")
+ck("synthetic: a DIFFERS bill marked CORRECT no longer blocks -- the month can finalise", s6["can_finalise"], str(s6["reasons"]))
+cl.post(P + "/api/verdict", json=dict(bill_id=b801, verdict="WRONG", wrong_amount="1995", reason="rev2 test"))
+with app.test_request_context():
+    s6 = PA._month_summary(_db(), "2025-06")
+ck("synthetic: the same bill marked WRONG blocks again (rule a kept)", not s6["can_finalise"] and any("WRONG" in x for x in s6["reasons"]))
+cl.post(P + "/api/verdict", json=dict(bill_id=b801, verdict="CORRECT"))
+r = cl.post(P + "/api/finalise", json=dict(month="2025-06"))
+ck("synthetic: the doctor finalises; purchase_month stores the NET item-wise total",
+   r.status_code == 200 and q("SELECT billwise_total_p, itemwise_total_p FROM purchase_month WHERE month='2025-06'")[0][:] == (600000, 599500))
+ck("no page shows a gross figure without the word gross beside it (July gross 508,062 never appears on the hub)", "508,062" not in cl.get(P + "/page/hub").get_data(as_text=True))
+
+# ------------------------------------------------------------- 14. fail closed
 as_("", "", set())
 r = cl.get(P + "/page/hub")
 ck("nobody signed in -> the hub is refused", r.status_code in (401, 302))
