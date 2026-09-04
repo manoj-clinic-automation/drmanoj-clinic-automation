@@ -1,0 +1,7 @@
+# S225_STAFF_ORDER -- predicted pins. A0: the close records what the box PRINTS, never these.
+/root/finance/purchase_app.py       c6f187ac90eed90b3564aab45cd76b9a   (rev 6; full-file copy, so the pin IS the kit file)
+/root/finance/walk_staff_gate_s225.py  25e49703b1b900ef9f170389064ec74e   (a tool, not a live file; BLIND)
+/root/portal/portal.py              7bc591151553344e80d1e034a8f176d6   (from d28038047d81abd290d58ed15f9a1482, the live pin read back 04-Sep 13:05, rebuilt EXACTLY offline)
+/root/portal/tile_grants.json v8    07af4daa579776a357ea6d71ec6bd1f2   (full-file copy)
+# finance_app.py is NOT touched: 0aa211fb4c04041d85cbf58c6825eb42 stays.
+# clinic_day_pdf.py is NOT touched: 518affe983e02a266f943bced48e9c35 stays (the PDF writer the order PDF imports).

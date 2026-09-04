@@ -1,0 +1,59 @@
+-- 1  rebuild the live portal.py from the repository chain ------------
+  PASS  S218_PORTAL_TILE                                           -> 16bfd590e2e422bb81bb8b6ad6e84eae
+  PASS  S222_PORTAL_ENTRY                                          -> c89ffa9f619712929c2b81d6e1d98c17
+  PASS  S222_SCANAPP_INAPP                                         -> 23824f92988621a38c1ae0cd7fb1314c
+  PASS  S222_TILE_GRANTS                                           -> d15acef3fcb0237563475968c2eec921
+  PASS  S223_LAUNCH_TILES                                          -> 2cfd2f62a1c46671f0facf04c1c9e774
+  PASS  S223_CORRECTIONS_TILE                                      -> fbd4029b3dec43cb9586950b80b15fc1
+  PASS  S223_CLINIC_DAY                                            -> e2f907527113588e7ce8287d678525a1
+  PASS  S223_REGISTER_CARD                                         -> 302e7459ff342d7a4481f814dcc855c5
+  PASS  S224_MARG_PURCHASES                                        -> 3530f637d620c225906f9c0113b1f0b0
+  PASS  S224_DOCTERZ_TILE_NAMES                                    -> d28038047d81abd290d58ed15f9a1482
+  PASS  the rebuilt file IS the live pin d28038047d81abd290d58ed15f9a1482 (read back from the box 04-Sep 13:05)   [d28038047d81abd290d58ed15f9a1482]
+  PASS  tile_grants.json v7 in the repo IS the live pin 578702a5a10e1487e0f320c6f1b75755   [578702a5a10e1487e0f320c6f1b75755]
+
+-- 2  the anchors, each exactly once, in the live bytes ---------------
+  PASS  anchor 'Marg Purchases tile (url+roles lines)' matches exactly once   [1]
+  PASS  replacement for 'Marg Purchases tile (url+roles lines)' is not already present
+  PASS  anchor 'group map (Marg Purchases row)' matches exactly once   [1]
+  PASS  replacement for 'group map (Marg Purchases row)' is not already present
+  PASS  MARK absent before
+
+-- 3  refusals -----------------------------------------------------------
+  PASS  wrong md5 REFUSES and changes nothing
+  PASS  no argument -> USAGE, nothing changed
+
+-- 4  apply ----------------------------------------------------------------
+  PASS  patcher exits 0 and prints NEW PIN
+     NEW PIN (predicted)  7bc591151553344e80d1e034a8f176d6
+  PASS  second run says ALREADY PATCHED and leaves the pin alone
+  PASS  exactly one timestamped backup, equal to the live bytes
+  PASS  LF only, no CRLF
+  PASS  exactly 8 lines added (the tile block) and 1 line changed (the group row)
+
+-- 5  the tile, word for word ----------------------------------------------
+  PASS  _visible_sections present (module head executed)
+  PASS  Order Medicines exists, url /finance/purchase/page/staff, roles ['doctor'], live
+  PASS    desc = 'Item · stock · quantity — send to the stockist on WhatsApp'   [Item · stock · quantity — send to the stockist on WhatsApp]
+  PASS    icon is the cart
+  PASS    sits in Money & Accounts
+  PASS    placed immediately after Marg Purchases
+  PASS  every OTHER tile (41) is byte-identical: name, desc, url, roles, icon
+  PASS  tile order otherwise unchanged
+
+-- 6  tile_grants.json v8 --------------------------------------------------
+  PASS  v8 says version 8
+  PASS  same users, same defaults
+  PASS  v8 = v7 + 'Order Medicines' in the extra of exactly amir, shavez, darpan, alisha, shivani; nothing else moves
+  PASS  every name in v8 mask/extra is a real tile after the patch
+  PASS  the v8 note carries the S225 history and keeps the old
+
+-- 7  who sees what: before (live + v7) vs after (patched + v8) ---------
+  PASS  the only change over 48 user/role/pc combinations is 'Order Medicines' appearing
+  PASS  as staff, exactly the five see it   [['alisha', 'amir', 'darpan', 'shavez', 'shivani']]
+  PASS  as doctor, manoj sees it (by role)
+  PASS  bhawna and 'nobody' do not
+  PASS  with the OLD grants file (v7) beside the NEW portal.py, staff LOSE the tile and the doctor keeps it (fail closed, never locked out)
+  PASS  with NO grants file, same shape
+
+ALL PASS  (0 FAIL)

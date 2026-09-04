@@ -1,0 +1,13 @@
+S225_STAFF_ORDER · built 04-Sep-2026 · Session 225 · the staff order page, as the owner dictated it
+Target: /root/finance/purchase_app.py 6366edb5 (rev 5) -> rev 6 (full-file replacement, same mount, finance_app.py UNTOUCHED)
+        /root/portal/portal.py d2803804 -> ONE new tile "Order Medicines" after Marg Purchases (8 lines added, 1 group row)
+        /root/portal/tile_grants.json v7 578702a5 -> v8 (the tile granted to amir, shavez, darpan, alisha, shivani)
+Ruling (owner, 04-Sep-2026 11:45 IST): "item, current stock and order quantity is all the staff need to know and see";
+        "round off to 10 strips, and then in multiples of 10"; WhatsApp = "Sanjeevni Medicos, G 15 Rampur Garden,
+        Bareilly, then a list of item name with quantity"; "call from PWA by clicking the number"; "print PDF A4".
+Assistant's calls: strips round to 10s, other units keep the engine's box quantity; the phone number is never printed,
+        it travels only inside the wa.me link; any signed-in person of the medical unit may send; the order is written
+        SENT (who, when, audited) the moment the tap happens; the doctor's Orders page is unchanged.
+Proven offline: selftest 261/261 (the whole S224 selftest as regression + 33 staff checks, on the real Marg archive);
+        tile selftest ALL PASS on the live portal bytes rebuilt from the repository chain (pin d2803804 EXACT).
+The live-shape walk (walk_staff_gate_s225.py) runs ON THE BOX inside the install line, before the restart.

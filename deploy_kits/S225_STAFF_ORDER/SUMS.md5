@@ -1,0 +1,14 @@
+c6f187ac90eed90b3564aab45cd76b9a  purchase_app.py
+18e8b0b2ea94e2209622979608b79a50  purchase_schema.sql
+41d68148fc3aa461da30a9eb4053b649  marg_purchase_rows.py
+628912d9c955258dba344bce63089bdb  patch_portal_staff_order_s225.py
+07af4daa579776a357ea6d71ec6bd1f2  tile_grants.json
+25e49703b1b900ef9f170389064ec74e  walk_staff_gate_s225.py
+14c3e84fb406617eb6aeecdf3a677894  selftest_staff_order.py
+0d9c5e68773dddea3e1973287923a61e  selftest_staff_tile_s225.py
+1574fa9e856c211816443f6f79c91a55  INSTALL.txt
+98317dc553a20946847270b103198bcf  README.md
+456732826917aab4bfbc72544c6648ce  KIT_ID.txt
+a81072e761ea0fea0726e39e8b1befba  PREDICTED_PINS.txt
+314f38e4312496b57d81409a7c7a1f46  EVIDENCE_selftest_s225.txt
+93774de1bad905cdd27207bc9271f55f  EVIDENCE_tile_s225.txt

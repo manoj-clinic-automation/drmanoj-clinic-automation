@@ -1,0 +1,20 @@
+S225_STAFF_ORDER -- the staff order page (Order Medicines).
+
+ONE LINE on the VPS. It pulls the repo, checks the kit's own sums, copies purchase_app.py rev 6 and the
+walk tool beside finance_app.py, RUNS THE LIVE-SHAPE WALK against a copy of the db through the real gate
+(stops here if any check fails -- nothing restarted, nothing live changed), patches portal.py by its live
+pin and installs tile_grants.json v8 (both backed up first), restarts both services, then CHECKS they came
+back. If either did not, it restores that file's backup by itself, restarts again, and prints the log.
+finance_app.py is not touched.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S225_STAFF_ORDER && md5sum -c SUMS.md5 --quiet && \cp /root/finance/purchase_app.py /root/finance/purchase_app.py.bak_S225_$(date +%Y%m%d-%H%M%S) && \cp purchase_app.py walk_staff_gate_s225.py /root/finance/ && FIN_DIR=/root/finance /root/wa/venv/bin/python3 -B /root/finance/walk_staff_gate_s225.py && \cp /root/portal/tile_grants.json /root/portal/tile_grants.json.bak_S225_$(date +%Y%m%d-%H%M%S) && \cp patch_portal_staff_order_s225.py /root/portal/ && /root/wa/venv/bin/python3 -B /root/portal/patch_portal_staff_order_s225.py d28038047d81abd290d58ed15f9a1482 && \cp tile_grants.json /root/portal/tile_grants.json && systemctl restart clinic-finance.service && systemctl restart clinic-portal && sleep 3 && (systemctl is-active --quiet clinic-finance.service && systemctl is-active --quiet clinic-portal && echo "UP -- Order Medicines live" && curl -s localhost:8106/finance/purchase/api/healthz && echo && md5sum /root/finance/purchase_app.py /root/portal/portal.py /root/portal/tile_grants.json || (echo "A SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; ls -t /root/finance/purchase_app.py.bak_S225_* | head -1 | xargs -I{} \cp {} /root/finance/purchase_app.py; ls -t /root/portal/portal.py.bak_S225_ordertile_* | head -1 | xargs -I{} \cp {} /root/portal/portal.py; ls -t /root/portal/tile_grants.json.bak_S225_* | head -1 | xargs -I{} \cp {} /root/portal/tile_grants.json; systemctl restart clinic-finance.service; systemctl restart clinic-portal; sleep 4; systemctl is-active clinic-finance.service clinic-portal; md5sum /root/finance/purchase_app.py /root/portal/portal.py; journalctl -u clinic-finance.service -n 12 --no-pager | tail -12; journalctl -u clinic-portal -n 12 --no-pager | tail -12))
+
+The three md5 lines it prints at the end are the pins the close records (A0). Expected, from PREDICTED_PINS.txt:
+purchase_app.py c6f187ac... · portal.py 7bc59115... · tile_grants.json 07af4daa...
+
+If the WALK fails, the line stops before any restart. purchase_app.py on disk is then rev 6 but the RUNNING
+service is still rev 5 (gunicorn holds the old module). Restore with:
+ls -t /root/finance/purchase_app.py.bak_S225_* | head -1 | xargs -I{} \cp {} /root/finance/purchase_app.py
+
+Then open, as any of the five (or as yourself):
+https://followup.dr-manoj.in/finance/purchase/page/staff
