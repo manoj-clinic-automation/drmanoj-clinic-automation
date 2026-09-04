@@ -1,0 +1,77 @@
+S224_DAY_REVENUE_PDF -- selftest_clinic_day_pdf.py -- 04-Sep-2026 05:28 -- python3 3.10.12, flask 3.1.3, no PDF library of any kind
+-- 1  the PDF ------------------------------------------------------------
+  PASS  HTTP 200 for the clinic checker
+  PASS  it is a PDF: starts with %PDF-1.4
+  PASS  it ends with %%EOF
+  PASS  Content-Type application/pdf
+  PASS  inline by default, named Docterz_Revenue_<date>.pdf
+  PASS  Content-Length is the body
+  PASS  at least one page (Count 2)
+  PASS  every page object is there
+  PASS  xref offsets are exact
+  PASS  startxref points at the xref table
+  PASS  the date is in the text (03-Sep-2026)
+  PASS  the total is in the text, Indian grouping (Rs 16,550)
+  PASS  the three heads carry their amounts
+  PASS  all five sections are titled, in the page's order
+  PASS  every line's patient and clinic ID are on the sheet
+  PASS  a line with no clinic ID prints a dash, not a blank
+  PASS  subtotals: consult, x-ray, proc
+  PASS  people seen = distinct IDs + anonymous (26)
+  PASS  the tender line: Cash / Online / Card / Split, from tender_json
+  PASS  the split legs block is on the sheet
+  PASS  D367: the sheet's own (differing) total is nowhere
+  PASS  the rupee sign is not used (core fonts have no glyph)
+  PASS  no 10-digit run in the PDF's text (the xref table's 10-digit offsets are structure, not text)
+  PASS  no Docterz UID shape in the text
+  PASS  Page 1 of N is printed
+  PASS  the maker's name is on the foot line
+
+-- 2  dl=1, the .pdf alias, the gate ----------------------------------------
+  PASS  ?dl=1 -> attachment
+  PASS  /day/<date>.pdf serves the same PDF
+  PASS  a clinic MAKER gets 403 on the PDF
+  PASS  a viewer gets 403 on the PDF
+  PASS  the refusal carries no PDF and no figure
+  PASS  a viewer gets 403 on the share page, in words
+  PASS  the refusal leaks no money
+  PASS  a malformed date -> 404, not a stack trace
+  PASS  a valid date with no day -> 404 in words
+  PASS  a date shaped 2026-9-3 is refused (must be yyyy-mm-dd)
+
+-- 3  the share page ---------------------------------------------------------
+  PASS  HTTP 200, a complete HTML document
+  PASS  mobile viewport
+  PASS  'Share PDF on WhatsApp' button
+  PASS  'Download PDF' link to ?dl=1
+  PASS  the JS uses navigator.share with files, and canShare first
+  PASS  the PDF is fetched with the session cookie
+  PASS  the fallback: wa.me text link with the numbers, no file
+  PASS  the fallback wa.me text names the PDF's absolute URL
+  PASS  the day's total and heads are on the page
+  PASS  a date picker, defaulting to this date, posting to /finance/clinic/share
+  PASS  a link back to the A4 page
+  PASS  no patient name on the share page (only the PDF carries them)
+  PASS  no 10-digit run on the share page
+  PASS  a date with no day says so and points at the newest day
+  PASS  a malformed date on the share page -> 404 with the picker
+
+-- 4  the bookmark ---------------------------------------------------------------
+  PASS  /finance/clinic/share -> 302 to yesterday's share page
+  PASS  ?d=<date> -> that day's share page
+  PASS  a bad ?d falls back to yesterday
+
+-- 5  a day with totals but no lines, no tender table; no table at all --------------
+  PASS  still a PDF, with the totals and the 'no entries' note
+  PASS  with no clinic_day_revenue table at all: 404, not a 500
+  PASS  share page with no table: 'No day has been read yet'
+
+-- 6  the writer's own edges ------------------------------------------------------
+  PASS  Indian grouping
+  PASS  None -> dash
+  PASS  typographic characters fold to WinAnsi-safe text
+  PASS  parentheses and backslashes are escaped in strings
+  PASS  139 lines paginate onto 3 pages with the header repeated
+  PASS  over-long names are trimmed with an ellipsis, never overrun the column
+
+GREEN  63 checks, 0 failed

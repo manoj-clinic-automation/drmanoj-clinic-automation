@@ -1,0 +1,14 @@
+S224_BANK_MPR_STATUS -- predicted pins (LF, VPS-side; F-294)
+
+/root/finance/finance_app.py      44bf7b50d1e86af14e5bda79624fc8ca (live, 04-Sep 03:11)  ->  NEW PIN printed by the patcher
+/root/finance/bank_mpr_status.py                                  NEW  ->  (see SUMS.md5)
+
+WHY THE finance_app TO-PIN IS NOT WRITTEN HERE: no store holds the 44bf7b50 bytes (the repo's finance_app.py is
+behind the box, F-299). The patcher takes the live md5 as its argument, refuses on any other value, and prints
+the new pin; that printed line is what the close records. The offline chain that proves the patcher:
+  $HOME/s224patch/finance_app.py  97fe3206c18cb232cca98b59fb47e821  (the purchase-patched offline copy)
+    -> S224_BANK_MPR_STATUS        3917da443f8793851fd43f78bec5ea3a   walk 17/17 on that copy
+The edit is a pure append after one exact line, so on the box it lands identically.
+
+RESTART: clinic-finance.service only. portal.py untouched (no tile: reachable by URL, and the Day Revenue page
+patch waits for that page's pin capture -- OWNER_TODO step 4).

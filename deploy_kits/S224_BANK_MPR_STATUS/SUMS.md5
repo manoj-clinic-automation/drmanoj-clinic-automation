@@ -1,0 +1,10 @@
+a0e740ce745230bcd7cada69e0428648  bank_mpr_status.py
+d6b5c9675c1687068df3813c4d4f7349  patch_finance_app_mpr_status_s224.py
+4463db1c46dd363a8eb59964fd7ee4ac  selftest_bank_mpr_status.py
+99479c3a76aab710fa4d2c44199457d8  walk_mpr_status_s224.py
+b12cb68fb4e8da485a7eaef215e4c782  README.md
+c8d926e3a422c1e069b0ff5b06cb2068  INSTALL.txt
+ecff0439072ba3b217418401e30d7b5a  PREDICTED_PINS.txt
+3e26b747134dd24aed81ab12cb2220e4  KIT_ID.txt
+4b1fe7dd478e7883be0842cb109516fc  EVIDENCE_selftest_s224.txt
+9f85349aca9b87bb274e3f652733b395  EVIDENCE_walk_s224.txt

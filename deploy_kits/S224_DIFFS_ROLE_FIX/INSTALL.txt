@@ -1,0 +1,30 @@
+S224_DIFFS_ROLE_FIX -- ONE PASTE on the VPS after the publish (PUBLISH_ALL.bat). ONE LINE.
+
+It fetches the repo, verifies the kit (SUMS.md5), GUARDS both live pins (stock_app.py must read 4e929d0b,
+stock_diffs.html must read 3f6a87b2 -- anything else REFUSES and changes nothing), backs both files up as
+.bak_S224diffsrole_<date>, copies the two full files, compiles the new stock_app.py with the venv python, restarts
+clinic-finance.service, waits 3 s, checks it is active and prints the two new pins. If the compile fails or the
+service does not come back it ROLLS BACK BY ITSELF and restarts.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S224_DIFFS_ROLE_FIX && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_app.py | cut -c1-8)" = "4e929d0b" ] && [ "$(md5sum /root/finance/stock_diffs.html | cut -c1-8)" = "3f6a87b2" ] || { echo "REFUSED: kit sums or live pins do not match -- NOTHING CHANGED"; false; } && \cp /root/finance/stock_app.py /root/finance/stock_app.py.bak_S224diffsrole_$(date +%Y%m%d) && \cp /root/finance/stock_diffs.html /root/finance/stock_diffs.html.bak_S224diffsrole_$(date +%Y%m%d) && \cp stock_app.py stock_diffs.html /root/finance/ && (/root/wa/venv/bin/python3 -B -c "import py_compile;py_compile.compile('/root/finance/stock_app.py',doraise=True,cfile='/tmp/s224_diffs_check.pyc')" && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- the diffs page now draws only the buttons your login may use" && md5sum /root/finance/stock_app.py /root/finance/stock_diffs.html || (echo "COMPILE FAILED OR SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; \cp /root/finance/stock_app.py.bak_S224diffsrole_$(date +%Y%m%d) /root/finance/stock_app.py; \cp /root/finance/stock_diffs.html.bak_S224diffsrole_$(date +%Y%m%d) /root/finance/stock_diffs.html; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; md5sum /root/finance/stock_app.py /root/finance/stock_diffs.html; journalctl -u clinic-finance.service -n 12 --no-pager)); rm -f /tmp/s224_diffs_check.pyc
+
+Expected at the end:  UP -- the diffs page now draws only the buttons your login may use
+                      a61af74a1be41b879771af8977d2d9a5  /root/finance/stock_app.py
+                      fb3726553d4aec43b6b231014aba5a55  /root/finance/stock_diffs.html
+
+If it prints REFUSED, say so and paste nothing else: the live file is not what this kit was built on.
+
+WHAT EACH PERSON SEES AFTER THE RESTART (a hard reload of the page, or reopen the PWA):
+  You (checker):   the eight cause buttons and the note box per line, as before; under them "staff's reason: ..."
+                   once Darpan has recorded one.
+  Darpan (maker):  the seven staff-reason buttons per line (the same ones as on the finding page); the cause as text.
+  Amir / Alisha / Shivani / Shavez (viewer): the list, the cause and the staff's reason as text. No button at all.
+  The finding page (/finance/stock/page/finding): you now get the write off / recover / no loss buttons, which the
+  live login shape (role=doctor, roles=[checker]) was denying you -- worth one look after the restart.
+
+ROLLING BACK by hand = the two .bak_S224diffsrole_* files beside the live ones, \cp them back, restart the service.
+
+OFFLINE EVIDENCE (this kit does not run tests on the box):
+  EVIDENCE_render_s224.txt        RENDER GREEN 55/55  -- jsdom running the page's own JS for four logins, tapping
+  EVIDENCE_selftest_s224.txt      SELFTEST GREEN 11/11 -- provenance chain, idempotency, refusal on a wrong base
+  EVIDENCE_walks_rerun_s224.txt   S213 27/27 · S221 prices 63/63 · purchase_due 75/75 · amir 29/29 · finding 51/52*

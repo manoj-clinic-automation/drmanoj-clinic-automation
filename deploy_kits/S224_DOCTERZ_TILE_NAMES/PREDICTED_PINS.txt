@@ -1,0 +1,16 @@
+# S224_DOCTERZ_TILE_NAMES -- predicted from the EXACT live bytes of both files.
+#
+# portal.py was not read from the box and did not need to be: its live bytes were REPRODUCED
+# by selftest_docterz_names_s224.py from the repository chain
+#   S204_VPS_LIVE/root__portal__portal.py 24ea2c0b + S218_PORTAL_TILE + S222_PORTAL_ENTRY
+#   + S222_SCANAPP_INAPP + S222_TILE_GRANTS + S223_LAUNCH_TILES + S223_CORRECTIONS_TILE
+#   + S223_CLINIC_DAY + S223_REGISTER_CARD + S224_MARG_PURCHASES = 3530f637d620c225906f9c0113b1f0b0
+# and the patcher refuses against anything else.
+#
+# The owner's md5sum after installing must read exactly:
+d28038047d81abd290d58ed15f9a1482  /root/portal/portal.py
+578702a5a10e1487e0f320c6f1b75755  /root/portal/tile_grants.json
+#
+/root/portal/portal.py          3530f637d620c225906f9c0113b1f0b0  ->  d28038047d81abd290d58ed15f9a1482
+/root/portal/tile_grants.json   c4d01adeba0d5bbc570db992064b2ff5 (v6)  ->  578702a5a10e1487e0f320c6f1b75755 (v7)
+# Restart: clinic-portal, once, after both files are in place. Nothing else is touched.

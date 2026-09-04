@@ -1,0 +1,10 @@
+S224_BANK_MPR_STATUS · built 04-Sep-2026 · Session 224 · "where is the bank MPR for <date>?" in one line
+Target (live pin passed as an argument -- the repo copy of finance_app.py is behind the box):
+  /root/finance/finance_app.py   <live, 44bf7b50 at 03:11 IST 04-Sep>  -> NEW PIN printed by patch_finance_app_mpr_status_s224.py
+  /root/finance/bank_mpr_status.py   NEW (see SUMS.md5)
+Anchor: the exact line `# --- S224_MARG_PURCHASES end ---` (S224_MARG_PURCHASES rev 1, installed 03:11 IST); the
+mount is appended after it, before `if __name__ == "__main__":`. MPR_ANCHOR env overrides if a later S224 kit
+has appended its own end-marker.
+Proven offline: selftest 25/25 (every state on a throwaway db); WALK 17/17 through the REAL patched finance_app.py
+and its REAL front gate (FIN_DIR=$HOME/s224patch, chained after the purchase patch). Two live files, one new.
+No table created, nothing written, no <script>. No gate change, no PUBLIC_PATHS change.

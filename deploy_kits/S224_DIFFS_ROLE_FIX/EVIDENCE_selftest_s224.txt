@@ -1,0 +1,13 @@
+PASS  the base is the live pin 4e929d0b
+PASS  the patcher runs clean on the live base
+PASS  and produces exactly the shipped stock_app.py
+PASS  one dated backup was left beside it
+PASS  a second run refuses (already patched)
+PASS  and leaves the file unchanged
+PASS  a wrong base is refused
+PASS  and untouched
+PASS  the shipped file has the three S224 anchors
+PASS  no server gate was relaxed: /cause, /decision and /rate still _require("checker") alone
+PASS  no 10-digit run in the shipped files
+
+11 PASS  0 FAIL

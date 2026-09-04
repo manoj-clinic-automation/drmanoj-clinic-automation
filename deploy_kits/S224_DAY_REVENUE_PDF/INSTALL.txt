@@ -1,0 +1,32 @@
+S224_DAY_REVENUE_PDF -- ONE PASTE, on the VPS. Touches /root/finance/finance_app.py (three mount lines
+after the S224_MARG_PURCHASES block) and adds /root/finance/clinic_day_pdf.py. portal.py, the tiles,
+finance_clinic_day.py (the A4 page) and the database are NOT touched.
+
+THE PIN YOU TYPE. 44bf7b50d1e86af14e5bda79624fc8ca is finance_app.py's live pin as recorded at 03:11 IST
+today. If ANOTHER S224 kit has patched finance_app.py since (S224_BANK_MPR_STATUS anchors on the same
+line), replace it with the NEW PIN that kit's patcher printed -- the patcher refuses anything else
+and changes nothing. Either order works; each kit's anchor stays exactly once.
+
+It refreshes the repo, verifies the kit, copies the module + patcher in, patches (backup made first),
+restarts the finance app and CHECKS it came back. If it did not, it puts the backup back by itself
+and restarts again. You end up live, or exactly where you were -- never at a 503.
+
+THE PASTE (one line):
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S224_DAY_REVENUE_PDF && md5sum -c SUMS.md5 --quiet && \cp clinic_day_pdf.py patch_finance_app_daypdf_s224.py walk_daypdf_gate_s224.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_finance_app_daypdf_s224.py 44bf7b50d1e86af14e5bda79624fc8ca && systemctl restart clinic-finance.service && sleep 3 && (systemctl is-active --quiet clinic-finance.service && echo "UP -- day revenue PDF live" && curl -s -o /dev/null -w "clinic/share -> %{http_code}\n" localhost:8106/finance/clinic/share && md5sum /root/finance/finance_app.py /root/finance/clinic_day_pdf.py || (echo "FINANCE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; \cp "$(ls -t /root/finance/finance_app.py.bak_S224_daypdf_* | head -1)" /root/finance/finance_app.py; systemctl restart clinic-finance.service; sleep 4; systemctl is-active clinic-finance.service; md5sum /root/finance/finance_app.py; journalctl -u clinic-finance.service -n 12 --no-pager | tail -12))
+
+GOOD:  the patcher's "NEW PIN  <32 hex>" line (write it down -- that is the close's pin),
+       then "UP -- day revenue PDF live", then "clinic/share -> 302" (the login redirect; signed out,
+       302 is the CORRECT answer), then two md5 lines: finance_app.py = that NEW PIN, and
+       clinic_day_pdf.py = the md5 in SUMS.md5 (also in PREDICTED_PINS.txt).
+
+THEN, ON THE PHONE (signed in to the portal in Chrome):
+https://followup.dr-manoj.in/finance/clinic/share
+  -> yesterday's day, "Share PDF on WhatsApp" opens Android's share sheet; WhatsApp is one tap.
+  Bookmark it / "Add to Home screen". "Another day" picks any date.
+
+OPTIONAL (proves the gate on the box, touches no live file, writes an invented day into a COPY of the db):
+FIN_DIR=/root/finance /root/wa/venv/bin/python3 -B /root/finance/walk_daypdf_gate_s224.py
+
+ROLLBACK BY HAND (one line):
+\cp "$(ls -t /root/finance/finance_app.py.bak_S224_daypdf_* | head -1)" /root/finance/finance_app.py && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active clinic-finance.service && md5sum /root/finance/finance_app.py

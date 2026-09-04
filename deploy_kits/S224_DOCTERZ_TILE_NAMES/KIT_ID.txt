@@ -1,0 +1,7 @@
+S224_DOCTERZ_TILE_NAMES · built 04-Sep-2026 · Session 224 · the Docterz tiles say Docterz
+Target: /root/portal/portal.py 3530f637 -> d2803804 (two tile renames + their _TILE_GROUP keys, six lines)
+        /root/portal/tile_grants.json v6 c4d01ade -> v7 578702a5 (the same two names; nothing granted or withdrawn)
+Ruling (owner, 04-Sep-2026): Day Revenue -> Docterz Revenue, desc 'takings' -> 'collection';
+        Daily Register -> Docterz daily collection, desc 'The counter's' -> 'Reception's'.
+NOT touched: Daily Collection and Clinic (S182 manual clinic-entry tiles, not Docterz-fed), every other tile.
+Proven offline: selftest 59/59 on the live bytes rebuilt from the repository chain (pin exact).

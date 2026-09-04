@@ -1,0 +1,23 @@
+S224_DIFFS_ROLE_FIX -- the standing S213/S221 stock walks RE-RUN on the NEW stock_app.py (a61af74a) + NEW stock_diffs.html, offline on manojz, 04-Sep-2026
+Each walk: a temp folder holding the kit's two files beside the live-shape stock_schema.sql, stock_check_live.html, stock_finding.html, stock_drift.html, returns_desk.py 3296eca0, returns_desk.html 6d98e1b0; FIN_DB = an empty db built by ensure_schema + _f_ensure + a setting table + one seed snapshot row (the box's finance.db is VPS-only).
+
+== S213 WALK_stock_screen.py (from inside its own folder)
+ALL WALK CHECKS PASS (27)
+
+== S221 walk_stock_finding_s221.py
+WALK RED -- 51 passed, 1 failed
+   FAILED: the cost column is present and honestly empty (M3 backfills it)
+
+== S221 walk_stock_prices_s221.py
+WALK GREEN -- 63 passed, 0 failed
+
+== S221 walk_purchase_due_s221.py
+WALK GREEN -- 75 passed, 0 failed
+
+== S221 walk_amir_access_s221.py
+WALK GREEN -- 29 passed, 0 failed
+
+NOTE walk_stock_finding_s221: the ONE failure ('the cost column is present and honestly empty (M3 backfills it)') is PRE-EXISTING -- identical on the UNPATCHED live bytes 4e929d0b (re-run in /sessions/rcw-018prfdsprbmaj87buof5gud/s224_diffs_selftest/base):
+WALK RED -- 51 passed, 1 failed
+   FAILED: the cost column is present and honestly empty (M3 backfills it)
+That walk predates S221_TWO_PRICES, which fills the cost column it expects to find empty. Not this kit's doing.

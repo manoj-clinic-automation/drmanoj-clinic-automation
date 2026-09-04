@@ -1,0 +1,25 @@
+S224_DIFFS_ROLE_FIX · built 04-Sep-2026 · Session 224 · the owner: "diffs page cause button fix to make it proper"
+
+WHAT IT CLOSES. stock_diffs.html showed the eight cause buttons to EVERY login that could open it, while
+/api/diff/<id>/cause is checker-only -- Darpan, Amir and the desk girls tapped and got "not_permitted".
+A control that refuses is a trap (S222 ruling). Found by the S224 all-staff sweep (S224_STOCK_ANCHOR_FIX §6 item 2).
+
+WHAT IT DOES. /api/open now says who is looking (you = user, may_cause, may_answer) and carries each line's latest
+staff answer; the page draws ONLY the controls that login may use:
+  checker (the owner)   the eight cause buttons + note, as S213 built them; the staff's reason shown as text
+  maker (Darpan)        the S221 staff-reason buttons -> /api/diff/<id>/answer; the cause shown as text
+  viewer (Amir, desk)   the recorded cause and reason as TEXT -- zero buttons, zero inputs
+No server gate moved: /cause, /decision, /rate still refuse everyone but the checker on their own.
+ALSO FIXED on the way: _may_decide read the broker role ('doctor') and never the unit roles, so /api/finding
+told the live owner may_decide=false (the finding page would have offered him the staff buttons, not the
+decisions). _has_role looks in roles AND role. Page text stays English (the owner's ruling today).
+
+Targets (live pins, reproduced from the repo chain and md5-proven, F-299):
+  /root/finance/stock_app.py     4e929d0b -> a61af74a
+  /root/finance/stock_diffs.html 3f6a87b2 -> fb372655
+Restart: clinic-finance.service. Database: nothing new (stock_diff_answer already exists since S221; CREATE IF NOT EXISTS).
+
+PROVEN OFFLINE: RENDER GREEN 55/55 (jsdom running the page's own JS as owner / Darpan / Amir / Alisha, tapping) ·
+SELFTEST GREEN 11/11 (provenance, idempotency, refusal on a wrong base, gates unchanged) · standing walks re-run on
+the new file: S213 27/27 · S221 prices 63/63 · purchase_due 75/75 · amir_access 29/29 · finding 51/52 (the one
+failure is pre-existing and identical on the unpatched live bytes -- see EVIDENCE_walks_rerun_s224.txt).

@@ -1,0 +1,6 @@
+# S224_DIFFS_ROLE_FIX -- pins PREDICTED OFFLINE (F-299: patched the REPRODUCED live bytes, never a repo copy).
+# stock_app.py: the S213 base 83b0a1b0 walked through S221_STOCK_FINDING ed2f76ef -> S221_TWO_PRICES c627e440
+#   -> S221_PURCHASE_DUE 74825031 -> S221_AMIR_ACCESS 4e929d0b (== the S223-close live pin) -> this kit.
+# stock_diffs.html: the S213 file 3f6a87b2 (== the S223-close live pin), replaced whole.
+a61af74a1be41b879771af8977d2d9a5  /root/finance/stock_app.py      (was 4e929d0bd34af068bb4fb82eabe92dff)
+fb3726553d4aec43b6b231014aba5a55  /root/finance/stock_diffs.html  (was 3f6a87b25016655eeadd9229c629cc42)

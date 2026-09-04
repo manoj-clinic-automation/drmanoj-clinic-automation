@@ -1,0 +1,136 @@
+<title>Stock Differences — Sanjeevni</title>
+<style>
+:root{
+  --ground:#F6F8F7;--surface:#FFF;--surface-2:#EDF2F0;--ink:#15201E;--ink-2:#3D4B48;
+  --muted:#66756F;--line:#D9E2DF;--accent:#0E5C58;--on-accent:#FFF;
+  --diff:#8C3A2B;--diff-soft:#F6E3DF;--ok:#0E5C58;
+}
+@media (prefers-color-scheme:dark){:root{
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;
+  --muted:#869892;--line:#26332F;--accent:#63C2B6;--on-accent:#0D1312;
+  --diff:#E08A76;--diff-soft:#33201C;--ok:#63C2B6;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.5 -apple-system,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:720px;margin:0 auto;padding:14px 14px 80px}
+h1{font-size:24px;margin:10px 0 2px}
+.sub{color:var(--muted);margin:0 0 14px;font-size:13.5px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:8px;padding:12px 13px}
+.card.short{border-color:var(--diff)}
+.nm{font-weight:600;overflow-wrap:anywhere}
+.num{font-family:ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.meta{font-size:12.5px;color:var(--muted);font-family:ui-monospace,monospace;margin-top:2px}
+.d{font-weight:700}
+.d.short{color:var(--diff)} .d.over{color:var(--ok)}
+.causes{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.causes button{font:inherit;font-size:13px;padding:7px 10px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.causes button[data-on="1"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.done{color:var(--muted);font-size:13px;margin-top:8px}
+.rec{font-size:13.5px;margin-top:8px;color:var(--ink-2)}
+.rec b{font-weight:600}
+.rec .who{color:var(--muted);font-size:12.5px}
+.empty{text-align:center;color:var(--muted);padding:50px 10px}
+.note{width:100%;font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);margin-top:8px}
+.bad{color:var(--diff)}
+</style>
+<div class="wrap">
+<h1>Stock differences</h1>
+<p class="sub" id="sub">Every open difference, largest first. A difference closes by itself when
+Marg's next export agrees.</p>
+<div id="list"><p class="empty">loading…</p></div>
+</div>
+<script>
+/* S224 DIFFS ROLE. The server says who is looking (/api/open -> you) and the
+   page draws ONLY the controls that login may use. A button that would be
+   refused is a trap (S222 ruling), so:
+     you.may_cause   (checker)  the eight cause buttons + note, as before
+     you.may_answer  (maker)    the staff reason buttons -> /api/diff/<id>/answer
+     neither         (viewer)   the recorded cause and reason, as text
+   The server still refuses on its own; this page is the courtesy. */
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+let CAUSES=[],LABELS={},REASONS={},YOU={};
+const SUB={
+  cause:"Every open difference, largest first. Naming the door it went out of is the checker's judgement — <b>UNEXPLAINED is an honest answer</b>; a guessed cause becomes a wrong number in a report later. A difference closes by itself when Marg's next export agrees.",
+  answer:"Every open difference, largest first. Tap the reason you know for a line — it is recorded against your name as your answer, not as the cause; the cause is the checker's judgement. A difference closes by itself when Marg's next export agrees.",
+  view:"Every open difference, largest first. The cause is the checker's judgement and the reason is the staff's answer; both are shown here as recorded. A difference closes by itself when Marg's next export agrees."
+};
+function recorded(x){
+  let h='<div class="rec">cause: <b>'+esc(x.cause_label||LABELS[x.cause]||x.cause||"not yet explained")+'</b>'+
+    (x.cause_note?' <span class="who">— '+esc(x.cause_note)+'</span>':'')+'</div>';
+  if(x.answer) h+='<div class="rec">staff\'s reason: <b>'+esc(x.answer.label||x.answer.reason)+'</b>'+
+    ' <span class="who">— '+esc(x.answer.answered_by||"")+(x.answer.note?' · '+esc(x.answer.note):'')+'</span></div>';
+  else if(YOU.may_cause) h+='<div class="rec"><span class="who">staff\'s reason: none yet</span></div>';
+  return h;
+}
+function post(url,body){
+  return fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(r=>r.json());
+}
+function load(){
+  fetch("/finance/stock/api/open").then(r=>r.json()).then(j=>{
+    const el=document.getElementById("list");
+    if(!j.ok){el.innerHTML='<p class="empty bad">'+esc(j.message||j.error)+'</p>';return}
+    CAUSES=j.causes||[];LABELS=j.labels||{};REASONS=j.reasons||{};YOU=j.you||{};
+    document.getElementById("sub").innerHTML=YOU.may_cause?SUB.cause:(YOU.may_answer?SUB.answer:SUB.view);
+    if(!j.items.length){el.innerHTML='<p class="empty">No open differences. Either everything matched, or Marg has already agreed and they closed themselves.</p>';return}
+    el.innerHTML="";
+    j.items.forEach(x=>{
+      const short=x.diff<0;
+      const c=document.createElement("div");
+      c.className="card"+(short?" short":"");
+      c.innerHTML='<div class="nm">'+esc(x.item)+'</div>'+
+        '<div class="meta">found '+esc(x.found_on)+' · marg <span class="num">'+x.marg_qty+
+        '</span> · counted <span class="num">'+x.counted_qty+'</span> · '+
+        '<span class="d '+(short?"short":"over")+'">'+(x.diff>0?"+":"")+x.diff+'</span>'+
+        (x.value_p!=null?' · ₹<span class="num">'+(Math.abs(x.value_p)/100).toFixed(2)+'</span>':'')+
+        (x.counted_by?' · by '+esc(x.counted_by):'')+'</div>';
+      if(YOU.may_cause){
+        // ---- the checker: the eight cause buttons and the note, as S213 built them
+        c.innerHTML+='<div class="causes" data-kind="cause"></div>'+
+          '<input class="note" placeholder="note (optional — required only by your own conscience)">'+
+          '<div class="done"></div>'+recorded(x);
+        const cs=c.querySelector(".causes");
+        CAUSES.forEach(k=>{
+          const b=document.createElement("button");
+          b.textContent=(LABELS[k]||k);
+          b.dataset.k=k; b.dataset.on=(x.cause===k?"1":"0");
+          b.addEventListener("click",()=>{
+            post("/finance/stock/api/diff/"+x.id+"/cause",{cause:k,note:c.querySelector(".note").value.trim()||null})
+            .then(jj=>{
+              if(!jj.ok){c.querySelector(".done").innerHTML='<span class="bad">'+esc(jj.message||jj.error)+'</span>';return}
+              [...cs.children].forEach(z=>z.dataset.on=(z.dataset.k===k?"1":"0"));
+              c.querySelector(".done").textContent="recorded: "+(LABELS[k]||k);
+            }).catch(()=>{c.querySelector(".done").innerHTML='<span class="bad">could not reach the server</span>'});
+          });
+          cs.appendChild(b);
+        });
+        if(x.cause && x.cause!=="UNEXPLAINED")
+          c.querySelector(".done").textContent="recorded: "+(LABELS[x.cause]||x.cause);
+        if(x.cause_note) c.querySelector(".note").value=x.cause_note;
+      }else if(YOU.may_answer){
+        // ---- the maker: the staff reasons (S221 answer layer), never the cause
+        c.innerHTML+=recorded(x)+'<div class="causes" data-kind="answer"></div><div class="done"></div>';
+        const cs=c.querySelector(".causes");
+        Object.keys(REASONS).forEach(k=>{
+          const b=document.createElement("button");
+          b.textContent=REASONS[k]||k;
+          b.dataset.k=k; b.dataset.on=(x.answer&&x.answer.reason===k?"1":"0");
+          b.addEventListener("click",()=>{
+            post("/finance/stock/api/diff/"+x.id+"/answer",{reason:k})
+            .then(jj=>{
+              if(!jj.ok){c.querySelector(".done").innerHTML='<span class="bad">'+esc(jj.message||jj.error)+'</span>';return}
+              [...cs.children].forEach(z=>z.dataset.on=(z.dataset.k===k?"1":"0"));
+              c.querySelector(".done").textContent="recorded: "+(REASONS[k]||k);
+            }).catch(()=>{c.querySelector(".done").innerHTML='<span class="bad">could not reach the server</span>'});
+          });
+          cs.appendChild(b);
+        });
+      }else{
+        // ---- a viewer: the record as text, nothing that would refuse him
+        c.innerHTML+=recorded(x);
+      }
+      el.appendChild(c);
+    });
+  }).catch(()=>{document.getElementById("list").innerHTML='<p class="empty bad">could not reach the server</p>'});
+}
+load();
+</script>

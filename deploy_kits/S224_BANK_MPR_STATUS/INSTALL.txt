@@ -1,0 +1,36 @@
+S224_BANK_MPR_STATUS -- ONE PASTE. It CANNOT leave the finance app down.
+
+It verifies the kit, copies two files, patches finance_app.py ONLY if its pin is the one you type,
+restarts the service, then CHECKS it came back. If it did not, it restores the backup by itself,
+restarts again, and prints the log. You end up with the MPR line live, or exactly where you started.
+
+STEP 0 -- read the live pin (one line; copy the 32-character value it prints):
+
+md5sum /root/finance/finance_app.py
+
+STEP 1 -- the paste. Replace <LIVE_FINANCE_APP_MD5> with the value from STEP 0. A wrong value REFUSES
+and changes nothing. (It was 44bf7b50d1e86af14e5bda79624fc8ca at 03:11 IST on 04-Sep; if another S224 kit
+has been installed since, it is that kit's NEW PIN instead.)
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S224_BANK_MPR_STATUS && md5sum -c SUMS.md5 --quiet && \cp bank_mpr_status.py patch_finance_app_mpr_status_s224.py walk_mpr_status_s224.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_finance_app_mpr_status_s224.py <LIVE_FINANCE_APP_MD5> && systemctl restart clinic-finance.service && sleep 3 && (systemctl is-active --quiet clinic-finance.service && echo "UP -- MPR status live" && curl -s -o /dev/null -w "healthz %{http_code}\n" localhost:8106/finance/healthz && curl -s -o /dev/null -w "mpr route (302 = gate alive, page mounted) %{http_code}\n" localhost:8106/finance/clinic/bank/mpr/2026-09-03 && md5sum /root/finance/finance_app.py /root/finance/bank_mpr_status.py || (echo "SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; ls -t /root/finance/finance_app.py.bak_S224_mprstatus_* | head -1 | xargs -I{} \cp {} /root/finance/finance_app.py; systemctl restart clinic-finance.service; sleep 4; systemctl is-active clinic-finance.service; md5sum /root/finance/finance_app.py; journalctl -u clinic-finance.service -n 12 --no-pager | tail -12))
+
+GOOD:  "UP -- MPR status live", "healthz 200", "mpr route ... 302" (the gate redirecting an anonymous curl
+       to the portal is the proof the route is mounted behind the login; a 404 would mean it is not),
+       then two md5 lines. finance_app.py gets the NEW pin the patcher printed ("NEW PIN ..." above);
+       bank_mpr_status.py must read as SUMS.md5 says.
+
+STEP 2 (optional, proves the gate on the box; touches no live file, copies the db first):
+
+FIN_DIR=/root/finance /root/wa/venv/bin/python3 -B /root/finance/walk_mpr_status_s224.py
+
+THEN, signed in on the portal, open (full URL, each its own line):
+
+https://followup.dr-manoj.in/finance/clinic/bank/mpr
+
+https://followup.dr-manoj.in/finance/clinic/bank/mpr/2026-09-03
+
+The first is the last 8 days, one line each; the second is the 03-Sep line alone (add ?json=1 for JSON).
+
+ROLLBACK BY HAND (if ever needed; one line each):
+\cp $(ls -t /root/finance/finance_app.py.bak_S224_mprstatus_* | head -1) /root/finance/finance_app.py
+systemctl restart clinic-finance.service

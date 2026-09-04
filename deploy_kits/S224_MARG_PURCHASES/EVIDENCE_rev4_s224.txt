@@ -1,0 +1,396 @@
+S224 rev 4 (the owner's ruling on returns) -- offline proof on manojz, 04-Sep-2026. purchase_app.py 290413278252a5835e27987b7d6e7023
+selftest 218/218 (rev 3: 169) -- RENDER 145/145 (rev 3: 130) -- walk 17/17 -- py_compile clean -- no ten-digit run -- LF.
+
+== selftest_purchase_app.py ==
+S224 selftest on <tmp>/s224_cho_xgdv
+  PASS  healthz answers without auth
+  PASS  August BILLWISE export is in the archive
+  PASS  BILLWISE parser: rows sum to Marg's TOTAL row
+  PASS  push with the WRONG token -> 401
+  PASS  push with the wrong HEADER NAME (X-Finance-Cron, F-237) -> 401
+  PASS  push with no header -> 401
+  PASS  push with an unknown type -> 400
+  PASS  push with a bad md5 -> 400
+  PASS  push with rows not a list -> 400
+  PASS  push with a non-JSON body -> 400
+  PASS  BILLWISE August stored as new
+  PASS  bills stored == BILLWISE rows
+  PASS  August bill-wise total == Marg TOTAL row
+  PASS  the same export again -> stored:false, duplicate
+  PASS  a duplicate did not add bills
+  PASS  healthz counts one export
+  PASS  two August SUPPLIERWISE exports of the same period exist (the supersede case)
+  PASS  SUPPLIERWISE parser: rows sum to GRAND TOTAL
+  PASS  SUPPLIERWISE and BILLWISE agree on the August total
+  PASS  older SUPPLIERWISE stored as new
+  PASS  SUPPLIERWISE added NO second copy of any bill (supplier_key joins the two reports)
+  PASS  later SUPPLIERWISE of the same period stored as new
+  PASS  the older one is now marked superseded_by the later
+  PASS  re-pushing the superseded one -> duplicate (idempotent on md5)
+  PASS  an OLDER stamp for a period that already has a later one -> superseded_older, not stored
+  PASS  bills still exactly the BILLWISE count after all that
+  PASS  every August bill's date came from BILLWISE (BILLWISE first)
+  PASS  no bill lost its printed supplier name
+  PASS  marg_purchase (S206) importable for ITEMWISE
+  PASS  ITEMWISE rows carry a null bill_date (the export has none)
+  PASS  ITEMWISE 01-26 stored
+  PASS  ITEMWISE 28-29 stored (a different period: coexists, does not supersede)
+  PASS  lines stored == ITEMWISE rows
+  PASS  EVERY ITEMWISE line was dated from its bill
+  PASS  every line's month is August
+  PASS  item-wise GROSS sum of the lines == the two exports' totals (gross is stored, labelled)
+  PASS  item-wise NET sum of the lines == the two exports' net (rev 2: this is the money the pages show)
+  PASS  BILLITEMWISE parser: rows sum to its TOTAL
+  PASS  BILLITEMWISE stored
+  PASS  BILLITEMWISE lines found their supplier from the bills (bill no + date)
+  PASS  July ITEMWISE pushed BEFORE its bills: lines are UNDATED
+  PASS  July (no bills yet) cannot finalise, and the story says its item lines are waiting undated (rev 4: undated never blocks by itself)
+  PASS  July BILLWISE arrives: the lines are re-dated by the bills
+  PASS  July bills == its BILLWISE rows
+  PASS  August summary: the month's figure is the SUPPLIER-WISE total == Marg TOTAL (rev 4), bill-wise identical, no disagreement
+  PASS  August summary: item-wise is NET, not gross (rev 2)
+  PASS  August summary: bills that ITEMWISE 28-29 and BILLITEMWISE 28-31 BOTH carry are counted ONCE (later stamp wins)
+  PASS  BILLITEMWISE lines that arrived BEFORE their bill were linked to it once the bill came (rev 2)
+  PASS  August is provisional and cannot finalise: bills without item lines (the ONLY reason; the one short bill does not block, rev 4)
+  PASS  August fixture: one bill has item lines SHORT of the bill (13056, Rs 23) and no purchase return
+  PASS  August story: calm, names the gap and the one action, never 'mark each'
+  PASS  hub renders for the doctor
+  PASS  hub shows 'August 2026'
+  PASS  hub shows 'July 2026'
+  PASS  hub shows 'Feed health'
+  PASS  hub shows 'Stock verification'
+  PASS  hub shows 'Scan links'
+  PASS  hub shows 'Orders'
+  PASS  hub shows 'PROVISIONAL'
+  PASS  hub shows '(doctor)'
+  PASS  hub says the asset app is not reachable when assets.db is absent
+  PASS  month page renders
+  PASS  month page shows 'cannot finalise yet'
+  PASS  month page shows 'Marg purchase, August 2026'
+  PASS  month page shows 'supplier-wise, final for month-end'
+  PASS  month page shows 'Correct'
+  PASS  month page shows 'Wrong'
+  PASS  month page shows 'no item lines yet'
+  PASS  month page offers Correct/Wrong ONLY on the short bill (one pair of buttons)
+  PASS  month page has no FINALISE button while it cannot finalise
+  PASS  a bad month is refused
+  PASS  a viewer cannot give a verdict (403)
+  PASS  a viewer's month page carries no verdict buttons
+  PASS  WRONG without amount+reason -> 400
+  PASS  maker marks a bill WRONG with amount and reason
+  PASS  the WRONG amount is stored in paise
+  PASS  month page shows WRONG with the reason
+  PASS  hub counts the WRONG bill
+  PASS  the same bill can be set CORRECT again
+  PASS  verdicts are audited
+  PASS  a maker cannot finalise (403, doctor only)
+  PASS  the doctor is refused on August with the reasons listed
+  PASS  a month whose bills and lines reconcile CAN finalise
+  PASS  finalise refused while a bill is WRONG, naming it
+  PASS  the FINALISE button appears for the doctor when the month reconciles
+  PASS  the doctor finalises May
+  PASS  purchase_month records FINAL with the totals
+  PASS  a FINAL month page shows FINAL and the reopen for the doctor
+  PASS  verdicts are locked on a FINAL month (403)
+  PASS  a maker cannot reopen (403)
+  PASS  reopen without a reason -> 400
+  PASS  the doctor reopens with a reason
+  PASS  finalise and reopen are audited
+  PASS  hub shows FINAL/PROVISIONAL chips
+  PASS  scans page without assets.db says 'asset app not reachable' and nothing breaks
+  PASS  rematch without assets.db -> 503 assets_unreachable
+  PASS  rematch runs against the temp assets.db
+  PASS  rematch found 2 links (one EXACT, one PROBABLE), ignoring the non-Pharmacy scan
+  PASS  the EXACT link is on the right bill
+  PASS  scans page renders with both lists
+  PASS  scans page links to the asset app's bill
+  PASS  month page shows the scan link on the matched bill
+  PASS  hub counts unmatched scans and unscanned bills
+  PASS  a viewer's scans page has no Re-match button
+  PASS  feed ping stored
+  PASS  hub shows the pull ASLEEP in red with the time
+  PASS  hub turns green when the next ping says ok
+  PASS  feed with the wrong token -> 401
+  PASS  vendors with the wrong token -> 401
+  PASS  vendor pairs stored
+  PASS  the response never echoes a phone
+  PASS  the audit row never holds a phone
+  PASS  plan reads the newest snapshot
+  PASS  plan paced the three items from sale lines
+  PASS  plan is labelled PROVISIONAL (5 feed days < 28)
+  PASS  the vendor comes from the last purchase line's supplier
+  PASS  the item that is OUT is on the plan
+  PASS  the item with 500 on hand at 0.5/day is NOT reordered
+  PASS  cover_after is computed
+  PASS  rate per pack comes from the last purchase line
+  PASS  orders page renders for the doctor
+  PASS  orders page (doctor) shows 'PROVISIONAL until the stock verification has run a month'
+  PASS  orders page (doctor) shows 'Save as order'
+  PASS  orders page (doctor) shows 'Copy this order'
+  PASS  orders page (doctor) shows 'Order book'
+  PASS  orders page (doctor) shows 'tel:'
+  PASS  stock card on the hub reads the feed comparison
+  PASS  a VIEWER's orders page has NO phone, no tel: link, no copy block, no save button
+  PASS  a MAKER sees the phone but not the Save button
+  PASS  a maker cannot save an order (403)
+  PASS  the doctor saves the plan as a draft order
+  PASS  order lines persisted with a total
+  PASS  order moved to sent
+  PASS  an unknown status is refused
+  PASS  hub counts the open order
+  PASS  order create and status are audited
+  PASS  the order book shows the order with its status
+  PASS  archive holds SUPPLIERWISE 2026-07
+  PASS  archive holds BILLWISE 2026-08
+  PASS  archive holds BILLWISE 2026-09
+  PASS  July: item-wise NET == 47739566 paise (Rs 4,77,395.66, the S212 record)
+  PASS  July: the month's figure is Rs 4,76,393 supplier-wise (bill-wise identical)
+  PASS  July: no bill without lines, no line set without a bill
+  PASS  July: exactly 2 PURCHASE RETURNS (item-wise net above the bill), nothing short, 101 of 103 agree
+  PASS  July: a return is never asked a verdict
+  PASS  July CAN finalise with its two returns (rev 4: returns never block)
+  PASS  July story: 'July: Rs 4,76,393 (supplier-wise, final for month-end). 103 bills; 2 carry a purchase return; ready to finalise.'
+  PASS  September: item-wise NET == 7243737 paise (Rs 72,437.37)
+  PASS  September: Rs 72,438 (bill-wise stands in: no supplier-wise yet) and all 11 bills AGREE within Rs 1
+  PASS  September story says quietly that bill-wise stands in, and is ready to finalise
+  PASS  August: reports the 27-Aug gap as NO ITEM LINES (item-wise export missing for that date)
+  PASS  August: the story names the gap and the one action
+  PASS  August: agree + returns + short + no-lines == bills
+  PASS  hub shows Marg total (supplier-wise), Item-wise net, Returns, No lines, Wrong columns
+  PASS  hub carries no Agree / Differ column and never says 'mark each' or 'unverified'
+  PASS  hub July item-wise is the NET figure
+  PASS  hub September shows Rs 72,437 net beside Rs 72,438
+  PASS  July month page: 'Purchase returns (2)' section, each row 'purchase return ... (Marg)', no verdict buttons, FINALISE offered
+  PASS  August month page lists the NO ITEM LINES bucket, each row saying which date's export is missing
+  PASS  August month page: 'Item lines short of the bill (1)' with the plain wording
+  PASS  synthetic: item-wise is NET (399500), never gross (440000)
+  PASS  synthetic: buckets are 1 agree / 1 short (net below the bill) / 1 no lines, no return
+  PASS  synthetic: the short bill 802 is offered a verdict; 801 and 803 are not
+  PASS  finalise refused: names the no-lines bill 803 ONLY (the short bill 802 does not block, rev 4)
+  PASS  synthetic: the story mentions the short bill in plain words
+  PASS  synthetic: supplier-less BILLITEMWISE lines found their bills by (bill no, date)
+  PASS  synthetic: for 802 the LATER export's lines replaced the earlier ITEMWISE set -- it now AGREES, counted once
+  PASS  synthetic: the month can finalise
+  PASS  synthetic: 801 is now SHORT by Rs 5 -- offered a verdict, the month still CAN finalise (rev 4)
+  PASS  synthetic month page: the buttons sit on 801 alone, worded 'Item lines missing -- check the bill'
+  PASS  synthetic: 801 marked CORRECT leaves the short list open-count at 0 and the month can finalise
+  PASS  synthetic: the same bill marked WRONG blocks again (rule a kept)
+  PASS  synthetic: supplier-wise now carries every bill, so the month's figure is supplier-wise Rs 6,005
+  PASS  synthetic: bill 802 is listed as DISAGREE (bill-wise 2,000 vs supplier-wise 2,005) and offered a verdict
+  PASS  synthetic: rule (c) -- the two reports disagree by Rs 5 for the month, so FINALISE is refused, naming 802
+  PASS  synthetic month page: 'Bill-wise and supplier-wise disagree (1)' section
+  PASS  synthetic: a corrected supplier-wise export supersedes the wrong one; the reports agree again and the month can finalise
+  PASS  synthetic: the doctor finalises; purchase_month stores the month's figure and the NET item-wise total
+  PASS  a finalised month shows 'FINAL -- manoj, <when> IST' on the page and in the hub line
+  PASS  no page shows a gross figure without the word gross beside it (July gross 508,062 never appears on the hub)
+  PASS  archive holds the 04-Sep BILLWISE
+  PASS  04-Sep BILLWISE stored (supersedes the 02-Sep one of the same period)
+  PASS  archive holds the 04-Sep SUPPLIERWISE
+  PASS  04-Sep SUPPLIERWISE stored (supersedes the 02-Sep one of the same period)
+  PASS  archive holds the 04-Sep BILLITEMWISE
+  PASS  04-Sep BILLITEMWISE stored (supersedes the 02-Sep one of the same period)
+  PASS  rev 4 supersede-by-containment: the 30-Aug '01-29' bill-wise export is retired by a later full-month one
+  PASS  the 28-31 Aug BILLITEMWISE export is retired by the 04-Sep full-month one (period contained, later stamp)
+  PASS  August: 84 effective bills -- the bill Marg moved to its corrected supplier between 02 and 04 Sep is counted ONCE
+  PASS  August: Rs 3,54,879 supplier-wise, bill-wise identical, no disagreement
+  PASS  August: every bill has item lines now; 83 agree; ONE purchase return (bill 148); nothing short
+  PASS  August: the moved bill's OLD-key item lines (still live in the 27-Aug ITEMWISE export) are stale, not an orphan set
+  PASS  August is READY TO FINALISE with its one return (the owner's ruling)
+  PASS  August story: 'August: Rs 3,54,879 (supplier-wise, final for month-end). 84 bills; 1 carries a purchase return; ready to finalise.'
+  PASS  August month page: FINALISE offered to the doctor, bill 148 labelled 'purchase return ... (Marg)', no verdict buttons anywhere
+  PASS  hub: August row shows 3,54,879 and the story line verbatim
+  PASS  wording: 'hub' never says 'mark each', 'unverified' or 'Differ'
+  PASS  wording: 'month/2026-08' never says 'mark each', 'unverified' or 'Differ'
+  PASS  wording: 'month/2026-07' never says 'mark each', 'unverified' or 'Differ'
+  PASS  wording: 'month/2026-09' never says 'mark each', 'unverified' or 'Differ'
+  PASS  wording: 'month/2025-06' never says 'mark each', 'unverified' or 'Differ'
+  PASS  the doctor finalises August; purchase_month stores the supplier-wise figure
+  PASS  hub August line now reads 'FINAL -- manoj, <when> IST'
+  PASS  bw_amount_p / sw_amount_p exist on purchase_bill and are filled for every effective bill (rev 4 columns, added on first request)
+  PASS  nobody signed in -> the hub is refused
+  PASS  signed in with no medical role -> refused (403)
+  PASS  schema was created lazily, never at import (F-303)
+  PASS  the archive holds the fifteen Jul-Sep exports the box was fed
+  PASS  oldest-first: all fifteen stored as new (nothing arrives older than a live export that contains it)
+  PASS  box order: 01-29 Aug BILLWISE and 28-31 Aug BILLITEMWISE are superseded; the full-month ones are live
+  PASS  box order: the rev-4 columns were added on the first request and back-filled
+  PASS  box order, August: 84 bills, Rs 3,54,879 supplier-wise, every bill has lines, 83 agree, one return (148), nothing stray left over
+  PASS  box order, August: the moved bill (02 of 18-Aug) found its lines under the OLD supplier key (stray set, rev 4)
+  PASS  box order, August story is exactly the line the hub will show
+  PASS  box order, July story is exactly the line the hub will show
+  PASS  box order, September: bill-wise stands in, 11 bills agree, ready to finalise
+  PASS  box order: the hub renders with all three stories and none of the banned wording
+  PASS  box order: every month page renders 200
+
+218 PASS  0 FAIL
+
+== RENDER_TEST_purchase.py ==
+  PASS  pushed BILLWISE 4-092619__816038f9
+  PASS  pushed SUPPLIERWISE 4-093037__05dc3bbb
+  PASS  pushed BILLWISE 3-065505__df20b4d2
+  PASS  pushed BILLITEMWISE 1-144904__5d0e7222
+  PASS  pushed ITEMWISE 7-035751__50fb6ead
+  PASS  pushed ITEMWISE 0-095406__16988595
+  PASS  pushed ITEMWISE 7-035514__758d5ca5
+  PASS  rematch ran
+  PASS  hub as doctor renders 200
+  PASS  hub as doctor: no ten-digit run anywhere
+  PASS  hub as doctor: nothing leaks as None, no traceback
+  PASS  hub as doctor: viewport + print stylesheet
+  PASS  hub as doctor: carries the owner's words
+  PASS  hub as doctor: shows nothing this role may not use
+  PASS  hub as doctor: none of the rev-4 banned wording
+  PASS  hub as doctor: every own link carries the mount prefix (rev 3)
+  PASS  hub as doctor: every internal link answers 200
+  PASS  month/2026-08 as doctor renders 200
+  PASS  month/2026-08 as doctor: no ten-digit run anywhere
+  PASS  month/2026-08 as doctor: nothing leaks as None, no traceback
+  PASS  month/2026-08 as doctor: viewport + print stylesheet
+  PASS  month/2026-08 as doctor: carries the owner's words
+  PASS  month/2026-08 as doctor: shows nothing this role may not use
+  PASS  month/2026-08 as doctor: none of the rev-4 banned wording
+  PASS  month/2026-08 as doctor: every own link carries the mount prefix (rev 3)
+  PASS  month/2026-08 as doctor: every internal link answers 200
+  PASS  month/2026-07 as doctor renders 200
+  PASS  month/2026-07 as doctor: no ten-digit run anywhere
+  PASS  month/2026-07 as doctor: nothing leaks as None, no traceback
+  PASS  month/2026-07 as doctor: viewport + print stylesheet
+  PASS  month/2026-07 as doctor: carries the owner's words
+  PASS  month/2026-07 as doctor: shows nothing this role may not use
+  PASS  month/2026-07 as doctor: none of the rev-4 banned wording
+  PASS  month/2026-07 as doctor: every own link carries the mount prefix (rev 3)
+  PASS  month/2026-07 as doctor: every internal link answers 200
+  PASS  scans as doctor renders 200
+  PASS  scans as doctor: no ten-digit run anywhere
+  PASS  scans as doctor: nothing leaks as None, no traceback
+  PASS  scans as doctor: viewport + print stylesheet
+  PASS  scans as doctor: carries the owner's words
+  PASS  scans as doctor: shows nothing this role may not use
+  PASS  scans as doctor: none of the rev-4 banned wording
+  PASS  scans as doctor: every own link carries the mount prefix (rev 3)
+  PASS  scans as doctor: every internal link answers 200
+  PASS  orders as doctor renders 200
+  PASS  orders as doctor: no ten-digit run anywhere
+  PASS  orders as doctor: nothing leaks as None, no traceback
+  PASS  orders as doctor: viewport + print stylesheet
+  PASS  orders as doctor: carries the owner's words
+  PASS  orders as doctor: shows nothing this role may not use
+  PASS  orders as doctor: none of the rev-4 banned wording
+  PASS  orders as doctor: every own link carries the mount prefix (rev 3)
+  PASS  orders as doctor: every internal link answers 200
+  PASS  hub as maker renders 200
+  PASS  hub as maker: no ten-digit run anywhere
+  PASS  hub as maker: nothing leaks as None, no traceback
+  PASS  hub as maker: viewport + print stylesheet
+  PASS  hub as maker: carries the owner's words
+  PASS  hub as maker: shows nothing this role may not use
+  PASS  hub as maker: none of the rev-4 banned wording
+  PASS  hub as maker: every own link carries the mount prefix (rev 3)
+  PASS  hub as maker: every internal link answers 200
+  PASS  month/2026-08 as maker renders 200
+  PASS  month/2026-08 as maker: no ten-digit run anywhere
+  PASS  month/2026-08 as maker: nothing leaks as None, no traceback
+  PASS  month/2026-08 as maker: viewport + print stylesheet
+  PASS  month/2026-08 as maker: carries the owner's words
+  PASS  month/2026-08 as maker: shows nothing this role may not use
+  PASS  month/2026-08 as maker: none of the rev-4 banned wording
+  PASS  month/2026-08 as maker: every own link carries the mount prefix (rev 3)
+  PASS  month/2026-08 as maker: every internal link answers 200
+  PASS  month/2026-07 as maker renders 200
+  PASS  month/2026-07 as maker: no ten-digit run anywhere
+  PASS  month/2026-07 as maker: nothing leaks as None, no traceback
+  PASS  month/2026-07 as maker: viewport + print stylesheet
+  PASS  month/2026-07 as maker: carries the owner's words
+  PASS  month/2026-07 as maker: shows nothing this role may not use
+  PASS  month/2026-07 as maker: none of the rev-4 banned wording
+  PASS  month/2026-07 as maker: every own link carries the mount prefix (rev 3)
+  PASS  month/2026-07 as maker: every internal link answers 200
+  PASS  scans as maker renders 200
+  PASS  scans as maker: no ten-digit run anywhere
+  PASS  scans as maker: nothing leaks as None, no traceback
+  PASS  scans as maker: viewport + print stylesheet
+  PASS  scans as maker: carries the owner's words
+  PASS  scans as maker: shows nothing this role may not use
+  PASS  scans as maker: none of the rev-4 banned wording
+  PASS  scans as maker: every own link carries the mount prefix (rev 3)
+  PASS  scans as maker: every internal link answers 200
+  PASS  orders as maker renders 200
+  PASS  orders as maker: no ten-digit run anywhere
+  PASS  orders as maker: nothing leaks as None, no traceback
+  PASS  orders as maker: viewport + print stylesheet
+  PASS  orders as maker: carries the owner's words
+  PASS  orders as maker: shows nothing this role may not use
+  PASS  orders as maker: none of the rev-4 banned wording
+  PASS  orders as maker: every own link carries the mount prefix (rev 3)
+  PASS  orders as maker: every internal link answers 200
+  PASS  hub as viewer renders 200
+  PASS  hub as viewer: no ten-digit run anywhere
+  PASS  hub as viewer: nothing leaks as None, no traceback
+  PASS  hub as viewer: viewport + print stylesheet
+  PASS  hub as viewer: carries the owner's words
+  PASS  hub as viewer: shows nothing this role may not use
+  PASS  hub as viewer: none of the rev-4 banned wording
+  PASS  hub as viewer: every own link carries the mount prefix (rev 3)
+  PASS  hub as viewer: every internal link answers 200
+  PASS  month/2026-08 as viewer renders 200
+  PASS  month/2026-08 as viewer: no ten-digit run anywhere
+  PASS  month/2026-08 as viewer: nothing leaks as None, no traceback
+  PASS  month/2026-08 as viewer: viewport + print stylesheet
+  PASS  month/2026-08 as viewer: carries the owner's words
+  PASS  month/2026-08 as viewer: shows nothing this role may not use
+  PASS  month/2026-08 as viewer: none of the rev-4 banned wording
+  PASS  month/2026-08 as viewer: every own link carries the mount prefix (rev 3)
+  PASS  month/2026-08 as viewer: every internal link answers 200
+  PASS  month/2026-07 as viewer renders 200
+  PASS  month/2026-07 as viewer: no ten-digit run anywhere
+  PASS  month/2026-07 as viewer: nothing leaks as None, no traceback
+  PASS  month/2026-07 as viewer: viewport + print stylesheet
+  PASS  month/2026-07 as viewer: carries the owner's words
+  PASS  month/2026-07 as viewer: shows nothing this role may not use
+  PASS  month/2026-07 as viewer: none of the rev-4 banned wording
+  PASS  month/2026-07 as viewer: every own link carries the mount prefix (rev 3)
+  PASS  month/2026-07 as viewer: every internal link answers 200
+  PASS  scans as viewer renders 200
+  PASS  scans as viewer: no ten-digit run anywhere
+  PASS  scans as viewer: nothing leaks as None, no traceback
+  PASS  scans as viewer: viewport + print stylesheet
+  PASS  scans as viewer: carries the owner's words
+  PASS  scans as viewer: shows nothing this role may not use
+  PASS  scans as viewer: none of the rev-4 banned wording
+  PASS  scans as viewer: every own link carries the mount prefix (rev 3)
+  PASS  scans as viewer: every internal link answers 200
+  PASS  orders as viewer renders 200
+  PASS  orders as viewer: no ten-digit run anywhere
+  PASS  orders as viewer: nothing leaks as None, no traceback
+  PASS  orders as viewer: viewport + print stylesheet
+  PASS  orders as viewer: carries the owner's words
+  PASS  orders as viewer: shows nothing this role may not use
+  PASS  orders as viewer: none of the rev-4 banned wording
+  PASS  orders as viewer: every own link carries the mount prefix (rev 3)
+  PASS  orders as viewer: every internal link answers 200
+  PASS  the month page groups bills by supplier (a supplier heading row per group)
+  PASS  the source files' header lines (shop name, phone) never reach a page
+
+145 PASS  0 FAIL
+
+== walk_purchase_gate_s224.py (FIN_DIR=<s224patch>, the patched finance_app.py, on a COPY of the db) ==
+walking <s224patch>/finance_app.py on a COPY of the db at <tmp>/walk_s224_gppjqd5x/finance.db
+  PASS  finance_app imported with the S224 mount (no import-time db call, F-303)
+  PASS  healthz is PUBLIC through the real gate
+  PASS  push with the WRONG token -> 401 from the real gate
+  PASS  push with the wrong header name (X-Finance-Cron) is NOT let in
+  PASS  push with the right token REACHES the route (400 malformed, not 302/401)
+  PASS  feed with the right token reaches the route
+  PASS  vendors with the right token reaches the route
+  PASS  the token opens NOTHING else (stock losses stays shut)
+  PASS  hub with nobody signed in -> login redirect
+  PASS  hub with a login that has no medical role -> refused
+  PASS  hub for the medical checker -> 200 and marked (doctor)
+  PASS  orders page renders for the checker
+  PASS  scans page renders for the checker
+  PASS  scans page says the asset app is not reachable and nothing else breaks
+  PASS  the finance app's own healthz still answers
+  PASS  the stock count page still answers for the checker
+  PASS  the purchase tables now exist in the COPY (created on first request)
+
+17 PASS  0 FAIL

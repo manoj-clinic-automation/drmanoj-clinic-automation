@@ -1499,44 +1499,23 @@ def _page(title, body, extra_js=""):
     return html, 200, {"Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store"}
 
 
-def _hhmm_ist_full(ts):
-    """'2026-09-04T09:21:05' or '...+05:30' -> '04-Sep 09:21' (stored times are IST)."""
-    try:
-        d = ts[:10]; t = ts[11:16]
-        y, m, dd = d.split("-")
-        mon = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")[int(m) - 1]
-        return "%s-%s %s" % (dd, mon, t)
-    except (ValueError, TypeError, IndexError):
-        return ts or "?"
-
-
 def _feed_card(con):
-    """Rev 5 (the owner: "and such lines also"): plain English, no per-type counts.
-    Three lines a person can read in one glance: when Marg's purchase data last
-    reached here, which months are on file, and whether manojz is awake."""
     f = con.execute("SELECT * FROM purchase_feed ORDER BY id DESC LIMIT 1").fetchone()
     last = con.execute("SELECT MAX(received_at) FROM purchase_export").fetchone()[0]
-    n_live = con.execute("SELECT COUNT(*) FROM purchase_export WHERE superseded_by IS NULL").fetchone()[0]
-    span = con.execute("SELECT MIN(period_from), MAX(period_to) FROM purchase_export "
-                       "WHERE superseded_by IS NULL").fetchone()
-    if n_live and span[0]:
-        months = "%s to %s (%d exports on file)" % (_month_name(span[0]), _month_name(span[1]), n_live)
-    else:
-        months = "nothing yet"
-    if last:
-        last_txt = "%s IST" % _esc(_hhmm_ist_full(last))
-    else:
-        last_txt = "never"
+    per = con.execute("SELECT type, COUNT(*), SUM(superseded_by IS NULL) FROM purchase_export "
+                      "GROUP BY type").fetchall()
+    held = ", ".join("%s %d live / %d held" % (r[0], r[2], r[1]) for r in per) or "nothing yet"
     if f is None:
-        pull = '<span class="warn">manojz has not reported in yet</span>'
+        pull = '<span class="warn">no ping from manojz yet</span>'
     elif (f["state"] or "") == "ok":
-        pull = '<span class="ok">manojz is awake</span> &middot; last Marg pull %s IST' % _esc(_hhmm_ist_full(f["pull_last"] or ""))
+        pull = '<span class="ok">manojz pull ok</span> (last pull %s, %s min ago at ping)' % (
+            _esc(f["pull_last"]), f["pull_age_min"] if f["pull_age_min"] is not None else "?")
     else:
-        pull = '<span class="bad">manojz pull asleep since %s IST</span>' % _hhmm_ist(f["pull_last"] or "")
-    return ('<div class="card"><h2>Feed health</h2>'
-            '<div>Last purchase data received: <b>%s</b></div>'
-            '<div>Months on file: %s</div><div>%s</div></div>'
-            % (last_txt, _esc(months), pull))
+        pull = '<span class="bad">manojz pull asleep since %s IST</span> (state %s, pinged %s)' % (
+            _hhmm_ist(f["pull_last"] or ""), _esc(f["state"]), _esc(f["at"]))
+    return ('<div class="card"><h2>Feed health</h2><div>Last push received: <b>%s</b></div>'
+            '<div>Exports held: %s</div><div>%s</div></div>'
+            % (_esc(last or "never"), _esc(held), pull))
 
 
 def _stock_card(con):

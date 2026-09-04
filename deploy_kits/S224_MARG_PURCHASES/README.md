@@ -1,4 +1,4 @@
-# S224_MARG_PURCHASES — Marg's purchases, on the box  (rev 2)
+# S224_MARG_PURCHASES — Marg's purchases, on the box  (rev 4)
 
 **What it is.** The pharmacy's four Marg purchase exports (BILLWISE, SUPPLIERWISE, ITEMWISE,
 BILLITEMWISE) are pushed nightly from manojz through one machine door and kept in `finance.db`.
@@ -6,8 +6,8 @@ On top of them, four pages under the finance app:
 
 | page | what the owner sees |
 |---|---|
-| `/finance/purchase/page/hub` | **the tile target.** Last six months: Marg bill-wise total, item-wise total **(net, after discount)**, bills, **agree / differ / no lines**, WRONG count, PROVISIONAL/FINAL, and a one-line plain-English verdict per month. Feed health (last push, exports held per type, manojz pull ok / *asleep since HH:MM IST*). Stock verification (latest computed-vs-Marg line, link to the drift page). Scan links (unmatched scans, unscanned bills). Orders (open orders, *Make this week's order*). |
-| `/finance/purchase/page/month/<yyyy-mm>` | bills grouped by supplier: date, bill no, amount, item-wise total for that bill, scan link into the asset app, **Correct / Wrong** (Wrong asks amount + reason). Undated item lines. The reconciliation **per bill**: AGREES (within ₹1) · DIFFERS (listed with the difference, gross beside net, *purchase return?* when item-wise > bill-wise) · NO ITEM LINES ("item-wise export missing for <date>") · ITEM LINES WITH NO BILL. **FINALISE** for the doctor, or the exact reasons it cannot; once FINAL, a **reopen** (doctor, with reason). |
+| `/finance/purchase/page/hub` | **the tile target.** Last six months: **Marg total (supplier-wise — final for month-end)**, item-wise net (after discount), bills, **Returns**, No lines, Wrong, PROVISIONAL/FINAL, and one calm line per month (rev 4: *August: ₹3,54,879 (supplier-wise, final for month-end). 84 bills; 1 carries a purchase return; ready to finalise.*). Feed health (last push, exports held per type, manojz pull ok / *asleep since HH:MM IST*). Stock verification (latest computed-vs-Marg line, link to the drift page). Scan links (unmatched scans, unscanned bills). Orders (open orders, *Make this week's order*). |
+| `/finance/purchase/page/month/<yyyy-mm>` | *Marg purchase, <Month>: ₹X (supplier-wise)* first and biggest; then bills grouped by supplier: date, bill no, amount, item-wise net for that bill, scan link into the asset app, and a **Check** column: *agrees* · *purchase return ₹d (Marg)* (never a verdict) · *item lines ₹d short — Item lines missing — check the bill* with **Correct / Wrong** (Wrong asks amount + reason) · *bill-wise ₹a, supplier-wise ₹b — check the bill* with Correct / Wrong · *no item lines yet*. Sections: Purchase returns · Item lines short of the bill · Bill-wise and supplier-wise disagree · Bills with no item lines yet · Item lines with no bill · Undated item lines. **FINALISE** for the doctor, or the exact reasons it cannot; once FINAL, *FINAL — <who>, <when> IST* and a **reopen** (doctor, with reason). |
 | `/finance/purchase/page/scans` | pharmacy scans in `assets.db` with no Marg bill; Marg bills with no scan; **Re-match now**. |
 | `/finance/purchase/page/orders` | the order book, and the reorder plan — the S207 engine on the newest stock snapshot, the last 28 days of sale lines and the last purchase rate, per vendor. **Save as order** (doctor), status buttons, vendor phone as a `tel:` link and a *Copy this order* block (never for a viewer). Labelled *PROVISIONAL until the stock verification has run a month* while `stock_feed` holds < 28 days. |
 
@@ -36,10 +36,10 @@ Server rules, as implemented and tested:
   `export_stamp` is the bill's set and the other export's lines for that bill are ignored (kept,
   never deleted). A BILLITEMWISE line (no supplier printed) that arrived before its bill is linked
   to it the moment (`bill_no`, date) names exactly one bill;
-* FINALISE (doctor only) is refused — with the reasons on the page, naming the bills — while the
-  month has (a) a bill marked WRONG, (b) an undated line, (c) a bill with NO item lines, or a DIFFERS
-  bill (|bill-wise − item-wise net| > ₹1) not yet marked **Correct** (an acknowledged return or
-  rounding), or (d) a line set that belongs to no bill of the month.
+* FINALISE (doctor only) is refused — with the reasons on the page, naming the bills — only while
+  the month has (a) a bill marked WRONG and unresolved, (b) a bill with NO item lines, or (c)
+  bill-wise and supplier-wise disagreeing by more than ₹1 for the month (rev 4). A purchase return
+  never blocks; undated lines and line sets with no bill are shown, never block.
 
 **A finding the contract did not anticipate.** `norm()` alone cannot join the reports:
 SUPPLIERWISE prints the bare name (`JUBILEE AGENCIES`), BILLWISE and ITEMWISE print
@@ -101,3 +101,44 @@ stops at 21-Aug and nothing item-wise covers 22–27 Aug, so 19 bills have no li
 gap, not arithmetic. The hub now says so in one line: *export item-wise 01–31 Aug once and this
 closes.* Rev 2 changes `purchase_app.py` only; `finance_app.py`, `portal.py` and the schema are
 untouched. Install with `INSTALL_REV2.txt` (one paste, self-rollback).
+
+## Rev 4 — the owner's ruling on returns (04-Sep-2026 10:40 IST)
+
+> "The supplier-wise report should be taken as FINAL for month-end work; Marg reports purchase
+> returns like this only — we learn and adjust accordingly; avoid such confusing lines on the page."
+
+He was reading *"August 2026: 83 of 84 bills agree; 1 bill differs from its item lines (148
+purchase return) — mark each Correct (a return or rounding) or Wrong."* Rev 4 makes the page obey:
+
+* **The month's figure is the supplier-wise total**, shown first and biggest — *Marg purchase,
+  August 2026: ₹3,54,879 (supplier-wise)*. Bill-wise is identical by construction and stands in
+  only while supplier-wise has not been exported (the page says so quietly: *bill-wise stands in*).
+  Every bill now remembers both amounts (`bw_amount_p`, `sw_amount_p` — two columns added to
+  `purchase_bill` on the first request and back-filled from `amount_p`; the schema file is untouched).
+* **A bill whose item-wise net exceeds its amount is a purchase return as Marg reports it** —
+  labelled *purchase return ₹d (Marg)*, counted in the hub's **Returns** column, never asked
+  Correct/Wrong, never blocks FINALISE. Correct/Wrong remain only where item lines fall short of
+  the bill by more than ₹1 (*Item lines missing — check the bill*) or where the two reports
+  disagree on a bill.
+* **One calm line per month**, no "mark each" anywhere: *July: ₹4,76,393 (supplier-wise, final
+  for month-end). 103 bills; 2 carry a purchase return; ready to finalise.* — or *… 19 bills have
+  no item lines yet (20–27 Aug) — export item-wise for those dates.*
+* **FINALISE** refuses only for (a) an unresolved WRONG, (b) a bill with no item lines, (c) the
+  two reports disagreeing by more than ₹1 for the month. Finalised months read *FINAL — <who>,
+  <when> IST* (converted to IST whatever zone the box runs in).
+* Rupees print in Indian grouping (₹3,54,879), the way the owner reads them.
+
+**Two things the live data taught the build, both fixed here.** (1) Between 02-Sep and 04-Sep
+Marg moved bill 02 of 18-Aug to its corrected supplier; the old key lived on through the 30-Aug
+"01–29 Aug" bill-wise export (a different period, so the full-month export did not retire it) and
+inflated the month by ₹10,641. Now an export **supersedes every live export of its type whose
+period it contains** and whose stamp is older, so 01–31 Aug (04-Sep) retires 01–29 Aug (30-Aug)
+and the full-month BILLITEMWISE retires 28–31 Aug. (2) That bill's item lines were stored under
+the old supplier key; a line set keyed to a supplier that names no live bill of the month is a
+**stray** and is matched to the bill by number and date (when unambiguous), and never listed as
+an orphan. Proven in the selftest's *box order* section: all fifteen Jul–Sep exports, oldest first,
+through a rev-3-shaped table — August 84 bills · ₹3,54,879 · 83 agree · 1 return · nothing stray.
+
+Proof: selftest **218/218** (was 169) · RENDER **145/145** (was 130) · walk 17/17 · `py_compile`
+clean · no ten-digit run. Rev 4 changes `purchase_app.py` only; install with `INSTALL_REV2.txt`
+(one paste, backs up rev 3 as `.bak_S224r3` once, self-rollback to it).

@@ -1,0 +1,93 @@
+-- 1  rebuild the live portal.py from the repository chain ------------
+  PASS  S218_PORTAL_TILE                                           -> 16bfd590e2e422bb81bb8b6ad6e84eae
+  PASS  S222_PORTAL_ENTRY                                          -> c89ffa9f619712929c2b81d6e1d98c17
+  PASS  S222_SCANAPP_INAPP                                         -> 23824f92988621a38c1ae0cd7fb1314c
+  PASS  S222_TILE_GRANTS                                           -> d15acef3fcb0237563475968c2eec921
+  PASS  S223_LAUNCH_TILES                                          -> 2cfd2f62a1c46671f0facf04c1c9e774
+  PASS  S223_CORRECTIONS_TILE                                      -> fbd4029b3dec43cb9586950b80b15fc1
+  PASS  S223_CLINIC_DAY                                            -> e2f907527113588e7ce8287d678525a1
+  PASS  S223_REGISTER_CARD                                         -> 302e7459ff342d7a4481f814dcc855c5
+  PASS  S224_MARG_PURCHASES                                        -> 3530f637d620c225906f9c0113b1f0b0
+  PASS  the rebuilt file IS the live pin 3530f637d620c225906f9c0113b1f0b0   [3530f637d620c225906f9c0113b1f0b0]
+
+-- 2  the anchors, each exactly once, in the live bytes ---------------
+  PASS  anchor 'Day Revenue tile name' matches exactly once   [1]
+  PASS  replacement for 'Day Revenue tile name' is not already present
+  PASS  anchor 'Day Revenue tile desc' matches exactly once   [1]
+  PASS  replacement for 'Day Revenue tile desc' is not already present
+  PASS  anchor 'Daily Register tile name' matches exactly once   [1]
+  PASS  replacement for 'Daily Register tile name' is not already present
+  PASS  anchor 'Daily Register tile desc' matches exactly once   [1]
+  PASS  replacement for 'Daily Register tile desc' is not already present
+  PASS  anchor 'group map rows' matches exactly once   [1]
+  PASS  replacement for 'group map rows' is not already present
+  PASS  MARK absent before
+
+-- 3  refusals -----------------------------------------------------------
+  PASS  wrong md5 REFUSES and changes nothing
+  PASS  no argument -> USAGE, nothing changed
+
+-- 4  apply ----------------------------------------------------------------
+  PASS  patcher exits 0 and prints NEW PIN
+     NEW PIN (predicted)  d28038047d81abd290d58ed15f9a1482
+  PASS  second run says ALREADY PATCHED and leaves the pin alone
+  PASS  exactly one timestamped backup, equal to the live bytes
+  PASS  LF only, no CRLF
+  PASS  same line count; exactly SIX lines differ (2 names, 2 descs, 2 group rows)   [6]
+     L284   {"icon": "\U0001F4C8", "name": "Day Revenue",
+            -> {"icon": "\U0001F4C8", "name": "Docterz Revenue",
+     L289   "desc": "Clinic takings by day \u2014 from Docterz",
+            -> "desc": "Clinic collection by day \u2014 from Docterz",
+     L293   {"icon": "\U0001F4D2", "name": "Daily Register",
+            -> {"icon": "\U0001F4D2", "name": "Docterz daily collection",
+     L297   "desc": "The counter's day totals \u2014 cash, UPI, card",
+            -> "desc": "Reception's day totals \u2014 cash, UPI, card",
+     L419   "Corrections": "Money & Accounts", "Day Revenue": "Money & Accounts",
+            -> "Corrections": "Money & Accounts", "Docterz Revenue": "Money & Accounts",
+     L420   "Daily Register": "Money & Accounts", "Marg Purchases": "Money & Accounts",
+            -> "Docterz daily collection": "Money & Accounts", "Marg Purchases": "Money & Accounts",
+
+-- 5  the ruling, word for word ------------------------------------------
+  PASS  _TILE_GROUP import-assert passed (module head executed)
+  PASS  'Day Revenue' is gone
+  PASS  'Daily Register' is gone
+  PASS  Docterz Revenue exists, url /finance/clinic/day, roles ['doctor']
+  PASS    desc = 'Clinic collection by day — from Docterz'   [Clinic collection by day — from Docterz]
+  PASS    'takings' nowhere in it
+  PASS  Docterz daily collection exists, url /finance/clinic/register, roles ['doctor']
+  PASS    desc = "Reception's day totals — cash, UPI, card"   [Reception's day totals — cash, UPI, card]
+  PASS    'counter' nowhere in it
+  PASS  both sit in Money & Accounts
+  PASS  both keep their S223 icons
+  PASS  no tile name starts with Day/Daily/Clinic AND points at a Docterz-fed page
+  PASS  every OTHER tile (39) is byte-identical: name, desc, url, roles, icon
+  PASS  Daily Collection and Clinic (manual clinic-entry, S182) are NOT touched
+  PASS  tile order unchanged
+
+-- 6  tile_grants.json v7 --------------------------------------------------
+  PASS  v6 is the live c4d01ade... ; v7 says version 7
+  PASS  v7 = v6 with the two names renamed and nothing else (users, masks, extras, defaults)
+  PASS  no old name survives in any v7 mask/extra (the _note keeps the history)
+  PASS  every name in v7 mask/extra is a real tile after the patch
+
+-- 7  who sees what: before (live + v6) vs after (patched + v7) ---------
+  PASS  over 48 user/role/pc combinations nobody gains or loses a tile -- only the two names change   [[]]
+  PASS  the five the owner named still see both   [['alisha', 'bhawna', 'manoj', 'shavez', 'shivani']]
+  PASS  with a STALE v6 the four staff logins would lose both tiles (why v7 ships with the patch)   [['alisha', 'bhawna', 'shavez', 'shivani']]
+  PASS  grants file gone: no staff sees them (fail closed); the owner keeps them as doctor
+     manoj   doctor  [Money & Accounts] UPI Sheet, Vehicle Tracking, Monthly Accounting, Daily Sale, Vaapsi Desk, Stock Check, Marg Purchases, Corrections, Docterz Revenue, Docterz daily collection, Sanjeevni Medicos, Clinic
+     shavez  staff   [Money & Accounts] Vaapsi Desk, Stock Check, Marg Purchases, Docterz Revenue, Docterz daily collection, Daily Collection, Clinic
+
+-- 8  hygiene ----------------------------------------------------------------
+  PASS  no 10-digit run in patch_portal_docterz_names_s224.py
+  PASS  LF only in patch_portal_docterz_names_s224.py
+  PASS  no 10-digit run in tile_grants.json
+  PASS  LF only in tile_grants.json
+  PASS  no 10-digit run in selftest_docterz_names_s224.py
+  PASS  LF only in selftest_docterz_names_s224.py
+  PASS  no 10-digit run introduced into portal.py by the patch
+  PASS  patched portal.py py_compiles
+
+GREEN  0 failed
+PREDICTED PIN  /root/portal/portal.py  3530f637d620c225906f9c0113b1f0b0 -> d28038047d81abd290d58ed15f9a1482
+PREDICTED PIN  /root/portal/tile_grants.json  c4d01adeba0d5bbc570db992064b2ff5 -> 578702a5a10e1487e0f320c6f1b75755 (v7)

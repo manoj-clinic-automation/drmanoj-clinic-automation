@@ -1,0 +1,18 @@
+S224_DAY_REVENUE_PDF -- predicted pins (LF, VPS-side; F-294). Built 04-Sep-2026.
+
+/root/finance/finance_app.py   44bf7b50d1e86af14e5bda79624fc8ca (LIVE, 03:11 IST -- or the NEW PIN of a later S224 patcher)
+                               ->  the NEW PIN patch_finance_app_daypdf_s224.py prints (one exact anchor: the
+                                   '# --- S224_MARG_PURCHASES end ---' line; three mount lines go in after it).
+                               The repo's finance_app.py is behind the box, so the after-pin cannot be predicted
+                               from here. On the offline reconstruction the same edit took
+                               97fe3206c18cb232cca98b59fb47e821 -> 968f3d0007921bccd2907819849b8f9b (walk evidence).
+
+NEW files (md5 of the kit copy = md5 on the box; all LF):
+  518affe983e02a266f943bced48e9c35  clinic_day_pdf.py
+  ee1178778ae586c1d7edd60aaa2c1d75  patch_finance_app_daypdf_s224.py
+  d7bf4b167f53a6bd5f279eeb36eaebde  walk_daypdf_gate_s224.py
+
+Kit-only (never copied to the box): selftest_clinic_day_pdf.py, EVIDENCE_selftest_s224.txt,
+EVIDENCE_walk_gate_s224.txt, README.md, INSTALL.txt, KIT_ID.txt -- pinned in SUMS.md5.
+
+NO TABLE is created or altered. NO other live file changes. Restart: clinic-finance.service only.

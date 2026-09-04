@@ -3,6 +3,9 @@
 """
 selftest_purchase_app.py -- S224: the REAL blueprint, on a temp finance.db, fed the REAL
 archived Marg exports through the SAME parser the manojz leg uses (marg_purchase_rows.py).
+Rev 4 (04-Sep-2026, the owner's ruling on returns): the month's figure is supplier-wise; a
+purchase return is labelled, counted and never asked Correct/Wrong; the finalise ladder is
+(a) WRONG, (b) no item lines, (c) the two reports disagree; no page says "mark each".
 
 Offline, on manojz:
     python3 -B selftest_purchase_app.py            (archive at ~/mnt/Downloads/margsync/MargArchive)
@@ -167,7 +170,9 @@ r = cl.get(P + "/api/healthz")
 ck("healthz counts one export", r.get_json()["exports"] == 1 and r.get_json()["last_received"])
 
 # ------------------------------------------------------------- 3. SUPPLIERWISE: two exports of one period
-SW = sorted(glob.glob(os.path.join(ARCHIVE, "PURCHASE_SUPPLIERWISE/2026-08/*_2026-08-01_to_2026-08-31__*.XLS")))
+# rev 4: pinned to the two 02-Sep supplier-wise files (the supersede pair). The owner's 04-Sep export moves
+# bill 02 of 18-Aug to its corrected supplier; section 15 pushes that pair and proves the old row drops out.
+SW = sorted(glob.glob(os.path.join(ARCHIVE, "PURCHASE_SUPPLIERWISE/2026-08/*_2026-08-01_to_2026-08-31__20260902-*.XLS")))
 ck("two August SUPPLIERWISE exports of the same period exist (the supersede case)", len(SW) >= 2)
 sw_old, sw_new = R.payload(SW[0], "SUPPLIERWISE"), R.payload(SW[-1], "SUPPLIERWISE")
 ck("SUPPLIERWISE parser: rows sum to GRAND TOTAL",
@@ -231,8 +236,8 @@ und = q1("SELECT COUNT(*) FROM purchase_line WHERE bill_date IS NULL")
 ck("July ITEMWISE pushed BEFORE its bills: lines are UNDATED", und == iwj["n_rows"])
 with app.test_request_context():
     s = PA._month_summary(_db(), "2026-07")
-ck("July month cannot finalise while lines are undated, and says so",
-   not s["can_finalise"] and any("could not be dated" in x for x in s["reasons"]))
+ck("July (no bills yet) cannot finalise, and the story says its item lines are waiting undated (rev 4: undated never blocks by itself)",
+   not s["can_finalise"] and any("no bills" in x for x in s["reasons"]) and "undated" in s["story"], s["story"])
 push(R.payload(BWJ, "BILLWISE"))
 ck("July BILLWISE arrives: the lines are re-dated by the bills", q1("SELECT COUNT(*) FROM purchase_line WHERE bill_date IS NULL") == 0)
 ck("July bills == its BILLWISE rows", q1("SELECT COUNT(*) FROM purchase_bill WHERE month='2026-07'") == R.payload(BWJ, "BILLWISE")["n_rows"])
@@ -240,7 +245,9 @@ ck("July bills == its BILLWISE rows", q1("SELECT COUNT(*) FROM purchase_bill WHE
 # ------------------------------------------------------------- 6. the month summary and the hub
 with app.test_request_context():
     s = PA._month_summary(_db(), "2026-08")
-ck("August summary: bill-wise == Marg TOTAL", s["billwise_p"] == bw["grand_amount_p"])
+ck("August summary: the month's figure is the SUPPLIER-WISE total == Marg TOTAL (rev 4), bill-wise identical, no disagreement",
+   s["marg_p"] == bw["grand_amount_p"] and s["basis"] == "supplier-wise" and s["sw_p"] == s["bw_p"] == bw["grand_amount_p"]
+   and s["month_disagree_p"] == 0 and not s["disagree"], "%s %s %s" % (s["marg_p"], s["basis"], s["month_disagree_p"]))
 _all_net = q1("SELECT SUM(net_amount_p) FROM purchase_line WHERE month='2026-08'")
 _all_gross = q1("SELECT SUM(amount_p) FROM purchase_line WHERE month='2026-08'")
 # the rev-2 dedupe, recomputed here by hand: per (supplier, bill) keep the export with the later stamp
@@ -257,9 +264,13 @@ ck("August summary: bills that ITEMWISE 28-29 and BILLITEMWISE 28-31 BOTH carry 
 _bi_lines = q("SELECT supplier_norm FROM purchase_line WHERE line_type='BILLITEMWISE'")
 ck("BILLITEMWISE lines that arrived BEFORE their bill were linked to it once the bill came (rev 2)",
    all(r[0] for r in _bi_lines) and not s["orphans"], str(len(s["orphans"])))
-ck("August is provisional and cannot finalise (bills without item lines, one that differs)",
-   s["status"]["status"] == "provisional" and not s["can_finalise"] and any("differs" in x for x in s["reasons"])
-   and any("no item-wise lines" in x for x in s["reasons"]))
+ck("August is provisional and cannot finalise: bills without item lines (the ONLY reason; the one short bill does not block, rev 4)",
+   s["status"]["status"] == "provisional" and not s["can_finalise"] and len(s["reasons"]) == 1
+   and "no item lines yet" in s["reasons"][0], str(s["reasons"]))
+ck("August fixture: one bill has item lines SHORT of the bill (13056, Rs 23) and no purchase return",
+   len(s["short"]) == 1 and not s["returns"] and s["short"][0]["diff_p"] < 0, str([(x["bill"]["bill_no"], x["diff_p"]) for x in s["short"]]))
+ck("August story: calm, names the gap and the one action, never 'mark each'",
+   "no item lines yet" in s["story"] and "export item-wise" in s["story"] and "mark each" not in s["story"].lower(), s["story"])
 as_("manoj", "doctor", {"checker"})
 r = cl.get(P + "/page/hub")
 h = r.get_data(as_text=True)
@@ -270,8 +281,9 @@ ck("hub says the asset app is not reachable when assets.db is absent", "asset ap
 r = cl.get(P + "/page/month/2026-08")
 m = r.get_data(as_text=True)
 ck("month page renders", r.status_code == 200)
-for word in ("cannot finalise yet", "bill-wise total", "Correct", "Wrong", "unverified"):
+for word in ("cannot finalise yet", "Marg purchase, August 2026", "supplier-wise, final for month-end", "Correct", "Wrong", "no item lines yet"):
     ck("month page shows '%s'" % word, word in m)
+ck("month page offers Correct/Wrong ONLY on the short bill (one pair of buttons)", m.count("onclick=\"verdict(") == 2, str(m.count("onclick=\"verdict(")))
 ck("month page has no FINALISE button while it cannot finalise", "FINALISE August" not in m)
 r = cl.get(P + "/page/month/13-2026")
 ck("a bad month is refused", r.status_code == 400)
@@ -319,7 +331,7 @@ ck("a month whose bills and lines reconcile CAN finalise", s["can_finalise"] and
 mb = q1("SELECT id FROM purchase_bill WHERE month='2026-05' ORDER BY id LIMIT 1")
 cl.post(P + "/api/verdict", json=dict(bill_id=mb, verdict="WRONG", wrong_amount="10", reason="test"))
 r = cl.post(P + "/api/finalise", json=dict(month="2026-05"))
-ck("finalise refused while a bill is WRONG, naming it", r.status_code == 409 and any("WRONG" in x for x in r.get_json()["reasons"]))
+ck("finalise refused while a bill is WRONG, naming it", r.status_code == 409 and any("marked Wrong" in x and "700" in x for x in r.get_json()["reasons"]))
 cl.post(P + "/api/verdict", json=dict(bill_id=mb, verdict="CORRECT"))
 m = cl.get(P + "/page/month/2026-05").get_data(as_text=True)
 ck("the FINALISE button appears for the doctor when the month reconciles", "FINALISE May 2026" in m)
@@ -384,7 +396,7 @@ ck("feed ping stored", r.status_code == 200 and q1("SELECT COUNT(*) FROM purchas
 hub = cl.get(P + "/page/hub").get_data(as_text=True)
 ck("hub shows the pull ASLEEP in red with the time", "pull asleep since 06:40 IST" in hub)
 cl.post(P + "/api/feed", json=dict(pull_last="2026-09-04T07:40:21+05:30", pull_age_min=3, state="ok", host="manojz"), headers=H)
-ck("hub turns green when the next ping says ok", "manojz pull ok" in cl.get(P + "/page/hub").get_data(as_text=True))
+ck("hub turns green when the next ping says ok", "manojz is awake" in cl.get(P + "/page/hub").get_data(as_text=True))
 r = cl.post(P + "/api/feed", json={}, headers={"X-Finance-Marg": "nope"})
 ck("feed with the wrong token -> 401", r.status_code == 401)
 
@@ -470,32 +482,40 @@ push(R.payload(one("PURCHASE_ITEMWISE/2026-09/*.XLS"), "ITEMWISE", MP.read_purch
 with app.test_request_context():
     sj, sa, ss = (PA._month_summary(_db(), m) for m in ("2026-07", "2026-08", "2026-09"))
 ck("July: item-wise NET == 47739566 paise (Rs 4,77,395.66, the S212 record)", sj["itemwise_p"] == 47739566, str(sj["itemwise_p"]))
-ck("July: bill-wise == Rs 4,76,393", sj["billwise_p"] == 47639300, str(sj["billwise_p"]))
+ck("July: the month's figure is Rs 4,76,393 supplier-wise (bill-wise identical)",
+   sj["marg_p"] == 47639300 and sj["basis"] == "supplier-wise" and sj["sw_p"] == sj["bw_p"] == 47639300, "%s %s" % (sj["marg_p"], sj["basis"]))
 ck("July: no bill without lines, no line set without a bill", not sj["no_lines"] and not sj["orphans"])
-ck("July: the DIFFERS bucket holds <= 2 bills (the two purchase returns)", 0 < len(sj["differ"]) <= 2, str(len(sj["differ"])))
-ck("July: 101 of 103 bills AGREE", len(sj["agree"]) == 101 and len(sj["bills"]) == 103, "%d/%d" % (len(sj["agree"]), len(sj["bills"])))
-ck("July: each DIFFERS bill carries the 'purchase return?' hint (item-wise > bill-wise)",
-   all(x["hint"].startswith("purchase return") for x in sj["differ"]))
-ck("July: the refusal NAMES the differing bills", not sj["can_finalise"] and all(x["bill"]["bill_no"] in " ".join(sj["reasons"]) for x in sj["differ"]))
+ck("July: exactly 2 PURCHASE RETURNS (item-wise net above the bill), nothing short, 101 of 103 agree",
+   len(sj["returns"]) == 2 and not sj["short"] and len(sj["agree"]) == 101 and len(sj["bills"]) == 103,
+   "%d ret %d short %d/%d" % (len(sj["returns"]), len(sj["short"]), len(sj["agree"]), len(sj["bills"])))
+ck("July: a return is never asked a verdict", not sj["needs_verdict"])
+ck("July CAN finalise with its two returns (rev 4: returns never block)", sj["can_finalise"], str(sj["reasons"]))
+ck("July story: 'July: Rs 4,76,393 (supplier-wise, final for month-end). 103 bills; 2 carry a purchase return; ready to finalise.'",
+   sj["story"] == "July: \u20b94,76,393 (supplier-wise, final for month-end). 103 bills; 2 carry a purchase return; ready to finalise.", sj["story"])
 ck("September: item-wise NET == 7243737 paise (Rs 72,437.37)", ss["itemwise_p"] == 7243737, str(ss["itemwise_p"]))
-ck("September: bill-wise == Rs 72,438 and all 11 bills AGREE within Rs 1",
-   ss["billwise_p"] == 7243800 and len(ss["agree"]) == 11 == len(ss["bills"]) and not ss["differ"] and not ss["no_lines"])
-ck("September CAN finalise on the rev-2 rule", ss["can_finalise"], str(ss["reasons"]))
+ck("September: Rs 72,438 (bill-wise stands in: no supplier-wise yet) and all 11 bills AGREE within Rs 1",
+   ss["marg_p"] == 7243800 and ss["basis"] == "bill-wise" and len(ss["agree"]) == 11 == len(ss["bills"]) and not ss["returns"] and not ss["short"] and not ss["no_lines"],
+   "%s %s" % (ss["marg_p"], ss["basis"]))
+ck("September story says quietly that bill-wise stands in, and is ready to finalise",
+   "bill-wise stands in" in ss["story"] and "ready to finalise" in ss["story"] and ss["can_finalise"], ss["story"])
 ck("August: reports the 27-Aug gap as NO ITEM LINES (item-wise export missing for that date)",
-   "2026-08-27" in sa["gap_dates"] and any("27-Aug" in x and "no item-wise lines" in x for x in sa["reasons"]))
-ck("August: the hub verdict names the gap and the one-line fix", "27-Aug" in sa["story"] and "export item-wise 01-31 Aug once" in sa["story"])
-ck("August: agree + differ + no-lines == bills", len(sa["agree"]) + len(sa["differ"]) + len(sa["no_lines"]) == len(sa["bills"]))
+   "2026-08-27" in sa["gap_dates"] and any("27 Aug" in x and "no item lines yet" in x for x in sa["reasons"]), str(sa["reasons"]))
+ck("August: the story names the gap and the one action", "27 Aug" in sa["story"] and "export item-wise for" in sa["story"], sa["story"])
+ck("August: agree + returns + short + no-lines == bills", len(sa["agree"]) + len(sa["returns"]) + len(sa["short"]) + len(sa["no_lines"]) == len(sa["bills"]))
 hub = cl.get(P + "/page/hub").get_data(as_text=True)
-ck("hub shows Item-wise (net), Agree / Differ / No lines columns and the verdict line",
-   "Item-wise (net)" in hub and ">Agree<" in hub and ">Differ<" in hub and ">No lines<" in hub and "export item-wise 01-31 Aug once" in hub)
-ck("hub July item-wise is the NET figure", "477,396" in hub and "508,062" not in hub)
-ck("hub September shows Rs 72,437 net beside Rs 72,438 bill-wise", "72,437" in hub and "72,438" in hub)
+ck("hub shows Marg total (supplier-wise), Item-wise net, Returns, No lines, Wrong columns",
+   "Marg total (supplier-wise)" in hub and ">Item-wise net<" in hub and ">Returns<" in hub and ">No lines<" in hub and ">Wrong<" in hub)
+ck("hub carries no Agree / Differ column and never says 'mark each' or 'unverified'",
+   ">Agree<" not in hub and ">Differ<" not in hub and "mark each" not in hub.lower() and "unverified" not in hub)
+ck("hub July item-wise is the NET figure", "4,77,396" in hub and "5,08,062" not in hub)
+ck("hub September shows Rs 72,437 net beside Rs 72,438", "72,437" in hub and "72,438" in hub)
 mj = cl.get(P + "/page/month/2026-07").get_data(as_text=True)
-ck("July month page lists the DIFFERS bucket with the hint and a gross column labelled gross",
-   "Bills that differ from their item lines (2)" in mj and "purchase return?" in mj and "Item-wise (gross)" in mj)
+ck("July month page: 'Purchase returns (2)' section, each row 'purchase return ... (Marg)', no verdict buttons, FINALISE offered",
+   "Purchase returns (2)" in mj and mj.count("(Marg)</span>") == 2 and 'onclick="verdict(' not in mj and "FINALISE July 2026" in mj)
 ma = cl.get(P + "/page/month/2026-08").get_data(as_text=True)
 ck("August month page lists the NO ITEM LINES bucket, each row saying which date's export is missing",
-   "Bills with no item lines (%d)" % len(sa["no_lines"]) in ma and ma.count("item-wise export missing for 27-Aug") >= 1)
+   "Bills with no item lines yet (%d)" % len(sa["no_lines"]) in ma and ma.count("item-wise export missing for 27-Aug") >= 1)
+ck("August month page: 'Item lines short of the bill (1)' with the plain wording", "Item lines short of the bill (1)" in ma and "check the bill" in ma)
 # the finalise rule, on a synthetic month far from the real data:
 #   bill 801 agrees; 802 differs by Rs 5 (net below bill-wise); 803 has no lines at all
 jun_bills = [dict(bill_date="2025-06-1%d" % i, bill_no=str(801 + i), supplier="ZZREV2 STOCKIST          BAREILLY", cash_p=0, credit_p=200000)
@@ -511,11 +531,14 @@ push(dict(type="ITEMWISE", md5="d" * 32, file="jun_iw.XLS", period_from="2025-06
 with app.test_request_context():
     s6 = PA._month_summary(_db(), "2025-06")
 ck("synthetic: item-wise is NET (399500), never gross (440000)", s6["itemwise_p"] == 399500, str(s6["itemwise_p"]))
-ck("synthetic: buckets are 1 agree / 1 differs / 1 no lines", (len(s6["agree"]), len(s6["differ"]), len(s6["no_lines"])) == (1, 1, 1))
-ck("synthetic: the DIFFERS hint for net < bill-wise is not 'purchase return'", not s6["differ"][0]["hint"].startswith("purchase return"))
+ck("synthetic: buckets are 1 agree / 1 short (net below the bill) / 1 no lines, no return",
+   (len(s6["agree"]), len(s6["short"]), len(s6["no_lines"]), len(s6["returns"])) == (1, 1, 1, 0))
+ck("synthetic: the short bill 802 is offered a verdict; 801 and 803 are not", s6["needs_verdict"] == {s6["short"][0]["bill"]["id"]})
 r = cl.post(P + "/api/finalise", json=dict(month="2025-06"))
 rs = " ".join(r.get_json().get("reasons") or [])
-ck("finalise refused: names the no-lines bill 803 AND the differing bill 802", r.status_code == 409 and "803" in rs and "802" in rs and "12-Jun" in rs)
+ck("finalise refused: names the no-lines bill 803 ONLY (the short bill 802 does not block, rev 4)",
+   r.status_code == 409 and "803" in rs and "802" not in rs and "12-Jun" in rs, rs)
+ck("synthetic: the story mentions the short bill in plain words", "1 bill has item lines short of the bill" in s6["story"], s6["story"])
 # a later BILLITEMWISE export (a different type, so it coexists) carries 803's lines and a corrected 802 that now agrees
 push(dict(type="BILLITEMWISE", md5="e" * 32, file="jun_bi.XLS", period_from="2025-06-01", period_to="2025-06-30", export_stamp="20250702-090000",
           n_rows=2, grand_amount_p=0, rows=[dict(_ln("803", 200000, 200000), supplier=""), dict(_ln("802", 200000, 210000), supplier="")]))
@@ -523,29 +546,103 @@ with app.test_request_context():
     s6 = PA._month_summary(_db(), "2025-06")
 ck("synthetic: supplier-less BILLITEMWISE lines found their bills by (bill no, date)", not s6["orphans"] and not s6["no_lines"])
 ck("synthetic: for 802 the LATER export's lines replaced the earlier ITEMWISE set -- it now AGREES, counted once",
-   len(s6["agree"]) == 3 and not s6["differ"] and s6["itemwise_p"] == 600000, "%s %s" % (s6["itemwise_p"], s6["reasons"]))
+   len(s6["agree"]) == 3 and not s6["short"] and not s6["returns"] and s6["itemwise_p"] == 600000, "%s %s" % (s6["itemwise_p"], s6["reasons"]))
 ck("synthetic: the month can finalise", s6["can_finalise"], str(s6["reasons"]))
 # now the CORRECT-verdict path: make 801 differ by Rs 5 through a later ITEMWISE (same period: supersedes the first ITEMWISE)
 push(dict(type="ITEMWISE", md5="f" * 32, file="jun_iw2.XLS", period_from="2025-06-01", period_to="2025-06-30", export_stamp="20250703-090000",
           n_rows=1, grand_amount_p=0, rows=[_ln("801", 199500, 220000)]))
 with app.test_request_context():
     s6 = PA._month_summary(_db(), "2025-06")
-ck("synthetic: 801 now DIFFERS by Rs 5 and the month is refused, naming 801",
-   len(s6["differ"]) == 1 and s6["differ"][0]["bill"]["bill_no"] == "801" and not s6["can_finalise"] and "801" in " ".join(s6["reasons"]))
+ck("synthetic: 801 is now SHORT by Rs 5 -- offered a verdict, the month still CAN finalise (rev 4)",
+   len(s6["short"]) == 1 and s6["short"][0]["bill"]["bill_no"] == "801" and s6["can_finalise"] and "801" in " ".join(
+       x["bill"]["bill_no"] for x in s6["short_open"]), str(s6["reasons"]))
+m6 = cl.get(P + "/page/month/2025-06").get_data(as_text=True)
+ck("synthetic month page: the buttons sit on 801 alone, worded 'Item lines missing -- check the bill'",
+   m6.count('onclick="verdict(') == 2 and "Item lines missing" in m6 and "check the bill" in m6)
 b801 = q1("SELECT id FROM purchase_bill WHERE bill_no='801' AND month='2025-06'")
 cl.post(P + "/api/verdict", json=dict(bill_id=b801, verdict="CORRECT"))
 with app.test_request_context():
     s6 = PA._month_summary(_db(), "2025-06")
-ck("synthetic: a DIFFERS bill marked CORRECT no longer blocks -- the month can finalise", s6["can_finalise"], str(s6["reasons"]))
+ck("synthetic: 801 marked CORRECT leaves the short list open-count at 0 and the month can finalise", s6["can_finalise"] and not s6["short_open"], str(s6["reasons"]))
 cl.post(P + "/api/verdict", json=dict(bill_id=b801, verdict="WRONG", wrong_amount="1995", reason="rev2 test"))
 with app.test_request_context():
     s6 = PA._month_summary(_db(), "2025-06")
-ck("synthetic: the same bill marked WRONG blocks again (rule a kept)", not s6["can_finalise"] and any("WRONG" in x for x in s6["reasons"]))
+ck("synthetic: the same bill marked WRONG blocks again (rule a kept)", not s6["can_finalise"] and any("marked Wrong" in x for x in s6["reasons"]))
+# rule (c): a supplier-wise export that disagrees with bill-wise on one bill blocks the month
+cl.post(P + "/api/verdict", json=dict(bill_id=b801, verdict="CORRECT"))
+push(dict(type="SUPPLIERWISE", md5="9" * 32, file="jun_sw.XLS", period_from="2025-06-01", period_to="2025-06-30", export_stamp="20250704-090000",
+          n_rows=3, grand_amount_p=600500, rows=[dict(jb, credit_p=(200500 if jb["bill_no"] == "802" else 200000)) for jb in jun_bills]))
+with app.test_request_context():
+    s6 = PA._month_summary(_db(), "2025-06")
+ck("synthetic: supplier-wise now carries every bill, so the month's figure is supplier-wise Rs 6,005",
+   s6["basis"] == "supplier-wise" and s6["marg_p"] == 600500 and s6["bw_p"] == 600000 and s6["sw_p"] == 600500, "%s %s" % (s6["basis"], s6["marg_p"]))
+ck("synthetic: bill 802 is listed as DISAGREE (bill-wise 2,000 vs supplier-wise 2,005) and offered a verdict",
+   [b["bill_no"] for b in s6["disagree"]] == ["802"] and s6["disagree"][0]["disagree_p"] == 500 and s6["disagree"][0]["id"] in s6["needs_verdict"])
+ck("synthetic: rule (c) -- the two reports disagree by Rs 5 for the month, so FINALISE is refused, naming 802",
+   not s6["can_finalise"] and any("disagree" in x and "802" in x for x in s6["reasons"]), str(s6["reasons"]))
+m6 = cl.get(P + "/page/month/2025-06").get_data(as_text=True)
+ck("synthetic month page: 'Bill-wise and supplier-wise disagree (1)' section", "Bill-wise and supplier-wise disagree (1)" in m6)
+push(dict(type="SUPPLIERWISE", md5="8" * 32, file="jun_sw2.XLS", period_from="2025-06-01", period_to="2025-06-30", export_stamp="20250705-090000",
+          n_rows=3, grand_amount_p=600000, rows=jun_bills))
+with app.test_request_context():
+    s6 = PA._month_summary(_db(), "2025-06")
+ck("synthetic: a corrected supplier-wise export supersedes the wrong one; the reports agree again and the month can finalise",
+   s6["can_finalise"] and not s6["disagree"] and s6["marg_p"] == 600000 and s6["basis"] == "supplier-wise", str(s6["reasons"]))
 cl.post(P + "/api/verdict", json=dict(bill_id=b801, verdict="CORRECT"))
 r = cl.post(P + "/api/finalise", json=dict(month="2025-06"))
-ck("synthetic: the doctor finalises; purchase_month stores the NET item-wise total",
+ck("synthetic: the doctor finalises; purchase_month stores the month's figure and the NET item-wise total",
    r.status_code == 200 and q("SELECT billwise_total_p, itemwise_total_p FROM purchase_month WHERE month='2025-06'")[0][:] == (600000, 599500))
+m6 = cl.get(P + "/page/month/2025-06").get_data(as_text=True)
+with app.test_request_context():
+    s6 = PA._month_summary(_db(), "2025-06")
+ck("a finalised month shows 'FINAL -- manoj, <when> IST' on the page and in the hub line",
+   "FINAL \u2014 manoj, " in m6 and " IST" in m6 and s6["story"].endswith(" IST.") and "FINAL \u2014 manoj, " in s6["story"], s6["story"])
 ck("no page shows a gross figure without the word gross beside it (July gross 508,062 never appears on the hub)", "508,062" not in cl.get(P + "/page/hub").get_data(as_text=True))
+
+# ------------------------------------------------------------- 15. REV 4: the owner's ruling, on the real full-month August
+as_("manoj", "doctor", {"checker"})
+for pat, typ in (("PURCHASE_BILLWISE/2026-08/*_2026-08-01_to_2026-08-31__20260904-*.XLS", "BILLWISE"),
+                 ("PURCHASE_SUPPLIERWISE/2026-08/*_2026-08-01_to_2026-08-31__20260904-*.XLS", "SUPPLIERWISE"),
+                 ("PURCHASE_BILLITEMWISE/2026-08/*_2026-08-01_to_2026-08-31__*.XLS", "BILLITEMWISE")):
+    f = one(pat)
+    ck("archive holds the 04-Sep %s" % typ, bool(f))
+    r = push(R.payload(f, typ))
+    ck("04-Sep %s stored (supersedes the 02-Sep one of the same period)" % typ, r.get_json()["stored"] is True)
+with app.test_request_context():
+    sa = PA._month_summary(_db(), "2026-08")
+bw0830 = R.payload(one("PURCHASE_BILLWISE/2026-08/*_2026-08-01_to_2026-08-29__*.XLS"), "BILLWISE")["md5"]
+ck("rev 4 supersede-by-containment: the 30-Aug '01-29' bill-wise export is retired by a later full-month one",
+   bool(q1("SELECT superseded_by FROM purchase_export WHERE md5=?", bw0830)))
+ck("the 28-31 Aug BILLITEMWISE export is retired by the 04-Sep full-month one (period contained, later stamp)",
+   q1("SELECT superseded_by FROM purchase_export WHERE md5=?", bi["md5"]) == R.payload(one("PURCHASE_BILLITEMWISE/2026-08/*_2026-08-01_to_2026-08-31__*.XLS"), "BILLITEMWISE")["md5"])
+ck("August: 84 effective bills -- the bill Marg moved to its corrected supplier between 02 and 04 Sep is counted ONCE",
+   len(sa["bills"]) == 84 and q1("SELECT COUNT(*) FROM purchase_bill WHERE month='2026-08'") == 85, "%d bills, %s rows" % (len(sa["bills"]), q1("SELECT COUNT(*) FROM purchase_bill WHERE month='2026-08'")))
+ck("August: Rs 3,54,879 supplier-wise, bill-wise identical, no disagreement",
+   sa["marg_p"] == 35487900 and sa["basis"] == "supplier-wise" and sa["sw_p"] == sa["bw_p"] == 35487900 and not sa["disagree"], "%s %s %s" % (sa["marg_p"], sa["sw_p"], sa["bw_p"]))
+ck("August: every bill has item lines now; 83 agree; ONE purchase return (bill 148); nothing short",
+   not sa["no_lines"] and len(sa["agree"]) == 83 and [x["bill"]["bill_no"] for x in sa["returns"]] == ["148"] and not sa["short"],
+   "%d agree %s ret %d short %d nolines" % (len(sa["agree"]), [x["bill"]["bill_no"] for x in sa["returns"]], len(sa["short"]), len(sa["no_lines"])))
+ck("August: the moved bill's OLD-key item lines (still live in the 27-Aug ITEMWISE export) are stale, not an orphan set",
+   not sa["orphans"] and sa["orphan_p"] == 0 and sa["itemwise_p"] == sa["itemwise_bills_p"], str([(t["bill_no"], t["bill_date"]) for t in sa["orphans"]]))
+ck("August is READY TO FINALISE with its one return (the owner's ruling)", sa["can_finalise"] and not sa["needs_verdict"], str(sa["reasons"]))
+ck("August story: 'August: Rs 3,54,879 (supplier-wise, final for month-end). 84 bills; 1 carries a purchase return; ready to finalise.'",
+   sa["story"] == "August: \u20b93,54,879 (supplier-wise, final for month-end). 84 bills; 1 carries a purchase return; ready to finalise.", sa["story"])
+ma = cl.get(P + "/page/month/2026-08").get_data(as_text=True)
+ck("August month page: FINALISE offered to the doctor, bill 148 labelled 'purchase return ... (Marg)', no verdict buttons anywhere",
+   "FINALISE August 2026" in ma and "purchase return " in ma and "(Marg)</span>" in ma and 'onclick="verdict(' not in ma)
+hub = cl.get(P + "/page/hub").get_data(as_text=True)
+ck("hub: August row shows 3,54,879 and the story line verbatim", "3,54,879" in hub and sa["story"] in hub)
+for pg in ("hub", "month/2026-08", "month/2026-07", "month/2026-09", "month/2025-06"):
+    h = cl.get(P + "/page/" + pg).get_data(as_text=True)
+    ck("wording: '%s' never says 'mark each', 'unverified' or 'Differ'" % pg,
+       "mark each" not in h.lower() and "unverified" not in h and ">Differ<" not in h and "differs from" not in h)
+r = cl.post(P + "/api/finalise", json=dict(month="2026-08"))
+ck("the doctor finalises August; purchase_month stores the supplier-wise figure",
+   r.status_code == 200 and q1("SELECT billwise_total_p FROM purchase_month WHERE month='2026-08'") == 35487900)
+ck("hub August line now reads 'FINAL -- manoj, <when> IST'", "FINAL \u2014 manoj, " in cl.get(P + "/page/hub").get_data(as_text=True))
+cl.post(P + "/api/reopen", json=dict(month="2026-08", reason="selftest leaves August provisional"))
+ck("bw_amount_p / sw_amount_p exist on purchase_bill and are filled for every effective bill (rev 4 columns, added on first request)",
+   q1("SELECT COUNT(*) FROM purchase_bill WHERE bw_amount_p IS NULL AND sw_amount_p IS NULL") == 0)
 
 # ------------------------------------------------------------- 14. fail closed
 as_("", "", set())
@@ -554,6 +651,75 @@ ck("nobody signed in -> the hub is refused", r.status_code in (401, 302))
 as_("stranger", "staff", set())
 ck("signed in with no medical role -> refused (403)", cl.get(P + "/page/hub").status_code == 403)
 ck("schema was created lazily, never at import (F-303)", PA._schema_done is True)
+
+# ------------------------------------------------------------- 16. THE BOX'S OWN ORDER (rev 4): every archived
+# Jul-Sep export, oldest stamp first, exactly as push_purchases.py sends them -- on a fresh db, through a
+# rev-3-shaped purchase_bill (no rev-4 columns) so the first-request migration is exercised too.
+DB2 = os.path.join(TMP, "box_order.db")
+c2 = sqlite3.connect(DB2)
+c2.executescript(io.open(os.path.join(HERE, "purchase_schema.sql"), encoding="utf-8").read())
+c2.close()
+PA._schema_done = False
+app2 = Flask("box_order")
+
+
+def _db2():
+    if not has_app_context():
+        raise RuntimeError("Working outside of application context")
+    if "db" not in g:
+        g.db = sqlite3.connect(DB2)
+        g.db.row_factory = sqlite3.Row
+    return g.db
+
+
+PA.init(app2, _db2, _require, marg_token=TOKEN, assets_db=ASSETS, assets_url="https://assets.example")
+
+
+@app2.teardown_appcontext
+def _close2(_e):
+    c = g.pop("db", None)
+    if c is not None:
+        c.close()
+
+
+cl2 = app2.test_client()
+WHO.update(user="manoj", role="doctor", roles={"checker"})
+box = []
+for typ in ("BILLWISE", "SUPPLIERWISE", "ITEMWISE", "BILLITEMWISE"):
+    for f in glob.glob(os.path.join(ARCHIVE, "PURCHASE_" + typ, "2026-0[789]", "*.XLS")):
+        box.append((os.path.basename(f).split("__")[2], f, typ))
+box.sort()
+ck("the archive holds the fifteen Jul-Sep exports the box was fed", len(box) == 15, str(len(box)))
+stored = 0
+for stamp, f, typ in box:
+    r = cl2.post(P + "/api/push", json=R.payload(f, typ, MP.read_purchase) if typ == "ITEMWISE" else R.payload(f, typ), headers=H)
+    stored += 1 if r.status_code == 200 and r.get_json()["stored"] else 0
+ck("oldest-first: all fifteen stored as new (nothing arrives older than a live export that contains it)", stored == 15, str(stored))
+c2 = sqlite3.connect(DB2)
+sup = {r[0][-8:-4]: r[1] for r in c2.execute("SELECT file, superseded_by FROM purchase_export")}
+cols = [r[1] for r in c2.execute("PRAGMA table_info(purchase_bill)")]
+c2.close()
+ck("box order: 01-29 Aug BILLWISE and 28-31 Aug BILLITEMWISE are superseded; the full-month ones are live",
+   sup.get("3269") and sup.get("7222") and not sup.get("38f9") and not sup.get("a21d") and not sup.get("3bbb"), str(sup))
+ck("box order: the rev-4 columns were added on the first request and back-filled", "bw_amount_p" in cols and "sw_amount_p" in cols)
+with app2.test_request_context():
+    b7, b8, b9 = (PA._month_summary(_db2(), m) for m in ("2026-07", "2026-08", "2026-09"))
+ck("box order, August: 84 bills, Rs 3,54,879 supplier-wise, every bill has lines, 83 agree, one return (148), nothing stray left over",
+   len(b8["bills"]) == 84 and b8["marg_p"] == 35487900 and b8["basis"] == "supplier-wise" and not b8["no_lines"] and len(b8["agree"]) == 83
+   and [x["bill"]["bill_no"] for x in b8["returns"]] == ["148"] and not b8["orphans"] and not b8["short"], b8["story"])
+ck("box order, August: the moved bill (02 of 18-Aug) found its lines under the OLD supplier key (stray set, rev 4)",
+   any(b["bill_no"].endswith("02") and b["bill_date"] == "2026-08-18" for b in b8["agree"]) and len(b8["stray"]) == 1, str(list(b8["stray"])))
+ck("box order, August story is exactly the line the hub will show",
+   b8["story"] == "August: \u20b93,54,879 (supplier-wise, final for month-end). 84 bills; 1 carries a purchase return; ready to finalise.", b8["story"])
+ck("box order, July story is exactly the line the hub will show",
+   b7["story"] == "July: \u20b94,76,393 (supplier-wise, final for month-end). 103 bills; 2 carry a purchase return; ready to finalise.", b7["story"])
+ck("box order, September: bill-wise stands in, 11 bills agree, ready to finalise",
+   b9["marg_p"] == 7243800 and b9["basis"] == "bill-wise" and len(b9["agree"]) == 11 and b9["can_finalise"], b9["story"])
+h2 = cl2.get(P + "/page/hub").get_data(as_text=True)
+ck("box order: the hub renders with all three stories and none of the banned wording",
+   cl2.get(P + "/page/hub").status_code == 200 and b7["story"] in h2 and b8["story"] in h2 and b9["story"] in h2 and "mark each" not in h2.lower())
+ck("box order: every month page renders 200",
+   all(cl2.get(P + "/page/month/" + m).status_code == 200 for m in ("2026-07", "2026-08", "2026-09")))
 
 print("\n%d PASS  %d FAIL" % (len(PASSED), len(FAILED)))
 for f in FAILED:

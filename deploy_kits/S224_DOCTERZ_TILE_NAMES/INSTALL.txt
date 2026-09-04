@@ -1,0 +1,30 @@
+S224_DOCTERZ_TILE_NAMES -- ONE PASTE. It CANNOT leave the portal down.
+
+Two tiles are renamed, nothing else: Day Revenue -> Docterz Revenue (desc: takings -> collection),
+Daily Register -> Docterz daily collection (desc: The counter's -> Reception's). tile_grants.json
+goes v6 -> v7 with the same two names, because grants match tiles BY NAME -- the two files move
+together. The patcher refuses unless /root/portal/portal.py is exactly
+3530f637d620c225906f9c0113b1f0b0 (the pin after today's Marg Purchases tile). If the portal does
+not come back, the paste restores both files from their backups by itself and restarts again.
+
+THE PASTE (one line):
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S224_DOCTERZ_TILE_NAMES && md5sum -c SUMS.md5 --quiet && \cp /root/portal/tile_grants.json /root/portal/tile_grants.json.bak_S224dz_$(date +%Y%m%d-%H%M%S) && \cp patch_portal_docterz_names_s224.py /root/portal/ && /root/wa/venv/bin/python3 -B /root/portal/patch_portal_docterz_names_s224.py 3530f637d620c225906f9c0113b1f0b0 && \cp tile_grants.json /root/portal/tile_grants.json && systemctl restart clinic-portal && sleep 3 && (systemctl is-active --quiet clinic-portal && echo "UP -- Docterz tiles renamed" && md5sum /root/portal/portal.py /root/portal/tile_grants.json || (echo "PORTAL DID NOT COME BACK -- ROLLING BACK BY ITSELF"; ls -t /root/portal/portal.py.bak_S224_dznames_* | head -1 | xargs -I{} \cp {} /root/portal/portal.py; ls -t /root/portal/tile_grants.json.bak_S224dz_* | head -1 | xargs -I{} \cp {} /root/portal/tile_grants.json; systemctl restart clinic-portal; sleep 4; systemctl is-active clinic-portal; md5sum /root/portal/portal.py /root/portal/tile_grants.json; journalctl -u clinic-portal -n 12 --no-pager | tail -12))
+
+GOOD:  "UP -- Docterz tiles renamed", then two md5 lines reading exactly
+       d28038047d81abd290d58ed15f9a1482  /root/portal/portal.py
+       578702a5a10e1487e0f320c6f1b75755  /root/portal/tile_grants.json
+       (the portal patcher's own "NEW PIN" line above them must say d28038047d81abd290d58ed15f9a1482
+       too -- the selftest rebuilt the live bytes from the repository, so the pin is predicted exactly,
+       not estimated).
+
+Then close the app fully and reopen: in Money & Accounts the two tiles now read
+   📈 Docterz Revenue -- Clinic collection by day — from Docterz
+   📒 Docterz daily collection -- Reception's day totals — cash, UPI, card
+for the same five people as before (shavez, shivani, alisha, Dr Bhawna, you). Nobody gains or
+loses a tile.
+
+ROLLBACK BY HAND (if ever needed; one line each):
+\cp $(ls -t /root/portal/portal.py.bak_S224_dznames_* | head -1) /root/portal/portal.py
+\cp $(ls -t /root/portal/tile_grants.json.bak_S224dz_* | head -1) /root/portal/tile_grants.json
+systemctl restart clinic-portal

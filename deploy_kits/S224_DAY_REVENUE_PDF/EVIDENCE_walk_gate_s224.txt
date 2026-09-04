@@ -1,0 +1,35 @@
+S224_DAY_REVENUE_PDF -- walk_daypdf_gate_s224.py -- 04-Sep-2026 05:28
+FIN_DIR = an offline copy of the box's finance_app.py AFTER S224_MARG_PURCHASES (97fe3206c18cb232cca98b59fb47e821, the repo-side reconstruction; the box's own pin is 44bf7b50d1e86af14e5bda79624fc8ca and is passed to the patcher on the box)
+beside it: finance_clinic_day.py as built at S223_DAY_PAGE_EDITS (dceb79a06e71f7e35150c69e1f5dd175), the neighbour whose routes must not collide
+
+-- the patcher, three ways --
+$ patch ... 44bf7b50d1e86af14e5bda79624fc8ca   (the box's pin, against the offline copy)
+REFUSING: .../finance_app.py is 97fe3206c18cb232cca98b59fb47e821, you said 44bf7b50d1e86af14e5bda79624fc8ca (D172/D188). Read the box's pin again.
+$ patch ... 97fe3206c18cb232cca98b59fb47e821
+current pin  97fe3206c18cb232cca98b59fb47e821 / NEW PIN 968f3d0007921bccd2907819849b8f9b / compiles
+$ patch ... 97fe3206c18cb232cca98b59fb47e821   (again)
+ALREADY PATCHED  (S224_DAY_REVENUE_PDF begin present); pin 968f3d0007921bccd2907819849b8f9b -- nothing to do
+
+-- the walk --
+walking <FIN_DIR>/finance_app.py on a COPY of the db at <HOME>/tmp/walk_s224pdf_0hrw1qz9/finance.db
+  PASS  finance_app imported with the S224_DAY_REVENUE_PDF mount
+  PASS  the S223 day page is mounted beside it (the neighbour the routes must not collide with)
+  PASS  share bookmark with nobody signed in -> 302 (the login redirect; curl's expected answer)
+  PASS  share bookmark for the checker -> 302 to yesterday's share page
+  PASS  PDF with nobody signed in -> 302, never the file
+  PASS  PDF for a login with NO clinic role -> refused by the front gate
+  PASS  PDF for the clinic MAKER -> 403 from require (checker only)
+  PASS  PDF for the clinic checker -> 200 application/pdf
+  PASS  it is a PDF that names the invented day and its total
+  PASS  the invented names are in the PDF, so the lines really came through the real db()
+  PASS  ?dl=1 -> attachment named Docterz_Revenue_<date>.pdf
+  PASS  /day/<date>.pdf reaches THIS module, not the S223 day page (no route collision)
+  PASS  /day/<date> still reaches the S223 A4 page, unchanged
+  PASS  /day (the month) still answers
+  PASS  share page for the checker -> 200 with both buttons and navigator.share
+  PASS  share page names no patient (only the PDF carries them)
+  PASS  share page for the maker -> 403 in words
+  PASS  the finance app's own healthz still answers
+  PASS  the purchase healthz still answers (the neighbouring S224 mount)
+
+19 PASS  0 FAIL

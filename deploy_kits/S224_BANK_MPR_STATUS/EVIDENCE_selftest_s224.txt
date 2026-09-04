@@ -1,0 +1,27 @@
+  PASS  applied: state
+  PASS  applied: line names time, rows, rupees
+  PASS  late: state
+  PASS  late: line says LATE with the time and the expectation
+  PASS  rejected: state
+  PASS  rejected: RECEIVED, NOT APPLIED with the parser's reason
+  PASS  no_rows: state (raw file for the mail day, no row)
+  PASS  no_rows: line says RECEIVED and NO UPI
+  PASS  waiting: 03-Sep seen at 04-Sep 10:45
+  PASS  waiting: line names the mail time and the expected-by
+  PASS  waiting: expected_by is 12:20 on D+1
+  PASS  not_received: 03-Sep seen at 04-Sep 13:00 (before the shout)
+  PASS  not_received: after the 15:00 shout, the line says the shout should have come
+  PASS  bad date refused
+  PASS  other unit is independent (medical 01-Sep: nothing seeded -> not_received)
+  PASS  missing tables: still answers (waiting), never raises
+  PASS  fragment has no <script> and carries data-state
+  PASS  fragment escapes html
+  PASS  GET /finance/clinic/bank/mpr/<date> -> 200 html fragment
+  PASS  GET .json -> json with state
+  PASS  ?json=1 -> json
+  PASS  ?unit=medical honoured
+  PASS  bad date -> 400
+  PASS  GET /finance/clinic/bank/mpr -> 200 page with 3 lines
+  PASS  no role -> 403 from require
+
+25 passed, 0 failed

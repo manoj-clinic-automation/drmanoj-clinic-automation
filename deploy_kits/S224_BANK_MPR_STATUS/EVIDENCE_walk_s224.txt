@@ -1,0 +1,21 @@
+walking $HOME/s224patch/finance_app.py on a COPY of the db at $HOME/tmp/walk_mpr_s224_gcckunjt/finance.db
+  PASS  finance_app imported with the S224 MPR mount (no import-time db call, F-303)
+  PASS  the mount sits AFTER the S224_MARG_PURCHASES end marker (chained, not interleaved)
+  PASS  the mounted module knows the app's UPI_DIR
+  PASS  the mounted module is on the clinic unit
+  PASS  anonymous -> not 200 through the REAL gate (login redirect or 401/403)
+  PASS  clinic checker -> 200 html line for yesterday
+  PASS  yesterday's line names one of the states in English
+  PASS  json for yesterday
+  PASS  the seeded APPLIED day reads applied through the real app db()
+  PASS  03-Sep answers from the store (never a 500)
+      03-Sep on this copy: Bank MPR for Thu 03-Sep-2026 (Clinic): WAITING — ICICI mails it ~11:15 on 04-Sep and the hourly push lands it by ~12:20 IST; not received yet
+  PASS  the 8-day page renders
+  PASS  the 8-day page has no <script>
+  PASS  a medical-only login is refused on the clinic route by the REAL gate (302 to portal, or 403)
+  PASS  nothing was written to the copied db by the walk (no audit row from these routes)
+  PASS  the temp statement store is still empty (the routes never write files)
+  PASS  S224_MARG_PURCHASES healthz still public and 200
+  PASS  /finance/healthz still 200
+
+17 passed, 0 failed

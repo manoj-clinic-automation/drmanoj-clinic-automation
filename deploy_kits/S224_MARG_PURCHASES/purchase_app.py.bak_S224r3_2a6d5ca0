@@ -1,25 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-purchase_app.py -- S224: Marg's purchases, on the box.  (rev 4, 04-Sep-2026)
-
-REV 4 -- the owner's ruling on returns (04-Sep 10:40 IST): "the supplier-wise report is
-    FINAL for month-end work; Marg reports purchase returns like this only -- we learn
-    and adjust; avoid confusing lines on the page."
-    * The month's figure is the SUPPLIER-WISE total. Bill-wise is identical by
-      construction; it stands in only while supplier-wise has not been exported, and
-      the page says so quietly. Each bill remembers both amounts (bw_amount_p,
-      sw_amount_p -- two columns added to purchase_bill on first request, back-filled
-      from amount_p; the schema file is untouched).
-    * A bill whose item-wise net EXCEEDS its amount is a PURCHASE RETURN as Marg
-      reports it: labelled "purchase return Rs d (Marg)", counted in Returns, never
-      asked Correct/Wrong, never blocks FINALISE.
-    * Correct / Wrong remain only where item-wise net is BELOW the bill by more than
-      Rs 1 (item lines missing -- check the bill) or where bill-wise and supplier-wise
-      disagree on a bill.
-    * FINALISE is refused only for (a) an unresolved WRONG, (b) a bill with no item
-      lines, (c) bill-wise vs supplier-wise disagreeing by more than Rs 1 for the
-      month. The one-line story never asks the reader to mark anything.
+purchase_app.py -- S224: Marg's purchases, on the box.  (rev 2, 04-Sep-2026)
 
 REV 2 -- gross vs net (the owner's find on the first screen).
     Rev 1 summed purchase_line.amount_p, which is Marg's GROSS line value before the
@@ -137,14 +119,6 @@ def _ensure(con):
         return
     with io.open(SCHEMA, "r", encoding="utf-8") as fh:
         con.executescript(fh.read())
-    # rev 4: each bill keeps BOTH reports' amounts. Added here, never in the schema file,
-    # so the one-file install stays one file; back-filled from amount_p once.
-    have = {r[1] for r in con.execute("PRAGMA table_info(purchase_bill)")}
-    for col, src in (("bw_amount_p", "bw_md5"), ("sw_amount_p", "sw_md5")):
-        if col not in have:
-            con.execute("ALTER TABLE purchase_bill ADD COLUMN %s INTEGER" % col)
-        con.execute("UPDATE purchase_bill SET %s=amount_p WHERE %s IS NULL AND %s IS NOT NULL"
-                    % (col, col, src))
     con.commit()
     _schema_done = True
 
@@ -251,17 +225,10 @@ def api_push():
     _ensure(con)
     if con.execute("SELECT 1 FROM purchase_export WHERE md5=?", (md5,)).fetchone():
         return jsonify(ok=True, stored=False, reason="duplicate")
-    # rev 4: an export supersedes every live export of its type whose period it CONTAINS and
-    # whose stamp is older (01-31 Aug exported on 04-Sep retires 01-29 Aug exported on 30-Aug --
-    # otherwise a bill Marg re-keyed in between lives on through the partial export and inflates
-    # the month). The same period counts as contained. An incoming export is itself superseded
-    # when a live newer export already contains its period.
     rivals = con.execute(
-        "SELECT md5, export_stamp FROM purchase_export WHERE type=? AND period_from>=? "
-        "AND period_to<=? AND superseded_by IS NULL AND export_stamp<?", (typ, pf, pt, stamp)).fetchall()
-    newer = con.execute(
-        "SELECT md5, export_stamp FROM purchase_export WHERE type=? AND period_from<=? "
-        "AND period_to>=? AND superseded_by IS NULL AND export_stamp>?", (typ, pf, pt, stamp)).fetchall()
+        "SELECT md5, export_stamp FROM purchase_export WHERE type=? AND period_from=? "
+        "AND period_to=? AND superseded_by IS NULL", (typ, pf, pt)).fetchall()
+    newer = [r for r in rivals if r[1] > stamp]
     if newer:
         con.execute("INSERT INTO purchase_export (md5,type,file,period_from,period_to,"
                     "export_stamp,received_at,n_rows,grand_amount_p,superseded_by) "
@@ -300,7 +267,6 @@ def _store_bills(con, typ, md5, rows):
     """BILLWISE / SUPPLIERWISE rows -> purchase_bill. Identity (supplier_key, bill_no);
     the date from BILLWISE first, SUPPLIERWISE second; verdicts survive re-pushes."""
     col = "bw_md5" if typ == "BILLWISE" else "sw_md5"
-    amt = "bw_amount_p" if typ == "BILLWISE" else "sw_amount_p"
     n = 0
     for i, r in enumerate(rows):
         if not isinstance(r, dict):
@@ -328,20 +294,18 @@ def _store_bills(con, typ, md5, rows):
                     break
         if target is None:
             con.execute("INSERT INTO purchase_bill (supplier_norm,supplier,bill_no,bill_date,"
-                        "month,cash_p,credit_p,amount_p,source_md5,%s,%s,date_src) "
-                        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)" % (col, amt),
-                        (key, sup, bno, d, d[:7], cash, credit, cash + credit, md5, md5,
-                         cash + credit, typ))
+                        "month,cash_p,credit_p,amount_p,source_md5,%s,date_src) "
+                        "VALUES (?,?,?,?,?,?,?,?,?,?,?)" % col,
+                        (key, sup, bno, d, d[:7], cash, credit, cash + credit, md5, md5, typ))
         else:
             # keep the longer printed name (the one carrying the city), and the BILLWISE date
             name = target[3] if len(target[3] or "") >= len(sup) else sup
             newdate = d if (typ == "BILLWISE" or target[2] != "BILLWISE") else target[1]
             src = "BILLWISE" if (typ == "BILLWISE" or target[2] == "BILLWISE") else typ
             con.execute("UPDATE purchase_bill SET supplier=?, bill_date=?, month=?, cash_p=?, "
-                        "credit_p=?, amount_p=?, source_md5=?, %s=?, %s=?, date_src=? WHERE id=?"
-                        % (col, amt),
+                        "credit_p=?, amount_p=?, source_md5=?, %s=?, date_src=? WHERE id=?" % col,
                         (name, newdate, newdate[:7], cash, credit, cash + credit, md5, md5,
-                         cash + credit, src, target[0]))
+                         src, target[0]))
         n += 1
     return n
 
@@ -486,30 +450,13 @@ EFF_LINE = ("EXISTS (SELECT 1 FROM purchase_export e WHERE e.superseded_by IS NU
             "e.md5=l.source_md5)")
 
 
-AGREE_P = 100          # a bill AGREES with its lines when |Marg amount - item-wise net| <= Rs 1
-
-
 def _bills_for_month(con, month):
-    """The month's effective bills, as dicts, each carrying the rev-4 money view:
-    bw_p (bill-wise, while that export is live), sw_p (supplier-wise, while live),
-    marg_p (the figure the month closes on: supplier-wise, else bill-wise), basis, and
-    disagree_p (supplier-wise minus bill-wise when both are live and differ by more
-    than Rs 1, else 0)."""
-    out = []
-    for r in con.execute(
-            "SELECT b.*, EXISTS (SELECT 1 FROM purchase_export e WHERE e.superseded_by IS NULL "
-            "AND e.md5=b.bw_md5) bw_live, EXISTS (SELECT 1 FROM purchase_export e WHERE "
-            "e.superseded_by IS NULL AND e.md5=b.sw_md5) sw_live FROM purchase_bill b WHERE "
-            "b.month=? AND " + EFF_BILL + " ORDER BY b.supplier, b.bill_date, b.bill_no", (month,)):
-        b = dict(r)
-        bw = (b["bw_amount_p"] if b["bw_amount_p"] is not None else b["amount_p"]) if b["bw_live"] else None
-        sw = (b["sw_amount_p"] if b["sw_amount_p"] is not None else b["amount_p"]) if b["sw_live"] else None
-        b["bw_p"], b["sw_p"] = bw, sw
-        b["marg_p"] = sw if sw is not None else (bw if bw is not None else b["amount_p"])
-        b["basis"] = "supplier-wise" if sw is not None else "bill-wise"
-        b["disagree_p"] = (sw - bw) if (sw is not None and bw is not None and abs(sw - bw) > AGREE_P) else 0
-        out.append(b)
-    return out
+    return con.execute(
+        "SELECT b.* FROM purchase_bill b WHERE b.month=? AND " + EFF_BILL +
+        " ORDER BY b.supplier, b.bill_date, b.bill_no", (month,)).fetchall()
+
+
+AGREE_P = 100          # a bill AGREES with its lines when |bill-wise - item-wise net| <= Rs 1
 
 
 def _line_sets(con, month):
@@ -537,33 +484,15 @@ def _line_sets(con, month):
     return sets
 
 
-def _bill_lines(bill, sets, stray=None):
+def _bill_lines(bill, sets):
     """The bill's line set, or None. A set with no supplier (a BILLITEMWISE bill whose
-    bill-wise row has not yet named it) still counts when bill_no and date agree; so does
-    a STRAY set (rev 4) -- one keyed to a supplier that names no live bill of the month,
-    i.e. the old key of a bill Marg moved to its corrected supplier -- when it is the
-    only stray with that bill number and date."""
+    bill-wise row has not yet named it) still counts when bill_no and date agree."""
     t = sets.get((bill["supplier_norm"], bill["bill_no"]))
     if t is None:
         t = sets.get((None, bill["bill_no"]))
         if t is not None and t["bill_date"] != bill["bill_date"]:
             t = None
-    if t is None and stray:
-        t = stray.get((bill["bill_no"], bill["bill_date"]))
     return t
-
-
-def _stray_sets(bills, sets):
-    """(bill_no, bill_date) -> the one line set whose supplier key names no live bill of
-    the month; None where two strays share a number and date (ambiguous: left alone)."""
-    live = {(b["supplier_norm"], b["bill_no"]) for b in bills}
-    out = {}
-    for k, t in sets.items():
-        if k[0] is None or k in live:
-            continue
-        key = (t["bill_no"], t["bill_date"])
-        out[key] = None if key in out else t
-    return {k: t for k, t in out.items() if t is not None}
 
 
 def _undated_lines(con, month=None):
@@ -597,9 +526,8 @@ def _dates_text(dates):
         return ""
     if len(ds) <= 6:
         days = ", ".join(_human(d)[:2].lstrip("0") for d in ds)
-        return "%s %s" % (days, _human(ds[0])[3:6])
-    return "%s\u2013%s %s (%d days)" % (_human(ds[0])[:2].lstrip("0"), _human(ds[-1])[:2].lstrip("0"),
-                                      _human(ds[-1])[3:6], len(ds))
+        return "%s-%s" % (days, _human(ds[0])[3:6])
+    return "%s ... %s (%d days)" % (_human(ds[0])[:6], _human(ds[-1])[:6], len(ds))
 
 
 def _bill_short(b):
@@ -614,138 +542,94 @@ def _name_some(items, fmt, limit=6):
 
 
 def _month_summary(con, month):
-    """Per-bill reconciliation on the owner's rev-4 ruling. The month's figure is the
-    SUPPLIER-WISE total (bill-wise is identical by construction and stands in only while
-    supplier-wise has not been exported). Item lines are the check, not the figure.
-    Buckets: AGREES (|item-wise net - Marg| <= Rs 1) · PURCHASE RETURN (item-wise net
-    ABOVE the bill by more than Rs 1 -- how Marg reports a return; nothing to mark,
-    never blocks) · SHORT (item-wise net BELOW the bill by more than Rs 1 -- item lines
-    missing; Correct/Wrong offered) · NO ITEM LINES · ITEM LINES WITH NO BILL. A bill on
-    which bill-wise and supplier-wise disagree is offered a verdict too, and a month on
-    which the two reports disagree by more than Rs 1 cannot close."""
+    """Per-bill reconciliation. Buckets: AGREES (|diff| <= Rs 1), DIFFERS, NO ITEM LINES,
+    and ITEM LINES WITH NO BILL. Money: bill-wise from Marg's bill report; item-wise is
+    the NET sum of each bill's one line set (see _line_sets)."""
     bills = _bills_for_month(con, month)
     sets = _line_sets(con, month)
-    stray = _stray_sets(bills, sets)
-    marg = sum(b["marg_p"] for b in bills)
-    sw_p = sum(b["sw_p"] for b in bills if b["sw_p"] is not None)
-    bw_p = sum(b["bw_p"] for b in bills if b["bw_p"] is not None)
-    n_sw = sum(1 for b in bills if b["sw_p"] is not None)
-    if not bills or n_sw == len(bills):
-        basis, basis_note = "supplier-wise", ""
-    elif n_sw == 0:
-        basis, basis_note = "bill-wise", "supplier-wise not exported yet for this month \u2014 bill-wise stands in"
-    else:
-        basis, basis_note = "supplier-wise", "%s so far only in bill-wise" % _plural(len(bills) - n_sw, "bill")
-    month_disagree_p = sum(b["sw_p"] - b["bw_p"] for b in bills
-                           if b["sw_p"] is not None and b["bw_p"] is not None)
-    agree, returns, short, no_lines, used = [], [], [], [], set()
+    bw = sum(b["amount_p"] for b in bills)
+    agree, differ, no_lines, used = [], [], [], set()
     iw = 0
     for b in bills:
-        t = _bill_lines(b, sets, stray)
+        t = _bill_lines(b, sets)
         if t is None:
             no_lines.append(b)
             continue
         used.add((t["supplier_norm"], t["bill_no"]))
         iw += t["net_p"]
-        d = t["net_p"] - b["marg_p"]
-        x = dict(bill=b, net_p=t["net_p"], gross_p=t["gross_p"], n=t["n"], diff_p=d)
-        if d > AGREE_P:
-            returns.append(x)
-        elif d < -AGREE_P:
-            short.append(x)
-        else:
+        d = t["net_p"] - b["amount_p"]
+        if abs(d) <= AGREE_P:
             agree.append(b)
-    # a line set nobody uses is an orphan -- unless a bill with the same number and date
-    # already took a set from the same or a later export: then it is the OLD key of a bill
-    # Marg re-keyed (moved to its corrected supplier) and is stale, not missing.
-    taken = {}
-    for k in used:
-        t = sets[k]
-        taken[(t["bill_no"], t["bill_date"])] = max(taken.get((t["bill_no"], t["bill_date"]), ""), t["stamp"])
-    orphans = [t for k, t in sets.items() if k not in used
-               and taken.get((t["bill_no"], t["bill_date"]), "") < t["stamp"]]
+        else:
+            hint = "purchase return?" if t["net_p"] > b["amount_p"] else "discount or rounding at bill level?"
+            differ.append(dict(bill=b, net_p=t["net_p"], gross_p=t["gross_p"], n=t["n"], diff_p=d, hint=hint))
+    orphans = [t for k, t in sets.items() if k not in used]
     orphan_p = sum(t["net_p"] for t in orphans)
-    disagree = [b for b in bills if b["disagree_p"]]
-    needs_verdict = {x["bill"]["id"] for x in short} | {b["id"] for b in disagree}
     wrong = [b for b in bills if b["verdict"] == "WRONG"]
-    short_open = [x for x in short if not x["bill"]["verdict"]]
-    disagree_open = [b for b in disagree if not b["verdict"]]
+    unverdicted = [b for b in bills if not b["verdict"]]
+    differ_open = [x for x in differ if x["bill"]["verdict"] != "CORRECT"]
     gap_dates = sorted(set(b["bill_date"] for b in no_lines))
     undated = _undated_lines(con, month)
     st = _month_status(con, month)
     reasons = []
     if wrong:
-        reasons.append("%s marked Wrong and not yet resolved: %s"
+        reasons.append("%s marked WRONG and not yet resolved: %s"
                        % (_plural(len(wrong), "bill"), _name_some(wrong, _bill_short)))
+    if undated:
+        reasons.append("%s could not be dated" % _plural(len(undated), "item line"))
     if no_lines:
-        reasons.append("%s no item lines yet (item-wise export missing for %s): %s"
+        reasons.append("%s no item-wise lines (item-wise export missing for %s): %s"
                        % (_plural(len(no_lines), "bill has", "bills have"), _dates_text(gap_dates),
                           _name_some(no_lines, _bill_short)))
-    if abs(month_disagree_p) > AGREE_P:
-        reasons.append("bill-wise and supplier-wise disagree by %s for this month: %s"
-                       % (_r(abs(month_disagree_p)),
-                          _name_some(disagree, lambda b: "%s (bill-wise %s, supplier-wise %s)"
-                                     % (_bill_short(b), _r(b["bw_p"]), _r(b["sw_p"])))))
+    if differ_open:
+        reasons.append("%s from %s item lines and %s not yet marked Correct: %s"
+                       % (_plural(len(differ_open), "bill differs", "bills differ"),
+                          "its" if len(differ_open) == 1 else "their",
+                          "is" if len(differ_open) == 1 else "are",
+                          _name_some(differ_open, lambda x: "%s (bill-wise %s, item-wise net %s, %s)"
+                                     % (_bill_short(x["bill"]), _r(x["bill"]["amount_p"]), _r(x["net_p"]), x["hint"]))))
+    if orphans:
+        reasons.append("%s belong to no bill of this month (%s): %s"
+                       % (_plural(len(orphans), "item line set"), _r(orphan_p),
+                          _name_some(orphans, lambda t: "%s (%s)" % (t["bill_no"], _human(t["bill_date"])[:6]))))
     if not bills:
         reasons.append("no bills have been pushed for this month")
-    can = not reasons
-    # the one calm line for the hub and the month page
+    # the one-line plain-English verdict for the hub
     mn = _month_name(month)
-    short_mn = mn.split(" ")[0]
-    head = "%s: %s (%s%s)" % (short_mn, _r(marg), basis,
-                              ", final for month-end" if basis == "supplier-wise" and bills else "")
     if st["status"] == "final":
-        story = "%s. FINAL \u2014 %s, %s IST." % (head, st["finalised_by"], _when_ist(st["finalised_at"]))
+        story = "%s: FINAL -- finalised by %s on %s." % (mn, st["finalised_by"], (st["finalised_at"] or "")[:10])
     elif not bills:
-        story = "%s: no bills yet%s." % (short_mn, ("; %s waiting, undated" % _plural(len(undated), "item line"))
-                                         if undated else "")
+        story = "%s: no bills yet." % mn
     else:
-        bits = [_plural(len(bills), "bill")]
-        if returns:
-            bits.append("%d %s a purchase return" % (len(returns), "carries" if len(returns) == 1 else "carry"))
+        bits = []
         if no_lines:
-            bits.append("%s no item lines yet (%s) \u2014 export item-wise for %s"
-                        % (_plural(len(no_lines), "bill has", "bills have"), _dates_text(gap_dates),
-                           "that date" if len(gap_dates) == 1 else "those dates"))
-        if short_open:
-            bits.append("%s item lines short of the bill \u2014 check the bill"
-                        % _plural(len(short_open), "bill has", "bills have"))
-        if disagree_open:
-            bits.append("bill-wise and supplier-wise disagree on %s" % _plural(len(disagree_open), "bill"))
-        if abs(month_disagree_p) > AGREE_P:
-            bits.append("the two reports disagree by %s for the month" % _r(abs(month_disagree_p)))
+            last = "%02d" % _days_in_month(month)
+            bits.append("%s on %s have no item-wise lines (%s) -- export item-wise 01-%s %s once and this closes"
+                        % (_plural(len(no_lines), "bill"), _plural(len(gap_dates), "day"), _dates_text(gap_dates),
+                           last, _human(month + "-01")[3:6]))
+        if differ_open:
+            bits.append("%s from %s item lines (%s) -- mark each Correct (a return or rounding) or Wrong"
+                        % (_plural(len(differ_open), "bill differs", "bills differ"),
+                           "its" if len(differ_open) == 1 else "their",
+                           _name_some(differ_open, lambda x: "%s %s" % (x["bill"]["bill_no"], x["hint"].rstrip("?")), 3)))
         if wrong:
-            bits.append("%s marked Wrong" % _plural(len(wrong), "bill"))
+            bits.append("%s marked WRONG" % _plural(len(wrong), "bill"))
         if undated:
             bits.append("%s undated" % _plural(len(undated), "item line"))
         if orphans:
-            bits.append("%s a bill not in the reports" % _plural(len(orphans), "item line set names", "item line sets name"))
-        if basis_note:
-            bits.append(basis_note)
-        if can:
-            bits.append("ready to finalise")
-        story = "%s. %s." % (head, "; ".join(bits))
-    return dict(month=month, bills=bills, sets=sets, stray=stray, marg_p=marg, billwise_p=marg, bw_p=bw_p, sw_p=sw_p,
-                basis=basis, basis_note=basis_note, month_disagree_p=month_disagree_p,
-                itemwise_p=iw + orphan_p, itemwise_bills_p=iw, orphan_p=orphan_p, diff_p=marg - (iw + orphan_p),
-                agree=agree, returns=returns, short=short, short_open=short_open, disagree=disagree,
-                disagree_open=disagree_open, needs_verdict=needs_verdict, no_lines=no_lines,
-                orphans=orphans, gap_dates=gap_dates, wrong=len(wrong),
-                to_check=len(short_open) + len(disagree_open), undated=undated, status=st,
-                can_finalise=can, reasons=reasons, story=story, head=head)
-
-
-IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
-
-
-def _when_ist(iso):
-    """A stored timestamp -> '04-Sep-2026 10:52' in IST. now_iso() is naive server-local
-    time; astimezone() reads it as such and converts, so the label is right whatever
-    zone the box runs in."""
-    try:
-        return dt.datetime.fromisoformat(iso).astimezone(IST).strftime("%d-%b-%Y %H:%M")
-    except (TypeError, ValueError, OverflowError):
-        return iso or "?"
+            bits.append("%s with no bill here" % _plural(len(orphans), "item line set"))
+        if not bits:
+            bits.append("all %d bills agree with their item lines to the rupee -- the doctor can finalise" % len(bills))
+        elif len(agree) == len(bills):
+            bits.insert(0, "all %d bills agree" % len(bills))
+        else:
+            bits.insert(0, "%d of %d bills agree" % (len(agree), len(bills)))
+        story = "%s: %s." % (mn, "; ".join(bits))
+    return dict(month=month, bills=bills, sets=sets, billwise_p=bw, itemwise_p=iw + orphan_p,
+                itemwise_bills_p=iw, orphan_p=orphan_p, diff_p=bw - (iw + orphan_p),
+                agree=agree, differ=differ, differ_open=differ_open, no_lines=no_lines,
+                orphans=orphans, gap_dates=gap_dates, wrong=len(wrong), unverdicted=len(unverdicted),
+                undated=undated, status=st, can_finalise=not reasons, reasons=reasons, story=story)
 
 
 def _days_in_month(ym):
@@ -1358,22 +1242,13 @@ def _phone_for(con, vendor):
 
 # ====================================================================== pages
 def _r(p):
-    """paise -> '₹3,54,879' (whole rupees, Indian grouping -- the way the owner reads a
-    figure; the reports print whole rupees)."""
+    """paise -> 'Rs 12,345' (whole rupees; the reports print whole rupees)."""
     if p is None:
         return "—"
     neg = p < 0
-    v = str(int(round(abs(p) / 100.0)))
-    if len(v) > 3:
-        head, tail = v[:-3], v[-3:]
-        parts = []
-        while len(head) > 2:
-            parts.insert(0, head[-2:])
-            head = head[:-2]
-        if head:
-            parts.insert(0, head)
-        v = ",".join(parts) + "," + tail
-    return ("−" if neg else "") + "₹" + v
+    v = int(round(abs(p) / 100.0))
+    s = "{:,}".format(v)
+    return ("−" if neg else "") + "₹" + s
 
 
 def _esc(s):
@@ -1499,44 +1374,23 @@ def _page(title, body, extra_js=""):
     return html, 200, {"Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store"}
 
 
-def _hhmm_ist_full(ts):
-    """'2026-09-04T09:21:05' or '...+05:30' -> '04-Sep 09:21' (stored times are IST)."""
-    try:
-        d = ts[:10]; t = ts[11:16]
-        y, m, dd = d.split("-")
-        mon = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")[int(m) - 1]
-        return "%s-%s %s" % (dd, mon, t)
-    except (ValueError, TypeError, IndexError):
-        return ts or "?"
-
-
 def _feed_card(con):
-    """Rev 5 (the owner: "and such lines also"): plain English, no per-type counts.
-    Three lines a person can read in one glance: when Marg's purchase data last
-    reached here, which months are on file, and whether manojz is awake."""
     f = con.execute("SELECT * FROM purchase_feed ORDER BY id DESC LIMIT 1").fetchone()
     last = con.execute("SELECT MAX(received_at) FROM purchase_export").fetchone()[0]
-    n_live = con.execute("SELECT COUNT(*) FROM purchase_export WHERE superseded_by IS NULL").fetchone()[0]
-    span = con.execute("SELECT MIN(period_from), MAX(period_to) FROM purchase_export "
-                       "WHERE superseded_by IS NULL").fetchone()
-    if n_live and span[0]:
-        months = "%s to %s (%d exports on file)" % (_month_name(span[0]), _month_name(span[1]), n_live)
-    else:
-        months = "nothing yet"
-    if last:
-        last_txt = "%s IST" % _esc(_hhmm_ist_full(last))
-    else:
-        last_txt = "never"
+    per = con.execute("SELECT type, COUNT(*), SUM(superseded_by IS NULL) FROM purchase_export "
+                      "GROUP BY type").fetchall()
+    held = ", ".join("%s %d live / %d held" % (r[0], r[2], r[1]) for r in per) or "nothing yet"
     if f is None:
-        pull = '<span class="warn">manojz has not reported in yet</span>'
+        pull = '<span class="warn">no ping from manojz yet</span>'
     elif (f["state"] or "") == "ok":
-        pull = '<span class="ok">manojz is awake</span> &middot; last Marg pull %s IST' % _esc(_hhmm_ist_full(f["pull_last"] or ""))
+        pull = '<span class="ok">manojz pull ok</span> (last pull %s, %s min ago at ping)' % (
+            _esc(f["pull_last"]), f["pull_age_min"] if f["pull_age_min"] is not None else "?")
     else:
-        pull = '<span class="bad">manojz pull asleep since %s IST</span>' % _hhmm_ist(f["pull_last"] or "")
-    return ('<div class="card"><h2>Feed health</h2>'
-            '<div>Last purchase data received: <b>%s</b></div>'
-            '<div>Months on file: %s</div><div>%s</div></div>'
-            % (last_txt, _esc(months), pull))
+        pull = '<span class="bad">manojz pull asleep since %s IST</span> (state %s, pinged %s)' % (
+            _hhmm_ist(f["pull_last"] or ""), _esc(f["state"]), _esc(f["at"]))
+    return ('<div class="card"><h2>Feed health</h2><div>Last push received: <b>%s</b></div>'
+            '<div>Exports held: %s</div><div>%s</div></div>'
+            % (_esc(last or "never"), _esc(held), pull))
 
 
 def _stock_card(con):
@@ -1578,24 +1432,22 @@ def page_hub():
     for m in _months(con):
         s = _month_summary(con, m)
         st = s["status"]["status"].upper()
-        rows.append('<tr><td><a href="%s/page/month/%s">%s</a></td><td class="n"><b>%s</b>%s</td>'
-                    '<td class="n">%s</td><td class="n">%d</td><td class="n">%d</td>'
-                    '<td class="n %s">%d</td><td class="n %s">%d</td>'
+        rows.append('<tr><td><a href="%s/page/month/%s">%s</a></td><td class="n">%s</td>'
+                    '<td class="n">%s</td><td class="n">%d</td><td class="n ok">%d</td>'
+                    '<td class="n %s">%d</td><td class="n %s">%d</td><td class="n %s">%d</td>'
                     '<td><span class="chip %s">%s</span></td></tr>'
-                    '<tr><td colspan="8" class="muted" style="padding-top:2px;padding-bottom:12px">%s</td></tr>'
-                    % (prefix, m, _esc(_month_name(m)), _r(s["marg_p"]),
-                       "" if s["basis"] == "supplier-wise" else '<div class="muted">bill-wise</div>',
-                       _r(s["itemwise_p"]), len(s["bills"]), len(s["returns"]),
+                    '<tr><td colspan="9" class="muted" style="padding-top:2px;padding-bottom:12px">%s</td></tr>'
+                    % (prefix, m, _esc(_month_name(m)), _r(s["billwise_p"]), _r(s["itemwise_p"]),
+                       len(s["bills"]), len(s["agree"]),
+                       "bad" if s["differ_open"] else "", len(s["differ"]),
                        "warn" if s["no_lines"] else "", len(s["no_lines"]),
                        "bad" if s["wrong"] else "", s["wrong"],
                        "ok" if st == "FINAL" else "warn", st, _esc(s["story"])))
-    months = ('<div class="card"><h2>Months</h2><div class="muted">The Marg total is the supplier-wise '
-              'report, final for month-end. Item-wise is NET (after discount), each bill\'s lines counted '
-              'once; a bill whose lines add up to more than the bill carries a purchase return, as Marg '
-              'reports it.</div>'
+    months = ('<div class="card"><h2>Months</h2><div class="muted">Item-wise is NET (after discount), each '
+              'bill\'s lines counted once. Agree = bill-wise and item-wise within &#8377;1.</div>'
               '<div class="scroll"><table><tr><th>Month</th>'
-              '<th class="n">Marg total (supplier-wise)</th><th class="n">Item-wise net</th><th class="n">Bills</th>'
-              '<th class="n">Returns</th><th class="n">No lines</th>'
+              '<th class="n">Bill-wise</th><th class="n">Item-wise (net)</th><th class="n">Bills</th>'
+              '<th class="n">Agree</th><th class="n">Differ</th><th class="n">No lines</th>'
               '<th class="n">Wrong</th><th>Status</th></tr>%s</table></div>%s</div>'
               % ("".join(rows), '' if rows else '<div class="muted">No purchase bills have arrived yet.</div>'))
     sc = _scan_state(con)
@@ -1638,13 +1490,11 @@ def page_month(month):
             cur = b["supplier_norm"]
             groups.append((b["supplier"], []))
         groups[-1][1].append(b)
-    ret_by = {x["bill"]["id"]: x for x in s["returns"]}
-    short_by = {x["bill"]["id"]: x for x in s["short"]}
     for name, bills in groups:
         out.append('<tr><th colspan="7" style="text-transform:none;font-size:14px;color:var(--ink);'
                    'padding-top:14px">%s</th></tr>' % _esc(name))
         for b in bills:
-            t = _bill_lines(b, s["sets"], s["stray"])
+            t = _bill_lines(b, s["sets"])
             tot, n = (t["net_p"], t["n"]) if t else (0, 0)
             lk = links.get(b["id"])
             scan = ('<a href="%s/bills/%d" target="_blank">scan %s</a>' % (_assets_url, lk[0], lk[1].lower())
@@ -1655,65 +1505,41 @@ def page_month(month):
                       % (_r(b["wrong_amount_p"]), _esc(b["reason"])))
             elif v == "CORRECT":
                 vh = '<span class="chip ok">Correct</span>'
-            elif b["id"] in ret_by:
-                vh = '<span class="chip">purchase return %s (Marg)</span>' % _r(ret_by[b["id"]]["diff_p"])
-            elif b["id"] in short_by:
-                vh = ('<span class="warn">item lines %s short</span> <span class="muted">Item lines missing '
-                      '\u2014 check the bill</span>' % _r(-short_by[b["id"]]["diff_p"]))
-            elif b["disagree_p"]:
-                vh = ('<span class="bad">bill-wise %s, supplier-wise %s</span> <span class="muted">'
-                      '\u2014 check the bill</span>' % (_r(b["bw_p"]), _r(b["sw_p"])))
-            elif not n:
-                vh = '<span class="warn">no item lines yet</span>'
             else:
-                vh = '<span class="ok">agrees</span>'
+                vh = '<span class="muted">unverified</span>'
             btn = ""
-            if not final and not viewer and b["id"] in s["needs_verdict"]:
+            if not final and not viewer:
                 btn = ('<span class="noprint"> <button class="sm" onclick="verdict(%d,\'CORRECT\')">Correct</button>'
                        ' <button class="sm" onclick="verdict(%d,\'WRONG\')">Wrong</button></span>' % (b["id"], b["id"]))
-            out.append('<tr><td>%s</td><td>%s</td><td class="n">%s</td><td class="n">%s</td>'
+            gap = "" if n and abs(tot - b["amount_p"]) <= AGREE_P else (
+                '<span class="warn"> no lines</span>' if not n else
+                '<span class="bad"> &ne; %s</span>' % _r(tot - b["amount_p"]))
+            out.append('<tr><td>%s</td><td>%s</td><td class="n">%s</td><td class="n">%s%s</td>'
                        '<td class="n">%d</td><td>%s</td><td>%s%s</td></tr>'
-                       % (_human(b["bill_date"]), _esc(b["bill_no"]), _r(b["marg_p"]), _r(tot) if n else "\u2014",
-                          n, scan, vh, btn))
+                       % (_human(b["bill_date"]), _esc(b["bill_no"]), _r(b["amount_p"]), _r(tot) if n else "—",
+                          gap, n, scan, vh, btn))
     buckets = []
-    if s["returns"]:
+    if s["differ"]:
         buckets.append(
-            '<h2>Purchase returns (%d)</h2><div class="muted">Marg reports a purchase return inside the bill: '
-            'the bill\'s item lines add up to more than the bill. Nothing to mark \u2014 the supplier-wise '
-            'figure already carries it.</div>'
-            '<div class="scroll"><table><tr><th>Date</th><th>Bill</th><th>Supplier</th><th class="n">Marg amount</th>'
-            '<th class="n">Item-wise (net)</th><th class="n">Return (Marg)</th></tr>%s</table></div>' % (len(s["returns"]), "".join(
-                '<tr><td>%s</td><td>%s</td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td></tr>'
-                % (_human(x["bill"]["bill_date"]), _esc(x["bill"]["bill_no"]), _esc(x["bill"]["supplier"]),
-                   _r(x["bill"]["marg_p"]), _r(x["net_p"]), _r(x["diff_p"])) for x in s["returns"])))
-    if s["short"]:
-        buckets.append(
-            '<h2>Item lines short of the bill (%d)</h2><div class="muted">The bill\'s item lines add up to less '
-            'than the bill \u2014 usually the item-wise export missed a line. Check the bill: Correct if Marg\'s '
-            'amount is right, Wrong if it is not.</div>'
-            '<div class="scroll"><table><tr><th>Date</th><th>Bill</th><th>Supplier</th><th class="n">Marg amount</th>'
-            '<th class="n">Item-wise (net)</th><th class="n">Short by</th><th>Check</th></tr>%s</table></div>' % (len(s["short"]), "".join(
-                '<tr><td>%s</td><td>%s</td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td class="n warn">%s</td><td>%s</td></tr>'
-                % (_human(x["bill"]["bill_date"]), _esc(x["bill"]["bill_no"]), _esc(x["bill"]["supplier"]),
-                   _r(x["bill"]["marg_p"]), _r(x["net_p"]), _r(-x["diff_p"]),
-                   _esc((x["bill"]["verdict"] or "to check").capitalize())) for x in s["short"])))
-    if s["disagree"]:
-        buckets.append(
-            '<h2>Bill-wise and supplier-wise disagree (%d)</h2><div class="muted">Marg\'s two reports give two '
-            'amounts for the same bill. Check the bill in Marg; a fresh export of both reports usually closes it.</div>'
+            '<h2>Bills that differ from their item lines (%d)</h2><div class="muted">Bill-wise is Marg\'s '
+            'bill report; item-wise is the net sum of the bill\'s lines. A purchase return shows as a negative '
+            'bill with positive lines. Mark each Correct (an acknowledged return or rounding) or Wrong.</div>'
             '<div class="scroll"><table><tr><th>Date</th><th>Bill</th><th>Supplier</th><th class="n">Bill-wise</th>'
-            '<th class="n">Supplier-wise</th><th>Check</th></tr>%s</table></div>' % (len(s["disagree"]), "".join(
-                '<tr><td>%s</td><td>%s</td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td>%s</td></tr>'
-                % (_human(b["bill_date"]), _esc(b["bill_no"]), _esc(b["supplier"]), _r(b["bw_p"]), _r(b["sw_p"]),
-                   _esc((b["verdict"] or "to check").capitalize())) for b in s["disagree"])))
+            '<th class="n">Item-wise (net)</th><th class="n">Item-wise (gross)</th><th class="n">Difference</th>'
+            '<th>Hint</th><th>Verdict</th></tr>%s</table></div>' % (len(s["differ"]), "".join(
+                '<tr><td>%s</td><td>%s</td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td class="n muted">%s</td>'
+                '<td class="n bad">%s</td><td class="muted">%s</td><td>%s</td></tr>'
+                % (_human(x["bill"]["bill_date"]), _esc(x["bill"]["bill_no"]), _esc(x["bill"]["supplier"]),
+                   _r(x["bill"]["amount_p"]), _r(x["net_p"]), _r(x["gross_p"]), _r(x["diff_p"]), _esc(x["hint"]),
+                   _esc(x["bill"]["verdict"] or "unverified")) for x in s["differ"])))
     if s["no_lines"]:
         buckets.append(
-            '<h2>Bills with no item lines yet (%d)</h2><div class="note">Item-wise export missing for %s. '
-            'Export item-wise for those dates (or the whole month) once and these close.</div>'
-            '<div class="scroll"><table><tr><th>Date</th><th>Bill</th><th>Supplier</th><th class="n">Marg amount</th>'
+            '<h2>Bills with no item lines (%d)</h2><div class="note">Item-wise export missing for %s. '
+            'Export item-wise for those days (or the whole month) once and these close.</div>'
+            '<div class="scroll"><table><tr><th>Date</th><th>Bill</th><th>Supplier</th><th class="n">Bill-wise</th>'
             '<th>Missing</th></tr>%s</table></div>' % (len(s["no_lines"]), _esc(_dates_text(s["gap_dates"])), "".join(
                 '<tr><td>%s</td><td>%s</td><td>%s</td><td class="n">%s</td><td class="muted">item-wise export missing for %s</td></tr>'
-                % (_human(b["bill_date"]), _esc(b["bill_no"]), _esc(b["supplier"]), _r(b["marg_p"]),
+                % (_human(b["bill_date"]), _esc(b["bill_no"]), _esc(b["supplier"]), _r(b["amount_p"]),
                    _human(b["bill_date"])) for b in s["no_lines"])))
     if s["orphans"]:
         buckets.append(
@@ -1729,44 +1555,43 @@ def page_month(month):
     if s["undated"]:
         und += ('<h2>Undated item lines</h2><div class="note">These lines came from an ITEMWISE export '
                'whose bill has not arrived in a BILLWISE or SUPPLIERWISE push, so they cannot be placed '
-               'in a month. They do not change the month\'s figure.</div><div class="scroll"><table><tr>'
+               'in a month. They stop the month from finalising.</div><div class="scroll"><table><tr>'
                '<th>Bill</th><th>Item</th><th class="n">Qty</th><th class="n">Net amount</th><th>From export</th></tr>%s'
                '</table></div>' % "".join(
                    '<tr><td>%s</td><td>%s</td><td class="n">%s</td><td class="n">%s</td><td class="muted">%s</td></tr>'
                    % (_esc(l["bill_no"] or "?"), _esc(l["item"]), l["qty"] if l["qty"] is not None else "",
                       _r(l["net_amount_p"] if l["net_amount_p"] is not None else l["amount_p"]),
                       _esc(l["file"])) for l in s["undated"]))
-    basis_line = ('<div class="muted">%s.</div>' % _esc(s["basis_note"])) if s["basis_note"] else ""
-    recon = ('<h2 style="margin-top:0;font-size:22px">Marg purchase, %s: %s <span class="muted" style="font-size:14px">(%s%s)</span></h2>%s'
-             '<div class="grid"><div class="kv"><b>%s</b><span>item-wise net (after discount)</span></div>'
-             '<div class="kv"><b>%d</b><span>bills &middot; %d agree &middot; %d %s a purchase return</span></div>'
-             '<div class="kv"><b class="%s">%d</b><span>without item lines yet</span></div>'
-             '<div class="kv"><b class="%s">%d</b><span>wrong &middot; %d to check</span></div></div>'
+    diff = s["diff_p"]
+    recon = ('<div class="grid"><div class="kv"><b>%s</b><span>bill-wise total (Marg)</span></div>'
+             '<div class="kv"><b>%s</b><span>item-wise total (net, after discount)</span></div>'
+             '<div class="kv"><b class="%s">%s</b><span>difference</span></div>'
+             '<div class="kv"><b>%d</b><span>bills &middot; <span class="ok">%d agree</span> &middot; '
+             '<span class="%s">%d differ</span> &middot; <span class="%s">%d without lines</span> &middot; '
+             '%d line sets with no bill</span></div>'
+             '<div class="kv"><b>%d</b><span>wrong &middot; %d unverified</span></div></div>'
              '<div class="muted" style="margin-top:8px">%s</div>'
-             % (_esc(_month_name(month)), _r(s["marg_p"]), s["basis"],
-                ", final for month-end" if s["basis"] == "supplier-wise" else "", basis_line,
-                _r(s["itemwise_p"]), len(s["bills"]), len(s["agree"]), len(s["returns"]),
-                "carries" if len(s["returns"]) == 1 else "carry",
-                "warn" if s["no_lines"] else "", len(s["no_lines"]),
-                "bad" if s["wrong"] else "", s["wrong"], s["to_check"], _esc(s["story"])))
+             % (_r(s["billwise_p"]), _r(s["itemwise_p"]), "ok" if abs(diff) <= AGREE_P else "bad", _r(diff),
+                len(s["bills"]), len(s["agree"]), "bad" if s["differ_open"] else "", len(s["differ"]),
+                "warn" if s["no_lines"] else "", len(s["no_lines"]), len(s["orphans"]),
+                s["wrong"], s["unverdicted"], _esc(s["story"])))
     if final:
-        st = ('<div class="note"><b>FINAL</b> \u2014 %s, %s IST.%s</div>'
-              % (_esc(s["status"]["finalised_by"]), _esc(_when_ist(s["status"]["finalised_at"])),
+        st = ('<div class="note"><b>FINAL</b> &mdash; finalised by %s at %s.%s</div>'
+              % (_esc(s["status"]["finalised_by"]), _esc(s["status"]["finalised_at"]),
                  ' <button class="sm noprint" onclick="reopen(\'%s\')">reopen</button>' % month if doctor else ""))
     else:
         if s["can_finalise"]:
-            st = ('<div class="note"><b>PROVISIONAL</b> \u2014 ready to finalise. %s</div>'
+            st = ('<div class="note"><b>PROVISIONAL</b> &mdash; everything reconciles. %s</div>'
                   % ('<button class="p noprint" onclick="finalise(\'%s\')">FINALISE %s</button>' % (month, _esc(_month_name(month)))
                      if doctor else '<span class="muted">Only the doctor can finalise.</span>'))
         else:
-            st = ('<div class="note"><b>PROVISIONAL</b> \u2014 cannot finalise yet:<ul>%s</ul>%s</div>'
+            st = ('<div class="note"><b>PROVISIONAL</b> &mdash; cannot finalise yet:<ul>%s</ul>%s</div>'
                   % ("".join("<li>%s</li>" % _esc(r) for r in s["reasons"]),
                      '<span class="muted">The FINALISE button appears for the doctor once these are cleared.</span>'))
-    body = ('<h1>%s \u2014 purchases</h1><div class="muted">One row per Marg bill. The amount is Marg\'s '
-            'supplier-wise figure (bill-wise while supplier-wise is not yet exported). Item-wise is the NET '
+    body = ('<h1>%s &mdash; purchases</h1><div class="muted">One row per Marg bill. Item-wise is the NET '
             '(after discount) sum of that bill\'s lines, from the latest export that carries the bill.</div><div class="card">%s%s</div><div class="card"><div class="scroll">'
             '<table><tr><th>Date</th><th>Bill</th><th class="n">Amount</th><th class="n">Item-wise (net)</th>'
-            '<th class="n">Lines</th><th>Scan</th><th>Check</th></tr>%s</table></div>%s</div>'
+            '<th class="n">Lines</th><th>Scan</th><th>Verdict</th></tr>%s</table></div>%s</div>'
             % (_esc(_month_name(month)), recon, st, "".join(out) or
                '<tr><td colspan="7" class="muted">No bills for this month.</td></tr>', und))
     return _page("%s purchases" % _month_name(month), body)

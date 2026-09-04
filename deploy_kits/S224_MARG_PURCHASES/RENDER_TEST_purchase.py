@@ -96,7 +96,7 @@ def one(pat):
 for typ, pat in (("BILLWISE", "PURCHASE_BILLWISE/2026-08/*_2026-08-01_to_2026-08-31__*.XLS"),
                  ("SUPPLIERWISE", "PURCHASE_SUPPLIERWISE/2026-08/*_2026-08-01_to_2026-08-31__*.XLS"),
                  ("BILLWISE", "PURCHASE_BILLWISE/2026-07/*.XLS"),
-                 ("BILLITEMWISE", "PURCHASE_BILLITEMWISE/2026-08/*.XLS")):
+                 ("BILLITEMWISE", "PURCHASE_BILLITEMWISE/2026-08/*_2026-08-28_to_2026-08-31__*.XLS")):
     p = one(pat)
     r = cl.post(P + "/api/push", json=R.payload(p, typ), headers=H)
     ck("pushed %s %s" % (typ, os.path.basename(p)[-22:-4]), r.status_code == 200 and r.get_json()["stored"])
@@ -135,21 +135,28 @@ cl.post(P + "/api/order", json=dict(action="create", vendor="ZZ RENDER VENDOR", 
 
 TEN = re.compile(r"(?<!\d)\d{10}(?!\d)")
 WORDS = {
-    "hub": ["Marg Purchases", "August 2026", "July 2026", "Bill-wise", "Item-wise", "Feed health",
-            "pull asleep since 06:40 IST", "Stock verification", "Scan links", "Orders", "PROVISIONAL", "Make this week"],
-    "month/2026-08": ["August 2026", "bill-wise total", "item-wise total", "difference", "unverified", "Scan", "Verdict",
-                      "PROVISIONAL", "cannot finalise yet", "differs"],
-    "month/2026-07": ["July 2026", "bill-wise total", "PROVISIONAL"],
+    "hub": ["Marg Purchases", "August 2026", "July 2026", "Marg total (supplier-wise)", "Item-wise net", "Returns",
+            "No lines", "Feed health", "pull asleep since 06:40 IST", "Stock verification", "Scan links", "Orders",
+            "PROVISIONAL", "Make this week", "(supplier-wise, final for month-end)", "carry a purchase return",
+            "ready to finalise"],
+    "month/2026-08": ["August 2026", "Marg purchase, August 2026", "supplier-wise, final for month-end", "item-wise net",
+                      "Scan", "Check", "PROVISIONAL", "cannot finalise yet", "no item lines yet", "export item-wise for"],
+    "month/2026-07": ["July 2026", "Marg purchase, July 2026", "Purchase returns (2)", "(Marg)", "PROVISIONAL",
+                      "ready to finalise"],
     "scans": ["Scan links", "Scans with no Marg bill", "Marg bills with no scan", "SOME OTHER SCAN", "https://assets.example/bills/"],
     "orders": ["Orders", "Order book", "Reorder plan", "PROVISIONAL until the stock verification has run a month",
                "ZZ RENDER VENDOR", "draft"],
 }
-ROLE_WORDS = {"doctor": {"month/2026-08": ["Correct", "Wrong"], "scans": ["Re-match now"], "orders": ["Save as order", "Copy this order"]},
+ROLE_WORDS = {"doctor": {"month/2026-08": ["Correct", "Wrong", "Item lines missing"], "month/2026-07": ["FINALISE July 2026"],
+                         "scans": ["Re-match now"], "orders": ["Save as order", "Copy this order"]},
               "maker": {"month/2026-08": ["Correct", "Wrong"], "scans": ["Re-match now"], "orders": ["Copy this order"]},
               "viewer": {"hub": ["(view only)"]}}
+# rev 4: no page says "mark each" / "unverified" / "Differ"; a purchase return never gets a verdict button
 NOT_FOR = {"viewer": {"month/2026-08": ['onclick="verdict('], "scans": ["Re-match now"],
                       "orders": ["Save as order", "Copy this order", "tel:"]},
-           "maker": {"orders": ["Save as order"], "month/2026-08": ["onclick=\"finalise("]}}
+           "maker": {"orders": ["Save as order"], "month/2026-08": ["onclick=\"finalise("]},
+           "doctor": {"month/2026-07": ['onclick="verdict(']}}
+NEVER = ["mark each", "Mark each", "unverified", ">Differ<", ">Agree<", "differs from", "Bill-wise total (Marg)"]
 for role, roles in (("doctor", {"checker"}), ("maker", {"maker"}), ("viewer", {"viewer"})):
     WHO.update(user={"doctor": "manoj", "maker": "darpan", "viewer": "amir"}[role], roles=roles)
     for page, words in WORDS.items():
@@ -164,6 +171,8 @@ for role, roles in (("doctor", {"checker"}), ("maker", {"maker"}), ("viewer", {"
         ck("%s: carries the owner's words" % tag, not missing, "missing " + ", ".join(missing))
         bad = [w for w in NOT_FOR.get(role, {}).get(page, []) if w in h]
         ck("%s: shows nothing this role may not use" % tag, not bad, "found " + ", ".join(bad))
+        never = [w for w in NEVER if w in h]
+        ck("%s: none of the rev-4 banned wording" % tag, not never, "found " + ", ".join(never))
         links = set(re.findall(r'href="(/finance/purchase/[^"]+)"', h))
         # rev 3 (the owner's find): a link or the JS base that forgets the mount prefix 404s at the
         # portal root. Every own href and const P must start with /finance/purchase.

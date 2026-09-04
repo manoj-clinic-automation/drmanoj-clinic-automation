@@ -1,0 +1,12 @@
+a61af74a1be41b879771af8977d2d9a5  stock_app.py
+fb3726553d4aec43b6b231014aba5a55  stock_diffs.html
+e49c60b9eec2d7abb6a1d941ef352872  patch_diffs_role_s224.py
+7f2dba04f5af899e12aaa87b16604ce9  RENDER_TEST_diffs_role_s224.py
+a9787d643e9f86169a285e81b8f06267  selftest_diffs_role_s224.py
+02c0198130900fcf0ccdd8da875741a5  EVIDENCE_render_s224.txt
+a69bf6f36d7c47e14771ffc7b40e39c6  EVIDENCE_selftest_s224.txt
+49fb20da89b147fe12b4973e55250aff  EVIDENCE_walks_rerun_s224.txt
+55ac883fc226b746f46500a6fc30de77  PREDICTED_PINS.txt
+401a1e9220c441e2cd0e449771beac68  KIT_ID.txt
+f776625fad573dcace75b338fcf51953  INSTALL.txt
+e497ceed3cf25e920a3e49f9b0858ecf  README.md

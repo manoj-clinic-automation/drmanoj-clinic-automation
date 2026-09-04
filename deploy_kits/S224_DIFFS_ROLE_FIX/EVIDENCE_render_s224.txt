@@ -1,0 +1,59 @@
+PASS  the stock app under test carries the S224 DIFFS ROLE mark
+ * Serving Flask app 's224diffs'
+ * Debug mode: off
+PASS  seed: the snapshot loads
+PASS  seed: Amir (viewer) submits the count
+PASS  seed: three open differences
+PASS  /api/open you: manoj -> may_cause=True may_answer=False
+PASS  /api/open you.user is manoj
+PASS  /api/open you: darpan -> may_cause=False may_answer=True
+PASS  /api/open you.user is darpan
+PASS  /api/open you: amir -> may_cause=False may_answer=False
+PASS  /api/open you.user is amir
+PASS  /api/open you: alisha -> may_cause=False may_answer=False
+PASS  /api/open you.user is alisha
+PASS  /api/open still carries every S213 field (additive)
+PASS  /api/open lines carry answer (None yet) and cause_label
+PASS  /api/finding you.may_decide is TRUE for the live-shape owner (role=doctor, roles=[checker])
+PASS  /api/finding you.may_decide is FALSE for Darpan
+PASS  amir: page 200, no JS error
+PASS  amir: three cards
+PASS  amir: ZERO buttons and ZERO inputs -- nothing that would refuse
+PASS  amir: the cause is shown as text
+PASS  amir: the sub-line is the viewer's
+PASS  amir: no 10-digit run on the page
+PASS  alisha: page 200, no JS error
+PASS  alisha: three cards
+PASS  alisha: ZERO buttons and ZERO inputs -- nothing that would refuse
+PASS  alisha: the cause is shown as text
+PASS  alisha: the sub-line is the viewer's
+PASS  alisha: no 10-digit run on the page
+PASS  darpan: page 200, no JS error
+PASS  darpan: 7 reason buttons per card (21), ZERO cause buttons
+PASS  darpan: no note box (that is the checker's)
+PASS  darpan: the sub-line is the maker's
+PASS  darpan: tapping a reason is recorded on the page
+PASS  darpan: no 10-digit run on the page
+PASS  darpan: the answer landed in stock_diff_answer under his name
+PASS  darpan: reloading shows his reason as text and the button lit
+PASS  manoj: page 200, no JS error
+PASS  manoj: 8 cause buttons per card (24), ZERO reason buttons
+PASS  manoj: a note box per card
+PASS  manoj: the sub-line is the checker's
+PASS  manoj: he sees Darpan's reason as text
+PASS  manoj: tapping a cause is recorded on the page
+PASS  manoj: no 10-digit run on the page
+PASS  manoj: the cause and note landed in stock_diff under his name
+PASS  amir: now reads the owner's cause and Darpan's reason as text
+PASS  server still refuses darpan on /cause (403)
+PASS  server still refuses darpan on /decision (403)
+PASS  server still refuses amir on /cause (403)
+PASS  server still refuses amir on /decision (403)
+PASS  server accepts the owner on /cause (200)
+PASS  an unknown login gets 403 on the page
+PASS  stock_app.py: no 10-digit run in the file
+PASS  stock_app.py: LF line endings
+PASS  stock_diffs.html: no 10-digit run in the file
+PASS  stock_diffs.html: LF line endings
+
+55 PASS  0 FAIL
