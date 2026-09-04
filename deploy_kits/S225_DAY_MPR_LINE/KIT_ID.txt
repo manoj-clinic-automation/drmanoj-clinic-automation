@@ -1,0 +1,10 @@
+S225_DAY_MPR_LINE · built 04-Sep-2026 · Session 225 · the bank MPR line on the Day Revenue page, with the direct link
+Target: /root/finance/finance_clinic_day.py dceb79a0 (S223_DAY_PAGE_EDITS, read back 04-Sep 13:05) -> 713bdf3a (anchor patch, 7 anchors)
+Owner (15:35 IST): "/finance/clinic/bank/mpr isn't showing in the day sheet; on /finance/clinic/day the report should be stated as
+        applied or pending from bank or whatever, and a direct link of the day's MPR to match then and there."
+Builds: (A) a Bank MPR card on every day page -- bank_mpr_status's own line (APPLIED at / LATE / REFUSED / NO UPI / WAITING /
+        NOT RECEIVED), the day's online (UPI) total against the bank's applied total with the difference, and the link to
+        /finance/clinic/bank/mpr/<date>; (B) a Bank column on the month table, one word per day, each a link.
+        One rule, one place: mpr_state() (S224). If that module is absent the page says so and still renders.
+Proven offline: selftest_day_mpr_s225.py 17/17 on the exact live bytes (pin dceb79a0 held in the repo); predicted new pin 713bdf3a.
+This closes S224_BANK_MPR_STATUS §5's first "what waits" item.

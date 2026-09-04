@@ -1,0 +1,3 @@
+# S225_DAY_MPR_LINE -- predicted. A0: the close records what the box prints.
+/root/finance/finance_clinic_day.py  before dceb79a06e71f7e35150c69e1f5dd175  after 713bdf3a9c1a8dafe076be1feb32219a
+# bank_mpr_status.py a0e740ce, finance_app.py 0aa211fb -- NOT touched.

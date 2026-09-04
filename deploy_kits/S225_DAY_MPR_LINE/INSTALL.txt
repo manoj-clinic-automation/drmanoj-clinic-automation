@@ -1,0 +1,11 @@
+S225_DAY_MPR_LINE -- the bank's word ON the Day Revenue page, with a direct link (the owner, 04-Sep 15:35).
+
+ONE LINE on the VPS. Pulls the repo, checks the kit, copies the patcher beside finance_clinic_day.py, patches it
+BY ITS LIVE PIN (dceb79a0 -- refuses on anything else; backs up first; compiles; restores on failure), restarts
+clinic-finance, checks it came back, prints the new pin. Rolls back to the backup by itself if the service does
+not return. bank_mpr_status.py and finance_app.py are not touched.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S225_DAY_MPR_LINE && md5sum -c SUMS.md5 --quiet && \cp patch_clinic_day_mpr_s225.py /root/finance/ && /root/wa/venv/bin/python3 -B /root/finance/patch_clinic_day_mpr_s225.py dceb79a06e71f7e35150c69e1f5dd175 && systemctl restart clinic-finance.service && sleep 3 && (systemctl is-active --quiet clinic-finance.service && echo "UP -- bank line on the day page" && curl -s -o /dev/null -w 'day page -> %{http_code}\n' localhost:8106/finance/clinic/day && md5sum /root/finance/finance_clinic_day.py || (echo "SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; ls -t /root/finance/finance_clinic_day.py.bak_S225_mpr_* | head -1 | xargs -I{} \cp {} /root/finance/finance_clinic_day.py; systemctl restart clinic-finance.service; sleep 4; systemctl is-active clinic-finance.service; md5sum /root/finance/finance_clinic_day.py; journalctl -u clinic-finance.service -n 12 --no-pager | tail -12))
+
+Expected new pin: 713bdf3a9c1a8dafe076be1feb32219a (predicted from the exact live bytes). Then open:
+https://followup.dr-manoj.in/finance/clinic/day

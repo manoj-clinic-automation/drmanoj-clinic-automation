@@ -1,4 +1,4 @@
-S225 selftest (S224 regression + staff page) on <home>/tmp/s224_0j4jvimn
+S225 selftest (S224 regression + staff page) on <home>/tmp/s224_ko_e_52_
   PASS  healthz answers without auth
   PASS  August BILLWISE export is in the archive
   PASS  BILLWISE parser: rows sum to Marg's TOTAL row
@@ -289,5 +289,7 @@ S225 selftest (S224 regression + staff page) on <home>/tmp/s224_0j4jvimn
   PASS  a new stockist without a first phone is refused
   PASS  signed out: book 401, api 401
   PASS  no bank value, no full phone in any audit row
+  PASS  FRESH DB, no vendors push ever: the staff page renders 200 (the columns are created on the first request of any kind)
+  PASS  FRESH DB: phone2 and bank_status exist after that first request
 
-290 PASS  0 FAIL
+292 PASS  0 FAIL

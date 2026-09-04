@@ -73,7 +73,7 @@ ck("phone book: a medical VIEWER not named in the setting -> 403 (fail-closed)",
 rb = c.get(P + "/page/book", headers=DOC)
 ck("phone book: the doctor -> 200 through the real gate", rb.status_code == 200 and "Stockist phone book" in rb.get_data(as_text=True), str(rb.status_code))
 r = c.post(P + "/api/book", json=dict(action="phones", vendor="ZZ WALK NOBODY", phone="1"), headers=DOC)
-ck("phone book API reaches the route for the doctor (a bad phone -> 400, nothing written)", r.status_code == 400)
+ck("phone book API reaches the route for the doctor (an unknown stockist -> 404, nothing written)", r.status_code == 404 and (r.get_json() or {}).get("error") == "no_such_vendor", str(r.status_code))
 con = sqlite3.connect(DB)
 nb = con.execute("SELECT COUNT(*) FROM purchase_vendor_contact WHERE vendor_norm='ZZ WALK NOBODY' OR vendor='ZZ WALK NOBODY'").fetchone()[0]
 cols = {x[1] for x in con.execute("PRAGMA table_info(purchase_vendor_contact)")}

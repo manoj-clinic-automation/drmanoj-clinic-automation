@@ -23,7 +23,7 @@ in its *Why* column. Bottles, tubes and units keep the engine's box quantity.
 - **Every change is audited by field name and last-4**, never by value.
 - The staff page rings either number (**Call 1 / Call 2**); WhatsApp goes to the first.
 
-**Proof:** `selftest_phonebook.py` **290/290** — the whole S224 selftest and the rev-6 staff checks as regression, then the
+**Proof:** `selftest_phonebook.py` **292/292** — the whole S224 selftest and the rev-6 staff checks as regression, then the
 engine rounding on the doctor's page, the allow-list (doctor only until seeded; Darpan once named; Amir refused page, API
 and link), phones normalised and validated, the push-does-not-clobber rule, both Call buttons, the UNVERIFIED → Verify →
 VERIFIED → modified → UNVERIFIED cycle, IFSC validation, duplicate names, signed-out 401s, and that no audit row carries a
@@ -31,3 +31,5 @@ number. `walk_phonebook_gate_s225.py` runs on the box inside the install line th
 
 **Owed, next (§8):** the arrival flow (acknowledge / supplied qty / short) with the scan button in context · Sarvam-vs-Marg
 cross-check **live on the event** (his ruling) · new-items log · salt list · stock snapshot on capture.
+
+**Rev 7b:** the walk on the box (before any restart) caught the staff page reading `phone2` on a database that had never opened the book — the rev-7 columns are now added on the first request of any kind; a fresh-database case is in the selftest. The walk's own fourth expectation was wrong (404, not 400) — fixed.

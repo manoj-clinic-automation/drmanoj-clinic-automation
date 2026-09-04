@@ -164,6 +164,10 @@ def _ensure(con):
         con.execute("UPDATE purchase_bill SET %s=amount_p WHERE %s IS NULL AND %s IS NOT NULL"
                     % (col, col, src))
     con.commit()
+    # rev 7: the phone-book columns (phone2, the bank fields, source) are read by the staff page
+    # and the vendor push as well as the book -- so they are added HERE, on the first request of
+    # any kind, not only when the book is opened. (The S225 walk on the box caught exactly that.)
+    _ensure_book(con)
     _schema_done = True
 
 

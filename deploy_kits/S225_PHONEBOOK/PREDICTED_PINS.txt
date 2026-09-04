@@ -1,4 +1,4 @@
 # S225_PHONEBOOK -- predicted pins. A0: the close records what the box PRINTS.
-/root/finance/purchase_app.py   0b77cc53df7299ce622f8fcc7eafaea2   (rev 7; full-file copy, so the pin IS the kit file)
+/root/finance/purchase_app.py   e4e5a75bd3a5b5b2c4f1f48eb15835d7   (rev 7; full-file copy, so the pin IS the kit file)
 # finance_app.py 0aa211fb, portal.py 7bc59115, tile_grants.json 07af4daa, clinic_day_pdf.py 518affe9 -- NOT touched.
 # finance.db setting purchase.phonebook_users -- state, not a file.

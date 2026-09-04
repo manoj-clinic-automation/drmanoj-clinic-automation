@@ -864,6 +864,40 @@ as_("", "", set())
 ck("signed out: book 401, api 401", cl.get(P + "/page/book").status_code == 401 and cl.post(P + "/api/book", json={}).status_code == 401)
 ck("no bank value, no full phone in any audit row", not any((ACC in (d or "")) or (FAKE2 in (d or "")) or (FAKE_PHONE in (d or "")) for (d,) in [(r[0],) for r in q("SELECT detail FROM purchase_audit WHERE action LIKE 'book_%'")]))
 
+# ------------------------------------------------------------- 15. the gap the box's walk found: a db that never saw a vendors push
+TMP3 = tempfile.mkdtemp(prefix="s225fresh_"); DB3 = os.path.join(TMP3, "finance.db")
+c3 = sqlite3.connect(DB3)
+c3.executescript("""
+CREATE TABLE sale_line_item (id INTEGER PRIMARY KEY, day_entry_id INTEGER, ingest_batch_id INTEGER, unit TEXT NOT NULL, business_date TEXT NOT NULL,
+  bill_no TEXT NOT NULL, is_return INTEGER NOT NULL DEFAULT 0, seq INTEGER, item_name TEXT NOT NULL, item_key TEXT NOT NULL, pack TEXT, qty_raw TEXT,
+  amount_p INTEGER, expiry_ym TEXT, batch TEXT);
+CREATE TABLE stock_snapshot (as_on TEXT NOT NULL, item TEXT NOT NULL, qty INTEGER NOT NULL, packing TEXT, pack_size INTEGER NOT NULL DEFAULT 1,
+  loaded_at TEXT NOT NULL, source TEXT, PRIMARY KEY (as_on, item));
+CREATE TABLE stock_feed (id INTEGER PRIMARY KEY, as_on TEXT NOT NULL, source TEXT NOT NULL, item TEXT NOT NULL, qty INTEGER NOT NULL, received_at TEXT NOT NULL);
+""")
+c3.execute("INSERT INTO stock_snapshot VALUES (?,?,?,?,?,?,?)", (today.strftime("%d-%m-%Y"), "ZZFRESH ITEM", 0, "1*10", 10, "t", "push_snapshot"))
+for d in range(26):
+    c3.execute("INSERT INTO sale_line_item (unit,business_date,bill_no,seq,item_name,item_key,qty_raw) VALUES (?,?,?,?,?,?,?)",
+               ("medical", (today - dt.timedelta(days=d)).isoformat(), "F%d" % d, 1, "ZZFRESH ITEM", "zzfresh item", "0:2"))
+c3.commit(); c3.close()
+def _db3():
+    if "db3" not in g:
+        g.db3 = sqlite3.connect(DB3); g.db3.row_factory = sqlite3.Row
+    return g.db3
+app3 = Flask("fresh"); PA._schema_done = False
+PA.init(app3, _db3, _require, unit="medical", marg_token=TOKEN, assets_db=os.path.join(TMP3, "absent.db"), assets_url="https://assets.example")
+@app3.teardown_appcontext
+def _close3(_e):
+    c = g.pop("db3", None)
+    if c is not None: c.close()
+cl3 = app3.test_client()
+as_("amir", "staff", {"viewer"})
+r = cl3.get(P + "/page/staff")
+ck("FRESH DB, no vendors push ever: the staff page renders 200 (the columns are created on the first request of any kind)", r.status_code == 200 and "Order medicines" in r.get_data(as_text=True), str(r.status_code))
+c3 = sqlite3.connect(DB3); cols3 = {x[1] for x in c3.execute("PRAGMA table_info(purchase_vendor_contact)")}; c3.close()
+ck("FRESH DB: phone2 and bank_status exist after that first request", "phone2" in cols3 and "bank_status" in cols3)
+PA._schema_done = False; PA._db, PA._require = _db, _require
+
 print("\n%d PASS  %d FAIL" % (len(PASSED), len(FAILED)))
 for f in FAILED:
     print("  FAILED: " + f)

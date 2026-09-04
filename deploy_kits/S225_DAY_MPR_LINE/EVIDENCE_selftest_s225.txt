@@ -1,0 +1,20 @@
+  PASS  the repo holds the live bytes of finance_clinic_day.py (dceb79a06e71f7e35150c69e1f5dd175)
+  PASS  wrong md5 REFUSES, file untouched
+  PASS  patch applies, prints NEW PIN
+     NEW PIN (predicted)  713bdf3a9c1a8dafe076be1feb32219a
+  PASS  second run: ALREADY PATCHED, pin unchanged
+  PASS  day page 01-Sep renders with a Bank MPR card
+  PASS    it says APPLIED with the bank's own line
+  PASS    it says Matches: ours 1,700 and bank 1,700
+  PASS    it links to the day's MPR page
+  PASS  day page 02-Sep: applied LATE, and 'Does not match ... bank is higher by ₹ 2,000'
+  PASS  day page 03-Sep: WAITING or NOT RECEIVED, no match line, link present
+  PASS  month page has a Bank column
+  PASS    01-Sep reads Applied, 02-Sep Applied late, 03-Sep Waiting/Not received, each linking to its MPR
+  PASS  month page still renders its totals row
+  PASS  the MPR page itself still answers
+  PASS  signed out: the page's own 'Not permitted' answer, and no bank card on it (unchanged S223 behaviour)
+  PASS  with bank_mpr_status absent the page still renders and says so
+  PASS  month page with the module absent shows — in the Bank column and renders
+
+17 PASS  0 FAIL
