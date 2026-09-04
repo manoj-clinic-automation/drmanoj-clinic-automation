@@ -1,0 +1,20 @@
+walking <home>/s224patch/finance_app.py on a COPY of the db at <tmp>/walk_s224_5xebrhqx/finance.db
+  PASS  finance_app imported with the S224 mount (no import-time db call, F-303)
+  PASS  healthz is PUBLIC through the real gate
+  PASS  push with the WRONG token -> 401 from the real gate
+  PASS  push with the wrong header name (X-Finance-Cron) is NOT let in
+  PASS  push with the right token REACHES the route (400 malformed, not 302/401)
+  PASS  feed with the right token reaches the route
+  PASS  vendors with the right token reaches the route
+  PASS  the token opens NOTHING else (stock losses stays shut)
+  PASS  hub with nobody signed in -> login redirect
+  PASS  hub with a login that has no medical role -> refused
+  PASS  hub for the medical checker -> 200 and marked (doctor)
+  PASS  orders page renders for the checker
+  PASS  scans page renders for the checker
+  PASS  scans page says the asset app is not reachable and nothing else breaks
+  PASS  the finance app's own healthz still answers
+  PASS  the stock count page still answers for the checker
+  PASS  the purchase tables now exist in the COPY (created on first request)
+
+17 PASS  0 FAIL

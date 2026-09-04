@@ -1,0 +1,27 @@
+S224_MARG_PURCHASES -- predicted pins (LF, VPS-side; F-294). Built 04-Sep-2026.
+
+/root/finance/finance_app.py   <LIVE PIN, typed by the owner>  ->  the NEW PIN the finance patcher prints (three exact anchors: the S223 clinic_register.init block, the S208 X-Finance-Marg gate tuple, PUBLIC_PATHS)
+/root/portal/portal.py         <LIVE PIN, typed by the owner>  ->  the NEW PIN the portal patcher prints (two exact anchors: the Stock Check tile's url+roles lines, the S223 'Daily Register' group row)
+/root/portal/tile_grants.json  08828cb1bcc0642a097ca1da32033bc1 (v5)  ->  c4d01adeba0d5bbc570db992064b2ff5 (v6)
+
+NEW files (md5 of the kit copy = md5 on the box; all LF):
+  17b6a62cc83bbb0061e7e7650bb33ea2  purchase_app.py
+  18e8b0b2ea94e2209622979608b79a50  purchase_schema.sql
+  41d68148fc3aa461da30a9eb4053b649  marg_purchase_rows.py
+  ff1cfc7f2b08bc9274d7e4b46811bf3c  patch_finance_app_purchase_s224.py
+  507afbbab5049737a48e50f70d0f7ae2  patch_portal_purchase_tile_s224.py
+  c4d01adeba0d5bbc570db992064b2ff5  tile_grants.json
+  c2addd592cd785ec9ae01b8c535d4410  walk_purchase_gate_s224.py
+  f917ce4ded226416f6171033dcbb726a  selftest_purchase_app.py
+  13f5f10162578b0b6fbf2d0a182f70c2  RENDER_TEST_purchase.py
+  3467e710830495c5e2a31469a90d9274  EVIDENCE_selftest_s224.txt
+  c1e50a948254192b3c668369ff396f07  EVIDENCE_render_s224.txt
+  60f7493a044bf44082a6eb624cdc9a3d  EVIDENCE_walk_gate_s224.txt
+  fb5bc5c32e702ef6e3b30f3585ad56ec  INSTALL.txt
+  268c07fef5fef3749acf33d31fd51689  README.md
+  4eaebaf255149acc1bb44392405ef555  KIT_ID.txt
+
+TABLES CREATED on first request, never at import (F-303): purchase_export, purchase_bill, purchase_line, purchase_month, purchase_order, purchase_order_line, purchase_vendor_contact, purchase_scan_link, purchase_feed, purchase_audit. No existing table is touched.
+
+Restarts: clinic-finance.service and clinic-portal.
+The manojz leg's files (push_purchases.py, selftest_push_purchases.py, manojz/, SUMS_manojz_leg.md5) are pinned by that leg's own list, not here.

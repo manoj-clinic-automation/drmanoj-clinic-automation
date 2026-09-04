@@ -29,7 +29,7 @@
 </style></head><body>
 
 <h1>MARG — THE ONE-PAGE CARD</h1>
-<p class="sub">Sanjeevni Medicos · true as at 27 Aug 2026 (S205) · full detail in <code>MARG_MEDICAL_CURRENT.md</code></p>
+<p class="sub">Sanjeevni Medicos · true as at 26 Aug 2026 · full detail in <code>MARG_MEDICAL_CURRENT.md</code></p>
 
 <div class="grid">
 
@@ -99,25 +99,6 @@
       <tr><td>Nothing<br>new arriving</td><td>Check box 2 — is the watcher ALIVE? Then run the deep check.</td></tr>
       <tr><td>A day<br>is missing</td><td>Generate that one day again in Marg. It is picked up automatically.</td></tr>
       <tr><td>Numbers<br>look wrong</td><td><b>Marg is right for the day TOTAL only.</b> Its CASH column overstates cash — home-medicine bills are booked as cash and never collected.</td></tr>
-    </table>
-  </div>
-
-  <div class="box wide">
-    <h2 style="color:#a00">If you ever run SEND_TO_CLINIC.bat by hand — read this first</h2>
-    <p style="margin:0 0 1.5mm"><b>It can say ACCEPTED when nothing was sent</b>, and that report
-    is then blocked from ever being sent again by itself. (Known fault AF-1 / F-206. The fix is
-    queued; until then this is the whole of what you need to know.)</p>
-    <table>
-      <tr><td style="width:26%"><b>Do not trust<br>the ACCEPTED line</b></td>
-          <td>Check the clinic server instead: <code>/finance/approvals</code> must show that
-          day&#39;s export. That page is the truth; the batch&#39;s own words are not.</td></tr>
-      <tr><td><b>If it is<br>not there</b></td>
-          <td>The send did <b>not</b> happen, however the batch read. Tell Claude the report and
-          the date &mdash; the block has to be cleared or it stays for ever.</td></tr>
-      <tr><td><b>Better:<br>do not use it</b></td>
-          <td>manojz sends every verified report by itself every ten minutes.
-          <code>D:\Downloads\margsync\_UPLOAD_NOW\</code> is <b>empty</b> when there is nothing
-          to do by hand. This batch is only for when manojz is unavailable.</td></tr>
     </table>
   </div>
 

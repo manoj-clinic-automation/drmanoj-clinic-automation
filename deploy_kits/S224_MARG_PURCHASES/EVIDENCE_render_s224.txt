@@ -1,0 +1,117 @@
+  PASS  pushed BILLWISE 2-151005__eaf37943
+  PASS  pushed SUPPLIERWISE 2-151219__a8e2915d
+  PASS  pushed BILLWISE 3-065505__df20b4d2
+  PASS  pushed BILLITEMWISE 1-144904__5d0e7222
+  PASS  pushed ITEMWISE 7-035751__50fb6ead
+  PASS  pushed ITEMWISE 0-095406__16988595
+  PASS  pushed ITEMWISE 7-035514__758d5ca5
+  PASS  rematch ran
+  PASS  hub as doctor renders 200
+  PASS  hub as doctor: no ten-digit run anywhere
+  PASS  hub as doctor: nothing leaks as None, no traceback
+  PASS  hub as doctor: viewport + print stylesheet
+  PASS  hub as doctor: carries the owner's words
+  PASS  hub as doctor: shows nothing this role may not use
+  PASS  hub as doctor: every internal link answers 200
+  PASS  month/2026-08 as doctor renders 200
+  PASS  month/2026-08 as doctor: no ten-digit run anywhere
+  PASS  month/2026-08 as doctor: nothing leaks as None, no traceback
+  PASS  month/2026-08 as doctor: viewport + print stylesheet
+  PASS  month/2026-08 as doctor: carries the owner's words
+  PASS  month/2026-08 as doctor: shows nothing this role may not use
+  PASS  month/2026-08 as doctor: every internal link answers 200
+  PASS  month/2026-07 as doctor renders 200
+  PASS  month/2026-07 as doctor: no ten-digit run anywhere
+  PASS  month/2026-07 as doctor: nothing leaks as None, no traceback
+  PASS  month/2026-07 as doctor: viewport + print stylesheet
+  PASS  month/2026-07 as doctor: carries the owner's words
+  PASS  month/2026-07 as doctor: shows nothing this role may not use
+  PASS  month/2026-07 as doctor: every internal link answers 200
+  PASS  scans as doctor renders 200
+  PASS  scans as doctor: no ten-digit run anywhere
+  PASS  scans as doctor: nothing leaks as None, no traceback
+  PASS  scans as doctor: viewport + print stylesheet
+  PASS  scans as doctor: carries the owner's words
+  PASS  scans as doctor: shows nothing this role may not use
+  PASS  scans as doctor: every internal link answers 200
+  PASS  orders as doctor renders 200
+  PASS  orders as doctor: no ten-digit run anywhere
+  PASS  orders as doctor: nothing leaks as None, no traceback
+  PASS  orders as doctor: viewport + print stylesheet
+  PASS  orders as doctor: carries the owner's words
+  PASS  orders as doctor: shows nothing this role may not use
+  PASS  orders as doctor: every internal link answers 200
+  PASS  hub as maker renders 200
+  PASS  hub as maker: no ten-digit run anywhere
+  PASS  hub as maker: nothing leaks as None, no traceback
+  PASS  hub as maker: viewport + print stylesheet
+  PASS  hub as maker: carries the owner's words
+  PASS  hub as maker: shows nothing this role may not use
+  PASS  hub as maker: every internal link answers 200
+  PASS  month/2026-08 as maker renders 200
+  PASS  month/2026-08 as maker: no ten-digit run anywhere
+  PASS  month/2026-08 as maker: nothing leaks as None, no traceback
+  PASS  month/2026-08 as maker: viewport + print stylesheet
+  PASS  month/2026-08 as maker: carries the owner's words
+  PASS  month/2026-08 as maker: shows nothing this role may not use
+  PASS  month/2026-08 as maker: every internal link answers 200
+  PASS  month/2026-07 as maker renders 200
+  PASS  month/2026-07 as maker: no ten-digit run anywhere
+  PASS  month/2026-07 as maker: nothing leaks as None, no traceback
+  PASS  month/2026-07 as maker: viewport + print stylesheet
+  PASS  month/2026-07 as maker: carries the owner's words
+  PASS  month/2026-07 as maker: shows nothing this role may not use
+  PASS  month/2026-07 as maker: every internal link answers 200
+  PASS  scans as maker renders 200
+  PASS  scans as maker: no ten-digit run anywhere
+  PASS  scans as maker: nothing leaks as None, no traceback
+  PASS  scans as maker: viewport + print stylesheet
+  PASS  scans as maker: carries the owner's words
+  PASS  scans as maker: shows nothing this role may not use
+  PASS  scans as maker: every internal link answers 200
+  PASS  orders as maker renders 200
+  PASS  orders as maker: no ten-digit run anywhere
+  PASS  orders as maker: nothing leaks as None, no traceback
+  PASS  orders as maker: viewport + print stylesheet
+  PASS  orders as maker: carries the owner's words
+  PASS  orders as maker: shows nothing this role may not use
+  PASS  orders as maker: every internal link answers 200
+  PASS  hub as viewer renders 200
+  PASS  hub as viewer: no ten-digit run anywhere
+  PASS  hub as viewer: nothing leaks as None, no traceback
+  PASS  hub as viewer: viewport + print stylesheet
+  PASS  hub as viewer: carries the owner's words
+  PASS  hub as viewer: shows nothing this role may not use
+  PASS  hub as viewer: every internal link answers 200
+  PASS  month/2026-08 as viewer renders 200
+  PASS  month/2026-08 as viewer: no ten-digit run anywhere
+  PASS  month/2026-08 as viewer: nothing leaks as None, no traceback
+  PASS  month/2026-08 as viewer: viewport + print stylesheet
+  PASS  month/2026-08 as viewer: carries the owner's words
+  PASS  month/2026-08 as viewer: shows nothing this role may not use
+  PASS  month/2026-08 as viewer: every internal link answers 200
+  PASS  month/2026-07 as viewer renders 200
+  PASS  month/2026-07 as viewer: no ten-digit run anywhere
+  PASS  month/2026-07 as viewer: nothing leaks as None, no traceback
+  PASS  month/2026-07 as viewer: viewport + print stylesheet
+  PASS  month/2026-07 as viewer: carries the owner's words
+  PASS  month/2026-07 as viewer: shows nothing this role may not use
+  PASS  month/2026-07 as viewer: every internal link answers 200
+  PASS  scans as viewer renders 200
+  PASS  scans as viewer: no ten-digit run anywhere
+  PASS  scans as viewer: nothing leaks as None, no traceback
+  PASS  scans as viewer: viewport + print stylesheet
+  PASS  scans as viewer: carries the owner's words
+  PASS  scans as viewer: shows nothing this role may not use
+  PASS  scans as viewer: every internal link answers 200
+  PASS  orders as viewer renders 200
+  PASS  orders as viewer: no ten-digit run anywhere
+  PASS  orders as viewer: nothing leaks as None, no traceback
+  PASS  orders as viewer: viewport + print stylesheet
+  PASS  orders as viewer: carries the owner's words
+  PASS  orders as viewer: shows nothing this role may not use
+  PASS  orders as viewer: every internal link answers 200
+  PASS  the month page groups bills by supplier (a supplier heading row per group)
+  PASS  the source files' header lines (shop name, phone) never reach a page
+
+115 PASS  0 FAIL

@@ -22,15 +22,11 @@ WHY THIS REPLACES push_snapshot.py AS THE DAILY FEED
 THE TWO EXPORTS AMIR MUST TAKE, EVERY VISIT, OVER THE SAME DATE RANGE
     PURCHASE ITEM WISE      what came in: item, batch, expiry, quantity
     PURCHASE SUPPLIER WISE  supplier, DATE, bill number, amount
-      -- or, since S224, PURCHASE BILL WISE: DATE group, bill number, party,
-         amount. Either report dates a bill; both may be present. Where both
-         name the same bill with DIFFERENT dates, SUPPLIER WISE is kept and
-         the conflict is printed, never resolved silently.
 
     The item-wise report carries NO DATE on any row -- only supplier and bill
-    number. Without a dated report there is no way to tell a purchase that
-    happened after the baseline from one already inside it, and adding both
-    would double-count. So a purchase file whose period reaches past the
+    number. Without the supplier-wise report there is no way to tell a purchase
+    that happened after the baseline from one already inside it, and adding
+    both would double-count. So a purchase file whose period reaches past the
     baseline is REFUSED unless every one of its bills can be dated.
 
 WHAT IT REFUSES TO DO
@@ -212,126 +208,53 @@ def sale_units(ln, size):
 
 
 # ----------------------------------------------------------- purchases
-DATE_SOURCES = (("SUPPLIERWISE", "PURCHASE_SUPPLIERWISE"),
-                ("BILLWISE", "PURCHASE_BILLWISE"))
-
-
 def bill_dates(archive):
-    """{(supplier, bill): date} from every PURCHASE SUPPLIER WISE export,
-    then every PURCHASE BILL WISE export (S224).
+    """{(supplier, bill): date} from every PURCHASE SUPPLIER WISE export.
 
-    SUPPLIER WISE layout: a header row SUPPLIER NAME | DATE | BILL NO. | CASH
-    | CREDIT, then one row per bill. The supplier cell is written once and
-    left blank on the following rows of the same supplier, so it is carried
-    down. TOTAL rows are skipped -- they are furniture, and a furniture row
-    read as a bill is exactly the fault that made a page header look like a
-    salt (S207).
-
-    BILL WISE layout: a header row BILL NO. | PARTY NAME | CASH | CREDIT, then
-    a DATE GROUP row (col0 = dd-mm-yyyy, the rest blank) and the bills under
-    it: col0 bill number (may read as '160.0'), col1 party. The date carries
-    down until the next date row; TOTAL ends the group.
-
-    Merge rule: SUPPLIER WISE first. BILL WISE fills any (supplier, bill) not
-    already dated. If both give DIFFERENT dates for one key, SUPPLIER WISE is
-    kept and the pair is recorded in `conflicts` -- reported, never resolved.
-
-    Returns (dates, files, conflicts). `files` rows read
-    (name, bills read, bills newly dated, status, source).
+    Layout: a header row SUPPLIER NAME | DATE | BILL NO. | CASH | CREDIT, then
+    one row per bill. The supplier cell is written once and left blank on the
+    following rows of the same supplier, so it is carried down. TOTAL rows are
+    skipped -- they are furniture, and a furniture row read as a bill is
+    exactly the fault that made a page header look like a salt (S207).
     """
-    out, files, conflicts = {}, [], []
-    for source, sub in DATE_SOURCES:
-        pats = [os.path.join(archive, sub, "*", "*.XLS"),
-                os.path.join(archive, sub, "*", "*.xlsx")]
-        for p in _effective(sum([glob.glob(x) for x in pats], [])):
-            try:
-                sh = xlsx_sheet.open_sheet_any(p)
-            except Exception as e:                             # noqa: BLE001
-                files.append((os.path.basename(p), 0, 0, str(e), source))
+    out, files = {}, []
+    pats = [os.path.join(archive, "PURCHASE_SUPPLIERWISE", "*", "*.XLS"),
+            os.path.join(archive, "PURCHASE_SUPPLIERWISE", "*", "*.xlsx")]
+    for p in _effective(sum([glob.glob(x) for x in pats], [])):
+        try:
+            sh = xlsx_sheet.open_sheet_any(p)
+        except Exception as e:                                 # noqa: BLE001
+            files.append((os.path.basename(p), 0, str(e)))
+            continue
+        n, supplier = 0, None
+        for i in range(sh.nrows):
+            cells = [_txt(c) for c in sh.row(i)]
+            if not cells:
                 continue
-            if source == "SUPPLIERWISE":
-                got = _supplierwise_rows(sh)
-            else:
-                got = _billwise_rows(sh)
-            new = 0
-            for key, date in got:
-                have = out.get(key)
-                if have is None:
-                    out[key] = date
-                    new += 1
-                elif have != date and source != "SUPPLIERWISE":
-                    conflicts.append((key[0], key[1], ddmmyyyy(have),
-                                      ddmmyyyy(date), os.path.basename(p)))
-                elif source == "SUPPLIERWISE":
-                    out[key] = date            # within-source: later file wins
-            files.append((os.path.basename(p), len(got), new, "ok", source))
-    return out, files, conflicts
-
-
-def _supplierwise_rows(sh):
-    """[((supplier, bill), date)] from one SUPPLIER WISE sheet."""
-    got, supplier = [], None
-    for i in range(sh.nrows):
-        cells = [_txt(c) for c in sh.row(i)]
-        if not cells:
-            continue
-        first = cells[0].strip()
-        rest = cells[1:] if len(cells) > 1 else []
-        if first.upper().startswith("SUPPLIER NAME"):
-            continue
-        if first:
-            supplier = first
-        date = None
-        bill = None
-        for c in rest:
-            cs = c.strip()
-            if cs.upper().startswith("TOTAL"):
-                date, bill = None, None
-                break
-            if date is None and dkey(cs):
-                date = dkey(cs)
+            first = cells[0].strip()
+            rest = cells[1:] if len(cells) > 1 else []
+            if first.upper().startswith("SUPPLIER NAME"):
                 continue
-            if date is not None and bill is None and cs:
-                bill = _billno(cs)
-                break
-        if supplier and date and bill:
-            got.append(((PM.norm(supplier), bill), date))
-    return got
-
-
-def _billwise_rows(sh):
-    """[((supplier, bill), date)] from one BILL WISE sheet.
-
-    Nothing before the first date-group row is a bill: the shop's name,
-    address and title lines sit above the header. TOTAL closes the group, so
-    the footer line after it is never read as a bill either.
-    """
-    got, date = [], None
-    for i in range(sh.nrows):
-        cells = [_txt(c) for c in sh.row(i)]
-        if not cells:
-            continue
-        first = cells[0].strip()
-        if not first:
-            continue
-        up = first.upper()
-        if up.startswith("BILL NO"):
-            continue
-        if up.startswith("TOTAL"):
+            if first:
+                supplier = first
             date = None
-            continue
-        rest = [c.strip() for c in cells[1:]]
-        d = dkey(first)
-        if d is not None and not any(rest):
-            date = d
-            continue
-        if date is None:
-            continue
-        party = rest[0] if rest else ""
-        if not party:
-            continue
-        got.append(((PM.norm(party), _billno(first)), date))
-    return got
+            bill = None
+            for c in rest:
+                cs = c.strip()
+                if cs.upper().startswith("TOTAL"):
+                    date, bill = None, None
+                    break
+                if date is None and dkey(cs):
+                    date = dkey(cs)
+                    continue
+                if date is not None and bill is None and cs:
+                    bill = _billno(cs)
+                    break
+            if supplier and date and bill:
+                out[(PM.norm(supplier), bill)] = date
+                n += 1
+        files.append((os.path.basename(p), n, "ok"))
+    return out, files
 
 
 def _txt(cell):
@@ -362,7 +285,7 @@ def purchases_after(archive, after):
     an undated purchase is either double-counted or lost, and there is no
     third option.
     """
-    dates, dfiles, dconf = bill_dates(archive)
+    dates, dfiles = bill_dates(archive)
     rows, used, skipped, undated = [], [], [], []
     pats = [os.path.join(archive, "PURCHASE_ITEMWISE", "*", "*.XLS"),
             os.path.join(archive, "PURCHASE_ITEMWISE", "*", "*.xlsx")]
@@ -397,7 +320,7 @@ def purchases_after(archive, after):
             n += 1
         used.append((os.path.basename(p), n, ddmmyyyy(end)))
         horizon = end if horizon is None or end > horizon else horizon
-    return rows, horizon, used, skipped, undated, dfiles, dconf
+    return rows, horizon, used, skipped, undated, dfiles
 
 
 def _period_end(period):
@@ -426,14 +349,12 @@ def compute(archive, base_as_on=None, upto=None):
     if B is None:
         return {"error": "the baseline export carries no readable as-on date"}
 
-    pur, horizon, pused, pskipped, undated, dfiles, dconf = purchases_after(archive, B)
+    pur, horizon, pused, pskipped, undated, dfiles = purchases_after(archive, B)
     if undated:
         return {"error": "%d purchase line(s) could not be dated -- the "
-                         "SUPPLIER WISE or BILL WISE export for the same range "
-                         "is missing or does not cover them. Nothing sent."
-                         % len(undated),
-                "undated": undated[:10], "date_files": dfiles,
-                "date_conflicts": dconf}
+                         "SUPPLIER WISE export for the same range is missing "
+                         "or does not cover them. Nothing sent." % len(undated),
+                "undated": undated[:10]}
 
     sale, sdays, sskipped = sales_after(archive, B, upto)
     if not sdays:
@@ -534,7 +455,6 @@ def compute(archive, base_as_on=None, upto=None):
             "purchase_rows": len(pur), "purchase_horizon": horizon,
             "purchase_files": pused, "purchase_skipped": pskipped,
             "sale_skipped": sskipped, "supplierwise_files": dfiles,
-            "date_files": dfiles, "date_conflicts": dconf,
             "branches": dict(branch), "pack_conflicts": pconflicts,
             "blocked_names": blocked_names.most_common(20),
             "negative": sorted([(i["item"], i["qty"]) for i in items
@@ -591,21 +511,6 @@ def send(url, body, tok):
         return json.loads(r.read().decode("utf-8"))
 
 
-def _print_date_files(rep):
-    """Which export dated the bills, and any date the two sources dispute."""
-    for row in rep.get("date_files") or []:
-        f, n, new, status, source = row
-        print("dates      %-12s %s   %d bill(s), %d newly dated%s"
-              % (source, f[:44], n, new, "" if status == "ok" else " -- " + status))
-    conf = rep.get("date_conflicts") or []
-    if conf:
-        print("  !! %d bill(s) dated DIFFERENTLY by the two purchase reports -- "
-              "SUPPLIER WISE kept, not resolved:" % len(conf))
-        for sup, bill, kept, other, f in conf[:10]:
-            print("     %-28s bill %-8s %s (supplier wise)  vs  %s (%s)"
-                  % (sup[:28], bill, kept, other, f[:44]))
-
-
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--archive", default=DEF_ARCHIVE)
@@ -631,7 +536,6 @@ def main(argv=None):
         print("REFUSING: %s" % rep["error"])
         for u in rep.get("undated", []):
             print("   undated: %s bill %s  %s" % (u[1], u[2], u[3]))
-        _print_date_files(rep)
         return 0 if rep.get("empty") else 1
 
     for name, n in rep["rejected"]:
@@ -643,7 +547,6 @@ def main(argv=None):
         print("purchases  %s   %d dated line(s), period to %s" % (f[:44], n, end))
     for f, why in rep["purchase_skipped"]:
         print("  skipped %s -- %s" % (f[:44], why))
-    _print_date_files(rep)
     print("sales      %d line(s) over %d day(s), %s .. %s"
           % (rep["sale_lines"], len(rep["sale_days"]),
              ddmmyyyy(rep["sale_days"][0]), ddmmyyyy(rep["sale_days"][-1])))

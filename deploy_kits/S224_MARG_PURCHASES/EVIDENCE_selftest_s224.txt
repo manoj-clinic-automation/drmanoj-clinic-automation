@@ -1,0 +1,136 @@
+S224 selftest on <tmp>/s224_vhlccyta
+  PASS  healthz answers without auth
+  PASS  August BILLWISE export is in the archive
+  PASS  BILLWISE parser: rows sum to Marg's TOTAL row
+  PASS  push with the WRONG token -> 401
+  PASS  push with the wrong HEADER NAME (X-Finance-Cron, F-237) -> 401
+  PASS  push with no header -> 401
+  PASS  push with an unknown type -> 400
+  PASS  push with a bad md5 -> 400
+  PASS  push with rows not a list -> 400
+  PASS  push with a non-JSON body -> 400
+  PASS  BILLWISE August stored as new
+  PASS  bills stored == BILLWISE rows
+  PASS  August bill-wise total == Marg TOTAL row
+  PASS  the same export again -> stored:false, duplicate
+  PASS  a duplicate did not add bills
+  PASS  healthz counts one export
+  PASS  two August SUPPLIERWISE exports of the same period exist (the supersede case)
+  PASS  SUPPLIERWISE parser: rows sum to GRAND TOTAL
+  PASS  SUPPLIERWISE and BILLWISE agree on the August total
+  PASS  older SUPPLIERWISE stored as new
+  PASS  SUPPLIERWISE added NO second copy of any bill (supplier_key joins the two reports)
+  PASS  later SUPPLIERWISE of the same period stored as new
+  PASS  the older one is now marked superseded_by the later
+  PASS  re-pushing the superseded one -> duplicate (idempotent on md5)
+  PASS  an OLDER stamp for a period that already has a later one -> superseded_older, not stored
+  PASS  bills still exactly the BILLWISE count after all that
+  PASS  every August bill's date came from BILLWISE (BILLWISE first)
+  PASS  no bill lost its printed supplier name
+  PASS  marg_purchase (S206) importable for ITEMWISE
+  PASS  ITEMWISE rows carry a null bill_date (the export has none)
+  PASS  ITEMWISE 01-26 stored
+  PASS  ITEMWISE 28-29 stored (a different period: coexists, does not supersede)
+  PASS  lines stored == ITEMWISE rows
+  PASS  EVERY ITEMWISE line was dated from its bill
+  PASS  every line's month is August
+  PASS  item-wise sum of the lines == the two exports' totals
+  PASS  BILLITEMWISE parser: rows sum to its TOTAL
+  PASS  BILLITEMWISE stored
+  PASS  BILLITEMWISE lines found their supplier from the bills (bill no + date)
+  PASS  July ITEMWISE pushed BEFORE its bills: lines are UNDATED
+  PASS  July month cannot finalise while lines are undated, and says so
+  PASS  July BILLWISE arrives: the lines are re-dated by the bills
+  PASS  July bills == its BILLWISE rows
+  PASS  August summary: bill-wise == Marg TOTAL
+  PASS  August summary: item-wise = ITEMWISE lines + BILLITEMWISE only for bills with no ITEMWISE line
+  PASS  August is provisional and cannot finalise (ITEMWISE does not yet cover the whole month)
+  PASS  hub renders for the doctor
+  PASS  hub shows 'August 2026'
+  PASS  hub shows 'July 2026'
+  PASS  hub shows 'Feed health'
+  PASS  hub shows 'Stock verification'
+  PASS  hub shows 'Scan links'
+  PASS  hub shows 'Orders'
+  PASS  hub shows 'PROVISIONAL'
+  PASS  hub shows '(doctor)'
+  PASS  hub says the asset app is not reachable when assets.db is absent
+  PASS  month page renders
+  PASS  month page shows 'cannot finalise yet'
+  PASS  month page shows 'bill-wise total'
+  PASS  month page shows 'Correct'
+  PASS  month page shows 'Wrong'
+  PASS  month page shows 'unverified'
+  PASS  month page has no FINALISE button while it cannot finalise
+  PASS  a bad month is refused
+  PASS  a viewer cannot give a verdict (403)
+  PASS  a viewer's month page carries no verdict buttons
+  PASS  WRONG without amount+reason -> 400
+  PASS  maker marks a bill WRONG with amount and reason
+  PASS  the WRONG amount is stored in paise
+  PASS  month page shows WRONG with the reason
+  PASS  hub counts the WRONG bill
+  PASS  the same bill can be set CORRECT again
+  PASS  verdicts are audited
+  PASS  a maker cannot finalise (403, doctor only)
+  PASS  the doctor is refused on August with the reasons listed
+  PASS  a month whose bills and lines reconcile CAN finalise
+  PASS  finalise refused while a bill is WRONG, naming it
+  PASS  the FINALISE button appears for the doctor when the month reconciles
+  PASS  the doctor finalises May
+  PASS  purchase_month records FINAL with the totals
+  PASS  a FINAL month page shows FINAL and the reopen for the doctor
+  PASS  verdicts are locked on a FINAL month (403)
+  PASS  a maker cannot reopen (403)
+  PASS  reopen without a reason -> 400
+  PASS  the doctor reopens with a reason
+  PASS  finalise and reopen are audited
+  PASS  hub shows FINAL/PROVISIONAL chips
+  PASS  scans page without assets.db says 'asset app not reachable' and nothing breaks
+  PASS  rematch without assets.db -> 503 assets_unreachable
+  PASS  rematch runs against the temp assets.db
+  PASS  rematch found 2 links (one EXACT, one PROBABLE), ignoring the non-Pharmacy scan
+  PASS  the EXACT link is on the right bill
+  PASS  scans page renders with both lists
+  PASS  scans page links to the asset app's bill
+  PASS  month page shows the scan link on the matched bill
+  PASS  hub counts unmatched scans and unscanned bills
+  PASS  a viewer's scans page has no Re-match button
+  PASS  feed ping stored
+  PASS  hub shows the pull ASLEEP in red with the time
+  PASS  hub turns green when the next ping says ok
+  PASS  feed with the wrong token -> 401
+  PASS  vendors with the wrong token -> 401
+  PASS  vendor pairs stored
+  PASS  the response never echoes a phone
+  PASS  the audit row never holds a phone
+  PASS  plan reads the newest snapshot
+  PASS  plan paced the three items from sale lines
+  PASS  plan is labelled PROVISIONAL (5 feed days < 28)
+  PASS  the vendor comes from the last purchase line's supplier
+  PASS  the item that is OUT is on the plan
+  PASS  the item with 500 on hand at 0.5/day is NOT reordered
+  PASS  cover_after is computed
+  PASS  rate per pack comes from the last purchase line
+  PASS  orders page renders for the doctor
+  PASS  orders page (doctor) shows 'PROVISIONAL until the stock verification has run a month'
+  PASS  orders page (doctor) shows 'Save as order'
+  PASS  orders page (doctor) shows 'Copy this order'
+  PASS  orders page (doctor) shows 'Order book'
+  PASS  orders page (doctor) shows 'tel:'
+  PASS  stock card on the hub reads the feed comparison
+  PASS  a VIEWER's orders page has NO phone, no tel: link, no copy block, no save button
+  PASS  a MAKER sees the phone but not the Save button
+  PASS  a maker cannot save an order (403)
+  PASS  the doctor saves the plan as a draft order
+  PASS  order lines persisted with a total
+  PASS  order moved to sent
+  PASS  an unknown status is refused
+  PASS  hub counts the open order
+  PASS  order create and status are audited
+  PASS  the order book shows the order with its status
+  PASS  nobody signed in -> the hub is refused
+  PASS  signed in with no medical role -> refused (403)
+  PASS  schema was created lazily, never at import (F-303)
+
+133 PASS  0 FAIL

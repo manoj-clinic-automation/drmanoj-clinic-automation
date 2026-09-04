@@ -1,0 +1,11 @@
+S224_MARG_PURCHASES · built 04-Sep-2026 · Session 224 · Marg's purchases on the box
+Target (live pins, passed as arguments -- the repo copies are behind the box):
+  /root/finance/finance_app.py  <live>  -> NEW PIN printed by patch_finance_app_purchase_s224.py
+  /root/portal/portal.py        <live>  -> NEW PIN printed by patch_portal_purchase_tile_s224.py
+  /root/finance/purchase_app.py, purchase_schema.sql, marg_purchase_rows.py   NEW (see SUMS.md5)
+  /root/portal/tile_grants.json v5 08828cb1 -> v6 (see SUMS.md5)
+Contract: S224_PURCHASE_PUSH_CONTRACT.md (manojz push_purchases.py is the other leg).
+Proven offline: selftest 133/133 on the REAL August/July exports through the shared parser;
+RENDER 115/115 (every page x doctor/maker/viewer, no ten-digit run, print + mobile tags, no
+dead link); WALK 17/17 through the REAL patched finance_app.py and its REAL front gate.
+Six live files (four of them new). Tables created on first request, never at import (F-303).
