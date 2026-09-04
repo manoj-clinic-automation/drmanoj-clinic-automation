@@ -11,7 +11,7 @@ from import_neft_bank import supplier_key  # noqa: E402 -- exact same key as the
 
 PHONE_A, PHONE_B, PHONE_C = "PHONE-STUB-A", "PHONE-STUB-B", "PHONE-STUB-C"
 ACCT_A, ACCT_B_OLD, ACCT_B_NEW, ACCT_C = "ACCTSTUBAQ", "WRONGSTUB", "ACCTSTUBBR", "ACCTSTUBCS"
-ACCT_D = "ACCTSTUBDT"
+ACCT_D, ACCT_E = "ACCTSTUBDT", "ACCTSTUBEU"
 IFSC_WRONG, IFSC_B, IFSC_C = "WRONGSTUB0", "SBINSTUBE1", "ABCDSTUBF2"
 
 
@@ -23,7 +23,7 @@ def make_db(path):
                 "updated_at TEXT NOT NULL)")
     con.execute("CREATE TABLE purchase_audit (id INTEGER PRIMARY KEY, at TEXT NOT NULL, who TEXT NOT NULL, "
                 "action TEXT NOT NULL, ref TEXT, detail TEXT)")
-    # A: already in the book, no bank yet -> should be written VERIFIED
+    # A: already in the book, no bank yet -> should be UPDATED, VERIFIED
     con.execute("INSERT INTO purchase_vendor_contact (vendor_norm, vendor, phone, updated_at) VALUES (?,?,?,?)",
                 (supplier_key("A.A. Pharmaceuticals"), "A.A. Pharmaceuticals", PHONE_A, "2026-01-01T00:00:00"))
     # B: in the book, source CSV names it with a BAREILLY city tail, existing bank details WRONG -> should update
@@ -35,6 +35,7 @@ def make_db(path):
                 "bank_verified_by, bank_verified_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?)",
                 (supplier_key("Correct Already"), "Correct Already", PHONE_C, ACCT_C, IFSC_C,
                  "VERIFIED", "someone", "2026-01-01T00:00:00", "2026-01-01T00:00:00"))
+    # D and E do not exist yet -- NOT in the book at all, no phone on file anywhere
     con.commit()
     con.close()
 
@@ -46,7 +47,10 @@ def make_csv(path):
         w.writerow(("A.A. Pharmaceuticals", ACCT_A, "KARBSTUBG3", "VERIFIED", ""))
         w.writerow(("Surya Surgicals Bareilly", ACCT_B_NEW, IFSC_B, "VERIFIED", ""))
         w.writerow(("Correct Already", ACCT_C, IFSC_C, "VERIFIED", ""))
-        w.writerow(("Nobody Yet Pharma", ACCT_D, "HDFCSTUBH4", "UNVERIFIED", "NOT PAID THIS FY"))
+        # D: brand new vendor, VERIFIED in the source -> must be CREATED as bank-only, VERIFIED, phone blank
+        w.writerow(("New Verified Pharma", ACCT_D, "HDFCSTUBH4", "VERIFIED", ""))
+        # E: brand new vendor, UNVERIFIED/flagged -> must be CREATED as bank-only, UNVERIFIED, never auto-approved
+        w.writerow(("Nobody Yet Pharma", ACCT_E, "ICICSTUBJ5", "UNVERIFIED", "NOT PAID THIS FY"))
 
 
 def run(args):
@@ -66,17 +70,17 @@ def main():
     r = run(["--csv", csvp, "--db", db])
     if open(db, "rb").read() != before:
         print("FAIL: dry run modified the database"); ok = False
-    if "matched (will change): 2" not in r.stdout:
-        print("FAIL: expected 2 to change in dry run\n" + r.stdout); ok = False
+    if "existing vendor, bank details to update: 2" not in r.stdout:
+        print("FAIL: expected 2 existing vendors to update\n" + r.stdout); ok = False
     if "already correct, no change: 1" not in r.stdout:
         print("FAIL: expected 1 unchanged\n" + r.stdout); ok = False
-    if "not in the phone book yet -- NOT written, needs a phone number first: 1" not in r.stdout:
-        print("FAIL: expected 1 unmatched\n" + r.stdout); ok = False
+    if "new phone-book entry to create (bank details only, no phone yet): 2" not in r.stdout:
+        print("FAIL: expected 2 new bank-only entries\n" + r.stdout); ok = False
 
     # apply
     r = run(["--csv", csvp, "--db", db, "--apply"])
-    if "wrote 2 vendor(s)" not in r.stdout:
-        print("FAIL: expected apply to write 2\n" + r.stdout); ok = False
+    if "updated 2, created 2 new" not in r.stdout:
+        print("FAIL: expected apply to report updated 2, created 2\n" + r.stdout); ok = False
     con = sqlite3.connect(db); con.row_factory = sqlite3.Row
     a = con.execute("SELECT * FROM purchase_vendor_contact WHERE vendor_norm=?", (supplier_key("A.A. Pharmaceuticals"),)).fetchone()
     if not (a["acct_no"] == ACCT_A and a["bank_status"] == "VERIFIED" and a["bank_verified_by"]):
@@ -87,18 +91,21 @@ def main():
     c = con.execute("SELECT * FROM purchase_vendor_contact WHERE vendor_norm=?", (supplier_key("Correct Already"),)).fetchone()
     if c["bank_verified_by"] != "someone":
         print("FAIL: row C was rewritten though it was already correct: %s" % dict(c)); ok = False
-    n = con.execute("SELECT COUNT(*) c FROM purchase_vendor_contact WHERE vendor LIKE '%Nobody%'").fetchone()
-    if n["c"] != 0:
-        print("FAIL: unmatched vendor D was inserted -- must never happen"); ok = False
+    d = con.execute("SELECT * FROM purchase_vendor_contact WHERE vendor_norm=?", (supplier_key("New Verified Pharma"),)).fetchone()
+    if d is None or not (d["acct_no"] == ACCT_D and d["bank_status"] == "VERIFIED" and d["bank_verified_by"] and (d["phone"] or "") == ""):
+        print("FAIL: row D (new, VERIFIED) not created correctly: %s" % (dict(d) if d else None)); ok = False
+    e = con.execute("SELECT * FROM purchase_vendor_contact WHERE vendor_norm=?", (supplier_key("Nobody Yet Pharma"),)).fetchone()
+    if e is None or not (e["acct_no"] == ACCT_E and e["bank_status"] == "UNVERIFIED" and not e["bank_verified_by"] and (e["phone"] or "") == ""):
+        print("FAIL: row E (new, UNVERIFIED) not created correctly, or was auto-approved: %s" % (dict(e) if e else None)); ok = False
     aud = con.execute("SELECT COUNT(*) c FROM purchase_audit").fetchone()
-    if aud["c"] != 2:
-        print("FAIL: expected 2 audit rows, got %d" % aud["c"]); ok = False
+    if aud["c"] != 4:
+        print("FAIL: expected 4 audit rows (2 updates + 2 creates), got %d" % aud["c"]); ok = False
     bak_files = [f for f in os.listdir(tmp) if f.startswith("test.db.bak_s225_neft_")]
     if len(bak_files) != 1:
         print("FAIL: expected exactly 1 backup file, found %d" % len(bak_files)); ok = False
     con.close()
 
-    # re-run (idempotency): second apply should report 0 to change
+    # re-run (idempotency): second apply should report 0 to change and 0 new
     r = run(["--csv", csvp, "--db", db, "--apply"])
     if "nothing to write" not in r.stdout:
         print("FAIL: second apply was not a no-op\n" + r.stdout); ok = False

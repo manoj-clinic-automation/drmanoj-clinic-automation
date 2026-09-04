@@ -1,21 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-import_neft_bank.py -- S225, owner's ruling of 04-Sep-2026 (S225_OWNER_RULINGS §5):
+import_neft_bank.py -- S225, owner's ruling of 04-Sep-2026 (S225_OWNER_RULINGS_04SEP.md, item 5):
 "all existing bank details already accepted as decided; it's for the future part."
 
 Runs ON THE VPS. Reads a plain CSV (vendor, acct_no, ifsc, status, note) produced by
-export_neft_csv.py on manojz, and writes into purchase_vendor_contact -- ONLY for
-vendors that already exist in the phone book (a bank-only row with no phone is never
-created here; that is a separate decision). Matches by the exact same supplier_key()
-used everywhere else in purchase_app.py.
+export_neft_csv.py on manojz, and writes into purchase_vendor_contact -- matched by the exact
+same supplier_key() used everywhere else in purchase_app.py.
 
-Rows whose source status is VERIFIED are written with bank_status='VERIFIED' directly --
-this is the one deliberate, logged exception to D370 (a machine write normally drops to
-UNVERIFIED); it exists because the owner's ruling above already IS the verification, made
-in writing, dated. bank_verified_by records that ruling, not a person clicking Verify.
-Rows whose source status is UNVERIFIED go in as UNVERIFIED, unchanged, flagged separately --
-never auto-approved.
+A vendor already in the phone book gets its bank fields updated. A vendor NOT yet in the phone
+book gets a NEW row created, bank fields filled, phone left blank -- corrected 04-Sep-2026: a
+full bank account + IFSC is what a bulk NEFT file needs, and that has nothing to do with whether
+a phone number has been typed in yet (the app's own /api/book "add" action requires a phone
+because a human adding a contact wants to be able to call them; this import bypasses that screen
+entirely and is not bound by it). Nobody is ever guessed a phone number here.
+
+Rows whose source status is VERIFIED are written with bank_status='VERIFIED' directly -- this is
+the one deliberate, logged exception to D370 (a machine write normally drops to UNVERIFIED); it
+exists because the owner's ruling above already IS the verification, made in writing, dated.
+bank_verified_by records that ruling, not a person clicking Verify. Rows whose source status is
+UNVERIFIED go in as UNVERIFIED, unchanged, flagged separately -- never auto-approved, whether the
+vendor already existed or is newly created here.
 
 No account numbers are ever printed -- only last-4. The CSV is real financial data and must
 never be committed to git; it lives beside this script only for the run and should be deleted
@@ -23,7 +28,7 @@ never be committed to git; it lives beside this script only for the run and shou
 
 Usage (both from the deploy_kits/S225_NEFT_IMPORT folder on the VPS):
     python3 -B import_neft_bank.py --csv /root/finance/_import/neft_bank_export_S225.csv
-        (dry run: reports every match/mismatch, writes nothing -- the default)
+        (dry run: reports every match/mismatch/new entry, writes nothing -- the default)
     python3 -B import_neft_bank.py --csv /root/finance/_import/neft_bank_export_S225.csv --apply --delete-source
         (writes, after taking a timestamped backup of finance.db; deletes the CSV on success)
 """
@@ -43,6 +48,7 @@ BOOK_COLS = (("phone2", "TEXT"), ("acct_name", "TEXT"), ("acct_no", "TEXT"), ("i
              ("bank_verified_by", "TEXT"), ("bank_verified_at", "TEXT"), ("source", "TEXT"),
              ("added_by", "TEXT"))
 BANK_FIELDS = ("acct_name", "acct_no", "ifsc", "bank_branch", "upi_id")
+VERIFIED_NOTE = "owner (NEFT import, S225 ruling 04-Sep-2026)"
 
 
 def norm(s):
@@ -112,39 +118,41 @@ def main():
     con.row_factory = sqlite3.Row
     ensure_book(con)
 
-    matched, unmatched, unchanged = [], [], []
+    changed, unchanged, new = [], [], []
     for r in rows:
         key = supplier_key(r["vendor"])
         row = con.execute("SELECT * FROM purchase_vendor_contact WHERE vendor_norm=?", (key,)).fetchone()
+        new_status = r["status"] if r["status"] in ("VERIFIED", "UNVERIFIED") else ((row["bank_status"] if row else "") or "")
         if row is None:
-            unmatched.append(r)
+            new.append((r, key, new_status))
             continue
-        new_status = r["status"] if r["status"] in ("VERIFIED", "UNVERIFIED") else (row["bank_status"] or "")
         same = ((row["acct_no"] or "") == r["acct_no"] and (row["ifsc"] or "") == r["ifsc"]
                 and (row["bank_status"] or "") == new_status)
         if same:
             unchanged.append(r)
             continue
-        matched.append((row, r, key, new_status))
+        changed.append((row, r, key, new_status))
 
-    print("\nmatched (will change): %d" % len(matched))
-    for row, r, key, new_status in matched:
+    print("\nexisting vendor, bank details to update: %d" % len(changed))
+    for row, r, key, new_status in changed:
         print("  %-35s acct ..%s  ifsc %s  -> %s%s" %
               (r["vendor"][:35], last4(r["acct_no"])[-4:], r["ifsc"], new_status,
                "  [%s]" % r["note"][:60] if r["note"] else ""))
     print("\nalready correct, no change: %d" % len(unchanged))
     for r in unchanged:
         print("  %-35s (already on file, unchanged)" % r["vendor"][:35])
-    print("\nnot in the phone book yet -- NOT written, needs a phone number first: %d" % len(unmatched))
-    for r in unmatched:
-        print("  %-35s acct ..%s" % (r["vendor"][:35], last4(r["acct_no"])[-4:]))
+    print("\nnew phone-book entry to create (bank details only, no phone yet): %d" % len(new))
+    for r, key, new_status in new:
+        print("  %-35s acct ..%s  ifsc %s  -> %s%s" %
+              (r["vendor"][:35], last4(r["acct_no"])[-4:], r["ifsc"], new_status,
+               "  [%s]" % r["note"][:60] if r["note"] else ""))
 
     if not a.apply:
         print("\nimport_neft_bank: DRY RUN -- nothing written. Re-run with --apply to write.")
         con.close()
         return 0
 
-    if not matched:
+    if not changed and not new:
         print("\nimport_neft_bank: nothing to write.")
         con.close()
         return 0
@@ -154,8 +162,8 @@ def main():
     print("\nimport_neft_bank: backed up database -> %s" % bak)
 
     try:
-        for row, r, key, new_status in matched:
-            verified_by = "owner (NEFT import, S225 ruling 04-Sep-2026)" if new_status == "VERIFIED" else (row["bank_verified_by"] or "")
+        for row, r, key, new_status in changed:
+            verified_by = VERIFIED_NOTE if new_status == "VERIFIED" else (row["bank_verified_by"] or "")
             verified_at = now_iso() if new_status == "VERIFIED" else (row["bank_verified_at"] or "")
             con.execute(
                 "UPDATE purchase_vendor_contact SET acct_no=?, ifsc=?, bank_status=?, bank_verified_by=?, "
@@ -165,6 +173,18 @@ def main():
                         (now_iso(), "neft_import_s225", "book_bank_neft_import", key,
                          '{"vendor": %r, "acct_last4": %r, "ifsc": %r, "bank_status": %r}' %
                          (r["vendor"], last4(r["acct_no"]), r["ifsc"], new_status)))
+        for r, key, new_status in new:
+            verified_by = VERIFIED_NOTE if new_status == "VERIFIED" else ""
+            verified_at = now_iso() if new_status == "VERIFIED" else ""
+            con.execute(
+                "INSERT INTO purchase_vendor_contact (vendor_norm, vendor, phone, acct_no, ifsc, bank_status, "
+                "bank_verified_by, bank_verified_at, source, added_by, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                (key, r["vendor"], "", r["acct_no"], r["ifsc"], new_status, verified_by, verified_at,
+                 "neft_import", "neft_import_s225", now_iso()))
+            con.execute("INSERT INTO purchase_audit (at, who, action, ref, detail) VALUES (?,?,?,?,?)",
+                        (now_iso(), "neft_import_s225", "book_bank_neft_import_new", key,
+                         '{"vendor": %r, "acct_last4": %r, "ifsc": %r, "bank_status": %r, "note": "no phone on file yet"}' %
+                         (r["vendor"], last4(r["acct_no"]), r["ifsc"], new_status)))
         con.commit()
     except Exception as e:  # noqa: BLE001
         con.rollback()
@@ -172,7 +192,8 @@ def main():
         con.close()
         return 1
 
-    print("\nimport_neft_bank: wrote %d vendor(s). Verify on the live page:" % len(matched))
+    print("\nimport_neft_bank: updated %d, created %d new (no phone yet). Verify on the live page:" %
+          (len(changed), len(new)))
     print("  https://followup.dr-manoj.in/finance/purchase/page/book")
     con.close()
 
