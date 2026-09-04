@@ -1,0 +1,48 @@
+PASS  search finds the patient by name
+PASS  search finds by phone last-4
+PASS  history returns EVERY bill, not the last one
+PASS  an expired sold line is marked expired in history
+PASS  items API aggregates one row per medicine
+PASS  bought units converted through the pack (0:2 of 1*10 = 2)
+PASS  items carry a per-unit price guess
+PASS  net unit price honours the bill's own discount (10% off 1000 -> 900)
+PASS  a Marg credit note reduces the returnable cap (bought 1 - CN 1 = 0)
+PASS  previous returns listed with source and date
+PASS  an untouched item's cap equals its bought units
+PASS  items carry their bills inline
+PASS  bill entries carry purchased qty and the discount given
+PASS  catalog type-ahead finds shop items by fragment, priced
+PASS  slip saves
+PASS  clean recent item is GREEN
+PASS  the SERVER found its bill
+PASS  expired item is RED
+PASS  opened item is RED
+PASS  >60-day return is YELLOW, accepted
+PASS  refund counts ONLY accepted lines (1000+30000)
+PASS  late flag on the visit
+PASS  slip number minted
+PASS  returning more than ever bought flags qty_over_bought, accepted
+PASS  slip saves with NO money choice (v8: counter settles)
+PASS  settle cash without a named payer is refused
+PASS  counter settles cash, payer logged
+PASS  double settlement refused
+PASS  staff cannot Cancel a SETTLED slip (owner's rule)
+PASS  bill-not-traced line is YELLOW and accepted
+PASS  3rd visit in 30 days flags frequent_returner
+PASS  Rs 2,500 refund flags big_refund, never blocks
+PASS  the day's slips list back (6 saved)
+PASS  every slip is filed open for the CN matcher
+PASS  refused lines are FILED, not vanished
+desk roles: 3 added; medical unit now: alisha(viewer), shavez(viewer), shivani(viewer)
+PASS  seeder writes schema-legal viewer rows (the CHECK lesson)
+desk roles: 0 added; medical unit now: alisha(viewer), shavez(viewer), shivani(viewer)
+PASS  seeder is idempotent
+PASS  Cancel without a reason from the list is refused
+PASS  same-day un-settled slip Cancels
+PASS  double Cancel refused
+PASS  a Cancelled slip cannot be settled
+PASS  Cancelled slips leave the CN-pending list
+PASS  accepted desk slips reduce the cap on the next visit
+PASS  a login without the desk roles is refused
+
+44 passed, 0 failed

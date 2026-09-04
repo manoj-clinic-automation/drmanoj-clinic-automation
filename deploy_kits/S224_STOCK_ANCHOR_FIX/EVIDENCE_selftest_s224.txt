@@ -1,0 +1,28 @@
+PASS  S214 base returns_desk.py afc8b0d0
+PASS  S214 base returns_desk.html 32c4b8cc
+PASS  after S221_JAANKARI returns_desk.py 1dc1fd62
+PASS  after S221_JAANKARI returns_desk.html 6d98e1b0 == LIVE
+PASS  after S222_DESK_USERS returns_desk.py 3296eca0 == LIVE
+PASS  server patcher REFUSES a non-live base (exit 2)
+PASS  ...and leaves it untouched
+PASS  server patcher runs on the live bytes (exit 0)
+PASS  KIT returns_desk.py == patched live bytes
+PASS  server patcher is idempotent
+PASS  page patcher runs on the live bytes (exit 0)
+PASS  KIT returns_desk.html == patched live bytes
+PASS  page patcher is idempotent
+PASS  returns_desk.py is LF-only
+PASS  returns_desk.html is LF-only
+PASS  patch_desk_anchor_s224.py is LF-only
+PASS  patch_deskpage_anchor_s224.py is LF-only
+PASS  RENDER_TEST_anchor_s224.py is LF-only
+PASS  kit returns_desk.py compiles
+PASS  page: exactly one anchor box builder
+PASS  page: the box sits under the spot heading
+PASS  page: script tags balanced
+
+KIT PINS (predicted):
+  dface15bd886774c59d5c88034619650  /root/finance/returns_desk.py
+  77e754e9b072eb78033affd5e8505b2a  /root/finance/returns_desk.html
+
+SELFTEST GREEN  22 passed, 0 failed

@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>वापसी डेस्क — Sanjeevni</title>
+<style>
+:root{--bg:#0e1b1e;--card:#14262b;--line:#1f3a41;--ink:#e8f1f2;--dim:#9db4b8;
+--teal:#2aa198;--green:#2e9e5b;--red:#c0392b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font:16px/1.4 system-ui,'Noto Sans Devanagari',sans-serif;padding-bottom:110px}
+.wrap{max-width:760px;margin:0 auto;padding:8px}
+.steps{position:sticky;top:0;z-index:8;display:flex;gap:6px;background:var(--bg);
+padding:8px;border-bottom:1px solid var(--line)}
+.steps button{flex:1;padding:9px 4px;border-radius:10px;border:1px solid var(--line);
+background:var(--card);color:var(--dim);font-weight:700;font-size:14px}
+.steps button.on{background:var(--teal);color:#04282c;border-color:var(--teal)}
+.steps button:disabled{opacity:.45}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+padding:10px;margin:10px 0}
+input,select{font:inherit;border-radius:10px;border:1px solid var(--line);
+background:#0b1517;color:var(--ink);padding:12px;width:100%}
+button{font:inherit;border-radius:10px;cursor:pointer}
+.ghost{background:transparent;color:var(--teal);border:1px solid var(--teal);padding:9px 12px}
+.item{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px;width:100%;
+border-top:1px solid var(--line);padding:9px 2px}
+.item .l{min-width:0;flex:1}
+.item .nm{font-weight:600}
+.item .sub{color:var(--dim);font-size:13px;line-height:1.35}
+.item.inCart{background:#0f2e26;border-radius:8px;padding-left:6px}
+.tag{font-size:13px;border:1px solid var(--teal);border-radius:14px;padding:5px 11px;
+color:var(--teal);white-space:nowrap;background:none}
+.tag.sel{background:#0f2e26;color:var(--ink);border-color:var(--line)}
+.redtxt{color:#ff9d8f}
+.qtybox{display:flex;gap:5px;align-items:center}
+.qtybox input{width:82px;text-align:center;padding:10px 4px;font-size:17px}
+.qtybox .okb{background:var(--teal);color:#04282c;border:none;padding:10px 14px;font-weight:800}
+.cartline{border-top:1px solid var(--line);padding:9px 0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.qty{display:flex;align-items:center;gap:4px}
+.qty button{width:46px;height:44px;font-size:20px;background:#0b1517;color:var(--ink);
+border:1px solid var(--line)}
+.qty input{width:70px;text-align:center;padding:9px 4px;font-size:17px}
+.cond{font-size:13px;padding:7px 11px;border-radius:16px;border:1px solid var(--line);
+background:#0b1517;color:var(--ink)}
+.cond.bad{background:#3a1512;border-color:var(--red);color:#ffb4a8}
+.total{font-size:19px;font-weight:800}
+.dim{color:var(--dim);font-size:13px}
+.hide{display:none!important}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#0c2a2f;border-top:2px solid var(--teal);
+padding:10px 12px;z-index:9}
+.bar .row{max-width:760px;margin:0 auto}
+.bar button{background:var(--teal);color:#04282c;border:none;font-weight:800;
+font-size:17px;padding:13px 20px}
+.overlay{position:fixed;inset:0;background:rgba(5,15,17,.92);z-index:20;display:flex;
+flex-direction:column;align-items:center;justify-content:center;gap:14px;font-size:19px}
+.spin{width:42px;height:42px;border:5px solid var(--line);border-top-color:var(--teal);
+border-radius:50%;animation:r 1s linear infinite}
+@keyframes r{to{transform:rotate(360deg)}}
+#printArea{display:none}
+@media print{body{background:#fff;padding:0}body>*{display:none!important}
+#printArea{display:block!important;color:#000;font:14px/1.5 system-ui,'Noto Sans Devanagari',sans-serif;padding:6mm}
+#printArea table{width:100%;border-collapse:collapse}
+#printArea td,#printArea th{border:1px solid #444;padding:4px 6px;text-align:left}
+#printArea .foot{font-size:12px;border-top:1px solid #444;margin-top:4mm;padding-top:2mm}}
+</style>
+</head>
+<body>
+<div class="steps">
+ <button id="st1" class="on" onclick="go(1)">1 मरीज</button>
+ <button id="st2" disabled onclick="go(2)">2 दवाएँ</button>
+ <button id="st3" disabled onclick="go(3)">3 पर्ची</button>
+ <button class="ghost" style="flex:0 0 auto" onclick="resetAll()">↺</button>
+</div>
+<div class="wrap">
+
+<div id="p1">
+ <div class="card">
+  <input id="q" placeholder="नाम / क्लिनिक ID / फ़ोन के आख़िरी 4 अंक" autocomplete="off">
+  <div id="plist"></div>
+ </div>
+ <div class="card">
+  <div class="row"><b>आज की पर्चियाँ</b><button class="ghost" onclick="loadSlips()">↻</button></div>
+  <div id="todaySlips" class="dim">—</div>
+ </div>
+ <!-- S221 star-1-1 -- jaankari: poochhna hai, hukum nahin -->
+ <div class="card hide" id="jkCard">
+  <div class="row"><b>📋 जानकारी चाहिए</b><button class="ghost" onclick="loadJaankari()">↻</button></div>
+  <div class="dim" style="margin:4px 0 10px;line-height:1.5">
+   इनका जवाब देने से कोई पैसा नहीं बदलता ।
+   सिर्फ़ डॉक्टर साहब को पता चल जाता है ।
+   पता न हो तो कोई बात नहीं — छोड़ दीजिए ।
+  </div>
+  <div id="jkList"></div>
+  <div id="jkDone" class="dim" style="margin-top:10px"></div>
+ </div>
+</div>
+
+<div id="p2" class="hide">
+ <div class="card">
+  <div class="row"><b id="pname"></b><button class="ghost" onclick="go(1)">↩ पीछे</button></div>
+  <button class="ghost" style="margin-top:8px;width:100%"
+   onclick="document.getElementById('catbox').classList.toggle('hide');document.getElementById('cf').focus()">
+   + बिना बिल की दवा (दुकान के रिकॉर्ड से)</button>
+  <div id="catbox" class="hide" style="margin-top:8px">
+   <input id="cf" placeholder="दवा का नाम टाइप करें…" autocomplete="off"
+    oninput="catSearch(this.value.trim().toLowerCase())">
+   <div id="catlist"></div>
+  </div>
+  <div id="selpanel" class="hide" style="margin-top:8px;border:1px solid var(--teal);
+   border-radius:10px;padding:6px 8px">
+   <div class="dim" style="font-weight:700">चुनी हुई दवाएँ</div>
+   <div id="sellist"></div>
+  </div>
+  <div id="ilist"></div>
+ </div>
+</div>
+
+<div id="p3" class="hide">
+ <div class="card">
+  <div class="row"><b>पर्ची — <span id="pname2"></span></b>
+  <button class="ghost" onclick="go(2)">↩ और दवा</button></div>
+  <div id="cart"></div>
+  <div class="row" style="margin-top:8px"><span>कुल वापसी (net, बिल की छूट के हिसाब से)</span>
+   <span class="total" id="tot">₹0</span></div>
+ </div>
+ <div class="card">
+  <div class="dim">रक़म का निपटान <b style="color:var(--ink)">medical sales counter</b> पर होगा —
+   मरीज यह पर्ची वहाँ दिखाएगा (नक़द या नई ख़रीद में adjust)।</div>
+  <div class="dim" id="msg" style="margin-top:8px"></div>
+ </div>
+</div>
+</div>
+
+<div class="bar hide" id="bar">
+ <div class="row">
+  <span id="barTxt" class="total">—</span>
+  <button id="barBtn" onclick="barGo()">आगे →</button>
+ </div>
+</div>
+
+<div class="overlay hide" id="ov"><div class="spin"></div>
+ <div>प्रोसेस हो रहा है…<br><span class="dim">बिल मिलाए जा रहे हैं</span></div></div>
+
+<div id="printArea"></div>
+
+<script>
+"use strict";
+var USER=__DESK_USER__;
+var API=location.pathname.replace(/\/$/,'')+'/api';
+var HI={expired:'दवा expiry निकल चुकी है',damaged_or_opened:'पैकिंग खुली/ख़राब है',
+ not_ours:'हमारे यहाँ की नहीं है'};
+var POLICY='वापसी नियम: हर दवा उसकी बिक्री की तारीख़ से 2 महीने के अंदर, सील बंद हालत में वापस/बदली जा सकती है। खुली, ख़राब या expiry निकली दवा वापस नहीं हो सकती।<br>निवेदन: वापसी हो तो आख़िरी ख़रीद की दवाएँ तुरंत लौटाएँ — पुरानी ख़रीदों की दवाएँ रोक कर बाद में एक साथ लौटाना आगे संभव नहीं हो पाएगा।';
+var patient=null, items=[], cart=[], openKey=null, pend={}, step=1;
+
+function $(id){return document.getElementById(id);}
+function rupee(p){return '₹'+((p||0)/100).toLocaleString('en-IN',{maximumFractionDigits:2});}
+function cssk(k){return String(k).replace(/[^a-zA-Z0-9]/g,'_');}
+function billShort(b){return String(b||'').replace(/^A0*/,'');}
+function unitWord(name){
+ var n=String(name||'').toUpperCase();
+ if(/\bTAB/.test(n))return 'गोली';
+ if(/\bCAP/.test(n))return 'कैप्सूल';
+ if(/SYR|SUSP|SOLN|SOLUTION|DROP/.test(n))return 'शीशी';
+ if(/OINT|GEL\b|CREAM|LOTION/.test(n))return 'ट्यूब';
+ if(/\bINJ|VIAL|AMP/.test(n))return 'इंजेक्शन';
+ if(/SPRAY/.test(n))return 'स्प्रे';
+ if(/POWDER|SACHET/.test(n))return 'पाउच';
+ return 'नग';
+}
+function cartOf(k){for(var i=0;i<cart.length;i++)if(cart[i].key===k)return cart[i];return null;}
+
+function go(n){
+ ['p1','p2','p3'].forEach(function(p,i){$(p).classList.toggle('hide',i!==n-1);});
+ [1,2,3].forEach(function(i){$('st'+i).classList.toggle('on',i===n);});
+ step=n; drawBar();
+}
+function resetAll(){patient=null;items=[];cart=[];openKey=null;pend={};
+ $('q').value='';$('plist').innerHTML='';$('st2').disabled=true;$('st3').disabled=true;
+ $('msg').textContent='';
+ $('catbox').classList.add('hide');$('cf').value='';$('catlist').innerHTML='';
+ go(1);loadSlips();}
+
+$('q').addEventListener('input',function(e){
+ var q=e.target.value.trim(); if(q.length<2){$('plist').innerHTML='';return;}
+ fetch(API+'/search?q='+encodeURIComponent(q)).then(function(r){return r.json();})
+ .then(function(j){
+  $('plist').innerHTML=(j.patients||[]).map(function(p){
+   return '<div class="item" onclick=\'pick('+JSON.stringify(JSON.stringify(p))+')\'>'
+    +'<span class="l"><span class="nm">'+(p.name||'—')+'</span><br>'
+    +'<span class="sub">'+(p.clinic_id||'')+(p.last4?(' · ***'+p.last4):'')+'</span></span>'
+    +'<span class="tag">चुनें</span></div>';}).join('')
+   ||'<div class="dim" style="padding:8px">कोई नहीं मिला</div>';
+ });
+});
+
+function pick(s){
+ patient=JSON.parse(s);
+ $('pname').textContent=patient.name||('ID '+patient.id);
+ $('pname2').textContent=patient.name||'';
+ $('st2').disabled=false; go(2);
+ $('ilist').innerHTML='<div class="dim" style="padding:8px">लोड हो रही है…</div>';
+ fetch(API+'/items?pid='+patient.id).then(function(r){return r.json();})
+ .then(function(j){items=j.items||[];redraw();});
+}
+
+function priceTxt(it){
+ var p=(it.unit_net_p!=null?it.unit_net_p:it.unit_p)||0;
+ var w=unitWord(it.item_name);
+ if(it.pack_n){
+  var sp=p*it.pack_n, smrp=(it.unit_p||0)*it.pack_n;
+  return (it.discounted?('net '+rupee(sp)+' <s style="opacity:.6">'+rupee(smrp)+'</s>')
+          :rupee(sp))+' / पत्ता ('+it.pack_n+' '+w+')';
+ }
+ return (it.discounted?('net '+rupee(p)+' <s style="opacity:.6">'+rupee(it.unit_p)+'</s>')
+         :rupee(p))+' / '+w;
+}
+function billsTxt(it){
+ return (it.bills||[]).map(function(b){
+  return billShort(b.bill_no)+' '+String(b.date||'').slice(5)
+   +(b.units?(' · <b style="color:var(--ink);font-size:14px">'+b.units+'</b>'):'')
+   +(b.disc_pct?(' · '+b.disc_pct+'%'):'');
+ }).join('  |  ');
+}
+function row(it,fromCat){
+ var k=it.item_key||it.item_name, c=cartOf(k), right;
+ var warn='';
+ if(openKey===k){
+  right='<span class="qtybox"><input type="number" id="qb_'+cssk(k)+'" inputmode="numeric"'
+   +' placeholder="कितनी?" onkeydown="if(event.key===\'Enter\')confQty()">'
+   +'<button class="okb" onclick="event.stopPropagation();confQty()">✔</button></span>';
+  warn='<div id="warn_'+cssk(k)+'" class="hide" style="flex-basis:100%;background:#3a1512;'
+   +'border:1px solid var(--red);border-radius:8px;color:#ffb4a8;font-size:15px;'
+   +'padding:8px 10px;margin-top:6px"></div>';
+ }else if(c){
+  right='<span class="tag sel">✔ '+c.units+' '+unitWord(c.item_name)+'</span>';
+ }else{
+  right='<span class="tag">+ जोड़ें</span>';
+ }
+ var rets=(it.returns||[]).map(function(r){
+  return '<span class="redtxt">'+(r.src==='CN'?'CN':'पर्ची')+' '
+   +String(r.date||'').slice(5)+' · '+r.units+' वापस</span>';}).join('  |  ');
+ var sub=fromCat?('बिना बिल · '+priceTxt(it))
+               :(priceTxt(it)+(it.bills&&it.bills.length?('<br>'+billsTxt(it)):'')
+                 +(rets?('<br>'+rets):''));
+ return '<div class="item'+(c?' inCart':'')+'" onclick=\'tapRow('
+  +JSON.stringify(JSON.stringify(it))+','+(fromCat?'true':'false')+')\'>'
+  +'<span class="l"><span class="nm">'+it.item_name
+  +((!fromCat&&it.bought_units)?' <b style="color:var(--teal)">· '+it.bought_units+'</b>':'')
+  +(it.last_expired?' <span class="redtxt">· expiry निकली</span>':'')+'</span><br>'
+  +'<span class="sub">'+sub+'</span></span>'+right+warn+'</div>';
+}
+function drawItems(){
+ $('ilist').innerHTML=items.map(function(it){return row(it,false);}).join('')
+  ||'<div class="dim" style="padding:8px">इस मरीज की कोई ख़रीद दर्ज नहीं — नीचे "बिना बिल" से लें</div>';
+ focusQty();
+}
+function catSearch(q){
+ if(q.length<2){$('catlist').innerHTML='';return;}
+ $('catlist').innerHTML='<div class="dim" style="padding:6px">खोज रही है…</div>';
+ fetch(API+'/catalog?q='+encodeURIComponent(q)).then(function(r){return r.json();})
+ .then(function(j){
+  $('catlist').innerHTML=(j.items||[]).map(function(it){return row(it,true);}).join('')
+   ||'<div class="dim" style="padding:6px">रिकॉर्ड में नहीं मिली</div>';
+  focusQty();
+ }).catch(function(){});
+}
+function focusQty(){
+ if(openKey!==null){var el=$('qb_'+cssk(openKey));if(el)el.focus();}
+}
+function drawSel(){
+ $('selpanel').classList.toggle('hide',cart.length===0);
+ $('sellist').innerHTML=cart.map(function(c,i){
+  return '<div class="row" style="border-top:1px solid var(--line);padding:7px 0">'
+   +'<span class="l" style="min-width:0"><b>'+c.item_name+'</b>'
+   +'<br><span class="dim">'+conv(c)+' · '+rupee(c.amount_p)+'</span></span>'
+   +'<span class="qty">'
+   +'<button onclick="event.stopPropagation();sq('+i+',-1)">−</button>'
+   +'<input type="number" inputmode="numeric" value="'+c.units+'" data-prev="'+c.units+'"'
+   +' onfocus="this.dataset.prev=this.value;this.value=\'\'"'
+   +' onblur="if(this.value===\'\')this.value=this.dataset.prev"'
+   +' onchange="sqset('+i+',this.value)">'
+   +'<button onclick="event.stopPropagation();sq('+i+',1)">+</button>'
+   +'<button style="background:#0b1517;color:var(--dim);border:1px solid var(--line)"'
+   +' onclick="event.stopPropagation();srm('+i+')">✕</button></span></div>';}).join('');
+}
+function sq(i,d){var c=cart[i];c.units=Math.max(1,c.units+d);if(c.cap&&c.units>c.cap)c.units=c.cap;
+ c.amount_p=(c.unit_net_p||c.unit_p)*c.units;redraw();}
+function sqset(i,v){var c=cart[i];c.units=Math.max(1,parseInt(v,10)||1);if(c.cap&&c.units>c.cap)c.units=c.cap;
+ c.amount_p=(c.unit_net_p||c.unit_p)*c.units;redraw();}
+function srm(i){cart.splice(i,1);redraw();}
+function redraw(){
+ drawSel();
+ drawItems();
+ if(!$('catbox').classList.contains('hide'))
+  catSearch(($('cf').value||'').trim().toLowerCase());
+ drawBar();
+}
+function tapRow(sit,fromCat){
+ var it=JSON.parse(sit), k=it.item_key||it.item_name;
+ if(cartOf(k)){cart=cart.filter(function(c){return c.key!==k;});openKey=null;}
+ else{openKey=k;pend[k]=it;}
+ redraw();
+}
+function capOf(it){if(!it||!it.item_key)return 0;
+ if(it.cap_units!=null)return it.cap_units;
+ return it.bought_units||0;}
+function confQty(){
+ if(openKey===null)return;
+ var k=openKey, el=$('qb_'+cssk(k));
+ var n=parseInt(el&&el.value,10);
+ if(!n||n<1){if(el)el.focus();return;}
+ var it=pend[k]||{};
+ var cap=capOf(it);
+ if(cap&&n>cap){
+  el.value='';
+  var w=$('warn_'+cssk(k));
+  if(w){var b=it.bought_units||0, r=it.returned_units||0;
+   w.innerHTML='⚠ बिल में कुल <b>'+b+'</b>'+(r?(' — पहले वापस <b>'+r+'</b>'):'')
+    +' — अधिकतम <b>'+cap+'</b> ही ली जा सकती हैं। मरीज को बताएँ; बहस हो तो "बिना बिल" से लें।';
+   w.classList.remove('hide');}
+  el.focus();return;
+ }
+ var up=(it.unit_net_p!=null?it.unit_net_p:it.unit_p)||0;
+ cart.push({key:k,item_key:it.item_key||null,item_name:it.item_name||String(k),
+  units:n,unit_p:it.unit_p||0,unit_net_p:up,amount_p:up*n,cap:cap,
+  pack_n:it.pack_n||null,mrp_p:it.unit_p||0,condition:'sealed'});
+ openKey=null;
+ redraw();
+}
+
+function conv(c){
+ var w=unitWord(c.item_name);
+ if(!c.pack_n||c.units<c.pack_n)return c.units+' '+w;
+ var s=Math.floor(c.units/c.pack_n), l=c.units%c.pack_n;
+ return c.units+' '+w+' = '+s+' पत्ता'+(l?(' + '+l+' '+w):'');
+}
+function drawCart(){
+ $('cart').innerHTML=cart.map(function(c,i){
+  return '<div class="cartline">'
+   +'<div class="row"><b>'+c.item_name+'</b>'
+   +'<button class="ghost" style="padding:5px 11px" onclick="rm('+i+')">✕</button></div>'
+   +'<div class="row" style="margin-top:7px"><div class="qty">'
+   +'<button onclick="qd('+i+',-1)">−</button>'
+   +'<input type="number" inputmode="numeric" value="'+c.units+'" data-prev="'+c.units+'"'
+   +' onfocus="this.dataset.prev=this.value;this.value=\'\'"'
+   +' onblur="if(this.value===\'\')this.value=this.dataset.prev"'
+   +' onchange="qset('+i+',this.value)"><button onclick="qd('+i+',1)">+</button></div>'
+   +'<button class="cond'+(c.condition!=='sealed'?' bad':'')+'" onclick="cond('+i+')">'
+   +(c.condition==='sealed'?'सील बंद ✔':'खुला/ख़राब')+'</button></div>'
+   +'<div class="row" style="margin-top:5px"><span class="dim">'+conv(c)
+   +(c.mrp_p&&c.unit_net_p<c.mrp_p?(' · MRP '+rupee(c.mrp_p*c.units)+' → net'):'')+'</span>'
+   +'<span>'+(c.condition!=='sealed'?'<span class="redtxt">वापसी नहीं होगी</span>':rupee(c.amount_p))
+   +'</span></div></div>';}).join('')
+  ||'<div class="dim">कोई दवा नहीं चुनी</div>';
+ var tot=netTotal();
+ $('tot').textContent=rupee(tot); drawBar();
+}
+function netTotal(){
+ var t=0;for(var i=0;i<cart.length;i++)if(cart[i].condition==='sealed')t+=cart[i].amount_p;
+ return t;
+}
+function rm(i){cart.splice(i,1);drawCart();}
+function qd(i,d){var c=cart[i];c.units=Math.max(1,c.units+d);if(c.cap&&c.units>c.cap)c.units=c.cap;
+ c.amount_p=(c.unit_net_p||c.unit_p)*c.units;drawCart();}
+function qset(i,v){var c=cart[i];c.units=Math.max(1,parseInt(v,10)||1);if(c.cap&&c.units>c.cap)c.units=c.cap;
+ c.amount_p=(c.unit_net_p||c.unit_p)*c.units;drawCart();}
+function cond(i){cart[i].condition=cart[i].condition==='sealed'?'opened':'sealed';drawCart();}
+
+function drawBar(){
+ var n=cart.length;
+ if(step===1||n===0){$('bar').classList.add('hide');return;}
+ $('bar').classList.remove('hide');
+ $('barTxt').textContent=n+' दवाएँ · net '+rupee(netTotal());
+ $('barBtn').textContent=(step===2)?'पर्ची बनाएँ →':'✔ पक्का करें और प्रिंट';
+}
+function barGo(){
+ if(step===2){$('st3').disabled=false;drawCart();go(3);}
+ else save();
+}
+function save(){
+ if(!cart.length)return;
+ $('ov').classList.remove('hide');
+ var body={patient_ref_id:patient?patient.id:null,
+  patient_label:patient?((patient.name||'')+(patient.clinic_id?(' · '+patient.clinic_id):'')):'बिना रिकॉर्ड',
+  lines:cart.map(function(c){return {item_key:c.item_key,item_name:c.item_name,
+   units:c.units,unit_p:c.unit_net_p||c.unit_p,amount_p:c.amount_p,condition:c.condition};}),
+  closure:'nothing'};
+ fetch(API+'/slip',{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify(body)})
+ .then(function(r){return r.json();})
+ .then(function(j){
+  $('ov').classList.add('hide');
+  if(!j.ok){$('msg').textContent='रुका: '+(j.message||j.error);return;}
+  printSlip(j,body); resetAll();
+ })
+ .catch(function(){$('ov').classList.add('hide');
+  $('msg').textContent='सर्वर से जवाब नहीं — दोबारा दबाएँ';});
+}
+
+function printSlip(j,body){
+ var rows=j.lines.map(function(l){
+  return '<tr><td>'+l.item_name+'<br><span style="font-size:11px">'
+   +(l.bills?('बिल: '+l.bills):'')+'</span></td>'
+   +'<td>'+(l.qty_text||l.qty_units)+'</td>'
+   +'<td>'+(l.accepted?rupee(l.amount_p):'—')+'</td>'
+   +'<td>'+(l.accepted?'ली गई ✔':('नहीं ली — '+(HI[(l.reasons||[])[0]]||'')))+'</td></tr>';}).join('');
+ $('printArea').innerHTML='<h2>Sanjeevni Medicos — वापसी पर्ची</h2>'
+  +'<p>पर्ची <b>'+j.slip_no+'</b> · '+j.business_date+' · स्टाफ: '+j.staff+'<br>'
+  +'मरीज: '+(body.patient_label||'')+'</p>'
+  +'<table><tr><th>दवा</th><th>मात्रा</th><th>रक़म</th><th>फ़ैसला</th></tr>'+rows+'</table>'
+  +'<p><b>कुल वापसी: '+rupee(j.refund_p)+'</b></p>'
+  +'<p style="border:1px solid #444;padding:4px 6px"><b>यह पर्ची medical sales counter पर दिखाएँ</b> —'
+  +' रक़म वहाँ नक़द मिलेगी या नई ख़रीद में adjust होगी।</p>'
+  +'<div class="foot">'+POLICY+'</div>';
+ window.print();
+}
+
+var VOID_HI={matra_galat:'मात्रा ग़लत',dawa_galat:'दवा ग़लत',raqam_galat:'रक़म ग़लत',
+ irada_badla:'मरीज ने इरादा बदला',anya:'अन्य'};
+function slipRow(s){
+ var st = s.status==='void' ? '<span class="redtxt">Cancel हुई</span>'
+  : s.settle_state==='cash' ? 'नक़द ✔ ('+(s.cash_paid_by||'')+')'
+  : s.settle_state==='adjust' ? 'Adjust ✔ बिल '+(s.adjust_bill_no||'')
+  : '<span style="color:var(--teal)">निपटान बाक़ी</span>';
+ var acts='';
+ if(s.status!=='void'&&s.settle_state==='pending'){
+  acts='<div class="row" style="margin-top:6px;gap:6px">'
+   +'<button class="ghost" style="flex:1;padding:7px" onclick="askForm(\''+s.slip_no+'\',\'cash\')">💵 नक़द</button>'
+   +'<button class="ghost" style="flex:1;padding:7px" onclick="askForm(\''+s.slip_no+'\',\'adjust\')">🧾 Adjust</button>'
+   +'<button class="ghost" style="flex:1;padding:7px;color:#ff9d8f;border-color:#c0392b"'
+   +' onclick="askForm(\''+s.slip_no+'\',\'void\')">Cancel करें</button></div>';
+  if(openForm&&openForm.slip===s.slip_no)acts+=formHtml(s.slip_no,openForm.kind);
+ }
+ return '<div class="cartline"><div class="row"><span><b>'+s.slip_no+'</b>'
+  +'<br><span class="dim">'+(s.patient_label||'')+' · '+s.staff+' · '+st+'</span></span>'
+  +'<span>'+rupee(s.refund_p)+'</span></div>'+acts+'</div>';
+}
+var openForm=null;   // {slip,kind}
+function askForm(no,kind){openForm={slip:no,kind:kind};loadSlips();}
+function formHtml(no,kind){
+ if(kind==='cash')return '<div class="row" style="margin-top:6px;gap:6px">'
+  +'<select id="fv" style="flex:1"><option value="">किसने दिया — चुनें</option>'
+  +'<option>alisha</option><option>shivani</option><option>darpan</option>'
+  +'<option>shavez</option><option>manoj</option></select>'
+  +'<button class="ghost" onclick="doSettle(\''+no+'\',\'cash\')">✔</button>'
+  +'<button class="ghost" onclick="openForm=null;loadSlips()">✕</button></div>';
+ if(kind==='adjust')return '<div class="row" style="margin-top:6px;gap:6px">'
+  +'<input id="fv" placeholder="नए बिल का नंबर (Marg)" style="flex:1">'
+  +'<button class="ghost" onclick="doSettle(\''+no+'\',\'adjust\')">✔</button>'
+  +'<button class="ghost" onclick="openForm=null;loadSlips()">✕</button></div>';
+ return '<div class="row" style="margin-top:6px;gap:6px">'
+  +'<select id="fv" style="flex:1"><option value="">Cancel की वजह — चुनें</option>'
+  +Object.keys(VOID_HI).map(function(k){return '<option value="'+k+'">'+VOID_HI[k]+'</option>';}).join('')
+  +'</select>'
+  +'<button class="ghost" style="color:#ff9d8f;border-color:#c0392b" onclick="doVoid(\''+no+'\')">✔</button>'
+  +'<button class="ghost" onclick="openForm=null;loadSlips()">✕</button></div>';
+}
+function doSettle(no,how){
+ var v=($('fv').value||'').trim();
+ if(!v){$('fv').focus();return;}
+ var body={slip_no:no,how:how};
+ if(how==='cash')body.cash_paid_by=v.toLowerCase();else body.adjust_bill_no=v;
+ fetch(API+'/slip/settle',{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify(body)}).then(function(r){return r.json();})
+ .then(function(j){if(!j.ok)alert('रुका: '+(j.message||j.error));openForm=null;loadSlips();});
+}
+function doVoid(no){
+ var v=$('fv').value;
+ if(!v){$('fv').focus();return;}
+ var body={slip_no:no,reason:v};
+ fetch(API+'/slip/void',{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify(body)}).then(function(r){return r.json();})
+ .then(function(j){if(!j.ok)alert('रुका: '+(j.message||j.error));openForm=null;loadSlips();});
+}
+function loadSlips(){
+ fetch(API+'/slips').then(function(r){return r.json();})
+ .then(function(j){
+  $('todaySlips').innerHTML=(j.slips||[]).map(slipRow).join('')||'—';
+ }).catch(function(){});
+}
+loadSlips();
+
+/* S221 star-1-1 -- Darpan's list. Read, ask, record. It cannot do anything
+   else: the only write behind it is one row in jaankari_answer. */
+var JK={disputes:[],identity:[],spot:[]};
+var JK_CAP=6, JK_MORE={};
+function jkMore(g){JK_MORE[g]=1;jkRender();}
+function jkEsc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function jkBtns(kind,ref){
+ return '<div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap">'
+  +'<button onclick="jkSay(\''+kind+'\',\''+ref+'\',\'ok\')">\u092f\u0939 \u0938\u0939\u0940 \u0939\u0948</button>'
+  +'<button class="ghost" onclick="jkSay(\''+kind+'\',\''+ref+'\',\'find_bill\')">\u092c\u093f\u0932 \u0922\u0942\u0901\u0922\u093c\u094b</button>'
+  +'<button class="ghost" onclick="jkSay(\''+kind+'\',\''+ref+'\',\'dont_know\')">\u092a\u0924\u093e \u0928\u0939\u0940\u0902</button>'
+  +'</div>';
+}
+function jkBox(inner){
+ return '<div style="border-top:1px solid #eee;padding:10px 2px;line-height:1.6">'+inner+'</div>';
+}
+function jkDispute(r){
+ var mob=r.mobile?('<div class="dim">\u0966\u0966 '+jkEsc(r.mobile)+'</div>'):'';
+ return jkBox('<div><b>'+jkEsc(r.bill||'')+'</b> \u00b7 '+jkEsc(r.date||'')+'</div>'
+  +'<div>\u092a\u0930\u094d\u091a\u0940 \u092a\u0930 \u0928\u093e\u092e <b>'+jkEsc(r.bill_name||'\u2014')+'</b> \u0932\u093f\u0916\u093e \u0939\u0948, '
+  +'\u092a\u0930 ID <b>'+jkEsc(r.clinic_id||'')+'</b> \u0939\u092e\u093e\u0930\u0947 \u0930\u093f\u0915\u0949\u0930\u094d\u0921 \u092e\u0947\u0902 '
+  +'<b>'+jkEsc(r.master_name||'\u2014')+'</b> \u0939\u0948 \u0964 \u0938\u0939\u0940 \u0915\u094c\u0928 \u0939\u0948 ?</div>'
+  +mob+jkBtns('dispute',r.ref));
+}
+function jkIdentity(r){
+ var nm=r.name?('<div>\u092a\u0930\u094d\u091a\u0940 \u092a\u0930 <b>'+jkEsc(r.name)+'</b> \u0932\u093f\u0916\u093e \u0939\u0948 \u0964</div>'):'';
+ return jkBox('<div><b>'+jkEsc(r.ref)+'</b> \u00b7 '+jkEsc(r.date||'')+' \u00b7 '+rupee(r.amount_p)+'</div>'
+  +'<div>\u092f\u0939 \u0935\u093e\u092a\u0938\u0940 \u0915\u093f\u0938\u0915\u0940 \u0925\u0940 ? \u0915\u094b\u0908 \u0928\u093e\u092e \u092f\u093e ID \u0928\u0939\u0940\u0902 \u091c\u0941\u0921\u093c\u093e \u0964</div>'
+  +nm+jkBtns('identity',r.ref));
+}
+function jkSpot(r){
+ var b=r.batch?(' \u00b7 \u092c\u0948\u091a '+jkEsc(r.batch)):'';
+ return jkBox('<div><b>'+jkEsc(r.item||'')+'</b>'+b+'</div>'
+  +'<div>\u0936\u0947\u0932\u094d\u092b\u093c \u092a\u0930 \u0917\u093f\u0928 \u0915\u0930 \u092c\u0924\u093e\u0907\u090f \u2014 \u0915\u093f\u0924\u0928\u0940 \u0939\u0948 ?</div>'
+  +'<div class="row" style="gap:6px;margin-top:8px">'
+  +'<input id="jkq_'+jkEsc(r.ref)+'" type="number" inputmode="numeric" style="max-width:120px" placeholder="\u0917\u093f\u0928\u0924\u0940">'
+  +'<button onclick="jkCount(\''+r.ref+'\')">\u0917\u093f\u0928 \u0932\u093f\u092f\u093e</button>'
+  +'<button class="ghost" onclick="jkSay(\'spot\',\''+r.ref+'\',\'dont_know\')">\u0905\u092d\u0940 \u0928\u0939\u0940\u0902</button>'
+  +'</div>');
+}
+function jkRender(){
+ var pend='',done=0;
+ var groups=[['disputes',JK.disputes,jkDispute,'\u0928\u093e\u092e \u092e\u0947\u0932 \u0928\u0939\u0940\u0902 \u0916\u093e \u0930\u0939\u093e'],
+             ['identity',JK.identity,jkIdentity,'\u0915\u093f\u0938\u0915\u0940 \u0935\u093e\u092a\u0938\u0940 \u0925\u0940'],
+             ['spot',JK.spot,jkSpot,'\u0917\u093f\u0928\u0924\u0940 \u0915\u0930\u0928\u0940 \u0939\u0948']];
+ for(var g=0;g<groups.length;g++){
+  var rows=(groups[g][1]||[]).filter(function(r){return !r.answered;});
+  done+=(groups[g][1]||[]).length-rows.length;
+  if(!rows.length)continue;
+  /* JK_CAP -- one sitting, never a wall. The render test showed 22 rows of
+     history stacked on a phone; a queue that long is not a question, it is a
+     chore, and he will stop opening the page. The rest wait their turn. */
+  var show=JK_MORE[groups[g][0]]?rows.length:Math.min(rows.length,JK_CAP);
+  pend+='<div style="margin-top:12px"><b>'+groups[g][3]+'</b> <span class="dim">('+rows.length+')</span></div>';
+  if(groups[g][0]==='spot')pend+=jkAnchorBox();   /* S224 anchor */
+  for(var i=0;i<show;i++)pend+=groups[g][2](rows[i]);
+  if(show<rows.length)pend+='<div style="padding:8px 2px"><button class="ghost" onclick="jkMore(\''+groups[g][0]+'\')">'
+    +'और दिखाएँ ('+(rows.length-show)+')</button></div>';
+ }
+ $('jkList').innerHTML=pend;
+ $('jkDone').innerHTML=done?('\u2713 '+done+' \u0915\u093e \u091c\u0935\u093e\u092c \u0926\u0947 \u0926\u093f\u092f\u093e \u2014 \u0927\u0928\u094d\u092f\u0935\u093e\u0926 \u0964'):'';
+ var any=pend||done;
+ $('jkCard').className=any?'card':'card hide';
+}
+function jkPost(body){
+ return fetch(API+'/jaankari/answer',{method:'POST',
+  headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+  .then(function(r){return r.json();});
+}
+function jkSay(kind,ref,answer){
+ jkPost({kind:kind,ref:ref,answer:answer}).then(function(j){
+  if(!j.ok){alert('\u0930\u0941\u0915\u093e: '+(j.message||j.error));return;}
+  loadJaankari();
+ }).catch(function(){});
+}
+/* S224 anchor -- THE LAST SALE BILL NUMBER. A count without a cut-off in the
+   bill stream is not a measurement, it is an impression (the owner, 04-Sep).
+   The counting page has asked for it since S207; the spot count now does too.
+   One box for the sitting; the server refuses a 'counted' answer without it. */
+var JK_ANCHOR='';
+function jkAnchorBox(){
+ return '<div id="jkAnchorBox" style="border:1px solid var(--teal);border-radius:10px;padding:8px 10px;margin-top:8px">'
+  +'<label for="jkAnchor" style="display:block;font-weight:700;margin-bottom:4px">'
+  +'\u0906\u0916\u093c\u093f\u0930\u0940 \u0938\u0947\u0932 \u092c\u093f\u0932 \u0928\u0902\u092c\u0930 (Marg)</label>'
+  +'<input id="jkAnchor" type="text" autocapitalize="characters" autocomplete="off" placeholder="A003195" '
+  +'style="width:100%;padding:10px" value="'+jkEsc(JK_ANCHOR)+'" oninput="JK_ANCHOR=this.value.trim().toUpperCase()">'
+  +'<div class="dim" style="margin-top:6px;line-height:1.5">'
+  +'\u0917\u093f\u0928\u0924\u0940 \u0907\u0938 \u092c\u093f\u0932 \u092a\u0930 \u091f\u093f\u0915\u0940 \u0939\u0948 \u2014 '
+  +'\u0907\u0938\u0915\u0947 \u092c\u093e\u0926 \u092c\u093f\u0915\u0940 \u0926\u0935\u093e \u0907\u0938 \u0917\u093f\u0928\u0924\u0940 \u092e\u0947\u0902 \u0928\u0939\u0940\u0902 \u092e\u093e\u0928\u0940 \u091c\u093e\u090f\u0917\u0940 \u0964 '
+  +'\u092c\u093f\u0928\u093e \u092c\u093f\u0932 \u0928\u0902\u092c\u0930 \u0917\u093f\u0928\u0924\u0940 \u0926\u0930\u094d\u091c \u0928\u0939\u0940\u0902 \u0939\u094b\u0917\u0940 \u0964'
+  +'</div><div id="jkAnchorMsg" style="color:#f0b429;margin-top:4px"></div></div>';
+}
+function jkCount(ref){
+ var a=$('jkAnchor');if(a)JK_ANCHOR=String(a.value).trim().toUpperCase();
+ if(!JK_ANCHOR){
+  if(a){a.focus();}
+  var m=$('jkAnchorMsg');if(m)m.textContent='\u092a\u0939\u0932\u0947 \u0906\u0916\u093c\u093f\u0930\u0940 \u0938\u0947\u0932 \u092c\u093f\u0932 \u0928\u0902\u092c\u0930 \u0932\u093f\u0916\u093f\u090f \u2014 \u092c\u093f\u0928\u093e \u092c\u093f\u0932 \u0915\u0940 \u0917\u093f\u0928\u0924\u0940 \u0926\u0930\u094d\u091c \u0928\u0939\u0940\u0902 \u0939\u094b\u0924\u0940 \u0964';
+  return;
+ }
+ var el=$('jkq_'+ref);var v=el?String(el.value).trim():'';
+ if(v===''){if(el)el.focus();return;}
+ jkPost({kind:'spot',ref:ref,answer:'counted',value:v,anchor_bill:JK_ANCHOR}).then(function(j){
+  if(!j.ok){alert('\u0930\u0941\u0915\u093e: '+(j.message||j.error));return;}
+  loadJaankari();
+ }).catch(function(){});
+}
+function loadJaankari(){
+ fetch(API+'/jaankari').then(function(r){return r.json();})
+ .then(function(j){if(!j||!j.ok)return;JK=j.lists||JK;jkRender();})
+ .catch(function(){});
+}
+loadJaankari();
+</script>
+</body>
+</html>

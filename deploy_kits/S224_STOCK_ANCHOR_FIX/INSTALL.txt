@@ -1,0 +1,29 @@
+S224_STOCK_ANCHOR_FIX -- ONE PASTE on the VPS after the publish (PUBLISH_ALL.bat). ONE LINE.
+
+It fetches the repo, verifies the kit (SUMS.md5), GUARDS both live pins (returns_desk.py must read 3296eca0,
+returns_desk.html must read 6d98e1b0 -- anything else REFUSES and changes nothing), backs both files up as
+.bak_S224anchor_<date>, copies the two full files, restarts clinic-finance.service, waits 3 s, checks it is
+active and prints the two new pins. If the service does not come back it ROLLS BACK BY ITSELF and restarts.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S224_STOCK_ANCHOR_FIX && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/returns_desk.py | cut -c1-8)" = "3296eca0" ] && [ "$(md5sum /root/finance/returns_desk.html | cut -c1-8)" = "6d98e1b0" ] || { echo "REFUSED: kit sums or live pins do not match -- NOTHING CHANGED"; false; } && \cp /root/finance/returns_desk.py /root/finance/returns_desk.py.bak_S224anchor_$(date +%Y%m%d) && \cp /root/finance/returns_desk.html /root/finance/returns_desk.html.bak_S224anchor_$(date +%Y%m%d) && \cp returns_desk.py returns_desk.html /root/finance/ && systemctl restart clinic-finance.service && sleep 3 && (systemctl is-active --quiet clinic-finance.service && echo "UP -- the bill anchor is live on the Vaapsi desk" && md5sum /root/finance/returns_desk.py /root/finance/returns_desk.html || (echo "SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; \cp /root/finance/returns_desk.py.bak_S224anchor_$(date +%Y%m%d) /root/finance/returns_desk.py; \cp /root/finance/returns_desk.html.bak_S224anchor_$(date +%Y%m%d) /root/finance/returns_desk.html; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; md5sum /root/finance/returns_desk.py /root/finance/returns_desk.html; journalctl -u clinic-finance.service -n 12 --no-pager))
+
+Expected at the end:  UP -- the bill anchor is live on the Vaapsi desk
+                      dface15bd886774c59d5c88034619650  /root/finance/returns_desk.py
+                      77e754e9b072eb78033affd5e8505b2a  /root/finance/returns_desk.html
+
+If it prints REFUSED, say so and paste nothing else: the live file is not what this kit was built on.
+
+WHAT STAFF SEE AFTER THE RESTART (a hard reload of the Vaapsi page, or reopen the PWA):
+  Under "ginti karni hai" one box: आख़िरी सेल बिल नंबर (Marg), placeholder A003195, with the why-line in Hindi.
+  "gin liya" without it: the box takes focus and a Hindi line says why. Nothing is sent.
+  With it: the count is recorded WITH the bill number in its own column (anchor_bill).
+  "abhi nahin", the identity and dispute answers: unchanged -- they are not counts.
+  Amir: still refused at the desk (F-296). The counting page /finance/stock/page/count: unchanged.
+
+ROLLING BACK by hand = the two .bak_S224anchor_* files beside the live ones, \cp them back, restart the service.
+The anchor_bill column stays in jaankari_answer (harmless; nothing old reads it).
+
+OFFLINE EVIDENCE (this kit does not run tests on the box):
+  EVIDENCE_render_s224.txt              RENDER GREEN 99/99  -- jsdom running the page's own JS for every login
+  EVIDENCE_selftest_s224.txt            SELFTEST GREEN 22/22 -- provenance chain, idempotency, refusal on a wrong base
+  EVIDENCE_selftest_S214_rerun_s224.txt 44 passed, 0 failed -- the standing desk selftest on the NEW returns_desk.py

@@ -1,0 +1,17 @@
+S224_STOCK_ANCHOR_FIX · built 04-Sep-2026 · Session 224 · URGENT (the owner, verbatim: "IN VAAPSI PAGE, THE STOCK CHECK SECTION DOES NOT HAVE ANY LAST SALE BILL NUMBER ENTRY BOX, PLEASE FIX IT.")
+
+WHAT IT CLOSES. The Vaapsi desk's spot-count group ("ginti karni hai", S221_JAANKARI) took a bare number with no
+last-sale-bill anchor -- the rule every count on the counting page has obeyed since S207 and that stock_app's
+/api/count enforces. Un-parks S223_PARKED_SPOTCOUNT_HAS_NO_ANCHOR by the owner's instruction.
+
+WHAT IT DOES. ONE Hindi anchor box under the spot heading on the Vaapsi page; "gin liya" refuses without it on the
+page AND the server (400 anchor_required, Hindi). jaankari_answer gains one column, anchor_bill; the anchor is
+stored upper-cased in the row (D367). Nothing else moves: no money, no patient, no spot-check status.
+
+Targets (live pins, reproduced from the repo chain and md5-proven, F-299):
+  /root/finance/returns_desk.py    3296eca0 -> dface15b
+  /root/finance/returns_desk.html  6d98e1b0 -> 77e754e9
+Restart: clinic-finance.service. Database: one ALTER TABLE ADD COLUMN on first request, idempotent.
+
+PROVEN OFFLINE: RENDER GREEN 99/99 (jsdom, the page's own JS tapping for every login) · SELFTEST GREEN 22/22
+(provenance + idempotency + refusal on a wrong base) · S214 selftest_returns_desk.py re-run on the new file 44/44.

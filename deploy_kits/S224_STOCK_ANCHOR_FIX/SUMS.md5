@@ -1,0 +1,13 @@
+3ff9de073168804c6a1762082b613e74  KIT_ID.txt
+964ba3145b2673eec276509284030a62  README.md
+31608240404bd3aa96ceba2254faef29  INSTALL.txt
+231e8041993f2bc61e4b7529d2c959a0  PREDICTED_PINS.txt
+dface15bd886774c59d5c88034619650  returns_desk.py
+77e754e9b072eb78033affd5e8505b2a  returns_desk.html
+1b547cc9e0b33cde46f5d85bad77b9c1  patch_desk_anchor_s224.py
+fcc8202ea8bb325de7073d98ac00d61b  patch_deskpage_anchor_s224.py
+31c589b8bc331c480241551e08bd585b  RENDER_TEST_anchor_s224.py
+551dca8330048e6bc9a93a4aa5956858  selftest_anchor_s224.py
+0a3ef9efccdf034acda0688ac489b9b0  EVIDENCE_render_s224.txt
+78a6162a60c34d89f83375e63464c99b  EVIDENCE_selftest_s224.txt
+fb2034685303cbaec783f112074dd186  EVIDENCE_selftest_S214_rerun_s224.txt

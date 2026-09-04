@@ -1,0 +1,106 @@
+== 1  THE VAAPSI PAGE, every login, JS running (jsdom) ==
+PASS  darpan: page 200
+PASS  darpan: no JS errors
+PASS  darpan: jaankari card visible
+PASS  darpan: THE ANCHOR BOX IS THERE
+PASS  darpan: anchor label is Hindi
+PASS  darpan: anchor placeholder A003195
+PASS  darpan: the spot rows render (3)
+PASS  darpan TAP 1: 'gin liya' with no bill is REFUSED on the page (Hindi line)
+PASS  darpan TAP 1: focus moves to the anchor box
+PASS  darpan TAP 1: nothing left the list
+PASS  darpan TAP 2: anchor upper-cased by the page
+PASS  darpan TAP 2: the counted row leaves the list
+PASS  darpan TAP 2: anchor survives the re-render
+PASS  darpan TAP 2: done line counts 1
+PASS  darpan TAP 2: the ROW carries the anchor (D367)
+PASS  shavez: page 200
+PASS  shavez: no JS errors
+PASS  shavez: jaankari card visible
+PASS  shavez: THE ANCHOR BOX IS THERE
+PASS  shavez: anchor label is Hindi
+PASS  shavez: anchor placeholder A003195
+PASS  shavez: the spot rows render (2)
+PASS  alisha: page 200
+PASS  alisha: no JS errors
+PASS  alisha: jaankari card visible
+PASS  alisha: THE ANCHOR BOX IS THERE
+PASS  alisha: anchor label is Hindi
+PASS  alisha: anchor placeholder A003195
+PASS  alisha: the spot rows render (2)
+PASS  shivani: page 200
+PASS  shivani: no JS errors
+PASS  shivani: jaankari card visible
+PASS  shivani: THE ANCHOR BOX IS THERE
+PASS  shivani: anchor label is Hindi
+PASS  shivani: anchor placeholder A003195
+PASS  shivani: the spot rows render (2)
+PASS  amir: refused at the desk (403, F-296)
+PASS  amir: refusal is in Hindi
+PASS  manoj: page 200
+PASS  manoj: no JS errors
+PASS  manoj: jaankari card visible
+PASS  manoj: THE ANCHOR BOX IS THERE
+PASS  manoj: anchor label is Hindi
+PASS  manoj: anchor placeholder A003195
+PASS  manoj: the spot rows render (2)
+
+== 2  THE SERVER IS THE RULE (no page) ==
+PASS  darpan: counted WITHOUT anchor -> 400 anchor_required
+PASS  darpan: the refusal is Hindi
+PASS  shavez: counted WITHOUT anchor -> 400 anchor_required
+PASS  shavez: the refusal is Hindi
+PASS  alisha: counted WITHOUT anchor -> 400 anchor_required
+PASS  alisha: the refusal is Hindi
+PASS  shivani: counted WITHOUT anchor -> 400 anchor_required
+PASS  shivani: the refusal is Hindi
+PASS  manoj: counted WITHOUT anchor -> 400 anchor_required
+PASS  manoj: the refusal is Hindi
+PASS  shavez: counted WITH anchor -> ok
+PASS  shavez: 'abhi nahin' needs NO anchor (it is not a count)
+PASS  shavez: identity answer unaffected
+PASS  rows: anchor stored upper-cased and trimmed
+PASS  rows: non-count answers carry no anchor
+PASS  api/jaankari reads the anchor back on the answered row
+PASS  api/jaankari: 3 spot rows still listed (status untouched -- evidence only)
+
+== 3  THE COUNTING PAGE, every login (jsdom) ==
+PASS  darpan: count page 200
+PASS  darpan: no JS errors
+PASS  darpan: #bill anchor input present
+PASS  darpan: #billdate present
+PASS  darpan: Start counting disabled until the anchor is typed
+PASS  darpan: stock /api/count without bill_no -> 400 (the S208 rule holds)
+PASS  shavez: count page 200
+PASS  shavez: no JS errors
+PASS  shavez: #bill anchor input present
+PASS  shavez: #billdate present
+PASS  shavez: Start counting disabled until the anchor is typed
+PASS  shavez: stock /api/count without bill_no -> 400 (the S208 rule holds)
+PASS  alisha: count page 200
+PASS  alisha: no JS errors
+PASS  alisha: #bill anchor input present
+PASS  alisha: #billdate present
+PASS  alisha: Start counting disabled until the anchor is typed
+PASS  alisha: stock /api/count without bill_no -> 400 (the S208 rule holds)
+PASS  shivani: count page 200
+PASS  shivani: no JS errors
+PASS  shivani: #bill anchor input present
+PASS  shivani: #billdate present
+PASS  shivani: Start counting disabled until the anchor is typed
+PASS  shivani: stock /api/count without bill_no -> 400 (the S208 rule holds)
+PASS  amir: count page 200
+PASS  amir: no JS errors
+PASS  amir: #bill anchor input present
+PASS  amir: #billdate present
+PASS  amir: Start counting disabled until the anchor is typed
+PASS  amir: stock /api/count without bill_no -> 400 (the S208 rule holds)
+PASS  manoj: count page 200
+PASS  manoj: no JS errors
+PASS  manoj: #bill anchor input present
+PASS  manoj: #billdate present
+PASS  manoj: Start counting disabled until the anchor is typed
+PASS  manoj (owner console): count-page label is English (D366)
+PASS  manoj: stock /api/count without bill_no -> 400 (the S208 rule holds)
+
+RENDER GREEN  99 passed, 0 failed

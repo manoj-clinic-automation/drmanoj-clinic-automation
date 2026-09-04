@@ -1,0 +1,12 @@
+# S224_STOCK_ANCHOR_FIX -- pins PREDICTED OFFLINE (LF). The live bytes were REPRODUCED from the repo chain,
+# every link md5-checked (selftest_anchor_s224.py does it again on demand):
+#   returns_desk.py    S214 afc8b0d0 -> S221_JAANKARI 1dc1fd62 -> S222_DESK_USERS 3296eca0 == LIVE (S223 close pin)
+#   returns_desk.html  S214 32c4b8cc -> S221_JAANKARI 6d98e1b0 == LIVE (S223 close pin; S222 left it untouched)
+# then this kit's two patchers over those bytes. The kit's full files ARE that result, byte for byte.
+#
+# The install paste GUARDS both live prefixes and refuses otherwise. The owner's md5sum at the end must read:
+dface15bd886774c59d5c88034619650  /root/finance/returns_desk.py     (was 3296eca0f65d4396e61cfa80e11bee26)
+77e754e9b072eb78033affd5e8505b2a  /root/finance/returns_desk.html   (was 6d98e1b076d14ad0c70a200406e901b1)
+#
+# NOT touched: stock_app.py stays 4e929d0bd34af068bb4fb82eabe92dff; finance_app.py, portal.py, cards_registry.json,
+# darpan_card.html, stock_check_live.html all unchanged. No restart other than clinic-finance.service.
