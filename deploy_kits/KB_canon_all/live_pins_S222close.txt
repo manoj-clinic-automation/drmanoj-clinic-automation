@@ -1,0 +1,31 @@
+# live_pins -- S222 close, 03-Sep-2026
+# Every pin below was PREDICTED OFFLINE and then READ BACK FROM THE BOX identical.
+# columns: kind <TAB> md5 <TAB> path <TAB> note
+#
+# VPS     = installed and hashed on the box today
+# STAGED  = built, gated, published to the repo, NOT installed. Install in the order below.
+# PROMOTED= a PENDING 8-char prefix from the S221 close, settled today by a box read
+#
+# RECOVERED INTO THE REPOSITORY AT THE S223 CLOSE. It existed ONLY in project knowledge until then,
+# while live_pins_S220close, S221close and S223close all sat here -- a gap from the S222 close,
+# found by the A13.4 copy-verify-then-delete check and repaired before anything was retired.
+
+VPS	3296eca0f65d4396e61cfa80e11bee26	/root/finance/returns_desk.py	S222 (kit S222_DESK_USERS) -- F-296 CLOSED. returns.desk_users, an OPT-IN allow-list read at _auth(), the desk's only door. Set -> only those logins plus any maker/checker. UNSET, BLANK OR UNREADABLE -> nothing changes, deliberately: reception must not be lockable out by a half-applied change. Walk 40/40 incl. Amir refused on all twelve routes. Was 1dc1fd62...
+PROMOTED	6d98e1b076d14ad0c70a200406e901b1	/root/finance/returns_desk.html	S221 -- UNCHANGED by S222 and proven so at install step 6. The S221 close held this as an 8-char prefix; the box read settles it. PENDING -> VPS.
+PROMOTED	1dc1fd6229e74c60e0eceb4a14db8aeb	(the S221 returns_desk.py, superseded above)	S221 -- read from the box at the S222 install guard before anything was copied, which is what promotes it. Also reproduced offline: repo S214 bytes afc8b0d0 + the S221 patcher = this exact value.
+VPS	26b1defeb0333fb8642a7abf95a93e5b	/root/finance/darpan_corrections.html	S222 (kit S222_CORRECTIONS_TRAP) -- a control that refuses is a trap. The page ASKS (/api/ledger-check, checker-only) rather than guessing at a role. AN ERROR SHOWS IT, deliberately. Render 17/17. Was f2f6f60e... -- NOT the b3cfd86f the Register's pin table named. See F-297.
+VPS	3e213e4dfd4171eb4cf3bbcd0538025b	/root/finance/joiner_app.py	S222, four kits in sequence: JOINER_LOGIN c879eafe (F-295) -> ALLRECS 1ebab919 -> FORMS d3f4c802 -> SECTIONS. Was ff157c1c...
+VPS	71540e8c610b02636d08ae7d0739df1d	/root/finance/staff_manage.html	S222, six kits in sequence: the login line that ASKS instead of asserting -> all-records -> fully English (D366) -> the joiner FORM and the leaver PICKER -> ?flow= entry -> sections by system. Was 9ff9fc48... ONE prompt left in the whole page.
+VPS	c89ffa9f619712929c2b81d6e1d98c17	/root/portal/portal.py	S222 (kit S222_PORTAL_ENTRY) -- Manage Users is the front door. Live bytes reproduced before the file was touched: S204_VPS_LIVE 24ea2c0b + the S218 tile patcher = 16bfd590, the pin the box printed. Was 16bfd590... SUPERSEDED same session by 23824f92 then d15acef3.
+VPS	none	/root/finance/finance.db setting	S222 -- returns.desk_users = darpan,shavez,alisha,shivani. Blank or delete it and the gate is off; that is the designed fail-safe, not a bug.
+VPS	none	joiner JOIN-2026-0001	AMIR SOHAIL, purchase, Emp Code 101, username amir -- 6/6 COMPLETE. Verified independently by S222_AMIR_JOINER running report-only through joiner_app's own rules.
+STAGED	71bd32777b69e375e41576c7aeb7eb1d	/root/assetapp/asset_register.py	S222_SCANAPP_INAPP step 1 -- INSTALLED AT THE S223 OPEN, 22:59 IST, pin read back identical.
+STAGED	none	followup vhost /usr/local/lsws/conf/vhosts/followup.dr-manoj.in/vhost.conf	S222_SCANAPP_INAPP step 2 -- INSTALLED AT THE S223 OPEN. THE ONLY CHANGE IN THIS PROJECT THAT CAN TAKE THE SITE DOWN. Append-managed, never replaced.
+STAGED	23824f92988621a38c1ae0cd7fb1314c	/root/portal/portal.py	S222_SCANAPP_INAPP step 3 -- INSTALLED AT THE S223 OPEN. From c89ffa9f.
+STAGED	d15acef3fcb0237563475968c2eec921	/root/portal/portal.py	S222_TILE_GRANTS -- INSTALLED SECOND AT THE S223 OPEN, 23:07 IST, from 23824f92. GRANTS GREEN: 48 user x role x PC combinations, not one tile appeared or disappeared. SUPERSEDED at S223 by e2f90752 then 302e7459.
+STAGED	none	/root/portal/tile_grants.json	NEW at S222. Reproduces 03-Sep behaviour EXACTLY, including darpan's mask. SUPERSEDED at S223 by 08828cb1.
+
+# AT 17:05 ON 03-SEP THE GRANTS PATCHER REFUSED, CORRECTLY. Built against 23824f92, the box
+# still at c89ffa9f. TWO KITS CHAINED ON ONE FILE MUST BE INSTALLED IN THE ORDER THEY WERE
+# CHAINED (F-298). Nothing was harmed: the from-pin gate turned a planning error into a
+# refusal on the login system.

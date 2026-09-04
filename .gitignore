@@ -159,3 +159,13 @@ finance/REPORT_1.xls
 # of portal.py, so it has to ship with its kit or the kit installs nothing. Checked before
 # this line was added: six logins, sixteen tile names, and the only digits in it are "2026".
 !deploy_kits/*/tile_grants.json
+# S223: F-300 RECURRED. `deploy_kits/S223_XRAY_LIST/` holds exactly one file --
+# xray_list.json -- so the blanket *.json rule above made the ENTIRE KIT invisible
+# to git. `git status` did not list it; nothing warned; it would have published as
+# an empty folder. At S222 the publish gate caught this shape because other files
+# in the kit were staged; here NOTHING was staged, so there was nothing to refuse.
+# The rule: WHEN A KIT'S WHOLE PAYLOAD IS ONE .json, CHECK IT IS TRACKED BEFORE
+# THE PUBLISH -- an ignored file is silent by design, and silence is the failure.
+# This list carries the clinic's X-ray vocabulary only: study names, view codes,
+# film sizes and misspellings. No patient, no number, no secret.
+!deploy_kits/S223_XRAY_LIST/xray_list.json

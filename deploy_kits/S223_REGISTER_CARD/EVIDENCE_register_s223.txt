@@ -1,8 +1,7 @@
 S223_REGISTER_CARD -- the render test, run before the paste.
 
 A real Flask app, a real database, real form posts. The db getter RAISES outside an application
-context exactly as finance_app's does -- see section 0 and the incident in the README.
-F-185: scanned for identifiers before committing.
+context exactly as finance_app's does. F-185: scanned for identifiers before committing.
 
 -- 0  init() must not touch the database -----------------------------
   PASS  init() completed with NO application context, exactly as gunicorn imports it
@@ -91,4 +90,36 @@ F-185: scanned for identifiers before committing.
   PASS  it has a phone breakpoint
   PASS  the viewport allows zooming (never disable it)
 
-GREEN  61 checks, 0 failed
+-- 12  the end-of-day drawer count ------------------------------------
+  PASS  expected cash = register cash PLUS physio cash (1000+300+700)   [200000]
+  PASS  the count asks for QUANTITIES, not an amount
+  PASS  every note denomination is offered
+  PASS  coins are offered, at the bottom
+  PASS  the coin band comes after the note band
+  PASS  the quantities are stored as quantities
+  PASS  it sums them itself (3x500 + 2x200 + 1x100 = 2,000)
+  PASS  it says the drawer matches the day
+  PASS  and offers the handover
+  PASS  it defaults the handover to Dr Bhawna
+  PASS  status starts as counted, not confirmed
+  PASS  confirming records the handover
+  PASS  and it is audited
+  PASS  recount clears it
+  PASS  a short drawer states both figures and the difference (1,700 vs 2,000, short 300)
+  PASS  it says 'less in the drawer', never that anyone is short
+  PASS  it offers a recount rather than a verdict
+  PASS  a word where a count should be is refused, nothing saved
+  PASS  the previous count survives the refusal
+
+-- 13  the drawer CLOSES the loop with the bank ------------------------
+  PASS  expected drawer cash follows the register (2,300)
+  PASS  the drawer is 300 light
+  PASS  the bank is 300 over
+  PASS  the two are recognised as the SAME mistake
+  PASS  the screen says so, in words, with the figure
+  PASS  and says plainly that no money is missing
+  PASS  the drawer line appears in the three-record table
+  PASS  when they point the same way but do not match, it says that instead
+  PASS  and it says something else is in there too
+
+GREEN  89 checks, 0 failed

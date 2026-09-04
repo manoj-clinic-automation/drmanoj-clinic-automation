@@ -62,6 +62,41 @@ which appeared inside the page's own promise never to say anyone was short; the 
 phrase that HTML had wrapped across a line. F-293, twice more. The tests were fixed, and the page's
 wording tightened to "it never accuses anyone", which is better English anyway.
 
+## THE DRAWER COUNT — and the thing it closes
+
+**The owner, 04-Sep:** *"staff hands over the cash before leaving, to dr Bhawna, and a format is
+coming to my mind — they can type the quantities of currencies, with option for coins at bottom,
+as a sweep for any such days, it sums up for them, they click ok, or do a recount."*
+
+Built exactly so. **Quantities, never amounts** — counting notes into piles is what a person
+actually does, and typing a total invites the total they EXPECT rather than the one in their hand.
+₹500 down to ₹10 as notes, ₹20 down to ₹1 as coins underneath, each line showing what it comes to
+and a running total as they type. Then **Yes — handed over** (default: Dr Bhawna) or **Count again**.
+Alisha does it mostly, sometimes Shivani, rarely Shavez — all three already hold the tile.
+
+**Physiotherapy cash is included in what the drawer should hold**, on the owner's instruction: it
+is one physical drawer, so expected = register cash across every section PLUS physio cash.
+
+### And then his "just a thought", which turned out to be the best idea of the night
+
+> *"a figure for the Docterz and mpr reconciliation also? just a thought, but it will solve
+> drawer cash"*
+
+**It does, and from the opposite direction.** A bill paid by UPI but rung as CASH makes the
+register's cash figure too high — so **the drawer comes up short by exactly that amount, the same
+evening**, without waiting days for a bank statement. And when the MPR finally arrives, **the bank
+is over by the same figure**. Two independent measurements of one mistake, from opposite ends.
+
+When they match, the screen says it in words:
+
+> *The drawer is short by exactly what the bank is over — ₹300. That is a bill paid by UPI and
+> written down as cash. **No money is missing**, and two separate records say so independently.*
+
+When they point the same way but do not match to the rupee, it says that instead — *"something
+else is in there too"* — rather than pretending the case is closed.
+
+**This is what turns the ₹43,330 from a suspicion into something checkable on the day it happens.**
+
 ## ⚠ THE OUTAGE THIS KIT CAUSED, AND WHAT IT CHANGES
 
 **The first version of this kit took the whole finance app down.** Not this screen -- the whole

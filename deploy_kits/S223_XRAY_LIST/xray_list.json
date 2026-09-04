@@ -1,0 +1,243 @@
+{
+  "_note": "S223 X-ray picklist. Built 04-Sep-2026 from the clinic's own 'X-RAY DETAIL RAGISTER' (6,177 entries, 1,197 distinct typed forms). Frequency order: the commonest study is the first tap. Two entries (KS, PROS) await the owner's word on what they mean and are labelled 'confirm' on the screen until he says. 04-Sep: the owner confirmed K/S = knee studies, and that PROSISER is a PROCEDURE -- so 107 historical rows in the X-ray register are procedures, not X-rays, and PROSISER is removed from this list. They belong to the procedures module and are a backfill source for it.",
+  "studies": [
+    {
+      "code": "KNEE",
+      "label": "Knee",
+      "seen": 684,
+      "aliases": [
+        "KNEE",
+        "BOTH KNEE",
+        "L.KNEE",
+        "R.KNEE"
+      ]
+    },
+    {
+      "code": "LS",
+      "label": "Lumbosacral spine",
+      "seen": 600,
+      "aliases": [
+        "L/S",
+        "L S",
+        "L.S.SPAINE",
+        "L S SPINE",
+        "LS SPINE"
+      ]
+    },
+    {
+      "code": "KS",
+      "label": "Knee studies",
+      "seen": 423,
+      "aliases": [
+        "K/S",
+        "K S"
+      ]
+    },
+    {
+      "code": "ANKLE",
+      "label": "Ankle",
+      "seen": 325,
+      "aliases": [
+        "ANKLE"
+      ]
+    },
+    {
+      "code": "FOOT",
+      "label": "Foot",
+      "seen": 272,
+      "aliases": [
+        "FOOT"
+      ]
+    },
+    {
+      "code": "CS",
+      "label": "Cervical spine",
+      "seen": 363,
+      "aliases": [
+        "C/S",
+        "C S",
+        "CARVICAL",
+        "CERVICAL"
+      ]
+    },
+    {
+      "code": "SHOULDER",
+      "label": "Shoulder",
+      "seen": 217,
+      "aliases": [
+        "SHOULDER",
+        "SHUOLDER",
+        "SHOLDER",
+        "SHOUKDER"
+      ]
+    },
+    {
+      "code": "WRIST",
+      "label": "Wrist",
+      "seen": 190,
+      "aliases": [
+        "WRIST"
+      ]
+    },
+    {
+      "code": "ELBOW",
+      "label": "Elbow",
+      "seen": 158,
+      "aliases": [
+        "ELBOW",
+        "ELWOB",
+        "ELBO"
+      ]
+    },
+    {
+      "code": "LEG",
+      "label": "Leg  (tibia-fibula)",
+      "seen": 107,
+      "aliases": [
+        "LEG"
+      ]
+    },
+    {
+      "code": "HAND",
+      "label": "Hand",
+      "seen": 128,
+      "aliases": [
+        "HAND"
+      ]
+    },
+    {
+      "code": "CHEST",
+      "label": "Chest",
+      "seen": 125,
+      "aliases": [
+        "CHEST"
+      ]
+    },
+    {
+      "code": "PBH",
+      "label": "Pelvis both hips",
+      "seen": 251,
+      "aliases": [
+        "PBH",
+        "P.B.H",
+        "PELVIS"
+      ]
+    },
+    {
+      "code": "TOES",
+      "label": "Toes",
+      "seen": 55,
+      "aliases": [
+        "TOES",
+        "TOE"
+      ]
+    },
+    {
+      "code": "DS",
+      "label": "Dorsal spine",
+      "seen": 54,
+      "aliases": [
+        "D/S",
+        "D S",
+        "DORSAL"
+      ]
+    },
+    {
+      "code": "THUMB",
+      "label": "Thumb",
+      "seen": 45,
+      "aliases": [
+        "THUMB"
+      ]
+    },
+    {
+      "code": "FOREARM",
+      "label": "Forearm",
+      "seen": 60,
+      "aliases": [
+        "FORAM",
+        "FOREARM",
+        "FORARM"
+      ]
+    },
+    {
+      "code": "CLAVICLE",
+      "label": "Clavicle",
+      "seen": 83,
+      "aliases": [
+        "CLAVICAL",
+        "CLAVICLE",
+        "CLAVICEL"
+      ]
+    },
+    {
+      "code": "DL",
+      "label": "Dorsolumbar",
+      "seen": 32,
+      "aliases": [
+        "D/L",
+        "D L"
+      ]
+    }
+  ],
+  "views": [
+    {
+      "code": "APL",
+      "label": "AP / LAT"
+    },
+    {
+      "code": "AP",
+      "label": "AP"
+    },
+    {
+      "code": "LAT",
+      "label": "LAT"
+    },
+    {
+      "code": "OBL",
+      "label": "Oblique"
+    }
+  ],
+  "sides": [
+    {
+      "code": "-",
+      "label": "—"
+    },
+    {
+      "code": "R",
+      "label": "Right"
+    },
+    {
+      "code": "L",
+      "label": "Left"
+    },
+    {
+      "code": "B",
+      "label": "Both"
+    }
+  ],
+  "films": [
+    {
+      "code": "8x10",
+      "label": "8 x 10  (small)"
+    },
+    {
+      "code": "11x14",
+      "label": "11 x 14  (large)"
+    }
+  ],
+  "spelling": {
+    "LET": "LAT",
+    "LETRAL": "LAT",
+    "SPAINE": "SPINE",
+    "ELWOB": "ELBOW",
+    "SHUOLDER": "SHOULDER",
+    "SHOLDER": "SHOULDER",
+    "SHOUKDER": "SHOULDER",
+    "CLAVICAL": "CLAVICLE",
+    "FORAM": "FOREARM",
+    "CARVICAL": "CERVICAL",
+    "OBEGUE": "OBLIQUE",
+    "OBLIQE": "OBLIQUE"
+  }
+}

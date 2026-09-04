@@ -60,6 +60,17 @@ FIELDS = ["%s_%s_p" % (s, t) for s, _ in SECTIONS for t, _ in TENDERS]
 # took a payment. It is a fifth money channel, and like card it cannot be reconciled here.
 PHYSIO_FIELDS = ["physio_cash_p", "physio_upi_p"]
 
+# THE DRAWER COUNT. The owner's design, 04-Sep: "staff hands over the cash before leaving, to dr
+# Bhawna, and ... they can type the quantities of currencies, with option for coins at bottom, as a
+# sweep for any such days, it sums up for them, they click ok, or do a recount."
+#
+# Quantities, never amounts -- counting notes into piles is what a person actually does at the end
+# of a day, and typing a total invites the total they EXPECT rather than the one in their hand.
+NOTES = ((500, "n500"), (200, "n200"), (100, "n100"), (50, "n50"), (20, "n20"), (10, "n10"))
+COINS = ((20, "c20"), (10, "c10"), (5, "c5"), (2, "c2"), (1, "c1"))
+DENOMS = NOTES + COINS
+DRAWER_FIELDS = [k for _, k in DENOMS]
+
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS clinic_register_day (
   business_date TEXT PRIMARY KEY,
@@ -74,6 +85,22 @@ CREATE TABLE IF NOT EXISTS clinic_register_day (
   note TEXT NOT NULL DEFAULT '', entered_by TEXT NOT NULL DEFAULT '',
   entered_at TEXT NOT NULL DEFAULT '', updated_by TEXT NOT NULL DEFAULT '',
   updated_at TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS clinic_drawer_day (
+  business_date TEXT PRIMARY KEY,
+  n500 INTEGER NOT NULL DEFAULT 0, n200 INTEGER NOT NULL DEFAULT 0,
+  n100 INTEGER NOT NULL DEFAULT 0, n50 INTEGER NOT NULL DEFAULT 0,
+  n20 INTEGER NOT NULL DEFAULT 0,  n10 INTEGER NOT NULL DEFAULT 0,
+  c20 INTEGER NOT NULL DEFAULT 0,  c10 INTEGER NOT NULL DEFAULT 0,
+  c5 INTEGER NOT NULL DEFAULT 0,   c2 INTEGER NOT NULL DEFAULT 0,
+  c1 INTEGER NOT NULL DEFAULT 0,
+  counted_p INTEGER NOT NULL DEFAULT 0,
+  expected_p INTEGER,
+  status TEXT NOT NULL DEFAULT 'counted',
+  counted_by TEXT NOT NULL DEFAULT '', handed_to TEXT NOT NULL DEFAULT '',
+  note TEXT NOT NULL DEFAULT '',
+  counted_at TEXT NOT NULL DEFAULT '', confirmed_at TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS clinic_physio_day (
@@ -171,6 +198,31 @@ def _paise(v):
 
 def register_row(con, d):
     return con.execute("SELECT * FROM clinic_register_day WHERE business_date=?", (d,)).fetchone()
+
+
+def drawer_row(con, d):
+    try:
+        return con.execute("SELECT * FROM clinic_drawer_day WHERE business_date=?", (d,)).fetchone()
+    except Exception:                            # noqa: BLE001
+        return None
+
+
+def drawer_total_p(vals):
+    return sum(rupees * 100 * int(vals.get(key) or 0) for rupees, key in DENOMS)
+
+
+def expected_cash_p(con, d):
+    """What the drawer SHOULD hold: the register's cash across every section PLUS physiotherapy
+    cash -- the owner's instruction of 04-Sep, and correct because it is one physical drawer.
+    Returns None when the register has not been filled, because there is then nothing to expect."""
+    reg = register_row(con, d)
+    if reg is None:
+        return None
+    total = sum(reg["%s_cash_p" % sec] for sec, _ in SECTIONS)
+    phy = physio_row(con, d)
+    if phy is not None:
+        total += phy["cash_p"]
+    return total
 
 
 def physio_row(con, d):
@@ -278,7 +330,24 @@ def three_way(con, d):
                                                 "Most likely the register total was written wrong.")
         else:
             verdict, why = "all differ", "all three differ — this day needs a person, not a formula"
+    # THE DRAWER IS A FOURTH SIGNAL, and the fastest one. The owner, 04-Sep: "a figure for the
+    # Docterz and mpr reconciliation also? just a thought, but it will solve drawer cash."
+    # He is right, and it closes the loop from the other end. A bill paid by UPI but rung as CASH
+    # makes the register's cash too high -- so the DRAWER comes up short by exactly that amount,
+    # the same evening, without waiting days for a statement. And when the MPR finally lands, the
+    # bank is over by the same figure. Two independent measurements of one mistake, from opposite
+    # directions. When they agree, nothing is missing and nobody need be asked about it.
+    dr = drawer_row(con, d)
+    exp = expected_cash_p(con, d)
+    drawer_diff = (dr["counted_p"] - exp) if (dr is not None and exp is not None) else None
+    bank_diff = (bank - doc["upi"]) if (bank_known and doc["known"]) else None
+    closed = (drawer_diff is not None and bank_diff is not None
+              and drawer_diff < 0 and bank_diff > 0 and abs(drawer_diff) == bank_diff)
+    same_way = (drawer_diff is not None and bank_diff is not None
+                and drawer_diff < 0 and bank_diff > 0 and not closed)
     return dict(reg=reg, doc=doc, phy=phy, bank=bank, bank_known=bank_known,
+                drawer=dr, expected_cash=exp, drawer_diff=drawer_diff, bank_diff=bank_diff,
+                closed=closed, same_way=same_way,
                 r_cash=r_cash, r_upi=r_upi, r_card=r_card,
                 p_cash=p_cash, p_upi=p_upi, verdict=verdict, why=why)
 
@@ -362,7 +431,74 @@ def register_card(date):
     if request.method == "POST":
         now = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         who = u.get("user", "")
-        if request.form.get("clear") == "yes":
+        if request.form.get("drawer") == "count":
+            vals, bad = {}, []
+            for _rs, key in DENOMS:
+                raw = (request.form.get(key) or "").strip()
+                if raw == "":
+                    vals[key] = 0
+                    continue
+                if not raw.isdigit():
+                    bad.append("%s — %r is not a whole number of notes/coins" % (key, raw[:8]))
+                else:
+                    vals[key] = int(raw)
+            if bad:
+                msg = ("<div class='bad'><b>Nothing was saved.</b><br>%s</div>"
+                       % "<br>".join(_esc(x) for x in bad))
+            else:
+                counted = drawer_total_p(vals)
+                exp = expected_cash_p(con, date)
+                prev = drawer_row(con, date)
+                cols = DRAWER_FIELDS
+                if prev is None:
+                    con.execute("INSERT INTO clinic_drawer_day (business_date, %s, counted_p, "
+                                "expected_p, status, counted_by, handed_to, note, counted_at) "
+                                "VALUES (?,%s,?,?,?,?,?,?,?)"
+                                % (",".join(cols), ",".join("?" * len(cols))),
+                                [date] + [vals[c] for c in cols] + [
+                                    counted, exp, "counted", who,
+                                    (request.form.get("handed_to") or "Dr Bhawna").strip()[:60],
+                                    (request.form.get("dnote") or "").strip()[:200], now])
+                else:
+                    con.execute("UPDATE clinic_drawer_day SET %s, counted_p=?, expected_p=?, "
+                                "status='counted', counted_by=?, handed_to=?, note=?, counted_at=? "
+                                "WHERE business_date=?" % ",".join("%s=?" % c for c in cols),
+                                [vals[c] for c in cols] + [
+                                    counted, exp, who,
+                                    (request.form.get("handed_to") or "Dr Bhawna").strip()[:60],
+                                    (request.form.get("dnote") or "").strip()[:200], now, date])
+                con.commit()
+                if exp is None:
+                    msg = ("<div class='ok'><b>Counted: ₹%s.</b> The register for this day has not "
+                           "been filled in yet, so there is nothing to compare it with.</div>"
+                           % _r(counted))
+                elif counted == exp:
+                    msg = ("<div class='ok'><b>₹%s counted, and that is exactly what the day's "
+                           "takings say.</b> Confirm the handover below.</div>" % _r(counted))
+                else:
+                    d_ = counted - exp
+                    msg = ("<div class='bad'><b>₹%s counted; the day's takings come to ₹%s.</b><br>"
+                           "That is ₹%s %s. Count again, or write a line saying why and confirm."
+                           "</div>" % (_r(counted), _r(exp), _r(abs(d_)),
+                                       "more in the drawer" if d_ > 0 else "less in the drawer"))
+        elif request.form.get("drawer") == "confirm":
+            con.execute("UPDATE clinic_drawer_day SET status='confirmed', handed_to=?, "
+                        "confirmed_at=? WHERE business_date=?",
+                        ((request.form.get("handed_to") or "Dr Bhawna").strip()[:60], now, date))
+            con.commit()
+            if _audit:
+                try:
+                    _audit(con, "clinic_drawer_day", date, "confirm", before=None,
+                           after={"counted_p": (drawer_row(con, date) or {})["counted_p"]}, who=who)
+                    con.commit()
+                except Exception:                # noqa: BLE001
+                    pass
+            msg = "<div class='ok'><b>Handover confirmed.</b> The cash is signed over.</div>"
+        elif request.form.get("drawer") == "recount":
+            con.execute("DELETE FROM clinic_drawer_day WHERE business_date=?", (date,))
+            con.commit()
+            msg = "<div class='ok'>Count cleared. Count again from the start.</div>"
+        elif request.form.get("clear") == "yes":
             # An empty day saved by accident is worse than an unfilled one: it looks answered.
             # One tap undoes it, and the removal is audited like any other change.
             before = register_row(con, date)
@@ -480,7 +616,99 @@ def _card_html(con, date, u, msg):
         <a class="btn" href="/finance/clinic/day/%s">the day&#8217;s entries</a></p>
       </div>%s""" % (_human(date), msg, "".join(rows), phys,
                      _esc("" if reg is None else (reg["note"] or "")), clear, who,
-                     date, _compare_html(t, date))
+                     date, _drawer_html(con, date) + _compare_html(t, date))
+
+
+def _drawer_html(con, date):
+    """The end-of-day count. Quantities in, the total done for them, then OK or count again."""
+    row = drawer_row(con, date)
+    exp = expected_cash_p(con, date)
+    counted = row["counted_p"] if row is not None else None
+
+    def qty(key):
+        v = "" if row is None or not row[key] else str(row[key])
+        return ("<td><input name='%s' value='%s' inputmode='numeric' pattern='[0-9]*' "
+                "autocomplete='off' class='amt qty' data-rs='%d'></td>"
+                % (key, _esc(v), [r for r, k in DENOMS if k == key][0]))
+
+    def band(title, rows_):
+        out = ["<tr class='sep'><td colspan='3'>%s</td></tr>" % title]
+        for rs, key in rows_:
+            out.append("<tr><th class='sec'>&#8377; %d</th>%s"
+                       "<td class='r' id='sub_%s'>&mdash;</td></tr>" % (rs, qty(key), key))
+        return "".join(out)
+
+    status = ""
+    if row is not None:
+        if row["status"] == "confirmed":
+            status = ("<p class='verdict all_agree'>Handed over to %s and confirmed at %s.</p>"
+                      % (_esc(row["handed_to"] or "Dr Bhawna"), _esc(row["confirmed_at"])))
+        else:
+            status = ("<p class='mut'>counted by <b>%s</b> at %s — not yet confirmed</p>"
+                      % (_esc(row["counted_by"]), _esc(row["counted_at"])))
+
+    lines = []
+    if exp is not None:
+        lines.append("<tr><th class='sec'>The day&#8217;s cash</th><td class='r'>&#8377; %s</td>"
+                     "<td class='mut'>register + physiotherapy</td></tr>" % _r(exp))
+    if counted is not None:
+        lines.append("<tr><th class='sec'>Counted in the drawer</th>"
+                     "<td class='r'><b>&#8377; %s</b></td><td class='mut'></td></tr>" % _r(counted))
+    if exp is not None and counted is not None:
+        d_ = counted - exp
+        lines.append("<tr><th class='sec'>Difference</th><td class='r'><b>%s</b></td>"
+                     "<td class='mut'>%s</td></tr>"
+                     % (("&#8377; %s" % _r(abs(d_))) if d_ else "none",
+                        "" if not d_ else ("more in the drawer" if d_ > 0
+                                           else "less in the drawer")))
+    summary = ("<table class='grid'>%s</table>" % "".join(lines)) if lines else ""
+
+    confirm = ""
+    if row is not None and row["status"] != "confirmed":
+        confirm = ("""<form method="post" class="inline">
+          <input type="hidden" name="drawer" value="confirm">
+          <label class="mut" for="ht">Handed to</label>
+          <input id="ht" name="handed_to" class="note" value="%s" maxlength="60">
+          <button type="submit" class="save">Yes — handed over, correct</button></form>
+          <form method="post" class="inline"><input type="hidden" name="drawer" value="recount">
+          <button type="submit" class="clear">Count again</button></form>"""
+                   % _esc(row["handed_to"] or "Dr Bhawna"))
+
+    return """
+      <div class="card"><h2>End of day — cash handed over</h2>
+        <p class="mut">Count the notes into piles and type how many of each. The total is worked
+        out for you. Coins are at the bottom — leave them empty on a day with none.</p>
+        <form method="post">
+        <input type="hidden" name="drawer" value="count">
+        <table class="grid entry"><thead><tr><th>Note</th><th>How many</th><th class="r">Comes to</th>
+          </tr></thead><tbody>%s%s</tbody>
+          <tfoot><tr><th class="sec">Total counted</th><td></td>
+            <td class="r" id="drawer_total"><b>&mdash;</b></td></tr></tfoot></table>
+        <p><label class="mut" for="dnote">Note (optional)</label><br>
+           <input id="dnote" name="dnote" class="note" value="%s" maxlength="200"></p>
+        <button type="submit" class="save">Work out the total</button>
+        </form>
+        %s%s%s
+      </div>
+<script>
+(function(){
+  var f=document.querySelectorAll('.qty');
+  function draw(){
+    var t=0;
+    for(var i=0;i<f.length;i++){
+      var n=parseInt(f[i].value,10); if(isNaN(n)||n<0){n=0;}
+      var rs=parseInt(f[i].getAttribute('data-rs'),10)*n; t+=rs;
+      var c=document.getElementById('sub_'+f[i].name);
+      if(c){c.innerHTML = rs ? ('\u20B9 '+rs.toLocaleString('en-IN')) : '\u2014';}
+    }
+    var d=document.getElementById('drawer_total');
+    if(d){d.innerHTML='<b>'+(t?('\u20B9 '+t.toLocaleString('en-IN')):'\u2014')+'</b>';}
+  }
+  for(var i=0;i<f.length;i++){f[i].addEventListener('input',draw);}
+  draw();
+})();
+</script>""" % (band("Notes", NOTES), band("Coins", COINS),
+                 _esc("" if row is None else (row["note"] or "")), summary, status, confirm)
 
 
 def _compare_html(t, date):
@@ -502,16 +730,36 @@ def _compare_html(t, date):
                  "the bank feed carries no card"),
             line("Physiotherapy", t["p_upi"] if t["p_upi"] is not None else None, None, None,
                  "its own UPI channel — not in the bank line above")]
+    extra = ""
+    if t.get("drawer") is not None and t.get("drawer_diff") is not None:
+        dd = t["drawer_diff"]
+        extra = ("<tr><th class='sec'>Drawer counted</th><td class='r'>%s</td><td class='r'>%s</td>"
+                 "<td class='r'>—</td><td class='mut'>%s</td></tr>"
+                 % (_r(t["drawer"]["counted_p"]), _r(t["expected_cash"]),
+                    "matches the day's cash" if dd == 0 else
+                    ("%s %s in the drawer" % (_r(abs(dd)), "more" if dd > 0 else "less"))))
+    closer = ""
+    if t.get("closed"):
+        closer = ("<p class='verdict all_agree'>The drawer is short by exactly what the bank is "
+                  "over — ₹%s. That is a bill paid by UPI and written down as cash. <b>No money is "
+                  "missing</b>, and two separate records say so independently.</p>"
+                  % _r(abs(t["drawer_diff"])))
+    elif t.get("same_way"):
+        closer = ("<p class='verdict waiting_bank'>The drawer is ₹%s light and the bank is ₹%s "
+                  "over. Both point the same way — UPI written down as cash — but they do not "
+                  "match to the rupee, so something else is in there too.</p>"
+                  % (_r(abs(t["drawer_diff"])), _r(t["bank_diff"])))
+
     return """
       <div class="card"><h2>The three records, side by side</h2>
         <table class="grid"><thead><tr><th></th><th class="r">Register</th>
           <th class="r">Docterz</th><th class="r">Bank</th><th></th></tr></thead>
-          <tbody>%s</tbody></table>
-        <p class="verdict %s">%s</p>
+          <tbody>%s%s</tbody></table>
+        <p class="verdict %s">%s</p>%s
         <p class="mut">This screen states what the three records say. It does not decide who is
         right, and it never accuses anyone. Where two agree and one differs, that is the one to
         look at first.</p>
-      </div>""" % ("".join(body), t["verdict"].replace(" ", "_"), _esc(t["why"]))
+      </div>""" % ("".join(body), extra, t["verdict"].replace(" ", "_"), _esc(t["why"]), closer)
 
 
 def _denied():
@@ -556,7 +804,12 @@ button.save{background:var(--accent);color:#fff;border:0;border-radius:9px;paddi
  font-size:20px;font-weight:600;cursor:pointer;width:100%%;margin-top:6px}
 button.clear{background:var(--paper);color:#8c2f2f;border:2px solid #8c2f2f;border-radius:9px;
  padding:11px 18px;font-size:17px;cursor:pointer}
-.clearf{margin-top:14px}
+.clearf,.inline{margin-top:14px}
+.inline{display:inline-block;margin-right:12px}
+.inline .note{display:inline-block;width:auto;min-width:170px;margin:0 8px}
+.inline button.save{width:auto;margin-top:0}
+tfoot th.sec,tfoot td{background:#dff0d8;font-size:20px}
+#drawer_total{font-size:22px}
 a.btn{display:inline-block;border:2px solid var(--accent);color:var(--accent);border-radius:9px;
  padding:11px 16px;text-decoration:none;font-size:17px;margin:6px 8px 0 0;background:var(--paper)}
 .navrow{margin-top:14px}
