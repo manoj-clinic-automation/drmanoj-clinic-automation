@@ -1,0 +1,7 @@
+3adad7f983228ea3bbb5ea635c8ce872  purchase_app.py
+01b2f24d557701c50d2072c2f2ecb0b1  walk_book_inline_s225.py
+82496d4022b7cf56f8cf1d7280f3b459  patch_book_inline_s225.py
+58925984df2a91b4ae3ef6be609afbff  selftest_book_inline.py
+41d68148fc3aa461da30a9eb4053b649  marg_purchase_rows.py
+18e8b0b2ea94e2209622979608b79a50  purchase_schema.sql
+491c04e9fc0151af7d7cf879bccf60bd  push_salts.py

@@ -1,0 +1,356 @@
+S225 selftest (S224 regression + staff page) on /sessions/rcw-01bbsubw4sgrdt6zuuofytfk/tmp/s224_mled7o2t
+  PASS  healthz answers without auth
+  PASS  August BILLWISE export is in the archive
+  PASS  BILLWISE parser: rows sum to Marg's TOTAL row
+  PASS  push with the WRONG token -> 401
+  PASS  push with the wrong HEADER NAME (X-Finance-Cron, F-237) -> 401
+  PASS  push with no header -> 401
+  PASS  push with an unknown type -> 400
+  PASS  push with a bad md5 -> 400
+  PASS  push with rows not a list -> 400
+  PASS  push with a non-JSON body -> 400
+  PASS  BILLWISE August stored as new
+  PASS  bills stored == BILLWISE rows
+  PASS  August bill-wise total == Marg TOTAL row
+  PASS  the same export again -> stored:false, duplicate
+  PASS  a duplicate did not add bills
+  PASS  healthz counts one export
+  PASS  two August SUPPLIERWISE exports of the same period exist (the supersede case)
+  PASS  SUPPLIERWISE parser: rows sum to GRAND TOTAL
+  PASS  SUPPLIERWISE and BILLWISE agree on the August total
+  PASS  older SUPPLIERWISE stored as new
+  PASS  SUPPLIERWISE added NO second copy of any bill (supplier_key joins the two reports)
+  PASS  later SUPPLIERWISE of the same period stored as new
+  PASS  the older one is now marked superseded_by the later
+  PASS  re-pushing the superseded one -> duplicate (idempotent on md5)
+  PASS  an OLDER stamp for a period that already has a later one -> superseded_older, not stored
+  PASS  bills still exactly the BILLWISE count after all that
+  PASS  every August bill's date came from BILLWISE (BILLWISE first)
+  PASS  no bill lost its printed supplier name
+  PASS  marg_purchase (S206) importable for ITEMWISE
+  PASS  ITEMWISE rows carry a null bill_date (the export has none)
+  PASS  ITEMWISE 01-26 stored
+  PASS  ITEMWISE 28-29 stored (a different period: coexists, does not supersede)
+  PASS  lines stored == ITEMWISE rows
+  PASS  EVERY ITEMWISE line was dated from its bill
+  PASS  every line's month is August
+  PASS  item-wise GROSS sum of the lines == the two exports' totals (gross is stored, labelled)
+  PASS  item-wise NET sum of the lines == the two exports' net (rev 2: this is the money the pages show)
+  PASS  BILLITEMWISE parser: rows sum to its TOTAL
+  PASS  BILLITEMWISE stored
+  PASS  BILLITEMWISE lines found their supplier from the bills (bill no + date)
+  PASS  July ITEMWISE pushed BEFORE its bills: lines are UNDATED
+  PASS  July (no bills yet) cannot finalise, and the story says its item lines are waiting undated (rev 4: undated never blocks by itself)
+  PASS  July BILLWISE arrives: the lines are re-dated by the bills
+  PASS  July bills == its BILLWISE rows
+  PASS  August summary: the month's figure is the SUPPLIER-WISE total == Marg TOTAL (rev 4), bill-wise identical, no disagreement
+  PASS  August summary: item-wise is NET, not gross (rev 2)
+  PASS  August summary: bills that ITEMWISE 28-29 and BILLITEMWISE 28-31 BOTH carry are counted ONCE (later stamp wins)
+  PASS  BILLITEMWISE lines that arrived BEFORE their bill were linked to it once the bill came (rev 2)
+  PASS  August is provisional and cannot finalise: bills without item lines (the ONLY reason; the one short bill does not block, rev 4)
+  PASS  August fixture: one bill has item lines SHORT of the bill (13056, Rs 23) and no purchase return
+  PASS  August story: calm, names the gap and the one action, never 'mark each'
+  PASS  hub renders for the doctor
+  PASS  hub shows 'August 2026'
+  PASS  hub shows 'July 2026'
+  PASS  hub shows 'Feed health'
+  PASS  hub shows 'Stock verification'
+  PASS  hub shows 'Scan links'
+  PASS  hub shows 'Orders'
+  PASS  hub shows 'PROVISIONAL'
+  PASS  hub shows '(doctor)'
+  PASS  hub says the asset app is not reachable when assets.db is absent
+  PASS  month page renders
+  PASS  month page shows 'cannot finalise yet'
+  PASS  month page shows 'Marg purchase, August 2026'
+  PASS  month page shows 'supplier-wise, final for month-end'
+  PASS  month page shows 'Correct'
+  PASS  month page shows 'Wrong'
+  PASS  month page shows 'no item lines yet'
+  PASS  month page offers Correct/Wrong ONLY on the short bill (one pair of buttons)
+  PASS  month page has no FINALISE button while it cannot finalise
+  PASS  a bad month is refused
+  PASS  a viewer cannot give a verdict (403)
+  PASS  a viewer's month page carries no verdict buttons
+  PASS  WRONG without amount+reason -> 400
+  PASS  maker marks a bill WRONG with amount and reason
+  PASS  the WRONG amount is stored in paise
+  PASS  month page shows WRONG with the reason
+  PASS  hub counts the WRONG bill
+  PASS  the same bill can be set CORRECT again
+  PASS  verdicts are audited
+  PASS  a maker cannot finalise (403, doctor only)
+  PASS  the doctor is refused on August with the reasons listed
+  PASS  a month whose bills and lines reconcile CAN finalise
+  PASS  finalise refused while a bill is WRONG, naming it
+  PASS  the FINALISE button appears for the doctor when the month reconciles
+  PASS  the doctor finalises May
+  PASS  purchase_month records FINAL with the totals
+  PASS  a FINAL month page shows FINAL and the reopen for the doctor
+  PASS  verdicts are locked on a FINAL month (403)
+  PASS  a maker cannot reopen (403)
+  PASS  reopen without a reason -> 400
+  PASS  the doctor reopens with a reason
+  PASS  finalise and reopen are audited
+  PASS  hub shows FINAL/PROVISIONAL chips
+  PASS  scans page without assets.db says 'asset app not reachable' and nothing breaks
+  PASS  rematch without assets.db -> 503 assets_unreachable
+  PASS  rematch runs against the temp assets.db
+  PASS  rematch found 2 links (one EXACT, one PROBABLE), ignoring the non-Pharmacy scan
+  PASS  the EXACT link is on the right bill
+  PASS  scans page renders with both lists
+  PASS  scans page links to the asset app's bill
+  PASS  month page shows the scan link on the matched bill
+  PASS  hub counts unmatched scans and unscanned bills
+  PASS  a viewer's scans page has no Re-match button
+  PASS  feed ping stored
+  PASS  hub shows the pull ASLEEP in red with the time
+  PASS  hub turns green when the next ping says ok
+  PASS  feed with the wrong token -> 401
+  PASS  vendors with the wrong token -> 401
+  PASS  vendor pairs stored
+  PASS  the response never echoes a phone
+  PASS  the audit row never holds a phone
+  PASS  plan reads the newest snapshot
+  PASS  plan paced the three items from sale lines
+  PASS  plan is labelled PROVISIONAL (5 feed days < 28)
+  PASS  the vendor comes from the last purchase line's supplier
+  PASS  the item that is OUT is on the plan
+  PASS  the item with 500 on hand at 0.5/day is NOT reordered
+  PASS  cover_after is computed
+  PASS  rate per pack comes from the last purchase line
+  PASS  orders page renders for the doctor
+  PASS  orders page (doctor) shows 'PROVISIONAL until the stock verification has run a month'
+  PASS  orders page (doctor) shows 'Save as order'
+  PASS  orders page (doctor) shows 'Copy this order'
+  PASS  orders page (doctor) shows 'Order book'
+  PASS  orders page (doctor) shows 'tel:'
+  PASS  stock card on the hub reads the feed comparison
+  PASS  a VIEWER's orders page has NO phone, no tel: link, no copy block, no save button
+  PASS  a MAKER sees the phone but not the Save button
+  PASS  a maker cannot save an order (403)
+  PASS  the doctor saves the plan as a draft order
+  PASS  order lines persisted with a total
+  PASS  order moved to sent
+  PASS  an unknown status is refused
+  PASS  hub counts the open order
+  PASS  order create and status are audited
+  PASS  the order book shows the order with its status
+  PASS  archive holds SUPPLIERWISE 2026-07
+  PASS  archive holds BILLWISE 2026-08
+  PASS  archive holds BILLWISE 2026-09
+  PASS  July: item-wise NET == 47739566 paise (Rs 4,77,395.66, the S212 record)
+  PASS  July: the month's figure is Rs 4,76,393 supplier-wise (bill-wise identical)
+  PASS  July: no bill without lines, no line set without a bill
+  PASS  July: exactly 2 PURCHASE RETURNS (item-wise net above the bill), nothing short, 101 of 103 agree
+  PASS  July: a return is never asked a verdict
+  PASS  July CAN finalise with its two returns (rev 4: returns never block)
+  PASS  July story: 'July: Rs 4,76,393 (supplier-wise, final for month-end). 103 bills; 2 carry a purchase return; ready to finalise.'
+  PASS  September: item-wise NET == 7243737 paise (Rs 72,437.37)
+  PASS  September: Rs 72,438 (bill-wise stands in: no supplier-wise yet) and all 11 bills AGREE within Rs 1
+  PASS  September story says quietly that bill-wise stands in, and is ready to finalise
+  PASS  August: reports the 27-Aug gap as NO ITEM LINES (item-wise export missing for that date)
+  PASS  August: the story names the gap and the one action
+  PASS  August: agree + returns + short + no-lines == bills
+  PASS  hub shows Marg total (supplier-wise), Item-wise net, Returns, No lines, Wrong columns
+  PASS  hub carries no Agree / Differ column and never says 'mark each' or 'unverified'
+  PASS  hub July item-wise is the NET figure
+  PASS  hub September shows Rs 72,437 net beside Rs 72,438
+  PASS  July month page: 'Purchase returns (2)' section, each row 'purchase return ... (Marg)', no verdict buttons, FINALISE offered
+  PASS  August month page lists the NO ITEM LINES bucket, each row saying which date's export is missing
+  PASS  August month page: 'Item lines short of the bill (1)' with the plain wording
+  PASS  synthetic: item-wise is NET (399500), never gross (440000)
+  PASS  synthetic: buckets are 1 agree / 1 short (net below the bill) / 1 no lines, no return
+  PASS  synthetic: the short bill 802 is offered a verdict; 801 and 803 are not
+  PASS  finalise refused: names the no-lines bill 803 ONLY (the short bill 802 does not block, rev 4)
+  PASS  synthetic: the story mentions the short bill in plain words
+  PASS  synthetic: supplier-less BILLITEMWISE lines found their bills by (bill no, date)
+  PASS  synthetic: for 802 the LATER export's lines replaced the earlier ITEMWISE set -- it now AGREES, counted once
+  PASS  synthetic: the month can finalise
+  PASS  synthetic: 801 is now SHORT by Rs 5 -- offered a verdict, the month still CAN finalise (rev 4)
+  PASS  synthetic month page: the buttons sit on 801 alone, worded 'Item lines missing -- check the bill'
+  PASS  synthetic: 801 marked CORRECT leaves the short list open-count at 0 and the month can finalise
+  PASS  synthetic: the same bill marked WRONG blocks again (rule a kept)
+  PASS  synthetic: supplier-wise now carries every bill, so the month's figure is supplier-wise Rs 6,005
+  PASS  synthetic: bill 802 is listed as DISAGREE (bill-wise 2,000 vs supplier-wise 2,005) and offered a verdict
+  PASS  synthetic: rule (c) -- the two reports disagree by Rs 5 for the month, so FINALISE is refused, naming 802
+  PASS  synthetic month page: 'Bill-wise and supplier-wise disagree (1)' section
+  PASS  synthetic: a corrected supplier-wise export supersedes the wrong one; the reports agree again and the month can finalise
+  PASS  synthetic: the doctor finalises; purchase_month stores the month's figure and the NET item-wise total
+  PASS  a finalised month shows 'FINAL -- manoj, <when> IST' on the page and in the hub line
+  PASS  no page shows a gross figure without the word gross beside it (July gross 508,062 never appears on the hub)
+  PASS  archive holds the 04-Sep BILLWISE
+  PASS  04-Sep BILLWISE stored (supersedes the 02-Sep one of the same period)
+  PASS  archive holds the 04-Sep SUPPLIERWISE
+  PASS  04-Sep SUPPLIERWISE stored (supersedes the 02-Sep one of the same period)
+  PASS  archive holds the 04-Sep BILLITEMWISE
+  PASS  04-Sep BILLITEMWISE stored (supersedes the 02-Sep one of the same period)
+  PASS  rev 4 supersede-by-containment: the 30-Aug '01-29' bill-wise export is retired by a later full-month one
+  PASS  the 28-31 Aug BILLITEMWISE export is retired by the 04-Sep full-month one (period contained, later stamp)
+  PASS  August: 84 effective bills -- the bill Marg moved to its corrected supplier between 02 and 04 Sep is counted ONCE
+  PASS  August: Rs 3,54,879 supplier-wise, bill-wise identical, no disagreement
+  PASS  August: every bill has item lines now; 83 agree; ONE purchase return (bill 148); nothing short
+  PASS  August: the moved bill's OLD-key item lines (still live in the 27-Aug ITEMWISE export) are stale, not an orphan set
+  PASS  August is READY TO FINALISE with its one return (the owner's ruling)
+  PASS  August story: 'August: Rs 3,54,879 (supplier-wise, final for month-end). 84 bills; 1 carries a purchase return; ready to finalise.'
+  PASS  August month page: FINALISE offered to the doctor, bill 148 labelled 'purchase return ... (Marg)', no verdict buttons anywhere
+  PASS  hub: August row shows 3,54,879 and the story line verbatim
+  PASS  wording: 'hub' never says 'mark each', 'unverified' or 'Differ'
+  PASS  wording: 'month/2026-08' never says 'mark each', 'unverified' or 'Differ'
+  PASS  wording: 'month/2026-07' never says 'mark each', 'unverified' or 'Differ'
+  PASS  wording: 'month/2026-09' never says 'mark each', 'unverified' or 'Differ'
+  PASS  wording: 'month/2025-06' never says 'mark each', 'unverified' or 'Differ'
+  PASS  the doctor finalises August; purchase_month stores the supplier-wise figure
+  PASS  hub August line now reads 'FINAL -- manoj, <when> IST'
+  PASS  bw_amount_p / sw_amount_p exist on purchase_bill and are filled for every effective bill (rev 4 columns, added on first request)
+  PASS  nobody signed in -> the hub is refused
+  PASS  signed in with no medical role -> refused (403)
+  PASS  schema was created lazily, never at import (F-303)
+  PASS  the archive holds the fifteen Jul-Sep exports the box was fed
+  PASS  oldest-first: all fifteen stored as new (nothing arrives older than a live export that contains it)
+  PASS  box order: 01-29 Aug BILLWISE and 28-31 Aug BILLITEMWISE are superseded; the full-month ones are live
+  PASS  box order: the rev-4 columns were added on the first request and back-filled
+  PASS  box order, August: 84 bills, Rs 3,54,879 supplier-wise, every bill has lines, 83 agree, one return (148), nothing stray left over
+  PASS  box order, August: the moved bill (02 of 18-Aug) found its lines under the OLD supplier key (stray set, rev 4)
+  PASS  box order, August story is exactly the line the hub will show
+  PASS  box order, July story is exactly the line the hub will show
+  PASS  box order, September: bill-wise stands in, 11 bills agree, ready to finalise
+  PASS  box order: the hub renders with all three stories and none of the banned wording
+  PASS  box order: every month page renders 200
+  PASS  unit word: strips for pack_size>1
+  PASS  unit word: bottle for ML, tube for GM, unit otherwise
+  PASS  rounding: 1..10 strips -> 10; 11 -> 20; 47 -> 50; 50 -> 50; 0 -> 0
+  PASS  rounding: bottles keep the engine's quantity
+  PASS  wa digits: 10-digit -> 91 prefix; +91 kept; junk -> empty
+  PASS  WhatsApp text is EXACTLY header, blank line, item lines -- nothing else
+  PASS  wa.me url carries the number and the encoded text
+  PASS  staff page renders for a viewer (amir)
+  PASS  staff page shows 'Order medicines'
+  PASS  staff page shows 'Stock now'
+  PASS  staff page shows 'Order qty'
+  PASS  staff page shows 'Send on WhatsApp'
+  PASS  staff page shows 'Call'
+  PASS  staff page shows 'Orders sent'
+  PASS  staff page shows 'Print A4'
+  PASS  staff page never shows 'Rate'
+  PASS  staff page never shows 'Per day'
+  PASS  staff page never shows 'Cover after'
+  PASS  staff page never shows 'cadence'
+  PASS  staff page never shows 'confidence'
+  PASS  staff page never shows 'approx'
+  PASS  staff page never shows '₹'
+  PASS  staff page never shows 'Save as order'
+  PASS  staff page never shows 'Copy this order'
+  PASS  staff page never shows 'confirm</span>'
+  PASS  staff page never prints the phone number as text
+  PASS  staff page has the tel: link for the stockist
+  PASS  staff page shows the OUT item with the engine's rounded quantity
+  PASS  staff page does NOT show the item the engine did not reorder
+  PASS  a VIEWER may send: 200 with an order id and a wa.me url
+  PASS  the order is written as SENT by amir with note whatsapp
+  PASS  one new order, its lines in strips with pack_size and units
+  PASS  the send is audited as order_sent_whatsapp without a phone in it
+  PASS  the wa.me text is the dictated header + this order's lines
+  PASS  a stockist with no number -> 409 and NO order written
+  PASS  all-zero lines -> 400
+  PASS  the sent order appears in 'Orders sent' with a Print A4 button
+  PASS  the A4 PDF renders (200, application/pdf, %%PDF header, %%EOF)
+  PASS  the PDF carries the header, the stockist and the item -- and no rupee figure
+  PASS  a missing order's PDF -> 404
+  PASS  signed out: staff page 401, send 401, pdf 401
+  PASS  the doctor's Orders page still shows the admin detail and the WhatsApp-sent order in its book
+  PASS  the doctor's nav now carries 'Order medicines'
+  PASS  engine: every strip line is a multiple of 10 and at least 10
+  PASS  engine: the value follows the (rounded) quantity
+  PASS  doctor's Orders page: column is 'Order qty', quantities carry the unit word, copy text reads 'Item — qty strips'
+  PASS  doctor's page and staff page agree on the quantity
+  PASS  the doctor opens the phone book (no setting row yet: doctor only)
+  PASS  darpan is REFUSED while no setting names him (fail-closed)
+  PASS  darpan opens the book once named; the nav shows Phone book
+  PASS  the book lists ZZTEST STOCKIST with its number and 'from Marg / manojz', no bank details
+  PASS  amir (not named) is refused the page and the API, and sees no Phone book link
+  PASS  darpan adds a second number (normalised to 10 digits)
+  PASS  the audit row carries last-4 only, never the number
+  PASS  a phone that is not 10 digits is refused
+  PASS  after a server edit the manojz push leaves the number alone (source='server' wins)
+  PASS  staff page shows Call 1 and Call 2 for a stockist with two numbers
+  PASS  darpan saves bank details -> UNVERIFIED
+  PASS  the bank audit carries field names and last-4 only
+  PASS  a wrong IFSC is refused
+  PASS  darpan cannot verify
+  PASS  darpan's book shows UNVERIFIED, 'waits for Dr Manoj'; rev 12: the TABLE shows the FULL account number (the owner, 05-Sep: this page is the NEFT source)
+  PASS  rev 12: rows are addressed by index, not by a quoted name in the attribute (no quoting hazard)
+  PASS  the doctor's book offers Verify
+  PASS  the doctor verifies -> VERIFIED with who/when
+  PASS  the doctor adds a new stockist with bank details -> VERIFIED by the act
+  PASS  adding the same name twice is refused
+  PASS  darpan modifies one bank field on a VERIFIED record -> back to UNVERIFIED
+  PASS  saving identical bank details changes nothing
+  PASS  a new stockist without a first phone is refused
+  PASS  signed out: book 401, api 401
+  PASS  no bank value, no full phone in any audit row
+  PASS  FRESH DB, no vendors push ever: the staff page renders 200 (the columns are created on the first request of any kind)
+  PASS  FRESH DB: phone2 and bank_status exist after that first request
+  PASS  a SENT order shows Arrived and Different on the staff page
+  PASS  second order sent; sent_by recorded
+  PASS  Arrived (one tap): order RECEIVED by amir, every line supplied = asked, nothing short
+  PASS  receiving it twice is refused (409)
+  PASS  the receipt is audited
+  PASS  Different: ITEM 1 recorded short (asked 10, got 0), ITEM 0 as asked; order RECEIVED
+  PASS  a partial supply (3 of 10) without the tick is recorded as short anyway
+  PASS  carried shorts: ZZTEST ITEM 1 is carried from the LATEST received order (shortfall 7)
+  PASS  the plan's ITEM 1 line carries the shortfall and says 'carried', a multiple of 10 (rev 9: received stock now counts, so the base need may be nil)
+  PASS  RECEIVED orders show 'Scan the bill' with the note to type, and the short count
+  PASS  the staff page explains Arrived / Different
+  PASS  after re-ordering ITEM 1 from the same stockist the carry is consumed
+  PASS  signed out: arrive -> 401
+  PASS  opening the hub remembers the scans' fingerprint
+  PASS  opening again with no change does NOT re-match (cheap)
+  PASS  a NEW scan landing is picked up on the next page opening: one more re-match
+  PASS  a push that stores re-matches at once (audit who='push')
+  PASS  stock in transit: the RECEIVED ZZTEST quantities not yet in Marg are counted
+  PASS  the plan's ITEM 0 line says 'not yet in Marg — counted as stock' (or the item no longer needs ordering)
+  PASS  the ZZTEST items (in the one and only snapshot = the baseline) are NOT logged as new
+  PASS  a brand-new shelf item and a first-bought item are logged; the old ZZTEST items are not
+  PASS  running again logs nothing more (idempotent, a row is written once)
+  PASS  the log says where each was first seen, with the stockist for the bought one
+  PASS  the hub shows the New items card with the count and both names
+  PASS  push_salts reads the REAL work list: rename 2 (the note line is not a task) · create 38 · change 77 · waiting 7 · cleanup 1 = 125; 196 names
+  PASS  push_salts finds and reads Marg's fresh SALT WISE ITEM LIST (04-Sep): ~375 items
+  PASS  the work list AND Marg's list ride the vendors door: all tasks stored, nothing kept yet, Marg items stored
+  PASS  a note line (no second column) is not stored as a task
+  PASS  the direct /api/salts door works too; a wrong token -> 401
+  PASS  sheet 4 'Already correct' is NOT a task (68 items not asked again)
+  PASS  amir is refused before the setting names him (fail-closed)
+  PASS  amir opens the work list: five sections in order, Download Excel, Print A4, 0 of N done; nav shows Salt list
+  PASS  amir sees 'waits for Dr Manoj' on the waiting rows, no answer box
+  PASS  the Marg says column is there, with the list's date and 'Marg: not yet' / 'Marg: done' chips and the current salt on waiting rows
+  PASS  on the real lists Marg confirms exactly the 2 changes + 1 create done as at 04-Sep (3 in all)
+  PASS  amir ticks a change row DONE: recorded with his name, audited
+  PASS  amir cannot answer a waiting row (doctor only)
+  PASS  the doctor sees the answer box with the salt datalist on the waiting rows
+  PASS  the doctor answers a waiting row: saved with his name, the name joins the list
+  PASS  an answer on a non-waiting row is refused (409); an empty answer 400; unknown id 404
+  PASS  a later push keeps the tick and the answer (kept=2), overwrites neither
+  PASS  the page now reads 1 of N ticked, the done row struck through, the answer shown in green
+  PASS  Excel download: a zip, spreadsheet content type
+  PASS    openpyxl opens it: 5 sheets, the change sheet has header + 77 rows, the DONE mark is in it, the waiting sheet carries the doctor's answer
+  PASS  A4 PDF renders with the five sections and [x] / [ ] marks
+  PASS  darpan (not named) cannot open the list, the Excel or the PDF
+  PASS  signed out -> 401
+  PASS  _bank_name reads the bank off the IFSC; unknown -> ''
+  PASS  the book page carries no popup at all: no prompt(), confirm() or alert() in the book's own script
+  PASS  every row has its three inline slots (phones, bank, verify), hidden until tapped
+  PASS  the doctor's Verify is an inline yes/no, not a confirm()
+  PASS  the add form reports inline (msg-add), not alert()
+  PASS  full account number and IFSC in the table, the bank named from the IFSC
+  PASS  a row from the NEFT import says so, and a row with no phone says 'no number yet' + 'add numbers'
+  PASS  the page counts the stockists without a number
+  PASS  BOOKV (the index -> name list) is served beside BOOK
+  PASS  darpan also sees the full account number (the three editors are the NEFT preparers), but no Verify button
+  PASS  the inline phones form's payload (action=phones) still lands through the unchanged API for a NEFT-only row
+  PASS  ...and that row keeps its VERIFIED bank status (phones and bank are separate actions)
+  PASS  amir is still refused the book (rev 12 changed the page, not the gate)
+  PASS  no full account number in any audit row after rev 12 either
+
+353 PASS  0 FAIL

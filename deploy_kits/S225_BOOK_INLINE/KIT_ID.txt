@@ -1,0 +1,1 @@
+S225_BOOK_INLINE -- purchase_app.py rev 12 (the inline phone book, full bank details) -- built 05-Sep-2026 from the rev-11b base ed5aa92631b9e87466d9942cb5ead14c

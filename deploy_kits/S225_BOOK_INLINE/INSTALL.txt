@@ -1,0 +1,17 @@
+S225_BOOK_INLINE -- the phone book, rev 12 of the purchase app (05-Sep-2026, the owner):
+"full bank details that display correctly in page, and a bank detail addition/modification opens an inline form and not a popup".
+
+What changes: the book shows the FULL account number and IFSC to its three editors (Dr Manoj, Darpan, Shavez -- the page is the
+bulk-NEFT source), names the bank from the IFSC, labels the rows that came from the NEFT records, counts the stockists still
+without a phone number, and every add / edit numbers / edit bank / verify is an INLINE form in the row. No prompt(), confirm()
+or alert() anywhere on the book page. The API, its rules (D370) and every other page are untouched. Selftest: 353 PASS 0 FAIL
+(339 regression + 14 rev-12); the JS parses and its click paths ran in a DOM stand-in.
+
+ONE LINE on the VPS, F-321 shape (probe-copy walk; the live folder is written only after the walk is green; rollback BY PIN to rev 11b):
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S225_BOOK_INLINE && md5sum -c SUMS.md5 --quiet && rm -rf /tmp/s225bi_probe && mkdir -p /tmp/s225bi_probe && \cp -r /root/finance/*.py /root/finance/*.sql /tmp/s225bi_probe/ && (\cp -r /root/finance/finance_ui /tmp/s225bi_probe/ 2>/dev/null; true) && \cp purchase_app.py walk_book_inline_s225.py /tmp/s225bi_probe/ && FIN_DIR=/tmp/s225bi_probe FIN_DB=/root/finance/finance.db /root/wa/venv/bin/python3 -B /tmp/s225bi_probe/walk_book_inline_s225.py && \cp /root/finance/purchase_app.py /root/finance/purchase_app.py.bak_S225bi_$(date +%Y%m%d-%H%M%S) && \cp purchase_app.py /root/finance/ && systemctl restart clinic-finance.service && sleep 3 && (systemctl is-active --quiet clinic-finance.service && echo "UP -- inline phone book" && curl -s localhost:8106/finance/purchase/api/healthz && echo && md5sum /root/finance/purchase_app.py || (echo "SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; md5sum /root/finance/purchase_app.py.bak_S225bi_* | awk '$1=="ed5aa92631b9e87466d9942cb5ead14c"{print $2}' | head -1 | xargs -I{} \cp {} /root/finance/purchase_app.py; systemctl restart clinic-finance.service; sleep 4; systemctl is-active clinic-finance.service; md5sum /root/finance/purchase_app.py; journalctl -u clinic-finance.service -n 12 --no-pager | tail -12))
+
+Expected pin: 3adad7f983228ea3bbb5ea635c8ce872.
+
+Then open:
+https://followup.dr-manoj.in/finance/purchase/page/book
