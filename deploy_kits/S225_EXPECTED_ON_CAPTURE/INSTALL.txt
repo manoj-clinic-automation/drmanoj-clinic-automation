@@ -1,0 +1,36 @@
+S225_EXPECTED_ON_CAPTURE -- our computed stock figure pushed when the sale report lands, not only at 22:30.
+
+Why (06-Sep 01:30 IST): the drift page said "Our computed figure: never received". The 05-Sep 22:30 nightly never ran --
+manojz was asleep ~21:38-01:04 (watchdog log) -- and the catch-up run of 05-Sep 08:46 hung at step 1 with no output.
+Marg's side has pushed on capture since S225 (MargSnapshotOnCapture); this does the same for our side. Offline, the
+computation for 05-Sep cross-checks against Marg's own 05-Sep closing at 372 of 373 items exact (1 differs: BIO D3 MAX +7).
+
+Runs ON MANOJZ. The two files are already placed in D:\Downloads\margsync\MargPull\ by the assistant (this kit is the
+record copy; hashes in SUMS.md5). REV 2 (06-Sep 02:30, the owner: "Amir adds a few purchases and exports, and then the
+server should apply immediately"): it also watches for a new PURCHASE_* export and, when one lands, runs the S224 kit's
+push_purchases.py FIRST (purchase books current on the server) and then PUSH_STOCK_DAILY.bat (recompute). The .bat holds
+the pinned baseline (03-09-2026) and the refusal check in one place -- nothing is duplicated. Selftest 12/12.
+
+ONE line registers the scheduled task -- IN A POWERSHELL WINDOW (Start -> type PowerShell), pasted bare, NOT wrapped in
+powershell -Command (F-314 battery flags; 10-minute time limit so a hung run can never block the next):
+
+$a=New-ScheduledTaskAction -Execute 'D:\Downloads\margsync\MargPull\EXPECTED_ON_CAPTURE.bat'; $t=New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 15) -RepetitionDuration (New-TimeSpan -Days 3650); $s=New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Minutes 10); Register-ScheduledTask -TaskName 'MargExpectedOnCapture' -Action $a -Trigger $t -Settings $s -Force | Out-Null; Get-ScheduledTask -TaskName 'MargExpectedOnCapture' | Select-Object TaskName,State
+
+Then, still in PowerShell, ONE line: stop the nightly's stuck instance (if any) and give it the same 10-minute limit so a
+hang can never again swallow the next night's run:
+
+Get-ScheduledTask | Where-Object {$_.TaskName -like '*nightly*'} | ForEach-Object { Stop-ScheduledTask -TaskName $_.TaskName -ErrorAction SilentlyContinue; $s=New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Minutes 30); Set-ScheduledTask -TaskName $_.TaskName -Settings $s | Out-Null; Get-ScheduledTask -TaskName $_.TaskName | Select-Object TaskName,State }
+
+Its log:  D:\Downloads\margsync\_analysis\expected_on_capture_log.txt
+The page:  https://followup.dr-manoj.in/finance/stock/page/drift
+
+06-Sep 03:00 -- the pasted PowerShell line opened a window that closed before anything could be read. So, instead of the
+two lines above, ONE DOUBLE-CLICK (the window stays open and shows both tables):
+
+D:\Downloads\margsync\MargPull\REGISTER_EXPECTED_ON_CAPTURE.bat
+
+06-Sep 02:50 -- "for the morning flow they will not wait at all": PULL_FROM_MEDICAL.bat (the 10-minute pull, live on manojz) now
+runs snapshot_on_capture.py and expected_on_capture.py itself at the end of every cycle, right after the archive and the outbox
+-- so whatever a cycle captures is on the server before the cycle ends (worst case 10 minutes after Amir's export, typically 5).
+Anchor patch, CRLF preserved, backup PULL_FROM_MEDICAL.bat.bak_S225_* beside it. Was 2e201d470c579f0778ea7e3d7c91974a, now
+39bd6ac8ba7333f0e4182812fc2d2702 (record copy in this kit). The two 15-minute tasks remain as backstops; nothing else changed.

@@ -1,0 +1,1 @@
+S225_EXPECTED_ON_CAPTURE -- compute and push OUR stock figure when the sale report lands (manojz, every 15 min). Built 06-Sep-2026 01:4x IST. Record copy; the live files are in D:\Downloads\margsync\MargPull\.
