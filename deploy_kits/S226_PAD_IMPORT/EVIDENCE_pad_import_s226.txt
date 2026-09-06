@@ -1,0 +1,137 @@
+== S226 PAD IMPORT -- the sheet becomes the count ==
+  ok   the page opens with the readiness lines   Sale report: current to 05-09-2026, last bill A003412 (16 bi
+  ok   it says what it read   What was read
+Against the shop list as on 06-09-2026 — 373 items. The sheet held
+  ok   ...the right number counted   40 counted 33 agree with Marg 7 differ 333 not counted
+  ok   ...and that the rest were not counted   40 counted 33 agree with Marg 7 differ 333 not counted
+  ok   the differences are listed with a rupee value   What was read
+Against the shop list as on 06-09-2026 — 373 items. The sheet held 373 rows.
+40
+counted
+33
+agree with Marg
+  ok   ...and it admits which ones it could not price   What was read
+Against the shop list as on 06-09-2026 — 373 items. The sheet held 373 rows.
+40
+counted
+33
+agree with Marg
+7
+differ
+333
+not counted
+Short by value: Rs 525.00 · over: Rs 0.00
+Recording go
+  ok   nothing is blocked on a clean sheet
+  ok   ...but the button is still shut until it knows who counted
+  ok   the button opens once all four are given
+  ok   IT RECORDS, AND SAYS WHAT IT RECORDED   Recorded as count #1 — 7 difference(s), finding SF-2026-001.
+The sheet is now in the ledger. It cann
+  ok   the ledger holds it, all forty   (1, 40, 373, 'A003425', 'walk')
+  ok   ...against the whole shop, not just the sheet   (1, 40, 373, 'A003425', 'walk')
+  ok   the finding is sealed
+  ok   the data horizon is frozen with it
+  ok   the differences raised match what the preview showed   (7, '40 counted 33 agree with Marg 7 differ 333 not counted')
+  ok   ...and a difference carries Marg's own figure, not the sheet's claim   ('ACILOC 300', 40, 37, -3)
+  ok   it cannot be recorded twice from that screen
+  ok   A SHEET WITH ROWS IT CANNOT USE IS NOT REFUSED   What was read
+Against the shop list as on 06-09-2026 — 373 items. The sheet held 373 rows.
+40
+counted
+33
+agree with Marg
+7
+differ
+333
+not counted
+Short by value
+  ok   ...it says what will go to the follow-up   What was read
+Against the shop list as on 06-09-2026 — 373 items. The sheet held 373 rows.
+40
+counted
+33
+agree with Marg
+7
+differ
+333
+not counted
+Short by value: Rs 525.00 · over: Rs 0.00
+Recording goes ahead. 3 row(s) could not be used as written and 333 item(s) were not counted. They will be on a 
+  ok   ...it still names the unknown item and its row
+  ok   ...and the negative, and the half tablet
+  ok   ...and the record button IS offered
+  ok   IT RECORDS THE CLEAN ROWS   Recorded as count #2 — 7 difference(s), finding SF-2026-002.
+The sheet is now in
+  ok   ...forty clean rows, the three bad ones kept out   40
+  ok   ...AND HANDS THE RESULT SHEET BACK THEN AND THERE   Recorded as count #2 — 7 difference(s), finding SF-2026-002.
+The sheet is now in the ledger. It cannot be recorded twice from here.
+The result sheet is ready. Summary, the differences, 3 row(s) sent b
+  ok   ...the rows it could not use are KEPT, figure and all, not lost   [('SOMETHING NOBODY KNOWS', 7, 'this name is not in the shop list -- correct it'), ('CIPCAL HD', None, 'a negative count: -3'), ('CIXCEF O', None, 'the figure is not a whole number: 2.5')]
+  ok   the result downloads as a real spreadsheet   (200, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  ok   FIVE TABS, in the approved order   ['SUMMARY', 'DIFFERENCES', 'NOT COUNTED', 'SENT BACK TO FIX', 'MATCHED']
+  ok   SUMMARY: who, when, bill, the four readiness lines, the count in numbers   SANJEEVNI MEDICOS -- STOCK CHECK RESULT | 
+Finding SF-2026-002  -  count #2 | 
+PART OF COUNT #2  (06-09-2026)  -- do not change this line | 
+ | 
+Date and time | 06-09-2026 07:05 IST
+Counted by | Darpan
+Entered by | Amir
+Recorded by | walk
+Marg stock as on | 06-09-2026  (processed here 06-09-2026 03:10)
+After bill | A003426 dated 2026-09-06
+ | 
+READ FIRST -- KNOW THE DATA | 
+Sale report | Sale report: current to 05-09-2026, last bill A003412 (16 bills that day).
+Purchases | Purchases: current to 03-09-2026 -- 4 bills that day, Rs 71,314.50.
+Marg's closing stock | Marg's closing stock: as on 05-
+  ok   SUMMARY: no VALUE AT MRP block -- removed at the owner's word
+  ok   SUMMARY: says which count it belongs to
+  ok   DIFFERENCES: exactly the approved columns   ['ITEM', 'PACKING', 'MARG STOCK (strips & tabs)', 'PHYSICAL COUNT (strips & tabs)', 'DIFFERENCE (strips & tabs)', 'AT MRP', "STAFF'S REASON", "CHECKER'S CAUSE", 'DECISION']
+  ok   DIFFERENCES: the grouping row says which side is which   ("AS PER MARG (the computer's stock)", 'PHYSICAL STOCK (counted on the shelf)', 'DIFFERENCE = physical minus Marg')
+  ok   DIFFERENCES: a row reads in strips and tabs, shortage as 'short ...'   ['ACILOC 300', '1*20', '2 strips', '1 strip 17 tablets', 'short 3 tablets', '-Rs 75.00']
+  ok   DIFFERENCES: seven rows, no bare numbers
+  ok   NOT COUNTED: names only, with shaded cells to fill -- no Marg figure   ['#', 'ITEM', 'PACKING', 'STRIPS', 'LOOSE', 'TOTAL UNITS', 'REMARKS']
+  ok   NOT COUNTED: exactly the 333 items nobody reached, none that was accepted   333
+  ok   NOT COUNTED: the fill cells are shaded
+  ok   SENT BACK TO FIX: the three rows, name as written, what to fix   [('SOMETHING NOBODY KNOWS', 'this name is not in the shop list -- correct it  (you wrote 7)'), ('CIPCAL HD', 'a negative count: -3'), ('CIXCEF O', 'the figure is not a whole number: 2.5')]
+  ok   MATCHED: the 33 that agreed, in strips and tabs
+  ok   the whole workbook opens in a second, independent reader
+  ok   THE FILLED WORKBOOK IS RECOGNISED AS PART OF COUNT #2   What was read
+Against the shop list as on 06-09-2026 — 373 items. The sheet held 336 rows.
+3
+counted
+0
+agree with Marg
+3
+differ
+373
+not counted
+Short by value: Rs 13,350.00 · over: Rs 175.00
+This is a
+  ok   ...it read BOTH fill-in tabs: three figures   3 counted 0 agree with Marg 3 differ 373 not counted
+  ok   ...and it records as part of it   Recorded as count #3 — part of count #2 — 3 difference(s), finding SF-2026-003.
+The sheet is now in the ledger. It canno
+  ok   ...the total was settled from the SHOP's pack size, not the sheet   (5, 5, 1)
+  ok   ...the corrected name landed as the real item
+  ok   ...and the NEXT result for count #2 shows the true state: 330 not counted, 1 still to fix   (330, 1)
+  ok   ...and the one still open is the half-tablet row, by its ORIGINAL row, not its name   [('CIXCEF O',)]
+  ok   ...its summary counts the family together: 43 accepted   SANJEEVNI MEDICOS -- STOCK CHECK RESULT | 
+Finding SF-2026-002  -  count #2 | 
+PART OF COUNT #2  (06-09-2026)  -- do not change this line | 
+ | 
+Date and time | 06-09-2026 07:05 IST
+Counted by | Darpan
+Entered by | Amir
+Recorded by | walk
+Marg stock as on | 06-09-2026  (processed here 06-09-2026 03:10)
+After bill | A003426 dated 2026-09-06
+ | 
+READ FIRST -- KNOW THE DATA | 
+Sale report | Sale repo
+  ok   A FRESH PAD IS THERE ON DEMAND   200
+  ok   ...with every item and no figures   (373, 0)
+  ok   A FILE SWAPPED AFTER THE CHECK IS REFUSED   This is not the file that was checked a moment ago. Look at it again before recording it.
+  ok   ...and still nothing extra was written
+  ok   no javascript error anywhere in that
+
+54 ok, 0 FAILED

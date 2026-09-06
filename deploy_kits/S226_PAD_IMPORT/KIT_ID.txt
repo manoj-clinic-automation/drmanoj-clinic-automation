@@ -1,0 +1,5 @@
+S226_PAD_IMPORT
+Session 226 · 06-Sep-2026
+The filled stock count pad becomes the count; what cannot be used comes back as a
+follow-up sheet, then and there; a fresh pad is there on demand. Four files:
+stock_app.py (replaced) · padreader.py, padwriter.py, stock_pad.html (NEW).

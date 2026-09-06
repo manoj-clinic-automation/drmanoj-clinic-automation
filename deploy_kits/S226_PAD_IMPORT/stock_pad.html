@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Record the counted sheet</title>
+<style>
+:root{--ink:#1a1a1a;--muted:#5b5b5b;--line:#d9d9d9;--bg:#fafafa;--sunk:#f0f0f0;
+      --warn:#8a5300;--bad:#8c1d18;--ok:#14532d;--accent:#1a1a1a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+     font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;
+      margin-bottom:14px}
+h1{font-size:20px;margin:0 0 6px} h2{font-size:16px;margin:0 0 8px}
+.muted{color:var(--muted);font-size:13.5px}
+.bad{color:var(--bad)} .ok{color:var(--ok)} .warn{color:var(--warn)}
+button,input{font:inherit}
+input[type=text],input[type=date]{padding:10px 11px;border:1px solid var(--line);
+  border-radius:8px;width:100%}
+button{padding:11px 16px;border:1px solid var(--line);border-radius:9px;background:#fff;
+  cursor:pointer}
+button.primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+button[disabled]{opacity:.45;cursor:not-allowed}
+.tiles{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.tile{flex:1 1 130px;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.tile b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.tile span{font-size:12.5px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:6px}
+th{font-size:12px;text-transform:uppercase;color:var(--muted);text-align:left}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.stop{background:#8c1d18;color:#fff;padding:12px 14px;border-radius:10px;font-weight:600;
+      line-height:1.5;margin-bottom:12px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:3px}
+details{margin-top:8px} summary{cursor:pointer;font-size:14px}
+</style></head>
+<body><div class="wrap">
+
+<div class="card" id="rdy-card">
+  <h2 style="margin:0 0 6px">Read first &mdash; know the data</h2>
+  <div id="rdy">reading&hellip;</div>
+</div>
+
+<div class="card">
+  <h1>Record the counted sheet</h1>
+  <div class="muted">Choose the filled stock count pad. Nothing is recorded until you
+    have seen what was read and pressed the button at the bottom &mdash; and what is
+    recorded is exactly the file you looked at.</div>
+  <p style="margin:12px 0 0"><input type="file" id="file" accept=".xlsx,.xlsm"></p>
+  <p class="muted" id="fname"></p>
+  <p class="muted" style="margin-top:10px">Need a blank pad for a new count?
+    <a id="freshpad" href="#">Download today&rsquo;s pad</a> &mdash; the shop&rsquo;s item list
+    as it stands, with no figures in it.</p>
+</div>
+
+<div id="out"></div>
+
+<div class="card" id="confirm" style="display:none">
+  <h2>Who counted it, and against which bill</h2>
+  <div class="fields">
+    <div><label>Counted by</label><input type="text" id="cby" autocomplete="off"></div>
+    <div><label>Entered by</label><input type="text" id="eby" autocomplete="off"></div>
+    <div><label>After bill number</label><input type="text" id="bill" placeholder="A003425"
+         autocapitalize="characters" autocomplete="off"></div>
+    <div><label>Bill date</label><input type="date" id="bdate"></div>
+  </div>
+  <p style="margin:14px 0 0"><button class="primary" id="go" disabled>Record this count</button></p>
+  <p class="muted" id="said"></p>
+</div>
+
+</div>
+<script>
+/* ---- S226 READINESS HEADER -------------------------------------------------
+   The owner, 06-Sep-2026: this page must OPEN with the data-readiness lines,
+   before any result. "Read first, know the data." A difference is only
+   readable against the horizon of the books that produced it. Self-contained
+   on purpose: its own escaper, its own styles, its own failure text, so it
+   can be dropped into any stock page without depending on that page. */
+function rdyEsc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function rdyMoney(p){
+  var n=Math.round(Number(p||0))/100, s=(n<0?"-":""), a=Math.abs(n).toFixed(2);
+  var w=a.split(".")[0], d=a.split(".")[1], t=w.length>3?w.slice(-3):w, hd=w.length>3?w.slice(0,-3):"";
+  var parts=[]; while(hd.length>2){parts.unshift(hd.slice(-2));hd=hd.slice(0,-2);}
+  if(hd)parts.unshift(hd);
+  return s+"Rs "+(parts.length?parts.join(",")+","+t:t)+"."+d;
+}
+function rdyRender(el, R){
+  if(!el) return;
+  if(!R || R.ok===false){
+    el.innerHTML='<div style="border-left:3px solid #8a5300;background:#fffaf1;'
+      +'padding:9px 12px;border-radius:0 8px 8px 0"><b>The readiness lines could '
+      +'not be read.</b><div>Nothing below is wrong because of that — but it is '
+      +'not known here how far the sales, the purchases and the stock export '
+      +'run. Check that in Marg before relying on any difference on this page.'
+      +'</div></div>';
+    return;
+  }
+  var h='<ol style="margin:0 0 2px 18px;padding:0">';
+  (R.lines||[]).forEach(function(t){h+='<li style="margin:3px 0">'+rdyEsc(t)+'</li>';});
+  h+='</ol>';
+  var p=R.purchase||{}, b=p.bills||[];
+  if(b.length){
+    h+='<div style="font-size:13.5px;color:#5b5b5b;margin:9px 0 4px">The bills of '
+      +rdyEsc(rdyDmy(p.bill_date))+', as the Bill-wise purchase report shows them:</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13.5px">'
+      +'<thead><tr><th style="text-align:left;padding:4px 6px;border-bottom:1px solid #d9d9d9">Supplier</th>'
+      +'<th style="text-align:left;padding:4px 6px;border-bottom:1px solid #d9d9d9">Bill no</th>'
+      +'<th style="text-align:right;padding:4px 6px;border-bottom:1px solid #d9d9d9">Amount</th></tr></thead><tbody>';
+    b.forEach(function(x){
+      h+='<tr><td style="padding:4px 6px;border-bottom:1px solid #eee">'+rdyEsc(x.supplier)
+        +'</td><td style="padding:4px 6px;border-bottom:1px solid #eee">'+rdyEsc(x.bill_no)
+        +'</td><td style="padding:4px 6px;border-bottom:1px solid #eee;text-align:right;'
+        +'font-variant-numeric:tabular-nums">'+rdyEsc(rdyMoney(x.amount_p))+'</td></tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  (R.warnings||[]).forEach(function(w){
+    h+='<div style="border-left:3px solid #8a5300;background:#fffaf1;padding:8px 11px;'
+      +'border-radius:0 8px 8px 0;margin-top:8px">'+rdyEsc(w)+'</div>';
+  });
+  if(R.frozen===false && R.note)
+    h+='<div style="font-size:13px;color:#5b5b5b;margin-top:7px">'+rdyEsc(R.note)+'</div>';
+  el.innerHTML=h;
+}
+function rdyDmy(s){
+  s=String(s||"").slice(0,10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(s)?(s.slice(8,10)+"-"+s.slice(5,7)+"-"+s.slice(0,4)):s;
+}
+/* ---- end S226 READINESS HEADER --------------------------------------------- */
+var API=location.pathname.replace(/\/page\/pad\/?$/,"");
+function $(i){return document.getElementById(i);}
+var PREVIEW=null, FILE=null;
+function money(p){ return p==null? "\u2014" : rdyMoney(p); }
+
+$("file").addEventListener("change", function(){
+  FILE = this.files && this.files[0]; PREVIEW=null; $("go").disabled=true;
+  $("confirm").style.display="none"; $("said").textContent="";
+  if(!FILE){ $("out").innerHTML=""; $("fname").textContent=""; return; }
+  $("fname").textContent = FILE.name;
+  $("out").innerHTML='<div class="card">Reading the sheet&hellip;</div>';
+  var fd=new FormData(); fd.append("file", FILE);
+  fetch(API+"/api/pad/preview",{method:"POST",body:fd})
+    .then(function(r){return r.json();}).then(show)
+    .catch(function(e){ $("out").innerHTML='<div class="card bad">Could not read it: '
+      +rdyEsc(""+e)+"</div>"; });
+});
+
+function show(j){
+  if(!j.ok){
+    $("out").innerHTML='<div class="card"><div class="stop">'+rdyEsc(j.message||j.error)
+      +"</div></div>";
+    return;
+  }
+  PREVIEW=j;
+  var h='<div class="card"><h2>What was read</h2>';
+  h+='<div class="muted">Against the shop list as on <b>'+rdyEsc(rdyDmy(j.as_on))
+    +"</b> &mdash; "+j.items_in_shop+" items. The sheet held "+j.rows_in_sheet+" rows.</div>";
+  h+='<div class="tiles">'
+    +tile(j.counted,"counted")+tile(j.agreed,"agree with Marg")
+    +tile(j.differed,"differ")+tile(j.not_counted,"not counted")+"</div>";
+  h+='<div>Short by value: <b class="bad">'+money(j.short_p)+"</b>"
+    +' &middot; over: <b>'+money(j.over_p)+"</b>";
+  if(j.unpriced) h+=' <span class="muted">(&mdash; '+j.unpriced
+    +" of the differences have no rate on record, so they carry no rupee value)</span>";
+  h+="</div>";
+
+  if(j.part_of){
+    h+='<div style="margin-top:10px;padding:9px 12px;border:1px solid var(--line);border-radius:8px">'
+      +"This is a <b>follow-up sheet for count #"+j.part_of+"</b>. What is recorded from it "
+      +"joins that count.</div>";
+  }
+  if(j.blocked){
+    h+='<div class="stop" style="margin-top:12px">'+rdyEsc(j.blocked_why)+"</div>";
+  } else if(j.followup_why){
+    h+='<div style="margin-top:12px;padding:10px 12px;border-left:4px solid var(--warn);'
+      +'background:#fffaf1;border-radius:0 8px 8px 0"><b>Recording goes ahead.</b> '
+      +rdyEsc(j.followup_why).replace("follow-up sheet","result sheet")+"</div>";
+  }
+  if(j.to_fix){
+    if((j.problems||[]).length){
+      h+="<h2 style=\"margin-top:12px\">Rows to fix in the sheet</h2><table><thead><tr>"
+        +"<th>Row</th><th>Item</th><th>What is wrong</th></tr></thead><tbody>";
+      j.problems.forEach(function(p){ h+="<tr><td>"+p.row+"</td><td>"+rdyEsc(p.item)
+        +"</td><td>"+rdyEsc(p.why)+"</td></tr>"; });
+      h+="</tbody></table>";
+    }
+    if((j.unmatched||[]).length){
+      h+="<h2 style=\"margin-top:12px\">Names not in the shop list</h2>"
+        +'<div class="muted">A figure was written against each of these, and none of '
+        +"them matches an item Marg knows. They go on the follow-up sheet with the "
+        +"figure kept, for the name to be corrected.</div><table><thead><tr><th>Row</th><th>Written as</th>"
+        +'<th class="n">Figure</th></tr></thead><tbody>';
+      j.unmatched.forEach(function(x){ h+="<tr><td>"+x.row+"</td><td>"+rdyEsc(x.item)
+        +'</td><td class="n">'+x.counted+"</td></tr>"; });
+      h+="</tbody></table>";
+    }
+  }
+
+  if((j.differences||[]).length){
+    h+="<h2 style=\"margin-top:14px\">The differences</h2><table><thead><tr><th>Item</th>"
+      +'<th class="n">Marg</th><th class="n">Counted</th><th class="n">Difference</th>'
+      +'<th class="n">At MRP</th></tr></thead><tbody>';
+    j.differences.forEach(function(d){
+      h+="<tr><td>"+rdyEsc(d.item)+'</td><td class="n">'+d.marg+'</td><td class="n">'
+        +d.counted+'</td><td class="n '+(d.diff<0?"bad":"warn")+'">'+(d.diff>0?"+":"")
+        +d.diff+'</td><td class="n">'+money(d.value_p)+"</td></tr>";
+    });
+    h+="</tbody></table>";
+  }
+  if((j.not_counted_list||[]).length){
+    h+='<details><summary>'+j.not_counted+" item(s) were not counted &mdash; show them"
+      +"</summary><div class=\"muted\" style=\"margin-top:6px\">"
+      +j.not_counted_list.map(rdyEsc).join(" &middot; ")+"</div></details>";
+  }
+  h+="</div>";
+  $("out").innerHTML=h;
+  $("confirm").style.display = j.blocked ? "none" : "";
+  gate();
+}
+function tile(v,l){ return '<div class="tile"><b>'+(v==null?"&mdash;":v)+"</b><span>"+l+"</span></div>"; }
+function gate(){
+  $("go").disabled = !(PREVIEW && !PREVIEW.blocked && $("cby").value.trim()
+    && $("eby").value.trim() && $("bill").value.trim() && $("bdate").value);
+}
+["cby","eby","bill","bdate"].forEach(function(i){ $(i).addEventListener("input",gate); });
+
+$("go").addEventListener("click", function(){
+  if(!PREVIEW || !FILE) return;
+  $("go").disabled=true; $("said").textContent="Recording\u2026";
+  var fd=new FormData();
+  fd.append("file",FILE); fd.append("md5",PREVIEW.md5);
+  fd.append("bill_no",$("bill").value.trim()); fd.append("bill_date",$("bdate").value);
+  fd.append("counted_by",$("cby").value.trim()); fd.append("entered_by",$("eby").value.trim());
+  fetch(API+"/api/pad/commit",{method:"POST",body:fd})
+    .then(function(r){return r.json();}).then(function(j){
+      if(!j.ok){ $("said").innerHTML='<span class="bad">'+rdyEsc(j.message||j.error)
+        +"</span>"; $("go").disabled=false; return; }
+      var fp=j.from_pad||{};
+      var line='<b class="ok">Recorded as count #'+j.count_id
+        +(fp.part_of?(" &mdash; part of count #"+fp.part_of):"")+" &mdash; "
+        +j.differences+" difference(s), finding "+rdyEsc(j.finding_no||"")+".</b>"
+        +'<br>The sheet is now in the ledger. It cannot be recorded twice from here.';
+      if(fp.followup){
+        line+='<div style="margin-top:12px;padding:12px 14px;border:2px solid var(--warn);'
+          +'border-radius:10px;background:#fffaf1"><b>The result sheet is ready.</b> '
+          +"Summary, the differences, "+(fp.to_fix?fp.to_fix+" row(s) sent back to fix, ":"")
+          +fp.not_counted+" item(s) not yet counted to fill in, and the matched list.<br>"
+          +'<a href="'+API+fp.followup+'" style="display:inline-block;margin-top:8px;'
+          +'padding:9px 14px;background:#1a1a1a;color:#fff;border-radius:8px;text-decoration:none">'
+          +"Download the result sheet</a>"
+          +'<div class="muted" style="margin-top:6px">Staff fill the NOT COUNTED and SENT BACK '
+          +"TO FIX tabs; upload the same workbook here and it joins count #"+j.count_id
+          +". It stays available at that link, and always shows the current state.</div></div>";
+      }
+      $("said").innerHTML=line;
+      $("file").disabled=true;
+    })
+    .catch(function(e){ $("said").innerHTML='<span class="bad">'+rdyEsc(""+e)+"</span>";
+      $("go").disabled=false; });
+});
+
+$("freshpad").href = API+"/pad.xlsx";
+fetch(API+"/api/readiness").then(function(r){return r.json();})
+  .then(function(j){ rdyRender($("rdy"), j); })
+  .catch(function(){ rdyRender($("rdy"), {ok:false}); });
+</script>
+</body></html>

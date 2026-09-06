@@ -1,0 +1,68 @@
+== S226_COUNT_SEARCH -- the counter's screen ==
+  ok   THE HALF-DONE COUNT SURVIVES the new page
+  ok   it reopens on the counting screen, not the gate
+  ok   progress shows the two already counted   2 / 6
+  ok   there is a search box, on the sticky bar
+  ok   three letters find the item   BIO D3 MAX
+1*15
+358
+23 strips 13 tablets
+OK
+Not OK
+  ok   and only that item   1
+  ok   it says what it is showing   Showing 1 item matching “d3” — every item, counted or not.
+  ok   SPACES AND THE INCH MARK DO NOT MATTER (primecast5 finds PRIME CAST 5")   PRIME CAST 5"orthotic
+1*1
+45
+45 pcs
+OK
+Not OK
+  ok   AN ALREADY-COUNTED ITEM IS STILL FINDABLE -- the whole point of a correction   MEG QCS
+1*15
+684
+45 strips 9 tablets
+you counted 684 · 45 st
+  ok   OK saves the expected figure
+  ok   ...and the box CLEARS ITSELF, ready for the next name Darpan calls
+  ok   ...and progress moved   3 / 6
+  ok   Not OK opens the entry box
+  ok   the physical count is saved against the right item   {"c":3,"st":null,"lo":3,"cby":"Darpan","eby":"Amir","at":"2026-09-06T07:05:34.936Z"}
+  ok   REVISITING A COUNTED ITEM SHOWS WHAT WAS ENTERED   ['20', '5']
+  ok   ...and the row says it without opening anything   BIO D3 MAX | 1*15 | 358 | 23 strips 13 tablets | you counted 305 · 20 strips 5 tablets · 12:35 PM | 
+  ok   ...in strips and tablets, the convention   BIO D3 MAX | 1*15 | 358 | 23 strips 13 tablets | you counted 305 · 20 strips 5 tablets · 12:35 PM | 
+  ok   ...and it can simply be adjusted when more stock turns up   {"c":350,"st":23,"lo":5,"cby":"Darpan","eby":"Amir","at":"2026-09-06T07:05:36.943Z"}
+  ok   AN ITEM COUNTED AS 'OK' ALSO SHOWS ITS FIGURE ON RETURN   ALCOXIB 120 | 1*10 | 13 | 1 strip 3 tablets | you counted 13 · 1 strip 3 tablets · 12:35 PM | OK | N
+  ok   ...with its boxes filled, not blank   ['1', '3']
+  ok   AN OLD ENTRY IS NOT DESTROYED BY LOOKING AT IT   ('{"c":700,"cby":"Darpan","eby":"Amir","at":"2026-09-06T11:00:00"}', '{"c":700,"cby":"Darpan","eby":"Amir","at":"2026-09-06T11:00:00"}')
+  ok   ...its figure is still 700, not 0
+  ok   ...and it opens FILLED, derived from the total it does have   ['70', '0']
+  ok   ...while a real edit still saves   {"c":470,"st":47,"lo":0,"cby":"Darpan","eby":"Amir","at":"2026-09-06T07:05:40.499Z"}
+  ok   clearing brings the list back   1
+  ok   chip 'diff' renders instead of blanking   BIO D3 MAX
+1*15
+358
+23 strips 13 tablets
+you count
+  ok   chip 'all' renders instead of blanking   ALCOXIB 120
+1*10
+13
+1 strip 3 tablets
+you counted 
+  ok   chip 'stock' renders instead of blanking   ALCOXIB 120
+1*10
+13
+1 strip 3 tablets
+you counted 
+  ok   chip 'nil' renders instead of blanking   Nothing here.
+  ok   Differences shows BOTH mismatched items   BIO D3 MAX
+1*15
+358
+23 strips 13 tablets
+you counted 350 · 23 strips 5 tablets · 12:35 PM
+
+  ok   a differing row opens its entry box already filled
+  ok   a search overrides the chip rather than fighting it
+  ok   no sideways scroll at phone width
+  ok   no javascript error anywhere in that
+
+34 ok, 0 FAILED

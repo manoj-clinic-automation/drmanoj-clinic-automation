@@ -1,0 +1,32 @@
+S226_PAD_IMPORT -- ONE PASTE on the VPS after the publish. ONE LINE.
+stock_app.py replaced; padreader.py, padwriter.py, stock_pad.html are NEW.
+Nothing on the counting page changes.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S226_PAD_IMPORT && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_app.py | cut -c1-8)" = "c338d6ad" ] || { echo "REFUSED: kit sums or the live pin do not match -- NOTHING CHANGED"; false; } && \cp /root/finance/stock_app.py /root/finance/stock_app.py.bak_S226pad_$(date +%Y%m%d) && \cp stock_app.py padreader.py padwriter.py stock_pad.html /root/finance/ && (/root/wa/venv/bin/python3 -B -c "import py_compile;[py_compile.compile('/root/finance/'+f,doraise=True,cfile='/tmp/s226_'+f+'.pyc') for f in ('stock_app.py','padreader.py','padwriter.py')]" && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- the filled count pad can now be uploaded, recorded, and followed up" && md5sum /root/finance/stock_app.py /root/finance/padreader.py /root/finance/padwriter.py /root/finance/stock_pad.html || (echo "COMPILE FAILED OR SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; \cp /root/finance/stock_app.py.bak_S226pad_$(date +%Y%m%d) /root/finance/stock_app.py; rm -f /root/finance/padreader.py /root/finance/padwriter.py /root/finance/stock_pad.html; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; journalctl -u clinic-finance.service -n 12 --no-pager)); rm -f /tmp/s226_*.pyc
+
+Expected at the end:  UP -- the filled count pad can now be uploaded, recorded, and followed up
+                      (the stock_app.py sum printed by SUMS.md5)  /root/finance/stock_app.py
+                      (and the three new files' own sums)
+
+THEN, when Amir's sheet is ready:
+
+  https://followup.dr-manoj.in/finance/stock/page/pad
+
+  1. Choose the filled pad. Read what the page says it understood.
+  2. Fill the four boxes (who counted, who entered, the bill number, its date). Record.
+  3. It hands back the RESULT WORKBOOK at once: SUMMARY, DIFFERENCES, NOT COUNTED,
+     SENT BACK TO FIX, MATCHED -- the layout you approved. Give it to Amir.
+  4. He fills the NOT COUNTED and SENT BACK TO FIX tabs; you upload the same workbook
+     here the same way. It joins the same count.
+  5. Repeat until NOT COUNTED and SENT BACK TO FIX come back empty.
+
+  A blank pad for the NEXT count: the "Download today's pad" link on the same page.
+
+ROLLING BACK = the .bak_S226pad_* file beside the live one, \cp it back, delete the
+three new files, restart.
+
+OFFLINE EVIDENCE -- 131 checks in this kit, 230 including the unchanged walks:
+  EVIDENCE_pad_import_s226.txt              54/54 the real pad, accept + result workbook + join, in a browser
+  EVIDENCE_regress_count_search_s226.txt    34/34 the counting page, unchanged
+  EVIDENCE_regress_submit_flow_s226.txt     30/30 report and send, through the same helper
+  EVIDENCE_regress_safestore_s226.txt       13/13 the safe store, unchanged
