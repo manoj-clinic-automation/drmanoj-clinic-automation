@@ -1,0 +1,7 @@
+S226_PAD_ONPAGE
+Session 226 · 06-Sep-2026
+The Excel count lives ON the stock-check page: details first, the pad comes down
+prefilled, one tap uploads it, the result sheet is offered, the loop goes on --
+staff never need the doctor. Four files replaced: stock_app.py, padreader.py,
+padwriter.py, stock_check_live.html. Supersedes S226_PAD_IMPORT's separate page
+(its address now redirects here).

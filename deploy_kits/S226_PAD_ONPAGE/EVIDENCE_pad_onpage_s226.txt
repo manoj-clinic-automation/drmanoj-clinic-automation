@@ -1,0 +1,128 @@
+== S226 PAD ON-PAGE -- the Excel loop on the stock-check page ==
+  ok   the page opens on the readiness lines and the four details   Sale report: current to 05-09-2026, last bill A003
+  ok   the Excel panel is ON THIS PAGE, under the details
+  ok   ...its download button is shut until the details are given
+  ok   ...and it says what it wants
+  ok   the on-screen count is still there, as the second choice
+  ok   no recent counts yet, nothing shown
+  ok   with the four details the download opens
+  ok   ...and the note says what will be written into the pad   Ready. The pad is written with: Darpan (entered by Amir), bill A003425 of 06-09-2026.
+  ok   THE PAD DOWNLOADS FROM THE BUTTON   STOCK_COUNT_PAD_06-09-2026.xlsx
+  ok   ...with every item and no figures
+  ok   ...AND THE FOUR DETAILS WRITTEN IN ITS TOP LINES   {'date': '06-09-2026', 'counted_by': 'Darpan', 'entered_by': 'Amir', 'bill_no': 'A003425', 'bill_date': '2026-09-06'}
+  ok   ...where a person sees them: B5 Darpan, B6 Amir, B7 the bill, E7 its date as dd-mm-yyyy   ('Darpan', 'Amir', 'A003425', '06-09-2026')
+  ok   ...and the detail cells are shaded -- a person may still correct them
+  ok   the note now tells them what to do next
+  ok   (a fresh device: no details in the boxes)
+  ok   A PROCESSING BOX SHOWED WHILE IT WORKED
+  ok   ...and is gone when it is done
+  ok   IT RECORDS IN ONE STEP AND SAYS SO   Recorded as count #1.
+This sheet: 40 counted · 33 agree with Marg · 7 differ · 3 rows sent back to fix
+Whole count so fa
+  ok   ...this sheet: 40 counted, 3 rows sent back to fix   Recorded as count #1.
+This sheet: 40 counted · 33 agree with Marg · 7 differ · 3 rows sent back to fix
+Whole count so far: 40 of 373 items · 7 differ
+Still to do: 333 items not counted, 3 rows to fix.
+Download the sheet for the remaining work
+Fill the NOT COUNTED and SENT BACK TO FIX tabs in that fi
+  ok   ...still to do: 333 not counted, 3 to fix   Recorded as count #1.
+This sheet: 40 counted · 33 agree with Marg · 7 differ · 3 rows sent back to fix
+Whole count so far: 40 of 373 items · 7 differ
+Still to do: 333 items not counted, 3 rows to fix.
+Download the sheet for the remaining work
+Fill the NOT COUNTED and SENT BACK TO FIX tabs in that file, save it, and upload it here the same way. It joins this count. Repeat until this box says everyt
+  ok   ...AND OFFERS THE SHEET FOR THE REMAINING WORK   Download the sheet for the remaining work
+  ok   ...and says what to do with it: the two tabs, upload again, repeat
+  ok   the ledger holds it: 40 of the shop, pinned to THE SHEET'S bill (the boxes were empty)   (1, 40, 373, 'A003425', '2026-09-06', 'walk')
+  ok   ...counted by Darpan, entered by Amir -- from the sheet's own top lines   [('Darpan', 'Amir')]
+  ok   the finding is sealed and the horizon frozen
+  ok   the three rows it could not use are KEPT   [('SOMETHING NOBODY KNOWS', 7), ('CIPCAL HD', None), ('CIXCEF O', None)]
+  ok   the sheet's bytes are remembered with the count   [(1, 'pad_filled.xlsx')]
+  ok   the result link is the family's result sheet   /finance/stock/api/pad/followup/1.xlsx?t=1788679951691
+  ok   THE RECENT LIST NOW SHOWS COUNT #1 WITH ITS SHEET   RECENT COUNTS — EACH WITH ITS RESULT SHEET
+Count #1
+06-09-2026 07:32 IST · bill A003425 · Darpan
+40 counted, 7 differ · 336 still to do
+Sheet for the remaining work
+  ok   THE SAME FILE TWICE IS NOT A SECOND COUNT   Already recorded — count #1.
+This exact file was already recorded as count #1. Nothing was recorded again -- the result sheet below is the current one.
+Whole co
+  ok   ...nothing extra in the ledger
+  ok   ...and the result sheet is still offered
+  ok   the result sheet has the five approved tabs   ['SUMMARY', 'DIFFERENCES', 'NOT COUNTED', 'SENT BACK TO FIX', 'MATCHED']
+  ok   ...SUMMARY carries who and which bill, from the sheet   SANJEEVNI MEDICOS -- STOCK CHECK RESULT | 
+Finding SF-2026-001  -  count #1 | 
+PART OF COUNT #1  (06-09-2026)  -- do not change this line | 
+ | 
+Date and time | 06-09-2026 07:32 IST
+Counted by | Darpan
+Entered by | Amir
+Recorded by | walk
+Marg stock as on | 06-09-2026  (processed here 06-09-2026 03:
+  ok   THE FILLED RESULT SHEET JOINS THE COUNT   Recorded as part of count #1.
+This sheet: 3 counted · 0 agree with Marg · 3 differ
+Whole count so far: 43 of 373 items ·
+  ok   ...three figures from the two tabs   Recorded as part of count #1.
+This sheet: 3 counted · 0 agree with Marg · 3 differ
+Whole count so far: 43 of 373 items · 10 differ
+Still to do: 330 items not counted, 1 row to fix.
+Download the sheet 
+  ok   ...whole count so far 43   Recorded as part of count #1.
+This sheet: 3 counted · 0 agree with Marg · 3 differ
+Whole count so far: 43 of 373 items · 10 differ
+Still to do: 330 items not counted, 1 row to fix.
+Download the sheet for the remaining work
+Fill the NOT COUNTED and SENT BACK TO FIX tabs in that file, save it, and upl
+  ok   ...still to do: 330 not counted, 1 to fix   Recorded as part of count #1.
+This sheet: 3 counted · 0 agree with Marg · 3 differ
+Whole count so far: 43 of 373 items · 10 differ
+Still to do: 330 items not counted, 1 row to fix.
+Download the sheet for the remaining work
+Fill the NOT COUNTED and SENT BACK TO FIX tabs in that file, save it, and upload it here the same way. It joins this count. Repeat until this box says everything is counted.
+  ok   ...the total settled from the SHOP's pack size   (5, 1)
+  ok   ...the corrected name landed as the real item
+  ok   ...as part of count #1, pinned to count #1's bill   (1,)
+  ok   ...THE TWO CORRECTED ROWS ARE CLOSED BY THEIR ORIGINAL ROW; the half-tablet row still open   [('CIXCEF O',)]
+  ok   the recent list shows one count with one follow-up sheet, 331 still to do   RECENT COUNTS — EACH WITH ITS RESULT SHEET
+Count #1 (+1 follow-up sheet)
+06-09-2026 07:32 IST · bill A003425 · Darpan
+43 counted, 10 differ · 331 still to do
+Sheet for the remaining work
+  ok   THE LAST SHEET CLOSES THE LOOP: everything counted   Recorded as part of count #1.
+This sheet: 331 counted · 330 agree with Marg · 1 differ
+Whole count so far: 373 of 373 items · 11 differ
+Everything is counted. Nothing is left to do on the shelf.
+Download the result sheet
+The doctor sees the same result in the finding SF-2026-001. Reasons for the dif
+  ok   ...the result sheet is offered, and the doctor is pointed to the finding
+  ok   ...whole count = the whole shop   Recorded as part of count #1.
+This sheet: 331 counted · 330 agree with Marg · 1 differ
+Whole count so far: 373 of 373 items · 11 differ
+Everything is counted. Nothing is left to do on the shelf.
+Download the result sheet
+The doctor sees the same result in the finding SF-2026-001. Reasons for the dif
+  ok   the recent list says complete
+  ok   no issue left open
+  ok   A PAD WITH BLANK TOP LINES, NO DETAILS ON THE PAGE: it ASKS, records nothing   One more thing before it is recorded.
+The sheet does not say who counted / who entered / the last bill number / the bill date. Fill that in above and upload the same file again.I have filled them in —
+  ok   ...nothing recorded
+  ok   ...the four boxes are marked
+  ok   ...FILL THEM IN, ONE TAP, THE SAME FILE IS RECORDED   Recorded as count #4.
+This sheet: 5 counted · 4 agree with Marg · 1 differ
+Whole count so far: 5 of 373 items · 1 differ
+  ok   ...pinned to the bill from the boxes   ('A003440', '2026-09-07')
+  ok   ...counted by Shavez, from the boxes   [('Shavez',)]
+  ok   ...the marks are gone
+  ok   A FILE THAT IS NOT A PAD IS REFUSED IN WORDS   Not recorded.
+that file could not be read as a count pad (BadZipFile).
+Nothing was written. If the sheet is right and this keeps happening, tell the doctor — with the file.
+  ok   ...the picker is open again
+  ok   THE OLD ADDRESS /page/pad GOES TO THIS PAGE   (302, '/finance/stock/page/count')
+  ok   the recent list is one call, newest first, roots only   [4, 1]
+  ok   the on-screen button opens with the same four details
+  ok   ...and the counting screen comes up as before
+  ok   ...search still finds
+  ok   ...OK still counts
+  ok   no javascript error anywhere in that
+
+64 ok, 0 FAILED
