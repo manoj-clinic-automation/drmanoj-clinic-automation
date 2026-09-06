@@ -1,0 +1,28 @@
+S226_COUNT_SEARCH -- ONE PASTE on the VPS after the publish. ONE LINE. One file.
+
+SAFE DURING A LIVE COUNT: the count is held in the browser's own storage
+(sanj-stock-live-v1), which this does not touch. Amir reloads the page once and
+carries on from where he was. Proven by reloading the new page over a seeded
+half-finished count.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S226_COUNT_SEARCH && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_check_live.html | cut -c1-8)" = "75a53efb" ] || { echo "REFUSED: kit sums or the live pin do not match -- NOTHING CHANGED"; false; } && \cp /root/finance/stock_check_live.html /root/finance/stock_check_live.html.bak_S226search_$(date +%Y%m%d) && \cp stock_check_live.html /root/finance/ && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- the counting page now has a search box, and the Differences chip no longer blanks it" && md5sum /root/finance/stock_check_live.html || (echo "SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; \cp /root/finance/stock_check_live.html.bak_S226search_$(date +%Y%m%d) /root/finance/stock_check_live.html; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; md5sum /root/finance/stock_check_live.html)
+
+Expected at the end:  UP -- the counting page now has a search box, and the Differences chip no longer blanks it
+                      cbcc1cdfc5ed875b92c8beb1c1282232  /root/finance/stock_check_live.html
+
+TELL AMIR, in this order:
+  1. Reload the page once. His count is still there -- nothing is lost.
+  2. There is now a box under the chips. Darpan calls a name; type three or four
+     letters of it; the item appears. Order does not matter any more.
+  3. Spaces and punctuation do not matter -- typing  primecast5  finds  PRIME CAST 5"
+  4. After pressing OK the box empties itself, ready for the next name.
+  5. An item already counted can still be found and corrected -- just type its name.
+
+ALSO FIXED, and he should be told plainly: tapping "Differences", "All",
+"Has stock" or "Nil" after marking an item Not OK used to blank the list and
+freeze the page. That was live. It is fixed.
+
+ROLLING BACK = the .bak_S226search_* file beside the live one, \cp it back, restart.
+
+OFFLINE EVIDENCE:  EVIDENCE_count_search_s226.txt   24/24, the page driven at phone
+                   width over a seeded half-finished count.

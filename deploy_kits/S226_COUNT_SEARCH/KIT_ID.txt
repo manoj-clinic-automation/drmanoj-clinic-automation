@@ -1,0 +1,5 @@
+S226_COUNT_SEARCH
+Session 226 · 06-Sep-2026 · built DURING a live count, with Darpan on the shelf
+and Amir at the screen.
+Two things: a search box so the shelf's order stops mattering, and the fix for a
+LIVE CRASH that blanked the counting list on every filter but "To do".
