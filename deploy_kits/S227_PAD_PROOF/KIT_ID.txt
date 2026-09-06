@@ -1,0 +1,10 @@
+S227_PAD_PROOF
+Session 227 · 06-Sep-2026
+Every uploaded stock-count sheet is KEPT byte for byte on the VPS (pad_uploads/
+beside finance.db, md5-named, read back and verified, with a plain INDEX.txt), and
+every recorded sheet has a printable PDF receipt -- the proof of what the server
+ingested -- offered on the page the moment it is recorded and again from the recent
+list. The checker can take any original back and the whole folder as one zip.
+Three files installed: stock_app.py, pad_receipt.py (NEW), stock_check_live.html.
+padreader.py / padwriter.py are here ONLY for the walk; unchanged, NOT installed.
+Supersedes S226_STOCK_CLOSE.

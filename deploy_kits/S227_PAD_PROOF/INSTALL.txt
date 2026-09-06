@@ -1,0 +1,38 @@
+S227_PAD_PROOF -- ONE PASTE on the VPS after the publish. ONE LINE.
+Three files installed: stock_app.py, pad_receipt.py (new), stock_check_live.html.
+Refuses -- and changes NOTHING -- unless the kit sums check and the live pins are
+those S226_STOCK_CLOSE printed: stock_app.py fdcdf873, stock_check_live.html 6fd3b7f9.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S227_PAD_PROOF && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_app.py | cut -c1-8)" = "fdcdf873" ] && [ "$(md5sum /root/finance/stock_check_live.html | cut -c1-8)" = "6fd3b7f9" ] || { echo "REFUSED: kit sums or the live pins do not match -- NOTHING CHANGED"; false; } && for f in stock_app.py stock_check_live.html; do \cp /root/finance/$f /root/finance/$f.bak_S227proof_$(date +%Y%m%d); done && \cp stock_app.py pad_receipt.py stock_check_live.html /root/finance/ && (/root/wa/venv/bin/python3 -B -c "import py_compile;[py_compile.compile('/root/finance/'+f,doraise=True,cfile='/tmp/s227p_'+f+'.pyc') for f in ('stock_app.py','pad_receipt.py')]" && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- every uploaded sheet is kept, and each recorded sheet has its PDF proof" && md5sum /root/finance/stock_app.py /root/finance/pad_receipt.py /root/finance/stock_check_live.html || (echo "COMPILE FAILED OR SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; for f in stock_app.py stock_check_live.html; do \cp /root/finance/$f.bak_S227proof_$(date +%Y%m%d) /root/finance/$f; done; rm -f /root/finance/pad_receipt.py; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; journalctl -u clinic-finance.service -n 12 --no-pager)); rm -f /tmp/s227p_*.pyc
+
+Expected at the end:  UP -- every uploaded sheet is kept, and each recorded sheet has its PDF proof
+                      6c15fa66312613acb48704d8d1daea81  /root/finance/stock_app.py
+                      727b651369b6959f6826d9c869c583f8  /root/finance/pad_receipt.py
+                      b571ba27b31fac09167d11ddc1497e24  /root/finance/stock_check_live.html
+
+WHAT STAFF SEE, on https://followup.dr-manoj.in/finance/stock/page/count :
+  after a sheet is recorded, under the numbers: "Download the PROOF of this sheet (PDF) -- save it
+  or print it", and a line saying the Excel file itself is kept on the server, with its fingerprint.
+  Under Recent stock checks, every count carries "Proof of each sheet (PDF): sheet 1 - sheet 2 ...".
+  A proof opens in the phone's PDF viewer; save or print from there.
+
+WHAT THE DOCTOR HAS, in addition (checker only):
+  https://followup.dr-manoj.in/finance/stock/api/pad/archive.zip     the whole folder as one zip
+  https://followup.dr-manoj.in/finance/stock/api/pad/archive         what it holds, as a list
+  https://followup.dr-manoj.in/finance/stock/api/pad/file/<md5>.xlsx one original back, byte for byte
+  On the box: /root/finance/pad_uploads/  (<md5>.xlsx, <md5>_count<N>_..._PROOF.pdf, INDEX.txt)
+  The folder appears at the FIRST upload after install; it is not created by the install.
+
+ROLLING BACK = the two .bak_S227proof_* files beside the live ones, \cp each back, remove
+  /root/finance/pad_receipt.py, restart. Nothing already kept in pad_uploads/ is touched.
+
+OFFLINE EVIDENCE -- 142 checks in a real browser at phone width (390px):
+  EVIDENCE_pad_proof_s227.txt               65/65 upload -> proof on the page -> the receipt read back as
+                                                  text, every one of 40 figures matching the sheet -> the
+                                                  bytes on disk identical -> repeat, part, refused, held ->
+                                                  the checker's originals and zip -> a counter refused ->
+                                                  the close, proofs kept
+  EVIDENCE_regress_count_search_s227.txt    34/34 the on-screen count, unchanged
+  EVIDENCE_regress_submit_flow_s227.txt     30/30 report and send, unchanged
+  EVIDENCE_regress_safestore_s227.txt       13/13 the safe store, unchanged
+  Sub-agent screen read of the receipt (2 pages) and the three boxes: one clipped footer, fixed.
