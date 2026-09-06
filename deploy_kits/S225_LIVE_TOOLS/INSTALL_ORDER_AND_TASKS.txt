@@ -1,0 +1,19 @@
+S225_LIVE_TOOLS -- the manojz files as they run at the S225 close (06-Sep-2026 04:00 IST), captured from D:\Downloads\margsync\.
+Every file below was hashed on manojz and compared to this kit's copy in BOTH directions at the close (see the close report).
+
+destinations (all manojz):
+  D:\Downloads\margsync\MargPull\PULL_FROM_MEDICAL.bat            (S225: runs the two on-capture pushers at the end of every 10-minute cycle)
+  D:\Downloads\margsync\MargPull\expected_on_capture.py            (S225 NEW, rev 2)     + EXPECTED_ON_CAPTURE.bat (launcher)
+  D:\Downloads\margsync\MargPull\register_expected_on_capture.ps1  (S225 NEW)            + REGISTER_EXPECTED_ON_CAPTURE.bat (the owner's double-click)
+  D:\Downloads\margsync\MargPull\snapshot_on_capture.py            (S225, unchanged)     + SNAPSHOT_ON_CAPTURE.bat
+  D:\Downloads\margsync\MARG_WALL_CARD.html                        (S225: D376 on the card; reprint owed, F-310)
+  D:\Downloads\margsync\PUSH_STOCK_DAILY.bat · PUSH_STOCK_NIGHTLY.bat (S224 v2, unchanged; hashed for the first time here)
+
+scheduled tasks on manojz (all as the owner's interactive account, battery flags cleared -- F-314):
+  Marg pull from medical     every 10 min  -> wscript PULL_HIDDEN.vbs -> PULL_FROM_MEDICAL.bat AUTO HIDDEN   (the primary trigger for everything)
+  MargPullWatchdog           every 15 min  -> PULL_WATCHDOG.bat
+  MargSnapshotOnCapture      every 15 min  -> SNAPSHOT_ON_CAPTURE.bat      (backstop; 10-minute limit)
+  MargExpectedOnCapture      every 15 min  -> EXPECTED_ON_CAPTURE.bat      (backstop; 10-minute limit; registered 06-Sep ~03:00)
+  Clinic stock nightly       22:30         -> PUSH_STOCK_NIGHTLY.bat       (the sweep; owned by another account -- its 30-minute limit is owed, F-323)
+
+credentials needed (never their values): the finance machine token (read from the medical share \\<medical>\DDrive\SendToClinic\token.txt, cached locally by push_snapshot's read_token) · the SMB credential for the medical share (cmdkey, per Windows user).
