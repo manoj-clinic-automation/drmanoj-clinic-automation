@@ -1,0 +1,52 @@
+S227_STAFF -- ONE PASTE on the VPS after the publish. ONE LINE.
+Six files installed: stock_app.py, stock_desk.html, stock_report.html, stock_check_live.html, pad_receipt.py, stock_amir.html (NEW).
+Refuses -- and changes NOTHING -- unless the kit sums check and the live pins are those S227_CONCLUSION printed:
+stock_app.py 241ed195, stock_desk.html e51aa299, stock_report.html 94a90ff4 (and stock_check_live 961be526, pad_receipt 1e0c3827).
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S227_STAFF && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_app.py | cut -c1-8)" = "241ed195" ] && [ "$(md5sum /root/finance/stock_desk.html | cut -c1-8)" = "e51aa299" ] && [ "$(md5sum /root/finance/stock_report.html | cut -c1-8)" = "94a90ff4" ] && [ "$(md5sum /root/finance/stock_check_live.html | cut -c1-8)" = "961be526" ] && [ "$(md5sum /root/finance/pad_receipt.py | cut -c1-8)" = "1e0c3827" ] || { echo "REFUSED: kit sums or the live pins do not match -- NOTHING CHANGED"; false; } && for f in stock_app.py stock_desk.html stock_report.html stock_check_live.html pad_receipt.py; do \cp /root/finance/$f /root/finance/$f.bak_S227staff_$(date +%Y%m%d); done && \cp stock_app.py stock_desk.html stock_report.html stock_check_live.html pad_receipt.py stock_amir.html /root/finance/ && (/root/wa/venv/bin/python3 -B -c "import py_compile;[py_compile.compile('/root/finance/'+f,doraise=True,cfile='/tmp/s227s_'+f+'.pyc') for f in ('stock_app.py','pad_receipt.py')]" && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- Amir's board, Darpan's lists in turns, consumables, orthotics families, merged spans, the actionable audit" && md5sum /root/finance/stock_app.py /root/finance/stock_desk.html /root/finance/stock_report.html /root/finance/stock_check_live.html /root/finance/pad_receipt.py /root/finance/stock_amir.html || (echo "COMPILE FAILED OR SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; for f in stock_app.py stock_desk.html stock_report.html stock_check_live.html pad_receipt.py; do \cp /root/finance/$f.bak_S227staff_$(date +%Y%m%d) /root/finance/$f; done; rm -f /root/finance/stock_amir.html; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; journalctl -u clinic-finance.service -n 12 --no-pager)); rm -f /tmp/s227s_*.pyc
+
+Expected at the end:  UP -- Amir's board, Darpan's lists in turns, consumables, orthotics families, merged spans, the actionable audit
+                      8eef64201d0f5e81313d26f56bd7b8b3  /root/finance/stock_app.py
+                      f044a5dbf4a61a304ed755033d9f9ae2  /root/finance/stock_desk.html
+                      9be950f2e1c24c8659b60865418b6bc5  /root/finance/stock_report.html
+                      3d6a2fb882145e76c4d87ca91e92022d  /root/finance/stock_check_live.html
+                      a52751f48860a8327e637a25c7e0d210  /root/finance/pad_receipt.py
+                      56ed926f3b464521522c696f62126353  /root/finance/stock_amir.html
+
+AMIR'S BOARD (new page, linked from the count page, the desk foot and the report):
+                       https://followup.dr-manoj.in/finance/stock/page/amir?count=1
+  1 Reports the server still needs from Marg -- ONE question per item (the export spans merged), the Excel of
+    it, the purchase lines to fix, and the UPLOAD BOX (an export, a PDF, a photo; kept on the server).
+  2 Vouchers to post in Marg -- only decided lines: stock issue (written off), consumption (consumables
+    used), corrections (Marg to the shelf / brand swap); the three Excel lists.
+  3 Darpan's lists in turns -- "Cut the next medicines list" = 5 largest gaps + 5 routine, quantities only,
+    no rates; Print (PDF); "Darpan returned it"; the typing board for his answers (reason number + note);
+    then the next list. Orthotics are a separate list. Nothing repeats.
+  4 Files on the server.   5 Orthotics by family (same article, other brands) with the verdict.
+WHAT ELSE CHANGES
+  Consumables (blade, gloves, casts, syringes ...) are their own card: "Write off all as used" -- consumption,
+  never a loss to chase. Orthotics are their own card: the FAMILY verdict on each line (a family that nets
+  to zero = a brand swap, Amir corrects Marg). "over" is explained on the desk and the same-salt pairs are
+  named on the over card. The residue is read across merged export spans -- the "74 strips OUT then
+  34 strips IN" double narration is gone; a few tabs at a boundary are ignored; ONE row per item on Amir's
+  lookup list. The audit workbook shows only what needs Amir (free too high, packing differs) with the
+  exact thing to do. The upload box sits in the desk foot from the first card.
+  Table created on first request (F-303): stock_tranche. Setting, optional: stock.consumable_words
+  (comma-separated extra words). The first write-off candidates card stays as it was.
+
+ROLLING BACK = the five .bak_S227staff_* files beside the live ones, \cp each back, delete
+/root/finance/stock_amir.html, restart.
+
+OFFLINE EVIDENCE -- 402 checks in a real browser at phone width (390px):
+  EVIDENCE_staff_s227.txt        27/27 syringes -> consumables lane; two brands of a knee support -> one family, net 0,
+                                       brand swap; the L size its own family; TYRO's -76s3t/+34s3t merged to ONE question of
+                                       40 strips OUT; a 3-tab wobble = clean; one lookup row per item; the audit JSON and
+                                       workbook (packing conflict + free too high only); list 1 cut 5+5, a second refused
+                                       while out, orthotics separate, the PDF without a rupee, returned -> list 2 with new
+                                       items; the typing board records on the S221 layer; Amir's board on the phone (four
+                                       boxes, Hindi lines, the board, a file sent); the desk (over explained, upload box in
+                                       the foot from card 1, consumables and orthotics cards, the family verdict per line)
+  EVIDENCE_regress_audit_s227.txt   53/53 · desk 47/47 · lanes 46/46 · report 46/46 · diff_sheet 41/41 · pad_proof 65/65 ·
+  count_search 34/34 · submit_flow 30/30 · safestore 13/13
+  Sub-agent screen reads: Amir's board (Devanagari renders, the board stacks on the phone, nothing overflows),
+  the orthotics card, Darpan's list 1 PDF (no rupee, no MRP, closed boxes) -- fine.

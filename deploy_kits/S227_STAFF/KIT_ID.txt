@@ -1,0 +1,18 @@
+S227_STAFF  (kit B of the loss triage plan -- the staff side, from the owner's read of the first lists)
+Session 227 · 06-Sep-2026
+The owner, on the first live lookup list and audit workbook: "multiple entries for the same
+item -- correct it"; "blade, gloves, fibre casts are never billed to patients"; "orthotics is
+the biggest puzzle -- same items from different companies, bought one, sold another; cleanup
+once and for all"; "Darpan: keep orthotics separate; 5 highest-value + 5 routine at a time,
+quantities only, no rates; he submits, he gets another"; "the audit should show only the
+ones that need Amir and the exact reason"; "all uploads and downloads on the staff page meant
+for it -- I could not find the upload button"; "2 items over -- check with exact salts";
+"explain this over to me"; "learn all from this stock check event ... optimise for next run".
+So: AMIR'S BOARD (/page/amir) -- Marg's owed reports with the upload box, vouchers to post,
+Darpan's lists in turns (stock_tranche) with the printable rate-free list and the typing
+board, files, orthotics by family; a CONSUMABLES lane and an ORTHOTICS lane with family
+analytics (_ortho_family, brand words stripped); export spans MERGED before pinpointing,
+boundary tabs ignored, one lookup row per item; the audit workbook actionable only; the
+desk explains "over" and names the same-salt pairs. Six files: stock_app.py,
+stock_desk.html, stock_report.html, stock_check_live.html, pad_receipt.py, stock_amir.html
+(NEW). Supersedes S227_CONCLUSION.

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock check — Amir's board</title>
+<style>
+/* S227 STAFF -- AMIR'S BOARD. The owner, 06-Sep-2026: "this place is primarily for
+   Amir to export some required reports from Marg that are still needed by the VPS ...
+   all uploads and downloads to be placed on the staff page who is meant for it ...
+   any staff worksheet has to be user friendly with only the required data."
+   Four boxes, top to bottom: what Marg owes the server (+ the upload box) ·
+   vouchers to post · Darpan's lists in turns (+ the typing board) · files. */
+:root{
+  --ground:#F6F8F7;--surface:#FFF;--surface-2:#EDF2F0;--ink:#15201E;--ink-2:#3D4B48;--muted:#66756F;--line:#D9E2DF;
+  --accent:#0E5C58;--on-accent:#FFF;--accent-soft:#D8E9E6;--ok:#0E5C58;--diff:#8C3A2B;--diff-soft:#F6E3DF;--warn:#8A5A12;--warn-soft:#F7ECD8;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}}
+:root[data-theme="dark"]{
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+.wrap{max-width:760px;margin:0 auto;padding:12px 12px 40px}
+h1{font-size:19px;margin:0}.sub{color:var(--muted);font-size:13px}.hi{color:var(--muted);font-size:13px;margin-top:2px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}
+.card h2{font-size:18px;margin:0 0 2px}.card .n{display:inline-block;min-width:26px;height:26px;line-height:26px;text-align:center;border-radius:13px;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:700;margin-right:8px}
+.card .lead{color:var(--ink-2);font-size:14px;margin:6px 0 10px}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.row .it{font-weight:700}.row .q{color:var(--ink-2);font-size:13.5px}.row .qq{color:var(--diff);font-weight:600;font-size:13.5px;margin-top:2px}
+.row .r{text-align:right;white-space:nowrap;font-weight:700}
+.row.done{opacity:.55}
+a.b,button.b{display:inline-block;font:inherit;font-size:15px;font-weight:700;padding:10px 14px;border-radius:10px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-decoration:none;margin:4px 6px 4px 0}
+a.b.main,button.b.main{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+button.b.grey{color:var(--muted);font-weight:600}
+.empty{color:var(--muted);font-style:italic;font-size:14px}
+.margbox{margin-top:12px;padding:10px 12px;border:1px dashed var(--line);border-radius:10px}.margbox input{display:block;width:100%;font:inherit;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);margin-top:6px}
+.msg{font-size:13.5px;color:var(--ok);margin-top:6px;font-weight:600}.err{color:var(--diff);font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:13.5px}th,td{text-align:left;padding:6px 6px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-size:12px}td.n,th.n{text-align:right;white-space:nowrap}
+.board td input,.board td select{font:inherit;font-size:14px;padding:6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:100%}
+.board td.sel{min-width:140px}
+.tr{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.tr b{font-size:15px}.tr .st{color:var(--muted);font-size:13px}
+.tg{font:inherit;font-size:13px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--accent);cursor:pointer;font-weight:600}
+.fam{padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}.fam b{display:block}.fam .m{color:var(--ink-2);font-size:13px}.fam .v{color:var(--accent);font-weight:600;font-size:13px}
+.fam.swap .v{color:var(--warn)}
+</style></head><body><div class="wrap">
+<div class="top"><h1>Stock check — Amir's board</h1><span class="sub" id="who"></span></div>
+<div class="hi">स्टॉक चेक — अमीर का काम: Marg से जो रिपोर्ट चाहिए, वाउचर, दर्पण की लिस्ट</div>
+<div id="body"><div class="card"><span class="sub">Loading…</span></div></div>
+</div>
+<script>
+/*__BOOT__*/
+const BASE="/finance/stock";
+const B=window.BOOT||{count_id:0,user:"",checker:false};
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function units(n,ps){ n=Number(n||0); ps=Number(ps||1); if(n<0) return "short "+units(-n,ps);
+  if(ps<=1) return n+" pc"+(Math.abs(n)===1?"":"s"); const s=Math.floor(n/ps), t=n%ps; const b=[]; if(s)b.push(s+" strip"+(s===1?"":"s")); if(t)b.push(t+" tab"+(t===1?"":"s")); return b.join(" ")||"0 strips"; }
+let D=null;
+function load(){
+  fetch(BASE+"/api/pad/amir/"+B.count_id).then(r=>r.json()).then(j=>{ if(!j.ok){ document.getElementById("body").innerHTML='<div class="card err">'+esc(j.message||"could not read the count")+'</div>'; return; } D=j; render(); })
+  .catch(()=>{ document.getElementById("body").innerHTML='<div class="card err">The server did not answer. Check the internet and reload.</div>'; });
+}
+function render(){
+  const d=D;
+  document.getElementById("who").textContent="Count #"+d.count_id+" · "+(d.day||"")+" · "+(B.user||"");
+  let h="";
+  // 1 -- what Marg still owes the server
+  const L=d.lookups||[];
+  h+='<div class="card"><h2><span class="n">1</span>Reports the server still needs from Marg</h2><div class="hi">Marg से ये रिपोर्ट निकाल कर नीचे भेजें</div>'
+    +'<div class="lead">One question per item: open the item\'s ledger in Marg between the two dates and see which voucher moved the quantity. Take a screenshot or export the ledger and send it below — the server reads it; nothing to type.</div>'
+    +(L.length?L.map(x=>'<div class="row"><div><div class="it">'+esc(x.item)+' <span class="sub">'+esc(x.packing)+'</span></div>'+x.questions.map(q=>'<div class="qq">'+esc(q)+'</div>').join("")+'</div><div class="r">'+esc(units(x.diff,x.pack))+'</div></div>').join(""):'<div class="empty">Nothing owed — every difference is explained by the documents on the server.</div>')
+    +'<div style="margin-top:10px"><a class="b" href="'+esc(d.links.lookups)+'">This list as Excel</a>'+(d.links.audit?'<a class="b" href="'+esc(d.links.audit)+'">Purchase lines to fix in Marg (Excel)</a>':'')+'</div>'
+    +margBox(d)+'</div>';
+  // 2 -- vouchers
+  const V=d.vouchers||{issue:[],fix:[],consume:[]};
+  const vrow=x=>'<div class="row"><div><div class="it">'+esc(x.item)+' <span class="sub">'+esc(x.packing)+'</span></div><div class="q">Marg '+esc(units(x.marg,x.pack))+' → shelf '+esc(units(x.counted,x.pack))+' · '+esc(x.why)+'</div></div><div class="r">'+esc(units(x.diff,x.pack))+'</div></div>';
+  h+='<div class="card"><h2><span class="n">2</span>Vouchers to post in Marg</h2><div class="hi">Marg में वाउचर — डॉक्टर के फैसले के बाद</div>'
+    +'<div class="lead">Only lines the doctor has decided. Post ONE voucher per block, then tick the Excel.</div>'
+    +'<h3 style="font-size:15px;margin:8px 0 2px">Stock issue — written off ('+V.issue.length+')</h3>'+(V.issue.length?V.issue.map(vrow).join(""):'<div class="empty">none yet</div>')
+    +'<h3 style="font-size:15px;margin:12px 0 2px">Consumption — procedure consumables used ('+V.consume.length+')</h3>'+(V.consume.length?V.consume.map(vrow).join(""):'<div class="empty">none yet</div>')
+    +'<h3 style="font-size:15px;margin:12px 0 2px">Corrections — Marg figure to the shelf / brand swap ('+V.fix.length+')</h3>'+(V.fix.length?V.fix.map(vrow).join(""):'<div class="empty">none yet</div>')
+    +'<div style="margin-top:10px"><a class="b" href="'+esc(d.links.cleanup)+'">Marg cleanup list (Excel)</a><a class="b" href="'+esc(d.links.amir)+'">No-movement check list (Excel)</a>'+(d.links.ortho?'<a class="b" href="'+esc(d.links.ortho)+'">Orthotics cleanup (Excel)</a>':'')+'</div></div>';
+  // 3 -- Darpan's lists in turns
+  const T=d.tranches||[], open=k=>T.filter(t=>t.kind===k&&!t.returned_at);
+  const trow=t=>'<div class="tr"><div><b>List '+t.no+' — '+(t.kind==="ortho"?"orthotics":"medicines")+'</b> · '+t.items.length+' items<div class="st">given '+esc(t.issued_text)+(t.returned_at?' · back '+esc(t.returned_text):' · <b>with Darpan</b>')+'</div></div><div><a class="b" href="'+esc(t.pdf)+'" target="_blank" rel="noopener">Print</a>'+(t.returned_at?'':'<button class="b main" data-ret="'+t.id+'">Darpan returned it</button>')+'</div></div>';
+  h+='<div class="card"><h2><span class="n">3</span>Darpan\'s lists — in turns</h2><div class="hi">दर्पण की लिस्ट — एक बार में 10 आइटम, दाम नहीं</div>'
+    +'<div class="lead">Ten items at a time — five with the largest gaps, five routine — quantities only, no rates. Print, hand over, mark returned when he brings it back, type his answers below, then cut the next. Orthotics are a separate list.</div>'
+    +(T.length?T.map(trow).join(""):'<div class="empty">No list cut yet.</div>')
+    +'<div style="margin-top:10px">'+(open("med").length?'':'<button class="b main" data-next="med">Cut the next medicines list ('+(d.pool.med||0)+' left)</button>')+(open("ortho").length?'':'<button class="b" data-next="ortho">Cut the next orthotics list ('+(d.pool.ortho||0)+' left)</button>')+'</div><div class="msg" id="tmsg"></div>'
+    +'<h3 style="font-size:15px;margin:14px 0 4px">Type Darpan\'s answers</h3><div class="hi">दर्पण के जवाब यहाँ टाइप करें — कारण नंबर और टिप्पणी</div>'
+    +'<div class="sub">Reasons: '+(d.reasons||[]).map(r=>r.n+' = '+esc(r.en)+(r.hi?' / '+esc(r.hi):'')).join(' · ')+'</div>'
+    +board(d)+'</div>';
+  // 4 -- files on the server
+  const F=d.marg_answers||[];
+  h+='<div class="card"><h2><span class="n">4</span>Files on the server ('+F.length+')</h2>'+(F.length?F.map(x=>'<div class="row"><div><div class="it">'+esc(x.orig)+'</div><div class="q">'+(x.item?esc(x.item)+' · ':'')+(x.note?esc(x.note)+' · ':'')+esc(x.by)+' · '+esc(x.at_text)+'</div></div></div>').join(""):'<div class="empty">none yet</div>')+'</div>';
+  // 5 -- orthotics families, for the cleanup
+  const OF=d.ortho_families||[];
+  if(OF.length) h+='<div class="card"><h2><span class="n">5</span>Orthotics — by family</h2><div class="hi">एक ही सामान, अलग कंपनी — परिवार देखें</div><div class="lead">Same article, different brands. A family that nets to zero was sold as one brand and billed as another — swap the figures in Marg.</div>'
+    +OF.map(f=>'<div class="fam'+(f.net===0&&(f.short||f.over)?' swap':'')+'"><b>'+esc(f.key)+'</b><div class="m">'+esc(f.text)+'</div><div class="v">'+esc(f.verdict)+'</div></div>').join("")+'</div>';
+  document.getElementById("body").innerHTML=h;
+}
+function board(d){
+  const open=T=>T.filter(t=>t.returned_at&&t.items.length);
+  const T=d.tranches||[]; const last=[...T].reverse().find(t=>t.returned_at);
+  const items=last?last.items:[];
+  const byItem={}; (d.differences||[]).forEach(x=>byItem[x.item]=x);
+  if(!items.length) return '<div class="empty">When Darpan returns a list, its items appear here to type.</div>';
+  const sel=(d.reasons||[]).map(r=>'<option value="'+r.n+'">'+r.n+' — '+esc(r.en)+'</option>').join("");
+  return '<div class="sub">List '+last.no+' ('+(last.kind==="ortho"?"orthotics":"medicines")+')</div><table class="board"><tr><th>Item</th><th class="n">Marg → shelf</th><th>Reason</th><th>Note / recount</th></tr>'
+    +items.map(it=>{ const x=byItem[it]||{}; return '<tr data-item="'+esc(it)+'"'+(x.answer?' class="done"':'')+'><td>'+esc(it)+(x.answer?'<div class="sub">on record: '+esc(x.answer)+'</div>':'')+'</td><td class="n">'+esc(units(x.marg,x.pack))+' → '+esc(units(x.counted,x.pack))+'</td><td class="sel"><select><option value="">—</option>'+sel+'</select></td><td><input type="text" placeholder="e.g. recount 12 strips 4 tabs"></td></tr>'; }).join("")
+    +'</table><button class="b main" id="saveans">Record these answers</button><span class="msg" id="amsg"></span>';
+}
+function margBox(d){
+  const L=d.marg_answers||[];
+  return '<div class="margbox" id="margbox"><b>Send Marg\'s report or screenshot to the server</b><div class="hi">Marg की रिपोर्ट / स्क्रीनशॉट यहाँ भेजें</div><div class="sub">Any file — an export, a PDF, a photo. It is kept on the server; nothing to type.</div>'
+    +'<form id="margform"><input type="file" name="file" id="margfile" required><input type="text" name="item" id="margitem" placeholder="Item (optional)"><input type="text" name="note" id="margnote" placeholder="Note (optional)"><button type="submit" class="b main">Send to the server</button></form><div class="msg" id="margmsg"></div></div>';
+}
+document.addEventListener("submit", async e=>{
+  if(e.target.id!=="margform") return; e.preventDefault();
+  const fd=new FormData(e.target); const m=document.getElementById("margmsg"); m.textContent="Sending…";
+  const r=await fetch(D.marg_answer_url,{method:"POST",body:fd}).catch(()=>null); const j=r?await r.json().catch(()=>null):null;
+  if(!j||!j.ok){ m.textContent="Not kept: "+((j&&j.message)||"the server did not answer"); return; }
+  m.textContent=j.message; setTimeout(load, 900);
+});
+document.addEventListener("click", async e=>{
+  const nx=e.target.closest("button[data-next]"); if(nx){ const m=document.getElementById("tmsg"); m.textContent="Cutting…";
+    const r=await fetch(BASE+"/api/pad/tranche/"+D.count_id+"/next",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind:nx.dataset.next})}).catch(()=>null);
+    const j=r?await r.json().catch(()=>null):null; if(!j||!j.ok){ m.textContent=(j&&j.message)||"the server did not answer"; return; } m.textContent=j.message; load(); return; }
+  const rt=e.target.closest("button[data-ret]"); if(rt){ await fetch(BASE+"/api/pad/tranche/"+D.count_id+"/"+rt.dataset.ret+"/returned",{method:"POST"}).catch(()=>null); load(); return; }
+  if(e.target.id==="saveans"){ const rows=[...document.querySelectorAll("table.board tr[data-item]")]; const answers=rows.map(tr=>({item:tr.dataset.item, reason:tr.querySelector("select").value, note:tr.querySelector("input").value})).filter(a=>a.reason||a.note);
+    const m=document.getElementById("amsg"); if(!answers.length){ m.textContent="Nothing typed yet."; return; }
+    const r=await fetch(BASE+"/api/pad/answers/"+D.count_id,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({answers:answers})}).catch(()=>null);
+    const j=r?await r.json().catch(()=>null):null; m.textContent=(j&&j.message)||"the server did not answer"; if(j&&j.ok) setTimeout(load, 800); }
+});
+load();
+</script></body></html>

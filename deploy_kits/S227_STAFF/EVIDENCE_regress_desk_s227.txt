@@ -1,0 +1,54 @@
+ * Serving Flask app 'WALK_readiness_s226'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:8845
+Press CTRL+C to quit
+  ok   the count is recorded: 12 differences
+  ok   LANE marg      <- WALK-001 DOLO TAB (3 strips 5 tabs IN of Marg between 01-08-2026 and 06-09-2026 with no d)   ('marg', '', "3 strips 5 tabs IN of Marg between 01-08-2026 and 06-09-2026 with no document on the server -- an adjustment, a correction or a late entry. Amir looks up that span in Marg's item ledger before the shelf is blamed.")
+  ok   LANE loss      <- WALK-002 PANTO CAP (Marg agrees with the documents; the shelf is short 4 tabs (allowance 0)   ('loss', '', 'Marg agrees with the documents; the shelf is short 4 tabs (allowance 0 strips) -- breakage, unbilled sale or theft')
+  ok   LANE over      <- WALK-003 PANTO SYP 100ML (more on the shelf than Marg (+5 pcs) -- a wrong-item sale or an unente)   ('over', '', 'more on the shelf than Marg (+5 pcs) -- a wrong-item sale or an unentered purchase; never a loss')
+  ok   LANE allowance <- WALK-006 PANTO TAB (short 2 tabs, within the allowance of 2 tabs for this item (3 strips 9)   ('allowance', '', 'short 2 tabs, within the allowance of 2 tabs for this item (3 strips 9 tabs sold, 9 loose) -- expected')
+  ok   LANE loss      <- WALK-008 DOLO CAP (Marg agrees with the documents; the shelf is short 7 tabs (allowance 0)   ('loss', '', 'Marg agrees with the documents; the shelf is short 7 tabs (allowance 0 strips) -- breakage, unbilled sale or theft')
+  ok   LANE recount   <- WALK-010 MOX INJ (counted far above Marg (+200 pcs, Marg 40 pcs) -- nobody has that much)   ('recount', '', 'counted far above Marg (+200 pcs, Marg 40 pcs) -- nobody has that much extra; an entry slip is likely')
+  ok   LANE recount   <- WALK-013 PANTO TAB (Marg's own figure is negative (-13) -- a purchase or a wrong-item sale)   ('recount', '', "Marg's own figure is negative (-13) -- a purchase or a wrong-item sale is missing in Marg; count again and check Marg")
+  ok   LANE bill      <- WALK-018 ORTHO TAB (the gap is about 1 box of 10 strips and a purchase of that size sits i)   ('bill', '', 'the gap is about 1 box of 10 strips and a purchase of that size sits in the window -- see the bill')
+  ok   LANE dead      <- WALK-041 PANTO TAB (Old stock, short -- bought before April, nothing sold. Write-off candi)   ('dead', 'D', 'Old stock, short -- bought before April, nothing sold. Write-off candidate; Amir checks expiry first.')
+  ok   LANE dead      <- WALK-042 MOX TAB (Bought this year, never sold, gone from the shelf -- top of the rechec)   ('dead', 'C', 'Bought this year, never sold, gone from the shelf -- top of the recheck list, then the bill.')
+  ok   LANE dead      <- WALK-043 ZINC TAB (Adjustment stock -- no purchase bill on the server, Marg's figure move)   ('dead', 'B', "Adjustment stock -- no purchase bill on the server, Marg's figure moved without a document; shelf short. OWNER CONFIRMS: kept elsewhere / used or given / genuinely missing.")
+  ok   LANE ortho     <- WALK-044 LS BELT UNISON L (an orthotic short 1 strip; no other brand of the same article is over )   ('ortho', '', 'an orthotic short 1 strip; no other brand of the same article is over -- fitted in the clinic and not keyed, or missing. Darpan rechecks; then write off or pursue.')
+  ok   the allowance for the loose-sold item is 2 units (9 loose sold, cheap) and the shortage sits inside it   (2, 9, 39)
+  ok   ...and a Rs 1,500-a-strip item gets NO allowance
+  ok   THE IDENTICAL-SALT PAIR is proposed (D385): ETORICOXIB 90 short one brand, over the other; ETORICOXIB 60 is NOT in it   [{'net': 1, 'over': [{'diff': 5, 'item': 'WALK-003 PANTO SYP 100ML', 'pack': 1}], 'salt': 'ETORICOXIB 90', 'short': [{'diff': -4, 'item': 'WALK-002 PANTO CAP', 'pack': 10}]}]
+  ok   ...the pair is a proposal: both lines stay in their own lanes, nothing netted
+  ok   THE OWNER'S SHORT LIST holds exactly the adjustment-stock item   ['WALK-043 ZINC TAB']
+  ok   the sitting-dead matched items (shelf = Marg, nothing sold) are in the cleanup lane's second list, all kind A, names[44] among them   ['WALK-033 CALPOL SYP 100ML', 'WALK-040 ORTHO INJ', 'WALK-035 ORTHO TAB', 'WALK-038 PANTO CAP', 'WALK-039 ZINC SYP 100ML', 'WALK-045 ZINC SYP 100ML', 'WALK-034 MOX INJ', 'WALK-031 PANTO TAB', 'WALK-032 PANTO CAP', 'WALK-036 ZINC TAB', 'WALK-037 ZINC TAB']
+  ok   lane totals: recount 2, dead 3 (+11 matched; the LS BELT is an orthotic now), salt 1 pair, every lane with lines / short / over / unpriced   [('consume', 0), ('ortho', 1), ('recount', 2), ('bill', 1), ('marg', 1), ('loss', 2), ('allowance', 1), ('over', 1), ('salt', 0), ('dead', 3)]
+  ok   the price ladder: a sold item carries its sale price; an unsold item with a purchase rate carries a PROVISIONAL price (rate / 0.8)   ('provisional', -31250)
+  ok   ...an orthotic uses the orthotics margin (rate / 0.7)   -35710
+  ok   ...the mismatch totals count the provisional lines   {'cost_net_p': 107500, 'cost_over_p': 545000, 'cost_priced': 12, 'cost_short_p': 437500, 'cost_unpriced': 0, 'lines': 12, 'mrp_net_p': 420546, 'mrp_over_p': 843011, 'mrp_priced': 12, 'mrp_provisional': 4, 'mrp_short_p': 422465, 'mrp_unpriced': 0, 'over_lines': 3, 'short_lines': 9, 'unpriced_both': 0, 'unpriced_both_units': 0}
+  ok   the owner's running totals start all-open
+  ok   THE DESK OPENS on the four numbers and card 1 of N   Card 1 of 12
+  ok   ...the first card is the owner's word on the adjustment-stock item, three big buttons, nothing to tick   Your word — adjustment stockWALK-043 ZINC TAB 1*15Marg 2 strips 10 tabs → counted 2 strips · short 10 tabsRs 312.50 at MRP (estimated from the purchase rate) · Rs 250 at costAdjustment stock -- no purchase bill on the server, Marg's figure moved without a document; shelf short.Sold since April: 0 st
+  ok   ONE TAP: recorded, a green Done strip with Undo, and the NEXT CARD IS ALREADY THERE   DoneWALK-043 ZINC TAB — parked — kept elsewhereUndoExpected shrinkage1 small shortage within the allowanceshort Rs 5.50 at MRPThe shrinkage a shop expects after months of cutting strips — each one inside the allowance the server computed for that item from its own sales.Write off allthe usual answer
+  ok   ...the server holds it
+  ok   UNDO: the line is open again (a new row, the history kept) and the card comes back
+  ok   SKIP: the next card, a LANE card -- the allowance lane, its count and value, one main button, See the items, Skip   Expected shrinkage1 small shortage within the allowanceshort Rs 5.50 at MRPThe shrinkage a shop expects after months of cutting strips — each one inside the allowance the server computed for that item from its own sales.Write off allthe usual answerSee the 1 itemSkip for nowWALK-006 PANTO TAB 1*10Ma
+  ok   ...See the items opens the list under the card, each line with its own small buttons
+  ok   THE WHOLE LANE IN ONE TAP: written off, no confirm box, the next card is up   Done1 line — written offUndoMore on the shelf than Marg1 item overover Rs 85 at MRPThe shelf holds more than Marg says. That is never a loss: usually the other half of a shortage — a brand with the sa
+  ok   ...and the S221 decision layer agrees
+  ok   TO THE END: every card answered with one tap each, the closing card says what is left and where   That is all for now5 lines still open — they are with Darpan or Amir, or skippedYour decisions are on Amir's lists now. Next:Give Amir the Marg cleanup listevery line you wrote off, explained or sent to MargGive Amir the no-movement listexpiry checks and the clinic-billed stockGive Amir the Marg led
+  ok   ...the lanes got their usual answers: recount -> RECOUNT, over -> EXPLAINED, bill -> VERIFY_BILL, marg -> MARG_FIX, loss -> RECOVER, orthotic -> MARG_FIX (the ortho card main), dead D -> WRITE_OFF   {'WALK-010 MOX INJ': 'RECOUNT', 'WALK-001 DOLO TAB': 'MARG_FIX', 'WALK-018 ORTHO TAB': 'VERIFY_BILL', 'WALK-044 LS BELT UNISON L': 'MARG_FIX', 'WALK-041 PANTO TAB': 'WRITE_OFF', 'WALK-042 MOX TAB': 'RECOUNT', 'WALK-043 ZINC TAB': None, 'WALK-003 PANTO SYP 100ML': 'EXPLAINED', 'WALK-013 PANTO TAB': 'RECOUNT', 'WALK-008 DOLO CAP': 'RECOVER', 'WALK-006 PANTO TAB': 'WRITE_OFF', 'WALK-002 PANTO CAP': 'RECOVER'}
+  ok   ...the running numbers: written off, to pursue; 'still open' = the lines with Darpan (recount) and Amir (bill) plus the one skipped card   {'bill': 1, 'explained': 1, 'marg_fix': 2, 'open': 5, 'open_p': 132000, 'parked': 0, 'parked_p': 0, 'pursue': 2, 'pursue_p': 2955, 'recount': 3, 'written_off': 2, 'written_off_p': 31800}
+  ok   AMIR'S MARG CLEANUP LIST carries every line written off, explained, pursued or sent to Marg   ['WALK-001 DOLO TAB', 'WALK-044 LS BELT UNISON L', 'WALK-041 PANTO TAB', 'WALK-003 PANTO SYP 100ML', 'WALK-008 DOLO CAP', 'WALK-006 PANTO TAB', 'WALK-002 PANTO CAP']
+  ok   THE REPORT: no ticks, no decision buttons -- a document
+  ok   ...a one-line pointer to the desk at the top
+  ok   ...every lane folded, each with a plain 'Show N items' button, no browser arrows
+  ok   ...Show opens the lane and reads Hide; the rows carry the reason and the owner's word
+  ok   ...Hide folds it again
+  ok   ...sections 2 and 3 fold the same way
+  ok   ...and open on the button
+  ok   SEARCH still works and opens the lane that matches
+  ok   A COUNTER IS REFUSED THE DESK (403)   403
+  ok   THE PAGES THREW NO ERROR THROUGH ALL OF IT
+
+47 ok, 0 FAIL
