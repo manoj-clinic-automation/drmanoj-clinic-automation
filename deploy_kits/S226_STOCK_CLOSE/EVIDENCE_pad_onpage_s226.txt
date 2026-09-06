@@ -1,0 +1,171 @@
+== S226 PAD ON-PAGE -- the Excel loop on the stock-check page ==
+  ok   the page opens on the readiness lines and the four details   Sale report: current to 05-09-2026, last bill A003
+  ok   the Excel panel is ON THIS PAGE, under the details
+  ok   ...its download button is shut until the details are given
+  ok   ...and it says what it wants
+  ok   the page is numbered 1-2-3-4 for the staff
+  ok   ...and the result box sits UNDER step 4, where the close button is explained
+  ok   the on-screen count is still there, as the second choice
+  ok   no recent counts yet, nothing shown
+  ok   with the four details the download opens
+  ok   ...and the note says what will be written into the pad   Ready. The pad is written with: Darpan (entered by Amir), bill A003425 of 06-09-2026.
+  ok   THE PAD DOWNLOADS FROM THE BUTTON   STOCK_COUNT_06-09-2026_SHEET_1.xlsx
+  ok   ...with every item and no figures
+  ok   ...AND THE FOUR DETAILS WRITTEN IN ITS TOP LINES   {'date': '06-09-2026', 'counted_by': 'Darpan', 'entered_by': 'Amir', 'bill_no': 'A003425', 'bill_date': '2026-09-06'}
+  ok   ...where a person sees them: B5 Darpan, B6 Amir, B7 the bill, E7 its date as dd-mm-yyyy   ('Darpan', 'Amir', 'A003425', '06-09-2026')
+  ok   ...and the detail cells are shaded -- a person may still correct them
+  ok   the note now tells them what to do next
+  ok   (a fresh device: no details in the boxes)
+  ok   A PROCESSING BOX SHOWED WHILE IT WORKED
+  ok   ...and is gone when it is done
+  ok   IT RECORDS IN ONE STEP AND SAYS SO   Recorded as count #1.
+This sheet: 40 counted · 33 agree with Marg · 7 differ from Marg · 3 rows sent back to fix
+Whole c
+  ok   ...this sheet: 40 counted, 3 rows sent back to fix   Recorded as count #1.
+This sheet: 40 counted · 33 agree with Marg · 7 differ from Marg · 3 rows sent back to fix
+Whole count so far: 40 of 373 items · 7 differ from Marg
+Some stock count is left: 333 items not counted, 3 rows to fix. Download the sheet and complete it.
+Download SHEET 2 REMAINING
+It 
+  ok   ...SOME STOCK COUNT IS LEFT: 333 not counted, 3 to fix -- download and complete   Recorded as count #1.
+This sheet: 40 counted · 33 agree with Marg · 7 differ from Marg · 3 rows sent back to fix
+Whole count so far: 40 of 373 items · 7 differ from Marg
+Some stock count is left: 333 items not counted, 3 rows to fix. Download the sheet and complete it.
+Download SHEET 2 REMAINING
+It holds only what is still to do. Fill the NOT COUNTED and SENT BACK TO FIX tabs, save it, and upload 
+  ok   ...AND OFFERS THE SHEET FOR THE REMAINING WORK   Download SHEET 2 REMAINING
+  ok   ...and NO close button while work is left
+  ok   ...and says what to do with it: the two tabs, upload at step 3, repeat
+  ok   the ledger holds it: 40 of the shop, pinned to THE SHEET'S bill (the boxes were empty)   (1, 40, 373, 'A003425', '2026-09-06', 'walk')
+  ok   ...counted by Darpan, entered by Amir -- from the sheet's own top lines   [('Darpan', 'Amir')]
+  ok   the finding is sealed and the horizon frozen
+  ok   the three rows it could not use are KEPT   [('SOMETHING NOBODY KNOWS', 7), ('CIPCAL HD', None), ('CIXCEF O', None)]
+  ok   the sheet's bytes are remembered with the count   [(1, 'pad_filled.xlsx')]
+  ok   the result link is the family's result sheet   /finance/stock/api/pad/followup/1.xlsx?t=1788681803683
+  ok   THE RECENT LIST NOW SHOWS COUNT #1 WITH ITS SHEET   RECENT STOCK CHECKS — EACH WITH ITS SHEET
+Count #1 (sheet 1)
+06-09-2026 08:03 IST · bill A003425 · Darpan
+40 of 373 counted, 7 differ from Marg · OPEN — 336 still to do (333 not counted, 3 to fix)
+Dow
+  ok   THE SAME FILE TWICE IS NOT A SECOND COUNT   Already recorded — count #1.
+This exact file was already recorded as count #1. Nothing was recorded again -- the result sheet below is the current one.
+Whole co
+  ok   ...nothing extra in the ledger
+  ok   ...and the result sheet is still offered
+  ok   the result sheet has the five approved tabs   ['SUMMARY', 'DIFFERENCES', 'NOT COUNTED', 'SENT BACK TO FIX', 'MATCHED']
+  ok   ...SUMMARY carries who and which bill, from the sheet   SANJEEVNI MEDICOS -- STOCK CHECK RESULT | 
+Finding SF-2026-001  -  count #1 | 
+PART OF COUNT #1  (06-09-2026)  -- do not change this line | 
+ | 
+Date and time | 06-09-2026 08:03 IST
+Counted by | Darpan
+Entered by | Amir
+Recorded by | walk
+Marg stock as on | 06-09-2026  (processed here 06-09-2026 03:
+  ok   THE FILLED RESULT SHEET JOINS THE COUNT   Recorded as part of count #1.
+This sheet: 3 counted · 0 agree with Marg · 3 differ from Marg
+Whole count so far: 43 of 3
+  ok   ...three figures from the two tabs   Recorded as part of count #1.
+This sheet: 3 counted · 0 agree with Marg · 3 differ from Marg
+Whole count so far: 43 of 373 items · 10 differ from Marg
+Some stock count is left: 330 items not counted, 
+  ok   ...whole count so far 43   Recorded as part of count #1.
+This sheet: 3 counted · 0 agree with Marg · 3 differ from Marg
+Whole count so far: 43 of 373 items · 10 differ from Marg
+Some stock count is left: 330 items not counted, 1 row to fix. Download the sheet and complete it.
+Download SHEET 3 REMAINING
+It holds only what is s
+  ok   ...still to do: 330 not counted, 1 to fix   Recorded as part of count #1.
+This sheet: 3 counted · 0 agree with Marg · 3 differ from Marg
+Whole count so far: 43 of 373 items · 10 differ from Marg
+Some stock count is left: 330 items not counted, 1 row to fix. Download the sheet and complete it.
+Download SHEET 3 REMAINING
+It holds only what is still to do. Fill the NOT COUNTED and SENT BACK TO FIX tabs, save it, and upload it at step 3. Repeat
+  ok   ...the next sheet is named SHEET 3 REMAINING   Download SHEET 3 REMAINING
+  ok   ...and downloads under that name   attachment; filename="STOCK_COUNT_06-09-2026_SHEET_3_REMAINING.xlsx"
+  ok   ...the total settled from the SHOP's pack size   (5, 1)
+  ok   ...the corrected name landed as the real item
+  ok   ...as part of count #1, pinned to count #1's bill   (1,)
+  ok   ...THE TWO CORRECTED ROWS ARE CLOSED BY THEIR ORIGINAL ROW; the half-tablet row still open   [('CIXCEF O',)]
+  ok   the recent list shows one count with one follow-up sheet, 331 still to do   RECENT STOCK CHECKS — EACH WITH ITS SHEET
+Count #1 (sheets 1–2)
+06-09-2026 08:03 IST · bill A003425 · Darpan
+43 of 373 counted, 10 differ from Marg · OPEN — 331 still to do (330 not counted, 1 to fix)
+  ok   THE LAST SHEET: the server says everything is counted   Recorded as part of count #1.
+This sheet: 331 counted · 330 agree with Marg · 1 differ from Marg
+Whole count so far: 373 of 373 items · 11 differ from Marg
+The server has checked: everything is counted. Nothing is left on the shelf.
+Close the stock check
+Closing completes count #1. After that no mor
+  ok   ...whole count = the whole shop   Recorded as part of count #1.
+This sheet: 331 counted · 330 agree with Marg · 1 differ from Marg
+Whole count so far: 373 of 373 items · 11 differ from Marg
+The server has checked: everything is counted. Nothing is left on the shelf.
+Close the stock check
+Closing completes count #1. After that no mor
+  ok   ...AND ONLY NOW THE CLOSE BUTTON APPEARS
+  ok   the recent list says everything counted, not yet closed
+  ok   ...but carries NO second close button for the count the box is showing
+  ok   no issue left open
+  ok   closing asks once, then says STOCK CHECK COMPLETED   ['Close the stock check?\n\nCount #1 will be completed. No more sheets can be added to it.', 'STOCK CHECK COMPLETED\n\nCount #1 is closed. No more sheets for it.']
+  ok   ...the box says STOCK CHECK COMPLETED, no more sheets, start again at step 1   STOCK CHECK COMPLETED
+Count #1 was closed on 06-09-2026 08:03 IST by walk. Everything was counted. No more sheets can be added to it. For the next stock check, start again at step 1.
+Download the FINAL RESULT sheet
+  ok   ...the ledger holds the close: count #1, complete, nothing left   [(1, 'complete', 0, 0, 'walk')]
+  ok   ...the FINAL RESULT sheet is offered
+  ok   ...named so   attachment; filename="STOCK_COUNT_06-09-2026_FINAL_RESULT.xlsx"
+  ok   ...and its SUMMARY says CLOSED -- stock check completed   SANJEEVNI MEDICOS -- STOCK CHECK RESULT | 
+Finding SF-2026-001  -  count #1 | 
+PART OF COUNT #1  (06-09-2026)  -- do not change this line | 
+ | 
+Date and time | 06-09-2026 08:03 IST
+Counted by | Darpan
+Entered by | Amir
+Recorded by | walk
+Marg stock as on | 06-09-2026  (processed here 06-09-2026 03:10)
+After bill | A003425 dated 2026-09-06
+Status | CLOSED -- stock check completed on 06-09-2026 08:
+  ok   the recent list says CLOSED -- completed
+  ok   A SHEET FOR A CLOSED COUNT IS REFUSED, in words, nothing recorded   Not recorded.
+Count #1 was CLOSED on 06-09-2026 08:03. This sheet belongs to it and cannot be added now -- nothing was recorded. For a new count, start again at step 1 and download a fresh pad.
+Nothing was written. If the sheet is right and this keeps happening, tell the doctor — with the file.
+  ok   ...nothing added
+  ok   closing an already-closed count changes nothing
+  ok   A PAD WITH BLANK TOP LINES, NO DETAILS ON THE PAGE: it ASKS, records nothing   One more thing before it is recorded.
+The sheet does not say who counted / who entered / the last bill number / the bill date. Fill that in above and upload the same file again.I have filled them in —
+  ok   ...nothing recorded
+  ok   ...the four boxes are marked
+  ok   ...FILL THEM IN, ONE TAP, THE SAME FILE IS RECORDED   Recorded as count #4.
+This sheet: 5 counted · 4 agree with Marg · 1 differ from Marg
+Whole count so far: 5 of 373 items 
+  ok   ...pinned to the bill from the boxes   ('A003440', '2026-09-07')
+  ok   ...counted by Shavez, from the boxes   [('Shavez',)]
+  ok   ...the marks are gone
+  ok   an incomplete count shows the checker a 'close as it stands' button    what is still to do. Fill the NOT COUNTED and SENT BACK TO FIX tabs, save it, and upload it at step 3. Repeat until this box says everything is counted.
+Doctor: close count #4 as it stands (368 left)
+  ok   ...once, not again in the list for the same count
+  ok   ...and in the list when the box is not showing it
+  ok   ...a counter sees no such button in the list
+  ok   ...AND THE SERVER REFUSES A COUNTER: 'some stock count is still left ... only the doctor'   {'error': 'incomplete', 'message': 'Some stock count is still left: 368 item(s) not counted, 0 row(s) to fix. Download the sheet and complete it. Only the doctor can close a count with work left.', 'ok': False, 'remaining': 368}
+  ok   ...nothing closed
+  ok   THE DOCTOR CLOSES IT AS IT STANDS -- asked once, plainly   ['CLOSE COUNT #4 AS IT STANDS?\n\nWork is still left on it. It will be closed as INCOMPLETE, no more sheets can be added, and the analysis and follow-up run on what was counted.']
+  ok   ...recorded as INCOMPLETE with what was left   ('incomplete', 368, 0)
+  ok   ...the box says closed by the doctor, what was left, no more sheets   STOCK CHECK CLOSED BY THE DOCTOR
+Count #4 was closed on 06-09-2026 08:03 IST by walk. It was closed as it stood: 368 not counted, 0 to fix. No more sheets can be added to it. For the next stock check, start again at step 1.
+Download the FINAL RESULT sheet
+  ok   ...the list says so too
+  ok   ...and its sheet is the FINAL RESULT   attachment; filename="STOCK_COUNT_06-09-2026_FINAL_RESULT.xlsx"
+  ok   A FILE THAT IS NOT A PAD IS REFUSED IN WORDS   Not recorded.
+that file could not be read as a count pad (BadZipFile).
+Nothing was written. If the sheet is right and this keeps happening, tell the doctor — with the file.
+  ok   a FRESH pad after a close starts a NEW count -- the loop is not blocked for good
+  ok   ...the picker is open again
+  ok   THE OLD ADDRESS /page/pad GOES TO THIS PAGE   (302, '/finance/stock/page/count')
+  ok   the recent list is one call, newest first, roots only   [4, 1]
+  ok   the on-screen button opens with the same four details
+  ok   ...and the counting screen comes up as before
+  ok   ...search still finds
+  ok   ...OK still counts
+  ok   no javascript error anywhere in that
+
+92 ok, 0 FAILED

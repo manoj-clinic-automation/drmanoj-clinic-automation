@@ -1,0 +1,8 @@
+S226_STOCK_CLOSE
+Session 226 · 06-Sep-2026
+The stock-check page as a numbered 1-2-3-4 flow; sheets named SHEET 1 / SHEET 2
+REMAINING / FINAL RESULT; "Close the stock check" appears only when the server
+verifies nothing is left, says STOCK CHECK COMPLETED, and the count takes no more
+sheets; the checker may close an abandoned count as it stands. Three files replaced:
+stock_app.py, padwriter.py, stock_check_live.html (padreader.py unchanged, f617d7d5).
+Supersedes S226_PAD_ONPAGE.
