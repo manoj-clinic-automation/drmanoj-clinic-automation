@@ -1,0 +1,20 @@
+S226_REVISIT -- ONE PASTE on the VPS after the publish. ONE LINE. One file.
+SAFE DURING A LIVE COUNT. Amir reloads once and carries on.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S226_REVISIT && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_check_live.html | cut -c1-8)" = "fe7d37aa" ] || { echo "REFUSED: kit sums or the live pin do not match -- NOTHING CHANGED"; false; } && \cp /root/finance/stock_check_live.html /root/finance/stock_check_live.html.bak_S226revisit_$(date +%Y%m%d) && \cp stock_check_live.html /root/finance/ && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- a counted item now shows its figure and opens filled in" && md5sum /root/finance/stock_check_live.html || (echo "SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; \cp /root/finance/stock_check_live.html.bak_S226revisit_$(date +%Y%m%d) /root/finance/stock_check_live.html; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; md5sum /root/finance/stock_check_live.html)
+
+Expected at the end:  UP -- a counted item now shows its figure and opens filled in
+                      bfdf4cde687021fd9b9b46fb16548e51  /root/finance/stock_check_live.html
+
+TELL DARPAN AND AMIR:
+  Reload once. Every item already counted will now show a line under it --
+  "you counted 305 - 20 strips 5 tablets - 11:04".
+  To change an item because more stock turned up: type its name in the search box.
+  It opens with your figure already in the boxes. Change the number, that is all.
+  Nothing has to be typed again from nothing.
+
+ROLLING BACK = the .bak_S226revisit_* file beside the live one, \cp it back, restart.
+
+OFFLINE EVIDENCE:
+  EVIDENCE_revisit_s226.txt             30/30 -- the revisit, the adjustment, the OK case
+  EVIDENCE_submit_regression_s226.txt   30/30 -- report and send, re-run unchanged

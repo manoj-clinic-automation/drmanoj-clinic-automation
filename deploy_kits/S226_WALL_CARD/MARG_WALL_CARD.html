@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Marg — the one-page card</title>
+<style>
+  @page { size: A4; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Arial, Helvetica, sans-serif; color:#000;
+         background:#fff; margin:0; padding:8mm; font-size:10.2pt; line-height:1.32; }
+  h1 { font-size:17pt; margin:0 0 1mm; letter-spacing:-.3px; }
+  .sub { font-size:8.6pt; color:#333; margin:0 0 3mm; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:4mm; }
+  .box { border:1.6pt solid #000; border-radius:2mm; padding:3mm 3.5mm; break-inside:avoid; }
+  .box.wide { grid-column:1 / -1; }
+  .box h2 { font-size:10.5pt; margin:0 0 2mm; text-transform:uppercase; letter-spacing:.6px;
+            border-bottom:1pt solid #000; padding-bottom:1mm; }
+  .num { display:inline-block; width:5mm; font-weight:700; }
+  code, .p { font-family:Consolas,"Courier New",monospace; font-size:8.8pt;
+             background:#f0f0f0; padding:0 1mm; word-break:break-all; }
+  ul { margin:0; padding-left:5mm; } li { margin-bottom:1.2mm; }
+  table { width:100%; border-collapse:collapse; font-size:9pt; }
+  td { padding:.8mm 1mm; vertical-align:top; border-bottom:.5pt solid #bbb; }
+  td:first-child { font-weight:600; white-space:nowrap; padding-right:2mm; }
+  .warn { border:1.6pt solid #000; background:#000; color:#fff; padding:2mm 3mm;
+          border-radius:1mm; margin-top:2mm; font-size:9.2pt; }
+  .warn b { color:#fff; }
+  .big { font-size:11pt; font-weight:700; }
+  .foot { margin-top:3mm; font-size:8pt; color:#333; border-top:.8pt solid #000; padding-top:1.5mm; }
+  @media print { body { padding:0; } .box { border-width:1.2pt; } }
+</style></head><body>
+
+<h1>MARG — THE ONE-PAGE CARD</h1>
+<p class="sub">Sanjeevni Medicos · true as at 06 Sep 2026 (S225) · full detail in <code>MARG_MEDICAL_CURRENT.md</code></p>
+
+<div class="grid">
+
+  <div class="box wide">
+    <h2>Is it working? — 60 seconds, no login</h2>
+    <table>
+      <tr><td><span class="num">1</span>THE ANSWER</td>
+          <td><code>D:\Downloads\margsync\MARG_PICTURE.txt</code> &nbsp;(this PC)<br>
+              Look for <b>days with NO export = 0</b> and <b>exports NOT on server = 0</b>.</td></tr>
+      <tr><td><span class="num">2</span>THE MACHINE</td>
+          <td><code>H:\My Drive\Clinic Data Archive\FromMedical\heartbeat.txt</code><br>
+              <b>WATCHER : ALIVE</b> · captures today · <b>BACKUP</b> age.</td></tr>
+      <tr><td><span class="num">3</span>IGNORE</td>
+          <td><code>_last_pull.txt</code> — it says <b>ok</b> even when everything failed.</td></tr>
+    </table>
+  </div>
+
+  <div class="box">
+    <h2>Generating the report</h2>
+    <p style="margin:0 0 2mm">On the <b>MEDICAL PC</b>: Marg → Daily Reports → Sale Reports →
+       <b>BILL WISE STATEMENT</b></p>
+    <ul>
+      <li><b>Report Type = Detail</b> &nbsp;(Summary-1 loses the CASH column)</li>
+      <li><b>With Item Deta. = Yes</b></li>
+      <li><b>Day Total = Yes</b> · Less Cr/Dr Adj. = Yes</li>
+      <li>Report For = <code>2 Sale-S/R-Brk</code> · 80 Col · Disc.Bill Sign = <code>2-Bill+Item</code></li>
+      <li>Operator / mobiles blank · Single Party, Group, COMPNA = N</li>
+    </ul>
+    <p style="margin:2mm 0 0">Export screen: separator <b>Header</b> · heading <b>No/1</b> ·
+       data from line <b>5</b> · ends <b>0</b> · <b>Formated</b></p>
+    <div class="warn"><b>EVERY MORNING, ONE EXPORT FOR THE LAST TWO DAYS</b> (yesterday and the day
+      before &mdash; the owner's default from 06-Sep-2026). A bill entered late for a closed day is caught
+      by the next morning's export; the server keeps the newer export of a day. <b>Never month-to-date
+      <i>with item detail</i></b> &mdash; it once stopped at day 6 of 15 and said nothing.</div>
+    <p style="margin:2mm 0 0"><b>Closing stock</b> (Marg → Stock Reports → closing stock, <b>whole store</b>):
+      every morning too, <b>after</b> every one of yesterday's bills &mdash; sale <i>and</i> purchase &mdash;
+      has been entered. It reaches the count page and the drift page within ten minutes on its own.
+      <b>Marg cannot re-issue a closing stock for a past date</b>: the export is always "as of now", so
+      whatever has not been entered by the time you take it is missing from that day for good.</p>
+    <p style="margin:2mm 0 0"><b>Purchases &mdash; ONE report, and mind the name.</b>
+      Marg → Purchase → <b>BILL ITEM WISE</b>, from the last export date to today. That single report is
+      enough: it carries the quantity <i>and</i> each bill's own date, so the stock figure can place every
+      purchase on the right day by itself (06-Sep-2026).</p>
+    <div class="warn" style="margin:2mm 0 0"><b>PURCHASE BILL ITEM WISE is not PURCHASE ITEM WISE.</b>
+      They are two different reports one word apart, and the wrong one costs a morning: on 06-Sep the
+      right data was exported three times into a reader that was looking at the other report, and the
+      stock figure sat unchanged at a four-day-old horizon while everybody assumed it was updating.</div>
+    <div class="warn" style="margin:2mm 0 0"><b>Enter a bill the day it arrives.</b> A purchase bill
+      entered days later reaches the books only from the day it is entered &mdash; and yesterday's closing
+      stock can never be taken again. On 06-Sep six bills dated 05-Sep were entered on the 6th; the
+      05&#8209;Sep comparison is wrong for ever, and eleven items show a gap that was never on the shelf.</div>
+    <p style="margin:2mm 0 0"><b>Stock-check morning:</b> enter every pending bill → export
+      <b>BILL ITEM WISE</b> purchases → export <b>closing stock</b> → wait ten minutes → count.</p>
+  </div>
+
+  <div class="box">
+    <h2>After you click — do nothing</h2>
+    <ul>
+      <li>The watcher copies it in <b>seconds</b>.</li>
+      <li>The pull collects it within <b>10 minutes</b>.</li>
+      <li>It appears on the clinic server for <b>you to approve</b>.</li>
+      <li>Confirm with box 1 — not by watching Marg.</li>
+    </ul>
+    <h2 style="margin-top:3mm">Deep check — read only</h2>
+    <p style="margin:0">Double-click on the <b>MEDICAL PC</b>:<br>
+      <code>F:\My Drive\Clinic Data Archive\ToMedical\MEDICAL_CENSUS.bat</code></p>
+    <p style="margin:1.5mm 0 0">Changes nothing. Writes <code>CENSUS.txt</code> and
+      <code>BACKUP.txt</code> into <b>FromMedical</b>, which come back on their own.</p>
+  </div>
+
+  <div class="box">
+    <h2>Backup — the crown jewels</h2>
+    <ul>
+      <li>Take a Marg backup <b>every 2–3 days</b>. It lands on <b>E:\</b>.</li>
+      <li>The agent copies it off-site to Drive <b>by itself</b>, within the hour.</li>
+      <li>The heartbeat shouts after <b>3 days</b> without one.</li>
+      <li>Back up <b>last financial year</b> too — it is rarely done.</li>
+    </ul>
+    <div class="warn"><b>A RESTORE MUST GO INTO A NEW OR TEST COMPANY.</b> Never over the
+      live one. If the engineer says it can only restore over the live company —
+      <b>stop and ask first.</b></div>
+  </div>
+
+  <div class="box">
+    <h2>If something is wrong</h2>
+    <table>
+      <tr><td>Report<br>never came</td><td>Is the medical PC on and logged in? Nothing runs until someone logs in.</td></tr>
+      <tr><td>Nothing<br>new arriving</td><td>Check box 2 — is the watcher ALIVE? Then run the deep check.</td></tr>
+      <tr><td>A day<br>is missing</td><td>Generate that one day again in Marg. It is picked up automatically.</td></tr>
+      <tr><td>Numbers<br>look wrong</td><td><b>Marg is right for the day TOTAL only.</b> Its CASH column overstates cash — home-medicine bills are booked as cash and never collected.</td></tr>
+    </table>
+  </div>
+
+  <div class="box wide">
+    <h2 style="color:#a00">If you ever run SEND_TO_CLINIC.bat by hand — read this first</h2>
+    <p style="margin:0 0 1.5mm"><b>It can say ACCEPTED when nothing was sent</b>, and that report
+    is then blocked from ever being sent again by itself. (Known fault AF-1 / F-206. The fix is
+    queued; until then this is the whole of what you need to know.)</p>
+    <table>
+      <tr><td style="width:26%"><b>Do not trust<br>the ACCEPTED line</b></td>
+          <td>Check the clinic server instead: <code>/finance/approvals</code> must show that
+          day&#39;s export. That page is the truth; the batch&#39;s own words are not.</td></tr>
+      <tr><td><b>If it is<br>not there</b></td>
+          <td>The send did <b>not</b> happen, however the batch read. Tell Claude the report and
+          the date &mdash; the block has to be cleared or it stays for ever.</td></tr>
+      <tr><td><b>Better:<br>do not use it</b></td>
+          <td>manojz sends every verified report by itself every ten minutes.
+          <code>D:\Downloads\margsync\_UPLOAD_NOW\</code> is <b>empty</b> when there is nothing
+          to do by hand. This batch is only for when manojz is unavailable.</td></tr>
+    </table>
+  </div>
+
+  <div class="box wide">
+    <p class="big" style="margin:0 0 1.5mm">Three things that are easy to get wrong</p>
+    <table>
+      <tr><td style="width:33%">Never trust <code>_last_pull.txt</code></td>
+          <td style="width:34%">Never export month-to-date with item detail</td>
+          <td>Never use Marg's CASH column as the cash figure</td></tr>
+    </table>
+  </div>
+
+</div>
+
+<p class="foot"><b>Send Claude:</b> <code>MARG_PICTURE.txt</code>, <code>heartbeat.txt</code>,
+and <code>BACKUP.txt</code> — those three answer almost everything.
+&nbsp;·&nbsp; Full reference: <code>D:\Downloads\margsync\MARG_MEDICAL_CURRENT.md</code>
+&nbsp;·&nbsp; Why it is like this: <code>MARG_MEDICAL_HISTORY.md</code></p>
+
+</body></html>

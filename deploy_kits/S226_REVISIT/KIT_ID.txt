@@ -1,0 +1,4 @@
+S226_REVISIT
+Session 226 · 06-Sep-2026 · one file, the counting page.
+An item already counted now shows what was counted, and opens filled in when it
+is looked at again. The counters' own complaint, during the first real count.
