@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock loss — your desk</title>
+<style>
+/* S228 LOSS DESK -- the owner, 06-Sep-2026: "a real assessment of the loss of
+   pharmacy from my side, item and qty wise, for my record -- I do the play here."
+   HIS page. Three lines at the top (D383: the conclusion first), the sections in
+   his order -- where the money is, where the quantity is, the rest -- and one tap
+   per line. The workings sit folded behind the item's name. English (D369, D-en);
+   same tokens as the desk and the report; both colour schemes. */
+:root{
+  --ground:#F6F8F7;--surface:#FFF;--surface-2:#EDF2F0;--ink:#15201E;--ink-2:#3D4B48;--muted:#66756F;--line:#D9E2DF;
+  --accent:#0E5C58;--on-accent:#FFF;--accent-soft:#D8E9E6;--ok:#0E5C58;--diff:#8C3A2B;--diff-soft:#F6E3DF;--warn:#8A5A12;--warn-soft:#F7ECD8;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}}
+:root[data-theme="dark"]{
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+.wrap{max-width:640px;margin:0 auto;padding:12px 12px 40px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+h1{font-size:19px;margin:0}.sub{color:var(--muted);font-size:13px}
+/* the three lines, and nothing else, at the top */
+.tally{position:sticky;top:0;z-index:5;background:var(--surface);border:1.5px solid var(--accent);border-radius:12px;padding:12px 14px;margin:10px 0 4px;box-shadow:0 8px 24px -18px rgba(0,0,0,.4)}
+.tally .l1{font-size:20px;font-weight:700;line-height:1.25}
+.tally .l2{font-size:15px;color:var(--ink-2);margin-top:2px}
+.tally .l3{font-size:13.5px;color:var(--muted);margin-top:2px}
+.tally .go{margin-top:10px}
+button.b,a.b{display:block;width:100%;font:inherit;font-size:16px;font-weight:700;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left;min-height:48px;text-decoration:none}
+button.b.main,a.b.main{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+button.b small,a.b small{display:block;font-weight:400;font-size:13px;color:var(--muted);margin-top:2px}
+button.b.main small,a.b.main small{color:var(--on-accent);opacity:.85}
+button.b.grey{border-color:var(--line);color:var(--muted);font-weight:600;font-size:14.5px;min-height:40px}
+button.b:disabled{opacity:.5;cursor:default}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 8px 24px -18px rgba(0,0,0,.3)}
+.card h2{font-size:17px;margin:0 0 2px}.card h2 .n{display:inline-block;min-width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;background:var(--accent);color:var(--on-accent);font-size:13px;margin-right:8px}
+.lead{font-size:13.5px;color:var(--muted);margin:2px 0 8px}
+.secsum{font-size:14px;color:var(--ink-2);font-weight:600;margin:2px 0 8px}
+/* one line = one tap */
+.li{display:grid;grid-template-columns:48px 1fr auto;gap:8px;align-items:start;padding:10px 8px;border-top:1px solid var(--line)}
+.li:first-of-type{border-top:0}
+.li .tick{grid-row:1/3;width:44px;height:44px;border-radius:10px;border:2px solid var(--line);background:var(--surface);cursor:pointer;font-size:22px;line-height:1;padding:0;color:var(--muted)}
+.li.on .tick{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.li .n{font-weight:700;font-size:15px;cursor:pointer}
+.li .q{color:var(--ink-2);font-size:13.5px}
+.nb{white-space:nowrap}
+.back{color:var(--ok);font-weight:700}
+.li .v{text-align:right;white-space:nowrap;font-weight:700;font-size:15px;color:var(--diff)}
+.li .v small{display:block;font-weight:400;font-size:13px;color:var(--muted)}
+.li.on{background:var(--accent-soft);border-radius:10px}
+.li.gone{opacity:.7}.li .tick.done{display:flex;align-items:center;justify-content:center;width:44px;height:44px;color:var(--ok);font-size:19px;font-weight:700;background:none;border:0}
+.li .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 7px;margin-left:6px}
+.work{grid-column:2/4;margin-top:6px;padding:9px 10px;background:var(--surface-2);border-radius:8px;font-size:13px;color:var(--ink-2)}
+.work div{padding:2px 0}
+.none{color:var(--muted);font-style:italic;font-size:14px;padding:6px 0}
+.share{border:1.5px solid var(--line);border-radius:12px;padding:12px;margin:10px 0;background:var(--surface-2)}
+.share .h{font-weight:700;font-size:15.5px}.share .m{font-size:13px;color:var(--muted)}
+.share .tot{font-size:15px;font-weight:700;margin-top:4px}
+.share .got{font-size:14px;color:var(--ok);font-weight:700}
+.rl{font-size:13px;padding:4px 0;border-top:1px solid var(--line)}
+.rec{margin-top:8px;display:grid;grid-template-columns:1fr;gap:6px}
+.rec select,.rec input{font:inherit;font-size:15px;padding:9px 10px;border-radius:9px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);width:100%}
+.msg{display:block;font-size:13.5px;color:var(--accent);margin-top:6px;min-height:18px}
+.msg.bad{color:var(--diff);font-weight:700}
+.tr{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.tr .st{font-size:12.5px;color:var(--muted)}
+.tr div:last-child{display:flex;gap:6px;flex-wrap:wrap}.tr a.b,.tr button.b{width:auto;font-size:14px;padding:8px 12px;min-height:0}
+.foot{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+.foot a{font-size:14px;color:var(--accent);font-weight:600;text-decoration:none;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.err{color:var(--diff);font-weight:700}
+</style></head><body><div class="wrap">
+<div class="top"><h1>Stock loss — your desk</h1><span class="sub" id="who"></span></div>
+<div id="tally"></div>
+<div id="body"><div class="card"><span class="sub">Loading…</span></div></div>
+<div class="foot" id="foot"></div>
+</div>
+<script>
+/*__BOOT__*/
+const BASE="/finance/stock";
+const B=window.BOOT||{count_id:0,user:"",checker:false};
+let D=null, OPEN=new Set(), SHOWALL=new Set(), BUSY=false, MSG=null;
+const FOLD=8;
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function rs(p){ if(p==null) return "-"; const neg=p<0; let n=Math.abs(Math.round(p)); const paise=n%100; n=Math.floor(n/100);
+  let s=String(n); if(s.length>3){ let head=s.slice(0,-3), tail=s.slice(-3), parts=[]; while(head.length>2){parts.unshift(head.slice(-2));head=head.slice(0,-2);} if(head)parts.unshift(head); s=parts.join(",")+","+tail; }
+  return (neg?"-":"")+"Rs "+s+(paise?"."+String(paise).padStart(2,"0"):""); }
+function units(n,ps){ n=Math.abs(Number(n||0)); ps=Number(ps||1);
+  if(ps<=1) return n+" pc"+(n===1?"":"s"); const s=Math.floor(n/ps), t=n%ps; const b=[]; if(s)b.push(s+" strip"+(s===1?"":"s")); if(t)b.push(t+" tab"+(t===1?"":"s")); return b.join(" ")||"0 strips"; }
+
+function load(){
+  fetch(BASE+"/api/loss/"+B.count_id).then(r=>r.json()).then(j=>{
+    if(!j.ok){ document.getElementById("body").innerHTML='<div class="card err">'+esc(j.message||"could not read the count")+'</div>'; return; }
+    D=j; render();
+  }).catch(()=>{ document.getElementById("body").innerHTML='<div class="card err">The server did not answer. Check the internet and reload.</div>'; });
+}
+
+/* THE THREE LINES -- the conclusion first, nothing folded into it (D383, ruling 17). */
+function tally(){
+  const t=D.totals;
+  let l1, l2, l3;
+  if(t.ticked){
+    l1=rs(t.mrp_p)+" — "+t.ticked+" item"+(t.ticked===1?"":"s")+" marked as lost.";
+    l2=rs(t.cost_p)+" is what those cost you.";
+  }else{
+    l1=t.open_lines?(rs(t.all_mrp_p)+" short — "+t.open_lines+" item"+(t.open_lines===1?"":"s")+" still to look at."):"Every short item is with Darpan now.";
+    l2=t.open_lines?(rs(t.all_cost_p)+" is what those cost you."):"Nothing left on your side to mark.";
+  }
+  l3 = t.shared_p ? (rs(t.standing_p)+" still standing — "+rs(t.recovered_p)+" back of "+rs(t.shared_p)+" given to him.")
+                  : "Mark a line to put it on the sheet you give him.";
+  const can = t.ticked>0;
+  const go = t.open_lines
+    ? '<div class="go"><button class="b main" id="mkshare"'+(can?'':' disabled')+'>Make the sheet for Darpan'+(can?' ('+t.ticked+' item'+(t.ticked===1?"":"s")+')':'')+'<small>'+(can?'Frozen the moment you make it, and kept on the server':'Mark the lines you accept as a real loss first')+'</small></button><span class="msg" id="shmsg"></span></div>'
+    : '<div class="go"><span class="msg" id="shmsg"></span></div>';
+  document.getElementById("tally").innerHTML='<div class="tally"><div class="l1">'+esc(l1)+'</div><div class="l2">'+esc(l2)+'</div><div class="l3">'+esc(l3)+'</div>'+go+'</div>';
+}
+
+function line(r){
+  const on=r.ticked, o=OPEN.has(r.item);
+  let h='<div class="li'+(on?' on':'')+(r.shared?' gone':'')+'" data-item="'+esc(r.item)+'">';
+  h+=(r.shared?'<div class="tick done" aria-hidden="true">✓</div>':'<button class="tick" data-tick="'+esc(r.item)+'" aria-label="mark as lost">'+(on?'✓':'')+'</button>');
+  h+='<div><div class="n" data-open="'+esc(r.item)+'">'+esc(r.item)+(r.shared?'<span class="tag">on sheet '+r.sheet_no+'</span>':'')+(r.word?'<span class="tag">'+esc(r.word)+'</span>':'')+'</div>'
+    +'<div class="q"><span class="nb">short '+esc(r.short_text||units(r.short_units,r.pack))+'</span>'+(r.mrp_unit_p!=null?' · <span class="nb">MRP '+rs(r.mrp_unit_p)+' each</span>':' · no MRP on record')+(r.frozen?' · <span class="nb">as on sheet '+r.sheet_no+'</span>':'')+(r.back_p?' · <span class="nb back">'+rs(r.back_p)+' back</span>':'')+'</div></div>';
+  h+='<div class="v"><span class="nb">'+(r.loss_mrp_p!=null?rs(r.loss_mrp_p):'no price')+'</span><small class="nb">'+(r.loss_cost_p!=null?rs(r.loss_cost_p)+' at cost':'not priced')+'</small></div>';
+  if(o){
+    h+='<div class="work">'
+      +'<div><b>Marg</b> '+esc(units(r.marg,r.pack))+' · <b>counted</b> '+esc(units(r.counted,r.pack))+(r.packing?' · pack '+esc(r.packing):'')+'</div>'
+      +'<div><b>Where it sits:</b> '+esc(r.lane_title||'-')+(r.why?' — '+esc(r.why):'')+'</div>'
+      +(r.sold_fy!=null?'<div><b>Sold this year:</b> '+esc(units(r.sold_fy,r.pack))+(r.last_sale?' · last sale '+esc(r.last_sale):'')+'</div>':'')
+      +(r.last_purchase?'<div><b>Last bought:</b> '+esc(r.last_purchase)+'</div>':'')
+      +(r.answer?'<div><b>Reason on record:</b> '+esc(r.answer)+'</div>':'')
+      +(r.salt?'<div><b>Salt:</b> '+esc(r.salt)+'</div>':'')
+      +(r.consumable?'<div>A consumable — used on patients, never sold across the counter.</div>':'')
+      +(r.life?'<div><a href="'+esc(r.life)+'" target="_blank" rel="noopener">The whole life of this item</a></div>':'')
+      +'</div>';
+  }
+  return h+'</div>';
+}
+
+function section(s){
+  if(!s.rows.length) return '';
+  const mine=s.rows.filter(r=>!r.shared);
+  const open=SHOWALL.has(s.key)||s.rows.length<=FOLD+2;
+  const shown=open?s.rows:s.rows.slice(0,FOLD);
+  const hidden=s.rows.length-shown.length;
+  const sum=s.rows.reduce((a,r)=>a+(r.loss_mrp_p||0),0);
+  const n=mine.filter(r=>r.ticked).length;
+  const all=mine.length&&n===mine.length;
+  return '<div class="card"><h2>'+esc(s.title)+'</h2><div class="lead">'+esc(s.blurb)+'</div>'
+    +'<div class="secsum">'+s.rows.length+' item'+(s.rows.length===1?"":"s")+' · '+rs(sum)+' at MRP'+(n?' · '+n+' marked':'')+'</div>'
+    +(shown.map(line).join(""))
+    +(hidden?'<div style="margin-top:6px"><button class="b grey" data-show="'+esc(s.key)+'">Show the other '+hidden+' item'+(hidden===1?"":"s")+'</button></div>':'')
+    +(mine.length?'<div style="margin-top:10px"><button class="b grey" data-all="'+esc(s.key)+'" data-on="'+(all?0:1)+'">'+(all?'Un-mark all of these':'Mark all of these as lost')+'</button></div>':'')
+    +'</div>';
+}
+
+function shareCard(s){
+  const g=s.got;
+  const items=s.lines.map(l=>l.item);
+  const done={}; (s.recoveries||[]).forEach(r=>{done[r.item]=r;});
+  const opts=items.map(i=>'<option value="'+esc(i)+'">'+esc(i)+(done[i]?' (already answered)':'')+'</option>').join("");
+  return '<div class="share"><div class="h">Sheet '+s.no+' — '+esc(s.to_whom)+'</div>'
+    +'<div class="m">made '+esc(s.made_text)+' IST by '+esc(s.made_by||'you')+' · '+s.items+' item'+(s.items===1?"":"s")+' · fingerprint '+esc((s.md5||"").slice(0,8))+'</div>'
+    +'<div class="tot">'+rs(s.total_p)+' at MRP'+(s.unpriced?' · '+s.unpriced+' line'+(s.unpriced===1?"":"s")+' without a price':'')+'</div>'
+    +(g.recovered_p?'<div class="got">Recovered so far: '+rs(g.recovered_p)+(g.found_p?' — of which '+rs(g.found_p)+' came back as stock':'')+'</div>':'')
+    +(s.recoveries||[]).map(r=>{const L=s.lines.find(x=>x.item===r.item)||{};
+        const what=(r.kind==="FOUND")?('found '+units(r.units,L.pack||1)+' on the shelf'):((r.kind==="MONEY")?(rs(r.amount_p)+' recovered'):'accepted as lost');
+        return '<div class="rl"><b>'+esc(r.item)+'</b> — '+esc(what)+(r.note?' · '+esc(r.note):'')+'<div class="m">'+esc(r.at_text)+'</div></div>';}).join("")
+    +'<div style="margin-top:8px"><a class="b" href="'+esc(s.pdf)+'" target="_blank" rel="noopener">Open / print this sheet<small>A4 portrait — exactly as it was shared</small></a></div>'
+    +'<div class="rec" data-share="'+s.id+'">'
+      +'<select class="ritem">'+opts+'</select>'
+      +'<select class="rkind"><option value="ACCEPTED">Accepted as lost</option><option value="FOUND">Found on the shelf</option><option value="MONEY">Money recovered</option></select>'
+      +'<input class="rnum" type="number" min="0" step="1" placeholder="How many found / how many rupees" hidden>'
+      +'<input class="rnote" type="text" placeholder="Note (optional)">'
+      +'<button class="b" data-rec="'+s.id+'">Log this against sheet '+s.no+'</button><span class="msg" id="rmsg'+s.id+'"></span></div>'
+    +'</div>';
+}
+
+function render(){
+  document.getElementById("who").textContent=(B.user?B.user+" · ":"")+"count #"+D.count_id+(D.day?" of "+D.day:"");
+  tally();
+  let h="";
+  const secs=(D.sections||[]).filter(s=>s.rows.length);
+  if(!secs.length) h+='<div class="card"><div class="none">No item came up short on this count.</div></div>';
+  h+=secs.map(section).join("");
+  const S=D.shares||[];
+  h+='<div class="card"><h2>Sheets you have shared</h2>'
+    +'<div class="lead">Each one is frozen as it was handed over. Log what comes back against it; the log is kept for the next stock check.</div>'
+    +(S.length?S.map(shareCard).join(""):'<div class="none">None yet.</div>')+'</div>';
+  h+=tranches();
+  document.getElementById("body").innerHTML=h;
+  document.getElementById("foot").innerHTML='<a href="'+esc(D.links.desk)+'">Back to your decisions</a><a href="'+esc(D.links.report)+'">Full report (read)</a><a href="'+esc(D.links.amir)+'">Amir\'s board</a>';
+  if(MSG){ const el=document.getElementById(MSG.id); if(el){ el.className="msg"+(MSG.bad?" bad":""); el.textContent=MSG.text; } }
+}
+
+/* Darpan's lists in turns -- moved here from Amir's board. Same engine. */
+function tranches(){
+  const T=D.tranches||[], open=k=>T.filter(t=>t.kind===k&&!t.returned_at);
+  const row=t=>'<div class="tr"><div><b>List '+t.no+' — '+(t.kind==="ortho"?"orthotics":"medicines")+'</b> · '+t.items.length+' items<div class="st">given '+esc(t.issued_text)+(t.returned_at?' · back '+esc(t.returned_text):' · <b>with Darpan</b>')+'</div></div>'
+    +'<div><a class="b" href="'+esc(t.pdf)+'" target="_blank" rel="noopener">Print</a>'+(t.returned_at?'':'<button class="b main" data-ret="'+t.id+'">He returned it</button>')+'</div></div>';
+  return '<div class="card"><h2>Darpan\'s lists — in turns</h2>'
+    +'<div class="lead">A different job from the sheets above: these lists are for COUNTING AGAIN, not for explaining a loss. Ten items at a time — quantities only, no rates. Print it, hand it over, mark it returned when it comes back. Amir types his answers on his own board.</div>'
+    +(T.length?T.map(row).join(""):'<div class="none">No list cut yet.</div>')
+    +'<div style="margin-top:10px">'+(open("med").length?'':'<button class="b main" data-next="med">Cut the next medicines list ('+(D.pool.med||0)+' left)</button>')
+    +(open("ortho").length?'':'<button class="b" data-next="ortho">Cut the next orthotics list ('+(D.pool.ortho||0)+' left)</button>')+'</div><span class="msg" id="tmsg"></span></div>';
+}
+
+async function post(url, body){
+  const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})}).catch(()=>null);
+  return r?await r.json().catch(()=>null):null;
+}
+function say(el, j, good){ if(!el) return; const t=(j&&j.message)||"The server did not answer.";
+  el.className="msg"+(good?"":" bad"); el.textContent=t; if(el.id) MSG={id:el.id, text:t, bad:!good}; }
+
+document.addEventListener("change", e=>{
+  const k=e.target.closest(".rkind"); if(!k) return;
+  const box=k.closest(".rec"), num=box.querySelector(".rnum");
+  num.hidden=(k.value==="ACCEPTED");
+  num.placeholder=(k.value==="FOUND")?"How many were found (tablets or pieces)":"How many rupees were recovered";
+});
+
+document.addEventListener("click", async e=>{
+  const t=e.target;
+  const sh=t.closest("[data-show]");
+  if(sh){ SHOWALL.add(sh.getAttribute("data-show")); render(); return; }
+  const op=t.closest("[data-open]");
+  if(op){ const it=op.getAttribute("data-open"); if(OPEN.has(it)) OPEN.delete(it); else OPEN.add(it); render(); return; }
+  const tk=t.closest("[data-tick]");
+  if(tk && !BUSY){ BUSY=true; const it=tk.getAttribute("data-tick");
+    const row=(D.sections||[]).flatMap(s=>s.rows).find(r=>r.item===it);
+    const j=await post(BASE+"/api/loss/"+D.count_id+"/tick",{items:[it],on:!(row&&row.ticked)});
+    BUSY=false; if(j&&j.ok){ load(); } else { say(document.getElementById("shmsg"), j, false); }
+    return; }
+  const al=t.closest("[data-all]");
+  if(al && !BUSY){ BUSY=true; const key=al.getAttribute("data-all"), on=al.getAttribute("data-on")==="1";
+    const s=(D.sections||[]).find(x=>x.key===key)||{rows:[]};
+    const j=await post(BASE+"/api/loss/"+D.count_id+"/tick",{items:s.rows.filter(r=>!r.shared).map(r=>r.item),on:on});
+    BUSY=false; if(j&&j.ok){ load(); } else { say(document.getElementById("shmsg"), j, false); }
+    return; }
+  if(t.closest("#mkshare") && !BUSY){ BUSY=true; const m=document.getElementById("shmsg"); m.className="msg"; m.textContent="Making the sheet…";
+    const j=await post(BASE+"/api/loss/"+D.count_id+"/share",{}); BUSY=false;
+    say(m, j, !!(j&&j.ok)); if(j&&j.ok){ setTimeout(load, 700); }
+    return; }
+  const rc=t.closest("[data-rec]");
+  if(rc && !BUSY){ BUSY=true; const box=rc.closest(".rec"), m=box.querySelector(".msg");
+    const kind=box.querySelector(".rkind").value, num=box.querySelector(".rnum").value;
+    const body={share_id:Number(box.getAttribute("data-share")), item:box.querySelector(".ritem").value, kind:kind, note:box.querySelector(".rnote").value};
+    if(kind==="FOUND") body.units=Number(num||0); if(kind==="MONEY") body.amount=Number(num||0);
+    m.className="msg"; m.textContent="Saving…";
+    const j=await post(BASE+"/api/loss/"+D.count_id+"/recovery", body); BUSY=false;
+    say(m, j, !!(j&&j.ok)); if(j&&j.ok){ setTimeout(load, 700); }
+    return; }
+  const nx=t.closest("button[data-next]");
+  if(nx && !BUSY){ BUSY=true; const m=document.getElementById("tmsg"); m.className="msg"; m.textContent="Cutting…";
+    const j=await post(BASE+"/api/pad/tranche/"+D.count_id+"/next",{kind:nx.getAttribute("data-next")}); BUSY=false;
+    say(m, j, !!(j&&j.ok)); if(j&&j.ok){ setTimeout(load, 700); }
+    return; }
+  const rt=t.closest("button[data-ret]");
+  if(rt && !BUSY){ BUSY=true;
+    const j=await post(BASE+"/api/pad/tranche/"+D.count_id+"/"+rt.getAttribute("data-ret")+"/returned",{}); BUSY=false;
+    if(j&&j.ok){ load(); } else { say(document.getElementById("tmsg"), j, false); }
+    return; }
+});
+load();
+</script></body></html>

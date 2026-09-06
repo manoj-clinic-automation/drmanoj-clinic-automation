@@ -1,0 +1,86 @@
+S228_LOSS_DESK -- ONE PASTE on the VPS after the publish. ONE LINE.
+Five files installed: stock_app.py, pad_receipt.py, stock_amir.html, stock_desk.html, stock_loss.html (NEW).
+Refuses -- and changes NOTHING -- unless the kit sums check and the live pins are those the S227 close printed:
+stock_app.py 8eef6420, pad_receipt.py a52751f4, stock_amir.html 56ed926f, stock_desk.html f044a5db.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S228_LOSS_DESK && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_app.py | cut -c1-8)" = "8eef6420" ] && [ "$(md5sum /root/finance/pad_receipt.py | cut -c1-8)" = "a52751f4" ] && [ "$(md5sum /root/finance/stock_amir.html | cut -c1-8)" = "56ed926f" ] && [ "$(md5sum /root/finance/stock_desk.html | cut -c1-8)" = "f044a5db" ] || { echo "REFUSED: kit sums or the live pins do not match -- NOTHING CHANGED"; false; } && for f in stock_app.py pad_receipt.py stock_amir.html stock_desk.html; do \cp /root/finance/$f /root/finance/$f.bak_S228loss_$(date +%Y%m%d); done && \cp stock_app.py pad_receipt.py stock_amir.html stock_desk.html stock_loss.html /root/finance/ && (/root/wa/venv/bin/python3 -B -c "import py_compile;[py_compile.compile('/root/finance/'+f,doraise=True,cfile='/tmp/s228l_'+f+'.pyc') for f in ('stock_app.py','pad_receipt.py')]" && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- your loss desk, the frozen sheet for Darpan, recoveries logged, Darpan's lists on your page" && md5sum /root/finance/stock_app.py /root/finance/pad_receipt.py /root/finance/stock_amir.html /root/finance/stock_desk.html /root/finance/stock_loss.html || (echo "COMPILE FAILED OR SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; for f in stock_app.py pad_receipt.py stock_amir.html stock_desk.html; do \cp /root/finance/$f.bak_S228loss_$(date +%Y%m%d) /root/finance/$f; done; rm -f /root/finance/stock_loss.html; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; journalctl -u clinic-finance.service -n 12 --no-pager)); rm -f /tmp/s228l_*.pyc
+
+Expected at the end:  UP -- your loss desk, the frozen sheet for Darpan, recoveries logged, Darpan's lists on your page
+                      c8e2a6b8a1a9e15ad4e5132049027924  /root/finance/stock_app.py
+                      49ced28771a84f02f6276bbbe297443c  /root/finance/pad_receipt.py
+                      adf206b54cc55e88626089a7f3482fd0  /root/finance/stock_amir.html
+                      54aeda96ba022b30b21bdb9f77616a18  /root/finance/stock_desk.html
+                      0d77203482d668d8d00e5145682c841f  /root/finance/stock_loss.html
+
+YOUR LOSS DESK (new page, yours alone -- a member of staff opening it is refused):
+
+  https://followup.dr-manoj.in/finance/stock/page/loss?count=1
+
+  THE THREE LINES AT THE TOP, and nothing else:
+      Rs 9,561 short - 19 items still to look at.
+      Rs 6,917 is what those cost you.
+      Mark a line to put it on the sheet you give him.
+  and once a sheet is out, the third line reconciles on its own:
+      Rs 7,861 still standing - Rs 1,700 back of Rs 9,561 given to him.
+
+  WHERE THE MONEY IS   every shortage worth Rs 1,000 or more at MRP, biggest first
+  WHERE THE QUANTITY IS 10 or more short and not already above -- the lines that never
+                        surface by value (15 strips gone, and only Rs 75 of it)
+  THE REST              largest value first; a section over ten folds after eight
+  Each line: the shortage in strips and tabs (pcs on a pack-1 item), the MRP each,
+  the loss at MRP, and under it the loss at cost. One tap on the NAME opens the
+  workings -- Marg, the shelf, the lane, what it sold this year, the reason on
+  record; one tap on the BOX marks it as a real loss.
+
+  MAKE THE SHEET FOR DARPAN  freezes what you have marked: an A4 PORTRAIT sheet with
+  the item, the shortage, the MRP each, the loss at MRP, a total, and an empty box
+  per line for his answer -- NO purchase rate anywhere on it. The sheet is kept on
+  the server under its own fingerprint and reprints tomorrow byte for byte as it was
+  handed over, even if a price moves afterwards. A line that is on a sheet leaves
+  your side: it shows "on sheet 1", keeps the sheet's own figure, and can never go
+  out twice.
+
+  WHAT COMES BACK   against each sheet: found on the shelf (valued at the price that
+  was ON that sheet), money recovered, or accepted as lost. Every entry is logged with
+  the hour, shows on the line itself, and is kept for the next stock check.
+
+  DARPAN'S LISTS IN TURNS are now on THIS page (D389) -- cut, print, mark returned.
+  Amir's board keeps the typing of his answers, and nothing else about the lists.
+
+WHAT ELSE CHANGES
+  The decision desk's foot gains "Your loss desk" as its first link. Amir's board
+  loses the cut / print / returned buttons for Darpan's lists and gains a plain line
+  saying which list is with him; his typing table, four columns on a 390px phone,
+  now scrolls sideways instead of being sliced by the card edge.
+
+ROLLING BACK = the four .bak_S228loss_* files beside the live ones, \cp each back,
+delete /root/finance/stock_loss.html, restart. The three new tables are created on
+first request and are harmless if left behind.
+
+OFFLINE EVIDENCE -- 496 checks in a real browser at phone width (390px), 0 failures:
+  EVIDENCE_loss_s228.txt  93/93  the door (a member of staff is refused the page, the
+        numbers and a recovery) · only shortages, never the line that came up over ·
+        the money section, the quantity section, the rest, no line in two of them ·
+        Rs 4,800 at MRP and Rs 3,600 at cost on one line, 2 pcs and 40 strips in the
+        shop's own words · an item that never sold carries no price rather than a
+        made-up one · three lines at the top and no fourth · one tap marks, a second
+        un-marks, MARK ALL takes a section · the sheet frozen: kept on disk under its
+        md5, A4 portrait, one page, no cost column, and BYTE-IDENTICAL after a price
+        change · a line already on a sheet keeps the sheet's figure and cannot go out
+        twice · 100 strips found valued at the sheet's own price, money in rupees,
+        accepted-as-lost logged, an item not on the sheet refused · the lists cut,
+        printed (still no rupee on them) and marked returned from his page · Amir's
+        board gave the lists up and kept the typing · the desk links here
+  EVIDENCE_regress_pad_proof_s227 65/65 · audit 53/53 · desk 47/47 · lanes 46/46 ·
+  report 46/46 · diff_sheet 41/41 · count_search 34/34 · submit_flow 30/30 ·
+  staff 28/28 · safestore 13/13
+  WALK_staff_s227 was UPDATED, not the product: it asserted that Darpan's lists live
+  on Amir's board, which is the shape D389 supersedes. It now asserts the new one.
+
+  Sub-agent screen reads, three rounds. The first found four real defects behind 79
+  green checks -- a pack line sliced by the row rule on the printed sheet, a second
+  sheet re-listing everything already on the first (asking Darpan the same thing
+  twice and counting the money twice), a top box carrying five figures across eight
+  lines, and tick boxes too small for a thumb. The second found the screen and the
+  paper disagreeing on a repriced item, and a headline that did not reconcile with
+  the page under it. The third found nothing left to fix.

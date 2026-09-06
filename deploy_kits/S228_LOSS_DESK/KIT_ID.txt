@@ -1,0 +1,35 @@
+KIT           S228_LOSS_DESK
+SESSION       228
+DATE          06-Sep-2026
+RULING        D389 -- the owner's loss desk; S228_BUILD_BRIEF item 4 (and item 3,
+              Darpan's lists moving to the owner's page).
+
+WHAT IT ADDS  A page that is the owner's alone: every shortage on the count, priced
+              at MRP and at cost, with the money first and the quantity second; he
+              marks the lines he accepts as a real loss; he makes an A4 PORTRAIT
+              sheet for Darpan that is FROZEN the moment it is made and kept on the
+              server; he logs what comes back against that sheet. Darpan's lists in
+              turns move here from Amir's board; Amir keeps the typing.
+
+FILES INSTALLED (5)
+  stock_app.py     8eef6420 -> c8e2a6b8
+  pad_receipt.py   a52751f4 -> 49ced287
+  stock_amir.html  56ed926f -> adf206b5
+  stock_desk.html  f044a5db -> 54aeda96
+  stock_loss.html  NEW      -> 0d772034
+
+FILES IN THE KIT BUT NOT INSTALLED (the walks lean on them, unchanged at S227)
+  stock_check_live.html 3d6a2fb8 · stock_report.html 9be950f2 · padreader.py · padwriter.py
+
+TABLES CREATED ON FIRST REQUEST (F-303)
+  stock_loss_tick · stock_loss_share · stock_loss_recovery
+FOLDER CREATED ON FIRST SHEET
+  pad_uploads/loss_shares/<md5>.pdf -- the copy that was shared, kept unchanged
+
+EVIDENCE   496 checks, 0 failures, in a real browser at 390px:
+  EVIDENCE_loss_s228              93   the new page, the door, the sheet, the freeze, the recoveries
+  EVIDENCE_regress_pad_proof_s227 65 · audit 53 · desk 47 · lanes 46 · report 46 ·
+  diff_sheet 41 · count_search 34 · submit_flow 30 · staff 28 · safestore 13
+  Screens read three times by a sub-agent; the third read found nothing left to fix.
+
+NEXT FREE   D390 · F-340

@@ -1,0 +1,108 @@
+ * Serving Flask app 'walk_loss'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:8851
+Press CTRL+C to quit
+  ok   a real count is recorded through the page
+  ok   THE DOOR: a member of staff cannot open the loss desk   403
+  ok   ...nor read its numbers through the API   403
+  ok   the owner can   200
+  ok   the board answers
+  ok   EVERY SHORTAGE IS ON THE DESK -- 19 of them, the fourteen ordinary medicines included
+  ok   an item that came up OVER is not on a loss desk at all
+  ok   no line is in two sections   19
+  ok   WHERE THE MONEY IS, biggest first: the tablet at Rs 4,800 then the brace at Rs 3,000   ['TYRO BR TAB', 'KNEE BRACE HINGED UNISON']
+  ok   WHERE THE QUANTITY IS: 15 strips short but only Rs 75 -- it would never have surfaced by value   ['CHEAPO SALT TAB']
+  ok   THE REST holds the three-tablet line, the one with no price and the fourteen ordinary medicines
+  ok   ...largest value first inside it, so the rest is not a heap
+  ok   the tablet: 40 strips short, Rs 4,800 at MRP, Rs 3,600 at cost   ('40 strips', 480000, 360000)
+  ok   the brace: 2 pcs short, Rs 3,000 at MRP, Rs 2,000 at cost -- pieces, never 'units'   ('2 pcs', 300000, 200000)
+  ok   the item that never sold carries NO price rather than a made-up one
+  ok   ...and the desk says how many lines that is, so the total is honest beside it   1
+  ok   the whole shortage, before he marks anything: Rs 9,561   956100
+  ok   the page loads at phone width with his count on it
+  ok   THREE LINES AT THE TOP, the money first: 'Rs 9,561 short -- 19 items still to look at.'   Rs 9,561 short — 19 items still to look at.
+  ok   ...and ONE number on each line, never a row of them   Rs 6,917 is what those cost you.
+  ok   ...and there is no fourth line -- three, or nothing (his ruling)
+  ok   nothing to share until he marks something
+  ok   the sections are titled in his words
+  ok   no rupee figure is hidden behind a tap -- every line shows its loss at MRP and at cost   Rs 4,800
+Rs 3,600 at cost
+  ok   the workings are folded away until he asks
+  ok   ...and one tap on the name opens Marg, the shelf, where the line sits and what it sold this year   Marg 70 strips · counted 30 strips · pack 1*10
+Where it sits: Recount first — the gap is a
+  ok   ...and closes again
+  ok   ONE TAP marks a line, and the top line follows him: 'Rs 4,800 -- 1 item marked as lost.'   Rs 4,800 — 1 item marked as lost.
+  ok   ...with what it cost on the line below   Rs 3,600 is what those cost you.
+  ok   ...and the sheet button wakes up
+  ok   a second tap un-marks it   Rs 9,561 short — 19 items still to look at.
+  ok   MARK ALL takes the whole section in one tap: 2 items, Rs 7,800   Rs 7,800 — 2 items marked as lost.
+  ok   ...and it adds to what was already marked, never replaces it   (3, 787500)
+  ok   a marked line is coloured, not merely counted
+  ok   MAKING THE SHEET says what was made, in his words and his money   Sheet 1 made and frozen: 3 items, Rs 7,875 at MRP. Print it for Darpan.
+  ok   ...and the message is still there after the page refreshes itself
+  ok   one sheet is on record -- the three he marked, and not the sixteen he did not   1
+  ok   ...with its own fingerprint and the hour it was frozen
+  ok   ...and the total that was on it   787500
+  ok   THE COPY THAT WAS SHARED IS KEPT ON THE SERVER, named by its fingerprint   /root/kits/S228_LOSS_DESK/pad_uploads/loss_shares/dbcf1aa49bd25706cb0208da565d11b6.pdf
+  ok   the sheet opens as a PDF   200
+  ok   ...A4 PORTRAIT, as he asked   not portrait
+  ok   ...one page for three items   1
+  ok   ...carrying only the core data: the item, the shortage, the MRP each, the loss at MRP
+  ok   ...the shortage in the shop's own words -- 40 strips, 2 pcs
+  ok   ...the total, spelled out
+  ok   ...and one money format everywhere -- the sheet and the screen agree
+  ok   ...a box for his answer against every line, and a place to sign
+  ok   ...and no purchase rate anywhere on it -- Darpan is not shown what we paid
+  ok   one odd bill does NOT move a price -- the median is what guards it
+  ok   ...so a single Rs 990 line leaves the tablet at Rs 12 a tab
+  ok   a REAL price change -- the tablet reprices to Rs 24 -- but the line is ALREADY ON SHEET 1, so the desk keeps the sheet's figure   (480000, True)
+  ok   ...so the screen and the paper in Darpan's hand never say two prices for one medicine   1200
+  ok   BUT THE SHARED SHEET IS FROZEN -- the same bytes, to the byte
+  ok   ...and its recorded total has not moved either   787500
+  ok   ...nor its lines
+  ok   asking 'found' asks how many, and only then
+  ok   100 TABLETS FOUND come off the loss at the price that was ON THE SHEET: Rs 1,200   {'answered': 1, 'found_p': 120000, 'found_units': 100, 'money_p': 0, 'recovered_p': 120000}
+  ok   money recovered is logged in rupees and lands in paise   {'answered': 2, 'found_p': 120000, 'found_units': 100, 'money_p': 50000, 'recovered_p': 170000}
+  ok   a line he accepts as lost is logged too -- silence is never the record   {'message': 'Accepted as lost: CHEAPO SALT TAB.', 'ok': True, 'shares': [{'got': {'answered': 3, 'found_p': 120000, 'found_units': 100, 'money_p': 50000, 'recovered_p': 170000}, 'id': 1, 'items': 3, 'lines': [{'cost_unit_p': 900, 'counted': 300, 'item': 'TYRO BR TAB', 'loss_cost_p': 360000, 'loss_mrp_p': 480000, 'marg': 700, 'mrp_source': 'sale', 'mrp_unit_p': 1200, 'pack': 10, 'packing': '1*10', 'short_text': '40 strips', 'short_units': 400}, {'cost_unit_p': 100000, 'counted': 3, 'item': 'KNEE BRACE HINGED UNISON', 'loss_cost_p': 200000, 'loss_mrp_p': 300000, 'marg': 5, 'mrp_source': 'sale', 'mrp_unit_p': 150000, 'pack': 1, 'packing': '1*1', 'short_text': '2 pcs', 'short_units': 2}, {'cost_unit_p': 35, 'counted': 250, 'item': 'CHEAPO SALT TAB', 'loss_cost_p': 5250, 'loss_mrp_p': 7500, 'marg': 400, 'mrp_source': 'sale', 'mrp_unit_p': 50, 'pack': 10, 'packing': '1*10', 'short_text': '15 strips', 'short_units': 150}], 'made_at': '2026-09-06T17:31:58', 'made_by': 'walk_checker', 'made_text': '06-09-2026 17:31', 'md5': 'dbcf1aa49bd25706cb0208da565d11b6', 'no': 1, 'pdf': '/finance/stock/api/loss/share/1.pdf', 'recoveries': [{'amount_p': None, 'at': '2026-09-06T17:32:01', 'at_text': '06-09-2026 17:32', 'by': 'walk_checker', 'id': 1, 'item': 'TYRO BR TAB', 'kind': 'FOUND', 'note': 'in the back rack', 'units': 100}, {'amount_p': 50000, 'at': '2026-09-06T17:32:02', 'at_text': '06-09-2026 17:32', 'by': 'walk_checker', 'id': 2, 'item': 'KNEE BRACE HINGED UNISON', 'kind': 'MONEY', 'note': '', 'units': None}, {'amount_p': None, 'at': '2026-09-06T17:32:02', 'at_text': '06-09-2026 17:32', 'by': 'walk_checker', 'id': 3, 'item': 'CHEAPO SALT TAB', 'kind': 'ACCEPTED', 'note': 'no answer', 'units': None}], 'to_whom': 'Darpan', 'total_p': 787500, 'unpriced': 0}], 'totals': {'all_cost_p': 126450, 'all_mrp_p': 168600, 'all_unpriced': 1, 'cost_p': 0, 'lines': 19, 'mrp_p': 0, 'open_lines': 16, 'recovered_p': 170000, 'shared_p': 787500, 'standing_p': 617500, 'ticked': 0, 'unpriced': 0, 'whole_mrp_p': 956100}}
+  ok   an item that was never on that sheet is refused   400
+  ok   'found none' is a question, not a record   400
+  ok   a member of staff cannot log a recovery either   403
+  ok   THE THIRD LINE now carries the standing balance, so he sees where the play stands   Rs 6,175 still standing — Rs 1,700 back of Rs 7,875 given to him.
+  ok   ...and every recovery is listed under its sheet with the hour it was logged
+  ok   ...and the line itself says what has come back on it, so no row reads gross while the top reads net   ✓
+TYRO BR TABON SHEET 1
+short 40 strips · MRP Rs 12 each · as on sheet 1 · Rs 1,200 back
+Rs 4,800
+Rs 3,600 at cost
+  ok   the three that went out are marked 'on sheet 1' and are no longer his to mark   [('TYRO BR TAB', 1), ('KNEE BRACE HINGED UNISON', 1), ('CHEAPO SALT TAB', 1)]
+  ok   ...and they carry no tick button on the page at all
+  ok   ...so what is still HIS is 16 lines, and the top line counts only those   (16, 0)
+  ok   ...and a second sheet of nothing is refused, in words   Every line you have marked is already on a sheet with him.
+  ok   A SECOND SHEET is sheet 2, and the first is untouched   [(1, 787500), (2, 168600)]
+  ok   ...and it holds the SIXTEEN that were never handed over -- not one repeat   16
+  ok   ...the unpriced line rides on it, counted but not valued   1
+  ok   ...and the two sheets add up without counting a rupee twice: Rs 7,875 + Rs 1,686 = Rs 9,561   956100
+  ok   nothing is left on his side once both sheets are out
+  ok   ...and the sections then add up to exactly what is out with him -- one arithmetic on one page   (956100, 956100)
+  ok   ...and with nothing left to mark, the page stops asking him to mark something   Every short item is with Darpan now.
+  ok   ...and the third line reconciles on its own: standing, back, and what went out   Rs 7,861 still standing — Rs 1,700 back of Rs 9,561 given to him.
+  ok   a long section folds after 8, and says how many it is holding back   11
+  ok   ...and one tap opens the rest   19
+  ok   ...an item with no price says so in words, never a bare dash   no price
+not priced
+  ok   DARPAN'S LISTS ARE ON HIS PAGE NOW
+  ok   ...and he cuts one himself, and is told what he cut   List 1 cut: 10 items. Print it and hand it to Darpan.
+  ok   the list is on record with its items
+  ok   the list prints, and STILL carries no rupee -- that rule did not move with it   200
+  ok   he marks it returned from here
+  ok   AMIR'S BOARD no longer cuts or hands out Darpan's lists
+  ok   ...nor marks them returned
+  ok   ...but he still types Darpan's answers -- his work did not grow, and it did not vanish
+  ok   ...and he can still see which list is with Darpan   1Reports the server still needs from Marg
+Marg से ये रिपोर्ट निकाल कर नीचे भेजें
+  ok   THE DECISION DESK LINKS TO HIS LOSS DESK, first in the foot
+  ok   ...and it is named for what it does
+  ok   no page errors anywhere at 390px
+
+93 ok, 0 FAIL
