@@ -1,0 +1,14 @@
+S227_PINPOINT  (kit A, third cut -- the owner's read of the live desk, 06-Sep-2026)
+Session 227 · 06-Sep-2026
+"400 units is a confusing remnant, the qty taxonomy has to be globally implemented ...
+40 strips is neat and quick grasp ... (Marg loose 500) is confusing and of no use ... you
+have all data, find and pinpoint, otherwise ask for a specific lookup ... a syrup and we
+use strips ... what happened to 40 items carried forward with no movement."
+So: one quantity vocabulary server-side (_qw / _qws: strips and tabs, pcs for pack 1) in
+every reason, purchase line and residue sentence; the residue worked export day by export
+day, each span PINPOINTED -- a bill dated on the span's first day and keyed after that
+day's export is found and settled (TOLTRIS: bill 2767, 48 strips), what remains is one
+question for Marg's item ledger (TYRO BR: 40 strips out between 02-09 and 03-09) on
+Amir's lookup list (/api/pad/lookups/<count>.xlsx); the desk's last card lists the stock
+that has not moved since April and matches Marg. Three files: stock_app.py,
+stock_desk.html, stock_report.html. Supersedes S227_DESK.

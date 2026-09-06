@@ -1,0 +1,36 @@
+S227_PINPOINT -- ONE PASTE on the VPS after the publish. ONE LINE.
+Three files installed: stock_app.py, stock_desk.html, stock_report.html (stock_check_live.html unchanged, 961be526).
+Refuses -- and changes NOTHING -- unless the kit sums check and the live pins are those
+S227_DESK printed: stock_app.py 95c38cbb, stock_desk.html f1a38a8d, stock_report.html 56be4b95.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S227_PINPOINT && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_app.py | cut -c1-8)" = "95c38cbb" ] && [ "$(md5sum /root/finance/stock_desk.html | cut -c1-8)" = "f1a38a8d" ] && [ "$(md5sum /root/finance/stock_report.html | cut -c1-8)" = "56be4b95" ] || { echo "REFUSED: kit sums or the live pins do not match -- NOTHING CHANGED"; false; } && for f in stock_app.py stock_desk.html stock_report.html; do \cp /root/finance/$f /root/finance/$f.bak_S227pin_$(date +%Y%m%d); done && \cp stock_app.py stock_desk.html stock_report.html /root/finance/ && (/root/wa/venv/bin/python3 -B -c "import py_compile;py_compile.compile('/root/finance/stock_app.py',doraise=True,cfile='/tmp/s227p_stock_app.pyc')" && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- strips and tabs everywhere, every residue pinpointed, Amir's lookup list live" && md5sum /root/finance/stock_app.py /root/finance/stock_desk.html /root/finance/stock_report.html || (echo "COMPILE FAILED OR SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; for f in stock_app.py stock_desk.html stock_report.html; do \cp /root/finance/$f.bak_S227pin_$(date +%Y%m%d) /root/finance/$f; done; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; journalctl -u clinic-finance.service -n 12 --no-pager)); rm -f /tmp/s227p_*.pyc
+
+Expected at the end:  UP -- strips and tabs everywhere, every residue pinpointed, Amir's lookup list live
+                      ca667e3a1d8bb0addaa4649f37538f9b  /root/finance/stock_app.py
+                      e874422d7d35cfba93bfc4bcb4482903  /root/finance/stock_desk.html
+                      532d259fbf856f8eb9478826e5aa5f16  /root/finance/stock_report.html
+
+WHAT CHANGES ON THE SCREENS
+  Quantities: strips and tabs for a strip item, pcs for a bottle / vial / belt -- in every reason, every
+  purchase line ("48 strips (40 + 8 free on the bill)"), every residue. No "units", no "(Marg loose N)".
+  The residue is worked export day by export day. A bill dated on the first day of a span and keyed after
+  that day's export is FOUND and settled ("+48 strips is bill 2767 of 27-08-2026 -- keyed in Marg after that
+  day's export was taken; the documents agree, nothing to chase") and the line leaves the Marg lane.
+  What no document explains becomes ONE question, pinpointed to its span: "Marg > item ledger > TYRO BR >
+  02-09-2026 to 03-09-2026: what voucher moved 40 strips out?" -- on the line, in the life, and on
+  AMIR'S LOOKUP LIST (Excel):  https://followup.dr-manoj.in/finance/stock/api/pad/lookups/1.xlsx
+  The desk ends with a card for the stock that has not moved since April and matches Marg (nothing to
+  decide; the items listed; Amir's no-movement list), and the closing card offers the lookup list.
+
+ROLLING BACK = the three .bak_S227pin_* files beside the live ones, \cp each back, restart.
+
+OFFLINE EVIDENCE -- 366 checks in a real browser at phone width (390px):
+  EVIDENCE_pinpoint_audit_s227.txt   45/45 the audit walk grown: TOLTRIS-shaped (Marg -12 -> 357 -> 189, a 48-strip bill
+                                           dated 27-08 keyed after that export) -> residue pinpointed to 27-08..02-09, EXPLAINED
+                                           by bill 2767, residue 0, lane no longer "Marg moved"; TYRO-shaped (-40 strips
+                                           between 02-09 and 03-09, no document) -> ONE question for Amir, the lookup list;
+                                           a syrup in pcs; every reason free of "units"; the report and desk screens
+  EVIDENCE_regress_desk_s227.txt     47/47 · lanes 46/46 · report 45/45 · diff_sheet 41/41 · pad_proof 65/65 ·
+  count_search 34/34 · submit_flow 30/30 · safestore 13/13
+  Sub-agent screen reads: fine -- no "units", no "Marg loose"; the green span names bill 2767; the red span
+  carries Amir's question; the no-movement card lists "Marg N strips = shelf", buttons fit.

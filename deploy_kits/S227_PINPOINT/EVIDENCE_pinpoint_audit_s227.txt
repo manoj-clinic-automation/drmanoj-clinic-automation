@@ -1,0 +1,120 @@
+ * Serving Flask app 'WALK_readiness_s226'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:8846
+Press CTRL+C to quit
+  ok   the count is recorded
+  ok   BIO D3 MAX: three bill lines counted, not six (a superseded export and a double entry dropped)   (3, 2)
+  ok   '20 strips, loose 300' = 300 units (not 600)   {'50428': 300, '53875': 165, '62695': 60}
+  ok   '10 + 1 free, loose 150' = 165 units (the free strip is not inside the loose figure)   {'50428': 300, '53875': 165, '62695': 60}
+  ok   '4 strips, no loose' = 60 units   {'50428': 300, '53875': 165, '62695': 60}
+  ok   bought this FY = 525 units   525
+  ok   ...each line says how it was read   ['loose column = the units', 'loose column = the units; free strips added', 'strips x pack + loose remainder']
+  ok   a TRUE loose remainder still adds: '6 strips + 3 loose' = 63; '2 + 4 free' = 60   {'BM-1': 63, 'BM-2': 60}
+  ok   AUDIT: one double entry (bill 53875, the overlapping export)   [{'batch': 'B2', 'bill_date': '2026-06-20', 'bill_date_text': '20-06-2026', 'bill_no': '53875', 'direction': 'PURCHASE', 'first_id': 3, 'free': 1.0, 'id': 4, 'item': 'BIO D3 MAX CAP', 'loose': 150.0, 'packing': '1*15', 'qty': 10.0, 'vendor': 'ANMOL AGENCIES', 'why': 'same bill, item, batch and quantity already on the server -- counted once'}]
+  ok   AUDIT: one line from a superseded export (bill 50428, the old file)   [{'batch': 'B1', 'bill_date': '2026-05-10', 'bill_date_text': '10-05-2026', 'bill_no': '50428', 'direction': 'PURCHASE', 'free': 0.0, 'id': 1, 'item': 'BIO D3 MAX CAP', 'loose': 300.0, 'packing': '1*15', 'qty': 20.0, 'vendor': 'ANMOL AGENCIES', 'why': 'its export was replaced by a later one -- not counted'}]
+  ok   AUDIT: loose-is-total instances: 1971 (6, was 12), 2767 (480, was 960), 50428 (300, was 600), 53875 (165, was 315), PO-9 (300, was 600) -- nothing else   [('1971', 6, 12), ('2767', 480, 960), ('50428', 300, 600), ('53875', 165, 315), ('PO-9', 300, 600)]
+  ok   AUDIT: the odd free quantity is flagged (4 free on 2 paid)   [{'batch': 'R2', 'bill_date': '2026-08-13', 'bill_date_text': '13-08-2026', 'bill_no': 'BM-2', 'direction': 'PURCHASE', 'free': 4.0, 'id': 7, 'item': 'REMAIN TAB', 'loose': 0.0, 'packing': '1*10', 'qty': 2.0, 'vendor': 'BHARAT MEDICAL', 'why': 'free 4 against 2 paid -- more than half; check the bill'}]
+  ok   AUDIT: lines checked = the 9 live-or-duplicate lines + 1 superseded = 10   10
+  ok   AUDIT WORKBOOK: 8 rows, the four kinds, a WHY column and a tick column   (8, ['DOUBLE ENTRY', 'FREE TOO HIGH', 'LOOSE = TOTAL', 'OLD EXPORT'])
+  ok   ...the BIO D3 MAX why-line reads in plain words   ['same bill, item, batch and quantity already on the server -- counted once', 'the loose column (300) is the whole quantity in units (20 strips x 15); read as 300 units, not 600', 'the loose column (150) is the whole quantity in units (10 strips x 15); read as 165 units, not 315']
+  ok   AXIMAL 200 short 286 (3 boxes less 14) -> BILL lane, '3 boxes'   ('bill', 'the gap is about 3 boxes of 10 strips and a purchase of that size sits in the window -- see the bill')
+  ok   BIO D3 MAX short 60 with purchases read right -> not a Marg-moved line   ('loss', 'Marg agrees with the documents; the shelf is short 4 strips (allowance 0 strips) -- breakage, unbilled sale or theft')
+  ok   the report links carry the audit workbook   {'amir': '/finance/stock/api/pad/amir/1.xlsx', 'audit': '/finance/stock/api/pad/audit.xlsx', 'cleanup': '/finance/stock/api/pad/cleanup/1.xlsx', 'diffs_pdf': '/finance/stock/api/pad/diffs/1.pdf', 'final_sheet': '/finance/stock/api/pad/followup/1.xlsx', 'finding': '/finance/stock/page/finding?count=1', 'lookups': '/finance/stock/api/pad/lookups/1.xlsx', 'mismatch': '/finance/stock/api/pad/mismatch/1'}
+  ok   REPORT search 'Axemal' -> the AXIMAL row alone, marked as a near match   (['AXIMAL 200 TAB'], '1 of 27 near match — no exact spelling')
+  ok   REPORT search 'bio d3' -> exact   ['BIO D3 MAX CAP']
+  ok   REPORT search for nonsense says so   nothing like that on this count
+  ok   the audit workbook link is on the report page
+  ok   the report's purchase list says '20 strips' in the shop's words -- no 'units', no 'Marg loose' -- and the dropped double entries   BIO D3 MAX CAP1*15
+Marg 26 strips 10 tabs → counted 22 strips 10 tabs · short 4 strips
+Marg agrees with the documents; the shelf is short 4 strips (allowance 0 strips) -- breakage, unbilled sale or theft
+no word yet
+-Rs 480
+at MRP
+-Rs 1,500 at cost
+THIS FINANCIAL YEAR — 01-04-2026 to 06-09-2026
+10-05-2026 · ANMOL AGENCIES · bill 50428
+BIO D3 MAX CAP · b. B1
+20 strips (20 on the bill) · Rs 90 a strip
+20-06-2026 · ANMOL AGENCIES · bill 53875
+BIO D3 MAX CAP · b. B2
+11 strips (10 + 1 free on the bill) · Rs 90 a strip
+02-08-2026 · ANMOL AGENCIES · bill 62695
+BIO D3 MAX CAP · b. B3
+4 strips · Rs 90 a strip
+Bought: 35 strips in 3 bill lines ·
+2 double entries on the server not counted
+Sold: 3 strip
+  ok   DESK find 'Axemal' -> 'nearest' + AXIMAL 200   No item spelt exactly like that — the nearest:
+AXIMAL 200 TAB 1*10
+Marg 30 strips → shelf 1 strip 4 tabs · short 28 strips 6 tabs
+bill
+  ok   ...tapping it jumps to the box-sized-gaps card with the AXIMAL line opened   BOX-SIZED GAPS
+1 gap the size of a box
+short Rs 3,432 at MRP
+A whole box of strips and a purchase of that size in the window: the physical bill must be seen. Amir's job.
+Send all to bill verification
+Amir checks the bills
+Hide the 1 item
+Skip for now
+AXIMAL 200 TAB 1*10
+Marg 30 strips → 1 strip 4 ta
+  ok   TOLTRIS: Marg -12 -> 189 (+20 strips 1 tab); documents in the window explain -27 strips 9 tabs (bought 0); raw residue +48 strips   (201, -279, 480)
+  ok   ...PINPOINTED to the span 27-08 -> 02-09 and EXPLAINED: bill 2767 of 27-08-2026 (48 strips) keyed after that day's export; residue left 0   [{'docs_delta': -111, 'explained': {'bills': [{'bill_date_text': '27-08-2026', 'bill_no': '2767', 'direction': 'PURCHASE', 'qty_text': '48 strips', 'vendor': 'SHIVAAZ FORMULATIONS BAREILLY'}], 'sentence': "+48 strips is bill 2767 of 27-08-2026 (48 strips, 8 free on the bill) -- keyed in Marg after that day's export was taken; the documents agree, nothing to chase."}, 'from_date': '2026-08-27', 'from_qty': -12, 'from_text': '27-08-2026', 'lookup': None, 'marg_delta': 369, 'moved_text': '+36 strips 9 tabs', 'purchased': 0, 'residue': 480, 'residue_text': '+48 strips', 'returned': 0, 'sold': 111, 'to_date': '2026-09-02', 'to_qty': 357, 'to_text': '02-09-2026'}]
+  ok   ...the sentence speaks in strips, never units   From 27-08-2026 to 06-09-2026 Marg's figure moved +20 strips 1 tab; the documents explain -27 strips 9 tabs (bought 0 strips, sold 27 strips 9 tabs, returned 0 strips); the +48 strips that moved without a document is explained (+48 strips is bill 2767 of 27-08-2026 (48 strips, 8 free on the bill) -- keyed in Marg after that day's export was taken; the documents agree, nothing to chase.).
+  ok   ...the purchase line reads '48 strips (40 + 8 free on the bill)'   {'basis': 'loose column = the units', 'batch': '260500', 'bill_date': '2026-08-27', 'bill_date_text': '27-08-2026', 'bill_no': '2767', 'direction': 'PURCHASE', 'expiry': '', 'free': 8.0, 'item': 'TOLTRIS PLUS TAB', 'loose': 480.0, 'on_bill': '40 + 8 free', 'packing': '1*10', 'purchase_rate_p': None, 'qty': 40.0, 'qty_text': '48 strips', 'rate_p': 14214, 'units': 480, 'vendor': 'SHIVAAZ FORMULATIONS BAREILLY'}
+  ok   TYRO BR: the -40 strips is PINPOINTED to 02-09 -> 03-09 and turned into ONE question for Amir   (-400, [{'docs_delta': -10, 'explained': None, 'from_date': '2026-09-02', 'from_qty': 700, 'from_text': '02-09-2026', 'lookup': 'Marg > item ledger > TYRO BR TAB > 02-09-2026 to 03-09-2026: what voucher moved 40 strips out? No bill, return or sale on the server for it.', 'marg_delta': -410, 'moved_text': '-41 strips', 'purchased': 0, 'residue': -400, 'residue_text': '-40 strips', 'returned': 0, 'sold': 10, 'to_date': '2026-09-03', 'to_qty': 290, 'to_text': '03-09-2026'}])
+  ok   ...in words: '-40 strips moved with NO document behind them, between 02-09-2026 and 03-09-2026'   From 27-08-2026 to 06-09-2026 Marg's figure moved -43 strips; the documents explain -3 strips (bought 0 strips, sold 3 strips, returned 0 strips); -40 strips moved with NO document behind them, between 02-09-2026 and 03-09-2026 (-40 strips).
+  ok   A SYRUP is counted in pcs: '6 pcs (5 + 1 free on the bill)', never strips   {'basis': 'loose column = the units', 'batch': 'YL256A', 'bill_date': '2026-07-13', 'bill_date_text': '13-07-2026', 'bill_no': '1971', 'direction': 'PURCHASE', 'expiry': '', 'free': 1.0, 'item': 'LACTOVAX SYP', 'loose': 6.0, 'on_bill': '5 + 1 free', 'packing': '1*1', 'purchase_rate_p': None, 'qty': 5.0, 'qty_text': '6 pcs', 'rate_p': 9000, 'units': 6, 'vendor': 'SHIVAAZ FORMULATIONS BAREILLY'}
+  ok   LANES: TOLTRIS is NOT a 'Marg moved' line any more -- its move is the late-keyed bill; it lands in loss with the note   ('loss', "Marg agrees with the documents (its +48 strips move on 27-08-2026 is bill 2767, keyed after that day's export); the shelf is short 1 strip 8 tabs (allowance 1 tab) -- breakage, unbilled sale or theft")
+  ok   LANES: TYRO BR is the Marg lane, the reason names the span and the strips, and carries its lookup   ('marg', "Marg's figure moved -40 strips more than the documents explain between 02-09-2026 and 03-09-2026 -- an adjustment, a correction or a late bill; Amir looks up that span in Marg's item ledger")
+  ok   ...every lane reason on this count speaks strips/tabs/pcs, not units
+  ok   the SYRUP line reads 'short 2 pcs'   Marg agrees with the documents; the shelf is short 2 pcs (allowance 0 pcs) -- breakage, unbilled sale or theft
+  ok   AMIR'S LOOKUP LIST: one row -- TYRO BR, the question, a write-in column and a tick   [['TYRO BR TAB', '1*10', 290, 60, -230, 'Marg > item ledger > TYRO BR TAB > 02-09-2026 to 03-09-2026: what voucher moved 40 strips out? No bill, return or sale on the server for it.', None, None]]
+  ok   the report links carry the lookup list
+  ok   REPORT, TOLTRIS opened: the span line in green with the bill named; no 'units' anywhere in the life   TOLTRIS PLUS TAB1*10
+Marg 18 strips 9 tabs → counted 17 strips 1 tab · short 1 strip 8 tabs
+Marg agrees with the documents (its +48 strips move on 27-08-2026 is bill 2767, keyed after that day's export); the shelf is short 1 strip 8 tabs (allowance 1 tab) -- breakage, unbilled sale or theft
+no word yet
+-Rs 216
+at MRP
+-Rs 450 at cost
+THIS FINANCIAL YEAR — 01-04-2026 to 06-09-2026
+27-08-2026 · SHIVAAZ FORMULATIONS BAREILLY · bill 2767
+TOLTRIS PLUS TAB · b. 260500
+48 strips (40 + 8 free on the bill) · Rs 142.14 a strip
+Bought: 48 strips in 1 bill line
+Sold: 27 strips 9 tabs in 5 bills · Returned by patients: 0 strips in 0 credit notes
+Marg's own figure by export day: 27-08-2026 = -12 → 02-09-2026 = 357 → 06-09-2026 = 189
+From 27-08-2026 to 06-09-2026 Marg's figure moved +20 strips 1 tab; the documents explain -27 strips 9 tabs (bought 0 strips, sold 27 strips 9 tabs, returned 0 strips); the
+  ok   REPORT, TYRO opened: the open span with 'For Amir: Marg > item ledger > ...'   TYRO BR TAB1*10
+Marg 29 strips → counted 6 strips · short 23 strips
+Marg's figure moved -40 strips more than the documents explain between 02-09-2026 and 03-09-2026 -- an adjustment, a correction or a late bill; Amir looks up that span in Marg's item ledger
+MAJORno word yet
+-Rs 2,760
+at MRP
+-Rs 5,750 at cost
+THIS FINANCIAL YEAR — 01-04-2026 to 06-09-2026
+No purchase bill for this item on the server this financial year (the server holds what Marg's purchase reports have sent it).
+Sold: 3 strips in 3 bills · Returned by patients: 0 strips in 0 credit notes
+Marg's own figure by export day: 27-08-2026 = 720 → 02-09-2026 = 700 → 03-09-2026 = 290 → 06-09-2026 = 290
+From 27-08-2026 to 06-09-2026 Marg's figure moved -43 strips; the documents explain -3 strips (bought 0 strips, sold 3 strips, returned 0 strips); -40 strips moved with NO document behind them, between 02-09-2026 and 03-09-2026 (-40
+  ok   the report's tools strip carries the lookup list
+  ok   DESK: the last card is 'No movement since April -- shelf matches Marg', 20 items carried forward, nothing to decide, Amir's list   NO MOVEMENT SINCE APRIL — SHELF MATCHES MARG
+20 items carried forward, not one sold this year
+The shelf and Marg agree on every one, so there is nothing to decide here. They sit on Amir's no-movement list: check expiry, return to the vendor where possible, and ask why they are still stocked.
+Give Am
+  ok   ...See the 20 items lists them with 'Marg N strips = shelf'
+  ok   ...the closing card offers Amir the Marg ledger lookups (1 span)   THAT IS ALL FOR NOW
+6 lines still open — they are with Darpan or Amir, or skipped
+Your decisions are on Amir's lists now. Next:
+Give Amir the Marg cleanup list
+every line you wrote off, explained or sent to Marg
+Give Amir the no-movement list
+expiry checks and the clinic-billed stock
+Give Amir the Marg ledger lookups
+1 span where Marg moved with no document — one question each
+Give Darpan the hand
+  ok   no page errors
+
+45 ok, 0 FAIL

@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock check report</title>
+<style>
+/* S227 FINDING REPORT -- the count as a document. English throughout (D369).
+   Same tokens as the count page, both colour schemes, and it prints clean:
+   the PDF is the browser's print of this page (the owner's spec, S226). */
+:root{
+  --ground:#F6F8F7;--surface:#FFF;--surface-2:#EDF2F0;--sunk:#E3EAE7;
+  --ink:#15201E;--ink-2:#3D4B48;--muted:#66756F;--line:#D9E2DF;
+  --accent:#0E5C58;--on-accent:#FFF;--accent-soft:#D8E9E6;
+  --ok:#0E5C58;--diff:#8C3A2B;--diff-soft:#F6E3DF;--warn:#8A5A12;--warn-soft:#F7ECD8;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--sunk:#0A100F;
+  --ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;
+  --ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}}
+:root[data-theme="dark"]{
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--sunk:#0A100F;
+  --ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;
+  --ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:15px;line-height:1.45;-webkit-text-size-adjust:100%}
+.wrap{max-width:980px;margin:0 auto;padding:12px 12px 40px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin:10px 0}
+h1{font-size:20px;margin:0 0 2px}h2{font-size:16px;margin:0 0 8px}
+.sub{color:var(--muted);font-size:13px}
+.mono,.num{font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:14px}.kv b{color:var(--ink-2);font-weight:600}
+.kpis{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.kpi{background:var(--surface-2);border-radius:8px;padding:8px 10px;min-width:96px}
+.kpi .v{font-size:20px;font-weight:700;line-height:1.1}.kpi .l{font-size:12px;color:var(--muted)}
+.kpi.diff .v{color:var(--diff)}.kpi.ok .v{color:var(--ok)}
+.rdy{font-size:13px;color:var(--ink-2);margin-top:8px;padding-left:10px;border-left:3px solid var(--line)}
+.seal{font-size:13px;margin-top:6px}.seal.bad{color:var(--diff);font-weight:700}
+.mm{font-size:15px}.mm b.s{color:var(--diff)}.mm b.o{color:var(--warn)}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.tools a,.tools button{font:inherit;font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--accent);text-decoration:none;font-weight:600;cursor:pointer}
+.tools button.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.filters button{font:inherit;font-size:13px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer}
+.filters button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
+.row{border-top:1px solid var(--line);padding:8px 2px}
+.row .h{display:grid;grid-template-columns:1fr auto;gap:6px;cursor:pointer}
+.row .t{font-weight:700}.row .p{font-size:12px;color:var(--muted);font-weight:400;margin-left:6px}
+.row .q{font-size:13px;color:var(--ink-2)}
+.row .d{font-weight:700}.row .d.short{color:var(--diff)}.row .d.over{color:var(--warn)}
+.row .v{text-align:right;white-space:nowrap}.row .v .big{font-weight:700}.row .v .none{color:var(--muted);font-size:12px}
+.badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:999px;margin:2px 4px 0 0;border:1px solid var(--line);color:var(--ink-2)}
+.badge.major{background:var(--diff-soft);color:var(--diff);border-color:var(--diff);font-weight:700}
+.badge.ans{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.badge.dec{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.life{margin:8px 0 2px;padding:10px;background:var(--surface-2);border-radius:8px;font-size:13px}
+.life h4{margin:0 0 6px;font-size:13px}.life table{width:100%;border-collapse:collapse;font-size:12.5px}
+.life th,.life td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.life th{color:var(--muted);font-weight:600;font-size:11.5px}.life td.n,.life th.n{text-align:right;white-space:nowrap}
+.life .tot{font-weight:700;margin-top:6px}.life .nw{white-space:nowrap}
+.life .pl{padding:6px 0;border-bottom:1px solid var(--line)}.life .narrow{display:none}
+@media (max-width:640px){.life table.wide{display:none}.life .narrow{display:block}}.life .det{margin-top:8px;padding:8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
+.life .det.bad{border-color:var(--diff);color:var(--diff);font-weight:700}.life .det.good{color:var(--ok)}
+.life .note{color:var(--muted);margin-top:6px}
+.life .spans{margin-top:6px}.life .span{padding:6px 8px;border-left:3px solid var(--diff);background:var(--surface);margin-top:4px;border-radius:0 6px 6px 0}.life .span.good{border-left-color:var(--ok)}.life .span .ok{color:var(--ok)}.life .span .ask{color:var(--diff);font-weight:600}
+.tot{display:flex;flex-wrap:wrap;gap:6px 8px;margin:10px 0 4px;font-size:14px}.tot span{padding:6px 10px;border-radius:8px;background:var(--surface-2);border-left:4px solid var(--line)}.tot span b{font-size:16px}.tot .w{border-color:var(--muted)}.tot .p{border-color:var(--diff)}.tot .p b{color:var(--diff)}.tot .k{border-color:var(--warn)}.tot .k b{color:var(--warn)}.tot .o{border-color:var(--ink)}
+.search{margin:8px 0 2px}.search input{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}.search input:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+.lane{border:1px solid var(--line);border-radius:10px;margin:8px 0;background:var(--surface);border-left:5px solid var(--accent)}.lane .lh{display:flex;flex-direction:column;gap:3px;padding:10px 12px;align-items:flex-start}
+.lane .lt{font-weight:700;font-size:16px}.lane .lc{font-size:12.5px;color:var(--muted)}.lane .lv{font-size:14px}.lane .lv b.s{color:var(--diff)}.lane .lv b.o{color:var(--warn)}
+.lane .lb{padding:4px 12px 10px}.lane-dead{border-left-color:var(--muted)}.lane-loss{border-left-color:var(--diff)}.lane-over{border-left-color:var(--warn)}
+button.tg{font:inherit;font-size:14px;font-weight:700;padding:8px 14px;border-radius:999px;border:1.5px solid var(--accent);background:var(--surface);color:var(--accent);cursor:pointer;min-height:38px;white-space:nowrap;margin-top:4px}
+.card>.lh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:0}
+a.desk{display:inline-block;margin-top:4px;font-weight:700;color:var(--accent);font-size:16px}
+.row .why{font-size:12.5px;color:var(--ink-2);margin:2px 0}.nw{white-space:nowrap}.row .h{grid-template-columns:auto 1fr auto}.row .h .tick{padding-top:4px}.row .h .tick input{width:18px;height:18px}
+.badge.kind{background:var(--surface-2);font-weight:700}.badge.word{background:var(--warn-soft);color:var(--warn);border-color:var(--warn);font-weight:700}
+.acts,.bulk{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 2px;align-items:center}.bulk{margin:6px 0 10px;padding:6px 8px;border-radius:8px;background:var(--accent-soft);font-size:13px}.bl{font-size:12px;color:var(--muted);margin-right:4px}.more{display:inline-flex;gap:4px;align-items:center}
+button.act{min-height:30px}button.moretoggle{border-style:dashed;color:var(--muted)}
+button.act{font:inherit;font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer}
+button.act.a-WRITE_OFF{border-color:var(--muted)}button.act.a-RECOVER{border-color:var(--diff);color:var(--diff);font-weight:700}button.act.a-PARKED{border-color:var(--warn);color:var(--warn)}
+.card.owner{border:2px solid var(--warn);background:var(--warn-soft)}.pair{padding:8px 0;border-top:1px solid var(--line);font-size:13.5px}
+details.sub2{margin-top:8px}details.sub2 summary{font-size:13px;font-weight:600;cursor:pointer}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}.tbl th,.tbl td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.tbl th{color:var(--muted);font-size:12px}.tbl td.n,.tbl th.n{text-align:right;white-space:nowrap}
+details summary{cursor:pointer;font-weight:700}
+.empty{color:var(--muted);font-style:italic}
+.err{color:var(--diff);font-weight:700}
+select{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+@media print{
+  body{background:#fff;color:#000;font-size:11.5px}.wrap{max-width:none;padding:0}
+  .card{border:none;padding:6px 0;margin:6px 0;break-inside:avoid}.tools,.filters,select,.noprint{display:none!important}
+  .lane{border:none}button.tg{display:none!important}.lb[hidden]{display:block!important}
+  .row .h{cursor:default}.life{background:#fff;border:1px solid #999}.kpi{border:1px solid #bbb;background:#fff}
+  details{display:block}details summary{list-style:none}details:not([open]) .body{display:none}
+}
+</style></head><body><div class="wrap">
+<div class="card" id="head"><div class="sub">Loading the report…</div></div>
+<div id="body"></div>
+</div>
+<script>
+/*__BOOT__*/
+const BASE="/finance/stock";
+const B=window.BOOT||{count_id:0,roots:[],user:"",checker:false};
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function rs(p){ if(p==null) return null; const neg=p<0; let n=Math.abs(Math.round(p)); const paise=n%100; n=Math.floor(n/100);
+  let s=String(n); if(s.length>3){ let head=s.slice(0,-3), tail=s.slice(-3), parts=[]; while(head.length>2){parts.unshift(head.slice(-2));head=head.slice(0,-2);} if(head)parts.unshift(head); s=parts.join(",")+","+tail; }
+  return (neg?"-":"")+"Rs "+s+(paise?"."+String(paise).padStart(2,"0"):""); }
+function units(n,ps){ n=Number(n||0); ps=Number(ps||1); if(n<0) return "short "+units(-n,ps);
+  if(ps<=1) return n+" pc"+(Math.abs(n)===1?"":"s"); const s=Math.floor(n/ps), t=n%ps; const b=[]; if(s)b.push(s+" strip"+(s===1?"":"s")); if(t)b.push(t+" tab"+(t===1?"":"s")); return b.join(" ")||"0 strips"; }
+let D=null, FILTER="all", Q="", OPEN=new Set([]);
+const DECIDE=false;   // S227 DESK: decisions live on /page/desk, one card at a time; this page is the document
+function load(cid){
+  fetch(BASE+"/api/pad/report/"+cid).then(r=>r.json()).then(j=>{ if(!j.ok){ document.getElementById("head").innerHTML='<div class="err">'+esc(j.message||"The report could not be read.")+'</div>'; return; } D=j; render(); })
+  .catch(()=>{ document.getElementById("head").innerHTML='<div class="err">The server did not answer. Check the internet and reload.</div>'; });
+}
+function render(){
+  const d=D, m=d.mismatch||{};
+  const closed=d.closed ? ('<b class="'+(d.closed.how==="complete"?"":"")+'">CLOSED</b> — '+(d.closed.how==="complete"?"completed":"by the doctor as it stood")+' on '+esc(d.closed.at_text||"")+(d.closed.by?" by "+esc(d.closed.by):"")) : '<b>OPEN</b> — '+((d.not_counted||0)+(d.sent_back||0))+' still to do';
+  let h='<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap"><div><h1>Stock check report — count #'+d.count_id+(d.parts?' (sheets 1–'+(d.parts+1)+')':'')+'</h1>'
+    +'<div class="sub">Advanced Orthopaedic Surgery Centre · Medical store · '+esc(d.when||"")+'</div></div>'
+    +'<div class="noprint">'+(B.roots&&B.roots.length>1?'<select id="pick">'+B.roots.map(r=>'<option value="'+r+'"'+(r===d.count_id?" selected":"")+'>Count #'+r+'</option>').join("")+'</select>':'')+'</div></div>';
+  h+='<div class="kv" style="margin-top:8px"><b>Status</b><span>'+closed+'</span>'
+    +'<b>Counted by</b><span>'+esc(d.counted_by||"-")+'</span><b>Entered by</b><span>'+esc(d.entered_by||"-")+'</span><b>Submitted by</b><span>'+esc(d.submitted_by||"-")+'</span>'
+    +'<b>Marg stock as on</b><span>'+esc(d.as_on||"-")+(d.as_on_note?' <span class="sub">('+esc(d.as_on_note)+')</span>':'')+'</span>'
+    +'<b>After bill</b><span>'+esc(d.bill_no||"-")+' dated '+esc(d.bill_date_text||d.bill_date||"-")+'</span>'
+    +'<b>Finding</b><span>'+d.seals.map(s=>esc(s.finding_no||("count #"+s.count_id))+' <span class="sub">('+esc(s.sealed_text)+')</span>').join(" · ")+'</span></div>';
+  h+='<div class="seal '+(d.seal_ok?"":"bad")+'">'+(d.seal_ok?'Sealed figures: unchanged since sealing (fingerprint checked now).':'SEALED FIGURES HAVE CHANGED since sealing — tell the doctor before using this report.')+'</div>';
+  if((d.readiness_lines||[]).some(x=>x)) h+='<div class="rdy">'+(d.readiness_lines||[]).filter(x=>x).map(x=>esc(x)).join("<br>")+'<div class="sub">The data horizon, frozen at the moment of sealing.</div></div>';
+  h+='<div class="kpis"><div class="kpi"><div class="v">'+d.counted+'<span class="sub"> / '+d.items_in_shop+'</span></div><div class="l">items counted</div></div>'
+    +'<div class="kpi ok"><div class="v">'+d.agreed+'</div><div class="l">agree with Marg</div></div>'
+    +'<div class="kpi diff"><div class="v">'+d.differed+'</div><div class="l">differ · '+d.major+' major</div></div>'
+    +'<div class="kpi"><div class="v">'+d.not_counted+'</div><div class="l">not counted</div></div>'
+    +(d.sent_back?'<div class="kpi"><div class="v">'+d.sent_back+'</div><div class="l">rows to fix</div></div>':'')
+    +'<div class="kpi"><div class="v">'+d.explained+'<span class="sub"> / '+d.differed+'</span></div><div class="l">explained so far</div></div></div>';
+  if(m.lines) h+='<div class="mm">Value of the mismatch at MRP: <b class="s">short '+rs(m.mrp_short_p)+'</b> ('+m.short_lines+' line'+(m.short_lines===1?'':'s')+') · <b class="o">over '+rs(m.mrp_over_p)+'</b> ('+m.over_lines+') · net '+rs(m.mrp_net_p)+(m.mrp_unpriced?' · '+m.mrp_unpriced+' line'+(m.mrp_unpriced===1?'':'s')+' with no MRP on record':'')
+    +'<div class="sub">At cost (last purchase rate), for reference: short '+rs(m.cost_short_p)+', over '+rs(m.cost_over_p)+(m.cost_unpriced?', '+m.cost_unpriced+' without a rate':'')+'. Staff and doctor see the same figures (owner\'s ruling, 06-Sep-2026).</div></div>';
+  h+='<div class="tools"><button type="button" onclick="window.print()">Print / save as PDF</button>'
+    +'<a href="'+esc(d.links.final_sheet)+'">Result sheet (Excel)</a><a href="'+esc(d.links.diffs_pdf)+'" target="_blank" rel="noopener">Differences to check by hand (PDF)</a>'
+    +'<a href="'+esc(d.links.mismatch)+'" target="_blank" rel="noopener">Mismatch, item-wise (data)</a>'
+    +(d.sheets||[]).filter(s=>s.from_sheet).map(s=>'<a href="'+esc(s.receipt)+'" target="_blank" rel="noopener">Proof of sheet '+s.n+'</a>').join("")+'</div>';
+  document.getElementById("head").innerHTML=h;
+  // the owner's running totals and the search box
+  const t=d.totals||{};
+  h+='<div class="tot noprint"><span class="w">written off <b>'+rs(t.written_off_p||0)+'</b> ('+(t.written_off||0)+')</span><span class="p">to pursue <b>'+rs(t.pursue_p||0)+'</b> ('+(t.pursue||0)+')</span><span class="k">parked <b>'+rs(t.parked_p||0)+'</b> ('+(t.parked||0)+')</span><span class="o">still open <b>'+rs(t.open_p||0)+'</b> ('+(t.open||0)+')</span></div>';
+  h+='<div class="search noprint"><input type="search" id="q" placeholder="Search an item — type part of the name" value="'+esc(Q)+'" autocomplete="off"><span class="sub" id="qn"></span></div>';
+  document.getElementById("head").innerHTML=h;
+  let b='';
+  // ---- decisions live on the desk
+  const need=(d.differences||[]).filter(x=>x.needs_owner);
+  if(B.checker) b+='<div class="card owner noprint" id="s0"><b>'+((d.totals||{}).open||0)+' line'+((d.totals||{}).open===1?'':'s')+' still need'+((d.totals||{}).open===1?'s':'')+' a word'+(need.length?' — '+need.length+' of them yours alone':'')+'.</b> <a class="desk" href="'+esc(BASE+"/page/desk?count="+d.count_id)+'">Open the decision desk →</a><div class="sub">One card at a time, one question, big buttons. This page is the document.</div></div>';
+  // ---- 1 the lanes
+  const L=d.differences||[];
+  b+='<div class="card" id="s1"><h2>1 · Differences — '+L.length+' item'+(L.length===1?'':'s')+' in '+(d.lanes||[]).filter(l=>l.lines||l.pairs||l.dead_matched).length+' lanes</h2>'
+    +'<div class="sub">Each lane is one kind of difference. Show a lane for its items; tap an item for its purchases and sales this year ('+esc(d.fy_from_text)+' to '+esc(d.upto_text)+').</div>';
+  (d.lanes||[]).forEach((l,i)=>{
+    const ds=L.filter(x=>x.lane===l.key);
+    if(!ds.length && !l.pairs && !l.dead_matched) return;
+    const open=OPEN.has(l.key);
+    b+='<div class="lane lane-'+l.key+'" data-lane="'+l.key+'"><div class="lh"><span class="lt">'+esc(l.title)+'</span>'
+      +'<span class="lc">'+(l.lines?l.lines+' line'+(l.lines===1?'':'s'):(l.pairs?l.pairs+' pair'+(l.pairs===1?'':'s'):''))+(l.dead_matched?' + '+l.dead_matched+' matched':'')+(l.major?' · '+l.major+' major':'')+(l.decided?' · '+l.decided+' decided':'')+'</span>'
+      +'<span class="lv">'+(l.short_p?'<b class="s">short '+rs(l.short_p)+'</b>':'')+(l.over_p?' <b class="o">over '+rs(l.over_p)+'</b>':'')+(l.unpriced?' <span class="sub">'+l.unpriced+' unpriced</span>':'')+'</span>'
+      +'<button type="button" class="tg" data-tg="lane">'+(open?'Hide':'Show')+' '+(l.lines||l.pairs||l.dead_matched)+' item'+((l.lines||l.pairs||l.dead_matched)===1?'':'s')+'</button></div>'
+      +'<div class="lb"'+(open?'':' hidden')+'><div class="sub">'+esc(l.blurb)+'</div>';
+    if(DECIDE && B.checker && ds.length && l.key!=="dead") b+='<div class="bulk noprint"><span class="bl">Whole lane, or the ticked lines:</span>'+laneButtons(l.key,null,l.key)+'</div>';
+    if(l.key==="salt"){
+      b+=(d.pairs||[]).map(p=>'<div class="pair"><b>'+esc(p.salt)+'</b> — short: '+p.short.map(x=>esc(x.item)+' ('+esc(units(x.diff,x.pack))+')').join(", ")+' · over: '+p.over.map(x=>esc(x.item)+' (+'+esc(units(x.diff,x.pack))+')').join(", ")+' · net '+esc(units(p.net,p.short[0].pack))+'<div class="sub">A proposal only (D385): the same Marg salt entry, character for character. Nothing is netted until you say so on the lines themselves.</div></div>').join("")||'<div class="empty">No identical-salt pair among the differences.</div>';
+    } else {
+      b+=ds.map(x=>rowHtml(x,false)).join("");
+      if(l.key==="dead"){
+        const dm=d.dead_matched||[];
+        if(dm.length) b+='<div class="sub2"><button type="button" class="tg" data-tg="sub">Show '+dm.length+' more item'+(dm.length===1?'':'s')+' with no sale this year whose shelf MATCHES Marg (sitting dead)</button><div class="lb" hidden><table class="tbl" style="margin-top:6px"><tr><th>Kind</th><th>Item</th><th class="n">Marg = shelf</th><th class="n">At MRP</th><th>Last purchase</th></tr>'+dm.map(x=>'<tr><td>'+esc(x.kind)+'</td><td>'+esc(x.item)+' <span class="sub">'+esc(x.packing)+'</span></td><td class="n">'+esc(units(x.marg,x.pack))+'</td><td class="n">'+(x.mrp_p==null?'<span class="sub">no price</span>':rs(Math.abs(x.mrp_p))+(x.mrp_source==="provisional"?'<span class="sub">*</span>':''))+'</td><td>'+esc(x.last_purchase||"-")+'</td></tr>').join("")+'</table></div></div>';
+        b+='<div class="tools"><a href="'+esc(d.links.amir)+'">Amir\'s check list (Excel)</a><a href="'+esc(d.links.cleanup)+'">Marg cleanup list for Amir (Excel)</a>'+(d.links.lookups?'<a href="'+esc(d.links.lookups)+'">Marg ledger lookups for Amir (Excel)</a>':'')+(d.links.audit?'<a href="'+esc(d.links.audit)+'">Purchase data audit (Excel)</a>':'')+'</div>';
+      }
+    }
+    b+='</div></div>';
+  });
+  b+='</div>';
+  // ---- 2 not counted
+  const N=d.not_counted_rows||[];
+  b+='<div class="card" id="s2"><div class="lh"><h2 style="margin:0">2 · Not counted — '+N.length+' item'+(N.length===1?'':'s')+'</h2>'+(N.length?'<button type="button" class="tg" data-tg="sec">Show '+N.length+' item'+(N.length===1?'':'s')+'</button>':'')+'</div>';
+  if(N.length){ b+='<div class="sub">Marg\'s stock sitting unchecked: <b>'+rs(d.unchecked_p)+' at MRP</b>'+(d.unchecked_unpriced?' ('+d.unchecked_unpriced+' item'+(d.unchecked_unpriced===1?'':'s')+' with no price)':'')+'. This is what stops a partial count from looking like a complete one.</div>'
+    +'<div class="lb" hidden><table class="tbl"><tr><th>Item</th><th class="n">Marg stock</th><th class="n">At MRP</th></tr>'+N.map(x=>'<tr data-item="'+esc(x.item)+'"><td>'+esc(x.item)+' <span class="sub">'+esc(x.packing)+'</span></td><td class="n">'+esc(units(x.marg,x.pack))+'</td><td class="n">'+(x.mrp_p==null?'<span class="sub">no price</span>':rs(Math.abs(x.mrp_p))+(x.mrp_source==="provisional"?'<span class="sub">*</span>':''))+'</td></tr>').join("")+'</table></div>'; }
+  else b+='<div class="empty">Everything in the shop was counted.</div>';
+  b+='</div>';
+  // ---- 3 matched (collapsed)
+  const M=d.matched||[];
+  b+='<div class="card" id="s3"><div class="lh"><h2 style="margin:0">3 · '+M.length+' item'+(M.length===1?'':'s')+' matched exactly</h2><button type="button" class="tg" data-tg="sec">Show '+M.length+' item'+(M.length===1?'':'s')+'</button></div><div class="lb" hidden><table class="tbl" style="margin-top:8px"><tr><th>Item</th><th class="n">Marg = counted</th></tr>'+M.map(x=>'<tr data-item="'+esc(x.item)+'"><td>'+esc(x.item)+' <span class="sub">'+esc(x.packing)+'</span></td><td class="n">'+esc(units(x.qty,x.pack))+'</td></tr>').join("")+'</table></div></div>';
+  // ---- 4 sent back
+  const F=d.fixes||[];
+  if(F.length) b+='<div class="card" id="s4"><h2>4 · Rows sent back to fix — '+F.length+'</h2><table class="tbl"><tr><th>Sheet row</th><th>As written</th><th class="n">Figure</th><th>Why</th></tr>'+F.map(f=>'<tr><td>'+esc(f.row||"-")+'</td><td>'+esc(f.written)+'</td><td class="n">'+esc(f.figure==null?"-":f.figure)+'</td><td>'+esc(f.why)+'</td></tr>').join("")+'</table></div>';
+  b+='<div class="sub" style="margin:6px 2px">* = a provisional price: the last purchase rate ÷ (1 − '+Math.round((d.settings||{}).margin_med*100)+'% medicines / '+Math.round((d.settings||{}).margin_ortho*100)+'% orthotics). An item the shop has sold carries its own selling price.</div>';
+  document.getElementById("body").innerHTML=b;
+  applySearch();
+}
+const ACTS={WRITE_OFF:"Write off",RECOVER:"Pursue",RECOUNT:"Recount",VERIFY_BILL:"Verify bill",MARG_FIX:"Marg fix",PARKED:"Kept elsewhere",EXPLAINED:"Explained",OPEN:"Reopen"};
+// the three words that fit a lane come first; the rest sit behind "more"
+const PRIMARY={recount:["RECOUNT","EXPLAINED","WRITE_OFF"],bill:["VERIFY_BILL","RECOUNT","WRITE_OFF"],marg:["MARG_FIX","RECOUNT","EXPLAINED"],loss:["WRITE_OFF","RECOVER","RECOUNT"],allowance:["WRITE_OFF","RECOVER"],over:["EXPLAINED","RECOUNT","MARG_FIX"],salt:["EXPLAINED","RECOUNT"],dead:["WRITE_OFF","PARKED","MARG_FIX"]};
+function laneButtons(lane, item, laneKey){
+  const who=item?'data-item="'+esc(item)+'"':'data-lane="'+esc(lane)+'"';
+  const prim=PRIMARY[laneKey||lane]||["WRITE_OFF","RECOVER","RECOUNT"];
+  const rest=Object.keys(ACTS).filter(k=>prim.indexOf(k)<0);
+  const btn=k=>'<button type="button" class="act a-'+k+'" data-act="'+k+'" '+who+'>'+ACTS[k]+'</button>';
+  return prim.map(btn).join("")+'<span class="more"><button type="button" class="act moretoggle">more…</button><span class="rest" hidden>'+rest.map(btn).join("")+'</span></span>';
+}
+function rowHtml(x, owner){
+  const v=x.mrp_p, c=x.cost_p, w=x.word;
+  return '<div class="row" data-item="'+esc(x.item)+'"><div class="h" data-item="'+esc(x.item)+'">'+(DECIDE&&B.checker?'<label class="tick noprint"><input type="checkbox" class="sel" data-item="'+esc(x.item)+'"></label>':'')+'<div><div class="t">'+esc(x.item)+'<span class="p">'+esc(x.packing)+'</span></div>'
+    +'<div class="q">Marg '+esc(units(x.marg,x.pack))+' → counted '+esc(units(x.counted,x.pack))+' · <span class="d '+(x.diff<0?"short":"over")+'">'+esc(units(x.diff,x.pack))+(x.diff>0?" over":"")+'</span></div>'
+    +'<div class="why">'+esc(x.why||"")+'</div>'
+    +'<div>'+(x.major?'<span class="badge major">MAJOR</span>':'')+(x.kind?'<span class="badge kind">'+esc(x.kind)+'</span>':'')
+    +(w?'<span class="badge word">'+esc(w.label)+(w.note?' — '+esc(w.note):'')+'</span>':'')
+    +(x.answer?'<span class="badge ans">staff: '+esc(x.answer.label)+(x.answer.note?' — '+esc(x.answer.note):'')+'</span>':'')
+    +(x.cause&&x.cause.cause!=="UNEXPLAINED"?'<span class="badge">cause: '+esc(x.cause.label)+'</span>':'')
+    +(x.salt_pair?'<span class="badge">salt pair: '+esc(x.salt_pair)+'</span>':'')
+    +(!w&&!x.answer?'<span class="badge">no word yet</span>':'')+'</div>'+(w?'<div class="sub">by '+esc(w.by)+' · <span class="nw">'+esc(w.at_text)+'</span></div>':'')+'</div>'
+    +'<div class="v">'+(v==null?'<div class="none">no price</div>':'<div class="big">'+rs(v)+(x.mrp_source==="provisional"?'<span class="sub">*</span>':'')+'</div><div class="sub">at MRP</div>')+(c==null?'':'<div class="sub">'+rs(c)+' at cost</div>')+'</div></div>'
+    +(DECIDE&&B.checker?'<div class="acts noprint"><span class="bl">This line:</span>'+(owner?[["PARKED","Kept elsewhere"],["WRITE_OFF","Used or given — write off"],["RECOVER","Genuinely missing — pursue"]].map(a=>'<button type="button" class="act a-'+a[0]+'" data-act="'+a[0]+'" data-item="'+esc(x.item)+'">'+a[1]+'</button>').join(""):laneButtons(null,x.item,x.lane))+'</div>':'')
+    +'<div class="life" hidden></div></div>';
+}
+function editDist(a,b){ const m=a.length,n=b.length; if(!m) return n; if(!n) return m; let prev=[]; for(let j=0;j<=n;j++) prev[j]=j;
+  for(let i=1;i<=m;i++){ const cur=[i]; for(let j=1;j<=n;j++){ let v=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1)); if(i>1&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1]) v=Math.min(v,prev[j-1]); cur[j]=v; } prev=cur; } return prev[n]; }
+function nearMatch(q,name){ // every word typed must sit near a word of the name: 1 slip up to 5 letters, 2 slips beyond
+  const words=name.toUpperCase().split(/[^A-Z0-9]+/).filter(Boolean);
+  return q.split(/[^A-Z0-9]+/).filter(Boolean).every(w=>{ const tol=w.length<=3?0:(w.length<=5?1:2);
+    return words.some(x=>{ if(x.indexOf(w)===0) return true; const h=x.slice(0,w.length); return editDist(w,h)<=tol||editDist(w,x)<=tol; }); });
+}
+function applySearch(){
+  const q=(Q||"").trim().toUpperCase(); let n=0, tot=0;
+  document.querySelectorAll("[data-item]").forEach(el=>{
+    if(el.classList.contains("h")||el.tagName==="INPUT"||el.tagName==="BUTTON") return;
+    tot++; const hit=!q||String(el.dataset.item).toUpperCase().indexOf(q)>=0; el.hidden=!hit; if(hit)n++;
+  });
+  let near=false;
+  if(q&&!n){ // no exact match: forgive a spelling slip (Axemal -> AXIMAL)
+    document.querySelectorAll("[data-item]").forEach(el=>{ if(el.classList.contains("h")||el.tagName==="INPUT"||el.tagName==="BUTTON") return; const hit=nearMatch(q,String(el.dataset.item)); el.hidden=!hit; if(hit){n++;near=true;} });
+  }
+  const qn=document.getElementById("qn"); if(qn) qn.textContent=q?(n?(n+" of "+tot+(near?" near ":" ")+"match"+(near?" — no exact spelling":"")):"nothing like that on this count"):"";
+  if(q) document.querySelectorAll(".lane").forEach(x=>{ const lb=x.querySelector(".lb"); if(lb&&x.querySelector(".row:not([hidden])")&&lb.hidden){ lb.hidden=false; const t=x.querySelector("button.tg"); if(t) t.textContent=t.textContent.replace("Show","Hide"); } });
+}
+async function decide(items, act){
+  if(!items.length) return;
+  const note = (act==="RECOVER"||act==="PARKED") ? (window.prompt("A note for the record (optional):","")||"") : "";
+  const r=await fetch(BASE+"/api/pad/decide",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({count_id:D.count_id,items:items,action:act,note:note})});
+  const j=await r.json().catch(()=>null);
+  if(!j||!j.ok){ window.alert("Not recorded: "+((j&&j.message)||"the server did not answer")); return; }
+  OPEN=new Set([...document.querySelectorAll(".lane")].filter(x=>x.querySelector(".lb")&&!x.querySelector(".lb").hidden).map(x=>x.dataset.lane));
+  load(D.count_id);
+}
+document.addEventListener("input", e=>{ if(e.target.id==="q"){ Q=e.target.value; applySearch(); } });
+document.addEventListener("click", e=>{
+  const t=e.target.closest("button.tg"); if(!t) return;
+  const box=t.closest(".lh")?t.closest(".lh").nextElementSibling:t.nextElementSibling;
+  if(!box) return; box.hidden=!box.hidden; t.textContent=t.textContent.replace(box.hidden?"Hide":"Show", box.hidden?"Show":"Hide");
+});
+document.addEventListener("click", e=>{
+  const mt=e.target.closest("button.moretoggle"); if(mt){ const r=mt.parentElement.querySelector(".rest"); r.hidden=!r.hidden; mt.textContent=r.hidden?"more…":"less"; return; }
+  const a=e.target.closest("button.act[data-act]");
+  if(a){
+    const act=a.dataset.act;
+    if(a.dataset.item){ decide([a.dataset.item], act); return; }
+    const lane=a.dataset.lane;
+    const ticked=[...document.querySelectorAll('.lane[data-lane="'+lane+'"] input.sel:checked')].map(i=>i.dataset.item);
+    const all=(D.differences||[]).filter(x=>x.lane===lane).map(x=>x.item);
+    const items=ticked.length?ticked:all;
+    if(!ticked.length && !window.confirm("Apply '"+a.textContent+"' to ALL "+all.length+" items in this lane?")) return;
+    decide(items, act); return;
+  }
+  if(e.target.closest("label.tick")) return;
+  const h=e.target.closest(".row .h"); if(!h) return;
+  const row=h.parentElement, box=row.querySelector(".life"), item=h.dataset.item;
+  if(!box.hidden){ box.hidden=true; return; }
+  box.hidden=false;
+  if(box.dataset.done) return;
+  box.innerHTML='<span class="sub">Reading the item\'s purchases, sales and Marg figures…</span>';
+  fetch(BASE+"/api/pad/item/"+D.count_id+"/"+encodeURIComponent(item)).then(r=>r.json()).then(j=>{ box.dataset.done="1"; box.innerHTML=lifeHtml(j); })
+    .catch(()=>{ box.innerHTML='<span class="err">Could not read this item\'s history. Try again.</span>'; });
+});
+document.addEventListener("change", e=>{ if(e.target.id==="pick"){ const c=e.target.value; history.replaceState(null,"","?count="+c); load(c); } });
+function lifeHtml(j){
+  if(!j.ok) return '<span class="err">'+esc(j.message||"not readable")+'</span>';
+  const ps=j.pack_size||1;
+  let h='<h4>THIS FINANCIAL YEAR — '+esc(j.since_text)+' to '+esc(j.upto_text)+'</h4>';
+  const P=j.purchases||[];
+  if(P.length){
+    const qf=p=>'<b>'+esc(p.qty_text||units(p.units,ps))+'</b>'+(p.free||p.loose?' <span class="sub">('+esc(p.on_bill||'')+' on the bill)</span>':'');
+    // a table on a wide screen; one line per bill on the phone (a seven-column table squashes at 390px)
+    h+='<table class="wide"><tr><th>Date</th><th>Vendor</th><th>Bill no</th><th>Item as on the bill</th><th class="n">Quantity</th><th class="n">Rate</th></tr>'
+      +P.map(p=>'<tr'+(p.direction==="RETURN"?' style="color:var(--warn)"':'')+'><td class="mono nw">'+esc(p.bill_date_text)+'</td><td>'+esc(p.vendor)+'</td><td class="mono nw">'+esc(p.bill_no)+(p.direction==="RETURN"?' <span class="sub">(return)</span>':'')+'</td><td>'+esc(p.item)+(p.batch?' <span class="sub">b. '+esc(p.batch)+'</span>':'')+'</td>'
+        +'<td class="n">'+qf(p)+'</td><td class="n">'+(p.rate_p==null?'-':rs(p.rate_p))+'</td></tr>').join("")+'</table>'
+      +'<div class="narrow">'+P.map(p=>'<div class="pl"'+(p.direction==="RETURN"?' style="color:var(--warn)"':'')+'><span class="mono">'+esc(p.bill_date_text)+'</span> · <b>'+esc(p.vendor)+'</b> · bill <span class="mono">'+esc(p.bill_no)+'</span>'+(p.direction==="RETURN"?' (return)':'')
+        +'<br><span class="sub">'+esc(p.item)+(p.batch?' · b. '+esc(p.batch):'')+'</span><br>'+qf(p)+(p.rate_p==null?'':' · '+rs(p.rate_p)+(ps>1?' a strip':' each'))+'</div>').join("")+'</div>'
+      +'<div class="tot">Bought: '+esc(units(j.purchased_units,ps))+' in '+j.purchase_lines+' bill line'+(j.purchase_lines===1?'':'s')+(j.purchase_lines_dropped?' · <span class="sub">'+j.purchase_lines_dropped+' double entr'+(j.purchase_lines_dropped===1?'y':'ies')+' on the server not counted</span>':'')+'</div>';
+    if((j.purchase_names||[]).length>1) h+='<div class="note">On purchase bills this item is written as: '+j.purchase_names.map(esc).join(" / ")+'</div>';
+  } else h+='<div class="empty">No purchase bill for this item on the server this financial year (the server holds what Marg\'s purchase reports have sent it).</div>';
+  h+='<div class="tot" style="font-weight:600">Sold: '+esc(units(j.sold_units,ps))+' in '+j.sale_bills+' bill'+(j.sale_bills===1?'':'s')+' · Returned by patients: '+esc(units(j.returned_units,ps))+' in '+j.credit_notes+' credit note'+(j.credit_notes===1?'':'s')+'</div>';
+  if((j.marg||[]).length) h+='<div style="margin-top:6px">Marg\'s own figure by export day: '+j.marg.map(s=>'<span class="mono">'+esc(s.text)+' = '+esc(s.qty)+'</span>').join(" → ")+'</div>';
+  if(j.detector){ const t=j.detector; h+='<div class="det '+(t.residue===0?"good":"bad")+'">'+esc(t.sentence)+'</div>';
+    const sp=(t.spans||[]).filter(x=>x.residue);
+    if(sp.length) h+='<div class="spans">'+sp.map(x=>'<div class="span '+(x.explained?'good':'bad')+'"><b>'+esc(x.from_text)+' → '+esc(x.to_text)+'</b>: Marg '+esc(x.from_qty)+' → '+esc(x.to_qty)+' ('+esc(x.moved_text)+') · residue <b>'+esc(x.residue_text)+'</b><br>'+(x.explained?'<span class="ok">'+esc(x.explained.sentence)+'</span>':'<span class="ask">For Amir: '+esc(x.lookup)+'</span>')+'</div>').join("")+'</div>';
+  }
+  else h+='<div class="note">Only one Marg export day for this item in the window — the movement check needs two.</div>';
+  h+='<div class="note">A residue is a stock change no document on the server explains. A bill keyed after its day\'s export is found and settled here; what remains is one question for Marg\'s item ledger, on Amir\'s lookup list.</div>';
+  return h;
+}
+load(B.count_id);
+</script></body></html>
