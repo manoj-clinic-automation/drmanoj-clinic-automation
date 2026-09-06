@@ -1,0 +1,105 @@
+ * Serving Flask app 'WALK_readiness_s226'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:8837
+Press CTRL+C to quit
+  ok   the count is recorded through the page   Recorded as count #1.
+This sheet: 40 counted · 26 agree with Marg · 14 differ from Marg
+Whole count so far: 40 of 120 it
+  ok   THE BOX OFFERS THE STOCK CHECK REPORT
+  ok   ...and the recent list links it
+  ok   THE REPORT PAYLOAD: count #1, one sheet, sealed and unchanged, the four readiness lines frozen   ([{'count_id': 1, 'finding_no': 'SF-2026-001', 'seal': 'b83666115d1b7b390b00ba97e6df4e58', 'seal_ok': True, 'sealed_at': '2026-09-06T13:39:18', 'sealed_text': '06-09-2026 13:39 IST'}], ['Sale report: current to 04-09-2026, last bill A003602 (1 bill that day).', 'Purchases: current to 10-08-2026 -- 3 bills that day, Rs 3.00.', "Marg's closing stock: as on 05-09-2026, processed here 06-09-2026 03:10 (2 items). Our computed figure: as on 05-09-2026, processed 06-09-2026 02:50 (2 items).", 'All sale returns up to credit-note CN00170 dated 25-08-2026 have been processed.'])
+  ok   ...the numbers: 40 counted of 120, 14 differ, 80 not counted, the mismatch at MRP present
+  ok   ...the financial year window: from 01-04-2026 to the count's as-on 06-09-2026   ('2026-04-01', '2026-09-06')
+  ok   ...X is a MAJOR difference: short 22 at its MRP, over Rs 1,000   {'allowance': 0, 'answer': None, 'bought_fy': True, 'cause': {'cause': 'UNEXPLAINED', 'diff_id': 1, 'label': 'not yet explained', 'note': ''}, 'cost_p': -55000, 'counted': 115, 'decision': None, 'diff': -22, 'item': 'WALK-001 DOLO TAB', 'kind': '', 'lane': 'marg', 'lane_title': 'Marg moved without a document', 'last_purchase': '2026-09-02', 'last_sale': '2026-09-04', 'life': '/finance/stock/api/pad/item/1/WALK-001 DOLO TAB', 'lookups': ['Marg > item ledger > WALK-001 DOLO TAB > 01-08-2026 to 06-09-2026: which voucher took 3 strips 5 tabs IN? No bill, return or sale on the server for it.'], 'loose_fy': 6, 'major': True, 'marg': 137, 'mrp_p': -220000, 'mrp_source': 'sale', 'needs_owner': False, 'pack': 15, 'packing': '1*15', 'residue': 50, 'salt': '', 'sold_fy': 96, 'why': "3 strips 5 tabs IN of Marg between 01-08-2026 and 06-09-2026 with no document on the server -- an adjustment, a correction or a late entry. Amir looks up that span in Marg's item ledger before the shelf is blamed.", 'word': None}
+  ok   ...every difference carries its life link, its answer / cause / decision slots, and MAJOR is counted
+  ok   ...NOT COUNTED carries Marg's stock and its value at MRP sitting unchecked, and a total
+  ok   ...MATCHED is the list of exact matches
+  ok   THE LIFE OF X: four purchase lines THIS financial year -- the March bill is not there   ['AN/1301', 'BM-7741', 'PO/2210', 'PO/2299']
+  ok   ...each with vendor, date, bill number, item as written, qty + free + loose, units, rate   {'basis': 'strips x pack + loose remainder', 'batch': '', 'bill_date': '2026-04-15', 'bill_date_text': '15-04-2026', 'bill_no': 'AN/1301', 'direction': 'PURCHASE', 'expiry': '', 'free': 1.0, 'item': 'WALK-001 DOLO TAB', 'loose': 0.0, 'on_bill': '4 + 1 free', 'packing': '1*15', 'purchase_rate_p': None, 'qty': 4.0, 'qty_text': '5 strips', 'rate_p': 9100, 'units': 75, 'vendor': 'ANMOL AGENCIES'}
+  ok   ...THE TRAILING-DOT SPELLING ON THE BILL IS MATCHED (BM-7741, 6 strips + 3 loose = 93 units)   [('AN/1301', 75), ('BM-7741', 93), ('PO/2210', -30), ('PO/2299', 15)]
+  ok   ...a purchase RETURN is negative units and named
+  ok   ...bought this FY = 153 units, in date order
+  ok   ...sold and returned, by the sale lines: 96 sold in 6 bills, 5 returned in 1 credit note   (96, 6, 5)
+  ok   ...Marg's own figure by export day: 01-08 = 100 -> 06-09 = 137   [{'as_on': '2026-08-01', 'qty': 100, 'text': '01-08-2026'}, {'as_on': '2026-09-06', 'qty': 137, 'text': '06-09-2026'}]
+  ok   THE DETECTOR: Marg moved +37, the documents explain -13 (bought 78, sold 96, returned 5), residue +50   {'conclusion': "3 strips 5 tabs IN between 01-08-2026 and 06-09-2026 of Marg with no document on the server -- the one thing to chase. Amir looks it up in Marg's item ledger.", 'details': ["Window 01-08-2026 to 06-09-2026: Marg's figure 100 -> 137 (+2 strips 7 tabs). Documents on the server: bought 5 strips 3 tabs, sold 6 strips 6 tabs, returned 5 tabs (-13 tabs). Difference +3 strips 5 tabs.", '01-08-2026 -> 06-09-2026: Marg 100 -> 137 (+2 strips 7 tabs); documents -13 tabs; residue 3 strips 5 tabs IN -- Marg > item ledger > WALK-001 DOLO TAB > 01-08-2026 to 06-09-2026: which voucher took 3 strips 5 tabs IN? No bill, return or sale on the server for it.'], 'docs_delta': -13, 'explained_units': 0, 'from_date': '2026-08-01', 'from_qty': 100, 'from_text': '01-08-2026', 'kind': 'lookup', 'lookups': ['Marg > item ledger > WALK-001 DOLO TAB > 01-08-2026 to 06-09-2026: which voucher took 3 strips 5 tabs IN? No bill, return or sale on the server for it.'], 'marg_delta': 37, 'purchased': 78, 'raw_residue': 50, 'residue': 50, 'returned': 5, 'sentence': "3 strips 5 tabs IN between 01-08-2026 and 06-09-2026 of Marg with no document on the server -- the one thing to chase. Amir looks it up in Marg's item ledger.", 'sold': 96, 'spans': [{'docs_delta': -13, 'explained': None, 'from_date': '2026-08-01', 'from_qty': 100, 'from_text': '01-08-2026', 'lookup': 'Marg > item ledger > WALK-001 DOLO TAB > 01-08-2026 to 06-09-2026: which voucher took 3 strips 5 tabs IN? No bill, return or sale on the server for it.', 'marg_delta': 37, 'moved_text': '+2 strips 7 tabs', 'purchased': 78, 'residue': 50, 'residue_text': '+3 strips 5 tabs', 'returned': 5, 'sold': 96, 'to_date': '2026-09-06', 'to_qty': 137, 'to_text': '06-09-2026'}], 'to_date': '2026-09-06', 'to_qty': 137, 'to_text': '06-09-2026'}
+  ok   an item with no purchase, no sale and one export day says so plainly, no detector
+  ok   a life for a count that does not exist is 404
+  ok   THE REPORT OPENS: count #1, the clinic, when, status OPEN, who, Marg as-on, after bill, the finding   Stock check report — count #1
+Advanced Orthopaedic Surgery Centre · Medical store · 06-09-2026 13:39 IST
+Status
+OPEN — 80 still to do
+Counted by
+Darpan
+Entered by
+Amir
+Submitted by
+walk
+Marg stock as on
+06-09-2026 (processed here 06-09-2026 03:10)
+After bill
+A003425 dated 06-09-2026
+Finding
+SF-2026-001 (06-09-2026 13:39 IST)
+Sealed figures: unchanged since sealing (fingerprint checked now).
+Sale r
+  ok   ...the seal line says unchanged since sealing
+  ok   ...the four readiness lines, frozen
+  ok   ...the KPI tiles: counted, agree, differ + major, not counted, explained so far
+  ok   ...THE VALUE OF THE MISMATCH AT MRP, staff and doctor seeing the same figures
+  ok   ...the tools: print, the result sheet, the hand sheet, the mismatch data, the proof
+  ok   SECTION 1 -- Differences, 14 items, in lanes, with the FY window in words
+  ok   ...14 rows across the lanes, each with Marg -> counted, the difference in strips and tabs, MAJOR where it is, 'no word yet'
+  ok   ...X reads 'short 1 strip 7 tabs' in the doctor's convention, with its MRP value   WALK-001 DOLO TAB1*15
+Marg 9 strips 2 tabs → counted 7 strips 10 tabs · short 1 strip 7 tabs
+3 strips 5 tabs IN of Marg between 01-08-2026 and 06-09-2026 with no document on the server -- an adjustment, a correction or a late entry. Amir looks up that span in Marg's item ledger before the shelf is blamed.
+MAJORno word yet
+-Rs 2,200
+at MRP
+-Rs 550 at cost
+  ok   TAP X: THE CONCLUSION FIRST -- one line, the workings folded   CONCLUSION 3 strips 5 tabs IN between 01-08-2026 and 06-09-2026 of Marg with no document on the server -- the one thing to chase. Amir looks it up in Marg's item ledger.
+Show how this was decided
+  ok   TAP X: THE INLINE SECTION OPENS with the financial year and the four purchase rows -- vendor, date, bill no, item, qty   CONCLUSION 3 strips 5 tabs IN between 01-08-2026 and 06-09-2026 of Marg with no document on the server -- the one thing to chase. Amir looks it up in Marg's item ledger.
+Hide how this was decided
+THIS FINANCIAL YEAR — 01-04-2026 to 06-09-2026
+15-04-2026 · ANMOL AGENCIES · bill AN/1301
+WALK-001 DOLO TAB
+5 strips (4 + 1 free on the bill) · Rs 91 a strip
+12-08-2026 · BHARAT MEDICAL · bill BM-7741
+WALK-001 DOLO TAB.
+6 strips 3 tabs (6 + 3 loose on the bill) · Rs 92.50 a strip
+20-08-2026 · PRIME ORTH
+  ok   ...bought / sold / returned totals in strips and tabs, Marg's figures by export day   O · bill PO/2210 (return)
+WALK-001 DOLO TAB
+-2 strips · Rs 93 a strip
+02-09-2026 · PRIME ORTHO · bill PO/2299
+WALK-001 DOLO TAB
+1 strip · Rs 93 a strip
+Bought: 10 strips 3 tabs in 4 bill lines
+On purchase bills this item is written as: WALK-001 DOLO TAB / WALK-001 DOLO TAB.
+Sold: 6 strips 6 tabs in 6 bills · Returned by patients: 5 tabs in 1 credit note
+Marg's own figure by export day: 01-08-2026 = 100 → 06-09-2026 = 137
+Marg's figure, export day by export day, against the documents:
+Window 01-0
+  ok   ...THE RESIDUE, in one sentence, and what a residue means
+  ok   ...the spelling note: the bill writes it two ways
+  ok   ...tap again: it folds away (and does not re-fetch)
+  ok   X sits in the 'Marg moved without a document' lane, its residue in the reason
+  ok   SECTION 2 -- Not counted: 80 items, Marg's stock sitting unchecked valued at MRP, the sentence about a partial count
+  ok   SECTION 3 -- Matched, collapsed to one line
+  ok   ...opens on a tap to the list
+  ok   no section 4 when nothing was sent back
+  ok   A STAFF REASON SHOWS ON THE LINE, and 'explained so far' counts it   WALK-001 DOLO TAB1*15
+Marg 9 strips 2 tabs → counted 7 strips 10 tabs · short 1 strip 7 tabs
+3 strips 5 tabs IN of Marg between 01-08-2026 and 06-09-2026 with no document on the server -- an adjustment, a correction or a late entry. Amir looks up that span in Marg's item ledger before the shelf is blamed.
+MAJORstaff: breakage — one strip crushed
+-Rs 2,200
+at MRP
+-Rs 550 at cost
+  ok   /page/report with no count opens the newest
+  ok   a closed count reads CLOSED in the head
+  ok   A SEALED FIGURE TAMPERED WITH (a stock_diff row edited): the report says so, in red, before anything else
+  ok   a report for a count that does not exist says so
+  ok   THE PAGE THREW NO ERROR THROUGH ALL OF IT
+
+46 ok, 0 FAIL

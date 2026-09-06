@@ -1,0 +1,15 @@
+S227_CONCLUSION  (kit A, fourth cut -- the owner's read of the live PINPOINT desk, 06-Sep-2026)
+Session 227 · 06-Sep-2026
+"These narrations are confusing as to what is the final judgement ... I need only your
+conclusion; the decision metrics you took should be expandable and understandable."
+"Moved in, or out? clarify inline." "bill keyed after that day's export -- purchase entry?"
+"A section for me and Amir to generate these from Marg, for you -- better as upload to
+the VPS than in chat." "The no-movement list: first candidate for write off, for my eyes
+after Darpan and Amir confirm; narrow down to the actionable ones."
+So: one CONCLUSION line per item, the workings behind "Show how this was decided";
+IN / OUT in words; a late-keyed bill recognised across two export spans (ROSIKA FORTE)
+and settled in one sentence; "a purchase entry keyed in Marg after that day's export";
+the desk's last card = FIRST WRITE-OFF CANDIDATES with values, Marg-0 lines dropped;
+"Send Marg's answer to the server" (any file, kept byte for byte in
+pad_uploads/marg_answers/, table stock_marg_answer, listed on the page).
+Three files: stock_app.py, stock_desk.html, stock_report.html. Supersedes S227_PINPOINT.

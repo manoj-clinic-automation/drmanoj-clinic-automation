@@ -1,0 +1,44 @@
+S227_CONCLUSION -- ONE PASTE on the VPS after the publish. ONE LINE.
+Three files installed: stock_app.py, stock_desk.html, stock_report.html (stock_check_live.html unchanged, 961be526).
+Refuses -- and changes NOTHING -- unless the kit sums check and the live pins are those
+S227_PINPOINT printed: stock_app.py ca667e3a, stock_desk.html e874422d, stock_report.html 532d259f.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S227_CONCLUSION && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_app.py | cut -c1-8)" = "ca667e3a" ] && [ "$(md5sum /root/finance/stock_desk.html | cut -c1-8)" = "e874422d" ] && [ "$(md5sum /root/finance/stock_report.html | cut -c1-8)" = "532d259f" ] || { echo "REFUSED: kit sums or the live pins do not match -- NOTHING CHANGED"; false; } && for f in stock_app.py stock_desk.html stock_report.html; do \cp /root/finance/$f /root/finance/$f.bak_S227conc_$(date +%Y%m%d); done && \cp stock_app.py stock_desk.html stock_report.html /root/finance/ && (/root/wa/venv/bin/python3 -B -c "import py_compile;py_compile.compile('/root/finance/stock_app.py',doraise=True,cfile='/tmp/s227c_stock_app.pyc')" && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- one conclusion per item, the workings folded, IN/OUT said, Marg's answers upload to the server" && md5sum /root/finance/stock_app.py /root/finance/stock_desk.html /root/finance/stock_report.html || (echo "COMPILE FAILED OR SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; for f in stock_app.py stock_desk.html stock_report.html; do \cp /root/finance/$f.bak_S227conc_$(date +%Y%m%d) /root/finance/$f; done; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; journalctl -u clinic-finance.service -n 12 --no-pager)); rm -f /tmp/s227c_*.pyc
+
+Expected at the end:  UP -- one conclusion per item, the workings folded, IN/OUT said, Marg's answers upload to the server
+                      241ed1950b0f5a6560b2e1cedeac3ca2  /root/finance/stock_app.py
+                      e51aa29930ab64ca85e289d2c644c003  /root/finance/stock_desk.html
+                      94a90ff479aa86e25bc7090dd960c938  /root/finance/stock_report.html
+
+WHAT CHANGES ON THE SCREENS
+  An item's life opens with ONE boxed line -- "CONCLUSION: Nothing to chase in Marg: +48 strips is bill 2767 of
+  27-08-2026 ... a purchase entry keyed in Marg after that day's export" / "40 strips OUT between 02-09 and 03-09
+  of Marg with no document on the server -- the one thing to chase. Amir looks it up." -- and a button
+  "Show how this was decided" that unfolds the workings (the window line, one line per export span, the
+  purchase lines, sales, Marg by export day). Red border = something to chase; teal = nothing.
+  IN / OUT said in words everywhere a quantity moved. The ROSIKA FORTE kind of case (-60 strips in one span,
+  +60 in the next) is recognised as ONE late-keyed bill and settled in one sentence.
+  The desk's last card is now "FIRST WRITE-OFF CANDIDATES -- no movement since April": the carried-forward
+  items with stock, largest value first, cost and MRP totals; Darpan confirms shelf + expiry, Amir tries the
+  vendor; what comes back is the owner's list. Items with Marg 0 are not on it.
+  "Send Marg's answer to the server" -- on the desk's closing card and the report's tools strip: any file
+  (an export, a PDF, a photo of the ledger) with an optional item and note. Kept byte for byte in
+  pad_uploads/marg_answers/ with a row in stock_marg_answer (count, item, note, name, bytes, who, when),
+  listed on the page. The next build reads them. Nothing in chat.
+  Amir's lookup list = the work list of what to pull from Marg:
+                       https://followup.dr-manoj.in/finance/stock/api/pad/lookups/1.xlsx
+
+ROLLING BACK = the three .bak_S227conc_* files beside the live ones, \cp each back, restart.
+Table created on first request (F-303): stock_marg_answer. Folder: pad_uploads/marg_answers/.
+
+OFFLINE EVIDENCE -- 376 checks in a real browser at phone width (390px):
+  EVIDENCE_conclusion_audit_s227.txt   54/54 the audit walk grown again: the ROSIKA-shaped late bill settled across two
+                                             spans (residue 0, no lookup, one sentence); conclusions for TOLTRIS (explained),
+                                             TYRO (40 strips OUT, Amir) in words; details free of "units"; the lanes; the
+                                             report life (conclusion first, workings folded, then opened); the desk's
+                                             write-off-candidates card with values; the Marg-answer upload from the
+                                             closing card (row + file kept byte for byte + listed; no file refused)
+  EVIDENCE_regress_report_s227.txt     46/46 · desk 47/47 · lanes 46/46 · diff_sheet 41/41 · pad_proof 65/65 ·
+  count_search 34/34 · submit_flow 30/30 · safestore 13/13
+  Sub-agent screen reads (native resolution): fine -- conclusion boxes colour-coded, Show/Hide state right,
+  inputs inside the width, the list rows carry a value each.

@@ -1,0 +1,98 @@
+ * Serving Flask app 'WALK_readiness_s226'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:8831
+Press CTRL+C to quit
+  ok   the sheet is recorded: 40 counted, 13 differ   Recorded as count #1.
+This sheet: 40 counted · 27 agree with Marg · 13 differ from Marg
+Whole count so far: 40 of 120 items · 13 differ from Marg
+Stock mismatch at MRP: short Rs 867.18 (6 lines) · over Rs 1,175 (7) · 4 at a provisional price
+Download the PROOF of this sheet (PDF) — save it or print 
+  ok   THE BOX SAYS THE VALUE OF THE MISMATCH AT MRP: short, over, and the lines without an MRP   Recorded as count #1.
+This sheet: 40 counted · 27 agree with Marg · 13 differ from Marg
+Whole count so far: 40 of 120 items · 13 differ from Marg
+Stock mismatch at MRP: short Rs 867.18 (6 lines) · over Rs 1,175 (7) · 4 at a provisional price
+Download the PROOF of this sheet (PDF) — save it or print it
+The proof says exactly what the server recorded from the sheet you just uploaded — and your Excel file itself is kept on the server, unchanged, for any question later. File fingerprint: 4fa58c69…
+Some stock count is left: 80 items not counted. Download the sheet and complete it.
+Download SHEET 2 
+  ok   ...AND OFFERS THE DIFFERENCES SHEET FOR THE COUNTER TO FILL BY HAND   what is still to do. Fill the NOT COUNTED and SENT BACK TO FIX tabs, save it, and upload it at step 3. Repeat until this box says everything is counted.
+Doctor: close count #1 as it stands (80 left)
+Doctor: DECIDE — one card at a time
+Open the STOCK CHECK REPORT — every difference with its purchases, sales and Marg figures
+Download DIFFERENCES TO CHECK (PDF) — for the counter to fill by hand
+The same items are on the DIFFERENCES tab of the result sheet. What he writes by hand is typed there (recount, reason number, remarks) and uploaded at step 3 — a recount joins this count as the next sheet.
+  ok   ...the downloads in the box, in order: proof, the remaining sheet, the desk, the report, the differences sheet   ['dl proof', 'dl', 'dl desk', 'dl report', 'dl diffs']
+  ok   THE MISMATCH JSON: basis MRP, one row per difference, totals short / over / net / unpriced   {'cost_net_p': -10000, 'cost_over_p': 87500, 'cost_priced': 13, 'cost_short_p': 97500, 'cost_unpriced': 0, 'lines': 13, 'mrp_net_p': 30782, 'mrp_over_p': 117500, 'mrp_priced': 13, 'mrp_provisional': 4, 'mrp_short_p': 86718, 'mrp_unpriced': 0, 'over_lines': 7, 'short_lines': 6, 'unpriced_both': 0, 'unpriced_both_units': 0}
+  ok   ...ordered by MRP value, largest first; each row carries item, Marg, counted, diff, cost and MRP values   {'answer': None, 'cost_p': 12500, 'counted': 45, 'diff': 5, 'item': 'WALK-025 ZINC INJ', 'marg': 40, 'mrp_p': 47000, 'mrp_source': 'sale', 'pack': 1, 'packing': '1*1'}
+  ok   ...AN ITEM'S MRP VALUE IS ITS DIFFERENCE TIMES ITS OWN STRIP RATE OVER THE PACK   ({'answer': None, 'cost_p': 12500, 'counted': 410, 'diff': 5, 'item': 'WALK-001 PANTO TAB', 'marg': 405, 'mrp_p': 335, 'mrp_source': 'sale', 'pack': 15, 'packing': '1*15'}, 67)
+  ok   ...AN ITEM WITH A HYPHEN OR A QUOTE IN ITS NAME IS PRICED TOO (the sale key, not the raw name)   ('WALK-001 PANTO TAB', {'answer': None, 'cost_p': 12500, 'counted': 410, 'diff': 5, 'item': 'WALK-001 PANTO TAB', 'marg': 405, 'mrp_p': 335, 'mrp_source': 'sale', 'pack': 15, 'packing': '1*15'})
+  ok   an item the shop never sold carries a PROVISIONAL price from its purchase rate, and says so (never a cost wearing an MRP label unmarked)   [{'answer': None, 'cost_p': -17500, 'counted': 6, 'diff': -7, 'item': 'WALK-034 MOX TAB', 'marg': 13, 'mrp_p': -21875, 'mrp_source': 'provisional', 'pack': 30, 'packing': '1*30'}]
+  ok   the cost totals sit beside, for reference
+  ok   THE DIFFERENCES SHEET IS A PDF, landscape, named STOCK_COUNT_<day>_DIFFERENCES_TO_CHECK.pdf   inline; filename="STOCK_COUNT_06-09-2026_DIFFERENCES_TO_CHECK.pdf"
+  ok   ...its head: the clinic, the count, who counted, the bill, Marg as-on   Advanced Orthopaedic Surgery Centre - Medical store                                                                                               STOCK COUNT #1 - DIFFERENCES TO CHECK
+Counted 06-09-2026 13:38 IST by Darpan, entered by Amir - after bill A003425 dated 06-09-2026 - against Marg stock a
+  ok   ...THE VALUE OF THE MISMATCH AT MRP on the sheet, the same figures as the box   ['VALUE OF THE MISMATCH AT MRP: short Rs 867.18 (6 lines) - over Rs 1,175 (7 lines) - net Rs 307.82 - 0 of 13 lines have no MRP on record']
+  ok   ...how to fill it, in plain words, and the reason legend 1-7
+  ok   ...the columns: #, Item, Pack, Marg, Counted, Difference, At MRP, RECOUNT strips, loose, REASON, REMARKS
+  ok   ...EVERY DIFFERENCE IS ON IT, and none of the matched items
+  ok   ...13 numbered rows, largest MRP value first, a provisional price marked with *   ('   1 WALK-025 ZINC INJ                                      1*1           40 pc            45 pc                      5 pc             Rs 470', ' 13 WALK-001 PANTO TAB                                     1*15             27s            27s 5t                        5t           Rs 3.35')
+  ok   ...a shortage carries the sign in the word: 'short 7t', never a minus on a strip   ['   3 WALK-010 DOLO SYP 100ML                                1*1          137 pc           130 pc                short 7 pc         -Rs 290.50']
+  ok   ...the totals bar and the signature line for the counter and the typist
+  ok   the result workbook still has the five tabs   ['SUMMARY', 'DIFFERENCES', 'NOT COUNTED', 'SENT BACK TO FIX', 'MATCHED']
+  ok   ...SUMMARY carries the VALUE OF THE STOCK MISMATCH at MRP: short, over, net, lines without an MRP, cost beside   VALUE OF THE STOCK MISMATCH (at MRP, the shop's selling price) | 
+Short on the shelf, at MRP | Rs 867.18  (6 lines)
+Over on the shelf, at MRP | Rs 1,175.00  (7 lines)
+Net, at MRP | Rs 307.82
+Lines with no MRP on record | 0 of 13  (the shop has never sold them here)
+At cost (last purchase rate), for reference | short Rs 975.00, over Rs 875.00, 0 lines without a rate
+ | 
+EXPLANATIONS (optional, fill
+  ok   ...THE DIFFERENCES TAB HAS THE FILL-IN COLUMNS: RECOUNT STRIPS, RECOUNT LOOSE, REASON (1-7), REMARKS, after AT MRP and AT COST   ['ITEM', 'PACKING', 'MARG STOCK (strips & tabs)', 'PHYSICAL COUNT (strips & tabs)', 'DIFFERENCE (strips & tabs)', 'AT MRP', 'AT COST', 'RECOUNT STRIPS', 'RECOUNT LOOSE', 'REASON (1-7)', 'REMARKS']
+  ok   ...the shaded cells are the four answer cells, the figures are not
+  ok   ...the note says what the numbers mean and that a blank row is no change
+  ok   ...one row per difference, the same order as the PDF (MRP first)
+  ok   ...AT MRP is a rupee figure on every line (sale price, or the provisional one)
+  ok   THE TYPED-IN DIFFERENCES TAB JOINS THE COUNT: 2 recounts recorded as part of count #1   Recorded as part of count #1.
+This sheet: 2 counted · 1 agree with Marg · 1 differ from Marg
+Whole count so far: 40 of 120 items · 12 differ from Marg
+Stock mismatch at MRP: short Rs 867.18 (6 lines) · over Rs 1,162.35 (6) · 4 at a provisional price
+Download the PROOF of this sheet (PDF) — save it o
+  ok   ...A NOW AGREES (one difference fewer), B carries its new figure -- the sealed first count untouched   Recorded as part of count #1.
+This sheet: 2 counted · 1 agree with Marg · 1 differ from Marg
+Whole count so far: 40 of 120 items · 12 differ from Marg
+Stock mismatch at MRP: short Rs 867.18 (6 lines) · over Rs 1,162.35 (6) · 4 at a provisional price
+Download the PROOF of this sheet (PDF) — save it or print it
+The proof says exactly what the server recorded from the sheet you just uploaded — and yo
+  ok   ...THE BLANK DIFFERENCES ROWS CHANGED NOTHING: still 80 not counted, nothing sent back   Some stock count is left: 80 items not counted. Download the sheet and complete it.
+Download SHEET 3 REMAINING
+It holds only what is still to do. Fill the NOT COUNTED and SENT BACK TO FIX tabs, save i
+  ok   THE REASONS LANDED ON THE EXPLANATION LAYER: B count error, C breakage + remark, D don't know, E remark only as don't know   [('WALK-010 DOLO SYP 100ML', 'breakage', 'two strips crushed in the drawer', 'walk'), ('WALK-016 ORTHO CAP', 'dont_know', '(no reason given) Darpan says it was given to the OT', 'walk'), ('WALK-007 DOLO TAB', 'count_error', None, 'walk'), ('WALK-013 CALPOL TAB', 'dont_know', None, 'walk')]
+  ok   the mismatch is re-valued on the family: one line fewer, B at its new figure, 4 explained   (12, 4)
+  ok   ...and the answer travels with its item
+  ok   THE NEXT HAND-FILL SHEET shows the reason already on record in the item's box, so it is not asked twice   ['40 items counted of 120 - 28 agree - 12 DIFFER - 80 not counted - 0 to fix - 4 reasons already on record', 'VALUE OF THE MISMATCH AT MRP: short Rs 867.18 (6 lines) - over Rs 1,162.35 (6 lines) - net Rs 295.17 - 0 of 12 lines have no MRP on record', 'number from the legend. Write anything else in REMARKS. Then this sheet is typed into the DIFFERENCES tab of the Excel result sheet, column for column, and uploaded at step 3 -- the count already', '   3 WALK-010 DOLO SYP 100ML                                1*1          137 pc           130 pc                short 7 pc         -Rs 290.50                                                   on record: breakage - two strips...', "   9 WALK-016 ORTHO CAP                                    1*10            1s 3t               6t                  short 7t         -Rs 43.75                                                   on record: don't know - (no reas...", " 11 WALK-013 CALPOL TAB                                    1*30           4s 17t           4s 22t                        5t           Rs 8.65                                                   on record: don't know", ' 12 WALK-007 DOLO TAB                                      1*10                0               2t                        2t           Rs 6.20                                                   on record: count error']
+  ok   ...and the recent list carries the mismatch line and the differences links for the count   RECENT STOCK CHECKS — EACH WITH ITS SHEET
+Count #1 (sheets 1–2)
+06-09-2026 13:38 IST · bill A003425 · Darpan
+40 of 120 counted, 12 differ from Marg · OPEN — 80 still to do (80 not counted)
+Download SHEET 3 REMAINING
+Stock mismatch at MRP: short Rs 867.18 (6 lines) · over Rs 1,162.35 (6) · 4 at a provisional price
+Decide · Open the report · Differences: sheet to check by hand (PDF) · value at MRP
+P
+  ok   the part's receipt: 2 items recorded from this sheet, A and B
+  ok   AN UNTOUCHED RESULT WORKBOOK (blank DIFFERENCES, blank NOT COUNTED) IS REFUSED IN WORDS, nothing recorded   Not recorded.
+Not one figure in this sheet could be used, so there is nothing to record.
+Nothing was written. If the sheet is right and this keeps happening, tell the doctor — with the file.
+  ok   ...and no answer was invented from blank rows
+  ok   the reader hands on NO row from a blank DIFFERENCES tab, and every NOT COUNTED row as before   80
+  ok   CLOSED: the mismatch line, the FINAL RESULT sheet, the DIFFERENCES sheet and the proofs are all in the box   STOCK CHECK COMPLETED
+Count #1 was closed on 06-09-2026 13:38 IST by walk. Everything was counted. No more sheets can be added to it. For the next stock check, start again at step 1.
+Stock mismatch at MRP: short Rs 867.18 (6 lines) · over Rs 1,162.35 (6) · 4 at a provisional price
+Download the FINAL RESULT sheet
+Doctor: DECIDE — one card at a time
+Open the STOCK CHECK REPORT — every difference with its purchases, sales and Marg figures
+Download DIFFERENCES TO CHECK (PDF) — for the counter to fil
+  ok   a mismatch for a count that does not exist is 404
+  ok   THE PAGE THREW NO ERROR THROUGH ALL OF IT
+
+41 ok, 0 FAIL

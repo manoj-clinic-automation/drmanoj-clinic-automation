@@ -1,0 +1,83 @@
+ * Serving Flask app 'WALK_readiness_s226'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:8803
+Press CTRL+C to quit
+== S226 -- REPORT AND SEND TO LEDGER, driven ==
+  ok   four of six counted, two of them differing   4 / 6
+  ok   the report renders at all   SANJEEVNI STOCK CHECK
+counted by : Darpan
+entered by : Amir
+after bill : A003425
+  ok   it names both differences   SANJEEVNI STOCK CHECK
+counted by : Darpan
+entered by : Amir
+after bill : A003425
+     dated : 2026-09-06
+marg stock : as on 06-09-2026
+counted    : 4 of 6
+differences: 2
+NOT YET SENT TO LEDGER: 4
+
+DIF
+  ok   it does not claim the two that matched are differences   SANJEEVNI STOCK CHECK
+counted by : Darpan
+entered by : Amir
+after bill : A003425
+     dated : 2026-09-06
+marg stock : as on 06-09-2026
+counted    : 4 of 6
+differences: 2
+NOT YET SENT TO LEDGER: 4
+
+DIFFERENCES — to reconcile in Marg
+
+TYRO BR
+  marg 700  found 690  diff -10
+ALCOXIB 120
+  marg 13  foun
+  ok   it says how many were not counted   SANJEEVNI STOCK CHECK
+counted by : Darpan
+entered by : Amir
+after bill : A003425
+     dated : 2026-09-06
+marg stock : as on 06-09-2026
+counted    : 4 of 6
+differences: 2
+NOT YET SENT TO LEDGER: 4
+
+DIF
+  ok   no page error while reporting
+  ok   a partial count ASKS before sending   [('confirm', '2 item(s) not counted. Send anyway?\n\nA partial count is recorded honestly as a partial count -- items not counted raise no difference.'), ('alert', 'Recorded as count #1.\n2 difference(s) raised — the checker names each cause at\n/finance/stock/page/diffs')]
+  ok   ...and then confirms what it recorded   [('confirm', '2 item(s) not counted. Send anyway?\n\nA partial count is recorded honestly as a partial count -- items not counted raise no difference.'), ('alert', 'Recorded as count #1.\n2 difference(s) raised — the checker names each cause at\n/finance/stock/page/diffs')]
+  ok   the confirmation names the count number   2 item(s) not counted. Send anyway?
+
+A partial count is recorded honestly as a partial count -- items not counted raise 
+  ok   the send did not throw
+  ok   the ledger holds the count   (1, 4, 6, 'A003425')
+  ok   ...pinned to the bill the gate asked for   (1, 4, 6, 'A003425')
+  ok   exactly two differences raised, and the right two   [('ALCOXIB 120', 13, 11, -2), ('TYRO BR', 700, 690, -10)]
+  ok   the differences carry the real numbers   [('ALCOXIB 120', 13, 11, -2), ('TYRO BR', 700, 690, -10)]
+  ok   the finding is SEALED in the same breath   ('SF-2026-001', 2)
+  ok   and the data horizon is frozen with it
+  ok   the Send button locks itself so it cannot go twice
+  ok   ...and says so   Sent — count #1
+     after reload: entries={}  progress=0 / 6  share='Sent — count #1'
+  ok   A RELOAD AFTER SENDING still knows the count went   Sent — count #1
+  ok   ...the Send button stays locked
+  ok   ...and the screen SAYS so, with the count number   This count has already been sent to the ledger — count #1 at 01:39 PM.
+2 difference(s) were raised. The list below is em
+  ok   ...the time on it is the wall clock, never UTC   ('01', '13:39')
+  ok   ...it explains why the list looks empty   This count has already been sent to the ledger — count #1 at 01:39 PM.
+2 difference(s) were raised. The list below is empty because the ledger holds the count now — that is normal, and nothing has bee
+  ok   ...and warns against counting the same day twice   This count has already been sent to the ledger — count #1 at 01:39 PM.
+2 difference(s) were raised. The list below is empty because the ledger holds the count now — that is normal, and nothing has been lost.
+Do not count the shelf again for the same 
+  ok   'Start a genuinely new count' asks first   [('confirm', 'Start a NEW count?\n\nThe count already sent (#1) stays in the ledger untouched. This only clears this screen so the shelf can be counted again -- and what you send next will be recorded as a SEPARATE count.')]
+  ok   ...and then frees the page -- the banner is gone
+  ok   ...the button no longer says Sent   Send to ledger
+  ok   ...and it can send again once something IS counted   Send to ledger (1)
+  ok   ...while the count already in the ledger is untouched
+  ok   ...and that survives a reload too, without the old banner
+
+30 ok, 0 FAILED, 0 note(s)
