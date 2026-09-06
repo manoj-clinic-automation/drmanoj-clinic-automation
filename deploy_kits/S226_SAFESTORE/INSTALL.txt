@@ -1,0 +1,19 @@
+S226_SAFESTORE -- ONE PASTE on the VPS after the publish. ONE LINE. One file.
+This is the kit the counting hold was called for.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S226_SAFESTORE && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_check_live.html | cut -c1-8)" = "bfdf4cde" ] || { echo "REFUSED: kit sums or the live pin do not match -- NOTHING CHANGED"; false; } && \cp /root/finance/stock_check_live.html /root/finance/stock_check_live.html.bak_S226safe_$(date +%Y%m%d) && \cp stock_check_live.html /root/finance/ && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- looking at a counted item can no longer destroy it" && md5sum /root/finance/stock_check_live.html || (echo "SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; \cp /root/finance/stock_check_live.html.bak_S226safe_$(date +%Y%m%d) /root/finance/stock_check_live.html; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; md5sum /root/finance/stock_check_live.html)
+
+Expected at the end:  UP -- looking at a counted item can no longer destroy it
+                      d529857fdb5f420cb326960bf6f35264  /root/finance/stock_check_live.html
+
+BEFORE ANYONE COUNTS AGAIN -- one thing to know:
+  Any item still showing "you counted 0" that should not be zero was destroyed by
+  the twenty-minute window this fixes. Those items must be counted again. Nothing
+  was submitted, so nothing wrong reached the ledger.
+
+OFFLINE EVIDENCE -- 77 checks, driven in a real browser at phone width:
+  EVIDENCE_count_search_s226.txt   34/34  search, revisit, adjust, and the destroyer
+  EVIDENCE_submit_flow_s226.txt    30/30  report, send, ledger rows, reload after send
+  EVIDENCE_safestore_s226.txt      13/13  a browser that will not save; a damaged record
+
+ROLLING BACK = the .bak_S226safe_* file beside the live one, \cp it back, restart.
