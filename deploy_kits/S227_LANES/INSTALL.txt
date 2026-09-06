@@ -1,0 +1,41 @@
+S227_LANES -- ONE PASTE on the VPS after the publish. ONE LINE.
+Four files installed: stock_app.py, stock_report.html, stock_check_live.html, pad_receipt.py.
+Refuses -- and changes NOTHING -- unless the kit sums check and the live pins are those
+S227_FINDING_REPORT printed: stock_app.py f33e2826, stock_report.html 539fcce6, stock_check_live.html 8558a0e1.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S227_LANES && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_app.py | cut -c1-8)" = "f33e2826" ] && [ "$(md5sum /root/finance/stock_report.html | cut -c1-8)" = "539fcce6" ] && [ "$(md5sum /root/finance/stock_check_live.html | cut -c1-8)" = "8558a0e1" ] || { echo "REFUSED: kit sums or the live pins do not match -- NOTHING CHANGED"; false; } && for f in stock_app.py stock_report.html stock_check_live.html pad_receipt.py; do \cp /root/finance/$f /root/finance/$f.bak_S227lanes_$(date +%Y%m%d); done && \cp stock_app.py stock_report.html stock_check_live.html pad_receipt.py /root/finance/ && (/root/wa/venv/bin/python3 -B -c "import py_compile;[py_compile.compile('/root/finance/'+f,doraise=True,cfile='/tmp/s227l_'+f+'.pyc') for f in ('stock_app.py','pad_receipt.py')]" && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- the lanes, the price ladder, the allowance and the owner's word are live" && md5sum /root/finance/stock_app.py /root/finance/stock_report.html /root/finance/stock_check_live.html /root/finance/pad_receipt.py || (echo "COMPILE FAILED OR SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; for f in stock_app.py stock_report.html stock_check_live.html pad_receipt.py; do \cp /root/finance/$f.bak_S227lanes_$(date +%Y%m%d) /root/finance/$f; done; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; journalctl -u clinic-finance.service -n 12 --no-pager)); rm -f /tmp/s227l_*.pyc
+
+Expected at the end:  UP -- the lanes, the price ladder, the allowance and the owner's word are live
+                      0ab2e9577064479e7fb276e9b000e969  /root/finance/stock_app.py
+                      e28340bc5f819d599c17db36ce78582f  /root/finance/stock_report.html
+                      cb8dfe57fb9f003e8e3d449a8040d292  /root/finance/stock_check_live.html
+                      1e0c38271bc23c232a7be63e7dfe8eec  /root/finance/pad_receipt.py
+
+THE REPORT, count #1:  https://followup.dr-manoj.in/finance/stock/page/report?count=1
+  Head: running totals (written off / to pursue / parked / still open) and a SEARCH BOX.
+  "Needs your word" card first, if any adjustment-stock item wants it (three buttons, one tap each).
+  1 · Differences as eight folding lanes; each line shows its reason, a MAJOR badge, the kind letter in
+      the cleanup lane, and "This line:" buttons (three that fit + more...). A lane's highlighted row
+      applies a word to the whole lane or to the ticked lines (a confirm asks before a whole lane).
+  Amir's lists (Excel) sit inside lane 8: the no-movement check list and the Marg cleanup list.
+  Settings, if ever wanted (table setting): stock.margin_med 0.20 · stock.margin_ortho 0.30 ·
+  stock.allowance_scale 1.0 · stock.major_p 100000 (paise). Nothing needs setting today.
+  Tables created on first request (F-303): stock_mrp_manual, stock_diff_lane.
+
+ROLLING BACK = the four .bak_S227lanes_* files beside the live ones, \cp each back, restart.
+
+OFFLINE EVIDENCE -- 272 checks in a real browser at phone width (390px):
+  EVIDENCE_lanes_s227.txt                   44/44 twelve engineered items land in their lanes with the right reason;
+                                                  the allowance from loose sales (2) and none for a Rs 1,500 strip; the
+                                                  identical-salt pair proposed and NOT the similar salt; the owner's
+                                                  short list; the price ladder (sale / provisional at 0.8 and 0.7);
+                                                  the page (totals, search, owner card, lanes, badges, Amir links);
+                                                  search filters and opens the lane; kept-elsewhere from the card;
+                                                  a whole lane written off in one tap; one ticked line pursued;
+                                                  reopen as a new row; the S221 layer mirrored; Amir's two Excel
+                                                  lists; a counter refused (403); the allowance scale as a setting
+  EVIDENCE_regress_report_s227.txt          45/45 (checks moved from filter chips to lanes)
+  EVIDENCE_regress_diff_sheet_s227.txt      41/41 (the hand sheet now marks a provisional price "(p)")
+  EVIDENCE_regress_pad_proof_s227.txt       65/65 · count_search 34/34 · submit_flow 30/30 · safestore 13/13
+  Sub-agent screen reads: eight buttons per line were too many -- three that fit + "more..."; the lane row
+  highlighted and labelled; the who/when on its own line, timestamp unbroken.

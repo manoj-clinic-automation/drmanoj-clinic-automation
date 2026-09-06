@@ -1,0 +1,143 @@
+  ok   the page opens: four steps, the Excel panel, no recent counts
+  ok   SHEET 1 comes down from the button with every item and the four details   {'date': '06-09-2026', 'counted_by': 'Darpan', 'entered_by': 'Amir', 'bill_no': 'A003425', 'bill_date': '2026-09-06'}
+  ok   IT RECORDS IN ONE STEP AND SAYS SO   Recorded as count #1.
+This sheet: 40 counted · 34 agree with Marg · 6 differ from Marg · 3 rows sent back to fix
+Whole c
+  ok   ...this sheet: 40 counted, 3 rows sent back to fix   Recorded as count #1.
+This sheet: 40 counted · 34 agree with Marg · 6 differ from Marg · 3 rows sent back to fix
+Whole count so far: 40 of 120 items · 6 differ from Marg
+Stock mismatch at MRP: short Rs 562.50 (6 lines) · over Rs 0 (0) · 6 at a provisional price
+Download the PROOF of this sheet (PDF)
+  ok   ...some stock count is left: 80 not counted, 3 to fix   Recorded as count #1.
+This sheet: 40 counted · 34 agree with Marg · 6 differ from Marg · 3 rows sent back to fix
+Whole count so far: 40 of 120 items · 6 differ from Marg
+Stock mismatch at MRP: short Rs 562.50 (6 lines) · over Rs 0 (0) · 6 at a provisional price
+Download the PROOF of this sheet (PDF) — save it or print it
+The proof says exactly what the server recorded from the sheet you just uploa
+  ok   THE BOX OFFERS THE PROOF OF THIS SHEET, a PDF, right under the numbers   Recorded as count #1.
+This sheet: 40 counted · 34 agree with Marg · 6 differ from Marg · 3 rows sent back to fix
+Whole count so far: 40 of 120 items · 6 differ from Marg
+Stock mismatch at MRP: short Rs 562.50 (6 lines) · over Rs 0 (0) · 6 at a provisional price
+Download the PROOF of this sheet (PDF) — save it or print it
+The proof says exactly what the server recorded from the sheet you just uploaded — and your Excel file itself is kept on the server, unchanged, for any question later. File fingerprint: 8d79a319…
+Some stock count is left: 80 items not counted, 3 rows to fix. Download the sheet
+  ok   ...and says the Excel file itself is kept on the server, with its fingerprint   Recorded as count #1.
+This sheet: 40 counted · 34 agree with Marg · 6 differ from Marg · 3 rows sent back to fix
+Whole count so far: 40 of 120 items · 6 differ from Marg
+Stock mismatch at MRP: short Rs 562.50 (6 lines) · over Rs 0 (0) · 6 at a provisional price
+Download the PROOF of this sheet (PDF) — save it or print it
+The proof says exactly what the server recorded from the sheet you just uploaded — and your Excel file itself is kept on the server, unchanged, for any question later. File fingerprint: 8d79a319…
+Some stock count is left: 80 items not counted, 3 rows to fix. Download the sheet and complete it.
+Download SHEET 2 REMAINING
+It holds only what is still to do. Fill the NOT COUNTED
+  ok   ...the proof sits ABOVE the remaining-work sheet link, the result sheet still offered
+  ok   ...the proof link is the receipt for count #1   /finance/stock/api/pad/receipt/1.pdf?t=1788694544614
+  ok   THE RECEIPT IS A PDF, opened inline under the sheet's name   inline; filename="STOCK_COUNT_06-09-2026_SHEET_1_PROOF.pdf"
+  ok   ...it names the count and the sheet   Advanced Orthopaedic Surgery Centre
+MEDICAL STORE - STOCK COUNT UPLOAD RECEIPT
+
+Count #1 - sheet 1
+This is the server's own record of what it read from ONE uploaded sheet and what it recorded from it.
+  ok   ...who: uploaded by walk, counted by Darpan, entered by Amir, bill A003425 dated 06-09-2026
+  ok   ...THE FILE: its name, its size, its md5, KEPT on the server, verified   THE FILE THAT WAS UPLOADED
+File name                      pad_filled.xlsx
+Size                           13061 bytes
+md5 (fingerprint)              8d79a319e691baf7e2fba5dd7616575c
+Uploaded at                    06-09-2026 11:35 IST
+Kept on the server             YES - unchanged, as 8d79a319e691baf7e2fba5dd7616575c.xlsx
+The server wrote the uploaded bytes to its archive and read them back: the md5
+  ok   ...what this sheet did: 43 rows read, 40 counted, 3 sent back   WHAT THIS SHEET DID
+43 rows with figures - 40 items counted - 34 agree with Marg - 6 differ - 3 rows sent back to fix
+Whole count #1 after this sheet: 40 of 120 items counted, 6 differ from Marg, 80 n
+  ok   ...the whole count after it: 40 of 120, 80 not yet counted, 3 to fix
+  ok   ...DIFFERENCES FROM THIS SHEET, first, with the count   6
+  ok   ...the three rows sent back, as written, with why   ROWS SENT BACK TO FIX (3) - kept as written, not recorded as a count
+ Row    As written on the sheet                                 Figure   Why it could not be used
+   69 SOMETHING NOBODY KNOWS                                         7   this name is not in the shop list -- correct it
+   70 WALK-062 DOLO TAB                                              -   a negative count: -3
+   71 WALK-063 DOL
+  ok   ...EVERY ITEM RECORDED FROM THIS SHEET (40), each with Marg, counted, strips, loose, diff
+  ok   ...AND EVERY ONE OF THE 40 FIGURES ON THE RECEIPT IS THE FIGURE THE SHEET CARRIED   WALK-040 PANTO OINT 30G
+  ok   ...the foot names the count, the full md5, and the time in IST, unclipped   Count #1 sheet 1 - md5 8d79a319e691baf7e2fba5dd7616575c - PDF made 06-09-2026 11:35 IST                                 
+  ok   ...on 2 page(s) of A4
+  ok   THE UPLOADED BYTES ARE ON DISK, beside the database, named by their md5   /home/claude/s227b/pad_uploads
+  ok   ...BYTE FOR BYTE the file that was uploaded
+  ok   ...and a second reader opens the kept copy
+  ok   the archive ledger holds it: recorded, count #1, verified, once, by walk   ('8d79a319e691baf7e2fba5dd7616575c.xlsx', 'pad_filled.xlsx', 13061, 1, 'recorded', 1, 1, 'walk')
+  ok   INDEX.txt, a line a person can read: IST, md5, recorded, count 1, by walk, the name, verified   06-09-2026 11:35 IST | 8d79a319e691baf7e2fba5dd7616575c | recorded           | count 1 | by walk | pad_filled.xlsx | 13061 bytes | verified
+
+  ok   A FROZEN COPY OF THE RECEIPT WAS WRITTEN BESIDE THE SHEET the moment it was recorded   ['8d79a319_count1_STOCK_COUNT_06-09-2026_SHEET_1_PROOF.pdf']
+  ok   ...and it says what the route says (the same sealed rows)
+  ok   THE RECENT LIST CARRIES THE SHEETS WITH THEIR RECEIPTS   [{'count_id': 1, 'filename': 'pad_filled.xlsx', 'from_sheet': True, 'kept': True, 'md5': '8d79a319e691baf7e2fba5dd7616575c', 'n': 1, 'receipt': '/finance/stock/api/pad/receipt/1.pdf', 'when': '06-09-2026 11:35 IST'}]
+  ok   ...and the page shows 'Proof of each sheet (PDF): sheet 1' under count #1   RECENT STOCK CHECKS — EACH WITH ITS SHEET
+Count #1 (sheet 1)
+06-09-2026 11:35 IST · bill A003425 · Darpan
+40 of 120 counted, 6 differ from Marg · OPEN — 83 still to do (80 not counted, 3 to fix)
+Download SHEET 2 REMAINING
+Stock mismatch at MRP: short Rs 562.50 (6 lines) · over Rs 0 (0) · 6 at a prov
+  ok   THE SAME FILE TWICE IS NOT A SECOND COUNT -- and the proof is still offered   Already recorded — count #1.
+This exact file was already recorded as count #1. Nothing was recorded again -- the result sheet below is the current one.
+Whole count so far: 40 of 120 items · 6 differ f
+  ok   ...the archive counts it as seen twice, STILL recorded (a recorded sheet never regresses), count #1, ONE file on disk   (2, 'recorded', 1)
+  ok   ...INDEX.txt logs the repeat as an event
+  ok   ...nothing extra in the ledger
+  ok   THE FILLED RESULT SHEET JOINS THE COUNT   Recorded as part of count #1.
+This sheet: 3 counted · 0 agree with Marg · 3 differ from Marg
+Whole count so far: 43 of 120 items · 9 differ from Marg
+Stock mismatch at MRP: short Rs 562.50 (8 lines) ·
+  ok   ...with its own proof link, for count #2
+  ok   THE PART'S RECEIPT: count #1 sheet 2, recorded as count #2 part of #1, named SHEET_2_PROOF   Advanced Orthopaedic Surgery Centre
+MEDICAL STORE - STOCK COUNT UPLOAD RECEIPT
+
+Count #1 - sheet 2 (recorded as count #2, part of #1)
+This is the server's own record of what it read from ONE uploaded 
+  ok   ...3 items counted, the corrected name among them, the settled total from the shop's pack size   ['   1 WALK-041 ZINC TAB                                                        1*30          0             63          2         3      +63', '   1 WALK-041 ZINC TAB                                                        1*30          0             63          2         3      +63']
+  ok   ...the whole count after it: 43 of 120
+  ok   ...the sheet's own md5 on it, kept
+  ok   both sheets on disk, both in the ledger
+  ok   the recent list: 'Proof of each sheet (PDF): sheet 1 · sheet 2'   RECENT STOCK CHECKS — EACH WITH ITS SHEET
+Count #1 (sheets 1–2)
+06-09-2026 11:35 IST · bill A003425 · Darpan
+43 of 120 counted, 9 differ from Marg · OPEN — 78 still to do (77 not counted, 1 to fix)
+Download SHEET 3 REMAINING
+Stock mismatch at MRP: short Rs 562.50 (8 lines) · over Rs 1,968.75 (1) · 7 at a provisional price · 2 lines with no MRP on record
+Open the report · Differences: sheet to chec
+  ok   ...and the page has thrown no error so far
+  ok   A FILE THAT IS NOT A PAD IS REFUSED IN WORDS, nothing recorded   Not recorded.
+that file could not be read as a count pad (BadZipFile).
+Nothing was written. If the sheet is right and this keeps happening, tell the doctor — with the file.
+  ok   ...BUT THE BYTES ARE KEPT ALL THE SAME -- refused-unreadable, no count, verified   ('refused-unreadable', None, 1, 'junk.xlsx')
+  ok   ...nothing in the count ledger for it
+  ok   A PAD HELD FOR DETAILS is kept as held-need_details, no count yet   ('One more thing before it is recorded.\nThe sheet does not say who counted / who entered / the last bi', ('held-need_details', None))
+  ok   ...filled in, the same file is recorded as count #3 -- and the SAME archive row becomes recorded, count 3, seen twice   ('Recorded as count #3.\nThis sheet: 1 counted · 0 agree with Marg · 1 differ from ', ('recorded', 3, 2))
+  ok   THE CHECKER TAKES THE ORIGINAL BACK, byte for byte, under a name that says which   attachment; filename="8d79a319_pad_filled.xlsx"
+  ok   ...a bad md5 is refused
+  ok   ...an unknown md5 is 404
+  ok   THE ARCHIVE LIST: four files, newest first, each on disk and verified, with its outcome and receipt   [('recorded', 3), ('refused-unreadable', None), ('recorded', 2), ('recorded', 1)]
+  ok   THE WHOLE FOLDER AS ONE ZIP: the four sheets, three receipts, INDEX.txt, the two CSVs   ['pad_uploads/47e005856b970f16d0ae36f22efd344a.xlsx', 'pad_uploads/47e00585_count3_STOCK_COUNT_06-09-2026_SHEET_1_PROOF.pdf', 'pad_uploads/70ebf4ab097de26b2b1a2e21cd77112d.xlsx', 'pad_uploads/70ebf4ab_count2_STOCK_COUNT_06-09-2026_SHEET_2_PROOF.pdf', 'pad_uploads/8d79a319_count1_STOCK_COUNT_06-09-2026_SHEET_1_PROOF.pdf', 'pad_uploads/8d79a319e691baf7e2fba5dd7616575c.xlsx', 'pad_uploads/94379bd40e3519256c189724ca7ddc4d.xlsx', 'pad_uploads/ARCHIVE_LEDGER.csv', 'pad_uploads/INDEX.txt', 'pad_uploads/SHEETS_RECORDED.csv']
+  ok   ...and the sheet inside the zip is the sheet that was uploaded
+  ok   ...the ledger CSV inside says recorded / count 1 / verified for it
+  ok   the checker sees the archive line under the recent list
+  ok   A COUNTER IS REFUSED the originals, the zip and the list (403, 403, 403)   (403, 403, 403)
+  ok   ...but gets the receipt of a recorded sheet
+  ok   ...and sees no archive line on the page
+  ok   THE LAST SHEET: everything counted, the close button appears, its proof offered   Recorded as part of count #1.
+This sheet: 78 counted · 77 agree with Marg · 1 differ from Marg
+Whole count so far: 120 of 120 items · 10 differ from Marg
+Stock mismatch at MRP: short Rs 562.50 (9 lines) · over Rs 1,968.75 (1) · 7 at a provisional price · 3 lines with no MRP on record
+Download the PR
+  ok   CLOSED: STOCK CHECK COMPLETED, the FINAL RESULT sheet, AND the proof of each of the three sheets   STOCK CHECK COMPLETED
+Count #1 was closed on 06-09-2026 11:36 IST by walk. Everything was counted. No more sheets can be added to it. For the next stock check, start again at step 1.
+Stock mismatch at MRP: short Rs 562.50 (9 lines) · over Rs 1,968.75 (1) · 7 at a provisional price · 3 lines with no MRP on record
+Download the FINAL RESULT sheet
+Open the STOCK CHECK REPORT — every difference with it
+  ok   ...sheet 1's receipt, made again after the close, carries the same 40 figures and now says the count is CLOSED   Whole count #1 after this sheet: 120 of 120 items counted, 10 differ from Marg, 0 not yet counted, 0 to fix - NOTHING LEFT.
+Count #1 is CLOSED - completed on 06-09-2026 11:36 IST by walk.
+
+DIFFERENCES FROM THIS SHEET (6)
+   # Item                                                                     P
+  ok   a receipt for a count that does not exist is 404
+  ok   the old address still goes to this page
+  ok   THE PAGE THREW NO ERROR THROUGH ALL OF IT
+
+65 ok, 0 FAIL

@@ -1,0 +1,14 @@
+S227_LANES  (kit A of the loss triage plan)
+Session 227 · 06-Sep-2026
+The report reads itself: every difference in ONE of eight lanes with its reason
+(recount first · verify the bill · Marg moved without a document · real shelf loss ·
+within the allowance · over · identical-salt swap, proposal only (D385) · no movement
+since April with kinds A-E); the price ladder (sale price -> purchase rate / margin,
+provisional and marked -> a typed MRP -> cost); the allowance engine (rises with
+movement and loose sales, falls with value per unit, capped at a pack; a setting);
+the owner's word in bulk or per line (append-only, mirrored to the S221 decision
+layer); the short "needs your word" list; running totals; a search box on the report
+and the count page; Amir's two lists (no-movement check list; Marg cleanup list).
+Four files installed: stock_app.py, stock_report.html, stock_check_live.html,
+pad_receipt.py. padreader / padwriter unchanged (afa8da2f / e7546afe), here for the walks.
+Supersedes S227_FINDING_REPORT.
