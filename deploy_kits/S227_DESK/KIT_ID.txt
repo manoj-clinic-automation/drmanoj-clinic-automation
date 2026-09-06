@@ -1,0 +1,16 @@
+S227_DESK  (kit A of the loss triage plan, second cut -- the desk / document split)
+Session 227 · 06-Sep-2026
+The owner on S227_LANES: "too much data in a very confusing manner ... too complex and
+daunting for a human". So: a DECISION DESK (/page/desk) -- one card, one question, big
+buttons, Skip, Undo, a find box that forgives a spelling slip -- and the REPORT as a
+read-only document, every section folded, Show/Hide per lane, the search forgiving too.
+The owner on BIO D3 MAX ("20 + 300 loose = 600 ... our data is wrong ... do a complete
+data audit"): Marg's loose column is the WHOLE quantity in units, so purchase units are
+now read as Marg means them; a line from a superseded export is not counted; the same
+bill line arriving through two overlapping exports is counted once; the box-sized-gap
+test tolerates a fistful (AXIMAL 200: 286 short = "about 3 boxes"); and a PURCHASE DATA
+AUDIT workbook (/api/pad/audit.xlsx) lists every double entry, loose-is-total line, old
+export line and out-of-proportion free quantity for Amir to correct in Marg.
+Four files installed: stock_app.py, stock_desk.html (NEW), stock_report.html,
+stock_check_live.html. pad_receipt / padreader / padwriter unchanged (1e0c3827 /
+afa8da2f / e7546afe), here for the walks. Supersedes S227_LANES.

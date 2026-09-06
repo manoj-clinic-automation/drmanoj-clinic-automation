@@ -1,0 +1,61 @@
+ * Serving Flask app 'WALK_readiness_s226'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:8846
+Press CTRL+C to quit
+  ok   the count is recorded
+  ok   BIO D3 MAX: three bill lines counted, not six (a superseded export and a double entry dropped)   (3, 2)
+  ok   '20 strips, loose 300' = 300 units (not 600)   {'50428': 300, '53875': 165, '62695': 60}
+  ok   '10 + 1 free, loose 150' = 165 units (the free strip is not inside the loose figure)   {'50428': 300, '53875': 165, '62695': 60}
+  ok   '4 strips, no loose' = 60 units   {'50428': 300, '53875': 165, '62695': 60}
+  ok   bought this FY = 525 units   525
+  ok   ...each line says how it was read   ['loose column = the units', 'loose column = the units; free strips added', 'strips x pack + loose remainder']
+  ok   a TRUE loose remainder still adds: '6 strips + 3 loose' = 63; '2 + 4 free' = 60   {'BM-1': 63, 'BM-2': 60}
+  ok   AUDIT: one double entry (bill 53875, the overlapping export)   [{'batch': 'B2', 'bill_date': '2026-06-20', 'bill_date_text': '20-06-2026', 'bill_no': '53875', 'direction': 'PURCHASE', 'first_id': 3, 'free': 1.0, 'id': 4, 'item': 'BIO D3 MAX CAP', 'loose': 150.0, 'packing': '1*15', 'qty': 10.0, 'vendor': 'ANMOL AGENCIES', 'why': 'same bill, item, batch and quantity already on the server -- counted once'}]
+  ok   AUDIT: one line from a superseded export (bill 50428, the old file)   [{'batch': 'B1', 'bill_date': '2026-05-10', 'bill_date_text': '10-05-2026', 'bill_no': '50428', 'direction': 'PURCHASE', 'free': 0.0, 'id': 1, 'item': 'BIO D3 MAX CAP', 'loose': 300.0, 'packing': '1*15', 'qty': 20.0, 'vendor': 'ANMOL AGENCIES', 'why': 'its export was replaced by a later one -- not counted'}]
+  ok   AUDIT: loose-is-total instances: 50428 (300, was read 600), 53875 (165, was 315), PO-9 (300, was 600) -- nothing else   [('50428', 300, 600), ('53875', 165, 315), ('PO-9', 300, 600)]
+  ok   AUDIT: the odd free quantity is flagged (4 free on 2 paid)   [{'batch': 'R2', 'bill_date': '2026-08-13', 'bill_date_text': '13-08-2026', 'bill_no': 'BM-2', 'direction': 'PURCHASE', 'free': 4.0, 'id': 7, 'item': 'REMAIN TAB', 'loose': 0.0, 'packing': '1*10', 'qty': 2.0, 'vendor': 'BHARAT MEDICAL', 'why': 'free 4 against 2 paid -- more than half; check the bill'}]
+  ok   AUDIT: lines checked = the 7 live-or-duplicate lines + 1 superseded = 8   8
+  ok   AUDIT WORKBOOK: 6 rows, the four kinds, a WHY column and a tick column   (6, ['DOUBLE ENTRY', 'FREE TOO HIGH', 'LOOSE = TOTAL', 'OLD EXPORT'])
+  ok   ...the BIO D3 MAX why-line reads in plain words   ['same bill, item, batch and quantity already on the server -- counted once', 'the loose column (300) is the whole quantity in units (20 strips x 15); read as 300 units, not 600', 'the loose column (150) is the whole quantity in units (10 strips x 15); read as 165 units, not 315']
+  ok   AXIMAL 200 short 286 (3 boxes less 14) -> BILL lane, '3 boxes'   ('bill', 'the gap is about 3 boxes of 10 strips and a purchase of that size sits in the window -- see the bill')
+  ok   BIO D3 MAX short 60 with purchases read right -> not a Marg-moved line   ('loss', 'Marg agrees with the bills; the shelf is short 60 units (allowance 0) -- breakage, unbilled sale or theft')
+  ok   the report links carry the audit workbook   {'amir': '/finance/stock/api/pad/amir/1.xlsx', 'audit': '/finance/stock/api/pad/audit.xlsx', 'cleanup': '/finance/stock/api/pad/cleanup/1.xlsx', 'diffs_pdf': '/finance/stock/api/pad/diffs/1.pdf', 'final_sheet': '/finance/stock/api/pad/followup/1.xlsx', 'finding': '/finance/stock/page/finding?count=1', 'mismatch': '/finance/stock/api/pad/mismatch/1'}
+  ok   REPORT search 'Axemal' -> the AXIMAL row alone, marked as a near match   (['AXIMAL 200 TAB'], '1 of 24 near match — no exact spelling')
+  ok   REPORT search 'bio d3' -> exact   ['BIO D3 MAX CAP']
+  ok   REPORT search for nonsense says so   nothing like that on this count
+  ok   the audit workbook link is on the report page
+  ok   the report's purchase list shows '20 strips (Marg loose 300) = 300 units' and the dropped double entries   BIO D3 MAX CAP1*15
+Marg 26 strips 10 tabs → counted 22 strips 10 tabs · short 4 strips
+Marg agrees with the bills; the shelf is short 60 units (allowance 0) -- breakage, unbilled sale or theft
+no word yet
+-Rs 480
+at MRP
+-Rs 1,500 at cost
+THIS FINANCIAL YEAR — 01-04-2026 to 06-09-2026
+10-05-2026 · ANMOL AGENCIES · bill 50428
+BIO D3 MAX CAP · b. B1
+20 strips (Marg loose 300) = 300 units · Rs 90 a strip
+20-06-2026 · ANMOL AGENCIES · bill 53875
+BIO D3 MAX CAP · b. B2
+10 strips + 1 free (Marg loose 150) = 165 units · Rs 90 a strip
+02-08-2026 · ANMOL AGENCIES · bill 62695
+BIO D3 MAX CAP · b. B3
+4 st
+  ok   DESK find 'Axemal' -> 'nearest' + AXIMAL 200   No item spelt exactly like that — the nearest:
+AXIMAL 200 TAB 1*10
+Marg 30 strips → shelf 1 strip 4 tabs · short 28 strips 6 tabs
+bill
+  ok   ...tapping it jumps to the box-sized-gaps card with the AXIMAL line opened   BOX-SIZED GAPS
+1 gap the size of a box
+short Rs 3,432 at MRP
+A whole box of strips and a purchase of that size in the window: the physical bill must be seen. Amir's job.
+Send all to bill verification
+Amir checks the bills
+Hide the 1 item
+Skip for now
+AXIMAL 200 TAB 1*10
+Marg 30 strips → 1 strip 4 ta
+  ok   no page errors
+
+26 ok, 0 FAIL

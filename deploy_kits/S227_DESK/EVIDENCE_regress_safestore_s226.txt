@@ -1,0 +1,30 @@
+ * Serving Flask app 'WALK_readiness_s226'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:8809
+Press CTRL+C to quit
+== S226 SAFE STORE ==
+  ok   normal working: no alarm on screen
+  ok   A BROWSER THAT WILL NOT SAVE SAYS SO, LOUDLY   THIS BROWSER IS NOT SAVING YOUR ENTRIES.
+Stop counting and tell the doctor now. Do not rel
+  ok   ...and tells them not to reload   THIS BROWSER IS NOT SAVING YOUR ENTRIES.
+Stop counting and tell the doctor now. Do not reload this page — what is on screen is all there is,
+  ok   ...and to stop and tell the doctor   THIS BROWSER IS NOT SAVING YOUR ENTRIES.
+Stop counting and tell the doctor now. Do not reload this page — what is on screen is all there is,
+  ok   a good copy is kept beside the live one
+  ok   A DAMAGED RECORD IS RECOVERED FROM THE BACKUP   THE SAVED COUNT WAS DAMAGED AND HAS BEEN RECOVERED FROM THE BACKUP COPY.
+Check the last few items yo
+  ok   ...and the counted figure is back, intact   {"BIO D3 MAX":{"c":350,"st":23,"lo":5,"at":"2026-09-06T11:00:00"}}
+  ok   ...and the progress counter proves it   1 / 2
+  ok   ...and it is there when searched for   BIO D3 MAX
+1*15
+358
+23 strips 13 tablets
+you counted 350 · 23 strips 5 tablets ·
+  ok   ...and the unreadable bytes were set aside, not thrown away
+  ok   the warning is on the GATE, before anyone can count over the top   ('THE SAVED COUNT COULD NOT BE READ.\nIt has been set aside unt', 'gate visible')
+  ok   NOTHING READABLE ANYWHERE: it says so instead of starting blank   THE SAVED COUNT COULD NOT BE READ.
+It has been set aside untouched, so nothing is destroyed. Do not count over the top o
+  ok   ...and those bytes were set aside too
+
+13 ok, 0 FAILED

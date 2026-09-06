@@ -1,0 +1,51 @@
+S227_DESK -- ONE PASTE on the VPS after the publish. ONE LINE.
+Four files installed: stock_app.py, stock_desk.html (NEW), stock_report.html, stock_check_live.html.
+Refuses -- and changes NOTHING -- unless the kit sums check and the live pins are those
+S227_LANES printed: stock_app.py 0ab2e957, stock_report.html e28340bc, stock_check_live.html cb8dfe57.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S227_DESK && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_app.py | cut -c1-8)" = "0ab2e957" ] && [ "$(md5sum /root/finance/stock_report.html | cut -c1-8)" = "e28340bc" ] && [ "$(md5sum /root/finance/stock_check_live.html | cut -c1-8)" = "cb8dfe57" ] || { echo "REFUSED: kit sums or the live pins do not match -- NOTHING CHANGED"; false; } && for f in stock_app.py stock_report.html stock_check_live.html; do \cp /root/finance/$f /root/finance/$f.bak_S227desk_$(date +%Y%m%d); done && \cp stock_app.py stock_desk.html stock_report.html stock_check_live.html /root/finance/ && (/root/wa/venv/bin/python3 -B -c "import py_compile;py_compile.compile('/root/finance/stock_app.py',doraise=True,cfile='/tmp/s227d_stock_app.pyc')" && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- the decision desk, the read-only report, the purchase data audit and the forgiving search are live" && md5sum /root/finance/stock_app.py /root/finance/stock_desk.html /root/finance/stock_report.html /root/finance/stock_check_live.html || (echo "COMPILE FAILED OR SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; for f in stock_app.py stock_report.html stock_check_live.html; do \cp /root/finance/$f.bak_S227desk_$(date +%Y%m%d) /root/finance/$f; done; rm -f /root/finance/stock_desk.html; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; journalctl -u clinic-finance.service -n 12 --no-pager)); rm -f /tmp/s227d_*.pyc
+
+Expected at the end:  UP -- the decision desk, the read-only report, the purchase data audit and the forgiving search are live
+                      95c38cbba6631d32432e5dc6cfb6a98d  /root/finance/stock_app.py
+                      f1a38a8d982502ce39d45d466bd5373d  /root/finance/stock_desk.html
+                      56be4b95d617f53c91b7ce702083711d  /root/finance/stock_report.html
+                      961be526affb9bfbe55c5a656f28cdfc  /root/finance/stock_check_live.html
+
+THE DESK, count #1:    https://followup.dr-manoj.in/finance/stock/page/desk?count=1
+  One card at a time, one question, big buttons. Your-word items first (Kept elsewhere / Used or given /
+  Genuinely missing), then each lane as one card with its usual answer ("Write off all", "Explained",
+  "Send all to Darpan's recheck", "Send all to bill verification", "Send all to the Marg check"), then the
+  real-loss items one by one (Pursue / Write off / Darpan recounts). "See the N items" opens the list with
+  a button per line; "Its purchases and sales" opens the life; Skip for now; Undo on the last word.
+  A FIND box at the top: a rough spelling is fine ("Axemal" finds AXIMAL 200) and jumps to its card.
+THE REPORT, count #1:  https://followup.dr-manoj.in/finance/stock/page/report?count=1
+  Now a document only -- no buttons. Every section folded on arrival; Show / Hide per lane; the search
+  box forgives a spelling slip and opens the matching lane. The same links to Amir's lists.
+THE PURCHASE DATA AUDIT (Excel, whole financial year, every purchase line on the server):
+                       https://followup.dr-manoj.in/finance/stock/api/pad/audit.xlsx
+  DOUBLE ENTRY = the same bill line held twice (overlapping exports) -- now counted once.
+  LOOSE = TOTAL = Marg's loose column is the WHOLE quantity in units (BIO D3 MAX: 20 strips, loose 300 =
+  300 units, not 600) -- now read that way. OLD EXPORT = a line from an export a later one replaced --
+  now not counted. FREE TOO HIGH = free more than half the paid strips -- check the bill.
+  Also on the desk foot and the report's tools strip. Nothing is deleted on the server; the sheet is
+  Amir's list to correct in Marg's purchase register.
+
+ROLLING BACK = the three .bak_S227desk_* files beside the live ones, \cp each back, delete
+/root/finance/stock_desk.html, restart.
+
+OFFLINE EVIDENCE -- 347 checks in a real browser at phone width (390px):
+  EVIDENCE_desk_s227.txt         47/47 the queue (your-word items, lanes, loss items), one card at a time; every button
+                                       records and the Done strip shows it; Undo reopens (a new row, history kept);
+                                       Skip; the item list; the life panel; the closing card and Amir's links
+  EVIDENCE_audit_s227.txt        26/26 BIO-D3-MAX-shaped lines: '20 strips, loose 300' = 300 (not 600); '10 + 1 free,
+                                       loose 150' = 165; a true remainder '6 + 3 loose' = 63 still adds; a superseded
+                                       export dropped; the same bill from two overlapping exports counted once; the
+                                       audit JSON and workbook (four kinds, plain-word WHY); AXIMAL 200 short 286 with a
+                                       30-strip bill -> the bill lane, "3 boxes"; 'Axemal' finds AXIMAL on the report
+                                       (near match, said so) and on the desk (jumps to its card, row outlined)
+  EVIDENCE_regress_lanes_s227.txt        46/46 (page checks moved to the read-only document; words via the route)
+  EVIDENCE_regress_report_s227.txt       45/45 · diff_sheet 41/41 · pad_proof 65/65 · count_search 34/34 ·
+  submit_flow 30/30 · safestore 13/13
+  Sub-agent screen reads: the desk at 390px (cards, list, life, Done/Undo); the report's purchase lines
+  ("20 strips (Marg loose 300) = 300 units", "2 double entries on the server not counted"); the find box.
+  One wording slip found and fixed ("4 = 60 units" -> "4 strips = 60 units").

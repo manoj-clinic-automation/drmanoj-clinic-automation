@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock check — decisions</title>
+<style>
+/* S227 DESK -- the owner, 06-Sep-2026, on the lanes page: "too much data in a
+   very confusing manner ... too complex and daunting for a human to work with."
+   So: ONE card at a time, ONE question, two or three big buttons, nothing to
+   tick, no confirm boxes; the next card comes by itself; Undo on the last one.
+   English (D369); same tokens as the other pages; both colour schemes. */
+:root{
+  --ground:#F6F8F7;--surface:#FFF;--surface-2:#EDF2F0;--ink:#15201E;--ink-2:#3D4B48;--muted:#66756F;--line:#D9E2DF;
+  --accent:#0E5C58;--on-accent:#FFF;--accent-soft:#D8E9E6;--ok:#0E5C58;--diff:#8C3A2B;--diff-soft:#F6E3DF;--warn:#8A5A12;--warn-soft:#F7ECD8;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}}
+:root[data-theme="dark"]{
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+.wrap{max-width:640px;margin:0 auto;padding:12px 12px 40px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+h1{font-size:19px;margin:0}.sub{color:var(--muted);font-size:13px}
+.nums{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.nums span{padding:6px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--line);font-size:14px}.nums b{font-size:16px}
+.nums .s b{color:var(--diff)}.nums .o b{color:var(--warn)}.nums .w b{color:var(--muted)}
+.prog{margin:8px 0 4px;font-size:13px;color:var(--muted);display:flex;justify-content:space-between}
+.bar{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}.bar i{display:block;height:100%;background:var(--accent);width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 16px;margin:12px 0;box-shadow:0 8px 24px -18px rgba(0,0,0,.3)}
+.card .kind{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.card h2{font-size:21px;margin:4px 0 6px;line-height:1.25}
+.card .big{font-size:17px;margin:6px 0}.card .big b.s{color:var(--diff)}.card .big b.o{color:var(--warn)}
+.card .why{color:var(--ink-2);font-size:14.5px;margin:8px 0}
+.card .facts{font-size:13.5px;color:var(--ink-2);margin:6px 0;padding-left:10px;border-left:3px solid var(--line)}
+.btns{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+button.b,a.b{display:block;font:inherit;font-size:17px;font-weight:700;padding:14px 16px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left;min-height:52px;text-decoration:none}
+a.b.main{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}a.b small{display:block;font-weight:400;font-size:13px;color:var(--muted);margin-top:2px}a.b.main small{color:var(--on-accent);opacity:.85}
+button.b small{display:block;font-weight:400;font-size:13px;color:var(--muted);margin-top:2px}
+button.b.main{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}button.b.main small{color:var(--on-accent);opacity:.85}
+button.b.red{border-color:var(--diff);color:var(--diff)}button.b.amber{border-color:var(--warn);color:var(--warn)}
+button.b.grey{border-color:var(--line);color:var(--muted);font-weight:600;font-size:15px;min-height:44px}
+.row2{display:flex;gap:8px}.row2 button.b{flex:1;text-align:center}
+.list{margin-top:10px;border-top:1px solid var(--line)}
+.li{display:grid;grid-template-columns:1fr auto;gap:6px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.li .n{font-weight:700}.li .q{color:var(--ink-2);font-size:13px}.li .v{text-align:right;white-space:nowrap;font-weight:700}.li .v small{display:block;font-weight:400;color:var(--muted)}
+.li .acts{grid-column:1/3;display:flex;gap:6px;flex-wrap:wrap}.li .acts button{font:inherit;font-size:13px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer}
+.li.done{opacity:.55}.li .done-tag{grid-column:1/3;font-size:12.5px;color:var(--warn);font-weight:700}
+.done-card{background:var(--accent-soft);border-color:var(--accent)}
+.undo{margin-top:8px;font-size:14px}.undo a{color:var(--accent);font-weight:700;cursor:pointer;text-decoration:underline}
+.foot{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}.foot a{font-size:14px;color:var(--accent);font-weight:600;text-decoration:none;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.life{margin-top:10px;padding:10px;background:var(--surface-2);border-radius:8px;font-size:13.5px}
+.life .pl{padding:5px 0;border-bottom:1px solid var(--line)}.life .det{margin-top:8px;padding:8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
+.life .det.bad{border-color:var(--diff);color:var(--diff);font-weight:700}.life .det.good{color:var(--ok)}
+.err{color:var(--diff);font-weight:700}.empty{color:var(--muted);font-style:italic}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+.find{margin:8px 0 4px}.find input{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}.find input:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+#qr{margin-top:6px}#qr .hit{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-bottom:6px;cursor:pointer}#qr .hit .n{font-weight:600}#qr .hit .sub{font-size:12px;color:var(--muted)}#qr .none{font-size:13px;color:var(--muted);padding:4px 2px}
+</style></head><body><div class="wrap">
+<div class="top"><h1>Stock check — your decisions</h1><span class="sub" id="who"></span></div>
+<div class="nums" id="nums"></div>
+<div class="prog"><span id="pt">Loading…</span><span id="pc"></span></div><div class="bar"><i id="pb"></i></div>
+<div class="find"><input type="search" id="q" placeholder="Find one item — a rough spelling is fine" autocomplete="off"><div id="qr" hidden></div></div>
+<div id="card"></div>
+<div class="foot" id="foot"></div>
+</div>
+<script>
+/*__BOOT__*/
+const BASE="/finance/stock";
+const B=window.BOOT||{count_id:0,user:"",checker:false};
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function rs(p){ if(p==null) return "-"; const neg=p<0; let n=Math.abs(Math.round(p)); const paise=n%100; n=Math.floor(n/100);
+  let s=String(n); if(s.length>3){ let head=s.slice(0,-3), tail=s.slice(-3), parts=[]; while(head.length>2){parts.unshift(head.slice(-2));head=head.slice(0,-2);} if(head)parts.unshift(head); s=parts.join(",")+","+tail; }
+  return (neg?"-":"")+"Rs "+s+(paise?"."+String(paise).padStart(2,"0"):""); }
+function units(n,ps){ n=Number(n||0); ps=Number(ps||1); if(n<0) return "short "+units(-n,ps);
+  if(ps<=1) return n+" pc"+(Math.abs(n)===1?"":"s"); const s=Math.floor(n/ps), t=n%ps; const b=[]; if(s)b.push(s+" strip"+(s===1?"":"s")); if(t)b.push(t+" tab"+(t===1?"":"s")); return b.join(" ")||"0 strips"; }
+const LABEL={WRITE_OFF:"written off",RECOVER:"to pursue",EXPLAINED:"explained — no loss",RECOUNT:"sent to Darpan's recheck",PARKED:"parked — kept elsewhere",VERIFY_BILL:"sent for bill verification",MARG_FIX:"to be corrected in Marg",OPEN:"reopened"};
+let D=null, CARDS=[], I=0, LAST=null, SKIPPED=new Set();
+
+function load(){
+  fetch(BASE+"/api/pad/report/"+B.count_id).then(r=>r.json()).then(j=>{ if(!j.ok){ document.getElementById("card").innerHTML='<div class="card err">'+esc(j.message||"could not read the count")+'</div>'; return; } D=j; build(); render(); })
+  .catch(()=>{ document.getElementById("card").innerHTML='<div class="card err">The server did not answer. Check the internet and reload.</div>'; });
+}
+// ---- the queue: what still needs a word, in the order a person would take it
+function build(){
+  const L=D.differences||[], open=x=>!x.word;
+  const lane=k=>L.filter(x=>x.lane===k&&open(x));
+  const sumShort=xs=>xs.reduce((a,x)=>a+((x.mrp_p!=null&&x.mrp_p<0)?-x.mrp_p:0),0);
+  const sumOver=xs=>xs.reduce((a,x)=>a+((x.mrp_p!=null&&x.mrp_p>0)?x.mrp_p:0),0);
+  CARDS=[];
+  // 1 the owner's word on adjustment stock -- one item per card
+  L.filter(x=>x.needs_owner).forEach(x=>CARDS.push({t:"item",kind:"Your word — adjustment stock",x:x,
+    btns:[["PARKED","Kept elsewhere","parked: out of every list until a spot count finds it","amber"],["WRITE_OFF","Used or given","written off, nothing to chase","grey"],["RECOVER","Genuinely missing","to pursue","red"]]}));
+  // 2 the lanes that can be answered in one go
+  const bulk=(key,kind,title,why,btns)=>{ const xs=lane(key); if(!xs.length) return; CARDS.push({t:"lane",key:key,kind:kind,title:title,why:why,xs:xs,short:sumShort(xs),over:sumOver(xs),btns:btns}); };
+  bulk("allowance","Expected shrinkage",n=>n+" small shortage"+(n===1?"":"s")+" within the allowance","The shrinkage a shop expects after months of cutting strips — each one inside the allowance the server computed for that item from its own sales.",
+       [["WRITE_OFF","Write off all","the usual answer","main"]]);
+  bulk("over","More on the shelf than Marg",n=>n+" item"+(n===1?"":"s")+" over","Surplus is never a loss — a wrong-item sale or a purchase not entered. Marking them explained keeps them out of the loss totals; Amir sees them on the report.",
+       [["EXPLAINED","Explained — not a loss","the usual answer","main"],["RECOUNT","Send to Darpan's recheck","if a figure looks impossible","grey"]]);
+  bulk("recount","Cannot be real as written",n=>n+" figure"+(n===1?"":"s")+" to count again","Counted far above Marg, or exactly one strip, or Marg itself negative — an entry slip more likely than a loss. Darpan counts these again on paper.",
+       [["RECOUNT","Send all to Darpan's recheck","the usual answer","main"]]);
+  bulk("bill","Box-sized gaps",n=>n+" gap"+(n===1?"":"s")+" the size of a box","A whole box of strips and a purchase of that size in the window: the physical bill must be seen. Amir's job.",
+       [["VERIFY_BILL","Send all to bill verification","Amir checks the bills","main"]]);
+  bulk("marg","Marg moved without a document",n=>n+" item"+(n===1?"":"s")+" where Marg moved on its own","Marg's own figure moved more than the bills explain — an adjustment or a late bill. Look in Marg before blaming the shelf. Amir's job.",
+       [["MARG_FIX","Send all to the Marg check","Amir looks in Marg","main"],["RECOUNT","Send to Darpan's recheck","if the shelf is in doubt","grey"]]);
+  // the cleanup lane, by kind
+  const dead=k=>lane("dead").filter(x=>x.kind===k);
+  const dk=(k,kind,title,why,btns)=>{ const xs=dead(k); if(!xs.length) return; CARDS.push({t:"lane",key:"dead"+k,kind:kind,title:title,why:why,xs:xs,short:sumShort(xs),over:sumOver(xs),btns:btns}); };
+  dk("E","No movement · clinic-billed",n=>n+" orthotic / consumable item"+(n===1?"":"s")+" billed at the clinic desk","Marg never sees these sales, so its figure is stale and the shelf is the truth. Amir corrects Marg to the shelf figures.",
+     [["MARG_FIX","Correct Marg to the shelf — Amir","the usual answer","main"]]);
+  dk("D","No movement · old stock short",n=>n+" old item"+(n===1?"":"s")+" short, nothing sold since April","Bought before April, never sold, part gone: expired, discarded or sampled unrecorded. Usually small.",
+     [["WRITE_OFF","Write off all","after Amir's expiry check they are gone anyway","main"],["RECOUNT","Send to Darpan's recheck","if you want them counted again first","grey"]]);
+  dk("C","No movement · bought this year, gone",n=>n+" item"+(n===1?"":"s")+" bought this year, never sold, not on the shelf","The one dead-stock case worth chasing: a bill exists, nothing sold, the stock is gone.",
+     [["RECOUNT","Send to Darpan's recheck first","then the bill","main"],["RECOVER","Pursue","","red"],["WRITE_OFF","Write off","","grey"]]);
+  // 3 the real losses, one by one, largest first
+  lane("loss").sort((a,b)=>Math.abs(b.mrp_p||0)-Math.abs(a.mrp_p||0)).forEach(x=>CARDS.push({t:"item",kind:"Real shelf loss"+(x.major?" · MAJOR":""),x:x,
+    btns:[["RECOVER","Pursue","to be recovered from the person responsible","red"],["WRITE_OFF","Write off","accept the loss","grey"],["RECOUNT","Darpan counts again","before deciding","grey"]]}));
+  I=0; while(I<CARDS.length && SKIPPED.has(cardId(CARDS[I]))) I++;
+}
+function cardId(c){ return c.t==="item"?("i:"+c.x.item):("l:"+c.key); }
+function render(){
+  const d=D, m=d.mismatch||{}, t=d.totals||{};
+  document.getElementById("who").textContent="Count #"+d.count_id+" · "+(d.day||"")+" · "+(B.user||"");
+  document.getElementById("nums").innerHTML='<span class="s">short <b>'+rs(m.mrp_short_p||0)+'</b></span><span class="o">over <b>'+rs(m.mrp_over_p||0)+'</b></span><span class="w">written off <b>'+rs(t.written_off_p||0)+'</b></span><span>to pursue <b>'+rs(t.pursue_p||0)+'</b></span><span>still open <b>'+(t.open||0)+'</b> line'+(t.open===1?'':'s')+'</span>';
+  const total=CARDS.length, done=CARDS.filter(c=>SKIPPED.has(cardId(c))).length;
+  document.getElementById("pt").textContent=total?(I<total?("Card "+(I+1)+" of "+total):("All "+total+" card"+(total===1?"":"s")+" seen")):"Nothing to decide";
+  document.getElementById("pc").textContent=total?((t.written_off+t.pursue+t.parked+t.explained+t.recount+t.bill+t.marg_fix)+" line"+((t.written_off+t.pursue+t.parked+t.explained+t.recount+t.bill+t.marg_fix)===1?"":"s")+" decided"):"";
+  document.getElementById("pb").style.width=total?Math.round(100*I/total)+"%":"100%";
+  const el=document.getElementById("card");
+  let h="";
+  if(LAST) h+='<div class="card done-card"><div class="kind">Done</div><div class="big">'+esc(LAST.text)+'</div><div class="undo"><a data-undo="1">Undo</a></div></div>';
+  if(I>=CARDS.length){
+    h+='<div class="card"><div class="kind">'+(CARDS.length?"That is all for now":"Nothing needs your word")+'</div><h2>'+((t.open||0)?((t.open)+" line"+(t.open===1?"":"s")+" still open — they are with Darpan or Amir, or skipped"):"Every line has your word.")+'</h2>'
+      +'<div class="why">Your decisions are on Amir\'s lists now. Next:</div>'
+      +'<div class="btns"><a class="b main" href="'+esc(d.links.cleanup)+'">Give Amir the Marg cleanup list<small>every line you wrote off, explained or sent to Marg</small></a>'
+      +'<a class="b" href="'+esc(d.links.amir)+'">Give Amir the no-movement list<small>expiry checks and the clinic-billed stock</small></a>'
+      +'<a class="b" href="'+esc(d.links.diffs_pdf)+'" target="_blank" rel="noopener">Give Darpan the hand sheet (PDF)<small>the lines sent to recheck are on it</small></a>'
+      +(SKIPPED.size?'<button class="b grey" data-again="1">Show the '+SKIPPED.size+' skipped card'+(SKIPPED.size===1?'':'s')+' again</button>':'')+'</div></div>';
+    el.innerHTML=h; foot(); return;
+  }
+  const c=CARDS[I];
+  if(c.t==="lane"){
+    const n=c.xs.length;
+    h+='<div class="card"><div class="kind">'+esc(c.kind)+'</div><h2>'+esc(c.title(n))+'</h2>'
+      +'<div class="big">'+(c.short?'<b class="s">short '+rs(c.short)+'</b>':'')+(c.short&&c.over?' · ':'')+(c.over?'<b class="o">over '+rs(c.over)+'</b>':'')+(!c.short&&!c.over?'<span class="sub">no priced value</span>':'')+' <span class="sub">at MRP</span></div>'
+      +'<div class="why">'+esc(c.why)+'</div>'
+      +'<div class="btns">'+c.btns.map(b=>'<button class="b '+b[3]+'" data-act="'+b[0]+'" data-all="1">'+esc(b[1])+(b[2]?'<small>'+esc(b[2])+'</small>':'')+'</button>').join("")
+      +'<div class="row2"><button class="b grey" data-list="1">See the '+n+' item'+(n===1?'':'s')+'</button><button class="b grey" data-skip="1">Skip for now</button></div></div>'
+      +'<div class="list" id="list" hidden>'+c.xs.map(x=>li(x,c)).join("")+'</div></div>';
+  } else {
+    const x=c.x;
+    h+='<div class="card"><div class="kind">'+esc(c.kind)+'</div><h2>'+esc(x.item)+' <span class="sub">'+esc(x.packing)+'</span></h2>'
+      +'<div class="big">Marg '+esc(units(x.marg,x.pack))+' → counted '+esc(units(x.counted,x.pack))+' · <b class="'+(x.diff<0?'s':'o')+'">'+esc(units(x.diff,x.pack))+(x.diff>0?' over':'')+'</b></div>'
+      +'<div class="big">'+(x.mrp_p==null?'<span class="sub">no price on record</span>':'<b class="'+(x.mrp_p<0?'s':'o')+'">'+rs(Math.abs(x.mrp_p))+'</b> at MRP'+(x.mrp_source==="provisional"?' <span class="sub">(estimated from the purchase rate)</span>':''))+(x.cost_p!=null?' <span class="sub">· '+rs(Math.abs(x.cost_p))+' at cost</span>':'')+'</div>'
+      +'<div class="why">'+esc(String(x.why||"").split(" OWNER CONFIRMS")[0])+'</div>'
+      +'<div class="facts">Sold since April: '+esc(units(x.sold_fy||0,x.pack))+(x.loose_fy?' ('+x.loose_fy+' loose)':'')+' · last sale '+esc(x.last_sale||"none")+' · last purchase on the server '+esc(x.last_purchase||"none")+(x.answer?' · staff say: '+esc(x.answer.label)+(x.answer.note?' — '+esc(x.answer.note):''):'')+'</div>'
+      +'<div class="btns">'+c.btns.map(b=>'<button class="b '+b[3]+'" data-act="'+b[0]+'" data-item="'+esc(x.item)+'">'+esc(b[1])+(b[2]?'<small>'+esc(b[2])+'</small>':'')+'</button>').join("")
+      +'<div class="row2"><button class="b grey" data-life="'+esc(x.item)+'">Its purchases and sales</button><button class="b grey" data-skip="1">Skip for now</button></div></div>'
+      +'<div class="life" id="life" hidden></div></div>';
+  }
+  el.innerHTML=h; foot();
+}
+function li(x,c){
+  return '<div class="li" data-item="'+esc(x.item)+'"><div><div class="n">'+esc(x.item)+' <span class="sub">'+esc(x.packing)+'</span></div><div class="q">Marg '+esc(units(x.marg,x.pack))+' → '+esc(units(x.counted,x.pack))+' · '+esc(units(x.diff,x.pack))+(x.diff>0?' over':'')+'</div></div>'
+    +'<div class="v">'+(x.mrp_p==null?'<small>no price</small>':rs(Math.abs(x.mrp_p)))+'</div>'
+    +'<div class="acts">'+c.btns.map(b=>'<button data-act="'+b[0]+'" data-item="'+esc(x.item)+'">'+esc(b[1].replace(/ all$/,""))+'</button>').join("")+'<button data-act="RECOUNT" data-item="'+esc(x.item)+'">Darpan recounts</button></div></div>';
+}
+function foot(){
+  document.getElementById("foot").innerHTML='<a href="'+esc(BASE+"/page/report?count="+D.count_id)+'">Full report (read)</a><a href="'+esc(D.links.cleanup)+'">Marg cleanup list for Amir</a><a href="'+esc(D.links.amir)+'">No-movement list for Amir</a><a href="'+esc(D.links.diffs_pdf)+'" target="_blank" rel="noopener">Hand sheet for Darpan (PDF)</a>'+(D.links.audit?'<a href="'+esc(D.links.audit)+'">Purchase data audit (Excel)</a>':'')+'';
+}
+async function decide(items, act, text){
+  const r=await fetch(BASE+"/api/pad/decide",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({count_id:D.count_id,items:items,action:act,note:""})}).catch(()=>null);
+  const j=r?await r.json().catch(()=>null):null;
+  if(!j||!j.ok){ document.getElementById("card").insertAdjacentHTML("afterbegin",'<div class="card err">Not recorded: '+esc((j&&j.message)||"the server did not answer")+'</div>'); return false; }
+  LAST={items:items, act:act, text:text};
+  return true;
+}
+document.addEventListener("click", async e=>{
+  const u=e.target.closest("a[data-undo]"); if(u&&LAST){ const items=LAST.items; LAST=null; await decide(items,"OPEN",""); LAST=null; reload(); return; }
+  const ag=e.target.closest("button[data-again]"); if(ag){ SKIPPED.clear(); build(); render(); return; }
+  const sk=e.target.closest("button[data-skip]"); if(sk){ SKIPPED.add(cardId(CARDS[I])); I++; while(I<CARDS.length&&SKIPPED.has(cardId(CARDS[I]))) I++; LAST=null; render(); return; }
+  const ls=e.target.closest("button[data-list]"); if(ls){ const l=document.getElementById("list"); l.hidden=!l.hidden; ls.textContent=l.hidden?ls.textContent.replace("Hide","See"):ls.textContent.replace("See","Hide"); return; }
+  const lf=e.target.closest("button[data-life]"); if(lf){ const box=document.getElementById("life"); box.hidden=!box.hidden; if(!box.hidden&&!box.dataset.done){ box.innerHTML='<span class="sub">Reading…</span>'; const j=await fetch(BASE+"/api/pad/item/"+D.count_id+"/"+encodeURIComponent(lf.dataset.life)).then(r=>r.json()).catch(()=>null); box.dataset.done="1"; box.innerHTML=lifeHtml(j); } return; }
+  const a=e.target.closest("button[data-act]"); if(!a) return;
+  const c=CARDS[I], act=a.dataset.act;
+  if(a.dataset.all){ const items=c.xs.map(x=>x.item); if(await decide(items,act,items.length+" line"+(items.length===1?"":"s")+" — "+(LABEL[act]||act))) reload(); return; }
+  const item=a.dataset.item;
+  if(await decide([item],act,item+" — "+(LABEL[act]||act))) reload();
+});
+function editDist(a,b){ const m=a.length,n=b.length; if(!m) return n; if(!n) return m; let prev=[]; for(let j=0;j<=n;j++) prev[j]=j;
+  for(let i=1;i<=m;i++){ const cur=[i]; for(let j=1;j<=n;j++){ let v=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1)); if(i>1&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1]) v=Math.min(v,prev[j-1]); cur[j]=v; } prev=cur; } return prev[n]; }
+function nearMatch(q,name){ const words=name.toUpperCase().split(/[^A-Z0-9]+/).filter(Boolean);
+  return q.split(/[^A-Z0-9]+/).filter(Boolean).every(w=>{ const tol=w.length<=3?0:(w.length<=5?1:2);
+    return words.some(x=>{ if(x.indexOf(w)===0) return true; const h=x.slice(0,w.length); return editDist(w,h)<=tol||editDist(w,x)<=tol; }); });
+}
+function find(q){
+  const box=document.getElementById("qr"); q=(q||"").trim().toUpperCase();
+  if(!q||!D){ box.hidden=true; box.innerHTML=""; return; }
+  const L=(D.differences||[]).concat(D.dead_matched||[]);
+  let hits=L.filter(x=>x.item.toUpperCase().indexOf(q)>=0); let near=false;
+  if(!hits.length){ hits=L.filter(x=>nearMatch(q,x.item)); near=hits.length>0; }
+  box.hidden=false;
+  box.innerHTML=(near?'<div class="none">No item spelt exactly like that — the nearest:</div>':'')+(hits.slice(0,8).map(x=>'<div class="hit" data-find="'+esc(x.item)+'"><div><div class="n">'+esc(x.item)+' <span class="sub">'+esc(x.packing||"")+'</span></div><div class="sub">Marg '+esc(units(x.marg,x.pack))+' → shelf '+esc(units(x.counted,x.pack))+(x.diff!=null?' · '+esc(units(x.diff,x.pack))+(x.diff>0?' over':''):'')+(x.word?' · '+esc(LABEL[x.word.action]||x.word.action):'')+'</div></div><div class="sub">'+esc(x.lane||"")+'</div></div>').join("")||'<div class="none">Nothing like that on this count.</div>');
+}
+document.getElementById("q").addEventListener("input",e=>find(e.target.value));
+document.addEventListener("click",e=>{ const h=e.target.closest("[data-find]"); if(!h) return; const item=h.dataset.find;
+  // jump to the card that holds this item: its own card, or the lane card that lists it (opened)
+  let k=CARDS.findIndex(c=>c.t==="item"&&c.x.item===item); if(k<0) k=CARDS.findIndex(c=>c.t==="lane"&&c.xs.some(x=>x.item===item));
+  if(k<0){ h.insertAdjacentHTML("beforeend",'<div class="sub">already decided or not on a card — see the full report</div>'); return; }
+  I=k; LAST=null; render(); const l=document.getElementById("list"); if(l){ l.hidden=false; const b=document.querySelector("button[data-list]"); if(b) b.textContent=b.textContent.replace("See","Hide"); const row=l.querySelector('[data-item="'+CSS.escape(item)+'"]'); if(row){ row.style.outline="2px solid var(--accent)"; row.scrollIntoView({block:"center"}); } }
+  document.getElementById("qr").hidden=true; document.getElementById("q").value="";
+});
+function reload(){ fetch(BASE+"/api/pad/report/"+B.count_id).then(r=>r.json()).then(j=>{ if(j.ok){ D=j; build(); render(); } }); }
+function lifeHtml(j){
+  if(!j||!j.ok) return '<span class="err">Could not read this item\'s history.</span>';
+  const ps=j.pack_size||1, P=j.purchases||[];
+  let h='<b>This financial year, '+esc(j.since_text)+' to '+esc(j.upto_text)+'</b>';
+  h+=P.length?P.map(p=>'<div class="pl"><span class="mono">'+esc(p.bill_date_text)+'</span> · <b>'+esc(p.vendor)+'</b> · bill <span class="mono">'+esc(p.bill_no)+'</span>'+(p.direction==="RETURN"?' (return)':'')+'<br><span class="sub">'+esc(p.item)+'</span> · '+(esc(p.qty)+' strip'+(p.qty==1?'':'s')+(p.free?' + '+esc(p.free)+' free':'')+((p.basis&&p.basis.indexOf('loose column = the units')===0)?'':(p.loose?' + '+esc(p.loose)+' loose':'')))+' = <b>'+esc(p.units)+' units</b></div>').join("")+(j.purchase_lines_dropped?'<div class="sub">'+j.purchase_lines_dropped+' double entr'+(j.purchase_lines_dropped===1?'y':'ies')+' on the server not counted</div>':'')
+    :'<div class="empty">No purchase bill on the server this financial year.</div>';
+  h+='<div style="margin-top:6px">Sold: '+esc(units(j.sold_units,ps))+' in '+j.sale_bills+' bill'+(j.sale_bills===1?'':'s')+' · Returned: '+esc(units(j.returned_units,ps))+'</div>';
+  if((j.marg||[]).length) h+='<div>Marg\'s figure by export day: '+j.marg.map(s=>'<span class="mono">'+esc(s.text)+' = '+esc(s.qty)+'</span>').join(" → ")+'</div>';
+  if(j.detector) h+='<div class="det '+(j.detector.residue===0?"good":"bad")+'">'+esc(j.detector.sentence)+'</div>';
+  return h;
+}
+load();
+</script></body></html>
