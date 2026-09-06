@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock check report</title>
+<style>
+/* S227 FINDING REPORT -- the count as a document. English throughout (D369).
+   Same tokens as the count page, both colour schemes, and it prints clean:
+   the PDF is the browser's print of this page (the owner's spec, S226). */
+:root{
+  --ground:#F6F8F7;--surface:#FFF;--surface-2:#EDF2F0;--sunk:#E3EAE7;
+  --ink:#15201E;--ink-2:#3D4B48;--muted:#66756F;--line:#D9E2DF;
+  --accent:#0E5C58;--on-accent:#FFF;--accent-soft:#D8E9E6;
+  --ok:#0E5C58;--diff:#8C3A2B;--diff-soft:#F6E3DF;--warn:#8A5A12;--warn-soft:#F7ECD8;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--sunk:#0A100F;
+  --ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;
+  --ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}}
+:root[data-theme="dark"]{
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--sunk:#0A100F;
+  --ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;
+  --ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:15px;line-height:1.45;-webkit-text-size-adjust:100%}
+.wrap{max-width:980px;margin:0 auto;padding:12px 12px 40px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin:10px 0}
+h1{font-size:20px;margin:0 0 2px}h2{font-size:16px;margin:0 0 8px}
+.sub{color:var(--muted);font-size:13px}
+.mono,.num{font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:14px}.kv b{color:var(--ink-2);font-weight:600}
+.kpis{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.kpi{background:var(--surface-2);border-radius:8px;padding:8px 10px;min-width:96px}
+.kpi .v{font-size:20px;font-weight:700;line-height:1.1}.kpi .l{font-size:12px;color:var(--muted)}
+.kpi.diff .v{color:var(--diff)}.kpi.ok .v{color:var(--ok)}
+.rdy{font-size:13px;color:var(--ink-2);margin-top:8px;padding-left:10px;border-left:3px solid var(--line)}
+.seal{font-size:13px;margin-top:6px}.seal.bad{color:var(--diff);font-weight:700}
+.mm{font-size:15px}.mm b.s{color:var(--diff)}.mm b.o{color:var(--warn)}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.tools a,.tools button{font:inherit;font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--accent);text-decoration:none;font-weight:600;cursor:pointer}
+.tools button.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.filters button{font:inherit;font-size:13px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer}
+.filters button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
+.row{border-top:1px solid var(--line);padding:8px 2px}
+.row .h{display:grid;grid-template-columns:1fr auto;gap:6px;cursor:pointer}
+.row .t{font-weight:700}.row .p{font-size:12px;color:var(--muted);font-weight:400;margin-left:6px}
+.row .q{font-size:13px;color:var(--ink-2)}
+.row .d{font-weight:700}.row .d.short{color:var(--diff)}.row .d.over{color:var(--warn)}
+.row .v{text-align:right;white-space:nowrap}.row .v .big{font-weight:700}.row .v .none{color:var(--muted);font-size:12px}
+.badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:999px;margin:2px 4px 0 0;border:1px solid var(--line);color:var(--ink-2)}
+.badge.major{background:var(--diff-soft);color:var(--diff);border-color:var(--diff);font-weight:700}
+.badge.ans{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.badge.dec{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.life{margin:8px 0 2px;padding:10px;background:var(--surface-2);border-radius:8px;font-size:13px}
+.life h4{margin:0 0 6px;font-size:13px}.life table{width:100%;border-collapse:collapse;font-size:12.5px}
+.life th,.life td{text-align:left;padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.life th{color:var(--muted);font-weight:600;font-size:11.5px}.life td.n,.life th.n{text-align:right;white-space:nowrap}
+.life .tot{font-weight:700;margin-top:6px}.life .nw{white-space:nowrap}
+.life .pl{padding:6px 0;border-bottom:1px solid var(--line)}.life .narrow{display:none}
+@media (max-width:640px){.life table.wide{display:none}.life .narrow{display:block}}.life .det{margin-top:8px;padding:8px;border-radius:6px;background:var(--surface);border:1px solid var(--line)}
+.life .det.bad{border-color:var(--diff);color:var(--diff);font-weight:700}.life .det.good{color:var(--ok)}
+.life .note{color:var(--muted);margin-top:6px}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}.tbl th,.tbl td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.tbl th{color:var(--muted);font-size:12px}.tbl td.n,.tbl th.n{text-align:right;white-space:nowrap}
+details summary{cursor:pointer;font-weight:700}
+.empty{color:var(--muted);font-style:italic}
+.err{color:var(--diff);font-weight:700}
+select{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+@media print{
+  body{background:#fff;color:#000;font-size:11.5px}.wrap{max-width:none;padding:0}
+  .card{border:none;padding:6px 0;margin:6px 0;break-inside:avoid}.tools,.filters,select,.noprint{display:none!important}
+  .row .h{cursor:default}.life{background:#fff;border:1px solid #999}.kpi{border:1px solid #bbb;background:#fff}
+  details{display:block}details summary{list-style:none}details:not([open]) .body{display:none}
+}
+</style></head><body><div class="wrap">
+<div class="card" id="head"><div class="sub">Loading the report…</div></div>
+<div id="body"></div>
+</div>
+<script>
+/*__BOOT__*/
+const BASE="/finance/stock";
+const B=window.BOOT||{count_id:0,roots:[],user:"",checker:false};
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function rs(p){ if(p==null) return null; const neg=p<0; let n=Math.abs(Math.round(p)); const paise=n%100; n=Math.floor(n/100);
+  let s=String(n); if(s.length>3){ let head=s.slice(0,-3), tail=s.slice(-3), parts=[]; while(head.length>2){parts.unshift(head.slice(-2));head=head.slice(0,-2);} if(head)parts.unshift(head); s=parts.join(",")+","+tail; }
+  return (neg?"-":"")+"Rs "+s+(paise?"."+String(paise).padStart(2,"0"):""); }
+function units(n,ps){ n=Number(n||0); ps=Number(ps||1); if(n<0) return "short "+units(-n,ps);
+  if(ps<=1) return n+" pc"+(Math.abs(n)===1?"":"s"); const s=Math.floor(n/ps), t=n%ps; const b=[]; if(s)b.push(s+" strip"+(s===1?"":"s")); if(t)b.push(t+" tab"+(t===1?"":"s")); return b.join(" ")||"0 strips"; }
+let D=null, FILTER="all";
+function load(cid){
+  fetch(BASE+"/api/pad/report/"+cid).then(r=>r.json()).then(j=>{ if(!j.ok){ document.getElementById("head").innerHTML='<div class="err">'+esc(j.message||"The report could not be read.")+'</div>'; return; } D=j; render(); })
+  .catch(()=>{ document.getElementById("head").innerHTML='<div class="err">The server did not answer. Check the internet and reload.</div>'; });
+}
+function render(){
+  const d=D, m=d.mismatch||{};
+  const closed=d.closed ? ('<b class="'+(d.closed.how==="complete"?"":"")+'">CLOSED</b> — '+(d.closed.how==="complete"?"completed":"by the doctor as it stood")+' on '+esc(d.closed.at_text||"")+(d.closed.by?" by "+esc(d.closed.by):"")) : '<b>OPEN</b> — '+((d.not_counted||0)+(d.sent_back||0))+' still to do';
+  let h='<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap"><div><h1>Stock check report — count #'+d.count_id+(d.parts?' (sheets 1–'+(d.parts+1)+')':'')+'</h1>'
+    +'<div class="sub">Advanced Orthopaedic Surgery Centre · Medical store · '+esc(d.when||"")+'</div></div>'
+    +'<div class="noprint">'+(B.roots&&B.roots.length>1?'<select id="pick">'+B.roots.map(r=>'<option value="'+r+'"'+(r===d.count_id?" selected":"")+'>Count #'+r+'</option>').join("")+'</select>':'')+'</div></div>';
+  h+='<div class="kv" style="margin-top:8px"><b>Status</b><span>'+closed+'</span>'
+    +'<b>Counted by</b><span>'+esc(d.counted_by||"-")+'</span><b>Entered by</b><span>'+esc(d.entered_by||"-")+'</span><b>Submitted by</b><span>'+esc(d.submitted_by||"-")+'</span>'
+    +'<b>Marg stock as on</b><span>'+esc(d.as_on||"-")+(d.as_on_note?' <span class="sub">('+esc(d.as_on_note)+')</span>':'')+'</span>'
+    +'<b>After bill</b><span>'+esc(d.bill_no||"-")+' dated '+esc(d.bill_date_text||d.bill_date||"-")+'</span>'
+    +'<b>Finding</b><span>'+d.seals.map(s=>esc(s.finding_no||("count #"+s.count_id))+' <span class="sub">('+esc(s.sealed_text)+')</span>').join(" · ")+'</span></div>';
+  h+='<div class="seal '+(d.seal_ok?"":"bad")+'">'+(d.seal_ok?'Sealed figures: unchanged since sealing (fingerprint checked now).':'SEALED FIGURES HAVE CHANGED since sealing — tell the doctor before using this report.')+'</div>';
+  if((d.readiness_lines||[]).some(x=>x)) h+='<div class="rdy">'+(d.readiness_lines||[]).filter(x=>x).map(x=>esc(x)).join("<br>")+'<div class="sub">The data horizon, frozen at the moment of sealing.</div></div>';
+  h+='<div class="kpis"><div class="kpi"><div class="v">'+d.counted+'<span class="sub"> / '+d.items_in_shop+'</span></div><div class="l">items counted</div></div>'
+    +'<div class="kpi ok"><div class="v">'+d.agreed+'</div><div class="l">agree with Marg</div></div>'
+    +'<div class="kpi diff"><div class="v">'+d.differed+'</div><div class="l">differ · '+d.major+' major</div></div>'
+    +'<div class="kpi"><div class="v">'+d.not_counted+'</div><div class="l">not counted</div></div>'
+    +(d.sent_back?'<div class="kpi"><div class="v">'+d.sent_back+'</div><div class="l">rows to fix</div></div>':'')
+    +'<div class="kpi"><div class="v">'+d.explained+'<span class="sub"> / '+d.differed+'</span></div><div class="l">explained so far</div></div></div>';
+  if(m.lines) h+='<div class="mm">Value of the mismatch at MRP: <b class="s">short '+rs(m.mrp_short_p)+'</b> ('+m.short_lines+' line'+(m.short_lines===1?'':'s')+') · <b class="o">over '+rs(m.mrp_over_p)+'</b> ('+m.over_lines+') · net '+rs(m.mrp_net_p)+(m.mrp_unpriced?' · '+m.mrp_unpriced+' line'+(m.mrp_unpriced===1?'':'s')+' with no MRP on record':'')
+    +'<div class="sub">At cost (last purchase rate), for reference: short '+rs(m.cost_short_p)+', over '+rs(m.cost_over_p)+(m.cost_unpriced?', '+m.cost_unpriced+' without a rate':'')+'. Staff and doctor see the same figures (owner\'s ruling, 06-Sep-2026).</div></div>';
+  h+='<div class="tools"><button type="button" onclick="window.print()">Print / save as PDF</button>'
+    +'<a href="'+esc(d.links.final_sheet)+'">Result sheet (Excel)</a><a href="'+esc(d.links.diffs_pdf)+'" target="_blank" rel="noopener">Differences to check by hand (PDF)</a>'
+    +'<a href="'+esc(d.links.mismatch)+'" target="_blank" rel="noopener">Mismatch, item-wise (data)</a>'
+    +(d.sheets||[]).filter(s=>s.from_sheet).map(s=>'<a href="'+esc(s.receipt)+'" target="_blank" rel="noopener">Proof of sheet '+s.n+'</a>').join("")+'</div>';
+  document.getElementById("head").innerHTML=h;
+  let b='';
+  // ---- 1 differences
+  const L=d.differences||[];
+  b+='<div class="card" id="s1"><h2>1 · Differences — '+L.length+' item'+(L.length===1?'':'s')+', largest value first</h2>'
+    +'<div class="sub">Tap an item to see its purchases this financial year (from '+esc(d.fy_from_text)+' to '+esc(d.upto_text)+') — vendor, date, bill number, quantity — with its sales, returns and Marg\'s own figures, and whether every movement has a document behind it. MAJOR = Rs 1,000 or more at MRP (at cost when no MRP), or two strips / twenty units when unpriced.</div>'
+    +'<div class="filters">'+[["all","All ("+L.length+")"],["major","Major ("+d.major+")"],["short","Short ("+L.filter(x=>x.diff<0).length+")"],["over","Over ("+L.filter(x=>x.diff>0).length+")"],["open","Unexplained ("+L.filter(x=>!x.answer&&!(x.cause&&x.cause.cause!=="UNEXPLAINED")).length+")"]].map(f=>'<button type="button" data-f="'+f[0]+'"'+(FILTER===f[0]?' class="on"':'')+'>'+f[1]+'</button>').join("")+'</div>'
+    +'<div id="rows"></div></div>';
+  // ---- 2 not counted
+  const N=d.not_counted_rows||[];
+  b+='<div class="card" id="s2"><h2>2 · Not counted — '+N.length+' item'+(N.length===1?'':'s')+'</h2>';
+  if(N.length){ b+='<div class="sub">Marg\'s stock sitting unchecked: <b>'+rs(d.unchecked_p)+' at MRP</b>'+(d.unchecked_unpriced?' ('+d.unchecked_unpriced+' item'+(d.unchecked_unpriced===1?'':'s')+' with no MRP)':'')+'. This is what stops a partial count from looking like a complete one.</div>'
+    +'<table class="tbl"><tr><th>Item</th><th class="n">Marg stock</th><th class="n">At MRP</th></tr>'+N.map(x=>'<tr><td>'+esc(x.item)+' <span class="sub">'+esc(x.packing)+'</span></td><td class="n">'+esc(units(x.marg,x.pack))+'</td><td class="n">'+(x.mrp_p==null?'<span class="sub">no MRP</span>':rs(Math.abs(x.mrp_p)))+'</td></tr>').join("")+'</table>'; }
+  else b+='<div class="empty">Everything in the shop was counted.</div>';
+  b+='</div>';
+  // ---- 3 matched (collapsed)
+  const M=d.matched||[];
+  b+='<div class="card" id="s3"><details><summary>3 · '+M.length+' item'+(M.length===1?'':'s')+' matched exactly</summary><div class="body"><table class="tbl" style="margin-top:8px"><tr><th>Item</th><th class="n">Marg = counted</th></tr>'+M.map(x=>'<tr><td>'+esc(x.item)+' <span class="sub">'+esc(x.packing)+'</span></td><td class="n">'+esc(units(x.qty,x.pack))+'</td></tr>').join("")+'</table></div></details></div>';
+  // ---- 4 sent back
+  const F=d.fixes||[];
+  if(F.length) b+='<div class="card" id="s4"><h2>4 · Rows sent back to fix — '+F.length+'</h2><table class="tbl"><tr><th>Sheet row</th><th>As written</th><th class="n">Figure</th><th>Why</th></tr>'+F.map(f=>'<tr><td>'+esc(f.row||"-")+'</td><td>'+esc(f.written)+'</td><td class="n">'+esc(f.figure==null?"-":f.figure)+'</td><td>'+esc(f.why)+'</td></tr>').join("")+'</table></div>';
+  document.getElementById("body").innerHTML=b;
+  renderRows();
+}
+function renderRows(){
+  const L=(D.differences||[]).filter(x=>FILTER==="all"||(FILTER==="major"&&x.major)||(FILTER==="short"&&x.diff<0)||(FILTER==="over"&&x.diff>0)||(FILTER==="open"&&!x.answer&&!(x.cause&&x.cause.cause!=="UNEXPLAINED")));
+  const el=document.getElementById("rows");
+  if(!L.length){ el.innerHTML='<div class="empty">Nothing here.</div>'; return; }
+  el.innerHTML=L.map((x,i)=>{
+    const v=x.mrp_p, c=x.cost_p;
+    return '<div class="row" data-i="'+i+'"><div class="h" data-item="'+esc(x.item)+'"><div><div class="t">'+esc(x.item)+'<span class="p">'+esc(x.packing)+'</span></div>'
+      +'<div class="q">Marg '+esc(units(x.marg,x.pack))+' → counted '+esc(units(x.counted,x.pack))+' · <span class="d '+(x.diff<0?"short":"over")+'">'+esc(units(x.diff,x.pack))+(x.diff>0?" over":"")+'</span></div>'
+      +'<div>'+(x.major?'<span class="badge major">MAJOR</span>':'')+(x.answer?'<span class="badge ans">staff: '+esc(x.answer.label)+(x.answer.note?' — '+esc(x.answer.note):'')+'</span>':'')
+      +(x.cause&&x.cause.cause!=="UNEXPLAINED"?'<span class="badge">cause: '+esc(x.cause.label)+'</span>':'')+(x.decision?'<span class="badge dec">'+esc(x.decision.label)+'</span>':'')
+      +(!x.answer&&!(x.cause&&x.cause.cause!=="UNEXPLAINED")?'<span class="badge">not yet explained</span>':'')+'</div></div>'
+      +'<div class="v">'+(v==null?'<div class="none">no MRP</div>':'<div class="big">'+rs(v)+'</div><div class="sub">at MRP</div>')+(c==null?'':'<div class="sub">'+rs(c)+' at cost</div>')+'</div></div>'
+      +'<div class="life" id="life-'+i+'" hidden></div></div>';
+  }).join("");
+}
+document.addEventListener("click", e=>{
+  const f=e.target.closest(".filters button[data-f]"); if(f){ FILTER=f.dataset.f; render(); return; }
+  const h=e.target.closest(".row .h"); if(!h) return;
+  const row=h.parentElement, box=row.querySelector(".life"), item=h.dataset.item;
+  if(!box.hidden){ box.hidden=true; return; }
+  box.hidden=false;
+  if(box.dataset.done) return;
+  box.innerHTML='<span class="sub">Reading the item\'s purchases, sales and Marg figures…</span>';
+  fetch(BASE+"/api/pad/item/"+D.count_id+"/"+encodeURIComponent(item)).then(r=>r.json()).then(j=>{ box.dataset.done="1"; box.innerHTML=lifeHtml(j); })
+    .catch(()=>{ box.innerHTML='<span class="err">Could not read this item\'s history. Try again.</span>'; });
+});
+document.addEventListener("change", e=>{ if(e.target.id==="pick"){ const c=e.target.value; history.replaceState(null,"","?count="+c); load(c); } });
+function lifeHtml(j){
+  if(!j.ok) return '<span class="err">'+esc(j.message||"not readable")+'</span>';
+  const ps=j.pack_size||1;
+  let h='<h4>THIS FINANCIAL YEAR — '+esc(j.since_text)+' to '+esc(j.upto_text)+'</h4>';
+  const P=j.purchases||[];
+  if(P.length){
+    const qf=p=>esc(p.qty)+(p.free?' + '+esc(p.free)+' free':'')+(p.loose?' + '+esc(p.loose)+' loose':'');
+    // a table on a wide screen; one line per bill on the phone (a seven-column table squashes at 390px)
+    h+='<table class="wide"><tr><th>Date</th><th>Vendor</th><th>Bill no</th><th>Item as on the bill</th><th class="n">Qty + free</th><th class="n">Units</th><th class="n">Rate</th></tr>'
+      +P.map(p=>'<tr'+(p.direction==="RETURN"?' style="color:var(--warn)"':'')+'><td class="mono nw">'+esc(p.bill_date_text)+'</td><td>'+esc(p.vendor)+'</td><td class="mono nw">'+esc(p.bill_no)+(p.direction==="RETURN"?' <span class="sub">(return)</span>':'')+'</td><td>'+esc(p.item)+(p.batch?' <span class="sub">b. '+esc(p.batch)+'</span>':'')+'</td>'
+        +'<td class="n">'+qf(p)+'</td><td class="n">'+esc(p.units)+'</td><td class="n">'+(p.rate_p==null?'-':rs(p.rate_p))+'</td></tr>').join("")+'</table>'
+      +'<div class="narrow">'+P.map(p=>'<div class="pl"'+(p.direction==="RETURN"?' style="color:var(--warn)"':'')+'><span class="mono">'+esc(p.bill_date_text)+'</span> · <b>'+esc(p.vendor)+'</b> · bill <span class="mono">'+esc(p.bill_no)+'</span>'+(p.direction==="RETURN"?' (return)':'')
+        +'<br><span class="sub">'+esc(p.item)+(p.batch?' · b. '+esc(p.batch):'')+'</span><br>'+qf(p)+' = <b>'+esc(p.units)+' units</b>'+(p.rate_p==null?'':' · '+rs(p.rate_p)+' a strip')+'</div>').join("")+'</div>'
+      +'<div class="tot">Bought: '+esc(units(j.purchased_units,ps))+' ('+j.purchased_units+' units) in '+j.purchase_lines+' bill line'+(j.purchase_lines===1?'':'s')+'</div>';
+    if((j.purchase_names||[]).length>1) h+='<div class="note">On purchase bills this item is written as: '+j.purchase_names.map(esc).join(" / ")+'</div>';
+  } else h+='<div class="empty">No purchase bill for this item on the server this financial year (the server holds what Marg\'s purchase reports have sent it).</div>';
+  h+='<div class="tot" style="font-weight:600">Sold: '+esc(units(j.sold_units,ps))+' in '+j.sale_bills+' bill'+(j.sale_bills===1?'':'s')+' · Returned by patients: '+esc(units(j.returned_units,ps))+' in '+j.credit_notes+' credit note'+(j.credit_notes===1?'':'s')+'</div>';
+  if((j.marg||[]).length) h+='<div style="margin-top:6px">Marg\'s own figure by export day: '+j.marg.map(s=>'<span class="mono">'+esc(s.text)+' = '+esc(s.qty)+'</span>').join(" → ")+'</div>';
+  if(j.detector){ const t=j.detector; h+='<div class="det '+(t.residue===0?"good":"bad")+'">'+esc(t.sentence)+'</div>'; }
+  else h+='<div class="note">Only one Marg export day for this item in the window — the movement check needs two.</div>';
+  h+='<div class="note">A residue is a stock change no document explains — an adjustment, a correction, a wrong entry, or a bill entered after its day\'s export. That is the only kind worth chasing in Marg.</div>';
+  return h;
+}
+load(B.count_id);
+</script></body></html>

@@ -1,0 +1,38 @@
+S227_FINDING_REPORT -- ONE PASTE on the VPS after the publish. ONE LINE.
+Three files installed: stock_app.py, stock_report.html (new), stock_check_live.html.
+Refuses -- and changes NOTHING -- unless the kit sums check and the live pins are those
+S227_DIFF_SHEET printed: stock_app.py d5452eca, stock_check_live.html befa5e63.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S227_FINDING_REPORT && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_app.py | cut -c1-8)" = "d5452eca" ] && [ "$(md5sum /root/finance/stock_check_live.html | cut -c1-8)" = "befa5e63" ] || { echo "REFUSED: kit sums or the live pins do not match -- NOTHING CHANGED"; false; } && for f in stock_app.py stock_check_live.html; do \cp /root/finance/$f /root/finance/$f.bak_S227report_$(date +%Y%m%d); done && \cp stock_app.py stock_report.html stock_check_live.html /root/finance/ && (/root/wa/venv/bin/python3 -B -c "import py_compile;py_compile.compile('/root/finance/stock_app.py',doraise=True,cfile='/tmp/s227r_stock_app.pyc')" && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- the stock check report is live" && md5sum /root/finance/stock_app.py /root/finance/stock_report.html /root/finance/stock_check_live.html || (echo "COMPILE FAILED OR SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; for f in stock_app.py stock_check_live.html; do \cp /root/finance/$f.bak_S227report_$(date +%Y%m%d) /root/finance/$f; done; rm -f /root/finance/stock_report.html; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; journalctl -u clinic-finance.service -n 12 --no-pager)); rm -f /tmp/s227r_*.pyc
+
+Expected at the end:  UP -- the stock check report is live
+                      f33e28262ebf9307a4fab983b6c2ebe7  /root/finance/stock_app.py
+                      539fcce6e4eefa355225e2c7b11fbcab  /root/finance/stock_report.html
+                      8558a0e163fc64c57d9692e9435ec7b7  /root/finance/stock_check_live.html
+
+THE REPORT FOR TODAY'S COUNT #1:
+  https://followup.dr-manoj.in/finance/stock/page/report?count=1
+  (no ?count= opens the newest count). Also "Open the STOCK CHECK REPORT" in the count page's box
+  and "Open the report" under every recent count. Print / save as PDF from the button on the page.
+  Tap any difference: its purchases this financial year (from 01-04-2026 to the count's Marg as-on day),
+  sales, returns, Marg's figure by export day, and the residue -- the movement no document explains.
+  Data behind it: /finance/stock/api/pad/report/1 and /finance/stock/api/pad/item/1/<item name>.
+
+ROLLING BACK = the two .bak_S227report_* files beside the live ones, \cp each back, remove
+  /root/finance/stock_report.html, restart.
+
+OFFLINE EVIDENCE -- 231 checks in a real browser at phone width (390px):
+  EVIDENCE_report_s227.txt                  48/48 the report payload (seal, readiness, numbers, FY window, MAJOR);
+                                                  the life of an item: four FY purchase lines with vendor/date/bill/
+                                                  item/qty/units, the March bill excluded, a trailing-dot spelling
+                                                  matched, a purchase return negative; sold/returned by the sale
+                                                  lines; Marg by export day; THE RESIDUE against the walk's own
+                                                  arithmetic; the page: head, seal, KPIs, mismatch, tools, section 1
+                                                  rows and filters, the tap-to-expand, fold, sections 2-4, a reason
+                                                  and a decision shown, the newest count by default, CLOSED, a
+                                                  tampered sealed figure shouted in red, 404s, no JS error
+  EVIDENCE_regress_diff_sheet_s227.txt      41/41 S227_DIFF_SHEET, unchanged (one check widened for the new link)
+  EVIDENCE_regress_pad_proof_s227.txt       65/65 S227_PAD_PROOF, unchanged
+  EVIDENCE_regress_count_search_s226.txt    34/34 · EVIDENCE_regress_submit_flow_s226.txt 30/30 · EVIDENCE_regress_safestore_s226.txt 13/13
+  Sub-agent screen read: the purchase table squashed at 390px -- now one line per bill on the phone, a table on
+  a wide screen; re-read: fine.

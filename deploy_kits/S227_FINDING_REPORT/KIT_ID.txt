@@ -1,0 +1,13 @@
+S227_FINDING_REPORT
+Session 227 · 06-Sep-2026
+The stock-check REPORT: the count as a document on its family (a count and its
+parts) -- head, frozen readiness lines, the seal checked now, KPI tiles, the mismatch
+at MRP, Section 1 Differences (largest value first; MAJOR flagged; filters) where a
+tap opens the item's life THIS FINANCIAL YEAR inline: every purchase (vendor, date,
+bill no, item as on the bill, qty + free + loose, units, rate), sales and returns,
+Marg's own figure by export day, and the residue no document explains; Section 2
+Not counted with the value sitting unchecked; Section 3 Matched, collapsed; Section 4
+rows sent back. Prints clean (the PDF is the browser's print). Linked from the count
+page. Three files installed: stock_app.py, stock_report.html (NEW), stock_check_live.html.
+pad_receipt.py / padreader.py / padwriter.py unchanged (3973e0a5 / afa8da2f / e7546afe),
+here only for the walks. Supersedes S227_DIFF_SHEET.
