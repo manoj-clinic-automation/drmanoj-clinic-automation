@@ -1,0 +1,41 @@
+S226_READINESS -- ONE PASTE on the VPS after the publish (PUBLISH_ALL.bat). ONE LINE.
+
+It fetches the repo, verifies the kit (SUMS.md5), GUARDS all three live pins (stock_app.py must read a61af74a,
+stock_drift.html ffe7333c, stock_check_live.html 298005a2 -- anything else REFUSES and changes nothing), backs
+all three up as .bak_S226readiness_<date>, copies the three full files, compiles the new stock_app.py with the
+venv python, restarts clinic-finance.service, waits 3 s, checks it is active and prints the three new pins. If
+the compile fails or the service does not come back it ROLLS BACK BY ITSELF and restarts.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S226_READINESS && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_app.py | cut -c1-8)" = "a61af74a" ] && [ "$(md5sum /root/finance/stock_drift.html | cut -c1-8)" = "ffe7333c" ] && [ "$(md5sum /root/finance/stock_check_live.html | cut -c1-8)" = "298005a2" ] || { echo "REFUSED: kit sums or live pins do not match -- NOTHING CHANGED"; false; } && \cp /root/finance/stock_app.py /root/finance/stock_app.py.bak_S226readiness_$(date +%Y%m%d) && \cp /root/finance/stock_drift.html /root/finance/stock_drift.html.bak_S226readiness_$(date +%Y%m%d) && \cp /root/finance/stock_check_live.html /root/finance/stock_check_live.html.bak_S226readiness_$(date +%Y%m%d) && \cp stock_app.py stock_drift.html stock_check_live.html /root/finance/ && (/root/wa/venv/bin/python3 -B -c "import py_compile;py_compile.compile('/root/finance/stock_app.py',doraise=True,cfile='/tmp/s226_readiness_check.pyc')" && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- both stock pages now open with the readiness lines" && md5sum /root/finance/stock_app.py /root/finance/stock_drift.html /root/finance/stock_check_live.html || (echo "COMPILE FAILED OR SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; \cp /root/finance/stock_app.py.bak_S226readiness_$(date +%Y%m%d) /root/finance/stock_app.py; \cp /root/finance/stock_drift.html.bak_S226readiness_$(date +%Y%m%d) /root/finance/stock_drift.html; \cp /root/finance/stock_check_live.html.bak_S226readiness_$(date +%Y%m%d) /root/finance/stock_check_live.html; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; md5sum /root/finance/stock_app.py /root/finance/stock_drift.html /root/finance/stock_check_live.html; journalctl -u clinic-finance.service -n 12 --no-pager)); rm -f /tmp/s226_readiness_check.pyc
+
+Expected at the end:  UP -- both stock pages now open with the readiness lines
+                      d977d5b4030a071e93ca5207caa0e23d  /root/finance/stock_app.py
+                      b9fef081f37d94fcda4f7c07de01c2a2  /root/finance/stock_drift.html
+                      75a53efb2cd7cb26cd83c548843074c6  /root/finance/stock_check_live.html
+
+If it prints REFUSED, say so and paste nothing else: a live file is not what this kit was built on.
+
+WHAT YOU SEE AFTER THE RESTART (a hard reload, or reopen the PWA):
+
+  https://followup.dr-manoj.in/finance/stock/page/drift
+  https://followup.dr-manoj.in/finance/stock/page/count
+
+  Both open with a card headed "Read first - know the data" and four lines:
+    1. Sale report: current to <date>, last bill <no> (<n> bills that day).
+    2. Purchases: current to <date> -- <n> bills that day, Rs <total>.
+       ...and under it, those bills by supplier, bill number and amount.
+    3. Marg's closing stock: as on <date>, processed here <date time> (<n> items).
+       Our computed figure: as on <date>, processed <date time> (<n> items).
+    4. All sale returns up to credit-note <no> dated <date> have been processed.
+  Then a warning line whenever the stock figure runs past the purchases, which is
+  today's case: "Count after the purchase export, not before it."
+
+  From the next count onward the finding carries those same four lines, frozen on
+  the day it was sealed. Findings sealed before this kit say so rather than
+  pretending today's lines were theirs.
+
+ROLLING BACK by hand = the three .bak_S226readiness_* files beside the live ones, \cp them back, restart.
+
+OFFLINE EVIDENCE (this kit runs no test on the box):
+  EVIDENCE_walk_readiness_s226.txt   50/50 -- real schemas, real pages, a real count, a dropped table, an empty server
+  EVIDENCE_screen_s226.txt           16/16 -- both pages in a real browser at phone width, no page error

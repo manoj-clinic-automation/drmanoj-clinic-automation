@@ -1,0 +1,11 @@
+PREDICTED OFFLINE, before the install. Read them back from the box afterwards.
+
+  BASE (what must be live BEFORE this kit -- the install REFUSES otherwise)
+    a61af74a1be41b879771af8977d2d9a5  /root/finance/stock_app.py         (S224_DIFFS_ROLE_FIX)
+    ffe7333c4c3b09f04ba0958126a2c7fe  /root/finance/stock_drift.html     (S221_PURCHASE_DUE)
+    298005a25336f30c7124f114aa90a109  /root/finance/stock_check_live.html(S213_STOCK_SCREEN)
+
+  AFTER
+    d977d5b4030a071e93ca5207caa0e23d  /root/finance/stock_app.py
+    b9fef081f37d94fcda4f7c07de01c2a2  /root/finance/stock_drift.html
+    75a53efb2cd7cb26cd83c548843074c6  /root/finance/stock_check_live.html

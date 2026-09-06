@@ -1,0 +1,5 @@
+S226_READINESS
+Session 226 · 06-Sep-2026
+The readiness header on the drift page and the count page, and the data horizon
+logged with every sealed stock-check result. The owner's ruling of 06-Sep and
+the S226 backlog's item 1.

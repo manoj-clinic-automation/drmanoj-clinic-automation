@@ -1,0 +1,53 @@
+== S226 READINESS -- live-shape walk ==
+  ok   api/readiness answers 200   200
+  ok   api/readiness ok
+  ok   headline is the owner's words   Read first -- know the data.
+  ok   sale horizon is 05-09   2026-09-05
+  ok   LAST BILL NUMBER is A003412, not A003395   A003412
+  ok   bill count for that day is 16   16
+  ok   sale line reads plainly   Sale report: current to 05-09-2026, last bill A003412 (16 bills that day).
+  ok   sale line prints dd-mm-yyyy   Sale report: current to 05-09-2026, last bill A003412 (16 bills that day).
+  ok   purchases dated to 03-09 (NOT the 31-Aug bill)   2026-09-03
+  ok   that last day's bills are listed   4
+  ok   the bills carry supplier + bill no + amount
+  ok   the day's total is right   7131450
+  ok   the day's money is printed   Purchases: current to 03-09-2026 -- 4 bills that day, Rs 71,314.50.
+  ok   Indian grouping, lakhs not thousands   Rs 3,54,87,900.00
+  ok   Indian grouping, crores   Rs 1,23,45,67,890.12
+  ok   small and negative amounts   ('Rs 0.00', '-Rs 50.99')
+  ok   the purchase feed stamp is read too   2026-09-03
+  ok   the live purchase export is listed
+  ok   Marg's export: as-on date   {'as_on': '2026-09-05', 'items': 2, 'processed_at': '2026-09-06T03:10:22', 'source': 'push_snapshot.py as on 05-09-2026'}
+  ok   Marg's export: WHEN IT WAS PROCESSED   Marg's closing stock: as on 05-09-2026, processed here 06-09-2026 03:10 (2 items). Our computed figure: as on 05-09-2026, processed 06-09-2026 02:50 (2 items).
+  ok   our computed figure is named separately   Marg's closing stock: as on 05-09-2026, processed here 06-09-2026 03:10 (2 items). Our computed figure: as on 05-09-2026, processed 06-09-2026 02:50 (2 items).
+  ok   the credit-note sentence is the owner's, verbatim in shape   All sale returns up to credit-note CN00161 dated 04-09-2026 have been processed.
+  ok   four readiness lines, in order   4
+  ok   the horizon gap is WARNED, not left to be noticed   ['Purchases are 3 days behind today -- anything entered into Marg after 03-09-2026 is not in any figure on this page.', 'The stock figure is for 05-09-2026 but purchases are known only to 03-09-2026. Count after the purchase export, not before it.']
+  ok   drift carries readiness in the SAME round trip
+  ok   drift still does its own job   2
+  ok   drift page serves 200   200
+  ok   the readiness card is ON the drift page
+  ok   it OPENS with it -- before any result
+  ok   the header is wired to render
+  ok   the page's own script is untouched
+  ok   count page serves 200   200
+  ok   the readiness card is ON the count page too
+  ok   it opens with it, above the gate
+  ok   the count page fetches its own readiness
+  ok   the count page's data injection still happened
+  ok   a count can still be submitted   {'count_id': 1, 'differences': 1, 'finding_no': 'SF-2026-001', 'items': 2, 'marg_claim_mismatches': [], 'ok': True, 'snapshot_used': True}
+  ok   it was sealed   SF-2026-001
+  ok   one difference raised   1
+  ok   THE RESULT IS LOGGED WITH ITS DATA HORIZON
+  ok   the log carries the last sale bill and its date
+  ok   the log carries purchases-to-date with that day's bills
+  ok   the log carries the credit-note sentence
+  ok   the finding document shows the frozen header
+  ok   the counted and the expected stock are on the finding
+  ok   a missing purchase table does NOT kill the drift page   200
+  ok   ...and the header says so instead of guessing   Purchases: the purchase books could not be read from the server, so how far they are known is unknown.
+  ok   ...while the other three lines still stand
+  ok   an EMPTY server says 'nothing has reached the server yet', not zero   ['Sale report: nothing has reached the server yet.', 'Purchases: nothing has reached the server yet.', "Marg's closing stock: never received. Our computed figure: never received.", 'No sale return has been processed on the server yet.']
+  ok   an empty server raises no warning it cannot support
+
+50 ok, 0 FAILED

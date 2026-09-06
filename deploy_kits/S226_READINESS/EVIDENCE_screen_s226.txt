@@ -1,0 +1,30 @@
+== S226 READINESS -- the screen ==
+  ok   drift: the header PAINTED   Sale report: current to 05-09-2026, last bill A003412 (16 bills that d
+  ok   drift: last bill number on the screen
+  ok   drift: purchases horizon on the screen
+  ok   drift: the stock export's date AND time
+  ok   drift: the credit-note sentence
+  ok   drift: the last day's bills are listed by supplier
+  ok   drift: the money reads as rupees   Sale report: current to 05-09-2026, last bill A003412 (16 bills that day).
+Purchases: current to 03-09-2026 -- 4 bills that day, Rs 71,314.50.
+Marg's closing stock: as on 05-09-2026, processed here 06-09-2026 03:10 (2 items). Our computed figure: as on 05-09-2026, processed 06-09-2026 02:50 (2 items).
+All sale returns up to credit-note CN00161 dated 04-09-2026 have been processed.
+The bills of 03-09-2026, as the Bill-wise purchase report shows them:
+SUPPLIER	BILL NO	AMOUNT
+ANMOL AGENCIES	AN/1188	Rs 12,405.00
+BHARAT MEDICAL	BM-7741	Rs 3,863.00
+PRIME ORTHO	PO/2210	Rs 54,119.00
+SHREE DISTRIBUTORS	SD/990	Rs 927.50
+Purchases are 3 days behind today -- anything entered into Marg after 03-09-2026 is not in any figure on this page.
+The stock figure is for 05-09-2026 but purchases are known only to 03-09-2026. Count after the purchase export, not before it.
+  ok   drift: the warning is visible
+  ok   drift: the header is ABOVE the results   (14, 1546.171875)
+  ok   drift: the page's own rows still render
+  ok   drift: no horizontal scroll at phone width
+  ok   count: the header PAINTED   Sale report: current to 05-09-2026, last bill A003412 (16 bills that d
+  ok   count: last bill number on the screen
+  ok   count: the gate still works below it
+  ok   count: no horizontal scroll at phone width
+  ok   no javascript error on either page
+
+16 ok, 0 FAILED
