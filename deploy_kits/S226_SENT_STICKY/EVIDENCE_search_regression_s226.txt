@@ -1,0 +1,69 @@
+== S226_COUNT_SEARCH -- the counter's screen ==
+  ok   THE HALF-DONE COUNT SURVIVES the new page
+  ok   it reopens on the counting screen, not the gate
+  ok   progress shows the two already counted   2 / 6
+  ok   there is a search box, on the sticky bar
+  ok   three letters find the item   BIO D3 MAX
+1*15
+358
+23 strips 13 tablets
+OK
+Not OK
+  ok   and only that item   1
+  ok   it says what it is showing   Showing 1 item matching “d3” — every item, counted or not.
+  ok   SPACES AND THE INCH MARK DO NOT MATTER (primecast5 finds PRIME CAST 5")   PRIME CAST 5"orthotic
+1*1
+45
+45 pcs
+OK
+Not OK
+  ok   AN ALREADY-COUNTED ITEM IS STILL FINDABLE -- the whole point of a correction   MEG QCS
+1*15
+684
+45 strips 9 tablets
+OK
+Not OK
+  ok   OK saves the expected figure
+  ok   ...and the box CLEARS ITSELF, ready for the next name Darpan calls
+  ok   ...and progress moved   3 / 6
+  ok   Not OK opens the entry box
+  ok   the physical count is saved against the right item   {"c":3,"st":null,"lo":3,"cby":"Darpan","eby":"Amir","at":"2026-09-06T04:47:56.503Z"}
+  ok   clearing brings the list back   2
+  ok   chip 'diff' renders instead of blanking   LACTOVAX SYP 200MLorthotic
+1*1
+5
+5 pcs
+OK
+Not OK
+P
+  ok   chip 'all' renders instead of blanking   ALCOXIB 120
+1*10
+13
+1 strip 3 tablets
+OK
+Not OK
+BI
+  ok   chip 'stock' renders instead of blanking   ALCOXIB 120
+1*10
+13
+1 strip 3 tablets
+OK
+Not OK
+BI
+  ok   chip 'nil' renders instead of blanking   Nothing here.
+  ok   Differences shows BOTH mismatched items   LACTOVAX SYP 200MLorthotic
+1*1
+5
+5 pcs
+OK
+Not OK
+PIECES
+Counted 3 · Marg 5 · -2
+TYRO BR
+1*
+  ok   a differing row opens its entry box already filled
+  ok   a search overrides the chip rather than fighting it
+  ok   no sideways scroll at phone width
+  ok   no javascript error anywhere in that
+
+24 ok, 0 FAILED

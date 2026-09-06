@@ -1,0 +1,25 @@
+S226_SENT_STICKY -- ONE PASTE on the VPS after the publish. ONE LINE. One file.
+
+SAFE DURING A LIVE COUNT (the count lives in the browser's own storage, untouched).
+BEST DONE BEFORE THEY PRESS SEND -- that is when the hazard starts.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S226_SENT_STICKY && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_check_live.html | cut -c1-8)" = "cbcc1cdf" ] || { echo "REFUSED: kit sums or the live pin do not match -- NOTHING CHANGED"; false; } && \cp /root/finance/stock_check_live.html /root/finance/stock_check_live.html.bak_S226sent_$(date +%Y%m%d) && \cp stock_check_live.html /root/finance/ && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- a sent count now remembers it was sent, even after a reload" && md5sum /root/finance/stock_check_live.html || (echo "SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; \cp /root/finance/stock_check_live.html.bak_S226sent_$(date +%Y%m%d) /root/finance/stock_check_live.html; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; md5sum /root/finance/stock_check_live.html)
+
+Expected at the end:  UP -- a sent count now remembers it was sent, even after a reload
+                      fe7d37aac17401d4889bc50be3eefd61  /root/finance/stock_check_live.html
+
+WHAT CHANGES: after Amir presses "Send to ledger", the page keeps saying so --
+through a reload, a closed tab, a flat battery. It shows the count number and the
+time on the wall clock, explains that the empty list is normal because the ledger
+holds the count now, and warns that counting the same day again would be recorded
+as a second, separate count. A button offers that path honestly if it is ever
+wanted.
+
+NOTHING ELSE ON THE PAGE CHANGES. The search box and all the chips behave exactly
+as they do now (re-proven, 24/24).
+
+ROLLING BACK = the .bak_S226sent_* file beside the live one, \cp it back, restart.
+
+OFFLINE EVIDENCE:
+  EVIDENCE_submit_flow_s226.txt        30/30 -- report, send, ledger rows read back, reload
+  EVIDENCE_search_regression_s226.txt  24/24 -- the search walk, unchanged

@@ -1,0 +1,4 @@
+S226_SENT_STICKY
+Session 226 · 06-Sep-2026 · one file, the counting page.
+"Sent" now survives a reload, so a counted shelf cannot quietly be counted and
+submitted twice. Found by driving the end of the flow while the real count ran.
