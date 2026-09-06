@@ -1,0 +1,10 @@
+S227_DIFF_SHEET
+Session 227 · 06-Sep-2026
+The differences as a sheet the counter fills BY HAND (landscape PDF with RECOUNT /
+REASON / REMARKS boxes), the DIFFERENCES tab of the result workbook as the third
+fill-in tab (the typist's copy of the same columns), a recount joining the count as
+the next sheet and a reason landing on the explanation layer, and THE VALUE OF THE
+STOCK MISMATCH AT MRP -- item-wise and in total, on the page, on the sheet, in the
+SUMMARY tab and as its own JSON. MRP lookup fixed to the sale lines' own key.
+Five files installed: stock_app.py, pad_receipt.py, stock_check_live.html,
+padreader.py, padwriter.py. Supersedes S227_PAD_PROOF.

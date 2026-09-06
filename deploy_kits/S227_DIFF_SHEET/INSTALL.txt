@@ -1,0 +1,39 @@
+S227_DIFF_SHEET -- ONE PASTE on the VPS after the publish. ONE LINE.
+Five files installed: stock_app.py, pad_receipt.py, stock_check_live.html, padreader.py, padwriter.py.
+Refuses -- and changes NOTHING -- unless the kit sums check and the live pins are those
+S227_PAD_PROOF printed: stock_app.py 6c15fa66, pad_receipt.py 727b6513, stock_check_live.html b571ba27.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S227_DIFF_SHEET && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_app.py | cut -c1-8)" = "6c15fa66" ] && [ "$(md5sum /root/finance/pad_receipt.py | cut -c1-8)" = "727b6513" ] && [ "$(md5sum /root/finance/stock_check_live.html | cut -c1-8)" = "b571ba27" ] || { echo "REFUSED: kit sums or the live pins do not match -- NOTHING CHANGED"; false; } && for f in stock_app.py pad_receipt.py stock_check_live.html padreader.py padwriter.py; do \cp /root/finance/$f /root/finance/$f.bak_S227diff_$(date +%Y%m%d); done && \cp stock_app.py pad_receipt.py stock_check_live.html padreader.py padwriter.py /root/finance/ && (/root/wa/venv/bin/python3 -B -c "import py_compile;[py_compile.compile('/root/finance/'+f,doraise=True,cfile='/tmp/s227d_'+f+'.pyc') for f in ('stock_app.py','pad_receipt.py','padreader.py','padwriter.py')]" && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- the differences sheet, the DIFFERENCES fill-in tab and the mismatch at MRP are live" && md5sum /root/finance/stock_app.py /root/finance/pad_receipt.py /root/finance/stock_check_live.html /root/finance/padreader.py /root/finance/padwriter.py || (echo "COMPILE FAILED OR SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; for f in stock_app.py pad_receipt.py stock_check_live.html padreader.py padwriter.py; do \cp /root/finance/$f.bak_S227diff_$(date +%Y%m%d) /root/finance/$f; done; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; journalctl -u clinic-finance.service -n 12 --no-pager)); rm -f /tmp/s227d_*.pyc
+
+Expected at the end:  UP -- the differences sheet, the DIFFERENCES fill-in tab and the mismatch at MRP are live
+                      d5452eca3aecff2d68af57aae2012a88  /root/finance/stock_app.py
+                      3973e0a52f1c5e0ee5de4e959a91fc92  /root/finance/pad_receipt.py
+                      befa5e6334bc1a39a9fe5f6a185d22ce  /root/finance/stock_check_live.html
+                      afa8da2f7c43d0b932367503b83a01d5  /root/finance/padreader.py
+                      e7546afe02ee6dbe2e2b107a8465489f  /root/finance/padwriter.py
+
+FOR TODAY'S COUNT #1 (already closed), the moment this is live:
+  https://followup.dr-manoj.in/finance/stock/api/pad/diffs/1.pdf       the hand-fill sheet for the counter
+  https://followup.dr-manoj.in/finance/stock/api/pad/mismatch/1        the mismatch, item-wise, totals at MRP
+  https://followup.dr-manoj.in/finance/stock/api/pad/followup/1.xlsx   the FINAL RESULT workbook, DIFFERENCES tab now fill-in
+  The same three are linked under "Recent stock checks" on the count page.
+  NOTE: count #1 is CLOSED, so a typed-in DIFFERENCES tab for it is refused at upload (a closed count takes
+  no sheets, D381). Its reasons go in through the finding's own reason buttons; recounts wait for the
+  next count. For every count from now on the loop is: hand sheet -> typed into the tab -> uploaded at step 3.
+
+ROLLING BACK = the five .bak_S227diff_* files beside the live ones, \cp each back, restart.
+
+OFFLINE EVIDENCE -- 183 checks in a real browser at phone width (390px):
+  EVIDENCE_diff_sheet_s227.txt              41/41 the mismatch line and link in the box; the JSON totals against the
+                                                  walk's own arithmetic (an item's MRP value = diff x its strip rate /
+                                                  pack; a hyphenated name priced); the PDF read back (head, legend,
+                                                  every difference, order, 'short' in the word, totals, signatures);
+                                                  the DIFFERENCES tab (11 columns, shaded answer cells); answers typed
+                                                  in and uploaded: 2 recounts join as a part, 4 reasons on the layer,
+                                                  blank rows change nothing; an untouched workbook refused; the close
+  EVIDENCE_regress_pad_proof_s227.txt       65/65 S227_PAD_PROOF, unchanged (one check widened for the third link)
+  EVIDENCE_regress_count_search_s227.txt    34/34 the on-screen count, unchanged
+  EVIDENCE_regress_submit_flow_s227.txt     30/30 report and send, unchanged
+  EVIDENCE_regress_safestore_s227.txt       13/13 the safe store, unchanged
+  Sub-agent screen read: the hand-fill boxes were open "L" shapes -- closed, darkened; the DIFFERENCES link
+  shared the doctor's red -- now amber. Re-read: boxes fine.
