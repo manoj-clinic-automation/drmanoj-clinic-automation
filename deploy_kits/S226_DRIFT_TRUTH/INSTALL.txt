@@ -1,0 +1,39 @@
+S226_DRIFT_TRUTH -- ONE PASTE on the VPS after the publish (PUBLISH_ALL.bat). ONE LINE.
+It sits ON TOP of S226_READINESS, so it refuses unless that kit is already live.
+
+It fetches the repo, verifies the kit (SUMS.md5), GUARDS both live pins (stock_app.py must read d977d5b4,
+stock_drift.html b9fef081 -- anything else REFUSES and changes nothing), backs both up as
+.bak_S226drift_<date>, copies the two full files AND the new stock_now.html, compiles the new stock_app.py
+with the venv python, restarts clinic-finance.service, waits 3 s, checks it is active and prints the three
+pins. If the compile fails or the service does not come back it ROLLS BACK BY ITSELF and restarts.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S226_DRIFT_TRUTH && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_app.py | cut -c1-8)" = "d977d5b4" ] && [ "$(md5sum /root/finance/stock_drift.html | cut -c1-8)" = "b9fef081" ] || { echo "REFUSED: kit sums or live pins do not match -- NOTHING CHANGED"; false; } && \cp /root/finance/stock_app.py /root/finance/stock_app.py.bak_S226drift_$(date +%Y%m%d) && \cp /root/finance/stock_drift.html /root/finance/stock_drift.html.bak_S226drift_$(date +%Y%m%d) && \cp stock_app.py stock_drift.html stock_now.html /root/finance/ && (/root/wa/venv/bin/python3 -B -c "import py_compile;py_compile.compile('/root/finance/stock_app.py',doraise=True,cfile='/tmp/s226_drift_check.pyc')" && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- the newest export now wins, and the stock page is live" && md5sum /root/finance/stock_app.py /root/finance/stock_drift.html /root/finance/stock_now.html || (echo "COMPILE FAILED OR SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; \cp /root/finance/stock_app.py.bak_S226drift_$(date +%Y%m%d) /root/finance/stock_app.py; \cp /root/finance/stock_drift.html.bak_S226drift_$(date +%Y%m%d) /root/finance/stock_drift.html; rm -f /root/finance/stock_now.html; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; md5sum /root/finance/stock_app.py /root/finance/stock_drift.html; journalctl -u clinic-finance.service -n 12 --no-pager)); rm -f /tmp/s226_drift_check.pyc
+
+Expected at the end:  UP -- the newest export now wins, and the stock page is live
+                      c338d6ade65a759aca3e09bea7299d7c  /root/finance/stock_app.py
+                      daa40ee896548b97808cab564cadeee3  /root/finance/stock_drift.html
+                      91cdc56db4fd2d77cf8249c777f36f6f  /root/finance/stock_now.html
+
+If it prints REFUSED, say so and paste nothing else.
+
+WHAT CHANGES ON YOUR SCREENS (hard reload, or reopen the PWA):
+
+  https://followup.dr-manoj.in/finance/stock/page/drift
+    - the item counts in the readiness header are ITEMS now, not rows (you saw 746 and 1,492)
+    - the newest export of a day wins, so a re-export shows -- LACTOVAX should go to 0
+    - headers: Days compared / Days agreed / Days differed / Gap on the last day /
+      Day by day (oldest -> newest), with one line above the table saying what a gap is
+    - the day-by-day figures are chips in a right-aligned column, under their own header
+    - a day compared only once says "first day compared -- too early to say which"
+
+  https://followup.dr-manoj.in/finance/stock/page/now      <-- NEW
+    Stock as we hold it: every item, ours and Marg's side by side, the gap, four counts
+    and three filters. There is no portal tile for it yet -- open it by this address.
+
+ROLLING BACK by hand = the two .bak_S226drift_* files beside the live ones, \cp them back,
+delete /root/finance/stock_now.html, restart the service.
+
+OFFLINE EVIDENCE (this kit runs no test on the box):
+  EVIDENCE_walk_drift_truth_s226.txt   32/32 -- the morning of 06-Sep rebuilt; every check fails on the old code
+  EVIDENCE_screen_drift_s226.txt       17/17 -- both pages in a real browser at phone width, column measured
+  EVIDENCE_regress_readiness_s226.txt  50/50 -- the S226_READINESS walk re-run unchanged

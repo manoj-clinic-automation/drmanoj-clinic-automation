@@ -1,0 +1,35 @@
+== S226_DRIFT_TRUTH -- live-shape walk ==
+  ok   Marg's count is ITEMS, not rows (he saw 746)   3
+  ok   our count is ITEMS, not rows (he saw 1,492)   4
+  ok   the NEWEST Marg push is reported (03:10, not 01:26)   2026-09-06T03:10:46
+  ok   the newest push of ours is reported (02:59, not 02:50)   2026-09-06T02:59:12
+  ok   the merged LACTOVAX now AGREES -- the re-export reached the table   {'agreed': 2, 'cost_p': None, 'days': ['2026-09-04', '2026-09-05'], 'deltas': [0, 0], 'disagreed': 0, 'item': 'LACTOVAX SYP 200ML', 'last': 0, 'mrp_p': None, 'runs': 2, 'verdict': 'agrees every day'}
+  ok   the merged-away duplicate stops on the day it was merged   ['2026-09-04']
+  ok   ...and its history is not rewritten either
+  ok   BIO D3 MAX still shows its real 7 -- nothing was papered over   {'agreed': 1, 'cost_p': None, 'days': ['2026-09-04', '2026-09-05'], 'deltas': [0, 7], 'disagreed': 1, 'item': 'BIO D3 MAX', 'last': 7, 'mrp_p': None, 'runs': 2, 'verdict': 'gap on some days -- look at the shelf'}
+  ok   ACILOC agrees on both days
+  ok   two days compared, so a series exists
+  ok   'runs' is now spoken of as DAYS   agrees every day
+  ok   a gap on some days points at the shelf   gap on some days -- look at the shelf
+  ok   the day-by-day series is in date order
+  ok   ONE day never claims to know which -- the overclaim he read   first day compared -- too early to say which
+  ok   /api/now answers
+  ok   it shows the NEWEST day   2026-09-05
+  ok   ours and Marg's side by side   {'cost_p': None, 'gap': 7, 'item': 'BIO D3 MAX', 'marg': 58, 'mrp_p': None, 'ours': 65}
+  ok   the gap is ours minus Marg's
+  ok   an item only one feed has is not called a gap
+  ok   the biggest gap sorts first   BIO D3 MAX
+  ok   totals: items / agree / differ   (4, 2, 1)
+  ok   the readiness header rides along
+  ok   BELOW ZERO is counted and named
+  ok   the stock page serves
+  ok   it opens with the readiness card too
+  ok   it says plainly this is not a count
+  ok   the drift headers say what they mean
+  ok   'Runs' and 'Recent' are gone from the headers
+  ok   the gap is explained above the table
+  ok   the day-by-day column is a numeric column
+  ok   a missing feed table does not kill /page/now
+  ok   ...nor /api/now
+
+32 ok, 0 FAILED

@@ -1,0 +1,23 @@
+== S226_DRIFT_TRUTH -- the screens ==
+  ok   the headers now say what they mean   ITEM DAYS COMPARED DAYS AGREED DAYS DIFFERED GAP ON THE LAST DAY DAY BY DAY (OLDEST → NEWEST) READING
+  ok   'Runs' and 'Recent' are gone   ITEM DAYS COMPARED DAYS AGREED DAYS DIFFERED GAP ON THE LAST DAY DAY BY DAY (OLDEST → NEWEST) READING
+  ok   the gap is explained before the table
+  ok   the day-by-day column sits under its header   (720, 720)
+  ok   its right edges line up with the numeric columns too   (466, 466)
+  ok   a differing day is marked, an agreeing one is not   1
+  ok   the merged item reads as agreeing
+  ok   no sideways scroll at phone width
+  ok   the stock page paints
+  ok   it names the day it is for   Read first — know the data
+Sale report: current to 05-09-2026, last bill A003412 (16 bills that day).
+Purchases: current to 03-09-2026 -- 4 bills that day, Rs 71,314.50.
+Marg's closing stock: as on 05
+  ok   the readiness header is on it too
+  ok   ours and Marg's are both on the row
+  ok   the tiles count the shop
+  ok   'only where we differ' really filters   BIO D3 MAX	65	58	+7
+  ok   'below zero' explains itself rather than alarming
+  ok   no sideways scroll at phone width
+  ok   no javascript error on either page
+
+17 ok, 0 FAILED

@@ -1,0 +1,11 @@
+PREDICTED OFFLINE, before the install. Read them back from the box afterwards.
+
+  BASE (the install REFUSES on anything else -- this kit sits ON TOP of S226_READINESS)
+    d977d5b4030a071e93ca5207caa0e23d  /root/finance/stock_app.py
+    b9fef081f37d94fcda4f7c07de01c2a2  /root/finance/stock_drift.html
+    (stock_now.html does not exist yet -- it is new in this kit)
+
+  AFTER
+    c338d6ade65a759aca3e09bea7299d7c  /root/finance/stock_app.py
+    daa40ee896548b97808cab564cadeee3  /root/finance/stock_drift.html
+    91cdc56db4fd2d77cf8249c777f36f6f  /root/finance/stock_now.html   (NEW)

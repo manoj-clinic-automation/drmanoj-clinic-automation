@@ -1,0 +1,12 @@
+c338d6ade65a759aca3e09bea7299d7c  stock_app.py
+daa40ee896548b97808cab564cadeee3  stock_drift.html
+91cdc56db4fd2d77cf8249c777f36f6f  stock_now.html
+2fe8faad873e5a2581e144067a57abf5  INSTALL.txt
+1fdea8235851fd40145c79d0534c6ba1  KIT_ID.txt
+38e13fe33ca13223bbb53a3271df5ea6  PREDICTED_PINS.txt
+8ed5ffa3f1e36c8c42ad749bdfa2d67e  README.md
+2f2830e90157ba441076ca9cd98034d4  WALK_drift_truth_s226.py
+475a83956d7cb835baecc0694eec8354  WALK_screen_drift_s226.py
+215d5b90798730df698e8e4c2dedfdba  EVIDENCE_walk_drift_truth_s226.txt
+6ab75ef241444b664c3a980da99a2390  EVIDENCE_screen_drift_s226.txt
+bdcffe3dddfe49a1ada54e52fa9720bd  EVIDENCE_regress_readiness_s226.txt

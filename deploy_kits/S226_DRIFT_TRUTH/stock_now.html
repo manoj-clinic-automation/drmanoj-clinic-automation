@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock as we hold it</title>
+<style>
+:root{--ink:#1a1a1a;--muted:#5b5b5b;--line:#d9d9d9;--bg:#fafafa;--warn:#8a5300;
+      --bad:#8c1d18;--ok:#14532d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+     font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;
+      margin-bottom:14px}
+h1{font-size:19px;margin:0 0 4px}
+h2{font-size:16px;margin:0 0 8px}
+.muted{color:var(--muted);font-size:13.5px}
+.bad{color:var(--bad)}.ok{color:var(--ok)}.warn{color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left}
+th{font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);
+   vertical-align:bottom}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tiles{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tile{flex:1 1 120px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;
+      background:#fff}
+.tile b{display:block;font-size:21px;font-variant-numeric:tabular-nums}
+.tile span{font-size:12.5px;color:var(--muted)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 8px}
+.tabs button{font:inherit;font-size:13.5px;padding:5px 11px;border:1px solid var(--line);
+             background:#fff;border-radius:999px;cursor:pointer;color:var(--ink)}
+.tabs button[aria-pressed="true"]{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+</style></head>
+<body><div class="wrap">
+
+<div class="card" id="rdy-card">
+  <h2 style="margin:0 0 6px">Read first &mdash; know the data</h2>
+  <div id="rdy">reading&hellip;</div>
+</div>
+
+<div class="card">
+  <h1>Stock as we hold it</h1>
+  <div class="muted">This is the stock <b>this system computes</b> &mdash; the last
+    counted baseline, plus purchases, minus sales, plus sale returns &mdash; set beside
+    what Marg&rsquo;s own closing export says for the same day. It is not a count. A
+    count is what settles a difference; this is what tells you where to look.</div>
+  <div id="head" class="muted" style="margin-top:8px"></div>
+  <div class="tiles" id="tiles"></div>
+</div>
+
+<div class="card">
+  <h2>The items</h2>
+  <div class="tabs" id="tabs">
+    <button data-f="all" aria-pressed="true">All</button>
+    <button data-f="differ" aria-pressed="false">Only where we differ</button>
+    <button data-f="below" aria-pressed="false">Below zero</button>
+  </div>
+  <div class="muted" id="filternote"></div>
+  <div style="overflow-x:auto;margin-top:8px"><table><thead><tr>
+    <th>Item</th><th class="n">Ours</th><th class="n">Marg</th><th class="n">Gap</th>
+  </tr></thead><tbody id="rows"><tr><td colspan="4" class="muted">loading&hellip;</td></tr>
+  </tbody></table></div>
+</div>
+
+</div>
+<script>
+/* ---- S226 READINESS HEADER -------------------------------------------------
+   The owner, 06-Sep-2026: this page must OPEN with the data-readiness lines,
+   before any result. "Read first, know the data." A difference is only
+   readable against the horizon of the books that produced it. Self-contained
+   on purpose: its own escaper, its own styles, its own failure text, so it
+   can be dropped into any stock page without depending on that page. */
+function rdyEsc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function rdyMoney(p){
+  var n=Math.round(Number(p||0))/100, s=(n<0?"-":""), a=Math.abs(n).toFixed(2);
+  var w=a.split(".")[0], d=a.split(".")[1], t=w.length>3?w.slice(-3):w, hd=w.length>3?w.slice(0,-3):"";
+  var parts=[]; while(hd.length>2){parts.unshift(hd.slice(-2));hd=hd.slice(0,-2);}
+  if(hd)parts.unshift(hd);
+  return s+"Rs "+(parts.length?parts.join(",")+","+t:t)+"."+d;
+}
+function rdyRender(el, R){
+  if(!el) return;
+  if(!R || R.ok===false){
+    el.innerHTML='<div style="border-left:3px solid #8a5300;background:#fffaf1;'
+      +'padding:9px 12px;border-radius:0 8px 8px 0"><b>The readiness lines could '
+      +'not be read.</b><div>Nothing below is wrong because of that — but it is '
+      +'not known here how far the sales, the purchases and the stock export '
+      +'run. Check that in Marg before relying on any difference on this page.'
+      +'</div></div>';
+    return;
+  }
+  var h='<ol style="margin:0 0 2px 18px;padding:0">';
+  (R.lines||[]).forEach(function(t){h+='<li style="margin:3px 0">'+rdyEsc(t)+'</li>';});
+  h+='</ol>';
+  var p=R.purchase||{}, b=p.bills||[];
+  if(b.length){
+    h+='<div style="font-size:13.5px;color:#5b5b5b;margin:9px 0 4px">The bills of '
+      +rdyEsc(rdyDmy(p.bill_date))+', as the Bill-wise purchase report shows them:</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13.5px">'
+      +'<thead><tr><th style="text-align:left;padding:4px 6px;border-bottom:1px solid #d9d9d9">Supplier</th>'
+      +'<th style="text-align:left;padding:4px 6px;border-bottom:1px solid #d9d9d9">Bill no</th>'
+      +'<th style="text-align:right;padding:4px 6px;border-bottom:1px solid #d9d9d9">Amount</th></tr></thead><tbody>';
+    b.forEach(function(x){
+      h+='<tr><td style="padding:4px 6px;border-bottom:1px solid #eee">'+rdyEsc(x.supplier)
+        +'</td><td style="padding:4px 6px;border-bottom:1px solid #eee">'+rdyEsc(x.bill_no)
+        +'</td><td style="padding:4px 6px;border-bottom:1px solid #eee;text-align:right;'
+        +'font-variant-numeric:tabular-nums">'+rdyEsc(rdyMoney(x.amount_p))+'</td></tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  (R.warnings||[]).forEach(function(w){
+    h+='<div style="border-left:3px solid #8a5300;background:#fffaf1;padding:8px 11px;'
+      +'border-radius:0 8px 8px 0;margin-top:8px">'+rdyEsc(w)+'</div>';
+  });
+  if(R.frozen===false && R.note)
+    h+='<div style="font-size:13px;color:#5b5b5b;margin-top:7px">'+rdyEsc(R.note)+'</div>';
+  el.innerHTML=h;
+}
+function rdyDmy(s){
+  s=String(s||"").slice(0,10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(s)?(s.slice(8,10)+"-"+s.slice(5,7)+"-"+s.slice(0,4)):s;
+}
+/* ---- end S226 READINESS HEADER --------------------------------------------- */
+var API=location.pathname.replace(/\/page\/now\/?$/,"");
+var DATA=null, F="all";
+function $(i){return document.getElementById(i);}
+function num(v){return v===null||v===undefined?"&mdash;":(v<0?'<span class="bad">'+v+"</span>":String(v));}
+function gapCell(g){
+  if(g===null||g===undefined) return '<span class="muted">only one feed</span>';
+  if(g===0) return '<span class="ok">0</span>';
+  return '<span class="bad">'+(g>0?"+":"")+g+"</span>";
+}
+function paint(){
+  if(!DATA) return;
+  var rows=DATA.rows||[];
+  if(F==="differ") rows=rows.filter(function(r){return r.gap!==null&&r.gap!==0;});
+  if(F==="below")  rows=rows.filter(function(r){return (r.ours!==null&&r.ours<0)||(r.marg!==null&&r.marg<0);});
+  $("filternote").innerHTML = F==="below"
+    ? "A stock below zero is not an empty shelf. It is a sale rung up against goods whose purchase bill has not been entered in Marg yet. Enter the bill and the line clears itself."
+    : (F==="differ" ? "Every line where our figure and Marg&rsquo;s do not agree for this day."
+                    : "");
+  $("rows").innerHTML=rows.map(function(r){
+    return "<tr><td>"+rdyEsc(r.item)+'</td><td class="n">'+num(r.ours)
+      +'</td><td class="n">'+num(r.marg)+'</td><td class="n">'+gapCell(r.gap)+"</td></tr>";
+  }).join("")||'<tr><td colspan="4" class="muted">Nothing to show under this filter.</td></tr>';
+}
+Array.prototype.forEach.call(document.querySelectorAll("#tabs button"),function(b){
+  b.addEventListener("click",function(){
+    F=b.getAttribute("data-f");
+    Array.prototype.forEach.call(document.querySelectorAll("#tabs button"),function(x){
+      x.setAttribute("aria-pressed", x===b?"true":"false");});
+    paint();
+  });
+});
+fetch(API+"/api/now").then(function(r){return r.json();}).then(function(j){
+  rdyRender($("rdy"), j.readiness);
+  if(!j.ok){$("rows").innerHTML='<tr><td colspan="4">'+rdyEsc(j.message||j.error)+"</td></tr>";return;}
+  DATA=j;
+  if(!j.as_on){
+    $("head").innerHTML="<b>No stock figure has reached this server yet.</b>";
+    $("rows").innerHTML='<tr><td colspan="4" class="muted">Nothing yet.</td></tr>';
+    return;
+  }
+  var t=j.totals||{};
+  $("head").innerHTML="Stock as on <b>"+rdyEsc(rdyDmy(j.as_on))+"</b>. Our figure processed "
+    +rdyEsc(j.ours_at?rdyStamp(j.ours_at):"— never received")
+    +"; Marg&rsquo;s "+rdyEsc(j.marg_at?rdyStamp(j.marg_at):"— never received")+".";
+  $("tiles").innerHTML=
+     tile(t.items,"items")+tile(t.agree,"agree with Marg")
+    +tile(t.differ,"differ")+tile(t.below_zero,"below zero","bad");
+  paint();
+}).catch(function(e){
+  rdyRender($("rdy"), {ok:false});
+  $("rows").innerHTML='<tr><td colspan="4">'+rdyEsc(""+e)+"</td></tr>";});
+function tile(v,label,cls){
+  return '<div class="tile"><b class="'+(cls&&v?cls:"")+'">'+(v===undefined?"&mdash;":v)
+    +"</b><span>"+label+"</span></div>";
+}
+function rdyStamp(ts){
+  ts=String(ts||"");
+  return ts.length>=16?(rdyDmy(ts.slice(0,10))+" "+ts.slice(11,16)):rdyDmy(ts);
+}
+</script>
+</body></html>
