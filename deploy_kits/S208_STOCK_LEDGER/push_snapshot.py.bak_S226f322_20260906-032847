@@ -32,27 +32,12 @@ WHAT IT SENDS
     a shortage can be priced. No patient data. No bill numbers. Nothing that
     is not already a stock figure.
 
-F-235 GUARD, AS CORRECTED BY F-322
+F-235 GUARD
     A category-filtered export carries the SAME store name and as-on date as
     the full one and a byte-identical header. Sending the 81-row orthotics
-    file as if it were the shop would silently zero 295 items.
-
-    The guard was written as "the largest export for the date wins". That is
-    too strong, and on 06-Sep-2026 it cost the owner a morning: he merged a
-    duplicate item in Marg -- exactly the cleanup he had been asked for -- and
-    re-exported. The merged export is legitimately ONE ROW SMALLER, so the
-    guard refused it and re-sent the pre-merge file. The page kept showing the
-    gap he had just closed, and the marker said the new file had been pushed.
-
-    The right test is the router's own, and it is now literally the same
-    number: an export is a FILTERED SUBSET only when it is at or below 60% of
-    the day's largest (marg_router.SUBSET_MAX_FRACTION), or below the absolute
-    floor. Anything above that is a full store export, and among full exports
-    THE LATEST CAPTURE WINS -- which is also the owner's standing rule for
-    sale reports: the server keeps the newer export of a day.
-
-    81 of 374 is 22%: still refused. 438 of 439 is 99.8%: accepted, and it
-    supersedes.
+    file as if it were the shop would silently zero 295 items. So the largest
+    export for the newest date wins, and a smaller one for the same date is
+    refused with a message that says why.
 """
 import argparse, glob, json, os, sys, urllib.request, urllib.error
 
@@ -65,9 +50,6 @@ DEF_URL = "https://followup.dr-manoj.in/finance/stock/api/snapshot"
 DEF_TOKEN_UNC = r"\\100.119.151.40\DDrive\SendToClinic\token.txt"
 DEF_TOKEN_CACHE = r"D:\Downloads\margsync\SendToClinic\token.txt"
 FILTERED_MAX = 200
-# Kept identical to marg_router.SUBSET_MAX_FRACTION on purpose: one rule
-# about what a subset is, written down in two places, must be one number.
-SUBSET_MAX_FRACTION = 0.60
 
 
 def read_token(unc=DEF_TOKEN_UNC, cache=DEF_TOKEN_CACHE):
@@ -125,29 +107,23 @@ def newest_full(archive):
     if not cands:
         return None, []
 
-    # S221 LATEST WINS -- the capture stamp is in the filename, so use it. A
-    # shelf counted after the last bill supersedes one counted at midday.
+    # S221 LATEST WINS -- the third tiebreaker.
+    # Two FULL exports of the same date have equal row counts, so max() used to
+    # keep whichever glob listed first: the winner was decided by filesystem
+    # order. The capture stamp is in the filename, so use it. A shelf counted
+    # after the last bill supersedes one counted at midday.
+    # Row count is still compared FIRST, so the F-235 guard stands: a
+    # category-filtered subset cannot win by being late.
     def _taken(name):
         parts = str(name).split("__")
         return parts[2] if len(parts) > 2 else ""
 
-    # F-322 (S226). Choose the DAY first, then separate the day's exports into
-    # full ones and filtered subsets, then let the latest full one win. Row
-    # count is a GUARD, never a tiebreaker: making it a tiebreaker is what made
-    # a merge look like a filter.
-    bk = max(as_on_key(r.get("as_on")) for _, r in cands)
-    same = [(n, r) for n, r in cands if as_on_key(r.get("as_on")) == bk]
-    biggest = max(len(r["rows"]) for _, r in same)
-    full_ones, subsets = [], []
-    for n, r in same:
-        if len(r["rows"]) <= SUBSET_MAX_FRACTION * biggest:
-            subsets.append((n, len(r["rows"])))
-        else:
-            full_ones.append((n, r))
-    best_name, best = max(full_ones, key=lambda c: (_taken(c[0]), len(c[1]["rows"])))
-    rejected = [(n, k, "subset") for n, k in subsets]
-    rejected += [(n, len(r["rows"]), "older")
-                 for n, r in full_ones if n != best_name]
+    best_name, best = max(cands, key=lambda c: (as_on_key(c[1].get("as_on")),
+                                                len(c[1]["rows"]),
+                                                _taken(c[0])))
+    bk = as_on_key(best.get("as_on"))
+    rejected = [(n, len(r["rows"])) for n, r in cands
+                if n != best_name and as_on_key(r.get("as_on")) == bk]
     return best, rejected
 
 
@@ -242,15 +218,10 @@ def main(argv=None):
     if full is None:
         print("no WHOLE STORES closing export found")
         return 2
-    for name, n, why in rejected:
-        if why == "subset":
-            print("  skipped %s (%d rows vs %d) -- same as-on date and at or "
-                  "below %d%% of it: a category filter, not the shop (F-235)"
-                  % (name, n, len(full["rows"]), int(SUBSET_MAX_FRACTION * 100)))
-        else:
-            print("  superseded %s (%d rows) -- a full export of the same day, "
-                  "taken earlier than the one being sent (F-322)"
-                  % (name, n))
+    for name, n in rejected:
+        print("  skipped %s (%d rows vs %d) -- same as-on date, fewer items: "
+              "a category filter, not the shop (F-235)"
+              % (name, n, len(full["rows"])))
     if len(full["rows"]) < FILTERED_MAX:
         print("REFUSING: the largest export for %s has only %d rows. That is a "
               "filtered subset, not the shop. Nothing sent."
@@ -258,32 +229,17 @@ def main(argv=None):
         return 2
 
     rt = rates(a.archive)
-    # F-322b (S226). Two rows with the SAME item name in one whole-store export
-    # are one product held under two item masters in Marg. This used to keep the
-    # first and DROP the rest in silence -- on 05-Sep that turned
-    # LACTOVAX SYP (-2) + LACTOVAX SYP (7) into -2, and the drift page showed a
-    # seven-unit gap that was never on the shelf. The stock of a product is the
-    # sum of its masters, and a merge that happens here is said out loud.
-    items, by_name, merged = [], {}, []
+    items, seen = [], set()
     for row in full["rows"]:
         n = row["item"]
-        if not n or n.upper() in ("DESCRIPTION", "TOTAL"):
+        if not n or n.upper() in ("DESCRIPTION", "TOTAL") or n in seen:
             continue
-        q = int(row["units"] or 0)
-        if n in by_name:
-            by_name[n]["qty"] += q
-            if n not in merged:
-                merged.append(n)
-            continue
-        d = {"item": n, "qty": q,
+        seen.add(n)
+        d = {"item": n, "qty": int(row["units"] or 0),
              "packing": row["packing"], "pack_size": int(row["pack_size"] or 1)}
         if n in rt:
             d["rate_p"] = rt[n]
-        by_name[n] = d
         items.append(d)
-    for n in merged:
-        print("  two item masters under one name, added together: %s = %d"
-              % (n, by_name[n]["qty"]))
     body = {"as_on": full.get("as_on"), "source": "push_snapshot", "items": items}
     print("as on %s : %d items, %d priced"
           % (body["as_on"], len(items), sum(1 for i in items if "rate_p" in i)))

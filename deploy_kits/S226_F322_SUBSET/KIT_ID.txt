@@ -1,0 +1,5 @@
+S226_F322_SUBSET
+Session 226 · 06-Sep-2026
+F-322, which stopped being a candidate and happened: a merged item in Marg was
+re-exported, and the sender refused the merged file and re-sent the old one.
+PC-side (manojz). Nothing on the VPS changes.

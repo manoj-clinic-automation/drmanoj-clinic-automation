@@ -1,0 +1,13 @@
+DRY RUN against the owner's own archive, 06-09-2026 08:57 IST. Nothing sent.
+
+--- the file that is live now (S208_STOCK_LEDGER/push_snapshot.py, 7722c33a) ---
+  skipped STOCK_CLOSING_TOTALS__2026-09-05__20260906-011453__b5a64797.XLS (374 rows vs 374) -- same as-on date, fewer items: a category filter, not the shop (F-235)
+  skipped STOCK_CLOSING_TOTALS__2026-09-05__20260906-030421__523e8318.XLS (373 rows vs 374) -- same as-on date, fewer items: a category filter, not the shop (F-235)
+as on 05-09-2026 : 373 items, 190 priced
+dry run -- nothing sent
+
+--- this kit ---
+  superseded STOCK_CLOSING_TOTALS__2026-09-05__20260906-011453__b5a64797.XLS (374 rows) -- a full export of the same day, taken earlier than the one being sent (F-322)
+  superseded STOCK_CLOSING_TOTALS__2026-09-05__20260906-011454__d7d28657.XLS (374 rows) -- a full export of the same day, taken earlier than the one being sent (F-322)
+as on 05-09-2026 : 373 items, 190 priced
+dry run -- nothing sent

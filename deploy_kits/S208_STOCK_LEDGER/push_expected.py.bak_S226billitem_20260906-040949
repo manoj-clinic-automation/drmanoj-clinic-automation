@@ -62,7 +62,6 @@ import urllib.request
 HERE = os.path.dirname(os.path.abspath(__file__))
 KITS = os.path.dirname(HERE)
 for _sub in ("S206_SANJEEVNI_MARG_PURCHASE", "S206_SANJEEVNI_RECONCILE",
-             "S224_MARG_PURCHASES", "S208_STOCK_LEDGER",
              os.path.join("S205_LIVE_TOOLS", "manojz")):
     _p = os.path.join(KITS, _sub)
     if _p not in sys.path:
@@ -72,7 +71,6 @@ sys.path.insert(0, HERE)
 import marg_report as MR            # noqa: E402  the daily sale report
 import marg_stock as MS             # noqa: E402  closing stock
 import marg_purchase as MP          # noqa: E402  purchase item-wise
-import marg_purchase_rows as MBI    # noqa: E402  S224: BILL ITEM WISE
 import purchase_returns as PR       # noqa: E402  marks return rows
 import xlsx_sheet                   # noqa: E402
 import packmap as PM                # noqa: E402  pack sizes, one match key
@@ -354,109 +352,6 @@ def _billno(s):
         return s
 
 
-
-def billitem_after(archive, after):
-    """S226. Purchase quantities from the BILL ITEM WISE export.
-
-    WHY THIS EXISTS -- the owner, 06-Sep-2026: "check data of purchase exports
-    in file, its there and was there in previous one also." He was right.
-
-    This computation read PURCHASE_ITEMWISE and nothing else. Marg has a second
-    report whose name differs by one word -- PURCHASE **BILL** ITEM WISE -- and
-    it is the one that actually gets exported most mornings. It carries the same
-    item, packing, quantity and loose quantity, and, unlike ITEM WISE, it
-    carries THE BILL'S OWN DATE on every row, so nothing has to be dated by
-    looking it up in another export. The server's money side has read it since
-    S224. Only the stock side did not, and it cost a morning of exporting the
-    right data into a reader that did not want it.
-
-    A row is kept when its own bill date is after the baseline. The returned
-    key set is (bill date, bill number, normalised item) so the ITEM WISE pass
-    can skip anything already counted here -- a purchase counted twice is worse
-    than a purchase not counted at all.
-
-    LIMIT, STATED: this export exposes no variance rows, so purchase RETURNS
-    cannot be identified in it the way purchase_returns.apply() identifies them
-    in ITEM WISE. No negative or return row has ever appeared in one (every
-    file in the archive was checked). If one does, this refuses rather than
-    guess -- see the caller.
-    """
-    pats = [os.path.join(archive, "PURCHASE_BILLITEMWISE", "*", "*.XLS"),
-            os.path.join(archive, "PURCHASE_BILLITEMWISE", "*", "*.xlsx")]
-    rows, used, skipped, covered, negatives = [], [], [], {}, []
-
-    # ONE EXPORT PER BILL DATE. Two BILL ITEM WISE exports overlap all the
-    # time -- 01->06 Sep and 04->06 Sep both carry the 05-Sep bills -- and
-    # neither supersedes the other, because their periods differ. Taking rows
-    # from both counted every purchase TWICE: on the first run of this the
-    # cross-check came back with eleven items out by exactly 2x, 1,480 units.
-    #
-    # Row-level de-duplication is the wrong tool: one bill can legitimately
-    # carry the same item twice, in two batches. So the choice is made per
-    # BILL DATE, the way F-322 chooses per as-on date: for each date, the
-    # export with the LATEST capture stamp that covers it wins, and only that
-    # export's rows for that date are read.
-    def _taken(name):
-        parts = str(os.path.basename(name)).split("__")
-        return parts[2] if len(parts) > 2 else ""
-
-    reps = []
-    for path in _effective(sum([glob.glob(x) for x in pats], [])):
-        try:
-            rep = MBI.read_billitemwise(path)
-        except Exception as e:                                 # noqa: BLE001
-            skipped.append((os.path.basename(path), "unreadable: %s" % e))
-            continue
-        end = dkey(rep.get("period_to"))
-        if end is None:
-            skipped.append((os.path.basename(path), "no readable period"))
-            continue
-        if end <= after:
-            skipped.append((os.path.basename(path),
-                            "period ends %s, inside the baseline" % ddmmyyyy(end)))
-            continue
-        reps.append((path, rep, end))
-
-    owner = {}          # bill date -> (capture stamp, path)
-    for path, rep, _end in reps:
-        for r in rep["rows"]:
-            d = dkey(r.get("bill_date"))
-            if d is None or d <= after:
-                continue
-            t = _taken(path)
-            if d not in owner or t > owner[d][0]:
-                owner[d] = (t, path)
-
-    horizon = None
-    for path, rep, end in reps:
-        n, notmine = 0, 0
-        for r in rep["rows"]:
-            d = dkey(r.get("bill_date"))
-            if d is None or d <= after:
-                continue
-            if owner[d][1] != path:
-                notmine += 1
-                continue
-            if (r.get("qty") or 0) < 0 or (r.get("loose_qty") or 0) < 0:
-                negatives.append((os.path.basename(path), r.get("bill_no"),
-                                  r.get("item")))
-                continue
-            r["_date"] = d
-            r["is_return"] = False
-            r["bill"] = r.get("bill_no")
-            rows.append(r)
-            covered[(d, _billno(r.get("bill_no")), PM.norm(r.get("item")))] = True
-            n += 1
-        if notmine:
-            skipped.append((os.path.basename(path),
-                            "%d line(s) for day(s) a later export already "
-                            "covers -- not counted twice" % notmine))
-        if n:
-            used.append((os.path.basename(path), n, ddmmyyyy(end)))
-            horizon = end if horizon is None or end > horizon else horizon
-    return rows, horizon, used, skipped, covered, negatives
-
-
 def purchases_after(archive, after):
     """Dated purchase rows after the baseline. Refuses what it cannot date.
 
@@ -468,16 +363,10 @@ def purchases_after(archive, after):
     third option.
     """
     dates, dfiles, dconf = bill_dates(archive)
-    # S226: BILL ITEM WISE first. It dates itself, so it needs no lookup, and
-    # what it covers the ITEM WISE pass must not count again.
-    rows, bhorizon, bused, bskipped, covered, bnegatives = \
-        billitem_after(archive, after)
-    used = [(n + "  [BILL ITEM WISE]", k, e) for n, k, e in bused]
-    skipped = [(n + "  [BILL ITEM WISE]", w) for n, w in bskipped]
-    undated, conflicts = [], []
+    rows, used, skipped, undated = [], [], [], []
     pats = [os.path.join(archive, "PURCHASE_ITEMWISE", "*", "*.XLS"),
             os.path.join(archive, "PURCHASE_ITEMWISE", "*", "*.xlsx")]
-    horizon = bhorizon
+    horizon = None
     for p in _effective(sum([glob.glob(x) for x in pats], [])):
         try:
             rep = MP.read_purchase(p)
@@ -503,16 +392,12 @@ def purchases_after(archive, after):
                 continue
             if d <= after:
                 continue
-            key = (d, _billno(r.get("bill")), PM.norm(r.get("item")))
-            if key in covered:
-                continue          # BILL ITEM WISE already counted this bill line
             r["_date"] = d
             rows.append(r)
             n += 1
-        used.append((os.path.basename(p) + "  [ITEM WISE]", n, ddmmyyyy(end)))
+        used.append((os.path.basename(p), n, ddmmyyyy(end)))
         horizon = end if horizon is None or end > horizon else horizon
-    return (rows, horizon, used, skipped, undated, dfiles, dconf,
-            conflicts, bnegatives)
+    return rows, horizon, used, skipped, undated, dfiles, dconf
 
 
 def _period_end(period):
@@ -541,19 +426,7 @@ def compute(archive, base_as_on=None, upto=None):
     if B is None:
         return {"error": "the baseline export carries no readable as-on date"}
 
-    (pur, horizon, pused, pskipped, undated, dfiles, dconf,
-     pconflicts, pnegatives) = purchases_after(archive, B)
-    if pnegatives:
-        return {"error": "%d BILL ITEM WISE line(s) carry a negative quantity. "
-                         "That export marks no returns, so a negative cannot be "
-                         "read safely. Nothing sent." % len(pnegatives),
-                "billitem_negatives": pnegatives[:10]}
-    if pconflicts:
-        return {"error": "%d purchase line(s) appear in BOTH the BILL ITEM WISE "
-                         "and the ITEM WISE export with DIFFERENT quantities. "
-                         "One of the two exports is stale. Nothing sent."
-                         % len(pconflicts),
-                "purchase_conflicts": pconflicts[:10]}
+    pur, horizon, pused, pskipped, undated, dfiles, dconf = purchases_after(archive, B)
     if undated:
         return {"error": "%d purchase line(s) could not be dated -- the "
                          "SUPPLIER WISE or BILL WISE export for the same range "
@@ -799,8 +672,7 @@ def main(argv=None):
         for nm, q in rep["negative"][:8]:
             print("     %-30s %.0f" % (nm[:30], q))
         print("     Sales were rung up for goods this ledger never saw arrive. "
-              "Export PURCHASE > BILL ITEM WISE for the range in Marg -- that "
-              "one report is enough, and it dates itself -- then run again.")
+              "Get the two purchase exports for the range and run again.")
     if rep["blocked_names"]:
         print("  %d sale line(s) could not be tied to an item -- their units are "
               "NOT subtracted:" % sum(n for _, n in rep["blocked_names"]))

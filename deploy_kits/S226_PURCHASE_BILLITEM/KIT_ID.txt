@@ -1,0 +1,4 @@
+S226_PURCHASE_BILLITEM
+Session 226 · 06-Sep-2026 · PC-side (manojz). Nothing on the VPS changes.
+The stock computation now reads PURCHASE BILL ITEM WISE, the report the clinic
+actually exports every morning. Installed at the owner's word, 06-Sep.

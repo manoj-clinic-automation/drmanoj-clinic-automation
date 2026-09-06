@@ -1,0 +1,22 @@
+== S226_F322_SUBSET -- live-shape walk ==
+   archive: /sessions/rcw-01fb9fqdyipjnetdpfbb5a9v/mnt/Downloads/margsync/MargArchive
+  ok   a whole-store export is found
+  ok   the MERGED export is the one chosen, not a rejected one   ['STOCK_CLOSING_TOTALS__2026-09-05__20260906-011453__b5a64797.XLS', 'STOCK_CLOSING_TOTALS__2026-09-05__20260906-011454__d7d28657.XLS']
+  ok   the two earlier full exports are named SUPERSEDED, not 'a category filter'   [('STOCK_CLOSING_TOTALS__2026-09-05__20260906-011453__b5a64797.XLS', (374, 'older')), ('STOCK_CLOSING_TOTALS__2026-09-05__20260906-011454__d7d28657.XLS', (374, 'older'))]
+  ok   nothing full is called a subset any more   {'STOCK_CLOSING_TOTALS__2026-09-05__20260906-011453__b5a64797.XLS': (374, 'older'), 'STOCK_CLOSING_TOTALS__2026-09-05__20260906-011454__d7d28657.XLS': (374, 'older')}
+  ok   the chosen export carries the merged LACTOVAX, once   [{'store': 'WHOLE STORES', 'as_on': '05-09-2026', 'item': 'LACTOVAX SYP', 'packing': '200ML.', 'pack_size': None, 'packs': 0, 'loose': 5.0, 'units': 5.0, 'raw': '5', 'unit': 'SYP', 'row': 216}]
+  ok   the pre-merge exports are there to test with   ['STOCK_CLOSING_TOTALS__2026-09-05__20260906-011453__b5a64797.XLS', 'STOCK_CLOSING_TOTALS__2026-09-05__20260906-011454__d7d28657.XLS']
+  ok   the pre-merge file really does hold the name twice   [('LACTOVAX SYP', -2.0), ('LACTOVAX SYP', 7.0)]
+  ok   two masters under one name ADD UP instead of one being dropped   5
+  ok   ...and the merge is something the run can say out loud   ['LACTOVAX SYP']
+  ok   438-of-439 shape: the LATER, ONE-SMALLER export wins   373
+  ok   ...and the earlier one is 'older', not 'subset'   [('STOCK_CLOSING_TOTALS__2026-09-05__20260906-011453__aaaaaaaa.XLS', 374, 'older')]
+  ok   THE ORTHOTICS SHAPE: 81 of 374 is still refused, however late it is   374
+  ok   ...and it is named a category filter   [('STOCK_CLOSING_TOTALS__2026-09-05__20260906-235959__cccccccc.XLS', 81, 'subset')]
+  ok   exactly at the 60% line, a late export is still a filter   374
+  ok   just above it, a late export supersedes   226
+  ok   a BIGGER export of an OLDER day never wins -- the day is chosen first   ('05-09-2026', 373)
+  ok   ...and a different day is not reported as a rejection at all
+  ok   the two rules are ONE number   0.6
+
+18 ok, 0 FAILED
