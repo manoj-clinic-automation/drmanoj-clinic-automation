@@ -1,0 +1,216 @@
+{
+  "_about": "S230_FRESHNESS · the legs this box watches. THIS FILE IS THE CONFIGURATION — adding, moving, widening or parking a leg is an edit here and never a change to freshness.py. Fields: name (unique, shown on the page), group (the page heading), kind (state_json | file_mtime | log_mtime | glob_newest | sqlite_max), target (the path, glob or database), max_age_h (the window in hours), note (shown under the name on the page), disabled (true parks the leg without deleting it). state_json also takes field; sqlite_max also takes table and column. {STATE_FILE} in a target expands to the collector's own state file. No numbers, ids, secrets or key paths belong in this file (F-185).",
+  "_windows": "26 h = a daily job, with two hours of slack for a late start. 50-74 h = a job that may legitimately be quiet over a closed Sunday. 200 h = weekly. 4400 h = a twice-yearly drill. A window is a first estimate for every leg whose cadence was not confirmed on the box; after one week of the page, widen the ones that cry wolf and tighten the ones that hid a real stop.",
+  "legs": [
+    {
+      "name": "clinic state backup (off-box)",
+      "group": "Backups",
+      "kind": "state_json",
+      "target": "/root/state_backup/clinic_state_backup.state.json",
+      "field": "last_success_iso",
+      "max_age_h": 26,
+      "note": "nightly 01:50 · the console, assets, punches, staff stores and the shape of the machine"
+    },
+    {
+      "name": "finance.db nightly local copy",
+      "group": "Backups",
+      "kind": "glob_newest",
+      "target": "/root/backups/finance/finance_*.db",
+      "max_age_h": 26,
+      "note": "nightly 01:05 · the newest verified local copy of the finance database"
+    },
+    {
+      "name": "finance.db off-box copy",
+      "group": "Backups",
+      "kind": "log_mtime",
+      "target": "/root/finance/drive_backup.log",
+      "max_age_h": 26,
+      "note": "nightly 01:40 · the log is written on every run, so its mtime is the heartbeat"
+    },
+    {
+      "name": "finance local backup script",
+      "group": "Backups",
+      "kind": "log_mtime",
+      "target": "/root/finance/backup.log",
+      "max_age_h": 26,
+      "note": "nightly · the on-box copy and prune"
+    },
+    {
+      "name": "asset app archive",
+      "group": "Backups",
+      "kind": "glob_newest",
+      "target": "/root/backups/assetapp_*.tar.gz",
+      "max_age_h": 200,
+      "note": "weekly · if this reads NEVER the cron line is fiction — that is the point of the row"
+    },
+    {
+      "name": "finance restore drill",
+      "group": "Backups",
+      "kind": "state_json",
+      "target": "/root/finance/finance_restore_verify.state.json",
+      "field": "last_verify_iso",
+      "max_age_h": 4400,
+      "note": "a TWICE-YEARLY drill, not a job — the window is six months on purpose, and this row going stale is a reminder to do the drill, not a fault"
+    },
+    {
+      "name": "bank statement match",
+      "group": "Finance pipeline",
+      "kind": "log_mtime",
+      "target": "/root/finance/bank_match.log",
+      "max_age_h": 26,
+      "note": "window is an estimate until one week of the page confirms the cadence"
+    },
+    {
+      "name": "Docterz ingest",
+      "group": "Finance pipeline",
+      "kind": "log_mtime",
+      "target": "/root/finance/logs/docterz_ingest.log",
+      "max_age_h": 26,
+      "note": "window is an estimate until one week of the page confirms the cadence"
+    },
+    {
+      "name": "patient sync",
+      "group": "Finance pipeline",
+      "kind": "log_mtime",
+      "target": "/root/finance/patient_sync.log",
+      "max_age_h": 26,
+      "note": "window is an estimate until one week of the page confirms the cadence"
+    },
+    {
+      "name": "finance self-heal",
+      "group": "Finance pipeline",
+      "kind": "log_mtime",
+      "target": "/root/finance/heal.log",
+      "max_age_h": 26,
+      "note": "window is an estimate until one week of the page confirms the cadence"
+    },
+    {
+      "name": "intent watcher",
+      "group": "Finance pipeline",
+      "kind": "log_mtime",
+      "target": "/root/finance/intent.log",
+      "max_age_h": 26,
+      "note": "window is an estimate until one week of the page confirms the cadence"
+    },
+    {
+      "name": "Marg stock feed",
+      "group": "Marg lane",
+      "kind": "sqlite_max",
+      "target": "/root/finance/finance.db",
+      "table": "stock_feed",
+      "column": "received_at",
+      "max_age_h": 30,
+      "note": "the newest closing-stock row pushed from the shop PC · read-only · 30 h leaves room for a late push"
+    },
+    {
+      "name": "Marg purchase feed",
+      "group": "Marg lane",
+      "kind": "sqlite_max",
+      "target": "/root/finance/finance.db",
+      "table": "purchase_feed",
+      "column": "at",
+      "max_age_h": 30,
+      "note": "the purchase pull's own heartbeat row · read-only · purchase_export.received_at is the alternative if you would rather watch arriving exports than the pull"
+    },
+    {
+      "name": "call console cron",
+      "group": "Console and calls",
+      "kind": "log_mtime",
+      "target": "/root/wa/logs/console_cron.log",
+      "max_age_h": 26
+    },
+    {
+      "name": "portal gist",
+      "group": "Console and calls",
+      "kind": "log_mtime",
+      "target": "/root/wa/portal_gist.log",
+      "max_age_h": 26
+    },
+    {
+      "name": "call verdict sweep",
+      "group": "Console and calls",
+      "kind": "log_mtime",
+      "target": "/root/wa/recordings-archive/verdict_cron.log",
+      "max_age_h": 26,
+      "note": "nightly 03:40 · the floor under the at-hangup worker"
+    },
+    {
+      "name": "daily call digest",
+      "group": "Console and calls",
+      "kind": "log_mtime",
+      "target": "/root/wa/recordings-archive/digest_cron.log",
+      "max_age_h": 26,
+      "note": "the morning pulse and the nightly digest write here"
+    },
+    {
+      "name": "flag investigator",
+      "group": "Console and calls",
+      "kind": "log_mtime",
+      "target": "/root/wa/recordings-archive/flag_investigator.log",
+      "max_age_h": 26
+    },
+    {
+      "name": "VPS health report",
+      "group": "Console and calls",
+      "kind": "log_mtime",
+      "target": "/root/wa/health_report.log",
+      "max_age_h": 26,
+      "note": "08:00 daily · this page is generated five minutes after it"
+    },
+    {
+      "name": "attendance mailer",
+      "group": "Attendance",
+      "kind": "log_mtime",
+      "target": "/root/att_mailer.log",
+      "max_age_h": 26
+    },
+    {
+      "name": "attendance doctor",
+      "group": "Attendance",
+      "kind": "log_mtime",
+      "target": "/root/att_doctor.log",
+      "max_age_h": 26
+    },
+    {
+      "name": "punch listener",
+      "group": "Attendance",
+      "kind": "log_mtime",
+      "target": "/root/attlistener.log",
+      "max_age_h": 50,
+      "note": "the listener is quiet when nobody punches, so the window spans a closed day"
+    },
+    {
+      "name": "punch file",
+      "group": "Attendance",
+      "kind": "file_mtime",
+      "target": "/root/punches.csv",
+      "max_age_h": 74,
+      "note": "the punches themselves · three days, so a Sunday plus a holiday does not cry wolf"
+    },
+    {
+      "name": "freshness collector (this page)",
+      "group": "Watchdog",
+      "kind": "state_json",
+      "target": "{STATE_FILE}",
+      "field": "last_run_iso",
+      "max_age_h": 26,
+      "note": "the collector watching itself · this row shows the PREVIOUS run, because state is written after the reading is done · if this row is stale the page you are reading is stale"
+    },
+    {
+      "name": "follow-up files arriving from the clinic PC",
+      "group": "Marg lane",
+      "kind": "glob_newest",
+      "target": "/root/wa/followup-inbox/*",
+      "max_age_h": 50,
+      "note": "the clinic PC pushes the tracker's files here · if this goes quiet the callback tracker keeps showing yesterday and says nothing · 50 h so a Sunday does not cry wolf"
+    },
+    {
+      "name": "renewals push",
+      "group": "Console and calls",
+      "kind": "file_mtime",
+      "target": "/root/finance/renewals_state.json",
+      "max_age_h": 50,
+      "note": "the personal Janitor pushes anything due inside 30 days here, which becomes the Renewals tile · last seen written 07-Sep 08:42 IST"
+    }
+  ]
+}

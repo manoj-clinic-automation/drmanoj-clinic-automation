@@ -1,0 +1,80 @@
+S230_FRESHNESS — install, ONE LINE AT A TIME.
+
+Nothing here is destructive. The script is strictly READ-ONLY against everything it
+watches: it opens databases in read-only mode, stats files, reads logs. It never
+writes to, moves, restarts or signals any other service. The only files it creates
+are its own four: a page, a JSON, a state file and its own log.
+
+You never type a secret in this install. Step 6 copies the phone-alert topic that is
+already on the box.
+
+STOP AT STEP 12 and send me what it printed. Steps 14 onward come after that.
+
+---------------------------------------------------------------------------
+[VPS] 1 · pull the published code:
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main
+
+[VPS] 2 · put the script in place:
+\cp /root/deploy/repo/deploy_kits/S230_FRESHNESS/freshness.py /root/finance/freshness.py
+
+[VPS] 3 · put the leg list in place (this file is the settings; the script is never edited):
+\cp /root/deploy/repo/deploy_kits/S230_FRESHNESS/legs.json /root/finance/freshness_legs.json
+
+[VPS] 4 · make it runnable:
+chmod 750 /root/finance/freshness.py
+
+[VPS] 5 · write the settings file:
+printf 'LEGS_FILE=/root/finance/freshness_legs.json\nSTATE_FILE=/root/finance/freshness.state.json\nJSON_OUT=/root/finance/freshness.json\nHTML_OUT=/root/finance/freshness.html\nSUMMARY_FILE=/root/finance/freshness.summary.log\nNTFY_TITLE=Clinic freshness\n' > /root/finance/freshness.conf
+
+[VPS] 6 · copy the phone-alert topic from the watchman that already uses it (nothing is printed):
+{ grep -h -m1 '^WATCHDOG_NTFY_URL=' /root/wa/.env 2>/dev/null | sed 's/^WATCHDOG_NTFY_URL=/NTFY_URL=/' || true; } >> /root/finance/freshness.conf
+
+[VPS] 7 · if step 6 found nothing, take it from the running watchman instead (still nothing printed):
+grep -q '^NTFY_URL=' /root/finance/freshness.conf || grep -m1 -oE 'https://ntfy[.]sh/[A-Za-z0-9_-]+' /root/wa/clinic_watchdog.py | sed 's#^#NTFY_URL=#' >> /root/finance/freshness.conf
+
+[VPS] 8 · lock the settings file down:
+chmod 600 /root/finance/freshness.conf
+
+[VPS] 9 · confirm the topic landed — this prints the word FOUND or MISSING, never the topic itself:
+grep -q '^NTFY_URL=https' /root/finance/freshness.conf && echo "TOPIC FOUND" || echo "TOPIC MISSING - tell Claude"
+
+[VPS] 10 · read the leg list back. This touches nothing at all and must print 26 legs:
+/root/wa/venv/bin/python3 /root/finance/freshness.py list
+
+[VPS] 11 · the first real read. NO phone alert is sent by this line. Expect several to read NEVER - that is the estate answering this question for the first time:
+/root/wa/venv/bin/python3 /root/finance/freshness.py check
+
+[VPS] 12 · what it recorded:
+cat /root/finance/freshness.summary.log
+
+---------------------------------------------------------------------------
+STOP HERE. Send me the output of steps 10, 11 and 12.
+
+A leg reading NEVER or ERROR at this point is not a fault in your system - it means
+I declared it from the repository and the live box says otherwise. I correct the leg
+list, you publish once more, and then we arm it. This is the step that catches a
+wrong assumption, and it is the only step that can.
+---------------------------------------------------------------------------
+
+[VPS] 13 · AFTER I have corrected the list and you have published, re-copy it:
+\cp /root/deploy/repo/deploy_kits/S230_FRESHNESS/legs.json /root/finance/freshness_legs.json
+
+[VPS] 14 · read again, still touching nothing:
+/root/wa/venv/bin/python3 /root/finance/freshness.py check
+
+[VPS] 15 · one phone alert by hand, so the first message arrives while you are watching:
+/root/wa/venv/bin/python3 /root/finance/freshness.py --shout
+
+[VPS] 16 · run it a second time - it must say "already shouted" and send nothing:
+/root/wa/venv/bin/python3 /root/finance/freshness.py --shout
+
+[VPS] 17 · set it to run every morning at 08:05, five minutes after the health report:
+(crontab -l 2>/dev/null; echo '5 8 * * * /root/wa/venv/bin/python3 /root/finance/freshness.py --shout >> /root/finance/freshness.log 2>&1') | crontab -
+
+[VPS] 18 · confirm the line is there exactly once (must print 1):
+crontab -l | grep -c freshness.py
+
+---------------------------------------------------------------------------
+ROLLBACK - one line. Removes the morning run. Nothing else on the box changes:
+crontab -l | grep -v 'freshness.py' | crontab -
+---------------------------------------------------------------------------

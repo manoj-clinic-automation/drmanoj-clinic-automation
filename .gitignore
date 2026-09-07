@@ -182,3 +182,4 @@ finance/REPORT_1.xls
 !deploy_kits/S230_GAS_EXPORT/DailyClinicReports/appsscript.json
 !deploy_kits/S230_GAS_EXPORT/ClinicAccountingReports/appsscript.json
 !deploy_kits/S230_GAS_EXPORT/UPIReconciliation/appsscript.json
+!deploy_kits/S230_FRESHNESS/legs.json
