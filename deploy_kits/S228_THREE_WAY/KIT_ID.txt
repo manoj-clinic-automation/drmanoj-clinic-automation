@@ -1,0 +1,33 @@
+KIT       S228_THREE_WAY
+SESSION   228
+DATE      06-Sep-2026
+RULING    The owner, 06-Sep-2026: "today's stock check having three columns, one for
+          the physical, second for the Marg, and third for our own system. Then we
+          compare our system with the Marg export -- we should match -- and then only
+          we should populate the screens." And: "go for 3rd stk line, if it varied,
+          [show it], start as you find safe and comfortable."
+
+WHAT IT ADDS
+  The third figure on the stock check, and -- the part that answers why he asked --
+  a line that says WHICH of the two pushes the count's own "Marg" column actually
+  came from. stock_snapshot is last-write-wins and both push_snapshot (Marg's
+  export) and push_expected (our computed figure) land on it; a count could be
+  measured against our own arithmetic while every page called it Marg. Read-only:
+  nothing computes a stock figure here, the two feeds already exist in stock_feed
+  and this subtracts them.
+
+FILES INSTALLED (2)
+  stock_app.py       c8e2a6b8 -> 55cd610e
+  stock_report.html  9be950f2 -> bd750dc8
+
+IN THE KIT, NOT INSTALLED (the walks lean on them; unchanged at S228_LOSS_DESK)
+  stock_desk.html 54aeda96 - stock_loss.html 0d772034 - stock_amir.html adf206b5
+  pad_receipt.py 49ced287 - stock_check_live.html 3d6a2fb8 - padreader/padwriter
+
+NO NEW TABLE, NO MIGRATION.  stock_feed already exists (S221 TWO PRICES).
+
+EVIDENCE  544 checks, 0 failures, one file set, in a real browser at 390px.
+          Screens read four times by a sub-agent; the first three each found a real
+          defect behind green checks, the fourth signed it off.
+
+NEXT FREE D390 - F-340

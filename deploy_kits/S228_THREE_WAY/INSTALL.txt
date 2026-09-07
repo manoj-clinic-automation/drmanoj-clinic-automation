@@ -1,0 +1,79 @@
+S228_THREE_WAY -- ONE PASTE on the VPS after the publish. ONE LINE.
+Two files installed: stock_app.py, stock_report.html.
+Refuses -- and changes NOTHING -- unless the kit sums check and the live pins are the S228_LOSS_DESK ones:
+stock_app.py c8e2a6b8, stock_report.html 9be950f2, stock_desk.html 54aeda96, stock_loss.html 0d772034.
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main && cd /root/deploy/repo/deploy_kits/S228_THREE_WAY && md5sum -c SUMS.md5 --quiet && [ "$(md5sum /root/finance/stock_app.py | cut -c1-8)" = "c8e2a6b8" ] && [ "$(md5sum /root/finance/stock_report.html | cut -c1-8)" = "9be950f2" ] && [ "$(md5sum /root/finance/stock_desk.html | cut -c1-8)" = "54aeda96" ] && [ "$(md5sum /root/finance/stock_loss.html | cut -c1-8)" = "0d772034" ] || { echo "REFUSED: kit sums or the live pins do not match -- NOTHING CHANGED"; false; } && for f in stock_app.py stock_report.html; do \cp /root/finance/$f /root/finance/$f.bak_S228tw_$(date +%Y%m%d); done && \cp stock_app.py stock_report.html /root/finance/ && (/root/wa/venv/bin/python3 -B -c "import py_compile;py_compile.compile('/root/finance/stock_app.py',doraise=True,cfile='/tmp/s228tw.pyc')" && systemctl restart clinic-finance.service && sleep 3 && systemctl is-active --quiet clinic-finance.service && echo "UP -- the third stock line: the shelf, Marg, and our own system" && md5sum /root/finance/stock_app.py /root/finance/stock_report.html || (echo "COMPILE FAILED OR SERVICE DID NOT COME BACK -- ROLLING BACK BY ITSELF"; for f in stock_app.py stock_report.html; do \cp /root/finance/$f.bak_S228tw_$(date +%Y%m%d) /root/finance/$f; done; systemctl restart clinic-finance.service; sleep 3; systemctl is-active clinic-finance.service; journalctl -u clinic-finance.service -n 12 --no-pager)); rm -f /tmp/s228tw.pyc
+
+Expected at the end:  UP -- the third stock line: the shelf, Marg, and our own system
+                      55cd610e...  /root/finance/stock_app.py
+                      bd750dc8...  /root/finance/stock_report.html
+
+WHERE TO LOOK, after it is up:
+
+  https://followup.dr-manoj.in/finance/stock/page/report?count=1
+
+WHAT IS NEW -- three things, all on the report, all read-only
+
+1 · THE THIRD FIGURE, on every line
+    Marg 70 strips -> counted 30 strips - short 40 strips
+    our own system said 110 strips - 40 strips more than Marg
+    Where our system agrees with Marg the second line is three words: "our own
+    system: same". Where our system never computed that day there is no second
+    line at all -- never a number nobody can stand behind. Every quantity is kept
+    whole, so a figure is never split from its unit by a line break.
+
+2 · THE CARD: "OUR SYSTEM VS MARG'S EXPORT"
+    One sentence -- agree, or differ on N of the M items both of them carry, with
+    the biggest gaps in a small table, Marg beside ours, the gap in strips. Green
+    with a tick when they agree; red when they do not. It always says, in its own
+    line, that it compares THE TWO COMPUTER FIGURES ONLY and that the shelf is
+    compared further down -- so it can never be read against the count's own
+    "3 differ" tile.
+    It sits AFTER the tiles, so you meet "3 differ - short Rs 6,840" before you
+    meet one computer arguing with another. It jumps ahead of them only in the
+    alarm state below.
+
+3 · "MEASURED AGAINST" -- and this is the one that answers the question
+    stock_snapshot is keyed (as_on, item) and LAST WRITE WINS. Two senders push to
+    it: Marg's closing-stock export (push_snapshot) and our own computed figure
+    (push_expected). Whichever landed later for a day IS what the count was
+    measured against -- and until now no screen said which. A count could be
+    measured against our own arithmetic while every page called it Marg.
+    The header now names it, with the hour it was pushed. When it was NOT Marg's
+    export, the page says so in red AND the card carries a filled red banner of
+    its own, above everything:
+        "This count's own figures came from OUR SYSTEM, not from Marg's export.
+         What follows compares the two feeds, not the count against Marg."
+    In that state the card goes above the numbers, and the count is never called
+    trustworthy.
+
+NOTHING ELSE MOVES. The count, the decision desk, the loss desk, Amir's board and
+every Excel and PDF are untouched. No figure is computed here: the two feeds are
+already on the server (stock_feed, append-only) and this subtracts them.
+
+ROLLING BACK = the two .bak_S228tw_* files beside the live ones, \cp each back, restart.
+
+OFFLINE EVIDENCE -- 544 checks in a real browser at phone width (390px), 0 failures,
+all against this one file set:
+  EVIDENCE_threeway_s228.txt  48/48  both feeds found - the provenance in all four
+        states (Marg / ours / two senders / not recorded) - the verdict with its
+        denominator named - gaps in strips, biggest first - items only one side has
+        - the third figure on the row and on the matched rows - an uncomputed item
+        showing nothing rather than zero - the alarm banner and its red card - the
+        card after the tiles normally and before them on the alarm - the tick and
+        the green ground when they agree - no gap-explanation printed when there is
+        no gap - no figure split from its unit anywhere - no sideways scroll at
+        390px with every lane open
+  EVIDENCE_regress_loss_s228 93/93 - pad_proof 65/65 - audit 53/53 - desk 47/47 -
+  report 46/46 - lanes 46/46 - diff_sheet 41/41 - count_search 34/34 -
+  submit_flow 30/30 - staff 28/28 - safestore 13/13
+
+  Sub-agent screen reads, four rounds. The first found the card reporting a normal
+  "ours vs Marg" comparison directly under a warning that the count had NOT been
+  measured against Marg -- a reader who skipped the header would have been told the
+  opposite of the truth. The second found the agreeing card looking like any other
+  box and the item line wrapping to three lines with "short 40 strips" stranded.
+  The third found the card pushing the count's own numbers a screen further down,
+  and "counted 30" breaking away from "strips" on exactly the two MAJOR lines. The
+  fourth signed it off. Every one of those was behind green checks.

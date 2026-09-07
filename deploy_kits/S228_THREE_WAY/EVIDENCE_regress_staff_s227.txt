@@ -1,0 +1,100 @@
+ * Serving Flask app 'WALK_readiness_s226'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:8847
+Press CTRL+C to quit
+  ok   the count is recorded: 29 differences
+  ok   the count page links to Amir's board
+  ok   A CONSUMABLE (syringes, 62 short) lands in the consumables lane: 'used in the clinic, never billed ... write off as consumption'   ('consume', 'a procedure consumable -- used in the clinic, never billed to patients; 62 pcs used since Marg last knew. Write off as consumption; Amir posts one stock-issue voucher.')
+  ok   THE ORTHOTICS FAMILY: TYNOR over 1, UNISON short 1 -> one family 'KNEE SUPPORT HINGED M', net 0, 'brand swap'   ('KNEE SUPPORT HINGED M', "the family 'KNEE SUPPORT HINGED M' nets to zero across 2 brands (KNEE SUPPORT HINGED M UNISON short 1, KNEE SUPPORT HINGED M TYNOR over 1) -- one brand was sold and another billed; Amir swaps the figures in Marg, nothing is lost.", 'brand swap -- Amir swaps the figures in Marg, nothing lost')
+  ok   ...the families list carries the L size as its own family (matched, not swapped) and the M family with both members   ['KNEE SUPPORT HINGED M', 'KNEE SUPPORT HINGED L']
+  ok   TYRO: -76 strips 3 tabs then +34 strips 3 tabs are MERGED into one span 27-08 -> 03-09 and ONE question: 40 strips OUT   (-400, ['Marg > item ledger > TYRO BR TAB > 27-08-2026 to 03-09-2026: which voucher took 40 strips OUT? No bill, return or sale on the server for it.'], [('27-08-2026', '03-09-2026', -400, 2), ('03-09-2026', '06-09-2026', 0, 1)])
+  ok   WOBBLE: 3 tabs one way then 3 tabs back is boundary noise -- clean, no question   ('clean', [], 'Marg and the documents agree from 27-08-2026 to 06-09-2026. Nothing to chase in Marg.')
+  ok   AMIR'S LOOKUP LIST: ONE row per item (TYRO only), the question inside it   [['TYRO BR TAB', '1*10', 270, 40, -230, 'Marg > item ledger > TYRO BR TAB > 27-08-2026 to 03-09-2026: which voucher took 40 strips OUT? No bill, return or sale on the server for it.', None, None]]
+  ok   the 'over' total is explained in the report data: pairs list present
+  ok   AUDIT JSON: the packing conflict (bill says 1*15, stock says 1*10) and the free-too-high line; needs_amir = 2   ([{'batch': 'P1', 'bill_date': '2026-08-10', 'bill_date_text': '10-08-2026', 'bill_no': '77', 'free': 0.0, 'id': 1, 'item': 'PACKCLASH TAB', 'loose': 150.0, 'packing': '1*15', 'qty': 10.0, 'stock_packing': '1*10', 'vendor': 'ANMOL AGENCIES'}], [{'batch': 'P2', 'bill_date': '2026-08-10', 'bill_date_text': '10-08-2026', 'bill_no': '77', 'direction': 'PURCHASE', 'free': 4.0, 'id': 2, 'item': 'MED-001 DOLO TAB', 'loose': 20.0, 'packing': '1*10', 'qty': 2.0, 'vendor': 'ANMOL AGENCIES', 'why': 'free 4 against 2 paid -- more than half; check the bill'}], 2)
+  ok   AUDIT WORKBOOK for Amir: only the 2 lines that need him, each with the exact thing to do; loose-is-total rows NOT on it   [['FREE TOO HIGH', 'ANMOL AGENCIES', '77', '10-08-2026', 'MED-001 DOLO TAB', '1*10', 'P2', 2.0, 4.0, 20.0, 'open this bill in Marg: is the free quantity really 4 on 2 paid? Correct the entry if not.', None], ['PACKING DIFFERS', 'ANMOL AGENCIES', '77', '10-08-2026', 'PACKCLASH TAB', '1*15', 'P1', 10.0, 0.0, 150.0, 'the purchase says packing 1*15 but the stock item is 1*10 -- one of the two is wrong in Marg; fix the item master or the bill line.', None]]
+  ok   LIST 1 (medicines) cut: 10 items -- 5 by value, 5 routine; no orthotic, no consumable on it   {'message': 'List 1 cut: 10 items. Print it and hand it to Darpan.', 'ok': True, 'tranche': {'id': 1, 'issued_at': '2026-09-06T19:35:42', 'issued_by': 'walk', 'issued_text': '06-09-2026 19:35 IST', 'items': ['TYRO BR TAB', 'MED-013 DOLO TAB', 'MED-017 DOLO TAB', 'MED-008 DOLO TAB', 'MED-001 DOLO TAB', 'MED-002 DOLO TAB', 'MED-006 DOLO TAB', 'MED-010 DOLO TAB', 'MED-014 DOLO TAB', 'MED-018 DOLO TAB'], 'kind': 'med', 'no': 1, 'pdf': '/finance/stock/api/pad/tranche/1/1.pdf', 'returned_at': None, 'returned_by': '', 'returned_text': ''}}
+  ok   ...a second medicines list is REFUSED while Darpan still has list 1   {'error': 'none', 'message': 'Darpan still has list 1 -- mark it returned first.', 'ok': False}
+  ok   ...the ORTHOTICS list is separate: cut with the two knee supports   {'message': 'List 1 cut: 2 items. Print it and hand it to Darpan.', 'ok': True, 'tranche': {'id': 2, 'issued_at': '2026-09-06T19:35:42', 'issued_by': 'walk', 'issued_text': '06-09-2026 19:35 IST', 'items': ['KNEE SUPPORT HINGED M TYNOR', 'KNEE SUPPORT HINGED M UNISON'], 'kind': 'ortho', 'no': 1, 'pdf': '/finance/stock/api/pad/tranche/1/2.pdf', 'returned_at': None, 'returned_by': '', 'returned_text': ''}}
+  ok   THE PAPER LIST: 'LIST 1 FOR DARPAN - MEDICINES - COUNT AGAIN', 10 rows, quantities only -- NO 'Rs', no 'MRP', no 'At MRP'   Advanced Orthopaedic Surgery Centre - Medical store                                                                                          LIST 1 FOR DARPAN - MEDICINES - COUNT AGAIN
+Stock count #1 of 06-09-2026 - list given 06-09-2026 19:35 IST - 10 items
+Go to the shelf for each item and count it again. Write the new count in RECOUNT (strips and loose) only if it is different. Write the REASON as a number from the legend. Anything else in REMARKS. Bring
+the sheet back; the next list comes after this one.
+REASON legend: 1 = count error 2 = not billed 3 = breakage 4 = expiry 5 = sample / giv
+  ok   ...returned: list 2 cuts with the NEXT 10, none repeated   {'message': 'List 2 cut: 10 items. Print it and hand it to Darpan.', 'ok': True, 'tranche': {'id': 3, 'issued_at': '2026-09-06T19:35:42', 'issued_by': 'walk', 'issued_text': '06-09-2026 19:35 IST', 'items': ['MED-021 DOLO TAB', 'MED-012 DOLO TAB', 'MED-016 DOLO TAB', 'MED-003 DOLO TAB', 'MED-023 DOLO TAB', 'MED-022 DOLO TAB', 'PACKCLASH TAB', 'MED-007 DOLO TAB', 'MED-011 DOLO TAB', 'MED-015 DOLO TAB'], 'kind': 'med', 'no': 2, 'pdf': '/finance/stock/api/pad/tranche/1/3.pdf', 'returned_at': None, 'returned_by': '', 'returned_text': ''}}
+  ok   THE TYPING BOARD records Darpan's answer on the S221 layer (reason 3 = breakage, the note); the empty line is skipped   ({'message': '1 answer recorded.', 'ok': True, 'recorded': 1}, [('TYRO BR TAB', 'breakage', 'one strip crushed')])
+  ok   AMIR'S BOARD: the four boxes -- Marg's reports (with the upload box), vouchers, typing Darpan's answers, files; and the orthotics families   1Reports the server still needs from Marg
+Marg से ये रिपोर्ट निकाल कर नीचे भेजें
+One question per item: open the item's ledger in Marg between the two dates and see which voucher moved the quantity. Take a screenshot or export the ledger and send it below — the server reads it; nothing to type.
+TYRO
+  ok   ...and the lists themselves are NOT handed out from here any more (D389)
+  ok   ...box 1 carries TYRO's one question in words and a Hindi line
+  ok   ...box 3 shows list 1 returned, list 2 with Darpan, the orthotics list with Darpan, and the typing board for list 1 with the answer on record   1Reports the server still needs from Marg
+Marg से ये रिपोर्ट निकाल कर नीचे भेजें
+One question per item: open the item's ledger in Marg between the two dates and see which voucher moved the quantity. Take a screenshot or export the ledger and send it below — the server reads it; nothing to type.
+TYRO BR TAB 1*10
+Marg > item ledger > TYRO BR TAB > 27-08-2026 to 03-09-2026: which voucher took 40 strips OUT? No bill, return or sale on the server for it.
+short 23 strips
+This list as ExcelPurchase lines to fix in Marg (Excel)
+Send Marg's report or screenshot to the server
+Marg की रिपोर्ट / स्क्रीनशॉट यहाँ भेजें
+Any file — an export, a PDF, a photo. It is kept on the server; nothing to type.
+Send to the server
+2Vouchers to post in Marg
+Marg में वाउचर — डॉक्टर के फैसले के बाद
+Only lines the doctor has decided. Post ONE voucher per block, then tick the Excel.
+Stock issue — written off (0)
+none yet
+Consumption — procedure consumables used (0)
+none yet
+Corrections — Marg figure to the shelf / brand swap (0)
+none yet
+Marg cleanup list (Excel)No-movement check list (Excel)Orthotics cleanup (Excel)
+3Type Darpan's answers
+दर्पण के जवाब यहाँ टाइप करें — कारण नंबर और टिप्पणी
+The doctor gives Darpan the list and takes it back. When a list comes back, its items appear here — type the reason number and the note against each, and record them.
+List 1 — medicines · 10 items
+given 06-09-2026 19:35 IST · back 06-09-2026 19:35 IST — type its answers below
+List 2 — medicines · 10 items
+given 06-09-2026
+  ok   ...an answer typed on the board is recorded (count error, the recount in the note)   [('TYRO BR TAB', 'breakage', 'one strip crushed'), ('MED-017 DOLO TAB', 'count_error', 'recount 9 strips 4 tabs')]
+  ok   ...a file sent from Amir's board is kept and listed in box 4
+  ok   DESK: 'over' is explained in the numbers strip
+  ok   DESK: the upload box sits in the foot from the first card, and Amir's board is the first link
+  ok   ...a PROCEDURE CONSUMABLES card ('Write off all as used') and an ORTHOTICS card ('read the family, not the line') are in the queue   CANNOT BE REAL AS WRITTEN
+6 figures to count again
+short Rs 2,400 at MRP
+Counted far above Marg, or exactly one strip, o || MARG MOVED WITHOUT A DOCUMENT
+1 item where Marg moved on its own
+short Rs 13,800 at MRP
+Marg's own figure moved more tha || PROCEDURE CONSUMABLES
+1 consumable used in the clinic
+short Rs 24,800 at MRP
+Blades, gloves, casts, syringes: used on pa || ORTHOTICS — READ THE FAMILY, NOT THE LINE
+2 orthotics differing
+short Rs 400 · over Rs 400 at MRP
+Same article, differen || REAL SHELF LOSS · MAJOR
+MED-013 DOLO TAB 1*10
+Marg 22 strips → counted 19 strips 6 tabs · short 2 strips 4 tabs
+Rs 1,440 || REAL SHELF LOSS · MAJOR
+MED-017 DOLO TAB 1*10
+Marg 26 strips → counted 23 strips 6 tabs · short 2 strips 4 tabs
+Rs 1,152 || REAL SHELF LOSS · MAJOR
+MED-008 DOLO TAB 1*10
+Marg 17 st
+  ok   ...the orthotics card's list names the family verdict on each line   KNEE SUPPORT HINGED M TYNOR 1*1
+Marg 3 pcs → 4 pcs · 1 pc over
+Rs 400
+family KNEE SUPPORT HINGED M: brand swap -- Amir swaps the figures in Marg, nothing lost
+Brand swap — Amir corrects Marg
+Send to Darpan's recheck
+Write off
+Darpan recounts
+KNEE SUPPORT HINGED M UNISON 1*1
+Marg 4 pcs → 3 pcs · short 1 pc
+Rs 400
+family KNEE SUPPORT HINGED M: brand swap -- Amir swaps the figures in Marg, nothing lo
+  ok   no page errors
+
+28 ok, 0 FAIL

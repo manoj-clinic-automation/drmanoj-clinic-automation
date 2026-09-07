@@ -1,0 +1,56 @@
+ * Serving Flask app 'walk_tw'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:8861
+Press CTRL+C to quit
+  ok   a real count is recorded
+  ok   the report carries the three-way block
+  ok   it knows BOTH feeds landed for that day
+  ok   THE PROVENANCE: the count's own figures came from Marg's export, and the page says so   ('marg', "Marg's own closing-stock export.")
+  ok   ...with the hour Marg's export was pushed   06-09-2026 08:52
+  ok   OUR SYSTEM AND MARG DIFFER on exactly the two items built to differ   ['TYRO BR TAB', 'CHEAPO SALT TAB']
+  ok   ...the biggest gap is first, and it is said in STRIPS, never in units (D384)   {'gap': 400, 'gap_text': '40 strips', 'item': 'TYRO BR TAB', 'marg': 700, 'ours': 1100, 'pack': 10}
+  ok   ...the smaller one is 3 strips   3 strips
+  ok   ...the agreeing items are counted, not listed   (7, 9)
+  ok   ...and the headline NAMES ITS DENOMINATOR, so it cannot be read against the count's own tiles   Our system and Marg's export differ on 2 of the 9 items both of them carry — largest: TYRO BR TAB 40 strips, CHEAPO SALT TAB 3 strips.
+  ok   an item only OUR system knows is named, not silently dropped   (1, ['ONLYOURS TAB'])
+  ok   an item only MARG knows is named too   (1, ['NOTCOMPUTED SYP'])
+  ok   the count is NOT called trustworthy while the two disagree
+  ok   THE THIRD COLUMN: the tablet carries Marg 700, ours 1100, counted 300   (700, 1100, 400)
+  ok   an item our system never computed shows NO third figure -- never a made-up one
+  ok   the matched rows carry it as well
+  ok   the page shows the provenance line
+  ok   ...and the verdict card
+  ok   ...with NO banner while the figures really are Marg's
+  ok   ...with the two differing lines in a small table, Marg beside ours   3
+  ok   ...and it always says WHAT it compares, so it cannot be read against the count's own tiles
+  ok   ROUTINE CONFIRMATION SITS AFTER THE NUMBERS -- the tiles come first   the card is above the tiles
+  ok   THE COUNT'S OWN LINE IS UNCHANGED -- Marg, then counted, then the shortage   TYRO BR TAB1*10 Marg 70 strips → counted 30 strips · short 40 strips our own system said 110 strips — 40 strips more tha
+  ok   ...and the third figure sits on its OWN line, so nothing is squeezed   TYRO BR TAB1*10 Marg 70 strips → counted 30 strips · short 40 strips our own system said 110 strips — 40 strips more than Marg the gap is about a whole box (40 
+  ok   ...and NO figure anywhere on an item line is split from its unit by a line break
+  ok   ...where our system agrees with Marg the line is three words, not a sentence   KNEE BRACE UNISON1*1 Marg 5 pcs → counted 3 pcs · short 2 pcs our own system: same an orthotic short 2 pcs; no other bra
+  ok   ...the page still does not scroll sideways at 390px with every lane open   390
+  ok   ...the card is marked as a disagreement, not as agreement   tw bad
+  ok   ...and it says what a gap usually means, so nobody recounts the shelf for it
+  ok   no page errors at 390px
+  ok   WHEN OUR OWN PUSH WROTE THE FIGURES, the page stops calling them Marg's   OUR OWN COMPUTED FIGURE, not Marg's export — our push landed
+  ok   ...and the CARD carries its own banner, so a reader who skips the header cannot be misled   This count's own figures came from OUR SYSTEM, not from Marg
+  ok   ...and such a count is never called trustworthy
+  ok   ...and it is flagged on the page, not buried
+  ok   ...as a filled banner across the card, not a red word in a table   ⚠ This count's own figures came from OUR SYSTEM, not from Ma
+  ok   ...and the card is red even though the two feeds themselves are comparable
+  ok   ...and THIS time the card JUMPS the queue and sits above the numbers   the alarm is below the tiles
+  ok   when TWO senders wrote one day, the page says the figures are not from one source   more than one sender wrote this day (push_expected
+  ok   ...and that state gets its own banner too   This count's own figures were written by more than
+  ok   WITH NO COMPUTED FIGURE the page says so plainly and compares nothing   Our own system has not computed a figure for 06-09-2026, so there is nothing to compare against Marg for this count.
+  ok   ...and every third figure is absent rather than zero
+  ok   ...the card is neither green nor red -- there is nothing to judge   tw
+  ok   ...and the difference lines simply do not mention our system at all
+  ok   WHEN THEY AGREE the page says so in one line, and the count is trustworthy   Our system and Marg's export AGREE on all 10 items both of them carry.
+  ok   ...and no banner at all
+  ok   ...and the card turns green, with a tick, so agreement LOOKS like agreement   OUR SYSTEM VS MARG’S EXPORT
+✓ Our system and Marg's export A
+  ok   ...and it does NOT print the gap explanation when there is no gap   n and Marg’s. The shelf is compared further down, on the count itself.
+  ok   no page errors in any of the five states
+
+48 ok, 0 FAIL
