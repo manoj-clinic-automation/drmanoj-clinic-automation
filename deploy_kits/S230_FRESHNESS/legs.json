@@ -61,12 +61,14 @@
       "note": "window is an estimate until one week of the page confirms the cadence"
     },
     {
-      "name": "Docterz ingest",
+      "name": "clinic day revenue ingest",
       "group": "Finance pipeline",
-      "kind": "log_mtime",
-      "target": "/root/finance/logs/docterz_ingest.log",
-      "max_age_h": 26,
-      "note": "window is an estimate until one week of the page confirms the cadence"
+      "kind": "sqlite_max",
+      "target": "/root/finance/finance.db",
+      "table": "clinic_day_revenue",
+      "column": "taken_at",
+      "max_age_h": 200,
+      "note": "watches the data it lands, not a log — there is no log and no timer for it: docterz_ingest.py is run by hand today. 200 h so it only speaks when the day-revenue table has genuinely gone a week without a refresh. Tighten to 26 h the day it gets a timer."
     },
     {
       "name": "patient sync",
