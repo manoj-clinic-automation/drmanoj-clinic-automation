@@ -80,7 +80,7 @@ advances.
 Then unchanged: wall card · F-333 reset · Google Fonts · S208 kit revision · SALT WISE · NEFT · loans view · procedures · S223 dawn specs ·
 tracker parser.
 
-**Pending install:** `S228_THREE_WAY` (`stock_app.py` → 55cd610e, `stock_report.html` → bd750dc8). **Retired unused:** `S228_CENSUS`.
+**~~Pending install: `S228_THREE_WAY`~~ — INSTALLED at the S228 post-close fold**, hours after this runbook was written. The owner read the box: `stock_app.py` **55cd610e**, `stock_report.html` **bd750dc8**, the other four unchanged, service active. **Passes, not predictions.** Corrected here in place rather than left to be read as current; Register v5.78 and `live_pins_S228fold.txt` carry it. **The live-shape read is owed at the S229 open** — the browser is still in the F-242 login loop, so nobody has looked at the installed page. **Retired unused:** `S228_CENSUS`.
 
 ---
 

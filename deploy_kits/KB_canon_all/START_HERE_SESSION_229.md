@@ -41,7 +41,7 @@ read and write it perfectly.
 
 **2 ·** Open **`CANONICAL_MANIFEST.md`** (Tier 0 · the linchpin).
 **3 ·** **Verify every row by md5.** Halt on a hash mismatch, never on absence from one store. Verify a kit gate from **inside** its folder.
-**4 ·** **Read only Tier 0:** manifest · the START-HERE prompt · KB Register **v5.77** · `HANDOFF_RUNBOOK_2026-09-07_Session228close_v160.md` ·
+**4 ·** **Read only Tier 0:** manifest · the START-HERE prompt · KB Register **v5.78** · `HANDOFF_RUNBOOK_2026-09-07_Session228close_v160.md` ·
 `OWNER_TODO_LIVE.md` · any open incident.
 **5 ·** Open **`D:\Downloads\ClaudeCowork\00_INDEX.md`** and read **`03_WORKING_PAPERS\S228\S229_BUILD_BRIEF.md`** — one brief instead of
 ten papers, and the shortest path in.
@@ -66,18 +66,18 @@ itself is sound — it was measured against Marg's own export (`push_snapshot`, 
 
 | document | version |
 |---|---|
-| KB Register | **v5.77** (S228 close) |
-| KB History Archive | **v1.74** (S228) — append proven, 1,182,074 + 14,775 = 1,196,849 |
+| KB Register | **v5.78** (S228 post-close fold) |
+| KB History Archive | **v1.75** (S228 post-close fold) — append proven, 1,196,849 + 2,706 = 1,199,555 |
 | Fault → Action Register | **v2.59** — F-350 last minted |
 | Handoff Runbook | **v160** |
-| Live pins | `live_pins_S228close.txt` |
+| Live pins | `live_pins_S228fold.txt` |
 | Build brief | `S229_BUILD_BRIEF.md` |
 
 **Next free: D398 · F-351 · Session 229.**
 
 **Live on the VPS after S228:** `stock_app.py` c8e2a6b8 · `pad_receipt.py` 49ced287 · `stock_amir.html` adf206b5 · `stock_desk.html` 54aeda96 ·
 `stock_loss.html` 0d772034.
-**Pending install:** `S228_THREE_WAY` → `stock_app.py` 55cd610e, `stock_report.html` bd750dc8.
+**`S228_THREE_WAY` is INSTALLED** (S228 post-close fold): `stock_app.py` **55cd610e**, `stock_report.html` **bd750dc8** — read back from the box by the owner, service active. **Nothing is pending install.** ⚠ **Owed at this session's open: the LIVE-SHAPE READ of that page.** 544 offline checks stand behind it; the live shape does not, because the browser is in the F-242 login loop.
 **Medical PC:** `marg_router.py` 5e034804 · `signatures.json` 3ecab70a · `_analysis\marg_item_ledger.py` 01d365da.
 
 ---
