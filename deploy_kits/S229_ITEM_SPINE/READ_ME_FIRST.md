@@ -64,24 +64,37 @@ python marg_spine.py --selftest
 python marg_spine.py --db /root/finance/finance.db --dry-run
 ```
 
-## Install
+## Install — ONE line, and it gates itself
 
-On the VPS, after the publish and a `git pull`:
-
-```
-/root/wa/venv/bin/python3 /root/finance/marg_spine.py --db /root/finance/finance.db --selftest
-```
+After the publish, on the VPS. First the clone:
 
 ```
-/root/wa/venv/bin/python3 /root/finance/marg_spine.py --db /root/finance/finance.db --dry-run
+cd /root/deploy/repo && git pull
 ```
 
+Then the whole thing, in one line. It runs the 54 self-tests, rehearses the entire build on a
+COPY, writes a backup of the database, and only then builds — stopping at the first doubt and
+touching nothing if anything fails:
+
 ```
-/root/wa/venv/bin/python3 /root/finance/marg_spine.py --db /root/finance/finance.db --build
+/root/wa/venv/bin/python3 /root/deploy/repo/deploy_kits/S229_ITEM_SPINE/marg_spine.py --db /root/finance/finance.db --install
 ```
 
-Re-runnable: **building twice changes nothing** (proven on the real database, all five tables
-byte-identical between runs).
+It prints `1/4 … 4/4` and either `DONE` or `REFUSING: … Nothing was touched.` The refusal paths
+are tested: a corrupt database and a missing file both stop at step 2, and no backup is left
+behind by a run that refused.
+
+To undo entirely, the line it prints at the end:
+
+```
+\cp /root/finance/finance.db.bak_S229_spine /root/finance/finance.db
+```
+
+**Re-runnable:** building twice changes nothing — proven on the real database, all five tables
+byte-identical between runs. Nothing is copied into `/root/finance/`; the script runs from the
+deploy clone, so there is only ever one copy of it.
+
+**No service restart is needed.** Nothing reads the spine yet.
 
 ## Verify this kit
 

@@ -872,14 +872,62 @@ def selftest(out=print):
     return bad[0] == 0
 
 
+def install(db, out=print):
+    """ONE LINE that does the whole safe thing, in order, and stops at the first
+    doubt.  Written because a four-step install is four chances to run step 3
+    without step 2 -- and the two skipped steps are the proof.
+
+      1  the 54 self-tests            -> refuse on a single failure
+      2  a build on a COPY            -> refuse if it raises
+      3  a backup of the database     -> refuse if it cannot be written
+      4  the real build
+    """
+    import shutil, tempfile, traceback
+    out("=" * 66)
+    out("  1/4  SELF-TESTS")
+    if not selftest(out):
+        out("\n  REFUSING: a self-test failed. Nothing was touched."); return 2
+    out("\n" + "=" * 66)
+    out("  2/4  REHEARSAL on a copy -- the real database is not opened for writing")
+    tmp = os.path.join(tempfile.mkdtemp(), "rehearsal.db")
+    try:
+        shutil.copy2(db, tmp)
+        con = sqlite3.connect(tmp); build(con, out); con.close()
+    except Exception:
+        out(traceback.format_exc())
+        out("  REFUSING: the rehearsal failed. Nothing was touched."); return 3
+    out("\n" + "=" * 66)
+    out("  3/4  BACKUP")
+    bak = db + ".bak_S229_spine"
+    try:
+        shutil.copy2(db, bak)
+        out("  written: %s  (%.1f MB)" % (bak, os.path.getsize(bak) / 1048576.0))
+    except Exception:
+        out(traceback.format_exc())
+        out("  REFUSING: no backup could be written. Nothing was touched."); return 4
+    out("\n" + "=" * 66)
+    out("  4/4  BUILD  -- adds seven new tables; alters nothing that exists")
+    con = sqlite3.connect(db); build(con, out); report(con, out); con.close()
+    out("\n" + "=" * 66)
+    out("  DONE. Nothing reads the spine yet -- no screen has changed.")
+    out("  To undo entirely:  \\cp %s %s" % (bak, db))
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="The Marg item spine.")
     ap.add_argument("--db")
+    ap.add_argument("--install", action="store_true",
+                    help="selftest, rehearse on a copy, back up, then build. One line, self-gating.")
     ap.add_argument("--build", action="store_true")
     ap.add_argument("--dry-run", action="store_true", help="build on a scratch copy; change nothing")
     ap.add_argument("--report", action="store_true")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args(argv)
+    if a.install:
+        if not a.db:
+            ap.error("--install needs --db")
+        return install(a.db)
     if a.selftest:
         return 0 if selftest() else 1
     if not a.db:
