@@ -1,1 +1,19 @@
-S149 close: housekeeping finished — Register v2.2 (F-46, D247 indexed), FAR v2.1 changelog fixed (F-45), Archive S147 backfilled + S149 appended, README + manifest regenerated, runbook v87 + START_HERE_150; archive 41 superseded docs (pure renames)
+Session 228: the loss desk, Marg's item ledger read, and the 581 undated purchase lines
+
+- S228_LOSS_DESK installed and live: stock_app.py c8e2a6b8, pad_receipt.py 49ced287,
+  stock_amir.html adf206b5, stock_desk.html 54aeda96, stock_loss.html 0d772034 (new).
+  Tables stock_loss_tick / stock_loss_share / stock_loss_recovery; pad_uploads/loss_shares/.
+- S228_THREE_WAY built, walked (544 checks, four screen reads), NOT installed:
+  stock_app.py -> 55cd610e, stock_report.html -> bd750dc8.
+- S228_STOCK_SHEET: the section-wise stock comparison sheet for the 06-09 count and its
+  two generators.
+- S228_CENSUS retired unused - finance.db is readable from the Drive nightly backup.
+- Docs: Register v5.77, Archive v1.74 (append proven, 1,182,074 + 14,775 = 1,196,849),
+  Fault v2.59 (F-340 ... F-350), Runbook v160, START_HERE_SESSION_229, S229_BUILD_BRIEF,
+  live_pins_S228close (93 VPS / 71 BLIND, register_pin_verified: yes), manifest and
+  MD5SUMS_ALL (385 rows, green).
+- Diagnostics: F-340 - 581 purchase lines, all of April/May/June, have no bill date and
+  every stock query drops them silently; repaired by one PURCHASE BILLWISE export for
+  01-04 to 30-06, which _redate_lines() applies with no code change. F-341 three missing
+  sale days. F-342 the server database is in Drive. F-343 negative Marg balances printed
+  without their minus. F-347 two documents of this session withdrawn as wrong.
