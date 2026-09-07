@@ -2,6 +2,62 @@
 
 **Built at Session 230, 07-Sep-2026. Not installed by the builder — the owner installs it.**
 
+## CHANGELOG
+
+### v2 — 07-Sep-2026 · the discovery rule missed the staff ledger itself
+
+v1 discovered data files under `/root/staff_ledger/` and `/root/staff_register/`
+by **extension**, and the extensions it knew were `*.db` and `*.csv`. On the
+live box those two stores keep most of their records as `.jsonl`, `.json` and
+`.html`. So the first run shipped 46 files and **silently left out**:
+
+| missed in v1 | what it is |
+|---|---|
+| `/root/staff_ledger/ledger.jsonl` | **the staff ledger itself — the only record of what each person owes** |
+| `/root/staff_ledger/advance_pct.json` | the advance percentage |
+| `/root/staff_ledger/waivers_2026-07.json` | the month's waivers |
+| `/root/staff_ledger/users.json` | the ledger's maker/checker identities |
+| `/root/staff_ledger/applications/` | a whole subdirectory — the walk did not go down |
+| `/root/staff_register/hold_ledger.jsonl` | holds |
+| `/root/staff_register/manual_advances_2026-07.json` | manual advances |
+| `/root/staff_register/register_salary_2026-07.html` | a generated salary register — small, and a record |
+
+**This was found by checking what actually lives on the live box, not by any
+test.** Eighty-six green checks in v1's walk did not catch it, and could not
+have: the fixture estate was built from the same assumption as the code. A test
+can only prove that the rule you wrote is the rule that runs — it cannot tell
+you the rule is the wrong shape for the machine. That is what a live-shape
+check is for, and it is why one is worth more than a hundred green assertions.
+
+**What changed in v2:**
+
+- the discovery list is now `.db` `.sqlite` `.sqlite3` `.csv` `.jsonl` `.json`
+  `.html`, and the walk descends **one level**, so `applications/` is seen
+- a store's subdirectory structure is preserved inside the bundle, so
+  `applications/x.json` can never collide with an `x.json` at the store root
+- **the secret patterns still run first and still win.** Widening what counts
+  as data did not widen what may be shipped: `secret_key`, `sa_key.json`,
+  `.env`, `token*`, `credentials*`, `*.pem` and the rest are matched before any
+  extension is considered, skipped, and counted. The walk now proves this with
+  a fixture in which a `secret_key` and an `sa_key.json` sit in the same
+  directory as `ledger.jsonl` — the ledger travels, the two secrets do not.
+- code stays excluded: `*.py`, anything containing `.bak`, and `__pycache__`
+- the walk is now **104 checks across 18 paths**, 18 of them new and all of
+  them about this gap
+
+`users.json` carries the ledger's maker/checker identities. It is included, as
+a record, and it travels only inside the encrypted bundle — but it is the one
+included file whose contents are closest to an authentication concern, and it
+is named here so nobody has to discover that later.
+
+**Nothing else changed.** Same conf, same slot files, same cron, same key. A
+box already running v1 needs only the new script file in place; the next run
+picks up the missing files by itself.
+
+### v1 — 07-Sep-2026
+
+First build. Installed the same day: first run OK, 46 files, cron at 01:50.
+
 ## The gap this closes
 
 S230 measured the box. Exactly one thing on the VPS has a daily off-box copy:
@@ -21,8 +77,8 @@ Nothing holds the rest. This kit is the second off-box leg.
 | `/root/wa/console.db` | sqlite **online-backup api** (`.backup`), never a file copy |
 | `/root/assetapp/assets.db` | sqlite online-backup api — the **index only** |
 | `/root/punches.csv`, `/root/punches_raw.log` | byte copy |
-| `/root/staff_register/` | data files **discovered at runtime** (`*.db`, `*.csv`); sqlite files through `.backup` |
-| `/root/staff_ledger/` | same |
+| `/root/staff_register/` | data files **discovered at runtime** — `*.db`, `*.sqlite`, `*.csv`, `*.jsonl`, `*.json`, `*.html`, one level deep; sqlite files through `.backup` |
+| `/root/staff_ledger/` | same, including `ledger.jsonl` and the `applications/` subdirectory |
 | `/root/staff_master.csv` | byte copy |
 
 A live database copied byte-wise while a writer holds it is a torn database
@@ -53,6 +109,11 @@ into an afternoon:**
   `*.key`, `id_rsa*`, `*secret*` is skipped by pattern before it is ever read.
   The script logs **how many** it skipped and never their names or contents. A
   backup that carries the keys to the estate is a second copy of the breach.
+  These patterns are matched **before** any extension is considered, on every
+  file the walk sees, so widening what counts as data can never widen what
+  ships.
+- **Application code**, again: `*.py`, anything containing `.bak`, and
+  `__pycache__`, even inside a store that is otherwise backed up.
 
 ## 🔴 Encryption, and the one thing that can never be undone
 
@@ -172,7 +233,7 @@ Everything, without shipping anything and without changing a byte on Drive:
 | file | role |
 |---|---|
 | `clinic_state_backup.py` | the whole job: `preflight` / `run` / `list` |
-| `WALK_clinic_state.py` | the live-shape walk: a fixture estate in a temp dir, a fake Drive with per-file revision history, **86 checks across 17 paths** — every refusal, the secret-skipping, the encryption round trip, and a full decrypt-and-untar of the bytes actually shipped. No network, no real path. |
+| `WALK_clinic_state.py` | the live-shape walk: a fixture estate in a temp dir, a fake Drive with per-file revision history, **104 checks across 18 paths** — every refusal, the secret-skipping, the encryption round trip, and a full decrypt-and-untar of the bytes actually shipped. No network, no real path. |
 | `INSTALL_ONE_PASTE.txt` | the owner's steps, one line per command, full paths |
 | `KIT_ID.txt` | the kit's name |
 | `SUMS.md5` | the gate — verify from **inside** this folder: `md5sum -c SUMS.md5` |

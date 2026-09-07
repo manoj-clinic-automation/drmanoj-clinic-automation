@@ -94,9 +94,17 @@ SRC_DIRS = [
     "/root/staff_register",
     "/root/staff_ledger",
 ]
-DIR_DATA_EXT = (".db", ".sqlite", ".sqlite3", ".csv")
+# v2, 07-Sep-2026 — WIDENED AFTER A LIVE-BOX CHECK. v1 looked for *.db and
+# *.csv only, and therefore missed /root/staff_ledger/ledger.jsonl — the staff
+# ledger itself, the only record of what each person owes. Extension-based
+# discovery is only as good as the list; the list is now the one the live box
+# actually has, and it recurses one level so applications/ is seen.
+DIR_DATA_EXT = (".db", ".sqlite", ".sqlite3", ".csv", ".jsonl", ".json", ".html")
+# Code is never data: GitHub is its backup, and a .bak beside it is still code.
+DIR_SKIP_EXT = (".py", ".pyc", ".pyo", ".bak", ".swp", ".tmp", ".lock")
 DIR_SKIP_NAMES = ("__pycache__", ".git", "venv", ".venv", "node_modules",
                   "uploads", "static", "templates")
+DIR_MAX_DEPTH = 1        # the store root, plus one level of subdirectories
 
 # INCLUDED — the shape of the machine. Small, and it turns a rebuild from
 # archaeology into an afternoon.
@@ -373,21 +381,34 @@ class Gathered(object):
 
 def _walk_dir_data(d):
     """Discover the actual data files under a store — never hard-code names.
-    Secrets are matched by pattern FIRST, so they are counted as skipped even
-    when the extension filter would have dropped them anyway."""
+    Returns [(fullpath, path relative to the store)] and a count of secrets.
+
+    ORDER MATTERS AND IS NOT NEGOTIABLE. The secret patterns are matched FIRST,
+    on every file the walk sees, before any extension is considered. Widening
+    what counts as data (v2) must never widen what counts as shippable: a file
+    named secret_key or sa_key.json is skipped and counted whatever its
+    extension, and whatever else changes here later."""
     out, secrets = [], 0
+    d = d.rstrip(os.sep)
     for base, dirs, files in os.walk(d):
-        dirs[:] = sorted(x for x in dirs if x not in DIR_SKIP_NAMES)
+        rel_base = os.path.relpath(base, d)
+        depth = 0 if rel_base == "." else rel_base.count(os.sep) + 1
+        dirs[:] = sorted(x for x in dirs
+                         if x not in DIR_SKIP_NAMES and depth < DIR_MAX_DEPTH)
         for name in sorted(files):
             full = os.path.join(base, name)
-            if is_secret(name):
+            low = name.lower()
+            if is_secret(name):          # FIRST, and it wins
                 secrets += 1
                 continue
-            if not name.lower().endswith(DIR_DATA_EXT):
+            if low.endswith(DIR_SKIP_EXT) or ".bak" in low:
+                continue                 # code, and backups of code
+            if not low.endswith(DIR_DATA_EXT):
                 continue
             if not os.path.isfile(full):
                 continue
-            out.append(full)
+            rel = name if rel_base == "." else os.path.join(rel_base, name)
+            out.append((full, rel))
     return out, secrets
 
 
@@ -403,7 +424,10 @@ def gather(conf, dest_root, integrity_fatal=True):
     for d in (data_dir, shape_dir, schema_dir):
         os.makedirs(d, exist_ok=True)
 
-    def take(src, rel_prefix):
+    def take(src, rel):
+        """rel is the path this file will have inside data/ — a store's
+        subdirectory structure is preserved, so applications/x.json cannot
+        collide with x.json at the store root."""
         name = os.path.basename(src)
         if is_secret(name):
             g.secrets_skipped += 1
@@ -418,7 +442,6 @@ def gather(conf, dest_root, integrity_fatal=True):
                 % (name, size / 1048576.0))
             return
         mt = os.path.getmtime(src)
-        rel = os.path.join(rel_prefix, name) if rel_prefix else name
         dst = os.path.join(data_dir, rel)
         os.makedirs(os.path.dirname(dst), exist_ok=True)
         if is_sqlite(src):
@@ -433,7 +456,8 @@ def gather(conf, dest_root, integrity_fatal=True):
                 return
             sqlite_backup(src, dst)
             try:
-                with open(os.path.join(schema_dir, name + ".schema.sql"), "w") as fh:
+                schema_name = rel.replace(os.sep, "__") + ".schema.sql"
+                with open(os.path.join(schema_dir, schema_name), "w") as fh:
                     fh.write(sqlite_schema(src))
             except Exception as ex:
                 log("WARNING: schema dump failed for", name, ":", ex)
@@ -443,7 +467,7 @@ def gather(conf, dest_root, integrity_fatal=True):
         g.entries.append((os.path.join("data", rel), os.path.getsize(dst), mt, src))
 
     for src in SRC_FILES:
-        take(src, "")
+        take(src, os.path.basename(src))
 
     for d in SRC_DIRS:
         if not os.path.isdir(d):
@@ -453,9 +477,9 @@ def gather(conf, dest_root, integrity_fatal=True):
         found, sec = _walk_dir_data(d)
         g.secrets_skipped += sec
         if not found:
-            log("WARNING: no *.db / *.csv data files found under", d)
-        for src in found:
-            take(src, label)
+            log("WARNING: no data files found under", d)
+        for src, rel in found:
+            take(src, os.path.join(label, rel))
 
     _gather_shape(conf, shape_dir, g)
     _write_inventory(dest_root, g)

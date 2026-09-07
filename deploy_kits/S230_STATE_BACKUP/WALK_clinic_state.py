@@ -9,7 +9,7 @@
 #  The REAL gather/preflight/run/list functions are then driven through:
 #
 #   1  gather: every included file present, every excluded one absent
-#   2  secrets skipped by pattern, counted, never named
+#   2  secrets skipped by pattern, counted, never named\n#  2b  v2 discovery: .jsonl/.json/.html and one level down are DATA,\n#      and widening that did NOT widen what counts as a secret
 #   3  databases copied by the sqlite ONLINE BACKUP api (row counts survive)
 #   4  the shape: crontab, clinic units only, clinic vhosts only, schemas,
 #      and both shape directories overridable from the conf
@@ -165,6 +165,27 @@ write(p("staff_register", "app.py"), "# code, not data — GitHub is its backup\
 write(p("staff_register", ".env"), "SECRET=never-in-a-backup\n")
 write(p("staff_ledger", "credentials.json"), "{}\n")
 write(p("staff_ledger", "token.json"), "{}\n")
+
+# --- the live-box shapes v1 missed (S230 v2). These are the whole reason the
+# --- extension list was widened, so the fixture now carries every one.
+write(p("staff_ledger", "ledger.jsonl"),
+      '{"staff":"A","owes":100}\n{"staff":"B","owes":250}\n')     # THE LEDGER
+write(p("staff_ledger", "advance_pct.json"), '{"pct":30}\n')
+write(p("staff_ledger", "waivers_2026-07.json"), '{"waived":[]}\n')
+write(p("staff_ledger", "users.json"), '{"users":["maker","checker"]}\n')
+write(p("staff_ledger", "approved_adjustments_2026-07.csv"), "who,amt\nA,10\n")
+write(p("staff_ledger", "applications", "app_001.json"), '{"id":1}\n')
+write(p("staff_ledger", "applications", "deeper", "too_deep.json"), '{"id":2}\n')
+write(p("staff_ledger", "secret_key"), "x" * 64)          # MUST stay skipped
+write(p("staff_ledger", "sa_key.json"), '{"type":"x"}\n')  # MUST stay skipped
+write(p("staff_register", "hold_ledger.jsonl"), '{"hold":1}\n')
+write(p("staff_register", "manual_advances_2026-07.json"), '{"adv":[]}\n')
+write(p("staff_register", "register_salary_2026-07.html"),
+      "<html><body>salary register</body></html>\n")
+write(p("staff_register", "salary_engine.py"), "# code\n")
+write(p("staff_register", "salary_engine.py.bak"), "# older code\n")
+write(p("staff_register", "salary_engine.py.bak2"), "# older code still\n")
+write(p("staff_register", "__pycache__", "salary_engine.cpython-39.pyc"), "junk\n")
 write(p("wa", "api_key.json"), "{}\n")
 write(p("assetapp", "uploads", "scan001.jpg"), "x" * 2048)
 
@@ -243,7 +264,7 @@ check("credentials.json not in the bundle",
       not any("credentials" in x for x in inbundle))
 check("token.json not in the bundle", not any("token" in x for x in inbundle))
 check("api_key.json not in the bundle", not any("api_key" in x for x in inbundle))
-check("exactly 4 secrets skipped and counted", G.secrets_skipped == 4)
+check("exactly 6 secrets skipped and counted", G.secrets_skipped == 6)
 check("is_secret catches every named pattern",
       all(M.is_secret(n) for n in (".env", "prod.env", "sa_key.json", "token.txt",
                                    "credentials.json", "server.pem", "id_rsa",
@@ -251,6 +272,50 @@ check("is_secret catches every named pattern",
 check("is_secret does not eat ordinary data names",
       not any(M.is_secret(n) for n in ("console.db", "punches.csv",
                                        "staff_master.csv", "notes.csv")))
+
+print("- 2b . v2 discovery: the live-box shapes v1 missed, and the secrets it must not")
+LEDGER = set(x[len("data/staff_ledger/"):] for x in inbundle
+             if x.startswith("data/staff_ledger/"))
+REGISTER = set(x[len("data/staff_register/"):] for x in inbundle
+               if x.startswith("data/staff_register/"))
+check("THE STAFF LEDGER ITSELF is included (top-level .jsonl)",
+      "ledger.jsonl" in LEDGER)
+check("a top-level .json is included", "advance_pct.json" in LEDGER)
+check("the dated .json files are included",
+      "waivers_2026-07.json" in LEDGER and "users.json" in LEDGER)
+check("a file one level down is included, with its subpath preserved",
+      "applications/app_001.json" in LEDGER)
+check("two levels down is NOT included (depth cap)",
+      not any("deeper" in x for x in LEDGER))
+check("the register .jsonl is included", "hold_ledger.jsonl" in REGISTER)
+check("the register .json is included", "manual_advances_2026-07.json" in REGISTER)
+check("a generated .html record is included",
+      "register_salary_2026-07.html" in REGISTER)
+check("secret_key is STILL skipped though .jsonl and .json are now data",
+      not any("secret_key" in x for x in inbundle))
+check("sa_key.json is STILL skipped", not any("sa_key" in x for x in inbundle))
+check("both new secrets are matched by pattern",
+      M.is_secret("secret_key") and M.is_secret("sa_key.json"))
+check("the ledger sits beside those two secrets and still travels",
+      "ledger.jsonl" in LEDGER and "sa_key.json" not in LEDGER
+      and "secret_key" not in LEDGER)
+check("code is still excluded", not any(x.endswith("salary_engine.py")
+                                        for x in inbundle))
+check("backups of code are still excluded",
+      not any(".bak" in x for x in inbundle))
+check("__pycache__ is still excluded",
+      not any("pycache" in x or x.endswith(".pyc") for x in inbundle))
+check("the ledger store yields exactly the seven data files it has",
+      LEDGER == {"ledger.db", "ledger.jsonl", "advance_pct.json",
+                 "waivers_2026-07.json", "users.json",
+                 "approved_adjustments_2026-07.csv",
+                 "applications/app_001.json"})
+check("the register store yields exactly the five data files it has",
+      REGISTER == {"register.db", "notes.csv", "hold_ledger.jsonl",
+                   "manual_advances_2026-07.json",
+                   "register_salary_2026-07.html"})
+check("the included-file count rose by the nine v1 would have missed",
+      len(G.entries) == 34)
 
 print("- 3 . databases travel through the sqlite online-backup api")
 
@@ -320,7 +385,7 @@ check("inventory has a line per included file", len(inv_rows) == len(G.entries) 
 check("inventory lines carry path, size and mtime",
       all(len(l.split("\t")) == 4 and l.split("\t")[1].isdigit() for l in inv_rows))
 check("inventory states the secrets-skipped count",
-      "secrets skipped by pattern: 4" in inv)
+      "secrets skipped by pattern: 6" in inv)
 check("inventory states what is excluded by design", "EXCLUDED by design" in inv)
 
 print("- 6 . encryption")
@@ -391,7 +456,7 @@ for key in ("last_success_iso", "bytes", "md5", "files_included", "secrets_skipp
 check("state md5 matches the shipped bytes",
       st["md5"] == hashlib.md5(shipped).hexdigest())
 check("state bytes matches the shipped length", st["bytes"] == len(shipped))
-check("state secrets_skipped is 4", st["secrets_skipped"] == 4)
+check("state secrets_skipped is 6", st["secrets_skipped"] == 6)
 check("state lists the sources it took", len(st["sources"]) >= 8)
 summary = open(p("state_backup", "summary.log")).read()
 check("a one-line summary was written", summary.count("\n") == 1 and " OK " in summary)
