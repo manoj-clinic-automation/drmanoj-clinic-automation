@@ -1,0 +1,91 @@
+S230_STATE_BACKUP v1 — install, ONE LINE AT A TIME. After PUBLISH + deploy pull.
+
+=============================================================================
+BEFORE YOU PASTE ANYTHING — one substitution, and two owner actions.
+=============================================================================
+
+SUBSTITUTION: the text <KEYFILE> appears in step 5 and step 7 below. Replace it
+in BOTH lines with the SAME full path you choose for the encryption key file.
+A path under /root/state_backup/ ending in .key is a fine choice. The key path
+is never written into the repository, which is why you supply it.
+
+OWNER ACTION A — do this in Google Drive, from Dr Manoj's OWN account, BEFORE
+step 8. Create two empty files in the Drive folder the S213 finance job already
+uses (it is already shared to the service account as Editor), named EXACTLY:
+
+    clinic_state_nightly.tar.gz.enc
+    clinic_state_monthly.tar.gz.enc
+
+A service account has ZERO Drive storage quota and cannot create a file. It can
+only write new content into a file the owner already owns. If these two do not
+exist, the job stops with exit 13 and names them.
+
+OWNER ACTION B — after step 5, copy the key file OFF the VPS, that same hour:
+  1. WinSCP the key file down into  F:\ClinicBackup\S230_STATE_BACKUP\
+  2. paste its single line into Dr Manoj's own credentials store as a secure note
+
+*** A BACKUP WHOSE KEY IS LOST IS UNRECOVERABLE. There is no reset and no ***
+*** recovery. If the VPS dies and the key died with it, every file in     ***
+*** Drive is permanently unreadable noise. This is the one manual action  ***
+*** the design requires.                                                  ***
+
+=============================================================================
+THE LINES. One at a time. Wait for each to finish.
+=============================================================================
+
+[VPS] 1 · deploy clone pull:
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main
+
+[VPS] 2 · make the job's own directory:
+mkdir -p /root/state_backup
+
+[VPS] 3 · lock that directory down:
+chmod 700 /root/state_backup
+
+[VPS] 4 · put the script in place:
+\cp /root/deploy/repo/deploy_kits/S230_STATE_BACKUP/clinic_state_backup.py /root/state_backup/clinic_state_backup.py
+
+[VPS] 5 · generate the encryption key, created mode 600 in one step:
+( umask 077; openssl rand -base64 48 > <KEYFILE> )
+
+[VPS] 6 · copy the service-account path and the folder id from the S213 conf:
+grep -E '^(SA_JSON|FOLDER_ID)=' /root/finance/drive_backup.conf >> /root/state_backup/clinic_state_backup.conf
+
+[VPS] 7 · name the key file in the conf:
+printf 'ENC_KEY_FILE=%s\n' '<KEYFILE>' >> /root/state_backup/clinic_state_backup.conf
+
+[VPS] 8 · lock the conf down:
+chmod 600 /root/state_backup/clinic_state_backup.conf
+
+[VPS] 9 · confirm the conf has exactly three lines (expect: 3):
+grep -c '=' /root/state_backup/clinic_state_backup.conf
+
+[VPS] 10 · preflight — must end "PREFLIGHT OK":
+/root/wa/venv/bin/python3 /root/state_backup/clinic_state_backup.py preflight
+
+[VPS] 11 · the first real shipment, watched:
+/root/wa/venv/bin/python3 /root/state_backup/clinic_state_backup.py run
+
+[VPS] 12 · confirm the run can state its own age:
+/root/wa/venv/bin/python3 /root/state_backup/clinic_state_backup.py list
+
+[VPS] 13 · the nightly cron, 01:50, after both finance legs:
+(crontab -l 2>/dev/null; echo '50 1 * * * /root/wa/venv/bin/python3 /root/state_backup/clinic_state_backup.py run >> /root/state_backup/clinic_state_backup.log 2>&1') | crontab -
+
+[VPS] 14 · confirm the cron line is there:
+crontab -l | grep clinic_state_backup
+
+=============================================================================
+IF YOU USE A DIFFERENT DRIVE FOLDER instead of the S213 one, replace step 6
+with these two lines, in this order, substituting the folder id in the second:
+=============================================================================
+
+grep -E '^SA_JSON=' /root/finance/drive_backup.conf >> /root/state_backup/clinic_state_backup.conf
+
+printf 'FOLDER_ID=%s\n' 'REPLACE_WITH_THE_FOLDER_ID' >> /root/state_backup/clinic_state_backup.conf
+
+=============================================================================
+ROLLBACK — one line. Nothing else is touched.
+=============================================================================
+
+crontab -l | grep -v clinic_state_backup | crontab -

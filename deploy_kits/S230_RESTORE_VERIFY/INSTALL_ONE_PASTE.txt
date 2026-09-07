@@ -1,0 +1,38 @@
+S230_RESTORE_VERIFY — install, ONE LINE AT A TIME. After PUBLISH + deploy pull.
+
+There is NO cron and NO service in this kit. Installation is just putting one
+file in place. Running it is one manual line, twice a year and after any change
+to the backup chain. It is read-only: it cannot alter the backup.
+
+It needs nothing new in the conf. The shipper's /root/finance/drive_backup.conf
+already carries SA_JSON and FOLDER_ID, which is all this reads. WORK_DIR and
+VERIFY_STATE_FILE are optional and only if you want them elsewhere than the
+defaults (/tmp and beside the conf).
+
+[VPS] 1 · deploy clone pull:
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main
+
+[VPS] 2 · put the file in place:
+\cp /root/deploy/repo/deploy_kits/S230_RESTORE_VERIFY/verify_restore.py /root/finance/verify_restore.py
+
+[VPS] 3 · make it readable only by root:
+chmod 700 /root/finance/verify_restore.py
+
+[VPS] 4 · THE RUN — the nightly slot, watched. Must end "RESTORE VERIFY PASS":
+/root/wa/venv/bin/python3 /root/finance/verify_restore.py nightly
+
+[VPS] 5 · the monthly slot, the same way:
+/root/wa/venv/bin/python3 /root/finance/verify_restore.py monthly
+
+[VPS] 6 · read back when the backup was last proved restorable:
+cat /root/finance/finance_restore_verify.state.json
+
+OPTIONAL — keep the restored database in the work dir to look at it:
+/root/wa/venv/bin/python3 /root/finance/verify_restore.py nightly --keep
+
+OPTIONAL — delete that kept copy when you are done (it holds patient names):
+rm -f /tmp/restore_verify_*.db /tmp/restore_verify_*.db.gz
+
+IF STEP 4 FAILS, the exit code says where: 13 slot file gone · 20 Drive
+unreachable · 30 bad download · 31 the archive will not decompress · 32 the
+database will not open. README.md has the full table.

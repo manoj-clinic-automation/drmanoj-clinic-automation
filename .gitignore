@@ -169,3 +169,16 @@ finance/REPORT_1.xls
 # This list carries the clinic's X-ray vocabulary only: study names, view codes,
 # film sizes and misspellings. No patient, no number, no secret.
 !deploy_kits/S223_XRAY_LIST/xray_list.json
+
+# ---------------------------------------------------------------------------
+# S230 (07-Sep-2026): the Apps Script RECOVERY EXPORT.
+# Each exported project carries an appsscript.json -- Google's own project
+# manifest: timezone, runtime version and OAuth scopes. It holds no key and no
+# number, and without it a restored project has no scopes and will not run.
+# The blanket *.json rule at line 17 swallowed all three silently and the
+# publish gate correctly refused -- the same shape as the S223_XRAY_LIST note
+# above. Exact paths only, no wildcard, so nothing else is widened.
+# ---------------------------------------------------------------------------
+!deploy_kits/S230_GAS_EXPORT/DailyClinicReports/appsscript.json
+!deploy_kits/S230_GAS_EXPORT/ClinicAccountingReports/appsscript.json
+!deploy_kits/S230_GAS_EXPORT/UPIReconciliation/appsscript.json
