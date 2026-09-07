@@ -212,6 +212,10 @@ MERGED_RECORDS = [
      "own stock export still carried it on 27-Aug and 02-Sep-2026."),
     ("NIPRO 3 ML DISPO SYR", "DISPO SYRINGE NIPRO 3ML", "done",
      "the 20-character clip of the same merged-away record, as the sale report printed it"),
+    ("VINTAZ P 4500", "VINTAZ P 4500 INJ", "done",
+     "merged by the owner between Marg's 02-09 and 03-09 exports, and the arithmetic proves it: "
+     "VINTAZ P 4500 held 25 and VINTAZ P 4500 INJ held -1 on 02-09; on 03-09 there is one row at 24. "
+     "25 + (-1) = 24. Registered so the spine stops asking whether they are the same item."),
     ("PARI 12.5", "PARI CR 12.5", "optional",
      "out of use since 15-Jul-2026, not on the 06-Sep shelf; 12 old bills"),
     ("PARI 25", "PARI CR 25", "optional",
