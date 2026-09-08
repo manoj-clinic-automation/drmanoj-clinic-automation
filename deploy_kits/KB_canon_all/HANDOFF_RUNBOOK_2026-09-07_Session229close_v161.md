@@ -22,7 +22,7 @@ D354's ledger decision, not an export. `F:\ClinicBackup` holds zips and mirrors 
 **F-351.** `marg_rescan.py` — the tool that rescues quarantined reports — had been raising
 `ValueError` on every run since the S228 `c0` change, logged as `PROBLEM: rescan=1` on **69
 consecutive ten-minute cycles** and nowhere else. Two lines. The owner's own scheduler then rescued
-**11 reports** unaided; quarantine 28 to 18; **zero unknowns**.
+**11 reports** unaided; quarantine 28 → 18; **zero unknowns**.
 
 **Four signatures added** and **`MARG_REPORT_REGISTER` v1.1** written as the one live document
 joining shape, cadence, route and coverage. The S203 expectations file is **retired in place**.
@@ -38,7 +38,7 @@ owner installed it through one self-gating line.
 **And the owner corrected the assistant four times, and was right four times.** That is the part of
 this session that should be read before the next one starts.
 
-**New fault codes:** F-351, F-352. **Decisions:** D398 ... D412. **No SOP change. No
+**New fault codes:** F-351, F-352. **Decisions:** D398 … D412. **No SOP change. No
 surveillance-scope change.**
 
 ---
@@ -95,7 +95,7 @@ loud accept/reject tile for a new report. **Observing and reporting only; never 
 
 **⭐6 · The direct push from the medical PC (D402)** — after the ingestion contract is settled.
 
-**⭐7 · The junk** — by evidence, into quarantine, only once the shape is known.
+**⭐7 · The junk (D400-adjacent)** — by evidence, into quarantine, only once the shape is known.
 
 **Also standing:** the PWA (D395/D396) · the wall card revision · the joiner reset button (F-333) ·
 Google Fonts off the count page · NEFT · the loans PWA view · procedures (D373) · the S223 dawn
@@ -110,7 +110,7 @@ single `--install` that runs the self-tests, rehearses the whole build on a copy
 and only then builds — refusing at the first doubt and touching nothing if anything fails. Both
 refusal paths are tested. **Prefer this shape for anything that writes to the live database.**
 
-Unchanged and still earned: build and test offline, `py_compile`, then the owner installs. A prepared
+Unchanged and still earned: build and test offline → `py_compile` → the owner installs. A prepared
 kit is proven only by a LIVE-SHAPE walk. Verify a kit gate from **inside** its own folder. **Never
 run `py_compile` inside the repository** — it leaves a `__pycache__` that `.gitignore` drops
 silently and the publish gate correctly refuses. It happened twice today.
@@ -125,9 +125,9 @@ screen has changed. The undo is one line, printed by the installer and recorded 
 **LIVE on manojz:** `signatures.json` at 17 signatures, and the F-351 fix in `marg_rescan.py`. Both
 hashed on the machine at this close.
 
-**NOT live:** the newer `marg_spine.py` in the repository working tree (`b5956f59...`) carrying the
+**NOT live:** the newer `marg_spine.py` in the repository working tree (`b5956f59…`) carrying the
 VINTAZ merge registration. It is **not published and not installed** and must never be confused with
-what runs (`9a08b2c4...`).
+what runs (`9a08b2c4…`).
 
 **DECLARED-PENDING:** the two VPS spine pins. The owner ran the installer and pasted its closing
 lines, but no `md5sum` was read from the box. **They are not passes and are re-hashed at the S230
