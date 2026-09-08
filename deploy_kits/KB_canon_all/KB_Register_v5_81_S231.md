@@ -543,6 +543,14 @@
 
 > Replaces the old §S146-lifted header and the per-session live-file lines scattered through the removed "additions" blocks. Each md5 is the **latest** for that file; `§12A` below remains the fuller authority for the call-hook family. VPS python for `/root/wa`-context scripts = `/root/wa/venv/bin/python3`; the **asset app and the finance app use system `python3`** (F-53).
 
+**S232 wave — F-368 CLOSED ON THE VPS, 08-Sep-2026 11:11 IST, by the owner from one line. Nine files OUT of `/root/wa/` and into `/root/_quarantine_S232_F368_20260908_111131`, mode 700, files 600. NOTHING DELETED.**
+
+| File | md5 | live as of |
+|---|---|---|
+| `/root/_quarantine_S232_F368_20260908_111131/` | *(a quarantine folder; no file md5)* | **S232 NEW.** Holds the six stale copies of the secrets file (`.env.bak_20260707_162509` · `.env.bak.20260708-102630` · `.env.preswap.102831` · `.env.bak_s126_20260708_212316` · `.env.bak_s127_pre_rotation_20260708_232229` · `.env.bak_s127_step2_20260709_085801`, 1,327–1,450 B each) and the three stale code copies (`waba.py.bak.20260814_172324` · `portal_console.py.bak-20260812-0729` · `wa_logs/portal_console.py.new`). **Each of the six carried `MYOP_AUTH_TOKEN`, `MYOP_LOGS_TOKEN` and every other secret in that file, including ones never rotated** — and the three code copies were *the files a future sweep finds and believes*. **`/root/wa/.env` was checked present before and after and never touched.** **DELETE THIS FOLDER AFTER THE WABA ROTATION**, which is when the token inside it finally becomes worthless. The undo is one line and the script printed it. Kit: `deploy_kits\S232_F368_QUARANTINE\`. |
+
+**Done BEFORE the rotation, deliberately, and the record said the opposite.** F-368 read *"not to be touched mid-rotation"*, which had been carried as *wait for the rotation*. **Mid-rotation and before it are not the same moment:** doing this first means six fewer files holding the old token on the day it is replaced. **The owner asked the question that surfaced it — "the things you have put behind the MyOperator key rotation can be done now also" — and he was right about four of the five items held there.**
+
 **S232 wave — THE MEDICAL PC CAPTURE CHAIN OFF ONE MAN'S LOGIN (F-362, ⭐5 item 1.9). INSTALLED AND VERIFIED ON THE MACHINE 08-Sep-2026 by the owner from one paste; `WATCHER ALIVE, pid 9948` read back, heartbeat healthy, offsite copy COMPLETE. No file on that PC was replaced, removed or renamed — the Startup item is untouched — so no md5 moved anywhere.**
 
 | File | md5 | live as of |
