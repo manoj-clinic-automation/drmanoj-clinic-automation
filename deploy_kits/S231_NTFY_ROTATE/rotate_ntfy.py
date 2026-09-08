@@ -334,7 +334,19 @@ def scan_conf_files(old_topics):
                     continue
                 if any(tp in txt for tp in old_topics):
                     out.append(fp)
-    return out
+
+    # systemd's .wants/ entries are symlinks to the real unit file. Writing
+    # through one works, but restoring it with \cp would replace the SYMLINK
+    # with a regular file and quietly change how systemd sees the unit as
+    # enabled. Keep one entry per real file, preferring the real path.
+    seen, deduped = {}, []
+    for fp in out:
+        real = os.path.realpath(fp)
+        if real in seen:
+            continue
+        seen[real] = fp
+        deduped.append(real if os.path.exists(real) else fp)
+    return sorted(set(deduped))
 
 
 def main():
