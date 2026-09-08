@@ -1,0 +1,111 @@
+S234_PAYMENT_REGISTER v1 — install.
+
+WHAT THIS DOES, IN ONE SENTENCE
+The Payment Register — the Google sheet your personal Inbox Janitor writes a
+row into for every payment email it captures — becomes a real table on the VPS,
+so the payments product has something to read.
+
+WHAT IT DOES NOT DO
+It never writes to Google. It has no Google key, no network call and no Sheets
+library, and it cannot acquire one. The sheet stays the original; this is a
+read of it. Nothing you do in Google is at risk from this kit.
+
+NOTHING TO SUBSTITUTE. NO KEY. NO SECRET. NO ACTION IN GOOGLE.
+The nightly pull installed at S233 already brings the sheet down to the box at
+01:45. This kit reads what that pull leaves on disk, and nothing else.
+
+=============================================================================
+ THE INSTALL — TWO LINES. Paste the first, wait for it, then paste the second.
+=============================================================================
+
+Two lines and not one, because an installer that lives inside the deploy clone
+cannot be the thing that pulls the deploy clone (F-375, learned at S233).
+
+[VPS] 1 · pull the deploy clone:
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main
+
+[VPS] 2 · run the installer:
+
+bash /root/deploy/repo/deploy_kits/S234_PAYMENT_REGISTER/install.sh
+
+It walks eleven stages and proves each one before starting the next:
+
+  * it refuses to install a script whose own selftest does not pass;
+  * it keeps a dated copy of anything already in place;
+  * it REHEARSES the whole ingest against a throwaway database first, so a bad
+    read is discovered before finance.db is opened at all;
+  * it creates only new tables named payment_register* — no existing table,
+    view or row in finance.db is altered, dropped or written;
+  * it switches the 02:05 schedule on ONLY after the real ingest succeeded;
+  * on any failure it stops dead, says which stage, and prints the line that
+    puts things back.
+
+When it finishes it prints three lines. Copy those three back to me and
+nothing else.
+
+If it stops, send me everything it printed. Do not paste anything else first.
+
+Proven offline before it was handed over: payments_register.py selftest — 56
+checks, 0 failures; WALK_install.py — 24 checks, 0 failures, including every
+refusal above; and a live-shape walk over all 250 real rows of your own sheet.
+
+=============================================================================
+ WHAT TO EXPECT, SO AN ORDINARY NIGHT IS NOT MISTAKEN FOR A FAULT
+=============================================================================
+
+* exit 0  — the ordinary night. New payment emails appear as new rows.
+* exit 10 — the nightly pull has not left a copy of the sheet on the box.
+            The pull is the thing to look at, not this script.
+* exit 11 — a column was ADDED, REMOVED or RENAMED in the sheet in Google.
+            Nothing was written. Tell me what changed and I will fix the code.
+* exit 42 — the sheet has FEWER rows than the table. The register is
+            append-only, so this cannot happen on its own: either the pull
+            caught a broken export or rows were deleted in Google. Nothing is
+            written and nothing is lost.
+* exit 43 — the pulled copy is more than 30 hours old, so the pull is not
+            running. Fixing the pull fixes this.
+* exit 44 — the DATE COLUMN's format was changed in the sheet. This one
+            matters and it is explained below.
+
+=============================================================================
+ THE ONE THING TO KNOW ABOUT THE SHEET ITSELF
+=============================================================================
+
+Your Janitor writes every date as text, day first — dd-MM-yyyy. The sheet then
+quietly re-reads some of them month-first: "19-07-2026" has no 19th month so it
+stays text, but "09-07-2026" is accepted as the 7th of September when the
+Janitor meant the 9th of July. On the copy taken 08-Sep-2026, 95 of the 250
+rows had been re-dated that way inside Google.
+
+It costs us nothing today, because those cells are still DISPLAYED in the
+original order and the pull takes displayed values — so reading every row
+day-first gives the right date for all 250, and it does. It would cost
+something if that column were ever re-formatted in Google, and that is exactly
+what exit 44 watches for.
+
+It does mean one thing for you: sorting that sheet by date inside Google would
+sort 95 rows by the wrong date. Do the sorting on the box, not in the sheet.
+
+=============================================================================
+ AND ONE THING ABOUT THE MONEY
+=============================================================================
+
+The register has a row per EMAIL, not per payment, and one renewal often sends
+three — a reminder, an invoice, a receipt. On your 250 rows, 178 carry an
+amount and add up to Rs 16,87,268.75, but five vendor/date/amount groups hold
+ten of those rows, so Rs 4,29,411.39 of that total is the same money counted
+twice. The table keeps every row exactly as the sheet has it; a view beside it
+marks which rows are the first of their group, so a total can be honest without
+anything being thrown away.
+
+=============================================================================
+ ROLLBACK — two lines, in this order. Nothing else is touched.
+=============================================================================
+
+crontab -l | grep -v payments_register.py | crontab -
+
+rm -f /root/finance/payments_register.py
+
+The payment_register tables can be left where they are. They are derived from
+the sheet and hold nothing that is not also in Google.
