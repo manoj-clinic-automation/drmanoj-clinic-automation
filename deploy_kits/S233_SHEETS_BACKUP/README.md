@@ -1,158 +1,155 @@
-# S233_SHEETS_BACKUP — the Google Sheets, into the bundle that already works
+# S233_SHEETS_BACKUP — the originals, into the bundle that already works
 
-**Session 233 · 08-Sep-2026 · ⭐1-1 of `OWNER_TODO_LIVE`**
+**Session 233 · 08-Sep-2026 · ⭐1-1 of `OWNER_TODO_LIVE` · kit at v2**
 
 ---
 
-## 1 · THE FAULT THIS CLOSES
+## 1 · WHAT THIS IS
 
-S232 measured the Google plane and found one real gap. Not the code — six of the
-eight script projects holding real code already have a copy on disk. **The live
-Google Sheets.** The call-duration feed, the WhatsApp inbox, the doctor-only
-verdicts, the accounting books, the payment register. **Zero copies anywhere:**
-not on the VPS, not in this repository, not on the SSD. Searched and confirmed.
+`sheets_pull.py` writes each configured Google Sheet to one CSV per tab under
+`/root/state_backup/sheets/`. `clinic_state_backup.py` **v3** is the S230 file
+with **one row added to `SRC_DIRS`**, so that directory rides inside the
+AES-256 bundle that has gone to Drive nightly since S230 and whose restore has
+been drilled and passed. **No second key, no second destination, no second
+mechanism** — the owner's instruction, and the whole design.
 
-**The code can be rewritten. These cannot.**
+## 2 · v1 SHIPPED EIGHT BOOKS. v2 SHIPS FOUR. THE OWNER WAS RIGHT.
 
-## 2 · WHAT WAS BUILT, AND WHAT DELIBERATELY WAS NOT
+v1 was installed on 08-Sep and preflight reached all eight books. **The owner
+then challenged the list itself** — *"do we really need to pull all the data
+from Google Drive… what should be the reason to load the VPS with this data?"* —
+and the challenge held. Four books came off, each for a reason that survives a
+read:
 
-The owner's instruction was exact: *put them inside the nightly encrypted bundle
-that already exists, and do not invent a second mechanism.* That bundle —
-`clinic_state_backup.py`, cron 01:50 — has shipped AES-256 to Drive since S230,
-55 files a night, read-back verified, September pinned forever, **and its restore
-has been drilled and passed.** It is the only backup leg in this estate ever
-proven rather than assumed. Its key is in three places (VPS · `F:\ClinicBackup\`
-· Bitwarden, D415).
+| book | v2 | why |
+|---|---|---|
+| `tracker` | **kept** | 19 tabs, 21,135 rows. The callback system's working core. |
+| `audit` | **kept** | 4 tabs, 13,580 rows. **The original** — `console.db` is REBUILT from this sheet (`portal_console.py` keeps the transcript cache in a separate file precisely because rebuilds wipe things), so backing up the database does **not** preserve these rows. |
+| `renewals` | **kept** | 2 tabs. Owned by the personal account, fed by the personal Janitor project, **no twin in the clinic account** — verified, `Clinic_Janitor.gs` only archives inbox mail and never touches renewals. |
+| `payment_register` | **kept** | 1 tab. On the box as **working data** for the payments product, not as an archive. |
+| `accounting_details` | dropped | the dead Google-Forms system, unmonitored, due for retirement. |
+| `daily_clinic_reports` | dropped | ICICI, UPI and the vehicle log already flow to the VPS by other routes. |
+| `monthly_accounting` | dropped | same family; derived from the two above. |
+| `patient_diagnosis` | dropped | **already pulled** — `portal_console.py` reads it into `console.db` as patient enrichment. Pulling it twice bought nothing. |
 
-So this kit is deliberately small:
-
-| file | what it is |
-|---|---|
-| `sheets_pull.py` | **new.** Pulls each configured spreadsheet to one CSV per tab under `/root/state_backup/sheets/`. No network destination, no key, no upload. It writes to a directory and stops. |
-| `clinic_state_backup.py` | **v3.** The S230 file, with **one row added to `SRC_DIRS`** and its state-file kit tag updated. Same walk, same tar, same key, same two owner-owned slot files, same restore. |
-
-**No second key. No second destination. No second cron destination.** The
-exporter runs at 01:45; the bundle that already runs at 01:50 picks the
-directory up as one more source, exactly as it picks up `/root/staff_ledger`.
+**Not included: the call recordings.** `Call_Recordings` holds a join key and a
+Drive file id per call — **never audio**. The mp3s are downloaded from
+MyOperator daily by `call_recording_archive.py` and uploaded into a **new Drive
+folder every month**. Sampled 08-Sep: ten calls, 432 B to 329 KB, ~165 KB mean —
+on the order of a few MB a day and under a GB a year. **They have no copy
+outside Google Drive, and they are the largest unprotected thing in the estate.**
+Held for the owner's decision rather than slipped into a nightly job.
 
 ## 3 · WHY CSV
 
-A CSV per tab is readable by anything, forever, with no library and no Google. A
-restore is a paste. The book's shape — tab names, dimensions, row counts, md5 per
-tab — is preserved beside the data in `_BOOK.json`.
-
-**And the export can state its own age.** `_TAKEN_AT.json` at the root records,
-per book, the IST time of its last success, its tab count and its row counts. It
-rides *inside* the encrypted bundle, so a restored bundle can be asked how fresh
-its sheets are without this script and without this box.
+A CSV per tab is readable by anything, forever, with no library and no Google;
+a restore is a paste. The book's shape — tab names, dimensions, row counts, md5
+per tab — sits beside the data in `_BOOK.json`. **And the export states its own
+age:** `_TAKEN_AT.json` records, per book, the IST time of its last success and
+its row counts, and rides *inside* the encrypted bundle, so a restored bundle
+can be asked how fresh its sheets are without this script and without this box.
 
 ## 4 · THE REFUSALS — a bad day must never overwrite a good backup
 
-This is the part that matters, and it is the part the walk exists to prove.
-
-| what happens in Google | what this does |
+| what happened | what this does |
 |---|---|
-| a book cannot be opened, and it exported last run | **exit 41.** Its previous export is left exactly where it is and still ships. |
-| a tab that had rows returns **zero** | **exit 42.** The whole new pull for that book is thrown away. |
-| a tab loses more than `SHRINK_GUARD_PCT` (default 20%) of its rows | **exit 42**, same. |
-| a tab that existed last run has vanished | **exit 42**, same. |
-| an ordinary fall inside the guard | taken normally. |
+| a sheet is genuinely not shared | **exit 41.** The one case that means *go to Google and share it*. |
+| Google rate-limits, and retrying does not clear it | **exit 43.** **The sharing is fine — re-share nothing.** |
+| a tab returns zero rows, or vanished | **exit 42.** The new pull for that book is thrown away. |
+| a tab lost more than `SHRINK_GUARD_PCT` (default 20%) | **exit 42**, same. |
 
-**An exit 41 or 42 does not stop the 01:50 bundle.** The bundle ships whatever
-good copy is on disk and records its age. A refusal is never silent: every one
-names the book and the tab.
+**None of them stops the 01:50 bundle.** It ships the last good copy on disk and
+records its age. Every refusal names the book and the tab.
 
-## 5 · THE PROOF — 142 checks, three walks, and the guard made to fire
+## 5 · TWO DEFECTS OF THE ASSISTANT'S OWN, FOUND ON THE FIRST LIVE RUN
 
-**A kit is proven only by a LIVE-SHAPE walk** (S208 found two defects behind 65
-green checks; S209 found a page that killed a console behind four green gates).
+**F-372 — no pacing, no retry.** v1 fetched every tab of every book back to
+back. Preflight made ~16 calls over eight seconds and reached all eight books;
+the run made ~34 in under one second and **Google refused five of them**. Sheets
+quota is counted per minute and this box has other writers on the same project.
+v2 paces every call (`API_MIN_INTERVAL_S`, default 1.2 s) and retries a rate
+refusal with backoff (`API_MAX_RETRIES`, default 5). **A permission refusal is
+never retried — a retried 403 is just a slower 403.**
+
+**F-373 — every failure wore the same words.** The quota refusal printed *"share
+this sheet with the service account"*, which would have sent the owner back to
+Google to re-share five sheets that were already shared correctly. **That is the
+F-352 class: a message that causes a wrong action.** v2 separates the two, gives
+them different exit codes, and check 28 of the walk asserts that a rate refusal
+**never contains the word "share"**.
+
+## 6 · THE PROOF — 47 checks across two walks, and the guard made to fire
 
 ```
-python WALK_sheets_pull.py     24 checks   the exporter, against a fake Google
-python WALK_v3_seam.py         14 checks   the SEAM — see below
+python -B WALK_sheets_pull.py     33 checks   the exporter, against a fake Google
+python -B WALK_v3_seam.py         14 checks   the SEAM — see below
 ```
 
 **`WALK_v3_seam.py` exists because of F-369.** `WALK_clinic_state.py` proves the
-bundler with 104 checks, but it **replaces `SRC_DIRS` with its own fixture list**,
-so it never once looks at the row S233 added. *A gate proves the rows it has and
-says nothing about the rows it does not have.* The seam walk therefore runs the
-**real** exporter against a fake Google, takes the **real** bytes it writes,
-points the **real** v3 `gather()` at them, and reads the collected tree back to
-prove a Google Sheet now arrives inside the bundle the way `console.db` does —
-**and that a wipe upstream cannot take the good copy out of it.**
+bundler with 104 checks but **replaces `SRC_DIRS` with its own fixture list**, so
+it never looks at the row S233 added. *A gate proves the rows it has and says
+nothing about the rows it does not have.* The seam walk runs the **real**
+exporter against a fake Google, takes the **real** bytes it writes, points the
+**real** v3 `gather()` at them, and reads the collected tree back — proving a
+Google Sheet now arrives inside the bundle the way `console.db` does, **and that
+a wipe upstream cannot take the good copy out of it.**
 
-**The guard is made to fail on purpose, twice** (a selftest that cannot fail is
-not a test — S232, rule 5). Check 8 wipes a tab and watches the refusal; check 9
-reads the surviving rows back off disk.
+**The guard is made to fail on purpose** (a selftest that cannot fail is not a
+test — S232 rule 5): checks 8-9 wipe a tab and read the surviving rows back;
+checks 30-31 make Google refuse twice and prove the retry carries through;
+checks 32-33 make the refusal permanent and prove the good copy survives.
 
-**The walk found a real defect in this kit before it shipped:** a duplicate label
-died *after* `.staging` had been created, leaving it behind for the next run.
-Everything that can refuse now refuses before a single directory is made.
+**Both walks found real defects before shipping:** the v1 walk caught a duplicate
+label that died *after* `.staging` was created; everything that can refuse now
+refuses before a single directory is made.
 
-To re-run the S230 walk against v3 — it must sit beside the script it imports:
+`WALK_clinic_state.py` passed 104 of 104 against v3 on 08-Sep. It is **not** kept
+in this kit — the same file live in two places in one repository is the exact
+shape of the `VPS_Push_UPI.gs` fault (D202 / F-201) this session is meant to
+resolve. It is in `D:\dr-manoj-git\_to_delete_S233\` with its `WHY_SAFE.txt`. To
+re-run it, copy it in beside the script it imports:
 
 ```
 copy D:\dr-manoj-git\drmanoj-clinic-automation\deploy_kits\S230_STATE_BACKUP\WALK_clinic_state.py D:\dr-manoj-git\drmanoj-clinic-automation\deploy_kits\S233_SHEETS_BACKUP\
 ```
 
-It passed 104 of 104 against v3 on 08-Sep-2026. The copy was **not** kept in this
-kit: the same file live in two places in one repository is the exact shape of the
-`VPS_Push_UPI.gs` fault (D202 / F-201) this session is meant to resolve. It is in
-`D:\dr-manoj-git\_to_delete_S233\` with its `WHY_SAFE.txt`.
+## 7 · THE GAP THIS KIT DOES **NOT** CLOSE — read this before believing the backup
 
-## 6 · THE BOOKS, AND HOW THEY WERE CHOSEN
+**Measured 08-Sep-2026: `F:\ClinicBackup\S230_STATE_BACKUP\` holds
+`clinic_state.key` (65 bytes) and `READ_ME_KEY.txt`. The key, and nothing else.
+`ColdBackups\` holds four handoff zips and no state bundle.**
 
-Every id in the install line was read from **code that runs** — `gspread`
-call sites on the VPS and `openById` in the live Apps Script — and then
-confirmed against the clinic account's own Drive listing. None was recalled.
+So the encrypted bundle exists **only in Google Drive**. For VPS-resident data
+that is a real second home. **For a Google Sheet the chain is Google → VPS →
+Google, and it never leaves the account** — which means this kit does *not*
+protect against losing the Google account, the one failure Google itself cannot
+cover.
 
-| label | what it holds | how it was found |
-|---|---|---|
-| `tracker` | Clinic Callback Tracker — `Call_Durations`, `WA_Inbox`, `Followups_Today`, `Call_Recordings`, `Followup_Outcomes` | ten `open_by_key` sites |
-| `audit` | Call Audit (Doctor Only) — `Call_Verdicts` | `portal_console.py`, `call_verdict.py` |
-| `accounting_details` | Accounting details — the UPI reconciliation source | `UPIReconciliation/Code.gs` |
-| `daily_clinic_reports` | Daily Clinic Reports | `UPIReconciliation`, `DailyClinicReports` |
-| `monthly_accounting` | Monthly Accounting Reports | `ClinicAccountingReports` |
-| `payment_register` | Payment Register | Drive; owned by the personal account, shared in |
-| `patient_diagnosis` | patient_diagnosis | a VPS `open_by_key` site |
-| `renewals` | Renewals Master v2 — the doctor's portal tile | `portal.py`, `finance_app.py` |
+**Closing that is the next kit, and it is worth more than this one.** It cannot
+be a nightly job: the owner's PCs are powered off at night. It must be a
+**catch-up copy that runs whenever a machine is awake** — weekly is ample, since
+Drive already holds ~30 nightly revisions.
 
-**Eight books, not seven.** The S232 note counted `Call_Durations`, `WA_Inbox`
-and `Call_Verdicts` as three items; they are **tabs**, and they live in two
-books. Counting by book, and adding `patient_diagnosis` and `renewals` which the
-S232 list did not name, the live set is eight. Backing up a book backs up every
-tab in it, whatever it is called, so the unit here is the book.
+## 8 · ALSO QUEUED, NOT BUILT
 
-⚠ **`renewals` may need a share.** Read from the clinic account on 08-Sep-2026,
-that id answered *not found* — consistent with a sheet owned by the personal
-account and never shared to the clinic one, which `portal.py`'s own comment
-describes ("access stays gated by Google login"). **Preflight will say plainly**
-whether the service account can read it. That is what preflight is for, and it
-is why step 8 comes before step 9.
+- **Payment Register as a real table**, for the payments product — this kit only
+  lands it as CSV.
+- **The weekly script re-export** that diffs against the copy on disk — every
+  script copy today is a one-off snapshot that goes stale the first time someone
+  edits in the browser, and nothing says so.
+- **The two personal Apps Script projects** — Janitor and the CC-statement saver.
+  They run only in the personal account, feed the renewals and the Payment
+  Register, and have **no second copy of any kind**. JSON exports requested.
+- **Raw vehicle tracker into the VPS**, and retiring the email side of the legacy
+  scripts. Recorded in `claude\S233_GAS_FUTURE_WORK.md`.
 
-## 7 · WHAT IS **NOT** IN THIS KIT, and why
+## 9 · INSTALL
 
-**`Trip.csv` is out of scope, deliberately.** It is not a Google Sheet: it is a
-family of dated CSV files in a Drive folder, one per day, written by the vehicle
-tracker. Covering a Drive folder of loose files is a different mechanism, and the
-owner's instruction was to invent none. It also sits inside the work he set aside
-on 08-Sep: the vehicle-tracker analysis has **already migrated to the VPS** and
-its email part is to be retired. Recorded in `claude\S233_GAS_FUTURE_WORK.md`.
-
-**The weekly script re-export is not in this kit either.** It is ⭐1-1's second
-half — every script copy on disk today is a one-off snapshot that goes stale the
-first time someone edits in the browser, and nothing says so. Separate kit.
-
-## 8 · INSTALL
-
-`INSTALL_ONE_PASTE.txt`, one line at a time. Sixteen lines, no substitution, no
-key, no secret. **Step 8 is the gate:** it reads every book, writes nothing, and
-names any sheet the service account cannot see. Do not go past it until it ends
-`PREFLIGHT OK`.
-
-**Rollback is two lines** and is in that file. Step 2 keeps the running v2 beside
-it before anything is replaced.
+`INSTALL_ONE_PASTE.txt`, one line at a time. Fifteen lines, no substitution, no
+key, no secret, **and no owner action in Google** — all four books were proven
+reachable by v1's preflight on 08-Sep. Step 2 keeps v1 beside it; rollback is
+two lines.
 
 ---
-*S233_SHEETS_BACKUP · built and walked offline 08-Sep-2026 · nothing installed by
-the assistant · the publish is the owner's double-click.*
+*S233_SHEETS_BACKUP v2 · built and walked offline 08-Sep-2026 · nothing installed
+by the assistant · the publish is the owner's double-click.*

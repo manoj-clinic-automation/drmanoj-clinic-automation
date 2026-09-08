@@ -1,14 +1,46 @@
 #!/root/wa/venv/bin/python3
 # =============================================================================
-#  sheets_pull.py  ·  Session 233  ·  S233_SHEETS_BACKUP  ·  v1
+#  sheets_pull.py  ·  Session 233  ·  S233_SHEETS_BACKUP  ·  v2
 #
-#  THE SEVEN SHEETS ARE THE DATA. THE CODE CAN BE REWRITTEN; THEY CANNOT.
+#  THE ORIGINALS ARE THE DATA. THE CODE CAN BE REWRITTEN; THEY CANNOT.
 #
-#  S232 measured the Google plane and found the gap: the live Google Sheets --
-#  the call-duration feed, the WhatsApp inbox, the doctor-only verdicts, the
-#  accounting books, the payment register -- have ZERO copies anywhere. Not on
-#  the VPS, not in the repository, not on the SSD. Everything else in this
-#  estate has at least one copy; these have none.
+#  v1 pulled eight books. THE OWNER CHALLENGED THAT LIST AND WAS RIGHT: three
+#  of the eight were the dead Google-Forms system, already unmonitored and
+#  already flowing to the VPS by other routes; a fourth (patient_diagnosis) was
+#  ALREADY being read into console.db by portal_console.py and did not need
+#  pulling twice. The list is now FOUR books, and each is here for a stated
+#  reason that survives a read:
+#
+#    tracker           19 tabs. The callback system's working core.
+#    audit             4 tabs, ~13,580 verdict rows. THE ORIGINAL: console.db
+#                      is REBUILT from this sheet, not fed by it, so a backup
+#                      of the database does NOT preserve these rows.
+#    renewals          2 tabs. Owned by the personal account, fed by the
+#                      personal Janitor project, no twin and no copy anywhere.
+#    payment_register  1 tab. Not here as an archive -- the owner wants this
+#                      ON the box as working data for the payments product.
+#
+#  DELIBERATELY NOT HERE: the call recordings. Call_Recordings holds a join key
+#  and a Drive link per call, never audio; the mp3s live in month-foldered
+#  Drive folders written by call_recording_archive.py. They are the largest
+#  unprotected thing in the estate and they are the owner's decision to take,
+#  not a line to slip into a nightly job.
+#
+#  v2 ALSO FIXES TWO DEFECTS OF THE ASSISTANT'S OWN, both found on the first
+#  live run (F-372, F-373 -- to be minted at the S233 close):
+#
+#    1. NO PACING AND NO RETRY. v1 fetched every tab of every book back to
+#       back. Preflight made ~16 calls over eight seconds and reached all
+#       eight books; the run made ~34 in under one second and Google refused
+#       five of them. Sheets quota is per-minute and this box has other
+#       writers on the same project. v2 paces every call and retries a
+#       rate-limit refusal with backoff.
+#    2. EVERY FAILURE WORE THE SAME WORDS. A quota refusal printed "share this
+#       sheet with the service account" -- which would have sent the owner
+#       back to Google to re-share five sheets that were already shared
+#       correctly. That is the F-352 class: a message that causes a wrong
+#       action. v2 tells a permission refusal from a rate refusal and says
+#       which one it was.
 #
 #  THIS SCRIPT DOES NOT SHIP ANYTHING. It has no Drive upload, no network
 #  destination and no key. It pulls each configured spreadsheet down to CSV
@@ -49,6 +81,8 @@
 #      SHEETS_DIR=/root/state_backup/sheets      (optional; this is the default)
 #      SHEETS=<id>:<label>,<id>:<label>,...      (required)
 #      SHRINK_GUARD_PCT=20                       (optional; this is the default)
+#      API_MIN_INTERVAL_S=1.2                    (optional; pacing, v2)
+#      API_MAX_RETRIES=5                         (optional; v2)
 #  Spreadsheet ids live in the CONF and never in this file (F-185), the same
 #  stance clinic_state_backup.py takes for every id, path and secret.
 #
@@ -65,7 +99,7 @@ import json
 import os
 import shutil
 import sys
-import tempfile
+import time
 
 CONF_PATH = "/root/state_backup/clinic_state_backup.conf"
 
@@ -75,11 +109,20 @@ TAKEN_AT = "_TAKEN_AT.json"
 BOOK_META = "_BOOK.json"
 STAGING = ".staging"
 
+# v2 pacing. Sheets quota is counted per minute, and this box has other writers
+# on the same Google project (the call-hook receiver writes Call_Durations all
+# day). 1.2 s between calls is ~50/min from this job, which leaves room for
+# them. Slow is fine: this runs at 01:45 with nobody waiting.
+API_MIN_INTERVAL_S_DEFAULT = 1.2
+API_MAX_RETRIES_DEFAULT = 5
+RETRY_STATUS = (429, 500, 502, 503, 504)
+
 EXIT_OK = 0
 EXIT_CONF = 10
 EXIT_DEPS = 11
 EXIT_UNREACHABLE = 41
 EXIT_SHRANK = 42
+EXIT_RATELIMIT = 43
 
 IST = datetime.timezone(datetime.timedelta(hours=5, minutes=30))
 
@@ -213,10 +256,78 @@ def open_client(conf):
     return gspread.service_account(filename=find_sa_key(conf))
 
 
-def book_rows(worksheet):
+# ------------------------------------------------- v2 · pacing and retries ----
+_LAST_CALL = [0.0]
+
+
+def status_of(ex):
+    """The HTTP status behind an exception, or None. gspread wraps the response
+    differently across versions, so this asks three ways and never raises."""
+    for path in (("response", "status_code"), ("response", "status"),
+                 ("status_code",)):
+        obj = ex
+        try:
+            for attr in path:
+                obj = getattr(obj, attr)
+            if isinstance(obj, int):
+                return obj
+        except AttributeError:
+            continue
+    text = str(ex)
+    for code in RETRY_STATUS + (401, 403, 404):
+        if str(code) in text:
+            return code
+    return None
+
+
+def is_rate(ex):
+    return status_of(ex) in RETRY_STATUS
+
+
+def is_permission(ex):
+    if isinstance(ex, PermissionError):
+        return True
+    return status_of(ex) in (401, 403, 404)
+
+
+def why(ex):
+    """One phrase naming what actually refused — never a guess, and never the
+    word 'share' unless Google said permission. This is F-372's whole point."""
+    if is_permission(ex):
+        return "PERMISSION — the service account cannot read it"
+    if is_rate(ex):
+        return "RATE LIMIT — Google refused, not a sharing problem"
+    return "%s — neither a permission nor a rate refusal" % type(ex).__name__
+
+
+def api(conf, fn, *a, **kw):
+    """Every Google call goes through here: paced before, retried on a rate
+    refusal with backoff, and never retried on a permission refusal — retrying
+    a 403 is just a slower 403."""
+    interval = float(conf.get("API_MIN_INTERVAL_S") or API_MIN_INTERVAL_S_DEFAULT)
+    tries = int(conf.get("API_MAX_RETRIES") or API_MAX_RETRIES_DEFAULT)
+    delay = 2.0
+    for attempt in range(1, tries + 1):
+        wait = interval - (time.time() - _LAST_CALL[0])
+        if wait > 0:
+            time.sleep(wait)
+        _LAST_CALL[0] = time.time()
+        try:
+            return fn(*a, **kw)
+        except Exception as ex:                  # noqa: BLE001
+            if is_permission(ex) or not is_rate(ex) or attempt == tries:
+                raise
+            log("  rate-limited, waiting %.0fs and trying again (%d of %d)"
+                % (delay, attempt, tries - 1))
+            time.sleep(delay)
+            delay *= 2
+    raise RuntimeError("unreachable")
+
+
+def book_rows(conf, worksheet):
     """Every value in the tab, as a list of rows. gspread pads short rows, so
     the width is the widest row; nothing is trimmed and nothing is parsed."""
-    return worksheet.get_all_values()
+    return api(conf, worksheet.get_all_values)
 
 
 # ------------------------------------------------------------------- pull ----
@@ -314,22 +425,19 @@ def do_run(conf):
 
 
 def _pull(conf, root, staging_root, books, guard, state, prev_books, gc):
-    unreachable, shrank, done = [], [], []
+    unreachable, rate_hit, shrank, done = [], [], [], []
     for sid, label in books:
         previous = prev_books.get(label, {}).get("meta")
         try:
-            sh = gc.open_by_key(sid)
-            tabs = [(ws.title, book_rows(ws)) for ws in sh.worksheets()]
+            sh = api(conf, gc.open_by_key, sid)
+            tabs = [(ws.title, book_rows(conf, ws))
+                    for ws in api(conf, sh.worksheets)]
             title = sh.title
         except Exception as ex:                      # noqa: BLE001 — any failure
-            if previous:
-                unreachable.append("%s : could not be opened this run (%s) and"
-                                   " WAS exported last run. Its previous export"
-                                   " is untouched." % (label, type(ex).__name__))
-            else:
-                unreachable.append("%s : could not be opened, and has never been"
-                                   " exported (%s). If it was only just shared,"
-                                   " run preflight." % (label, type(ex).__name__))
+            tail = ("Its previous export is untouched." if previous
+                    else "It has never been exported.")
+            line = "%s : %s. %s" % (label, why(ex), tail)
+            (rate_hit if is_rate(ex) else unreachable).append(line)
             continue
 
         staged = os.path.join(staging_root, label)
@@ -345,6 +453,15 @@ def _pull(conf, root, staging_root, books, guard, state, prev_books, gc):
         done.append("%s : %d tab(s), %d row(s)"
                     % (label, len(meta["tabs"]), meta["row_total"]))
 
+    # v2: a book dropped from SHEETS= must also leave the age file, or `list`
+    # keeps reporting a book nobody pulls any more as though it were current.
+    # Its exported CSVs are left on disk untouched — removing data is never
+    # this script's business.
+    wanted = set(label for _, label in books)
+    for gone in [k for k in prev_books if k not in wanted]:
+        log("dropped from the list, no longer tracked:", gone)
+        del prev_books[gone]
+
     state["books"] = prev_books
     save_taken(conf, state)
 
@@ -352,13 +469,23 @@ def _pull(conf, root, staging_root, books, guard, state, prev_books, gc):
         log("OK  ", line)
     for line in unreachable:
         log("MISS", line)
+    for line in rate_hit:
+        log("RATE", line)
     for line in shrank:
         log("HOLD", line)
 
     log("%d of %d book(s) exported into %s" % (len(done), len(books), root))
     if unreachable:
-        die(EXIT_UNREACHABLE, "%d book(s) could not be read. Nothing good was"
+        die(EXIT_UNREACHABLE, "%d book(s) could not be READ — a permission"
+                              " problem. Share those sheets with the service"
+                              " account as Viewer. Nothing good was"
                               " overwritten." % len(unreachable))
+    if rate_hit:
+        die(EXIT_RATELIMIT, "%d book(s) were refused by Google's rate limit"
+                            " even after retrying. DO NOT re-share anything —"
+                            " the sharing is fine. Raise API_MIN_INTERVAL_S in"
+                            " the conf, or just let tonight's run take them."
+                            % len(rate_hit))
     if shrank:
         die(EXIT_SHRANK, "%d tab(s) shrank past the guard. The previous export"
                          " stands and nothing was overwritten." % len(shrank))
@@ -370,22 +497,30 @@ def do_preflight(conf):
     books = parse_sheets(conf)
     find_sa_key(conf)
     gc = open_client(conf)
-    bad = 0
+    denied, limited = 0, 0
     for sid, label in books:
         try:
-            sh = gc.open_by_key(sid)
-            names = [ws.title for ws in sh.worksheets()]
+            sh = api(conf, gc.open_by_key, sid)
+            names = [ws.title for ws in api(conf, sh.worksheets)]
             log("REACHABLE  %-24s %-44s %d tab(s): %s"
                 % (label, sh.title, len(names), ", ".join(names)))
         except Exception as ex:                      # noqa: BLE001
-            bad += 1
-            log("NOT SHARED %-24s %s — share this sheet with the service"
-                " account as Viewer, then run preflight again."
-                % (label, type(ex).__name__))
-    log("%d of %d book(s) reachable." % (len(books) - bad, len(books)))
-    if bad:
+            if is_rate(ex):
+                limited += 1
+                log("RATE LIMIT %-24s Google refused after retrying. The"
+                    " sharing is NOT the problem — do not re-share." % label)
+            else:
+                denied += 1
+                log("NOT SHARED %-24s %s — share this sheet with the service"
+                    " account as Viewer, then run preflight again."
+                    % (label, why(ex)))
+    log("%d of %d book(s) reachable." % (len(books) - denied - limited, len(books)))
+    if denied:
         die(EXIT_UNREACHABLE, "%d book(s) are not readable by the service"
-                              " account. Nothing was written." % bad)
+                              " account. Nothing was written." % denied)
+    if limited:
+        die(EXIT_RATELIMIT, "%d book(s) hit the rate limit. Nothing was"
+                            " written and nothing needs re-sharing." % limited)
     log("PREFLIGHT OK")
     return EXIT_OK
 

@@ -61,21 +61,44 @@ class FakeSpreadsheet:
         return [FakeWorksheet(t, r) for t, r in self._tabs]
 
 
+class FakeResponse:
+    def __init__(self, code):
+        self.status_code = code
+
+
+class FakeAPIError(Exception):
+    """Shaped like gspread's APIError: an exception carrying a response with a
+    status code. 429 is what Google actually returned on the first live run."""
+
+    def __init__(self, code):
+        Exception.__init__(self, "APIError %d" % code)
+        self.response = FakeResponse(code)
+
+
 class FakeClient:
     """WORLD is the whole of Google as far as the script can tell. A key absent
-    from it raises, exactly as gspread does for a sheet that is not shared."""
+    from it raises a permission error, exactly as gspread does for a sheet that
+    is not shared. RATE_FOR counts down 429s per key, so a book can be made to
+    fail twice and then succeed — which is what a real rate limit does."""
 
     def __init__(self, world):
         self.world = world
 
     def open_by_key(self, key):
+        if RATE_FOR.get(key, 0) > 0:
+            RATE_FOR[key] -= 1
+            CALLS.append(("429", key))
+            raise FakeAPIError(429)
         if key not in self.world:
             raise PermissionError("the caller does not have permission")
+        CALLS.append(("ok", key))
         title, tabs = self.world[key]
         return FakeSpreadsheet(title, tabs)
 
 
 WORLD = {}
+RATE_FOR = {}
+CALLS = []
 
 
 def install_fake_gspread():
@@ -113,6 +136,10 @@ def write_conf(path, sheets, extra=""):
         fh.write("SA_JSON=%s\n" % key)
         fh.write("SHEETS_DIR=%s\n" % os.path.join(os.path.dirname(path), "sheets"))
         fh.write("SHEETS=%s\n" % sheets)
+        # v2: no pacing and a short backoff, so the walk stays fast. The live
+        # conf uses the real defaults; these two knobs exist for exactly this.
+        fh.write("API_MIN_INTERVAL_S=0\n")
+        fh.write("API_MAX_RETRIES=3\n")
         if extra:
             fh.write(extra + "\n")
 
@@ -241,6 +268,39 @@ def main():
         # 24 · the export directory is not world-readable
         check("24 export directory is 0700",
               oct(os.stat(root).st_mode & 0o777), "0o700")
+
+        # --------------------------------------------------------------------
+        # 25-31 · v2 ONLY. THE FAULT THAT ACTUALLY HAPPENED ON THE LIVE BOX.
+        # On 08-Sep the first real run lost five of eight books to Google's
+        # rate limit, and told the owner to re-share sheets that were already
+        # shared. These checks exist so that cannot recur unseen.
+        # --------------------------------------------------------------------
+        check("25 a 429 is told from a 403", mod.is_rate(FakeAPIError(429)), True)
+        check("26 and a 403 is NOT called a rate limit",
+              mod.is_rate(PermissionError("no")), False)
+        check("27 a 403 IS called a permission problem",
+              mod.is_permission(PermissionError("no")), True)
+        check("28 a rate refusal never says the word 'share'",
+              "share" in mod.why(FakeAPIError(429)).lower(), False)
+        check("29 a permission refusal does name permission",
+              "PERMISSION" in mod.why(PermissionError("no")), True)
+
+        # 30 · two 429s then success — the retry must carry it through
+        RATE_FOR.clear()
+        RATE_FOR["ID_TRACKER"] = 2
+        del CALLS[:]
+        check("30 it RETRIES through a rate limit and wins",
+              run_mode(mod, "run"), 0)
+        check("31 and it really was refused twice first",
+              sum(1 for c in CALLS if c[0] == "429"), 2)
+
+        # 32-33 · a rate limit that never clears is its OWN exit code, and the
+        #         previous export still stands
+        RATE_FOR["ID_TRACKER"] = 99
+        check("32 an unclearing rate limit exits 43", run_mode(mod, "run"), 43)
+        check("33 and the good copy is still there",
+              len(read_rows(root, "tracker", "Call_Durations")) > 0, True)
+        RATE_FOR.clear()
 
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
