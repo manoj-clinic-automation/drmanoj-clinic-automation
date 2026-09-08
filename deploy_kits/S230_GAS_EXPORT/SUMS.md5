@@ -1,13 +1,12 @@
-# S230_GAS_EXPORT - md5 of every file in this folder (SUMS.md5 itself excluded).
-# Verify from INSIDE this folder:  md5sum -c SUMS.md5
-ddf57169a2f33b1187eea7a497a6e502  ClinicAccountingReports/Code.gs
-6f26171294d7253f8a6fb4f46b0a6f35  ClinicAccountingReports/appsscript.json
-4239dde82a96c07bd1214a61df54fc61  DailyClinicReports/Code.gs
-e4dc4eee12d2d1517d4767620eedad84  DailyClinicReports/appsscript.json
-fd4b7ad4f14eec0c5bfc4342bb8d7a23  READ_ME_FIRST.md
-b2f9a200abccc48348841752300be668  UPIReconciliation/Bank_Statement_Filer.gs
-5f2d7bdd52aa9d2e040660cb3df12b5b  UPIReconciliation/Clinic_Janitor.gs
-6e788c6c7f89858384cc9211a84028ee  UPIReconciliation/Code.gs
-10c298dd1840478b288f6cea94619a21  UPIReconciliation/Neft_Draft.gs
-5477a19ed3b3a1ce3302ea58d61ac579  UPIReconciliation/VPS_Push_UPI.gs
-43656bcc13677fd4b4bc1c165b29a487  UPIReconciliation/appsscript.json
+ddf57169a2f33b1187eea7a497a6e502  ./ClinicAccountingReports/Code.gs
+6f26171294d7253f8a6fb4f46b0a6f35  ./ClinicAccountingReports/appsscript.json
+4239dde82a96c07bd1214a61df54fc61  ./DailyClinicReports/Code.gs
+e4dc4eee12d2d1517d4767620eedad84  ./DailyClinicReports/appsscript.json
+fd4b7ad4f14eec0c5bfc4342bb8d7a23  ./READ_ME_FIRST.md
+d239bc460789a564e3dc1704adcd913d  ./RESTORE_DailyClinicReports.md
+b2f9a200abccc48348841752300be668  ./UPIReconciliation/Bank_Statement_Filer.gs
+5f2d7bdd52aa9d2e040660cb3df12b5b  ./UPIReconciliation/Clinic_Janitor.gs
+6e788c6c7f89858384cc9211a84028ee  ./UPIReconciliation/Code.gs
+10c298dd1840478b288f6cea94619a21  ./UPIReconciliation/Neft_Draft.gs
+5477a19ed3b3a1ce3302ea58d61ac579  ./UPIReconciliation/VPS_Push_UPI.gs
+43656bcc13677fd4b4bc1c165b29a487  ./UPIReconciliation/appsscript.json
