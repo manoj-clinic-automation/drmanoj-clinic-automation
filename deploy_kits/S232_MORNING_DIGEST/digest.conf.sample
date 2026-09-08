@@ -1,0 +1,24 @@
+# /root/finance/digest.conf   --  configuration, not code (D417/D423)
+# Every line here can be changed without touching a line of python and without
+# a restart: the file is read once per run.
+#
+# THE ntfy TOPIC IS NOT IN THIS FILE, DELIBERATELY.
+# It is read from /root/finance/freshness.conf, so the topic lives in exactly
+# ONE file on this box. That is F-358's whole lesson: the S231 rotation found
+# the topic in sixteen files across a PUBLIC repository, and the only reason it
+# could be rotated at all was that freshness.py already held its own in a conf.
+
+FRESHNESS_JSON = /root/finance/freshness.json
+LEDGER_DIR     = /root/staff_ledger
+WAITING_FILE   = /root/finance/digest_waiting.txt
+STATE_FILE     = /root/finance/digest.state.json
+
+# Every actionable line ends in a COMPLETE url. Never a bare /finance/... .
+FRESHNESS_PAGE = https://followup.dr-manoj.in/finance/freshness
+LEDGER_URL     = https://followup.dr-manoj.in/ledger/
+
+# 1 = at most one digest per calendar day (IST). Set 0 while testing.
+ONCE_PER_DAY = 1
+
+# Longest any single block may run before it says "... and N more".
+MAX_LINES = 12
