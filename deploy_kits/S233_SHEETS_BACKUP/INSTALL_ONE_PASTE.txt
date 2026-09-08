@@ -1,4 +1,39 @@
-S233_SHEETS_BACKUP v2 — install, ONE LINE AT A TIME. After PUBLISH + deploy pull.
+S233_SHEETS_BACKUP v2 — install.
+
+=============================================================================
+ THE EASY WAY — ONE LINE. This is the recommended way.
+=============================================================================
+
+Paste this single line on the VPS and nothing else:
+
+bash /root/deploy/repo/deploy_kits/S233_SHEETS_BACKUP/install.sh
+
+It does all nine stages for you and PROVES each one before starting the next.
+It is safe to run twice. It is safe to stop. Specifically:
+
+  * it takes a dated copy of BOTH live scripts before replacing either;
+  * it NEVER deletes anything except exported CSV copies whose source is still
+    sitting in Google;
+  * it stops dead at the first thing that does not go as expected, and when it
+    stops it prints the exact two lines that put everything back;
+  * on ANY failure the nightly schedule is NOT switched on, so tonight still
+    runs exactly as it did last night;
+  * it only switches the schedule on after it has proven the sheets are
+    readable, the pull succeeded, and the shipped bundle actually contains
+    them.
+
+When it finishes it prints four lines for you to copy back to me. That is all
+that is asked of you.
+
+If it stops, send me everything it printed. Do not paste anything else first.
+
+Proven offline by WALK_install.py — 24 checks, 0 failures, including every
+failure path above.
+
+=============================================================================
+ THE LONG WAY — only if you would rather do it by hand, or if the one line
+ above stopped and you want to continue from where it stopped.
+=============================================================================
 
 READ THIS FIRST IF v1 IS ALREADY ON THE BOX — it is. On 08-Sep v1 was installed,
 preflight passed 8 of 8, and the first real run lost five books to Google's rate
