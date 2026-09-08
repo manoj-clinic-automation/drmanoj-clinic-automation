@@ -91,7 +91,7 @@ question that settles it. **An empty cell is the finding, not a gap to be filled
 
 | # | vendor | what it does | what a lapse costs | known | the one question owed |
 |---|---|---|---|---|---|
-| **1** | **Tailscale** | the only link between the medical PC and manojz | 🔴 **the entire Marg lane stops** — no exports, no sale data, no purchase data, no stock. And **node keys expire on a schedule**, so this can lapse without anyone cancelling anything. | free/personal tier is the presumption; two nodes | **Which account owns the tailnet, and is key expiry DISABLED on both nodes?** That second half is the whole risk. |
+| **1** | **Tailscale** | the only link between the medical PC and manojz | 🔴 **the entire Marg lane stops** — no exports, no sale data, no purchase data, no stock. **Node keys expire on a schedule**, so this lapses without anyone cancelling anything. | tailnet **`tail4aa9a0.ts.net`** · node **`medical`** = `medical.tail4aa9a0.ts.net`, `tailscaled.exe` pid 3780, up since the 29-Aug boot · ✅ **KEY EXPIRY DISABLED for `medical`, set by the owner in the admin console 07-Sep-2026 ~20:55 IST** (`S230_MEDICAL_PC_INVENTORY` §1 and §5.1 — measured and recorded, not assumed) | **Half of it is closed. The other half has never been recorded: is key expiry disabled on the `manojz` node too?** The link has two ends and either one lapsing stops the lane. |
 | **2** | **The registrar accounts** | who holds the login for `dr-manoj.in`, `drmanojagarwal.com`, `nkpathology.com` | 🔴 a domain nobody can renew is a domain that lapses | GoDaddy holds at least `dr-manoj.in` (forwarding is theirs); Hostinger holds the VPS | **Which registrar holds each of the three, and where does each login live?** → Bitwarden, D421. |
 | **3** | **Google account `drmka.ortho@gmail.com`** | Drive archive · every Apps Script · the live Sheets · the VPS database backup destination | 🔴 the entire Google plane, including the only off-box copy of the finance database | storage plan unknown | **Is it a paid Workspace or a free account, and how full is the storage?** A full Drive stops the backup silently. |
 | **4** | **Sarvam AI** | call transcription (03:00 nightly) + bill OCR | transcripts and bill auto-fill stop; the verdict layer starves | key is on the VPS, not in the repository | **Prepaid credit or subscription, and what is the balance?** |
@@ -104,6 +104,18 @@ question that settles it. **An empty cell is the finding, not a gap to be filled
 > cheque; **Tailscale is the biggest hole.** It costs nothing, nobody sends an invoice for it, and
 > a node key quietly reaching its expiry date stops the Marg lane with no bill, no email and no
 > error anyone reads. **Cost is not risk. The register had been sorted by cost.**
+>
+> ✅ **AND HALF OF IT WAS ALREADY CLOSED — by the owner, on 07-Sep, and this register did not know.**
+> `S230_MEDICAL_PC_INVENTORY` §1 records key expiry DISABLED on the `medical` node, with the node
+> name, the daemon's pid and the minute it was set. **A finding recorded in one document and
+> unknown to another is this project's most-repeated fault, and it just repeated inside a
+> document written to end it.** The register is now the place both halves live.
+>
+> ⚠ **The `manojz` end is still unrecorded anywhere.** The link has two ends; either key lapsing
+> stops the lane just as completely. Both nodes are on ONE page — *Machine Details → Key expiry* at
+> `https://login.tailscale.com/admin/machines`. **The assistant tried to read it directly in this
+> session and could not: the browser pane is not signed in to Tailscale, and signing in is not
+> something a session does.** One look, and this row closes for good.
 
 ## 5 · THE REGISTER STILL FORGETS — unfixed, and it is a live-script change
 
@@ -133,8 +145,9 @@ installed unasked.
 3. **Then the register goes behind a screen with its age on it** — *"26 items · nearest in N days ·
    nothing overdue"* — rather than an email. **A list you can look at beats a mail you can miss**,
    and it is the rule this whole estate keeps arriving at: everything that runs says how old it is.
-4. **And Tailscale key expiry gets disabled before any of that**, because it is the only item on this
-   page that can bite without anybody being billed.
+4. **And the `manojz` node's key expiry gets disabled before any of that** — `medical`'s already is.
+   It is the only item on this page that can bite without anybody being billed, and it is now
+   half-closed rather than open.
 
 ---
 *Renewals and Vendor Register v1 · S232 · 08-Sep-2026. Supersedes §2–§3 of
