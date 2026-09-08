@@ -295,6 +295,40 @@ def write_env(pairs):
     os.chmod(ENV_PATH, 0o600)
 
 
+CONF_EXT = {".env", ".conf", ".json", ".ini", ".cfg", ".sh", ".service", ".txt", ""}
+
+
+def scan_conf_files(old_topics):
+    """Every NON-.py file under /root that names one of the old topics.
+
+    These are the configured publishers -- e.g. the freshness layer keeps its
+    topic in its own conf, not in code. A rotation that misses them is a HALF
+    rotation, which is worse than none: the owner would believe he had moved."""
+    out = []
+    for root in SEARCH_ROOTS:
+        for dirpath, dirnames, filenames in os.walk(root):
+            dirnames[:] = [d for d in dirnames
+                           if d not in SKIP_DIRS and not d.startswith("_backup_S231")]
+            if "/deploy/repo/" in dirpath + "/":
+                continue
+            for fn_ in filenames:
+                if fn_.endswith(".py"):
+                    continue
+                ext = os.path.splitext(fn_)[1]
+                if ext not in CONF_EXT:
+                    continue
+                fp = os.path.join(dirpath, fn_)
+                try:
+                    if os.path.getsize(fp) > 2_000_000:
+                        continue
+                    txt = open(fp, "r", errors="ignore").read()
+                except Exception:
+                    continue
+                if any(tp in txt for tp in old_topics):
+                    out.append(fp)
+    return out
+
+
 def main():
     mode = "--check"
     for a in sys.argv[1:]:
@@ -327,6 +361,7 @@ def main():
         say("    .env names no ntfy topic today")
 
     say("\n[3] live scripts")
+    old_topics = set()
     found = discover()
     problems = []
     for name in TARGETS:
@@ -342,6 +377,7 @@ def main():
             p = paths[0]
             txt = open(p, "r", errors="ignore").read()
             hits = set(TOPIC_RE.findall(txt))
+            old_topics.update(hits)
             say("    %-28s %s   (%d literal topic(s))" % (name, p, len(hits)))
 
     say("\n[4] staff ledger topic source")
@@ -354,6 +390,14 @@ def main():
             say("  - %s" % p)
         return 2
 
+    say("\n[4b] other files configured with the same topic")
+    conf_hits = scan_conf_files(old_topics) if old_topics else []
+    if conf_hits:
+        for fp in conf_hits:
+            say("    %s" % fp)
+    else:
+        say("    none found")
+
     if mode == "--check":
         say("\n[5] --check only. NOTHING WAS CHANGED.")
         say("    Re-run with --install to rotate.")
@@ -365,23 +409,48 @@ def main():
     shutil.copy2(ENV_PATH, os.path.join(BACKUP_DIR, "env.bak"))
     for name, paths in found.items():
         shutil.copy2(paths[0], os.path.join(BACKUP_DIR, name + ".bak"))
+    for i, fp in enumerate(conf_hits):
+        shutil.copy2(fp, os.path.join(BACKUP_DIR, "conf%d_%s.bak" % (i, os.path.basename(fp))))
     say("    %s" % BACKUP_DIR)
 
     say("\n[6] generating new topics")
-    new_vps   = "c-" + secrets.token_urlsafe(16).replace("_", "").replace("-", "")[:20]
-    new_ledger = "l-" + secrets.token_urlsafe(16).replace("_", "").replace("-", "")[:20]
-    url_vps    = "https://ntfy.sh/" + new_vps
-    url_ledger = "https://ntfy.sh/" + new_ledger
-    say("    two new topics generated (values shown once at the end)")
+    new_vps = "c-" + secrets.token_urlsafe(16).replace("_", "").replace("-", "")[:20]
+    url_vps = "https://ntfy.sh/" + new_vps
+    say("    one new topic generated (value shown once at the end)")
 
     say("\n[7] writing config BEFORE removing any default")
-    write_env({"WATCHDOG_NTFY_URL": url_vps, "NTFY_URL": url_ledger})
+    write_env({"WATCHDOG_NTFY_URL": url_vps})
     back = env_topics()
-    if back.get("WATCHDOG_NTFY_URL") != url_vps or back.get("NTFY_URL") != url_ledger:
+    if back.get("WATCHDOG_NTFY_URL") != url_vps:
         say("    REFUSING -- .env did not read back as written. Restore:")
         say("      \\cp %s/env.bak %s" % (BACKUP_DIR, ENV_PATH))
         return 2
     say("    .env written and read back correctly (mode 600)")
+
+    say("\n[7b] moving other configured publishers to the new topic")
+    if not conf_hits:
+        say("    none to move")
+    for fp in conf_hits:
+        try:
+            txt = open(fp, "r", errors="ignore").read()
+            new_txt = txt
+            for tp in old_topics:
+                new_txt = new_txt.replace(tp, new_vps)
+            if new_txt == txt:
+                say("    %-44s unchanged" % fp)
+                continue
+            if fp.endswith(".json"):
+                json.loads(new_txt)          # refuse to write broken JSON
+            with open(fp, "w") as f:
+                f.write(new_txt)
+            chk = open(fp, "r", errors="ignore").read()
+            if any(tp in chk for tp in old_topics):
+                say("    REFUSING -- old topic survived in %s" % fp)
+                return 2
+            say("    %-44s moved" % fp)
+        except Exception as e:
+            say("    REFUSING -- could not move %s: %s" % (fp, e))
+            return 2
 
     say("\n[8] patching live scripts")
     for name, key in TARGETS.items():
@@ -409,20 +478,14 @@ def main():
             return 2
         say("    %-28s patched (%d site(s)), no literal topic remains" % (name, n))
 
-    say("\n[9] restarting the one service that reads its topic at start")
-    try:
-        r = subprocess.run(["systemctl", "restart", "staff-ledger.service"],
-                           capture_output=True, text=True, timeout=60)
-        say("    staff-ledger.service restart rc=%d" % r.returncode)
-        r2 = subprocess.run(["systemctl", "is-active", "staff-ledger.service"],
-                            capture_output=True, text=True, timeout=30)
-        say("    staff-ledger.service is-active: %s" % r2.stdout.strip())
-    except Exception as e:
-        say("    WARN could not restart staff-ledger.service: %s" % e)
+    say("\n[9] staff ledger -- deliberately NOT touched")
+    say("    Its unit declares no Environment=/EnvironmentFile=, so NTFY_URL is")
+    say("    empty and its ntfy() returns without publishing. Nothing to rotate.")
+    say("    No restart. Its leaked string is a repo comment, scrubbed separately.")
 
     say("\n[10] proving the new topics carry")
     ok = True
-    for label, u in (("VPS alerts", url_vps), ("staff ledger", url_ledger)):
+    for label, u in (("VPS alerts", url_vps),):
         try:
             st = push_test(u, "Clinic alerts moved",
                            "S231: this topic is new and private. "
@@ -436,16 +499,18 @@ def main():
         say("          issue, not a rollback reason. Retry the push before subscribing.")
 
     say("\n" + "=" * 74)
-    say("DONE. SUBSCRIBE YOUR PHONE TO THESE TWO, THEN DELETE THE OLD ONES.")
+    say("DONE. SUBSCRIBE YOUR PHONE TO THIS ONE, THEN DELETE THE OLD ONE.")
     say("=" * 74)
     say("  VPS alerts   : %s" % url_vps)
-    say("  Staff ledger : %s" % url_ledger)
     say("=" * 74)
     say("Shown once. They are in %s (mode 600) and in no repository." % ENV_PATH)
     say("Undo everything:")
     say("  \\cp %s/env.bak %s" % (BACKUP_DIR, ENV_PATH))
     for name in found:
         say("  \\cp %s/%s.bak %s" % (BACKUP_DIR, name, found[name][0]))
+    for i, fp in enumerate(conf_hits):
+        say("  \\cp %s/conf%d_%s.bak %s"
+            % (BACKUP_DIR, i, os.path.basename(fp), fp))
     return 0
 
 
