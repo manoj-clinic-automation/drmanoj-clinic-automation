@@ -21,22 +21,40 @@ CHECKS cannot see.**
 | the item spine | 🔴 **BUILT AT S229 AND NOTHING READS IT** |
 | the WABA token | 🔴 **CONTAINED, NOT REVOKED** — the only genuinely blocked item |
 
-## 2 · THE FIRST THING TO BUILD — the Apps Script and Sheets backup
+## 2 · THE FIRST THING TO BUILD — the Google plane, into the chain that already works
 
-**This is the last way the estate can lose data quietly, and it is now the only Tier-2 item open.**
+> **⚠ THIS SECTION WAS REWRITTEN AFTER THE CLOSE.** Its first version said the projects and Sheets
+> had *"no backup anywhere"*. **The owner challenged it and he was right.** The measured position is
+> **`claude/S232_BACKUP_STATUS_CORRECTED.md`** — read it before starting.
 
-**Eleven Apps Script projects across two accounts** — not the nine the census found; *"CC saver"* on
-the personal account is the tenth, settled at S232 — **plus seven live Sheets** (`Call_Durations`,
-`WA_Inbox`, `Call_Verdicts`, the Accounting sheet, the UPI recon tabs, `Trip.csv`, the Payment
-Register). **Apps Script keeps version history inside Google and nowhere else.** If a project is
-deleted or an account changes hands, the code goes with it.
+**What already exists, and must not be rebuilt.** `clinic_state_backup.py` v2 has shipped
+**AES-256-encrypted bundles to Google Drive nightly since S230** — 55 files, read-back verified, cron
+01:50, September pinned forever — and **its restore has been drilled and passed**, the only leg in
+this estate ever proven rather than assumed. Its key lives in three places: the VPS,
+`F:\ClinicBackup\S230_STATE_BACKUP\`, and **Bitwarden** (D415).
+
+**The seven live Sheets are the actual gap** — `Call_Durations`, `WA_Inbox`, `Call_Verdicts`, the
+Accounting sheet, the UPI recon tabs, `Trip.csv`, the Payment Register. **Zero copies anywhere**,
+confirmed by search at S232. **They are the data.** The code can be rewritten; these cannot. **Put
+them inside that existing nightly bundle. Do not invent a second mechanism.**
+
+**The code is largely covered already.** Six of the eight projects holding real code have a source
+copy on disk — `dashboard\` (14 files, verified against live at S230), the three in
+`deploy_kits\S230_GAS_EXPORT\`, and the Janitor and CC-saver files in `gmail-automation\gas\`. The
+two without a copy are dead and under the no-touch rule. **So the real fault is that nothing
+refreshes:** every copy is a one-off snapshot that goes stale the first time someone edits in the
+browser, and nothing says so. **Build the weekly re-export that diffs against the copy on disk.**
+
+**Ten projects are named; an eleventh is only inferred** from an orphaned trigger with no project
+name. **Identify it before including it.** And **resolve the `VPS_Push_UPI.gs` duplicate** — a
+200-line copy and the live 263-line one, both in the repo (D202/F-201).
 
 **D426 (S232) is what makes this buildable without the owner:** Drive/Gmail/Notion reads and Drive
 **write** are in scope for an unattended run, bounded to new files and new versions of documents this
 project authored.
 
-**`claude/S232_APPS_SCRIPT_TRIGGERS_READ.md` tells you which projects are actually armed**, so back
-up the live ones first rather than all eleven equally.
+**`claude/S232_APPS_SCRIPT_TRIGGERS_READ.md` tells you which projects are actually armed**, so cover
+the live ones first.
 
 🛑 **READ, NEVER ACT.** The ICICI → VPS bank chain is load-bearing across three projects; the Clinic
 Callback Tracker is **not to be touched at all**, nor its dead ancestor, which carries an unscoped

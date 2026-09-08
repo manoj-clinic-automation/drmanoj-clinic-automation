@@ -24,6 +24,14 @@ the session entry point and it carries only what S233 needs.*
 11. **When a screen is wrong, read the screen's own code FIRST.** The server is the last suspect.
 12. **Sub-agents read screens** — screenshots never enter the main conversation.
 
+13. **⭐ NO CLAIM ABOUT WHAT EXISTS WITHOUT A READ IN THE SAME TURN — negative claims most of all.**
+    *"there is no X"* / *"nothing is Y"* requires having looked for X, and saying where you looked.
+    **Ruled at S232 after three wrong claims in one session, every one caught by the owner and not
+    by me.** What gets BUILT goes through gates — selftests, hashes, prefix proofs, live-shape walks.
+    What gets SAID about the estate went through nothing. **A negative claim is the dangerous class**,
+    because he cannot check it without doing the work himself. If you have not looked, the honest
+    answer is *"I don't know yet — let me check."*
+
 **⭐ AND THE ONE FROM S232:** *"we need to stick to the core plan as much as possible and deviate only
 for the compulsions."* **The plan is `claude/S232_ACTION_PLAN.md`. Adjacent good ideas are drift.**
 
@@ -76,7 +84,27 @@ and the S232 papers in `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S232\`.
 **Canon at this close:** Register **v5.82** · Archive **v1.79** · Fault **v2.64** · Runbook **v164** ·
 manifest current · `live_pins_S232close.txt`.
 
-**Next free: D428 · F-372 · Session 233.**
+**Next free: D429 · F-372 · Session 233.** *(**D428 is ruled and awaits minting**: the four
+MyOperator Script-Property values for a restored DailyClinicReports go to **Bitwarden** — the owner's
+word, 08-Sep, final. The stopgap file `D:\Downloads\margsync\_config\myop_defaults.json` retires
+the moment they are filed.)*
+
+**⚠ CORRECTED AFTER THIS FILE WAS FIRST WRITTEN.** Two claims of mine at the S232 close were wrong
+and the owner caught both: *"the Apps Script projects and Sheets have no backup of any kind"* and
+*"nothing in the backup chain is encrypted."* §3 below is the corrected version. The full measured
+position is **`claude/S232_BACKUP_STATUS_CORRECTED.md`** — read it before starting §3.
+
+**Three standing facts about this estate that must not be forgotten again:**
+
+1. **The VPS state backup is AES-256 encrypted and ships to Drive nightly** (`clinic_state_backup.py`
+   v2, S230, cron 01:50, September pinned forever). **Its restore has been drilled and passed** — the
+   only leg here ever proven rather than assumed.
+2. **Bitwarden is LIVE**, free tier, and already holds that bundle's encryption key (D415). The key
+   is in three places: the VPS · `F:\ClinicBackup\S230_STATE_BACKUP\` (`clinic_state.key` 65 bytes
+   + `READ_ME_KEY.txt` 1,427 bytes) · Bitwarden. **D421 defers only the bulk consolidation**, whose
+   real subject is `D:\Downloads\Projects\_Infrastructure\Credentials\` — ten plaintext files.
+   **The master password and 2FA recovery are on paper, deliberately outside Bitwarden.**
+3. **Secrets never go to cloud storage.** That is a design rule of the shipper, not an omission.
 
 **Genuinely blocked:** the WABA rotation, on **Ms. Khushi Jain's** answer — *do the old and new
 tokens overlap?* **Nothing else in the plan waits on anything.**
@@ -88,10 +116,26 @@ exercise is done · **Sanjeevni/Marg stays in this project** — develop it, the
 
 ## §3 · WHAT S233 DOES — in the owner's order
 
-**1 · Back up the Apps Script projects and the live Sheets.** The last way this estate can lose data
-quietly: **eleven** projects across two accounts (not nine — "CC saver" is the tenth, on the personal
-account) and seven Sheets, with no backup anywhere. **D426 put Drive reads and writes in scope**, so
-it can run unattended. `claude/S232_APPS_SCRIPT_TRIGGERS_READ.md` says which are actually armed.
+**1 · Bring the Google plane into the backup chain that already works.** Not "build a backup" — the
+chain exists and is proven; the Google plane was never brought inside it.
+
+- **The seven live Sheets have no copy anywhere** — searched at S232 across the repo, `D:\Downloads\`
+  and `D:\Downloads\ClaudeCowork\`. **They are the data, and they are the job.** They belong
+  **inside the nightly encrypted Drive bundle** described in §2, whose restore has been drilled.
+  **Do not invent a second mechanism.**
+- **Six of the eight script projects holding real code ALREADY have a source copy**: `dashboard\`
+  (14 files, verified against live at S230), the three in `deploy_kits\S230_GAS_EXPORT\`, and the
+  Janitor and CC-saver files in `gmail-automation\gas\`. The two without a copy are both dead and
+  both under the no-touch rule. **So the gap is not "no backup" — it is that nothing refreshes.**
+  Build the **weekly re-export that diffs against the copy on disk**, so drift is reported instead of
+  discovered.
+- **Ten projects are named; an eleventh is only inferred** from an orphaned trigger the page cannot
+  attribute. **Identify it before including it.**
+- **Resolve the `VPS_Push_UPI.gs` duplicate** — the repo holds a 200-line copy and the live 263-line
+  one. That is the D202/F-201 breach we forbid everywhere else.
+
+**D426 put Drive reads and writes in scope**, so this can run unattended.
+`claude/S232_APPS_SCRIPT_TRIGGERS_READ.md` says which projects are actually armed.
 
 **2 · Sanjeevni steps 2+3, clubbed** — derivation off the screens, lanes pointed at the spine.
 **The spine was built at S229 and nothing reads it.** No screen changes behaviour.
