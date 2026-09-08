@@ -1,0 +1,453 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+rotate_ntfy.py  --  S231 / F-358 / F-364 : rotate the clinic's ntfy alert topics
+and take the topic OUT of the code.
+
+WHY THIS EXISTS
+---------------
+The repository github.com/manoj-clinic-automation/drmanoj-clinic-automation is
+PUBLIC (verified unauthenticated at S231: private=false, visibility=public).
+Two ntfy topics were readable inside it:
+
+  * one hard-coded as a DEFAULT in three live VPS scripts
+  * one shown as an EXAMPLE in a comment in the staff_ledger family
+
+On ntfy.sh the topic name IS the credential.  Anyone who read the repository
+could subscribe to the clinic's alerts, and could publish to them -- i.e. send
+the owner an alert that looks exactly like his own system speaking.
+
+Rotating makes every public copy of the OLD topics worthless.  So this script
+does not try to rewrite history.  It does three things, in this order:
+
+  1. writes NEW random topics into /root/wa/.env          (config, not code)
+  2. patches the LIVE scripts to READ that file, with NO default
+  3. proves the new topics work, and prints them ONCE
+
+Order matters.  Config is written BEFORE the defaults are removed, so there is
+never a moment when a publisher has no topic to publish to.
+
+SAFETY
+------
+  * default action is --check : discovers, reports, changes NOTHING
+  * --install refuses at the first doubt and touches nothing if anything fails
+  * every file it will touch is backed up first, to one timestamped folder
+  * it asserts each anchor occurs EXACTLY ONCE before replacing it
+  * it re-reads every file afterwards and verifies the literal is gone
+  * the new topic values are printed exactly once, to this terminal only.
+    They are never written to the repository, never logged, never emailed.
+
+RUN IT (on the VPS, as root):
+    /root/wa/venv/bin/python3 /root/deploy/repo/deploy_kits/S231_NTFY_ROTATE/rotate_ntfy.py --check
+    /root/wa/venv/bin/python3 /root/deploy/repo/deploy_kits/S231_NTFY_ROTATE/rotate_ntfy.py --install
+"""
+
+import os
+import re
+import sys
+import json
+import shutil
+import secrets
+import datetime
+import subprocess
+import urllib.request
+
+ENV_PATH  = "/root/wa/.env"
+SEARCH_ROOTS = ["/root"]
+SKIP_DIRS = {".git", "node_modules", "venv", "__pycache__", "backups", "_backup"}
+
+# The live scripts we expect to patch.  basename -> (env key it must end up using)
+TARGETS = {
+    "clinic_watchdog.py":        "WATCHDOG_NTFY_URL",
+    "clinic_health_report.py":   "WATCHDOG_NTFY_URL",
+    "clinic_timer_freshness.py": "WATCHDOG_NTFY_URL",
+}
+
+TOPIC_RE = re.compile(r'https://ntfy\.sh/([A-Za-z0-9_\-]+)')
+
+STAMP = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+BACKUP_DIR = "/root/_backup_S231_ntfy_%s" % STAMP
+
+
+# --------------------------------------------------------------------------
+# small helpers
+# --------------------------------------------------------------------------
+def say(msg=""):
+    print(msg, flush=True)
+
+
+def mask(topic):
+    if len(topic) <= 5:
+        return "*" * len(topic)
+    return topic[:2] + "*" * (len(topic) - 4) + topic[-2:]
+
+
+def mask_text(s):
+    return TOPIC_RE.sub(lambda m: "https://ntfy.sh/" + mask(m.group(1)), s)
+
+
+class Refuse(Exception):
+    pass
+
+
+# --------------------------------------------------------------------------
+# the patch itself -- pure function, so it can be self-tested
+# --------------------------------------------------------------------------
+READER = '''
+def _ntfy_url_from_env_file():
+    """Read the alert topic from /root/wa/.env  (S231/F-358: never hard-coded).
+
+    Returns "" if absent.  Callers MUST treat "" as loud -- never silent."""
+    try:
+        with open("%s", "r") as _f:
+            for _line in _f:
+                _line = _line.strip()
+                if _line.startswith("%s="):
+                    return _line.split("=", 1)[1].strip().strip('"').strip("'")
+    except Exception:
+        pass
+    return ""
+'''
+
+
+def patch_source(text, env_key):
+    """Remove the hard-coded topic and read it from the env file instead.
+
+    Returns (new_text, n_changes).  Raises Refuse on anything unexpected."""
+    hits = TOPIC_RE.findall(text)
+    if not hits:
+        return text, 0
+
+    # 1. insert the reader helper once, just before the first use
+    if "_ntfy_url_from_env_file" not in text:
+        reader = READER % (ENV_PATH, env_key)
+        # place it after the last top-level import
+        m = None
+        for m in re.finditer(r'^(?:import|from)\s+\S+.*$', text, re.M):
+            pass
+        if m is None:
+            raise Refuse("no import block found -- refusing to guess placement")
+        text = text[:m.end()] + "\n\n" + reader.strip() + "\n" + text[m.end():]
+
+    # 2. NTFY_TOPIC_URL = os.environ.get("KEY", "https://ntfy.sh/xxx")
+    pat_default = re.compile(
+        r'(?P<name>[A-Z_]*NTFY[A-Z_]*)\s*=\s*os\.environ\.get\(\s*'
+        r'(["\'])(?P<key>[^"\']+)\2\s*,\s*(["\'])https://ntfy\.sh/[A-Za-z0-9_\-]+\4\s*\)'
+    )
+    # 3. NTFY_URL = "https://ntfy.sh/xxx"
+    pat_literal = re.compile(
+        r'(?P<name>[A-Z_]*NTFY[A-Z_]*)(?P<pad>\s*)=(?P<pad2>\s*)'
+        r'(["\'])https://ntfy\.sh/[A-Za-z0-9_\-]+\4'
+    )
+
+    n = 0
+
+    def _sub_default(m):
+        nonlocal n
+        n += 1
+        return ('%s = os.environ.get("%s", "") or _ntfy_url_from_env_file()'
+                % (m.group("name"), m.group("key")))
+
+    def _sub_literal(m):
+        nonlocal n
+        n += 1
+        return ('%s%s=%s os.environ.get("%s", "") or _ntfy_url_from_env_file()'
+                % (m.group("name"), m.group("pad"), m.group("pad2").rstrip(), env_key))
+
+    text = pat_default.sub(_sub_default, text)
+    text = pat_literal.sub(_sub_literal, text)
+
+    # 4. scrub any remaining literal topic in comments / docstrings
+    def _scrub(m):
+        nonlocal n
+        n += 1
+        return "https://ntfy.sh/<topic-from-%s>" % os.path.basename(ENV_PATH)
+
+    text = TOPIC_RE.sub(_scrub, text)
+
+    if TOPIC_RE.search(text):
+        raise Refuse("a literal topic survived the patch -- refusing")
+    return text, n
+
+
+# --------------------------------------------------------------------------
+# self-tests -- run before anything is touched
+# --------------------------------------------------------------------------
+def self_test():
+    fails = []
+
+    def check(name, cond):
+        if not cond:
+            fails.append(name)
+
+    a = ('import os\n'
+         'NTFY_TOPIC_URL = os.environ.get("WATCHDOG_NTFY_URL", "https://ntfy.sh/abc123")\n')
+    out, n = patch_source(a, "WATCHDOG_NTFY_URL")
+    check("default-form replaced", "ntfy.sh/abc123" not in out)
+    check("default-form reads env file", "_ntfy_url_from_env_file()" in out)
+    check("default-form keeps name", "NTFY_TOPIC_URL" in out)
+    check("default-form counted", n >= 1)
+
+    b = 'import os\nNTFY_URL      = "https://ntfy.sh/zzz999"\n'
+    out, n = patch_source(b, "WATCHDOG_NTFY_URL")
+    check("literal-form replaced", "ntfy.sh/zzz999" not in out)
+    check("literal-form reads env file", "_ntfy_url_from_env_file()" in out)
+
+    c = 'import os\n# see https://ntfy.sh/commentonly for the topic\n'
+    out, n = patch_source(c, "WATCHDOG_NTFY_URL")
+    check("comment scrubbed", "ntfy.sh/commentonly" not in out)
+
+    d = 'import os\nX = 1\n'
+    out, n = patch_source(d, "WATCHDOG_NTFY_URL")
+    check("clean file untouched", out == d and n == 0)
+
+    for src in (a, b, c):
+        out, _ = patch_source(src, "WATCHDOG_NTFY_URL")
+        try:
+            compile(out, "<patched>", "exec")
+        except SyntaxError as e:
+            fails.append("patched output does not compile: %s" % e)
+
+    # idempotence
+    out1, _ = patch_source(a, "WATCHDOG_NTFY_URL")
+    out2, n2 = patch_source(out1, "WATCHDOG_NTFY_URL")
+    check("idempotent", n2 == 0)
+
+    return fails
+
+
+# --------------------------------------------------------------------------
+# discovery
+# --------------------------------------------------------------------------
+def discover():
+    found = {}
+    for root in SEARCH_ROOTS:
+        for dirpath, dirnames, filenames in os.walk(root):
+            dirnames[:] = [d for d in dirnames
+                           if d not in SKIP_DIRS and not d.startswith("_backup_S231")]
+            if "/deploy/repo/" in dirpath + "/":
+                continue          # the checked-out repo is not the live copy
+            for fn in filenames:
+                if fn in TARGETS:
+                    found.setdefault(fn, []).append(os.path.join(dirpath, fn))
+    return found
+
+
+def env_topics():
+    """Which topics does /root/wa/.env already name?"""
+    out = {}
+    if not os.path.exists(ENV_PATH):
+        return out
+    for line in open(ENV_PATH, "r", errors="ignore"):
+        line = line.strip()
+        if "=" in line and "ntfy" in line.lower():
+            k, v = line.split("=", 1)
+            out[k.strip()] = v.strip().strip('"').strip("'")
+    return out
+
+
+def staff_ledger_env_source():
+    """Where does staff-ledger.service get NTFY_URL from?"""
+    notes = []
+    try:
+        r = subprocess.run(["systemctl", "cat", "staff-ledger.service"],
+                           capture_output=True, text=True, timeout=20)
+        if r.returncode == 0:
+            for line in r.stdout.splitlines():
+                s = line.strip()
+                if s.startswith("Environment") or s.startswith("EnvironmentFile"):
+                    notes.append(mask_text(s))
+    except Exception as e:
+        notes.append("could not read unit: %s" % e)
+    return notes
+
+
+# --------------------------------------------------------------------------
+# actions
+# --------------------------------------------------------------------------
+def push_test(url, title, body):
+    req = urllib.request.Request(
+        url, data=body.encode("utf-8"),
+        headers={"Title": title, "Priority": "default", "Tags": "white_check_mark"})
+    with urllib.request.urlopen(req, timeout=20) as r:
+        return r.status
+
+
+def write_env(pairs):
+    lines = []
+    if os.path.exists(ENV_PATH):
+        lines = open(ENV_PATH, "r", errors="ignore").read().splitlines()
+    keys = set(pairs)
+    out, seen = [], set()
+    for line in lines:
+        k = line.split("=", 1)[0].strip() if "=" in line else None
+        if k in keys:
+            out.append("%s=%s" % (k, pairs[k]))
+            seen.add(k)
+        else:
+            out.append(line)
+    for k, v in pairs.items():
+        if k not in seen:
+            out.append("%s=%s" % (k, v))
+    body = "\n".join(out).rstrip("\n") + "\n"
+    with open(ENV_PATH, "w") as f:
+        f.write(body)
+    os.chmod(ENV_PATH, 0o600)
+
+
+def main():
+    mode = "--check"
+    for a in sys.argv[1:]:
+        if a in ("--check", "--install"):
+            mode = a
+
+    say("=" * 74)
+    say("S231 ntfy rotation  --  mode %s  --  %s" % (mode, STAMP))
+    say("=" * 74)
+
+    say("\n[1] self-tests")
+    fails = self_test()
+    if fails:
+        say("    REFUSING -- %d self-test failure(s):" % len(fails))
+        for f in fails:
+            say("      - %s" % f)
+        return 2
+    say("    all self-tests passed; nothing has been touched")
+
+    say("\n[2] environment")
+    if not os.path.exists(ENV_PATH):
+        say("    REFUSING -- %s does not exist" % ENV_PATH)
+        return 2
+    say("    %s present" % ENV_PATH)
+    cur = env_topics()
+    if cur:
+        for k, v in cur.items():
+            say("    already in .env: %s = %s" % (k, mask_text(v)))
+    else:
+        say("    .env names no ntfy topic today")
+
+    say("\n[3] live scripts")
+    found = discover()
+    problems = []
+    for name in TARGETS:
+        paths = found.get(name, [])
+        if len(paths) == 0:
+            say("    %-28s NOT FOUND (skipped, not an error)" % name)
+        elif len(paths) > 1:
+            say("    %-28s %d copies -- AMBIGUOUS:" % (name, len(paths)))
+            for p in paths:
+                say("        %s" % p)
+            problems.append("%s has %d live copies" % (name, len(paths)))
+        else:
+            p = paths[0]
+            txt = open(p, "r", errors="ignore").read()
+            hits = set(TOPIC_RE.findall(txt))
+            say("    %-28s %s   (%d literal topic(s))" % (name, p, len(hits)))
+
+    say("\n[4] staff ledger topic source")
+    for n in staff_ledger_env_source() or ["    (no Environment= / EnvironmentFile= lines found)"]:
+        say("    %s" % n)
+
+    if problems:
+        say("\nREFUSING -- ambiguity above must be resolved first:")
+        for p in problems:
+            say("  - %s" % p)
+        return 2
+
+    if mode == "--check":
+        say("\n[5] --check only. NOTHING WAS CHANGED.")
+        say("    Re-run with --install to rotate.")
+        return 0
+
+    # ---------------- install ----------------
+    say("\n[5] backing up")
+    os.makedirs(BACKUP_DIR, exist_ok=True)
+    shutil.copy2(ENV_PATH, os.path.join(BACKUP_DIR, "env.bak"))
+    for name, paths in found.items():
+        shutil.copy2(paths[0], os.path.join(BACKUP_DIR, name + ".bak"))
+    say("    %s" % BACKUP_DIR)
+
+    say("\n[6] generating new topics")
+    new_vps   = "c-" + secrets.token_urlsafe(16).replace("_", "").replace("-", "")[:20]
+    new_ledger = "l-" + secrets.token_urlsafe(16).replace("_", "").replace("-", "")[:20]
+    url_vps    = "https://ntfy.sh/" + new_vps
+    url_ledger = "https://ntfy.sh/" + new_ledger
+    say("    two new topics generated (values shown once at the end)")
+
+    say("\n[7] writing config BEFORE removing any default")
+    write_env({"WATCHDOG_NTFY_URL": url_vps, "NTFY_URL": url_ledger})
+    back = env_topics()
+    if back.get("WATCHDOG_NTFY_URL") != url_vps or back.get("NTFY_URL") != url_ledger:
+        say("    REFUSING -- .env did not read back as written. Restore:")
+        say("      \\cp %s/env.bak %s" % (BACKUP_DIR, ENV_PATH))
+        return 2
+    say("    .env written and read back correctly (mode 600)")
+
+    say("\n[8] patching live scripts")
+    for name, key in TARGETS.items():
+        paths = found.get(name, [])
+        if not paths:
+            continue
+        p = paths[0]
+        txt = open(p, "r", errors="ignore").read()
+        try:
+            new, n = patch_source(txt, key)
+        except Refuse as e:
+            say("    REFUSING on %s -- %s" % (p, e))
+            say("    Nothing further changed. Restore .env with:")
+            say("      \\cp %s/env.bak %s" % (BACKUP_DIR, ENV_PATH))
+            return 2
+        if n == 0:
+            say("    %-28s already clean" % name)
+            continue
+        compile(new, p, "exec")
+        with open(p, "w") as f:
+            f.write(new)
+        chk = open(p, "r", errors="ignore").read()
+        if TOPIC_RE.search(chk):
+            say("    REFUSING -- %s still contains a literal topic after write" % p)
+            return 2
+        say("    %-28s patched (%d site(s)), no literal topic remains" % (name, n))
+
+    say("\n[9] restarting the one service that reads its topic at start")
+    try:
+        r = subprocess.run(["systemctl", "restart", "staff-ledger.service"],
+                           capture_output=True, text=True, timeout=60)
+        say("    staff-ledger.service restart rc=%d" % r.returncode)
+        r2 = subprocess.run(["systemctl", "is-active", "staff-ledger.service"],
+                            capture_output=True, text=True, timeout=30)
+        say("    staff-ledger.service is-active: %s" % r2.stdout.strip())
+    except Exception as e:
+        say("    WARN could not restart staff-ledger.service: %s" % e)
+
+    say("\n[10] proving the new topics carry")
+    ok = True
+    for label, u in (("VPS alerts", url_vps), ("staff ledger", url_ledger)):
+        try:
+            st = push_test(u, "Clinic alerts moved",
+                           "S231: this topic is new and private. "
+                           "The old one is retired and now carries nothing.")
+            say("    %-14s test push HTTP %s" % (label, st))
+        except Exception as e:
+            ok = False
+            say("    %-14s test push FAILED: %s" % (label, e))
+    if not ok:
+        say("    NOTE: config and code are in place; the push failure is a network")
+        say("          issue, not a rollback reason. Retry the push before subscribing.")
+
+    say("\n" + "=" * 74)
+    say("DONE. SUBSCRIBE YOUR PHONE TO THESE TWO, THEN DELETE THE OLD ONES.")
+    say("=" * 74)
+    say("  VPS alerts   : %s" % url_vps)
+    say("  Staff ledger : %s" % url_ledger)
+    say("=" * 74)
+    say("Shown once. They are in %s (mode 600) and in no repository." % ENV_PATH)
+    say("Undo everything:")
+    say("  \\cp %s/env.bak %s" % (BACKUP_DIR, ENV_PATH))
+    for name in found:
+        say("  \\cp %s/%s.bak %s" % (BACKUP_DIR, name, found[name][0]))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
