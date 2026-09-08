@@ -1,0 +1,76 @@
+S234_PERSONAL_DOCS_BACKUP v1 — install.
+
+WHAT THIS DOES, IN ONE SENTENCE
+Your Personal Documents sheet — the one your Janitor keeps identity-document
+rows and their expiry dates in — joins the four books already pulled to the VPS
+at 01:45 and shipped inside the encrypted nightly bundle at 01:50.
+
+WHY IT MATTERS
+It is the last thing in your personal Google account with exactly ONE copy, in
+ONE account. Nothing else in the estate is in that position any more.
+
+WHAT IT DOES NOT DO
+It adds no job, no key and no mechanism, and it changes not one line of the
+pull or the bundle. It adds one book to a list. Nothing is written to GitHub —
+that book and its numbers never enter the repository, and this kit carries no
+row of it.
+
+=============================================================================
+ THE INSTALL — TWO LINES. Paste the first, wait for it, then paste the second.
+=============================================================================
+
+[VPS] 1 · pull the deploy clone:
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main
+
+[VPS] 2 · run the installer:
+
+bash /root/deploy/repo/deploy_kits/S234_PERSONAL_DOCS_BACKUP/install.sh
+
+=============================================================================
+ THE ONE THING THAT MIGHT ASK SOMETHING OF YOU
+=============================================================================
+
+The four books already being pulled were shared with the backup's service
+account long ago. This fifth one probably has not been.
+
+If it has not, the installer stops at the preflight stage, PUTS THE SETTINGS
+BACK EXACTLY AS THEY WERE, and prints one email address on screen. Open your
+Personal Documents sheet in Google, press Share, give that address VIEWER
+access, and run the second line again. Nothing else is needed and nothing is
+lost in between — tonight's backup runs exactly as last night's either way.
+
+The address is not written here on purpose: the installer reads it off the box,
+so it is always the right one.
+
+=============================================================================
+ WHERE THE NUMBERS END UP — said plainly, because they are identity documents
+=============================================================================
+
+* as plain CSV at /root/state_backup/sheets/personal_docs/ on the VPS — which
+  is inside D429, your own ruling that the VPS is a safe place for your data,
+  on a box only you hold credentials for;
+* inside the AES-256 bundle on the clinic Drive, never in plain form there;
+* nowhere else. Not in GitHub, not on any PC, not in this kit.
+
+It is a real second copy and not a pretend one: the book lives in your PERSONAL
+account and the bundle lands in the CLINIC account, encrypted on the way.
+
+=============================================================================
+ WHAT IT PRINTS, AND WHAT TO SEND BACK
+=============================================================================
+
+Three lines — books, rows, inbundle. Send those three and nothing else.
+If it stops instead, send me everything it printed.
+
+Proven offline before handover: WALK_pd_install.py — 24 checks, 0 failures,
+including every failure path, each one asserting the settings file comes back
+BYTE FOR BYTE.
+
+=============================================================================
+ ROLLBACK
+=============================================================================
+
+The installer prints the exact line, naming the dated copy it kept:
+
+  \cp /root/state_backup/clinic_state_backup.conf.bak_<stamp> /root/state_backup/clinic_state_backup.conf
