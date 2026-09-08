@@ -1,0 +1,22 @@
+=== PASTE THIS INTO AN **ADMINISTRATOR** POWERSHELL ON THE **MEDICAL** PC ===
+=== It will ask you once for the MEDICAL\SET password. Nothing else.     ===
+
+$ErrorActionPreference='Stop'
+$py='D:\SendToClinic\pyportable\pythonw.exe'; $ag='D:\SendToClinic\medical_agent.py'
+Write-Host "`n[1] checking" -ForegroundColor Cyan
+if(!(Test-Path $py)){throw "not found: $py"}; if(!(Test-Path $ag)){throw "not found: $ag"}
+$startup="$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\MargAgent.cmd"
+Write-Host ("    agent      : OK"); Write-Host ("    startup item: " + $(if(Test-Path $startup){"present (kept, unchanged)"}else{"NOT FOUND - tell Claude"}))
+Write-Host "`n[2] creating the two tasks" -ForegroundColor Cyan
+schtasks /Create /TN "MargAgentBoot" /TR "`"$py`" `"$ag`"" /SC ONSTART /RU "$env:COMPUTERNAME\$env:USERNAME" /RP * /RL HIGHEST /F
+schtasks /Create /TN "MargAgentBootStop" /TR "schtasks /End /TN MargAgentBoot" /SC ONLOGON /RU "SYSTEM" /RL HIGHEST /F
+Write-Host "`n[3] starting it now and checking the watcher" -ForegroundColor Cyan
+schtasks /Run /TN "MargAgentBoot" | Out-Null; Start-Sleep -Seconds 20
+$pidf='D:\SendToClinic\_watcher.pid'
+if(Test-Path $pidf){ $wp=(Get-Content $pidf -Raw).Trim(); $alive=Get-Process -Id $wp -ErrorAction SilentlyContinue
+  if($alive){Write-Host "    WATCHER ALIVE, pid $wp" -ForegroundColor Green}else{Write-Host "    watcher pid $wp NOT running - tell Claude" -ForegroundColor Yellow} }
+else{ Write-Host "    no pid file yet - tell Claude" -ForegroundColor Yellow }
+Get-Content 'D:\SendToClinic\heartbeat.txt' -Tail 3 -ErrorAction SilentlyContinue
+Write-Host "`nDONE. Captures now start at BOOT, with nobody logged in." -ForegroundColor Green
+Write-Host "Your logon item is untouched, so the Drive backup still runs as before."
+Write-Host "UNDO (one line): schtasks /Delete /TN MargAgentBoot /F; schtasks /Delete /TN MargAgentBootStop /F"

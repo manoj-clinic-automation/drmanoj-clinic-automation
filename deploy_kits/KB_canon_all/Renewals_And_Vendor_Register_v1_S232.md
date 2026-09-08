@@ -91,7 +91,7 @@ question that settles it. **An empty cell is the finding, not a gap to be filled
 
 | # | vendor | what it does | what a lapse costs | known | the one question owed |
 |---|---|---|---|---|---|
-| **1** | **Tailscale** | the only link between the medical PC and manojz | 🔴 **the entire Marg lane stops** — no exports, no sale data, no purchase data, no stock. **Node keys expire on a schedule**, so this lapses without anyone cancelling anything. | tailnet **`tail4aa9a0.ts.net`** · node **`medical`** = `medical.tail4aa9a0.ts.net`, `tailscaled.exe` pid 3780, up since the 29-Aug boot · ✅ **KEY EXPIRY DISABLED for `medical`, set by the owner in the admin console 07-Sep-2026 ~20:55 IST** (`S230_MEDICAL_PC_INVENTORY` §1 and §5.1 — measured and recorded, not assumed) | **Half of it is closed. The other half has never been recorded: is key expiry disabled on the `manojz` node too?** The link has two ends and either one lapsing stops the lane. |
+| **1** | **Tailscale** | the only link between the medical PC and manojz | 🔴 **the entire Marg lane stops** — no exports, no sale data, no purchase data, no stock. **Node keys expire on a schedule**, so this lapses without anyone cancelling anything. | tailnet **`tail4aa9a0.ts.net`** · node **`medical`** = `medical.tail4aa9a0.ts.net`, `tailscaled.exe` pid 3780, up since the 29-Aug boot · ✅ **KEY EXPIRY DISABLED for `medical`, set by the owner in the admin console 07-Sep-2026 ~20:55 IST** (`S230_MEDICAL_PC_INVENTORY` §1 and §5.1 — measured and recorded, not assumed) | ✅ **CLOSED, BOTH ENDS.** `manojz` measured 08-Sep-2026 by the owner from PowerShell (`tailscale status --json` → `Self.KeyExpiry` absent) = **key expiry DISABLED**. `medical` was already disabled 07-Sep. **Neither node can now fall off the tailnet from a lapsed key. Nothing further owed on this row.** |
 | **2** | **The registrar accounts** | who holds the login for `dr-manoj.in`, `drmanojagarwal.com`, `nkpathology.com` | 🔴 a domain nobody can renew is a domain that lapses | GoDaddy holds at least `dr-manoj.in` (forwarding is theirs); Hostinger holds the VPS | **Which registrar holds each of the three, and where does each login live?** → Bitwarden, D421. |
 | **3** | **Google account `drmka.ortho@gmail.com`** | Drive archive · every Apps Script · the live Sheets · the VPS database backup destination | 🔴 the entire Google plane, including the only off-box copy of the finance database | storage plan unknown | **Is it a paid Workspace or a free account, and how full is the storage?** A full Drive stops the backup silently. |
 | **4** | **Sarvam AI** | call transcription (03:00 nightly) + bill OCR | transcripts and bill auto-fill stop; the verdict layer starves | key is on the VPS, not in the repository | **Prepaid credit or subscription, and what is the balance?** |
@@ -111,11 +111,12 @@ question that settles it. **An empty cell is the finding, not a gap to be filled
 > unknown to another is this project's most-repeated fault, and it just repeated inside a
 > document written to end it.** The register is now the place both halves live.
 >
-> ⚠ **The `manojz` end is still unrecorded anywhere.** The link has two ends; either key lapsing
-> stops the lane just as completely. Both nodes are on ONE page — *Machine Details → Key expiry* at
-> `https://login.tailscale.com/admin/machines`. **The assistant tried to read it directly in this
-> session and could not: the browser pane is not signed in to Tailscale, and signing in is not
-> something a session does.** One look, and this row closes for good.
+> ✅ **AND THE `manojz` END WAS CLOSED THE SAME MORNING.** Measured by the owner from PowerShell:
+> `Self.KeyExpiry` absent = expiry disabled. **Both ends of the link are safe and this row is
+> shut.** *(Recorded because it took three attempts to get a reading: the admin console's
+> per-machine page could not be found by eye, and the browser pane is not signed in. **One
+> line of PowerShell answered in a second what a console hunt could not** — when a setting has
+> a CLI, ask the CLI.)*
 
 ## 5 · THE REGISTER STILL FORGETS — unfixed, and it is a live-script change
 
@@ -145,9 +146,7 @@ installed unasked.
 3. **Then the register goes behind a screen with its age on it** — *"26 items · nearest in N days ·
    nothing overdue"* — rather than an email. **A list you can look at beats a mail you can miss**,
    and it is the rule this whole estate keeps arriving at: everything that runs says how old it is.
-4. **And the `manojz` node's key expiry gets disabled before any of that** — `medical`'s already is.
-   It is the only item on this page that can bite without anybody being billed, and it is now
-   half-closed rather than open.
+4. ~~**Tailscale key expiry.**~~ **CLOSED 08-Sep-2026, both nodes.** Nothing owed.
 
 ---
 *Renewals and Vendor Register v1 · S232 · 08-Sep-2026. Supersedes §2–§3 of
