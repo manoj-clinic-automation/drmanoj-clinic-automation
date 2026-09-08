@@ -151,6 +151,14 @@ def int_conf(conf, key, default):
         return default
 
 
+def bool_conf(conf, key, default):
+    """A missing key keeps the default. Anything explicitly off is off."""
+    v = str(conf.get(key, "")).strip().lower()
+    if v == "":
+        return default
+    return v not in ("0", "off", "no", "false")
+
+
 # ------------------------------------------------------------------ legs ----
 def expand(value, subs):
     """{STATE_FILE} in a declared target becomes the resolved path. This is how
@@ -590,6 +598,17 @@ def post_ntfy(url, title, body):
     return True
 
 
+def green_body(rows, total, html_out):
+    """The daily proof of life. ASCII stays in the TITLE (ntfy sends it as an
+    HTTP header and an emoji there breaks the push); the tick marks live here."""
+    lines = ["\u2705 All %d legs fresh." % total, ""]
+    for r in sort_rows(rows):
+        lines.append("\u2713 %s \u2014 %s" % (r["name"], r["age_words"]))
+    lines.append("")
+    lines.append("page: " + html_out)
+    return "\n".join(lines)
+
+
 def shout_body(rows, total, html_out):
     lines = ["%d of %d legs are not fresh:" % (len(rows), total)]
     for r in sort_rows(rows):
@@ -605,7 +624,26 @@ def do_shout(conf, rows, state, today, html_out, total):
     url = conf.get("NTFY_URL")
     bad = [r for r in rows if r["verdict"] != OK]
     if not bad:
-        return "nothing to shout about"
+        # S232, the owner's ask: silence cannot tell "all 26 are healthy" apart
+        # from "the job never ran". One line a day, at most once per calendar
+        # day, so the ABSENCE of it is itself readable. Configuration, not code.
+        if not bool_conf(conf, "DAILY_GREEN", True):
+            return "all fresh — daily green is switched off in the conf"
+        if state.get("green_sent") == today:
+            return "all fresh — green already sent today"
+        if not url:
+            return "all fresh — NTFY_URL is not set in the conf, nothing sent"
+        title = "Clinic freshness: all %d fresh" % total          # ASCII only
+        # Built OUTSIDE the try on purpose: a defect in here is MINE and must
+        # not be reported as a network failure. Only the post is caught.
+        gbody = green_body(rows, total, html_out)
+        try:
+            post_ntfy(url, title, gbody)
+        except Exception as ex:
+            return ("all fresh — green push FAILED (%s), it will be retried on"
+                    " the next run" % str(ex)[:120])
+        state["green_sent"] = today
+        return "all fresh — daily green sent (%d legs)" % total
     shouted = state.get("shouted") or {}
     fresh = [r for r in bad if ("%s|%s" % (r["name"], today)) not in shouted]
     if not fresh:

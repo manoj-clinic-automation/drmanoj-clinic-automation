@@ -40,7 +40,7 @@ import hashlib
 import datetime
 import subprocess
 
-SRC   = "/root/deploy/repo/deploy_kits/S230_FRESHNESS/freshness.py"
+SRC   = "/root/deploy/repo/deploy_kits/S232_FRESHNESS_GREEN/freshness.py"
 LIVE  = "/root/finance/freshness.py"
 STAMP = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 BACKUP = "/root/_backup_S232_green_%s" % STAMP
