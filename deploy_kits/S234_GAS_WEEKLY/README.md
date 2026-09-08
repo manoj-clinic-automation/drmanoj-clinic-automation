@@ -88,7 +88,7 @@ message that lies.
 
 | gate | result |
 |---|---|
-| `gas_export.py selftest` | **24 checks, 0 failures** |
+| `gas_export.py selftest` | **31 checks, 0 failures** |
 | `WALK_gas_install.py` | **26 checks, 0 failures** |
 | `bash -n install.sh` | clean |
 | `py_compile` | clean, to a temp `cfile` (F-376) |
@@ -111,6 +111,34 @@ comes back byte-identical.**
   wants their weekly drift watched too; it is not taken unasked.
 - **The four dead or empty projects** (#4, #7, #8, #9 of the census). Nothing to
   watch.
+
+## F-378 — the second comparison did nothing, and said so in words that read as fine
+
+**Found on the first live install, behind 24 green selftests and a 26-check
+walk.** v1 read a folder's `_PROJECT.json` to learn what was in it. The
+repository copy it compares against — `deploy_kits/S230_GAS_EXPORT/` — was
+written **by hand** at S230 and has no `_PROJECT.json`, so v1 returned nothing
+for it and the first real run printed, three times:
+
+```
+the repository copy is behind: nothing
+    DailyClinicReports       (there is no repository copy to compare against)
+```
+
+The copy was right there. **The entire second comparison — the one that answers
+"how stale is what everybody reads" — was inert, and its output looked like a
+mild note rather than a failure.** That is the S208/S209 shape again: green
+gates, and only running it against the real thing found it.
+
+**v2 builds the metadata by reading the files on disk when there is no meta file,
+counting lines and hashing exactly as the exporter does.** Five selftest checks
+now cover it, including one asserting that a matching hand-made folder reports
+**nothing** rather than "no copy".
+
+**And one more thing v2 does because of it:** a file differing only in trailing
+whitespace is reported as `changed_whitespace` — *"differs ONLY in trailing
+whitespace — not an edit"* — because the S230 export has one file without a
+final newline and a weekly false alarm is how a real alarm gets ignored.
 
 ## Files
 

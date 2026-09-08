@@ -93,7 +93,7 @@ report says so rather than crying wolf every week.
 Three lines — md5, projects, cron. Those three and nothing else.
 If it stops instead, send me everything it printed.
 
-Proven offline before handover: gas_export.py selftest — 24 checks, 0 failures;
+Proven offline before handover: gas_export.py selftest — 31 checks, 0 failures;
 WALK_gas_install.py — 26 checks, 0 failures, including every refusal path and
 each one asserting the settings file comes back BYTE FOR BYTE.
 

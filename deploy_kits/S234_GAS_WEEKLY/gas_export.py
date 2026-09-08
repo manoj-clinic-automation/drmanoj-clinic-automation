@@ -312,6 +312,7 @@ def write_project(dest, meta, files):
                                          body.endswith("\n") else 0),
             "bytes": len(body.encode("utf-8")),
             "md5": md5_bytes(body.encode("utf-8")),
+            "md5_trimmed": md5_bytes(body.rstrip().encode("utf-8")),
             "functions": fn_names(body),
         })
     out["line_total"] = sum(x["lines"] for x in out["files"])
@@ -321,14 +322,65 @@ def write_project(dest, meta, files):
 
 
 def read_meta(d):
+    """The metadata for a folder of exported script files.
+
+    ⚠ THE FALLBACK IS THE POINT, NOT A CONVENIENCE. The repository copy this
+    job compares against is `deploy_kits/S230_GAS_EXPORT/`, which was written
+    BY HAND at S230 and has no `_PROJECT.json` in it. v1 of this file returned
+    None for it and the run reported "there is no repository copy to compare
+    against" for all three projects — which reads like a note and is in fact
+    the entire second comparison silently doing nothing. Found on the first
+    live install, behind 24 green selftests and a 26-check walk (F-378).
+
+    So: read the meta file when there is one, and otherwise BUILD the same
+    shape by reading the files that are actually on disk."""
     p = os.path.join(d, PROJECT_META)
-    if not os.path.exists(p):
+    if os.path.exists(p):
+        try:
+            with open(p, encoding="utf-8") as fh:
+                return json.load(fh)
+        except (ValueError, OSError):
+            return None
+    return scan_dir_meta(d)
+
+
+# Files that live beside an export without being part of it.
+NOT_SOURCE = {"README.md", "READ_ME_FIRST.md", "SUMS.md5", "MD5SUMS.txt",
+              "KIT_ID.txt"}
+SOURCE_EXT = (".gs", ".json", ".html")
+
+
+def scan_dir_meta(d):
+    """Build export metadata from a plain folder of script files. Counts lines
+    and hashes exactly as write_project does, so the two are comparable."""
+    if not os.path.isdir(d):
         return None
-    try:
-        with open(p, encoding="utf-8") as fh:
-            return json.load(fh)
-    except (ValueError, OSError):
+    files = []
+    for name in sorted(os.listdir(d)):
+        p = os.path.join(d, name)
+        if not os.path.isfile(p) or name in NOT_SOURCE:
+            continue
+        if name.startswith("_") or not name.lower().endswith(SOURCE_EXT):
+            continue
+        try:
+            with open(p, encoding="utf-8") as fh:
+                body = fh.read()
+        except (OSError, UnicodeDecodeError):
+            continue
+        files.append({
+            "name": name, "type": "",
+            "lines": body.count("\n") + (1 if body and not
+                                          body.endswith("\n") else 0),
+            "bytes": len(body.encode("utf-8")),
+            "md5": md5_bytes(body.encode("utf-8")),
+            "md5_trimmed": md5_bytes(body.rstrip().encode("utf-8")),
+            "functions": fn_names(body),
+        })
+    if not files:
         return None
+    return {"title": os.path.basename(d), "file_id": "", "modified_time": "",
+            "pulled_at_ist": "", "scanned": True, "files": files,
+            "line_total": sum(f["lines"] for f in files)}
 
 
 def judge_shrink(label, new, old, pct):
@@ -379,6 +431,13 @@ def compare(label, new_meta, other_meta, other_what):
                                          other_what, MASKED[(label, name)])})
             continue
         if a["md5"] != b["md5"]:
+            ta, tb = a.get("md5_trimmed"), b.get("md5_trimmed")
+            if ta and tb and ta == tb:
+                out.append({"label": label, "against": other_what,
+                            "kind": "changed_whitespace", "file": name,
+                            "detail": "differs ONLY in trailing whitespace "
+                                      "from the %s — not an edit" % other_what})
+                continue
             out.append({"label": label, "against": other_what,
                         "kind": "changed", "file": name,
                         "detail": "%d lines in Google vs %d in the %s"
@@ -616,6 +675,49 @@ def selftest():
           len(f) == 1 and f[0]["kind"] == "changed_shape")
     check("masked: and the report says why it compared on shape",
           "masked" in f[0]["detail"])
+
+    # ---- F-378: A FOLDER WITH NO _PROJECT.json IS STILL A COPY ------------
+    # This is the check whose absence let the entire second comparison do
+    # nothing while reporting a benign-looking note. It is written first here
+    # so it is never quietly dropped again.
+    handmade = os.path.join(tmp, "handmade", "daily")
+    os.makedirs(handmade)
+    with open(os.path.join(handmade, "Code.gs"), "w") as fh:
+        fh.write("function a(){}\n")
+    with open(os.path.join(handmade, "appsscript.json"), "w") as fh:
+        fh.write("{}\n")
+    with open(os.path.join(handmade, "READ_ME_FIRST.md"), "w") as fh:
+        fh.write("not source\n")
+    scanned = read_meta(handmade)
+    check("F-378: a hand-made export folder with NO _PROJECT.json is still "
+          "read as a copy", scanned is not None)
+    check("F-378: and prose beside it is not counted as source",
+          sorted(f["name"] for f in scanned["files"])
+          == ["Code.gs", "appsscript.json"])
+    check("F-378: its line count matches the exporter's own counting",
+          scanned["line_total"] == 2)
+    check("F-378: AND COMPARING AGAINST IT REPORTS NOTHING WHEN IT MATCHES "
+          "— not 'no copy'", compare("daily", m1, scanned,
+                                     "repository copy") == [])
+    with open(os.path.join(handmade, "Code.gs"), "w") as fh:
+        fh.write("function a(){}\nfunction b(){}\n")
+    f = compare("daily", m1, read_meta(handmade), "repository copy")
+    check("F-378: and it reports a real difference when there is one",
+          len(f) == 1 and f[0]["kind"] == "changed")
+
+    # ---- a trailing newline is not an edit --------------------------------
+    nonl = os.path.join(tmp, "nonl", "daily")
+    os.makedirs(nonl)
+    with open(os.path.join(nonl, "Code.gs"), "w") as fh:
+        fh.write("function a(){}")
+    with open(os.path.join(nonl, "appsscript.json"), "w") as fh:
+        fh.write("{}\n")
+    f = compare("daily", m1, read_meta(nonl), "repository copy")
+    check("whitespace: a missing trailing newline is reported as whitespace, "
+          "NOT as an edit",
+          len(f) == 1 and f[0]["kind"] == "changed_whitespace")
+    check("whitespace: and the report says it is not an edit",
+          "not an edit" in f[0]["detail"])
 
     # ---- the shrink guard -------------------------------------------------
     big = write_project(os.path.join(tmp, "big", "p"), *_fake_project(
