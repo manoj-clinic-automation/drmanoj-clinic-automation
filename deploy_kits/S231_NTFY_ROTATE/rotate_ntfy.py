@@ -297,6 +297,12 @@ def write_env(pairs):
 
 CONF_EXT = {".env", ".conf", ".json", ".ini", ".cfg", ".sh", ".service", ".txt", ""}
 
+# Unit files live OUTSIDE /root. The WhatsApp notifier keeps the topic as a bare
+# name in Environment=NTFY_TOPIC=... in its unit -- not as a URL. Missing that
+# would have moved the system alerts and left the WhatsApp alerts on the old,
+# public topic: a HALF rotation, the worst outcome of the three.
+CONF_ROOTS = ["/root", "/etc/systemd/system"]
+
 
 def scan_conf_files(old_topics):
     """Every NON-.py file under /root that names one of the old topics.
@@ -305,7 +311,9 @@ def scan_conf_files(old_topics):
     topic in its own conf, not in code. A rotation that misses them is a HALF
     rotation, which is worse than none: the owner would believe he had moved."""
     out = []
-    for root in SEARCH_ROOTS:
+    for root in CONF_ROOTS:
+        if not os.path.isdir(root):
+            continue
         for dirpath, dirnames, filenames in os.walk(root):
             dirnames[:] = [d for d in dirnames
                            if d not in SKIP_DIRS and not d.startswith("_backup_S231")]
@@ -392,6 +400,8 @@ def main():
 
     say("\n[4b] other files configured with the same topic")
     conf_hits = scan_conf_files(old_topics) if old_topics else []
+    if old_topics:
+        say("    (searching %s)" % ", ".join(CONF_ROOTS))
     if conf_hits:
         for fp in conf_hits:
             say("    %s" % fp)
@@ -414,7 +424,10 @@ def main():
     say("    %s" % BACKUP_DIR)
 
     say("\n[6] generating new topics")
-    new_vps = "c-" + secrets.token_urlsafe(16).replace("_", "").replace("-", "")[:20]
+    # Unambiguous alphabet: no 0/O, no 1/l/I -- this gets typed on a phone.
+    # 31 symbols ** 16 places is about 10**23 possibilities; not guessable.
+    ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789"
+    new_vps = "".join(secrets.choice(ALPHABET) for _ in range(16))
     url_vps = "https://ntfy.sh/" + new_vps
     say("    one new topic generated (value shown once at the end)")
 
@@ -451,6 +464,33 @@ def main():
         except Exception as e:
             say("    REFUSING -- could not move %s: %s" % (fp, e))
             return 2
+
+    units = sorted({os.path.basename(fp) for fp in conf_hits
+                    if fp.endswith(".service")})
+    if units:
+        say("\n[7c] telling systemd, and restarting the units whose topic moved")
+        try:
+            r = subprocess.run(["systemctl", "daemon-reload"],
+                               capture_output=True, text=True, timeout=60)
+            say("    daemon-reload rc=%d" % r.returncode)
+        except Exception as e:
+            say("    REFUSING -- daemon-reload failed: %s" % e)
+            return 2
+        for u in units:
+            try:
+                subprocess.run(["systemctl", "restart", u],
+                               capture_output=True, text=True, timeout=90)
+                r2 = subprocess.run(["systemctl", "is-active", u],
+                                    capture_output=True, text=True, timeout=30)
+                state = r2.stdout.strip()
+                say("    %-34s %s" % (u, state))
+                if state != "active":
+                    say("    REFUSING -- %s did not come back active." % u)
+                    say("    Restore it with the undo lines below, then tell Claude.")
+                    return 2
+            except Exception as e:
+                say("    REFUSING -- could not restart %s: %s" % (u, e))
+                return 2
 
     say("\n[8] patching live scripts")
     for name, key in TARGETS.items():
@@ -501,9 +541,18 @@ def main():
     say("\n" + "=" * 74)
     say("DONE. SUBSCRIBE YOUR PHONE TO THIS ONE, THEN DELETE THE OLD ONE.")
     say("=" * 74)
-    say("  VPS alerts   : %s" % url_vps)
+    say("")
+    say("  Open the ntfy app on your phone, Add subscription, and type ONLY")
+    say("  the name below (not the https part). Read it in fours:")
+    say("")
+    say("        %s   %s   %s   %s"
+        % (new_vps[0:4], new_vps[4:8], new_vps[8:12], new_vps[12:16]))
+    say("")
+    say("  as one word:  %s" % new_vps)
+    say("  full address: %s" % url_vps)
+    say("")
     say("=" * 74)
-    say("Shown once. They are in %s (mode 600) and in no repository." % ENV_PATH)
+    say("Shown once. It is in %s (mode 600) and in no repository." % ENV_PATH)
     say("Undo everything:")
     say("  \\cp %s/env.bak %s" % (BACKUP_DIR, ENV_PATH))
     for name in found:
