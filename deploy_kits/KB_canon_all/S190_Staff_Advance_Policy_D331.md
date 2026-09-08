@@ -1,4 +1,21 @@
 # The Staff Advance Policy — every staff member, one rule (D331 candidate · S190)
+> ## ⚠ SUPERSEDED — DO NOT QUOTE THIS DOCUMENT AS POLICY
+>
+> **Retired in place at S232, 08-Sep-2026.** This is the S190 *design* paper. It was never
+> corrected as the design was built and then amended five times, and it is wrong in ways that
+> matter — the 75% ceiling it states was **retired by D352**, and the *"no escape hatch"* it
+> states twice was **amended by D374**. Both stored copies of this file, in git and in project
+> knowledge, are byte-identical and both are wrong: two stores agreeing is not correctness.
+>
+> **What the code actually does is in `Staff_Advance_Policy_AS_BUILT_v1_S232.md`**, rebuilt
+> from `staff_ledger.py` v3.6-S225-LOANS-D374. Its §9 lists every statement below that is
+> now false.
+>
+> Kept, not deleted (F-23): it is the record of what was designed and ruled at S190, and the
+> as-built document cites it.
+
+---
+
 
 **Design drafted at S190 on the owner's rulings, surveyed against the LIVE ledger bytes
 (`staff_ledger.py` `92665b64…` — the service-verified pin, 2,607 lines, read before
