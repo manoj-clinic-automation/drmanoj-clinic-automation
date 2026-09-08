@@ -12,9 +12,17 @@ away locked the door to the next session, and nothing said so).
 
 **`MD5SUMS_ALL.txt` is the ONE checksum authority for this folder (F-120).** It once shipped alongside
 `SUMS.md5` and `MD5SUMS.txt`, both stale, both able to convict a correct file; they are now in
-`deploy_kits/_attic_S186/`. Exactly two files are excluded from it, because neither can be inside it:
-`MD5SUMS_ALL.txt` itself and `KIT_ID.txt`, which carries its hash. **Everything else in this folder is
-listed.** The inverse check is part of the close: files on disk = rows listed + those two. Project knowledge remains the READING
+`deploy_kits/_attic_S186/`. **CORRECTED AT S233, 08-Sep-2026 — this paragraph was wrong, and a session that trusted it narrowed
+the gate by one row before catching itself.** Exactly ONE file is excluded, because it cannot be
+inside itself: `MD5SUMS_ALL.txt`. **`KIT_ID.txt` IS listed and always has been** — it does not carry
+this folder's hash; it is a session identity card carrying the close's version numbers and its
+standing warnings. **Everything else in this folder is listed.** The inverse check is part of the
+close: files on disk = rows listed + that one.
+
+**And the rule this cost:** when you rebuild `MD5SUMS_ALL.txt`, do not rebuild it from a description
+of what it should contain. **Diff the new row list against the old one and prove that nothing was
+dropped** — a gate that quietly loses a row still exits 0, and that is the F-369 shape. At S233 the
+rebuild was checked this way and reported *added: one · dropped: none* before it was accepted. Project knowledge remains the READING
 copy; git is the VERIFICATION copy. RULE: a hash verdict is only ever
 pronounced on bytes delivered as a FILE (git clone, or project_read returning
 a file path) — re-keyed inline text may corroborate, never convict or acquit.

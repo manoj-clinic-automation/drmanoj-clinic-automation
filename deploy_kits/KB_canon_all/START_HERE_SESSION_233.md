@@ -157,4 +157,27 @@ chain exists and is proven; the Google plane was never brought inside it.
    avoid it, measured at S232. If you must, rename `.git\index.lock` aside immediately and say so.
 
 ---
-*START_HERE_SESSION_233 · written at the S232 close, 08-Sep-2026.*
+
+## §5 · THE PERSONAL GOOGLE PLANE — added mid-S233, and it CARRIES FORWARD
+
+**Read `PERSONAL_GOOGLE_PLANE_v1_S233.md` before touching anything in the owner's PERSONAL Google
+account, or designing anything that writes the Payment Register or the renewals.** Four facts, all
+read from exported source on 08-Sep-2026, each of which would otherwise be rediscovered the hard way:
+
+1. **The renewals ALREADY push to the VPS daily** — `/finance/api/renewals-push`, on every run, quiet
+   days included. **Do not build that again.**
+2. **The Payment Register is CREATED and appended BY the Janitor**, its id in a Script Property. A VPS
+   table must read it as an upstream source, never co-author it.
+3. **The bank chain has a FOURTH limb** — `Bank_Statement_Relay.gs` forwards statement mail personal →
+   clinic daily at 07:00. It is inside the *read, never act* hold.
+4. **A third personal book, `PERSONAL_DOCS_ID`, has no backup and appears in no census.**
+
+🛑 **The two project exports and their books NEVER go into git** — passports, licences, an arms-licence
+UIN, policy numbers, and a `govt ID` tab. They live in
+`D:\Downloads\ClaudeCowork\04_SOURCE_DATA\S233_GOOGLE_EXPORTS_2026-09-08\` and
+`F:\ClinicBackup\S233_GOOGLE_EXPORTS_2026-09-08\`. Permanent.
+
+**This section must be carried into every later entry point.**
+
+---
+*START_HERE_SESSION_233 · written at the S232 close, 08-Sep-2026 · §5 added mid-session, 08-Sep.*
