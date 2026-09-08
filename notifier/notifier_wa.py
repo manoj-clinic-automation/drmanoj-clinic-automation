@@ -5,14 +5,29 @@ notifier_wa.py - new-WhatsApp -> ntfy push for Dr. Manoj Agarwal Clinic.
 A long-running, READ-ONLY watcher. It does NOT touch the receiver or the relay.
 Every POLL_SECONDS it checks the WA_Inbox tab for NEW inbound patient messages,
 resolves the patient's NAME from Patient_Master (last-10-digit phone match - the
-same key the dashboard uses), and sends a NAME-ONLY push to ntfy:
+same key the dashboard uses), and pushes to ntfy:
 
-      Title:  New WhatsApp
-      Body :  <Patient Name>          (or "<Name> (3 messages)")
-              "new contact"           (when the number isn't in Patient_Master)
+      Title:  New WhatsApp - <Patient Name>     (ASCII only; ntfy header rule)
+      Body :  <the message text>
+              "new contact" as the name when the number isn't in Patient_Master
 
-PRIVACY: pushes carry the NAME only - never the phone number, the message text,
-or any diagnosis.
+PRIVACY - READ THIS BEFORE CHANGING IT.
+  Until S231 this push carried the NAME ONLY, deliberately. On 08-Sep-2026 the
+  owner ruled that it must carry the FULL message text: his messages are short,
+  and a name alone still forced him into the callback tracker, a reload and the
+  WhatsApp section before he could see what had been said.
+
+  The consequence he accepted, stated plainly so nobody re-derives it later:
+  the message text now leaves this server and sits on ntfy.sh, visible to
+  EVERY device subscribed to the messages topic - his phone, his PC, the
+  assistant PC, the reception PC and his assistant's personal phone. Those are
+  people who already read these messages in the tracker. The topic name is
+  therefore the only thing protecting patient words: it lives in /root/wa/.env
+  alone and must NEVER be written into this repository (F-358).
+
+  The phone number is still never pushed. If the message column cannot be
+  found, this falls back to the old name-only behaviour rather than going
+  silent.
 
 SOURCES (all read-only, same spreadsheet):
   - WA_Inbox       tab : inbound rows the receiver already writes
@@ -169,11 +184,27 @@ def save_state(st):
         log("save_state failed:", e)
 
 
+MAX_PUSH_CHARS = 1500
+
+
+def ascii_title(s):
+    """ntfy sends the Title as an HTTP header, which must be ASCII."""
+    t = re.sub(r"\s+", " ", str(s or ""))          # newlines -> spaces FIRST,
+    t = "".join(ch for ch in t if 32 <= ord(ch) < 127)   # or words get joined
+    return t.strip()
+
+
+def clip(s, n=MAX_PUSH_CHARS):
+    s = str(s or "").strip()
+    return s if len(s) <= n else s[:n - 1].rstrip() + "\u2026"
+
+
 def wa_dir_phone_idx(ws):
     H = [str(x).strip().lower() for x in ws.row_values(1)]
     return (
         findcol(H, ['phone', 'number', 'customer_number', 'from', 'mobile']),
         findcol(H, ['direction', 'dir']),
+        findcol(H, ['message', 'text', 'body', 'msg', 'content', 'message text']),
     )
 
 
@@ -186,10 +217,14 @@ def main():
 
     gc = connect()
     ws = gc.open_by_key(SHEET_ID).worksheet(WA_TAB)
-    iPhone, iDir = wa_dir_phone_idx(ws)
+    iPhone, iDir, iText = wa_dir_phone_idx(ws)
     if iPhone < 0:
         log("WA_Inbox has no phone column - aborting")
         sys.exit(2)
+    if iText >= 0:
+        log("message column found at index %d - pushes carry the message text" % iText)
+    else:
+        log("message column NOT FOUND - falling back to name-only pushes (S231)")
 
     pat = load_patient_map(gc)
     last_pat = time.time()
@@ -227,6 +262,30 @@ def main():
                 continue
 
             new_rows = vals[last_count:n]
+
+            if iText >= 0:
+                # S231, owner's ruling: one push per message, carrying its text.
+                for r in new_rows:
+                    direction = str(r[iDir]).lower() if (0 <= iDir < len(r)) else ""
+                    if "out" in direction:
+                        continue        # our own outbound reply -> skip
+                    phone = r[iPhone] if iPhone < len(r) else ""
+                    name = pat.get(last10(phone), "") or "new contact"
+                    text = clip(r[iText] if iText < len(r) else "")
+                    if not text:
+                        text = "(no text - media or empty message)"
+                    title = ascii_title("New WhatsApp - " + name)
+                    if name and name not in title:
+                        # the name did not survive the ASCII-only header;
+                        # carry it in the body instead of losing it
+                        ntfy_push("New WhatsApp", "%s\n%s" % (name, text))
+                    else:
+                        ntfy_push(title or "New WhatsApp", text)
+                last_count = n
+                st["wa_rows"] = n
+                save_state(st)
+                continue
+
             known = {}     # name -> count
             unknown = 0
             for r in new_rows:
