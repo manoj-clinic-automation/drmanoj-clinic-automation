@@ -1,0 +1,108 @@
+S234_GAS_WEEKLY v1 — install.
+
+WHAT THIS DOES, IN ONE SENTENCE
+Every Sunday the VPS re-downloads your three unversioned Apps Script projects
+from Google and tells you, in plain words, what has changed since last week and
+how far behind the copy in your repository has fallen.
+
+WHY IT EXISTS
+S230 found 2,122 lines of live clinic automation that existed in no repository
+at all, and took a photograph of it on 7-Sep. Nothing refreshes that photograph.
+The cost of that is already on record: VPS_Push_UPI.gs in the repository was a
+whole generation behind the live project, and Bank_Statement_Relay.gs held an
+older copy — both silently, both found only because somebody went and looked.
+This is the thing that looks, every week, so nobody has to.
+
+WHAT IT DOES NOT DO
+It reads Google and never writes to it. No project is edited, no trigger is
+created, changed or even read, no Script Property is touched. It asks Google for
+read-only access and the code contains no POST, PATCH, PUT or DELETE at all.
+
+AND THE CALLBACK TRACKER IS BLOCKED IN THE CODE, NOT JUST LEFT OUT
+Your standing instruction is that the Clinic Callback Tracker is not to be
+touched at all, and it names re-export in so many words. Its id is written into
+a refuse-list inside the script: if anyone ever adds it to the settings, the job
+stops before making a single network call. A rule that lives only in a document
+is one settings edit away from being broken by someone who never read it.
+
+=============================================================================
+ THE INSTALL — TWO LINES. Paste the first, wait for it, then paste the second.
+=============================================================================
+
+[VPS] 1 · pull the deploy clone:
+
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main
+
+[VPS] 2 · run the installer:
+
+bash /root/deploy/repo/deploy_kits/S234_GAS_WEEKLY/install.sh
+
+=============================================================================
+ THE ONE THING THAT MIGHT ASK SOMETHING OF YOU
+=============================================================================
+
+The three script projects have probably never been shared with the backup's
+service account. If any one of them has not, the installer stops at the
+preflight stage, PUTS THE SETTINGS BACK EXACTLY AS THEY WERE, names which
+project it was, and prints the one email address to share it with.
+
+It also tells a PERMISSION refusal from a RATE-LIMIT refusal, and says which
+one it hit. That distinction matters: at S233 a rate-limit wearing the wrong
+words nearly sent you to Google to re-share five sheets that were already shared
+perfectly well.
+
+  * If it says PERMISSION — open that script project in Google, press Share,
+    give VIEWER access to the address it printed, run the second line again.
+  * If it says RATE LIMIT — change nothing at all, wait a few minutes, run the
+    second line again.
+
+=============================================================================
+ WHAT IT WILL TELL YOU EVERY SUNDAY
+=============================================================================
+
+Two lists, and either can be empty:
+
+  CHANGED IN GOOGLE SINCE LAST RUN   somebody edited a script in the browser
+  THE REPOSITORY COPY IS BEHIND      how stale the copy everyone reads has got
+
+They answer different questions. A project edited twice since September and not
+at all this week is quiet on the first list and months stale on the second —
+which is exactly the shape that hid VPS_Push_UPI.gs for a generation.
+
+One expected note in that second list: DailyClinicReports/Code.gs has four
+MyOperator values masked in the repository copy, so it can never match live byte
+for byte. It is compared on line count and function names instead, and the
+report says so rather than crying wolf every week.
+
+=============================================================================
+ WHAT TO EXPECT, SO A NORMAL WEEK IS NOT MISTAKEN FOR A FAULT
+=============================================================================
+
+* exit 0  — the ordinary week.
+* exit 41 — PERMISSION. A project is genuinely not shared. Go to Google.
+* exit 43 — RATE LIMIT. The sharing is fine. Change nothing.
+* exit 42 — a project came back smaller or missing files. The previous export
+            stands and nothing is overwritten. Look at the project in Google:
+            the project is what changed, not the backup.
+* exit 44 — someone put a forbidden project in the settings. Nothing ran.
+
+=============================================================================
+ WHAT TO SEND BACK
+=============================================================================
+
+Three lines — md5, projects, cron. Those three and nothing else.
+If it stops instead, send me everything it printed.
+
+Proven offline before handover: gas_export.py selftest — 24 checks, 0 failures;
+WALK_gas_install.py — 26 checks, 0 failures, including every refusal path and
+each one asserting the settings file comes back BYTE FOR BYTE.
+
+=============================================================================
+ ROLLBACK — three lines, in this order.
+=============================================================================
+
+crontab -l | grep -v gas_export.py | crontab -
+
+sed -i '/^GAS=/d' /root/state_backup/clinic_state_backup.conf
+
+rm -f /root/state_backup/gas_export.py
