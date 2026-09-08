@@ -1,0 +1,102 @@
+S233_SHEETS_BACKUP v1 — install, ONE LINE AT A TIME. After PUBLISH + deploy pull.
+
+WHAT THIS KIT DOES, IN ONE SENTENCE: the live Google Sheets — the only data in
+this estate with zero copies anywhere — start riding inside the AES-256 nightly
+bundle that has shipped to Drive since S230 and whose restore has been drilled.
+
+WHAT IT DOES NOT DO: it does not create a second backup mechanism, a second key,
+a second destination or a second cron destination. One new script that writes
+CSV to a directory, and ONE new line in the job that already works.
+
+=============================================================================
+NOTHING TO SUBSTITUTE. NO KEY. NO SECRET. Two owner actions, and step 8 tells
+you if the second is even needed.
+=============================================================================
+
+OWNER ACTION A — none before step 1. Start pasting.
+
+OWNER ACTION B — ONLY IF step 8 names a sheet as NOT SHARED. Open that sheet in
+Google, Share, paste the service account's address (step 7 prints it), give it
+"Viewer", untick "Notify people", Send. Then run step 8 again. A sheet the
+service account cannot read cannot be backed up, and this kit refuses to
+pretend otherwise.
+
+=============================================================================
+THE LINES. One at a time. Wait for each to finish.
+=============================================================================
+
+[VPS] 1 · deploy clone pull:
+git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main
+
+[VPS] 2 · keep the file that is live now, so rollback is a copy back:
+\cp /root/state_backup/clinic_state_backup.py /root/state_backup/clinic_state_backup.py.v2_S230
+
+[VPS] 3 · put the exporter in place:
+\cp /root/deploy/repo/deploy_kits/S233_SHEETS_BACKUP/sheets_pull.py /root/state_backup/sheets_pull.py
+
+[VPS] 4 · put the bundler v3 in place:
+\cp /root/deploy/repo/deploy_kits/S233_SHEETS_BACKUP/clinic_state_backup.py /root/state_backup/clinic_state_backup.py
+
+[VPS] 5 · name the export directory in the conf the S230 job already uses:
+printf 'SHEETS_DIR=/root/state_backup/sheets\n' >> /root/state_backup/clinic_state_backup.conf
+
+[VPS] 6 · name the books — ONE line, ids and labels, nothing secret in it:
+printf 'SHEETS=1USjArkqIdrE9hIqerghms76STatM5XTbSW_a9I3klo0:tracker,1rq9VvB5L94EmmZbiUwase9HBLsJ3htispYLd1rHjSRQ:audit,1AnJWDJsAwtgkfFCQNwLzi6lqPPAfGwd-4TUZkuzrZH8:accounting_details,1rwxrqAiLh9xBLezZLe7VqBWeCn3FRf_GZqOAEZi-oWc:daily_clinic_reports,13eJo58J7G8n846mGlyv-pHpDILQnCrK-8ZZekyi1Hrg:monthly_accounting,1wKMcAWMz5VqjoC7q5AgbRvB0xEODrUvibRQw4iRPAHY:payment_register,1uTzTatn-9sxDl-uNS6rn8b_YhqgR3lE8wxLEqNi6x6g:patient_diagnosis,1OB70_Mapuugc33zkfFevwnrS0e8s1NdWzsrzJDqO38E:renewals\n' >> /root/state_backup/clinic_state_backup.conf
+
+[VPS] 7 · print the service account's address — this is who the sheets must be shared with:
+python3 -c "import json;c=dict(l.strip().split('=',1) for l in open('/root/state_backup/clinic_state_backup.conf') if '=' in l and not l.strip().startswith('#'));print(json.load(open(c['SA_JSON'].strip()))['client_email'])"
+
+[VPS] 8 · preflight — reads every book, writes NOTHING, and names any that is not shared:
+/root/wa/venv/bin/python3 /root/state_backup/sheets_pull.py preflight
+
+    *** If step 8 says NOT SHARED for any book, do OWNER ACTION B for exactly ***
+    *** those books and run step 8 again. Do not go to step 9 until step 8    ***
+    *** ends "PREFLIGHT OK".                                                  ***
+
+[VPS] 9 · the first real pull, watched:
+/root/wa/venv/bin/python3 /root/state_backup/sheets_pull.py run
+
+[VPS] 10 · what landed, and how old it is:
+/root/wa/venv/bin/python3 /root/state_backup/sheets_pull.py list
+
+[VPS] 11 · prove the bundler still passes its own preflight with v3 in place:
+/root/wa/venv/bin/python3 /root/state_backup/clinic_state_backup.py preflight
+
+[VPS] 12 · ship one bundle now, with the sheets inside it for the first time:
+/root/wa/venv/bin/python3 /root/state_backup/clinic_state_backup.py run
+
+[VPS] 13 · confirm the sheets are IN the shipped bundle (expect a number above 0):
+python3 -c "import json;s=json.load(open('/root/state_backup/clinic_state_backup.state.json'));print(sum(1 for x in s['sources'] if '/state_backup/sheets/' in x),'sheet files shipped, of',s['files_included'],'files total')"
+
+[VPS] 14 · the exporter's cron, 01:45 — five minutes before the bundle at 01:50:
+(crontab -l 2>/dev/null; echo '45 1 * * * /root/wa/venv/bin/python3 /root/state_backup/sheets_pull.py run >> /root/state_backup/sheets_pull.log 2>&1') | crontab -
+
+[VPS] 15 · confirm the cron line is there:
+crontab -l | grep sheets_pull
+
+[VPS] 16 · read the two pins back to me:
+md5sum /root/state_backup/sheets_pull.py /root/state_backup/clinic_state_backup.py
+
+=============================================================================
+WHAT TO EXPECT, SO A NORMAL NIGHT IS NOT MISTAKEN FOR A FAULT
+=============================================================================
+
+* exit 0  — every book pulled. The ordinary night.
+* exit 41 — a book could not be opened. Its LAST GOOD export is untouched and
+            still ships. Usually a share was withdrawn, or a sheet was renamed
+            away. The log names the book.
+* exit 42 — a tab lost more than a fifth of its rows, or emptied, or vanished.
+            The new pull is THROWN AWAY and the previous export still ships.
+            This is the guard working, not a failure of the backup. Look at the
+            sheet before doing anything: the sheet is the thing that changed.
+
+An exit 41 or 42 does NOT stop the 01:50 bundle. The bundle ships whatever good
+copy is on disk and records its age in _TAKEN_AT.json.
+
+=============================================================================
+ROLLBACK — two lines, in this order. Nothing else is touched.
+=============================================================================
+
+crontab -l | grep -v sheets_pull | crontab -
+
+\cp /root/state_backup/clinic_state_backup.py.v2_S230 /root/state_backup/clinic_state_backup.py
