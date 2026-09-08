@@ -543,6 +543,15 @@
 
 > Replaces the old §S146-lifted header and the per-session live-file lines scattered through the removed "additions" blocks. Each md5 is the **latest** for that file; `§12A` below remains the fuller authority for the call-hook family. VPS python for `/root/wa`-context scripts = `/root/wa/venv/bin/python3`; the **asset app and the finance app use system `python3`** (F-53).
 
+**S230/S232 wave — THE RESILIENCE AND FRESHNESS LEGS (VPS). ⚠ RECORDED AT S232, NOT SILENTLY FIXED: these four live files were installed at S230 and CONFIRMED from the box at the S231 open, but they were never written into THIS consolidated table — only into the S230 section table further down, which `gen_live_pins.py` never reads (it stops at the §12 STATE heading, and this table is above it). So they appear in NO `live_pins` list and `verify_live_pins.py` has never held the box to any of them. Four live files nobody was checking, S230 → S232 — F-369.**
+
+| File | md5 | live as of |
+|---|---|---|
+| `/root/finance/freshness.py` | `66d93a631c6c46ebb6536620450efa74` **DECLARED-PENDING** | **S232, installed AFTER the S231 close** (kit `S232_FRESHNESS_GREEN`, the daily-green morning line, D423) — was `6476d1d28d47055813737a66514dacaf`, the S230 pin confirmed from the box at the S231 open. `install_green.py` copies the repo file verbatim and re-hashes the landed file against exactly this md5, rolling back on any mismatch, so the value is structurally asserted and the owner's phone showed the 26-tick line the same morning; **but no `md5sum` has been read back from the box.** Re-hash at the next VPS contact. cron `5 8 * * *` on an IST box; 26 legs. |
+| `/root/finance/freshness_legs.json` | `ad223bc613d192c0c8774f0c78c65296` | **S230 — read back from the box and confirmed at the S231 open.** Configuration, not code: a window is widened or a leg retired HERE, never in `freshness.py`. |
+| `/root/state_backup/clinic_state_backup.py` | `425e77f57733215f4241b80653d33b07` | **S230 — read back from the box and confirmed at the S231 open.** v2 after F-355; cron 01:50; 55 files shipped, `secrets_skipped=2`. |
+| `/root/finance/verify_restore.py` | `f67ee579c21146f12f2b93e33666b5f6` | **S230 — read back from the box and confirmed at the S231 open.** The twice-yearly restore drill; PASS on its first run. |
+
 **S229 wave — THE ITEM SPINE (VPS `finance.db`, run from the deploy clone; and the manojz pipeline). ⚠ The two VPS rows are PREDICTIONS from the published kit bytes and are NOT passes: the owner ran the installer and pasted its closing lines, but no `md5sum` was read back from the box. They are DECLARED-PENDING and are re-hashed at the S230 open. The two manojz rows WERE hashed on manojz at this close and ARE passes.**
 
 | File | md5 | live as of |
@@ -2360,7 +2369,7 @@ the published kit bytes and are DECLARED-PENDING until read back from the box at
 |---|---|---|
 | `/root/state_backup/clinic_state_backup.py` | `425e77f5…` | LIVE · v2 · cron 01:50 · 55 files shipped, `secrets_skipped=2` |
 | `/root/finance/verify_restore.py` | `f67ee579…` | LIVE · twice-yearly drill · PASS on first run |
-| `/root/finance/freshness.py` | `6476d1d2…` | LIVE · cron 08:05 · 26 legs, 26 OK at arming |
+| `/root/finance/freshness.py` | `66d93a63…` **DECLARED-PENDING** | LIVE · cron 08:05 · 26 legs · **CHANGED AFTER THE S231 CLOSE** by kit `S232_FRESHNESS_GREEN` (the daily-green morning line) — was `6476d1d2…`, which is what the §S231 block below correctly records as confirmed AT THAT CLOSE. Not read back from the box since; the consolidated live-file table at the head of this Register carries the full md5 and the provenance. |
 | `/root/finance/freshness_legs.json` | `ad223bc6…` | LIVE · **configuration, not code** — legs are added and retired here |
 
 *Three conf files were written on the box and are deliberately NOT hashed here: they carry the

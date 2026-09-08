@@ -94,7 +94,7 @@ REM  deploy_kits\__pycache__\ -- which .gitignore blocks -- and the F-100 gate
 REM  below then refuses the publish. The check would create the thing that
 REM  fails the next check.
 if not exist "deploy_kits\NO_PHONE_NUMBERS.py" goto :phone_gate_missing
-echo Checking staged files for contact numbers...
+echo Checking staged files for contact numbers and credentials...
 %GIT% diff --cached --name-only > "%TEMP%\_staged_files.txt"
 python -B "deploy_kits\NO_PHONE_NUMBERS.py" --files-from "%TEMP%\_staged_files.txt" "%REPO_DIR%"
 if errorlevel 1 goto :phone_gate_failed
@@ -103,15 +103,22 @@ goto :phone_gate_done
 
 :phone_gate_failed
 echo.
-echo !! REFUSING - a phone number is in what you are about to publish.
-echo    Rule: NO PATIENT NUMBER, from 28-Aug-2026. Enforced as no number at all,
-echo    because nothing in the text says whose a number is.
+echo !! REFUSING - the gate found something in what you are about to publish.
+echo    READ THE LINES ABOVE: they say whether it is a NUMBER or a CREDENTIAL.
 echo.
-echo    DATA  - move the file to the config store, outside the repo:
-echo            D:\Downloads\margsync\_config\
-echo    PROSE - mask it. This does it for you, in place:
-echo            python -B deploy_kits\NO_PHONE_NUMBERS.py --fix --files-from "%TEMP%\_staged_files.txt" "%REPO_DIR%"
-echo            then read the diff and run PUBLISH again.
+echo    A CREDENTIAL (a Bearer token, a private key, a password in a file):
+echo            --fix will NOT help and masking is NOT the answer. Take the value
+echo            out of the file and read it from the environment or a conf file
+echo            on the box. If it was ever committed, it must also be ROTATED.
+echo            This repository is PUBLIC (F-365, 16-Jun-2026, 84 days).
+echo.
+echo    A NUMBER - rule: NO PATIENT NUMBER, from 28-Aug-2026. Enforced as no
+echo            number at all, because nothing in the text says whose a number is.
+echo            DATA  - move the file to the config store, outside the repo:
+echo                    D:\Downloads\margsync\_config\
+echo            PROSE - mask it. This does it for you, in place:
+echo                    python -B deploy_kits\NO_PHONE_NUMBERS.py --fix --files-from "%TEMP%\_staged_files.txt" "%REPO_DIR%"
+echo                    then read the diff and run PUBLISH again.
 echo.
 echo    The staged file list is left at %TEMP%\_staged_files.txt for that command.
 echo    NOTHING committed or pushed.
