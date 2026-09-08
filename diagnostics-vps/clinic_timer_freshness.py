@@ -36,12 +36,27 @@ import urllib.request
 from email.mime.text import MIMEText
 from datetime import datetime, timezone, timedelta
 
+def _ntfy_url_from_env_file():
+    """Read the alert topic from /root/wa/.env  (S231/F-358: never hard-coded).
+
+    Returns "" if absent.  Callers MUST treat "" as loud -- never silent."""
+    try:
+        with open("/root/wa/.env", "r") as _f:
+            for _line in _f:
+                _line = _line.strip()
+                if _line.startswith("WATCHDOG_NTFY_URL="):
+                    return _line.split("=", 1)[1].strip().strip('"').strip("'")
+    except Exception:
+        pass
+    return ""
+
+
 # ---- fixed facts about this box -------------------------------------------
 ENV_PATH        = "/root/wa/.env"
 HEARTBEAT_DIR   = "/root/wa/heartbeats"
 STATE_PATH      = "/root/wa/timer_freshness_state.json"
 LOG_PATH        = "/root/wa/timer_freshness.log"
-NTFY_URL        = "https://ntfy.sh/drmka-yfv80gjcixa643"
+NTFY_URL        = os.environ.get("WATCHDOG_NTFY_URL", "") or _ntfy_url_from_env_file()
 
 IST = timezone(timedelta(hours=5, minutes=30))   # VPS clock is IST
 GRACE = timedelta(hours=2)                        # slack past a scheduled slot

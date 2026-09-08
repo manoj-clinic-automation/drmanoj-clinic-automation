@@ -7,8 +7,9 @@ Wants=network-online.target
 Type=simple
 User=root
 WorkingDirectory=/root/wa
-Environment=NTFY_SERVER=https://ntfy.sh
-Environment=NTFY_TOPIC=drmka-yfv80gjcixa643
+# S231/F-358: the ntfy topic is a SECRET. This file is PUBLIC.
+# It lives only in /root/wa/.env on the box. Never put it here.
+EnvironmentFile=/root/wa/.env
 Environment=POLL_SECONDS=30
 Environment=PAT_REFRESH_MIN=30
 ExecStart=/root/wa/venv/bin/python /root/wa/notifier_wa.py

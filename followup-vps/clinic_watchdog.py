@@ -44,6 +44,21 @@ import urllib.request
 from datetime import datetime
 from email.mime.text import MIMEText
 
+def _ntfy_url_from_env_file():
+    """Read the alert topic from /root/wa/.env  (S231/F-358: never hard-coded).
+
+    Returns "" if absent.  Callers MUST treat "" as loud -- never silent."""
+    try:
+        with open("/root/wa/.env", "r") as _f:
+            for _line in _f:
+                _line = _line.strip()
+                if _line.startswith("WATCHDOG_NTFY_URL="):
+                    return _line.split("=", 1)[1].strip().strip('"').strip("'")
+    except Exception:
+        pass
+    return ""
+
+
 # ----------------------------------------------------------------------------
 # CONFIG — the nine ALWAYS-ON services the watchman guards.
 # Each entry: the systemd unit name, a plain-English label, and the one-line
@@ -72,7 +87,7 @@ LOG_FILE   = os.environ.get("WATCHDOG_LOG_FILE",   "/root/wa/watchdog.log")
 
 # Alert routing.
 # ntfy: reuse the clinic's existing private topic (already on the owner's phone).
-NTFY_TOPIC_URL = os.environ.get("WATCHDOG_NTFY_URL", "https://ntfy.sh/drmka-yfv80gjcixa643")
+NTFY_TOPIC_URL = os.environ.get("WATCHDOG_NTFY_URL", "") or _ntfy_url_from_env_file()
 # email: goes to the clinic Google account. SMTP settings are read from the
 # environment if present; if email cannot be sent, ntfy still fires (never both fail silently).
 ALERT_EMAIL_TO = os.environ.get("WATCHDOG_EMAIL_TO", "drmka.ortho@gmail.com")

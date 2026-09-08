@@ -62,7 +62,7 @@ Environment (all optional):
   LEDGER_DIR   data directory        (default /root/staff_ledger)
   LEDGER_PORT  port                  (default 8043)
   STAFF_CSV    staff master path     (default /root/staff_master.csv)
-  NTFY_URL     e.g. https://ntfy.sh/yourtopic  — pinged on new PENDING entry
+  NTFY_URL     e.g. https://ntfy.sh/<topic-from-.env>  — pinged on new PENDING entry
 """
 
 import os, sys, json, csv, hashlib, secrets, datetime, tempfile, getpass, urllib.request
@@ -693,6 +693,21 @@ def build_statement(staff, month=None):
 # SALARY_PAID system rows (locking the month) + salary_final_<month>.csv.
 
 import re as _re2, subprocess as _sp
+
+def _ntfy_url_from_env_file():
+    """Read the alert topic from /root/wa/.env  (S231/F-358: never hard-coded).
+
+    Returns "" if absent.  Callers MUST treat "" as loud -- never silent."""
+    try:
+        with open("/root/wa/.env", "r") as _f:
+            for _line in _f:
+                _line = _line.strip()
+                if _line.startswith("NTFY_URL="):
+                    return _line.split("=", 1)[1].strip().strip('"').strip("'")
+    except Exception:
+        pass
+    return ""
+
 
 def _att(name):
     return os.path.join(ATT_BASE, name)
