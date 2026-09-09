@@ -183,3 +183,20 @@ finance/REPORT_1.xls
 !deploy_kits/S230_GAS_EXPORT/ClinicAccountingReports/appsscript.json
 !deploy_kits/S230_GAS_EXPORT/UPIReconciliation/appsscript.json
 !deploy_kits/S230_FRESHNESS/legs.json
+
+# ---------------------------------------------------------------------------
+# S236 (09-Sep-2026): F-300 RECURRED A THIRD TIME -- the S236_DISCOUNT kit.
+# `discount_seed_S236.json` is the whole payload of T1: the owner's OWN settled
+# discount ruling for all 93 orthotic, bandage, casting and consumable products
+# -- product name, his percentage, the printed M.R.P. it applies to, and the
+# date that M.R.P. was in force. Without it the kit installs an empty table.
+# The blanket *.json rule at line 17 swallowed it and the publish gate correctly
+# refused -- the same shape as the S223_XRAY_LIST and S230_GAS_EXPORT notes
+# above. THIS IS THE THIRD RECURRENCE, so it is worth saying once more plainly:
+# ANY NEW KIT WHOSE PAYLOAD IS A .json NEEDS ITS LINE HERE, ADDED WHEN THE KIT
+# IS BUILT AND NOT WHEN THE PUBLISH REFUSES.
+# It holds no patient, no phone number, no secret -- product names, rupee
+# figures and two dates. Verified clean by the F-185 gate before this line was
+# added. Exact path only, no wildcard, so nothing else is widened.
+# ---------------------------------------------------------------------------
+!deploy_kits/S236_DISCOUNT/discount_seed_S236.json
