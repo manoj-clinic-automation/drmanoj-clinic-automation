@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-ledger_reconcile.py  v1.0  (S238, D442)  --  the owner's stated record, made true
+ledger_reconcile.py  v1.1  (S238, D442)  --  the owner's stated record, made true
+
+v1.1 (10-Sep-2026 night): a record line may say "month_advances" -- ALL of one
+person's short-term advances dated in the month come off that month's salary (the
+owner's words for Ranjeet, Shivani and Sukhveer). The advances are found at run
+time, so an advance reversed and entered again is followed, not missed -- v1.0
+needed each advance's reference and stopped RED when one had been re-entered.
 ===============================================================================
 Dr Manoj, 10-Sep-2026 (D442): "Whatever transactions I submitted to you are the
 only thing which we can understand out here, and I want those to be replicated
@@ -38,7 +44,7 @@ OPTIONS  --record FILE  --module /root/staff_ledger.py  --ledger-dir DIR
 """
 import os, sys, csv, json, shutil, hashlib, tempfile, secrets, datetime, importlib.util, io, contextlib
 
-VERSION = "1.0-S238-D442"
+VERSION = "1.1-S238-D442"
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_RECORD = os.path.join(HERE, "stated_record_2026-08.txt")
 DEFAULT_MODULE = "/root/staff_ledger.py"
@@ -92,12 +98,12 @@ def load_record(path):
         lines = [l for l in f if l.strip() and not l.lstrip().startswith("#")]
     for i, r in enumerate(csv.DictReader(lines), 2):
         r = {k.strip(): (v or "").strip() for k, v in r.items() if k}
-        if r["kind"] not in ("recovery", "schedule", "balance", "account", "held"):
+        if r["kind"] not in ("recovery", "schedule", "balance", "account", "held", "month_advances"):
             raise SystemExit("!! record line %d: unknown kind %r" % (i, r["kind"]))
         r["held"] = r.get("held", "").upper() in ("Y", "YES", "HELD")
         r["amount"] = int(r["amount"]) if r.get("amount") else 0
         out.append(r)
-    months = {r["month"] for r in out if r["kind"] in ("recovery", "balance") and r["month"]}
+    months = {r["month"] for r in out if r["kind"] in ("recovery", "balance", "month_advances") and r["month"]}
     if len(months) != 1:
         raise SystemExit("!! the record must speak for exactly one month; it names %s" % sorted(months))
     return out, months.pop()
@@ -234,8 +240,33 @@ def build_plan(sm, rows, record, month, by):
                                              "no schedule" if not have else "a different schedule", steps))
         ids[new_id] = new
 
+    # ---- 1b. month_advances: every short-term advance of the person dated in the
+    #      month, found NOW (so a re-entered advance is followed) -> recovery lines
+    b_ids = {x["ref"] for x in record if x["kind"] == "account" and x["value"].upper() == "B"}
+    expanded = []
+    for it in [x for x in record if x["kind"] == "month_advances"]:
+        found = [r for r in rows
+                 if r["category"] == "ADVANCE_ISSUE" and r["status"] == "APPROVED"
+                 and r["staff"] == it["staff"] and r["amount"] > 0 and r["id"] not in rev
+                 and not r.get("interest") and r["id"] not in b_ids
+                 and str(r.get("date_from", ""))[:7] == it["month"]
+                 and not str(r.get("narration", "")).startswith("opening balance migrated")]
+        if not found:
+            P.say("OK", "%s: no short-term advance dated %s — nothing to recover" % (it["staff"], it["month"]))
+            continue
+        for r in sorted(found, key=lambda x: (x["date_from"], x.get("ts_entry", ""))):
+            done_here = recovered_in(rows, r["id"], it["month"])
+            left = r["amount"] - sum(-x["amount"] for x in rows
+                                     if x["category"] == "ADVANCE_INSTALMENT" and x.get("contra_of") == r["id"]
+                                     and x["status"] == "APPROVED")
+            expanded.append({"kind": "recovery", "staff": it["staff"], "ref": r["id"],
+                             "month": it["month"], "amount": done_here + max(0, left),
+                             "value": "", "held": it["held"],
+                             "note": "%s (advance %s, %s)" % (it["note"] or "all advances of the month",
+                                                              r["id"], r["date_from"])})
+
     # ---- 2. recoveries the closes should have made -------------------------
-    for it in [x for x in record if x["kind"] == "recovery"]:
+    for it in [x for x in record if x["kind"] == "recovery"] + expanded:
         issue, why = live_issue(it["ref"], it["staff"])
         if not issue:
             P.say("BLOCKED", "%s: %s" % (it["staff"], why)); continue

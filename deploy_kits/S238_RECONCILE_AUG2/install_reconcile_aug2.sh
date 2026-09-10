@@ -7,6 +7,8 @@
 #  Shivani's and Sukhveer's August advances come off the AUGUST salary. The
 #  reconciler itself is unchanged (v1.0, 3f3457dd); it is now proven against the
 #  live staff_ledger.py v3.7 (49b13f42, S238_CLOSE_GUARD).
+#  v1.1 of the reconciler: 'month_advances' lines find the advances at run time
+#  (the first run stopped RED: one of Sukhveer's advances had been re-entered).
 #
 #  Places the reconciler, proves it on a throw-away COPY of the real ledger, and
 #  then prints the DRY RUN: every difference between the owner's stated record
@@ -74,5 +76,8 @@ echo "-- $OUT   (run on a throw-away copy of the real ledger)"
 echo "-- placed and verified: $RDIR"
 echo ""
 LEDGER_DIR="$LDIR" "$PY" "$RDIR/ledger_reconcile.py" --module "$MODULE" --ledger-dir "$LDIR"
+echo ""
+echo "== AUGUST AS THE SALARY PAGE SHOWS IT NOW (read-only; before --apply) =="
+"$PY" -B "$KDIR/august_nets.py" 2026-08 2>&1 | tail -20
 echo ""
 echo "(installer finished — nothing was written to the ledger)"

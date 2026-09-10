@@ -3,12 +3,21 @@
 **The owner, 10-Sep-2026 (night):** "Ranjeet's, Shivani's and Sukhveer's August advances — they come off
 August's salary."
 
-Revision 2 adds six recovery lines to the August stated record: Ranjeet ₹5,000 + ₹1,000, Shivani
-₹1,100, and Sukhveer ₹6,000 + ₹4,000 + ₹4,000. Each of their short-term balances at 31-Aug becomes ₹0.
-This includes the two advances that were booked against September (Ranjeet's ₹1,000 and Sukhveer's
-₹4,000), because both were given in August.
+Revision 2 adds three lines to the August stated record, one each for Ranjeet, Shivani and Sukhveer.
+Each line says that ALL of that person's short-term advances dated in August come off the August salary,
+and their short-term balances at 31-Aug become ₹0. That includes the advances that were booked against
+September.
 
-The reconciler is unchanged (v1.0). The installer places the new record and proves the tool on a
+**First run, 10-Sep 22:07:** it stopped RED and wrote nothing. One of Sukhveer's advances had been
+reversed and entered again after the ledger copy used for testing was taken, so the reference in the
+record no longer pointed at a live advance. **Reconciler v1.1** now finds the advances when it runs, so
+a re-entered advance is followed. It was proven on four ledger shapes: as tested, re-entered in August,
+re-entered in September, and reversed only. The selftest had 0 failures in each.
+
+At the end, the installer also prints August as the salary page computes it now. This is read-only and
+uses the live settings and hold ledger.
+
+The reconciler itself otherwise works as before. The installer places the new record and proves the tool on a
 throw-away copy of the real ledger. It then prints the dry run. **It never writes.** Writing is one
 separate line, `--apply`.
 

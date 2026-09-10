@@ -1,5 +1,6 @@
-3f3457dddfbab0fb5f6d204b27cacefb  ledger_reconcile.py
-db39f073bec71a218156f34f0feb2120  stated_record_2026-08.txt
-22e68f00a3b0a51c82051fafceda41d5  install_reconcile_aug2.sh
-fd8659c2e06038375d1bbad9362da15e  KIT_ID.txt
-23b100a473b07316975749d8df2cc26f  READ_ME_FIRST.md
+d797f2b45cda3132fa1889c6f3a3234d  ledger_reconcile.py
+15a50c15e315d5b0794c4645b0aaea01  stated_record_2026-08.txt
+7db1bdcc0e768c8038fb528173db7f8e  install_reconcile_aug2.sh
+f864701fbce5cc343644332f14bca0c4  august_nets.py
+da532bf19a74eb06aabfd51f6d9071b0  KIT_ID.txt
+2733e742b5f0929b81c01974bf42e87f  READ_ME_FIRST.md
