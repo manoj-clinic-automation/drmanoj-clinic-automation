@@ -1,0 +1,14 @@
+# /etc/systemd/system/clinic-certwatch.timer
+# Once a day, early morning IST, so a warning is waiting when the day starts.
+# The VPS clock is UTC: 01:10 UTC = 06:40 IST.
+# Persistent=true means a run missed while the box was down happens on boot --
+# a watchman that skips a day because of a reboot is the failure it exists to prevent.
+[Unit]
+Description=Run the clinic certificate watch daily
+[Timer]
+OnCalendar=*-*-* 01:10:00 UTC
+Persistent=true
+AccuracySec=1min
+Unit=clinic-certwatch.service
+[Install]
+WantedBy=timers.target

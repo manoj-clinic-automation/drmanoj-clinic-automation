@@ -1,0 +1,13 @@
+# /etc/systemd/system/clinic-certwatch.service
+# The certificate night-watchman (S237, F-387).
+# Read-only. It never renews, installs, restarts or changes anything.
+[Unit]
+Description=Clinic certificate watch (what the sites actually serve)
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=oneshot
+WorkingDirectory=/root/wa
+ExecStart=/root/wa/venv/bin/python3 /root/wa/cert_watch.py
+# The alert topic and SMTP settings are read from /root/wa/.env by the script
+# itself, exactly as clinic_watchdog.py does. No secret is written here.
