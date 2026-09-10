@@ -1,0 +1,27 @@
+# STATED RECORD — AUGUST 2026 · the owner's own list (D442), confirmed against his physical records 10-Sep-2026
+# Sources: S237_THE_STATED_RECORD (A-D), S237_BUILD_BRIEF §1 and §2B. The ledger is corrected to THIS, never the reverse.
+# kind: recovery = what the August salary should have recovered on one advance
+#       schedule = the agreed repayment steps an advance must carry
+#       balance  = what each account should hold at 31-Aug (A interest loan · B interest-free · C short-term)
+#       account  = which advance is tranche B
+#       held     = reported every run, never written, until the evidence or the decision arrives
+# held = Y : shown, never written.
+kind,staff,ref,month,amount,value,held,note
+schedule,Darpan,0cc0b26b38c5,,,"2026-08:8000, 2026-09:4000, 2026-10:4000, 2026-11:4000",,B2 - the 17-Aug Rs 20000: 8000 against August then 4000 a month
+schedule,Darpan,e485b1568a27,,,"2026-08:7000, 2026-09:8000",,B4 - the 31-Aug Rs 15000: 7000 against August then 8000 September
+recovery,Darpan,0cc0b26b38c5,2026-08,8000,,,B2 - 8000 against August; the advance was approved on 25-Aug after the August close of 20-Aug had run
+recovery,Darpan,e485b1568a27,2026-08,7000,,,B4 - 7000 against August from the 31-Aug Rs 15000
+recovery,Surendra,c66a7a9f90bf,2026-08,2000,,,C1 - the 10-Aug Rs 2000 clears in full from August
+recovery,Surendra,fd47cf5f18ca,2026-08,3000,,,C5 - the 25-Aug Rs 3000 clears in full from August
+recovery,Surendra,3e4033170e76,2026-08,2000,,,C9 - the Rs 8000 group recovers 2000 from August (part 1 of 14-Aug)
+account,Darpan,f9f60e18fd5e,,,B,,the migrated interest-free tranche
+balance,Darpan,A,2026-08,174000,,Y,the ledger reads 175000: one month split wrongly between interest and principal - waits for the loan workbook
+balance,Darpan,B,2026-08,180000,,,
+balance,Darpan,C,2026-08,20000,,,12000 left on the 20000 and 8000 left on the 15000
+balance,Surendra,C,2026-08,6000,,,
+balance,Shivani,C,2026-08,1100,,,
+balance,Ranjeet,C,2026-08,6000,,,
+balance,Sukhveer,C,2026-08,14000,,,6000 (10-Aug) + 4000 (13-Aug) + 4000 (23-Aug)
+balance,Shavez,C,2026-08,0,,,
+held,Darpan,25fcbbea0410,2026-04,,,Y,April 2026 is recorded as a SKIP but the owner's record has it PAID (and it spent one of the two FY skips) - waits for the loan workbook
+held,Darpan,f9f60e18fd5e,,,,Y,Tranche B (Rs 180000) has no recovery terms - nothing collects on it while the loan runs - the owner's decision
