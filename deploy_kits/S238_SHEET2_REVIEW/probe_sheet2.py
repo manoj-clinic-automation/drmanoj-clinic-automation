@@ -31,9 +31,9 @@ if len(sys.argv) > 1 and sys.argv[1] == "--one":
     spec = importlib.util.spec_from_file_location("salary_policy_probe", p)
     M = importlib.util.module_from_spec(spec); spec.loader.exec_module(M)
     r = M.compute(ym)
-    out = {"staff": {s["name"]: {"adv": s["adv_ded"], "net": s["net"], "held": s.get("held", 0),
-                                 "prior": s.get("prior_collect", 0), "release": s.get("release", 0)}
-                     for s in r["staff"]},
+    num = lambda st: {k: round(float(v), 2) for k, v in st.items()
+                      if isinstance(v, (int, float)) and not isinstance(v, bool)}
+    out = {"staff": {s["name"]: num(s) for s in r["staff"]},
            "closed": bool(r.get("ledger_closed")), "render": ""}
     if render:
         try:
@@ -59,16 +59,26 @@ def run(p, render):
     return json.loads(line[-1][2:])
 old, new = run(live_p, "0"), run(new_p, "1")
 fails = []
+# v1.9 changes only wording and print -- and the hold threshold default (30 -> 20,
+# the owner's ruling). So a difference is allowed ONLY in the hold fields and in what
+# they carry into the totals; anything else is a failure, named field by field.
+HOLD = {"release", "prior_collect", "net", "deductions", "ded",
+        "total_deductions"}
 print("  %-11s %11s %11s   %11s %11s" % ("staff", "Advance NOW", "Advance NEW", "net NOW", "net NEW"))
 for n, s in new["staff"].items():
     o = old["staff"].get(n, {})
+    diff = sorted(k for k in set(s) | set(o) if abs(s.get(k, 0) - o.get(k, 0)) > 0.01)
+    other = [k for k in diff if k not in HOLD]
     flag = ""
-    if abs(s["adv"] - o.get("adv", 0)) > 0.01:
+    if "adv_ded" in diff:
         flag = "   <-- ADVANCE CHANGED"; fails.append(n)
-    elif abs(s["net"] - o.get("net", 0)) > 0.01:
-        flag = "   (hold threshold 30%->20%: last month's hold now %s)" % (
-            "cancelled" if s["release"] > o.get("release", 0) else "deducted")
-    print("  %-11s %11.2f %11.2f   %11.2f %11.2f%s" % (n, o.get("adv", 0), s["adv"], o.get("net", 0), s["net"], flag))
+    elif other:
+        flag = "   <-- CHANGED: " + ", ".join(other); fails.append(n)
+    elif diff:
+        flag = "   (last month's hold: 20%% threshold -> %s)" % (
+            "cancelled" if s.get("release", 0) > o.get("release", 0) else "now deducted")
+    print("  %-11s %11.2f %11.2f   %11.2f %11.2f%s" % (n, o.get("adv_ded", 0), s.get("adv_ded", 0),
+                                                     o.get("net", 0), s.get("net", 0), flag))
 print("  every sheet renders from the new result" if new["render"] == "ok" else "  RENDER FAILED: " + new["render"])
 if new["render"] != "ok": fails.append("render")
 print("sheet2 probe: %d failures" % len(fails))

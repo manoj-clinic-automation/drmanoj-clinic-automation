@@ -8,8 +8,13 @@ import sys, importlib.util, os
 d = sys.argv[1]
 spec = importlib.util.spec_from_file_location("salary_policy_set", os.path.join(d, "salary_policy.py"))
 M = importlib.util.module_from_spec(spec); spec.loader.exec_module(M)
-before = M.load_settings().get("improve_pct")
-if before == 20:
+import json
+try:
+    stored = json.load(open(M.SETTINGS_PATH, encoding="utf-8")).get("improve_pct")
+except Exception:
+    stored = None
+before = stored if stored is not None else "not stored (default %s)" % M.DEFAULTS.get("improve_pct")
+if stored == 20:
     print("improve_pct already 20 -- nothing written"); sys.exit(0)
 ok, err = M.save_settings({"improve_pct": 20}, by="manoj (owner ruling 10-Sep-2026, kit S238_SHEET2_REVIEW)")
 after = M.load_settings().get("improve_pct")
