@@ -97,8 +97,14 @@ SITES = [
     ("drmanojagarwal.in",       False, "RETIRED by the owner -- not renewed on purpose (D-, S236)"),
 ]
 
-WARN_DAYS = 21          # start warning here -- acme.sh renews at 30, so 21 means renewal has already failed once
-URGENT_DAYS = 7         # shout from here
+# THE THRESHOLDS ARE TUNED TO THIS SERVER, and the numbers are not arbitrary.
+# Measured 10-Sep-2026: CyberPanel's own renew.py renews a certificate when it has
+# 15 DAYS OR FEWER left -- not the 30 days acme.sh uses. So a warning at 21 days
+# would fire while CyberPanel was behaving exactly as designed, which is a
+# watchman crying wolf. These numbers sit INSIDE CyberPanel's window, so a
+# warning means the renewal is genuinely LATE, not merely approaching.
+WARN_DAYS = 10          # CyberPanel has already had 5 days to renew this and has not
+URGENT_DAYS = 4         # it is about to break in front of patients
 PORT = 443
 TIMEOUT = 15
 
@@ -251,7 +257,7 @@ def evaluate(host, watch, cert, now_epoch, error=None, browser_ok=None):
         r["note"] = "%d days left" % d
     elif d <= WARN_DAYS:
         r["verdict"] = V_WARN
-        r["note"] = "%d days left -- the 30-day auto-renewal has already not happened" % d
+        r["note"] = "%d days left -- CyberPanel renews at 15, so this one is already LATE" % d
     else:
         r["verdict"] = V_OK
         r["note"] = "%d days left" % d
@@ -597,11 +603,16 @@ def selftest():
     ck("healthy site counts the days", ok["days"], 89)
 
     warn = evaluate("attendance.dr-manoj.in", True,
-                    _cert("Oct  1 00:00:00 2026 GMT", ["attendance.dr-manoj.in"]), NOW)
-    ck("21 days out warns", warn["verdict"], V_WARN)
+                    _cert("Sep 20 00:00:00 2026 GMT", ["attendance.dr-manoj.in"]), NOW)
+    ck("10 days out warns", warn["verdict"], V_WARN)
+    ck("and it says CyberPanel is late", "already LATE" in warn["note"], True)
+    ck("22 days out is still quiet -- CyberPanel has not been asked yet",
+       evaluate("attendance.dr-manoj.in", True, _cert("Oct  2 00:00:00 2026 GMT", ["attendance.dr-manoj.in"]), NOW)["verdict"], V_OK)
+    ck("16 days out is still quiet -- one day outside CyberPanel's window",
+       evaluate("a", True, _cert("Sep 26 00:00:00 2026 GMT", ["a"]), NOW)["verdict"], V_OK)
 
-    urg = evaluate("a.dr-manoj.in", True, _cert("Sep 15 00:00:00 2026 GMT", ["a.dr-manoj.in"]), NOW)
-    ck("5 days out is urgent", urg["verdict"], V_URGENT)
+    urg = evaluate("a.dr-manoj.in", True, _cert("Sep 13 00:00:00 2026 GMT", ["a.dr-manoj.in"]), NOW)
+    ck("3 days out is urgent", urg["verdict"], V_URGENT)
 
     exp = evaluate("drmanojagarwal.com", True,
                    _cert("Sep  8 10:07:00 2026 GMT", ["drmanojagarwal.com"]), NOW)
@@ -679,7 +690,7 @@ def selftest():
        evaluate("a", True, _cert("Sep 14 00:00:00 2026 GMT", ["a"]), NOW,
                 error="self-signed certificate", browser_ok=False)["verdict"], V_UNTRUSTED)
     ck("but an expiry inside a trusted site still reports URGENT",
-       evaluate("a", True, _cert("Sep 14 00:00:00 2026 GMT", ["a"]), NOW, browser_ok=True)["verdict"], V_URGENT)
+       evaluate("a", True, _cert("Sep 13 00:00:00 2026 GMT", ["a"]), NOW, browser_ok=True)["verdict"], V_URGENT)
 
     # --- anti-spam key ------------------------------------------------------
     ck("the key holds host and verdict", problem_key(exp), "drmanojagarwal.com:EXPIRED")
@@ -705,7 +716,8 @@ def selftest():
     ck("the site that broke is watched", ("drmanojagarwal.com", True) in [(h, w) for h, w, _ in SITES], True)
     ck("the retired domain is not watched", ("drmanojagarwal.in", False) in [(h, w) for h, w, _ in SITES], True)
     ck("attendance is watched", ("attendance.dr-manoj.in", True) in [(h, w) for h, w, _ in SITES], True)
-    ck("warn threshold is under acme's 30-day renewal", WARN_DAYS < 30, True)
+    ck("warn fires INSIDE CyberPanel's 15-day renewal window", WARN_DAYS < 15, True)
+    ck("and leaves CyberPanel at least 4 days to do its job first", 15 - WARN_DAYS >= 4, True)
     ck("urgent is tighter than warn", URGENT_DAYS < WARN_DAYS, True)
 
     fails = [c for c in checks if not c[0]]

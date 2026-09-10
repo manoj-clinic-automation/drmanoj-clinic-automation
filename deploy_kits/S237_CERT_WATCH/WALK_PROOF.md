@@ -25,14 +25,20 @@ a broken site can never fall through to OK.
 
 ## THE WALK OUTPUT
 
+*Re-run 10-Sep-2026 after the thresholds were retuned to CyberPanel's measured 15-day
+renewal window. `_proof/walk.py` now mints its own fixture certificates and adds its own
+hosts entries, so the proof is reproducible from the kit alone.*
+
 ```
+minted 7 fixture certificates
+
 LIVE-SHAPE WALK -- real TLS, real certificates, shipped code path
 
   PASS certwalk-good.test         got UNTRUSTED want UNTRUSTED  a browser refuses this site -- self-signed certificate
   PASS certwalk-warn.test         got UNTRUSTED want UNTRUSTED  a browser refuses this site -- self-signed certificate
   PASS certwalk-soon.test         got UNTRUSTED want UNTRUSTED  a browser refuses this site -- self-signed certificate
-  PASS certwalk-expired.test      got EXPIRED   want EXPIRED    EXPIRED 3 days ago -- browsers are refusing this site now
-  PASS certwalk-expstag.test      got EXPIRED   want EXPIRED    EXPIRED 3 days ago -- browsers are refusing this site now (a
+  PASS certwalk-expired.test      got EXPIRED   want EXPIRED    EXPIRED 4 days ago -- browsers are refusing this site now
+  PASS certwalk-expstag.test      got EXPIRED   want EXPIRED    EXPIRED 4 days ago -- browsers are refusing this site now (a
   PASS certwalk-staging.test      got STAGING   want STAGING    issued by the Let's Encrypt STAGING CA -- every browser reje
   PASS certwalk-mismatch.test     got MISMATCH  want MISMATCH   certificate does not cover this name (it covers somebody-els
   PASS certwalk-dead.test         got ERROR     want ERROR      gaierror: [Errno -2] Name or service not known
@@ -45,35 +51,35 @@ CLINIC CERTIFICATES -- 8 site(s) need attention.
    gaierror: [Errno -2] Name or service not known
 
 * certwalk-expired.test -- EXPIRED
-   EXPIRED 3 days ago -- browsers are refusing this site now
-   expires 08-Sep-2026 05:43 IST, issued by certwalk-expired.test
+   EXPIRED 4 days ago -- browsers are refusing this site now
+   expires 07-Sep-2026 07:59 IST, issued by certwalk-expired.test
 
 * certwalk-expstag.test -- EXPIRED
-   EXPIRED 3 days ago -- browsers are refusing this site now (and it is a STAGING certificate)
-   expires 08-Sep-2026 05:43 IST, issued by certwalk-expstag.test
+   EXPIRED 4 days ago -- browsers are refusing this site now (and it is a STAGING certificate)
+   expires 07-Sep-2026 07:59 IST, issued by certwalk-expstag.test
 
 * certwalk-staging.test -- STAGING
    issued by the Let's Encrypt STAGING CA -- every browser rejects it
-   expires 08-Dec-2026 05:42 IST, issued by certwalk-staging.test
+   expires 08-Dec-2026 07:59 IST, issued by certwalk-staging.test
 
 * certwalk-mismatch.test -- MISMATCH
    certificate does not cover this name (it covers somebody-else.test)
-   expires 08-Dec-2026 05:42 IST, issued by somebody-else.test
+   expires 08-Dec-2026 07:59 IST, issued by somebody-else.test
 
 * certwalk-good.test -- UNTRUSTED
    a browser refuses this site -- self-signed certificate
-   expires 08-Dec-2026 05:42 IST, issued by certwalk-good.test
+   expires 08-Dec-2026 07:59 IST, issued by certwalk-good.test
 
 * certwalk-soon.test -- UNTRUSTED
    a browser refuses this site -- self-signed certificate
-   expires 15-Sep-2026 05:42 IST, issued by certwalk-soon.test
+   expires 14-Sep-2026 07:59 IST, issued by certwalk-soon.test
 
 * certwalk-warn.test -- UNTRUSTED
    a browser refuses this site -- self-signed certificate
-   expires 30-Sep-2026 05:42 IST, issued by certwalk-warn.test
+   expires 30-Sep-2026 07:59 IST, issued by certwalk-warn.test
 
 Checked by opening each site the way a browser does.
-Nothing was changed. Time: 2026-09-10 05:46:29 IST
+Nothing was changed. Time: 2026-09-10 07:59:21 IST
 --- end of message ---
 
   PASS self-signed good cert is reported, not silently passed
@@ -86,12 +92,12 @@ Nothing was changed. Time: 2026-09-10 05:46:29 IST
   PASS expired appears before warn
   PASS message is ascii-encodable for the push header
   PASS expired+staging cert mentions staging
-=== Clinic certificates -- 2026-09-10 05:46:29 IST ===
+=== Clinic certificates -- 2026-09-10 07:59:21 IST ===
   !!  certwalk-good.test         UNTRUSTED   88 d  a browser refuses this site -- self-signed certificate
   !!  certwalk-warn.test         UNTRUSTED   19 d  a browser refuses this site -- self-signed certificate
-  !!  certwalk-soon.test         UNTRUSTED    4 d  a browser refuses this site -- self-signed certificate
-  !!  certwalk-expired.test      EXPIRED     -3 d  EXPIRED 3 days ago -- browsers are refusing this site now
-  !!  certwalk-expstag.test      EXPIRED     -3 d  EXPIRED 3 days ago -- browsers are refusing this site now (and it is a STAGING certificate)
+  !!  certwalk-soon.test         UNTRUSTED    3 d  a browser refuses this site -- self-signed certificate
+  !!  certwalk-expired.test      EXPIRED     -4 d  EXPIRED 4 days ago -- browsers are refusing this site now
+  !!  certwalk-expstag.test      EXPIRED     -4 d  EXPIRED 4 days ago -- browsers are refusing this site now (and it is a STAGING certificate)
   !!  certwalk-staging.test      STAGING     88 d  issued by the Let's Encrypt STAGING CA -- every browser rejects it
   !!  certwalk-mismatch.test     MISMATCH    88 d  certificate does not cover this name (it covers somebody-else.test)
   !!  certwalk-dead.test         ERROR             gaierror: [Errno -2] Name or service not known
@@ -102,5 +108,5 @@ WALK: 19 checks, 0 failures
 ```
 
 ---
-*Reproduce with `_proof/walk.py`. It needs `cryptography` to mint the fixtures, port 443 free, and
-the seven `certwalk-*.test` names pointed at 127.0.0.1. The shipped `cert_watch.py` needs none of that.*
+*Reproduce with `_proof/walk.py` (needs `cryptography`, port 443 free, and permission to write
+`/etc/hosts`). The shipped `cert_watch.py` needs none of that.*

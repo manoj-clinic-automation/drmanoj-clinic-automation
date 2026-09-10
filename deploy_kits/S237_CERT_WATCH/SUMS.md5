@@ -1,9 +1,9 @@
-3d16e64b2749b3a113bf4e6161611325  cert_watch.py
+d10be1a08cdbd5d03c3c12b2549ac3e2  cert_watch.py
 89d2a8ea64f6dabb495ddc48c86acf6b  clinic-certwatch.service
 3555d9920a0e2aef85624b058955005a  clinic-certwatch.timer
 d3f24678ba74f0fa07d2ac275748ebd0  install_cert_watch.sh
-7fb1a52446cfaf0dc607d70cc3aa007c  KIT_ID.txt
-a6c097e777411f16b0993d496c173814  READ_ME_FIRST.md
-1405296128c2e79b45aac1a8a8167984  WALK_PROOF.md
-556aac4d330942f674d8c073cd9a96ef  _proof/walk.py
+617fb24bcc5f5b713ebdc5bdc307fda4  KIT_ID.txt
+f59f8093e27b779d65aeeb8da18c37c0  READ_ME_FIRST.md
+6e02353d823ee97112263df929fba953  WALK_PROOF.md
+e96c991b854b8de20f43009cf3cf29bf  _proof/walk.py
 f875594722eeb3887ade8fcdd5ee48cd  _proof/install_walk.sh

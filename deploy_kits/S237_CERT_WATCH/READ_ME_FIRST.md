@@ -31,8 +31,8 @@ acme.sh reported a clean successful renewal every night while the live certifica
 | **STAGING** | a certificate from Let's Encrypt's *test* authority. Looks issued and valid to acme.sh; **every browser rejects it.** This was the root cause on 08-Sep |
 | **MISMATCH** | a valid certificate, but not for this hostname |
 | **UNTRUSTED** | a browser refuses the site for some other reason — never reported as OK |
-| **URGENT** | 7 days or fewer left |
-| **WARN** | 21 days or fewer left. 21 is deliberate: acme.sh renews at 30, so 21 means a renewal **has already failed once** |
+| **URGENT** | 4 days or fewer left |
+| **WARN** | 10 days or fewer left. **Measured on this server, not guessed: CyberPanel's `renew.py` renews at 15 days.** A warning at 21 would fire while CyberPanel was behaving exactly as designed — a watchman crying wolf. 10 sits INSIDE its window, so a warning means the renewal is genuinely **LATE** |
 | **ERROR** | the site could not be reached at all — said out loud, never a silence |
 | **SKIP** | `drmanojagarwal.in` only, which is being retired on purpose |
 
@@ -41,7 +41,7 @@ A site a browser refuses **now** always outranks one expiring **later**.
 ## HOW IT WAS PROVEN
 
 - `py_compile` clean.
-- **70 self-test checks, 0 failures** — offline, no network, nothing sent.
+- **74 self-test checks, 0 failures** — offline, no network, nothing sent.
 - **A live-shape walk of the watchman: 19 checks, 0 failures.** Seven real certificates — healthy,
   20 days out, 4 days out, expired, expired-and-staging, staging, and wrong-name — served over a real
   TLS socket and read by the shipped code, end to end. (`_proof/walk.py`, output in `WALK_PROOF.md`.)
