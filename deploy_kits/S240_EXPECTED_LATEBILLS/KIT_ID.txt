@@ -1,0 +1,11 @@
+KIT      S240_EXPECTED_LATEBILLS  eefc8f4918fa6735371be298cbc731d8
+BUILT    11-Sep-2026 IST, Session 240, for MANOJZ
+PURPOSE  push_expected.py adds purchase bills that are DATED on/before the pinned
+         baseline but were KEYED into Marg after the baseline stock export was
+         taken (the owner, D465: the bill date is not the arrival date; a Marg
+         stock export is always the current stock).
+REPLACES deploy_kits\S208_STOCK_LEDGER\push_expected.py  a0e47a98 -> eefc8f4918fa6735371be298cbc731d8
+PROOF    real archive, container: baseline 03-09 -> Yuvika 571 added (TYNOR wrist
+         splints +2 each), nothing else changes; baseline 06-09 -> Jubilee 15521 and
+         Ravi 7617 added; 13/13 selftest; S214 selftest_adopt 19/19.
+OFF      set LATE_KEYED=off (environment) -- the old behaviour, no reinstall.
