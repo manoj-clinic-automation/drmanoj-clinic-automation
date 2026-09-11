@@ -1,0 +1,32 @@
+S239_DOCTERZ_PICKUP -- evidence, 11-Sep-2026 (IST). Aggregates only; no patient value.
+
+SANDBOX = a copy of the live tracker (code, data\, uploads\, outputs\) staged from manojz at ~08:20 IST,
+          with the seven Docterz files then in D:\Downloads. Feed-URL fetch disabled; VPS + patient push stubbed.
+
+0  Sandbox reproduces the PC: re-running the 08:08 manual run's inputs gave a Day Revenue sheet
+   IDENTICAL cell-for-cell to the PC's outputs\Staff_Action_Today_2026-09-08.xlsx.
+1  selftest: 16/16 ok.
+2  FIRST PASS on today's real Downloads: 150 processed days remembered from uploads\; all 7 files
+   archived; 9 day-decisions, all SKIP (identical / already run by hand); no tracker run; no push.
+   The 03-09 Sep range export (131 rows) was correctly NOT fed to the tracker.
+3  Next-morning export (new day + new follow-up log): RUN; staff workbook for the next call day;
+   VPS upload + patient push called once each.
+4  Same pass again: nothing.
+5  Truncated re-export (27 of 29 patients): QUARANTINE, shouted, tracker not run.
+6  Re-export with changed money, same patients, newer: RUN (newest wins).
+7  Identical re-download: nothing.
+8  Range export covering two new days: cut per day, two runs in date order; Day Revenue GRAND TOTAL
+   per day equal to that day's bills exactly (12,500 and 9,700); only the latest day pushed.
+9  No file in Downloads moved, renamed or deleted in any scenario.
+
+Day_Tenders.csv (split legs, read by the VPS day page):
+   live file 206 rows = 188 distinct legs + 18 DUPLICATES (9 bills doubled: the Apr-Jun backfill export
+   overlapping the June dailies, and same-day re-exports) -- F-420.
+   rebuilt: 192 rows, 0 duplicates, 64 days (adds 05, 09, 10-Sep). One bill (19-Jun) now shows no split
+   because its newer export records one tender -- newest wins.
+
+revenue.py fix, old vs new parse_day_revenue over all 85 retained consultation exports:
+   bills unchanged (21,42,350 both) · cash unchanged · 175 phantom footer rows removed · 0 real patients
+   removed · 27 rows gain previously dropped non-cash tender, +18,600 collected
+   (Split Payment 26, Patient APP 1). Full run on 19-Aug: visits 31 -> 28 (phantoms gone), online +600
+   (the Wallet leg), nothing else changed.
