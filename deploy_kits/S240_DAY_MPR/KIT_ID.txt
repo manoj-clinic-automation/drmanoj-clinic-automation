@@ -1,0 +1,6 @@
+S240_DAY_MPR 56fb76198a6911ae512c3b73925a3c22
+BUILT    11-Sep-2026 IST, Session 240
+PURPOSE  The day's bank MPR as a table: /finance/clinic/day/<date>/mpr shows ICICI's UPI entries
+         beside the clinic's online entries, paired by amount (paired · bank-only · ours-only),
+         UPI refs last-4. Both "bank MPR" links (day card, month table) now open it.
+REPLACES /root/finance/finance_clinic_day.py 54b5faa9 -> (above), with backup and auto-rollback
