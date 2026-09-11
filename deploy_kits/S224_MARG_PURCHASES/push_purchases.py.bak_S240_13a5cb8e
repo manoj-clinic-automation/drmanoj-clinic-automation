@@ -353,18 +353,7 @@ def parse_last_pull(path=DEF_PULL_FILE):
         return None, "no _last_pull.txt"
     ends = [l for l in lines if l.startswith("END")]
     if not ends:
-        # S240 (F-431): the 22:30 nightly and the 10-minute pull start in the same minute, so the
-        # feed read _last_pull.txt while a pull was running -- START written, END not yet -- and
-        # reported "asleep" with no time, every night since S224. A pull that is running NOW is
-        # the opposite of asleep: its START time is the answer.
-        starts = [l for l in lines if l.startswith("START")]
-        if not starts:
-            return None, "no END line"
-        m = re.search(r"(\d{2})-(\d{2})-(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})", starts[-1])
-        if not m:
-            return None, "no END line"
-        d, mo, y, hh, mm, ss = (int(x) for x in m.groups())
-        return dt.datetime(y, mo, d, hh, mm, ss, tzinfo=IST), "pull in progress"
+        return None, "no END line"
     last = ends[-1]
     m = re.search(r"(\d{2})-(\d{2})-(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})", last)
     if not m:
