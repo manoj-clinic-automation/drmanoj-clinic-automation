@@ -1,0 +1,9 @@
+S240_MARG_INGEST e0cbe6e9d42a9fd1b186bac2f56a9a50
+BUILT    11-Sep-2026 IST, Session 240 · D467 Phase 1 (shadow)
+PURPOSE  The server's own front door for Marg exports: every 5 min it reads the Marg archive
+         the owner's PC mirrors to Google Drive, runs the SAME router (vendored unchanged:
+         marg_router.py da8fc928, signatures.json 65d1e1ee), keeps PHI-free files, reads sale
+         reports into PHI-free item lines (file not kept), and compares verdicts with the PC.
+         Sends nothing; feeds no screen; finance_app untouched; no restart.
+NEW      /root/marg_ingest/ · tables mi_file, mi_sale_line, mi_run in finance.db · one cron line
+OFF      touch /root/marg_ingest/OFF   (or remove the line tagged # S240_MARG_INGEST)
