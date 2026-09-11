@@ -12,7 +12,10 @@
 #  as, (2) backs up finance.db, (3) runs the reader once to catch up every day
 #  since 03-Sep, (4) adds ONE cron line so it runs itself 3x a day from now on.
 #  No code changes. Red path: nothing is scheduled if the catch-up run fails;
-#  the backup is kept.
+#  the backup is kept. REV 2 (11-Sep, first live run): the catch-up itself WORKED
+#  (68 -> 73 days, newest 10-Sep) but two June workbooks that predate the tracker's
+#  'Day Revenue' sheet made the reader exit 1 and the gate refused to schedule.
+#  Those two -- and only that reason -- are now accepted.
 # =============================================================================
 set -u
 KIT="S238_DOCTERZ_LIVE"
@@ -62,8 +65,18 @@ echo "[3/6] finance.db backed up: $BAK"
 mkdir -p "$FIN/logs"
 echo "[4/6] catch-up run (reads every new day sheet from Drive):"
 echo "=== $(date '+%F %T') catch-up by $KIT ===" >> "$LOG"
-"$PY" -B "$ING" 2>&1 | tee -a "$LOG" | sed 's/^/    /' | tail -25
-RC=${PIPESTATUS[0]}
+OUT="$(mktemp)"
+"$PY" -B "$ING" > "$OUT" 2>&1; RC=$?
+cat "$OUT" >> "$LOG"
+grep -v "FutureWarning\|warnings.warn" "$OUT" | sed 's/^/    /' | tail -25
+# The only failures accepted: the two June workbooks written before the tracker had a
+# 'Day Revenue' sheet at all (first live run, 11-Sep: 2026-06-11 and 2026-06-13). They are
+# re-tried every run and always fail the same way -- harmless. Any OTHER failure stops here.
+if [ "$RC" != "0" ] && grep -q "FAILED" "$OUT" && ! grep "FAILED" "$OUT" | grep -vq "no 'Day Revenue' sheet"; then
+  echo "    ($(grep -c FAILED "$OUT") old workbook(s) from before the tracker had a Day Revenue sheet -- skipped, as expected)"
+  RC=0
+fi
+rm -f "$OUT"
 AFTER="$(state)"
 echo "    clinic_day_revenue before: $BEFORE"
 echo "    clinic_day_revenue after:  $AFTER"

@@ -24,3 +24,9 @@ nothing scheduled; a wrong reader file is refused before anything is touched; a 
 ```
 bash /root/deploy/vps_deploy.sh S238_DOCTERZ_LIVE
 ```
+
+**Rev 2 (after the first live run, 11-Sep 06:52):** the catch-up worked, taking the screen from 68 days
+(newest 03-Sep) to 73 days (newest 10-Sep). But two June workbooks written before the tracker had a Day
+Revenue sheet made the reader report "failed 2", so the installer correctly refused to schedule. Those two,
+and only that reason, are now accepted; any other failure still stops the schedule. The walk covers both
+cases (17/17).
