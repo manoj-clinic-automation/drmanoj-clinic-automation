@@ -1,0 +1,15 @@
+82ed48e1ec15d45fef753c536a99b8d1  KIT_ID.txt
+d8e6e7a82a9cb735fe06bc8f334aefda  install_S240_MARG_SHADOW.sh
+b6e1cc2c80b9b79561c096ea7c8fcd98  lib/marg_effective.py
+0ae8f78de2f600ce623e7e5d6bb9c176  lib/marg_purchase.py
+41d68148fc3aa461da30a9eb4053b649  lib/marg_purchase_rows.py
+eeab56055be76fec9531399ce9a0556e  lib/marg_report.py
+ed659a6ad69f7c25407b6da7e7a84e3b  lib/marg_stock.py
+0f135be83fb552a1b7ad2963a8bce4a4  lib/packmap.py
+cd42c04be742898e0f22c451bffd0074  lib/purchase_returns.py
+4b3b700c1640591a3723d4fce3de5603  lib/push_expected.py
+03a845242ea29aec6bc46b1fc254809d  lib/push_snapshot.py
+3570e79a03481e094a8efd625a9e8931  lib/resolve.py
+cde468a5cc13ca294e3db8f516b0c9ca  lib/xlsx_sheet.py
+1a7f266f0ed57392faa320543b95bb87  marg_ingest.py
+4568b4a3440677422f5173d32a5430f7  marg_shadow.py

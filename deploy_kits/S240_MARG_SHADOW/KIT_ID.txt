@@ -1,0 +1,10 @@
+S240_MARG_SHADOW 4568b4a3440677422f5173d32a5430f7
+BUILT    12-Sep-2026 IST, Session 240 · D467 Phase 1b (shadow)
+PURPOSE  The server works the expected stock out ITSELF -- the PC's own push_expected.py 4b3b700c
+         and its modules, vendored unchanged, over the server's archive, with the sale lines taken
+         from mi_sale_line -- and compares it with the PC's pushed figure over the SAME evidence
+         (only exports captured before the PC pushed). Sends nothing; no screen; no restart.
+NEEDS    S240_MARG_INGEST (marg_ingest.py e0cbe6e9) already installed and run once
+NEW      /root/marg_ingest/marg_shadow.py + lib/ · tables sh_run, sh_diff, sh_feed · two cron lines
+ALSO     marg_ingest.py e0cbe6e9 -> new: google-auth's Python-3.9 warning no longer fills the log
+OFF      touch /root/marg_ingest/OFF   (or remove the lines tagged # S240_MARG_SHADOW)
