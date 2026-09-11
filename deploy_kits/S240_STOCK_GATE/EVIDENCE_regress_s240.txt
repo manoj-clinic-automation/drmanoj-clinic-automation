@@ -1,0 +1,35 @@
+REGRESSION: the 13 S226-S228 stock walks, run serially from a deploy_kits mirror, gate switched off (STOCK_GATE=off) so the new file is measured on the old fixtures:
+  WALK_audit_s227: live 55cd610e ok=53 fail=0  |  S240 ok=53 fail=0
+  WALK_count_search_s226: live 55cd610e ok=34 fail=0  |  S240 ok=34 fail=0
+  WALK_desk_s227: live 55cd610e ok=47 fail=0  |  S240 ok=47 fail=0
+  WALK_diff_sheet_s227: live 55cd610e ok=40 fail=2  |  S240 ok=40 fail=2
+  WALK_lanes_s227: live 55cd610e ok=46 fail=0  |  S240 ok=46 fail=0
+  WALK_loss_s228: live 55cd610e ok=93 fail=0  |  S240 ok=93 fail=0
+  WALK_pad_proof_s227: live 55cd610e ok=65 fail=0  |  S240 ok=65 fail=0
+  WALK_readiness_s226: live 55cd610e ok=50 fail=0  |  S240 ok=50 fail=0
+  WALK_report_s227: live 55cd610e ok=46 fail=0  |  S240 ok=46 fail=0
+  WALK_safestore_s226: live 55cd610e ok=13 fail=0  |  S240 ok=13 fail=0
+  WALK_staff_s227: live 55cd610e ok=28 fail=0  |  S240 ok=28 fail=0
+  WALK_submit_flow_s226: live 55cd610e ok=30 fail=0  |  S240 ok=30 fail=0
+  WALK_threeway_s228: live 55cd610e ok=48 fail=0  |  S240 ok=48 fail=0
+  (diff_sheet's 2 failures are the live file's own, identical before and after -- not introduced here)
+ENDPOINT COMPARE on the 11-Sep nightly (owner login): 12 stock pages/APIs -- 10 byte-identical, 2 (api/now, api/drift) differ only by the added readiness.gate block and COUNT GATE warning lines.
+GATE WALK (gate on, live-shape nightly copies):
+  ok   today (newest = our own computed 09-09): the staff count page REFUSES
+  ok   ...and says why, in Hinglish, with no override link
+  ok   the owner sees the reasons in English with 'Open the count anyway'
+  ok   the owner's override opens the real count page
+  ok   a staff login cannot override
+  ok   a staff count against a red stock is refused 409 and NOTHING is recorded
+  ok   the readiness header carries the gate and a COUNT GATE warning
+  ok   unchanged page still answers 200: /finance/stock/page/now
+  ok   unchanged page still answers 200: /finance/stock/api/now
+  ok   unchanged page still answers 200: /finance/stock/api/drift
+  ok   unchanged page still answers 200: /finance/stock/page/drift
+  ok   unchanged page still answers 200: /finance/stock/page/diffs
+  ok   unchanged page still answers 200: /finance/stock/api/open
+  ok   the 06-09 shape (the day of the real count): the staff page OPENS
+  ok   ...gate green
+  ok   the 05-09 stock (taken 06-09 01:26) is RED: a bill keyed after it
+  ok   the 02-09 stock: nothing earlier to compare -> AMBER, said, not silent
+gate walk: 0 failures
