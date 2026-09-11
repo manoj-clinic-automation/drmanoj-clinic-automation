@@ -1,0 +1,60 @@
+VERIFY_HTML = """<!doctype html><meta charset="utf-8">
+<title>Step 0 - absent days to check - {{ ym }}</title>
+<style>
+ body{font-family:"Segoe UI",Arial,sans-serif;margin:16px auto;max-width:900px;color:#111;background:#fff;font-size:13px;
+      -webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .bar{margin:0 0 10px} .bar a{margin-right:16px;color:#05c;font-weight:bold;text-decoration:none}
+ .hdr{text-align:center;border-bottom:2px solid #222;padding-bottom:4px;margin-bottom:6px}
+ .hdr h1{font-size:18px;margin:0} .hdr .t{font-size:13.5px;font-weight:700;margin:2px 0 0;letter-spacing:.3px}
+ .hdr .m{font-size:11.5px;color:#444;margin-top:2px}
+ table.v{border-collapse:collapse;width:100%;table-layout:fixed;border:1.5px solid #333}
+ table.v th{background:#e9e9e9;font-size:10.5px;padding:3px 2px;border:1px solid #777;text-align:left}
+ table.v td{border:1px solid #888;padding:3px 4px;font-size:12px;vertical-align:middle;white-space:nowrap;overflow:hidden}
+ table.v thead{display:table-header-group}
+ table.v tbody{break-inside:avoid;page-break-inside:avoid;border-top:2.5px solid #222}
+ col.nm{width:16%} col.dt{width:9%} col.ck{width:14%} col.fx{width:5%}
+ td.nm{font-weight:700;font-size:12.5px;background:#fafafa;white-space:normal}
+ td.nm small{display:block;font-weight:400;color:#444;font-size:10.5px}
+ td.dt.sun{background:#d9ccff;color:#3b0f8a;font-weight:800;border-left:3px solid #3b0f8a}
+ td.gap{border-left:2px solid #555}
+ td.fx{text-align:center}
+ table.v td.done{color:#444;font-style:italic;background:#e6e6e6;font-size:10px;white-space:normal;line-height:1.15}
+ .bx{display:inline-block;width:13px;height:13px;border:1.5px solid #333;border-radius:2px;
+     vertical-align:-3px;margin:0 2px 0 5px} .bx.first{margin-left:0}
+ .donly{margin:8px 0 0;border:1px solid #999;border-radius:6px;padding:5px 8px;font-size:12px}
+ .sunk{color:#3b0f8a;font-weight:800;text-decoration:underline}
+ .sign{display:flex;justify-content:space-between;margin-top:18px;font-size:12px}
+ .err{border:2px solid #b00;padding:8px;border-radius:6px}
+ @page{size:A4 portrait;margin:8mm}
+ @media print{.noprint{display:none!important} body{margin:0;max-width:none}
+   tr{break-inside:avoid;page-break-inside:avoid}}
+</style>
+<div class="bar noprint"><a href="{{ prefix }}/salary/flow?ym={{ ym }}">&larr; Month-end flow</a>
+ <a href="{{ prefix }}/fixabsents?ym={{ ym }}">Fix absents desk &rarr;</a>
+ <a href="#" onclick="window.print();return false">&#128424; Print</a></div>
+<div class="hdr"><h1>Dr. Manoj Agarwal Clinic</h1>
+ <div class="t">STEP 0 &middot; ABSENT DAYS TO CHECK AGAINST THE PHYSICAL register &mdash; {{ month }}</div>
+ <div class="m">Machine data as on {{ today }} &middot; {{ nstaff }} staff &middot; {{ nopen }} day(s) still
+ absent &middot; {{ ndone }} already corrected &middot; tick P / L / A from the register, then Fixed</div></div>
+{% if not feed_ok %}<div class="err">The punch feed is unavailable, so absences cannot be listed.
+ This page will not guess &mdash; try again later.</div>
+{% elif not blocks %}<div class="m">No machine-absent days in {{ month }}.</div>
+{% else %}
+<table class="v"><colgroup><col class="nm">{% for _ in range(3) %}<col class="dt"><col class="ck"><col class="fx">{% endfor %}</colgroup>
+<thead><tr><th>Staff</th>{% for _ in range(3) %}<th{% if not loop.first %} class="gap"{% endif %}>Date</th><th>P / L / A</th><th style="text-align:center">Fixed</th>{% endfor %}</tr></thead>
+{% for b in blocks %}{% set rows = b["items"]|batch(3)|list %}<tbody>
+{% for row in rows %}<tr>
+ {% if loop.first %}<td class="nm" rowspan="{{ rows|length }}">{{ b.name }}<small>{{ b.absent }} day(s){% if b.corrected %} &middot; {{ b.corrected }} corrected{% endif %}</small></td>{% endif %}
+ {% for r in row %}<td class="dt{{ ' sun' if r.sun else '' }}{{ ' gap' if not loop.first else '' }}">{{ r.d[8:10] }}-{{ r.d[5:7] }} {{ 'Sun' if r.sun else r.dow }}</td>
+  {% if r.done %}<td class="done" colspan="2">&#10003; already marked present{% if r["in"] %} {{ r["in"] }}{% endif %}</td>
+  {% else %}<td class="ck"><span class="bx first"></span>P<span class="bx"></span>L<span class="bx"></span>A</td><td class="fx"><span class="bx first"></span></td>{% endif %}
+ {% endfor %}{% for _ in range(3 - row|length) %}<td class="gap"></td><td></td><td></td>{% endfor %}</tr>
+{% endfor %}</tbody>
+{% endfor %}</table>{% endif %}
+{% if donly %}<div class="donly"><b>Punch dates only (not on the grid):</b>
+{% for d in donly %}<div><b>{{ d.name }}</b> &mdash; punched on {{ d.days|length }} day(s):
+ {% for x in d.days %}{% if x.sun %}<span class="sunk">{{ x.day }}</span>{% else %}{{ x.day }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
+ {% if not d.days %}none{% endif %}</div>{% endfor %}</div>{% endif %}
+<div class="sign"><span>Checked by: ______________________</span><span>Signature: ______________</span>
+ <span>Date: ____________</span></div>
+"""
