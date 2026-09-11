@@ -1,0 +1,6 @@
+S240_DAY_PHONE 54b5faa92208d9f36dc2a3cb78e58cdb
+BUILT    11-Sep-2026 IST, Session 240
+PURPOSE  Docterz Revenue on phones: tables scroll sideways inside their card (Day column pinned
+         on the month table; patient names wrap on the day page) instead of squeezing until the
+         figures overlap. Desktop screen pixel-identical; A4 print rules unchanged.
+REPLACES /root/finance/finance_clinic_day.py 713bdf3a -> (above), with backup and auto-rollback

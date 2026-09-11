@@ -764,134 +764,6 @@ def keyed_vs_dated(archive, B, T_b):
     return late_rows, late_rep, early, early_rep, unknown
 
 
-# ------------------------------------------ S240 clipped sale names (D466)
-# THE OWNER, 11-Sep-2026: no product is renamed "until unless there is no
-# other way, because everybody is accustomed and tuned to it" -- the counter,
-# Amir, the whole shop. So the 20-character sale name stays, and the size it
-# hides is found another way.
-#
-# THE OTHER WAY. The counter never sells "KNEE SUPPORT HINGED": it picks one
-# real item in Marg -- L, M, XL or XXL -- and Marg takes that item's stock
-# down. Only the sale EXPORT prints the name clipped. The whole-shop closing
-# export prints 29 characters, which tells every one of the 22 apart, and it
-# is taken every night. So between two closings, the size whose stock fell
-# IS the size that was sold -- the same fact Marg recorded, read from a report
-# that does not clip it.
-#
-# A family is settled for one gap between two closings only when the books
-# balance exactly: for every size, (fall in stock + purchases of that size in
-# the gap) is a whole number, and the family's total equals what the sale
-# export says the family sold (returns netted). Anything else -- a purchase
-# whose own name is clipped, a closing taken in the middle of a shop day, a
-# sale after the last closing -- stays as before: not subtracted, and named.
-# The next night's closing usually settles it.
-
-def _gap_side(d, stamp):
-    """Is a sale dated d before (-1) or after (+1) the closing taken at stamp?
-    0 = cannot tell (closing taken during that day's shop hours)."""
-    sd = dt.datetime.strptime(stamp[:8], "%Y%m%d").date()
-    hm = stamp[9:13]
-    if d < sd:
-        return -1
-    if d > sd:
-        return 1
-    if hm >= "2200":
-        return -1
-    if hm < "0900":
-        return 1
-    return 0
-
-
-def resolve_clipped(lines, families, closings, pur, size_of, B, T_b):
-    """-> (alloc {full key: net units sold}, settled line ids, report, open).
-    lines: sale lines already keyed (ln['_key'] = the clipped name).
-    families: {clipped key: [full keys]}."""
-    alloc, settled, report, still = collections.Counter(), set(), [], []
-    if os.environ.get("CLIP_RESOLVE", "").strip().lower() == "off":
-        return alloc, settled, report, still
-    mine = [ln for ln in lines if ln.get("_key") in families]
-    if not mine or not T_b:
-        return alloc, settled, report, still
-    # the boundaries: the baseline itself, then every closing after it that
-    # can be placed against the sale dates
-    bounds = [(T_b, None)]
-    for t, m in closings:
-        if t > T_b and t[9:13] and (t[9:13] >= "2200" or t[9:13] < "0900"):
-            bounds.append((t, m))
-    base_map = dict(closings).get(T_b)
-    if base_map is None:
-        return alloc, settled, report, [(ln["date"], ln["bill"], ln["_key"], "baseline closing not readable") for ln in mine]
-    bounds[0] = (T_b, base_map)
-    for j in range(len(bounds) - 1):
-        (ta, ma), (tb, mb) = bounds[j], bounds[j + 1]
-        for fam, fulls in families.items():
-            inside = [ln for ln in mine if ln["_key"] == fam
-                      and (j == 0 or _gap_side(ln["date"], ta) == 1)
-                      and _gap_side(ln["date"], tb) == -1]
-            if not inside:
-                continue
-            want, bad = 0.0, False
-            for ln in inside:
-                u, _br = sale_units(ln, size_of(fulls[0]))
-                if u is None:
-                    bad = True
-                    break
-                want += -u if PS_is_cn(ln.get("bill")) else u
-            if bad:
-                continue
-            da = dt.datetime.strptime(ta[:8], "%Y%m%d").date()
-            db = dt.datetime.strptime(tb[:8], "%Y%m%d").date()
-            # Purchases of the family in the gap. Their KEYING moment is what
-            # the closings saw, and it is not exported, so three readings are
-            # tried and only an exact balance is accepted: none keyed in the
-            # gap; those dated in it (late-keyed bills left out); all dated
-            # in it. A wrong reading cannot balance, because every size must
-            # come out whole and the family must total what was sold.
-            dated, dated_nl, clipped_buy = (collections.Counter(),
-                                            collections.Counter(), False)
-            for r in pur:
-                k = PM.norm(r.get("item"))
-                d = r.get("_date")
-                if d is None or not (da <= d <= db):
-                    continue
-                if k in fulls:
-                    q = r.get("loose_qty") or 0
-                    q = -q if r.get("is_return") else q
-                    dated[k] += q
-                    if not r.get("_late"):
-                        dated_nl[k] += q
-                elif k and any(f.startswith(k) for f in fulls):
-                    clipped_buy = True
-            ok, sold = False, {}
-            for bought in (collections.Counter(), dated_nl, dated):
-                if clipped_buy and bought:
-                    continue
-                sold = {f: (ma.get(f, 0) - mb.get(f, 0)) + bought[f] for f in fulls}
-                ok = (all(abs(v - round(v)) < 1e-6 for v in sold.values())
-                      and abs(sum(sold.values()) - want) < 1e-6
-                      and (want < 0 or all(v >= -1e-6 for v in sold.values())))
-                if ok:
-                    break
-            if not ok:
-                continue
-            for f, v in sold.items():
-                if abs(v) > 1e-6:
-                    alloc[f] += v
-            for ln in inside:
-                settled.add(id(ln))
-            report.append((ta, tb, fam, len(inside),
-                           ", ".join("%s %+.0f" % (f, -v)
-                                     for f, v in sorted(sold.items()) if abs(v) > 1e-6)))
-    for ln in mine:
-        if id(ln) not in settled:
-            last = bounds[-1][0]
-            why = ("sold after the last closing export (%s)" % last
-                   if _gap_side(ln["date"], last) != -1 else
-                   "the closings do not balance for this family in that gap")
-            still.append((ln["date"], ln["bill"], ln["_key"], why))
-    return alloc, settled, report, still
-
-
 # ------------------------------------------------------------- compute
 def compute(archive, base_as_on=None, upto=None):
     """Everything, in one pass. Returns a dict; raises nothing quietly."""
@@ -1005,13 +877,6 @@ def compute(archive, base_as_on=None, upto=None):
             continue
         M[k]["preturn" if r.get("is_return") else "purchased"] += q
 
-    # S240 (D466): the clipped names, settled from the nightly closings.
-    fams = {k: sorted(v) for k, v in dict(ambiguous).items()}
-    clip_alloc, clip_done, clip_rep, clip_open = resolve_clipped(
-        sale, fams, _closings(archive) if fams else [], pur, size_of, B, T_b)
-    for f, u in clip_alloc.items():
-        M[f]["sold"] += u
-
     branch = collections.Counter()
     blocked = set(ambiguous) | set(unresolved)
     blocked_names = collections.Counter()
@@ -1019,9 +884,6 @@ def compute(archive, base_as_on=None, upto=None):
     for ln in sale:
         k = ln.get("_key")
         if not k:
-            continue
-        if id(ln) in clip_done:
-            branch["clipped, settled"] += 1
             continue
         if k in blocked:
             branch["blocked"] += 1
@@ -1054,7 +916,6 @@ def compute(archive, base_as_on=None, upto=None):
             "baseline_source": base.get("source") or "",
             "baseline_taken": T_b, "late_bills": late_rep,
             "early_bills": early_rep, "keying_unknown": unknown,
-            "clipped_settled": clip_rep, "clipped_open": clip_open,
             "rejected": rejected, "as_on": as_on, "sale_days": sdays,
             "sale_lines": len(sale), "sold_lines": sold_lines,
             "purchase_rows": len(pur), "purchase_horizon": horizon,
@@ -1130,21 +991,6 @@ def _print_date_files(rep):
         for sup, bill, kept, other, f in conf[:10]:
             print("     %-28s bill %-8s %s (supplier wise)  vs  %s (%s)"
                   % (sup[:28], bill, kept, other, f[:44]))
-
-
-def _print_clipped(rep):
-    """S240 (D466): sale names Marg clips at 20 characters, settled by size."""
-    done, still = rep.get("clipped_settled") or [], rep.get("clipped_open") or []
-    if not (done or still):
-        return
-    print("  CLIPPED SALE NAMES -- the size read from the nightly closing exports:")
-    for ta, tb, fam, n, what in done:
-        print("     %-20s %d line(s), closings %s -> %s : %s"
-              % (fam[:20], n, ta[4:13], tb[4:13], what))
-    if still:
-        print("  %d clipped sale line(s) not settled yet -- NOT subtracted:" % len(still))
-        for d, bill, fam, why in still[:10]:
-            print("     %s %-9s %-20s %s" % (ddmmyyyy(d), bill, fam[:20], why))
 
 
 def _print_keying(rep):
@@ -1250,7 +1096,6 @@ def main(argv=None):
               "NOT subtracted:" % sum(n for _, n in rep["blocked_names"]))
         for nm, n in rep["blocked_names"][:8]:
             print("     %-30s %d line(s)" % (str(nm)[:30], n))
-    _print_clipped(rep)
     if rep["held"]:
         print("  %d item(s) NOT sent -- their sales could not be read safely:"
               % len(rep["held"]))
