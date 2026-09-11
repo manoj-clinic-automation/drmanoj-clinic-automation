@@ -1,0 +1,19 @@
+S240_SANJEEVNI_123 -- evidence, 11-Sep-2026 (IST). Built on the 11-Sep 01:05 nightly finance.db
+(Drive finance_nightly.db.gz, md5 bcaf2ec8... = its own label, quick_check ok).
+
+SELFTESTS  sale_bill_door 11/11 · export_watch 15/15 (rev 2, the owner's ruling of 11-Sep: supplier-wise only at month-end; stock closing that night or before 10:30 next morning) · spine_cadence 5/5 · marg_spine (b5956f59) 54/54
+LIVE-SHAPE WALK (Flask, purchase_app mounted exactly as on the box, on a copy of the nightly):
+  pages hub / salts / month 2026-09 / staff / orders: rev 13 byte-identical to rev 12 when no watch row exists
+  push with a wrong token -> 401 · empty push -> 400 malformed (unchanged)
+  SALE_BILL door: 31 archived exports -> 30 stored, 1 unreadable (27-Aug .xlsx, named not hidden), 0 refused
+    556 bills, 22 days, gross Rs 5,36,764.28, discount Rs 27,987.50, net Rs 5,08,429.00
+    fixture A003495: gross 3170.00 / discount 870.00 / net 2300.00 -- to the paisa
+    the same export again -> "duplicate"; sale_line_item / purchase_* / marg_item row counts unchanged
+  export watch at 23:40 (Amir punched; bill-wise in; item-wise not in the probe copy; stock closing only due):
+    hub shows "Amir punched in on 11-Sep-2026, but these Marg exports did not arrive: PURCHASE BILL ITEM WISE ..."
+    salt page shows "11-Sep-2026 ki Marg export poori nahi aayi. Baaki: ..."; supplier-wise not asked mid-month
+  spine cadence on the nightly: 1 new name, 1 new task (the VINTAZ name clash, from the b5956f59 merge);
+    a second run with nothing moved -> skipped
+INSTALLER WALK (stubbed systemctl/curl/crontab, live-shaped folder): GREEN; re-run GREEN and idempotent
+  (0 legs added, 4 cron lines, not 8); RED path (app not answering) restored rev 12 3adad7f9 by itself;
+  a moved purchase_app pin -> refused, nothing changed.

@@ -1,0 +1,5 @@
+{"legs": [
+ {"name": "Sale bills from Marg (S240)", "group": "Marg lane", "kind": "sqlite_max", "target": "/root/finance/finance.db", "table": "sale_bill_push", "column": "received_at", "max_age_h": 50, "note": "push_sale_bills.py on manojz, every 30 min; a new SALE_BILLWISE export lands daily"},
+ {"name": "Item spine cadence (S240)", "group": "Marg lane", "kind": "sqlite_max", "target": "/root/finance/finance.db", "table": "marg_spine_drift", "column": "at", "max_age_h": 30, "note": "spine_cadence.py, nightly 23:50 always runs"},
+ {"name": "Amir export watch (S240)", "group": "Marg lane", "kind": "sqlite_max", "target": "/root/finance/finance.db", "table": "export_watch", "column": "checked_at", "max_age_h": 30, "note": "export_watch.py 23:40 and 10:45"}
+]}

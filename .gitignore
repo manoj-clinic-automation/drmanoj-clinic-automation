@@ -200,3 +200,11 @@ finance/REPORT_1.xls
 # added. Exact path only, no wildcard, so nothing else is widened.
 # ---------------------------------------------------------------------------
 !deploy_kits/S236_DISCOUNT/discount_seed_S236.json
+
+# ---------------------------------------------------------------------------
+# S240 (11-Sep-2026): three freshness-leg declarations the S240 installer appends to
+# /root/finance/freshness_legs.json -- leg names, table and column names, hours.
+# No patient, no phone number, no secret. Exact path only, as the S236 line above.
+# (PUBLISH_ALL refused the push rather than drop it -- F-100's guard, again.)
+# ---------------------------------------------------------------------------
+!deploy_kits/S240_SANJEEVNI_123/legs_add_s240.json

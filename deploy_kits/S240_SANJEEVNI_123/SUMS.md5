@@ -1,0 +1,12 @@
+8090ca2041574e25be39682dd5555ffe  purchase_app.py
+16469968f68ebc6e0a9e23a3bb9001f4  sale_bill.py
+83fc60eda32ec9a9e62e926e8f0d7141  sale_bill_door.py
+0993c4411a34769865bcefbb8c7a05e0  export_watch.py
+0eeed35425e919fa67ff4cce8f8a9acc  spine_cadence.py
+b5956f59464671f23dc376391f9e8bae  marg_spine.py
+a39b2fccf7f2069390d5a8d97f2d9b29  marg_spine_schema.sql
+143658f187de1d2622ccadbeb730e8d3  legs_add_s240.json
+900d69ec7c777578348acef12d9420ec  install_S240_SANJEEVNI.sh
+0a79288cede30187f704086616a78d8a  KIT_ID.txt
+4303be331fb643944dac9144d2bde84c  README.md
+889aa8d6de17dc166a114184cdf1afc7  EVIDENCE_walk_s240.txt
