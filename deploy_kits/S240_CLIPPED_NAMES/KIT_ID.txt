@@ -1,0 +1,9 @@
+KIT      S240_CLIPPED_NAMES  4b3b700c1640591a3723d4fce3de5603
+BUILT    11-Sep-2026 IST, Session 240, for MANOJZ
+PURPOSE  D466 (no renames): the size behind a 20-character clipped sale name is read
+         from the nightly whole-shop closing exports (29 characters) -- the size
+         whose stock fell between two closings is the size that was sold; settled
+         only when every size balances exactly.
+REPLACES deploy_kits\S208_STOCK_LEDGER\push_expected.py  eefc8f49 -> 4b3b700c
+         (carries the S240 late-keyed-bills change unchanged)
+OFF      set CLIP_RESOLVE=off (environment) -- the old behaviour, no reinstall.

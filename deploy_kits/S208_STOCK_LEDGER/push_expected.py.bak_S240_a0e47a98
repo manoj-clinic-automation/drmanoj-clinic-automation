@@ -525,245 +525,6 @@ def _period_end(period):
     return max(found) if found else None
 
 
-# ------------------------------------------------ S240 late-keyed bills
-# THE OWNER, 11-Sep-2026 (D465): "Ravi bill date is 6 but it arrived late,
-# don't confuse, the physical stock was a actual inventory at that time."
-# And: a Marg stock export is ALWAYS the current stock -- there is no dated
-# option. So the baseline is "everything KEYED into Marg by the moment it was
-# exported", not "everything DATED on or before its as-on day".
-#
-# The ledger above adds purchases by BILL DATE (> baseline). Those two rules
-# disagree for exactly two kinds of bill:
-#   LATE   dated on/before the baseline, keyed AFTER the export was taken.
-#          Not in the baseline, and skipped by the date rule. Lost -- ours
-#          reads LOW. (Yuvika 571: dated 01-09, keyed 06-09 morning.)
-#   EARLY  dated after the baseline, keyed BEFORE the export was taken.
-#          In the baseline AND added again. Counted twice.
-# Keying time is never exported, so it is bounded from the capture stamps:
-#   hi = the first export (item level) that CONTAINS the bill
-#   lo = the last export that covers its date and does NOT contain it
-#        (never earlier than the bill's own date)
-# If hi <= baseline capture   -> keyed before: inside the baseline.
-# If lo >= baseline capture   -> keyed after:  LATE, proven by the exports.
-# Otherwise the window straddles the baseline, and the whole-shop closing
-# exports taken inside that window decide it: each of the bill's items is
-# looked for as a step UP between two consecutive closings. If every item
-# that shows a step shows it in the same gap, that gap is on one side of the
-# baseline and settles it. Anything else is NAMED as "keying time unknown"
-# and left out -- guessing either way is how a count gets blamed on a person.
-
-def _stamp(path):
-    parts = str(os.path.basename(path)).split("__")
-    return parts[2] if len(parts) > 2 else ""
-
-
-def _period_start(period):
-    if isinstance(period, (list, tuple)) and len(period) == 2:
-        return dkey(period[0])
-    s = str(period or "")
-    found = [dkey(t) for t in s.replace("_", " ").replace("to", " ").split()]
-    found = [d for d in found if d]
-    return min(found) if found else None
-
-
-def _item_exports(archive, dates):
-    """Every item-level purchase export, superseded ones INCLUDED -- a file
-    replaced for counting is still a true picture of what was keyed at the
-    moment it was taken. -> [(stamp, kind, start, end, {(date, bill): rows})]"""
-    out = []
-    for kind, sub in (("BILL ITEM WISE", "PURCHASE_BILLITEMWISE"),
-                      ("ITEM WISE", "PURCHASE_ITEMWISE")):
-        for p in sorted(glob.glob(os.path.join(archive, sub, "*", "*"))):
-            if not p.lower().endswith((".xls", ".xlsx")):
-                continue
-            try:
-                if kind == "BILL ITEM WISE":
-                    rep = MBI.read_billitemwise(p)
-                    start, end = dkey(rep.get("period_from")), dkey(rep.get("period_to"))
-                else:
-                    rep = MP.read_purchase(p)
-                    PR.apply(rep)
-                    start = _period_start(rep.get("period"))
-                    end = _period_end(rep.get("period"))
-            except Exception:                                  # noqa: BLE001
-                continue
-            if start is None or end is None:
-                continue
-            bills = collections.defaultdict(list)
-            for r in rep["rows"]:
-                if kind == "BILL ITEM WISE":
-                    d, b = dkey(r.get("bill_date")), r.get("bill_no")
-                else:
-                    b = r.get("bill")
-                    d = dates.get((PM.norm(r.get("supplier")), _billno(b)))
-                if d is None:
-                    continue
-                bills[(d, _billno(b))].append(r)
-            out.append((_stamp(p), kind, start, end, dict(bills),
-                        os.path.basename(p)))
-    # Bill-level exports (SUPPLIER WISE, BILL WISE) carry no items, but they
-    # are taken far more often -- and a bill's presence or absence in one is
-    # the same evidence of when it was keyed. Presence only: no rows.
-    for source, sub in DATE_SOURCES:
-        for p in sorted(glob.glob(os.path.join(archive, sub, "*", "*"))):
-            if not p.lower().endswith((".xls", ".xlsx")):
-                continue
-            parts = os.path.basename(p).split("__")
-            span = [dkey(x) for x in (parts[1].split("_to_")
-                                      if len(parts) > 2 else [])]
-            if not span or None in span:
-                continue
-            try:
-                sh = xlsx_sheet.open_sheet_any(p)
-                got = (_supplierwise_rows(sh) if source == "SUPPLIERWISE"
-                       else _billwise_rows(sh))
-            except Exception:                                  # noqa: BLE001
-                continue
-            if not got:
-                continue
-            bills = dict(((d, key[1]), []) for key, d in got)
-            out.append((_stamp(p), source, min(span), max(span), bills,
-                        os.path.basename(p)))
-    return out
-
-
-def _closings(archive):
-    """Whole-shop closing exports by capture stamp: [(stamp, {key: units})]."""
-    best = {}
-    for p in glob.glob(os.path.join(archive, "STOCK_CLOSING", "*", "*")):
-        if not p.lower().endswith((".xls", ".xlsx")):
-            continue
-        try:
-            rep = MS.read_closing(p)
-        except Exception:                                      # noqa: BLE001
-            continue
-        if rep.get("store") != "WHOLE STORES" or \
-                len(rep["rows"]) < PS.FILTERED_MAX:
-            continue
-        t = _stamp(p)
-        if t in best and len(best[t]["rows"]) >= len(rep["rows"]):
-            continue
-        best[t] = rep
-    out = []
-    for t in sorted(best):
-        m = collections.Counter()
-        for r in best[t]["rows"]:
-            k = PM.norm(r.get("item"))
-            if k:
-                m[k] += (r.get("units") or 0)
-        out.append((t, m))
-    return out
-
-
-def _complete_name(k, names):
-    """ITEM WISE cuts long names ('...LF L ELA' for '...LF L ELAST'). Map a
-    cut name to the ONE full name it is the start of; never guess between two,
-    never touch a short name (a short name was not cut)."""
-    if not k or k in names or len(k) < RS.TRUNC_LEN:
-        return k
-    fam = [m for m in names if len(m) > len(k) and m.startswith(k)]
-    return fam[0] if len(fam) == 1 else k
-
-
-def _closing_verdict(bill_rows, lo, hi, T_b, closings):
-    """'late', 'in', or None. See the block comment above."""
-    pre = [c for c in closings if c[0] <= lo]
-    post = [c for c in closings if c[0] >= hi]
-    if not pre or not post:
-        return None, "no closing export on both sides"
-    seq = [pre[-1]] + [c for c in closings if lo < c[0] < hi] + [post[0]]
-    if len(seq) < 2:
-        return None, "no closing export inside the window"
-    names = set(seq[-1][1]) | set(seq[0][1])
-    votes = set()
-    for r in bill_rows:
-        k = _complete_name(PM.norm(r.get("item")), names)
-        incs = [seq[j + 1][1].get(k, 0) - seq[j][1].get(k, 0)
-                for j in range(len(seq) - 1)]
-        top = max(incs)
-        if top <= 0 or incs.count(top) != 1:
-            continue
-        votes.add(incs.index(top))
-    if len(votes) != 1:
-        return None, ("no item stepped up" if not votes
-                      else "items stepped up in different gaps")
-    j = votes.pop()
-    a, b = seq[j][0], seq[j + 1][0]
-    if a >= T_b:
-        return "late", "closings %s -> %s" % (a, b)
-    if b <= T_b:
-        return "in", "closings %s -> %s" % (a, b)
-    return None, "the step straddles the baseline"
-
-
-def keyed_vs_dated(archive, B, T_b):
-    """-> (late_rows, late_report, early_keys, early_report, unknown_report).
-    late_rows are ready to add to the purchase list (dated, '_late' marked)."""
-    late_rows, late_rep, early, early_rep, unknown = [], [], set(), [], []
-    if os.environ.get("LATE_KEYED", "").strip().lower() == "off":
-        return late_rows, late_rep, early, early_rep, unknown   # switch-off
-    if not T_b:
-        return late_rows, late_rep, early, early_rep, unknown
-    dates, _f, _c = bill_dates(archive)
-    ex = _item_exports(archive, dates)
-    if not ex:
-        return late_rows, late_rep, early, early_rep, unknown
-    closings = None
-    # the bills as they stand NOW: per date, the newest export covering it
-    newest = {}
-    for e in ex:
-        t, _k, s, en, bills, _n = e
-        d = s
-        while d <= en:
-            if d not in newest or t > newest[d][0]:
-                newest[d] = e
-            d += dt.timedelta(days=1)
-    for d in sorted(newest):
-        t_new, _k, _s, _e, bills_new, _n = newest[d]
-        if t_new <= T_b and d <= B:
-            continue          # all of it keyed before the baseline: inside it
-        for key in sorted(k for k in bills_new if k[0] == d):
-            has = sorted(e[0] for e in ex if key in e[4])
-            hi = has[0]
-            lacks = [e[0] for e in ex if e[2] <= d <= e[3]
-                     and key not in e[4] and e[0] < hi]
-            lo = max(lacks + [d.strftime("%Y%m%d-000000")])
-            # the rows to use: the newest BILL ITEM WISE holding the bill
-            # (full names, dates itself), else the newest ITEM WISE
-            srcs = sorted((e for e in ex if e[4].get(key)),
-                          key=lambda e: (e[1] == "BILL ITEM WISE", e[0]))
-            if not srcs:
-                continue          # seen only in bill-level exports: no items
-            src = srcs[-1]
-            rows = src[4][key]
-            if d <= B:
-                if hi <= T_b:
-                    continue                      # keyed before: in baseline
-                if lo >= T_b:
-                    verdict, why = "late", "not in the export of %s" % lo
-                else:
-                    if closings is None:
-                        closings = _closings(archive)
-                    verdict, why = _closing_verdict(rows, lo, hi, T_b, closings)
-                if verdict == "late":
-                    for r in rows:
-                        r = dict(r)
-                        r["_date"] = d
-                        r["bill"] = r.get("bill") or r.get("bill_no")
-                        r["is_return"] = bool(r.get("is_return"))
-                        r["_late"] = True
-                        late_rows.append(r)
-                    late_rep.append((ddmmyyyy(d), key[1], len(rows), why, src[5]))
-                elif verdict is None:
-                    unknown.append((ddmmyyyy(d), key[1], len(rows), why))
-            else:
-                if hi <= T_b:
-                    early.add(key)
-                    early_rep.append((ddmmyyyy(d), key[1], len(rows),
-                                      "in the export of %s" % hi))
-    return late_rows, late_rep, early, early_rep, unknown
-
-
 # ------------------------------------------------------------- compute
 def compute(archive, base_as_on=None, upto=None):
     """Everything, in one pass. Returns a dict; raises nothing quietly."""
@@ -801,31 +562,12 @@ def compute(archive, base_as_on=None, upto=None):
                 "undated": undated[:10], "date_files": dfiles,
                 "date_conflicts": dconf}
 
-    # S240: bills keyed on the other side of the baseline's capture moment.
-    T_b = _stamp(base.get("source") or "")
-    late_rows, late_rep, early, early_rep, unknown = keyed_vs_dated(archive, B, T_b)
-    if early:
-        pur = [r for r in pur
-               if (r.get("_date"), _billno(r.get("bill"))) not in early]
-    bnames = {}
-    for r in base["rows"]:
-        bnames.setdefault(PM.norm(r.get("item")), r.get("item"))
-    for r in late_rows:                 # ITEM WISE cuts long names
-        k = _complete_name(PM.norm(r.get("item")), bnames)
-        if k in bnames and k != PM.norm(r.get("item")):
-            r["item"] = bnames[k]
-    pur = pur + late_rows
-
     sale, sdays, sskipped = sales_after(archive, B, upto)
     if not sdays:
         return {"error": "no sale report dated after the baseline (%s). "
                          "Nothing to compute." % ddmmyyyy(B), "empty": True}
     last_sale = max(sdays)
     as_on = last_sale if upto is None else min(last_sale, upto)
-    if upto is not None:
-        # --upto is a cross-check tool: a purchase dated after it is not part
-        # of the shelf on that day. (The daily run passes no --upto.)
-        pur = [r for r in pur if r.get("_date") is None or r["_date"] <= as_on]
 
     # ---- pack sizes: observed, never assumed ----
     obs = []
@@ -914,8 +656,6 @@ def compute(archive, base_as_on=None, upto=None):
                              # reach these books only through that export.
     return {"baseline_as_on": B, "baseline_items": len(base["rows"]),
             "baseline_source": base.get("source") or "",
-            "baseline_taken": T_b, "late_bills": late_rep,
-            "early_bills": early_rep, "keying_unknown": unknown,
             "rejected": rejected, "as_on": as_on, "sale_days": sdays,
             "sale_lines": len(sale), "sold_lines": sold_lines,
             "purchase_rows": len(pur), "purchase_horizon": horizon,
@@ -993,35 +733,6 @@ def _print_date_files(rep):
                   % (sup[:28], bill, kept, other, f[:44]))
 
 
-def _print_keying(rep):
-    """S240: bills whose keying moment, not their date, decides the count."""
-    t = rep.get("baseline_taken") or "unknown"
-    B = rep.get("baseline_as_on")
-    if B and t[:8] == B.strftime("%Y%m%d") and "0900" <= t[9:13] < "2200":
-        print("  note: the baseline export was taken at %s:%s on its own day. "
-              "Sales rung up on %s AFTER that moment are in neither figure -- "
-              "take the closing export after the counter shuts."
-              % (t[9:11], t[11:13], ddmmyyyy(B)))
-    late, early, unk = (rep.get("late_bills") or [], rep.get("early_bills") or [],
-                        rep.get("keying_unknown") or [])
-    if not (late or early or unk):
-        print("keying     no bill keyed across the baseline export (taken %s)" % t)
-        return
-    print("keying     baseline export taken %s" % t)
-    if late:
-        print("  LATE-KEYED BILLS ADDED -- dated on/before the baseline, keyed after it:")
-        for d, b, n, why, src in late:
-            print("     bill %-9s dated %s  %d line(s)  (%s)" % (b, d, n, why))
-    if early:
-        print("  EARLY-KEYED BILLS NOT ADDED AGAIN -- already inside the baseline:")
-        for d, b, n, why in early:
-            print("     bill %-9s dated %s  %d line(s)  (%s)" % (b, d, n, why))
-    if unk:
-        print("  !! KEYING TIME UNKNOWN -- NOT added; may be missing from this figure:")
-        for d, b, n, why in unk:
-            print("     bill %-9s dated %s  %d line(s)  (%s)" % (b, d, n, why))
-
-
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--archive", default=DEF_ARCHIVE)
@@ -1059,7 +770,6 @@ def main(argv=None):
         print("purchases  %s   %d dated line(s), period to %s" % (f[:44], n, end))
     for f, why in rep["purchase_skipped"]:
         print("  skipped %s -- %s" % (f[:44], why))
-    _print_keying(rep)
     _print_date_files(rep)
     print("sales      %d line(s) over %d day(s), %s .. %s"
           % (rep["sale_lines"], len(rep["sale_days"]),
