@@ -1,0 +1,126 @@
+VERIFY_HTML = """<!doctype html><meta charset="utf-8">
+<title>Step 0 - absent days to check - {{ ym }}</title>
+<style>
+ body{font-family:"Segoe UI",Arial,sans-serif;margin:18px auto;max-width:900px;color:#111;background:#fff;font-size:14px;
+      -webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .bar{margin:0 0 12px} .bar a{margin-right:16px;color:#05c;font-weight:bold;text-decoration:none}
+ .hdr{text-align:center;border-bottom:2px solid #222;padding-bottom:6px;margin-bottom:8px}
+ .hdr h1{font-size:20px;margin:0} .hdr .t{font-size:15px;font-weight:700;margin:3px 0 0;letter-spacing:.3px}
+ .hdr .m{font-size:12.5px;color:#444;margin-top:3px}
+ .how{border:1px solid #999;border-radius:6px;padding:7px 10px;margin:8px 0 10px;font-size:12.5px;line-height:1.45}
+ table.v{border-collapse:collapse;width:100%}
+ table.v th{background:#e9e9e9;font-size:12px;padding:6px 6px;border:1px solid #777;text-align:left}
+ table.v td{border:1px solid #888;padding:5px 6px;font-size:13px;vertical-align:middle}
+ table.v{border:1.5px solid #333}
+ table.v thead{display:table-header-group}
+ table.v tbody{break-inside:avoid;page-break-inside:avoid;border-top:2.5px solid #222}
+ td.nm{font-weight:700;font-size:14px;width:23%;background:#fafafa}
+ td.nm small{display:block;font-weight:400;color:#444;font-size:11.5px;margin-top:2px}
+ td.dt{width:13%;white-space:nowrap} td.dy{width:9%}
+ tr.sun td.dt,tr.sun td.dy{background:#d9ccff;color:#3b0f8a;font-weight:800}
+ tr.sun td.dt{border-left:4px solid #3b0f8a}
+ td.ck{width:37%;white-space:nowrap} td.fx{width:18%;text-align:center}
+ .bx{display:inline-block;width:13px;height:13px;border:1.5px solid #333;border-radius:2px;
+     vertical-align:-2px;margin:0 4px 0 12px} .bx:first-child{margin-left:2px}
+ tr.done td.dt,tr.done td.dy,tr.done td.ck{color:#444;font-style:italic;background:#e6e6e6}
+ .donly{margin:14px 0 0;border:1px solid #999;border-radius:6px;padding:8px 10px;font-size:13px}
+ .donly h3{margin:0 0 4px;font-size:13.5px}
+ .sunk{color:#3b0f8a;font-weight:800;text-decoration:underline}
+ .sign{display:flex;justify-content:space-between;margin-top:26px;font-size:13px}
+ .err{border:2px solid #b00;padding:8px;border-radius:6px}
+ @page{size:A4 portrait;margin:10mm}
+ @media print{.noprint{display:none!important} body{margin:0;max-width:none;font-size:12px}
+   table.v td{font-size:12px;padding:4px 5px} table.v th{font-size:11px}
+   tr{break-inside:avoid;page-break-inside:avoid}}
+</style>
+<div class="bar noprint"><a href="{{ prefix }}/salary/flow?ym={{ ym }}">&larr; Month-end flow</a>
+ <a href="{{ prefix }}/fixabsents?ym={{ ym }}">Fix absents desk &rarr;</a>
+ <a href="#" onclick="window.print();return false">&#128424; Print</a></div>
+<div class="hdr"><h1>Dr. Manoj Agarwal Clinic</h1>
+ <div class="t">STEP 0 &middot; ABSENT DAYS TO CHECK AGAINST THE PHYSICAL register &mdash; {{ month }}</div>
+ <div class="m">Machine data as on {{ today }} &middot; {{ nstaff }} staff &middot; {{ nopen }} day(s) still
+ absent &middot; {{ ndone }} already corrected</div></div>
+<div class="how">Each date below had <b>no punch</b> on the machine although the person was on the roster.
+ Look it up in the physical attendance register and tick <b>P</b> (present &mdash; the machine missed it),
+ <b>L</b> (on leave) or <b>A</b> (absent). Mark every <b>P</b> present on the Fix-absents desk with the
+ in-time from the register, then tick <b>Fixed</b>. What is left is the final attendance; approve
+ Sheet 1 only after this. Sundays are shaded.</div>
+{% if not feed_ok %}<div class="err">The punch feed is unavailable, so absences cannot be listed.
+ This page will not guess &mdash; try again later.</div>
+{% elif not blocks %}<div class="how">No machine-absent days in {{ month }}.</div>
+{% else %}
+<table class="v"><thead><tr><th>Staff</th><th>Date</th><th>Day</th>
+ <th>Physical register says</th><th>Fixed in system</th></tr></thead>
+{% for b in blocks %}<tbody>
+{% for r in b["items"] %}<tr class="{{ 'sun' if r.sun else '' }}{{ ' done' if r.done else '' }}">
+ {% if loop.first %}<td class="nm" rowspan="{{ b['items']|length }}">{{ b.name }}
+   <small>{{ b.absent }} day(s) without a punch{% if b.corrected %} &middot; {{ b.corrected }} corrected{% endif %}</small></td>{% endif %}
+ <td class="dt">{{ r.d[8:10] }}-{{ r.d[5:7] }}-{{ r.d[:4] }}</td><td class="dy">{{ 'Sun' if r.sun else r.dow }}</td>
+ {% if r.done %}<td class="ck" colspan="2">&#10003; already marked present{% if r["in"] %} (in {{ r["in"] }}){% endif %}</td>
+ {% else %}<td class="ck"><span class="bx"></span>P<span class="bx"></span>L<span class="bx"></span>A</td>
+ <td class="fx"><span class="bx" style="margin:0"></span></td>{% endif %}</tr>
+{% endfor %}</tbody>
+{% endfor %}</table>{% endif %}
+{% if donly %}<div class="donly"><h3>Punch dates only &mdash; not on the grid</h3>
+{% for d in donly %}<div><b>{{ d.name }}</b> &mdash; punched on {{ d.days|length }} day(s):
+ {% for x in d.days %}{% if x.sun %}<span class="sunk">{{ x.day }}</span>{% else %}{{ x.day }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
+ {% if not d.days %}none{% endif %}</div>{% endfor %}</div>{% endif %}
+<div class="sign"><span>Checked by: ______________________</span><span>Signature: ______________</span>
+ <span>Date: ____________</span></div>
+<div class="m noprint" style="margin-top:10px;color:#555;font-size:12px">Days a staff member has already asked
+ to be marked present (awaiting a decision) are in the requests queue, not here. Holidays and rostered-off
+ days are never listed.</div>
+"""
+
+
+def _verify_blocks(ym):
+    """STEP 0 data: absent_worklist, each staff's open and corrected days in one
+    date-ordered list, WITHOUT the staff the policy lists as dates-only (their
+    punch dates are returned separately). Returns (blocks, feed_ok, donly)."""
+    P, _err = _policy_module()
+    try:
+        names = P.dates_only_names(P.load_settings()) if P else set()
+    except Exception:
+        names = set()
+    con = get_db()
+    try:
+        blocks, feed_ok = absent_worklist(con, ym)
+        staff_rows = [(r["staff_id"], r["name"]) for r in
+                      con.execute("SELECT staff_id, name FROM staff WHERE active=1")]
+    finally:
+        con.close()
+    blocks = [b for b in blocks if (b["name"] or "").strip().lower() not in names]
+    for b in blocks:
+        items = [dict(r, done=False) for r in b["rows"]] + [dict(r, done=True) for r in b["done"]]
+        b["items"] = sorted(items, key=lambda r: r["d"])
+    donly = []
+    if names and feed_ok:
+        idx = punch_month_index(ym) or {}
+        for sid, nm in staff_rows:
+            if (nm or "").strip().lower() in names:
+                days = []
+                for d in sorted(k for k, v in idx.items() if sid in v):
+                    try:
+                        dd = datetime.date.fromisoformat(d)
+                    except ValueError:
+                        continue
+                    days.append({"day": dd.day, "sun": dd.weekday() == 6})
+                donly.append({"name": nm, "days": days})
+    return blocks, feed_ok, donly
+
+
+@app.route(APP_PREFIX + "/salary/flow/verify")
+@require("salary")
+def salary_flow_verify():
+    ym = _flow_ym()
+    blocks, feed_ok, donly = _verify_blocks(ym)
+    try:
+        month = datetime.date(int(ym[:4]), int(ym[5:7]), 1).strftime("%B %Y")
+    except Exception:
+        month = ym
+    return render_template_string(
+        VERIFY_HTML, prefix=APP_PREFIX, ym=ym, month=month, blocks=blocks, feed_ok=feed_ok,
+        donly=donly, today=_today(), nstaff=len(blocks),
+        nopen=sum(len(b["rows"]) for b in blocks), ndone=sum(len(b["done"]) for b in blocks))
+
+
