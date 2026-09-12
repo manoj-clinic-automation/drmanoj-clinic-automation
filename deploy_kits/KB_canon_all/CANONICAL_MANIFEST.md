@@ -2297,3 +2297,30 @@ evidence of what is running; the live pin is, and the database is better.* Two k
 **END OF CANONICAL_MANIFEST — S238 CLOSE (11-Sep-2026).** Next free: **D455 · F-420 · Session 239.** *(This footer is the last line of the file. The S231 footer above had been six closes stale and sat seventeen table rows from the end — both recorded at the S238 close, not silently removed. Earlier footers retained as truncation-proofs.)*
 
 **END OF CANONICAL_MANIFEST — S239 CLOSE (11-Sep-2026).** Next free: **D463 · F-429 · Session 240.** *(This footer is the last line of the file. The S238 footer above is retained as a truncation-proof.)*
+
+---
+
+## §S241 CLOSE — 12-Sep-2026 · rows added at this close
+
+⚠ **Recorded, not silent: this close could NOT re-verify the manifest row by row.** The device shell
+on manojz has been unusable since the Windows update of 8-Sep (F-443), so `md5sum` could not be run
+across the stores and `MD5SUMS_ALL.txt` was not rebuilt. **The three rows below were hashed
+mechanically in the assistant's own workspace on the exact bytes that were then written to disk, so
+they are proven.** Every other row in this file is carried unchanged and **unverified at this close**,
+which is stated here rather than implied by silence. The first session that finds the shell alive
+should re-run the verification and `gen_live_pins.py`.
+
+| file | session | md5 | note |
+|---|---|---|---|
+| `KB_History_Archive_v1_88_S241close.md` | **S241 close** | `e157b212216701535be294acd63b24ea` | **CURRENT** Archive. §S241 appended — the medical PC made to start at power-on and proven with nobody connected; Amir's seven steps built, walked and live; the salt list delivered as a sheet matched back by row id. **Pure append proven: the first 1,337,935 bytes are byte-identical to v1.87 (`94d8db2d9c2cb7e7aa143c042ca60d1a`); +9,149 bytes.** |
+| `Fault_Action_Register_v2_73.md` | **S241 close** | `45f09695fe5cdb1c67ecda049fee5e4d` | **CURRENT** Fault Register. **F-439 … F-443 minted, two of them the assistant's** — F-439 the agent running only inside the owner's own Windows login (six hours dark, zero captures that morning); F-440 the power-on fix taking the counter's own account off the sign-in screen, nobody told; F-441 the salts page judging ticks against a salt list older than the ticks; F-442 Drive's letter moving `F:` → `G:` across a reboot; F-443 a fourth consecutive close without a device shell. **Pure append proven: the first 589,959 bytes byte-identical to v2.72 (`f0ed6c0772307caf4e9b88c143456978`); +4,132 bytes.** |
+| `KB_Register_v5_91_S241close.md` | **S241 close** | `393a2628b39aa972e10c96094ef3e724` | **CURRENT** Register. H1 rewritten with the S240 H1 retained beneath it; the §S241 block inserted above §S240; D478 · D479 · D480 indexed; the four self-referential lines checked and none stale. **The consolidated live-file table was deliberately NOT edited row by row** — the pins are quoted from the installers' own PINS lines and marked as such, rather than merged into a table that would then claim a verification that did not happen. |
+
+**Live pins recorded at this close, from the installers' own output and the patch, NOT from
+`gen_live_pins.py` (F-443):** `/root/finance/finance_app.py` `81db4854` → **`72bc8323`** ·
+`/root/finance/amir_day.py` **`ae2c89398e3c1fa63f9dadcff9e69d84`** ·
+`/root/finance/amir_salts.py` **`8d6ef482573e56ae8676712a82a2a563`** (NEW) · medical PC unchanged:
+`marg_watch.py` **`581ff3a7`**, `marg_push.py` **`630fc5ef`**.
+**There is no `live_pins_S241close.txt` this close, and none is claimed.**
+
+**END OF CANONICAL_MANIFEST — S241 CLOSE (12-Sep-2026).** Next free: **D481 · F-444 · Session 242.** *(This footer is the last line of the file. The S239 and S238 footers above are retained as truncation-proofs. No row-by-row md5 re-verification ran at this close — see the warning at the head of this block.)*
