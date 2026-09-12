@@ -1,0 +1,6 @@
+S242_AMIR_TILE d08721f69bc7c3e3a79a50192b20affb
+/root/portal/portal.py        ed558b3663c3dd100a24f58aafc32363 -> d08721f69bc7c3e3a79a50192b20affb
+/root/portal/tile_grants.json 710f13bd14ebfdf8108372c81414db1e -> 7e7445a37ace9ea7c8218d598a05b81d (v11 -> v12)
+Amir's seven-step page gets a tile, and it is the ONLY tile he carries. Owner, 12-Sep-2026:
+"allow him only the one u made today ... Marg Purchases, Order Medicines, Stock Check, Scan
+Purchase is not for him for now, so park these too, will decide these later." Parked, not removed.

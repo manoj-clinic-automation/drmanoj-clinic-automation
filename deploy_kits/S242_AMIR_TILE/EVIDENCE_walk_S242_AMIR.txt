@@ -1,0 +1,42 @@
+0 - portal.py imported: every tile is grouped (its own assert) and the module compiles
+    grants file in use: tile_grants.json  version 12
+
+1 - AMIR sees exactly one tile, and it is his own page
+  PASS  amir's tiles   got=['Amir ka kaam'] want=['Amir ka kaam']
+  PASS  where it goes   got=['/finance/amir'] want=['/finance/amir']
+
+2 - the five parked tiles are gone FOR AMIR
+  PASS  amir cannot see 'Forms & Downloads'   got=False want=False
+  PASS  amir cannot see 'Scan Purchase'   got=False want=False
+  PASS  amir cannot see 'Marg Purchases'   got=False want=False
+  PASS  amir cannot see 'Order Medicines'   got=False want=False
+  PASS  amir cannot see 'Stock Check'   got=False want=False
+
+3 - PARKED, NOT REMOVED: every one still exists in portal.py with its roles intact
+  PASS  'Forms & Downloads' still defined, roles unchanged   got=[['doctor', 'manager', 'staff']] want=[['doctor', 'manager', 'staff']]
+  PASS  'Scan Purchase' still defined, roles unchanged   got=[['staff', 'manager']] want=[['staff', 'manager']]
+  PASS  'Marg Purchases' still defined, roles unchanged   got=[['doctor']] want=[['doctor']]
+  PASS  'Order Medicines' still defined, roles unchanged   got=[['doctor']] want=[['doctor']]
+  PASS  'Stock Check' still defined, roles unchanged   got=[['doctor']] want=[['doctor']]
+
+4 - nobody else moved
+  PASS  shavez   got=['Call Tracker', 'Forms & Downloads', 'Asset Register', 'Scan Purchase', 'Vaapsi Desk', 'Docterz Revenue', 'Docterz daily collection'] want=['Call Tracker', 'Forms & Downloads', 'Asset Register', 'Scan Purchase', 'Vaapsi Desk', 'Docterz Revenue', 'Docterz daily collection']
+  PASS  shivani   got=['Call Tracker', 'Forms & Downloads', 'Scan Purchase', 'Vaapsi Desk', 'Docterz Revenue', 'Docterz daily collection'] want=['Call Tracker', 'Forms & Downloads', 'Scan Purchase', 'Vaapsi Desk', 'Docterz Revenue', 'Docterz daily collection']
+  PASS  alisha   got=['Call Tracker', 'Forms & Downloads', 'Scan Purchase', 'Vaapsi Desk', 'Docterz Revenue', 'Docterz daily collection'] want=['Call Tracker', 'Forms & Downloads', 'Scan Purchase', 'Vaapsi Desk', 'Docterz Revenue', 'Docterz daily collection']
+  PASS  darpan   got=['Forms & Downloads', 'Scan Purchase', 'Daily Sale', 'Vaapsi Desk'] want=['Forms & Downloads', 'Scan Purchase', 'Daily Sale', 'Vaapsi Desk']
+  PASS  a bare staff login is untouched   got=['Forms & Downloads', 'Scan Purchase', 'Attendance', 'Staff Register'] want=['Forms & Downloads', 'Scan Purchase', 'Attendance', 'Staff Register']
+
+5 - the doctor keeps everything, including the new tile
+  PASS  doctor has the new tile   got=True want=True
+  PASS  doctor still has 'Forms & Downloads'   got=True want=True
+  PASS  doctor still has 'Marg Purchases'   got=True want=True
+  PASS  doctor still has 'Order Medicines'   got=True want=True
+  PASS  doctor still has 'Stock Check'   got=True want=True
+  PASS  doctor still has 'Docterz daily collection'   got=True want=True
+  PASS  doctor still has 'Salary — approve & lock'   got=True want=True
+
+6 - FAIL CLOSED: with no grants file at all, Amir loses the tile and the doctor keeps it
+  PASS  amir without grants   got=False want=False
+  PASS  doctor without grants   got=True want=True
+
+ALL CHECKS PASSED
