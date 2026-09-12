@@ -1,0 +1,103 @@
+EVIDENCE -- S241_AMIR_DAY_R2, walked offline before install
+built 12-Sep-2026 18:45 IST, Session 241
+
+=== the seven steps, on a real Flask app over a real sqlite database ===
+-- 1. an empty day
+   ok   home opens and lands on step 1
+   ok   the 1 to 7 banner is drawn
+-- 2. the punch never blocks
+   ok   after the punch tick it moves to step 2
+   ok   step 2 leads to step 3
+   ok   step 3 leads to the check
+-- 3. the check TELLS him, and names the open Excel
+   ok   both reports reported missing
+   ok   it says dobara banaiye
+   ok   it names the open Excel
+   ok   he is not asked whether a report arrived
+-- 4. one report only -- still not done
+   ok   one verified, one not
+-- 5. a report with the wrong period is refused by reason
+   ok   wrong period named, not just missing
+-- 6. the right pair verifies
+   ok   both verified
+   ok   verified pair leads to the bills
+-- 7. the bill list fills itself
+   ok   both bills are listed
+   ok   he types no bill number
+   ok   every reason is offered
+   ok   the choice is forced on every option of every bill
+-- 8. a half-answered form writes the half and keeps the rest
+   ok   the unanswered bill is still on the list
+   ok   the answered bill is gone
+   ok   it did not move past step 5
+-- 9. a deficiency raises exactly one claim; 'theek hai' raises none
+   ok   one claim raised, not two
+   ok   the claim carries supplier, reason, amount and state open
+   ok   no claim for the bill answered theek hai
+   ok   the list is now empty
+-- 10. re-answering the same bill does not raise a second claim
+   ok   still one claim
+-- 11. the day will not close while something is left
+   ok   close refused, and it says what is left
+   ok   nothing was written
+-- 12. the salt tick, then the close
+   ok   DIN BAND shown
+   ok   the close is recorded with a name
+-- 13. yesterday's unanswered bill returns as pichhla baaki
+   ok   the carried bill is shown under pichhla baaki
+-- 14. a hostile supplier name cannot inject markup
+   ok   the script tag is escaped
+-- 15. no phone-shaped digits anywhere on his screens (F-185)
+   ok   no ten-digit phone-shaped number rendered
+-- 16. the owner's view is English and counts the claims
+   ok   owner page is English
+   ok   owner page has no Hinglish leaking in
+   ok   it reports the open claim
+-- 17. the tables are created once and survive a second call
+   ok   schema creation is idempotent
+-- 18. an out-of-range step does not explode
+   ok   step 99 falls back to step 1
+-- 19. a user without the role is refused, and nothing is written
+   ok   refused with 403
+   ok   the refusal is readable, not a stack trace
+   ok   nothing new was written by the refused user
+-- 20. the gate lets a viewer in (Amir is not a maker on this unit)
+   ok   viewer is inside the gate
+   ok   maker and checker are still inside it
+   ok   it is gated on the medical unit
+
+43 ok, 0 failed
+
+=== the mount patch, on copies of a finance_app-shaped file ===
+-- happy path
+   ok   exit 0
+   ok   one block added
+   ok   anchored after the LAST end marker
+   ok   it is before __main__
+   ok   it still compiles
+   ok   it names the anchor it used
+-- run it again
+   ok   exit 0 and says ALREADY MOUNTED
+   ok   still exactly one block
+   ok   the file did not change
+-- CRLF is refused
+   ok   refused for CRLF
+   ok   byte-identical after the refusal
+-- no anchor is refused
+   ok   refused with no anchor
+   ok   byte-identical after the refusal
+-- a helper defined after the anchor is refused
+   ok   refused because require comes later
+   ok   byte-identical after the refusal
+-- a missing UNIT is refused
+   ok   refused for missing UNIT
+   ok   byte-identical after the refusal
+-- a missing file is refused
+   ok   refused for a missing target
+-- an indented end-marker is not mistaken for an anchor
+   ok   it fell back to the previous real anchor
+   ok   and the result compiles
+-- an edit that would not compile is rolled back
+   ok   refused, and the file was put back
+
+21 ok, 0 failed

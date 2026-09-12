@@ -1,0 +1,14 @@
+S241_AMIR_DAY_R2 e379859fc73c95cfa24d302ec00a35f6
+BUILT    12-Sep-2026 IST, Session 241 · re-cut of S241_AMIR_DAY
+PURPOSE  ONE change: any role on the medical unit may open Amir's own day.
+         S241_AMIR_DAY gated on maker/checker. The install of that kit printed
+         the roster read off the box -- medical has ONE maker, ONE checker and
+         FOUR viewers among alisha, amir, darpan, manoj, shavez, shivani -- so
+         the narrow gate would have refused Amir his own screen. Every write
+         still records who made it, so the record stays attributable.
+NEEDS    S241_AMIR_DAY installed (the mount block is already in finance_app.py)
+NEW      nothing. Replaces /root/finance/amir_day.py, with a backup.
+         The mount patch runs, finds itself, says ALREADY MOUNTED, changes nothing.
+PAGES    https://followup.dr-manoj.in/finance/amir      (Amir, Hinglish)
+         https://followup.dr-manoj.in/finance/amir/day  (owner, English)
+OFF      put back /root/finance/amir_day.py.bak_S241R2_<md5-8> and restart
