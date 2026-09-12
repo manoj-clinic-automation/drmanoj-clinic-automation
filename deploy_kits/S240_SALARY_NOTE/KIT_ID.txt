@@ -1,0 +1,16 @@
+S240_SALARY_NOTE d9df9dde44b198ac61625fe2e1df83b7
+BUILT    12-Sep-2026 IST, Session 240
+PURPOSE  Two corrections to the salary sheet, and NO amount changes anywhere:
+         1. the footnote said "salary / 30"; the engine divides by 30.5 (D343). The line was
+            built with a whole-number format, so 30.5 printed as 30. It is the line staff read
+            before signing.
+         2. Amir is flat pay (D459). His row printed "31" in the Leaves column -- computed and
+            then thrown away -- and it inflated the clinic's leave total by 31 days. Part-time
+            rows now show no leave working.
+NOT DONE No column is added or removed. The extra "weighted / allowed" columns are PARKED at the
+         owner's word, 12-Sep-2026.
+GATE     the live salary_policy.py must be v1.16 (c7577174); a corrected file (aabd90fb) exits
+         as already done.
+PROOF    it renders August BEFORE and AFTER on the real data and refuses unless SHEET 4 -- every
+         name and every amount -- is byte-identical and at most two numbers changed on the page.
+UNDO     the backup it names, then restart the staff register service.
