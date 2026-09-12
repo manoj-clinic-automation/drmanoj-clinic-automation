@@ -1,0 +1,12 @@
+S240_MEDICAL_PUSH 630fc5efeac89513d5b0d057df9e0639
+BUILT    12-Sep-2026 IST, Session 240 · D467 phase 2b (the medical PC's half)
+PURPOSE  Every Marg export the watcher captures is sent to the clinic server within seconds, by
+         the medical PC itself, and the server answers what the report was and whether it
+         verified. No trip to that machine: both files go down the Drive kit channel the agent
+         already polls, md5- and compile-gated.
+SAFETY   The pusher is a DAEMON THREAD inside the watcher. It never deletes, moves or rewrites a
+         captured file. If it is absent, broken or unimportable, capture carries on exactly as
+         before -- proved both ways. A bad key, a dead line or a server that is down is never
+         treated as a refusal: the file waits and is tried again, for ever.
+NO NEW SECRET -- it reads D:\SendToClinic\token.txt, the key this machine already holds.
+UNDO     put marg_watch.py aa55cdb5 back in the Drive _kit folder.

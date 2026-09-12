@@ -1,0 +1,13 @@
+# KIT_MANIFEST.txt -- read by medical_agent.py (S205.1) from this folder, every kit check.
+# It declares files the agent may install BEYOND its own built-in list, one per line:
+#
+#     <name in this folder> | <where it goes on the medical PC> | <the md5 it must have>
+#
+# The agent refuses any destination outside D:\SendToClinic, refuses a file whose md5 does not
+# match what is declared here, and refuses a .py that does not compile. A line it cannot read is
+# reported in the heartbeat and skipped, never guessed at.
+#
+# S240 (D467 phase 2b) -- the pusher: every captured export goes to the clinic server by itself.
+# marg_watch.py needs no line here: it is already on the agent's built-in list, and changing it
+# is what makes the agent restart the watcher.
+marg_push.py | D:\SendToClinic\marg_push.py | 630fc5efeac89513d5b0d057df9e0639
