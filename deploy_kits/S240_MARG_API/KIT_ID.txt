@@ -1,0 +1,14 @@
+S240_MARG_API 598ba2df83f029d6f861e63190a62a33
+BUILT    12-Sep-2026 IST, Session 240 · D467 phase 2b (the machine door)
+PURPOSE  The medical PC can push each Marg export the moment it is captured:
+           GET  /finance/api/marg-file   "are you there?"
+           POST /finance/api/marg-file   one export -> TAKEN / ALREADY / REFUSED / BUSY
+         Same marg_take.take() as the browser page and the 5-minute collector: de-duplicated by
+         the file's own md5, same router, sale reports read into PHI-free lines and deleted.
+NO NEW SECRET
+         It uses FINANCE_MARG_TOKEN, the scoped stage-only key the medical PC already holds.
+         That key opens this path and no other, grants no identity and no role, and the handler
+         re-checks it even though the front gate already did.
+NEEDS    S240_MARG_DOOR installed (marg_door.py 8ba1f586)
+CHANGES  /root/finance/marg_door.py replaced · ONE line added to the app's token tuple
+OFF      remove "/finance/api/marg-file" from that tuple and restart
