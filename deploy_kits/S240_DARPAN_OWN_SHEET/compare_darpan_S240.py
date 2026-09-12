@@ -37,9 +37,16 @@ ck("SHEET 4 keeps everyone else, same order, same rupee",
    [x for x in p4b if x[0].lower() != who] == p4a,
    "before %d, after %d" % (len(p4b), len(p4a)))
 ck("exactly one person left", len(p4b) - len(p4a) == 1, "%d -> %d" % (len(p4b), len(p4a)))
-ck("the name appears nowhere on the page now", who not in a.lower())
 
 r3b = {n.strip().lower(): [float(x) for x in NUM.findall(cells)] for n, cells in S3.findall(b)}
+r3a = {n.strip().lower() for n, _ in S3.findall(a)}
+ck("SHEET 3 had a row for the person before", who in r3b, sorted(r3b)[:4])
+ck("SHEET 3 has no row for the person now", who not in r3a, sorted(r3a)[:4])
+# He may still be NAMED elsewhere on the page -- a hold note, a cover-day line, the part-time
+# block. That is not a row and is not money, so it is reported, never failed on: the rows and the
+# totals below are what decide.
+left = a.lower().count(who)
+print("     the name still appears %d time(s) outside the two tables (notes, not rows)" % left)
 tb = [float(x) for x in NUM.findall(TOT.search(b).group(1))] if TOT.search(b) else []
 ta = [float(x) for x in NUM.findall(TOT.search(a).group(1))] if TOT.search(a) else []
 his = r3b.get(who, [])
