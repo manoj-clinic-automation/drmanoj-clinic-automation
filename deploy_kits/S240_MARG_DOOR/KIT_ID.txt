@@ -1,0 +1,13 @@
+S240_MARG_DOOR 8ba1f586ed9f7d897639fc5efca7a2f9
+BUILT    12-Sep-2026 IST, Session 240 · D467 phase 2a
+PURPOSE  ONE DOOR for Marg exports on the server, and the worst-case way in: a page at
+         /finance/clinic/marg/upload where a person can hand the server an export from any
+         browser -- no medical PC, no Drive, no Tailscale. Everything that arrives, by any
+         route, now goes through marg_take.take(): de-duplicated by the file's own md5,
+         classified by the same router the 5-minute collector uses, sale reports read into
+         PHI-free lines and the file deleted (S186).
+NEEDS    S240_MARG_INGEST installed and run once
+NEW      /root/marg_ingest/marg_take.py · /root/finance/marg_door.py · one mount line in
+         finance_app.py (anchored, backed up, rolled back if the app does not come back)
+         · mi_file gains a 'source' column
+OFF      remove the mount block marked S240_MARG_DOOR from finance_app.py and restart
