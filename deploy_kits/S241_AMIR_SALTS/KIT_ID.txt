@@ -1,0 +1,18 @@
+S241_AMIR_SALTS 8d6ef482573e56ae8676712a82a2a563
+BUILT    12-Sep-2026 IST, Session 241 · on the owner's word
+PURPOSE  The salt list as a sheet Amir can carry. He downloads one Excel, COPIES
+         the exact salt name out of it into Marg, writes Y against what he did,
+         and uploads the same file back. He never types a name into the sheet --
+         the spelling is the whole point. The tick is matched by ROW ID, never
+         by a name, because the name is the thing that was wrong.
+NEEDS    S241_AMIR_DAY installed · padwriter.py and padreader.py already in
+         /root/finance/ (the stock pad's own stdlib writer and reader)
+NEW      /root/finance/amir_salts.py · replaces /root/finance/amir_day.py ·
+         one new table, lazily: amir_salt_upload (de-duplicates by file md5)
+         finance_app.py is NOT touched -- the salt page rides on the day's mount
+WRITES   purchase_salt_task.done / done_by / done_at -- the SAME rows his
+         existing salts page ticks, so the two can never disagree
+PAGES    https://followup.dr-manoj.in/finance/amir/salts
+         https://followup.dr-manoj.in/finance/amir/salts.xlsx
+OFF      put back /root/finance/amir_day.py.bak_S241salts_<md5-8>, delete
+         amir_salts.py, restart. Step 6 falls back to the page he has today.
