@@ -1,0 +1,15 @@
+S241_AMIR_DAY 655d12fa506dd2668f7f07d6450912a6
+BUILT    12-Sep-2026 IST, Session 241 · D472, on the owner's GO
+PURPOSE  Amir's day as SEVEN STEPS on a phone: punch nudge, bill entry, take the
+         two exports, the server's own verification, a forced answer on every
+         bill, the salt and name list, DAY CLOSED. A deficient bill becomes a
+         claim for Darpan (D471). He types no bill number and is never asked
+         whether a report arrived.
+NEEDS    S224_MARG_PURCHASES (purchase_bill, purchase_export) already live
+NEW      /root/finance/amir_day.py · one mount block in finance_app.py ·
+         four new tables created lazily: amir_day, amir_step,
+         amir_bill_disposition, amir_claim
+PAGES    https://followup.dr-manoj.in/finance/amir      (Amir, Hinglish)
+         https://followup.dr-manoj.in/finance/amir/day  (owner, English)
+OFF      remove the block marked S241_AMIR_DAY from finance_app.py and restart;
+         the four tables are inert once nothing reads them
