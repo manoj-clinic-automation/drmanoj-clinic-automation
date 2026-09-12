@@ -1,0 +1,5 @@
+S242_REGISTER_TODAY c6b87682ccbfb03734a39ad33c26f2a3
+/root/finance/clinic_register.py  93a31e68234df066776b7b80ef65ffbd -> c6b87682ccbfb03734a39ad33c26f2a3
+The daily register opens on TODAY. Owner, 12-Sep-2026: "its showing of 11 sept, shd be of today,
+to be used at end of day." One helper, two call sites; the gate, the tables, the day page and the
+to-do behaviour are untouched. Full-file replacement, gated on the from-pin.

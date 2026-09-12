@@ -1,0 +1,27 @@
+today=2026-09-12  yesterday=2026-09-11  (Docterz knows 2026-09-11 and 2026-09-10 only)
+
+1 - nothing filled: the index must open TODAY, not yesterday
+  PASS  redirect target   got='/finance/clinic/register/2026-09-12' want='/finance/clinic/register/2026-09-12'
+  PASS  status   got=302 want=302
+
+2 - today's page renders, with the other two records NOT KNOWN rather than zero
+  PASS  status   got=200 want=200
+  PASS  the day is named on the page   got=True want=True
+  PASS  no traceback   got=False want=False
+
+3 - fill today, then the index must fall back to the next unfilled day (yesterday)
+  PASS  redirect target   got='/finance/clinic/register/2026-09-11' want='/finance/clinic/register/2026-09-11'
+
+4 - 'all days' must list today, so a filled today is visible there
+  PASS  status   got=200 want=200
+  PASS  today listed   got=True want=True
+
+5 - the gate is untouched: a refused user still gets the denial, not the day
+  PASS  status   got=200 want=200
+  PASS  no redirect to a day   got=False want=False
+
+6 - a day Docterz DOES know still works (nothing regressed)
+  PASS  status   got=200 want=200
+  PASS  no traceback   got=False want=False
+
+ALL CHECKS PASSED

@@ -1,0 +1,6 @@
+S242_DOCTERZ_COLLECTION_TILE -- /root/portal/tile_grants.json v10 (812cbbc6) -> v11 (710f13bd).
+Adds the tile "Docterz daily collection" (url /finance/clinic/register) to shavez, shivani and
+alisha. Data only: no code file is touched and the portal does NOT need a restart -- the grants
+file is read per request. Backup taken by the one line: tile_grants.json.bak_S242_v10.
+Owner's ask, 12-Sep-2026, Session 242: "put docterz daily collection tile in receptionists and
+shavez PWA, currently its in my PWA only."
