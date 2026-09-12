@@ -35,6 +35,7 @@ salary working outputs, moved out of /root and /root/finance.
 Why safe: every item was checked against every live .py/.sh/.html/.conf/.service/.timer under /root,
 the root crontab and /etc/systemd — anything referenced was HELD and not moved ($skipped held).
 Nothing was deleted; nothing was restarted; finance.db, logs, json, env and every live module stayed.
+NOTE: the finance_app.py.bak_* chain is the only history of the live finance_app.py anywhere. Retired, never to be deleted, until the repository holds the live file byte for byte.
 Undo: bash $UNDO   (moves everything back to its original path)
 Delete: the owner's decision, after a full cycle — never this script.
 W

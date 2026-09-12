@@ -25,7 +25,7 @@ cat_of() {
     install_finance_S179.sh|post_install_finance.sh|update_finance_*.sh|add_finance_*.sh|mask_darpan_tiles.sh|finance_gitignore_additions.txt|B1_reconciliation.md|finance_migration_S182_*.sql|finance_browse.md5|finance_epoch.md5|finance_parked.md5|finance_scanner.md5|finance_sso.md5|finance_ui.md5|finance_upi.md5|finance.md5) echo "D_installresidue";;
     add_bhawna_desk_s223.py|backfill_lookup_s218.py|close_amir_joiner_s222.py|correct_days_s218.py|crosstab.py|diagnose_identity_text.py|explore_db.py|find_the_june_case.py|fix_f185_fixtures.py|json_keys.py|legacy_sweep.py|rejoin_returns_s220.py|repair_upi_txn.py|research_once.py|returns_keyprobe.py|returns_probe.py|returns_recovery.py|tally_recent.py|validate_visit_rung.py|why_unmatched.py|s218_backfill_effects.csv|patch_switcher.py|watchdog_live_copy.py) echo "E_oneoff";;
     marg_14_15_aug.xls|medical_adjustments.csv|medical_daily_ledger.csv|medical_exceptions.csv|medical_legacy.csv|audit_finance_backup.db) echo "F_legacydata";;
-    flow_2026-*.html|salary_inputs_*|scenario_2026-*|review_2026-*.csv|deductions_extras_*.csv|selftest_grid.html) echo "G_salaryoutput";;
+    flow_2026-*.html|salary_inputs_*|scenario_2026-*|review_2026-*.csv|deductions_extras_*.csv|selftest_grid.html) echo "";;  # S243 review: salary inputs/outputs stay in place
     *) echo "";;
   esac
 }
