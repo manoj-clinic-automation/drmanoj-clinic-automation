@@ -1,0 +1,21 @@
+S240_DARPAN_SHEETS a8d0304ace29bf6f3ee50342b05bae0b
+BUILT    12-Sep-2026 IST, Session 240
+PURPOSE  Darpan's two own sheets, after D475 took him off the common one. Two printed pages are
+         added at the end of the same salary document, one pair per own-sheet person.
+SHEET 5  the owner's page: salary; leaves (taken / weighted / allowed / charged) and their
+         deduction; late minutes, marks, charge, held, collected; last month's held charge; dress
+         and I-card; other fines; the advance adjusted this month; duty credits and OT if any;
+         then the advance story -- opening, taken, recovered, interest, closing; then NET PAYABLE.
+SLIP     his page, Hinglish, his month only: salary, each deduction with its working, the advance
+         cut this month (the owner, 12-Sep: YES), what he gets, a plain warning line when the
+         advance took more than the salary, and a signature rule. No balances, no history.
+SAFE     Nothing is computed. Every figure is the month's own, read from compute() and from the
+         ledger the month close already produces.
+SETTING  own_sheet_staff (comma-separated), as set by S240_DARPAN_OWN_SHEET. Defaults to "darpan".
+GATE     the live salary_policy.py must be d42842e4 (after S240_DARPAN_OWN_SHEET); 21b9cd00 exits
+         as already done.
+PROOF    renders the sheets BEFORE and AFTER on the real August data and refuses unless the only
+         difference in the entire document is one inserted block of exactly two pages, his, with
+         the advance deduction and the same net on both, and SHEET 3 / SHEET 4 unchanged row for
+         row and rupee for rupee.
+UNDO     the backup it names, then restart the staff register service.
