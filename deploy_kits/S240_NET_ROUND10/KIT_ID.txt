@@ -1,0 +1,21 @@
+S240_NET_ROUND10 c62e17e20add329a066da04232703a04
+BUILT    12-Sep-2026 IST, Session 240
+PURPOSE  The owner, 12-Sep-2026: "ROUND OFF NET PAYABLE TO LAST 10 RUPEES." Money is handed over
+         in notes, so the paise and the last digit are not paid (D477).
+WHERE    at the ONE place the net is computed, so sheet 3, sheet 4, the own sheets, the slip, the
+         totals and whatever the lock stores all carry the same rounded rupee.
+RULE     cut TOWARDS ZERO, always. 8,651.33 is paid 8,650; a month ending at -1,949.07 carries
+         1,940 forward, not 1,950. The rounding never runs against the person, and never moves a
+         net by Rs.10 or more.
+KEPT     net_exact and net_round_off stay on the record, so a page that shows a working can show
+         the round-off line and still add up. Two such lines appear -- owner's SHEET 5 and the
+         salary slip -- and only when there is something to round.
+NOCOLS   no column is added to sheets 3 or 4 (the owner, 12-Sep: "dont add any columns now").
+         Sheet 3's footnote gains one sentence saying the net is cut to the last Rs.10.
+GATE     the live salary_policy.py must be 21b9cd00 (after S240_DARPAN_SHEETS); 92aecbe3 exits as
+         already done.
+PROOF    renders August BEFORE and AFTER on the real data and refuses unless every column except
+         the net is unchanged to the paisa, every net is its old value cut towards zero to the
+         last Rs.10, an already-round net has not moved, the TOTAL net is the sum of the rounded
+         nets, SHEET 4 pays the same rupee as SHEET 3, and the own sheets agree.
+UNDO     the backup it names, then restart the staff register service.
