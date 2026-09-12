@@ -1,0 +1,7 @@
+S243_RETIRE records-and-move
+/root and /root/finance: superseded copies, dated backup folders, applied patchers, walk/selftest/seed
+helpers, S179/S180/S195 install residue, one-off scripts, legacy import data, salary working outputs
+-> /root/_retired/S243_<stamp>/ (same relative paths). MOVE ONLY, never delete; UNDO.sh puts all back.
+Dry run is read-only and must be pasted back and reviewed before the move. Nothing is restarted.
+Excluded by ruling: .acme.sh, crontab.bak_S237, _quarantine_S232_*, finance.db, *.log, *.json, *.env.
+Proven offline: dry-run -> move (43) -> MANIFEST.md5 verifies inside the retired folder -> UNDO -> tree byte-identical.
