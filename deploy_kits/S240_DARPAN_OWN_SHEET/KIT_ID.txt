@@ -1,0 +1,18 @@
+S240_DARPAN_OWN_SHEET 749c97c1c1fe3fe369c6db1ed11331cf
+BUILT    12-Sep-2026 IST, Session 240
+PURPOSE  Darpan comes OFF the common salary sheet (owner, 12-Sep-2026: his advance history is too
+         long for one line on a shared sheet to tell the truth about it). His line no longer
+         appears on sheets 3 or 4, and the -1,949.07 that would have sat on a page he signs goes
+         with it.
+HALF     This is the first half only. His TWO own sheets -- one for the owner with the full
+         advance history, one for Darpan with only leaves, leave deduction, late minutes, marks
+         and their deduction -- are a separate build.
+SAFE     Nothing is computed differently. Pay, advances and the ledger are untouched; the staff
+         list is filtered once, so both sheets, the serial numbers and every total follow.
+SETTING  own_sheet_staff (comma-separated). Defaults to "darpan" when unset.
+GATE     the live salary_policy.py must be aabd90fb (after S240_SALARY_NOTE); d42842e4 exits as
+         already done.
+PROOF    renders August BEFORE and AFTER on the real data and refuses unless his name is gone,
+         SHEET 4 keeps every other name in order for the same rupee, and every SHEET 3 total
+         drops by exactly his own figure.
+UNDO     the backup it names, then restart the staff register service.
