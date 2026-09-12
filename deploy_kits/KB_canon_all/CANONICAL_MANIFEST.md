@@ -2324,3 +2324,47 @@ should re-run the verification and `gen_live_pins.py`.
 **There is no `live_pins_S241close.txt` this close, and none is claimed.**
 
 **END OF CANONICAL_MANIFEST — S241 CLOSE (12-Sep-2026).** Next free: **D481 · F-444 · Session 242.** *(This footer is the last line of the file. The S239 and S238 footers above are retained as truncation-proofs. No row-by-row md5 re-verification ran at this close — see the warning at the head of this block.)*
+
+---
+
+## §S242 CLOSE — 12-Sep-2026 · rows added at this close
+
+✅ **THE ROW-BY-ROW VERIFICATION RAN, THE PIN LIST WAS REGENERATED, AND THE FOLDER'S HASH GATE WAS
+REBUILT.** S241 recorded all three as BLOCKED by the dead device shell on manojz (F-443). Only one
+of them ever needed a shell: `gen_live_pins.py` is a script over two files, `MD5SUMS_ALL.txt` is md5
+over a folder of files, and manifest rows are verified by hashing the files themselves — all of
+which the file-transfer tools and a `git clone` can supply (**F-447**).
+
+⚠ **AND THE GATE WAS RED.** Run at this close for the first time in four sessions — the one command
+`README_VERIFY.md` names for Phase 0 — `md5sum -c MD5SUMS_ALL.txt` **exited 1**: 484 rows OK and
+`CANONICAL_MANIFEST.md` **FAILED**, because the S241 close appended its block to this file and did
+not rebuild the sums. The inverse check found the other half: **three S241 canon files were on disk
+and in no row at all** (Archive v1.88, Fault Register v2.73, Register v5.91). Nothing had drifted,
+no file was wrong, and no row was listed-but-missing. **Rebuilt at this close: rows 485 → 495,
+added 10, dropped 0, exit 0 on all 495** — the ten being this close's seven documents and the three
+S241 files that had never been listed. The inverse check closes it: 496 files on disk = 495 rows +
+`MD5SUMS_ALL.txt`, which cannot be inside itself (**F-448**).
+
+**Cross-store check, taken before any document was written:** the repository's
+`deploy_kits/KB_canon_all/CANONICAL_MANIFEST.md` and the project-knowledge copy were
+**byte-identical** (`c7a9ff0deea655fc95f85a0ef43cd2dd`), and the three S241 canon rows reproduced
+exactly from the staged files — `e157b212…`, `45f09695…`, `393a2628…`. **No hash mismatch anywhere.**
+
+| file | session | md5 | note |
+|---|---|---|---|
+| `KB_History_Archive_v1_89_S242close.md` | **S242 close** | `ea282d81abe3529158f45c81bb6477b5` | **CURRENT** Archive. §S242 appended — the register tile granted to reception and used the same evening; the register made to open on today; Amir's live page found with no door and given the only tile he carries; the drawer count ruled optional; the close's own three cleared rows recorded in §8. **Pure append proven: the first 1,347,084 bytes are byte-identical to v1.88 (`e157b212216701535be294acd63b24ea`); +13,545 bytes.** |
+| `Fault_Action_Register_v2_74.md` | **S242 close** | `9e0840962b34b2dcf5b504c2544b016e` | **CURRENT** Fault Register. **F-444 … F-448 minted, three of them the assistant's** — F-444 the register taking its date from Docterz's calendar instead of the clock; F-445 a page live, walked and pinned with no door anywhere in the portal; F-446 an optional section reported as a missed step; F-447 one blocker generalised over three close steps for four closes; F-448 the folder's own hash gate exiting 1 since the S241 close with nobody running it. **Pure append proven: the first 594,091 bytes byte-identical to v2.73 (`45f09695fe5cdb1c67ecda049fee5e4d`); +5,562 bytes.** |
+| `KB_Register_v5_92_S242close` | **S242 close** | `0505881f8eba00e70d71dff0ee362f4f` | **CURRENT** Register. H1 rewritten with the S241 H1 retained beneath it; the §S242 blockquote inserted above §S241; **the CONSOLIDATED live-file table edited row by row this time** — a new S242 wave block carrying the four new pins, and the three superseded rows marked `*(superseded at S242)*` in place, their historical duplicates further down deliberately untouched. D481 … D484 indexed; the four self-referential lines checked. *(S241 deliberately did not edit that table; the pins are therefore current here for the first time since S239.)* ⚠ **The row above deliberately names this file WITHOUT its `.md` extension.** `gen_live_pins.py` keys on the basename followed immediately by the table pipe; a row written `KB_Register_vX_SNNNclose.md` does not match, and the generator stamps `register_pin_verified: no` on an otherwise correct pin list. The S240 row is the pattern to copy. |
+| `HANDOFF_RUNBOOK_2026-09-12_Session242close_v173.md` | **S242 close** | `8a4f4e08a8120d675dfcfb623f4b8b5d` | **CURRENT** Runbook. §0 the three changes and the evening they were used · §1 the mental models, including *"live" is not "reachable"*, *an empty field is a question*, and *run the gate even when you cannot rebuild it* · §2 the live backlog with Darpan's claim queue at ⭐1 · §3 install discipline · §4 the boundary. Supersedes v172. |
+| `START_HERE_SESSION_243.md` | **S242 close** | `4a29ad65c2e10074a2c97ecfc2da4e03` | **CURRENT** entry point. Carries the standing rulings, the current canon versions, the three pins that moved, **D484's do-not-flag rule**, Amir's one-tile state, the F-447 correction to how F-443 is read at Phase 0, and **the gate command as a Phase-0 step with its exit-0 requirement**. Next free **D485 · F-449**. |
+| `S242_BUILD_BRIEF.md` | **S242 close** | `c2145fe7971e5d453f9ef736a56a0731` | **CURRENT** build brief — the single document S243 reads instead of the session's papers. The three changes with their pins, the two reconstructions that made them gateable, the two rulings that change how a screen is read, the three self-findings, and the note that Darpan's claim queue opens on an empty table by design. |
+| `live_pins_S242close.txt` | **S242 close** | `d44f94a3b00f2b59a1ba2d3479f3a51b` | **CURRENT** pin list — generated by `gen_live_pins.py` **v1.3** from `KB_Register_v5_92_S242close` against this manifest, **`register_pin_verified: yes`**, **316 rows (VPS 258 · SHORT 20 · BLIND 38)**. The first verified pin list since the S240 close; S241 quoted its pins from the installers instead, under F-443. *(Generated against this manifest before this row was added to it, which cannot affect the verification: the generator keys only on the Register's basename.)* |
+
+**Live pins recorded at this close — each PREDICTED from the built bytes before the install and
+PRINTED BY THE BOX after it, and this close the pin list was regenerated from the Register rather
+than quoted:** `/root/finance/clinic_register.py` `93a31e68…` → **`c6b87682ccbfb03734a39ad33c26f2a3`** ·
+`/root/portal/portal.py` `ed558b36…` → **`d08721f69bc7c3e3a79a50192b20affb`** ·
+`/root/portal/tile_grants.json` v10 `812cbbc6…` → v11 **`710f13bd14ebfdf8108372c81414db1e`** → v12
+**`7e7445a37ace9ea7c8218d598a05b81d`**.
+
+**END OF CANONICAL_MANIFEST — S242 CLOSE (12-Sep-2026).** Next free: **D485 · F-449 · Session 243.** *(This footer is the last line of the file. The S241, S239 and S238 footers above are retained as truncation-proofs. The row-by-row md5 verification DID run at this close, and so did the folder's own hash gate — see the notes at the head of this block.)*
