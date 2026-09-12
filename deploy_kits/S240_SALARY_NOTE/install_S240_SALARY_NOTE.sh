@@ -54,7 +54,7 @@ SVC="$(basename "$(grep -rl staff_register /etc/systemd/system/*.service 2>/dev/
 
 W="$(mktemp -d)"
 echo "-- rendering August as it stands today..."
-( cd "$SDIR" && "$PY" -B "$KDIR/render_S240.py" "$YM" "$W/before.html" ) || red "could not render before the edit -- nothing was changed"
+( cd "$SDIR" && "$PY" -B "$KDIR/render_S240.py" "$SDIR" "$YM" "$W/before.html" ) || red "could not render before the edit -- nothing was changed"
 
 OUT="$(SP_PATH="$SP" "$PY" -B "$KDIR/patch_salary_policy_S240.py" 2>&1)" || { echo "$OUT"; red "the edit refused -- nothing was changed"; }
 echo "$OUT" | sed 's/^/   /'
@@ -62,7 +62,7 @@ BAK="$(echo "$OUT" | awk -F': *' '/backup *:/{print $2}')"
 "$PY" -m py_compile "$SP" || restore "salary_policy.py does not compile after the edit"
 
 echo "-- rendering August again, and comparing..."
-( cd "$SDIR" && "$PY" -B "$KDIR/render_S240.py" "$YM" "$W/after.html" ) || restore "could not render after the edit"
+( cd "$SDIR" && "$PY" -B "$KDIR/render_S240.py" "$SDIR" "$YM" "$W/after.html" ) || restore "could not render after the edit"
 "$PY" -B "$KDIR/compare_S240.py" "$W/before.html" "$W/after.html" || restore "the comparison did not prove the change was safe"
 
 if [ -n "$SVC" ]; then
