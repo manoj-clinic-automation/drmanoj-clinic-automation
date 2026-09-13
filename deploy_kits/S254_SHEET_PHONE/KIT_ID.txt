@@ -1,0 +1,4 @@
+S254_SHEET_PHONE eaaea278498b8511ca9a79adf9c20eba
+clinic_register.py eaaea278498b8511ca9a79adf9c20eba from 92136a97929d86b8458e62e1a9c8878f (S251)
+clinic_money.py d5c3a8459b04753e09e9630cb2de6560 from da9122e0f8b48a1a0aa3d86d02adc109 (S253 -- install S253 first)
+patch_s249.py / seed_s249.py: the S251 copies, used by the walk only

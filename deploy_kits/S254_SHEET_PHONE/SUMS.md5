@@ -1,0 +1,10 @@
+435597fce60d8c06ca06c954f148509c  EVIDENCE_S254.txt
+91873ed3c6b437c35df0e9921e163e9d  KIT_ID.txt
+f9980c6f833f94dcab6a864ddfa14492  README.md
+d5c3a8459b04753e09e9630cb2de6560  clinic_money.py
+eaaea278498b8511ca9a79adf9c20eba  clinic_register.py
+2a947d098450da1ca8eca9a5d1361f94  install_S254_SHEET_PHONE.sh
+362e676580aa1fe323ada038e5f7d830  patch_s249.py
+3ad83e72863d8211a41867c7e7786346  patch_s254.py
+893c315dd30a0128710da120b802ee8e  seed_s249.py
+20d1ec12684442db1da4759bdc9df03c  walk_s254.py
