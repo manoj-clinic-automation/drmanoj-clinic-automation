@@ -1,0 +1,159 @@
+EVIDENCE_S243 -- kit S243_AMIR_VISIT -- built 13-Sep-2026 in the container against the 13-Sep live capture (/home/claude/S243/capture/tree/root)
+
+== base pins (capture/tree/root/finance)
+ae2c89398e3c1fa63f9dadcff9e69d84  amir_day.py
+8d6ef482573e56ae8676712a82a2a563  amir_salts.py
+f002defb9f4a5d35028c051462225def  finance_app.py
+cc349dd00d0a2f861ec54242c9551557  finance_ui/finance_approvals.html
+
+== amir_day patcher selftest on the LIVE bytes (patch(live) == the kit's amir_day.py)
+  PASS  live amir_day.py is the pin ae2c8939
+  PASS  patches (patched)
+  PASS  compiles
+  PASS  only additions, bar the healthz kit name and the three export-stamp lines
+  PASS  the export-stamp fix landed in _export_state, _bills and _hhmm
+  PASS  healthz names the kit and the route exists once
+  PASS  the gate is untouched: GATE_STEPS and done[6] as before
+  PASS  the prompt rides on step 6 and the close screen
+  PASS  second run is a no-op
+  PASS  patch(live) is byte-for-byte the kit's amir_day.py (bf7d9826)
+  PASS  a stranger file is refused
+selftest: 11 passed, 0 failed
+
+== hub patcher selftest: the live page, and the page after S243_DARPAN_KAL's hub patch
+  PASS  finance_approvals.html (cc349dd0): patches (patched)
+  PASS    block, loader and call each once
+  PASS    the block sits inside the Marg card, before its help
+  PASS    the Marg card's own help, the home-medicine loader and the reclass loader survive
+  PASS    only additions: every original line still present
+  PASS    the S243_AUTOAPPLY wording is still there
+  PASS    second run is a no-op
+  PASS  hub_kal.html (7dbb5e56): patches (patched)
+  PASS    block, loader and call each once
+  PASS    the block sits inside the Marg card, before its help
+  PASS    the Marg card's own help, the home-medicine loader and the reclass loader survive
+  PASS    only additions: every original line still present
+  PASS    the S243_AUTOAPPLY wording is still there
+  PASS    DARPAN_KAL's card, loader and call are untouched
+  PASS    second run is a no-op
+  PASS  a stranger page is refused
+selftest: 16 passed, 0 failed
+
+== predicted to-pins
+  amir_day.py                ae2c89398e3c1fa63f9dadcff9e69d84 -> bf7d9826119edab48652fd959e1e8da5 (the kit's file)
+  finance_approvals.html     cc349dd00d0a2f861ec54242c9551557 -> e348a106c494e6094953226dd06de07f
+  finance_approvals.html     after DARPAN_KAL 7dbb5e56a6564abbfebaa6f94cee484c -> c12be75b8c357417c84581f96343eab7
+  (reverse order also proven: this kit first, then DARPAN_KAL's four hub anchors still match once each)
+
+== py_compile (Python 3.11.15)
+  ok  amir_day.py
+  ok  patch_amir_day_salt_prompt_s243.py
+  ok  patch_hub_amir_visit_s243.py
+  ok  walk_amir_visit_s243.py
+  ok  install_S243_AMIR_VISIT.sh (bash -n)
+  ok  mock_install_amir_visit_s243.sh (bash -n)
+
+== the live-shape walk (real finance_app f002defb patched in memory with S243_SCREEN_FIXES + S243_DARPAN_KAL; real sqlite from finance_schema + finance_returns + purchase_schema + purchase_salt_task + mi_file; real hub page patched by both)
+walking /home/claude/S243/capture/tree/root/finance/finance_app.py (finance_app in memory: screen_fixes:patched darpan_kal:patched; hub: darpan_kal:patched amir_visit:patched)
+  temp db /tmp/walk_s243_amir_visit_69duyyaa/finance.db  today 2026-09-13
+  PASS  amir_day is mounted (and amir_salts rides on it)
+  PASS  darpan_kal is mounted too (the kit before this one)
+  PASS  healthz still 200
+  PASS  amir healthz names S243_AMIR_VISIT
+  PASS  the gate steps are unchanged (2,4,5,6)
+  PASS  Amir: /finance/amir sends him to step 1 (303)
+  PASS  Amir step 6 opens 200, no prompt before any salt tick
+  PASS  owner page: 200, 'No salt ticks on this day' with yesterday's list named
+  PASS  owner page: the collapsed block 'Amir's visit -- what was done' is there, closed
+  PASS  API (checker): ok, 7 verdicts, salt_list not pending, nothing fresh
+  PASS  API: step 4 already 'done' from the arrived pair; step 3 'done' by arrival without the tap; step 1 'not yet'
+  PASS  API: reports = BILLWISE 2 rows Rs 12,345 + ITEMWISE 9 rows
+  PASS  EXPORT-STAMP FIX: the pair with Marg's YYYYMMDD-HHMMSS stamps is verified as today's (the live S241 code could not)
+  PASS  EXPORT-STAMP FIX: today's bills are today's, not 'pichhla baaki'
+  PASS  EXPORT-STAMP FIX: the S241 fixture shape (yyyy-mm-dd hh:mm:ss) is still read
+  PASS  Amir step 4 shows both reports verified with a readable time, not the raw stamp
+  PASS  API: bills step 5 'not yet -- 2 to tap'
+  PASS  API: step 7 open with the plain-words list
+  PASS  API is JSON-safe (round-trips)
+  PASS  Amir step 6: the RED line, Hinglish, with yesterday's list time
+  PASS  Amir step 6: the tick button is still there -- the prompt does not replace the step
+  PASS  owner page: AMBER 'Waiting for Marg's SALT WISE ITEM LIST -- 3 salt tasks ticked since the last list'
+  PASS  API: pending true, since_list 3, ticks_day 3, by zzamir; salts.ticked 3 (renames 2, new 1)
+  PASS  API: salt_list.owner_line/css carry the amber
+  PASS  API: step 6 still 'not yet' -- the salt TAP is his, the ticks are the tasks
+  PASS  POST tick 6 -> 303 onward
+  PASS  Amir step 7 (still baaki): 200
+  PASS  done[6] is true from the tap alone; the prompt is pending; _left() does not name the list
+  PASS  API: step 6 'done HH:MM by zzamir; 3 tasks ticked'
+  PASS  step 5 lists the two bills from the bill-wise export
+  PASS  POST step 5 with one 'short' and one 'ok' -> onward
+  PASS  step 7 'Din band karein?' with the RED prompt on the close screen
+  PASS  the day CLOSES with the list still awaited -- a prompt, not a gate
+  PASS  API: CLOSED, all seven verdicts 'done', salt list still pending
+  PASS  API: bills tapped 2 (Kam maal aaya 1, Theek hai 1); one claim raised worth Rs 7,000
+  PASS  API: bills line and reports line are readable
+  PASS  owner page CLOSED: state line, amber list, and the details block lists 'Claims raised for Darpan: <b>1</b>'
+  PASS  Amir close screen: GREEN 'SALT WISE ITEM LIST aa gayi' with the arrival time, red gone
+  PASS  Amir step 6: GREEN too
+  PASS  owner page: green 'Salt list arrived HH:MM, after the day's 3 ticks'
+  PASS  API: fresh true, pending false, last_list = the new stamp
+  PASS  a tick AFTER the list -> pending again, since_list 1
+  PASS  a row with a blank stamp is read by its received_at (ISO with zone) -> fresh
+  PASS  state file read: applied_at, applied_as_on, applied_stamp from the archived name
+  PASS  owner page: 'Salts page refreshed HH:MM from the list of <today>'
+  PASS  a broken state file is ignored, the API still answers
+  PASS  API refused to Amir (maker) -- 403 JSON
+  PASS  API refused to a viewer -- 403
+  PASS  API anonymous -> the portal (302)
+  PASS  API for a login with no medical role -> the portal (302)
+  PASS  a malformed date is refused 400
+  PASS  anonymous /finance/amir/day -> the portal
+  PASS  anonymous step 6 -> the portal
+  PASS  Amir may still open the English day page (as before S243)
+  PASS  his salts sheet page still opens 200 (amir_salts untouched)
+  PASS  an empty past day: ok, OPEN, bills 'not needed', check 'not done', no exception
+  PASS  owner page for that day: 200 with the details block
+  PASS  a past day is judged by its own ticks: today's ticks do not make 05-Jan pending
+  PASS  no purchase_salt_task, no mi_file: quiet state, nothing pending
+  PASS  ticks but no mi_file table at all: pending, 'no list seen yet'
+  PASS  _norm_ts reads all three writers' shapes
+  PASS  hub /finance/approvals: 200 (real page; hub patch state darpan_kal:patched amir_visit:patched)
+  PASS  hub: the collapsed block sits in the Marg card, with its loader and its call
+  PASS  hub: the block is a closed <details> (collapsed by default)
+  PASS  hub: the loader fetches THIS kit's API
+  PASS  hub: DARPAN_KAL's card and the S243 auto-apply wording are both still there
+  PASS  hub: the Marg card's own help survives once
+  PASS  hub refused to Amir (302 to the portal, as before)
+  PASS  owner page carries no 10-digit number
+  PASS  Amir's close screen carries no 10-digit number
+
+walk: 70 passed, 0 failed
+
+== the defect found by the walk (to mint as a finding at the close)
+  purchase_app.api_push requires export_stamp to match STAMP_RE = YYYYMMDD-HHMMSS (purchase_app.py ~line 312) and stores it as such.
+  live amir_day.py _export_state(): substr(COALESCE(export_stamp, received_at), 1, 10) = '<yyyy-mm-dd>' -- can never be true for a real export; step 4 could never verify.
+  live amir_day.py _bills(): the same substr as seen_day -- every bill of the day fell under 'pichhla baaki'.
+  S241 fixture (deploy_kits/S241_AMIR_DAY_R2/selftest_amir_day.py add_export) used stamp_day + ' 09:40:00' -- the wrong shape, so the S241 walk was green.
+  fixed in this kit's amir_day.py by _export_day_sql() (both shapes) and _hhmm() (readable time from Marg's stamp).
+
+== the installer's proofs on a throw-away ROOT (mock_install_amir_visit_s243.sh; run with the SUMS.md5 of the moment -- the final SUMS below re-covers this file)
+== mock root /tmp/mock_amir_visit_K9wh1D  amir_day ae2c89398e3c1fa63f9dadcff9e69d84  hub cc349dd00d0a2f861ec54242c9551557  kit amir_day bf7d9826119edab48652fd959e1e8da5
+---- proof 1: wrong amir_day pin is refused
+  PASS  refused, nothing placed, no .new left
+---- proof 2: install on the true pins
+  PASS  installed: kit amir_day placed, hub carries the mark
+  PASS  backups named by the from-pins
+  PASS  import smoke under the unit env: route registered
+  PASS  patch(live) == kit file proven before placing
+---- proof 3: second run is ALREADY INSTALLED
+  PASS  ALREADY INSTALLED, nothing moved
+---- proof 4: healthz failure rolls back to the from-pins
+  PASS  RED on healthz -> both files restored to the from-pins
+---- proof 5: a hub already patched by S243_DARPAN_KAL is accepted by lineage
+  PASS  mock hub now carries the DARPAN_KAL mark (7dbb5e56a6564abbfebaa6f94cee484c)
+  PASS  accepted by lineage; the .bak carries the DARPAN_KAL pin 7dbb5e56
+  PASS  both kits' blocks, loaders and calls coexist in the page
+---- proof 6: a stranger hub is refused
+  PASS  refused: hub is neither the pin nor DARPAN_KAL lineage; amir_day untouched
+
+mock: 11 passed, 0 failed   (root /tmp/mock_amir_visit_K9wh1D)

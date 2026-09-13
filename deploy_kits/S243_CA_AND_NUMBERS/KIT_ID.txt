@@ -1,0 +1,10 @@
+S243_CA_AND_NUMBERS new-module + full-file + on-box-patch
+accountant_upi_cash.py -- NEW file into /root/finance: the MONTHLY accountant report "UPI booked as cash" (CA ruling 13-Sep-2026), /finance/accountant/upi-cash/<yyyy-mm> page + print + .xlsx (padwriter) + JSON, checker only
+darpan_corrections.html -- REPLACED full file (live pin 26b1defeb0333fb8642a7abf95a93e5b): read-only record page, Hindi header "Ab Marg me sudhaar nahi karna hai", tick control hidden; route and API untouched
+finance_app.py patched ON THE BOX by patch_ca_and_numbers_s243.py (live pin f002defb9f4a5d35028c051462225def -> predicted d20a44e175dde53c9e26ff62b6eed681; OR a SCREEN_FIXES/DARPAN_KAL-marked file, f93f7430 -> ece2a82b): guarded mount; health "Correction checklist" work item -> info line; "Cash / UPI split" info; HEALTH_LINKS + selftest wording -> the report
+finance_ui/finance_approvals.html patched ON THE BOX (live pin cc349dd00d0a2f861ec54242c9551557 -> e1e40ae7ba41ce889d1dc141a7d680ca; OR DARPAN_KAL-marked 7dbb5e56 -> 520ff235): Cash<->UPI card links the report; tab "Accountant"
+returns_desk.py patched ON THE BOX (live pin dface15bd886774c59d5c88034619650 -> dffbe8fba15a6e9f37f8aba0ee546034): /api/search returns and searches the full number from patient_ref.mobile where present, last4 otherwise (owner ruling B)
+returns_desk.html patched ON THE BOX (live pin 77e754e9b072eb78033affd5e8505b2a -> 4d6f21615ca16f40fab730b6decf34a0): picker and chosen line show the full number where present
+BUILT S243 13-Sep-2026 -- offline, walked live-shape 61/61 (stacked on SCREEN_FIXES+DARPAN_KAL) and 59/59 (live bytes alone); installer mock-tested 5/5
+SERVICE clinic-finance (restarted by the installer after the import smoke)
+NOT TOUCHED tile_grants.json -- Darpan's "Corrections" tile removal belongs to S243_REPORTS_TILE (v13); README

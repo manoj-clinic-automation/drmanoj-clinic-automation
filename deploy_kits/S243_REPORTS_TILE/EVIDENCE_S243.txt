@@ -1,0 +1,215 @@
+EVIDENCE_S243 -- kit S243_REPORTS_TILE -- built 13-Sep-2026 in the container against the 13-Sep live capture
+
+== base pins (capture/tree/root)
+f002defb9f4a5d35028c051462225def  finance/finance_app.py
+cc349dd00d0a2f861ec54242c9551557  finance/finance_ui/finance_approvals.html
+d08721f69bc7c3e3a79a50192b20affb  portal/portal.py
+7e7445a37ace9ea7c8218d598a05b81d  portal/tile_grants.json
+
+== sibling states this kit was proven against (the sibling patchers applied to copies)
+4cd8f966339a1b686aad9817fb41a1eb  fa_sf.py
+1aa9af6db1e625bc68402ff8a77c0248  fa_kal.py
+f93f7430b5c36449d520d41b6012ec3d  fa_both.py
+7dbb5e56a6564abbfebaa6f94cee484c  hub_kal.html
+   fa_sf = f002defb + S243_SCREEN_FIXES; fa_kal = f002defb + S243_DARPAN_KAL; fa_both = both; hub_kal = cc349dd0 + S243_DARPAN_KAL
+
+== patcher selftest on the LIVE bytes and on every sibling state
+  PASS  fa_live.py: patches (patched)
+  PASS    compiles
+  PASS    mount lands after every other mount and before __main__, once
+  PASS    only additions: every original line still present
+  PASS    second run is a no-op
+  PASS  fa_sf.py: patches (patched)
+  PASS    compiles
+  PASS    mount lands after every other mount and before __main__, once
+  PASS    only additions: every original line still present
+  PASS    second run is a no-op
+  PASS  fa_kal.py: patches (patched)
+  PASS    compiles
+  PASS    mount lands after every other mount and before __main__, once
+  PASS    only additions: every original line still present
+  PASS    second run is a no-op
+  PASS  fa_both.py: patches (patched)
+  PASS    compiles
+  PASS    mount lands after every other mount and before __main__, once
+  PASS    only additions: every original line still present
+  PASS    second run is a no-op
+  PASS  hub_live.html: patches (patched)
+  PASS    line, loader and call each once
+  PASS    the pushed-reports list and loader survive
+  PASS    the S243_DARPAN_KAL anchors are untouched (either install order works)
+  PASS    only additions, plus one call: every original line still present (the call line grew)
+  PASS    second run is a no-op
+  PASS  hub_kal.html: patches (patched)
+  PASS    line, loader and call each once
+  PASS    the pushed-reports list and loader survive
+  PASS    the S243_DARPAN_KAL anchors are untouched (either install order works)
+  PASS    only additions, plus one call: every original line still present (the call line grew)
+  PASS    second run is a no-op
+  PASS  a stranger .py is refused
+  PASS  a stranger page is refused
+selftest: 34 passed, 0 failed
+
+== predicted to-pins
+029aa24ad84c0386aea2b0612e91f965  fa_live.py.new
+9643e339d871d8c841f85d58fe6e972f  fa_sf.py.new
+f9787ef7972cb749dc2e5fbcc8ebc347  fa_kal.py.new
+dae5fd906c1528ea625f4bad6809bd57  fa_both.py.new
+3e01002e47aa2e94763faced596bbf27  hub_live.html.new
+b8578b8d613b046d21047484b32b9076  hub_kal.html.new
+   order independence: this kit first, then DARPAN_KAL -> the same bytes:
+f9787ef7972cb749dc2e5fbcc8ebc347  fa_rpt_then_kal.py.new
+b8578b8d613b046d21047484b32b9076  hub_rpt_then_kal.html.new
+   portal.py d08721f69bc7c3e3a79a50192b20affb -> 4bb6bde0e2e07033ac0e0f5d7a7daaf6 (patch_portal_reports_tile_s243.py on a copy; second run ALREADY PATCHED)
+   tile_grants.json v12 7e7445a37ace9ea7c8218d598a05b81d -> v13 c9ee95c39bb805086b79d95327b2b626  (diff: _note appended, version 13, 'Aaj ki reports' added to shavez.extra and amir.extra; nothing else)
+
+== py_compile
+  all compile (Python 3.11.15)
+
+== reports_tile.py selftest
+  ok   empty db: two rows, both due, nothing crashes
+  ok   owner's line reads 0 of 2
+  ok   a refused sale report shows refused with a Hindi reason
+  ok   a later verified copy wins: aa gayi 09:07
+  ok   a morning stock snapshot as on today counts as yesterday's close
+  ok   no Amir row, no salt row yet
+  ok   Amir day -> the purchase pair appears, due
+  ok   bill-wise to yesterday arrives; item-wise that stops at the 10th does not
+  ok   received today counts even with an older stamp
+  ok   a salt tick with no list ever -> the salt row appears, due
+  ok   the list arrives after the tick -> aa gayi
+  ok   owner's line 5 of 5
+  ok   next day: the tick is older than the list and no list today -> no salt row
+  ok   timestamps normalise
+  ok   Hindi reasons cover the router's words
+reports_tile selftest: 15 checks, 0 failures
+
+== the live-shape walk, lineage live -> SCREEN_FIXES -> DARPAN_KAL -> this kit (real finance_app patched in memory, real sqlite from finance_schema.sql + finance_returns.sql + marg_ingest.SCHEMA + purchase_schema.sql + amir_day._ensure, real hub page patched into the UI dir, real portal.py patched in memory with the v13 grants)
+walking /home/claude/S243/capture/tree/root/finance/finance_app.py (patched in memory: patched; lineage live -> SCREEN_FIXES -> DARPAN_KAL)
+  temp db /tmp/walk_s243_rpt_s5jap792/finance.db   mi_file schema from marg_ingest.py
+  PASS  reports_tile is mounted (blueprint registered)
+  PASS  healthz still 200
+  PASS  /finance/amir still opens for amir (nothing else moved)
+  PASS  darpan_kal is still mounted beside it
+  PASS  before the seed: shavez has no medical role -> sent to the portal (302), not a 500
+  PASS  seed_reports_role: adds shavez a medical viewer row once; second run NOT changed
+  PASS  PAGE shavez: 200 text/html
+  PASS  PAGE: the one instruction line
+  PASS  PAGE: 30-s auto refresh present
+  PASS  PAGE: no JavaScript at all
+  PASS  PAGE: the sale row and the stock row, both baaki
+  PASS  PAGE: yesterday's date named on the sale row
+  PASS  PAGE: no Amir rows on a day he did not punch and has no amir_day
+  PASS  PAGE: no salt row when no tick is newer than the last list
+  PASS  PAGE: 0 / 2 aa gayi
+  PASS  API checker: ok, 2 rows due, the owner's line
+  PASS  API: no phone number, no token in the payload
+  PASS  PAGE: a refused sale report reads 'manzoor nahi' with the time
+  PASS  PAGE: the refusal reason in plain Hindi, the router's words beneath
+  PASS  API: sale row state refused, reason_hi present
+  PASS  API: the owner's line counts the refusal
+  PASS  PAGE: the later verified copy wins: 'aa gayi 09:06'
+  PASS  a verified sale export that stops before yesterday does not tick yesterday
+  PASS  PAGE: a morning push_snapshot as on today ticks the stock closing (yesterday's close)
+  PASS  PAGE: everything in -> the green 'sab reports aa gayi' card
+  PASS  API: the owner's line 2 of 2
+  PASS  Amir punched today (machine id 101 in the punch file) -> the purchase pair appears, both due
+  PASS  punch removed -> the pair is gone again
+  PASS  an amir_day row for today alone -> Amir day (his page opened)
+  PASS  purchase BILLWISE received today, 1st..yesterday -> aa gayi; item-wise still due
+  PASS  purchase ITEMWISE received today -> aa gayi; 4 of 4
+  PASS  PAGE: the two purchase rows read '1 tareekh se aaj tak (Amir ke din)'
+  PASS  a tick OLDER than the last list -> no salt row
+  PASS  a tick NEWER than the last list -> the salt row appears, due
+  PASS  API: 4 of 5 now
+  PASS  a refused salt list today -> manzoor nahi with the layout reason
+  PASS  the fresh list arrives -> aa gayi 09:45; 5 of 5
+  PASS  PAGE: 'Ek file pehchan nahi aayi' line with the Hindi reason
+  PASS  PAGE amir (viewer): 200
+  PASS  alisha (clinic role only, no medical role): sent to the portal, nothing shown
+  PASS  anonymous -> 302 to the portal
+  PASS  anonymous API -> not 200
+  PASS  PAGE /finance/reports/aaj/<yesterday>: 200, no auto-refresh on a picked day, a way back
+  PASS  a malformed date -> back to today (302)
+  PASS  the page's own healthz
+  PASS  PAGE owner hub /finance/approvals: 200 (real page, patched patched)
+  PASS  PAGE owner hub: the line 'Today's reports' with its loader and its call, on the Marg card
+  PASS  PAGE owner hub: the DARPAN_KAL card is still there beside it
+  PASS  the page wrote nothing: no audit_log rows, no data_flag rows from this walk
+  PASS  portal.py patched in memory (patched) imports: every tile is grouped (its own assert)
+  PASS  grants file in use is v13
+  PASS  shavez (portal role manager) is shown 'Aaj ki reports'
+  PASS  amir is shown 'Aaj ki reports' beside 'Amir ka kaam'
+  PASS  alisha is NOT shown it
+  PASS  darpan / shivani / a bare staff login are NOT shown it
+  PASS  the doctor has it by role
+  PASS  where it goes
+  PASS  shavez's other tiles are unchanged (the S242 walk's list, plus the new one)
+  PASS  FAIL CLOSED: no grants file -> shavez and amir lose the tile, the doctor keeps it
+  PASS  reports_tile.py --selftest: 0 failures
+
+WALK: 60 passed, 0 failed
+
+== the same walk on the bare live file (a box without the sibling kits)
+walking /home/claude/S243/capture/tree/root/finance/finance_app.py (patched in memory: patched; lineage live)
+
+WALK: 58 passed, 0 failed
+
+== the installer's proofs on a throw-away ROOT (mock_install_reports_tile_s243.sh)
+== mock root /tmp/mock_rpt_VhrXCI  finance_app f002defb9f4a5d35028c051462225def  hub cc349dd00d0a2f861ec54242c9551557  portal d08721f69bc7c3e3a79a50192b20affb  grants 7e7445a37ace9ea7c8218d598a05b81d
+---- proof 1: wrong finance_app pin is refused
+  PASS  refused, nothing placed
+---- proof 6: wrong portal.py pin is refused
+  PASS  refused, nothing placed (finance untouched too)
+---- proof 2: install on the true pins
+  PASS  installer exit 0, INSTALLED
+  PASS  all four files carry the change; grants v13
+  PASS  four .bak_S243_<pin8> backups
+  PASS  portal.py landed as the predicted pin 4bb6bde0
+  PASS  both import smokes green
+  PASS  shavez seeded a medical viewer row
+  PASS  both services restarted
+     finance_app now 029aa24ad84c0386aea2b0612e91f965 (from f002defb9f4a5d35028c051462225def)
+---- proof 3: second run is ALREADY INSTALLED
+  PASS  ALREADY INSTALLED, nothing moved
+---- proof 4: healthz fails -> full rollback
+  PASS  RED, all files back to the from-pins, module removed
+  PASS  rollback named what it restored
+---- proof 5: lineage -- SCREEN_FIXES + DARPAN_KAL already on the box
+     finance_app after the siblings: f93f7430b5c36449d520d41b6012ec3d   hub: 7dbb5e56a6564abbfebaa6f94cee484c
+  PASS  the sibling kits reproduce their predicted pins (f93f7430 / 7dbb5e56)
+  PASS  installed on the sibling lineage
+  PASS  the .bak names carry the ACTUAL from-pins
+  PASS  to-pins as predicted (finance_app dae5fd90, hub b8578b8d)
+  PASS  the DARPAN_KAL marks survive beside ours
+  PASS  a re-seed changes nothing
+        Shavez's tile: Aaj ki reports -> https://followup.dr-manoj.in/finance/reports/aaj
+
+MOCK INSTALL: 18 passed, 0 failed   (logs under /tmp/mock_rpt_VhrXCI, /tmp/mock_rpt4_Gii9fr, /tmp/mock_rpt5_ZmZaEa)
+
+== the rendered page, as text (sample: refused sale report, stock due, an Amir day)
+Aaj ki reports
+Aaj ki reports
+Ravivaar, 13-09-2026 &middot; Amir ka din
+Marg me report banao, yahan khud tick ho jayegi.
+Bill-wise sale report
+kal ki, 12-09-2026
+&#10007; manzoor nahi 
+09:01 baje
+Item detail nahi hai -- &#x27;With Item Details = Yes&#x27; karke dobara banaiye.
+this export carries NO item detail
+Stock closing report
+kal shaam tak ka stock (as on 12-09-2026)
+&#9675; baaki
+Purchase item-wise report
+1 tareekh se aaj tak (Amir ke din)
+&#9675; baaki
+Purchase bill-wise report
+1 tareekh se aaj tak (Amir ke din)
+&#9675; baaki
+0 / 4 aa gayi
+
+== gates
+  NO_PHONE_NUMBERS.py: see below
+  NO_PHONE_NUMBERS: clean -- 11 staged file(s) checked (numbers and credentials).  rc=0
+  LF line endings on every file; the two .sh files are pure ASCII; no __pycache__; fixture token is DUMMY-TOKEN-PUT-HERE only

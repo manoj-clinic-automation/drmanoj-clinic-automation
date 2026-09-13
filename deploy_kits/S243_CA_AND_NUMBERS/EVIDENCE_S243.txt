@@ -1,0 +1,156 @@
+EVIDENCE -- S243_CA_AND_NUMBERS -- built 13-Sep-2026 (container, offline; live tree = the 13-Sep byte-exact capture)
+
+== 1 . live pins read from the capture
+f002defb9f4a5d35028c051462225def  finance_app.py
+cc349dd00d0a2f861ec54242c9551557  finance_ui/finance_approvals.html
+dface15bd886774c59d5c88034619650  returns_desk.py
+77e754e9b072eb78033affd5e8505b2a  returns_desk.html
+26b1defeb0333fb8642a7abf95a93e5b  darpan_corrections.html
+e7546afe02ee6dbe2e2b107a8465489f  padwriter.py
+f9370dde648f629461d4efac2b4805af  marg_report.py
+747b4a506042b95c862f3eafc74608f3  finance_ingest.py
+9a90b1f5a65f44e8434cf3dae904e612  finance_patient_sync.py
+
+== 2 . stacked sibling bytes (SCREEN_FIXES then DARPAN_KAL applied to a copy)
+f93f7430b5c36449d520d41b6012ec3d  work/ca_stack/finance_app_stacked.py
+7dbb5e56a6564abbfebaa6f94cee484c  work/ca_stack/finance_ui/finance_approvals_stacked.html
+
+== 3 . module offline selftest
+selftest month_report: PASS {"bills_n": 2, "bills_p": 83000, "answered_n": 1, "ticked_before_ruling_n": 0, "reclass_n": 0, "reclass_to_upi_p": 0, "reclass_to_cash_p": 0, "days_n": 0, "days_upi_as_cash_p": 0, "days_cash_as_upi_p": 0, "bills_total": "830.00", "reclass_to_upi": "0.00", "reclass_to_cash": "0.00", "days_upi_as_cash": "0.00", "days_cash_as_upi": "0.00"}
+selftest page: PASS
+selftest xlsx: PASS 5475 bytes
+
+== 4 . patcher --selftest on the LIVE bytes
+  PASS  finance_app.py [fa]: patches (patched)
+  PASS    compiles
+  PASS    mark present once
+  PASS    second run is a no-op
+  PASS    mount lands once, before __main__
+  PASS    the work item is gone: no 'Correction checklist' label, no _correction_rows in health
+  PASS    the info line and the new links are in
+  PASS    the worklist routes and the S195 checklist API survive untouched
+  PASS    every other original line still present
+  PASS  finance_approvals.html [hub]: patches (patched)
+  PASS    mark present once
+  PASS    second run is a no-op
+  PASS    card link and tab once; DARPAN_KAL's anchors untouched
+  PASS    only additions: every original line still present
+  PASS  returns_desk.py [rd]: patches (patched)
+  PASS    compiles
+  PASS    mark present once
+  PASS    second run is a no-op
+  PASS    the search still answers last4 and name, and now the full number
+  PASS    nothing stores a number: no INSERT/UPDATE added
+  PASS  returns_desk.html [rdh]: patches (patched)
+  PASS    mark present (on both edited lines)
+  PASS    second run is a no-op
+  PASS    picker and chosen line show full where present else ***last4
+  PASS  a stranger .py is refused
+  PASS  a stranger page is refused
+  PASS  a stranger desk is refused
+selftest: 27 passed, 0 failed
+
+== 5 . patcher --selftest on the STACKED bytes
+  PASS  finance_app_stacked.py [fa]: patches (patched)
+  PASS    compiles
+  PASS    mark present once
+  PASS    second run is a no-op
+  PASS    mount lands once, before __main__
+  PASS    the work item is gone: no 'Correction checklist' label, no _correction_rows in health
+  PASS    the info line and the new links are in
+  PASS    the worklist routes and the S195 checklist API survive untouched
+  PASS    every other original line still present
+  PASS  finance_approvals_stacked.html [hub]: patches (patched)
+  PASS    mark present once
+  PASS    second run is a no-op
+  PASS    card link and tab once; DARPAN_KAL's anchors untouched
+  PASS    only additions: every original line still present
+  PASS  a stranger .py is refused
+  PASS  a stranger page is refused
+  PASS  a stranger desk is refused
+selftest: 17 passed, 0 failed
+
+== 6 . LIVE-SHAPE WALK, stacked (SCREEN_FIXES + DARPAN_KAL + this kit)
+walking capture/tree/root/finance/finance_app.py (this kit's patch: patched; stacked first: SCREEN_FIXES+DARPAN_KAL; hub: patched; desk: patched/patched)
+  temp db /tmp/walk_s243_ca_1co2a03t/finance.db
+  PASS  accountant_upi_cash is mounted
+  PASS  darpan and returns_desk still mounted
+  PASS  darpan_kal (sibling kit) still mounted beside this one
+  PASS  healthz still 200
+  PASS  /finance/accountant/upi-cash -> this month
+  PASS  PAGE checker: 200 text/html
+  PASS  PAGE: English title, the ruling line, the month
+  PASS  PAGE: per-bill rows date/bill/amount/bank ref/matched-on
+  PASS  PAGE: the agreed bill and last month's bill are NOT in this month's section A
+  PASS  PAGE: monthly total 830.00 over 2 bills
+  PASS  PAGE: Darpan's answer shown where given, pre-ruling tick shown as history
+  PASS  PAGE: section B (mode changed on re-import) carries A5 1,500.00 CASH->UPI
+  PASS  PAGE: section C (day level) carries the day row
+  PASS  PAGE: xlsx link, print view, month picker, hub link
+  PASS  PAGE: no patient name, no phone number on the accountant page
+  PASS  PRINT view: 200 and prints itself
+  PASS  XLSX: 200, spreadsheet mime, attachment
+  PASS  XLSX: three sheets, bills and the SUM formula in sheet 1
+  PASS  XLSX: a real zip with the workbook parts
+  PASS  API: ok, totals bills_n=2 bills_p=83000 answered_n=1 ticked=1 reclass_n=1 days_n=1
+  PASS  API: months list carries this month and last month
+  PASS  API: last month has its own one bill
+  PASS  a bad month is refused
+  PASS  checker only: maker and viewer are sent away (page redirects, api 403)
+  PASS  anonymous: redirected to the portal
+  PASS  PAGE corrections (checker): 200
+  PASS  PAGE corrections: the Hindi ruling header is present
+  PASS  PAGE corrections: the tick control is gone (read-only)
+  PASS  PAGE corrections: the owner block still carries ledger check + transfer, and the report link
+  PASS  PAGE corrections (viewer Amir): still opens
+  PASS  API corrections still answers: 2 rows, 1 corrected (history), 1 pending
+  PASS  API tick still answers (kept, never called by the page): 200 ok
+  PASS  API tick: second tick 409 as before
+  PASS  API tick: unknown 404 as before
+  PASS  health api answers
+  PASS  health: 'corrlist' is an INFO line, not a work item
+  PASS  health: the line counts this month's bills and names the accountant report
+  PASS  health: the label 'Correction checklist' is gone
+  PASS  health: 'upisplit' never bad any more
+  PASS  health: no bad/warn row left that points at Marg corrections
+  PASS  PAGE health: 200, the info row renders with the (i) mark and links the accountant report
+  PASS  PAGE health: the row sits under 'Worth knowing', no nested anchor
+  PASS  /finance/marg-worklist still renders (route kept)
+  PASS  /finance/api/marg-corrections still answers (API kept)
+  PASS  PAGE hub: 200 (patched patched)
+  PASS  PAGE hub: the Cash <-> UPI card links the accountant report; tab 'Accountant' present
+  PASS  PAGE hub: loaders unchanged (loadReclass, loadHomeMed)
+  PASS  PAGE hub: the sibling kit's Darpan card survives
+  PASS  hub api reclassifications still answers with the flip
+  PASS  PAGE returns desk: 200 for a desk user
+  PASS  PAGE returns desk: the picker shows p.mobile first, ***last4 otherwise
+  PASS  PAGE returns desk: the chosen patient's line carries the number
+  PASS  search by name: both patients (the WALK-IN row matches 'WALK' too, as before)
+  PASS  search: full number where present, empty mobile + last4 otherwise
+  PASS  search by five+ digits hits the FULL number
+  PASS  search by last four still works
+  PASS  search by clinic id still works
+  PASS  search: a non-desk login is refused
+  PASS  no `mobile` column at all: search still answers, mobile empty, last4 kept
+  PASS  no `mobile` column: five digits fall back to the name/id search (no error)
+  PASS  the app selftest's expectations follow the change (patcher S1/S2 applied)
+
+61 passed, 0 failed
+
+== 7 . LIVE-SHAPE WALK, live bytes alone
+  PASS  no `mobile` column: five digits fall back to the name/id search (no error)
+  PASS  the app selftest's expectations follow the change (patcher S1/S2 applied)
+
+59 passed, 0 failed
+
+
+== 8 . installer mock proofs (ROOT=<tmp>, final SUMS.md5 in force)
+  PASS  refused, nothing placed
+  PASS  installed, marks present, backups written
+     to-pins: finance_app d20a44e175dde53c9e26ff62b6eed681  hub e1e40ae7ba41ce889d1dc141a7d680ca  returns_desk.py dffbe8fb  returns_desk.html 4d6f2161
+  PASS  ALREADY INSTALLED, bytes unchanged
+  PASS  RED on healthz, five files back on the from-pins, new file removed
+     sibling-patched pins: finance_app f93f7430b5c36449d520d41b6012ec3d  hub 7dbb5e56a6564abbfebaa6f94cee484c
+  PASS  sibling lineage accepted, .bak carries the sibling pin, all three kits' marks coexist
+     final pins: finance_app ece2a82b80a374114155840aa65f3614  hub 520ff2359afcdb9b24f24f5b214f4e03
+== mock proofs: 5 passed, 0 failed  (root /tmp/mock_ca_92J6Gn)

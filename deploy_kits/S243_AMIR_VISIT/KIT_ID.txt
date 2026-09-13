@@ -1,0 +1,8 @@
+S243_AMIR_VISIT full-file + on-box-patch
+amir_day.py -- FULL-FILE replacement of /root/finance/amir_day.py (live pin ae2c89398e3c1fa63f9dadcff9e69d84 -> the kit's file; the kit's file IS patch(live) by patch_amir_day_salt_prompt_s243.py, thirteen anchors each exactly once, proven byte-for-byte on the box before placing)
+finance_ui/finance_approvals.html -- patched ON THE BOX by patch_hub_amir_visit_s243.py (live pin cc349dd00d0a2f861ec54242c9551557 -> predicted e348a106c494e6094953226dd06de07f; OR a page carrying the S243_DARPAN_KAL mark, 7dbb5e56 -> c12be75b8c357417c84581f96343eab7; three anchors, exactly once each)
+finance_app.py -- NOT touched (amir_day mounted since S241; the new route rides on the same blueprint)
+WHAT: (a) the SALT WISE ITEM LIST prompt -- red to Amir on step 6 and the close screen until the mi_file row of a newer list is seen, amber/green to the owner; a prompt, never a gate (owner ruling 13-Sep-2026) (b) "Amir's visit -- what was done": /finance/amir/day/api/visit-summary?date= (checker only), a collapsed block on /finance/amir/day and inside the hub's Marg card (c) the export-stamp fix the walk found: step 4 could never verify a real export (YYYYMMDD-HHMMSS vs yyyy-mm-dd)
+BUILT S243 13-Sep-2026 -- offline, walked live-shape 70/70 on the real finance_app f002defb patched in memory with S243_SCREEN_FIXES + S243_DARPAN_KAL first; installer mock-tested
+SERVICE clinic-finance (restarted by the installer after the import smoke)
+ORDER: after S243_SCREEN_FIXES and S243_DARPAN_KAL (the hub gate also accepts the plain cc349dd0 page)

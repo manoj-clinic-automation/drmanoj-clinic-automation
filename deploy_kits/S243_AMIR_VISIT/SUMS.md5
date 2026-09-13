@@ -1,0 +1,9 @@
+d91269436c7e03947dd4253a940fd480  KIT_ID.txt
+63a4ed58cad10f2a3bcaa4a9a0a5f78b  README.md
+19b67bce9fade86a4a3db7226533924b  EVIDENCE_S243.txt
+bf7d9826119edab48652fd959e1e8da5  amir_day.py
+8b8e5f2779a7d0a1beb8adb7d188b424  patch_amir_day_salt_prompt_s243.py
+9e2bebbfdbbe30b70c30228a9a18994d  patch_hub_amir_visit_s243.py
+8f0673d5572d543d0d872790e2b37fca  install_S243_AMIR_VISIT.sh
+58b74f06ec392c8d08402bf852e8f910  walk_amir_visit_s243.py
+9a7fe96d2a5c52b08bc1f529a6864f50  mock_install_amir_visit_s243.sh
