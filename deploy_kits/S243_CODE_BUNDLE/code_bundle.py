@@ -1,6 +1,6 @@
 #!/root/wa/venv/bin/python3
 # =============================================================================
-#  code_bundle.py  .  Session 243  .  S243_CODE_BUNDLE  .  v1.1
+#  code_bundle.py  .  Session 243  .  S243_CODE_BUNDLE  .  v1.2
 #
 #  THE OFF-BOX LEG OF THE LIVE CODE.
 #
@@ -28,11 +28,18 @@
 #    * *config*.py and *_config.py are hard-excluded by name
 #    * *.conf are no longer a source at all (this script reads its own conf
 #      from disk; it never needed to ship it)
-#    * EVERY candidate file is read and scanned: a line that assigns a quoted
-#      literal of 8+ characters to a name containing PASS / PASSWORD / SECRET /
-#      TOKEN / SEED / SALT / API_KEY / PRIVATE excludes the whole file, and the
-#      SUMMARY names it (excluded_secret=N (basenames)). A name read from the
-#      environment does not match; only a literal does.
+#    * EVERY candidate file is read and scanned with the repository's own
+#      publish-gate credential heuristic (NO_PHONE_NUMBERS.py, ported below):
+#      a file the gate would refuse is left out and the SUMMARY names it
+#      (excluded_secret=N (basenames)).
+#
+#  v1.2 (S243, same day): v1.1's own blunt pattern excluded finance_app.py,
+#  purchase_app.py, finance_patient_match.py, clinic_sso.py and
+#  portal_console.py on the live box (constants like TOKEN_HEADER = "X-...")
+#  and the FATAL guard fired -- the installer rolled back as designed. The
+#  scan is now the gate's, which knows a constant, a path, a filename, a
+#  placeholder and a hash pin from a credential; and att_config.py /
+#  portal_config.py are named outright in BASENAME_EXCLUDES.
 #
 #  The Drive half is REUSED from finance_drive_backup.py (S213 v2, pin
 #  14b406773de7f196abb105114f346080): load_conf, find_sa_json, make_session,
@@ -117,11 +124,93 @@ SOURCES = [
 # --- what never goes in, whatever the pattern said (fnmatch on the file name)
 HARD_EXCLUDES = (".env*", "*.env", "*.conf", "*.db*", "*.log", "*.bak*", "token*",
                  "*key*.json", "patient_fp.env", "*config*.py", "*_config.py")
-# --- a line that assigns a quoted literal to a secret-shaped name excludes
-#     the whole file (v1.1). Case-insensitive on the name.
-SECRET_LINE = re.compile(
-    r'^\s*[A-Za-z_]*(PASS|PASSWORD|SECRET|TOKEN|SEED|SALT|API_KEY|PRIVATE)[A-Za-z_]*'
-    r'\s*=\s*["\'][^"\']{8,}["\']', re.IGNORECASE)
+# --- an explicit basename wall: the two files the first live bundle carried.
+#     att_config.py holds its literals in a shape the heuristic below does
+#     not flag, so it is named here outright (v1.2).
+BASENAME_EXCLUDES = ("att_config.py", "portal_config.py")
+
+# =============================================================================
+#  CONTENT SCAN -- ported from the repository's own publish gate,
+#  deploy_kits/NO_PHONE_NUMBERS.py (S231 census, credential layer): the
+#  regexes BEARER / PRIVKEY / SECRET_ASSIGN / PLACEHOLDER / ALLCAPS_NAME /
+#  HASH_PIN / FILENAME_VAL / FILEISH_NAME / SECRET_WORD / SECRET_CAMEL and the
+#  functions name_is_secret_shaped / benign_secret / scan_secrets_text are that
+#  file's, copied verbatim (v1.2). A file is excluded from the bundle exactly
+#  when the gate itself would refuse to publish it. v1.1 used a blunter
+#  pattern and, live, excluded finance_app.py on a line like
+#  TOKEN_HEADER = "X-..." -- a name held as a constant, which the gate's
+#  benign_secret() rules out. Nothing here ever prints a value.
+# =============================================================================
+BEARER = re.compile(r"(?i)\bbearer\s+([A-Za-z0-9_\-\.=+/]{16,})")
+PRIVKEY = re.compile(r"-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----")
+SECRET_ASSIGN = re.compile(
+    r"(?i)\b([A-Za-z0-9_]*"
+    r"(?:TOKEN|SECRET|API_?KEY|PASSWORD|PASSWD|PWD|AUTH)"
+    r"[A-Za-z0-9_]*)['\"]?\s*[:=]\s*(['\"])([^'\"\n]*)\2")
+
+PLACEHOLDER = re.compile(
+    r"(?i)(put|paste|here|mask|xxxx|todo|change[-_ ]?(this|me|it)|your[_ -]"
+    r"|example|dummy|sample|redact|<|>|\u00ab|\u00bb|\u2026|\.\.\.)")
+ALLCAPS_NAME = re.compile(r"[A-Z][A-Z0-9_]*$")
+HASH_PIN = re.compile(r"(?:[0-9a-fA-F]{16}|[0-9a-fA-F]{32}"
+                      r"|[0-9a-fA-F]{40}|[0-9a-fA-F]{64})$")
+FILENAME_VAL = re.compile(r"[\w.-]+\.[A-Za-z0-9]{1,6}$")
+FILEISH_NAME = re.compile(r"(?i).*(_FILE|_PATH|FILENAME|_DIR)$")
+
+SECRET_MIN = 16   # shorter than this is not a live credential worth a halt
+
+# The keyword must be a WHOLE COMPONENT of the name, not a fragment of a word.
+SECRET_WORD = re.compile(
+    r"(?i)(?:^|[_\-])(token|secret|api_?key|password|passwd|pwd|auth)(?:$|[_\-])")
+SECRET_CAMEL = re.compile(
+    r"(?:^|[a-z0-9])(Token|Secret|ApiKey|Password|Passwd|Auth)(?:$|[A-Z_\-])")
+
+
+def name_is_secret_shaped(name):
+    return bool(SECRET_WORD.search(name) or SECRET_CAMEL.search(name))
+
+
+def benign_secret(name, value):
+    """Why this assignment is NOT a credential -- or None if it looks like one.
+    Every branch here was earned by a real line in the repository (gate)."""
+    v = value.strip()
+    if len(v) < SECRET_MIN:
+        return "too short"
+    if ALLCAPS_NAME.match(v):
+        return "a name held as a constant"
+    if "/" in v or "\\" in v:
+        return "a path"
+    if FILEISH_NAME.match(name) or FILENAME_VAL.match(v):
+        return "a filename"
+    if PLACEHOLDER.search(v):
+        return "a placeholder"
+    if HASH_PIN.match(v):
+        return "a hash pin"
+    if "{" in v or "%s" in v or "$" in v:
+        return "interpolated, not a literal"
+    return None
+
+
+def scan_secrets_text(text):
+    """[(line, kind)] -- never the value. (gate: scan_secrets_text, minus the
+    length string this bundle has no use for)"""
+    out = []
+    for m in PRIVKEY.finditer(text):
+        out.append((text[:m.start()].count("\n") + 1, "PRIVATE KEY BLOCK"))
+    for m in BEARER.finditer(text):
+        v = m.group(1)
+        if PLACEHOLDER.search(v):
+            continue
+        out.append((text[:m.start()].count("\n") + 1, "Authorization: Bearer"))
+    for m in SECRET_ASSIGN.finditer(text):
+        name, v = m.group(1), m.group(3)
+        if not name_is_secret_shaped(name):
+            continue
+        if benign_secret(name, v):
+            continue
+        out.append((text[:m.start()].count("\n") + 1, "%s = <literal>" % name))
+    return out
+
 # --- a path component that disqualifies the whole path
 EXCLUDE_DIRS = ("_retired", "_retired_*", "__pycache__", "backups", "deploy")
 
@@ -265,6 +354,8 @@ def md5_bytes(data):
 
 # --------------------------------------------------------------- gather -----
 def _name_excluded(name):
+    if name in BASENAME_EXCLUDES:
+        return True
     for pat in HARD_EXCLUDES:
         if fnmatch.fnmatch(name, pat):
             return True
@@ -278,17 +369,14 @@ def _path_excluded(rel):
     return False
 
 def has_secret_literal(path):
-    """True when any line of the file assigns a quoted literal to a
-    secret-shaped name. Read as text with replacement; binaries simply
-    do not match."""
+    """True when the repository gate's credential layer would flag the file.
+    Read as text with errors ignored; binaries simply do not match."""
     try:
-        with open(path, "r", encoding="utf-8", errors="replace") as f:
-            for line in f:
-                if SECRET_LINE.match(line):
-                    return True
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            text = f.read()
     except OSError:
         return True      # unreadable: treat as unsafe, leave it out
-    return False
+    return bool(scan_secrets_text(text))
 
 def _wanted(name, patterns, subs):
     if not any(fnmatch.fnmatch(name, p) for p in patterns):

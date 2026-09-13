@@ -1,6 +1,6 @@
 # S243_CODE_BUNDLE -- the live code gets a nightly off-box copy
 
-**Built at Session 243, 12-Sep-2026. v1.1 on 13-Sep-2026 after the first live bundle was inspected -- see "The 07:19 finding".**
+**Built at Session 243, 12-Sep-2026. v1.1 and v1.2 on 13-Sep-2026 after the first live bundle was inspected -- see "The 07:19 finding".**
 
 ## The gap this closes
 
@@ -48,11 +48,16 @@ Never, whatever the pattern said: `.env*`, `*.env`, `*.conf`, `*.db*`, `*.log`,
 and any path through `_retired*`, `__pycache__`, `backups`, `deploy`. The
 excludes run after the includes.
 
-And, by CONTENT: every candidate file is read; a line assigning a quoted
-literal of eight or more characters to a name containing PASS, PASSWORD,
-SECRET, TOKEN, SEED, SALT, API_KEY or PRIVATE excludes that whole file. The
-summary line names each one: `excluded_secret=N (basenames)`. A name read
-from the environment (`SECRET_KEY = os.environ[...]`) does not match.
+Named outright, whatever else says: `att_config.py`, `portal_config.py`.
+
+And, by CONTENT: every candidate file is read with the repository's own
+publish-gate credential heuristic (`deploy_kits/NO_PHONE_NUMBERS.py`, ported
+verbatim: a secret-shaped NAME assigned a literal of 16+ characters that is
+not a constant, a path, a filename, a placeholder, a hash pin or interpolated;
+a Bearer literal; a private-key block). A file the gate would refuse is left
+out and named: `excluded_secret=N (basenames)`. Over the 217 files of the
+captured live tree the port reports exactly what the gate reports, and it
+flags one file: `portal_config.py`.
 
 ## The 07:19 finding (why v1.1)
 
@@ -60,10 +65,18 @@ The first live bundle, shipped 07:19 on 13-Sep-2026, was opened and read. It
 carried `root/portal/portal_config.py` (token seed, SSO secret, an auth token,
 PIN hash and salt as literals), `root/att_config.py` (a dashboard password,
 an SMTP password, a secret key) and `root/finance/freshness.conf` (a live
-ntfy topic). Standing hold: secrets never go to cloud storage. v1.1 adds the
-three walls above; the selftest now carries a decoy of each class and proves
-them absent. The 07:19 revision on Drive should be treated as exposed until
-the owner overwrites it (the next `run`) and rotates what it held.
+ntfy topic). Standing hold: secrets never go to cloud storage.
+
+v1.1 added the filename walls and a content scan of its own -- a blunt
+pattern that, live, excluded `finance_app.py`, `purchase_app.py`,
+`finance_patient_match.py`, `clinic_sso.py` and `portal_console.py` on
+constants like `TOKEN_HEADER = "X-Finance-Marg"`; the FATAL guard fired and
+the installer rolled back as designed. v1.2 replaces that scan with the
+gate's own heuristic and names the two config files outright. Proven against
+the captured live tree: the five files are IN, the two config files are OUT
+(see EVIDENCE_S243.txt). The 07:19 revision on Drive should be treated as
+exposed until the owner overwrites it (the next `run`) and rotates what it
+held.
 
 ## Install (one line, on the VPS, after PUBLISH + deploy pull)
 
@@ -114,11 +127,14 @@ the file you need. Members are rooted at `/` (`root/finance/finance_app.py`).
 
 - The bundle is not encrypted. It carries code, not patient data and (from
   v1.1) not configuration secrets; the same trust domain as the S213 db.gz.
-- The content scan is deliberately blunt: a code file that assigns a long
-  quoted literal to a name merely containing `token` (a field name, say) is
-  excluded too, and named in the summary. Read the summary after the first
-  live run; a false exclusion is repaired by renaming the variable, never by
-  loosening the scan.
+- The content scan is the publish gate's, no looser and no tighter. Its
+  known blind spot: a credential under a name the gate does not consider
+  secret-shaped (`SMTP_PASS`, `DASHBOARD_PASSWORD` is caught, `SMTP_PASS` is
+  not) -- that is why `att_config.py` is named outright. Its known edge: a
+  mixed-case literal of 16+ characters under a secret-shaped name is a hit
+  even when it is a header name; the live one is 14 characters. Read the
+  summary after every live run; a false exclusion is repaired by renaming
+  the variable or shortening the constant, never by loosening the scan.
 - Drive's revision window (~30 days) is Google's behaviour, not a contract.
   The local copy is overwritten nightly; there is no on-box history by design
   (the repository is the history of intent, the bundle is the history of fact).

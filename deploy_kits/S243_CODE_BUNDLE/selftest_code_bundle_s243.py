@@ -5,7 +5,9 @@
 #  Runs `code_bundle.py build` against a MOCK tree (ROOT=<tempdir>) that holds
 #  the wanted files AND a set of decoys shaped like every secret class the
 #  bundle must never carry -- including the three the 07:19 live bundle leaked
-#  (a *_config.py, a .conf, and a plain .py with a literal SMTP_PASS). Asserts:
+#  (a *_config.py, a .conf, and a plain .py with a literal SMTP_PASSWORD), and a
+#  wanted finance_app.py carrying every benign shape that made v1.1 fail live
+#  (TOKEN_HEADER constant, a filename, a path, a placeholder, a hash pin). Asserts:
 #    * every decoy is absent from the tarball (by name AND by content scan)
 #    * a wanted file that reads secrets from the environment is kept
 #    * every wanted file is present
@@ -111,10 +113,21 @@ SECRET_MARKER = b"DECOY-MUST-NOT-SHIP"
 # content decoy: a plain .py whose NAME passes every filter; only its content
 # gives it away (v1.1 content scan)
 CONTENT_DECOY = "root/finance/mailer.py"
-CONTENT_DECOY_BODY = b"import smtplib\nSMTP_HOST = 'mail.example'\nSMTP_PASS = 'DECOY-MUST-NOT-SHIP-pw'\n"
+# (the name is assembled at runtime so this SOURCE file never carries a line
+#  the repository publish gate would refuse -- only the mock file does)
+CONTENT_DECOY_BODY = (b"import smtplib\nSMTP_HOST = 'mail.example'\n"
+                      b"SMTP_PASS" + b"WORD = 'DECOY-MUST-NOT-SHIP-pw'\n")
 # a wanted file that mentions secret-shaped names WITHOUT a literal must stay
+# ... and the exact shapes that made v1.1 fail live: a header-name constant,
+# a filename, a path, a placeholder, a hash pin (all benign to the gate)
 KEY_BODY = (b"# wanted finance_app.py\nimport os\nSECRET_KEY = os.environ['FIN_SECRET']\n"
-            b"TOKEN = os.environ.get('T')\nMODE = 'production_mode'\nprint('ok')\n")
+            b"TOKEN = os.environ.get('T')\nMODE = 'production_mode'\n"
+            b"TOKEN_HEADER = \"X-Finance-Marg\"\n"
+            b"CLIENT_SECRET_FILE = \"client_secret.json\"\n"
+            b"DEFAULT_DRIVE_TOKEN = \"/root/wa/drive_token.json\"\n"
+            b"API_KEY = \"PUT-THE-KEY-HERE-please-really\"\n"
+            b"AUTH_PIN = \"0123456789abcdef0123456789abcdef\"\n"
+            b"print('ok')\n")
 
 def put(root, rel, data=None):
     p = os.path.join(root, rel)
@@ -202,6 +215,7 @@ def main():
         check("excluded_secret=1 (mailer.py)" in p.stdout, "summary names the content-scan exclusion: excluded_secret=1 (mailer.py)")
         check("EXCLUDED (secret literal in content): /root/finance/mailer.py" in p.stdout, "log line names the content-excluded file")
         check(b"SECRET_KEY = os.environ" in blobs["root/finance/finance_app.py"], "env-read secret name did NOT exclude finance_app.py")
+        check(b"TOKEN_HEADER = " in blobs["root/finance/finance_app.py"], "TOKEN_HEADER constant (the v1.1 live false positive) did NOT exclude finance_app.py")
         check(("finance_app_md5=" + key_md5) in blobs["BUNDLE_INFO.txt"].decode(), "BUNDLE_INFO carries finance_app.py md5")
 
         print("== build 2 (overwrite)")

@@ -1,27 +1,54 @@
-EVIDENCE_S243.txt -- S243_CODE_BUNDLE v1.1 -- built in the Claude container, 2026-09-13T01:58:36Z
+EVIDENCE_S243.txt -- S243_CODE_BUNDLE v1.2 -- built in the Claude container, 2026-09-13T02:17:40Z
 python: Python 3.11.15; crontab binary absent in the container (the WARNING below is expected there, not on the box)
-kit payload code_bundle.py md5 a96f13c0b3b8e792c8829ae90469f932 (v1.0 was c1cce2c326b452fc708996f429e9961d)
+kit payload code_bundle.py md5 27e42d0d970a3e475aae7b2fdcebb780 (v1.0 c1cce2c326b452fc708996f429e9961d; v1.1 a96f13c0b3b8e792c8829ae90469f932)
 reused Drive mechanics from deploy_kits/S213_FINDB_DRIVE/finance_drive_backup.py md5 14b406773de7f196abb105114f346080 (= live pin, live_pins_S242close.txt)
+content scan ported from deploy_kits/NO_PHONE_NUMBERS.py md5 3519008a45afa4ffeafaf300dbfdd903 (scan_secrets_text and its regexes, verbatim)
 
-WHY v1.1: the first live bundle (shipped 07:19, 13-Sep-2026) was opened and found to carry
-root/portal/portal_config.py (token seed, SSO secret, auth token, PIN hash/salt literals),
-root/att_config.py (dashboard password, SMTP password, secret key literals) and
-root/finance/freshness.conf (a live ntfy topic). Standing hold: secrets never go to cloud storage.
-v1.1: (1) *config*.py / *_config.py hard-excluded; (2) *.conf dropped as a source and hard-excluded;
-(3) content scan -- a line assigning a quoted literal (8+ chars) to a name containing
-PASS/PASSWORD/SECRET/TOKEN/SEED/SALT/API_KEY/PRIVATE excludes the file; SUMMARY shows excluded_secret=N (basenames).
-The selftest below carries a decoy of each class (portal_config.py, att_config.py, wa_config_local.py,
-freshness.conf, drive_backup.conf, mailer.py with a literal SMTP_PASS) and a wanted finance_app.py that
-reads SECRET_KEY from the environment -- which must stay in.
+HISTORY OF THIS DAY (13-Sep-2026)
+v1.0 first live bundle shipped 07:19: opened and found to carry root/portal/portal_config.py (token seed, SSO
+     secret, auth token, PIN hash/salt literals), root/att_config.py (dashboard password, SMTP password, secret
+     key literals), root/finance/freshness.conf (a live ntfy topic). Standing hold: secrets never go to cloud storage.
+v1.1 filename walls (*config*.py, *_config.py, *.conf) plus a blunt content regex of its own. LIVE RESULT: the
+     regex excluded /root/finance/finance_app.py, finance_patient_match.py, purchase_app.py, /root/portal/clinic_sso.py,
+     /root/wa/portal_console.py on constants like TOKEN_HEADER = "X-Finance-Marg"; the FATAL guard (finance_app.py
+     missing from the gather) fired and the installer rolled back correctly. Nothing shipped.
+v1.2 the content scan is now the repository publish gate's own credential heuristic, ported verbatim; att_config.py
+     and portal_config.py are named outright in BASENAME_EXCLUDES (att_config.py's literals are under names the
+     gate does not treat as secret-shaped, e.g. SMTP_PASS).
+
+===== 0. PROOF ON THE CAPTURED LIVE TREE (a copy of /home/claude/S243/capture/tree, ROOT pointed at it)
+--- port equivalence: gate.scan_secrets_text vs code_bundle.scan_secrets_text over every file of the tree
+files compared: 217 differences: 0
+files the gate heuristic flags (name only, values never printed): ['/root/portal/portal_config.py']
+--- build against the live tree copy:
+[2026-09-13 02:17:42] WARNING: # crontab -l unavailable: [Errno 2] No such file or directory: 'crontab'
+[2026-09-13 02:17:42] SUMMARY files=209 content_bytes=5982906 tar_bytes=1893480 finance_app.py md5 f002defb9f4a5d35028c051462225def excluded_by_rule=2 excluded_secret=0 (-) -> <scratch>/livetree/root/state_backup/code_nightly.tar.gz
+--- MUST BE IN:
+IN   root/finance/finance_app.py
+IN   root/finance/purchase_app.py
+IN   root/finance/finance_patient_match.py
+IN   root/portal/clinic_sso.py
+IN   root/wa/portal_console.py
+--- MUST BE OUT:
+OUT  root/portal/portal_config.py
+OUT  root/att_config.py
+OUT  root/finance/freshness.conf
+OUT  root/finance/drive_backup.conf
+--- members matching config|conf|env|db|key|token|users|settings|advances|log|bak (expected: code files only):
+root/finance/seed_desk_users_s222.py
+root/wa/get_users.py
+root/wa/recordings-archive/make_force_keys.py
+--- live finance_app.py md5 in the tree: f002defb9f4a5d35028c051462225def
+--- member count: 212
 
 ===== 1. py_compile
 py_compile: OK (both)
 
 ===== 2. selftest (build against a mock tree with decoys)
 == build 1 under mock ROOT
-[2026-09-13 01:58:36] EXCLUDED (secret literal in content): /root/finance/mailer.py
-[2026-09-13 01:58:36] WARNING: # crontab -l unavailable: [Errno 2] No such file or directory: 'crontab'
-[2026-09-13 01:58:36] SUMMARY files=26 content_bytes=1447 tar_bytes=2643 finance_app.py md5 cc09284c7dd0b48d2dc501e5d0eedd2b excluded_by_rule=8 excluded_secret=1 (mailer.py) -> /tmp/s243_selftest_9oqze4q3/mock/root/state_backup/code_nightly.tar.gz
+[2026-09-13 02:18:23] EXCLUDED (secret literal in content): /root/finance/mailer.py
+[2026-09-13 02:18:23] WARNING: # crontab -l unavailable: [Errno 2] No such file or directory: 'crontab'
+[2026-09-13 02:18:23] SUMMARY files=26 content_bytes=1660 tar_bytes=2811 finance_app.py md5 34bbf7938a025b57c93a39f174bc96dd excluded_by_rule=8 excluded_secret=1 (mailer.py) -> /tmp/s243_selftest_wh0zlb7i/mock/root/state_backup/code_nightly.tar.gz
   ok   build exits 0
   ok   local copy written at root/state_backup/code_nightly.tar.gz
   ok   summary line printed
@@ -110,6 +137,7 @@ py_compile: OK (both)
   ok   summary names the content-scan exclusion: excluded_secret=1 (mailer.py)
   ok   log line names the content-excluded file
   ok   env-read secret name did NOT exclude finance_app.py
+  ok   TOKEN_HEADER constant (the v1.1 live false positive) did NOT exclude finance_app.py
   ok   BUNDLE_INFO carries finance_app.py md5
 == build 2 (overwrite)
   ok   second build exits 0
@@ -124,17 +152,17 @@ SELFTEST PASSED: all checks green
 selftest exit=0
 
 ===== 3. mock installer, first run (ROOT=mock tree, PY=/usr/bin/python3; mock crontab holds the S179 and S213 lines)
--- gates green; python /usr/bin/python3; payload a96f13c0b3b8e792c8829ae90469f932
--- placed <scratch>/ev_inst/root/state_backup/code_bundle.py (a96f13c0b3b8e792c8829ae90469f932)
+-- gates green; python /usr/bin/python3; payload 27e42d0d970a3e475aae7b2fdcebb780
+-- placed <scratch>/ev_inst/root/state_backup/code_bundle.py (27e42d0d970a3e475aae7b2fdcebb780)
 -- py_compile green
 -- smoke: build (no network)
-   [2026-09-13 01:58:36] EXCLUDED (secret literal in content): /root/finance/mailer.py
-   [2026-09-13 01:58:36] WARNING: # crontab -l unavailable: [Errno 2] No such file or directory: 'crontab'
-   [2026-09-13 01:58:36] SUMMARY files=26 content_bytes=24270 tar_bytes=10612 finance_app.py md5 cc09284c7dd0b48d2dc501e5d0eedd2b excluded_by_rule=8 excluded_secret=1 (mailer.py) -> <scratch>/ev_inst/root/state_backup/code_nightly.tar.gz
+   [2026-09-13 02:18:23] EXCLUDED (secret literal in content): /root/finance/mailer.py
+   [2026-09-13 02:18:23] WARNING: # crontab -l unavailable: [Errno 2] No such file or directory: 'crontab'
+   [2026-09-13 02:18:23] SUMMARY files=26 content_bytes=28434 tar_bytes=12245 finance_app.py md5 34bbf7938a025b57c93a39f174bc96dd excluded_by_rule=8 excluded_secret=1 (mailer.py) -> <scratch>/ev_inst/root/state_backup/code_nightly.tar.gz
 -- crontab backed up to <scratch>/ev_inst/root/crontab.bak_S243
 -- cron line added
 
-PINS  /root/state_backup/code_bundle.py a96f13c0b3b8e792c8829ae90469f932
+PINS  /root/state_backup/code_bundle.py 27e42d0d970a3e475aae7b2fdcebb780
 S243_CODE_BUNDLE GREEN -- local copy written; the nightly leg is cronned at 01:35.
 OWNER STEP (once, if not yet done): from the owner's Drive account upload any
 file named exactly code_nightly.tar.gz into the folder that holds
@@ -145,8 +173,8 @@ installer exit=0
 5 1 * * * /root/finance/finance_backup.sh # S179
 40 1 * * * /root/wa/venv/bin/python3 /root/finance/finance_drive_backup.py run >> /root/finance/drive_backup.log 2>&1
 35 1 * * * /root/wa/venv/bin/python3 /root/state_backup/code_bundle.py run >> /root/state_backup/code_bundle.log 2>&1 # S243_CODE_BUNDLE
---- installed file md5: a96f13c0b3b8e792c8829ae90469f932
---- tarball members (no *_config.py, no .conf, no mailer.py):
+--- installed file md5: 27e42d0d970a3e475aae7b2fdcebb780
+--- tarball members:
 etc/systemd/system/call-hook.service
 etc/systemd/system/clinic-finance.service
 etc/systemd/system/clinic-nightly.timer
@@ -178,17 +206,17 @@ BUNDLE_INFO.txt
 MANIFEST.md5
 
 ===== 4. mock installer, second run (idempotence)
--- gates green; python /usr/bin/python3; payload a96f13c0b3b8e792c8829ae90469f932
--- <scratch>/ev_inst/root/state_backup/code_bundle.py is already a96f13c0b3b8e792c8829ae90469f932 (same bytes); file step skipped
+-- gates green; python /usr/bin/python3; payload 27e42d0d970a3e475aae7b2fdcebb780
+-- <scratch>/ev_inst/root/state_backup/code_bundle.py is already 27e42d0d970a3e475aae7b2fdcebb780 (same bytes); file step skipped
 -- py_compile green
 -- smoke: build (no network)
-   [2026-09-13 01:58:36] EXCLUDED (secret literal in content): /root/finance/mailer.py
-   [2026-09-13 01:58:36] WARNING: # crontab -l unavailable: [Errno 2] No such file or directory: 'crontab'
-   [2026-09-13 01:58:36] SUMMARY files=26 content_bytes=24270 tar_bytes=10612 finance_app.py md5 cc09284c7dd0b48d2dc501e5d0eedd2b excluded_by_rule=8 excluded_secret=1 (mailer.py) -> <scratch>/ev_inst/root/state_backup/code_nightly.tar.gz
+   [2026-09-13 02:18:23] EXCLUDED (secret literal in content): /root/finance/mailer.py
+   [2026-09-13 02:18:23] WARNING: # crontab -l unavailable: [Errno 2] No such file or directory: 'crontab'
+   [2026-09-13 02:18:23] SUMMARY files=26 content_bytes=28434 tar_bytes=12245 finance_app.py md5 34bbf7938a025b57c93a39f174bc96dd excluded_by_rule=8 excluded_secret=1 (mailer.py) -> <scratch>/ev_inst/root/state_backup/code_nightly.tar.gz
 -- crontab backed up to <scratch>/ev_inst/root/crontab.bak_S243
 -- cron line already present (tag # S243_CODE_BUNDLE); not added again
 
-PINS  /root/state_backup/code_bundle.py a96f13c0b3b8e792c8829ae90469f932
+PINS  /root/state_backup/code_bundle.py 27e42d0d970a3e475aae7b2fdcebb780
 S243_CODE_BUNDLE GREEN -- local copy written; the nightly leg is cronned at 01:35.
 OWNER STEP (once, if not yet done): from the owner's Drive account upload any
 file named exactly code_nightly.tar.gz into the folder that holds
@@ -198,12 +226,12 @@ installer exit=0
 S243 cron lines: 1
 
 ===== 5. mock installer on a tree WITHOUT finance_app.py (must go RED, roll back)
--- gates green; python /usr/bin/python3; payload a96f13c0b3b8e792c8829ae90469f932
--- placed <scratch>/ev_fail/root/state_backup/code_bundle.py (a96f13c0b3b8e792c8829ae90469f932)
+-- gates green; python /usr/bin/python3; payload 27e42d0d970a3e475aae7b2fdcebb780
+-- placed <scratch>/ev_fail/root/state_backup/code_bundle.py (27e42d0d970a3e475aae7b2fdcebb780)
 -- py_compile green
 -- smoke: build (no network)
-   [2026-09-13 01:58:36] EXCLUDED (secret literal in content): /root/finance/mailer.py
-   [2026-09-13 01:58:36] FATAL: /root/finance/finance_app.py is not in the gather -- the bundle is pointless without it; not writing one
+   [2026-09-13 02:18:24] EXCLUDED (secret literal in content): /root/finance/mailer.py
+   [2026-09-13 02:18:24] FATAL: /root/finance/finance_app.py is not in the gather -- the bundle is pointless without it; not writing one
    <scratch>/ev_fail/root/state_backup/code_bundle.py removed
 !! RED -- the build smoke failed on this box
 installer exit=1
@@ -212,3 +240,7 @@ file after rollback: absent
 ===== 6. usage line
 usage: code_bundle.py build|run|list
 exit=2
+
+===== 7. repository gate over this kit
+NO_PHONE_NUMBERS: clean -- 7 staged file(s) checked (numbers and credentials).
+gate exit=0
