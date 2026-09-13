@@ -1,0 +1,113 @@
+== S245_AMIR_BILLTAP -- EVIDENCE, 13-Sep-2026 IST
+
+-- 1. patch(live S244 file) == the kit's file, byte for byte
+OK  patch(amir_day.py) == kit/amir_day.py  (4 edits, md5 79eb701f2df14e58c77e130a77b972ba)
+
+-- 2. py_compile
+py_compile ok
+
+-- 3. THE STEP 5 WALK, verbatim
+
+== S245 walk -- amir_day.py /home/claude/S245/kit/amir_day.py
+
+-- A. what the screen looks like now
+  ok    A1 every bill offers one plain 'Theek hai' tap
+  ok    A2 the reasons are inside a <details> that is SHUT by default
+  ok    A3 the second tap says 'Theek nahi'
+  ok    A4 no 'required' anywhere -- a required control inside a shut <details> silently blocks the whole submit
+  ok    A5 the four reasons are present but folded away
+  ok    A6 'Theek hai' is not one of four open choices
+  ok    A7 one hidden key per bill, exactly as the server reads it
+  ok    A8 five choices per bill, all one radio group
+  ok    A9 the count the server will loop over is on the form
+  ok    A10 he types no bill number -- the key travels hidden
+  ok    A11 the bill count is said in plain words up top
+  ok    A12 the save button is always reachable
+  ok    A13 a hostile supplier name is escaped
+  ok    A14 rupees are readable
+  ok    A15 he is told when to open the second tap, in one line
+
+-- B. it still does exactly what it did
+  ok    B1 'theek hai' is written
+  ok    B2 a reason is written
+  ok    B3 the unanswered bill is NOT written
+  ok    B4 'theek hai' raises no claim
+  ok    B5 a deficiency raises exactly one claim
+  ok    B6 the unanswered bill comes straight back, alone
+  ok    B7 the answered bills are gone
+  ok    B8 a value that is not one of the five is refused, not stored
+  ok    B9 the real answer is then stored
+  ok    B10 re-answering the same bill raises no second claim
+  ok    B11 and posting it again still raises none
+  ok    B12 with nothing left the screen says so
+
+-- C. yesterday's leftovers, and the close
+  ok    C1 an unanswered older bill returns as pichhla baaki
+  ok    C2 and it is tappable in the same simple way
+  ok    C3 the day will not close while a bill is untapped
+  ok    C4 and posting the close writes nothing
+  ok    C5 with every bill tapped the day is ready to close
+  ok    C6 and it closes
+
+-- D. the standing properties
+  ok    D1 GATE_STEPS unchanged
+  ok    D2 the five answers are unchanged
+  ok    D3 the claim-raising set is unchanged
+  ok    D4 no ten-digit phone-shaped number on any screen walked (F-185)
+  ok    D5 the page is still JavaScript-free
+  ok    D6 no onclick/onchange handler was introduced
+  ok    D7 the report reminder band still rides above the bills
+
+== 40 checks, 40 ok, 0 failed
+== WALK GREEN
+
+-- 4. THE S244 WALK, re-run UNCHANGED as a regression suite
+  ok    I7 the grace window is the documented one, and tunable
+
+== 62 checks, 62 ok, 0 failed
+== WALK GREEN
+
+-- 5. NEGATIVE CONTROL: the S245 walk against the LIVE S244 file, which must FAIL
+
+== S245 walk -- amir_day.py /home/claude/S245/neg/amir_day.py
+
+-- A. what the screen looks like now
+  FAIL  A1 every bill offers one plain 'Theek hai' tap 
+  FAIL  A2 the reasons are inside a <details> that is SHUT by default 
+  FAIL  A3 the second tap says 'Theek nahi' 
+  FAIL  A4 no 'required' anywhere -- a required control inside a shut <details> silently blocks the whole submit 
+  ok    A5 the four reasons are present but folded away
+  ok    A6 'Theek hai' is not one of four open choices
+      ... the live file fails A1-A4: five options open on every bill, and 'required'
+      on each of them.
+
+-- 6. MOCK INSTALL on a fake VPS tree, from a FROZEN copy of this kit
+      (ROOT=, service steps skipped; the kit's own SUMS gate runs for real)
+
+   run 1 -- installs:
+   -- MOCK: ROOT=/home/claude/S245/mock PY=/usr/bin/python3 PY_SMOKE=/usr/bin/python3 SKIP_SVC=1
+   -- gates green: SUMS.md5 and KIT_ID.txt (S245_AMIR_BILLTAP)
+   -- live pin: amir_day.py aad400fa (as expected)
+   -- proof: patch(live amir_day.py aad400fa) == kit amir_day.py 79eb701f, byte for byte
+   -- walk_amir_billtap_s245.py on this box: == 40 checks, 40 ok, 0 failed
+   -- walk_amir_processing_s244.py on this box: == 62 checks, 62 ok, 0 failed
+   -- placed: amir_day.py aad400fa -> 79eb701f | backup /home/claude/S245/mock/root/finance/amir_day.py.bak_S245_aad400fa
+   -- MOCK: service smoke, restart and healthz skipped
+   
+   == S245_AMIR_BILLTAP INSTALLED (mock)
+      amir_day.py  was aad400fa9c4b7804229c9f175c86533b  now 79eb701f2df14e58c77e130a77b972ba
+
+   run 2 -- already installed, changes nothing:
+   -- MOCK: ROOT=/home/claude/S245/mock PY=/usr/bin/python3 PY_SMOKE=/usr/bin/python3 SKIP_SVC=1
+   -- gates green: SUMS.md5 and KIT_ID.txt (S245_AMIR_BILLTAP)
+   -- ALREADY INSTALLED: amir_day.py 79eb701f is the kit's file. Nothing changed.
+
+   run 3 -- a live file that is NOT the pin: refuses, file left byte-identical:
+   -- MOCK: ROOT=/home/claude/S245/mock PY=/usr/bin/python3 PY_SMOKE=/usr/bin/python3 SKIP_SVC=1
+   -- gates green: SUMS.md5 and KIT_ID.txt (S245_AMIR_BILLTAP)
+   !! RED -- live amir_day.py is 36cec3f9d9d3f2e49a7d471690b23585 -- not the pin aad400fa this kit was built on (full-file replacement needs the exact pin); NOTHING changed
+   !! S245_AMIR_BILLTAP NOT installed
+   file before 36cec3f9d9d3f2e49a7d471690b23585  after 36cec3f9d9d3f2e49a7d471690b23585  -- byte-identical, as required
+
+   (this log was appended AFTER the runs, so the SUMS line in the kit is
+    recomputed below; the runs above gated on the frozen copy's own SUMS.)

@@ -1,0 +1,10 @@
+S245_AMIR_BILLTAP
+Built 13-Sep-2026 IST, Session 245.
+Owner ruling, 13-Sep-2026, in his words:
+  "bill check kariye - make it user friendly , all collapsed default shd be
+   bill ok / not ok - if not ok tapped then ask only ask options , its very
+   cumbersome right now"
+Touches exactly one file: /root/finance/amir_day.py (full-file replacement).
+From pin: aad400fa9c4b7804229c9f175c86533b   (S244_AMIR_PROCESSING)
+No schema change, no new route, no cron, no service file, no other file.
+The form the server reads is unchanged, field for field.
