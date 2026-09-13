@@ -1,0 +1,170 @@
+EVIDENCE_S249.txt -- S249_CLINIC_MONEY, built 13-Sep-2026 (assistant, cloud workspace)
+
+=== patch_s249.py --selftest src kit  (src = the byte-exact live files; finance_app.py 912398e9 rebuilt from the 07:19 capture + the four S243 patches) ===
+ok   finance_clinic_day.py: patch(live) == kit True; second pass already
+ok   clinic_register.py: patch(live) == kit True; second pass already
+ok   finance_app.py: not shipped (F-185); patch(live) -> 1fc62335f085b4cb4a634bbe9cca96c4 == predicted; second pass already
+ok   portal.py: patch(live) == kit True; second pass already
+selftest GREEN
+
+=== walk_s249.py (offline; FIN_MODS = the live capture with finance_app.py at 912398e9) ===
+darpan_kal NOT mounted: No module named 'darpan_kal'
+reports_tile NOT mounted: No module named 'reports_tile'
+accountant_upi_cash NOT mounted: No module named 'accountant_upi_cash'
+WALK S249_CLINIC_MONEY   finance_app=/tmp/walk_s249_e6nu8qxc/mods/finance_app.py   db=/tmp/walk_s249_e6nu8qxc/finance.db
+
+-- 0 the mount
+  PASS  finance_app.py patched in memory from the live bytes (patched)
+  PASS  clinic_money is mounted
+  PASS  clinic_register and clinic_day still mounted
+  PASS  healthz 200
+  PASS  finance_app resolves /finance/physio to the physio unit
+  PASS  not signed in: the match page redirects to the portal
+
+-- 1 the physiotherapy unit and Bhati's hard edge
+  PASS  before the seed: bhati is refused everywhere (302 to the portal)
+  PASS  seed_s249: unit + 6 rows + setting once; second run NOT changed
+  PASS  bhati holds NO clinic row
+  PASS  bhati: /finance/physio 200, in Hindi, read-only
+  PASS  bhati refused at the front gate: /finance/clinic/register -> 302
+  PASS  bhati refused at the front gate: /finance/clinic/day -> 302
+  PASS  bhati refused at the front gate: /finance/clinic/day/2026-09-12 -> 302
+  PASS  bhati refused at the front gate: /finance/clinic/day/2026-09-12/mpr -> 302
+  PASS  bhati refused at the front gate: /finance/clinic/bank/mpr -> 302
+  PASS  bhati refused at the front gate: /finance/clinic/match -> 302
+  PASS  bhati refused at the front gate: /finance/clinic/match/2026-09-12 -> 302
+  PASS  bhati refused at the front gate: /finance/clinic/money -> 302
+  PASS  bhati refused at the front gate: /finance/clinic/register/2026-09-12 -> 302
+  PASS  bhati refused at the front gate: /finance/approvals -> 302
+  PASS  bhati refused at the front gate: /finance/darpan/kal -> 302
+  PASS  bhati refused at the front gate: /finance/amir -> 302
+  PASS  bhati refused on the clinic API: 403 no_role_here, not data
+  PASS  bhati cannot tap received (403)
+  PASS  bhati cannot post other-UPI (302 at the gate)
+  PASS  alisha (reception): the physio table in English
+  PASS  manoj: the physio table, English
+  PASS  a stray clinic row for bhati is deactivated by the seed
+  PASS  ... proven: the stray row is deactivated and printed
+  PASS  ... and bhati is refused again
+
+-- 2 F-459: the one 'our online' figure (the 12-Sep shape)
+  PASS  our_online_p = 4,550 (2,050 + 600 + 500 + the split's 1,400)
+  PASS  ... and clinic_money reads the same figure
+  PASS  NEGATIVE CONTROL: the live file has no our_online_p (the card read the sheet bucket, 3,150)
+  PASS  day page 200 and it says our online is 4,550 (not the sheet's 3,150)
+  PASS  day page BEFORE the other-UPI is recorded: bank lower by 1,950
+  PASS  day page links the morning match
+  PASS  MPR page: the same 4,550 and the same 1,950
+  PASS  MPR page: 3 paired, 1 bank-only, 1 ours-only
+
+-- 3 the counter sheet
+  PASS  register card 200 with the other-UPI box, the physio hand-over select, no float block yet
+  PASS  sheet saved
+  PASS  physio 1,800 cash, handed to Dr Bhawna, stamped
+  PASS  the three records line: register and Docterz agree on UPI, the BANK differs (before the other-UPI is recorded)
+  PASS  blank amount: 400, nothing saved
+  PASS  2,050 recorded; back to the sheet
+  PASS  row: 2,050 PhonePe, the phone, bill 2353, by alisha; the day's reason 'a while'
+  PASS  the sheet lists it, remembers the phone and the app, offers '+ add another'
+  PASS  day page AFTER: 'of which ₹ 2,050 went to another UPI', expected 2,500, bank higher by 100, link to the match
+  PASS  the three records line names the 2,050 kept out; the bank still differs -- by the 100 rung as cash (the drawer closes that loop below)
+  PASS  add another, then remove it: one row again
+  PASS  every write is audited
+
+-- 4 the reconciler: four passes and the explanation layer
+  PASS  verdict: nothing to do
+  PASS  pass 1: counter 6,950 = Docterz 6,950 (physio out)
+  PASS  expected in the bank = 4,550 - 2,050 = 2,500
+  PASS  explained: the other UPI (paired with Fauzia's 2,050) and the 100 rung as cash
+  PASS  the other-UPI line names the entry and says 'not in the bank by nature'
+  PASS  the rung-as-cash line names Kamla's 100 at 10:41
+  PASS  notes: physiotherapy kept out
+  PASS  no flag at all
+  PASS  staff card 200, no JavaScript, the takeaway line
+  PASS  the numbers table and 'Explained' card are on it; no Flags card
+  PASS  reception's button: First pass done (enabled)
+  PASS  alisha: first pass done
+  PASS  shavez (the named checker) sees 'Close the day — checked'
+  PASS  alisha cannot close: only the checker
+  PASS  shavez closes: two passes, alisha then shavez
+  PASS  D2: ONE flag -- counter 2,300 vs Docterz 1,700, +600, whole-fee hint 'one consultation ahead'
+  PASS  D2: the flag is a staff flag, not the owner's
+  PASS  the flag persists in clinic_money_flag, open, with the answer form; 'First pass done' is disabled until answered
+  PASS  pass 1 refused while a flag is unanswered
+  PASS  an empty explanation is refused (write it, or press Cannot explain)
+  PASS  explained by alisha
+  PASS  pass 1 done
+  PASS  shavez sees her line and Agree / Disagree
+  PASS  pass 2 refused until his word is given
+  PASS  agree on an explained staff flag -> reconciled
+  PASS  day closed on two passes; nothing reached the owner
+  PASS  a reconciled flag is kept as the record even after the sheet is corrected
+  PASS  D3: P's 500 never reached the bank after two banking days -> an OWNER flag (money that never lands)
+  PASS  ... but the morning after it is only a note: 'still to reach it'
+  PASS  shavez, reception absent: the button says one pass only
+  PASS  an owner-level flag does not block his pass
+  PASS  closed on one pass, marked so
+  PASS  the owner's queue holds exactly that one: money that never landed
+  PASS  D4 unfilled, the morning after: one staff flag, nothing else
+  PASS  D4 unfilled after 14:00 the next day: the owner's flag
+  PASS  ... and it is in his queue
+  PASS  D5 tender swap: 500 under UPI on the counter, card in Docterz -> explained, no flag
+  PASS  D5 counter 50 over: under Rs 100 is a note, never a flag
+
+-- 5 the float: not revenue, moves only the handover
+  PASS  owner page 200: the float not issued yet; the queue shows the two owner items
+  PASS  issued 2,500 (5x200 + 10x100 + 10x50) on 12-Sep
+  PASS  standing 2,500; the day's collection is UNCHANGED (register cash 2,000 + physio 1,800 = 3,800)
+  PASS  no count yet: the handover expectation equals the collection
+  PASS  the sheet now shows the float block, prefilled 5 / 10 / 10, opened with 2,500
+  PASS  kept 2,500 aside: adjust 0, handover = collection = 3,800
+  PASS  drawer 3,700 counted against a 3,800 handover: '100 less in the drawer'
+  PASS  ... and the S224 loop closes, other-UPI aware: short by exactly what the bank is over, 'No money is missing'
+  PASS  D6: opened 2,500, kept 2,000 -> +500 released; handover 1,000 + 500 = 1,500; change asked
+  PASS  the sheet says: 500 short, made up next time; change needed 10 x 50; handover line names the release
+  PASS  the match notes the float and does not flag it
+  PASS  owner tops up 500 on 14-Sep -> the float opens at 2,500 again on the 14th
+  PASS  owner's month line: the float short on 1 day (₹ 500 made up); change asked on 1 day
+
+-- 6 the physiotherapy table
+  PASS  bhati: September open, August folded; Hindi headings; 1,800 on the 12th, handed to Dr Bhawna, 'abhi nahi'
+  PASS  bhati sees NO doctor's revenue, no patient, no bank word
+  PASS  manoj: a Received button on the 12th
+  PASS  Dr Bhawna taps received: stamped, redirect
+  PASS  bhati now sees 'mil gaya bhawna'
+  PASS  reception cannot tap received (403)
+
+-- 7 the owner's line
+  PASS  other UPI this month: 2,050, 1 payment, not yet settled; the settle button
+  PASS  physiotherapy this month: 1,800, all received
+  PASS  morning passes: 3 closed, one pass only on 10-Sep
+  PASS  settled tick
+  PASS  owner reconciles the never-landed flag with a note
+  PASS  the doctor's Morning match tile lands on his own line
+  PASS  reception's lands on yesterday
+  PASS  shavez (a maker) is refused the owner's page
+  PASS  not a date
+  PASS  no token, no full phone number on any page
+
+-- 8 the portal: who is shown what
+  PASS  patched portal.py imports (every tile grouped -- its own assert); grants v15
+  PASS  bhati is shown Physiotherapy and nothing of Docterz, money or staff
+  PASS  shavez is shown Morning match beside Docterz daily collection; not Physiotherapy
+  PASS  shivani is shown Morning match beside Docterz daily collection; not Physiotherapy
+  PASS  alisha is shown Morning match beside Docterz daily collection; not Physiotherapy
+  PASS  bhawna is shown Physiotherapy
+  PASS  the doctor holds both by role
+  PASS  darpan and amir are not shown either
+  PASS  both tiles open the right doors
+
+== 126 checks, 126 passed, 0 failed
+== WALK GREEN
+
+=== mock install from a frozen copy of the live tree (systemctl / curl / journalctl shimmed) ===
+[1/9] kit gates green
+-- ALREADY INSTALLED: every file is this kit's. Re-seeding roles (idempotent):
+   seed_s249: NOT changed (already seeded)
+(that tree already carries the kit: ALREADY INSTALLED. The GREEN run, the rollback drill -- healthz 500 after placing, every file restored to its pin, clinic_money.py removed -- and the currency-gate refusal on a drifted clinic_register.py were run in the build session; the installer's steps 1-9 printed GREEN, finance_app.py patched on the box to 1fc62335.)
+
+=== the publish gate (NO_PHONE_NUMBERS --files-from, as PUBLISH_ALL runs it) ===
+NO_PHONE_NUMBERS: clean -- 13 staged file(s) checked (numbers and credentials).
