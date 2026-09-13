@@ -2436,12 +2436,12 @@ remains CURRENT until v2.75 carries it.
 
 | file | session | md5 | note |
 |---|---|---|---|
-| `KB_History_Archive_v1_90_S243close.md` | **S243 close** | `e9ed64996b083008fecf0aaed3c81dff` | **CURRENT** Archive. §S243 appended — the evidence study, the retire move, eleven kits, the owner's rulings quoted, F-449 … F-458, and the full text of D485 … D495. **Pure append proven: the first 1,360,629 bytes byte-identical to v1.89 (md5 ea282d81…); +18,069 → 1,378,698.** |
-| `Fault_Action_Register_v2_75.md` | **S243 close** | `fe78ea6c63d7f1383dbeec48d3d69eec` | **CURRENT** Fault Register. **F-449 … F-458 minted, three the assistant's** (F-456 secrets in the first code bundle; F-457 the token at the wrong door; F-458's gate gap). Pure append proven: first 599,653 bytes byte-identical to v2.74 (md5 9e084096…). |
-| `KB_Register_v5_93_S243close` | **S243 close** | `e6660820d7903e9ebab777c09578c44b` | **CURRENT** Register. H1 rewritten (S242 H1 retained); the **S243 wave** (19 rows, 6 NEW) at the head of CURRENT LIVE FILE VERSIONS; ten older rows marked superseded; D485 … D495 and F-449 … F-458 indexed; the four self-referential lines checked — two found stale and corrected visibly. |
-| `HANDOFF_RUNBOOK_2026-09-13_Session243close_v174.md` | **S243 close** | `a38b51e586803a39ee531190039271b0` | **CURRENT** Runbook. §0 the night and the morning · §1 six mental models (empty never rebuild; read the gate before blaming the key; a refused install is the system working; anchors beat pins; the owner's words are the spec; say the bad news first) · §2 backlog · §3 discipline · §4 the boundary. |
-| `START_HERE_SESSION_244.md` | **S243 close** | `6ff5f26259abaf0ee4a19890f9b5db78` | **CURRENT** entry point. §0 twelve standing rulings incl. the 13-Sep mandate; Phase 0 with the F-448 gate line and F-449's one-CURRENT rule; pins moved; what is true that was not; ⭐1 D493 phase 2. |
-| `S243_BUILD_BRIEF.md` | **S243 close** | `0e8bbfb7b03842c53f9d1b8e4942522a` | **CURRENT** build brief — twelve kits in one table with pins; three things worth knowing; the rulings; the owed list. |
+| `KB_History_Archive_v1_90_S243close.md` | **S243 close** | `e9ed64996b083008fecf0aaed3c81dff` | *(superseded at the S244 close)* was **CURRENT** Archive. §S243 appended — the evidence study, the retire move, eleven kits, the owner's rulings quoted, F-449 … F-458, and the full text of D485 … D495. **Pure append proven: the first 1,360,629 bytes byte-identical to v1.89 (md5 ea282d81…); +18,069 → 1,378,698.** |
+| `Fault_Action_Register_v2_75.md` | **S243 close** | `fe78ea6c63d7f1383dbeec48d3d69eec` | *(superseded at the S244 close)* was **CURRENT** Fault Register. **F-449 … F-458 minted, three the assistant's** (F-456 secrets in the first code bundle; F-457 the token at the wrong door; F-458's gate gap). Pure append proven: first 599,653 bytes byte-identical to v2.74 (md5 9e084096…). |
+| `KB_Register_v5_93_S243close` | **S243 close** | `e6660820d7903e9ebab777c09578c44b` | *(superseded at the S244 close)* was **CURRENT** Register. H1 rewritten (S242 H1 retained); the **S243 wave** (19 rows, 6 NEW) at the head of CURRENT LIVE FILE VERSIONS; ten older rows marked superseded; D485 … D495 and F-449 … F-458 indexed; the four self-referential lines checked — two found stale and corrected visibly. |
+| `HANDOFF_RUNBOOK_2026-09-13_Session243close_v174.md` | **S243 close** | `a38b51e586803a39ee531190039271b0` | *(superseded at the S244 close)* was **CURRENT** Runbook. §0 the night and the morning · §1 six mental models (empty never rebuild; read the gate before blaming the key; a refused install is the system working; anchors beat pins; the owner's words are the spec; say the bad news first) · §2 backlog · §3 discipline · §4 the boundary. |
+| `START_HERE_SESSION_244.md` | **S243 close** | `6ff5f26259abaf0ee4a19890f9b5db78` | *(superseded at the S244 close)* was **CURRENT** entry point. §0 twelve standing rulings incl. the 13-Sep mandate; Phase 0 with the F-448 gate line and F-449's one-CURRENT rule; pins moved; what is true that was not; ⭐1 D493 phase 2. |
+| `S243_BUILD_BRIEF.md` | **S243 close** | `0e8bbfb7b03842c53f9d1b8e4942522a` | *(superseded at the S244 close)* was **CURRENT** build brief — twelve kits in one table with pins; three things worth knowing; the rulings; the owed list. |
 | `SANJEEVNI_SYSTEM_BOOK_v1_1_S243close.md` | **S243 close** | `5c3c04846b9065baf179cc2e2ed5700f` | **CURRENT** Tier-1 reference — THE MAP of Sanjeevni: twelve sections from evidence + §13 the owner's rulings of 13-Sep; §11.4 the plan of record with the S243 statuses; §12 the residue register. Supersedes v1 (`3f19d04f17265e276229019045eaa7fc`, written at the S243 open, retired from project knowledge at this close — its bytes are the first part of v1.1). |
 | `gen_live_pins.py` | **S240 close** | `7a2bfdd279d7682eb77e070cc5fa10f9` | unchanged v1.3 — generated this close's pin list. |
 
@@ -2462,6 +2462,49 @@ remains CURRENT until v2.75 carries it.
 
 | file | session | md5 | note |
 |---|---|---|---|
-| `live_pins_S243close.txt` | **S243 close** | `25558f8067a28f2cc748028186b9781e` | **CURRENT** pin list — generated by `gen_live_pins.py` v1.3 from `KB_Register_v5_93_S243close` against this manifest, **`register_pin_verified: yes`**, **335 rows (VPS 276 · SHORT 20 · BLIND 39)**; the S242 list (316 rows) superseded. Every S243 pin in it was printed by the box at install. |
+| `live_pins_S243close.txt` | **S243 close** | `25558f8067a28f2cc748028186b9781e` | *(superseded at the S244 close)* was **CURRENT** pin list — generated by `gen_live_pins.py` v1.3 from `KB_Register_v5_93_S243close` against this manifest, **`register_pin_verified: yes`**, **335 rows (VPS 276 · SHORT 20 · BLIND 39)**; the S242 list (316 rows) superseded. Every S243 pin in it was printed by the box at install. |
+
+## §S244 CLOSE — 13-Sep-2026 · rows added at this close
+
+**Every row below was hashed from the file itself in the assistant's workspace before it was written to any store.** The pure appends of the Archive and the Fault Register are proven in their END markers; the Register's four self-referential lines were checked and ONE was found stale — two clauses on the how-to-use line (the Runbook pointer at v165 since S232; the second Fault pointer at v2.65) — corrected visibly (F-45 family). The folder's own gate (`MD5SUMS_ALL.txt`) was rebuilt from the previous row list, diffed (**503 rows → 510: added seven · dropped none · two hashes changed — `CANONICAL_MANIFEST.md` and `KIT_ID.txt`**), and exits 0. F-449's rule was applied: for every family exactly one row reads CURRENT, and the seven S243-close rows above were demoted at this close. **`KIT_ID.txt` was found not rewritten since the S236 close** — seven closes — and is rewritten here, recorded not silent. **Session numbering: the next session is S255** (F-463 — kits S244 … S254 were issued inside Session 244).
+
+| file | session | md5 | note |
+|---|---|---|---|
+| `KB_History_Archive_v1_91_S244close.md` | **S244 close** | `eac6b2bf682d66e1859011afdce06896` | **CURRENT** Archive. §S244 appended — the two chats, eleven kits, the owner's rulings quoted, F-459 … F-464, the live pins by chain, and the full text of D496 … D509. **Pure append proven: the first 1,378,698 bytes byte-identical to v1.90 (md5 e9ed6499…); +22,891 → 1,401,589.** |
+| `Fault_Action_Register_v2_76.md` | **S244 close** | `2e8dc5c3ca2bb05246270ce78c361fab` | **CURRENT** Fault Register. **F-459 … F-464 minted, two the assistant's** (F-460 a published kit rebuilt in place; F-463 the kit counter ran ahead and numbers were re-used). Pure append proven: first 608,542 bytes byte-identical to v2.75 (md5 fe78ea6c…); +5,870 → 614,412. |
+| `KB_Register_v5_94_S244close` | **S244 close** | `1fc251d37184d8e16a52601a2dba4c67` | **CURRENT** Register. H1 rewritten (S243 H1 retained); the **S244 wave** (9 rows, 1 NEW, two rows marked not-passes: `amir_day.py` SHORT/declared, `staff_master.csv` SHORT) at the head of CURRENT LIVE FILE VERSIONS; seven older rows marked superseded; D496 … D509 and F-459 … F-464 indexed; reserved line → D510; the how-to-use line corrected on two clauses. |
+| `HANDOFF_RUNBOOK_2026-09-13_Session244close_v175.md` | **S244 close** | `c1e1610b38a449b801dafcaec881593e` | **CURRENT** Runbook. §0 the day in six · §1 six mental models (a published kit is frozen; read the reserved line before minting; name the shared file when two chats run; the owner reads the screen, the assistant reads the code; one function per figure; every install line carries the pull) · §2 backlog · §3 discipline · §4 the boundary. |
+| `START_HERE_SESSION_255.md` | **S244 close** | `83df8833a1b6925fda2896c55cebab46` | **CURRENT** entry point — **Session 255** (no sessions 245–254). §0 fifteen standing rulings incl. F-460 / F-463 / F-464; Phase 0 with the gate line and **§7 the two pins to re-hash on the box at the open**; the three new addresses; ⭐1 the Razorpay / Yes Bank channel. |
+| `S244_BUILD_BRIEF.md` | **S244 close** | `b72402028681e3cb878cf8a544593366` | **CURRENT** build brief — eleven kits in one table with pins; three things worth knowing; **the Razorpay / Yes Bank plan written and not built (D507, three steps)**; the owed list. |
+| `KIT_ID.txt` | **S244 close** | `39d74ea6749f5c58f61bd9cd3f068cce` | identity card of this folder, rewritten at this close for the first time since S236 (recorded, not silent); carries the four S244 warnings (F-460 · F-462 · F-463 · F-464) and the two not-pass pins. |
+| `gen_live_pins.py` | **S240 close** | `7a2bfdd279d7682eb77e070cc5fa10f9` | unchanged v1.3 — generated this close's pin list. |
+| `SANJEEVNI_SYSTEM_BOOK_v1_1_S243close.md` | **S243 close** | `5c3c04846b9065baf179cc2e2ed5700f` | **CURRENT** Tier-1 reference, unchanged this session (row above retained; nothing in the Book moved — the clinic-money system is Docterz-side, not Sanjeevni). |
+
+**S244 working papers** (project knowledge now; `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S244\` at this close; every md5 hashed from the file — the seven `claude/S24x_*_BUILT.md` documents keep their kit-numbered decision labels with the F-463 note in the Register):
+
+| file | md5 | note |
+|---|---|---|
+| `S244_AMIR_PROCESSING_BUILT.md` | `6282b4f68ce45022d64a4ae2a3cef311` | S244 (D497; labelled D478 — F-463) |
+| `S245_AMIR_BILLTAP_BUILT.md` | `ec82abc519032b6bb19440680c475465` | S245 (D498; labelled D479); superseded README — F-460 |
+| `S246_AMIR_LIST_REOPEN_BUILT.md` | `7e71d1fe4c8d975425c3c07f6ea2d410` | S246 (D499 · D500; labelled D480 · D481; its "F-457/F-458" are F-461/F-460) |
+| `S247_LEDGER_LATE_COLLECT_BUILT.md` | `fba4ec792e50d7d6b5ab2eba71b39c4d` | S247 (D501; labelled D482) |
+| `S248_SALARY_RAISE_BUILT.md` | `f6f8ae7b0f82dc0d177e5c36e6edb5ef` | S248 (D502 · D503; labelled D483 · D484) |
+| `S249_CLINIC_MONEY_FINAL_PLAN.md` | `e5acf5cda6fda0c542b562c623d8ab79` | the plan the owner approved unread — *"I trust you"* |
+| `S249_CLINIC_MONEY_BUILT.md` | `62fafa248ac9c5402ddb8c90e607afed` | S249 → S251 build and install record (D504 · D505 · D507) |
+| `S250_STAFF_REGISTER_TILE_LIVE.md` | `d1a071fa943a65d664bad054d8d34e58` | the second chat's record (D496) |
+| `S252_FLOAT_FLOW_BUILT.md` | `c400202a4c2c546a22cd948af746b934` | D506 |
+| `S253_MATCH_PLAIN_BUILT.md` | `6c924fba92a9a50f16c80eb75bf2c7f9` | D508 |
+| `S254_SHEET_PHONE_BUILT.md` | `74ea09233cf1dac3f3b6770567090988` | D509 |
+| `S253_S254_INSTALLED.md` | `53dc805911268dfa8c35eb9cc0fa6e77` | the live pins after the last two installs, read from the box |
+
+**Live pins after this close — PRINTED BY THE BOX at install unless marked:** `/root/finance/amir_day.py` bf7d9826 → aad400fa (S244) → 79eb701f (S245) → **`a9f2062267ebac59e02fdb0f88e775de` (S246 — PREDICTED, not read back; SHORT in the Register)** · `/root/staff_ledger.py` 49b13f42 → **`eacd71544715ff597712aee5e6233135`** (S247) · `/root/staff_master.csv` → **`e48ae0b0` (S248 — SHORT)** · `/root/finance/finance_clinic_day.py` 56fb7619 → **`b2b7ff7d8ed654aa4cca067b1cfe5716`** · `/root/finance/clinic_register.py` c6b87682 → 92136a97 → **`eaaea278498b8511ca9a79adf9c20eba`** · `/root/finance/finance_app.py` 912398e9 → **`1fc62335f085b4cb4a634bbe9cca96c4`** (patched on the box, F-185) · NEW `/root/finance/clinic_money.py` 08c57466 → 9cc6bb7a → da9122e0 → **`d5c3a8459b04753e09e9630cb2de6560`** · `/root/portal/portal.py` 06f1b378 → **`d0f126a3815a4c7e24960a15f1951857`** · `/root/portal/tile_grants.json` v14 0efad736 → v15 `932f7bd05f4bf19b1f53deb9a2f35d22` (S250, the second chat) → **v16 `d7edf850a977c033448d6e14076490b4`**. Full table with chains: `KB_Register_v5_94_S244close` S244 wave.
+
+**The pin list row (generated after every row above was final):**
+
+| file | session | md5 | note |
+|---|---|---|---|
+| `live_pins_S244close.txt` | **S244 close** | `c11dc9e783400e6677cc775f350e04b8` | **CURRENT** pin list — generated by `gen_live_pins.py` v1.3 from `KB_Register_v5_94_S244close` against this manifest, **`register_pin_verified: yes`**, **344 rows (VPS 283 · SHORT 22 · BLIND 39)**; the S243 list (335 rows) superseded. Two S244 rows are SHORT by design and are re-hashed at the S255 open. |
 
 **END OF CANONICAL_MANIFEST — S243 CLOSE (13-Sep-2026).** Next free: **D496 · F-459 · Session 244.** *(This footer is the last line of the file. The S243-open, S242, S241, S239 and S238 footers above are retained as truncation-proofs. The row-by-row md5 verification ran at this close on every row above, and the folder's own hash gate exits 0.)*
+
+**END OF CANONICAL_MANIFEST — S244 CLOSE (13-Sep-2026).** Next free: **D510 · F-465 · Session 255.** *(This footer is the last line of the file. The S243, S243-open, S242, S241, S239 and S238 footers above are retained as truncation-proofs. The row-by-row md5 verification ran at this close on every row above, and the folder's own hash gate exits 0.)*

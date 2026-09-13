@@ -1,120 +1,123 @@
-# OWNER TO-DO — LIVE · refreshed at the **S243 close**, 13-Sep-2026
+# OWNER TO-DO — LIVE · refreshed at the **S244 close**, 13-Sep-2026
 
-*Detail: `claude/START_HERE_SESSION_244.md` (**the next chat opens here**) · `claude/S243_BUILD_BRIEF.md` ·
-`claude/S243_CLOSE_REPORT.md` · `claude/SANJEEVNI_SYSTEM_BOOK_v1_1_S243close.md` · `claude/S243_LIVE_PINS_AFTER_INSTALLS.md`.*
+*Detail: `claude/START_HERE_SESSION_255.md` (**the next chat opens here — Session 255, not 245**) ·
+`claude/S244_BUILD_BRIEF.md` · `claude/S244_CLOSE_REPORT.md` · `claude/S249_CLINIC_MONEY_BUILT.md`.*
 
-## 🔗 WHERE SESSION 243 LIVES — for a fresh chat
+## 🔗 WHERE SESSION 244 LIVES — for a fresh chat
 
-Session 243 ran in **Cowork**, session id **`cse_01DJg9aZ4PvzPULcTZU1P758`** (harness URL
-`https://claude.ai/code/session_01SpUrkxcrwD3arRQncYkkw4`). Reopen it from the Cowork session list for
-the full working context — the eleven kit builds, the owner's rulings in his own words, the two 401s and
-the code-bundle incident as they happened. The written record of the same session is
-`claude/S243_CLOSE_REPORT.md` → `claude/S243_BUILD_BRIEF.md` → `claude/SANJEEVNI_SYSTEM_BOOK_v1_1_S243close.md`;
-the chat is for what those compress. Its working files live at `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S243\`.
+Session 244 ran in **two Cowork chats on 13-Sep-2026**:
+
+- **"S244 — Amir's day, the ledger, two raises and the clinic's money (S244–S254)"** — harness URL
+  `https://claude.ai/code/session_01Lzr9B9CP8UHtHLwPnicaKH`. Kits S244 … S249, S251 … S254; the owner's
+  rulings in his own words; the S249 refusal and re-issue; the three afternoon reshapes.
+- **"S244-B — Staff Register tile for reception & Shavez (S250)"** — chat id **`cse_012zEwLSmC8WKGXpqxgAuFQ4`**.
+  One kit, `S250_STAFF_REGISTER_TILE` (D496). *Add this name to that chat's title so the record stays straight.*
+
+The written record: `claude/S244_CLOSE_REPORT.md` → `claude/S244_BUILD_BRIEF.md` → the `claude/S24x_*_BUILT.md`
+documents. Working files: `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S244\`.
 
 ---
 
 ## ⭐0 — WHAT NEEDS YOU
 
-**1 · TWO WORDS TO STAFF, tomorrow morning.** Darpan: open **Kal ka hisaab** every morning and enter
-yesterday's cash and whom he gave it to. Shavez: open **Aaj ki reports** before the first sale and
-generate in Marg whatever shows ○.
-
-```
-https://followup.dr-manoj.in/finance/darpan/kal
-```
-
-```
-https://followup.dr-manoj.in/finance/reports/aaj
-```
-
-**2 · THE PROCEDURE-MEDICINE WORD.** What does Darpan type as the customer on a procedure-medicine bill
-in Marg? One word, when you have it — it completes Darpan's arithmetic.
-
-**3 · REPRINT AUGUST, THEN LOCK IT.** Still standing since S240; the money has not changed.
-
-```
-https://attendance.dr-manoj.in/register/salary/flow/preview?ym=2026-08
-```
-
-**4 · AMIR'S PASSWORD** (login `amir`) — set a new one and tell him:
+**1 · BHATI'S LOGIN** — parked by you. When ready: user `bhati`, role `staff`, a password. His tile and his
+physio-viewer row are already in place; nothing else opens to him.
 
 ```
 https://followup.dr-manoj.in/portal/users
 ```
 
-**5 · KEYS TO ROTATE** (F-456, with the MyOperator rotation when it happens): the portal token seed,
-the SSO secret, the MyOperator token, the attendance mail password. They went to your own Drive for
-30 minutes on 13-Sep and are in its trash; nobody else's account.
+**2 · TWO WORDS TO STAFF.** Reception: open **Morning match** every morning and answer every flag (a line, or
+*Cannot explain*) — **Saturday 12-Sep's first pass is still open.** Shavez: second pass after theirs; when
+they are away, his pass alone closes the day. When ICICI UPI is down, the sheet's *Paid to another UPI* box.
 
-**6 · AFTER A FULL CYCLE — one line, yours alone:** delete the retired residue. Not before Session 245.
+```
+https://followup.dr-manoj.in/finance/clinic/match
+```
+
+**3 · YOUR OWN LINE, each morning — four things only, and the float in one line:**
+
+```
+https://followup.dr-manoj.in/finance/clinic/money
+```
+
+**4 · REPRINT AUGUST, THEN LOCK IT.** Alisha's ₹5,000 is now deducted in August and the two raises are in
+it. Sheet 2 needs approving again, then lock.
+
+```
+https://attendance.dr-manoj.in/register/salary/flow/preview?ym=2026-08
+```
+
+**5 · AMIR'S PASSWORD** (login `amir`) — set a new one and tell him.
+
+**6 · KEYS TO ROTATE** (F-456, with the MyOperator rotation): the portal token seed, the SSO secret, the
+MyOperator token, the attendance mail password.
+
+**7 · AFTER A FULL CYCLE — one line, yours alone:** delete the retired residue. Not before Session 256.
 
 ```
 rm -rf /root/_retired/S243_2026-09-13_0007
 ```
 
-**7 · THE MARG VENDOR** — still no answer from Ram Singh.
+**8 · THE PROCEDURE-MEDICINE WORD** in Marg — still owed. **9 · THE MARG VENDOR** — still no answer.
 
-**8 · YOUR RULINGS, when convenient:** Amir's five parked tiles (D483) · F-436 purchase serial · Rung 3
-(gross → net) · the two Marg merges · vouchers (D388/D397) · Darpan's loan workbook · tranche B terms.
+**10 · YOUR RULINGS, when convenient:** Amir's five parked tiles · F-436 purchase serial · Rung 3 (gross →
+net) · the two Marg merges · vouchers (D388/D397) · Darpan's loan workbook · tranche B terms · Surendra's two
+August advances attributed to Sep and Oct (the S247 control moves them if you want them in August).
 
-**9 · Carried:** arms licence renews 27-Sep · UptimeRobot watches the `.in` not the `.com` · Ms. Khushi
-Jain / MyOperator WABA token overlap · ICICI card ·9012 expiry (D436) · four values into Bitwarden
-(D428) · call recordings copy · VINTAZ P 4500 INJ write-off tap · Parvesh's exit date · the wall card
-(F-310) · ~300 `marg_watch.py.before_*` on the medical PC (deleting is yours).
+**11 · Carried:** arms licence renews 27-Sep · UptimeRobot watches the `.in` not the `.com` · Ms. Khushi Jain /
+MyOperator WABA token overlap · ICICI card ·9012 expiry (D436) · four values into Bitwarden (D428) · call
+recordings copy · VINTAZ P 4500 INJ write-off tap · Parvesh's exit date · the wall card (F-310) · ~300
+`marg_watch.py.before_*` on the medical PC.
 
-**10 · What nothing touches (yours to decide):** `D:\dr-manoj-git\_to_delete_S2xx\` folders ·
-`_S204_WORK\` · `_PHI_QUARANTINE_S202\` · `patient_fp.env.BACKUP_KEEP_SAFE` (**keep**) · the SSD's
-17+ cold kits (rule of 5) · on the VPS `/root/_quarantine_S232_F368_*` (waits for the WABA rotation),
-`/root/wa/staff_ledger.py` (stray), `/root/deploy/repo/staff_ledger/` (fossil), the six stale
-`/root/wa/.env.bak*` (secrets inside — say the word and they go to `_retired`).
+**12 · What nothing touches (yours to decide):** `D:\dr-manoj-git\_to_delete_S2xx\` folders · `_S204_WORK\` ·
+`_PHI_QUARANTINE_S202\` · `patient_fp.env.BACKUP_KEEP_SAFE` (**keep**) · the SSD's cold kits (rule of 5) · on the
+VPS `/root/_quarantine_S232_F368_*`, `/root/wa/staff_ledger.py` (stray), `/root/deploy/repo/staff_ledger/`
+(fossil), the six stale `/root/wa/.env.bak*`.
 
 ---
 
-## ⭐1 — WHAT I BUILD NEXT (Book §11.4)
+## ⭐1 — WHAT I BUILD NEXT
 
-1. **D493 phase 2** — patient mobile written at Apply for patients not in the master; backfill.
-2. **Darpan's claim tab** on Kal ka hisaab (D471).
-3. **Records:** F-450/F-453/F-454 pin rows · F-451 cron (install or retire `clinic_upi_check`) ·
-   F-458 gate improvement · Book v1.1 → v2 when Phase 3 lands.
-4. **Phase 3:** one `sanjeevni.conf` per machine · per-sender tokens · server-side `refused/` + rescan ·
-   OFF switches · spine and attribution on the one-door store · retire manojz senders one at a time
-   after seven clean shadow nights (pull last; Docterz pickup stays) · vendor phone book master on the VPS.
-5. **Phase 4:** Sanjeevni in its own process, same URLs, one lane at a time.
-6. **Later, when you ask:** Docterz clinical report · statement page · loan-restatement row ·
-   actual-paid on the lock.
+1. **The Razorpay / Yes Bank channel** (D507, three steps in `claude/S244_BUILD_BRIEF.md`) — the wallet
+   payments that reach your personal Gmail and settle to Yes Bank, tracked at last.
+2. **At the open:** re-hash `amir_day.py` and `staff_master.csv` on the box (one line in START_HERE §7);
+   if S246 is not installed, its one line.
+3. **When you ask:** Bhati's itemising (lookup, not browse) · the learning step (answered patterns become
+   auto-explanations) · the physiotherapy system (home visits, patients not in Docterz, sessions).
+4. **Carried from S243:** D493 phase 2 · Darpan's claim tab · F-458 gate improvement · F-450/F-453/F-454 pin
+   rows · F-451 cron · Book §11.4 Phase 3, then Phase 4.
 
 ---
 
 ## 🛑 STANDING HOLDS
 
-- ⛔ **D484 — the empty drawer count is not a missed step.** ⛔ **No deterrent text on staff screens**
-  (13-Sep) — the data is the deterrent. ⛔ **No cash↔UPI corrections in Marg** (CA, D492).
-- Apps Script: read, never act (D434). D431 — the two project exports never enter git. Sanjeevni stays
-  in this project · NEFT nothing without your word · secrets never to cloud storage (F-456 is why) ·
-  follow-up tracker stays on your PC (D454) · Attendance and Staff Register held from staff phones
-  (D457) · Marg is never written to.
-- ⭐ D442 your stated record is the authority · F-411 hash before reasoning · F-428 "ready" names the
-  next human step · F-438 a proof asserts exactly what the change claims · F-443 a step that could not
-  run says so by name · F-447 name the resource, not the tool · F-448 run the gate even when you
-  cannot rebuild it · **F-449 exactly one CURRENT per family** · **F-457 read the gate before blaming
-  the key.**
+- ⛔ **A published kit is immutable (F-460).** ⛔ **July 2026 is a test case — never reconciled (D503).**
+  ⛔ **The float is never revenue (D506).** ⛔ **Flags are never deleted — reconciled or cleared by the data
+  (D505).** ⛔ **No cash↔UPI corrections in Marg** (CA, D492). ⛔ **D484 — the empty drawer count is not a
+  missed step.** ⛔ **No deterrent text on staff screens.**
+- Apps Script: read, never act (D434) — the Razorpay relay will be read-only forwarding. D431 — the two
+  project exports never enter git. Sanjeevni stays in this project · NEFT nothing without your word ·
+  secrets never to cloud storage · follow-up tracker stays on your PC (D454) · Attendance held from staff
+  phones (D457; Staff Register now open to its three, D496) · Marg is never written to.
+- ⭐ D442 your stated record is the authority · F-411 hash before reasoning · F-428 "ready" names the next
+  human step · F-438 a proof asserts exactly what the change claims · F-443 a step that could not run says so
+  by name · F-449 exactly one CURRENT per family · F-457 read the gate before blaming the key · **F-463
+  numbers come from the reserved line** · **F-464 every install line carries the pull.**
 
 ---
 
-## ✅ DONE AT THE S243 CLOSE — 13-Sep-2026
+## ✅ DONE AT THE S244 CLOSE — 13-Sep-2026
 
-- ~~**PUBLISH the S242 close**~~ — done 12-Sep 22:51.
-- ~~**Apply the three pending sale reports**~~ — done by you 13-Sep morning; **and Apply is automatic
-  from now (D488).**
-- ~~**The salt-wise list**~~ — refreshed before Amir's visit (63 confirmed); **self-refreshing (D489).**
-- ~~**A8c — the deploy clone pull**~~ — done fourteen times today with every install line.
-- ~~**The VPS residue**~~ — 495 files retired (D485); ~~**the stock defect**~~ — fixed, history repaired
-  (D490); ~~**the finance app under the watchdog**~~; ~~**nightly code copy**~~; ~~**byte-exact live
-  capture**~~; ~~**Darpan's day, Shavez's board, Amir's prompt + your visit summary, the CA change,
-  full numbers on the returns desk, two screen fixes, the Darpan tile**~~ — all live and read back.
+- ~~**Amir's step 4, step 5, the bill list, Din band**~~ — live (S244, S245, S246*).
+- ~~**Alisha's advance in August**~~ — collected on the desk (S247). ~~**Awdhesh and Sandip's raise**~~ — S248.
+- ~~**Staff Register for reception and Shavez**~~ — second chat, S250.
+- ~~**The morning match, other UPI, the float, physiotherapy, Bhati's edge, the owner's line**~~ — S251,
+  reshaped S252 / S253 / S254; ~~**the float issued (₹2,500)**~~; ~~**Saturday's ₹2,050 recorded**~~ by reception.
+- ~~**Two words to staff about Darpan's and Shavez's tiles**~~ — carried into item 2 above with the new tile.
 
-## ✅ DONE AT THE S242 CLOSE — 12-Sep-2026 (retained)
+## ✅ DONE AT THE S243 CLOSE — 13-Sep-2026 (retained)
 
-- ~~Docterz daily collection tile for reception~~ · ~~register opens on today~~ · ~~Amir's tile~~ ·
-  ~~the drawer count ruling~~ · ~~the first register entry~~ · ~~the S241 canon debt~~.
+- ~~the S242 close published~~ · ~~Apply automatic~~ · ~~the salt list self-refreshing~~ · ~~495 residue files
+  retired~~ · ~~the stock defect fixed~~ · ~~the finance app under the watchdog~~ · ~~nightly code copy~~ ·
+  ~~Darpan's day, Shavez's board, Amir's prompt, the CA change, full numbers, two screen fixes~~.
