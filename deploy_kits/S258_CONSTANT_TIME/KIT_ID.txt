@@ -1,0 +1,9 @@
+S258_CONSTANT_TIME
+/root/finance/finance_app.py  1fc62335f085b4cb4a634bbe9cca96c4 -> a4201e9fc52c25528ba3b92db403101f  (patched on the box; predicted offline from the S255 capture)
+/root/finance/stock_app.py    aa6d9cd9afbe5c7a2e44315678f58de3 -> 8615d64dbeda516e6efb6f025ec777b3
+/root/finance/purchase_app.py ad1fc00466458897751df7c9e9fcb99d -> 52550e63e7fdffc186de4fcd4f93717b
+Purpose (Club C.1, F-470): all nine machine-door token checks (7 in finance_app, 1 stock, 1 purchase)
+compared with == / != -- the plain compare leaks timing. Each becomes hmac.compare_digest through one
+helper _tok_ok(). Identical answers for every real request; an EMPTY expected token never matches
+(before, a missing token and a missing header could compare equal on the two != sites). No route,
+role, token value or table changes. First kit built from the S255 exact-bytes capture of the monolith.

@@ -1,0 +1,173 @@
+EVIDENCE_S258.txt -- S258_CONSTANT_TIME -- built 2026-09-13T23:29:33Z in container
+
+## 1. Bases = live pins
+1fc62335f085b4cb4a634bbe9cca96c4  _base_fa.py
+aa6d9cd9afbe5c7a2e44315678f58de3  _base_st.py
+ad1fc00466458897751df7c9e9fcb99d  _base_pu.py
+finance_app.py base = the S255 private capture (VPS_finance_2026-09-13_S255.zip), byte-exact live
+
+## 2. Predicted outputs
+a4201e9fc52c25528ba3b92db403101f  _pred_finance_app.py
+8615d64dbeda516e6efb6f025ec777b3  stock_app.py
+52550e63e7fdffc186de4fcd4f93717b  purchase_app.py
+
+## 3. Diff finance_app.py (base -> predicted)
+37a38,46
+> import hmac                                            # S258
+> 
+> 
+> def _tok_ok(given, expected):
+>     """S258: constant-time token compare (F-470). False when either side is empty."""
+>     try:
+>         return bool(expected) and bool(given) and hmac.compare_digest(str(given), str(expected))
+>     except Exception:                                  # noqa: BLE001
+>         return False
+261c270
+<     if CRON_TOKEN and request.headers.get("X-Finance-Cron") == CRON_TOKEN:
+---
+>     if _tok_ok(request.headers.get("X-Finance-Cron"), CRON_TOKEN):              # S258
+278c287
+<             and request.headers.get("X-Finance-Marg") == MARG_TOKEN:
+---
+>             and _tok_ok(request.headers.get("X-Finance-Marg"), MARG_TOKEN):      # S258
+287c296
+<             and request.headers.get("X-Finance-Renewals") == RENEWALS_TOKEN:
+---
+>             and _tok_ok(request.headers.get("X-Finance-Renewals"), RENEWALS_TOKEN):  # S258
+2334c2343
+<     is_cron = bool(CRON_TOKEN and request.headers.get("X-Finance-Cron") == CRON_TOKEN)
+---
+>     is_cron = _tok_ok(request.headers.get("X-Finance-Cron"), CRON_TOKEN)         # S258
+3254c3263
+<     if request.headers.get("X-Finance-Marg") != MARG_TOKEN:
+---
+>     if not _tok_ok(request.headers.get("X-Finance-Marg"), MARG_TOKEN):          # S258
+5318c5327
+<     if request.headers.get("X-Finance-Marg", "") != tok:
+---
+>     if not _tok_ok(request.headers.get("X-Finance-Marg", ""), tok):             # S258
+7556c7565
+<     is_cron = bool(CRON_TOKEN and request.headers.get("X-Finance-Cron") == CRON_TOKEN)
+---
+>     is_cron = _tok_ok(request.headers.get("X-Finance-Cron"), CRON_TOKEN)         # S258
+11542c11551
+<     if request.headers.get("X-Finance-Renewals") != RENEWALS_TOKEN:
+---
+>     if not _tok_ok(request.headers.get("X-Finance-Renewals"), RENEWALS_TOKEN):  # S258
+
+## 4. Diff stock_app.py
+51a52,60
+> import hmac                                            # S258
+> 
+> 
+> def _tok_ok(given, expected):
+>     """S258: constant-time token compare (F-470). False when either side is empty."""
+>     try:
+>         return bool(expected) and bool(given) and hmac.compare_digest(str(given), str(expected))
+>     except Exception:                                  # noqa: BLE001
+>         return False
+815c824
+<     if _marg_token and request.headers.get("X-Finance-Marg") == _marg_token:
+---
+>     if _tok_ok(request.headers.get("X-Finance-Marg"), _marg_token):             # S258
+
+## 5. Diff purchase_app.py
+112a113,121
+> import hmac                                            # S258
+> 
+> 
+> def _tok_ok(given, expected):
+>     """S258: constant-time token compare (F-470). False when either side is empty."""
+>     try:
+>         return bool(expected) and bool(given) and hmac.compare_digest(str(given), str(expected))
+>     except Exception:                                  # noqa: BLE001
+>         return False
+221c230
+<     if _marg_token and request.headers.get("X-Finance-Marg") == _marg_token:
+---
+>     if _tok_ok(request.headers.get("X-Finance-Marg"), _marg_token):             # S258
+
+## 6. Selftest
+PASS  given='xxxxxx' -> True (old shapes agree)
+PASS  given='wrong' -> False (old shapes agree)
+PASS  given='' -> False (old shapes agree)
+PASS  given='' -> False (old shapes agree)
+PASS  given='xxxxxx' -> False (old shapes agree)
+PASS  given='xxxxxx' -> False (old shapes agree)
+PASS  empty expected token never matches (stricter than the old `!=` shape)
+PASS  non-string given handled without raising
+PASS  _pred_finance_app.py: no plain token compare left
+PASS  _pred_finance_app.py: 8 call site(s) + 1 definition
+PASS  _pred_finance_app.py: hmac imported once
+PASS  stock_app.py: no plain token compare left
+PASS  stock_app.py: 1 call site(s) + 1 definition
+PASS  stock_app.py: hmac imported once
+PASS  purchase_app.py: no plain token compare left
+PASS  purchase_app.py: 1 call site(s) + 1 definition
+PASS  purchase_app.py: hmac imported once
+
+17 passed, 0 failed
+
+## 7. TEST A clean install
+== S258_CONSTANT_TIME installer ==
+target : /tmp/m258/finance
+python : /usr/bin/python3
+finance_app.py  : from 1fc62335f085b4cb4a634bbe9cca96c4 -> to a4201e9fc52c25528ba3b92db403101f ; live 1fc62335f085b4cb4a634bbe9cca96c4
+stock_app.py    : from aa6d9cd9afbe5c7a2e44315678f58de3 -> to 8615d64dbeda516e6efb6f025ec777b3 ; live aa6d9cd9afbe5c7a2e44315678f58de3
+purchase_app.py : from ad1fc00466458897751df7c9e9fcb99d -> to 52550e63e7fdffc186de4fcd4f93717b ; live ad1fc00466458897751df7c9e9fcb99d
+backup : /tmp/m258/finance/finance_app.py.bak_S258_1fc62335
+backup : /tmp/m258/finance/stock_app.py.bak_S258_aa6d9cd9
+backup : /tmp/m258/finance/purchase_app.py.bak_S258_ad1fc004
+fa: anchors applied: 8
+smoke  : py_compile OK
+smoke  : SMOKE_OK no plain token compare left in any of the three
+md5sum of installed files:
+a4201e9fc52c25528ba3b92db403101f  /tmp/m258/finance/finance_app.py
+8615d64dbeda516e6efb6f025ec777b3  /tmp/m258/finance/stock_app.py
+52550e63e7fdffc186de4fcd4f93717b  /tmp/m258/finance/purchase_app.py
+S258_CONSTANT_TIME: DONE
+proof  : within 10 minutes the pipeline page should show a fresh manojz heartbeat and medical push -- both doors now answer through the new compare.
+exit=0
+
+## 8. TEST B rerun
+== S258_CONSTANT_TIME installer ==
+target : /tmp/m258/finance
+python : /usr/bin/python3
+finance_app.py  : from 1fc62335f085b4cb4a634bbe9cca96c4 -> to a4201e9fc52c25528ba3b92db403101f ; live a4201e9fc52c25528ba3b92db403101f
+stock_app.py    : from aa6d9cd9afbe5c7a2e44315678f58de3 -> to 8615d64dbeda516e6efb6f025ec777b3 ; live 8615d64dbeda516e6efb6f025ec777b3
+purchase_app.py : from ad1fc00466458897751df7c9e9fcb99d -> to 52550e63e7fdffc186de4fcd4f93717b ; live 52550e63e7fdffc186de4fcd4f93717b
+ALREADY INSTALLED (all three live md5 == to-pin).
+exit=0
+
+## 9. TEST C wrong base
+== S258_CONSTANT_TIME installer ==
+target : /tmp/m258c/finance
+python : /usr/bin/python3
+finance_app.py  : from 1fc62335f085b4cb4a634bbe9cca96c4 -> to a4201e9fc52c25528ba3b92db403101f ; live 1fc62335f085b4cb4a634bbe9cca96c4
+stock_app.py    : from aa6d9cd9afbe5c7a2e44315678f58de3 -> to 8615d64dbeda516e6efb6f025ec777b3 ; live 401b30e3b8b5d629635a5c613cdb7919
+purchase_app.py : from ad1fc00466458897751df7c9e9fcb99d -> to 52550e63e7fdffc186de4fcd4f93717b ; live ad1fc00466458897751df7c9e9fcb99d
+REFUSED: stock_app.py is 401b30e3b8b5d629635a5c613cdb7919, expected aa6d9cd9afbe5c7a2e44315678f58de3
+exit=1 (refusal expected)
+1fc62335f085b4cb4a634bbe9cca96c4  /tmp/m258c/finance/finance_app.py
+
+## 10. TEST D forced failure -> all three restored
+== S258_CONSTANT_TIME installer ==
+target : /tmp/m258d/finance
+python : /usr/bin/python3
+finance_app.py  : from 1fc62335f085b4cb4a634bbe9cca96c4 -> to a4201e9fc52c25528ba3b92db403101f ; live 1fc62335f085b4cb4a634bbe9cca96c4
+stock_app.py    : from aa6d9cd9afbe5c7a2e44315678f58de3 -> to 8615d64dbeda516e6efb6f025ec777b3 ; live aa6d9cd9afbe5c7a2e44315678f58de3
+purchase_app.py : from ad1fc00466458897751df7c9e9fcb99d -> to 52550e63e7fdffc186de4fcd4f93717b ; live ad1fc00466458897751df7c9e9fcb99d
+backup : /tmp/m258d/finance/finance_app.py.bak_S258_1fc62335
+backup : /tmp/m258d/finance/stock_app.py.bak_S258_aa6d9cd9
+backup : /tmp/m258d/finance/purchase_app.py.bak_S258_ad1fc004
+fa: anchors applied: 8
+smoke  : py_compile OK
+smoke  : FORCED FAILURE
+!! restoring all three byte-identically
+1fc62335f085b4cb4a634bbe9cca96c4  /tmp/m258d/finance/finance_app.py
+aa6d9cd9afbe5c7a2e44315678f58de3  /tmp/m258d/finance/stock_app.py
+ad1fc00466458897751df7c9e9fcb99d  /tmp/m258d/finance/purchase_app.py
+exit=1 (rollback expected)
+1fc62335f085b4cb4a634bbe9cca96c4  /tmp/m258d/finance/finance_app.py
+aa6d9cd9afbe5c7a2e44315678f58de3  /tmp/m258d/finance/stock_app.py
+ad1fc00466458897751df7c9e9fcb99d  /tmp/m258d/finance/purchase_app.py

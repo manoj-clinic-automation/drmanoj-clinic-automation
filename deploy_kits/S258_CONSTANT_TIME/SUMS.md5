@@ -1,0 +1,8 @@
+35a7211ed724af737fbbffade88c1899  ./EVIDENCE_S258.txt
+c9265d3f5a9136f6176b5fbd3612f46a  ./KIT_ID.txt
+f0e36507a5d5c41e56c10df836fcbe1d  ./README.md
+3db43f4f0b5817ac5a148d13dcd9e49c  ./install_S258_CONSTANT_TIME.sh
+d2c3f5ce7b77730f6532ce3c57558932  ./patch_compare_s258.py
+52550e63e7fdffc186de4fcd4f93717b  ./purchase_app.py
+171ee65def5391b1f7a7eceebbc8d710  ./selftest_compare_s258.py
+8615d64dbeda516e6efb6f025ec777b3  ./stock_app.py
