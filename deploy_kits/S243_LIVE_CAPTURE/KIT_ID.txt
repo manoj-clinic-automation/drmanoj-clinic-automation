@@ -1,0 +1,8 @@
+S243_LIVE_CAPTURE f002defb9f4a5d35028c051462225def
+Records only. LIVE_MANIFEST_2026-09-13.md5 = md5 of every live code file on the VPS as shipped by
+/root/state_backup/code_bundle.py at 13-Sep-2026 07:19 IST (bundle md5 c25992d95d8d138cf941304b0fcc15ad,
+215 files). The byte-exact files are NOT in this public repository (the publish gate refuses two of them
+on number-shaped text, and two carry live secrets). They are held privately at
+D:\Downloads\ClaudeCowork\02_SESSION_KITS\S243_LIVE_CAPTURE_2026-09-13_private.zip and on F:\ClinicBackup,
+minus portal_config.py / att_config.py / *.conf which stay on the VPS only.
+From this point /root/finance/finance_app.py (f002defb) is rebuildable from a byte-exact copy.

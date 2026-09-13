@@ -1,6 +1,6 @@
 # S243_CODE_BUNDLE -- the live code gets a nightly off-box copy
 
-**Built at Session 243, 12-Sep-2026.**
+**Built at Session 243, 12-Sep-2026. v1.1 on 13-Sep-2026 after the first live bundle was inspected -- see "The 07:19 finding".**
 
 ## The gap this closes
 
@@ -35,7 +35,7 @@ once from the owner's account; the job then overwrites its content forever.
 
 ## What goes in, what never does
 
-Included: `/root/finance` (py sql html sh conf) and `finance_ui/*.html`;
+Included: `/root/finance` (py sql html sh) and `finance_ui/*.html`;
 `/root/portal` (py html json, minus any name containing `users` or `secret`);
 `/root/marg_ingest` (py json) and everything under `lib/`; `/root/wa/*.py`,
 `call-hook/*.py`, `recordings-archive/*.py`; `/root/staff_register` (py json,
@@ -43,9 +43,27 @@ minus names containing `settings` or `advances`); `/root/staff_ledger_reconcile/
 `/root/state_backup/*.py`; `/root/*.py`; the `clinic-*`, `wa-*`, `call-*`
 systemd units; the root crontab as `crontab.txt`.
 
-Never, whatever the pattern said: `.env*`, `*.env`, `*.db*`, `*.log`, `*.bak*`,
-`token*`, `*key*.json`, `patient_fp.env`, and any path through `_retired*`,
-`__pycache__`, `backups`, `deploy`. The excludes run after the includes.
+Never, whatever the pattern said: `.env*`, `*.env`, `*.conf`, `*.db*`, `*.log`,
+`*.bak*`, `token*`, `*key*.json`, `patient_fp.env`, `*config*.py`, `*_config.py`,
+and any path through `_retired*`, `__pycache__`, `backups`, `deploy`. The
+excludes run after the includes.
+
+And, by CONTENT: every candidate file is read; a line assigning a quoted
+literal of eight or more characters to a name containing PASS, PASSWORD,
+SECRET, TOKEN, SEED, SALT, API_KEY or PRIVATE excludes that whole file. The
+summary line names each one: `excluded_secret=N (basenames)`. A name read
+from the environment (`SECRET_KEY = os.environ[...]`) does not match.
+
+## The 07:19 finding (why v1.1)
+
+The first live bundle, shipped 07:19 on 13-Sep-2026, was opened and read. It
+carried `root/portal/portal_config.py` (token seed, SSO secret, an auth token,
+PIN hash and salt as literals), `root/att_config.py` (a dashboard password,
+an SMTP password, a secret key) and `root/finance/freshness.conf` (a live
+ntfy topic). Standing hold: secrets never go to cloud storage. v1.1 adds the
+three walls above; the selftest now carries a decoy of each class and proves
+them absent. The 07:19 revision on Drive should be treated as exposed until
+the owner overwrites it (the next `run`) and rotates what it held.
 
 ## Install (one line, on the VPS, after PUBLISH + deploy pull)
 
@@ -68,7 +86,7 @@ restarted.
 Lists the Drive folder, says whether the slot `code_nightly.tar.gz` is present
 and how many revisions it holds, and the age of the local copy.
 
-## The slot — DONE at S243 (13-Sep-2026 01:06 IST)
+## The slot -- DONE at S243 (13-Sep-2026 01:06 IST)
 
 `code_nightly.tar.gz` was created by the assistant through the owner's Drive
 connector (owner `drmka.ortho`, 219-byte placeholder) in the same folder as
@@ -80,7 +98,7 @@ overwrites it. If `list` ever says MISSING again, re-create it the same way.
 | file | role |
 |---|---|
 | `code_bundle.py` | the whole job: `build` / `run` / `list` |
-| `selftest_code_bundle_s243.py` | `build` against a mock tree with forty decoys; asserts every decoy absent, every wanted file present, the manifest verifies, the refusal without `finance_app.py` |
+| `selftest_code_bundle_s243.py` | `build` against a mock tree with forty-six decoys (name and content); asserts every decoy absent, every wanted file present, the manifest verifies, the refusal without `finance_app.py` |
 | `install_S243_CODE_BUNDLE.sh` | the installer; honours `ROOT` and `PY` for tests |
 | `EVIDENCE_S243.txt` | selftest and mock-installer transcripts from the build container |
 | `KIT_ID.txt` | kit name and payload md5 (F-88) |
@@ -94,9 +112,13 @@ the file you need. Members are rooted at `/` (`root/finance/finance_app.py`).
 
 ## Known limits, stated plainly
 
-- The bundle is not encrypted. It carries code and configuration, not patient
-  data; the same trust domain as the S213 db.gz and the clinic CSVs. The
-  `drive_backup.conf` it carries names a key path and a folder id, not a key.
+- The bundle is not encrypted. It carries code, not patient data and (from
+  v1.1) not configuration secrets; the same trust domain as the S213 db.gz.
+- The content scan is deliberately blunt: a code file that assigns a long
+  quoted literal to a name merely containing `token` (a field name, say) is
+  excluded too, and named in the summary. Read the summary after the first
+  live run; a false exclusion is repaired by renaming the variable, never by
+  loosening the scan.
 - Drive's revision window (~30 days) is Google's behaviour, not a contract.
   The local copy is overwritten nightly; there is no on-box history by design
   (the repository is the history of intent, the bundle is the history of fact).

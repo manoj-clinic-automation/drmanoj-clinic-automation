@@ -1,2 +1,2 @@
-S243_CODE_BUNDLE c1cce2c326b452fc708996f429e9961d
-S243 -- nightly off-box copy of the live code (code_nightly.tar.gz into the FinanceDB_Backups Drive folder, next to finance_nightly.db.gz). NEW /root/state_backup/code_bundle.py + one cron line 01:35. Nothing replaced, nothing restarted.
+S243_CODE_BUNDLE a96f13c0b3b8e792c8829ae90469f932
+S243 v1.1 -- nightly off-box copy of the live code (code_nightly.tar.gz into the FinanceDB_Backups Drive folder, next to finance_nightly.db.gz). NEW /root/state_backup/code_bundle.py + one cron line 01:35. Nothing replaced, nothing restarted. v1.1: *config*.py, *.conf and any file with a literal secret assignment are excluded (07:19 finding).

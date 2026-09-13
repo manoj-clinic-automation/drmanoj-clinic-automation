@@ -1,6 +1,6 @@
 #!/root/wa/venv/bin/python3
 # =============================================================================
-#  code_bundle.py  .  Session 243  .  S243_CODE_BUNDLE  .  v1
+#  code_bundle.py  .  Session 243  .  S243_CODE_BUNDLE  .  v1.1
 #
 #  THE OFF-BOX LEG OF THE LIVE CODE.
 #
@@ -15,10 +15,24 @@
 #
 #  WHAT IS TAKEN (see SOURCES below): code, templates, SQL, shell, unit files
 #  and the root crontab. WHAT IS NEVER TAKEN (HARD_EXCLUDES / EXCLUDE_DIRS):
-#  any .env, any database, any log, any .bak, any token or key json, the
-#  portal user file (password hashes), the staff settings/advances files,
-#  anything under _retired / __pycache__ / backups / deploy. The excludes are
-#  applied AFTER the include patterns, so a pattern can never pull a secret in.
+#  any .env, any .conf, any database, any log, any .bak, any token or key
+#  json, any *config*.py, the portal user file (password hashes), the staff
+#  settings/advances files, anything under _retired / __pycache__ / backups /
+#  deploy. The excludes are applied AFTER the include patterns, so a pattern
+#  can never pull a secret in.
+#
+#  v1.1 (S243, after the first live bundle of 07:19 was inspected): that bundle
+#  carried portal_config.py, att_config.py and freshness.conf -- literal
+#  passwords, tokens, seeds, salts and a live ntfy topic. Standing hold:
+#  SECRETS NEVER GO TO CLOUD STORAGE. So, three new walls:
+#    * *config*.py and *_config.py are hard-excluded by name
+#    * *.conf are no longer a source at all (this script reads its own conf
+#      from disk; it never needed to ship it)
+#    * EVERY candidate file is read and scanned: a line that assigns a quoted
+#      literal of 8+ characters to a name containing PASS / PASSWORD / SECRET /
+#      TOKEN / SEED / SALT / API_KEY / PRIVATE excludes the whole file, and the
+#      SUMMARY names it (excluded_secret=N (basenames)). A name read from the
+#      environment does not match; only a literal does.
 #
 #  The Drive half is REUSED from finance_drive_backup.py (S213 v2, pin
 #  14b406773de7f196abb105114f346080): load_conf, find_sa_json, make_session,
@@ -55,6 +69,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -83,7 +98,7 @@ OUT_PATH  = os.path.join(OUT_DIR, SLOT)
 # --- what goes in: (directory relative to ROOT, name patterns, recurse,
 #     substrings that exclude a file name inside THAT directory) -------------
 SOURCES = [
-    ("root/finance",                 ("*.py", "*.sql", "*.html", "*.sh", "*.conf"), False, ()),
+    ("root/finance",                 ("*.py", "*.sql", "*.html", "*.sh"),           False, ()),
     ("root/finance/finance_ui",      ("*.html",),                                    False, ()),
     ("root/portal",                  ("*.py", "*.html", "*.json"),                   False, ("users", "secret")),
     ("root/marg_ingest",             ("*.py", "*.json"),                             False, ()),
@@ -100,8 +115,13 @@ SOURCES = [
 ]
 
 # --- what never goes in, whatever the pattern said (fnmatch on the file name)
-HARD_EXCLUDES = (".env*", "*.env", "*.db*", "*.log", "*.bak*", "token*",
-                 "*key*.json", "patient_fp.env")
+HARD_EXCLUDES = (".env*", "*.env", "*.conf", "*.db*", "*.log", "*.bak*", "token*",
+                 "*key*.json", "patient_fp.env", "*config*.py", "*_config.py")
+# --- a line that assigns a quoted literal to a secret-shaped name excludes
+#     the whole file (v1.1). Case-insensitive on the name.
+SECRET_LINE = re.compile(
+    r'^\s*[A-Za-z_]*(PASS|PASSWORD|SECRET|TOKEN|SEED|SALT|API_KEY|PRIVATE)[A-Za-z_]*'
+    r'\s*=\s*["\'][^"\']{8,}["\']', re.IGNORECASE)
 # --- a path component that disqualifies the whole path
 EXCLUDE_DIRS = ("_retired", "_retired_*", "__pycache__", "backups", "deploy")
 
@@ -257,6 +277,19 @@ def _path_excluded(rel):
                 return True
     return False
 
+def has_secret_literal(path):
+    """True when any line of the file assigns a quoted literal to a
+    secret-shaped name. Read as text with replacement; binaries simply
+    do not match."""
+    try:
+        with open(path, "r", encoding="utf-8", errors="replace") as f:
+            for line in f:
+                if SECRET_LINE.match(line):
+                    return True
+    except OSError:
+        return True      # unreadable: treat as unsafe, leave it out
+    return False
+
 def _wanted(name, patterns, subs):
     if not any(fnmatch.fnmatch(name, p) for p in patterns):
         return False
@@ -269,6 +302,7 @@ def gather():
     an include pattern is still dropped."""
     seen = {}
     skipped_secret = 0
+    content_hits = []
     for d, patterns, recurse, subs in SOURCES:
         base = under_root(d)
         if not os.path.isdir(base):
@@ -290,8 +324,12 @@ def gather():
                 if _name_excluded(name) or _path_excluded(rel):
                     skipped_secret += 1
                     continue
+                if has_secret_literal(ap):
+                    content_hits.append(name)
+                    log("EXCLUDED (secret literal in content):", "/" + rel)
+                    continue
                 seen[rel] = ap
-    return sorted(seen.items()), skipped_secret
+    return sorted(seen.items()), skipped_secret, sorted(content_hits)
 
 def capture_crontab():
     """The root crontab as text; a note instead of a failure when there is
@@ -308,7 +346,7 @@ def capture_crontab():
 def build():
     """Build the tarball into OUT_PATH (atomic replace), verify it against its
     own manifest, print the summary. Returns (path, summary dict)."""
-    files, skipped = gather()
+    files, skipped, content_hits = gather()
     if not files:
         die(20, "nothing gathered under", ROOT, "-- refusing to write an empty bundle")
     rels = [r for r, _ in files]
@@ -371,11 +409,12 @@ def build():
 
     summary = {"files": len(files), "content_bytes": content_bytes,
                "tar_bytes": os.path.getsize(OUT_PATH), "tar_md5": md5_file(OUT_PATH),
-               "finance_app_md5": key_md5, "skipped_by_exclude": skipped}
+               "finance_app_md5": key_md5, "skipped_by_exclude": skipped,
+               "excluded_secret": content_hits}
     log("SUMMARY files=%d content_bytes=%d tar_bytes=%d finance_app.py md5 %s"
-        " excluded_by_rule=%d -> %s"
+        " excluded_by_rule=%d excluded_secret=%d (%s) -> %s"
         % (summary["files"], content_bytes, summary["tar_bytes"], key_md5,
-           skipped, OUT_PATH))
+           skipped, len(content_hits), ", ".join(content_hits) or "-", OUT_PATH))
     return OUT_PATH, summary
 
 def verify_tarball(path):
