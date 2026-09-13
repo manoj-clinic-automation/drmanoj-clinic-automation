@@ -14,7 +14,7 @@ Designed to run ON THE BOX against the live file, which is not in the repository
         writes FA_PATH.new  (never the live file itself)
         prints the md5 before and after
 
-Refuses unless (a) the live md5 starts with the S240-close pin 81db4854 and
+Refuses unless (a) the live md5 starts with the S243_AUTOAPPLY pin f002defb and
 (b) the anchor occurs exactly once in the live bytes. Prints ALREADY PATCHED and
 exits 0 when the marker is already present.
 """
@@ -24,7 +24,7 @@ import os
 import sys
 
 TARGET = os.environ.get("FA_PATH", "/root/finance/finance_app.py")
-FROM_PIN8 = os.environ.get("FA_FROM_PIN8", "81db4854")     # 8-char pin, read back at the S240 install
+FROM_PIN8 = os.environ.get("FA_FROM_PIN8", "f002defb")     # S243_AUTOAPPLY pin, 13-Sep (history 81db4854 -> 72bc8323 -> f002defb)
 MARK = "S243: a checker (the doctor) lands on his Review console"
 
 OLD = ('    u, err = require("maker")\n'

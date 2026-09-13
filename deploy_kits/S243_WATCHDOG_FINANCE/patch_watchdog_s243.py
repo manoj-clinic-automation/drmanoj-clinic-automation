@@ -2,22 +2,22 @@
 # -*- coding: utf-8 -*-
 """
 patch_watchdog_s243.py -- S243_WATCHDOG_FINANCE
-Reads the S204 base copy of /root/wa/clinic_watchdog.py (byte-identical to the
-live pin 01ca6591...) and adds THREE units to the SERVICES list:
+Reads the live copy (followup-vps, S231/F-358 ntfy-from-.env build) of /root/wa/clinic_watchdog.py (byte-identical to the
+live md5 389afcfe... (pin-list row 01ca6591 was STALE, F-454 candidate)) and adds THREE units to the SERVICES list:
   clinic-finance.service, staff-register.service, assetapp.service
 Nothing else changes. The watchdog's only check is `systemctl is-active`;
 it has no HTTP-probe framework, so none is invented (see README).
 
 Usage:  python3 patch_watchdog_s243.py [BASE] [OUT]
-  BASE default: /tmp/kbv/deploy_kits/S204_VPS_LIVE/root__wa__clinic_watchdog.py
+  BASE default: /tmp/kbv/followup-vps/clinic_watchdog.py
   OUT  default: ./clinic_watchdog.py
 """
 import sys, hashlib, os
 
-BASE = sys.argv[1] if len(sys.argv) > 1 else "/tmp/kbv/deploy_kits/S204_VPS_LIVE/root__wa__clinic_watchdog.py"
+BASE = sys.argv[1] if len(sys.argv) > 1 else "/tmp/kbv/followup-vps/clinic_watchdog.py"
 OUT  = sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "clinic_watchdog.py")
 
-EXPECTED_BASE_MD5 = "01ca6591a74ec8009bf9748fb7f480c2"
+EXPECTED_BASE_MD5 = "389afcfe318c1618ad87349aa9695e22"
 
 def md5(b):
     return hashlib.md5(b).hexdigest()

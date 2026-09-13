@@ -13,7 +13,7 @@ import sys, ast, os, difflib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 NEW  = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "clinic_watchdog.py")
-BASE = sys.argv[2] if len(sys.argv) > 2 else "/tmp/kbv/deploy_kits/S204_VPS_LIVE/root__wa__clinic_watchdog.py"
+BASE = sys.argv[2] if len(sys.argv) > 2 else "/tmp/kbv/followup-vps/clinic_watchdog.py"
 
 ORIGINAL_11 = [
     "wa-receiver.service", "wa-send-api.service", "wa-notifier.service",

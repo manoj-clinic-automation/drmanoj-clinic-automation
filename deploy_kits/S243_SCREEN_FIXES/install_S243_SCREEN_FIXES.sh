@@ -14,7 +14,7 @@
 #
 #  Gates: SUMS + KIT_ID -> live pins are the ones this kit was built on -> .bak_S243_<pin8>
 #  of both -> place -> py_compile both -> import smoke with the unit's own environment ->
-#  restart -> healthz within 20 s. Any RED after placing: both files restored, service
+#  restart -> healthz within 20 s. finance_app.py from-pin: f002defb (S243_AUTOAPPLY, installed 13-Sep). Any RED after placing: both files restored, service
 #  restarted if it was restarted, exit 1. Re-run when already installed: ALREADY INSTALLED.
 #
 #  ROOT=<dir> prefixes every absolute path (mock test only). MOCK_FA_PIN8 / PY / PY_SMOKE /
@@ -33,7 +33,7 @@ HZ_URL="http://127.0.0.1:8106/finance/healthz"
 
 PA_FROM="8090ca2041574e25be39682dd5555ffe"      # purchase_app.py rev 13, S240_SANJEEVNI_123
 PA_TO="$(awk 'NR==1{print $2}' "$KDIR/KIT_ID.txt")"
-FA_FROM_PIN8_LIST="${MOCK_FA_PIN8:-81db4854 72bc8323}"   # S240 close pin; S241 mount pin (see README)
+FA_FROM_PIN8_LIST="${MOCK_FA_PIN8:-f002defb}"   # S243_AUTOAPPLY pin (13-Sep); history 81db4854 (S240) -> 72bc8323 (S241) -> f002defb
 FA_MARK="S243: a checker (the doctor) lands on his Review console"
 
 # python for py_compile: the venv first (house rule), /usr/bin/python3 as the fallback

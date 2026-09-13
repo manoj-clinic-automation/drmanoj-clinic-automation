@@ -1,5 +1,6 @@
-S243_WATCHDOG_FINANCE 00567d696b391f38f4f15499a0ade02e
-/root/wa/clinic_watchdog.py 01ca6591a74ec8009bf9748fb7f480c2 -> 00567d696b391f38f4f15499a0ade02e
+S243_WATCHDOG_FINANCE 35e406261f27b2b0845911ee6382bb3d
+/root/wa/clinic_watchdog.py 389afcfe318c1618ad87349aa9695e22 -> 35e406261f27b2b0845911ee6382bb3d
 Purpose: add clinic-finance.service (8106), staff-register.service (8044) and assetapp.service (8030)
 to the VPS watchdog's SERVICES guard list (11 -> 14 units). Liveness only via systemctl is-active,
 exactly as the file already works; no probe framework invented; nothing else changed.
+Base = live copy /tmp/kbv/followup-vps/clinic_watchdog.py (pin-list row 01ca6591 was stale: F-454 candidate).

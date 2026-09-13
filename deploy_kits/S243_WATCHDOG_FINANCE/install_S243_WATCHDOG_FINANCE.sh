@@ -18,8 +18,8 @@ KIT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TARGET="$ROOT/wa/clinic_watchdog.py"
 NEWFILE="$KIT_DIR/clinic_watchdog.py"
 
-FROM_MD5="01ca6591a74ec8009bf9748fb7f480c2"
-TO_MD5="00567d696b391f38f4f15499a0ade02e"
+FROM_MD5="389afcfe318c1618ad87349aa9695e22"
+TO_MD5="35e406261f27b2b0845911ee6382bb3d"
 FROM8="${FROM_MD5:0:8}"
 BAK="$TARGET.bak_S243_$FROM8"
 

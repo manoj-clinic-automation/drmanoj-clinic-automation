@@ -133,3 +133,141 @@ md5sum: /tmp/mock_wd/root/wa/__pycache__: Is a directory
 ## 8. Note on smoke
 clinic_watchdog.py has no dry/check mode: a real run calls systemctl and may push an ntfy
 alert. Smoke is therefore py_compile + an import-only load asserting 14 units. Stated in README.
+
+==================================================================================
+## 9. REBASE 2026-09-13T01:45:12Z -- stale pin (F-454 candidate)
+Installer REFUSED on the VPS: live /root/wa/clinic_watchdog.py md5 = 389afcfe318c1618ad87349aa9695e22,
+but live_pins_S242close.txt row 303 says 01ca6591 (S156 build). The pin row is STALE.
+Byte-identical live copy: /tmp/kbv/followup-vps/clinic_watchdog.py
+389afcfe318c1618ad87349aa9695e22  /tmp/kbv/followup-vps/clinic_watchdog.py
+Drift S204 -> live (diff): only the S231/F-358 change -- NTFY_TOPIC_URL now read from
+/root/wa/.env via _ntfy_url_from_env_file(); hard-coded topic removed. SERVICES list identical (11 units).
+Sections 1-8 above are SUPERSEDED (they were built on the S204 copy, to-pin 00567d69...).
+
+## 10. Patcher re-run on live copy
+base : 389afcfe318c1618ad87349aa9695e22  /tmp/kbv/followup-vps/clinic_watchdog.py
+new  : 35e406261f27b2b0845911ee6382bb3d  /home/claude/S243/S243_WATCHDOG_FINANCE/clinic_watchdog.py
+
+## 11. Diff live -> new
+80a81,84
+>     # S243: three web apps added to the guard (finance / register / asset). Liveness only.
+>     ("clinic-finance.service",           "Clinic finance app (port 8106)",   "systemctl restart clinic-finance"),
+>     ("staff-register.service",           "Staff register app (port 8044)",   "systemctl restart staff-register"),
+>     ("assetapp.service",                 "Asset register app (port 8030)",   "systemctl restart assetapp"),
+
+## 12. py_compile
+py_compile OK
+
+## 13. Selftest on live base
+PASS  SERVICES has 14 entries (got 14)
+PASS  every entry is a (unit, label, fix) tuple of strings
+PASS  original unit present once: wa-receiver.service
+PASS  original unit present once: wa-send-api.service
+PASS  original unit present once: wa-notifier.service
+PASS  original unit present once: call-api.service
+PASS  original unit present once: call-hook.service
+PASS  original unit present once: clinic-portal.service
+PASS  original unit present once: gutlog.service
+PASS  original unit present once: clinic-followup-receiver.service
+PASS  original unit present once: attendance-dashboard.service
+PASS  original unit present once: attlistener.service
+PASS  original unit present once: staff-ledger.service
+PASS  new unit present once: clinic-finance.service
+PASS  new unit present once: staff-register.service
+PASS  new unit present once: assetapp.service
+PASS  original 11 keep their order at the top of the list
+PASS  no duplicate units
+PASS  no lines removed versus base (removed=0)
+PASS  exactly 4 lines added versus base (added=4)
+PASS  every added line is the S243 comment or one of the 3 new units
+PASS  LF line endings
+RESULT: OK (0 failures)
+
+## 14. Installer static checks
+bash -n OK
+21:FROM_MD5="389afcfe318c1618ad87349aa9695e22"
+22:TO_MD5="35e406261f27b2b0845911ee6382bb3d"
+ASCII-only OK
+LF OK: clinic_watchdog.py
+LF OK: patch_watchdog_s243.py
+LF OK: selftest_watchdog_s243.py
+LF OK: install_S243_WATCHDOG_FINANCE.sh
+LF OK: README.md
+LF OK: EVIDENCE_S243.txt
+LF OK: KIT_ID.txt
+
+## 15. Mock end-to-end, live base (ROOT=/tmp/mock_wd/root)
+### TEST A: wrong pin (tampered) -> must REFUSE, exit 1
+== S243_WATCHDOG_FINANCE installer ==
+target : /tmp/mock_wd/root/wa/clinic_watchdog.py
+python : /usr/bin/python3
+from   : 389afcfe318c1618ad87349aa9695e22
+to     : 35e406261f27b2b0845911ee6382bb3d
+live   : b06c4a97b1bd7caecf9ce099581db430
+REFUSED: live md5 is neither the from-pin nor the to-pin. Not touching the file.
+exit=1
+
+### TEST A2: stale S204 copy (01ca6591) as live -> must REFUSE, exit 1
+== S243_WATCHDOG_FINANCE installer ==
+target : /tmp/mock_wd/root/wa/clinic_watchdog.py
+python : /usr/bin/python3
+from   : 389afcfe318c1618ad87349aa9695e22
+to     : 35e406261f27b2b0845911ee6382bb3d
+live   : 01ca6591a74ec8009bf9748fb7f480c2
+REFUSED: live md5 is neither the from-pin nor the to-pin. Not touching the file.
+exit=1
+
+### TEST B: live copy, FORCE_FAIL=1 -> install then ROLL BACK, exit 1
+== S243_WATCHDOG_FINANCE installer ==
+target : /tmp/mock_wd/root/wa/clinic_watchdog.py
+python : /usr/bin/python3
+from   : 389afcfe318c1618ad87349aa9695e22
+to     : 35e406261f27b2b0845911ee6382bb3d
+live   : 389afcfe318c1618ad87349aa9695e22
+backup : /tmp/mock_wd/root/wa/clinic_watchdog.py.bak_S243_389afcfe
+installed -> /tmp/mock_wd/root/wa/clinic_watchdog.py
+smoke: py_compile OK
+smoke: SMOKE_OK units=14
+smoke: FORCE_FAIL=1 set (test hook) -- treating smoke as failed
+!! FAILURE -- restoring live file from /tmp/mock_wd/root/wa/clinic_watchdog.py.bak_S243_389afcfe
+ROLLED BACK OK: live md5 389afcfe318c1618ad87349aa9695e22 == from-pin (byte-identical restore)
+exit=1
+after rollback:
+389afcfe318c1618ad87349aa9695e22  /tmp/mock_wd/root/wa/clinic_watchdog.py
+
+### TEST C: clean install from live from-pin -> exit 0
+== S243_WATCHDOG_FINANCE installer ==
+target : /tmp/mock_wd/root/wa/clinic_watchdog.py
+python : /usr/bin/python3
+from   : 389afcfe318c1618ad87349aa9695e22
+to     : 35e406261f27b2b0845911ee6382bb3d
+live   : 389afcfe318c1618ad87349aa9695e22
+backup : /tmp/mock_wd/root/wa/clinic_watchdog.py.bak_S243_389afcfe
+installed -> /tmp/mock_wd/root/wa/clinic_watchdog.py
+smoke: py_compile OK
+smoke: SMOKE_OK units=14
+predicted post-install md5: 35e406261f27b2b0845911ee6382bb3d
+md5sum of installed file:
+35e406261f27b2b0845911ee6382bb3d  /tmp/mock_wd/root/wa/clinic_watchdog.py
+No service restart needed: clinic-watchdog.timer runs the script fresh every 5 min.
+Rollback line: cp -p /tmp/mock_wd/root/wa/clinic_watchdog.py.bak_S243_389afcfe /tmp/mock_wd/root/wa/clinic_watchdog.py
+S243_WATCHDOG_FINANCE: DONE
+exit=0
+
+### TEST D: rerun -> ALREADY INSTALLED, exit 0
+== S243_WATCHDOG_FINANCE installer ==
+target : /tmp/mock_wd/root/wa/clinic_watchdog.py
+python : /usr/bin/python3
+from   : 389afcfe318c1618ad87349aa9695e22
+to     : 35e406261f27b2b0845911ee6382bb3d
+live   : 35e406261f27b2b0845911ee6382bb3d
+ALREADY INSTALLED (live md5 == to-pin). Nothing to do.
+md5sum of installed file:
+35e406261f27b2b0845911ee6382bb3d  /tmp/mock_wd/root/wa/clinic_watchdog.py
+exit=0
+
+### mock tree after tests:
+35e406261f27b2b0845911ee6382bb3d  /tmp/mock_wd/root/wa/clinic_watchdog.py
+389afcfe318c1618ad87349aa9695e22  /tmp/mock_wd/root/wa/clinic_watchdog.py.bak_S243_389afcfe
+
+## 16. Backup name on the VPS will be /root/wa/clinic_watchdog.py.bak_S243_389afcfe

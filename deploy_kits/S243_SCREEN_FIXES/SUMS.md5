@@ -1,8 +1,8 @@
-d625b112a5c70602d25f2e5f2c3c2b53  KIT_ID.txt
-6cf35741e30c22076a040177ba4e64e8  README.md
-f3bf273e8a9f13da45a9de5873e86aef  install_S243_SCREEN_FIXES.sh
+25d911cbc2ed5133f28b083fe6787d18  KIT_ID.txt
+3dcbb39443ac72b0d0780d8d43fb846f  README.md
+5b5d913344041a24ad276e1361f5bfa7  install_S243_SCREEN_FIXES.sh
 ad1fc00466458897751df7c9e9fcb99d  purchase_app.py
 a6aeb9fdc06525126df67551aa067ed8  patch_purchase_root_s243.py
-31047866df8b1cd4b2485a25b2541b2f  patch_finance_daily_s243.py
+4d1fa573115c896c842aeee545098f8a  patch_finance_daily_s243.py
 5ebd4952aa94bf4de533cf5853e9b9e6  walk_purchase_root_s243.py
 80c50d75ea740f98f97c36eee8e6267f  walk_finance_daily_s243.py

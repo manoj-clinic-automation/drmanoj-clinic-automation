@@ -18,9 +18,9 @@ bash /root/deploy/repo/deploy_kits/S243_SCREEN_FIXES/install_S243_SCREEN_FIXES.s
 ```
 
 The installer: SUMS + KIT_ID gate -> refuses unless `/root/finance/purchase_app.py` is `8090ca20...` and
-`/root/finance/finance_app.py` starts `81db4854` (live_pins_S242close.txt) **or** `72bc8323` (the S241-close
-manifest records `81db4854 -> 72bc8323` when S241_AMIR_DAY mounted amir_day; the pins file row was not
-re-edited -- see Doubts) -> `.bak_S243_<pin8>` of both -> purchase_app via `.new` + md5 + `mv`; finance_app
+`/root/finance/finance_app.py` starts `f002defb` (S243_AUTOAPPLY, installed 13-Sep; history `81db4854` S240 -> `72bc8323`
+S241 -> `f002defb`; the S243_AUTOAPPLY patch text applied to the S204_C2 base leaves the `/finance/daily` anchor at count 1)
+-> `.bak_S243_<pin8>` of both -> purchase_app via `.new` + md5 + `mv`; finance_app
 patched ON THE BOX by `patch_finance_daily_s243.py` (anchor must occur exactly once in the live bytes, else
 refused with nothing changed) -> `py_compile` both (`/root/wa/venv/bin/python3`, fallback `/usr/bin/python3`)
 -> `import finance_app` under the unit's own environment (read from `systemctl show`, drop-ins included; the
@@ -30,7 +30,7 @@ within 20 s. Any RED after placing restores both files (and restarts if it had r
 Predicted pin after install: `/root/finance/purchase_app.py` **`ad1fc00466458897751df7c9e9fcb99d`**.
 `/root/finance/finance_app.py` is patched in place, so its pin is only known at install -- the installer prints it; record it.
 
-## Rollback (one line each; `<pin8>` is printed by the installer, e.g. 8090ca20 and 81db4854 or 72bc8323)
+## Rollback (one line each; `<pin8>` is printed by the installer, e.g. 8090ca20 and f002defb)
 
 ```
 \cp -f /root/finance/purchase_app.py.bak_S243_8090ca20 /root/finance/purchase_app.py && \cp -f /root/finance/finance_app.py.bak_S243_<pin8> /root/finance/finance_app.py && systemctl restart clinic-finance.service

@@ -1,4 +1,4 @@
-S243_SCREEN_FIXES -- evidence, 12-Sep-2026. Repo clone /tmp/kbv; nothing live touched.
+S243_SCREEN_FIXES -- evidence, 12/13-Sep-2026 (rev 2: finance_app from-pin f002defb after S243_AUTOAPPLY). Repo clone /tmp/kbv; nothing live touched.
 
 == A · purchase_app.py: from 8090ca2041574e25be39682dd5555ffe (S240_SANJEEVNI_123, = live_pins_S242close.txt row 28) to ad1fc00466458897751df7c9e9fcb99d
    patcher on the S240 copy (count==1 guard, FROM pin guard, ALREADY PATCHED on re-run):
@@ -82,8 +82,10 @@ wrote /tmp/pa_check.py md5 ad1fc00466458897751df7c9e9fcb99d
      PASS  maker: /finance/approvals still refused (302 to the portal) -- no gate widened
    RESULT: 8 passed, 0 failed
 
-== INSTALLER mock (ROOT=/home/claude/S243/mock: S240 purchase_app + S204_C2 finance_app with the repo modules, the real unit file + a marg_token drop-in; fake systemctl/curl on PATH; MOCK_FA_PIN8=70f79997 because the mock's finance_app is the S204 base)
-   T1 finance pin not expected -> !! RED -- live finance_app.py is 70f799973a0f131c3f515407b2a8cd03 -- not one of the pins this kit expects (81db4854 72bc8323); NOTHING chang ; files: 8090ca20 70f79997  (unchanged)
+== B · S243_AUTOAPPLY (installed 13-Sep, finance_app.py 72bc8323 -> f002defb9f4a5d35028c051462225def): its patch text (H/P/L/D anchors: api_marg_push, the checker's Apply, the S219 ledger line) applied to the S204_C2 base leaves the /finance/daily anchor at count 1; grep of patch_marg_autoapply_s243.py for finance_daily.html | def page_daily | route(/finance/daily): 0 matches.
+
+== INSTALLER mock rev 2 (ROOT=/home/claude/S243/mock: S240 purchase_app + S204_C2 finance_app with the repo modules, the real unit file + a marg_token drop-in; fake systemctl/curl on PATH; MOCK_FA_PIN8=70f79997 because the mock's finance_app is the S204 base; the shipped gate is f002defb)
+   T1 finance pin not f002defb -> !! RED -- live finance_app.py is 70f799973a0f131c3f515407b2a8cd03 -- not one of the pins this kit expects (f002defb); NOTHING changed ; files: 8090ca20 70f79997  (unchanged)
    T2 purchase pin 6366edb5 -> !! RED -- live purchase_app.py is 6366edb5bb42797d31ce5d73b1cf6598 -- not rev 13 8090ca20 this kit was built on; NOTHING changed
    T3 install:
       -- MOCK: ROOT=/home/claude/S243/mock PY=/usr/bin/python3 PY_SMOKE=/usr/bin/python3
@@ -118,8 +120,7 @@ wrote /tmp/pa_check.py md5 ad1fc00466458897751df7c9e9fcb99d
    T7 install with env via systemctl show: -- smoke: import ok: finance_app (/usr/bin/python3, env from the unit) == S243_SCREEN_FIXES INSTALLED 
 
 == DOUBTS
-   1. finance_app.py live pin: live_pins_S242close.txt row 21 says 81db4854 (S240), but CANONICAL_MANIFEST (S241 close) and KB_Register v5.91 record 81db4854 -> 72bc8323 when S241_AMIR_DAY mounted amir_day; the pins table was 'deliberately NOT edited row by row'. The installer accepts either; the count==1 anchor check on the live bytes is the real guard. Whatever md5sum /root/finance/finance_app.py prints before install is the true FROM pin.
-   2. The mock's finance_app is the S204_C2 base (70f79997), not the live 81db/72bc file; the on-box patcher is what proves the live anchor, and it refuses with nothing changed if it is not exactly once.
-   3. The import smoke runs under /usr/bin/python3 (the unit's ExecStart interpreter); py_compile uses the venv per the house rule. The smoke needs gunicorn's env only (no db call at import, F-303).
-   4. ASCII-only .sh; kit files are LF. No phone-shaped number in any kit file: 0 files match.
-   SUMS.md5 covers every kit file except itself and this evidence file.
+   1. finance_app.py from-pin is f002defb (S243_AUTOAPPLY, read back 13-Sep). If anything else lands on finance_app.py before this kit installs, the gate refuses with nothing changed; the on-box count==1 anchor check is the real guard either way.
+   2. The mock's finance_app is the S204_C2 base (70f79997), not the live file; the on-box patcher proves the live anchor and refuses if it is not exactly once.
+   3. The import smoke runs under /usr/bin/python3 (the unit's ExecStart interpreter); py_compile uses the venv per the house rule. No db call at import (F-303).
+   4. ASCII-only .sh; kit files are LF. SUMS.md5 covers every kit file except itself and this evidence file.

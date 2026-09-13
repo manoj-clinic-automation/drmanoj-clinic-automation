@@ -1,3 +1,3 @@
 S243_SCREEN_FIXES ad1fc00466458897751df7c9e9fcb99d
 purchase_app.py rev 14 over rev 13 8090ca2041574e25be39682dd5555ffe (S240_SANJEEVNI_123)
-finance_app.py patched ON THE BOX by patch_finance_daily_s243.py (live pin 81db4854 per live_pins_S242close.txt; 72bc8323 per the S241-close manifest -- both accepted, the anchor count is the real guard)
+finance_app.py patched ON THE BOX by patch_finance_daily_s243.py (live pin f002defb9f4a5d35028c051462225def after S243_AUTOAPPLY, 13-Sep; history 81db4854 -> 72bc8323 -> f002defb; the anchor count is the real guard)
