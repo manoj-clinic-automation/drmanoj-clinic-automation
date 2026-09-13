@@ -1,0 +1,10 @@
+S244_AMIR_PROCESSING
+Built 13-Sep-2026 IST, Session 244.
+Owner ruling, 13-Sep-2026, in his words:
+  "change the report acceptance flow - system shd tell amir - processing -
+   processing done - then any report still to generate, meanwhile he shd be
+   able to start whatever next tasks he has in his 7 steps flow, while the
+   report is being processed"
+Touches exactly one file: /root/finance/amir_day.py (full-file replacement).
+From pin: bf7d9826119edab48652fd959e1e8da5   (S243_AMIR_VISIT)
+No schema change, no new route, no cron, no service file, no other file.

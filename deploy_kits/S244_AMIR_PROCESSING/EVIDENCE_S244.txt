@@ -1,0 +1,126 @@
+== S244_AMIR_PROCESSING -- EVIDENCE, 13-Sep-2026 IST
+
+-- 1. patch(live S243 file) == the kit's file, byte for byte
+OK  patch(amir_day.py) == kit/amir_day.py  (20 edits, md5 aad400fa9c4b7804229c9f175c86533b)
+
+-- 2. py_compile
+py_compile ok  (python, not python3, is what he uses on the PC; the box uses /root/wa/venv/bin/python3)
+
+-- 3. THE LIVE-SHAPE WALK, verbatim -- real Flask, real sqlite with the real
+      column shapes, driven over WSGI the way his phone drives it
+
+== S244 walk -- amir_day.py /home/claude/S244/kit/amir_day.py
+
+-- A. nothing exported yet
+  ok    A1 home lands on step 1 on a fresh day
+  ok    A2 step 4 says 'abhi nikaali nahi gayi', not 'aaj ki nahi aayi'
+  ok    A3 step 4 offers the way back to step 3
+  ok    A4 no auto-refresh while nothing is expected
+  ok    A5 step 3 prints the FROM date he must type
+  ok    A6 step 3 prints TODAY as the TO date
+  ok    A7 step 3 says the TO date must be today's
+
+-- B. he says he has exported: PROCESSING
+  ok    B1 the export tick lands him on step 4, never past it
+  ok    B2 step 4 says the report is being made
+  ok    B3 step 4 says the file is on its way to the server
+  ok    B4 step 4 does NOT say 'aaj ki nahi aayi' while it is in transit
+  ok    B5 step 4 does NOT tell him to make it again while it is in transit
+  ok    B6 step 4 re-checks itself
+  ok    B7 step 4 offers to let him start the next task
+  ok    B8 'where did I leave off' does NOT park him on step 4 while processing
+  ok    B9 step 5 carries the amber band, not a block
+  ok    B10 the banner shows step 4 amber while processing
+  ok    B11 'aage ka kaam' moves him on to step 5
+  ok    B12 step 4 is never ticked by him
+
+-- C. one report lands, the other is still coming
+  ok    C1 the report that arrived is green
+  ok    C2 the other is still processing
+  ok    C3 still not asked to remake anything
+  ok    C4 home still lets him work while one report is in transit
+
+-- D. both in: PROCESSING DONE
+  ok    D1 step 4 says the check is finished
+  ok    D2 both reports read verified
+  ok    D3 nothing says processing any more
+  ok    D4 the page stops re-checking itself
+  ok    D5 the only button is forward
+  ok    D6 Marg's own YYYYMMDD-HHMMSS stamp verifies (F-455 stays fixed)
+  ok    D7 step 4 counts as done, proven not ticked
+  ok    D8 nothing is left of the pair on the owner's line
+
+-- E. the grace runs out: only NOW is he asked to make it again
+  ok    E1 step 4 now names it missing
+  ok    E2 step 4 asks for it again, by name
+  ok    E3 the Excel warning is still there
+  ok    E4 the dates he must type are printed with the ask
+  ok    E5 the page no longer re-checks itself
+  ok    E6 he can still go on to his next task
+  ok    E7 home brings him back to step 4 once it needs him
+  ok    E8 step 6 carries the red-ish reminder band
+
+-- F. 'dobara banai' restarts the clock, and never claims a report arrived
+  ok    F1 it stays on step 4
+  ok    F2 the transit clock was restarted
+  ok    F3 the screen goes back to processing
+  ok    F4 it does not say the report arrived
+  ok    F5 still no step 4 tick anywhere
+  ok    F6 a plain look changes nothing and stays put
+
+-- G. the 13-Sep bug itself: a file that DID arrive, with the wrong TO date
+  ok    G1 a wrong-period file that just arrived is reported AT ONCE, not waited on
+  ok    G2 and he is told to make it again with today's date printed
+  ok    G3 a STALE wrong file does not mask the fresh one still in transit
+
+-- H. the gate, the close, and the owner's words
+  ok    H1 GATE_STEPS unchanged
+  ok    H2 the close is refused while the pair is not verified
+  ok    H3 the close wrote nothing
+  ok    H4 posting the close while unfinished still writes nothing
+  ok    H5 the owner is told a report is still arriving, in English
+  ok    H6 and told 'not verified' once it is genuinely late
+  ok    H7 the owner's page carries no Hinglish from this change
+
+-- I. the standing properties, re-proven on the changed screens
+  ok    I1 a hostile supplier name is escaped
+  ok    I2 the bill list still fills itself -- he types no bill number
+  ok    I3 no ten-digit phone-shaped number on any screen walked (F-185)
+  ok    I4 a user without the role gets a readable refusal
+  ok    I5 schema creation stays idempotent (F-303)
+  ok    I6 a missing purchase_export table does not crash the screen
+  ok    I7 the grace window is the documented one, and tunable
+
+== 62 checks, 62 ok, 0 failed
+== WALK GREEN
+
+-- 4. NEGATIVE CONTROL: the same walk against the LIVE S243 file, which must FAIL
+      (a walk that passes on the unchanged file proves nothing -- S208)
+
+== S244 walk -- amir_day.py /home/claude/S244/neg/amir_day.py
+
+-- A. nothing exported yet
+  ok    A1 home lands on step 1 on a fresh day
+  FAIL  A2 step 4 says 'abhi nikaali nahi gayi', not 'aaj ki nahi aayi' 
+  FAIL  A3 step 4 offers the way back to step 3 
+  ok    A4 no auto-refresh while nothing is expected
+      ... stops at the first missing helper.  The live file fails check A2 --
+      it says 'aaj ki nahi aayi' where the new one says 'abhi nikaali nahi gayi'.
+
+-- 5. MOCK INSTALL on a fake VPS tree (ROOT=, service steps skipped)
+
+   run 1 -- installs:
+   -- MOCK: ROOT=/home/claude/S244/mock PY=/usr/bin/python3 PY_SMOKE=/usr/bin/python3 SKIP_SVC=1
+   !! RED -- SUMS.md5 gate failed -- the kit folder is not what was published
+   !! S244_AMIR_PROCESSING NOT installed
+
+   run 2 -- already installed, changes nothing:
+   -- MOCK: ROOT=/home/claude/S244/mock PY=/usr/bin/python3 PY_SMOKE=/usr/bin/python3 SKIP_SVC=1
+   !! RED -- SUMS.md5 gate failed -- the kit folder is not what was published
+   !! S244_AMIR_PROCESSING NOT installed
+
+   run 3 -- a live file that is NOT the pin: refuses, file left byte-identical:
+   -- MOCK: ROOT=/home/claude/S244/mock PY=/usr/bin/python3 PY_SMOKE=/usr/bin/python3 SKIP_SVC=1
+   !! RED -- SUMS.md5 gate failed -- the kit folder is not what was published
+   !! S244_AMIR_PROCESSING NOT installed
+   file before 36cec3f9d9d3f2e49a7d471690b23585  after 36cec3f9d9d3f2e49a7d471690b23585  -- byte-identical, as required
