@@ -1,0 +1,238 @@
+EVIDENCE_S257.txt -- S257_PORTAL_EVIDENCE -- built 2026-09-13T23:15:55Z in container
+
+## 1. Bases = the live pins after the S255 rollback (verified by the owner's rollback output)
+b2b7ff7d8ed654aa4cca067b1cfe5716  _base_fcd.py
+d5c3a8459b04753e09e9630cb2de6560  _base_cm.py
+
+## 2. Patchers: 7 + 9 anchors, count==1 each
+15818d91ab1b553e76e317d603d37963  finance_clinic_day.py
+14e96b76230f25eccac2bcb28e741ea4  clinic_money.py
+
+## 3. Diff finance_clinic_day.py
+112a113,127
+> def _gateway_col(con):
+>     """S257: 'gateway_ref' when clinic_day_line carries the S256 column, else a blank literal, so
+>     the query never fails on a database that has not been written to since S256."""
+>     try:
+>         cols = [r[1] for r in con.execute("PRAGMA table_info(clinic_day_line)")]
+>         return "gateway_ref" if "gateway_ref" in cols else "'' AS gateway_ref"
+>     except Exception:                                             # noqa: BLE001
+>         return "'' AS gateway_ref"
+> 
+> 
+> def _channel_of(ref):
+>     """S257 D510: "portal" when a Razorpay id was on the line, else "icici". The mode word is never consulted."""
+>     return "portal" if (ref or "").strip() else "icici"
+> 
+> 
+115c130,131
+<     of split bills from clinic_day_tender.  The MPR page pairs these; the card sums them."""
+---
+>     of split bills from clinic_day_tender.  The MPR page pairs these; the card sums them.
+>     S257: each entry carries channel = portal | icici, decided by its Razorpay id (D510)."""
+119c135
+<                 "SELECT section, sn, patient, clinic_id, amount_p, mode, shift FROM clinic_day_line "
+---
+>                 "SELECT section, sn, patient, clinic_id, amount_p, mode, shift, %s FROM clinic_day_line "
+121,122c137,138
+<                 % ",".join("?" * len(_ONLINE_MODES)), (date,) + _ONLINE_MODES):
+<             ours.append(dict(r, how=r["mode"]))
+---
+>                 % (_gateway_col(con), ",".join("?" * len(_ONLINE_MODES))), (date,) + _ONLINE_MODES):
+>             ours.append(dict(r, how=r["mode"], channel=_channel_of(r["gateway_ref"])))
+131c147,148
+<                              mode=r["tender"], shift="", how="%s (part of a split bill %s)"
+---
+>                              mode=r["tender"], shift="", gateway_ref="", channel="icici",
+>                              how="%s (part of a split bill %s)"
+139c156,157
+<     """THE day's online figure (F-459).  clinic_money.py reads this too."""
+---
+>     """THE day's online figure (F-459).  clinic_money.py reads this too.  Unchanged meaning: all
+>     online revenue, both channels.  Use our_icici_online_p against the ICICI MPR."""
+140a159,168
+> 
+> 
+> def our_icici_online_p(con, date):
+>     """S257 D510: the part of the day's online money the ICICI MPR can be expected to show."""
+>     return sum(o["amount_p"] for o in _our_online_entries(con, date) if o.get("channel") != "portal")
+> 
+> 
+> def our_portal_p(con, date):
+>     """S257 D510: the Razorpay part, proven by an id on the line. Settles to Yes Bank."""
+>     return sum(o["amount_p"] for o in _our_online_entries(con, date) if o.get("channel") == "portal")
+303c331
+<     out.append(_mpr_card(con, date, our_online_p(con, date)))          # S249 F-459: the ONE online figure
+---
+>     out.append(_mpr_card(con, date, our_icici_online_p(con, date)))    # S249 F-459 + S257 D510: ICICI-only
+376c404,406
+<     ours = _our_online_entries(con, date)                         # S249 F-459: the same entries as the card
+---
+>     _all = _our_online_entries(con, date)                         # S249 F-459: the same entries as the card
+>     ours = [o for o in _all if o.get("channel") != "portal"]      # S257 D510 / F-468: portal never pairs here
+>     portal_kept_out = [o for o in _all if o.get("channel") == "portal"]
+383a414,420
+>     portal_note = ""
+>     if portal_kept_out:
+>         portal_note = ('<p class="mut">Kept out of this pairing: %s — portal (Razorpay) payments, settled to '
+>                        'Yes Bank, never in the ICICI file.</p>'
+>                        % " · ".join("₹ %s (%s, id …%s)" % (_rupees(o["amount_p"]), _esc(o.get("patient") or "entry"),
+>                                                             _esc((o.get("gateway_ref") or "")[-4:]))
+>                                     for o in portal_kept_out))
+413a451,452
+>     if portal_note:
+>         out.append(portal_note)                                   # S257: what the pairing deliberately left out
+
+## 4. Diff clinic_money.py
+112a113,126
+> 
+> 
+> def _gateway_col(con):
+>     """S257: 'gateway_ref' when clinic_day_line carries the S256 column, else a blank literal."""
+>     try:
+>         cols = [r[1] for r in con.execute("PRAGMA table_info(clinic_day_line)")]
+>         return "gateway_ref" if "gateway_ref" in cols else "'' AS gateway_ref"
+>     except Exception:                                  # noqa: BLE001
+>         return "'' AS gateway_ref"
+> 
+> 
+> def _channel_of(ref):
+>     """S257 D510: "portal" when a Razorpay id was on the line, else "icici". Never the mode word."""
+>     return "portal" if (ref or "").strip() else "icici"
+314a329,347
+> # ------------------------------------------------------------ channel 4: portal (Razorpay)
+> def _portal_month_row(con, first, last):
+>     """One table row for the month's portal money: every line that carries a Razorpay id.
+>     Returns "" when there is none, so a month without a portal payment shows no row."""
+>     if _gateway_col(con) != "gateway_ref":
+>         return ""
+>     try:
+>         r = con.execute("SELECT COALESCE(SUM(amount_p),0) AS s, COUNT(*) AS c FROM clinic_day_line "
+>                         "WHERE business_date BETWEEN ? AND ? AND gateway_ref != ''", (first, last)).fetchone()
+>     except Exception:                                  # noqa: BLE001
+>         return ""
+>     total, count = r["s"] or 0, r["c"] or 0
+>     if not count:
+>         return ""
+>     return ('<tr><th class="sec">Portal (Razorpay → Yes Bank)</th><td class="r">₹ %s</td>'
+>             '<td>%d payment%s, each with its Razorpay id · settles to Yes Bank, never in the ICICI file</td></tr>'
+>             % (_r(total), count, "s" if count != 1 else ""))
+> 
+> 
+540,541c573,575
+<     rows = list(con.execute("SELECT section, sn, patient, clinic_id, amount_p, mode, shift FROM clinic_day_line "
+<                             "WHERE business_date=? AND section IN ('consult','xray','proc') ORDER BY section, sn", (d,)))
+---
+>     rows = list(con.execute("SELECT section, sn, patient, clinic_id, amount_p, mode, shift, %s FROM clinic_day_line "
+>                             "WHERE business_date=? AND section IN ('consult','xray','proc') ORDER BY section, sn"
+>                             % _gateway_col(con), (d,)))
+556a591
+>                                       channel="icici", gateway_ref="",
+574c609,610
+<             out["online"].append(dict(patient=r["patient"], clinic_id=r["clinic_id"], amount_p=p, how=m))
+---
+>             out["online"].append(dict(patient=r["patient"], clinic_id=r["clinic_id"], amount_p=p, how=m,
+>                                       gateway_ref=r["gateway_ref"] or "", channel=_channel_of(r["gateway_ref"])))
+753c789,792
+<     expected_bank = d_t["upi"] - other
+---
+>     portal_rows = [o for o in doc["online"] if o.get("channel") == "portal"]
+>     portal_p = sum(o["amount_p"] for o in portal_rows)
+>     res["portal_p"] = portal_p
+>     expected_bank = d_t["upi"] - other - portal_p          # S257 D510: Razorpay settles to Yes Bank
+755c794,798
+<     ours = list(doc["online"])
+---
+>     ours = [o for o in doc["online"] if o.get("channel") != "portal"]
+>     for o in portal_rows:                                  # channel 4, explained by its own id
+>         who = "%s%s" % (o.get("patient") or "entry", (" · ID " + o["clinic_id"]) if o.get("clinic_id") else "")
+>         expl("portal", o["amount_p"], "₹%s (%s) is a portal payment — Razorpay id …%s — settled to the Yes Bank "
+>              "account, so it is never in the ICICI file." % (_r(o["amount_p"]), who, (o.get("gateway_ref") or "")[-4:]))
+1310c1353
+<           </tbody></table><p class="mut">Bank expects = Docterz online − other UPI (₹%s). Bank: %s%s.</p>%s
+---
+>           </tbody></table><p class="mut">Bank expects = Docterz online − other UPI (₹%s) − portal (Razorpay, by id). Bank: %s%s.</p>%s
+1562a1606
+>       %s
+1568c1612
+<         dt.date(y, mth, 1).strftime("%B"), y, prev, prev, nxt, nxt, ym,
+---
+>         dt.date(y, mth, 1).strftime("%B"), y, prev, prev, nxt, nxt, ym, _portal_month_row(con, first, last),
+
+## 5. py_compile
+OK
+
+## 6. Selftest -- both real refuting cases
+PASS  Bindu's 'Online Payment' WITH id is portal
+PASS  Alka's 'Wallet' WITHOUT id is NOT portal (the S255 error)
+PASS  ICICI side = Alka 600+500, Ajay 100, split leg 2,050
+PASS  our_online_p unchanged = all online ₹3,850
+PASS  icici ₹3,250 · portal ₹600
+PASS  no rupee invented or lost
+PASS  the reconciler tags the SAME single portal entry
+PASS  F-468: MPR page and reconciler agree on what is portal
+PASS  revenue untouched: upi ₹3,850 · cash ₹1,000
+PASS  bank expectation subtracts portal, once
+PASS  portal kept out of pairing, once
+PASS  no mode-label list exists anywhere -- the label is never consulted
+PASS  month row: 1 payment, ₹600, by id
+PASS  a month with no id shows no row
+PASS  the MPR page pairs ICICI-only and says what it kept out
+PASS  no column -> everything ICICI, no crash, total intact
+PASS  reconciler reads an unmigrated database unchanged
+PASS  month row silent without the column
+
+18 passed, 0 failed
+
+## 7. TEST A clean install (backfill skipped in mock)
+== S257_PORTAL_EVIDENCE installer ==
+target : /tmp/m257/finance
+python : /usr/bin/python3
+finance_clinic_day.py : from b2b7ff7d8ed654aa4cca067b1cfe5716 -> to 15818d91ab1b553e76e317d603d37963 ; live b2b7ff7d8ed654aa4cca067b1cfe5716
+clinic_money.py : from d5c3a8459b04753e09e9630cb2de6560 -> to 14e96b76230f25eccac2bcb28e741ea4 ; live d5c3a8459b04753e09e9630cb2de6560
+backup : /tmp/m257/finance/finance_clinic_day.py.bak_S257_b2b7ff7d
+backup : /tmp/m257/finance/clinic_money.py.bak_S257_d5c3a845
+smoke  : py_compile OK
+smoke  : SMOKE_OK wallet-without-id=icici, online-with-id=portal
+md5sum of installed files:
+15818d91ab1b553e76e317d603d37963  /tmp/m257/finance/finance_clinic_day.py
+14e96b76230f25eccac2bcb28e741ea4  /tmp/m257/finance/clinic_money.py
+S257_PORTAL_EVIDENCE: DONE
+exit=0
+
+## 8. TEST B rerun
+== S257_PORTAL_EVIDENCE installer ==
+target : /tmp/m257/finance
+python : /usr/bin/python3
+finance_clinic_day.py : from b2b7ff7d8ed654aa4cca067b1cfe5716 -> to 15818d91ab1b553e76e317d603d37963 ; live 15818d91ab1b553e76e317d603d37963
+clinic_money.py : from d5c3a8459b04753e09e9630cb2de6560 -> to 14e96b76230f25eccac2bcb28e741ea4 ; live 14e96b76230f25eccac2bcb28e741ea4
+ALREADY INSTALLED (both live md5 == to-pin).
+15818d91ab1b553e76e317d603d37963  /tmp/m257/finance/finance_clinic_day.py
+14e96b76230f25eccac2bcb28e741ea4  /tmp/m257/finance/clinic_money.py
+exit=0
+
+## 9. TEST C S256 missing -> REFUSED
+== S257_PORTAL_EVIDENCE installer ==
+target : /tmp/m257c/finance
+python : /usr/bin/python3
+REFUSED: S256_GATEWAY_REF is not installed (docterz_ingest.py is 814fa5ca98406a903e22b43d9b610105). Install S256 first.
+exit=1 (refusal expected)
+b2b7ff7d8ed654aa4cca067b1cfe5716  /tmp/m257c/finance/finance_clinic_day.py
+d5c3a8459b04753e09e9630cb2de6560  /tmp/m257c/finance/clinic_money.py
+
+## 10. TEST D forced failure -> both restored
+== S257_PORTAL_EVIDENCE installer ==
+target : /tmp/m257d/finance
+python : /usr/bin/python3
+finance_clinic_day.py : from b2b7ff7d8ed654aa4cca067b1cfe5716 -> to 15818d91ab1b553e76e317d603d37963 ; live b2b7ff7d8ed654aa4cca067b1cfe5716
+clinic_money.py : from d5c3a8459b04753e09e9630cb2de6560 -> to 14e96b76230f25eccac2bcb28e741ea4 ; live d5c3a8459b04753e09e9630cb2de6560
+backup : /tmp/m257d/finance/finance_clinic_day.py.bak_S257_b2b7ff7d
+backup : /tmp/m257d/finance/clinic_money.py.bak_S257_d5c3a845
+smoke  : py_compile OK
+smoke  : FORCED FAILURE
+!! restoring both files byte-identically
+b2b7ff7d8ed654aa4cca067b1cfe5716  /tmp/m257d/finance/finance_clinic_day.py
+d5c3a8459b04753e09e9630cb2de6560  /tmp/m257d/finance/clinic_money.py
+exit=1 (rollback expected)
+b2b7ff7d8ed654aa4cca067b1cfe5716  /tmp/m257d/finance/finance_clinic_day.py
+d5c3a8459b04753e09e9630cb2de6560  /tmp/m257d/finance/clinic_money.py

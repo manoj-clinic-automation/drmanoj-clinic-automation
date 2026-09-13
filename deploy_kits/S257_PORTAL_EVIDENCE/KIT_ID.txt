@@ -1,0 +1,10 @@
+S257_PORTAL_EVIDENCE
+/root/finance/finance_clinic_day.py b2b7ff7d8ed654aa4cca067b1cfe5716 -> 15818d91ab1b553e76e317d603d37963
+/root/finance/clinic_money.py       d5c3a8459b04753e09e9630cb2de6560 -> 14e96b76230f25eccac2bcb28e741ea4
+Requires S256_GATEWAY_REF installed (docterz_ingest.py 3809f046...). The installer checks and refuses otherwise.
+Purpose (D510): portal money (Razorpay -> Yes Bank) is recognised by the Razorpay id on the line
+(clinic_day_line.gateway_ref), never by the Docterz mode word. Out of the ICICI expectation, out of
+the pairing on BOTH screens (F-468 fixed), explained by its id, a row on the month card. Revenue and
+every tender figure unchanged. The installer ends with a re-read of every Docterz export on Drive
+(docterz_ingest.py --all) so past days gain their ids -- a few per month, by the owner's account.
+Supersedes S255_PORTAL_CHANNEL (label-based, rolled back, F-467).

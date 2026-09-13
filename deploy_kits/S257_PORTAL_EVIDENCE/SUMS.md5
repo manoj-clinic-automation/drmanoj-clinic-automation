@@ -1,0 +1,9 @@
+57dabd676bcd954583586728a62685fc  ./EVIDENCE_S257.txt
+b519f4300210b01cc51eb7d77d4d17db  ./KIT_ID.txt
+bd2b17f565de34543f811bdf5df93465  ./README.md
+14e96b76230f25eccac2bcb28e741ea4  ./clinic_money.py
+15818d91ab1b553e76e317d603d37963  ./finance_clinic_day.py
+989dc18995f096b6ae8fe15d42e89af0  ./install_S257_PORTAL_EVIDENCE.sh
+e09f194dfdc2937a918c3dfbd812bdff  ./patch_cm_s257.py
+1f637353656ca76e19cbab0eb208b253  ./patch_fcd_s257.py
+0398dcf2e4c396eefe928c29bf92026f  ./selftest_portal_s257.py
