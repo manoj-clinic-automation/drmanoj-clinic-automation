@@ -1,0 +1,124 @@
+EVIDENCE_S243 -- kit S243_DARPAN_KAL -- built 13-Sep-2026 in the container against the 13-Sep live capture (rev 2: page walk, real recipients, SCREEN_FIXES lineage)
+
+== base pins (capture/tree/root/finance)
+f002defb9f4a5d35028c051462225def  finance_app.py
+cc349dd00d0a2f861ec54242c9551557  finance_ui/finance_approvals.html
+
+== patcher selftest on the LIVE bytes
+  PASS  finance_app.py: patches (patched)
+  PASS    compiles
+  PASS    mount lands after the S241 block, once
+  PASS    only additions: every original line still present
+  PASS    second run is a no-op
+  PASS  finance_approvals.html: patches (patched)
+  PASS    card, tab, loader and call each once
+  PASS    the home-medicine card and loader survive
+  PASS    only additions: every original line still present
+  PASS    second run is a no-op
+  PASS  a stranger .py is refused
+  PASS  a stranger page is refused
+selftest: 12 passed, 0 failed
+
+== predicted to-pins
+  finance_app.py  f002defb9f4a5d35028c051462225def -> 1aa9af6db1e625bc68402ff8a77c0248 (patched)
+  finance_approvals.html  cc349dd00d0a2f861ec54242c9551557 -> 7dbb5e56a6564abbfebaa6f94cee484c (patched)
+  (after S243_SCREEN_FIXES first: finance_app 4cd8f966... -> f93f7430..., see mock proof 5)
+
+== py_compile
+  all four compile (python3 3.11.15)
+
+== the live-shape walk (real finance_app f002defb patched in memory, real sqlite from the schemas, real hub page patched into the UI dir)
+walking /home/claude/S243/capture/tree/root/finance/finance_app.py (patched in memory: patched)
+  PASS  darpan_kal is mounted
+  PASS  healthz still 200
+  PASS  old /finance/darpan still opens for the maker
+  PASS  old /finance/darpan/corrections still opens for the checker
+  PASS  /finance/darpan/kal opens for the maker
+  PASS  /finance/darpan/kal/<date> opens for the checker
+  PASS  a viewer NOT named in recipients is refused
+  PASS  anonymous is sent to login / refused
+  PASS  PAGE maker: 200, text/html
+  PASS  PAGE maker: the Hindi section labels are in the page
+  PASS  PAGE maker: the two inputs (cash amount, Dr Manoj / Dr Bhawna)
+  PASS  PAGE maker: the five reasons and the five return answers are in the page
+  PASS  PAGE: no deterrent line, no phone-number field
+  PASS  PAGE Dr Bhawna (viewer named in recipients): 200 html with her 'received' view
+  PASS  PAGE Dr Bhawna: her list answers (empty before any handover)
+  PASS  PAGE anonymous: redirected to the portal
+  PASS  PAGE owner hub /finance/approvals: 200 (real page, patched patched)
+  PASS  PAGE owner hub: the card 'Darpan — needs you' is present with its loader and tab
+  PASS  PAGE a day with NO sale report: 200 page, api answers ok with applied=false (no exception)
+  PASS  api/day answers for the maker
+  PASS  net sale = printout (bills net of the credit note)
+  PASS  home medicine found from the ingest tag (A4 275)
+  PASS  procedure medicine from the typed head (P9 150)
+  PASS  online = the bank's settled total, not provisional
+  PASS  expected cash = sale - home - proc - online
+  PASS  returns: count 1, the large one flagged
+  PASS  no deterrent line anywhere in the page
+  PASS  exact match -> complete, no reason asked
+  PASS  ONE cash_movement out -> dr_bhawna landed on the day's own day_entry
+  PASS  v_cash_ledger sees the handover (cash_out_p)
+  PASS  /finance/api/cash-position still answers
+  PASS  Rs 30 short -> still complete (tolerance Rs 50)
+  PASS  re-typing updates the SAME cash_movement row
+  PASS  Rs 210 short -> state open, reason list offered
+  PASS  reason 'online not on POS' with a matching bank txn (210) -> confirmed, complete
+  PASS  same reason, Rs 333 short, no such txn -> contradicted, needs_owner
+  PASS  reason 'home medicine not in printout', Rs 275 = the home bill -> confirmed
+  PASS  reason 'return refunded in cash', no slip, CN exists -> not confirmable (his word stands)
+  PASS  'other' without words is refused
+  PASS  'other' with words -> not confirmable, explained
+  PASS  checks are recorded with evidence
+  PASS  Rs 120 MORE than expected -> complete, no reason asked
+  PASS  the excess is recorded as owed back to Darpan (provisional: bank not in)
+  PASS  day before yesterday shows online as provisional (Marg modes)
+  PASS  return answered 'slip checked'
+  PASS  the answer shows on the flagged row
+  PASS  'other' return answer without words is refused
+  PASS  Dr Bhawna sees the day handed to her
+  PASS  Dr Bhawna cannot open a day handed to Dr Manoj
+  PASS  Dr Bhawna cannot mark Dr Manoj's day received
+  PASS  Dr Bhawna marks yesterday received
+  PASS  a second 'received' is refused (409)
+  PASS  Darpan cannot change a handover already received
+  PASS  owner card answers for the checker
+  PASS  owner card: the owed-back row is listed
+  PASS  owner card: the unreceived Dr Manoj handover is amber
+  PASS  owner card: yesterday is NOT listed as needing him (explained, not contradicted)
+  PASS  owner card: the LARGE RETURN answered 'slip checked' is not raised (only money flags / 'other')
+  PASS  owner card refused to the maker
+  PASS  the checker may re-type a received day
+  PASS  owner card now lists exactly the contradicted day, one English line with the why
+  PASS  owner 'ask' re-opens the day for Darpan
+  PASS  owner 'accept' closes it as explained
+  PASS  after the owner's decision Darpan cannot re-type
+  PASS  owner marks the owed cash returned to Darpan
+  PASS  owed row leaves the card; owed total 0
+  PASS  repeat pattern: same reason 4x in 30 days is one card line
+  PASS  a claim on a day with no report is saved as waiting_report
+  PASS  no day_entry was created by this kit
+  PASS  no darpan_kal write touched sale_item / day_line / day_noncash_bill
+  PASS  every act is in darpan_kal_audit
+  PASS  seed_kal_recipients: runs, sets manoj/bhawna, adds bhawna viewer once; second run changes nothing
+
+WALK: 72 passed, 0 failed
+
+== installer mock proofs (ROOT=<tmp>, fake systemctl/curl; SUMS.md5 as published minus EVIDENCE itself)
+== mock root /tmp/mock_kal_HdqhhS  finance_app f002defb9f4a5d35028c051462225def  hub cc349dd00d0a2f861ec54242c9551557
+  PASS  refused, nothing placed
+  PASS  installed, marks present, backups written
+     to-pins: finance_app 1aa9af6db1e625bc68402ff8a77c0248  hub 7dbb5e56a6564abbfebaa6f94cee484c
+  PASS  ALREADY INSTALLED, bytes unchanged
+  PASS  RED on healthz, both files back on the from-pins, new files removed
+---- proof 5: a S243_SCREEN_FIXES-patched finance_app.py (other md5) is accepted; from-pin recorded; recipients seeded
+     SCREEN_FIXES-patched finance_app: 4cd8f966339a1b686aad9817fb41a1eb
+-- finance_app.py 4cd8f966 carries the S243_SCREEN_FIXES mark (that kit installed first): lineage accepted; the patcher's anchor count is the guard
+  PASS  SCREEN_FIXES lineage accepted, both marks present, .bak named by the actual pin, recipients seeded
+     to-pin after SCREEN_FIXES then DARPAN_KAL: finance_app f93f7430b5c36449d520d41b6012ec3d
+== mock proofs: 5 passed, 0 failed   (logs in /tmp/mock_kal_HdqhhS)
+
+== number gate
+NO_PHONE_NUMBERS: clean -- 12 staged file(s) checked (numbers and credentials).
+
+== LF everywhere, ASCII .sh: checked clean

@@ -1,0 +1,11 @@
+dd839132ea14859e53235b9406b613e4  KIT_ID.txt
+34ec4835b39869c98044843dafcfae3a  README.md
+3a92d79f7ff8c3fb323fb4e0634296d7  EVIDENCE_S243.txt
+28e23b15daae7f92d4ea668fb5a06b77  darpan_kal.py
+ecc6f0c53db4ea7e48bf8e3b1120e6b4  darpan_kal_schema.sql
+e62746d86e349a143179b320f9d6a87f  darpan_kal.html
+dc6d975ca799bd16b2721bf51ccef6d7  patch_finance_app_darpan_kal_s243.py
+fa7b6033af9088d648b6f7b4cd349e04  install_S243_DARPAN_KAL.sh
+b471a1493a9db3af7dd4b8674d7c3424  seed_kal_recipients_s243.py
+254258fdb51e287018d4c33eb09bccee  walk_darpan_kal_s243.py
+759a62e15165eed544edb1403fc13502  mock_install_darpan_kal_s243.sh

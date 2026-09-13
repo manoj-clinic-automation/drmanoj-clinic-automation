@@ -1,0 +1,7 @@
+S243_DARPAN_KAL new-module + on-box-patch
+darpan_kal.py / darpan_kal_schema.sql / darpan_kal.html -- NEW files into /root/finance (Darpan's morning page, owner's ruling 13-Sep-2026)
+finance_app.py patched ON THE BOX by patch_finance_app_darpan_kal_s243.py (live pin f002defb9f4a5d35028c051462225def -> predicted 1aa9af6db1e625bc68402ff8a77c0248; OR a file carrying the S243_SCREEN_FIXES mark, e.g. 4cd8f966 -> f93f7430; one anchor, the S241_AMIR_DAY end line, exactly once; guarded mount; the actual from-pin is recorded)
+finance_ui/finance_approvals.html patched ON THE BOX by the same patcher (live pin cc349dd00d0a2f861ec54242c9551557 -> predicted 7dbb5e56a6564abbfebaa6f94cee484c; card "Darpan -- needs you", four anchors)
+BUILT S243 13-Sep-2026 -- offline, walked live-shape (72/72, incl. the rendered PAGE walk) on the real finance_app f002defb patched in memory; installer mock-tested (5/5)
+SERVICE clinic-finance (restarted by the installer after the import smoke)
+AFTER: owner repoints Darpan's portal tile to /finance/darpan/kal (GUI). Recipients manoj/bhawna are seeded by the installer.
