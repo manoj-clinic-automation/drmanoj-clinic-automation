@@ -1,0 +1,146 @@
+== S248_SALARY_RAISE -- EVIDENCE, 13-Sep-2026 IST
+
+-- 1. py_compile
+py_compile ok
+
+-- 2. THE WALK, verbatim (the real staff_ledger.py reads the file back in section E)
+
+== S248 walk -- /home/claude/S248/kit/raise_salary_s248.py
+
+-- A. the dry run tells the truth and writes nothing
+  ok    A1 the dry run succeeds
+  ok    A2 it names both raises, with both figures
+  ok    A3 it says it wrote nothing
+  ok    A4 and the file is byte-identical
+  ok    A5 no backup was taken for a dry run
+
+-- B. the raise itself
+  ok    B1 it applies
+  ok    B2 Awdhesh is Rs 10500
+  ok    B3 Sandip is Rs 8000
+  ok    B4 it printed before and after
+  ok    B5 a backup was taken, and it still holds the old figures
+  ok    B6 every row is still there, in the same order
+  ok    B7 EXACTLY two rows changed, and they are the two
+  ok    B8 and only the base_salary column moved
+  ok    B9 the inactive person is untouched
+  ok    B10 a name with a space survives the rewrite
+  ok    B11 every column of the header survives, in order
+  ok    B12 the notes column is not mangled
+
+-- C. a second run changes nothing
+  ok    C1 it says ALREADY APPLIED
+  ok    C2 and the file is byte-identical
+  ok    C3 no second backup was taken
+
+-- D. what it refuses, writing nothing
+  ok    D1 a figure that is not what the raise was worked out from is refused
+  ok    D2 and nothing at all is written -- not even Awdhesh's half
+  ok    D3 a missing person is refused by name
+  ok    D4 and nothing is written
+  ok    D5 a person listed twice is refused
+  ok    D6 and nothing is written
+  ok    D7 a missing file is refused
+  ok    D8 a master with no base_salary column is refused
+
+-- E. what the salary engine then reads
+  ok    E1 the engine reads the old figures first
+  ok    E2 after the raise the engine reads the new ones
+  ok    E3 nobody else moved by a rupee
+  ok    E4 the inactive person is still out of the engine's list
+  ok    E5 the advance ceiling follows the new base, as it should
+
+== 33 checks, 33 ok, 0 failed
+== WALK GREEN
+
+-- 3. A DRY RUN, then the APPLY, then a RE-RUN, on a mock master of the real shape
+   (the same three steps the installer performs against /root/staff_master.csv)
+
+   dry:
+      before:
+        Awdhesh      Rs 10000    ->  Rs 10500
+        Sandip       Rs 7400     ->  Rs 8000
+   == DRY RUN -- nothing written.
+   file md5 before: a4cb0f17ac243ed161f8b1292e9d9ed1
+   apply:
+      before:
+        Awdhesh      Rs 10000    ->  Rs 10500
+        Sandip       Rs 7400     ->  Rs 8000
+      after:
+        Awdhesh      Rs 10500
+        Sandip       Rs 8000
+      backup: mock/root/staff_master.csv.bak_S248_SALARY_RAISE_20260913_055235
+   == APPLIED
+   file md5 after:  4627c0cc55330573df698dfb793d1e88
+   re-run:
+      already: Awdhesh is already Rs 10500
+      already: Sandip is already Rs 8000
+   == ALREADY APPLIED -- the staff master already carries this raise. Nothing changed.
+
+   the two rows, read back out of the file:
+     Awdhesh    10500
+     Sandip     8000
+
+-- 4. MOCK INSTALL end to end, from a FROZEN copy of this kit, on a fresh master
+      (STAFF_CSV / SL_LIVE / PY overridden; the service restarts skipped)
+
+   run 1 -- applies:
+   [1/7] kit gates green
+   [2/7] /home/claude/S248/mock3/root/staff_master.csv present, md5 0b4f025493085d458ac4925a565479d9
+   [3/7] == 33 checks, 33 ok, 0 failed
+   [4/7] DRY RUN against the real staff master — nothing is written yet:
+      before:
+        Awdhesh      Rs 10000    ->  Rs 10500
+        Sandip       Rs 7400     ->  Rs 8000
+   == DRY RUN -- nothing written.
+   [5/7] files that read the staff master (read-only check):
+   [6/7] applying:
+      before:
+        Awdhesh      Rs 10000    ->  Rs 10500
+        Sandip       Rs 7400     ->  Rs 8000
+      after:
+        Awdhesh      Rs 10500
+        Sandip       Rs 8000
+      backup: /home/claude/S248/mock3/root/staff_master.csv.bak_S248_SALARY_RAISE_20260913_055304
+   == APPLIED
+   [7/7] the salary engine now reads: OK 4 staff, Awdhesh 10500, Sandip 8000
+   
+   ==============================================================
+     GREEN — the raise is in the staff master.
+       Awdhesh  Rs 10,000  ->  Rs 10,500
+       Sandip   Rs  7,400  ->  Rs  8,000
+   
+     SEE IT, then lock August:
+       https://attendance.dr-manoj.in/register/salary?ym=2026-08
+   
+     staff_master.csv: 0b4f025493085d458ac4925a565479d9 -> c272edd59af57cecadce5c91766fe616
+     Reverse:  \cp -f /home/claude/S248/mock3/root/staff_master.csv.bak_S248_SALARY_RAISE_20260913_055304 /home/claude/S248/mock3/root/staff_master.csv
+   ==============================================================
+
+   run 2 -- already applied, changes nothing:
+   [1/7] kit gates green
+   [2/7] /home/claude/S248/mock3/root/staff_master.csv present, md5 c272edd59af57cecadce5c91766fe616
+   [3/7] == 33 checks, 33 ok, 0 failed
+   [4/7] DRY RUN against the real staff master — nothing is written yet:
+      already: Awdhesh is already Rs 10500
+      already: Sandip is already Rs 8000
+   == ALREADY APPLIED -- the staff master already carries this raise. Nothing changed.
+   [5/7] files that read the staff master (read-only check):
+   [6/7] applying:
+      already: Awdhesh is already Rs 10500
+      already: Sandip is already Rs 8000
+   == ALREADY APPLIED -- the staff master already carries this raise. Nothing changed.
+      (the master was already at these figures)
+   [7/7] the salary engine now reads: OK 4 staff, Awdhesh 10500, Sandip 8000
+   
+   ==============================================================
+     GREEN — the raise is in the staff master.
+       Awdhesh  Rs 10,000  ->  Rs 10,500
+       Sandip   Rs  7,400  ->  Rs  8,000
+   
+     SEE IT, then lock August:
+       https://attendance.dr-manoj.in/register/salary?ym=2026-08
+   
+     staff_master.csv: c272edd59af57cecadce5c91766fe616 -> c272edd59af57cecadce5c91766fe616
+     Reverse:  \cp -f /home/claude/S248/mock3/root/staff_master.csv.bak_S248_SALARY_RAISE_20260913_055304 /home/claude/S248/mock3/root/staff_master.csv
+   ==============================================================
