@@ -1,0 +1,9 @@
+S255_PORTAL_CHANNEL
+/root/finance/finance_clinic_day.py b2b7ff7d8ed654aa4cca067b1cfe5716 -> 992865c032c20abd33d21ee1abb12c38
+/root/finance/clinic_money.py       d5c3a8459b04753e09e9630cb2de6560 -> 97368596e774969fdaea3cfc09f9d64f
+Purpose (D510): Docterz's Wallet / Patient APP / Net Banking rows are Razorpay payments that settle
+to the Yes Bank current account. They were being expected in the ICICI MPR, held two banking days,
+then flagged to the owner as money that "never reached the ICICI account". This kit gives them their
+own channel: out of the bank expectation, out of the pairing, explained on the day, and a row of
+their own on the month card. Revenue and every tender total are unchanged.
+Step 1 of three (D507). Steps 2 and 3 -- the payment record and the Yes Bank settlement -- follow.

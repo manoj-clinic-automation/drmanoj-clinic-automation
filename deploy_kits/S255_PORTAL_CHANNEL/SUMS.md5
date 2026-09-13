@@ -1,0 +1,9 @@
+ff904001220f117bfe62f16ec6554e09  ./EVIDENCE_S255.txt
+7e3c69f035b91c45abebee0b3c7a75ac  ./KIT_ID.txt
+a361a47d4f3536d981b6fd6f95c0b71b  ./README.md
+97368596e774969fdaea3cfc09f9d64f  ./clinic_money.py
+992865c032c20abd33d21ee1abb12c38  ./finance_clinic_day.py
+8caa7a634ecfd6ccb92cdee02b8050ff  ./install_S255_PORTAL_CHANNEL.sh
+7b4da6fada3584ac9122bc2b96d3567b  ./patch_cm_s255.py
+b1384d988ce7ef907c4afe2aefd44339  ./patch_fcd_s255.py
+e9148e32cbc26c5ca7566c815b6c426d  ./selftest_portal_s255.py

@@ -1,0 +1,190 @@
+EVIDENCE_S255.txt -- S255_PORTAL_CHANNEL -- built 2026-09-13T12:25:48Z in container
+
+## 1. Bases verified against the live pins (live_pins_S244close.txt)
+pin line 18: b2b7ff7d8ed654aa4cca067b1cfe5716  /root/finance/finance_clinic_day.py
+pin line 16: d5c3a8459b04753e09e9630cb2de6560  /root/finance/clinic_money.py
+b2b7ff7d8ed654aa4cca067b1cfe5716  _base_fcd.py
+d5c3a8459b04753e09e9630cb2de6560  _base_cm.py
+=> both MATCH. Bases accepted (taken from the published kits S251_CLINIC_MONEY / S254_SHEET_PHONE).
+
+## 2. Patchers (count==1 guards on every anchor)
+patch_fcd_s255.py: 5 anchors ; patch_cm_s255.py: 8 anchors
+992865c032c20abd33d21ee1abb12c38  finance_clinic_day.py
+97368596e774969fdaea3cfc09f9d64f  clinic_money.py
+
+## 3. Diff base -> new, finance_clinic_day.py
+122c122
+<             ours.append(dict(r, how=r["mode"]))
+---
+>             ours.append(dict(r, how=r["mode"], channel=_channel_of(r["mode"])))
+131c131,132
+<                              mode=r["tender"], shift="", how="%s (part of a split bill %s)"
+---
+>                              mode=r["tender"], shift="", channel=_channel_of(r["tender"]),
+>                              how="%s (part of a split bill %s)"
+139c140,141
+<     """THE day's online figure (F-459).  clinic_money.py reads this too."""
+---
+>     """THE day's online figure (F-459).  clinic_money.py reads this too.  Unchanged meaning: all
+>     online revenue, both channels.  Use our_icici_online_p when comparing against the ICICI MPR."""
+140a143,153
+> 
+> 
+> def our_icici_online_p(con, date):
+>     """S255 D510: the part of the day's online money the ICICI MPR can be expected to show."""
+>     return sum(o["amount_p"] for o in _our_online_entries(con, date) if o.get("channel") != "portal")
+> 
+> 
+> def our_portal_p(con, date):
+>     """S255 D510: the Razorpay part -- Wallet, Patient APP, Net Banking.  Settles to Yes Bank;
+>     no independent record exists for it yet (the payment-email relay is step 2 of D507)."""
+>     return sum(o["amount_p"] for o in _our_online_entries(con, date) if o.get("channel") == "portal")
+303c316
+<     out.append(_mpr_card(con, date, our_online_p(con, date)))          # S249 F-459: the ONE online figure
+---
+>     out.append(_mpr_card(con, date, our_icici_online_p(con, date)))    # S249 F-459 + S255 D510: ICICI-only
+333a347,354
+> # S255 D510: of those four, three are Razorpay -- they settle to Yes Bank and are never in the
+> # ICICI MPR. "Online Payment" is the counter's own ICICI UPI and is.
+> _PORTAL_MODES = ("Net Banking", "Patient APP", "Wallet")
+> 
+> 
+> def _channel_of(mode):
+>     """"portal" (Razorpay -> Yes Bank) or "icici" (the counter's UPI, in the MPR)."""
+>     return "portal" if (mode or "").strip() in _PORTAL_MODES else "icici"
+
+## 4. Diff base -> new, clinic_money.py
+112a113,121
+> # S255 D510: three of those four are Razorpay. The receipt goes to the owner's personal Gmail
+> # and the money settles to the Yes Bank current account -- so it is NEVER in the ICICI MPR this
+> # page reads. "Online Payment" is the counter's own ICICI UPI and is.
+> PORTAL_MODES = ("Net Banking", "Patient APP", "Wallet")
+> 
+> 
+> def _channel_of(mode):
+>     """"portal" (Razorpay -> Yes Bank) or "icici" (the counter's UPI, in the MPR)."""
+>     return "portal" if (mode or "").strip() in PORTAL_MODES else "icici"
+314a324,349
+> # ------------------------------------------------------------ channel 4: portal (Razorpay)
+> def _portal_month_row(con, first, last):
+>     """One table row for the month's portal money. Same two sources as the day: plain bills in
+>     clinic_day_line and the legs of split bills in clinic_day_tender. Returns "" if there is none,
+>     so a clinic that never takes a portal payment never sees the row."""
+>     q = ",".join("?" * len(PORTAL_MODES))
+>     total, count = 0, 0
+>     for table, col in (("clinic_day_line", "mode"), ("clinic_day_tender", "tender")):
+>         if not _table(con, table):
+>             continue
+>         try:
+>             r = con.execute("SELECT COALESCE(SUM(amount_p),0) AS s, COUNT(*) AS c FROM %s "
+>                             "WHERE business_date BETWEEN ? AND ? AND %s IN (%s)" % (table, col, q),
+>                             (first, last) + PORTAL_MODES).fetchone()
+>             total += r["s"] or 0
+>             count += r["c"] or 0
+>         except Exception:                                  # noqa: BLE001
+>             pass
+>     if not total and not count:
+>         return ""
+>     return ('<tr><th class="sec">Portal (Razorpay → Yes Bank)</th><td class="r">₹ %s</td>'
+>             '<td>%d payment%s · no independent record yet — the receipt is in the owner\'s personal '
+>             'Gmail and the money settles to Yes Bank</td></tr>'
+>             % (_r(total), count, "s" if count != 1 else ""))
+> 
+> 
+556a592
+>                                       channel=_channel_of(t),
+574c610,611
+<             out["online"].append(dict(patient=r["patient"], clinic_id=r["clinic_id"], amount_p=p, how=m))
+---
+>             out["online"].append(dict(patient=r["patient"], clinic_id=r["clinic_id"], amount_p=p,
+>                                       how=m, channel=_channel_of(m)))
+753c790,793
+<     expected_bank = d_t["upi"] - other
+---
+>     portal_rows = [o for o in doc["online"] if o.get("channel") == "portal"]
+>     portal_p = sum(o["amount_p"] for o in portal_rows)
+>     res["portal_p"] = portal_p
+>     expected_bank = d_t["upi"] - other - portal_p          # S255 D510: Razorpay settles to Yes Bank
+755c795,800
+<     ours = list(doc["online"])
+---
+>     ours = [o for o in doc["online"] if o.get("channel") != "portal"]
+>     for o in portal_rows:                                  # channel 4, explained before the bank is read
+>         who = "%s%s" % (o.get("patient") or "entry", (" · ID " + o["clinic_id"]) if o.get("clinic_id") else "")
+>         expl("portal", o["amount_p"], "₹%s (%s, %s) is a portal payment — Razorpay settles it to the Yes Bank "
+>              "account, so it is never in the ICICI file. Awaiting the Razorpay record."
+>              % (_r(o["amount_p"]), who, o["how"]))
+1310c1355
+<           </tbody></table><p class="mut">Bank expects = Docterz online − other UPI (₹%s). Bank: %s%s.</p>%s
+---
+>           </tbody></table><p class="mut">Bank expects = Docterz online − other UPI (₹%s) − portal money (Razorpay → Yes Bank). Bank: %s%s.</p>%s
+1562a1608
+>       %s
+1568c1614
+<         dt.date(y, mth, 1).strftime("%B"), y, prev, prev, nxt, nxt, ym,
+---
+>         dt.date(y, mth, 1).strftime("%B"), y, prev, prev, nxt, nxt, ym, _portal_month_row(con, first, last),
+
+## 5. py_compile
+py_compile OK (Python 3.11.15)
+
+## 6. Selftest
+PASS  our_online_p unchanged = all online (Rs 1,600)
+PASS  our_icici_online_p = ICICI only (Rs 500)
+PASS  our_portal_p = Wallet+Patient APP+Net Banking (Rs 1,100)
+PASS  the two channels add back to the whole -- no rupee invented or lost
+PASS  _channel_of: the three portal modes, and nothing else
+PASS  revenue untouched: Docterz upi tender still Rs 1,600
+PASS  revenue untouched: cash still Rs 900
+PASS  3 portal entries tagged, Rs 1,100
+PASS  1 ICICI entry tagged, Rs 500
+PASS  every online entry carries a channel
+PASS  the bank expectation subtracts portal money, once
+PASS  portal entries are kept out of the bank pairing, once
+PASS  each portal payment explains itself, once
+PASS  the old owner-flag text still exists for real ICICI misses
+PASS  the month card gains a Portal row with the right total
+PASS  a month with no portal payment shows no row at all
+
+16 passed, 0 failed
+
+## 7. TEST C: wrong base -> REFUSED, nothing touched
+== S255_PORTAL_CHANNEL installer ==
+target : /tmp/mock255c/finance
+python : /usr/bin/python3
+finance_clinic_day.py : from b2b7ff7d8ed654aa4cca067b1cfe5716 -> to 992865c032c20abd33d21ee1abb12c38 ; live b2b7ff7d8ed654aa4cca067b1cfe5716
+clinic_money.py : from d5c3a8459b04753e09e9630cb2de6560 -> to 97368596e774969fdaea3cfc09f9d64f ; live 9e2be86c6ec9a6885a8fe784ba2d4ea6
+REFUSED: clinic_money.py is 9e2be86c6ec9a6885a8fe784ba2d4ea6, expected d5c3a8459b04753e09e9630cb2de6560
+exit=1 (refusal expected)
+after refusal, finance_clinic_day.py untouched:
+b2b7ff7d8ed654aa4cca067b1cfe5716  /tmp/mock255c/finance/finance_clinic_day.py
+
+## 8. TEST D: forced smoke failure -> BOTH files restored byte-identically
+== S255_PORTAL_CHANNEL installer ==
+target : /tmp/mock255d/finance
+python : /usr/bin/python3
+finance_clinic_day.py : from b2b7ff7d8ed654aa4cca067b1cfe5716 -> to 992865c032c20abd33d21ee1abb12c38 ; live b2b7ff7d8ed654aa4cca067b1cfe5716
+clinic_money.py : from d5c3a8459b04753e09e9630cb2de6560 -> to 97368596e774969fdaea3cfc09f9d64f ; live d5c3a8459b04753e09e9630cb2de6560
+backup : /tmp/mock255d/finance/finance_clinic_day.py.bak_S255_b2b7ff7d
+backup : /tmp/mock255d/finance/clinic_money.py.bak_S255_d5c3a845
+smoke  : py_compile OK
+smoke  : FORCED FAILURE
+!! restoring both files byte-identically
+b2b7ff7d8ed654aa4cca067b1cfe5716  /tmp/mock255d/finance/finance_clinic_day.py
+d5c3a8459b04753e09e9630cb2de6560  /tmp/mock255d/finance/clinic_money.py
+exit=1 (rollback expected)
+after rollback:
+b2b7ff7d8ed654aa4cca067b1cfe5716  /tmp/mock255d/finance/finance_clinic_day.py
+d5c3a8459b04753e09e9630cb2de6560  /tmp/mock255d/finance/clinic_money.py
+=> must read b2b7ff7d... and d5c3a845..., the original bases
+
+## 9. What the owner will see change
+- a Docterz Wallet / Patient APP / Net Banking payment is no longer held two banking days
+  and then flagged 'never reached the ICICI account'; it is explained on the day it appears.
+- 'Bank expects' on the match page drops by the day's portal money.
+- the month card gains a 'Portal (Razorpay -> Yes Bank)' row when there is portal money.
+- revenue, the counter-vs-Docterz comparison and every tender total are unchanged (selftest 6,7).
+
+## 10. Restart
+clinic-finance IS restarted by this installer (both files are mounted into finance_app).
+The watchdog has guarded clinic-finance since S243, so a failed restart alarms within 5 min.
