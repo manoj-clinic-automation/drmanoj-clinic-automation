@@ -1,0 +1,8 @@
+S251_CLINIC_MONEY 08c57466b44e417d93fc1e6117724fda
+clinic_money.py 08c57466b44e417d93fc1e6117724fda NEW
+finance_clinic_day.py b2b7ff7d8ed654aa4cca067b1cfe5716 from 56fb76198a6911ae512c3b73925a3c22
+clinic_register.py 92136a97929d86b8458e62e1a9c8878f from c6b87682ccbfb03734a39ad33c26f2a3
+finance_app.py 1fc62335f085b4cb4a634bbe9cca96c4 from 912398e9897b180dce43955814beaf43 -- PATCHED ON THE BOX (not shipped, F-185)
+portal.py d0f126a3815a4c7e24960a15f1951857 from 06f1b378608fbc97c54bc1f546d7985c
+tile_grants.json d7edf850a977c033448d6e14076490b4 v16 from v15 932f7bd05f4bf19b1f53deb9a2f35d22 (S250)
+S251 = S249 re-issued (F-458): only tile_grants.json differs; S249_CLINIC_MONEY is SUPERSEDED, do not install it

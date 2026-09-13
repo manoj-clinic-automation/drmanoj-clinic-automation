@@ -1,0 +1,12 @@
+bccb6b9a2ef83eed8e4495c5bfd86a34  EVIDENCE_S251.txt
+b7c76c4e9120acaea128d7b459de64d1  KIT_ID.txt
+c87eac8f45e1fbbfacaa6acbcbc58bcf  README.md
+08c57466b44e417d93fc1e6117724fda  clinic_money.py
+92136a97929d86b8458e62e1a9c8878f  clinic_register.py
+b2b7ff7d8ed654aa4cca067b1cfe5716  finance_clinic_day.py
+4e5c27c893d03616a42af5fadfedb183  install_S251_CLINIC_MONEY.sh
+362e676580aa1fe323ada038e5f7d830  patch_s249.py
+d0f126a3815a4c7e24960a15f1951857  portal.py
+893c315dd30a0128710da120b802ee8e  seed_s249.py
+d7edf850a977c033448d6e14076490b4  tile_grants.json
+3cf1b6ada19fc8831faa1d0865c75584  walk_s249.py
