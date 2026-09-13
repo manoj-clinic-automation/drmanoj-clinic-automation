@@ -1,0 +1,8 @@
+S243_DARPAN_TILE on-box-patch + portal tile (portal only)
+/root/portal/portal.py        4bb6bde0e2e07033ac0e0f5d7a7daaf6 -> 06f1b378608fbc97c54bc1f546d7985c (tile "Kal ka hisaab" -> /finance/darpan/kal, roles [doctor], immediately before Daily Sale; group row; nothing removed or moved)
+/root/portal/tile_grants.json c9ee95c39bb805086b79d95327b2b626 -> 0efad736e71de7199e7c596a5b3d0c2e (v13 -> v14: granted by name to darpan; every other login byte-equal to v13)
+CORRECTIONS (the CA ruling): never in darpan's grants -- roles [doctor], no name-grant to anyone -- so nothing to withdraw; the walk proves he is not shown it before or after. Page untouched, reachable by address and for the owner.
+DAILY SALE: not repointed (it is the owner's tile too; his lands on Review since S243_SCREEN_FIXES). Stays in darpan's extra as the fallback form.
+BUILT S243 13-Sep-2026 -- offline against the reproduced live portal.py (REPORTS_TILE patch on the 13-Sep capture = 4bb6bde0, verified); walked live-shape 52/52 via portal's own _visible_sections; installer mock-tested 17/17
+SERVICE clinic-portal (restarted by the installer only after the import smoke passes; /portal/health polled)
+AFTER: nothing for the owner -- Darpan taps the tile.

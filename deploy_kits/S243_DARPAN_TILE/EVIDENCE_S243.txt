@@ -1,0 +1,131 @@
+EVIDENCE_S243 -- kit S243_DARPAN_TILE -- built 13-Sep-2026 in the container against the REPRODUCED live portal.py
+
+== how the live file was reproduced (not read from the box)
+d08721f69bc7c3e3a79a50192b20affb  capture/tree/root/portal/portal.py   (13-Sep capture)
+   + S243_REPORTS_TILE/patch_portal_reports_tile_s243.py  ->
+4bb6bde0e2e07033ac0e0f5d7a7daaf6  repro/portal.py
+   = the pin the box reports for /root/portal/portal.py after S243_REPORTS_TILE. Verified before anything was written.
+c9ee95c39bb805086b79d95327b2b626  S243_REPORTS_TILE/tile_grants.json  (v13, live)
+
+== the tile Darpan uses today (v13 + live bytes, portal's own _visible_sections)
+darpan (staff): ['Forms & Downloads', 'Scan Purchase', 'Daily Sale', 'Vaapsi Desk']  -- no Corrections; Corrections is roles [doctor], name-granted to nobody
+decision: NEW tile 'Kal ka hisaab' -> /finance/darpan/kal, granted to darpan; Daily Sale NOT repointed (it is the owner's tile too); Corrections: nothing to withdraw
+
+== predicted to-pins
+06f1b378608fbc97c54bc1f546d7985c  portal.py after patch_portal_darpan_tile_s243.py (from 4bb6bde0)
+0efad736e71de7199e7c596a5b3d0c2e  tile_grants.json v14 (from v13 c9ee95c3: version, note, darpan.extra only)
+
+== grants v13 -> v14 diff (the _note line elided)
+2,3c2,3
+<   "version": 13,
+---
+>   "version": 14,
+76a77
+>         "Kal ka hisaab",
+
+== the walk (PORTAL_PY = the reproduced 4bb6bde0 file)
+WALK S243_DARPAN_TILE  portal.py=repro/portal.py
+  live portal.py 4bb6bde0e2e07033ac0e0f5d7a7daaf6
+  PASS  the live portal.py is the pin this kit was built on (4bb6bde0)
+  PASS  the patcher patches it (patched)
+  patched  06f1b378608fbc97c54bc1f546d7985c
+  PASS  the patched bytes are the predicted to-pin 06f1b378
+  PASS  second pass is a no-op ('already')
+  PASS  only additions: every original line is still present, in order
+  PASS  exactly 11 lines added (10 for the tile, 1 for the group row)
+  PASS  LF only
+  PASS  v13 grants beside the walk are c9ee95c3
+  PASS  the kit's tile_grants.json is v14 0efad736
+  PASS  py_compile of the patched copy
+  PASS  v14: version field 13 -> 14
+  PASS  v14: the note grew by one S243 v14 paragraph and lost nothing
+  PASS  v14: darpan.extra = [Kal ka hisaab, Daily Sale, Vaapsi Desk]
+  PASS  v14: darpan.mask unchanged
+  PASS  v14: every other login's grants are byte-equal to v13 (12 logins)
+  PASS  v14: defaults (section order) unchanged
+  PASS  'Corrections' is granted by name to NOBODY in v13 and in v14 (the CA ruling: nothing to withdraw)
+  PASS  BASELINE portal.py (live bytes) imports with v13
+  PASS  PATCHED portal.py imports: every tile is grouped (its own assert)
+  PASS  grants file in use is v14
+  PASS  the tile exists exactly once
+  PASS  it opens /finance/darpan/kal
+  PASS  it carries roles ['doctor'] only (fail closed) and sits in Money & Accounts
+  PASS  it is NOT in the baseline
+  PASS  it sits immediately before Daily Sale
+  PASS  every other tile is in the same order as before
+  PASS  every other tile is byte-for-byte what it was (icon, desc, url, roles, group, flags)
+  PASS  Daily Sale is untouched: /finance/daily, roles ['doctor'], its to-do counter flag
+  PASS  Corrections is untouched: still defined, /finance/darpan/corrections, roles ['doctor']
+  PASS  GROUP_ORDER unchanged
+  PASS  darpan IS shown 'Kal ka hisaab'
+  PASS  darpan is NOT shown 'Corrections' (after)
+  PASS  darpan was NOT shown 'Corrections' before either (nothing to withdraw)
+  PASS  darpan's tiles are exactly the old ones plus the new one
+  PASS  darpan's Money & Accounts reads: Kal ka hisaab, Daily Sale, Vaapsi Desk
+  PASS  darpan's section order is unchanged (Clinic, then Money & Accounts)
+  PASS  manoj (doctor) is shown 'Kal ka hisaab' by role
+  PASS  manoj still sees Corrections, Daily Sale, Aaj ki reports, Amir ka kaam, Manage Users
+  PASS  manoj sees everything he saw before, plus the one new tile, in the same order
+  PASS  manoj (doctor, on the clinic PC) likewise
+  PASS  shavez (manager) unchanged, tile for tile and section for section
+  PASS  amir (staff) unchanged, tile for tile and section for section
+  PASS  alisha (staff) unchanged, tile for tile and section for section
+  PASS  shivani (staff) unchanged, tile for tile and section for section
+  PASS  bhawna (doctor) unchanged, tile for tile and section for section (bar the doctor-role tile)
+  PASS  nobody (staff) unchanged, tile for tile and section for section
+  PASS  parvesh (staff) unchanged, tile for tile and section for section
+  PASS  shavez is NOT shown 'Kal ka hisaab'
+  PASS  amir is still shown exactly ['Amir ka kaam', 'Aaj ki reports']
+  PASS  bhawna (doctor) is shown it by role -- the page shows her the owner view
+  PASS  FAIL CLOSED: no grants file -> darpan loses the tile (and Daily Sale, as before), the doctor keeps both
+  PASS  FAIL CLOSED: malformed grants file -> same
+
+WALK: 52 passed, 0 failed
+
+== installer mock proofs (throw-away ROOT; mock systemctl and curl)
+== mock root <mockroot>  portal 4bb6bde0e2e07033ac0e0f5d7a7daaf6  grants c9ee95c39bb805086b79d95327b2b626
+  PASS  the mock starts from the live pins (4bb6bde0 / c9ee95c3)
+---- proof 1: wrong portal.py pin is refused
+  PASS  refused, nothing placed, no restart
+---- proof 2: wrong grants pin is refused
+  PASS  refused, nothing placed, no restart
+---- proof 3: install on the true pins
+  PASS  installer exit 0, INSTALLED
+  PASS  portal.py landed as the predicted pin 06f1b378
+  PASS  tile_grants.json landed as v14 0efad736
+  PASS  two .bak_S243_<pin8> backups holding the from-bytes
+  PASS  import smoke green (darpan shown it, no Corrections, doctor keeps everything)
+  PASS  clinic-portal restarted exactly once, after the smoke
+  PASS  health polled to 200
+  PASS  no __pycache__ left in the portal folder
+---- proof 4: second run is ALREADY INSTALLED
+  PASS  ALREADY INSTALLED, nothing moved, no restart
+---- proof 5: health fails -> full rollback
+  PASS  RED, both files back to the from-pins
+  PASS  rollback named what it restored
+  PASS  service restarted again on the restored files
+---- proof 6: import smoke fails -> rollback, and the service is NEVER restarted
+  PASS  RED before the restart, both files back
+  PASS  no restart at all
+
+MOCK INSTALL: 17 passed, 0 failed   (logs under <mockroot>, <mockroot>, <mockroot>)
+
+== the successful mock install, verbatim
+-- MOCK: ROOT=<mockroot> PY=python3
+-- gates green: SUMS.md5 and KIT_ID.txt (S243_DARPAN_TILE); grants v14 0efad736e71de7199e7c596a5b3d0c2e
+-- live pins: portal.py 4bb6bde0 | tile_grants.json c9ee95c3 (as expected)
+-- prepared: portal.py copy 06f1b378 | py_compile clean with python3
+-- placed: portal.py 4bb6bde0 -> 06f1b378 | tile_grants.json c9ee95c3 -> 0efad736 | backups .bak_S243_<pin8>
+-- smoke portal: import ok: tile present, grants v14, darpan sees it, no Corrections for him, the doctor keeps everything
+[mock systemctl] restart clinic-portal.service
+[mock systemctl] is-active --quiet clinic-portal.service
+-- portal health 200 after 0s
+
+== S243_DARPAN_TILE INSTALLED
+   portal.py                  was 4bb6bde0e2e07033ac0e0f5d7a7daaf6  actual 06f1b378608fbc97c54bc1f546d7985c
+   tile_grants.json           was c9ee95c39bb805086b79d95327b2b626  actual 0efad736e71de7199e7c596a5b3d0c2e  (v13 -> v14)
+   backups: <mockroot>/root/portal/portal.py.bak_S243_4bb6bde0  <mockroot>/root/portal/tile_grants.json.bak_S243_c9ee95c3  (rollback line in README)
+   Darpan's tile: Kal ka hisaab -> https://followup.dr-manoj.in/finance/darpan/kal
+
+== hygiene
+ASCII .sh: yes (both)   LF only: yes (all files)   py_compile: patcher + walk clean   bash -n: both scripts clean   __pycache__: none
