@@ -1,0 +1,3 @@
+S253_MATCH_PLAIN da9122e0f8b48a1a0aa3d86d02adc109
+clinic_money.py da9122e0f8b48a1a0aa3d86d02adc109 from 9cc6bb7ab5a9eacaf9ecfaee20e44763 (S252) -- the ONLY file placed
+patch_s249.py / seed_s249.py: the S251 copies, used by the walk only
