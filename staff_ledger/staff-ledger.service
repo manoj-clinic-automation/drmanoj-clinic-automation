@@ -1,0 +1,13 @@
+[Unit]
+Description=Staff Ledger maker-checker (D255/D257)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root
+ExecStart=/root/wa/venv/bin/python3 /root/staff_ledger.py serve
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

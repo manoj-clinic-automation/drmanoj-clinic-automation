@@ -10,6 +10,8 @@ Environment=FINANCE_DB=/root/finance/finance.db
 Environment=FINANCE_UI_DIR=/root/finance/finance_ui
 Environment=FINANCE_SCAN_DIR=/root/finance/scans
 Environment=FINANCE_PORT=8106
+Environment=FINANCE_CRON_TOKEN=DUMMY-TOKEN-PUT-HERE
+Environment=FINANCE_MARG_TOKEN=DUMMY-TOKEN-PUT-HERE
 Environment=FINANCE_SSO_DIR=/root/portal
 Environment=FINANCE_PORTAL_LOGIN=/portal
 # SECURITY, and none of these lines is optional:
@@ -27,3 +29,11 @@ Restart=always
 RestartSec=5
 [Install]
 WantedBy=multi-user.target
+
+# S255: this file is the live unit as captured from the box on 13-Sep-2026,
+# with two values redacted. FINANCE_CRON_TOKEN and FINANCE_MARG_TOKEN carry
+# real secrets on the VPS and read DUMMY-TOKEN-PUT-HERE here (F-185).
+# The real values are in the private capture,
+# F:\ClinicBackup\DrManojClinic_Automation\04_LIVE_SOURCE\VPS_finance_2026-09-13_S255.zip
+# Rotating either token (F-456) means editing this unit on the box and
+# restarting clinic-finance, or the app comes back with the old value.

@@ -1,0 +1,11 @@
+[Unit]
+Description=Staff Daily Register (D271) maker-checker-override
+After=network.target
+[Service]
+Type=simple
+WorkingDirectory=/root/staff_register
+ExecStart=/root/wa/venv/bin/python3 /root/staff_register/staff_register.py
+Restart=always
+RestartSec=5
+[Install]
+WantedBy=multi-user.target
