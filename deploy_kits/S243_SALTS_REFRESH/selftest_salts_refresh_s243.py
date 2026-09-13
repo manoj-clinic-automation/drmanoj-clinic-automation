@@ -153,7 +153,7 @@ class _Door(BaseHTTPRequestHandler):
 srv = HTTPServer(("127.0.0.1", 0), _Door)
 PORT = srv.server_address[1]
 threading.Thread(target=srv.serve_forever, daemon=True).start()
-URL = "http://127.0.0.1:%d/finance/purchase/api/salts" % PORT
+URL = "http://127.0.0.1:%d/finance/purchase/api/vendors" % PORT
 
 # ------------------------------------------------------------------ the mock root
 TMP = tempfile.mkdtemp(prefix="s243_salts_")
@@ -226,7 +226,7 @@ ck("--dry-run writes no state", not os.path.exists(STATE))
 rc = SR.main(ARGS + ["--once"])
 ck("first --once exits 0 and POSTs once", rc == 0 and len(_Door.calls) == 1, "rc=%s calls=%d" % (rc, len(_Door.calls)))
 c = _Door.calls[0]
-ck("POST went to /finance/purchase/api/salts", c["path"] == "/finance/purchase/api/salts", c["path"])
+ck("POST went to /finance/purchase/api/vendors (the door the front gate opens)", c["path"] == "/finance/purchase/api/vendors", c["path"])
 ck("header X-Finance-Marg carries the drop-in token", c["token"] == _Door.token)
 ck("body carries 120 marg_items, marg_as_on 2026-09-12, marg_md5 of the NEWER file",
    c["body"] and len(c["body"]["marg_items"]) == 120 and c["body"]["marg_as_on"] == "2026-09-12"
@@ -319,7 +319,7 @@ if have_live:
     con.execute("INSERT INTO purchase_salt_task (section,seq,a,b,c,done,done_by,done_at) VALUES ('change',1,'ZZ ITEM NEWEST 001','WRONG','ZZ SALT NEWEST 00',1,'amir','2026-09-10T10:00:00')")
     con.commit(); con.close()
     body = _Door.calls[-1]["body"]                            # exactly what salts_refresh sent on the last --force
-    r = cl.post("/finance/purchase/api/salts", json=body, headers=H)
+    r = cl.post("/finance/purchase/api/vendors", json=body, headers=H)
     j = r.get_json() or {}
     ck("the REAL handler accepts salts_refresh's payload: ok, marg_items=126, stored=0 (no tasks touched)", r.status_code == 200 and j.get("ok") is True and j.get("marg_items") == 126 and j.get("stored") == 0, r.get_data(as_text=True)[:160])
     con = sqlite3.connect(DB)
@@ -338,7 +338,7 @@ if have_live:
         marg = {r_[0]: r_[1] for r_ in c2.execute("SELECT item_norm, salt FROM purchase_salt_marg")}
         say = PA._marg_says(c2, dict(section="change", a="ZZ ITEM NEWEST 001", b="WRONG", c="ZZ SALT NEWEST 00"), marg, {s for s in marg.values()})
     ck("_marg_says now reads 'done' for the ticked item from the fresh list", say[0] == "done", str(say))
-    r = cl.post("/finance/purchase/api/salts", json=body, headers={"X-Finance-Marg": "ZZWRONG"})
+    r = cl.post("/finance/purchase/api/vendors", json=body, headers={"X-Finance-Marg": "ZZWRONG"})
     ck("the real door refuses a wrong token with 401", r.status_code == 401)
 
 # ------------------------------------------------------------------ 7. compile + hygiene

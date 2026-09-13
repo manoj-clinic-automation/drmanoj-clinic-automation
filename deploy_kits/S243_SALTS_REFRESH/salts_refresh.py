@@ -15,7 +15,7 @@ This tool takes the NEWEST such file (by the stamp in its name, else its mtime),
 push_salts.read_marg_salt_list does (same rows, same as-on rule: the stamp's date), and POSTs the same
 marg_items / marg_as_on / marg_md5 payload to the finance app's own machine door:
 
-    POST http://127.0.0.1:8106/finance/purchase/api/salts      header X-Finance-Marg: <FINANCE_MARG_TOKEN>
+    POST http://127.0.0.1:8106/finance/purchase/api/vendors      header X-Finance-Marg: <FINANCE_MARG_TOKEN>
 
 The handler (purchase_app.api_salts -> _store_marg_salts) REPLACES purchase_salt_marg whole and stamps every row
 with marg_as_on; the page shows MAX(as_on). No `tasks` key is sent, so Amir's DONE ticks and the doctor's
@@ -48,7 +48,7 @@ DEF_INGEST = ROOT + "/root/marg_ingest"
 DEF_ARCHIVE = ROOT + "/root/marg_ingest/archive"
 DEF_DROPIN = ROOT + "/etc/systemd/system/clinic-finance.service.d/marg_token.conf"
 DEF_STATE = ROOT + "/root/finance/salts_refresh.state.json"
-DEF_URL = os.environ.get("SALTS_REFRESH_URL", "http://127.0.0.1:8106/finance/purchase/api/salts")
+DEF_URL = os.environ.get("SALTS_REFRESH_URL", "http://127.0.0.1:8106/finance/purchase/api/vendors")
 TYPE_DIR = "SALT_WISE_ITEM_LIST"
 MIN_ROWS = 100                      # a list this short is a truncated export; the handler would wipe the table with it
 STAMP_RE = re.compile(r"__(\d{8})-(\d{6})__")
@@ -170,12 +170,14 @@ def read_marg_salt_list(path, ingest=DEF_INGEST):
 
 
 def build_payload(path, ingest=DEF_INGEST):
-    """Exactly the marg_* keys push_salts.py sends (it rides /vendors with the work list; here they go alone
-    to /api/salts, which accepts marg_items without tasks). source/host are informational; the handler
-    ignores them."""
+    """Exactly the marg_* keys push_salts.py sends, through the SAME door it uses: /api/vendors.
+    S243 lesson (a live 401 'bad_token'): finance_app's front gate opens the machine token only for
+    /finance/purchase/api/push, /vendors and /feed (S224 patch); /api/salts exists in purchase_app but is
+    NOT on that list, so a token there is refused before purchase_app ever sees it. /vendors with an empty
+    "pairs" and no "salt_tasks" stores only marg_items (purchase_app 11b) and touches nothing else."""
     items, as_on = read_marg_salt_list(path, ingest)
     md5 = hashlib.md5(io.open(path, "rb").read()).hexdigest()
-    return dict(marg_items=items, marg_as_on=as_on, marg_md5=md5, source=os.path.basename(path), host="vps")
+    return dict(pairs={}, marg_items=items, marg_as_on=as_on, marg_md5=md5, source=os.path.basename(path), host="vps")
 
 
 def load_state(state=DEF_STATE):

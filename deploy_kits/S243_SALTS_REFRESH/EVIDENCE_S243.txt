@@ -114,3 +114,6 @@ salts_refresh 13-09-2026 00:28 DRY RUN file=SALT_WISE_ITEM_LIST_DEFAULT__2026-09
 
 == 13-Sep 06:55 IST · live 401 bad_token on first --force: the S187 drop-in held a stale token. read_token now takes the value from the RUNNING service (/proc/MainPID/environ, then systemctl show -p Environment last occurrence), drop-in as the last fallback; explicit/mock drop-in path unchanged for tests. Selftest re-run below.
 RESULT: PASS
+
+== 13-Sep 07:00 IST · second live 401: cause found by reading the code, not the box — finance_app front gate (S224 patch) opens X-Finance-Marg only for /purchase/api/push, /vendors, /feed; /api/salts is not on the list, so the token is refused before purchase_app. Fixed: post through /api/vendors with pairs={} and marg_items (the exact door push_salts.py uses; handler 11b). Selftest updated and re-run:
+RESULT: PASS
