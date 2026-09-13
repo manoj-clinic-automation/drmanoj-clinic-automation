@@ -1,0 +1,31 @@
+PORTAL.PY RECONSTRUCTION -- proved at S250, 13-Sep-2026, before this kit's walk was run.
+
+The repository holds NO full copy of the live /root/portal/portal.py. It holds one base and a
+chain of anchored patchers. This kit needed the live bytes so that the walk could ask portal's own
+_visible_sections what each person is shown. The chain was replayed from the base and every
+declared intermediate pin was reproduced EXACTLY, in order, ending on the pin the S243 close
+declares live.
+
+  deploy_kits/S204_VPS_LIVE/root__portal__portal.py         24ea2c0b44bad08fbce71908a5019ecc
+  S218_PORTAL_TILE/patch_portal_vaapsi_tile.py           -> 16bfd590e2e422bb81bb8b6ad6e84eae
+  S222_PORTAL_ENTRY/patch_portal_users_entry_s222.py     -> c89ffa9f619712929c2b81d6e1d98c17
+  S222_SCANAPP_INAPP/patch_portal_scanapp_tiles_s222.py  -> 23824f92988621a38c1ae0cd7fb1314c
+  S222_TILE_GRANTS/patch_portal_grants_s222.py           -> d15acef3fcb0237563475968c2eec921
+  S223_LAUNCH_TILES/patch_portal_launch_tiles_s223.py    -> 2cfd2f62a1c46671f0facf04c1c9e774
+  S223_CORRECTIONS_TILE/patch_portal_corrections_tile... -> fbd4029b3dec43cb9586950b80b15fc1
+  S223_CLINIC_DAY/patch_portal_dayrevenue_tile_s223.py   -> e2f907527113588e7ce8287d678525a1
+  S223_REGISTER_CARD/patch_portal_register_tile_s223.py  -> 302e7459ff342d7a4481f814dcc855c5
+  S224_MARG_PURCHASES/patch_portal_purchase_tile_s224.py -> 3530f637d620c225906f9c0113b1f0b0
+  S224_DOCTERZ_TILE_NAMES/patch_portal_docterz_names...  -> d28038047d81abd290d58ed15f9a1482
+  S225_STAFF_ORDER/patch_portal_staff_order_s225.py      -> 7bc591151553344e80d1e034a8f176d6
+  S239_PORTAL_F242/patch_portal_f242_s239.py             -> ed558b3663c3dd100a24f58aafc32363
+  S242_AMIR_TILE/patch_portal_amir_tile_s242.py          -> d08721f69bc7c3e3a79a50192b20affb
+  S243_REPORTS_TILE/patch_portal_reports_tile_s243.py    -> 4bb6bde0e2e07033ac0e0f5d7a7daaf6
+  S243_DARPAN_TILE/patch_portal_darpan_tile_s243.py      -> 06f1b378608fbc97c54bc1f546d7985c
+
+  live_pins_S243close.txt declares /root/portal/portal.py    06f1b378608fbc97c54bc1f546d7985c
+  MATCH.
+
+Fifteen patchers, fifteen declared pins, fifteen exact reproductions. portal.py is NOT edited by
+this kit -- the reconstruction exists only so the walk can be run against the real code rather
+than against a reading of the JSON.

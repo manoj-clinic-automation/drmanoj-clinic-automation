@@ -1,0 +1,11 @@
+S250_STAFF_REGISTER_TILE -- grants file only (no code, no restart)
+/root/portal/tile_grants.json  0efad736e71de7199e7c596a5b3d0c2e -> 932f7bd05f4bf19b1f53deb9a2f35d22 (v14 -> v15)
+CHANGE: "Staff Register" removed from the mask of shavez, shivani and alisha. Nothing else in the file moves.
+WHO GAINS IT: shavez (checker), shivani and alisha (makers) -- one tile each, in the Staff section, url /register/review.
+NOT GRANTED BY NAME: the tile carries roles [doctor, manager, staff] in portal.py, so lifting the mask is the whole change.
+UNCHANGED: "Attendance" stays masked for all three; darpan, amir, awdhesh, sukhveer, surendra, parvesh, sandeep, vikky keep the S239 v9 hold; manoj and bhawna unchanged; section order untouched.
+/root/portal/portal.py 06f1b378608fbc97c54bc1f546d7985c -- NOT TOUCHED.
+BUILT S250 13-Sep-2026 -- the live portal.py reproduced offline from the S204 base plus fifteen anchored patchers (EVIDENCE_portal_reconstruction_S250.txt), then walked live-shape 67/67 through portal's own _visible_sections with v14 beside v15 as the baseline.
+INSTALLER rehearsed end to end against a fake box: predicted md5 printed, backup taken, rerun refuses and changes nothing.
+SERVICE none. The grants file is read per request -- no restart, no downtime.
+AFTER: the three open the app and the tile is there. The register's OWN gate (SR_MAKER_USERS / SR_CHECKER_USERS in staff_register.py) is unchanged and still decides what they may do; the install line prints those two lists so a mismatch is seen at once.

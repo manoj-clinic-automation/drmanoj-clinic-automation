@@ -1,0 +1,79 @@
+S250_STAFF_REGISTER_TILE -- live-shape walk
+portal.py : /tmp/claude-0/-home-claude/b349718a-39a5-5a6e-b109-44c94fe4a6eb/scratchpad/s250/rebuild/portal.py
+  PASS  portal.py is the declared pin 06f1b378
+  PASS  grants v14 is the declared pin 0efad736
+  PASS  grants v15 is the declared pin 932f7bd0
+  PASS  portal.py imports under all three grant states
+  PASS  exactly one 'Staff Register' tile in portal.py
+  PASS  its url is /register/review
+  PASS  its roles are doctor/manager/staff (so lifting the mask is the whole change)
+  PASS  'Staff Register' is grouped under Staff
+  PASS  no name-grant was used: 'Staff Register' is in nobody's extra in v15
+
+THE THREE WHO GAIN IT
+  PASS  shavez (staff): gains exactly ['Staff Register']
+  PASS  shavez (staff): loses nothing
+  PASS  shavez (staff): Attendance still NOT shown
+  PASS  shavez (staff): it lands in the Staff section
+  PASS  shavez (staff): every other tile keeps its place
+  PASS  shavez (manager): gains exactly ['Staff Register']
+  PASS  shavez (manager): loses nothing
+  PASS  shavez (manager): Attendance still NOT shown
+  PASS  shavez (manager): it lands in the Staff section
+  PASS  shavez (manager): every other tile keeps its place
+  PASS  shivani (staff): gains exactly ['Staff Register']
+  PASS  shivani (staff): loses nothing
+  PASS  shivani (staff): Attendance still NOT shown
+  PASS  shivani (staff): it lands in the Staff section
+  PASS  shivani (staff): every other tile keeps its place
+  PASS  alisha (staff): gains exactly ['Staff Register']
+  PASS  alisha (staff): loses nothing
+  PASS  alisha (staff): Attendance still NOT shown
+  PASS  alisha (staff): it lands in the Staff section
+  PASS  alisha (staff): every other tile keeps its place
+
+EVERYBODY ELSE -- tile for tile, section for section
+  PASS  darpan: unchanged
+  PASS  darpan: still does NOT see 'Staff Register'
+  PASS  amir: unchanged
+  PASS  amir: still does NOT see 'Staff Register'
+  PASS  awdhesh: unchanged
+  PASS  awdhesh: still does NOT see 'Staff Register'
+  PASS  sukhveer: unchanged
+  PASS  sukhveer: still does NOT see 'Staff Register'
+  PASS  surendra: unchanged
+  PASS  surendra: still does NOT see 'Staff Register'
+  PASS  parvesh: unchanged
+  PASS  parvesh: still does NOT see 'Staff Register'
+  PASS  sandeep: unchanged
+  PASS  sandeep: still does NOT see 'Staff Register'
+  PASS  vikky: unchanged
+  PASS  vikky: still does NOT see 'Staff Register'
+  PASS  manoj (doctor): unchanged
+  PASS  manoj (doctor): still sees 'Staff Register'
+  PASS  bhawna (doctor): unchanged
+  PASS  bhawna (doctor): still sees 'Staff Register'
+  PASS  a staff login with no grants row: unchanged
+  PASS  the owner's PC-tools view is unchanged
+
+FAIL CLOSED -- no grants file at all
+  PASS  shavez: with no grants file 'Staff Register' is still shown -- it sits on the staff role, so this kit can never take it away
+  PASS  shavez: with no grants file the screen is the code-only screen (no extra, no mask)
+  PASS  shivani: with no grants file 'Staff Register' is still shown -- it sits on the staff role, so this kit can never take it away
+  PASS  shivani: with no grants file the screen is the code-only screen (no extra, no mask)
+  PASS  alisha: with no grants file 'Staff Register' is still shown -- it sits on the staff role, so this kit can never take it away
+  PASS  alisha: with no grants file the screen is the code-only screen (no extra, no mask)
+  PASS  the doctor keeps 'Staff Register' with no grants file
+  PASS  the money tiles granted by name are the ones that fall away with no grants file (fail closed, unchanged)
+
+THE DIFF v14 -> v15, measured
+  PASS  version 14 -> 15
+  PASS  the v14 note is carried whole, only appended to
+  PASS  same set of logins
+  PASS  exactly three logins change
+  PASS  shavez: only the mask changes, and only by removing 'Staff Register'
+  PASS  shivani: only the mask changes, and only by removing 'Staff Register'
+  PASS  alisha: only the mask changes, and only by removing 'Staff Register'
+  PASS  section order block untouched
+
+67 passed, 0 failed
