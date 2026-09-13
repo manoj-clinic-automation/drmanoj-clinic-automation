@@ -14,7 +14,7 @@
 #  route, no new table, no schema change, no cron, no service file.
 #
 #  Gates: SUMS + KIT_ID -> live pin -> patcher selftest on the LIVE bytes -> the kit's own
-#  two walks (S245's 40 checks and S244's 62-check regression suite) against the kit file
+#  two walks (S245's 53 checks and S244's 62-check regression suite) against the kit file
 #  ON THIS BOX -> .bak_S245_<pin8> -> place -> py_compile
 #  -> import smoke under the unit's own environment -> restart -> healthz within 20 s.
 #  Any RED after placing: the file is restored, the service restarted, exit 1.
@@ -128,7 +128,9 @@ for need in ('/finance/amir', '/finance/amir/step/<int:n>', '/finance/amir/day',
 assert amir_day.GATE_STEPS == (2, 4, 5, 6), 'GATE_STEPS moved'
 assert 1 <= amir_day.EXPORT_GRACE_MIN <= 60, 'EXPORT_GRACE_MIN out of range'
 assert [c for c, _l in amir_day.REASONS] == ['ok', 'short', 'nodeal', 'discount', 'other'], 'REASONS moved'
-print('import ok: amir_day mounted, every route still registered, grace %d min, 5 answers' % amir_day.EXPORT_GRACE_MIN)" 2>&1)" || SMOKE_RC=$?
+import re as _re
+assert _re.match(r'^\\d{4}-\\d{2}-\\d{2}$', amir_day.BILLS_FROM), 'BILLS_FROM is not a date'
+print('import ok: amir_day mounted, routes registered, grace %d min, bills from %s' % (amir_day.EXPORT_GRACE_MIN, amir_day.BILLS_FROM))" 2>&1)" || SMOKE_RC=$?
 [ "$SMOKE_RC" -eq 0 ] || red "import smoke failed under the service environment:
 $(echo "$SMOKE_OUT" | tail -8)"
 echo "-- smoke: $(echo "$SMOKE_OUT" | tail -1) ($PY_SMOKE, env from the unit)"
