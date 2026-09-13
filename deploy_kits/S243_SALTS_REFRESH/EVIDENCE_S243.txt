@@ -111,3 +111,6 @@ salts_refresh 13-09-2026 00:28 DRY RUN file=SALT_WISE_ITEM_LIST_DEFAULT__2026-09
 --- after rollback: 0 copies of salts_refresh.py remain
 
 == 13-Sep 06:40 IST · publish gate: fixture token literal renamed to DUMMY-TOKEN-PUT-HERE (line 125); selftest re-run 44/44 PASS; SUMS.md5 recomputed.
+
+== 13-Sep 06:55 IST · live 401 bad_token on first --force: the S187 drop-in held a stale token. read_token now takes the value from the RUNNING service (/proc/MainPID/environ, then systemctl show -p Environment last occurrence), drop-in as the last fallback; explicit/mock drop-in path unchanged for tests. Selftest re-run below.
+RESULT: PASS

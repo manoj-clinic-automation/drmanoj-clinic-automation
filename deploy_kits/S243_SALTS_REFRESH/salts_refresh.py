@@ -59,9 +59,7 @@ def _now():
     return dt.datetime.now().replace(microsecond=0)
 
 
-def read_token(dropin=DEF_DROPIN):
-    """FINANCE_MARG_TOKEN from the systemd drop-in written by install_m1a.sh:
-    [Service] / Environment=FINANCE_MARG_TOKEN=<token>. Returned, never printed."""
+def _token_from_dropin(dropin):
     try:
         with io.open(dropin, "r", encoding="utf-8") as fh:
             for line in fh:
@@ -71,6 +69,43 @@ def read_token(dropin=DEF_DROPIN):
     except OSError:
         return None
     return None
+
+
+def _token_from_running_service(unit="clinic-finance"):
+    """The value the live app actually holds (S243 fix after a 401: the S187 drop-in
+    can be stale once a token has been rotated). 1) /proc/<MainPID>/environ of the
+    running service; 2) systemctl show -p Environment, LAST occurrence wins as in systemd."""
+    import subprocess
+    try:
+        pid = subprocess.run(["systemctl", "show", "-p", "MainPID", "--value", unit],
+                             capture_output=True, text=True, timeout=10).stdout.strip()
+        if pid and pid != "0":
+            with io.open("/proc/%s/environ" % pid, "rb") as fh:
+                for kv in fh.read().split(b"\0"):
+                    if kv.startswith(b"FINANCE_MARG_TOKEN="):
+                        v = kv.split(b"=", 1)[1].decode("utf-8", "ignore").strip()
+                        if v:
+                            return v
+    except Exception:
+        pass
+    try:
+        out = subprocess.run(["systemctl", "show", "-p", "Environment", "--value", unit],
+                             capture_output=True, text=True, timeout=10).stdout
+        vals = [t.split("=", 1)[1].strip().strip('"') for t in out.split() if t.startswith("FINANCE_MARG_TOKEN=")]
+        if vals:
+            return vals[-1]
+    except Exception:
+        pass
+    return None
+
+
+def read_token(dropin=DEF_DROPIN):
+    """FINANCE_MARG_TOKEN as the live finance app holds it. Returned, never printed.
+    Default (real box): the running service first, then systemd's merged view, then the
+    S187 drop-in file. An explicit non-default dropin (tests, ROOT mock) is read as a file only."""
+    if dropin != DEF_DROPIN or ROOT:
+        return _token_from_dropin(dropin)
+    return _token_from_running_service() or _token_from_dropin(dropin)
 
 
 def stamp_of(path):
