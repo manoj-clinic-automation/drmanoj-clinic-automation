@@ -1,0 +1,125 @@
+S243_SCREEN_FIXES -- evidence, 12-Sep-2026. Repo clone /tmp/kbv; nothing live touched.
+
+== A · purchase_app.py: from 8090ca2041574e25be39682dd5555ffe (S240_SANJEEVNI_123, = live_pins_S242close.txt row 28) to ad1fc00466458897751df7c9e9fcb99d
+   patcher on the S240 copy (count==1 guard, FROM pin guard, ALREADY PATCHED on re-run):
+source purchase_app_S240.py md5 8090ca2041574e25be39682dd5555ffe
+wrote /tmp/pa_check.py md5 ad1fc00466458897751df7c9e9fcb99d
+   ad1fc00466458897751df7c9e9fcb99d  /tmp/pa_check.py
+   ad1fc00466458897751df7c9e9fcb99d  purchase_app.py
+   ALREADY PATCHED -- nothing to do
+   diff rev 13 -> rev 14 (the only change):
+   1755a1756,1762
+   > @bp.route("/", strict_slashes=False)
+   > def page_root():
+   >     """S243: the bare prefix -> the hub. Both /finance/purchase and
+   >     /finance/purchase/ land here; the app's own gate has already run."""
+   >     return redirect(request.script_root + _url_prefix + "/page/hub", code=302)
+   > 
+   > 
+
+== A · live-shape walk (Flask 3.1.3, init(app, db, require, unit=, marg_token=, assets_db=) as in the S224 mount and selftest):
+   walking /home/claude/S243/work/purchase_app.py (md5 ad1fc00466458897751df7c9e9fcb99d) on a temp db at /tmp/walk_s243_bnmaerx5/finance.db
+     PASS  GET /finance/purchase -> 302
+     PASS  GET /finance/purchase Location is /finance/purchase/page/hub
+     PASS  GET /finance/purchase/ -> 302
+     PASS  GET /finance/purchase/ Location is /finance/purchase/page/hub
+     PASS  root with nobody signed in still redirects to the hub (the app gate, not this rule, refuses strangers)
+     PASS  hub answers 200 for the checker
+     PASS  hub is marked (doctor)
+     PASS  salts page answers 200 for the checker
+     PASS  api/healthz answers 200 ok
+     PASS  hub with nobody signed in -> 401 from the mounted require (fail closed)
+     PASS  no page carries a phone-shaped number
+     PASS  unpatched rev 13: GET /finance/purchase/ -> 404 (the symptom)
+     PASS  /finance/purchase/page/hub: same status and same bytes as the unpatched rev 13
+     PASS  /finance/purchase/page/salts: same status and same bytes as the unpatched rev 13
+     PASS  /finance/purchase/api/healthz: same status and same bytes as the unpatched rev 13
+     PASS  unpatched rev 13 has no page_root
+   RESULT: 16 passed, 0 failed
+
+== B · finance_app.py /finance/daily. Live file not in the repo. Anchor (base S204_C2 70f79997 L4614-4617; identical in S204_VPS_LIVE root__finance__finance_app.py L4610-4613):
+   u, err = require("maker") / if err: return redirect(PORTAL_LOGIN, code=302) / return send_file(... "finance_daily.html")
+   count(old)==1 in S204_C2: 1   in S204_VPS_LIVE: 1
+   later patchers: 106 .py/.sh files in deploy_kits/S204..S242 mention finance_app.py; grep for finance_daily.html | def page_daily | the anchor text across all of them:
+   0 files match -> the anchor is untouched by every later patch (S208..S241 incl. S218_HUB_FINAL_2, which changed only the WALK LINK to /finance/daily, and S241_AMIR_DAY, which appends a mount block after the last '# --- S###_X end ---' anchor).
+   names the new code calls (current_user, roles_for, db, UNIT) are module-level in the base (L217, L317, L89, L73) and no later patcher redefines them.
+   the patcher, proven on the S204_C2 base (pin guard lifted for the offline proof):
+   source finance_app.py md5 70f799973a0f131c3f515407b2a8cd03
+   wrote finance_app.py.new md5 1da67b781a4dd605cb03339c0691d5ac
+   4616a4617,4622
+   >         # S243: a checker (the doctor) lands on his Review console, not the
+   >         # portal. The maker gate is unchanged; only the destination of the
+   >         # refusal moved, and only for a login that holds checker here.
+   >         u0 = current_user()
+   >         if "checker" in roles_for(db(), UNIT, u0["user"], u0["role"]):
+   >             return redirect("/finance/review", code=302)
+   pin guard, unlifted, on the base: REFUSED: source pin is not 81db4854... -- the live file moved since this patch was built
+   re-run on the .new: ALREADY PATCHED -- nothing to do
+
+== B · live-shape walk: the REAL finance_app imported as gunicorn does (repo finance/ modules beside it), real front gate + require + unit_role, db built from finance_schema.sql:
+   -- unpatched S204_C2 base:
+   walking /home/claude/S243/work/fa_unpatched/finance_app.py on a COPY of the db at /tmp/walk_s243_fa_like4y5a/finance.db
+     file carries the S243 mark: False
+     PASS  anonymous /finance/daily -> 302 to the portal
+     PASS  login with NO medical role -> 302 to the portal (front gate, unchanged)
+     PASS  medical MAKER -> 200, the Daily Sale form
+     PASS  UNPATCHED: medical CHECKER -> 302 to the portal (the symptom)
+     PASS  checker: /finance/review -> 200
+     PASS  checker: /finance/approvals -> 200
+     PASS  checker: /finance/ answers (200 or a redirect within /finance)
+     PASS  maker: /finance/approvals still refused (302 to the portal) -- no gate widened
+   RESULT: 8 passed, 0 failed
+   -- patched (.new):
+   walking /home/claude/S243/work/fa_patched/finance_app.py on a COPY of the db at /tmp/walk_s243_fa_43qk85kc/finance.db
+     file carries the S243 mark: True
+     PASS  anonymous /finance/daily -> 302 to the portal
+     PASS  login with NO medical role -> 302 to the portal (front gate, unchanged)
+     PASS  medical MAKER -> 200, the Daily Sale form
+     PASS  medical CHECKER -> 302 to /finance/review (S243)
+     PASS  checker: /finance/review -> 200
+     PASS  checker: /finance/approvals -> 200
+     PASS  checker: /finance/ answers (200 or a redirect within /finance)
+     PASS  maker: /finance/approvals still refused (302 to the portal) -- no gate widened
+   RESULT: 8 passed, 0 failed
+
+== INSTALLER mock (ROOT=/home/claude/S243/mock: S240 purchase_app + S204_C2 finance_app with the repo modules, the real unit file + a marg_token drop-in; fake systemctl/curl on PATH; MOCK_FA_PIN8=70f79997 because the mock's finance_app is the S204 base)
+   T1 finance pin not expected -> !! RED -- live finance_app.py is 70f799973a0f131c3f515407b2a8cd03 -- not one of the pins this kit expects (81db4854 72bc8323); NOTHING chang ; files: 8090ca20 70f79997  (unchanged)
+   T2 purchase pin 6366edb5 -> !! RED -- live purchase_app.py is 6366edb5bb42797d31ce5d73b1cf6598 -- not rev 13 8090ca20 this kit was built on; NOTHING changed
+   T3 install:
+      -- MOCK: ROOT=/home/claude/S243/mock PY=/usr/bin/python3 PY_SMOKE=/usr/bin/python3
+      -- MOCK: finance_app pin override 70f79997
+      -- gates green: SUMS.md5 and KIT_ID.txt (S243_SCREEN_FIXES -> purchase_app.py ad1fc004)
+      -- live pins: purchase_app.py 8090ca20 | finance_app.py 70f79997 (as expected)
+      source /home/claude/S243/mock/root/finance/finance_app.py md5 70f799973a0f131c3f515407b2a8cd03
+      wrote /home/claude/S243/mock/root/finance/finance_app.py.new md5 1da67b781a4dd605cb03339c0691d5ac
+      -- prepared: purchase_app.py.new ad1fc004 | finance_app.py.new 1da67b78 | py_compile clean with /usr/bin/python3
+      -- placed: purchase_app.py 8090ca20 -> ad1fc004 | finance_app.py 70f79997 -> 1da67b78 | backups .bak_S243_<pin8>
+      -- smoke: import ok: finance_app (/usr/bin/python3, env from the unit)
+      -- healthz 200 after 0s | anonymous /finance/purchase/ 302 | anonymous /finance/daily 302 (302 = the login gate, as before; the signed-in checks are the owner's browser)
+      == S243_SCREEN_FIXES INSTALLED
+         purchase_app.py  predicted ad1fc00466458897751df7c9e9fcb99d  actual ad1fc00466458897751df7c9e9fcb99d
+         finance_app.py   was 70f799973a0f131c3f515407b2a8cd03  actual 1da67b781a4dd605cb03339c0691d5ac  (patched on this box; record this pin)
+         backups: /home/claude/S243/mock/root/finance/purchase_app.py.bak_S243_8090ca20  /home/claude/S243/mock/root/finance/finance_app.py.bak_S243_70f79997  (rollback line in README)
+      restarts=1 backups: finance_app.py.bak_S243_70f79997 purchase_app.py.bak_S243_8090ca20 
+   T4 re-run: -- ALREADY INSTALLED: purchase_app.py ad1fc004 = kit; finance_app.py 1da67b78 carries the S243 mark. Nothing changed. restarts still 1
+   T5 healthz never 200:
+      !! RED -- healthz answered '000' after 20 s
+         restored purchase_app.py from /home/claude/S243/mock/root/finance/purchase_app.py.bak_S243_8090ca20 (8090ca20)
+         restored finance_app.py from /home/claude/S243/mock/root/finance/finance_app.py.bak_S243_70f79997 (70f79997)
+         service back up on the restored files
+      !! S243_SCREEN_FIXES NOT installed
+      files after: 8090ca20 70f79997  restarts=2 healthz polls=20 .new left: 0
+   T6 import smoke fails (PY_SMOKE=/bin/false; env via systemctl show):
+      !! RED -- import smoke failed under the service environment:
+         restored purchase_app.py from /home/claude/S243/mock/root/finance/purchase_app.py.bak_S243_8090ca20 (8090ca20)
+         restored finance_app.py from /home/claude/S243/mock/root/finance/finance_app.py.bak_S243_70f79997 (70f79997)
+      !! S243_SCREEN_FIXES NOT installed
+      files after: 8090ca20 70f79997  restart called: no
+   T7 install with env via systemctl show: -- smoke: import ok: finance_app (/usr/bin/python3, env from the unit) == S243_SCREEN_FIXES INSTALLED 
+
+== DOUBTS
+   1. finance_app.py live pin: live_pins_S242close.txt row 21 says 81db4854 (S240), but CANONICAL_MANIFEST (S241 close) and KB_Register v5.91 record 81db4854 -> 72bc8323 when S241_AMIR_DAY mounted amir_day; the pins table was 'deliberately NOT edited row by row'. The installer accepts either; the count==1 anchor check on the live bytes is the real guard. Whatever md5sum /root/finance/finance_app.py prints before install is the true FROM pin.
+   2. The mock's finance_app is the S204_C2 base (70f79997), not the live 81db/72bc file; the on-box patcher is what proves the live anchor, and it refuses with nothing changed if it is not exactly once.
+   3. The import smoke runs under /usr/bin/python3 (the unit's ExecStart interpreter); py_compile uses the venv per the house rule. The smoke needs gunicorn's env only (no db call at import, F-303).
+   4. ASCII-only .sh; kit files are LF. No phone-shaped number in any kit file: 0 files match.
+   SUMS.md5 covers every kit file except itself and this evidence file.

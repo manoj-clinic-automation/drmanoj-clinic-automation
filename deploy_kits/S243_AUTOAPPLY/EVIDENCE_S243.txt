@@ -1,0 +1,208 @@
+S243_AUTOAPPLY -- evidence, 13-Sep-2026. Repo clone /tmp/kbv (read-only); nothing live touched; no phone number, no token.
+
+== 0 . what is live (from KB_canon_all)
+   S219_MARG_AUTOAPPLY went LIVE at S219 (live_pins_S219close.txt: finance_app.py a57980c2 'kits S219_MARG_AUTOAPPLY then S219_RETURNS_M7'); its D_NEW block is present in the live file -> shape S219-present.
+   finance_app.py live pin: 81db4854 (live_pins_S242close.txt row SHORT) / 72bc8323 (CANONICAL_MANIFEST.md L2320, S241 mount) -- both accepted by the installer.
+   finance_approvals.html live pin: e1652297a1ed5b81a0fcfedd2662f047 (S220, unchanged since) -- rebuilt here byte-for-byte:
+   S218_HUB_FINAL_2 1b72317a -> S219 M7 -> S220 F277 -> LARGE_GATE -> METRICS -> INTENT =
+     e1652297a1ed5b81a0fcfedd2662f047  hub_live.html
+
+== 1 . anchors: exactly once in the S204_C2 base and in the live-shaped copy; every later patcher grepped
+   base.py {'A_INS': 1, 'P': 1, 'D_OLD': 1, 'D_NEW': 0}
+   live_like.py {'A_INS': 1, 'P': 1, 'D_OLD': 0, 'D_NEW': 1}
+   patchers checked: 102
+     OVERLAP S210_MARGTIDY/patch_finance_app_margtidy.py ['row = con.execute("SELECT * FROM marg_push_staging WHERE id=?",', '(pid,)).fetchone()', '_marg_staging(con)', 'return jsonify(ok=False, error="no_id"), 400']
+     OVERLAP S210_RULEDWORDS/patch_finance_app_margtidy.py ['row = con.execute("SELECT * FROM marg_push_staging WHERE id=?",', '(pid,)).fetchone()', '_marg_staging(con)', 'return jsonify(ok=False, error="no_id"), 400']
+     OVERLAP S219_MARG_AUTOAPPLY/patch_marg_autoapply_s219.py ['message="Received: %d day(s), %d bill(s). NOTHING has "', 'id=cur.lastrowid, days=survey, not_filed=not_filed,', 'bills=sum(len(d["bills"]) for d in rep["days"]),', '"entered the books -- Dr. Manoj will check and "', 'item_lines=total_items,', '"apply it on the workbench. Report pahunch "', '"gayi hai; abhi khaate mein nahi gayi."', '% (len(days), sum(len(d["bills"])', 'return jsonify(ok=True, verdict="ACCEPTED-FOR-REVIEW",', 'for d in rep["days"])))']
+     OVERLAP S219_RETURNS_M7/patch_returns_stubguard_s219.py ['(pid,)).fetchone()']
+   (the S210_MARGTIDY hits are lines of the dismiss route it INSERTS, not an edit of the anchor: the P anchor's first line
+    'pid = (request.get_json(silent=True) or {}).get("id")' is unique to the apply route and the whole block counts 1 in both files;
+    S219 is the D region and both of its shapes are handled; S219_RETURNS_M7 stubguard shares only '(pid,)).fetchone()'.)
+   live-shaped copy = S204_C2 70f79997 + S208_LEDGER3 pend + S210 DBPATIENCE/MARGTIDY/RULEDWORDS/TRUTHFLOW + S211 REMOVEFIX + S219 M1:
+     d0be1de00aef29ed55544caa361e603d  live_like.py
+
+== 2 . patcher selftest (in-memory patch, compile, marks, additive, second run no-op, stranger refused)
+     PASS  base.py: patches (patched, shape S219-absent)
+     PASS    compiles
+     PASS    mark present once
+     PASS    core defined once, route calls it once
+     PASS    helpers land before the push route
+     PASS    the push handler calls the auto-apply once
+     PASS    the pre-S243 closing block survives intact
+     PASS    OFF file named
+     PASS    the list hands the hub the S243 facts once
+     PASS    only additions: every original line still present
+     PASS    second run is a no-op
+     PASS  live_like.py: patches (patched, shape S219-present)
+     PASS    compiles
+     PASS    mark present once
+     PASS    core defined once, route calls it once
+     PASS    helpers land before the push route
+     PASS    the push handler calls the auto-apply once
+     PASS    the pre-S243 closing block survives intact
+     PASS    OFF file named
+     PASS    the list hands the hub the S243 facts once
+     PASS    only additions: every original line still present
+     PASS    second run is a no-op
+     PASS  a stranger file is refused
+     PASS  both closing shapes at once is refused
+   selftest: 24 passed, 0 failed
+
+== 3 . hub patcher selftest on the S218 FINAL bytes and on the rebuilt live pin e1652297
+     PASS  hub_S218.html: patches (patched)
+     PASS    applied-automatically wording present once
+     PASS    the old wording survives for a hand apply
+     PASS    the rule is shown on a superseded row
+     PASS    only these two lines changed
+     PASS    second run is a no-op
+     PASS  hub_live.html: patches (patched)
+     PASS    applied-automatically wording present once
+     PASS    the old wording survives for a hand apply
+     PASS    the rule is shown on a superseded row
+     PASS    only these two lines changed
+     PASS    second run is a no-op
+     PASS  a stranger file is refused
+   selftest: 13 passed, 0 failed
+   predicted hub after patch:
+     cc349dd00d0a2f861ec54242c9551557  hub_live_s243.html
+
+== 4 . the patcher on the live-shaped copy (this is the on-box run, FA_PATH pointed at the copy)
+   source live_like.py md5 d0be1de00aef29ed55544caa361e603d
+   shape  S219-present
+   wrote live_like_s243.py md5 b2dfc153f06b296d757ee6024df8cbac
+   source live_like_s243.py md5 b2dfc153f06b296d757ee6024df8cbac
+   ALREADY PATCHED -- nothing to do
+   diff stat live-shaped -> patched (additions only; the 7-line prelude of api_marg_push_apply becomes the route + the core def):
+     lines added: 283
+     lines removed: 0
+
+== 5 . LIVE-SHAPE WALK on the patched live-shaped copy (real Flask, real sqlite, real xls via xlwt->xlrd, marg_gate multipart)
+   walking /home/claude/S243/work/live_like_s243.py
+     S243 mark: True | S210 autofile: True | S219 M1: True | S210/S211 remove route: True
+     temp db /tmp/walk_s243_aa_errx6mtr/finance.db
+   
+   --- 0 · plumbing
+     PASS  a file that is not a Marg export is REFUSED whole, as today (422)
+     PASS  the refusal left its data_flag, as today
+     PASS  the wrong token is still refused (401)
+   
+   --- 1 · a VERIFIED sale report for a NOT-filed day applies AT ONCE
+     PASS  HTTP 200, verdict APPLIED
+     PASS  the message says applied automatically
+     PASS  staging row status='applied'
+     PASS  staging row applied_by='auto'
+     PASS  staging row records the S243 rule and per-day facts
+     PASS  the day was FILED by the apply (D354 autofile), entered_by auto
+     PASS  sale_item holds the 3 bills
+     PASS  sale_line_item holds the 6 drug lines
+     PASS  audit_log: 'auto-apply' by 'auto' naming the rule
+     PASS  audit_log: the checker-path 'apply' row is also by 'auto'
+     PASS  the MARG_DAY_NOT_FILED flag written at push time is cleared
+     PASS  hub list: applied_by auto, auto.rule present
+     PASS  hub card text reads '✓ applied automatically <time>'
+     PASS  hub list: the day reads FILED now (S210 F-249 re-answers it)
+   
+   --- 2 · a SECOND push for the same day with FEWER bills is put aside
+     PASS  HTTP 200, verdict SUPERSEDED
+     PASS  status='superseded' (the table's own word; 'dismissed' is refused by its CHECK)
+     PASS  applied_by='auto', rule 'older than applied'
+     PASS  its replay payload is cleared (can never be replayed by the day-save)
+     PASS  audit_log 'auto-dismiss' by auto
+     PASS  the books are untouched: still 3 bills, 6 lines
+     PASS  the first push stays APPLIED
+     PASS  hub list carries the rule for the superseded row
+     PASS  the SAME bytes again -> ALREADY-RECEIVED, as today
+   
+   --- 3 · a LATER, FULLER export for the same day (4 bills) is applied over it
+     PASS  verdict APPLIED
+     PASS  the day now holds 4 bills and 8 lines (replaced, not duplicated)
+     PASS  one live ingest_batch for the day; the earlier one is 'superseded' (ingest_day rule)
+     PASS  F1 stays APPLIED (it truly was; history is not rewritten)
+     PASS  F3 applied_by auto, facts say 4 bills, last bill 4
+     PASS  same-count re-export with NO later bill than applied (A2..A4 vs A1..A4) is put aside
+     PASS  same-count export whose LAST bill is later (A5) is applied
+     PASS  same bills, one amount corrected (net differs from the recorded apply) -> applied, newest wins
+     PASS  same count, same last bill, DIFFERENT net again -> applied (arrival order is the tie-break: newest wins)
+     PASS  ...the day's net follows the latest export
+     PASS  ...fewer bills with a different net is still put aside (the net rule only ranks the SAME bill set)
+   
+   --- 4 · the OFF file: behaves exactly as today; the manual Apply still works
+     PASS  with the OFF file, a not-filed day's push is ACCEPTED-FOR-REVIEW only
+     PASS  ...the message says NOTHING entered the books (today's words)
+     PASS  ...row PENDING, nothing in the books, no day filed
+     PASS  ...no automatic audit row was written
+     PASS  the checker's Apply button works unchanged (ok, day ingested)
+     PASS  ...status applied, applied_by = the checker (not auto)
+     PASS  ...hub card text for a hand apply still reads '✓ loaded <time>'
+     PASS  ...2 bills, 4 lines in the books
+     PASS  Apply on a non-pending row is refused 409, as today
+     PASS  Apply without a checker login is refused
+   
+   --- 5 · an OLDER push for the same day still pending is superseded when the newer applies
+     PASS  (OFF) the older push is pending
+     PASS  the newer push is APPLIED
+     PASS  the older one is now 'superseded' with rule 'superseded by <md5-8>'
+     PASS  ...its audit row 'auto-dismiss' by auto exists
+     PASS  ...the response names it
+     PASS  the day holds the newer export: 3 bills
+     PASS  the owner's Remove button works unchanged (S211: status 'rejected')
+   
+   --- 6 · a day already FILED by hand: the push applies at once (the S219 order, now by S243)
+     PASS  verdict APPLIED
+     PASS  applied_by auto; 2 bills in the books
+     PASS  the S219 apply summary line rides along (one rule, D349)
+   
+   --- 7 · a two-day report: one day already fully held, one new -> applied (the new day is what it brings)
+     PASS  verdict APPLIED (D3 held equal, D5 new)
+     PASS  D5 filed and holding 2 bills; D3 still 3
+     PASS  the identical bytes again -> ALREADY-RECEIVED
+   
+   --- 8 · the rest of the surface
+     PASS  every applied day still holds its drug lines at the end (bill numbers are unique across days, as in Marg)
+     PASS  the two MARG_DAY_NOT_FILED flags left are the hand-applied day (unchanged path) and the removed, never-filed day
+     PASS  healthz answers 200
+     PASS  the list route is still checker-only
+     PASS  no audit row by 'auto' names a phone-shaped number
+     PASS  py_compile of the file under test
+   
+   RESULT: 66 passed, 0 failed
+
+== 6 . the same walk on the UNPATCHED live-shaped copy reproduces the 12-Sep symptom
+   walking /home/claude/S243/work/live_like.py
+     S243 mark: False | S210 autofile: True | S219 M1: True | S210/S211 remove route: True
+     temp db /tmp/walk_s243_aa_1r4jnvha/finance.db
+   
+   --- 0 · plumbing
+     PASS  a file that is not a Marg export is REFUSED whole, as today (422)
+     PASS  the refusal left its data_flag, as today
+     PASS  the wrong token is still refused (401)
+   
+   --- U · UNPATCHED file: the symptom the owner met on 13-Sep morning
+     PASS  push of a NOT-filed day is ACCEPTED-FOR-REVIEW only
+     PASS  ...and the row sits PENDING
+     PASS  ...the day is not filed (no day_entry) -- '(day not filed)' on the hub
+     PASS  ...nothing in the books
+   RESULT (unpatched): 7 passed, 0 failed -- the symptom is reproduced
+
+== 7 . the patched S204_C2 base WITHOUT S210 autofile (not live; shows the honest 'held' path): the push stays PENDING and says why
+     S243 mark: True | S210 autofile: False | S219 M1: False | S210/S211 remove route: False
+     (expected on this non-live base, the walk asserts APPLIED) FAIL  HTTP 200, verdict APPLIED   [(200, 'ACCEPTED-FOR-REVIEW', 'Received: 1 day(s). Automatic apply could not complete (still not filed: 2026-09-12) -- the report is staged for Dr. Manoj to check and apply on the workbench. Report pahunch gayi hai; abhi khaate mein nahi gayi.')]
+   -> on that base the held row records audit 'auto-apply-held' by auto and the owner's Apply still works; live carries S210 autofile so this path is reached only when autofile refuses.
+
+== 8 . installer mock (ROOT=, fake systemctl/curl, live-shaped file d0be1de0 via MOCK_FA_PIN8, real hub pin e1652297)
+   fresh install:
+     -- healthz 200 after 0s | anonymous marg-push/list 302 (302/401 = the login gate, as before) | tokenless POST marg-push 302 (401 = the sender gate, as before)
+     
+     == S243_AUTOAPPLY INSTALLED
+        finance_app.py             was d0be1de00aef29ed55544caa361e603d  actual b2dfc153f06b296d757ee6024df8cbac  (patched on this box; record this pin)
+        finance_approvals.html     was e1652297a1ed5b81a0fcfedd2662f047  actual cc349dd00d0a2f861ec54242c9551557
+        backups: /home/claude/S243/mock_aa/root/finance/finance_app.py.bak_S243_d0be1de0  /home/claude/S243/mock_aa/root/finance/finance_ui/finance_approvals.html.bak_S243_e1652297  (rollback line in README)
+        OFF switch (no restart needed):  touch /home/claude/S243/mock_aa/root/finance/AUTOAPPLY_OFF     ON again:  rm /home/claude/S243/mock_aa/root/finance/AUTOAPPLY_OFF
+   rerun -> ALREADY INSTALLED (both marks). wrong pin (real list vs d0be1de0) -> RED, NOTHING changed, file untouched.
+   healthz forced 000 -> RED after 20 s, both files restored byte-identical (d0be1de0 / e1652297), service restarted (2 restarts logged).
+   sibling S243_SCREEN_FIXES mark + .bak_S243_81db4854 present -> lineage accepted, installed; same mark with no such backup -> RED refused.
+   AUTOAPPLY_OFF present at install -> the NOTE line prints.
+
+== 9 . publish gate (deploy_kits/NO_PHONE_NUMBERS.py, both layers) -- the walk fixture token literal was renamed to DUMMY-TOKEN-PUT-HERE (lines 69/151; a fixture, never a credential)
+   walk re-run after the rename: RESULT: 66 passed, 0 failed (patched live-shaped copy); unpatched copy: 7 passed, 0 failed.
+   gate on the kit's files (base /home/claude/S243): NO_PHONE_NUMBERS: clean -- 9 staged file(s) checked (numbers and credentials). rc=0

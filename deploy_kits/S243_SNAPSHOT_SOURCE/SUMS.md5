@@ -1,0 +1,8 @@
+aa6d9cd9afbe5c7a2e44315678f58de3  stock_app.py
+82871d4a8e33335c70c138e3f46eb3e8  install_S243_SNAPSHOT_SOURCE.sh
+ff2204885f1fddb514ec87898a2d1141  KIT_ID.txt
+e1c6ceed7cf46da2255e11b2c386d8ae  README.md
+f7b1389e458645dc68a016c823ecf154  patch_stock_snapshot_source_s243.py
+5daf1f602d4ee47cbc91f86ed6128157  stock_expected_schema.sql
+11c2d1fa9ecd7bf14ce6597ee5c8bb38  migrate_stock_expected_s243.py
+d8279c8be229dc066e9e0d330bd11839  walk_snapshot_source_s243.py

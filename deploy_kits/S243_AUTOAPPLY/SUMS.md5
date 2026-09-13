@@ -1,0 +1,7 @@
+c4bc90f500de9826ec6050d9920f160e  KIT_ID.txt
+735aec46cd5915ba7457f0899437c7b6  README.md
+3750ceb0716f62ffc70326142915bd0c  EVIDENCE_S243.txt
+67fff156892c55ad351c006cced19b3f  install_S243_AUTOAPPLY.sh
+e353d060577b2d2c22fd3d6531003539  patch_marg_autoapply_s243.py
+5ff9f9270f070eab25b640205e3a766c  patch_hub_autoapply_s243.py
+33723c587b508a2573ad7ba943b87ed4  walk_autoapply_s243.py

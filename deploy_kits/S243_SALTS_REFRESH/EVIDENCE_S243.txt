@@ -1,0 +1,113 @@
+EVIDENCE_S243.txt -- kit S243_SALTS_REFRESH -- built 13-Sep-2026 in the build container (python3 3.11.15)
+
+== source facts confirmed by reading the repo (read-only clone /tmp/kbv)
+purchase_app.py (S240_SANJEEVNI_123, live pin 8090ca20): /api/salts -> _machine_auth (header X-Finance-Marg == FINANCE_MARG_TOKEN)
+  accepts tasks OR marg_items (non-empty); _store_marg_salts: DELETE FROM purchase_salt_marg, then INSERT every {item,salt} with
+  as_on = payload marg_as_on (else today), source_md5 = marg_md5[:32]. REPLACE-ALL. page_salts shows MAX(as_on) as 'list of <date>'.
+push_salts.py (S225_SALTS): read_marg_salt_list -> items [{item,salt}], as_on = date of the __YYYYmmdd-HHMMSS__ stamp in the name;
+  sends marg_items / marg_as_on / marg_md5 (riding /vendors with the work list). Reader = xlrd, sheet 0, rows from index 3.
+marg_router.canonical_name / _archive_and_index: archive/<TYPE>/<date[:7]>/<TYPE>_<VARIANT>__<date>__<stamp>__<md5-8><ext>;
+  SALT_WISE_ITEM_LIST signature: dating=file_mtime, uploadable=false; marg_ingest/marg_take keep the file (not PHI_TYPES).
+install_m1a.sh: drop-in /etc/systemd/system/clinic-finance.service.d/marg_token.conf = '[Service]\nEnvironment=FINANCE_MARG_TOKEN=<tok>'.
+marg_report.py (vendored at /root/marg_ingest with xlrd/): _open_sheet(path) -> sheet 0 via xlrd.
+
+== py_compile
+salts_refresh.py, selftest_salts_refresh_s243.py: ok
+
+== bash -n install_S243_SALTS_REFRESH.sh
+ok
+
+== selftest_salts_refresh_s243.py
+S243_SALTS_REFRESH selftest  (mock root /tmp/s243_salts_abk9tby4, door on port 40545)
+1. the newest file, by the stamp in its name
+  ok   find_newest picks the 12-Sep file although the 28-Aug file has the newer mtime
+  ok   the STOCK_CLOSING decoy is never a candidate
+  ok   as_on comes from the capture stamp: 2026-09-12
+  ok   reads 120 items under 6 salts (page-number and total lines skipped)
+  ok   an item row is {item, salt} with the salt upper-cased and the leading number stripped
+  ok   the token is read from the drop-in and equals the dummy
+  ok   a missing drop-in gives None, not an exception
+2. the payload is push_salts.py's, key for key
+  ok   marg_items == push_salts.read_marg_salt_list(same file)
+  ok   marg_as_on == push_salts' as_on (stamp date)
+  ok   marg_md5 is the file's full md5, as push_salts sends it
+  ok   no 'tasks' / 'salt_tasks' key: Amir's ticks are never in this payload
+  ok   the older file reads the same way through both readers
+3. --dry-run / --once / --once / --force
+salts_refresh 13-09-2026 00:27 DRY RUN file=SALT_WISE_ITEM_LIST_DEFAULT__2026-09-12__20260912-224900__a5bcdd91.XLS as_on=2026-09-12 rows=120 salts=6 md5=a5bcdd91 -> would POST http://127.0.0.1:40545/finance/purchase/api/salts (nothing sent)
+  ok   --dry-run exits 0 and sends nothing
+  ok   --dry-run writes no state
+salts_refresh 13-09-2026 00:27 file=SALT_WISE_ITEM_LIST_DEFAULT__2026-09-12__20260912-224900__a5bcdd91.XLS as_on=2026-09-12 rows=120 salts=6 -> server 200: ok marg_items=120 stored=0 kept=0
+  ok   first --once exits 0 and POSTs once
+  ok   POST went to /finance/purchase/api/salts
+  ok   header X-Finance-Marg carries the drop-in token
+  ok   body carries 120 marg_items, marg_as_on 2026-09-12, marg_md5 of the NEWER file
+  ok   state written: file, md5, as_on, rows, ok, applied_at, reply
+  ok   the state file holds no token
+  ok   second --once is a no-op: exit 0, no POST
+  ok   ...but it records checked_at (proof of life) and keeps the applied record
+salts_refresh 13-09-2026 00:27 file=SALT_WISE_ITEM_LIST_DEFAULT__2026-09-12__20260912-224900__a5bcdd91.XLS as_on=2026-09-12 rows=120 salts=6 -> server 200: ok marg_items=120 stored=0 kept=0
+  ok   --force re-sends the same file: exit 0, second POST
+  ok   the forced payload is identical to the first
+4. a newer export lands in the archive
+salts_refresh 13-09-2026 00:27 file=SALT_WISE_ITEM_LIST_DEFAULT__2026-09-13__20260913-081500__e526a182.XLS as_on=2026-09-13 rows=126 salts=6 -> server 200: ok marg_items=126 stored=0 kept=0
+  ok   --once sees the 13-Sep file and POSTs it (126 rows, as_on 2026-09-13)
+  ok   and the next --once is again a no-op
+5. what is refused
+salts_refresh 13-09-2026 00:27 file=SALT_WISE_ITEM_LIST_DEFAULT__2026-09-13__20260913-090000__ed5b8c7b.XLS as_on=2026-09-13 rows=10 salts=2 -- fewer than 100 rows, looks truncated; nothing sent (use --min-rows= to override)
+  ok   a 10-row list (truncated export) is NOT sent: exit 2, no POST -- the table is not wiped
+salts_refresh 13-09-2026 00:27 file=SALT_WISE_ITEM_LIST_DEFAULT__2026-09-13__20260913-090000__ed5b8c7b.XLS as_on=2026-09-13 rows=10 salts=2 -> server 200: ok marg_items=10 stored=0 kept=0
+  ok   --min-rows=1 lets it through (the override exists and works)
+salts_refresh 13-09-2026 00:27 file=SALT_WISE_ITEM_LIST_DEFAULT__2026-09-13__20260913-081500__e526a182.XLS as_on=2026-09-13 rows=126 -- no FINANCE_MARG_TOKEN in the drop-in; nothing sent
+  ok   no drop-in -> exit 2, nothing sent
+salts_refresh 13-09-2026 00:27 file=SALT_WISE_ITEM_LIST_DEFAULT__2026-09-13__20260913-081500__e526a182.XLS as_on=2026-09-13 rows=126 -> server ERROR 401 {"ok": false, "error": "bad_token"}
+  ok   a wrong token -> the door's 401 -> exit 1, state.ok false
+salts_refresh 13-09-2026 00:27 file=SALT_WISE_ITEM_LIST_DEFAULT__2026-09-13__20260913-081500__e526a182.XLS as_on=2026-09-13 rows=126 -> server unreachable (URLError)
+  ok   an unreachable door -> exit 1, no crash
+salts_refresh 13-09-2026 00:27 no SALT_WISE_ITEM_LIST in /tmp/s243_salts_abk9tby4/empty_archive/SALT_WISE_ITEM_LIST -- nothing to send
+  ok   an empty archive -> exit 2, nothing sent
+salts_refresh 13-09-2026 00:27 file=SALT_WISE_ITEM_LIST_DEFAULT__2026-09-13__20260913-081500__e526a182.XLS as_on=2026-09-13 rows=126 salts=6 -> server 200: ok marg_items=126 stored=0 kept=0
+  ok   after the refusals a good --force goes through again
+6. the live purchase_app's /api/salts on a temp db
+  ok   seed: the handler takes a 3-row list dated 04-Sep
+  ok   the REAL handler accepts salts_refresh's payload: ok, marg_items=126, stored=0 (no tasks touched)
+  ok   purchase_salt_marg is REPLACED whole: 126 rows, the 04-Sep rows gone
+  ok   every row carries as_on 2026-09-13 -> the page's 'list of 13-Sep-2026' (MAX(as_on))
+  ok   Amir's DONE tick on purchase_salt_task survives untouched
+  ok   source_md5 on the rows is the export's md5 (first 32)
+  ok   _marg_says now reads 'done' for the ticked item from the fresh list
+  ok   the real door refuses a wrong token with 401
+7. hygiene
+  ok   salts_refresh.py py_compiles
+  ok   salts_refresh.py never prints the token (no print of tok / token variable)
+  ok   no leftover state.tmp
+
+44 passed, 0 failed
+RESULT: PASS
+
+== installer walk against a mock ROOT (install / rerun / rollback)
+--- install #1
+-- S243_SALTS_REFRESH install  (python: /usr/bin/python3)
+-- kit SUMS.md5 verified
+-- installed <ROOT>/root/finance/salts_refresh.py  md5 d41c79c457de7c36271673ee679d2847
+-- py_compile ok
+-- smoke: --dry-run
+salts_refresh 13-09-2026 00:28 DRY RUN file=SALT_WISE_ITEM_LIST_DEFAULT__2026-09-12__20260912-224900__7e9b002e.XLS as_on=2026-09-12 rows=128 salts=8 md5=7e9b002e -> would POST http://127.0.0.1:8106/finance/purchase/api/salts (nothing sent)
+-- mock ROOT set: crontab untouched (would add: */10 8-22 * * * /root/wa/venv/bin/python3 -B /root/finance/salts_refresh.py --once >> /root/finance/salts_refresh.log 2>&1 # S243_SALTS_REFRESH)
+-- INSTALLED. Nothing was restarted.
+-- Immediate apply (do not wait for cron):  /usr/bin/python3 -B <ROOT>/root/finance/salts_refresh.py --force
+-- State:  <ROOT>/root/finance/salts_refresh.state.json      Log:  <ROOT>/root/finance/salts_refresh.log
+--- install #2 (rerun)
+-- S243_SALTS_REFRESH install  (python: /usr/bin/python3)
+-- kit SUMS.md5 verified
+-- ALREADY INSTALLED: <ROOT>/root/finance/salts_refresh.py matches the kit (d41c79c457de7c36271673ee679d2847) and the cron line is present
+-- nothing changed. Immediate apply if wanted:  /usr/bin/python3 -B <ROOT>/root/finance/salts_refresh.py --force
+--- rollback
+-- S243_SALTS_REFRESH rollback
+-- removed <ROOT>/root/finance/salts_refresh.py
+-- mock ROOT set: crontab untouched
+-- state file <ROOT>/root/finance/salts_refresh.state.json and log left in place (harmless; delete by hand if wanted)
+-- ROLLED BACK. Nothing was restarted.
+--- after rollback: 0 copies of salts_refresh.py remain
+
+== 13-Sep 06:40 IST · publish gate: fixture token literal renamed to DUMMY-TOKEN-PUT-HERE (line 125); selftest re-run 44/44 PASS; SUMS.md5 recomputed.

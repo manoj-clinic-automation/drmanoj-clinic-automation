@@ -1,0 +1,6 @@
+S243_AUTOAPPLY on-box-patch
+finance_app.py patched ON THE BOX by patch_marg_autoapply_s243.py (live pin 81db4854 per live_pins_S242close.txt, 72bc8323 per the S241-close manifest -- both accepted; the four anchor counts are the real guard; S219 M1 present or absent both handled)
+finance_ui/finance_approvals.html patched ON THE BOX by patch_hub_autoapply_s243.py (live pin e1652297a1ed5b81a0fcfedd2662f047, S220 -> predicted cc349dd00d0a2f861ec54242c9551557 after the patch)
+BUILT S243 13-Sep-2026 -- offline, walked live-shape (66/66) on the S204_C2 base carrying S208/S210/S211/S219 marg-path patches; installer mock-tested
+SERVICE clinic-finance (restarted by the installer after the import smoke)
+OFF switch: touch /root/finance/AUTOAPPLY_OFF

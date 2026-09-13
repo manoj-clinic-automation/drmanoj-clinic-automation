@@ -1,0 +1,135 @@
+EVIDENCE_S243.txt -- S243_WATCHDOG_FINANCE -- built 2026-09-12T19:01:55Z in container
+
+## 1. Base verification
+pin row (live_pins_S242close.txt line 303): VPS 01ca6591a74ec8009bf9748fb7f480c2 /root/wa/clinic_watchdog.py  S156 - 11 services
+md5 of /tmp/kbv/deploy_kits/S204_VPS_LIVE/root__wa__clinic_watchdog.py:
+01ca6591a74ec8009bf9748fb7f480c2  /tmp/kbv/deploy_kits/S204_VPS_LIVE/root__wa__clinic_watchdog.py
+=> MATCHES the pin. Base accepted.
+
+## 2. Patcher run (python3 patch_watchdog_s243.py)
+base : 01ca6591a74ec8009bf9748fb7f480c2  /tmp/kbv/deploy_kits/S204_VPS_LIVE/root__wa__clinic_watchdog.py
+new  : 00567d696b391f38f4f15499a0ade02e  /home/claude/S243/S243_WATCHDOG_FINANCE/clinic_watchdog.py
+
+## 3. Diff base -> new
+65a66,69
+>     # S243: three web apps added to the guard (finance / register / asset). Liveness only.
+>     ("clinic-finance.service",           "Clinic finance app (port 8106)",   "systemctl restart clinic-finance"),
+>     ("staff-register.service",           "Staff register app (port 8044)",   "systemctl restart staff-register"),
+>     ("assetapp.service",                 "Asset register app (port 8030)",   "systemctl restart assetapp"),
+
+## 4. py_compile
+py_compile OK (python3 3.11.15)
+
+## 5. Selftest (python3 selftest_watchdog_s243.py)
+PASS  SERVICES has 14 entries (got 14)
+PASS  every entry is a (unit, label, fix) tuple of strings
+PASS  original unit present once: wa-receiver.service
+PASS  original unit present once: wa-send-api.service
+PASS  original unit present once: wa-notifier.service
+PASS  original unit present once: call-api.service
+PASS  original unit present once: call-hook.service
+PASS  original unit present once: clinic-portal.service
+PASS  original unit present once: gutlog.service
+PASS  original unit present once: clinic-followup-receiver.service
+PASS  original unit present once: attendance-dashboard.service
+PASS  original unit present once: attlistener.service
+PASS  original unit present once: staff-ledger.service
+PASS  new unit present once: clinic-finance.service
+PASS  new unit present once: staff-register.service
+PASS  new unit present once: assetapp.service
+PASS  original 11 keep their order at the top of the list
+PASS  no duplicate units
+PASS  no lines removed versus base (removed=0)
+PASS  exactly 4 lines added versus base (added=4)
+PASS  every added line is the S243 comment or one of the 3 new units
+PASS  LF line endings
+RESULT: OK (0 failures)
+
+## 6. Installer static checks
+bash -n OK
+ASCII-only OK
+LF OK: clinic_watchdog.py
+LF OK: patch_watchdog_s243.py
+LF OK: selftest_watchdog_s243.py
+LF OK: install_S243_WATCHDOG_FINANCE.sh
+LF OK: README.md
+LF OK: EVIDENCE_S243.txt
+LF OK: KIT_ID.txt
+
+## 7. Mock end-to-end (ROOT=/tmp/mock_wd/root; mock live file = copy of base)
+### TEST A: wrong pin -> must REFUSE, exit 1
+== S243_WATCHDOG_FINANCE installer ==
+target : /tmp/mock_wd/root/wa/clinic_watchdog.py
+python : /usr/bin/python3
+from   : 01ca6591a74ec8009bf9748fb7f480c2
+to     : 00567d696b391f38f4f15499a0ade02e
+live   : 8fde73efd9753e21b531073b40427f21
+REFUSED: live md5 is neither the from-pin nor the to-pin. Not touching the file.
+exit=1
+
+### TEST B: reset to base, FORCE_FAIL=1 -> must install then ROLL BACK, exit 1
+== S243_WATCHDOG_FINANCE installer ==
+target : /tmp/mock_wd/root/wa/clinic_watchdog.py
+python : /usr/bin/python3
+from   : 01ca6591a74ec8009bf9748fb7f480c2
+to     : 00567d696b391f38f4f15499a0ade02e
+live   : 01ca6591a74ec8009bf9748fb7f480c2
+backup : /tmp/mock_wd/root/wa/clinic_watchdog.py.bak_S243_01ca6591
+installed -> /tmp/mock_wd/root/wa/clinic_watchdog.py
+smoke: py_compile OK
+smoke: SMOKE_OK units=14
+smoke: FORCE_FAIL=1 set (test hook) -- treating smoke as failed
+!! FAILURE -- restoring live file from /tmp/mock_wd/root/wa/clinic_watchdog.py.bak_S243_01ca6591
+ROLLED BACK OK: live md5 01ca6591a74ec8009bf9748fb7f480c2 == from-pin (byte-identical restore)
+exit=1
+after rollback:
+01ca6591a74ec8009bf9748fb7f480c2  /tmp/mock_wd/root/wa/clinic_watchdog.py
+__pycache__
+clinic_watchdog.py
+clinic_watchdog.py.bak_S243_01ca6591
+
+### TEST C: clean install from from-pin -> exit 0
+== S243_WATCHDOG_FINANCE installer ==
+target : /tmp/mock_wd/root/wa/clinic_watchdog.py
+python : /usr/bin/python3
+from   : 01ca6591a74ec8009bf9748fb7f480c2
+to     : 00567d696b391f38f4f15499a0ade02e
+live   : 01ca6591a74ec8009bf9748fb7f480c2
+backup : /tmp/mock_wd/root/wa/clinic_watchdog.py.bak_S243_01ca6591
+installed -> /tmp/mock_wd/root/wa/clinic_watchdog.py
+smoke: py_compile OK
+smoke: SMOKE_OK units=14
+predicted post-install md5: 00567d696b391f38f4f15499a0ade02e
+md5sum of installed file:
+00567d696b391f38f4f15499a0ade02e  /tmp/mock_wd/root/wa/clinic_watchdog.py
+No service restart needed: clinic-watchdog.timer runs the script fresh every 5 min.
+Rollback line: cp -p /tmp/mock_wd/root/wa/clinic_watchdog.py.bak_S243_01ca6591 /tmp/mock_wd/root/wa/clinic_watchdog.py
+S243_WATCHDOG_FINANCE: DONE
+exit=0
+
+### TEST D: rerun -> ALREADY INSTALLED, exit 0
+== S243_WATCHDOG_FINANCE installer ==
+target : /tmp/mock_wd/root/wa/clinic_watchdog.py
+python : /usr/bin/python3
+from   : 01ca6591a74ec8009bf9748fb7f480c2
+to     : 00567d696b391f38f4f15499a0ade02e
+live   : 00567d696b391f38f4f15499a0ade02e
+ALREADY INSTALLED (live md5 == to-pin). Nothing to do.
+md5sum of installed file:
+00567d696b391f38f4f15499a0ade02e  /tmp/mock_wd/root/wa/clinic_watchdog.py
+exit=0
+
+### mock tree after tests:
+total 44
+drwxr-xr-x 3 root root  4096 Sep 12 19:01 .
+drwxr-xr-x 3 root root  4096 Sep 12 19:01 ..
+drwxr-xr-x 2 root root  4096 Sep 12 19:01 __pycache__
+-rw-r--r-- 1 root root 12818 Sep 12 19:01 clinic_watchdog.py
+-rw-r--r-- 1 root root 12391 Sep 12 17:25 clinic_watchdog.py.bak_S243_01ca6591
+md5sum: /tmp/mock_wd/root/wa/__pycache__: Is a directory
+00567d696b391f38f4f15499a0ade02e  /tmp/mock_wd/root/wa/clinic_watchdog.py
+01ca6591a74ec8009bf9748fb7f480c2  /tmp/mock_wd/root/wa/clinic_watchdog.py.bak_S243_01ca6591
+
+## 8. Note on smoke
+clinic_watchdog.py has no dry/check mode: a real run calls systemctl and may push an ntfy
+alert. Smoke is therefore py_compile + an import-only load asserting 14 units. Stated in README.

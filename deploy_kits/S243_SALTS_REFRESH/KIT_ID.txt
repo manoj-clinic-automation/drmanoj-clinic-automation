@@ -1,0 +1,2 @@
+S243_SALTS_REFRESH
+built 2026-09-13 (S243) -- salts_refresh.py: the server archive SALT_WISE_ITEM_LIST -> POST /finance/purchase/api/salts every 10 min, no restart

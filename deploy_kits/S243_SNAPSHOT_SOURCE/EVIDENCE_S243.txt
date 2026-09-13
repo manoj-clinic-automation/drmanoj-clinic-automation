@@ -1,0 +1,332 @@
+EVIDENCE_S243.txt -- kit S243_SNAPSHOT_SOURCE -- built 12-Sep-2026 in the container, offline
+=====================================================================================
+Base   /root/finance/stock_app.py live pin 0b965da40816079a60c49a20946832b3 (live_pins_S242close.txt row 26, SHORT 0b965da4)
+       repo copy deploy_kits/S240_STOCK_GATE_R2/stock_app.py md5 0b965da40816079a60c49a20946832b3  -- MATCHES the pin
+Refs   deploy_kits/S208_STOCK_LEDGER/push_expected.py 4b3b700c1640591a3723d4fce3de5603 (= pin row 31, SHORT 4b3b700c)
+       deploy_kits/S208_STOCK_LEDGER/push_snapshot.py 03a845242ea29aec6bc46b1fc254809d (= pin row 77)
+       deploy_kits/S208_STOCK_LEDGER/stock_schema.sql df8ce7727c2b27f0feb7c2853320731c
+       deploy_kits/S240_MARG_SHADOW/marg_shadow.py    4568b4a3440677422f5173d32a5430f7 (= pin row 25, SHORT 4568b4a3)
+Result stock_app.py 0b965da40816079a60c49a20946832b3 -> aa6d9cd9afbe5c7a2e44315678f58de3
+
+1. THE DEFECT -- CONFIRMED from the code (line numbers are in the 0b965da4 base)
+-------------------------------------------------------------------------------
+ stock_app.py L945-946  @bp.route("/api/snapshot", methods=["POST"]) / def api_snapshot()  -- ONE door
+ stock_app.py L968-974  INSERT INTO stock_snapshot (as_on,item,qty,packing,pack_size,loaded_at,source)
+                        ... ON CONFLICT(as_on,item) DO UPDATE SET qty=excluded.qty, ..., source=excluded.source
+                        -> keyed (as_on,item); source is a VALUE, not part of the key; last write wins
+ stock_schema.sql L82-91  CREATE TABLE stock_snapshot (... source TEXT, PRIMARY KEY (as_on, item))
+ stock_app.py L799 def reconcile(con, as_on)  L818  SELECT qty FROM stock_snapshot WHERE as_on=? AND item=?
+                        -> no source filter; L823 closes an open stock_diff when that qty == counted_qty
+ stock_app.py L1001     closed = reconcile(con, as_on)  -- run after EVERY push, whichever sender
+ push_snapshot.py L287  body = {"as_on": full.get("as_on"), "source": "push_snapshot", "items": items}
+                        -> source "push_snapshot"; as_on = Marg's closing-stock export date (dd-mm-yyyy)
+ push_expected.py L951-952  last_sale = max(sdays); as_on = last_sale if upto is None else min(last_sale, upto)
+ push_expected.py L1277-1280  body = {"as_on": ddmmyyyy(rep["as_on"]),
+                        "source": "push_expected base=%s pur_to=%s" % (ddmmyyyy(baseline_as_on), ddmmyyyy(h) or "none"), ...}
+                        -> source starts with "push_expected"; as_on = the LAST SALE DATE, which is normally later
+                           than Marg's export date -> it was usually the NEWEST day in stock_snapshot
+ stock_app.py L446-454  _feed_kind(source): startswith("push_expected") -> "expected"; startswith("push_snapshot") -> "marg"
+ stock_app.py L982-993  every push is ALSO appended to stock_feed (as_on, source, item, qty, received_at) -- correct
+ stock_app.py L468-475  the S228 comment already names this fault ("LAST WRITE WINS ... whichever arrived later IS the
+                        count's Marg column"); L483-497 _snapshot_source() and L1830-1834 gate R3 only REPORT it.
+ Consequences: (a) L832 _newest_snapshot -> L882 page_count: the counting universe could be the computed day;
+               (b) L818 reconcile: a difference could close because OUR arithmetic agreed with the count;
+               (c) L2422, L2848, L3347, L3578, L3588 (pad readers keyed on the count's as_on) read whichever sender won.
+ Both push scripts run on manojz with the same X-Finance-Marg token (push_snapshot.py L300, push_expected.py L1115),
+ so the server cannot tell them apart by auth -- only by source, which it already does for stock_feed.
+ VERDICT: CONFIRMED. Shown live-shape in the walk (section 4): TYRO 700 (Marg) became 1100 (ours) and an open
+ difference closed on our own figure.
+
+2. READERS CHECKED -- who reads the computed figure, and from where (0b965da4 line numbers)
+-------------------------------------------------------------------------------
+ Readers of the COMPUTED figure -- all via stock_feed (through _feed_latest L304-333 / _feed_kind L446):
+   /api/drift    L1444-1505  _feed_latest -> byday[expected]/[marg]; feeds list from stock_feed L1495-1499
+   /api/now      L1983-2025  _feed_latest -> ours/marg for the newest feed day
+   readiness     L1728-1767  _r_stock: _feed_latest per kind; L1913-1945 readiness(); L1948 /api/readiness
+   three-way     L500-579    _three_way: ours/marg from _feed_latest (L507-511); provenance via _snapshot_source (L512)
+   purchase due  L354-370    _purchases_known_to: DISTINCT source FROM stock_feed (pur_to= stamp)
+   count gate    L1825-1826  stock_gate R3: stock_feed WHERE source LIKE 'push_snapshot%' (Marg's arrival time)
+   marg_shadow.py L152-159   SELECT ... FROM stock_feed WHERE as_on=? AND source LIKE 'push_expected%' (sh_feed comparison)
+ Readers of stock_snapshot -- all want MARG's figure or the count-day packing/pack_size:
+   L832-854  _newest_snapshot (page_count L882; stock_gate L1817; L2171; L2382)
+   L857-861  _snapshot_qty_map (L2053 _record_count: server-authoritative marg_qty)
+   L818      reconcile
+   L483-497  _snapshot_source (provenance only; after the fix it says 'marg')
+   L2422, L2848  packing/pack_size for the count's as_on (pad sheets)
+   L3203     "Marg's own figure, every export day in the window" (item life) -- was polluted by computed rows; now clean
+   L3347, L3578, L3588  pack_size/qty for the count's as_on
+   L3960-3962  newest day's packing (purchase-line conflicts)
+   OTHER FILES (live pins): purchase_app.py 8090ca20 L1198-1209 _latest_snapshot (newest day: items, qty, packing),
+   L2921-2925 _known_items, L2955-2959 (newest snapshot vs earlier) -- all "Marg's newest export";
+   darpan_app.py L753-754 MAX(as_on), COUNT(DISTINCT as_on) -- a heartbeat line, any sender;
+   marg_spine.py -- NOT a one-shot: spine_cadence.py re-runs it every 30 min. Read in the S240_SANJEEVNI_123 copy
+   b5956f59464671f23dc376391f9e8bae (the live pin row 49 is 9a08b2c4, a hash the repository does not hold; the S229
+   kit copy is the same b5956f59). Step 4 L520-540: SELECT DISTINCT item, source FROM stock_snapshot -- item and
+   source only, no qty/packing; it does NOT filter by source but BRANCHES on it: a push_expected row that resolves
+   by truncation/cleaning gets an alias (L526-529); one that does not raises a 'derived_name' task and creates
+   nothing (L530-536, "ONLY MARG'S OWN EXPORT MAY CREATE AN ITEM"). Step 6 L565-615 reads stock_feed (SOURCES L422,
+   item + as_on) -- which S243 leaves untouched and which carries EVERY push_expected name -- and gives the same
+   names the same truncation/parsed alias (L590-593), first/last seen (L594), and for an unresolved name a
+   marg_name_unresolved row plus a question/ambiguous task (L602-615). Facts (_facts L640-670) come from
+   purchase_salt_marg, stock_count_item and stock_rate only; stock_rate is still written by both pushes.
+   => the computed rows in stock_snapshot contribute NO name and NO fact that stock_feed does not also supply; the
+   only difference is the wording of the task for an unresolved computed name ('derived_name' vs 'unknown, seen in
+   stock_feed'). After S243 step 4 sees Marg rows only, which is what its own comment demands. marg_spine UNTOUCHED.
+   marg_derive.py L228, L533-544 (S235, not in the live pins) reads stock_snapshot qty by as_on -- Marg's figure.
+ CONCLUSION: no reader needs the computed figure from stock_snapshot. Nothing is pointed at stock_expected.
+
+3. THE PATCH -- patch_stock_snapshot_source_s243.py (four anchors, each assert src.count(old)==1)
+-------------------------------------------------------------------------------
+base  0b965da40816079a60c49a20946832b3  /tmp/kbv/deploy_kits/S240_STOCK_GATE_R2/stock_app.py
+wrote aa6d9cd9afbe5c7a2e44315678f58de3  <scratch>/re_stock_app.py
+old md5 0b965da40816079a60c49a20946832b3
+new md5 aa6d9cd9afbe5c7a2e44315678f58de3
+ re-patched output identical to the shipped stock_app.py: YES
+ py_compile: base ok / patched ok  (python 3.11.15, flask 3.1.3 in the container)
+ diff --stat: 49 lines added, 6 lines changed/removed
+ line endings: LF only (no CR) in every kit file: 0 files with CR
+ ASCII in .sh: 0 non-ASCII lines
+
+4. THE WALK -- walk_snapshot_source_s243.py, run from a deploy_kits-shaped tree (sibling kits present), python3 -B
+   base = S240_STOCK_GATE_R2/stock_app.py 0b965da4; patched = ./stock_app.py aa6d9cd9; schemas = S208 stock_schema.sql
+   + S224 purchase_schema.sql + S204 finance_returns.sql; now_iso() pinned so the two runs are byte-comparable.
+-------------------------------------------------------------------------------
+== S243 SNAPSHOT SOURCE -- live-shape walk ==
+base    0b965da40816079a60c49a20946832b3  <scratch>/deploy_kits/S240_STOCK_GATE_R2/stock_app.py
+patched aa6d9cd9afbe5c7a2e44315678f58de3  <scratch>/deploy_kits/S243_SNAPSHOT_SOURCE/stock_app.py
+schema  <scratch>/deploy_kits/S208_STOCK_LEDGER/stock_schema.sql + <scratch>/deploy_kits/S224_MARG_PURCHASES/purchase_schema.sql + <scratch>/deploy_kits/S204_VPS_LIVE/root__finance__finance_returns.sql
+
+---- BASE: <scratch>/deploy_kits/S240_STOCK_GATE_R2/stock_app.py (0b965da4)
+  ok   [BASE] Marg's closing stock for 09-09-2026 lands through the machine token (200)
+  ok   [BASE] our computed figure for the SAME 09-09-2026 lands (200)
+  ok   [BASE] our computed figure for 10-09-2026 (a day Marg has not exported) lands (200)
+  ok   [BASE] /finance/stock/api/healthz answers 200
+  ok   [BASE] /finance/stock/api/now answers 200
+  ok   [BASE] /finance/stock/api/drift answers 200
+  ok   [BASE] /finance/stock/api/readiness answers 200
+  ok   [BASE] /finance/stock/api/open answers 200
+
+---- NEW: <scratch>/deploy_kits/S243_SNAPSHOT_SOURCE/stock_app.py (aa6d9cd9)
+  ok   [NEW] Marg's closing stock for 09-09-2026 lands through the machine token (200)
+  ok   [NEW] our computed figure for the SAME 09-09-2026 lands (200)
+  ok   [NEW] our computed figure for 10-09-2026 (a day Marg has not exported) lands (200)
+  ok   [NEW] /finance/stock/api/healthz answers 200
+  ok   [NEW] /finance/stock/api/now answers 200
+  ok   [NEW] /finance/stock/api/drift answers 200
+  ok   [NEW] /finance/stock/api/readiness answers 200
+  ok   [NEW] /finance/stock/api/open answers 200
+
+---- THE DEFECT, on the base (0b965da4)
+  ok   base: after both pushes stock_snapshot for 09-09-2026 holds OUR figure, called Marg (TYRO 1100, not 700)
+  ok   base: its source column says push_expected
+  ok   base: the open difference CLOSED because our arithmetic (370) agreed with the count -- Marg still says 400
+  ok   base: the newest snapshot day is the computed feed's 10-09-2026, a day Marg never exported
+  ok   base: the S228 provenance line already had to say not-Marg ('expected' or 'mixed') for 09-09-2026
+
+---- THE FIX, on the patched file
+  ok   new: stock_snapshot for 09-09-2026 holds ONLY Marg's rows (4 items, all push_snapshot)
+  ok   new: Marg's figures are intact (TYRO 700, CHEAPO 400)
+  ok   new: stock_expected exists and holds the computed rows for 09-09-2026 (4 items, all push_expected)
+  ok   new: the computed figures are intact there (TYRO 1100, ONLYOURS 250)
+  ok   new: the computed-only day 10-09-2026 wrote NOTHING to stock_snapshot
+  ok   new: stock_snapshot days = [09-09-2026] only
+  ok   new: stock_feed still holds BOTH pushes for 09-09-2026 (append-only, unchanged)
+  ok   new: stock_feed is identical to the base run
+  ok   new: the open difference STAYS open -- Marg (400) still disagrees with the count (370)
+  ok   new: the newest snapshot day is Marg's 09-09-2026 -- the count page counts against Marg
+  ok   new: the count gate on the newest day no longer says 'no Marg STOCK CLOSING' (base verdict was red)
+  ok   new: the S228 provenance line now says 'marg' for 09-09-2026
+  ok   new: the Marg push reply still carries items/reconciled (push_snapshot.py reads them) and says stored_in=stock_snapshot
+  ok   new: the computed push reply says stored_in=stock_expected, reconciled=0
+  ok   new: stock_rate is written by both pushes as before (identical to the base run)
+
+---- THE READERS: same JSON before and after (they read stock_feed, not stock_snapshot)
+  ok   /finance/stock/api/now: identical figures before and after the patch (gate block aside)
+  ok   /finance/stock/api/drift: identical figures before and after the patch (gate block aside)
+  ok   /finance/stock/api/readiness: identical figures before and after the patch (gate block aside)
+  ok   /finance/stock/api/now shows ours vs Marg for 10-09-2026 from stock_feed on both
+      count gate on the NEWEST snapshot day, base: red on 10-09-2026: There is no Marg STOCK CLOSING export as on 10-09-2026 -- the figures for that d
+      count gate on the NEWEST snapshot day, new : red on 09-09-2026: Purchases (item-wise) are exported only up to nothing, but this stock is as on 0
+      count gate for 09-09-2026 on the base: red (Purchases (item-wise) are exported only up to nothing, but this stock is as on 09-09-2026. Export PU)
+      count gate for 09-09-2026 on the new : red (Purchases (item-wise) are exported only up to nothing, but this stock is as on 09-09-2026. Export PU)
+  ok   /finance/stock/api/open: on the base the difference is gone (closed by our own arithmetic); on the new it is still open
+
+walk: 41 ok, 0 FAIL
+
+   Before/after JSON diff: /api/now, /api/drift, /api/readiness IDENTICAL (as_of/today and the gate block set aside;
+   the gate is the one thing that changes, by design: on the base the newest snapshot day was the computed 10-09
+   (RED, "no Marg STOCK CLOSING"); on the patch it is Marg's 09-09). /api/open differs by design: the base had closed
+   the difference on our own arithmetic; the patch keeps it open. /api/healthz 200 on both.
+
+5. THE MIGRATION -- migrate_stock_expected_s243.py on a mock db shaped like the live one
+   (06-09 both senders, ours later; 09-09 Marg only; 10-09 ours only = the newest day; 05-09 ours only with a
+    stock_count against it; 01-09 a 'manual' and a blank source)
+-------------------------------------------------------------------------------
+--- dry run
+== S243 stock_expected migration -- DRY RUN (nothing written) ==
+db  <scratch>/mig/finance.db
+stock_expected table: absent (created on --apply)
+stock_snapshot: 13 rows over 5 days (newest 10-09-2026) -- marg 4, computed 7, other 2
+
+computed rows by day:
+  05-09-2026      1 rows   Marg push in feed: no    count against it: yes   -> restore 0, delete 0, keep 1
+  06-09-2026      3 rows   Marg push in feed: yes   count against it: no    -> restore 2, delete 1, keep 0
+  10-09-2026      3 rows   Marg push in feed: no    count against it: no    -> restore 0, delete 3, keep 0
+
+plan: copy 7 into stock_expected; in stock_snapshot restore 2 to Marg's figure, delete 1 (Marg's export lacked the item), delete 3 (expected-only days), KEEP 1 (expected-only days a count was measured against)
+!! KEPT in stock_snapshot, computed figures a count was measured against: 05-09-2026
+   The count(s) against those days were measured against OUR arithmetic, not Marg. Owner's decision.
+
+dry run -- nothing written. Re-run with --apply to do the above.
+exit 0
+--- apply
+== S243 stock_expected migration -- APPLY ==
+db  <scratch>/mig/finance.db
+backup <scratch>/mig/finance.db.bak_S243_SNAPSHOT_20260912_191323 (61440 bytes)
+stock_expected table: present
+stock_snapshot: 13 rows over 5 days (newest 10-09-2026) -- marg 4, computed 7, other 2
+
+computed rows by day:
+  05-09-2026      1 rows   Marg push in feed: no    count against it: yes   -> restore 0, delete 0, keep 1
+  06-09-2026      3 rows   Marg push in feed: yes   count against it: no    -> restore 2, delete 1, keep 0
+  10-09-2026      3 rows   Marg push in feed: no    count against it: no    -> restore 0, delete 3, keep 0
+
+plan: copy 7 into stock_expected; in stock_snapshot restore 2 to Marg's figure, delete 1 (Marg's export lacked the item), delete 3 (expected-only days), KEEP 1 (expected-only days a count was measured against)
+!! KEPT in stock_snapshot, computed figures a count was measured against: 05-09-2026
+   The count(s) against those days were measured against OUR arithmetic, not Marg. Owner's decision.
+
+done: stock_expected now 7 rows; computed rows still in stock_snapshot: 1 (expected 1 kept)
+newest stock_snapshot day: 10-09-2026 -> 09-09-2026
+exit 0
+--- rerun (idempotent)
+== S243 stock_expected migration -- DRY RUN (nothing written) ==
+db  <scratch>/mig/finance.db
+stock_expected table: present
+stock_snapshot: 9 rows over 4 days (newest 09-09-2026) -- marg 6, computed 1, other 2
+
+computed rows by day:
+  05-09-2026      1 rows   Marg push in feed: no    count against it: yes   -> restore 0, delete 0, keep 1
+
+plan: copy 1 into stock_expected; in stock_snapshot restore 0 to Marg's figure, delete 0 (Marg's export lacked the item), delete 0 (expected-only days), KEEP 1 (expected-only days a count was measured against)
+!! KEPT in stock_snapshot, computed figures a count was measured against: 05-09-2026
+   The count(s) against those days were measured against OUR arithmetic, not Marg. Owner's decision.
+
+dry run -- nothing written. Re-run with --apply to do the above.
+exit 0
+--- tables after
+  stock_snapshot ('01-09-2026', 'A', 1, 'manual')
+  stock_snapshot ('01-09-2026', 'B', 1, None)
+  stock_snapshot ('05-09-2026', 'A', 99, 'push_expected base=03-09-2026 pur_to=08-09-2026')
+  stock_snapshot ('06-09-2026', 'A', 100, 'push_snapshot')
+  stock_snapshot ('06-09-2026', 'B', 50, 'push_snapshot')
+  stock_snapshot ('06-09-2026', 'C', 7, 'push_snapshot')
+  stock_snapshot ('09-09-2026', 'A', 95, 'push_snapshot')
+  stock_snapshot ('09-09-2026', 'B', 48, 'push_snapshot')
+  stock_snapshot ('09-09-2026', 'C', 7, 'push_snapshot')
+  stock_expected ('05-09-2026', 'A', 99, 'push_expected base=03-09-2026 pur_to=08-09-2026')
+  stock_expected ('06-09-2026', 'A', 90, 'push_expected base=03-09-2026 pur_to=08-09-2026')
+  stock_expected ('06-09-2026', 'B', 50, 'push_expected base=03-09-2026 pur_to=08-09-2026')
+  stock_expected ('06-09-2026', 'D', 3, 'push_expected base=03-09-2026 pur_to=08-09-2026')
+  stock_expected ('10-09-2026', 'A', 92, 'push_expected base=03-09-2026 pur_to=08-09-2026')
+  stock_expected ('10-09-2026', 'B', 47, 'push_expected base=03-09-2026 pur_to=08-09-2026')
+  stock_expected ('10-09-2026', 'D', 3, 'push_expected base=03-09-2026 pur_to=08-09-2026')
+  backup finance.db.bak_S243_SNAPSHOT_20260912_191323 stock_snapshot rows 13
+   -> A 06-09 restored 90 -> 100 (Marg's newest feed), D 06-09 deleted (Marg's export lacked it), 10-09 deleted,
+      05-09 KEPT and named (a count was measured against it), 'manual' and blank untouched, newest day 10-09 -> 09-09.
+      Second run: nothing left to move except the named keep. Backup taken before writing (sqlite backup API).
+
+6. THE INSTALLER -- install_S243_SNAPSHOT_SOURCE.sh on a mock (ROOT=<scratch>/mock, fake systemctl + curl on PATH,
+   kit run from <scratch>/deploy_kits/S243_SNAPSHOT_SOURCE with the sibling kits beside it)
+-------------------------------------------------------------------------------
+T1 refusal on wrong pin (live = S240_STOCK_GATE 5227c1d1)
+!! RED -- <scratch>/mock/root/finance/stock_app.py is 5227c1d16cfdd8288a1783557f5dddb2, expected 0b965da40816079a60c49a20946832b3. The box is not where this kit was built against -- read the pin and stop. NOTHING changed.
+   exit 1; live still 5227c1d1; files: finance.db stock_app.py stock_schema.sql 
+
+T2 install on the from-pin
+-- gates green; the box is on the from-pin 0b965da4
+-- predicted after: aa6d9cd9afbe5c7a2e44315678f58de3
+walk: 41 ok, 0 FAIL
+-- walked on this box with this box's python: green
+-- stock_expected table present (0 rows)
+-- py_compile + import stock_app: green
+-- clinic-finance.service restarted; healthz 200 after 1s
+================ MIGRATION DRY RUN (nothing written) ================
+db  <scratch>/mock/root/finance/finance.db
+stock_expected table: present
+stock_snapshot: 13 rows over 5 days (newest 10-09-2026) -- marg 4, computed 7, other 2
+computed rows by day:
+  05-09-2026      1 rows   Marg push in feed: no    count against it: yes   -> restore 0, delete 0, keep 1
+  06-09-2026      3 rows   Marg push in feed: yes   count against it: no    -> restore 2, delete 1, keep 0
+  10-09-2026      3 rows   Marg push in feed: no    count against it: no    -> restore 0, delete 3, keep 0
+plan: copy 7 into stock_expected; in stock_snapshot restore 2 to Marg's figure, delete 1 (Marg's export lacked the item), delete 3 (expected-only days), KEEP 1 (expected-only days a count was measured against)
+!! KEPT in stock_snapshot, computed figures a count was measured against: 05-09-2026
+   The count(s) against those days were measured against OUR arithmetic, not Marg. Owner's decision.
+dry run -- nothing written. Re-run with --apply to do the above.
+======================================================================
+PINS  stock_app.py predicted aa6d9cd9afbe5c7a2e44315678f58de3
+      stock_app.py actual    aa6d9cd9afbe5c7a2e44315678f58de3
+      was 0b965da40816079a60c49a20946832b3   backup <scratch>/mock/root/finance/stock_app.py.bak_S243_0b965da4
+S243_SNAPSHOT_SOURCE GREEN -- from now the computed feed lands in stock_expected; stock_snapshot is Marg's.
+NEXT (separate, explicit, after reading the dry run above):
+  /usr/bin/python3 <scratch>/deploy_kits/S243_SNAPSHOT_SOURCE/migrate_stock_expected_s243.py --db <scratch>/mock/root/finance/finance.db --apply
+   exit 0; live now aa6d9cd9; files: __pycache__ finance.db stock_app.py stock_app.py.bak_S243_0b965da4 stock_schema.sql 
+   mock calls:
+           1 curl -s -o /dev/null -w %{http_code} http://127.0.0.1:8106/finance/healthz
+           1 systemctl is-active --quiet clinic-finance.service
+           1 systemctl restart clinic-finance.service
+
+T3 rerun on the installed box
+ALREADY INSTALLED -- <scratch>/mock/root/finance/stock_app.py is already aa6d9cd9afbe5c7a2e44315678f58de3; nothing to do
+   (the migration is still a separate line: see README)
+   exit 0
+
+T4 forced failure: fake curl answers 500 -> auto-rollback
+-- gates green; the box is on the from-pin 0b965da4
+-- predicted after: aa6d9cd9afbe5c7a2e44315678f58de3
+walk: 41 ok, 0 FAIL
+-- walked on this box with this box's python: green
+-- stock_expected table present (0 rows)
+-- py_compile + import stock_app: green
+!! RED -- healthz answered '500', not 200, within 20 s
+   stock_app.py put back from <scratch>/mock/root/finance/stock_app.py.bak_S243_0b965da4 (0b965da40816079a60c49a20946832b3)
+   the service is up again on the old file
+   exit 1; live back on 0b965da4
+   mock calls:
+          20 curl -s -o /dev/null -w %{http_code} http://127.0.0.1:8106/finance/healthz
+           1 systemctl is-active --quiet clinic-finance.service
+           2 systemctl restart clinic-finance.service
+
+T5 tampered payload (one byte appended to stock_app.py in a copy of the kit)
+!! RED -- SUMS.md5 gate failed (run md5sum -c SUMS.md5 here to see which row)
+   (__pycache__ in the mock finance folder is py_compile's own output, as with every kit since S242.)
+
+7. FILES AND HASHES
+-------------------------------------------------------------------------------
+SUMS.md5 covers every file but itself and this EVIDENCE; md5sum -c SUMS.md5 from inside the kit folder: all OK
+NO_PHONE_NUMBERS.py (repo gate) over the kit: clean -- no contact number and no credential
+
+ff2204885f1fddb514ec87898a2d1141  KIT_ID.txt
+e1c6ceed7cf46da2255e11b2c386d8ae  README.md
+4df74d0b07404e7224dd4c854755cb29  SUMS.md5
+82871d4a8e33335c70c138e3f46eb3e8  install_S243_SNAPSHOT_SOURCE.sh
+f7b1389e458645dc68a016c823ecf154  patch_stock_snapshot_source_s243.py
+aa6d9cd9afbe5c7a2e44315678f58de3  stock_app.py
+5daf1f602d4ee47cbc91f86ed6128157  stock_expected_schema.sql
+11c2d1fa9ecd7bf14ce6597ee5c8bb38  migrate_stock_expected_s243.py
+d8279c8be229dc066e9e0d330bd11839  walk_snapshot_source_s243.py
+
+from-pin  0b965da40816079a60c49a20946832b3  /root/finance/stock_app.py
+to-pin    aa6d9cd9afbe5c7a2e44315678f58de3  /root/finance/stock_app.py
+new table stock_expected  (finance.db; idempotent; the app creates it on first computed push too)
+
+DOUBTS (for the owner / the next session)
+ 1. RESOLVED (coordinator follow-up): marg_spine.py runs every 30 min via spine_cadence.py; checked in the
+    S240_SANJEEVNI_123 copy b5956f59 (live pin 9a08b2c4 is not in the repository). The computed rows it read from
+    stock_snapshot add no name and no fact that its stock_feed pass does not also add -- see section 2. Untouched.
+ 2. The migration KEEPS computed rows on an expected-only day a count was measured against, and names the day.
+    If the live db has such a day, the owner decides; the count page might still show that day if it is the newest.
+ 3. reconcile() is now skipped for the computed push. Marg pushes still reconcile exactly as before.
+ 4. The walk in the installer needs the sibling kits in the deploy clone (S240_STOCK_GATE_R2, S208_STOCK_LEDGER,
+    S224_MARG_PURCHASES, S204_VPS_LIVE); all four are in the repository today. Without them the walk still runs
+    (purchase/sale blocks say unknown) but the gate checks degrade to amber.
+ 5. Built and walked on python 3.11 / flask 3.1 in the container; the box's own python re-walks it before the copy.

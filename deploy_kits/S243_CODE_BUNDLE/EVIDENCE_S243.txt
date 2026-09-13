@@ -1,0 +1,192 @@
+EVIDENCE_S243.txt -- S243_CODE_BUNDLE -- built in the Claude container, 2026-09-12T19:06:13Z
+python: Python 3.11.15; crontab binary absent in the container (the WARNING below is expected there, not on the box)
+kit payload code_bundle.py md5 c1cce2c326b452fc708996f429e9961d
+reused Drive mechanics from deploy_kits/S213_FINDB_DRIVE/finance_drive_backup.py md5 14b406773de7f196abb105114f346080 (= live pin, live_pins_S242close.txt)
+
+===== 1. py_compile
+py_compile: OK (both)
+
+===== 2. selftest (build against a mock tree with decoys)
+== build 1 under mock ROOT
+[2026-09-12 19:06:13] WARNING: # crontab -l unavailable: [Errno 2] No such file or directory: 'crontab'
+[2026-09-12 19:06:13] SUMMARY files=27 content_bytes=1411 tar_bytes=2618 finance_app.py md5 c13b8cece5eabaaadf945a09cf37fe16 excluded_by_rule=5 -> /tmp/s243_selftest_kcwccv1p/mock/root/state_backup/code_nightly.tar.gz
+  ok   build exits 0
+  ok   local copy written at root/state_backup/code_nightly.tar.gz
+  ok   summary line printed
+== members: 30
+  ok   decoy absent: root/finance/.env
+  ok   decoy absent: root/finance/.env.local
+  ok   decoy absent: root/finance/patient_fp.env
+  ok   decoy absent: root/finance/finance.db
+  ok   decoy absent: root/finance/finance.db-wal
+  ok   decoy absent: root/finance/finance_app.py.bak_S240
+  ok   decoy absent: root/finance/app.log
+  ok   decoy absent: root/finance/_retired/old_app.py
+  ok   decoy absent: root/finance/_retired_S234/older.py
+  ok   decoy absent: root/finance/__pycache__/finance_app.cpython-39.pyc
+  ok   decoy absent: root/finance/backups/finance_app.py
+  ok   decoy absent: root/finance/deploy/finance_app.py
+  ok   decoy absent: root/finance/finance_ui/notes.txt
+  ok   decoy absent: root/portal/clinic_users.json
+  ok   decoy absent: root/portal/secret_key.json
+  ok   decoy absent: root/portal/portal_secret.py
+  ok   decoy absent: root/portal/console.db
+  ok   decoy absent: root/marg_ingest/token.json
+  ok   decoy absent: root/marg_ingest/lib/token.txt
+  ok   decoy absent: root/marg_ingest/lib/api_key.json
+  ok   decoy absent: root/marg_ingest/lib/__pycache__/util.cpython-39.pyc
+  ok   decoy absent: root/marg_ingest/lib/.env
+  ok   decoy absent: root/wa/patient-mirror-key.json
+  ok   decoy absent: root/wa/token.pickle
+  ok   decoy absent: root/wa/token.txt
+  ok   decoy absent: root/wa/console.db
+  ok   decoy absent: root/wa/wa.log
+  ok   decoy absent: root/wa/wa_app.py.bak
+  ok   decoy absent: root/staff_register/settings.json
+  ok   decoy absent: root/staff_register/staff_advances.json
+  ok   decoy absent: root/staff_register/register.db
+  ok   decoy absent: root/state_backup/clinic_state_backup.conf
+  ok   decoy absent: root/state_backup/code_bundle.log
+  ok   decoy absent: root/state_backup/state.json
+  ok   decoy absent: root/.env
+  ok   decoy absent: root/notes.txt
+  ok   decoy absent: root/deploy/repo/x.py
+  ok   decoy absent: etc/systemd/system/ssh.service
+  ok   decoy absent: etc/systemd/system/other.service
+  ok   decoy absent: etc/passwd
+  ok   wanted present: root/finance/finance_app.py
+  ok   wanted present: root/finance/marg_door.py
+  ok   wanted present: root/finance/schema.sql
+  ok   wanted present: root/finance/stock_desk.html
+  ok   wanted present: root/finance/finance_backup.sh
+  ok   wanted present: root/finance/drive_backup.conf
+  ok   wanted present: root/finance/finance_ui/index.html
+  ok   wanted present: root/portal/portal.py
+  ok   wanted present: root/portal/login.html
+  ok   wanted present: root/portal/tile_grants.json
+  ok   wanted present: root/marg_ingest/marg_take.py
+  ok   wanted present: root/marg_ingest/config.json
+  ok   wanted present: root/marg_ingest/lib/util.py
+  ok   wanted present: root/marg_ingest/lib/sub/deep.py
+  ok   wanted present: root/wa/wa_app.py
+  ok   wanted present: root/wa/call-hook/hook.py
+  ok   wanted present: root/wa/recordings-archive/archive.py
+  ok   wanted present: root/staff_register/salary_policy.py
+  ok   wanted present: root/staff_register/roster.json
+  ok   wanted present: root/staff_ledger_reconcile/reconcile.py
+  ok   wanted present: root/state_backup/clinic_state_backup.py
+  ok   wanted present: root/state_backup/code_bundle.py
+  ok   wanted present: root/staff_ledger.py
+  ok   wanted present: etc/systemd/system/clinic-finance.service
+  ok   wanted present: etc/systemd/system/clinic-nightly.timer
+  ok   wanted present: etc/systemd/system/wa-receiver.service
+  ok   wanted present: etc/systemd/system/call-hook.service
+  ok   crontab.txt present
+  ok   BUNDLE_INFO.txt present
+  ok   MANIFEST.md5 present
+  ok   no member carries decoy content: []
+  ok   no unexpected members: []
+  ok   MANIFEST.md5 verifies every row: []
+  ok   every member has a manifest row: []
+  ok   row count = wanted + crontab (28)
+  ok   summary names finance_app.py md5
+  ok   BUNDLE_INFO carries finance_app.py md5
+== build 2 (overwrite)
+  ok   second build exits 0
+  ok   second build replaced the local copy
+  ok   no temp files left behind: []
+== refusal: tree without finance_app.py
+  ok   build refused (exit 21)
+  ok   no tarball written on refusal
+== usage
+  ok   no mode -> usage, exit 2
+SELFTEST PASSED: all checks green
+selftest exit=0
+
+===== 3. mock installer, first run (ROOT=mock tree, PY=/usr/bin/python3; mock crontab holds the S179 and S213 lines)
+-- gates green; python /usr/bin/python3; payload c1cce2c326b452fc708996f429e9961d
+-- placed <scratch>/ev_inst/root/state_backup/code_bundle.py (c1cce2c326b452fc708996f429e9961d)
+-- py_compile green
+-- smoke: build (no network)
+   [2026-09-12 19:06:13] WARNING: # crontab -l unavailable: [Errno 2] No such file or directory: 'crontab'
+   [2026-09-12 19:06:13] SUMMARY files=27 content_bytes=22156 tar_bytes=9807 finance_app.py md5 c13b8cece5eabaaadf945a09cf37fe16 excluded_by_rule=5 -> <scratch>/ev_inst/root/state_backup/code_nightly.tar.gz
+-- crontab backed up to <scratch>/ev_inst/root/crontab.bak_S243
+-- cron line added
+
+PINS  /root/state_backup/code_bundle.py c1cce2c326b452fc708996f429e9961d
+S243_CODE_BUNDLE GREEN -- local copy written; the nightly leg is cronned at 01:35.
+OWNER STEP (once, if not yet done): from the owner's Drive account upload any
+file named exactly code_nightly.tar.gz into the folder that holds
+finance_nightly.db.gz. Then verify with:
+/root/wa/venv/bin/python3 /root/state_backup/code_bundle.py list
+installer exit=0
+--- mock crontab after:
+5 1 * * * /root/finance/finance_backup.sh # S179
+40 1 * * * /root/wa/venv/bin/python3 /root/finance/finance_drive_backup.py run >> /root/finance/drive_backup.log 2>&1
+35 1 * * * /root/wa/venv/bin/python3 /root/state_backup/code_bundle.py run >> /root/state_backup/code_bundle.log 2>&1 # S243_CODE_BUNDLE
+--- installed file md5: c1cce2c326b452fc708996f429e9961d
+--- tarball members:
+etc/systemd/system/call-hook.service
+etc/systemd/system/clinic-finance.service
+etc/systemd/system/clinic-nightly.timer
+etc/systemd/system/wa-receiver.service
+root/finance/drive_backup.conf
+root/finance/finance_app.py
+root/finance/finance_backup.sh
+root/finance/finance_ui/index.html
+root/finance/marg_door.py
+root/finance/schema.sql
+root/finance/stock_desk.html
+root/marg_ingest/config.json
+root/marg_ingest/lib/sub/deep.py
+root/marg_ingest/lib/util.py
+root/marg_ingest/marg_take.py
+root/portal/login.html
+root/portal/portal.py
+root/portal/tile_grants.json
+root/staff_ledger.py
+root/staff_ledger_reconcile/reconcile.py
+root/staff_register/roster.json
+root/staff_register/salary_policy.py
+root/state_backup/clinic_state_backup.py
+root/state_backup/code_bundle.py
+root/wa/call-hook/hook.py
+root/wa/recordings-archive/archive.py
+root/wa/wa_app.py
+crontab.txt
+BUNDLE_INFO.txt
+MANIFEST.md5
+
+===== 4. mock installer, second run (idempotence)
+-- gates green; python /usr/bin/python3; payload c1cce2c326b452fc708996f429e9961d
+-- <scratch>/ev_inst/root/state_backup/code_bundle.py is already c1cce2c326b452fc708996f429e9961d (same bytes); file step skipped
+-- py_compile green
+-- smoke: build (no network)
+   [2026-09-12 19:06:13] WARNING: # crontab -l unavailable: [Errno 2] No such file or directory: 'crontab'
+   [2026-09-12 19:06:13] SUMMARY files=27 content_bytes=22156 tar_bytes=9807 finance_app.py md5 c13b8cece5eabaaadf945a09cf37fe16 excluded_by_rule=5 -> <scratch>/ev_inst/root/state_backup/code_nightly.tar.gz
+-- crontab backed up to <scratch>/ev_inst/root/crontab.bak_S243
+-- cron line already present (tag # S243_CODE_BUNDLE); not added again
+
+PINS  /root/state_backup/code_bundle.py c1cce2c326b452fc708996f429e9961d
+S243_CODE_BUNDLE GREEN -- local copy written; the nightly leg is cronned at 01:35.
+OWNER STEP (once, if not yet done): from the owner's Drive account upload any
+file named exactly code_nightly.tar.gz into the folder that holds
+finance_nightly.db.gz. Then verify with:
+/root/wa/venv/bin/python3 /root/state_backup/code_bundle.py list
+installer exit=0
+S243 cron lines: 1
+
+===== 5. mock installer on a tree WITHOUT finance_app.py (must go RED, roll back)
+-- gates green; python /usr/bin/python3; payload c1cce2c326b452fc708996f429e9961d
+-- placed <scratch>/ev_fail/root/state_backup/code_bundle.py (c1cce2c326b452fc708996f429e9961d)
+-- py_compile green
+-- smoke: build (no network)
+   [2026-09-12 19:06:13] FATAL: /root/finance/finance_app.py is not in the gather -- the bundle is pointless without it; not writing one
+   <scratch>/ev_fail/root/state_backup/code_bundle.py removed
+!! RED -- the build smoke failed on this box
+installer exit=1
+file after rollback: absent
+
+===== 6. usage line
+usage: code_bundle.py build|run|list
+exit=2
