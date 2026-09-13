@@ -1,0 +1,9 @@
+da756aa1d84e41bc911c69dbdac47014  ./EVIDENCE_S256.txt
+92108b9de9c7690003250f56791424c8  ./KIT_ID.txt
+5f770dfbffd9c6315e5e170577025e96  ./README.md
+75f89072f368a5f60bb6b75510d7a959  ./docterz_day.py
+3809f046e4b33d834e164c5320d91b4c  ./docterz_ingest.py
+34e12db6cfaba6df2574aa6fe83300d6  ./install_S256_GATEWAY_REF.sh
+d0f6434a441393d7ee15325abcb09c83  ./patch_day_s256.py
+aae54b4af18a1f20d305a511a008921d  ./patch_ing_s256.py
+ab80593dcb48760f68d41c6c90020fd2  ./selftest_gateway_s256.py

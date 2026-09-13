@@ -1,0 +1,141 @@
+EVIDENCE_S256.txt -- S256_GATEWAY_REF -- built 2026-09-13T14:02:45Z in container
+
+## 1. THE PREMISE, PROVEN BEFORE ANYTHING WAS BUILT (the S255 lesson)
+Two independent sources, same payment, same id:
+  (a) Docterz payment-completed email forwarded by the owner 13-Sep: Payment ID pay_TVSzKeESCXc04L,
+      patient Bindu M., amount 600, 29-Aug-2026.
+  (b) the 29-Aug-2026 Day Revenue sheet inside Staff_Action_Today_2026-08-31.xlsx on Drive:
+      row 13 consultation Rs 600  Mode = 'Online Payment pay_TVSzKeESCXc04L'
+      procedures row 1  Rs 800    Mode = 'Online Payment pay_TVSzKeESCXc04L'
+=> Docterz appends the Razorpay reference to the Mode cell. The live parser strips it.
+
+## 2. Bases verified against live_pins_S244close.txt
+line 164: e939235ee5d37bcbf21ce2c5c4de1f01  /root/finance/docterz_day.py
+line 165: 80bf760dd6103504776964c58d876f17  /root/finance/docterz_ingest.py
+e939235ee5d37bcbf21ce2c5c4de1f01  _base_day.py
+80bf760dd6103504776964c58d876f17  _base_ing.py
+=> both MATCH.
+
+## 3. Patchers, count==1 on every anchor: 3 + 3
+75f89072f368a5f60bb6b75510d7a959  docterz_day.py
+3809f046e4b33d834e164c5320d91b4c  docterz_ingest.py
+
+## 4. Diff base -> new, docterz_day.py
+150a151
+>                 "gateway_ref": "",   # S256: the Razorpay id, when Docterz appends one
+158a160,161
+>             gw = _GATEWAY.search(raw_mode)                 # S256: keep it, do not discard it
+>             lines[-1]["gateway_ref"] = gw.group(0).strip() if gw else ""
+174c177
+<                           "mode": "", "shift": _s(r[3])})
+---
+>                           "mode": "", "gateway_ref": "", "shift": _s(r[3])})
+
+## 5. Diff base -> new, docterz_ingest.py
+82a83
+>   gateway_ref   TEXT    NOT NULL DEFAULT '',
+219a221,231
+> def _ensure_gateway_ref(con):
+>     """S256: add clinic_day_line.gateway_ref to a database created before this kit. Idempotent,
+>     additive, and silent when the column is already there."""
+>     try:
+>         cols = [r[1] for r in con.execute("PRAGMA table_info(clinic_day_line)")]
+>         if "gateway_ref" not in cols:
+>             con.execute("ALTER TABLE clinic_day_line ADD COLUMN gateway_ref TEXT NOT NULL DEFAULT ''")
+>     except Exception:                                      # noqa: BLE001
+>         pass
+> 
+> 
+222a235
+>     _ensure_gateway_ref(con)
+226c239
+<         "mode, shift) VALUES (?,?,?,?,?,?,?,?)",
+---
+>         "mode, gateway_ref, shift) VALUES (?,?,?,?,?,?,?,?,?)",
+228c241,242
+<           l["amount_p"], l["mode"], l["shift"]) for l in d.get("lines", [])])
+---
+>           l["amount_p"], l["mode"], l.get("gateway_ref", ""), l["shift"])
+>          for l in d.get("lines", [])])
+
+## 6. py_compile
+OK (Python 3.11.15)
+
+## 7. Selftest (19 checks, on the rebuilt 29-Aug sheet shape)
+PASS  the consultation keeps the Razorpay id
+PASS  the procedure keeps the same id
+PASS  the mode is still normalised to 'Online Payment'
+PASS  a cash line carries no reference
+PASS  an x-ray cash line carries no reference
+PASS  every line has the field
+PASS  the date still reads 2026-08-29
+PASS  consultations still ₹1,200
+PASS  procedures still ₹800
+PASS  the day still totals ₹2,500
+PASS  the online tender is still ₹1,400, under the plain name
+PASS  cash still ₹1,100
+PASS  both of Bindu's lines are stored with the id
+PASS  no other line gained one
+PASS  the stored mode is unchanged
+PASS  an old database gains the column on first write
+PASS  the old day's row survives the migration untouched
+PASS  and the new day's two references land in it
+PASS  re-running the same day leaves no duplicate (migration is idempotent)
+
+19 passed, 0 failed
+
+## 8. TEST A clean install
+== S256_GATEWAY_REF installer ==
+target : /tmp/m256/finance
+python : /usr/bin/python3
+docterz_day.py : from e939235ee5d37bcbf21ce2c5c4de1f01 -> to 75f89072f368a5f60bb6b75510d7a959 ; live e939235ee5d37bcbf21ce2c5c4de1f01
+docterz_ingest.py : from 80bf760dd6103504776964c58d876f17 -> to 3809f046e4b33d834e164c5320d91b4c ; live 80bf760dd6103504776964c58d876f17
+backup : /tmp/m256/finance/docterz_day.py.bak_S256_e939235e
+backup : /tmp/m256/finance/docterz_ingest.py.bak_S256_80bf760d
+smoke  : py_compile OK
+smoke  : SMOKE_OK reference stored, blank kept blank
+md5sum of installed files:
+75f89072f368a5f60bb6b75510d7a959  /tmp/m256/finance/docterz_day.py
+3809f046e4b33d834e164c5320d91b4c  /tmp/m256/finance/docterz_ingest.py
+S256_GATEWAY_REF: DONE
+exit=0
+
+## 9. TEST B rerun
+== S256_GATEWAY_REF installer ==
+target : /tmp/m256/finance
+python : /usr/bin/python3
+docterz_day.py : from e939235ee5d37bcbf21ce2c5c4de1f01 -> to 75f89072f368a5f60bb6b75510d7a959 ; live 75f89072f368a5f60bb6b75510d7a959
+docterz_ingest.py : from 80bf760dd6103504776964c58d876f17 -> to 3809f046e4b33d834e164c5320d91b4c ; live 3809f046e4b33d834e164c5320d91b4c
+ALREADY INSTALLED (both live md5 == to-pin). Nothing to do.
+75f89072f368a5f60bb6b75510d7a959  /tmp/m256/finance/docterz_day.py
+3809f046e4b33d834e164c5320d91b4c  /tmp/m256/finance/docterz_ingest.py
+exit=0
+
+## 10. TEST C wrong base -> REFUSED
+== S256_GATEWAY_REF installer ==
+target : /tmp/m256c/finance
+python : /usr/bin/python3
+docterz_day.py : from e939235ee5d37bcbf21ce2c5c4de1f01 -> to 75f89072f368a5f60bb6b75510d7a959 ; live e939235ee5d37bcbf21ce2c5c4de1f01
+docterz_ingest.py : from 80bf760dd6103504776964c58d876f17 -> to 3809f046e4b33d834e164c5320d91b4c ; live df207dc9143c6fabf60b69b9c3035103
+REFUSED: docterz_ingest.py is df207dc9143c6fabf60b69b9c3035103, expected 80bf760dd6103504776964c58d876f17
+exit=1 (refusal expected)
+untouched:
+e939235ee5d37bcbf21ce2c5c4de1f01  /tmp/m256c/finance/docterz_day.py
+
+## 11. TEST D forced failure -> both restored
+== S256_GATEWAY_REF installer ==
+target : /tmp/m256d/finance
+python : /usr/bin/python3
+docterz_day.py : from e939235ee5d37bcbf21ce2c5c4de1f01 -> to 75f89072f368a5f60bb6b75510d7a959 ; live e939235ee5d37bcbf21ce2c5c4de1f01
+docterz_ingest.py : from 80bf760dd6103504776964c58d876f17 -> to 3809f046e4b33d834e164c5320d91b4c ; live 80bf760dd6103504776964c58d876f17
+backup : /tmp/m256d/finance/docterz_day.py.bak_S256_e939235e
+backup : /tmp/m256d/finance/docterz_ingest.py.bak_S256_80bf760d
+smoke  : py_compile OK
+smoke  : FORCED FAILURE
+!! restoring both files byte-identically
+e939235ee5d37bcbf21ce2c5c4de1f01  /tmp/m256d/finance/docterz_day.py
+80bf760dd6103504776964c58d876f17  /tmp/m256d/finance/docterz_ingest.py
+exit=1 (rollback expected)
+after rollback:
+e939235ee5d37bcbf21ce2c5c4de1f01  /tmp/m256d/finance/docterz_day.py
+80bf760dd6103504776964c58d876f17  /tmp/m256d/finance/docterz_ingest.py

@@ -1,0 +1,10 @@
+S256_GATEWAY_REF
+/root/finance/docterz_day.py    e939235ee5d37bcbf21ce2c5c4de1f01 -> 75f89072f368a5f60bb6b75510d7a959
+/root/finance/docterz_ingest.py 80bf760dd6103504776964c58d876f17 -> 3809f046e4b33d834e164c5320d91b4c
+Purpose: Docterz appends the Razorpay reference to the Mode cell ("Online Payment pay_XXXX").
+The live parser stripped it and kept only a footnote, so the one piece of evidence that identifies
+a portal payment was discarded every day. This kit keeps it: a new clinic_day_line.gateway_ref
+column, filled from the sheet. Additive only -- no bucket, tender or total moves by a rupee.
+Proven premise (S255 lesson): the id in the 29-Aug sheet equals the Payment ID in the Docterz
+email for the same visit, character for character.
+This is the record step. The reconciler is NOT touched here; that comes after the data has run.
