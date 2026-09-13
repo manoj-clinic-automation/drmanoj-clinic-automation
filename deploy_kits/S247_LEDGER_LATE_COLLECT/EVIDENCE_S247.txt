@@ -1,0 +1,101 @@
+== S247_LEDGER_LATE_COLLECT -- EVIDENCE, 13-Sep-2026 IST
+
+-- 1. patch(the file that is LIVE now, v3.7 49b13f42) == the kit's file, byte for byte
+OK  patch(staff_ledger.py) == kit/staff_ledger.py  (5 edits, md5 eacd71544715ff597712aee5e6233135)
+
+-- 2. py_compile
+py_compile ok
+
+-- 3. THE MODULE'S OWN SELFTEST -- unchanged by this kit, and still passing
+SELFTEST PASSED — 323 maker-checker, rate-card, advance, loan, skip, statement, salary, report, F-51, D332/SL5+SL6+SL7 and S238 checks OK
+
+-- 4. THE LIVE-SHAPE WALK, verbatim
+
+== S247 walk -- staff_ledger.py /home/claude/S247/kit/staff_ledger.py
+   app version 3.8-S247-LATE-COLLECT
+
+-- A. the situation, before anything is fixed
+  ok    A1 the advance is approved and open
+  ok    A2 it counts against the August salary
+  ok    A3 August is closed
+  ok    A4 August collected nothing from it
+  ok    A5 August cannot be closed again -- unchanged
+
+-- B. the control the page now offers
+  ok    B1 the advances page renders
+  ok    B2 it offers the new control
+  ok    B3 with August among the months
+  ok    B4 the amount is prefilled with the whole balance
+  ok    B5 a reason is demanded by the form itself
+  ok    B6 it says in one line why this exists
+  ok    B7 Defer is still there, untouched
+
+-- C. what it refuses, and writes nothing while refusing
+  ok    C1 a month that is not closed is refused, by reason
+  ok    C1 a month that is not closed -- and the ledger is byte-identical
+  ok    C2 a month before the one it counts against is refused, by reason
+  ok    C2 a month before the one it counts against -- and the ledger is byte-identical
+  ok    C3 no reason is refused, by reason
+  ok    C3 no reason -- and the ledger is byte-identical
+  ok    C4 more than the balance is refused, by reason
+  ok    C4 more than the balance -- and the ledger is byte-identical
+  ok    C5 nothing, or a negative is refused, by reason
+  ok    C5 nothing, or a negative -- and the ledger is byte-identical
+  ok    C6 an amount that is not a number is refused, by reason
+  ok    C6 an amount that is not a number -- and the ledger is byte-identical
+  ok    C7 an advance that does not exist is refused, by reason
+  ok    C7 an advance that does not exist -- and the ledger is byte-identical
+  ok    C8 a maker cannot do this at all
+
+-- D. the correction itself
+  ok    D1 it returns to the advances page
+  ok    D2 exactly one row was written
+  ok    D3 the ledger is append-only -- nothing before it moved
+  ok    D4 August now has the collection
+  ok    D5 it is the same row the close writes
+  ok    D6 it carries the name of the person who decided it
+  ok    D7 and the reason, in the row itself
+  ok    D8 and it is marked as a late collection for anyone reading later
+  ok    D9 the balance is now nil
+  ok    D10 the advance has left the open list
+
+-- E. it cannot be done twice, and the next close does not repeat it
+  ok    E1 a second collection for the same month is refused
+  ok    E2 -- and wrote nothing
+  ok    E3 the settled advance is gone from the page
+  ok    E4 September's close collects nothing more on it
+  ok    E5 and the August collection still stands, alone
+
+-- F. the rest of the ledger is untouched
+  ok    F1 the advance that WAS caught by August's close is unaffected
+  ok    F2 the statement shows the collection to the owner
+  ok    F3 the entry form still refuses to offer a system category by hand
+  ok    F4 a hand-typed instalment is still impossible
+
+-- G. a partial collection
+  ok    G1 a part amount is taken as given
+  ok    G2 the advance stays open for the rest
+  ok    G3 August is no longer offered for that advance
+  ok    G4 but September is, now that it is closed
+  ok    G5 and the page offers exactly that
+
+-- H. the standing properties
+  ok    H1 the version says what is live
+  ok    H2 close_month still refuses a re-close
+  ok    H3 closed_months reads back what was closed
+  ok    H4 the helper and the writer agree on what is blocked
+
+== 55 checks, 55 ok, 0 failed
+== WALK GREEN
+
+-- 5. THE PROBE, against a COPY of a ledger of the real shape
+     (on the box this runs against /root/staff_ledger and then deletes the copy)
+live-shape probe: 22 checks, 0 failures (4 rows in the copy, 2 statements rendered) — collected Rs 5000 for Meera against 2026-08, on the copy
+
+-- 6. NEGATIVE CONTROL: the same walk against the LIVE v3.7 file, which must FAIL
+Traceback (most recent call last):
+  File "/home/claude/S247/walk_late_collect_s247.py", line 117, in <module>
+    check("A3 August is closed", "2026-08" in L.closed_months())
+                                              ^^^^^^^^^^^^^^^
+AttributeError: module 'staff_ledger' has no attribute 'closed_months'. Did you mean: 'close_month'?
+      It cannot start: v3.7 has no closed_months, no late_collect_blocked and no control.

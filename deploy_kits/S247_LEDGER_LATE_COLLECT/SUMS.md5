@@ -1,0 +1,8 @@
+0c08760ebebfe863d5713130105c7318  KIT_ID.txt
+e8aad8b52e7ebb514ff6bb49f40876de  README.md
+858bae6815da3fc4a9b0ddf37c94dfde  EVIDENCE_S247.txt
+eacd71544715ff597712aee5e6233135  staff_ledger.py
+517e1b7401fbd25a43ce8f89b583be59  patch_staff_ledger_late_collect_s247.py
+1280efa22886fe13ede8cc171654ece9  walk_late_collect_s247.py
+a7a93e15166795420c25788cd9ac0e2e  probe_live_shape_s247.py
+47176aab76bde8f31d56ff6e27fbfddc  install_late_collect_s247.sh

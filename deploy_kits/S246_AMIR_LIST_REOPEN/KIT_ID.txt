@@ -1,0 +1,13 @@
+S246_AMIR_LIST_REOPEN
+Built 13-Sep-2026 IST, Session 246.
+Owner rulings, 13-Sep-2026, in his words:
+  "show only purchase bills from 1sept onwards all previous are settled , and
+   only not ok marked bills shd appear till they are corrected and you get ok
+   for them"
+  "din band kar diya / then there is no way to open the flow again"
+Touches exactly one file: /root/finance/amir_day.py (full-file replacement).
+From pin: 79eb701f2df14e58c77e130a77b972ba   (S245_AMIR_BILLTAP, live since 13-Sep)
+Schema: two columns ADDED to amir_day (reopened_at, reopened_by), lazily and
+idempotently. Nothing existing is altered or dropped. No new route, no cron,
+no service file, no other file.
+SUPERSEDES the S245_AMIR_BILLTAP kit folder, which now refuses on the pin.

@@ -1,0 +1,130 @@
+== S246_AMIR_LIST_REOPEN -- EVIDENCE, 13-Sep-2026 IST
+
+-- 1. patch(the file that is LIVE now) == the kit's file, byte for byte
+OK  patch(amir_day.py) == kit/amir_day.py  (20 edits, md5 a9f2062267ebac59e02fdb0f88e775de)
+
+-- 2. py_compile
+py_compile ok
+
+-- 3. THE REOPEN / NAVIGATION WALK, verbatim
+
+== S246 walk -- amir_day.py /home/claude/S246/kit/amir_day.py
+
+-- A. the schema grows under a table that is already there
+  ok    A1 the live table starts with four columns
+  ok    A2 the two new columns are added in place
+  ok    A3 running it again changes nothing (F-303)
+  ok    A4 an existing row keeps its data
+
+-- B. every step is a link, on every screen
+  ok    B1 all seven steps are links in the banner
+  ok    B2 the banner no longer has dead <span> steps
+  ok    B3 the link text is still the step name
+
+-- C. close the day, then find the way back in
+  ok    C1 the day is ready to close
+  ok    C2 it closed
+  ok    C3 the closed screen says DIN BAND
+  ok    C4 it offers the bill list by name
+  ok    C5 it names how many flags are waiting there
+  ok    C6 it offers salt and the report check
+  ok    C7 it offers to open the day again
+  ok    C8 and the banner is still all links
+  ok    C9 'where did I leave off' lands on the closed screen, not nowhere
+  ok    C10 a step opened directly on a closed day still renders
+
+-- D. a new bill after the close is not silently lost
+  ok    D1 the closed screen says a new bill has arrived
+  ok    D2 and the jump takes him to the bills
+
+-- E. opening the day again
+  ok    E1 a plain post on a closed day does NOT reopen it
+  ok    E2 reopening clears the close
+  ok    E3 and records when, and by whom
+  ok    E4 the step 7 tick is gone, so the day reads OPEN
+  ok    E5 it drops him where the work actually is
+  ok    E6 everything else already done stays done
+  ok    E7 his answers were not touched
+  ok    E8 and the flag is still standing
+  ok    E9 the close screen is back to asking, not announcing
+
+-- F. re-closing, and what the owner sees
+  ok    F1 the day closes again
+  ok    F2 and the screen says it had been opened again
+  ok    F3 the owner's page says so too, in English
+  ok    F4 and names who
+  ok    F5 the owner's page carries no Hinglish from this change
+  ok    F6 the visit summary carries the reopen, for the record
+
+-- G. the standing properties
+  ok    G1 GATE_STEPS unchanged
+  ok    G2 the five answers are unchanged
+  ok    G3 the settlement line is a real date
+  ok    G4 healthz names this kit
+  ok    G5 no ten-digit phone-shaped number on any screen walked (F-185)
+  ok    G6 no onclick/onchange handler was introduced
+  ok    G7 no <script> tag was introduced
+
+== 41 checks, 41 ok, 0 failed
+== WALK GREEN
+
+-- 4. THE LIST WALK (S245), re-run as a regression suite
+  ok    F8 the report reminder band still rides above the bills
+
+== 53 checks, 53 ok, 0 failed
+== WALK GREEN
+
+-- 5. THE STEP 3/4 WALK (S244), re-run as a regression suite
+  ok    I7 the grace window is the documented one, and tunable
+
+== 62 checks, 62 ok, 0 failed
+== WALK GREEN
+
+   TOTAL: 41 + 53 + 62 = 156 checks, 156 ok, 0 failed
+
+-- 6. NEGATIVE CONTROL: the S246 walk against the file that is LIVE now, which must FAIL
+
+== S246 walk -- amir_day.py /home/claude/S246/neg/amir_day.py
+
+-- A. the schema grows under a table that is already there
+  ok    A1 the live table starts with four columns
+  FAIL  A2 the two new columns are added in place 
+  ok    A3 running it again changes nothing (F-303)
+  ok    A4 an existing row keeps its data
+
+-- B. every step is a link, on every screen
+  FAIL  B1 all seven steps are links in the banner -- []
+  FAIL  B2 the banner no longer has dead <span> steps 
+      ... the live file has no reopen columns and no links in the banner.
+
+-- 7. MOCK INSTALL on a fake VPS tree, from a FROZEN copy of this kit
+      (ROOT=, service steps skipped; the kit's own SUMS gate runs for real)
+
+   run 1 -- installs:
+   -- MOCK: ROOT=/home/claude/S246/mock PY=/usr/bin/python3 PY_SMOKE=/usr/bin/python3 SKIP_SVC=1
+   -- gates green: SUMS.md5 and KIT_ID.txt (S246_AMIR_LIST_REOPEN)
+   -- live pin: amir_day.py 79eb701f (as expected)
+   -- proof: patch(live amir_day.py 79eb701f) == kit amir_day.py a9f20622, byte for byte
+   -- walk_amir_reopen_s246.py on this box: == 41 checks, 41 ok, 0 failed
+   -- walk_amir_billtap_s245.py on this box: == 53 checks, 53 ok, 0 failed
+   -- walk_amir_processing_s244.py on this box: == 62 checks, 62 ok, 0 failed
+   -- placed: amir_day.py 79eb701f -> a9f20622 | backup /home/claude/S246/mock/root/finance/amir_day.py.bak_S246_79eb701f
+   -- MOCK: service smoke, restart and healthz skipped
+   
+   == S246_AMIR_LIST_REOPEN INSTALLED (mock)
+      amir_day.py  was 79eb701f2df14e58c77e130a77b972ba  now a9f2062267ebac59e02fdb0f88e775de
+
+   run 2 -- already installed, changes nothing:
+   -- MOCK: ROOT=/home/claude/S246/mock PY=/usr/bin/python3 PY_SMOKE=/usr/bin/python3 SKIP_SVC=1
+   -- gates green: SUMS.md5 and KIT_ID.txt (S246_AMIR_LIST_REOPEN)
+   -- ALREADY INSTALLED: amir_day.py a9f20622 is the kit's file. Nothing changed.
+
+   run 3 -- a live file that is NOT the pin: refuses, file left byte-identical:
+   -- MOCK: ROOT=/home/claude/S246/mock PY=/usr/bin/python3 PY_SMOKE=/usr/bin/python3 SKIP_SVC=1
+   -- gates green: SUMS.md5 and KIT_ID.txt (S246_AMIR_LIST_REOPEN)
+   !! RED -- live amir_day.py is 36cec3f9d9d3f2e49a7d471690b23585 -- not the pin 79eb701f this kit was built on (full-file replacement needs the exact pin); NOTHING changed
+   !! S246_AMIR_LIST_REOPEN NOT installed
+   file before 36cec3f9d9d3f2e49a7d471690b23585  after 36cec3f9d9d3f2e49a7d471690b23585  -- byte-identical, as required
+
+   (this log was appended AFTER the runs, so the kit's SUMS is recomputed below;
+    the runs above gated on the frozen copy's own SUMS.)
