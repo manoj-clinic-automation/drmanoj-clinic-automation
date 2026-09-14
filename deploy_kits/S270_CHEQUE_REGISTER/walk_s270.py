@@ -1,5 +1,17 @@
 # -*- coding: utf-8 -*-
-"""S270 LIVE-SHAPE WALK -- run on the box, against a COPY of the real database.
+"""S270 LIVE-SHAPE WALK v2 -- run on the box, against a COPY of the real database.
+
+v2, after v1 failed on the box and taught two things (F-483):
+
+  1  THE PATCHED COPY MUST SIT BESIDE purchase_schema.sql. The app resolves its
+     schema from its OWN folder, so a copy run out of /tmp made every page a 500
+     looking for /tmp/purchase_schema.sql. --file must be a path inside
+     /root/finance/.  This walk now refuses if it is not.
+  2  A CHECK MUST NEVER PASS ON AN ERROR PAGE. Four checks went green in v1
+     because a 500 body contains neither the string they wanted absent nor a
+     working answer. Every check that reads a page now goes through need200(),
+     which FAILS loudly when the page did not answer 200 -- it never quietly
+     succeeds and never silently skips.
 
 It loads BOTH files -- the one being replaced and the patched one -- each
 against its OWN copy of the real finance.db, and holds them against each other.
@@ -70,12 +82,35 @@ def body_of(client, path):
     return r.status_code, r.get_data(as_text=True)
 
 
+def need200(client, path, what):
+    """Fetch a page and REFUSE to let anything downstream pass if it is not 200.
+    Returns (html, True) when the page answered, (body, False) when it did not,
+    and in the second case it has already recorded the failure itself."""
+    st, h = body_of(client, path)
+    if st != 200:
+        ck("%s answers 200" % what, False, "status %d -- %s" % (st, _first_error(h)))
+        return h, False
+    return h, True
+
+
+def _first_error(html):
+    m = re.search(r"(\w*Error: [^<\n]+)", html or "")
+    return m.group(1) if m else "no exception text in the body"
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--file", required=True)
     ap.add_argument("--before", required=True)
     ap.add_argument("--db", required=True)
     a = ap.parse_args(argv)
+
+    real_dir = os.path.dirname(os.path.abspath(a.before))
+    if os.path.dirname(os.path.abspath(a.file)) != real_dir:
+        print("REFUSING: --file must sit in the app's own folder (%s).\n"
+              "          The app loads purchase_schema.sql from beside itself, so a copy\n"
+              "          anywhere else makes every page a 500. (F-483)" % real_dir)
+        return 2
 
     live_md5_start = hashlib.md5(open(a.db, "rb").read()).hexdigest()
     tmp = tempfile.mkdtemp(prefix="s270_")
@@ -123,12 +158,12 @@ def main(argv=None):
        "Write a cheque, and log it. The moment" not in h1)
 
     print("\n  4 - THE REGISTER ITSELF")
-    s, h = body_of(c1, P + "/page/cheques")
-    ck("the register answers 200", s == 200, s)
-    ck("it names itself", "Cheque register" in h)
-    s, h = body_of(c1, "%s/page/cheques/%s" % (P, month))
-    ck("the month's register answers 200", s == 200, s)
-    ck("it holds itself against the sheet", "Against the sheet" in h)
+    h, ok = need200(c1, P + "/page/cheques", "the register")
+    if ok:
+        ck("it names itself", "Cheque register" in h)
+    h, ok = need200(c1, "%s/page/cheques/%s" % (P, month), "the month's register")
+    if ok:
+        ck("it holds itself against the sheet", "Against the sheet" in h)
     ck("it did not exist before this kit", body_of(c0, P + "/page/cheques")[0] == 404,
        body_of(c0, P + "/page/cheques")[0])
 
@@ -147,23 +182,37 @@ def main(argv=None):
             "payee": g["name"], "cheque_no": "WALK-S270-1",
             "cheque_date": "14-09-2026", "amount_p": g["payable_p"]})
         j = r.get_json()
-        ck("the cheque is accepted", bool(j and j.get("ok")), j)
-        r2 = c1.post(P + "/api/cheque", json={
-            "month": month, "vendor_norm": g["norm"], "vendor": g["name"],
-            "cheque_no": "WALK-S270-1", "cheque_date": "15-09-2026", "amount_p": 100})
-        j2 = r2.get_json()
-        ck("the same number a second time is REFUSED", not (j2 or {}).get("ok"), j2)
-        s, h = body_of(c1, "%s/page/cheques/%s" % (P, month))
-        ck("the register shows it", "WALK-S270-1" in h)
-        ck("and the sheet now says that vendor has its cheque",
-           "WALK-S270-1" in body_of(c1, "%s/page/pay/%s" % (P, month))[1])
+        first_ok = bool(j and j.get("ok"))
+        ck("the cheque is accepted", first_ok, "%s %s" % (r.status_code, j))
+        if not first_ok:
+            ck("the duplicate check can be trusted", False,
+               "the first cheque never landed, so a refusal proves nothing")
+        else:
+            r2 = c1.post(P + "/api/cheque", json={
+                "month": month, "vendor_norm": g["norm"], "vendor": g["name"],
+                "cheque_no": "WALK-S270-1", "cheque_date": "15-09-2026", "amount_p": 100})
+            j2 = r2.get_json()
+            ck("the same number a second time is REFUSED",
+               r2.status_code == 200 and j2 is not None and not j2.get("ok")
+               and "WALK-S270-1" in (j2.get("message") or ""),
+               "%s %s" % (r2.status_code, j2))
+            h, ok = need200(c1, "%s/page/cheques/%s" % (P, month), "the register after logging")
+            if ok:
+                ck("the register shows it", "WALK-S270-1" in h)
+            h, ok = need200(c1, "%s/page/pay/%s" % (P, month), "the sheet after logging")
+            if ok:
+                ck("and the sheet now says that vendor has its cheque", "WALK-S270-1" in h)
 
     print("\n  6 - A VIEWER MAY READ IT AND MAY NOT WRITE IT")
     vmod, vapp, vdb = load(a.file, db_a, "pa_viewer", role="viewer")
     vc = vapp.test_client()
     sv, hv = body_of(vc, P + "/page/cheques")
-    if sv != 200:
-        skip("a viewer can open the register", "this box answered %d for a viewer" % sv)
+    if sv in (401, 403):
+        skip("a viewer can open the register",
+             "this box refuses a viewer at the front gate (%d) -- a role question, not a bug" % sv)
+    elif sv != 200:
+        ck("a viewer can open the register", False,
+           "status %d -- %s" % (sv, _first_error(hv)))
     else:
         ck("a viewer can open the register", "Cheque register" in hv)
         ck("a viewer is offered no void control", 'onclick="chqvoid(' not in hv)

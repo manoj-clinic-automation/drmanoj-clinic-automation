@@ -72,11 +72,19 @@ file byte for byte. *Wrap, don't edit.*
   departure, the viewer gate, and that the sheet's own tables are untouched.
 - **The patcher was proven end to end** against a file carrying the real anchors: it patches, parses,
   repoints the card, leaves the old string in place, and refuses on a second run.
-- **`walk_s270.py` runs on the box** against a **copy** of the real database: `/hub`, `/scans`,
+- **`walk_s270.py` v2 runs on the box** against a **copy** of the real database: `/hub`, `/scans`,
   `/orders` and `/book` must come back **byte-identical**; every rupee figure the sheet showed before
   must still be on it; the register must not have existed before the patch; a real cheque-lane vendor
   is logged and the duplicate refused; and the live database's md5 is taken before and after and
   printed either way.
+
+**v1 of the walk failed on the box, and the failure was the walk's, not the kit's (F-483).** It ran
+the patched copy out of `/tmp`, and `purchase_app.py` resolves `purchase_schema.sql` from its OWN
+folder — so every page answered 500 looking for `/tmp/purchase_schema.sql`. Two repairs: the walk
+now **refuses a `--file` outside the app's own folder**, and every check that reads a page goes
+through `need200()`, because **four v1 checks went green on a 500 body** — passing for the absence
+of a string that an error page also lacks. A check that cannot run now fails loudly or is named as
+skipped; it never quietly succeeds.
 
 **No pin is predicted (F-472).** The patcher prints the md5 it reads back off the disk, and that
 value — nothing else — goes into the record.
