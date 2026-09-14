@@ -1,0 +1,7 @@
+KIT      : S271_CHEQUE_MONTHS
+SESSION  : 257
+DATE     : 2026-09-14
+TARGET   : VPS, /root/finance/purchase_app.py
+FROM     : the S270 file, 800d58a3cf4699ba42cdc8c553160cf1 (read from the box)
+CHANGES  : one line + one helper. No new table. No CSS. No nav change.
+NUMBERS  : F-484 minted for the finding. Next free D522 - F-485 - kit S272.
