@@ -1,0 +1,9 @@
+8837193a5f41a8563598efa62a9c1f86  README.md
+e9ac98ab1bc0a260f2b2e8b81d651b0a  walk_s260.py
+11f1a168c9ab267939d548a0e99a9051  manojz/INSTALL_S260_MANOJZ.bat
+f7855fa823daecea5aa13263fc9c02e6  manojz/PULL_FROM_MEDICAL.bat
+5cbec862593e201884b8f372775c7db2  manojz/PUSH_STOCK_DAILY.bat
+42ac9a9790278616dc735620736876cb  manojz/install_s260.py
+52f502d1ee1a59e37086fb3e514f7874  manojz/marg_gate.py
+31aad5e65a31eece32441027f6db6e47  manojz/pipeline_status.py
+1524b5f7351b26e7ae08e10d144c3abd  manojz/probe_conf_s260.bat

@@ -1,22 +1,11 @@
-# KIT_MANIFEST.txt -- read by medical_agent.py (S205.1) from this folder, every kit check.
-# It declares files the agent may install BEYOND its own built-in list, one per line:
+# KIT_MANIFEST.txt -- NOT USED BY THIS KIT. Kept only so an older copy of this
+# folder is not mistaken for a live Drive delivery.
 #
-# <name in this folder> | <where it goes on the medical PC> | <the md5 it must have>
+# S259's medical half does NOT go down the Google Drive kit channel. It is sent
+# from manojz over the Tailscale share the Marg pull already uses, by
+#     INSTALL_S259_MEDICAL.bat  in this folder.
+# The reason is written up in the kit README and in F-473: the channel itself is
+# sound, but the assistant could not carry 17 KB of base64 through the Drive
+# connector without a one-byte slip -- twice, both caught by the file size.
 #
-# The agent refuses any destination outside D:\SendToClinic, refuses a file whose md5 does not
-# match what is declared here, and refuses a .py that does not compile. A line it cannot read is
-# reported in the heartbeat and skipped, never guessed at.
-#
-# S240 (D467 phase 2b) -- the pusher: every captured export goes to the clinic server by itself.
-# marg_watch.py needs no line here: it is already on the agent's built-in list, and changing it
-# is what makes the agent restart the watcher.
-#
-# S259 (Club C.2, D511) -- THE OFF SWITCHES. A file in D:\SendToClinic\_off\ stops the job it
-# names; deleting it starts the job again. Nothing is restarted either way. ALL_OFF.txt stops the
-# SENDING only -- capture keeps its own marker, MARG_WATCH_OFF.txt, because an export that is not
-# captured is gone for ever. The _off folder is created by this delivery; READ_ME.txt explains it
-# in the shop's own words.
-marg_push.py | D:\SendToClinic\marg_push.py | 566e189e986128fa2ebb341a78b9ab65
-TURN_OFF_ALL.bat | D:\SendToClinic\TURN_OFF_ALL.bat | 805ba88689cec8caac9acfe86a81868b
-TURN_ON_ALL.bat | D:\SendToClinic\TURN_ON_ALL.bat | 01dd435875191c10cb9cd3e9de20904d
-_off_READ_ME.txt | D:\SendToClinic\_off\READ_ME.txt | 3bd3bdd91eecf260627cdbb427bf185f
+# Nothing below this line is read by anything.

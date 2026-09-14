@@ -96,6 +96,25 @@ It gates on the from-pins, backs up, installs, builds the `_off` folder, runs
 the walk on the machine, and puts the old files back by itself if any part of
 the walk fails. It leaves everything switched on.
 
-**the medical PC** — `marg_push.py`, `marg_watch.py`, `TURN_OFF_ALL.bat`,
-`TURN_ON_ALL.bat` and `_off_READ_ME.txt` (as `_off\READ_ME.txt`) go down the
-agent's Drive kit channel into `D:\SendToClinic\`. Not installed by this kit.
+**the medical PC — also one double-click, and it is run ON MANOJZ:**
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\deploy_kits\S259_OFF_SWITCHES\medical\INSTALL_S259_MEDICAL.bat
+```
+
+It reaches the medical PC over the Tailscale share the Marg pull already uses,
+`\\100.119.151.40\DDrive\SendToClinic`, gates on the two from-pins, backs up,
+copies across, then proves the delivered files by running their own selftests
+**over the share** and really throwing the switch — and puts the old files back
+if any of that fails. The medical PC must be on with Tailscale up.
+
+**The new files start being used at that machine's next watcher restart** (its
+next reboot or logon). Capture and sending carry on exactly as before until then.
+
+*Why not the Drive kit channel.* It was the obvious route and it was tried. The
+channel is sound — `medical_agent.py` reads `_kit\KIT_MANIFEST.txt` and installs
+what it declares, md5-gated, into `D:\SendToClinic`. What failed was the
+assistant carrying 17 KB of base64 through the Drive connector by hand: two
+attempts, two files off by a single byte, caught by the size each time. The
+Tailscale share carries the bytes with no transcription at all, so that is the
+route. Nothing was left behind on Drive — see F-473.

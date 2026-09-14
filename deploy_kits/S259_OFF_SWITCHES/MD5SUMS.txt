@@ -1,4 +1,4 @@
-0881c1391a1bf31af35d5fe4850ea0a9  README.md
+fa254709c659c7e51c806b2e2120a4d5  README.md
 9cbf4e238e86f5cdd6ac7afe320547a4  walk_s259.py
 0a323479ebc7c4674020bb02759f4fa4  manojz/INSTALL_S259_MANOJZ.bat
 5c2a6c9098a783ef12f442e14697af34  manojz/PUSH_STOCK_DAILY.bat
@@ -8,9 +8,11 @@ c2492438c9f77169c418ac133513ad75  manojz/PUSH_STOCK_NIGHTLY.bat
 98c2173a13550b4852475adbc9030f32  manojz/_off_READ_ME.txt
 e28b0e8935d23fdb23254ebe0a2df85d  manojz/install_s259.py
 8d7fc79d12e3f8bbbdeaeb04289e0787  manojz/pull_watchdog.py
-275ec09eb68e97c11f9dfde0cbe5504b  medical/KIT_MANIFEST.txt
+974b04a71e14c36fd67d49c2bfc53480  medical/INSTALL_S259_MEDICAL.bat
+69349db297e82bd0408e363ac6b6e69a  medical/KIT_MANIFEST.txt
 805ba88689cec8caac9acfe86a81868b  medical/TURN_OFF_ALL.bat
 01dd435875191c10cb9cd3e9de20904d  medical/TURN_ON_ALL.bat
 3bd3bdd91eecf260627cdbb427bf185f  medical/_off_READ_ME.txt
+e6d0758a77883e6d34a9a4463f146208  medical/install_s259_medical.py
 566e189e986128fa2ebb341a78b9ab65  medical/marg_push.py
 9f0bf9c4c5fc285d339541ef3c76179f  medical/marg_watch.py
