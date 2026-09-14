@@ -1,0 +1,8 @@
+ee46a85308e875109da4df09c3db84ec  README.md
+939587fd172e9a1c2927fcd3074cf729  KIT_ID.txt
+7ca6421b1b62dbee1b57a37cc66404d2  block.py
+3244bedae24958a7b523b215672672ff  patch_vendor_pay_s261.py
+bbdd319b778849be370f9def34f85b22  walk_vendor_pay_s261.py
+191f9da0b454580abdbb11effc0d284f  walk_live_s261.py
+18e8b0b2ea94e2209622979608b79a50  purchase_schema.sql
+84db715bb82b264f2965e8f30ba3537e  install_S261_VENDOR_PAY.sh
