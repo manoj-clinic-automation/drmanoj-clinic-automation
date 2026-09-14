@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""S270 LIVE-SHAPE WALK v2 -- run on the box, against a COPY of the real database.
+"""S270 LIVE-SHAPE WALK v3 -- run on the box, against a COPY of the real database.
 
 v2, after v1 failed on the box and taught two things (F-483):
 
@@ -192,8 +192,11 @@ def main(argv=None):
                 "month": month, "vendor_norm": g["norm"], "vendor": g["name"],
                 "cheque_no": "WALK-S270-1", "cheque_date": "15-09-2026", "amount_p": 100})
             j2 = r2.get_json()
+            # A refusal is judged by WHAT IT SAYS, not by the code it rides on.
+            # v2 demanded 200 and failed a correct refusal that came back 403,
+            # which is what _refuse() returns on this box (F-483, second half).
             ck("the same number a second time is REFUSED",
-               r2.status_code == 200 and j2 is not None and not j2.get("ok")
+               j2 is not None and j2.get("ok") is False
                and "WALK-S270-1" in (j2.get("message") or ""),
                "%s %s" % (r2.status_code, j2))
             h, ok = need200(c1, "%s/page/cheques/%s" % (P, month), "the register after logging")

@@ -263,6 +263,14 @@ ck("47 the unique index is partial, so a void really does free the number",
    any("ux_pchq_live_no" in (r["name"] or "") for r in con.execute(
        "SELECT name FROM sqlite_master WHERE type='index'")))
 
+# 48..50  THE DRIFT GUARD -- the shared stylesheet must not grow by one byte
+ck("48 the shared stylesheet is untouched", NS["CSS"] == "",
+   "CHEQUE_CSS must never be appended to the page-wide CSS (F-478): %r" % NS["CSS"][:60])
+ck("49 the sheet's own script DID gain the cheque functions",
+   "chqadd" in NS["PAY_JS"] and "function esc(s)" in NS["PAY_JS"])
+h = card(CON[0], "2026-09", "/finance/purchase", [], True)
+ck("50 the card brings its own style with it", "<style>" in h and ".chqform" in h, h[:120])
+
 print("\n%d checks passed, %d failed, %d skipped" % (OK[0], len(BAD), len(SKIP)))
 if BAD: print("FAILED: " + ", ".join(BAD))
 sys.exit(1 if BAD else 0)

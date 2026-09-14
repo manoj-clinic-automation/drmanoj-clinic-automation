@@ -1,6 +1,6 @@
-ee7db7329b7b128a5d380b2384c75b71  block.py
-3674d33dd7638eb5a0e22cc39e617893  patch_cheque_register_s270.py
-4fb6c37b29f10e2f0d42e2849fcb609b  walk_s270.py
-04966842c291047917bb5eb4b4c2cd4c  selftest_cheque_s270.py
-8151e0d6bea37ac4e507ba308e20e92f  README.md
+ab031ecfefe8a4cd0f879625c1a68be8  block.py
+8b7689db6f3802a357d9ba9075f89f4d  patch_cheque_register_s270.py
+b3c796fc3cf55baa0bb7ed091b80e781  walk_s270.py
+e8ce06244a399931686a260ec2aaf218  selftest_cheque_s270.py
+5afbc9588d5646a6ba1dad1f2387bee9  README.md
 256c5ca0249e9c6649b5f579b88a5fec  KIT_ID.txt

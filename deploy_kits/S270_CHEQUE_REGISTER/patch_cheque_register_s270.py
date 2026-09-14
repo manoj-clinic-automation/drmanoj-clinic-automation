@@ -27,6 +27,7 @@ from disk; that value, and nothing else, is what goes into the record.
 """
 import argparse
 import hashlib
+import re
 import io
 import os
 import shutil
@@ -94,8 +95,11 @@ def main(argv=None):
     # sit before PAY_JS and CSS, because it EXTENDS both at import time.
     if out.index("PAY_JS = PAY_JS + CHEQUE_JS") < out.index('PAY_JS = """'):
         sys.exit("REFUSING: the block would extend PAY_JS before PAY_JS exists. Nothing written.")
-    if out.index("CSS = CSS + CHEQUE_CSS") < out.index("CSS = CSS + PAY_CSS"):
-        sys.exit("REFUSING: the block would extend CSS before the sheet's CSS. Nothing written.")
+    # anchored to the start of a line -- the block MENTIONS this string in a
+    # comment explaining why it must never be a statement (F-478)
+    if re.search(r"^CSS = CSS \+ CHEQUE_CSS", out, re.M):
+        sys.exit("REFUSING: this block must NOT extend the page-wide stylesheet (F-478).\n"
+                 "          Four screens grew by 1,287 bytes the last time it did.")
 
     new = out.encode("utf-8")
     if a.check:

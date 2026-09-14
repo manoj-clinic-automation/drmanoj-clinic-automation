@@ -249,7 +249,8 @@ def _cheque_card_s270(con, month, prefix, groups, editable):
     live = _cheque_by_vendor_s270(con, month)
 
     if not cheq and not rec["n_live"]:
-        return ('<div class="card"><h2>Paid by cheque</h2><div class="muted">Nobody this month '
+        return ('<style>%s</style>' % CHEQUE_CSS
+                + '<div class="card"><h2>Paid by cheque</h2><div class="muted">Nobody this month '
                 '— every vendor with a bill has a confirmed account. '
                 '<a href="%s/page/cheques">The cheque register</a> holds every cheque ever '
                 'written here.</div></div>' % prefix)
@@ -406,7 +407,8 @@ def page_cheques_s270(month=None):
                  'payment sheet, on the vendor the cheque settles.</div>'
                  % ((" for %s" % _month_name(month)) if month else ""))
 
-    body = ('<h1>Cheque register%s</h1>'
+    body = ('<style>' + CHEQUE_CSS + '</style>'
+            '<h1>Cheque register%s</h1>'
             '<div class="muted">Sanjeevni Medicos &middot; every cheque written to a vendor who '
             'is not on the NEFT lane — number, date, payee and the month it settles. '
             'Nothing here is ever deleted; a wrong entry is voided with a reason and stays.</div>'
@@ -482,7 +484,13 @@ button.plainbtn.warn{color:#a33}
 .kvline b{font-weight:600}
 """
 
-# the sheet's own script gains the three cheque functions, so the form on the
+# The sheet's own script gains the three cheque functions, so the form on the
 # payment sheet works there too. page_pay already substitutes __MONTH__.
+# PAY_JS reaches ONLY the payment sheet, so nothing else grows by a byte.
 PAY_JS = PAY_JS + CHEQUE_JS
-CSS = CSS + CHEQUE_CSS
+
+# THE SHARED STYLESHEET IS DELIBERATELY NOT TOUCHED (F-478).
+# An earlier draft did `CSS = CSS + CHEQUE_CSS`, and the walk caught it on the
+# box: /hub, /scans, /orders and /book each grew by exactly 1,287 bytes -- four
+# screens with nothing to do with cheques, carrying cheque CSS. The style now
+# travels with the two things that need it and with nothing else.

@@ -65,7 +65,7 @@ file byte for byte. *Wrap, don't edit.*
 
 ## The proof
 
-- **47 offline checks, 0 failed** (`selftest_cheque_s270.py`) — the block is executed against stubs
+- **50 offline checks, 0 failed** (`selftest_cheque_s270.py`) — the block is executed against stubs
   of the helpers `purchase_app.py` provides, so every route runs exactly as written: the day-first
   date reader (including 31 September and 29 February refused), the duplicate-number refusal, the
   void that frees the number, the reconciliation to the rupee, a part payment, the FINAL-month
@@ -85,6 +85,15 @@ now **refuses a `--file` outside the app's own folder**, and every check that re
 through `need200()`, because **four v1 checks went green on a 500 body** — passing for the absence
 of a string that an error page also lacks. A check that cannot run now fails loudly or is named as
 skipped; it never quietly succeeds.
+
+**v2 then failed five checks on the box, and four of them were a real drift of mine (F-478).**
+`/hub`, `/scans`, `/orders` and `/book` each grew by **exactly 1,287 bytes** — the cheque CSS, which
+an early draft appended to the page-wide stylesheet, landing on four screens that have nothing to do
+with cheques. **The style now travels with the card and the register and with nothing else**, the
+patcher **refuses** any block that appends to the shared stylesheet, and offline check 48 asserts the
+shared sheet is untouched. The fifth failure was the walk's own assertion: a correct refusal came
+back **403**, which is what `_refuse()` returns here, and v2 insisted on 200. **A refusal is now
+judged by what it says, not by the code it rides on.**
 
 **No pin is predicted (F-472).** The patcher prints the md5 it reads back off the disk, and that
 value — nothing else — goes into the record.
