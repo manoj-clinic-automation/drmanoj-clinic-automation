@@ -1,0 +1,6 @@
+f7855fa823daecea5aa13263fc9c02e6  PULL_FROM_MEDICAL.bat
+5cbec862593e201884b8f372775c7db2  PUSH_STOCK_DAILY.bat
+c2492438c9f77169c418ac133513ad75  PUSH_STOCK_NIGHTLY.bat
+52f502d1ee1a59e37086fb3e514f7874  marg_gate.py
+31aad5e65a31eece32441027f6db6e47  pipeline_status.py
+8d7fc79d12e3f8bbbdeaeb04289e0787  pull_watchdog.py
