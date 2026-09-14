@@ -1,0 +1,8 @@
+KIT      : S270_CHEQUE_REGISTER
+SESSION  : 257
+DATE     : 2026-09-14
+TARGET   : VPS, /root/finance/purchase_app.py
+FROM     : the S267 file (live pin at the S256 close: 34628cd8de65a5fbd4440cd7f96b0f70)
+ADDS     : one table purchase_cheque; four routes; one card repointed
+NUMBERS  : D521 taken for the register's rulings. Next free D522 - F-483 - kit S271.
+NOTE     : a cheque may be logged on a FINAL month, on purpose. See README.
