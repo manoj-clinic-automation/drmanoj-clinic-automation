@@ -47,4 +47,11 @@ purchase page's bytes, so it would be a claimed change with its own walk.
   patch, **was not offered before it**, and that opening it shows what the sheet still owes. The four
   other screens must still come back byte-identical.
 
+**F-484, and it is the walk's third lesson of the day.** The first run of this walk failed one
+check — *"it did not exist before this kit"* — carried over verbatim from S270, where the register
+was new. S271's "before" file **is** the live S270, so the register exists on both sides and 200 is
+correct. **A walk asserts what its OWN kit claims;** a check inherited from the kit before it is a
+claim about the wrong change. Corrected in place, and the install chain stopped exactly as it should
+have — nothing was written to the live file.
+
 **No pin is predicted (F-472).** The patcher prints the md5 it reads off the disk.

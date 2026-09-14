@@ -176,7 +176,12 @@ def main(argv=None):
     h, ok = need200(c1, "%s/page/cheques/%s" % (P, month), "the month's register")
     if ok:
         ck("it holds itself against the sheet", "Against the sheet" in h)
-    ck("it did not exist before this kit", body_of(c0, P + "/page/cheques")[0] == 404,
+    # S270's walk asserted 404 here, because the register was new. S271's "before"
+    # IS the live S270 file, so the register exists on both sides and 200 is the
+    # right answer. A WALK ASSERTS WHAT ITS OWN KIT CLAIMS -- a check carried over
+    # from the kit before it is a claim about the wrong change (F-484).
+    ck("the register existed before this kit and still answers",
+       body_of(c0, P + "/page/cheques")[0] == 200,
        body_of(c0, P + "/page/cheques")[0])
 
     print("\n  4b - A MONTH WITH NO CHEQUE IS STILL REACHABLE (the S271 correction)")
