@@ -118,9 +118,29 @@ routine allows, rather than minted quietly into a file that says it is closed.**
 own project.** Trimming build briefs buys tens of kilobytes against a manifest that grows every
 close.
 
+## ⚠ A SECOND FAULT IS OWED — F-502, ALSO TO BE MINTED FIRST
+
+**A file write reported success and left the old bytes on disk.** At the S259 close
+`deploy_kits\S280_JOB_PULSE_FIX\SUMS.md5` was rewritten from three rows to four so the kit's own
+gate would cover the README it had been shipped without. The commit returned that path in its
+`written` list. **The file on disk was still the three-row version**, and it was the publish — which
+carried the README but not the sums — that exposed it.
+
+**The README beside it, committed in the same call, landed byte-perfect.** So this is not "the tool
+was down"; it is a single write that silently did nothing while reporting that it had. Every other
+`.md5` written that close (five kit sums under `ClaudeCowork\02_SESSION_KITS\S259\`) was checked
+afterwards and all five were correct, **so it is not a pattern in the extension either — which makes
+it worse, not better: there is no rule that would have predicted which write to distrust.**
+
+**The lesson is already a project rule and was not applied to this file: a write to a store is not
+done until it is read back and hashed.** The fourteen canon documents were read back; this one was
+not, because it was a two-line housekeeping file. **Read back everything, or the exception is where
+the fault lives.** This is the F-383 family (a tidy script that moved 218 items and reported
+`MOVED 0`) and the S258 rule that a gate must be asked what it is guarding.
+
 ## §2 — RESERVED NUMBERS
 
-**Next free: D528 · F-501 · A-D25 · kit S281 · Session 260.** Take them from this line, never from
+**Next free: D528 · F-501 · A-D25 · kit S281 · Session 260.** ⚠ **F-501 AND F-502 ARE BOTH SPOKEN FOR** by the two owed faults above — mint them first, then take F-503 onward. Take them from this line, never from
 memory (F-463).
 
 ## §3 — THE CURRENT CANON

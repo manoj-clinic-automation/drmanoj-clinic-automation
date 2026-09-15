@@ -150,5 +150,13 @@ every close from here is closer to the wall.** Mint it as F-501 at the S260 open
 v2.81 because that file was sealed and prefix-proven before the refusal happened, and OWED is an
 answer the routine allows while a quiet append to a closed file is not.
 
+## §6 · A SECOND FAULT OWED — F-502 RESERVED
+
+`deploy_kits\S280_JOB_PULSE_FIX\SUMS.md5` was rewritten to four rows; the commit reported it
+written; **the disk kept the three-row file.** The README committed in the same call landed
+byte-perfect, and the five other kit sums written that close were all correct, so nothing would have
+told you which write to distrust. **The only defence is the rule that was skipped for this one file:
+read the write back and hash it.** Mint as F-502 at the S260 open, with F-501.
+
 ---
 *v180 · S259 close · 15-Sep-2026 · supersedes v179 whole.*
