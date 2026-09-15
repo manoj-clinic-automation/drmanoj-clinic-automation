@@ -1,0 +1,19 @@
+KIT      : S273_BACKUP_GAP
+SESSION  : 258
+DATE     : 2026-09-15
+PURPOSE  : the nightly code bundle carries the six live files that S258 measured
+           as having NO byte-exact copy in ANY store -- not the bundle, not
+           GitHub, not the encrypted state bundle, not the SSD.
+TARGET   : VPS, /root/state_backup/code_bundle.py   (v1.2 -> v1.3)
+FROM     : 27e42d0d970a3e475aae7b2fdcebb780
+TO       : ed5b483f6eb09f0e3663091a01aaa251
+INSTALLS : one file. No service restarted, no page changed, no database opened,
+           no Drive upload (the 01:35 cron does that, unchanged).
+ROLLBACK : \cp /root/state_backup/code_bundle.py.bak_S273_27e42d0d /root/state_backup/code_bundle.py
+PROOF    : walk_s273.py -- 21 checks over a mock ROOT built from the box's OWN
+           nightly bundle, running the live tool and the patched tool side by
+           side. Plus a full installer rehearsal on a mock box: success,
+           idempotence, pin refusal, and a byte-identical rollback.
+NUMBERS  : next free after this kit -- D522, F-485, A-D25.
+NOTE     : no secret wall is loosened. EXCLUDE_DIRS is untouched; the "deploy"
+           wall stays and six named paths are allowed through it by name.
