@@ -50,7 +50,63 @@ D:\Downloads\_kbtools\PAPERS.bat
    report. It names every row added, dropped and changed since the last one. **This replaces the
    folder-wide rebuild that used to be owed at every close.**
 5. Open `D:\Downloads\ClaudeCowork\00_INDEX.md` and read `03_WORKING_PAPERS\S257\S257_BUILD_BRIEF.md`.
-6. Confirm, then ask which ⭐1 item to start.
+6. **Run §1.5, the maintenance pass, in full** — then confirm, and only then ask which ⭐1 item to start.
+
+## §1.5 — THE MAINTENANCE PASS — MANDATORY, AND BEFORE ANY BACKLOG ITEM
+
+**The owner's instruction, 15-Sep-2026:** *"write the session start prompt in such a way that this
+work is thoroughly done there first and then we proceed to any other task."*
+
+**Why it exists.** Every session adds code to the VPS and to Sanjeevni, and nobody has been reading
+the result. `/root/finance/purchase_app.py` has been patched **eight times since S224**, and no
+session has read the whole file since. S270's patcher was therefore built from anchors **inferred out
+of previous kits** rather than from the live file. *(It installed correctly — the patcher refuses
+unless the pin matches and the anchor appears exactly once, and the walk ran the patched file against
+the real database. The method was blind; the gates caught the blindness. That is luck with a good
+harness, not a way to work.)*
+
+**Do these five, in order, and report each. Do not ask which backlog item until all five are answered.**
+
+**1 · BRING THE VPS's OWN CODE WITHIN REACH.** A whole copy of the live server code is written to
+Drive every night at 01:35 by `code_bundle.py` as `code_nightly.tar.gz`. It is reachable from a
+Drive folder that is **not** normally connected — so the nightly on manojz must copy it into one that
+is. Until that is built, get it however you can and say how.
+
+```
+D:\Downloads\_kbtools\vps_code\code_nightly.tar.gz
+```
+
+**2 · READ THE LIVE FILE BEFORE TOUCHING IT.** From that bundle, take the real
+`/root/finance/purchase_app.py`, hash it, and hold it against the Register's pin. **From this session
+on, no patcher is built from an inferred anchor when the real file can be read.**
+
+**3 · MEASURE THE FOUR NUMBERS.** Measured, never projected. Record them in the close report.
+
+| number | what it is | over the line when |
+|---|---|---|
+| **drift** | patches applied to a live file since anyone last read it whole | **5 or more** |
+| **dead** | blocks left computed-but-unused by *wrap, don't edit* | **3 or more in one file** |
+| **folders** | files at each connected root, and anything loose at a root | growth with no owner |
+| **stale** | closes since the Sanjeevni architecture document was checked against the running system | **3 or more** |
+
+**At the S257 close, `purchase_app.py` was at drift 8 and dead 1 — over the line on the first count.**
+That is the first consolidation job, and it is the reason this section exists.
+
+**4 · THE NIGHTLY DOES THE WORK, NOT THE CLOSE.** `D:\Downloads\_kbtools\` already runs at 03:10.
+Three steps belong in it and are the build for this session: **(a)** copy the VPS code bundle into
+reach (item 1); **(b)** the dated KB mirror zip to
+`F:\ClinicBackup\DrManojClinic_Automation\01_KB_MIRRORS\`, owed since 8-Sep; **(c)** the folder
+counts for item 3. **A maintenance job that runs itself is the only kind that keeps running.**
+
+**5 · ORGANISE WHAT THE ASSISTANT WRITES.** Under the paper policy, evidence goes to
+`03_WORKING_PAPERS\_EVIDENCE\S###\` and is never announced. The same discipline is owed to the
+other roots: nothing loose at `D:\Downloads\` or `D:\dr-manoj-git\`, every kit in
+`deploy_kits\S###_NAME\`, every tool in `_kbtools\`. **Report anything loose; move nothing of his
+without saying so.**
+
+**If a number is over the line, the consolidation is this session's first work item — unless he
+waives it, in one line.** He is not to be handed the measuring; he is to be told the number.
+
 
 ## §2 — RESERVED NUMBERS
 

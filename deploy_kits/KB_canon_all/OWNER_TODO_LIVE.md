@@ -105,6 +105,13 @@ the VPS `/root/_quarantine_S232_F368_*`, `/root/wa/staff_ledger.py` (stray),
 
 ## ⭐1 — WHAT I BUILD NEXT
 
+**0 · THE MAINTENANCE PASS — FIRST, BEFORE ANYTHING ELSE (your instruction, 15-Sep).**
+Every session adds code to the VPS and to Sanjeevni and nobody has been reading the result.
+`purchase_app.py` has been patched **eight times since anyone read it whole**. S258 opens by bringing
+the server's own code within reach, reading the real file before touching it, measuring four numbers,
+and putting three steps into the nightly job so the maintenance runs itself. **Full detail in
+`START_HERE_SESSION_258.md` §1.5. Nothing else starts until it is done.**
+
 1. **Club C.4 — per-sender tokens**, folded into your F-456 rotation.
 2. **Club C.3 remainder — the medical PC's own two settings** (the server address in `marg_push.py`
    and `SEND_TO_CLINIC.bat`), held to ride with the next medical change.
