@@ -1,27 +1,38 @@
 KB_canon_all — the byte-authoritative copy of every manifest-pinned canonical row.
-Refreshed at the S257 CLOSE, 14-Sep-2026.
+Refreshed at the S258 CLOSE, 15-Sep-2026.
 
 CURRENT AT THIS CLOSE
-  Register        KB_Register_v5_97_S257close.md
-  History Archive KB_History_Archive_v1_94_S257close.md   (+14,601 -> 1,439,590; prefix proven)
-  Fault Register  Fault_Action_Register_v2_79.md          (+6,774 -> 631,365; prefix proven)
-  Runbook         HANDOFF_RUNBOOK_2026-09-14_Session257close_v178.md
-  Entry point     START_HERE_SESSION_258.md
-  Build brief     S257_BUILD_BRIEF.md
-  Paper policy    PAPER_POLICY_v1.md  (v1.1 -- NEW, binding on the assistant)
-  Live pins       live_pins_S257close.txt
+  Register        KB_Register_v5_98_S258close.md
+  History Archive KB_History_Archive_v1_95_S258close.md   (+17,588 -> 1,457,178; prefix proven)
+  Fault Register  Fault_Action_Register_v2_80.md          (+11,941 -> 643,306; prefix proven)
+  Runbook         HANDOFF_RUNBOOK_2026-09-15_Session258close_v179.md
+  Entry point     START_HERE_SESSION_259.md
+  Build brief     S258_BUILD_BRIEF.md
+  Sanjeevni Book  SANJEEVNI_SYSTEM_BOOK_v1_2_S258.md      (supersedes v1.1 WHOLE)
+  Close-out       END_OF_SESSION_PROMPT_v14.md            (supersedes v13 WHOLE)
+  Evergreen       START_HERE_PROMPT_v9.md                 (supersedes v8 WHOLE)
+  Paper policy    PAPER_POLICY_v1.md  (v1.1 -- binding on the assistant)
+  Live pins       live_pins_S258close.txt                 (381 rows; register_pin_verified: yes)
   Manifest        CANONICAL_MANIFEST.md
 
 RESERVED, TAKE FROM HERE (F-463)
-  Next free: D522 . F-485 . kit S272 . Session 258
+  Next free: D524 . F-493 . kit S277 . Session 259
 
 STANDING WARNINGS CARRIED BY THIS FOLDER
   * Verify this folder's gate FROM INSIDE IT:  md5sum -c MD5SUMS_ALL.txt
     From anywhere else a good folder reports FAILED.
   * MD5SUMS_ALL.txt is the ONE checksum authority here (F-120). It alone is not listed,
     because it cannot be inside itself. KIT_ID.txt IS listed.
-  * F-479 (S257): the S256 row for S256_CLOSE_REPORT.md was taken three minutes before the
-    file's last save. Rebuilt from the bytes at this close. WRITE THE SUMS LAST.
+  * F-485 (S258): a file entered this folder TWICE and gained no row, and the gate went on
+    reporting all-OK while not checking it. 537 files stood against 535 rows. The gate is now
+    owned nightly by canon_sums.py (S275) AND by the close before the publish (v14 A8b).
+    ASK A GATE WHAT IT IS GUARDING, NOT JUST WHETHER IT PASSED.
+  * F-490 (S258): MD5SUMS_ALL.txt.new in this folder is a 260-row HALF-WRITTEN temp file that
+    is rowed as though it were a document. Reported, not deleted -- deleting is the owner's.
+    canon_sums.py no longer uses that name; its temp name is unique per run and it refuses a
+    collision.
+  * F-479 (S257): the S256 row was taken three minutes before the file's last save.
+    WRITE THE SUMS LAST.
   * F-472: a predicted pin is never recorded as a live pin. A lost read-back is BLIND, not SHORT.
   * F-482: /root/finance/push_purchases.py has NEVER been on the VPS. Its VPS row is struck.
   * Two pins remain unhashed and say so: the medical PC's marg_push.py and marg_watch.py,
