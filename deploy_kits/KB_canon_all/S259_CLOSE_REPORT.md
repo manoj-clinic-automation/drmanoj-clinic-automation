@@ -148,3 +148,22 @@ the box already emits). **F-493 … F-500.** Kits **S277 · S278 · S279 · S280
 ---
 *S259_CLOSE_REPORT · written after every canon document was final and before `MD5SUMS_ALL.txt` was
 rebuilt, so that the gate covers this file too (F-479 — write the sums last).*
+
+---
+
+## ⭐ ADDED AFTER THE CLOSE, ON HIS INSTRUCTION — THE TOP JOB OF S260
+
+He read the cap answer and said: **"Add these task to next session top job."** Written into
+`START_HERE_SESSION_260.md` as a new **§0.0**, ahead of the ⭐1 backlog, and into Runbook v180 §7:
+
+1. **Take `CANONICAL_MANIFEST.md` out of project knowledge**, after proving the repository copy and
+   its gate — ~140 KB back at a stroke, measured before and after, recorded as a decision, with the
+   evergreen prompt updated so Phase 0 reads the manifest from the clone.
+2. **Prepare the Sanjeevni/Marg split** — plan, measured sizes, and a rehearsal staged in
+   `ClaudeCowork` first. The only step that is his is creating the new project, and it is asked for
+   in one line when the rest is done.
+
+**Measured position when he asked: 1,850,657 of 2,000,000 · 92.5 % · headroom 149,343 bytes**, against a manifest that costs about **139,825** to write. **One more close, not
+two.** The verification behind the answer is in this report's tranche row and in F-501; the count
+that mattered — **35 documents removed, 12 surviving in the repository, 30 in `ClaudeCowork`, 0 in
+neither** — was checked name by name, not assumed.

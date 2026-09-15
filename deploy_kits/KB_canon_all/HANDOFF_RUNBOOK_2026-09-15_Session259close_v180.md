@@ -158,5 +158,19 @@ byte-perfect, and the five other kit sums written that close were all correct, s
 told you which write to distrust. **The only defence is the rule that was skipped for this one file:
 read the write back and hash it.** Mint as F-502 at the S260 open, with F-501.
 
+## §7 · THE TOP JOB OF S260 — THE OWNER'S OWN INSTRUCTION
+
+He asked how the 2 MB cap was handled, then said **"Add these task to next session top job."** Two
+jobs, ahead of the ⭐1 backlog, detailed in `START_HERE_SESSION_260.md` §0.0:
+
+1. **Take `CANONICAL_MANIFEST.md` out of project knowledge** — the repository copy is authoritative
+   and Phase 0 clones it anyway. ~140 KB back, measured before and after, recorded as a decision,
+   and the evergreen prompt updated so no session reads its absence as a fault.
+2. **Prepare the Sanjeevni/Marg split** — plan, sizes and rehearsal, all the assistant's. The only
+   thing that is his is creating the new project, asked for in one line when the rest is ready.
+
+**Position at the S259 close: 1,850,657 of 2,000,000 · 92.5 % · headroom 149,343 · the manifest
+alone costs ~139,825 to write.** Room for one more close, not two.
+
 ---
 *v180 · S259 close · 15-Sep-2026 · supersedes v179 whole.*

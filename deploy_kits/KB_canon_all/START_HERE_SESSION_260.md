@@ -4,6 +4,64 @@ Hi Claude. Continuing Dr. Manoj Agarwal's clinic-automation project. **This is S
 The evergreen rules are in **`START_HERE_PROMPT_v9.md`** (the project's custom instructions). This
 file is the entry point for *this* session only.
 
+## ⭐⭐ §0.0 — THE TOP JOB OF THIS SESSION — HIS INSTRUCTION, 15-Sep-2026
+
+**He asked at the S259 close how the 2 MB project-knowledge cap had been handled and whether
+anything was incomplete, then said: "Add these task to next session top job."** So these two come
+**before** the ⭐1 backlog, and before any Sanjeevni build work. They come **after** Phase 0 and the
+two owed faults, because Phase 0 is what proves the stores are sound in the first place.
+
+**The measured position at the S259 close: 1,850,657 of 2,000,000 — 92.5 %, headroom 149,343 bytes,
+and `CANONICAL_MANIFEST.md` alone costs about 139,825 to write.** That is room for ONE more close,
+not two. Three times during the S259 close the store refused the manifest outright and documents had
+to be deleted mid-close to make it fit (F-501).
+
+### JOB 1 — take the manifest's copy OUT of project knowledge. Do this FIRST; it is one action.
+
+`deploy_kits\KB_canon_all\CANONICAL_MANIFEST.md` in the repository is the byte-authoritative copy,
+and **Phase 0 step 4 clones the repository and verifies it by md5 every session anyway.** The
+project-knowledge copy is a convenience duplicate that costs ~140 KB of a 2 MB cap at every single
+close, and it is also the one document that keeps being refused.
+
+**Do it in this order and prove each step:**
+
+1. Confirm the repository copy is present and its `md5sum -c` gate is green **from inside
+   `KB_canon_all\`** — never delete the convenience copy before the authoritative one is proven.
+2. Delete `claude/CANONICAL_MANIFEST.md` from project knowledge.
+3. Measure `knowledge_size` immediately before and after, and state both.
+4. Write the change into `START_HERE_PROMPT` (the evergreen prompt) so Phase 0 step 3 reads the
+   manifest **from the clone**, not from project knowledge, and so no future session reports it
+   missing as a fault.
+5. Record it as a decision (**D528 is free**) with the measured before/after.
+
+**Expected recovery ~140 KB, which roughly doubles the headroom.** Measure it; do not project it —
+`knowledge_size` is an indexed measure and has been wrong by 3× when projected from file size
+(the S206 lesson).
+
+### JOB 2 — prepare the Sanjeevni/Marg split, which is the durable answer
+
+Branching Sanjeevni/Marg into its own project has been the stated durable answer since S206 and is
+now **overdue rather than optional**: JOB 1 buys one or two closes, not a year.
+
+**What is the assistant's, and is to be done without asking him anything:**
+
+- A written split plan: which documents move, which stay, what the new project's custom
+  instructions say, how the manifest and the canon gate are split or shared, and what a session's
+  Phase 0 looks like across two projects.
+- The measured size of each side, so he can see the cap problem is actually solved and not moved.
+- A rehearsal: everything staged and verified in `D:\Downloads\ClaudeCowork\` first, so the move
+  itself is a copy of already-proven bytes.
+
+**What is HIS, and it is the only thing:** creating the new project in claude.ai. Ask for that in
+**one line**, when the plan and the rehearsal are done — not before.
+
+> ⚠ **The rule that governs both jobs: nothing is deleted from any store until its surviving copy
+> has been proven present.** At S259 all 35 documents removed from project knowledge were checked
+> one by one — 12 survive in the repository, 30 in `ClaudeCowork`, **0 in neither**. Hold the same
+> standard here. And note the open method fault: **a project-knowledge document still cannot be
+> hashed by the tools**, so provenance for a moved document is by construction, not by byte
+> comparison. Say so plainly wherever it applies.
+
 ## §0 — THE STANDING OWNER RULINGS (restated every close)
 
 1. **Publishing is HIS double-click.** Name one file, full path.
