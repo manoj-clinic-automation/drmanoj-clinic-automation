@@ -1,0 +1,24 @@
+KIT      : S279_JOB_PULSE
+SESSION  : 259
+DATE     : 2026-09-15
+PURPOSE  : G0 -- a job that is quiet must stop looking like a job that is passing.
+           Measures LIVENESS for every scheduled clinic job, hourly.
+TARGET   : VPS. New file /root/finance/job_pulse.py + ONE appended crontab line.
+TOUCHES  : no existing job, no database, no live file. Read-only everywhere else.
+OUTPUT   : /root/finance/JOB_PULSE_LATEST.txt  and  /root/finance/job_pulse.json
+METHOD   : 45 of the 46 clinic cron lines already name their own log file. The
+           path is READ OUT OF THE CRONTAB at run time, never inferred and never
+           baked in -- so a job added tomorrow is watched tomorrow. systemd is
+           asked directly for the four timers.
+LIMIT    : a log's timestamp proves the job WROTE something, not that it
+           succeeded. Printed on the face of every report, not left to be found.
+PROVEN   : 17-check selftest (passes), plus a live-shape walk on the box's own
+           crontab -- 46 clinic lines resolved to 34 jobs + 4 timers = 38, zero
+           parse errors -- plus a sandboxed end-to-end install: crontab backed up
+           and read back, exactly one line added, re-run says "already installed"
+           and changes nothing.
+NOTE     : the selftest found three real defects before any of this shipped --
+           a weekly job whose gap could not be measured in an 8-day window, a
+           crash on the one job that names no log, and one assertion where MY
+           expected figure was wrong and the code was right. All three recorded.
+NUMBERS  : next free D525, F-494, A-D25, kit S280.
