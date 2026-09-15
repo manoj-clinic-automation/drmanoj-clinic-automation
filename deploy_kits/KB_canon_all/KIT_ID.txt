@@ -1,22 +1,24 @@
 KB_canon_all — the byte-authoritative copy of every manifest-pinned canonical row.
-Refreshed at the S258 CLOSE, 15-Sep-2026.
+Refreshed at the S259 CLOSE, 15-Sep-2026.
 
 CURRENT AT THIS CLOSE
-  Register        KB_Register_v5_98_S258close.md
-  History Archive KB_History_Archive_v1_95_S258close.md   (+18,992 -> 1,458,582; prefix proven)
-  Fault Register  Fault_Action_Register_v2_80.md          (+14,246 -> 645,611; prefix proven)
-  Runbook         HANDOFF_RUNBOOK_2026-09-15_Session258close_v179.md
-  Entry point     START_HERE_SESSION_259.md
-  Build brief     S258_BUILD_BRIEF.md
-  Sanjeevni Book  SANJEEVNI_SYSTEM_BOOK_v1_2_S258.md      (supersedes v1.1 WHOLE)
-  Close-out       END_OF_SESSION_PROMPT_v14.md            (supersedes v13 WHOLE)
-  Evergreen       START_HERE_PROMPT_v9.md                 (supersedes v8 WHOLE)
+  Register        KB_Register_v5_99_S259close.md
+  History Archive KB_History_Archive_v1_96_S259close.md   (+13,446 -> 1,472,028; prefix proven)
+  Fault Register  Fault_Action_Register_v2_81.md          (+11,150 -> 656,761; prefix proven)
+  Runbook         HANDOFF_RUNBOOK_2026-09-15_Session259close_v180.md
+  Entry point     START_HERE_SESSION_260.md
+  Build brief     S259_BUILD_BRIEF.md
+  Close report    S259_CLOSE_REPORT.md
+  Owner to-do     OWNER_TODO_LIVE.md                      (UN-MANIFESTED by design, A10)
+  Sanjeevni Book  SANJEEVNI_SYSTEM_BOOK_v1_2_S258.md      (UNCHANGED at S259; stale = 1 close)
+  Close-out       END_OF_SESSION_PROMPT_v14.md            (unchanged)
+  Evergreen       START_HERE_PROMPT_v9.md                 (unchanged)
   Paper policy    PAPER_POLICY_v1.md  (v1.1 -- binding on the assistant)
-  Live pins       live_pins_S258close.txt                 (381 rows; register_pin_verified: yes)
+  Live pins       live_pins_S259close.txt                 (384 rows; register_pin_verified: yes)
   Manifest        CANONICAL_MANIFEST.md
 
 RESERVED, TAKE FROM HERE (F-463)
-  Next free: D524 . F-493 . kit S277 . Session 259
+  Next free: D528 . F-501 . A-D25 . kit S281 . Session 260
 
 STANDING WARNINGS CARRIED BY THIS FOLDER
   * Verify this folder's gate FROM INSIDE IT:  md5sum -c MD5SUMS_ALL.txt
@@ -27,15 +29,19 @@ STANDING WARNINGS CARRIED BY THIS FOLDER
     reporting all-OK while not checking it. 537 files stood against 535 rows. The gate is now
     owned nightly by canon_sums.py (S275) AND by the close before the publish (v14 A8b).
     ASK A GATE WHAT IT IS GUARDING, NOT JUST WHETHER IT PASSED.
+    At this close: 563 files, 563 rows, md5sum -c green from inside, zero files without a row.
   * F-490 (S258): MD5SUMS_ALL.txt.new in this folder is a 260-row HALF-WRITTEN temp file that
-    is rowed as though it were a document. Reported, not deleted -- deleting is the owner's.
-    canon_sums.py no longer uses that name; its temp name is unique per run and it refuses a
-    collision.
+    is rowed as though it were a document. STILL PRESENT and still gated at S259 -- reported
+    again rather than quietly deleted, because deleting in here is the owner's.
   * F-479 (S257): the S256 row was taken three minutes before the file's last save.
     WRITE THE SUMS LAST.
   * F-472: a predicted pin is never recorded as a live pin. A lost read-back is BLIND, not SHORT.
   * F-482: /root/finance/push_purchases.py has NEVER been on the VPS. Its VPS row is struck.
   * Two pins remain unhashed and say so: the medical PC's marg_push.py and marg_watch.py,
     reachable only through the Drive kit channel (F-443).
-
-Nothing here installs. Do not run vps_deploy.
+  * F-495 (S259): of the VPS's 38 scheduled jobs only EIGHT could prove they had run, and all
+    five nightly backups were among the thirty that could not. job_pulse.py now answers it
+    hourly. One job -- the asset-register backup -- still names no log and discards its errors.
+  * F-498 (S259) IS HALF OPEN: job_pulse still cannot tell an empty log from a stale one.
+  * F-493 (S259): item 3f's entry condition must name sh_run.differ = 0, NOT the hub card.
+    Two surfaces answer different questions under identical wording.
