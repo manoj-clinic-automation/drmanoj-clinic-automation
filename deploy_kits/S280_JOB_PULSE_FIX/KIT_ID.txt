@@ -1,0 +1,19 @@
+KIT      : S280_JOB_PULSE_FIX
+SESSION  : 259
+DATE     : 2026-09-15
+PURPOSE  : job_pulse v1.0 -> v1.1. Two faults its OWN first live run exposed.
+TARGET   : VPS, /root/finance/job_pulse.py only. The crontab is NOT opened.
+GATE     : refuses unless the installed file is v1.0 cbeb6d72d09a3c8114056dfabb8f70fd
+FIXES    : (1) systemd timestamps were forced to UTC and then shifted again, so
+               two timers reported a run in the future and an age of -329 min.
+               Now asked for a unix epoch; a negative age reports AHEAD? and is
+               counted as a problem, never as healthy.
+           (2) a quiet job read SILENT. marg_ingest runs every 5 min, prints
+               nothing on an idle pass, and its log had not moved in 2.3 days
+               while mi_run showed a run at 01:00 that morning. The seven jobs
+               with a real run table are now read from the table; the log is the
+               fallback, and each line says which was used.
+PROVEN   : selftest 22 checks including one per fix, plus a live-shape walk on
+           the box's own crontab against the nightly database copy -- all seven
+           table-backed jobs resolved through their tables.
+NUMBERS  : next free D525, F-494, A-D25, kit S281.
