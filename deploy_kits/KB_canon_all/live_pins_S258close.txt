@@ -2,10 +2,10 @@
 # DO NOT HAND-EDIT the VPS rows. Change the Register, re-run the
 # generator. One authored source (D202).
 # source: KB_Register_v5_98_S258close.md
-# source_md5: c873daa7fac1453f00b9e1d7fff496e5
+# source_md5: f0d59a9cdc4cacc14ab5276988546ce1
 # session: S258 close
 # manifest: CANONICAL_MANIFEST.md
-# manifest_current_register_pin: c873daa7fac1453f00b9e1d7fff496e5
+# manifest_current_register_pin: f0d59a9cdc4cacc14ab5276988546ce1
 # register_pin_verified: yes
 # columns: kind <TAB> md5 <TAB> path-or-name <TAB> note
 #

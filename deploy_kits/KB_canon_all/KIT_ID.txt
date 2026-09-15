@@ -3,8 +3,8 @@ Refreshed at the S258 CLOSE, 15-Sep-2026.
 
 CURRENT AT THIS CLOSE
   Register        KB_Register_v5_98_S258close.md
-  History Archive KB_History_Archive_v1_95_S258close.md   (+17,588 -> 1,457,178; prefix proven)
-  Fault Register  Fault_Action_Register_v2_80.md          (+11,941 -> 643,306; prefix proven)
+  History Archive KB_History_Archive_v1_95_S258close.md   (+18,992 -> 1,458,582; prefix proven)
+  Fault Register  Fault_Action_Register_v2_80.md          (+14,246 -> 645,611; prefix proven)
   Runbook         HANDOFF_RUNBOOK_2026-09-15_Session258close_v179.md
   Entry point     START_HERE_SESSION_259.md
   Build brief     S258_BUILD_BRIEF.md

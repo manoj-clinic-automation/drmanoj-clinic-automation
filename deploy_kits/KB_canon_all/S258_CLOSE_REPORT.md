@@ -14,14 +14,14 @@
 | # | step | verdict | evidence |
 |---|---|---|---|
 | **0** | the three nightly reports read FIRST | **DONE** | `REBUILD_REPORT_LATEST.txt` and `MAINTENANCE_REPORT_LATEST.txt` present and current. **`CANON_SUMS_LATEST.txt` did not exist** — S275 shipped after the 03:10 run, so tonight's is its first. Stated as expected, not as green. |
-| **1** | Archive (A1), append proven | **DONE** | `KB_History_Archive_v1_95_S258close.md` — **first 1,439,590 bytes byte-identical to v1.94 (`2669e946…`)**, +17,588 → **1,457,178 B**, md5 `dbc744bad666f7c9ff5c17851b01b04e`. Nine sections; §9 is F-491. |
-| **2** | Fault Register | **DONE** | `Fault_Action_Register_v2_80.md` — **F-485 … F-492**, six of the eight the assistant's. **First 631,365 bytes byte-identical to v2.79 (`cf494367…`)**, +11,941 → **643,306 B**, md5 `33e700e291f0182512bbe374aba2ed14`. |
-| **3** | KB Register (A2) + the four self-referential lines | **DONE — and two were stale** | `KB_Register_v5_98_S258close.md`, md5 `b7f1804b3b312e218458c4a09d4f1b23`. **The how-to-use line was stale in TWO clauses at once**: the Runbook pointer read v176 while v178 was current, and the second Fault pointer read v2.77 while the first on the same line read v2.79. Both corrected visibly. **And the changelog section had stopped being written at v5.95** — no v5.96 or v5.97 bullet exists. Recorded, not back-filled. |
-| **4** | Manifest (A7), written LAST | **DONE** | `CANONICAL_MANIFEST.md`, md5 `cacf0a4ef40486bd80db46d14fd0da09`. Every row of a file this close touched was rewritten from the bytes, not from the plan — four rows were found carrying pre-F-491 hashes and corrected. |
+| **1** | Archive (A1), append proven | **DONE** | `KB_History_Archive_v1_95_S258close.md` — **first 1,439,590 bytes byte-identical to v1.94 (`2669e946…`)**, +18,992 → **1,458,582 B**, md5 `bb209277ca360cc059be3c679496395e`. Ten sections; §9 is F-491, §10 is F-492. |
+| **2** | Fault Register | **DONE** | `Fault_Action_Register_v2_80.md` — **F-485 … F-492**, six of the eight the assistant's. **First 631,365 bytes byte-identical to v2.79 (`cf494367…`)**, +14,246 → **645,611 B**, md5 `33e700e291f0182512bbe374aba2ed14`. |
+| **3** | KB Register (A2) + the four self-referential lines | **DONE — and two were stale** | `KB_Register_v5_98_S258close.md`, md5 `f0d59a9cdc4cacc14ab5276988546ce1`. **The how-to-use line was stale in TWO clauses at once**: the Runbook pointer read v176 while v178 was current, and the second Fault pointer read v2.77 while the first on the same line read v2.79. Both corrected visibly. **And the changelog section had stopped being written at v5.95** — no v5.96 or v5.97 bullet exists. Recorded, not back-filled. |
+| **4** | Manifest (A7), written LAST | **DONE** | `CANONICAL_MANIFEST.md`. **Its own md5 is deliberately NOT quoted here**: the manifest rows this report, so stating the manifest's hash inside a document the manifest describes has no fixed point — **`MD5SUMS_ALL.txt` is the authority for it (F-120), and the gate is what proves it.** Every row of a file this close touched was rewritten from the bytes, not from the plan; rows were twice found carrying hashes from a previous pass and corrected. |
 | **4b** | **A7b — the manifest's four self-referential surfaces** | **DONE, the first close to own them** | narrative · STATUS line · Tier-0 rows · footer. **The STATUS line had read S240 for eight consecutive closes** and the footer had been frozen at S255 for two, because no close step owned them. v14 A7b now does. |
-| **5** | Runbook + START_HERE (A3/A4) | **DONE** | `HANDOFF_RUNBOOK_2026-09-15_Session258close_v179.md` (`594aaf21…`, §1 now **eight** mental models) · `START_HERE_SESSION_259.md` (`2d265340…`). |
+| **5** | Runbook + START_HERE (A3/A4) | **DONE** | `HANDOFF_RUNBOOK_2026-09-15_Session258close_v179.md` (`e83fc7e7…`, §1 now **nine** mental models) · `START_HERE_SESSION_259.md` (`678f76da…`). |
 | **6** | `OWNER_TODO_LIVE` (A10) | **DONE** | `3d742462…`. **A10b honoured: nothing was added that I could have done myself.** The one item that was about to be — `INSTALL_S275.bat` — was withdrawn as an invented step. |
-| **7** | Live pins (A8/A8a/A8b) | **DONE** | `live_pins_S258close.txt`, md5 `6e2df32a92d40e4a9c4d42453d709352` — **381 rows (VPS 327 · SHORT 20 · BLIND 34), `register_pin_verified: yes`**. **Regenerated a second time** after the F-491 edits changed the Register's bytes: a pin list generated from a superseded Register is not a pin list. **A8a: its manifest row was written in the same breath.** |
+| **7** | Live pins (A8/A8a/A8b) | **DONE** | `live_pins_S258close.txt`, md5 `3212d06ccb8a2f111ca586a05021b746` — **381 rows (VPS 327 · SHORT 20 · BLIND 34), `register_pin_verified: yes`**. **Regenerated a second time** after the F-491 edits changed the Register's bytes: a pin list generated from a superseded Register is not a pin list. **A8a: its manifest row was written in the same breath.** |
 | **7b** | **A8c — the VPS deploy clone pulled** | **DONE** | carried by this session's two install lines (S273, S274), each of which included its own `git pull` (F-464). |
 | **8** | **NOTION (A9)** | **DONE — URL quoted** | `https://app.notion.com/p/3dc18b9d8f91812da8acf8e53fae3451?pvs=204` — created first try, no 403. *(Its title was written as "three retractions", corrected to "two" so Notion and canon do not disagree.)* |
 | **9** | **KB EXTENSION (A13)** | **DONE** — eight steps answered below | see §A13. |
@@ -134,6 +134,10 @@ A tool saying "written" is not a delivery (F-481).
 3. **F-491's repair**, before the shelf's figure is quoted again.
 3b. **The cap.** 94.67 % and rising, ~106 KB of margin. **The next close cannot report a tranche as
    DONE unless the measured number falls** — the arithmetic, not the gesture.
+3c. **A close step that derives every append-proof figure from the files** and fails the close when a
+   stated figure disagrees with the file it describes. The stale-figure correction above is the
+   fourth time the F-45 family has been caught by eye at a close this week; `canon_sums.py` proved
+   the fix works for hash rows, and the same idea covers the prose.
 4. **F-489 first** — item 3f cannot start until the hub and `sh_run` agree.
 5. **`CANON_SUMS_LATEST.txt` should exist for the first time** on the morning of 16-Sep.
 
@@ -152,8 +156,40 @@ a gate:
   its source instead of trusting that five kits built the same way were built the same way
   (**F-492**).
 
-**All four were found by asking what a good-looking result was actually measuring.** That is A0, and
+- **and a fifth, found AFTER the publish, during A16b**: the Archive's byte count and `+N` figure
+  were left at their pre-F-492 values — **`+17,588 → 1,457,178` where the truth is
+  `+18,992 → 1,458,582`** — in the manifest, the Register's how-to-use line, `KIT_ID.txt` and **this
+  report's own row 1**, together with the Archive's superseded md5. **Corrected visibly here, not
+  silently.**
+
+**All five were found by asking what a good-looking result was actually measuring.** That is A0, and
 it is the only part of this routine that no automation replaces.
+
+**The fifth deserves its own sentence, because it is this session's own lesson landing on this
+session.** The canon gate passed 550 of 550 on the published commit **while four documents stated
+the wrong size for a file the gate had just certified** — because *the gate hashes files and does
+not read prose*. Exactly F-485's shape: **green is not the same as complete, and a gate answers only
+the question it was built to ask.** The figures went stale because F-492 was minted after they were
+written, and the re-flow updated the hash rows — which are mechanical — and not the sentences, which
+are not.
+
+**Nothing was wrong with the Archive.** Its append proof is sound and was re-derived from the
+published bytes during A16b: the first **1,439,590** bytes of v1.95 are byte-identical to v1.94
+(`2669e946…`). Only the description of it was stale. *A correct file described by a wrong number is
+still a fault — it is how a later session gets told the wrong thing by canon.*
+
+**It was not four figures, it was eleven.** The A16b sweep, run properly, found the Archive's size
+and delta stale in four documents, **the Fault Register's size and delta stale in two**, and **five
+superseded hashes quoted in this report's own checklist** — the Register, the Runbook, the entry
+point, the pin list and the manifest. Each was correct when written and each was overtaken by the
+next pass. **The count is the point: hand-written figures do not go stale one at a time, they go
+stale in a wave, every time a document upstream of them is rewritten.**
+
+**And the durable answer is not "check harder" — it is that these figures should never have
+been typed.** The byte count, the delta and the md5 are all derivable from the two files. **S259
+owes a close step that computes every append-proof figure from the files and refuses a close where a
+stated figure and the file disagree** — the same move `canon_sums.py` made for the hash rows, applied
+to the prose that quotes them.
 
 **The last one is the sharpest, because it was found while doing the close rather than while doing
 the work.** S276 had been built, walked, installed, and proven live by reading the machine's own
