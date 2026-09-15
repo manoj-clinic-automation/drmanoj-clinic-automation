@@ -252,14 +252,19 @@ from the April–July NEFT advice sheets **under the name the bank knows**; Marg
 the vendor prints**, and for **14 of the 22 those are not the same string**. S263 added the alias, so
 one firm with two names is one vendor.
 
-**⚠ A finding of this revision [live].** On the September payment sheet one vendor reads
-**`AGARWAL SURGICALS AND MEDICALS CHEQUE`** — the word *CHEQUE* is inside the supplier's name as Marg
-holds it. The cheque card below it, and the owner's to-do, both name the firm as
-**`AGARWAL SURGICALS AND MEDICALS`**. **These are the same firm under two strings, and the payment mode
-has been typed into the supplier name in Marg.** This is why ⭐0 item 2 reports it as *"not in the
-vendor register at all"*. It matters twice over: bank details added under the clean name will not meet
-the bill unless the S263 alias is set, and **the standing rule is that Amir must not rename a supplier
-in Marg** — so the repair belongs on the alias, on this server, not in Marg.
+**⚠ A claim this revision made and then RETRACTED — recorded, not tidied away.** Reading the payment
+sheet as plain text, one vendor appeared to read `AGARWAL SURGICALS AND MEDICALS CHEQUE`, and this
+section first reported that the payment mode had been typed into the supplier's name in Marg. **It had
+not.** `CHEQUE` is a chip — `'<span class="chip warn">CHEQUE</span>'`, `purchase_app.py` line 2215 —
+rendered beside the name to mark the cheque lane, and a plain-text read of the page runs the two
+together. Checked against the data afterwards: `purchase_bill` holds the supplier as
+**`AGARWAL SURGICALS AND MEDICALS`** across nine bills, clean, and `purchase_vendor_contact` **has a
+row for it** (added 14-Sep 22:30, with a phone). **Nothing is wrong with the name.**
+
+What is actually missing is narrower and is already on the owner's list: the row has **no
+`acct_no`, no `ifsc`, no `acct_name`** — which is precisely why the vendor sits on the cheque lane and
+why ⭐0 item 2 asks for its bank details. Give those and it moves to NEFT by itself, with no alias and
+no rename anywhere.
 
 ### 5.4 Scan links
 `purchase_scan_link` · `/finance/purchase/page/scans`.
@@ -569,22 +574,29 @@ excludes — and is **right** to exclude — any `.env`, `.conf`, database, log,
 shipped literal passwords (F-456). **Nothing here argues with a single one of them.**
 
 But *excluded for a good reason* is not the same as *has a copy somewhere*. Every live-pinned VPS file
-was held against the bundle, and then every absentee against GitHub. **Seven live-pinned files have no
-byte-exact copy in any store — not the bundle, not the repository, not the SSD:**
+was held against the bundle, then every absentee against GitHub, **and then against the encrypted state
+bundle's own `SRC_FILES` and `SRC_DIRS`** — the third store, and the one the first pass of this check
+forgot to read. **Six live-pinned files have no byte-exact copy in any store:**
 
 | file | why the bundle skips it | why GitHub does not save it |
 |---|---|---|
 | `/root/finance/freshness_legs.json` | `.json` is not a source under `/root/finance` | **not in the repository at all.** Its own pin note says *"Configuration, not code: a window is widened or a leg retired HERE, never in `freshness.py`."* **The 26+ legs that decide what `/finance/health` watches exist only on the box.** |
-| `/root/staff_master.csv` | `.csv` is not a source | not in the repository — correctly, it is staff data. **And it sits at `/root/`, outside every `SRC_DIR` of the encrypted state bundle**, which walks `/root/staff_register`, `/root/staff_ledger` and `/root/state_backup/sheets`. It falls between the two backups. |
 | `/root/deploy/repo/deploy_kits/S229_ITEM_SPINE/marg_spine.py` | under `deploy` | the repository's copy is **a different file.** **The live item spine — the whole of §4 — exists byte-exact nowhere but the box.** |
 | `/root/assetapp/asset_register.py` | `/root/assetapp` is not a source at all | the repository's copy is a different file. **`assets.dr-manoj.in` is a live application with no off-box copy.** |
 | `/root/deploy/email_agent.py` | under `deploy` | the repository's copy is a different file |
 | `/root/deploy/gen_live_pins.py` (with `verify_live_pins.py`) | under `deploy` | the repository's copy is a different file. **These are the tools that generate and check the pin list itself.** |
 | `/root/deploy/sweep_baseline.txt` | under `deploy` | not in the repository at all |
 
-**Withdrawn after checking rather than asserted:** `/usr/local/lsws/conf/vhosts/followup.dr-manoj.in/vhost.conf`
-looked like an eighth, but `clinic_state_backup.py` gathers `VHOST_DIR` into the encrypted state bundle
-by design, so the routing **is** covered. `/root/portal/clinic_users.py`, `/root/shared/sarvam_ocr.py`,
+**Withdrawn after checking rather than asserted — and one of them was withdrawn only on a second look,
+which is recorded here rather than tidied away.** `/root/staff_master.csv` was first written up as a
+gap on the strength of `SRC_DIRS` alone; `clinic_state_backup.py` also has a `SRC_FILES` list, and
+`/root/staff_master.csv` is **the fifth line of it**, beside `console.db`, `assets.db`, `punches.csv`
+and `punches_raw.log`, under the heading *"INCLUDED — the data with no other off-box copy."* **It is
+covered, nightly and encrypted.** The lesson is the project's own: a store is not checked until every
+one of its inclusion lists has been read, and reading one of two is how a false gap gets minted.
+`/usr/local/lsws/conf/vhosts/followup.dr-manoj.in/vhost.conf` looked like a gap too, but
+`clinic_state_backup.py` gathers `VHOST_DIR` into the same bundle by design, so the routing **is**
+covered. `/root/portal/clinic_users.py`, `/root/shared/sarvam_ocr.py`,
 `/root/assetapp/scanner_widget.js`, `/root/assetapp/smoke_test.py`, `/root/finance/cards_registry.json`
 and `/root/wa/casepack/casepack_page.html` are each **byte-exact in the repository** and need nothing.
 `/root/finance/push_purchases.py` is the row struck at S257 as F-482 — it has never existed on the box,
@@ -694,19 +706,24 @@ Seven things, each read rather than inferred, each carried into the close report
 mismatches.** The Register is correct on every row the bundle can reach. That is the ground everything
 below stands on.
 
-0. **Seven live-pinned files have no byte-exact copy in any store** (§11.2b) — among them the **live
+0. **Six live-pinned files have no byte-exact copy in any store** (§11.2b) — among them the **live
    item spine**, the **live asset register application**, and **`freshness_legs.json`, the configuration
    that decides what the health page watches.** `code_bundle.py` excludes each of them for a reason
-   that is individually correct; the repository's copies differ or are absent; the encrypted state
-   bundle walks three directories and `/root/staff_master.csv` sits outside all of them. **No single
-   store is wrong. The gap lives between them, and nothing was positioned to see it until the bundle
-   and the pin list could be read side by side.**
+   that is individually correct, and the repository's copies differ or are absent. **No single store is
+   wrong. The gap lives between them, and nothing was positioned to see it until the bundle and the pin
+   list could be read side by side.** *(This read seven in the first draft of this section. The seventh,
+   `/root/staff_master.csv`, is covered by the encrypted state bundle's `SRC_FILES` and was withdrawn
+   the same session — see §11.2b.)*
 1. **The stock shadow's agreement has tripled its disagreement — 3 differing → 9** (§7.2), and its
    latest comparable day is three days old. This is the witness for retiring the manojz senders, so it
    decides when item 3f may start.
-2. **`AGARWAL SURGICALS AND MEDICALS CHEQUE`** — a payment mode typed into a supplier's name in Marg
-   (§5.3). It is why the vendor reads as absent from the register, and the repair belongs on the S263
-   alias, never on a rename in Marg.
+2. ~~A payment mode typed into a supplier's name in Marg.~~ **RETRACTED within the session** (§5.3):
+   `CHEQUE` is a lane chip beside the name, and a plain-text read of the page ran the two together.
+   The vendor's name is clean and it **is** in the register; only its bank details are missing. **The
+   lesson is the one this revision earned twice: a page read as text is not the data.** Both
+   retractions in this document — this and `staff_master.csv` in §11.2b — came from asserting on a
+   partial reading, and both were caught by checking the underlying store afterwards. **The store is
+   the check; the page is the symptom.**
 3. **Seven health checks have never once fired in 14+ days**, and the page says so about itself (§10.3).
    At least one of them is demonstrably computing while never reporting — the check cannot tell a quiet
    guard from a dead one.
