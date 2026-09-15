@@ -1,0 +1,19 @@
+KIT      : S278_BOARD_TILE
+SESSION  : 259
+DATE     : 2026-09-15
+PURPOSE  : give the Sanjeevni System Board a permanent place -- one tile, first
+           on the owner's portal, opening the board.
+TARGET   : VPS, /root/portal/portal.py  (two additive insertions, nothing else)
+WHO SEES : roles ["doctor"] only. No tile_grants.json change. Staff unaffected.
+GATE     : refuses unless portal.py is dc8f363e389259130764219e01a6b42d -- the
+           live pin, byte-confirmed against the box's own nightly bundle at S259.
+EXPECTED : portal.py becomes 4974209bfd2a66510294d8adf8712523. That is COMPUTED
+           from the patched bytes offline, not read from the box (F-472) -- the
+           installer prints the real one, and that is the value to record.
+ROLLBACK : /root/portal/portal.py.bak_S278_dc8f363e, written before any change;
+           the installer restores it byte-identically if the portal will not start.
+PROVEN   : live-shape walk against the real portal.py from the nightly bundle --
+           install, re-run (says "already installed", changes nothing), refusal on
+           a drifted file, and a forced failed restart that rolled back to
+           dc8f363e389259130764219e01a6b42d exactly.
+NUMBERS  : next free D525, F-494, A-D25, kit S279.

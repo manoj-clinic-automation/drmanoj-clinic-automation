@@ -22,10 +22,20 @@ STALENESS, COMPUTED NOT GUESSED
                not worth writing.
     superseded a per-kit evidence note, or a dated snapshot of a document that
                has a newer live version (OWNER_TODO_LIVE_*, START_HERE_*).
+
+F-491 (S259).  v1.0 built its citation corpus from 00_INDEX.md PLUS
+MANIFEST.md5.  Since S268 the manifest is rebuilt nightly over the whole tree,
+so every paper's name was in the corpus by construction and "never cited" could
+only ever read 0 -- a fault that reported itself as success.  MANIFEST.md5 is
+gone from the corpus, and a share gate now REFUSES any source that names
+INVENTORY_SHARE or more of the papers, naming it on the page.  A file whose name
+says NEVER_CITED is refused outright: a list of the uncited is not a reading of
+them.  The corpus, and anything refused, are printed on the page so the figure
+can never again be meaningless in silence.
 """
 import argparse, io, json, os, re, time, html
 
-VERSION = "1.0"
+VERSION = "1.1"
 
 KINDS = [
     (re.compile(r'_BUILD_BRIEF\.md$'),              "brief",    "the session's one handover"),
@@ -64,30 +74,47 @@ def session_of(relpath):
     return None
 
 
-def load_haystack(root):
-    """Text of every place a paper could be referred to.  Missing files are
-    reported, never silently treated as empty (F-443)."""
-    parts, missing = [], []
-    cands = [os.path.join(root, "00_INDEX.md")]
-    canon = os.path.join(os.path.dirname(root.rstrip("\\/")), "..")
-    for extra in (os.path.join(root, "MANIFEST.md5"),):
-        cands.append(extra)
-    for p in cands:
-        if os.path.exists(p):
-            parts.append(io.open(p, encoding="utf-8", errors="replace").read())
-        else:
+def _read(p):
+    return io.open(p, encoding="utf-8", errors="replace").read()
+
+
+# F-491: a source that names EVERY paper is an inventory, not a citation, and it
+# drives "never cited" silently to zero.  Refuse it and say so.
+INVENTORY_SHARE = 0.90
+NOT_A_CITATION = re.compile(r'NEVER_CITED', re.I)
+
+
+def gather_corpus(root, extra_paths, names):
+    """The places a paper could be REFERRED TO: 00_INDEX.md, plus whatever
+    --also-scan / --canon supplied (the canonical manifest, the newest KB
+    Register).  Missing files are reported, never silently treated as empty
+    (F-443).  MANIFEST.md5 is deliberately not here -- see F-491 above."""
+    used, rejected, missing, parts = [], [], [], []
+    stems = [(n, os.path.splitext(n)[0]) for n in names]
+    total = float(len(stems) or 1)
+    for p in [os.path.join(root, "00_INDEX.md")] + list(extra_paths):
+        base = os.path.basename(p)
+        if not os.path.exists(p):
             missing.append(p)
-    return "\n".join(parts), missing
+            continue
+        if NOT_A_CITATION.search(base):
+            rejected.append("%s -- a list of the uncited is not a reading of them" % base)
+            continue
+        txt = _read(p)
+        hit = sum(1 for n, st in stems if n in txt or st in txt)
+        share = hit / total
+        if share >= INVENTORY_SHARE:
+            rejected.append("%s -- names %.0f%% of the papers: an inventory, not a citation"
+                            % (base, 100.0 * share))
+            continue
+        used.append("%s (%.0f%%)" % (base, 100.0 * share))
+        parts.append(txt)
+    return "\n".join(parts), used, rejected, missing
 
 
 def walk(root, extra_haystack_paths):
+    """The papers first, then the corpus -- the share gate needs the names."""
     base = os.path.join(root, "03_WORKING_PAPERS")
-    hay, missing = load_haystack(root)
-    for p in extra_haystack_paths:
-        if os.path.exists(p):
-            hay += "\n" + io.open(p, encoding="utf-8", errors="replace").read()
-        else:
-            missing.append(p)
     rows = []
     now = time.time()
     for dirpath, dirnames, filenames in os.walk(base):
@@ -100,7 +127,6 @@ def walk(root, extra_haystack_paths):
             except Exception:
                 continue
             kind, blurb = classify(name)
-            stem = os.path.splitext(name)[0]
             rows.append({
                 "path": rel,
                 "name": name,
@@ -111,9 +137,13 @@ def walk(root, extra_haystack_paths):
                 "bytes": st.st_size,
                 "age_days": int((now - st.st_mtime) // 86400),
                 "mtime": time.strftime("%Y-%m-%d", time.localtime(st.st_mtime)),
-                "orphan": (name not in hay and stem not in hay),
             })
-    return rows, missing
+    hay, used, rejected, missing = gather_corpus(
+        root, extra_haystack_paths, [r["name"] for r in rows])
+    for r in rows:
+        stem = os.path.splitext(r["name"])[0]
+        r["orphan"] = (r["name"] not in hay and stem not in hay)
+    return rows, missing, used, rejected
 
 
 def shelve(rows, current_session):
@@ -256,7 +286,7 @@ def files_block(rows, empty="Nothing here."):
 SKIP_TODO = re.compile(r'^(carried|what nothing touches|your rulings)', re.I)
 
 
-def build(rows, current_session, owner_items, missing):
+def build(rows, current_session, owner_items, missing, corpus=None, rejected=None):
     rows = sorted(rows, key=lambda r: (-(r["session"] or 0), r["name"]))
     cur = [r for r in rows if r["shelf"] == "CURRENT"]
     rec = [r for r in rows if r["shelf"] == "RECENT"]
@@ -357,9 +387,15 @@ def build(rows, current_session, owner_items, missing):
              '<span class="k keep">keep</span> &mdash; a build brief or a close report: the two kinds '
              "written to be read again. "
              '<span class="k orphan">never cited</span> &mdash; the file&rsquo;s name appears in no index, '
-             "no manifest and no register. Written once, never referred to again. "
+             "no canonical manifest and no register. Written once, never referred to again. "
              '<span class="k">superseded</span> &mdash; a dated snapshot, or a note that one kit went live, '
              "whose living version has moved on.")
+    if corpus:
+        o.append("<br><br><b>Looked for a mention in:</b> %s"
+                 % html.escape(", ".join(corpus)))
+    if rejected:
+        o.append("<br><b>Refused as a corpus (F-491):</b> %s"
+                 % html.escape("; ".join(rejected)))
     if missing:
         o.append("<br><br><b>Could not be read, so not counted:</b> %s"
                  % html.escape(", ".join(missing)))
@@ -387,7 +423,7 @@ def main():
                     help="omit the html/head/body wrapper (for publishing as an artifact)")
     a = ap.parse_args()
 
-    missing = []
+    missing, corpus, rejected = [], [], []
     if a.canon:
         cand = os.path.join(a.canon, "CANONICAL_MANIFEST.md")
         if os.path.exists(cand):
@@ -406,7 +442,7 @@ def main():
     if a.inventory:
         rows = json.load(io.open(a.inventory, encoding="utf-8"))
     else:
-        rows, missing = walk(a.root, a.also_scan)
+        rows, missing, corpus, rejected = walk(a.root, a.also_scan)
 
     if str(a.session).lower() == "auto":
         nums = [r["session"] for r in rows if r["session"]]
@@ -425,7 +461,7 @@ def main():
     elif a.owner_items:
         missing.append(a.owner_items)
 
-    page = build(rows, session, owner_items, missing)
+    page = build(rows, session, owner_items, missing, corpus, rejected)
     if not a.fragment:
         page = ("<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\">"
                 "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
@@ -434,6 +470,10 @@ def main():
     io.open(a.out, "w", encoding="utf-8").write(page)
     print("wrote %s  (%d papers, %d never referred to)" % (
         a.out, len(rows), sum(1 for r in rows if r["orphan"])))
+    if corpus:
+        print("corpus   : %s" % ", ".join(corpus))
+    for x in rejected:
+        print("REFUSED  : %s" % x)
 
 
 if __name__ == "__main__":
