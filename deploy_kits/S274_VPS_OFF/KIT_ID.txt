@@ -1,0 +1,22 @@
+KIT      : S274_VPS_OFF
+SESSION  : 258
+DATE     : 2026-09-15
+PURPOSE  : Club 3h, the VPS half -- an OFF switch for the four Sanjeevni server
+           jobs that had no way to be stopped. The PC half was S259 (Club C.2).
+TARGET   : VPS, /root/finance/{spine_cadence,sale_attribution,export_watch,salts_refresh}.py
+PINS     : spine_cadence     0eeed354... -> c1e31012...
+           sale_attribution  c74f0049... -> 82b4f526...
+           export_watch      0993c441... -> 2920c28e...
+           salts_refresh     d7994e38... -> 40cb2615...
+INSTALLS : four files, all-or-nothing. Creates /root/finance/_off (EMPTY) and
+           /root/finance/sanjeevni_switch.sh. No cron line touched, no service
+           restarted, NO MARKER CREATED -- installing stops nothing.
+ROLLBACK : \cp /root/finance/<file>.bak_S274_<pin8> /root/finance/<file>
+PROOF    : walk_s274.py  32 checks over the box's own live bytes
+           prove_off_s274.py  32 checks, run again ON THE BOX by the installer
+           against a TEMPORARY folder, so the proof never creates a marker a
+           running job could read.
+NUMBERS  : next free after this kit -- D522, F-485, A-D25.
+NOTE     : /root/marg_ingest/OFF (S240) is untouched and keeps its own name.
+           The clinic's own jobs (finance_heal, finance_intent, bank_match, the
+           backups, the Docterz ingest) are deliberately NOT in scope.
