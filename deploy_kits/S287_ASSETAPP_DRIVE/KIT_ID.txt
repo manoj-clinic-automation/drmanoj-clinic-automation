@@ -1,0 +1,13 @@
+KIT      : S287_ASSETAPP_DRIVE
+SESSION  : 263
+DATE     : 2026-09-17
+PURPOSE  : assetapp_backup.py S286 -> v2: the verified archive also goes to Google Drive
+           (FinanceDB_Backups, owner-owned slots created at S263); server keeps 3 days when
+           Drive is verified, else 14. Owner, 17-Sep: off-site = the connected Drive.
+TARGET   : VPS, /root/state_backup/assetapp_backup.py only. The crontab is READ, not written.
+GATE     : S286 script 9fdc66a3d7d0bfe94541b2eb228302e9 installed; S286 cron line once;
+           selftest on the box; first run must make a verified archive or S286 is restored.
+TO-PIN   : b816504c89fa127b7519d29a77e54658
+PROVEN   : selftest 29/29; real finance_drive_backup.py (14b40677) against a Drive REST
+           stand-in; installer rehearsed (upgrade, repeat, restore, two refusals).
+NUMBERS  : kit S287 used. Next free: D532, F-511 (S263 git locks), A-D25, kit S288.
