@@ -1,4 +1,4 @@
-# OWNER TO-DO — LIVE · refreshed at the **S265 close** (the parent), 17-Sep-2026 — the clinic sections refreshed; the Sanjeevni sections as S264 left them (that chat's S288 · S292 · S293 · S294 live, S297 held — see the board)
+# OWNER TO-DO — LIVE · refreshed at the **S266 close** (the Sanjeevni project), 17-Sep-2026 22:45 IST — the Sanjeevni sections rewritten (S299 · S301 · S302 · S304 · S305 live; S307 · S308 published, one line each owed); the clinic sections as the parent's S265 close left them, and its own S267 close refreshes them next
 
 *Detail: `START_HERE_SESSION_267.md` (clone) · `S265_BUILD_BRIEF.md` (parent) · `S264_BUILD_BRIEF.md` (Sanjeevni).*
 *Everything else this session wrote is evidence and is on the shelf:*
@@ -79,7 +79,29 @@ four cold-kit zips by rule E, the rest your own downloads — Docterz CSVs, foll
 and the 9 at `D:\dr-manoj-git\` · **`D:\dr-manoj-git\_to_delete_S263\`** — two empty git lock files my shell left
 (F-511), with `WHY_SAFE.txt`; delete when convenient.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at S264
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S266 close
+
+**A · THE PUBLISH (it carries tonight's records), then TWO LINES ON THE VPS.**
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+```
+cd /root/deploy/repo && git pull --ff-only && bash /root/deploy/repo/deploy_kits/S307_SUPPLIER_CHECK_2/install_S307_SUPPLIER_CHECK_2.sh
+```
+
+```
+bash /root/deploy/repo/deploy_kits/S308_PURSUE_EVIDENCE/install_S308_PURSUE_EVIDENCE.sh
+```
+
+**B · THE STOCK CHECK IS YOURS TO WALK — step 2, *Try to match*: 18 pairs (9 orthotic, 7 medicine, 2 already settled by your words).** Nothing downstream moves until they are answered; each Yes puts its Marg vouchers up at once, and 31 lines are already waiting on Amir's board.
+
+```
+https://followup.dr-manoj.in/finance/stock/page/hub?count=1
+```
+
+*(The rest of this section is as S264 left it.)*
 
 0 · **ONE PASTE, when convenient — the project's instructions, v1.1.** Open the Sanjeevni project's settings →
 custom instructions, and replace the whole text with this file's contents (it is v1 plus the map of what the
@@ -148,7 +170,17 @@ August advances · the VINTAZ P 4500 INJ write-off tap · the wall card (F-310) 
 8. The portal tile caption · the F-384 sweep · `freshness_legs.json` recorded from the box.
 9. ~~F-498's second half~~ (S283) · ~~the asset-register backup~~ (S286 + S287) · ~~Docterz early~~ (S291) · ~~bank SMS~~ (S290) · ~~petty book~~ (S289) · ~~attendance tile for all staff~~ (S295 + S296) — **done.**
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at S264
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S266 close
+
+1. **Darpan's claim queue** — open → contacted → settled, self-closing on a matching purchase return (D471).
+2. **Count #2 by section** — orthotics monthly, staff-run end to end.
+3. The tidy-up chain: one store for sale lines → retire the manojz senders → Sanjeevni in its own process.
+4. ~~The daily summary print~~ (S302) · ~~the wrong-supplier check, second stage~~ (S307) · ~~Darpan's help on the pursued lines~~ (S308) · ~~the vouchers~~ (S301) · ~~the proof~~ (S304) · ~~the missed-export alarm from the door~~ (S305) — **done this session.**
+5. Your three stock corrections and Darpan's day-close place in the portal wait on you, not on code.
+
+*(The S264 list follows, for the items it still holds.)*
+
+## ⭐1 — WHAT I BUILT BEFORE · THE SANJEEVNI PROJECT — refreshed at S264
 
 1. **The first live look at S285** (the wrong-supplier warning on Amir's step 4, live 17-Sep ~07:55) once his export of the day has landed — the wording in his hands.
 2. ~~**F-493** — the Sanjeevni Book §7.2 correction (Book v1.3)~~ — **DONE, S264: v1.3 in the project, on the shelf

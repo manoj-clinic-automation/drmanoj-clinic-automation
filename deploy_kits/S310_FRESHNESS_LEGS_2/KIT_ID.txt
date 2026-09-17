@@ -1,0 +1,9 @@
+KIT      : S310_FRESHNESS_LEGS_2
+SESSION  : 267 (parent -- Systems & Automation)
+DATE     : 2026-09-17
+TARGET   : VPS -- the legs file the health collector reads (freshness.conf LEGS_FILE; /root/finance/freshness_legs.json, b02f846a after S309)
+FROM     : "asset app archive" 200 h + the "weekly" note; no leg for the petty photo backup
+TO       : "asset app archive" 26 h + a note naming S286; NEW leg "petty bill photos off-box" 26 h on /root/backups/petty_backup.log (added only once that log exists)
+DATA     : yes -- one leg changed, one leg added; backup .bak_S310_<md5-8> beside the file; no code, no restart
+BUILDS   : the F-517 rule (a kit that schedules a job rereads every watch that names it), from the live crontab read at the S309 install
+NUMBERS  : kit S310 (claimed on the System Board; S307, S308 are the Sanjeevni chat's)
