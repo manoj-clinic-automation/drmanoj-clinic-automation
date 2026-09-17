@@ -1,24 +1,25 @@
 KB_canon_all — the byte-authoritative copy of every manifest-pinned canonical row.
-Refreshed at the S259 CLOSE, 15-Sep-2026.
+Refreshed at the S260 CLOSE, 17-Sep-2026 (EOS-light; no live code; the publish OWED).
 
 CURRENT AT THIS CLOSE
-  Register        KB_Register_v5_99_S259close.md
-  History Archive KB_History_Archive_v1_96_S259close.md   (+13,446 -> 1,472,028; prefix proven)
-  Fault Register  Fault_Action_Register_v2_81.md          (+11,150 -> 656,761; prefix proven)
-  Runbook         HANDOFF_RUNBOOK_2026-09-15_Session259close_v180.md
-  Entry point     START_HERE_SESSION_260.md
-  Build brief     S259_BUILD_BRIEF.md
-  Close report    S259_CLOSE_REPORT.md
-  Owner to-do     OWNER_TODO_LIVE.md                      (UN-MANIFESTED by design, A10)
-  Sanjeevni Book  SANJEEVNI_SYSTEM_BOOK_v1_2_S258.md      (UNCHANGED at S259; stale = 1 close)
+  Register        KB_Register_v5_100_S260close.md
+  History Archive KB_History_Archive_v1_97_S260close.md   (+5,640 -> 1,477,668; prefix proven)
+  Fault Register  Fault_Action_Register_v2_84.md          (v2.81 -> v2.82 -> v2.83 -> v2.84, each prefix proven; 665,936)
+  Runbook         HANDOFF_RUNBOOK_2026-09-17_Session260close_v181.md
+  Entry point     START_HERE_SESSION_261.md
+  Build brief     S260_BUILD_BRIEF.md
+  Close report    S260_CLOSE_REPORT.md
+  Split plan      S260_SPLIT_PLAN.md                      (D528: two projects, one canon)
+  Owner to-do     OWNER_TODO_LIVE.md                      (UN-MANIFESTED by design, A10; split into two lists)
+  Sanjeevni Book  SANJEEVNI_SYSTEM_BOOK_v1_2_S258.md      (UNCHANGED at S260; stale = 2 closes; moves to the Sanjeevni project)
   Close-out       END_OF_SESSION_PROMPT_v14.md            (unchanged)
-  Evergreen       START_HERE_PROMPT_v9.md                 (unchanged)
+  Evergreen       START_HERE_PROMPT_v10.md                (pasted by the owner 17-Sep; supersedes v9)
   Paper policy    PAPER_POLICY_v1.md  (v1.1 -- binding on the assistant)
-  Live pins       live_pins_S259close.txt                 (384 rows; register_pin_verified: yes)
-  Manifest        CANONICAL_MANIFEST.md
+  Live pins       live_pins_S260close.txt                 (385 rows; register_pin_verified: yes)
+  Manifest        CANONICAL_MANIFEST.md                   (REPOSITORY ONLY since S260 -- no project-knowledge copy, D528)
 
 RESERVED, TAKE FROM HERE (F-463)
-  Next free: D528 . F-501 . A-D25 . kit S281 . Session 260
+  Next free: D529 . F-506 . A-D25 . kit S281 . Session 261
 
 STANDING WARNINGS CARRIED BY THIS FOLDER
   * Verify this folder's gate FROM INSIDE IT:  md5sum -c MD5SUMS_ALL.txt
@@ -29,10 +30,10 @@ STANDING WARNINGS CARRIED BY THIS FOLDER
     reporting all-OK while not checking it. 537 files stood against 535 rows. The gate is now
     owned nightly by canon_sums.py (S275) AND by the close before the publish (v14 A8b).
     ASK A GATE WHAT IT IS GUARDING, NOT JUST WHETHER IT PASSED.
-    At this close: 563 files, 563 rows, md5sum -c green from inside, zero files without a row.
+    At this close: 575 files, 575 rows, md5sum -c green from inside, zero files without a row.
   * F-490 (S258): MD5SUMS_ALL.txt.new in this folder is a 260-row HALF-WRITTEN temp file that
-    is rowed as though it were a document. STILL PRESENT and still gated at S259 -- reported
-    again rather than quietly deleted, because deleting in here is the owner's.
+    is rowed as though it were a document. STILL PRESENT and still gated at S260 -- reported
+    a third time rather than quietly deleted, because deleting in here is the owner's.
   * F-479 (S257): the S256 row was taken three minutes before the file's last save.
     WRITE THE SUMS LAST.
   * F-472: a predicted pin is never recorded as a live pin. A lost read-back is BLIND, not SHORT.
@@ -45,3 +46,15 @@ STANDING WARNINGS CARRIED BY THIS FOLDER
   * F-498 (S259) IS HALF OPEN: job_pulse still cannot tell an empty log from a stale one.
   * F-493 (S259): item 3f's entry condition must name sh_run.differ = 0, NOT the hub card.
     Two surfaces answer different questions under identical wording.
+  * F-504 (S260): 184 of 314 project-knowledge documents existed in NO other store. 180 were
+    rescued as transcriptions to ClaudeCowork\01_RESCUED_FROM_PROJECT_KNOWLEDGE\S260_RESCUE\
+    and hashed there. A TRANSCRIPTION IS A BACKUP, NOT A SURVIVOR: nothing leaves project
+    knowledge until a byte-proven copy exists. Every build paper is written to ClaudeCowork
+    in the same close it is written to project knowledge.
+  * F-505 (S260): deploy/push_kit.bat on manojz carried LF where this folder's row is CRLF;
+    the canon-sums nightly refused on it. The repository bytes were written back. WHEN TWO
+    GATES DISAGREE ON ONE FILE, LOOK AT LINE ENDINGS BEFORE CONTENT.
+  * D528 (S260): Sanjeevni/Marg is its own project from S261. ONE canon, ONE number series,
+    ONE Fault Register / KB Register / Archive -- all in this folder; both projects read it
+    from the clone. 110 documents staged as proven bytes in
+    ClaudeCowork\05_DELIVERABLES\SANJEEVNI_PROJECT_STAGING\ (35 to the new project's knowledge).
