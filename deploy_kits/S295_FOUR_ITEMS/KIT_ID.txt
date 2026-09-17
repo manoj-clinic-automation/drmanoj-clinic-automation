@@ -1,0 +1,9 @@
+KIT      : S295_FOUR_ITEMS
+SESSION  : 265 (parent -- Systems & Automation)
+DATE     : 2026-09-17
+TARGET   : VPS -- portal.py · tile_grants.json · clinic_money.py · darpan_app.py · darpan_card.html · docterz_ingest.py · state_backup/petty_backup.py (NEW) · root's crontab (+1 line)
+FROM     : afb415b8 · 23dba543 (v18) · 14e96b76 · c98f0c24 · 4a31f14e · 3809f046 · (none) -- each held against the live bundle / S289 read-back
+TO       : c14c2c64 · 85a6e067 (v19) · a92fc4c6 · f98004c9 · 572fb019 · d2102bb7 · 10b1ecbf
+NEEDS    : S290 live (finance_app 8dc77ef4 + bank_sms.py) · S287 live (assetapp_backup.py b816504c)
+BUILDS   : the owner's 17-Sep asks -- staff attendance tile for every staff login; SMS figure where staff look; petty photos off the box; the two June Docterz files stop failing every ten minutes.
+NUMBERS  : kit S295 (claimed on the System Board by S265; S293/S294 were the Sanjeevni chat's).

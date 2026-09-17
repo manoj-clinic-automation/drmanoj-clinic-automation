@@ -1,0 +1,166 @@
+{
+  "_note": "S223 - the launch tile set, per the owner's rulings at the S223 open. CHANGES FROM v1: (1) darpan's mask is GONE - he sees the same operational layer as everyone else. (2) Daily Sale, Vaapsi Desk and the NEW Stock Check tile are granted BY NAME here; in portal.py they carry roles ['doctor'] only. That is deliberate: if this file is ever missing or malformed, staff lose those three money screens (fail closed) and the doctor keeps everything (never locked out). Everything else - Scan Purchase, Staff Register, Attendance, Forms & Downloads - is untouched and stays on the staff role. This file decides what a person is SHOWN. It grants no access: every server-side gate, including returns.desk_users and the medical unit_role, is unchanged and still decides what they may reach.  S223 v4: the NEW 'Day Revenue' tile is granted to shavez, shivani, alisha, bhawna and manoj -- the owner's list. In portal.py it carries roles ['doctor'] only, so a lost grants file leaves it with the owner and nobody else. The PAGE's own gate is the clinic maker/checker roles, which is the same five people by construction.  S223 v5: the NEW 'Daily Register' tile is granted to the same five the owner named -- shavez, shivani, alisha, bhawna, manoj. In portal.py it carries roles ['doctor'] only, so a lost grants file leaves it with the owner alone. The PAGE's own gate is the clinic maker/checker roles, which is the same five by construction.  S224 v6: the NEW 'Marg Purchases' tile is granted to amir, shavez, darpan, alisha and shivani -- the five who work the pharmacy and its stock; the doctor holds it by role. Nothing else changes. The PAGE's own gate is the medical unit_role: a viewer sees everything read-only and never a vendor phone; verdicts need maker/checker; FINALISE and orders are the doctor's alone.  S224 v7: TWO RENAMES ONLY, per the owner's ruling of 04-Sep-2026 that the Docterz tiles say Docterz: 'Day Revenue' is now 'Docterz Revenue' and 'Daily Register' is now 'Docterz daily collection' -- the same five people (shavez, shivani, alisha, bhawna, manoj), the same tiles, nothing granted and nothing withdrawn. portal.py is patched to the same two names in the same install (patch_portal_docterz_names_s224.py); the two files must move together, because a grant matches a tile by its name and a stale name matches nothing.  S225 v8: the NEW 'Order Medicines' tile -- the staff face of Marg Purchases (item, stock now, order quantity; one tap to WhatsApp; Call; Print A4) -- is granted to amir, shavez, darpan, alisha and shivani, the same five who hold Marg Purchases; the doctor holds it by role. In portal.py it carries roles ['doctor'] only, so a lost grants file leaves it with the owner alone. The PAGE's own gate is the medical unit_role, unchanged. Nothing else changes.  S239 v9 -- THE STAFF APP, PHASE 1 (owner's rulings, 11-Sep-2026): (1) Shavez, Shivani and Alisha get the 'Call Tracker' tile (their follow-up calling list; the page asks each person's own key once and remembers it on that phone). (2) In the Sanjeevni/Marg tiles only 'Vaapsi Desk' is active for now: Stock Check, Marg Purchases and Order Medicines are withdrawn from shavez, shivani, alisha and darpan (amir keeps his -- it is his work). (3) Docterz: only 'Docterz Revenue' stays; 'Docterz daily collection', 'Daily Collection' and 'Clinic' are withdrawn -- none had a single entry in finance.db (nightly of 07-Sep); their pages and books are untouched and a re-grant is one line. (4) 'Attendance' and 'Staff Register' are HELD from every staff login for the time being (masked by name; the pages and their own gates are unchanged). Darpan keeps Daily Sale and Vaapsi Desk.  S239 v10: the hold covers the real login names parvesh, sandeep, vikky (v9 guessed other spellings).  S242 v11: 'Docterz daily collection' (/finance/clinic/register) re-granted to shavez, shivani and alisha -- the owner's ask of 12-Sep-2026. Withdrawn at S239 v9 for having no entries; reception is who fills it, so it goes to reception. The page's own gate (clinic maker/checker) is unchanged, and nothing else in this file moves.  S242 v12 -- AMIR CARRIES ONE TILE, the owner's ruling of 12-Sep-2026: \"allow him only the one u made today ... Marg Purchases, Order Medicines, Stock Check, Scan Purchase is not for him for now, so park these too, will decide these later.\" His 'extra' is now the single new tile 'Amir ka kaam' (/finance/amir, his seven steps, live since S241 and until now with no door in the app). Stock Check, Marg Purchases and Order Medicines leave his extra; Forms & Downloads and Scan Purchase come off the staff role by mask. PARKED, NOT REMOVED: every one of those tiles still exists in portal.py with its roles unchanged and is untouched for everybody else -- putting any of them back for Amir is one line here. The pages' own gates (the medical unit_role above all) are unchanged and still decide what he may reach; this file only decides what he is shown.  S243 v13 -- THE REPORT GENERATOR'S TILE, the owner's ruling of 13-Sep-2026: Shavez becomes the Marg report generator (the morning job on the medical PC, before any sale starts, and on Amir's days too), so the NEW tile 'Aaj ki reports' (/finance/reports/aaj -- the server ticks each Marg export as it arrives through the one door; refused and still-due ones are the only things it asks about) is granted BY NAME to shavez and to amir. In portal.py it carries roles ['doctor'] only, so a lost grants file leaves it with the owner alone. The PAGE's own gate is the medical unit_role (any role); the installer seeds shavez a medical viewer row if he has none. Nothing else in this file moves.  S243 v14 -- DARPAN'S DAY GETS ITS DOOR, the owner's ruling of 13-Sep-2026: Darpan's day now lives at /finance/darpan/kal ('Kal ka hisaab', kit S243_DARPAN_KAL -- yesterday's Marg report fills the numbers, he types two things: kitna cash diya, kisko diya), so the NEW tile 'Kal ka hisaab' is granted BY NAME to darpan. In portal.py it carries roles ['doctor'] only, so a lost grants file leaves it with the owner alone. Daily Sale stays in his extra untouched: the manual form is the fallback, and the tile is the owner's too (his lands on Review since S243_SCREEN_FIXES), so it is NOT repointed. The CA's ruling retired 'Corrections' as Darpan's task: checked, it was never in his grants (roles ['doctor'], no name-grant to anyone), so there is nothing to withdraw -- the page stays reachable by address and for the owner. Nothing else in this file moves.  S250 v15 -- THE STAFF REGISTER REACHES THE PEOPLE WHO FILL IT, the owner's ruling of 13-Sep-2026: Shivani and Alisha are the register's makers and Shavez its checker, and none of the three could see it on their phone -- 'Staff Register' was masked from every staff login at S239 v9. The mask line is lifted for shavez, shivani and alisha ONLY; the tile carries roles ['doctor','manager','staff'] in portal.py, so that is the whole change -- nothing granted by name, no code edited, no restart. 'Attendance' stays masked for all three and the S239 v9 hold stands for every other staff login. The page's own gate is untouched: staff_register.py resolves maker/checker from SR_MAKER_USERS / SR_CHECKER_USERS, and D272 still bars a checker from approving a date he entered.  S249/S251 v16 -- THE MORNING MATCH AND PHYSIOTHERAPY, the owner's rulings of 13-Sep-2026: (1) the NEW tile 'Morning match' (/finance/clinic/match -- the counter sheet, Docterz and the bank MPR joined into one verdict; reception makes the first pass, Shavez checks; flags stay on the card until reconciled) is granted BY NAME to shavez, shivani and alisha. In portal.py it carries roles ['doctor'] only, so a lost grants file leaves it with the owner alone; the doctor's own login lands on /finance/clinic/money, his four kinds of flag. The PAGE's gate is the clinic maker/checker roles. (2) the NEW tile 'Physiotherapy' (/finance/physio -- the physiotherapy revenue table; reception writes it from the counter sheet, the physiotherapist only reads it, the doctors tap received) is granted BY NAME to bhati (NEW login, clinic physiotherapist, portal role staff) and to bhawna. Its gate is a NEW server unit 'physio': bhati holds a viewer row there and NO row in the clinic unit, so every /finance/clinic/... address refuses him at the front gate -- 'the data he gets is only and only of the physiotherapy part'. bhati is masked from Attendance, Staff Register, Forms & Downloads and Scan Purchase exactly as amir is. Nothing else in this file moves.  S262 v17 -- VENDOR PAYMENTS GETS ITS DOOR, the owner's ask of 14-Sep-2026 (\"will definitely add a dial to my already cluttered PWA right now for it and also add a dial for Shavez in it\"): the NEW tile 'Vendor payments' (/finance/purchase/page/pay -- the month's payment sheet prepared inside the system: every vendor with its two fortnights, what is carried in and what is payable, NEFT where the account is confirmed and cheque where it is not; then verified against Marg's own supplier-wise statement; then locked, and the advice file and its letter come off THAT sheet and nothing else) is granted BY NAME to shavez, who carries the list into the advice file and writes the cheque register. In portal.py it carries roles ['doctor'] only, so a lost grants file leaves it with the owner alone. NO SECOND PAGE was built for him: the PAGE's own gate is the medical unit_role, and a viewer sees the sheet read-only -- no carry-forward typed, no verification run, no lock. If he is ever made a maker there, that is the line to reconsider, not this one. Nothing else in this file moves. | v18 (S289, 17-Sep-2026): 'Petty book' to bhati and bhawna (the doctor has it by role); 'Bhati aaj' to shavez, shivani and alisha; bhati also masked from 'Staff Ledger — Entry' and 'Asset Register' so a manager-role login shows him the same two tiles as a staff one. | v19 (S295, 17-Sep-2026): the NEW tile 'Meri attendance' (/register/me) is given by role to staff and manager; bhati masked from it (not on the biometric).",
+  "version": 19,
+  "users": {
+    "alisha": {
+      "extra": [
+        "Call Tracker",
+        "Vaapsi Desk",
+        "Docterz Revenue",
+        "Docterz daily collection",
+        "Morning match",
+        "Bhati aaj"
+      ],
+      "mask": [
+        "Attendance"
+      ]
+    },
+    "bhawna": {
+      "mask": [
+        "CC Statements → Tally",
+        "Case Pack · PC fallback",
+        "Follow-up Tracker",
+        "Follow-up WhatsApps",
+        "GMB Review Assist",
+        "Sanjeevni Medicos",
+        "Send WhatsApp",
+        "Surgical Case Pack",
+        "Vitals & Plan"
+      ],
+      "extra": [
+        "Clinic",
+        "Daily Sale",
+        "Docterz Revenue",
+        "Docterz daily collection",
+        "Stock Check",
+        "Vaapsi Desk",
+        "Physiotherapy",
+        "Petty book"
+      ]
+    },
+    "manoj": {
+      "extra": [
+        "Clinic",
+        "Daily Sale",
+        "Docterz Revenue",
+        "Docterz daily collection",
+        "Manage Users",
+        "Stock Check",
+        "Vaapsi Desk"
+      ]
+    },
+    "shavez": {
+      "extra": [
+        "Call Tracker",
+        "Asset Register",
+        "Vaapsi Desk",
+        "Docterz Revenue",
+        "Docterz daily collection",
+        "Aaj ki reports",
+        "Morning match",
+        "Vendor payments",
+        "Bhati aaj"
+      ],
+      "mask": [
+        "Attendance"
+      ]
+    },
+    "shivani": {
+      "extra": [
+        "Call Tracker",
+        "Vaapsi Desk",
+        "Docterz Revenue",
+        "Docterz daily collection",
+        "Morning match",
+        "Bhati aaj"
+      ],
+      "mask": [
+        "Attendance"
+      ]
+    },
+    "darpan": {
+      "extra": [
+        "Kal ka hisaab",
+        "Daily Sale",
+        "Vaapsi Desk"
+      ],
+      "mask": [
+        "Attendance",
+        "Staff Register"
+      ]
+    },
+    "amir": {
+      "extra": [
+        "Amir ka kaam",
+        "Aaj ki reports"
+      ],
+      "mask": [
+        "Attendance",
+        "Staff Register",
+        "Forms & Downloads",
+        "Scan Purchase"
+      ]
+    },
+    "awdhesh": {
+      "mask": [
+        "Attendance",
+        "Staff Register"
+      ]
+    },
+    "sukhveer": {
+      "mask": [
+        "Attendance",
+        "Staff Register"
+      ]
+    },
+    "surendra": {
+      "mask": [
+        "Attendance",
+        "Staff Register"
+      ]
+    },
+    "parvesh": {
+      "mask": [
+        "Attendance",
+        "Staff Register"
+      ]
+    },
+    "sandeep": {
+      "mask": [
+        "Attendance",
+        "Staff Register"
+      ]
+    },
+    "vikky": {
+      "mask": [
+        "Attendance",
+        "Staff Register"
+      ]
+    },
+    "bhati": {
+      "extra": [
+        "Physiotherapy",
+        "Petty book"
+      ],
+      "mask": [
+        "Attendance",
+        "Staff Register",
+        "Forms & Downloads",
+        "Scan Purchase",
+        "Staff Ledger — Entry",
+        "Asset Register",
+        "Meri attendance"
+      ]
+    }
+  },
+  "defaults": {
+    "_note": "Section order. DISPLAY ONLY - it grants nothing and hides nothing. The owner's ruling of 03-Sep: the work someone does most sits highest, attendance lowest because it is personal. Sections not named keep their place after those that are.",
+    "groups_by_role": {
+      "staff": [
+        "Clinic",
+        "Money & Accounts",
+        "Staff"
+      ]
+    }
+  }
+}

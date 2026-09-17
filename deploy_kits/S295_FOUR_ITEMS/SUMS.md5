@@ -1,0 +1,13 @@
+6dd2a312c1cf834b33d10df33871fa61  KIT_ID.txt
+440cf9e9cace0f2a861c62fc05a300e6  README.md
+1ef0672f6018772c8be45b765274aed8  install_S295_FOUR_ITEMS.sh
+f82748a259440b01ab8c4f6aa9e9f4ce  walk_s295.py
+cd40a941fcb56833249ebf37bc3d4a77  attendance_map_s295.py
+38b1dacc03e0ae285c352485b1582b64  test_docterz_s295.py
+c14c2c649e0405378abcd95d8749c666  portal.py
+85a6e0674906fad9c538883ac0e3ead1  tile_grants.json
+a92fc4c6236fda9ec3a7c0ed7bac68f5  clinic_money.py
+f98004c922837f4f8ac41daa153f79b3  darpan_app.py
+572fb019c3f8a090a3a69153d471b3da  darpan_card.html
+d2102bb766a64d02c60473b556e4fdd2  docterz_ingest.py
+10b1ecbf65fd5d7476f94c113a3bf367  petty_backup.py
