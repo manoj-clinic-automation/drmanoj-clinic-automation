@@ -1,0 +1,9 @@
+KIT      : S306_BUNDLE_MASK
+SESSION  : 267 (parent -- Systems & Automation)
+DATE     : 2026-09-17
+TARGET   : VPS -- /root/state_backup/code_bundle.py (cron 01:35)
+FROM     : ed5b483f (v1.3, S273; held byte-exact against the 17-Sep 01:35 bundle)
+TO       : a70bf6e2 (v1.4, predicted; read back on install)
+DATA     : none; no restart; the tokens are NOT rotated here (F-456, owner)
+BUILDS   : F-518 -- unit-file Environment= secret values masked in the nightly code bundle, original md5 recorded, closing guard (exit 23)
+NUMBERS  : kit S306 (claimed on the System Board 22:00 IST; S304, S305 are the Sanjeevni chat's)

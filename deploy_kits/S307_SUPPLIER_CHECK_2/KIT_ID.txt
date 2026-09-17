@@ -1,0 +1,10 @@
+KIT      : S307_SUPPLIER_CHECK_2
+SESSION  : 266 (Sanjeevni -- Pharmacy & Marg), 17-Sep-2026, on the owner's "go" (item: the wrong-supplier check, second stage)
+DATE     : 2026-09-17
+TARGET   : VPS -- /root/finance/amir_day.py (patched on the box)
+FROM     : amir_day.py b3c20319c4808ebc64bec197c951468c (S285)
+TO       : amir_day.py 00c443cbce0b07ba763bbe655a3e3c58 (predicted; read back on install)
+CHANGES  : Amir's step 4 (bills), beside S285's item-supplier warning: (a) a purchase RETURN (a bill with a minus amount) under a supplier who never supplied its item now says so -- "Ye wapsi hai ... kabhi X se nahi aaya"; (b) every other bill with the same number and date under another supplier, in a live bill-wise export, is named on the bill -- the same amount reads "Ek hi bill do supplier ke naam to nahi chadh gaya?", a different amount a softer look. Nothing decided for him; "Supplier galat likha" and Theek hai as before. Lists and S285 warnings unchanged. No table. clinic-finance restarted.
+BUILDS   : the Sanjeevni plan block 2, "the wrong-supplier check, second stage: purchase returns under the wrong supplier; the same bill number from two suppliers on one day"; the owner's "go", 17-Sep 22:0x.
+NUMBERS  : kit S307 (claimed on the board at 22:02 after reading kit_S306 = the parent's). Next free: S308.
+PROJECT  : Sanjeevni
