@@ -1,0 +1,9 @@
+KIT      : S296_ATTENDANCE_NAMES
+SESSION  : 265 (parent -- Systems & Automation)
+DATE     : 2026-09-17
+TARGET   : VPS -- /root/staff_register/staff_register.db, table staff, column username, two rows (data only; no code file, no restart)
+FROM     : Sandip username '' · Vikki username '' (S295 attendance map, 17-Sep)
+TO       : Sandip -> sandeep · Vikki -> vikky
+NEEDS    : S295 live (portal.py c14c2c64)
+BUILDS   : the owner's 17-Sep ask -- 'Meri attendance' opens for every staff login that has the PWA.
+NUMBERS  : kit S296 (claimed on the System Board by S265 at 17:10 IST).
