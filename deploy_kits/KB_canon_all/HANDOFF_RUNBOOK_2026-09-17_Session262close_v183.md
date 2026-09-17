@@ -2,9 +2,9 @@
 
 ## §0 · WHAT HAPPENED
 
-**One sitting, 06:48 → close, the first session of "Sanjeevni — Pharmacy & Marg", beside the parent's S261
+**One sitting, 06:48 → 08:38 (the publish), the first session of "Sanjeevni — Pharmacy & Marg", beside the parent's S261
 and then S263 in the same clone. Three kits built offline, published and installed by the owner from one line
-each, all three live and read back on the rendered pages by noon. Two VPS pins moved. F-494 and D524 closed.
+each, all three live and read back on the rendered pages by 08:00. Two VPS pins moved. F-494 and D524 closed.
 F-507 … F-509 minted; D529 … D531. EOS.**
 
 **1 · The move, proven from the new side (D528 part 2, step 1).** The 35 staged documents written to this
@@ -32,7 +32,7 @@ on ≥ 2 earlier bills carries a warning on step 4, in Hindi, above *Theek hai*;
 itself (F-508). 36 checks driving both modules as code; 5 of 226 bills since July would have warned. Live:
 `amir_day.py` `a9f20622…` → `b3c20319…`. Step 4 and the owner's day view read clean.
 
-**5 · Recorded, not built.** F-507: `freshness_legs.json` on the box ≠ its S230 pin — re-pinned to the
+**5 · Recorded, not built — and one of the assistant's own (F-510).** The first writing of this close carried install times of ~09:25 / ~09:30 / ~10:10 and a close of 11:15: estimated, not read. The clock says 07:38, 07:38, 07:55 and 08:38. Corrected in every file at 08:45, and minted. F-507: `freshness_legs.json` on the box ≠ its S230 pin — re-pinned to the
 bundle's bytes; the diff is the parent's. The refused 16-Sep 23:55 export is the owner's own daily summary
 sale report (Darpan prints it, pays the day against it) — its title carried no date; teach the router. The
 15-Sep salt list is the one on the server and sufficient (his word). Numbers: drift 0 · dead 1 · **stale 3,

@@ -141,7 +141,7 @@ August advances · the VINTAZ P 4500 INJ write-off tap · the wall card (F-310) 
 
 ## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at S262
 
-1. **The first live look at S285** (the wrong-supplier warning on Amir's step 4, live 17-Sep ~10:10) once his export of the day has landed — the wording in his hands.
+1. **The first live look at S285** (the wrong-supplier warning on Amir's step 4, live 17-Sep ~07:55) once his export of the day has landed — the wording in his hands.
 2. **F-493** — the Sanjeevni Book §7.2 correction (Book v1.3) — stale 3, the first documentation job.
 3. **Teach the router your daily summary sale report** (the 16-Sep 23:55 refusal: its title row carries no date) so it files instead of refusing.
 4. **The item↔supplier check, second stage** — purchase returns under the wrong supplier; the same bill number under two suppliers on one day, on Amir's screen.
@@ -167,9 +167,9 @@ Unchanged from S259 (D524 · D525 · D526 · D527 · F-493 and all earlier), plu
 
 ## ✅ DONE AT THE S262 CLOSE — 17-Sep-2026 (the Sanjeevni project)
 
-- ~~**F-494** — the ₹17,777 of purchase lines with no vendor~~ — **S282_LINE_OWNER, installed by you ~09:25; 5 lines placed, 0 left.**
-- ~~**D524** — Shavez writes the cheque register~~ — **S284_SHAVEZ_MAKER, installed by you ~09:30; a named grant (D529).**
-- ~~**Your ask of 17-Sep — the wrong-supplier check on Amir's bills**~~ — **S285_SUPPLIER_CHECK, installed by you ~10:10 (D530 · D531).**
+- ~~**F-494** — the ₹17,777 of purchase lines with no vendor~~ — **S282_LINE_OWNER, installed by you ~07:38; 5 lines placed, 0 left.**
+- ~~**D524** — Shavez writes the cheque register~~ — **S284_SHAVEZ_MAKER, installed by you ~07:38; a named grant (D529).**
+- ~~**Your ask of 17-Sep — the wrong-supplier check on Amir's bills**~~ — **S285_SUPPLIER_CHECK, installed by you ~07:55 (D530 · D531).**
 - ~~The 35 Sanjeevni documents into their own project~~ — **done and proven by hash; 117,736 of 2,000,000 there.**
 - Your two notes recorded: the 15-Sep salt list is current and sufficient; the refused 16-Sep 23:55 export is your own daily summary sale report (Darpan prints it and pays the day against it).
 

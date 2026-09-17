@@ -1,0 +1,14 @@
+KIT      : S286_ASSETAPP_BACKUP
+SESSION  : 263
+DATE     : 2026-09-17
+PURPOSE  : the asset register's 02:30 backup names a log, checks its archive, and prunes
+           only after a good night. Replaces the bare tar line (job pulse NO TRACE).
+TARGET   : VPS. New /root/state_backup/assetapp_backup.py; ONE crontab line swapped.
+GATE     : old tar line present exactly once; script slot free or already these bytes;
+           selftest on the box; first real run must end OK before the crontab is opened.
+TO-PIN   : /root/state_backup/assetapp_backup.py 9fdc66a3d7d0bfe94541b2eb228302e9
+PROVEN   : selftest 20/20; old line = real crontab byte for byte; installer rehearsed on a
+           fake root with the real crontab (install, repeat, moved-on refusal, failed first
+           run leaves crontab untouched, bad read-back restored identical); job_pulse v1.2
+           reads the new line.
+NUMBERS  : kit S286 used. Next free: D532, F-511 (S263 git-locks; F-510 went to S262 time correction), A-D25, kit S287.

@@ -2,7 +2,7 @@
 
 **What this session was for:** the first session of "Sanjeevni — Pharmacy & Marg" — bringing the 35 documents
 in and proving them. **What it also did:** three fixes on the pharmacy side, built in the morning, installed by
-you from one line each, and working on the live screens by noon.
+you from one line each, and working on the live screens by 08:00.
 
 ## What is different now
 
@@ -15,6 +15,10 @@ you from one line each, and working on the live screens by noon.
 
 Measured on last night's data, the new warning would have shown on 5 of 226 bills since July — three of them
 L.K. DRUG HOUSE bills in August.
+
+## One correction, mine
+
+The first version of this brief and of the close records said the three fixes were installed around 09:30–10:10 and the session closed at 11:30. The clock says 07:38, 07:38, 07:55 and 08:38. I had estimated instead of reading a clock; every file is corrected and the slip is recorded as F-510.
 
 ## What was not a fault
 

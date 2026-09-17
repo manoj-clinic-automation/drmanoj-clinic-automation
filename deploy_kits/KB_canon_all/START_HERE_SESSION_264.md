@@ -52,7 +52,7 @@ D:\Downloads\_kbtools\CANON_SUMS_LATEST.txt
    papers and snapshots added, OK or WARN on the counts, and canon sums 100 % with 0 uncovered.** Anything
    else is a finding.
 3. **Clone the repository; `md5sum -c MD5SUMS_ALL.txt` from inside `KB_canon_all\`.** At S262 the publish
-   was owed — **if the gate does not show v2.86 / v1.99 / v5.102, the owner has not published yet**: say
+   was owed — **if the gate does not show v2.87 / v1.100 / v5.102, the owner has not published yet**: say
    so, name the file, and read the canon from the PC's `D:\dr-manoj-git\…\KB_canon_all\` for this session.
 4. **Open `CANONICAL_MANIFEST.md` FROM THE CLONE.** There is no copy in project knowledge (D528).
 5. **Read Tier 0 only:** the manifest · `KB_Register_v5_102_S262close.md` ·
@@ -73,7 +73,7 @@ project's first documentation job · folders per the 05:05 report.**
 
 ## §2 — RESERVED NUMBERS
 
-**Next free: D532 · F-510 · A-D25 · kit S286 · Session 264** — *after checking the board and the clone
+**Next free: D532 · F-511 · A-D25 · kit S286 · Session 264** — *after checking the board and the clone
 for a later close (§0 rule 14).* D529 … D531, F-507 … F-509 and kits S282 · S284 · S285 were used at S262;
 S283 is the parent's (S263).
 
@@ -82,8 +82,8 @@ S283 is the parent's (S263).
 | | |
 |---|---|
 | KB Register | `KB_Register_v5_102_S262close.md` |
-| History Archive | `KB_History_Archive_v1_99_S262close.md` |
-| Fault Register | `Fault_Action_Register_v2_86.md` (F-0 … F-509) |
+| History Archive | `KB_History_Archive_v1_100_S262close.md` (§S262a: the time erratum) |
+| Fault Register | `Fault_Action_Register_v2_87.md` (F-0 … F-510) |
 | Runbook | `HANDOFF_RUNBOOK_2026-09-17_Session262close_v183.md` |
 | Live pins | `live_pins_S262close.txt` |
 | Build brief | `S262_BUILD_BRIEF.md` (also in the Sanjeevni project's knowledge) |
@@ -106,7 +106,8 @@ Deferred at his word (§0 rule 13). `OWNER_TODO_LIVE.md` is the list. Nothing be
 ## §6 — WHAT THIS CLOSE OWES THE NEXT ONE
 
 - **The publish** (his double-click) — owed; verify landed (A16b): the S262 canon and nothing else pending
-  from this session (the three kits were published at ~09:20 and ~10:00, commits before `a633a78`).
+  from this session (the three kits were published at 07:35 `e216066` and 07:53 `a633a78`; this close's first publish landed 08:38 `2214298`, gate 592/592 — its TIME CORRECTION (F-510) is the second publish).
+- **F-510** — every clock time in canon is read from a clock at the moment of writing (`date`, a commit stamp, a file mtime), never estimated; the next open checks this file's own times against the commit log.
 - **The first live look at S285** once Amir's 17-Sep export has landed: does step 4 show a warning, and is
   the wording right on his phone.
 - **The Sanjeevni Book v1.3** (F-493 §7.2) — stale 3.
