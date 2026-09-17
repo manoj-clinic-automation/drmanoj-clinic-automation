@@ -1,0 +1,33 @@
+KIT      : S311_SUPPLIER_CHECK_2B
+PROJECT  : Sanjeevni — Pharmacy & Marg (session S266, re-opened after its close)
+WRITTEN  : 18-Sep-2026, 04:45 IST (clock read)
+REPLACES : S311 is the rebuild of S307_SUPPLIER_CHECK_2, whose folder is frozen (F-512).
+           S307's PATCH was correct and is carried here BYTE-IDENTICALLY — the payload files
+           (patcher, selftest, walk) keep S307 names and are S307's exact bytes, so the code that lands on the box
+           is the code S307 already patched to the predicted md5 and walked green.
+           Only the installer differs, and only in its health gate.
+
+WHAT WENT WRONG (F-525, the assistant's)
+  S307's installer demanded HTTP 200 from /finance/amir/api/healthz after the restart.
+  That route is NOT in finance_app.py's PUBLIC_PATHS, so an unauthenticated curl on the box
+  has always been redirected: it answered 302, the installer called that red, and it restored
+  amir_day.py byte-identically. Nothing was harmed — the box is exactly as it was, b3c20319.
+  S285 printed the same code for information only; S307 turned it into a pass/fail gate.
+
+THE FIX
+  The service check now hits /finance/healthz, which IS public and must answer 200.
+  Amir's own page is probed for information and 200/302/401 all pass — 302 is the login gate.
+
+FILE     : /root/finance/amir_day.py
+FROM     : b3c20319c4808ebc64bec197c951468c   (S285 — the live file now, after S307 restored it)
+TO       : 00c443cbce0b07ba763bbe655a3e3c58   (proven on the box by S307's own [3/7] line)
+
+WHAT THE PATCH DOES (unchanged from S307)
+  Amir's step 4, the bill list: a bill number that appears on the same date under ANOTHER
+  supplier is shown as a twin (the same amount = the same bill probably entered twice), and a
+  purchase return — a bill carrying a minus amount — is worded as a return instead of being
+  warned about as if it were a mistake.
+
+PROVEN     selftest 25/0 on the PC · on the box, 508 live bills: 4 with a same-number twin
+           (0 at the same amount), 5 returns, 0 warned · the bill list itself unchanged.
+INSTALL    bash /root/deploy/repo/deploy_kits/S311_SUPPLIER_CHECK_2B/install_S311_SUPPLIER_CHECK_2B.sh
