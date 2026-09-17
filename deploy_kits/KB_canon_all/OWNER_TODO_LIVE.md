@@ -1,21 +1,22 @@
-# OWNER TO-DO — LIVE · refreshed at the **S262 close** (the Sanjeevni project), 17-Sep-2026 — the parent's S263 was open beside it and refreshes its own sections at its close
+# OWNER TO-DO — LIVE · refreshed at the **S263 close** (the parent project), 17-Sep-2026 — the Sanjeevni sections as S262 left them, with one ordering ruling added
 
-*Detail: `START_HERE_SESSION_264.md` (clone) · `S261_BUILD_BRIEF.md` (parent) · `S262_BUILD_BRIEF.md` (Sanjeevni).*
+*Detail: `START_HERE_SESSION_265.md` (clone) · `S263_BUILD_BRIEF.md` (parent) · `S262_BUILD_BRIEF.md` (Sanjeevni).*
 *Everything else this session wrote is evidence and is on the shelf:*
 
 ```
 D:\Downloads\_kbtools\PAPERS.bat
 ```
 
-## 🔗 WHERE SESSION 261 LIVES — for a fresh chat
+## 🔗 WHERE SESSION 263 LIVES — for a fresh chat
 
-Session 261 ran in **one Cowork chat** (17-Sep 06:38 → close) alongside the Sanjeevni project's first
-session (S262) — name it **"S261 — the 35 moved out (D528 part 2); the pharmacy PC share restored; F-506"**.
+Session 263 ran in **one Cowork chat** (17-Sep 07:42 → close) beside the Sanjeevni project's S262 close —
+name it **"S263 — job pulse three words; asset register backup to Google Drive; System Board"**.
 
 ## 📋 READ THE BOARD BEFORE THIS LIST
 
-Your System Board is the first tile on your portal. You write on it; I read it at the start of every
-session. No new notes were on it at S261; both projects' sessions write their status there.
+Your **System Board** is the first tile on your portal — renamed at S263, one board for the clinic and the
+pharmacy (D533). You write on it; every session reads it first; **every close now refreshes its page** so it
+never again announces work already done. No new notes were on it at S263.
 
 ## ⭐ YOUR RULING OF 17-Sep — this list is DEFERRED
 
@@ -26,16 +27,17 @@ below is chased. **Only one line is marked urgent, and it is a thing to know, no
 
 ## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (clinic core)
 
-**1 · THE PUBLISH — one double-click, when convenient.** It carries the S261 canon (Fault Register v2.85,
-Archive v1.98, Register v5.101, runbook v182, START_HERE_263, the brief, pins, the manifest,
-`MD5SUMS_ALL.txt`, `KIT_ID.txt`, and the tool fix `S281_PAPERS_SORT` — already applied on this PC,
-nothing to run). Nothing on the VPS changes.
+**1 · THE PUBLISH — one double-click, when convenient.** It carries the S263 canon (Fault Register v2.88,
+Archive v1.101, Register v5.103, runbook v184, START_HERE_265, the close routine v15, the brief, the close
+report, pins, the manifest, `MD5SUMS_ALL.txt`). **Nothing on the VPS changes** — all three of today's kits are
+already installed.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · AFTER THE PUBLISH — one line on the VPS, so its clone carries the close (F-240 / F-464):**
+**2 · AFTER THE PUBLISH — one line on the VPS, so its clone carries the close (F-240 / F-464).** Not urgent;
+it also rides the next kit's install line.
 
 ```
 git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main
@@ -67,7 +69,9 @@ rm -rf /root/_retired/S243_2026-09-13_0007
 · four values into Bitwarden (D428) · call recordings copy · Parvesh's exit date · the `.bak_*` files to
 keep (`finance.db.bak_S265/S266` · `purchase_app.py.bak_S270/S271` · `code_bundle.py.bak_S273` · the
 four `/root/finance/*.bak_S274_*` · `portal.py.bak_S278` · `job_pulse.py.bak_S280` ·
-`crontab.bak_S279`) — keep until each has run a week or a month as its note says.
+`crontab.bak_S279` · **new at S263:** `job_pulse.py.bak_S283_917713f5` · `crontab.bak_S286` ·
+`/root/state_backup/assetapp_backup.py.bak_S287_9fdc66a3`) — keep until each has run a week or a month as its note says. **The arms
+licence is now its own line on your board.**
 
 **8 · WHAT NOTHING TOUCHES (yours to decide):** `D:\dr-manoj-git\_PHI_QUARANTINE_S202\` · `_S204_WORK\`
 · `patient_fp.env.BACKUP_KEEP_SAFE` (**keep**) · the SSD's cold kits (rule of 5) · on the VPS
@@ -75,7 +79,8 @@ four `/root/finance/*.bak_S274_*` · `portal.py.bak_S278` · `job_pulse.py.bak_S
 stale `/root/wa/.env.bak*` · the never-cited working papers · `KB_canon_all\MD5SUMS_ALL.txt.new`
 (F-490) — reported, not deleted · **the 84 loose files at `D:\Downloads\`** (up from 72 at S258:
 four cold-kit zips by rule E, the rest your own downloads — Docterz CSVs, follow-up audits, bank PDFs)
-and the 9 at `D:\dr-manoj-git\`.
+and the 9 at `D:\dr-manoj-git\` · **`D:\dr-manoj-git\_to_delete_S263\`** — two empty git lock files my shell left
+(F-511), with `WHY_SAFE.txt`; delete when convenient.
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — carried there since S261
 
@@ -127,11 +132,16 @@ August advances · the VINTAZ P 4500 INJ write-off tap · the wall card (F-310) 
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **D528 step 4** — the 75 evidence-only Sanjeevni papers out of this project, a batch at a time, each
-   behind its `MANIFEST.md5` row (rowed at S261).
-2. **F-498's second half** — an empty log and an old log are different facts.
+0. **At the next open (18-Sep):** hold today's three pins against the 01:35 bundle (`job_pulse.py` `5eae0eb7…`,
+   `assetapp_backup.py` `b816504c…`, S262's `purchase_app.py` `d1476f80…` and `amir_day.py` `b3c20319…`) and read
+   the first 02:30 line of `/root/backups/assetapp_backup.log` through the job pulse — expected OK with *drive
+   unchanged* unless the register changed.
+1. **D528 step 4** — **55** of the 75 evidence-only Sanjeevni papers left (20 out at S263, cold copy on F:), a
+   batch at a time, each read back and hashed first.
+2. ~~**F-498's second half**~~ — **DONE, S283, live 08:39.**
 3. **F-496** — the backup carries whether each job is switched on.
-4. **The asset-register nightly backup that names no log.**
+4. ~~**The asset-register nightly backup that names no log**~~ — **DONE, S286 (09:04) + S287 (10:00): verified,
+   logged, and to Google Drive (D532).**
 5. **D525's seven never-fired health checks + the UPI check** — the bundle should now carry
    `freshness_legs.json`.
 6. The portal tile caption — with the next portal change.
@@ -142,7 +152,8 @@ August advances · the VINTAZ P 4500 INJ write-off tap · the wall card (F-310) 
 ## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at S262
 
 1. **The first live look at S285** (the wrong-supplier warning on Amir's step 4, live 17-Sep ~07:55) once his export of the day has landed — the wording in his hands.
-2. **F-493** — the Sanjeevni Book §7.2 correction (Book v1.3) — stale 3, the first documentation job.
+2. **F-493** — the Sanjeevni Book §7.2 correction (Book v1.3) — stale 3, the first documentation job. **Ruled at
+   S263: the Book before the v1.1 prompt (item 6), because the map should describe a current Book.**
 3. **Teach the router your daily summary sale report** (the 16-Sep 23:55 refusal: its title row carries no date) so it files instead of refusing.
 4. **The item↔supplier check, second stage** — purchase returns under the wrong supplier; the same bill number under two suppliers on one day, on Amir's screen.
 5. **Darpan's day-close place in the portal** — waits on your three corrections, not on code.
@@ -164,6 +175,19 @@ Unchanged from S259 (D524 · D525 · D526 · D527 · F-493 and all earlier), plu
 - ⭐ **Your 17-Sep ruling — your list is deferred; only what turns urgent is named, with the reason.**
 
 ---
+
+## ✅ DONE AT THE S263 CLOSE — 17-Sep-2026 (the parent)
+
+- ~~**The S261/S262 publishes**~~ — **done by you** (`2214298` 08:38 · `4701361` 09:02 · `63d4735` 10:00), each read back.
+- ~~**F-498 — an empty log and an old log read as one fact**~~ — **S283_JOB_PULSE_EMPTY, installed by you 08:39.**
+- ~~**The asset-register backup that named no log**~~ — **S286_ASSETAPP_BACKUP, installed by you 09:04.**
+- ~~**Your direction: the asset backups off the server, to Google Drive**~~ — **S287_ASSETAPP_DRIVE, installed by
+  you 10:00; 204 MB on Drive, verified by Drive's md5; September kept forever; the server now keeps 3 days
+  (D532).**
+- ~~**The board still read as of 15-Sep and was titled for the pharmacy only**~~ — **renamed System Board and
+  refreshed; every close now keeps it current (D533).**
+- ~~The open-time rescue check~~ — 276 of 276 project documents have a copy on your PC; three found nowhere and rescued.
+- ~~D528 step 4, batch 1~~ — 20 of 75 papers out, proven by hash, cold copy on F:.
 
 ## ✅ DONE AT THE S262 CLOSE — 17-Sep-2026 (the Sanjeevni project)
 
