@@ -1,0 +1,9 @@
+KIT      : S309_FRESHNESS_DOCTERZ
+SESSION  : 267 (parent -- Systems & Automation)
+DATE     : 2026-09-17
+TARGET   : VPS -- the legs file the health collector reads (freshness.conf LEGS_FILE; normally /root/finance/freshness_legs.json, eaa97691 in the 17-Sep bundle)
+FROM     : leg "clinic day revenue ingest" max_age_h 200 + the hand-run note
+TO       : max_age_h 50 + a note that names the S238/S291 timer and the measured quiet spells
+DATA     : yes -- two strings in one leg; backup .bak_S309_<md5-8> beside the file; no code, no restart
+BUILDS   : F-517
+NUMBERS  : kit S309 (claimed on the System Board 22:41 IST; S309, S308 are the Sanjeevni chat's)
