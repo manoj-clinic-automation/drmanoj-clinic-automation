@@ -1,0 +1,10 @@
+KIT      : S308_PURSUE_EVIDENCE
+SESSION  : 266 (Sanjeevni -- Pharmacy & Marg), 17-Sep-2026, on the owner's "GO" (item: Darpan's help on the lines to pursue)
+DATE     : 2026-09-17
+TARGET   : VPS -- /root/finance/stock_app.py (patched on the box) · stock_hub.html (replaced whole)
+FROM     : stock_app.py b997aa355d4b56a0794534369e38385f (S304) · stock_hub.html 3f54859201892ec59dfc4455f07b330b (S304)
+TO       : stock_app.py a8f98cdae47bd23bef3ede5c5fd48d07 · stock_hub.html 936677b8d90a694ba26e9ac7b9de9732 (predicted; read back on install)
+CHANGES  : Step 8 ("Darpan: sold without a bill?") now carries, for every line the owner has marked to pursue: what sold in the 30 days before the count and on how many bills (returns netted off), when it last sold, what has sold since the count, when it was last bought, and the item's own open question for Marg's ledger. An item that never sells reads "NOT SOLD ONCE in the 30 days before the count -- a shortage here is not a counter sale". Worst first, ten on the page. Reads only: no table, no decision -- his answer is still evidence and the owner's tap still decides. clinic-finance restarted.
+BUILDS   : the Sanjeevni plan block 1 step 6 ("the system searches the sale lines for him; his answer is evidence, your tap decides") and the owner's "GO" of 17-Sep 22:39.
+NUMBERS  : kit S308 (claimed on the board at 22:39 after reading it). Next free: S309.
+PROJECT  : Sanjeevni
