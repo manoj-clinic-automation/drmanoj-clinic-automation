@@ -1,0 +1,9 @@
+KIT      : S292_DESK_PAIRS
+SESSION  : 264 (Sanjeevni -- Pharmacy & Marg), after its close, from the owner's screenshot of the desk
+DATE     : 2026-09-17
+TARGET   : VPS, /root/finance/stock_desk.html
+FROM     : 16b9a234b71150b19c8d2ef883eb5f08 (S288 pin, read back on the box at install)
+TO       : 6b6636bfbcec022169532042ba6b7d53 (predicted; read back on install)
+CHANGES  : four anchored edits + two helpers (pairBlock, pairLine) + one stylesheet rule in the page script. No server code. No restart. Nothing on manojz.
+BUILDS   : the "over" card lists each of ITS items with its own same-salt partner; a toggle shows all pairs one per line; a real-loss card names its partner ("a billing swap is the usual answer").
+NUMBERS  : kit S292 (claimed on the board 15:20; S289-S291 are S265's). Next free: S293.

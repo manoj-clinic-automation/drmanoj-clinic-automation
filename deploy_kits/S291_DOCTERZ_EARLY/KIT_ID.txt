@@ -1,0 +1,8 @@
+KIT      : S291_DOCTERZ_EARLY
+SESSION  : 265 (parent -- Systems & Automation)
+DATE     : 2026-09-17
+TARGET   : VPS -- root's crontab only (the four S238_DOCTERZ_SCHEDULE lines -> one S291 line, same command)
+FROM     : S238 schedule 09:30-12:00 every 10 min + 13:40 + 19:40 (read from the 17-Sep bundle's crontab capture)
+TO       : */10 * * * * (all day); backup /root/finance/crontab.bak_S291; undo = crontab /root/finance/crontab.bak_S291
+BUILDS   : the owner's 17-Sep ask -- the Docterz figures early. Found: the auto-pickup already puts the day sheet on Drive at night or at boot; only the reader's clock was late.
+NUMBERS  : kit S291 (claimed on the System Board by S265).

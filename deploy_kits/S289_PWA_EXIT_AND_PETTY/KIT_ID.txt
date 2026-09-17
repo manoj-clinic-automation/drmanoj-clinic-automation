@@ -1,0 +1,9 @@
+KIT      : S289_PWA_EXIT_AND_PETTY
+SESSION  : 265 (parent -- Systems & Automation)
+DATE     : 2026-09-17
+TARGET   : VPS -- /root/staff_register/staff_register.py · /root/att_month_report.py · /root/finance/finance_app.py (patched on the box) · /root/finance/petty_book.py (NEW) · /root/portal/portal.py · /root/portal/tile_grants.json
+FROM     : b9a72d1a · 0184cb13 · a4201e9f · (none) · 4974209b · 2eb2f271 (each the S264-close live pin, held against the 17-Sep 01:35 bundle bytes)
+TO       : 13a26205 · ce72c323 · ac61df70 · 53f7e65d · afb415b8 · 23dba543 (predicted; read back on install)
+DATA     : business_unit 'petty' + unit_role petty/bhati maker, manoj+bhawna checker, shavez+shivani+alisha viewer (INSERT OR IGNORE)
+BUILDS   : the owner's 17-Sep rulings -- staff "Mark my exit"; Manoj Bhati's petty book (availability, diaries, renovation, Rahul monthly, loan, physio tick) + the doctors' check page; reception's one line
+NUMBERS  : kit S289 (claimed on the System Board 15:00 IST; S288 was the Sanjeevni chat's). S290/S291 reserved (bank SMS, Docterz pickup).
