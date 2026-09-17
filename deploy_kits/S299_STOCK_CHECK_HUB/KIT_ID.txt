@@ -1,0 +1,11 @@
+KIT      : S299_STOCK_CHECK_HUB
+SESSION  : 266 (Sanjeevni -- Pharmacy & Marg), 17-Sep-2026, on the owner's "go" for the two fixes to the held S297
+DATE     : 2026-09-17
+TARGET   : VPS -- /root/finance/stock_app.py · pad_receipt.py · stock_desk.html · stock_amir.html (patched on the box) · stock_hub.html (NEW) · /root/portal/portal.py (patched on the box)
+FROM     : stock_app.py bb7df8d78b0f1ff8cfd86a5c260f301c (S294) · pad_receipt.py 239a81fb7f637663092424c20974ca01 (S294) · stock_desk.html aac7f96c73f879dba557310d207d064f (S294) · stock_amir.html 32aa7d45fc93f19d4526a5bca3a3743a (S293) · portal.py c14c2c649e0405378abcd95d8749c666 (S295)
+TO       : stock_app.py 75ffe86168e94c98fd1d724d0226a373 · pad_receipt.py f06daf1621b025557b648378398c6c83 · stock_desk.html 485720fd2bb75ba8669b11d3dff4c0d1 · stock_amir.html 3181d9de5133afd51fe46dd2f61e9133 · stock_hub.html d0bec54f682cbe41c5bec70b30bbefb9 · portal.py e13adbd65d82ba9015fcbb1b24d832c3 (predicted; read back on install)
+CHANGES  : Everything S297 did (the Stock Check tile opens /finance/stock/page/hub, every step in order; Try to match in the 09-Sep workbook columns with Yes / No; Darpan's list waits for every answer, shortages only, Qty in Marg | Physical <day> | Difference), plus the owner's two fixes: (a) step 4 "Darpan's answers typed -- by Amir or by you" with the button, Amir's board opens at the typing card; (b) every confirmed swap is STOCK ISSUE on the short item and STOCK RECEIVE on the extra item for the swapped quantity, reason "swap confirmed", at once -- on Amir's board (first block), the Marg cleanup Excel (VOUCHER column, swap rows first, a decided remainder from Marg-after-swap to the shelf, never CHANGE 0) and the hub's step 6. The orthotics cleanup sheet no longer tells Amir to swap figures himself. clinic-finance and clinic-portal restarted.
+SUPERSEDES: S297_STOCK_CHECK_HUB (built 17-Sep, held, never published; D:\dr-manoj-git\_to_delete\S297_STOCK_CHECK_HUB_held_17Sep). Fresh number under F-512.
+BUILDS   : the owner, 17-Sep evening: "I type Darpan's answers too" and "every confirmed swap must become Marg vouchers straight away ... a swap only reduces the loss burden and sanitises the physical stock; Marg must still be corrected to the shelf."
+NUMBERS  : kit S299 (claimed on the board). Next free: S300.
+PROJECT  : Sanjeevni

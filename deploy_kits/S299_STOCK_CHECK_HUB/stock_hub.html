@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock check</title>
+<style>
+/* S299 THE STOCK CHECK HUB -- the owner, 17-Sep-2026: "that is the proper place for it, not
+   these fragmented and hidden URLs. Make a stock check tile and populate the entire flow
+   there." One count, every step in the order it happens, where each stands, and the one
+   door that does it. The swaps sit in the 09-Sep workbook's own TRY TO MATCH layout.
+   English (the owner's page); the same tokens as the desk and the loss desk; both schemes. */
+:root{
+  --ground:#F6F8F7;--surface:#FFF;--surface-2:#EDF2F0;--ink:#15201E;--ink-2:#3D4B48;--muted:#66756F;--line:#D9E2DF;
+  --accent:#0E5C58;--on-accent:#FFF;--accent-soft:#D8E9E6;--ok:#0E5C58;--diff:#8C3A2B;--diff-soft:#F6E3DF;--warn:#8A5A12;--warn-soft:#F7ECD8;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}}
+:root[data-theme="dark"]{
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 16px 48px}
+h1{font-size:21px;margin:0}.sub{color:var(--muted);font-size:13.5px}
+.facts{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0 4px;font-size:14.5px;color:var(--ink-2)}
+.facts b{color:var(--ink)}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+a.b,button.b{display:inline-block;font:inherit;font-size:14.5px;font-weight:700;padding:9px 13px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-decoration:none;min-height:42px}
+a.b.main,button.b.main{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+button.b:disabled{opacity:.5;cursor:default}
+a.b:focus-visible,button.b:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px}
+.tbl{overflow-x:auto}
+.step .n{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;border:2px solid var(--line);color:var(--muted);background:var(--surface)}
+.step.now{border-color:var(--accent);box-shadow:0 8px 24px -18px rgba(0,0,0,.35)}
+.step.now .n{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.step.done .n{background:var(--accent-soft);border-color:var(--accent-soft);color:var(--ok)}
+.step.wait{opacity:.82}
+.step h2{font-size:17px;margin:3px 0 2px}
+.step .state{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:2px;border:1px solid var(--line);color:var(--muted)}
+.step.now .state{border-color:var(--accent);color:var(--accent)}
+.step.done .state{color:var(--ok)}
+.lead{font-size:14px;color:var(--ink-2);margin:2px 0 8px}
+.hold{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:9px 11px;font-size:14px;font-weight:600;margin:6px 0}
+.bridge{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0 12px}
+.bridge div{background:var(--surface-2);border-radius:10px;padding:8px 10px}
+.bridge .k{font-size:12px;color:var(--muted)}.bridge .v{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
+.sect{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+table.m{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed}
+table.m th{text-align:left;font-size:12px;color:var(--muted);font-weight:700;padding:6px 6px;border-bottom:1.5px solid var(--line);vertical-align:bottom}
+table.m td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+table.m td.num,table.m th.num{text-align:right;font-variant-numeric:tabular-nums}
+table.m th{overflow-wrap:break-word}
+table.m td.it{font-weight:700}
+table.m tr.yes td{background:var(--accent-soft)}
+table.m tr.no td{color:var(--muted)}
+.ans{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ans button.b{padding:6px 12px;min-height:36px;font-size:14px}
+.ans .said{font-weight:700}.ans .said.yes{color:var(--ok)}
+.ans a.chg{font-size:13px;color:var(--muted);cursor:pointer;text-decoration:underline}
+.tot td{font-weight:700;border-bottom:0}
+.tr{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14.5px;flex-wrap:wrap}
+.tr .st{font-size:13px;color:var(--muted)}
+.tr .btns{display:flex;gap:6px;flex-wrap:wrap}
+.figs{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14.5px;margin:4px 0 8px}
+.figs b{font-variant-numeric:tabular-nums}
+.none{color:var(--muted);font-style:italic;font-size:14px;padding:4px 0}
+.msg{display:block;font-size:13.5px;color:var(--accent);margin-top:6px;min-height:18px}
+.msg.bad{color:var(--diff);font-weight:700}
+.foot{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
+.err{color:var(--diff);font-weight:700}
+/* the TRY TO MATCH table folds into one card per pair on a phone */
+@media (max-width:760px){
+  .bridge{grid-template-columns:1fr}
+  table.m thead{display:none}
+  table.m,table.m tbody,table.m tr,table.m td{display:block;width:100%}
+  table.m tr{border:1px solid var(--line);border-radius:12px;margin:8px 0;padding:6px 10px}
+  table.m td{border:0;padding:3px 0;text-align:left!important}
+  table.m td[data-l]::before{content:attr(data-l);display:block;font-size:11.5px;color:var(--muted);font-weight:600}
+  table.m tr.tot{border-style:dashed}
+}
+</style></head><body><div class="wrap">
+<div><h1>Stock check</h1><div class="sub" id="who"></div></div>
+<div id="body"><div class="facts">Loading…</div></div>
+<div class="foot" id="foot"></div>
+</div>
+<script>
+/*__BOOT__*/
+const BASE="/finance/stock";
+const B=window.BOOT||{count_id:0,user:""};
+let D=null, BUSY=false;
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+const STATE={done:"done",now:"now",wait:"waiting"};
+
+function load(){
+  fetch(BASE+"/api/pad/hub/"+B.count_id).then(r=>r.json()).then(j=>{
+    if(!j.ok){ document.getElementById("body").innerHTML='<div class="facts err">'+esc(j.message||"Could not read the count.")+'</div>'; return; }
+    D=j; render();
+  }).catch(()=>{ document.getElementById("body").innerHTML='<div class="facts err">The server did not answer. Pull down to try again.</div>'; });
+}
+
+function step(n, st, title, status, body){
+  return '<section class="step '+st+'" id="step'+n+'"><div class="n">'+(st==="done"?"✓":n)+'</div><div><h2>'+esc(title)+'<span class="state">'+STATE[st]+'</span></h2>'
+    +(status?'<div class="lead">'+status+'</div>':'')+(body||'')+'</div></section>';
+}
+
+function matchTable(rows, kind){
+  const rs=rows.filter(r=>r.kind===kind); if(!rs.length) return '<div class="none">No pair proposed.</div>';
+  const units=rs.reduce((a,r)=>a+(r.qty||0),0);
+  return '<div class="tbl"><table class="m"><colgroup><col style="width:12%"><col style="width:17%"><col style="width:17%"><col style="width:9%"><col style="width:9%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:11%"></colgroup><thead><tr><th>Family</th><th>Item that is SHORT</th><th>Item that is EXTRA</th><th class="num">Qty</th>'
+    +'<th class="num">Rate of the item that left</th><th class="num">Rate of the item billed</th><th class="num">Difference per '+(kind==="med"?"pack":"unit")+'</th><th>How close</th><th>Confirmed? (yes / no)</th></tr></thead><tbody>'
+    +rs.map(r=>{
+      const k=esc(JSON.stringify([r.short,r.over]));
+      let a;
+      if(r.answer) a='<span class="said '+(r.answer==="YES"?"yes":"")+'">'+(r.answer==="YES"?"Yes — a swap":"No — not a swap")+'</span> <a class="chg" data-ans="OPEN" data-k="'+k+'">change</a>';
+      else if(r.by_words) a='<span class="said">decided on the desk</span>';
+      else a='<button class="b main" data-ans="YES" data-k="'+k+'">Yes</button><button class="b" data-ans="NO" data-k="'+k+'">No</button>';
+      return '<tr class="'+(r.answer==="YES"?"yes":(r.answer==="NO"?"no":""))+'"><td data-l="Family">'+esc(r.family)+'</td>'
+        +'<td class="it" data-l="Item that is SHORT">'+esc(r.short)+'</td><td class="it" data-l="Item that is EXTRA">'+esc(r.over)+'</td>'
+        +'<td class="num" data-l="Qty">'+esc(r.qty_text)+'</td>'
+        +'<td class="num" data-l="Rate of the item that left">'+esc(r.rate_left||"not priced")+'</td>'
+        +'<td class="num" data-l="Rate of the item billed">'+esc(r.rate_billed||"not priced")+'</td>'
+        +'<td class="num" data-l="Difference per '+(kind==="med"?"pack":"unit")+'">'+esc(r.gap||"—")+'</td>'
+        +'<td data-l="How close">'+esc(r.close)+'</td><td data-l="Confirmed? (yes / no)"><div class="ans">'+a+'</div></td></tr>';
+    }).join("")
+    +(kind==="ortho"?'<tr class="tot"><td colspan="3">Units a swap would explain</td><td class="num">'+units+'</td><td colspan="5"></td></tr>':'')
+    +'</tbody></table></div>';
+}
+
+function render(){
+  const d=D, L=d.links, M=d.match, T=d.lists, W=d.words, V=d.vouchers;
+  document.getElementById("who").textContent="Count #"+d.count_id+" of "+(d.day||"");
+  let h='<div class="facts">Counted on <b>'+esc(d.day)+'</b> by <b>'+esc(d.counted_by||"-")+'</b>, entered by <b>'+esc(d.entered_by||"-")+'</b>, against the Marg stock export as on <b>'+esc(d.as_on)+'</b> (bills to '+esc(d.bill_no||"-")+' of '+esc(d.bill_date||"-")+'). '
+    +'<b>'+d.counted+'</b> counted · <b>'+d.agreed+'</b> agree · <b>'+d.differed+'</b> differ'+(d.not_counted?' · '+d.not_counted+' not counted':'')+'. '+(d.seal_ok?'Sealed, never edited.':'<span class="err">The seal does not read back.</span>')
+    +'<div class="links"><a class="b" href="'+esc(L.report)+'">The count — full report</a><a class="b" href="'+esc(L.diffs_pdf)+'" target="_blank" rel="noopener">All differences (PDF, your copy)</a></div></div>';
+
+  // 1 -- the count
+  h+=step(1,"done","The count of "+(d.day||""),"Darpan counted, Amir entered, the count was sealed. Everything below is a layer on it — nothing changes the count itself.","");
+
+  // 2 -- try to match
+  const b2='<div class="bridge"><div><div class="k">Short at the count</div><div class="v">'+esc(M.short_count_day)+'</div></div>'
+    +'<div><div class="k">Taken out by confirmed swaps</div><div class="v">'+esc(M.taken_out)+'</div></div>'
+    +'<div><div class="k">Still short</div><div class="v">'+esc(M.still_short)+'</div></div></div>'
+    +(M.unpriced?'<div class="sub">'+M.unpriced+' short line'+(M.unpriced===1?' is':'s are')+' not priced and sit outside these figures.</div>':'')
+    +'<div class="sect">Orthotics — by product, then the nearest size</div>'+matchTable(M.rows,"ortho")
+    +'<div class="sect">Medicines — the same salt in Marg</div>'+matchTable(M.rows,"med")
+    +'<span class="msg" id="mmsg"></span><div class="links"><a class="b" href="'+esc(L.match_xlsx)+'">Try to match (Excel)</a></div>';
+  h+=step(2,M.state,"Try to match — was the wrong item billed?",
+    (M.total?('<b>'+M.answered+' of '+M.total+'</b> pairs answered'+(M.yes?' · '+M.yes+' confirmed as swaps':'')+(M.no?' · '+M.no+' not':'')+'. ')
+      :'No pair to answer. ')
+    +'Where one item is short and its near neighbour is extra, one item probably left the shelf and the other was billed. A pairing is a suggestion until you say Yes. A Yes takes the units off both lines (the rest stays short) and puts both on the Marg vouchers at once — step 6.',b2);
+
+  // 3 -- Darpan's list
+  const open=k=>(T.tranches||[]).filter(t=>t.kind===k&&!t.returned_at);
+  let b3=(T.hold?'<div class="hold">'+esc(T.hold)+'</div>':'');
+  b3+=(T.tranches||[]).length?(T.tranches.map(t=>'<div class="tr"><div><b>List '+t.no+' — '+(t.kind==="ortho"?"orthotics":"medicines")+'</b> · '+t.items.length+' items<div class="st">given '+esc(t.issued_text)+(t.returned_at?' · back '+esc(t.returned_text):' · with Darpan')+'</div></div>'
+      +'<div class="btns"><a class="b" href="'+esc(t.pdf)+'" target="_blank" rel="noopener">Print</a>'+(t.returned_at?'':'<button class="b main" data-ret="'+t.id+'">He returned it</button>')+'</div></div>').join("")):'<div class="none">No list cut yet.</div>';
+  if(!T.hold){
+    b3+='<div class="links">'+(open("med").length?'':'<button class="b main" data-next="med"'+(T.pool.med?'':' disabled')+'>Cut the next medicines list ('+T.pool.med+' left)</button>')
+      +(open("ortho").length?'':'<button class="b" data-next="ortho"'+(T.pool.ortho?'':' disabled')+'>Cut the next orthotics list ('+T.pool.ortho+' left)</button>')+'</div>';
+  }
+  b3+='<span class="msg" id="tmsg"></span>';
+  h+=step(3,T.state,"Darpan's list — the reason for each shortage",
+    'Ten lines at a time: item, Qty in Marg, Physical on '+esc(d.day)+', the difference. He writes a reason number and remarks; he does not count again. Never on it: consumables, lines you have decided or parked, lines below zero in Marg.',b3);
+
+  // 4 -- Darpan's answers typed, by Amir or by you (S299)
+  const A=d.answers;
+  h+=step(4,A.state,"Darpan's answers typed — by Amir or by you",
+    (A.returned?('<b>'+A.returned+'</b> list'+(A.returned===1?'':'s')+' back · <b>'+A.typed+' of '+A.items+'</b> answers typed. '):'Nothing to type until a list comes back. ')
+    +'Either of you can type them: the reason number and his remarks against each item.',
+    '<div class="links"><a class="b main" href="'+esc(L.amir)+'#answers">Type Darpan\'s answers</a><a class="b" href="'+esc(L.amir)+'">Amir\'s board</a></div>');
+
+  // 5 -- your word
+  h+=step(5,W.state,"Your word on each line — and the loss",
+    'Per line: explained · write off · pursue · parked. The loss is what you write off and what you pursue.',
+    '<div class="figs"><span>Written off <b>'+W.written_off+'</b> · '+esc(W.written_off_rs||"Rs 0")+'</span><span>To pursue <b>'+W.pursue+'</b> · '+esc(W.pursue_rs||"Rs 0")+'</span><span>Parked <b>'+W.parked+'</b></span><span>Explained <b>'+W.explained+'</b></span><span>Still open <b>'+W.open+'</b> · '+esc(W.open_rs||"Rs 0")+'</span></div>'
+    +'<div class="links"><a class="b main" href="'+esc(L.desk)+'">Decision desk</a><a class="b" href="'+esc(L.loss)+'">Loss desk</a></div>');
+
+  // 6 -- vouchers
+  h+=step(6,V.state,"Put it back into Marg — the vouchers",
+    ((V.swap_issue||V.swap_receive)?('Confirmed swaps, to key now: <b>'+V.swap_issue+'</b> STOCK ISSUE on the short item'+(V.swap_issue===1?'':'s')+' and <b>'+V.swap_receive+'</b> STOCK RECEIVE on the extra item'+(V.swap_receive===1?'':'s')+' ('+V.swap_units+' unit'+(V.swap_units===1?'':'s')+'). A swap takes the loss off; Marg must still be brought to the shelf. '):'No confirmed swap yet. ')
+    +'<b>'+V.issue+'</b> line'+(V.issue===1?'':'s')+' to reduce (written off) · <b>'+V.fix+'</b> to correct (explained, Marg fixes). Amir keys them as stock issue and stock receive vouchers.',
+    '<div class="links"><a class="b" href="'+esc(L.amir)+'">Amir\'s board</a><a class="b" href="'+esc(L.cleanup)+'">Marg cleanup list (Excel)</a><a class="b" href="'+esc(L.ortho)+'">Orthotics cleanup (Excel)</a></div>');
+
+  // 7 -- proof
+  h+=step(7,d.proof.state,"The proof — Marg agrees with the shelf",
+    'The next Marg stock export after the vouchers must read shelf plus movement. Then count #'+d.count_id+' closes.',
+    '<div class="links"><a class="b" href="'+esc(L.drift)+'">Marg against our figures</a></div>');
+
+  // 8 -- pursue
+  h+=step(8,d.pursue.state,"Darpan: sold without a bill?",
+    d.pursue.lines?('<b>'+d.pursue.lines+'</b> line'+(d.pursue.lines===1?'':'s')+' you chose to pursue. His answer is evidence; your tap decides.'):'Only the lines you mark to pursue come here.',
+    '<div class="links"><a class="b" href="'+esc(L.loss)+'">Loss desk</a></div>');
+
+  document.getElementById("body").innerHTML=h;
+  document.getElementById("foot").innerHTML='<a class="b" href="'+esc(L.count)+'">Start a new count</a>';
+}
+
+async function post(url, body){
+  const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})}).catch(()=>null);
+  return r?await r.json().catch(()=>null):null;
+}
+function say(id, j){ const el=document.getElementById(id); if(!el) return; el.className="msg"+(j&&j.ok?"":" bad"); el.textContent=(j&&j.message)||"The server did not answer."; }
+
+document.addEventListener("click", async e=>{
+  const t=e.target;
+  const an=t.closest("[data-ans]");
+  if(an && !BUSY){ BUSY=true; const k=JSON.parse(an.getAttribute("data-k"));
+    const j=await post(BASE+"/api/pad/match/"+D.count_id,{short:k[0],over:k[1],answer:an.getAttribute("data-ans")}); BUSY=false;
+    if(j&&j.ok){ const y=window.scrollY; D=null; fetch(BASE+"/api/pad/hub/"+B.count_id).then(r=>r.json()).then(x=>{ if(x.ok){D=x; render(); window.scrollTo(0,y); say("mmsg", j);} }); }
+    else say("mmsg", j);
+    return; }
+  const nx=t.closest("button[data-next]");
+  if(nx && !BUSY){ BUSY=true; document.getElementById("tmsg").textContent="Cutting…";
+    const j=await post(BASE+"/api/pad/tranche/"+D.count_id+"/next",{kind:nx.getAttribute("data-next")}); BUSY=false;
+    say("tmsg", j); if(j&&j.ok){ setTimeout(load, 700); } return; }
+  const rt=t.closest("button[data-ret]");
+  if(rt && !BUSY){ BUSY=true;
+    const j=await post(BASE+"/api/pad/tranche/"+D.count_id+"/"+rt.getAttribute("data-ret")+"/returned",{}); BUSY=false;
+    if(j&&j.ok){ load(); } else { say("tmsg", j); } return; }
+});
+load();
+</script></body></html>
