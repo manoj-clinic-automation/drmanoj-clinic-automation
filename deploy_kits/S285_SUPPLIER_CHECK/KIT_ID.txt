@@ -1,0 +1,9 @@
+KIT      : S285_SUPPLIER_CHECK
+SESSION  : 262 (Sanjeevni -- Pharmacy & Marg)
+DATE     : 2026-09-17
+TARGET   : VPS, /root/finance/amir_day.py
+FROM     : a9f2062267ebac59e02fdb0f88e775de (S246 pin, held against the 17-Sep bundle)
+TO       : b3c20319c4808ebc64bec197c951468c (predicted; read back on install)
+CHANGES  : five anchored edits + one helper. Reason "supplier" (not a claim). No table. No setting. Nothing on manojz.
+BUILDS   : the owner's 17-Sep ask -- a wrong supplier on a purchase bill flagged on Amir's step 4, corrected in Marg, clears itself.
+NUMBERS  : kit S285 (next free after S281-S284, per the board). Next free: S286.
