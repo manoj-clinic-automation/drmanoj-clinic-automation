@@ -1,0 +1,10 @@
+KIT      : S301_MARG_VOUCHERS
+SESSION  : 266 (Sanjeevni -- Pharmacy & Marg), 17-Sep-2026, on the owner's "proceed" on the work list (item: vouchers Amir can key)
+DATE     : 2026-09-17
+TARGET   : VPS -- /root/finance/stock_app.py · stock_amir.html (patched on the box) · stock_hub.html (replaced whole)
+FROM     : stock_app.py 75ffe86168e94c98fd1d724d0226a373 (S299) · stock_amir.html 3181d9de5133afd51fe46dd2f61e9133 (S299) · stock_hub.html d0bec54f682cbe41c5bec70b30bbefb9 (S299)
+TO       : stock_app.py 5cc1328d9289ad8b1f662fe4d4e33ef4 · stock_amir.html 14024b8dfc64c76959ec12f43e0a4f88 · stock_hub.html a3bfab191fb7ac2f0dd02bf6852ae9bf (predicted; read back on install)
+CHANGES  : S235 T7 / D388. Everything on the Marg cleanup list (confirmed swaps, decided lines) becomes a round of STOCK ISSUE and STOCK RECEIVE vouchers of at most six lines (setting stock.voucher_lines), in the 09-Sep workbook's VOUCHER 1 - SHORT / VOUCHER 2 - EXCESS layout (one Excel per round). Each Marg voucher is recorded as entered with Marg's own voucher number (append-only, undo allowed; also written to stock_voucher). A round is frozen; what changes later (a remainder decided, an answer taken back) goes on the next round as the difference, a reversal included -- keyed in order, Marg ends where the lines say. Amir's board card 2: waiting lines, "Make the Marg vouchers", each voucher with "Entered in Marg"; the S299 lists kept underneath. Hub step 6: not yet on a voucher · vouchers entered · the button. New tables stock_voucher_line, stock_voucher_entered. clinic-finance restarted.
+BUILDS   : the owner's "proceed" (17-Sep evening) on the list: "vouchers Amir can key ... each voucher gets a done-in-Marg record, so a round closes on the server".
+NUMBERS  : kit S301 (claimed on the board; S300 is the parent's). Next free: S302.
+PROJECT  : Sanjeevni
