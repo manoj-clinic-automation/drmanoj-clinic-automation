@@ -1,0 +1,9 @@
+KIT      : S290_BANK_SMS
+SESSION  : 265 (parent -- Systems & Automation)
+DATE     : 2026-09-17
+TARGET   : VPS -- /root/finance/finance_app.py (patched on the box) · /root/finance/bank_sms.py (NEW) · /root/finance/bank_sms.key (NEW, 0600)
+FROM     : finance_app.py ac61df70 (the S289 read-back, 17-Sep)
+TO       : finance_app.py 8dc77ef4 · bank_sms.py 3a8f0a88 (predicted; read back on install)
+BUILDS   : the owner's 17-Sep ask -- the bank's morning settlement SMS from his phone (MacroDroid) to the server; the doctors' page shows SMS vs MPR per day and the phone setup with the key.
+PROVED   : on the owner's own log -- SMS on day D = MPR total of D-1 to the rupee, 23 of 23 days; the 9 raw texts he pasted parse to exactly those days and amounts (scratch only; no real figure in this kit).
+NUMBERS  : kit S290 (claimed on the System Board by S265).

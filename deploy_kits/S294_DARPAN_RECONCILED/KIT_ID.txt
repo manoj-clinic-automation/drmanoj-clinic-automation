@@ -1,0 +1,9 @@
+KIT      : S294_DARPAN_RECONCILED
+SESSION  : 264 (Sanjeevni -- Pharmacy & Marg), after its close, on the owner's ruling of 17-Sep
+DATE     : 2026-09-17
+TARGET   : VPS, /root/finance/stock_app.py, /root/finance/pad_receipt.py, /root/finance/stock_desk.html
+FROM     : stock_app.py 8615d64dbeda516e6efb6f025ec777b3 · pad_receipt.py a224e7b406dc2133048d9bff1523bc42 (S293) · stock_desk.html 6b6636bfbcec022169532042ba6b7d53 (S292)
+TO       : stock_app.py bb7df8d78b0f1ff8cfd86a5c260f301c · pad_receipt.py 239a81fb7f637663092424c20974ca01 · stock_desk.html aac7f96c73f879dba557310d207d064f (predicted; read back on install)
+CHANGES  : Darpan's list only after reconciliation -- none while a same-salt pair or orthotic swap family waits for the owner's word; then only open real-loss / cannot-be-real lines (no consumable, no parked or decided line, no Marg-negative line, no bill-check or surplus). List columns Shelf counted | Marg stock | Difference (bold); the paragraph is gone. Desk footer: "All differences -- your copy (not for Darpan)" + "Darpan's list -- cut and print it on the loss page". No table, no route, no data. clinic-finance restarted.
+BUILDS   : the owner's ruling: "only after our total reconciliation -- the stock they counted on that date, the Marg stock export on that date in adjacent columns, and the difference clearly marked."
+NUMBERS  : kit S294 (claimed on the board). Next free: S295.
