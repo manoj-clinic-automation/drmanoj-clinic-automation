@@ -1,22 +1,24 @@
-# OWNER TO-DO — LIVE · refreshed at the **S263 close** (the parent project), 17-Sep-2026 — the Sanjeevni sections as S262 left them, with one ordering ruling added
+# OWNER TO-DO — LIVE · refreshed at the **S264 close** (the Sanjeevni project), 17-Sep-2026 — the clinic sections as S263 left them; the Sanjeevni sections refreshed
 
-*Detail: `START_HERE_SESSION_265.md` (clone) · `S263_BUILD_BRIEF.md` (parent) · `S262_BUILD_BRIEF.md` (Sanjeevni).*
+*Detail: `START_HERE_SESSION_266.md` (clone) · `S263_BUILD_BRIEF.md` (parent) · `S264_BUILD_BRIEF.md` (Sanjeevni).*
 *Everything else this session wrote is evidence and is on the shelf:*
 
 ```
 D:\Downloads\_kbtools\PAPERS.bat
 ```
 
-## 🔗 WHERE SESSION 263 LIVES — for a fresh chat
+## 🔗 WHERE SESSIONS 263 AND 264 LIVE — for a fresh chat
 
-Session 263 ran in **one Cowork chat** (17-Sep 07:42 → close) beside the Sanjeevni project's S262 close —
-name it **"S263 — job pulse three words; asset register backup to Google Drive; System Board"**.
+Session 263 ran in **one Cowork chat** (17-Sep 07:42 → 11:08, the parent) — name it **"S263 — job pulse three
+words; asset register backup to Google Drive; System Board"**. Session 264 ran in **one Cowork chat** (17-Sep
+12:59 → close, the Sanjeevni project) — name it **"S264 — Book v1.3 (F-493); START_HERE v1.1 shared-systems
+map; F-513"**.
 
 ## 📋 READ THE BOARD BEFORE THIS LIST
 
 Your **System Board** is the first tile on your portal — renamed at S263, one board for the clinic and the
 pharmacy (D533). You write on it; every session reads it first; **every close now refreshes its page** so it
-never again announces work already done. No new notes were on it at S263.
+never again announces work already done. No new notes were on it at S263 or S264.
 
 ## ⭐ YOUR RULING OF 17-Sep — this list is DEFERRED
 
@@ -27,10 +29,10 @@ below is chased. **Only one line is marked urgent, and it is a thing to know, no
 
 ## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (clinic core)
 
-**1 · THE PUBLISH — one double-click, when convenient.** It carries the S263 canon (Fault Register v2.88,
-Archive v1.101, Register v5.103, runbook v184, START_HERE_265, the close routine v15, the brief, the close
-report, pins, the manifest, `MD5SUMS_ALL.txt`). **Nothing on the VPS changes** — all three of today's kits are
-already installed.
+**1 · THE PUBLISH — one double-click, when convenient.** It carries the S264 canon (Fault Register v2.89,
+Archive v1.102, Register v5.104, runbook v185, START_HERE_266, pins, the manifest, `MD5SUMS_ALL.txt`, this
+list, the Sanjeevni Book v1.3 and the v1.1 prompt). **Nothing on the VPS changes; no kit.** *(The S263 publish
+is done — `03f15b3`, 11:18.)*
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -82,7 +84,15 @@ four cold-kit zips by rule E, the rest your own downloads — Docterz CSVs, foll
 and the 9 at `D:\dr-manoj-git\` · **`D:\dr-manoj-git\_to_delete_S263\`** — two empty git lock files my shell left
 (F-511), with `WHY_SAFE.txt`; delete when convenient.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — carried there since S261
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at S264
+
+0 · **ONE PASTE, when convenient — the project's instructions, v1.1.** Open the Sanjeevni project's settings →
+custom instructions, and replace the whole text with this file's contents (it is v1 plus the map of what the
+two projects share). Until then the sessions read it from the project's knowledge and nothing breaks.
+
+```
+D:\Downloads\ClaudeCowork\05_DELIVERABLES\SANJEEVNI_PROJECT_STAGING\SANJEEVNI_START_HERE_PROMPT_v1_1.md
+```
 
 *(The 17-Sep stock export is settled: it was taken at 05:13, held back by a stale stored password on this
 PC after you changed the counter login, and went through at 06:50 once you refreshed it. Nothing lost.)*
@@ -149,15 +159,16 @@ August advances · the VINTAZ P 4500 INJ write-off tap · the wall card (F-310) 
 8. `freshness_legs.json` on the box differs from the Register (S262's pin check) — record the box's bytes
    at the next close that touches the VPS.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at S262
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at S264
 
 1. **The first live look at S285** (the wrong-supplier warning on Amir's step 4, live 17-Sep ~07:55) once his export of the day has landed — the wording in his hands.
-2. **F-493** — the Sanjeevni Book §7.2 correction (Book v1.3) — stale 3, the first documentation job. **Ruled at
-   S263: the Book before the v1.1 prompt (item 6), because the map should describe a current Book.**
+2. ~~**F-493** — the Sanjeevni Book §7.2 correction (Book v1.3)~~ — **DONE, S264: v1.3 in the project, on the shelf
+   and in canon; every stock figure now names its surface.** **New from it:** the shadow's last three runs read
+   `no pc figure` — read the cause on the 18-Sep database after the 06:51 catch-up (Book §7.2).
 3. **Teach the router your daily summary sale report** (the 16-Sep 23:55 refusal: its title row carries no date) so it files instead of refusing.
 4. **The item↔supplier check, second stage** — purchase returns under the wrong supplier; the same bill number under two suppliers on one day, on Amir's screen.
 5. **Darpan's day-close place in the portal** — waits on your three corrections, not on code.
-6. `SANJEEVNI_START_HERE_PROMPT_v1.1` — the shared-systems map; one more paste for you when ready.
+6. ~~`SANJEEVNI_START_HERE_PROMPT_v1.1` — the shared-systems map~~ — **DONE, S264; the paste is yours (⭐0 item 0).**
 7. The tidy-up chain: one store for sale lines → retire the senders on manojz → Sanjeevni in its own process (gated on `sh_run.differ = 0` for seven runs, F-493).
 8. **Parked at your word:** the per-person PWA banner.
 9. ~~**D524** — Shavez to maker on the cheque register~~ — **DONE, S284, live 17-Sep.** ~~**F-494** — ₹17,777 belonging to no vendor~~ — **DONE, S282, live 17-Sep.** ~~Which report the refused export was~~ — **your own daily summary sale report (your word).**
@@ -175,6 +186,14 @@ Unchanged from S259 (D524 · D525 · D526 · D527 · F-493 and all earlier), plu
 - ⭐ **Your 17-Sep ruling — your list is deferred; only what turns urgent is named, with the reason.**
 
 ---
+
+## ✅ DONE AT THE S264 CLOSE — 17-Sep-2026 (the Sanjeevni project)
+
+- ~~**The S263 publish**~~ — **done by you, 11:18** (`03f15b3`); gate 603/603 in the clone.
+- ~~**F-493 — the Book's §7.2 carried the hub card's number as the shadow's**~~ — **Book v1.3 written; the witness for retiring the manojz senders is the shadow alone.**
+- ~~**The map of shared systems**~~ — **`SANJEEVNI_START_HERE_PROMPT_v1_1` written and staged; one paste, yours.**
+- **F-513 found and closed in canon** — the item spine's Register pin had been a never-read-back prediction since 7-Sep; the live file is in the repository and the bundle after all; re-pinned. Nothing for you.
+- Book §11.4 item 3h (OFF switches) found done on all three machines since S274 — the row moved.
 
 ## ✅ DONE AT THE S263 CLOSE — 17-Sep-2026 (the parent)
 
