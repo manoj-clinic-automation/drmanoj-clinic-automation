@@ -1,0 +1,9 @@
+KIT      : S288_DESK_PARKED
+SESSION  : 264 (Sanjeevni -- Pharmacy & Marg), after its close, the owner at the desk
+DATE     : 2026-09-17
+TARGET   : VPS, /root/finance/stock_desk.html
+FROM     : 54aeda96ba022b30b21bdb9f77616a18 (S228 pin, = the 17-Sep bundle and the S228_LOSS_DESK kit copy)
+TO       : 16b9a234b71150b19c8d2ef883eb5f08 (predicted; read back on install)
+CHANGES  : three anchored edits + one click handler in the page script. No server code. No restart. Nothing on manojz.
+BUILDS   : "Kept elsewhere -- with me, not lost" (PARKED) on every real-loss card and lane row; the find box shows a word already given and offers Change this word (OPEN, then the card).
+NUMBERS  : kit S288 (claimed on the board 14:55). Next free: S289.
