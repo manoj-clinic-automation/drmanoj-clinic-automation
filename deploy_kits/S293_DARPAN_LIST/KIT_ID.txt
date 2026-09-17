@@ -1,0 +1,9 @@
+KIT      : S293_DARPAN_LIST
+SESSION  : 264 (Sanjeevni -- Pharmacy & Marg), after its close, on the owner's ruling of 17-Sep
+DATE     : 2026-09-17
+TARGET   : VPS, /root/finance/pad_receipt.py and /root/finance/stock_amir.html
+FROM     : pad_receipt.py 49ced28771a84f02f6276bbbe297443c · stock_amir.html adf206b54cc55e88626089a7f3482fd0 (both = their Register pins = the 17-Sep bundle)
+TO       : pad_receipt.py a224e7b406dc2133048d9bff1523bc42 · stock_amir.html 32aa7d45fc93f19d4526a5bca3a3743a (predicted; read back on install)
+CHANGES  : Darpan's paper list: columns Marg | Shelf | Difference (all count-day) + REASON no. + REMARKS; header WRITE THE REASON; "Do not count again"; surplus reads "over". Typing board label "Note". No table, no route, no data. clinic-finance restarted.
+BUILDS   : the owner's ruling: "the Marg 6-September stock and the physical counted stock against each other so that the actual deficit is visible -- don't take Marg stock of a later date."
+NUMBERS  : kit S293 (claimed on the board). Next free: S294.
