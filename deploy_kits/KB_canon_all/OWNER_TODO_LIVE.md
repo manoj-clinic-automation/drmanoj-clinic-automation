@@ -1,13 +1,16 @@
-# OWNER TO-DO — LIVE · refreshed at the **S264 close** (the Sanjeevni project), 17-Sep-2026 — the clinic sections as S263 left them; the Sanjeevni sections refreshed
+# OWNER TO-DO — LIVE · refreshed at the **S265 close** (the parent), 17-Sep-2026 — the clinic sections refreshed; the Sanjeevni sections as S264 left them (that chat's S288 · S292 · S293 · S294 live, S297 held — see the board)
 
-*Detail: `START_HERE_SESSION_266.md` (clone) · `S263_BUILD_BRIEF.md` (parent) · `S264_BUILD_BRIEF.md` (Sanjeevni).*
+*Detail: `START_HERE_SESSION_267.md` (clone) · `S265_BUILD_BRIEF.md` (parent) · `S264_BUILD_BRIEF.md` (Sanjeevni).*
 *Everything else this session wrote is evidence and is on the shelf:*
 
 ```
 D:\Downloads\_kbtools\PAPERS.bat
 ```
 
-## 🔗 WHERE SESSIONS 263 AND 264 LIVE — for a fresh chat
+## 🔗 WHERE SESSIONS 263, 264 AND 265 LIVE — for a fresh chat
+
+Session 265 ran in **one Cowork chat** (17-Sep 13:04 → close ~19:00, the parent) — name it **"S265 — bank SMS by MacroDroid; Docterz every 10 min; petty book; attendance tile for all staff; Pravesh exit (S298)"**.
+
 
 Session 263 ran in **one Cowork chat** (17-Sep 07:42 → 11:08, the parent) — name it **"S263 — job pulse three
 words; asset register backup to Google Drive; System Board"**. Session 264 ran in **one Cowork chat** (17-Sep
@@ -29,21 +32,13 @@ below is chased. **Only one line is marked urgent, and it is a thing to know, no
 
 ## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (clinic core)
 
-**1 · THE PUBLISH — one double-click, when convenient.** It carries the S264 canon (Fault Register v2.89,
-Archive v1.102, Register v5.104, runbook v185, START_HERE_266, pins, the manifest, `MD5SUMS_ALL.txt`, this
-list, the Sanjeevni Book v1.3 and the v1.1 prompt). **Nothing on the VPS changes; no kit.** *(The S263 publish
-is done — `03f15b3`, 11:18.)*
+**1 · THE PUBLISH — in the next chat, at your word.** It carries the S265 canon (Fault v2.90, Archive v1.103, Register v5.105, runbook v186, START_HERE_267, pins, the manifest, this list) and **`S298_PRAVESH_EXIT`**. *(The S264 publish is done — `de5e344`, 14:07; your kit publishes of the afternoon `23ab413` · `cf28eb2` · `f28493d` · `a7f232a` · `4df579b` · `326319c` all landed.)*
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · AFTER THE PUBLISH — one line on the VPS, so its clone carries the close (F-240 / F-464).** Not urgent;
-it also rides the next kit's install line.
-
-```
-git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo reset --hard origin/main
-```
+**2 · AFTER THE PUBLISH — one line on the VPS for Pravesh's exit (S298).** The next chat checks the publish landed first, then hands you the line. It also pulls the VPS clone (F-464).
 
 **3 · THE ₹650 FLAG, 12-Sep.** Reception answers, Shavez checks.
 
@@ -51,13 +46,13 @@ git -C /root/deploy/repo fetch --depth 1 origin main && git -C /root/deploy/repo
 https://followup.dr-manoj.in/finance/clinic/match/2026-09-12
 ```
 
-**4 · BHATI'S LOGIN** (user `bhati`, role `staff`) and **AMIR'S PASSWORD** (login `amir`).
+**4 · ~~BHATI'S LOGIN~~ (done by you, S265) · AMIR'S PASSWORD** (login `amir`) · **logins for Arjun and Ranjeet** when they get the app (their attendance page opens by first name — nothing else needed).
 
 ```
 https://followup.dr-manoj.in/portal/users
 ```
 
-**5 · KEYS TO ROTATE (F-456)** — including the two tokens in `clinic-finance.service` (F-465). Club C.4
+**5 · KEYS TO ROTATE (F-456)** — including the two tokens in `clinic-finance.service` (F-465), which the nightly code bundle also carries to Drive and your PC (F-518, masking is mine). Club C.4
 rides with it. Needs your credentials.
 
 **6 · AFTER A FULL CYCLE — one line, yours alone:**
@@ -68,11 +63,11 @@ rm -rf /root/_retired/S243_2026-09-13_0007
 
 **7 · CARRIED:** arms licence renews 27-Sep — **10 days, and nothing sends** · UptimeRobot watches the
 `.in` not the `.com` · Ms. Khushi Jain / MyOperator WABA token overlap · ICICI card ·9012 expiry (D436)
-· four values into Bitwarden (D428) · call recordings copy · Parvesh's exit date · the `.bak_*` files to
+· four values into Bitwarden (D428) · call recordings copy · ~~Parvesh's exit date~~ (31-Aug, S298) · **the Apps Script SMS log — retire after a week of clean MacroDroid data (D535)** · the `.bak_*` files to
 keep (`finance.db.bak_S265/S266` · `purchase_app.py.bak_S270/S271` · `code_bundle.py.bak_S273` · the
 four `/root/finance/*.bak_S274_*` · `portal.py.bak_S278` · `job_pulse.py.bak_S280` ·
 `crontab.bak_S279` · **new at S263:** `job_pulse.py.bak_S283_917713f5` · `crontab.bak_S286` ·
-`/root/state_backup/assetapp_backup.py.bak_S287_9fdc66a3`) — keep until each has run a week or a month as its note says. **The arms
+`/root/state_backup/assetapp_backup.py.bak_S287_9fdc66a3` · **new at S265:** `staff_register.py.bak_S289_*` · `att_month_report.py.bak_S289_*` · `finance_app.py.bak_S289_*`/`bak_S290_*` · `portal.py.bak_S289_*`/`bak_S295_*` · `crontab.bak_S291` · `crontab.bak_S295` · the S295 `.bak_S295_*` files · `staff_register.db.bak_S296_20260917_171307`) — keep until each has run a week or a month as its note says. **The arms
 licence is now its own line on your board.**
 
 **8 · WHAT NOTHING TOUCHES (yours to decide):** `D:\dr-manoj-git\_PHI_QUARANTINE_S202\` · `_S204_WORK\`
@@ -140,24 +135,18 @@ August advances · the VINTAZ P 4500 INJ write-off tap · the wall card (F-310) 
 
 ---
 
-## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
+## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT — refreshed at S265
 
-0. **At the next open (18-Sep):** hold today's three pins against the 01:35 bundle (`job_pulse.py` `5eae0eb7…`,
-   `assetapp_backup.py` `b816504c…`, S262's `purchase_app.py` `d1476f80…` and `amir_day.py` `b3c20319…`) and read
-   the first 02:30 line of `/root/backups/assetapp_backup.log` through the job pulse — expected OK with *drive
-   unchanged* unless the register changed.
-1. **D528 step 4** — **55** of the 75 evidence-only Sanjeevni papers left (20 out at S263, cold copy on F:), a
-   batch at a time, each read back and hashed first.
-2. ~~**F-498's second half**~~ — **DONE, S283, live 08:39.**
-3. **F-496** — the backup carries whether each job is switched on.
-4. ~~**The asset-register nightly backup that names no log**~~ — **DONE, S286 (09:04) + S287 (10:00): verified,
-   logged, and to Google Drive (D532).**
-5. **D525's seven never-fired health checks + the UPI check** — the bundle should now carry
-   `freshness_legs.json`.
-6. The portal tile caption — with the next portal change.
-7. The F-384 sweep of the manifest's historical blocks.
-8. `freshness_legs.json` on the box differs from the Register (S262's pin check) — record the box's bytes
-   at the next close that touches the VPS.
+0. **Your evening corrections (D540), first in the next chat, one kit:** the reason as tap choices · past days show absents and leaves, display only · *Mark overtime* with *Told Dr Bhawna* / *Told Dr Manoj* · *My month* removed (F-516).
+1. **At the next open (18-Sep):** hold the 18-Sep bundle against the S265 and Sanjeevni pins; the first 02:40 petty-backup line; the Docterz no-sheet memory; **10:00 — the first bank SMS against the MPR.**
+2. **F-519** — the August Lock Desk's two totals, read from the database before anything is said on money.
+3. **F-518** — mask token values in the code bundle · **F-517** — the Docterz health leg to 26 h.
+4. **D528 step 4** — 55 of the 75 evidence-only Sanjeevni papers left.
+5. **F-496** — the backup carries whether each job is switched on.
+6. **D525's seven never-fired health checks + the UPI check.**
+7. `END_OF_SESSION_PROMPT` v16 — D534 (the board's Sanjeevni plan every close), F-513's PENDING count, F-515's claim-first rule.
+8. The portal tile caption · the F-384 sweep · `freshness_legs.json` recorded from the box.
+9. ~~F-498's second half~~ (S283) · ~~the asset-register backup~~ (S286 + S287) · ~~Docterz early~~ (S291) · ~~bank SMS~~ (S290) · ~~petty book~~ (S289) · ~~attendance tile for all staff~~ (S295 + S296) — **done.**
 
 ## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at S264
 
@@ -186,6 +175,14 @@ Unchanged from S259 (D524 · D525 · D526 · D527 · F-493 and all earlier), plu
 - ⭐ **Your 17-Sep ruling — your list is deferred; only what turns urgent is named, with the reason.**
 
 ---
+
+## ✅ DONE AT THE S265 CLOSE — 17-Sep-2026 (the parent)
+
+- ~~**Docterz figures late on the server**~~ — **S291, every ten minutes all day** (D538); the two June files no longer fail (S295).
+- ~~**The bank's SMS only on your phone, the sheet missing days**~~ — **S290 + your MacroDroid macro, first post HTTP 200** (D535); the SMS figure on the morning match and Darpan's card (S295).
+- ~~**Late exits and Bhati's petty cash**~~ — **S289: Mark my exit; the petty book** (D536 · D537); **photos to Drive nightly** (S295).
+- ~~**The attendance tile for every staff member with the app**~~ — **S295 + S296: ten staff open their own page.**
+- **Pravesh's exit** — **S298 built** (F-514, D539); **waits for your publish.**
 
 ## ✅ DONE AT THE S264 CLOSE — 17-Sep-2026 (the Sanjeevni project)
 

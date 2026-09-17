@@ -1,0 +1,9 @@
+KIT      : S298_PRAVESH_EXIT
+SESSION  : 265 (parent -- Systems & Automation)
+DATE     : 2026-09-17
+TARGET   : VPS -- /root/finance/joiner_app.py · /root/staff_master.csv (one byte) · staff_register.db (one staff row + audit) · finance.db exit register (EXIT-2026-0001, emp_code 17)
+FROM     : joiner_app.py 3e213e4d (17-Sep bundle) · Pravesh active in staff master and register, code 17 not retired, exit 6/7
+TO       : joiner_app.py 6305b05d · Pravesh inactive from 31-Aug-2026 in both, code 17 retired, exit COMPLETE
+NEEDS    : August 2026 LOCKED in the staff register (refuses otherwise)
+BUILDS   : the owner's 17-Sep "parvesh quit ... confused midway" -- step 7 done, and its words fixed for the next leaver.
+NUMBERS  : kit S298 (claimed on the System Board by S265 at 17:30 IST; built as S297 before the Sanjeevni chat's S297 claim was seen, renumbered before any publish).
