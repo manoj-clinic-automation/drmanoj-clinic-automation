@@ -1,25 +1,25 @@
 KB_canon_all — the byte-authoritative copy of every manifest-pinned canonical row.
-Refreshed at the S260 CLOSE, 17-Sep-2026 (EOS-light; no live code; the publish OWED).
+Refreshed at the S261 CLOSE, 17-Sep-2026 (EOS-light; no live code; one kit S281 already applied; the publish OWED).
 
 CURRENT AT THIS CLOSE
-  Register        KB_Register_v5_100_S260close.md
-  History Archive KB_History_Archive_v1_97_S260close.md   (+5,640 -> 1,477,668; prefix proven)
-  Fault Register  Fault_Action_Register_v2_84.md          (v2.81 -> v2.82 -> v2.83 -> v2.84, each prefix proven; 665,936)
-  Runbook         HANDOFF_RUNBOOK_2026-09-17_Session260close_v181.md
-  Entry point     START_HERE_SESSION_261.md
-  Build brief     S260_BUILD_BRIEF.md
-  Close report    S260_CLOSE_REPORT.md
-  Split plan      S260_SPLIT_PLAN.md                      (D528: two projects, one canon)
-  Owner to-do     OWNER_TODO_LIVE.md                      (UN-MANIFESTED by design, A10; split into two lists)
-  Sanjeevni Book  SANJEEVNI_SYSTEM_BOOK_v1_2_S258.md      (UNCHANGED at S260; stale = 2 closes; moves to the Sanjeevni project)
+  Register        KB_Register_v5_101_S261close.md
+  History Archive KB_History_Archive_v1_98_S261close.md   (+5,263 -> 1,482,931; prefix proven)
+  Fault Register  Fault_Action_Register_v2_85.md          (F-506; prefix proven over v2.84; 667,919)
+  Runbook         HANDOFF_RUNBOOK_2026-09-17_Session261close_v182.md
+  Entry point     START_HERE_SESSION_263.md               (S262 is the Sanjeevni project's)
+  Build brief     S261_BUILD_BRIEF.md
+  Close report    S261_CLOSE_REPORT.md
+  Split plan      S260_SPLIT_PLAN.md                      (D528 part 2 EXECUTED at S261: the 35 moved; step 4 -- the 75 evidence papers -- over later closes)
+  Owner to-do     OWNER_TODO_LIVE.md                      (UN-MANIFESTED by design, A10; refreshed S261)
+  Sanjeevni Book  SANJEEVNI_SYSTEM_BOOK_v1_2_S258.md      (FROZEN ROW; the live document is the Sanjeevni project's since 17-Sep; stale = 3, owned there)
   Close-out       END_OF_SESSION_PROMPT_v14.md            (unchanged)
   Evergreen       START_HERE_PROMPT_v10.md                (pasted by the owner 17-Sep; supersedes v9)
   Paper policy    PAPER_POLICY_v1.md  (v1.1 -- binding on the assistant)
-  Live pins       live_pins_S260close.txt                 (385 rows; register_pin_verified: yes)
+  Live pins       live_pins_S261close.txt                 (385 rows; register_pin_verified: yes)
   Manifest        CANONICAL_MANIFEST.md                   (REPOSITORY ONLY since S260 -- no project-knowledge copy, D528)
 
 RESERVED, TAKE FROM HERE (F-463)
-  Next free: D529 . F-506 . A-D25 . kit S281 . Session 261
+  Next free: D529 . F-507 . A-D25 . kit S283 (S282 and S284 are the Sanjeevni project's, built at S262; S285 next after both) . Session 263
 
 STANDING WARNINGS CARRIED BY THIS FOLDER
   * Verify this folder's gate FROM INSIDE IT:  md5sum -c MD5SUMS_ALL.txt
@@ -30,7 +30,7 @@ STANDING WARNINGS CARRIED BY THIS FOLDER
     reporting all-OK while not checking it. 537 files stood against 535 rows. The gate is now
     owned nightly by canon_sums.py (S275) AND by the close before the publish (v14 A8b).
     ASK A GATE WHAT IT IS GUARDING, NOT JUST WHETHER IT PASSED.
-    At this close: 575 files, 575 rows, md5sum -c green from inside, zero files without a row.
+    At this close: see the line at the foot of this file (written after the sums, F-479).
   * F-490 (S258): MD5SUMS_ALL.txt.new in this folder is a 260-row HALF-WRITTEN temp file that
     is rowed as though it were a document. STILL PRESENT and still gated at S260 -- reported
     a third time rather than quietly deleted, because deleting in here is the owner's.
@@ -58,3 +58,7 @@ STANDING WARNINGS CARRIED BY THIS FOLDER
     ONE Fault Register / KB Register / Archive -- all in this folder; both projects read it
     from the clone. 110 documents staged as proven bytes in
     ClaudeCowork\05_DELIVERABLES\SANJEEVNI_PROJECT_STAGING\ (35 to the new project's knowledge).
+  * F-506 (S261): build_papers_index.py picked its newest Register by STRING sort and read v5.99
+    from v5.100 on. Fixed in S281_PAPERS_SORT (applied on manojz). SORT VERSIONS BY THE NUMBER.
+
+AT THE S261 CLOSE: 584 files, 584 rows, md5sum -c green from inside, zero files without a row.

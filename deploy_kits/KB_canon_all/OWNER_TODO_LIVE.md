@@ -1,22 +1,21 @@
-# OWNER TO-DO — LIVE · refreshed at the **S260 close**, 17-Sep-2026
+# OWNER TO-DO — LIVE · refreshed at the **S261 close**, 17-Sep-2026
 
-*Detail: `claude/START_HERE_SESSION_261.md` · `claude/S260_BUILD_BRIEF.md` · `claude/S260_SPLIT_PLAN.md`.*
+*Detail: `claude/START_HERE_SESSION_263.md` · `claude/S261_BUILD_BRIEF.md`.*
 *Everything else this session wrote is evidence and is on the shelf:*
 
 ```
 D:\Downloads\_kbtools\PAPERS.bat
 ```
 
-## 🔗 WHERE SESSION 260 LIVES — for a fresh chat
+## 🔗 WHERE SESSION 261 LIVES — for a fresh chat
 
-Session 260 ran in **one Cowork chat in two sittings** (15-Sep 18:00 → 19:35 IST, paused at your usage
-limit; 17-Sep 04:30 → 06:30 IST) — name it **"S260 — the store with the cap held the only copy; 180
-rescued; the split (D528)"**.
+Session 261 ran in **one Cowork chat** (17-Sep 06:38 → close) alongside the Sanjeevni project's first
+session (S262) — name it **"S261 — the 35 moved out (D528 part 2); the pharmacy PC share restored; F-506"**.
 
 ## 📋 READ THE BOARD BEFORE THIS LIST
 
 Your System Board is the first tile on your portal. You write on it; I read it at the start of every
-session. No new notes were on it at S260.
+session. No new notes were on it at S261; both projects' sessions write their status there.
 
 ## ⭐ YOUR RULING OF 17-Sep — this list is DEFERRED
 
@@ -27,9 +26,10 @@ below is chased. **Only one line is marked urgent, and it is a thing to know, no
 
 ## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (clinic core)
 
-**1 · THE PUBLISH — one double-click, when convenient.** It carries the S260 canon (Fault Register v2.84,
-Archive v1.97, Register v5.100, runbook v181, START_HERE_261, START_HERE_PROMPT_v10, the brief, pins,
-`MD5SUMS_ALL.txt`, `KIT_ID.txt`). Nothing on the VPS changes.
+**1 · THE PUBLISH — one double-click, when convenient.** It carries the S261 canon (Fault Register v2.85,
+Archive v1.98, Register v5.101, runbook v182, START_HERE_263, the brief, pins, the manifest,
+`MD5SUMS_ALL.txt`, `KIT_ID.txt`, and the tool fix `S281_PAPERS_SORT` — already applied on this PC,
+nothing to run). Nothing on the VPS changes.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -77,12 +77,10 @@ stale `/root/wa/.env.bak*` · the never-cited working papers · `KB_canon_all\MD
 four cold-kit zips by rule E, the rest your own downloads — Docterz CSVs, follow-up audits, bank PDFs)
 and the 9 at `D:\dr-manoj-git\`.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — carried there at S261
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — carried there since S261
 
-⚠ **ONE THING TO KNOW: your stock export of 17-Sep morning had reached neither the server nor the
-archive by 06:00 IST** (newest sale report on the server: 14-Sep, received 15-Sep 08:01; newest capture
-on manojz: 15-Sep 15:11). The Sanjeevni project's first session finds where it went. If it does not turn
-up, the counter's capture is the first suspect and that is mine to check, not yours.
+*(The 17-Sep stock export is settled: it was taken at 05:13, held back by a stale stored password on this
+PC after you changed the counter login, and went through at 06:50 once you refreshed it. Nothing lost.)*
 
 1 · **CLOSE AUGUST** — Check it now, then Lock it, after your staff give you the go on their audit.
 
@@ -129,23 +127,26 @@ August advances · the VINTAZ P 4500 INJ write-off tap · the wall card (F-310) 
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **S261 §0.0 — the move:** the 35 into the Sanjeevni project, proven there, then out of here, measured.
+1. **D528 step 4** — the 75 evidence-only Sanjeevni papers out of this project, a batch at a time, each
+   behind its `MANIFEST.md5` row (rowed at S261).
 2. **F-498's second half** — an empty log and an old log are different facts.
 3. **F-496** — the backup carries whether each job is switched on.
 4. **The asset-register nightly backup that names no log.**
 5. **D525's seven never-fired health checks + the UPI check** — the bundle should now carry
    `freshness_legs.json`.
-6. **The never-cited figure** — unread since S259 (196 of 380); needs `build_papers_index.py` run.
-7. `SANJEEVNI_START_HERE_PROMPT_v1.1` — the shared-systems map; one more paste for you.
-8. The portal tile caption — with the next portal change.
+6. The portal tile caption — with the next portal change.
+7. The F-384 sweep of the manifest's historical blocks.
+8. `freshness_legs.json` on the box differs from the Register (S262's pin check) — record the box's bytes
+   at the next close that touches the VPS.
 
 ## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT
 
-1. **Where the 17-Sep export went.**
+1. `SANJEEVNI_START_HERE_PROMPT_v1.1` — the shared-systems map; one more paste for you, from that project.
 2. **D524** — Shavez to maker on the cheque register (one line for you when it ships).
 3. **F-494** — ₹17,777 of purchase lines belonging to no vendor.
 4. **Darpan's day-close place in the portal** — waits on your three corrections, not on code.
-5. **F-493** — the Sanjeevni Book §7.2 correction (Book v1.3).
+5. **F-493** — the Sanjeevni Book §7.2 correction (Book v1.3) — **three closes unchecked; its first job.**
+   Also: which report the refused 16-Sep 23:55 export was.
 6. The tidy-up chain: one store for sale lines → retire the senders on manojz → Sanjeevni in its own process.
 7. **Parked at your word:** the per-person PWA banner.
 
@@ -163,7 +164,15 @@ Unchanged from S259 (D524 · D525 · D526 · D527 · F-493 and all earlier), plu
 
 ---
 
-## ✅ DONE AT THE S260 CLOSE — 17-Sep-2026
+## ✅ DONE AT THE S261 CLOSE — 17-Sep-2026
+
+- ~~**The S260 publish**~~ — **done by you, 06:35** (`af73217`); gate 575/575.
+- ~~The move (D528 part 2, steps 1–3)~~ — 35 in the Sanjeevni project, out of here; 1,593,475 → 1,475,742.
+- ~~The pharmacy PC unreachable since 15-Sep~~ — a stale stored password; **your one `cmdkey` line**; pull
+  OK 06:50; the 17-Sep stock export and two days of sales through.
+- ~~The never-cited figure~~ — 205 of 406 (50.5 %), down from 51.5 %; the tool's F-506 fixed in place.
+
+## ✅ DONE AT THE S260 CLOSE — 17-Sep-2026 (retained)
 
 - ~~**Paste `START_HERE_PROMPT_v10` into this project's instructions**~~ — **done by you, 17-Sep.**
 - ~~**Create "Sanjeevni — Pharmacy & Marg" and paste its instructions**~~ — **done by you, 17-Sep.**

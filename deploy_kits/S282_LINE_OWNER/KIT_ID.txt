@@ -1,0 +1,9 @@
+KIT      : S282_LINE_OWNER
+SESSION  : 262 (Sanjeevni -- Pharmacy & Marg; first session of the split project)
+DATE     : 2026-09-17
+TARGET   : VPS, /root/finance/purchase_app.py + one pass over /root/finance/finance.db
+FROM     : 3535dc978d4ec53846368c8772347a50 (read from the 17-Sep nightly bundle, held to the S260 live pin)
+TO       : 216a0cd95afad73eecbc484683892ca3 (predicted; read back on install)
+CHANGES  : one anchored call + one helper in _redate_lines. No new table. No screen. Nothing on manojz.
+REPAIRS  : F-494 -- five lines of bill 160 / 01-Sep-2026, Rs 17,776.68, placed by their ITEMWISE witness.
+NUMBERS  : kit S282 claimed on the board (parent S261 keeps S281/S283). Next free after both: S285.

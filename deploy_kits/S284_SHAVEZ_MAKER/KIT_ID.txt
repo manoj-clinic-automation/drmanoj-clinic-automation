@@ -1,0 +1,9 @@
+KIT      : S284_SHAVEZ_MAKER
+SESSION  : 262 (Sanjeevni -- Pharmacy & Marg)
+DATE     : 2026-09-17
+TARGET   : VPS, /root/finance/purchase_app.py + setting purchase.cheque_users in /root/finance/finance.db
+FROM     : 216a0cd95afad73eecbc484683892ca3 (the S282_LINE_OWNER pin -- install S282 first)
+TO       : d1476f80836e8b68fae2da1855c7105f (predicted; read back on install)
+CHANGES  : four anchored edits + one helper (the cheque routes, the register page, the sheet's cheque card). One setting row. No new table. Nothing on manojz.
+CLOSES   : D524 -- Shavez writes the cheque register; a named grant, not a unit_role maker row.
+NUMBERS  : kit S284 claimed on the board (parent S261 keeps S281/S283). Next free after both: S285.
