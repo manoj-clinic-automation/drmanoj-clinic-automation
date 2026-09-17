@@ -1,0 +1,10 @@
+KIT      : S304_COUNT_PROOF
+SESSION  : 266 (Sanjeevni -- Pharmacy & Marg), 17-Sep-2026, on the owner's "proceed" on the work list (item: the proof for count #1)
+DATE     : 2026-09-17
+TARGET   : VPS -- /root/finance/stock_app.py (patched on the box) · stock_hub.html (replaced whole)
+FROM     : stock_app.py 5cc1328d9289ad8b1f662fe4d4e33ef4 (S301) · stock_hub.html a3bfab191fb7ac2f0dd02bf6852ae9bf (S301)
+TO       : stock_app.py b997aa355d4b56a0794534369e38385f · stock_hub.html 3f54859201892ec59dfc4455f07b330b (predicted; read back on install)
+CHANGES  : Step 7 of the Stock Check hub ("the proof -- Marg agrees with the shelf") read DONE from the counting close of 06-Sep since S297 -- wrong. It now comes from _proof_state: for each item with voucher lines ENTERED in Marg (S301), drift = Marg's figure minus our computed figure on the same basis, on the last export day before the first voucher was entered and the first after the last, both days with that day's purchases in (pur_to); the item agrees when its drift moved by exactly its vouchers. PROVEN (done) only when every entered item agrees and nothing is left to make or enter; the items that differ are named on the step for Amir to look at in Marg; items that moved in Marg without a voucher are counted, not blocking. Reads only; no table. clinic-finance restarted.
+BUILDS   : the owner's "proceed" (17-Sep evening) on the list: "the proof for count #1 -- after Amir keys the vouchers, the next Marg export is checked against the shelf, and count #1 closes by itself when they agree". Also corrects a defect of S297/S299 (step 7 from the counting close) -- F-row at the S266 close.
+NUMBERS  : kit S304 (claimed on the board). Next free: S305.
+PROJECT  : Sanjeevni

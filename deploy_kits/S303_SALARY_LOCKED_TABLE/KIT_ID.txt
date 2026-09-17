@@ -1,0 +1,9 @@
+KIT      : S303_SALARY_LOCKED_TABLE
+SESSION  : 267 (parent -- Systems & Automation)
+DATE     : 2026-09-17
+TARGET   : VPS -- /root/staff_register/staff_register.py
+FROM     : 439d6790 (S300, live and read back 17-Sep 21:26)
+TO       : 0a098cfa (predicted; read back on install)
+DATA     : none -- salary_policy.py, the staff ledger and the hold ledger untouched
+BUILDS   : F-519 -- the lock desk of a locked month shows the frozen locked table (its TOTAL = the card) and a per-staff list of what today's recompute moved; frozen sheets read-only at /register/salary/locked
+NUMBERS  : kit S303 (claimed on the System Board 21:36 IST; S301, S302 are the Sanjeevni chat's)

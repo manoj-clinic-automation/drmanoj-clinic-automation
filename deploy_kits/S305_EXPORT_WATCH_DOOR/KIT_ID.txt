@@ -1,0 +1,10 @@
+KIT      : S305_EXPORT_WATCH_DOOR
+SESSION  : 266 (Sanjeevni -- Pharmacy & Marg), 17-Sep-2026, on the owner's "proceed" on the work list (item: the "no export today" alarm, D467 phase 2c)
+DATE     : 2026-09-17
+TARGET   : VPS -- /root/finance/export_watch.py (whole file)
+FROM     : export_watch.py 2920c28ee7e9f87b89f771d4c1923831 (S274)
+TO       : export_watch.py f6845ec5ae1dc8fe200ebf5f4c3ad173 (predicted; read back on install)
+CHANGES  : The missed-export watch (S240) judged Amir's days only from what the clinic PC (manojz) parsed and sent, and called a day "unknown" whenever manojz was silent. It now also reads the door's own VERIFIED record (mi_file): purchase bill-wise, the item lines, last month's supplier-wise (1st-5th), and a WHOLE-STORE stock closing (never an orthotics subset); a REFUSED file is never evidence. "Unknown" now means neither route reported since the day ended. The "have" record names the route (via pc / door). Table, cron lines, notification and screens unchanged. No restart.
+BUILDS   : D467 phase 2c ("the no-export-today alarm ... a deliberate silent day in rehearsal raises it"); a prerequisite for retiring manojz's data jobs (Book 11.4 phase 3).
+NUMBERS  : kit S305 (claimed on the board; renumbered from S303, which the parent session holds -- the S303-named copy was never published). Next free: S306.
+PROJECT  : Sanjeevni

@@ -1,0 +1,10 @@
+KIT      : S302_DAILY_PRINT
+SESSION  : 266 (Sanjeevni -- Pharmacy & Marg), 17-Sep-2026, on the owner's "proceed" on the work list (item: teach the router the daily sale summary report)
+DATE     : 2026-09-17
+TARGET   : VPS -- /root/marg_ingest/marg_ingest.py · marg_router.py · signatures.json (whole files). manojz -- D:\Downloads\margsync\MargPull\marg_router.py · signatures.json (the same two files; placed by the session itself, backups beside them)
+FROM     : VPS marg_ingest.py 1a7f266f0ed57392faa320543b95bb87 · marg_router.py da8fc9284bed077d0d86da07d95f439e · signatures.json 65d1e1ee3cc0d564b9673a54c5da4877 · manojz marg_router.py da8fc928… · signatures.json 65d1e1ee… (read on the PC 17-Sep)
+TO       : marg_ingest.py 7f6b4dc25d1c247c8b45f05108e600ca · marg_router.py 318086e36b0088f2da57b95d19a86b98 · signatures.json b2dcb2115a208bff81fac1c37c839428
+CHANGES  : The owner's daily summary sale report (Marg's print-layout BILL WISE SALES STATEMENT: one text column, "AS ON" with no date, column heads boxed between two rules, the day as its own line, "*** End of Report ***") was refused as unknown every time it was made (16-Sep 23:55). The router now reads that layout -- only where a sheet has no ordinary header row and at most two columns -- and the new signature SALE_DAILY_PRINT/TEXT identifies it, dated from its day line, completeness by "End of Report", never uploadable. On the VPS it is in PHI_TYPES: identified, recorded, and the raw file deleted at the door (it carries names and mobiles). SALE_BILLWISE DETAIL and every other report are read exactly as before.
+BUILDS   : the owner's "proceed" (17-Sep evening); owed since S262: "I will teach the system that report's shape so it files next time."
+NUMBERS  : kit S302 (claimed on the board). Next free: S303.
+PROJECT  : Sanjeevni
