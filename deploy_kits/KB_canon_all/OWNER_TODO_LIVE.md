@@ -1,6 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S261 close**, 17-Sep-2026
+# OWNER TO-DO — LIVE · refreshed at the **S262 close** (the Sanjeevni project), 17-Sep-2026 — the parent's S263 was open beside it and refreshes its own sections at its close
 
-*Detail: `claude/START_HERE_SESSION_263.md` · `claude/S261_BUILD_BRIEF.md`.*
+*Detail: `START_HERE_SESSION_264.md` (clone) · `S261_BUILD_BRIEF.md` (parent) · `S262_BUILD_BRIEF.md` (Sanjeevni).*
 *Everything else this session wrote is evidence and is on the shelf:*
 
 ```
@@ -102,7 +102,7 @@ Darpan's whole day flow sits behind these.
 https://followup.dr-manoj.in/finance/stock/page/desk?count=1
 ```
 
-4 · **THE FIRST CHEQUE, ₹400** to AGARWAL SURGICALS AND MEDICALS — log it from the payment sheet.
+4 · **THE FIRST CHEQUE, ₹400** to AGARWAL SURGICALS AND MEDICALS — log it from the payment sheet. **Since S284 (17-Sep) Shavez can log it too.**
 
 ```
 https://followup.dr-manoj.in/finance/purchase/page/cheques
@@ -139,16 +139,17 @@ August advances · the VINTAZ P 4500 INJ write-off tap · the wall card (F-310) 
 8. `freshness_legs.json` on the box differs from the Register (S262's pin check) — record the box's bytes
    at the next close that touches the VPS.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at S262
 
-1. `SANJEEVNI_START_HERE_PROMPT_v1.1` — the shared-systems map; one more paste for you, from that project.
-2. **D524** — Shavez to maker on the cheque register (one line for you when it ships).
-3. **F-494** — ₹17,777 of purchase lines belonging to no vendor.
-4. **Darpan's day-close place in the portal** — waits on your three corrections, not on code.
-5. **F-493** — the Sanjeevni Book §7.2 correction (Book v1.3) — **three closes unchecked; its first job.**
-   Also: which report the refused 16-Sep 23:55 export was.
-6. The tidy-up chain: one store for sale lines → retire the senders on manojz → Sanjeevni in its own process.
-7. **Parked at your word:** the per-person PWA banner.
+1. **The first live look at S285** (the wrong-supplier warning on Amir's step 4, live 17-Sep ~10:10) once his export of the day has landed — the wording in his hands.
+2. **F-493** — the Sanjeevni Book §7.2 correction (Book v1.3) — stale 3, the first documentation job.
+3. **Teach the router your daily summary sale report** (the 16-Sep 23:55 refusal: its title row carries no date) so it files instead of refusing.
+4. **The item↔supplier check, second stage** — purchase returns under the wrong supplier; the same bill number under two suppliers on one day, on Amir's screen.
+5. **Darpan's day-close place in the portal** — waits on your three corrections, not on code.
+6. `SANJEEVNI_START_HERE_PROMPT_v1.1` — the shared-systems map; one more paste for you when ready.
+7. The tidy-up chain: one store for sale lines → retire the senders on manojz → Sanjeevni in its own process (gated on `sh_run.differ = 0` for seven runs, F-493).
+8. **Parked at your word:** the per-person PWA banner.
+9. ~~**D524** — Shavez to maker on the cheque register~~ — **DONE, S284, live 17-Sep.** ~~**F-494** — ₹17,777 belonging to no vendor~~ — **DONE, S282, live 17-Sep.** ~~Which report the refused export was~~ — **your own daily summary sale report (your word).**
 
 ---
 
@@ -163,6 +164,14 @@ Unchanged from S259 (D524 · D525 · D526 · D527 · F-493 and all earlier), plu
 - ⭐ **Your 17-Sep ruling — your list is deferred; only what turns urgent is named, with the reason.**
 
 ---
+
+## ✅ DONE AT THE S262 CLOSE — 17-Sep-2026 (the Sanjeevni project)
+
+- ~~**F-494** — the ₹17,777 of purchase lines with no vendor~~ — **S282_LINE_OWNER, installed by you ~09:25; 5 lines placed, 0 left.**
+- ~~**D524** — Shavez writes the cheque register~~ — **S284_SHAVEZ_MAKER, installed by you ~09:30; a named grant (D529).**
+- ~~**Your ask of 17-Sep — the wrong-supplier check on Amir's bills**~~ — **S285_SUPPLIER_CHECK, installed by you ~10:10 (D530 · D531).**
+- ~~The 35 Sanjeevni documents into their own project~~ — **done and proven by hash; 117,736 of 2,000,000 there.**
+- Your two notes recorded: the 15-Sep salt list is current and sufficient; the refused 16-Sep 23:55 export is your own daily summary sale report (Darpan prints it and pays the day against it).
 
 ## ✅ DONE AT THE S261 CLOSE — 17-Sep-2026
 

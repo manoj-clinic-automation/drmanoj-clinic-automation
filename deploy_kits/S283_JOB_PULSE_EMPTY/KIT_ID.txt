@@ -1,0 +1,12 @@
+KIT      : S283_JOB_PULSE_EMPTY
+SESSION  : 263
+DATE     : 2026-09-17
+PURPOSE  : job_pulse v1.1 -> v1.2. F-498 second half: an old log, an empty log and
+           a missing log are three facts -- LATE/SILENT, EMPTY, NEVER RAN.
+TARGET   : VPS, /root/finance/job_pulse.py only. The crontab is NOT opened.
+GATE     : refuses unless the installed file is v1.1 917713f5269bb6af46ea355fc212ad2c
+TO-PIN   : 5eae0eb742bd79b202545fdc83cc05b2
+PROVEN   : selftest 33/33; live-shape walk on the bundle's crontab + 17-Sep nightly db,
+           39/39 rows identical to v1.1 and to the live pulse; installer rehearsed
+           (install, repeat, wrong pin, failed selftest, byte-identical rollback).
+NUMBERS  : kit S283 used. S285 was used by the Sanjeevni project (S262). Next free: D529, F-507, A-D25, kit S286.
