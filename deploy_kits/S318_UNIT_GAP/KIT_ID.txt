@@ -1,0 +1,9 @@
+KIT      : S318_UNIT_GAP
+SESSION  : 269 (parent -- Systems & Automation, clinic core)
+DATE     : 2026-09-18
+TARGET   : VPS -- /root/state_backup/code_bundle.py (the 01:35 code bundle builder)
+FROM     : c7f33e55e5ef409a34ff4557a2d77bc9 (v1.5, S317)
+TO       : 598e55a4255fef130366eb3c37d78363 (v1.6 -- the estate's other units, and the gap that reports itself)
+DATA     : no -- code only, one file, backup .bak_S318_<stamp> beside it; no service restarted
+BUILDS   : on S317's first live run, which read every enable symlink on the box and found eleven enabled units in no store
+NUMBERS  : kit S318 (claimed on the System Board before this folder was named, per F-515)
