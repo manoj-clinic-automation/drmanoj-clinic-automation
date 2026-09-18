@@ -1,0 +1,10 @@
+KIT      : S323_PROC_ONLY
+SESSION  : 269 (parent -- Systems & Automation, clinic core)
+DATE     : 2026-09-19
+TARGET   : VPS -- /root/finance/owner_sheets.py (four removals on the page) + the procedure names and the X-ray side flags
+FROM     : owner_sheets.py 70963a9175a1e9f16f83f71ff66c3d68 (S322)
+TO       : owner_sheets.py b354d89326116ce71ef2c7adeda6b23a
+DATA     : yes -- 24 cast/slab and ILI lines renamed to shorthand-first display names; the side flag set on the 13 limb X-rays (and any cast/slab or ILI line still without it); no price, approval or hand-typed name is touched; owner_service dumped to owner_service_before_S323_<stamp>.sql first
+BUILDS   : his message of 19-Sep -- X-ray section off the page, no turn-off on an asked side, consumables read-only, abbreviation first with the name in brackets, side on the X-rays where relevant
+FIXES    : S322 reported "X-rays that now ask a side: 0" -- its safety rule skipped every row he had already approved
+NUMBERS  : kit S323 (claimed on the System Board before this folder was named, per F-515)
