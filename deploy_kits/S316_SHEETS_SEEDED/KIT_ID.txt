@@ -1,0 +1,9 @@
+KIT      : S316_SHEETS_SEEDED
+SESSION  : 269 (parent -- Systems & Automation)
+DATE     : 2026-09-18
+TARGET   : VPS -- /root/finance/owner_sheets.py · /root/finance/xray_seed.json (NEW) · /root/finance/proc_seed.json (NEW)
+FROM     : owner_sheets.py 2520564c (S315, live)
+TO       : owner_sheets.py 5705f7ff · xray_seed.json 1b4d55c2 · proc_seed.json e49f3715 (predicted; read back by the installer)
+NEEDS    : S315 live (its own pin is the FROM above); the S315 tables migrate in place
+BUILDS   : the owner's correction of 18-Sep -- both lists arrive already written from his own X-ray register and his own procedure rulings; his work is approve / rename / reject / add. No backfill.
+NUMBERS  : kit S316 (claimed on the System Board by S269).

@@ -208,3 +208,19 @@ finance/REPORT_1.xls
 # (PUBLISH_ALL refused the push rather than drop it -- F-100's guard, again.)
 # ---------------------------------------------------------------------------
 !deploy_kits/S240_SANJEEVNI_123/legs_add_s240.json
+
+# ---------------------------------------------------------------------------
+# S316 (18-Sep-2026): F-300 AGAIN, and this time it was foreseen in the very note
+# above -- "ANY NEW KIT WHOSE PAYLOAD IS A .json NEEDS ITS LINE HERE, ADDED WHEN
+# THE KIT IS BUILT AND NOT WHEN THE PUBLISH REFUSES." S316_SHEETS_SEEDED was built
+# without these two lines and the publish gate refused the whole push, correctly.
+# The two files ARE the kit: `xray_seed.json` is the S223 extraction of the clinic's
+# own X-ray register (19 study names, their codes, how often each was seen, the
+# spelling corrections) and `proc_seed.json` is the owner's own procedure rulings of
+# 04-Sep (site names, which may be a cast or a slab, and the consumables he set).
+# No patient, no phone number, no secret -- names, codes, counts and sizes; the
+# F-185 gate reported both clean before these lines were added.
+# Exact paths only, no wildcard, so nothing else is widened.
+# ---------------------------------------------------------------------------
+!deploy_kits/S316_SHEETS_SEEDED/xray_seed.json
+!deploy_kits/S316_SHEETS_SEEDED/proc_seed.json

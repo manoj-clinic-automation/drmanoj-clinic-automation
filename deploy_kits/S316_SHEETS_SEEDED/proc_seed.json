@@ -1,0 +1,30 @@
+{
+  "_note": "S316 procedure seed. NOT invented: every line is the owner's own ruling of 04-Sep-2026 (S225_PROCEDURES_RULED, which supersedes the S223 draft) -- the eleven cast/slab sites with U slab allowed as a cast and the clavicle bandage as neither, the five ILI sites, and dressing. Consumables are the S225 table, exactly as he ruled it: size x quantity where he asked for dropdowns, stockinette used/not-used only, Loftypred OR Viracort, the D600 drape selectable. Nothing here is a backfill; it is a list to approve, edit, reject or add to.",
+  "procedures": [
+    {"code": "AK",     "label": "Above knee",            "group": "Cast / slab", "forms": ["cast", "slab"], "items": ["fibrecast", "roller", "padding", "stockinette"]},
+    {"code": "BK",     "label": "Below knee",            "group": "Cast / slab", "forms": ["cast", "slab"], "items": ["fibrecast", "roller", "padding", "stockinette"]},
+    {"code": "SBK",    "label": "Short below knee",      "group": "Cast / slab", "forms": ["cast", "slab"], "items": ["fibrecast", "roller", "padding", "stockinette"]},
+    {"code": "HBK",    "label": "High below knee",       "group": "Cast / slab", "forms": ["cast", "slab"], "items": ["fibrecast", "roller", "padding", "stockinette"]},
+    {"code": "CYL",    "label": "Cylinder",              "group": "Cast / slab", "forms": ["cast", "slab"], "items": ["fibrecast", "roller", "padding", "stockinette"]},
+    {"code": "AE",     "label": "Above elbow",           "group": "Cast / slab", "forms": ["cast", "slab"], "items": ["fibrecast", "roller", "padding", "stockinette"]},
+    {"code": "BE",     "label": "Below elbow",           "group": "Cast / slab", "forms": ["cast", "slab"], "items": ["fibrecast", "roller", "padding", "stockinette"]},
+    {"code": "SBE",    "label": "Short below elbow",     "group": "Cast / slab", "forms": ["cast", "slab"], "items": ["fibrecast", "roller", "padding", "stockinette"]},
+    {"code": "USLAB",  "label": "U slab",                "group": "Cast / slab", "forms": ["slab", "cast"], "items": ["fibrecast", "roller", "padding", "stockinette"]},
+    {"code": "SPICA",  "label": "Thumb spica",           "group": "Cast / slab", "forms": ["cast", "slab"], "items": ["fibrecast", "roller", "padding", "stockinette"]},
+    {"code": "CLAV",   "label": "Clavicle bandage",      "group": "Cast / slab", "forms": [],               "items": ["roller"]},
+    {"code": "ILI-SH", "label": "ILI shoulder",          "group": "Injection (ILI)", "forms": [], "items": ["steroid", "drape"]},
+    {"code": "ILI-EL", "label": "ILI elbow",             "group": "Injection (ILI)", "forms": [], "items": ["steroid", "drape"]},
+    {"code": "ILI-TH", "label": "ILI thumb",             "group": "Injection (ILI)", "forms": [], "items": ["steroid", "drape"]},
+    {"code": "ILI-FI", "label": "ILI finger (trigger finger)", "group": "Injection (ILI)", "forms": [], "items": ["steroid", "drape"]},
+    {"code": "ILI-HE", "label": "ILI heel (plantar fasciitis)", "group": "Injection (ILI)", "forms": [], "items": ["steroid", "drape"]},
+    {"code": "DRESS",  "label": "Dressing",              "group": "Dressing", "forms": [], "items": ["roller"]}
+  ],
+  "items": {
+    "fibrecast":   {"label": "Fibrecast bandage", "sizes": ["2\"", "3\"", "4\"", "5\""], "ask": "size_qty"},
+    "roller":      {"label": "Roller bandage",    "sizes": ["4\"", "6\""],               "ask": "size_qty"},
+    "padding":     {"label": "Cast padding",      "sizes": ["4\"", "6\""],               "ask": "size_qty"},
+    "stockinette": {"label": "Stockinette",       "sizes": [],                            "ask": "used_yesno"},
+    "steroid":     {"label": "Inj Loftypred 80 mg OR Inj Viracort 40", "sizes": [],       "ask": "one_of"},
+    "drape":       {"label": "Surgiwear D600 drape", "sizes": [],                         "ask": "selectable"}
+  }
+}
