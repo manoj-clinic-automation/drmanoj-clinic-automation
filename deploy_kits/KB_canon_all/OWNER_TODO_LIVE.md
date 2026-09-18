@@ -1,4 +1,26 @@
-# OWNER TO-DO — LIVE · refreshed at the **S266 close** (the Sanjeevni project), 17-Sep-2026 22:45 IST — the Sanjeevni sections rewritten (S299 · S301 · S302 · S304 · S305 live; S307 · S308 published, one line each owed); the clinic sections as the parent's S265 close left them, and its own S267 close refreshes them next
+# OWNER TO-DO — LIVE · refreshed at the **S267 close** (the parent project), 18-Sep-2026
+
+*Detail: `START_HERE_SESSION_269.md` (clone) · `S267_BUILD_BRIEF.md`. Everything else this session wrote is evidence and is on the shelf (`D:\Downloads\_kbtools\PAPERS.bat`).*
+
+## ⭐ WHAT NEEDS YOU AFTER S267 — four lines, and three of them are files
+
+**1 · THE PUBLISH — your double-click, whenever you are at the PC.** It carries the S267 canon (Register **v5.108**, Fault **v2.93**, Archive **v1.106**, Runbook **v189**, `START_HERE_SESSION_269`, the manifest, `live_pins_S267close.txt`, `MD5SUMS_ALL` 642/642 green) and the five kits, which are already installed — the publish is the record, not the install.
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · TWO CONTACT EXPORTS.** One from `bocbareilly@gmail.com` (the reception phone), one from the clinic Google account. CSV, however Google gives them. **The whole contacts plan (D545) waits on these two files and on nothing else.**
+
+**3 · THE PROCEDURE → CONSUMABLES MAP, and the X-ray price list.** One sheet, your words. It is what makes the chamber screen's dropdown fill its own prices (D546).
+
+**4 · ONE CONFIRMATION, next session, before any code.** The slip-logging flow as it now stands: reception untouched · the slip travels to your chamber as today · a chamber screen where the assistant picks the clinic ID, chooses the X-ray or procedure, and types the physical slip number · Awdhesh works a batch list after each session, no live screen, phone in pocket · a nightly three-way match that only reports exceptions · **the paper numbering stays the authority.**
+
+*Still deferred by your own word: token rotation (F-456). Still yours on the Sanjeevni side: the eighteen answers on step 2, Try to match.*
+
+---
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S266 close** (the Sanjeevni project), 17-Sep-2026 22:45 IST — the Sanjeevni sections rewritten (S299 · S301 · S302 · S304 · S305 live; S307 · S308 published, one line each owed); the clinic sections as the parent's S265 close left them, and its own S267 close refreshes them next
 
 *Detail: `START_HERE_SESSION_267.md` (clone) · `S265_BUILD_BRIEF.md` (parent) · `S264_BUILD_BRIEF.md` (Sanjeevni).*
 *Everything else this session wrote is evidence and is on the shelf:*

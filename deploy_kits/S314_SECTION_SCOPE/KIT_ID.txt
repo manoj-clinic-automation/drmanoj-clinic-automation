@@ -1,0 +1,70 @@
+KIT      : S314_SECTION_SCOPE
+PROJECT  : Sanjeevni — Pharmacy & Marg (session S268)
+WRITTEN  : 18-Sep-2026 (clock read on the PC)
+NUMBERS  : rungs 2 and 3 of S268_COUNT2_BY_SECTION_PLAN · D545 (the section map decides SCOPE only,
+           never whether a shortfall is a loss — the loss lanes keep their own word lists)
+
+REQUIRES : S313_SECTION_MAP LIVE. stock_app.py's FROM pin is S313's TO pin, and the installer also
+           checks section_map.py is on the box. Run S313's line first if not.
+
+FILE     : /root/finance/stock_app.py   10be8a9e -> 1b473fbf586dea13edd40a6a993cb2ba
+COLUMN   : stock_count.section, added additively IN stock_app's own ensure block — NOT in
+           stock_schema.sql, which is executed as CREATE TABLE IF NOT EXISTS on every boot and
+           would therefore change nothing on a database that already exists.
+TABLE    : none. SCREEN: none. RESTART: clinic-finance.
+
+WHAT IT MAKES POSSIBLE
+  An orthotics-only physical stock check. Download the ordinary pad, fill ONLY the orthotic rows,
+  upload it: the round is recognised as an orthotics round, is answerable for the section's items
+  and no others, reports nothing not counted, and closes. Until now the same upload reported the
+  other 300-odd shelves as not counted, api_pad_close refused it for staff and stamped it
+  'incomplete' for the owner — and that one function, _pad_family(), feeds the upload's reply, the
+  result workbook, the recent-counts list, the desk, Amir's board, the report, the hub and the loss
+  board, so nothing downstream could have been right either.
+
+HOW THE SCOPE IS DECIDED — and why it is derived rather than typed
+  The pad reader has always been right about blanks: "a blank is an item NOT COUNTED", never a zero.
+  So counting only the orthotic rows of the ordinary 373-row pad ALREADY records exactly those rows.
+  The round therefore already says what it covers in the only way that cannot be wrong — by what was
+  counted. So the scope is:
+    DECLARED   stock_count.section, when the owner has set it — it wins outright;
+    OBSERVED   otherwise: every item counted ACROSS THE FAMILY sits in one section of the map.
+               One item outside it, or one item the map has never heard of, or a family of fewer
+               than two items, and the round is a whole-shop round again.
+  A PART that adds a medicine widens the whole family back to the shop, which is the truth rather
+  than a convenience.
+
+THE SAFETY VALVE
+  An observed scope is an inference, and there is exactly one way it could mislead: a round MEANT to
+  be the whole shop whose first sheet happened to carry only one section reads as a sectioned round
+  and could be signed off 'complete' by a staff member with the rest of the shop never counted. So a
+  round whose section is OBSERVED rather than DECLARED can be closed complete only by the owner. A
+  declared round, and a whole-shop round, close exactly as they do today.
+
+AND COUNT #1 KEEPS ITS SCREENS
+  The five pages that pick "the current count" took the newest root, full stop — so the first
+  sectioned round would have taken the hub, the desk, Amir's board, the report and the loss board
+  away from the 06-Sep count, which is still open with real work on it. _newest_root() now prefers a
+  WHOLE-SHOP round, reading the effective scope and not merely the column. It deliberately does not
+  skip a CLOSED round: closed means the counting finished, not the check — the 06-Sep round was
+  closed on the day it was counted and is still the round every screen works through. A sectioned
+  round is opened by ?count=N until there is a chooser; a new whole-shop count takes the pages by
+  being the newest of its kind.
+
+NEW DOOR   POST /finance/stock/api/pad/section/<count>  {"section": "Orthotics"}  — owner only.
+           Declares a round's scope or clears it. Nothing else writes the column.
+
+PROVEN
+  selftest 22 checks, 0 failed, with negative controls: two sections is the whole shop (not a guess
+  at the bigger one); ONE item is not evidence of a section; an item the map does not know is the
+  whole shop; a PART that adds a medicine widens the family; a newer sectioned round does NOT
+  capture the pages, nor when the whole-shop round is closed. Red against the unpatched module.
+  walk on a scratch copy of the live database: THE 06-SEP WHOLE-SHOP ROUND IS IDENTICAL ON EVERY
+  FIGURE and the hub identical on every key; a round of the orthotics is answerable for them and
+  reports 0 not counted where the live module reports 305 on the same rows; one medicine widens it
+  and removing it narrows it again; the pages still open #1; an observed scope is owner-only to
+  close and declaring it hands it back to staff.
+  installer rehearsed on a fake root: install · rerun ALREADY INSTALLED · S313 not live refused with
+  nothing placed · restore byte-exact.
+
+INSTALL  bash /root/deploy/repo/deploy_kits/S314_SECTION_SCOPE/install_S314_SECTION_SCOPE.sh
