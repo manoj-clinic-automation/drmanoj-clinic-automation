@@ -81,7 +81,17 @@ and the 9 at `D:\dr-manoj-git\` · **`D:\dr-manoj-git\_to_delete_S263\`** — tw
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S266 close
 
-**A · THE PUBLISH (it carries tonight's records), then TWO LINES ON THE VPS.**
+**A · ONE DOUBLE-CLICK — the publish. Nothing else is owed to you but the answers in B.**
+
+Both of the 17th's lines are done: `S307` rolled itself back (its own health gate was wrong — F-525) and `S311_SUPPLIER_CHECK_2B` replaced it and is live; `S308` was already live. This publish carries the records that say so.
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+*(The 17th's wording, retained:)*
+
+**A · THE PUBLISH (it carried that night's records), then TWO LINES ON THE VPS — both now done.**
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat

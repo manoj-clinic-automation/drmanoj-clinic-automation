@@ -1,51 +1,64 @@
-# START HERE — SESSION 268 (either project) · written at the S266 close, 17-Sep-2026 22:45 IST
+# START HERE — SESSION 268
 
-Hi Claude. Continuing Dr. Manoj Agarwal's clinic-automation work. **This file supersedes `START_HERE_SESSION_267.md`** (written at the S265 close). **The next session to open, in either project, is Session 268** — claim it on the System Board first (F-509), and read the key you are about to write before you write it (F-521). The evergreen rules are `START_HERE_PROMPT_v10.md` (parent) / `SANJEEVNI_START_HERE_PROMPT_v1_1` (Sanjeevni).
+*Written at the **S266 post-close**, 18-Sep-2026, 05:1x IST, from the Sanjeevni project. Supersedes the copy written at the S266 close (17-Sep) in full: that one listed canon corrections this post-close has since made itself. The parent's **S267 was still open** when this was written — if it has closed since, its own `START_HERE` and its footer in the manifest sit on top of this one, and the board decides.*
 
-## §0 · THE STANDING OWNER RULINGS
+---
 
-1. **Publishing is HIS double-click.** Name one file, full path.
-2. **Full paths always, including URLs**, each in its own copy block.
-3. **One line per command.** Use `\cp` to bypass the alias.
-4. **Token-lean — never at the cost of verification.**
-5. **Plain language · one step at a time · full-file replacements · ALL-CAPS = urgent.**
-6. **Mask patient numbers (last 4); never print secrets or tokens** (F-185: no number of any kind in the repository).
-7. **Nothing live is rebuilt without his OK; the manual path stays.**
-8. **Sub-agents read screens.**
-9. **Do not hand him diagnostics.** Ask only for what nobody else can do.
-10. **When a screen is wrong, read the screen's code first.**
-11. **Do not hand him a step that is not his.**
-12. **His board carries only what needs him and what he should know** (D526 · D533) — and every close refreshes its page **and its Sanjeevni plan** (D534).
-13. **His own list is deferred** (17-Sep) — name only what has become urgent, and why.
+## THE NUMBERS — take them from the board, which wins if it is later
 
-## §1 · PHASE 0 — in order
+**Next free: D544 · F-526 · A-D25 · kit S312 · Session 268.**
 
-1. **Claim the session number on the System Board** (`board/_claude_status`), reading the key first. Answer the lines, set `read: true`, update `lastRead` with a read clock.
-2. **Connect and name the folders:** `D:\Downloads` · `D:\dr-manoj-git` · `F:\ClinicBackup`.
-3. **Read the three nightly reports** — `REBUILD_REPORT_LATEST.txt` · `MAINTENANCE_REPORT_LATEST.txt` · `CANON_SUMS_LATEST.txt`: exists · clock time · verdict.
-4. **Clone the repository in the cloud workspace** and run `md5sum -c MD5SUMS_ALL.txt` from inside `KB_canon_all\`. Halt on a hash mismatch. No git in the PC shell (F-511).
-5. **Read this file, then the project's Tier 0** — for Sanjeevni: the Book (v1.3) and the last `S###_BUILD_BRIEF`.
-6. **The maintenance pass:** hold the live pins against the 18-Sep bundle and state the three counts, **and the PENDING count**.
-7. **The cap:** measure `project_info` at the open and the close only.
+Consumed on the 17th/18th by S266 (Sanjeevni): D541 · D542 · D543 · F-521 … F-525 · kits S299 · S301 · S302 · S304 · S305 · S307 (withdrawn) · S308 · S311.
+By the parent's S267 in the same hours: kits S300 · S303 · S306 · S309 · S310.
 
-## §2 · WHAT THE S266 CLOSE LEFT
+**Claim your session number in `board/_claude_status` as your first act (F-509), reading the key immediately before you write it.**
 
-**Canon written, in the PC clone, NOT yet published at the close:** Fault `Fault_Action_Register_v2_91.md` (F-521 … F-524) · `KB_History_Archive_v1_104_S266close.md` · `KB_Register_v5_106_S266close.md` · `HANDOFF_RUNBOOK_2026-09-17_Session266close_v187.md` · this file · `live_pins_S266close.txt` · `CANONICAL_MANIFEST.md` (four surfaces) · `MD5SUMS_ALL.txt` · `OWNER_TODO_LIVE.md` · `S266_BUILD_BRIEF.md` · `S266_CLOSE_REPORT.md`.
+---
 
-**Live from this session (VPS, each from the owner's own line, every md5 read back):** `stock_app.py` `b997aa35…` · `stock_hub.html` `3f548592…` (NEW at S299) · `stock_amir.html` `14024b8d…` · `pad_receipt.py` `f06daf16…` · `stock_desk.html` `485720fd…` · `portal.py` `e13adbd6…` · `export_watch.py` `f6845ec5…` · `/root/marg_ingest/` `marg_ingest.py` `7f6b4dc2…`, `marg_router.py` `318086e3…`, `signatures.json` `b2dcb211…`. **manojz:** `MargPull\marg_router.py` and `signatures.json`, the same bytes, placed by the assistant.
+## THE CANON YOU ARE INHERITING
 
-**PENDING — published, not installed (3 rows):** `amir_day.py` → `00c443cb…` (S307) · `stock_app.py` → `a8f98cda…` and `stock_hub.html` → `936677b8…` (S308). **Hand the owner one line each, after checking the publish landed.**
+| document | version |
+|---|---|
+| History Archive | **v1.105** (`KB_History_Archive_v1_105_S266postclose.md`) |
+| Fault → Action Register | **v2.92** (F-525 is the last minted finding) |
+| KB Register | **v5.107** (`KB_Register_v5_107_S266postclose.md`) |
+| Handoff Runbook | **v188** (`HANDOFF_RUNBOOK_2026-09-18_Session266postclose_v188.md`) |
+| Live pins | `live_pins_S266postclose.txt` — generated from v5.107, never hand-edited (D202) |
+| Close routine | `END_OF_SESSION_PROMPT_v15.md` |
+| The Sanjeevni Book | **v1.3 (S264)** — *stale, see below* |
 
-**Reserved numbers:** next free **D544 · F-525 · A-D25 · kit S311 · Session 268** — after checking the board, which wins.
+The gate: `md5sum -c MD5SUMS_ALL.txt` from inside `KB_canon_all\`. If it does not show v1.105 / v2.92 / v5.107, **the owner has not published this post-close** — say so, name the file, and read the canon from the PC's clone at `D:\dr-manoj-git\drmanoj-clinic-automation\deploy_kits\KB_canon_all\`.
 
-## §3 · WHAT THE NEXT SESSION DOES FIRST
+---
 
-1. **Check the publish landed** (read `.git/logs/HEAD` and the refs, or clone) and hand over the two VPS lines above.
-2. **Look at the stock check with him** — he asked to walk through it. Step 2 (*Try to match*, 18 pairs) is his; everything downstream waits on it.
-3. **The 18-Sep bundle** — hold the S266 pins against it; state drift · dead · stale and the PENDING count.
-4. **Darpan's claim queue** (D471) is the next build; then count #2 by section.
-5. **The parent's own backlog** is in `START_HERE_SESSION_267` §2 and its own board keys — nothing from S266 was added to it.
+## WHAT THE S266 POST-CLOSE OWES YOU — nothing, and that is deliberate
 
-## §4 · THE SWITCHES
+The canon is current with the box. Both publishes (`cdb2a32`, `a8c6c8c`) landed and were verified from the VPS's own pull output. The three pin rows that were one kit behind are corrected in v5.107, and `live_pins` is regenerated from it. F-525 is written up and repaired in code. There is no correction queued for you.
 
-`bash /root/finance/sanjeevni_switch.sh status` · VPS `/root/finance/_off/ALL_OFF` · `/root/marg_ingest/OFF` · manojz `D:\Downloads\margsync\_off\ALL_OFF.txt` · medical PC `D:\SendToClinic\_off\ALL_OFF.txt` (**does not stop capture, by design**).
+**The one real debt is older and is not code:** the **Sanjeevni System Book is still v1.3 (S264)**. It does not describe the voucher round (D542), the hub's seven steps as S304 left them, the daily print, or the export-watch door. That was already the S266 close's single *stale*, and it is your first fold-in.
+
+---
+
+## WHAT TO BUILD, IN ORDER
+
+1. **Darpan's claim queue** — open → contacted → settled, closing itself on a matching purchase return (**D471**). Its evidence half is already live: S308 puts thirty days of sale evidence on each pursued line.
+2. **Count #2 by section** — orthotics monthly, medicines on their own cadence, staff-run end to end. That is the day the stock check is operational.
+3. Then the tidy-up chain: one store for sale lines → retire the manojz senders → Sanjeevni in its own process (Book §11.4 P4/P5).
+
+---
+
+## WHAT IS THE OWNER'S, AND HAS BEEN SINCE THE 17TH
+
+**Step 2, *Try to match* — eighteen pairs, unanswered.**
+
+```
+https://followup.dr-manoj.in/finance/stock/page/hub?count=1
+```
+
+Everything built on the 17th waits on them. **Ask once, early, plainly — and do not build past the block to look busy.** If they are still unanswered, the claim queue (item 1 above) is the work that does not depend on them.
+
+His standing items, untouched and deferred by his own word: close August · bank details for three suppliers · the first cheque · how Marg exports without a person.
+
+---
+
+*START_HERE_SESSION_268 · written at the S266 post-close · the Sanjeevni project.*
