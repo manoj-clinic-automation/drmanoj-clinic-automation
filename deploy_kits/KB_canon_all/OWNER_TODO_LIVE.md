@@ -1,6 +1,10 @@
-# OWNER TO-DO — LIVE · refreshed at the **S267 close** (the parent project), 18-Sep-2026
+# OWNER TO-DO — LIVE · refreshed at the **S268 close** (the Sanjeevni project), 18-Sep-2026
 
-*Detail: `START_HERE_SESSION_269.md` (clone) · `S267_BUILD_BRIEF.md`. Everything else this session wrote is evidence and is on the shelf (`D:\Downloads\_kbtools\PAPERS.bat`).*
+*The Sanjeevni sections are rewritten here; the clinic-core sections are exactly as the parent's S267 close left them and are the parent's to refresh.*
+
+*(previous header, retained:)* refreshed at the **S267 close** (the parent project), 18-Sep-2026
+
+*Detail, Sanjeevni: `START_HERE_SESSION_270.md` (clone) · `S268_BUILD_BRIEF.md`. Detail, clinic core: `START_HERE_SESSION_269.md` (clone) · `S267_BUILD_BRIEF.md`. Everything else this session wrote is evidence and is on the shelf (`D:\Downloads\_kbtools\PAPERS.bat`).*
 
 ## ⭐ WHAT NEEDS YOU AFTER S267 — four lines, and three of them are files
 
@@ -100,6 +104,35 @@ stale `/root/wa/.env.bak*` · the never-cited working papers · `KB_canon_all\MD
 four cold-kit zips by rule E, the rest your own downloads — Docterz CSVs, follow-up audits, bank PDFs)
 and the 9 at `D:\dr-manoj-git\` · **`D:\dr-manoj-git\_to_delete_S263\`** — two empty git lock files my shell left
 (F-511), with `WHY_SAFE.txt`; delete when convenient.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S268 close
+
+**A · ONE DOUBLE-CLICK — the publish.** It carries this session's records: the claim queue and the section
+map (both already live on the server — the publish is the record, not the install), the Sanjeevni Book v1.4,
+and the canon.
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**B · AND THEN, ONLY IF YOU WANT IT — one line for the sectioned count.** `S314_SECTION_SCOPE` is built and
+waiting. It is what makes an **orthotics-only physical stock check** actually work: without it a round of 69
+orthotic lines reports 304 items not counted and refuses to close. **Nothing else waits on it.** It is yours to
+run when you want that day to be possible; ask in the next chat and you get the line.
+
+**C · ONE LOOK, when convenient — four appliances Marg does not call orthotics.** BRACE TYLOR UNISON, SKIN
+TRACTION HOPE, TENNIS ELBOW L HOPE, TENNIS ELBOW M HOPE. Three are plainly appliances, so they may be
+miscategorised **in Marg**. It only decides whether an orthotics-only count carries them.
+
+```
+https://followup.dr-manoj.in/finance/stock/page/sections
+```
+
+*Yours and settled, raised here once as a record and never as a prompt: the eighteen answers on step 2, Try to
+match. You have said you will do them at your own time and will say when they are done; nothing on my side
+treats them as a blocker, and everything that does not depend on them has been built.*
+
+*(The S266 wording, retained:)*
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S266 close
 
@@ -202,6 +235,32 @@ August advances · the VINTAZ P 4500 INJ write-off tap · the wall card (F-310) 
 8. The portal tile caption · the F-384 sweep · `freshness_legs.json` recorded from the box.
 9. ~~F-498's second half~~ (S283) · ~~the asset-register backup~~ (S286 + S287) · ~~Docterz early~~ (S291) · ~~bank SMS~~ (S290) · ~~petty book~~ (S289) · ~~attendance tile for all staff~~ (S295 + S296) — **done.**
 
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S268 close
+
+1. **THE MARG REPORT CONTRACT — the whole of the next session.** Your words: *"define all the reports and the
+   frequency at which you require them from the Marg ERP software and then test them individually against your
+   parser for any defects … there should be no confusion in our system as to what the item name is, what the
+   category is, what the MRP is."* Every report type tested on its own, each with its grammar, an **independent
+   witness** that can prove the reader wrong, the fields it can be trusted for, its measured clip width, how often
+   you should export it, and **a deliberate failure** — no verdict without one. Then one document that says all
+   of it, and only then is any figure re-populated.
+2. **Rung 4 of the sectioned count** — a way to open a sectioned round without typing an address, and the
+   round's scope shown in words on the hub and the desk. Then rungs 5 and 6 (the seal and the report naming
+   their section; then the cadence).
+3. **The 22 renames, in one sitting, once count #1 closes** — and verified from the first export afterwards,
+   never assumed. That is F-535's own lesson.
+4. **Re-measure Amir's salt task page against today's export** — mine, not his: of his 125 rows, Marg already
+   matches on 47 (27 never ticked) and 43 name an item Marg no longer has. His page over-states his own backlog
+   and it is our fault, not his.
+5. **F-526** — the count proof windows on the day Amir *told the server*, not the day the stock moved. Parked
+   until the count closes, because it reads a table the count reads.
+6. ~~Darpan's claim queue~~ (S312) · ~~the section map~~ (S313) · ~~rungs 2 and 3 of the sectioned count~~
+   (S314, built) · ~~the Book off v1.3~~ (v1.4) — **done this session.**
+7. The tidy-up chain, unchanged: store purchase returns → one store for sale lines → retire the manojz senders
+   → Sanjeevni in its own process.
+
+*(The S266 list follows, for the items it still holds.)*
+
 ## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S266 close
 
 1. **Darpan's claim queue** — open → contacted → settled, self-closing on a matching purchase return (D471).
@@ -237,6 +296,25 @@ Unchanged from S259 (D524 · D525 · D526 · D527 · F-493 and all earlier), plu
 - ⭐ **F-504 — a transcription is a backup, not a survivor.** Nothing leaves project knowledge until its
   copy is proven by hash.
 - ⭐ **Your 17-Sep ruling — your list is deferred; only what turns urgent is named, with the reason.**
+
+---
+
+## ✅ DONE AT THE S268 CLOSE — 18-Sep-2026 (the Sanjeevni project)
+
+- **`S312_CLAIM_QUEUE` live** — the stock hub's step 8 can reach DONE for the first time. Darpan answers a
+  pursued line with his own thirty days of sale evidence beside it; **you settle, and only you.**
+- **`S313_SECTION_MAP` live**, and **you corrected it the same morning** — seven taps; orthotics is **69** lines.
+  The old word-list was wrong about **21 of 373 items**, measured against your own Marg category export.
+- **`S314_SECTION_SCOPE` built, publish-ready, not installed** — ⭐0 item B.
+- **`SANJEEVNI_SYSTEM_BOOK` v1.3 → v1.4** — the inherited *stale* closed.
+- **F-536, your catch** — Marg's page heading was being read as a salt; 19 of 373 items wrong, and one of the
+  pairs on your step-2 screen was a pair our own reader had invented. A reader that classifies every row
+  positively and checks itself against Marg's own item numbering now exists, and was made to fail on purpose at
+  exactly the two rows where the old bug lived. **Nothing in the stock check was changed.**
+- **F-535** — the name-shortening was never fixed where it matters: sale export **20** characters, purchase
+  **27**, Marg's own item list **29**, measured every month April–September.
+- **F-537** — the two chats' canon forked again and this time destroyed two files; both recovered from your own
+  published commit and everything rebuilt before any publish. Nothing wrong was published.
 
 ---
 
