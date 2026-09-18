@@ -221,10 +221,13 @@ instead of the whole shop. Pin: `/root/finance/stock_app.py` `10be8a9e` → `1b4
 live, which it is. Its walk holds the 06-Sep round against the live module and **every figure, and the
 entire hub payload, must come back identical** before it will install.
 
-**Do not push it.** It is his to run when he wants the sectioned count. If he asks, the line is:
+**Do not push it.** It is his to run when he wants the sectioned count. If he asks, the line is — and note the
+installer's FULL name, because the S268 close first handed him `install.sh` and the shell answered *No such file
+or directory*; **every installer in this estate is `install_<KIT>.sh`, and a line handed to the owner is read off
+the kit folder, never typed from memory:**
 
 ```
-cd /root/deploy/repo && git pull && bash deploy_kits/S314_SECTION_SCOPE/install.sh
+cd /root/deploy/repo && git pull && bash deploy_kits/S314_SECTION_SCOPE/install_S314_SECTION_SCOPE.sh
 ```
 
 ---

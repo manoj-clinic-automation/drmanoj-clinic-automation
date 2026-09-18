@@ -107,18 +107,21 @@ and the 9 at `D:\dr-manoj-git\` · **`D:\dr-manoj-git\_to_delete_S263\`** — tw
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S268 close
 
-**A · ONE DOUBLE-CLICK — the publish.** It carries this session's records: the claim queue and the section
+**A · DONE — THE PUBLISH LANDED**, `c5fb156`, a clean fast-forward of 27 files carrying both projects' records. *(As written at the close, it carried this session's records: the claim queue and the section
 map (both already live on the server — the publish is the record, not the install), the Sanjeevni Book v1.4,
-and the canon.
+and the canon.)*
+
+**B · DONE — `S314_SECTION_SCOPE` IS LIVE.** You published (`c5fb156`) and ran the line. **An orthotics-only
+physical stock check now works end to end: download the ordinary pad, fill ONLY the orthotic rows, upload it.**
+The walk proved on a copy of the live database that your 06-Sep count is **identical on every figure** — a round
+of the 69 orthotics now owes **0 not counted**, where before it would have said 304 and refused to close.
+
+**A2 · ONE SMALL PUBLISH, whenever you are next at the PC.** Five record files only — the Register, the manifest,
+the new pin list, next session's brief and the checksum list. **Nothing on the server depends on it.**
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-
-**B · AND THEN, ONLY IF YOU WANT IT — one line for the sectioned count.** `S314_SECTION_SCOPE` is built and
-waiting. It is what makes an **orthotics-only physical stock check** actually work: without it a round of 69
-orthotic lines reports 304 items not counted and refuses to close. **Nothing else waits on it.** It is yours to
-run when you want that day to be possible; ask in the next chat and you get the line.
 
 **C · ONE LOOK, when convenient — four appliances Marg does not call orthotics.** BRACE TYLOR UNISON, SKIN
 TRACTION HOPE, TENNIS ELBOW L HOPE, TENNIS ELBOW M HOPE. Three are plainly appliances, so they may be
