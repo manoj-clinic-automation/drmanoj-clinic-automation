@@ -1,0 +1,10 @@
+KIT      : S321_XRAY_VIEWS
+SESSION  : 269 (parent -- Systems & Automation, clinic core)
+DATE     : 2026-09-19
+TARGET   : VPS -- /root/finance/owner_sheets.py (the page) + the owner_service X-ray rows in finance.db
+FROM     : owner_sheets.py 5705f7ff7d6257b478dbb1d8ba16522d (S316)
+TO       : owner_sheets.py a4e8694e20cf93ae1a1a19953db355cc
+DATA     : yes -- 19 X-ray rows renamed and priced, one new row (Chest AP view); a row he has edited himself is never touched; the table is dumped to owner_service_before_S321_<stamp>.sql first
+FIXES    : the owner pressed Approve and got "page not accessible" -- every form action was relative and the page is served without a trailing slash, so the browser posted to /finance/clinic/status (404)
+BUILDS   : his message of 19-Sep -- views on every name, and the price rule (1 view 300 / 2 views 500 / 11x14 400 and 600 / wrist 3 views 800 / PBH 400 / chest 300 each)
+NUMBERS  : kit S321 (claimed on the System Board before this folder was named, per F-515)
