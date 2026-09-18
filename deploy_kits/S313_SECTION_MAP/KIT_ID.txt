@@ -1,0 +1,59 @@
+KIT      : S313_SECTION_MAP
+PROJECT  : Sanjeevni — Pharmacy & Marg (session S268)
+WRITTEN  : 18-Sep-2026 (clock read on the PC)
+NUMBERS  : F-528 (four rules answer "which section is this item in" and none is stored) ·
+           rung 1 of S268_COUNT2_BY_SECTION_PLAN
+
+REQUIRES : S312_CLAIM_QUEUE LIVE. stock_app.py's FROM pin is S312's TO pin, so the installer
+           refuses at [2/7] and places nothing if S312 has not been run. Run S312's line first.
+
+FILES    : /root/finance/section_map.py      NEW      -> b05b0f08ad65519675e21c9a6f4e90a0
+           /root/finance/stock_sections.html NEW      -> 17e006cc8f66ad99745df7a37b8824bc
+           /root/finance/stock_app.py        f313f3d3 -> 10be8a9ec5c59b2cde15e6c4b1934a32
+TABLE    : stock_item_section, NEW, created additively. NOTHING ELSE READS IT.
+RESTART  : clinic-finance.
+THE PAGE : https://followup.dr-manoj.in/finance/stock/page/sections   (owner only; not on any tile)
+
+WHY IT EXISTS — F-528, measured on the 18-Sep database over 373 items
+  _is_ortho()      37 words, stock_app  -> 93 items  (drives the 0.30 pricing margin and the dead lane)
+  _is_consumable() 31 words + a setting -> 25 items
+  _is_orthotic()   34 words, not consum.-> 68 items
+  orthotics.vocab  31 phrases AS STORED -> 88 items  (read by darpan_app only — the counter's screen)
+  Four rules, none stored, all recomputed on every call, and they disagree about 17 items:
+    PRIME PAD 4" and PRIME PAD 6" are ortho for pricing and in NO section list at all;
+    SKIN TRACTION HOPE is an orthotic the pricing list does not call ortho;
+    TAPEASE NS SPRAY is a consumable the pricing list does not call ortho;
+    6 items the counter calls orthotics that the stock lane does not, and 11 the other way round.
+  Harmless while every count is a whole-shop count. NOT harmless the moment a round is scoped: a
+  monthly orthotics count is a promise about WHICH LINES were counted, and the estate cannot say
+  which without first being asked which of four rules to use.
+
+WHAT IT DOES
+  One table, one authority. Seeded from stock_app._voucher_section()'s OWN rule reduced to the item
+  name — consumable first, then orthotic, else medicine — because that is already the rule that
+  prints the section heading on a Marg voucher in front of Amir. Seeding is INSERT-ONLY and never
+  overwrites the owner's word; what the seed had said is kept beside his, so the disagreement stays
+  visible instead of being tidied away. The page shows every disputed item, WHY it is disputed, and
+  three taps.
+
+WHAT IT DELIBERATELY DOES NOT DO
+  It changes nothing. The four word lists stay where they are and keep doing their own jobs. No
+  screen, no figure and no decision reads stock_item_section. That is the point of building this
+  rung first: the seed may be wrong for a while and it must cost nothing while it is. The word lists
+  are COPIED into section_map.py rather than imported, so this table cannot silently re-classify
+  itself because somebody adds a word to a pricing list months later.
+
+PROVEN
+  selftest 35 checks, 0 failed, with negative controls: a re-seed overwriting the owner's word, a
+  section that is not one of the three, a rename making a second row, the counter's vocabulary
+  moving a seeded section, a plain medicine being flagged disputed, an agreed item being flagged
+  disputed, and the setting-driven consumable word both present and absent. All red.
+  walk on a scratch copy of the live database: THE STOCK HUB IS BYTE-IDENTICAL ON EVERY KEY before
+  and after — this kit is meant to be invisible to the estate and the claim is tested, not asserted;
+  373 items of the 16-09-2026 snapshot seeded once and the second seed a no-op; Medicines 280 /
+  Orthotics 68 / Consumables 25; 17 disputed items named on the page; the owner's word survived a
+  re-seed and what the seed had said was kept.
+  installer rehearsed on a fake root: install · rerun ALREADY INSTALLED · S312 not live refused with
+  nothing placed · restore.
+
+INSTALL  bash /root/deploy/repo/deploy_kits/S313_SECTION_MAP/install_S313_SECTION_MAP.sh

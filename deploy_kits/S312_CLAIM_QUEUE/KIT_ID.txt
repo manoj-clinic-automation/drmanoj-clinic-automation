@@ -1,0 +1,61 @@
+KIT      : S312_CLAIM_QUEUE
+PROJECT  : Sanjeevni — Pharmacy & Marg (session S268)
+WRITTEN  : 18-Sep-2026 (clock read on the PC)
+NUMBERS  : D471 (the claim queue, the owner's standing ask) · D544 (step 8 is done when every
+           pursued line has a claim in a terminal state) · F-527 (no purchase return is stored
+           anywhere on this box — the finding this kit had to design around)
+
+FILES    : /root/finance/claim_queue.py    NEW      -> a61744ee8845b6f718af852edcac5eb0
+           /root/finance/stock_app.py      a8f98cda -> f313f3d337818cf07612507c58bf60f4
+           /root/finance/darpan_app.py     f98004c9 -> df3224c5fb45964d8b53df660ff60def
+           /root/finance/darpan_card.html  572fb019 -> 8510c9cbadffa42a7d4c49baff1e2aae
+           /root/finance/stock_hub.html    936677b8 -> c4f3280b2d005b39c02d3f6eed13c3ec
+TABLE    : claim_line, NEW, created additively by claim_queue.ensure().
+           amir_claim is NOT touched — it is Amir's bill-keyed supplier claim and its counters
+           on his step 7 keep exactly the meaning they have today.
+RESTART  : clinic-finance.
+
+WHAT IT DOES
+  A stock line the owner marks "to pursue" becomes a CLAIM: open -> contacted -> settled.
+  Darpan is asked WITH THE EVIDENCE S308 already gathered beside the line — how much of it sold
+  in the thirty days before the count, or the plain fact that it did not sell once — and taps one
+  of five answers in Hinglish, which carries the claim from open to contacted. The owner settles,
+  and only he does: his own rule on the hub is "His answer is evidence; your tap decides."
+
+WHY IT IS NOT JUST A NEW SCREEN
+  Hub step 8 could reach only 'waiting' and 'now'. There was no door to record an answer, so once
+  a line was pursued the hub's last step stayed amber for ever and the count could never visibly
+  finish (S268 finding 3, from the live code). This kit is that missing door, which is why it
+  closes a defect rather than adding a screen beside one.
+
+THE SELF-CLOSE, AND WHAT IS HONEST ABOUT IT
+  D471 asks the queue to close itself on a matching purchase return. IT CANNOT TODAY, and this kit
+  does not pretend otherwise. Measured on the 18-Sep database: purchase_line.direction is
+  'PURCHASE' on all 1,644 rows, no negative quantity, no purchase_return table; Marg prints a
+  return in the item-wise report as an ordinary positive line with no marker, and the is_return
+  flag marg_ingest computes lives in memory on manojz and is never persisted here. So:
+    * the return rule IS WRITTEN and ASLEEP. _returns_available() is a LIVE test, not a constant,
+      so the rule wakes by itself the day a return is stored — no further change here.
+    * what DOES self-close today is real and stored: a LATER COUNT that finds the item agreeing.
+    * a credit note (a purchase bill carrying a minus amount) is shown as a CANDIDATE and closes
+      nothing. It names a supplier and an amount and NO ITEM; it can never say which line it
+      answers, and it is never allowed to.
+  Persisting purchase returns is F-527 and is named to the next kit.
+
+PROVEN
+  selftest 47 checks, 0 failed, with negative controls: an answer off the list, an outcome off the
+  list, Darpan reopening a settled claim, a second mark making a second claim, a 14-day claim
+  sinking, the sweep closing on a purchase that is not a return, a credit note closing a claim, a
+  later count that still finds it short, and — the one that matters — A PAGE READ RESURRECTING A
+  SETTLED CLAIM. All red.
+  walk on a scratch copy of the live database: the hub payload is IDENTICAL to the live one on
+  every key but step 8; 2 pursued lines carry a claim and no line he never marked does; Darpan
+  answered, the owner settled, step 8 reached DONE; a word taken back withdrew its claim and kept
+  the row; 5 credit notes seen, flagged as candidates, 0 claims closed by them.
+  walk negative controls red: the unpatched module, and a patched module whose claim_queue.py was
+  never placed.
+  installer rehearsed whole on a fake root: install green · rerun ALREADY INSTALLED · wrong live
+  bytes refused with nothing placed · restore returns all four files BYTE-EXACT to their original
+  md5s, removes claim_queue.py and leaves no stray.
+
+INSTALL  bash /root/deploy/repo/deploy_kits/S312_CLAIM_QUEUE/install_S312_CLAIM_QUEUE.sh

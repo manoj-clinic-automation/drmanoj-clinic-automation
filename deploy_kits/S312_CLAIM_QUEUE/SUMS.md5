@@ -1,0 +1,9 @@
+a61744ee8845b6f718af852edcac5eb0  claim_queue.py
+c4a23061e70f1dd8909557392443520c  patch_stock_claims_s312.py
+ec7e6942375bc90893619e54c07e66eb  patch_darpan_claims_s312.py
+2cf2513d85ead2b5c80066eab73a550c  patch_cards_s312.py
+99f394d01767ea0b15b9d1f2ed132758  selftest_s312.py
+69885a18c05cd8cebdfd4648d0c25a9c  walk_s312.py
+15b55a4cd88f595ebe393dba30b695a2  install_S312_CLAIM_QUEUE.sh
+1cab588e813af1b61383e7ad132c471d  KIT_ID.txt
+81cfe55c934a84969e64691238dde8c6  README.md

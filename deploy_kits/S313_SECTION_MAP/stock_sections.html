@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The section map</title>
+<style>
+/* S313 THE SECTION MAP (F-528) -- the owner's page. Same tokens as the hub and the
+   desk, both schemes. Read-only to the estate: nothing else reads this table yet. */
+:root{
+  --ground:#F6F8F7;--surface:#FFF;--surface-2:#EDF2F0;--ink:#15201E;--ink-2:#3D4B48;--muted:#66756F;--line:#D9E2DF;
+  --accent:#0E5C58;--on-accent:#FFF;--accent-soft:#D8E9E6;--ok:#0E5C58;--diff:#8C3A2B;--diff-soft:#F6E3DF;--warn:#8A5A12;--warn-soft:#F7ECD8;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}}
+:root[data-theme="dark"]{
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:16px 16px 64px}
+h1{font-size:22px;margin:14px 0 4px}
+.lead{color:var(--ink-2);margin:0 0 14px;max-width:70ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.sub{color:var(--muted);font-size:13.5px}
+.figs{display:flex;flex-wrap:wrap;gap:14px;margin:8px 0 0;font-size:14.5px}
+.figs span{background:var(--surface-2);border-radius:8px;padding:5px 10px}
+.tbl{overflow-x:auto;margin-top:8px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:620px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:13px}
+tr.d td{background:var(--warn-soft)}
+.why{color:var(--warn);font-size:13px;display:block}
+.b{display:inline-block;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);
+   border-radius:8px;padding:5px 10px;margin:2px 4px 2px 0;font-size:13.5px;cursor:pointer;font-family:inherit}
+.b.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.b.t{background:transparent}
+.msg{margin-top:8px;font-size:14px;color:var(--ok)}
+.msg.bad{color:var(--diff)}
+.tag{font-size:12px;color:var(--muted)}
+.own{color:var(--accent);font-size:12px}
+</style></head>
+<body><div class="wrap">
+<h1>The section map</h1>
+<p class="lead">One stored answer to <b>which section an item belongs to</b> &mdash; Medicines, Orthotics or
+Consumables. It is here to be corrected long before anything depends on it: a monthly orthotics round is a
+promise that <i>these</i> lines were counted and <i>those</i> were not, and four different rules in this system
+would currently name four different sets of lines. <b>Nothing else reads this table yet</b>, so a wrong row
+costs nothing today.</p>
+<div id="sum" class="card"><div class="sub">Loading&hellip;</div></div>
+<div class="card">
+  <button class="b t" id="fAll">Everything</button>
+  <button class="b on" id="fDis">Only where the rules disagree</button>
+  <div id="msg" class="msg"></div>
+  <div class="tbl"><table><thead><tr>
+    <th>Item</th><th>Section</th><th>What the rules say</th><th>Move it</th>
+  </tr></thead><tbody id="rows"><tr><td colspan="4" class="sub">Loading&hellip;</td></tr></tbody></table></div>
+</div>
+</div>
+<script>
+const BASE="/finance/stock";
+let ONLY=true, BUSY=false, D=null;
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+function say(t,bad){const m=document.getElementById("msg");m.className="msg"+(bad?" bad":"");m.textContent=t||"";}
+function ruleBits(r){
+  const y=[];
+  y.push(r.consumable?"consumable":null);
+  y.push(r.orthotic?"orthotic":null);
+  y.push(r.ortho_priced?"priced as ortho":null);
+  if(r.counter_vocab===true) y.push("on the counter's list");
+  if(r.counter_vocab===false) y.push("not on the counter's list");
+  let h='<span class="tag">'+esc(y.filter(Boolean).join(" · ")||"nothing claims it")+'</span>';
+  for(const w of (r.why||[])) h+='<span class="why">'+esc(w)+'</span>';
+  return h;
+}
+function render(){
+  if(!D) return;
+  const s=D.summary, bs=s.by_section||{};
+  document.getElementById("sum").innerHTML=
+    '<div><b>'+s.total+'</b> items classified · <b>'+D.disputed+'</b> where the rules disagree</div>'
+    +'<div class="figs"><span>Medicines <b>'+(bs.Medicines||0)+'</b></span>'
+    +'<span>Orthotics <b>'+(bs.Orthotics||0)+'</b></span>'
+    +'<span>Consumables <b>'+(bs.Consumables||0)+'</b></span>'
+    +'<span>Set by you <b>'+s.owner_set+'</b></span>'
+    +'<span>Moved off the seed <b>'+s.moved+'</b></span></div>'
+    +'<div class="sub" style="margin-top:8px">Seeded by the rule that already prints the section heading on a '
+    +'Marg voucher — consumable first, then orthotic, else medicine. Word lists: '+esc(D.list_version)+'. '
+    +'Your word is never overwritten by a re-seed.</div>';
+  const rs=D.rows||[];
+  document.getElementById("rows").innerHTML = rs.length ? rs.map(r=>
+    '<tr'+(r.disputed?' class="d"':'')+'><td><b>'+esc(r.item)+'</b>'
+    +(r.moved?'<span class="own"> — you moved it from '+esc(r.seeded_as)+'</span>':'')+'</td>'
+    +'<td>'+esc(r.section)+(r.source==="owner"?'<span class="own"> (yours)</span>':'')+'</td>'
+    +'<td>'+ruleBits(r)+'</td>'
+    +'<td>'+(D.sections||[]).map(sec=>'<button class="b'+(sec===r.section?' on':'')
+      +'" data-item="'+esc(r.item)+'" data-sec="'+esc(sec)+'">'+esc(sec)+'</button>').join("")+'</td></tr>'
+  ).join("") : '<tr><td colspan="4" class="sub">Nothing to show — the four rules agree on every item.</td></tr>';
+  document.getElementById("fAll").className="b t"+(ONLY?"":" on");
+  document.getElementById("fDis").className="b t"+(ONLY?" on":"");
+}
+async function load(){
+  try{
+    const r=await fetch(BASE+"/api/sections?_="+Date.now()+(ONLY?"&disputed=1":""),{cache:"no-store"});
+    const j=await r.json();
+    if(!j.ok){say(j.message||"The server did not answer.",1);return;}
+    D=j; render();
+  }catch(e){say("The server did not answer.",1);}
+}
+document.getElementById("fAll").onclick=()=>{ONLY=false;load();};
+document.getElementById("fDis").onclick=()=>{ONLY=true;load();};
+document.addEventListener("click", async e=>{
+  const b=e.target.closest("button[data-item]");
+  if(!b||BUSY) return;
+  BUSY=true;
+  try{
+    const r=await fetch(BASE+"/api/sections/set",{method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({item:b.getAttribute("data-item"),section:b.getAttribute("data-sec")})});
+    const j=await r.json();
+    say(j.ok?(b.getAttribute("data-item")+" — "+j.message):(j.message||"Not saved."), !j.ok);
+    if(j.ok) await load();
+  }catch(err){say("Not saved.",1);}
+  BUSY=false;
+});
+load();
+</script></body></html>
