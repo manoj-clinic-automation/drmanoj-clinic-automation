@@ -1,0 +1,9 @@
+KIT      : S315_OWNER_SHEETS
+SESSION  : 269 (parent -- Systems & Automation)
+DATE     : 2026-09-18
+TARGET   : VPS -- /root/finance/owner_sheets.py (NEW) · /root/finance/finance_app.py (patched on the box) · /root/portal/portal.py (one tile)
+FROM     : finance_app.py 8dc77ef4 · portal.py e13adbd6 (both held against the 18-Sep 01:35 bundle)
+TO       : owner_sheets.py NEW · finance_app.py c9f73b18 · portal.py 4b365709 (predicted; read back by the installer)
+NEEDS    : nothing beyond those two pins
+BUILDS   : D546 -- the owner's X-ray price list and procedure -> consumables map, as a page he can work, seeded from his own billed amounts and the pharmacy item master; the read-back door the chamber screen will use.
+NUMBERS  : kit S315 (claimed on the System Board by S269 at 14:28 IST).
