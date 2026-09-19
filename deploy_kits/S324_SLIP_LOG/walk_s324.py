@@ -136,6 +136,7 @@ def main():
     xr = [s for s in svc if s["kind"] == "xray"]
     pr = [s for s in svc if s["kind"] == "proc"]
     check("the rate page has X-ray and procedure lines", xr and pr)
+    svc_before = [tuple(r) for r in con.execute("SELECT * FROM owner_service WHERE id<>? ORDER BY id", (xr[0]["id"],))]
     con.execute("UPDATE owner_service SET price_p=50000 WHERE id=?", (xr[0]["id"],))
     con.commit()
     s, t = page("shavez")
@@ -211,7 +212,8 @@ def main():
     check("a day Docterz has not sent reads as waiting", "has not arrived yet" in t)
     check("a bad date is sent home", get("manoj", "/finance/slips/report/2026-13-45").status_code == 302)
     # ---- nothing outside its own tables was written
-    check("owner_service untouched but for the walk's own price", con.execute("SELECT COUNT(*) FROM owner_service WHERE price_p=50000").fetchone()[0] == 1)
+    check("the rate page untouched by the tile (every other line byte-equal)",
+          [tuple(r) for r in con.execute("SELECT * FROM owner_service WHERE id<>? ORDER BY id", (xr[0]["id"],))] == svc_before)
     print("WALK OK %d checks" % N[0])
 
 
