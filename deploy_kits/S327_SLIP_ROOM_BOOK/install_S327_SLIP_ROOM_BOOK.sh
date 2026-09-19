@@ -1,0 +1,79 @@
+#!/bin/bash
+# =============================================================================
+#  install_S327_SLIP_ROOM_BOOK.sh · kit S327_SLIP_ROOM_BOOK (session 271, 19-Sep-2026, the first live morning)
+#
+#  Run by (one line on the VPS):
+#    cd /root/deploy/repo && git pull --ff-only && bash /root/deploy/repo/deploy_kits/S327_SLIP_ROOM_BOOK/install_S327_SLIP_ROOM_BOOK.sh
+#
+#  THE OWNER, the first live day: the room heading reads "X-ray room work"; each room line shows the
+#  slip's amount read-only, then UPI / Cash / Done; the book section is "Start new book", for when a
+#  book is finished. And "procedure slips up to 1136 are of the previous days" -- a ONE-TIME request at
+#  the start: fix_s327.py takes those old numbers off. After that every skipped number keeps asking its
+#  reason (Radd / Kharab / Baad mein) -- the owner's rule, restated the same day.
+#
+#  FILES:  /root/finance/slip_log.py  36cb5767 -> (TO below)  full-file replacement, backed up beside itself
+#          /root/finance/finance_app.py must be 41e0ffb4 (S324) -- checked, not changed
+#  DATA:   fix_s327.py -- placeholders below each book's start number voided. slip / slip_book only.
+#  Gates: SUMS + KIT_ID -> pins -> compile -> THE WALK ON THIS BOX (87 checks, scratch copy) -> backup ->
+#  place -> fix -> restart clinic-finance -> health. Any red after placing: the file restored, restarted.
+# =============================================================================
+set -u
+KIT="S327_SLIP_ROOM_BOOK"
+KDIR="$(cd "$(dirname "$0")" && pwd)"
+SPY="${SPY:-/usr/bin/python3}"
+ROOT="${ROOT:-/root}"
+FIN="$ROOT/finance"; POR="$ROOT/portal"
+DBF="${FINANCE_DB:-$FIN/finance.db}"
+STAMP="$(date +%Y%m%d_%H%M%S)"
+WALK="/tmp/s327_walk_$STAMP"
+FROM=36cb57671a730c868b2371625aa70810
+TO=6d825d918bb4ddfd471f64e526a0e758
+FA=41e0ffb4ce8c94a76c251294ef3e5d31
+DEST="$FIN/slip_log.py"
+m5() { md5sum "$1" 2>/dev/null | awk '{print $1}'; }
+say() { echo "$@"; }
+cd "$KDIR" || { say "!! cannot enter the kit folder"; exit 1; }
+md5sum -c SUMS.md5 >/dev/null 2>&1 || { say "!! [1/7] SUMS.md5 gate failed - nothing installed"; exit 1; }
+[ "$(awk 'NR==1{print $3}' KIT_ID.txt)" = "$KIT" ] || { say "!! [1/7] KIT_ID.txt names another kit - nothing installed"; exit 1; }
+[ "$(m5 slip_log.py)" = "$TO" ] || { say "!! [1/7] kit slip_log.py is not its pin - nothing installed"; exit 1; }
+say "[1/7] kit gates green"
+if [ "$(m5 "$DEST")" = "$TO" ]; then say "-- ALREADY INSTALLED. Re-running the fix (idempotent):"; "$SPY" -B fix_s327.py "$DBF"; exit 0; fi
+FROM2=630adb8b045b89197e1f403a68b30b4c          # the first S327 build, if it was installed before the owner's restatement
+[ "$(m5 "$DEST")" = "$FROM2" ] && FROM="$FROM2"
+[ "$(m5 "$DEST")" = "$FROM" ] || { say "!! [2/7] $DEST is $(m5 "$DEST"), expected $FROM - nothing installed"; exit 1; }
+[ "$(m5 "$FIN/finance_app.py")" = "$FA" ] || { say "!! [2/7] finance_app.py is not the S324 pin - nothing installed"; exit 1; }
+say "[2/7] live pins exact"
+"$SPY" -m py_compile slip_log.py fix_s327.py || { say "!! [3/7] compile failed - nothing installed"; exit 1; }
+say "[3/7] py_compile green"
+mkdir -p "$WALK/app" || exit 1
+cp -p "$FIN"/*.py "$WALK/app/" 2>/dev/null; cp -p "$FIN"/*.html "$FIN"/*.json "$FIN"/*.sql "$WALK/app/" 2>/dev/null
+[ -d "$FIN/finance_ui" ] && cp -rp "$FIN/finance_ui" "$WALK/app/"
+cp -p slip_log.py "$WALK/app/slip_log.py"
+"$SPY" -c "import sqlite3,sys; s=sqlite3.connect('file:%s?mode=ro'%sys.argv[1],uri=True); d=sqlite3.connect(sys.argv[2]); s.backup(d); d.close(); s.close()" "$DBF" "$WALK/walk.db" \
+  || { say "!! [4/7] no scratch copy - nothing installed"; rm -rf "$WALK"; exit 1; }
+"$SPY" -c "import sqlite3,sys; c=sqlite3.connect(sys.argv[1]); [c.execute('DROP TABLE IF EXISTS '+t) for t in ('slip_item','slip','slip_book')]; c.commit()" "$WALK/walk.db"
+"$SPY" -B seed_s324.py "$WALK/walk.db" >/dev/null || { say "!! [4/7] seed on the scratch copy failed"; rm -rf "$WALK"; exit 1; }
+WOUT="$( cd "$WALK/app" && FINANCE_DB="$WALK/walk.db" FINANCE_ALLOW_HEADER_AUTH=1 SLIP_NOW="$(date +%Y-%m-%dT%H:%M:%S)" \
+         FINANCE_SSO_DIR="$POR" PETTY_UPLOAD_DIR="$WALK/uploads" timeout 170 "$SPY" -B "$KDIR/walk_s327.py" "$WALK/app" 2>&1 | tail -1 )"
+echo "$WOUT" | grep -q "^WALK OK" || { say "!! [4/7] walk red: $WOUT - nothing installed"; rm -rf "$WALK"; exit 1; }
+rm -rf "$WALK"
+say "[4/7] $WOUT"
+BAK="$DEST.bak_S327_${FROM:0:8}"
+\cp -p "$DEST" "$BAK" || { say "!! [5/7] backup failed - nothing placed"; exit 1; }
+restore() { say "!! RED - restoring slip_log.py"; \cp -p "$BAK" "$DEST"; systemctl restart clinic-finance; sleep 3; say "   $DEST $(m5 "$DEST")"; exit 1; }
+\cp -p slip_log.py "$DEST" || restore
+[ "$(m5 "$DEST")" = "$TO" ] || restore
+say "[5/7] placed (backup $BAK)"
+"$SPY" -B fix_s327.py "$DBF" || restore
+systemctl restart clinic-finance || restore
+sleep 4
+systemctl is-active --quiet clinic-finance || restore
+say "[6/7] fixed; clinic-finance active"
+c2=$(curl -s -o /dev/null -m 8 -w '%{http_code}' http://127.0.0.1:8106/finance/healthz)
+c4=$(curl -s -o /dev/null -m 8 -w '%{http_code}' http://127.0.0.1:8106/finance/slips)
+say "health : finance $c2 · /finance/slips without a login $c4 (302 expected)"
+[ "$c2" = 200 ] && { [ "$c4" = 302 ] || [ "$c4" = 401 ]; } || restore
+journalctl -u clinic-finance --since "-2 min" --no-pager 2>/dev/null | grep -q "NOT mounted" && restore
+say "[7/7] all green"
+md5sum "$DEST"
+say "$KIT: DONE"
