@@ -1,0 +1,1 @@
+S329_SLIP_MENU kit S329_SLIP_MENU — the tile opens a menu; one upload tap per X-ray (session 271, 19-Sep-2026)
