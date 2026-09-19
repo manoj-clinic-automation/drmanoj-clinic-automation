@@ -1,3 +1,79 @@
+# OWNER TO-DO — LIVE · refreshed at the **S269 close** (the parent project), 19-Sep-2026
+
+*Detail: `START_HERE_SESSION_271.md` (clone) · `S269_BUILD_BRIEF.md`. Everything else this session wrote
+is evidence. Your ruling of 17-Sep still governs this list — nothing here is being chased.*
+
+## ⭐ WHAT NEEDS YOU AFTER S269 — **one double-click and one answer** *(the nightly is done)*
+
+**1 · THE PUBLISH — your double-click, and it needs ONE MORE GO.** Your first click on 19-Sep was **refused by our own safety gate, and the gate was right** — my fault, not yours: a line I had written into the fault register quoted a fake password in order to explain a fake password, and the gate cannot tell a fake one from a real one. It is fixed, nothing was published, nothing needs changing anywhere else, and the same check now passes. Nothing else about the click has changed. It carries the S269 canon (Register **v5.111**, Fault **v2.96**,
+Archive **v1.108**, Runbook **v191**, `START_HERE_SESSION_271`, `END_OF_SESSION_PROMPT_v16`, the manifest
+with all four surfaces and the F-543 repair, `live_pins_S269close.txt` 402 rows, `MD5SUMS_ALL` **664 rows,
+664 green — the first time this folder has read clean both ways**) and the S323 kit. Everything else this session built is already installed — the publish is
+the record, not the install.
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · ~~THE NIGHTLY~~ — **DONE, you already did it.** Your 19-Sep run had died halfway inside the SSD
+mirror step (**F-546**). I can see your fresh run: all three reports rewritten, the rebuild REBUILT, the
+canon gate FIXED, and `KB_mirror_ClaudeCowork_nightly_2026-09-19.zip` now complete on the SSD. Nothing
+further here.
+
+**3 · ONE ANSWER, and it is the next session's first question — your own words:** *how do slips get
+logged?* The chamber screen is built on your answer and not before it.
+
+*Also yours, in your own time: **approve the X-ray and procedure lists** and put your prices on the
+procedures — the X-rays already carry yours. And the **two contact exports are in hand** (19-Sep): 7,418
+contacts from `bocbareilly`, 2,972 from the clinic account; the phonebook work starts in the next chat.*
+
+```
+https://followup.dr-manoj.in/finance/clinic/sheets
+```
+
+## ⭐ WHAT I BUILD NEXT · THIS PROJECT — refreshed at S269
+
+1. **The slip flow**, on your answer — then the chamber screen.
+2. **The phonebook** from your two exports (they hold patient numbers, so they never enter the
+   repository — F-185).
+3. **The freshness page** — nothing serves the collector's own HTML, so the one surface that dates all
+   thirty watched jobs has never been readable in a browser (**F-540**). It also makes the link S310
+   prints true.
+4. **The `watcher` check made honest** (**D554** / **F-547**): red during clinic hours when the heartbeat
+   is stale. As it stands it can only go red in a 60-second window, so its green means nothing.
+5. **The last four units into the backup** (**D555**): `fitlog`, `gutlog`, `rxguard`, `email-agent.timer`.
+6. **Fault injection for `backup` and `outbox`** — closes D525 for good.
+7. **The daily report has said “Attendance report not received” for a week** while the attendance mails
+   arrive beside it — named on four unattended nights, and no close has taken it up.
+8. **PARKED at your word:** the bank-SMS feed.
+9. ~~F-496 — the backup carries whether each job is switched on~~ (**S317**) · ~~D525's never-fired
+   checks~~ (**S319** + the paper) · ~~EOS v16~~ · ~~the F-384 sweep~~ (**S320**, now nightly) · ~~the
+   procedure → consumables map and the X-ray price list~~ (**S316** … **S323**, from your own words) —
+   **done.**
+
+## ✅ DONE AT THE S269 CLOSE — 19-Sep-2026 (the parent)
+
+- ~~**Your X-ray and procedure lists arriving blank**~~ — **S316: both arrive written**, 19 X-ray studies
+  out of your own 6,177-entry register and 17 procedures out of your S225 rulings.
+- ~~**“Page not accessible” when you pressed Approve**~~ — **S321 (F-544): every button on that page had
+  been posting to the wrong address since it was built.** The test that passed 33 checks could not see it,
+  because it posted the addresses itself instead of clicking them.
+- ~~**The X-rays needing views and prices**~~ — **S321: your tariff, in your words** (D551).
+- ~~**Casts and slabs needing the word fibre, and both forms priced separately**~~ — **S322** (D552),
+  with right / left on the ILI lines and the limb X-rays as a switch on the line, not two lines.
+- ~~**The X-ray list in your way once it was done**~~ — **S323: off the page, one click away** (D553);
+  consumables read-only; names read `A/K (Above knee) fibre cast`.
+- ~~**The backup not knowing which jobs are switched on**~~ — **S317 (F-496 closed)**, and on its first run
+  it found **eleven enabled jobs whose start-up files were in no backup at all** (F-541); **S318** carried
+  seven of them and now names any that go missing, every morning.
+- ~~**“Checks that have never fired: seven”**~~ — **S319: five**, and the two that can never fire are named
+  as such. The rest of that question is answered in the register: two prove themselves by 1-Oct, two are
+  honest quiet guards, and one — `watcher` — cannot go red at all (F-547).
+- ~~**The manifest's duplicate CURRENT rows, found by hand twice before**~~ — **S320: your PC's nightly now
+  watches for them**, and four families were corrected at this close (F-543).
+
+---
+
 # OWNER TO-DO — LIVE · refreshed at the **S268 close** (the Sanjeevni project), 18-Sep-2026
 
 *The Sanjeevni sections are rewritten here; the clinic-core sections are exactly as the parent's S267 close left them and are the parent's to refresh.*
