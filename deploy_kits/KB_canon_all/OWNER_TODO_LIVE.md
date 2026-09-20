@@ -1,4 +1,4 @@
-# OWNER TO-DO — LIVE · refreshed at the **S272 close** (the Sanjeevni project), 20-Sep-2026 — the parent's sections exactly as S271 left them
+# OWNER TO-DO — LIVE · refreshed at the **S274 close** (the Sanjeevni project), 20-Sep-2026 — the parent's sections exactly as S271 left them; the S272 Sanjeevni sections retained below
 
 *Detail: `START_HERE_SESSION_273.md` · `S271_BUILD_BRIEF.md`. Everything else this session wrote is
 evidence. Your ruling of 17-Sep still governs this list — nothing here is being chased.*
@@ -171,6 +171,36 @@ stale `/root/wa/.env.bak*` · the never-cited working papers · `KB_canon_all\MD
 four cold-kit zips by rule E, the rest your own downloads — Docterz CSVs, follow-up audits, bank PDFs)
 and the 9 at `D:\dr-manoj-git\` · **`D:\dr-manoj-git\_to_delete_S263\`** — two empty git lock files my shell left
 (F-511), with `WHY_SAFE.txt`; delete when convenient.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S274 close
+
+**A · THE PUBLISH — one double-click.** It carries this close's record only (the S274 canon, the Book v1.6); everything built today is already live on the server from your five lines.
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**B · NOTHING ELSE.** The spine proves itself for seven nights (`gate 13/13`, from 20-Sep). The order rehearsal and near-expiry write their files nightly; the first order score lands 27-Sep; the near-expiry question (27 batches, F-576) is answered by the October *Stock expiry* export.
+
+*Yours, when you want them — never as a prompt: the buying rules and the four lists (`/root/finance/spine/order_rules.json`), whose day includes "make today's order", the wording on Shavez's tile, and the eighteen step-2 answers; the 06-Sep stock check is not touched by anything until you say it is completed.*
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S274 close
+
+1. **Read the first real morning** on Shavez's tile (21-Sep): the tick's lag behind the door; a one-line proposal if it is hours.
+2. **The category-list signature to the VPS** (`signatures.json` `b2dcb211` → manojz's `a987a08e`) — the first real rescue for the new rescan.
+3. **The rung-4 paper: ordering onto the spine**, ready for the day the seven nights are up and you have ruled on the lists.
+4. **After the seven nights, on your word, one screen at a time:** ordering → stock now → Amir's pages → returns / Darpan / claim queue → discount attribution → the stock-check screens last, after count #1 closes.
+
+## ✅ DONE AT THE S274 CLOSE — 20-Sep-2026 (the Sanjeevni project) — six of your seven
+
+- ~~**1 · Shavez's morning tile**~~ and ~~**2 · your overdue line**~~ — **`S337_SHAVEZ_MORNING_2` LIVE** (S334 published and restored itself at its own gate, F-573; same file, gate corrected).
+- ~~**3 · Refused Marg files kept, not deleted**~~ — **`S336_QUARANTINE` LIVE 09:02**; a refused file with no person's detail stays on the server; the 06:25 rescan re-judges it when the signatures change.
+- ~~**4 · The spine on the health page**~~ — **`S338_SPINE_HEALTH` LIVE 09:06**; two rows on the health page, red by itself if the gate fails. Its database into the nightly backup remains the parent's line.
+- ~~**5 · Ordering prepared against the spine, not switched**~~ — **`S341_ORDER_REHEARSAL` LIVE 09:44**; first rehearsal 47 lines · Rs 88,541 · 33 to confirm.
+- ~~**6 · Near-expiry**~~ — **`S343_NEAR_EXPIRY` LIVE 09:38**; nightly file beside the spine.
+- ~~**7 · The Sanjeevni Book**~~ — **v1.6** in canon and in this project.
+
+*(The S272 wording, retained below for the record.)*
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S272 close
 
