@@ -1,0 +1,9 @@
+KIT      : S349_WATCHER_FRESHNESS
+SESSION  : 276 (parent -- Systems & Automation, clinic core)
+DATE     : 2026-09-20
+TARGET   : VPS -- /root/finance/finance_app.py (three anchored edits) + NEW /root/finance/freshness_page.py; clinic-finance restarted
+FROM     : finance_app.py 7866b1ee6e70d19b5c096ef1b0099bd3 (S342), reproduced offline from the 20-Sep bundle through the S332 and S340 patchers and READ WHOLE this session
+TO       : read back at install, never predicted (F-472); offline the same patch gives 29819879dec3f057b7690e004e4e87cb
+DATA     : no -- code only; new setting keys read with defaults (pipeline.clinic_sunday, default 0); nothing written to the database
+BUILDS   : on the owner's two ticks of 20-Sep-2026: the watcher rule (D554 / F-547) and the freshness page (F-540)
+NUMBERS  : kit S349 (claimed on the System Board board/_numbers v22->v23 before this folder was named, per F-515)

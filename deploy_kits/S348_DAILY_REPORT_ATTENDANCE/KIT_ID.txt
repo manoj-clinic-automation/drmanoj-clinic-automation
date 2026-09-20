@@ -1,0 +1,9 @@
+KIT      : S348_DAILY_REPORT_ATTENDANCE
+SESSION  : 276 (parent -- Systems & Automation, clinic core)
+DATE     : 2026-09-20
+TARGET   : Apps Script project DailyClinicReports (drmka.ortho, script id 1WFQrMhcDwiaTA2IHaUR8rk5dTWmvKxGs_iL8YcFZhESGCMaBgPkyTOz9) -- Code.gs v5 -> v6.1
+FROM     : the live Code.gs, 964 lines, = the S230_GAS_EXPORT photograph byte-for-byte outside its four masked MyOperator values (hash of the masked text d0a17cbb, in-page)
+TO       : 1050 lines, masked-text hash cb859b0f in the page after the save = this folder's DailyClinicReports/Code.gs (which carries the S230 masks, never the values)
+DATA     : no -- code only; no trigger changed; placed by the assistant in the owner's signed-in browser (D577); NO INSTALLER, this is the record
+BUILDS   : on the carried backlog line "Attendance report not received" (OWNER_TODO_LIVE, item 7 of WHAT I BUILD NEXT at S269)
+NUMBERS  : kit S348 (claimed on the System Board board/_numbers v21->v22 before this folder was named, per F-515)
