@@ -1,36 +1,43 @@
-# OWNER TO-DO — LIVE · refreshed at the **S273 close** (the parent), 20-Sep-2026 — the Sanjeevni sections exactly as S274 left them, below
+# OWNER TO-DO — LIVE · refreshed at the **S276 close** (the parent), 20-Sep-2026 — the Sanjeevni sections exactly as S274 left them, below
 
-*Detail: `START_HERE_SESSION_276.md` · `S273_BUILD_BRIEF.md`. Everything else this session wrote is evidence.
+*Detail: `START_HERE_SESSION_277.md` · `S276_BUILD_BRIEF.md`. Everything else this session wrote is evidence.
 Your ruling of 17-Sep still governs this list — nothing here is being chased.*
 
-## ⭐ WHAT NEEDS YOU AFTER S273 — **one double-click**
+## ⭐ WHAT NEEDS YOU AFTER S276 — **one double-click, and two lines whenever you like**
 
-**1 · THE PUBLISH — your double-click.** It carries this close's record (Register **v5.115**, Archive
-**v1.112**, Fault **v2.100**, Runbook **v195**, `START_HERE_SESSION_276`, the build brief, the manifest,
-`live_pins_S273close.txt`). Everything built this session is already installed and working. The publish
-is the record, not the install.
+**1 · THE PUBLISH — your double-click.** It carries this close's record (Register **v5.116**, Archive **v1.113**,
+Fault **v2.101**, Runbook **v196**, `START_HERE_SESSION_277`, the build brief, the manifest, `live_pins_S276close.txt`).
+Everything built today is already installed and working. The publish is the record, not the install.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Staff: 2–3 days of X-ray files in the *X-ray test* folder** (the shortcut is on the reception desktop).
-Then open the test page once:
+**2 · Staff: 2–3 days of X-ray files in the *X-ray test* folder** (the shortcut is on the reception desktop). Unchanged from S273.
 
-```
-https://followup.dr-manoj.in/finance/records/xray-test
-```
+**3 · Two words, yours, no hurry (neither is urgent):** (a) the nightly unattended task's stored prompt still names
+`START_HERE_PROMPT_v8` — say "repoint it" and I will set it to v10 (a scheduled task's prompt is your setting to change);
+(b) say "yes" and the unattended reports move into the repository, where the nightly gate covers them (until then each
+night's report exists only in this project's knowledge and I rescue it by hand).
 
-## ⭐ WHAT I BUILD NEXT · THIS PROJECT — refreshed at S273
+## ⭐ WHAT I BUILD NEXT · THIS PROJECT — refreshed at S276
 
 1. **Live X-ray filing** — from the test run's evidence; then the one-time import of the old X-rays.
-2. **X-ray items into Check karein** (a file whose ID did not match; an X-ray with no file by the next day).
-3. **Sending reports to patients on WhatsApp** — once sending is cleared (F-82).
+2. **X-ray items into Check karein**; **old and new X-ray side by side** on the patient page.
+3. `gas_export.py`'s weekly comparison onto the current photograph of the daily-report script (F-591).
+4. **Sending reports to patients on WhatsApp** — once sending is cleared (F-82).
 
-Then, carried: your approvals and procedure prices on the rate page · the phonebook from your two exports ·
-the freshness page · the `watcher` check · the last four units into the backup · fault injection ·
-"Attendance report not received" · Manoj Bhati's petty-book layout · Docterz uploads to stop on your word
-after the 2–4-week parallel period · bank-SMS PARKED.
+Then, carried: the phonebook from your two exports · the last four units into the backup (your ruling on `fitlog` /
+`gutlog` / `rxguard` / `email-agent`) · fault injection for `backup`/`outbox` · Bhati's petty-book layout (offered) ·
+Docterz uploads to stop on your word after the 2–4-week parallel period · bank-SMS PARKED.
+
+## ✅ DONE AT THE S276 CLOSE — 20-Sep-2026 (the parent)
+
+- ~~**The pharmacy spine in no backup**~~ — **S347 live 10:55**: `spine.db` and its readings in the encrypted nightly, its code in the code bundle.
+- ~~**"Attendance report not received" on the daily report**~~ — **S348 live 11:15**: the report reads your own attendance server's mail (the old machine's mail stopped on 1-Aug). Tomorrow's report shows real figures.
+- ~~**The freshness page**~~ — **S349 + S350 live 12:48**: `https://followup.dr-manoj.in/finance/freshness`, linked from the health page.
+- ~~**The watcher rule**~~ — **S349 live 12:42**: red in clinic hours when the medical PC falls silent; info at night and on Sundays.
+- ~~**Two unattended reports that existed nowhere but here**~~ — rescued to your PC (`01_RESCUED_FROM_PROJECT_KNOWLEDGE\S276_RESCUE`).
 
 ## ✅ DONE AT THE S273 CLOSE — 20-Sep-2026 (the parent)
 
