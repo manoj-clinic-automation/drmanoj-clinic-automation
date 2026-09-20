@@ -1,0 +1,8 @@
+b02e1e2c7b495f9ae5f24a7f96ac0bd7  KIT_ID.txt
+877b540ff220fb22f7d52f8c716204db  README.md
+280937066a2f831171a5f18800a23cf8  install_S336_QUARANTINE.sh
+75b8056cc43ad6f3034ea1fa819ed7a8  marg_take.py
+45ca44aad0311657091e4364c4d81e37  phi_scan.py
+c6a28fc62e3048c0ebbfb0c98679da8c  marg_rescan.py
+0bbd8a56aaf3ef52b68b1d8ed7d21bd3  marg_rescan_vps.py
+6045690c9bce79f8223a5b044b82a2f9  selftest_s336.py
