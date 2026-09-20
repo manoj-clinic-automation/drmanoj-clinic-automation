@@ -224,3 +224,7 @@ finance/REPORT_1.xls
 # ---------------------------------------------------------------------------
 !deploy_kits/S316_SHEETS_SEEDED/xray_seed.json
 !deploy_kits/S316_SHEETS_SEEDED/proc_seed.json
+
+# S331_SPINE (Sanjeevni, S272): spine_rules.json IS the kit's data payload -- every hand-declared fact
+# the spine uses, each with its source. Exact path, no wildcard (the S236 rule, F-300 family).
+!deploy_kits/S331_SPINE/spine_rules.json

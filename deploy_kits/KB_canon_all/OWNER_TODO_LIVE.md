@@ -1,55 +1,46 @@
-# OWNER TO-DO — LIVE · refreshed at the **S269 close** (the parent project), 19-Sep-2026
+# OWNER TO-DO — LIVE · refreshed at the **S271 close** (the parent project), 20-Sep-2026
 
-*Detail: `START_HERE_SESSION_271.md` (clone) · `S269_BUILD_BRIEF.md`. Everything else this session wrote
-is evidence. Your ruling of 17-Sep still governs this list — nothing here is being chased.*
+*Detail: `START_HERE_SESSION_273.md` · `S271_BUILD_BRIEF.md`. Everything else this session wrote is
+evidence. Your ruling of 17-Sep still governs this list — nothing here is being chased.*
 
-## ⭐ WHAT NEEDS YOU AFTER S269 — **one double-click and one answer** *(the nightly is done)*
+## ⭐ WHAT NEEDS YOU AFTER S271 — **one double-click**
 
-**1 · THE PUBLISH — your double-click, and it needs ONE MORE GO.** Your first click on 19-Sep was **refused by our own safety gate, and the gate was right** — my fault, not yours: a line I had written into the fault register quoted a fake password in order to explain a fake password, and the gate cannot tell a fake one from a real one. It is fixed, nothing was published, nothing needs changing anywhere else, and the same check now passes. Nothing else about the click has changed. It carries the S269 canon (Register **v5.111**, Fault **v2.96**,
-Archive **v1.108**, Runbook **v191**, `START_HERE_SESSION_271`, `END_OF_SESSION_PROMPT_v16`, the manifest
-with all four surfaces and the F-543 repair, `live_pins_S269close.txt` 402 rows, `MD5SUMS_ALL` **664 rows,
-664 green — the first time this folder has read clean both ways**) and the S323 kit. Everything else this session built is already installed — the publish is
-the record, not the install.
+**1 · THE PUBLISH — your double-click.** It carries this close's record (Register **v5.112**, Archive
+**v1.109**, Fault **v2.97**, Runbook **v192**, `START_HERE_SESSION_273`, the build brief, the manifest,
+`live_pins_S271close.txt`). Everything built this session is already installed and working — the publish
+is the record, not the install.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · ~~THE NIGHTLY~~ — **DONE, you already did it.** Your 19-Sep run had died halfway inside the SSD
-mirror step (**F-546**). I can see your fresh run: all three reports rewritten, the rebuild REBUILT, the
-canon gate FIXED, and `KB_mirror_ClaudeCowork_nightly_2026-09-19.zip` now complete on the SSD. Nothing
-further here.
+*Nothing else. The records build starts in the next chat — you have already given the word.*
 
-**3 · ONE ANSWER, and it is the next session's first question — your own words:** *how do slips get
-logged?* The chamber screen is built on your answer and not before it.
+## ⭐ WHAT I BUILD NEXT · THIS PROJECT — refreshed at S271, in your order
 
-*Also yours, in your own time: **approve the X-ray and procedure lists** and put your prices on the
-procedures — the X-rays already carry yours. And the **two contact exports are in hand** (19-Sep): 7,418
-contacts from `bocbareilly`, 2,972 from the clinic account; the phonebook work starts in the next chat.*
+1. **Blood PDFs into the clinic Drive + the 360° patient page** (visits, procedures, pharmacy bills and
+   returns, reports).
+2. **The X-ray inbox** — a read-only test run first (2–3 days), then live, then the old X-rays imported.
+3. **"Check karein"** at reception (Shavez checks) and **one collapsed line for you**.
+4. **Reports patients send on the clinic WhatsApp**, confirmed by reception.
+5. **Outside MRI/CT scans and hospital/surgery events.**
+6. **Sending reports to patients on WhatsApp** — once sending is cleared.
 
-```
-https://followup.dr-manoj.in/finance/clinic/sheets
-```
+Then, carried: your approvals and procedure prices on the rate page · the phonebook from your two exports ·
+the freshness page · the `watcher` check · the last four units into the backup · fault injection ·
+"Attendance report not received" · Manoj Bhati's petty-book layout (Back button on top, sections folded —
+offered, awaiting your word) · bank-SMS PARKED.
 
-## ⭐ WHAT I BUILD NEXT · THIS PROJECT — refreshed at S269
+## ✅ DONE AT THE S271 CLOSE — 19–20-Sep-2026 (the parent)
 
-1. **The slip flow**, on your answer — then the chamber screen.
-2. **The phonebook** from your two exports (they hold patient numbers, so they never enter the
-   repository — F-185).
-3. **The freshness page** — nothing serves the collector's own HTML, so the one surface that dates all
-   thirty watched jobs has never been readable in a browser (**F-540**). It also makes the link S310
-   prints true.
-4. **The `watcher` check made honest** (**D554** / **F-547**): red during clinic hours when the heartbeat
-   is stale. As it stands it can only go red in a 60-second window, so its green means nothing.
-5. **The last four units into the backup** (**D555**): `fitlog`, `gutlog`, `rxguard`, `email-agent.timer`.
-6. **Fault injection for `backup` and `outbox`** — closes D525 for good.
-7. **The daily report has said “Attendance report not received” for a week** while the attendance mails
-   arrive beside it — named on four unattended nights, and no close has taken it up.
-8. **PARKED at your word:** the bank-SMS feed.
-9. ~~F-496 — the backup carries whether each job is switched on~~ (**S317**) · ~~D525's never-fired
-   checks~~ (**S319** + the paper) · ~~EOS v16~~ · ~~the F-384 sweep~~ (**S320**, now nightly) · ~~the
-   procedure → consumables map and the X-ray price list~~ (**S316** … **S323**, from your own words) —
-   **done.**
+- ~~**How slips get logged**~~ — **your answer, built the same day:** the **OPD & X-ray/Proc Slips** tile,
+  live in seven kits (S324 … S330) — a menu; OPD and X-ray/Proc slips; the X-ray room's Paid/Done with the
+  amount shown; every skipped number answered; the Docterz upload list, one tap per X-ray; blood tests; the
+  night report beside the old one, reaching you and Shavez.
+- ~~**2681 read as NAYA**~~ and ~~**a new patient read as purana**~~ — fixed (S325, S326).
+- ~~**Knee studies ₹1,000**~~ — set on your rate page.
+- ~~**Lab reports by e-mail**~~ — your Apps Script is running (19-Sep 19:40 IST, 5 sent at once, every 15 min since).
+- ~~**The 360° patient-record plan**~~ — settled with you, written whole in the build brief.
 
 ## ✅ DONE AT THE S269 CLOSE — 19-Sep-2026 (the parent)
 

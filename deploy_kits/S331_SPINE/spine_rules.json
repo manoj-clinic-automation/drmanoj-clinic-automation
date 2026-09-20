@@ -1,0 +1,498 @@
+{
+ "_min_full_closing_items": "A WHOLE STORES closing printed with a category filter carries the same title; measured: the orthotics print of 27-Aug has 100 rows, every full closing since 26-Aug has 370-440 rows (Marg prints only items with stock), the 31-Mar one 980. A partial taken for full would show as a stock difference, never pass silently.",
+ "_what": "S272 spine rules: every hand-declared fact the spine uses, each with its source. The builder reads nothing else that a person wrote. Change = new version of this file, never an edit in place.",
+ "aliases": {
+  "1 *** PRIME CAST 4\"": {
+   "kind": "parsed",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PRIME CAST 4\""
+  },
+  "1 *** PRIME CAST 5\"": {
+   "kind": "parsed",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PRIME CAST 5\""
+  },
+  "1 PRIME CAST 4 1 1": {
+   "kind": "parsed",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PRIME CAST 4\""
+  },
+  "1 PRIME CAST 5 1 1": {
+   "kind": "parsed",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PRIME CAST 5\""
+  },
+  "2 *** PRIME PAD 6\" 1": {
+   "kind": "parsed",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PRIME PAD 6\""
+  },
+  "2 PRIME PAD 6 1 1": {
+   "kind": "parsed",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PRIME PAD 6\""
+  },
+  "BLING CONT LS BELT X": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "BLING CONT. LS BELT"
+  },
+  "CARTILOX GO CAPS": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "CARTILOX-GO CAPS"
+  },
+  "CREPE 8CM 3IN SUNLIN": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "CREPE 8CM*3IN SUNLIN"
+  },
+  "CREPE BANDAGE 6CM 2I": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "CREPE BANDAGE 6CM*2I"
+  },
+  "DOPACEF 1 5": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "DOPACEF 1.5"
+  },
+  "FOLITRAX 7 5": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "FOLITRAX 7.5"
+  },
+  "GLI ME SR1": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "GLI-ME SR1"
+  },
+  "GLI ME SR2": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "GLI-ME SR2"
+  },
+  "INTACOXIA 60": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "INTACOXIA-60"
+  },
+  "LEUKOCRAPE 10*4": {
+   "kind": "historical",
+   "source": "S270 verify_all (read from the exports)",
+   "to": "LEUKOCREPE 10CM*4IN"
+  },
+  "LEUKOCRAPE 15*4": {
+   "kind": "historical",
+   "source": "S270 verify_all (read from the exports)",
+   "to": "LEUKOCREPE 15CM*6INC"
+  },
+  "LEUKOCRAPE 6*4": {
+   "kind": "historical",
+   "source": "S270 verify_all (read from the exports)",
+   "to": "LEUKOCREPE 6 CM"
+  },
+  "LEUKOCRAPE 8*4": {
+   "kind": "historical",
+   "source": "S270 verify_all (read from the exports)",
+   "to": "LEUKOCREPE 8 CM"
+  },
+  "LEUKOCREPE 10 CM": {
+   "kind": "historical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "LEUKOCREPE 10CM*4IN"
+  },
+  "LEUKOCREPE 10CM 4IN": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "LEUKOCREPE 10CM*4IN"
+  },
+  "LEUKOCREPE 15 CM": {
+   "kind": "historical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "LEUKOCREPE 15CM*6INC"
+  },
+  "LEUKOCREPE 15CM 6INC": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "LEUKOCREPE 15CM*6INC"
+  },
+  "LINTIDE 145 MCG": {
+   "kind": "historical",
+   "source": "S272: Marg's item is named 'LINTIDE 145 MCG 1*1' (its packing inside the name); the purchase report prints it without the suffix -- measured, the two keys move +1/-1 against each other at the 17-Sep closing",
+   "to": "LINTIDE 145 MCG 1*1"
+  },
+  "LINTIDE 145 MCG 1 1": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "LINTIDE 145 MCG 1*1"
+  },
+  "NIPRO 3 ML DISPO SYR": {
+   "kind": "merged",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "DISPO SYRINGE NIPRO"
+  },
+  "ONBIXIN 12 5": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "ONBIXIN 12.5"
+  },
+  "OXFLIN OZ": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "OXFLIN-OZ"
+  },
+  "PARI 12 5": {
+   "kind": "merged",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PARI CR 12.5"
+  },
+  "PARI 12.5": {
+   "kind": "merged",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PARI CR 12.5"
+  },
+  "PARI 25": {
+   "kind": "merged",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PARI CR 25"
+  },
+  "PARI CR 12 5": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PARI CR 12.5"
+  },
+  "PREGABA D 50 20": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PREGABA D 50/20"
+  },
+  "PRETOL 16": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PRETOL-16"
+  },
+  "PRETOL 4": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PRETOL-4"
+  },
+  "PRIME CAST 4": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PRIME CAST 4\""
+  },
+  "PRIME CAST 5": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PRIME CAST 5\""
+  },
+  "PRIME PAD 4": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PRIME PAD 4\""
+  },
+  "PRIME PAD 6": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "PRIME PAD 6\""
+  },
+  "Q2 7 CAP": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "Q2-7 CAP"
+  },
+  "QBACK 1 5": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "QBACK 1.5"
+  },
+  "SILVEREX HEAL": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "SILVEREX-HEAL"
+  },
+  "SOLOPOSE 0 25": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "SOLOPOSE 0.25"
+  },
+  "SOLOPOSE 0 5": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "SOLOPOSE 0.5"
+  },
+  "TFCT NIB": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "TFCT-NIB"
+  },
+  "THI OQ AP": {
+   "kind": "historical",
+   "source": "S270 verify_all (read from the exports)",
+   "to": "THIO Q AP"
+  },
+  "THYRONORM 37 5": {
+   "kind": "canonical",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "THYRONORM 37.5"
+  },
+  "VINTAZ P 4500": {
+   "kind": "historical",
+   "source": "S270 verify_all (read from the exports)",
+   "to": "VINTAZ P 4500 INJ"
+  },
+  "ZZLINTIDE 145 MCG": {
+   "kind": "parsed",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "LINTIDE 145 MCG 1*1"
+  },
+  "ZZLINVIZ 600": {
+   "kind": "parsed",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "LINVIZ 600"
+  },
+  "ZZZLINVIZ 600": {
+   "kind": "parsed",
+   "source": "S229 item spine (marg_item_name), carried by S270 verify_all",
+   "to": "LINVIZ 600"
+  }
+ },
+ "exceptions": [
+  {
+   "check": "TOTAL units = sum of every line",
+   "file_md5_prefix": "7b9331f0",
+   "reason": "Marg's 31-03-2026 closing prints TOTAL 26,689 while its 980 lines add to 26,729. Confirmed Marg-side: the owner re-exported the same report on 20-Sep-2026 (md5 cc608ca2) and every one of its 1,143 rows is identical to the 27-Aug export except Marg's advertising footer. The reader balances all 20 later full closings to the unit. The LINES are taken; the printed total is carried as Marg's own.",
+   "source": "S272, owner export 20-Sep-2026"
+  },
+  {
+   "check": "TOTAL units = sum of every line",
+   "file_md5_prefix": "cd7dab7f",
+   "reason": "Marg's 31-03-2026 closing prints TOTAL 26,689 while its 980 lines add to 26,729. Confirmed Marg-side: the owner re-exported the same report on 20-Sep-2026 (md5 cc608ca2) and every one of its 1,143 rows is identical to the 27-Aug export except Marg's advertising footer. The reader balances all 20 later full closings to the unit. The LINES are taken; the printed total is carried as Marg's own.",
+   "source": "S272, owner export 20-Sep-2026"
+  },
+  {
+   "check": "TOTAL units = sum of every line",
+   "file_md5_prefix": "cc608ca2",
+   "reason": "Marg's 31-03-2026 closing prints TOTAL 26,689 while its 980 lines add to 26,729. Confirmed Marg-side: the owner re-exported the same report on 20-Sep-2026 (md5 cc608ca2) and every one of its 1,143 rows is identical to the 27-Aug export except Marg's advertising footer. The reader balances all 20 later full closings to the unit. The LINES are taken; the printed total is carried as Marg's own.",
+   "source": "S272, owner export 20-Sep-2026"
+  }
+ ],
+ "families": {
+  "KNEE IMMOBILISER UNI": "KNEE IMMOBILI?ER UNI (family)",
+  "KNEE IMMOBILIZER UNI": "KNEE IMMOBILI?ER UNI (family)"
+ },
+ "min_full_closing_items": 250,
+ "opening": {
+  "as_on": "2026-03-31",
+  "file_md5_prefix": "7b9331f0",
+  "reason": "Marg's closing of the previous financial year (owner, 19-Sep: the spine opens at Marg's 31-Mar closing)"
+ },
+ "reconciliation": [
+  {
+   "k20": "INTACOXIA-60",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -400.0
+  },
+  {
+   "k20": "GEMCAL 500MG",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": 52.0
+  },
+  {
+   "k20": "FEBUWISE 40",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -40.0
+  },
+  {
+   "k20": "OPTIFENAC TBR",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": 21.0
+  },
+  {
+   "k20": "PANTOCID DSR",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -21.0
+  },
+  {
+   "k20": "PANTOCID L CAP",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": 21.0
+  },
+  {
+   "k20": "PANUM L",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -21.0
+  },
+  {
+   "k20": "BIO D3 MAX",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -20.0
+  },
+  {
+   "k20": "FEBUTAL",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -20.0
+  },
+  {
+   "k20": "ENZOMAC OINTMENT",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": 18.0
+  },
+  {
+   "k20": "PANTAVIN 40",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": 10.0
+  },
+  {
+   "k20": "PARI CR 12.5",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": 10.0
+  },
+  {
+   "k20": "TYCOB FORTE",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -10.0
+  },
+  {
+   "k20": "CROCAL",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": 9.0
+  },
+  {
+   "k20": "HCQS 200",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": 8.0
+  },
+  {
+   "k20": "ZIVOPREG M",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": 8.0
+  },
+  {
+   "k20": "FLUPIVAMP 100",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": 7.0
+  },
+  {
+   "k20": "XYCAL K2",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": 7.0
+  },
+  {
+   "k20": "RUNVACE TP",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -6.0
+  },
+  {
+   "k20": "TFCT-NIB",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -4.0
+  },
+  {
+   "k20": "ANTEGY M",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -3.0
+  },
+  {
+   "k20": "TYCOB 1500",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": 3.0
+  },
+  {
+   "k20": "CARTILOX-GO CAPS",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -2.0
+  },
+  {
+   "k20": "POWERGESIC 100 PATCH",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -2.0
+  },
+  {
+   "k20": "CCM",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -1.0
+  },
+  {
+   "k20": "DEPOPRED 2 ML",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": 1.0
+  },
+  {
+   "k20": "LEUKOCREPE 15CM*6INC",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -1.0
+  },
+  {
+   "k20": "NEUGABA M",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -1.0
+  },
+  {
+   "k20": "SHIGRU 60",
+   "reason": "stock moved in Marg without any sale or purchase in the exports, between 01-Apr and the first full closing (S270 reference s6)",
+   "source": "S270_CORE_DATA_VERIFICATION_REFERENCE s6",
+   "units": -1.0
+  },
+  {
+   "k20": "ALGESIA CR",
+   "reason": "June expiry removal by hand (R6)",
+   "source": "owner (S270 reference s6)",
+   "units": -5.0
+  },
+  {
+   "k20": "DOLOGESIC SP",
+   "reason": "added by the owner (S264)",
+   "source": "owner (S270 reference s6)",
+   "units": 280.0
+  },
+  {
+   "k20": "EFONOX TH",
+   "reason": "June expiry removal by hand (R6)",
+   "source": "owner (S270 reference s6)",
+   "units": -4.0
+  },
+  {
+   "k20": "ETOZOX 90",
+   "reason": "added by the owner (S264)",
+   "source": "owner (S270 reference s6)",
+   "units": 470.0
+  },
+  {
+   "k20": "TOFZA TAB",
+   "reason": "June expiry removal by hand (R6)",
+   "source": "owner (S270 reference s6)",
+   "units": -4.0
+  }
+ ],
+ "version": "S331.1"
+}
