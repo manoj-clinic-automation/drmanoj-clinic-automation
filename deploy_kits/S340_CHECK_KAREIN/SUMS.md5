@@ -1,0 +1,11 @@
+0f3e48caa2aa0b7200c54fe2be4bbb4d  records.py
+2268216fe5d681e35627fc88ebc739f2  walk_s340.py
+9ea8852dfa225117abd9fae3f03fea1c  install_S340_CHECK_KAREIN.sh
+e6be6b853c13ccbb8ff285a2b6d65e50  seed_s340.py
+acf6717edc4fbe2783e0d53bd9428518  patch_finance_app_s340.py
+b7911a7366d8ab60c5ff56fd4359b6c8  patch_portal_s340.py
+7e5adc89417dd5176c93df62a80579e4  make_grants_s340.py
+d9a9dc409b203a4d8dcdd623aa54565f  portal.py
+a5f8b3b1ef40047052b65d9735f02e3f  tile_grants.json
+6ebb701b528927fb130e9145995cd8a5  KIT_ID.txt
+577cf1a1712f9a57b6f11101b1fc3f42  README.md
