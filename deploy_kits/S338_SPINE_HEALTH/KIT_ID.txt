@@ -1,0 +1,2 @@
+S338 KIT S338_SPINE_HEALTH
+session 274 (Sanjeevni) · 20-Sep-2026 · D567 item 4: spine_build.py writes spine_state.json after every build; two health legs (Marg spine gate, Marg spine compare) appended to the parent's freshness_legs.json (declared)
