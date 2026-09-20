@@ -1,40 +1,44 @@
-# OWNER TO-DO — LIVE · refreshed at the **S277 close** (the parent), 20-Sep-2026 — the Sanjeevni sections exactly as S274 left them, below
+# OWNER TO-DO — LIVE · refreshed at the **S278 close** (the parent), 20-Sep-2026 — the Sanjeevni sections exactly as S274 left them, below
 
-*Detail: `START_HERE_SESSION_278.md` · `S277_BUILD_BRIEF.md`. Everything else this session wrote is evidence.
+*Detail: `START_HERE_SESSION_279.md` · `S278_BUILD_BRIEF.md`. Everything else this session wrote is evidence.
 Your ruling of 17-Sep still governs this list — nothing here is being chased.*
 
-## ⭐ WHAT NEEDS YOU AFTER S277 — **one double-click, and two lines whenever you like**
+## ⭐ WHAT NEEDS YOU AFTER S278 — **one double-click**
 
-**1 · THE PUBLISH — your double-click.** It carries this close's record (Register **v5.117**, Archive **v1.114**,
-Fault **v2.102**, Runbook **v197**, `START_HERE_SESSION_278`, the build brief, the manifest, `live_pins_S277close.txt`)
-and the removal of forty-one old checksum backups from the canon folder. Everything built today is already installed and
-working. The publish is the record, not the install.
+**1 · THE PUBLISH — your double-click.** It carries this close's record only (Register **v5.118**, Archive **v1.115**,
+Fault **v2.103**, Runbook **v198**, `START_HERE_SESSION_279`, the build brief, the manifest, `live_pins_S278close.txt`).
+Nothing on any machine waits on it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Staff: 2–3 days of X-ray files in the *X-ray test* folder** (the shortcut is on the reception desktop). There
-were 1½ days today; the page now reads their names as they write them (8 of 9). Unchanged from S273.
+**2 · Staff: 2–3 days of X-ray files in the *X-ray test* folder.** There is one evening so far. Unchanged.
 
-**3 · Two words, yours, no hurry (neither is urgent):** (a) the nightly unattended task's stored prompt still names
-`START_HERE_PROMPT_v8` — say "repoint it" and I will set it to v10 (a scheduled task's prompt is your setting to change);
-(b) say "yes" and the unattended reports move into the repository, where the nightly gate covers them.
+**3 · In the next session, when it asks:** each staff member taps *Allow notifications* once in the Clinic app, and one
+real test call — for the caller pop-up. Nothing before then.
 
-**4 · In the next session, two pages to tick** — the mail table (KEEP · RETIRE per project) and the Callback Tracker /
-tile list. They do not exist yet; the next session writes them and names them to you here.
-
-## ⭐ WHAT I BUILD NEXT · THIS PROJECT — refreshed at S277, in your order (D586 · D587)
+## ⭐ WHAT I BUILD NEXT · THIS PROJECT — refreshed at S278, in your order (D589)
 
 0. **Live X-ray filing** the day the test folder holds 2–3 days of files; then X-ray items into Check karein; old and new X-ray side by side; the one-time import of the old X-rays.
-1. **Block B — the mail flood:** measure every automated mail in both inboxes by project, the Sheet it fills, the tile it holds, the VPS screen that replaces it → your ticks → triggers off in your browser (restorable) → a quiet week measured. The Callback Tracker's own digests, summaries and morning report are on that table by your word; its health mail continues.
-2. **Block C — the Callback Tracker:** sign in once through the Clinic app (first) · the caller tile on the staff phone · why it loads slowly · WhatsApp call and reply buttons for every staff member · the WhatsApp ntfy alert with the sender's number · the Gist and Call Console improvements.
-3. **Block A — the PWA tiles:** the layout as a page on your phone, your screen first → your ticks → one kit.
-4. The Sunday Apps Script drift report onto a surface that is read (F-595's second half) · `canon_sums.py`'s backups out of canon for good (F-596).
+1. **Callback Tracker — sign in once through the Clinic app** (first).
+2. **The caller's name on the staff phone as it rings** (D590) — clinic ID, name, last visit, open items; family phones show every name; unknown numbers show *New number*; sent through the Clinic app, not ntfy; *answered by …* on the other phones.
+3. **The rest of the Callback Tracker:** why it loads slowly · WhatsApp call and reply buttons for every staff member · the sender's number in the WhatsApp alert · the Gist and Call Console list on a page you tick.
+4. **The mail flood** (D586): measured → your ticks → switched off in your browser (restorable) → a quiet week → counted again.
+5. **The portal tiles:** the layout as a page on your phone, your screen first → your ticks → one kit.
+6. The Sunday Apps Script report onto the health page (F-595) · the nightly's checksum backups out of the canon folder for good (F-596).
+7. **Vitals & Plan to the VPS** (F-598) — every screen and all readings kept; patient data on the VPS disk, not Drive; the PC copy the fallback.
 
 Then, carried: the phonebook from your two exports · the last four units into the backup (your ruling on `fitlog` /
 `gutlog` / `rxguard` / `email-agent`) · fault injection for `backup`/`outbox` · Bhati's petty-book layout (offered) ·
 Docterz uploads to stop on your word after the 2–4-week parallel period · bank-SMS PARKED · sending reports to patients on WhatsApp once sending is cleared (F-82).
+
+## ✅ DONE AT THE S278 CLOSE — 20-Sep-2026 (the parent)
+
+- ~~**"Repoint it" — the nightly unattended task's instructions**~~ — **done**: it reads `START_HERE_PROMPT_v10` (your delegation, D588).
+- ~~**"Yes" — the unattended reports into a store that is checked**~~ — **done by the Drive route**: each night's report lands in Drive and your PC's 03:10 nightly copies it into ClaudeCowork and the SSD; a lost night raises a warning (S354, D588).
+- ~~**The Vitals & Plan tile missing**~~ — **found**: a clinic-PC-only tile; the tool was never moved to the VPS (F-598). Use it today: `D:\clinic_writer\open_vitals.bat`, then `https://followup.dr-manoj.in/portal/mark-pc` once in that browser. The move is item 7.
+- **Your order of work recorded** (D589) and **the caller pop-up designed** from MyOperator's own documents (D590).
 
 ## ✅ DONE AT THE S277 CLOSE — 20-Sep-2026 (the parent)
 
