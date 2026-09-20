@@ -1,0 +1,2 @@
+S355 KIT S355_DAY_TRUTH
+session 275 (Sanjeevni) · 20-Sep-2026 · an autofiled pharmacy day follows the bank: UPI re-read from the statement for unapproved, never-corrected days, cash = net - UPI, the exception re-judged; every 30 min 07-23 + once at install; no parent file changed

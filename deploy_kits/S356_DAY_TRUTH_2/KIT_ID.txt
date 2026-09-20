@@ -1,0 +1,2 @@
+S356 KIT S356_DAY_TRUTH_2
+session 275 (Sanjeevni) · 20-Sep-2026 · supersedes S355 (frozen, never published): an unapproved pharmacy day follows the bank (UPI re-read from the statement) and carries its home / procedure medicine bills (Darpan's labels in Marg, from the review queue, by word lists in the setting table); every 30 min 07-23 + once at install; no parent file changed

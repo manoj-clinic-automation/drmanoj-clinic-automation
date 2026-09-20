@@ -1,0 +1,87 @@
+#!/bin/bash
+# =============================================================================
+#  install_S356_DAY_TRUTH_2.sh · kit S356_DAY_TRUTH_2 (session 275, Sanjeevni, 20-Sep-2026) -- supersedes S355_DAY_TRUTH (frozen, never published, never installed: pass 1 only)
+#
+#  Run by (one line on the VPS):
+#    cd /root/deploy/repo && git pull --ff-only && bash /root/deploy/repo/deploy_kits/S356_DAY_TRUTH_2/install_S356_DAY_TRUTH_2.sh
+#
+#  The approval section's cash was wrong two ways.  (1) The D354 autofile froze each day's UPI at the
+#  moment Marg's report arrived (the bank statement lands hours later): nine September days carry UPI 0.
+#  (2) Darpan's home / procedure medicine bills ('HOME MEDICINE', 'PROSIJER <name>') carry no ID and
+#  no phone, so the ingest parks them in the review queue, and since his typed form went nothing
+#  turned them into the day's deduction: every September day shows them as cash.
+#    /root/finance/day_resync.py   NEW (TO below) -- pass 1: unapproved, autofiled, never-corrected days
+#                                  take UPI from the bank statement, cash = net - UPI, one audit row, the
+#                                  upi_vs_statement exception re-judged by finance_upi.reconcile_upi;
+#                                  pass 2: every label bill of an unapproved day becomes one
+#                                  day_noncash_bill row (home_medicine / procedure_medicine), once;
+#                                  the spellings live in setting noncash.home_words / noncash.proc_words
+#    CRONTAB: one root line, every 30 min 07-23, tagged # S356_DAY_TRUTH_2 -- DECLARED TO THE PARENT
+#    finance.db: day_line rows of those days, new day_noncash_bill rows, audit_log rows, two setting
+#                rows (backup taken first, sqlite backup API)
+#  No parent file changed, no restart, no screen.  Honours /root/finance/_off/ALL_OFF.
+# =============================================================================
+set -u
+KIT="S356_DAY_TRUTH_2"
+KDIR="$(cd "$(dirname "$0")" && pwd)"
+VPY="${VPY:-/root/wa/venv/bin/python3}"
+SPY="${SPY:-/usr/bin/python3}"
+FIN="${FIN:-/root/finance}"
+DB="$FIN/finance.db"
+STAMP="$(date +%Y%m%d_%H%M%S)"
+WALK="/tmp/s356_walk_$STAMP"
+DR_TO=cfe61ee6fec44b9406b9f91d3c9f2e13
+CRON_LINE='*/30 7-23 * * * flock -n /tmp/day_resync.lock /root/wa/venv/bin/python3 -B /root/finance/day_resync.py >> /root/finance/day_resync.log 2>&1 # S356_DAY_TRUTH_2'
+m5() { md5sum "$1" 2>/dev/null | awk '{print $1}'; }
+say() { echo "$@"; }
+cd "$KDIR" || { say "!! cannot enter the kit folder"; exit 1; }
+md5sum -c SUMS.md5 >/dev/null 2>&1 || { say "!! [1/8] SUMS.md5 gate failed - nothing installed"; exit 1; }
+[ "$(awk 'NR==1{print $3}' KIT_ID.txt)" = "$KIT" ] || { say "!! [1/8] KIT_ID.txt names another kit - nothing installed"; exit 1; }
+[ "$(m5 day_resync.py)" = "$DR_TO" ] || { say "!! [1/8] kit day_resync.py is not its pin - nothing installed"; exit 1; }
+say "[1/8] kit gates green"
+if [ "$(m5 "$FIN/day_resync.py")" = "$DR_TO" ]; then say "-- ALREADY INSTALLED"; crontab -l 2>/dev/null | grep -q "# S356_DAY_TRUTH_2" && say "   cron line present" || say "   !! cron line ABSENT"; exit 0; fi
+[ -e "$FIN/day_resync.py" ] && { say "!! [2/8] $FIN/day_resync.py exists and is not this kit's - nothing installed"; exit 1; }
+[ -s "$DB" ] && [ -f "$FIN/finance_upi.py" ] || { say "!! [2/8] no finance.db or finance_upi.py at $FIN - nothing installed"; exit 1; }
+say "[2/8] finance.db and finance_upi.py are there; no earlier copy of this file"
+mkdir -p "$WALK/compile" || exit 1
+cp -p day_resync.py selftest_s356.py "$WALK/compile/" && ( cd "$WALK/compile" && "$SPY" -m py_compile day_resync.py selftest_s356.py && "$VPY" -m py_compile day_resync.py selftest_s356.py ) \
+  || { say "!! [3/8] compile failed - nothing installed"; rm -rf "$WALK"; exit 1; }
+say "[3/8] py_compile green on both pythons (on copies)"
+SOUT="$( cd "$WALK/compile" && "$VPY" -B selftest_s356.py --finance-dir "$FIN" --python "$VPY" 2>&1 )"
+echo "$SOUT" | grep -E '^  FAIL|selftest:' | sed 's/^/   /'
+echo "$SOUT" | grep -q "^selftest: 28/28" || { say "!! [4/8] selftest red - nothing installed"; rm -rf "$WALK"; exit 1; }
+say "[4/8] selftest 28/28 on a scratch database in the live shape, with this box's finance_upi"
+DOUT="$( cd "$WALK/compile" && "$VPY" -B day_resync.py --db "$DB" --dry-run --no-reconcile 2>&1 )"
+echo "$DOUT" | sed 's/^/   /'
+echo "$DOUT" | grep -q "unapproved autofiled day" && echo "$DOUT" | grep -q "^summary2:" || { say "!! [5/8] the dry run did not read the live database - nothing installed"; rm -rf "$WALK"; exit 1; }
+echo "$DOUT" | grep -q "SHAPE" && { say "!! [5/8] a day has an unexpected line shape - nothing installed, read the line above"; rm -rf "$WALK"; exit 1; }
+rm -rf "$WALK"
+say "[5/8] dry run against the live database read (nothing written)"
+BAK="$FIN/finance.db.bak_S356_$STAMP"
+"$VPY" - "$DB" "$BAK" <<'EOF' || { say "!! [6/8] database backup failed - nothing installed"; exit 1; }
+import sqlite3, sys
+src = sqlite3.connect(sys.argv[1]); dst = sqlite3.connect(sys.argv[2])
+src.backup(dst); dst.close(); src.close()
+EOF
+[ -s "$BAK" ] || { say "!! [6/8] backup empty - nothing installed"; exit 1; }
+say "[6/8] finance.db backed up (sqlite backup API): $BAK"
+CBAK="$FIN/crontab.bak_S356_$STAMP"
+crontab -l > "$CBAK" 2>/dev/null || : > "$CBAK"
+restore() {
+  say "!! RED after placing - restoring"
+  rm -f "$FIN/day_resync.py"; crontab "$CBAK" 2>/dev/null || true
+  say "   day_resync.py removed · crontab restored from $CBAK · the database backup is $BAK (rows already resynced carry their audit row; nothing else changed)"
+  exit 1
+}
+\cp -p day_resync.py "$FIN/day_resync.py" && [ "$(m5 "$FIN/day_resync.py")" = "$DR_TO" ] || restore
+if ! crontab -l 2>/dev/null | grep -q "# S356_DAY_TRUTH_2"; then { crontab -l 2>/dev/null; echo "$CRON_LINE"; } | crontab - || restore; fi
+crontab -l 2>/dev/null | grep -q "# S356_DAY_TRUTH_2" || restore
+say "[7/8] placed $DR_TO; cron */30 7-23 (# S356_DAY_TRUTH_2); crontab backup $CBAK"
+ROUT="$( cd "$FIN" && flock -w 60 /tmp/day_resync.lock "$VPY" -B day_resync.py 2>&1 )"
+echo "$ROUT" | sed 's/^/   /'
+echo "$ROUT" | grep -q "^summary:" && echo "$ROUT" | grep -q "^summary2:" || restore
+HC=$(curl -s -o /dev/null -m 8 -w '%{http_code}' http://127.0.0.1:8106/finance/healthz)
+[ "$HC" = "200" ] || restore
+say "[8/8] first resync run (above); the app answers healthz $HC (no restart was needed)"
+md5sum "$FIN/day_resync.py"
+say "$KIT: DONE -- every unapproved day now follows the bank and carries its home / procedure medicine bills, re-checked every 30 minutes; the approval section reads the corrected cash at its next refresh."
