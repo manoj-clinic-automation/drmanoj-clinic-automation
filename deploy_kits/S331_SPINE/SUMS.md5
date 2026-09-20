@@ -1,9 +1,9 @@
 ade430b2552bc4d01df360f884ea583e  README.md
-7225477e2b43f3f1d0631ed1c55fee0a  marg_read.py
+7ec9b325687de465ea6942affb25dec1  marg_read.py
 0fcf6c6419d5a69d7314e152421a2aa7  spine_evidence.py
 f5907fd4c3ada022a4cfa400356bd097  spine_build.py
 ab55344ee280b0b4847a45cebe6d3843  spine_read.py
 e4029460b1955294ce101ddf74a86a93  spine_compare.py
 dd6c761665ce38fe4ec65d25b6102265  spine_rules.json
 bfa607b980e4e838dfc7198f0bc7c9c9  selftest_spine.py
-50b8f82f92dfe9e603faa15070adfe06  install_S331_SPINE.sh
+6e62e283fb8726b5012299037cb8c079  install_S331_SPINE.sh

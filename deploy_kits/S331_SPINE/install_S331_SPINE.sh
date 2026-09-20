@@ -32,8 +32,8 @@ say 1/8 "kit sums"
 ( cd "$KIT" && md5sum -c SUMS.md5 --quiet ) || die 1/8 "SUMS.md5 does not verify inside $KIT"
 say 2/8 "python and readers"
 [ -x "$PY" ] || die 2/8 "$PY missing"
-"$PY" -c "import xlrd, sqlite3" || die 2/8 "$PY cannot import xlrd"
-[ -n "$ROOT" ] || "$PY" -c "import sys; sys.path.insert(0,'/root/marg_ingest'); import marg_ingest, xlsx_stdlib" || die 2/8 "the collector's modules do not import"
+if [ -n "$ROOT" ]; then "$PY" -c "import xlrd, sqlite3" || die 2/8 "$PY cannot import xlrd"
+else "$PY" -c "import sys; sys.path.insert(0,'/root/marg_ingest'); import xlrd, sqlite3, marg_ingest, xlsx_stdlib" || die 2/8 "the collector's folder does not give xlrd, marg_ingest and xlsx_stdlib to $PY (the readers use exactly what salts_refresh.py uses)"; fi
 say 3/8 "destination"
 mkdir -p "$DEST/readings" || die 3/8 "cannot make $DEST"
 ALREADY=1

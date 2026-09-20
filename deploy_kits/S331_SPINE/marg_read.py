@@ -76,7 +76,12 @@ def rows_of(path):
             return [[_cell(sh.cell_value(r, c)) for c in range(sh.ncols)] for r in range(sh.nrows)]
         ws = openpyxl.load_workbook(path, data_only=True, read_only=True).active
         return [[_cell(v) for v in r] for r in ws.iter_rows(values_only=True)]
-    import xlrd
+    try:
+        import xlrd
+    except ImportError:                         # the box keeps xlrd vendored beside the collector (salts_refresh does the same)
+        import sys
+        sys.path.insert(0, "/root/marg_ingest")
+        import xlrd
     sh = xlrd.open_workbook(path).sheet_by_index(0)
     out = []
     for r in range(sh.nrows):
