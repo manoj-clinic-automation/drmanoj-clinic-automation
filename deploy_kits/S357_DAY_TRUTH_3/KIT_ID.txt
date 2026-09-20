@@ -1,0 +1,2 @@
+S357 KIT S357_DAY_TRUTH_3
+session 275 (Sanjeevni) · 20-Sep-2026 · on S356: a credit note on a home / procedure medicine bill is goods back, not cash short (the owner, 20-Sep) — one cash_adjustment row of +amount, once; Darpan's page reads the same adjustment; clinic-finance restarted

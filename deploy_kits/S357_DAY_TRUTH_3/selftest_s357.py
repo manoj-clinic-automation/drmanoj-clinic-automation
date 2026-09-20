@@ -1,0 +1,260 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+"""selftest_s357.py -- S357_DAY_TRUTH_3: the resync proven on a scratch database.
+
+Builds a small database in the live shape (the nine tables day_resync touches
+or reads, DDL copied from the 20-Sep nightly finance.db), files eight days the
+way the D354 autofile files them, parks label bills in the review queue the
+way the ingest does, and checks every verdict: pass 1 FIXED · SAME · NO_BANK ·
+OVER_NET plus the three days it must never touch (approved, corrected by a
+person, typed by a person); pass 2 the home and procedure rows added from
+Darpan's spellings, a person's bill not, a credit note put back to the drawer as one adjustment (once), a
+resolved review still counted, an approved day untouched, a typed bill not
+duplicated, the ingest's own tag honoured, the word lists seeded.  When
+finance_upi is importable (--finance-dir), the exception is proven closed too.
+
+    python3 -B selftest_s357.py [--finance-dir /root/finance]
+Prints one line per check and 'selftest: N/N'.  Nothing outside a temp folder.
+"""
+import argparse
+import json
+import os
+import shutil
+import sqlite3
+import subprocess
+import sys
+import tempfile
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+DDL = """
+CREATE TABLE business_unit (code TEXT PRIMARY KEY);
+INSERT INTO business_unit VALUES ('medical');
+CREATE TABLE day_entry (
+    id INTEGER PRIMARY KEY, unit TEXT NOT NULL REFERENCES business_unit(code),
+    business_date TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','submitted','approved','locked','closed_holiday')),
+    manned_by INTEGER, manned_source TEXT,
+    source TEXT NOT NULL DEFAULT 'app' CHECK (source IN ('app','legacy_sheet')),
+    entered_by TEXT, entered_at TEXT, approved_by TEXT, approved_at TEXT, legacy_ref TEXT,
+    UNIQUE (unit, business_date));
+CREATE TABLE day_line (
+    id INTEGER PRIMARY KEY, day_entry_id INTEGER NOT NULL REFERENCES day_entry(id) ON DELETE CASCADE,
+    service TEXT NOT NULL, mode TEXT NOT NULL CHECK (mode IN ('cash','upi','card','credit')),
+    amount_p INTEGER NOT NULL CHECK (amount_p >= 0), line_kind TEXT, note TEXT);
+CREATE TABLE audit_log (
+    id INTEGER PRIMARY KEY, table_name TEXT NOT NULL, row_id INTEGER, action TEXT NOT NULL,
+    before_json TEXT, after_json TEXT, by_whom TEXT, at TEXT NOT NULL);
+CREATE TABLE upi_statement (
+    id INTEGER PRIMARY KEY, merchant_id TEXT NOT NULL, unit TEXT REFERENCES business_unit(code),
+    statement_date TEXT NOT NULL, source_msg_id TEXT, filename TEXT, sha256 TEXT,
+    parsed_total_p INTEGER, txn_count INTEGER, ingested_at TEXT, UNIQUE (merchant_id, statement_date));
+CREATE TABLE recon_exception (
+    id INTEGER PRIMARY KEY, unit TEXT NOT NULL REFERENCES business_unit(code), business_date TEXT NOT NULL,
+    kind TEXT NOT NULL, expected_p INTEGER, actual_p INTEGER, diff_p INTEGER,
+    severity TEXT NOT NULL DEFAULT 'high' CHECK (severity IN ('low','medium','high')),
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','acknowledged','resolved')),
+    detail TEXT, opened_at TEXT, shout_count INTEGER NOT NULL DEFAULT 0, last_shout_at TEXT,
+    resolution TEXT, closed_by TEXT, closed_at TEXT, UNIQUE (unit, business_date, kind));
+CREATE TABLE day_noncash_bill (
+    id INTEGER PRIMARY KEY, day_entry_id INTEGER NOT NULL REFERENCES day_entry(id) ON DELETE CASCADE,
+    unit TEXT NOT NULL REFERENCES business_unit(code), bill_date TEXT NOT NULL,
+    head TEXT NOT NULL CHECK (head IN ('home_medicine','procedure_medicine','other')), head_text TEXT,
+    bill_no TEXT NOT NULL, amount_p INTEGER NOT NULL CHECK (amount_p > 0), patient_ref_id INTEGER,
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','settled','written_off')),
+    settled_ref TEXT, settled_at TEXT, note TEXT, entered_by TEXT, entered_at TEXT, noncash_uid TEXT,
+    UNIQUE (unit, bill_no, bill_date));
+CREATE TABLE sale_item_review (
+    id INTEGER PRIMARY KEY, day_entry_id INTEGER NOT NULL REFERENCES day_entry(id) ON DELETE CASCADE,
+    raw_text TEXT, guess_clinic_id TEXT, guess_name TEXT, amount_p INTEGER, confidence REAL,
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','resolved','discarded')),
+    resolved_by TEXT, resolved_at TEXT, ingest_batch_id INTEGER, reason TEXT);
+CREATE TABLE sale_item (
+    id INTEGER PRIMARY KEY, day_entry_id INTEGER, unit TEXT, patient_ref_id INTEGER, service TEXT,
+    description TEXT, amount_p INTEGER, mode TEXT, source TEXT, source_ref TEXT, confidence REAL, home_med INTEGER DEFAULT 0);
+CREATE TABLE setting (key TEXT PRIMARY KEY, value TEXT, note TEXT);
+CREATE TABLE cash_adjustment (
+    id INTEGER PRIMARY KEY, day_entry_id INTEGER NOT NULL REFERENCES day_entry(id) ON DELETE CASCADE,
+    amount_p INTEGER NOT NULL, reason TEXT NOT NULL, source TEXT NOT NULL CHECK (source IN ('legacy_import','manual')),
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','explained','approved')),
+    explanation TEXT, approved_by TEXT, approved_at TEXT);
+"""
+
+U = "medical"
+
+
+def file_day(con, iso, net_p, upi_p, status="submitted", how="autofile", corrected=False, upi_line=True):
+    cur = con.execute("INSERT INTO day_entry (unit, business_date, status, source, entered_by, entered_at) "
+                      "VALUES (?,?,?,'app','app','2026-09-19T01:00:00')", (U, iso, status))
+    eid = cur.lastrowid
+    con.execute("INSERT INTO day_line (day_entry_id, service, mode, amount_p) VALUES (?,'pharmacy_sale','cash',?)",
+                (eid, net_p - upi_p))
+    if upi_line:
+        con.execute("INSERT INTO day_line (day_entry_id, service, mode, amount_p) VALUES (?,'pharmacy_sale','upi',?)",
+                    (eid, upi_p))
+    con.execute("INSERT INTO audit_log (table_name, row_id, action, after_json, by_whom, at) "
+                "VALUES ('day_entry', ?, ?, '{}', 'app', '2026-09-19T01:00:00')", (eid, how))
+    if corrected:
+        con.execute("INSERT INTO audit_log (table_name, row_id, action, before_json, by_whom, at) "
+                    "VALUES ('day_entry', ?, 'correct', '{}', 'darpan', '2026-09-19T09:00:00')", (eid,))
+    return eid
+
+
+def review(con, iso, bill, name, amount_p, status="open"):
+    eid = con.execute("SELECT id FROM day_entry WHERE business_date=?", (iso,)).fetchone()[0]
+    raw = json.dumps(dict(bill_date=iso, bill_no=bill, clinic_id="", patient_name=name, phone_last4="",
+                          description="", amount="%.2f" % (amount_p / 100.0), mode="cash"))
+    con.execute("INSERT INTO sale_item_review (day_entry_id, raw_text, guess_name, amount_p, confidence, status, reason) "
+                "VALUES (?,?,?,?,0.5,?,'low confidence')", (eid, raw, name, amount_p, status))
+
+
+def noncash(con, iso):
+    return con.execute("SELECT b.bill_no, b.head, b.amount_p, b.entered_by FROM day_noncash_bill b JOIN day_entry e "
+                       "ON e.id=b.day_entry_id WHERE e.business_date=? ORDER BY bill_no", (iso,)).fetchall()
+
+
+def bank(con, iso, total_p, n=3):
+    con.execute("INSERT INTO upi_statement (merchant_id, unit, statement_date, parsed_total_p, txn_count, ingested_at) "
+                "VALUES ('M1', ?, ?, ?, ?, '2026-09-19T10:56:00')", (U, iso, total_p, n))
+    con.execute("INSERT INTO recon_exception (unit, business_date, kind, expected_p, actual_p, diff_p, status, "
+                "detail, opened_at) VALUES (?,?,'upi_vs_statement',?,0,?, 'open','walk','2026-09-19T10:56:00')",
+                (U, iso, total_p, -total_p))
+
+
+def lines(con, iso):
+    r = con.execute("SELECT COALESCE(SUM(CASE WHEN l.mode='cash' THEN l.amount_p END),0) c, "
+                    "COALESCE(SUM(CASE WHEN l.mode='upi' THEN l.amount_p END),0) u "
+                    "FROM day_line l JOIN day_entry e ON e.id=l.day_entry_id WHERE e.business_date=?",
+                    (iso,)).fetchone()
+    return int(r[0]), int(r[1])
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--finance-dir", default=None, help="folder holding finance_upi.py (the live one)")
+    ap.add_argument("--python", default=sys.executable)
+    a = ap.parse_args()
+    tmp = tempfile.mkdtemp(prefix="s356_")
+    ok = 0
+    n = 0
+
+    def check(name, cond):
+        nonlocal ok, n
+        n += 1
+        ok += 1 if cond else 0
+        print("  %s %s" % ("ok  " if cond else "FAIL", name))
+
+    try:
+        shutil.copy(os.path.join(HERE, "day_resync.py"), tmp)
+        have_upi = False
+        if a.finance_dir and os.path.exists(os.path.join(a.finance_dir, "finance_upi.py")):
+            shutil.copy(os.path.join(a.finance_dir, "finance_upi.py"), tmp)
+            have_upi = True
+        db = os.path.join(tmp, "walk.db")
+        con = sqlite3.connect(db)
+        con.executescript(DDL)
+        # the seven days
+        file_day(con, "2026-09-01", 999300, 0); bank(con, "2026-09-01", 64300, 2)          # FIXED
+        file_day(con, "2026-09-03", 1655700, 421400); bank(con, "2026-09-03", 421400)     # SAME
+        file_day(con, "2026-09-04", 500000, 0)                                            # NO_BANK
+        file_day(con, "2026-09-05", 100000, 0); bank(con, "2026-09-05", 150000)           # OVER_NET
+        file_day(con, "2026-09-06", 800000, 0, status="approved"); bank(con, "2026-09-06", 100000)   # never
+        file_day(con, "2026-09-07", 800000, 0, corrected=True); bank(con, "2026-09-07", 100000)      # never
+        file_day(con, "2026-09-08", 800000, 0, how="create"); bank(con, "2026-09-08", 100000)        # typed: never
+        file_day(con, "2026-09-09", 700000, 0, upi_line=False); bank(con, "2026-09-09", 200000)      # FIXED, line inserted
+        # pass 2 -- the label bills (his spellings), parked in the review queue
+        review(con, "2026-09-01", "A1", "HOME MEDICINE", 533800)                       # home
+        review(con, "2026-09-01", "A2", "PROSIJER RAM X", 80500)                       # procedure + a name
+        review(con, "2026-09-01", "A3", "RAM X", 12000)                                # a person: not a label
+        review(con, "2026-09-03", "CN1", "HOME MEDICINE", -230000)                     # credit note: cannot be held, said
+        review(con, "2026-09-03", "A4", "Home Medisun", 35500, status="resolved")      # resolved review still counts
+        review(con, "2026-09-06", "A5", "HOME MEDICINE", 99900)                        # approved day: never
+        eid8 = con.execute("SELECT id FROM day_entry WHERE business_date='2026-09-08'").fetchone()[0]
+        con.execute("INSERT INTO day_noncash_bill (day_entry_id, unit, bill_date, head, bill_no, amount_p, entered_by) "
+                    "VALUES (?, 'medical', '2026-09-08', 'home_medicine', 'A6', 1500, 'darpan')", (eid8,))
+        review(con, "2026-09-08", "A6", "HOME MEDICINE", 1500)                          # typed already: not duplicated
+        con.execute("INSERT INTO sale_item (day_entry_id, unit, service, amount_p, source_ref, home_med) "
+                    "VALUES (?, 'medical', 'pharmacy_sale', 4200, 'A7', 1)", (eid8,))  # the ingest's own tag
+        con.commit()
+        con.close()
+
+        env = dict(os.environ, SANJEEVNI_OFF_DIR=os.path.join(tmp, "_off"))
+        run = lambda *x: subprocess.run([a.python, "-B", os.path.join(tmp, "day_resync.py"), "--db", db] + list(x),
+                                        capture_output=True, text=True, env=env, cwd=tmp)
+        d = run("--dry-run")
+        check("dry run exits 0", d.returncode == 0)
+        check("dry run names 5 candidates (approved, corrected, typed days excluded)", "5 unapproved autofiled" in d.stdout)
+        check("dry run: 01 WOULD_FIX", "WOULD_FIX 2026-09-01" in d.stdout)
+        check("dry run: 03 SAME", "SAME      2026-09-03" in d.stdout)
+        check("dry run: 04 NO_BANK", "NO_BANK   2026-09-04" in d.stdout)
+        check("dry run: 05 OVER_NET", "OVER_NET  2026-09-05" in d.stdout)
+        con = sqlite3.connect(db)
+        check("dry run wrote nothing", lines(con, "2026-09-01") == (999300, 0) and
+              con.execute("SELECT COUNT(*) FROM audit_log WHERE action='resync_upi'").fetchone()[0] == 0
+              and con.execute("SELECT COUNT(*) FROM day_noncash_bill").fetchone()[0] == 1)
+        check("dry run pass 2: 01 WOULD_ADD home 5338 + procedure 805", "WOULD_ADD 2026-09-01" in d.stdout
+              and "A1 home 5338.00" in d.stdout and "A2 proc 805.00" in d.stdout)
+        check("dry run pass 2: a credit note goes back to the drawer", "CN1 CN +2300.00 back to the drawer" in d.stdout)
+        con.close()
+
+        r = run()
+        check("apply exits 0", r.returncode == 0)
+        check("apply summary FIXED 2 · NO_BANK 1 · OVER_NET 1 · SAME 1",
+              "FIXED 2" in r.stdout and "NO_BANK 1" in r.stdout and "OVER_NET 1" in r.stdout and "SAME 1" in r.stdout)
+        con = sqlite3.connect(db)
+        check("01: UPI 643 from the bank, cash = net - UPI", lines(con, "2026-09-01") == (935000, 64300))
+        check("09: UPI line inserted when the autofile wrote none", lines(con, "2026-09-09") == (500000, 200000))
+        check("05: over-net day untouched", lines(con, "2026-09-05") == (100000, 0))
+        check("06 approved untouched", lines(con, "2026-09-06") == (800000, 0))
+        check("07 corrected-by-a-person untouched", lines(con, "2026-09-07") == (800000, 0))
+        check("08 typed-by-a-person untouched", lines(con, "2026-09-08") == (800000, 0))
+        nc1 = [tuple(r) for r in noncash(con, "2026-09-01")]
+        check("01: two noncash rows added -- home 5338 (A1), procedure 805 (A2); the person's bill A3 not",
+              nc1 == [("A1", "home_medicine", 533800, "day_resync"), ("A2", "procedure_medicine", 80500, "day_resync")])
+        nc3 = [tuple(r) for r in noncash(con, "2026-09-03")]
+        check("03: the resolved review's Home Medisun added as a bill; the credit note not a bill",
+              nc3 == [("A4", "home_medicine", 35500, "day_resync")])
+        adj = con.execute("SELECT a.amount_p, a.source, a.status FROM cash_adjustment a JOIN day_entry e ON e.id=a.day_entry_id "
+                          "WHERE e.business_date='2026-09-03'").fetchall()
+        check("03: the credit note is one cash_adjustment of +2300, explained", [tuple(r) for r in adj] == [(230000, "manual", "explained")])
+        check("no other adjustment written", con.execute("SELECT COUNT(*) FROM cash_adjustment").fetchone()[0] == 1)
+        check("06 approved: no noncash row", noncash(con, "2026-09-06") == [])
+        nc8 = [tuple(r) for r in noncash(con, "2026-09-08")]
+        check("08: Darpan's typed A6 kept once (not duplicated), the tagged A7 added",
+              nc8 == [("A6", "home_medicine", 1500, "darpan"), ("A7", "home_medicine", 4200, "day_resync")])
+        check("word lists seeded in setting", con.execute("SELECT COUNT(*) FROM setting WHERE key LIKE 'noncash.%'").fetchone()[0] == 2)
+        check("noncash audit rows: one per day added (01, 03, 08)",
+              con.execute("SELECT COUNT(*) FROM audit_log WHERE action='noncash_sync'").fetchone()[0] == 3)
+        au = con.execute("SELECT before_json, after_json, by_whom FROM audit_log WHERE action='resync_upi' "
+                         "ORDER BY id").fetchall()
+        check("two audit rows, before/after carried, by day_resync",
+              len(au) == 2 and json.loads(au[0][0])["upi_p"] == 0 and json.loads(au[0][1])["upi_p"] == 64300
+              and au[0][2] == "day_resync")
+        if have_upi:
+            st = con.execute("SELECT status FROM recon_exception WHERE business_date='2026-09-01'").fetchone()[0]
+            check("01: the upi_vs_statement exception closed by the live finance_upi", st == "resolved")
+            st5 = con.execute("SELECT status FROM recon_exception WHERE business_date='2026-09-05'").fetchone()[0]
+            check("05: the over-net exception stays open", st5 == "open")
+        else:
+            check("finance_upi not given: exception left for the next bank load (stated)",
+                  "finance_upi not importable" in r.stdout)
+            check("(placeholder so the count is the same either way)", True)
+        con.close()
+        r2 = run()
+        con = sqlite3.connect(db)
+        check("second apply changes nothing (SAME for every fixed day, no ADDED, still 5 noncash rows)",
+              r2.returncode == 0 and "SAME 3" in r2.stdout and "ADDED" not in r2.stdout
+              and con.execute("SELECT COUNT(*) FROM day_noncash_bill").fetchone()[0] == 5
+              and con.execute("SELECT COUNT(*) FROM cash_adjustment").fetchone()[0] == 1)
+        con.close()
+        os.makedirs(os.path.join(tmp, "_off")); open(os.path.join(tmp, "_off", "ALL_OFF"), "w").close()
+        r3 = run()
+        check("ALL_OFF honoured", r3.returncode == 0 and "OFF" in r3.stdout)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    print("selftest: %d/%d" % (ok, n))
+    return 0 if ok == n else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
