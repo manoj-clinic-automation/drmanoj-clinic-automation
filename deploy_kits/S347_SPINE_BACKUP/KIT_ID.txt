@@ -1,0 +1,9 @@
+KIT      : S347_SPINE_BACKUP
+SESSION  : 276 (parent -- Systems & Automation, clinic core)
+DATE     : 2026-09-20
+TARGET   : VPS -- /root/state_backup/code_bundle.py (01:35 code bundle) and /root/state_backup/clinic_state_backup.py (01:50 encrypted state bundle)
+FROM     : code_bundle.py 598e55a4255fef130366eb3c37d78363 (v1.6, S318) · clinic_state_backup.py fba579857e731cef2a122d554a232ed6 (v3, S233)
+TO       : read back at install, never predicted (F-472) -- two anchored patches, each backed up as .bak_S347_<stamp> beside its file
+DATA     : no -- code only; no service restarted (both files run by cron only)
+BUILDS   : on the Sanjeevni chat's S274 close note to the parent: the spine (S331, live 20-Sep 07:19) is in no store
+NUMBERS  : kit S347 (claimed on the System Board board/_numbers v20->v21 before this folder was named, per F-515)
