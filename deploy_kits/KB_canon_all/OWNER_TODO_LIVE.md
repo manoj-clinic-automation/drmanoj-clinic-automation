@@ -1,35 +1,48 @@
-# OWNER TO-DO — LIVE · refreshed at the **S276 close** (the parent), 20-Sep-2026 — the Sanjeevni sections exactly as S274 left them, below
+# OWNER TO-DO — LIVE · refreshed at the **S277 close** (the parent), 20-Sep-2026 — the Sanjeevni sections exactly as S274 left them, below
 
-*Detail: `START_HERE_SESSION_277.md` · `S276_BUILD_BRIEF.md`. Everything else this session wrote is evidence.
+*Detail: `START_HERE_SESSION_278.md` · `S277_BUILD_BRIEF.md`. Everything else this session wrote is evidence.
 Your ruling of 17-Sep still governs this list — nothing here is being chased.*
 
-## ⭐ WHAT NEEDS YOU AFTER S276 — **one double-click, and two lines whenever you like**
+## ⭐ WHAT NEEDS YOU AFTER S277 — **one double-click, and two lines whenever you like**
 
-**1 · THE PUBLISH — your double-click.** It carries this close's record (Register **v5.116**, Archive **v1.113**,
-Fault **v2.101**, Runbook **v196**, `START_HERE_SESSION_277`, the build brief, the manifest, `live_pins_S276close.txt`).
-Everything built today is already installed and working. The publish is the record, not the install.
+**1 · THE PUBLISH — your double-click.** It carries this close's record (Register **v5.117**, Archive **v1.114**,
+Fault **v2.102**, Runbook **v197**, `START_HERE_SESSION_278`, the build brief, the manifest, `live_pins_S277close.txt`)
+and the removal of forty-one old checksum backups from the canon folder. Everything built today is already installed and
+working. The publish is the record, not the install.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Staff: 2–3 days of X-ray files in the *X-ray test* folder** (the shortcut is on the reception desktop). Unchanged from S273.
+**2 · Staff: 2–3 days of X-ray files in the *X-ray test* folder** (the shortcut is on the reception desktop). There
+were 1½ days today; the page now reads their names as they write them (8 of 9). Unchanged from S273.
 
 **3 · Two words, yours, no hurry (neither is urgent):** (a) the nightly unattended task's stored prompt still names
 `START_HERE_PROMPT_v8` — say "repoint it" and I will set it to v10 (a scheduled task's prompt is your setting to change);
-(b) say "yes" and the unattended reports move into the repository, where the nightly gate covers them (until then each
-night's report exists only in this project's knowledge and I rescue it by hand).
+(b) say "yes" and the unattended reports move into the repository, where the nightly gate covers them.
 
-## ⭐ WHAT I BUILD NEXT · THIS PROJECT — refreshed at S276
+**4 · In the next session, two pages to tick** — the mail table (KEEP · RETIRE per project) and the Callback Tracker /
+tile list. They do not exist yet; the next session writes them and names them to you here.
 
-1. **Live X-ray filing** — from the test run's evidence; then the one-time import of the old X-rays.
-2. **X-ray items into Check karein**; **old and new X-ray side by side** on the patient page.
-3. `gas_export.py`'s weekly comparison onto the current photograph of the daily-report script (F-591).
-4. **Sending reports to patients on WhatsApp** — once sending is cleared (F-82).
+## ⭐ WHAT I BUILD NEXT · THIS PROJECT — refreshed at S277, in your order (D586 · D587)
+
+0. **Live X-ray filing** the day the test folder holds 2–3 days of files; then X-ray items into Check karein; old and new X-ray side by side; the one-time import of the old X-rays.
+1. **Block B — the mail flood:** measure every automated mail in both inboxes by project, the Sheet it fills, the tile it holds, the VPS screen that replaces it → your ticks → triggers off in your browser (restorable) → a quiet week measured. The Callback Tracker's own digests, summaries and morning report are on that table by your word; its health mail continues.
+2. **Block C — the Callback Tracker:** sign in once through the Clinic app (first) · the caller tile on the staff phone · why it loads slowly · WhatsApp call and reply buttons for every staff member · the WhatsApp ntfy alert with the sender's number · the Gist and Call Console improvements.
+3. **Block A — the PWA tiles:** the layout as a page on your phone, your screen first → your ticks → one kit.
+4. The Sunday Apps Script drift report onto a surface that is read (F-595's second half) · `canon_sums.py`'s backups out of canon for good (F-596).
 
 Then, carried: the phonebook from your two exports · the last four units into the backup (your ruling on `fitlog` /
 `gutlog` / `rxguard` / `email-agent`) · fault injection for `backup`/`outbox` · Bhati's petty-book layout (offered) ·
-Docterz uploads to stop on your word after the 2–4-week parallel period · bank-SMS PARKED.
+Docterz uploads to stop on your word after the 2–4-week parallel period · bank-SMS PARKED · sending reports to patients on WhatsApp once sending is cleared (F-82).
+
+## ✅ DONE AT THE S277 CLOSE — 20-Sep-2026 (the parent)
+
+- ~~**The X-ray test page reading 0 of 9 staff files**~~ — **S351 live ~13:33**: the ID read wherever your staff put it; **6 of 9**.
+- ~~**Knee studies read as a discrepancy**~~ — **your ruling (D584), S353 live ~14:3x**: one film per study, Knee studies two; **8 of 9**.
+- ~~**The Sunday Apps Script check pointing at the 7-Sep photograph (F-591)**~~ — **S352 live 13:33**: a living copy, `GAS_CURRENT`, kept current with every change I place in your browser.
+- ~~**Forty-one checksum backups inside the canon folder**~~ — moved to `D:\dr-manoj-git\_to_delete_S277\` with a note saying why each is safe to delete; yours to delete when convenient.
+- **Your three rulings recorded** (D586, D587): the redundant mails, the Callback Tracker's frictions, the tiles — the next session's whole mandate.
 
 ## ✅ DONE AT THE S276 CLOSE — 20-Sep-2026 (the parent)
 
