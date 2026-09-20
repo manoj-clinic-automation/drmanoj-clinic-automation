@@ -1,35 +1,46 @@
-# OWNER TO-DO — LIVE · refreshed at the **S274 close** (the Sanjeevni project), 20-Sep-2026 — the parent's sections exactly as S271 left them; the S272 Sanjeevni sections retained below
+# OWNER TO-DO — LIVE · refreshed at the **S273 close** (the parent), 20-Sep-2026 — the Sanjeevni sections exactly as S274 left them, below
 
-*Detail: `START_HERE_SESSION_273.md` · `S271_BUILD_BRIEF.md`. Everything else this session wrote is
-evidence. Your ruling of 17-Sep still governs this list — nothing here is being chased.*
+*Detail: `START_HERE_SESSION_276.md` · `S273_BUILD_BRIEF.md`. Everything else this session wrote is evidence.
+Your ruling of 17-Sep still governs this list — nothing here is being chased.*
 
-## ⭐ WHAT NEEDS YOU AFTER S271 — **one double-click**
+## ⭐ WHAT NEEDS YOU AFTER S273 — **one double-click**
 
-**1 · THE PUBLISH — your double-click.** It carries this close's record (Register **v5.112**, Archive
-**v1.109**, Fault **v2.97**, Runbook **v192**, `START_HERE_SESSION_273`, the build brief, the manifest,
-`live_pins_S271close.txt`). Everything built this session is already installed and working — the publish
+**1 · THE PUBLISH — your double-click.** It carries this close's record (Register **v5.115**, Archive
+**v1.112**, Fault **v2.100**, Runbook **v195**, `START_HERE_SESSION_276`, the build brief, the manifest,
+`live_pins_S273close.txt`). Everything built this session is already installed and working. The publish
 is the record, not the install.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-*Nothing else. The records build starts in the next chat — you have already given the word.*
+**2 · Staff: 2–3 days of X-ray files in the *X-ray test* folder** (the shortcut is on the reception desktop).
+Then open the test page once:
 
-## ⭐ WHAT I BUILD NEXT · THIS PROJECT — refreshed at S271, in your order
+```
+https://followup.dr-manoj.in/finance/records/xray-test
+```
 
-1. **Blood PDFs into the clinic Drive + the 360° patient page** (visits, procedures, pharmacy bills and
-   returns, reports).
-2. **The X-ray inbox** — a read-only test run first (2–3 days), then live, then the old X-rays imported.
-3. **"Check karein"** at reception (Shavez checks) and **one collapsed line for you**.
-4. **Reports patients send on the clinic WhatsApp**, confirmed by reception.
-5. **Outside MRI/CT scans and hospital/surgery events.**
-6. **Sending reports to patients on WhatsApp** — once sending is cleared.
+## ⭐ WHAT I BUILD NEXT · THIS PROJECT — refreshed at S273
+
+1. **Live X-ray filing** — from the test run's evidence; then the one-time import of the old X-rays.
+2. **X-ray items into Check karein** (a file whose ID did not match; an X-ray with no file by the next day).
+3. **Sending reports to patients on WhatsApp** — once sending is cleared (F-82).
 
 Then, carried: your approvals and procedure prices on the rate page · the phonebook from your two exports ·
 the freshness page · the `watcher` check · the last four units into the backup · fault injection ·
-"Attendance report not received" · Manoj Bhati's petty-book layout (Back button on top, sections folded —
-offered, awaiting your word) · bank-SMS PARKED.
+"Attendance report not received" · Manoj Bhati's petty-book layout · Docterz uploads to stop on your word
+after the 2–4-week parallel period · bank-SMS PARKED.
+
+## ✅ DONE AT THE S273 CLOSE — 20-Sep-2026 (the parent)
+
+- ~~**Blood reports into the clinic Drive + the 360° page**~~ — live. 22 reports filed at the first run,
+  every new one within 15 minutes. The page is on your portal as **Patient records**.
+- ~~**Check karein + your one line**~~ — live. Its first reading was a real lab report for an unknown ID.
+- ~~**WhatsApp reports**~~ — live, confirmed by reception before filing. The first real photo came in at 09:47.
+- ~~**Outside MRI/CT, discharge papers, Add event**~~ — live.
+- ~~**The X-ray test run**~~ — live; waiting only on staff files.
+- ~~**Drive space**~~ — 3.2 GB used of 5 TB; no paid plan needed.
 
 ## ✅ DONE AT THE S271 CLOSE — 19–20-Sep-2026 (the parent)
 
