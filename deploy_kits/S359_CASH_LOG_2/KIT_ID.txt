@@ -1,0 +1,2 @@
+S359 KIT S359_CASH_LOG_2
+session 275 (Sanjeevni) · 20-Sep-2026 · supersedes S358 (RED at its own login-gated kal healthz, never installed): the doctors log Darpan's daily cash (one day or the whole backlog, prefilled; the same row, landing and verdict as his entry, and the received stamp) + the month-wise table (sale · UPI · cash · − home · − procedure · = net cash) + the hub's home / procedure card reads the day books (finance_app.py anchored edit, declared); Kal ka hisaab to bhawna (tile_grants v24, declared); clinic-finance + clinic-portal restarted

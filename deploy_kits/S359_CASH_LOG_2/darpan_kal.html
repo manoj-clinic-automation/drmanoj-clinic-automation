@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sanjeevni — Kal ka hisaab</title>
+<style>
+ body{font:16px/1.45 system-ui,sans-serif;margin:0;background:#f6f4f1;color:#1c1c1c;
+      max-width:560px;margin:0 auto;padding:10px 12px 70px}
+ h1{font-size:19px;margin:8px 0 2px}
+ .sub{color:#777;font-size:13px;margin-bottom:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+ .tabs{display:flex;gap:6px;margin:6px 0 10px}
+ .tab{flex:1;text-align:center;padding:8px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:14px}
+ .tab.on{background:#2e6b34;color:#fff;border-color:#2e6b34}
+ .tab.off{color:#aaa;background:#f3f3f3}
+ .sec{background:#fff;border:1px solid #e4e0da;border-radius:10px;margin:10px 0;padding:12px 14px}
+ .row{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0}
+ .k{color:#555}.v{font-weight:600;font-variant-numeric:tabular-nums;font-size:18px}
+ .tot{border-top:2px solid #1c1c1c;margin-top:6px;padding-top:6px}
+ .tot .v{font-size:22px}
+ details{margin-top:4px}summary{color:#3c6ac2;font-size:14px;cursor:pointer}
+ table{border-collapse:collapse;width:100%;font-size:14px;margin-top:6px}
+ td,th{padding:4px 6px;border-bottom:1px solid #eee;text-align:left}
+ td.n{text-align:right;font-variant-numeric:tabular-nums}
+ .btn{display:inline-block;border:1px solid #bbb;border-radius:8px;padding:10px 14px;
+      margin:4px 6px 2px 0;background:#fafafa;font-size:15px;cursor:pointer}
+ .btn.primary{background:#2e6b34;color:#fff;border-color:#2e6b34}
+ .btn.pick{background:#fff;border-color:#3c6ac2;color:#3c6ac2;min-width:44%}
+ .btn.pick.on{background:#3c6ac2;color:#fff}
+ .btn.reason{display:block;width:100%;text-align:left;box-sizing:border-box;margin:6px 0}
+ .big{width:100%;font-size:24px;padding:10px;border:1px solid #bbb;border-radius:8px;
+      box-sizing:border-box;text-align:right}
+ .ok{color:#2e6b34;font-weight:600}.bad{color:#b3261e;font-weight:600}.amber{color:#b26a00;font-weight:600}
+ .muted{color:#888;font-size:13px}
+ .badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:10px;background:#eee;margin-left:6px}
+ .badge.ok{background:#e4f2e6}.badge.bad{background:#fbe7e5}.badge.amber{background:#fdf1dc}
+ .flag{border-left:4px solid #b26a00;padding-left:10px;margin:8px 0}
+ input[type=date]{font-size:15px;padding:6px;border:1px solid #bbb;border-radius:8px}
+ textarea{width:100%;box-sizing:border-box;font-size:15px;padding:8px;border:1px solid #bbb;border-radius:8px}
+ #msg{position:fixed;bottom:0;left:0;right:0;background:#1c1c1c;color:#fff;padding:10px 14px;font-size:15px;display:none}
+ a{color:#3c6ac2}
+</style>
+</head>
+<body>
+<h1 id="ttl">Sanjeevni — Kal ka hisaab</h1>
+<div class="sub"><input type="date" id="pick"> <span id="stat"></span>
+ <a href="/finance/darpan" id="oldLink">din ka card ↗</a></div>
+<div class="tabs" id="tabs">
+ <div class="tab on" id="tabKal">कल का हिसाब</div>
+ <div class="tab off" id="tabClaim" title="baad mein">Claim (jaldi)</div>
+</div>
+<div id="body">loading…</div>
+<div id="msg"></div>
+<script>
+const R=p=>p==null?"—":"₹"+(Math.round(p)/100).toLocaleString("en-IN",{maximumFractionDigits:2});
+const el=id=>document.getElementById(id);
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(t){const m=el("msg");m.textContent=t;m.style.display="block";setTimeout(()=>m.style.display="none",4000);}
+function yest(){const d=new Date(Date.now()-864e5);return d.toISOString().slice(0,10);}
+const path=location.pathname.split("/");
+let DATE=(/^\d{4}-\d{2}-\d{2}$/.test(path[path.length-1])?path[path.length-1]:yest());
+const VIEW=new URLSearchParams(location.search).get("view")||"";
+const OWNERVIEW=VIEW!=="staff";   /* S359: the owner lands on his English view; ?view=staff shows Darpan's form */
+el("pick").value=DATE; el("pick").onchange=()=>{DATE=el("pick").value;load();};
+let ME={kind:"staff"}, J=null, HANDED_TO=null, PICKED_REASON=null;
+
+async function post(u,b){const r=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});
+ const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok)throw(j.message||j.error||"nahin hua");return j;}
+
+const REASON_HI={home_not_in_print:"घर / प्रोसीजर दवा printout में नहीं थी",
+ online_not_on_pos:"online payment POS पर नहीं दिखा", return_cash:"वापसी (return) नकद दी",
+ carried:"बाकी कल दूँगा / कल दिया था", other:"और कुछ — दो शब्द लिखिए"};
+const ANSWER_HI={slip_checked:"मरीज़ की पर्ची देखी", wrong_bill:"गलत बिल चुना गया", exchange:"बदली थी, पैसे नहीं दिए",
+ doctor_said:"डॉक्टर ने कहा", other:"और कुछ — दो शब्द"};
+const PARTY={dr_manoj:"Dr Manoj", dr_bhawna:"Dr Bhawna"};
+const FLAG_HI={"NEVER BOUGHT":"यह दवा इस मरीज़ ने खरीदी नहीं थी","REFUNDED MORE THAN PAID":"जितना लिया उससे ज़्यादा वापस",
+ "RETURNED MORE THAN SOLD":"जितना बिका उससे ज़्यादा वापस","DISCOUNTED RETURN":"discount वाला बिल पूरा वापस","LARGE RETURN":"बड़ी वापसी"};
+
+function sec(h){return '<div class="sec">'+h+'</div>';}
+function bills(list){if(!list.length)return '<div class="muted">कोई नहीं</div>';
+ return '<table>'+list.map(b=>'<tr><td>'+esc(b.bill)+'</td><td class="muted">'+(b.src==="typed"?"typed":"Marg")+'</td><td class="n">'+R(b.amount_p)+'</td></tr>').join("")+'</table>';}
+
+async function load(){
+ el("body").innerHTML="loading…";
+ let r=await fetch("/finance/darpan/kal/api/day?date="+DATE+"&_="+Date.now(),{cache:"no-store"});
+ let j=await r.json().catch(()=>({}));
+ if(!j.ok){el("body").innerHTML=sec('<span class="bad">'+esc(j.message||j.error||"nahin khula")+'</span>');return;}
+ J=j; ME=j.me||ME;
+ if(ME.kind==="recipient"){return renderMine();}
+ if(ME.kind==="owner"&&OWNERVIEW){return renderOwner(j);}
+ renderStaff(j);
+}
+
+function renderStaff(j){
+ const c=j.calc, d=j.day, tol=j.tolerance_p;
+ el("stat").textContent=c.applied?("report आ गई · "+c.bills_n+" bill"):"";
+ let h="";
+ if(!c.applied){
+  h+=sec('<div class="row"><span class="k">कल की बिक्री की report</span><span class="amber">अभी नहीं आई</span></div>'+
+   '<div class="muted">Marg की report server पर आते ही यह पेज भर जाएगा। आप cash का amount अभी भी लिख सकते हैं — हिसाब report आने पर होगा।</div>');
+ }else{
+  h+=sec('<div class="row"><span class="k">कल की बिक्री (Marg)</span><span class="v">'+R(c.net_sale_p)+'</span></div>'+
+   (c.returns_p?'<div class="muted">('+R(c.gross_p)+' बिक्री − '+R(c.returns_p)+' वापसी'+(c.review_p?' + '+R(c.review_p)+' बिना नाम':'')+')</div>':'')+
+   '<div class="row"><span class="k">− घर / प्रोसीजर की दवा</span><span class="v">'+R(c.home_p+c.proc_p)+'</span></div>'+
+   '<details><summary>कौन से बिल</summary>'+bills(c.home_bills.concat(c.proc_bills))+'</details>'+
+   '<div class="row"><span class="k">− Online (UPI / card)'+(c.online_provisional?'<span class="badge amber">bank की report बाकी</span>':'<span class="badge ok">bank से</span>')+'</span><span class="v">'+R(c.online_p)+'</span></div>'+
+   (c.online_txns.length?'<details><summary>'+c.online_txns.length+' payment</summary><table>'+c.online_txns.map(t=>'<tr><td>'+esc(t.time||"")+'</td><td class="muted">'+esc(t.mode||"")+'</td><td class="n">'+R(t.amount_p)+'</td></tr>').join("")+'</table></details>':'')+
+   (c.adjust_p?'<div class="row"><span class="k">'+(c.adjust_p>0?'+':'−')+' सुधार (घर / प्रोसीजर की दवा वापस — cash नहीं)</span><span class="v">'+R(Math.abs(c.adjust_p))+'</span></div>':'')+
+   '<div class="row tot"><span class="k">= इतना cash होना चाहिए</span><span class="v">'+R(c.expected_p)+'</span></div>');
+ }
+ // the two inputs
+ const done=d&&d.handed_p!=null;
+ HANDED_TO=done?d.handed_to:HANDED_TO;
+ let ih='<div class="row"><span class="k">कितना cash दिया?</span></div>'+
+  '<input class="big" id="handed" inputmode="numeric" placeholder="₹" value="'+(done?(d.handed_p/100):"")+'"'+(d&&d.received_at?' disabled':'')+'>'+
+  '<div class="row" style="margin-top:8px"><span class="k">किसको दिया?</span></div>'+
+  '<div>'+["dr_manoj","dr_bhawna"].map(p=>'<span class="btn pick'+(HANDED_TO===p?' on':'')+'" onclick="pickParty(\''+p+'\')">'+PARTY[p]+'</span>').join("")+'</div>';
+ if(!(d&&d.received_at)) ih+='<button class="btn primary" style="width:100%;margin-top:8px" onclick="save()">'+(done?"बदल कर लिखिए":"लिख दीजिए")+'</button>';
+ h+=sec(ih);
+ // the result
+ if(done){
+  const diff=d.diff_p;
+  let rh="";
+  if(d.state==="waiting_report") rh='<span class="amber">report आने पर हिसाब होगा</span>';
+  else if(diff!=null&&Math.abs(diff)<=tol) rh='<span class="ok">✓ हिसाब मिल गया</span><div class="muted">दिन पूरा। किसी को कुछ नहीं कहना।</div>';
+  else if(diff>0) rh='<span class="ok">✓ लिख लिया</span> <span class="badge amber">'+R(diff)+' ज़्यादा</span><div class="muted">यह रकम आपको वापस मिलेगी — नीचे "आपको वापस" में दिखेगी।</div>';
+  else{
+   rh='<span class="bad">'+R(-diff)+' कम</span>';
+   if(d.state==="open"){
+    rh+='<div class="muted" style="margin:6px 0">वजह चुनिए:</div>'+
+     Object.keys(REASON_HI).map(k=>'<span class="btn reason'+(PICKED_REASON===k?' on':'')+'" onclick="pickReason(\''+k+'\')">'+REASON_HI[k]+'</span>').join("")+
+     '<textarea id="rnote" rows="2" placeholder="दो शब्द (ज़रूरी सिर्फ़ \'और कुछ\' पर)"></textarea>'+
+     '<button class="btn primary" style="width:100%;margin-top:6px" onclick="saveReason()">वजह भेजिए</button>';
+   }else{
+    const V={confirmed:'<span class="badge ok">मिलान हो गया</span>',not_confirmable:'<span class="badge">आपकी बात दर्ज</span>',contradicted:'<span class="badge bad">डॉक्टर साहब देखेंगे</span>'};
+    rh+='<div style="margin-top:6px">वजह: '+esc(REASON_HI[d.reason]||d.reason)+(d.reason_note?' — '+esc(d.reason_note):'')+' '+(V[d.verdict]||"")+'</div>';
+    if(d.owner_decision==="ask"&&d.owner_note) rh+='<div class="flag">डॉक्टर साहब का सवाल: '+esc(d.owner_note)+'</div>';
+   }
+  }
+  if(d.state!=="waiting_report") rh+='<div class="muted" style="margin-top:6px">'+PARTY[d.handed_to]+' को '+R(d.handed_p)+' · '+(d.received_at?'<span class="ok">मिल गया ✓</span>':'<span class="amber">अभी "मिला" नहीं लगा</span>')+'</div>';
+  h+=sec(rh);
+ }
+ // owed back to him
+ if((j.owed||[]).length){
+  h+=sec('<div class="row"><span class="k">आपको वापस मिलना है</span><span class="v">'+R(j.owed.reduce((a,o)=>a+o.amount_p,0))+'</span></div>'+
+   '<table>'+j.owed.map(o=>'<tr><td>'+o.business_date+'</td><td class="n">'+R(o.amount_p)+(o.provisional?' <span class="badge amber">bank बाकी</span>':'')+'</td></tr>').join("")+'</table>');
+ }
+ // returns
+ const rt=j.returns;
+ let vh='<div class="row"><span class="k">कल की वापसी</span><span class="v">'+rt.count+(rt.count?' <span class="muted" style="font-size:14px">('+R(rt.total_p)+')</span>':'')+'</span></div>';
+ if(!rt.flagged.length) vh+='<div class="muted">'+(rt.count?"सब ठीक — कुछ नहीं पूछना।":"कोई वापसी नहीं।")+'</div>';
+ rt.flagged.forEach(f=>{
+  vh+='<div class="flag"><div><b>'+esc(f.bill)+'</b> · '+R(f.amount_p)+' <span class="badge amber">'+esc(FLAG_HI[f.flag]||f.flag)+'</span></div>'+
+   (f.lines.length?'<div class="muted">'+f.lines.map(l=>esc(l.item)+(l.qty?' ×'+esc(l.qty):'')).join(" · ")+'</div>':'');
+  if(f.answered) vh+='<div class="ok">✓ '+esc(ANSWER_HI[f.answered.answer]||f.answered.answer)+(f.answered.note?' — '+esc(f.answered.note):'')+'</div>';
+  else vh+='<div>'+Object.keys(ANSWER_HI).map(k=>'<span class="btn" onclick="answerReturn(\''+esc(f.bill)+'\',\''+k+'\',\''+esc(f.flag)+'\')">'+ANSWER_HI[k]+'</span>').join("")+'</div>';
+  vh+='</div>';
+ });
+ h+=sec(vh);
+ el("body").innerHTML=h;
+}
+function pickParty(p){HANDED_TO=p;document.querySelectorAll(".btn.pick").forEach(b=>b.classList.toggle("on",b.textContent===PARTY[p]));}
+function pickReason(k){PICKED_REASON=k;document.querySelectorAll(".btn.reason").forEach(b=>b.classList.toggle("on",b.textContent===REASON_HI[k]));}
+async function save(){
+ const v=parseFloat((el("handed").value||"").replace(/[^\d.]/g,""));
+ if(!(v>=0))return toast("Cash ka amount samajh nahin aaya");
+ if(!HANDED_TO)return toast("Kisko diya -- chuniye");
+ try{const j=await post("/finance/darpan/kal/api/handover",{date:DATE,handed_p:Math.round(v*100),handed_to:HANDED_TO});
+  toast(j.state==="complete"?"Hisaab mil gaya ✓":(j.needs_reason?"Farq hai -- wajah chuniye":"Likh liya"));PICKED_REASON=null;load();}
+ catch(e){toast(""+e);}
+}
+async function saveReason(){
+ if(!PICKED_REASON)return toast("Wajah chuniye");
+ const d=J.day;
+ try{const j=await post("/finance/darpan/kal/api/handover",{date:DATE,handed_p:d.handed_p,handed_to:d.handed_to,reason:PICKED_REASON,reason_note:(el("rnote")||{}).value||""});
+  toast(j.verdict==="confirmed"?"Milaan ho gaya ✓":(j.verdict==="contradicted"?"Dr sahab dekhenge":"Aapki baat darj"));PICKED_REASON=null;load();}
+ catch(e){toast(""+e);}
+}
+async function answerReturn(bill,ans,flag){
+ let note="";if(ans==="other"){note=prompt("Do shabd: kya hua?")||"";if(!note)return;}
+ try{await post("/finance/darpan/kal/api/return-answer",{date:DATE,cn_bill:bill,answer:ans,note:note,flag:flag});load();}
+ catch(e){toast(""+e);}
+}
+
+/* ---- Dr Bhawna (or any named recipient): the days handed to her ---- */
+async function renderMine(){
+ document.documentElement.lang="en"; el("ttl").textContent="Cash handed to you"; el("tabs").style.display="none"; el("oldLink").style.display="none";
+ const r=await fetch("/finance/darpan/kal/api/mine?_="+Date.now(),{cache:"no-store"}); const j=await r.json().catch(()=>({}));
+ if(!j.ok){el("body").innerHTML=sec('<span class="bad">'+esc(j.message||j.error)+'</span>');return;}
+ const pend=await pendingHTML();
+ let h='<div class="row"><span class="k">'+PARTY[j.party]+'</span><span class="'+(j.unreceived?'amber':'ok')+'">'+(j.unreceived?j.unreceived+' not yet marked received':'all received')+'</span></div>';
+ if(!j.days.length)h+='<div class="muted">Nothing handed to you yet.</div>';
+ if(pend){el("body").innerHTML=pend+sec(h+'<table>'+j.days.map(d=>'<tr><td>'+d.business_date+'</td><td class="n">'+R(d.handed_p)+'</td><td>'+
+   (d.received_at?'<span class="ok">received ✓</span>':'<span class="btn primary" onclick="received(\''+d.business_date+'\')">मिला · received</span>')+'</td></tr>').join("")+'</table>');return;}
+ h+='<table>'+j.days.map(d=>'<tr><td>'+d.business_date+'</td><td class="n">'+R(d.handed_p)+'</td><td>'+
+   (d.received_at?'<span class="ok">received ✓</span>':'<span class="btn primary" onclick="received(\''+d.business_date+'\')">मिला · received</span>')+'</td></tr>').join("")+'</table>';
+ el("body").innerHTML=sec(h);
+}
+async function received(d){try{await post("/finance/darpan/kal/api/received",{date:d});toast("Marked received");load();}catch(e){toast(""+e);}}
+
+/* ---- the owner's English view of one day ---- */
+function renderOwner(j){
+ document.documentElement.lang="en"; el("ttl").textContent="Darpan — the day"; el("tabs").style.display="none";
+ const c=j.calc,d=j.day,tol=j.tolerance_p;
+ let h=sec('<div class="muted"><a href="/finance/darpan/kal/month">Month-wise: sale · UPI · cash · home / procedure ↗</a> · <a href="/finance/darpan/kal/'+DATE+'?view=staff">Darpan\'s form for this day ↗</a></div>')+
+  sec('<div class="row"><span class="k">Day sale (Marg, net of returns)</span><span class="v">'+R(c.net_sale_p)+'</span></div>'+
+  '<div class="row"><span class="k">− home / procedure medicine</span><span class="v">'+R(c.home_p+c.proc_p)+'</span></div><details><summary>bills</summary>'+bills(c.home_bills.concat(c.proc_bills))+'</details>'+
+  '<div class="row"><span class="k">− online '+(c.online_provisional?'<span class="badge amber">Marg modes; bank not in</span>':'<span class="badge ok">bank</span>')+'</span><span class="v">'+R(c.online_p)+'</span></div>'+
+  (c.adjust_p?'<div class="row"><span class="k">'+(c.adjust_p>0?'+':'−')+' adjustment (home / procedure medicine returned, no cash)</span><span class="v">'+R(Math.abs(c.adjust_p))+'</span></div>':'')+
+  '<div class="row tot"><span class="k">= expected cash</span><span class="v">'+R(c.expected_p)+'</span></div>'+
+  (c.applied?'':'<div class="amber">report not applied yet</div>'));
+ if(d&&d.handed_p!=null){
+  h+=sec('<div class="row"><span class="k">Handed</span><span class="v">'+R(d.handed_p)+' → '+PARTY[d.handed_to]+'</span></div>'+
+   '<div class="row"><span class="k">Difference</span><span class="'+(d.diff_p==null?'':Math.abs(d.diff_p)<=tol?'ok':'bad')+'">'+(d.diff_p==null?'—':R(d.diff_p))+'</span></div>'+
+   '<div class="row"><span class="k">State</span><span>'+esc(d.state)+(d.verdict?' · '+esc(d.verdict):'')+'</span></div>'+
+   (d.reason&&d.reason!=="none"?'<div>Reason: '+esc(d.reason)+(d.reason_note?' — '+esc(d.reason_note):'')+'</div>':'')+
+   '<div class="muted">'+(d.received_at?'received by '+esc(d.received_by)+' at '+esc(d.received_at):'<span class="amber">not yet marked received</span>')+' · '+(d.landed_movement_id?'landed as cash_movement #'+d.landed_movement_id:'not landed (no day_entry yet)')+'</div>'+
+   (j.checks.length?'<details open><summary>evidence</summary><pre style="font-size:12px;white-space:pre-wrap">'+esc(JSON.stringify(j.checks[0].evidence,null,1))+'</pre></details>':'')+
+   (d.owner_decision?'<div>Your decision: <b>'+esc(d.owner_decision)+'</b>'+(d.owner_note?' — '+esc(d.owner_note):'')+'</div>':
+    '<div><span class="btn" onclick="decide(\'accept\')">accept</span><span class="btn" onclick="decide(\'ask\')">ask Darpan</span><span class="btn" onclick="decide(\'reject\')">reject</span>'+
+    (d.received_at?'':'<span class="btn primary" onclick="received(\''+DATE+'\')">received</span>')+'</div>'));
+ }else h+=sec('<span class="muted">No handover typed for this day.</span>');
+ const rt=j.returns;
+ h+=sec('<div class="row"><span class="k">Returns</span><span class="v">'+rt.count+'</span></div>'+
+  (rt.flagged.length?'<table>'+rt.flagged.map(f=>'<tr><td>'+esc(f.bill)+'</td><td>'+esc(f.flag)+'</td><td class="n">'+R(f.amount_p)+'</td><td>'+(f.answered?esc(f.answered.answer)+(f.answered.note?' — '+esc(f.answered.note):''):'<span class="amber">unanswered</span>')+'</td></tr>').join("")+'</table>':'<div class="muted">nothing flagged</div>')+
+  '<div class="muted" style="margin-top:6px"><a href="/finance/api/day/'+DATE+'/full">every bill of the day ↗</a> · <a href="/finance/approvals#returnsCard">returns card ↗</a></div>');
+ if((j.owed||[]).length) h+=sec('<div class="k">Owed back to Darpan</div><table>'+j.owed.map(o=>'<tr><td>'+o.business_date+'</td><td class="n">'+R(o.amount_p)+'</td><td><span class="btn" onclick="owedBack('+o.id+')">returned to him</span></td></tr>').join("")+'</table>');
+ pendingHTML().then(p=>{el("body").innerHTML=(p||"")+h;});
+}
+
+/* ---- S359: cash received -- the doctors log what Darpan handed (one day, or the whole backlog) ---- */
+let PENDING=null;
+async function pendingHTML(){
+ const r=await fetch("/finance/darpan/kal/api/pending?_="+Date.now(),{cache:"no-store"}); const j=await r.json().catch(()=>({}));
+ if(!j.ok) return "";
+ PENDING=j;
+ const owner=j.me.kind==="owner"; const me=j.me.party;
+ const unl=j.days.filter(d=>d.kind==="unlogged"), unr=j.days.filter(d=>d.kind==="unreceived");
+ if(!unl.length&&!unr.length) return sec('<div class="row"><span class="k">Cash received</span><span class="ok">every day since '+esc(j.log_from)+' is logged and received ✓</span></div>');
+ let h='<div class="row"><span class="k">Cash received</span><span class="'+(unl.length?'amber':'ok')+'">'+unl.length+' day(s) not logged'+(unr.length?' · '+unr.length+' typed by Darpan, not yet received':'')+'</span></div>';
+ h+='<div class="muted">Darpan hands the cash daily. Log what you received: the amount is prefilled with the day\'s expected cash — change it if he gave a different sum. Each log lands as cash out of the drawer to '+(owner?'the doctor named':'you')+'.</div>';
+ if(unr.length){h+='<table>'+unr.map(d=>'<tr><td>'+d.date+'</td><td class="n">'+R(d.handed_p)+'</td><td>→ '+PARTY[d.handed_to]+'</td><td>'+
+   (owner||d.handed_to===me?'<span class="btn primary" onclick="logDay(\''+d.date+'\',null,\''+d.handed_to+'\')">received</span>':'')+'</td></tr>').join("")+'</table>';}
+ if(unl.length){
+  h+='<table>'+unl.map(d=>'<tr><td>'+d.date+(d.applied?'':' <span class="amber">no report</span>')+(d.online_provisional?' <span class="badge amber">bank pending</span>':'')+'</td>'+
+    '<td class="n"><input type="number" id="amt-'+d.date+'" value="'+(d.expected_p==null?'':Math.round(d.expected_p)/100)+'" style="width:96px;font-size:15px;padding:4px"></td>'+
+    '<td>'+(owner?'<span class="btn primary" onclick="logDay(\''+d.date+'\',true,\'dr_manoj\')">to me</span><span class="btn" onclick="logDay(\''+d.date+'\',true,\'dr_bhawna\')">to Dr Bhawna</span>'
+               :'<span class="btn primary" onclick="logDay(\''+d.date+'\',true,\''+me+'\')">received</span>')+'</td></tr>').join("")+'</table>';
+  const can=unl.filter(d=>d.expected_p!=null&&d.applied);
+  h+='<div class="muted">Expected in all: '+R(j.expected_total_p)+' over '+can.length+' day(s) with a report.</div>';
+  h+='<div>'+(owner?'<span class="btn" onclick="logAll(\'dr_manoj\')">log all as expected → to me</span><span class="btn" onclick="logAll(\'dr_bhawna\')">→ to Dr Bhawna</span>'
+                   :'<span class="btn" onclick="logAll(\''+me+'\')">log all as expected → received by me</span>')+'</div>';
+ }
+ return sec(h);
+}
+async function logDay(date,useBox,party){
+ const b={date:date,party:party};
+ if(useBox){const v=parseFloat((el("amt-"+date)||{}).value); if(isNaN(v)||v<0){toast("Amount?");return;} b.amount_p=Math.round(v*100);}
+ try{const j=await post("/finance/darpan/kal/api/log",b); const r=(j.results||[])[0]||{}; toast(r.ok?("Logged "+date+" · "+R(r.handed_p)+" → "+PARTY[r.handed_to]+(r.diff_p&&Math.abs(r.diff_p)>0?" · difference "+R(r.diff_p):"")):(r.message||r.error||"not logged")); load();}catch(e){toast(""+e);}
+}
+async function logAll(party){
+ if(!PENDING) return;
+ const dates=PENDING.days.filter(d=>d.kind==="unlogged"&&d.applied&&d.expected_p!=null).map(d=>d.date);
+ if(!dates.length){toast("Nothing to log");return;}
+ if(!confirm("Log "+dates.length+" day(s) as received exactly as expected, "+R(PENDING.expected_total_p)+" in all, to "+PARTY[party]+"?")) return;
+ try{const j=await post("/finance/darpan/kal/api/log",{dates:dates,as_expected:true,party:party}); toast("Logged "+j.logged+" of "+dates.length); load();}catch(e){toast(""+e);}
+}
+async function decide(dec){let note="";if(dec!=="accept"){note=prompt(dec==="ask"?"What to ask Darpan?":"Why?")||"";if(!note)return;}
+ try{await post("/finance/darpan/kal/api/owner/decide",{date:DATE,decision:dec,note:note});toast("Recorded");load();}catch(e){toast(""+e);}}
+async function owedBack(id){try{await post("/finance/darpan/kal/api/owed/returned",{id:id});toast("Recorded");load();}catch(e){toast(""+e);}}
+load();
+</script>
+</body>
+</html>
