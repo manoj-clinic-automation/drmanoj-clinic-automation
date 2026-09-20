@@ -1,4 +1,4 @@
-# OWNER TO-DO — LIVE · refreshed at the **S271 close** (the parent project), 20-Sep-2026
+# OWNER TO-DO — LIVE · refreshed at the **S272 close** (the Sanjeevni project), 20-Sep-2026 — the parent's sections exactly as S271 left them
 
 *Detail: `START_HERE_SESSION_273.md` · `S271_BUILD_BRIEF.md`. Everything else this session wrote is
 evidence. Your ruling of 17-Sep still governs this list — nothing here is being chased.*
@@ -171,6 +171,39 @@ stale `/root/wa/.env.bak*` · the never-cited working papers · `KB_canon_all\MD
 four cold-kit zips by rule E, the rest your own downloads — Docterz CSVs, follow-up audits, bank PDFs)
 and the 9 at `D:\dr-manoj-git\` · **`D:\dr-manoj-git\_to_delete_S263\`** — two empty git lock files my shell left
 (F-511), with `WHY_SAFE.txt`; delete when convenient.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S272 close
+
+**A · THE PUBLISH — one double-click.** It carries this close's record only; the spine is already live on the server.
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**B · NOTHING ELSE THIS WEEK.** The spine proves itself for seven nights on its own. The build of the seven waiting items starts in the next Sanjeevni chat on the word you have already given.
+
+*Yours and settled, raised here once as a record and never as a prompt: the eighteen answers on step 2, Try to match — at your own time; the 06-Sep stock check is not touched by anything until you say it is completed. Your deferred items (close August, the first cheque, bank details for three suppliers, gross beside net) stay deferred; they will show once more when Amir's pages move to the spine.*
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S272 close, in the order you approved
+
+1. **Shavez's morning tile** (plan approved 18-Sep).
+2. **Your overdue line** on the health card — salt list older than 8 days, item/category lists older than 35 days.
+3. **Refused Marg files kept, not deleted.**
+4. **The spine on the health page**, and into the nightly backup (the parent's one line).
+5. **Ordering, prepared against the spine but not switched** — then one sitting with you on three things you can see: the buying rules, the do-not-order / on-demand list, whose day includes "make today's order".
+6. **Near-expiry** — what to return before it expires, from the expiry exports already archived.
+7. **The Sanjeevni Book v1.5.**
+
+**After seven clean nights, on your word, one screen at a time:** ordering → stock now → Amir's pages (the 23 wrong salts and 43 wrong MRPs disappear there) → returns / Darpan / claim queue → discount attribution → **the stock-check screens last, after count #1 closes** (with the 22 renames). Then the old copies are retired one by one; the manual workflow stays as fallback throughout.
+
+## ✅ DONE AT THE S272 CLOSE — 20-Sep-2026 (the Sanjeevni project)
+
+- ~~**Re-confirm the S270 verification**~~ — re-run on the same files: every figure identical.
+- ~~**The 31-March opening**~~ — your re-export proved the 40 units are Marg's own printed total; settled.
+- ~~**The architecture**~~ — `S272_SPINE_ARCHITECTURE.md`; plain status in `S272_WHERE_WE_STAND.md`.
+- ~~**Build the three steps**~~ — **`S331_SPINE` LIVE 07:19 IST** from your line: the spine rebuilds itself every 10 minutes from the Marg archive, checks itself against Marg, and swaps in only when it passes. Nothing existing touched; the 06-Sep count untouched (373, proven on every build).
+
+*(The S268 wording, retained below for the items it still holds.)*
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S268 close
 
