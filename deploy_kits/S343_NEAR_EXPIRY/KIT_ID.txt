@@ -1,0 +1,2 @@
+S343 KIT S343_NEAR_EXPIRY
+session 274 (Sanjeevni) · 20-Sep-2026 · D567 item 6 / D409: near-expiry from the kept STOCK_EXPIRY exports, read by a reader with a TOTAL witness, with the spine's stock beside each batch and a sale-line cross-check; a nightly file beside the spine, no screen

@@ -1,0 +1,2 @@
+S342 KIT S342_CHECK_KAREIN_2
+session 273 (parent) · 20-Sep-2026 · S340 payload unchanged, the walk corrected (S340 refused itself on live data)
