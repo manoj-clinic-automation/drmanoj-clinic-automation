@@ -1,0 +1,31 @@
+# S358_CASH_LOG — the doctors log Darpan's cash, and the month-wise table
+
+**Project: Sanjeevni — Pharmacy & Marg · session S275 · 20-Sep-2026, 22:4x IST.** On S357 (live 22:27). The owner: *"the flow is that he gives the cash daily, to me or to Dr Bhawna, and both should have a system to log that cash — either he can log it or I can. And by this logging I also want to clear the backlog, because he has cleared all the cash till date. Secondly, a month-wise breakup of total sale, the UPI amount and the cash amount, and in the cash amount for internal accounting subtract two heads, home medicines and procedure medicines — available to me also."*
+
+## What changes
+
+- **`darpan_kal.py`** (`04bb1586` → `cc8253a6`, full file): three additions. `GET …/kal/api/pending` — every counter day since the log-from date (`setting darpan_kal.log_from`, default 2026-09-01) with a filed report and **no handover**, each with its expected cash, plus handovers Darpan typed that are **not yet received** (a recipient sees only hers). `POST …/kal/api/log` — the doctor logs one day (amount prefilled with the expected cash, changeable) or the whole backlog as expected, to himself or (the owner) to Dr Bhawna: **the same row, the same landing and the same verdict as Darpan's own entry** (`darpan_kal_day` → `_decide` → one `cash_movement` out of the drawer), and the log is also the *received* stamp. A short amount records the difference and leaves the reason to Darpan, as today. `GET …/kal/month` + `api/month` — the month-wise table.
+- **`darpan_kal.html`** (`31f737f2` → `6f3250ec`, full file): the owner now lands on his **English** view (`?view=staff` still shows Darpan's Hindi form); a **Cash received** block on top for the owner and for Dr Bhawna — the unreceived handovers with a *received* button, the unlogged days with the amount box and *to me / to Dr Bhawna* (owner) or *received* (Dr Bhawna), and *log all as expected*; a link to the month table. Darpan's own page is unchanged.
+- **`darpan_month.html`** (NEW): per month — total sale · UPI · cash · − home medicine · − procedure medicine · − other · ± adjustment · **= net cash** · handed to Dr Manoj / Dr Bhawna / bank · expenses; tap a month for its days (with each day's handover and whether it was received). English, doctors only.
+- **`tile_grants.json`** v23 `a5f8b3b1` → v24 `76448c67` (`grant_kal_s358.py`): *Kal ka hisaab* to **bhawna** — **a data edit on the parent's file, declared**. Her view of that page is the English *Cash handed to you* list with the log buttons.
+- `clinic-finance` and `clinic-portal` **restarted** — declared to the parent.
+
+## What the walk found (PC, a copy of the nightly database after S356)
+
+Pending for the owner: **16 unlogged September days, ₹2,00,927 expected in all** (01-Sep ₹9,350 … 18-Sep ₹22,860). Logging all as expected to Dr Manoj: 16 rows, every one *complete*, 16 cash movements out of the drawer, the pending list empty, and the drawer's closing balance falls from ₹4,07,872 to **₹2,06,945** — the balance carried from before September (August shows ₹3,72,479 net cash against ₹1,70,720 handed, i.e. ₹2,01,759 handed before the page existed and never logged; the owner decides whether the log-from date moves to 1-Aug). The month table on the same copy: Sept sale ₹3,40,720 · UPI ₹1,27,633 · cash ₹2,13,087 · home ₹11,023 · procedure ₹1,337 · net cash ₹2,00,727.
+
+## Proof
+
+- `selftest_s358.py` **24/24** on a scratch database in the live shape (the three cash views copied from the nightly `finance.db`, the kal schema from the box): the pending list; the owner logging at the expected amount (row, landing, received, complete, the ledger's net 0), at a different amount (the difference, state open), the backlog; a recipient stamping Darpan's handover, refused for the other doctor's day and for a changed amount; already-received and future dates refused; one audit line per log; the month row and its days adding up; the grants edit v23 → v24 and refused on anything else; the page and the month page carry their hooks.
+- The installer: gates → compile → selftest → the grants edit rehearsed = predicted bytes → **the kit module run read-only against the live database** (the pending count, the last two month rows printed) → backups → place → both services restarted → healthz, the kal health route and the four new routes imported; red → every file restored byte-identically, the month page removed, services restarted.
+
+## The one line (the owner's)
+
+```
+cd /root/deploy/repo && git pull --ff-only && bash /root/deploy/repo/deploy_kits/S358_CASH_LOG/install_S358_CASH_LOG.sh
+```
+
+## Named, not done
+
+- Months before September show home / procedure medicine only where Darpan typed them (those days are approved; the resync never touches an approved day). Rebuilding April–August from Marg's labels is a decision on approved books — the owner's.
+- The pre-September drawer balance (₹2.07 lakh) is the August handovers never logged; moving `darpan_kal.log_from` to 2026-08-01 lists them for logging (a one-line setting).

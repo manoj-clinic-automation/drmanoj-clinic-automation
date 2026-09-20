@@ -1,0 +1,2 @@
+S358 KIT S358_CASH_LOG
+session 275 (Sanjeevni) · 20-Sep-2026 · the doctors log Darpan's daily cash (one day or the whole backlog, prefilled with the expected cash; the same row, landing and verdict as his own entry, and the received stamp) + the month-wise table (sale · UPI · cash · − home · − procedure · = net cash); Kal ka hisaab to bhawna (tile_grants v24, declared); clinic-finance + clinic-portal restarted
