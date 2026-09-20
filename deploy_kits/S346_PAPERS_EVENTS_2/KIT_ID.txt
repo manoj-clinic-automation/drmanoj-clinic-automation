@@ -1,0 +1,2 @@
+S346 KIT S346_PAPERS_EVENTS_2
+session 273 (parent) · 20-Sep-2026 · S345 payload unchanged, the walk scoped to its own rows (S345 refused itself on live data)
