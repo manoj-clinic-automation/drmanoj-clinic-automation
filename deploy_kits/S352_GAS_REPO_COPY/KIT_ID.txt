@@ -1,0 +1,2 @@
+S352 KIT S352_GAS_REPO_COPY
+session 277 (parent) · 20-Sep-2026 · F-591: gas_export.py's repository copy repointed from the frozen S230 photograph to the living deploy_kits/GAS_CURRENT (one conf line, no code, no restart)

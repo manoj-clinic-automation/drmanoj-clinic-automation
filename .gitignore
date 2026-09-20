@@ -228,3 +228,10 @@ finance/REPORT_1.xls
 # S331_SPINE (Sanjeevni, S272): spine_rules.json IS the kit's data payload -- every hand-declared fact
 # the spine uses, each with its source. Exact path, no wildcard (the S236 rule, F-300 family).
 !deploy_kits/S331_SPINE/spine_rules.json
+
+# S277 (20-Sep-2026): GAS_CURRENT is the LIVING repository copy of the three Apps Script projects that
+# gas_export.py compares against every Sunday (kit S352, F-591). Each project carries its appsscript.json,
+# the same three files the S230 lines above allow -- exact paths, no wildcard (A11c).
+!deploy_kits/GAS_CURRENT/DailyClinicReports/appsscript.json
+!deploy_kits/GAS_CURRENT/ClinicAccountingReports/appsscript.json
+!deploy_kits/GAS_CURRENT/UPIReconciliation/appsscript.json

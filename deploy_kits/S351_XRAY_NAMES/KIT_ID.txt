@@ -1,0 +1,2 @@
+S351 KIT S351_XRAY_NAMES
+session 277 (parent) · 20-Sep-2026 · the X-ray test page reads the staff's real file-name shape: the clinic ID at the END of the name; sister rule; two numbers = check folder
