@@ -1,0 +1,9 @@
+KIT      : S350_FRESHNESS_CLOCK
+SESSION  : 276 (parent -- Systems & Automation, clinic core)
+DATE     : 2026-09-20
+TARGET   : VPS -- /root/finance/freshness_page.py, full-file replacement; finance_app.py NOT touched; clinic-finance restarted
+FROM     : dc60a4c6fc0033bda1cc9548db1efa5d (S349, installed 12:42 IST)
+TO       : the kit's freshness_page.py, read back at install (offline 5c38847eb99e8e530500c1f704bf8cba)
+DATA     : no
+BUILDS   : on the S349 page read live in the owner's browser at 12:4x IST: '0 min ago' for a file 277 min old -- utcnow().timestamp() on an IST box; the S349 walk handed render() its own clock and could not see it (F-581 class)
+NUMBERS  : kit S350 (claimed on the System Board board/_numbers v23->v24 before this folder was named, per F-515)
