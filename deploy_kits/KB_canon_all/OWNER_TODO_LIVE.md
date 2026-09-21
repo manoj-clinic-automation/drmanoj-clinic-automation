@@ -1,33 +1,30 @@
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S275 close
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S280 close
 
-**A · THE PUBLISH — one double-click.** It carries tonight's record only; everything built is already live on the server from your three lines.
+**A · THE PUBLISH — one double-click.** It carries today's record only; everything built is already live on the server from your lines.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**B · THE SEPTEMBER DAYS ARE READY TO APPROVE**, and after each one, log the cash you took. Your page:
+**B · ONE RULING WHEN YOU WANT IT — the ₹200 of 04-Sep.** Darpan filed ₹23,675; Marg's bills add up to ₹23,875. The day panel shows it. The next session finds the bill and puts it to you in one line.
 
-```
-https://followup.dr-manoj.in/finance/darpan/kal
-```
+*Yours when you want them, never as a prompt: the buying rules and the four lists (`order_rules.json`), the wording on Shavez's tile, the eighteen step-2 answers. The 06-Sep stock check is untouched by anything until you say it is completed.*
 
-17 days are listed with their expected cash — **₹2,29,652 in all**. One tap each, or *log all as expected*. Dr Bhawna has the same page for her days.
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S280 close
 
-**C · THE MONTH TABLE** — sale · UPI · cash · − home · − procedure · = net cash:
+1. **Your Yes Bank CSV** — it is still refused (F-612). I find your files, try the PDF for you, then let the page take the CSV by asking its dates. First job.
+2. **The ₹200 of 04-Sep** — found and put to you.
+3. **The rest of the approvals page** — "Needs you" at the top, the sections in your order, the audit material on its own page.
+4. **The spine's seven nights**, Shavez's first real morning, the category list, the rung-4 paper.
 
-```
-https://followup.dr-manoj.in/finance/darpan/kal/month
-```
+## ✅ DONE AT THE S280 CLOSE — 21-Sep-2026 (the Sanjeevni project)
 
-*Yours when you want them, never as a prompt: the buying rules and the four lists (`order_rules.json`), the wording on Shavez's tile, the eighteen step-2 answers, and Close August. The 06-Sep stock check is untouched by anything until you say it is completed.*
-
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S275 close
-
-1. **The Yes Bank statement upload** — it refuses both your PDF and your CSV, and its tile says the wrong thing. First job.
-2. **The approvals page, rebuilt in your order** — sale, returns, online, home/procedure, cash; approve then log; one drawer figure; the audit material moved off it.
-3. **The cash log back to 17 August** — only the days that need it.
-4. **Then the spine's seven nights** (20–27 Sep), Shavez's first real morning, the category signature, the rung-4 paper.
+- ~~The Yes Bank statement upload refuses both formats~~ — the **PDF** is read and checked against itself (S360, live). The CSV is carried as F-612.
+- ~~The approvals page's cash figures~~ — **one calculation** from the 17-Aug count, proven against both counts (S361); **one pool** for you and Dr Bhawna, every approved day gone to it, the two deposits their own record (S363).
+- ~~The day panel~~ — simple and expandable: sale → bills → medicines, returns, UPI, without cash, **Cash received** (15-Sep ₹11,291), where it went, checks in words (S365, read live).
+- ~~August kept for you~~ — 2777 paid at the counter, the counted opening untouched; August closes with drawer 0.
+- ~~Approve every September day~~ — **you did, 21-Sep.**
+- ~~The cash log back to 17 August / log September day by day~~ — **withdrawn on your ruling**: approving a day is the record (D598).
 
 ## ✅ DONE AT THE S275 CLOSE — 20–21-Sep-2026 (the Sanjeevni project)
 

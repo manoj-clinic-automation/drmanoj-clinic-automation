@@ -1,0 +1,1436 @@
+# SANJEEVNI SYSTEM BOOK — v1.8 · S280 · 21-Sep-2026
+
+*The one document that describes the Sanjeevni (pharmacy) system as it actually is. **Supersedes `SANJEEVNI_SYSTEM_BOOK_v1_7_S275.md` in full** (v1.8 = v1.7 whole, plus the blocks marked *Added at v1.8* — the one cash calculation and the pool at §6.7, the day panel at §10.7, the rulings of 21-Sep at §13.y, §14.00 what v1.8 found). v1.7's own opening follows, retained.*
+
+*(v1.7 H1, retained:)* SANJEEVNI SYSTEM BOOK — v1.7 · S275 · 21-Sep-2026
+
+*The one document that describes the Sanjeevni (pharmacy) system as it actually is. **Supersedes
+`SANJEEVNI_SYSTEM_BOOK_v1_6_S274.md` in full** (v1.7 = v1.6 whole, plus the blocks marked *Added at v1.7* — the day's
+money made true again at §2.2/§6.4/§6.6, the doctors' cash log and the month table at §10.5, the approvals page as it is to be
+rebuilt at §10.6, §11.4 restated, §13.z the rulings of 20–21-Sep, §14.0 what v1.7 found; v1.6's own additions stand as written).
+*(v1.6's supersession line, retained:)* **Superseded
+`SANJEEVNI_SYSTEM_BOOK_v1_5_S272.md` in full** (v1.6 = v1.5 whole, plus the six D567 items built and live at S274 — Shavez's
+morning tile §2.1/§10.4, the quarantine and the server-side rescan §3.3–3.4 (item 3d DONE), the spine's state file and health legs §4A,
+near-expiry §8.4, the order rehearsal §9.4, §11.4 restated, §13 the rulings of 20-Sep, §14.0 what v1.6 found; v1.5's own
+additions stand as written) — this is a complete document, never a delta
+(D202/D247). Fourteen sections plus the owner's rulings; each subsection names what lives there today —
+machines, files, tables, pages, jobs, people — and its state: **LIVE** (in use) · **FALLBACK** (kept
+switched on behind the live path) · **SHADOW** (runs, writes, feeds no screen) · **BUILT** (in the
+repository, not installed) · **PLANNED**. Money figures and patient data are never in this book.
+**Since D528 (S260–S262) this book lives in the project "Sanjeevni — Pharmacy & Marg"; the repository
+rows `SANJEEVNI_SYSTEM_BOOK_v1_2_S258.md` and `SANJEEVNI_SYSTEM_BOOK_v1_3_S264.md` are frozen and this
+revision is rowed beside them.**
+
+**Why v1.4 exists.** Between **20:57 on 17-Sep and about 05:00 on 18-Sep**, eleven kits went live on
+the box: **seven of them Sanjeevni's** — S299 (the hub), S301 (the voucher round), S302 (the daily
+print), S304 (the count proof), S305 (the export-watch door), S308 (the pursue evidence) and S311 (the
+wrong-supplier check, stage 2), with **S307 withdrawn by its own health gate** (F-525) and rebuilt as
+S311 — and four the parent's (S300, S303, S306, S309). v1.3 was written at 13:32 on the 17th and
+describes none of them. The book did not become *wrong*; it became **silent about the half of the stock
+lane that now does the work** — the voucher round, the hub that sequences the whole count, the daily
+print the router used to refuse, and the export-watch door that was still marked PLANNED. That silence
+was carried as the single `stale` through two closes and a post-close. This revision closes it:
+
+- **§2.1, §2.5, §3.1 — the daily print is taught.** `S302_DAILY_PRINT` gave the router the owner's own
+  daily summary sale report. It is no longer refused; it is identified, dated from its own day line,
+  recorded, and **deleted at the door** as PHI.
+- **§3.5 — the export-watch door is live.** `S305_EXPORT_WATCH_DOOR` closed D467 phase 2c: the watch
+  now reads the door's own record as well as manojz, so *unknown* means neither route saw an export,
+  not merely that the PC was quiet.
+- **§7.6 — the voucher round (D542).** Marg is corrected by **frozen rounds of at most six lines**, one
+  batch to one Marg voucher, each recorded as entered with **Marg's own number**; a later change or a
+  reversal is never an edit, it is the **difference on the next round**.
+- **§7.7 is new — the stock check hub.** Eight steps, what each asks, who does it, and **how each one
+  knows its own state**, read from the live code rather than from a kit README.
+- **§14.1** carries what this revision found that nobody was looking at — including **five defects in
+  live stock code**, one of which (F-526) can make the count proof read a true move as a mismatch.
+
+**How v1.4 was checked.** Four sources, each named at the row it supports:
+
+- **[code]** — read from **the box's own nightly bundle**, `code_nightly.tar.gz`, built at **01:35:02
+  on 18-Sep-2026**, **251 files**, extracted and read this session. This is the first bundle built by
+  `S306_BUNDLE_MASK` v1.4, so two unit-file secret *values* are masked in it with the original file md5
+  recorded in `BUNDLE_INFO` — pins still hold, and §11.2b's list is unchanged by it.
+- **[pins]** — the Register's live VPS pins (`live_pins_S266postclose.txt`, generated from Register
+  v5.107, `register_pin_verified: yes`) held against that bundle. **Over the Sanjeevni files: 18 current
+  rows, 17 matched the box's own bytes, 1 mismatched — `amir_day.py`, found at exactly its recorded
+  predecessor** because `S311_SUPPLIER_CHECK_2B` installed it after the bundle was built. That is an
+  expected mismatch at its predecessor hash, not a fault. Nothing Sanjeevni-owned is absent from the
+  bundle.
+- **[record]** — from a kit's own README, the System Board's kit lines, and the close that installed it,
+  where no live surface shows it. **A [record] row is not a live read and does not claim to be** (F-443).
+- **[live]** — rows so marked were read from the running pages on **15-Sep-2026, ~06:00 IST** (v1.2) and
+  are **carried, not re-read**: this revision opened no browser either. Where a [code] or [record] fact
+  supersedes a [live] row, the newer fact is stated beside it and the older kept for the trail.
+
+**What this revision deliberately did not touch.** Count #1's step 2, *Try to match* — the eighteen
+pairs — is **the owner's own work, at his own time, by his own word of 18-Sep**. It is not a blocker on
+this system's side and this book does not treat it as one. §7.7 describes the step; it does not chase it.
+
+---
+
+## 1 · FOUNDATIONS
+
+### 1.1 Machines and direction
+Four machines, one rule: **the VPS reaches nothing; both PCs push to it.**
+
+| machine | role | key paths |
+|---|---|---|
+| **Medical PC** (the counter, Windows, account `SET`) | Marg runs here; exports are captured and pushed | `D:\MARGERP\users\<login>\report\REPORT_n.XLS` (Marg's reused slots) · `D:\SendToClinic\` (agent, watcher, pusher, `_captured\` spool, `token.txt`, and since S259 `TURN_ON_ALL.bat` / `TURN_OFF_ALL.bat` / `_off_READ_ME.txt`) |
+| **manojz** (the owner's PC) | the pull chain and the only complete raw archive — FALLBACK sender | `D:\Downloads\margsync\MargPull\` (router, gate, rescan, pushers) · `MargArchive\<TYPE>\<YYYY-MM>\` + `index.csv` · `_config\` (numbers, never in git) · **`D:\Downloads\_kbtools\`** (the KB manifest tool S268, the paper shelf S269, the nightly maintenance S272 — none of it Sanjeevni, all of it the record-keeping this book depends on) |
+| **VPS** `followup.dr-manoj.in` (`srv1746119`) | every door, every table, every screen | `/root/finance/` (the apps + `finance.db`) · `/root/marg_ingest/` (collector, door, shadow) · `/root/portal/` (tiles, logins) |
+| **Google** (`drmka.ortho`) | mirrors and backups | Drive `Clinic Data Archive\MargArchive` (mirror the server reads) · `MargBackups` · `FinanceDB_Backups` (nightly db **and, since S243 K2, the nightly code bundle**) · `ToMedical\_kit` (agent self-update) · `FromMedical` (heartbeat) |
+
+**[live]** Tailscale, 15-Sep 05:51: manojz `100.75.93.88` Running; medical online at
+`100.119.151.40`, direct `192.168.1.26:41641`. *A green Tailscale is not a working pipeline — on
+26-Aug it read active and direct through a whole outage. The page says so itself.*
+
+### 1.2 People, logins and roles
+Portal logins (13 staff + owner): role `doctor` / `manager` / `staff`, mapped inside finance to **unit
+roles** in table `unit_role` on unit `medical`: **maker** (Darpan — files the day), **checker** (the
+owner alone — approves), **viewer**. Amir's page is gated on *any role on the medical unit* (D478).
+Tiles are convenience only — `tile_grants.json` shows, the route's own gate decides (S242 lesson).
+Who does what: **Amir** exports purchase reports, enters bills in Marg, does renames, raises claims ·
+**Darpan** files the day, keeps the drawer, chases claims and corrections, does shelf counts ·
+**counter staff** sell, take returns · **owner** approves, decides, locks.
+
+**Changed since v1.1 [record]:** S250 added the **Staff Register** working roles — Shivani and Alisha
+**makers**, Shavez **checker** (D272; he still may not approve).
+**Changed since v1.2 [record] — the open decision is closed.** v1.2 recorded that the S262 note said
+Shavez writes the cheque register while as built he was a **viewer** there (⭐0 item 14). The owner's
+word on the board (F5): *"make him maker."* **`S284_SHAVEZ_MAKER` (D529, installed 17-Sep 07:38)**
+did it **by a named grant, not a unit role**: a `unit_role` maker row would also have let him file the
+day, give bill verdicts, type carry-forwards and read the vendor phone book — none of it asked for —
+so the grant is the house pattern already used twice in the same file (`purchase.phonebook_users`,
+`purchase.salt_users`): **setting `purchase.cheque_users = shavez`, read fail-closed.** He can log a
+cheque, mark it handed over, or void it; nothing else changed for him.
+
+### 1.3 Tokens and keys
+One machine token, `FINANCE_MARG_TOKEN` (systemd drop-in on the VPS), opens seven token-only doors and
+is cached on both PCs.
+
+**Changed since v1.1 [record]:** **§11.4 item 3b is half done.** `S258_CONSTANT_TIME` (Club C step 1)
+made **every machine-door token check on the VPS a constant-time compare** — seven sites in
+`finance_app.py`, plus the other door modules. What remains of 3b is **per-sender tokens** (Club C.4),
+which needs the owner's credentials and rides his F-456 key rotation.
+**⚠ Standing exposure (F-465):** `clinic-finance.service` carries the real values of
+`FINANCE_CRON_TOKEN` and `FINANCE_MARG_TOKEN` as plain `Environment=` lines. This is why the live
+capture of that file may never go to the public repository.
+
+### 1.4 Standing rules
+Marg is never written to · the manojz pull chain stays as the fallback until the server path has
+earned it (D402) · no patient number at rest on the VPS (F-185; phones masked to last 4, names present
+in three tables — §6.5) · ingested-but-unaccepted is inert (D407) · dating happens at capture (D408) ·
+junk is moved, never deleted, by the assistant; deleting is the owner's · nothing already live is
+rebuilt without the owner's OK; the manual path stays.
+
+**Added since v1.1:** **D513** — a vendor not on the authorised NEFT register never enters the NEFT
+file; he is paid by cheque **and the cheque is logged** · **D520** — figures going to the bank carry
+no thousands separators · **D521** — a cheque may be logged on a FINAL month; a live cheque number is
+unique; nothing on the cheque register is ever deleted, only voided with a reason · **Amir must not
+rename a supplier in Marg** · **no cash↔UPI corrections in Marg** (the CA's ruling, D492).
+
+---
+
+## 2 · CAPTURE AND TRANSPORT
+
+### 2.1 The Marg report register
+Marg writes every report into a reused slot file whose name carries no type and no date (D188);
+identity comes from **content signatures** (`signatures.json`, one copy per machine — §3.1). Types
+known: SALE_BILLWISE (DETAIL — the only one allowed to travel to the books; SUMMARY1 never exported),
+STOCK_CLOSING (DEFAULT/TOTALS), STOCK_EXPIRY, PURCHASE_SUPPLIERWISE / BILLWISE / ITEMWISE /
+BILLITEMWISE, SALE_RETURN, SALE_BOOK, STOCK_ITEM_LEDGER (carries PHI — never into the repo),
+SALT_WISE_ITEM_LIST, STOCK_VALUATION, ITEM_MASTER (avoided, D403/D404). Cadence rulings:
+supplier-wise month-end only; stock closing by 10:30 next morning (D463).
+
+**✅ Taught at v1.4 [code] [record] — the report the register did not know is now known.** On 16-Sep at
+23:55 an export was refused at the door, *"no signature matches this title"*: a **BILL WISE SALES
+STATEMENT** whose title row carries *"AS ON"* and **no date**, printed as one text column rather than a
+table, so the router could neither classify nor date it. **The owner named it: his own daily summary
+sale report — the one Darpan prints for the physical record and pays the day's cash against.**
+`S302_DAILY_PRINT` (LIVE 17-Sep ~21:5x, both machines) added the type **`SALE_DAILY_PRINT` / layout
+`TEXT`** to `signatures.json`: read from the print layout **only** where a sheet has no ordinary header
+row and at most two columns; **dated from its own day line**; complete only when it carries *End of
+Report*; and **never `uploadable`**. The regression that proved it: over **359 archived and spooled
+exports the router's verdict changed on exactly two files — the two copies of the 16-Sep print** and
+nothing else.
+
+**The specimens in `_REFUSED\` are now history, not a queue.** The next pull's rescan re-reads
+`_REFUSED\` (§3.4), so the 16-Sep print files itself; they are kept until it has, then they are ordinary
+residue (§12).
+
+**Added at v1.6 [code, LIVE] — the morning has an owner and a page.** `reports_tile.py` (S243 → S337_SHAVEZ_MORNING_2,
+`2798436712…`) is Shavez's morning page at `/finance/reports/aaj`, the tile *Aaj ki reports* he and Amir have held since S243 v13.
+It opens on the due day — yesterday, or Saturday after a Sunday (the counter is closed on Sundays, measured Jul–Sep 2026) — with the
+Marg path and settings; a file the door has VERIFIED reads *aa gayi · jaanch ho rahi hai*; **the tick appears only when the spine's
+certified reader re-adds the report** (`spine/readings/<md5>.json`, or `marg_read.py` run on a file the door keeps) — D568; a failed
+witness reads *dobara banaiye* with the reason; both in before midnight → *kal raat ho gaya*; from 10:00 on a counter day with the
+pair not in, a red banner (*abhi mat nikaliye*), *Ab nikaliye* after 21:00; the 1st-of-month valuation and expiry rows (the door's
+format check, said so); and **the owner's overdue line** — salt list > 8 days, category / item list > 35 days — inside the `line`
+the hub's Marg card already prints. Attendance is not visible to the finance server yet, so the banner blames nobody.
+
+### 2.2 Capture on the medical PC — LIVE
+`medical_agent.py` (S205.1) starts at power-on under `SET` (D480, proven 12-Sep), supervises
+`marg_watch.py` (event-driven capture into `D:\SendToClinic\_captured\`, md5-deduplicated), writes a
+heartbeat to Drive `FromMedical` every 300 s, backs Marg up hourly to Drive `MargBackups`, and
+self-updates from Drive `ToMedical\_kit` by an md5 allow-list. The counter reaches its own account with
+**Ctrl+Alt+Del → Switch user**; SET stays signed in behind it. Drive's letter on this machine moves
+between reboots — never hard-coded in anything a person opens (F-442).
+
+**[live] 15-Sep 05:52:** watcher **alive**, **0 captures today**; the last pull reached the machine;
+the share was read in 0 ms. **The Marg backup is 1.8 days old** and drifting (it was 0.7 d on 13-Sep,
+1.6 d on 14-Sep). Marg's own serverbackup sits on `D:`, the same disk as the data — *"not a disaster
+copy"*, in the heartbeat's own words.
+**[record]** The watcher has restarted by itself twice in three nights (pid 11516 → 11292) and come
+back unaided both times. Recorded, not diagnosed.
+
+### 2.3 The three legs
+| leg | path | state |
+|---|---|---|
+| **A · direct push** | `marg_push.py` (a thread inside the watcher) → HTTPS `POST /finance/api/marg-file` → the one door | **LIVE** |
+| **B · pull** | manojz task *Marg pull from medical* every 10 min over Tailscale → `_spool` → router → archive → `_outbox` → `marg_gate send` → `POST /finance/api/marg-push` (sale) · `push_snapshot` / `push_expected` → `/finance/stock/api/snapshot` · `push_purchases` / `push_sale_bills` → `/finance/purchase/api/push` | **LIVE as the feed to the books; FALLBACK by ruling** |
+| **C · Drive collector** | manojz robocopies the archive to Drive → `/root/marg_ingest/marg_ingest.py` every 5 min reads it with the service account → the one door | **SHADOW** (de-duplicates against leg A by md5; OFF file `/root/marg_ingest/OFF`) |
+| **D · browser** | `/finance/clinic/marg/upload` (clinic maker/checker) → the one door | **LIVE, manual** |
+
+**[live]** Last Marg pull **14-Sep 22:30 IST**; the pipeline heartbeat from manojz was **2 minutes
+old** when read. **The last Marg report to arrive was 12-Sep 23:01 — 31 hours before the read**, which
+the health page raises as *"A day may not have been sent yet"* (Sunday closed). **Reports queued but
+not sent: nothing waiting.** So the transport is alive and the queue is empty; what is missing is an
+export nobody has generated.
+
+**Changed since v1.2 [record] — leg B was down from 15-Sep to 17-Sep morning and the machine was not
+the reason (S261).** The pull chain's own log: **146 consecutive failures from 15-Sep 10:20**, all
+*medical PC unreachable*. `pipeline_status` distinguishes the machine from the share, and **the
+machine answered throughout** — both Windows logins on the counter PC had been given passwords, and the
+credential manojz holds for `\\<medical>\DDrive` (user `MEDICAL\SET`) no longer matched. One line, the
+owner's (`cmdkey /add …`, the password typed by him and written nowhere), and **the 06:50 pull on 17-Sep
+was clean** — `share_seen=1`, four steps rc 0 — and cleared the whole backlog in one pass: the 17-Sep
+05:13 STOCK_CLOSING (as on 16-Sep) VERIFIED and pushed with the computed figure; the 15-Sep and 16-Sep
+sale exports ACCEPTED by the server at 06:51; outbox empty. **Two lessons the lane now carries:** a
+credential is a fourth thing that can fail between the machines, beside the machine, the share and the
+export; and *the medical PC's own capture (leg A) kept running the whole time* — the 05:13 stock
+closing was in `_captured\` before manojz could reach it. The leg that failed was the fallback.
+
+### 2.4 The one door — LIVE
+`/root/marg_ingest/marg_take.py` · `take(raw, name, source)`: md5 de-dup → router → verdict **TAKEN /
+ALREADY / REFUSED / BUSY** (flock) → sale reports parsed to PHI-free lines and the file deleted; other
+types kept in `/root/marg_ingest/archive/<TYPE>/<yyyy-mm>/`; every file rowed in `mi_file`. Wraps:
+`marg_door.py` (`/finance/api/marg-file` GET/POST, **constant-time hmac compare since S258**; the
+upload page). **Gap, unchanged:** refused files are deleted with no server-side rescan (§3.3–3.4,
+§11.4 item 3d).
+
+### 2.5 Archives and the PHI rule
+| archive | where | holds | rule |
+|---|---|---|---|
+| medical spool | `D:\SendToClinic\_captured\` | every capture | the edge archive by design; never pruned by a script |
+| manojz archive | `MargArchive\` + `index.csv`, `_REFUSED\` | every routed export, raw | the only complete raw copy; PHI stays on the PC |
+| Drive mirror | `Clinic Data Archive\MargArchive` | the same, unfiltered | **the one place raw sale exports with full mobiles sit outside the clinic.** The owner has since ruled it stays full: *"required for many correlation jobs, safe there"* (§13). §11.4 item 3i is therefore **withdrawn, not owed.** |
+| VPS archive | `/root/marg_ingest/archive/` | non-sale types only | sale reports deleted after read (S186) |
+| hand-named workbooks | `D:\Downloads\MARG REPORTS CLAUDE\`, two session kits | historical source | never routed |
+
+**Added at v1.4 [code] — the daily print never rests on the server.** `SALE_DAILY_PRINT` was put into
+the VPS door's **`PHI_TYPES`** in the *same* kit that taught the router to recognise it, and the two
+changes are deliberately inseparable: `S302` proved on the PC that **without the `PHI_TYPES` line the
+raw print file would have been identified, accepted and then left sitting in
+`/root/marg_ingest/archive/`** — a sale report with names on the server, which §2.5's whole rule exists
+to prevent. So the three files ship together and `marg_ingest.py` goes first. Live behaviour, simulated
+on the PC against real files before install: the print is **identified, recorded in `mi_file`, and the
+raw bytes deleted at the door**; a `SALE_BILLWISE` DETAIL export is unchanged (98 lines, parsed as
+before); a stock closing export is still kept. The complete raw copy stays where it always was — on
+manojz, in `MargArchive\` (and its Drive mirror, by ruling).
+
+---
+
+**Added at v1.7 [code, LIVE] — the day the autofile files is now re-read until the bank agrees.** D354's autofile builds a
+pharmacy day the moment Marg's sale report arrives — net sale from the report, UPI from the bank **as known at that instant**,
+cash = net − UPI — and until S356 it never looked again. The bank's MPR lands hours later, so **nine of sixteen September days
+were frozen at UPI 0** against ₹69,444 the bank had settled, each with a `upi_vs_statement` exception nobody could close
+(F-599). `/root/finance/day_resync.py` (`a4e53adc`, cron `*/30 7-23`, honours `_off/ALL_OFF`) now re-reads the statement for
+every **unapproved, autofiled, never-corrected** day: the UPI line becomes the bank's settled total, cash = net − UPI, one
+`audit_log` row (`resync_upi`, before/after), and the app's own `finance_upi.reconcile_upi` closes the exception. A day whose
+bank total exceeds its net sale is left alone and named. An approved day, a day a person typed or corrected, the expenses, the
+movements and Marg itself are never touched. **The root cause is the parent's:** the statement handler could call this on
+arrival instead of waiting for the half-hour — named, not done.
+
+## 3 · IDENTIFICATION
+
+### 3.1 Router and signatures
+`marg_router.py` (manojz `MargPull\`; vendored on the VPS in `/root/marg_ingest/` and `lib/`) classifies
+by content, deep-verifies via `marg_report.py`, archives, and marks `uploadable`. `signatures.json` is
+**the same bytes on both machines today** — and at v1.4 that is true *by hand, twice over*: `S302`
+changed both copies to `b2dcb211…` in one session (the VPS half by the owner's install line, the manojz
+half placed by the assistant at 21:29 IST), exactly as S240 had done before it. **There is still no
+mechanism keeping them equal** — target: single-sourced from the VPS, and each hand-sync is the argument
+for it. Repairs so far: F-351 (rescan), F-429 (ITEMWISE end row). Router selftest **55 checks** at v1.4,
+up from 47 before the print was taught.
+
+### 3.2 The file register — LIVE
+`mi_file` (212 rows at 12-Sep **[record]**) · `mi_run` (collector runs) · `mi_sale_line` (4,152 PHI-free
+sale lines keyed by file md5). Read by `marg_shadow` and the upload page's "last 20" list; **feeds no
+book yet** (§6.2).
+
+### 3.3 Verification and refusal
+Six refusal grounds at `/finance/api/marg-push`; the door's REFUSED verdict at `marg_take`. On manojz a
+refused file goes to `_REFUSED\`; on the VPS it is deleted and its md5 remembered.
+
+### 3.4 Rescan — manojz only
+`marg_rescan.py --if-signatures-changed --apply` re-files quarantine after a signature fix. **No server
+equivalent** — a `refused/` folder and a rescan on the VPS remain §11 items (3d).
+
+**Added at v1.6 [code, LIVE] — §3.3 and §3.4 are no longer "manojz only": item 3d is DONE (S336_QUARANTINE, 20-Sep 09:02).**
+The door (`marg_take.py 4bcf0243 → 75b8056c`) keeps a REFUSED / UNKNOWN export in `archive/_REFUSED` or `_UNKNOWN` beside the
+router's `.txt` **only when `phi_scan.clean()` finds no person's detail** (D569): no 6–9 ten-digit run in any cell — the shop's
+`Phone :` header and Marg's advertisement footer excepted, because every Marg export carries exactly those two (F-575) — no
+SALE / PATIENT / MOBILE / LEDGER / PRESCRIB / DOCTOR / CUSTOMER / ADDRESS in the preamble, not a PDF, readable and non-empty.
+Measured over the whole archive: 98/98 kept-type exports clean, 44/44 sale-family exports refused, 7 of 8 real quarantine files
+would be kept. Otherwise the file is deleted as S186 always said and the sidecar says `kept: no -- why`. **The rescan exists on the
+VPS:** `marg_rescan.py` (manojz's S229 tool, byte-identical) with `marg_rescan_vps.py` — 06:25 daily when `signatures.json` has
+changed (marker `archive/_signatures_seen.md5`), under the collector's lock; a rescued file is re-taken through the door
+(source `rescan`; the old `mi_file` row held and put back on any answer but TAKEN); `_rescued/` keeps sidecars only. First real
+rescue waits on the category-list signature reaching the VPS copy (`b2dcb211` → manojz's `a987a08e`).
+
+### 3.5 Pipeline status and the export watch — LIVE
+`pipeline_status.py` (end of every pull) → `POST /finance/api/pipeline-status` → table
+`pipeline_status` → page `/finance/pipeline`. `export_watch.py` (cron 23:40 today / 10:45 yesterday
+with ntfy) answers "did Amir export today" against his punch (machine id 101) → table `export_watch`.
+**✅ Closed at v1.4 [code] — D467 phase 2c is live; the alarm is no longer PLANNED.**
+`S305_EXPORT_WATCH_DOOR` (LIVE 17-Sep ~21:5x, `export_watch.py` → `f6845ec5…`, no restart) taught the
+watch to read **the door's own `VERIFIED` `mi_file` rows as well as manojz's report**. The point is what
+*unknown* now means: before, a day with no word from the PC-side reporter looked the same as a day with
+no export, so the watch could only be as awake as the PC was. Now **unknown means neither route saw an
+export** — the server's own record has been asked too. The walk read the real punches for 7–16 Sep and
+**old and new agreed on every day**, which is the result a change like this should produce: Amir punched
+on 10-Sep (red: no bill-wise, no lines, no stock) and 13-Sep (red: stock), and **11-Sep carried a full
+set of exports with no punch at all**, so nothing was expected that day and nothing was cried about.
+
+**Changed since v1.1 [record]:** `S259_OFF_SWITCHES` (Club C.2) gave **every PC-side job an OFF
+switch** — the four jobs that previously could only be stopped by killing a scheduled task or a
+process. `S260_MACHINE_CONF` (Club C.3, manojz half) put **the machine's settings in one file**
+instead of typed into four. **The medical PC's own two settings** (the server address in `marg_push.py`
+and in `SEND_TO_CLINIC.bat`) are **not yet moved** and are held to ride the next medical change.
+**Changed since v1.2 [code]:** the VPS side has its switches too — **`S274_VPS_OFF`** (S258 close)
+installed `/root/finance/sanjeevni_switch.sh` (`status` / `off` / `on` for spine, attribution, export
+watch and salts refresh — marker files under `/root/finance/_off/`, *"no service, no cron line, no
+database"*) and reads `/root/marg_ingest/OFF` beside them; `spine_cadence.py` honours `ALL_OFF` /
+`SPINE_OFF` (lines 186–213 in the bundle). **§11.4 item 3h is therefore done on all three machines.**
+The standing warning: `ALL_OFF` on the medical PC does not stop capture, by design — Marg reuses one
+file name for every export, so the watcher must keep taking copies.
+
+---
+
+## 4 · THE ITEM SPINE
+
+### 4.1 Items, names, facts — LIVE
+`marg_spine.py` (S229; run by `spine_cadence.py` every 30 min 09–23 with `--if-changed`, nightly 23:50):
+one row per product in `marg_item` (374), every spelling in `marg_item_name` (424), facts in
+`marg_item_fact` (1,132 — salt, pack, MRP, from `purchase_salt_marg`, `stock_count_item`, `stock_rate`).
+**Only Marg's own export may create an item**; a computed name that cannot be resolved raises a task,
+never a row. *(Counts [record], 12-Sep; `marg_item` still 374 in the 17-Sep database [db].)*
+**Where the spine's bytes are [code] — corrected at v1.3.** v1.2 §11.2b said the live spine *"exists
+byte-exact nowhere but the box."* It does not: the 17-Sep bundle carries **`/root/finance/marg_spine.py`
+and `/root/deploy/repo/deploy_kits/S229_ITEM_SPINE/marg_spine.py`, both `b5956f59464671f23dc376391f9e8bae`,
+and the repository's `deploy_kits/S229_ITEM_SPINE/marg_spine.py` is the same bytes.** What differs is the
+**Register's pin**, `9a08b2c4…`, which has stood **DECLARED-PENDING since S229** — a prediction from
+the kit that was never read back and matches nothing that can now be found. The cron runs the
+`/root/finance` copy (`spine_cadence.py`, `cd /root/finance`). Re-pinning is a canon action at this
+close (§11.2b, §14).
+
+### 4.2 Unresolved names and tasks
+`marg_name_unresolved` (10) · `marg_task` (42: derived_name, question, ambiguous). Amir's rename list
+(22 open, on him) and the two merges awaiting the owner's word (`DISPO SYRINGE NIPRO` / `NIPRO 3 ML
+DISPO SYR`, `PARI CR 12.5` / `PARI 12.5`).
+
+### 4.3 Cadence and drift
+`marg_spine_run` · `marg_spine_drift` · `spine_drift_latest.txt`. Drift = a name or fact that moved
+between runs; read on the spine page and in the health legs.
+
+### 4.4 Renames and merges
+Amir's salt work list `/finance/purchase/page/salts` and his downloadable sheet `/finance/amir/salts`
+(matched by row id, never by name). Merges in Marg: owner's word only.
+**[live]** The hub reports **6 new medicines first seen this month** — SHOULDER IMMOBILISE UNISON,
+LOFTYPRED 80 INJ, DENGEN PLUS, and three TYNOR WRIST SPLINT variants — and says of each that *"the salt
+of a new item is not yet on this server (Amir's salt list is owed)"*. v1.1 recorded `purchase_new_item`
+at 5; it is **6**.
+
+### 4.5 Discount rulings
+`marg_item_discount` (93 items, T1 rulings from S236; HYLASTO approved and never re-raised, D464) ·
+`marg_item_discount_history` · `marg_discount_run`. Feeds attribution (§6.3).
+
+---
+
+## 4A · THE SPINE — the single source of truth (S331, LIVE 20-Sep-2026 07:19 IST)
+
+**What it is.** One store built only from Marg's exports, in its own file `/root/finance/spine/spine.db`,
+rebuilt **from empty** on every run and swapped in only when its gate passes (D564). The old item spine of
+§4 keeps running until rung 5 retires it; **nothing in §4–§10 reads the new spine yet** — that is rung 3,
+seven clean nights (D566) before any lane moves. Plan: `S272_SPINE_ARCHITECTURE.md`; status:
+`S272_WHERE_WE_STAND.md`; kit `deploy_kits/S331_SPINE/`.
+
+| piece | file | what |
+|---|---|---|
+| readers | `marg_read.py` | one certified reader per report the spine uses (salt list · category list · item master · whole-stores closing · purchase bill-wise · purchase item-wise both groupings · sale DETAIL); every row classified, every report witnessed, the sale reader never reads the patient columns; xlrd borrowed from `/root/marg_ingest/` as `salts_refresh.py` does |
+| evidence | `spine_evidence.py` → `readings/<md5>.json` | one PHI-free reading per export in the Drive archive, through the collector's own read-only source; the raw file is never kept; `MargArchive/_SPINE_SEED/` carries the April–15-Aug sale back-fill as readings made on manojz |
+| builder + gate | `spine_build.py` + `spine_rules.json` | `sp_export` · `sp_item` (name + packing) · `sp_alias` · `sp_item_fact` (salt, MRP, P.RATE, S.RATE, category, company — dated, sourced) · `sp_sale_bill/line` · `sp_purchase_bill/line` (direction from the bill-wise sign) · `sp_close` · `sp_move` · `sp_recon` · `sp_check` · `sp_finding` · `sp_gate`. Rules file: the opening (Marg's 31-Mar closing), its printed-total exception (F-565), 34 reconciliation entries (D565), 51 aliases, 2 families |
+| read door | `spine_read.py` | `Spine().item / stock / sales / fact / bills / purchases / gate / status` — what rung 4 imports |
+| witness | `spine_compare.py` → `spine_compare_latest.txt` | where today's tables differ from the spine, read-only on both |
+| schedule | root crontab, `# S331_SPINE` | `*/10 8-23` evidence then build under `flock /tmp/spine.lock`; `55 23` compare. Switches: `/root/finance/_off/ALL_OFF`, `/root/finance/spine/OFF` |
+
+**The gate (14 blocking checks, reference §8 + two):** every export passes its own witness or a sourced
+exception · every purchase line ties to exactly one bill-wise bill (supplier + number as text + date) ·
+every sale export passes · no repeated bill number · the opening declared, full, accepted · at least one
+closing checkable · **stock = Marg on every item at the latest checkable closing** · the 06-Sep count
+baseline 373 (read-only look) · salt / category / item-master exports pass · no salt is the shop's name ·
+every sale and purchase name reaches a Marg item. A failing build is kept as `spine.db.failed`; the last
+good spine stays; the health page will carry the line (D567 item 4).
+
+**As it read on the box at install [live, 07:19 IST 20-Sep]:** 159 readings · gate 14/14 · 3,915 sale
+bills · 517 purchase bills, 5 RETURN · stock = Marg at 2026-09-17 on every item · 144 earlier item-day
+differences all closed by a later closing (Marg keyed the entry after the export) · pending closing
+2026-09-19. The compare: `sale_bill` 779 vs 3,915 · `purchase_bill` 519 vs 517 · salts differ 23 (the
+SANJEEVNI MEDICOS bug, live) · MRP off 43 · `stock_snapshot` latest 19-09.
+
+**What is deliberately NOT in it:** patient identity · the prescribed discount (the owner's register) ·
+the physical count (people's, stays in the stock tables) · clinic money.
+
+**The switch-over (D564):** after seven clean nights and his word, one kit per lane — 4a ordering →
+4b stock now/drift → 4c Amir's purchase and salt pages → 4d returns desk / Darpan / claim queue →
+4e attribution → **4f the stock-check screens, only after count #1 is closed** (with the 22 renames,
+D549) → rung 5 retirements (the §4 spine, `mi_sale_line`, the median-MRP rule, the word-lists, the second
+parser, the manojz senders one by one; §11.4 P4/P5 after).
+
+**Added at v1.6 [code, LIVE] — the spine is on the health page, and the gate count is 13.** `spine_build.py` (`f5907fd4 →
+1378c87d`, S338) writes `spine_state.json` beside the spine after every build — `at`, `gate`, `passed`, `failed`, the `spine_read`
+status line, and `last_success_iso`, which moves **only when the gate passed**. The parent's `freshness_legs.json` (`0e56aa9e →
+9dfbef9c`, a declared data edit) gained *Marg spine gate (S331)* (`state_json` on that field, 26 h) and *Marg spine compare (S331)*
+(`file_mtime` on `spine_compare_latest.txt`, 26 h): a failing gate goes red on the page by itself. **The nightly cron runs the build
+without `--acceptance`, so the nightly gate is 13 blocking checks; the 14th — stock = Marg on every item at every checkable closing
+— is the acceptance run S331's install used. D566's seven clean nights are seven nights of `gate 13/13` (D572, F-577).**
+`spine.db` and `readings/` are still in no backup — named to the parent again.
+
+## 5 · PURCHASE LANE — LIVE
+
+**This is the section that changed most since v1.1. Nine kits landed here in two days: S261, S262,
+S263, S264, S265, S266, S267, S270, S271. The month's vendor payment left the owner's workbook and
+became part of the system.**
+
+### 5.1 Exports → bills → lines
+`push_purchases.py` (manojz; nightly 22:30 and every 30 min) sends every archived PURCHASE_* export →
+`POST /finance/purchase/api/push` → `purchase_export`, `purchase_bill`, `purchase_line`,
+`purchase_audit`. Marg's purchase serial is in no export (F-436, parked).
+
+**[live]** Months on file **April 2026 → September 2026, 18 exports**. September carries **39 bills**,
+August 84 (one with a purchase return), July 103 (two), June 102, May 79 (one), April 94 (two).
+**Zero bills "with no lines" and zero "wrong" in every month** — the item-wise net reconciles to the
+supplier-wise total to the rupee in September, and to within a few rupees in the older months where
+only a bill-wise export exists. *[db] 17-Sep 01:35: 33 exports · 502 bills · 1,551 lines; September
+still 39 bills, the newest dated 12-Sep.*
+
+**Changed since v1.2 — F-494 found (S259) and repaired (S262, `S282_LINE_OWNER`).** Bill **160 of
+1-Sep exists twice** — DAANSHI PHARMA and KEDAR PHARMACEUTICAL, the same day. `purchase_line` placed a
+line by **bill number and date**; where both collide the line could not be placed and was stored with
+**no supplier** — five lines, present in September's month total and on **no vendor's payment sheet**.
+Sixteen bill numbers are shared by two suppliers across April–September; the other fifteen resolve
+because their dates differ. *A key that is unique per supplier is not unique across suppliers; the date
+is a coincidence that usually holds, not a tiebreaker.* **The repair:** the ITEM WISE export carries the
+same five lines under their owners, so a line whose (bill, date) names two suppliers goes to the one
+supplier ITEMWISE names for that exact line, if it is a candidate; none, two, or a stranger leaves it
+unowned **and named**. One anchored call in `_redate_lines` and a helper, and a one-off pass for the
+five already stored — installed 17-Sep 07:38 (`purchase_app.py` `3535dc97…` → `216a0cd9…`). **[db] the
+01:35 database still holds the 5 unowned lines; [record] after the install, none — the two vendors'
+sheets carry them.** The same collision heals itself in future.
+
+### 5.2 Months — provisional and final
+`purchase_month` · the hub shows every month Apr–Sep 2026; finalise/reopen at
+`/finance/purchase/api/finalise|reopen`.
+
+**[live] Still no month finalised — all six read PROVISIONAL, and all six say "ready to finalise."**
+This is unchanged from v1.1 and is the single oldest open thing in this lane. August is the one the
+owner has been asked to close (⭐0 item 4): **Check it now**, then **Lock it**.
+**⚠** Supplier-wise exports exist only for **July, August and September**; April, May and June fall
+back to bill-wise, and the hub says so on each row rather than hiding it.
+
+### 5.3 Vendors, the phone book, and the two names — LIVE
+`purchase_vendor_contact` · `/finance/purchase/page/book`; numbers live in
+`_config\stockist_phones.json` on manojz, never in git.
+
+**New since v1.1 [record], `S263_VENDOR_LINK`:** the bank details of 22 vendors were imported at S225
+from the April–July NEFT advice sheets **under the name the bank knows**; Marg's bills carry **the name
+the vendor prints**, and for **14 of the 22 those are not the same string**. S263 added the alias, so
+one firm with two names is one vendor.
+
+**⚠ A claim v1.2 made and then RETRACTED — recorded, not tidied away.** Reading the payment
+sheet as plain text, one vendor appeared to read `AGARWAL SURGICALS AND MEDICALS CHEQUE`, and this
+section first reported that the payment mode had been typed into the supplier's name in Marg. **It had
+not.** `CHEQUE` is a chip — `'<span class="chip warn">CHEQUE</span>'`, `purchase_app.py` line 2215 —
+rendered beside the name to mark the cheque lane, and a plain-text read of the page runs the two
+together. Checked against the data afterwards: `purchase_bill` holds the supplier as
+**`AGARWAL SURGICALS AND MEDICALS`** across nine bills, clean, and `purchase_vendor_contact` **has a
+row for it** (added 14-Sep 22:30, with a phone). **Nothing is wrong with the name.**
+
+What is actually missing is narrower and is already on the owner's list: the row has **no
+`acct_no`, no `ifsc`, no `acct_name`** — which is precisely why the vendor sits on the cheque lane and
+why ⭐0 item 2 asks for its bank details. Give those and it moves to NEFT by itself, with no alias and
+no rename anywhere.
+
+### 5.4 Scan links
+`purchase_scan_link` · `/finance/purchase/page/scans`.
+**[live] 0 pharmacy scans with no Marg bill · 501 Marg bills with no scan** (v1.1: 496).
+
+### 5.5 Salts and new items
+`purchase_salt_marg`, `purchase_salt_name`, `purchase_salt_task`, `purchase_new_item` — the salts page,
+Amir's sheet, `/purchase/api/salt_task`. See §4.4 for the live new-item count.
+
+### 5.6 Feed health and the hub
+`purchase_feed` — the hub's own card.
+**[live] "Last purchase data received: 13-Sep 10:20 IST"** — **two days before this read**, while the
+Marg pull itself ran at 14-Sep 22:30 and manojz reported two minutes ago. **The transport is alive;
+no purchase export has been generated since 13-Sep.** That is Amir's step, not a fault in the lane,
+and it is the same shape as the S238 finding (no purchase exports on 8–10 Sep).
+**[db] 17-Sep 01:35: still 13-Sep 10:20** — four days, two of them leg B's credential outage (§2.3),
+during which nothing Amir exported could have travelled by leg B anyway; his visit was expected 17-Sep
+and S285 waits on his export (§10.1).
+**✅ The v1.1 "Known 404" is closed:** `/finance/purchase/` (the bare prefix) redirects — `S243_SCREEN_FIXES`, LIVE 13-Sep (K4).
+
+### 5.7 The vendor payment sheet — NEW, LIVE (S261 · S264)
+`/finance/purchase/page/pay/<month>` — **one line per vendor, prepared from this server's own figures**,
+replacing the workbook on the owner's PC that a script used to prefill from an export. A vendor row
+opens to its bills; a bill opens to the bill. **`Carried in` is the only thing typed on the page** —
+what an earlier month left outstanding, settled outside this system.
+Three numbered steps on one screen: **1 · The sheet** · **2 · Verify against the supplier-wise
+statement** · **3 · Lock it**. Step 2 is a real cross-check, not a tick-box: Marg's supplier-wise export
+is held against the sheet **three ways — every bill it carries, the per-bill amounts, and the
+statement's own printed grand total.**
+**[live]** September reads **not checked yet**, with the page saying so in its own words: *"The sheet
+above is what this server believes; the statement is what Marg says. They are not the same claim until
+they have been held against each other."*
+**S264** gave the page its **month strip** (Sep 26 → Apr 26) — before it, the tile opened on September
+with no route to any other month, and the hub's month link goes to the *purchase audit*, not here.
+
+### 5.8 The bank advice, the letter, and the file — NEW, LIVE (S265 · S266 · S267)
+Step **4 · The advice, exactly as the bank gets it** — the same lines, the same columns, the same order
+as the sheet printed on blank A4 and emailed to the bank. Held to the files actually sent, April–July
+2026. Carries the firm's GSTIN, mobile and drug licence numbers as the real sheet does.
+**A month that is not locked prints as DRAFT and says so** — *"DRAFT — this month is not locked yet.
+Lock it before this is printed or emailed."* **[live]**
+**S266** adds the **covering letter** authorising the debit, word for word as Sanjeevni has always sent
+it, with three fields filled rather than typed. **S267** generates the **workbook** for the email — the
+bank's own file shape, not a lookalike — from the same rows the page shows.
+**D520 applies here:** figures going to the bank carry no thousands separators.
+
+### 5.9 The cheque register — NEW, LIVE (S270 · S271)
+`/finance/purchase/page/cheques` — *"every cheque written to a vendor who is not on the NEFT lane —
+number, date, payee and the month it settles."*
+This is **the half of D513 that had never been built**: S261–S263 built the first half (the sheet names
+the cheque vendors and keeps them out of the NEFT file); S270 built the logging.
+**Rules, on the page itself:** nothing is ever deleted; a wrong entry is **voided with a reason and
+stays**; a live cheque number is unique; a cheque may be logged on a FINAL month (D521).
+**S271** was a correction found on the live screen within the hour: the month strip had been built from
+the cheques already logged, so an empty register offered no months at all. It now comes from the book.
+**[live] The register is empty — 0 cheques, 0 handed over, 0 voided — and September owes one cheque to
+one vendor on the cheque lane.** Cheques are logged **from the payment sheet, on the vendor the cheque
+settles**, not from the register itself. *[db] 17-Sep 01:35: `purchase_cheque` still 0 rows.*
+**Changed since v1.2 [record]:** **Shavez writes it now** — `S284_SHAVEZ_MAKER`, by the named grant
+`purchase.cheque_users` (§1.2, D529). The one September cheque, to AGARWAL SURGICALS AND MEDICALS, is
+his to log.
+
+---
+
+**Added at v1.7 [code, LIVE] — home and procedure medicine are deducted again, from Darpan's own spellings.** Darpan bills
+these to a **label, not a person**: the Marg customer text is `HOME MEDICINE` (earlier `HOME MEDISUN`) or `PROSIJER <patient's
+name>` — measured across every bill-wise export since April. Such a bill carries no clinic ID and no phone, so the ingest cannot
+attach a patient and parks it in `sale_item_review`; it never reaches `sale_item`, which is why the S194 `home_med` tag has
+**zero rows, ever**. Until 18-Aug his typed day form carried those bills into `day_noncash_bill`; the autofile replaced the form
+and **nothing wrote that table for a month** — eleven September bills, ₹15,960 home and ₹1,337 procedure, all counted as cash
+(F-600). Since S356 `day_resync.py` pass 2 turns every label bill of an unapproved day into one `day_noncash_bill` row, matched
+against **`setting noncash.home_words`** (seeded `HOME MEDI`) and **`noncash.proc_words`** (seeded `PROSIJ, PROSEJ, PROCIJ,
+PROCED, PROSED, PRUSIJ`) — **a new spelling of his is a data edit, never code (D595)**. A bill Darpan typed himself is left as
+his; the table's own unique key stops a second row. April–August are approved days and are not touched — the owner's call.
+
+## 6 · SALE AND MONEY LANE
+
+### 6.1 Bill money rows — LIVE
+`push_sale_bills.py` (manojz, every 30 min) sends VERIFIED SALE_BILLWISE money rows → `/finance/purchase/api/push`
+type `SALE_BILL` → `sale_bill`, `sale_bill_push`. Rung 1 (S237/S240), backfilled 31 exports.
+
+### 6.2 Item lines — TWO STORES, target ONE
+| store | filled by | read by |
+|---|---|---|
+| `sale_line_item` | `/finance/api/marg-push` → checker taps **Apply** → `finance_returns.load_lines` | the spine, attribution, returns audit, stock arithmetic |
+| `mi_sale_line` | the one door (`marg_take`, legs A/C/D) | the shadow only |
+
+Also `sale_item` (day-level via the ingest adapter) and `marg_push_staging` (the pending Apply queue).
+**Target (§11 item 3e), unchanged:** the spine and attribution read the one-door store behind a flag;
+shadow-compare; switch; retire the second parser's store.
+**Changed since v1.1 [record]:** **A1 (D488) is LIVE — sale reports apply on arrival**, so the Apply
+queue is no longer the owner's standing chore.
+**[live]** *Reports queued but not sent: nothing waiting.*
+
+### 6.3 Attribution and discounts — LIVE
+`sale_attribution.py` (cron every 30 min 09–23, 23:55) attributes bill discount to lines using T1
+rulings → `sale_line_discount`, `sale_bill_attrib`, `sale_attrib_run`. Rung 2. **Rung 3 (gross → net
+side by side) still waits on the owner's word.**
+
+### 6.4 Cash ↔ UPI corrections
+`marg_correction` · Darpan's page `/finance/darpan/corrections` · `bank_match.py` (09:45, every 15 min
+10–12, final 12:00) against `upi_txn` → `upi_match` · the correction checklist `/finance/marg-worklist`.
+**The CA's ruling, 13-Sep (D492), changed this lane's purpose:** *no cash↔UPI corrections in Marg* —
+they reopen bills to unauthorised edits. **The system keeps the record as a monthly accountant report
+instead** (A4, LIVE 13-Sep). The page tracks; it never edits.
+**[live] 15-Sep:** 27 bills this month reclassified cash → UPI, *"the bank proves UPI, Marg rang cash"*,
+kept for the accountant report. Six days this month have UPI booked as cash; seven older days before
+1-Aug also differ and **are deliberately not being chased**.
+**⚠ [live] The UPI evidence leg is RED** — bank and books disagree on four September days (12, 09, 05
+and 02 September). The page states the consequence plainly: *"Cash is total minus UPI, so a wrong UPI
+moves the drawer with it."* The split is typed from the POS screen, not captured at billing (§13).
+
+### 6.4A A home or procedure credit note — NEW at v1.7, LIVE (S357)
+**The owner's ruling, 20-Sep:** *"The home medicine purchase return is only a bookkeeping entry of what goods or medicines
+which are given to home are returned and the amount is not deducted from today's cash."* Goods come back to the shop; no cash
+leaves the drawer. The `day_noncash_bill` table cannot hold a negative bill, and the day's **net** sale already carries the
+minus — so a label credit note becomes **one `cash_adjustment` row of +amount** (source `manual`, status `explained`, the
+ruling as its explanation), once per bill, which `v_cash_ledger`'s own ± column adds (D594). September has one: `CN00208` on
+11-Sep, **+₹2,300** — that day reads ₹17,223, not ₹14,923. Darpan's page shows the same adjustment as one row when there is
+one, so his expected cash and the owner's agree to the rupee.
+
+### 6.5 The boundary with the clinic books
+Sale reports reach the **day books** (`day_entry`, `day_line`, `recon_exception`, `ingest_batch`) only
+through Apply; the day is filed by the maker and approved by the checker (`/finance/review`). Patient
+references: `patient_ref` (phone last 4 only, **names present**), `patient_visit`,
+`marg_push_staging.parsed_json` (names).
+**Changed since v1.1:** the returns desk showing names and numbers in the clear is **no longer a gap** —
+**D493 reversed the masking** and full phone numbers on staff desks are the owner's ruling (§13). Phase
+2, writing the number at Apply where the master does not have it, is still open.
+**[live] Month vs Marg: −₹200 unexplained across 11 days, all of it on 2026-09-04.** Small, named, and
+the only unexplained difference this month.
+
+---
+### 6.7 · THE ONE CASH CALCULATION AND THE POOL — *Added at v1.8 (S280, 21-Sep-2026)*
+
+**What it is.** `/root/finance/sanjeevni_cash.py` (v1.1, `8e58691b`) is the only place the pharmacy's cash is worked out (D600). Every Sanjeevni cash figure reads it: the approvals page (day, month, the pool row), Darpan's card (expected drawer), the cash log's pending list, the month table, and the health page's drawer leg. A screen that cannot reach it falls back to its old arithmetic.
+
+**How it works.** It starts from the **17-Aug-2026 count** (`cash_anchor`: drawer 0, Dr Bhawna ₹1,56,235, Dr Manoj ₹18,963 — D598) and walks forward day by day: Marg's sale − UPI (from the bank) − without-cash bills (home / procedure, `day_noncash_bill`) − bills paid elsewhere (`cash_bill_ruling`, e.g. 2777 at the clinic counter, D597) ± adjustments − expenses = the day's cash into the drawer. Handovers are read from **both** registers (`cash_movement` and `cash_custody_event`) and each is counted once; `cash_handover_cover` says which days a handover covered. From September, an **approved** day's drawer cash is recorded as gone to **the pool** (D599); the pool's deposits to Yes Bank are `cash_pool_deposit` (03-Sep ₹3,00,000 Bareilly; 15-Sep ₹1,00,000 Moradabad). `cash_period_close` holds the ₹7 of August closed as rounding. `prove()` holds the calculation against the two physical counts (17-Aug and 25-Aug ₹43,903); a new count is a new proof row, never an edit to the anchor.
+
+**Where August and September stand (21-Sep).** August closes at drawer 0 and ₹3,77,858 with the doctors. September conserves: in the unit = ₹3,77,865 + September's cash − ₹4,00,000 deposited. The owner approved every September day on 21-Sep. **Open:** 04-Sep was filed at ₹23,675 while Marg's bills add to ₹23,875 — the ₹200 is put to him on the day panel, not ruled.
+
+**The Yes Bank door** (`finance_yesbank.py` v1.1, S360): reads the statement **PDF** and checks it against its own opening, totals, closing, period and running balance; refuses a CSV with no period line (F-112) — which is what Yes Bank's transaction download is, so his CSV is refused (F-612, open). Needs `pdftotext` on the box.
+
+
+## 7 · STOCK LANE — LIVE
+
+### 7.1 Marg's closing snapshot
+`push_snapshot.py` (manojz, on capture every 15 min) → `POST /finance/stock/api/snapshot` (source
+`push_snapshot`, as-on = Marg's date) → `stock_snapshot`, `stock_rate`, `stock_feed`.
+
+### 7.2 The computed expected figure
+`push_expected.py` (manojz, on capture and nightly; baseline 03-09-2026 + purchases − sales; source
+`push_expected …`, as-on = **last sale date**) → the same door and the same table. Server-side twin:
+`marg_shadow.py` (23:20, 06:20) computes the same over server data → `sh_feed`, `sh_diff`, `sh_run`.
+
+**⚠ TWO SURFACES, TWO QUESTIONS, ONE VOCABULARY — corrected at v1.3 (F-493).** Two screens report
+this subsection's agreement, both in the words *compared / agree / differ*, and **they are not the same
+comparison.** v1.1 wrote *"the shadow at 373 compared, 370 agree, 3 differ"* and v1.2 repeated *"v1.1
+recorded 373 compared, 370 agree, 3 differ"* — **373 was never the shadow's population; it is the hub
+card's.** The two figures were compared across closes as if they were one series, and the plan's
+condition for item 3f was read off the wrong one. From v1.3 on, **no figure in this book is
+written without the surface it came from:**
+
+| surface | what it compares | over what | the words on the screen |
+|---|---|---|---|
+| **the hub card** — *Stock verification*, `_stock_card()` in `/root/finance/purchase_app.py` [code] | the PC's **computed expected** figure against **Marg's own closing export** — `push_expected` vs `push_snapshot` rows in `stock_feed`, on the newest day that has both | the items carrying both sides that day (**373**) | *"Latest comparable day D: N items compared, A agree, X differ. K days of feed so far."* |
+| **the shadow** — `sh_run` / `shadow_last.json`, `marg_shadow.py` at 23:20 and 06:20 [code] | the **server's own re-run** of the PC's arithmetic (baseline 03-09-2026 + purchases − sales from the one-door store) against **what manojz pushed** as its computed figure, for the same as-on | the baseline's items (**374**) | `same` · `differ` · `only_here` · `only_pc` · `verdict` (`same` / `differs` / **`no pc figure`**) |
+
+**Marg's snapshot is not in the shadow's comparison at all. Neither figure is wrong; they answer
+different questions.** The hub card asks *does the PC's arithmetic agree with Marg?* — and **it can
+never reach zero while Marg carries two spellings of one product**: three of its nine differences on
+12-Sep were exactly that (KNEE IMMOBILIS**E**R UNISON M +1 / KNEE IMMOBILI**Z**ER UNISON L −1 /
+SHOULDER IMMOBILISE UNISON M −1). The shadow asks *does the server, computing on its own from the
+one-door store, get what the PC got?* — which is the only question that bears on retiring the PC-side
+sender (§11.4 item 3f).
+
+**The figures, each under its own name [db], from the 17-Sep 01:35 database:**
+
+*The hub card*, re-computed by `_stock_card()`'s own logic: **"Latest comparable day 14-09-2026: 373
+items compared, 370 agree, 3 differ. 5 days of feed so far."** The day-by-day series the card would
+have shown: 05-Sep 362/11 · 08-Sep 368/5 · 11-Sep 370/3 · 12-Sep 364/9 · 14-Sep 370/3 (agree/differ of
+373). So v1.2's *"the disagreement has tripled"* was one day's reading of a series that moves by a few
+units either way; **12-Sep was the high, not a trend.**
+
+*The shadow*, from `sh_run` — eleven runs since 12-Sep 05:26: **runs 1–4** (12-Sep 05:26 → 13-Sep
+06:20, as-on 11-09 then 12-09) **374 · 374 same · 0 differ · `same`** — four clean runs, two nights;
+**runs 5–8** (13-Sep 23:20 → 15-Sep 06:20, still as-on 12-09, against the PC's `pur_to=13-09` figure)
+**374 · 368 · 6 · `differs`**, `gap_units` 1,658; **runs 9, 10, 11** (15-Sep 23:20, 16-Sep 06:20,
+16-Sep 23:20, as-on 15-09): **`no pc figure`** — the shadow takes its as-on from the server's own last
+sale date (the one-door store, which leg A kept feeding), and that had moved to 15-Sep, while the
+newest computed figure manojz had pushed was as-on 14-09 (`push_expected … pur_to=13-09-2026`, received
+16-Sep 22:30); `pc_expected(con, as_on)` finds nothing for 15-09 and the run stops there. **Three runs
+that are neither clean nor differing.** They do not count toward 3f's seven, and a
+reader counting "quiet nights" as clean ones would have been wrong three times in a row. *Recorded,
+not diagnosed* — whether this is leg B's credential outage (§2.3) starving `push_expected` or the two
+legs' calendars drifting apart in general is the next thing to read, on the 18-Sep database, after the
+06:51 catch-up.
+
+**The rule this subsection now carries (F-493):** *a number carries the question it answers, or it
+carries nothing.* Two surfaces measuring different things may not share a vocabulary, and a condition
+written on a number must name the surface it is read from. **3f's witness is `sh_run.differ = 0 with
+verdict `same` on seven consecutive runs** — never the hub card, and never a `no pc figure` run.
+
+### 7.3 Drift and reconcile — the S243 defect, now fixed
+v1.1 described the defect: `stock_snapshot` keyed on (as_on, item) with no source, so Marg's figure and
+the computed figure landing on the same date meant the later silently became "Marg's", and
+`reconcile()` could auto-close a real difference.
+**✅ Fixed and live.** `S243_SNAPSHOT_SOURCE` (K3) went **LIVE 13-Sep (D490)**: computed rows go to a
+new `stock_expected` table, `stock_snapshot` holds Marg only, `stock_feed` is unchanged, and 1,119 past
+rows were migrated conservatively. Pages: `/finance/stock/page/drift`, `/page/now`.
+
+### 7.4 The count cycle
+readiness (`stock_check_readiness`, the S240 gate: physical | Marg | ours must agree) → pads
+(`padwriter`/`padreader`, `stock_count_pad_file`, `/page/pad`) → count (`stock_count`,
+`stock_count_item`) → diffs (`stock_diff`, `stock_diff_lane`, `stock_diff_answer`,
+`stock_diff_decision`) → decisions (`/page/desk`) → close (`stock_count_close`). Count #1 of
+06-Sep-2026 remains open. No stock screen on a phone until the three agree (S228).
+
+### 7.5 Loss desk and recovery
+`/finance/stock/page/loss` · `stock_loss_tick / share / recovery` · `stock_finding` · Amir's board
+`/page/amir` · report `/page/report`; F-379 recorded, unexplained items recorded as unexplained
+(F-434).
+
+### 7.6 Vouchers, the voucher round, and write-offs
+`stock_voucher` · rule **R6**: every expiry removal is a Marg voucher, never an in-place edit. The
+voucher *engine* (D388/D397) is still parked on the owner's word. What is **LIVE since 17-Sep** is
+something narrower and more useful: the count's own corrections going back into Marg as vouchers Amir
+can actually key.
+
+**The voucher round — D542 [code], `S301_MARG_VOUCHERS`, LIVE.** The principle first, because the
+mechanism only makes sense under it: **a round, once made, is frozen. Marg is never re-edited to match a
+changed answer; the change appears as the *difference* on the next round.** That is what makes the
+paper trail and Marg agree at the end, and it is what makes the proof in §7.7 arithmetically possible at
+all.
+
+| what | how it works |
+|---|---|
+| a **round** | one freeze (`_voucher_make`) of everything the cleanup list currently needs — the swap vouchers and the word vouchers — **minus what earlier rounds already froze**. Rounds are numbered and append-only. |
+| **splitting** | ISSUE and RECEIVE are separate; sections are kept together; each set is cut into **batches of at most six lines** (`stock.voucher_lines`, default **6**, clamped 1–8). **One batch = one Marg voucher.** |
+| **naming** | `VOUCHER 1 - SHORT` for the ISSUE set, `VOUCHER 2 - EXCESS` for the RECEIVE set; the Marg document kinds are `STOCK ISSUE` and `STOCK RECEIVE`. |
+| **entered** | Amir keys the batch into Marg, then records it with **Marg's own voucher number** and the date he keyed it. Append-only in `stock_voucher_entered`; the newest row per batch wins; an empty number clears the batch again. Mirrored into `stock_voucher` (S221) so the old surface still sees it. |
+| **a later change, or a reversal** | **never an edit.** It is a new line on the next round carrying only the difference, with its own reason — *"corrects an earlier voucher"* or *"the rest of the line"*. A reversal is just a difference with the opposite sign. |
+| **a part swap** | issues what was actually swapped **at once** (D541: a confirmed swap is a STOCK ISSUE *and* a STOCK RECEIVE in the same round); the remainder stays open and rides the next round as a write-off or a further swap. |
+
+Tables: **`stock_voucher_line`** (the frozen lines — count, round, kind, batch, line, section, family,
+item, the Marg figure it moves from, the change, the figure it moves to, what was counted, rate, value,
+reason) and **`stock_voucher_entered`** (count, round, kind, batch, Marg's voucher number, the date
+keyed, who, when).
+
+**One caution that is in the record because it is in the code.** The *date Amir keyed the voucher in
+Marg* is stored, but §7.7's proof windows on the *moment he told the server* instead. Where the two
+differ the proof can read a true move as a mismatch — **F-526**, minted at S268, §14.1 item 1.
+
+**Rehearsed before it went live [record]:** on the 17-Sep database, with the orthotic swaps answered
+Yes, round 1 came out as **eight Marg vouchers — four ISSUE (6/6/6/5 lines) and four RECEIVE
+(6/6/6/4)** — 18 swap lines, zero bad lines; an answer taken back left a reversal waiting rather than
+touching the round. On the box the same night: **31 lines waiting, 0 rounds made** — the count's
+corrections are sitting ready and the first real round is Amir's to key.
+
+### 7.7 The stock check hub — NEW at v1.4, LIVE
+`/finance/stock/page/hub` (`stock_hub.html` + `stock_app.py::page_hub`). **This is the owner's page and
+the spine of the whole count.** A checker who is not allowed to decide is sent on to the counting screen
+instead; the data comes from one call and the page stores nothing. Built as `S299_STOCK_CHECK_HUB`
+(17-Sep, the held S297 with the owner's two corrections folded in), then extended by S301, S304 and
+S308 in the same night.
+
+**It has eight steps, not seven** — the record has been saying seven since S299, and S308 added the
+eighth. Each step shows one of three states: **done · now · waiting.**
+
+| # | the step, as it reads | whose | door | how it knows its state |
+|---|---|---|---|---|
+| 1 | *The count of \<day\>* — Darpan counted, Amir entered, it was sealed | Darpan + Amir | — | **hard-coded `done`** — see §14.1 item 2 |
+| 2 | ***Try to match — was the wrong item billed?*** | **the owner alone** | Yes/No per pair, + a workbook | `now` while any proposed pair is unanswered; `done` when all are answered, or when there are no proposals |
+| 3 | *Darpan's list — the reason for each shortage* | owner cuts, Darpan writes | the tranche PDF | **`waiting` while any swap pair is unanswered** — Darpan's list comes after the swaps; then `now` / `done` by whether lists are out and the pool is empty |
+| 4 | *Darpan's answers typed — by Amir or by you* | Amir or owner | Amir's board | `waiting` with no returned list; `done` when every item on a returned list has an answer |
+| 5 | *Your word on each line — and the loss* | **the owner alone** | the desk, the loss page | `waiting` until step 2 is done; `done` when nothing is left open |
+| 6 | *Put it back into Marg — the vouchers* | Amir keys, owner watches | Amir's board, the round's workbook | `now` while anything is pending or a batch is unentered; `done` when rounds exist and nothing is open |
+| 7 | *The proof — Marg agrees with the shelf* | the owner | the drift page | computed — below |
+| 8 | *Darpan: sold without a bill?* | Darpan answers, owner decides | the loss desk | `waiting` until a line is marked to pursue, then `now` — **and never `done`; see §14.1 item 3** |
+
+**Step 7, the proof — `S304_COUNT_PROOF`, and what makes it a proof (D543).** The question it answers
+is not *"do the two figures agree?"* — they never will while a count is being worked — but **"did every
+item we put on a voucher move in Marg by exactly what its voucher said, and nothing else move that
+shouldn't have?"** It picks two of Marg's own stock exports: **R**, the last one *before* the first
+voucher was entered, and **L**, the first one *after* the last was entered. A day only qualifies if it
+carries **both** a Marg figure and our computed figure **and that day's purchases are already in ours** —
+otherwise the comparison is not like-for-like and the day is skipped. If our figures were re-based
+between the two days it refuses outright rather than compare across the change. Then for each item
+`drift = Marg − ours`, and the item passes when **the drift moved by exactly the sum of its voucher
+lines**. **PROVEN** requires every vouchered item to agree *and* no line still waiting. It also names
+**what moved without a voucher** — items in both exports, on no voucher, whose drift changed anyway.
+Rehearsed on the 17-Sep data: **28 of 29 agreed; the odd one had genuinely moved with no document
+behind it** — which is the finding such a proof exists to produce.
+
+**F-522 is closed and this revision confirms it in the code.** Step 7 used to read *done* from the
+06-Sep counting close, which is why it read *done* while nothing had been proved. It now reads only the
+two exports and the entered vouchers. The old fields are still shipped in the page's data and are simply
+never used — harmless, and noted in §12 rather than fixed.
+
+**Step 8's evidence — `S308_PURSUE_EVIDENCE`, LIVE.** When the owner marks a shortage *to pursue*,
+Darpan is not asked cold. Each pursued line carries, gathered server-side and read-only: **how many
+units on how many bills sold in the thirty days before the count** and the last such date — or, in as
+many words, **"NOT SOLD ONCE in the 30 days before the count — a shortage here is not a counter sale"** —
+what has sold **since** the count, and the **last purchase** of it. Up to two of the line's existing
+look-ups are appended. Rehearsed on the 17-Sep database against the four biggest open shortages: two had
+sold heavily before the count (287 strips on 170 bills; 139 on 63) and **two had not sold once**. That
+distinction is the whole value of the step, and it is exactly what Darpan's claim queue (§10.2) is
+built to take delivery of.
+
+---
+
+## 8 · RETURNS AND EXPIRY
+
+### 8.1 Vaapsi desk — LIVE (Hindi, counter)
+`returns_desk.py` · `/finance/returns/desk/` · three steps (patient / medicines / slip) · `return_visit`,
+`return_line` (slips have not started), `jaankari_answer`. Roles viewer/maker/checker on medical.
+**Full phone numbers show here by ruling (D493), not by oversight.**
+
+### 8.2 Jaankari — questions to the counter
+"name does not match" and "count needed" queues on the desk; answers feed the returns audit.
+
+### 8.3 Return intent and flags
+`finance_intent.py` (01:30) → `intent_signal` · `finance_returns_audit.py` /
+`finance_returns_escalate.py` · `pret*` tables (S207 credit-note chain) · exceptions `return_flagged`
+("NEVER BOUGHT", "DISCOUNTED RETURN") on the review page.
+**[live] Flags over 30 days:** MISSING_SCAN ×16, RETRO_INSERT ×12, EDITED_AFTER_REVEAL ×2,
+MARG_BILL_RANGE_GAP ×1 — *"notes, not failures."* **Flags are never deleted (D505).**
+
+### 8.4 Near-expiry and credit notes
+Window 3 months (D409); credit note due by the 7th (R5); STOCK_EXPIRY exports archive-only today — a
+near-expiry screen remains a §11 (Phase D) item.
+
+---
+
+**Added at v1.6 [code, LIVE] — §8.4's "archive-only" is over: near-expiry is read nightly (S343_NEAR_EXPIRY, 23:57).**
+`spine/near_expiry.py` reads the newest kept `STOCK_EXPIRY` export with a reader that can fail — every row classified, serials
+1..N, TOTAL = the sum of every row's units with `-3:8` read as −(3·pack+8); 8 of the 9 archived exports re-add exactly, the
+June-2025 one fails honestly — and writes `spine/expiry/near_expiry_latest.txt` (+ dated JSON): every batch EXPIRED / NEAR (≤ 3
+months, D409) / LATER with the spine's stock for the item beside it, the export's age (OVERDUE > 35 days), and a cross-check from
+the spine's sale lines (batch + expiry per sold line) marked NOT IN EXPORT (D571). First run: 7 batches all NEAR; ASTOFEN R at
+−38 units in Marg against 44 in the spine; **27 sold batches within the window with stock, not in the 28-Aug export (F-576, open)**.
+Every removal is still a Marg voucher (R6). No screen yet — a file beside the spine.
+
+## 9 · ORDERING — LIVE
+
+### 9.1 Short list by stockist
+`/finance/purchase/page/staff` — item · stock now · order qty, by supplier, plus "no supplier on record".
+
+### 9.2 Orders and PDFs
+`purchase_order`, `purchase_order_line` · `/finance/purchase/page/orders` · `/order/<id>/pdf`.
+**[live] 0 open orders (draft or sent).**
+
+### 9.3 Sent, chased, arrived
+"Send on WhatsApp / Call" from the page; arrival closes against the purchase export (S225_ARRIVAL).
+Chasing is Darpan's (claims — §10.2).
+
+---
+
+### 9.4 The order rehearsal — NEW at v1.6, LIVE (S341_ORDER_REHEARSAL, 23:58 nightly), NOT SWITCHED
+`spine/order_rehearsal.py` prepares, from `spine.db` alone, the order the S225 engine would make tomorrow — `plan_line`,
+`cadence_for`, `confidence` and every rail **copied** from `purchase_app.py` and stated in the file's second line as the owner's
+**unapproved defaults** — into `spine/orders/order_rehearsal_latest.txt` (+ dated JSON), and scores the proposal of seven nights
+ago against the spine's purchases since (proposed and bought · proposed not bought · bought not proposed) — D570. The four lists
+S270 named as missing live in `spine/order_rules.json` (`never_reorder` · `on_demand` · `internal_use`, seeded BLADE, ZIG ZAG COTTON
+500GM, GLOVES SURGICAL 7 per S235 · `orthotics_cycle`); an item on a list is held back with its reason. First real rehearsal, identical
+on the PC's rebuilt spine and on the box: **47 lines · Rs 88,541 · 33 CONFIRM** (36 box-roundings, 22 of them ≥ 2× the need).
+§9.1–9.3 are unchanged and still read the old tables; rung 4a moves them after the seven nights and his sitting.
+
+## 10 · PEOPLE AND SCREENS
+
+### 10.1 Amir's day — LIVE
+`/finance/amir` → `/finance/amir/step/<n>` (seven steps, Hinglish, phone-first, no JavaScript) ·
+`/finance/amir/day` (the owner's English view) · `/finance/amir/salts` (+ `.xlsx`). Tables `amir_day`,
+`amir_step`, `amir_bill_disposition`, `amir_claim`, `amir_salt_upload`. He is never asked whether a
+report arrived; he types no bill number; a bill with no answer comes back; a half-done day stays OPEN;
+he raises, never chases. **One tile only (D483); five parked, awaiting the owner's ruling.**
+
+**Changed since v1.1 [record] — two kits, and one published kit that must never be installed:**
+- **`S244_AMIR_PROCESSING`** — the report acceptance flow became **processing → processing done → what
+  is still to be made**, to the owner's ruling that Amir must be able to start his next step while a
+  report is still being generated.
+- **`S246_AMIR_LIST_REOPEN`** — the bill list shows **only purchase bills from 1 September onwards**
+  (everything earlier is settled) and **only bills marked not-OK, until they are corrected and cleared**;
+  and a day can be **opened again**.
+- ⛔ **`S245_AMIR_BILLTAP` is superseded and its installer must not be run.** It refuses correctly and
+  touches nothing. S246 was built on the file S245 had already made live.
+
+**Changed since v1.2 [record] — `S285_SUPPLIER_CHECK` (D530 · D531 · F-508), installed 17-Sep 07:55,
+`amir_day.py` `a9f20622…` → `b3c20319…`.** The owner's August case: Amir entered a purchase under the
+wrong supplier, found later, corrected by hand — and *Marg is consistent with such a mistake*, every
+export repeats the wrong name, so nothing in the system could see it. **D530, the rule:** for each bill
+still waiting for *Theek hai*, for each item on it, **if this supplier has never supplied the item and
+another has on two or more earlier bills, the bill carries a warning** naming the item and the usual
+supplier — on step 4, in Hindi, above *Theek hai* (*"… pehle hamesha KEDAR se aaya hai … Marg mein bill
+dekh lijiye"*); one more reason under *Theek nahi*, **Supplier galat likha**, deliberately **not** a
+claim for Darpan. A never-bought item raises nothing; a genuine second source trips once. Measured on the
+17-Sep nightly database: **5 of 226 bills July–September would have warned**, three of them L.K. DRUG
+HOUSE bills in August.
+**D531 / F-508 — the part that had never worked:** S246's list joined `purchase_bill` to **every**
+export that ever carried it, superseded or not, so a bill Amir corrected in Marg (which comes back under
+the right supplier, the wrong one gone from Marg) stayed on his list for ever. **The list now shows only
+bills a live BILLWISE export still carries**; the earliest export still decides *seen_day*, so *pichhla
+baaki* keeps its meaning. *Superseded* must reach every reader of a table, not only the month total.
+**[record] step 4 and the owner's day view read clean after the install; the warning shows when his
+next export lands. S285's first live look is owed (START_HERE_SESSION_265 §6).**
+
+### 10.2 Darpan's queue
+`/finance/darpan` (day card, drawer, cash position), `/finance/darpan/corrections`, `/finance/darpan/kal`
+(**LIVE 13-Sep, D491**), the stock recheck cards sent from the desk.
+
+**Next build, and now with its evidence half already standing:** the claim queue
+`open → contacted → settled` (settled names an outcome; **self-closes on a matching purchase return**;
+ages to the top at 14 days — **D471**). `amir_claim` is empty, so it opens quiet.
+
+**What changed under it at v1.4.** The queue was designed before there was anything to put in it.
+There is now: **hub step 8** (§7.7) marks a line *to pursue* and puts thirty days of sale evidence
+beside it, and the step has **no door of its own to record what Darpan says** — it goes *now* and stays
+*now* for ever (§14.1 item 3). The claim queue is that missing door. A pursued line becomes a claim;
+*contacted* is Darpan asked with the evidence in hand; *settled* names the outcome; and a purchase
+return that matches closes it without anyone touching it. **Built right, the claim queue closes an open
+defect rather than adding a screen beside it** — which is why it is the next build and why it does not
+wait on anything the owner owes.
+
+### 10.3 Owner: hub, review, health, pipeline
+`/finance/approvals` (the hub) · `/finance/review` = `/finance/` · `/finance/health` ·
+`/finance/pipeline`.
+**✅ The v1.1 "Known bounce" is closed:** `/finance/daily` no longer sends the doctor to the portal; a
+checker goes to `/finance/review` — `S243_SCREEN_FIXES`, LIVE 13-Sep (K4).
+
+**[live] `/finance/health`, 15-Sep 05:52 — what needs you 3 · worth knowing 6 · running normally 10.**
+The three red: **UPI evidence** (§6.4), **This month vs Marg** (§6.5), **Marg report 31 hours old**
+(§2.3). Running normally includes backup verified 15-Sep 01:05, the pipeline heartbeat 2 minutes old,
+nothing queued, the medical PC reachable and its watcher alive.
+
+**⚠ [live] The health page raises a fault about itself, and it deserves to be carried forward.**
+*"Checks that have never fired — 7 checks have never once reported a problem in 14+ days: backup,
+drawer, flags, margqueue, outbox, renewals, watcher. Either they guard something that never breaks, or
+they are dead and cannot say so. AF-2 was born dead and stayed green for five sessions. Worth one look
+each, once."* **This is the right instinct and nothing has acted on it.** Note the shape of the
+evidence: `renewals` is on that list, yet the same page correctly shows the arms licence at 12 days —
+so at least one of the seven is demonstrably *computing* while never having *reported*. The two states
+are not the same and the check cannot currently tell them apart.
+
+**Changed since v1.2 [code] [record] — the server can now say whether its own jobs ran.** S259
+measured the shape behind that paragraph as **F-495**: of 38 clinic jobs (46 cron lines resolving to
+34, plus 4 systemd timers), **8 left a run record anyone could read back; 30 did not — all five nightly
+backups among them** — and a job that is quiet looked exactly like a job that is passing. The fix that
+was refused: a "record that you ran" line in thirty live files. The fix that was built: **45 of the 46
+cron lines already name their own log**, so **`S279_JOB_PULSE`** (`/root/finance/job_pulse.py`, cron
+`17 * * * *`, hourly) reads each job's own log and writes `/root/finance/job_pulse.json` — one row per
+job with `last_seen` and a verdict — which the nightly bundle carries. **`S280`** corrected it the same
+day; **`S283`** (v1.2, S263, installed 08:39 17-Sep, `917713f5…` → `5eae0eb7…`) taught it three words
+after F-498: **EMPTY** and **NEVER RAN** are their own verdicts, distinct from **STALE**, in one
+PROBLEM list. **[db] the 17-Sep 01:17 pulse (in `job_pulse.py`'s pre-S283 words): 36 ALIVE · 1 LATE
+(`salts_refresh.py`, last 15-Sep 15:11 — quiet by nature: it writes only when a salt export gives it
+work, and the 15-Sep list proved it alive) · 1 SILENT (`records_worker.py`, a separate app) · 1 NO TRACE (`tar`, a backup that names no log; S286
+replaced it).** The seven never-fired *health legs* are a different thing from the job pulse and are
+still open: they live in `freshness_legs.json` and are the parent project's **D525**.
+
+### 10.4 Reception and counter
+Docterz daily collection `/finance/clinic/register` (reception: Shavez, Shivani, Alisha — D481; opens
+on today, D482) · the drawer count is optional by design (D484) · the returns desk (counter). Clinic
+pages are the clinic's, not Sanjeevni's — they share the process and the database today (§11 Phase 4–5).
+
+**Changed since v1.1 [record] — the clinic-money chain, four kits in one day:**
+`S249`/`S251_CLINIC_MONEY` (the morning match · other UPI · the float · physiotherapy · F-459) →
+`S252_FLOAT_FLOW` (*"I find the flow to be a friction one"* — the float without friction) →
+`S253_MATCH_PLAIN` (*"your match page data is very taxing … if you can simplify it"* — the morning-match
+card in plain words) → `S254_SHEET_PHONE` (the counter sheet on a regular Android phone: bigger entry
+boxes, optional sections collapsed by default with their names on the closed boxes).
+**S251 is S249 re-issued under the next number (F-458)** because `S250_STAFF_REGISTER_TILE` moved
+`tile_grants.json` between S249's commit and its install and S249's installer correctly refused at the
+currency gate. **⛔ The float is never revenue (D506). ⛔ The counter sheet's history before 12-Sep
+stays.**
+
+**And the Docterz payment channel, on evidence:** `S256_GATEWAY_REF` and `S257_PORTAL_EVIDENCE` keep the
+**Razorpay reference Docterz already sends**, which was previously thrown away, and S257 re-read every
+Docterz export on Drive so past days get their Razorpay ids. **D510: the channel of an online payment
+comes from its independent record, never from the Docterz mode word.**
+⛔ **`S255_PORTAL_CHANNEL` is published, refuted, and NOT to be installed (F-460).** A published kit is
+immutable; it stays in the repository with its refutation beside it.
+
+### 10.5 Tiles, grants and what each login sees
+`portal.py` `_visible_sections` decides from role + `tile_grants.json`.
+**⚠ v1.1 recorded `tile_grants.json` at v12. It is now v17** — `2eb2f2714091d97ae8f53a80902c913f`.
+The path: **v14 → v15** (S250, the Staff Register mask lifted for shavez, shivani, alisha) → **v16**
+(S251, the S249 grants folded onto the live v15) → **v17** (S262).
+**S262 added one tile: `Vendor payments`, in Money & Accounts, immediately after `Marg Purchases`** —
+*"because the two are read together: what came in, and what is owed for it."*
+**[live]** The purchase-lane nav now reads: Hub · Scan links · Orders · Order medicines · Phone book ·
+Salt list · **Vendor payments** · Stock check.
+
+---
+
+### 10.5 The doctors' cash log and the month table — NEW at v1.7, LIVE (S359)
+**His ruling, 20-Sep:** *"the flow is that he gives the cash daily, to me or to Dr Bhawna, and both should have a system to log
+that cash. Either he can log it or I can."* `/finance/darpan/kal` now carries, for the owner and for Dr Bhawna, a **Cash
+received** block: every counter day since `setting darpan_kal.log_from` with a filed report and **no handover**, each with its
+expected cash; and every handover Darpan typed that is not yet received. One tap logs a day — the amount prefilled with the
+expected cash and changeable — or *log all as expected* clears a backlog. **The doctor's log writes Darpan's own
+`darpan_kal_day` row**, is decided by the same `_decide`, lands as the same one `cash_movement` out of the drawer, and stamps
+*received* in the same act (D596). A short amount records the difference and leaves the reason to Darpan, as before. A
+recipient logs only to herself; the owner may name either doctor. The owner now lands on his **English** view of this page
+(`?view=staff` is Darpan's Hindi form); Dr Bhawna holds the tile from `tile_grants.json` v24.
+**`/finance/darpan/kal/month`** (`darpan_month.html`, doctors only) is the month-wise table he asked for in the same breath:
+total sale · UPI · cash · − home medicine · − procedure medicine · − other · ± adjustment · **= net cash** · handed to Dr Manoj
+/ Dr Bhawna / bank · expenses; tap a month for its days, each with its handover and whether it was received. **September as
+S275 closed: sale ₹3,77,565 · UPI ₹1,38,053 · cash ₹2,39,512 · home ₹11,023 · procedure ₹1,337 · adjustment +₹2,300 · net cash
+₹2,29,452**, none of it logged yet. The log window opens at **17-Aug-2026**, his physical-count date, and in August lists only
+days with no cash movement of their own (D593 — the second half of that rule is not built yet; until it is, the setting stays
+at 1-Sep).
+
+### 10.6 The approvals page — the owner's one surface, as it is to be rebuilt (D591, PLANNED)
+`/finance/approvals` is where he approves, and it had become twenty sessions of cards on one page. His ruling of 21-Sep sets
+its order and its limits. **The day panel:** sale (bill range → the bills → their items) · sale returns (count and amount → each
+credit note with its bills and items, every flag **in words**) · paid online (the bank's MPR against **Marg's own bill-wise
+UPI** — the two independent records, now that nobody declares a figure — collapsed, the difference in a sentence) · billed
+without cash (home and procedure by bill number → the bill's items) · cash (sale − online − billed-without-cash = expected,
+the drawer's opening and closing) · then *Needs you*, in words, at most two lines. **[Approve] first, then [Log cash → me /
+Dr Bhawna / bank]** on the same panel (D592). **What leaves the panel:** the label *Declared (Darpan)*, the
+*"variance 0 ✓ within ₹2,000"* line — structurally always zero since the autofile made Marg's total the day's total (F-605) —
+the stale mismatch wording, the raw exception kinds, and `line_sum_vs_day_total`. **What leaves the page** for an audit page one
+link away: the clinic and lab bank blocks, the returns audit apparatus, the intent signals, orthotics, staff cards, the walk
+counters. **Also to repair there:** one drawer figure, not the two that sit inches apart over different windows (F-604), with
+the ₹87,205 of previous-year cash from the 17-Aug count shown on its own line; and the review queue no longer asking for
+patient names on bills that are now classified. **And first of all, before the rebuild: F-603 — the Yes Bank statement upload
+refuses both PDF and CSV, and its tile's message is wrong.**
+### 10.7 · THE DAY PANEL ON THE APPROVALS PAGE — *Added at v1.8 (S280, 21-Sep-2026)*
+
+Tap a day on the approvals page and it opens in his order (D601), every line expandable:
+
+**Sale (Marg)** · N bills → each bill (patient name · last four of the ID) → its medicines (batch, expiry, quantity, amount) · **− Sale returns** → each credit note named, and a home-medicine return shown as goods back · **− Paid by UPI** · N payments, "bank confirms" → each payment (reference masked to the last four) · **− Without cash** · home / procedure medicine → the bills · **= Cash received** · then **− Paid at the clinic counter** · **+ Put back** · **− Paid from the drawer** · **= Cash for the drawer** · **Where the cash went** (to the pool, or the handover) · the checks as ticks in plain sentences · **"Nothing needs you"** or, in words, what does.
+
+Served by `/root/finance/sanjeevni_day.py` (`7f6ea583`, S365) at `/finance/sanjeevni/api/day/<date>`, owner only, read-only; the page is the parent's `finance_approvals.html` (`6c668ccc`). The older panel stays as the fallback and as a link, *"the old detailed view"*, at the foot of every day. Proven: 15-Sep reads Cash received ₹11,291 live.
+
+
+## 11 · WATCH, BACKUP, RECOVER — and the plan of record
+
+### 11.1 Watch
+`export_watch` (§3.5) · `freshness.py` 08:05 with `freshness_legs.json` → `/finance/health` ·
+`clinic_watchdog.py` every 5 min.
+**✅ K1 is LIVE (13-Sep, `35e40626`):** `clinic-finance`, `staff-register` and `assetapp` are on the
+watchdog. v1.1's "`clinic-finance` is not among them" no longer holds.
+ntfy is the notification layer (D425) · `finance_heal.py` every 30 min 08–21 · **`job_pulse.py`
+hourly at :17 (S279 · S280 · S283) → `job_pulse.json`** — the run-record every job lacked (§10.3).
+**⚠ `freshness_legs.json` — the file that decides what the health page watches — had been edited on
+the box, unrecorded, for two weeks (F-507, S262):** the Register pinned it at `ad223bc6…` (S230); the
+first bundle that carried it (17-Sep, S273) holds `eaa97691…`. The Register was re-pinned to the box's
+bytes at S262; **which legs moved is the parent project's diff, still owed.** The rule: a file whose pin
+note says *edited here* is re-pinned at every close that can read it.
+**⚠ Two watch gaps carried, both about something that is not being watched rather than something that
+broke:** **UptimeRobot watches the `.in`, not the `.com`** — the condition that let a full-day
+certificate outage pass unreported on 10-Sep; and **`S237_CERT_WATCH` has sent nothing in eleven days**.
+
+### 11.2 Backup
+`finance_backup.sh` 01:05 → `/root/backups/finance/` · `finance_drive_backup.py` 01:40 → Drive
+`finance_nightly.db.gz` · `clinic_state_backup.py` 01:50 → encrypted state bundle to Drive ·
+`sheets_pull.py` 01:45 · `gas_export.py` weekly · hourly Marg backup from the medical PC.
+
+**✅ The v1.1 gap is closed. K2 is LIVE and measured.** `code_bundle.py` writes
+`code_nightly.tar.gz` to Drive `FinanceDB_Backups` at **01:35** every night. **Read 15-Sep: shipped
+01:35:08 IST, 217 files, 2,014,229 B, md5 `4dd4ddc1…`.** The three nightly bundles have shipped on time
+for six consecutive nights.
+
+**✅ And it is now within a session's reach.** The bundle lands in a Google Drive folder no Cowork
+session can see. Kit **`S272_NIGHTLY_MAINTENANCE`**, installed 15-Sep, copies it into
+`D:\Downloads\_kbtools\vps_code\` as part of the 03:10 nightly on manojz, alongside the dated KB
+mirror to the SSD and the folder counts. **From this session on, the live server's own code can be
+read directly rather than inferred.**
+**[code] 17-Sep:** built 01:35:03, **244 files**, md5 `10421813…`, copied to manojz at 05:05 with the
+nightly database beside it; its internal manifest self-verifies. Three dated pairs are kept in the
+folder (15, 16, 17-Sep). **[record] the parent's S286/S287 (17-Sep) added the asset register's own
+backup and Drive copy; the job pulse's `tar` row is expected to give way to `assetapp_backup.py`,
+ALIVE, on the 18-Sep bundle — an expectation, to be read, not a fact yet.**
+
+### 11.2b · WHAT THE BUNDLE DID *NOT* CARRY — measured at S258, closed at S258's own close (S273), re-measured at S264
+
+`code_bundle.py` takes code, templates, SQL, shell, unit files and the root crontab. It deliberately
+excludes — and is **right** to exclude — any `.env`, `.conf`, database, log, `.bak`, key json,
+`*config*.py`, the portal user file, the staff settings, and **anything under `_retired`,
+`__pycache__`, `backups` or `deploy`**. Those walls were built at S243 after v1.0's first bundle
+shipped literal passwords (F-456). **Nothing here argues with a single one of them.**
+
+But *excluded for a good reason* is not the same as *has a copy somewhere*. At S258 every live-pinned
+VPS file was held against the bundle, then every absentee against GitHub, **and then against the
+encrypted state bundle's own `SRC_FILES` and `SRC_DIRS`**, and **six live-pinned files had no byte-exact
+copy in any store.** **`S273_BACKUP_GAP` (the S258 close) added the six to the bundle by name**, and
+the 17-Sep bundle is the proof. **Re-measured at S264 [code] [pins], the table now reads:**
+
+| file | in the 17-Sep bundle | against the Register's pin | in the repository |
+|---|---|---|---|
+| `/root/finance/freshness_legs.json` | **yes**, `eaa97691…` | **matched — after S262 re-pinned it** (F-507: the S230 pin `ad223bc6…` was two weeks stale) | not in the repository, by design (configuration) |
+| `/root/deploy/repo/deploy_kits/S229_ITEM_SPINE/marg_spine.py` — **and `/root/finance/marg_spine.py`, the copy the cron runs** | **yes, both**, `b5956f59464671f23dc376391f9e8bae` | **MISMATCH — the Register's `9a08b2c4…` has been DECLARED-PENDING since S229** (a prediction from the kit, never read back) | **`deploy_kits/S229_ITEM_SPINE/marg_spine.py` is `b5956f59…` — the same bytes as the box.** v1.2's *"exists byte-exact nowhere but the box"* was measured against the pin, not the box, and is **withdrawn**: the live spine is in the repository and in the bundle. What is wrong is the pin. |
+| `/root/assetapp/asset_register.py` | **yes**, `71bd3277…` | matched | the repository's `assetapp/asset_register.py` is `0cd8fc3b…` — a different file. The bundle is now its off-box copy. |
+| `/root/deploy/email_agent.py` | **yes**, `e535c4f8…` | matched | the two kit copies (S194, S195) are different files |
+| `/root/deploy/gen_live_pins.py` · `verify_live_pins.py` | **yes**, `9c402c36…` · `b4da75ec…` | matched | **byte-exact in `deploy_kits/S187_V1a/`** (the `KB_canon_all/gen_live_pins.py` copy is a different file) |
+| `/root/deploy/sweep_baseline.txt` | **yes**, `01b6ad8a…` | matched | not in the repository |
+
+**So the gap of S258 is closed by the bundle for all six, and one of the six was never a gap.** What
+remains is a canon action, not a backup action: **the Register's spine pin is re-pinned to
+`b5956f59…` at this close, with the S229 prediction recorded as never having matched.** The rule it
+adds to F-507's: *a DECLARED-PENDING pin is a promise to read back, and a promise thirty-three sessions
+old is a finding.*
+
+**Withdrawn after checking rather than asserted — and one of them was withdrawn only on a second look,
+which is recorded here rather than tidied away.** `/root/staff_master.csv` was first written up as a
+gap on the strength of `SRC_DIRS` alone; `clinic_state_backup.py` also has a `SRC_FILES` list, and
+`/root/staff_master.csv` is **the fifth line of it**, beside `console.db`, `assets.db`, `punches.csv`
+and `punches_raw.log`, under the heading *"INCLUDED — the data with no other off-box copy."* **It is
+covered, nightly and encrypted.** The lesson is the project's own: a store is not checked until every
+one of its inclusion lists has been read, and reading one of two is how a false gap gets minted.
+`/usr/local/lsws/conf/vhosts/followup.dr-manoj.in/vhost.conf` looked like a gap too, but
+`clinic_state_backup.py` gathers `VHOST_DIR` into the same bundle by design, so the routing **is**
+covered. `/root/portal/clinic_users.py`, `/root/shared/sarvam_ocr.py`,
+`/root/assetapp/scanner_widget.js`, `/root/assetapp/smoke_test.py`, `/root/finance/cards_registry.json`
+and `/root/wa/casepack/casepack_page.html` are each **byte-exact in the repository** and need nothing.
+`/root/finance/push_purchases.py` is the row struck at S257 as F-482 — it has never existed on the box,
+and the bundle agrees with the strike.
+
+**The shape of the gap at S258, plainly: two live applications and one live configuration file.** Not
+a fault in `code_bundle.py`, which does what it says. A gap between what three backups each cover, which
+nobody could see until the bundle and the pin list could be held against each other in one place —
+which is what S272 made possible on its first night, and what S273 closed on the second.
+
+### 11.3 Recover
+`verify_restore.py` — the restore drill (verified 12-Sep 01:05) · every kit installer backs up to
+`.bak_S###_<pin>` and rolls back byte-identical on failure · `/root/_retired/S243_2026-09-13_0007/UNDO.sh`
+restores the retired residue.
+**Rollbacks held open:** `finance.db.bak_S265` and `.bak_S266`; `purchase_app.py.bak_S270_34628cd8` and
+`.bak_S271_800d58a3` — **keep until the cheque register has carried a month.**
+
+### 11.4 The plan of record — restated at S264
+
+| # | item | state at S243 | state at S258 | **state at S264** |
+|---|---|---|---|---|
+| P1 | this book + the estate register | DONE | DONE — v1.2 | **DONE — this is v1.3** (F-493 corrected; lives in the Sanjeevni project since D528) |
+| P2 | residue out of `/root` — 495 moved, undo kept | DONE | DONE | **DONE** |
+| K1 | `clinic-finance`, `staff-register`, `assetapp` on the watchdog | LIVE | LIVE | **LIVE** |
+| K2 | nightly code bundle to Drive (01:35) | LIVE | LIVE, 217 files | **LIVE, 244 files** (S273 added the six of §11.2b); in reach on manojz by 05:05 (S272) |
+| K3 | `stock_snapshot` Marg-only; computed → `stock_expected` | LIVE | LIVE | **LIVE** (`stock_expected` 2,619 rows [db]) |
+| K4 | `/finance/purchase/` redirect · `/finance/daily` checker → review | LIVE | LIVE | **LIVE** |
+| 3a | one settings file per machine | next | manojz DONE (S260) | **unchanged** — the medical PC's two settings still ride the next medical change |
+| 3b | per-sender tokens, constant-time compare | next | constant-time compare DONE (S258) | **unchanged** — per-sender tokens on the owner's key rotation |
+| 3d | `refused/` kept + server-side rescan | next | still next | **still next** — and the daily summary report (§2.1) is the first case that would use it |
+| 3e | spine + attribution read the one-door store — **re-witnessed at v1.5: the witness is now the S331 spine gate, seven consecutive clean nights (D566); the `sh_run` shadow is retired at rung 5** | after 7 clean shadow nights | not started; *"3 → 9"* — **which was the hub card, not the shadow (F-493)** | **not started.** The witness is **`sh_run`: seven consecutive runs with `verdict = same` and `differ = 0`**. Read at S264 [db]: runs 1–4 clean, 5–8 `differs` (6), 9–11 `no pc figure` — **0 consecutive clean runs on the newest reading**; the `no pc figure` runs count for nothing (§7.2) |
+| 3f | retire manojz senders one at a time | after 3e | after 3e | **after 3e** — and S261's outage is the argument for it: the leg that failed for two days was the fallback (§2.3) |
+| 3g | manojz live tools out of the git checkout into `margsync\bin\` | with 3a | carried | **carried** |
+| 3h | OFF switch for every job | with 3a | PC side DONE (S259) | **DONE on all three machines** — VPS side by `S274_VPS_OFF` (S258 close): `sanjeevni_switch.sh` + `/root/finance/_off/` + `/root/marg_ingest/OFF` (§3.5) |
+| 3i | filter full mobiles out of the Drive archive mirror | with 3a | WITHDRAWN (§13) | **withdrawn** |
+| 3j | full phone numbers on the returns desk (D493) | LIVE where the master has it | LIVE; phase 2 open | **unchanged** — phase 2 (write at Apply) open |
+| D1 | Darpan's `/kal` LIVE; the claim tab (D471) | next | `/kal` LIVE; claim tab next | **unchanged** — `amir_claim` still 0 rows [db]; *Supplier galat likha* (S285) is deliberately not a claim |
+| P4 | Sanjeevni in its own process | after Phase 3 | after Phase 3 | **after Phase 3** |
+| P5 | its own database, attached read-only | optional, last | optional, last | **optional, last** |
+| A1–A4 | apply on arrival · salt list refresh · Shavez/Amir/Kal tiles · the CA report | LIVE | LIVE | **LIVE** — the salt refresh proved itself on the 15-Sep list (§10.3) |
+| — | Rung 3 · vouchers · parked tiles · merges · F-436 serial | owner's word | owner's word | **owner's word — deferred at his word, 17-Sep (rule 13)** |
+| **S258** | the vendor payment sheet, the bank advice, the covering letter, the workbook, the cheque register | — | LIVE (S261–S267, S270, S271) | **LIVE** — §5.7–5.9; **Shavez writes the register (S284)** |
+| **S258** | the four PC-side jobs' OFF switches; one settings file on manojz | — | LIVE (S259, S260) | **LIVE**; VPS switches too (S274) |
+| **S258** | the Docterz Razorpay reference kept, and backfilled from Drive | — | LIVE (S256, S257) | **LIVE** (clinic-side) |
+| **NEW** | the job pulse — every server job proves it ran (F-495) | — | — | **LIVE (S279 · S280 · S283)** — §10.3, §11.1 |
+| **NEW** | purchase lines owned by supplier where bill numbers collide (F-494) | — | — | **LIVE (S282)** — §5.1 |
+| **NEW** | the item↔supplier warning on Amir's step 4; his list forgets superseded exports (D530, D531, F-508) | — | — | **LIVE (S285)** — §10.1; first live look owed |
+| **NEW** | the router taught the daily summary sale report's shape | — | — | **owed** — §2.1 |
+| **NEW** | the shadow's `no pc figure` runs read on the 18-Sep database | — | — | **owed** — §7.2 |
+
+---
+
+**Added at v1.6 — §11.4 restated for S274.** 3d `refused/` kept + server-side rescan: **DONE (S336)**. 3e: the witness is
+seven nights of `gate 13/13` (D572), counted from 20-Sep. K2: the bundle still does not carry `root/finance/spine` — the parent's.
+New nightly files beside the spine: `spine_state.json`, `orders/`, `expiry/` (derived, rebuilt nightly, not backed up).
+Three root cron lines added this session (`# S336_QUARANTINE` 06:25 · `# S341_ORDER_REHEARSAL` 23:58 · `# S343_NEAR_EXPIRY`
+23:57), all honouring the spine's / collector's OFF switches.
+
+**Added at v1.7 — §11.4 restated for S275.** The spine's seven nights (D566/D572) run undisturbed: 20-Sep is night one and
+nothing moved onto the spine this session. K2 is closed on the parent's side — `code_bundle.py` carries `root/finance/spine`
+and the state backup carries `spine.db` + `readings/` since S347. New this session and in no store but `finance.db`: the two
+`setting` rows `noncash.home_words` and `noncash.proc_words` — the nightly state backup carries the database, so they travel
+with it. One root cron line added (`# S356_DAY_TRUTH_2`, every 30 min 07–23, honouring the spine's OFF switches); three of the
+parent's files moved and were declared (`finance_app.py`, `finance_ui/finance_approvals.html`, `tile_grants.json` v24).
+**Two kits are frozen and must never be installed (F-512):** `S355_DAY_TRUTH` (pass 1 only, never published) and
+`S358_CASH_LOG` (published, RED at its own login-gated probe, restored itself — F-602).
+
+## 12 · RESIDUE AND RETIREMENT REGISTER
+
+| what | where | state |
+|---|---|---|
+| 495 superseded files | `/root/_retired/S243_2026-09-13_0007/` | **retired 13-Sep.** The `finance_app.py.bak_*` chain is the only history of the live file. **K2 is now live, so the bundle carries the live file nightly — but the chain is still the only record of its past, and the owner's own one-line deletion (⭐0 item 11) is his alone and only after a full cycle.** |
+| 12 items HELD by a live reference | `/root`, `/root/finance` | left in place |
+| `_quarantine_S232_F368_…/` (six stale `.env` copies) | `/root` | held until the WABA token rotation completes |
+| six stale `.env.bak*` / `.env.preswap*` | `/root/wa/` | secrets inside — retire on the owner's word |
+| `/root/wa/staff_ledger.py` (stray) · `/root/deploy/repo/staff_ledger/` (fossil) | VPS | the owner's to decide |
+| migration tables `s184_*`, `s184c2_*`, `s186_*` · 37 empty tables | `finance.db` | candidates, never verdicts — after 3e |
+| `sale_line_item` beside `mi_sale_line` · `stock_feed` beside `sh_feed` · `MargArchive` beside `/root/marg_ingest/archive` | VPS | structural duplicates — retire by evidence in 3e/3f |
+| seven manojz scheduled Marg jobs | manojz Task Scheduler | FALLBACK; retire one at a time in 3f |
+| ~300 `marg_watch.py.before_*` · `_captured` spool | medical `D:\SendToClinic\` | clutter / edge archive; deletion is the owner's |
+| unmasked `marg_report.py` (two PC copies) vs masked `eeab5605` | manojz, medical | replace with the next PC kit |
+| `finance.db.bak_S265`, `.bak_S266` · `purchase_app.py.bak_S270_34628cd8`, `.bak_S271_800d58a3` | VPS | **the live rollbacks — keep until the register has carried a month** |
+| **NEW ·** 14 copies of `purchase_app.py` across `deploy_kits/`, every one a different file | repository | **lineage, not clutter — this is what made the S258 reconstruction possible.** Keep. Prune nothing here without reading §11.2 first. |
+| **NEW ·** 71 loose files at `D:\Downloads\`, 7 at `D:\dr-manoj-git\` | manojz | **measured at S258.** `S272` step C now counts them nightly and names what grew. `patient_fp.env.BACKUP_KEEP_SAFE` is **KEEP**. |
+| **NEW ·** `S245_AMIR_BILLTAP`, `S255_PORTAL_CHANNEL` | repository | **published and superseded/refuted. Immutable (F-460). Never install.** |
+| **NEW at v1.3 ·** the S282 / S284 / S285 rollbacks (`.bak_S###_<pin>` beside `purchase_app.py` and `amir_day.py`) | VPS | **keep until each has carried a week of Amir's visits and one cheque** |
+| **NEW at v1.3 ·** the daily summary sale report in `_REFUSED\` | manojz | **correct refusals, not junk** — they are the specimen for teaching the router (§2.1); leave until taught |
+| **NEW at v1.3 ·** the frozen repository row `SANJEEVNI_SYSTEM_BOOK_v1_2_S258.md` | `KB_canon_all` | **frozen by D528; superseded at v1.3.** Never edited, never deleted — the manifest names which is current |
+| **NEW at v1.4 ·** `deploy_kits/S297_STOCK_CHECK_HUB` (held, moved to `_to_delete\`) and `deploy_kits/S307_SUPPLIER_CHECK_2` | repository | **frozen by F-512.** S297 was superseded by S299 before any publish; S307 was published, installed, and **withdrawn by its own health gate** (F-525) and rebuilt byte-for-byte as S311. Neither folder is ever to be edited or installed. **They are the evidence for two rules**, which is why they are kept. |
+| **NEW at v1.4 ·** `closed` / `sealed_text` in the hub's data, and `per` in the match rows | `stock_app.py` | **vestigial — shipped to the page, never read by it.** The remains of the F-522 defect. Harmless; remove only when that code is open for another reason. |
+| **NEW at v1.4 ·** the frozen repository row `SANJEEVNI_SYSTEM_BOOK_v1_3_S264.md` | `KB_canon_all` | **superseded by this v1.4.** Never edited, never deleted — the manifest names which is current. |
+
+---
+
+## 13 · THE OWNER'S RULINGS (his words are the spec)
+
+*Carried unchanged from v1.1 — these are his words of 13-Sep-2026 and nothing since has revised them.*
+
+- **Machines.** SET is his RDP login on the medical PC, used mainly to run Marg reports himself; Darpan
+  and Amir use the staff account. All clinic PCs are off at close and on in the morning — the medical PC
+  after 8–8:30, sometimes 10–10:30. *No server job may assume the medical PC is up before mid-morning.*
+- **Darpan.** Generates sales and sale returns only; hands the day's cash to the owner or Dr Bhawna =
+  printout − home/procedure medicines − POS online sum, noted in a physical notebook. His screen follows
+  that exactly: prefilled morning form, two inputs, differences shown, five reasons, server-checked.
+  ₹50 day line · ₹2,000 month cap · no kharcha · excess = his calculation error, owed back to him · a
+  received tap by the recipient, later allowed (the physical copy is the proof) · flagged returns asked
+  on the same screen · **no deterrent notice — "the data surfacing there is the deterrent"** · the owner
+  a passive viewer with a filtered queue; the system is the main checker.
+- **Amir.** A distinct role (bills, renames, supplier payments in Marg), owner as backup; after visit-day
+  work the system asks him for the salt-wise export and keeps it raised until it arrives; the owner gets
+  a collapsed "Amir's visit — what was done".
+- **Shavez.** Marg report generator, a morning job before any sales and on Amir's days: "Aaj ki reports"
+  confirms each arrival and shows what is pending or refused.
+- **CA ruling.** No cash↔UPI corrections in Marg — they reopen bills to unauthorised edits; the system
+  keeps the record as a monthly accountant report.
+- **Numbers and data.** Full phone numbers everywhere on staff desks including the returns desk; the
+  Drive mirror keeps full PHI ("required for many correlation jobs, safe there"); the repository stays
+  number-free (F-185).
+- **Machines and moves.** Everything PC-side moves to the VPS if technically better; the vendor phone
+  book lives at the VPS; the spine is Claude's call; renames delegated to Amir; discount rulings flagged
+  for the owner to edit in Marg.
+- **Mandate.** *"I have to depend upon you and your skills. Whatever you think, say first and best to
+  arrange everything properly and everything remains stable and working."*
+
+**Added at v1.4 — his rulings of 17-Sep and 18-Sep-2026.**
+
+- **A confirmed swap is two documents at once (D541).** When the owner confirms that the wrong item was
+  billed, Marg gets a **STOCK ISSUE on the short item and a STOCK RECEIVE on the extra item in the same
+  round** — not one now and one later. Marg is still corrected *to the shelf*, never the shelf to Marg.
+- **Vouchers go in frozen rounds (D542).** At most six lines to a voucher; **one batch, one Marg
+  voucher**, recorded as entered with **Marg's own number**. A round is never re-opened: later changes,
+  reversals included, are **the difference on the next round**. *(The full mechanism is §7.6.)*
+- **What makes a count proven (D543).** For every item that went on a voucher, the gap between Marg and
+  our own figure must have moved by **exactly** that item's vouchers, measured between the last Marg
+  export before the first voucher and the first after the last — **both days with that day's purchases
+  already in**. Anything else is not a proof, however close the totals look.
+- **He types Darpan's answers too.** The counting screens were built as though only Amir keys; the owner
+  does it as well, and the wording follows the fact rather than the other way round.
+- **Step 2 of count #1 — the eighteen pairs — is his, and it is settled (18-Sep).** In his own words:
+  *"The 18 answers on step 2, Try to match, are mine and I will do them later, at my own time... Do not
+  ask, do not prompt, do not open a session with it, and do not treat it as a blocker on your side.
+  Assume it will be done; when it is, I will tell you myself."* **This book, and any session reading it,
+  takes that as final.** Work that depends on those answers is parked and named once; work that does not
+  goes ahead.
+- **His own standing items are deferred by his word** — close August · bank details for three suppliers ·
+  the first cheque · how Marg exports without a person. **Name one only when it has become urgent, and
+  say why.**
+
+---
+
+### 13.x · The rulings of 19–20-Sep-2026 (S270, S272) — his words are the spec
+
+- **19-Sep:** units are **strips and tablets**, never packs · ETOZOX 90 and DOLOGESIC SP were his additions · **Marg is not touched**: the spine opens at Marg's 31-Mar closing, applies every export, and books one dated reconciliation entry per unexplained item (*"whatever you deem best"*).
+- **18-Sep 20:35:** who exports what — Shavez the sale detail and closing stock every morning (valuation and expiry on the 1st); Amir the purchase pair; the owner the salt list every Monday, the category and item lists monthly.
+- **20-Sep:** *"build the three steps after you have confirmed everything about this spine only and in all cases the 6 September stock check every aspect should be left untouched until it is completed."* · *"this session is to be purely run using Fable 5.1 only."* · *"do seven number point and then start the build in your preferred order in a fresh chat."* (D567).
+
+### 13.y · The rulings of 20-Sep-2026 (S274) — his words are the spec
+*"do seven number point and then start the build in your preferred order in a fresh chat in this session."* — executed as D567's
+order: items 1–6 live by 09:44, item 7 is this revision. *"EOS complete"* at 09:5x. No new ruling on the buying rules, the four
+lists or Shavez's wording — those remain his, when he wants them (§9.4, §2.1).
+
+### 13.z · The rulings of 20–21-Sep-2026 (S275) — his words are the spec
+*"APPROVAL section in Sanjeevni is showing wrong figures on multiple days, its not subtracting the upi and procdure meds etc
+from the cash, so cant approve most sept entries."* — the whole session's mandate. *"These two points, especially the second,
+started when Darpan's form was modified… the home and procedure medicine are defined in his ways of spelling it and they were
+populating beforehand in his form and then some glitch has occurred."* — and they were: the form was replaced and nothing took
+over its writing (F-600). *"The home medicine purchase return is only a bookkeeping entry… the amount is not deducted from
+today's cash"* (D594). *"He gives the cash daily. To me or to Dr Bhavna. And both should have a system to log that cash… by
+this logging I also want to clear the backlog because he has cleared all the cash till date"* (D596). *"A month wise breakup of
+total sale, the UPI amount and the cash amount, and in the cash amount for internal accounting we need to subtract two heads,
+home medicines and procedure medicines… available to me also."* *"This is the data seen to approver — which is very
+confusing… as this is the main tab where i will do approvals it shd have all data arranged well, collapsed, expandable to
+granular details, flags need to be contextual and clear"* (D591). *"approve and then log cash move out"* (D592). *"we started
+logging from 17 august; in august log only required days"* (D593). *"upload bank statement didnt accept the pdf and csv, both
+formats for yes bank, fix it also when you fix this page, also fix the message on its tile"* (F-603).
+### 13.y · THE RULINGS OF 21-SEP-2026 (S280) — *Added at v1.8*
+
+- *"20-Aug there is a ₹3,000 bill billed without cash, marked 'Pawan Fibre cast' — mark it as sanjeevni sale … patient paid at clinic counter … cash is anyways with us, so mark it as received, dont show it pending."* → D597.
+- *"if you will change the 17th August opening balance then all the balances might get disturbed … I don't want to do all that stuff and for September also I simply want to do a approval … August maintain it yourself."* → D598.
+- *"DARPAN HANDED ALL CASH DAILY FROM 1ST TO 19TH SEPT, AND DR BHAWNA RECEIVINGS AND Y RECEIVINGS GO TO SAME POOL, SO MAINTAIN THT FLOW, I WILL MARK EACH DAY OF SEPT IN APPROVALS."* → D599.
+- *"The cash should be 11291 … It should be simple, human readable, and … expandable … which sale return were there, what were the sales and everything."* → D601.
+- *"For all the previous money which came, it was pooled at one place with me and Dr. Bhavna and then it was deposited to bank."*
+
+
+## 14 · WHAT EACH REVISION FOUND THAT NOBODY WAS LOOKING AT
+
+### 14.00 · WHAT v1.8 FOUND — *Added at v1.8 (S280)*
+
+Four drawer figures, each by its own arithmetic, had lived on the approvals page and Darpan's card; the 15-Sep panel showed the till's ₹11,530 with a ₹239 procedure bill inside it as the day's cash (F-610). August's handovers were split across two registers with no record of which days each covered. The Yes Bank door read only a CSV the bank never gives with a period line (F-603 → F-612). The account number was riding into the database on the bank's own file name (F-607).
+
+
+### 14.0 · At v1.7 (S275, 20–21-Sep-2026)
+1. **A figure taken from a feed "as known at that moment" is a wrong figure with a timestamp** — nine September days frozen at
+   UPI 0 while the bank's own record sat in the same database (F-599). 2. **When a form is replaced by an automatic filler,
+   nobody lists what the form used to write** — `day_noncash_bill` went unwritten for a month and ₹17,297 of billed-without-cash
+   counted as cash (F-600). 3. **A surface that reports "none" is making a claim**: the hub's home-medicine card counted a
+   column with zero rows for five months, and the owner found it by looking at one day (F-601). 4. **The login-gated health
+   probe killed a third kit** — S307, S334, now S358 (F-602). 5. **A check whose two sides became the same source prints a pass
+   forever**: "variance 0 ✓ within ₹2,000" has been structurally zero since D354 (F-605). 6. **Two computed drawer figures over
+   different windows sit inches apart on the page he uses most** (F-604). 7. **The one counter held again** — five kit claims
+   across a night in which the parent closed three sessions beside this one.
+
+### 14.0 · At v1.6 (S274, 20-Sep-2026)
+1. **Every Marg export carries two ten-digit numbers that are nobody's** — the shop's `Phone :` header and Marg's footer; a PHI scan
+   that does not know them refuses 96 of 98 kept exports (F-575). 2. **The nightly gate is 13, not 14** — the acceptance flag was on
+   only at install (F-577). 3. **27 sold batches expiring within three months, with stock, are not in Marg's near-expiry export**
+   (F-576) — the October export decides whether the window or the batches are the cause. 4. **A kit's login-gated `api/healthz`
+   read as red to its own installer** and restored a correct file (F-573). 5. **`py_compile` inside a kit folder** put a `__pycache__`
+   one step from GitHub (F-574). 6. **The Register's manifest row and pin header were one hash behind the file** after a visible
+   correction (F-578). 7. **The old expiry export of June 2025 has a different stock layout** and fails the reader's witness —
+   honestly. 8. **The one counter held under five collisions.**
+
+### 14.0 · At v1.5 (S272, 20-Sep-2026)
+
+1. **The one door's store was read by no screen** (F-566); every business table came from the older push paths, through a second copy of the sale parser. §2.4 and §6.2 stand as written; the target of 3e is now the spine.
+2. **The same fact in up to six places, each screen trusting a different one** (`S272_SPINE_ARCHITECTURE.md` §2.2); Marg's own MRP, category and company were never loaded (F-568).
+3. **Marg's 31-Mar closing prints a total 40 units below its lines** — its own, proven by the owner's re-export (F-565).
+4. **The S270 sweep witnessed 70 of the 104 inputs its figures used** (F-564); the builder now witnesses from the one list it reads.
+5. **`stock_snapshot` and `stock_feed` can disagree on the same date** (F-567) — both retire at rung 4b.
+
+### 14.1 · At v1.4 (S268, 18-Sep-2026)
+
+**Every one of these was read from the live code in the 18-Sep bundle, not from a kit README.** That
+distinction is the point of this section: five kits went into the stock lane in one night, each proved
+against its own rehearsal, and **the defects below are the ones that no single kit's tests could see,
+because each is about how one kit's assumption meets another's.**
+
+**First, what came back clean:** **17 of the 18 Sanjeevni pin rows matched the box's own bytes**, and
+the eighteenth — `amir_day.py` — was found at exactly its recorded predecessor because S311 installed it
+after the bundle was built. Nothing Sanjeevni-owned is missing from the bundle. The record and the box
+agree everywhere the bundle can reach.
+
+1. **The count proof windows on the wrong clock — minted as F-526.** When Amir records a voucher he
+   gives two facts: **Marg's voucher number** and **the date he keyed it into Marg**. Both are stored.
+   The proof (§7.7 step 7) picks its two Marg exports using **the moment he told the server**, not the
+   date he keyed it. Key a voucher in the morning, record it in the evening, and a Marg export taken in
+   between is classified as *before* although it already carries that voucher's move — so the item's
+   drift appears to have moved **twice** what its voucher said, and **a true correction reads as a
+   mismatch.** It cannot produce a false PROVEN, only a false failure; that is the right way round, but
+   it will send someone looking for a loss that is not there. The stored keying date is exactly the fix.
+2. **Step 1 says *done* even when the seal does not read back.** The first step's state is not computed
+   at all — it is the constant `done`. The page's own facts line will say *"The seal does not read
+   back."* directly above a green step 1. Small, and worth one line of code, because **a step that can
+   only ever say yes is not reporting, it is decorating.**
+3. **Step 8 can never reach *done*, by construction.** Its state is `waiting` before a line is pursued
+   and `now` after — there is no third branch, **because there is no door on the hub to record what
+   Darpan answered**. So the hub's last step stays amber for ever and the count never visibly finishes.
+   **This is not a bug to patch in isolation: it is the claim queue's job** (D471, §10.2), and it is
+   the reason the claim queue is the next build.
+4. **The pursue evidence counts the count day on both sides.** The "sold before" window runs from thirty
+   days before the count **through the count day**, and the "sold since" window runs **from the count
+   day** to today — so a bill written on the day of the count is counted in both. It inflates both
+   figures by the same day's sales and changes no decision, but the two numbers are shown side by side
+   as though they partitioned the item's history, and they do not.
+5. **The step-2 workbook builds the whole hub to print a table it does not use.** The Excel behind
+   *Try to match* calls the hub's full data assembly — which runs the count proof and up to forty
+   evidence look-ups against the sale and purchase tables — and then uses none of it. **Nothing is
+   wrong with the sheet; it just costs several seconds and a great deal of database work every time it
+   is opened.** Pure waste, no risk, cheap to fix when that code is next open.
+
+*And one thing this revision did not do:* it read no live page, exactly as v1.3 did not. Every [live]
+row in this book is still v1.2's 15-Sep reading, carried and so marked. **The rows most likely to have
+moved are §5.6, §6.4, §6.5 and §10.3** — the next revision that opens a browser should re-read those
+four first. Three closes have now said so; it remains true.
+
+### 14.2 · At v1.3 (S264, 17-Sep-2026)
+
+Five things, each read from the 17-Sep bundle and database rather than inferred; none from a screen.
+
+**First, what came back clean:** **119 of the Register's live VPS pins matched the box's own bytes**;
+the three that did not are the three files installed after the bundle was built, each found at exactly
+its recorded predecessor. The Register is right on every row the bundle can reach, with one exception
+below.
+
+1. **v1.2's §7.2 carried the hub card's population under the shadow's name (F-493)**, and the plan's
+   entry condition for retiring the PC-side sender was being read off a card that can never reach zero.
+   Corrected: every figure in §7.2 now names its surface, and the witness is `sh_run` alone.
+2. **The shadow's last three runs are neither clean nor differing — `no pc figure`** (§7.2). The
+   server's own last sale date ran ahead of the newest computed figure manojz had pushed, and the
+   shadow compares only the same as-on. Whoever counts "quiet nights" as clean ones is wrong three
+   times running. Recorded; the cause is read on the 18-Sep database.
+3. **The live item spine has a byte-exact copy in the repository and in the bundle after all**
+   (§4.1, §11.2b). v1.2's *"nowhere but the box"* was measured against a Register pin that has been
+   **DECLARED-PENDING since S229 and matches nothing** — a prediction never read back. The book was
+   wrong because the pin was; the pin is re-pinned at this close and the thirty-three-session promise is
+   minted as a finding.
+4. **§11.4 item 3h was already done on all three machines** — `S274_VPS_OFF` landed at the S258 close,
+   after v1.2's table was written, and no close since had moved the row.
+5. **Leg B, the fallback, was the leg that failed for two days (S261)** — a stale share credential,
+   while the machine answered and leg A kept capturing. The lane's fourth failure mode, beside the
+   machine, the share and the export, is a password (§2.3).
+
+*And one thing this revision did not do:* it read no live page. Every [live] row below is v1.2's
+15-Sep reading, carried and so marked; where the 17-Sep database says otherwise, the database is
+quoted beside it. The next revision that opens a browser should re-read §5.6, §6.4, §6.5 and §10.3
+first — those are the rows most likely to have moved.
+
+### 14.3 · At v1.2 (S258, 15-Sep-2026) — carried, with item 1 corrected
+
+Seven things, each read rather than inferred, each carried into the close report.
+
+**First, what came back clean, because a clean result measured is worth as much as a fault found:**
+**109 of the Register's live VPS pins were held against the box's own bytes and 109 matched, with zero
+mismatches.** The Register is correct on every row the bundle can reach. That is the ground everything
+below stands on.
+
+0. **Six live-pinned files have no byte-exact copy in any store** (§11.2b) — among them the **live
+   item spine**, the **live asset register application**, and **`freshness_legs.json`, the configuration
+   that decides what the health page watches.** `code_bundle.py` excludes each of them for a reason
+   that is individually correct, and the repository's copies differ or are absent. **No single store is
+   wrong. The gap lives between them, and nothing was positioned to see it until the bundle and the pin
+   list could be read side by side.** *(This read seven in the first draft of this section. The seventh,
+   `/root/staff_master.csv`, is covered by the encrypted state bundle's `SRC_FILES` and was withdrawn
+   the same session — see §11.2b.)*
+1. ~~**The stock shadow's agreement has tripled its disagreement — 3 differing → 9** (§7.2), and its
+   latest comparable day is three days old. This is the witness for retiring the manojz senders, so it
+   decides when item 3f may start.~~ **CORRECTED at v1.3 (F-493):** the 3 and the 9 were both the
+   **hub card's** (373 items, computed vs Marg), not the shadow's, and the hub card is not the witness
+   for 3f. The shadow that night read 374 · 368 · 6. Neither number was wrong; the name on it was.
+2. ~~A payment mode typed into a supplier's name in Marg.~~ **RETRACTED within the session** (§5.3):
+   `CHEQUE` is a lane chip beside the name, and a plain-text read of the page ran the two together.
+   The vendor's name is clean and it **is** in the register; only its bank details are missing. **The
+   lesson is the one this revision earned twice: a page read as text is not the data.** Both
+   retractions in this document — this and `staff_master.csv` in §11.2b — came from asserting on a
+   partial reading, and both were caught by checking the underlying store afterwards. **The store is
+   the check; the page is the symptom.**
+3. **Seven health checks have never once fired in 14+ days**, and the page says so about itself (§10.3).
+   At least one of them is demonstrably computing while never reporting — the check cannot tell a quiet
+   guard from a dead one.
+4. **The purchase feed has received nothing since 13-Sep 10:20** while every leg of the transport is
+   alive (§5.6). The missing step is an export nobody has generated.
+5. **The nightly code bundle is now within a session's reach** and corroborated the reconstruction of
+   `purchase_app.py` independently — two methods, one answer (§11.2).
+6. **The Phase 0 instruction about the assistant's browser is wrong** — F-242 was closed at S239 and the
+   browser reads live pages on the first attempt. The warning outlived the fault by nineteen sessions
+   and has been costing every session a capability it already had.
+
+---
+*SANJEEVNI_SYSTEM_BOOK_v1_4_S268 · 18-Sep-2026 · supersedes v1.3 in full · folds in the daily print
+(S302, §2.1/§2.5/§3.1), the export-watch door (S305, §3.5), the voucher round (D542, §7.6) and the
+stock check hub with its eight steps and its proof (S299/S301/S304/S308, new §7.7); adds the owner's
+rulings of 17-Sep and 18-Sep (§13) and five code findings including F-526 (§14.1) · read from the
+18-Sep 01:35 bundle and the Register's pins; no live page was read for this revision · lives in the
+project "Sanjeevni — Pharmacy & Marg" and is rowed in `KB_canon_all` · the manifest decides what is
+current.*
+
+*SANJEEVNI_SYSTEM_BOOK v1.7 · S275 · 21-Sep-2026 · v1.6 whole plus the blocks marked "Added at v1.7", §6.4A, §10.5, §10.6, §13.z and §14.0 · every figure read from the installers' own output on the box, the live pages in the browser, the 20-Sep nightly database and the PC's own Marg archive · lives in the project "Sanjeevni — Pharmacy & Marg" and is rowed in `KB_canon_all` · the manifest decides what is current.*
+
+*SANJEEVNI_SYSTEM_BOOK v1.8 · S280 · 21-Sep-2026 · v1.7 whole plus the blocks marked "Added at v1.8" (§6.7, §10.7, §13.y, §14.00) · every figure read from the installers' own output on the box, the live day panel in the browser and the 21-Sep scratch copy of the live database · lives in the project "Sanjeevni — Pharmacy & Marg" and is rowed in `KB_canon_all` · the manifest decides what is current.*
