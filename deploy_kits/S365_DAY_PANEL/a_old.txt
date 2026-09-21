@@ -1,0 +1,2 @@
+/* ------------- the one Day Page renderer, reused by every card ----------- */
+function dayDetail(d, elId){

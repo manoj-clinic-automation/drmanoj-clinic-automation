@@ -18,6 +18,9 @@
 #  THE TRACKER SIDE (Apps Script WebApp.gs + Dashboard.html) is placed by the assistant in the owner's
 #  browser (D577); gas/ here is the record of it. Either side alone changes nothing a person sees.
 #
+#  S279 re-issue: the first run's smoke checks asked 127.0.0.1:8090 (portal.py's stale docstring); the portal
+#  listens on 8099. The installer went red and restored byte-identically. Only the port changed.
+#
 #  Run by (one line on the VPS):
 #    cd /root/deploy/repo && git pull --ff-only && bash /root/deploy/repo/deploy_kits/S364_TRACKER_SSO/install_S364_TRACKER_SSO.sh
 # =============================================================================
@@ -26,6 +29,7 @@ KIT="S364_TRACKER_SSO"
 KDIR="$(cd "$(dirname "$0")" && pwd)"
 VPY="${VPY:-/root/wa/venv/bin/python3}"
 PD="${PD:-/root/portal}"
+PORT="${PORTAL_PORT:-8099}"   # clinic-portal.service (Estate Inventory row 8; NOT the 8090 in portal.py's own docstring -- S279 F-607)
 STAMP="$(date +%Y%m%d_%H%M%S)"
 WALK="/tmp/s364_walk_$STAMP"
 P_FROM=d9a9dc409b203a4d8dcdd623aa54565f
@@ -65,7 +69,7 @@ restore() {
   say "!! RED after placing - restoring byte-identically"
   \cp -p "$BAK" "$PD/portal.py"; mv -f "$PD/tracker_pass.py" "$PD/tracker_pass.py.removed_S364_$STAMP" 2>/dev/null
   systemctl restart clinic-portal || true; sleep 3
-  say "   $PD/portal.py $(m5 "$PD/portal.py") · portal $(curl -s -o /dev/null -m 8 -w '%{http_code}' http://127.0.0.1:8090/portal/health)"; exit 1
+  say "   $PD/portal.py $(m5 "$PD/portal.py") · portal $(curl -s -o /dev/null -m 8 -w '%{http_code}' http://127.0.0.1:$PORT/portal/health)"; exit 1
 }
 \cp -p tracker_pass.py "$PD/tracker_pass.py" && chmod 644 "$PD/tracker_pass.py" && [ "$(m5 "$PD/tracker_pass.py")" = "$TP" ] || restore
 \cp -p portal.py "$PD/portal.py" && [ "$(m5 "$PD/portal.py")" = "$P_TO" ] || restore
@@ -74,10 +78,10 @@ systemctl restart clinic-portal || restore
 sleep 4
 systemctl is-active --quiet clinic-portal || restore
 say "[6/7] clinic-portal active"
-H=$(curl -s -m 8 http://127.0.0.1:8090/portal/health)
-G=$(curl -s -o /dev/null -m 8 -w '%{http_code} %{redirect_url}' http://127.0.0.1:8090/portal/go/call-tracker)
-R=$(curl -s -m 8 -X POST -d 'p=not.a-pass' http://127.0.0.1:8090/portal/sso/tracker-redeem | tr -d ' \n')
-L=$(curl -s -o /dev/null -m 8 -w '%{http_code}' http://127.0.0.1:8090/portal/login)
+H=$(curl -s -m 8 http://127.0.0.1:$PORT/portal/health)
+G=$(curl -s -o /dev/null -m 8 -w '%{http_code} %{redirect_url}' http://127.0.0.1:$PORT/portal/go/call-tracker)
+R=$(curl -s -m 8 -X POST -d 'p=not.a-pass' http://127.0.0.1:$PORT/portal/sso/tracker-redeem | tr -d ' \n')
+L=$(curl -s -o /dev/null -m 8 -w '%{http_code}' http://127.0.0.1:$PORT/portal/login)
 say "health : $H"
 say "tile without a login : $G (302 to /portal/login expected)"
 say "redeem with a bad pass : $R ({\"ok\":false} expected) · login page $L"

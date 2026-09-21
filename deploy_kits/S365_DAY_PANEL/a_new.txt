@@ -1,0 +1,51 @@
+/* ------------- the one Day Page renderer, reused by every card ----------- */
+/* S365 (Sanjeevni, 21-Sep-2026): the day as the owner reads it -- sale, returns, UPI,
+   without cash, cash received, where the cash went -- each line opens to its bills and
+   each bill to its medicines. The old panel stays as the fallback (dayDetailOld). */
+function dayDetail(d, elId){
+  fetch("/finance/sanjeevni/api/day/"+d+"?_="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){
+    var el=$(elId); if(!el)return;
+    if(!v||!v.ok||!v.filed){ if(v&&v.ok&&!v.filed){el.innerHTML='<div class="mut">'+esc((v.needs_you||[""])[0])+'</div>';return} dayDetailOld(d,elId); return; }
+    function R(x){return (x==null||x==="")?"—":"₹"+x}
+    function line(sign,label,amount,sub,detail,strong){
+      var open=detail?'<span class="tog" style="margin-left:6px">▸</span>':'';
+      return '<div class="sjl" style="padding:3px 0;border-top:1px solid #eee">'+
+        '<div'+(detail?' onclick="var n=this.nextElementSibling;n.style.display=n.style.display===\'none\'?\'\':\'none\';var t=this.querySelector(\'.tog\');if(t)t.textContent=n.style.display===\'none\'?\'▸\':\'▾\'" style="cursor:pointer;display:flex;gap:8px"':' style="display:flex;gap:8px"')+'>'+
+        '<span style="width:14px;color:var(--text-3)">'+sign+'</span>'+
+        '<span style="flex:1'+(strong?';font-weight:700':'')+'">'+label+(sub?' <span class="mut" style="font-weight:400">· '+sub+'</span>':'')+open+'</span>'+
+        '<span class="num" style="min-width:90px;text-align:right'+(strong?';font-weight:700':'')+'">'+R(amount)+'</span></div>'+
+        (detail?'<div style="display:none;padding:4px 0 6px 22px">'+detail+'</div>':'')+'</div>';
+    }
+    function billList(list){
+      if(!list||!list.length)return '<span class="mut">none</span>';
+      return list.map(function(b){
+        var its=(b.items||[]).map(function(i){return '<tr><td>'+esc(i.item)+'</td><td class="mut">'+esc(i.pack||"")+'</td><td class="mut">'+esc(i.qty||"")+'</td><td class="num">₹'+esc(i.amount)+'</td><td class="mut">'+esc(i.batch||"")+' '+esc(i.expiry||"")+'</td></tr>'}).join("");
+        return '<div style="border-bottom:1px dotted #eee;padding:2px 0">'+
+          '<div onclick="var n=this.nextElementSibling;if(n)n.style.display=n.style.display===\'none\'?\'\':\'none\'" style="cursor:pointer;display:flex;gap:8px">'+
+          '<span style="flex:1">'+esc(b.bill)+' <span class="mut">'+esc(b.name||"no patient name")+'</span>'+(its?' <span class="tog">▸</span>':'')+'</span>'+
+          '<span class="num">₹'+esc(b.amount)+'</span></div>'+
+          (its?'<div style="display:none"><table>'+its+'</table></div>':'')+'</div>';
+      }).join("");
+    }
+    var h='<div class="sec" style="max-width:640px">';
+    h+=line("","Sale (Marg)",v.sale.total,v.sale.bills+" bill(s)",billList(v.sale.list));
+    h+=line("−","Sale returns",v.returns.total,v.returns.count?v.returns.count+" credit note(s)":"none",v.returns.count?billList(v.returns.list):null);
+    h+=line("−","Paid by UPI",v.upi.total,(v.upi.payments||[]).length?(v.upi.payments.length+" payment(s)"+(v.upi.bank_total!=null?" · bank confirms":"")):"",
+            (v.upi.payments||[]).length?v.upi.payments.map(function(p){return '<div style="display:flex;gap:8px"><span class="mut" style="flex:1">'+esc(p.time)+' '+esc(p.ref)+'</span><span class="num">₹'+esc(p.amount)+'</span></div>'}).join(""):null);
+    if(v.without_cash.list.length) h+=line("−","Without cash",v.without_cash.total,v.without_cash.list.map(function(x){return x.head}).join(", "),
+            v.without_cash.list.map(function(x){return '<div style="display:flex;gap:8px"><span style="flex:1">'+esc(x.bill)+' '+esc(x.head)+(x.note?' <span class="mut">'+esc(x.note)+'</span>':'')+'</span><span class="num">₹'+esc(x.amount)+'</span></div>'}).join(""));
+    h+=line("=","Cash received",v.cash_received,"",null,true);
+    if(v.paid_elsewhere.list.length) h+=line("−","Paid at the clinic counter",v.paid_elsewhere.total,"not in Darpan's drawer",
+            v.paid_elsewhere.list.map(function(x){return '<div>'+esc(x.bill)+' · ₹'+esc(x.amount)+'</div>'}).join(""));
+    (v.adjustments||[]).forEach(function(a){h+=line("+","Put back",a.amount,a.why,null)});
+    (v.expenses||[]).forEach(function(x){h+=line("−","Paid from the drawer",x.amount,x.what,null)});
+    if(v.drawer!=null&&v.drawer!==v.cash_received) h+=line("=","Cash for the drawer",v.drawer,"",null,true);
+    h+='</div>';
+    if(v.went) h+='<div style="margin:6px 0"><b>Where the cash went:</b> '+esc(v.went)+'</div>';
+    h+='<div style="margin:6px 0">'+(v.checks||[]).map(function(c){return '<span class="badge '+(c.ok===true?'b-ok':(c.ok===false?'b-bad':''))+'">'+(c.ok===true?'✓ ':(c.ok===false?'✗ ':'ⓘ '))+esc(c.text)+'</span>'}).join(" ")+'</div>';
+    h+='<div style="margin:6px 0">'+((v.needs_you||[]).length?'<b>Needs you:</b> '+v.needs_you.map(esc).join(' · '):'<span class="mut">Nothing needs you.</span>')+'</div>';
+    h+='<div class="mut" style="font-size:12px">'+(v.approved_by?'approved by '+esc(v.approved_by):'awaiting your approval')+' · <a href="#" onclick="dayDetailOld(\''+d+'\',\''+elId+'\');return false">the old detailed view</a></div>';
+    el.innerHTML=h;
+  }).catch(function(){dayDetailOld(d,elId)});
+}
+function dayDetailOld(d, elId){

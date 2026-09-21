@@ -1,0 +1,2 @@
+kit id S365_DAY_PANEL
+project Sanjeevni (session 280, 21-Sep-2026) -- touches the parent's finance_approvals.html, declared
