@@ -1,0 +1,2 @@
+kit id S363_CASH_POOL
+project Sanjeevni (session 280, 21-Sep-2026) -- touches the parent's finance_app.py and finance_approvals.html, declared; supersedes S362_CASH_SCREENS (never installed)
