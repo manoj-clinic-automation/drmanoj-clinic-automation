@@ -235,3 +235,5 @@ finance/REPORT_1.xls
 !deploy_kits/GAS_CURRENT/DailyClinicReports/appsscript.json
 !deploy_kits/GAS_CURRENT/ClinicAccountingReports/appsscript.json
 !deploy_kits/GAS_CURRENT/UPIReconciliation/appsscript.json
+# S279 (21-Sep-2026): the fourth project, the Clinic Callback Tracker (D583)
+!deploy_kits/GAS_CURRENT/ClinicCallbackTracker/appsscript.json
