@@ -1,0 +1,2 @@
+S370 KIT S370_SW_SCOPE
+session 279 (parent) · 22-Sep-2026 · the service worker scope /portal (the page is /portal, not /portal/); wait on the registration, never on .ready
