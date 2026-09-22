@@ -16,6 +16,7 @@ import os
 import re
 import sys
 import urllib.parse
+import urllib.error
 import urllib.request
 
 OUT = os.environ.get("RING_AGENTS_FILE", "/root/portal/ring_agents.json")
@@ -97,10 +98,21 @@ def _phone_of(u):
 
 
 def fetch_users(token):
-    url = "%s/search/user?token=%s&_all=1" % (HOST, urllib.parse.quote(token, safe=""))
-    req = urllib.request.Request(url, headers={"Accept": "application/json"})
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        data = json.loads(resp.read().decode("utf-8", "replace"))
+    # The real path is /user (the Postman collection's /search/user prefix is an authoring quirk -- API Master
+    # Reference 23-Jun §7). The first VPS run asked /search/user and got an HTTPError; /user is tried first now.
+    last = None
+    for path in ("/user", "/search/user"):
+        url = "%s%s?token=%s&_all=1" % (HOST, path, urllib.parse.quote(token, safe=""))
+        req = urllib.request.Request(url, headers={"Accept": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = json.loads(resp.read().decode("utf-8", "replace"))
+            break
+        except urllib.error.HTTPError as e:
+            last = e
+            continue
+    else:
+        raise last
     rows = data.get("data") if isinstance(data, dict) else data
     if isinstance(rows, dict):
         rows = rows.get("users") or rows.get("data") or list(rows.values())

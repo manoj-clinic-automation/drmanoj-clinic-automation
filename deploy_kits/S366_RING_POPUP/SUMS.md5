@@ -3,7 +3,7 @@ a3cd0466fc500c444f958fc83c8d9e42  ring_hook.py
 4344b59277d94b2d11d8d7cc23328677  ring_common.py
 6fa0a56a1e37dbfab24181b27d8ec085  portal_push.py
 ab728b08ccfdc2f0e904b223a7c28cc0  portal_sw.js
-7c3a2081fb2bbb0ff58c141bc68d8d70  ring_agents_build.py
+da5b5d259bfd6487b89f84abf7e2d844  ring_agents_build.py
 03ff5891b012c26d57a0a7a9adaf0d29  ring_setup.py
 521ceec1a8f75caa7df7e73b3cff6435  make_s366.py
 8bcead83bc69db375913e1e273bdcccc  walk_s366.py
