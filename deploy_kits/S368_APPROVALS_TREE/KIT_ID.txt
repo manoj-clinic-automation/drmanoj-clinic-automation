@@ -1,0 +1,2 @@
+kit id S368_APPROVALS_TREE
+project Sanjeevni (session 281, 22-Sep-2026) -- replaces the parent's finance_approvals.html (declared; old bytes kept beside it); restarts clinic-finance; finance.db untouched
