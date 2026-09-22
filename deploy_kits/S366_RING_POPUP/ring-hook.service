@@ -1,0 +1,15 @@
+[Unit]
+Description=Clinic ring-hook -- MyOperator dial_begin/answered/end -> caller pop-up on the staff phone (S366_RING_POPUP)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/portal
+EnvironmentFile=/root/portal/ring_hook.env
+ExecStart=/bin/sh -c 'exec /root/wa/venv/bin/gunicorn --chdir /root/portal -w 1 -b 127.0.0.1:${RING_HOOK_PORT} --timeout 30 ring_hook:app'
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

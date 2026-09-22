@@ -1,0 +1,2 @@
+kit id S367_DAY_TRUTH_4
+project Sanjeevni (session 281, 22-Sep-2026) -- touches no parent file; restarts clinic-finance; one finance.db row under D602, declared

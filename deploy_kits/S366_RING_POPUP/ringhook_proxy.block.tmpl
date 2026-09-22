@@ -1,0 +1,17 @@
+# === Reverse proxy for the RING-HOOK (ring_hook.py) -- Session 279, kit S366_RING_POPUP ===
+# Modelled on the S222 /scanapp block. MyOperator's second webhook entry posts to /ring-hook;
+# the live /mo-callhook (call_hook_capture.py, :8098) is untouched.
+extprocessor ringhook {
+  type                    proxy
+  address                 127.0.0.1:__PORT__
+  maxConns                50
+  pcKeepAliveTimeout      60
+  initTimeout             60
+  retryTimeout            0
+  respBuffer              0
+}
+context /ring-hook {
+  type                    proxy
+  handler                 ringhook
+  addDefaultCharset       off
+}

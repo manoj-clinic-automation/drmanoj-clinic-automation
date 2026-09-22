@@ -1,0 +1,15 @@
+7bddc17cd7e65c75303b0046a86a08db  portal.py
+a3cd0466fc500c444f958fc83c8d9e42  ring_hook.py
+4344b59277d94b2d11d8d7cc23328677  ring_common.py
+6fa0a56a1e37dbfab24181b27d8ec085  portal_push.py
+ab728b08ccfdc2f0e904b223a7c28cc0  portal_sw.js
+7c3a2081fb2bbb0ff58c141bc68d8d70  ring_agents_build.py
+03ff5891b012c26d57a0a7a9adaf0d29  ring_setup.py
+521ceec1a8f75caa7df7e73b3cff6435  make_s366.py
+f1b83891fdacfcd5e34e2ccd1e820185  walk_s366.py
+0af6ad97b93ce1406cac7a6b3729c48c  install_S366_RING_POPUP.sh
+9cc46b3b7f4bbb712d630babd8b785a4  ring-hook.service
+cc59b9bcad1e7a6e4ad5f11f6d32a7c7  ringhook_proxy.block.tmpl
+8ed4b672f481f481b23317ed40b22541  http_ece.py
+3f67e4a3a702f11f63b9e7ef4066359e  KIT_ID.txt
+e8a34f0835c9ccdaf15f87b36c62bcd9  README.md
