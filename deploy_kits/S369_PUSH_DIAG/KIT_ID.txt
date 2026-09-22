@@ -1,0 +1,2 @@
+S369 KIT S369_PUSH_DIAG
+session 279 (parent) · 22-Sep-2026 · the S366 card reports its state to the portal and speaks up on the phone
