@@ -8,6 +8,7 @@ Builds /root/portal/ring_agents.json -- which Clinic-app login owns each staff p
                  Prints names and whether a phone was found -- NEVER the numbers (F-185 applies to the terminal too).
   --set LOGIN PHONE   add or change one entry by hand (for a phone MyOperator does not list, e.g. the reception
                  mobile). The number goes into the 0600 file only.
+  --link "NAME" LOGIN  link a MyOperator user by NAME to a login; the phone is taken from MyOperator (e.g. --link "Reception Mobile" reception)
   --show         list logins and names in the file (no numbers).
 Existing entries are kept; the API adds or refreshes, never deletes.
 """
@@ -27,7 +28,7 @@ HOST = "https://developers.myoperator.co"
 # First token of the name decides, so "Shavez Ahmed" and "Shavez" both land on shavez.
 NAME_TO_LOGIN = {
     "shavez": "shavez", "shivani": "shivani", "alisha": "alisha", "darpan": "darpan",
-    "bhati": "bhati", "manoj bhati": "bhati",
+    "bhati": "bhati", "manoj bhati": "bhati", "awdhesh": "awdhesh",
     "dr manoj": "manoj", "manoj agarwal": "manoj", "dr manoj agarwal": "manoj",
 }
 PHONE_KEYS = ("phone", "mobile", "phone_number", "mobile_number", "number", "contact", "contact_number", "msisdn")
@@ -126,6 +127,24 @@ def main(argv):
             print("  %-10s %s" % (a.get("user", "?"), a.get("name", "")))
         print("%d phone(s) linked" % len(d["agents"]))
         return 0
+    if "--link" in argv:
+        # --link "<MyOperator user name>" <login>: the phone comes from MyOperator's record, nobody types it.
+        i = argv.index("--link")
+        want, login = argv[i + 1].strip().lower(), argv[i + 2].strip().lower()
+        token = (os.environ.get("MYOP_LOGS_TOKEN") or _load_env(WA_ENV).get("MYOP_LOGS_TOKEN") or "").strip()
+        try:
+            users = fetch_users(token)
+        except Exception as e:  # noqa: BLE001
+            print("!! MyOperator Get Users failed: %s" % type(e).__name__); return 2
+        hits = [u for u in users if str(u.get("name") or u.get("user_name") or "").strip().lower() == want]
+        if not hits:
+            print("!! no MyOperator user named '%s' -- names there: %s" % (argv[i + 1], ", ".join(sorted(str(u.get("name") or "") for u in users)))); return 1
+        phone = _phone_of(hits[0])
+        if not phone:
+            print("!! MyOperator holds no phone for '%s'" % argv[i + 1]); return 1
+        d["agents"][phone] = {"user": login, "name": str(hits[0].get("name") or "").strip()}
+        _write(d)
+        print("linked: %s -> %s (one phone, from MyOperator)" % (argv[i + 1], login)); return 0
     if "--set" in argv:
         i = argv.index("--set")
         login, phone = argv[i + 1], m10(argv[i + 2])

@@ -3,7 +3,7 @@ a3cd0466fc500c444f958fc83c8d9e42  ring_hook.py
 4344b59277d94b2d11d8d7cc23328677  ring_common.py
 6fa0a56a1e37dbfab24181b27d8ec085  portal_push.py
 ab728b08ccfdc2f0e904b223a7c28cc0  portal_sw.js
-da5b5d259bfd6487b89f84abf7e2d844  ring_agents_build.py
+4f32d4bd5b74871e8dfe5c0fee9bb62b  ring_agents_build.py
 03ff5891b012c26d57a0a7a9adaf0d29  ring_setup.py
 521ceec1a8f75caa7df7e73b3cff6435  make_s366.py
 8bcead83bc69db375913e1e273bdcccc  walk_s366.py
@@ -13,3 +13,5 @@ cc59b9bcad1e7a6e4ad5f11f6d32a7c7  ringhook_proxy.block.tmpl
 8ed4b672f481f481b23317ed40b22541  http_ece.py
 3f67e4a3a702f11f63b9e7ef4066359e  KIT_ID.txt
 18ca175949cf28674afba1857a9d7b8a  README.md
+9b6041e3a249bd8c54f3855088cbe771  reception_login.sh
+61edb0370f66fafabc2b09e28c99b215  gas_WebApp_S366.gs
