@@ -16,6 +16,8 @@
 #
 #  Run by (one line on the VPS):
 #    cd /root/deploy/repo && git pull --ff-only && bash /root/deploy/repo/deploy_kits/S366_RING_POPUP/install_S366_RING_POPUP.sh
+#  S279 re-issue 2: the first VPS run went red inside its own walk -- PYTHONPATH=/root/portal let the scratch portal import the
+#  REAL portal_config.py, so the walk signed its test cookie with the wrong secret. The walk now names that fault; PYTHONPATH gone.
 #  Re-running is safe: every step is idempotent; an already-installed box prints what it finds and stops.
 # =============================================================================
 set -u
@@ -74,7 +76,7 @@ mkdir -p "$WALK/app" || exit 1
 \cp -p ring_hook.py ring_common.py portal_push.py portal_sw.js portal.py "$WALK/app/" && \cp -p "$PD/clinic_sso.py" "$PD/clinic_users.py" "$PD/tracker_pass.py" "$WALK/app/" || { say "!! [4/9] scratch copy failed"; rm -rf "$WALK"; exit 1; }
 "$VPY" -B -m py_compile "$WALK/app/ring_hook.py" "$WALK/app/ring_common.py" "$WALK/app/portal_push.py" "$WALK/app/portal.py" "$KDIR/ring_agents_build.py" "$KDIR/ring_setup.py" "$KDIR/walk_s366.py" \
   || { say "!! [4/9] compile failed - nothing installed"; rm -rf "$WALK"; exit 1; }
-WOUT="$( cd /tmp && PYTHONPATH="$PD" timeout 180 "$VPY" -B "$KDIR/walk_s366.py" "$WALK/app" "$FIN" "$PD/tile_grants.json" "$PD/portal.py" 2>&1 | tail -1 )"
+WOUT="$( cd /tmp && timeout 180 "$VPY" -B "$KDIR/walk_s366.py" "$WALK/app" "$FIN" "$PD/tile_grants.json" "$PD/portal.py" 2>&1 | tail -1 )"
 rm -rf "$WALK"
 echo "$WOUT" | grep -q "^WALK OK" || { say "!! [4/9] walk red: $WOUT - nothing installed"; exit 1; }
 say "[4/9] $WOUT (scratch db + test salt; the LIVE portal.py is the negative control)"

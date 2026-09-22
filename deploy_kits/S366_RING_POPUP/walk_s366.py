@@ -160,6 +160,7 @@ clinic_users.add_role(st, "staff")
 for u, rl in [("manoj", "doctor"), ("shavez", "staff"), ("amir", "staff")]:
     clinic_users.add_user(st, u, rl, "pw-" + u + "-12345")
 P = load(os.path.join(app_dir, "portal.py"), "portal_walk")
+ok(P.SSO_SECRET == "walk-sso-secret", "the scratch portal reads the WALK secret, not a real portal_config.py (check sys.path/PYTHONPATH)")
 ok(P._PORTAL_PUSH and P._TRACKER_PASS and P._sso_ready(), "portal loads with push + tracker pass")
 pc = P.app.test_client()
 sw = pc.get("/portal/sw.js")

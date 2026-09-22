@@ -35,7 +35,7 @@ edits) · NEW `ring_hook.py` `a3cd0466…` · `ring_common.py` `4344b592…` · 
 `ab728b08…` · `ring_agents_build.py` `7c3a2081…` · `ring_setup.py` `03ff5891…` · checked unchanged: `tracker_pass.py`
 `97ac975a`, `clinic_sso.py` `2bc6ba15`, `clinic_users.py` `2e85a7c8`, `/root/finance/finance_patient_match.py` `0700768a`.
 
-**Proof before the paste.** `walk_s366.py` 49/49 (scratch finance.db with the real fingerprint code and a test salt, a
+**Proof before the paste.** `walk_s366.py` 50/50 (scratch finance.db with the real fingerprint code and a test salt, a
 fake push service; ring → hunt → answered → end, missed, unknown, family, unmapped phone, the gate, the test push, the
 six portal routes, the service worker, the card; the live portal.py as negative control: routes +6 none lost, every tile
 identical) · the real `pywebpush` path proven against a local push server (VAPID header, aes128gcm, TTL, Urgency) · the
