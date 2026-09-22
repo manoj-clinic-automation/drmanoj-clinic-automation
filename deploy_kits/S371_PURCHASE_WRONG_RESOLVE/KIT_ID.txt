@@ -1,0 +1,2 @@
+kit id S371_PURCHASE_WRONG_RESOLVE
+project Sanjeevni (session 281, 22-Sep-2026) -- purchase_app.py rev 13; restarts clinic-finance; finance.db: WRONG bills Marg has answered are resolved, audited, after a backup
