@@ -1,0 +1,2 @@
+kit id S377_ICICI_COUNT
+project Sanjeevni (session 281, 23-Sep-2026) -- F-615; touches the parent finance_approvals.html (declared); restarts clinic-finance; finance.db gains table bank_anchor and one row, after a backup
