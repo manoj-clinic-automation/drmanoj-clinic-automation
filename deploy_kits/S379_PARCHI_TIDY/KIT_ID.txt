@@ -1,0 +1,2 @@
+S379 KIT S379_PARCHI_TIDY
+session 279 (parent) · 23-Sep-2026 · Parchi: Docterz upload screen retired, new patients' names from the overnight report, procedure discount, six X-rays added; the day statement in slip order with every skipped number named (owner 23-Sep)
