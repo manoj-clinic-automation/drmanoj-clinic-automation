@@ -1,0 +1,2 @@
+kit id S380_PAY_PACK
+project Sanjeevni (session 281, 23-Sep-2026) -- purchase_app.py rev 14 (F-616, D605): the month's bank pack; restarts clinic-finance; no table row changes at install
