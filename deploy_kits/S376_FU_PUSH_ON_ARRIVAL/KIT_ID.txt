@@ -1,0 +1,2 @@
+S376 KIT S376_FU_PUSH_ON_ARRIVAL
+session 279 (parent) · 23-Sep-2026 · the follow-up list pushed to the Callback Tracker when the workbook arrives, not only at 22:00/07:00/11:00 (owner 23-Sep)

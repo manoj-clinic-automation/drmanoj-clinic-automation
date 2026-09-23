@@ -1,0 +1,2 @@
+kit id S375_BANK_ENTRY
+project Sanjeevni (session 281, 22-Sep-2026) -- D604; touches the parent finance_approvals.html (declared); restarts clinic-finance; finance.db gains one empty table bank_transfer

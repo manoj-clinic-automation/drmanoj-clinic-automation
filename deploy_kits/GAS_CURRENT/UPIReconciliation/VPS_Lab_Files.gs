@@ -22,6 +22,9 @@
  *  event papers) from the clinic server to Clinic Records / Scans | Papers | Blood outside | X-ray outside,
  *  then tells the server, which files it on the patient and deletes its own copy.
  *
+ *  S373: each run also files the X-ray photos in "X-ray test" / "X-ray inbox" as the server's plan says
+ *  (Clinic Records / X-ray / <Mon YYYY> / <DD-Mon>, originals to X-ray inbox / _filed, never deleted).
+ *
  *  ONE TIME:  add this as a new file in the project, Save, choose  setupLabFiles  in the function box
  *  and press Run. It makes the folders, shares them with the server, installs the 15-minute trigger,
  *  files every report since 17-Sep, and prints a short check including this Drive's free space.
@@ -73,6 +76,53 @@ function fileLabReports() {
   _fileLab(REC_SEARCH);
   try { _fileWa(); } catch (e) { Logger.log('WhatsApp step: ' + e); }
   try { _fileUploads(); } catch (e) { Logger.log('Papers step: ' + e); }
+  try { _fileXray(); } catch (e) { Logger.log('X-ray step: ' + e); }
+}
+
+/* S373 (23-Sep-2026, the owner: "the X-ray upload test period is over"): the X-ray photos staff put in
+   "X-ray test" or "X-ray inbox". The SERVER decides (xray-plan); this script only copies, moves and reports.
+   file  -> a copy under the new name into Clinic Records / X-ray / Mon YYYY / DD-Mon, and the original moves
+            to X-ray inbox / _filed / <today>   (if the move fails the copy is trashed, so nothing is doubled)
+   check -> moved to "X-ray check"; the staff type the clinic ID in Check karein and the next run files it
+   dup   -> moved to X-ray inbox / _filed / duplicates
+   Nothing is ever deleted. A report the server did not take is kept and sent first next run. */
+function _fileXray() {
+  var props = PropertiesService.getScriptProperties();
+  var left = props.getProperty('xray_unreported');
+  if (left) {
+    var p0 = _call('xray-done', 'post', { files: JSON.parse(left) });
+    if (p0.getResponseCode() !== 200) { Logger.log('X-ray: earlier report still not taken (' + p0.getResponseCode() + ')'); return; }
+    props.deleteProperty('xray_unreported');
+  }
+  var r = _call('xray-plan', 'get');
+  if (r.getResponseCode() !== 200) { Logger.log('xray-plan said ' + r.getResponseCode()); return; }
+  var items = (JSON.parse(r.getContentText() || '{}').items) || [];
+  if (!items.length) return;
+  var t0 = Date.now(), root = _recRoot(false), inbox = _sub(root, 'X-ray inbox'), filed = _sub(inbox, '_filed');
+  var check = _sub(root, 'X-ray check'), today = Utilities.formatDate(new Date(), REC_TZ, 'dd-MMM'), out = [];
+  for (var i = 0; i < items.length; i++) {
+    if (Date.now() - t0 > 3 * 60 * 1000) break;          // the rest next run
+    var it = items[i];
+    try {
+      var f = DriveApp.getFileById(it.id);
+      if (it.action === 'file') {
+        var dest = root;
+        for (var k = 0; k < it.path.length; k++) dest = _sub(dest, it.path[k]);
+        var copy = f.makeCopy(it.name, dest);
+        try { f.moveTo(_sub(filed, today)); } catch (e) { copy.setTrashed(true); Logger.log('X-ray not moved, copy withdrawn: ' + e); continue; }
+        out.push({ id: it.id, action: 'file', dest_id: copy.getId(), name: it.name });
+      } else if (it.action === 'check') {
+        f.moveTo(check); out.push({ id: it.id, action: 'check' });
+      } else if (it.action === 'dup') {
+        f.moveTo(_sub(filed, 'duplicates')); out.push({ id: it.id, action: 'dup' });
+      }
+    } catch (e) { Logger.log('X-ray not filed: ' + e); }
+  }
+  if (out.length) {
+    var p = _call('xray-done', 'post', { files: out });
+    if (p.getResponseCode() !== 200) props.setProperty('xray_unreported', JSON.stringify(out));
+    Logger.log('X-ray: ' + out.length + ' done, server said ' + p.getResponseCode());
+  }
 }
 
 /* S344: photos and PDFs patients sent on the clinic WhatsApp. The server gives the message id, MyOperator's
