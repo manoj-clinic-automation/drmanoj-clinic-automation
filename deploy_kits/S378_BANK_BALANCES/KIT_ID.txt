@@ -1,0 +1,2 @@
+kit id S378_BANK_BALANCES
+project Sanjeevni (session 281, 23-Sep-2026) -- both account balances, bold, at the top of Bank; touches the parent finance_approvals.html (declared); restarts clinic-finance; finance.db untouched
