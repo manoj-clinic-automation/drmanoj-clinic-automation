@@ -1,0 +1,2 @@
+S372 KIT S372_SLIP_COLUMN
+session 279 (parent) · 23-Sep-2026 · the physical slip number as the first column of the Day Revenue page and its PDF (owner ruling 23-Sep)
