@@ -1,0 +1,2 @@
+S374 KIT S374_XRAY_LIVE_2
+session 279 (parent) · 23-Sep-2026 · the X-ray live filing (S373 payload, byte-identical records.py 6492135c); the token-less probe accepts the app gate's 302 (S373 red at that probe, restored, frozen)
