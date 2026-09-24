@@ -1,0 +1,2 @@
+S393 KIT S393_PETTY_FOLD
+session 279 (parent) · 24-Sep-2026 · Bhati's petty book: a repeated tap of the same entry within 10 minutes is refused; both pages become one-screen folds (strip on top, one line per section, one open at a time)
