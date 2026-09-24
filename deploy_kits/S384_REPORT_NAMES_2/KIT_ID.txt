@@ -1,0 +1,2 @@
+S384 KIT S384_REPORT_NAMES_2
+session 279 (parent) · 24-Sep-2026 · S383's payload byte-identical (the name check + the Gist reports line); the installer names each failing check and reads the journal only from its own restart (S383 red, restored, frozen)
