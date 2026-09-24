@@ -1,0 +1,2 @@
+S392 KIT S392_LAB_NO_ID_2
+session 279 (parent) · 24-Sep-2026 · S391 follow-up: an original ID-less report that reaches the server after its resend follows the resend to the same patient (the re-send rule looks both ways in time)
