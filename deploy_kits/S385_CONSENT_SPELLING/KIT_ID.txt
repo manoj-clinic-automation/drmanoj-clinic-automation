@@ -1,0 +1,2 @@
+S385 KIT S385_CONSENT_SPELLING
+session 279 (parent) · 24-Sep-2026 · consent Hindi spelling corrected once, everywhere (body + every page header), remembered for next time; hand-edit in one place caught before printing (owner 24-Sep)
