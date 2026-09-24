@@ -1,0 +1,2 @@
+kit id S381_STICK_WATCH
+project Sanjeevni (session 281, 24-Sep-2026) -- medical PC marg_watch.py 9f0bf9c4 -> f39ce036 (F-617): the top level of E:\ (the Marg backup stick) is swept for fresh exports; delivered through the Drive _kit channel, no VPS change
