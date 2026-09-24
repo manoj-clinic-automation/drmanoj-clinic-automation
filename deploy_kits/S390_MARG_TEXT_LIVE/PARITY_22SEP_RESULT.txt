@@ -1,0 +1,11 @@
+  ok   finance reader: Marg's Excel reads clean   [[]]
+  ok   finance reader: the converted text reads clean   [[]]
+  ok   same report period and title   [(('2026-09-22', '2026-09-22'), ('2026-09-22', '2026-09-22'))]
+  ok   same GRAND TOTAL, to the paisa   [({'gross': 2361554, 'disc': 102364, 'tax': 0, 'drcr': 0, 'net': 2259100, 'cash': 1521300}, {'gross': 2361554, 'disc': 102364, 'tax': 0, 'drcr': 0, 'net': 2259100, 'cash': 1521300})]
+  ok   same number of bills in the footer   [(27, 27)]
+  ok   same days
+  ok   every bill identical in every field the server keeps (money, mode, ID, credit note)   [[]]
+  ok   every medicine line identical as the server parses it   [[]]
+  ok   the router identifies it as Marg's Excel is identified   [({'type': 'SALE_BILLWISE', 'variant': 'DETAIL', 'title_regex': 'BILL\\s+WISE\\s+]
+  ok   the one door's item lines are identical   [(133, 133, None)]
+PARITY_S389 GREEN -- 10/10

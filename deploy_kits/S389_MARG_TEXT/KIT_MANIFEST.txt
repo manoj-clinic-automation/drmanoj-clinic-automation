@@ -1,0 +1,30 @@
+# KIT_MANIFEST.txt -- read by medical_agent.py (S205.1) from this folder, every kit check.
+# It declares files the agent may install BEYOND its own built-in list, one per line:
+#
+# <name in this folder> | <where it goes on the medical PC> | <the md5 it must have>
+#
+# The agent refuses any destination outside D:\SendToClinic, refuses a file whose md5 does not
+# match what is declared here, and refuses a .py that does not compile. A line it cannot read is
+# reported in the heartbeat and skipped, never guessed at.
+#
+# S240 (D467 phase 2b) -- the pusher: every captured export goes to the clinic server by itself.
+# marg_watch.py needs no line here: it is already on the agent's built-in list, and changing it
+# is what makes the agent restart the watcher.
+#
+# S259 (Club C.2, D511) -- THE OFF SWITCHES. A file in D:\SendToClinic\_off\ stops the job it
+# names; deleting it starts the job again. Nothing is restarted either way. ALL_OFF.txt stops the
+# SENDING only -- capture keeps its own marker, MARG_WATCH_OFF.txt, because an export that is not
+# captured is gone for ever. The _off folder is created by this delivery; READ_ME.txt explains it
+# in the shop's own words.
+marg_push.py | D:\SendToClinic\marg_push.py | 566e189e986128fa2ebb341a78b9ab65
+TURN_OFF_ALL.bat | D:\SendToClinic\TURN_OFF_ALL.bat | 805ba88689cec8caac9acfe86a81868b
+TURN_ON_ALL.bat | D:\SendToClinic\TURN_ON_ALL.bat | 01dd435875191c10cb9cd3e9de20904d
+_off_READ_ME.txt | D:\SendToClinic\_off\READ_ME.txt | 3bd3bdd91eecf260627cdbb427bf185f
+#
+# S388 (F-618) -- run once in the staff account "user", which has no Google Drive and no administrator
+# rights: it puts the S387 starter in that account's start-up folder. Nothing runs it by itself.
+ENABLE_AGENT_THIS_ACCOUNT.bat | D:\SendToClinic\ENABLE_AGENT_THIS_ACCOUNT.bat | e00db276565e454cd6cbe799c4eb6d8c
+#
+# S389 (F-619) -- Marg's one-click TEXT export, read into the same .XLS Marg's Excel export is.
+# marg_watch.py (built-in list) imports it; with it absent, text exports simply wait.
+marg_txt.py | D:\SendToClinic\marg_txt.py | 598e8054538419ae8cf6276c70eeecc2

@@ -1,0 +1,2 @@
+kit id S390_MARG_TEXT_LIVE
+project Sanjeevni (session 281, 24-Sep-2026) -- medical PC: marg_txt S389.2 (two-digit line numbers) + marg_watch ce41fdaa (re-reads marg_txt when it changes); then MARG_TXT_LIVE.txt -- the text reader sends. Parity with Marg's own 22-Sep Excel GREEN 10/10. No VPS, manojz or parent change

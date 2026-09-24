@@ -1,0 +1,2 @@
+LIVE -- S390, 24-Sep-2026: the text reader sends. Parity with Marg's own 22-Sep Excel GREEN 10/10.
+Delete this file (or make it not begin with LIVE) to put the text reader back on hold.

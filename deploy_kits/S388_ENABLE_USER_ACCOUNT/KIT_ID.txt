@@ -1,0 +1,2 @@
+kit id S388_ENABLE_USER_ACCOUNT
+project Sanjeevni (session 281, 24-Sep-2026) -- medical PC: D:\SendToClinic\ENABLE_AGENT_THIS_ACCOUNT.bat via the Drive kit channel (one KIT_MANIFEST line); run once in the staff account "user" (F-618). No VPS change

@@ -1,0 +1,2 @@
+kit id S389_MARG_TEXT
+project Sanjeevni (session 281, 24-Sep-2026) -- medical PC: marg_watch.py f39ce036 -> 491aded8 + NEW marg_txt.py; Marg's text export captured as the same .XLS its Excel export is (F-619). ON HOLD by default until MARG_TXT_LIVE.txt; no VPS, manojz or parent change

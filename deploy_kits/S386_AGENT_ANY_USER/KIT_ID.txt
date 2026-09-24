@@ -1,0 +1,2 @@
+kit id S386_AGENT_ANY_USER
+project Sanjeevni (session 281, 24-Sep-2026) -- medical PC: NEW D:\SendToClinic\agent_guard.py + START_AGENT.cmd; the Marg agent starts for every Windows account, one copy only (F-618). Installed by double-click at the medical PC; no VPS change
