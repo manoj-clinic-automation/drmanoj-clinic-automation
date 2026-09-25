@@ -1,0 +1,2 @@
+kit id S399_DAY_TRUTH_5
+project Sanjeevni (session 283, 25-Sep-2026) -- touches no parent file; restarts nothing; finance.db backed up, then day_resync adds the missed label bill(s), declared
