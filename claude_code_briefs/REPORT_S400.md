@@ -150,5 +150,15 @@ kit — he never had a medical row — so the control shows this kit opens exact
   as a SyntaxWarning on newer pythons (fine on the box's 3.9); pre-existing, unrelated.
 - The publish and the repo-copy check are recorded below.
 
-### Publish
-(filled after `PUBLISH_ALL.bat` and the pull on the box — see the last lines of this file)
+### Publish and the repo-copy check (read from the box)
+- Journal after the restart: the only lines are gunicorn's own `reentrant call inside <_io.BufferedWriter name='<stderr>'>`
+  shutdown-logging race at the SIGTERM of 20:45:49 — the identical trace is in the journal at the 24-Sep 09:52:45 restart
+  (an earlier kit), nothing after 20:46, two workers running since 20:46:19. Not this kit; noted, not touched.
+- The installer was run from `/tmp/s400kit/` (SUMS.md5 checked OK there first) at 20:45:45 IST.
+- `PUBLISH_ALL.bat`: gate clean (10 staged files), commit `6c2beb6`, pushed, origin HEAD verified.
+- On the box at 20:49:19 IST: `/root/deploy/repo` pulled to `6c2beb6`; `md5sum -c SUMS.md5` OK in the repo kit; every one of the
+  8 kit files `cmp`-identical to the copy that ran; `sale_check.py` / `sale_check.html` placed == the repo kit; the six patched
+  files still at their TO pins; the repo installer's re-run took its ALREADY INSTALLED path (rc 0, seed re-checked, nothing
+  changed); healthz 200 at 20:49:20. `/tmp/s400kit` removed.
+- Live `sale_check_*` tables are created on the first request to the page (the S340 pattern); at 20:48 none existed yet — nobody
+  had opened it. The unit and the two role rows are in place (read back: `salecheck` bhati maker, manoj checker; bhati medical rows 0).
