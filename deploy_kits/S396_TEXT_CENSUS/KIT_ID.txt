@@ -1,0 +1,2 @@
+kit id S396_TEXT_CENSUS
+project Sanjeevni (session 281, 25-Sep-2026) -- medical PC marg_watch.py 61414a5a -> 6624df0b (S396) -> ce64bb31 (S396.1): any .txt judged by its content; a census of recent text files, the watcher log tail and every refused report text written to Drive Clinic Data Archive\FromMedical (F-620)

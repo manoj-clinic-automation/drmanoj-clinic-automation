@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S279 close** (the parent), 25-Sep-2026 09:3x IST
+# OWNER TO-DO — LIVE · refreshed at the **S281 close** (the Sanjeevni project), 25-Sep-2026 — the parent's sections exactly as its S279 close wrote them
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S279 close** (the parent), 25-Sep-2026 09:3x IST
 
 *Detail: `START_HERE_SESSION_282.md` · `S279_BUILD_BRIEF.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are exactly as its S280 close left them; its open S281 refreshes them at its own close.*
 
@@ -41,6 +43,43 @@ https://followup.dr-manoj.in/finance/petty
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S281 close
+
+**A · ONE WORD — "OK" to put the closing-stock reader in (S397).** Built and proved: the 24-Sep stock read from Marg's text export matches your 23-Sep Excel stock less the 24-Sep sales, on every item. Say OK in the new Sanjeevni chat and it goes in by itself through Drive; the 24-Sep stock you already exported is then sent automatically. Nothing for you or the staff to do after that.
+
+**B · THE PUBLISH — one double-click, whenever you are at the PC.** It carries the record of S281 (two kit folders, S396 and S397, and the close's documents). Everything already live stays live either way.
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+*Yours when you want them, never as a prompt:* update Gunina Pharmaceuticals' new bank account on the phone book page, then reprint August's bank pack and re-download the NEFT file if it has not gone to the bank —
+
+```
+https://followup.dr-manoj.in/finance/purchase/page/book
+```
+
+*For the Office vendor's visit: the SET and "user" accounts, `D:\SendToClinic` and `D:\MARGERP` must stay as they are.* *Exports: the bill-wise sale always **with the medicines under each bill** (the summary is refused, rightly).*
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S281 close
+
+1. **S397 in, on your OK** — and the 24-Sep closing stock confirmed on the server.
+2. **The Sanjeevni Book v1.9** — the text route, the one agent, the census, the approvals tree, the two accounts.
+3. **The vendor ledger reconciled** once the Yes Bank statement shows August's bulk NEFT.
+4. **The ICICI statement reader and one shelf for statements**; then **Amir's monthly pack** (NEFT sheet and both statements).
+5. **The spine's seven nights (27-Sep)**, the pharmacy screens switched to it, **Shavez's first real morning**; then your Yes Bank CSV (F-612) and the small items.
+
+## ✅ DONE AT THE S281 CLOSE — 22 → 25-Sep-2026 (the Sanjeevni project)
+
+- ~~**The ₹200 of 04-Sep**~~ — ruled: Marg's 18 bills, ₹23,875; a machine-filed day now follows Marg until you approve it (S367, D602).
+- ~~**The rest of the approvals page**~~ — **LIVE**: one tree, Needs you at the top, Checks folded at the foot, the old page one link away (S368, D603).
+- ~~**August could not be finalised (bills 148 and 67025)**~~ — cleared; a Wrong mark now clears when Marg agrees (S371).
+- ~~**Two bank accounts; the ₹40,000 transfer refused**~~ — **LIVE**: bank entry (S375), ICICI counted from its own statement (S377), both balances bold at the top (S378).
+- ~~**August's payment papers: one page and five blanks**~~ — **LIVE**: letter, annexure and sheet, each with its signature block (S380). ~~**Vendor bank details — where to change them**~~ — the phone book page.
+- ~~**Marg saving to the pen drive**~~ — watched (S381). ~~**Nothing captured when Shavez works in "user"**~~ — one agent for either account (S387, S388).
+- ~~**Office broken — Excel export failing**~~ — **LIVE**: Marg's text export carries the sale (S389, S390); 22-, 23- and 24-Sep on the server.
+- ~~**24-Sep sale "not picked"**~~ — it was the summary layout; the detailed one was taken at 07:27 and verified. The medical PC now tells Drive what it saw and why (S395, S396).
 
 *(The S280 close's wording, retained below.)*
 

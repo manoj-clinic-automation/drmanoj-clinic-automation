@@ -1,0 +1,17 @@
+converted: 43008 bytes, md5 451c3d573c97cf91dd820f5d14060d77, 441 rows, kind STOCK
+  ok   the same text gives the same bytes twice
+  ok   spine reader: Marg's Excel 23-Sep reads as STOCK_CLOSING, every check passes   [378 items, printed 26431.0, lines 26431.0]
+  ok   spine reader: converted text 24-Sep reads as STOCK_CLOSING, every check passes   [378 items, printed 25346.0, lines 25346.0]
+  ok   dates: 23-Sep and 24-Sep, from each report's own title
+  ok   router: both identified as STOCK_CLOSING / TOTALS, both end with TOTAL   [[('STOCK_CLOSING', 'TOTALS', True, 'IDENTIFIED'), ('STOCK_CLOSING', 'TOTALS', True, 'IDENTIFIED')]]
+  ok   same number of rows, once Marg's advert line is set aside   [(441, 441)]
+  ok   every letterhead, title, heading and page-furniture row identical, cell for cell (date aside)   [[]]
+  ok   items, page breaks and TOTAL fall on the same rows as Marg's sheet
+  ok   the same 378 items, same names and packings, same units   [378]
+  ok   stock cells are text or number exactly as Marg's sheet makes them (padded to 10, numbers only for plain counts)   [{('dash', 'dash'): 124, ('text', 'text'): 146, ('num', 'num'): 108}]
+  ok   the 24-Sep sale reads clean in the spine reader   [24 bills]
+  sale lines matched to items: 126, unmatched: [('KNEE SUPPORT HINGED', '1*1', 4), ('KNEE SUPPORT HINGED', '1*1', 4), ('KNEE SUPPORT HINGED', '1*1', 4)]
+  ok   a 20-letter family (the sale report cannot say which size): its sales = its drop   [[('KNEE SUPPORT HINGED', 3.0, 3.0)]]
+  ok   roll-forward: 23-Sep closing - 24-Sep sales = 24-Sep closing on every item   [376 of 378 exact (58 of them sold on 24-Sep); off: []]
+  ok   and in total: 26431 - 1085 sold = 25346
+PROVE_S397 GREEN -- 14/14

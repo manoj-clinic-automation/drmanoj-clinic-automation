@@ -1,0 +1,2 @@
+S398 KIT S398_SLIP_DEAD_CODE
+session 282 (parent) · 25-Sep-2026 · the v10 §1.5 drift read of slip_log.py: the Docterz-upload screen retired at S379 left 157 lines nobody can reach; deletion only, no behaviour change

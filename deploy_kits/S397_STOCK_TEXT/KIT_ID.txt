@@ -1,0 +1,2 @@
+kit id S397_STOCK_TEXT
+project Sanjeevni (session 281, 25-Sep-2026) -- medical PC marg_txt.py 76b5eb5d -> 38d85298 (reads the WHOLE STORES CLOSING STOCK text export) and marg_watch.py ce64bb31 -> 81145aa7 (offers every refused text again at start). BUILT AND PROVED, NOT INSTALLED: waits for the owner OK (F-620, D615)
