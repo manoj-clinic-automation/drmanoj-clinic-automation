@@ -77,5 +77,11 @@ files): `WALK_S400 GREEN -- 63/63` — every S400 behaviour (gate, flags, Sahi/G
 ### Not done / outside the brief
 - Nothing in the brief is left out. No other file, no data, no portal or grants change.
 
-### Publish and the repo-copy check
-(filled after `PUBLISH_ALL.bat` and the pull on the box — see the last lines of this file)
+### Publish and the repo-copy check (read from the box)
+- Journal after the 21:16:03 restart: no error, traceback or "NOT mounted" line (count 0 at 21:16:29). Both services active.
+- The installer was run from `/tmp/s402stage/S402_SALECHECK_RETURNS/` (SUMS.md5 checked OK there first; the S400 kit copied beside it
+  for its walk) at 21:15:58 IST.
+- `PUBLISH_ALL.bat`: gate clean (8 staged files: the kit, this report, the brief), commit `eb2719f`, pushed, origin HEAD verified.
+- On the box at 21:17:22 IST: `/root/deploy/repo` pulled to `eb2719f`; `md5sum -c SUMS.md5` OK in the repo kit; all 6 kit files
+  `cmp`-identical to the copy that ran; both live files still at their TO pins; the repo installer's re-run took its ALREADY INSTALLED
+  path (rc 0, nothing changed); healthz 200 at 21:17:23. `/tmp/s402stage` removed.
