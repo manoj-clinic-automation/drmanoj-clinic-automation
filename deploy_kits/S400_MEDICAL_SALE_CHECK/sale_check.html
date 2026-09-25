@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Medical sale check</title>
+<!-- S400_MEDICAL_SALE_CHECK (25-Sep-2026, D616): Bhati checks the Sanjeevni days not yet approved.
+     Hindi (Roman script), phone-first. Every figure comes from /finance/salecheck/api/...; nothing is
+     computed here. Never shown: drawer, pool, where the cash went, deposits, banks, months, other days. -->
+<style>
+ body{font:16px/1.45 system-ui,sans-serif;margin:0;background:#f6f4f1;color:#1c1c1c;max-width:560px;margin:0 auto;padding:10px 12px 40px}
+ h1{font-size:19px;margin:8px 0 2px}
+ .sub{color:#777;font-size:13px;margin-bottom:10px}
+ .card{background:#fff;border:1px solid #e4e0da;border-radius:10px;margin:10px 0;padding:12px 14px}
+ .card.tap{cursor:pointer}
+ .row{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;gap:8px}
+ .k{color:#555}.v{font-weight:600;font-variant-numeric:tabular-nums;font-size:18px}
+ .tot{border-top:2px solid #1c1c1c;margin-top:6px;padding-top:6px}.tot .v{font-size:22px}
+ .chip{display:inline-block;font-size:13px;padding:3px 10px;border-radius:12px;background:#eee;font-weight:600}
+ .chip.ok{background:#e4f2e6;color:#2e6b34}.chip.wrong{background:#fbe7e5;color:#b3261e}.chip.pending{background:#fdf1dc;color:#b26a00}
+ .flag{color:#b3261e;font-weight:600;font-size:14px;margin:3px 0;padding-left:10px;border-left:4px solid #b3261e}
+ details{margin-top:4px}summary{color:#3c6ac2;font-size:14px;cursor:pointer}
+ table{border-collapse:collapse;width:100%;font-size:14px;margin-top:6px}
+ td,th{padding:5px 6px;border-bottom:1px solid #eee;text-align:left;vertical-align:top}
+ td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ .muted{color:#888;font-size:13px}
+ .btn{display:inline-block;border:1px solid #bbb;border-radius:9px;padding:12px 16px;margin:6px 8px 4px 0;background:#fafafa;font-size:17px;font-weight:600;cursor:pointer}
+ .btn.ok{background:#2e6b34;color:#fff;border-color:#2e6b34}
+ .btn.bad{background:#fff;color:#b3261e;border-color:#b3261e}
+ .btn.pick{background:#fff;border-color:#3c6ac2;color:#3c6ac2;min-width:44%;text-align:center}
+ .btn.pick.on{background:#3c6ac2;color:#fff}
+ .btn.small{font-size:14px;padding:6px 10px;font-weight:500}
+ .btn.back{font-size:15px;padding:8px 12px;margin:0 0 8px}
+ select,input[type=number],textarea{width:100%;box-sizing:border-box;font-size:18px;padding:10px;border:1px solid #bbb;border-radius:9px;background:#fff;margin:4px 0}
+ input.big{font-size:26px;text-align:right}
+ .saved{background:#e4f2e6;border:2px solid #2e6b34;border-radius:12px;padding:14px;margin:10px 0}
+ .saved .t{font-size:22px;font-weight:700;color:#2e6b34}
+ .saved .l{font-size:18px;margin-top:4px}
+ .saved.dup{background:#fdf1dc;border-color:#b26a00}.saved.dup .t{color:#b26a00}
+ .saved.err{background:#fbe7e5;border-color:#b3261e}.saved.err .t{color:#b3261e}
+ .diff{color:#b3261e;font-weight:700}
+ .dline{font-size:14px;color:#555;margin:2px 0}
+ .issue{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #eee;font-size:15px}
+ a{color:#3c6ac2}
+</style>
+</head>
+<body>
+<h1>Medical sale check</h1>
+<div class="sub" id="sub">Sanjeevni ke din jo abhi approve nahi hue</div>
+<div id="msg"></div>
+<div id="body">loading&hellip;</div>
+<script>
+const el=id=>document.getElementById(id);
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const R=x=>(x==null||x==="")?"—":"₹"+x;
+let DAYS=[], D=null, VIEW="list", GALTI=null, MSG=null;
+
+async function get(u){const r=await fetch(u+(u.indexOf("?")<0?"?":"&")+"_="+Date.now(),{cache:"no-store"});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok){const e=new Error(j.message||j.error||("HTTP "+r.status));e.j=j;throw e;}return j;}
+async function post(u,b){const r=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok){const e=new Error(j.message||j.error||("HTTP "+r.status));e.j=j;throw e;}return j;}
+
+function say(kind,title,lines){MSG={kind,title,lines};render();window.scrollTo(0,0);}
+function msgHtml(){if(!MSG)return "";return '<div class="saved '+(MSG.kind||"")+'"><div class="t">'+esc(MSG.title)+'</div>'+(MSG.lines||[]).map(l=>'<div class="l">'+l+'</div>').join("")+'</div>';}
+
+async function loadList(){
+ el("body").innerHTML="loading…";
+ try{const j=await get("/finance/salecheck/api/days");DAYS=j.days||[];}catch(e){el("body").innerHTML='<div class="card">'+esc(e.message)+'</div>';return;}
+ VIEW="list";D=null;render();
+}
+async function openDay(iso){
+ el("body").innerHTML="loading…";
+ try{D=await get("/finance/salecheck/api/day/"+iso);}catch(e){D=null;MSG={kind:"err",title:"Nahi khula",lines:[esc(e.message)]};await loadList();return;}
+ VIEW="day";GALTI=null;render();
+}
+function render(){
+ let h=msgHtml();
+ if(VIEW==="list"){
+  if(!DAYS.length)h+='<div class="card">Sab din approve ho chuke hain — abhi jaanch ke liye kuch nahi.</div>';
+  DAYS.forEach(d=>{
+   h+='<div class="card tap" onclick="openDay(\''+d.date+'\')"><div class="row"><span><b>'+esc(d.day)+'</b> <span class="muted">'+esc(d.weekday)+'</span></span><span class="chip '+esc(d.chip.kind)+'">'+esc(d.chip.text)+'</span></div>'+
+      '<div class="row"><span class="k">'+d.bills+' bill · Marg sale</span><span class="v">'+R(d.sale)+'</span></div>'+
+      (d.flags||[]).map(f=>'<div class="flag">'+esc(f)+'</div>').join("")+'</div>';
+  });
+  el("body").innerHTML=h;return;
+ }
+ const d=D;
+ h+='<span class="btn back" onclick="loadList()">← Din ki list</span>';
+ h+='<div class="card"><div class="row"><span><b>'+esc(d.day)+'</b> <span class="muted">'+esc(d.weekday)+'</span></span><span class="chip '+esc(d.chip.kind)+'">'+esc(d.chip.text)+'</span></div>'+
+    (d.flags||[]).map(f=>'<div class="flag">'+esc(f)+'</div>').join("")+'</div>';
+ h+='<div class="card">'+
+    line("Marg bills",d.sale.total,d.sale.bills+" bill",bills(d.sale.list))+
+    line("− Sale return",d.returns.total,d.returns.count?d.returns.count+" credit note":"koi nahi",d.returns.count?bills(d.returns.list):"")+
+    line("− UPI (bank se)",d.upi.total,(d.upi.payments||[]).length+" payment"+(d.upi.bank_total!=null?" · bank ne bataya":" · bank ka statement abhi nahi"),
+         (d.upi.payments||[]).length?'<table>'+d.upi.payments.map(p=>'<tr><td>'+esc(p.time)+'</td><td class="muted">'+esc(p.ref)+'</td><td class="n">'+R(p.amount)+'</td></tr>').join("")+'</table>':"")+
+    line("− Home / Procedure dawa (bina cash)",d.without_cash.total,(d.without_cash.list||[]).length?d.without_cash.list.length+" bill":"koi nahi",
+         (d.without_cash.list||[]).length?'<table>'+d.without_cash.list.map(x=>'<tr><td>'+esc(x.bill)+'</td><td class="muted">'+esc(x.head)+(x.note?" · "+esc(x.note):"")+'</td><td class="n">'+R(x.amount)+'</td></tr>').join("")+'</table>':"")+
+    '<div class="row tot"><span class="k"><b>= Cash mila (hona chahiye)</b></span><span class="v">'+R(d.cash_received)+'</span></div>'+
+    '</div>';
+ // Darpan's record + Bhati's cash
+ let dl="";
+ if(d.darpan)dl='<div class="dline">Darpan ne likha: <b>'+R(d.darpan.handed)+'</b> '+esc(d.darpan.to_hi||"")+(d.darpan.at?' <span class="muted">('+esc(d.darpan.at)+')</span>':"")+'</div>';
+ else dl='<div class="dline">Darpan ne cash ka hisaab nahi likha.</div>';
+ if(d.cash){dl+='<div class="dline">Aapne likha: <b>'+R(d.cash.amount)+'</b> '+esc(d.cash.to_hi)+' <span class="muted">('+esc(d.cash.at)+')</span>'+
+   (d.cash.diff_p?' <span class="diff">— Darpan se ₹'+esc(d.cash.diff)+' '+(d.cash.diff_p>0?"zyada":"kam")+'</span>':"")+'</div>';}
+ const pre=d.cash?d.cash.amount_p:(d.darpan?d.darpan.handed_p:null);
+ const party=d.cash?d.cash.to:"dr_bhawna";
+ h+='<div class="card"><b>Darpan se cash mila</b>'+dl+
+    (d.open?'<input class="big" type="number" id="amt" inputmode="numeric" placeholder="₹ amount" value="'+(pre==null?"":(pre/100))+'">'+
+    '<div><span class="btn pick '+(party==="dr_bhawna"?"on":"")+'" id="pB" onclick="pick(\'dr_bhawna\')">Dr Bhawna</span><span class="btn pick '+(party==="dr_manoj"?"on":"")+'" id="pM" onclick="pick(\'dr_manoj\')">Dr Manoj</span></div>'+
+    '<div class="muted">Date: '+esc(d.day)+' (sale ki date — badalti nahi)</div>'+
+    '<span class="btn ok" onclick="saveCash()">Save</span>':'<div class="muted">Yeh din approve ho chuka hai.</div>')+'</div>';
+ // verdict + galti
+ h+='<div class="card">';
+ if(d.check&&d.check.verdict==="ok")h+='<div class="dline">✓ Sahi hai likha: '+esc(d.check.at)+'</div>';
+ if((d.issues||[]).length){h+='<div><b>Galti</b></div>'+d.issues.map(i=>'<div class="issue"><span>'+esc(i.bill==="DAY"?"Poora din":i.bill)+' — '+esc(i.problem_hi)+(i.note?' · '+esc(i.note):"")+'</span>'+(d.open?'<span class="btn small" onclick="removeIssue('+i.id+')">Hatao</span>':"")+'</div>').join("");}
+ if(d.open){
+  if(!(d.issues||[]).length)h+='<span class="btn ok" onclick="sahi()">Sahi hai</span>';
+  h+='<span class="btn bad" onclick="galti()">Galti hai</span>';
+  if(GALTI){
+   h+='<div style="margin-top:8px"><div class="k">Kaunsa bill</div><select id="gb"><option value="DAY">Poora din</option>'+d.bills.map(b=>'<option value="'+esc(b)+'"'+(GALTI.bill===b?" selected":"")+'>'+esc(b)+'</option>').join("")+'</select>'+
+      '<div class="k">Kya galti</div><select id="gp" onchange="GALTI.problem=this.value;render()"><option value="">— chuniye —</option>'+d.problems.map(p=>'<option value="'+p.key+'"'+(GALTI.problem===p.key?" selected":"")+'>'+esc(p.hi)+'</option>').join("")+'</select>'+
+      (GALTI.problem==="other"?'<textarea id="gn" rows="2" placeholder="Do shabd likhiye">'+esc(GALTI.note||"")+'</textarea>':"")+
+      '<span class="btn ok" onclick="jodo()">Jodo</span><span class="btn small" onclick="GALTI=null;render()">Rehne do</span></div>';
+  }
+ }
+ h+='</div>';
+ el("body").innerHTML=h;
+ if(GALTI&&el("gb"))el("gb").value=GALTI.bill||"DAY";
+}
+function line(label,amount,sub,detail){
+ return '<div class="row" '+(detail?'onclick="var n=this.nextElementSibling;n.style.display=n.style.display===\'none\'?\'\':\'none\'" style="cursor:pointer"':'')+'><span class="k">'+esc(label)+(sub?' <span class="muted">· '+esc(sub)+(detail?" ▸":"")+'</span>':"")+'</span><span class="v">'+R(amount)+'</span></div>'+
+        (detail?'<div style="display:none;padding:0 0 6px 8px">'+detail+'</div>':"");
+}
+function bills(list){
+ if(!list||!list.length)return '<div class="muted">koi nahi</div>';
+ return list.map(b=>'<div style="border-bottom:1px dotted #ddd;padding:3px 0"><div class="row" onclick="var n=this.nextElementSibling;if(n)n.style.display=n.style.display===\'none\'?\'\':\'none\'" style="cursor:pointer"><span><b>'+esc(b.bill)+'</b> <span class="muted">'+esc(b.name||"naam nahi")+'</span>'+((b.items||[]).length?' ▸':'')+'</span><span class="v" style="font-size:16px">'+R(b.amount)+'</span></div>'+
+   ((b.items||[]).length?'<div style="display:none"><table>'+b.items.map(i=>'<tr><td>'+esc(i.item)+'</td><td class="muted">'+esc(i.qty||"")+'</td><td class="n">'+R(i.amount)+'</td></tr>').join("")+'</table></div>':"")+'</div>').join("");
+}
+function pick(p){el("pB").classList.toggle("on",p==="dr_bhawna");el("pM").classList.toggle("on",p==="dr_manoj");}
+function partyPicked(){return el("pM").classList.contains("on")?"dr_manoj":"dr_bhawna";}
+async function saveCash(){
+ const v=parseFloat(el("amt").value);if(isNaN(v)||v<0){say("err","Amount likhiye",["Darpan ne jitna cash diya, wahi number."]);return;}
+ const party=partyPicked();
+ try{const j=await post("/finance/salecheck/api/cash",{date:D.date,amount_p:Math.round(v*100),party:party});
+  const L=["Din: <b>"+esc(j.day)+"</b>","Cash: <b>"+R(j.amount)+"</b>","Kisko: <b>"+esc(j.to_hi)+"</b>","Kab: "+esc(j.at)];
+  if(j.diff_p)L.push('<span class="diff">Darpan ne '+R(j.darpan)+' likha tha — ₹'+esc(j.diff)+' '+(j.diff_p>0?"zyada":"kam")+'. Doctor sahab dekhenge.</span>');
+  MSG={kind:"",title:"✓ Cash save ho gaya",lines:L};
+ }catch(e){MSG={kind:"err",title:"Save nahi hua",lines:[esc(e.message)]};}
+ await openDay(D.date);
+}
+async function sahi(){
+ try{const j=await post("/finance/salecheck/api/verdict",{date:D.date});
+  MSG=j.already?{kind:"dup",title:"Pehle hi likha hai",lines:["Din <b>"+esc(j.day)+"</b> par 'Sahi hai' "+esc(j.at)+" ko likha ja chuka hai."]}
+              :{kind:"",title:"✓ Sahi hai — save ho gaya",lines:["Din: <b>"+esc(j.day)+"</b>","Kab: "+esc(j.at)]};
+ }catch(e){MSG={kind:"err",title:"Nahi hua",lines:[esc(e.message)]};}
+ await openDay(D.date);
+}
+function galti(){GALTI={bill:"DAY",problem:"",note:""};render();}
+async function jodo(){
+ const bill=el("gb").value, problem=el("gp").value, note=el("gn")?el("gn").value.trim():"";
+ GALTI={bill,problem,note};
+ if(!problem){say("err","Kya galti?",["Drop-down se chuniye."]);return;}
+ try{const j=await post("/finance/salecheck/api/issue",{date:D.date,bill,problem,note});
+  MSG={kind:"",title:"✓ Galti likh li",lines:["Din: <b>"+esc(j.day)+"</b>","Bill: <b>"+esc(j.bill)+"</b>","Galti: <b>"+esc(j.problem_hi)+"</b>"+(j.note?" · "+esc(j.note):""),"Kab: "+esc(j.at)]};
+ }catch(e){MSG=e.j&&e.j.already?{kind:"dup",title:"Pehle hi likhi hai",lines:[esc(e.message)]}:{kind:"err",title:"Nahi hua",lines:[esc(e.message)]};}
+ GALTI=null;await openDay(D.date);
+}
+async function removeIssue(id){
+ try{await post("/finance/salecheck/api/issue/remove",{id});MSG={kind:"",title:"✓ Galti hata di",lines:[]};}
+ catch(e){MSG={kind:"err",title:"Nahi hua",lines:[esc(e.message)]};}
+ await openDay(D.date);
+}
+loadList();
+</script>
+</body>
+</html>

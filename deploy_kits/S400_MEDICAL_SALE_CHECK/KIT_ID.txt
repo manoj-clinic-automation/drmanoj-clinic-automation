@@ -1,0 +1,2 @@
+kit id S400_MEDICAL_SALE_CHECK
+project Sanjeevni (session 283, 25-Sep-2026, D616) -- Bhati checks the pharmacy days: new sale_check.py + sale_check.html; six live files patched on the box from their live bytes; restarts clinic-finance + clinic-portal; finance.db backed up, then the salecheck unit seeded (1 unit, 2 role rows)
