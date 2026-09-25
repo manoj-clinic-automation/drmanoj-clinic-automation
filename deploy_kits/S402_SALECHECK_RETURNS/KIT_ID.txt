@@ -1,0 +1,2 @@
+kit id S402_SALECHECK_RETURNS
+project Sanjeevni (session 283, 25-Sep-2026) -- Bhati's Medical sale check: the day's sale returns as one collapsible block (count, total; bill · name · amount). Patches sale_check.py + sale_check.html on the box from their S400 bytes; restarts clinic-finance only; no data change (finance.db backed up by rule)
