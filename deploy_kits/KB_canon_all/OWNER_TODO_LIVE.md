@@ -1,3 +1,49 @@
+# OWNER TO-DO — LIVE · refreshed at the **S279 close** (the parent), 25-Sep-2026 09:3x IST
+
+*Detail: `START_HERE_SESSION_282.md` · `S279_BUILD_BRIEF.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are exactly as its S280 close left them; its open S281 refreshes them at its own close.*
+
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S279 close
+
+**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record only (Register **v5.121**, Archive **v1.118**, Fault **v2.106**, Runbook **v201**, `START_HERE_SESSION_282`, the build brief, the manifest, `live_pins_S279close.txt`). Everything built is already live from your lines.
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today** (one file per year is fine), saved in `D:\Downloads`. It is the only place your patients' diagnoses live (F-629); the contacts build does not wait for it.
+
+**3 · THREE TAPS ON THE PETTY BOOK** — yours: *Yes, I gave it* on the ₹20,000 of 20-Sep; Dr Bhawna's: her ₹15,000 (18-Sep) and ₹20,000 (22-Sep), from her iPhone after her password is set.
+
+```
+https://followup.dr-manoj.in/finance/petty
+```
+
+*At the contacts build, and only then:* one look at a one-page summary with a short doubt list (Shavez may take it), your OK to apply, and about five minutes on the reception mobile to add the clinic account.
+
+## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT — in your order
+
+0. **Read `slip_log.py` and `portal.py` whole** — each has had five patches since last read whole (your §1.5 line). Half an hour.
+1. **The contacts build (D614)** — one clean list from both books and Docterz, *Name (clinic ID)*, pre-Docterz names de-duplicated, every missing Docterz patient added, then the nightly that ends the hand-typing. First job.
+2. **Why the 25-Sep nightly did not run** (F-630) and **five live files the nightly backup does not carry** (F-631).
+3. **The caller card, steps 2–3** — outcome buttons and per-person counts (D590).
+4. **The rest of your order (D589):** the Callback Tracker remainder, the mail flood, the tiles, F-595 / F-596, Vitals & Plan to the VPS.
+
+## ✅ DONE AT THE S279 CLOSE — 21 → 25-Sep-2026 (the parent)
+
+- ~~**Callback Tracker — sign in once through the Clinic app**~~ — **LIVE** (S364).
+- ~~**The caller's name on the staff phone as it rings**~~ — **LIVE** (S366 → S370); outcome buttons and counts still to come.
+- ~~**Live X-ray filing**~~ — **LIVE** (S374): the first run filed 19 X-rays and sent 6 to check.
+- ~~**The Callback Tracker stale after the morning exports**~~ — **LIVE** (S376): refreshed within five minutes.
+- ~~**Slip number as the first column; the Parchi tidy; the X-ray list**~~ — **LIVE** (S372, S379): slip order with gaps, names from the overnight report, procedure discount, 31 X-rays in your words.
+- ~~**Pathology reports not being mailed**~~ — **LIVE**: *Report baaki* for Sukhveer, reception and Shavez (S382, S384).
+- ~~**Sukhveer mailed at 4:30, still "mailed" at 7 pm**~~ — found (the lab left the ID out of the subject) and **fixed** (S391, S392).
+- ~~**Tulsi's consent — the Hindi spelling printed wrong**~~ — **LIVE** (S385): correct once, everywhere, remembered.
+- ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
+- ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
+- ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+*(The S280 close's wording, retained below.)*
+
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S280 close
 
 **A · THE PUBLISH — one double-click.** It carries today's record only; everything built is already live on the server from your lines.

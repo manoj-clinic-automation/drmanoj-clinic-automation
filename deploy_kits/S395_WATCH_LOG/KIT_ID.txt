@@ -1,0 +1,2 @@
+kit id S395_WATCH_LOG
+project Sanjeevni (session 281, 25-Sep-2026) -- medical PC marg_watch.py ce41fdaa -> 61414a5a: its messages written to D:\SendToClinic\marg_watch.log; a report*.txt it does not take kept in _captured_txt\refused\ with the reason (F-620). Nothing about what is taken changes
