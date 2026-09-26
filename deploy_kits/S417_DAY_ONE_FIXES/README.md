@@ -70,6 +70,12 @@ byte-identical to today's). Then S414's, S412's, S411's, S410's, S409's, S408's 
 S405's, S404's (on the 14:04 backup, as S414 ran it), S403's, S400's and S402's own walks re-run on the patched files, with S414's
 declared scratch pre-states.
 
+**Declared scratch pre-state (new in this kit):** S403's and S400's frozen walks run on a copy of `finance.db.bak_S414_20260926_174505`
+(the database S414's install took at 17:45:05 on 26-Sep, the last one they were green on). After it the owner approved the medicine buying
+rules (18:08 — S403 asserts "not yet approved" and a send refused before approval), tapped NEFT done for August (19:49 — 18 supplier
+messages queued, a Needs-you line S400 asserts absent) and an orthotic family's sizes moved. A diagnosis run on 27-Sep showed the same
+7 / 1 reds with the UNPATCHED files over today's data, and 52/52 / 63/63 with this kit's files on that backup. No walk was edited.
+
 ## Run
 ```
 cd /root/deploy/repo && git pull --ff-only && bash /root/deploy/repo/deploy_kits/S417_DAY_ONE_FIXES/install_S417_DAY_ONE_FIXES.sh

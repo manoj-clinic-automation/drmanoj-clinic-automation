@@ -25,8 +25,9 @@
 #          /root/finance/stmt_shelf.py                       94f456ce -> 95ba0a4f   the cards-root .xlsx fetched as all_txn (clinic file, declared)
 #  DATA: seed_s417.py on the live database AFTER the backup -- the card files re-read (the bank rows untouched). Restarts clinic-finance
 #  ONLY. The walk (this kit's), then S414's, S412's, S411's, S410's, S409's, S408's (26/27 + the S411-declared supersession), S407's,
-#  S406's, S405's, S404's (on the 14:04 backup, as S414 ran it), S403's, S400's and S402's own walks re-run on the patched files, with the
-#  scratch pre-states S414's installer declared.
+#  S406's, S405's, S404's (on the 14:04 backup, as S414 ran it), S403's and S400's (on the 17:45 backup S414's install took -- the owner
+#  approved the rules and tapped NEFT after it; declared) and S402's own walks re-run on the patched files, with the scratch pre-states
+#  S414's installer declared.
 # =============================================================================
 set -u
 KIT="S417_DAY_ONE_FIXES"
@@ -183,6 +184,16 @@ for i in 1 2 3; do copydb "$ADB" "$WALK/assets_scratch$i.db" || { say "!! [5/10]
 if [ -f "$S412_BAK" ]; then
   copydb "$S412_BAK" "$WALK/scratch10.db" || { say "!! [5/10] no scratch copy of $S412_BAK - nothing installed"; rm -rf "$WALK"; exit 1; }
   say "   S404's scratch copy = $(basename "$S412_BAK") (the count-1 swap pairs were still open there; declared)"
+fi
+# S403's and S400's frozen walks meet data the owner made AFTER S414's install ran them green at 17:45 on 26-Sep: he approved the medicine
+# buying rules at 18:08 (S403 asserts 'not yet approved' and sends before the approval), tapped NEFT done for August at 19:49 (18 supplier
+# messages queued -> a Needs-you line S400 asserts absent), and an orthotic family's sizes moved. Their scratch copies are therefore copies
+# of the database S414's install took at 17:45:05 -- the last one those two walks were green on (declared; a diagnosis run on 27-Sep showed
+# the same 7 / 1 reds on the UNPATCHED files over today's data, and 52/52 / 63/63 with this kit's files on that backup).
+S414_BAK="$FIN/finance.db.bak_S414_20260926_174505"
+if [ -f "$S414_BAK" ]; then
+  copydb "$S414_BAK" "$WALK/scratch11.db" && copydb "$S414_BAK" "$WALK/scratch12.db" || { say "!! [5/10] no scratch copy of $S414_BAK - nothing installed"; rm -rf "$WALK"; exit 1; }
+  say "   S403's and S400's scratch copies = $(basename "$S414_BAK") (before the owner's 18:08 approval and 19:49 NEFT tap; declared)"
 fi
 WENV="FINANCE_ALLOW_HEADER_AUTH=1 FINANCE_SSO_DIR=$POR PETTY_UPLOAD_DIR=$WALK/uploads RECORDS_DRIVE_STUB=$WALK/stub MARG_ARCHIVE=$MRG/archive"
 WOUT="$( cd "$WALK" && env $WENV FINANCE_DB="$WALK/scratch1.db" timeout 1800 "$VPY" -B "$KDIR/walk_s417.py" --app "$WALK/finance" --old "$WALK/old" --db "$WALK/scratch1.db" 2>&1 )"
