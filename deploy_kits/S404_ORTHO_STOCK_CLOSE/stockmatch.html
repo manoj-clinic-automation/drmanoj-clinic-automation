@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stock milaan</title>
+<!-- S404_ORTHO_STOCK_CLOSE (26-Sep-2026, D619): Darpan's stock match for the ORTHOTIC section of the 06-Sep count.
+     Hindi (Roman script), phone-first, works on the PC. Two cards: Adla-badli? (Haan / Nahi per pair) and
+     Kam kyun? (one reason chip per line). Every figure comes from /finance/stockmatch/api/...; nothing is computed here.
+     One tap = saved (a big green card, S394); a repeat within ten minutes writes nothing and says so. -->
+<style>
+ body{font:16px/1.45 system-ui,sans-serif;margin:0;background:#f6f4f1;color:#1c1c1c;max-width:640px;margin:0 auto;padding:10px 12px 40px}
+ h1{font-size:19px;margin:8px 0 2px}
+ h2{font-size:17px;margin:0 0 6px}
+ .sub{color:#777;font-size:13px;margin-bottom:8px}
+ .card{background:#fff;border:1px solid #e4e0da;border-radius:10px;margin:10px 0;padding:12px 14px}
+ .prog{background:#1c1c1c;color:#fff;border-radius:10px;padding:12px 14px;font-size:18px;font-weight:700;margin:10px 0}
+ .prog.done{background:#2e6b34}
+ .row{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;gap:8px}
+ .k{color:#555}.v{font-weight:600;font-variant-numeric:tabular-nums}
+ .pair,.line{border-top:1px solid #eee;padding:10px 0}
+ .pair:first-of-type,.line:first-of-type{border-top:0}
+ .pair.done,.line.done{background:#f1f7f2;margin:0 -14px;padding:10px 14px;border-radius:0}
+ .pair.owner,.line.owner{background:#f3f3f3;color:#555}
+ .nm{font-size:16px;font-weight:700}
+ .muted{color:#888;font-size:13px}
+ .btn{display:inline-block;border:1px solid #bbb;border-radius:9px;padding:12px 16px;margin:6px 8px 4px 0;background:#fafafa;font-size:17px;font-weight:600;cursor:pointer;user-select:none}
+ .btn.ok{background:#2e6b34;color:#fff;border-color:#2e6b34}
+ .btn.bad{background:#fff;color:#b3261e;border-color:#b3261e}
+ .btn.chip{font-size:15px;padding:9px 12px;border-color:#3c6ac2;color:#3c6ac2;background:#fff}
+ .btn.chip.on{background:#3c6ac2;color:#fff}
+ .btn:active{opacity:.7}
+ .ans{font-size:15px;font-weight:600;color:#2e6b34;margin-top:4px}
+ .ans.owner{color:#555}
+ .saved{background:#e4f2e6;border:2px solid #2e6b34;border-radius:12px;padding:14px;margin:10px 0}
+ .saved .t{font-size:22px;font-weight:700;color:#2e6b34}
+ .saved .l{font-size:18px;margin-top:4px}
+ .saved.dup{background:#fdf1dc;border-color:#b26a00}.saved.dup .t{color:#b26a00}
+ .saved.err{background:#fbe7e5;border-color:#b3261e}.saved.err .t{color:#b3261e}
+ .verdict{font-size:16px;font-weight:700}
+ .verdict.closed{color:#2e6b34}
+ .cond{font-size:14px;padding:2px 0}
+ .cond.ok{color:#2e6b34}.cond.no{color:#b26a00}
+ .empty{color:#888;font-style:italic;font-size:14px}
+ .tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:10px;background:#eee;margin-left:6px;vertical-align:middle}
+</style>
+</head>
+<body>
+<h1>Stock milaan &mdash; Orthotics</h1>
+<div class="sub" id="sub">06-Sep ki ginti &middot; sirf orthotics</div>
+<div id="body">loading&hellip;</div>
+<script>
+const el=id=>document.getElementById(id);
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let S=null, MSG=null, BUSY=false;
+const CID=(new URLSearchParams(location.search).get("count")||"");
+const Q=CID?("?count="+encodeURIComponent(CID)):"";
+
+async function get(u){const r=await fetch(u+(u.indexOf("?")<0?"?":"&")+"_="+Date.now(),{cache:"no-store"});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok){const e=new Error(j.message||j.error||("HTTP "+r.status));e.j=j;throw e;}return j;}
+async function post(u,b){const r=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok){const e=new Error(j.message||j.error||("HTTP "+r.status));e.j=j;throw e;}return j;}
+
+async function load(){
+ try{S=await get("/finance/stockmatch/api/state"+Q);}catch(e){el("body").innerHTML='<div class="card">'+esc(e.message)+'</div>';return;}
+ render();
+}
+function who(p){return p.answered_by==="darpan"?"Aapne":(p.answered_by?"Doctor sahab":"");}
+function msgHtml(){if(!MSG)return "";return '<div class="saved '+(MSG.kind||"")+'"><div class="t">'+esc(MSG.title)+'</div>'+(MSG.lines||[]).map(l=>'<div class="l">'+l+'</div>').join("")+'</div>';}
+function render(){
+ const s=S; let h=msgHtml();
+ el("sub").textContent=(s.day?s.day+" ki ginti":"")+" · sirf orthotics · round "+s.count_id;
+ h+='<div class="prog'+(s.progress.all&&s.progress.need?' done':'')+'">'+esc(s.progress.hi)+'</div>';
+ // card 1 -- the pairs
+ const open1=s.pairs.filter(p=>!p.locked).length;
+ h+='<div class="card"><h2>Adla-badli? <span class="tag">'+open1+'</span></h2><div class="muted">Ek size kam, doosra zyada &mdash; kya doosre size ka bill bana tha? Haan = adla-badli.</div>';
+ if(!s.pairs.length)h+='<div class="empty">Koi jodi nahi.</div>';
+ s.pairs.forEach(p=>{
+  const own=p.answered_by&&p.answered_by!==s.user;
+  h+='<div class="pair'+(p.locked?(own?' owner':' done'):'')+'"><div class="row"><span class="k">Kam:</span><span class="nm">'+esc(p.short)+'</span></div>'+
+     '<div class="row"><span class="k">Zyada:</span><span class="nm">'+esc(p.over)+'</span></div>'+
+     '<div class="muted">'+esc(p.qty_text)+' &middot; '+esc(p.close)+(p.family?' &middot; '+esc(p.family):'')+'</div>';
+  if(p.answer) h+='<div class="ans'+(own?' owner':'')+'">'+esc(who(p))+': '+(p.answer==="YES"?"Haan &mdash; adla-badli":"Nahi &mdash; adla-badli nahi")+(p.answered_text?' <span class="muted">('+esc(p.answered_text)+')</span>':'')+'</div>';
+  else if(p.by_words) h+='<div class="ans owner">Doctor sahab ne dono lines par faisla de diya.</div>';
+  else h+='<div><span class="btn ok" onclick="pair(\''+esc(p.short).replace(/'/g,"\\'")+'\',\''+esc(p.over).replace(/'/g,"\\'")+'\',\'YES\')">Haan</span><span class="btn bad" onclick="pair(\''+esc(p.short).replace(/'/g,"\\'")+'\',\''+esc(p.over).replace(/'/g,"\\'")+'\',\'NO\')">Nahi</span></div>';
+  h+='</div>';
+ });
+ h+='</div>';
+ // card 2 -- the lines
+ const L=s.lines.filter(l=>l.open);
+ const open2=L.filter(l=>!l.answered).length;
+ h+='<div class="card"><h2>Kam kyun? <span class="tag">'+open2+'</span></h2><div class="muted">Adla-badli ke baad jo kam ya zyada bacha &mdash; ek wajah chuniye.</div>';
+ if(!L.length)h+='<div class="empty">Koi line baaki nahi.</div>';
+ L.forEach(l=>{
+  const own=l.reasoned&&l.cause_by&&l.cause_by!==s.user;
+  h+='<div class="line'+(l.answered?(own||l.word?' owner':' done'):'')+'"><div class="nm">'+esc(l.item)+'</div>'+
+     '<div class="muted">Marg '+l.marg+' &middot; gina '+l.counted+' &middot; <b>'+esc(l.rem_text)+'</b>'+(l.swapped?' &middot; adla-badli '+l.swapped+' ('+esc(l.swap_with.join(", "))+')':'')+'</div>';
+  if(l.word) h+='<div class="ans owner">Doctor sahab: '+esc(l.word)+'</div>';
+  if(l.reasoned) h+='<div class="ans'+(own?' owner':'')+'">'+(own?'Doctor sahab':'Aapne')+': '+esc(l.cause_hi)+(l.cause_at_text?' <span class="muted">('+esc(l.cause_at_text)+')</span>':'')+'</div>';
+  if(!l.locked&&!l.word) h+='<div>'+l.reasons.map(r=>'<span class="btn chip'+(l.cause===r.key?' on':'')+'" onclick="reason('+l.diff_id+',\''+r.key+'\')">'+esc(r.hi)+'</span>').join("")+'</div>';
+  h+='</div>';
+ });
+ h+='</div>';
+ // the section
+ h+='<div class="card"><div class="verdict'+(s.closed?' closed':'')+'">'+esc(s.verdict_hi)+'</div>'+
+    s.conds.map(c=>'<div class="cond '+(c.ok?'ok':'no')+'">'+(c.ok?'&#10003; ':'&#9675; ')+esc(c.hi)+'</div>').join("")+'</div>';
+ el("body").innerHTML=h;
+}
+function after(j,title,lines){
+ MSG={kind:"",title:title,lines:lines};
+ if(j.round_made&&j.round_made.round_no)MSG.lines.push("Orthotic vouchers ban gaye: round "+j.round_made.round_no+" &middot; "+j.round_made.lines+" line &mdash; ab Amir ke paas.");
+ delete j.saved; S=j; render(); window.scrollTo(0,0);
+}
+async function pair(sh,ov,ans){
+ if(BUSY)return; BUSY=true;
+ try{const j=await post("/finance/stockmatch/api/pair"+Q,{short:sh,over:ov,answer:ans});
+  after(j,"\u2713 Save ho gaya",["Kam: <b>"+esc(sh)+"</b>","Zyada: <b>"+esc(ov)+"</b>","Jawab: <b>"+(ans==="YES"?"Haan \u2014 adla-badli":"Nahi")+"</b>"]);
+ }catch(e){MSG={kind:(e.j&&e.j.already)?"dup":"err",title:(e.j&&e.j.already)?"Pehle hi ho chuka":"Nahi hua",lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+async function reason(did,key){
+ if(BUSY)return; BUSY=true;
+ try{const j=await post("/finance/stockmatch/api/reason"+Q,{diff_id:did,reason:key});
+  if(j.already){MSG={kind:"dup",title:"Pehle hi likha hai",lines:["<b>"+esc(j.saved.item)+"</b>: "+esc(j.saved.hi)+" &mdash; dobara nahi likha."]};delete j.saved;S=j;render();window.scrollTo(0,0);}
+  else after(j,"\u2713 Save ho gaya",["<b>"+esc(j.saved.item)+"</b>","Wajah: <b>"+esc(j.saved.hi)+"</b>"+(j.saved.changed?" (badla)":"")]);
+ }catch(e){MSG={kind:"err",title:"Nahi hua",lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+load();
+</script>
+</body>
+</html>

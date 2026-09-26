@@ -71,3 +71,17 @@ Then tell the owner in the Claude Code window, in two lines, that it is done and
 ## If the owner says "undo"
 Put back the `.bak_S###_<from8>` files of that kit, restart the named service, healthz 200, read the md5s back,
 report. The database backup is used only if the brief's data change must be reversed — say so before using it.
+
+## One build at a time on the shared server (added 26-Sep-2026, S283)
+The health apps (`drmanoj-health-systems`) and this repository live on the SAME server, and two chats (clinic, Sanjeevni)
+write briefs here. Before the install step, take the server-wide lock and hold it until the report is written:
+`mkdir /root/deploy/.claude_code_build.lock` (fails if it exists = another build is installing: wait, re-check every
+2 minutes, never delete someone else's lock unless it is older than 3 hours and its owner's report shows it finished).
+Write the brief's kit number into `/root/deploy/.claude_code_build.lock/owner`; remove the directory at the end.
+Never touch `/root/gutlog`, `/root/rxguard`, `/root/fitlog`, `/srv/family`, `/root/family` or their services from a brief here.
+
+## Permissions (added 26-Sep-2026)
+`.claude\settings.json` in this folder is the permission list Claude Code runs under here: the ordinary build / test /
+install / publish path on the ONE server is allowed without asking; destructive commands, history rewriting, other hosts,
+secrets, and the other repository's folders and services are denied outright; anything else asks. If a needed command asks,
+say so in the report rather than working around it -- the list is widened by the chat, never bypassed.

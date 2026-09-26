@@ -1,0 +1,2 @@
+kit id S404_ORTHO_STOCK_CLOSE
+project Sanjeevni (session 283, 26-Sep-2026, D619 / D620) -- close the orthotic section of the 06-Sep stock check: Darpan's 'Stock milaan' (new stockmatch.py + stockmatch.html), the rename memory (new item_alias.py), nine live files patched on the box from their live bytes; restarts clinic-finance + clinic-portal; finance.db backed up, then the stockmatch unit and the 22 renames seeded
