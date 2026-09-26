@@ -237,3 +237,5 @@ finance/REPORT_1.xls
 !deploy_kits/GAS_CURRENT/UPIReconciliation/appsscript.json
 # S279 (21-Sep-2026): the fourth project, the Clinic Callback Tracker (D583)
 !deploy_kits/GAS_CURRENT/ClinicCallbackTracker/appsscript.json
+# Claude Code scratch (S283, 26-Sep): kits are built here, copied into deploy_kits/ only when final
+_scratch/

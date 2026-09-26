@@ -1,34 +1,50 @@
-# OWNER TO-DO — LIVE · refreshed at the **S281 close** (the Sanjeevni project), 25-Sep-2026 — the parent's sections exactly as its S279 close wrote them
+# OWNER TO-DO — LIVE · refreshed at the **S282 close** (the parent), 26-Sep-2026 — the Sanjeevni sections exactly as its S281 close wrote them
 
-*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S279 close** (the parent), 25-Sep-2026 09:3x IST
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S281 close** (the Sanjeevni project), 25-Sep-2026 — the parent's sections exactly as its S279 close wrote them
 
-*Detail: `START_HERE_SESSION_282.md` · `S279_BUILD_BRIEF.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are exactly as its S280 close left them; its open S281 refreshes them at its own close.*
+*Detail: `START_HERE_SESSION_284.md` · `S282_BUILD_BRIEF.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are exactly as its S281 close left them; its open S283 refreshes them at its own close.*
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S279 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S282 close
 
-**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record only (Register **v5.121**, Archive **v1.118**, Fault **v2.106**, Runbook **v201**, `START_HERE_SESSION_282`, the build brief, the manifest, `live_pins_S279close.txt`). Everything built is already live from your lines.
+**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record only (Register **v5.123**, Archive **v1.120**, Fault **v2.108**, Runbook **v203**, `START_HERE_SESSION_284`, the build brief, the manifest, `live_pins_S282close.txt`). Everything built this session is already live from your lines.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today** (one file per year is fine), saved in `D:\Downloads`. It is the only place your patients' diagnoses live (F-629); the contacts build does not wait for it.
+**2 · AT YOUR OWN PACE — the contacts workbook.** Sort the Vendors, Utilities, DTH, Staff and Family tabs (yellow *Move to* / *New name* columns), save, and tell me. Nothing else waits on it.
 
-**3 · THREE TAPS ON THE PETTY BOOK** — yours: *Yes, I gave it* on the ₹20,000 of 20-Sep; Dr Bhawna's: her ₹15,000 (18-Sep) and ₹20,000 (22-Sep), from her iPhone after her password is set.
+```
+D:\Downloads\margsync\_config\contacts_S282\CONTACT_GROUPS_TO_UPDATE.xlsx
+```
+
+**3 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today** (one file per year is fine), saved in `D:\Downloads`. It is the only place your patients' diagnoses live (F-629).
+
+**4 · IF NOT ALREADY DONE — three taps on the petty book** — yours: *Yes, I gave it* on the ₹20,000 of 20-Sep; Dr Bhawna's: her ₹15,000 (18-Sep) and ₹20,000 (22-Sep).
 
 ```
 https://followup.dr-manoj.in/finance/petty
 ```
 
-*At the contacts build, and only then:* one look at a one-page summary with a short doubt list (Shavez may take it), your OK to apply, and about five minutes on the reception mobile to add the clinic account.
+## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT — in your order of 26-Sep (D630)
 
-## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT — in your order
+1. **The caller card made operational** — at hang-up the staff phone asks *what happened* (Appointment booked first), a reminder at 10 minutes if nothing is chosen, and a count per person each day. The choice lands in the Callback Tracker as if typed there. You get one install line.
+2. **WhatsApp in the current tracker** — Reply for every staff member, with who sent it; the sender's number in the WhatsApp alert on your phone; a failed alert tried again instead of lost.
+3. **The Callback Tracker on the clinic server** — only after we discuss it, as you said.
+4. **Vitals & Plan to the clinic server.**
+5. My own two: the Sunday Apps Script report onto the health page; the checksum backups out of the record folder.
+6. Later: the contacts (after your workbook) · the mail flood (low) · the portal tiles (after the pharmacy move) · the WhatsApp save-failure watchdog (AF-19, not now).
 
-0. **Read `slip_log.py` and `portal.py` whole** — each has had five patches since last read whole (your §1.5 line). Half an hour.
-1. **The contacts build (D614)** — one clean list from both books and Docterz, *Name (clinic ID)*, pre-Docterz names de-duplicated, every missing Docterz patient added, then the nightly that ends the hand-typing. First job.
-2. **Why the 25-Sep nightly did not run** (F-630) and **five live files the nightly backup does not carry** (F-631).
-3. **The caller card, steps 2–3** — outcome buttons and per-person counts (D590).
-4. **The rest of your order (D589):** the Callback Tracker remainder, the mail flood, the tiles, F-595 / F-596, Vitals & Plan to the VPS.
+## ✅ DONE AT THE S282 CLOSE — 25 → 26-Sep-2026 (the parent)
+
+- ~~**Missed parchis could not be entered later, and only Shavez could enter**~~ — **LIVE** (S401): up to 7 days later, on the parchi's own day, by Bhati or reception as by Shavez; Bhati has the Report.
+- ~~**X-ray/Proc boxes cut off the names; SBK slab not found**~~ — **LIVE** (S413): one search box (SBK, BK find it), priced buttons for the common lines, full names, a running total. The prices and new X-rays you added yourself on your rate page.
+- ~~**The 25-Sep nightly did not run**~~ — found (Windows restarted at 01:30 and nobody signed in until 05:07) and **fixed** (S415): the PC wakes for it, and a 07:30 / log-on task catches a missed night.
+- ~~**Five live files had no nightly backup**~~ — **fixed** (S416); one of the five was never on the server and has been struck from the record.
+- ~~**The Parchi code's dead weight**~~ — removed (S398), nothing changed on screen.
+- ~~**The contacts**~~ — built: one clean list, DTH grouped, 490 doctors and referral contacts kept apart; your workbook is the next step (item 2 above).
+- ~~**The two scheduled tasks**~~ — evaluated: both still useful, both trimmed to short reports.
+- ~~**The two old `portal.py` copies in the repository**~~ — stamped retired (AF-23).
 
 ## ✅ DONE AT THE S279 CLOSE — 21 → 25-Sep-2026 (the parent)
 

@@ -1,0 +1,31 @@
+# S282 CLOSE REPORT — the parent · 25 → 26-Sep-2026 · END_OF_SESSION_PROMPT_v16 (EOS)
+
+*For the assistant. The owner's words that opened the close, 26-Sep: "do EOS here complete so that we do all these builds with full context in the fresh chat in this project." Folders connected: `D:\Downloads`, `D:\dr-manoj-git`, `F:\ClinicBackup` (all three mounted by `device_bash`); `H:\My Drive\FinanceDB_Backups` by the file tools only. Clock at the start of the close: 15:15:05 UTC = 20:45 IST 26-Sep (the PC's `date`).*
+
+| # | step | answer |
+|---|---|---|
+| 0 | The three nightly reports (A0.2) | **All three exist, all from the 26-Sep run:** REBUILD 03:11:40 (4,879 rows, +50, REBUILT) · MAINTENANCE 03:11:42 (bundle + db copied OK; SSD mirror `KB_mirror_ClaudeCowork_nightly_2026-09-26.zip` 4,885 files, CRC-tested OK; folder counts OK) **verdict WARN** — the `D:\Downloads` loose growth (134, +12: the owner's Docterz/tracker exports and the two cold kits; one file of this session's moved into `_config` at this close) · CANON SUMS 03:12:01 — 731 of 731 verified, 0 no-row, 0 mismatch, **FIXED** (rewrote with its own backup row). The 03:10 task's own result code was 2 (S415's history file) — to be read at the next open. |
+| 1 | Archive (A1) | **DONE.** `KB_History_Archive_v1_120_S282close.md` `b69de768…` — §S282 + D627 … D630 in full; **prefix proven: first 1,709,699 bytes = `2c87610c…` = v1.119**; 1,709,699 → 1,720,448 B. |
+| 2 | Fault Register | **DONE.** `Fault_Action_Register_v2_108.md` `025597c9…` §7.42 = F-637 … F-640; **prefix proven: first 808,351 bytes = `e559b223…` = v2.107**. |
+| 3 | KB Register (A2) | **DONE.** `KB_Register_v5_123_S282close.md` `c480f0af…`: H1 (v5.122 retained), §S282 table above §S281 (seven pinned rows, five BLIND), D627 … D630 indexed from the Archive text, changelog, the four numbers, END marker v5.123. |
+| 4 | Manifest (A7) + four surfaces (A7b) | **DONE.** Blockquote · STATUS (S281 retained) · rows (8 CURRENT for S282 incl. pins and this report; 7 S281 rows superseded — `S281_BUILD_BRIEF` as the family's current only, it stays the Sanjeevni plan) · footer. |
+| 5 | Runbook + START_HERE (A3/A4) | **DONE.** `HANDOFF_RUNBOOK_2026-09-26_Session282close_v203.md` `adc49f38…` · `START_HERE_SESSION_284.md` `51cd65e5…` (284 reserved on the board v106). |
+| 6 | `OWNER_TODO_LIVE` (A10/A10b) | **DONE.** Parent sections refreshed; ⭐0 = the publish, the contacts workbook (his pace), the Docterz report (when convenient), the petty taps (if not done) — all his; the Sanjeevni sections untouched. |
+| 7 | Pins (A8) + row (A8a) + sums (A8b) + clone (A8c) | **DONE.** `live_pins_S282close.txt` — 468 rows (VPS 385 · SHORT 22 · BLIND 61), `register_pin_verified: yes`, manifest row given. `MD5SUMS_ALL.txt` rewritten over the folder at this close (count in the publish note). Clone pull **rides the next VPS install line** (F-464) — the caller-card kit. |
+| 8 | Notion (A9) | **DONE.** https://app.notion.com/p/3e718b9d8f91818886d1dac389101bf0 |
+| 9 | KB extension (A13) | **DONE** — snapshot `00_CANON_SNAPSHOT_S282\`, kits `02_SESSION_KITS\S282\`, papers `03_WORKING_PAPERS\S282\` (the brief + this report), index row. The Cowork manifest lands this close's files at the 27-Sep 03:10 run. **Never-cited %: UNKNOWN (F-491 stands — the metric is still invalidated; not re-measured).** |
+| 10 | SSD (A14) | **DONE.** Newest nightly mirror `KB_mirror_ClaudeCowork_nightly_2026-09-26.zip` (4,885 files, 161,092,386 B zipped, md5 `98fa16fb…`, from the 03:11 report); the brief loose in `03_BUILD_BRIEFS\`; cold kit (row E). |
+| 11 | Cleanup (A13.5) | **Nothing to sweep** — `PYTHONDONTWRITEBYTECODE=1` for every python run in the trees; no `__pycache__` created. The answered doubts workbook moved from the Downloads root into `_config\contacts_S282\`. |
+| 12 | Reduction tranche (A15) | **Not moved this close** — `project_info` not measured (≈25k tokens; A15's order is the S206 papers onward, none of which this session touched). Owed to the next open, which measures anyway. |
+| 13 | Publish (A16) + landed (A16b) | **Named:** `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`. `.git` holds no `*.lock` (checked by `find`). Pending: this close's canon only; no kit, no `.json`. Landing verified at the next open (the commit after `18f77522`, 17:52:31 IST 26-Sep). |
+| 14 | The four numbers | drift **`portal.py` 7 — over the line** (read whole before the caller-card kit) · `slip_log.py` 2 · `finance_app.py` 4 · dead 1 · folders `D:\Downloads` 134 loose / 12,117, `D:\dr-manoj-git` 9 / 11,320, `F:\ClinicBackup` 7 / 641 (03:11) · stale 1 (the Sanjeevni Book, its chat's). |
+| 15 | What no store holds (A12b) | Run for the new pins — nothing held by one store alone (Register §S282 tail). |
+| 16 | The System Board (A10c) | **DONE** — `YOURS`/`TELL` lists and stamp refreshed from this `OWNER_TODO_LIVE`, the Sanjeevni plan line kept current; `_claude_status` written. |
+| 17 | PENDING pins (F-513) | Against the 26-Sep 01:35 bundle: **154 match · 6 mismatch · 12 missing · DECLARED-PENDING 2.** Mismatches: `slip_log.py` and `code_bundle.py` (the 2 pending — installed after 01:35) and four Sanjeevni files moved by S283 before 01:35 (`day_resync.py`, `sanjeevni_day.py`, `sanjeevni_approvals.py`, `finance_approvals.html` — declared on the board v91–v97, pinned at its close). Missing: the four F-631 files (carried from the 27-Sep bundle) and eight rows outside the bundle's lists by design or written as prose. |
+| 18a | The phone gate on this close | **Caught this close's own quotation of F-638's hyphenated range** in the Archive and the Fault Register — reworded before the publish; gate re-run clean (F-638 again, the assistant's). |
+| 18 | `.gitignore` allow lines | None needed — no kit this close, no blanket-ignored file. |
+| 19 | Canon folder listed first (A0.3) | **DONE** — found newest Register v5.122, Archive v1.119, Fault v2.107, Runbook v202 (the S281 close, 25-Sep 09:5x IST); S283 had written nothing. |
+
+**E · Cold kit:** taken — the Register and Archive bumped. Name, md5 and size in `D:\Downloads\ClaudeCowork\00_INDEX.md`. **Next due:** at the next version bump.
+
+*S282 close · 26-Sep-2026 · board v106 · numbers used: session 282; kits S398, S401, S413, S415, S416; D627 … D630; F-637 … F-640; session 284 reserved.*

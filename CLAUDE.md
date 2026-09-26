@@ -85,3 +85,14 @@ Never touch `/root/gutlog`, `/root/rxguard`, `/root/fitlog`, `/srv/family`, `/ro
 install / publish path on the ONE server is allowed without asking; destructive commands, history rewriting, other hosts,
 secrets, and the other repository's folders and services are denied outright; anything else asks. If a needed command asks,
 say so in the report rather than working around it -- the list is widened by the chat, never bypassed.
+
+## Unattended by design (added 26-Sep-2026 night, S283 — the owner: "I have to sit in front of the PC, otherwise the work stalls")
+- **The permission list is now broad on purpose:** every ordinary shell and PowerShell command runs without asking; only the
+  destructive, history-rewriting, other-service, other-repo and secret-reading commands are denied outright. There is no "ask" band.
+  If a command is refused, it was refused for a reason: do not look for another spelling of it — find a safe way or leave it, named,
+  in the report.
+- **Never pause to ask the owner a question mid-build.** Make the call the brief and this rulebook imply, write the call and its
+  reason in the report, and go on. A build that stops for a question is a failed build for him.
+- **Scratch lives INSIDE the repo:** `_scratch\<KIT_NAME>\` (git-ignored). Never write outside the repository or the server's /tmp.
+- **The one server, always by its IP or these names only:** srv1746119 · 93.127.195.49 · followup.dr-manoj.in. Any other host is out.
+- **Secrets never printed:** no `cat`/`Get-Content`/`systemctl cat` of a key, token, .env or service unit that carries one, even over ssh.
