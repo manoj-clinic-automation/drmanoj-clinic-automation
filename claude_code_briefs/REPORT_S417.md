@@ -129,3 +129,9 @@ detached.
   new month-specific notice sits beside it.
 - `packs.html` was not touched, so the card cell shows the learned tails as "…9012 / 9004".
 - No permission prompt was hit; nothing was installed on the box.
+
+### After publish
+PUBLISH_ALL at 04:58 IST gave commit `6a67a3d` (gate clean). The first version of the kit folder had already gone out in `c661376`, a
+publish that swept the pending tree, much as in S414. On the box I ran `git pull` (HEAD 6a67a3d): `md5sum -c` on the repository kit gave
+7/7 OK, `diff -r` of the repository kit against the kit that ran said **IDENTICAL**, and the repository installer answered ALREADY
+INSTALLED. The build lock was removed, `/tmp/s417*` cleaned, and clinic-finance and clinic-portal are active.
