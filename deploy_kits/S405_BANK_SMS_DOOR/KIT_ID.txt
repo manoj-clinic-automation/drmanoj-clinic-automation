@@ -1,0 +1,2 @@
+kit id S405_BANK_SMS_DOOR
+project Sanjeevni (session 283, 26-Sep-2026, D621, F-634) -- the phone's bank-SMS door is never silent (bank_sms_ignored, masked), ICICI read strict-then-tolerant (parse_grade), Yes Bank SMS read (bank_sms_yes), a NEFT debit equal to a finalised pay month's NEFT portion writes ONE purchase_neft_event and asks the owner 'OK? / Not this' in Needs you; three live files patched on the box from their live bytes (bank_sms.py, sanjeevni_approvals.py, finance_approvals.html); restarts clinic-finance; finance.db backed up, one setting seeded
