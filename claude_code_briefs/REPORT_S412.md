@@ -123,3 +123,12 @@ table drops the S405/S407/S408 re-runs already need); S411's walk is then 13/13 
 - The ICICI text statements are not calendar months (12-Jul..09-Aug, 11-Aug..10-Sep): with honest periods two September cells are now
   `partial`, which is the truth the S411 rule asks for.
 - No permission asked; nothing outside the venv installed; no file the brief did not name touched. The database backup stays.
+- **Rode along in the publish commit, not mine:** `deploy_kits/S413_SLIP_PICKER/` (7 files, KIT_ID "S413 KIT S413_SLIP_PICKER") was
+  already sitting in the working tree when `PUBLISH_ALL.bat` ran, and it commits everything pending. I did not write, run or install it, and
+  it is not on the server. Whoever owns S413 should check the published folder is what they meant.
+
+### After publish
+Commit `adf7be5` (26-Sep-2026 14:12 IST, PUBLISH_ALL; gates clean). On the box at 14:13 IST: `git pull` → HEAD adf7be5; `md5sum -c` of the
+repository kit all OK; `diff -r` repository kit vs the kit that ran: **IDENTICAL**; the repository installer answers ALREADY INSTALLED; the
+build lock (owner S412_YESBANK_UNLOCK, held 14:04–14:13) removed; `/tmp/s412kit` cleaned; clinic-finance / clinic-portal / assetapp active;
+public healthz 200.
