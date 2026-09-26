@@ -1,0 +1,2 @@
+kit id S403_PURCHASE_ORDERS_LIVE
+project Sanjeevni (session 283, 26-Sep-2026, D618) -- ONE screen 'Purchase orders': orthotic shortages -> WhatsApp order to Yuvika -> Order aaya? -> Bill scan karo, medicines behind the owner's rules; new porders.py + porders.html; eleven live files patched on the box from their live bytes (incl. the asset app's intake pre-fill); restarts clinic-finance + clinic-portal + assetapp; finance.db backed up, then the porders unit seeded

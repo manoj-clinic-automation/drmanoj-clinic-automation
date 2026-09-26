@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Purchase orders</title>
+<!-- S403_PURCHASE_ORDERS_LIVE (26-Sep-2026, D618): ONE screen -- shortages -> WhatsApp order -> arrival -> bill scan.
+     Hindi (Roman script), phone-first, every section collapsed until tapped; no typing except the supplied quantity
+     on 'Kam aaya'. Every figure comes from /finance/porders/api/...; nothing is computed here. The owner sees the same
+     screen in English (me = owner). The vendor's number never appears here: only inside the wa.me link a sender opens. -->
+<style>
+ body{font:16px/1.45 system-ui,sans-serif;margin:0;background:#f6f4f1;color:#1c1c1c;max-width:640px;margin:0 auto;padding:10px 12px 40px}
+ h1{font-size:19px;margin:8px 0 2px}
+ .sub{color:#777;font-size:13px;margin-bottom:8px}
+ details.sec{background:#fff;border:1px solid #e4e0da;border-radius:10px;margin:10px 0;padding:0}
+ details.sec>summary{cursor:pointer;list-style:none;padding:12px 14px;font-size:17px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+ details.sec>summary::-webkit-details-marker{display:none}
+ details.sec>summary .n{display:inline-block;min-width:28px;text-align:center;padding:2px 9px;border-radius:12px;background:#eee;font-size:14px}
+ details.sec>summary .n.red{background:#fbe7e5;color:#b3261e}.n.ok{background:#e4f2e6;color:#2e6b34}
+ details.sec>div{padding:0 14px 12px}
+ .line{border-top:1px solid #eee;padding:10px 0}
+ .line.done{background:#f1f7f2;margin:0 -14px;padding:10px 14px}
+ .nm{font-size:16px;font-weight:700}
+ .muted{color:#888;font-size:13px}
+ .red{color:#b3261e;font-weight:600}
+ .qty{display:inline-flex;align-items:center;gap:8px;margin:6px 0}
+ .qty b{font-size:22px;min-width:34px;text-align:center}
+ .btn{display:inline-block;border:1px solid #bbb;border-radius:9px;padding:10px 14px;margin:6px 8px 4px 0;background:#fafafa;font-size:16px;font-weight:600;cursor:pointer;user-select:none}
+ .btn.ok{background:#2e6b34;color:#fff;border-color:#2e6b34}
+ .btn.big{width:100%;text-align:center;font-size:18px;padding:14px;margin:8px 0}
+ .btn.bad{background:#fff;color:#b3261e;border-color:#b3261e}
+ .btn.chip{font-size:14px;padding:7px 10px;border-color:#3c6ac2;color:#3c6ac2;background:#fff}
+ .btn.chip.on{background:#3c6ac2;color:#fff}
+ .btn.sm{font-size:15px;padding:8px 10px}
+ .btn.pm{font-size:20px;padding:4px 14px;margin:0}
+ .btn:active{opacity:.7}
+ input.q{width:70px;font-size:20px;padding:6px;border:1px solid #bbb;border-radius:8px;text-align:right}
+ .saved{background:#e4f2e6;border:2px solid #2e6b34;border-radius:12px;padding:14px;margin:10px 0}
+ .saved .t{font-size:22px;font-weight:700;color:#2e6b34}
+ .saved .l{font-size:18px;margin-top:4px}
+ .saved.dup{background:#fdf1dc;border-color:#b26a00}.saved.dup .t{color:#b26a00}
+ .saved.err{background:#fbe7e5;border-color:#b3261e}.saved.err .t{color:#b3261e}
+ .tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:10px;background:#eee;margin-left:6px;vertical-align:middle}
+ .tag.approx{background:#fdf1dc;color:#b26a00}
+ .sent{background:#e8f0fb;border-radius:8px;padding:8px 10px;margin:6px 0;font-size:14px}
+ a{color:#3c6ac2}
+ table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:5px 6px;border-bottom:1px solid #eee;text-align:left}td.n{text-align:right}
+</style>
+</head>
+<body>
+<h1 id="ttl">Purchase orders</h1>
+<div class="sub" id="sub">loading&hellip;</div>
+<div id="body">loading&hellip;</div>
+<script>
+const el=id=>document.getElementById(id);
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let S=null, MSG=null, BUSY=false, EN=false, QTY={}, PICK={}, OPEN={1:true}, SHORTQ={};
+const T={
+ sub:["Kam saaman → Yuvika ko WhatsApp → aaya? → bill scan","Shortages → WhatsApp order → arrival → bill scan"],
+ s1:["Orthotics (Yuvika) — %d kam","Orthotics (Yuvika) — %d short"], s2:["Order aaya? (%d)","Orders arrived? (%d)"],
+ s3:["Bill scan karo (%d)","Bill scans pending (%d)"], s4:["Medicines (rules ka intezaar)","Medicines (awaiting the buying rules)"],
+ none1:["Abhi kuch kam nahi.","Nothing short right now."], shelf:["shelf","shelf"], keep:["rakhna","keep"], onord:["order par","on order"],
+ marg:["Marg","Marg"], approx:["approx","approx"], send:["Yuvika ko order bhejo","Send the order to Yuvika"],
+ sent:["Order bheja — %s, %s","Order sent — %s, %s"], none2:["Koi order baaki nahi.","No open order."],
+ ok:["Aa gaya","Arrived"], short:["Kam aaya","Short"], miss:["Nahi mila","Not available"], all:["Sab aa gaya","All arrived"],
+ howmany:["Kitna aaya?","How many came?"], none3:["Sab bill scan ho gaye.","Every bill is scanned."],
+ scan:["Scan karo","Scan"], red:["%d din se scan nahi","unscanned %d days"], recvd:["order aaya %s — bill abhi Marg mein nahi","received %s — bill not in Marg yet"],
+ rules:["Doctor sahab ke rules ka intezaar","Awaiting the doctor's buying rules"], sendm:["Order bhejo","Send"],
+ saved:["✓ Save ho gaya","✓ Saved"], dup:["Pehle hi ho chuka","Already done"], err:["Nahi hua","Not done"],
+ openwa:["WhatsApp khol raha hai…","Opening WhatsApp…"], source:["figures: %s · count %s se","figures: %s · from the count of %s"],
+ sizes:["doosra size:","other size:"], view:["Aap sirf dekh sakte hain.","View only."]
+};
+const L=(k,...a)=>{let s=T[k][EN?1:0];a.forEach(x=>{s=s.replace("%s",x).replace("%d",x)});return s;};
+
+async function get(u){const r=await fetch(u+(u.indexOf("?")<0?"?":"&")+"_="+Date.now(),{cache:"no-store"});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok){const e=new Error(j.message||j.error||("HTTP "+r.status));e.j=j;throw e;}return j;}
+async function post(u,b){const r=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok){const e=new Error(j.message||j.error||("HTTP "+r.status));e.j=j;throw e;}return j;}
+function msgHtml(){if(!MSG)return "";return '<div class="saved '+(MSG.kind||"")+'"><div class="t">'+esc(MSG.title)+'</div>'+(MSG.lines||[]).map(l=>'<div class="l">'+l+'</div>').join("")+'</div>';}
+function say(kind,title,lines){MSG={kind,title,lines};render();window.scrollTo(0,0);}
+
+async function load(){
+ try{S=await get("/finance/porders/api/state");}catch(e){el("body").innerHTML='<div class="sec" style="padding:12px">'+esc(e.message)+'</div>';return;}
+ EN=(S.me==="owner"); document.documentElement.lang=EN?"en":"hi";
+ S.ortho.lines.forEach(l=>{if(QTY[l.item]==null)QTY[l.item]=l.short; if(PICK[l.item]==null)PICK[l.item]=l.item;});
+ render();
+}
+function canWrite(){return S.me==="owner"||S.me==="sender";}
+function sec(n,title,cnt,cls,inner){return '<details class="sec"'+(OPEN[n]?' open':'')+' ontoggle="OPEN['+n+']=this.open"><summary><span>'+esc(title)+'</span><span class="n '+cls+'">'+cnt+'</span></summary><div>'+inner+'</div></details>';}
+function render(){
+ const s=S; let h=msgHtml();
+ el("sub").textContent=L("sub")+" · "+L("source",s.source,s.since_text);
+ // 1 -- orthotic shortages
+ let o="";
+ if(s.ortho.recent) o+='<div class="sent">'+L("sent",esc(s.ortho.recent.sent_text),esc(s.ortho.recent.by))+' · '+s.ortho.recent.lines+' line</div>';
+ if(!s.ortho.lines.length) o+='<div class="muted">'+L("none1")+'</div>';
+ s.ortho.lines.forEach(l=>{
+  const pick=PICK[l.item]||l.item, q=QTY[l.item];
+  o+='<div class="line"><div class="nm">'+esc(pick)+(l.approx?'<span class="tag approx">'+L("approx")+'</span>':'')+'</div>'+
+     '<div class="muted">'+L("shelf")+' '+l.shelf+(l.approx?' ('+L("approx")+', family '+l.family_shelf+')':'')+' · '+L("keep")+' '+l.keep+(l.on_order?' · '+L("onord")+' '+l.on_order:'')+(l.marg!=null?' · '+L("marg")+': '+l.marg:'')+'</div>'+
+     '<div class="qty"><span class="btn pm" onclick="dq(\''+esc(l.item).replace(/'/g,"\\'")+'\',-1)">−</span><b>'+q+'</b><span class="btn pm" onclick="dq(\''+esc(l.item).replace(/'/g,"\\'")+'\',1)">+</span></div>';
+  if(l.approx&&l.sizes.length) o+='<div class="muted">'+L("sizes")+' '+[l.item].concat(l.sizes).map(sz=>'<span class="btn chip'+(pick===sz?' on':'')+'" onclick="ps(\''+esc(l.item).replace(/'/g,"\\'")+'\',\''+esc(sz).replace(/'/g,"\\'")+'\')">'+esc(sz.replace(l.family,'').trim()||sz)+(l.sizes_shelf&&l.sizes_shelf[sz]!=null?' ('+l.sizes_shelf[sz]+')':'')+'</span>').join("")+'</div>';
+  o+='</div>';
+ });
+ if(s.ortho.lines.length&&canWrite()) o+='<span class="btn ok big" onclick="send()">'+L("send")+'</span>';
+ if(!canWrite()) o+='<div class="muted">'+L("view")+'</div>';
+ h+=sec(1,L("s1",s.ortho.n),s.ortho.n,s.ortho.n?'red':'ok',o);
+ // 2 -- orders arrived?
+ let a="";
+ if(!s.orders.open.length) a+='<div class="muted">'+L("none2")+'</div>';
+ s.orders.open.forEach(od=>{
+  a+='<div class="line"><div class="nm">#'+od.id+' '+esc(od.vendor)+'</div><div class="muted">'+esc(od.sent_text)+' · '+esc(od.sent_by||od.created_by)+'</div>';
+  od.lines.forEach(ln=>{
+   a+='<div class="line'+(ln.state!=="open"?' done':'')+'"><div>'+esc(ln.item)+' <b>× '+ln.packs+'</b>'+(ln.billed_qty!=null?' <span class="tag">Marg bill '+esc(ln.billed_bill_no)+' × '+ln.billed_qty+'</span>':'')+'</div>';
+   if(ln.state==="open"&&canWrite()){
+    a+='<div><span class="btn ok sm" onclick="arrive('+od.id+','+ln.id+',\'ok\')">'+L("ok")+'</span><span class="btn sm" onclick="askShort('+ln.id+')">'+L("short")+'</span><span class="btn bad sm" onclick="arrive('+od.id+','+ln.id+',\'missing\')">'+L("miss")+'</span></div>';
+    if(SHORTQ[ln.id]!=null) a+='<div>'+L("howmany")+' <input class="q" type="number" min="0" max="'+(ln.packs-1)+'" id="sq'+ln.id+'" value="'+SHORTQ[ln.id]+'"> <span class="btn ok sm" onclick="arriveShort('+od.id+','+ln.id+')">OK</span></div>';
+   } else if(ln.state!=="open") a+='<div class="muted">'+(ln.state==="ok"?L("ok"):(ln.state==="short"?L("short")+' — '+ln.supplied:L("miss")))+(ln.arrived_by?' · '+esc(ln.arrived_by):'')+'</div>';
+   a+='</div>';
+  });
+  if(od.open_lines&&canWrite()) a+='<span class="btn ok" onclick="arriveAll('+od.id+')">'+L("all")+'</span>';
+  a+='</div>';
+ });
+ if(s.orders.received.length) a+='<details style="margin-top:8px"><summary class="muted">'+(EN?'received orders':'aaye hue orders')+' ('+s.orders.received.length+')</summary>'+s.orders.received.map(od=>'<div class="muted">#'+od.id+' '+esc(od.vendor)+' · '+esc(od.received_text)+' · '+od.lines.map(l=>esc(l.item)+' '+(l.supplied!=null?l.supplied:0)+'/'+l.packs).join(", ")+'</div>').join("")+'</details>';
+ h+=sec(2,L("s2",s.orders.n),s.orders.n,s.orders.n?'':'ok',a);
+ // 3 -- bill scans
+ let b="";
+ if(!s.scans.n) b+='<div class="muted">'+L("none3")+'</div>';
+ s.scans.bills.forEach(x=>{
+  b+='<div class="line"><div class="nm">'+esc(x.vendor)+'</div><div class="muted">bill '+esc(x.bill_no)+' · '+esc(x.date_text)+' · '+esc(x.amount)+(x.red?' · <span class="red">'+L("red",x.age)+'</span>':'')+'</div>'+
+     '<a class="btn ok sm" href="'+esc(x.intake)+'" target="_blank">📷 '+L("scan")+'</a></div>';
+ });
+ s.scans.received.forEach(x=>{
+  b+='<div class="line"><div class="nm">'+esc(x.vendor)+'</div><div class="muted">'+L("recvd",esc(x.received_text))+(x.red?' · <span class="red">'+L("red",x.age)+'</span>':'')+'</div>'+
+     '<a class="btn ok sm" href="'+esc(x.intake)+'" target="_blank">📷 '+L("scan")+'</a></div>';
+ });
+ h+=sec(3,L("s3",s.scans.n),s.scans.n,s.scans.red?'red':(s.scans.n?'':'ok'),b);
+ // 4 -- medicines
+ let m="";
+ if(!s.meds.rules_ok) m+='<div class="muted">'+L("rules")+'</div>';
+ (s.meds.plan.vendors||[]).forEach((v,i)=>{
+  m+='<div class="line"><div class="nm">'+esc(v.vendor)+'</div><table>'+v.lines.map(l=>'<tr><td>'+esc(l.item)+'</td><td class="n">'+l.on_hand+'</td><td class="n"><b>'+l.qty+'</b> '+esc(l.unit)+'</td></tr>').join("")+'</table>'+
+     (s.meds.rules_ok&&canWrite()&&v.has_phone?'<span class="btn ok sm" onclick="sendMed(\''+esc(v.vendor).replace(/'/g,"\\'")+'\')">'+L("sendm")+'</span>':'')+'</div>';
+ });
+ if(!(s.meds.plan.vendors||[]).length) m+='<div class="muted">'+(EN?'Nothing to order on today\'s stock.':'Aaj ke stock par kuch order nahi.')+'</div>';
+ h+=sec(4,L("s4"),(s.meds.plan.vendors||[]).length,'',m);
+ el("body").innerHTML=h;
+}
+function dq(item,d){QTY[item]=Math.max(0,(QTY[item]||0)+d);render();}
+function ps(item,sz){PICK[item]=sz;render();}
+function askShort(lid){SHORTQ[lid]=0;render();}
+async function send(){
+ if(BUSY)return;BUSY=true;
+ const lines=S.ortho.lines.map(l=>({item:PICK[l.item]||l.item,qty:QTY[l.item]})).filter(l=>l.qty>0);
+ try{const j=await post("/finance/porders/api/send",{lines});
+  MSG={kind:j.already?"dup":"",title:j.already?L("dup"):L("saved"),lines:[esc(j.message||""),"Order #"+j.order_id+" · "+esc(j.sent_text)+" · "+esc(j.by),(j.wa_url?L("openwa"):"")]};
+  QTY={};PICK={};await load();
+  if(j.wa_url){window.location.href=j.wa_url;}
+ }catch(e){MSG={kind:"err",title:L("err"),lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+async function sendMed(vendor){
+ if(BUSY)return;BUSY=true;
+ try{const j=await post("/finance/porders/api/send_med",{vendor});MSG={kind:"",title:L("saved"),lines:["Order #"+j.order_id+" · "+esc(vendor)]};await load();if(j.wa_url)window.location.href=j.wa_url;}
+ catch(e){MSG={kind:(e.j&&e.j.already)?"dup":"err",title:(e.j&&e.j.already)?L("dup"):L("err"),lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+async function arrive(oid,lid,how,supplied){
+ if(BUSY)return;BUSY=true;
+ try{const j=await post("/finance/porders/api/arrive",{order_id:oid,line_id:lid,how,supplied});
+  MSG={kind:j.already?"dup":"",title:j.already?L("dup"):L("saved"),lines:j.saved?["<b>"+esc(j.saved.item)+"</b>: "+esc(j.saved.hi)]:[esc(j.message||"")]};delete SHORTQ[lid];await load();}
+ catch(e){MSG={kind:"err",title:L("err"),lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+function arriveShort(oid,lid){const v=parseInt((el("sq"+lid)||{}).value);if(isNaN(v)){return;}arrive(oid,lid,'short',v);}
+async function arriveAll(oid){
+ if(BUSY)return;BUSY=true;
+ try{const j=await post("/finance/porders/api/arrive",{order_id:oid,all:true});MSG={kind:"",title:L("saved"),lines:["Order #"+oid+": "+L("all")]};await load();}
+ catch(e){MSG={kind:"err",title:L("err"),lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+load();
+</script>
+</body>
+</html>
