@@ -1,0 +1,2 @@
+S413 KIT S413_SLIP_PICKER
+session 282 (parent) · 26-Sep-2026 · the owner: one search box over X-rays and procedures (SBK / BK find the right lines), most-used lines as buttons with prices, full names, running total; the room rows list each line with its price
