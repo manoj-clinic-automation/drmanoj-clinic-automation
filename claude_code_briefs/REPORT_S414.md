@@ -97,3 +97,11 @@ S411-declared supersession, accepted by name), S407 27/27, S406 27/27, S405 29/2
 - "last changes" (the audit list) does not update live after a tick; it refreshes when the block is next opened (said on the page).
 - S404's frozen walk now depends on the 14:04 backup file staying on the box (named above) — a small walk revision for a later kit.
 - No permission asked; nothing installed; no file the brief did not name touched.
+
+### After publish
+The kit folder reached origin in commit `7a910e4` (26-Sep-2026 17:47 IST) — a `PUBLISH_ALL` run by the other chat that swept the pending
+tree while my installer was running (it also carried their `S415_NIGHTLY_SELFHEAL` and `S416_BUNDLE_ALLOWLIST` folders, not mine, not
+installed by me); the kit's files had not changed since 17:44, and `git diff HEAD` on the folder is empty. This report went in `e78f543`
+(17:51 IST; gate clean). On the box at 17:51 IST: `git pull` → HEAD e78f543; `md5sum -c` of the repository kit all OK; `diff -r` repository
+kit vs the kit that ran: **IDENTICAL**; the repository installer answers ALREADY INSTALLED; the build lock (owner S414_RULES_PAGE_UX, held
+17:45–17:51) removed; `/tmp/s414kit` cleaned; clinic-finance / clinic-portal / assetapp active; public healthz 200.
