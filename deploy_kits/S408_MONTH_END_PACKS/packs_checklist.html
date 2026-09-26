@@ -1,0 +1,41 @@
+<!doctype html>
+<!-- packs_checklist.html · kit S408_MONTH_END_PACKS (26-Sep-2026, D624) · Shavez's monthly checklist (Hindi, staff). PARENT (clinic).
+     The workbook's items as rows: 'system se ho gaya' where automatic, a tick for the manual ones (who, when; a repeat within 10 minutes
+     is not written twice); the Lab items ticks only. From /finance/packs/api/checklist. -->
+<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mahine ka kaam</title>
+<style>
+body{margin:0;padding:14px;background:#dfe5e9;color:#14181c;font:17px/1.55 "Segoe UI",system-ui,sans-serif}
+h1{font-size:22px;color:#14456e;margin:0 0 10px}h2{font-size:18px;color:#14456e;margin:14px 0 6px}
+.card{background:#fffdf7;border:2px solid #8a9aa6;border-radius:10px;padding:14px;margin:0 0 14px}
+.mut{color:#3c464e;font-size:15px}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #d6dde3}
+.row:first-child{border-top:0}.ok{color:#2f6b45;font-weight:700}.open{color:#8a6100;font-weight:700}
+button{border:0;background:#14456e;color:#fff;border-radius:10px;padding:10px 16px;font-size:17px;cursor:pointer}
+.green{background:#e9f6e9;border-left:6px solid #2f6b45;padding:12px 14px;margin-bottom:12px;font-size:19px;font-weight:700}
+input{padding:6px;font-size:15px}
+</style></head><body>
+<h1>Mahine ka kaam — <span id="mn"></span></h1>
+<div class="mut">Mahina <input type="month" id="m" value="{{month}}" onchange="load()"> · jo system khud dekh leta hai wahan <b>system se ho gaya</b> likha aata hai; baaki par aap tick karein. {% if owner %}<a href="/finance/packs">Month-end packs (owner)</a> · {% endif %}<a href="/portal">Portal</a></div>
+<div id="flash"></div>
+<div id="list" class="card">load ho raha hai…</div>
+<script>
+function $(i){return document.getElementById(i)}
+function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function load(){
+  fetch("/finance/packs/api/checklist?month="+encodeURIComponent($("m").value)+"&_="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){$("list").innerHTML='<span class="open">'+esc(j.message||j.error)+'</span>';return}
+    $("mn").textContent=j.month_name;
+    var g={}; j.items.forEach(function(c){(g[c.grp]=g[c.grp]||[]).push(c)});
+    var open=j.items.filter(function(c){return !c.done}).length;
+    var h='<div class="mut">'+(open?('<span class="open">'+open+' kaam baaki</span>'):'<span class="ok">sab ho gaya ✓</span>')+'</div>';
+    Object.keys(g).forEach(function(k){h+='<h2>'+esc(k)+'</h2>'+g[k].map(function(c){
+      var right=c.done?('<span class="ok">'+(c.auto?'system se ho gaya ✓':'ho gaya ✓')+'</span><br><span class="mut">'+esc(c.done_by||"")+' '+esc((c.done_at||"").slice(0,16))+' '+esc(c.words||"")+'</span>')
+                      :(c.auto?('<span class="open">baaki</span><br><span class="mut">system dekhega · '+esc(c.words||"")+'</span>'):('<button onclick="tick('+c.id+')">Ho gaya</button>'));
+      return '<div class="row"><div>'+esc(c.item)+'</div><div style="text-align:right">'+right+'</div></div>'}).join("")});
+    $("list").innerHTML=h;
+  }).catch(function(){$("list").innerHTML='<span class="open">server nahi mila</span>'});
+}
+function tick(id){fetch("/finance/packs/api/checklist/tick",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({month:$("m").value,id:id})}).then(function(r){return r.json()}).then(function(j){
+  if(!j.ok){alert(j.message||j.error);return} $("flash").innerHTML='<div class="green">'+(j.already?'Pehle se likha hai.':'Ho gaya — aapke naam se likh liya.')+'</div>'; load()}).catch(function(){alert("save nahi hua — server nahi mila")})}
+load();
+</script></body></html>

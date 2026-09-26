@@ -1,0 +1,78 @@
+<!doctype html>
+<!-- packs.html · kit S408_MONTH_END_PACKS (26-Sep-2026, D624) · the owner's Month-end packs page (English). PARENT (clinic).
+     Three cards: the accountant pack (every item of his list, ready / missing / late, previews, the two paper ticks, ONE Send),
+     Amir's pack (Sanjeevni), Shavez's checklist as he sees it; above them the statement shelf (the month's cells, the unplaced files
+     with the one-tap 'which account?'). Everything from /finance/packs/api/state. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Month-end packs — Dr. Manoj Agarwal Clinic</title>
+<style>
+body{margin:0;padding:14px;background:#f3f2ee;color:#23272f;font:16px/1.5 "Segoe UI",system-ui,sans-serif}
+h1{font-size:22px;color:#1c3d5a;margin:0 0 10px}h2{font-size:18px;color:#1c3d5a;margin:0 0 8px}
+.card{background:#fbfaf8;border:1px solid #e6e3dc;border-radius:10px;padding:14px;margin:0 0 14px;overflow-x:auto}
+.mut{color:#666d78;font-size:14px}table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid #e6e3dc;padding:6px 8px;text-align:left;vertical-align:top;font-size:14.5px}
+th{background:#f5f4f0}.ok{color:#0c7a0c;font-weight:600}.bad{color:#9c2a20;font-weight:600}.warn{color:#8a6100;font-weight:600}
+button{border:1px solid #1c5cab;background:#2a78d6;color:#fff;border-radius:8px;padding:6px 12px;font-size:14px;cursor:pointer}
+button.ghost{background:#fff;color:#23272f;border-color:#c9c5bb}button.big{font-size:17px;padding:10px 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.cell{border:1px solid #e6e3dc;border-radius:8px;padding:8px;background:#fff}.cell b{display:block;font-size:13.5px}
+.st-empty{background:#fdecea}.st-arrived{background:#fdf3d7}.st-read{background:#e9f6e9}.st-matched{background:#dff2df}
+.green{background:#e9f6e9;border-left:6px solid #2f6b45;padding:10px 14px;margin-bottom:12px;font-size:17px}
+input,select{padding:6px;font-size:14px;border:1px solid #c9c5bb;border-radius:6px}
+</style></head><body>
+<h1>Month-end packs</h1>
+<div class="mut">Month <input type="month" id="m" value="{{month}}" onchange="load()"> · <button class="ghost" onclick="load()">show</button>
+ · <button class="ghost" onclick="refreshShelf()">re-read the shelf inbox</button> · <a href="/finance/packs/checklist">Shavez's checklist</a> · <a href="/portal">Portal</a></div>
+<div id="flash"></div>
+<div class="card"><h2>The statement shelf — <span id="mn"></span></h2>
+<div class="mut">One cell per account or card. Nightly at 05:40 the box lists the Drive folders and files what it finds by the statement's own content — the bank, the holder's name, the account or card tail, the period. Never by file name.</div>
+<div class="grid" id="cells"></div>
+<div id="unplaced"></div></div>
+<div class="card"><h2>Accountant pack</h2><div id="rows">loading…</div>
+<div style="margin-top:10px"><button class="big" onclick="sendPack()">Send to accountants</button> <span class="mut" id="to"></span></div>
+<div id="sends" class="mut"></div></div>
+<div class="card"><h2>Amir's pack <span class="mut">(Sanjeevni · shown on his board, no email)</span></h2><div id="amir"></div></div>
+<div class="card"><h2>Shavez's checklist — as the system sees it</h2><div id="chk"></div>
+<details><summary class="mut">Edit the items (add / rename / retire)</summary><div id="items"></div>
+<div style="margin-top:8px"><input id="ng" placeholder="group (Sanjeevni / Lab / Clinic / Accountant ka samaan)" style="width:230px"> <input id="ni" placeholder="new item" style="width:300px"> <button class="ghost" onclick="addItem()">add</button></div></details></div>
+<script>
+function $(i){return document.getElementById(i)}
+function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function flash(t,cls){$("flash").innerHTML=t?'<div class="green">'+esc(t)+'</div>':''}
+var S=null;
+function load(){
+  var m=$("m").value; fetch("/finance/packs/api/state?month="+encodeURIComponent(m)+"&_="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){$("rows").innerHTML='<span class="bad">'+esc(j.message||j.error)+'</span>';return}
+    S=j; $("mn").textContent=j.month_name;
+    $("cells").innerHTML=j.cells.map(function(c){var f=c.file;return '<div class="cell st-'+c.state+'"><b>'+esc(c.label)+'</b><span class="mut">'+esc(c.bank)+' · '+esc(c.kind)+(c.tail?' · …'+esc(c.tail):' · tail not learned yet')+'</span><br>'+
+      (f?('<span class="ok">'+esc(c.state)+'</span> <span class="mut">'+esc(f.period_from||"")+' → '+esc(f.period_to||"")+(f.read_status&&f.read_status!=="read"?' · '+esc(f.read_status):'')+'</span> <a href="/finance/packs/file/'+f.id+'" target="_blank">open</a>'):'<span class="bad">empty</span>')+
+      (c.twin_missing?'<br><span class="warn">newest original has no decrypted twin</span>':'')+'</div>'}).join("");
+    var u=j.unplaced||[];
+    $("unplaced").innerHTML=u.length?('<h3 style="font-size:15px;margin:10px 0 4px">Unplaced files — which account? (one tap)</h3><table><tr><th>File</th><th>Bank / kind / tail</th><th>Period</th><th>Why unplaced</th><th>Which account?</th></tr>'+
+      u.map(function(x){return '<tr><td>'+esc(x.name)+' <span class="mut">('+esc(x.folder)+(x.subfolder?'/'+esc(x.subfolder):'')+')</span></td><td>'+esc(x.bank||"?")+' / '+esc(x.kind||"?")+(x.tail?' / …'+esc(x.tail):'')+'</td><td class="mut">'+esc(x.period_from||"")+' → '+esc(x.period_to||"")+'</td><td class="mut">'+esc(x.why||"")+'</td><td><select id="sl'+x.id+'">'+j.slots.map(function(s){return '<option value="'+s.id+'">'+esc(s.holder_label)+'</option>'}).join("")+'</select> <button onclick="assign('+x.id+')">this one</button></td></tr>'}).join("")+'</table>'):'<div class="mut" style="margin-top:6px">No unplaced file.</div>';
+    $("rows").innerHTML='<table><tr><th>Item</th><th>Status</th><th>Why / detail</th><th>Preview</th></tr>'+j.rows.map(function(r){
+      var st=r.status==="ready"?'<span class="ok">ready ✓</span>':(r.status==="late"?'<span class="warn">late</span>':(r.status==="tick"?'<button class="ghost" onclick="tick(\''+esc(r.key)+'\')">tick — handed over</button>':'<span class="bad">missing</span>'));
+      var pv=r.preview?'<a href="'+esc(r.preview)+'" target="_blank">open</a>':'';
+      if(r.key==="income")pv+=' · <a href="/finance/packs/preview/income?month='+j.month+'">the sheet</a>';
+      if(r.key==="upi")pv+=' · <a href="/finance/packs/preview/upi?month='+j.month+'">the sheet</a>';
+      if(r.key==="digest")pv='<a href="/finance/packs/preview/digest?month='+j.month+'">the sheet</a>';
+      if(r.key.indexOf("bundle:")===0)pv='<a href="/finance/packs/preview/bundle_'+r.key.slice(7)+'?month='+j.month+'" target="_blank">the bundle</a>';
+      return '<tr><td>'+esc(r.title)+(r.sanjeevni?' <span class="mut">(Sanjeevni)</span>':'')+'</td><td>'+st+'</td><td class="mut">'+esc(r.why||"")+(r.files&&r.files.length?'<br>'+r.files.map(esc).join(", "):'')+'</td><td>'+pv+'</td></tr>'}).join("")+'</table>'+
+      '<div class="mut" style="margin-top:6px">'+j.attachments.length+' attachment(s), '+(j.attachments.reduce(function(a,x){return a+x.bytes},0)/1048576).toFixed(1)+' MB · a pack over '+esc(j.limit_mb)+' MB goes as part 1 / part 2.</div>';
+    $("to").textContent=j.to?("to: "+j.to):"the accountants' addresses are not set (packs.accountant_to)";
+    $("sends").innerHTML=(j.sends||[]).length?'Sent: '+j.sends.map(function(s){return esc(s.sent_at.slice(0,16))+' by '+esc(s.sent_by)+(s.resend?' (re-send)':'')+' · '+s.parts+' part(s) · '+(s.bytes/1048576).toFixed(1)+' MB'}).join(' · '):'Not sent yet for this month.';
+    var a=j.amir; $("amir").innerHTML=a.ready?('<span class="ok">ready</span> — both Sanjeevni statements are on the shelf; Amir sees "Pichle mahine ka pack" on his board. '+(a.seen?('Dekh liya ✓ '+esc(a.seen.by)+' '+esc((a.seen.at||"").slice(0,16))):'<span class="mut">not yet opened by him</span>')):'<span class="mut">not yet — it appears when both Sanjeevni statements (Yes Bank + ICICI) of the month are on the shelf.</span>';
+    var groups={}; j.checklist.forEach(function(c){(groups[c.grp]=groups[c.grp]||[]).push(c)});
+    $("chk").innerHTML=Object.keys(groups).map(function(g){return '<h3 style="font-size:15px;margin:8px 0 2px">'+esc(g)+'</h3><table>'+groups[g].map(function(c){return '<tr><td>'+esc(c.item)+'</td><td>'+(c.done?'<span class="ok">done'+(c.auto?' (system)':'')+'</span> <span class="mut">'+esc(c.done_by||"")+' '+esc((c.done_at||"").slice(0,16))+' '+esc(c.words||"")+'</span>':'<span class="warn">open</span> <span class="mut">'+esc(c.words||"")+'</span>')+'</td></tr>'}).join("")+'</table>'}).join("");
+    $("items").innerHTML='<table>'+j.items.map(function(i){return '<tr><td class="mut">'+esc(i.grp)+'</td><td>'+esc(i.item)+(i.auto_key?' <span class="mut">(auto: '+esc(i.auto_key)+')</span>':'')+'</td><td>'+(i.active?'<button class="ghost" onclick="itemAct('+i.id+',\'retire\')">retire</button>':'<button class="ghost" onclick="itemAct('+i.id+',\'restore\')">restore</button>')+' <button class="ghost" onclick="renameItem('+i.id+',\''+esc(i.item).replace(/'/g,"\\'")+'\')">rename</button></td></tr>'}).join("")+'</table>';
+  }).catch(function(e){$("rows").innerHTML='<span class="bad">could not reach the server ('+e+')</span>'});
+}
+function post(p,b){return fetch(p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b||{})}).then(function(r){return r.json()})}
+function assign(fid){var s=$("sl"+fid).value; post("/finance/packs/api/assign",{file:fid,slot:parseInt(s,10)}).then(function(j){if(!j.ok){alert(j.message||j.error);return} flash("Filed"+(j.tail_learned?" — the account's tail …"+j.tail_learned+" is learned for ever":"")+"."); load()})}
+function tick(k){post("/finance/packs/api/tick",{month:$("m").value,item:k}).then(function(j){if(!j.ok){alert(j.message||j.error);return} flash("Ticked."); load()})}
+function sendPack(){if(!confirm("Send the "+$("mn").textContent+" pack to the accountants now?"))return; post("/finance/packs/api/send",{month:$("m").value}).then(function(j){if(!j.ok){alert(j.message||j.error);return} flash(j.already?j.message:("Sent — "+j.parts+" mail(s), "+j.attachments+" attachment(s)"+(j.resend?" (a re-send, recorded)":"")+".")); load()})}
+function refreshShelf(){post("/finance/packs/api/refresh",{}).then(function(j){flash("Shelf re-read: placed "+j.placed+", unplaced "+j.unplaced+", read "+j.read+", refused "+j.refused+"."); load()})}
+function addItem(){post("/finance/packs/api/item",{action:"add",grp:$("ng").value,item:$("ni").value}).then(function(j){if(!j.ok){alert(j.message||j.error);return} $("ni").value=""; load()})}
+function itemAct(id,a){post("/finance/packs/api/item",{action:a,id:id}).then(function(){load()})}
+function renameItem(id,cur){var v=prompt("New wording:",cur); if(!v)return; post("/finance/packs/api/item",{action:"rename",id:id,item:v}).then(function(){load()})}
+load();
+</script></body></html>
