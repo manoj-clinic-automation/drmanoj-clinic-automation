@@ -1,0 +1,11 @@
+37a5a1326a8e90c364e3e50c6083f4f3  code_bundle.py
+13424b114f0b94b25380f8bd44a54acc  walk_s416.py
+295a004a12f1fbc5d043aab22e7aa55b  apply_s416.py
+2dae2045f531d463167359ed3d7c3e12  install_S416_BUNDLE_ALLOWLIST.sh
+ce4dc6a11705c40afd904440ed94b05a  KIT_ID.txt
+c121b2addc5db39bc195bdbf84af0ed3  README.md
+08807cdfbfd595f6425f5cc277a38dbb  five/casepack_page.html
+76502193b257161a2e26b0567bf7c3d7  five/fu_push_on_arrival.sh
+8ed4b672f481f481b23317ed40b22541  five/http_ece.py
+ab728b08ccfdc2f0e904b223a7c28cc0  five/portal_sw.js
+9cc46b3b7f4bbb712d630babd8b785a4  five/ring-hook.service

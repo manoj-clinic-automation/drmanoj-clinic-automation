@@ -1,0 +1,2 @@
+S416 KIT S416_BUNDLE_ALLOWLIST
+session 282 (parent) · 26-Sep-2026 · F-631: the five live files the nightly code bundle never carried -- four new source entries in code_bundle.py v1.8; proved on a mock root with the kit bytes of the five

@@ -1,0 +1,2 @@
+S415 KIT S415_NIGHTLY_SELFHEAL
+session 282 (parent) · 26-Sep-2026 · F-630: the 03:10 nightly on manojz missed 23-Sep and 25-Sep -- a second task at 07:30 and at log-on runs it only if the day has no run yet; wake-to-run; the tasks history and the PC sleep/wake/boot events written each run
