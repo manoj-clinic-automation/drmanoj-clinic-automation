@@ -1,0 +1,2 @@
+S419 KIT S419_RING_OUTCOME
+session 284 (parent) · 27-Sep-2026 · D590 steps 2-3: the outcome at hang-up, the 10-minute reminder, per-person counts; portal.py untouched
