@@ -63,7 +63,13 @@ Still open 122 lines Rs 63,903 (Rs 44,272 at cost) — **With me 0** (the owner 
 - The build lock (owner S430_DESK_FIRST_READ) was taken at 12:17:28 IST and is removed after this report's publish.
 
 ### After publish
-__PUBLISH__
+- `PUBLISH_ALL.bat` produced commit `5309982` (12:36:56 IST): the eleven kit files, the brief and this report; the phone gate was clean (14 files) and origin was verified.
+- On the box, `git pull --ff-only` brought `/root/deploy/repo` to `5309982`.
+  - `md5sum -c SUMS.md5` on the repository kit: 11/11 OK.
+  - `diff -r` of the repository kit against `/tmp/s430kit` (the kit that ran) found no differing file (the /tmp copy only has its own logs beside).
+  - The repository installer answered **ALREADY INSTALLED** (the five files at the kit's pins; clinic-finance active; healthz 200). No `__pycache__` in the repository kit on the box.
+- This report's own publish follows (the commit is named in the Claude Code window).
+- The kit ran from `/tmp/s430kit/` with `KITS=/root/deploy/repo/deploy_kits`, because it needs the S410/S414/S427/S428 kits beside it for their walks and seeds.
 
 ### Not done / outside the brief (noticed)
 - **The count is not closed** — the owner closes; the period line appears in the Month section only after the close (until then September's line reads "Leakage Rs 0 = 0.0%").
