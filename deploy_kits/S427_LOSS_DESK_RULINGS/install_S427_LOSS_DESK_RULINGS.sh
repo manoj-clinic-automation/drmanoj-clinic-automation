@@ -52,7 +52,7 @@ declare -A FROM=( [stock_app.py]=cf464882e49865f38153e1df6218301d [stock_hub.htm
                   [stock_amir.html]=c2ea41b2db7e2b337e0a97426aaed763 [loss_piles.py]=3b6554f86507509e0b1893129e748274
                   [stock_loss.html]=16cdddaa6363ccc8da0278fa5d4635a3 )
 declare -A TO=( [stock_app.py]=24c2b5fe7cacfe238751e487e52eb6d0 [stock_hub.html]=74ea06997b900e9f55c47dca473a9232
-                [stockmatch.py]=e85807dab1f8672d482272e0d355fe28 [stockmatch.html]=d6a7fb38a02e066f818222de14b2e2e2
+                [stockmatch.py]=e85807dab1f8672d482272e0d355fe28 [stockmatch.html]=ecd039f4f64d5be6a15d7ffbbcdf3950
                 [stock_amir.html]=244ac6eeb0117b14f2c3c7fa1576f728 [loss_piles.py]=9dc06c9000539b6fbf3f77ddac967c7d
                 [stock_loss.html]=fdd913e75677580a7897fe2631196c4c [qty_words.py]=1e67a3e35ce815798ef6ebd606e5b972 )
 PATCHED=(stock_app.py stock_hub.html stockmatch.py stockmatch.html stock_amir.html)

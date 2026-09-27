@@ -89,12 +89,12 @@ def craft(db):
 
 def craft_spine(db):
     c = sqlite3.connect(db, timeout=30)
-    for it, packing, ps, marg, cnt, mrp, uk, sales in CRAFT:
+    for n_, (it, packing, ps, marg, cnt, mrp, uk, sales) in enumerate(CRAFT, 1):
         c.execute("INSERT OR REPLACE INTO sp_item (k20, name, packing, unit_kind, first_seen, last_seen) VALUES (?,?,?,?,?,?)",
                   (it[:20].strip(), it, packing, uk, "2026-03-31", "2026-09-26"))
-        for i, (day, units) in enumerate(sales, 1):
+        for i, (day, units) in enumerate(sales, 1):              # one crafted bill per item and day: the key (date, bill, seq) never collides
             c.execute("INSERT OR REPLACE INTO sp_sale_line (date, bill, seq, name20, k20, pack, qty_raw, units, rate_p, batch, expiry) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-                      (day, "W427-%s" % day.replace("-", ""), i, it[:20].strip(), it[:20].strip(), packing, "%d:%d" % divmod(units, ps) if ps > 1 else str(units),
+                      (day, "W427-%02d-%s" % (n_, day.replace("-", "")), i, it[:20].strip(), it[:20].strip(), packing, "%d:%d" % divmod(units, ps) if ps > 1 else str(units),
                        float(units), int(mrp or 0), "W427", "12/28"))
     c.commit()
     c.close()

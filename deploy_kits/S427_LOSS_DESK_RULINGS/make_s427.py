@@ -340,7 +340,11 @@ async function note(){
 
 def build_stockmatch_html(s):
     s = rep(s, '''" · phir se gino · bina bill · orthotics · round "''', '''" · dobara ginna hai · bina bill · orthotics · round "''', "subtitle")
+    s = rep(s, " h+=s418Cards(s);                                            // S418: Phir se gino + Bina bill?\n",
+            " h+=s418Cards(s);                                            // S427 over S418: the staff block, Dobara ginna hai, Bina bill?\n", "the render hook's comment")
     s = rep(s, "</style>\n</head>", SM_CSS, "the block's style")
+    s = rep(s, "/* ---- S418 (D631): Phir se gino (count the item again -- no Marg figure is shown, count what is on the shelf) and\n   Bina bill? (the lines the doctor is pursuing -- one answer each). ---- */\n",
+            "/* ---- S427 (D632) over S418 (D631): the staff block, Dobara ginna hai (Darpan's own recount -- no Marg figure is shown, count\n   what is on the shelf) and Bina bill? (the lines the doctor is pursuing -- one answer each). ---- */\n", "the S418 comment")
     a_anchor, b_anchor = "function s418Cards(s){\n", "async function claim(id,key){\n"
     if s.count(a_anchor) != 1 or s.count(b_anchor) != 1:
         sys.exit("REFUSED: the S418 cards block is not where it was")

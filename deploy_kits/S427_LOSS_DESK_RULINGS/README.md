@@ -81,7 +81,7 @@ closed line stays closed); the brief's CLAUDE.md line went under a new heading "
 | /root/finance/stock_app.py (S418's TO) | cf464882e49865f38153e1df6218301d | 24c2b5fe7cacfe238751e487e52eb6d0 |
 | /root/finance/stock_hub.html (S418's TO) | bb8741fa7671399f9c495c75946d7c11 | 74ea06997b900e9f55c47dca473a9232 |
 | /root/finance/stockmatch.py (S418's TO) | d5f9392fea4247b37705e865e1c242cb | e85807dab1f8672d482272e0d355fe28 |
-| /root/finance/stockmatch.html (S418's TO) | 9a090e03c954bfda5a787e8d834f275c | d6a7fb38a02e066f818222de14b2e2e2 |
+| /root/finance/stockmatch.html (S418's TO) | 9a090e03c954bfda5a787e8d834f275c | ecd039f4f64d5be6a15d7ffbbcdf3950 |
 | /root/finance/stock_amir.html (quantity words only: the JS helper's name) | c2ea41b2db7e2b337e0a97426aaed763 | 244ac6eeb0117b14f2c3c7fa1576f728 |
 | /root/finance/loss_piles.py (whole file, v2.0, in the kit) | 3b6554f86507509e0b1893129e748274 | 9dc06c9000539b6fbf3f77ddac967c7d |
 | /root/finance/stock_loss.html (whole page, in the kit) | 16cdddaa6363ccc8da0278fa5d4635a3 | fdd913e75677580a7897fe2631196c4c |
