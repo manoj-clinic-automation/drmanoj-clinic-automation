@@ -1,39 +1,55 @@
-# OWNER TO-DO — LIVE · refreshed at the **S282 close** (the parent), 26-Sep-2026 — the Sanjeevni sections exactly as its S281 close wrote them
+# OWNER TO-DO — LIVE · refreshed at the **S284 close** (the parent), 27-Sep-2026 — the Sanjeevni sections exactly as its S281 close wrote them
 
-*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S281 close** (the Sanjeevni project), 25-Sep-2026 — the parent's sections exactly as its S279 close wrote them
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S282 close** (the parent), 26-Sep-2026 — the Sanjeevni sections exactly as its S281 close wrote them
 
-*Detail: `START_HERE_SESSION_284.md` · `S282_BUILD_BRIEF.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are exactly as its S281 close left them; its open S283 refreshes them at its own close.*
+*Detail: `START_HERE_SESSION_286.md` · `S284_BUILD_BRIEF.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are exactly as its S281 close left them; its open S283 refreshes them at its own close.*
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S282 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S284 close
 
-**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record only (Register **v5.123**, Archive **v1.120**, Fault **v2.108**, Runbook **v203**, `START_HERE_SESSION_284`, the build brief, the manifest, `live_pins_S282close.txt`). Everything built this session is already live from your lines.
+**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record and one small fix (S429: the monthly keep-forever backup closes its month only when the copy is really pinned).
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · AT YOUR OWN PACE — the contacts workbook.** Sort the Vendors, Utilities, DTH, Staff and Family tabs (yellow *Move to* / *New name* columns), save, and tell me. Nothing else waits on it.
+**2 · THEN ONE LINE ON THE SERVER — S429.**
+
+```
+cd /root/deploy/repo && git pull --ff-only && bash /root/deploy/repo/deploy_kits/S429_MONTHLY_PIN_GUARD/install_S429_MONTHLY_PIN_GUARD.sh
+```
+
+**3 · WHEN CONVENIENT — open Chrome with the Claude extension** on your PC and tell me; I then carry the 22 July Vitals sheets to the server myself. Their safety copy is already on the SSD.
+
+**4 · AT YOUR OWN PACE — the contacts workbook.** Sort the Vendors, Utilities, DTH, Staff and Family tabs, save, and tell me.
 
 ```
 D:\Downloads\margsync\_config\contacts_S282\CONTACT_GROUPS_TO_UPDATE.xlsx
 ```
 
-**3 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today** (one file per year is fine), saved in `D:\Downloads`. It is the only place your patients' diagnoses live (F-629).
+**5 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today**, saved in `D:\Downloads` (F-629).
 
-**4 · IF NOT ALREADY DONE — three taps on the petty book** — yours: *Yes, I gave it* on the ₹20,000 of 20-Sep; Dr Bhawna's: her ₹15,000 (18-Sep) and ₹20,000 (22-Sep).
+**6 · IF NOT ALREADY DONE — three taps on the petty book** — yours: *Yes, I gave it* on the ₹20,000 of 20-Sep; Dr Bhawna's: her ₹15,000 (18-Sep) and ₹20,000 (22-Sep).
 
 ```
 https://followup.dr-manoj.in/finance/petty
 ```
 
-## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT — in your order of 26-Sep (D630)
+## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The caller card made operational** — at hang-up the staff phone asks *what happened* (Appointment booked first), a reminder at 10 minutes if nothing is chosen, and a count per person each day. The choice lands in the Callback Tracker as if typed there. You get one install line.
-2. **WhatsApp in the current tracker** — Reply for every staff member, with who sent it; the sender's number in the WhatsApp alert on your phone; a failed alert tried again instead of lost.
-3. **The Callback Tracker on the clinic server** — only after we discuss it, as you said.
-4. **Vitals & Plan to the clinic server.**
-5. My own two: the Sunday Apps Script report onto the health page; the checksum backups out of the record folder.
-6. Later: the contacts (after your workbook) · the mail flood (low) · the portal tiles (after the pharmacy move) · the WhatsApp save-failure watchdog (AF-19, not now).
+1. **The Callback Tracker on the clinic server** — decided on your word (D634), same screens and flow for staff; you see it beside Google's before any switch, and the switch waits for your yes.
+2. **The July Vitals sheets onto the server** — when your Chrome is open (item 3 above).
+3. Watching: the first real outcome card and staff WhatsApp reply; tonight's backup with the Case Pack and Vitals; the 1-Oct monthly copy; the 4-Oct Apps Script row.
+4. Later: the contacts (after your workbook) · the mail flood (low) · the portal tiles (after the pharmacy move) · AF-19 (not now).
+
+## ✅ DONE AT THE S284 CLOSE — 27-Sep-2026 (the parent)
+
+- ~~**The caller card made operational**~~ — **LIVE** (S419): what happened at hang-up, a reminder at 10 minutes, a count per person.
+- ~~**WhatsApp in the current tracker**~~ — **LIVE** (S420 + Apps Script v83): Reply for every staff member with who sent it; the sender's number in your alert; a failed alert retried.
+- ~~**Vitals & Plan to the clinic server**~~ — **LIVE** (S423), July ledgers carried; the July PDF sheets kept on the PC with a checked SSD copy (your choice).
+- ~~**The Sunday Apps Script report onto the health page**~~ — **LIVE** (S422). ~~**The checksum backups out of the record folder**~~ — done (S421).
+- ~~**The Case Pack's patient files were in no backup**~~ — found and **fixed** (S424); Vitals too.
+- ~~**One broken part could stop the whole finance app**~~ — **fixed** (S425): all 25 parts load, and the health page names any that does not.
+- ~~**The Callback Tracker migration — decide it and do it yourself**~~ — decided and planned (saved); building starts next session.
 
 ## ✅ DONE AT THE S282 CLOSE — 25 → 26-Sep-2026 (the parent)
 

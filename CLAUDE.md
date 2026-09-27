@@ -96,3 +96,6 @@ say so in the report rather than working around it -- the list is widened by the
 - **Scratch lives INSIDE the repo:** `_scratch\<KIT_NAME>\` (git-ignored). Never write outside the repository or the server's /tmp.
 - **The one server, always by its IP or these names only:** srv1746119 · 93.127.195.49 · followup.dr-manoj.in. Any other host is out.
 - **Secrets never printed:** no `cat`/`Get-Content`/`systemctl cat` of a key, token, .env or service unit that carries one, even over ssh.
+
+## The pharmacy (added 27-Sep-2026, S427 / D632)
+- Quantities on any screen, notice, PDF or message: strips + tabs for strip items, pcs / bottles / tubes otherwise — never "units"; format through `qty_words.py`.

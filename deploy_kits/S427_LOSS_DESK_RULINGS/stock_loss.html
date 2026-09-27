@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock loss — your desk</title>
+<style>
+/* S427 LOSS DESK RULINGS (D632, 27-Sep-2026) -- the owner, on the live S418 desk: "one nomenclature, strips and tablets,
+   everywhere" · "recount should be Darpan's option" · "the Rs 1,000 rule puts slow items in write-off; fast sellers land
+   in Recount" · "it is a loss -- boldly: these are the major losses, this much has been written off". FOUR PILES by
+   turnover (With me / Write off / Big losses / Consumption), no recount pile, ONE tap closes the count and freezes the
+   staff block. Every figure and every quantity word comes from the server (loss_piles + qty_words). English. */
+:root{
+  --ground:#F6F8F7;--surface:#FFF;--surface-2:#EDF2F0;--ink:#15201E;--ink-2:#3D4B48;--muted:#66756F;--line:#D9E2DF;
+  --accent:#0E5C58;--on-accent:#FFF;--accent-soft:#D8E9E6;--ok:#0E5C58;--diff:#8C3A2B;--diff-soft:#F6E3DF;--warn:#8A5A12;--warn-soft:#F7ECD8;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}}
+:root[data-theme="dark"]{
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+.wrap{max-width:680px;margin:0 auto;padding:12px 16px 48px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+h1{font-size:19px;margin:0}.sub{color:var(--muted);font-size:13px}
+.tally{background:var(--surface);border:1.5px solid var(--accent);border-radius:12px;padding:10px 12px;margin:10px 0 4px;box-shadow:0 8px 24px -18px rgba(0,0,0,.4)}
+.tally .l1{font-size:19px;font-weight:700;line-height:1.25}
+.tally .l1 small{font-size:13.5px;font-weight:400;color:var(--muted)}
+.five{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
+.five div{background:var(--surface-2);border-radius:9px;padding:6px 8px;min-width:0}
+.five .k{font-size:11.5px;color:var(--muted);line-height:1.2}.five .v{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+.five .c{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.done2{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13.5px;color:var(--ink-2);margin-top:6px}
+.done2 b{font-variant-numeric:tabular-nums}
+button.b,a.b{display:block;width:100%;font:inherit;font-size:16px;font-weight:700;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left;min-height:48px;text-decoration:none}
+button.b.main,a.b.main{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+button.b.warn{background:var(--diff);color:#fff;border-color:var(--diff)}
+button.b small,a.b small{display:block;font-weight:400;font-size:13px;opacity:.85;margin-top:2px}
+button.b:disabled{opacity:.5;cursor:default}
+button.s{font:inherit;font-size:14px;font-weight:700;padding:7px 12px;border-radius:9px;border:1.5px solid var(--accent);background:var(--surface);color:var(--accent);cursor:pointer;min-height:38px;white-space:nowrap}
+button.s.main{background:var(--accent);color:var(--on-accent)}
+button:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:12px 0;box-shadow:0 8px 24px -18px rgba(0,0,0,.3)}
+.card h2{font-size:17px;margin:0 0 2px;display:flex;align-items:center;gap:8px}
+.card h2 .n{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-size:13px}
+.card.big h2 .n{background:var(--diff)}
+.sum{font-size:14.5px;color:var(--ink-2);font-weight:600;margin:2px 0 8px}
+.lead{font-size:13.5px;color:var(--muted);margin:0 0 8px}
+.li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:9px 0;border-top:1px solid var(--line)}
+.li:first-child{border-top:0}
+.li .n{font-weight:700;font-size:15px;overflow-wrap:anywhere}
+.li .q{color:var(--ink-2);font-size:13.5px}
+.li .w{grid-column:1/-1;font-size:13px;color:var(--muted)}
+.li .v{text-align:right;white-space:nowrap;font-weight:700;font-size:15px;color:var(--diff);font-variant-numeric:tabular-nums}
+.li .v small{display:block;font-weight:400;font-size:12.5px;color:var(--muted)}
+.li .act{grid-column:1/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.li select{font:inherit;font-size:14px;padding:6px 8px;border-radius:9px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);min-height:38px;max-width:100%}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 7px;margin-left:4px;vertical-align:1px}
+.tag.ok{color:var(--ok);border-color:var(--ok)}
+.grp{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:12px 0 2px;display:flex;justify-content:space-between;gap:8px}
+.grp span:last-child{text-transform:none;letter-spacing:0;font-weight:600;font-variant-numeric:tabular-nums}
+.block{background:var(--surface-2);border-left:4px solid var(--diff);border-radius:10px;padding:10px 12px;margin:8px 0}
+.block .b1{font-size:16px;font-weight:700}.block .b2{font-size:14.5px;color:var(--ink-2);margin-top:2px}.block .b3{font-size:14.5px;font-weight:700;color:var(--diff);margin-top:4px;overflow-wrap:anywhere}
+.block .hi{font-size:13px;color:var(--muted);margin-top:6px;border-top:1px dashed var(--line);padding-top:6px;overflow-wrap:anywhere}
+.block .note{font-size:13.5px;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+.more{font:inherit;font-size:14px;color:var(--accent);font-weight:700;background:none;border:0;padding:8px 0;cursor:pointer}
+details{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:12px 0}
+summary{font-weight:700;font-size:15.5px;cursor:pointer;min-height:32px;display:flex;align-items:center}
+.set{padding:10px 0;border-top:1px solid var(--line)}.set:first-of-type{border-top:0}
+.set .h{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.set .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.set select,.set input{font:inherit;font-size:15px;padding:7px 9px;border-radius:9px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);min-height:40px;width:11em;max-width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{font:inherit;font-size:13.5px;font-weight:600;padding:6px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;min-height:34px}
+.chip.add{border-color:var(--accent);color:var(--accent)}
+.rl{font-size:13.5px;padding:5px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.rl:first-child{border-top:0}
+.msg{display:block;font-size:14px;color:var(--accent);margin-top:8px;min-height:18px;font-weight:600}
+.msg.bad{color:var(--diff)}
+.none{color:var(--muted);font-style:italic;font-size:14px;padding:6px 0}
+.foot{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+.foot a{font-size:14px;color:var(--accent);font-weight:600;text-decoration:none;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.err{color:var(--diff);font-weight:700}
+@media (max-width:520px){.five{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:700px) and (min-height:700px){.tally{position:sticky;top:0;z-index:5}}
+</style></head><body><div class="wrap">
+<div class="top"><h1>Stock loss — your desk</h1><span class="sub" id="who"></span></div>
+<div id="tally"></div>
+<div id="body"><div class="card"><span class="sub">Loading…</span></div></div>
+<div class="foot" id="foot"></div>
+</div>
+<script>
+/*__BOOT__*/
+const BASE="/finance/stock";
+const B=window.BOOT||{count_id:0,user:"",checker:false};
+let D=null, BUSY=false, MSG={}, SHOWALL=new Set(), ARM=null, ARMT=null, SUGG=[];
+const FOLD=12;
+const PILES=[["with_me","With me / back in store"],["writeoff","Write off"],["bigloss","Big losses"],["consume","Consumption"]];
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function rs(p){ if(p==null) return "-"; const neg=p<0; let n=Math.abs(Math.round(p)); const paise=n%100; n=Math.floor(n/100);
+  let s=String(n); if(s.length>3){ let head=s.slice(0,-3), tail=s.slice(-3), parts=[]; while(head.length>2){parts.unshift(head.slice(-2));head=head.slice(0,-2);} if(head)parts.unshift(head); s=parts.join(",")+","+tail; }
+  return (neg?"-":"")+"Rs "+s+(paise?"."+String(paise).padStart(2,"0"):""); }
+function lines(n){ return n+" line"+(n===1?"":"s"); }
+function dash(s){ return String(s==null?"":s).replace(/ -- /g," — "); }
+
+function load(keep){
+  const y=window.scrollY;
+  fetch(BASE+"/api/loss/"+B.count_id+"/piles",{cache:"no-store"}).then(r=>r.json()).then(j=>{
+    if(!j.ok){ document.getElementById("body").innerHTML='<div class="card err">'+esc(j.message||"Could not read the count.")+'</div>'; return; }
+    D=j; render(); if(keep) window.scrollTo(0,y);
+  }).catch(()=>{ document.getElementById("body").innerHTML='<div class="card err">The server did not answer. Check the internet and reload.</div>'; });
+}
+
+/* the totals -- the server's figures, never added up here */
+function tally(){
+  const T=D.totals, o=T.open;
+  const cell=(k,t)=>'<div><div class="k">'+k+'</div><div class="v">'+rs(t.mrp_p)+'</div><div class="c">'+lines(t.n)+' · cost '+rs(t.cost_p)+'</div></div>';
+  let h='<div class="tally"><div class="l1">'+rs(o.mrp_p)+' still open <small>· '+lines(o.n)+' · '+rs(o.cost_p)+' at cost</small></div>'
+    +'<div class="five">'+cell("With you",T.with_me)+cell("Write off",T.writeoff)+cell("Big losses",T.bigloss)+cell("Consumption",T.consume)+'</div>'
+    +'<div class="done2"><span>Back in store <b>'+rs(T.back.mrp_p)+'</b> · '+lines(T.back.n)+'</span><span>Written off <b>'+rs(T.written_off.mrp_p)+'</b> · '+lines(T.written_off.n)+'</span>'
+    +'<span>Short at the count <b>'+rs(T.short.mrp_p)+'</b> · '+lines(T.short.n)+(T.short.unpriced?' ('+T.short.unpriced+' without a price)':'')+'</span></div></div>';
+  document.getElementById("tally").innerHTML=h;
+}
+
+function moveMenu(l){
+  let h='<select data-move="'+esc(l.item)+'" aria-label="Move '+esc(l.item)+' to another pile"><option value="">→ pile</option>';
+  PILES.forEach(p=>{ if(p[0]!==l.pile) h+='<option value="'+p[0]+'">'+esc(p[1])+'</option>'; });
+  if(l.moved) h+='<option value="auto">back to the system\'s choice</option>';
+  return h+'</select>';
+}
+function lineHtml(l, pile){
+  const val=(l.mrp_p==null)?'<span class="sub">no price</span>':rs(l.mrp_p);
+  let act='';
+  if(pile==="with_me") act+='<button class="s main" data-accept="'+esc(l.item)+'">Accept back</button>';
+  act+=moveMenu(l);
+  let st='';
+  if(l.recount&&l.recount.source==="recount") st+='<span class="tag ok">Darpan counted again</span>';
+  if(l.claim&&l.claim.answer) st+='<span class="tag">Darpan: '+esc(l.claim.answer)+'</span>';
+  if(l.moved) st+='<span class="tag">moved</span>';
+  const q=l.short_text?(l.short_text+' short'):(l.over_text?(l.over_text+' over'):'');
+  const sold=(l.sold_text!=null&&pile!=="with_me")?' · sold '+esc(l.sold_text)+(l.pct!=null?' ('+l.pct+'%)':''):'';
+  return '<div class="li"><div><div class="n">'+esc(l.item)+st+'</div><div class="q">'+esc(q)+(l.packing?' · '+esc(l.packing):'')+sold+'</div></div>'
+    +'<div class="v">'+val+(l.cost_p!=null?'<small>cost '+rs(l.cost_p)+'</small>':'')+'</div>'
+    +'<div class="w">'+esc(dash(l.why))+'</div><div class="act">'+act+'</div></div>';
+}
+function listHtml(key, ls){
+  if(!ls.length) return '<div class="none">Nothing here.</div>';
+  const all=SHOWALL.has(key), show=all?ls:ls.slice(0,FOLD);
+  return show.map(l=>lineHtml(l,key)).join("")+(ls.length>FOLD&&!all?'<button class="more" data-all="'+key+'">Show all '+ls.length+'</button>':'');
+}
+function pileCard(P, i){
+  const k=P.key, R=D.rules, m=MSG[k]?'<span class="msg'+(MSG[k].ok?'':' bad')+'">'+MSG[k].html+'</span>':'<span class="msg"></span>';
+  let h='<section class="card'+(k==="bigloss"?' big':'')+'" id="pile_'+k+'"><h2><span class="n">'+(i+1)+'</span>'+esc(P.title)+'</h2>'
+    +'<div class="sum">'+lines(P.n)+' · '+rs(P.mrp_p)+' at MRP · '+rs(P.cost_p)+' at cost'+(P.unpriced?' · '+P.unpriced+' without a price':'')+'</div>';
+  if(k==="with_me"){
+    h+='<p class="lead">Things you had with you or kept elsewhere. One tap each: it is here, not lost — the line closes and the shelf figure becomes Marg\'s. These stay open when you close the count.</p>'+m;
+    h+=listHtml(k,P.lines);
+  } else if(k==="writeoff"){
+    h+='<p class="lead">Normal shop loss. <b>Within the allowance</b>: short by no more than '+esc(R.allowance_pct)+'% of what the item itself sold since the previous count (at least '+R.allowance_min+' strip or pc). <b>Small real gap</b>: beyond that, under '+esc(R.ceiling)+' at MRP, not a slow item. Written off by the close, recorded group by group.</p>'+m;
+    const G=P.groups;
+    D.groups.forEach(g=>{
+      const ls=P.lines.filter(l=>l.group===g.key); if(!ls.length) return;
+      const t=G[g.key];
+      h+='<div class="grp"><span>'+esc(g.title)+'</span><span>'+lines(t.n)+' · '+rs(t.mrp_p)+'</span></div><div class="lead">'+esc(dash(g.blurb))+'</div>'+listHtml(k+"_"+g.key,ls);
+    });
+    if(!P.lines.length) h+='<div class="none">Nothing here.</div>';
+  } else if(k==="bigloss"){
+    h+='<p class="lead">Beyond the allowance and large: '+esc(R.big_floor)+' or more at MRP, or a slow item short by '+esc(R.slow_months)+' month'+(R.slow_months==="1"?'':'s')+' of its own sales (from '+esc(R.slow_floor)+'), or never sold in 180 days with stock on record. A loss — carelessness or theft — recorded by name and shown to the staff by name. Nothing here is pursued.</p>'+m;
+    h+=listHtml(k,P.lines);
+  } else {
+    h+='<p class="lead">Only the items on your consumption list ('+(R.consume_items.length?esc(R.consume_items.slice(0,4).join(", "))+(R.consume_items.length>4?' …':''):'empty')+') — used in the clinic, never billed. Written off as clinic consumption by the close. Add or take off names in Settings below.</p>'+m;
+    h+=listHtml(k,P.lines);
+  }
+  return h+'</section>';
+}
+
+function blockHtml(Bk, title, frozen){
+  if(!Bk) return '';
+  let h='<div class="block"><div class="sub">'+esc(title)+'</div><div class="b1">'+esc(Bk.lines_en[0])+'</div><div class="b2">'+esc(Bk.lines_en[1])+'</div><div class="b3">'+esc(Bk.lines_en[2])+'</div>'
+    +'<div class="hi">As Darpan sees it: '+Bk.lines_hi.map(esc).join(' · ')+'</div>';
+  if(frozen&&Bk.notes&&Bk.notes.length) h+=Bk.notes.map(n=>'<div class="note"><b>'+esc(n.by)+'</b> ('+esc(n.at_text)+'): '+esc(n.text)+'</div>').join("");
+  if(frozen&&!(Bk.notes&&Bk.notes.length)) h+='<div class="note sub">Nothing written under it yet (Kuchh batana hai?).</div>';
+  return h+'</div>';
+}
+function closeCard(){
+  const C=D.close, m=MSG.close?'<span class="msg'+(MSG.close.ok?'':' bad')+'">'+MSG.close.html+'</span>':'<span class="msg"></span>';
+  let h='<section class="card" id="close"><h2>Close the count</h2>';
+  if(D.block){
+    h+='<p class="lead">Closed '+esc(D.block.at_text)+' by '+esc(D.block.by)+'. The staff block below is pinned on Darpan\'s Stock milaan until the next count closes.</p>'+blockHtml(D.block,"The staff block — frozen",true);
+    if(C.n) h+='<p class="lead">'+lines(C.n)+' came into the piles after the close ('+rs(C.mrp_p)+'). Closing again writes off those and freezes a new block.</p>';
+  } else {
+    h+='<p class="lead">One tap writes off every line in Write off, Big losses and Consumption — '+lines(C.n)+', '+rs(C.mrp_p)+' at MRP — makes Amir\'s Marg vouchers (at most '+D.rules.batch+' lines each) and freezes the staff block for Darpan\'s Stock milaan. With-me lines stay open.</p>';
+    h+=blockHtml(D.block_preview,"The staff block, as it would read now",false);
+  }
+  const go=(ARM&&ARM.n)?'<button class="b warn" id="clyes">Yes, close the count — '+lines(ARM.n)+'<small id="clcd">'+rs(ARM.mrp_p)+' at MRP — this button goes away in '+ARM.left+' s</small></button>'
+    :'<button class="b main" id="clarm"'+(C.n?'':' disabled')+'>Close the count ('+lines(C.n)+')<small>'+rs(C.mrp_p)+' at MRP — you confirm on the next tap</small></button>';
+  return h+go+m+'</section>';
+}
+function soldAfterHtml(){
+  const L=D.sold_after||[];
+  if(!L.length) return '';
+  return '<details><summary>Sold after the count — the stock existed ('+L.length+')</summary><p class="lead">More was sold after the count day than had been counted plus bought since, so the stock was there and the count was short. The system closed these as explained; the shelf figure is Marg\'s.</p>'
+    +L.map(l=>'<div class="rl"><b>'+esc(l.item)+'</b> — counted '+esc(l.test.counted_text)+', sold since '+esc(l.test.sold_text)+(l.test.bought_after?', bought '+esc(l.test.bought_text):'')+' · '+esc(l.test.at_text)+'</div>').join("")+'</details>';
+}
+function recordHtml(){
+  const R=D.record, T=D.totals;
+  let h='<details id="record"><summary>Record — what was decided, by whom, when</summary>';
+  h+='<div class="sub" style="margin:6px 0">Written off: '+rs(T.written_off.mrp_p)+' · '+lines(T.written_off.n)+'. Back in store: '+rs(T.back.mrp_p)+' · '+lines(T.back.n)+'.</div>';
+  R.groups.forEach(g=>{ h+='<div class="grp"><span>Written off — '+esc(g.title)+'</span><span>'+lines(g.n)+' · '+rs(g.mrp_p)+' · cost '+rs(g.cost_p)+'</span></div>'
+    +g.lines.map(l=>'<div class="rl"><b>'+esc(l.item)+'</b> — '+esc(l.short_text||l.short_day_text)+' · '+rs(l.mrp_p)+'</div>').join(""); });
+  if(R.back.length) h+='<div class="grp"><span>Back in store</span><span>'+lines(R.back.length)+'</span></div>'+R.back.map(l=>'<div class="rl"><b>'+esc(l.item)+'</b> — '+esc(l.short_day_text)+' at the count · '+rs(l.mrp_day_p)+' · '+esc(dash(l.why))+'</div>').join("");
+  if(R.runs.length) h+='<div class="grp"><span>Each close</span><span></span></div>'+R.runs.map(r=>'<div class="rl">'+esc(r.at_text)+' by '+esc(r.by)+': '+lines(r.lines)+', '+rs(r.mrp_p)+' — '+r.groups.map(g=>esc(g.title)+' '+g.n).join(", ")+(r.round_no?' · Marg vouchers round '+r.round_no:'')+'</div>').join("");
+  if(R.settings_log.length) h+='<div class="grp"><span>Rule changes</span><span></span></div>'+R.settings_log.map(c=>'<div class="rl">'+esc(c.at_text)+' · '+esc(c.label)+': '+esc(c.old_text)+' → <b>'+esc(c.new_text)+'</b> ('+esc(c.seeded?"set by the build":c.by)+')</div>').join("");
+  if(R.trail.length) h+='<div class="grp"><span>Every tap on this desk</span><span></span></div>'+R.trail.slice(0,60).map(t=>'<div class="rl">'+esc(t.at_text)+' · '+esc(t.by)+' · '+esc(dash(t.what))+'</div>').join("");
+  h+='<div class="foot"><a href="'+esc(D.links.record_pdf)+'" target="_blank" rel="noopener">The record as a PDF</a></div>';
+  return h+'</details>';
+}
+function overHtml(){
+  if(!D.over.length) return '';
+  return '<details><summary>Over on the shelf — never a loss ('+D.over.length+')</summary><p class="lead">More on the shelf than Marg. Amir corrects Marg when the vouchers are made; nothing is lost here. Darpan may count any of these again on his Stock milaan.</p>'
+    +D.over.map(l=>'<div class="li"><div><div class="n">'+esc(l.item)+'</div><div class="q">'+esc(l.over_text)+' over · Marg '+esc(l.marg_text)+'</div></div><div class="v" style="color:var(--ok)">'+(l.recount?'<small>counted again</small>':'')+'</div><div class="w">'+esc(dash(l.why))+'</div></div>').join("")+'</details>';
+}
+function settingsHtml(){
+  let h='<details id="settings"><summary>Settings — the rules of the piles</summary><p class="lead">Changing a rule re-piles the lines; it never decides one. Every change is recorded with who and when. Quantities are in strips and tabs (pcs for a bottle, a tube, a belt).</p>';
+  D.settings.forEach(s=>{
+    let c;
+    if(s.kind==="list"){
+      c='<div class="chips">'+(s.items.length?s.items.map(it=>'<button class="chip" data-consume-remove="'+esc(it)+'" title="Take off the list">'+esc(it)+' ×</button>').join(""):'<span class="none">Nothing on the list.</span>')+'</div>'
+        +'<div class="row"><input id="consume_q" placeholder="Search an item to add" aria-label="Search an item to add to the consumption list" autocomplete="off"></div>'
+        +'<div class="chips" id="consume_sugg">'+SUGG.map(n=>'<button class="chip add" data-consume-add="'+esc(n)+'">+ '+esc(n)+'</button>').join("")+'</div>';
+      h+='<div class="set"><div><b>'+esc(s.label)+'</b> — <span class="sub">now: '+esc(s.shown)+'</span></div><div class="h">'+esc(s.hint)+'</div>'+c+'</div>';
+      return;
+    }
+    if(s.kind==="choice") c='<select id="set_'+esc(s.key)+'">'+s.choices.map(o=>'<option value="'+esc(o.v)+'"'+(String(s.value)===o.v?' selected':'')+'>'+esc(o.t)+'</option>').join("")+'</select>';
+    else if(s.kind==="rupees") c='<input id="set_'+esc(s.key)+'" inputmode="numeric" placeholder="rupees" value="'+(s.rupees==null?'':s.rupees)+'" aria-label="'+esc(s.label)+' in rupees">';
+    else c='<input id="set_'+esc(s.key)+'" inputmode="decimal" value="'+esc(s.value)+'" aria-label="'+esc(s.label)+'">';
+    h+='<div class="set"><div><b>'+esc(s.label)+'</b> — <span class="sub">now: '+esc(s.shown)+'</span></div><div class="h">'+esc(s.hint)+'</div><div class="row">'+c+'<button class="s" data-save="'+esc(s.key)+'">Save</button></div></div>';
+  });
+  return h+(MSG.settings?'<span class="msg'+(MSG.settings.ok?'':' bad')+'">'+MSG.settings.html+'</span>':'')+'</details>';
+}
+
+function render(){
+  document.getElementById("who").textContent="Count #"+D.count_id+" of "+(D.day||"");
+  tally();
+  let h='';
+  D.piles.forEach((P,i)=>{ h+=pileCard(P,i); });
+  h+=closeCard();
+  if(D.orthotics_elsewhere) h+='<div class="sub" style="margin:4px 2px">The '+D.orthotics_elsewhere+' orthotic lines are closed on their own section (the hub), not here.</div>';
+  h+=soldAfterHtml()+overHtml()+recordHtml()+settingsHtml();
+  const open=[...document.querySelectorAll("details[open]")].map(x=>x.id).filter(Boolean);
+  const qv=(document.getElementById("consume_q")||{}).value||"";
+  document.getElementById("body").innerHTML=h;
+  open.forEach(id=>{ const e=document.getElementById(id); if(e) e.open=true; });
+  const qi=document.getElementById("consume_q"); if(qi&&qv){ qi.value=qv; }
+  document.getElementById("foot").innerHTML='<a href="'+esc(D.links.hub)+'">Stock check — the hub</a><a href="'+esc(D.links.amir)+'">Amir\'s board</a><a href="'+esc(D.links.stockmatch)+'">Darpan\'s Stock milaan</a><a href="'+esc(D.links.record_pdf)+'" target="_blank" rel="noopener">The record (PDF)</a>';
+}
+
+async function post(url, body){
+  const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})}).catch(()=>null);
+  return r?await r.json().catch(()=>null):null;
+}
+function say(k, j, extra){ MSG={}; MSG[k]={ok:!!(j&&j.ok), html:esc((j&&j.message)||"The server did not answer.")+(extra||"")}; }
+function disarm(){ ARM=null; if(ARMT){ clearInterval(ARMT); ARMT=null; } }
+let QT=null;
+document.addEventListener("input", e=>{
+  if(e.target.id!=="consume_q") return;
+  const q=e.target.value.trim(); clearTimeout(QT);
+  if(q.length<2){ SUGG=[]; const s=document.getElementById("consume_sugg"); if(s) s.innerHTML=""; return; }
+  QT=setTimeout(async()=>{ const r=await fetch(BASE+"/api/loss/"+D.count_id+"/items?q="+encodeURIComponent(q),{cache:"no-store"}).catch(()=>null); const j=r?await r.json().catch(()=>null):null;
+    SUGG=(j&&j.ok)?j.items:[]; const s=document.getElementById("consume_sugg"); if(s) s.innerHTML=SUGG.map(n=>'<button class="chip add" data-consume-add="'+esc(n)+'">+ '+esc(n)+'</button>').join(""); },250);
+});
+document.addEventListener("change", async e=>{
+  const s=e.target.closest("select[data-move]");
+  if(!s||!s.value||BUSY) return;
+  BUSY=true; disarm();
+  const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/move",{item:s.getAttribute("data-move"),pile:s.value}); BUSY=false;
+  say(s.value==="auto"?"with_me":s.value, j); load(true);
+});
+document.addEventListener("click", async e=>{
+  const t=e.target;
+  const al=t.closest("[data-all]"); if(al){ SHOWALL.add(al.getAttribute("data-all")); render(); return; }
+  if(BUSY) return;
+  const ac=t.closest("[data-accept]");
+  if(ac){ BUSY=true; ac.disabled=true; const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/accept",{items:[ac.getAttribute("data-accept")]}); BUSY=false; say("with_me",j); load(true); return; }
+  const ca=t.closest("[data-consume-add]");
+  if(ca){ BUSY=true; const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/setting",{key:"stock.consume_items",add:ca.getAttribute("data-consume-add")}); BUSY=false; SUGG=[]; const qi=document.getElementById("consume_q"); if(qi) qi.value="";
+    MSG={settings:{ok:!!(j&&j.ok),html:esc((j&&j.message)||"The server did not answer.")}}; load(true); return; }
+  const cr=t.closest("[data-consume-remove]");
+  if(cr){ BUSY=true; const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/setting",{key:"stock.consume_items",remove:cr.getAttribute("data-consume-remove")}); BUSY=false;
+    MSG={settings:{ok:!!(j&&j.ok),html:esc((j&&j.message)||"The server did not answer.")}}; load(true); return; }
+  if(t.closest("#clarm")){ BUSY=true;
+    const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/close",{}); BUSY=false;
+    if(j&&j.ok&&j.arm){ ARM={token:j.arm.token,n:j.arm.n,mrp_p:j.arm.mrp_p,left:j.arm.seconds}; MSG={};
+      ARMT=setInterval(()=>{ if(!ARM){return;} ARM.left-=1; if(ARM.left<=0){ disarm(); render(); return; } const cd=document.getElementById("clcd"); if(cd) cd.textContent=rs(ARM.mrp_p)+" at MRP — this button goes away in "+ARM.left+" s"; },1000);
+    } else say("close",j);
+    render(); return; }
+  if(t.closest("#clyes")&&ARM){ BUSY=true; const tok=ARM.token; disarm();
+    const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/close",{token:tok}); BUSY=false;
+    say("close",j,(j&&j.ok&&j.done&&j.done.round_no)?' <a href="'+esc(D.links.amir)+'">Amir\'s board</a>':''); load(true); return; }
+  const sv=t.closest("[data-save]");
+  if(sv){ const key=sv.getAttribute("data-save"), inp=document.getElementById("set_"+key); BUSY=true;
+    const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/setting",{key:key,value:inp?inp.value:""}); BUSY=false;
+    MSG={settings:{ok:!!(j&&j.ok),html:esc((j&&j.message)||"The server did not answer.")}}; load(true); return; }
+});
+load();
+</script></body></html>

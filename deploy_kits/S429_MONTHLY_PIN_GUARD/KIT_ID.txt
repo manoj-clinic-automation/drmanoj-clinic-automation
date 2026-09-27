@@ -1,0 +1,2 @@
+S429 KIT S429_MONTHLY_PIN_GUARD
+session 284 (parent) · 27-Sep-2026 · F-649: only a confirmed keep-forever pin closes the backup month
