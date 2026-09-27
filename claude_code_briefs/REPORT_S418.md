@@ -118,6 +118,7 @@ The four patched files were built on the box from the live bytes by `make_s418.p
 
 ### Not done / outside the brief (noticed)
 - **The publish swept four files not from this build:** `deploy_kits/GAS_CURRENT/ClinicCallbackTracker/Dashboard.html`, `.../WebApp.gs`, `deploy_kits/GAS_CURRENT/READ_ME.md` and `deploy_kits/GAS_CURRENT/SUMS.md5`. They were changed in the working tree by someone else during this build, and PUBLISH_ALL publishes everything pending by design (as in S414/S417). I did not open or change them; the clinic chat should confirm they were meant to go out.
+- **The report's own publish (`445db57`, 05:51:30 IST) also swept two files not from this build:** `deploy_kits/KB_canon_all/MD5SUMS_ALL.txt` (updated) and `deploy_kits/KB_canon_all/MD5SUMS_ALL.txt.bak_20260926_031218` (deleted). Both were pending in the working tree from another session; I did not touch either.
 - The server's repository clone has stray `__pycache__` folders in `deploy_kits/S413_SLIP_PICKER/` and `deploy_kits/S416_BUNDLE_ALLOWLIST/`. They are untracked, from earlier runs; I left them.
 - `stock_diffs.html` (the cause chips) and `stock_desk.html` (the Decision desk) still exist and answer. They are only off the hub's step list, as ruled. The S228 tick/share routes are kept and used by the Pursue pile.
 - `stock.accept_back_by` can include Darpan, but only through the desk's API. There is no Accept-back button on his Stock milaan yet; add one if the owner widens it.

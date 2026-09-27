@@ -1,0 +1,2 @@
+S421 KIT S421_CANON_SUMS_OUTSIDE
+session 284 (parent) · 27-Sep-2026 · F-596: the canon sums backup outside KB_canon_all, no row; no rewrite when nothing changed. A RECORD kit: placed on manojz by the assistant, nothing to install.
