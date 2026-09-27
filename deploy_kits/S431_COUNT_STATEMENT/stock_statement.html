@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock count — the statement</title>
+<style>
+/* S431 COUNT STATEMENT (27-Sep-2026) -- the owner: "Better it be section-wise. The complete list of 6th Sept with Marg stock,
+   physical stock and shortages, the excess items removed and matched; the orthotics at selling price. Give me a link."
+   Three sections from his map, each with its totals; every counted line once (matched lines collapsed, never dropped); values
+   at selling price with the source of each price; what became of each line. Live; "Freeze this statement" keeps a copy. */
+:root{--ground:#F6F8F7;--surface:#FFF;--surface-2:#EDF2F0;--ink:#15201E;--ink-2:#3D4B48;--muted:#66756F;--line:#D9E2DF;--accent:#0E5C58;--on-accent:#FFF;--diff:#8C3A2B;--ok:#0E5C58;--warn:#8A5A12}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;--accent:#63C2B6;--on-accent:#0D1312;--diff:#E08A76;--ok:#63C2B6;--warn:#D3A052}}
+:root[data-theme="dark"]{--ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;--accent:#63C2B6;--on-accent:#0D1312;--diff:#E08A76;--ok:#63C2B6;--warn:#D3A052}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:15px;line-height:1.45}
+.wrap{max-width:980px;margin:0 auto;padding:12px 16px 48px}
+h1{font-size:19px;margin:0}.sub{color:var(--muted);font-size:13px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:12px 0;box-shadow:0 8px 24px -18px rgba(0,0,0,.3)}
+.card h2{font-size:17px;margin:0 0 6px}
+.tot{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px;margin:6px 0}
+.tot div{background:var(--surface-2);border-radius:9px;padding:6px 8px;min-width:0}
+.tot .k{font-size:11.5px;color:var(--muted);line-height:1.2}.tot .v{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}.tot .c{font-size:11.5px;color:var(--muted)}
+.tot .short .v{color:var(--diff)}.tot .over .v{color:var(--ok)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:11px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);padding:6px 6px;border-bottom:1px solid var(--line)}
+td{padding:6px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+td .w{display:block;color:var(--muted);font-size:12px}
+.short{color:var(--diff);font-weight:600}.over{color:var(--ok);font-weight:600}
+.tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 6px;margin-left:4px;vertical-align:1px}
+.tag.open{color:var(--warn);border-color:var(--warn)}.tag.none{color:var(--diff);border-color:var(--diff)}
+details{margin-top:8px}summary{cursor:pointer;font-weight:600;font-size:14px;min-height:30px;display:flex;align-items:center}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+a.b,button.b{display:inline-block;font:inherit;font-size:14px;font-weight:700;padding:9px 12px;border-radius:10px;border:1.5px solid var(--accent);background:var(--surface);color:var(--accent);text-decoration:none;cursor:pointer;min-height:40px}
+a.b.main,button.b.main{background:var(--accent);color:var(--on-accent)}
+.msg{display:block;font-size:14px;color:var(--accent);margin-top:6px;font-weight:600}.msg.bad{color:var(--diff)}
+.err{color:var(--diff);font-weight:700}
+.block{background:var(--surface-2);border-left:4px solid var(--warn);border-radius:10px;padding:8px 12px;margin:8px 0;font-size:14px}
+@media (max-width:640px){.hide-sm{display:none}}
+@media print{.noprint{display:none}body{background:#fff}.card{box-shadow:none;border-color:#ccc;break-inside:avoid}}
+</style></head><body><div class="wrap">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap"><h1>Stock count — the statement, section by section</h1><span class="sub" id="who"></span></div>
+<div id="body"><div class="card"><span class="sub">Loading…</span></div></div>
+</div>
+<script>
+/*__BOOT__*/
+const BASE="/finance/stock";
+const B=window.BOOT||{count_id:0,user:"",can_freeze:false};
+let D=null, BUSY=false, MSG=null, OPENM=new Set();
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function rs(p){ if(p==null) return "-"; const neg=p<0; let n=Math.abs(Math.round(p)); const paise=n%100; n=Math.floor(n/100);
+  let s=String(n); if(s.length>3){ let head=s.slice(0,-3), tail=s.slice(-3), parts=[]; while(head.length>2){parts.unshift(head.slice(-2));head=head.slice(0,-2);} if(head)parts.unshift(head); s=parts.join(",")+","+tail; }
+  return (neg?"-":"")+"Rs "+s+(paise?"."+String(paise).padStart(2,"0"):""); }
+function lines(n){ return n+" line"+(n===1?"":"s"); }
+function dash(s){ return String(s==null?"":s).replace(/ -- /g," — "); }
+function load(){
+  fetch(BASE+"/api/statement/"+B.count_id,{cache:"no-store"}).then(r=>r.json()).then(j=>{
+    if(!j.ok){ document.getElementById("body").innerHTML='<div class="card err">'+esc(j.message||"The statement could not be read.")+'</div>'; return; }
+    D=j; render();
+  }).catch(()=>{ document.getElementById("body").innerHTML='<div class="card err">The server did not answer. Check the internet and reload.</div>'; });
+}
+function totals(T,extra){
+  return '<div class="tot"><div><div class="k">Lines</div><div class="v">'+T.lines+'</div><div class="c">'+T.differing+' differ · '+T.matched+' matched</div></div>'
+    +'<div class="short"><div class="k">Short at selling price</div><div class="v">'+rs(T.short_p)+'</div><div class="c">'+lines(T.short_lines==null?T.differing:T.short_lines)+'</div></div>'
+    +'<div class="over"><div class="k">Excess at selling price</div><div class="v">'+rs(T.over_p)+'</div><div class="c">'+(T.over_lines!=null?lines(T.over_lines):'')+'</div></div>'
+    +'<div><div class="k">Net</div><div class="v">'+rs(T.net_p)+'</div><div class="c">'+(T.unpriced?'<span class="err">'+T.unpriced+' without a price</span>':'every differing line priced')+'</div></div>'+(extra||'')+'</div>';
+}
+function lineRow(l,i){
+  const became=(l.became?esc(dash(l.became)):'')+(l.voucher?' · '+esc(l.voucher):'')+(l.open?' <span class="tag open">open</span>':'');
+  const price=l.price_p?esc(l.price_text)+' <span class="tag">'+esc(l.price_src)+'</span>':'<span class="tag none">no price — name it</span>';
+  return '<tr><td class="n">'+i+'</td><td><b>'+esc(l.item)+'</b>'+(l.packing?' <span class="sub">'+esc(l.packing)+'</span>':'')+'<span class="w">'+became+'</span><span class="w">'+(l.swap_text?'swap: '+esc(l.swap_text)+' · ':'')+price+'</span></td>'
+    +'<td class="n">'+esc(l.marg_text)+'</td><td class="n">'+esc(l.counted_text)+'</td><td class="n short">'+esc(l.short_text||'')+'</td><td class="n over">'+esc(l.over_text||'')+'</td>'
+    +'<td class="n short">'+(l.short?rs(l.short_p):'')+'</td><td class="n over">'+(l.over?rs(l.over_p):'')+'</td></tr>';
+}
+function section(S){
+  const T=S.totals;
+  let extra='';
+  if(S.block){ const Bk=S.block;
+    extra='<div><div class="k">Lines still open (Darpan)</div><div class="v">'+Bk.open_lines+'</div><div class="c">'+esc(Bk.open_items.slice(0,3).join(", "))+(Bk.open_items.length>3?' …':'')+'</div></div>'
+      +'<div><div class="k">Awaiting your word</div><div class="v">'+Bk.await_owner+'</div><div class="c">'+esc(Bk.await_owner_items.slice(0,3).join(", "))+(Bk.await_owner_items.length>3?' …':'')+'</div></div>'
+      +'<div><div class="k">Not yet on a voucher</div><div class="v">'+Bk.not_vouchered+'</div></div><div><div class="k">Renames unverified</div><div class="v">'+Bk.renames_unverified+'<span class="c"> / '+Bk.renames_total+'</span></div></div>'; }
+  let h='<section class="card"><h2>'+esc(S.title)+'</h2>'+totals(T,extra);
+  if(S.block) h+='<div class="block">'+esc(dash(S.block.verdict))+' — read live from the orthotic section; nothing here decides anything (the buttons stay on the hub and Stock milaan).</div>';
+  if(S.groups&&S.groups.length) h+='<div class="sub">The close\'s groups: '+S.groups.map(g=>esc(g.title)+' '+g.n+' ('+rs(g.short_p)+')').join(' · ')+(S.back?' · back in store '+S.back:'')+(S.open?' · <span class="err">open '+S.open+'</span>':'')+'</div>';
+  if(T.unpriced) h+='<div class="sub err">No price on record: '+esc(T.unpriced_items.join(", "))+'</div>';
+  if(S.lines.length){
+    h+='<table><thead><tr><th class="n">#</th><th>Item · what became of it · price</th><th class="n">Marg</th><th class="n">Physical</th><th class="n">Short</th><th class="n">Excess</th><th class="n">Short Rs</th><th class="n">Excess Rs</th></tr></thead><tbody>'
+      +S.lines.map((l,i)=>lineRow(l,i+1)).join("")+'</tbody></table>';
+  } else h+='<div class="sub">No line differs after the swaps.</div>';
+  if(S.matched.length){
+    const open=OPENM.has(S.key);
+    h+='<details'+(open?' open':'')+' data-m="'+esc(S.key)+'"><summary>Matched — '+lines(S.matched.length)+' (Marg = physical)</summary><table><thead><tr><th class="n">#</th><th>Item</th><th class="n">Marg = physical</th><th class="hide-sm">Note</th></tr></thead><tbody>'
+      +S.matched.map((l,i)=>'<tr><td class="n">'+(i+1)+'</td><td>'+esc(l.item)+(l.packing?' <span class="sub">'+esc(l.packing)+'</span>':'')+'</td><td class="n">'+esc(l.marg_text)+'</td><td class="hide-sm sub">'+(l.swap_text?'swap: '+esc(l.swap_text):esc(dash(l.became||"")))+'</td></tr>').join("")+'</tbody></table></details>';
+  }
+  return h+'</section>';
+}
+function render(){
+  const d=D;
+  document.getElementById("who").textContent="Count #"+d.count_id+" of "+(d.day||"")+" · Marg stock as on "+(d.as_on||"");
+  const F=d.frozen_list||[];
+  let h='<div class="card"><div class="sub">Counted by <b>'+esc(d.counted_by||"-")+'</b>, entered by <b>'+esc(d.entered_by||"-")+'</b>. Live, built '+esc(d.built_text)+'. Values at <b>selling price</b>: '+esc(dash(d.price_rule))+'.'+(d.spine_ok?'':' <span class="err">The spine could not be read — prices fall back to the rate rule.</span>')+'</div>';
+  h+=totals(Object.assign({},d.overall,{short_lines:d.sections.reduce((a,s)=>a+s.totals.short_lines,0),over_lines:d.sections.reduce((a,s)=>a+s.totals.over_lines,0)}));
+  const C=d.close;
+  if(C&&C.at_text) h+='<div class="sub">The close of '+esc(C.at_text)+' by '+esc(C.by||"-")+': <b>'+lines(C.written_off)+' written off</b> ('+rs(C.written_off_p)+' at the desk\'s MRP), '+C.back+' back in store, '+C.open+' still open — by group: '+Object.keys(C.groups).map(g=>esc(g)+' '+C.groups[g].n+' ('+rs(C.groups[g].mrp_p)+')').join(' · ')+'.</div>';
+  h+='<div class="links noprint"><a class="b" href="'+esc(d.links.pdf)+'" target="_blank" rel="noopener">PDF (live)</a><a class="b" href="'+esc(d.links.xlsx)+'">Excel (live)</a>'
+    +(B.can_freeze?'<button class="b main" id="freeze"'+(BUSY?' disabled':'')+'>Freeze this statement</button>':'')+'<a class="b" href="'+esc(d.links.hub)+'">The hub</a><a class="b" href="'+esc(d.links.report)+'">The old report</a></div>';
+  if(MSG) h+='<span class="msg'+(MSG.ok?'':' bad')+'">'+MSG.html+'</span>';
+  if(F.length) h+='<div class="sub"><b>Frozen copies</b> ('+F.length+'): '+F.map(f=>'as at '+esc(f.made_text)+' IST by '+esc(f.made_by)+' · <a href="'+esc(f.links.pdf)+'" target="_blank" rel="noopener">PDF</a> · <a href="'+esc(f.links.xlsx)+'">Excel</a> · '+esc(f.md5.slice(0,8))).join('<br>')+'</div>';
+  h+='</div>';
+  d.sections.forEach(S=>{ h+=section(S); });
+  document.getElementById("body").innerHTML=h;
+}
+document.addEventListener("toggle", e=>{ const dt=e.target.closest("details[data-m]"); if(!dt) return; if(dt.open) OPENM.add(dt.dataset.m); else OPENM.delete(dt.dataset.m); }, true);
+document.addEventListener("click", async e=>{
+  if(e.target.id==="freeze"&&!BUSY){ BUSY=true; render();
+    const r=await fetch(D.links.freeze,{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).catch(()=>null); const j=r?await r.json().catch(()=>null):null;
+    BUSY=false; MSG={ok:!!(j&&j.ok),html:esc((j&&j.message)||"The server did not answer.")+((j&&j.ok&&j.frozen)?' <a href="'+esc(j.frozen.links.pdf)+'" target="_blank" rel="noopener">PDF</a> · <a href="'+esc(j.frozen.links.xlsx)+'">Excel</a>':'')}; load(); }
+});
+load();
+</script></body></html>

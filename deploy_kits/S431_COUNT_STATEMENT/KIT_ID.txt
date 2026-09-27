@@ -1,0 +1,3 @@
+kit id S431_COUNT_STATEMENT
+session 283 (Sanjeevni) · 27-Sep-2026 · the count of 06-09-2026 as one statement, section by section, at selling price; orthotics apart; freeze
+files: stock_statement.py (new, v1.0) · stock_statement.html (new) · make_s431.py · walk_s431.py · figures_s431.py · install_S431_COUNT_STATEMENT.sh · README.md · SUMS.md5
