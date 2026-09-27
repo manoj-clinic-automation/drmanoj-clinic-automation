@@ -21,3 +21,5 @@ other file byte for byte, trailing whitespace forgiven. Anything the Sunday run 
 *changed* against this folder is a photograph the repository does not yet hold — the assistant's to take.
 
 `SUMS.md5` covers every file here; check it from inside this folder: `md5sum -c SUMS.md5`.
+
+**S420 (27-Sep-2026, session 284):** `ClinicCallbackTracker/WebApp.gs` + `Dashboard.html` = Reply for every signed-in staff member with *sent by* (D630 item 2). Live editor sha256-matched to this folder for all fourteen files before the change; the change applied in the editor as ten + six exact replacements, saved, reloaded and re-hashed (WebApp.gs d335dbb71006…, Dashboard.html 46669b110575…); placed as **version 83 of the existing deployment** AKfycbyoQ5R3yv… (never a new deployment, D577).

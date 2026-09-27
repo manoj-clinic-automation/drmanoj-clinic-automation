@@ -1026,10 +1026,10 @@
         return '<div class="wa-entry">'+
                  '<div class="wa-item">'+
                    '<div class="wa-head">'+
-                     '<span class="arr '+(inbound?'in':'out')+'">'+(inbound?'▸ from':'we →')+'</span>'+
+                     '<span class="arr '+(inbound?'in':'out')+'">'+(inbound?'▸ from':('we →'+(m.by?(' '+esc(m.by)):'')))+'</span>'+
                      '<span class="who">'+who+'</span>'+
                      '<span class="tm">'+esc(m.time)+'</span>'+
-                     '<button class="wa-chat-btn" onclick="openThread(dget(\''+dref(m.number)+'\'))">Chat</button>'+(inbound ? '<button class="wa-call-btn" onclick="waCall(dget(\''+dref(m.number)+'\'),dget(\''+dref(m.name||'')+'\'))">\ud83d\udcde Call</button>' : '')+(DASH_ROLE==='full' ? '<button class="wa-reply-btn" onclick="openReply('+i+',dget(\''+dref(m.number)+'\'),this)">Reply</button>' : '')+
+                     '<button class="wa-chat-btn" onclick="openThread(dget(\''+dref(m.number)+'\'))">Chat</button>'+(inbound ? '<button class="wa-call-btn" onclick="waCall(dget(\''+dref(m.number)+'\'),dget(\''+dref(m.name||'')+'\'))">\ud83d\udcde Call</button>' : '')+(DASH_ROLE!=='none' ? '<button class="wa-reply-btn" onclick="openReply('+i+',dget(\''+dref(m.number)+'\'),this)">Reply</button>' : '')+
                    '</div>'+
                    '<div class="wa-msg" id="wamsg_'+i+'">'+msg+'</div>'+
                    waCallLine(m,i)+
@@ -1115,7 +1115,7 @@
     openReplyId=null; replyOpen=false;
   }
   function openReply(i, number, btn){
-    if(DASH_ROLE!=='full') return;                                       // staff cannot reply
+    if(DASH_ROLE==='none') return;                                       // S420: every staff member may reply (sent by is recorded)
     var slot=document.getElementById('rslot_'+i);
     if(!slot) return;
     if(slot.getAttribute('data-open')==='1'){ closeReply(); return; }   // tap again = close
@@ -3015,7 +3015,7 @@
     if(!msgs || !msgs.length){ body.innerHTML='<div class="thread-empty">No messages yet for this number.</div>'; return; }
     body.innerHTML = msgs.map(function(m){
       var cls=(m.dir==='out')?'out':'in';
-      var meta=esc(m.time)+((m.dir==='out'&&m.status)?(' \u00b7 '+esc(m.status)):'');
+      var meta=esc(m.time)+((m.dir==='out'&&m.by)?(' \u00b7 '+esc(m.by)):'')+((m.dir==='out'&&m.status)?(' \u00b7 '+esc(m.status)):'');   // S420: who sent it
       var content=isMediaUrl(m.text, m.type)?mediaHtml(m.text, m.type):esc(m.text);
       return '<div class="bub '+cls+'">'+content+'<span class="bt">'+meta+'</span></div>';
     }).join('');
@@ -3029,7 +3029,7 @@
     try{ (lastOk&&lastOk.recentWA||[]).forEach(function(x){ if(digits(x.number)===num && x.name) nm=x.name; }); }catch(e){}
     document.getElementById('threadName').textContent = nm || ('Conversation \u00b7 '+num);
     document.getElementById('threadBody').innerHTML='<div class="thread-empty">Loading\u2026</div>';
-    document.getElementById('threadFoot').style.display = (DASH_ROLE==='full')?'block':'none';
+    document.getElementById('threadFoot').style.display = (DASH_ROLE!=='none')?'block':'none';   // S420
     setThreadStatus('','');
     var tx=document.getElementById('threadText'), sb=document.getElementById('threadSend');
     if(tx){ tx.value=''; tx.disabled=true; tx.removeAttribute('data-window'); }
@@ -3042,7 +3042,7 @@
           if(!has) msgs=msgs.concat([{time:'just now',dir:'out',type:'text',text:optimisticText,status:'sent'}]);
         }
         renderThread(msgs);
-        if(DASH_ROLE==='full') enableThreadCompose(num);
+        if(DASH_ROLE!=='none') enableThreadCompose(num);   // S420
       })
       .withFailureHandler(function(err){
         document.getElementById('threadBody').innerHTML='<div class="thread-empty">Could not load: '+esc((err&&err.message)||err)+'</div>';

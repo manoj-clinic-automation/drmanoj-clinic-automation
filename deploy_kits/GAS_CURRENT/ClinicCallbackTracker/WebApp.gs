@@ -316,7 +316,7 @@ function computeDashboard_() {
 
   var recentWA = wa.recent.map(function (m) {
     var p = pat[m.ph];
-    return { number: m.ph, name: p ? p.name : '', time: m.time, dir: m.dir, text: m.text, full: m.full };
+    return { number: m.ph, name: p ? p.name : '', time: m.time, dir: m.dir, text: m.text, full: m.full, by: m.by || '' };   // S420
   });
 
   var callsByAgent = agentCallsMap_(raw, pat);
@@ -590,7 +590,7 @@ function waSendSecret_() {
 /** Window status for a number (no send). Called when a Reply box opens. */
 function checkWindow(key, number) {
   try {
-    if (dashRole_(key) !== 'full') return { ok: false, reason: 'Not authorized.' };
+    if (dashRole_(key) === 'none') return { ok: false, reason: 'Not authorized.' };   // S420: every signed-in role (owner, 26-Sep-2026)
     var num = String(number || '').replace(/\D/g, '');
     if (num.length < 10) return { ok: false, reason: 'Bad number.' };
     var secret = waSendSecret_();
@@ -613,9 +613,18 @@ function checkWindow(key, number) {
 }
 
 /** Send a free-text WhatsApp reply via the relay (24h window enforced server-side). */
+/** S420: who pressed Send -- the roster name behind the login; 'Doctor' for the master key. */
+function replyByName_(key) {
+  try {
+    var info = agentInfoForKey_(key);
+    if (info && info.name) return String(info.name);
+    return dashRole_(key) === 'full' ? 'Doctor' : 'Staff';
+  } catch (e) { return ''; }
+}
+
 function sendReply(key, number, message) {
   try {
-    if (dashRole_(key) !== 'full') return { ok: false, sent: false, reason: 'Not authorized.' };
+    if (dashRole_(key) === 'none') return { ok: false, sent: false, reason: 'Not authorized.' };   // S420: every signed-in role
     var num = String(number || '').replace(/\D/g, '');
     var msg = String(message == null ? '' : message).trim();
     if (num.length < 10) return { ok: false, sent: false, reason: 'Bad number.' };
@@ -628,7 +637,7 @@ function sendReply(key, number, message) {
       method: 'post',
       contentType: 'application/json',
       headers: { 'X-Send-Key': secret },
-      payload: JSON.stringify({ number: num, message: msg }),
+      payload: JSON.stringify({ number: num, message: msg, by: replyByName_(key) }),   // S420: 'sent by' rides to the relay
       muteHttpExceptions: true
     });
     var code = resp.getResponseCode();
@@ -710,6 +719,7 @@ function getThread(key, number) {
     var iText  = findCol_(H, ['message', 'text', 'body', 'snippet']);
     var iType  = findCol_(H, ['type', 'message_type']);
     var iStat  = findCol_(H, ['status']);
+    var iBy    = findCol_(H, ['sent by', 'by']);                    // S420
     if (iPhone < 0) return { ok: true, number: want, messages: [] };
     var tz = Session.getScriptTimeZone(), rows = [];
     for (var r = 1; r < vals.length; r++) {
@@ -723,12 +733,13 @@ function getThread(key, number) {
         time: t ? Utilities.formatDate(new Date(t), tz, 'd MMM h:mm a') : '',
         dir: iDir >= 0 ? (String(vals[r][iDir] || '').toLowerCase().indexOf('out') >= 0 ? 'out' : 'in') : 'in',
         type: type, text: text,
-        status: iStat >= 0 ? String(vals[r][iStat] || '').trim() : ''
+        status: iStat >= 0 ? String(vals[r][iStat] || '').trim() : '',
+        by: iBy >= 0 ? String(vals[r][iBy] || '').trim() : ''    // S420
       });
     }
     rows.sort(function (a, b) { return a._t - b._t; });   // oldest first (chat order)
     return { ok: true, number: want, messages: rows.map(function (m) {
-      return { time: m.time, dir: m.dir, type: m.type, text: m.text, status: m.status };
+      return { time: m.time, dir: m.dir, type: m.type, text: m.text, status: m.status, by: m.by };
     }) };
   } catch (err) {
     return { ok: false, reason: String(err && err.message ? err.message : err) };
@@ -798,6 +809,7 @@ function waLookup_() {
     var iDir   = findCol_(H, ['direction', 'dir']);
     var iText  = findCol_(H, ['message', 'text', 'body', 'snippet']);
     var iType  = findCol_(H, ['type', 'message_type']);
+    var iBy    = findCol_(H, ['sent by', 'by']);                    // S420
     if (iPhone < 0) return res;
 
     var cutoff = Date.now() - WA_LOOKBACK_HOURS * 3600 * 1000;
@@ -817,7 +829,8 @@ function waLookup_() {
         ph: ph, t: t,
         time: t ? Utilities.formatDate(new Date(t), tz, 'd MMM h:mm a') : '',
         dir: iDir >= 0 ? (String(vals[r][iDir] || '').toLowerCase().indexOf('out') >= 0 ? 'out' : 'in') : 'in',
-        text: text, full: full
+        text: text, full: full,
+        by: iBy >= 0 ? String(vals[r][iBy] || '').trim() : ''      // S420
       });
     }
     rows.sort(function (a, b) { return b.t - a.t; });
