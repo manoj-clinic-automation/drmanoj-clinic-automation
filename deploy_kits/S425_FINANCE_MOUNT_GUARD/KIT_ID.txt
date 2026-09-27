@@ -1,0 +1,2 @@
+S425 KIT S425_FINANCE_MOUNT_GUARD
+session 284 (parent) · 27-Sep-2026 · the eleven oldest finance_app mounts guarded; one health row names any part that did not load
