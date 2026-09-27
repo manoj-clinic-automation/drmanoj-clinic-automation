@@ -7,8 +7,8 @@
 set -u
 KIT="S419_RING_OUTCOME"; KDIR="$(cd "$(dirname "$0")" && pwd)"; VPY="${VPY:-/root/wa/venv/bin/python3}"; PD="${PD:-/root/portal}"
 PORTAL_PORT="${PORTAL_PORT:-8099}"; STAMP="$(date +%Y%m%d_%H%M%S)"; WALK="/tmp/s419_walk_$STAMP"
-RH_FROM=a3cd0466fc500c444f958fc83c8d9e42; RH_TO=ccbec230b0fcf7de1a5a1a3b0f1ad6ca
-PP_FROM=576ae269e7136261f47c1de2314f67b7; PP_TO=73c5c7d7fb9a2fb00a63a7ad8d2b4d24
+RH_FROM=a3cd0466fc500c444f958fc83c8d9e42; RH_TO=ccbec2304e8038e4353ece70d84a38d2
+PP_FROM=576ae269e7136261f47c1de2314f67b7; PP_TO=73c5c7d7804ccff14ddf961fa36e4c8a
 RC_LIVE=4344b59277d94b2d11d8d7cc23328677; RO_TO=495b0ada681cda359a1a621a22f4efa5
 m5() { md5sum "$1" 2>/dev/null | awk '{print $1}'; }; say() { echo "$@"; }
 cd "$KDIR" || exit 1
