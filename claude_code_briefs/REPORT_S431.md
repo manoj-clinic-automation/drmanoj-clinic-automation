@@ -175,3 +175,11 @@ No unpriced residue in Consumables; Medicines 1 (CORTIRI — old stock, no spine
 
 ### Publish
 Published with `PUBLISH_ALL.bat` (kit + this report); the commit is named in the "After publish" section below.
+
+### After publish (22:04 IST)
+- Commit `045af0a` "publish: pending kits and files (PUBLISH_ALL)" — 11 files: the kit (9), the brief, this report; pushed to origin/main (778511f → 045af0a).
+- On the box: `/root/deploy/repo` pulled to 045af0a; `md5sum -c SUMS.md5` in the repo kit: 0 not-OK; `diff -r` repo kit vs `/tmp/s431kit` (what ran):
+  identical. Installer re-run from the repo kit: `-- ALREADY INSTALLED: the five files are at the kit's pins; clinic-finance active; healthz 200`.
+- The five live md5s re-read 22:04: stock_app.py 2a95e254…, stock_hub.html 38e0537c…, stock_report.html 610169c0…, stock_statement.py 85ec7619…,
+  stock_statement.html 175f4654… (= the kit's pins).
+- Build lock released 22:04 IST. This section is published in a second commit.
