@@ -85,7 +85,13 @@ The five patched files were built on the box from the live bytes by `make_s427.p
 - The build lock `/root/deploy/.claude_code_build.lock` (owner S427_LOSS_DESK_RULINGS) was taken at 09:29:16 IST and is removed after this report's publish.
 
 ### After publish
-__PUBLISH__
+- `PUBLISH_ALL.bat` produced commit `15ed813` (09:44:00 IST): the five kit files changed since the swept intermediate copy (README, SUMS, installer, make, walk) and this report; the phone gate was clean (6 files) and origin was verified.
+- On the box, `git pull --ff-only` brought `/root/deploy/repo` to `15ed813`.
+  - `md5sum -c SUMS.md5` on the repository kit: 10/10 OK.
+  - `diff -r` of the repository kit against `/tmp/s427kit` (the kit that ran) found no differing file (the /tmp copy only has its own logs beside).
+  - The repository installer answered **ALREADY INSTALLED** (the eight files at the kit's pins; clinic-finance active; healthz 200). No `__pycache__` in the repository kit on the box.
+- This report's own publish follows (the commit is named in the Claude Code window).
+- The kit ran from `/tmp/s427kit/` with `KITS=/root/deploy/repo/deploy_kits`, because it needs the S403/S404 kits beside it for their walks.
 
 ### Not done / outside the brief (noticed)
 - **Nothing on the live database was closed by the install itself.** The sales-after-count test runs when the desk is read; the figures above come from a fresh scratch copy after the install. The first time the owner opens the desk, DOLOGESIC SP and TYCOB 1500 are closed on the live database (EXPLAINED, FOUND, audited "system: sold after count").
