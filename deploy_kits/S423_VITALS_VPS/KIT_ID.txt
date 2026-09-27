@@ -1,0 +1,2 @@
+S423 KIT S423_VITALS_VPS
+session 284 (parent) · 27-Sep-2026 · F-598 / D589: Vitals & Plan on the server, the Case Pack way; the clinic PC copy stays as the fallback
