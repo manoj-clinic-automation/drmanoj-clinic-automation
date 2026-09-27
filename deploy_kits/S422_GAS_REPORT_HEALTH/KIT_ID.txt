@@ -1,0 +1,2 @@
+S422 KIT S422_GAS_REPORT_HEALTH
+session 284 (parent) · 27-Sep-2026 · F-595: the Sunday Apps Script comparison onto the health page (one row) and the freshness table (one leg)
