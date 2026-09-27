@@ -82,7 +82,13 @@ The eight patched files were built on the box from the live bytes by `make_s428.
 - The build lock `/root/deploy/.claude_code_build.lock` (owner S428_STOCK_WATCH) was taken at 10:38:04 IST and is removed after this report's publish.
 
 ### After publish
-__PUBLISH__
+- `PUBLISH_ALL.bat` produced commit `45deaf4` (10:57:17 IST): the eight kit files and this report; the phone gate was clean (10 files) and origin was verified.
+- On the box, `git pull --ff-only` brought `/root/deploy/repo` to `45deaf4`.
+  - `md5sum -c SUMS.md5` on the repository kit: 8/8 OK.
+  - `diff -r` of the repository kit against `/tmp/s428kit` (the kit that ran) found no differing file (the /tmp copy only has its own logs beside).
+  - The repository installer answered **ALREADY INSTALLED** (the nine files at the kit's pins; cron line 1; clinic-finance active; healthz 200). No `__pycache__` in the repository kit on the box.
+- This report's own publish follows (the commit is named in the Claude Code window).
+- The kit ran from `/tmp/s428kit/` with `KITS=/root/deploy/repo/deploy_kits`, because it needs the S403/S404/S427 kits beside it for their walks.
 
 ### Not done / outside the brief (noticed)
 - **Nothing on the live database changed beyond the settings and the new empty tables.** No plan is due (from 06-11-2026), no roster exists yet (today is a Sunday; the first is Monday 28-09 at 06:30), no point, no trace (the desk's Big-loss traces open when the owner next reads the desk — 28 items, each a spine walk), leakage Rs 0.
