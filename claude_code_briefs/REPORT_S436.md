@@ -128,6 +128,11 @@ section's state before the seed rather than assume the brief's counts, and prove
   Nothing of it is in the repository.
 - Not done: nothing of the brief was left out.
 
+**After the publish (13:34 IST):** repository published with `PUBLISH_ALL.bat` (gate clean, commit `6658e2c` on main, origin verified); on the box
+`git pull --ff-only` → HEAD 6658e2c; `deploy_kits/S436_STAFF_PAGES_CLEAN/` SUMS.md5 15 of 15 OK; `diff -r` repo kit vs `/tmp/s436kit` (what ran):
+byte-identical; the repository's own installer run from `/root/deploy/repo`: "ALREADY INSTALLED: the eight files are at the kit's pins;
+clinic-finance active; healthz 200"; public healthz 200; the build lock released 13:34:32 IST. This report is published in a second commit.
+
 **Undo:** the eight `.bak_S436_<from8>` files back, `systemctl restart clinic-finance`, healthz 200. The seed's rows are the owner's rulings as data
 (the causes, the notes, the tasks, the run, round 4, the close row, the notice); `finance.db.bak_S436_20260928_130938` only if he asks for them to
 be reversed — say so first.
