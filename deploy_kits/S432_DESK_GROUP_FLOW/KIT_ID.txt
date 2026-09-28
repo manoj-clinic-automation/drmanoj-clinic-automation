@@ -1,0 +1,3 @@
+kit id S432_DESK_GROUP_FLOW
+session 283 (Sanjeevni) · 28-Sep-2026 · F-651 · the Loss desk made fast (the pile cache, the stored watch, in-place patches) and closed group by group the owner's way; the statement's Marg-negative lines; BELL CAST 5 to Consumables
+files: loss_piles.py (whole, v2.2) · stock_watch.py (whole, v1.2) · stock_loss.html (whole) · qty_words.py (whole, v1.1) · make_s432.py (stock_app.py, stock_statement.py, stock_statement.html by anchored edits) · seed_s432.py · walk_s432.py · walk_s427_s432.py · walk_s428_s432.py · walk_s431_s432.py · walk_s404_s432.py · figures_s432.py · install_S432_DESK_GROUP_FLOW.sh · README.md · SUMS.md5

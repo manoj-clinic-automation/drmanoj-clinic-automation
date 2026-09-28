@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock loss — your desk</title>
+<style>
+/* S427 LOSS DESK RULINGS (D632, 27-Sep-2026) -- the owner, on the live S418 desk: "one nomenclature, strips and tablets,
+   everywhere" · "recount should be Darpan's option" · "the Rs 1,000 rule puts slow items in write-off; fast sellers land
+   in Recount" · "it is a loss -- boldly: these are the major losses, this much has been written off". FOUR PILES by
+   turnover (With me / Write off / Big losses / Consumption), no recount pile, ONE tap closes the count and freezes the
+   staff block. Every figure and every quantity word comes from the server (loss_piles + qty_words). English.
+   S432 DESK GROUP FLOW (F-651, 28-Sep-2026) -- the owner: "the page opens real slow, and each tick takes a lot of time";
+   "I select a group -- a button to tick all -- I untick some, a change-pile menu appears; the ticked ones disappear on
+   Clear". The totals load first (a light read), each pile's lines when its card is opened; a tick, a move, an accept-back
+   or a clear changes the rows it touched and the totals from the small JSON the door returns -- no full redraw, no
+   re-fetch. Above the piles: the GROUP list -- pick a group, Tick all, untick the exceptions (a pile menu opens on each),
+   Clear this group (N ticked). The last clear closes the count by itself. The watch card shows the stored watch with
+   its time; 'Refresh watch' scores it again. */
+:root{
+  --ground:#F6F8F7;--surface:#FFF;--surface-2:#EDF2F0;--ink:#15201E;--ink-2:#3D4B48;--muted:#66756F;--line:#D9E2DF;
+  --accent:#0E5C58;--on-accent:#FFF;--accent-soft:#D8E9E6;--ok:#0E5C58;--diff:#8C3A2B;--diff-soft:#F6E3DF;--warn:#8A5A12;--warn-soft:#F7ECD8;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}}
+:root[data-theme="dark"]{
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+.wrap{max-width:680px;margin:0 auto;padding:12px 16px 48px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+h1{font-size:19px;margin:0}.sub{color:var(--muted);font-size:13px}
+.tally{background:var(--surface);border:1.5px solid var(--accent);border-radius:12px;padding:10px 12px;margin:10px 0 4px;box-shadow:0 8px 24px -18px rgba(0,0,0,.4)}
+.tally .l1{font-size:19px;font-weight:700;line-height:1.25}
+.tally .l1 small{font-size:13.5px;font-weight:400;color:var(--muted)}
+.five{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
+.five div{background:var(--surface-2);border-radius:9px;padding:6px 8px;min-width:0}
+.five .k{font-size:11.5px;color:var(--muted);line-height:1.2}.five .v{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+.five .c{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.done2{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13.5px;color:var(--ink-2);margin-top:6px}
+.done2 b{font-variant-numeric:tabular-nums}
+button.b,a.b{display:block;width:100%;font:inherit;font-size:16px;font-weight:700;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left;min-height:48px;text-decoration:none}
+button.b.main,a.b.main{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+button.b.warn{background:var(--diff);color:#fff;border-color:var(--diff)}
+button.b small,a.b small{display:block;font-weight:400;font-size:13px;opacity:.85;margin-top:2px}
+button.b:disabled{opacity:.5;cursor:default}
+button.s{font:inherit;font-size:14px;font-weight:700;padding:7px 12px;border-radius:9px;border:1.5px solid var(--accent);background:var(--surface);color:var(--accent);cursor:pointer;min-height:38px;white-space:nowrap}
+button.s.main{background:var(--accent);color:var(--on-accent)}
+button.s.quiet{border-color:var(--line);color:var(--ink-2)}
+button:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:12px 0;box-shadow:0 8px 24px -18px rgba(0,0,0,.3)}
+.card h2{font-size:17px;margin:0 0 2px;display:flex;align-items:center;gap:8px}
+.card h2 .n{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-size:13px}
+.card.big h2 .n{background:var(--diff)}
+details.card{padding:0}
+details.card>summary{list-style:none;padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;min-height:48px}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary .sum{margin:0}
+details.card>summary .tog{font-size:13px;color:var(--accent);font-weight:700;white-space:nowrap}
+details.card[open]>summary .tog.o{display:none}details.card:not([open])>summary .tog.c{display:none}
+details.card>.in{padding:0 14px 12px}
+.sum{font-size:14.5px;color:var(--ink-2);font-weight:600;margin:2px 0 8px}
+.lead{font-size:13.5px;color:var(--muted);margin:0 0 8px}
+.li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:9px 0;border-top:1px solid var(--line)}
+.li:first-child{border-top:0}
+.li .n{font-weight:700;font-size:15px;overflow-wrap:anywhere}
+.li .q{color:var(--ink-2);font-size:13.5px}
+.li .w{grid-column:1/-1;font-size:13px;color:var(--muted)}
+.li .v{text-align:right;white-space:nowrap;font-weight:700;font-size:15px;color:var(--diff);font-variant-numeric:tabular-nums}
+.li .v small{display:block;font-weight:400;font-size:12.5px;color:var(--muted)}
+.li .act{grid-column:1/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.li select,.gsel{font:inherit;font-size:14px;padding:6px 8px;border-radius:9px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);min-height:38px;max-width:100%}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 7px;margin-left:4px;vertical-align:1px}
+.tag.ok{color:var(--ok);border-color:var(--ok)}
+.grp{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:12px 0 2px;display:flex;justify-content:space-between;gap:8px}
+.grp span:last-child{text-transform:none;letter-spacing:0;font-weight:600;font-variant-numeric:tabular-nums}
+.block{background:var(--surface-2);border-left:4px solid var(--diff);border-radius:10px;padding:10px 12px;margin:8px 0}
+.block .b1{font-size:16px;font-weight:700}.block .b2{font-size:14.5px;color:var(--ink-2);margin-top:2px}.block .b3{font-size:14.5px;font-weight:700;color:var(--diff);margin-top:4px;overflow-wrap:anywhere}
+.block .hi{font-size:13px;color:var(--muted);margin-top:6px;border-top:1px dashed var(--line);padding-top:6px;overflow-wrap:anywhere}
+.block .note{font-size:13.5px;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+.more{font:inherit;font-size:14px;color:var(--accent);font-weight:700;background:none;border:0;padding:8px 0;cursor:pointer}
+details.plain{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:12px 0}
+details.plain>summary{font-weight:700;font-size:15.5px;cursor:pointer;min-height:32px;display:flex;align-items:center}
+.set{padding:10px 0;border-top:1px solid var(--line)}.set:first-of-type{border-top:0}
+.set .h{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.set .row,.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.set select,.set input{font:inherit;font-size:15px;padding:7px 9px;border-radius:9px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);min-height:40px;width:11em;max-width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{font:inherit;font-size:13.5px;font-weight:600;padding:6px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;min-height:34px}
+.chip.add{border-color:var(--accent);color:var(--accent)}
+.rl{font-size:13.5px;padding:5px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.rl:first-child{border-top:0}
+.msg{display:block;font-size:14px;color:var(--accent);margin-top:8px;min-height:18px;font-weight:600}
+.msg.bad{color:var(--diff)}
+.none{color:var(--muted);font-style:italic;font-size:14px;padding:6px 0}
+.foot{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+.foot a{font-size:14px;color:var(--accent);font-weight:600;text-decoration:none;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.err{color:var(--diff);font-weight:700}
+/* S432: the group list */
+.gcard{border:1.5px solid var(--accent)}
+.gl{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;padding:8px 0;border-top:1px solid var(--line);align-items:start}
+.gl:first-child{border-top:0}
+.gl input[type=checkbox]{width:22px;height:22px;margin:2px 0 0;accent-color:var(--accent)}
+.gl .n{font-weight:700;font-size:15px;overflow-wrap:anywhere}
+.gl .q{color:var(--ink-2);font-size:13px}
+.gl .w{font-size:12.5px;color:var(--muted)}
+.gl .v{text-align:right;white-space:nowrap;font-weight:700;font-size:14.5px;color:var(--diff);font-variant-numeric:tabular-nums}
+.gl.off .n,.gl.off .q{color:var(--muted)}
+.pm{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:6px;padding:6px 8px;border:1.5px dashed var(--accent);border-radius:10px;margin-top:4px;background:var(--accent-soft)}
+.pm .t{width:100%;font-size:13px;color:var(--ink-2);font-weight:600}
+.pm button{font:inherit;font-size:13.5px;font-weight:600;padding:6px 10px;border-radius:9px;border:1.5px solid var(--accent);background:var(--surface);color:var(--accent);cursor:pointer;min-height:36px}
+.pm button.quiet{border-color:var(--line);color:var(--ink-2)}
+.gbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 8px}
+.cache{font-size:12px;color:var(--muted);margin:2px 2px 0}
+@media (max-width:520px){.five{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:700px) and (min-height:700px){.tally{position:sticky;top:0;z-index:5}}
+</style></head><body><div class="wrap">
+<div class="top"><h1>Stock loss — your desk</h1><span class="sub" id="who"></span></div>
+<div id="tally"></div>
+<div id="body"><div class="card"><span class="sub">Loading…</span></div></div>
+<div class="foot" id="foot"></div>
+</div>
+<script>
+/*__BOOT__*/
+const BASE="/finance/stock";
+const B=window.BOOT||{count_id:0,user:"",checker:false};
+let D=null, FULL=false, BUSY=false, MSG={}, SHOWALL=new Set(), ARM=null, ARMT=null, SUGG=[];
+let GROUP="", TICK=new Set(), MENU=null, CARM=null, CARMT=null, OPENP=new Set(), T0=0, TIMES={};
+const FOLD=12;
+const PILES=[["with_me","With me / back in store"],["writeoff","Write off"],["bigloss","Big losses"],["consume","Consumption (clinic)"],["owner_use","Owner's use — taken for home, unbilled"]];   // S430: the fifth destination
+const CLOSE_PILES=["writeoff","bigloss","consume"];
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function rs(p){ if(p==null) return "-"; const neg=p<0; let n=Math.abs(Math.round(p)); const paise=n%100; n=Math.floor(n/100);
+  let s=String(n); if(s.length>3){ let head=s.slice(0,-3), tail=s.slice(-3), parts=[]; while(head.length>2){parts.unshift(head.slice(-2));head=head.slice(0,-2);} if(head)parts.unshift(head); s=parts.join(",")+","+tail; }
+  return (neg?"-":"")+"Rs "+s+(paise?"."+String(paise).padStart(2,"0"):""); }
+function lines(n){ return n+" line"+(n===1?"":"s"); }
+function dash(s){ return String(s==null?"":s).replace(/ -- /g," — "); }
+function gkey(l){ return l.group||(l.bucket==="consume"?"consume":(l.bucket==="bigloss"?"big":"small")); }
+function gtitle(k){ const g=(D.groups||[]).find(x=>x.key===k); return g?g.title:k; }
+
+/* S432: two reads -- the light one first (totals, headers, the close, the block), the full one behind it (the lines) */
+function load(keep){
+  const y=window.scrollY; T0=performance.now();
+  fetch(BASE+"/api/loss/"+B.count_id+"/piles?lite=1",{cache:"no-store"}).then(r=>r.json()).then(j=>{
+    if(!j.ok){ document.getElementById("body").innerHTML='<div class="card err">'+esc(j.message||"Could not read the count.")+'</div>'; return; }
+    TIMES.lite=Math.round(performance.now()-T0); D=j; FULL=false; render(); if(keep) window.scrollTo(0,y);
+    return fetch(BASE+"/api/loss/"+B.count_id+"/piles",{cache:"no-store"}).then(r=>r.json()).then(j2=>{
+      if(!j2.ok) return; TIMES.full=Math.round(performance.now()-T0); D=j2; FULL=true; render(); if(keep) window.scrollTo(0,y); });
+  }).catch(()=>{ document.getElementById("body").innerHTML='<div class="card err">The server did not answer. Check the internet and reload.</div>'; });
+}
+
+/* the totals -- the server's figures, never added up here */
+function tally(){
+  const T=D.totals, o=T.open;
+  const cell=(k,t)=>'<div><div class="k">'+k+'</div><div class="v">'+rs(t.mrp_p)+'</div><div class="c">'+lines(t.n)+' · cost '+rs(t.cost_p)+'</div></div>';
+  let h='<div class="tally"><div class="l1">'+rs(o.mrp_p)+' still open <small>· '+lines(o.n)+' · '+rs(o.cost_p)+' at cost</small></div>'
+    +'<div class="five">'+cell("With you",T.with_me)+cell("Write off",T.writeoff)+cell("Big losses",T.bigloss)+cell("Consumption & owner's use",T.consume)+'</div>'
+    +'<div class="done2"><span>Back in store <b>'+rs(T.back.mrp_p)+'</b> · '+lines(T.back.n)+'</span><span>Written off <b>'+rs(T.written_off.mrp_p)+'</b> · '+lines(T.written_off.n)+'</span>'
+    +'<span>Short at the count <b>'+rs(T.short.mrp_p)+'</b> · '+lines(T.short.n)+(T.short.unpriced?' ('+T.short.unpriced+' without a price)':'')+'</span></div></div>';
+  const c=D.cache||{}; const m=c.meta||{};
+  const ct=(c.built==="full"?'piles computed now in '+(c.ms||0)+' ms':(c.built==="partial"?(c.partial_n||0)+' line'+(c.partial_n===1?'':'s')+' recomputed in '+(c.partial_ms||0)+' ms':'piles from the store'))
+    +(m.built_text?' · stored '+esc(m.built_text):'')+(TIMES.lite?' · this page: totals in '+TIMES.lite+' ms'+(TIMES.full?', lines in '+TIMES.full+' ms':''):'');
+  document.getElementById("tally").innerHTML=h+(D.close?'<div class="card" style="margin:6px 0 0;padding:8px 12px">'+closeBtn()+'</div>':'')+'<div class="cache">'+ct+'</div>';   // S430 (2.4): the one Close button, also at the top
+}
+
+function moveMenu(l){
+  let h='<select data-move="'+esc(l.item)+'" aria-label="Move '+esc(l.item)+' to another pile"><option value="">→ pile</option>';
+  const cur=(l.moved&&l.moved.target)||(l.group==="owner_use"?"owner_use":l.pile);   // S430
+  PILES.forEach(p=>{ if(p[0]!==cur) h+='<option value="'+p[0]+'">'+esc(p[1])+'</option>'; });
+  if(l.moved) h+='<option value="auto">back to the system\'s choice</option>';
+  return h+'</select>';
+}
+function lineHtml(l, pile){
+  const val=(l.mrp_p==null)?'<span class="sub">no price</span>':rs(l.mrp_p);
+  let act='';
+  if(pile==="with_me") act+='<button class="s main" data-accept="'+esc(l.item)+'">Accept back</button>';
+  act+='<button class="s" data-count="'+esc(l.item)+'">Count this</button>';   // S428
+  act+=moveMenu(l);
+  let st='';
+  if(l.recount&&l.recount.source==="recount") st+='<span class="tag ok">Darpan counted again</span>';
+  if(l.claim&&l.claim.answer) st+='<span class="tag">Darpan: '+esc(l.claim.answer)+'</span>';
+  if(l.moved) st+='<span class="tag">moved</span>';
+  const q=l.short_text?(l.short_text+' short'):(l.over_text?(l.over_text+' over'):'');
+  const sold=(l.sold_text!=null&&pile!=="with_me")?' · sold '+esc(l.sold_text)+(l.pct!=null?' ('+l.pct+'%)':''):'';
+  return '<div class="li" data-li="'+esc(l.item)+'"><div><div class="n">'+esc(l.item)+st+'</div><div class="q">'+esc(q)+(l.packing?' · '+esc(l.packing):'')+sold+'</div></div>'
+    +'<div class="v">'+val+(l.cost_p!=null?'<small>cost '+rs(l.cost_p)+'</small>':'')+'</div>'
+    +'<div class="w">'+esc(dash(l.why))+'</div><div class="act">'+act+'</div></div>';
+}
+function listHtml(key, ls){
+  if(!ls.length) return '<div class="none">Nothing here.</div>';
+  const all=SHOWALL.has(key), show=all?ls:ls.slice(0,FOLD);
+  return show.map(l=>lineHtml(l,key)).join("")+(ls.length>FOLD&&!all?'<button class="more" data-all="'+key+'">Show all '+ls.length+'</button>':'');
+}
+function pileBody(P){
+  const k=P.key, R=D.rules, m=MSG[k]?'<span class="msg'+(MSG[k].ok?'':' bad')+'">'+MSG[k].html+'</span>':'<span class="msg"></span>';
+  let h=(k!=="with_me"?'<div class="lead" style="color:var(--accent);font-weight:600">Written off by <b>Close the count</b> — one tap for all three piles, at the top and the foot — or group by group from the list above.</div>':'');   // S430 (2.4)
+  if(!FULL) return h+'<div class="none">Loading the lines…</div>';
+  if(k==="with_me"){
+    h+='<p class="lead">Things you had with you or kept elsewhere. One tap each: it is here, not lost — the line closes and the shelf figure becomes Marg\'s. These stay open when you close the count.</p>'+m;
+    h+=listHtml(k,P.lines);
+  } else if(k==="writeoff"){
+    h+='<p class="lead">Normal shop loss. <b>Within the allowance</b>: short by no more than '+esc(R.allowance_pct)+'% of what the item itself sold since the previous count (at least '+R.allowance_min+' strip or pc). <b>Small real gap</b>: beyond that, under '+esc(R.ceiling)+' at MRP, not a slow item. Written off by the close, recorded group by group.</p>'+m;
+    const G=P.groups;
+    D.groups.forEach(g=>{
+      const ls=P.lines.filter(l=>l.group===g.key); if(!ls.length) return;
+      const t=G[g.key];
+      h+='<div class="grp"><span>'+esc(g.title)+'</span><span>'+lines(t.n)+' · '+rs(t.mrp_p)+'</span></div><div class="lead">'+esc(dash(g.blurb))+'</div>'+listHtml(k+"_"+g.key,ls);
+    });
+    if(!P.lines.length) h+='<div class="none">Nothing here.</div>';
+  } else if(k==="bigloss"){
+    h+='<p class="lead">Beyond the allowance and large: '+esc(R.big_floor)+' or more at MRP, or a slow item short by '+esc(R.slow_months)+' month'+(R.slow_months==="1"?'':'s')+' of its own sales (from '+esc(R.slow_floor)+'), or never sold in 180 days with stock on record. A loss — carelessness or theft — recorded by name and shown to the staff by name. Nothing here is pursued.</p>'+m;
+    h+=listHtml(k,P.lines);
+  } else {
+    h+='<p class="lead"><b>Clinic consumption</b>: only the items on your consumption list ('+(R.consume_items.length?esc(R.consume_items.slice(0,4).join(", "))+(R.consume_items.length>4?' …':''):'empty')+') — used in the clinic, never billed. <b>Owner\'s use</b>: lines you moved here — taken for home, unbilled; a recorded non-loss, never leakage, never on the staff block. Both written off by the close, each in its own group.</p>'+m;
+    const G2=P.groups||{};
+    D.groups.forEach(g=>{                                        // S430: the two groups of this pile
+      const ls=P.lines.filter(l=>l.group===g.key); if(!ls.length) return;
+      const t=G2[g.key]||{n:ls.length,mrp_p:ls.reduce((a,l)=>a+(l.mrp_p||0),0)};
+      h+='<div class="grp"><span>'+esc(g.title)+'</span><span>'+lines(t.n)+' · '+rs(t.mrp_p)+'</span></div><div class="lead">'+esc(dash(g.blurb))+'</div>'+listHtml(k+"_"+g.key,ls);
+    });
+    if(!P.lines.length) h+='<div class="none">Nothing here.</div>';
+  }
+  return h;
+}
+function pileCard(P, i){                                         // S432: a collapsed card; its lines are drawn when it is opened
+  const k=P.key;
+  return '<details class="card'+(k==="bigloss"?' big':'')+'" id="pile_'+k+'" data-pile="'+k+'"'+(OPENP.has(k)?' open':'')+'><summary><h2><span class="n">'+(i+1)+'</span>'+esc(P.title)+'</h2>'
+    +'<div class="sum">'+lines(P.n)+' · '+rs(P.mrp_p)+' at MRP · '+rs(P.cost_p)+' at cost'+(P.unpriced?' · '+P.unpriced+' without a price':'')+'</div>'
+    +'<span class="tog o">Show the lines ▾</span><span class="tog c">Hide ▴</span></summary>'
+    +'<div class="in" id="pin_'+k+'">'+(OPENP.has(k)?pileBody(P):'')+'</div></details>';
+}
+function drawPile(k){
+  const P=D.piles.find(p=>p.key===k), i=D.piles.findIndex(p=>p.key===k), e=document.getElementById("pile_"+k);
+  if(!P||!e) return;
+  const t=document.createElement("div"); t.innerHTML=pileCard(P,i); e.replaceWith(t.firstElementChild);
+}
+
+/* ---- S432 (3.2): the GROUP list -- pick a group, Tick all, untick the exceptions, Clear this group (N ticked) ---- */
+function groupLines(){
+  if(!FULL||!GROUP) return [];
+  const out=[];
+  D.piles.forEach(P=>{ if(CLOSE_PILES.indexOf(P.key)<0) return; P.lines.forEach(l=>{ if(GROUP==="all"||gkey(l)===GROUP) out.push(l); }); });
+  out.sort((a,b)=>((b.mrp_p||0)-(a.mrp_p||0))||(a.item<b.item?-1:1));
+  return out;
+}
+function groupRow(l){
+  const on=TICK.has(l.item), val=(l.mrp_p==null)?'no price':rs(l.mrp_p);
+  let h='<div class="gl'+(on?'':' off')+'" data-gl="'+esc(l.item)+'"><input type="checkbox" data-tick="'+esc(l.item)+'"'+(on?' checked':'')+' aria-label="'+esc(l.item)+'">'
+    +'<div><div class="n">'+esc(l.item)+(GROUP==="all"?' <span class="tag">'+esc(gtitle(gkey(l)))+'</span>':'')+'</div><div class="q">'+esc(l.short_text)+' short'+(l.packing?' · '+esc(l.packing):'')+'</div><div class="w">'+esc(dash(l.why))+'</div></div>'
+    +'<div class="v">'+val+'</div>';
+  if(MENU===l.item){
+    h+='<div class="pm"><span class="t">Unticked — where does '+esc(l.item)+' go?</span>';
+    PILES.forEach(p=>{ h+='<button data-gmove="'+esc(l.item)+'" data-pile="'+p[0]+'">'+esc(p[1])+'</button>'; });
+    if(l.moved) h+='<button data-gmove="'+esc(l.item)+'" data-pile="auto">back to the system\'s choice</button>';
+    h+='<button class="quiet" data-gclose="1">Leave it here, unticked</button></div>';
+  }
+  return h+'</div>';
+}
+function groupCard(){
+  if(!D.close) return '';
+  const G=D.groups||[], open=(D.close||{}).n||0;
+  const m=MSG.group?'<span class="msg'+(MSG.group.ok?'':' bad')+'">'+MSG.group.html+'</span>':'<span class="msg"></span>';
+  let h='<section class="card gcard" id="groupcard"><h2>Close the count group by group</h2>';
+  h+='<p class="lead">Pick a group, <b>Tick all</b>, then untick the lines that should not go — a pile menu opens on each. <b>Clear this group</b> writes the ticked lines off now, as that group, with Amir\'s vouchers; the unticked stay open. The last clear closes the count by itself. With-me lines are never in a group list.</p>';
+  h+='<div class="gbar"><select id="grp" class="gsel" aria-label="Group"><option value="">Group…</option>'
+    +G.filter(g=>g.key!=="earlier").map(g=>'<option value="'+esc(g.key)+'"'+(GROUP===g.key?' selected':'')+'>'+esc(g.title)+' ('+(g.open_n||0)+')</option>').join("")
+    +'<option value="all"'+(GROUP==="all"?' selected':'')+'>All ('+open+')</option></select>';
+  if(GROUP){ h+='<button class="s" data-tickall="1">Tick all</button><button class="s quiet" data-untickall="1">Untick all</button>'; }
+  h+='</div>';
+  if(!GROUP){ h+='<div class="none">'+(open?'Choose a group to see its lines.':'No open line outside With me — nothing to clear.')+'</div>'; return h+m+'</section>'; }
+  if(!FULL){ h+='<div class="none">Loading the lines…</div>'; return h+m+'</section>'; }
+  const ls=groupLines();
+  if(!ls.length) h+='<div class="none">Nothing open in this group.</div>';
+  else h+=ls.map(groupRow).join("");
+  const n=ls.filter(l=>TICK.has(l.item)).length, mrp=ls.filter(l=>TICK.has(l.item)).reduce((a,l)=>a+(l.mrp_p||0),0);
+  if(CARM) h+='<button class="b warn" data-clear-yes="1" style="margin-top:10px">Yes, clear — '+lines(CARM.n)+' as '+esc(GROUP==="all"?"all groups":gtitle(GROUP))+'<small class="clcd2">'+rs(CARM.mrp_p)+' at MRP — this button goes away in '+CARM.left+' s</small></button>';
+  else h+='<button class="b main" data-clear-arm="1" style="margin-top:10px"'+(n?'':' disabled')+'>Clear this group ('+n+' ticked)<small>'+rs(mrp)+' at MRP — written off now as '+esc(GROUP==="all"?"their groups":gtitle(GROUP))+', vouchers for Amir; you confirm on the next tap</small></button>';
+  return h+m+'</section>';
+}
+function drawGroup(){ const e=document.getElementById("groupcard"); if(!e) return; const t=document.createElement("div"); t.innerHTML=groupCard(); if(t.firstElementChild) e.replaceWith(t.firstElementChild); else e.remove(); }
+function disarmClear(){ CARM=null; if(CARMT){ clearInterval(CARMT); CARMT=null; } }
+
+/* ---- S432: the PATCH a door returns -- the changed lines and the totals, laid on the page in place ---- */
+function dropLine(item){
+  D.piles.forEach(P=>{ P.lines=P.lines.filter(l=>l.item!==item); });
+  if(D.done){ D.done.back=D.done.back.filter(l=>l.item!==item); D.done.written_off=D.done.written_off.filter(l=>l.item!==item); }
+  if(D.over) D.over=D.over.filter(l=>l.item!==item);
+}
+function applyPatch(p){
+  if(!p) return;
+  const touched=new Set();
+  Object.keys(p.lines||{}).forEach(item=>{
+    D.piles.forEach(P=>{ if(P.lines.some(l=>l.item===item)) touched.add(P.key); });
+    dropLine(item);
+    const l=p.lines[item]; if(!l) return;
+    if(CLOSE_PILES.indexOf(l.bucket)>=0||l.bucket==="with_me"){ const P=D.piles.find(x=>x.key===l.bucket); if(P){ P.lines.push(l); touched.add(P.key); } }
+    else if(l.bucket==="back"&&D.done) D.done.back.push(l);
+    else if(l.bucket==="written_off"&&D.done) D.done.written_off.push(l);
+    else if(l.bucket==="over"&&D.over) D.over.push(l);
+  });
+  D.totals=p.totals; D.close=p.close; if(p.block_preview) D.block_preview=p.block_preview; if(p.block!==undefined) D.block=p.block;
+  D.piles.forEach(P=>{ const t=D.totals[P.key]; if(t){ P.n=t.n; P.mrp_p=t.mrp_p; P.cost_p=t.cost_p; P.unpriced=t.unpriced; if(t.groups) P.groups=t.groups; }
+    P.lines.sort((a,b)=>((b.mrp_p||0)-(a.mrp_p||0))||(a.item<b.item?-1:1)); });
+  (D.groups||[]).forEach(g=>{ g.open_n=(p.groups_n||{})[g.key]||0; });
+  tally(); touched.forEach(k=>drawPile(k)); drawGroup(); drawClose();
+}
+
+function blockHtml(Bk, title, frozen){
+  if(!Bk) return '';
+  let h='<div class="block"><div class="sub">'+esc(title)+'</div><div class="b1">'+esc(Bk.lines_en[0])+'</div><div class="b2">'+esc(Bk.lines_en[1])+'</div><div class="b3">'+esc(Bk.lines_en[2])+'</div>'
+    +'<div class="hi">As Darpan sees it: '+Bk.lines_hi.map(esc).join(' · ')+'</div>';
+  if(frozen&&Bk.notes&&Bk.notes.length) h+=Bk.notes.map(n=>'<div class="note"><b>'+esc(n.by)+'</b> ('+esc(n.at_text)+'): '+esc(n.text)+'</div>').join("");
+  if(frozen&&!(Bk.notes&&Bk.notes.length)) h+='<div class="note sub">Nothing written under it yet (Kuchh batana hai?).</div>';
+  return h+'</div>';
+}
+function closeCard(){
+  const C=D.close, m=MSG.close?'<span class="msg'+(MSG.close.ok?'':' bad')+'">'+MSG.close.html+'</span>':'<span class="msg"></span>';
+  let h='<section class="card" id="close"><h2>Close the count</h2>';
+  if(D.block){
+    h+='<p class="lead">Closed '+esc(D.block.at_text)+' by '+esc(D.block.by)+' — '+esc(dash(D.block.how_text||"one tap"))+'. The staff block below is pinned on Darpan\'s Stock milaan until the next count closes.</p>'+blockHtml(D.block,"The staff block — frozen",true);
+    if(C.n) h+='<p class="lead">'+lines(C.n)+' came into the piles after the close ('+rs(C.mrp_p)+'). Closing again writes off those and freezes a new block.</p>';
+  } else {
+    h+='<p class="lead">One tap writes off every line in Write off, Big losses and Consumption — '+lines(C.n)+', '+rs(C.mrp_p)+' at MRP — makes Amir\'s Marg vouchers (at most '+D.rules.batch+' lines each) and freezes the staff block for Darpan\'s Stock milaan. With-me lines stay open. The same happens by itself when the last group is cleared above.</p>';
+    h+=blockHtml(D.block_preview,(D.block_preview&&D.block_preview.cleared_runs)?"The staff block, as it would read now ("+D.block_preview.cleared_runs+" clear"+(D.block_preview.cleared_runs===1?"":"s")+" already in it)":"The staff block, as it would read now",false);
+  }
+  const go=closeBtn();
+  return h+go+m+'</section>';
+}
+function drawClose(){ const e=document.getElementById("close"); if(!e) return; const t=document.createElement("div"); t.innerHTML=closeCard(); e.replaceWith(t.firstElementChild); }
+function closeBtn(){                                            // S430 (2.4): ONE button, drawn at the top and at the foot; one arm, one confirm
+  const C=D.close||{n:0,mrp_p:0};
+  return (ARM&&ARM.n)?'<button class="b warn" data-close-yes="1">Yes, close the count — '+lines(ARM.n)+'<small class="clcd">'+rs(ARM.mrp_p)+' at MRP — this button goes away in '+ARM.left+' s</small></button>'
+    :'<button class="b main" data-close-arm="1"'+(C.n?'':' disabled')+'>Close the count ('+lines(C.n)+')<small>'+rs(C.mrp_p)+' at MRP · every line in Write off, Big losses and Consumption &amp; owner\'s use — you confirm on the next tap</small></button>';
+}
+function soldAfterHtml(){
+  const L=D.sold_after||[];
+  if(!L.length) return '';
+  return '<details class="plain"><summary>Sold after the count — the stock existed ('+L.length+')</summary><p class="lead">More was sold after the count day than had been counted plus bought since, so the stock was there and the count was short. The system closed these as explained; the shelf figure is Marg\'s.</p>'
+    +L.map(l=>'<div class="rl"><b>'+esc(l.item)+'</b> — counted '+esc(l.test.counted_text)+', sold since '+esc(l.test.sold_text)+(l.test.bought_after?', bought '+esc(l.test.bought_text):'')+' · '+esc(l.test.at_text)+'</div>').join("")+'</details>';
+}
+function recordHtml(){
+  const R=D.record, T=D.totals;
+  if(!R) return '';
+  let h='<details class="plain" id="record"><summary>Record — what was decided, by whom, when</summary>';
+  h+='<div class="sub" style="margin:6px 0">Written off: '+rs(T.written_off.mrp_p)+' · '+lines(T.written_off.n)+'. Back in store: '+rs(T.back.mrp_p)+' · '+lines(T.back.n)+'.</div>';
+  R.groups.forEach(g=>{ h+='<div class="grp"><span>Written off — '+esc(g.title)+'</span><span>'+lines(g.n)+' · '+rs(g.mrp_p)+' · cost '+rs(g.cost_p)+'</span></div>'
+    +g.lines.map(l=>'<div class="rl"><b>'+esc(l.item)+'</b> — '+esc(l.short_text||l.short_day_text)+' · '+rs(l.mrp_p)+'</div>').join(""); });
+  if(R.back.length) h+='<div class="grp"><span>Back in store</span><span>'+lines(R.back.length)+'</span></div>'+R.back.map(l=>'<div class="rl"><b>'+esc(l.item)+'</b> — '+esc(l.short_day_text)+' at the count · '+rs(l.mrp_day_p)+' · '+esc(dash(l.why))+'</div>').join("");
+  if((R.closes||[]).length) h+='<div class="grp"><span>Each close of the count</span><span></span></div>'+R.closes.map(k=>'<div class="rl">'+esc(k.at_text)+' by '+esc(k.by)+': '+esc(dash(k.how_text))+' — total '+rs(k.total_p)+', small '+rs(k.small_p)+', big '+rs(k.big_p)+'</div>').join("");
+  if(R.runs.length) h+='<div class="grp"><span>Each close / clear</span><span></span></div>'+R.runs.map(r=>'<div class="rl">'+esc(r.at_text)+' by '+esc(r.by)+' · <b>'+esc(dash(r.kind_text||"Close the count"))+'</b>: '+lines(r.lines)+', '+rs(r.mrp_p)+' — '+r.groups.map(g=>esc(g.title)+' '+g.n).join(", ")+(r.round_no?' · Marg vouchers round '+r.round_no:'')+'</div>').join("");
+  if(R.settings_log.length) h+='<div class="grp"><span>Rule changes</span><span></span></div>'+R.settings_log.map(c=>'<div class="rl">'+esc(c.at_text)+' · '+esc(c.label)+': '+esc(c.old_text)+' → <b>'+esc(c.new_text)+'</b> ('+esc(c.seeded?"set by the build":c.by)+')</div>').join("");
+  if(R.trail.length) h+='<div class="grp"><span>Every tap on this desk</span><span></span></div>'+R.trail.slice(0,60).map(t=>'<div class="rl">'+esc(t.at_text)+' · '+esc(t.by)+' · '+esc(dash(t.what))+'</div>').join("");
+  h+='<div class="foot"><a href="'+esc(D.links.record_pdf)+'" target="_blank" rel="noopener">The record as a PDF</a></div>';
+  return h+'</details>';
+}
+function overHtml(){
+  if(!D.over||!D.over.length) return '';
+  return '<details class="plain"><summary>Over on the shelf — never a loss ('+D.over.length+')</summary><p class="lead">More on the shelf than Marg. Amir corrects Marg when the vouchers are made; nothing is lost here. Darpan may count any of these again on his Stock milaan.</p>'
+    +D.over.map(l=>'<div class="li"><div><div class="n">'+esc(l.item)+'</div><div class="q">'+esc(l.over_text)+' over · Marg '+esc(l.marg_text)+'</div></div><div class="v" style="color:var(--ok)">'+(l.recount?'<small>counted again</small>':'')+'</div><div class="w">'+esc(dash(l.why))+'</div></div>').join("")+'</details>';
+}
+function settingsHtml(){
+  if(!D.settings||!D.settings.length) return '';
+  let h='<details class="plain" id="settings"><summary>Settings — the rules of the piles</summary><p class="lead">Changing a rule re-piles the lines; it never decides one. Every change is recorded with who and when. Quantities are in strips and tabs (pcs for a bottle, a tube, a belt).</p>';
+  D.settings.forEach(s=>{
+    let c;
+    if(s.kind==="list"){
+      c='<div class="chips">'+(s.items.length?s.items.map(it=>'<button class="chip" data-consume-remove="'+esc(it)+'" title="Take off the list">'+esc(it)+' ×</button>').join(""):'<span class="none">Nothing on the list.</span>')+'</div>'
+        +'<div class="row"><input id="consume_q" placeholder="Search an item to add" aria-label="Search an item to add to the consumption list" autocomplete="off"></div>'
+        +'<div class="chips" id="consume_sugg">'+SUGG.map(n=>'<button class="chip add" data-consume-add="'+esc(n)+'">+ '+esc(n)+'</button>').join("")+'</div>';
+      h+='<div class="set"><div><b>'+esc(s.label)+'</b> — <span class="sub">now: '+esc(s.shown)+'</span></div><div class="h">'+esc(s.hint)+'</div>'+c+'</div>';
+      return;
+    }
+    if(s.kind==="choice") c='<select id="set_'+esc(s.key)+'">'+s.choices.map(o=>'<option value="'+esc(o.v)+'"'+(String(s.value)===o.v?' selected':'')+'>'+esc(o.t)+'</option>').join("")+'</select>';
+    else if(s.kind==="rupees") c='<input id="set_'+esc(s.key)+'" inputmode="numeric" placeholder="rupees" value="'+(s.rupees==null?'':s.rupees)+'" aria-label="'+esc(s.label)+' in rupees">';
+    else c='<input id="set_'+esc(s.key)+'" inputmode="decimal" value="'+esc(s.value)+'" aria-label="'+esc(s.label)+'">';
+    h+='<div class="set"><div><b>'+esc(s.label)+'</b> — <span class="sub">now: '+esc(s.shown)+'</span></div><div class="h">'+esc(s.hint)+'</div><div class="row">'+c+'<button class="s" data-save="'+esc(s.key)+'">Save</button></div></div>';
+  });
+  h+=watchSettings();                                          // S428: the second heading
+  return h+(MSG.settings?'<span class="msg'+(MSG.settings.ok?'':' bad')+'">'+MSG.settings.html+'</span>':'')+'</details>';
+}
+
+/* ---- S428 (D633): the watch card -- the full count's Sunday, the mornings' rosters, 'Count this', the close-watch list,
+   the traces, tap vs bill, this month's leakage -- and the second settings heading 'Counts & watch'.
+   S432: the STORED watch (scored by the 06:30 job or 'Refresh watch'), shown with its time; a read never scores it. ---- */
+let WSUGG=[];
+function pointsHtml(pts){ return pts.length?pts.map(p=>esc(p.at_text)+' '+esc(p.qty_text)+(p.gap_text?' ('+esc(p.gap_text)+')':'')).join(' · '):'no count yet'; }
+function watchCard(){
+  const W=D.watch; if(!W) return '';
+  const m=MSG.watch?'<span class="msg'+(MSG.watch.ok?'':' bad')+'">'+MSG.watch.html+'</span>':'<span class="msg"></span>';
+  const head='<section class="card" id="watch"><h2>Counts &amp; watch</h2><div class="row" style="margin:0 0 6px"><span class="sub">'+(W.stored_text?'As at '+esc(W.stored_text)+(W.refreshed_by?' ('+esc(W.refreshed_by)+')':''):'not scored yet')+' — scored by the 06:30 job, not by reading this page.</span><button class="s" data-watch-refresh="1"'+(BUSY?' disabled':'')+'>Refresh watch</button></div>';
+  if(W.ok===false) return head+'<div class="err">'+esc(W.note||'could not be read')+'</div>'+m+'</section>';
+  const P=W.plan||{}, pl=P.plan;
+  let h=head;
+  h+='<div class="grp"><span>Full count</span><span>every '+esc(P.cadence_months)+' month'+(String(P.cadence_months)==="1"?'':'s')+'</span></div>';
+  h+='<div class="lead">'+(P.last?'Last closed full count: '+esc(dash(P.last.as_on.split("-").reverse().join("-")))+'. ':'No closed full count yet. ')
+    +(pl?('<b>Due</b> (from '+esc(pl.due_from.split("-").reverse().join("-"))+'): '+(pl.status==="confirmed"?'Sunday <b>'+esc(pl.sunday_text)+'</b> — Amir picked, Darpan said yes.':(pl.status==="picked"?'Amir picked '+esc(pl.sunday_text)+' — Darpan\'s yes pending.':'Amir picks a Sunday on his board ('+pl.window_text.join(', ')+').')))
+      :('Next due from <b>'+esc(P.due_from.split("-").reverse().join("-"))+'</b>. Sundays only; Amir picks, Darpan confirms.'))+'</div>';
+  h+='<div class="grp"><span>Spot counts</span><span>'+esc((W.spot_days||[]).map(d=>d[0]+d.slice(1).toLowerCase()).join(", "))+' · up to '+W.cap+' items</span></div>';
+  const R=W.roster_today||{items:[]};
+  if(R.items.length) h+='<div class="lead"><b>Today ('+esc(R.day_text)+'):</b> '+R.items.map(r=>esc(r.item)+(r.answered_at?' — Darpan: '+esc(r.qty_hi)+(r.gap!=null?(r.gap<0?' (short)':(r.gap>0?' (over)':' (= records)')):''):' — not yet')).join(' · ')+'</div>';
+  else h+='<div class="lead"><b>Today:</b> '+(R.is_spot_day?'no list yet':'not a spot morning')+'.</div>';
+  if(W.next_day) h+='<div class="lead"><b>Next morning ('+esc(W.next_day_text)+'):</b> '+((W.roster_next||[]).length?W.roster_next.map(r=>esc(r.item)+' <span class="sub">('+esc(dash(r.reason))+')</span>').join(' · '):'nothing yet')+'</div>';
+  h+='<div class="lead">Count this — any item, at the head of Darpan\'s next list:</div><div class="row"><input id="watch_q" placeholder="Search an item" autocomplete="off" style="font:inherit;font-size:15px;padding:7px 9px;border-radius:9px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);min-height:40px;width:16em;max-width:100%"></div>'
+    +'<div class="chips" id="watch_sugg">'+WSUGG.map(n=>'<button class="chip add" data-ask="'+esc(n)+'">+ '+esc(n)+'</button>').join("")+'</div>'
+    +((W.asks||[]).length?'<div class="sub">Asked: '+W.asks.map(a=>esc(a.item)).join(', ')+'</div>':'')+m;
+  const L=W.leak, LP=W.leak_prev;
+  h+='<div class="grp"><span>Leakage</span><span>budget '+esc(L?L.budget_pct:'')+'%</span></div>';
+  h+='<div class="lead">'+(L?'<b style="color:'+(L.red?'var(--diff)':'var(--ok)')+'">'+esc(L.text)+'</b>':'—')+(LP&&LP.pct!=null?' · previous month: '+esc(LP.text):'')+'</div>';
+  const T=W.traces||[];
+  h+='<div class="grp"><span>Traces</span><span>'+T.length+(W.first_count_n?' · '+W.first_count_n+' with no earlier point (first count)':'')+'</span></div>';
+  if(!T.length) h+='<div class="none">No trace yet — one opens on every Big-loss line at the close and on every flag.</div>';
+  T.slice(0,12).forEach(t=>{ h+='<div class="li"><div><div class="n">'+esc(t.item)+' <span class="tag'+(t.verdict==="explained"?' ok':'')+'">'+esc(t.verdict_text)+'</span></div><div class="q">'+esc(t.gap_text)+' · '+esc(t.window_text)+' · from '+esc(dash(t.anchor_text))+'</div></div><div class="v" style="color:var(--muted);font-weight:400;font-size:12.5px">'+esc(t.opened_text)+'</div>'
+    +'<div class="w">'+t.findings.filter(f=>!f.ok||f.explains).map(f=>esc(dash(f.text))).join(' · ')+(t.fix?' — <b>Amir: '+esc(t.fix)+'</b>':'')+'</div></div>'; });
+  const V=W.tap_vs_bill||[];
+  if(V.length) h+='<div class="grp"><span>Tap vs bill</span><span>'+V.length+'</span></div>'+V.map(x=>'<div class="rl">'+esc(x.text)+' · '+esc(x.vendor)+' · '+esc(x.at_text)+'</div>').join("");
+  const WL=W.watch||[];
+  h+='<div class="grp"><span>Close-watch list</span><span>'+WL.length+'</span></div>';
+  WL.slice(0,60).forEach(x=>{ h+='<div class="li"><div><div class="n">'+esc(x.item)+'</div><div class="q">'+esc(x.why)+' · '+x.trend.map(tr=>esc(tr.label)+' sold '+esc(tr.sold)+(tr.lost?', lost '+esc(tr.lost):'')).join(' · ')+'</div></div><div class="v" style="color:var(--muted);font-weight:400;font-size:12.5px">'+esc(pointsHtml(x.points))+'</div><div class="act"><button class="s" data-count="'+esc(x.item)+'">Count this</button></div></div>'; });
+  const N=W.notices||[];
+  if(N.length) h+='<div class="grp"><span>Lines</span><span></span></div>'+N.slice(0,8).map(n=>'<div class="rl">'+esc(n.at_text)+' · '+esc(n.text)+'</div>').join("");
+  return h+'</section>';
+}
+function drawWatch(){ const e=document.getElementById("watch"); if(!e) return; const t=document.createElement("div"); t.innerHTML=watchCard(); if(t.firstElementChild) e.replaceWith(t.firstElementChild); }
+function watchSettings(){
+  const W=D.watch; if(!W||!W.settings) return '';
+  let h='<div class="grp" style="margin-top:18px"><span>Counts &amp; watch</span><span>S428</span></div><p class="lead">Sunday full counts, the mornings\' spot counts, arrivals, the trace and the leakage budget. In strips words; every change recorded.</p>';
+  W.settings.forEach(s=>{
+    let c;
+    if(s.kind==="choice") c='<select id="set_'+esc(s.key)+'">'+s.choices.map(o=>'<option value="'+esc(o.v)+'"'+(String(s.value)===o.v?' selected':'')+'>'+esc(o.t)+'</option>').join("")+'</select>';
+    else if(s.kind==="rupees") c='<input id="set_'+esc(s.key)+'" inputmode="numeric" placeholder="rupees" value="'+(s.rupees==null?'':s.rupees)+'" aria-label="'+esc(s.label)+' in rupees">';
+    else c='<input id="set_'+esc(s.key)+'" value="'+esc(s.value)+'" aria-label="'+esc(s.label)+'">';
+    h+='<div class="set"><div><b>'+esc(s.label)+'</b> — <span class="sub">now: '+esc(s.shown)+'</span></div><div class="h">'+esc(dash(s.hint))+'</div><div class="row">'+c+'<button class="s" data-save="'+esc(s.key)+'">Save</button></div></div>';
+  });
+  return h;
+}
+let WQT=null;
+document.addEventListener("input", e=>{
+  if(e.target.id!=="watch_q") return;
+  const q=e.target.value.trim(); clearTimeout(WQT);
+  if(q.length<2){ WSUGG=[]; const s=document.getElementById("watch_sugg"); if(s) s.innerHTML=""; return; }
+  WQT=setTimeout(async()=>{ const r=await fetch(BASE+"/api/loss/"+D.count_id+"/items?q="+encodeURIComponent(q),{cache:"no-store"}).catch(()=>null); const j=r?await r.json().catch(()=>null):null;
+    WSUGG=(j&&j.ok)?j.items:[]; const s=document.getElementById("watch_sugg"); if(s) s.innerHTML=WSUGG.map(n=>'<button class="chip add" data-ask="'+esc(n)+'">+ '+esc(n)+'</button>').join(""); },250);
+});
+function render(){
+  document.getElementById("who").textContent="Count #"+D.count_id+" of "+(D.day||"");
+  tally();
+  let h=groupCard();
+  D.piles.forEach((P,i)=>{ h+=pileCard(P,i); });
+  h+=closeCard()+watchCard();                                  // S428: the watch card
+  if(D.orthotics_elsewhere) h+='<div class="sub" style="margin:4px 2px">The '+D.orthotics_elsewhere+' orthotic lines are closed on their own section (the hub), not here.</div>';
+  h+=soldAfterHtml()+overHtml()+recordHtml()+settingsHtml();
+  const open=[...document.querySelectorAll("details.plain[open]")].map(x=>x.id).filter(Boolean);
+  const qv=(document.getElementById("consume_q")||{}).value||"";
+  const wv=(document.getElementById("watch_q")||{}).value||"";   // S428
+  document.getElementById("body").innerHTML=h;
+  open.forEach(id=>{ const e=document.getElementById(id); if(e) e.open=true; });
+  const qi=document.getElementById("consume_q"); if(qi&&qv){ qi.value=qv; }
+  const wi=document.getElementById("watch_q"); if(wi&&wv){ wi.value=wv; }   // S428
+  document.getElementById("foot").innerHTML='<a href="'+esc(D.links.hub)+'">Stock check — the hub</a><a href="'+esc(D.links.amir)+'">Amir\'s board</a><a href="'+esc(D.links.stockmatch)+'">Darpan\'s Stock milaan</a><a href="'+esc(D.links.record_pdf)+'" target="_blank" rel="noopener">The record (PDF)</a>';
+}
+
+async function post(url, body){
+  const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{})}).catch(()=>null);
+  return r?await r.json().catch(()=>null):null;
+}
+function say(k, j, extra){ MSG={}; MSG[k]={ok:!!(j&&j.ok), html:esc((j&&j.message)||"The server did not answer.")+(extra||"")}; }
+function disarm(){ ARM=null; if(ARMT){ clearInterval(ARMT); ARMT=null; } }
+let QT=null;
+document.addEventListener("input", e=>{
+  if(e.target.id!=="consume_q") return;
+  const q=e.target.value.trim(); clearTimeout(QT);
+  if(q.length<2){ SUGG=[]; const s=document.getElementById("consume_sugg"); if(s) s.innerHTML=""; return; }
+  QT=setTimeout(async()=>{ const r=await fetch(BASE+"/api/loss/"+D.count_id+"/items?q="+encodeURIComponent(q),{cache:"no-store"}).catch(()=>null); const j=r?await r.json().catch(()=>null):null;
+    SUGG=(j&&j.ok)?j.items:[]; const s=document.getElementById("consume_sugg"); if(s) s.innerHTML=SUGG.map(n=>'<button class="chip add" data-consume-add="'+esc(n)+'">+ '+esc(n)+'</button>').join(""); },250);
+});
+document.addEventListener("toggle", e=>{                        // S432: a pile's lines are drawn when its card opens
+  const d=e.target.closest&&e.target.closest("details[data-pile]"); if(!d) return;
+  const k=d.getAttribute("data-pile");
+  if(d.open){ OPENP.add(k); const P=D.piles.find(p=>p.key===k); const box=document.getElementById("pin_"+k); if(box&&P) box.innerHTML=pileBody(P); }
+  else OPENP.delete(k);
+}, true);
+document.addEventListener("change", async e=>{
+  const t=e.target;
+  if(t.id==="grp"){ GROUP=t.value; TICK=new Set(); MENU=null; disarmClear(); MSG={}; drawGroup(); return; }   // S432: the group picked
+  const tk=t.closest("input[data-tick]");
+  if(tk){ const item=tk.getAttribute("data-tick");                // S432: a tick is local; an UNTICK opens the pile menu on that line
+    if(tk.checked){ TICK.add(item); if(MENU===item) MENU=null; } else { TICK.delete(item); MENU=item; }
+    disarmClear(); drawGroup(); return; }
+  const s=t.closest("select[data-move]");
+  if(!s||!s.value||BUSY) return;
+  BUSY=true; disarm(); disarmClear();
+  const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/move",{item:s.getAttribute("data-move"),pile:s.value}); BUSY=false;
+  say(s.value==="auto"?"with_me":s.value, j); if(j&&j.ok&&j.patch) applyPatch(j.patch); else load(true);
+});
+document.addEventListener("click", async e=>{
+  const t=e.target;
+  const al=t.closest("[data-all]"); if(al){ SHOWALL.add(al.getAttribute("data-all")); const k=al.getAttribute("data-all").split("_")[0]; drawPile(k); return; }
+  if(t.closest("[data-tickall]")){ groupLines().forEach(l=>TICK.add(l.item)); MENU=null; disarmClear(); drawGroup(); return; }   // S432
+  if(t.closest("[data-untickall]")){ TICK=new Set(); MENU=null; disarmClear(); drawGroup(); return; }
+  if(t.closest("[data-gclose]")){ MENU=null; drawGroup(); return; }                       // the menu closed: the line stays where it is, unticked
+  if(BUSY) return;
+  const gm=t.closest("[data-gmove]");
+  if(gm){ BUSY=true; const item=gm.getAttribute("data-gmove"), pile=gm.getAttribute("data-pile");   // S432: the pile menu on an unticked line -> the move is written (audited 'owner'); the line leaves this list
+    const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/move",{item:item,pile:pile}); BUSY=false; MENU=null; TICK.delete(item);
+    MSG={group:{ok:!!(j&&j.ok),html:esc((j&&j.message)||"The server did not answer.")}}; if(j&&j.ok&&j.patch) applyPatch(j.patch); else load(true); return; }
+  if(t.closest("[data-clear-arm]")){ BUSY=true;                   // S432: Clear this group (N ticked) -- armed, a 10-second confirm
+    const items=groupLines().filter(l=>TICK.has(l.item)).map(l=>l.item);
+    const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/clear",{group:GROUP,items:items}); BUSY=false;
+    if(j&&j.ok&&j.arm){ CARM={token:j.arm.token,n:j.arm.n,mrp_p:j.arm.mrp_p,left:j.arm.seconds}; MSG={};
+      CARMT=setInterval(()=>{ if(!CARM){return;} CARM.left-=1; if(CARM.left<=0){ disarmClear(); drawGroup(); return; } document.querySelectorAll(".clcd2").forEach(cd=>{ cd.textContent=rs(CARM.mrp_p)+" at MRP — this button goes away in "+CARM.left+" s"; }); },1000);
+    } else MSG={group:{ok:false,html:esc((j&&j.message)||"The server did not answer.")}};
+    drawGroup(); return; }
+  if(t.closest("[data-clear-yes]")&&CARM){ BUSY=true; const tok=CARM.token; disarmClear();
+    const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/clear",{token:tok}); BUSY=false;
+    const dn=(j&&j.done)||{};
+    MSG={group:{ok:!!(j&&j.ok),html:esc((j&&j.message)||"The server did not answer.")+((j&&j.ok&&dn.round_no)?' <a href="'+esc(D.links.amir)+'">Amir\'s board</a>':'')}};
+    if(j&&j.ok&&dn.patch){ TICK=new Set(); applyPatch(dn.patch); if(dn.auto_closed){ MSG.close=MSG.group; drawClose(); } } else load(true); return; }
+  const ac=t.closest("[data-accept]");
+  if(ac){ BUSY=true; ac.disabled=true; const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/accept",{items:[ac.getAttribute("data-accept")]}); BUSY=false; say("with_me",j); if(j&&j.ok&&j.patch) applyPatch(j.patch); else load(true); return; }
+  const ca=t.closest("[data-consume-add]");
+  if(ca){ BUSY=true; const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/setting",{key:"stock.consume_items",add:ca.getAttribute("data-consume-add")}); BUSY=false; SUGG=[]; const qi=document.getElementById("consume_q"); if(qi) qi.value="";
+    MSG={settings:{ok:!!(j&&j.ok),html:esc((j&&j.message)||"The server did not answer.")}}; load(true); return; }
+  const cr=t.closest("[data-consume-remove]");
+  if(cr){ BUSY=true; const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/setting",{key:"stock.consume_items",remove:cr.getAttribute("data-consume-remove")}); BUSY=false;
+    MSG={settings:{ok:!!(j&&j.ok),html:esc((j&&j.message)||"The server did not answer.")}}; load(true); return; }
+  if(t.closest("[data-close-arm]")){ BUSY=true;                // S430: the top and the foot button share one arm
+    const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/close",{}); BUSY=false;
+    if(j&&j.ok&&j.arm){ ARM={token:j.arm.token,n:j.arm.n,mrp_p:j.arm.mrp_p,left:j.arm.seconds}; MSG={};
+      ARMT=setInterval(()=>{ if(!ARM){return;} ARM.left-=1; if(ARM.left<=0){ disarm(); tally(); drawClose(); return; } document.querySelectorAll(".clcd").forEach(cd=>{ cd.textContent=rs(ARM.mrp_p)+" at MRP — this button goes away in "+ARM.left+" s"; }); },1000);
+    } else say("close",j);
+    tally(); drawClose(); return; }
+  if(t.closest("[data-close-yes]")&&ARM){ BUSY=true; const tok=ARM.token; disarm();
+    const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/close",{token:tok}); BUSY=false;
+    say("close",j,(j&&j.ok&&j.done&&j.done.round_no)?' <a href="'+esc(D.links.amir)+'">Amir\'s board</a>':''); if(j&&j.ok&&j.done&&j.done.patch) applyPatch(j.done.patch); else load(true); return; }
+  if(t.closest("[data-watch-refresh]")){ BUSY=true; drawWatch();   // S432: the watch scored again, on demand
+    const j=await post(BASE+"/api/watch/refresh",{count_id:D.count_id}); BUSY=false;
+    if(j&&j.ok&&j.watch) D.watch=j.watch; MSG={watch:{ok:!!(j&&j.ok),html:esc((j&&j.message)||"The server did not answer.")}}; drawWatch(); return; }
+  const ct=t.closest("[data-count],[data-ask]");                // S428: Count this
+  if(ct){ BUSY=true; const j=await post(BASE+"/api/watch/ask",{item:ct.getAttribute("data-count")||ct.getAttribute("data-ask")}); BUSY=false; WSUGG=[]; const qi=document.getElementById("watch_q"); if(qi) qi.value="";
+    MSG={watch:{ok:!!(j&&j.ok),html:esc((j&&j.message)||"The server did not answer.")}};
+    if(j&&j.ok&&D.watch){ D.watch.asks=D.watch.asks||[]; const it=ct.getAttribute("data-count")||ct.getAttribute("data-ask"); if(!D.watch.asks.some(a=>a.item===it)) D.watch.asks.push({item:it}); }
+    drawWatch(); return; }
+  const sv=t.closest("[data-save]");
+  if(sv){ const key=sv.getAttribute("data-save"), inp=document.getElementById("set_"+key); BUSY=true;
+    const j=await post(BASE+"/api/loss/"+D.count_id+"/pile/setting",{key:key,value:inp?inp.value:""}); BUSY=false;
+    MSG={settings:{ok:!!(j&&j.ok),html:esc((j&&j.message)||"The server did not answer.")}}; load(true); return; }
+});
+load();
+</script></body></html>

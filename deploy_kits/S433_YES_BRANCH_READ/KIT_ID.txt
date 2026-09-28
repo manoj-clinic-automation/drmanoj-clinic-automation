@@ -1,0 +1,2 @@
+S433 KIT S433_YES_BRANCH_READ
+session 286 (parent) · 28-Sep-2026 · F-652: the statement shelf reads the Yes Bank branch statements (packs.py 938aa68f -> c3eb9db0, NEW yes_branch.py); the owner's rulings: ...0460 off the shelf, yes_cur_clinic retired
