@@ -127,6 +127,11 @@ by the rule and carries them; 34 RECEIVE lines instead of 15.
   list allows — the same shapes S436 used — rather than another spelling of the chained line.
 - Not done: nothing of the brief was left out. `stockmatch.py` was pinned but needed no change.
 
+**After the publish (23:15 IST):** repository published with `PUBLISH_ALL.bat` (gate clean, commit `c555235` on main, origin verified); on the box
+`git pull --ff-only` → HEAD c555235; `deploy_kits/S437_COUNT_PAGES_FINAL/` SUMS.md5 13 of 13 OK; `diff -r` repo kit vs `/tmp/s437kit` (what ran):
+byte-identical; the repository's own installer run from `/root/deploy/repo`: "ALREADY INSTALLED: the eight files are at the kit's pins;
+clinic-finance active; healthz 200"; public healthz 200; the build lock released 23:15:31 IST. This report is published in a second commit.
+
 **Undo:** the eight `.bak_S437_<from8>` files back, `systemctl restart clinic-finance`, healthz 200. The seed's rows (the setting, the rule's
 words, run 3, round 5) are data an older loss_piles ignores (round 5 would then show as "Round 5" on the older board);
 `finance.db.bak_S437_20260928_224714` only if the owner asks for them to be reversed — say so first.
