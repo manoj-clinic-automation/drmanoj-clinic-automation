@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stock milaan</title>
+<!-- S404_ORTHO_STOCK_CLOSE (26-Sep-2026, D619): Darpan's stock match for the ORTHOTIC section of the 06-Sep count.
+     Hindi (Roman script), phone-first, works on the PC. Two cards: Adla-badli? (Haan / Nahi per pair) and
+     Kam kyun? (one answer per line). Every figure comes from /finance/stockmatch/api/...; nothing is computed here.
+     One tap = saved (a big green card, S394); a repeat within ten minutes writes nothing and says so.
+     S436_STAFF_PAGES_CLEAN (28-Sep-2026, D638): Kam kyun? offers ONE answer a side (the server sends it); a line the rule
+     answered by default is shown for Darpan to confirm; the staff block prints every line the server gives (the orthotic
+     foot line too); the section's verdict comes from the server. -->
+<style>
+ body{font:16px/1.45 system-ui,sans-serif;margin:0;background:#f6f4f1;color:#1c1c1c;max-width:640px;margin:0 auto;padding:10px 12px 40px}
+ h1{font-size:19px;margin:8px 0 2px}
+ h2{font-size:17px;margin:0 0 6px}
+ .sub{color:#777;font-size:13px;margin-bottom:8px}
+ .card{background:#fff;border:1px solid #e4e0da;border-radius:10px;margin:10px 0;padding:12px 14px}
+ .prog{background:#1c1c1c;color:#fff;border-radius:10px;padding:12px 14px;font-size:18px;font-weight:700;margin:10px 0}
+ .prog.done{background:#2e6b34}
+ .row{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;gap:8px}
+ .k{color:#555}.v{font-weight:600;font-variant-numeric:tabular-nums}
+ .pair,.line{border-top:1px solid #eee;padding:10px 0}
+ .pair:first-of-type,.line:first-of-type{border-top:0}
+ .pair.done,.line.done{background:#f1f7f2;margin:0 -14px;padding:10px 14px;border-radius:0}
+ .pair.owner,.line.owner{background:#f3f3f3;color:#555}
+ .nm{font-size:16px;font-weight:700}
+ .muted{color:#888;font-size:13px}
+ .btn{display:inline-block;border:1px solid #bbb;border-radius:9px;padding:12px 16px;margin:6px 8px 4px 0;background:#fafafa;font-size:17px;font-weight:600;cursor:pointer;user-select:none}
+ .btn.ok{background:#2e6b34;color:#fff;border-color:#2e6b34}
+ .btn.bad{background:#fff;color:#b3261e;border-color:#b3261e}
+ .btn.chip{font-size:15px;padding:9px 12px;border-color:#3c6ac2;color:#3c6ac2;background:#fff}
+ .btn.chip.on{background:#3c6ac2;color:#fff}
+ .btn:active{opacity:.7}
+ .ans{font-size:15px;font-weight:600;color:#2e6b34;margin-top:4px}
+ .ans.owner{color:#555}
+ .saved{background:#e4f2e6;border:2px solid #2e6b34;border-radius:12px;padding:14px;margin:10px 0}
+ .saved .t{font-size:22px;font-weight:700;color:#2e6b34}
+ .saved .l{font-size:18px;margin-top:4px}
+ .saved.dup{background:#fdf1dc;border-color:#b26a00}.saved.dup .t{color:#b26a00}
+ .saved.err{background:#fbe7e5;border-color:#b3261e}.saved.err .t{color:#b3261e}
+ .verdict{font-size:16px;font-weight:700}
+ .verdict.closed{color:#2e6b34}
+ .cond{font-size:14px;padding:2px 0}
+ .cond.ok{color:#2e6b34}.cond.no{color:#b26a00}
+ .empty{color:#888;font-style:italic;font-size:14px}
+ .tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:10px;background:#eee;margin-left:6px;vertical-align:middle}
+ .blk{background:#2b1d1d;color:#fff;border-color:#2b1d1d}
+ .blk .bl1{font-size:18px;font-weight:700}.blk .bl2{font-size:15px;opacity:.9;margin-top:2px}.blk .bl3{font-size:16px;font-weight:700;margin-top:6px;color:#ffd9d2;overflow-wrap:anywhere}
+ .blk .muted{color:#d8cfcf}.blk input{border:1px solid #777;border-radius:8px;background:#fff;color:#1c1c1c}
+ .sugg .btn{margin:4px 6px 0 0}
+</style>
+</head>
+<body>
+<h1>Stock milaan</h1>
+<div class="sub" id="sub">06-Sep ki ginti &middot; sirf orthotics</div>
+<div id="body">loading&hellip;</div>
+<script>
+const el=id=>document.getElementById(id);
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let S=null, MSG=null, BUSY=false;
+const CID=(new URLSearchParams(location.search).get("count")||"");
+const Q=CID?("?count="+encodeURIComponent(CID)):"";
+
+async function get(u){const r=await fetch(u+(u.indexOf("?")<0?"?":"&")+"_="+Date.now(),{cache:"no-store"});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok){const e=new Error(j.message||j.error||("HTTP "+r.status));e.j=j;throw e;}return j;}
+async function post(u,b){const r=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok){const e=new Error(j.message||j.error||("HTTP "+r.status));e.j=j;throw e;}return j;}
+
+async function load(){
+ try{S=await get("/finance/stockmatch/api/state"+Q);}catch(e){el("body").innerHTML='<div class="card">'+esc(e.message)+'</div>';return;}
+ render();
+}
+function who(p){return p.answered_by==="darpan"?"Aapne":(p.answered_by?"Doctor sahab":"");}
+function msgHtml(){if(!MSG)return "";return '<div class="saved '+(MSG.kind||"")+'"><div class="t">'+esc(MSG.title)+'</div>'+(MSG.lines||[]).map(l=>'<div class="l">'+l+'</div>').join("")+'</div>';}
+function render(){
+ const s=S; let h=msgHtml();
+ h+=s428Top(s);                                              // S428: Aaj ki ginti on top, the count's Sunday
+ h+=s418Cards(s);                                            // S427 over S418: the staff block, Dobara ginna hai, Bina bill?
+ h+=s428Cards(s);                                            // S428: the loss lines, Stock batao, Kuchh gadbad hai, Dekh liya
+ el("sub").textContent=(s.day?s.day+" ki ginti":"")+" · aaj ki ginti · dobara ginna hai · bina bill · round "+s.count_id;
+ h+='<div class="prog'+(s.progress.all&&s.progress.need?' done':'')+'">'+esc(s.progress.hi)+'</div>';
+ // card 1 -- the pairs
+ const open1=s.pairs.filter(p=>!p.locked).length;
+ h+='<div class="card"><h2>Adla-badli? <span class="tag">'+open1+'</span></h2><div class="muted">Ek size kam, doosra zyada &mdash; kya doosre size ka bill bana tha? Haan = adla-badli.</div>';
+ if(!s.pairs.length)h+='<div class="empty">Koi jodi nahi.</div>';
+ s.pairs.forEach(p=>{
+  const own=p.answered_by&&p.answered_by!==s.user;
+  h+='<div class="pair'+(p.locked?(own?' owner':' done'):'')+'"><div class="row"><span class="k">Kam:</span><span class="nm">'+esc(p.short)+'</span></div>'+
+     '<div class="row"><span class="k">Zyada:</span><span class="nm">'+esc(p.over)+'</span></div>'+
+     '<div class="muted">'+esc(p.qty_text)+' &middot; '+esc(p.close)+(p.family?' &middot; '+esc(p.family):'')+'</div>';
+  if(p.answer) h+='<div class="ans'+(own?' owner':'')+'">'+esc(who(p))+': '+(p.answer==="YES"?"Haan &mdash; adla-badli":"Nahi &mdash; adla-badli nahi")+(p.answered_text?' <span class="muted">('+esc(p.answered_text)+')</span>':'')+'</div>';
+  else if(p.by_words) h+='<div class="ans owner">Doctor sahab ne dono lines par faisla de diya.</div>';
+  else h+='<div><span class="btn ok" onclick="pair(\''+esc(p.short).replace(/'/g,"\\'")+'\',\''+esc(p.over).replace(/'/g,"\\'")+'\',\'YES\')">Haan</span><span class="btn bad" onclick="pair(\''+esc(p.short).replace(/'/g,"\\'")+'\',\''+esc(p.over).replace(/'/g,"\\'")+'\',\'NO\')">Nahi</span></div>';
+  h+='</div>';
+ });
+ h+='</div>';
+ // card 2 -- the lines: S436 -- ONE answer a side (the server sends it); a line the rule answered by default stays here for Darpan to confirm
+ const L=s.lines.filter(l=>l.open||l.defaulted);
+ const open2=L.filter(l=>!l.answered||l.defaulted).length;
+ h+='<div class="card"><h2>Kam kyun? <span class="tag">'+open2+'</span></h2><div class="muted">Adla-badli ke baad jo kam ya zyada bacha &mdash; ek tap: kam = bina bill bik gaya, zyada = bill bana par diya nahi.</div>';
+ if(!L.length)h+='<div class="empty">Koi line baaki nahi.</div>';
+ L.forEach(l=>{
+  const own=l.reasoned&&l.cause_by&&l.cause_by!==s.user&&!l.defaulted;
+  h+='<div class="line'+(l.answered&&!l.defaulted?(own||l.word?' owner':' done'):'')+'"><div class="nm">'+esc(l.item)+(l.defaulted?' <span class="tag">default &mdash; aapne nahi likha</span>':'')+'</div>'+
+     '<div class="muted">Marg '+l.marg+' &middot; gina '+l.counted+' &middot; <b>'+esc(l.rem_text)+'</b>'+(l.swapped?' &middot; adla-badli '+l.swapped+' ('+esc(l.swap_with.join(", "))+')':'')+'</div>';
+  if(l.word&&!l.defaulted) h+='<div class="ans owner">Doctor sahab: '+esc(l.word)+'</div>';
+  if(l.reasoned&&!l.defaulted) h+='<div class="ans'+(own?' owner':'')+'">'+(own?'Doctor sahab':'Aapne')+': '+esc(l.cause_hi)+(l.cause_at_text?' <span class="muted">('+esc(l.cause_at_text)+')</span>':'')+'</div>';
+  if(l.defaulted) h+='<div class="ans owner">System: '+esc(l.cause_hi)+' &mdash; sahi ho to tap kar dijiye.</div>';
+  if(!l.locked&&(!l.word||l.defaulted)) h+='<div>'+l.reasons.map(r=>'<span class="btn chip'+(l.cause===r.key&&!l.defaulted?' on':'')+'" onclick="reason('+l.diff_id+',\''+r.key+'\')">'+esc(r.hi)+'</span>').join("")+'</div>';
+  h+='</div>';
+ });
+ h+='</div>';
+ // the section
+ h+='<div class="card"><div class="verdict'+(s.closed?' closed':'')+'">'+esc(s.verdict_hi)+'</div>'+
+    s.conds.map(c=>'<div class="cond '+(c.ok?'ok':'no')+'">'+(c.ok?'&#10003; ':'&#9675; ')+esc(c.hi)+'</div>').join("")+'</div>';
+ el("body").innerHTML=h;
+}
+/* ---- S427 (D632) over S418 (D631): the staff block, Dobara ginna hai (Darpan's own recount -- no Marg figure is shown, count
+   what is on the shelf) and Bina bill? (the lines the doctor is pursuing -- one answer each). ---- */
+function s418Cards(s){
+ let h='';
+ /* ---- S427 (D632): THE STAFF BLOCK -- pinned until the next count closes. Total loss; the small part written off; the big
+    part BY NAME. No reasons, no percentages, no questions; one line 'Kuchh batana hai?' under it. ---- */
+ const K=s.block;
+ if(K){
+  h+='<div class="card blk"><div class="bl1">'+esc(K.lines_hi[0])+'</div><div class="bl2">'+esc(K.lines_hi[1])+'</div><div class="bl3">'+esc(K.lines_hi[2])+'</div>'
+   +K.lines_hi.slice(3).map(x=>'<div class="bl2">'+esc(x)+'</div>').join("");   // S436: the orthotic foot line, when the server gives one
+  (K.notes||[]).forEach(n=>{ h+='<div class="muted" style="margin-top:4px">'+esc(n.by)+' ('+esc(n.at_text)+'): '+esc(n.text)+'</div>'; });
+  h+='<div class="row" style="justify-content:flex-start;flex-wrap:wrap;margin-top:8px"><input id="note_t" placeholder="Kuchh batana hai?" maxlength="500" style="flex:1;min-width:12em;font-size:16px;padding:8px"><span class="btn ok" onclick="note()">Bhej do</span></div></div>';
+ }
+ /* ---- S427: Dobara ginna hai -- Darpan's OWN option, any item of the round; no Marg figure is shown. ---- */
+ h+='<div class="card"><h2>Dobara ginna hai</h2><div class="muted">Koi item dobara ginna ho to naam likhiye, phir shelf par jitna hai utna likhiye. Aapki ginti darj ho jaati hai.</div>';
+ h+='<div class="row" style="justify-content:flex-start;flex-wrap:wrap"><input id="rq" placeholder="Item ka naam" oninput="rsearch()" autocomplete="off" style="flex:1;min-width:12em;font-size:17px;padding:8px"></div><div id="rsugg" class="sugg"></div>';
+ if(RSEL){
+  h+='<div class="line"><div class="nm">'+esc(RSEL.item)+'</div><div class="muted">'+esc(RSEL.packing||'')+(RSEL.pack>1?' &middot; ek patte mein '+RSEL.pack:'')+'</div>'
+   +'<div class="row" style="justify-content:flex-start;flex-wrap:wrap">'+(RSEL.pack>1?'<label>Patte <input id="rs0" inputmode="numeric" style="width:5em;font-size:17px;padding:8px"></label> <label>Goli <input id="rl0" inputmode="numeric" style="width:5em;font-size:17px;padding:8px"></label>'
+   :'<label>'+esc(RSEL.whole||'Nag')+' <input id="rl0" inputmode="numeric" style="width:6em;font-size:17px;padding:8px"></label>')+'<span class="btn ok" onclick="recount()">Likh do</span></div></div>';
+ }
+ const R=s.recounts||[];
+ if(R.length){ h+='<div class="muted" style="margin-top:8px">Aapne gina:</div>'; R.forEach(r=>{ h+='<div class="line done"><div class="nm">'+esc(r.item)+'</div><div class="ans">'+esc(r.qty_text)+' <span class="muted">('+esc(r.at_text)+')</span></div></div>'; }); }
+ h+='</div>';
+ const C=s.claims||[], A=s.claim_answers||[];
+ if(C.length){
+  h+='<div class="card"><h2>Bina bill? <span class="tag">'+C.filter(c=>!c.answer).length+'</span></h2><div class="muted">Doctor sahab in lines ka pata kar rahe hain &mdash; ek jawab chuniye.</div>';
+  C.forEach(c=>{
+   h+='<div class="line'+(c.answer?' done':'')+'"><div class="nm">'+esc(c.item)+'</div>'+(c.short_qty?'<div class="muted">'+c.short_qty+' kam</div>':'');
+   if(c.answer) h+='<div class="ans">Aapne: '+esc(c.answer_hi)+'</div>';
+   h+='<div>'+A.map(a=>'<span class="btn chip'+(c.answer===a.key?' on':'')+'" onclick="claim('+c.id+',\''+a.key+'\')">'+esc(a.hi)+'</span>').join("")+'</div></div>';
+  });
+  h+='</div>';
+ }
+ return h;
+}
+let RSEL=null, RSUGG=[], RT=null;
+function rsearch(){
+ const q=(el("rq")?el("rq").value:"").trim(); clearTimeout(RT);
+ if(q.length<2){ if(el("rsugg")) el("rsugg").innerHTML=""; return; }
+ RT=setTimeout(async()=>{ try{ const j=await get("/finance/stockmatch/api/items"+(Q?Q+"&":"?")+"q="+encodeURIComponent(q)); RSUGG=j.items||[];
+   if(el("rsugg")) el("rsugg").innerHTML=RSUGG.length?RSUGG.map((it,i)=>'<span class="btn chip" onclick="rpick('+i+')">'+esc(it.item)+'</span>').join(""):'<div class="empty">Koi item nahi mila.</div>';
+  }catch(e){ if(el("rsugg")) el("rsugg").innerHTML='<div class="empty">'+esc(e.message)+'</div>'; } },250);
+}
+function rpick(i){ RSEL=RSUGG[i]; const q=el("rq")?el("rq").value:""; render(); if(el("rq")) el("rq").value=q; const a=el("rs0")||el("rl0"); if(a) a.focus(); }
+async function recount(){
+ if(BUSY||!RSEL)return; const r=RSEL; const a=el("rs0"), b=el("rl0");
+ const body={item:r.item};
+ if(r.pack>1){ body.strips=(a&&a.value)||0; body.loose=(b&&b.value)||0; if(String((a&&a.value)||"").trim()===""&&String((b&&b.value)||"").trim()===""){MSG={kind:"err",title:"Ginti likhiye",lines:[esc(r.item)]};render();return;} }
+ else { body.pcs=(b&&b.value)||""; if(String(body.pcs).trim()===""){MSG={kind:"err",title:"Ginti likhiye",lines:[esc(r.item)]};render();return;} }
+ BUSY=true;
+ try{const j=await post("/finance/stockmatch/api/recount"+Q,body); RSEL=null; after(j,"✓ Save ho gaya",[esc(j.saved.message)]);}
+ catch(e){MSG={kind:"err",title:"Nahi hua",lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+async function note(){
+ if(BUSY)return; const t=((el("note_t")||{}).value||"").trim();
+ if(!t){MSG={kind:"err",title:"Kuchh likhiye",lines:[]};render();return;}
+ BUSY=true;
+ try{const j=await post("/finance/stockmatch/api/note"+Q,{text:t}); after(j,"✓ Likh liya",[esc(j.saved.message)]);}
+ catch(e){MSG={kind:"err",title:"Nahi hua",lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+/* ---- S428 (D633): Darpan's side of the watch. Aaj ki ginti (the morning's items, on top), the count's Sunday
+   (Theek hai / Nahi ho payega), the dated loss lines under the block, Stock batao (any item, any day), Kuchh gadbad
+   hai (what he sees -> the trace), Dekh liya on a trace. ---- */
+function boxes(pack, whole, id){
+ return pack>1?'<label>Patte <input id="ws'+id+'" inputmode="numeric" style="width:5em;font-size:17px;padding:8px"></label> <label>Goli <input id="wl'+id+'" inputmode="numeric" style="width:5em;font-size:17px;padding:8px"></label>'
+  :'<label>'+esc(whole||'Nag')+' <input id="wl'+id+'" inputmode="numeric" style="width:6em;font-size:17px;padding:8px"></label>';
+}
+function readBoxes(pack, id, body){
+ const a=el("ws"+id), b=el("wl"+id);
+ if(pack>1){ body.strips=(a&&a.value)||0; body.loose=(b&&b.value)||0; return String((a&&a.value)||"").trim()!==""||String((b&&b.value)||"").trim()!==""; }
+ body.pcs=(b&&b.value)||""; return String(body.pcs).trim()!=="";
+}
+function s428Top(s){
+ const W=s.watch; if(!W||!W.ok) return '';
+ let h='';
+ const R=W.roster||{items:[]};
+ if(R.items.length){
+  h+='<div class="card"><h2>Aaj ki ginti <span class="tag">'+R.open+'</span></h2><div class="muted">'+esc(R.day_text)+' &middot; yeh '+R.items.length+' item aaj subah gin kar likhiye. Shelf par jitna hai utna.</div>';
+  R.items.forEach(r=>{
+   h+='<div class="line'+(r.answered_at?' done':'')+'"><div class="nm">'+esc(r.item)+'</div><div class="muted">'+esc(r.packing||'')+(r.pack>1?' &middot; ek patte mein '+r.pack:'')+(r.reason_hi?' &middot; '+esc(r.reason_hi):'')+'</div>';
+   if(r.answered_at) h+='<div class="ans">Aapne gina: '+esc(r.qty_hi)+'</div>';
+   else h+='<div class="row" style="justify-content:flex-start;flex-wrap:wrap">'+boxes(r.pack,r.whole_hi,"r"+r.id)+'<span class="btn ok" onclick="spot('+r.id+','+r.pack+')">Bhej do</span></div>';
+   h+='</div>';
+  });
+  h+='</div>';
+ }
+ if(W.plan){
+  h+='<div class="card"><h2>Poori ginti ka Sunday</h2><div class="muted">'+esc(W.plan.text_hi)+'</div>';
+  if(!W.plan.confirmed) h+='<div><span class="btn ok" onclick="plan(\'ok\')">Theek hai</span><span class="btn bad" onclick="plan(\'no\')">Nahi ho payega</span></div>';
+  h+='</div>';
+ }
+ return h;
+}
+function s428Cards(s){
+ const W=s.watch; if(!W||!W.ok) return '';
+ let h='';
+ if((W.losses||[]).length){
+  h+='<div class="card"><h2>Ginti mein kam nikla</h2>'+W.losses.map(l=>'<div class="line"><div class="nm">'+esc(l.text_hi)+'</div></div>').join("")+'</div>';
+ }
+ h+='<div class="card"><h2>Stock batao</h2><div class="muted">Kisi bhi din, koi bhi item: naam likhiye, phir shelf par jitna hai utna likhiye.</div>';
+ h+='<div class="row" style="justify-content:flex-start;flex-wrap:wrap"><input id="sq" placeholder="Item ka naam" oninput="wsearch(\'sq\',\'ssugg\',\'spick\')" autocomplete="off" style="flex:1;min-width:12em;font-size:17px;padding:8px"></div><div id="ssugg" class="sugg"></div>';
+ if(SSEL){ h+='<div class="line"><div class="nm">'+esc(SSEL.item)+'</div><div class="muted">'+esc(SSEL.packing||'')+(SSEL.pack>1?' &middot; ek patte mein '+SSEL.pack:'')+'</div><div class="row" style="justify-content:flex-start;flex-wrap:wrap">'+boxes(SSEL.pack,SSEL.whole,"s")+'<span class="btn ok" onclick="stockBatao()">Likh do</span></div></div>'; }
+ h+='</div>';
+ h+='<div class="card"><h2>Kuchh gadbad hai?</h2><div class="muted">Koi item kam lag raha hai, ek-do dabbe nahi mil rahe? Item chuniye, kya dikh raha hai likhiye. System bikri aur kharid dekh kar batayega.</div>';
+ h+='<div class="row" style="justify-content:flex-start;flex-wrap:wrap"><input id="gq" placeholder="Item ka naam" oninput="wsearch(\'gq\',\'gsugg\',\'gpick\')" autocomplete="off" style="flex:1;min-width:12em;font-size:17px;padding:8px"></div><div id="gsugg" class="sugg"></div>';
+ if(GSEL){ h+='<div class="line"><div class="nm">'+esc(GSEL.item)+'</div><div class="muted">'+esc(GSEL.packing||'')+(GSEL.pack>1?' &middot; ek patte mein '+GSEL.pack:'')+'</div>'
+   +'<div class="row" style="justify-content:flex-start;flex-wrap:wrap"><input id="gt" placeholder="Kya gadbad hai?" maxlength="500" style="flex:1;min-width:12em;font-size:16px;padding:8px"></div>'
+   +'<div class="muted">Abhi shelf par kitna hai (likh sakein to):</div><div class="row" style="justify-content:flex-start;flex-wrap:wrap">'+boxes(GSEL.pack,GSEL.whole,"g")+'<span class="btn ok" onclick="gadbad()">Bhej do</span></div></div>'; }
+ h+='</div>';
+ if((W.traces||[]).length){
+  h+='<div class="card"><h2>System ne dekha</h2>'+W.traces.map(t=>'<div class="line"><div class="nm">'+esc(t.text_hi)+'</div><div><span class="btn chip" onclick="seen('+t.id+')">Dekh liya</span></div></div>').join("")+'</div>';
+ }
+ return h;
+}
+let SSEL=null, GSEL=null, WSUGG={}, WT=null;
+function wsearch(inp, box, pick){
+ const q=(el(inp)?el(inp).value:"").trim(); clearTimeout(WT);
+ if(q.length<2){ if(el(box)) el(box).innerHTML=""; return; }
+ WT=setTimeout(async()=>{ try{ const j=await get("/finance/stockmatch/api/watch-items"+(Q?Q+"&":"?")+"q="+encodeURIComponent(q)); WSUGG[box]=j.items||[];
+   if(el(box)) el(box).innerHTML=WSUGG[box].length?WSUGG[box].map((it,i)=>'<span class="btn chip" onclick="'+pick+'('+i+')">'+esc(it.item)+'</span>').join(""):'<div class="empty">Koi item nahi mila.</div>';
+  }catch(e){ if(el(box)) el(box).innerHTML='<div class="empty">'+esc(e.message)+'</div>'; } },250);
+}
+function spick(i){ SSEL=WSUGG["ssugg"][i]; const q=el("sq")?el("sq").value:""; render(); if(el("sq")) el("sq").value=q; }
+function gpick(i){ GSEL=WSUGG["gsugg"][i]; const q=el("gq")?el("gq").value:""; render(); if(el("gq")) el("gq").value=q; const t=el("gt"); if(t) t.focus(); }
+async function spot(rid, pack){
+ if(BUSY)return; const body={roster_id:rid};
+ if(!readBoxes(pack,"r"+rid,body)){MSG={kind:"err",title:"Ginti likhiye",lines:[]};render();return;}
+ BUSY=true;
+ try{const j=await post("/finance/stockmatch/api/spot"+Q,body); after(j,"✓ Save ho gaya",[esc(j.saved.message)]);}
+ catch(e){MSG={kind:"err",title:"Nahi hua",lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+async function stockBatao(){
+ if(BUSY||!SSEL)return; const body={item:SSEL.item};
+ if(!readBoxes(SSEL.pack,"s",body)){MSG={kind:"err",title:"Ginti likhiye",lines:[esc(SSEL.item)]};render();return;}
+ BUSY=true;
+ try{const j=await post("/finance/stockmatch/api/stock"+Q,body); SSEL=null; after(j,"✓ Save ho gaya",[esc(j.saved.message)]);}
+ catch(e){MSG={kind:"err",title:"Nahi hua",lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+async function gadbad(){
+ if(BUSY||!GSEL)return; const body={item:GSEL.item, text:((el("gt")||{}).value||"").trim()};
+ if(!body.text){MSG={kind:"err",title:"Kya gadbad hai, likhiye",lines:[esc(GSEL.item)]};render();return;}
+ readBoxes(GSEL.pack,"g",body);
+ BUSY=true;
+ try{const j=await post("/finance/stockmatch/api/gadbad"+Q,body); GSEL=null; after(j,"✓ Likh liya",[esc(j.saved.message)]);}
+ catch(e){MSG={kind:"err",title:"Nahi hua",lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+async function plan(ans){
+ if(BUSY)return; BUSY=true;
+ try{const j=await post("/finance/stockmatch/api/plan"+Q,{answer:ans}); after(j,"✓ Likh liya",[esc(j.saved.message)]);}
+ catch(e){MSG={kind:"err",title:"Nahi hua",lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+async function seen(id){
+ if(BUSY)return; BUSY=true;
+ try{const j=await post("/finance/stockmatch/api/trace/"+id+"/seen"+Q,{}); after(j,"✓",[esc(j.saved.message)]);}
+ catch(e){MSG={kind:"err",title:"Nahi hua",lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+async function claim(id,key){
+ if(BUSY)return; BUSY=true;
+ try{const j=await post("/finance/stockmatch/api/claim"+Q,{id:id,answer:key}); after(j,"✓ Save ho gaya",["<b>"+esc(j.saved.item)+"</b>","Jawab: <b>"+esc(j.saved.hi)+"</b>"]);}
+ catch(e){MSG={kind:"err",title:"Nahi hua",lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+function after(j,title,lines){
+ MSG={kind:"",title:title,lines:lines};
+ if(j.round_made&&j.round_made.round_no)MSG.lines.push("Orthotic vouchers ban gaye: round "+j.round_made.round_no+" &middot; "+j.round_made.lines+" line &mdash; ab Amir ke paas.");
+ if(j.round_made&&j.round_made.n_short!=null)MSG.lines.push("Orthotics band ho gaya: "+j.round_made.n_short+" line kam &mdash; doctor sahab ko khabar ho gayi.");
+ delete j.saved; S=j; render(); window.scrollTo(0,0);
+}
+async function pair(sh,ov,ans){
+ if(BUSY)return; BUSY=true;
+ try{const j=await post("/finance/stockmatch/api/pair"+Q,{short:sh,over:ov,answer:ans});
+  after(j,"\u2713 Save ho gaya",["Kam: <b>"+esc(sh)+"</b>","Zyada: <b>"+esc(ov)+"</b>","Jawab: <b>"+(ans==="YES"?"Haan \u2014 adla-badli":"Nahi")+"</b>"]);
+ }catch(e){MSG={kind:(e.j&&e.j.already)?"dup":"err",title:(e.j&&e.j.already)?"Pehle hi ho chuka":"Nahi hua",lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+async function reason(did,key){
+ if(BUSY)return; BUSY=true;
+ try{const j=await post("/finance/stockmatch/api/reason"+Q,{diff_id:did,reason:key});
+  if(j.already){MSG={kind:"dup",title:"Pehle hi likha hai",lines:["<b>"+esc(j.saved.item)+"</b>: "+esc(j.saved.hi)+" &mdash; dobara nahi likha."]};delete j.saved;S=j;render();window.scrollTo(0,0);}
+  else after(j,"\u2713 Save ho gaya",["<b>"+esc(j.saved.item)+"</b>","Wajah: <b>"+esc(j.saved.hi)+"</b>"+(j.saved.changed?" (badla)":"")]);
+ }catch(e){MSG={kind:"err",title:"Nahi hua",lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+load();
+</script>
+</body>
+</html>

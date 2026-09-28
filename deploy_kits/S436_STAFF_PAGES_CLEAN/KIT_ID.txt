@@ -1,0 +1,3 @@
+kit id S436_STAFF_PAGES_CLEAN
+session 283 (Sanjeevni) · 28-Sep-2026 · D638 · Darpan's orthotic answers made one-option, the orthotic loss computed and the section closed by rule, the wrong-salt pairs, Amir's board reduced to his work (Hindi, four sections), the renames card gated
+files: stockmatch.py (whole, v1.1) · stockmatch.html (whole) · stock_amir.html (whole) · loss_piles.py (whole, v2.3) · stock_watch.py (whole, v1.3) · make_s436.py (stock_app.py, stock_hub.html, stock_statement.py by anchored edits) · seed_s436.py · walk_s436.py · walk_s404_s436.py · figures_s436.py · install_S436_STAFF_PAGES_CLEAN.sh · README.md · SUMS.md5
