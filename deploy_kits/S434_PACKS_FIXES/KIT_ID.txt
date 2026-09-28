@@ -1,0 +1,2 @@
+S434 KIT S434_PACKS_FIXES
+session 286 (parent) · 28-Sep-2026 · the owner's walk of the August pack: F-653 ... F-657 fixed, the bundles read the confirmed month (F-658), the page folded into sections (packs.py c3eb9db0 -> 6a1cf6ce, packs.html 2e06943b -> 4c46cd0e)

@@ -1,0 +1,2 @@
+S435 KIT S435_SCAN_BILL_MONTH
+session 286 (parent) · 28-Sep-2026 · F-658: the scanner asks which month a bill is from; the person's month beats the OCR's date; the checker corrects it in one tap (asset_register.py df8c0e19 -> 1f80773b)

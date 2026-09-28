@@ -1,0 +1,7 @@
+# S435_SCAN_BILL_MONTH — the scanner asks which month a bill is from
+
+**Session 286 (parent) · 28-Sep-2026 · F-658.** The owner is clearing a backlog: September's pharmacy bills, August and September's lab bills, his own expense bills. The month-end pack puts each scanned bill into the month its **date** says — and the scanner's automatic reading of that date is unreliable (among the first 15 scans: 2016, 2023, 2024 and a November date). A backlog bill would then land in the wrong month's pack, or in none.
+
+**What changes (`/root/assetapp/asset_register.py` df8c0e19 → 1f80773b):** the intake page asks *Which month is this bill from? (bill kis mahine ka hai)* — this month first, then the three before it. The choice rides with the scan (the same road as the lane) into a new column `bills.bill_month`. `late_for` follows that month before the OCR's date. The bill page shows the month and lets the owner or the manager set it in one tap (`/bills/<id>/month`, audited, the last year only; reception cannot). S434's packs read `bill_month` first.
+
+**Proof:** `walk_s435.py` on a scratch database — the page asks; a bill scanned now for last month carries it and is late for it; an OCR misread (2016) does not move it; the checker moves it in one tap; a far month is refused; reception gets 403. **8/8.** The installer repeats the walk on a scratch copy of the live `assets.db` before placing anything.
