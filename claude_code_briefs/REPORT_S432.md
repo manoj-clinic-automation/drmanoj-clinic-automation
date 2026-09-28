@@ -273,3 +273,14 @@ scratch copy only. The statement's Medicines count reads 284 because BELL CAST 5
 
 ### Publish
 Published with `PUBLISH_ALL.bat` (kit + brief + this report); the commit is named in the "After publish" section below.
+
+### After publish (07:59–08:00 IST)
+- Commit `d49191a` "publish: pending kits and files (PUBLISH_ALL)" — 25 files: this kit (16), the S432 brief, this report — **and the
+  clinic chat's `deploy_kits/S433_YES_BRANCH_READ/` (7 files), which was sitting uncommitted in the folder; PUBLISH_ALL publishes everything
+  pending by design.** I did not touch, run or read that kit. The phone gate was clean (25 files); origin verified (07d1335 → d49191a).
+- On the box: `/root/deploy/repo` pulled to `d49191a` (07:59:51); `md5sum -c SUMS.md5` in the repository kit: 15 of 15 OK; `diff -r` of the
+  repository kit against `/tmp/s432kit` (what ran): identical; no `__pycache__` in the kit. The repository installer answered
+  **ALREADY INSTALLED: the seven files are at the kit's pins; clinic-finance active; healthz 200**. Two `__pycache__` folders found under
+  the clone's `deploy_kits/S413_SLIP_PICKER` and `S416_BUNDLE_ALLOWLIST` (earlier kits' compile runs, git-ignored) were removed; the clone is clean.
+- Build lock released 08:00:15 IST. Public `/finance/healthz` 200 after everything.
+- This section is published in a second commit.
