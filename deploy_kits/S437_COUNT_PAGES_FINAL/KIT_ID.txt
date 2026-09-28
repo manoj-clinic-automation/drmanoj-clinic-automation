@@ -1,0 +1,3 @@
+kit id S437_COUNT_PAGES_FINAL
+session 283 (Sanjeevni) · 28-Sep-2026 · F-659 · the three count pages finished: Amir's vouchers only (STOCK ISSUE 1..N, STOCK RECEIVE 1..M), the STOCK RECEIVE round by rule, the whole-piece items (CCM = bottle), the staff block as tables, Naam badlo gated on the proof
+files: stock_amir.html (whole) · stockmatch.html (whole) · loss_piles.py (whole, v2.4) · qty_words.py (whole, v1.2) · make_s437.py (stock_app.py, stock_statement.py v1.3, stock_hub.html, stock_loss.html by anchored edits) · seed_s437.py · walk_s437.py · walk_s436_s437.py · walk_s427_s437.py · figures_s437.py · install_S437_COUNT_PAGES_FINAL.sh · README.md · SUMS.md5
