@@ -1,48 +1,61 @@
-# OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026 — the Sanjeevni sections exactly as its S281 close wrote them
+# OWNER TO-DO — LIVE · refreshed at the **S287 close** (the parent), 01-Oct-2026 — the Sanjeevni sections exactly as its S281 close wrote them (its S283 close refreshes them)
 
-*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S284 close** (the parent), 27-Sep-2026 — the Sanjeevni sections exactly as its S281 close wrote them
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
-*Detail: `START_HERE_SESSION_287.md` · `S286_BUILD_BRIEF.md` · `S286_NEXT_BUILD_PLAN.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are exactly as its S281 close left them; its open S283 refreshes them at its own close.*
+*Detail: `START_HERE_SESSION_288.md` · `S287_BUILD_BRIEF.md`. Your ruling of 17-Sep still governs this list — nothing here is chased.*
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S286 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S287 close
 
-**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record (no new server step).
+**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record and the new backup kit.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · THE NEXT BUILD — open a fresh chat in this project and say:** *"Read claude/S286_NEXT_BUILD_PLAN.md and build it."* During it you will be asked for two one-time things only: the folder-access approval on your PC for the follow-up tracker's folder, and the Chrome download setting at the reception PC (staff words given).
+**2 · AFTER THE PUBLISH — one line on the server** (puts the ring card's database into the nightly encrypted backup):
 
-**3 · THE AUGUST ACCOUNTANT PACK — Send, when you are satisfied.** 20 of 25 ready, Amir's pack ready. Still missing: the clinic's Yes Bank current statement (ask the branch for August), and the lab and expense bills (staff scan them with "August" chosen). Tick the lab register and lab receipt book when handed over.
+```
+cd /root/deploy/repo && git pull --ff-only && bash /root/deploy/repo/deploy_kits/S445_RING_OUTCOMES_BACKUP/install_S445_RING_OUTCOMES_BACKUP.sh
+```
+
+**3 · PASS TO RECEPTION — the Chrome step** (until it is done the Docterz pickup folder stays empty): Chrome ⋮ → Settings → Downloads → Location: **Change** → Google Drive → My Drive → Clinic Records → **Docterz exports** → Select. Phir roz Docterz se dono report (Consultation report, Follow-up log) download karo — bas.
+
+**4 · ONE WORD — the follow-up tracker on the server (C·2): yes or no.** It means one evening when the PC copy stops being live and its records move to the server; the PC copy stays as the fallback.
+
+**5 · THE AUGUST ACCOUNTANT PACK — Send, when you are satisfied.** 20 of 25 ready, Amir's pack ready; still missing the clinic's Yes Bank current statement and the lab and expense bills.
 
 ```
 https://followup.dr-manoj.in/finance/packs?month=2026-08
 ```
 
-**4 · WHEN CONVENIENT — open Chrome with the Claude extension** on your PC and tell me; I then carry the 22 July Vitals sheets to the server myself. Their safety copy is already on the SSD.
+**6 · WHEN CONVENIENT — open Chrome with the Claude extension** on your PC and tell me; I then carry the 22 July Vitals sheets to the server.
 
-**5 · AT YOUR OWN PACE — the contacts workbook.** Sort the Vendors, Utilities, DTH, Staff and Family tabs, save, and tell me.
+**7 · AT YOUR OWN PACE — the contacts workbook.**
 
 ```
 D:\Downloads\margsync\_config\contacts_S282\CONTACT_GROUPS_TO_UPDATE.xlsx
 ```
 
-**6 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today**, saved in `D:\Downloads` (F-629).
+**8 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today**, saved in `D:\Downloads` (F-629).
 
-**7 · IF NOT ALREADY DONE — three taps on the petty book** — yours: *Yes, I gave it* on the ₹20,000 of 20-Sep; Dr Bhawna's: her ₹15,000 (18-Sep) and ₹20,000 (22-Sep).
+**9 · IF NOT ALREADY DONE — three taps on the petty book** — yours on the ₹20,000 of 20-Sep; Dr Bhawna's on her ₹15,000 (18-Sep) and ₹20,000 (22-Sep).
 
 ```
 https://followup.dr-manoj.in/finance/petty
 ```
 
-**Only if you want them (proposals, nothing owed):** D: steps 6–7 (the Marg console log, the record attic) · a mini PC, only for a nightly backup that does not need your PC on · one MacroDroid change so the bank SMS travels in the message body, not the web address (the Sanjeevni chat's note).
-
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Session 287 — the agreed plan, three install lines:** A the scan flow (no waiting, no questions for staff; double scans to Shavez and reception; the reception phone asks the name once) and the compact rate page · B discount and free with your maker–checker, cancelled after billing, the late parchi and the 17 of 28-Sep moved back · C the Docterz export from the reception PC and the follow-up tracker on the server.
-2. **Held at your word:** the Callback Tracker on the server (plan kept).
-3. Later: the July Vitals sheets (item 4) · the contacts (after your workbook) · the mail flood (low) · the portal tiles (after the pharmacy move).
+1. **02-Oct, with Shavez:** the X-ray pickup on Shavez's PC through its Google Drive.
+2. **On your word:** the follow-up tracker move (item 4) · the mail flood (low) · the July Vitals sheets · the contacts · the portal tiles (after the pharmacy move).
+3. **Held at your word:** the Callback Tracker on the server. **Parked by you:** the reception PC's Google Drive.
+
+## ✅ DONE AT THE S287 CLOSE — 01-Oct-2026 (the parent)
+
+- ~~**The scan flow, the rate page, discounts and free, cancelled after billing, the late parchi, the Docterz pickup**~~ — **LIVE** 09:19–09:20 from your three lines (S441, S442, S443). First pass: 100 scans judged, 3 double scans set aside, 2 questions to Shavez and reception.
+- ~~**The 17 parchis of 28-Sep saved under 29-Sep**~~ — moved back, audited.
+- ~~**A second copy of the ring card's database**~~ — found in no backup; the fix is built (item 2).
+- ~~**The System Board's status note at its size limit**~~ — trimmed; the old text kept.
 
 ## ✅ DONE AT THE S286 CLOSE — 27-Sep → 01-Oct-2026 (the parent)
 

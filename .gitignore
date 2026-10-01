@@ -239,3 +239,9 @@ finance/REPORT_1.xls
 !deploy_kits/GAS_CURRENT/ClinicCallbackTracker/appsscript.json
 # Claude Code scratch (S283, 26-Sep): kits are built here, copied into deploy_kits/ only when final
 _scratch/
+
+# S444 (01-Oct-2026, D648): the DUTY MAP's machine part -- every recurring staff duty, its door, and one read-only SELECT that
+# says when it is due. The live Needs-you check reads it from /root/deploy/repo/claude_code_briefs/, and every later kit that
+# moves a duty updates it (CLAUDE.md). Duty names, table names, SQL and screen texts only: no patient, no phone number, no
+# secret (the F-185 gate ran on it). The blanket *.json rule would hide it silently -- F-300's family. Exact path only.
+!claude_code_briefs/DUTY_MAP.json

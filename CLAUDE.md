@@ -99,3 +99,14 @@ say so in the report rather than working around it -- the list is widened by the
 
 ## The pharmacy (added 27-Sep-2026, S427 / D632)
 - Quantities on any screen, notice, PDF or message: strips + tabs for strip items, pcs / bottles / tubes otherwise — never "units"; format through `qty_words.py`.
+
+## Every duty has a door (added 01-Oct-2026, S444 / D648 — the owner: "it was finalised earlier that everything populates in his portal, in his work")
+1. **A kit that adds, moves or removes a staff duty updates `claude_code_briefs/DUTY_MAP.md` and `claude_code_briefs/DUTY_MAP.json`
+   in the same kit** — the duty, the system state that says it is due, the door on that person's own home (tile → page, and the
+   text the page shows while it is due), and the owner's Needs-you line if it is missed (or why there is none). A new duty's
+   `due_sql` is ONE read-only SELECT returning one row `(n, since)`, run on the live database before it is written in. A duty
+   with no door is a finding in the report, never silence.
+2. **The staff-eye walk.** The kit's walk signs in, on the scratch copy, as EVERY login the kit affects (a walk-only session — its
+   own secret and user store, never the live ones), renders that login's portal home and each door page, and asserts each of its
+   pending duties is visible there (the DUTY_MAP tile on the home; the `door_marker` on the door while `due_sql` says it is due).
+   A kit is not done until it passes. `deploy_kits/S444_STAFF_SAFE/walk_s444.py` (section 2) is the model.

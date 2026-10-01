@@ -1,0 +1,2 @@
+S445 KIT S445_RING_OUTCOMES_BACKUP
+session 287 (parent) · 01-Oct-2026 · F-677 / D654: ring_outcomes.db joins the encrypted nightly
