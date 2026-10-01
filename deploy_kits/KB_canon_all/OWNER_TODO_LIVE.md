@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S287 close** (the parent), 01-Oct-2026 — the Sanjeevni sections exactly as its S281 close wrote them (its S283 close refreshes them)
+# OWNER TO-DO — LIVE · refreshed at the **S283 close** (the Sanjeevni project), 02-Oct-2026 — the parent sections exactly as its S287 close wrote them, the Sanjeevni sections refreshed below them
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S287 close** (the parent), 01-Oct-2026 — the Sanjeevni sections exactly as its S281 close wrote them (its S283 close refreshes them)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
@@ -100,6 +102,75 @@ https://followup.dr-manoj.in/finance/petty
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S283 close (02-Oct)
+
+**1 · The publish** is the same double-click as the parent's: one publish carries both closes and the new brief.
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · One line to Claude Code** — the rest of what you decided on 01-Oct evening. S444 was built from an earlier text of the brief (my slip), so these are not live yet:
+
+- Amir's vouchers in order: orthotic first, then the renames, then medicine, 5 per visit.
+- His August pack.
+- The scanned bills as files for Marg's digital entry.
+- The `***` fix for the sale text.
+
+```
+Read CLAUDE.md, then build claude_code_briefs\S446_AMIR_STAGES_BILLS.md — install, verify, publish and report.
+```
+
+**3 · Until S446 is live, tell Amir one thing: orthotic vouchers first.** His app shows all 37 vouchers together (7 orthotic, 30 medicine) and does not hold him to the order.
+
+**4 · Paste Claude Code's S446 result** into a fresh chat in the Sanjeevni project. That chat checks every screen as each staff member sees it; you sign each one in.
+
+**5 · The staff's word on the Bill Scan Walkthrough** (sent to them 01-Oct). Relay what Shavez, Alisha, Shivani and reception say.
+
+**6 · One photo of Marg's purchase-import screen**, whenever convenient. Not urgent.
+
+**Held at your word:** S438_COUNT_BOOK.
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S283 close
+
+1. **Verify S446 (and S444) live** with the staff-eye walk: Amir, Darpan, Shavez, the owner, the medical PC.
+2. **Watch Stage A:** orthotic vouchers, then verified, then 22 renames, then verified, then live orthotic ordering.
+3. **Stage C:** medicine vouchers, 5 per visit.
+4. **The 18 supplier messages** not leaving the reception phone since 26-Sep. S446 reports why.
+5. **The *Medicine bills* home**, after the staff's feedback.
+6. **The spine rungs 4a–4f**, one kit each (`S283_SPINE_READINESS_27SEP.md`).
+7. **S438 when released.**
+
+## ✅ DONE AT THE S283 CLOSE — 25-Sep → 02-Oct-2026 (the Sanjeevni project)
+
+- **26 kits live** through Claude Code:
+  - Bhati's day check;
+  - purchase orders and buying rules without the paper sheet;
+  - the rename memory;
+  - two kinds of return;
+  - NEFT messages;
+  - month packs and scan lanes;
+  - the Loss desk in four piles;
+  - the stock watch;
+  - the count statement;
+  - the scan matcher and SMS door mended;
+  - *Scan ka kaam* with ← BACK and ↑;
+  - S444.
+- **S444, live 01-Oct 22:08:**
+  - Amir is one login however he types his name, and his app opens on his work.
+  - Every step shows the vouchers waiting.
+  - Each bill shows Marg's amount beside the paper's, with *Meri entry galat thi*.
+  - KEDAR 195 is settled as his own entry.
+  - The salt list cannot be forgotten silently.
+  - Your Needs-you lines appear by themselves.
+- **The 06-Sep count closed:** 136 lines written off, ₹64,679 at MRP. Its 37 Marg vouchers are still to be entered.
+- **The rule for every build from now** (D648): each duty is on the person's own screen, checked as that person. The duty map lists 42 duties; 9 had no screen, and S446 gives the pharmacy ones a place.
+- **Shavez's, Alisha's and Shivani's portals audited live.** The staff walkthrough was sent to them.
+
+---
+
+*(The S281-close Sanjeevni sections below are history — superseded by the S283 sections above.)*
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S281 close
 
