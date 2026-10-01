@@ -1,0 +1,2 @@
+S447 KIT S447_RATE_GROUPS
+session 288 (parent) · 02-Oct-2026 · F-681: the rate page shows each procedure group once
