@@ -1,45 +1,57 @@
-# OWNER TO-DO — LIVE · refreshed at the **S284 close** (the parent), 27-Sep-2026 — the Sanjeevni sections exactly as its S281 close wrote them
+# OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026 — the Sanjeevni sections exactly as its S281 close wrote them
 
-*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S282 close** (the parent), 26-Sep-2026 — the Sanjeevni sections exactly as its S281 close wrote them
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S284 close** (the parent), 27-Sep-2026 — the Sanjeevni sections exactly as its S281 close wrote them
 
-*Detail: `START_HERE_SESSION_286.md` · `S284_BUILD_BRIEF.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are exactly as its S281 close left them; its open S283 refreshes them at its own close.*
+*Detail: `START_HERE_SESSION_287.md` · `S286_BUILD_BRIEF.md` · `S286_NEXT_BUILD_PLAN.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are exactly as its S281 close left them; its open S283 refreshes them at its own close.*
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S284 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S286 close
 
-**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record and one small fix (S429: the monthly keep-forever backup closes its month only when the copy is really pinned).
+**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record (no new server step).
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · THEN ONE LINE ON THE SERVER — S429.**
+**2 · THE NEXT BUILD — open a fresh chat in this project and say:** *"Read claude/S286_NEXT_BUILD_PLAN.md and build it."* During it you will be asked for two one-time things only: the folder-access approval on your PC for the follow-up tracker's folder, and the Chrome download setting at the reception PC (staff words given).
+
+**3 · THE AUGUST ACCOUNTANT PACK — Send, when you are satisfied.** 20 of 25 ready, Amir's pack ready. Still missing: the clinic's Yes Bank current statement (ask the branch for August), and the lab and expense bills (staff scan them with "August" chosen). Tick the lab register and lab receipt book when handed over.
 
 ```
-cd /root/deploy/repo && git pull --ff-only && bash /root/deploy/repo/deploy_kits/S429_MONTHLY_PIN_GUARD/install_S429_MONTHLY_PIN_GUARD.sh
+https://followup.dr-manoj.in/finance/packs?month=2026-08
 ```
 
-**3 · WHEN CONVENIENT — open Chrome with the Claude extension** on your PC and tell me; I then carry the 22 July Vitals sheets to the server myself. Their safety copy is already on the SSD.
+**4 · WHEN CONVENIENT — open Chrome with the Claude extension** on your PC and tell me; I then carry the 22 July Vitals sheets to the server myself. Their safety copy is already on the SSD.
 
-**4 · AT YOUR OWN PACE — the contacts workbook.** Sort the Vendors, Utilities, DTH, Staff and Family tabs, save, and tell me.
+**5 · AT YOUR OWN PACE — the contacts workbook.** Sort the Vendors, Utilities, DTH, Staff and Family tabs, save, and tell me.
 
 ```
 D:\Downloads\margsync\_config\contacts_S282\CONTACT_GROUPS_TO_UPDATE.xlsx
 ```
 
-**5 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today**, saved in `D:\Downloads` (F-629).
+**6 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today**, saved in `D:\Downloads` (F-629).
 
-**6 · IF NOT ALREADY DONE — three taps on the petty book** — yours: *Yes, I gave it* on the ₹20,000 of 20-Sep; Dr Bhawna's: her ₹15,000 (18-Sep) and ₹20,000 (22-Sep).
+**7 · IF NOT ALREADY DONE — three taps on the petty book** — yours: *Yes, I gave it* on the ₹20,000 of 20-Sep; Dr Bhawna's: her ₹15,000 (18-Sep) and ₹20,000 (22-Sep).
 
 ```
 https://followup.dr-manoj.in/finance/petty
 ```
 
+**Only if you want them (proposals, nothing owed):** D: steps 6–7 (the Marg console log, the record attic) · a mini PC, only for a nightly backup that does not need your PC on · one MacroDroid change so the bank SMS travels in the message body, not the web address (the Sanjeevni chat's note).
+
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The Callback Tracker on the clinic server** — decided on your word (D634), same screens and flow for staff; you see it beside Google's before any switch, and the switch waits for your yes.
-2. **The July Vitals sheets onto the server** — when your Chrome is open (item 3 above).
-3. Watching: the first real outcome card and staff WhatsApp reply; tonight's backup with the Case Pack and Vitals; the 1-Oct monthly copy; the 4-Oct Apps Script row.
-4. Later: the contacts (after your workbook) · the mail flood (low) · the portal tiles (after the pharmacy move) · AF-19 (not now).
+1. **Session 287 — the agreed plan, three install lines:** A the scan flow (no waiting, no questions for staff; double scans to Shavez and reception; the reception phone asks the name once) and the compact rate page · B discount and free with your maker–checker, cancelled after billing, the late parchi and the 17 of 28-Sep moved back · C the Docterz export from the reception PC and the follow-up tracker on the server.
+2. **Held at your word:** the Callback Tracker on the server (plan kept).
+3. Later: the July Vitals sheets (item 4) · the contacts (after your workbook) · the mail flood (low) · the portal tiles (after the pharmacy move).
+
+## ✅ DONE AT THE S286 CLOSE — 27-Sep → 01-Oct-2026 (the parent)
+
+- ~~**A thorough evaluation of the D: drive**~~ — measured; on your "go", **2.48 GB** of proven-redundant material moved to the SSD with every file hash-matched; **D: free 19.8 → 22.4 GB.**
+- ~~**The August accountant pack and Amir's pack**~~ — the Yes Bank branch statements read (S433), your walk's faults fixed and the page folded into sections (S434), each scanned bill's month asked (S435); 20 of 25 ready, Amir's pack ready. ~~…0460 to be closed, off the shelf~~ — done.
+- ~~**S429's line (the monthly backup)**~~ — installed by you; confirmed in the 01-Oct server copy.
+- ~~**The bank SMS not reaching the Docterz revenue page**~~ — mended by the Sanjeevni chat (S439, 30-Sep); ten missed SMS recovered.
+- ~~**Scan app, rate page, discounts, cancelled patient, late parchis, Docterz pickup, the tracker's move**~~ — analysed with you and planned (`S286_NEXT_BUILD_PLAN.md`); building is session 287.
+- ~~**Overlapping builds with the Sanjeevni chat**~~ — announced on the board before they start (D646).
 
 ## ✅ DONE AT THE S284 CLOSE — 27-Sep-2026 (the parent)
 
