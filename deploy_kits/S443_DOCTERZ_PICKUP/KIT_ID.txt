@@ -1,0 +1,3 @@
+kit id S443_DOCTERZ_PICKUP
+session 287 (parent) · 01-Oct-2026 · D645 · the reception PC's Docterz exports picked up from the clinic Drive folder "Docterz exports" every 15 minutes -- known by content, one current export per kind and day, fewer rows quarantined, bytes on the box only -- and the 10:00 alarm on the owner's money page. The follow-up tracker's move is NOT here (a decision for the owner: it carries live ledgers on the PC).
+files: built/docterz_pickup.py (NEW) · walk_s443.py · install_S443_DOCTERZ_PICKUP.sh · README.md · SUMS.md5

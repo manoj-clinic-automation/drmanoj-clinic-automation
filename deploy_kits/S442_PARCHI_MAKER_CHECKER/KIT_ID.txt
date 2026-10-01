@@ -1,0 +1,3 @@
+kit id S442_PARCHI_MAKER_CHECKER
+session 287 (parent) · 01-Oct-2026 · D644 · F-663 · F-664 · F-668 · chhoot / free on any X-ray or procedure line with a maker-checker, the night check (Docterz below the rate, no chhoot written), radd after billing with the clinic ID (out of the expected money once approved), the late parchi's day proposed, the owner's monthly discounts page, OPD 19493-19509 moved to 28-Sep
+files: built/ (slip_log.py, slip_adjust.py NEW, clinic_money.py) · walk_s442.py · install_S442_PARCHI_MAKER_CHECKER.sh · README.md · SUMS.md5

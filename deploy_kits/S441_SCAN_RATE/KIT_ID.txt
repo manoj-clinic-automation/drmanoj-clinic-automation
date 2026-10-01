@@ -1,0 +1,3 @@
+kit id S441_SCAN_RATE
+session 287 (parent) · 01-Oct-2026 · D643 · F-665 · F-666 · F-667 · the scan flow with no waiting and no questions (every photo a page, the stamp at once, retries by itself, PDF / file), the after-the-fact checks (forgotten page joined, sure double set aside, unsure ones on Scan ka kaam for Shavez AND reception), the shared Reception login names who works and sends orders, the compact rate page saving in place
+files: built/ (seven full files: asset_register.py, scanner_widget.js, scan_checks_s441.py, owner_sheets.py, porders.py, porders.html, tile_grants.json) · walk_s441.py · install_S441_SCAN_RATE.sh · README.md · SUMS.md5

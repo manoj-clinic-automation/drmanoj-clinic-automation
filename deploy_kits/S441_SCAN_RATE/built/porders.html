@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Purchase orders</title>
+<!-- S440_SCAN_FLOW (30-Sep-2026, D640, F-662): section 3 is "Scan ka kaam" -- ONE list, a tap per line (Scan karo · Yahi bill hai? · Supplier chuno ·
+     Amount milao · Marg ka intezaar), each scan with its thumbnail; a sticky BACK bar (to ?from=, else the portal's tile hub) and a floating
+     up-arrow. Everything the lines show comes from /finance/porders/api/state (kaam); nothing is decided here. -->
+<!-- S417_DAY_ONE_FIXES (26-Sep-2026, F-636): the stock beside an order in the order's own unit -- '12 strips + 4', '3 pcs', '3 bottles', '5 units' (stock_text / shelf_text from the API); the WhatsApp text is untouched. -->
+<!-- S410_MEDICINE_ORDERING (26-Sep-2026, D626): section 4 is the ordering team's day -- "Aaj ke order (N)": the day's proposals
+     per supplier (item · shelf · order qty, ± allowed, a line removable), bhejo -> the S403 wa.me flow, SENT marked; "Beech ka order"
+     cards; the contextual text at the top; the freeze / paused reason; section 5 the holiday list (senders). The engine's full plan
+     stays one tap away. Nothing else on the screen moves.
+  -- kit S403 header below --
+<!-- S403_PURCHASE_ORDERS_LIVE (26-Sep-2026, D618): ONE screen -- shortages -> WhatsApp order -> arrival -> bill scan.
+     Hindi (Roman script), phone-first, every section collapsed until tapped; no typing except the supplied quantity
+     on 'Kam aaya'. Every figure comes from /finance/porders/api/...; nothing is computed here. The owner sees the same
+     screen in English (me = owner). The vendor's number never appears here: only inside the wa.me link a sender opens. -->
+<style>
+ body{font:16px/1.45 system-ui,sans-serif;margin:0;background:#f6f4f1;color:#1c1c1c;max-width:640px;margin:0 auto;padding:10px 12px 40px}
+ h1{font-size:19px;margin:8px 0 2px}
+ .sub{color:#777;font-size:13px;margin-bottom:8px}
+ details.sec{background:#fff;border:1px solid #e4e0da;border-radius:10px;margin:10px 0;padding:0}
+ details.sec>summary{cursor:pointer;list-style:none;padding:12px 14px;font-size:17px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+ details.sec>summary::-webkit-details-marker{display:none}
+ details.sec>summary .n{display:inline-block;min-width:28px;text-align:center;padding:2px 9px;border-radius:12px;background:#eee;font-size:14px}
+ details.sec>summary .n.red{background:#fbe7e5;color:#b3261e}.n.ok{background:#e4f2e6;color:#2e6b34}
+ details.sec>div{padding:0 14px 12px}
+ .line{border-top:1px solid #eee;padding:10px 0}
+ .line.done{background:#f1f7f2;margin:0 -14px;padding:10px 14px}
+ .nm{font-size:16px;font-weight:700}
+ .muted{color:#888;font-size:13px}
+ .red{color:#b3261e;font-weight:600}
+ .qty{display:inline-flex;align-items:center;gap:8px;margin:6px 0}
+ .qty b{font-size:22px;min-width:34px;text-align:center}
+ .btn{display:inline-block;border:1px solid #bbb;border-radius:9px;padding:10px 14px;margin:6px 8px 4px 0;background:#fafafa;font-size:16px;font-weight:600;cursor:pointer;user-select:none}
+ .btn.ok{background:#2e6b34;color:#fff;border-color:#2e6b34}
+ .btn.big{width:100%;text-align:center;font-size:18px;padding:14px;margin:8px 0}
+ .btn.bad{background:#fff;color:#b3261e;border-color:#b3261e}
+ .btn.chip{font-size:14px;padding:7px 10px;border-color:#3c6ac2;color:#3c6ac2;background:#fff}
+ .btn.chip.on{background:#3c6ac2;color:#fff}
+ .btn.sm{font-size:15px;padding:8px 10px}
+ .btn.pm{font-size:20px;padding:4px 14px;margin:0}
+ .btn:active{opacity:.7}
+ input.q{width:70px;font-size:20px;padding:6px;border:1px solid #bbb;border-radius:8px;text-align:right}
+ .saved{background:#e4f2e6;border:2px solid #2e6b34;border-radius:12px;padding:14px;margin:10px 0}
+ .saved .t{font-size:22px;font-weight:700;color:#2e6b34}
+ .saved .l{font-size:18px;margin-top:4px}
+ .saved.dup{background:#fdf1dc;border-color:#b26a00}.saved.dup .t{color:#b26a00}
+ .saved.err{background:#fbe7e5;border-color:#b3261e}.saved.err .t{color:#b3261e}
+ .tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:10px;background:#eee;margin-left:6px;vertical-align:middle}
+ .tag.approx{background:#fdf1dc;color:#b26a00}
+ .sent{background:#e8f0fb;border-radius:8px;padding:8px 10px;margin:6px 0;font-size:14px}
+ a{color:#3c6ac2}
+ table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:5px 6px;border-bottom:1px solid #eee;text-align:left}td.n{text-align:right}
+ #s440bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;background:#1f3864;color:#fff;margin:-10px -12px 8px;padding:6px 10px}
+ #s440back{display:flex;align-items:center;justify-content:center;min-height:44px;flex:1 1 auto;max-width:60%;background:#fff;color:#1f3864;border-radius:9px;font-size:18px;font-weight:800;text-decoration:none}
+ #ttl{margin-left:auto;font-weight:600;font-size:15px;text-align:right}
+ #s440up{position:fixed;right:14px;bottom:18px;width:48px;height:48px;border-radius:24px;border:0;background:#1f3864;color:#fff;font-size:24px;display:none;z-index:40}
+ details.kg{border-top:1px solid #e4e0da;margin:0 -14px;padding:0 14px}details.kg>summary{cursor:pointer;padding:10px 0;font-weight:700;font-size:16px}
+ details.kg>summary .n{display:inline-block;min-width:24px;text-align:center;padding:1px 8px;border-radius:12px;background:#fbe7e5;color:#b3261e;font-size:13px}
+ details.kg.calm>summary .n{background:#eee;color:#555}
+ .kline{display:flex;gap:10px;border-top:1px solid #eee;padding:10px 0}.kb{flex:1 1 auto;min-width:0}
+ a.kth{flex:0 0 62px}a.kth img{width:62px;height:82px;object-fit:cover;border:1px solid #ccc;border-radius:6px;background:#eee}a.kth.nopic{display:none}
+ details.kl{margin-top:4px}details.kl>summary{color:#888;font-size:13px;cursor:pointer}details.kl select{font-size:15px;padding:6px}
+ select.kv{font-size:16px;padding:8px;max-width:100%;margin:6px 0}
+</style>
+</head>
+<body>
+<div id="s440bar"><a id="s440back" href="/portal">← BACK</a><span id="ttl">Purchase orders</span></div>
+<button id="s440up" aria-label="upar" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<div class="sub" id="sub">loading&hellip;</div>
+<div id="body">loading&hellip;</div>
+<script>
+const el=id=>document.getElementById(id);
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let S=null, MSG=null, BUSY=false, EN=false, QTY={}, PICK={}, OPEN={1:true,4:true}, SHORTQ={}, DQ={};
+const T={
+ sub:["Kam saaman → Yuvika ko WhatsApp → aaya? → bill scan","Shortages → WhatsApp order → arrival → bill scan"],
+ s1:["Orthotics (Yuvika) — %d kam","Orthotics (Yuvika) — %d short"], s2:["Order aaya? (%d)","Orders arrived? (%d)"],
+ s3:["Scan ka kaam (%d)","Scan work (%d)"],
+ k6:["Dobara scan? / Galat lane?","Scanned twice? / Wrong lane?"], same:["Haan, wahi kaagaz","Yes, the same paper"], diff:["Nahi, alag bill","No, a different bill"],
+ tophar:["Haan, pharmacy ka hai","Yes, it is pharmacy"], stay:["Nahi, clinic ka hi","No, it is clinic"], lanq:["Yeh supplier pharmacy (Marg) ka lagta hai — clinic lane mein scan hua","This supplier looks like a pharmacy (Marg) one — scanned in the clinic lane"],
+ twinq:["Kya yeh dono ek hi kaagaz hain?","Are these two the same paper?"], answered:["Jawab ho gaye (%d)","Answered (%d)"],
+ k1:["Scan karo","To scan"], k2:["Yahi bill hai?","Is this the bill?"], k3:["Supplier chuno","Choose the supplier"], k4:["Amount milao","Match the amount"], k5:["Marg ka intezaar","Waiting for Marg"],
+ yes:["Haan, yahi hai","Yes, this one"], yes2:["Haan, doosri baar scan hua","Yes, scanned twice"], no:["Nahi","No"], taken:["Is bill ka scan pehle se hai (%s) — yeh wahi kaagaz hai?","This bill already has a scan (%s) — the same paper?"],
+ pick:["— supplier chuno —","— choose the supplier —"], notlisted:["List mein nahi hai","Not on the list"], isvendor:["Yeh supplier hai","This is the supplier"], pickfirst:["Pehle supplier chuniye.","Choose a supplier first."],
+ paper:["Kaagaz par amount:","Amount on the paper:"], match:["Milao","Match"], digits:["Sirf ank likhiye — jaise 14442","Digits only — e.g. 14442"],
+ lane:["Galat lane","Wrong lane"], move:["Hatao","Move"], days:["%d din se","%d days"], double:["Marg mein do baar — Amir ko batao","Entered twice in Marg — tell Amir"],
+ s4:["Aaj ke order (%d)","Today's orders (%d)"], s5:["Chhutti ke din (%d)","Holidays (%d)"],
+ bhejo:["%s ko order bhejo","Send the order to %s"], remove:["hatao","remove"], frozen:["Medicine ordering band hai","Medicine ordering is frozen"],
+ held:["Rukaa hua","Held"], interim:["Beech ka order","Interim order"], sentby:["bheja — %s, %s","sent — %s, %s"], nonetoday:["Aaj koi order nahi.","No order due today."],
+ plan:["Engine ka poora plan (dekhne ke liye)","The engine's full plan (for reference)"], addhol:["Chhutti jodo","Add a holiday"], holnote:["kyun","why"],
+ none1:["Abhi kuch kam nahi.","Nothing short right now."], shelf:["shelf","shelf"], keep:["rakhna","keep"], onord:["order par","on order"],
+ marg:["Marg","Marg"], approx:["approx","approx"], send:["Yuvika ko order bhejo","Send the order to Yuvika"],
+ sent:["Order bheja — %s, %s","Order sent — %s, %s"], none2:["Koi order baaki nahi.","No open order."],
+ ok:["Aa gaya","Arrived"], short:["Kam aaya","Short"], miss:["Nahi mila","Not available"], all:["Sab aa gaya","All arrived"],
+ howmany:["Kitna aaya?","How many came?"], none3:["Scan ka koi kaam baaki nahi.","No scan work is waiting."],
+ scan:["Scan karo","Scan"], red:["%d din se scan nahi","unscanned %d days"], recvd:["order aaya %s — bill abhi Marg mein nahi","received %s — bill not in Marg yet"],
+ rules:["Doctor sahab ke rules ka intezaar","Awaiting the doctor's buying rules"], sendm:["Order bhejo","Send"],
+ saved:["✓ Save ho gaya","✓ Saved"], dup:["Pehle hi ho chuka","Already done"], err:["Nahi hua","Not done"],
+ openwa:["WhatsApp khol raha hai…","Opening WhatsApp…"], source:["figures: %s · count %s se","figures: %s · from the count of %s"],
+ sizes:["doosra size:","other size:"], view:["Aap sirf dekh sakte hain.","View only."]
+};
+const L=(k,...a)=>{let s=T[k][EN?1:0];a.forEach(x=>{s=s.replace("%s",x).replace("%d",x)});return s;};
+
+async function get(u){const r=await fetch(u+(u.indexOf("?")<0?"?":"&")+"_="+Date.now(),{cache:"no-store"});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok){const e=new Error(j.message||j.error||("HTTP "+r.status));e.j=j;throw e;}return j;}
+async function post(u,b){const r=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok){const e=new Error(j.message||j.error||("HTTP "+r.status));e.j=j;throw e;}return j;}
+function msgHtml(){if(!MSG)return "";return '<div class="saved '+(MSG.kind||"")+'"><div class="t">'+esc(MSG.title)+'</div>'+(MSG.lines||[]).map(l=>'<div class="l">'+l+'</div>').join("")+'</div>';}
+function say(kind,title,lines){MSG={kind,title,lines};render();window.scrollTo(0,0);}
+
+async function load(){
+ try{S=await get("/finance/porders/api/state");}catch(e){el("body").innerHTML='<div class="sec" style="padding:12px">'+esc(e.message)+'</div>';return;}
+ EN=(S.me==="owner"); document.documentElement.lang=EN?"en":"hi";
+ S.ortho.lines.forEach(l=>{if(QTY[l.item]==null)QTY[l.item]=l.short; if(PICK[l.item]==null)PICK[l.item]=l.item;});
+ if(OPEN[3]==null&&S.kaam&&S.kaam.n)OPEN[3]=true;   // S440: work waiting -- the list is open
+ render();
+}
+function canWrite(){return S.me==="owner"||S.me==="sender";}
+function sec(n,title,cnt,cls,inner){return '<details class="sec"'+(OPEN[n]?' open':'')+' ontoggle="OPEN['+n+']=this.open"><summary><span>'+esc(title)+'</span><span class="n '+cls+'">'+cnt+'</span></summary><div>'+inner+'</div></details>';}
+function render(){
+ const s=S; let h=msgHtml();
+ el("sub").textContent=L("sub")+" · "+L("source",s.source,s.since_text);
+ // 1 -- orthotic shortages
+ let o="";
+ if(s.ortho.recent) o+='<div class="sent">'+L("sent",esc(s.ortho.recent.sent_text),esc(s.ortho.recent.by))+' · '+s.ortho.recent.lines+' line</div>';
+ if(!s.ortho.lines.length) o+='<div class="muted">'+L("none1")+'</div>';
+ s.ortho.lines.forEach(l=>{
+  const pick=PICK[l.item]||l.item, q=QTY[l.item];
+  o+='<div class="line"><div class="nm">'+esc(pick)+(l.approx?'<span class="tag approx">'+L("approx")+'</span>':'')+'</div>'+
+     '<div class="muted">'+L("shelf")+' '+esc(l.shelf_text||l.shelf)+(l.approx?' ('+L("approx")+', family '+l.family_shelf+')':'')+' · '+L("keep")+' '+l.keep+(l.on_order?' · '+L("onord")+' '+l.on_order:'')+(l.marg!=null?' · '+L("marg")+': '+l.marg:'')+'</div>'+
+     '<div class="qty"><span class="btn pm" onclick="dq(\''+esc(l.item).replace(/'/g,"\\'")+'\',-1)">−</span><b>'+q+'</b><span class="btn pm" onclick="dq(\''+esc(l.item).replace(/'/g,"\\'")+'\',1)">+</span></div>';
+  if(l.approx&&l.sizes.length) o+='<div class="muted">'+L("sizes")+' '+[l.item].concat(l.sizes).map(sz=>'<span class="btn chip'+(pick===sz?' on':'')+'" onclick="ps(\''+esc(l.item).replace(/'/g,"\\'")+'\',\''+esc(sz).replace(/'/g,"\\'")+'\')">'+esc(sz.replace(l.family,'').trim()||sz)+(l.sizes_shelf&&l.sizes_shelf[sz]!=null?' ('+l.sizes_shelf[sz]+')':'')+'</span>').join("")+'</div>';
+  o+='</div>';
+ });
+ if(s.ortho.lines.length&&canWrite()) o+='<span class="btn ok big" onclick="send()">'+L("send")+'</span>';
+ if(!canWrite()) o+='<div class="muted">'+L("view")+'</div>';
+ h+=sec(1,L("s1",s.ortho.n),s.ortho.n,s.ortho.n?'red':'ok',o);
+ // 2 -- orders arrived?
+ let a="";
+ if(!s.orders.open.length) a+='<div class="muted">'+L("none2")+'</div>';
+ s.orders.open.forEach(od=>{
+  a+='<div class="line"><div class="nm">#'+od.id+' '+esc(od.vendor)+'</div><div class="muted">'+esc(od.sent_text)+' · '+esc(od.sent_by||od.created_by)+'</div>';
+  od.lines.forEach(ln=>{
+   a+='<div class="line'+(ln.state!=="open"?' done':'')+'"><div>'+esc(ln.item)+' <b>× '+ln.packs+'</b>'+(ln.billed_qty!=null?' <span class="tag">Marg bill '+esc(ln.billed_bill_no)+' × '+ln.billed_qty+'</span>':'')+'</div>';
+   if(ln.state==="open"&&canWrite()){
+    a+='<div><span class="btn ok sm" onclick="arrive('+od.id+','+ln.id+',\'ok\')">'+L("ok")+'</span><span class="btn sm" onclick="askShort('+ln.id+')">'+L("short")+'</span><span class="btn bad sm" onclick="arrive('+od.id+','+ln.id+',\'missing\')">'+L("miss")+'</span></div>';
+    if(SHORTQ[ln.id]!=null) a+='<div>'+L("howmany")+' <input class="q" type="number" min="0" max="'+(ln.packs-1)+'" id="sq'+ln.id+'" value="'+SHORTQ[ln.id]+'"> <span class="btn ok sm" onclick="arriveShort('+od.id+','+ln.id+')">OK</span></div>';
+   } else if(ln.state!=="open") a+='<div class="muted">'+(ln.state==="ok"?L("ok"):(ln.state==="short"?L("short")+' — '+ln.supplied:L("miss")))+(ln.arrived_by?' · '+esc(ln.arrived_by):'')+'</div>';
+   a+='</div>';
+  });
+  if(od.open_lines&&canWrite()) a+='<span class="btn ok" onclick="arriveAll('+od.id+')">'+L("all")+'</span>';
+  a+='</div>';
+ });
+ if(s.orders.received.length) a+='<details style="margin-top:8px"><summary class="muted">'+(EN?'received orders':'aaye hue orders')+' ('+s.orders.received.length+')</summary>'+s.orders.received.map(od=>'<div class="muted">#'+od.id+' '+esc(od.vendor)+' · '+esc(od.received_text)+' · '+od.lines.map(l=>esc(l.item)+' '+(l.supplied!=null?l.supplied:0)+'/'+l.packs).join(", ")+'</div>').join("")+'</details>';
+ h+=sec(2,L("s2",s.orders.n),s.orders.n,s.orders.n?'':'ok',a);
+ // 3 -- Scan ka kaam (S440, D640): five kinds of line, each with its own buttons and nothing else
+ const K=s.kaam||{n:0,counts:{},scan:[],confirm:[],vendor:[],amount:[],wait:[],received:[],suppliers:[]};
+ let b=kmsgHtml();
+ const pic=x=>'<a class="kth" href="'+esc(x.pdf)+'" target="_blank"><img loading="lazy" src="'+esc(x.thumb)+'" alt="scan" onerror="this.parentNode.className=\'kth nopic\'"></a>';
+ const old=x=>x.age?(' · <span class="'+(x.age>3?'red':'muted')+'">'+L("days",x.age)+'</span>'):'';
+ const lane=x=>canWrite()?'<details class="kl"><summary>'+L("lane")+'</summary><form method="post" action="/scanapp/bills/'+x.scan+'/lane"><input type="hidden" name="back" value="'+esc(location.pathname+location.search)+'"><select name="lane"><option value="clinic">Clinic bill</option><option value="lab_purchase">Lab purchase</option><option value="other_doc">Other document</option></select> <button class="btn sm">'+L("move")+'</button></form></details>':'';
+ const read=x=>'<div class="muted">Scan '+esc(x.stamp)+': '+esc(x.scan_vendor||"—")+' · '+esc(x.scan_no||"—")+' · '+esc(x.scan_amount)+old(x)+'</div>';
+ const grp=(id,title,n,inner,open,calm)=>n?('<details class="kg'+(calm?' calm':'')+'" id="kg'+id+'"'+(open?' open':'')+'><summary>'+title+' <span class="n">'+n+'</span></summary>'+inner+'</details>'):'';
+ if(!K.n&&!(K.wait||[]).length&&!(K.twin||[]).length) b+='<div class="muted">'+L("none3")+'</div>';
+ let g1="";
+ (K.scan||[]).forEach(x=>{
+  g1+='<div class="line"><div class="nm">'+esc(x.vendor)+'</div><div class="muted">bill '+esc(x.bill_no)+' · '+esc(x.date_text)+' · '+esc(x.amount)+old(x)+'</div>'+
+      (x.double?'<div class="sent">'+L("double")+' ('+esc((x.double_nos||[]).join(" / "))+')</div>':'')+
+      '<a class="btn ok sm" href="'+esc(x.intake)+'">📷 '+L("scan")+'</a></div>';
+ });
+ (K.received||[]).forEach(x=>{
+  g1+='<div class="line"><div class="nm">'+esc(x.vendor)+'</div><div class="muted">'+L("recvd",esc(x.received_text))+(x.red?' · <span class="red">'+L("red",x.age)+'</span>':'')+'</div>'+
+      '<a class="btn ok sm" href="'+esc(x.intake)+'">📷 '+L("scan")+'</a></div>';
+ });
+ b+=grp(1,L("k1"),(K.scan||[]).length+(K.received||[]).length,g1,true);
+ let g2="";
+ (K.confirm||[]).forEach(x=>{
+  g2+='<div class="kline">'+pic(x)+'<div class="kb"><div class="nm">'+esc(x.vendor)+' · bill '+esc(x.bill_no)+'</div><div class="muted">Marg: '+esc(x.date_text)+' · '+esc(x.amount)+'</div>'+read(x)+
+      (x.taken_by?'<div class="sent">'+L("taken",esc(x.taken_stamp||("#"+x.taken_by)))+'</div>':'')+
+      (canWrite()?'<div><span class="btn ok sm" onclick="kConfirm('+x.scan+','+x.bill_id+',true)">'+L(x.taken_by?"yes2":"yes")+'</span><span class="btn bad sm" onclick="kConfirm('+x.scan+','+x.bill_id+',false)">'+L("no")+'</span></div>':'')+lane(x)+'</div></div>';
+ });
+ b+=grp(2,L("k2"),(K.confirm||[]).length,g2,true);
+ let g3="";
+ (K.vendor||[]).forEach(x=>{
+  g3+='<div class="kline">'+pic(x)+'<div class="kb">'+read(x)+
+      (canWrite()?'<div><select class="kv" id="kv'+x.scan+'"><option value="">'+L("pick")+'</option>'+(K.suppliers||[]).map(v=>'<option>'+esc(v)+'</option>').join("")+'<option value="-">'+L("notlisted")+'</option></select></div><span class="btn ok sm" onclick="kVendor('+x.scan+')">'+L("isvendor")+'</span>':'')+lane(x)+'</div></div>';
+ });
+ b+=grp(3,L("k3"),(K.vendor||[]).length,g3,true);
+ let g4="";
+ (K.amount||[]).forEach(x=>{
+  g4+='<div class="kline">'+pic(x)+'<div class="kb"><div class="nm">'+esc(x.vendor)+' · bill '+esc(x.bill_no)+'</div><div>Scan <b>'+esc(x.scan_amount)+'</b> · Marg <b>'+esc(x.amount)+'</b></div>'+
+      (canWrite()?'<div>'+L("paper")+' <input class="q" style="width:110px" inputmode="decimal" id="ka'+x.scan+'"> <span class="btn ok sm" onclick="kAmount('+x.scan+')">'+L("match")+'</span></div>':'')+lane(x)+'</div></div>';
+ });
+ b+=grp(4,L("k4"),(K.amount||[]).length,g4,true);
+ let g5="";
+ (K.wait||[]).forEach(x=>{
+  g5+='<div class="kline">'+pic(x)+'<div class="kb">'+read(x)+'<div class="muted">'+esc(EN?(x.note_en||x.note):x.note)+'</div>'+lane(x)+'</div></div>';
+ });
+ b+=grp(5,L("k5"),(K.wait||[]).length,g5,false,true);
+ // S441 (D643): the asset app's after-the-fact questions -- Shavez and reception both see them; the first answer settles it
+ let g6="";
+ const who=x=>' · '+esc(x.by||"")+' · '+esc((x.at||"").slice(11,16)||x.at||"");
+ (K.twin||[]).forEach(x=>{
+  const c=x.cand;
+  g6+='<div class="kline">'+pic(x)+'<div class="kb"><div class="nm">'+esc(x.stamp)+'</div>'+read(x)+'<div class="muted">'+(x.kind==="lane"?L("lanq"):L("twinq"))+who(x)+'</div>'+
+      (c?'<div class="kline" style="border:0;padding:4px 0">'+pic(c)+'<div class="kb"><div class="nm">'+esc(c.stamp)+'</div><div class="muted">'+esc(c.vendor||"—")+' · '+esc(c.bill_no||"—")+' · '+esc(c.amount)+who(c)+'</div></div></div>':'')+
+      (canWrite()?'<div>'+(x.kind==="lane"?'<span class="btn ok sm" onclick="kAns('+x.scan+','+x.q+',\'pharmacy\')">'+L("tophar")+'</span><span class="btn sm" onclick="kAns('+x.scan+','+x.q+',\'stay\')">'+L("stay")+'</span>'
+                    :'<span class="btn ok sm" onclick="kAns('+x.scan+','+x.q+',\'same\')">'+L("same")+'</span><span class="btn sm" onclick="kAns('+x.scan+','+x.q+',\'different\')">'+L("diff")+'</span>')+'</div>':'')+'</div></div>';
+ });
+ b+=grp(6,L("k6"),(K.twin||[]).length,g6,true);
+ if((K.answered||[]).length) b+='<details class="kg calm"><summary>'+L("answered",K.answered.length)+'</summary>'+K.answered.map(a=>'<div class="muted">'+esc(a.stamp)+' — '+esc(a.answer)+' · '+esc(a.by||"")+' '+esc(a.at||"")+'</div>').join("")+'</details>';
+ h+=sec(3,L("s3",K.n),K.n,K.n?'red':'ok',b);
+ // 4 -- the ordering team's day (S410, D626): the proposals prepared at 09:00, ± / remove / bhejo; the engine's plan folded away
+ const d=s.today||{proposals:[],n:0,sent:0,unsent:0,text:""};
+ let m="";
+ if(d.frozen) m+='<div class="saved err"><div class="t">'+L("frozen")+'</div><div class="l">'+esc(d.frozen.reason||"")+' · '+esc((d.frozen.at||"").slice(0,16))+'</div></div>';
+ if(!s.meds.rules_ok) m+='<div class="muted">'+L("rules")+'</div>';
+ if(d.text) m+='<div class="sent">'+esc(d.text)+'</div>';
+ (d.merged_ahead||[]).forEach(x=>{m+='<div class="muted">'+esc(x.vendor)+': '+esc(x.day)+' ka order nahi gaya — '+esc(x.into)+' ke order mein judega</div>';});
+ (d.proposals||[]).forEach(p=>{
+  if(!DQ[p.id]){DQ[p.id]={}; p.lines.forEach(l=>{DQ[p.id][l.item]=l.qty;});}
+  const q=DQ[p.id];
+  m+='<div class="line'+(p.status==="sent"?' done':'')+'"><div class="nm">'+esc(p.vendor)+(p.kind==="interim"?'<span class="tag approx">'+L("interim")+'</span>':'')+(p.status==="held"?'<span class="tag">'+L("held")+'</span>':'')+'</div>';
+  if(p.reason) m+='<div class="muted">'+esc(p.reason)+'</div>';
+  if(p.carried_from) m+='<div class="muted">'+esc(p.carried_from)+' ka order bhi isme</div>';
+  if(p.status==="sent"){ m+='<div class="sent">'+L("sentby",esc(p.sent_text),esc(p.sent_by||""))+' · order #'+p.sent_order_id+'</div><table>'+p.lines.map(l=>'<tr><td>'+esc(l.item)+'</td><td class="n"><b>'+l.qty+'</b> '+esc(l.unit)+'</td></tr>').join("")+'</table>'; }
+  else {
+   m+='<table>'+p.lines.map(l=>'<tr><td>'+esc(l.item)+'</td><td class="n">'+esc(l.stock_text!=null?l.stock_text:l.on_hand)+'</td><td class="n">'+(canWrite()&&p.status!=="held"?'<span class="qty"><span class="btn pm" onclick="pq('+p.id+',\''+esc(l.item).replace(/'/g,"\\'")+'\',-1)">−</span><b>'+(q[l.item]||0)+'</b><span class="btn pm" onclick="pq('+p.id+',\''+esc(l.item).replace(/'/g,"\\'")+'\',1)">+</span></span> '+esc(l.unit)+' <span class="btn chip" onclick="pq('+p.id+',\''+esc(l.item).replace(/'/g,"\\'")+'\',-9999)">'+L("remove")+'</span>':'<b>'+l.qty+'</b> '+esc(l.unit))+'</td></tr>').join("")+'</table>';
+   if(canWrite()&&p.status!=="held"&&s.meds.rules_ok&&!d.frozen) m+='<span class="btn ok big" onclick="sendDay('+p.id+')">'+L("bhejo",esc(p.short||p.vendor))+'</span>';
+  }
+  m+='</div>';
+ });
+ if(!(d.proposals||[]).length) m+='<div class="muted">'+L("nonetoday")+'</div>';
+ m+='<details style="margin-top:8px"><summary class="muted">'+L("plan")+'</summary>';
+ (s.meds.plan.vendors||[]).forEach((v,i)=>{
+  m+='<div class="line"><div class="nm">'+esc(v.vendor)+'</div><table>'+v.lines.map(l=>'<tr><td>'+esc(l.item)+'</td><td class="n">'+esc(l.stock_text!=null?l.stock_text:l.on_hand)+'</td><td class="n"><b>'+l.qty+'</b> '+esc(l.unit)+'</td></tr>').join("")+'</table></div>';
+ });
+ if(!(s.meds.plan.vendors||[]).length) m+='<div class="muted">'+(EN?'Nothing to order on today\'s stock.':'Aaj ke stock par kuch order nahi.')+'</div>';
+ m+='</details>';
+ h+=sec(4,L("s4",d.n||0),(d.unsent||0),(d.unsent?'red':(d.n?'ok':'')),m);
+ // 5 -- the holiday list (S410): an order day on a holiday moves to the previous working day; senders keep it
+ let hl="";
+ (d.holidays||[]).forEach(x=>{hl+='<div class="line"><b>'+esc(x.day)+'</b> <span class="muted">'+esc(x.note||"")+' · '+esc(x.set_by||"")+'</span>'+(canWrite()?' <span class="btn chip" onclick="holiday(\''+esc(x.day)+'\',true)">'+L("remove")+'</span>':'')+'</div>';});
+ if(canWrite()) hl+='<div class="line"><input type="date" id="holDay"> <input class="q" style="width:140px;font-size:15px;text-align:left" id="holNote" placeholder="'+L("holnote")+'"> <span class="btn ok sm" onclick="holiday(null,false)">'+L("addhol")+'</span></div>';
+ h+=sec(5,L("s5",(d.holidays||[]).length),(d.holidays||[]).length,'',hl);
+ el("body").innerHTML=h;
+}
+function pq(pid,item,dl){const q=DQ[pid]||(DQ[pid]={}); q[item]=dl<=-9999?0:Math.max(0,(q[item]||0)+dl); render();}
+async function sendDay(pid){
+ if(BUSY)return;BUSY=true;
+ const p=(S.today.proposals||[]).find(x=>x.id===pid); const q=DQ[pid]||{};
+ const lines=(p?p.lines:[]).map(l=>({item:l.item,qty:q[l.item]!=null?q[l.item]:l.qty})).filter(l=>l.qty>0);
+ try{const j=await post("/finance/porders/api/day/send",{proposal_id:pid,lines});
+  MSG={kind:j.already?"dup":"",title:j.already?L("dup"):L("saved"),lines:[esc(j.message||""),"Order #"+j.order_id+(j.sent_text?" · "+esc(j.sent_text):"")+(j.by?" · "+esc(j.by):""),(j.wa_url?L("openwa"):"")]};
+  delete DQ[pid]; await load(); if(j.wa_url){window.location.href=j.wa_url;}
+ }catch(e){MSG={kind:(e.j&&e.j.already)?"dup":"err",title:(e.j&&e.j.already)?L("dup"):L("err"),lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+async function holiday(day,remove){
+ if(BUSY)return;BUSY=true;
+ const d=day||(el("holDay")||{}).value, note=(el("holNote")||{}).value||"";
+ try{ if(!d) throw new Error(EN?"pick a date":"tareekh chuniye"); await post("/finance/porders/api/rules/holiday",{day:d,note,remove:!!remove}); await load(); }
+ catch(e){MSG={kind:"err",title:L("err"),lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+function dq(item,d){QTY[item]=Math.max(0,(QTY[item]||0)+d);render();}
+function ps(item,sz){PICK[item]=sz;render();}
+function askShort(lid){SHORTQ[lid]=0;render();}
+async function send(){
+ if(BUSY)return;BUSY=true;
+ const lines=S.ortho.lines.map(l=>({item:PICK[l.item]||l.item,qty:QTY[l.item]})).filter(l=>l.qty>0);
+ try{const j=await post("/finance/porders/api/send",{lines});
+  MSG={kind:j.already?"dup":"",title:j.already?L("dup"):L("saved"),lines:[esc(j.message||""),"Order #"+j.order_id+" · "+esc(j.sent_text)+" · "+esc(j.by),(j.wa_url?L("openwa"):"")]};
+  QTY={};PICK={};await load();
+  if(j.wa_url){window.location.href=j.wa_url;}
+ }catch(e){MSG={kind:"err",title:L("err"),lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+async function sendMed(vendor){
+ if(BUSY)return;BUSY=true;
+ try{const j=await post("/finance/porders/api/send_med",{vendor});MSG={kind:"",title:L("saved"),lines:["Order #"+j.order_id+" · "+esc(vendor)]};await load();if(j.wa_url)window.location.href=j.wa_url;}
+ catch(e){MSG={kind:(e.j&&e.j.already)?"dup":"err",title:(e.j&&e.j.already)?L("dup"):L("err"),lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+async function arrive(oid,lid,how,supplied){
+ if(BUSY)return;BUSY=true;
+ try{const j=await post("/finance/porders/api/arrive",{order_id:oid,line_id:lid,how,supplied});
+  MSG={kind:j.already?"dup":"",title:j.already?L("dup"):L("saved"),lines:j.saved?["<b>"+esc(j.saved.item)+"</b>: "+esc(j.saved.hi)]:[esc(j.message||"")]};delete SHORTQ[lid];await load();}
+ catch(e){MSG={kind:"err",title:L("err"),lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+function arriveShort(oid,lid){const v=parseInt((el("sq"+lid)||{}).value);if(isNaN(v)){return;}arrive(oid,lid,'short',v);}
+async function arriveAll(oid){
+ if(BUSY)return;BUSY=true;
+ try{const j=await post("/finance/porders/api/arrive",{order_id:oid,all:true});MSG={kind:"",title:L("saved"),lines:["Order #"+oid+": "+L("all")]};await load();}
+ catch(e){MSG={kind:"err",title:L("err"),lines:[esc(e.message)]};render();window.scrollTo(0,0);}
+ BUSY=false;
+}
+// S440 (D640): Scan ka kaam -- the three answers a person can give; the line goes when the server has taken it
+let KMSG=null;
+function kmsgHtml(){if(!KMSG)return "";return '<div class="saved '+(KMSG.kind||"")+'" id="kmsg"><div class="l">'+esc(KMSG.text)+'</div></div>';}
+async function kDo(url,body){
+ if(BUSY)return;BUSY=true;OPEN[3]=true;
+ try{const j=await post(url,body);KMSG={kind:"",text:"✓ "+(j.message||"")};await load();}
+ catch(e){KMSG={kind:"err",text:e.message};render();}
+ BUSY=false;
+}
+function kAns(scan,q,answer){kDo("/scanapp/bills/"+scan+"/s441",{q,answer});}   // S441: answered in the asset app, which owns the scans
+function kConfirm(scan,bill,yes){kDo("/finance/porders/api/scan/confirm",{scan,bill,yes});}
+function kVendor(scan){const v=(el("kv"+scan)||{}).value;if(!v){KMSG={kind:"err",text:L("pickfirst")};render();return;}kDo("/finance/porders/api/scan/vendor",{scan,vendor:v});}
+function kAmount(scan){const v=((el("ka"+scan)||{}).value||"").trim();if(!/^\d+(\.\d{1,2})?$/.test(v)){KMSG={kind:"err",text:L("digits")};render();return;}kDo("/finance/porders/api/scan/amount",{scan,paper:v});}
+(function(){ // the BACK bar returns to the page the person came from (?from=, a path inside this site), else the portal's tile hub; the up-arrow after a screen
+ const f=new URLSearchParams(location.search).get("from");
+ if(f&&f.charAt(0)==="/"&&f.charAt(1)!=="/"&&!/[\\"'<>\r\n]/.test(f)) el("s440back").href=f;
+ window.addEventListener("scroll",function(){el("s440up").style.display=(window.pageYOffset>window.innerHeight)?"block":"none";});
+})();
+load();
+</script>
+</body>
+</html>
