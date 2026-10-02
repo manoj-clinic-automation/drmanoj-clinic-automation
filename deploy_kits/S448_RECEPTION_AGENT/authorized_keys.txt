@@ -1,0 +1,4 @@
+# PUBLIC keys that may send jobs to the reception agent through the clinic Drive.
+# One line per key:  <64 hex characters of an Ed25519 public key>  <label>
+# The installer adds these to C:\ClinicAgent\authorized_keys.txt if they are not there.
+6b135cebe94714de80c912d724778486c5978043d65a813cc44d8a88ff5a47a8  parent-manojz (secret on the owner's PC: D:\Downloads\margsync\_config\reception_agent_key.txt; enrolled 02-Oct-2026)

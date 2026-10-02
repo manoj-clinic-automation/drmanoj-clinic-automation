@@ -1,0 +1,2 @@
+S449 KIT S449_RECEPTION_UPLOAD
+session 290 (parent) · 02-Oct-2026 · D659: the reception PC posts its heartbeat and the two Docterz reports straight to the server, signed with its own key

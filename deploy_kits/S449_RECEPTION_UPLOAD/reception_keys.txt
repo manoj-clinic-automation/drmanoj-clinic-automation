@@ -1,0 +1,4 @@
+# reception_keys.txt -- kit S449_RECEPTION_UPLOAD. PUBLIC keys that may post to /finance/api/reception/*.
+# One line per key: <64 hex of an Ed25519 public key>  <label>. Empty means the door is shut (503).
+# The matching secret was made on the reception PC by its agent (C:\ClinicAgent\upload_key.txt) and never left it.
+8cbbfde87b92697ec4fdc21307af887c94b0ed9eaf7cfe586c8cb0bdfa134972  receptionpc (key made on that PC 02-Oct-2026 11:39 IST, agent S449.1)

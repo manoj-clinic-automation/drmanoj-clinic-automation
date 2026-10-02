@@ -1,0 +1,10 @@
+d465b0e857d0221fc3af6bb1ba48dc48  INSTALL_RECEPTION_AGENT.bat
+a9ede783025a4965c2e660cad4cd77b9  README_REINSTALL.txt
+9661b55732857376c18767c344192eb8  agent_guard.py
+fd9afcba6894e8f841918dbd597460b6  config.json
+74829388da0a2b0fb210d9d7a4b7a4d9  reception_agent.py
+b55c3b10498cabd673d717c179ee4e25  reception_sign.py
+30a7b6ab01fbaa598844f4b3d8220a68  pyportable.zip
+4165d355c20ebd0d7489e1e89dce9f4c  tests/test_kit.py
+026638d6ceeae0c8a3c71f51e3806c50  authorized_keys.txt
+e4babe1618436cf9604b39b5221b46b5  share_setup.cmd
