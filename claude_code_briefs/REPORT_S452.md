@@ -52,6 +52,8 @@ https://followup.dr-manoj.in/finance/purchase/page/phone-setup
 | 23:51:36 | `finance.db.bak_S452_20261002_234511` written; files placed; `clinic-finance` restarted (journal: stopped/started 23:51:36). |
 | 23:51:45 | Data step done; installer `DONE`. |
 | 23:52:32 | Read back: md5s, health, the duty's SQL on the live database (below). |
+| — | PUBLISH_ALL → `bc83453`. The publish also carried `claude_code_briefs/S454_BILL_REGISTER.md`, another chat's brief that had arrived in the repository; I did not read it or act on it. |
+| 23:55:24 | On the box, `git pull`, then `diff -r` of the repository's kit against the copy that ran: **byte-identical**. `claude_code_briefs/DUTY_MAP.md/.json` = the kit's. SUMS: 0 mismatches. The repository's installer answers **"ALREADY INSTALLED"**. |
 
 ### Live files, FROM → TO, md5 read back on the box (23:52:32)
 | file | FROM | TO (read back) |
