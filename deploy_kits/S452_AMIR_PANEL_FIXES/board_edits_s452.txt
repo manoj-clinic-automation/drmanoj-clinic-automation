@@ -1,0 +1,239 @@
+@@@ OLD
+   Stock issue voucher number one, two, three." So section 1 is the vouchers ONLY, numbered as Amir keys them -- STOCK ISSUE वाउचर 1..N,
+@@@ NEW
+   Stock issue voucher number one, two, three." So section 1 is the vouchers ONLY, numbered as Amir keys them -- STOCK ISSUE voucher 1..N,
+@@@ END
+@@@ OLD
+   then STOCK RECEIVE वाउचर 1..M, continuously across the whole count (the server numbers them; the internal round numbers never show
+@@@ NEW
+   then STOCK RECEIVE voucher 1..M, continuously across the whole count (the server numbers them; the internal round numbers never show
+@@@ END
+@@@ OLD
+   here) -- and a voucher line is item (packing) · Marg से → तक · कितना, nothing else. A keyed voucher folds to one line with its Marg
+@@@ NEW
+   here) -- and a voucher line is item (packing) · Marg se → tak · kitna, nothing else. A keyed voucher folds to one line with its Marg
+@@@ END
+@@@ OLD
+     1  वाउचर — Marg में डालने हैं       STOCK ISSUE वाउचर 1..N, STOCK RECEIVE वाउचर 1..M; one tap "Marg में डाल दिया" with Marg's voucher number
+@@@ NEW
+     1  Voucher — Marg mein daalne hain      STOCK ISSUE voucher 1..N, STOCK RECEIVE voucher 1..M; one tap "Marg mein daal diya" with Marg's voucher number
+@@@ END
+@@@ OLD
+     2  वाउचर के बाद — closing stock     the one instruction, the proof's confirmation when the next export lands, the upload box as fallback
+@@@ NEW
+     2  Voucher ke baad — closing stock     the one instruction, the proof's confirmation when the next export lands, the upload box as fallback
+@@@ END
+@@@ OLD
+     3  सुधार — Marg में ठीक करना है     Salt theek karo · Rate daalo · Naam badlo (only when Marg = shelf is proven)
+@@@ NEW
+     3  Sudhar — Marg mein theek karna hai  Salt theek karo · Rate daalo (S452: also on his card while due) · Naam badlo (only when Marg = shelf is proven)
+@@@ END
+@@@ OLD
+     4  बाकी काम                          anything the system still needs from him (the S428 lines: bill entry baaki, sudhaar, the Sunday)
+@@@ NEW
+     4  Baaki kaam                          anything the system still needs from him (the S428 lines: bill entry baaki, sudhaar, the Sunday).
+        S452 (02-Oct-2026): every fixed word in Roman Hindi, as his day reads; "Aur voucher kholiye" under Stage C's lot; #rates opens (b).
+@@@ END
+@@@ OLD
+<div class="sub">वाउचर · closing stock · सुधार · बाकी काम — सब एक ही पन्ने पर</div>
+@@@ NEW
+<div class="sub">Voucher · closing stock · sudhar · baaki kaam — sab ek hi panne par</div>
+@@@ END
+@@@ OLD
+function vtitle(v){ return (v.kind==="ISSUE"?"STOCK ISSUE":"STOCK RECEIVE")+" — वाउचर "+v.seq; }
+@@@ NEW
+function vtitle(v){ return (v.kind==="ISSUE"?"STOCK ISSUE":"STOCK RECEIVE")+" — voucher "+v.seq; }
+@@@ END
+@@@ OLD
+  // S437: item (packing) · Marg से → तक · कितना -- and nothing else; every word from the server (qty_words, the whole-piece list included)
+@@@ NEW
+  // S437: item (packing) · Marg se → tak · kitna -- and nothing else; every word from the server (qty_words, the whole-piece list included)
+@@@ END
+@@@ OLD
+  return '<div class="ln"><div><div class="it">'+esc(l.item)+(l.packing?' <span class="sub">('+esc(l.packing)+')</span>':'')+'</div><div class="q">Marg से '+esc(l.from_hi)+' → तक '+esc(l.to_hi)+'</div></div>'
+@@@ NEW
+  return '<div class="ln"><div><div class="it">'+esc(l.item)+(l.packing?' <span class="sub">('+esc(l.packing)+')</span>':'')+'</div><div class="q">Marg se '+esc(l.from_hi)+' → tak '+esc(l.to_hi)+'</div></div>'
+@@@ END
+@@@ OLD
+    return '<details class="vd"><summary><span><b>'+esc(vtitle(v))+'</b> <span class="sub">· '+v.n+' item</span></span><span class="chip ok">✓ Marg नं. '+esc(v.entered.no)+'</span></summary><div class="in">'
+@@@ NEW
+    return '<details class="vd"><summary><span><b>'+esc(vtitle(v))+'</b> <span class="sub">· '+v.n+' item</span></span><span class="chip ok">✓ Marg no. '+esc(v.entered.no)+'</span></summary><div class="in">'
+@@@ END
+@@@ OLD
+      +'<div class="vs" style="margin-top:8px">Marg में डला '+(v.entered.on?'('+esc(v.entered.on)+') ':'')+'· '+esc(v.entered.by)+' · '+esc(v.entered.at_text)+' <button class="tg" data-unent="'+esc(k)+'">वापस लें</button></div></div></details>';
+@@@ NEW
+      +'<div class="vs" style="margin-top:8px">Marg mein daala '+(v.entered.on?'('+esc(v.entered.on)+') ':'')+'· '+esc(v.entered.by)+' · '+esc(v.entered.at_text)+' <button class="tg" data-unent="'+esc(k)+'">Wapas lein</button></div></div></details>';
+@@@ END
+@@@ OLD
+  return '<div class="vc '+(v.kind==="ISSUE"?'issue':'receive')+'"><div class="vh">'+esc(vtitle(v))+'</div><div class="vs">'+(v.kind==="ISSUE"?"Marg में कम करना":"Marg में बढ़ाना")+' · '+v.n+' item — Marg में यह एक वाउचर बनाइए</div>'
+@@@ NEW
+  return '<div class="vc '+(v.kind==="ISSUE"?'issue':'receive')+'"><div class="vh">'+esc(vtitle(v))+'</div><div class="vs">'+(v.kind==="ISSUE"?"Marg mein kam karna":"Marg mein badhana")+' · '+v.n+' item — Marg mein yeh ek voucher banaiye</div>'
+@@@ END
+@@@ OLD
+    +'<div class="ent"><input type="text" inputmode="text" placeholder="Marg का वाउचर नंबर" data-vno="'+esc(k)+'"><button class="b main" data-ent="'+esc(k)+'">Marg में डाल दिया</button></div></div>';
+@@@ NEW
+    +'<div class="ent"><input type="text" inputmode="text" placeholder="Marg ka voucher number" data-vno="'+esc(k)+'"><button class="b main" data-ent="'+esc(k)+'">Marg mein daal diya</button></div></div>';
+@@@ END
+@@@ OLD
+function render(){
+@@@ NEW
+function moreBtn(d){
+  // S452: Stage C -- "Aur voucher kholiye" opens the next lot at once, as often as he taps, until none is left
+  const S=d.stage||{}; if(S.stage!=="C"||!(S.more>0)) return "";
+  return '<div style="margin-top:10px"><button class="b main" data-more="1">Aur voucher kholiye ('+Math.min(S.per||12,S.more)+')</button> <span class="sub">baaki '+S.more+'</span></div>';
+}
+function render(){
+@@@ END
+@@@ OLD
+  h+='<div class="card" id="vouchers"><h2><span class="n">1</span>वाउचर — Marg में डालने हैं</h2><div class="lead">हर कार्ड Marg में <b>एक</b> वाउचर है (6 line तक)। पहले सब <b>STOCK ISSUE</b> (Marg में कम करना), फिर सब <b>STOCK RECEIVE</b> (Marg में बढ़ाना)। हर line में item, Marg से → तक और कितना — बस इतना डालना है। डालने के बाद Marg का वाउचर नंबर लिखिए और <b>Marg में डाल दिया</b> दबाइए।</div>';
+@@@ NEW
+  h+='<div class="card" id="vouchers"><h2><span class="n">1</span>Voucher — Marg mein daalne hain</h2><div class="lead">Har card Marg mein <b>ek</b> voucher hai (6 line tak). Pehle sab <b>STOCK ISSUE</b> (Marg mein kam karna), phir sab <b>STOCK RECEIVE</b> (Marg mein badhana). Har line mein item, Marg se → tak aur kitna — bas itna daalna hai. Daalne ke baad Marg ka voucher number likhiye aur <b>Marg mein daal diya</b> dabaiye.</div>';
+@@@ END
+@@@ OLD
+  h+='<div class="tally"><span>STOCK ISSUE <b>'+nI+'</b></span><span>STOCK RECEIVE <b>'+nR+'</b></span><span>डल गए <b>'+done+' / '+VF.length+'</b></span></div>';
+@@@ NEW
+  h+='<div class="tally"><span>STOCK ISSUE <b>'+nI+'</b></span><span>STOCK RECEIVE <b>'+nR+'</b></span><span>Daal diye <b>'+done+' / '+VF.length+'</b></span></div>';
+@@@ END
+@@@ OLD
+  if(!VF.length) h+='<div class="empty">अभी कोई वाउचर नहीं।</div>';
+@@@ NEW
+  if(!VF.length) h+='<div class="empty">Abhi koi voucher nahi.</div>';
+@@@ END
+@@@ OLD
+  h+='<div class="msg" id="vmsg"></div></div>';
+@@@ NEW
+  h+=moreBtn(d)+'<div class="msg" id="vmsg"></div></div>';
+@@@ END
+@@@ OLD
+  h+='<div class="card"><h2><span class="n">2</span>वाउचर के बाद — Marg से closing stock निकालें</h2><div class="lead">सब वाउचर डल जाने के बाद पूरे स्टोर का closing stock export रोज़ की तरह निकालिए — वह अपने आप server तक पहुँचता है। अगला export आते ही यहाँ पुष्टि आएगी कि Marg और shelf मिल गए या नहीं।</div>'
+@@@ NEW
+  h+='<div class="card"><h2><span class="n">2</span>Voucher ke baad — Closing stock nikaaliye</h2><div class="lead">Sab voucher daal dene ke baad poore store ka closing stock export roz ki tarah nikaaliye — woh apne aap server tak pahunchta hai. Agla export aate hi yahan pushti aayegi ki Marg aur shelf mil gaye ya nahi.</div>'
+@@@ END
+@@@ OLD
+    +'<div class="row"><div><div class="it">Marg = shelf?</div><div class="q">'+esc(d.proof_hi||"अभी बाकी")+'</div></div><div class="r"><span class="chip'+(d.proof_state==="done"?' ok':' warn')+'">'+(d.proof_state==="done"?"मिल गए ✓":((d.proof_hi||"").startsWith("Marg = shelf")?"आ गया":"अभी बाकी"))+'</span></div></div>'
+@@@ NEW
+    +'<div class="row"><div><div class="it">Marg = shelf?</div><div class="q">'+esc(d.proof_hi||"Abhi baaki")+'</div></div><div class="r"><span class="chip'+(d.proof_state==="done"?' ok':' warn')+'">'+(d.proof_state==="done"?"Mil gaye ✓":((d.proof_hi||"").startsWith("Marg = shelf")?"Aa gaya":"Abhi baaki"))+'</span></div></div>'
+@@@ END
+@@@ OLD
+  h+='<div class="card"><h2><span class="n">3</span>सुधार — Marg में ठीक करना है</h2>';
+@@@ NEW
+  h+='<div class="card"><h2><span class="n">3</span>Sudhar — Marg mein theek karna hai</h2>';
+@@@ END
+@@@ OLD
+  h+='<h3>(a) Salt theek karo</h3><div class="lead">Marg में इन items का salt गलत है — item master में salt बदलिए। अगला salt export आते ही यह अपने आप हट जाएगा।</div>';
+@@@ NEW
+  h+='<h3>(a) Salt theek karo</h3><div class="lead">Marg mein in items ka salt galat hai — item master mein salt badliye. Agla salt export aate hi yeh apne aap hat jayega.</div>';
+@@@ END
+@@@ OLD
+  if(!SF.length) h+='<div class="empty">कोई नहीं।</div>';
+@@@ NEW
+  if(!SF.length) h+='<div class="empty">Koi nahi.</div>';
+@@@ END
+@@@ OLD
+  SF.forEach(s=>{ h+='<div class="row'+(s.marg_done?' done':'')+'"><div><div class="it">'+esc(s.item)+'</div><div class="q">अभी: '+esc(s.marg_now||s.salt_now||"—")+' → <span class="copy">'+esc(s.salt_new)+'</span></div></div><div class="r"><span class="chip'+(s.marg_done?' ok':' warn')+'">'+esc(s.hi)+'</span></div></div>'; });
+@@@ NEW
+  SF.forEach(s=>{ h+='<div class="row'+(s.marg_done?' done':'')+'"><div><div class="it">'+esc(s.item)+'</div><div class="q">Abhi: '+esc(s.marg_now||s.salt_now||"—")+' → <span class="copy">'+esc(s.salt_new)+'</span></div></div><div class="r"><span class="chip'+(s.marg_done?' ok':' warn')+'">'+esc(s.hi)+'</span></div></div>'; });
+@@@ END
+@@@ OLD
+  h+='<h3>(b) Rate daalo</h3><div class="lead">इन items का selling rate Marg में नहीं है — item master में rate डालिए, तभी इनका हिसाब बनेगा।</div>';
+@@@ NEW
+  h+='<h3 id="rates">(b) Rate daalo</h3><div class="lead">In items ka selling rate Marg mein nahi hai — item master mein rate daaliye, tabhi inka hisaab banega.</div>';
+@@@ END
+@@@ OLD
+  if(!RT.length) h+='<div class="empty">कोई नहीं।</div>';
+@@@ NEW
+  if(!RT.length) h+='<div class="empty">Koi nahi.</div>';
+@@@ END
+@@@ OLD
+  RT.forEach(t=>{ h+='<div class="row"><div><div class="it">'+esc(t.item)+' <span class="sub">'+esc(t.packing||"")+'</span></div><div class="q">'+esc(t.hi)+'</div></div><div class="r"><span class="chip warn">करना है</span></div></div>'; });
+@@@ NEW
+  RT.forEach(t=>{ h+='<div class="row"><div><div class="it">'+esc(t.item)+' <span class="sub">'+esc(t.packing||"")+'</span></div><div class="q">'+esc(t.hi)+'</div></div><div class="r"><span class="chip warn">Karna hai</span></div></div>'; });
+@@@ END
+@@@ OLD
+  if(!d.renames_ready) h+='<div class="lead">'+esc(d.renames_wait_hi||"नाम बदलना — बाद में, जब Marg और shelf मिल जाएँ")+'</div>';
+@@@ NEW
+  if(!d.renames_ready) h+='<div class="lead">'+esc(d.renames_wait_hi||"Naam badalna — baad mein, jab Marg aur shelf mil jaayein")+'</div>';
+@@@ END
+@@@ OLD
+    h+='<div class="lead">Marg में इन नामों को ठीक वैसे ही बदलिए जैसा लिखा है (कॉपी कीजिए), फिर टिक कीजिए। Server Marg के अगले stock export से खुद पढ़ लेगा: <b>'+(RS?RS.verified:0)+' of '+RN.length+'</b> दिख गए'+(RS&&RS.amber?' · <span class="err">'+RS.amber+' टिक हुए पर Marg में अभी नहीं दिखे</span>':'')+'।</div>';
+@@@ NEW
+    h+='<div class="lead">Marg mein in naamon ko theek waise hi badliye jaisa likha hai (copy kijiye), phir tick kijiye. Server Marg ke agle stock export se khud padh lega: <b>'+(RS?RS.verified:0)+' of '+RN.length+'</b> dikh gaye'+(RS&&RS.amber?' · <span class="err">'+RS.amber+' tick hue par Marg mein abhi nahi dikhe</span>':'')+'.</div>';
+@@@ END
+@@@ OLD
+      +'<div class="r">'+(r.state==="planned"?'<button class="b main" data-rtick="'+esc(r.old_name)+'">Marg में बदल दिया</button>':(r.state==="verified"?'✓':'<span class="chip'+(r.state==="amber"?' bad':' ok')+'">'+(r.state==="amber"?'अभी दिखा नहीं':'✓ टिक')+'</span> <button class="tg" data-runtick="'+esc(r.old_name)+'">वापस</button>'))+'</div></div>').join("");
+@@@ NEW
+      +'<div class="r">'+(r.state==="planned"?'<button class="b main" data-rtick="'+esc(r.old_name)+'">Marg mein badal diya</button>':(r.state==="verified"?'✓':'<span class="chip'+(r.state==="amber"?' bad':' ok')+'">'+(r.state==="amber"?'Abhi dikha nahi':'✓ Tick')+'</span> <button class="tg" data-runtick="'+esc(r.old_name)+'">Wapas</button>'))+'</div></div>').join("");
+@@@ END
+@@@ OLD
+  h+='<div class="card"><h2><span class="n">4</span>बाकी काम</h2>'+restCard(d.watch)+'</div>';
+@@@ NEW
+  h+='<div class="card"><h2><span class="n">4</span>Baaki kaam</h2>'+restCard(d.watch)+'</div>';
+@@@ END
+@@@ OLD
+  const hh=location.hash.slice(1); if(!window._s436 && (hh==="vouchers"||hh==="renames")){ window._s436=1; const e=document.getElementById(hh); if(e) e.scrollIntoView(); }
+@@@ NEW
+  const hh=location.hash.slice(1); if(!window._s436 && (hh==="vouchers"||hh==="renames"||hh==="rates")){ window._s436=1; const e=document.getElementById(hh); if(e) e.scrollIntoView(); }
+@@@ END
+@@@ OLD
+  return '<div class="margbox" id="margbox"><b>रिपोर्ट यहाँ भी भेज सकते हैं</b><div class="sub">अगर export अपने आप न पहुँचे — कोई भी फ़ाइल (export, PDF, फोटो)। कुछ टाइप नहीं करना।</div>'
+@@@ NEW
+  return '<div class="margbox" id="margbox"><b>Report yahan bhi bhej sakte hain</b><div class="sub">Agar export apne aap na pahunche — koi bhi file (export, PDF, photo). Kuch type nahi karna.</div>'
+@@@ END
+@@@ OLD
+    +'<form id="margform"><input type="file" name="file" id="margfile" required><input type="text" name="item" id="margitem" placeholder="Item (ज़रूरी नहीं)"><input type="text" name="note" id="margnote" placeholder="Note (ज़रूरी नहीं)"><button type="submit" class="b main" style="margin-top:8px">Server को भेजो</button></form><div class="msg" id="margmsg"></div>'
+@@@ NEW
+    +'<form id="margform"><input type="file" name="file" id="margfile" required><input type="text" name="item" id="margitem" placeholder="Item (zaroori nahi)"><input type="text" name="note" id="margnote" placeholder="Note (zaroori nahi)"><button type="submit" class="b main" style="margin-top:8px">Server ko bhejo</button></form><div class="msg" id="margmsg"></div>'
+@@@ END
+@@@ OLD
+    +((d.marg_answers||[]).length?'<div class="sub" style="margin-top:6px">भेजी हुई: '+d.marg_answers.slice(0,4).map(x=>esc(x.orig)+' ('+esc(x.at_text)+')').join(' · ')+'</div>':'')+'</div>';
+@@@ NEW
+    +((d.marg_answers||[]).length?'<div class="sub" style="margin-top:6px">Bheji hui: '+d.marg_answers.slice(0,4).map(x=>esc(x.orig)+' ('+esc(x.at_text)+')').join(' · ')+'</div>':'')+'</div>';
+@@@ END
+@@@ OLD
+    if(P){ n++; h+='<div class="row"><div><div class="it">पूरी गिनती का Sunday</div><div class="q">'+(P.status==="confirmed"?'Sunday <b>'+esc(P.sunday_text)+'</b> — Darpan ने हाँ कही ✓':(P.status==="picked"?'आपने <b>'+esc(P.sunday_text)+'</b> चुना — Darpan की हाँ बाकी':'गिनती का Sunday चुनिए:'))+'</div>'
+@@@ NEW
+    if(P){ n++; h+='<div class="row"><div><div class="it">Poori ginti ka Sunday</div><div class="q">'+(P.status==="confirmed"?'Sunday <b>'+esc(P.sunday_text)+'</b> — Darpan ne haan kahi ✓':(P.status==="picked"?'Aapne <b>'+esc(P.sunday_text)+'</b> chuna — Darpan ki haan baaki':'Ginti ka Sunday chuniye:'))+'</div>'
+@@@ END
+@@@ OLD
+    (W.bill_pending||[]).forEach(x=>{ n++; h+='<div class="row"><div><div class="it">'+esc(x.item)+'</div><div class="q">'+esc(x.text_hi)+' — माल आ गया, Marg में बिल अभी नहीं</div></div><div class="r"><span class="chip warn">bill entry</span></div></div>'; });
+@@@ NEW
+    (W.bill_pending||[]).forEach(x=>{ n++; h+='<div class="row"><div><div class="it">'+esc(x.item)+'</div><div class="q">'+esc(x.text_hi)+' — maal aa gaya, Marg mein bill abhi nahi</div></div><div class="r"><span class="chip warn">bill entry</span></div></div>'; });
+@@@ END
+@@@ OLD
+    (W.fixes||[]).forEach(x=>{ n++; h+='<div class="row"><div><div class="it">'+esc(x.item)+'</div><div class="q">'+esc(x.fix)+' · '+esc(x.at_text)+'</div></div><div class="r"><span class="chip warn">सुधार</span></div></div>'; });
+@@@ NEW
+    (W.fixes||[]).forEach(x=>{ n++; h+='<div class="row"><div><div class="it">'+esc(x.item)+'</div><div class="q">'+esc(x.fix)+' · '+esc(x.at_text)+'</div></div><div class="r"><span class="chip warn">Sudhar</span></div></div>'; });
+@@@ END
+@@@ OLD
+  if(!n) h+='<div class="empty">आज कुछ नहीं — सब ऊपर है।</div>';
+@@@ NEW
+  if(!n) h+='<div class="empty">Aaj kuch nahi — sab upar hai.</div>';
+@@@ END
+@@@ OLD
+  const fd=new FormData(e.target); const m=document.getElementById("margmsg"); m.textContent="भेज रहे हैं…";
+@@@ NEW
+  const fd=new FormData(e.target); const m=document.getElementById("margmsg"); m.textContent="Bhej rahe hain…";
+@@@ END
+@@@ OLD
+  if(!j||!j.ok){ m.textContent="नहीं गया: "+((j&&j.message)||"server ने जवाब नहीं दिया"); return; }
+@@@ NEW
+  if(!j||!j.ok){ m.textContent="Nahi gaya: "+((j&&j.message)||"server ne jawab nahi diya"); return; }
+@@@ END
+@@@ OLD
+document.addEventListener("click", async e=>{
+@@@ NEW
+document.addEventListener("click", async e=>{
+  const mo=e.target.closest("button[data-more]"); if(mo){ const m=document.getElementById("vmsg"); if(m) m.textContent="…";   // S452
+    const r=await fetch(BASE+"/api/pad/amir/"+D.count_id+"/more",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).catch(()=>null);
+    const j=r?await r.json().catch(()=>null):null; if(m) m.textContent=(j&&j.message)||"server ne jawab nahi diya"; if(j&&j.ok) setTimeout(load, 700); return; }
+@@@ END
+@@@ OLD
+    if(en.dataset.ent&&!no){ m.textContent="पहले Marg का वाउचर नंबर लिखिए।"; if(inp) inp.focus(); return; }
+@@@ NEW
+    if(en.dataset.ent&&!no){ m.textContent="Pehle Marg ka voucher number likhiye."; if(inp) inp.focus(); return; }
+@@@ END
+@@@ OLD
+    const j=r?await r.json().catch(()=>null):null; m.textContent=(j&&j.ok)?(en.dataset.unent?"वापस ले लिया।":"लिख लिया — वाउचर नं. "+no):((j&&j.message)||"server ne jawab nahi diya"); if(j&&j.ok) setTimeout(load, 700); return; }
+@@@ NEW
+    const j=r?await r.json().catch(()=>null):null; m.textContent=(j&&j.ok)?(en.dataset.unent?"Wapas le liya.":"Likh liya — voucher no. "+no):((j&&j.message)||"server ne jawab nahi diya"); if(j&&j.ok) setTimeout(load, 700); return; }
+@@@ END

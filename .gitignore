@@ -247,6 +247,8 @@ _scratch/
 !claude_code_briefs/DUTY_MAP.json
 # S446 (02-Oct-2026): the kit carries the DUTY_MAP.json its walk and installer ran with (in SUMS.md5) -- the same file, exact path.
 !deploy_kits/S446_AMIR_STAGES_BILLS/DUTY_MAP.json
+# S452 (02-Oct-2026): the same -- the kit's DUTY_MAP.json (v3) that its walk and installer ran with (in SUMS.md5). Exact path.
+!deploy_kits/S452_AMIR_PANEL_FIXES/DUTY_MAP.json
 # S290 (02-Oct-2026): the reception agent kit's config.json holds one setting -- how to start the Claude app on
 # that PC -- and no secret (read). The blanket *.json rule above was written for credentials (F-675, F-100).
 !deploy_kits/S448_RECEPTION_AGENT/config.json
