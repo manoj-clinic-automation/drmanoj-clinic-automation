@@ -1,0 +1,5 @@
+# reception_job_keys.txt -- PUBLIC keys whose signature lets a job into this server's relay queue for the reception PC
+# (reception_door.py, S453). One line per key:  <64 hex characters of an Ed25519 public key>  <label>
+# The same key must ALSO be in C:\ClinicAgent\authorized_keys.txt on that PC, or the PC refuses the job.
+# Empty means the relay is shut. The secret is on the owner's PC only.
+6b135cebe94714de80c912d724778486c5978043d65a813cc44d8a88ff5a47a8  parent-manojz

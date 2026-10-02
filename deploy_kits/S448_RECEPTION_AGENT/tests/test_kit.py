@@ -394,13 +394,13 @@ def beat_version():
     return json.load(open(os.path.join(root2, "heartbeat.json")))["agent_version"]
 
 
-check("guard starts the agent and a heartbeat appears", wait_for(lambda: beat_version() == "S449.3"))
+check("guard starts the agent and a heartbeat appears", wait_for(lambda: beat_version() == "S453.1"))
 g2 = subprocess.run([py, os.path.join(root2, "agent_guard.py")], cwd=root2, env=env, timeout=30)
 check("a second guard steps aside (one per PC)", g2.returncode == 0 and g.poll() is None)
 put(os.path.join(root2, "jobs", "in", "live.py"), "print('through the running agent')\n")
 check("a job dropped in runs through the live agent",
       wait_for(lambda: "through the running agent" in open(os.path.join(root2, "jobs", "out", "live.py.out.txt")).read()))
-put(os.path.join(root2, "reception_agent.py.new"), agent_src.replace('AGENT_VERSION = "S449.3"', 'AGENT_VERSION = "S449.4-test"'))
+put(os.path.join(root2, "reception_agent.py.new"), agent_src.replace('AGENT_VERSION = "S453.1"', 'AGENT_VERSION = "S449.4-test"'))
 check("a good update is installed and the new version reports in",
       wait_for(lambda: beat_version() == "S449.4-test"))
 check("...and is confirmed (marker gone, .prev kept)",
@@ -411,7 +411,7 @@ check("an update that does not compile is refused and set aside",
       wait_for(lambda: os.path.exists(os.path.join(root2, "reception_agent.py.rejected")))
       and beat_version() == "S449.4-test")
 put(os.path.join(root2, "reception_agent.py.new"),
-    agent_src.replace('AGENT_VERSION = "S449.3"', 'AGENT_VERSION = "S449.5-bad"').replace(
+    agent_src.replace('AGENT_VERSION = "S453.1"', 'AGENT_VERSION = "S449.5-bad"').replace(
         "def main():\n    quiet_errors()", "def main():\n    raise RuntimeError('dies at start')\n    quiet_errors()"))
 check("an update that compiles but dies is ROLLED BACK by the guard",
       wait_for(lambda: os.path.exists(os.path.join(root2, "reception_agent.py.failed"))
@@ -538,7 +538,7 @@ st6 = m6.new_state()
 beat6, _ = m6.build_beat(st6, cfg6)
 m6.direct_pass(st6, cfg6, beat6)
 check("the heartbeat reaches the server, signed, and is the same heartbeat",
-      len(GOT["beats"]) == 1 and GOT["beats"][0]["agent_version"] == "S449.3" and st6["upload"]["ok_at"])
+      len(GOT["beats"]) == 1 and GOT["beats"][0]["agent_version"] == "S453.1" and st6["upload"]["ok_at"])
 check("both reports are sent, each once, under a clean name",
       sorted(n for n, _ in GOT["reports"]) == ["consultation_report_2031-01-07.csv", "followup_logs (3).csv"]
       and st6["upload"]["reports_sent"] == 2, GOT["reports"])
@@ -642,6 +642,158 @@ bq4, _ = m6.build_beat(m6.new_state(), cfg6)
 check("...and with it true (the default) it still is",
       any("Claude" in a for a in bq4["attention"]), bq4["attention"])
 check("the text heartbeat has the SERVER and VIEW lines", "SERVER  : direct upload on" in m6.human(b_ok) and "VIEW    : Tailscale running" in m6.human(b_ok))
+
+
+# ---------------------------------------------------------------------------
+# 7. S453 -- the second job door: the server relays, this PC decides
+# ---------------------------------------------------------------------------
+import base64 as _b64
+import datetime as _dt
+root7 = fresh_root()
+m7 = load(root7)
+os.environ["USERPROFILE"] = os.path.join(root7, "home"); os.makedirs(os.path.join(root7, "home", "Downloads"))
+m7.find_my_drive = lambda: None
+m7.ensure_dirs()
+sk7 = bytes(range(7, 39)); pk7 = m7.ed_public(sk7).hex()
+p7 = m7.upload_public()
+Q = {"offer": None, "acks": [], "results": [], "asked": 0, "mode": "ok"}
+
+
+class H7(_hs.BaseHTTPRequestHandler):
+    def log_message(self, *a):
+        pass
+
+    def do_POST(self):
+        body = self.rfile.read(int(self.headers.get("Content-Length") or 0))
+        kind = {"next": "jobs-next", "ack": "jobs-ack", "result": "job-result", "heartbeat": "heartbeat"}[self.path.rsplit("/", 1)[1]]
+        name = self.headers.get("X-Rx-Name") or ""
+        good = m7.ed_verify(bytes.fromhex(p7), m7.upload_message(kind, self.headers.get("X-Rx-Time"), name,
+                            self.headers.get("X-Rx-Mtime") or "", body), bytes.fromhex(self.headers.get("X-Rx-Sig") or ""))
+        if Q["mode"] == "401" or not good:
+            out, code = {"ok": False, "status": "NOT_YOU", "message": "bad signature"}, 401
+        elif kind == "jobs-next":
+            Q["asked"] += 1
+            out, code = (dict(Q["offer"], ok=True, status="JOB") if Q["offer"] else {"ok": True, "status": "NONE"}), 200
+        elif kind == "jobs-ack":
+            Q["acks"].append((name, body.decode()))
+            if Q["offer"] and Q["offer"]["name"] == name and not Q.get("deaf"):
+                Q["offer"] = None
+            out, code = {"ok": True, "status": "NOTED"}, 200
+        elif kind == "job-result":
+            Q["results"].append((name, body.decode("utf-8", "replace"))); out, code = {"ok": True, "status": "KEPT"}, 200
+        else:
+            out, code = {"ok": True, "status": "KEPT"}, 200
+        raw = json.dumps(out).encode()
+        self.send_response(code); self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(raw))); self.end_headers(); self.wfile.write(raw)
+
+
+srv7 = _hs.HTTPServer(("127.0.0.1", 0), H7)
+_th.Thread(target=srv7.serve_forever, daemon=True).start()
+json.dump({"server_url": "http://127.0.0.1:%d" % srv7.server_address[1], "job_timeout_default": 30}, open(os.path.join(root7, "config.json"), "w"))
+cfg7 = m7.load_config()
+st7 = m7.new_state()
+
+
+def offer(tail, text, key=sk7, hours_ago=0.0, sign_text=None, b64=None):
+    name = (m7.now() - _dt.timedelta(hours=hours_ago)).strftime("%Y%m%dT%H%M%S_") + tail
+    content = text.encode()
+    sig = m7.ed_sign(key, m7.job_message(name, (sign_text if sign_text is not None else text).encode()))
+    Q["offer"] = {"name": name, "job": b64 if b64 is not None else _b64.b64encode(content).decode(), "sig": sig.hex()}
+    return name
+
+
+def queued():
+    return sorted(n for n in os.listdir(m7.JOBS_IN) if not n.endswith(".tmp"))
+
+
+check("S453: the defaults switch the server door on, once a minute", cfg7["server_jobs"] is True and cfg7["server_jobs_seconds"] == 60)
+n1 = offer("a1.py", "print('never run')\n")
+m7.poll_server_jobs(st7, cfg7)
+check("S453: with no key enrolled the server is not even asked, whatever it offers", Q["asked"] == 0 and queued() == [])
+put(m7.KEYS_FILE, "# test\n%s  parent-test\n" % pk7)
+Q["offer"] = None
+m7.poll_server_jobs(st7, cfg7)
+check("S453: the server is asked, signed with this PC's own key; nothing waiting, nothing queued",
+      Q["asked"] == 1 and queued() == [] and st7["server_jobs"]["ok_at"] and st7["server_jobs"]["last_error"] is None)
+n2 = offer("hello.py", "print('hello from the server door')\n")
+m7.poll_server_jobs(st7, cfg7)
+check("S453: a job signed with an enrolled key is queued byte for byte, acknowledged 'taken', and its name recorded as used",
+      queued() == ["server__" + n2] and open(os.path.join(m7.JOBS_IN, "server__" + n2)).read() == "print('hello from the server door')\n"
+      and Q["acks"][-1] == (n2, "taken") and Q["offer"] is None and m7._seen_read()[n2].get("road") == "server", (queued(), Q["acks"]))
+check("S453: it runs like any other job", wait_job(m7, st7, cfg7) and st7["last_job"]["name"] == "server__" + n2 and st7["last_job"]["exit"] == 0, st7.get("last_job"))
+check("S453: its result is remembered ON DISK until the server has it", st7["server_results"] == ["server__" + n2]
+      and json.load(open(m7.SERVER_RESULTS_FILE)) == ["server__" + n2] and m7.new_state()["server_results"] == ["server__" + n2])
+Q["mode"] = "401"
+m7.poll_server_jobs(st7, cfg7)
+check("S453: a server that does not answer: the result stays waiting, nothing raises, the heartbeat says so",
+      st7["server_results"] == ["server__" + n2] and Q["results"] == [] and st7["server_jobs"]["last_error"]
+      and m7.build_beat(st7, cfg7)[0]["server_jobs"]["results_waiting"] == 1)
+Q["mode"] = "ok"
+m7.poll_server_jobs(st7, cfg7)
+check("S453: when it answers again the result goes back under the job's own name, once",
+      len(Q["results"]) == 1 and Q["results"][0][0] == n2 and "hello from the server door" in Q["results"][0][1] and "EXIT: 0" in Q["results"][0][1]
+      and st7["server_results"] == [] and json.load(open(m7.SERVER_RESULTS_FILE)) == [], Q["results"])
+m7.poll_server_jobs(st7, cfg7)
+check("...and is not sent twice", len(Q["results"]) == 1)
+Q["offer"] = {"name": n2, "job": _b64.b64encode(b"print('hello from the server door')\n").decode(), "sig": "00" * 64}
+a_before = len(Q["acks"])
+m7.poll_server_jobs(st7, cfg7)
+check("S453: the same job offered again (the server lost the acknowledgement): NOT run again, acknowledged again",
+      queued() == [] and len(Q["acks"]) == a_before + 1 and Q["acks"][-1] == (n2, "taken"))
+for label, kw, want in (
+        ("a key that is not enrolled", dict(key=bytes(range(9, 41))), "does not match an enrolled key"),
+        ("a job changed after it was signed", dict(sign_text="print('something else')\n"), "does not match an enrolled key"),
+        ("a job signed 50 hours ago", dict(hours_ago=50), "more than 48 hours ago"),
+        ("a job that did not arrive whole", dict(b64="not base64 !!"), "did not arrive whole")):
+    r_before = st7["drive_refused"]
+    nx = offer("bad%d.py" % r_before, "print('must never run')\n", **kw)
+    m7.poll_server_jobs(st7, cfg7)
+    check("S453: %s is REFUSED -- never queued, the server told why, the name never read again" % label,
+          queued() == [] and Q["acks"][-1][0] == nx and want in Q["acks"][-1][1] and st7["drive_refused"] == r_before + 1
+          and m7._seen_read()[nx]["refused"], Q["acks"][-1])
+big = "x = 1\n" * 180000
+nb = offer("big.py", big)
+m7.poll_server_jobs(st7, cfg7)
+check("S453: a job over 1 MB is refused", queued() == [] and "larger than 1 MB" in Q["acks"][-1][1])
+seen7 = m7._seen_read(); nd = (m7.now()).strftime("%Y%m%dT%H%M%S_") + "twice.py"
+seen7[nd] = {"at": m7.iso(), "sha256": "x", "refused": None}; m7._seen_write(seen7)
+Q["offer"] = {"name": nd, "job": _b64.b64encode(b"print(1)\n").decode(), "sig": m7.ed_sign(sk7, m7.job_message(nd, b"print(1)\n")).hex()}
+m7.poll_server_jobs(st7, cfg7)
+check("S453: a job the Drive door already took is not run a second time through the server", queued() == [] and Q["acks"][-1] == (nd, "taken"))
+Q["offer"] = {"name": "../../evil.py", "job": "", "sig": ""}
+a_before = len(Q["acks"])
+m7.poll_server_jobs(st7, cfg7); m7.poll_server_jobs(st7, cfg7)
+check("S453: a name that is not a job name is ignored outright (no file, no acknowledgement, said once in the log)",
+      queued() == [] and len(Q["acks"]) == a_before and open(m7.AGENT_LOG).read().count("SERVER JOB IGNORED") == 1)
+Q["offer"] = None
+asked = Q["asked"]
+m7.poll_server_jobs(st7, dict(cfg7, server_jobs=False)); m7.poll_server_jobs(st7, dict(cfg7, direct_upload=False))
+check("S453: server_jobs false, or direct_upload false, in config.json: the server is not asked", Q["asked"] == asked)
+n3 = offer("deaf.cmd" if os.name == "nt" else "deaf.py", "print('once')\n")
+Q["deaf"] = True
+m7.poll_server_jobs(st7, cfg7); wait_job(m7, st7, cfg7); m7.poll_server_jobs(st7, cfg7); m7.poll_server_jobs(st7, cfg7)
+check("S453: a server that keeps offering a job it was told is taken: the job still runs exactly once",
+      st7["jobs_done"] == 2 and [r[0] for r in Q["results"]].count(n3) == 1, (st7["jobs_done"], [r[0] for r in Q["results"]]))
+Q["deaf"] = False; Q["offer"] = None
+srv7.shutdown(); srv7.server_close()
+m7.poll_server_jobs(st7, cfg7)
+check("S453: the server gone altogether: no error raised, the heartbeat carries the reason",
+      st7["server_jobs"]["last_error"] and "server_jobs" in m7.build_beat(st7, cfg7)[0])
+b7, _ = m7.build_beat(st7, cfg7)
+check("S453: the heartbeat's server_jobs block holds counts and times only", set(b7["server_jobs"]) == {"enabled", "last_answer", "taken_since_start", "results_waiting", "last_error"}
+      and b7["server_jobs"]["taken_since_start"] == 2 and "SERVER JOBS: on" in m7.human(b7))
+tool7 = fresh_root(); shutil.copy(os.path.join(KIT, "reception_sign.py"), tool7)
+kf7 = os.path.join(tool7, "k.txt"); open(kf7, "w").write(sk7.hex() + "\n")
+tk = subprocess.run([sys.executable, os.path.join(tool7, "reception_sign.py"), "read-token", kf7, n2], capture_output=True, text=True)
+try:
+    tj = json.loads(tk.stdout)
+except ValueError:
+    tj = {}
+check("S453: the signing tool's read-token is the job's name, the time and a signature over exactly those",
+      tk.returncode == 0 and tj.get("name") == n2 and abs(int(tj.get("ts", 0)) - time.time()) < 30
+      and m7.ed_verify(bytes.fromhex(pk7), b"clinic-reception-job-read-v1\n" + n2.encode() + b"\n" + tj["ts"].encode(), bytes.fromhex(tj["sig"])), tk.stdout + tk.stderr)
+check("...and it refuses a name that is not a stamped job name", subprocess.run([sys.executable, os.path.join(tool7, "reception_sign.py"), "read-token", kf7, "x.py"], capture_output=True).returncode == 2)
 
 
 print("\n%d passed, %d failed" % (len(PASS), len(FAIL)))

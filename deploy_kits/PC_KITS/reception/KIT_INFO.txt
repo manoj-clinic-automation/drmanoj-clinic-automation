@@ -2,8 +2,8 @@
 # kit.zip = the files of deploy_kits/S448_RECEPTION_AGENT (a zip so their Windows line endings survive git), without
 # the bundled Python, which is deploy_kits/PC_KITS/_shared/<python_file>. pc_kits.py serves the kit only while both
 # files are exactly these md5s. No secret, no patient, no number is in either.
-version=agent S449.3, guard S448.1
+version=agent S453.1, guard S448.1
 packed=02-Oct-2026
-kit_md5=f6a9502b98615f13c6ac7f991e1cbc2f
+kit_md5=90e8e94ed935b26d0c00a9030c217da2
 python_file=pyportable_3.11.9.zip
 python_md5=30a7b6ab01fbaa598844f4b3d8220a68

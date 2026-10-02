@@ -1,0 +1,2 @@
+S453 KIT S453_RECEPTION_SERVER_DOOR
+session 290 (parent) · 02-Oct-2026 · D661: a second job door for the reception PC, through the server -- the server relays, the PC decides

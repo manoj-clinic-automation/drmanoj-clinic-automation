@@ -43,6 +43,15 @@ Five jobs:
      the two Docterz reports -- by its name AND its first line -- is ever
      read or sent, and only to the clinic's own server.
 
+  6. A SECOND JOB DOOR, THROUGH THE SERVER (S453, D661). Google Drive is what
+     failed on this PC on 01-Oct, and until now it was also the only road a
+     job could arrive by. Once a minute the agent asks the clinic server --
+     over the same signed road as job 5 -- whether a job is waiting. The
+     server only relays: a job from it is held to EXACTLY the Drive door's
+     rules (an Ed25519 signature from a key in authorized_keys.txt, the
+     signing time in its name, a name used once), so the server itself
+     cannot make this PC run anything. The result goes back the same way.
+
 Modelled on medical_agent.py (S205.1). Stdlib only. It writes only inside its
 own folder and the Drive FromReception / ToReception folders. Apart from the
 two Docterz reports of job 5 it reads folder listings, never a patient file.
@@ -52,6 +61,8 @@ as  reception_agent.py.new . It is compiled first, the running copy is kept
 as .prev, and agent_guard.py puts .prev back if the new one dies.
 """
 
+import base64
+import binascii
 import csv
 import datetime as dt
 import hashlib
@@ -65,7 +76,7 @@ import subprocess
 import sys
 import time
 
-AGENT_VERSION = "S449.3"
+AGENT_VERSION = "S453.1"
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -88,6 +99,7 @@ KEYS_FILE = P("authorized_keys.txt")
 SEEN_FILE = P("drive_jobs_seen.json")
 UPLOAD_KEY_FILE = P("upload_key.txt")       # this PC's own signing secret (S449)
 UPLOAD_SENT_FILE = P("upload_sent.json")    # md5 of every report already sent
+SERVER_RESULTS_FILE = P("server_results.json")   # results the server has not had yet (S453)
 OFF_ALL = P("_off", "ALL_OFF.txt")
 OFF_JOBS = P("_off", "JOBS_OFF.txt")
 JOBS_IN = P("jobs", "in")
@@ -123,11 +135,15 @@ DEFAULTS = {
     "upload_days": 4,
     "upload_max_files": 2,
     "share_name": "ReceptionC",
+    "server_jobs": True,
+    "server_jobs_seconds": 60,
 }
 
 JOB_EXTS = (".ps1", ".cmd", ".bat", ".py")
 JOB_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$")
 DRIVE_JOB_PREFIX = "drive__"
+SERVER_JOB_PREFIX = "server__"
+SERVER_RESULT_MAX = 900 * 1024
 SIG_CONTEXT = b"clinic-reception-job-v1\n"
 DRIVE_JOB_MAX_BYTES = 1024 * 1024
 # A Drive job's name begins with the time it was signed (the PC's own clock,
@@ -477,7 +493,8 @@ def upload_public():
     return ed_public(secret).hex() if secret else None
 
 
-def _post_signed(cfg, path, kind, body, name="", mtime="", timeout=15):
+def _post_signed(cfg, path, kind, body, name="", mtime="", timeout=15,
+                 max_answer=65536):
     """(http code or None, answer dict or None, short error or None)."""
     secret = upload_secret()
     if not secret:
@@ -503,7 +520,7 @@ def _post_signed(cfg, path, kind, body, name="", mtime="", timeout=15):
     code, raw = None, b""
     try:
         with urllib.request.build_opener(_NoRedirect).open(req, timeout=timeout) as r:
-            code, raw = r.status, r.read(65536)
+            code, raw = r.status, r.read(max_answer)
     except urllib.error.HTTPError as ex:
         code = ex.code
         try:
@@ -1032,6 +1049,13 @@ def build_beat(st, cfg):
             "reports_sent_since_start": st["upload"]["reports_sent"],
             "last_report_sent": st["upload"]["last_report_at"],
         },
+        "server_jobs": {
+            "enabled": bool(cfg.get("direct_upload") and cfg.get("server_jobs")),
+            "last_answer": st["server_jobs"]["ok_at"],
+            "taken_since_start": st["server_jobs"]["taken"],
+            "results_waiting": len(st["server_results"]),
+            "last_error": st["server_jobs"]["last_error"],
+        },
     }
     if chrome is not None and reports_dir:
         beat["chrome_saves_to_exports"] = any(
@@ -1132,6 +1156,11 @@ def human(beat):
                     du.get("last_accepted") or "not yet",
                     du.get("reports_sent_since_start"),
                     (" | %s" % du["last_error"]) if du.get("last_error") else ""))
+    sv = beat.get("server_jobs") or {}
+    lines.append("SERVER JOBS: %s | the server last answered %s | taken since start %s%s"
+                 % ("on" if sv.get("enabled") else "OFF",
+                    sv.get("last_answer") or "not yet", sv.get("taken_since_start"),
+                    (" | %s" % sv["last_error"]) if sv.get("last_error") else ""))
     for rp in beat["repairs"]:
         lines.append("REPAIR  : " + rp)
     return "\r\n".join(lines) + "\r\n"
@@ -1505,6 +1534,9 @@ def finish_files(st, cfg, name, started, rc, timed_out, error, md5=None):
                                          " (TIMED OUT)" if timed_out else ""))
     if name.startswith(DRIVE_JOB_PREFIX):
         st["drive_results"].append(name)
+    if name.startswith(SERVER_JOB_PREFIX):
+        st["server_results"].append(name)
+        _server_results_write(st["server_results"])
     prune(JOBS_DONE, int(cfg["keep_done"]))
     prune(JOBS_OUT, int(cfg["keep_done"]))
 
@@ -1674,6 +1706,129 @@ def poll_drive_jobs(st, cfg):
 
 
 # --------------------------------------------------------------------------
+# S453 -- the second job door: the clinic server relays, this PC decides
+# --------------------------------------------------------------------------
+def _server_results_read():
+    try:
+        with open(SERVER_RESULTS_FILE, "r", encoding="utf-8") as fh:
+            got = json.load(fh)
+        return [n for n in got if isinstance(n, str)][:50] if isinstance(got, list) else []
+    except (OSError, ValueError):
+        return []
+
+
+def _server_results_write(names):
+    try:
+        _write(SERVER_RESULTS_FILE, json.dumps(list(names)[:50]))
+    except OSError:
+        pass
+
+
+def poll_server_jobs(st, cfg):
+    """Send back the results the server has not had, then ask it for the next
+    job. A job from the server is held to exactly the Drive door's rules; the
+    list of used names is the same one, so a job sent by both roads runs once.
+    Never raises."""
+    sj = st["server_jobs"]
+    if not cfg.get("direct_upload") or not cfg.get("server_jobs"):
+        return
+    keys = authorized_keys()
+    if not keys:
+        return                       # no key enrolled: this door is shut too
+    for name in list(st["server_results"]):
+        raw = None
+        try:
+            with open(os.path.join(JOBS_OUT, name + ".out.txt"), "rb") as fh:
+                raw = fh.read()
+        except OSError:
+            pass
+        if raw is None:
+            raw = b"the result of this job is no longer on the PC\r\n"
+        if len(raw) > SERVER_RESULT_MAX:
+            raw = (raw[:SERVER_RESULT_MAX // 4]
+                   + b"\r\n\r\n[... cut from the middle to fit the server's limit ...]\r\n\r\n"
+                   + raw[-(SERVER_RESULT_MAX - SERVER_RESULT_MAX // 4):])
+        code, _ans, err = _post_signed(cfg, "/finance/api/reception/jobs/result",
+                                       "job-result", raw,
+                                       name[len(SERVER_JOB_PREFIX):], timeout=20)
+        if err and code != 400:
+            sj["last_error"] = err
+            return                   # the server is not there: the next pass tries again
+        st["server_results"].remove(name)
+        _server_results_write(st["server_results"])
+        log("server job: the result of %s %s" % (name, "was sent" if not err else
+                                                 "was not wanted (%s)" % err))
+    # a 1 MB job is 1.4 MB of base64: read enough to refuse it by its own rule
+    code, ans, err = _post_signed(cfg, "/finance/api/reception/jobs/next",
+                                  "jobs-next", b"", timeout=20,
+                                  max_answer=2 * 1024 * 1024)
+    if err:
+        if sj["last_error"] != err:
+            log("server jobs: not answered -- %s" % err)
+        sj["last_error"] = err
+        return
+    if sj["last_error"] or sj["ok_at"] is None:
+        log("server jobs: the server answers")
+    sj["ok_at"], sj["last_error"] = iso(), None
+    if (ans or {}).get("status") != "JOB":
+        return
+    name = str(ans.get("name") or "")
+    if not _job_name_ok(name):
+        if not sj.get("warned_name"):
+            sj["warned_name"] = True
+            log("SERVER JOB IGNORED: the server offered a name that is not allowed")
+        return
+
+    def ack(word):
+        _post_signed(cfg, "/finance/api/reception/jobs/ack", "jobs-ack",
+                     word.encode("utf-8")[:500], name, timeout=10)
+
+    seen = _seen_read()
+    if name in seen:                 # here already, by this road or by Drive
+        ack("taken" if not seen[name].get("refused")
+            else "refused earlier: %s" % seen[name]["refused"])
+        return
+    verdict, content = None, b""
+    try:
+        content = base64.b64decode(str(ans.get("job") or ""), validate=True)
+        sig_hex = str(ans.get("sig") or "").strip()
+        sig = bytes.fromhex(sig_hex) if re.fullmatch(r"[0-9a-fA-F]{128}",
+                                                      sig_hex) else b""
+    except (ValueError, binascii.Error):
+        content, sig, verdict = b"", b"", "the job did not arrive whole"
+    if not verdict:
+        if len(content) > DRIVE_JOB_MAX_BYTES:
+            verdict = "the job is larger than 1 MB"
+        elif not any(ed_verify(k, job_message(name, content), sig)
+                     for k, _ in keys):
+            verdict = "the signature does not match an enrolled key"
+        else:
+            verdict = drive_job_stamp_verdict(name)
+    seen[name] = {"at": iso(), "sha256": hashlib.sha256(content).hexdigest(),
+                  "refused": verdict, "road": "server"}
+    if not _seen_write(seen):
+        log("server job %s NOT taken: its name could not be recorded" % name)
+        return                       # offered again at the next pass
+    if verdict:
+        st["drive_refused"] += 1
+        log("SERVER JOB REFUSED: %s -- %s" % (name, verdict))
+        ack(verdict)
+        return
+    try:
+        tmp = os.path.join(JOBS_IN, SERVER_JOB_PREFIX + name + ".tmp")
+        with open(tmp, "wb") as fh:
+            fh.write(content)
+        _replace(tmp, os.path.join(JOBS_IN, SERVER_JOB_PREFIX + name))
+    except OSError as ex:
+        log("could not queue the server job %s: %s" % (name, ex))
+        ack("this PC could not queue the job: %s" % ex)
+        return
+    sj["taken"] += 1
+    log("server job accepted: %s (sha256 %s)" % (name, seen[name]["sha256"][:16]))
+    ack("taken")
+
+
+# --------------------------------------------------------------------------
 # replacing this file safely
 # --------------------------------------------------------------------------
 def _compiles(path):
@@ -1810,7 +1965,9 @@ def new_state():
             "repair_at": {},
             "upload": {"ok_at": None, "fail_streak": 0, "last_error": None,
                        "reports_sent": 0, "last_report_at": None},
-            "upload_cache": {}}
+            "upload_cache": {},
+            "server_jobs": {"ok_at": None, "last_error": None, "taken": 0},
+            "server_results": _server_results_read()}
 
 
 def main():
@@ -1824,6 +1981,7 @@ def main():
     recover_orphans(st, cfg)
     last_beat = 0.0
     last_drive = 0.0
+    last_server = 0.0
     last_tick = time.time()
     while True:
         cfg = load_config()
@@ -1852,6 +2010,15 @@ def main():
                 except Exception as ex:                        # noqa: BLE001
                     log("drive job pass FAILED: %s: %s"
                         % (ex.__class__.__name__, ex))
+            if time.time() - last_server >= cfg["server_jobs_seconds"]:
+                last_server = time.time()
+                try:
+                    poll_server_jobs(st, cfg)
+                except Exception as ex:                        # noqa: BLE001
+                    log("server job pass FAILED: %s: %s"
+                        % (ex.__class__.__name__, ex))
+                # time spent talking to the server is not a clock jump
+                last_tick = time.time()
 
         if time.time() - last_beat >= cfg["beat_seconds"]:
             try:
