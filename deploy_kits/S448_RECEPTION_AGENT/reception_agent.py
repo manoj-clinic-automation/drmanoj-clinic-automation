@@ -65,7 +65,7 @@ import subprocess
 import sys
 import time
 
-AGENT_VERSION = "S449.1"
+AGENT_VERSION = "S449.3"
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -122,6 +122,7 @@ DEFAULTS = {
     "server_url": "https://followup.dr-manoj.in",
     "upload_days": 4,
     "upload_max_files": 2,
+    "share_name": "ReceptionC",
 }
 
 JOB_EXTS = (".ps1", ".cmd", ".bat", ".py")
@@ -524,6 +525,55 @@ def _post_signed(cfg, path, kind, body, name="", mtime="", timeout=15):
         if ans else " (its direct-upload door is not there yet)"))[:160]
 
 
+def enroll(code):
+    """`--enroll <code>`: run by the setup file from the Clinic PCs page (S450).
+    Gives the server this PC's PUBLIC key under the page's one-time code, then
+    posts one signed heartbeat to prove the direct road works. Prints plain
+    lines; 0 only when both worked."""
+    quiet_errors()
+    ensure_dirs()
+    cfg = load_config()
+    pub = upload_public()
+    if not pub:
+        sys.stdout.write("this PC could not make its signing key\n")
+        return 1
+    try:
+        import urllib.error
+        import urllib.request
+        req = urllib.request.Request(
+            cfg["server_url"] + "/finance/api/pc-kit/enroll", method="POST",
+            data=json.dumps({"pc_key": pub, "agent": AGENT_VERSION,
+                             "computer": os.environ.get("COMPUTERNAME", "")}).encode("utf-8"),
+            headers={"Content-Type": "application/json", "X-Kit-Code": str(code),
+                     "User-Agent": "ClinicAgent/%s" % AGENT_VERSION})
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                code_, raw = r.status, r.read(65536)
+        except urllib.error.HTTPError as ex:
+            code_, raw = ex.code, ex.read(65536)
+        try:
+            ans = json.loads(raw.decode("utf-8", errors="replace"))
+        except ValueError:
+            ans = {}
+        if code_ != 200 or not isinstance(ans, dict) or not ans.get("ok"):
+            sys.stdout.write("the server did not take this PC's key: %s %s\n" % (
+                code_, str((ans or {}).get("message") or "")[:160]))
+            return 1
+    except Exception as ex:                                    # noqa: BLE001
+        sys.stdout.write("the server could not be reached: %s: %s\n"
+                         % (ex.__class__.__name__, str(ex)[:160]))
+        return 1
+    st = new_state()
+    beat, _procs = build_beat(st, cfg)
+    _c, _a, err = _post_signed(cfg, "/finance/api/reception/heartbeat",
+                               "heartbeat", json.dumps(beat).encode("utf-8"))
+    if err:
+        sys.stdout.write("the key is enrolled, but the first report was not accepted: %s\n" % err)
+        return 1
+    sys.stdout.write("the server knows this PC and accepted its first report\n")
+    return 0
+
+
 def _sent_read():
     try:
         with open(UPLOAD_SENT_FILE, "r", encoding="utf-8") as fh:
@@ -887,6 +937,29 @@ def disk_free_gb(path):
         return None
 
 
+def share_ready(name):
+    """Is the owner's read-only share there? None when it cannot be asked.
+
+    Read from the registry, where Windows keeps its shares. NOT `net share
+    <name>`: without administrator rights that prints the share and then
+    fails with "System error 5", so it said NO for a share that was there
+    (the live walk of S449.2, 02-Oct-2026).
+    """
+    if not IS_WIN or not re.fullmatch(r"[A-Za-z0-9_$-]{1,40}", str(name or "")):
+        return None
+    try:
+        import winreg
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                            r"SYSTEM\CurrentControlSet\Services\LanmanServer\Shares") as k:
+            try:
+                winreg.QueryValueEx(k, str(name))
+                return True
+            except FileNotFoundError:
+                return False
+    except Exception:                                          # noqa: BLE001
+        return None
+
+
 def is_off(path):
     """The switch is the FILE. A file whose first word is ON counts as absent,
     because a linked session can write a file here but cannot delete one."""
@@ -930,6 +1003,11 @@ def build_beat(st, cfg):
         "xray": scan_xray(inbox, check),
         "disk_free_gb_c": disk_free_gb(os.path.splitdrive(ROOT)[0] + "\\"
                                        if IS_WIN else ROOT),
+        "owner_view": {
+            "tailscale_running": None if procs is None
+            else "tailscaled.exe" in procs,
+            "share_ready": share_ready(cfg.get("share_name")),
+        },
         "jobs": {
             "waiting": _count(JOBS_IN),
             "running": st["job"]["name"] if st.get("job") else None,
@@ -1036,6 +1114,9 @@ def human(beat):
         % (x.get("inbox_waiting"), x.get("inbox_oldest_hours"),
            x.get("last_filed"), x.get("check_waiting")),
         "DISK    : %s GB free" % beat["disk_free_gb_c"],
+        "VIEW    : Tailscale running %s | the owner's read-only share %s"
+        % (_yn((beat.get("owner_view") or {}).get("tailscale_running")),
+           _yn((beat.get("owner_view") or {}).get("share_ready"))),
         "JOBS    : waiting %s | running %s | done since start %s"
         % (beat["jobs"]["waiting"], beat["jobs"]["running"],
            beat["jobs"]["done_since_start"]),
@@ -1840,6 +1921,8 @@ def cli(argv):
         for prof, what in chrome_set_download_dir(target):
             sys.stdout.write("Chrome %s: %s\n" % (prof, what))
         return 0
+    if argv[1] == "--enroll" and len(argv) > 2:
+        return enroll(argv[2])
     if argv[1] == "--install-keys" and len(argv) > 2:
         added, total = install_keys(argv[2])
         sys.stdout.write("Drive-door keys: %d added from the kit, %d enrolled%s\n"

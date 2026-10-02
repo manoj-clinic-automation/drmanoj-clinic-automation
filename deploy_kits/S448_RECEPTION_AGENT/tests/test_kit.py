@@ -394,24 +394,24 @@ def beat_version():
     return json.load(open(os.path.join(root2, "heartbeat.json")))["agent_version"]
 
 
-check("guard starts the agent and a heartbeat appears", wait_for(lambda: beat_version() == "S449.1"))
+check("guard starts the agent and a heartbeat appears", wait_for(lambda: beat_version() == "S449.3"))
 g2 = subprocess.run([py, os.path.join(root2, "agent_guard.py")], cwd=root2, env=env, timeout=30)
 check("a second guard steps aside (one per PC)", g2.returncode == 0 and g.poll() is None)
 put(os.path.join(root2, "jobs", "in", "live.py"), "print('through the running agent')\n")
 check("a job dropped in runs through the live agent",
       wait_for(lambda: "through the running agent" in open(os.path.join(root2, "jobs", "out", "live.py.out.txt")).read()))
-put(os.path.join(root2, "reception_agent.py.new"), agent_src.replace('AGENT_VERSION = "S449.1"', 'AGENT_VERSION = "S449.2-test"'))
+put(os.path.join(root2, "reception_agent.py.new"), agent_src.replace('AGENT_VERSION = "S449.3"', 'AGENT_VERSION = "S449.4-test"'))
 check("a good update is installed and the new version reports in",
-      wait_for(lambda: beat_version() == "S449.2-test"))
+      wait_for(lambda: beat_version() == "S449.4-test"))
 check("...and is confirmed (marker gone, .prev kept)",
       wait_for(lambda: not os.path.exists(os.path.join(root2, "update_pending.json")))
       and os.path.exists(os.path.join(root2, "reception_agent.py.prev")))
 put(os.path.join(root2, "reception_agent.py.new"), "def broken(:\n")
 check("an update that does not compile is refused and set aside",
       wait_for(lambda: os.path.exists(os.path.join(root2, "reception_agent.py.rejected")))
-      and beat_version() == "S449.2-test")
+      and beat_version() == "S449.4-test")
 put(os.path.join(root2, "reception_agent.py.new"),
-    agent_src.replace('AGENT_VERSION = "S449.1"', 'AGENT_VERSION = "S449.3-bad"').replace(
+    agent_src.replace('AGENT_VERSION = "S449.3"', 'AGENT_VERSION = "S449.5-bad"').replace(
         "def main():\n    quiet_errors()", "def main():\n    raise RuntimeError('dies at start')\n    quiet_errors()"))
 check("an update that compiles but dies is ROLLED BACK by the guard",
       wait_for(lambda: os.path.exists(os.path.join(root2, "reception_agent.py.failed"))
@@ -419,7 +419,7 @@ check("an update that compiles but dies is ROLLED BACK by the guard",
 old = os.path.getmtime(os.path.join(root2, "heartbeat.json"))
 check("...and the previous version is heartbeating again",
       wait_for(lambda: os.path.getmtime(os.path.join(root2, "heartbeat.json")) > old + 1
-               and beat_version() == "S449.2-test", 60))
+               and beat_version() == "S449.4-test", 60))
 put(os.path.join(root2, "RESTART.flag"), "x")
 check("RESTART.flag restarts the agent under the guard",
       wait_for(lambda: open(os.path.join(root2, "guard.log")).read().count("asked to be started again") >= 2))
@@ -499,6 +499,14 @@ class H(_hs.BaseHTTPRequestHandler):
 
     def do_POST(self):
         body = self.rfile.read(int(self.headers.get("Content-Length") or 0))
+        if self.path.endswith("/pc-kit/enroll"):
+            j = json.loads(body)
+            good_code = self.headers.get("X-Kit-Code") == "GOODCODE"
+            if good_code:
+                GOT["enrolled"] = j
+            raw = json.dumps({"ok": good_code, "message": "" if good_code else "this code is not known"}).encode()
+            self.send_response(200 if good_code else 401); self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(raw))); self.end_headers(); self.wfile.write(raw); return
         kind = "heartbeat" if self.path.endswith("/heartbeat") else "report"
         msg = m6.upload_message(kind, self.headers.get("X-Rx-Time"), self.headers.get("X-Rx-Name") or "",
                                 self.headers.get("X-Rx-Mtime") or "", body)
@@ -530,7 +538,7 @@ st6 = m6.new_state()
 beat6, _ = m6.build_beat(st6, cfg6)
 m6.direct_pass(st6, cfg6, beat6)
 check("the heartbeat reaches the server, signed, and is the same heartbeat",
-      len(GOT["beats"]) == 1 and GOT["beats"][0]["agent_version"] == "S449.1" and st6["upload"]["ok_at"])
+      len(GOT["beats"]) == 1 and GOT["beats"][0]["agent_version"] == "S449.3" and st6["upload"]["ok_at"])
 check("both reports are sent, each once, under a clean name",
       sorted(n for n, _ in GOT["reports"]) == ["consultation_report_2031-01-07.csv", "followup_logs (3).csv"]
       and st6["upload"]["reports_sent"] == 2, GOT["reports"])
@@ -571,6 +579,56 @@ b_ok, _ = m6.build_beat(st6c, cfg6)
 check("when the server answers again the count clears, the waiting report goes, the attention line leaves",
       st6c["upload"]["fail_streak"] == 0 and len(GOT["reports"]) == 4
       and not any("direct upload" in a for a in b_ok["attention"]))
+import contextlib as _cl
+import io as _io
+buf = _io.StringIO()
+with _cl.redirect_stdout(buf):
+    rc_bad = m6.enroll("WRONG")
+check("--enroll with a code the server does not know: says so, exit 1, nothing enrolled",
+      rc_bad == 1 and "did not take" in buf.getvalue() and "enrolled" not in GOT, buf.getvalue())
+buf = _io.StringIO(); nb = len(GOT["beats"])
+with _cl.redirect_stdout(buf):
+    rc_ok = m6.enroll("GOODCODE")
+check("--enroll with the page's code: the PUBLIC key goes up, then one signed heartbeat is accepted",
+      rc_ok == 0 and GOT.get("enrolled", {}).get("pc_key") == p1 and len(GOT["beats"]) == nb + 1
+      and key_text.strip() not in json.dumps(GOT["enrolled"]), (rc_ok, buf.getvalue()))
+check("the heartbeat carries the two facts the Clinic PCs page ticks (None off Windows, never a guess)",
+      set(GOT["beats"][-1]["owner_view"]) == {"tailscale_running", "share_ready"}
+      and GOT["beats"][-1]["owner_view"]["share_ready"] is None)
+import types as _ty
+
+
+class _FakeKey:
+    def __init__(self, names): self.names = names
+    def __enter__(self): return self
+    def __exit__(self, *a): return False
+
+
+def _fake_winreg(names, broken=False):
+    w = _ty.ModuleType("winreg"); w.HKEY_LOCAL_MACHINE = object(); asked = []
+    def OpenKey(root, path):
+        if broken:
+            raise PermissionError("no")
+        asked.append(path); return _FakeKey(names)
+    def QueryValueEx(k, name):
+        if name not in k.names:
+            raise FileNotFoundError(name)
+        return (["Path=C:\\"], 7)
+    w.OpenKey, w.QueryValueEx, w.asked = OpenKey, QueryValueEx, asked
+    return w
+
+
+m6.IS_WIN = True
+sys.modules["winreg"] = _fake_winreg(["print$", "ReceptionC"])
+check("on Windows the share is read from the registry's own list of shares (no command, no administrator rights)",
+      m6.share_ready("ReceptionC") is True and "LanmanServer" in sys.modules["winreg"].asked[-1])
+sys.modules["winreg"] = _fake_winreg(["print$"])
+check("...a missing share reads False, and a name that is not a share name is never looked up",
+      m6.share_ready("ReceptionC") is False and m6.share_ready("x & del") is None)
+sys.modules["winreg"] = _fake_winreg([], broken=True)
+check("...and when the registry cannot be read the answer is None, never a guess", m6.share_ready("ReceptionC") is None)
+del sys.modules["winreg"]
+m6.IS_WIN = False
 srv.shutdown()
 cfg_off = dict(cfg6, direct_upload=False)
 n_before = len(GOT["beats"])
@@ -583,7 +641,7 @@ check("with keep_claude_running false a missing Claude app is not an attention l
 bq4, _ = m6.build_beat(m6.new_state(), cfg6)
 check("...and with it true (the default) it still is",
       any("Claude" in a for a in bq4["attention"]), bq4["attention"])
-check("the text heartbeat has the SERVER line", "SERVER  : direct upload on" in m6.human(b_ok))
+check("the text heartbeat has the SERVER and VIEW lines", "SERVER  : direct upload on" in m6.human(b_ok) and "VIEW    : Tailscale running" in m6.human(b_ok))
 
 
 print("\n%d passed, %d failed" % (len(PASS), len(FAIL)))

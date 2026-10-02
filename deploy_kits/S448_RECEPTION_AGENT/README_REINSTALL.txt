@@ -30,7 +30,15 @@ A. WHAT ONLY A PERSON CAN DO -- in this order
       ReceptionC to Tailscale addresses only, switches Guest off and removes
       the old open shares. Its log: C:\ClinicAgent\share_setup_log.txt.)
 
-B. THE ONE LINE -- press Windows key + R, paste, Enter
+B. THE AGENT -- THE SIMPLE WAY (since S450): in Chrome on this PC sign in to
+   the clinic portal as Dr Manoj, open the tile "Clinic PCs", press
+   "Set up this PC as the Reception PC", then Keep, then Run. The file it
+   downloads fetches this kit from the clinic server, installs it, opens the
+   direct road to the server, and offers step A.6 at its end. Nothing below
+   in B is needed then.
+
+   THE OLDER WAY, kept as the fallback (it needs Google Drive signed in
+   first) -- press Windows key + R, paste, Enter
    (use the folder this kit is in; from the clinic Drive it is the line below)
 
    cmd /k "G:\My Drive\Clinic Data Archive\ToReception\S448_RECEPTION_AGENT_kit\INSTALL_RECEPTION_AGENT.bat"

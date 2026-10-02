@@ -1,0 +1,2 @@
+S450 KIT S450_CLINIC_PCS_TILE
+session 290 (parent) · 02-Oct-2026 · D660: the PC kits on the server behind the owner-only tile "Clinic PCs" -- one card and one button per clinic PC
