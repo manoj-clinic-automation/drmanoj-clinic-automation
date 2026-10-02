@@ -1,46 +1,40 @@
-# OWNER TO-DO — LIVE · refreshed at the **S283 close** (the Sanjeevni project), 02-Oct-2026 — the parent sections exactly as its S287 close wrote them, the Sanjeevni sections refreshed below them
+# OWNER TO-DO — LIVE · refreshed at the **S288 close** (the parent), 02-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S283 close** (the Sanjeevni project), 02-Oct-2026 — the parent sections exactly as its S287 close wrote them, the Sanjeevni sections refreshed below them
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S287 close** (the parent), 01-Oct-2026 — the Sanjeevni sections exactly as its S281 close wrote them (its S283 close refreshes them)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
-*Detail: `START_HERE_SESSION_288.md` · `S287_BUILD_BRIEF.md`. Your ruling of 17-Sep still governs this list — nothing here is chased.*
+*Detail: `START_HERE_SESSION_290.md` · `S288_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased.*
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S287 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S288 close
 
-**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record and the new backup kit.
+**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries only today's record; no server line follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · AFTER THE PUBLISH — one line on the server** (puts the ring card's database into the nightly encrypted backup):
+**2 · THE RECEPTION PC** — in the chat you opened on that PC. It will ask you for the Google sign-in there (your password, typed by you only).
 
-```
-cd /root/deploy/repo && git pull --ff-only && bash /root/deploy/repo/deploy_kits/S445_RING_OUTCOMES_BACKUP/install_S445_RING_OUTCOMES_BACKUP.sh
-```
+**3 · ONE WORD — the follow-up tracker on the server (C·2): yes or no.** One evening when the PC copy stops being live and its records move to the server; the PC copy stays as the fallback.
 
-**3 · PASS TO RECEPTION — the Chrome step** (until it is done the Docterz pickup folder stays empty): Chrome ⋮ → Settings → Downloads → Location: **Change** → Google Drive → My Drive → Clinic Records → **Docterz exports** → Select. Phir roz Docterz se dono report (Consultation report, Follow-up log) download karo — bas.
-
-**4 · ONE WORD — the follow-up tracker on the server (C·2): yes or no.** It means one evening when the PC copy stops being live and its records move to the server; the PC copy stays as the fallback.
-
-**5 · THE AUGUST ACCOUNTANT PACK — Send, when you are satisfied.** 20 of 25 ready, Amir's pack ready; still missing the clinic's Yes Bank current statement and the lab and expense bills.
+**4 · THE AUGUST ACCOUNTANT PACK — Send, when you are satisfied.** 20 of 25 ready, Amir's pack ready; still missing the clinic's Yes Bank current statement and the lab and expense bills.
 
 ```
 https://followup.dr-manoj.in/finance/packs?month=2026-08
 ```
 
-**6 · WHEN CONVENIENT — open Chrome with the Claude extension** on your PC and tell me; I then carry the 22 July Vitals sheets to the server.
-
-**7 · AT YOUR OWN PACE — the contacts workbook.**
+**5 · AT YOUR OWN PACE — the contacts workbook.**
 
 ```
 D:\Downloads\margsync\_config\contacts_S282\CONTACT_GROUPS_TO_UPDATE.xlsx
 ```
 
-**8 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today**, saved in `D:\Downloads` (F-629).
+**6 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today**, saved in `D:\Downloads` (F-629).
 
-**9 · IF NOT ALREADY DONE — three taps on the petty book** — yours on the ₹20,000 of 20-Sep; Dr Bhawna's on her ₹15,000 (18-Sep) and ₹20,000 (22-Sep).
+**7 · IF NOT ALREADY DONE — three taps on the petty book** — yours on the ₹20,000 of 20-Sep; Dr Bhawna's on her ₹15,000 (18-Sep) and ₹20,000 (22-Sep).
 
 ```
 https://followup.dr-manoj.in/finance/petty
@@ -48,9 +42,17 @@ https://followup.dr-manoj.in/finance/petty
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **02-Oct, with Shavez:** the X-ray pickup on Shavez's PC through its Google Drive.
-2. **On your word:** the follow-up tracker move (item 4) · the mail flood (low) · the July Vitals sheets · the contacts · the portal tiles (after the pharmacy move).
-3. **Held at your word:** the Callback Tracker on the server. **Parked by you:** the reception PC's Google Drive.
+1. **The reception PC** (item 2) — and, only if its Google Drive cannot be made to run, the X-ray pickup on Shavez's PC instead.
+2. **On your word:** the follow-up tracker move · the contacts · the mail flood (low) · the portal tiles (after the pharmacy move).
+3. **Held at your word:** the Callback Tracker on the server.
+The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S288 CLOSE — 02-Oct-2026 (the parent)
+
+- ~~**The publish and the server line for the ring card's backup (S445)**~~ — both done by you; tonight's backup is the first to carry it.
+- ~~**The 22 July Vitals sheets — open Chrome with the Claude extension**~~ — done: all 22 on the server, each checked against your PC's copy.
+- ~~**The procedures tile: Cast / slab in three places**~~ — **LIVE** (S447): one block per group. No line or price changed.
+- ~~**A proper list so that nothing is missed**~~ — `claude/S288_PENDING_LIST.md`.
 
 ## ✅ DONE AT THE S287 CLOSE — 01-Oct-2026 (the parent)
 

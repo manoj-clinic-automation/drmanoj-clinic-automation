@@ -245,3 +245,5 @@ _scratch/
 # moves a duty updates it (CLAUDE.md). Duty names, table names, SQL and screen texts only: no patient, no phone number, no
 # secret (the F-185 gate ran on it). The blanket *.json rule would hide it silently -- F-300's family. Exact path only.
 !claude_code_briefs/DUTY_MAP.json
+# S446 (02-Oct-2026): the kit carries the DUTY_MAP.json its walk and installer ran with (in SUMS.md5) -- the same file, exact path.
+!deploy_kits/S446_AMIR_STAGES_BILLS/DUTY_MAP.json

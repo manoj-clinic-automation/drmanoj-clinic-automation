@@ -1,0 +1,81 @@
+PROVE_S446  2026-10-02 05:13:27 IST  (marg_txt S446, F-674)
+old reader 38d85298f1627ab22b59c9f3459d8764  (deploy_kits\S397_STOCK_TEXT\marg_txt.py)
+new reader 70f920c445ec82fc8c1e069f1f758efb  (built by make_marg_txt_s446.py)
+
+0. the bytes
+  ok   the old reader is the medical PC's live S397 (38d85298) -- the repository copy and Drive ToMedical\_kit agree
+  ok   the new reader parses as Python 3.8 (the medical PC runs 3.11) and compiles here
+  ok   the new reader's own selftest passes (with the S446 checks)   [24 OK, 0 FAIL]
+
+1. negative control: the OLD reader refuses the 30-Sep sale (and its two copies) at line 52
+  ok   OLD refuses 30-Sep report.txt 1a0ec847: line 52, the *** line   [line 52: a line of a kind this reader does not know]
+  ok   OLD refuses 30-Sep user_aa..txt 956234ff: line 52, the *** line   [line 52: a line of a kind this reader does not know]
+  ok   OLD refuses 01-Oct re-export f87d791b: line 52, the *** line   [line 52: a line of a kind this reader does not know]
+
+2. the NEW reader takes the 30-Sep sale whole
+  ok   NEW converts the 30-Sep report.txt   [22528 bytes, md5 7818a331e7f6aef0c84afb5a2757a373]
+  ok   its own rows: 24 bills, first A003914 last CN00230   [24]
+  ok   its own rows: GRAND TOTAL printed Rs 23,598.00 net, footer 'Bills: 24'   [gross 23814.92 disc 216.72 net 23598.00 cash 22938.00]
+  ok   its own rows: the 24 bills' NET add to the GRAND TOTAL NET (23,598.00)   [23598.00]
+  ok   its own rows: the one *** line is bill A003920's item 4, Rs 180.00, qty 1, kept as Marg prints it   [['4 *** FINGER EXTENSION SPL 1*1', 1.0, '  180.00']]
+  ok   server finance reader (marg_report, S444 copy f9370dde) reads it clean: every DAY TOTAL = its bills, GRAND = the days, footer = bills read   [[]]
+  ok   finance reader: 24 bills, 134 item lines, one day 2026-09-30, GRAND net Rs 23,598.00   [grand paise {"gross": 2381492, "disc": 21672, "tax": 0, "drcr": 0, "net": 2359800, "cash": 2293800}]
+  ok   router (S302 copy) identifies it as Marg's Excel is: SALE_BILLWISE / DETAIL   [('SALE_BILLWISE', 'DETAIL', 'IDENTIFIED')]
+  ok   the door's item lines (marg_ingest.sale_lines): 134, the *** line among them at Rs 180.00, bill A003920   [('A003920', None, 18000)]
+  ok   the spine reader (marg_read S331) reads it SALE_BILLWISE, every check passing, no anomaly; it reads the *** line as Marg's Excel (seq 4, pack 1*1)   [24 bills, 134 lines, anomalies 0]
+
+3. the 30-Sep copies and the 01-Oct re-export
+  ok   NEW converts 30-Sep user_aa..txt 956234ff: 24 bills, GRAND net Rs 23,598.00   [xls md5 7818a331e7f6aef0c84afb5a2757a373, the SAME bytes as the 30-Sep report.txt's]
+  ok     ...and every cell equal to the 30-Sep report.txt's rows   [163 rows]
+  ok   NEW converts 01-Oct re-export f87d791b: 24 bills, GRAND net Rs 23,598.00   [xls md5 72bfdba1a10da14366b304bb9574f5cd, NOT the same bytes as the 30-Sep report.txt's]
+  ok     ...its bills, amounts, totals and item lines are the 30-Sep ones; only the items' SECOND column differs (33 item lines) -- the figure Marg prints there is as of the moment of export   [163 rows]
+
+4. the only difference is the *** line: with a figure in that column both readers agree byte for byte
+  ok   the *** line is line 52 of the file
+  ok   30-Sep with '999' in that column: OLD converts, NEW converts, the same bytes   [95b878249881dc409129b8d113a3d31f]
+  ok   NEW on the real file vs that: one cell differs, the item's own text ('4 *** ...' / '4 999 ...')   [[(43, 1)]]
+
+5. parity: every other text export there is, OLD and NEW side by side
+    refused_text\20260925-053533__repor..9b00179c.txt OLD REFUSED  NEW REFUSED   same reason: no GRAND TOTAL line
+    refused_text\20260925-073658__repor..47896301.txt OLD CONVERTS NEW CONVERTS  same bytes 451c3d57
+    refused_text\20260926-094624__user_..bc7573f6.txt OLD NOT_THIS NEW NOT_THIS  same reason: not a complete bill-wise sales text export
+    refused_text\20260926-094702__user_..3e796c2d.txt OLD NOT_THIS NEW NOT_THIS  same reason: not a complete bill-wise sales text export
+    refused_text\20260927-045028__user_..1ba05a16.txt OLD REFUSED  NEW REFUSED   same reason: no title or no column heads at the top
+    refused_text\20260930-221033__user_..63f235cd.txt OLD REFUSED  NEW CONVERTS  <- the *** file: the one intended change
+    refused_text\20260930-221037__repor..bd9d9d4e.txt OLD REFUSED  NEW CONVERTS  <- the *** file: the one intended change
+    refused_text\20261001-085334__user_..891c9766.txt OLD NOT_THIS NEW NOT_THIS  same reason: not a complete bill-wise sales text export
+    refused_text\20261001-085557__user_..08cffb36.txt OLD NOT_THIS NEW NOT_THIS  same reason: not a complete bill-wise sales text export
+    refused_text\20261001-085815__user_..bf319abb.txt OLD NOT_THIS NEW NOT_THIS  same reason: not a complete bill-wise sales text export
+    refused_text\20261001-085955__user_..5c87b9f5.txt OLD NOT_THIS NEW NOT_THIS  same reason: not a complete bill-wise sales text export
+    refused_text\20261001-090549__user_..e29541bd.txt OLD NOT_THIS NEW NOT_THIS  same reason: not a complete bill-wise sales text export
+    refused_text\20261001-125547__user_..5ddfacdd.txt OLD REFUSED  NEW CONVERTS  <- the *** file: the one intended change
+    marg_txt SELFTEST_SAMPLE (sale)                OLD CONVERTS NEW CONVERTS  same bytes e5918c7b
+    marg_txt STOCK_SAMPLE (stock)                  OLD CONVERTS NEW CONVERTS  same bytes 6239dbdc
+    30-Sep with 999                                OLD CONVERTS NEW CONVERTS  same bytes 95b87824
+    30-Sep copy with 999                           OLD CONVERTS NEW CONVERTS  same bytes 95b87824
+    01-Oct with 999                                OLD CONVERTS NEW CONVERTS  same bytes cc9fe870
+  ok   every file except the three *** copies: the same verdict, and the same .XLS bytes where it converts (15 files)
+  ok   the three *** copies (30-Sep x2, 01-Oct) are the only verdicts that change   [['refused_text\\20260930-221033__user_..63f235cd.txt', 'refused_text\\20260930-221037__repor..bd9d9d4e.txt', 'refused_text\\20261001-125547__user_..5ddfacdd.txt']]
+  ok   the S397 proof's own file (24-Sep closing stock text 6da7cfb8) converts to the very .XLS PROVE_S397 recorded (451c3d573c97cf91dd820f5d14060d77)   [451c3d573c97cf91dd820f5d14060d77]
+  ok   line by line over the whole corpus: the new rule takes a line the old item rule did not ONLY on the three *** lines (line 52 of each copy)   [[('refused_text\\20260930-', 52), ('refused_text\\20260930-', 52), ('refused_text\\20261001-', 52)]]
+
+6. *** anywhere else still refuses (crafted copies of the 30-Sep file, line 52 or its bill)
+  ok   refused: *** moved into the quantity (line 52)   [line 52: an item line that cannot be read]
+  ok   refused: *** moved into the amount (rate) (line 52)   [line 52: an item line that cannot be read]
+  ok   refused: *** moved into the line number (line 52)   [line 52: a line of a kind this reader does not know]
+  ok   refused: **** (four) in the column (line 52)   [line 52: a line of a kind this reader does not know]
+  ok   refused: ** (two) in the column (line 52)   [line 52: a line of a kind this reader does not know]
+  ok   refused: *** with no space before the name (line 52)   [line 52: a line of a kind this reader does not know]
+  ok   refused: *** in bill A003920's CASH amount (line 48)   [not a number where one must be]
+  ok   refused: *** in bill A003920's NET amount (line 48)   [not a number where one must be]
+  ok   refused: *** in the DAY TOTAL (line 225)   [not a number where one must be]
+  ok   refused: *** in the GRAND TOTAL (line 227)   [not a number where one must be]
+  ok   refused/left alone: the 30-Sep file cut short before its GRAND TOTAL   [not a complete bill-wise sales text export]
+
+7. the medical PC's own path: the LIVE marg_watch (S397, unchanged) at its next start, with each reader
+  ok   with the OLD reader: the refused 30-Sep texts are offered again and refused again (0 taken)   [0]
+  ok   with the NEW reader: retry_refused takes the 30-Sep sale, exactly marg_txt's bytes; its 22:10:33 twin is the same .XLS ('already taken'); the 01-Oct re-export is a SECOND .XLS of the same sale (other bytes)   [(2, [['20260930-221033', '7818a331e7f6aef0c84afb5a2757a373'], ['20261001-125547', '72bfdba1a10da14366b304bb9574f5cd']])]
+  ok   the live marg_watch's own selftest passes with the new reader beside it   [31 OK, 0 FAIL]
+    (marg_watch offers refused texts again ONLY at its start, and only those under 3 days old)
+
+PROVE_S446 GREEN -- 59/59
