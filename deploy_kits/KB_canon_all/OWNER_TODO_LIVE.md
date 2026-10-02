@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S288 close** (the parent), 02-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
+# OWNER TO-DO — LIVE · refreshed at the **S290 close** (the parent), 03-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S288 close** (the parent), 02-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S283 close** (the Sanjeevni project), 02-Oct-2026 — the parent sections exactly as its S287 close wrote them, the Sanjeevni sections refreshed below them
 
@@ -6,17 +8,17 @@
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
-*Detail: `START_HERE_SESSION_290.md` · `S288_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased.*
+*Detail: `START_HERE_SESSION_291.md` · `S290_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below date from 02-Oct morning; your board is current for the pharmacy.*
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S288 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S290 close
 
-**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries only today's record; no server line follows it.
+**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries only this session's record; no server line follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · THE RECEPTION PC** — in the chat you opened on that PC. It will ask you for the Google sign-in there (your password, typed by you only).
+**2 · AT THE RECEPTION DESK — the LAN cable back into the reception PC.** It was out on the night of 02-Oct. On the cable that PC reaches the clinic server; the last test of its setup then runs by itself, and the Claude app is removed from it afterwards.
 
 **3 · ONE WORD — the follow-up tracker on the server (C·2): yes or no.** One evening when the PC copy stops being live and its records move to the server; the PC copy stays as the fallback.
 
@@ -34,18 +36,28 @@ D:\Downloads\margsync\_config\contacts_S282\CONTACT_GROUPS_TO_UPDATE.xlsx
 
 **6 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today**, saved in `D:\Downloads` (F-629).
 
-**7 · IF NOT ALREADY DONE — three taps on the petty book** — yours on the ₹20,000 of 20-Sep; Dr Bhawna's on her ₹15,000 (18-Sep) and ₹20,000 (22-Sep).
+**7 · WHEN YOU HAVE ONE — the "other works" you want Tailscale for.** It is on the reception PC, the Medical PC, your PC and your phone.
 
-```
-https://followup.dr-manoj.in/finance/petty
-```
+*Closed by your word of 02-Oct and not on this list: the technician of 25-Sep, AnyDesk and UltraViewer, passwords, the Windows activation on the reception PC.*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The reception PC** (item 2) — and, only if its Google Drive cannot be made to run, the X-ray pickup on Shavez's PC instead.
-2. **On your word:** the follow-up tracker move · the contacts · the mail flood (low) · the portal tiles (after the pharmacy move).
-3. **Held at your word:** the Callback Tracker on the server.
+1. **The last proof on the reception PC** — the second job door from that PC's side; then the Claude app is removed from it by a job.
+2. **My own housekeeping:** one whole read of the finance app's main file · the firewall step into the reinstall kit · the build lock in my installers · the server reachable from a phone hotspot · the reception PC's Wi-Fi, read at the desk.
+3. **The Medical PC's and your PC's buttons on the *Clinic PCs* tile.**
+4. **On your word:** the follow-up tracker move · the contacts · the mail flood (low) · the portal tiles (after the pharmacy move).
+5. **Held at your word:** the Callback Tracker on the server.
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S290 CLOSE — 02 → 03-Oct-2026 (the parent; the reception-PC chat folded in)
+
+- ~~**The reception PC**~~ — Google Drive runs again; Chrome saves into *Docterz exports*; an agent watches it and repairs it; the X-rays had no backlog (sessions 289 and 290).
+- ~~**Direct upload from the reception PC to the server**~~ — **LIVE** (S449): heartbeat and both Docterz reports, without Google Drive.
+- ~~**The kits on the server, a tile on your portal, one click after a reinstall**~~ — **LIVE** (S450, S451): the tile *Clinic PCs*; the Reception PC's button rehearsed on that PC.
+- ~~**Tailscale on the reception PC, and the PC shared with you**~~ — done; it opens from your phone.
+- ~~**"Check that the reception PC setup is complete or not"**~~ — checked: it was not. Firewall on and the open share removed (your "Yes", 22:26); the restart test passed (22:44). One proof left — item 2 above.
+- ~~**A second way to send work to that PC**~~ — **LIVE** on the server (S453); to be proven from the PC.
+- ~~**Three taps on the petty book**~~ — off this list: you ticked it on your board on 25-Sep.
 
 ## ✅ DONE AT THE S288 CLOSE — 02-Oct-2026 (the parent)
 

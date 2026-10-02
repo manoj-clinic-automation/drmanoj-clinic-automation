@@ -1,10 +1,10 @@
 # Claude Code brief — S454_BILL_REGISTER (every Marg purchase bill of a month on one register with its paper: verified only on what the scan reads well, items judged by Marg's own arithmetic and by learnt names, a missing scan as a re-upload line that reaches a person, the month reading "N of N")
 
-Written 02-Oct-2026, 22:4x IST, by the Sanjeevni chat (S283 post-close), at the owner's word: "go. But do not build or code anything right now." **It is built only when the owner pastes its line.** Read `CLAUDE.md` first. **Kit S454 · decision D662 · faults F-690, F-691** (System Board `_numbers` v179). It serves D650 (Marg's entry is final; the scan is the witness), D640 (everything the scan flow needs from a person is a one-tap line in the staff's own list) and D648 (every duty has a door).
+Written 02-Oct-2026, 22:4x IST, by the Sanjeevni chat (S283 post-close), at the owner's word: "go. But do not build or code anything right now." **It is built only when the owner pastes its line.** Read `CLAUDE.md` first. **Kit S454 · decisions D662, D663 · faults F-690, F-691** (System Board `_numbers`). §3.5 added 03-Oct at the owner's word, before any build. It serves D650 (Marg's entry is final; the scan is the witness), D640 (everything the scan flow needs from a person is a one-tap line in the staff's own list) and D648 (every duty has a door).
 
 **Runs AFTER S452_AMIR_PANEL_FIXES is installed, on its TO pins.** If `claude_code_briefs\REPORT_S452.md` does not exist, stop and say so.
 
-**Touches (declared, all Sanjeevni's):** `/root/finance/purchase_app.py`, `porders.py`, `porders.html`, `reports_tile.py`, `sanjeevni_approvals.py`; `amir_day.py` only if the corrections list needs a new line kind; `claude_code_briefs/DUTY_MAP.md` + `.json`. **READ ONLY:** the asset app's store (through `purchase_app`'s existing door), `item_alias.py`, `packs.py`. **No parent file:** not `finance_app.py`, `portal.py`, `tile_grants.json`, `finance_approvals.html`, `asset_register.py`. If a parent file turns out to be needed, stop and report; do not edit it.
+**Touches (declared, all Sanjeevni's):** `/root/finance/purchase_app.py`, `porders.py`, `porders.html`, `reports_tile.py`, `sanjeevni_approvals.py`, `supplier_msg.py` (§3.5 only); `amir_day.py` only if the corrections list needs a new line kind; `claude_code_briefs/DUTY_MAP.md` + `.json`. **READ ONLY:** the asset app's store (through `purchase_app`'s existing door), `item_alias.py`, `packs.py`. **No parent file:** not `finance_app.py`, `portal.py`, `tile_grants.json`, `finance_approvals.html`, `asset_register.py`. If a parent file turns out to be needed, stop and report; do not edit it.
 
 ## 1 · How this came
 
@@ -63,7 +63,7 @@ One set of rules, used by the matcher, the register and the Sarvam counter alike
 - **Bill number:** Marg's number, leading zeros dropped, equals **one whole run of digits** in the scan's reading. "YS/0585/" followed by the financial year has the run 585 and the year's own runs; Marg's 585 is one of them. A run that is the financial year, and any reading shaped like a drug-licence number (ending "/BLY" or the like), is never the bill number. Letters in Marg's number ("EP002243") are compared by their digit run, as S439 does.
 - **Date:** the day and the month agree. A year other than Marg's is a misread and is ignored; the row may say "year misread", small and grey.
 - **Total:** within Rs 1 is equal. Up to a setting `purchase.total_noise_rs` (default 10) is **verified, with the difference shown** and no task (the D622 rule: rounding noise is not a finding). More than that is *Amount milao*, as today.
-- **Verified** = the total agrees, the bill number agrees, and at least one of supplier and date agrees. If the fourth differs it goes to §3.4 as one question; a year-only date difference and a punctuation difference never ask.
+- **Verified** = the total agrees, the bill number agrees, and at least one of supplier and date agrees. If the fourth differs it goes to §3.4 as one question; a year-only date difference and a punctuation difference never ask. A field the scan did not read at all (no supplier, or the shop's own name in its place) asks nothing either: the row says "not read on the scan", small and grey.
 - **Learning:** each verified bill teaches the supplier's printed spelling (as today). If the scan's reading carries the supplier's GST number, a verified bill may teach "this number = this supplier", kept in the database only, never in a kit or a report (F-185); it is then the first test for that supplier. If the reading does not carry it, say so and skip this.
 - Re-run the matcher on September with these rules **before anything else is built**, on a copy, and REPORT: how many of the 14 unlinked scans now link, how many of the 63 are verified without a tap, and every row whose state changes, by name. If a rule links a wrong pair on the copy, stop and report.
 
@@ -91,11 +91,20 @@ Staff pages in Roman Hindi; the owner's in English.
 - **The owner's Needs-you** (`sanjeevni_approvals`, the S444 mechanism) gets one line when the oldest line of *Scan ka kaam* is older than `purchase.scan_wait_days` (default 3), with the count and the oldest age; and one when a scan has waited for Marg's entry longer than `purchase.entry_wait_days` (default 3).
 - **`DUTY_MAP`:** the duties "scan a bill Marg has and the server does not", "answer what the paper says", and "close the month's register" each get their row, their state and their door. The staff-eye walk asserts them.
 
+### 3.5 The bank advice on Vendor payments: the owner and Shavez only (D663) — `purchase_app.py`, `supplier_msg.py`
+
+The owner, 03-Oct: "The vendor payment sheet should be limited to me and Shavez." S452 closed the advice Excel to everyone but the senders. The Vendor payments page (`/finance/purchase/page/pay`) still draws S265's bank advice annexure, with every supplier's full account number and IFSC, for every medical login.
+
+- **One rule, one list.** The annexure, the covering letter and the payment pack (S380), on screen and in print, are served only to the logins in `supplier_msg.senders` (today: manoj, shavez). The same list S452 used for the Excel.
+- **Every other medical login** (amir, darpan, bhati, reception) still opens the page and sees the month's suppliers, amounts and paid state as today, with **no account number and no IFSC anywhere in the served page**: not in the HTML, not in a script block, not in a hidden print section. The letter and pack addresses answer them with the page's own refusal.
+- **Amir's paid NEFT sheet (S452's PDF):** REPORT whether it carries account numbers. If it does, his copy carries supplier and amount only.
+- REPORT every other address under `/finance/purchase/` and `/finance/amir/` that serves an account number, and to which logins. Close none beyond this section without the owner's word; list them.
+
 ## 4 · Pins
 
 S452's TO pins, from `REPORT_S452.md`, each read live before the first edit. `porders.py` and `porders.html` were moved by the parent's S441 and by S444: read them whole from the box. `reports_tile.py` and `sanjeevni_approvals.py`: read live.
 
-Not touched: `finance_app.py`, `portal.py`, `tile_grants.json`, `finance_approvals.html`, `asset_register.py`, `packs.py`, `supplier_msg.py`, `stock_app.py`, the crontab (the 23:59 re-match stays), the medical PC.
+Not touched: `finance_app.py`, `portal.py`, `tile_grants.json`, `finance_approvals.html`, `asset_register.py`, `packs.py`, `stock_app.py`, the crontab (the 23:59 re-match stays), the medical PC.
 
 ## 5 · Walk (scratch copies of `finance.db` and `assets.db`; rows keyed W454*; dates from today)
 
@@ -112,7 +121,8 @@ Not touched: `finance_app.py`, `portal.py`, `tile_grants.json`, `finance_approva
 - **Items.** A crafted bill whose lines add up carries the tick; one that does not says by how much. A one-line verified bill teaches its name; a two-line bill with equal quantity and rate on both lines teaches nothing.
 - **The Sarvam page.** Punctuation and prefixes are not counted wrong. September's header figures equal §2's "wrong in substance" column, or the difference is explained row by row.
 - **Late work.** With a crafted *Scan karo* line 4 days old: Shavez's line shows, the owner's Needs-you shows; both leave when the scan arrives.
-- **Staff-eye walk** (CLAUDE.md, "Every duty has a door") for the reception login, shavez, amir and the owner.
+- **The bank advice.** As amir, darpan, bhati and the reception login: the Vendor payments page answers and holds no account number and no IFSC (search the served bytes for each seeded account string); the letter and the pack refuse. As shavez and the owner: unchanged, byte for byte where nothing else moved.
+- **Staff-eye walk** (CLAUDE.md, "Every duty has a door") for the reception login, shavez, amir, darpan and the owner.
 - **Earlier walks re-run:** S439, S440, S441's scan checks, S446, S452 — each adjustment named.
 - **Negative control** on the box as it is.
 
@@ -125,6 +135,7 @@ Kit `deploy_kits\S454_BILL_REGISTER\` · installed · published · `claude_code_
 - The bills that still have no paper on the server, by supplier, bill number, date and amount — the list reception scans from.
 - How many of Marg's bills add up to their own total, and what that says about the item check.
 - What reception, Shavez and Amir will each see, in their own words.
+- That the bank advice now opens for you and Shavez only, and any other page that still shows an account number to staff.
 
 Ending with:
 
