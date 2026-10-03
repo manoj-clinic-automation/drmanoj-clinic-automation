@@ -228,7 +228,7 @@ def walk(a, root):
     con = sqlite3.connect(fdb)
     with open(os.path.join(old, "finance_schema.sql"), encoding="utf-8") as fh:
         con.executescript(fh.read())
-    con.execute("INSERT INTO staff_ref (id, name, is_pharmacy) VALUES (1,'Made-up One',1),(2,'Made-up Two',1),(3,'Made-up Three',1),(4,'Made-up Four',1)")
+    con.execute("INSERT INTO staff_ref (id, name, is_pharmacy) VALUES (1,'Made-up One',1),(2,'Made-up Two',1),(3,'Made-up Three',1),(4,'Made-up Four',1),(5,'Made-up Five',1)")
     for i, (d, status) in enumerate((("2026-08-10", "approved"), ("2026-08-11", "approved"), ("2026-08-12", "approved"),
                                      ("2026-08-13", "approved"), ("2026-08-14", "submitted")), 1):
         con.execute("INSERT INTO day_entry (id,unit,business_date,status,source,entered_by,entered_at) VALUES (?,?,?,?,'app','walk',?)",
@@ -237,7 +237,8 @@ def walk(a, root):
            (2, 2, 300000, 2, 0, None),          # no stamp, ledger has it by hand
            (3, 3, 150000, 3, 0, None),          # no stamp, nothing in the ledger
            (4, 4, 100000, 4, 1, "gone99"),      # stamped, row not in the ledger
-           (5, 5, 50000, 1, 0, None)]           # on a day not approved: not listed
+           (5, 5, 50000, 1, 0, None),           # on a day not approved: not listed
+           (6, 1, 70000, 5, 1, "ddd444")]       # stamped, and its row truly reversed in the ledger (an approved contra)
     for xid, eid, amt, staff, posted, ref in exp:
         con.execute("INSERT INTO day_expense (id,day_entry_id,amount_p,category_fixed,staff_id,ledger_posted,ledger_ref) VALUES (?,?,?,'salary_advance',?,?,?)",
                     (xid, eid, amt, staff, posted, ref))
@@ -248,6 +249,12 @@ def walk(a, root):
     with open(led, "w", encoding="utf-8") as fh:
         for r in ({"id": "aaa111", "staff": "Made-up One", "category": "ADVANCE_ISSUE", "date_from": "2026-08-10", "amount": 2000, "status": "APPROVED",
                    "maker": "wdoctor", "narration": "Salary advance, medical 2026-08-10 (finance expense #1)"},
+                  {"id": "aaa112", "staff": "Made-up One", "category": "ADVANCE_INSTALMENT", "date_from": "2026-09", "amount": -500, "status": "APPROVED",
+                   "maker": "wdoctor", "narration": "an instalment collected: it points at the advance, and is not a reversal", "contra_of": "aaa111"},
+                  {"id": "ddd444", "staff": "Made-up Five", "category": "ADVANCE_ISSUE", "date_from": "2026-08-09", "amount": 700, "status": "APPROVED",
+                   "maker": "wdoctor", "narration": "by hand"},
+                  {"id": "ddd445", "staff": "Made-up Five", "category": "ADVANCE_ISSUE", "date_from": "2026-08-09", "amount": -700, "status": "APPROVED",
+                   "maker": "wdoctor", "narration": "contra of ddd444", "contra_of": "ddd444"},
                   {"id": "bbb222", "staff": "Made-up Two", "category": "ADVANCE_ISSUE", "date_from": "2026-08-12", "amount": 3000, "status": "APPROVED",
                    "maker": "wdoctor", "narration": "advance, by hand"},
                   {"id": "ccc333", "staff": "Made-up Three", "category": "ADVANCE_ISSUE", "date_from": "2026-06-01", "amount": 1500, "status": "APPROVED",
@@ -257,7 +264,11 @@ def walk(a, root):
     rp = lambda *args: subprocess.run([sys.executable, "-B", a.report] + list(args), capture_output=True, text=True)
     adv = rp("advances", led, fdb).stdout
     L = [l for l in adv.splitlines() if l.startswith("  2026-")]
-    check("2.1 the advances report lists the four on approved days or stamped, and not the one on a day still waiting", len(L) == 4 and "2026-08-14" not in adv, adv)
+    check("2.1 the advances report lists the five on approved days or stamped, and not the one on a day still waiting", len(L) == 5 and "2026-08-14" not in adv, adv)
+    five = [l for l in L if "Made-up Five" in l]
+    L = [l for l in L if "Made-up Five" not in l]
+    check("2.1b F-714: an advance with an instalment collected against it is NOT called reversed (the instalment points at it too); one with an approved contra of its own kind IS",
+          "REVERSED" not in L[0] and len(five) == 1 and "REVERSED there since" in five[0], (L[0], five))
     check("2.2 stamped with its row in the ledger: said so, with the row; no stamp but entered by hand two days later: 'the ledger has it', nothing to do",
           "Made-up One  Rs 2000" in L[0] and "STAMPED, and its row is in the ledger" in L[0] and "aaa111" in L[0] and "posted by the finance app" in L[0]
           and "Made-up Two  Rs 3000" in L[1] and "NO STAMP, but the ledger has it" in L[1] and "bbb222" in L[1] and "by hand" in L[1], L[:2])

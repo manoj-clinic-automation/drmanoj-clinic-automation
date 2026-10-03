@@ -1,0 +1,5 @@
+kit id S454_BILL_REGISTER
+part P3B_FIRST_DAY (S454 section 18: what the first afternoon of use showed -- "Ek scan mein ek hi bill." on the two scan screens (F-712); the
+arrival button reads "Save kijiye" while a line is short or missing; "P.L." dropped like PVT and LTD; an order that arrived by its scan is on the
+way once on marg too; a credit note is a return in the spot count's reading (F-713); the agreement card says on what stock)
+session 283 (Sanjeevni) · 03-Oct-2026 · faults F-711, F-712, F-713

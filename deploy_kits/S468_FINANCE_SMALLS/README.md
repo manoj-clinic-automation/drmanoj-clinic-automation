@@ -32,3 +32,12 @@ Session 292 (parent), 03-Oct-2026. At the owner's word: "then proceed with this 
     \cp -p /root/finance/finance_app.py.bak_S468_72d25382 /root/finance/finance_app.py && systemctl restart clinic-finance
 
 The scans moved aside go back with one `mv` of the folder's contents; nothing was deleted.
+
+## After the first run on the box (03-Oct-2026, 18:4x IST) — F-714
+
+The advances report said "REVERSED there since" of an advance that is live and being recovered: it took any approved
+row pointing at the advance (`contra_of`) for a reversal, and an instalment, a skip and a deferral point at it too.
+The ledger's own test adds "of the same category". `report_s468.py` now does the same, and `walk_s468.py` holds it
+(check 2.1b: SHOWN to fail on the report as first published). The report is read-only; nothing was changed by the
+wrong word. The kit's `apply_s468.py` and the installed `finance_app.py` are untouched by this correction, so there
+is nothing to install again.

@@ -81,7 +81,11 @@ def advances(led, dbf):
         if b["ledger_posted"]:
             r = by_id.get(b["ledger_ref"])
             if r:
-                rev = [x for x in rows if x.get("contra_of") == r.get("id") and x.get("status") == "APPROVED"]
+                # a REVERSAL is an approved contra of the SAME category (the ledger's own test). An instalment, a skip
+                # and a deferral also point at the advance through contra_of -- they are not reversals (F-714: this
+                # report said 'REVERSED' of a live advance on its first run on the box, 03-Oct, for want of this line).
+                rev = [x for x in rows if x.get("contra_of") == r.get("id") and x.get("status") == "APPROVED"
+                       and x.get("category") == r.get("category")]
                 print(head + ": STAMPED, and its row is in the ledger -- %s%s" % (say(r), "; REVERSED there since" if rev else ""))
             else:
                 n = near(b["staff"], amount, b["business_date"])
