@@ -1,6 +1,6 @@
 # Duty map — every recurring staff duty, and the door that shows it
 
-**01-Oct-2026 · kit S444_STAFF_SAFE · decision D648; updated 02-Oct-2026 by S446_AMIR_STAGES_BILLS (D649, D650) and by S452_AMIR_PANEL_FIXES (F-686, F-687; the owner's rulings of 02-Oct evening).** Built from the live box, read only: the tiles each login is shown
+**01-Oct-2026 · kit S444_STAFF_SAFE · decision D648; updated 02-Oct-2026 by S446_AMIR_STAGES_BILLS (D649, D650) and by S452_AMIR_PANEL_FIXES (F-686, F-687; the owner's rulings of 02-Oct evening); 03-Oct-2026 by S454_BILL_REGISTER part 1 (D666, D668, D669: the one-task reception screen, Darpan's order sheet).** Built from the live box, read only: the tiles each login is shown
 (`portal.py` TILES + `tile_grants.json` v30), the per-unit roles (`unit_role` in finance.db), and every pending-work table the
 Sanjeevni and finance modules keep (finance.db opened read-only, 21:50 IST). The machine part is `DUTY_MAP.json` beside this
 file; a duty's id from that file is shown in brackets, e.g. `[amir.count_vouchers]`.
@@ -66,6 +66,7 @@ attendance, Scan Purchase. (Kal ka hisaab also links to his old card /finance/da
 | Vaapsi Desk "jaankari": count the shelf after a flagged return `[darpan.desk_shelf_counts]` | `stock_spot_check.status='due'` with no `jaankari_answer` (kind spot) | Vaapsi Desk → /finance/returns/desk "जानकारी चाहिए" (script tab) | JSON |
 | Vaapsi Desk "jaankari": name / clinic ID that disagree `[darpan.desk_identity]` | `identity_dispute.status='open'` with no `jaankari_answer` (kind dispute) | Vaapsi Desk "जानकारी चाहिए" | JSON |
 | Send the orthotic order to Yuvika | orthotic shortage computed by porders (count + purchases − sales vs keep) | Purchase orders → /finance/porders; card "Orthotic kam hai" on Kal ka hisaab | Needs-you, porders: "Orthotic shortages: N items -- order not sent" |
+| **S454:** after making the order in Marg, save PENDING ORDERS (PURCHASE) as TEXT, the default way `[darpan.order_sheet]` | due only when the newest order-sheet file was refused (`mi_file` not VERIFIED, ORDER_PENDING) and no later sheet was taken | Kal ka hisaab → card "Order sheet": "<dd-mm> ki sheet mil gayi · N dawa · M supplier · reception ke paas pahunch gayi", or "Order sheet adhoori thi, system ne nahi li — Marg se dobara TEXT mein save kijiye"; the one instruction always under it | Needs-you, order_sheet: "Darpan's order sheet refused today" |
 | Daily Sale by hand — only when the Marg autofile fails | a counter day with no `day_entry` | Daily Sale → /finance/daily | Needs-you (1) once filed: "N days to approve" |
 
 The jaankari lists are shared by every desk login (`returns.desk_users` = darpan, shavez, alisha, shivani, bhawna); the JSON names Darpan.
@@ -87,7 +88,7 @@ Docterz Revenue, Bhati aaj, Asset Register, Staff Ledger — Entry, Forms & Down
 | Staff Register: check and approve each day | staff_register.db `day_review.status='draft'` (none today: September approved to 01-Oct) | Staff Register (tile shows "to approve") | none (other database) |
 | Verify present / exit requests | staff_register.db `present_request.status='pending'` (none) | Staff Register | none |
 | Month-end checklist | `packs_item` not auto-done and no `packs_done` for the month | Mahine ka kaam → /finance/packs/checklist | Needs-you, packs (after the 10th): "Shavez's month-end checklist for <Month>: N items open" |
-| Backup send of a supplier NEFT message unsent 30 min `[shavez.supplier_messages]` | `supplier_msg.status` queued / failed, queued 30+ min | **door added S446**: Vendor payments shows "Pichhle mahine ka baaki: N" above the current month while an earlier month holds unsent messages or NEFT lines with no NEFT recorded; one tap opens that month ("Pending — baaki … Bhejo") | Needs-you, supplier_msg: "N supplier messages unsent" |
+| Backup send of a supplier NEFT message unsent 30 min `[shavez.supplier_messages]` | `supplier_msg.status` queued / failed, queued 30+ min, kind neft / cheque (S454: an order message is the order screen's) | **door added S446**: Vendor payments shows "Pichhle mahine ka baaki: N" above the current month while an earlier month holds unsent messages or NEFT lines with no NEFT recorded; one tap opens that month ("Pending — baaki … Bhejo") | Needs-you, supplier_msg: "N supplier messages unsent" |
 | Log every slip at the chamber | `slip` against the night's Docterz lines | OPD & X-ray/Proc Slips → /finance/slips | none (night report only) |
 | Room ticks Paid / Done when in the X-ray room | `slip` series xp with `paid_at` / `done_at` empty | OPD & X-ray/Proc Slips → room | none |
 | Check karein, Report baaki (X-ray), Purchase orders, Vaapsi Desk | shared with the reception desk — see Alisha and Reception | same tiles | as there |
@@ -131,12 +132,13 @@ on Darpan's, Shavez's, Alisha's and Shivani's homes (`porders.senders`).
 
 | Duty | Due when (system state) | Door on its home (tile → page) | Owner's line if missed |
 |---|---|---|---|
-| Scan every Marg purchase bill `[reception.bill_scan]` | `purchase_bill` from `porders.scan_from` (01-Sep), in a live export, with no `purchase_scan_link` | Purchase orders → /finance/porders "Scan karo" → Scan Purchase | Needs-you, porders: "Bill scan pending on N purchase bills" |
-| Answer "Yahi bill hai?" and "Supplier chuno" `[reception.scan_questions]` | `purchase_scan_state` unlinked with a likely bill, or vendor unknown and not chosen | Purchase orders "Yahi bill hai?" / "Supplier chuno" | JSON |
-| "Amount milao": type the paper's amount when scan and Marg differ | linked scan more than 2% from Marg, no `amount_state` (needs assets.db) | Purchase orders "Amount milao" | Needs-you, porders (when it goes to the owner) |
-| Send the day's medicine orders `[reception.medicine_orders]` | `order_proposal.status='merged'` due, no later 'sent' for the supplier | Purchase orders "Aaj ke order" | Needs-you, order_rules: "Order not sent: …" |
-| Send the orthotic order | porders' computed shortage | Purchase orders | Needs-you, porders |
-| Tap "Order aaya?" when goods arrive `[reception.order_arrival]` | `purchase_order.status='sent'` | Purchase orders "Order aaya?" | JSON |
+**S454 (03-Oct-2026, D666 / D668): the Purchase-orders tile opens "Aaj ka kaam" — the big "Naya bill scan karo" and a row for each kind of work, shown only while it has work.** The old page stays one tap away (`?old=1`, "Purana page" for the owner and Shavez).
+
+| Order from the suppliers still to be ordered `[reception.medicine_orders]` | `porders.simple`=1: Darpan's sheet lines `order_sheet_line.state='to_order'` (on `order.source`=system: today's open `order_proposal`); the orthotic shortage card (S403) beside them | Purchase orders → /finance/porders "Order karna hai" → a card per supplier: "Sab ko WhatsApp bhejo", "Kholiye" (Call karo, the number under it), "Order ho gaya" | Needs-you, order_sheet: a supplier with no number; an order of the sheet never placed; the phone silent while messages wait. One push a day at `order.remind_times` (17:00) naming those still to order |
+| When goods come, scan the bill `[reception.order_arrival]` | `purchase_order.status='sent'` with no bill scan tied (`order_scan_tie`) | Purchase orders "Maal aaya?" → "Bill scan karo" (the scan records the delivery by itself); "Bill nahi hai, ya kam aaya?" for a short delivery | JSON |
+| Scan each paper still to scan `[reception.bill_scan]` | orders received on the arrival screen with no bill scan (for `purchase.arrival_scan_days`), and Marg bills of a counted month (`purchase.register_from`) with no scan and no likely scan, not marked "paper nahi mila" | Purchase orders "Bill scan karna hai" → by supplier, five at a time, "Scan karo"; "Koi paper nahi mil raha?" | Needs-you, porders |
+| Answer the question about a scan `[reception.scan_questions]` | the matcher's questions (likely bill, amount, supplier), S441's, and "is it a pharmacy bill?" for a paper with nothing read — counted months | Purchase orders "Photo dekh kar bataiye" → one question on the screen, "Sawaal i / N" | JSON |
+| A parked month's work (optional) | `purchase.parked_months` (2026-09): its bills to scan and its questions | Purchase orders → "Purana kaam: September" at the foot of the home | none (no count, no reminder, no alert, nothing to Amir) |
 | Keep the phone's MacroDroid sending supplier NEFT messages | `supplier_msg` queued (18 since 26-Sep 19:49) | **no door** on this home | Needs-you, supplier_msg |
 | Follow-up calls | Call Tracker Google Sheet | Call Tracker | none |
 

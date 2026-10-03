@@ -10,6 +10,7 @@ A published part folder is frozen; a later part adds a folder beside it and neve
 | part | folder | brief |
 |---|---|---|
 | 1 | `P1_ORDER_SHEET_RECEPTION/` | §3 the order sheet (reader, road, loader) · §4 reception's screen · the settings · §7.5 cards · §7.3 ordering lines |
+| 1B | `P1B_COMPARE_FIRST/` | part 1's first load compared after its own paper orders (0 of 21); the comparison first, the 02-Oct figure made again (5 of 21) |
 | 2 | (to come) | §5 pairing · §6 Amir · §7 the owner's pages · §8 Vendor payments · §12 the duty |
 | 3 | (to come) | §9 the shelf figure |
 | 4 | (to come) | §10 the medical PC's refusal note (the watcher; not before 04-Oct 13:00 IST) |

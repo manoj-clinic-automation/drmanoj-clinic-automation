@@ -1,0 +1,4 @@
+kit id S454_BILL_REGISTER
+part P1B_COMPARE_FIRST
+project Sanjeevni (session 283, 03-Oct-2026; D666) -- the first load's comparison made before its own paper orders (part 1 read 0 of 21; the truth is 5 of 21)
+restarts clinic-finance only; finance.db backed up first; one file (order_sheet.py) and one figure (order_sheet.cmp of the 02-Oct sheet)
