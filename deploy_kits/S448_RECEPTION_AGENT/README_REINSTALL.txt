@@ -15,10 +15,10 @@ A. WHAT ONLY A PERSON CAN DO -- in this order
       quit Drive, rename that folder (DriveFS_old_<date>), start Drive, sign
       in again. (The fault of 01-Oct-2026 and its cure.)
    3. Chrome, opened once, and Docterz signed in for the staff.
-   4. Optional: the Claude desktop app, signed in. It is a second way in for
-      Claude; the agent restarts it if it stops. Not needed once a Drive-door
-      key is enrolled (authorized_keys.txt). If the app is NOT put back, set
-      "keep_claude_running": false in C:\ClinicAgent\config.json.
+   4. The Claude desktop app is NOT put back on this PC. It was removed on
+      03-Oct-2026 at the owner's word: Claude works here through signed jobs
+      (the Drive door and the server door). The kit's config.json says
+      "keep_claude_running": false, so the agent does not look for it.
    5. Tailscale (so the owner can view this PC from his own devices):
       install it from https://tailscale.com/download and sign in with the
       owner's account. The PC appears on his tailnet as "receptionpc".
@@ -29,6 +29,15 @@ A. WHAT ONLY A PERSON CAN DO -- in this order
       (It makes the account "clinicview", shares C:\ read-only as
       ReceptionC to Tailscale addresses only, switches Guest off and removes
       the old open shares. Its log: C:\ClinicAgent\share_setup_log.txt.)
+   7. The firewall and the sharing rules, AFTER step 6: right-click
+      C:\ClinicAgent\secure_setup.cmd (the installer puts it there; it is in
+      this kit's folder too), choose "Run as administrator", click Yes.
+      (Windows Firewall on for all three profiles; file sharing reachable
+      from Tailscale addresses only; the licence server's ports left open to
+      the clinic's own network; the old open shares removed. It starts no
+      scan and changes no Windows Security exclusion. Safe to run again.
+      Its log: C:\ClinicAgent\secure_setup_log.txt. Without this step a
+      reinstalled PC has its firewall as Windows left it.)
 
 B. THE AGENT -- THE SIMPLE WAY (since S450): in Chrome on this PC sign in to
    the clinic portal as Dr Manoj, open the tile "Clinic PCs", press
@@ -53,7 +62,8 @@ B. THE AGENT -- THE SIMPLE WAY (since S450): in Chrome on this PC sign in to
    folder at Clinic Records\Docterz exports (only if Chrome is closed --
    otherwise the agent does it itself the next time Chrome is closed), sets
    the start at logon, starts the agent and shows its first heartbeat.
-   Safe to run again at any time.
+   It also puts share_setup.cmd and secure_setup.cmd beside the agent in
+   C:\ClinicAgent, for steps A.6 and A.7. Safe to run again at any time.
 
 C. THE CHECKS THAT PROVE IT WORKED
    1. The window says DONE and shows a heartbeat with "ATTENTION: nothing".
@@ -77,11 +87,12 @@ D. WHAT THE KIT HOLDS
    reception_agent.py            the agent
    agent_guard.py                keeps the agent alive, undoes a bad update
    pyportable.zip                CPython 3.11.9, standard library only
-   config.json                   this PC's settings (how to start the Claude app)
+   config.json                   this PC's settings (no Claude app kept running)
    authorized_keys.txt           PUBLIC keys allowed to send jobs through Drive
                                  (may be absent: then the Drive door is shut)
    reception_sign.py             for a Claude session: make a key, sign a job
    share_setup.cmd               the owner's read-only view of this PC (A.6)
+   secure_setup.cmd              the firewall and the sharing rules (A.7)
    tests\test_kit.py             the offline walk
    MD5SUMS.txt                   the md5 of every file above
 

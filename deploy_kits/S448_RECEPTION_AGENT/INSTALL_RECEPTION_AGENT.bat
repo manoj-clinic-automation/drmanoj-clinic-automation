@@ -110,6 +110,10 @@ if exist "%ROOT%\config.json" echo   .. settings  : %ROOT%\config.json is there
 if not exist "%ROOT%\config.json" echo   .. settings  : none - the agent's own defaults apply
 "%PY%" "%ROOT%\reception_agent.py" --install-keys "%KIT%authorized_keys.txt"
 "%PY%" "%ROOT%\reception_agent.py" --set-chrome-download
+REM ---- 6c. the two files a person runs once as administrator - README A.6 and A.7 - kept beside the agent
+if exist "%KIT%share_setup.cmd" copy /y "%KIT%share_setup.cmd" "%ROOT%\share_setup.cmd" >nul
+if exist "%KIT%secure_setup.cmd" copy /y "%KIT%secure_setup.cmd" "%ROOT%\secure_setup.cmd" >nul
+if exist "%ROOT%\secure_setup.cmd" echo   .. security  : %ROOT%\secure_setup.cmd is there - run once as administrator, README A.7
 echo.
 
 REM ---- 7. the shell the .ps1 jobs will run in

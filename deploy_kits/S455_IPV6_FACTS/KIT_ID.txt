@@ -1,0 +1,2 @@
+S455 KIT S455_IPV6_FACTS
+session 291 (parent) · 03-Oct-2026 · F-692: READ-ONLY -- what the server has for IPv6, and that the Reception PC kit the Clinic PCs page serves is whole after the pull. Places nothing, restarts nothing.

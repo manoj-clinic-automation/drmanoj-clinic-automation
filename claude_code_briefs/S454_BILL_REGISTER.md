@@ -1,10 +1,12 @@
 # Claude Code brief — S454_BILL_REGISTER (every Marg purchase bill of a month on one register with its paper: verified only on what the scan reads well, items judged by Marg's own arithmetic and by learnt names, a missing scan as a re-upload line that reaches a person, the month reading "N of N")
 
-Written 02-Oct-2026, 22:4x IST, by the Sanjeevni chat (S283 post-close), at the owner's word: "go. But do not build or code anything right now." **It is built only when the owner pastes its line.** Read `CLAUDE.md` first. **Kit S454 · decisions D662, D663 · faults F-690, F-691** (System Board `_numbers`). §3.5 added 03-Oct at the owner's word, before any build. It serves D650 (Marg's entry is final; the scan is the witness), D640 (everything the scan flow needs from a person is a one-tap line in the staff's own list) and D648 (every duty has a door).
+> **HOLD — DO NOT BUILD (03-Oct-2026, 05:04 IST).** The owner found the reception screen of §3.4 and §3.6 too heavy for the staff and has asked for it to be redrawn as one task at a time. A revised brief and mock will replace this text and this line will go. If you have been asked to build this file while this line stands, stop and say so; build nothing.
+
+Written 02-Oct-2026, 22:4x IST, by the Sanjeevni chat (S283 post-close), at the owner's word: "go. But do not build or code anything right now." **It is built only when the owner pastes its line.** Read `CLAUDE.md` first. **Kit S454 · decisions D662, D663 · faults F-690, F-691, F-695** (System Board `_numbers`). §3.5, §3.6 and §3.7 added 03-Oct at the owner's word, before any build. **The owner has seen these screens as a mock: `claude_code_briefs\S454_BILL_REGISTER_MOCK.html`. Read it before §3; build the staff lines to its words, groups and buttons.** Its figures are examples. It serves D650 (Marg's entry is final; the scan is the witness), D640 (everything the scan flow needs from a person is a one-tap line in the staff's own list) and D648 (every duty has a door).
 
 **Runs AFTER S452_AMIR_PANEL_FIXES is installed, on its TO pins.** If `claude_code_briefs\REPORT_S452.md` does not exist, stop and say so.
 
-**Touches (declared, all Sanjeevni's):** `/root/finance/purchase_app.py`, `porders.py`, `porders.html`, `reports_tile.py`, `sanjeevni_approvals.py`, `supplier_msg.py` (§3.5 only); `amir_day.py` only if the corrections list needs a new line kind; `claude_code_briefs/DUTY_MAP.md` + `.json`. **READ ONLY:** the asset app's store (through `purchase_app`'s existing door), `item_alias.py`, `packs.py`. **No parent file:** not `finance_app.py`, `portal.py`, `tile_grants.json`, `finance_approvals.html`, `asset_register.py`. If a parent file turns out to be needed, stop and report; do not edit it.
+**Touches (declared, all Sanjeevni's):** `/root/finance/purchase_app.py`, `porders.py`, `porders.html`, `reports_tile.py`, `sanjeevni_approvals.py`, `supplier_msg.py` (§3.5 only), `amir_day.py` (§3.6: his list's rule); the corrections list in `amir_day.py` only if it needs a new line kind; `claude_code_briefs/DUTY_MAP.md` + `.json`. **READ ONLY:** the asset app's store (through `purchase_app`'s existing door), `item_alias.py`, `packs.py`. **No parent file:** not `finance_app.py`, `portal.py`, `tile_grants.json`, `finance_approvals.html`, `asset_register.py`. If a parent file turns out to be needed, stop and report; do not edit it.
 
 ## 1 · How this came
 
@@ -100,6 +102,29 @@ The owner, 03-Oct: "The vendor payment sheet should be limited to me and Shavez.
 - **Amir's paid NEFT sheet (S452's PDF):** REPORT whether it carries account numbers. If it does, his copy carries supplier and amount only.
 - REPORT every other address under `/finance/purchase/` and `/finance/amir/` that serves an account number, and to which logins. Close none beyond this section without the owner's word; list them.
 
+### 3.6 A paper with no bill number and no amount is never Amir's (F-695) — `purchase_app.py`, `porders.py`, `porders.html`, `amir_day.py`
+
+**What happened.** After S452, Amir's "Marg mein daalne ke bill" showed two Yuvika scans, B-0007 and B-0018. The owner: "That is something which is not possible. All September bills have been entered in Marg." Both are handwritten **Estimate** slips of Yuvika Surgicals (plaster rolls, bandage): no bill number, no amount. His words: "These slips are not of pharmacy purchase. They are for the direct purchases in the consumption zone, not related to Marg pipeline. They land up in the procedure room. They are only scanned as all documents are scanned at the reception." Yuvika's four September bills in Marg all had their scans. The S452 rule (the chat's own) read "nothing read, so no matching bill" as "not entered in Marg". On 03-Oct both were moved to the clinic lane in the owner's login; Amir's list reads 0.
+
+**The supplier never decides the lane.** Yuvika sells the pharmacy its orthotics on printed bills, which are in Marg, and the procedure room its plaster on handwritten slips, which are not. The paper decides.
+
+- **The rule.** A pharmacy-lane scan on which neither a bill number nor an amount was read (S440's `no_digits`), or whose reading is headed Estimate, Challan or Quotation, is:
+  - never in *Marg ka intezaar*;
+  - never on Amir's "Marg mein daalne ke bill", in the list or in its count;
+  - never counted as "a scan with no Marg bill waiting for Marg's entry" on the register. It has its own line there: "Paper to be named by reception".
+- **It goes to reception, on *Scan ka kaam*, as the group "Yeh kaunsa kagaz hai?"** with the picture and one tap, as in the mock:
+  - **"Pharmacy ka bill hai"** — two boxes open, the bill number and the amount as on the paper. Saved, the scan is matched like any read scan.
+  - **"Clinic ka saaman"**, **"Dr sahab ka kharcha"**, **"Lab ka saaman"**, **"Bill nahi hai"** — the scan leaves the pharmacy lane for that lane. Use the lane words the asset app's own staff screen uses, if they differ from these.
+- **The lane move is the asset app's own.** It goes through the asset app's existing re-lane route (S409; "Galat lane" in S440). `assets.db` stays read only from the finance side, and `asset_register.py` is not edited. If the route cannot be called from this line, the button opens the asset app's re-lane control for that scan; say which you built.
+- **S440's line** "Number / amount nahi padha gaya — manager isse theek karega, dobara scan mat karo" goes; this group replaces it.
+- After this, *Marg ka intezaar* and Amir's list hold only scans with a supplier, and a bill number or an amount, read, and no likely Marg bill.
+- REPORT every pharmacy-lane scan this rule catches on your day, by stamp.
+- **Not here:** how clinic consumables are grouped (procedure room, X-ray films, others), warranty cards, the Dr MK expense lane. Those are the parent project's, on the owner's word of 03-Oct (D664).
+
+### 3.7 One duty reads a wrong figure — `claude_code_briefs/DUTY_MAP.json`
+
+`manoj.returns_ok` reads 7 in the staff-eye walks of S446 and S452, while the owner's own line reads 3. The duty's `due_sql` does not apply `returns.act_from` (02-Sep: the owner's ruling that earlier returns are accepted). Make it read the rule the owner's line reads. REPORT both figures before and after.
+
 ## 4 · Pins
 
 S452's TO pins, from `REPORT_S452.md`, each read live before the first edit. `porders.py` and `porders.html` were moved by the parent's S441 and by S444: read them whole from the box. `reports_tile.py` and `sanjeevni_approvals.py`: read live.
@@ -122,6 +147,8 @@ Not touched: `finance_app.py`, `portal.py`, `tile_grants.json`, `finance_approva
 - **The Sarvam page.** Punctuation and prefixes are not counted wrong. September's header figures equal §2's "wrong in substance" column, or the difference is explained row by row.
 - **Late work.** With a crafted *Scan karo* line 4 days old: Shavez's line shows, the owner's Needs-you shows; both leave when the scan arrives.
 - **The bank advice.** As amir, darpan, bhati and the reception login: the Vendor payments page answers and holds no account number and no IFSC (search the served bytes for each seeded account string); the letter and the pack refuse. As shavez and the owner: unchanged, byte for byte where nothing else moved.
+- **Which paper.** A crafted pharmacy-lane scan with no number and no amount: it is in "Yeh kaunsa kagaz hai?", not in *Marg ka intezaar*, not on Amir's list and not in his count. "Pharmacy ka bill hai" with a number and an amount typed: it is matched to its crafted Marg bill. "Clinic ka saaman": it leaves the pharmacy lane (on the scratch `assets.db`) and every pharmacy page. A crafted scan headed "Estimate" with an amount read is caught too. Two Yuvika papers, one printed and matched, one unread: only the unread one is asked about.
+- **The duty.** `manoj.returns_ok` equals the owner's returns line on the box's own data.
 - **Staff-eye walk** (CLAUDE.md, "Every duty has a door") for the reception login, shavez, amir, darpan and the owner.
 - **Earlier walks re-run:** S439, S440, S441's scan checks, S446, S452 — each adjustment named.
 - **Negative control** on the box as it is.
@@ -136,6 +163,7 @@ Kit `deploy_kits\S454_BILL_REGISTER\` · installed · published · `claude_code_
 - How many of Marg's bills add up to their own total, and what that says about the item check.
 - What reception, Shavez and Amir will each see, in their own words.
 - That the bank advice now opens for you and Shavez only, and any other page that still shows an account number to staff.
+- That a slip with no bill number and no amount can no longer reach Amir, and what reception sees for one.
 
 Ending with:
 

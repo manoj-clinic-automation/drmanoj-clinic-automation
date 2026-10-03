@@ -2,5 +2,6 @@
  "claude_start_command": [
   "explorer.exe",
   "shell:AppsFolder\\Claude_pzs8sxrjxfjjc!Claude"
- ]
+ ],
+ "keep_claude_running": false
 }
