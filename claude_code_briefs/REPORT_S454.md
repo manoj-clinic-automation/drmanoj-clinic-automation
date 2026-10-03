@@ -1,6 +1,22 @@
-# REPORT S454 — S454_BILL_REGISTER · Part 1 of 5 (with its fix, 1B) · installed 03-Oct-2026 12:24 IST (1B 12:28 IST) · published
+# REPORT S454 — S454_BILL_REGISTER · Part 1 of 5 (with its fixes 1B and 1C) · installed 03-Oct-2026 12:24 IST (1B 12:28, 1C 15:36 IST) · published
 
-## For the owner
+## For the owner — part 1C (the corrections of 03-Oct afternoon)
+
+- **The printed order sheet now shows the whole open order.** It lists what is still to be ordered, what is waiting for its goods
+  (with the Order box already ticked), and the old pending lines. Nothing prints over another column now, and the instruction line at
+  the foot fits the page. One page holds 33 medicine lines. Today's open order (10 suppliers, 28 lines) prints on two pages, and no
+  supplier is split across them.
+- **Payment messages, as I found them at 15:36 IST:** 18 sent, 0 waiting, 0 failed. The phone has sent them all. One of them, the
+  August NEFT note to A.A. Pharmaceuticals, was marked sent during the setup test but never went. It is back in the queue, so the phone
+  will send it the next time it is awake. Nothing else was held or changed.
+- **You can test the reception phone at any time with a message to your own number.** Open the "Reception phone" card, save your number
+  once (it shows only its last 4 digits), then tap "Send a test message". The card shows when it was queued, handed to the phone, and
+  sent (or why it failed). The key is never shown on this card. https://followup.dr-manoj.in/finance/porders?old=1
+- The phone only asks the server while it is awake and unlocked, so the WhatsApp button now stays on for up to 12 hours of a dark phone.
+  An order message that waits more than an hour still goes back to "WhatsApp nahi gaya — call kijiye" for the staff. The setup page's
+  steps now match the macro you built (every minute, no loop, one WhatsApp only).
+
+## For the owner — part 1
 
 - **Reception now works from one simple screen.** "Purchase orders" opens on *Aaj ka kaam*: a scan button, then one row per kind of
   work: Order karna hai · Maal aaya? · Bill scan karna hai · Photo dekh kar bataiye. Each row opens one task at a time. To order, they
@@ -181,6 +197,77 @@ In both lists: DFO MR, VOLITRA APS SPRAY, MEG QCS (sheet 20 strip / system 10), 
   PANTOCID DSR, DECA INSTABOLIN 50, CEECIT MZ, PREGHYPE NT TAB, PRETOL 8, AURAB L CAP, FENARIC T4 TAB.
 - Only on the system's list (23): among them NUPTACH 200, OPTIFENAC TBR and UPRISE 6L INJ, which are already old pending lines on
   Darpan's sheet. The brief expected 9 of 21 on 01-Oct's stock; this is 02-Oct's stock (`as_on` 02-10-2026).
+
+### Part 1C · P1C_SHEET_PAGE_AND_PHONE (brief §17; install log 03-Oct, placed 15:36:14 IST by the files' own time)
+
+| file | FROM | TO (md5sum after placing) |
+|---|---|---|
+| /root/finance/supplier_msg.py | fc6c1724d6da4e1d04897b60d61c13b8 | 2f43af754a160376cec955f92f3aa43a |
+| /root/finance/porders_s454.py | 05716f3c040478d09fd2016561c7c99c | c2608914e56b0f7ce049d93aeed23d39 |
+| /root/finance/order_sheet.py | 93f55d87730e749d78ea5561de38266f | cffbeef3f4405132ab1861ffc146bea9 |
+| /root/finance/order_sheet_pdf.py | 9c28df38435a25d7e1d65c34b8d43ec9 | 6e7a5e1a7ae68cb4548c8c8f15cf27cb (v1.1, replaced whole) |
+
+- **Health:** finance healthz 200. `/finance/porders`, `/finance/porders/s454/sheet.pdf` and `/finance/purchase/page/phone-setup`
+  answered 302 (the login gate, expected). Nothing logged "NOT mounted" and there was no traceback. These were untouched, md5s compared
+  before and after: finance_app.py, portal.py, tile_grants.json, porders.py, order_rules.py, purchase_app.py, sanjeevni_approvals.py,
+  marg_take.py, signatures.json, amir_day.py, reports_tile.py.
+- **Backups:** `finance.db.bak_S454_20261003_153557` (backup API); `supplier_msg.py.bak_S454_fc6c1724`, `porders_s454.py.bak_S454_05716f3c`,
+  `order_sheet.py.bak_S454_93f55d87`, `order_sheet_pdf.py.bak_S454_9c28df38`.
+- **Restarted:** clinic-finance only (ActiveEnterTimestamp 15:36:14 IST).
+- **Data steps (`data_s454p1c.py`), as printed:**
+  - payment messages as found: waiting 0 · sent 18 · failed 0 · skipped 0 (17.6: reported, none changed);
+  - 17.9: message 1 read `sent` by `reception-phone` at 2026-10-03T15:00:27, so it was put back to waiting (queued, attempts 0, sent_at /
+    sent_by / last_try_at cleared, and handed_at cleared too so the phone may take it at once). Audit row `s454_msg_reset` with the reason.
+    Message 2 left as it is;
+  - 17.10: `order.phone_alive_min` 30 → 720 (audit `s454_setting`);
+  - payment messages after: waiting 1 · sent 17 · failed 0.
+- **What changed, in code:**
+  - `order_sheet_pdf.py` v1.1: the page carries the whole open order (to order · in the WhatsApp line · awaited under "Maal aaya?",
+    Order box ticked · old pending). Awaited = status `sent`, no bill scan tied — the screen's own rule — less any line Marg recorded
+    (`supplied` set). Band boxes are ticked only when nothing of that supplier is left to order; a paper order ticks only its lines. The
+    head line counts what is drawn. Names wrap inside the Item cell (never shortened). The old tag stays after the name when it fits,
+    otherwise it takes its own line inside the cell. Phone numbers move to a second band line when they would reach the boxes. The foot
+    wraps. A block is never split (one longer than a page is continued with "(aage)"). **One page holds 33 one-line rows under one
+    band.**
+  - `porders_s454.py`: "1 medicine / supplier / bill" in the owner's English. The owner's "Reception phone" card, and two owner-only
+    routes, `POST /finance/porders/api/s454/test_number` and `/test_send`. `order.phone_alive_min` accepted up to 1440.
+  - `supplier_msg.py`: kind `test` (month `test`). The queue hands a test first, once per gap, and never retries a failed test
+    (`kind NOT IN ('order','test')`). `s454_card_facts`, `s454_save_test_to` (the number is never in the audit: only its digit count),
+    `s454_queue_test`. The setup page's printed steps are now the macro as built (17.10).
+  - `order_sheet.py`: the default `order.phone_alive_min` 720. The owner's line reads "for 12 hours".
+- **The walk** (`walk_s454p1c.py`, on backup-API copies; NEW = built files, OLD = the box as it is): **WALK_S454P1C GREEN — 33 of 33.**
+  - The live order: no text outside its cell or the margins (2 pages, 28 rows). **Negative control:** the page as installed fails on
+    three old tags (01-09, 09-09, 25-09; they ran 8.0, 56.2 and 32.4 pt past the Item cell) and on the foot (it ran to x 602.5 against a
+    margin of 561.3).
+  - Every awaited line is on the page with its Order box ticked: 16 of 16. **Control:** 0 of 16.
+  - The head line, "Order: 02-10-2026 · Darpan (Marg) · 10 supplier · 28 dawa: 2 order karna hai, 16 ka maal aana hai, 10 purane
+    pending", equals the rows drawn. No band box is ticked for the paper orders.
+  - Crafted: a 30-character name with an old tag, a long supplier name with two numbers, a supplier with none — no violation (control:
+    the tag ran out). A long order: 4 pages, 79 rows, no supplier split, head = rows. `sheet_print_old = 0`: no old rows. A crafted scan
+    of DEEPAM's bill tied order #2 and DEEPAM left the page.
+  - "1 medicine", "11 medicines", "1 dawa" (control: "1 medicines").
+  - The card: shown to the owner only (shavez, reception, darpan: no card, 403 on both taps); the key is not on the page. A bad number
+    gets 400. Once saved, the number shows masked and is never in full on the page or in the audit. A test is kind `test` with two lines
+    and the ₹ line. It is counted nowhere else (payment list, pending, the setup page's count, the reception counts, order messages, the
+    owner's lines: all unchanged). It is handed first and once, and its JSON keeps the line break and the ₹ to the saved number. "Sent"
+    shows queued · handed · sent with times. No staff screen shows it. "Could not send" shows the reason and the test is never re-handed.
+  - **Queue parity:** the same 7 rows in the same order, NEW = OLD: [19, 20, 21, 22, 23, 24, retry 21]. These are the walk's own rows,
+    because the live queue was empty by then.
+  - The 17.9 and 17.10 steps, each idempotent. Message 1 is left alone when it reads otherwise.
+  - Setup page: the new steps are present, and "ask again at once" and "5 minute" are gone (control: still there).
+- **17.10, the lines when the phone has been dark for an hour:** the phone still counts as alive, the WhatsApp button stays enabled,
+  and the owner has **no line**. An order message waiting more than an hour is withdrawn. The staff card then reads "<supplier> · 1
+  dawa · WhatsApp nahi gaya — call kijiye". **Dark 13 hours with an order message waiting**, the owner reads: "The reception phone has
+  not asked the server for 12 hours -- 1 order message(s) wait".
+- **The macro's interval** as the setup page now states it: every 1 minute, one message per run. Ten messages take about ten minutes
+  while the phone is awake.
+- Picture: `deploy_kits/S454_BILL_REGISTER/P1C_SHEET_PAGE_AND_PHONE/pictures/17_reception_phone_card.html` (the walk's own made-up
+  number, masked).
+- **Noticed:** `purchase_app._s446_earlier_card` counts *every* kind in `supplier_msg` for an earlier month's "unsent". From November,
+  an order message of October that was withdrawn (`skipped`) is not counted, but one still `queued`/`failed` would be. Test messages
+  carry month `test` and are never counted. This is for Part 2, which patches purchase_app anyway: payment kinds only.
+- A copy of today's printed sheet (it carries the phone book's numbers) is still in the git-ignored local
+  `_scratch\S454_BILL_REGISTER\view\`. Its deletion was refused by the permission list, so it was left there. It was never published.
 
 ### Published and checked on the box
 - PUBLISH_ALL: the part-1 folder went out in another session's publish at 12:20 (722f564, S458/S459's), unchanged since. 1B, this
