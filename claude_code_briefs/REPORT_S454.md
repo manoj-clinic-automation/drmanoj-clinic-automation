@@ -1,4 +1,19 @@
-# REPORT S454 — S454_BILL_REGISTER · Part 1 of 5 (with its fixes 1B and 1C) · installed 03-Oct-2026 12:24 IST (1B 12:28, 1C 15:36 IST) · published
+# REPORT S454 — S454_BILL_REGISTER · Parts 1 and 2 of 5 (with 1B, 1C, 1D) · installed 03-Oct-2026 12:24 IST (1B 12:28, 1C 15:36, 1D 16:35, 2 17:26 IST) · published
+
+## For the owner — part 2 (bill scans and Marg bills, your month register, Vendor payments; installed 17:26 IST)
+
+- **A bill scan is now paired with its Marg bill by one set of rules.** The bill number and the total must agree, plus the supplier or
+  the date. Today this paired 4 more September bills by itself: two of L.K. Drug House, one of Essential Pharma and one of Saisun. Each
+  was the only unscanned bill of that supplier for that exact amount, and each scan's medicine lines match the bill. No existing pair
+  was undone.
+- **Your month register** is the Scan links page. Every September Marg bill now sits in one state: Verified 53 · Has its scan 8 ·
+  Amount differs 6 · No scan 12 · Entered twice in Marg 1. That is 61 of 80 bills settled. Two bills (MANNAT, KEDAR) now show "Amount
+  differs": their scans read Rs 40 and Rs 243 more than Marg. Reception will be asked about them.
+- **Amir is asked nothing new.** His step 2 shows "Scan ho chuke bill (N)" with the files, if he wants them. He still enters from his paper bill.
+- **Vendor payments (and suppliers' bank details) now open only for you and Shavez.** Everyone else sees only the last 4 digits of an
+  account in the phone book, and no IFSC. Amir's paid-NEFT sheet carries no account numbers.
+- Your Needs-you list: the "bill scan waiting" line now comes only after 3 days. The returns line and its duty now count the same
+  thing (3 each today). Checked, working.
 
 ## For the owner — part 1D (a fault of mine in part 1, found and mended at 16:35 IST)
 
@@ -297,6 +312,98 @@ In both lists: DFO MR, VOLITRA APS SPRAY, MEG QCS (sheet 20 strip / system 10), 
 - A copy of today's printed sheet (it carries the phone book's numbers) is still in the git-ignored local
   `_scratch\S454_BILL_REGISTER\view\`. Its deletion was refused by the permission list, so it was left there. It was never published.
 
+### Part 2 · P2_PAIRING_REGISTER (brief §5, §6, §7, §8, §12; placed 17:26:14 IST by the files' own time)
+
+| file | FROM | TO (md5sum after placing) |
+|---|---|---|
+| /root/finance/purchase_app.py | 591432422d6b06af3dff886a8a0fc378 | 4eee14b5e41a70c9450ed5cf6ff0bd29 |
+| /root/finance/porders.py | d4842f2c0f40a6ff69bd9a6d0425778f | a5a823bf30661a4bf65ced39b2355500 |
+| /root/finance/porders_s454.py | c2608914e56b0f7ce049d93aeed23d39 | e2228b8f8434e8ea3766b00e5e5e1a2e |
+| /root/finance/order_sheet.py | cffbeef3f4405132ab1861ffc146bea9 | b2e61034790ea37fde4272859ccd1f58 |
+| /root/finance/amir_day.py | 85f208d0d64def40fb5a02e02c531284 | 709f20c1078cbcb36fc1108e452c40c1 |
+| /root/finance/reports_tile.py | 8a9870414cf299b0396bec4bc937ef04 | 9d2244a6d56d3791428982565f620a97 |
+| /root/finance/scan_register.py | (new) | 8d100e60c467dab413830a251ef198fb |
+
+- **Health:** finance healthz 200. These answered 302 (the gate, expected): `/finance/porders`, `/finance/purchase/page/scans`,
+  `/finance/purchase/page/pay`, `/finance/amir`, `/finance/reports/aaj`, `/finance/purchase/page/sarvam`. No "NOT mounted", no traceback in
+  the journal since the restart. Untouched, md5s compared before and after: finance_app.py, portal.py, tile_grants.json,
+  sanjeevni_approvals.py, packs.py, asset_register.py, item_alias.py, stockmatch.py, stock_app.py, stock_watch.py, supplier_msg.py,
+  order_rules.py, darpan_kal.py, marg_take.py, signatures.json.
+- **Backups:** `finance.db.bak_S454_20261003_170649` (backup API); `purchase_app.py.bak_S454_59143242`, `porders.py.bak_S454_d4842f2c`,
+  `porders_s454.py.bak_S454_c2608914`, `order_sheet.py.bak_S454_cffbeef3`, `amir_day.py.bak_S454_85f208d0`, `reports_tile.py.bak_S454_8a987041`.
+- **Restarted:** clinic-finance only (ActiveEnterTimestamp 17:26:15 IST).
+- **Every block sits above its file's `__main__` guard** (purchase_app.py, reports_tile.py have one). This is the lesson of 1D: the nightly
+  `purchase_app.py rematch` cron runs the new rules.
+- **The data step (`data_s454p2.py`), as printed:**
+  - settings: purchase.entry_mode = paper · total_noise_rs = 10 · scan_wait_days = 3 · entry_wait_days = 7.
+  - the matcher: 67 links stored (were 63) · 4 new · 0 dropped. Reasons: amount_differs 3, dup 1, no_bill_yet 8, number_differs 1,
+    vendor_unknown 3.
+  - The 4 new links (AUTO): L.K. DRUG HOUSE 75904 Rs 4,440 ← scan #33 · L.K. DRUG HOUSE 78354 Rs 1,199 ← #42 · ESSENTIAL PHARMA EP002243
+    Rs 2,415 ← #48 · SAISUN PHARMA IP006767 Rs 8,479 ← #88.
+  - returns.pending_ok = 3|2026-09-02.
+- **§5's report on September** (`rules_report_s454p2.py`, scratch copies, before anything was placed): **RULES_REPORT GREEN**, no new pair is
+  suspect.
+  - The 63 links before the pass: Verified 53 · Has its scan 4 · Amount differs 6.
+  - New pairs by the rules: 4 (OLD made 0), the four above. In each, the scan's one item line is the Marg bill's line. The scans misread the
+    bill number ('KT-475964', 'RT-47834', 'EP012243', '6387') and three of them the year.
+  - Links dropped: none.
+  - Questions: "Is this the bill?" 8 → 4 · "Match the amount" 4 → 6 (513 MANNAT +Rs 40, 535 KEDAR +Rs 243 added: within 2%, beyond Rs 10)
+    · "Choose the supplier" 3 → 3 · second scans 1 → 1 · S441's 6 → 6.
+  - **The register of September, read on the live box after the install:** verified 53 · has_scan 8 · amount_differs 6 · no_scan 12 · double
+    1 (a000163 / A000163) · accepted 0. 61 of 80 settled. Scans with no Marg bill: probably 4, vendor 3, second 1. October: 8 scans
+    waiting for Marg, no Marg bill yet.
+- **§7.4 The Sarvam counter for September, by the rules** (67 linked bills): misread supplier 4 · bill no. 8 · date 13 · total 10 · item
+  lines 78 of 158 read right. Batch and expiry are not judged (with them it was 28).
+  - Supplier, row by row: DRUG DEAL 5207 (scan B-0034 read the shop's own name 'SANJEEVINI MEDICOS'), DEEPAM PHARMA 601 (B-0072, 'M/S
+    SANJEEVANI MEDICOS'), DRUG DEAL 5620 (B-0073, the heading 'WHOLE SALE CHEMIST & DRUGGIST'). These three are the shop's name or a heading:
+    not read.
+  - GUNINA 65194 (B-0038, 'GUNINA PHARMACEUTICALS P.L. LTD.'): the rule drops a standalone P / PVT / LTD / CO / M/S, but "P.L." leaves an
+    "L", so by the brief's rule as written it differs. It is the same supplier. Adding "P.L." to the drop list is the chat's call; I did
+    not widen the rule.
+  - Bill no. (8): the four above, YOGENDRA 15496 ('7615486'), DEEPAM 856 and DEEPAM 623 (the licence '21/2014/BLY', '217/2014/BLY'),
+    YUVIKA SURGICALS 672 ('15/0823/2026-27': 672 is no whole digit run of it). Date (13): mostly the year (2024/2025 for 2026). Total (10): e.g. GUNINA 71226 read 1,52,618 for 14,908; KEDAR 185 read 16,760
+    for 18,700.
+- **The walk** (`walk_s454p2.py`, NEW = built files, OLD = the box as it was; backup-API copies; walk-only portal secret and users):
+  **WALK_S454P2 GREEN — 44 of 44.**
+  - R, the rules: suppliers, bill numbers (series/prefix/brackets agree; licence and financial year never), dates, states, noise.
+  - L, September's real data: no link lost; the four auto-links (**NEGATIVE:** the box as it was pairs none). One candidate pairs and two
+    of the same amount ask. A wrong paper scanned from a line settles nothing. The intake link carries the supplier only (**NEGATIVE:** the old
+    one carried the number and the amount).
+  - Q, G, S: the amount questions [513, 518, 519, 523, 528, 535] equal the register's "Amount differs". The register is one state per bill,
+    headed as parked, with no accept tap on a parked month and no Roman Hindi (**NEGATIVE:** no register on the box as it was). A counted
+    month's accept is the owner's only, and audited; Undo restores. The Sarvam head equals the register's foot.
+  - A, Amir: "Scan ho chuke bill (N)" on paper (**NEGATIVE:** the old words). S452's words on `both`; `digital` refused. His paid-NEFT
+    sheet has no account number.
+  - V, Vendor payments: amir, darpan, bhati and the reception login get 403 (or the 302 gate) on the page, the month, the letter, the
+    advice and the pack, with no link and no account number or IFSC on any page they can open (**NEGATIVE:** the box as it was opened them
+    to the staff). Shavez and the owner: as before. The phone book shows Darpan the last 4 digits, no IFSC, and refuses him a bank edit.
+    The reception phone's keyed queue: unchanged.
+  - D: manoj.returns_ok = the owner's own line (3 = 3; **NEGATIVE:** 7 vs 3 on the box as it was).
+  - N: "Bill scan waiting" after 5 days for the owner, and "Bill scan baaki" for Shavez, both gone once paired. "Scanned and not yet in
+    Marg for more than 7 days" for the owner only; Amir gets nothing new.
+  - E: the staff-eye walk with DUTY_MAP v5 for reception, darpan, shavez, amir and the owner — every tile on its home, every due duty's
+    marker on its door.
+- **The earlier walks** (S403, S407, S410, S414, S417, S428, S439, S440, S441, S444, S446, S452), each copied to scratch and run twice: on the
+  box as it was and on part 2's files. **WALKS_OLD_S454P2 GREEN.**
+  - S403 13 reds, S407 5, S410 3, S414 1, S417 4, S428 8, S441 6, S444 14, S446 14: every one is red word for word on the box as it
+    was too (their own controls are gone, plus today's data).
+  - S439 23 = 5 as before + 18 intended. S440 27 = 7 + 20 intended. S452 11 = 9 + 2 intended. The intended ones, named in the log one by
+    one with their reason:
+    - I1: the same pairs, now made by the rule "verified (S454 5)" (the grade and rule words changed, never the pair).
+    - I2/I4/I6: the walks' crafted near-match scans (one supplier, one amount, the only unscanned bill) are now paired by the auto-link.
+      Their questions, answers and "open" lines no longer arise, and the groups' counts follow.
+    - I3/I5: a scan whose total differs is no longer paired by S439's vendor + bill-tail rule. It is asked, and the amount question is now
+      beyond Rs 10, not 2%.
+  - The old page's checks read `?legacy=1` (Q1–Q5). S452's walk runs with `purchase.entry_mode = both` (Q6).
+- **§8, the addresses closed to everyone but the owner and `supplier_msg.senders`:** `/finance/purchase/page/pay`, `/page/pay/<month>`,
+  its `/letter`, `/advice.xlsx` and `/pack`, and `POST /api/pay-letter`, `/api/pay-verify`, `/api/pay-line`. The phone book page and
+  `api_book` mask the account (last 4) and the IFSC/UPI, and refuse bank edits and verification to others. `_book_nav` draws the
+  Vendor payments link for them only.
+- **Found by the staff-eye walk, on live data (16:40 IST):** `amir.arrival_bill_entry` was due the minute an arrival was tapped (line 18,
+  arrived 16:32), but its door (stock_watch's "bill entry baaki" on Amir's card) waits `arrival.bill_grace_days` (3). In v5 its `due_sql`
+  waits the same grace. I ran it read-only on the live database before writing it in: (0, None). The owner's line still comes at 3 days.
+- **Also in this kit:** `purchase_app._s446_earlier_card` now counts payment kinds only (`neft`, `cheque`), as noted under 1C.
+
 ### Published and checked on the box
 - PUBLISH_ALL: the part-1 folder went out in another session's publish at 12:20 (722f564, S458/S459's), unchanged since. 1B, this
   report and the duty map went out in d43f0c1 (12:32).
@@ -324,8 +431,16 @@ In both lists: DFO MR, VOLITRA APS SPRAY, MEG QCS (sheet 20 strip / system 10), 
 
 Every due duty's door was seen in the staff-eye walk.
 
+**Part 2: v5** (27d9d1b5 / ffd37cfe), the same bytes as the kit's `P2_PAIRING_REGISTER/DUTY_MAP.*`:
+- manoj.returns_ok: its `due_sql` reads setting `returns.pending_ok`. amir_day writes it when the owner's Needs-you is built, from the
+  owner's own rule (`returns_kinds`, `returns.act_from`). Duty 3 = owner line 3 today.
+- reception.bill_scan: the owner's line comes only after `purchase.scan_wait_days`, from `scan_register.owner_lines`.
+- amir.scan_files (new): never due. Its door is step 2's "Scan ho chuke bill". Amir is asked nothing new.
+- amir.arrival_bill_entry: due only after `arrival.bill_grace_days`, as its door (above).
+- Shavez's "Bill scan baaki" line on Aaj ki reports and the owner's register are in the .md.
+
 ### Not done, and why
-- Parts 2–5 are not started; they come with the second line. The watcher is not replaced: Part 4, not before 04-Oct 13:00 IST.
+- Parts 3–5 are not installed yet (see the top for where the run stands). The watcher is not replaced: Part 4, not before 04-Oct 13:00 IST.
 - The reception phone was not set up; that needs the owner's login on that phone. The phone has not asked since S452
   (`supplier_msg.phone_last` absent; 18 NEFT messages queued since 26-Sep 19:49).
 - The approvals-page sentence about reminder times is **for the parent**: `finance_ui/finance_approvals.html` line 1255 still names

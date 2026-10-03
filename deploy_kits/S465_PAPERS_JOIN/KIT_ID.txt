@@ -1,0 +1,2 @@
+kit id S465_PAPERS_JOIN
+project parent (session 292, 03-Oct-2026) -- D664 slice 2 of 3: one purchase, one PDF (join scanned papers, with undo) and the suggestions corrected from the first real papers; the asset app (clinic_papers.py replaced + one line of asset_register.py)

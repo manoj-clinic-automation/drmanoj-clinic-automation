@@ -1,0 +1,2 @@
+kit id S466_EXPENSE_WARRANTY
+project parent (session 292, 03-Oct-2026) -- D664 slice 3 of 3: a Dr MK expense keeps its warranty (what it is, till, reminder) and the asset app's Renewals & warranties page shows it to the owner; clinic_papers.py replaced + three edits of asset_register.py; /api/due untouched

@@ -1,0 +1,5 @@
+kit id S454_BILL_REGISTER
+part P2_PAIRING_REGISTER (S454 sections 5, 6, 7, 8, 12: a scan paired with its Marg bill on what a scan reads well -- one set of rules; Amir asked
+nothing new; the owner's month register, Needs-you and Shavez's line; the Sarvam counter; Vendor payments for the owner and Shavez only;
+manoj.returns_ok on the owner's own rule)
+session 283 (Sanjeevni) · 03-Oct-2026 · decisions D662 D663 D665 D666 D667 D668 D669 · faults F-690 F-691 F-695

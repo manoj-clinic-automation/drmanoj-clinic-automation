@@ -1,0 +1,13 @@
+7cd88afc5ca2cc015401a436e3f02fcd  install_S454_P2.sh
+99166c6f25dde120c1da7992f493019d  make_s454p2.py
+8d100e60c467dab413830a251ef198fb  scan_register.py
+119fc8ec951596396d29ab2ed58203ef  walk_s454p2.py
+af4372a00808d0b1ae6133044d8879ac  rules_report_s454p2.py
+2e65290929625f4daeb4f9f0f5e33000  data_s454p2.py
+633a781ed90597262820907058ce6675  plan_old_s454p2.py
+f3311f0cebcd203828cfa02ccf270fea  walks_old_s454p2.py
+c77d2ef94a205d4bd778f4f70178d789  PINS.sh
+27d9d1b59f6955316f7ac11598ba68ef  DUTY_MAP.json
+ffd37cfea2dea5cd1b056d7ad01c24fa  DUTY_MAP.md
+608b51366e14f9426393cc5fb62aa40c  KIT_ID.txt
+ce0da844c223bab69e3441700dd8dca0  README.md

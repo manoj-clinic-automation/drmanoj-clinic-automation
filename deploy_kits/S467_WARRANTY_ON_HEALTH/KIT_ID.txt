@@ -1,0 +1,2 @@
+kit id S467_WARRANTY_ON_HEALTH
+project parent (session 292, 03-Oct-2026) -- D664: the Renewals row of /finance/health names a Dr MK expense warranty inside its reminder window; two insertions in finance_app.py, read-only on assets.db, nothing written
