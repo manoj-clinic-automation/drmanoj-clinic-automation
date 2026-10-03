@@ -22,6 +22,9 @@ Read CLAUDE.md, then continue claude_code_briefs\S454_BILL_REGISTER.md from wher
 - **Worth knowing:** today 166 medicines differ from Marg by a pack or more. Most of these are the 6 September count's corrections
   that are not yet entered as vouchers in Marg (Amir's count-voucher duty shows 37 waiting). 5 show below zero and are counted as zero:
   TYRO BR (the count found 230 tabs fewer than Marg), NORTIMER TAB, GLI-ME SR1 and two ankle binders.
+- The six new settings of parts 2 and 3 are on your settings card at https://followup.dr-manoj.in/finance/porders?old=1. They are:
+  entry mode (paper), amount noise (Rs 10), scan wait (3 days), entry wait (7 days), stock basis (count; "marg" brings back the old
+  list) and gap size (1 pack). Nothing needs doing from you today.
 
 ## For the owner — part 2 (bill scans and Marg bills, your month register, Vendor payments; installed 17:26 IST)
 
@@ -527,6 +530,12 @@ In both lists: DFO MR, VOLITRA APS SPRAY, MEG QCS (sheet 20 strip / system 10), 
   passes `md5sum -c` (13 files) and is identical (`diff -r`) to the copy that ran. `claude_code_briefs/DUTY_MAP.json` / `.md` there read
   27d9d1b5… / ffd37cfe… (v5). All 45 duties' `due_sql` run on the live database (read-only) with no error. Due now includes
   manoj.returns_ok = 3 and reception.order_arrival = 4; amir.arrival_bill_entry is not due (its one arrival is inside the grace).
+- **Part 3:** the folder went out at 17:59:49 IST in another session's PUBLISH_ALL (d45b3cc), swept from the working copy. It was final
+  from 17:55, when it was packed and copied to the box for the install. The report followed in 31ffef1. On the box, pulled at 18:20:25 IST:
+  `P3_SHELF_FIGURE` passes `md5sum -c` (11 files) and is identical (`diff -r`) to the copy that ran. No `__pycache__` or `.pyc`. The 18:20
+  cron tick of `order_rules.py`, the first on part 3's file, ran cleanly (`"gaps": 0`, the closing already recorded).
+- **The build lock:** part 1D held it from 16:35:07 to 16:36:16 IST. Parts 2 and 3 held it from 17:06:35 to 18:20:38 IST (owner
+  S454_BILL_REGISTER). Finance healthz was 200 and clinic-finance active at each release.
 - The build lock was taken at 12:05:29 IST (owner S454_BILL_REGISTER) and released at 12:34:05 IST. Finance healthz was 200 and
   clinic-finance active at release. `/tmp/s454p1` (the owner's sheet, scratch copies) and `/tmp/s454w` were removed.
 
