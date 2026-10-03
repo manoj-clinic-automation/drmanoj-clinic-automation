@@ -1,6 +1,6 @@
-# REPORT S454 — S454_BILL_REGISTER · all five parts built; everything installed except the medical PC's watcher · 03-Oct-2026 (1 12:24, 1B 12:28, 1C 15:36, 1D 16:35, 2 17:26, 3 18:17, 3B 19:39, 5 {P5_AT}, 4 server {P4A_AT} IST) · published
+# REPORT S454 — S454_BILL_REGISTER · all five parts built; everything installed except the medical PC's watcher · 03-Oct-2026 (1 12:24, 1B 12:28, 1C 15:36, 1D 16:35, 2 17:26, 3 18:17, 3B 19:39, 5 20:03, 4 server 20:28 IST) · published
 
-**Where the run stands ({STAND_AT} IST):** everything in the brief is installed, checked and published, except one file: the medical PC's new
+**Where the run stands (03-Oct 20:31 IST):** everything in the brief is installed, checked and published, except one file: the medical PC's new
 watcher (Part 4). The brief forbids delivering it before 04-Oct 13:00 IST (§10.3), and §19 says to stop there. It is built, walked and packed in
 `deploy_kits/S454_BILL_REGISTER/P4B_REFUSAL_WATCHER/`. Its delivery script refuses to run before that hour; I tried it at 19:07 IST and it
 refused. Nothing is half-installed. The line for the watcher, any time after 04-Oct 13:00 IST:
@@ -23,7 +23,7 @@ Read CLAUDE.md, then continue claude_code_briefs\S454_BILL_REGISTER.md from wher
     is shown beside it, so you can see where the difference comes from.
   - https://followup.dr-manoj.in/finance/purchase/page/items?month=2026-09
 - **The system now learns each supplier's own name for a medicine** from bills whose scan matches Marg, line by line.
-  - Tonight it learnt {P5_LEARNT} names. September's "item lines read right" went from {P5_BEFORE} to {P5_AFTER} of 162.
+  - Tonight it learnt 36 names. September's "item lines read right" went from 78 to 84 of 162.
   - The first try paired two names wrongly (an address line with CHYMORAL AP; "CCM TAB" with DFO 4X GEL). So a pair whose names share nothing
     is never learnt. These names change no stock, no order and no bill.
 - **When the medical PC refuses a file, the server is now ready to hear it** (installed). The PC's own half goes in after 04-Oct 13:00 IST.
@@ -203,9 +203,120 @@ Yuvika with 2 items.
   03-Oct 15:32). It is git-ignored and was never published. Its deletion was refused by the permission list in part 1C, so it is still there for
   the owner to remove.
 
-{P5_SECTION}
+### Part 5 · P5_ITEMS (brief §11; data step 20:03 IST, clinic-finance ActiveEnterTimestamp 20:03:34 IST)
 
-{P4_SECTION}
+| file | FROM | TO (md5sum after placing) |
+|---|---|---|
+| /root/finance/purchase_app.py | 61e6d26abe52293883e37cc61b459da5 (3) | 979391b6e191e0d2468f3db6fc57366e |
+| /root/finance/item_check.py | (new) | 9000e3768086e0935d88bec8c8b1cd07 |
+
+- **Health:** finance healthz 200. These answered 302 (the gate): `/finance/porders`, `/finance/purchase/page/items`, `/finance/purchase/page/sarvam`,
+  `/finance/purchase/page/scans`, `/finance/amir`. No "NOT mounted", no traceback. Untouched, md5s compared before and after: finance_app.py, portal.py,
+  tile_grants.json, sanjeevni_approvals.py, packs.py, asset_register.py, item_alias.py, stockmatch.py, supplier_msg.py, porders.py, porders_s454.py,
+  order_sheet.py, scan_register.py, order_rules.py, stock_watch.py, stock_app.py, shelf_figure.py, amir_day.py, reports_tile.py, darpan_kal.py,
+  marg_take.py, signatures.json.
+- **Backups:** `finance.db.bak_S454_20261003_194114` (backup API); `purchase_app.py.bak_S454_61e6d26a`.
+- **The crons' own commands as scripts** on the built files: all three exit 0. One live `purchase_app.py rematch` after placing (20:03:44 IST) exited 0:
+  0 new links, 67 stored.
+- **11.1 — the items check, measured before it was drawn** (the brief's rule: quantity × rate, less discount, plus tax, from `purchase_line`; one
+  copy of each line):
+  - August: **57 of 83** bills with lines add up within Rs 10; 26 do not; 1 bill has no lines on the server.
+  - September: **57 of 81**; 24 do not. October: no Marg bill on the server yet.
+  - **What the non-adding bills are:** Marg's own net figure for every line (`net_amount_p`) does add up, on all 83 and all 81. So the difference
+    is a discount or scheme that reached the bill and is not in the discount column. For example, A.A. PHARMACEUTICALS 378 is 20 × 110 + 5% =
+    Rs 2,310 against a bill of Rs 2,195 (5% less). DAANSHI 160 shows 4% hidden.
+  - The page shows both figures per line, so the owner can see which. Address:
+    https://followup.dr-manoj.in/finance/purchase/page/items?month=2026-09. It is the owner's only (the medical checker); the walk was refused
+    for darpan, amir, shavez and reception. It is linked from the Sarvam page.
+  - **Marg prints each line twice** (ITEMWISE and BILLITEMWISE). Read naively, every bill would double. `item_check.marg_lines` reads one copy:
+    the bill-item-wise one, from the newest export in force.
+- **11.2 — learning the suppliers' item names:**
+  - **September's item figure: 78 of 162 item lines read right before, 84 of 162 after** (batch and expiry not judged, as part 2). The brief's
+    "28 of 158" was S446's count with batch and expiry; part 2 already moved it to 78.
+  - **36 names learnt**, among them: KEDAR 'MEBG QCS' = MEG QCS, 'MIKO C/S' = MEG QCS; SHIVAAZ 'ARSODEO TAB' = ARSEODEO, 'COVACHINE GEL SYP' =
+    COVCAINE GEL SYP; JANTA 'NUPATCHI 200 SACH 3'S' = NUPTACH 200, 'ZIX ROD CAP 10'S' = ZIXR R OD; JUBILEE 'SHELLAC ST TAB GOLD - 12% MRP' =
+    SHELCAL XT; ESS KAY 'CHMSET DIT TAG' = ONKET DT. The full list is in the install log and on the items page.
+  - **A guard I added (not in the brief's words), and why.** The first run on the copy learnt 38 names, two of them plainly wrong. DRUG DEAL's
+    'BARBELLY Junction only,' (an address line the reader took for an item) was paired with CHYMORAL AP, and GUNINA's 'CCM TAB' with DFO 4X GEL.
+    Their quantity and rate agreed by chance.
+    - A wrong learnt name would make the Sarvam figure count a misread as right. So two names that share nothing are never learnt as one. Akin
+      means at least 0.4 alike as strings, or both carrying a word with the same first three letters (form words such as TAB and CAP do not
+      count).
+    - It removed exactly those two.
+    - Two learnt names are doubtful but plausible OCR misreads, and I left them: 'CHMSET DIT TAG' = ONKET DT (0.45 alike) and 'MIKO C/S' = MEG
+      QCS (0.53).
+    - The chat may want a stricter rule, or a way for the owner to strike one name. Neither is built.
+- **The walk** (`walk_s454p5.py`; NEW = after part 5, OLD = the box after P3B; backup-API copies): **WALK_S454P5 GREEN — 15 of 15.**
+  - **R:** today's figures (above). The box as it is does not move September's figure (78 → 78).
+  - **I:** a crafted bill whose line comes to Rs 1,050 against Rs 1,000 is listed with "+₹50", and one that adds up is not. Head line: "October
+    2026: 1 of 2 bills add up (the lines' value comes to the bill within ₹10); 1 does not." The page is the owner's only, with one link from the
+    Sarvam page. **NEGATIVE:** the box as it is has no page (404) and no link.
+  - **L:** a verified pair's two lines are learnt on quantity and rate (KORAMIN XR CAPSULE 10S = W454P5 KORAX 5, VELTRIX DUO SACHET 3S = W454P5
+    VELOZ 20), once; the next pass learns nothing. Nothing is learnt from a pair that is not verified, from one whose line counts differ, or
+    where the names share nothing. The Sarvam check then reads both lines right. **NEGATIVE:** the box as it is reads both names wrong.
+  - **S:** the staff-eye walk, DUTY_MAP v5. Clean.
+- **The earlier walks:** **WALKS_OLD_S454P5 GREEN**, the same named reds as P3B: S403 13, S407 5, S410 3, S414 1, S417 4, S428 8, S439 23, S440 27,
+  S441 6, S444 14, S446 14, S452 11.
+
+### Part 4, the server side · P4A_REFUSAL_DOOR (brief §10.2; placed 20:28 IST, clinic-finance ActiveEnterTimestamp 20:28:30 IST)
+
+| file | FROM | TO (md5sum after placing) |
+|---|---|---|
+| /root/finance/marg_door.py | 598ba2df83f029d6f861e63190a62a33 (the brief's pin, S240) | 6a2366638234bf0ddf9c7d6c745c975b |
+
+- **Health:** finance healthz 200. These answered 302 (the gate): `/finance/porders`, `/finance/darpan/kal`, `/finance/reports/aaj`,
+  `/finance/clinic/marg/upload`. `/finance/api/marg-file` with no key answered 401, the door's own refusal. No "NOT mounted", no traceback.
+  Untouched, md5s compared: finance_app.py, portal.py, tile_grants.json, every other Sanjeevni file, marg_take.py, marg_ingest.py, signatures.json.
+- **Backups:** `finance.db.bak_S454_20261003_200633` (backup API; no data step); `marg_door.py.bak_S454_598ba2df`.
+- **What the door does:**
+  - A POST to `/finance/api/marg-file` with the header `X-Marg-Note: refused` is the medical PC's note. It uses the same key, and the app's
+    front gate checks it first, then the door.
+  - Its JSON body holds only `name`, `md5`, `kind` (SALE / STOCK / ORDER / none) and `reason`. A file, or any other key, is refused with 400
+    and nothing is written. Before `take()`, one `mi_file` row is written: type SALE_BILLWISE / STOCK_CLOSING / ORDER_PENDING, verdict REFUSED,
+    `pc_verdict` REFUSED, `pc_type` the kind, reason "the medical PC refused it: …", `drive_folder` `pc_note`, size 0, kept 0, source `push`.
+  - The same md5 again answers ALREADY and writes nothing.
+- **Who reads the row:** no reader was changed.
+  - The owner's Needs-you (`amir_day._s444_refused_lines`): "Report refused today: ORDER_PENDING at hh:mm -- the medical PC refused it: …".
+  - The reports tile (`reports_tile.status`): the sale row reads "refused" with the PC's reason when the due day's sale is not in.
+  - Darpan's card (`order_sheet.refused_sheet` → `/finance/darpan/kal/api/day` → `order_sheet.refused`): "Order sheet adhoori thi".
+  - The duty `darpan.order_sheet` is due on such a row: its `due_sql` reads type ORDER_PENDING, not verified.
+- **The walk** (`walk_s454p4.py`; NEW = the box + the door with **part 4's watcher**, OLD = the box and the **S397 watcher** as they are;
+  backup-API copies; the walk's own key, never the live one): **WALK_S454P4 GREEN — 18 of 18.**
+  - **D, the door:** one row; ALREADY on the same file; a bad key 401 and no row; an extra key 400 and no row; a file 400 and no row.
+    **NEGATIVE:** the box as it is takes the note for a file with no name, refuses it, and writes nothing.
+  - **O, who reads it:** the owner's line; Darpan's card (its own data, not the page's script); the reports tile, with the due day's sale removed
+    on the copy, reads "refused" with the PC's reason. **NEGATIVE:** none of them on the box as it is.
+  - **W, end to end:** the scratch app is served on 127.0.0.1. Part 4's watcher, in a scratch folder with `marg_push.py` beside it and the walk's
+    key in `token.txt`, keeps a cut-off order sheet as refused. Its note reaches the door over HTTP at marg_push's own address: one row,
+    ORDER, "an order sheet without the '*** End of Report ***' line at the end (cut short?)". No line of the file is in the row.
+    **NEGATIVE:** the S397 watcher keeps it ("not a bill-wise sales statement (it begins: 'SANJEEVNI MEDICOS')") and nobody hears.
+  - The watcher's own selftest passes with **37 checks** (S397's 31 + 6 new). The reader's own selftest passes.
+  - **S:** the staff-eye walk, DUTY_MAP v5. Clean.
+- **The earlier walks:** **WALKS_OLD_S454P4A GREEN**, the same named reds word for word on both runs: S403 13, S407 5, S410 3, S414 1, S417 4, S428 8, S439 23, S440 27, S441 6, S444 14, S446 14, S452 11.
+
+### Part 4, the medical PC · P4B_REFUSAL_WATCHER — built, walked, packed; NOT delivered (§10.3, §19 step 4)
+
+- **The clock at the decision:** 03-Oct-2026 19:07:34 IST (read from `deliver_S454_P4B.ps1`'s own refusal, exit 2). The watcher is not placed
+  on Drive `ToMedical\_kit` before 04-Oct 13:00 IST. Drive still holds `marg_watch.py` 81145aa7. The heartbeat at 19:00:35 IST read
+  `WATCHER FILE: D:\SendToClinic\marg_watch.py md5 81145aa7` and `marg_watch.py up to date (81145aa7)`.
+- **What is packed** (`deploy_kits/S454_BILL_REGISTER/P4B_REFUSAL_WATCHER/`):
+  - `marg_watch.py` S454, **20ec1602174cea5e2726d87797fa8e88**, built by `make_s454p4b.py` (10 anchored edits) from the live S397 bytes 81145aa7.
+    These are the repository's S397 copy, which equals the heartbeat's md5 and Drive's.
+  - `KIT_MANIFEST.txt`: part 1's with one comment block (LF b8ff9568; written to Drive with CRLF as **9e754e5c**, replacing 05fb3485).
+  - `deliver_S454_P4B.ps1`: the clock gate, both pins, `.superseded` backups, place, md5 read-back, both put back on red.
+- **`marg_push.py` is not changed** (566e189e). The watcher imports it for its address (`MARG_PUSH_URL`, default the followup door), its key
+  (`token.txt`), its TLS context and its off switch. A note is not sent while `_off\ALL_OFF.txt` or `MARG_PUSH_OFF.txt` is present.
+- **How the note behaves:**
+  - It is sent once per file. A file already kept in `_captured_txt\refused` is never kept or noted again, which includes the start's retry of
+    the last three days.
+  - It runs in its own daemon thread, three tries a minute apart, so capture never waits.
+  - A run of six or more digits in the reason is masked before it leaves the PC.
+- **"Why not" learns the order sheet:** "an order sheet without the '*** End of Report ***' line at the end (cut short?)" / "an order sheet the
+  reader cannot take". An order sheet under any name is kept and noted (S397 kept only `report*.txt` and statements).
+- **Also proved on manojz** (Python 3.14, Windows): the new watcher's `--selftest` with the S454 reader beside it gives SELFTEST OK, 37 checks.
+- **The retry at its start is not reported:** it has not started. When it is delivered, its start log shows what it offered again. Any refused
+  text younger than three days at that moment (after 04-Oct 13:00, those of 01-Oct 13:00 onwards) is offered to the reader again. A text the
+  reader then takes is sent once. A text still refused is not noted, because it was kept before.
 
 ### Part 1 · P1_ORDER_SHEET_RECEPTION — FROM → TO, read back on the box (install log 03-Oct 12:24:27 IST)
 
@@ -653,9 +764,15 @@ Every due duty's door was seen in the staff-eye walk.
 - Shavez's "Bill scan baaki" line on Aaj ki reports and the owner's register are in the .md.
 
 ### Not done, and why
-- **Part 4 (§10, the medical PC's refusal note) and Part 5 (§11, the items) are not started.** The brief forbids replacing the medical
+- **The medical PC's watcher (Part 4, §10.1) is not delivered.** The brief forbids it before 04-Oct 13:00 IST (§10.3), and §19 step 4 says
+  to stop there. It is built, walked end to end and packed (P4B_REFUSAL_WATCHER). The server's door for its note is installed (P4A). Until the
+  watcher is delivered, a text the medical PC itself refuses still reaches nobody.
+- **Two bills in one scan are not caught by the system** (§18.1). The stored reading has no page of its own, so no guess was built. The
+  finding for the parent is under P3B.
+- ~~**Part 4 (§10, the medical PC's refusal note) and Part 5 (§11, the items) are not started.** The brief forbids replacing the medical
   PC's watcher before 04-Oct 13:00 IST (§10.3), and Part 5 follows Part 4 in its order. I did not install half of Part 4 (the server door
-  without the watcher) tonight. Until Part 4 is in, a sheet the medical PC itself refuses still reaches nobody (as said in Part 1).
+  without the watcher) tonight. Until Part 4 is in, a sheet the medical PC itself refuses still reaches nobody (as said in Part 1).~~
+  *(Superseded on 03-Oct evening by §19: Part 5 and Part 4's server side are installed; only the watcher waits.)*
 - **Not built in Part 3, by the brief:** judging a full count by the shelf figure (the loss desk still judges by Marg). That is the next kit's.
 - ~~The reception phone was not set up; that needs the owner's login on that phone. The phone has not asked since S452
   (`supplier_msg.phone_last` absent; 18 NEFT messages queued since 26-Sep 19:49).~~ *(Stale, struck by §18.7: it was set up on 03-Oct
@@ -667,13 +784,27 @@ Every due duty's door was seen in the staff-eye walk.
   The blanket `*.json` rule would hide them otherwise.
 
 ### Noticed outside the brief
-- **S428's spine reading counts a credit note as a sale.** `stock_watch.Spine.sales` sums `sp_sale_line` units, and a CN bill's lines
+- **Tonight (P3B, part 5, part 4):**
+  - **Darpan's door marker can never go red.** The duty map's marker for `darpan.order_sheet` is "Order sheet adhoori thi". That text is always
+    in `/finance/darpan/kal`'s page source, because the card is drawn by its script from `/api/day`. So the staff-eye walk's "door seen" for
+    this duty is true whether the card shows the refusal or not. Part 4's walk reads the card's own data instead. The duty map's marker is the
+    chat's to change; I did not change it.
+  - **The owner's "Report refused today" line says "(Shavez / Amir to export it again)" for every type**, an order sheet included, which is
+    Darpan's to save again (`amir_day._s444_refused_lines`). Not changed.
+  - **The items check shows a hidden discount on about a quarter of the bills.** Marg's net line value is below quantity × rate − discount +
+    tax by a few percent, most often 5%. This is a discount not entered in the discount column. Whether Amir should enter it there is the
+    chat's call.
+  - **Two learnt names are doubtful** (ESS KAY 'CHMSET DIT TAG' = ONKET DT; KEDAR 'MIKO C/S' = MEG QCS). There is no way yet for the owner to
+    strike a learnt name.
+  - **PUBLISH_ALL carried P3B in another session's publish** (99a7200, 18:50:38 IST; the same bytes as ran). Tonight's publish also carries
+    that session's pending `deploy_kits/KB_canon_all/` files (S292 close). I did not open, run or change them.
+- ~~**S428's spine reading counts a credit note as a sale.** `stock_watch.Spine.sales` sums `sp_sale_line` units, and a CN bill's lines
   carry positive units (they are returns). The shelf figure reads `sp_move` (SALE / SALE_RETURN apart) and is not affected. S428's own
-  pace and expectation are. Not changed: outside this brief.
-- **Part 1's double count on `marg`** (above, under Part 3): mended for `count`, the default. On `marg` it stands, as the brief asks for
-  today's plan there. The chat may want it mended there too.
-- **GUNINA's "P.L. LTD."** is counted a supplier misread by §5's rule as written (above, under Part 2). Adding "P.L." to the drop list is
-  the chat's call.
+  pace and expectation are. Not changed: outside this brief.~~ *(Mended in P3B, §18.5, F-713.)*
+- ~~**Part 1's double count on `marg`** (above, under Part 3): mended for `count`, the default. On `marg` it stands, as the brief asks for
+  today's plan there. The chat may want it mended there too.~~ *(Mended in P3B, §18.4.)*
+- ~~**GUNINA's "P.L. LTD."** is counted a supplier misread by §5's rule as written (above, under Part 2). Adding "P.L." to the drop list is
+  the chat's call.~~ *(Mended in P3B, §18.3.)*
 - **PUBLISH_ALL commits everything pending.** Part 2's publish (306b4c4) also carried three kits other sessions had left in the working
   copy: S465_PAPERS_JOIN, S466_EXPENSE_WARRANTY and S467_WARRANTY_ON_HEALTH. I did not open, run or change them. They passed the
   NO_PHONE_NUMBERS gate with the rest (40 files).
