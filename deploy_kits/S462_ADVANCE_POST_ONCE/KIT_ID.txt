@@ -1,0 +1,2 @@
+kit id S462_ADVANCE_POST_ONCE
+project parent (session 292, 03-Oct-2026) -- a pharmacy salary advance reaches the Staff Ledger once (F-706); finance_app.py only

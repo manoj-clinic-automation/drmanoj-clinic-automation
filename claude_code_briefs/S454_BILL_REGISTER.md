@@ -37,7 +37,7 @@ Written 03-Oct-2026 by the Sanjeevni chat (S283 post-close) from `S283_PURCHASE_
 
 If you must stop, stop at a part's boundary, say in the report exactly what is installed and what is left, and end. The owner then pastes the second line of §16.
 
-**On a continued run, do §17 first** (corrections to Part 1, found when it was read live on 03-Oct), as its own small folder in the same kit, walked and installed before Part 2 is begun.
+**On a continued run, do §17 first** (corrections to Part 1, found when it was read live on 03-Oct), as its own small folder in the same kit, walked and installed before Part 2 is begun. It also adds a card with the reception phone's state and a test message (17.7).
 
 ## 0 · The rules this build stands on
 
@@ -652,7 +652,7 @@ https://followup.dr-manoj.in/finance/purchase/page/scans
 
 ## 17 · Corrections to Part 1 — do these first on the continued run
 
-Part 1 (installed 03-Oct 12:24 IST, with 1B at 12:28) was read against this brief and against the live screens on 03-Oct, in the owner's login, read only. **It stands.** The home, "Order karna hai", "Maal aaya?", the old pending list, the owner's cards and the fourteen settings are as §3 and §4 ask. One thing is wrong, and it is all in the printed order sheet (`order_sheet_pdf.py`, live pin 9c28df38 — read it live before the edit). Build it as folder `P1C_ORDER_SHEET_PAGE` in the same kit; walk it; install it; report it; then begin Part 2.
+Part 1 (installed 03-Oct 12:24 IST, with 1B at 12:28) was read against this brief and against the live screens on 03-Oct, in the owner's login, read only. **It stands.** The home, "Order karna hai", "Maal aaya?", the old pending list, the owner's cards and the fourteen settings are as §3 and §4 ask. One thing is wrong, and it is all in the printed order sheet (`order_sheet_pdf.py`, live pin 9c28df38 — read it live before the edit): 17.1 to 17.5. One thing is added, about the reception phone (`supplier_msg.py`, `porders.py` or its S454 module): 17.7. (17.6 records a ruling and asks for no code.) Build all of it as folder `P1C_SHEET_PAGE_AND_PHONE` in the same kit; walk it; install it; report it; then begin Part 2. **Install this before anything else.**
 
 **17.1 The page carries the whole open order, not only what is still to be ordered.** This completes §4.3, which did not say it.
 
@@ -683,4 +683,28 @@ Part 1 (installed 03-Oct 12:24 IST, with 1B at 12:28) was read against this brie
 
 **17.5 One word.** The owner's English view says "1 medicines"; make it "1 medicine". Check the Hindi reads rightly for one ("1 dawa").
 
-**Report**, owner lines first: one sentence that the printed sheet now shows the whole open order, and how many lines it holds on a page.
+**17.6 Payment messages go as they do today — nothing is held.** The owner, 03-Oct, was asked whether the payment messages waiting since 26-Sep should go out when the reception phone is set up. He first said to send them later; then, before 13:36 IST: *"We can send vendor payment messages now, so proceed accordingly."* **His later word stands.** Do not hold, skip or re-queue any payment message; add no setting for it. An earlier text of this section (brief md5 ac1e7915) asked for a hold: it is withdrawn. He is setting the phone up now, so the waiting messages may already have gone when you read this — REPORT how many payment messages are waiting, sent and failed as you find them, and change none.
+
+**17.7 A card that shows the reception phone's state, and a test message.** So that the phone can be checked at any time — after WhatsApp changes its screen, say — without a real message and without opening the page that shows the key.
+
+- A card for the owner, **"Reception phone"**, among his cards on `/finance/porders?old=1`. **The key is never on this card.** It shows:
+  - when the phone last asked the server ("never" until it has);
+  - messages waiting for the phone: orders, and payments, each as a count;
+  - **"Test number"** — a field the owner fills once, kept in the setting `supplier_msg.test_to`; after saving it is shown with all but its last four digits masked. It is never written to a log, an audit detail, a walk's output or the report;
+  - **"Send a test message"** — queues one message of its own kind (`test`) to that number. Two lines, to prove the line break and the encoding: "Sanjeevni test · dd-mm hh:mm" and "Yeh sirf jaanch hai — ₹ 1,234.50". Disabled, with the reason, when no test number is saved;
+  - **the last test's state**, with clock times in IST: queued · handed to the phone · sent, or failed with the phone's reason.
+- A test message is counted nowhere else: not with payments, not with orders, not in any staff's line.
+- The phone-setup page itself is left as it is, apart from what Part 1 added. Do not open it in a way that shows the key to a walk, a log or the report.
+
+**17.8 The walk for 17.7.**
+
+- A test message: handed out once (F-702), the phone's "sent" marks it sent, the card shows the three times; the phone's "could not send" shows the reason. It appears in no payment or order count, and on no staff screen.
+- Payment and order messages are handed out exactly as before this folder: the same rows, in the same order, on a copy of the live queue. **Control:** the box as it is gives the same answers.
+- A login that is not the owner does not get the "Reception phone" card or its taps.
+- No phone number and no key in any output.
+
+**Report**, owner lines first:
+
+- one sentence that the printed sheet now shows the whole open order, and how many lines it holds on a page;
+- the payment messages as you found them: waiting, sent, failed;
+- that the phone can be tested with a message to his own number, and the address of the card.

@@ -1,0 +1,2 @@
+kit id S463_ROLE_LOCKS
+project parent (session 292, 03-Oct-2026) -- the checker's figures answer only the checker (F-707); finance_app.py only; needs S462 first
