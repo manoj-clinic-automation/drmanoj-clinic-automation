@@ -1,176 +1,355 @@
-# Claude Code brief — S454_BILL_REGISTER (every Marg purchase bill of a month on one register with its paper: verified only on what the scan reads well, items judged by Marg's own arithmetic and by learnt names, a missing scan as a re-upload line that reaches a person, the month reading "N of N")
+> **HOLD — DO NOT BUILD (03-Oct-2026, 07:43 IST).** The owner changed the design after this text was written: the order now comes from Darpan's Marg order sheet, WhatsApp goes to all suppliers in one tap, September is parked, a printed order sheet is added, and the items screen and the medical PC's refusal note join the build. This text is superseded and is being rewritten from `S283_PURCHASE_FLOW_DECISIONS_03OCT.md`. **If you were handed this file, stop and tell the owner.**
 
-> **HOLD — DO NOT BUILD (03-Oct-2026, 05:04 IST).** The owner found the reception screen of §3.4 and §3.6 too heavy for the staff and has asked for it to be redrawn as one task at a time. A revised brief and mock will replace this text and this line will go. If you have been asked to build this file while this line stands, stop and say so; build nothing.
+# Claude Code brief — S454_BILL_REGISTER (the pharmacy's purchase flow at reception as one simple screen: order by phone, arrival, bill scan, and one question at a time; scans paired with Marg on the fields a scan reads well; the owner's month register; Amir left as he is)
 
-Written 02-Oct-2026, 22:4x IST, by the Sanjeevni chat (S283 post-close), at the owner's word: "go. But do not build or code anything right now." **It is built only when the owner pastes its line.** Read `CLAUDE.md` first. **Kit S454 · decisions D662, D663 · faults F-690, F-691, F-695** (System Board `_numbers`). §3.5, §3.6 and §3.7 added 03-Oct at the owner's word, before any build. **The owner has seen these screens as a mock: `claude_code_briefs\S454_BILL_REGISTER_MOCK.html`. Read it before §3; build the staff lines to its words, groups and buttons.** Its figures are examples. It serves D650 (Marg's entry is final; the scan is the witness), D640 (everything the scan flow needs from a person is a one-tap line in the staff's own list) and D648 (every duty has a door).
+Written 03-Oct-2026 by the Sanjeevni chat (S283 post-close), after a full day's discussion with the owner and two independent reads of this text against his words. **This text replaces every earlier text of this file** (their hashes began e43cb026, 979c3cec, edecf773, 5f8d091c). Read `CLAUDE.md` first.
 
-**Runs AFTER S452_AMIR_PANEL_FIXES is installed, on its TO pins.** If `claude_code_briefs\REPORT_S452.md` does not exist, stop and say so.
+**Kit S454 · faults F-690, F-691, F-695 · decisions:** D665 (the live flow at reception: §3, §5, §6) · D662 (pairing and the month register: §4, §7) · D663 (Vendor payments: §8). It serves D650 (Marg's entry is final and overrules the scan's reading), D640 (a tap per line for staff), D643 (the scanner is asked nothing while scanning), D648 (every duty has a door) and D626 (the buying rules).
 
-**Touches (declared, all Sanjeevni's):** `/root/finance/purchase_app.py`, `porders.py`, `porders.html`, `reports_tile.py`, `sanjeevni_approvals.py`, `supplier_msg.py` (§3.5 only), `amir_day.py` (§3.6: his list's rule); the corrections list in `amir_day.py` only if it needs a new line kind; `claude_code_briefs/DUTY_MAP.md` + `.json`. **READ ONLY:** the asset app's store (through `purchase_app`'s existing door), `item_alias.py`, `packs.py`. **No parent file:** not `finance_app.py`, `portal.py`, `tile_grants.json`, `finance_approvals.html`, `asset_register.py`. If a parent file turns out to be needed, stop and report; do not edit it.
+**The mock: `claude_code_briefs\S454_BILL_REGISTER_MOCK.html`. Read it before §3.** The owner saw these screens on a canvas over several rounds. Screens 8, 9, 10, 11 and 13 were corrected to his rulings after his last look; he is told so, and §13 asks you to show him the built ones. The staff screens (1 to 12) bind you in their words, their order and their buttons. Screen 13, the owner's register, binds you in the names of its states and its shape. Its counts are examples. The screens the mock does not show are listed in §3.8.
+
+**Runs on S452's files** (live 02-Oct 23:51 IST; its pins equal the 03-Oct 03:12 nightly bundle, §11).
+
+**Touches (declared, all Sanjeevni's):** `/root/finance/porders.py`, `porders.html`, `order_rules.py`, `purchase_app.py`, `amir_day.py`, `reports_tile.py`, `sanjeevni_approvals.py`, `supplier_msg.py` (§8 only), `claude_code_briefs/DUTY_MAP.md` + `.json`. A new template or module beside `porders.html` is allowed; pin it.
+
+**READ ONLY:** `assets.db` and the asset app (its intake link and its re-lane route are called as they are; `asset_register.py` is not edited), the stock-count tables, `item_alias.py`, `packs.py`, `darpan_kal.py`.
+
+**No parent file:** not `finance_app.py`, `portal.py`, `tile_grants.json`, `finance_approvals.html`, `asset_register.py`. If one turns out to be needed, stop and report; do not edit it.
+
+## 0 · The rules this build stands on
+
+1. **A staff screen shows only what that person has to do.** The owner, 03-Oct: "They should only see what they need to do. What has already been accepted by the system is not a part of their flow. They should get it in very simple terms. The sections are nice but the arrangement seems very overwhelming." One task on the screen at a time. No counts of settled things, no day counts, no tags, no explanations.
+2. **Staff pages in Roman Hindi; the owner's in English.** Phone width first. Buttons at least 44 px. Typing only where a number on the paper must be given.
+3. **Amir is asked nothing new.** The owner: "A soft start is what I want for Amir. Abruptly we cannot change the system. We will keep both the flows." No new kind of line reaches any list of his from this kit.
+4. **September is practice.** The owner: "The backlog is only for the assessment and training and not for any real accountancy or accountability work." Alerts, day counts and the accept-without-paper tap start with October (`purchase.register_from`). A practice month's lines stay in the staff's lists so they can practise, and its register shows its states and counts for the owner's assessment. **Nothing new of a practice month reaches Amir.** What S440 already puts on his *Marg sudhar* today (a bill entered twice in Marg; an amount already answered) stays as it is; this kit pulls nothing off his lists and adds nothing to them.
+5. **Every threshold is a setting the owner can change on his screen** (§10).
+6. **The old page stays one tap away** (§3.7) until a later kit removes it. There is no timer.
+7. **Build in the order of the parts and walk each part.** One kit. If the whole cannot be made clean in one kit, install §3 to §6 and §8 as S454, keep what §3.4 and §3.5 record for the register in their tables and show it as plain lines on today's Scan links page, say plainly what of §7 and §9 is left, and stop there.
+8. **"REPORT" means: write it in `REPORT_S454.md`.** It never means wait for the owner. The only stops are the ones this brief names.
 
 ## 1 · How this came
 
-On 02-Oct the owner asked what the net result is of September's bills: staff scanned the papers, Amir keyed every purchase into Marg, the exports reached the server. The chat read his live pages and answered: not whole. His words that this brief serves:
+The owner asked what the net result was of September: the staff had scanned the bills, Amir had keyed every purchase into Marg. The chat read his live pages: 63 of 81 Marg bills had their scan, and the scan list had stood untouched since 30-Sep. A first brief was written for a month register. He then saw the staff screen as a mock, found it too heavy, and widened the question to the everyday flow: the reception staff order the medicines, receive them and scan the bill, and the system pairs the scan with Marg when Amir enters the bill. His rulings, in his words:
 
-- "These three fields are being cached correctly. Because if it is so, then we can cross verify what bills with Marg have been verified. Because reading the item data must be an issue."
-- "Our system mainly verifies the verifiable fields with the cross checks that these bills have arrived, and what all bills are missing should be populated for re-upload."
-- "We should consider only the data which we can verify, and the other data we should find a way how to match it properly with our data."
-- "The Marg system accepts a photo and a PDF, both." So the files S446 serves to Amir for Marg's digital entry need no conversion; that route stays as it is.
+- **The regular flow:** "The goods come with the bill and the bill is scanned then or within a day." September's bills were all scanned at the month's end; that was a one-time catch-up. From here on the scan comes first, Amir's Marg entry follows on his next visit (two to three days), and the system pairs the two when his export arrives.
+- **Ordering:** "The default is calling the supplier. One card per supplier will be 'order karo'. They call from there only; the click to call should exist. That should terminate with a confirmation, because sometimes the call is not picked or the number is busy. They should have a tap, 'order ho gaya'. If they do not tap, we keep it posted as a pending order to be made by the reception staff." And: "The ordering should be first the automated WhatsApp, after we set the reception mobile for that."
+- **Out of stock at the stockist:** "Leave it as such."
+- **Arrival:** all received unless tapped otherwise. "The bill scan there needs to be optional and not compulsory, because staff might be busy at that time and might do the work later."
+- **Stock basis:** "You have the 6 September stock report and can work out the shortages using that, till the vouchers of the loss and extra medicines are filed."
+- **Amir:** "All purchases are entered in a physical register with the date, bill number, vendor name, items. Amir writes the Marg number there whenever he enters those bills. That is his current flow and it will take time to shift him." Reception scans; the system matches "as those bills are entered". Only "once this flow is established and running" do scans go into Marg's digital entry without waiting for his visit: "that might take one or two months."
+- **Two slips:** two Yuvika papers shown as "not in Marg" were handwritten estimate slips for the procedure room. "These slips are not of pharmacy purchase. They are for the direct purchases in the consumption zone, not related to the Marg pipeline. They are only scanned as all documents are scanned at the reception." And of such papers: "Later on I can assign lanes for such purchases, or Shavez can assign."
+- **Vendor payments:** "The vendor payment sheet should be limited to me and Shavez."
 
-## 2 · What the chat read on the live pages, 02-Oct ~22:00 IST — REPORT the same facts first, as they stand on your day
+## 2 · What the chat read — REPORT the same facts first, as they stand on your day
 
-Pages: `/finance/purchase/page/scans` and `/finance/purchase/page/sarvam?month=2026-09`, as the owner.
+**Scans against Marg** (`/finance/purchase/page/scans`, `/finance/purchase/page/sarvam?month=2026-09`, as the owner, 03-Oct):
 
-- **September in Marg: 81 purchase bills. 63 linked to a scan. 18 with no scan. 14 scans with no Marg bill.**
-- **Scan work, 32 lines:** To scan 11 · Is this the bill? 8 · Choose the supplier 3 · Match the amount 4 · Waiting for Marg 2 · second scans 1.
-- **F-691 — the list stood still.** These counts are what they were on 30-Sep. Nobody worked the list and nothing told anyone. Say from `audit_log` when the last tap on *Scan ka kaam* was, and by whom.
-- **Of the 18 bills "with no scan", 6 probably have one** that was read differently and waits for a "Haan" (bills 75904, 78354, EP002243, IP006767, KEDAR 189, A.A. 416). One more (KEDAR 163) is in Marg twice. So about 11 have no paper on the server at all. Say whether any of the 11 sits in another lane of the asset app (scanned as a clinic bill by mistake): search every lane by bill-number tail and amount.
-- **F-690 — the Sarvam page miscounts.** It says of the 63 linked bills: supplier wrong 13 · bill no. wrong 7 · date wrong 9 · total wrong 10 · items wrong 57. Read cell by cell:
+- September: 81 Marg bills · 63 linked to a scan · 18 with no scan · 12 scans with no Marg bill.
+- *Scan ka kaam*: To scan 11 · Is this the bill? 8 · Choose the supplier 3 · Match the amount 4 · Waiting for Marg 0 · second scans 1 · S441's questions 6.
+- **F-691:** those counts are what they were on 30-Sep. Nobody worked the list and nothing told anyone. Say from `audit_log` when the last tap was, and whose.
+- Of the 18, six probably have a scan read differently (bills 75904, 78354, EP002243, IP006767, KEDAR 189, A.A. 416). KEDAR 163 is in Marg twice.
+- **F-690, the Sarvam page miscounts.** It says of the 63 linked bills: supplier wrong 13, bill number 7, date 9, total 10. Read cell by cell, in substance: supplier wrong 3, bill number 4, date 9, total 10. The rest are a full stop, a bracket or a prefix ("PVT. LTD." against "PVT LTD"; a printed number with its series and financial year against Marg's short number). All of supplier, bill number and date are right on 47 of 63. Item lines: 28 of 158 read right (batch 67, name 36, rate 33, quantity 22, expiry 21 wrong).
+- **F-695:** scans B-0007 and B-0018 (Yuvika, no number and no amount read) were on Amir's list as bills Marg does not have. They are estimate slips. Yuvika's four September bills in Marg all have their scans. On 03-Oct both were moved to the clinic lane in the owner's login; Amir's list reads 0.
 
-| field | page says wrong | wrong in substance | what the rest are |
-|---|---|---|---|
-| supplier | 13 | 3 (scans 34, 72, 73: the shop's own name or a heading read as the supplier) | 10 differ by a full stop, a bracket or an ampersand's spacing ("PVT. LTD." / "PVT LTD", "(EXTN)" / "EXTN") |
-| bill number | 7 | 4 (scans 63 and 92 read the drug-licence number; 45 and 99 misread digits) | 3 are the printed full number against Marg's short one ("YS/0585/" followed by the printed financial year, against "585") |
-| date | 9 | 9 | 6 have only the year wrong, 2 the month, 1 is a day off |
-| total | 10 | 10 | 4 large (the *Amount milao* four), 6 between Rs 6 and Rs 243 |
-| item lines | 130 of 158 lines | not judged | batch 67 · name 36 · rate 33 · qty 22 · expiry 21 |
+**Ordering** (`/finance/porders/api/state`, as the owner, 03-Oct; and the 03-Oct nightly copy of `finance.db`):
 
-- All three of supplier, bill number and date are right on **47 of 63** in substance (35 by the page's count).
-- **Scan 99** pairs a reading "15/0823/" plus the financial year with Marg's bill 672. Either a misread or a wrong link: look at the picture and say which.
-- Only linked bills are in these figures. The 14 unlinked scans are the worst read, so the true rate over all scans is lower. Say that figure too.
+- The ordering screen is live: 18 suppliers, 39 lines planned, the rules approved by the owner on 26-Sep.
+- **No medicine order has ever been sent through it.** `purchase_order` holds one row: the owner's test order to Yuvika of 26-Sep; its first line cleared itself against Yuvika's bill of 28-Sep. `order_proposal`: 9 merged, 1 open. The order days of 28-Sep (8 suppliers) and 02-Oct (Kedar) were merged forward to Monday 05-Oct by `nightly()`.
+- **Stock basis.** `order_rules` takes a medicine's shelf from Marg's snapshot (`_latest_snapshot`, `s["qty"]`). The orthotic side (`porders.ortho_items`) takes it from the count: counted + purchases since − sales since + returns.
+- **The count is all there.** `stock_count` id 1 (06-Sep): `stock_count_item` holds 373 items, every one with `counted_qty`: Medicines 284, Orthotics 69, Consumables 20. Of the 377 items in Marg's newest snapshot, 372 have a count row; 5 do not.
+- The two differ a great deal. MEG QCS: counted 640 on 06-Sep, Marg 477 on 30-Sep. PATOPAN DSR: 314 and 43. TYRO BR: 470 and 57. The count's loss and extra vouchers are not in Marg yet.
+- RAVI MEDICAL AGENCY has no phone in the phone book. Two planned items have no supplier on record.
 
-## 3 · The build
+## 3 · PART A — the reception screen (`/finance/porders`), one task at a time
 
-### 3.1 The register — `purchase_app.py`; the page `/finance/purchase/page/scans`
+For every login in `porders.senders` (manoj, darpan, shavez, shivani, alisha, reception). The owner sees the same screens with the same buttons, in English. A viewer (`porders.viewers`) keeps the old page. S441's "who is working" on the shared reception login stays, and that name is the person on every record below.
 
-The Scan links page becomes the month's bill register. Same address, `?month=YYYY-MM`, default the newest month that is not whole. No second page.
+### 3.1 The home — "Aaj ka kaam"
 
-- **One row per Marg purchase bill of the month** (`purchase_bill.month`; Marg's bill date decides the month). Each row is in exactly one state:
-  - **Verified** — its scan is linked and the four fields agree by §3.2.
-  - **One thing differs** — linked, and one named field differs. The row names the field, both values, and whose line it is now (§3.4).
-  - **No scan** — on the re-upload list, with the days it has waited.
-  - **Entered twice in Marg** — as today, on Amir's list.
-  - **Accepted without paper** — the owner's own tap, for a paper that is lost. Owner only, one tap, audited with the reason; it can be undone.
-- **Under the bills, the scans that have no Marg bill**, each in one state: second scan (set aside) · near-match waiting for a "Haan" · supplier not read · waiting for Marg's entry (S452's list for Amir).
-- **The head line, in the owner's English** (the shape; the figures are an example): "September 2026 — 81 bills in Marg · 63 verified · 6 one thing differs · 11 no scan · 1 entered twice · 14 scans with no bill." The month is **whole** when every Marg bill is verified or accepted without paper and no scan of that month is open. Then the line reads "81 of 81 ✓" and says when it became whole.
-- The same one line on the owner's approvals page, Month section, through `sanjeevni_approvals`'s existing lines (no edit to the parent's page).
-- Every figure on this page, on *Scan ka kaam*, on Amir's list and on the Sarvam page comes from **one function**. Two pages must not be able to disagree about a bill.
-- Phone width: no sideways scroll. The sticky BACK bar and the up-arrow stay.
+- A large button first, always, on the finished screen too: **"Naya bill scan karo"**. It opens the asset app's intake with the pharmacy lane and this month set, and comes back here (S403's link, S440's `from`).
+- Then one row for each kind of work, **shown only when its count is above zero**: a big tappable row with its count and its name, nothing else.
+  1. **"Order karna hai"** — the suppliers to be ordered from today (§3.2).
+  2. **"Maal aaya?"** — the orders made and not yet received (§3.3).
+  3. **"Bill scan karna hai"** — the papers still to be scanned (§3.4).
+  4. **"Photo dekh kar bataiye"** — the questions about scans (§3.5).
+- When no row has work: under the button, one green card, **"Sab kaam ho gaya"**, and "Naya bill aate hi yahan dikhega."
+- Nothing else is on the staff's page: no keep-in-stock numbers, no rules, no stock, no cover days, no history.
+- **The doors stay as they are:** the portal's Purchase orders tile; and the line on Darpan's *Kal ka hisaab* card, which comes from `order_rules.day_summary` and keeps counting what it counts today, the orders not yet made. `darpan_kal.py` is not edited.
 
-### 3.2 A bill is verified on what the scan reads well — `purchase_app.py`
+### 3.2 Order karna hai — by phone, ended by one tap
 
-One set of rules, used by the matcher, the register and the Sarvam counter alike.
+- **The list.** One card per supplier with an open proposal for today: the supplier's name, how many medicines, and **"Order karo"**. Four at a time, then "Baaki N supplier dikhaiye". A held proposal (under the minimum, paused) is not the staff's work and is not listed.
+- **One supplier.** The medicines and the quantity of each in the order's own unit (S417's words: strip, tube, bottle). No stock figure, no cover. Then:
+  - **"Call karo"** — a `tel:` link to the supplier's number from the phone book (`_phone_for`). The tap is recorded (who, when). The number is also shown in small text under the button, for a desk that cannot dial (not drawn in the mock).
+  - "Baat ho gayi? Tab yeh dabaiye. Phone nahi laga to BACK, order yahin baaki rahega."
+  - **"Order ho gaya"** — this makes the purchase order exactly as `send_proposal` makes it today (the same tables, the same ten-minute repeat guard), with `note` saying it went by call, and marks the proposal ordered by this person. No WhatsApp window opens.
+  - A small text button **"Quantity badalni hai?"** opens S410's own plus, minus and remove on each line; what is changed goes with "Order ho gaya".
+- **There is no tap for a call that failed.** Leaving the screen without "Order ho gaya" is all it takes: the proposal stays open. If "Call karo" was tapped and the order was not made, the supplier's card in the list reads "call kiya tha, order baaki".
+- **No phone in the phone book:** no Call button; the line "Is supplier ka phone number yahan nahi hai"; "Order ho gaya" still works.
+- **If the stockist says on the call that an item is not there**, nothing new is tapped. The order is made as it is, and that item is answered "Nahi mila" at arrival, as today. (The owner: out of stock, "leave it as such".)
+- **Pending stays posted.** The cadence still decides the day a supplier's proposal is first made. Today `nightly()` merges an unmade proposal into the supplier's next order day, which can be a week away. Change it: an open proposal of an earlier day is carried to **the next working day** (a blocked day or a holiday is skipped), as that supplier's one proposal, its lines planned again on that morning's stock, `carried_from` kept. If the fresh plan is empty the proposal closes itself. Never two proposals for one supplier on one day: the interim check skips a supplier that already has an open proposal that day. The nine rows already merged into 05-Oct are left as they are; say what they became.
+- **The channel is a setting**, `order.channel`:
+  - `call` — the default, as above.
+  - `whatsapp_tap` — today's one-tap wa.me order, kept whole: the supplier screen shows today's "…ko order bhejo", which makes the order and opens WhatsApp as it does today; "Order ho gaya" is not shown; "Call karo" stays below as a plain link.
+  - `whatsapp_auto` — the reception mobile sending by itself. **Not built here.** The setting refuses the value with one line saying so. It is the owner's first choice once that phone is set up.
+- **Untouched:** the owner's approval of the rules, the freeze, a supplier's pause, holidays, blocked days, the minimum order, the cadence, the repeat guard. When ordering is frozen the row is not shown.
+- **Orthotics** keep their own rules (S403). When that section offers an order, it is one more supplier card in this list, ended the same way.
+- **The notices** at 12:00, 15:00 and 17:00 keep going to `order.notice_to`, counting the suppliers still to be ordered.
 
-- **Supplier:** equal after dropping punctuation, brackets, "&"/"AND", and legal-form words ("PVT", "LTD", "P", "M/S", a trailing town). Then the learnt spellings (`purchase_scan_alias`). The shop's own name, or a heading such as "WHOLE SALE CHEMIST & DRUGGIST", is never a supplier: treat it as "not read".
-- **Bill number:** Marg's number, leading zeros dropped, equals **one whole run of digits** in the scan's reading. "YS/0585/" followed by the financial year has the run 585 and the year's own runs; Marg's 585 is one of them. A run that is the financial year, and any reading shaped like a drug-licence number (ending "/BLY" or the like), is never the bill number. Letters in Marg's number ("EP002243") are compared by their digit run, as S439 does.
-- **Date:** the day and the month agree. A year other than Marg's is a misread and is ignored; the row may say "year misread", small and grey.
-- **Total:** within Rs 1 is equal. Up to a setting `purchase.total_noise_rs` (default 10) is **verified, with the difference shown** and no task (the D622 rule: rounding noise is not a finding). More than that is *Amount milao*, as today.
-- **Verified** = the total agrees, the bill number agrees, and at least one of supplier and date agrees. If the fourth differs it goes to §3.4 as one question; a year-only date difference and a punctuation difference never ask. A field the scan did not read at all (no supplier, or the shop's own name in its place) asks nothing either: the row says "not read on the scan", small and grey.
-- **Learning:** each verified bill teaches the supplier's printed spelling (as today). If the scan's reading carries the supplier's GST number, a verified bill may teach "this number = this supplier", kept in the database only, never in a kit or a report (F-185); it is then the first test for that supplier. If the reading does not carry it, say so and skip this.
-- Re-run the matcher on September with these rules **before anything else is built**, on a copy, and REPORT: how many of the 14 unlinked scans now link, how many of the 63 are verified without a tap, and every row whose state changes, by name. If a rule links a wrong pair on the copy, stop and report.
+### 3.3 Maal aaya? — everything received unless tapped; the bill scan optional
 
-### 3.3 Item lines: judged by Marg's arithmetic and by learnt names, never by the scan's reading — `purchase_app.py`
+- One order on the screen. With more than one waiting, a list first: supplier and order date, one tap each.
+- The medicines and quantities, each shown as received. Above them: "Jo kam aaya ya nahi mila, us par tap kijiye."
+- Tapping a line opens the three answers the page has today: **"Kam aaya"** (one box, "Kitna aaya?"), **"Nahi mila"**, **"Aa gaya"**.
+- **"Maal aa gaya"** saves it through `api_arrive`'s own rules: untouched lines as received, the tapped ones as answered. **"Abhi nahi aaya"** leaves, saving nothing.
+- Then one screen: a green "Maal darj ho gaya", and **"Bill abhi scan karna hai?"** with two buttons of equal weight:
+  - **"Bill scan karo"** — the intake, with the supplier, the pharmacy lane and the month filled in.
+  - **"Baad mein"** — home. The line under it: "Baad mein karenge to yeh 'Bill scan karna hai' mein milega."
+- **One paper, one line.** An arrived order whose bill is not scanned waits under "Bill scan karna hai" as "<supplier> · <dd-mm> ka maal". It leaves when the first of these happens:
+  - a pharmacy-lane scan of that supplier, **scanned at or after the time the order was made** and not tied to another order, is tied to it (so a bill scanned the evening before the arrival tap counts);
+  - a Marg bill of that supplier, **dated on or after the day the order was made**, appears with no scan: that bill's own line (§3.4) takes the order's place, never both;
+  - `purchase.arrival_scan_days` (7) pass from the arrival. After that only the Marg bill, once entered, can ask for the paper.
+  - With two arrived orders of one supplier, the older order is served first.
+- Keep the tie between an order and its scan in a table on the finance side; the asset app is not edited. Say how you tied them.
+- Marg's purchase still clears an order by itself, as today.
+- Goods that came without an order in the system have no line here; the staff use "Naya bill scan karo".
 
-- **Arithmetic.** For each Marg bill, the value of its own lines (`purchase_line`: quantity × rate, less the line discount, plus tax) against the bill's amount. **Measure this first on August and September and REPORT** how many bills agree within the noise setting, and what the usual differences are (round-off, a bill-level discount, a credit note). Then:
-  - where Marg's lines add up to Marg's total **and** that total equals the paper's: the row carries a small tick "items add up". That is the item check;
-  - where they do not: the row says by how much. No staff task from this in S454. The measurement decides the next step.
-  - If the export does not carry enough to compute this for most bills, say so and build nothing more of it.
-- **Learnt item names.** A new table (`purchase_item_alias`: supplier, the paper's item name as read, Marg's item) is taught only by a verified bill, and only where the pairing is certain: the bill has one line, or the quantity and the rate both agree and no other line of that bill shares them. The next compare looks the name up there first. A rename in Marg is followed through `item_alias` (D620).
-- **The Sarvam trial line (D650) becomes two honest figures:** the four header fields by §3.2, and the item lines. In the item figure, "name" is judged through the learnt names. Batch and expiry are their own figure. Nothing in the item figure makes a task for anyone.
-- **Batch and expiry are not verified from the scan.** They belong to the shelf: the arrival tap, the spot counts (S428), near-expiry (S343). Nothing is built for them here; say in the report what those three already catch.
-- REPORT: Marg's line count against the scan's line count for September, so the owner sees how much of the item table the scan reads at all.
+### 3.4 Bill scan karna hai — a short list by supplier
 
-### 3.4 What is left reaches a person — `porders.py`, `porders.html`, `reports_tile.py`, `sanjeevni_approvals.py`
+- **What is in it:** arrived orders with no bill scan (§3.3), and Marg bills with no scan and no likely scan (today's "Scan karo" group).
+- **Grouped by supplier**, as the papers are filed: "KEDAR PHARMACEUTICAL · 3 bill". Under it one line per paper: the bill number (or "<dd-mm> ka maal"), the date, the amount, and **"Scan karo"** (the pre-filled intake). Five lines at a time, oldest first, then **"Agle 5 dikhaiye"**.
+- A small text button at the foot, **"Koi paper nahi mil raha?"**: the Marg-bill lines with a tick each and one button "Paper nahi mila". It is recorded (who, when); the line leaves the staff's list and shows on the owner's register (§7.1). An arrived-order line has no such tick; it only waits.
 
-Staff pages in Roman Hindi; the owner's in English.
+### 3.5 Photo dekh kar bataiye — one question on the screen
 
-- **The re-upload list is *Scan karo*, as today,** on *Scan ka kaam*. Each line gains the days it has waited ("5 din se"), oldest first, and one more tap: **"Paper nahi mila"**. That tap sends the line to the owner as one Needs-you line ("Paper lost: KEDAR 160, 03-Sep, Rs …"), where his "accepted without paper" closes it.
-- **A new group, "Paper par kya likha hai?"** — a linked bill where one field differs. The line shows the picture and two buttons: Marg's value and the scan's value (and "doosra" with one box, for the total and the date only).
-  - Paper = Marg: verified; the misread is learnt.
-  - Paper ≠ Marg: the line goes to Amir's *Marg sudhar* list through the path *Amount milao* already uses for "Marg galat"; it clears itself when an export shows Marg equal to the paper.
-  - *Amount milao* stays as it is and is the total's form of this group.
-- **Shavez's morning page** (`reports_tile`) gets one line while anything waits: "Bill scan baaki: 11 · sabse purana 12 din — kholiye", opening *Scan ka kaam*. It leaves when the list is empty.
-- **The owner's Needs-you** (`sanjeevni_approvals`, the S444 mechanism) gets one line when the oldest line of *Scan ka kaam* is older than `purchase.scan_wait_days` (default 3), with the count and the oldest age; and one when a scan has waited for Marg's entry longer than `purchase.entry_wait_days` (default 3).
-- **`DUTY_MAP`:** the duties "scan a bill Marg has and the server does not", "answer what the paper says", and "close the month's register" each get their row, their state and their door. The staff-eye walk asserts them.
+A queue, oldest scan first. Each card: a bar with **"Sawaal i / N"** and a thin progress line; the scan's first page, large (tap opens the file); one line saying which paper (supplier, and the bill number where it is not the thing being asked); the question in one line; big buttons; **"Baad mein"**, which sends the card to the end of the queue for this sitting. After the last card: "Sab kaam ho gaya".
 
-### 3.5 The bank advice on Vendor payments: the owner and Shavez only (D663) — `purchase_app.py`, `supplier_msg.py`
+The kinds, and their words:
 
-The owner, 03-Oct: "The vendor payment sheet should be limited to me and Shavez." S452 closed the advice Excel to everyone but the senders. The Vendor payments page (`/finance/purchase/page/pay`) still draws S265's bank advice annexure, with every supplier's full account number and IFSC, for every medical login.
+1. **Is this the bill?** (S440's confirm, for a scan not yet paired) "Kya yeh <SUPPLIER> ka bill <number> hai?" with "<dd-mm> · <amount>" under it. **Haan / Nahi**, with today's meaning. Where that bill already has a scan: "Kya yeh <SUPPLIER> ke bill <number> ka doosra scan hai?"
+2. **The amount differs** (S440's amount, for a paired scan). "Bill par total amount kya likha hai?" Two buttons with the two amounts, **not labelled as Marg's or the scan's**, and "Koi aur amount" with one box.
+   - In a month from `purchase.register_from` on: what follows the answer is what follows today. That path is not changed.
+   - In a practice month: the answer is recorded on the register only. Nothing goes to Amir.
+3. **The supplier is not known** (S440's vendor, for a scan not yet paired). "Yeh bill kis supplier ka hai?" Up to three likely suppliers as buttons, then "Koi aur" with today's list.
+4. **Is it a pharmacy bill?** (new, F-695; §3.6).
+5. **S441's questions** ("Dobara scan?", "Galat lane?") join the queue as cards with their own words and their own answer routes.
 
-- **One rule, one list.** The annexure, the covering letter and the payment pack (S380), on screen and in print, are served only to the logins in `supplier_msg.senders` (today: manoj, shavez). The same list S452 used for the Excel.
-- **Every other medical login** (amir, darpan, bhati, reception) still opens the page and sees the month's suppliers, amounts and paid state as today, with **no account number and no IFSC anywhere in the served page**: not in the HTML, not in a script block, not in a hidden print section. The letter and pack addresses answer them with the page's own refusal.
-- **Amir's paid NEFT sheet (S452's PDF):** REPORT whether it carries account numbers. If it does, his copy carries supplier and amount only.
-- REPORT every other address under `/finance/purchase/` and `/finance/amir/` that serves an account number, and to which logins. Close none beyond this section without the owner's word; list them.
+**No card is made for a date or a bill number that differs on a paired scan.** Marg's entry stands (D650); the scan's reading is counted as a misreading (§4, §7.4).
 
-### 3.6 A paper with no bill number and no amount is never Amir's (F-695) — `purchase_app.py`, `porders.py`, `porders.html`, `amir_day.py`
-
-**What happened.** After S452, Amir's "Marg mein daalne ke bill" showed two Yuvika scans, B-0007 and B-0018. The owner: "That is something which is not possible. All September bills have been entered in Marg." Both are handwritten **Estimate** slips of Yuvika Surgicals (plaster rolls, bandage): no bill number, no amount. His words: "These slips are not of pharmacy purchase. They are for the direct purchases in the consumption zone, not related to Marg pipeline. They land up in the procedure room. They are only scanned as all documents are scanned at the reception." Yuvika's four September bills in Marg all had their scans. The S452 rule (the chat's own) read "nothing read, so no matching bill" as "not entered in Marg". On 03-Oct both were moved to the clinic lane in the owner's login; Amir's list reads 0.
+### 3.6 A paper with no bill number and no amount is never Amir's (F-695)
 
 **The supplier never decides the lane.** Yuvika sells the pharmacy its orthotics on printed bills, which are in Marg, and the procedure room its plaster on handwritten slips, which are not. The paper decides.
 
-- **The rule.** A pharmacy-lane scan on which neither a bill number nor an amount was read (S440's `no_digits`), or whose reading is headed Estimate, Challan or Quotation, is:
-  - never in *Marg ka intezaar*;
-  - never on Amir's "Marg mein daalne ke bill", in the list or in its count;
-  - never counted as "a scan with no Marg bill waiting for Marg's entry" on the register. It has its own line there: "Paper to be named by reception".
-- **It goes to reception, on *Scan ka kaam*, as the group "Yeh kaunsa kagaz hai?"** with the picture and one tap, as in the mock:
-  - **"Pharmacy ka bill hai"** — two boxes open, the bill number and the amount as on the paper. Saved, the scan is matched like any read scan.
-  - **"Clinic ka saaman"**, **"Dr sahab ka kharcha"**, **"Lab ka saaman"**, **"Bill nahi hai"** — the scan leaves the pharmacy lane for that lane. Use the lane words the asset app's own staff screen uses, if they differ from these.
-- **The lane move is the asset app's own.** It goes through the asset app's existing re-lane route (S409; "Galat lane" in S440). `assets.db` stays read only from the finance side, and `asset_register.py` is not edited. If the route cannot be called from this line, the button opens the asset app's re-lane control for that scan; say which you built.
-- **S440's line** "Number / amount nahi padha gaya — manager isse theek karega, dobara scan mat karo" goes; this group replaces it.
-- After this, *Marg ka intezaar* and Amir's list hold only scans with a supplier, and a bill number or an amount, read, and no likely Marg bill.
-- REPORT every pharmacy-lane scan this rule catches on your day, by stamp.
-- **Not here:** how clinic consumables are grouped (procedure room, X-ray films, others), warranty cards, the Dr MK expense lane. Those are the parent project's, on the owner's word of 03-Oct (D664).
+- A pharmacy-lane scan on which neither a bill number nor an amount was read (S440's `no_digits`), or whose reading is headed Estimate, Challan or Quotation, is never in *Marg ka intezaar*, never on Amir's list or in its count, and never counted on the register as waiting for Marg.
+- It is a card in §3.5: **"Kya yeh dawa (pharmacy) ka bill hai?"** with two buttons and nothing to type:
+  - **"Haan, pharmacy ka bill"** — the scan stays in the pharmacy lane and leaves this card (if its supplier is not known, the supplier card comes next).
+    - If figures were read on it (an Estimate or Challan heading with a number or an amount), it is matched by §4 like any scan.
+    - If nothing was read, it is an **unread pharmacy paper**. **It never pairs by itself.** When exactly one unscanned Marg bill of that supplier is dated within `purchase.unread_pair_days` (7) either side of the scan day, now or later, a kind-1 card is asked: "Kya yeh <SUPPLIER> ka bill <number> hai?" — reception reads the number on the paper. "Haan" pairs it; the row reads "Has its scan" with the note "paired by reception; nothing was read on the paper". "Nahi", or two such bills, or none: it waits.
+    - Until it is paired it shows on the register as "unread pharmacy paper", where a checker may complete it in the asset app as today.
+  - **"Nahi, pharmacy ka nahi"** — the scan leaves the pharmacy lane for the asset app's clinic lane, through the asset app's existing re-lane route (`/bills/<id>/lane`, the one S440's "Galat lane" uses). Its exact lane is set there later by Shavez or the owner; reception is not asked. If that route cannot be called from here, the button opens the asset app's own control for that scan; say which you built.
+- S440's line "Number / amount nahi padha gaya — manager isse theek karega" goes.
+- **Not here, the parent project's (D664):** how clinic consumables are grouped, one PDF for a bill and its warranty cards, the Dr MK expense lane.
 
-### 3.7 One duty reads a wrong figure — `claude_code_briefs/DUTY_MAP.json`
+### 3.7 The old page stays one tap away
 
-`manoj.returns_ok` reads 7 in the staff-eye walks of S446 and S452, while the owner's own line reads 3. The duty's `due_sql` does not apply `returns.act_from` (02-Sep: the owner's ruling that earlier returns are accepted). Make it read the rule the owner's line reads. REPORT both figures before and after.
+- `porders.simple` = 1 serves these screens. Set to 0, everyone is back on today's page.
+- With it on, `/finance/porders?old=1` serves today's page. A small link at the foot of the home, "Purana page", for the owner and Shavez only.
+- Today's routes keep working; the new screens call them where they can.
 
-## 4 · Pins
+### 3.8 Screens the mock does not show — build them in the same pattern
 
-S452's TO pins, from `REPORT_S452.md`, each read live before the first edit. `porders.py` and `porders.html` were moved by the parent's S441 and by S444: read them whole from the box. `reports_tile.py` and `sanjeevni_approvals.py`: read live.
+The supplier card of §3.5; the second-scan wording of kind 1; S441's cards; the tick list of "Koi paper nahi mil raha?"; an arrived order's line in the scan list; the list of orders when more than one waits in "Maal aaya?"; a supplier with no phone; `order.channel=whatsapp_tap`; the owner's English. Put a picture of each (a saved page from the walk) in the kit and name them in the report, so the owner can look.
 
-Not touched: `finance_app.py`, `portal.py`, `tile_grants.json`, `finance_approvals.html`, `asset_register.py`, `packs.py`, `stock_app.py`, the crontab (the 23:59 re-match stays), the medical PC.
+## 4 · PART B — a scan is paired with its Marg bill on what a scan reads well (`purchase_app.py`)
 
-## 5 · Walk (scratch copies of `finance.db` and `assets.db`; rows keyed W454*; dates from today)
+One set of rules, in one function, used by the matcher, the staff's questions, the register and the Sarvam counter. Two pages must not be able to disagree about a bill.
 
-- **The rules, each on a crafted pair and on the September pair that showed it.**
-  - "GUNINA PHARMACEUTICALS PVT. LTD." and "ESS KAY AGENCIES (EXTN)" agree with Marg's spelling. The shop's own name does not count as a supplier.
-  - "YS/0585/" plus the financial year agrees with 585. A licence-shaped reading does not agree with anything. A financial-year run alone never links a bill.
-  - A date with the year wrong agrees; with the month wrong it does not.
-  - A total Rs 6 off is verified with the difference shown; Rs 243 off is *Amount milao*.
-  - A wrong pair is not made: two bills of one supplier with the same amount and neighbouring numbers stay apart.
-- **The register.** On the box's own data the head line's figures add up to the Marg bill count; every bill is in exactly one state; the scans below are each in one state; the same bill shows the same state on the register, on *Scan ka kaam*, on Amir's list and on the Sarvam page.
-- **Whole.** A crafted month with every bill verified reads "N of N ✓". One bill accepted without paper keeps it whole and is named. Undoing it opens the month again.
-- **Paper nahi mila.** The reception login taps it; the owner's Needs-you carries the line; his tap closes it; each step one audit row.
-- **Paper par kya likha hai?** Paper = Marg verifies and teaches. Paper ≠ Marg lands on Amir's *Marg sudhar* and clears on a crafted export.
-- **Items.** A crafted bill whose lines add up carries the tick; one that does not says by how much. A one-line verified bill teaches its name; a two-line bill with equal quantity and rate on both lines teaches nothing.
-- **The Sarvam page.** Punctuation and prefixes are not counted wrong. September's header figures equal §2's "wrong in substance" column, or the difference is explained row by row.
-- **Late work.** With a crafted *Scan karo* line 4 days old: Shavez's line shows, the owner's Needs-you shows; both leave when the scan arrives.
-- **The bank advice.** As amir, darpan, bhati and the reception login: the Vendor payments page answers and holds no account number and no IFSC (search the served bytes for each seeded account string); the letter and the pack refuse. As shavez and the owner: unchanged, byte for byte where nothing else moved.
-- **Which paper.** A crafted pharmacy-lane scan with no number and no amount: it is in "Yeh kaunsa kagaz hai?", not in *Marg ka intezaar*, not on Amir's list and not in his count. "Pharmacy ka bill hai" with a number and an amount typed: it is matched to its crafted Marg bill. "Clinic ka saaman": it leaves the pharmacy lane (on the scratch `assets.db`) and every pharmacy page. A crafted scan headed "Estimate" with an amount read is caught too. Two Yuvika papers, one printed and matched, one unread: only the unread one is asked about.
+**How a field agrees**
+
+- **Supplier:** start from what `_vendor_match` and `supplier_key` do today, and add only this: punctuation and brackets are dropped; "&" equals "AND"; the standalone words PVT, LTD, P, CO and M/S are dropped (never a letter inside a name); a trailing BAREILLY is dropped. Then the learnt spellings (`purchase_scan_alias`). The shop's own name, or a heading such as "WHOLE SALE CHEMIST & DRUGGIST", is never a supplier: the field is "not read".
+- **Bill number:** Marg's number, leading zeros dropped, equals **one whole run of digits** in the scan's reading. A run that is the financial year, and any reading shaped like a drug-licence number (ending "/BLY" or the like), is never the bill number. Letters in Marg's number are compared by their digit run, as S439 does.
+- **Date:** the day and the month agree. A year other than Marg's is a misreading and is ignored.
+- **Total:** within Rs 1 is equal (paise; fixed, not a setting). Up to `purchase.total_noise_rs` (10) agrees, with the difference shown (the D622 rule). More differs.
+
+**The states of a Marg bill that has a scan — each bill in exactly one**
+
+- **Amount differs:** paired, and the total differs by more than the noise. One card (§3.5, kind 2). After the answer the row is Verified or Has its scan (the paper agreed with Marg), or it stays here and says "the paper reads <amount>".
+- **Verified:** the total agrees, the bill number agrees, and at least one of supplier and date agrees. This is how the matcher pairs by itself. If the other of the two was read differently or not read, the row is still Verified and carries one note saying what the scan read.
+- **Has its scan:** paired, the total agrees or was not read, and the row is not Verified: the bill number was read differently or not read, or neither supplier nor date agrees. Such a pair comes from reception's "Haan" (§3.5 kind 1, §3.6) or from the auto-link below. Marg's entry stands. The row carries one note saying what the scan read. Nobody is asked.
+
+A link that exists today is never undone by these rules; they only give it its state.
+
+**What is already known is not asked — only if the record shows it.** REPORT what the intake link (S403, S440's `from`) leaves on a scan's record today. Then:
+
+- If the record shows the scan was made from a line of this screen (§3.3, §3.4): its supplier is taken from that line, the supplier card is not asked, and the §3.6 card is not asked (it is a pharmacy paper). **It settles nothing by itself:** the scan still pairs only by §4's rules or by reception's "Haan". A wrong paper scanned from a line must not settle that line's bill.
+- If the record shows nothing of the kind: nothing changes; the scan is treated as any other. The asset app is not edited to make it show.
+
+**The system asks less (auto-link).** Before a kind-1 card is made: if the supplier agrees, the amount is within Rs 1, and **exactly one** unscanned bill of that supplier carries that amount, pair them with no card (audit `auto_link`). Two candidates: a card.
+
+Each Verified bill teaches the supplier's printed spelling, as today.
+
+**Before anything else of this part is placed**, run the rules on September on a copy and REPORT: how many of the 12 unlinked scans now pair by themselves, each by stamp and bill; how many of the 63 are Verified; how many questions are left for reception; every row whose state changes. **If a rule pairs a wrong scan and bill on the copy, stop and report.**
+
+## 5 · PART C — orders are worked out from the count, not from Marg's stock (`order_rules.py`)
+
+- `order.stock_basis` = `count` (the default) or `marg`.
+- On `count`, a medicine's shelf is: **its counted quantity at its newest count** (count 1 of 06-Sep; a later spot or full count of that item replaces it) **+ purchases since − sales since + returns**, from the same sources and the same boundary the orthotic shelf uses (`porders.ortho_items`), plus what is marked arrived on an order and is not yet in Marg (today's in-transit rule).
+- An item with no count row keeps Marg's figure. A result below zero is taken as zero and named. If a later spot count is not stored as a quantity for the item, say so and use the full count.
+- The staff see only the quantity to order. Both figures, where they differ, go into `owner_state`'s data and onto the old page. If drawing them on the owner's approvals page would need an edit to `finance_approvals.html`, do not edit it: the old page is enough; say so.
+- When the count's vouchers are filed in Marg the two figures agree by themselves. Nothing has to be switched.
+- REPORT: for every line of today's plan, both figures and what changes in the proposal (lines added, dropped, quantity changed); the five items with no count row; and, since purchases reach Marg two to three days late, how many planned lines have a delivery in that gap that no arrival tap covers.
+
+## 6 · PART D — Amir: nothing new is asked of him (`amir_day.py`, `purchase_app.py`)
+
+**The stage of his soft start is one setting,** `purchase.entry_mode`: `paper` (the default: he enters from the paper bill and the physical register, as today) → `both` (he may also use the scanned file) → `digital` (scans go into Marg's digital entry without waiting for his visit; Marg takes a photo and a PDF, both). The owner moves it when he chooses.
+
+- **On `paper`:** his step 2 card is headed **"Scan ho chuke bill (N)"** and reads: "Reception ne jo bill scan kiye hain aur Marg mein abhi nahi hain, woh yahan dikhenge. Aap apne register se jaise daalte hain, waise hi daaliye. Chahein to bill ki file yahan se le sakte hain." The downloads stay. The line "N scan abhi reception ki jaanch mein hain — Marg mein mat daaliye" is not shown. His step 7 never lists these as work. No reminder and no Needs-you line comes from them. The duty-map row has no due state.
+- **On `both`:** S452's words and its grey line return. Nothing else changes yet.
+- **`digital` is not built.** The setting refuses the value with one line saying so.
+- His list never holds an unread paper (§3.6).
+- **Nothing in this kit adds a new kind of line to *Marg sudhar*, to his board or to his step 7.** What reaches him today for a counted month (the amount path of S440, the double entry of S440) reaches him as today. For a practice month, nothing new reaches him at all.
+- The physical purchase register stays the lock against double entry while both flows run: nothing here replaces it.
+
+## 7 · PART E — the owner (`purchase_app.py`, `sanjeevni_approvals.py`, `reports_tile.py`)
+
+### 7.1 The month's register — the Scan links page
+
+`/finance/purchase/page/scans?month=YYYY-MM`, default the newest month. No second page.
+
+- **One row per Marg purchase bill of the month**, in exactly one state:
+  - **Verified** (§4).
+  - **Has its scan** — with its note (§4).
+  - **Amount differs** — both amounts, and "waiting for reception" or "the paper reads <amount>".
+  - **No scan** — with the note "scan <stamp> is probably this bill" where a question is waiting at reception; "paper not found" where reception said so; the days waited, in a counted month only.
+  - **Entered twice in Marg** — as S440 marks it today; nothing new. The two entries are one row; this state wins over every other, whether or not one of them has a scan.
+  - **Accepted without paper** — the owner's own tap on a "paper not found" row, audited, undoable; only in a month from `purchase.register_from` on.
+- **Under them, the scans with no Marg bill**, each in one state: probably a bill already in Marg · supplier not known · to be named by reception · unread pharmacy paper · waiting for Marg's entry · second scan.
+- **The head line:** the count of each state, **Verified and Has its scan shown separately**, and "N of M settled" (Verified, Has its scan, Accepted without paper). It reads "M of M ✓" with its date when every bill is settled and no scan of the month is open. A practice month shows the same counts.
+- **At the foot, one block:** the Sarvam counter's header figures for the month's linked bills (§7.4) and its item figure, with the line "Items are not judged from the scan", linking to the Sarvam page.
+- **A month before `purchase.register_from` is headed "Practice month: nothing here raises an alert."** It has no accept-without-paper tap, no day counts, and raises no Needs-you line.
+- The same one line on the owner's approvals page, Month section, through `sanjeevni_approvals`'s existing lines.
+- Phone width: no sideways scroll; the sticky BACK bar and the up-arrow stay.
+
+### 7.2 Is the new flow ready? — one line a week
+
+On the register's head and in the Month section: **"Last 7 days: N bills entered in Marg · n had their scan before the entry · m paired with no tap."** This is what tells the owner when to move `purchase.entry_mode`. English, no alert.
+
+### 7.3 What reaches a person — only for months from `purchase.register_from`
+
+- **Shavez's morning page** (`reports_tile`): one line while a line of "Bill scan karna hai" waits that belongs to a counted month (a Marg bill of that month with no scan, or an order that arrived in it with no bill scan): "Bill scan baaki: N · sabse purana X din", with "Kholiye", opening the reception screen. September's lines stay in the staff's lists for practice and are not counted here.
+- **The owner's Needs-you:**
+  - the oldest counted line of "Bill scan karna hai" is older than `purchase.scan_wait_days` (3): the count and the age;
+  - a paper reception could not find: his tap accepts it;
+  - a scan in the state "waiting for Marg's entry" (a read pharmacy bill with no Marg bill and no likely one) for more than `purchase.entry_wait_days` (7): for his eyes only, never Amir's. An unread pharmacy paper and a scan with a question open are not counted;
+  - a supplier on today's order list with no phone number.
+- **`DUTY_MAP`:** rows for "order from today's suppliers", "say what arrived", "scan the bill", "answer the question about a scan", each with this screen as its door and due only for work of a counted month (ordering and arrival are always counted); Amir's scan list with no due state. The staff-eye walk asserts them.
+
+### 7.4 The Sarvam counter, and the items
+
+- **F-690:** the Sarvam page counts by §4's rules. Punctuation and prefixes are not misses. A date, a bill number or a supplier read differently on a paired scan is a miss here, and only here.
+- **Item lines are not judged from the scan.** MEASURE and REPORT only, for August and September: for how many Marg bills do the lines' own value (quantity × rate, less discount, plus tax, from `purchase_line`) come to the bill's amount within the noise setting, and what the usual differences are. No screen is built from it in this kit.
+- **Learning the suppliers' item names is deferred** to the kit that follows that measurement: it changes only the Sarvam item figure, and it should rest on the measured facts.
+- Batch and expiry are not verified from a scan. They belong to the shelf (the arrival, the spot counts, near-expiry).
+
+## 8 · PART F — Vendor payments: the owner and Shavez only (D663) (`purchase_app.py`, `supplier_msg.py`)
+
+S452 closed the bank advice Excel to everyone but the senders. The Vendor payments page still opens for every medical login, and draws S265's annexure with every supplier's full account number and IFSC.
+
+- **The Vendor payments page** (`/finance/purchase/page/pay` and its month pages), **the covering letter, the annexure, the bank advice and the payment pack** (S265, S380), on screen and in print, open only for the logins in `supplier_msg.senders` (today: manoj, shavez). Every other login gets the page's own refusal, and the "Vendor payments" link is not drawn for them.
+- **No page a login opens under `/finance/purchase/` or `/finance/amir/` serves an account number or an IFSC to a login outside that list.** REPORT each address you closed.
+- **Not touched: the reception phone's keyed message queue** (S407, `/finance/api/supplier-msg/next`). It is not a login; the suppliers' payment notices carry the account number and IFSC by the owner's own ruling.
+- **Amir keeps what the owner ruled for him in S452, on his own pages:** the one NEFT line, and his month pack on step 2 ("Paid NEFT sheet (PDF)" and the two bank statements), once the month is confirmed. That is not the payment pack above and is not closed. His Paid NEFT sheet carries supplier and amount only; if it carries account numbers today, take them out of his copy.
+- REPORT every link to the Vendor payments page from a staff screen, and that it is gone for those logins.
+
+## 9 · PART G — one duty reads a wrong figure (`DUTY_MAP.json`)
+
+`manoj.returns_ok` reads 7 in the staff-eye walks of S446 and S452 while the owner's own line reads 3. Its `due_sql` does not apply `returns.act_from` (02-Sep). Make it read the rule the owner's line reads. REPORT both figures before and after.
+
+## 10 · The settings, all editable by the owner where he edits Sanjeevni's settings today
+
+| key | default | what it does |
+|---|---|---|
+| `porders.simple` | 1 | the one-task screens; 0 returns the old page |
+| `order.channel` | call | call, or whatsapp_tap; whatsapp_auto is refused |
+| `order.stock_basis` | count | count, or marg |
+| `purchase.entry_mode` | paper | paper, or both; digital is refused |
+| `purchase.register_from` | 2026-10-01 | the first counted month; earlier months are practice |
+| `purchase.total_noise_rs` | 10 | a total difference up to this is not a question |
+| `purchase.scan_wait_days` | 3 | the owner hears of a bill waiting to be scanned after this |
+| `purchase.entry_wait_days` | 7 | the owner sees a scan not yet entered in Marg after this |
+| `purchase.arrival_scan_days` | 7 | how long an arrived order asks for its bill's scan |
+| `purchase.unread_pair_days` | 7 | how near in date a Marg bill must be for reception to be asked whether an unread pharmacy paper is that bill |
+
+Say in the report where each is edited. A key with no editing place today goes on the card where the order rules are edited, if that needs no parent file; otherwise on the old page.
+
+## 11 · Pins — S452's TO, each equal to the 03-Oct 03:12 nightly bundle; read each live before its first edit
+
+| file | pin |
+|---|---|
+| `purchase_app.py` | `341c663e` |
+| `amir_day.py` | `85f208d0` |
+| `supplier_msg.py` | `5cc35d2a` |
+| `porders.py` | `3620b374` |
+| `porders.html` | `7a6799ae` |
+| `order_rules.py` | `00a60efb` |
+| `reports_tile.py` | `8a987041` |
+| `sanjeevni_approvals.py` | `792f4a9a` |
+
+Not touched: `finance_app.py`, `portal.py`, `tile_grants.json`, `finance_approvals.html`, `asset_register.py`, `packs.py`, `stock_app.py`, `stock_amir.html`, `darpan_kal.py`, the medical PC, and the crontab except `order_rules`'s own lines if the carry needs one (declare it).
+
+## 12 · Walk (scratch copies of `finance.db`, `assets.db` and the spine; rows keyed W454*; dates from today)
+
+- **The home.** As the reception login with crafted work of each kind: the scan button and the four rows with their counts, no other text on a row. With one kind empty: that row is absent. With nothing: the button and "Sab kaam ho gaya". No stock, cover or rule figure in the served page. As the owner: the same screens in English.
+- **Order.**
+  - A crafted open proposal: its card; with six open, four cards and "Baaki 2 supplier dikhaiye". The supplier screen lists the lines in the order's unit; the Call link is a `tel:` link, the number shows under it, and its tap writes one audit row; "Order ho gaya" makes one order with its lines, marks the proposal ordered by the named person, and the card is gone. A second tap within ten minutes makes no second order.
+  - Call tapped, the screen left: the proposal is open and the card reads "call kiya tha, order baaki".
+  - A quantity changed by the text button goes into the order.
+  - An unmade proposal: after `nightly()` it is on the next working day, once, with lines planned on that day's stock; a blocked day and a holiday are skipped; an interim proposal is not made beside it; when stock has arrived it closes itself.
+  - A supplier with no phone: no Call button, the tap still works, the owner's Needs-you names it.
+  - Frozen, paused, held and unapproved: nothing to order is shown; the routes refuse as today.
+  - `order.channel=whatsapp_tap`: today's send button, no "Order ho gaya", and S410's walk passes on it. `whatsapp_auto` is refused with its line.
+  - An orthotic shortage: its card in the same list, ended the same way.
+  - The 12:00 notice counts the suppliers still to be ordered. Darpan's card line reads what it read before.
+  - No phone number appears in the walk's output.
+- **Arrival.** Two orders waiting: the list, then one order. All received in one tap. One line short with a quantity, one "Nahi mila": saved by today's rules, the short carries as today. "Abhi nahi aaya" saves nothing. After it: both buttons. "Baad mein" puts the order under "Bill scan karna hai". It leaves on a crafted scan of that supplier made after the order, the evening before the arrival tap included; on a crafted Marg bill, whose own line takes its place, the list's count unchanged; and on the eighth day. Two arrived orders of one supplier: the older is served first.
+- **The scan list.** Grouped by supplier, five lines, "Agle 5". "Paper nahi mila" is offered on Marg-bill lines only, takes the line off the staff's list and puts it on the register.
+- **The questions.** One card at a time with "Sawaal i / N". Kind 1 on a crafted case and on September's own, the second-scan wording included. Kind 2: the two amounts are not labelled; in a counted month the answer does exactly what S440's walk expects; in a practice month it is on the register only, and **no row is added to any list of Amir's** (count his *Marg sudhar*, his board and his step 7 before and after); the rows that were on his lists before the kit are still there. Kind 3 with three likely suppliers. S441's two questions as cards. A paired scan whose date or bill number differs makes **no card**. "Baad mein" moves the card to the end. After the last: finished.
+- **Is it a pharmacy bill?** A crafted pharmacy scan with no number and no amount is a card, is not in *Marg ka intezaar*, not on Amir's list, not in his count; S440's "manager isse theek karega" line is in no served page. "Haan" with the supplier unknown: the supplier card comes next. "Haan" with nothing read: it shows on the register as an unread pharmacy paper and **pairs with nothing by itself**; with one crafted Marg bill of that supplier inside the window a kind-1 card is asked, and its "Haan" makes the row "Has its scan" with its note; with two such bills, or one outside the window, no card. "Haan" on an "Estimate" with a number and an amount read: matched by §4. "Nahi": it is in the clinic lane on the scratch `assets.db`. A scan headed "Estimate" with an amount read is caught too. Of two Yuvika papers, one printed and paired, one unread, only the unread one is asked about.
+- **The rules.** "PVT. LTD.", "(EXTN)", "&" against "AND" and a trailing BAREILLY agree with Marg's spelling; a "P" inside a name is kept; the shop's own name is "not read". A printed number with its series and year agrees with Marg's short number; a licence-shaped reading agrees with nothing; a financial-year run alone pairs nothing. A wrong year agrees. A wrong month with the supplier, the number and the total agreeing is Verified with its note; a misread bill number with the rest agreeing is "Has its scan" with its note. No bill is in two states. Rs 6 off agrees; Rs 243 off is "Amount differs" with one card. The auto-link pairs one candidate, writes its `auto_link` audit row, and asks on two. Every link that existed before the run still exists after it. A bill entered twice is one row in that state, with or without a scan. A scan made from a line of the screen (if the record shows it) is not asked its supplier or the §3.6 card, and a wrong paper scanned from a line does not settle that line's bill. Two bills of one supplier with the same amount and neighbouring numbers stay apart.
+- **Stock basis.** A crafted item: counted 100, 30 sold, 20 bought and 2 returned by a customer since: shelf 92 whatever Marg says; with 10 marked arrived and not in Marg: 102; with no count row: Marg's figure; with a later spot count: that count is the base; below zero: zero and named. Both figures in `owner_state` and on the old page, neither on a staff screen. On `marg` the plan equals today's plan line for line.
+- **Amir.** On `paper`: the new heading and words, the downloads, no grey line; step 7 lists nothing of it; no Needs-you from it. On `both`: S452's walk passes on his step 2. `digital` is refused with its line. An unread paper never reaches him in either. His paid NEFT sheet holds no account number.
+- **The register.** The head line's figures add up to the Marg bill count, Verified and Has its scan counted apart; the foot block's figures equal the Sarvam page's; every bill in one state; the same bill in the same state on every page; the same line in the approvals Month section. A practice month: the heading, no accept tap, no day counts, no Needs-you. A counted month: accept without paper settles the row and is undoable. The weekly line on crafted rows.
+- **What reaches a person.** A crafted counted-month line four days old: Shavez's line and the owner's Needs-you show, and leave when the scan arrives. The same in a practice month: neither shows, and the line is still in the staff's list. A crafted read scan waiting for Marg's entry for eight days: the owner's line, nothing on Amir's pages; an unread pharmacy paper of the same age raises no line.
+- **The settings.** Each of the ten is changed on the owner's screen and takes effect: the old page, the channel, the stock basis, the entry mode, the register's first month, the noise, the three waiting times, and the unread paper's pairing window.
+- **The Sarvam page.** September's header figures equal §2's "in substance", or the difference is explained row by row.
+- **Vendor payments.** As amir, darpan, bhati and the reception login: the page, the letter, the annexure, the sheet and the pack refuse; no "Vendor payments" link on their screens; no page they can open under `/finance/purchase/` or `/finance/amir/` holds a seeded account string. As shavez and the owner: unchanged. The phone's keyed queue answers as before.
 - **The duty.** `manoj.returns_ok` equals the owner's returns line on the box's own data.
-- **Staff-eye walk** (CLAUDE.md, "Every duty has a door") for the reception login, shavez, amir, darpan and the owner.
-- **Earlier walks re-run:** S439, S440, S441's scan checks, S446, S452 — each adjustment named.
+- **The old page.** `?old=1` and `porders.simple=0` serve today's page, and S440's and S410's walks pass on it. "Purana page" is on the home for the owner and Shavez, and for nobody else.
+- **The pictures of §3.8** are in the kit, one saved page each.
+- **Staff-eye walk** (CLAUDE.md, "Every duty has a door") for the reception login, darpan, shavez, amir and the owner, at phone width.
+- **Earlier walks re-run:** S403, S410, S414, S417, S439, S440, S441's scan checks, S444, S446, S452 — each adjustment named.
 - **Negative control** on the box as it is.
 
-## 6 · Done means
+## 13 · Done means
 
 Kit `deploy_kits\S454_BILL_REGISTER\` · installed · published · `claude_code_briefs\REPORT_S454.md`, owner lines first:
 
-- September's line as the register now reads it, and August's.
-- How many bills became verified by the new rules without anyone touching them.
-- The bills that still have no paper on the server, by supplier, bill number, date and amount — the list reception scans from.
-- How many of Marg's bills add up to their own total, and what that says about the item check.
-- What reception, Shavez and Amir will each see, in their own words.
-- That the bank advice now opens for you and Shavez only, and any other page that still shows an account number to staff.
-- That a slip with no bill number and no amount can no longer reach Amir, and what reception sees for one.
+- What the reception staff now see, screen by screen, in their own words, and the pictures of the screens the mock did not show.
+- How an order is made by phone, and what happens when the call does not go through.
+- What the order quantities are worked out from now, and how the first day's proposals changed.
+- September as the register reads it, and how many bills paired themselves under the new rules.
+- That Amir's work is unchanged, and what his card says.
+- That Vendor payments opens for you and Shavez only, and that Amir keeps only his own Paid NEFT sheet, with no account number on it.
+- The built screens 8, 9, 10, 11 and 13 as pictures, since they were corrected after your last look at the canvas.
+- The settings you can change, and where.
+- **What is not built, and why.** At least: WhatsApp sent by the reception mobile by itself; scans going into Marg's digital entry without Amir; the items check as a screen; learning the suppliers' item names; the medical PC's refusal note.
 
 Ending with:
 
 ```
-https://followup.dr-manoj.in/finance/purchase/page/scans
+https://followup.dr-manoj.in/finance/porders
 ```
 
 ```
-https://followup.dr-manoj.in/finance/purchase/page/sarvam?month=2026-09
+https://followup.dr-manoj.in/finance/purchase/page/scans
 ```

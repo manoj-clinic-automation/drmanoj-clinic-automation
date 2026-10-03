@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S290 close** (the parent), 03-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
+# OWNER TO-DO — LIVE · refreshed at the **S291 close** (the parent), 03-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S290 close** (the parent), 03-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S288 close** (the parent), 02-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
 
@@ -8,9 +10,9 @@
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
-*Detail: `START_HERE_SESSION_291.md` · `S290_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below date from 02-Oct morning; your board is current for the pharmacy.*
+*Detail: `START_HERE_SESSION_292.md` · `S291_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below date from 02-Oct morning; your board is current for the pharmacy.*
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S290 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S291 close
 
 **1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries only this session's record; no server line follows it.
 
@@ -18,36 +20,55 @@
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · AT THE RECEPTION DESK — the LAN cable back into the reception PC.** It was out on the night of 02-Oct. On the cable that PC reaches the clinic server; the last test of its setup then runs by itself, and the Claude app is removed from it afterwards.
+**2 · ONE WORD — yes or no: shall your PC pick up reception's Docterz reports from the clinic Drive by itself?** Reception's evening export reaches the server, but your portal shows the day only after your own PC has seen the files. Until I build this on your yes, on a morning when yesterday is missing from your portal, this one line on your PC brings it in within 15 minutes:
 
-**3 · ONE WORD — the follow-up tracker on the server (C·2): yes or no.** One evening when the PC copy stops being live and its records move to the server; the PC copy stays as the fallback.
+```
+cmd /c copy /y "H:\My Drive\Clinic Records\Docterz exports\*.csv" "D:\Downloads\"
+```
 
-**4 · THE AUGUST ACCOUNTANT PACK — Send, when you are satisfied.** 20 of 25 ready, Amir's pack ready; still missing the clinic's Yes Bank current statement and the lab and expense bills.
+**3 · THE RECEPTION PC'S LAN CABLE — when convenient.** It shows no link even pushed home: try a different cable or wall socket. If a known-good cable shows nothing, it is the PC's own socket — the vendor's. Not urgent: that PC is on the clinic Wi-Fi now.
+
+**4 · THE RECEPTION PC'S WINDOWS — your decision, no hurry.** It has had no Windows security fixes since November 2025 and cannot run Windows 11. "Enroll now" on its Windows Update screen is worth one try after clinic hours (it asks for a Microsoft account sign-in); the lasting answer is a new PC for reception.
+
+**5 · ONE WORD — the follow-up tracker on the server (C·2): yes or no.** One evening when the PC copy stops being live and its records move to the server; the PC copy stays as the fallback. It also ends item 2 for good.
+
+**6 · THE AUGUST ACCOUNTANT PACK — Send, when you are satisfied.** 20 of 25 ready, Amir's pack ready; still missing the clinic's Yes Bank current statement and the lab and expense bills.
 
 ```
 https://followup.dr-manoj.in/finance/packs?month=2026-08
 ```
 
-**5 · AT YOUR OWN PACE — the contacts workbook.**
+**7 · AT YOUR OWN PACE — the contacts workbook.**
 
 ```
 D:\Downloads\margsync\_config\contacts_S282\CONTACT_GROUPS_TO_UPDATE.xlsx
 ```
 
-**6 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today**, saved in `D:\Downloads` (F-629).
+**8 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today**, saved in `D:\Downloads` (F-629).
 
-**7 · WHEN YOU HAVE ONE — the "other works" you want Tailscale for.** It is on the reception PC, the Medical PC, your PC and your phone.
+**9 · WHEN YOU HAVE ONE — the "other works" you want Tailscale for.** It is on the reception PC, the Medical PC, your PC and your phone.
 
 *Closed by your word of 02-Oct and not on this list: the technician of 25-Sep, AnyDesk and UltraViewer, passwords, the Windows activation on the reception PC.*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The last proof on the reception PC** — the second job door from that PC's side; then the Claude app is removed from it by a job.
-2. **My own housekeeping:** one whole read of the finance app's main file · the firewall step into the reinstall kit · the build lock in my installers · the server reachable from a phone hotspot · the reception PC's Wi-Fi, read at the desk.
-3. **The Medical PC's and your PC's buttons on the *Clinic PCs* tile.**
-4. **On your word:** the follow-up tracker move · the contacts · the mail flood (low) · the portal tiles (after the pharmacy move).
-5. **Held at your word:** the Callback Tracker on the server.
+1. **On your yes: your PC picks up reception's Docterz reports by itself** — or the tracker moves to the server.
+2. **A short plan and a mock for your ruling on clinic consumables, one PDF per purchase and the *Dr MK expense* lane** — no build until you say.
+3. **My own housekeeping:** the Wi-Fi driver step into the reinstall notes · each PC's Windows currency on the health page · the build lock in my installers · a tidy-up of the finance app's main file (your OK first).
+4. **The Medical PC's and your PC's buttons on the *Clinic PCs* tile.**
+5. **On your word:** the contacts · the mail flood (low) · the portal tiles (after the pharmacy move).
+6. **Held at your word:** the Callback Tracker on the server.
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S291 CLOSE — 03-Oct-2026 (the parent)
+
+- ~~**The publish of the S290 record**~~ — done by you 04:28 on 03-Oct; and the publish of the reinstall kit, 05:51 (S291).
+- ~~**The last test of the reception PC's setup**~~ — passed 04:24 through the second job door; the Claude app was then removed from that PC by a job (S291). *The LAN cable was not what brought it back — that PC came back on Wi-Fi; the cable is item 3 above.*
+- ~~**The firewall step in the one-click reinstall**~~ — in the kit your *Clinic PCs* tile serves, rehearsed on that PC (S291).
+- ~~**The server from a phone hotspot**~~ — one record you added at GoDaddy; proven from the reception PC (S291).
+- ~~**The reception PC and the clinic Wi-Fi**~~ — on `Airtel_Airtrl_mano_8080` after the Intel driver you installed (S291).
+- ~~**02-Oct's Docterz day on your portal**~~ — there since 07:50 on 03-Oct (S291); the lasting fix is item 2 above.
+- ~~**One whole read of the finance app's main file**~~ — done; nothing dead, a short tidy-up list kept (S291).
 
 ## ✅ DONE AT THE S290 CLOSE — 02 → 03-Oct-2026 (the parent; the reception-PC chat folded in)
 
