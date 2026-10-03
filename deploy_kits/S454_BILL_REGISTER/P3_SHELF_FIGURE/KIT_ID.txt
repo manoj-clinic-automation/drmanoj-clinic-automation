@@ -1,0 +1,5 @@
+kit id S454_BILL_REGISTER
+part P3_SHELF_FIGURE (S454 section 9: one shelf figure -- the last count, then every sale, return and purchase since, and what arrived and is not
+in Marg yet; the system's own list works from it with Marg's figure beside it for the owner; the gap at each closing; F-696 gap (3) repaired:
+the 20-character sale name)
+session 283 (Sanjeevni) · 03-Oct-2026 · decision D667 · fault F-696
