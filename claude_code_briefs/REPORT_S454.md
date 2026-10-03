@@ -318,6 +318,26 @@ Yuvika with 2 items.
   text younger than three days at that moment (after 04-Oct 13:00, those of 01-Oct 13:00 onwards) is offered to the reader again. A text the
   reader then takes is sent once. A text still refused is not noted, because it was kept before.
 
+### Tonight's publish, read back on the box, and the build lock
+
+- **The folders went out in other sessions' PUBLISH_ALL**, swept from the working copy after they were final:
+  - P3B_FIRST_DAY in 99a7200 (18:50:38 IST);
+  - P5_ITEMS, P4A_REFUSAL_DOOR and P4B_REFUSAL_WATCHER in 73debb0 (19:59:29 IST).
+  - Nothing in them changed after. `git diff HEAD` on the four folders is empty.
+  - This report went out in 2988380 (20:31:21 IST, my PUBLISH_ALL: NO_PHONE_NUMBERS clean, origin HEAD verified). The gate was also run by
+    hand over all 38 files this run added or changed: clean.
+- **On the box:** `/root/deploy/repo` was pulled `--ff-only` to 2988380 at 20:31:49 IST. The four folders pass `md5sum -c` (9, 10, 8 and 6
+  files) and are identical (`diff -r`) to the copies that ran. No `__pycache__` or `.pyc`. The duty map there is v5 (27d9d1b5), unchanged
+  tonight.
+- **All eight live files read back at their TO pins at 20:31 IST:** porders_s454 c3562c5b · order_sheet a5408df0 · scan_register 904f07b1 ·
+  order_rules 734fc6bc · stock_watch 6d4d660f · purchase_app 979391b6 · item_check 9000e376 · marg_door 6a236663. Healthz 200;
+  clinic-finance active. The 20:30 cron tick of `order_rules.py`, the first on P3B's file, ran cleanly.
+- **The build lock:** taken 19:17:02 IST (owner S454_BILL_REGISTER), held through P3B, part 5 and part 4A, released 20:32:00 IST. Healthz 200
+  at release.
+- **Not removed:** `/tmp/s454*` folders and logs left on the box by parts 1–3 (`/tmp/s454dev`, `/tmp/s454p1c_*`, `/tmp/s454p1d_*` …). Some may
+  hold scratch copies of finance.db. They are not this run's, so I did not delete them. The chat may want them cleared. This run's own
+  copies were removed.
+
 ### Part 1 · P1_ORDER_SHEET_RECEPTION — FROM → TO, read back on the box (install log 03-Oct 12:24:27 IST)
 
 | file | FROM | TO (md5sum after placing) |
