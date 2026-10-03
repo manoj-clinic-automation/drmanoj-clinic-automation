@@ -1,0 +1,2 @@
+kit id S468_FINANCE_SMALLS
+project parent (session 292, 03-Oct-2026) -- the self-test no longer stores its made-up bank statements in the live folders (three insertions inside selftest()); a read-only report names two salary advances; old tiny test scans are moved aside, never deleted

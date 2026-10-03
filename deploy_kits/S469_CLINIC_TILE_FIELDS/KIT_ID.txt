@@ -1,0 +1,2 @@
+kit id S469_CLINIC_TILE_FIELDS
+project parent (session 292, 03-Oct-2026) -- the clinic tile and the clinic exceptions answer a non-checker only what reception's entry page reads (the deposit banner; the days not filled); the checker unchanged; fields only, nobody refused; two edits of finance_app.py

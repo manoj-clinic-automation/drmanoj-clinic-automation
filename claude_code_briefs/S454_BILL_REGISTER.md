@@ -37,6 +37,8 @@ Written 03-Oct-2026 by the Sanjeevni chat (S283 post-close) from `S283_PURCHASE_
 
 If you must stop, stop at a part's boundary, say in the report exactly what is installed and what is left, and end. The owner then pastes the second line of §16.
 
+**From Part 3 on, the order is §19's, not the list above:** §18 first (folder `P3B_FIRST_DAY`), then Part 5, then Part 4's server side; only the medical PC's watcher waits for 04-Oct 13:00 IST. §17 is done (Parts 1C, 1D).
+
 **On a continued run, do §17 first** (corrections to Part 1, found when it was read live on 03-Oct), as its own small folder in the same kit, walked and installed before Part 2 is begun. It also adds a card with the reception phone's state and a test message (17.7).
 
 ## 0 · The rules this build stands on
@@ -728,3 +730,51 @@ Part 1 (installed 03-Oct 12:24 IST, with 1B at 12:28) was read against this brie
 - one sentence that the printed sheet now shows the whole open order, and how many lines it holds on a page;
 - the payment messages as you found them: waiting, sent, failed;
 - that the phone can be tested with a message to his own number, and the address of the card.
+
+## 18 · Before Part 4 — what the first afternoon of use showed (03-Oct)
+
+Parts 1, 1B, 1C, 1D, 2 and 3 were read against this brief by the chat on 03-Oct, with the live pages in the owner's login, read only. **They stand.** Reception scanned October's bills from "Maal aaya?" the same afternoon: five suppliers' orders closed by their scans. What follows is what that afternoon showed. Build it as folder `P3B_FIRST_DAY` in the same kit; walk it; install it; report it; then begin Part 4. Every cron's own command is run as a script in the walk, as Part 3 did (F-711).
+
+**18.1 Two bills in one scan (F-712).**
+
+- **The fact.** Scan B-0121 (Alisha, 03-Oct 16:44) is one PDF of two photographs, and they are two different Shivaaz bills: SF 003463 of 01-10 (Rs 7,658) and SF 003499 of 03-10 (Rs 4,747). The reading took the first. The second, the delivery of the 02-Oct order, was read by nobody; Shivaaz stayed under "Maal aaya?" and reception could not tell why. The owner was told to have SF 003499 scanned by itself.
+- **REPORT first** what the stored reading holds page by page (`assets.db` is read only; the asset app and its reader are the parent's, and `asset_register.py` moved today: read its hash live). Say plainly whether a second bill number or a second total on a later page can be seen from what is stored.
+- **If it can:** nothing is guessed. Reception gets one question under "Photo dekh kar bataiye": **"Is scan mein do alag bill hain?"** with the photo; **"Haan, do bill hain"** and **"Nahi, ek hi bill hai"**. On Haan: the line "Doosra bill alag se scan kijiye", and the scan stays as its first bill. On the owner's register the scan carries "two bills in one scan" until the second is scanned or the owner dismisses it. A bill that simply runs to two pages (the same number, "continued", one total) is never asked.
+- **If it cannot** be seen from what is stored: build no guess. Write the finding for the parent, one paragraph, in the report (what the reader would have to keep per page).
+- **Either way, one line on the staff's screens**, under the scan button on "Maal aaya?" and under "Naya bill scan karo": **"Ek scan mein ek hi bill."**
+
+**18.2 The save button on the arrival screen says what it does.** On "Bill nahi hai, ya kam aaya?", the button at the foot reads "Maal aa gaya" even when every line is tapped "Nahi mila" (a dealer who has no stock: Drug Deal, 03-Oct). While any line is tapped "Kam aaya" or "Nahi mila", the button reads **"Save kijiye"** (owner: "Save"); with every line "Aa gaya" it stays "Maal aa gaya". What it writes does not change.
+
+**18.3 A supplier's "P.L." is dropped like "PVT" and "LTD"** in §5's supplier rule (GUNINA PHARMACEUTICALS P.L. LTD. is the same supplier). REPORT September's Sarvam counter again: supplier misreads should fall from 4 to 3.
+
+**18.4 An order that arrived by its scan is on the way once, on `marg` too.** Part 3 mended the double count for `order.stock_basis = count` and left it on `marg` to prove "today's plan, line for line". That proof is made; mend it there as well. REPORT the plan's lines that change on `marg` (a scratch copy).
+
+**18.5 A credit note is a return, not a sale, in the spot-count reading (F-713).** `stock_watch.Spine.sales` sums a credit note's lines as sales (Part 3's finding). Read sales and returns apart, as `shelf_figure` does. REPORT, on a scratch copy of the live data, how many items' pace or expectation change and by how much, before placing. Negative control: the box as it is.
+
+**18.6 The owner's card says on what stock the system agreed.** The card "the system agreed on X of Y" keeps the figure stored when the sheet was loaded (5 of 21 for 02-10, on Marg's stock); it is the record and is not recomputed. Beside it, in a few words, the basis: "on Marg's stock" or "on the shelf figure". From the next sheet the comparison is taken on `order.stock_basis`.
+
+**18.7 The report.** Strike the stale line under "Not done" that says the reception phone was not set up: it was set up on 03-Oct (17.10), and the "Reception phone" card shows when it last asked. Name once more the file left on the PC with the phone book's numbers (`_scratch\S454_BILL_REGISTER\view\sheet_p1c.pdf`, git-ignored): the chat will have the owner remove it.
+
+**18.8 The walk for this.**
+
+- 18.1: a crafted two-bill scan asks the question (or, if it cannot be seen, the walk says so and checks only the staff line); a two-page single bill asks nothing. The line "Ek scan mein ek hi bill." is on both screens.
+- 18.2: the button's words in the three cases; the rows written are the same as before.
+- 18.3 to 18.5: each with the box as it is as its negative control.
+- 18.6: the card's words on a sheet loaded before and after.
+- The staff-eye walk, and the earlier walks, as Part 3 ran them.
+- No phone number and no key in any output.
+
+**Report**, owner lines first: what reception sees that is new (two lines at most), and whether two bills in one scan are now caught.
+
+## 19 · The order from here (the owner, 03-Oct evening: "Why not do it now?")
+
+Only one thing has a reason to wait: the medical PC's **watcher** (§10.3, step 3), whose restart would re-send the refused sale texts of 30-Sep and 01-Oct if it came before 04-Oct 13:00 IST. Nothing else does. So the order of the list in the head is replaced by this one, and a run begun on the evening of 03-Oct does everything but the watcher:
+
+1. **§18** — folder `P3B_FIRST_DAY`. Walk, install, report.
+2. **Part 5** — §11, the items. It does not depend on Part 4. Walk, install, report.
+3. **Part 4, the server side** — §10.2 (`marg_door` takes the PC's note and writes the refused row), with the owner's line, the reports tile and Darpan's card reading it. Walk it with a crafted note sent as the watcher will send it; install; report. A door that nobody yet knocks on is harmless, and it must be there before the watcher is.
+4. **Part 4, the medical PC** — build the watcher (and `marg_push.py` only if §10.1 needs it) and `KIT_MANIFEST.txt`, walk them on copies, and pack them in the kit. **Read the clock. If it is not yet 04-Oct 13:00 IST, do not place them on Drive `ToMedical\_kit` and do not deliver them: stop here**, say in the report that the watcher alone is left and why, and end. If it is past that hour, deliver, confirm by the heartbeat, and REPORT the retry it made at its start.
+
+The owner's line for the watcher, any time after 04-Oct 13:00 IST, is the same second line of §16.
+
+**The staff are at work while this runs** (Saturday evening). Each install restarts `clinic-finance` once, as Parts 2 and 3 did; take the lock, keep each restart single, and check `/finance/porders` answers after it. Nothing on a staff screen changes tonight but §18.1's one line and §18.2's word.
