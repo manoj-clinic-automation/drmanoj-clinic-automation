@@ -252,3 +252,7 @@ _scratch/
 # S290 (02-Oct-2026): the reception agent kit's config.json holds one setting -- how to start the Claude app on
 # that PC -- and no secret (read). The blanket *.json rule above was written for credentials (F-675, F-100).
 !deploy_kits/S448_RECEPTION_AGENT/config.json
+# S454 (03-Oct-2026), part 1: the kit's DUTY_MAP.json (v4) that its walk and installer ran with, and the ONE new Marg signature
+# (ORDER_PENDING: a title, eleven column names, no data) that make_s454p1.py inserts -- both in SUMS.md5. Exact paths only.
+!deploy_kits/S454_BILL_REGISTER/P1_ORDER_SHEET_RECEPTION/DUTY_MAP.json
+!deploy_kits/S454_BILL_REGISTER/P1_ORDER_SHEET_RECEPTION/sig_entry_s454.json

@@ -1,0 +1,72 @@
+<!-- S454 part 1 walk picture (scratch data, phone numbers masked): 08_maal_aaya.html -->
+<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Maal aaya?</title><style>
+*{box-sizing:border-box}
+body{margin:0;background:#f6f4f1;color:#1c1c1c;font:16px/1.45 system-ui,sans-serif}
+.wrap{max-width:480px;margin:0 auto;padding:0 12px 28px;display:flex;flex-direction:column;gap:12px}
+.bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;background:#1f3864;color:#fff;margin:0 -12px;padding:6px 10px}
+.bar a.bk{display:flex;align-items:center;justify-content:center;min-height:44px;width:150px;background:#fff;color:#1f3864;border-radius:9px;font-size:18px;font-weight:800;text-decoration:none}
+.bar .tt{font-weight:600}
+h1{margin:4px 0 0;font-size:22px}
+.mut{font-size:15px;color:#5b5b5b}
+.sig{font-size:14px;color:#5b5b5b}
+a.big,button.big{display:flex;align-items:center;justify-content:center;gap:10px;min-height:60px;width:100%;background:#2e6b34;border:1px solid #2e6b34;border-radius:12px;padding:12px;color:#fff;font:700 20px system-ui,sans-serif;text-align:center;text-decoration:none;cursor:pointer}
+a.big.out,button.big.out{background:#fff;color:#1f3864;border-color:#1f3864}
+a.big.blue,button.big.blue{background:#1f3864;border-color:#1f3864}
+button.big[disabled]{background:#b8b8b8;border-color:#b8b8b8;color:#fff;cursor:default}
+a.row{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #e4e0da;border-radius:12px;padding:14px 16px;color:#1c1c1c;text-decoration:none;min-height:60px}
+a.row .n{flex:0 0 52px;height:52px;border-radius:26px;background:#1f3864;color:#fff;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800}
+a.row .l{flex:1 1 auto;font-size:19px;font-weight:700}
+.card{background:#fff;border:1px solid #e4e0da;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.card .nm{font-size:17px;font-weight:700}
+.card .sb{font-size:14.5px;color:#5b5b5b}
+.card .sb.am{color:#8a5300;font-weight:600}
+.two{display:flex;gap:8px}
+.two>*{flex:1 1 0;display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:10px;padding:8px;font:700 16px system-ui,sans-serif;text-decoration:none;cursor:pointer}
+.b{background:#fff;color:#1f3864;border:1px solid #1f3864}
+.g{background:#2e6b34;color:#fff;border:1px solid #2e6b34}
+.ok{background:#e4f2e6;border:2px solid #2e6b34;border-radius:12px;padding:14px 16px}
+.ok .t{font-size:19px;font-weight:800;color:#1f4d25}
+.err{background:#fbe7e5;border:2px solid #b3261e;border-radius:12px;padding:12px 14px;color:#8c1d18;font-weight:700}
+.lnk{text-align:center}
+.lnk a,.lnk button{display:inline-block;min-height:44px;padding:10px 8px;color:#5b5b5b;font:15px system-ui,sans-serif;text-decoration:underline;background:none;border:0;cursor:pointer}
+.more{display:block;min-height:52px;border:1px solid #1f3864;border-radius:10px;padding:12px;background:#fff;color:#1f3864;font-weight:700;font-size:17px;text-align:center;text-decoration:none}
+.list{background:#fff;border:1px solid #e4e0da;border-radius:12px;padding:4px 14px;display:flex;flex-direction:column}
+.li{display:flex;align-items:baseline;gap:10px;padding:11px 0;border-top:1px solid #eee}
+.li:first-child{border-top:0}
+.li .i{flex:1 1 auto;font-size:18px;font-weight:600}
+.li .q{font-size:18px;font-weight:800;white-space:nowrap}
+.num{text-align:center;font-size:17px;font-weight:600;padding-top:6px;letter-spacing:.04em}
+.oldb{background:#fdf1dc;border:2px solid #8a5300;border-radius:12px;padding:10px 14px}
+.oldb .h{font-size:15.5px;font-weight:800;color:#5c3700}
+.ol{padding:10px 0;border-top:1px solid #f0d9b0;display:flex;flex-direction:column;gap:6px}
+.ol:first-of-type{border-top:0}
+.ol .r1{display:flex;align-items:baseline;gap:10px}.ol .r1 .i{flex:1 1 auto;font-size:17px;font-weight:600}.ol .r1 .q{font-size:16px;font-weight:700}
+.ol .r2{display:flex;align-items:center;gap:10px}.ol .r2 .w{flex:1 1 auto;font-size:14.5px}
+.red{color:#8c1d18;font-weight:700}.grn{color:#1f4d25;font-weight:700}
+.sm{border:1px solid #1f3864;border-radius:9px;padding:8px 10px;color:#1f3864;background:#fff;font:600 14.5px system-ui,sans-serif;min-height:44px;cursor:pointer;white-space:nowrap}
+.qbox{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.qbox b{min-width:34px;text-align:center;font-size:20px}
+.pm{min-width:48px;min-height:44px;font-size:20px;border:1px solid #bbb;border-radius:9px;background:#fafafa;cursor:pointer}
+.ar{display:flex;align-items:center;gap:10px;min-height:52px;padding:8px 0;border-top:1px solid #eee;cursor:pointer}
+.ar:first-child{border-top:0}.ar .i{flex:1 1 auto;font-size:18px;font-weight:600}.ar .q{font-size:17px;font-weight:700;white-space:nowrap}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chips button{min-height:44px;border:1px solid #bbb;border-radius:9px;padding:9px 12px;background:#fafafa;font:600 16px system-ui,sans-serif;cursor:pointer}
+.chips button.on{border-color:#8a5300;background:#fdf1dc;color:#5c3700}
+input.amt,input.kq{min-height:44px;font-size:18px;border:1px solid #999;border-radius:9px;padding:9px 10px;width:110px}
+select.kv{min-height:44px;font-size:16px;padding:8px;max-width:100%;width:100%}
+.prog{height:6px;background:#e4e0da;border-radius:3px;overflow:hidden}.prog i{display:block;height:6px;background:#1f3864}
+.pic{display:block;background:#fff;border:1px solid #e4e0da;border-radius:12px;padding:8px;text-align:center;text-decoration:none;color:#5b5b5b}
+.pic img{max-width:100%;max-height:360px;border-radius:6px}
+.grp{font-size:17px;font-weight:800;margin-top:4px}
+.ln{background:#fff;border:1px solid #e4e0da;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.ln .t{flex:1 1 auto;min-width:0}.ln .t .a{font-size:17px;font-weight:700}.ln .t .s{font-size:14.5px;color:#5b5b5b}
+.ln a.sk{display:inline-flex;align-items:center;justify-content:center;min-height:48px;border-radius:10px;padding:10px 14px;background:#2e6b34;color:#fff;font-weight:700;text-decoration:none;white-space:nowrap}
+label.tk{display:flex;align-items:center;gap:12px;min-height:48px}label.tk input{width:24px;height:24px}
+</style><script>
+async function s454(url, body, then){
+ try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok||!j.ok){const m=document.getElementById('msg');if(m){m.className='err';m.textContent=j.message||j.error||('HTTP '+r.status);m.style.display='block';window.scrollTo(0,0);}return null;}
+  if(typeof then==='string'){location.href=then;}else if(typeof then==='function'){then(j);}else{location.reload();}
+  return j;}catch(e){const m=document.getElementById('msg');if(m){m.className='err';m.textContent=String(e);m.style.display='block';}return null;}
+}
+</script></head><body><div class="wrap"><div class="bar"><a class="bk" href="/finance/porders">← BACK</a><span class="tt">Maal aaya?</span></div><div id="msg" class="err" style="display:none"></div><div style="font-size:16px">Maal aaya? Bill scan kijiye, bas. Maal apne aap darj ho jayega.</div><div class="card" data-order="2"><div><div class="nm">DEEPAM PHARMA</div><div class="sb">Order 02-10 · 2 dawa</div></div><a class="big" style="min-height:52px;font-size:18px" href="/scanapp/intake?lane=pharmacy&amp;vendor=DEEPAM+PHARMA&amp;from=%2Ffinance%2Fporders%2Fs454%2Fmaal">📷 Bill scan karo</a><div class="lnk"><a href="/finance/porders/s454/maal/2">Bill nahi hai, ya kam aaya?</a></div></div><div class="card" data-order="3"><div><div class="nm">DRUG DEAL</div><div class="sb">Order 02-10 · 1 dawa</div></div><a class="big" style="min-height:52px;font-size:18px" href="/scanapp/intake?lane=pharmacy&amp;vendor=DRUG+DEAL&amp;from=%2Ffinance%2Fporders%2Fs454%2Fmaal">📷 Bill scan karo</a><div class="lnk"><a href="/finance/porders/s454/maal/3">Bill nahi hai, ya kam aaya?</a></div></div><div class="card" data-order="4"><div><div class="nm">GUNINA PHARMACEUTICALS PVT LTD</div><div class="sb">Order 02-10 · 2 dawa</div></div><a class="big" style="min-height:52px;font-size:18px" href="/scanapp/intake?lane=pharmacy&amp;vendor=GUNINA+PHARMACEUTICALS+PVT+LTD&amp;from=%2Ffinance%2Fporders%2Fs454%2Fmaal">📷 Bill scan karo</a><div class="lnk"><a href="/finance/porders/s454/maal/4">Bill nahi hai, ya kam aaya?</a></div></div><div class="card" data-order="5"><div><div class="nm">JANTA PHARMACEUTICALS</div><div class="sb">Order 02-10 · 1 dawa</div></div><a class="big" style="min-height:52px;font-size:18px" href="/scanapp/intake?lane=pharmacy&amp;vendor=JANTA+PHARMACEUTICALS&amp;from=%2Ffinance%2Fporders%2Fs454%2Fmaal">📷 Bill scan karo</a><div class="lnk"><a href="/finance/porders/s454/maal/5">Bill nahi hai, ya kam aaya?</a></div></div><div class="card" data-order="6"><div><div class="nm">KEDAR PHARMACEUTICAL</div><div class="sb">Order 02-10 · 5 dawa</div></div><a class="big" style="min-height:52px;font-size:18px" href="/scanapp/intake?lane=pharmacy&amp;vendor=KEDAR+PHARMACEUTICAL&amp;from=%2Ffinance%2Fporders%2Fs454%2Fmaal">📷 Bill scan karo</a><div class="lnk"><a href="/finance/porders/s454/maal/6">Bill nahi hai, ya kam aaya?</a></div></div><div class="card" data-order="7"><div><div class="nm">KRISHNA MEDICOS</div><div class="sb">Order 02-10 · 1 dawa</div></div><a class="big" style="min-height:52px;font-size:18px" href="/scanapp/intake?lane=pharmacy&amp;vendor=KRISHNA+MEDICOS&amp;from=%2Ffinance%2Fporders%2Fs454%2Fmaal">📷 Bill scan karo</a><div class="lnk"><a href="/finance/porders/s454/maal/7">Bill nahi hai, ya kam aaya?</a></div></div><div class="card" data-order="8"><div><div class="nm">RADHA MEDICAL &amp; SCIENTIFIC</div><div class="sb">Order 02-10 · 1 dawa</div></div><a class="big" style="min-height:52px;font-size:18px" href="/scanapp/intake?lane=pharmacy&amp;vendor=RADHA+MEDICAL+%26+SCIENTIFIC&amp;from=%2Ffinance%2Fporders%2Fs454%2Fmaal">📷 Bill scan karo</a><div class="lnk"><a href="/finance/porders/s454/maal/8">Bill nahi hai, ya kam aaya?</a></div></div><div class="card" data-order="9"><div><div class="nm">RAVI MEDICAL AGENCY</div><div class="sb">Order 02-10 · 1 dawa</div></div><a class="big" style="min-height:52px;font-size:18px" href="/scanapp/intake?lane=pharmacy&amp;vendor=RAVI+MEDICAL+AGENCY&amp;from=%2Ffinance%2Fporders%2Fs454%2Fmaal">📷 Bill scan karo</a><div class="lnk"><a href="/finance/porders/s454/maal/9">Bill nahi hai, ya kam aaya?</a></div></div><div class="card" data-order="10"><div><div class="nm">SHIVAAZ FORMULATIONS</div><div class="sb">Order 02-10 · 5 dawa</div></div><a class="big" style="min-height:52px;font-size:18px" href="/scanapp/intake?lane=pharmacy&amp;vendor=SHIVAAZ+FORMULATIONS&amp;from=%2Ffinance%2Fporders%2Fs454%2Fmaal">📷 Bill scan karo</a><div class="lnk"><a href="/finance/porders/s454/maal/10">Bill nahi hai, ya kam aaya?</a></div></div><div class="card" data-order="11"><div><div class="nm">SHRADDHA MEDICOSE</div><div class="sb">Order 02-10 · 2 dawa</div></div><a class="big" style="min-height:52px;font-size:18px" href="/scanapp/intake?lane=pharmacy&amp;vendor=SHRADDHA+MEDICOSE&amp;from=%2Ffinance%2Fporders%2Fs454%2Fmaal">📷 Bill scan karo</a><div class="lnk"><a href="/finance/porders/s454/maal/11">Bill nahi hai, ya kam aaya?</a></div></div></div></body></html>

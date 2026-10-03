@@ -1,0 +1,2 @@
+kit id S454_BILL_REGISTER
+project Sanjeevni (session 283, 03-Oct-2026) -- the pharmacy's purchase flow, whole; installed part by part, each part a folder of its own (see README.md)

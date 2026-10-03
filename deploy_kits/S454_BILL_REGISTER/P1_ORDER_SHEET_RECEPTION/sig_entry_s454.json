@@ -1,0 +1,25 @@
+    {
+      "type": "ORDER_PENDING",
+      "variant": "TEXT",
+      "title_regex": "PENDING\\s+ORDERS\\s+\\(PURCHASE\\)",
+      "header": [
+        "SUPPLIER",
+        "PHONES",
+        "ITEM NAME",
+        "PACKING",
+        "ENTRY NO.",
+        "DATED",
+        "ORDER QTY",
+        "RECEIVE",
+        "PENDING",
+        "RATE",
+        "VALUE"
+      ],
+      "end_row": [
+        "TOTAL"
+      ],
+      "dating": "file_mtime",
+      "deep_verify": "structural",
+      "uploadable": false,
+      "_note": "S454 (D666, 03-Oct-2026): Darpan's PENDING ORDERS (PURCHASE) -- Marg's text export, converted on the medical PC by marg_txt S454 into one row per item line (supplier, phones, item, packing, entry number, date, order qty, receive, pending, rate, value) under a title row and the heads, the TOTAL row last. The title carries no date and the first column is the supplier, so the sheet is dated by its own file time (dating:file_mtime) -- without it verify() refuses it for having no dates. The TOTAL row is its completeness marker (end_row). A VERIFIED sheet is loaded at once by /root/finance/order_sheet.py through marg_take's hook."
+    }

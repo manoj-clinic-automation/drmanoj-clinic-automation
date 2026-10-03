@@ -1,0 +1,11 @@
+PROVE_S454_MEDICAL, run on manojz on 03-Oct-2026 (python -B prove_s454_medical.py --kit <this folder> --watch deploy_kits/S397_STOCK_TEXT/marg_watch.py --old deploy_kits/S446_AMIR_STAGES_BILLS/medical/marg_txt.py --real <the owner's 02-Oct sheet, not kept> --refused <FromMedical/refused_text> --work _scratch/...):
+
+ok   1  the S454 reader's selftest passes (38 checks)
+  ok   1  the live watcher's own selftest passes with the S454 reader beside it   [[]]
+  ok   2  the watcher takes the sheet saved as 'report.txt': one .XLS in the spool, the reader's own bytes (8845e680)   [['20261003-120154__report_TXT__8845e680.XLS']]
+  ok   2  its log line names the reader S454   [['  + CAPTURED report.txt (text) -> 20261003-120154__report_TXT__8845e680.XLS  (converted by marg_txt S454)']]
+  ok   3  a sheet cut short is not converted; the watcher keeps it as refused, with its reason (the note reaches the owner in part 4)   [[["  ! NOT TAKEN report2.txt (text): not a bill-wise sales statement (it begins: 'SANJEEVNI MEDICOS') -- kept in _captured_txt\\refused"], ['20261003-120154__report2__e1bd9fb2cff423804cb9fe2dc470d052.txt', '20261003-120154__report2__e1bd9fb2cff423804cb9fe2dc470d052.why.txt']]]
+  ok   4  parity: 15 texts the S446 reader read give the same verdict and the same bytes with S454's   [[]]
+  ok   5  Darpan's own sheet of 02-Oct (read from the owner's folder, not kept): ORDER, 11 suppliers, 32 lines, 4,046 units, 41,226
+  ok   5  old reader (S446): not recognised
+PROVE_S454_MEDICAL GREEN -- 8 of 8

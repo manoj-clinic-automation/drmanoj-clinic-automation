@@ -1,0 +1,9 @@
+# deploy_kits/PC_KITS/medical -- the Medical PC's setup kit, as the Clinic PCs page serves it (kit S458).
+# kit.zip = setup_pc.py, its README and payload/: the tools exactly as that PC ran them when the kit was packed
+# (read from the owner's PC's mirror of D:\SendToClinic). The installer only fills what is missing. The bundled
+# Python is deploy_kits/PC_KITS/_shared/<python_file>. No secret (token.txt is never packed), no patient, no number.
+version=installer S458.1; the tools as on that PC, newest dated 02-Oct-2026
+packed=03-Oct-2026
+kit_md5=83922881945b0cfd02da6fae808eee74
+python_file=pyportable_3.11.9.zip
+python_md5=30a7b6ab01fbaa598844f4b3d8220a68

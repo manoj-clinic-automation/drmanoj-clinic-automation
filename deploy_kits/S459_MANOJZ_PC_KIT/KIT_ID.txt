@@ -1,0 +1,2 @@
+S459 KIT S459_MANOJZ_PC_KIT
+session 292 (parent) · 03-Oct-2026 · Dr Manoj's PC: its own state to the SSD every night (it was in no backup), and a Clinic PCs kit that restores from it

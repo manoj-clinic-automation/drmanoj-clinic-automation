@@ -1,0 +1,9 @@
+# deploy_kits/PC_KITS/manojz -- Dr Manoj's PC's setup kit, as the Clinic PCs page serves it (kit S459).
+# kit.zip = setup_pc.py and its README. It holds no data and no secret: the installer restores this PC's state
+# from the newest nightly zip on the SSD (F:\ClinicBackup\DrManojClinic_Automation\05_PC_STATE\manojz) and only
+# puts back what is not there. The bundled Python (deploy_kits/PC_KITS/_shared/<python_file>) only runs the installer.
+version=installer S459.1; restores from the nightly state copy on the SSD
+packed=03-Oct-2026
+kit_md5=07f124f8c34188ca8b080c66f3bc2138
+python_file=pyportable_3.11.9.zip
+python_md5=30a7b6ab01fbaa598844f4b3d8220a68

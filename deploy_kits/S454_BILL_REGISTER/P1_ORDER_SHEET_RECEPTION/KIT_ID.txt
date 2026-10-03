@@ -1,0 +1,4 @@
+kit id S454_BILL_REGISTER
+part P1_ORDER_SHEET_RECEPTION
+project Sanjeevni (session 283, 03-Oct-2026; D666, D668, D669; F-690, F-695, F-702) -- the order comes from Darpan's Marg sheet; reception orders, receives and scans on one simple screen
+restarts clinic-finance only; finance.db and the crontab backed up first; the medical PC's reader goes by Drive (ToMedical\_kit), its watcher is NOT replaced (part 4)
