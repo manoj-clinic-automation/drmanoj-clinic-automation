@@ -1,4 +1,27 @@
-# REPORT S454 — S454_BILL_REGISTER · Parts 1 and 2 of 5 (with 1B, 1C, 1D) · installed 03-Oct-2026 12:24 IST (1B 12:28, 1C 15:36, 1D 16:35, 2 17:26 IST) · published
+# REPORT S454 — S454_BILL_REGISTER · Parts 1, 2 and 3 of 5 (with 1B, 1C, 1D) · installed 03-Oct-2026 12:24 IST (1B 12:28, 1C 15:36, 1D 16:35, 2 17:26, 3 18:17 IST) · published
+
+**Where the run stands (03-Oct 18:20 IST):** Parts 1, 2 and 3 are installed, checked and published. **Parts 4 and 5 are not started.** Part 4
+puts a new watcher on the medical PC, and the brief forbids that before 04-Oct 13:00 IST (§10.3). Part 5 follows Part 4 in the brief's
+order. So this run stops at the Part 3 / Part 4 boundary. Nothing is half-installed. The continued run's line, any time after 04-Oct 13:00 IST:
+
+```
+Read CLAUDE.md, then continue claude_code_briefs\S454_BILL_REGISTER.md from where claude_code_briefs\REPORT_S454.md stops — install, verify, publish and report.
+```
+
+## For the owner — part 3 (the shelf figure; installed 18:17 IST)
+
+- **The system's own medicine list now works from a "shelf figure".** That is the 6 September count, plus every sale, return and purchase
+  since, plus goods that arrived and are not in Marg yet. Marg's own figure is kept beside it on your screens; staff screens show neither.
+- **Against Darpan's sheet of 2 October the system now agrees on 9 of 21 medicines (it was 5 of 21).** For the other 12: ten have enough
+  stock by the shelf figure for 11 days or more (CHYMORAL AP, for one, has 80 tabs, about 11 days). KT ROS DT has never been bought on
+  the server's records. PRETOL 8 was last bought from Kedar, not Shivaaz.
+- **One fault proven and repaired:** Marg's sales report cuts medicine names to 20 letters, so 5 medicines with longer names never had
+  their sales counted. 2 of them sell, and now they are counted.
+- **From the next Marg closing:** if Marg moves by a pack or more with no voucher, you get one line, "Marg and the shelf figure moved
+  apart on N items". The item also goes up Darpan's spot-count list. Today's closing is the first one recorded, so nothing is flagged yet.
+- **Worth knowing:** today 166 medicines differ from Marg by a pack or more. Most of these are the 6 September count's corrections
+  that are not yet entered as vouchers in Marg (Amir's count-voucher duty shows 37 waiting). 5 show below zero and are counted as zero:
+  TYRO BR (the count found 230 tabs fewer than Marg), NORTIMER TAB, GLI-ME SR1 and two ankle binders.
 
 ## For the owner — part 2 (bill scans and Marg bills, your month register, Vendor payments; installed 17:26 IST)
 
@@ -404,6 +427,90 @@ In both lists: DFO MR, VOLITRA APS SPRAY, MEG QCS (sheet 20 strip / system 10), 
   waits the same grace. I ran it read-only on the live database before writing it in: (0, None). The owner's line still comes at 3 days.
 - **Also in this kit:** `purchase_app._s446_earlier_card` now counts payment kinds only (`neft`, `cheque`), as noted under 1C.
 
+### Part 3 · P3_SHELF_FIGURE (brief §9; placed 18:17:11 IST by the files' own time)
+
+| file | FROM | TO (md5sum after placing) |
+|---|---|---|
+| /root/finance/order_rules.py | 6587dc84941f4e53ccc39d0847812123 (1D) | 1729e971982d0823f8d33b3976fa4d74 |
+| /root/finance/purchase_app.py | 4eee14b5e41a70c9450ed5cf6ff0bd29 (2) | 61e6d26abe52293883e37cc61b459da5 |
+| /root/finance/stock_watch.py | 9cca2f2a9e86e6523b9fcefb4f6df3bd | b429660ddc9a5291e261c5fa6fe652c0 |
+| /root/finance/stock_app.py | f14a1cfaf9a47b1199a0763ac47d1006 | 7e159de737c0ec03cea890053f1bcd58 |
+| /root/finance/order_sheet.py | b2e61034790ea37fde4272859ccd1f58 (2) | ebe1eb4b327c1a784e20174cda0abd4b |
+| /root/finance/porders_s454.py | e2228b8f8434e8ea3766b00e5e5e1a2e (2) | eadbc8d3582991fa36ef3fde83253126 |
+| /root/finance/shelf_figure.py | (new) | 23c34ebb1149996e1053c26573077460 |
+
+- **Health:** finance healthz 200. These answered 302 (the gate): `/finance/porders`, `/finance/porders/s454/order`,
+  `/finance/stock/page/count`, `/finance/amir`, `/finance/purchase/page/scans`. No "NOT mounted", no traceback. Untouched, md5s compared
+  before and after: finance_app.py, portal.py, tile_grants.json, sanjeevni_approvals.py, packs.py, asset_register.py, item_alias.py,
+  stockmatch.py, supplier_msg.py, porders.py, amir_day.py, reports_tile.py, scan_register.py, darpan_kal.py, marg_take.py, signatures.json.
+  The duty map is unchanged: the owner's gap line is a Needs-you line, and the roster reason sits inside darpan.spot_count.
+- **Backups:** `finance.db.bak_S454_20261003_175504` (backup API); `order_rules.py.bak_S454_6587dc84`, `purchase_app.py.bak_S454_4eee14b5`,
+  `stock_watch.py.bak_S454_9cca2f2a`, `stock_app.py.bak_S454_f14a1cfa`, `order_sheet.py.bak_S454_b2e61034`, `porders_s454.py.bak_S454_e2228b8f`.
+- **Restarted:** clinic-finance only (ActiveEnterTimestamp 18:17:12 IST).
+- **The crons' own commands as scripts** (the lesson of 1D): `order_rules.py tick` and `stock_watch.py job` exit 0 on the built files
+  (scratch copies). The tick's JSON carries `"gaps": 372`. One live tick by hand after placing (18:17:21 IST) exited 0, with `"gaps": 0`
+  (the data step had just recorded the closing). Every block sits above its file's `__main__` guard.
+- **The data step:** order.stock_basis = count · stock.gap_min_packs = 1.
+  - Gap rows at Marg's closing of 2026-10-02: 372 written · flagged 0 (the first closing has nothing to compare with) · approximate 22 ·
+    shelf and Marg a pack or more apart: 166.
+  - The figure by kind: counted 367 · below_zero 5 · no_count 6.
+  - The boundary report (9.1): one base after 09:00 IST, the count of 06-09 at 14:41, with 0 bills that day.
+- **Found while building, on live data, and repaired in this kit: the count-day boundary for purchases.** A bill dated on (or up to 7 days
+  before) the count day but entered in Marg after the count was missed.
+  - PANSPED L: counted 0 at 14:41 on 06-09; its 1,000-tab bill of 06-09 came in later. The figure read 0 against Marg's 726.
+  - SHELCAL XT: a bill of 05-09 for 300 (figure 0 against Marg's 123).
+  - The fix: Marg's own figure at the count (`marg_qty`) settles it. What Marg gained since the count, beyond its sales, returns, later
+    purchases and the count's vouchers filed, is such bills. They are taken in newest first while they fit that gain, within one pack.
+  - The 6-Sep count is older than the first purchase export on the server (11-Sep), so no export time can tell. On 03-Oct the repair
+    touches 3 of 378 items: PANSPED L +1,000 (now 726), SHELCAL XT +300 (now 123), DECA INSTABOLIN 50 +10 (Marg read −3 at the count,
+    3 now; the shelf figure is 8).
+  - Every other item checked by hand reconciles exactly as Marg + (counted − Marg at the count): CHYMORAL AP, DEFVAX 6, PATOPAN DSR,
+    XYCAL K2, TYRO BR.
+- **Found while building, and repaired for `count`: Part 1 counts an order that arrived by its scan twice on the system's list.**
+  - Part 1's `_s454_or_arrived` keeps such an order "on the way". `order_sheet` also marks it `received`, so `purchase_app._in_transit`
+    counts it as well. Live: 6 such orders, all with unanswered lines.
+  - On `count` (the default now), on the way = a sent order not arrived. A counted item has the arrival inside its shelf figure. An item
+    with no count has it once, through `_in_transit`.
+  - On `marg` the old way stands, because the brief asks for today's plan line for line there. The walk shows the double count there as its
+    negative control.
+- **§9.4, the report** (`report_s454p3.py`, scratch copies, Darpan's sheet of 02-Oct with its own paper orders taken off the copy, as 1B
+  did; stock as on 02-10-2026):
+  - **The system agreed on:** OLD (the box as it was, Marg's stock) **5 of 21** · NEW on marg (the 20-character repair only) 5 of 21 · NEW
+    on count (the default) **9 of 21**.
+  - On both (count): TENDOZAC TAB, VERC 16, CCM, DFO MR, VOLITRA APS SPRAY, MEG QCS, CROCAL, OSTOVAXL DM, PREGHYPE NT TAB.
+  - Only on Darpan's sheet (12), with the plan's own reason:
+    - enough cover by the shelf figure: CHYMORAL AP 80 (Marg 106) 11 days · LONAC AQ INJ 12 (33) 26 days · PRETOL-4 31 (137) 22 days ·
+      RANIMIG 150 113 86 days · NARCOGEN FORTE 54 (89) 20 days · PANTOCID DSR 92 (126) 21 days · DECA INSTABOLIN 50 8 (3) 56 days ·
+      CEECIT MZ 115 (123) 20 days · AURAB L CAP 71 (115) 15 days · FENARIC T4 TAB 73 (84) 21 days;
+    - KT ROS DT: no Marg purchase of it on the server, so no supplier to list it under;
+    - PRETOL 8: bought last from KEDAR PHARMACEUTICAL, not SHIVAAZ FORMULATIONS.
+  - Only on the system's list (28). Among them: XYCAL K2 (shelf 30, Marg 12), TYRO BR (shelf 0, Marg 114), DEFVAX 6 (2 / 69),
+    PANTAVIN 40, TOLTRIS PLUS, and the old pending NUPTACH 200, OPTIFENAC TBR and UPRISE 6L INJ. The full list with its reasons is in the
+    install log's [6/13]. PANSPED L (50 strips) and SHELCAL XT (10 strips) were on it before the boundary repair, and are off it now.
+  - **The three suspected gaps of §2.4:**
+    - (1) a line tapped "Aa gaya" while its order is still "sent": 0 such lines, not proven, not changed.
+    - (2) `_in_transit`'s exact-name match: 0 received lines missed, not proven, not changed.
+    - (3) `_pace` keys sales by the 20-character name: 5 medicines with longer names, with a pace OLD 0 → NEW 2. **Proven, repaired** (on
+      count; on marg the plan stays today's).
+- **The walk** (`walk_s454p3.py`, NEW = the box after part 2 + part 3's files, OLD = the box after part 2; backup-API copies; walk-only
+  portal secret and users): **WALK_S454P3 GREEN — 26 of 26.**
+  - F, the figure: counted 100, 30 sold, 20 bought, 2 returned = 92 whatever Marg says (555). +10 arrived by a scan = 102. A later spot
+    answer is the base (98). A part of the count family (40). No count = Marg's, named. Below zero = 0, named. Two items on one key share
+    by counted share (30/20, approximate).
+  - The boundary: a count-day bill entered later is in (0 − 30 + 100 = 70). A bill Marg already had is not added twice (40).
+    **NEGATIVE:** without it the item reads below zero.
+  - P, the plan: on marg it is part 2's plan line for line (23 lines). On count, both figures are on the lines and no staff screen prints
+    them. Goods received and not in Marg: once on count. **NEGATIVE:** twice on marg. The long-name medicine gets its line (**NEGATIVE:**
+    the box as it was never lists it).
+  - W: a spot answer is compared with the shelf figure (102; **NEGATIVE:** the box as it was had none). A recorded count stores the shelf
+    figure beside Marg's; the loss desk is still by Marg (−460).
+  - G, the gap: constant three closings, no flag. Closed by a filed voucher (+20), no flag, gap 0. A pack moved with no voucher: flagged,
+    and it stays flagged. An approximate item is never flagged. The owner's line, the card, and one more roster reason, within the cap.
+  - E: the staff-eye walk (DUTY_MAP v5) for reception, darpan, shavez, amir and the owner. Clean.
+- **The earlier walks** (the same twelve; part 2's adjustments now on both runs): **WALKS_OLD_S454P3 GREEN.** Every walk's reds are the
+  same, word for word, with and without part 3: S403 13, S407 5, S410 3, S414 1, S417 4, S428 8, S439 23, S440 27, S441 6, S444 14,
+  S446 14, S452 11. Part 3 moved nothing they check.
+
 ### Published and checked on the box
 - PUBLISH_ALL: the part-1 folder went out in another session's publish at 12:20 (722f564, S458/S459's), unchanged since. 1B, this
   report and the duty map went out in d43f0c1 (12:32).
@@ -416,6 +523,10 @@ In both lists: DFO MR, VOLITRA APS SPRAY, MEG QCS (sheet 20 strip / system 10), 
   - the rest are unrelated lines, as before;
   - September's "Bill scan pending on 18 purchase bills" and S410's "Order not sent: Kedar …" are gone, by design.
 
+- **Part 2:** published in 306b4c4. On the box, `/root/deploy/repo` was pulled `--ff-only` at 17:30:17 IST. `P2_PAIRING_REGISTER`
+  passes `md5sum -c` (13 files) and is identical (`diff -r`) to the copy that ran. `claude_code_briefs/DUTY_MAP.json` / `.md` there read
+  27d9d1b5… / ffd37cfe… (v5). All 45 duties' `due_sql` run on the live database (read-only) with no error. Due now includes
+  manoj.returns_ok = 3 and reception.order_arrival = 4; amir.arrival_bill_entry is not due (its one arrival is inside the grace).
 - The build lock was taken at 12:05:29 IST (owner S454_BILL_REGISTER) and released at 12:34:05 IST. Finance healthz was 200 and
   clinic-finance active at release. `/tmp/s454p1` (the owner's sheet, scratch copies) and `/tmp/s454w` were removed.
 
@@ -440,7 +551,10 @@ Every due duty's door was seen in the staff-eye walk.
 - Shavez's "Bill scan baaki" line on Aaj ki reports and the owner's register are in the .md.
 
 ### Not done, and why
-- Parts 3–5 are not installed yet (see the top for where the run stands). The watcher is not replaced: Part 4, not before 04-Oct 13:00 IST.
+- **Part 4 (§10, the medical PC's refusal note) and Part 5 (§11, the items) are not started.** The brief forbids replacing the medical
+  PC's watcher before 04-Oct 13:00 IST (§10.3), and Part 5 follows Part 4 in its order. I did not install half of Part 4 (the server door
+  without the watcher) tonight. Until Part 4 is in, a sheet the medical PC itself refuses still reaches nobody (as said in Part 1).
+- **Not built in Part 3, by the brief:** judging a full count by the shelf figure (the loss desk still judges by Marg). That is the next kit's.
 - The reception phone was not set up; that needs the owner's login on that phone. The phone has not asked since S452
   (`supplier_msg.phone_last` absent; 18 NEFT messages queued since 26-Sep 19:49).
 - The approvals-page sentence about reminder times is **for the parent**: `finance_ui/finance_approvals.html` line 1255 still names
@@ -450,6 +564,16 @@ Every due duty's door was seen in the staff-eye walk.
   The blanket `*.json` rule would hide them otherwise.
 
 ### Noticed outside the brief
+- **S428's spine reading counts a credit note as a sale.** `stock_watch.Spine.sales` sums `sp_sale_line` units, and a CN bill's lines
+  carry positive units (they are returns). The shelf figure reads `sp_move` (SALE / SALE_RETURN apart) and is not affected. S428's own
+  pace and expectation are. Not changed: outside this brief.
+- **Part 1's double count on `marg`** (above, under Part 3): mended for `count`, the default. On `marg` it stands, as the brief asks for
+  today's plan there. The chat may want it mended there too.
+- **GUNINA's "P.L. LTD."** is counted a supplier misread by §5's rule as written (above, under Part 2). Adding "P.L." to the drop list is
+  the chat's call.
+- **PUBLISH_ALL commits everything pending.** Part 2's publish (306b4c4) also carried three kits other sessions had left in the working
+  copy: S465_PAPERS_JOIN, S466_EXPENSE_WARRANTY and S467_WARRANTY_ON_HEALTH. I did not open, run or change them. They passed the
+  NO_PHONE_NUMBERS gate with the rest (40 files).
 - The medical PC heartbeat says "BACKUPS: 6 kit backup files are lying about - the prune is not working", and Drive
   `ToMedical\_kit` holds a `__pycache__` folder dated 25-Aug. Neither was touched.
 - S458's medical-PC reinstall kit (`deploy_kits/PC_KITS/medical/kit.zip`, packed 03-Oct) carries `marg_txt.py` 70f920c4 (S446). Its
