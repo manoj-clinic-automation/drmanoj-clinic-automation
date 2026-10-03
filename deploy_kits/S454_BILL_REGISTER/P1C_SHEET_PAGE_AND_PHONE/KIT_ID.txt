@@ -1,0 +1,4 @@
+kit id S454_BILL_REGISTER
+part P1C_SHEET_PAGE_AND_PHONE (S454 section 17: the printed sheet carries the whole open order, nothing over another column; the owner's
+Reception phone card and test message; the setup page's steps as built; phone alive 720 minutes; "1 medicine"; message 1 put back)
+session 283 (Sanjeevni) · 03-Oct-2026 · decisions D666 D669 · faults F-702 (the handout gap, kept)

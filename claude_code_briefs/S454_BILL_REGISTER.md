@@ -703,6 +703,26 @@ Part 1 (installed 03-Oct 12:24 IST, with 1B at 12:28) was read against this brie
 - A login that is not the owner does not get the "Reception phone" card or its taps.
 - No phone number and no key in any output.
 
+**17.9 One payment message was marked sent that did not go — put it back.** While the reception phone's macro was being set up with the owner on 03-Oct, two test runs told the server "sent" although WhatsApp had not opened (the link went to an unregistered WhatsApp Messenger on that phone; the macro reports "sent" whatever happened on the screen):
+
+- message id 2 (Deepam Pharma, the August NEFT), marked sent 15:00:54 IST — the owner then sent it by hand from WhatsApp Business. It is true; leave it.
+- message id 1 (A.A. Pharmaceuticals, the August NEFT), marked sent 15:00:27 IST — **it did not go.** In the installer, set it back to waiting (queued, attempts 0, `sent_at`, `sent_by` and `last_try_at` cleared), audited with the reason, **only if it still reads sent at that time by `reception-phone`**. REPORT what you found and what you did.
+
+**17.10 The reception phone is set up — make the server and the setup page match what was built.** The owner built the macro with the chat on 03-Oct; its first message went by itself at 15:04:56 IST (id 3). The phone runs **WhatsApp Business**. What was learnt, and what follows from it:
+
+- **The phone asks only while it is awake and unlocked** (two constraints on the macro: Device Unlocked, Screen On). They are needed: the macro reports "sent" whatever happened on the screen, so with the screen dark it would mark messages sent that never went. A dark phone therefore does not ask, and that is normal.
+  - `order.phone_alive_min`: the default becomes **720**, and the live value is set to it in the installer (audited). The WhatsApp button is disabled only when the phone has no key or has not asked for that long. A message that waits because the phone is dark is still withdrawn after `order.whatsapp_wait_min` and its supplier goes back to "call kijiye", as §4.2 has it.
+  - REPORT the owner's line and the staff's line as they read when the phone has been dark for an hour.
+- **The setup page's printed steps are corrected** to the macro as built (do not open the page in a way that shows the key to a walk, a log or the report):
+  - the timer is every **1 minute**; no loop. Take out Part 1's "ask again at once" sentence;
+  - the header's name is exactly `X-Phone-Token`, with no space inside it or after it. The keyboard adds one, and then the request never leaves the phone;
+  - after the request: **If** `resp` contains `text` → **JSON Parse** `resp` into a dictionary `msg` → **Open Website**, the address typed by hand, never pasted from a chat: `https://wa.me/{lv=msg[to]}?text={lv=msg[text]}` (the letter l, not the figure 1), "URL encode parameters" ticked → wait 6 s → **UI Interaction**, Click, text `Send` → wait 3 s → **HTTP Request** POST to `/done`, content type `application/json`, body `{"id": {lv=msg[id]}, "ok": true}`;
+  - the POST is made by copying the first request, so the key comes with it;
+  - **only one WhatsApp on the phone.** With an unregistered WhatsApp Messenger beside WhatsApp Business, the link stops at a box and nothing is sent;
+  - the two constraints, and why;
+  - a first run is made once by "Test actions" and watched; it is never repeated blind.
+- The "Reception phone" card of 17.7 says in one line that the phone sends only while awake and unlocked.
+
 **Report**, owner lines first:
 
 - one sentence that the printed sheet now shows the whole open order, and how many lines it holds on a page;

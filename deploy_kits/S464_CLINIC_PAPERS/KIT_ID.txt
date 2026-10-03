@@ -1,0 +1,2 @@
+kit id S464_CLINIC_PAPERS
+project parent (session 292, 03-Oct-2026) -- D664 slice 1 of 3: the clinic papers to sort, the three groups, the month by group; the asset app (new file clinic_papers.py + three small edits)
