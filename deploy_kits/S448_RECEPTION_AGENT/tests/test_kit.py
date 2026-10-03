@@ -394,13 +394,13 @@ def beat_version():
     return json.load(open(os.path.join(root2, "heartbeat.json")))["agent_version"]
 
 
-check("guard starts the agent and a heartbeat appears", wait_for(lambda: beat_version() == "S453.1"))
+check("guard starts the agent and a heartbeat appears", wait_for(lambda: beat_version() == "S456.1"))
 g2 = subprocess.run([py, os.path.join(root2, "agent_guard.py")], cwd=root2, env=env, timeout=30)
 check("a second guard steps aside (one per PC)", g2.returncode == 0 and g.poll() is None)
 put(os.path.join(root2, "jobs", "in", "live.py"), "print('through the running agent')\n")
 check("a job dropped in runs through the live agent",
       wait_for(lambda: "through the running agent" in open(os.path.join(root2, "jobs", "out", "live.py.out.txt")).read()))
-put(os.path.join(root2, "reception_agent.py.new"), agent_src.replace('AGENT_VERSION = "S453.1"', 'AGENT_VERSION = "S449.4-test"'))
+put(os.path.join(root2, "reception_agent.py.new"), agent_src.replace('AGENT_VERSION = "S456.1"', 'AGENT_VERSION = "S449.4-test"'))
 check("a good update is installed and the new version reports in",
       wait_for(lambda: beat_version() == "S449.4-test"))
 check("...and is confirmed (marker gone, .prev kept)",
@@ -411,7 +411,7 @@ check("an update that does not compile is refused and set aside",
       wait_for(lambda: os.path.exists(os.path.join(root2, "reception_agent.py.rejected")))
       and beat_version() == "S449.4-test")
 put(os.path.join(root2, "reception_agent.py.new"),
-    agent_src.replace('AGENT_VERSION = "S453.1"', 'AGENT_VERSION = "S449.5-bad"').replace(
+    agent_src.replace('AGENT_VERSION = "S456.1"', 'AGENT_VERSION = "S449.5-bad"').replace(
         "def main():\n    quiet_errors()", "def main():\n    raise RuntimeError('dies at start')\n    quiet_errors()"))
 check("an update that compiles but dies is ROLLED BACK by the guard",
       wait_for(lambda: os.path.exists(os.path.join(root2, "reception_agent.py.failed"))
@@ -538,7 +538,7 @@ st6 = m6.new_state()
 beat6, _ = m6.build_beat(st6, cfg6)
 m6.direct_pass(st6, cfg6, beat6)
 check("the heartbeat reaches the server, signed, and is the same heartbeat",
-      len(GOT["beats"]) == 1 and GOT["beats"][0]["agent_version"] == "S453.1" and st6["upload"]["ok_at"])
+      len(GOT["beats"]) == 1 and GOT["beats"][0]["agent_version"] == "S456.1" and st6["upload"]["ok_at"])
 check("both reports are sent, each once, under a clean name",
       sorted(n for n, _ in GOT["reports"]) == ["consultation_report_2031-01-07.csv", "followup_logs (3).csv"]
       and st6["upload"]["reports_sent"] == 2, GOT["reports"])
@@ -794,6 +794,67 @@ check("S453: the signing tool's read-token is the job's name, the time and a sig
       tk.returncode == 0 and tj.get("name") == n2 and abs(int(tj.get("ts", 0)) - time.time()) < 30
       and m7.ed_verify(bytes.fromhex(pk7), b"clinic-reception-job-read-v1\n" + n2.encode() + b"\n" + tj["ts"].encode(), bytes.fromhex(tj["sig"])), tk.stdout + tk.stderr)
 check("...and it refuses a name that is not a stamped job name", subprocess.run([sys.executable, os.path.join(tool7, "reception_sign.py"), "read-token", kf7, "x.py"], capture_output=True).returncode == 2)
+
+# ---- S456 (F-700): how current Windows is ------------------------------------------------------------------------------
+root8 = fresh_root()
+m8 = load(root8)
+
+
+def _ft(y, mo, d):
+    n = int((m8.dt.datetime(y, mo, d, 6, 30) - m8.dt.datetime(1601, 1, 1)).total_seconds() * 10 ** 7)
+    return n >> 32, n & 0xFFFFFFFF
+
+
+_cv10 = {"ProductName": "Windows 10 Home", "DisplayVersion": "22H2", "CurrentBuild": "19045", "UBR": 6466}
+_rf = "Package_for_RollupFix~31bf3856ad364e35~amd64~~19041.%s.1.9"
+w8 = m8.windows_facts(_cv10, [(_rf % "6466", 112) + _ft(2025, 11, 12), (_rf % "6332", 80) + _ft(2025, 10, 15),
+                              (_rf % "7000", 112) + _ft(2026, 9, 16)], 1761000000)
+check("S456: build, release and product are read as Windows states them",
+      w8["product"] == "Windows 10 Home" and w8["release"] == "22H2" and w8["build"] == "19045.6466", w8)
+check("S456: the update that counts is the one whose number IS this build, not a later-dated package",
+      w8["update_installed"] == "2025-11-12" and w8["update_is_this_build"] is True, w8)
+check("S456: the system files' date is a date", w8["system_files_dated"] == "2025-10-20", w8)
+w8b = m8.windows_facts(_cv10, [(_rf % "6332", 112) + _ft(2025, 10, 15), (_rf % "6466", 80) + _ft(2025, 11, 12)], None)
+check("S456: no installed package for this build -> the newest installed one, and it says it is not this build",
+      w8b["update_installed"] == "2025-10-15" and w8b["update_is_this_build"] is False and w8b["system_files_dated"] is None, w8b)
+w8c = m8.windows_facts({"ProductName": "Windows 10 Pro", "DisplayVersion": "24H2", "CurrentBuild": "26100", "UBR": 4061}, [], None)
+check("S456: Windows 11 is called 11 (its registry still says 10)", w8c["product"] == "Windows 11 Pro" and w8c["update_installed"] is None
+      and w8c["update_is_this_build"] is None, w8c)
+w8d = m8.windows_facts(None, [("x", 112, None, None), 7, ("a~b", 112, "z", 1), (_rf % "1", 112, -5, 0)], "junk")
+check("S456: junk in, nothing raised, every value None", all(v is None for v in w8d.values()), w8d)
+check("S456: a nonsense date is refused, not printed", m8._filetime_date(0, 0) is None and m8._filetime_date(2 ** 40, 0) is None)
+m8.IS_WIN = False
+check("S456: off Windows the reading is None and nothing is called", m8.windows_state(force=True) is None)
+calls8 = []
+m8.IS_WIN = True
+m8._read_windows_raw = lambda: (calls8.append(1), (_cv10, [(_rf % "6466", 112) + _ft(2025, 11, 12)], 1761000000))[1]
+a8 = m8.windows_state(force=True)
+b8 = m8.windows_state()
+check("S456: read once and kept -- the second heartbeat does not read the registry again", a8 is b8 and calls8 == [1] and a8["build"] == "19045.6466", calls8)
+m8._WIN_CACHE["at"] = time.time() - m8.WIN_EVERY - 5
+m8.windows_state()
+check("S456: ...and read again after six hours", calls8 == [1, 1], calls8)
+
+
+def _boom():
+    raise OSError("registry closed")
+
+
+m8._read_windows_raw = _boom
+check("S456: a read that raises is None, not a crash", m8.windows_state(force=True) is None)
+m8._read_windows_raw = lambda: (_cv10, [(_rf % "6466", 112) + _ft(2025, 11, 12)], 1761000000)
+m8.IS_WIN = False                      # the rest of build_beat must run as on this machine
+m8._WIN_CACHE["value"], m8._WIN_CACHE["at"] = m8.windows_facts(*m8._read_windows_raw()), time.time()
+m8.ensure_dirs()
+beat8, _ = m8.build_beat(m8.new_state(), m8.load_config())
+txt8 = m8.human(beat8)
+check("S456: the heartbeat carries the reading and the text file says it in one line",
+      beat8["windows"]["build"] == "19045.6466"
+      and "WINDOWS : Windows 10 Home 22H2 build 19045.6466 | system files dated 2025-10-20 | last cumulative update installed 2025-11-12" in txt8, txt8)
+check("S456: the reading holds six plain values and no path, user or file name",
+      sorted(beat8["windows"]) == ["build", "product", "release", "system_files_dated", "update_installed", "update_is_this_build"])
+m8._WIN_CACHE["value"] = None
+check("S456: a PC whose Windows could not be read says 'not read'", "WINDOWS : not read" in m8.human(m8.build_beat(m8.new_state(), m8.load_config())[0]))
 
 
 print("\n%d passed, %d failed" % (len(PASS), len(FAIL)))

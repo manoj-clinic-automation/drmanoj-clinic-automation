@@ -1,0 +1,2 @@
+S456 KIT S456_WINDOWS_CURRENCY
+session 292 (parent) · 03-Oct-2026 · F-700: how current each PC's Windows is, in the heartbeat and on the health page; F-694: the installer takes the build lock

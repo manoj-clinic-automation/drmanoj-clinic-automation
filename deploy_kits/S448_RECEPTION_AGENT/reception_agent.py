@@ -52,6 +52,12 @@ Five jobs:
      signing time in its name, a name used once), so the server itself
      cannot make this PC run anything. The result goes back the same way.
 
+  7. SAY HOW CURRENT WINDOWS IS (S456, F-700). On 03-Oct-2026 the owner
+     learned from a photograph that this PC's Windows had had no security
+     fix since November 2025. The heartbeat now carries the build, the date
+     of the system files and the day the last cumulative update went in --
+     three registry keys and one file's date, read at most every six hours.
+
 Modelled on medical_agent.py (S205.1). Stdlib only. It writes only inside its
 own folder and the Drive FromReception / ToReception folders. Apart from the
 two Docterz reports of job 5 it reads folder listings, never a patient file.
@@ -76,7 +82,7 @@ import subprocess
 import sys
 import time
 
-AGENT_VERSION = "S453.1"
+AGENT_VERSION = "S456.1"
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -284,6 +290,139 @@ def uptime_hours():
         return round(fn() / 3600000.0, 1)
     except Exception:                                          # noqa: BLE001
         return None
+
+
+# --------------------------------------------------------------------------
+# S456 (F-700): how current this PC's Windows is -- its build, the date of
+# its system files and the day its last cumulative update went in. Read from
+# the registry and from one file's date: no PowerShell, no Windows Update
+# call, nothing downloaded, nothing changed. At most once every six hours.
+# Never raises: a value it cannot read is None.
+# --------------------------------------------------------------------------
+WIN_EVERY = 6 * 3600
+_WIN_CACHE = {"at": 0.0, "value": None}
+_CV_KEY = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+_CBS_KEY = (r"SOFTWARE\Microsoft\Windows\CurrentVersion"
+            r"\Component Based Servicing\Packages")
+
+
+def _filetime_date(high, low):
+    """A Windows FILETIME (two 32-bit halves, UTC) as YYYY-MM-DD, or None."""
+    try:
+        ft = (int(high) << 32) | (int(low) & 0xFFFFFFFF)
+        if ft <= 0:
+            return None
+        d = dt.datetime(1601, 1, 1) + dt.timedelta(microseconds=ft // 10)
+        return d.strftime("%Y-%m-%d") if 2000 <= d.year <= 2100 else None
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
+def windows_facts(cv, rollups, kernel_mtime):
+    """Pure: what the heartbeat says about Windows, from what was read.
+    cv = the CurrentVersion values; rollups = [(package name, CurrentState,
+    InstallTimeHigh, InstallTimeLow)] of the cumulative-update packages;
+    kernel_mtime = the date of ntoskrnl.exe in seconds, or None."""
+    cv = cv if isinstance(cv, dict) else {}
+    build, ubr = str(cv.get("CurrentBuild") or "").strip(), cv.get("UBR")
+    product = str(cv.get("ProductName") or "").strip()
+    try:
+        if int(build) >= 22000 and product.startswith("Windows 10"):
+            product = "Windows 11" + product[len("Windows 10"):]   # the registry still says 10
+    except ValueError:
+        pass
+    out = {"product": product or None,
+           "release": str(cv.get("DisplayVersion") or cv.get("ReleaseId") or "").strip() or None,
+           "build": ("%s.%s" % (build, ubr)) if (build and ubr is not None) else (build or None),
+           "system_files_dated": None,
+           "update_installed": None,
+           "update_is_this_build": None}
+    try:
+        if kernel_mtime:
+            day = dt.datetime(1970, 1, 1) + dt.timedelta(seconds=float(kernel_mtime))
+            if 2000 <= day.year <= 2100:
+                out["system_files_dated"] = day.strftime("%Y-%m-%d")
+    except (TypeError, ValueError, OverflowError):
+        pass
+    same, anyone = None, None
+    for row in rollups or []:
+        try:
+            name, state, high, low = row
+        except (TypeError, ValueError):
+            continue
+        if state != 112:                                   # 112 = installed
+            continue
+        day = _filetime_date(high, low)
+        if not day:
+            continue
+        ver = str(name).split("~")[-1].split(".")          # e.g. 19041.6466.1.9
+        if ubr is not None and len(ver) > 1 and ver[1] == str(ubr):
+            same = max(same or day, day)
+        anyone = max(anyone or day, day)
+    out["update_installed"] = same or anyone
+    if same or anyone:
+        out["update_is_this_build"] = bool(same)
+    return out
+
+
+def _read_windows_raw():
+    """(CurrentVersion values, cumulative-update packages, ntoskrnl's date)."""
+    import winreg
+    access = winreg.KEY_READ | getattr(winreg, "KEY_WOW64_64KEY", 0)
+    cv, rollups, kernel = {}, [], None
+    try:
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, _CV_KEY, 0, access) as k:
+            for name in ("ProductName", "DisplayVersion", "ReleaseId",
+                         "CurrentBuild", "UBR"):
+                try:
+                    cv[name] = winreg.QueryValueEx(k, name)[0]
+                except OSError:
+                    pass
+    except OSError:
+        pass
+    try:
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, _CBS_KEY, 0, access) as k:
+            for i in range(100000):
+                try:
+                    name = winreg.EnumKey(k, i)
+                except OSError:
+                    break
+                if not name.startswith("Package_for_RollupFix~"):
+                    continue
+                vals = []
+                try:
+                    with winreg.OpenKey(k, name, 0, access) as p:
+                        for v in ("CurrentState", "InstallTimeHigh", "InstallTimeLow"):
+                            try:
+                                vals.append(winreg.QueryValueEx(p, v)[0])
+                            except OSError:
+                                vals.append(None)
+                except OSError:
+                    continue
+                rollups.append((name, vals[0], vals[1], vals[2]))
+    except OSError:
+        pass
+    root = os.environ.get("SystemRoot") or "C:\\Windows"
+    for sub in ("System32", "Sysnative"):
+        try:
+            kernel = os.path.getmtime(os.path.join(root, sub, "ntoskrnl.exe"))
+            break
+        except OSError:
+            continue
+    return cv, rollups, kernel
+
+
+def windows_state(force=False):
+    """The cached reading: a dict, or None off Windows / when it failed."""
+    if force or not _WIN_CACHE["at"] or time.time() - _WIN_CACHE["at"] > WIN_EVERY:
+        value = None
+        if IS_WIN:
+            try:
+                value = windows_facts(*_read_windows_raw())
+            except Exception:                                  # noqa: BLE001
+                value = None
+        _WIN_CACHE["value"], _WIN_CACHE["at"] = value, time.time()
+    return _WIN_CACHE["value"]
 
 
 # --------------------------------------------------------------------------
@@ -1006,6 +1145,7 @@ def build_beat(st, cfg):
         "user": os.environ.get("USERNAME", ""),
         "python": sys.version.split()[0],
         "pc_uptime_hours": uptime_hours(),
+        "windows": windows_state(),
         "switched_off": is_off(OFF_ALL),
         "jobs_off": is_off(OFF_JOBS),
         "google_drive_running": None if procs is None
@@ -1100,6 +1240,16 @@ def _yn(v):
     return "unknown" if v is None else ("yes" if v else "NO")
 
 
+def _windows_words(w):
+    if not isinstance(w, dict):
+        return "not read"
+    return ("%s %s build %s | system files dated %s | last cumulative "
+            "update installed %s"
+            % (w.get("product") or "?", w.get("release") or "",
+               w.get("build") or "?", w.get("system_files_dated") or "unknown",
+               w.get("update_installed") or "unknown"))
+
+
 def human(beat):
     r, d, x = beat["docterz_exports"], beat["downloads_folder"], beat["xray"]
 
@@ -1138,6 +1288,7 @@ def human(beat):
         % (x.get("inbox_waiting"), x.get("inbox_oldest_hours"),
            x.get("last_filed"), x.get("check_waiting")),
         "DISK    : %s GB free" % beat["disk_free_gb_c"],
+        "WINDOWS : " + _windows_words(beat.get("windows")),
         "VIEW    : Tailscale running %s | the owner's read-only share %s"
         % (_yn((beat.get("owner_view") or {}).get("tailscale_running")),
            _yn((beat.get("owner_view") or {}).get("share_ready"))),

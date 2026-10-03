@@ -8,6 +8,25 @@ can do, because each step is a sign-in or a Windows prompt.
 A. WHAT ONLY A PERSON CAN DO -- in this order
    1. Windows, logged in as the reception user. (The agent starts at logon;
       nothing runs at the Windows login screen.)
+   1a. THE CLINIC WI-FI -- only if this PC is to use Wi-Fi (no working LAN
+      cable). The clinic's network "Airtel_Airtrl_mano_8080" is a Wi-Fi 6
+      network. A fresh Windows 10 gives this PC's card (Intel Dual Band
+      Wireless-AC 3160) Intel's driver of 2016 (18.33.0.2), and with that
+      driver the clinic's network is NOT IN THE LIST AT ALL, while other
+      networks are. It is not a password fault and not a router fault.
+      Cure: put the PC on any other internet for ten minutes (a phone
+      hotspot will do), then
+         Settings > Update & Security > Windows Update >
+         View optional updates > Driver updates
+      tick  Intel - net - 4/29/2019 - 18.33.17.1  , press Download and
+      install, and restart. The clinic's network is then in the list: join
+      it, TICK "Connect automatically", and type the Wi-Fi password (the
+      owner's; it is in no kit).
+      Check, in a Command Prompt:
+         netsh wlan show drivers      (Version reads 18.33.17.1)
+         netsh wlan show interfaces   (SSID reads the clinic's network)
+      (The fault of 02/03-Oct-2026 and its cure, F-693. The cabled port
+      showed no link on those days: a cable or socket matter, not this.)
    2. Google Drive for desktop, signed in with the CLINIC Google account.
       "My Drive" must show Clinic Records and Clinic Data Archive.
       If Drive will not start with a permission error on
@@ -81,6 +100,10 @@ C. THE CHECKS THAT PROVE IT WORKED
       enrolled: the heartbeat then shows "public_key" (heartbeat.json) and an
       attention line. Claude enrolls it on the server (reception_keys.txt,
       kit S449_RECEPTION_UPLOAD) -- nothing for a person to do at the desk.
+   7. HOW CURRENT WINDOWS IS (S456). The heartbeat's WINDOWS line names the
+      build, the date of the system files and the day the last cumulative
+      update went in; the clinic's health page says the same in its
+      Reception PC row. Nothing for a person to do at the desk.
 
 D. WHAT THE KIT HOLDS
    INSTALL_RECEPTION_AGENT.bat   the installer (this is all a person runs)

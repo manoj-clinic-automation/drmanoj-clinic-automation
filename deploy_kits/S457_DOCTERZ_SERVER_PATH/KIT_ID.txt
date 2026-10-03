@@ -1,0 +1,2 @@
+S457 KIT S457_DOCTERZ_SERVER_PATH
+session 292 (parent) · 03-Oct-2026 · F-697: the owner's PC reads reception's two Docterz exports back from the server (signed), not from Google Drive
