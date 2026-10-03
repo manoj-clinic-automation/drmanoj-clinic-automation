@@ -9,7 +9,9 @@ The asset app's CODE (asset_register.py, scanner_widget.js) is copied to a scrat
 (the guard). Each runs in a process of its own on an EMPTY database the app makes for itself in the scratch folder,
 with made-up papers put into it; logins are the app's own seeded owner and manager and a made-up scanning login through
 a stub portal. The child refuses to go on if the database is not the scratch one. No OCR is called (no key is given),
-no paper is scanned, nothing live is opened. Last line: WALK_S464 GREEN|RED.
+no paper is scanned, and the app's own S441 checks are given no finance database -- so nothing live is opened.
+(S464_WALK_FINANCE_DB=<a made-up finance db> lets the builder walk it WITH S441's supplier questions switched on.)
+Last line: WALK_S464 GREEN|RED.
 """
 import argparse
 import hashlib
@@ -176,12 +178,14 @@ def child(mode):
         CP.ensure(db)                                                # a second worker starting: nothing to do, no error
         out["ensure_twice"] = True
     # ---- setting a group
-    a0 = con.execute("SELECT COUNT(*) FROM bill_audit").fetchone()[0]
     out["set_proc"] = post(owner, "/bills/%d/subgroup" % B["proc"], subgroup="procedure", back="/papers")
     out["proc_after"] = snap(B["proc"])
-    out["audit"] = [dict(r) for r in con.execute("SELECT action, detail, who FROM bill_audit WHERE bill_id=? ORDER BY id", (B["proc"],))]
+    # the asset app's own after-the-fact checks (S441) may write lines of their own beside ours; count only ours
+    out["audit"] = [dict(r) for r in con.execute("SELECT action, detail, who FROM bill_audit WHERE bill_id=? "
+                                                 "AND action='subgroup' ORDER BY id", (B["proc"],))]
     out["set_same"] = post(owner, "/bills/%d/subgroup" % B["proc"], subgroup="procedure")
-    out["audit_n_after_same"] = con.execute("SELECT COUNT(*) FROM bill_audit WHERE bill_id=?", (B["proc"],)).fetchone()[0]
+    out["audit_n_after_same"] = con.execute("SELECT COUNT(*) FROM bill_audit WHERE bill_id=? AND action='subgroup'",
+                                            (B["proc"],)).fetchone()[0]
     out["set_bad"] = post(owner, "/bills/%d/subgroup" % B["xray"], subgroup="drop table")
     out["set_missing"] = post(owner, "/bills/999999/subgroup", subgroup="others")
     out["set_pharm"] = post(owner, "/bills/%d/subgroup" % B["pharm"], subgroup="procedure")
@@ -197,7 +201,8 @@ def child(mode):
     # ---- the lane suggestion goes through the app's own door
     out["move_battery"] = post(owner, "/bills/%d/lane" % B["battery"], lane="owner_expense", back="/papers")
     out["battery_after"] = snap(B["battery"])
-    out["battery_audit"] = [r[0] for r in con.execute("SELECT action FROM bill_audit WHERE bill_id=?", (B["battery"],))]
+    out["battery_audit"] = [r[0] for r in con.execute("SELECT action FROM bill_audit WHERE bill_id=? AND action NOT LIKE 's441%'",
+                                                      (B["battery"],))]
     p2 = get(owner, "/papers")
     out["papers_after"] = [p2[0], sorted(set(re.findall(r'>(B-\d+)</a>', p2[1])))]
     out["flash"] = "is under Procedure room" in get(owner, "/papers/%d" % B["proc"])[1] or True
@@ -256,7 +261,10 @@ def run(root, tag, d):
     e = dict(os.environ)
     e.update({"S464_ROOT": root, "ASSETS_DB": os.path.join(base, "assets.db"), "ASSETS_UPLOADS": os.path.join(base, "uploads"),
               "CLINIC_PORTAL_DIR": portal, "SARVAM_API_KEY": "", "SCANAPP_PREFIX": "/scanapp",
-              "FINANCE_LOCAL_URL": "http://127.0.0.1:9", "TMPDIR": tmp, "TEMP": tmp, "TMP": tmp, "PYTHONDONTWRITEBYTECODE": "1"})
+              "FINANCE_LOCAL_URL": "http://127.0.0.1:9", "TMPDIR": tmp, "TEMP": tmp, "TMP": tmp, "PYTHONDONTWRITEBYTECODE": "1",
+              # S441 reads the finance database for its own questions; the walk gives it none, so the box's live
+              # finance.db is not opened (the first run on the box did open it, read-only -- F-709).
+              "FINANCE_DB_FOR_SCANS": os.environ.get("S464_WALK_FINANCE_DB") or os.path.join(base, "no_finance.db")})
     p = subprocess.run([sys.executable, "-B", os.path.abspath(__file__), "--child", tag], cwd=d, env=e,
                        capture_output=True, text=True, timeout=300)
     got = None

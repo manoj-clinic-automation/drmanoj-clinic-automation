@@ -38,7 +38,7 @@ Each word list grows from the app's `settings` table (`d664.words.<name>`, comma
 ## Files
 - `built/clinic_papers.py` — the module.
 - `apply_s464.py` — three exact anchors, each found once, or nothing is written.
-- `walk_s464.py` — 63 checks on three scratch copies (old, new, new without the module), each on an empty database with made-up papers.
+- `walk_s464.py` — 63 checks on three scratch copies (old, new, new without the module), each on an empty database with made-up papers. The app's own S441 checks are given no finance database, so the box's `finance.db` is not opened; `S464_WALK_FINANCE_DB` walks it with S441's supplier questions switched on (the shape the first run on the box met — F-709).
 - `figure_s464.py` — read-only: opens every new page on a **copy** of the box's own `assets.db`; prints counts only.
 - `install_S464_CLINIC_PAPERS.sh` — gates → build lock → pins → apply on scratch → walk → the real-papers check → backups → rename into place → restart `assetapp` → door, mount, column and journal checks → restore on red. `DRY=1` places nothing.
 

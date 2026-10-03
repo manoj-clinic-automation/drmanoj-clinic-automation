@@ -68,7 +68,7 @@ echo "$WOUT" | tail -1 | grep -q "^WALK_S464 GREEN" || { say "!! [4/8] walk red 
 say "[4/8] walk green: the list and its suggestions, the groups, the month, who may ask, the guard with the new file absent, the pharmacy scan untouched"
 
 copydb "$ADB" "$SCR/live/assets.db" && mkdir -p "$SCR/live/uploads" || { say "!! [5/8] no copy of assets.db for the real-papers check - nothing installed"; clean; exit 1; }
-FOUT="$( cd /tmp && S464_ROOT="$SCR" ASSETS_DB="$SCR/live/assets.db" ASSETS_UPLOADS="$SCR/live/uploads" SARVAM_API_KEY="" FINANCE_LOCAL_URL="http://127.0.0.1:9" timeout 300 "$SPY" -B "$KDIR/figure_s464.py" "$SCR/live/assetapp" 2>&1 )"
+FOUT="$( cd /tmp && S464_ROOT="$SCR" ASSETS_DB="$SCR/live/assets.db" ASSETS_UPLOADS="$SCR/live/uploads" SARVAM_API_KEY="" FINANCE_LOCAL_URL="http://127.0.0.1:9" FINANCE_DB_FOR_SCANS="$SCR/no_finance.db" timeout 300 "$SPY" -B "$KDIR/figure_s464.py" "$SCR/live/assetapp" 2>&1 )"
 echo "$FOUT" | grep -E '^FIGURE_S464' | cut -c1-600 | sed 's/^/   /'
 echo "$FOUT" | grep -q "^FIGURE_S464 OK" || { say "!! [5/8] the new pages did not all open on a copy of the real database - nothing installed"; echo "$FOUT" | tail -20 | cut -c1-400; clean; exit 1; }
 [ "$(m5 "$AST/asset_register.py")" = "$AR_FROM" ] || { say "!! [5/8] asset_register.py changed during the checks - nothing installed"; clean; exit 1; }
