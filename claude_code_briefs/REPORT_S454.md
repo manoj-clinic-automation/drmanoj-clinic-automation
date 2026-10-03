@@ -88,6 +88,7 @@ amir_day.py, reports_tile.py, stock_app.py, stock_watch.py.
   - `marg_txt.py` 70f920c4 → **ed17bb763c202f81cb8b3708fac61b52**;
   - `KIT_MANIFEST.txt` bdd27768 → **05fb348589ba967e26bf8b7c9ff2aebc** (CRLF, as live; the kit keeps the LF copy 5959bde8).
   - Both read back. The watcher (S397, 81145aa7) was **not** replaced.
+  - The medical PC's heartbeat at 12:33:02 IST reads `marg_txt.py up to date (ed17bb76)`.
 - manojz `D:\Downloads\margsync\MargPull\signatures.json` a987a08e → **7f72c572808218fbfc008373336beea8** (20 signatures), read back.
   Backup `signatures.json.bak_S454_a987a08e`.
 - PROVE_S454_MEDICAL was GREEN 8 of 8, re-run 03-Oct before packing:
@@ -181,6 +182,21 @@ In both lists: DFO MR, VOLITRA APS SPRAY, MEG QCS (sheet 20 strip / system 10), 
 - Only on the system's list (23): among them NUPTACH 200, OPTIFENAC TBR and UPRISE 6L INJ, which are already old pending lines on
   Darpan's sheet. The brief expected 9 of 21 on 01-Oct's stock; this is 02-Oct's stock (`as_on` 02-10-2026).
 
+### Published and checked on the box
+- PUBLISH_ALL: the part-1 folder went out in another session's publish at 12:20 (722f564, S458/S459's), unchanged since. 1B, this
+  report and the duty map went out in d43f0c1 (12:32).
+- On the box, `/root/deploy/repo` was pulled `--ff-only` to d43f0c1 at 12:33:04 IST. Both part folders pass `md5sum -c` (48 and 6
+  files) and match, by `diff -r`, the copies that ran. No `__pycache__` or `.pyc`. The NO_PHONE_NUMBERS gate is clean (63 files).
+- The owner's Needs-you, as the live code builds it with v4 (on a backup-API copy):
+  - no duty-map orphan line;
+  - "Orthotic shortages: 2 items -- order not sent": Yuvika's order has arrived, and the 2 short items are on no open order;
+  - "18 supplier messages unsent (30 min or more)";
+  - the rest are unrelated lines, as before;
+  - September's "Bill scan pending on 18 purchase bills" and S410's "Order not sent: Kedar …" are gone, by design.
+
+- The build lock was taken at 12:05:29 IST (owner S454_BILL_REGISTER) and released at 12:34:05 IST. Finance healthz was 200 and
+  clinic-finance active at release. `/tmp/s454p1` (the owner's sheet, scratch copies) and `/tmp/s454w` were removed.
+
 ### Duty map
 `claude_code_briefs/DUTY_MAP.json` / `.md` are now v4 (5a415824 / 758c8345), the same bytes as the kit's:
 - reception.medicine_orders: source-aware, door "Order karna hai".
@@ -206,6 +222,8 @@ Every due duty's door was seen in the staff-eye walk.
 ### Noticed outside the brief
 - The medical PC heartbeat says "BACKUPS: 6 kit backup files are lying about - the prune is not working", and Drive
   `ToMedical\_kit` holds a `__pycache__` folder dated 25-Aug. Neither was touched.
+- S458's medical-PC reinstall kit (`deploy_kits/PC_KITS/medical/kit.zip`, packed 03-Oct) carries `marg_txt.py` 70f920c4 (S446). Its
+  installer only fills what is missing, and the Drive agent then brings ed17bb76. Still, the next repack should take the S454 reader.
 - B-0113's supplier reads "KEDAR PHAMACEUTICAL" (a misread). It was tied through a **learnt spelling**: `purchase_scan_alias` already
   maps it to KEDAR PHARMACEUTICAL. That is the brief's rule, not a similar spelling.
 
