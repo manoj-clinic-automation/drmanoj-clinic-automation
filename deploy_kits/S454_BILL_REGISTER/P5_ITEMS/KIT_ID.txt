@@ -1,0 +1,4 @@
+kit id S454_BILL_REGISTER
+part P5_ITEMS (S454 section 11: the items -- the owner's items check, the Marg bills whose lines' own value does not come to the bill; the
+suppliers' item names learnt from verified bills on quantity and rate, judged first by the Sarvam check)
+session 283 (Sanjeevni) · 03-Oct-2026

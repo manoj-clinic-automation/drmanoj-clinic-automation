@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S291 close** (the parent), 03-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
+# OWNER TO-DO — LIVE · refreshed at the **S292 close** (the parent), 03-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S291 close** (the parent), 03-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S290 close** (the parent), 03-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
 
@@ -10,9 +12,9 @@
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
-*Detail: `START_HERE_SESSION_292.md` · `S291_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below date from 02-Oct morning; your board is current for the pharmacy.*
+*Detail: `START_HERE_SESSION_293.md` · `S292_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below date from 02-Oct morning; your board is current for the pharmacy.*
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S291 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S292 close
 
 **1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries only this session's record; no server line follows it.
 
@@ -20,17 +22,17 @@
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · ONE WORD — yes or no: shall your PC pick up reception's Docterz reports from the clinic Drive by itself?** Reception's evening export reaches the server, but your portal shows the day only after your own PC has seen the files. Until I build this on your yes, on a morning when yesterday is missing from your portal, this one line on your PC brings it in within 15 minutes:
+**2 · PLEASE DO NOT PRESS THE TWO NEW BUTTONS ON *CLINIC PCs* YET** (Medical PC, Dr Manoj's PC). I test both setups first and will tell you in one line when they are ready. The Reception button is as before.
+
+**3 · WHEN YOU SETTLE IT — clinic expenses and MK expenses.** You said the two overlap and are not finalised. Until you tell me the split, nothing suggests a group for electrical, plumbing and similar papers; you can still sort each by hand on the list.
 
 ```
-cmd /c copy /y "H:\My Drive\Clinic Records\Docterz exports\*.csv" "D:\Downloads\"
+https://followup.dr-manoj.in/scanapp/papers
 ```
 
-**3 · THE RECEPTION PC'S LAN CABLE — when convenient.** It shows no link even pushed home: try a different cable or wall socket. If a known-good cable shows nothing, it is the PC's own socket — the vendor's. Not urgent: that PC is on the clinic Wi-Fi now.
+**4 · THE RECEPTION PC — three small things, none urgent.** (a) The LAN cable: try a different cable or wall socket. (b) On its Wi-Fi list, tick **Connect automatically** for `Airtel_Airtrl_mano_8080`. (c) Its Windows has had no security fixes since November 2025 — your decision ("Enroll now" after clinic hours, or a new PC for reception).
 
-**4 · THE RECEPTION PC'S WINDOWS — your decision, no hurry.** It has had no Windows security fixes since November 2025 and cannot run Windows 11. "Enroll now" on its Windows Update screen is worth one try after clinic hours (it asks for a Microsoft account sign-in); the lasting answer is a new PC for reception.
-
-**5 · ONE WORD — the follow-up tracker on the server (C·2): yes or no.** One evening when the PC copy stops being live and its records move to the server; the PC copy stays as the fallback. It also ends item 2 for good.
+**5 · ONE WORD, WHEN YOU LIKE — the follow-up tracker on the server (C·2): yes or no.** Less pressing now: your PC already collects the Docterz reports by itself. The move would end the need for your PC to be on.
 
 **6 · THE AUGUST ACCOUNTANT PACK — Send, when you are satisfied.** 20 of 25 ready, Amir's pack ready; still missing the clinic's Yes Bank current statement and the lab and expense bills.
 
@@ -52,13 +54,22 @@ D:\Downloads\margsync\_config\contacts_S282\CONTACT_GROUPS_TO_UPDATE.xlsx
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **On your yes: your PC picks up reception's Docterz reports by itself** — or the tracker moves to the server.
-2. **A short plan and a mock for your ruling on clinic consumables, one PDF per purchase and the *Dr MK expense* lane** — no build until you say.
-3. **My own housekeeping:** the Wi-Fi driver step into the reinstall notes · each PC's Windows currency on the health page · the build lock in my installers · a tidy-up of the finance app's main file (your OK first).
-4. **The Medical PC's and your PC's buttons on the *Clinic PCs* tile.**
-5. **On your word:** the contacts · the mail flood (low) · the portal tiles (after the pharmacy move).
-6. **Held at your word:** the Callback Tracker on the server.
+1. **My own first:** one whole read of the finance app's and the scan app's main files (many small changes went into both today) · the check of today's five server files against tonight's backup.
+2. **Monday 08:30:** the small update to the reception PC, so its Windows level shows on your health page.
+3. **The test of the Medical PC's and your PC's setups** — then the two new buttons are yours to use.
+4. **On your word:** the expense split · the tracker on the server · the contacts · the mail flood (low) · the portal tiles (after the pharmacy move).
+5. **Held at your word:** the Callback Tracker on the server.
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S292 CLOSE — 03-Oct-2026 (the parent)
+
+- ~~**The publish of the S291 record**~~ — done by you; and every publish of the day after it, each verified.
+- ~~**Yes or no: shall your PC pick up reception's Docterz reports by itself**~~ — you chose the server road; built and live since 11:35 (S457). **Your evening copy line is retired.**
+- ~~**The Wi-Fi driver step in the reinstall notes · the build lock in my installers · each PC's Windows level on the health page**~~ — done (S456; the reception PC's own update goes Monday 08:30).
+- ~~**The Medical PC's and your PC's buttons on *Clinic PCs***~~ — on the page (S458, S459, S460); see item 2 above. Your own PC's settings now go to the SSD every night.
+- ~~**The tidy-up of the finance app**~~ — done (S461, S462, S463, S468, S469): a salary advance cannot post twice; the checker's figures open for the checker only.
+- ~~**Your ruling on clinic consumables, one PDF per purchase and the *Dr MK expense* lane**~~ — built at your word "build." and live (S464 … S467): the list to sort, the join with an undo, *Keep the warranty*.
+- **Corrected the same hour:** a report of mine said the 17-Aug salary advance was "reversed". It is not — it is open and being recovered. Neither advance needs you.
 
 ## ✅ DONE AT THE S291 CLOSE — 03-Oct-2026 (the parent)
 

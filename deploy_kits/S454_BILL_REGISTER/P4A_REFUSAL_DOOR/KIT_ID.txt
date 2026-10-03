@@ -1,0 +1,4 @@
+kit id S454_BILL_REGISTER
+part P4A_REFUSAL_DOOR (S454 section 10.2: the server takes the medical PC's note of a refused text on the marg-file door, with the same key, and
+writes one row refused by the PC; the owner's Needs-you, the reports tile and Darpan's card name it)
+session 283 (Sanjeevni) · 03-Oct-2026

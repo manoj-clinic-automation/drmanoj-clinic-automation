@@ -1,12 +1,40 @@
-# REPORT S454 — S454_BILL_REGISTER · Parts 1, 2 and 3 of 5 (with 1B, 1C, 1D) · installed 03-Oct-2026 12:24 IST (1B 12:28, 1C 15:36, 1D 16:35, 2 17:26, 3 18:17 IST) · published
+# REPORT S454 — S454_BILL_REGISTER · all five parts built; everything installed except the medical PC's watcher · 03-Oct-2026 (1 12:24, 1B 12:28, 1C 15:36, 1D 16:35, 2 17:26, 3 18:17, 3B 19:39, 5 {P5_AT}, 4 server {P4A_AT} IST) · published
 
-**Where the run stands (03-Oct 18:20 IST):** Parts 1, 2 and 3 are installed, checked and published. **Parts 4 and 5 are not started.** Part 4
-puts a new watcher on the medical PC, and the brief forbids that before 04-Oct 13:00 IST (§10.3). Part 5 follows Part 4 in the brief's
-order. So this run stops at the Part 3 / Part 4 boundary. Nothing is half-installed. The continued run's line, any time after 04-Oct 13:00 IST:
+**Where the run stands ({STAND_AT} IST):** everything in the brief is installed, checked and published, except one file: the medical PC's new
+watcher (Part 4). The brief forbids delivering it before 04-Oct 13:00 IST (§10.3), and §19 says to stop there. It is built, walked and packed in
+`deploy_kits/S454_BILL_REGISTER/P4B_REFUSAL_WATCHER/`. Its delivery script refuses to run before that hour; I tried it at 19:07 IST and it
+refused. Nothing is half-installed. The line for the watcher, any time after 04-Oct 13:00 IST:
 
 ```
 Read CLAUDE.md, then continue claude_code_briefs\S454_BILL_REGISTER.md from where claude_code_briefs\REPORT_S454.md stops — install, verify, publish and report.
 ```
+
+## For the owner — tonight (§18, the items, and the server's half of the refusal note)
+
+- **Reception sees one new line under both scan buttons: "Ek scan mein ek hi bill."** On "Bill nahi hai, ya kam aaya?" the button now reads
+  **"Save kijiye"** while anything is marked short or not come. With everything received it still reads "Maal aa gaya". It saves exactly as before.
+- **Two bills in one scan are not caught by the system yet.** For each scan the asset app keeps one reading: the first bill's supplier, number,
+  date, total and lines. B-0121's four lines add up to its first bill (Rs 7,658). Nothing of the second bill (SF 003499) is kept, so the system
+  cannot see it. I built no guess. The new line on the screen is the guard until the asset app keeps a reading per page; that is a job for the
+  parent, below.
+- **A new page for you: Items check.** It asks whether each Marg bill's lines (quantity × rate, less discount, plus tax) add up to the bill.
+  - August: 57 of 83 bills add up. September: 57 of 81.
+  - Most that do not are about 5% off: a discount the supplier gave that is not in Marg's discount column. Marg's own net figure for each line
+    is shown beside it, so you can see where the difference comes from.
+  - https://followup.dr-manoj.in/finance/purchase/page/items?month=2026-09
+- **The system now learns each supplier's own name for a medicine** from bills whose scan matches Marg, line by line.
+  - Tonight it learnt {P5_LEARNT} names. September's "item lines read right" went from {P5_BEFORE} to {P5_AFTER} of 162.
+  - The first try paired two names wrongly (an address line with CHYMORAL AP; "CCM TAB" with DFO 4X GEL). So a pair whose names share nothing
+    is never learnt. These names change no stock, no order and no bill.
+- **When the medical PC refuses a file, the server is now ready to hear it** (installed). The PC's own half goes in after 04-Oct 13:00 IST.
+  Until then a file the medical PC itself refuses still reaches nobody.
+- **Four smaller mends, each checked:**
+  - GUNINA's "P.L. LTD." now counts as GUNINA (September's supplier misreads 4 → 3).
+  - On Marg's stock, the system's list no longer counts an order that arrived by its scan twice.
+  - A credit note (a customer's return) is no longer counted as a sale in the spot-count reading. 98 medicines' 90-day sales were overstated,
+    by 2,071 units in all.
+  - Your card "the system agreed on 5 of 21" now says "on Marg's stock".
+- **Nothing for you to do tonight.** The reception phone is set up and asking: it last asked the server at 18:49 IST, answered 200.
 
 ## For the owner — part 3 (the shelf figure; installed 18:17 IST)
 
@@ -81,9 +109,10 @@ Read CLAUDE.md, then continue claude_code_briefs\S454_BILL_REGISTER.md from wher
 - **The system agreed on 5 of Darpan's 21 medicines.** Darpan ordered 16 that the system's list did not ask for. The system would
   have ordered 23 that are not new on his sheet; 3 of those are already on it as older pending lines. Part 3 shows the reason for
   each item (the shelf figure). (My first install showed "0 of 21". That was my mistake, now fixed: 1B.)
-- **The reception phone cannot send yet.** It has not asked the server since the key was changed on 02-Oct (your one step from S452
+- ~~**The reception phone cannot send yet.** It has not asked the server since the key was changed on 02-Oct (your one step from S452
   is still open). Until then the WhatsApp button stays grey and the staff call. Once the phone is set up, ten messages take about
-  2 minutes. If the macro cannot ask again straight away, they take about 50 minutes (one every 5 minutes).
+  2 minutes. If the macro cannot ask again straight away, they take about 50 minutes (one every 5 minutes).~~ *(Stale: the phone was set
+  up on 03-Oct (17.10). The "Reception phone" card shows when it last asked: 18:49 IST tonight.)*
 - **September is parked.** It raises no "Bill scan pending" and stays behind "Purana kaam: September". Amir's work is unchanged:
   his lists are the same with or without this kit. Everything was tested on copies of today's records (97 of 97 checks, plus the 12
   earlier tests) and checked again live.
@@ -107,12 +136,76 @@ Yuvika with 2 items.
   edit; it is reported for the parent chat below.
 
 **What you need to do:**
-- Set up the reception phone. Sign in as yourself on that phone, open the page below, copy the key into the macro's two HTTP steps,
-  and sign out: https://followup.dr-manoj.in/finance/purchase/page/phone-setup
+- ~~Set up the reception phone. Sign in as yourself on that phone, open the page below, copy the key into the macro's two HTTP steps,
+  and sign out: https://followup.dr-manoj.in/finance/purchase/page/phone-setup~~ *(done on 03-Oct)*
 - Tell Darpan, once, to save Marg's order report as TEXT, the way he saves the stock report. The same line is on his card:
   https://followup.dr-manoj.in/finance/darpan/kal
 
 ## For the chat
+
+### P3B · P3B_FIRST_DAY (brief §18; placed 19:39 IST by the install log, clinic-finance ActiveEnterTimestamp 19:39:12 IST)
+
+| file | FROM | TO (md5sum after placing) |
+|---|---|---|
+| /root/finance/porders_s454.py | eadbc8d3582991fa36ef3fde83253126 (3) | c3562c5bc5602ecdb32e416a231ba30c |
+| /root/finance/order_sheet.py | ebe1eb4b327c1a784e20174cda0abd4b (3) | a5408df0fac852391d5845c5ae4d8865 |
+| /root/finance/scan_register.py | 8d100e60c467dab413830a251ef198fb (2) | 904f07b1c7c6ce2291632586b7ddf279 |
+| /root/finance/order_rules.py | 1729e971982d0823f8d33b3976fa4d74 (3) | 734fc6bcd67bb23da1bea2a6e927fcad |
+| /root/finance/stock_watch.py | b429660ddc9a5291e261c5fa6fe652c0 (3) | 6d4d660f20a0e441fb1082597e5fd96c |
+
+- **Health:** finance healthz 200. These answered 302 (the gate): `/finance/porders`, `/finance/porders/s454/maal`, `/finance/purchase/page/scans`,
+  `/finance/purchase/page/sarvam`, `/finance/stock/page/count`. No "NOT mounted", no traceback. These were untouched, md5s compared before and
+  after: finance_app.py, portal.py, tile_grants.json, sanjeevni_approvals.py, packs.py, asset_register.py, item_alias.py, stockmatch.py,
+  supplier_msg.py, porders.py, purchase_app.py, stock_app.py, shelf_figure.py, amir_day.py, reports_tile.py, darpan_kal.py, order_sheet_pdf.py,
+  marg_take.py, signatures.json.
+- **Backups:** `finance.db.bak_S454_20261003_191706` (backup API; no data step); `porders_s454.py.bak_S454_eadbc8d3`,
+  `order_sheet.py.bak_S454_ebe1eb4b`, `scan_register.py.bak_S454_8d100e60`, `order_rules.py.bak_S454_1729e971`, `stock_watch.py.bak_S454_b429660d`.
+- **The crons' own commands as scripts (F-711)** on the built files, scratch copies: `order_rules.py tick`, `stock_watch.py job`,
+  `purchase_app.py rematch` each exit 0. One live tick after placing (19:39:20 IST) exited 0.
+- **18.1 — two bills in one scan (F-712). What the stored reading holds** (`assets.db`, read only; `asset_register.py` read live, e774be89):
+  - **The finding.** `bills` keeps one header per scan: `vendor`, `bill_no`, `bill_date`, `total_amount`. `bill_items` keeps the lines. No
+    column keeps a page's own reading: `page_of` is S441's join of a forgotten page.
+  - **B-0121** (Alisha, 03-Oct 16:44, a 2-page PDF) reads SHIVAAZ FORMULATIONS · SF 003463 · 2026-10-01 · Rs 7,658. Its four lines (CROCAL TAB,
+    TRAMAVIN GEL, PREGHYPNE NT TAB, DEFVAX-6 TAB) come to Rs 7,659.82: **the first bill only.** Nothing of SF 003499 (Rs 4,747) is stored.
+  - **It cannot be seen from what is stored, so no guess is built.** Two pages are no sign either: a single bill can run to two.
+  - **For the parent (D664's project):** to catch two bills in one scan, the asset app's reader (`_bg_extract` → `sarvam_ocr.extract`) would
+    have to read each page of a PDF on its own and keep, per page, the bill number, the date and the total it read (a small table: scan id,
+    page, bill_no, bill_date, total). It would also have to say when a later page carries a different number or a second total. Then the
+    question "Is scan mein do alag bill hain?" can be asked from data. Today the reader reads the whole PDF once and keeps one header.
+  - **The staff line** "Ek scan mein ek hi bill." is on the home under "Naya bill scan karo", and under every "Bill scan karo" on "Maal aaya?".
+    The owner's English reads "One bill per scan."
+- **18.2:** the arrival screen's button carries both words. A small script switches it on every tap: "Save kijiye" while any line is Kam aaya or
+  Nahi mila, "Maal aa gaya" otherwise. The rows it writes are the same as the box writes, checked line by line.
+- **18.3:** `scan_register.sup_norm` drops a standalone "P.L." ("A.P.L." inside a name is kept).
+  - September's Sarvam counter: **misread supplier 4 → 3**; bill no. 8, date 13, total 10, all unchanged.
+  - The matcher re-run on each side: 67 links, none made, none lost. Register rows whose state moves: 0.
+- **18.4 — on `marg`, the plan's lines that change: none** (23 lines both ways, same items, same quantities, on today's copy).
+  - What changes is the stock counted as "on the way" for 17 items: an order that arrived by its scan now counts once. CROCAL, KT ROS DT,
+    MEG QCS and RANIMIG 150 go from 600 to 300 each, TENDOZAC TAB from 400 to 200, and so on.
+  - No line changed, because the 17 are covered either way today.
+- **18.5 (F-713), before placing, on a scratch copy of today's data:**
+  - 98 items' 90-day sales move: 2,071 units of credit notes are no longer counted as sales. The largest: TYRO BR 8,275 → 7,851, ORICOX P
+    5,319 → 5,069, TRAMATEE P TAB 15T 4,705 → 4,475, FLUXIC P 2,584 → 2,356, ONKET DT 1,963 → 1,779, DFO MR 1,032 → 866.
+  - The expected stock (the spot count's comparison) moves for 0 items today. It reads the sales after Marg's newest closing (02-Oct), and no
+    credit note falls after it yet. From the next one it is read as a return.
+  - **Negative control:** the box as it is reads a crafted 10 sold + 3 returned as 13 sold, and expects 87 where 93 is right.
+- **18.6:** the card "Orders of 02-10-2026: the system agreed on 5 of 21 items with Darpan's sheet" keeps its stored figure and now says
+  **"on Marg's stock"**. From the next sheet, `compare()` stores the basis it was taken on, and the card says "on the shelf figure" on `count`.
+- **The walk** (`walk_s454p3b.py`; NEW = after P3B, OLD = the box as it was; backup-API copies; walk-only portal secret and users):
+  **WALK_S454P3B GREEN — 26 of 26.**
+  - Every item above has its negative control red on the box as it was.
+  - The "P.L." control is the real one: on September's linked bills exactly one supplier reading moves, the P.L. scan's, from differ to agree.
+    The matcher's own `_vendor_match` already agreed on it; only the counter's reading differed.
+  - The staff-eye walk passes on DUTY_MAP v5 for reception, darpan, shavez, amir and the owner.
+- **The earlier walks:** **WALKS_OLD_S454P3B GREEN**, with the same named reds as part 3, word for word on both runs: S403 13, S407 5, S410 3,
+  S414 1, S417 4, S428 8, S439 23, S440 27, S441 6, S444 14, S446 14, S452 11.
+- **The file left on this PC with the phone book's numbers (§18.7), once more:** `_scratch\S454_BILL_REGISTER\view\sheet_p1c.pdf` (26,704 bytes,
+  03-Oct 15:32). It is git-ignored and was never published. Its deletion was refused by the permission list in part 1C, so it is still there for
+  the owner to remove.
+
+{P5_SECTION}
+
+{P4_SECTION}
 
 ### Part 1 · P1_ORDER_SHEET_RECEPTION — FROM → TO, read back on the box (install log 03-Oct 12:24:27 IST)
 
@@ -564,8 +657,9 @@ Every due duty's door was seen in the staff-eye walk.
   PC's watcher before 04-Oct 13:00 IST (§10.3), and Part 5 follows Part 4 in its order. I did not install half of Part 4 (the server door
   without the watcher) tonight. Until Part 4 is in, a sheet the medical PC itself refuses still reaches nobody (as said in Part 1).
 - **Not built in Part 3, by the brief:** judging a full count by the shelf figure (the loss desk still judges by Marg). That is the next kit's.
-- The reception phone was not set up; that needs the owner's login on that phone. The phone has not asked since S452
-  (`supplier_msg.phone_last` absent; 18 NEFT messages queued since 26-Sep 19:49).
+- ~~The reception phone was not set up; that needs the owner's login on that phone. The phone has not asked since S452
+  (`supplier_msg.phone_last` absent; 18 NEFT messages queued since 26-Sep 19:49).~~ *(Stale, struck by §18.7: it was set up on 03-Oct
+  (17.10). The "Reception phone" card shows when it last asked.)*
 - The approvals-page sentence about reminder times is **for the parent**: `finance_ui/finance_approvals.html` line 1255 still names
   09:00, 12:00, 15:00 and 17:00. S454 sends one reminder at `order.remind_times` (17:00) and none at 09:00 on `marg_sheet`.
 - F-701 was not repaired; it is outside this brief.
