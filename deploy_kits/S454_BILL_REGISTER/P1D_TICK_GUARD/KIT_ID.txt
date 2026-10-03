@@ -1,0 +1,4 @@
+kit id S454_BILL_REGISTER
+part P1D_TICK_GUARD (the order tick runs again from the cron: part 1's block sat below order_rules.py's __main__ guard -- NameError on every
+tick since 12:30 IST on 03-Oct; the guard moves to the end of the file)
+session 283 (Sanjeevni) · 03-Oct-2026 · D666

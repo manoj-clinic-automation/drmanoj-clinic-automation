@@ -1,5 +1,11 @@
 # REPORT S454 — S454_BILL_REGISTER · Part 1 of 5 (with its fixes 1B and 1C) · installed 03-Oct-2026 12:24 IST (1B 12:28, 1C 15:36 IST) · published
 
+## For the owner — part 1D (a fault of mine in part 1, found and mended at 16:35 IST)
+
+- The ordering system's 10-minute background job had been failing since 12:30 today. It was a mistake in how part 1 was added to the file.
+  The screens were not affected, because they do the same work whenever they are opened. But the job is what sends the 17:00 reminder
+  and prepares tomorrow morning's lists. Mended and checked at 16:35 IST: the job now runs cleanly. Nothing else changed.
+
 ## For the owner — part 1C (the corrections of 03-Oct afternoon)
 
 - **The printed order sheet now shows the whole open order.** It lists what is still to be ordered, what is waiting for its goods
@@ -197,6 +203,28 @@ In both lists: DFO MR, VOLITRA APS SPRAY, MEG QCS (sheet 20 strip / system 10), 
   PANTOCID DSR, DECA INSTABOLIN 50, CEECIT MZ, PREGHYPE NT TAB, PRETOL 8, AURAB L CAP, FENARIC T4 TAB.
 - Only on the system's list (23): among them NUPTACH 200, OPTIFENAC TBR and UPRISE 6L INJ, which are already old pending lines on
   Darpan's sheet. The brief expected 9 of 21 on 01-Oct's stock; this is 02-Oct's stock (`as_on` 02-10-2026).
+
+### Part 1D · P1D_TICK_GUARD (a fault of part 1; placed 16:35:21 IST by the file's own time)
+
+- **The fault.** Part 1 appended its block to `order_rules.py` below the file's `if __name__ == "__main__":` line. That block holds
+  `_s454_pass`, `_s454_remind`, `_s454_source` and `_s454_or_arrived`. The cron runs `order_rules.py tick` as a script, so every tick since
+  12:30 IST died with `NameError: name '_s454_pass' is not defined` (`/root/finance/order_rules.log`).
+  - The service imports the module, so it was unaffected. Page reads kept loading sheets, making ties and clearing lines.
+  - What was lost until 16:35: the cron's own sheet loading, tie and clearing passes (the page reads covered them). No reminder was due
+    before 17:00. Tomorrow's 05:30 nightly and 09:00 preparation would have failed.
+  - Found while checking Part 2's own appended blocks for the same mistake. purchase_app.py, porders.py, supplier_msg.py,
+    darpan_kal.py and marg_take.py were checked: only order_rules.py had it.
+- **The fix.** The two guard lines move to the end of the file. order_rules.py d29efa8e6425fa359ea28d38c0758ccc →
+  **6587dc84941f4e53ccc39d0847812123**, read back. Backup `order_rules.py.bak_S454_d29efa8e`. No data change, so no database backup was
+  made. clinic-finance was restarted; healthz 200; `/finance/porders` 302 (the gate). These were untouched, md5s compared: finance_app.py,
+  portal.py, tile_grants.json, porders.py, porders_s454.py, order_sheet.py, supplier_msg.py, purchase_app.py, marg_take.py,
+  signatures.json.
+- **WALK_S454P1D GREEN — 3 of 3.**
+  - The cron's own command, run as a script on a scratch copy, exits 0 with the S454 pass in its JSON. **Negative control:** the live file
+    fails with the same NameError.
+  - Imported in-process, the module exposes the same names.
+- **One live tick by hand after placing** (16:35:29 IST) exited 0:
+  `{"slot": "none", "s454": {"sheets": 0, "withdrawn": 0, "refresh": 0, "ties": 0, "marg_lines": 0}, "notice": {... "why": "not yet"}}`.
 
 ### Part 1C · P1C_SHEET_PAGE_AND_PHONE (brief §17; install log 03-Oct, placed 15:36:14 IST by the files' own time)
 
