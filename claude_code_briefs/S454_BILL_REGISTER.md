@@ -37,6 +37,8 @@ Written 03-Oct-2026 by the Sanjeevni chat (S283 post-close) from `S283_PURCHASE_
 
 If you must stop, stop at a part's boundary, say in the report exactly what is installed and what is left, and end. The owner then pastes the second line of §16.
 
+**On a continued run, do §17 first** (corrections to Part 1, found when it was read live on 03-Oct), as its own small folder in the same kit, walked and installed before Part 2 is begun.
+
 ## 0 · The rules this build stands on
 
 1. **A staff screen shows only what that person has to do.** The owner: "They should only see what they need to do. What has already been accepted by the system is not a part of their flow. They should get it in very simple terms." One task on the screen at a time. No counts of settled things, no day counts, no tags, no explanations.
@@ -647,3 +649,38 @@ https://followup.dr-manoj.in/finance/porders
 ```
 https://followup.dr-manoj.in/finance/purchase/page/scans
 ```
+
+## 17 · Corrections to Part 1 — do these first on the continued run
+
+Part 1 (installed 03-Oct 12:24 IST, with 1B at 12:28) was read against this brief and against the live screens on 03-Oct, in the owner's login, read only. **It stands.** The home, "Order karna hai", "Maal aaya?", the old pending list, the owner's cards and the fourteen settings are as §3 and §4 ask. One thing is wrong, and it is all in the printed order sheet (`order_sheet_pdf.py`, live pin 9c28df38 — read it live before the edit). Build it as folder `P1C_ORDER_SHEET_PAGE` in the same kit; walk it; install it; report it; then begin Part 2.
+
+**17.1 The page carries the whole open order, not only what is still to be ordered.** This completes §4.3, which did not say it.
+
+- As installed, on 03-Oct the page printed 6 suppliers and 12 items ("2 naye, 10 purane pending") while 9 suppliers and 16 medicines of the 02-Oct order stood under "Maal aaya?". The staff's paper had lost exactly the lines they are waiting for.
+- **The rule.** The page prints every line of the order that is not yet closed, under its supplier:
+  - lines still to be ordered;
+  - lines whose WhatsApp is in the phone's line;
+  - lines ordered and awaited (everything under "Maal aaya?");
+  - then the old pending lines, as §4.3 has them.
+- A line leaves the page when its goods are recorded (by the bill's scan or by Marg), or when it lapses. A supplier with nothing left does not print.
+- **What is already done is drawn done.** A line that is ordered has its "Order" box ticked. A supplier ordered by WhatsApp or by call has that box in its band ticked; an order whose way is not known (the first load of §3.5) ticks only its lines. "Aaya" and "Bill scan" are always empty: a supplier whose bill is scanned is no longer on the page.
+- The orthotic card's lines (S403) print under their supplier as new lines, as they do now.
+- **The head line counts what is on the page**, in this shape: "Order: dd-mm-yyyy · Darpan (Marg) · N supplier · M dawa: A order karna hai, B ka maal aana hai, C purane pending". A part that is zero is left out.
+- A supplier's block is never split across pages. The page may run to a second sheet when the order is long; say in the report how many lines one page holds.
+
+**17.2 The old-pending tag never prints over another column.** On 03-Oct three lines did: KNEE IMMOBILISER UNISON M (the tag ran across Pack and reached Qty), POWERGESIC 100 PATCH and ARM SLING XL HOPE (the tag ran into Pack). Put the tag on its own second line inside the Item cell, the row growing to hold it; or measure the name and the tag and wrap. Do not shorten the medicine's name.
+
+**17.3 The foot's instruction line stays inside the page.** As installed it ran off the right edge and its end ("jab zaroorat ho.") was cut. Wrap it to the page's width; two lines if needed.
+
+**17.4 The walk for this.**
+
+- Every piece of text on the page lies inside its own cell and inside the page's margins. Measure it from the PDF's own text positions and the font's widths, not by eye.
+- Run it on: the order as it stands live (a copy); a medicine name of 30 characters with an old-pending tag; a supplier with two phone numbers; a supplier with none; an order long enough for a second page.
+- The counts in the head line equal the rows on the page.
+- An awaited line is on the page with its "Order" box ticked; after its supplier's bill is scanned (a crafted scan), the supplier is gone from the page.
+- **Negative control:** the page as installed fails the first check (the three lines and the foot) and the awaited-lines check.
+- No phone number in any output of the walk.
+
+**17.5 One word.** The owner's English view says "1 medicines"; make it "1 medicine". Check the Hindi reads rightly for one ("1 dawa").
+
+**Report**, owner lines first: one sentence that the printed sheet now shows the whole open order, and how many lines it holds on a page.

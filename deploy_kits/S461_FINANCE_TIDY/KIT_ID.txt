@@ -1,0 +1,2 @@
+kit id S461_FINANCE_TIDY
+project parent (session 292, 03-Oct-2026) -- finance_app.py: four display/hygiene edits from the S291 whole read; no figure, row, gate or role changes
