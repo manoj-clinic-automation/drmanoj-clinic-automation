@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S292 close** (the parent), 03-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
+# OWNER TO-DO — LIVE · refreshed at the **S293 close** (the parent), 04-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S292 close** (the parent), 03-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S291 close** (the parent), 03-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
 
@@ -12,54 +14,64 @@
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
-*Detail: `START_HERE_SESSION_293.md` · `S292_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below date from 02-Oct morning; your board is current for the pharmacy.*
+*Detail: `START_HERE_SESSION_294.md` · `S293_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below date from 02-Oct morning; your board is current for the pharmacy.*
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S292 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S293 close
 
-**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries only this session's record; no server line follows it.
+**1 · THE FOUR YES BANK PASSWORDS — on the packs page, *Statement passwords*, *Set*.** One each for NK Pathology, Dr Manoj Agarwal Clinic, Sanjeevni Medicos and the HUF (the two savings accounts are already read from the branch's copies). Then press *re-read the shelf inbox*. Typed once, kept on the server only, never shown again.
+
+```
+https://followup.dr-manoj.in/finance/packs
+```
+
+**2 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries only this session's record; no server line follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · PLEASE DO NOT PRESS THE TWO NEW BUTTONS ON *CLINIC PCs* YET** (Medical PC, Dr Manoj's PC). I test both setups first and will tell you in one line when they are ready. The Reception button is as before.
+**3 · THE SEPTEMBER PACK — *Send to accountants*, when you are satisfied.** Nothing goes to them by itself any more (your ruling of 04-Oct: the pack, never the mail as it comes). 13 of 15 statements at this close.
 
-**3 · WHEN YOU SETTLE IT — clinic expenses and MK expenses.** You said the two overlap and are not finalised. Until you tell me the split, nothing suggests a group for electrical, plumbing and similar papers; you can still sort each by hand on the list.
+**4 · PLEASE DO NOT PRESS THE TWO NEW PC BUTTONS ON *CLINIC PCs & PHONES* YET** (Medical PC, Dr Manoj's PC). I test both setups first. The Reception button and the two phone buttons are ready.
+
+**5 · WHEN YOU SETTLE IT — clinic expenses and MK expenses.** Until you tell me the split, nothing suggests a group for electrical, plumbing and similar papers; you can still sort each by hand.
 
 ```
 https://followup.dr-manoj.in/scanapp/papers
 ```
 
-**4 · THE RECEPTION PC — three small things, none urgent.** (a) The LAN cable: try a different cable or wall socket. (b) On its Wi-Fi list, tick **Connect automatically** for `Airtel_Airtrl_mano_8080`. (c) Its Windows has had no security fixes since November 2025 — your decision ("Enroll now" after clinic hours, or a new PC for reception).
+**6 · THE RECEPTION PC — three small things, none urgent.** (a) The LAN cable: a different cable or wall socket. (b) On its Wi-Fi list, tick **Connect automatically** for `Airtel_Airtrl_mano_8080`. (c) Its Windows has had no security fixes since November 2025 — your decision.
 
-**5 · ONE WORD, WHEN YOU LIKE — the follow-up tracker on the server (C·2): yes or no.** Less pressing now: your PC already collects the Docterz reports by itself. The move would end the need for your PC to be on.
+**7 · ONE WORD, WHEN YOU LIKE — the follow-up tracker on the server (C·2): yes or no.**
 
-**6 · THE AUGUST ACCOUNTANT PACK — Send, when you are satisfied.** 20 of 25 ready, Amir's pack ready; still missing the clinic's Yes Bank current statement and the lab and expense bills.
-
-```
-https://followup.dr-manoj.in/finance/packs?month=2026-08
-```
-
-**7 · AT YOUR OWN PACE — the contacts workbook.**
+**8 · AT YOUR OWN PACE — the contacts workbook.**
 
 ```
 D:\Downloads\margsync\_config\contacts_S282\CONTACT_GROUPS_TO_UPDATE.xlsx
 ```
 
-**8 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today**, saved in `D:\Downloads` (F-629).
+**9 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today**, saved in `D:\Downloads` (F-629).
 
-**9 · WHEN YOU HAVE ONE — the "other works" you want Tailscale for.** It is on the reception PC, the Medical PC, your PC and your phone.
+**10 · WHEN YOU HAVE ONE — the "other works" you want Tailscale for.**
 
-*Closed by your word of 02-Oct and not on this list: the technician of 25-Sep, AnyDesk and UltraViewer, passwords, the Windows activation on the reception PC.*
+*Closed by your word of 02-Oct and not on this list: the technician of 25-Sep, AnyDesk and UltraViewer, passwords, the Windows activation on the reception PC. Closed by your word of 04-Oct: the accountants get the pack only; no statement passes through the clinic mailbox.*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **My own first:** one whole read of the finance app's and the scan app's main files (many small changes went into both today) · the check of today's five server files against tonight's backup.
+1. **My own first:** the check of today's twelve server files against tonight's backup · the relay's 07:00 run and the shelf's 07:30 read on Monday · a watch that tells us when no statement has reached Drive for days (so a lapsed authorisation is seen without your failure mails) · Shavez's hand-over photos into the nightly backup.
 2. **Monday 08:30:** the small update to the reception PC, so its Windows level shows on your health page.
 3. **The test of the Medical PC's and your PC's setups** — then the two new buttons are yours to use.
 4. **On your word:** the expense split · the tracker on the server · the contacts · the mail flood (low) · the portal tiles (after the pharmacy move).
 5. **Held at your word:** the Callback Tracker on the server.
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S293 CLOSE — 04-Oct-2026 (the parent)
+
+- ~~**The publish of the S292 record**~~ — done by you; and the two publishes of this session after it, each verified.
+- ~~**September statements not reaching the pack**~~ — found: two of your personal Google scripts had stopped on 1-Oct asking to be authorised again; you re-authorised them; the relay now files each statement straight into Drive, with nothing through the clinic mailbox and nothing to the accountants except the pack (D674). 12 files came at 09:31; the old forwarded copies left the clinic inbox at your yes.
+- ~~**The accountant pack refined · one password per Yes Bank account · a better flow for Shavez's *Mahine ka kaam* · both phones' MacroDroid setups beside the PC kits · the finance tidy**~~ — all five built at your "take my yes" and live from your own lines (S471 … S474).
+- ~~**Your and Dr Bhawna's Yes Bank savings statements refused by the shelf**~~ — the bank's 1-Oct interest row; the reader taught it; both read (S475).
+- **One thing corrected on the way:** the first publish was refused by the repository's own guard (a folder name it watches for); renamed, published again, nothing lost.
 
 ## ✅ DONE AT THE S292 CLOSE — 03-Oct-2026 (the parent)
 
