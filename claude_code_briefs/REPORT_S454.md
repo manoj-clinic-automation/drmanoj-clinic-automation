@@ -1,6 +1,6 @@
 # REPORT S454 — S454_BILL_REGISTER · all five parts built and installed; nothing is left · 03-Oct-2026 (1 12:24, 1B 12:28, 1C 15:36, 1D 16:35, 2 17:26, 3 18:17, 3B 19:39, 5 20:03, 4 server 20:28 IST) · 04-Oct-2026 (4 medical PC, corrected: 13:23 IST) · published
 
-**Where the run stands (04-Oct 13:25 IST):** everything in the brief is installed and checked. The last piece, the medical PC's watcher, went in
+**Where the run stands (04-Oct 13:29 IST):** everything in the brief is installed and checked. The last piece, the medical PC's watcher, went in
 today at 13:23 IST as the corrected build of §20 (`P4C_REFUSAL_WATCHER`). The first build (P4B) was never delivered. Nothing is half-installed
 and nothing is waiting.
 
@@ -268,6 +268,19 @@ The duty map is unchanged (v5): no duty is added, moved or removed, and no staff
 **To undo:** in Drive `ToMedical\_kit`, copy `marg_watch_S397.py.superseded` over `marg_watch.py` and `KIT_MANIFEST_S454P1.txt.superseded` over
 `KIT_MANIFEST.txt`; the agent installs them and restarts the watcher. The markers and the sentinel on the medical PC are plain files the S397
 watcher never reads. No database backup is involved.
+
+**Published, read back on the box, and the build lock (04-Oct):**
+
+- **PUBLISH_ALL** (mine): the P4C folder and this report went out in 4edf2e6 (13:28:17 IST). NO_PHONE_NUMBERS clean over 10 staged files, and
+  clean by hand over the 9 this run added or changed. Origin HEAD verified. The lines added to this report after that go out in the next
+  publish, which changes no kit file.
+- **On the box:** `/root/deploy/repo` pulled `--ff-only` to 4edf2e6 at 13:28:36 IST. `P4C_REFUSAL_WATCHER` passes `md5sum -c` (7 files). Its
+  `marg_watch.py` and `walk_s454p4c.py` are identical (`diff`) to the copies the walk ran on the box. No `__pycache__` or `.pyc` in the kit.
+  The file on Drive is the same 297cc3d9 the folder holds (the delivery script pins it before placing and reads it back after).
+- **The last look, 13:28:49 IST:** the heartbeat still reads pid 15556 and 297cc3d9; the watcher's log has 8 lines since its start and no
+  `note:` line; `pc_note` rows 0; finance healthz 200; clinic-finance active (not restarted today by this run); `marg_door.py` 6a236663.
+- **The build lock:** taken 13:23:42 IST (owner "S454_BILL_REGISTER P4C_REFUSAL_WATCHER"), released 13:28:49 IST. It was held although no
+  server file changed, because the rulebook asks for it before any install step.
 
 ### P3B · P3B_FIRST_DAY (brief §18; placed 19:39 IST by the install log, clinic-finance ActiveEnterTimestamp 19:39:12 IST)
 
