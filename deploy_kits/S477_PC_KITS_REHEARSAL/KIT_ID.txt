@@ -1,0 +1,2 @@
+kit id S477_PC_KITS_REHEARSAL
+project parent (session 294, 04-Oct-2026) -- the scratch-folder rehearsal of the Medical PC kit (S458) and Dr Manoj PC kit (S459.2) on a real Windows, as the last step of the 03:10 nightly on Dr Manoj PC; one report, counts only

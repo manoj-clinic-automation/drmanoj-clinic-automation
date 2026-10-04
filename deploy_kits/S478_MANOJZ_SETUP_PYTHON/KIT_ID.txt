@@ -1,0 +1,2 @@
+kit id S478_MANOJZ_SETUP_PYTHON
+project parent (session 294, 04-Oct-2026) -- installer S459.2 of Dr Manoj PC kit: pip is asked through the PC own Python by its full path (a bare python started from the kit Python is the kit Python: no pip); PC_KITS/manojz repacked

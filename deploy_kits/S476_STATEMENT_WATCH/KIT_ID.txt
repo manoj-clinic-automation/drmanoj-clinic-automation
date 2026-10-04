@@ -1,0 +1,2 @@
+kit id S476_STATEMENT_WATCH
+project parent (session 294, 04-Oct-2026) -- F-723: the statement road says when no bank statement has reached the shelf (packs page + health page); F-725: the owner-only text door for one shelf file; F-243: clinic_users.json, the hand-over photos and the spine order snapshots into the encrypted nightly

@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S293 close** (the parent), 04-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
+# OWNER TO-DO — LIVE · refreshed at the **S285 close** (the Sanjeevni project), 04-Oct-2026 — the parent sections exactly as its S293 close wrote them, the Sanjeevni sections refreshed here
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S293 close** (the parent), 04-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S292 close** (the parent), 03-Oct-2026 — the Sanjeevni sections exactly as its S283 close wrote them
 
@@ -14,7 +16,7 @@
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
-*Detail: `START_HERE_SESSION_294.md` · `S293_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below date from 02-Oct morning; your board is current for the pharmacy.*
+*Detail: `START_HERE_SESSION_294.md` · `S293_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S285 close's (04-Oct afternoon); `S285_BUILD_BRIEF.md` is their detail.*
 
 ## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S293 close
 
@@ -160,6 +162,44 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S285 close (04-Oct, afternoon)
+
+**1 · The publish** — this close's record. The same double-click as the parent's:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · One fresh salt-wise export from Marg as Excel**, after your name corrections of today (PAROXITENE CR 12.5, LAXATIVE SYP, JARDIANCE). It confirms Amir's three salt tasks of 01-Oct — or shows my reader's fault again, which the next kit mends either way.
+
+**3 · The remaining Marg text exports from the copy block** I gave you today — not urgent; each one missing is named in the next kit's report as waiting for its sample.
+
+**4 · Tomorrow, nothing to do.** After the morning sale export, Amir's card should read *"Orthotic: sab sahi ✓"* and his 22 renames open by themselves; the first weekly score of the system's list shows on your `?old=1` card after the night of 05-Oct. If the ✓ is not there by mid-morning, tell the next chat.
+
+**Held at your word:** S438_COUNT_BOOK.
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S285 close
+
+1. **The next kit** (brief from `claude/S285_NEXT_BUILD_PLAN.md`): every Marg report the shop exports read as text — purchase bill-wise and item-wise, salt-wise, category-wise and the rest, each from a captured sample; the salts you answer in section 4 reaching Amir's sheet (F-726); a learnt item name struck; two small repairs (F-717, the Excel header); the printed sheet's small remarks.
+2. **K2 — the buying model (D672)** after the first weekly score: each supplier's own rhythm from its bills, your fixed days as an override; each medicine's level and lot from its own history.
+3. **K3 — Darpan's screen** (mock first); **K4 — the switch** when the bar on your card (D673) is met three weeks running.
+4. **The spine's own kit:** the 12 items held twice (F-727); the remaining rungs.
+5. **Still open from before:** the phone's blind *sent* (F-708); Darpan shown once how to save the order report as text; the PDF with phone numbers in `_scratch\` on your PC, to remove.
+
+## ✅ DONE AT THE S285 CLOSE — 02 → 04-Oct-2026 (the Sanjeevni project)
+
+- **S446, S452 (02-Oct):** Amir's count in three gated stages; his panel's fixes; the token page closed to him.
+- **S454 whole (03 → 04-Oct):** reception's one-task screen · the order from Darpan's Marg sheet, read by itself (proved 04-Oct 09:48) · the printed sheet · the reception phone set up and the 18 August NEFT messages gone · the month's register of bills with their papers · Vendor payments for you and Shavez · the shelf figure · the Items check and 36 learnt names · the medical PC's refusal note, rebuilt before delivery (F-715) and live 13:23 today.
+- **S470 (04-Oct 15:04):** the system's medicine list reads every figure from the spine; its hidden constants are your settings; a weekly score of the list against what was really bought, from the night of 05-Oct.
+- **Read, not built:** what is wrong with our own ordering, measured; the four-kit plan you delegated (K1 done; D672, D673).
+- **The counter today:** Amir's 7 orthotic vouchers in; the BAMBOO L line voided by your line; the three salts explained.
+- **The Marg apply fault proven** (F-716) and repaired by the parent the same morning.
+- **The canon lines of 02 → 03-Oct written** (D662 … D670, F-686 … F-713).
+
+---
+
+*(The S283-close Sanjeevni sections below are history — superseded by the S285 sections above.)*
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S283 close (02-Oct)
 
