@@ -1,0 +1,5 @@
+kit id S454_BILL_REGISTER
+part P4C_REFUSAL_WATCHER (S454 section 20: the medical PC's watcher, corrected before any delivery -- a note that cannot be sent waits and is
+tried again at every start and census; the note never carries a line of the file; delivered to Drive ToMedical\_kit in P4B's place, not before
+04-Oct-2026 13:00 IST. P4B's watcher 20ec1602 was never delivered.)
+brief section 20 (read 04-Oct-2026, session 285) - built and delivered 04-Oct-2026

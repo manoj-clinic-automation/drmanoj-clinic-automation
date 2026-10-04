@@ -1,15 +1,24 @@
-# REPORT S454 — S454_BILL_REGISTER · all five parts built; everything installed except the medical PC's watcher · 03-Oct-2026 (1 12:24, 1B 12:28, 1C 15:36, 1D 16:35, 2 17:26, 3 18:17, 3B 19:39, 5 20:03, 4 server 20:28 IST) · published
+# REPORT S454 — S454_BILL_REGISTER · all five parts built and installed; nothing is left · 03-Oct-2026 (1 12:24, 1B 12:28, 1C 15:36, 1D 16:35, 2 17:26, 3 18:17, 3B 19:39, 5 20:03, 4 server 20:28 IST) · 04-Oct-2026 (4 medical PC, corrected: 13:23 IST) · published
 
-**Where the run stands (03-Oct 20:31 IST):** everything in the brief is installed, checked and published, except one file: the medical PC's new
-watcher (Part 4). The brief forbids delivering it before 04-Oct 13:00 IST (§10.3), and §19 says to stop there. It is built, walked and packed in
-`deploy_kits/S454_BILL_REGISTER/P4B_REFUSAL_WATCHER/`. Its delivery script refuses to run before that hour; I tried it at 19:07 IST and it
-refused. Nothing is half-installed. The line for the watcher, any time after 04-Oct 13:00 IST:
+**Where the run stands (04-Oct 13:25 IST):** everything in the brief is installed and checked. The last piece, the medical PC's watcher, went in
+today at 13:23 IST as the corrected build of §20 (`P4C_REFUSAL_WATCHER`). The first build (P4B) was never delivered. Nothing is half-installed
+and nothing is waiting.
 
-```
-Read CLAUDE.md, then continue claude_code_briefs\S454_BILL_REGISTER.md from where claude_code_briefs\REPORT_S454.md stops — install, verify, publish and report.
-```
+## For the owner — 04-Oct (the last piece: the medical PC tells you when it refuses a file)
 
-## For the owner — tonight (§18, the items, and the server's half of the refusal note)
+- **From today, a report the medical PC cannot read no longer disappears silently.** You get a line in Needs-you ("Report refused today …"),
+  Shavez's reports page shows it, and for an order sheet Darpan's card says "Order sheet adhoori thi".
+- **If the internet is down at that moment, the message waits and goes when the line is back.** The first build would have lost it; that is
+  what was corrected today before anything was delivered.
+- **The message never carries a line of the report.** It holds only the file's name, the kind of report it looked like, and the reason.
+- **It is running.** The medical PC took the new watcher by itself and restarted it at 13:24 IST; its own heartbeat confirms it. The 16 old
+  refused files lying on that PC were marked quietly and none was announced to you.
+- **Not yet seen live:** no file has been refused since 13:24, so no real message has come yet. The first one will show by itself.
+- **Nothing for you to do.** One thing to know: when the staff save a report the PC cannot read and then save it again properly, you will
+  still see the first one as "refused" for that day. It happened three times this morning (two purchase statements saved as text, one sale
+  report cut short and saved again 26 seconds later). It is harmless; the chat may want to quieten it (below).
+
+## For the owner — 03-Oct night (§18, the items, and the server's half of the refusal note)
 
 - **Reception sees one new line under both scan buttons: "Ek scan mein ek hi bill."** On "Bill nahi hai, ya kam aaya?" the button now reads
   **"Save kijiye"** while anything is marked short or not come. With everything received it still reads "Maal aa gaya". It saves exactly as before.
@@ -26,8 +35,8 @@ Read CLAUDE.md, then continue claude_code_briefs\S454_BILL_REGISTER.md from wher
   - Tonight it learnt 36 names. September's "item lines read right" went from 78 to 84 of 162.
   - The first try paired two names wrongly (an address line with CHYMORAL AP; "CCM TAB" with DFO 4X GEL). So a pair whose names share nothing
     is never learnt. These names change no stock, no order and no bill.
-- **When the medical PC refuses a file, the server is now ready to hear it** (installed). The PC's own half goes in after 04-Oct 13:00 IST.
-  Until then a file the medical PC itself refuses still reaches nobody.
+- **When the medical PC refuses a file, the server is now ready to hear it** (installed). ~~The PC's own half goes in after 04-Oct 13:00 IST.
+  Until then a file the medical PC itself refuses still reaches nobody.~~ *(Done: the PC's half went in on 04-Oct at 13:23 IST, above.)*
 - **Four smaller mends, each checked:**
   - GUNINA's "P.L. LTD." now counts as GUNINA (September's supplier misreads 4 → 3).
   - On Marg's stock, the system's list no longer counts an order that arrived by its scan twice.
@@ -100,8 +109,9 @@ Read CLAUDE.md, then continue claude_code_briefs\S454_BILL_REGISTER.md from wher
   `deploy_kits/S454_BILL_REGISTER/P1_ORDER_SHEET_RECEPTION/pictures/`.
 - **What is new for Darpan.** After he makes the order in Marg, he saves Marg's report as TEXT, the same way he saves the stock
   report. It reaches reception by itself. His *Kal ka hisaab* card shows "02-10 ki sheet mil gayi · N dawa · N supplier", and it says
-  so if a sheet arrived incomplete. **Until Part 4 is in, a sheet that the medical PC itself refuses reaches nobody.** (A sheet the
-  server refuses is already shown, on his card and in your Needs you.)
+  so if a sheet arrived incomplete. ~~**Until Part 4 is in, a sheet that the medical PC itself refuses reaches nobody.**~~ *(Part 4 is in
+  since 04-Oct 13:23 IST: such a sheet now shows on his card too.)* (A sheet the server refuses is already shown, on his card and in your
+  Needs you.)
 - **The order of 02-Oct is in the system.** It has 10 suppliers and 21 medicines, entered as already ordered. **2 orders have
   arrived by their bill's scan:** Kedar (scan B-0113, this morning) and Yuvika's orthotic order of 26-Sep (scan B-0099). The other 9
   are awaited under "Maal aaya?". The 11 old pending lines on Darpan's sheet all read "nahi aaya" in Marg. Ravi Medical Agency has
@@ -128,8 +138,8 @@ Yuvika with 2 items.
 **Vendor payments** (for you and Shavez only) comes in Part 2.
 
 **Not built yet, and why:**
-- Parts 2–5: pairing, Amir, your register pages, Vendor payments, the shelf figure, the medical PC's refusal note, items. They follow
-  in order; Part 4 not before 04-Oct 13:00.
+- ~~Parts 2–5: pairing, Amir, your register pages, Vendor payments, the shelf figure, the medical PC's refusal note, items. They follow
+  in order; Part 4 not before 04-Oct 13:00.~~ *(All installed since: see the sections above.)*
 - Scans going into Marg's digital entry without Amir, and judging a full count by the shelf figure: both outside this brief.
 - The repair of F-701: outside this brief.
 - On your approvals page, a sentence still lists the reminder times as 09:00, 12:00, 15:00 and 17:00. It is in a parent file I may not
@@ -142,6 +152,122 @@ Yuvika with 2 items.
   https://followup.dr-manoj.in/finance/darpan/kal
 
 ## For the chat
+
+### Part 4, the medical PC, corrected · P4C_REFUSAL_WATCHER (brief §20; delivered 04-Oct 13:23:48 IST by the delivery script's own clock line)
+
+**The run of 04-Oct** read the brief at d54d8c4d (§20 in it). The clock when it began: 13:05 IST, past the hour of §10.3. §20 was done first:
+P4C was built from P4B's file, walked, packed, and delivered in P4B's place. P4B's watcher (20ec1602) was never placed on Drive.
+
+| file | FROM | TO (md5 read back after placing) |
+|---|---|---|
+| Drive `ToMedical\_kit\marg_watch.py` | 81145aa7d7c8e9f7e23072cfab1ee620 (S397, pinned on Drive and in the 13:23:14 heartbeat) | **297cc3d9ff5edddc894390426bdc463a** |
+| Drive `ToMedical\_kit\KIT_MANIFEST.txt` | 05fb348589ba967e26bf8b7c9ff2aebc (part 1's, CRLF) | **9e754e5c48407f0f08b72746e76a2bb2** (P4B's bytes b8ff9568 with CRLF; no word of its S454 comment had to change) |
+| medical `D:\SendToClinic\marg_watch.py` | 81145aa7 | **297cc3d9** (the heartbeat's `WATCHER FILE` line, 13:24:19 IST) |
+
+- **Backups on Drive, read back:** `marg_watch_S397.py.superseded` (81145aa7), `KIT_MANIFEST_S454P1.txt.superseded` (05fb3485).
+- **No server file changed. No service restarted on the server.** `marg_door.py` read 6a236663 (P4A's TO) and healthz 200 before the delivery.
+  No database backup was made: there is no data step and no server install. `marg_push.py` (566e189e) and `marg_txt.py` (ed17bb76) are not
+  changed; the heartbeat still reads both "up to date".
+- **The heartbeat, 13:24:19 IST** (the one before it, 13:23:14, read pid 7060 and 81145aa7):
+  `WATCHER : ALIVE, pid 15556` · `WATCHER FILE: D:\SendToClinic\marg_watch.py  md5 297cc3d9` · `marg_watch.py up to date (297cc3d9)` ·
+  `IGNORED : 0 file(s)`. Every other kit file reads "up to date". That heartbeat is 31 seconds after the placing.
+- **Its start, from `FromMedical\marg_watch_log.txt` (the watcher's own lines):**
+  - 13:24:20 `marg_watch S454 P4C starting -- text reader S454, text route LIVE, refusal notes on (a note that cannot go waits and is tried again)`
+  - 13:24:20 `spool : D:\SendToClinic\_captured (329 already captured)` · `event-driven capture active on 3 folder(s)`
+  - 13:24:20 `notes: the first start with refusal notes on this PC -- 16 text(s) already in refused marked as kept before S454, none
+    announced; sentinel S454_NOTES_STARTED.flag written`
+  - 13:24:22 `pusher: on -- on every capture, and every 60s anyway`
+- **The retry it made at its start (§10.3, §20.4):** it offered the reader the refused texts younger than three days, which are this morning's
+  three. None was taken ("a text refused earlier is taken now" is not in the log).
+  - `user_aa1173712817` kept 09:38:01 and again 09:40:02: Marg's bill-wise and supplier/item-wise *purchase* statements saved as text. The
+    reader does not know them. They were refused again without a line, because each is already kept.
+  - `user_ab529675328` kept 09:43:21: a sale text with no GRAND TOTAL line (885 bytes). The reader refused it again; the log has the one line
+    "a text export marg_txt would not convert -- no GRAND TOTAL line". The staff had saved it again at 09:43:47 and that one was taken.
+  - The refused sale texts of 30-Sep and 01-Oct were kept at 30-Sep 22:10 and 01-Oct 12:55 at the latest (their names' own stamps), so at
+    13:24 they were older than three days and the retry passes them by. The log shows nothing captured or sent at the start.
+- **No note left for an old refusal.** Three readings agree:
+  - the log's first-start line above (16 marked, none announced), and no `note:` line after it;
+  - Drive `FromMedical\refused_text` at 13:24: the six newest kept texts each have a `.note` reading
+    `2026-10-04 13:24:20  kept before S454 -- no note sent`;
+  - the server, read only, at 13:25:20 IST: `mi_file` rows with `drive_folder = 'pc_note'`, all time: **0** (it was 0 at 13:24:04 too).
+- **Not proven live, and why:** no text has been refused on the medical PC since 13:24, so no real note has crossed the real door yet. I
+  cannot make one: it needs a file on that PC. What stands in its place: P4A's walk sent a note over HTTP to the real door code (with P4B's
+  watcher), and P4C's walk shows its request is the same shape (address, both headers, the four keys). The first real refusal will write a
+  row with `drive_folder = 'pc_note'`, and its `.note` on Drive will read "sent -- the server answered NOTED".
+
+**What P4C is** (`make_s454p4c.py`, 10 anchored edits on P4B's 20ec1602, each anchor once; README in the folder):
+
+- **20.1.** A note is done only when the server has answered. That fact is the marker `<stem>.note` beside the kept text.
+  - Ends a note: *sent* (2xx) · *refused by the server* (400, 413) · *taken later* · *overtaken* · *expired* (older than `CENSUS_DAYS`, logged).
+  - Waits, with no marker: a dead line, 401, 403, 404, the off switch, a missing key.
+  - Tried: when the text is kept; at every start after `retry_refused`; at every census. One attempt at a time for a text. The three tries a
+    minute apart are inside one attempt, as before.
+  - The first start: before the first sweep, every text in `refused` is marked "kept before S454 -- no note sent", then the sentinel
+    `_captured_txt\S454_NOTES_STARTED.flag` is written (also when `refused` is empty).
+- **20.2.** "(it begins: …)" is cut. A reader's refusal leaves as "the reader refused it (line N)" or "the reader refused it". The `.why.txt`
+  and the log keep every reason whole. Checked, as the brief asks: `_why_not` has eight other answers and none quotes the file;
+  `marg_txt.py` raises `Refused` in 38 places and every one reaches the note only through "the reader refused it: …".
+- **The marker and Drive: it is copied** ("copy it, or leave it out of both — say which"). `share_refused` copies the `.note` beside the text
+  and its reason, so the list on Drive still agrees with `refused`, and the chat can see from Drive which notes are done and which wait. It
+  takes 18 files now, not 12: the same six texts.
+- **The heartbeat is left as it is.** Its writer is `medical_agent.py`, which the brief does not allow. How many notes wait is read from the
+  log's tail on Drive (one line when notes begin to wait, with the reason) and from the markers there (a kept text with no `.note` waits).
+
+**Calls I made beyond the brief's words, each with its reason:**
+
+- **A 2xx counts as "sent" only when the answer is the server's own JSON.** A page reached through a redirect (a login page, a captive
+  portal) also answers 200; marking that "sent" would lose the note. Such an answer waits.
+- **401, 403 and 404 get one try in an attempt, not three** (P4B also stopped at the first), and the note waits for the next start or census.
+- **When the line, the switch or the key says "not now", the rest of that pass is not sent.** It would meet the same answer. Those notes are
+  still checked for *expired* and *overtaken* in that pass.
+- **"Taken later" also covers a text the retry finds already taken or held**, not only one it takes at that moment.
+- **"Overtaken" is judged from the kept copies in `_captured_txt`:** a text of the same kind (SALE, STOCK, ORDER) whose file is newer than the
+  refused one. Texts only: an Excel export of the same kind is not seen as overtaking. A text of no known kind is never overtaken.
+- **Until the sentinel exists, no waiting note is sent** (only the note of a text kept at that moment). If an old text cannot be marked, the
+  sentinel is not written and the log says so.
+- **The log says "N note(s) wait" once per reason, not at every census.** Otherwise a day with the off switch set would fill the 64 KB tail
+  that Drive carries.
+- **The start line reads "marg_watch S454 P4C starting"**, so the log tells P4C from P4B.
+
+**The walk** (`walk_s454p4c.py`; a made-up `marg_push.py`, a made-up sender, Drive's folder stubbed, the census kept inside the scratch folder;
+every check through `watch()`'s own start and census; a restart is a new process on the same folder): **WALK_S454P4C GREEN — 36 of 36**, on
+manojz (Python 3.14.5) and on the server's Python 3.9.25 in `/tmp` (the medical PC runs 3.11.9). The same bytes on both: P4C 297cc3d9,
+P4B 20ec1602, the reader ed17bb76, the walk 5f34b523.
+
+1. A dead line: 3 tries, no marker, still waiting. At the next census it is sent once and marked "sent -- the server answered NOTED". Three
+   censuses later it has not gone again. **NEGATIVE (P4B): the note is lost** — 3 tries on the dead line, 0 sent once the line is back.
+2. Answered 400: one try, marked "refused by the server (HTTP 400) -- not tried again", not tried over three censuses. Answered 401: no
+   marker, tried again at each census (1 → 4 tries); once the key is known again it goes, once.
+3. The off switch set: nothing sent, nothing marked, one line in the log over three censuses. Lifted: sent at the next census, marked.
+4. The first start: both old texts marked "kept before S454", no note for them, sentinel written. A note kept on a dead line is left waiting
+   across the restart. The second start sends it, once; the old texts stay silent.
+   **NEGATIVE (P4B): the note waiting across the restart is never sent.**
+5. A text the reader takes at the start's retry: taken (1 .XLS), marked "taken later", no note at the start or over three censuses.
+6. A waiting ORDER note, then a good order sheet taken: marked "overtaken -- a ORDER text was taken after it", no note once the line is back.
+7. A `report*.txt` with none of the three headings: reason "not a bill-wise sales statement", nothing of its first line, and its `.why.txt`
+   still has it. A sale statement refused at a line: reason "the reader refused it (line 9)", nothing of that line.
+   **NEGATIVE (P4B): the first line of the file is in the reason; the refused line of the sale statement is in the reason.**
+   The note's shape is the door's and equals P4B's: keys {kind, md5, name, reason}, `X-Marg-Note: refused`, the key header, JSON.
+8. With markers present, Drive's list (through the census's own `share_refused`) agrees with `refused`: 6 files with 2 markers, and 9 files
+   with 3 markers after a restart. At that start the retry offered the reader the 3 kept texts and never a marker.
+9. P4B's selftest passes with 37 checks; every one passes in P4C's, which has 40 (3 new). The reader's own selftest passes beside it.
+10. More than the brief asks: a waiting note four days old is marked "expired", logged, never sent.
+11. More than the brief asks: a note still being tried (a slow line, a census every 0.4 s) is not started twice.
+
+**The negative controls of checks 4 and 5 are not as the brief expected, and I did not bend them.** The brief says P4B goes red on 4 by
+"a note sent for an old text" and on 5 by "a note for a taken text". Read in the code and then run: **P4B does neither.** It sends a note only
+at the moment a text is kept and has no retry of notes, so at a start it sends nothing for a text already in `refused`, taken or not. The walk
+prints both as they are ("AS IT IS (P4B)"). P4B's red on check 4 is the lost note above. So that checks 4, 5 and 6 can be seen to fail on what
+the code does, the walk builds **MUT**: P4C with §20's three guards taken out by anchored edits (the first-start marking and its sentinel
+rule, "taken later", "overtaken"). MUT sends a note for each old text (1, 1), for the taken text (1), and for the overtaken refusal (1).
+
+**Folder** `deploy_kits/S454_BILL_REGISTER/P4C_REFUSAL_WATCHER/`: `make_s454p4c.py`, `marg_watch.py`, `KIT_MANIFEST.txt`, `walk_s454p4c.py`,
+`deliver_S454_P4C.ps1`, `README.md` (it lists every part of the kit as installed; the kit's top README is frozen), `KIT_ID.txt`, `SUMS.md5`.
+The duty map is unchanged (v5): no duty is added, moved or removed, and no staff screen changes. `darpan.order_sheet`'s door was walked in P4A.
+
+**To undo:** in Drive `ToMedical\_kit`, copy `marg_watch_S397.py.superseded` over `marg_watch.py` and `KIT_MANIFEST_S454P1.txt.superseded` over
+`KIT_MANIFEST.txt`; the agent installs them and restarts the watcher. The markers and the sentinel on the medical PC are plain files the S397
+watcher never reads. No database backup is involved.
 
 ### P3B · P3B_FIRST_DAY (brief §18; placed 19:39 IST by the install log, clinic-finance ActiveEnterTimestamp 19:39:12 IST)
 
@@ -295,6 +421,8 @@ Yuvika with 2 items.
 - **The earlier walks:** **WALKS_OLD_S454P4A GREEN**, the same named reds word for word on both runs: S403 13, S407 5, S410 3, S414 1, S417 4, S428 8, S439 23, S440 27, S441 6, S444 14, S446 14, S452 11.
 
 ### Part 4, the medical PC · P4B_REFUSAL_WATCHER — built, walked, packed; NOT delivered (§10.3, §19 step 4)
+
+*(04-Oct: P4B was never delivered. §20 replaced it with P4C, above. What follows is the record of 03-Oct.)*
 
 - **The clock at the decision:** 03-Oct-2026 19:07:34 IST (read from `deliver_S454_P4B.ps1`'s own refusal, exit 2). The watcher is not placed
   on Drive `ToMedical\_kit` before 04-Oct 13:00 IST. Drive still holds `marg_watch.py` 81145aa7. The heartbeat at 19:00:35 IST read
@@ -784,9 +912,13 @@ Every due duty's door was seen in the staff-eye walk.
 - Shavez's "Bill scan baaki" line on Aaj ki reports and the owner's register are in the .md.
 
 ### Not done, and why
-- **The medical PC's watcher (Part 4, §10.1) is not delivered.** The brief forbids it before 04-Oct 13:00 IST (§10.3), and §19 step 4 says
+- ~~**The medical PC's watcher (Part 4, §10.1) is not delivered.** The brief forbids it before 04-Oct 13:00 IST (§10.3), and §19 step 4 says
   to stop there. It is built, walked end to end and packed (P4B_REFUSAL_WATCHER). The server's door for its note is installed (P4A). Until the
-  watcher is delivered, a text the medical PC itself refuses still reaches nobody.
+  watcher is delivered, a text the medical PC itself refuses still reaches nobody.~~ *(Delivered on 04-Oct at 13:23 IST as P4C, §20.)*
+- **A real note has not yet been seen on the live door** (04-Oct). It needs a refused text on the medical PC; none has come since 13:24 IST.
+- **The heartbeat does not say how many notes wait** (§20.1's last line): its writer, `medical_agent.py`, is not a file this brief may touch.
+- **§20.5's four items are not built**, as the brief says: the refused line's "Shavez / Amir" for an order sheet; a refusal showing in
+  Needs-you only on its day; striking a learnt item name; the 158 / 162 item-line total.
 - **Two bills in one scan are not caught by the system** (§18.1). The stored reading has no page of its own, so no guess was built. The
   finding for the parent is under P3B.
 - ~~**Part 4 (§10, the medical PC's refusal note) and Part 5 (§11, the items) are not started.** The brief forbids replacing the medical
@@ -804,7 +936,22 @@ Every due duty's door was seen in the staff-eye walk.
   The blanket `*.json` rule would hide them otherwise.
 
 ### Noticed outside the brief
-- **Tonight (P3B, part 5, part 4):**
+- **04-Oct (P4C):**
+  - **A refusal that the staff put right at once will still show to the owner for that day.** This morning, before P4C, the medical PC
+    refused three texts: two *purchase* statements saved as text (09:38, 09:40; then exported as Excel and taken) and a sale text with no
+    GRAND TOTAL (09:43:21; saved again and taken at 09:43:47). From now each such refusal sends its note at once. "Overtaken" only stops a
+    *late* note. The owner's line (`_s444_refused_lines`, as S444's block reads in the repository) lists every refused row of the day and does
+    not drop one when a good file of the same type follows. A purchase statement has no kind, so its row has an empty type and reads
+    "unknown file". The chat's call: the owner's line could skip a refusal that a later verified file of the same type answers, and the
+    watcher could stop keeping text exports of reports that only ever come as Excel. Neither is built.
+  - **Python 3.14 warns about one line of the watcher** that is S397's own, not this kit's: `"… -> _captured_txt\held …"` has a bare
+    backslash (`\h`). The medical PC's Python 3.11 says nothing. A future Python will refuse the file. Not changed: outside §20.
+  - **A command was refused by the permission list:** one combined command that began by deleting a `/tmp` folder on the server. I did not
+    look for another way to delete; I used a fresh folder. `/tmp/s454p4c_132209` is left on the box: the walk's scratch files and a
+    read-only probe script. It holds no copy of any database.
+  - **PUBLISH_ALL commits everything pending.** Today's publish also carries `claude_code_briefs/S470_ORDER_ON_SPINE.md`, a brief another
+    chat left in the working copy. I did not open, run or change it.
+- **03-Oct night (P3B, part 5, part 4):**
   - **Darpan's door marker can never go red.** The duty map's marker for `darpan.order_sheet` is "Order sheet adhoori thi". That text is always
     in `/finance/darpan/kal`'s page source, because the card is drawn by its script from `/api/day`. So the staff-eye walk's "door seen" for
     this duty is true whether the card shows the refusal or not. Part 4's walk reads the card's own data instead. The duty map's marker is the
