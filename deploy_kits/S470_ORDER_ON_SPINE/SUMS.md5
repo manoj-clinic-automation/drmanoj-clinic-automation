@@ -1,0 +1,15 @@
+8ad29b36bb237ea56c6e9c7b07dd0d4a  KIT_ID.txt
+e2ba0fe4d985ed6173aa35294fbd3953  PINS.sh
+db1ab8baa8a69a975ad1aa3202927e02  README.md
+301ca363eee226abc4341ebf0f02a2bb  compare_s470.py
+88362b122a92e38b1021d65891e6fabd  data_s470.py
+0ada2452af5bee8f5f4d3dff32c36d5d  install_S470_ORDER_ON_SPINE.sh
+681077b056750b640525cf48e82c9de7  make_s470.py
+104d366d2e284ccfedef46ca0a744230  order_rehearsal.py
+dc2168bd8e8859c7397f2d7f6aca6ac0  order_rules_block_s470.py
+6f12531fea28dedb9d00db25c63663cc  plan_old_s470.py
+f54a5afc94aa988c1660631667687334  porders_block_s470.py
+6ab5acd760e5bcb19ff5aae7bf46fc27  selftest_block_s470.py
+a484d789c1a96a24f868dae9b7c54760  spine_read_block_s470.py
+92106af191c5637ece6e23eb1a8d59ae  walk_s470.py
+cc54fa15398aca6d5b0f541eebe48e5e  walks_old_s470.py

@@ -1,0 +1,4 @@
+kit id S470_ORDER_ON_SPINE
+project Sanjeevni (brief of session 285, 04-Oct-2026; D672, D673; F-718, F-719) -- the medicine order engine reads the spine behind
+order.engine_source; the nightly trial keeps and scores the list the engine really made; one line a week on the owner's card
+rung 4a of S272_SPINE_ARCHITECTURE section 5. No staff screen changes; the duty map is not edited.
