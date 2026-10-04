@@ -1,0 +1,2 @@
+kit id S479_YES_MONTHLY_READER
+project parent (session 294, 04-Oct-2026) -- F-725: yes_monthly.py, the reader of Yes Bank's monthly e-mailed statement (the third Yes Bank layout), chosen by layout in packs.py; ONE LINE ONCE across the three Yes Bank readers (finance_yesbank.py and yes_branch.py no longer write a row another layout already put on the table); the accountants, the owner's preview and Amir's pack are handed the unlocked copy of a statement the shelf opened
