@@ -53,6 +53,20 @@
 - **The crons' own commands as scripts** on the built files, on scratch copies, before placing: `order_rules.py tick`,
   `stock_watch.py job`, `purchase_app.py rematch` and `spine/order_rehearsal.py` each exit 0.
 
+### Published, read back on the box, and the build lock
+
+- **PUBLISH_ALL** (mine): the kit folder and this report went out in 4ebe68a (15:06:27 IST). NO_PHONE_NUMBERS clean over the 17 files
+  this run added; origin HEAD verified. The lines of this section go out in the next publish, which changes no kit file.
+- **On the box:** `/root/deploy/repo` pulled `--ff-only` to 4ebe68a at 15:06:47 IST. `deploy_kits/S470_ORDER_ON_SPINE` passes
+  `md5sum -c` (15 files) and is identical (`diff -r`) to the copy the installer ran from (`/tmp/s470kit_144034`). No `__pycache__` or
+  `.pyc` in it. The duty map there is v5 (27d9d1b5), unchanged.
+- **The cron's first tick on the new file** (15:10:02 IST) ran cleanly: `{"slot": "none", … "why": "not yet"}`. Healthz 200 at 15:10:37.
+- **The build lock:** taken 14:40:35 IST (owner S470_ORDER_ON_SPINE), held through the install and the first publish, released
+  15:06:47 IST. Finance healthz was 200 and clinic-finance active at release.
+- **How it ran:** the kit was copied to the box and the installer run there, with every gate, both walks and the earlier walks before
+  anything was placed (14:40 to 15:05 IST). The owner's line at the foot of the brief is therefore not needed; run again it answers
+  "ALREADY INSTALLED".
+
 ### What was built (kit `deploy_kits/S470_ORDER_ON_SPINE/`)
 
 - **A — the read door** (`spine_read.py`, 3 anchored edits): `sales_daily`, `stock_series`, `purchase_lines`, `family`, `last_sale`,
@@ -275,10 +289,11 @@ Each walk is copied to scratch and run twice: on the box as it is, and on the pa
   0. Neither can be on the system's list. Staff order from Darpan's sheet, so this harms nothing today; it would on `order.source = system`.
 - **Every future walk that makes up an item must make it up in the spine too**, or set `order.engine_source = tables` as P9 does. An
   item that exists only in the old tables is not planned on `spine`.
-- **`/tmp` on the box holds this run's scratch folders:** `/tmp/s470dev_135755` (the dev runs; it holds scratch copies of `finance.db`,
-  `assets.db` and the spine), `/tmp/s470kit_142936` and `/tmp/s470kit_144034` (the kit copies and the install log), and
-  `/tmp/s470probe_134244` (read-only probe scripts). The permission list refuses `rm -rf` and I did not look for another way. The chat
-  may want them cleared. The installer removed its own walk folder.
+- **`/tmp` on the box holds this run's scratch folders, and one is large.** `/tmp/s470dev_135755` is **5.8 GB**: the dev runs of the
+  walks, with many scratch copies of `finance.db`, `assets.db` and the spine (the money records, as copies). Also `/tmp/s470kit_142936`
+  and `/tmp/s470kit_144034` (the kit copies and the install log, under 1 MB) and `/tmp/s470probe_134244` (read-only probe scripts).
+  The permission list refuses `rm -rf` and I did not look for another way. **The chat should have them cleared.** The disk has 75 GB
+  free (25% used). The installer removed its own walk folder.
 
 ```
 https://followup.dr-manoj.in/finance/porders?old=1
