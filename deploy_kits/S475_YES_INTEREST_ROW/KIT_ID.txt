@@ -1,0 +1,2 @@
+kit id S475_YES_INTEREST_ROW
+project parent (session 293, 04-Oct-2026) -- F-720: the Yes Bank readers accept the bank quarter-end interest row (txn date the next day, value date inside the month); the two refused September statements read today
