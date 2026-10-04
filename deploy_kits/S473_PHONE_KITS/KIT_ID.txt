@@ -1,0 +1,2 @@
+kit id S473_PHONE_KITS
+project parent (session 293, 04-Oct-2026) -- the two phones' MacroDroid setups on the Clinic PCs & phones page: a template per phone in the repository (keys as placeholders), the live key put in when the owner presses the button

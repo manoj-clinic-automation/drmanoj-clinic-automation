@@ -10,3 +10,13 @@ Living copy (D583 rule: every Apps Script change placed in the owner's browser l
   `from:yes.bank.in` -- ANY sender at the Yes Bank branch domain with an attachment is relayed; the locked e-statements
   (customer-ID passwords the owner does not use) stay a fallback only. Saved, run once: "relayed 0" (the 7 were already
   relayed and labelled at 14:51).
+- 04-Oct-2026 (S293, the parent), on the owner's ruling that a bank statement never enters the staff-readable clinic mailbox and
+  the accountants get statements only inside the month-end pack: Bank_Statement_Relay.gs -> S293 v2 (md5 3fd8564a, 3,601 B),
+  placed in the shared Janitor project from the clinic account's browser pane through the editor's own API (byte-exact; sha256
+  109b479d... read back after a reload, 08:1x IST). It now SAVES each statement mail's attachments straight into the clinic Drive
+  folder Clinic Data Archive / Bank Statements / <YYYY> (folder 1wGzaXnCo... shared to drmanojkragarwal@ as editor the same
+  minute, verified by the Drive API) -- no forward, no mail. Same senders, same label, plus a file-name dedupe. The clinic-side
+  Bank_Statement_Filer.gs (UPI Reconciliation) is RETIRED the same hour: its daily trigger removed by its own retireStmtFiler()
+  ("RETIRED S293: 1 trigger(s) removed", 08:07:01 IST; 7 other triggers untouched). The Janitor and CC saver triggers have failed
+  since 1-Oct / 2-Oct with "Authorization is required" -- the owner re-authorises both in his personal account (his hand only);
+  the relay's first run after that catches up the last 40 days of unlabelled statement mail.

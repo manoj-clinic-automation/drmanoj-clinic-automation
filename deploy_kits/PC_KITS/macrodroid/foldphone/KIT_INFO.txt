@@ -1,0 +1,6 @@
+# deploy_kits/PC_KITS/macrodroid/foldphone -- the MacroDroid macros of Dr Manoj's phone (Fold): Bank SMS to Clinic Server + Bank SMS 2 (Yes Bank) -- the retired 'SMS to Google Sheet' macro dropped, as the Clinic PCs & phones page serves them (kit S473).
+# The template is the owner's own export of 04-Oct-2026 with every key replaced by a placeholder ({{BANK_SMS_KEY}} / {{PHONE_TOKEN}})
+# and the geofence / cell-tower data and the macros' stored variable values (the last order text) blanked. The LIVE key goes in on the server when the owner presses the button. No secret here.
+version=macros of 04-Oct-2026, keys as placeholders
+packed=04-Oct-2026
+template_md5=72f19a54457e04923b7fb6225cffc031

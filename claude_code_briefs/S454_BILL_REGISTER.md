@@ -39,6 +39,8 @@ If you must stop, stop at a part's boundary, say in the report exactly what is i
 
 **From Part 3 on, the order is §19's, not the list above:** §18 first (folder `P3B_FIRST_DAY`), then Part 5, then Part 4's server side; only the medical PC's watcher waits for 04-Oct 13:00 IST. §17 is done (Parts 1C, 1D).
 
+**The watcher: §20 before any delivery (04-Oct).** P4B's watcher is not delivered. On the continued run build §20 (folder `P4C_REFUSAL_WATCHER`) and deliver that one, under §19 step 4's hour.
+
 **On a continued run, do §17 first** (corrections to Part 1, found when it was read live on 03-Oct), as its own small folder in the same kit, walked and installed before Part 2 is begun. It also adds a card with the reception phone's state and a test message (17.7).
 
 ## 0 · The rules this build stands on
@@ -775,6 +777,54 @@ Only one thing has a reason to wait: the medical PC's **watcher** (§10.3, step 
 3. **Part 4, the server side** — §10.2 (`marg_door` takes the PC's note and writes the refused row), with the owner's line, the reports tile and Darpan's card reading it. Walk it with a crafted note sent as the watcher will send it; install; report. A door that nobody yet knocks on is harmless, and it must be there before the watcher is.
 4. **Part 4, the medical PC** — build the watcher (and `marg_push.py` only if §10.1 needs it) and `KIT_MANIFEST.txt`, walk them on copies, and pack them in the kit. **Read the clock. If it is not yet 04-Oct 13:00 IST, do not place them on Drive `ToMedical\_kit` and do not deliver them: stop here**, say in the report that the watcher alone is left and why, and end. If it is past that hour, deliver, confirm by the heartbeat, and REPORT the retry it made at its start.
 
-The owner's line for the watcher, any time after 04-Oct 13:00 IST, is the same second line of §16.
+The owner's line for the watcher, any time after 04-Oct 13:00 IST, is the same second line of §16. **04-Oct: §20 comes first — P4C replaces P4B before anything is delivered.**
 
 **The staff are at work while this runs** (Saturday evening). Each install restarts `clinic-finance` once, as Parts 2 and 3 did; take the lock, keep each restart single, and check `/finance/porders` answers after it. Nothing on a staff screen changes tonight but §18.1's one line and §18.2's word.
+
+## 20 · Before the watcher is delivered — corrections found when Part 4 was read (04-Oct, session 285)
+
+P4B's watcher (`marg_watch.py` 20ec1602) was read in the kit on 04-Oct, before any delivery, and then read again by an independent reader. **P4B is not delivered.** Build the corrected watcher from P4B's file as a new folder `P4C_REFUSAL_WATCHER` in the same kit (P4B's folder is published and stays as it is), walk it, pack it, and deliver P4C in P4B's place under §19 step 4's rule (not before 04-Oct 13:00 IST; read the clock). No server file is changed by this section: P4A's door takes the same note (a second note of an md5 it already holds is answered 200 ALREADY).
+
+### 20.1 A note that could not be sent is tried again (today it is lost)
+
+- **Read in the code:** `_keep_refused` sends the note once, at the moment it keeps the file. `_send_note` tries three times a minute apart and gives up. The file is then already in `_captured_txt\refused`, so every later sighting returns at `if any(tmd5 in n ...)` before the note, and `retry_refused` at a start goes the same way. A refusal that meets three minutes without a line — or the off switch, or a missing key — never reaches the server. That is the silence §10 exists to end.
+- **The marker.** A refused text is *noted* only when the server has answered for it. Keep that fact beside the kept text as `<stem>.note` (the stem its `.txt` and `.why.txt` share): one line saying what happened and when. It is not a `.txt`, so `retry_refused` never offers it to the reader; make `share_refused` and P4B's selftest check on Drive's list agree with it (copy it, or leave it out of both — say which).
+- **What ends a note.** A marker is written when: the server answered 2xx (*sent*); the server answered 400 or 413 (*refused by the server*, with the status — a retry cannot change these); the text was taken by the reader later (*taken later*); a text of the same kind was taken after it (*overtaken*); or it is older than `CENSUS_DAYS` and still unsent (*expired*, and logged). **Nothing else ends it:** 401, 403, 404, a dead line, the off switch and a missing key all leave it waiting — `marg_push.py` treats a bad key as something never to be abandoned, and so does this.
+- **When a waiting note is tried.** At every start, after `retry_refused` has run, and at every census (where `publish_diagnostics` runs): each kept text younger than `CENSUS_DAYS` with no marker has its note sent. The note is built again through `note_of` from the kept text and its `.why.txt`. The three tries a minute apart stay as they are inside one attempt. One attempt at a time: a note still being tried is not started twice.
+- **A text the reader takes at the start's retry is not a refusal any more:** mark it *taken later* and send no note. (Today it stays in `refused`, and the door would write a refused row for a file the server already holds as its `.XLS`.)
+- **A late note must not raise a false alarm.** The door dates a note at its arrival. If a sale, a stock or an order text was taken after the refused one of the same kind was kept, the staff have already exported again: mark the waiting note *overtaken* and do not send it. Otherwise Darpan's card would say his sheet is incomplete after he has already sent a good one.
+- **The past is not announced, once.** The first time the corrected watcher starts on a PC — recorded by a sentinel file in `_captured_txt\`, outside `refused`, written even when `refused` is empty, before the first sweep — every text already in `refused` gets a marker saying it was kept before S454, and no note is sent for it. With the sentinel there, a later start never does this again: a note waiting across a restart or a boot stays waiting.
+- The capture path does not wait on a note, as today (its own thread; capture never fails for a note).
+- If the heartbeat's writer is among the files this part may touch, the heartbeat says how many notes are waiting. If it is not, leave it and say so in the report.
+
+### 20.2 The note never carries a line of the file
+
+- **Read in the code, two places.** (a) `_why_not` answers "not a bill-wise sales statement (it begins: …)" with the file's first line, up to 80 characters. (b) A reader's refusal is sent as `"the reader refused it: %s" % str(ex)`, and `marg_txt.py` raises "line N: a line of a kind this reader does not know: …" with up to 60 characters of that line — in a sale statement, a line of a bill. `note_of` masks only an unbroken run of six or more digits. §10.1 says: no file content.
+- **The rule.** The local `.why.txt` and the PC's log keep every reason whole, as today. In the note: for (a) the reason is cut from " (it begins:" to its end; for (b) the note says only "the reader refused it (line N)", or "the reader refused it" when there is no line number. What is left is masked as today. No other reason may quote the file: check each branch of `_why_not` and each `Refused(...)` in `marg_txt.py`, and say so in the report. `marg_txt.py` itself is not changed.
+
+### 20.3 Walk
+
+Its own file, `walk_s454p4c.py`, which loads either watcher (P4B's or P4C's) with a made-up `marg_push` and a made-up sender, and with Drive's folder stubbed — nothing leaves the PC from a walk. Each check is run through `watch()`'s own start and census, not by calling the new function alone:
+
+1. a note whose sending fails (a dead line) is still waiting after the attempt, is sent at the next census, is marked, and is not sent again;
+2. a note the server answers 400 is marked and not tried again; one answered 401 is still waiting;
+3. with the off switch set nothing is sent and nothing is marked; lifted, it goes;
+4. at the first start, texts already in `refused` are marked as old and no note leaves; at a second start, with the sentinel there, a waiting note is still waiting and is then sent;
+5. a text taken by the reader at the start's retry is marked *taken later* and no note leaves;
+6. a waiting ORDER note with a later ORDER text taken is marked *overtaken* and no note leaves;
+7. a `report*.txt` with none of the three headings: its note's reason holds nothing of its first line, and its `.why.txt` still does; a sale statement the reader refuses at a line: the note says "(line N)" and nothing of that line;
+8. `share_refused` and the listing on Drive still agree with `refused` with markers present;
+9. every check P4B's selftest made still passes.
+
+Negative control: checks 1, 4, 5 and 7 run against P4B's `marg_watch.py` and go red **on what it does** (a note lost, a note sent for an old text, a note for a taken text, a line of the file in the reason) — not merely because a function is absent.
+
+### 20.4 Delivery and pins
+
+- `deliver_S454_P4C.ps1`, made from P4B's script: Drive `ToMedical\_kit\marg_watch.py` FROM 81145aa7 (S397, what the medical PC runs today) TO P4C's file. `KIT_MANIFEST.txt`: the watcher has no line in it, so P4C's manifest is P4B's bytes unless a word of its S454 comment must change — FROM 05fb3485 (Drive, CRLF) TO P4C's file with CRLF; pin both spellings as P4B's script does. The same refusal before 04-Oct 13:00 IST, the same IST check, the same backups and put-back. P4B's 20ec1602 is never placed on Drive; if Drive already holds it, stop and report.
+- `marg_push.py` and `marg_txt.py` are not changed.
+- Confirm by the heartbeat (the watcher's md5). REPORT the retry it made at its start, the sentinel written, and that no note left for an old refusal.
+- The kit's top `README.md` is pinned and frozen: do not edit it. List every part of the kit, as installed, in P4C's own `README.md`.
+
+### 20.5 Not in this section — read on 04-Oct and left for the next kit
+
+The owner's refused line names Shavez / Amir even for an order sheet; a refusal shows on his Needs-you only on the day it arrives; a learnt item name cannot be struck (three of the 36 look wrong); the item-line total reads 158 in Part 2's report and 162 in Part 5's. Do not build these here.

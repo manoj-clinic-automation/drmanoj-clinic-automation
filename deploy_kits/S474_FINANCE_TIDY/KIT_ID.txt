@@ -1,0 +1,2 @@
+kit id S474_FINANCE_TIDY
+project parent (session 293, 04-Oct-2026) -- the finance app tidied after the S293 whole read (reception's tile call no longer writes, the self-test puts the ledger env back, an unused constant gone) and F-716 repaired: the Marg apply paths commit once per day so a rollback is real; a refused file may be sent again
