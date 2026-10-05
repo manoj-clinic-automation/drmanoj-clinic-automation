@@ -550,8 +550,33 @@ def main():
         check("C10 'Needs you' is the duty map's own count for the owner", T["needs_n"] == len(mine) and snap0["sections"]["needs"]["chip"] == str(len(mine)),
               "%s vs %s" % (T["needs_n"], sorted(mine)))
         nl = [l for l in lines_of(snap0, "needs") if l["dot"] in ("b", "w")]
-        check("C11 ... one line each, and each carries its own number", len(nl) == len(mine) and all(
-            any(re.search(r"(?<!\d)%d(?!\d)" % v[0], l["text"]) for l in nl) for v in mine.values()), str([l["text"][:60] for l in nl]))
+        MAP = json.load(open(dutymap, encoding="utf-8"))
+        MAPD = {d_["id"]: d_ for d_ in MAP.get("duties") or []}
+
+        def expect_line(did, v):
+            """The line the MAP writes for a duty: its own owner_line filled with the count and the date the owner's SQL gave when the
+            walk asked it directly. None where the map gives the duty no such line (the page then shows the duty's description)."""
+            d_ = MAPD.get(did) or {}
+            if not d_.get("owner_line"):
+                return None
+            days = None
+            if v[1]:
+                try:
+                    days = (today - dt.date.fromisoformat(str(v[1])[:10])).days
+                except ValueError:
+                    days = None
+            try:
+                return tidy(str(d_["owner_line"]).format(n=v[0], days=(days if days is not None else "?"), since=OC.dm(v[1]) if v[1] else "-",
+                                                         person=(MAP.get("people") or {}).get(d_.get("person"), d_.get("person") or "")))
+            except Exception:                                          # noqa: BLE001 -- a line the map cannot fill
+                return None
+        # (S481.1: until 05-Oct 18:1x this asked only that each count appear in SOME line -- a duty whose line carries no count
+        #  (the month's purchases to finalise) then passed or failed by what the other lines happened to hold. On the server it failed.)
+        want_n = sorted(x for x in (expect_line(k, v) for k, v in mine.items()) if x)
+        check("C11 ... one line each, and each line is the map's own owner's line filled with the count the owner's SQL gives",
+              len(nl) == len(mine) and sorted(l["text"].strip() for l in nl if l["text"].strip() in want_n) == want_n
+              and len(want_n) >= len(mine) - 1, "%s / %s" % ([l["text"][:70] for l in nl if l["text"].strip() not in want_n][:3],
+                                                              [x[:70] for x in want_n if x not in [l["text"].strip() for l in nl]][:3]))
         staff_due = {k: v for k, v in du.items() if v[2] != "manoj" and v[0] != "ERR" and v[0] > 0}
         check("C12 the staff's open duties: the map's own count", T["work_open"] == len(staff_due), "%s vs %s" % (T["work_open"], len(staff_due)))
 
@@ -564,6 +589,10 @@ def main():
                 return True
         check("C13 ... and how many are late, by the map's own allowed days", T["work_late"] == sum(1 for v in staff_due.values() if is_late(v)),
               "%s vs %s" % (T["work_late"], sum(1 for v in staff_due.values() if is_late(v))))
+        want_s = [x for x in (expect_line(k, v) for k, v in staff_due.items()) if x]
+        got_s = [l["text"].strip() for l in lines_of(snap0, "work") if l.get("sub")]
+        check("C13b ... and every open staff duty is written in the map's own words, with its own count and date", bool(want_s) is bool(staff_due)
+              and all(x in got_s for x in want_s) and len(want_s) >= len(staff_due) - 3, str([x[:70] for x in want_s if x not in got_s][:3]))
         ppl = [p for p in O["people"] if p != "manoj" and any(v[2] == p for v in du.values())]
         heads = [l for l in lines_of(snap0, "work") if l.get("b") in [str(O["people"][p]) for p in ppl] and not l.get("sub")]
         check("C14 one head line per person of the map", len(heads) == len(ppl), "%s vs %s" % ([l.get("b") for l in heads], ppl))
@@ -716,10 +745,12 @@ def main():
         car = O2.get("carriers") or {}
         mine2 = {k: v for k, v in (O2.get("duties") or {}).items() if v[2] == "manoj" and v[0] != "ERR" and v[0] > 0}
         nl2 = [l for l in lines_of(snap1, "needs") if l["dot"] in ("b", "w")]
-        check("D8b a stale figure left in a cache is never shown: the owner's lines are the counts the approvals page makes NOW",
+        want2 = sorted(x for x in (expect_line(k, v) for k, v in mine2.items()) if x)
+        check("D8b a stale figure left in a cache is never shown: the owner's lines are the map's lines filled with the counts made NOW",
               bool(O2) and snap1["tile"]["needs_n"] == len(mine2) and not any("987" in l["text"] for l in nl2)
-              and all(any(re.search(r"(?<!\d)%d(?!\d)" % v[0], l["text"]) for l in nl2) for v in mine2.values()),
-              "%s vs %s / %s" % (snap1["tile"]["needs_n"], len(mine2), [l["text"][:50] for l in nl2 if "987" in l["text"]]))
+              and sorted(l["text"].strip() for l in nl2 if l["text"].strip() in want2) == want2 and len(want2) >= len(mine2) - 1,
+              "%s vs %s / stale: %s / not the map's: %s" % (snap1["tile"]["needs_n"], len(mine2), [l["text"][:50] for l in nl2 if "987" in l["text"]],
+                                                            [x[:70] for x in want2 if x not in [l["text"].strip() for l in nl2]][:3]))
         check("D9a the made-up patient's name really travels in the owners' own answers (the slips to approve and the clinic's flags for the "
               "owner -- both made by this walk)", car.get("slip_pending") and car.get("owner_queue"), str(car))
         note("the made-up name is carried by: %s" % ", ".join(k for k, v in sorted(car.items()) if v))

@@ -70,7 +70,7 @@ read-only — once as today and once as the 15th of the month would read — and
 
 ## Proof
 
-- `walk_s481.py`: 93 checks on the scratch box (05-Oct 01:35 code and database): the edits; the builder leaves the database
+- `walk_s481.py`: 94 checks on the scratch box (05-Oct 01:35 code and database): the edits; the builder leaves the database
   it read byte-identical; every figure against its owning module asked directly in a second process; made-up rows move the reading
   by exactly that; a made-up patient name put where the owners keep names is in no reading; none of the phone numbers and bank
   references the database holds is in a reading; the service's part (owner only, one builder at a time, a dead lock taken over,
@@ -82,6 +82,13 @@ read-only — once as today and once as the 15th of the month would read — and
   (a stale cached returns count); no wait after a failure.
 - The page and the tile were read on screenshots (phone light and dark, desktop) by two sub-agents; an independent code review
   found no high defect and its ten findings are taken in.
+
+- **05-Oct 18:0x IST, the first server run: the walk went RED on one check (D8b) and nothing was placed.** The fault was the walk's:
+  D8b and C11 asked only that each of the owner's counts appear in *some* line, and the line "Last month's purchases not finalised"
+  carries no count — on the scratch box another line happened to hold a lone "1", on the server none did. Reproduced on a copy with one
+  more unconfirmed petty entry, then corrected: each line is now compared with the duty map's own owner's line filled with the count
+  and date the owner's SQL gives (C11, C13b for the staff's lines, D8b). Three more negative controls (a wrong count, a wrong date, a
+  dropped staff line) are red. The four files this kit places or edits did not change.
 
 ## What this kit is not (the next two kits)
 

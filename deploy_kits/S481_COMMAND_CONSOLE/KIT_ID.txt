@@ -4,3 +4,4 @@ on the Clinic app's home and the command console behind it: ONE READING LAYER ov
 functions and the duty map's own due_sql), made by a separate short process on a COPY of finance.db; the owner only; nothing live written
 places /root/finance/owner_console.py be555816 and /root/finance/owner_console.html 75b5d017 (both NEW)
 edits /root/finance/finance_app.py 47a83382 -> ef1382d2 and /root/portal/portal.py d9b7685f -> 10a675e7 (apply_s481.py, five exact anchors)
+walk corrected 05-Oct-2026 18:2x IST (the first server run stopped RED at the walk, nothing placed): checks C11 and D8b asked only that each count appear in SOME line; they now compare each line with the duty map's own line. The four files this kit places or edits are unchanged.
