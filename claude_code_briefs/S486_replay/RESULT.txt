@@ -1,0 +1,29 @@
+universe: 191 medicines sold in the period; 158 have a supplier on record; 124 of those have books that add up (the like-for-like set)
+WHOLE 04-May .. 03-Oct (153 days)
+  THE SHOP AS IT WAS (Darpan's sheets)     (sales as they happened)      | empty-shelf item-days  173 | avg stock Rs  228035 | supplier orders/wk  18.2                                | lines/wk  39.0
+  FIXED  (the engine as it stands)         lost sale  1.14% (Rs  23846) | empty-shelf item-days  246 | avg stock Rs  159237 | supplier orders/wk  23.8 (of them between reviews  9.9) | lines/wk  59.4
+  REFINED (S486 Part B)                    lost sale  0.54% (Rs  11352) | empty-shelf item-days  100 | avg stock Rs  202866 | supplier orders/wk  20.2 (of them between reviews  3.0) | lines/wk  39.8
+FIRST HALF 04-May .. 19-Jul
+  THE SHOP AS IT WAS (Darpan's sheets)     (sales as they happened)      | empty-shelf item-days   57 | avg stock Rs  218415 | supplier orders/wk  18.6                                | lines/wk  42.5
+  FIXED  (the engine as it stands)         lost sale  0.57% (Rs   6211) | empty-shelf item-days   94 | avg stock Rs  165175 | supplier orders/wk  23.2 (of them between reviews  9.7) | lines/wk  58.6
+  REFINED (S486 Part B)                    lost sale  0.30% (Rs   3246) | empty-shelf item-days   63 | avg stock Rs  196254 | supplier orders/wk  20.1 (of them between reviews  3.1) | lines/wk  41.3
+SECOND HALF 20-Jul .. 03-Oct
+  THE SHOP AS IT WAS (Darpan's sheets)     (sales as they happened)      | empty-shelf item-days  116 | avg stock Rs  237781 | supplier orders/wk  17.8                                | lines/wk  35.5
+  FIXED  (the engine as it stands)         lost sale  1.75% (Rs  17635) | empty-shelf item-days  152 | avg stock Rs  153221 | supplier orders/wk  24.4 (of them between reviews 10.1) | lines/wk  60.1
+  REFINED (S486 Part B)                    lost sale  0.80% (Rs   8105) | empty-shelf item-days   37 | avg stock Rs  209564 | supplier orders/wk  20.3 (of them between reviews  2.9) | lines/wk  38.4
+WHAT EACH PART IS WORTH (whole period; REFINED with one part taken out)
+  without the shop's own lots (tens)       lost sale  0.78% (Rs  16427) | empty-shelf item-days  163 | avg stock Rs  174832 | supplier orders/wk  23.6 (of them between reviews  5.2) | lines/wk  57.9
+  list made before the sale report lands   lost sale  0.75% (Rs  15653) | empty-shelf item-days  122 | avg stock Rs  201537 | supplier orders/wk  20.4 (of them between reviews  3.1) | lines/wk  40.0
+  without the short (7-day) rate           lost sale  0.77% (Rs  16106) | empty-shelf item-days  118 | avg stock Rs  186158 | supplier orders/wk  20.6 (of them between reviews  3.3) | lines/wk  40.7
+  without orders between reviews           lost sale  1.02% (Rs  21394) | empty-shelf item-days  168 | avg stock Rs  196426 | supplier orders/wk  17.6 (of them between reviews  0.0) | lines/wk  38.8
+  between-review orders with full safety   lost sale  0.49% (Rs  10325) | empty-shelf item-days   98 | avg stock Rs  205939 | supplier orders/wk  22.2 (of them between reviews  5.2) | lines/wk  40.9
+  without the largest-day floor            lost sale  0.61% (Rs  12757) | empty-shelf item-days  110 | avg stock Rs  201928 | supplier orders/wk  20.2 (of them between reviews  3.0) | lines/wk  39.5
+  with in-stock-day correction             lost sale  0.54% (Rs  11332) | empty-shelf item-days  100 | avg stock Rs  204984 | supplier orders/wk  20.2 (of them between reviews  3.0) | lines/wk  40.2
+  Kedar on a learnt rhythm too             lost sale  0.64% (Rs  13336) | empty-shelf item-days  101 | avg stock Rs  202090 | supplier orders/wk  20.3 (of them between reviews  3.0) | lines/wk  40.0
+  minimum order Rs 2,000                   lost sale  0.70% (Rs  14592) | empty-shelf item-days  126 | avg stock Rs  199569 | supplier orders/wk  17.2 (of them between reviews  2.1) | lines/wk  38.9
+  safety 2 days                            lost sale  0.58% (Rs  12247) | empty-shelf item-days  106 | avg stock Rs  193329 | supplier orders/wk  20.4 (of them between reviews  3.4) | lines/wk  39.8
+  safety 4 days                            lost sale  0.48% (Rs   9986) | empty-shelf item-days   93 | avg stock Rs  209795 | supplier orders/wk  19.9 (of them between reviews  2.6) | lines/wk  40.0
+IF GOODS TAKE TWO DAYS TO ARRIVE, NOT ONE (whole period)
+  FIXED                                    lost sale  2.04% (Rs  42847) | empty-shelf item-days  351 | avg stock Rs  152107 | supplier orders/wk  23.7 (of them between reviews  9.7) | lines/wk  58.8
+  REFINED                                  lost sale  0.92% (Rs  19294) | empty-shelf item-days  140 | avg stock Rs  194842 | supplier orders/wk  20.4 (of them between reviews  3.2) | lines/wk  39.8
+  REFINED, safety 4                        lost sale  0.67% (Rs  14098) | empty-shelf item-days  129 | avg stock Rs  202242 | supplier orders/wk  19.9 (of them between reviews  2.6) | lines/wk  39.9
