@@ -6,20 +6,57 @@ Built, walked, installed (server), placed (manojz), packed (medical PC) and publ
 ## For Dr Manoj
 
 - **Every report you export from Marg as text is now understood** — purchase (all four kinds), the salt, category and item lists, the
-  short sale statement, sale return, stock valuation, expiry and the stock register. The server and your PC are ready today; the medical
-  PC's two files are **packed and waiting for one line**, which the Sanjeevni chat will give after it has read them.
+  short sale statement, sale return, stock valuation, expiry and the stock register. The server, your PC and — since your line at
+  07:59 — the medical PC are all updated. Yesterday's reports that had been turned away were taken at once: all 15 reached the server
+  and were accepted.
 - **A day with no sale is now accepted as an answer**, not thrown out as a broken file. A blank report made for *today* is still refused,
   with the staff's own words ("aaj ki report — kal ki tareekh chun kar dobara banaiye").
-- **The orthotic proof has not run yet.** It needs Sunday's empty day, and that needs the medical PC's files first. After they land:
-  **one sale report (with item detail) of 04-10-2026 from Marg** — you or Shavez — and the proof runs by itself.
+- **The orthotic proof has not run yet.** It needs Sunday's empty day. The one thing left: **one sale report (with item detail) of
+  04-10-2026 from Marg** — you or Shavez — and the proof runs by itself.
 - **The salts page no longer treats the shop's name as a salt.** Tested on a copy, "Marg confirms" goes from 78 to 82; the corrected
   list is already in place on the live page.
 - It works: 91 checks green (60 on your PC against the real reports, 31 on the server on a copy), the server is healthy, and every
-  changed file has a backup beside it. One thing for the chat to settle **before** the medical PC's line is given is marked **(1)** below.
+  changed file has a backup beside it. One thing still open for the chat is marked **(1)** below: on a closed **weekday**, Shavez's
+  screen would wrongly say "jaanch me fail" for a correct empty report. Sunday's is not affected.
 
 ---
 
 ## For the chat
+
+### 0 · Added 08:15 — the medical PC's files were delivered (the owner's line, 07:59)
+
+Everything below this section is the record as it stood at 07:30, when `deliver_S480.ps1` had not been run. At 07:59 the owner gave
+the line in the Claude Code window and it was run from the kit folder (the kit's `SUMS.md5` checked first: 0 mismatches).
+
+- **Drive `ToMedical\_kit`, 07:59:17:** all three at their FROM pins → placed → read back `marg_txt.py` `14b75012…`, `marg_watch.py`
+  `58b54f37…`, `KIT_MANIFEST.txt` `ea2b437a…`; `marg_push.py` `566e189e` not changed. Backups beside them: `marg_txt_S454.py.superseded`,
+  `marg_watch_S454P4C.py.superseded`, `KIT_MANIFEST_S454P4C.txt.superseded` (each read back at its FROM pin).
+- **The medical PC, heartbeat of 07:59:51:** `WATCHER FILE … md5 58b54f37`, `marg_watch.py up to date (58b54f37)`, `marg_txt.py up to
+  date (14b75012)`; the watcher alive under a new process. Its log, 07:59:52: `marg_watch S480 starting -- text reader S480, text route
+  LIVE`.
+- **Its first start (D.4), counted from its log:** every text refused in the last three days was offered again — 13 taken (`a text
+  refused earlier is taken now`; the others were the same reports under their twin names), plus the two texts lying in the watched
+  folder: 15 captured in all. **The 09:43:21 text of 04-10 stayed refused**, by the stamp in its name, with the staff's words — as B.1
+  requires (the one "would not convert" line of the start).
+- **The server, 08:00:45 → 08:01:51, 15 rows, all VERIFIED, all by push:** PURCHASE_BILLWISE, PURCHASE_ITEMWISE ×3,
+  PURCHASE_BILLITEMWISE, SALT_WISE_ITEM_LIST ×2, CATEGORY_WISE_ITEM_LIST, ITEM_MASTER, STOCK_EXPIRY/NEAR, STOCK_VALUATION/BATCHWISE,
+  SALE_BILLWISE/SUMMARY1, SALE_RETURN/SUMMARY, SALE_RETURN/DEFAULT, STOCK_ITEM_LEDGER/TEXT. The four patient-bearing ones (short sale,
+  both returns, the register) are `kept 0` and **none is at rest** in the archive (looked for by name); `archive/SALE_BILLWISE` holds
+  no file. No refusal today.
+- **The reports tile, read on a read-only connection at 08:04:** sale `ok` (18 bills — the DETAIL report of 03-10; the short statement
+  of the same day did **not** displace it), closing stock `ok`, valuation `ok`, expiry `ok`, salt list `ok` (380 items); no banner;
+  the owner's three lists (salt, category, item) all fresh.
+- **The salts job by itself, 08:10:** posted the text-made list (`6340e66b`, 380 rows, 242 salts) → `server 200`; the page's list:
+  0 items under the firm's name.
+- **The Drive collector:** 08:10:42, `listed 303, new 0, failed 0` — the 15 sheets reached Drive after the push had already recorded
+  them, so finding (2) below did not bite. healthz 200 throughout; 0 error lines in the service's journal.
+
+Two things seen in this, neither a fault of the day: a text taken at a re-offer carries **today's** capture stamp, so the lists
+exported on 04-Oct are dated 05-Oct on the server (S397's rule, unchanged); and the salt list the page now holds is the text of 14:15,
+which the analysis records as the same rows as the Excel of 17:55.
+
+**Still open:** the EMPTY day of 04-10 (one DETAIL sale export of 04-10-2026 from Marg), and findings **(1)** and **(2)** of §8, which
+the delivery makes live: (1) for the first closed weekday, (2) only if a push ever fails before Drive delivers.
 
 ### 1 · What ran, and when
 
@@ -368,10 +405,6 @@ manojz: `python -B deploy_kits\S480_MARG_TEXT_READERS\install_manojz_S480.py --u
 
 The server: nothing to run — it is installed. (The brief's line, if run, answers `ALREADY INSTALLED`.)
 
-The medical PC, **only after the chat has read `marg_txt.py` and `marg_watch.py` and settled (1)**, on manojz from the kit folder:
+The medical PC: done — the owner's line was run at 07:59 (§0).
 
-```
-powershell -ExecutionPolicy Bypass -File deliver_S480.ps1
-```
-
-Then: **one DETAIL sale export of 04-10-2026 from Marg** (the owner or Shavez), and the proof runs by itself.
+Left: **one DETAIL sale export of 04-10-2026 from Marg** (the owner or Shavez), and the proof runs by itself.
