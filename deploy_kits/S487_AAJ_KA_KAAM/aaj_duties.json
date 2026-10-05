@@ -1,0 +1,269 @@
+{
+ "version": 1,
+ "kit": "S487_AAJ_KA_KAAM",
+ "_note": "PARENT'S (clinic). What the staff's 'Aaj ka kaam' list needs beyond claude_code_briefs/DUTY_MAP.json (D648), which stays the one list of every duty that has a queryable state: (1) 'from' -- NOTHING BEFORE THIS DAY IS SHOWN OR COUNTED (the owner, 05-Oct-2026, D679: 'use from current month only, and the leftovers of September'); the setting duties.from overrides it. (2) 'floor' -- the dated tables the floor is laid under: aaj_kaam.py shadows each with a TEMP view (rows on or after the floor only) on its own read-only connection, so the duty map's SQL is run unedited; 'first_of' moves a table's floor forward to the first day ANOTHER table has a row (a clinic day is a counter-sheet duty only since the counter sheet exists). (3) 'works' -- a login that works other queues as well as its own. (4) 'extra' -- the parent's lines the map does not hold: kind 'sql' (one read-only SELECT returning n and since, as the map's), kind 'tick' (no state in the database: the person taps 'Ho gaya' -- one row in duty_tick, who and when; period day / week / month), kind 'fetch' (the count lives behind another app's own door; the page reads that door with the person's own login). Texts: 'hi' Roman Hinglish for the person, 'en' English for the owner's console. Offered to DUTY_MAP.json at the session's close; until then this file is the only place they live. 'ok_hi' -- how a line reads in the list's 'nothing pending' part. 'console': 'fact' -- the owner's console already says this as a fact line of its own (yesterday's two Docterz exports), so it is not repeated under the person there; the staff's list carries it.",
+ "from": "2026-09-01",
+ "floor": {
+  "clinic_day_revenue": {
+   "col": "business_date",
+   "first_of": [
+    "clinic_register_day",
+    "business_date"
+   ]
+  },
+  "clinic_money_flag": {
+   "col": "business_date"
+  },
+  "day_entry": {
+   "col": "business_date"
+  }
+ },
+ "works": {
+  "alisha": [
+   "alisha",
+   "reception"
+  ],
+  "shivani": [
+   "alisha",
+   "reception"
+  ]
+ },
+ "names": {
+  "awdhesh": "Awdhesh",
+  "bhawna": "Dr Bhawna"
+ },
+ "extra": [
+  {
+   "id": "reception.docterz_consultation",
+   "person": "alisha",
+   "also": [
+    "reception",
+    "shavez"
+   ],
+   "kind": "sql",
+   "group": "first",
+   "allowed_days": 0,
+   "single": true,
+   "hi": "Pichhle din ki Docterz Consultation report server par nahin aayi",
+   "how_hi": "Reception PC par Docterz se report nikaliye -- wo apne aap server par chali jaati hai. Call Tracker aur Revenue isi par chalte hain.",
+   "en": "Docterz Consultation report of {since} has not reached the server (reception)",
+   "tile": "Docterz Revenue",
+   "door": null,
+   "sql": "WITH d(day) AS (SELECT CASE strftime('%w', date('now','localtime','-1 day')) WHEN '0' THEN date('now','localtime','-2 day') ELSE date('now','localtime','-1 day') END) SELECT CASE WHEN (SELECT day FROM d) >= (SELECT MIN(business_date) FROM docterz_export) AND NOT EXISTS (SELECT 1 FROM docterz_export e WHERE e.kind = 'consultation' AND e.business_date = (SELECT day FROM d) AND e.status = 'current') THEN 1 ELSE 0 END AS n, (SELECT day FROM d) AS since",
+   "console": "fact",
+   "ok_hi": "Pichhle din ki Docterz Consultation report server par aa gayi"
+  },
+  {
+   "id": "reception.docterz_followup",
+   "person": "alisha",
+   "also": [
+    "reception",
+    "shavez"
+   ],
+   "kind": "sql",
+   "group": "first",
+   "allowed_days": 0,
+   "single": true,
+   "hi": "Pichhle din ki Docterz Follow-up log server par nahin aayi",
+   "how_hi": "Reception PC par Docterz se report nikaliye -- wo apne aap server par chali jaati hai. Call Tracker aur Revenue isi par chalte hain.",
+   "en": "Docterz Follow-up log of {since} has not reached the server (reception)",
+   "tile": "Docterz Revenue",
+   "door": null,
+   "sql": "WITH d(day) AS (SELECT CASE strftime('%w', date('now','localtime','-1 day')) WHEN '0' THEN date('now','localtime','-2 day') ELSE date('now','localtime','-1 day') END) SELECT CASE WHEN (SELECT day FROM d) >= (SELECT MIN(business_date) FROM docterz_export) AND NOT EXISTS (SELECT 1 FROM docterz_export e WHERE e.kind = 'followup' AND e.business_date = (SELECT day FROM d) AND e.status = 'current') THEN 1 ELSE 0 END AS n, (SELECT day FROM d) AS since",
+   "console": "fact",
+   "ok_hi": "Pichhle din ki Docterz Follow-up log server par aa gayi"
+  },
+  {
+   "id": "reception.night_exports",
+   "person": "alisha",
+   "also": [
+    "reception"
+   ],
+   "kind": "sql",
+   "group": "night",
+   "allowed_days": 9,
+   "soft": true,
+   "hi": "Jaane se pehle: aaj ki Docterz ki dono report nikaliye",
+   "how_hi": "Raat ko rah jaaye to kal subah yahi pehla kaam hoga.",
+   "en": "Tonight: today's Docterz exports not on the server yet ({n} of 2)",
+   "tile": "Docterz Revenue",
+   "door": null,
+   "sql": "WITH k(kind) AS (VALUES ('consultation'), ('followup')) SELECT COUNT(*) AS n, date('now','localtime') AS since FROM k WHERE strftime('%H','now','localtime') >= '19' AND strftime('%w','now','localtime') <> '0' AND NOT EXISTS (SELECT 1 FROM docterz_export e WHERE e.kind = k.kind AND e.business_date = date('now','localtime') AND e.status = 'current')",
+   "ok_hi": "Aaj ki Docterz report: raat 7 baje ke baad yahan dikhegi agar baaki hui"
+  },
+  {
+   "id": "reception.night_counter_sheet",
+   "person": "alisha",
+   "also": [
+    "reception"
+   ],
+   "kind": "sql",
+   "group": "night",
+   "allowed_days": 9,
+   "soft": true,
+   "hi": "Jaane se pehle: aaj ka counter sheet bhariye (cash / UPI / card)",
+   "how_hi": "Raat ko rah jaaye to kal subah bhar dijiye.",
+   "en": "Tonight: today's counter sheet not filled yet",
+   "tile": "Docterz daily collection",
+   "door": "/finance/clinic/register",
+   "sql": "SELECT CASE WHEN strftime('%H','now','localtime') >= '19' AND strftime('%w','now','localtime') <> '0' AND NOT EXISTS (SELECT 1 FROM clinic_register_day g WHERE g.business_date = date('now','localtime')) THEN 1 ELSE 0 END AS n, date('now','localtime') AS since",
+   "single": true,
+   "ok_hi": "Aaj ka counter sheet: raat 7 baje ke baad yahan dikhega agar baaki hua"
+  },
+  {
+   "id": "reception.staff_register",
+   "person": "alisha",
+   "kind": "fetch",
+   "group": "open",
+   "hi": "Staff register: {n} din ki entry baaki (attendance / chhutti)",
+   "en": "Staff register: days to enter (read on the page from the register's own door)",
+   "tile": "Staff Register",
+   "door": "/register/review",
+   "fetch": {
+    "url": "/portal/review-counts",
+    "field": "to_enter"
+   }
+  },
+  {
+   "id": "shavez.staff_register_approve",
+   "person": "shavez",
+   "kind": "fetch",
+   "group": "open",
+   "hi": "Staff register: {n} din approve karne hain",
+   "en": "Staff register: days to approve (read on the page from the register's own door)",
+   "tile": "Staff Register",
+   "door": "/register/review",
+   "fetch": {
+    "url": "/portal/review-counts",
+    "field": "to_approve",
+    "only_if": "show_approve"
+   }
+  },
+  {
+   "id": "shavez.slip_adjust_check",
+   "person": "shavez",
+   "kind": "sql",
+   "group": "open",
+   "allowed_days": 1,
+   "hi": "Parchi par chhoot / free / cancel -- dekh kar pass kijiye",
+   "en": "Slip discounts / cancellations waiting: {n} -- since {since} (Shavez)",
+   "tile": "OPD & X-ray/Proc Slips",
+   "door": "/finance/slips",
+   "sql": "SELECT COUNT(*) AS n, MIN(substr(made_at,1,10)) AS since FROM slip_adjust WHERE state = 'pending'",
+   "ok_hi": "Parchi par chhoot / free / cancel: kuch pass karna baaki nahin"
+  },
+  {
+   "id": "shavez.mahine_ka_kaam",
+   "person": "shavez",
+   "kind": "fetch",
+   "group": "open",
+   "hi": "Mahine ka kaam (checklist) -- {n} baaki",
+   "en": "Mahine ka kaam: the month-end checklist's open count (read on the page)",
+   "tile": "Mahine ka kaam",
+   "door": "/finance/packs/checklist",
+   "fetch": {
+    "url": "/finance/packs/api/checklist/line",
+    "field": "open"
+   }
+  },
+  {
+   "id": "bhati.petty_today",
+   "person": "bhati",
+   "kind": "tick",
+   "period": "day",
+   "group": "open",
+   "hi": "Aaj ka petty kharcha book mein likh diya (bill ki photo ke saath) -- ya aaj koi kharcha nahin hua",
+   "en": "Bhati: today's petty expenses entered in the petty book",
+   "tile": "Petty book",
+   "door": "/finance/petty"
+  },
+  {
+   "id": "bhati.petty_cash_match",
+   "person": "bhati",
+   "kind": "tick",
+   "period": "day",
+   "group": "open",
+   "hi": "Haath ka petty cash book se mila liya",
+   "en": "Bhati: petty cash in hand agrees with the book",
+   "tile": "Petty book",
+   "door": "/finance/petty"
+  },
+  {
+   "id": "shavez.week_cheque_register",
+   "person": "shavez",
+   "kind": "tick",
+   "period": "week",
+   "group": "week",
+   "hi": "Cheque register check kiya",
+   "en": "Shavez: cheque register checked (weekly)",
+   "tile": null,
+   "door": null
+  },
+  {
+   "id": "shavez.week_purchase_orders",
+   "person": "shavez",
+   "kind": "tick",
+   "period": "week",
+   "group": "week",
+   "hi": "Purchase orders dekhe: kaun se gaye, kaun se aaye, kaun se der se",
+   "en": "Shavez: purchase orders reviewed (weekly)",
+   "tile": "Purchase orders",
+   "door": "/finance/porders"
+  },
+  {
+   "id": "shavez.week_slip_audit",
+   "person": "shavez",
+   "kind": "tick",
+   "period": "week",
+   "group": "week",
+   "hi": "Parchi ki haftewar jaanch padhi, khule sawaal nipta diye",
+   "en": "Shavez: weekly slip audit read, open exceptions cleared",
+   "tile": "OPD & X-ray/Proc Slips",
+   "door": "/finance/slips"
+  },
+  {
+   "id": "reception.week_float",
+   "person": "alisha",
+   "kind": "tick",
+   "period": "week",
+   "group": "week",
+   "hi": "Chhutta (float) gina aur Rs 2,500 poora kiya",
+   "en": "Reception: change float counted and topped up (weekly)",
+   "tile": null,
+   "door": null
+  },
+  {
+   "id": "reception.week_film_stock",
+   "person": "alisha",
+   "kind": "tick",
+   "period": "week",
+   "group": "week",
+   "hi": "X-ray film ka stock gina (dono size)",
+   "en": "Reception: X-ray film stock counted, both sizes (weekly)",
+   "tile": null,
+   "door": null
+  },
+  {
+   "id": "reception.week_pathology_register",
+   "person": "alisha",
+   "kind": "tick",
+   "period": "week",
+   "group": "week",
+   "hi": "Pathology register ko Report baaki se milaya",
+   "en": "Reception: pathology register tallied against Report baaki (weekly)",
+   "tile": "Report baaki",
+   "door": "/finance/slips/pending"
+  },
+  {
+   "id": "reception.month_new_register",
+   "person": "alisha",
+   "kind": "tick",
+   "period": "month",
+   "group": "month",
+   "hi": "Naya register 1 tareekh ko shuru kiya",
+   "en": "Reception: new physical register started on the 1st (monthly)",
+   "tile": null,
+   "door": null
+  }
+ ]
+}

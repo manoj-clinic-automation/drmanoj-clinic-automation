@@ -1,0 +1,155 @@
+<!doctype html>
+<!-- aaj_kaam.html · kit S487_AAJ_KA_KAAM (05-Oct-2026, D679) · the staff's own daily list (Roman Hinglish, staff). PARENT (clinic).
+     Drawn from /finance/aaj/api/list with textContent only. A count that lives behind another app's door (the staff register,
+     Mahine ka kaam) is read from that door with the person's own login; a tick is one POST. The owner's ?as=<login> shows a
+     person's list as they will see it, with taps off. -->
+<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Aaj ka kaam</title>
+<style>
+body{margin:0;padding:14px;background:#dfe5e9;color:#14181c;font:17px/1.5 "Segoe UI",system-ui,sans-serif}
+.wrap{max-width:620px;margin:0 auto}
+h1{font-size:23px;color:#14456e;margin:0 0 2px}
+h2{font-size:18px;color:#14456e;margin:16px 0 6px}
+.mut{color:#3c464e;font-size:15px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.top a,.top button{background:#fff;color:#14456e;border:1px solid #8a9aa6;border-radius:10px;padding:0 14px;min-height:44px;display:inline-flex;align-items:center;font:inherit;font-size:15px;text-decoration:none;cursor:pointer;white-space:nowrap}
+.banner{background:#fff4d6;border-left:6px solid #8a6100;padding:10px 12px;margin:0 0 12px;font-size:15px;border-radius:6px}
+.green{background:#e9f6e9;border-left:6px solid #2f6b45;padding:12px 14px;margin-bottom:12px;font-size:19px;font-weight:700;border-radius:6px}
+.count{font-size:19px;font-weight:700;margin:0 0 10px}
+.count .open{color:#8a6100}.count .late{color:#9c2a20}
+.card{background:#fffdf7;border:2px solid #8a9aa6;border-radius:10px;padding:4px 14px;margin:0 0 6px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #d6dde3}
+.row:first-child{border-top:0}
+.row .t{flex:1;min-width:0;overflow-wrap:break-word}
+.row .how{display:block;color:#2c353c;font-size:15px;margin-top:4px}
+.row .door{display:inline-block;color:#14456e;font-size:15px;margin-top:4px;min-height:32px}
+.row.done{flex-wrap:wrap;gap:4px 12px}
+.row.done .ok{flex-basis:100%;text-align:left}
+.tag{display:inline-block;font-size:13px;font-weight:700;border-radius:999px;padding:1px 9px;margin-left:6px;vertical-align:middle}
+.tag.late{background:#f8dedb;color:#9c2a20}
+.ok{color:#2f6b45;font-weight:700;font-size:15px;text-align:right}
+.btn{border:0;background:#14456e;color:#fff;border-radius:10px;padding:0 16px;min-height:46px;font:inherit;font-size:16px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;white-space:nowrap}
+.btn.tick{background:#2f6b45}
+.btn:disabled{opacity:.55;cursor:default}
+details.clear{margin-top:14px}
+details.clear>summary{cursor:pointer;color:#2f6b45;font-weight:700;padding:10px 0;min-height:44px}
+details.clear ul{margin:2px 0 0;padding-left:22px}
+details.clear li{margin:4px 0;color:#3c464e;font-size:15px}
+#flash{color:#9c2a20;font-weight:700;margin:6px 0}
+[hidden]{display:none!important}
+</style></head><body><div class="wrap">
+<div class="top"><a href="/portal">&larr; Clinic app</a><button id="again" type="button">Dobara dekhiye</button></div>
+<div class="banner" id="banner" hidden></div>
+<div class="banner" id="partial" hidden>Poori list abhi nahin khul paayi — jo neeche dikh raha hai woh adhoori hai. Dr Manoj ko bataiye.</div>
+<h1 id="h">Aaj ka kaam</h1>
+<div class="mut" id="sub">load ho raha hai&hellip;</div>
+<div id="flash"></div>
+<div id="count" class="count"></div>
+<div id="list"></div>
+<details class="clear" id="clear" hidden><summary id="clearsum"></summary><ul id="clearlist"></ul></details>
+</div>
+<script>
+(function(){
+  var AS=(new URLSearchParams(location.search)).get('as')||'';
+  function $(i){return document.getElementById(i);}
+  function el(tag,cls,text){var e=document.createElement(tag); if(cls)e.className=cls; if(text!==undefined&&text!==null)e.textContent=text; return e;}
+  function q(){return AS?('?as='+encodeURIComponent(AS)):'';}
+  var TODAY='';
+  var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function when(s){ s=String(s||''); if(s.length<16)return s;
+    var t=s.slice(11,16); if(s.slice(0,10)===TODAY)return t;
+    return s.slice(8,10)+'-'+(MON[Number(s.slice(5,7))-1]||'')+' '+t; }
+  var GEN=0, PENDING=0;
+  var MSG={off:'Yeh list abhi shuru nahin hui hai.', owner_only:'Yeh sirf Dr Manoj dekh sakte hain.', not_signed_in:'Pehle Clinic app par login kijiye.',
+           no_such_login:'Is naam ka koi login nahin hai.', no_database:'Abhi list nahin ban paayi. Thodi der mein dobara dekhiye.'};
+
+  function fillFetch(row, r){
+    /* a count that lives behind another app's door: asked with this login. Until every such door has answered, the page does
+       not say 'all done'; an answer that arrives after the list was drawn again is dropped (GEN). */
+    var gen=GEN;
+    if(r.preview){ row.querySelector('.tx').textContent=r.text.replace('{n}','…').replace('{text}','…'); row.querySelector('.t').appendChild(el('span','how','The count appears on their own login.')); return; }
+    row.hidden=true; PENDING+=1;
+    function done(){ if(gen!==GEN)return; PENDING-=1; drawCount(); }
+    fetch(r.fetch.url,{credentials:'same-origin',cache:'no-store'}).then(function(x){return x.ok?x.json():null;}).then(function(d){
+      if(gen!==GEN)return;
+      if(d&&(!r.fetch.only_if||d[r.fetch.only_if])){
+        var n=Number(d[r.fetch.field]||0);
+        if(n>0){
+          row.querySelector('.tx').textContent=r.text.replace('{n}',String(n)).replace('{text}',String((r.fetch.text_field&&d[r.fetch.text_field])||n));
+          row.hidden=false;
+          var c=$('count'); c.setAttribute('data-extra',String(Number(c.getAttribute('data-extra')||0)+1));
+        }
+      }
+      done();
+    }).catch(function(){ done(); });
+  }
+  var BASE={open:0,late:0,partial:false};
+  function drawCount(){
+    var c=$('count'), extra=Number(c.getAttribute('data-extra')||0), open=BASE.open+extra;
+    c.textContent='';
+    if(!open&&PENDING>0){ c.className='count'; return; }
+    if(!open&&BASE.partial){ c.className='count'; c.appendChild(el('span','late','List adhoori hai')); return; }
+    if(!open){ c.appendChild(el('span','ok','Sab ho gaya ✓')); c.className='green'; return; }
+    c.className='count';
+    c.appendChild(el('span','open',open+' kaam baaki'));
+    if(BASE.late){ c.appendChild(document.createTextNode(' · ')); c.appendChild(el('span','late',BASE.late+' late')); }
+  }
+
+  function row(r, d){
+    var w=el('div','row'), t=el('div','t'), tx=el('span','tx',r.text);
+    t.appendChild(tx);
+    if(r.late)t.appendChild(el('span','tag late','late'));
+    if(r.how)t.appendChild(el('span','how',r.how));
+    w.appendChild(t);
+    if(r.kind==='tick'&&r.door){ var dl=el('a','door',(r.tile||'Page')+' kholiye\u00a0→'); dl.href=r.door; dl.target='_blank'; dl.rel='noopener'; t.appendChild(el('br')); t.appendChild(dl); }
+    if(r.kind==='tick'&&r.done){ w.className='row done'; w.appendChild(el('div','ok','ho gaya ✓ '+(r.done.by_name||r.done.by||'')+', '+when(r.done.at))); }
+    else if(r.kind==='tick'){
+      var b=el('button','btn tick','Ho gaya'); b.type='button';
+      if(!r.can_tick){ b.disabled=true; }
+      else b.addEventListener('click',function(){
+        b.disabled=true; $('flash').textContent='';
+        fetch('/finance/aaj/api/tick',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:r.id})})
+         .then(function(x){ if((x.headers.get('Content-Type')||'').indexOf('json')<0){ throw new Error(x.redirected||x.status===401?'login':'server'); } return x.json(); })
+         .then(function(j){ if(!j.ok){ $('flash').textContent=j.message||(j.error==='not_signed_in'?MSG.not_signed_in:'Tick nahin lag paaya. Dobara kijiye.'); b.disabled=false; return; } load(); })
+         .catch(function(e){ $('flash').textContent=(e&&e.message==='login')?MSG.not_signed_in:'Tick nahin lag paaya. Dobara kijiye.'; b.disabled=false; });
+      });
+      w.appendChild(b);
+    }
+    else if(r.door){ var a=el('a','btn','Kholiye'); a.href=r.door; a.target='_blank'; a.rel='noopener'; if(r.tile)a.title=r.tile; w.appendChild(a); }
+    if(r.kind==='fetch')fillFetch(w,r);
+    return w;
+  }
+
+  function load(){
+    fetch('/finance/aaj/api/list'+q(),{credentials:'same-origin',cache:'no-store'})
+     .then(function(x){ var ct=x.headers.get('Content-Type')||''; if(ct.indexOf('json')<0){ throw new Error((x.redirected||x.status===401)?'login':'server'); } return x.json(); })
+     .then(function(d){
+       GEN+=1; PENDING=0; TODAY=d.today||'';
+       var list=$('list'); list.textContent=''; $('count').textContent=''; $('count').className='count'; $('count').setAttribute('data-extra','0'); $('clear').hidden=true;
+       if(!d.ok){ $('partial').hidden=true; $('sub').textContent=MSG[d.error]||'Abhi list nahin ban paayi. Thodi der mein dobara dekhiye.'; return; }
+       $('h').textContent='Aaj ka kaam — '+d.name;
+       $('sub').textContent=d.day+' · '+d.as_of+' baje ki list';
+       var bn=$('banner');
+       if(d.view_as){ bn.hidden=false; bn.textContent='You are seeing '+d.name+'’s list as it will appear to them. Taps are off in this view.'+(d.on?'':' The lists are still OFF for staff. The weekly and monthly lines are shown here for your eye; for the staff each begins with the first week / month after you turn the lists on.'); }
+       else bn.hidden=true;
+       $('partial').hidden=!d.partial;
+       if(!d.has){ $('sub').textContent=d.partial?'List abhi nahin khul paayi.':'Aapke naam par abhi koi kaam set nahin hai.'; return; }
+       BASE.open=d.open; BASE.late=d.late; BASE.partial=!!d.partial; drawCount();
+       (d.sections||[]).forEach(function(s){
+         list.appendChild(el('h2',null,s.title));
+         var card=el('div','card'); s.rows.forEach(function(r){ card.appendChild(row(r,d)); }); list.appendChild(card);
+       });
+       if(d.clear&&d.clear.length){
+         $('clear').hidden=false; $('clearsum').textContent='In kaamon mein abhi kuch baaki nahin ('+d.clear.length+')';
+         var ul=$('clearlist'); ul.textContent=''; d.clear.forEach(function(c){ ul.appendChild(el('li',null,c.text)); });
+       }
+     })
+     .catch(function(e){ $('sub').textContent=(e&&e.message==='login')?MSG.not_signed_in:'Server se jawab nahin aaya — neeche ki list purani ho sakti hai. Thodi der mein dobara dekhiye.'; });
+  }
+  $('again').addEventListener('click',load);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden)load(); });
+  setInterval(function(){ if(!document.hidden)load(); },120000);
+  load();
+})();
+</script>
+</body></html>

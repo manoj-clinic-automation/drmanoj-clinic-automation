@@ -1,0 +1,6 @@
+kit id S487_AAJ_KA_KAAM
+project parent (session 294, 05-Oct-2026; D679; the owner's word of 05-Oct: "Start staff lists build now, dont populate old stale data, use from current month only, and the leftovers of September") -- the staff's own daily list
+'Aaj ka kaam': one Hinglish screen per person from the duty map's own due_sql (DUTY_MAP.json is NOT edited) plus the parent's lines of aaj_duties.json; NOTHING BEFORE 01-SEP-2026 shown or counted (TEMP views laid under the SQL);
+installs SWITCHED OFF for staff -- the owner previews each list from his console and turns them on with one tap; nothing written at install
+places /root/finance/aaj_kaam.py d65e0bf4, aaj_kaam.html 03ccc58e, aaj_duties.json 7aa29bef (all NEW); replaces owner_console.py be555816 -> 4819eceb and owner_console.html 75b5d017 -> e6d35d88
+edits /root/finance/finance_app.py ef1382d2 -> bff362c3 and /root/portal/portal.py 10a675e7 -> 63df9d49 (apply_s487.py, six exact anchors)
