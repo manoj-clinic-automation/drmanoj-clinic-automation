@@ -25,7 +25,7 @@ Built, walked, installed (server), placed (manojz), packed (medical PC) and publ
 
 | step | when (IST, 05-Oct-2026) | result |
 |---|---|---|
-| build lock `/root/deploy/.claude_code_build.lock` (owner `S480_MARG_TEXT_READERS`) | taken 07:25:06 | released after this report was written (§9) |
+| build lock `/root/deploy/.claude_code_build.lock` (owner `S480_MARG_TEXT_READERS`) | taken 07:25:06 | held until this report was written, then removed |
 | server installer, real run (from `/tmp/S480kit`, `md5sum -c SUMS.md5` 17 of 17 OK — the repository's kit, byte for byte) | 07:25:06 → 07:25:24 | `S480_MARG_TEXT_READERS: DONE`, exit 0 |
 | `clinic-finance` restarted (the only service restarted) | 07:25:15 | active · `/finance/healthz` 200 |
 | manojz: `install_manojz_S480.py` | 07:25:53 | `S480 manojz: PLACED` |
@@ -346,7 +346,17 @@ through the upload page, would verify at the server: the "is the day over" rule 
 
 ### 10 · Publish
 
-Being published with this report (PUBLISH_ALL.bat); the result is added below once the push is verified.
+`PUBLISH_ALL.bat` ran at 07:29:01 and answered `PUBLISHED AND VERIFIED - origin HEAD = ab58e39fcf` (commit of 07:29:02 +0530): the kit's
+18 files, the brief, this report, and **one line in `.gitignore`**. The repository hides every `.json` by default and the publish gate
+refuses a kit file that would be dropped; `deploy_kits/S480_MARG_TEXT_READERS/sig_blocks_s480.json` (report titles and column heads, no
+number, no secret) is allowed by its exact path, as S454's `sig_entry_s454.json` was. The F-185 gate over every added file:
+`NO_PHONE_NUMBERS: clean -- 21 staged file(s) checked`. No `__pycache__` in the kit folder.
+
+On the server at 07:29:23: `git pull --ff-only` → HEAD `ab58e39fcf`; in the repository's kit `md5sum -c SUMS.md5` 17 of 17 OK, and all
+18 files are identical (`cmp`) to the copy that ran from `/tmp/S480kit`. The brief's own line then answers
+`-- ALREADY INSTALLED: the ten files are at the kit's pins; clinic-finance active; healthz 200`.
+
+This section was added after that, and the report published again with it (a second run of `PUBLISH_ALL.bat`).
 
 ### 11 · Undo
 
