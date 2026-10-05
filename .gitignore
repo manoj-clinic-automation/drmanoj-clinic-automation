@@ -264,3 +264,5 @@ _scratch/
 !deploy_kits/S480_MARG_TEXT_READERS/sig_blocks_s480.json
 # S482 (05-Oct-2026): the kit's DUTY_MAP.json (v6: shavez.bill_chain_gap added) that its walk and installer ran with (in SUMS.md5). Exact path.
 !deploy_kits/S482_BILL_CHAIN/DUTY_MAP.json
+# S485 (05-Oct-2026): the kit's DUTY_MAP.json (v7: darpan.order_review added) that its walk and installer ran with (in SUMS.md5). Exact path.
+!deploy_kits/S485_DARPAN_ORDER_TAB/DUTY_MAP.json

@@ -7,6 +7,8 @@ file; a duty's id from that file is shown in brackets, e.g. `[amir.count_voucher
 
 **05-Oct-2026 · kit S482_BILL_CHAIN (D675 b):** `[shavez.bill_chain_gap]` added — the bill-number chain's gap line on Shavez's *Aaj ki reports*. `DUTY_MAP.json` is v6.
 
+**05-Oct-2026 · kit S485_DARPAN_ORDER_TAB (D677):** `[darpan.order_review]` added — Darpan confirms the system's order list on the second tab of his own page. `DUTY_MAP.json` is v7.
+
 **How to read a row.**
 *Due when* = the table and the condition that say the work is waiting. *Door* = the tile on that person's own portal home, and
 the page it opens, where the waiting work is shown. *Owner's line* = what reaches the owner if it is missed:
@@ -69,6 +71,7 @@ attendance, Scan Purchase. (Kal ka hisaab also links to his old card /finance/da
 | Vaapsi Desk "jaankari": name / clinic ID that disagree `[darpan.desk_identity]` | `identity_dispute.status='open'` with no `jaankari_answer` (kind dispute) | Vaapsi Desk "जानकारी चाहिए" | JSON |
 | Send the orthotic order to Yuvika | orthotic shortage computed by porders (count + purchases − sales vs keep) | Purchase orders → /finance/porders; card "Orthotic kam hai" on Kal ka hisaab | Needs-you, porders: "Orthotic shortages: N items -- order not sent" |
 | **S454:** after making the order in Marg, save PENDING ORDERS (PURCHASE) as TEXT, the default way `[darpan.order_sheet]` | due only when the newest order-sheet file was refused (`mi_file` not VERIFIED, ORDER_PENDING) and no later sheet was taken | Kal ka hisaab → card "Order sheet": "<dd-mm> ki sheet mil gayi · N dawa · M supplier · reception ke paas pahunch gayi", or "Order sheet adhoori thi, system ne nahi li — Marg se dobara TEXT mein save kijiye"; the one instruction always under it | Needs-you, order_sheet: "Darpan's order sheet refused today" |
+| Each order day from 09:30: confirm the system's order list `[darpan.order_review]` (S485, D677; while `order.source = darpan`) | an `order_proposal` row of today with status `open`, once `order.darpan_list_time` has passed | Kal ka hisaab → /finance/darpan/kal, the second tab "आज का ऑर्डर": hold a line, add a medicine, − / +, पक्का per supplier (then it is on reception's "Order karna hai" cards) | Needs-you, order_rules: an order not sent rides to its next order day and raises "Order not sent: …" (as on `system`) |
 | Daily Sale by hand — only when the Marg autofile fails | a counter day with no `day_entry` | Daily Sale → /finance/daily | Needs-you (1) once filed: "N days to approve" |
 
 The jaankari lists are shared by every desk login (`returns.desk_users` = darpan, shavez, alisha, shivani, bhawna); the JSON names Darpan.

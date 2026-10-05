@@ -1,0 +1,4 @@
+kit id S485_DARPAN_ORDER_TAB
+project Sanjeevni (brief of session 295, 05-Oct-2026; D677; no F-number) -- Darpan reviews the system's order list on his own page (K3 of the
+ordering plan): the second tab of Kal ka hisaab from 09:30; his Pakka is the hand-over to reception; the Marg sheet road one setting away
+installed by install_S485_DARPAN_ORDER_TAB.sh (holding the build lock); six files of /root/finance; nothing on manojz or the medical PC
