@@ -1,0 +1,4 @@
+kit id S484_SPINE_BILL_TIES
+project Sanjeevni (brief of session 295, 05-Oct-2026; F-734, F-735, F-736 repaired; F-737 recorded, not repaired; no D-number) -- the spine ties
+a bill number two suppliers share, orders same-second exports by what they are, and takes S483's two reader edits
+installed by install_S484_SPINE_BILL_TIES.sh (holding the build lock); two server files in /root/finance/spine; nothing on manojz or the medical PC
