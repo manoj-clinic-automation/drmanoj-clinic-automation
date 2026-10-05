@@ -1,0 +1,4 @@
+kit id S482_BILL_CHAIN
+project Sanjeevni (brief of session 295, 05-Oct-2026; D675 b, D676; F-731, F-732, F-733) -- the chain of Marg's bill numbers says what is missing;
+the empty day settles everywhere it touches; the rename list carries the right names
+the server part is installed by install_S482_BILL_CHAIN.sh (holding the build lock); the manojz part (MargPull\marg_gate.py) by install_manojz_S482.py

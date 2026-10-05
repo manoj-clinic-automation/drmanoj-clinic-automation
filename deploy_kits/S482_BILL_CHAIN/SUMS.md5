@@ -1,0 +1,11 @@
+427235cee5a1b15b05cda101c8d7234a  DUTY_MAP.json
+f67aac78c0cccb21070a0ab0eef39eeb  KIT_ID.txt
+0cf8316a591ed317c0f5757eed0bfff8  PINS.sh
+2fc87f8064bfdf37bbf2702aa18a9b43  README.md
+faa79f89a1fc805593dae644acf01f50  chain_block_s482.py
+2f323a632d0174530908b0f7be86b6fc  install_S482_BILL_CHAIN.sh
+330ebd28dfc0695b1bad400d3f0164b5  install_manojz_S482.py
+3493b8281a57819cdfdf623d00820dc9  make_s482.py
+abc52ea9cb41991e50ce1e69b5507153  renames_s482.py
+37d7c747b0e663f69d201eafe53372c3  tile_block_s482.py
+590b6a4fe4d168cd616197e3f45d7ba6  walk_s482.py

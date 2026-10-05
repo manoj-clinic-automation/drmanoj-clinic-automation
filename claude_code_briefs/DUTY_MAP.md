@@ -5,6 +5,8 @@
 Sanjeevni and finance modules keep (finance.db opened read-only, 21:50 IST). The machine part is `DUTY_MAP.json` beside this
 file; a duty's id from that file is shown in brackets, e.g. `[amir.count_vouchers]`.
 
+**05-Oct-2026 · kit S482_BILL_CHAIN (D675 b):** `[shavez.bill_chain_gap]` added — the bill-number chain's gap line on Shavez's *Aaj ki reports*. `DUTY_MAP.json` is v6.
+
 **How to read a row.**
 *Due when* = the table and the condition that say the work is waiting. *Door* = the tile on that person's own portal home, and
 the page it opens, where the waiting work is shown. *Owner's line* = what reaches the owner if it is missed:
@@ -82,6 +84,7 @@ Docterz Revenue, Bhati aaj, Asset Register, Staff Ledger — Entry, Forms & Down
 | Before sales: yesterday's bill-wise sale report `[shavez.sale_report]` | counter days (Mon–Sat) after the newest `sale_bill.business_date`, up to yesterday | Aaj ki reports → /finance/reports/aaj "… ki bikri report aur closing stock nikaliye" | JSON (the hub's Marg card also shows it) |
 | Before sales: yesterday's closing stock `[shavez.closing_stock]` | counter days after the newest VERIFIED `mi_file` STOCK_CLOSING / `stock_feed` push snapshot | Aaj ki reports (same card) | JSON |
 | 1st–7th: Stock valuation and Stock expiry of last month `[shavez.month_reports]` | no VERIFIED `mi_file` STOCK_VALUATION / STOCK_EXPIRY received this month | Aaj ki reports "Stock valuation" row | JSON |
+| A gap in Marg's bill numbers: re-export the days the line names `[shavez.bill_chain_gap]` (S482, D675 b) | `mi_bill_chain` holds a row with `gap_before` or `gap_inside` (the chain is rewritten whenever a sale report or an EMPTY day lands; never by the calendar) | Aaj ki reports → /finance/reports/aaj, one red line per gap: "Bill … nahi mile (… se … ke beech) — … ki bikri report dobara banaiye." It leaves by itself when the re-export closes the gap | the tile's own English line (`reports_tile.status` → `line`: "Bill chain: … missing between … — re-export both days."); nothing on Needs-you (a duty with a door raises nothing there) |
 | The salt list when Amir's did not come (S444: "Shavez kal subah nikalega") | same state as `[amir.salt_list]` | Aaj ki reports salt row (S444 adds "N din se baaki") | Needs-you, amir_day (a) |
 | Morning match: check reception's first pass `[shavez.match_check]` | `clinic_money_day.status='maker_done'` | Morning match → /finance/clinic/match — lands on yesterday only (older days: see findings) | JSON |
 | Morning match first pass himself when reception is away | as `[alisha.match_first_pass]` | Morning match | JSON |
