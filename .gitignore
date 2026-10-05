@@ -258,3 +258,7 @@ _scratch/
 !deploy_kits/S454_BILL_REGISTER/P1_ORDER_SHEET_RECEPTION/sig_entry_s454.json
 # S454 part 2: the kit's DUTY_MAP.json (v5) that its walk and installer ran with (in SUMS.md5). Exact path.
 !deploy_kits/S454_BILL_REGISTER/P2_PAIRING_REGISTER/DUTY_MAP.json
+# S480 (05-Oct-2026): the Marg signature blocks make_s480.py adds to signatures.json (the category block manojz already held, the batch-wise
+# valuation, the register's text shape) and two end-marker notes -- report titles and column heads, no number and no secret (the F-185 gate
+# ran on it; in SUMS.md5). Exact path only.
+!deploy_kits/S480_MARG_TEXT_READERS/sig_blocks_s480.json

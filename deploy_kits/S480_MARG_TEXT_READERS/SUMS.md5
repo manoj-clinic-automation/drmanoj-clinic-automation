@@ -1,0 +1,17 @@
+15581b2ab22ce264796f5e5400d77fdb  KIT_ID.txt
+c9681701ac23d4cbcf8ed39bc23e2b48  KIT_MANIFEST.txt
+78ad356ec51f00bbc1e74e558642164c  PINS.sh
+00f3b1e25cdfdde174fd21ce57aa5f5f  README.md
+17603c0c941101a704624d9b076c0610  deliver_S480.ps1
+37baaecf1b021ddfc0c36b1e43f0a18e  install_S480_MARG_TEXT_READERS.sh
+0b581c27e36d0312b1e239b45b14b241  install_manojz_S480.py
+0caa14ed2cf3b90f57ca8eabcc1c0c65  make_s480.py
+2bf284ba0c7f6bc4e6902e54379c8e12  marg_report.py
+14b750120233e349d713d9de1d1edb7a  marg_txt.py
+58b54f37865cb487720b95eaa4aedde5  marg_watch.py
+1ba529851eed04973e4bd540547c447c  push_expected.py
+d958b0586c1c059505b288c85c2d0eb0  sig_blocks_s480.json
+21604e0fa84f0403e1a86e7584c3a1bd  signatures.json
+a78ac9e33f4e1b715c2eaa2cbffdbc65  txt_block_s480.py
+c1dd4aff7c28224ef066c58a256a4f95  txt_selftest_block_s480.py
+7896dc59437ec18b78afc503a2c396fe  walk_s480.py

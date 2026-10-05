@@ -1,0 +1,4 @@
+kit id S480_MARG_TEXT_READERS
+project Sanjeevni (brief of session 295, 05-Oct-2026; D675; F-726 b, F-728, F-729, F-730) -- every Marg text report lands; an empty report is an answer
+the server part is installed by install_S480_MARG_TEXT_READERS.sh; the manojz part by install_manojz_S480.py; the medical PC's two files are PACKED
+here (marg_txt.py, marg_watch.py, KIT_MANIFEST.txt) and deliver_S480.ps1 is NOT run by Claude Code -- the Sanjeevni chat reads both files first (F-715)
