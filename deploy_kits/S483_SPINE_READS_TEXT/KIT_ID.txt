@@ -1,0 +1,5 @@
+kit id S483_SPINE_READS_TEXT
+project Sanjeevni (brief of session 295, 05-Oct-2026; F-734, F-735; no D-number) -- the spine's reader takes the two text-made sheets that
+froze its build on 05-Oct: one server file (/root/finance/spine/marg_read.py), two readings written again
+STATUS 05-Oct-2026: BUILT AND WALKED, NOT INSTALLED -- the walk's section 3 is red on the server (five purchase lines of a bill number two
+suppliers share still tie to no bill: spine_build.py's rule, outside this brief); install_S483_SPINE_READS_TEXT.sh places nothing while it is
