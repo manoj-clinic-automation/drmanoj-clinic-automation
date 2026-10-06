@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S295 close** (the Sanjeevni project), 05-Oct-2026 — the parent sections exactly as its S293 close wrote them (its S294 is open), the Sanjeevni sections refreshed here
+# OWNER TO-DO — LIVE · refreshed at the **S294 close** (the parent), 06-Oct-2026 — the Sanjeevni sections exactly as its S295 close wrote them
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S295 close** (the Sanjeevni project), 05-Oct-2026 — the parent sections exactly as its S293 close wrote them (its S294 is open), the Sanjeevni sections refreshed here
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S285 close** (the Sanjeevni project), 04-Oct-2026 — the parent sections exactly as its S293 close wrote them, the Sanjeevni sections refreshed here
 
@@ -18,14 +20,14 @@
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
-*Detail: `START_HERE_SESSION_294.md` · `S293_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S295 close's (05-Oct evening); `S295_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_296.md` the next chat's entry.*
+*Detail: `START_HERE_SESSION_297.md` · `S294_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S295 close's (05-Oct evening); `S295_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_296.md` the next chat's entry.*
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S293 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S294 close
 
-**1 · THE FOUR YES BANK PASSWORDS — on the packs page, *Statement passwords*, *Set*.** One each for NK Pathology, Dr Manoj Agarwal Clinic, Sanjeevni Medicos and the HUF (the two savings accounts are already read from the branch's copies). Then press *re-read the shelf inbox*. Typed once, kept on the server only, never shown again.
+**1 · LOOK AT EACH PERSON'S LIST, THEN TURN THE LISTS ON.** The staff's *Aaj ka kaam* lists are live and switched off. Open your console, open *Today's work*, tap **List** beside each name; tell me any wording to change. When you are happy, **Turn on** is on the *Staff lists* line in the same section. Until then the staff see nothing new.
 
 ```
-https://followup.dr-manoj.in/finance/packs
+https://followup.dr-manoj.in/finance/console
 ```
 
 **2 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries only this session's record; no server line follows it.
@@ -34,40 +36,61 @@ https://followup.dr-manoj.in/finance/packs
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**3 · THE SEPTEMBER PACK — *Send to accountants*, when you are satisfied.** Nothing goes to them by itself any more (your ruling of 04-Oct: the pack, never the mail as it comes). 13 of 15 statements at this close.
+**3 · THE TWO YES BANK PASSWORDS STILL MISSING — on the packs page, *Statement passwords*, *Set*.** NK Pathology's current account and the Clinic's current account. September reads 13 of 15 without them. Typed once, kept on the server only, never shown again.
 
-**4 · PLEASE DO NOT PRESS THE TWO NEW PC BUTTONS ON *CLINIC PCs & PHONES* YET** (Medical PC, Dr Manoj's PC). I test both setups first. The Reception button and the two phone buttons are ready.
+```
+https://followup.dr-manoj.in/finance/packs
+```
 
-**5 · WHEN YOU SETTLE IT — clinic expenses and MK expenses.** Until you tell me the split, nothing suggests a group for electrical, plumbing and similar papers; you can still sort each by hand.
+**4 · THE SEPTEMBER PACK — *Send to accountants*, when you are satisfied.** Nothing goes to them by itself (your ruling of 04-Oct).
+
+**5 · ONE SMALL FOLDER TO DELETE, WHEN YOU ARE AT THE PC** (I cannot delete on your PC; it holds three empty files and one leftover, all harmless — the note inside says why). On manojz:
+
+```
+D:\Downloads\_to_delete_S294
+```
+
+**6 · WHEN YOU SETTLE IT — clinic expenses and MK expenses.** Until you tell me the split, nothing suggests a group for electrical, plumbing and similar papers; you can still sort each by hand.
 
 ```
 https://followup.dr-manoj.in/scanapp/papers
 ```
 
-**6 · THE RECEPTION PC — three small things, none urgent.** (a) The LAN cable: a different cable or wall socket. (b) On its Wi-Fi list, tick **Connect automatically** for `Airtel_Airtrl_mano_8080`. (c) Its Windows has had no security fixes since November 2025 — your decision.
+**7 · THE RECEPTION PC — three small things, none urgent.** (a) The LAN cable: a different cable or wall socket. (b) On its Wi-Fi list, tick **Connect automatically** for `Airtel_Airtrl_mano_8080`. (c) Its Windows has had no security fixes since November 2025 — your decision (its level now shows on your health page).
 
-**7 · ONE WORD, WHEN YOU LIKE — the follow-up tracker on the server (C·2): yes or no.**
+**8 · ONE WORD, WHEN YOU LIKE — the follow-up tracker on the server (C·2): yes or no.**
 
-**8 · AT YOUR OWN PACE — the contacts workbook.**
+**9 · AT YOUR OWN PACE — the contacts workbook.**
 
 ```
 D:\Downloads\margsync\_config\contacts_S282\CONTACT_GROUPS_TO_UPDATE.xlsx
 ```
 
-**9 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today**, saved in `D:\Downloads` (F-629).
+**10 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today**, saved in `D:\Downloads` (F-629).
 
-**10 · WHEN YOU HAVE ONE — the "other works" you want Tailscale for.**
+**11 · WHEN YOU HAVE ONE — the "other works" you want Tailscale for.**
 
-*Closed by your word of 02-Oct and not on this list: the technician of 25-Sep, AnyDesk and UltraViewer, passwords, the Windows activation on the reception PC. Closed by your word of 04-Oct: the accountants get the pack only; no statement passes through the clinic mailbox.*
+*Ready for you now, no longer held: the **Medical PC** and **Dr Manoj's PC** buttons on *Clinic PCs & phones* — both setups were tested on a real Windows on 05-Oct.*
+
+*Closed by your word of 02-Oct and not on this list: the technician of 25-Sep, AnyDesk and UltraViewer, passwords, the Windows activation on the reception PC. Closed by your word of 04-Oct: the accountants get the pack only; no statement passes through the clinic mailbox; the 61 test scans stay.*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **My own first:** the check of today's twelve server files against tonight's backup · the relay's 07:00 run and the shelf's 07:30 read on Monday · a watch that tells us when no statement has reached Drive for days (so a lapsed authorisation is seen without your failure mails) · Shavez's hand-over photos into the nightly backup.
-2. **Monday 08:30:** the small update to the reception PC, so its Windows level shows on your health page.
-3. **The test of the Medical PC's and your PC's setups** — then the two new buttons are yours to use.
-4. **On your word:** the expense split · the tracker on the server · the contacts · the mail flood (low) · the portal tiles (after the pharmacy move).
-5. **Held at your word:** the Callback Tracker on the server.
+1. **After your word on the lists:** any wording you want changed; then, in the order we settled on 05-Oct — the morning step each person answers before their other tiles open (from their punch) · stand-ins when someone is away · the lock until the previous day's Docterz reports are exported · the attendance month-end sheet · later, approving from inside your console.
+2. **My own, no word needed:** small wording on your console (minutes late on a late first punch; Bhati's punch) · bringing the finance app's own test suite up to date · on or after 09-Oct, the old Drive folder on the reception PC.
+3. **On your word:** the expense split · the tracker on the server · the contacts · the mail flood (low) · the portal tiles (after the pharmacy move).
+4. **Held at your word:** the Callback Tracker on the server.
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S294 CLOSE — 04 → 06-Oct-2026 (the parent)
+
+- ~~**The check of the twelve server files against the backup · the relay's Monday run · a watch for when no statement reaches Drive · the hand-over photos into the nightly backup**~~ — all four done (S476; the pins equal the 05-Oct and the 06-Oct backups).
+- ~~**Monday 08:30: the small update to the reception PC**~~ — done 08:30–08:35 on 05-Oct; its Windows level shows on your health page.
+- ~~**The test of the Medical PC's and your PC's setups**~~ — done by the nightly job on a real Windows, 46 checks green; one defect found by reading and repaired first (S477, S478). **The two buttons are yours to use.**
+- ~~**The four Yes Bank passwords**~~ — two set by you on 04-Oct; the e-mailed monthly statement they opened is now read (S479). Two remain (item 3 above).
+- ~~**A tile at the top of your app and a command console behind it**~~ — live since 05-Oct evening (S481).
+- ~~**The staff's daily lists, nothing older than 01-Sep**~~ — live since 21:35 on 05-Oct, switched off until your tap (S487; item 1 above).
+- **Three things corrected on the way:** the console's first install stopped at its own test and placed nothing (my test's fault; second run green) · the lists' first publish was refused for a file I had not listed (one more double-click) · a test copy of the database sat in my evidence folder on your PC for a few seconds and was emptied at once (item 5 above).
 
 ## ✅ DONE AT THE S293 CLOSE — 04-Oct-2026 (the parent)
 
