@@ -258,3 +258,7 @@ WALK_S488 GREEN -- 75 checks
    - `marg_watch.py` capture message: `"\h"`, the same kind.
 5. **The watcher's start line still says "marg_watch S480 starting".** Changing it means editing `main()`, which is outside E.4's list. The heartbeat's md5 is the proof of the version.
 6. The new `S488_ITEMS_JS` and the route sit inside the S454 part 5 block of `purchase_app.py`. Nothing outside the Items check block moved.
+7. **The report's publish (07fc02c, 14:23:36) also carried `deploy_kits/S490_ORDER_SHEET_PACKING/`.** That is the chat's own urgent medical-PC kit (F-756), whose files were written at 14:22:21. PUBLISH_ALL publishes everything pending; nothing of it was opened, run or changed by this build.
+   - **It meets S488 on the medical PC.** S490 moves Drive's `marg_txt.py` 14b75012 → 7fa5136d and `KIT_MANIFEST.txt` ea2b437a → 95a1dc5f. `deliver_S488.ps1` pins both at their S480 values.
+   - So once S490 is delivered, deliver_S488 will refuse, by design: "nothing delivered".
+   - S490's own README already says that S488's medical-PC delivery must then be made again, as a new kit number. `marg_watch.py` S488 itself does not depend on S490's change.
