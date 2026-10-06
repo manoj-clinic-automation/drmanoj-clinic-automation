@@ -9,6 +9,8 @@ file; a duty's id from that file is shown in brackets, e.g. `[amir.count_voucher
 
 **05-Oct-2026 · kit S485_DARPAN_ORDER_TAB (D677):** `[darpan.order_review]` added — Darpan confirms the system's order list on the second tab of his own page. `DUTY_MAP.json` is v7.
 
+**06-Oct-2026 · kit S488_DATES_AND_WAITS:** `[manoj.salt_list]` and `[manoj.item_lists]` added — the owner's own Marg lists are his duties, silent until a list is late; their limits are setting rows. No staff list changes. `DUTY_MAP.json` is v8.
+
 **How to read a row.**
 *Due when* = the table and the condition that say the work is waiting. *Door* = the tile on that person's own portal home, and
 the page it opens, where the waiting work is shown. *Owner's line* = what reaches the owner if it is missed:
@@ -187,6 +189,8 @@ Home: every doctor tile. His own recurring duties, so the map is whole:
 | Confirm money given to Bhati / OK his loan `[manoj.petty_confirm]` | `petty_entry` receive / loan_out not confirmed | Petty book → /finance/petty | JSON |
 | Finalise last month's purchases `[manoj.purchase_month_final]` | `purchase_month` of last month not 'final' | Marg Purchases → /finance/purchase/page/hub | JSON |
 | Settle a scan amount reception could not `[manoj.scan_amount]` | `purchase_scan_state.amount_state='owner'` | Purchase orders | Needs-you, porders (S440) |
+| Export Marg's SALT WISE ITEM LIST, weekly `[manoj.salt_list]` (S488) | the newest VERIFIED `mi_file` of type SALT_WISE_ITEM_LIST (as-on = date_from, else the day it arrived) older than `owner.salt_list_days` (8) | **no door** — the work is done in Marg; no page of ours does it (the hub's Marg card names it inside its sentence) | JSON: "Your salt list from Marg is overdue -- due since dd-mm" |
+| Export Marg's CATEGORY WISE ITEM LIST and the item list, monthly `[manoj.item_lists]` (S488) | each of CATEGORY_WISE_ITEM_LIST and ITEM_MASTER whose newest VERIFIED `mi_file` is older than `owner.item_lists_days` (35), or never came | **no door** — as above | JSON: "Your monthly Marg lists are overdue: N of 2 (category list / item list) -- due since dd-mm" |
 | Approve the medicine buying rules | porders `_rules_ok` | Purchase orders | Needs-you, porders: "Buying rules for medicines await your approval" |
 | Record the NEFT once the bank SMS comes | `purchase_neft_event` for the finalised month (August: provisional, no bank line yet) | Vendor payments | Needs-you, bank_sms / supplier_msg |
 | Send the month-end pack | `pack_send` for the month | Month-end packs → /finance/packs | Needs-you, packs (empty shelf cells after the 10th) |
@@ -228,6 +232,7 @@ findings 1, 2, 3, 4 and 9 (each marked below); 5 is the phone's own step (below)
    "Pending — baaki … Bhejo" is only on the NEFT month's sheet (/pay/2026-08). The owner's line exists (supplier_msg). *Sanjeevni*
    (purchase_app — READ ONLY in S444): the tile should land on the month whose messages wait. **→ door added S446: "Pichhle mahine
    ka baaki: N" above the current month, one tap to that month.**
+10. **The owner — his own Marg lists** (`[manoj.salt_list]`, `[manoj.item_lists]`, S488). The map's first duties with no door: the export is done in Marg, and no page of ours does it. He is told by the duty-map check (amir_day's orphan-duty lines on Needs-you) and by his console; the hub's Marg card also names a late list inside its sentence. The staff-eye walk exempts exactly these two ids from the door check.
 
 **Doors that exist but the work is not being done** (measured 01-Oct 21:50 IST; the JSON check raises each of these the day its
 duty is marked `"raise": true` in DUTY_MAP.json — not done in S444, the owner's call):

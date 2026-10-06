@@ -1,0 +1,6 @@
+kit id S488_DATES_AND_WAITS
+project Sanjeevni (brief of session 296, 06-Oct-2026; F-753, F-754; no D-number) -- dates compared as dates; a waiting card says since when and
+for what; the owner's own Marg lists become his duties (DUTY_MAP v8); a learnt item name can be struck; a refused text with a person's detail
+stays off Drive (the medical PC's marg_watch.py: packed here, NOT placed)
+the server part is installed by install_S488_DATES_AND_WAITS.sh (holding the build lock); the medical PC part by deliver_S488.ps1, only when the
+chat has read marg_watch.py S488 and gives the owner the one PowerShell line

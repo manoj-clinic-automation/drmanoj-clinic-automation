@@ -1,0 +1,15 @@
+f27423b61e50857875bb8f7ba4e5c57c  DUTY_MAP.json
+d17e18b1ca8ac458313c309004645cc3  KIT_ID.txt
+59b31641eced4e6ee0ba0ce0ca70a8e6  KIT_MANIFEST.txt
+afeeddf914c92c9deecaabf98b34026f  PINS.sh
+66170d15b99cdb464295b429b6e3d20a  README.md
+781a072a1ef1e228f0545ca32f8489da  control_s488e.py
+485b4f5d8fe61f9c205854f485833cdb  deliver_S488.ps1
+0c29d161e7b0303592cfbe9a09601183  fdiff_s488e.py
+39eac3570646a7831fe89154772d4d9c  install_S488_DATES_AND_WAITS.sh
+7b347d52712e1c0b5f204a490a70814e  make_manifest_s488.py
+f3e423bd16e38f579e793312c21c1c71  make_marg_watch_s488.py
+ab3d43a9edb617ce8b651eecc3c024d5  make_s488.py
+0a78ae15be60d8a0293b96ecfa38f35b  marg_watch.py
+c2814a17311c8609283e613183577688  rejudge_s488.py
+08281a8b7af427ffeb447378ad7d2b4c  walk_s488.py
