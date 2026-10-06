@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S294 close** (the parent), 06-Oct-2026 — the Sanjeevni sections exactly as its S295 close wrote them
+# OWNER TO-DO — LIVE · refreshed at the **S297 close** (the parent), 06-Oct-2026, the evening — the Sanjeevni sections exactly as its S295 close wrote them (its session 296 is open)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S294 close** (the parent), 06-Oct-2026 — the Sanjeevni sections exactly as its S295 close wrote them
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S295 close** (the Sanjeevni project), 05-Oct-2026 — the parent sections exactly as its S293 close wrote them (its S294 is open), the Sanjeevni sections refreshed here
 
@@ -22,65 +24,90 @@
 
 *Detail: `START_HERE_SESSION_297.md` · `S294_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S295 close's (05-Oct evening); `S295_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_296.md` the next chat's entry.*
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S294 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S297 close
 
-**1 · LOOK AT EACH PERSON'S LIST, THEN TURN THE LISTS ON.** The staff's *Aaj ka kaam* lists are live and switched off. Open your console, open *Today's work*, tap **List** beside each name; tell me any wording to change. When you are happy, **Turn on** is on the *Staff lists* line in the same section. Until then the staff see nothing new.
+*This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
 ```
-https://followup.dr-manoj.in/finance/console
+https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 ```
 
-**2 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries only this session's record; no server line follows it.
+**NOW**
+
+**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries only today's record; nothing changes on the server and no server line follows.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**3 · THE TWO YES BANK PASSWORDS STILL MISSING — on the packs page, *Statement passwords*, *Set*.** NK Pathology's current account and the Clinic's current account. September reads 13 of 15 without them. Typed once, kept on the server only, never shown again.
+**2 · LOOK AT EACH PERSON'S LIST, THEN TURN THE LISTS ON.** The staff's *Aaj ka kaam* lists are live and switched off. On your console open *Today's work* and tap **List** beside each name. Staff see nothing new until you tap **Turn on**. *(The mock-up of the changes you ruled on 06-Oct is paused at your word — say "resume the lists" when you want it.)*
+
+```
+https://followup.dr-manoj.in/finance/console
+```
+
+**3 · THE TWO YES BANK PASSWORDS STILL MISSING — on the packs page, *Statement passwords*, *Set*.** NK Pathology's current account and the Clinic's current account. September reads 13 of 15 without them.
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**4 · THE SEPTEMBER PACK — *Send to accountants*, when you are satisfied.** Nothing goes to them by itself (your ruling of 04-Oct).
+**LATER — none of these is urgent**
 
-**5 · ONE SMALL FOLDER TO DELETE, WHEN YOU ARE AT THE PC** (I cannot delete on your PC; it holds three empty files and one leftover, all harmless — the note inside says why). On manojz:
+**4 · RANJEET'S LOGIN** — on the Portal users page; he has none yet. His attendance page opens by itself once his login is his first name. The password is yours to set.
 
 ```
-D:\Downloads\_to_delete_S294
+https://followup.dr-manoj.in/portal/users
 ```
 
-**6 · WHEN YOU SETTLE IT — clinic expenses and MK expenses.** Until you tell me the split, nothing suggests a group for electrical, plumbing and similar papers; you can still sort each by hand.
+**5 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** Nothing goes to the accountants by itself.
+
+**6 · CLINIC EXPENSES AND MK EXPENSES — the split, when you settle it.**
 
 ```
 https://followup.dr-manoj.in/scanapp/papers
 ```
 
-**7 · THE RECEPTION PC — three small things, none urgent.** (a) The LAN cable: a different cable or wall socket. (b) On its Wi-Fi list, tick **Connect automatically** for `Airtel_Airtrl_mano_8080`. (c) Its Windows has had no security fixes since November 2025 — your decision (its level now shows on your health page).
+**7 · ONE WORD — the follow-up tracker on the server: yes or no.**
 
-**8 · ONE WORD, WHEN YOU LIKE — the follow-up tracker on the server (C·2): yes or no.**
+**8 · THE RECEPTION PC — two things.** Its Windows has had no security fixes since November 2025 — your decision. Its LAN cable: try another cable or wall socket.
 
-**9 · AT YOUR OWN PACE — the contacts workbook.**
+**9 · THE CONTACTS WORKBOOK — the yellow columns.**
 
 ```
 D:\Downloads\margsync\_config\contacts_S282\CONTACT_GROUPS_TO_UPDATE.xlsx
 ```
 
-**10 · WHEN CONVENIENT — the Docterz *Clinical Data Report*, 2022 → today**, saved in `D:\Downloads` (F-629).
+**10 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
 
-**11 · WHEN YOU HAVE ONE — the "other works" you want Tailscale for.**
+**11 · THE ARMS LICENCE — renewal is in December; to be submitted in November** (your correction). Nothing on the system reminds you; tick it on the board when it is submitted.
 
-*Ready for you now, no longer held: the **Medical PC** and **Dr Manoj's PC** buttons on *Clinic PCs & phones* — both setups were tested on a real Windows on 05-Oct.*
+**12 · WHEN YOU HAVE ONE — the "other works" you want Tailscale for.**
 
-*Closed by your word of 02-Oct and not on this list: the technician of 25-Sep, AnyDesk and UltraViewer, passwords, the Windows activation on the reception PC. Closed by your word of 04-Oct: the accountants get the pack only; no statement passes through the clinic mailbox; the 61 test scans stay.*
+**One ruling I need before Darpan's first skipped month:** today a skipped month is two presses and adds the flat skip amount — tell me in a line how you want a skip to work and I make it one button.
+
+*Closed by your word and not on this list: the technician of 25-Sep, AnyDesk and UltraViewer, passwords, the Windows activation on the reception PC (02-Oct) · the accountants get the pack only; no statement passes through the clinic mailbox; the 61 test scans stay (04-Oct) · a panel to waive late minutes or write off a negative carry — "nothing more required" (06-Oct).*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **After your word on the lists:** any wording you want changed; then, in the order we settled on 05-Oct — the morning step each person answers before their other tiles open (from their punch) · stand-ins when someone is away · the lock until the previous day's Docterz reports are exported · the attendance month-end sheet · later, approving from inside your console.
-2. **My own, no word needed:** small wording on your console (minutes late on a late first punch; Bhati's punch) · bringing the finance app's own test suite up to date · on or after 09-Oct, the old Drive folder on the reception PC.
-3. **On your word:** the expense split · the tracker on the server · the contacts · the mail flood (low) · the portal tiles (after the pharmacy move).
-4. **Held at your word:** the Callback Tracker on the server.
+1. **On your word "resume the lists":** the mock-up of one person's *Aaj ka kaam* list and your switch panel, on your six rulings of 06-Oct — shown to you before anything is built. Then, in the order we settled on 05-Oct: the morning step on punch · stand-ins · the Docterz-export lock · the attendance month-end sheet · later, approving from inside your console.
+2. **From your board, on my list:** a set-up section in your portal — the biometric machine, Hostinger, CyberPanel, SSH, the websites — with set-up notes and links (never a password on a page) · MyOperator's answer about the WhatsApp key, read and turned into exact steps for you.
+3. **My own, no word needed:** two small things on the salary sheets (a total row and commas on Sheet 4; one footnote on Sheet 3) and the slip's line about a negative salary · small wording on your console · the finance app's own test suite · on or after 09-Oct, the old Drive folder on the reception PC.
+4. **On your word:** the expense split · the tracker on the server · the contacts · the mail flood (low) · the portal tiles.
+5. **Held at your word:** the Callback Tracker on the server.
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S297 CLOSE — 06-Oct-2026 (the parent)
+
+- ~~**"The advances section … is lacking clarity for me and for staff both"**~~ — done (S489). Sheet 2 now has *this month's advances* and *instalment loans* as separate tables, one line per loan, and one closing line per person.
+- ~~**Darpan on the main salary sheet; his loan instalment private to him; a ledger page of the running loan from April 2026**~~ — done (S489). April's added amount came off, as you said.
+- ~~**Salary slips**~~ — printed only for staff with a running instalment loan, one format.
+- ~~**September**~~ — locked by you at 12:21 on the new pages, and printed.
+- ~~**The publish of the S294 record**~~ — landed 06:20 on 06-Oct.
+- ~~**One small folder to delete** · **"Connect automatically" on the reception PC**~~ — ticked by you on the board on 06-Oct.
+- ~~**"lot of struck off data still resides in the system board and my responses where I type something"**~~ — the board is rebuilt: only open lines, ticked lines leave, and your eight notes are answered on it.
+- ~~**"such minor permissions need not be taken every time"**~~ — the end of session now writes your board once and asks once.
+- **Corrected on the way, my side:** I told you a negative salary is adjusted next month — the system does not do that; it is by hand · the September pages I showed you and the pages you locked carried different totals because the late-charge settings had been changed in between (your change; I should have said what the preview was worked on) · seven of your notes on the board had waited since 24 September with no answer.
 
 ## ✅ DONE AT THE S294 CLOSE — 04 → 06-Oct-2026 (the parent)
 
