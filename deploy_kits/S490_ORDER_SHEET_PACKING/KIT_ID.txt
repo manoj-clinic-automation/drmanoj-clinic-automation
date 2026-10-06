@@ -1,0 +1,4 @@
+kit id S490_ORDER_SHEET_PACKING
+project Sanjeevni (the chat's own build, session 296, 06-Oct-2026; F-756) -- the pending-orders reader takes a packing of any shape
+the medical PC only: marg_txt.py S490 and its KIT_MANIFEST.txt line; delivered by deliver_S490.ps1 (the owner's one line on manojz)
+no server file, no marg_watch.py, no manojz file
