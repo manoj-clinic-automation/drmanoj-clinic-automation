@@ -1,0 +1,11 @@
+KIT      : S489_SALARY_LAYOUT
+SESSION  : 297 (parent -- Systems & Automation)
+DATE     : 2026-10-06
+TARGET   : VPS -- /root/staff_register/salary_policy.py (full file) · NEW /root/staff_register/loan_pages.json · ONE row appended to /root/staff_ledger/ledger.jsonl
+FROM     : salary_policy.py 92aecbe3 (v1.16, S240; = the 06-Oct-2026 01:35 bundle and live_pins_S294close)
+TO       : salary_policy.py -- the md5 in the installer's TO= line and in SUMS.md5 (v1.17-S489; predicted, read back on install)
+PINS     : /root/staff_ledger.py eacd7154 (S247) and /root/staff_register/staff_register.py 0a098cfa (S303) must be at these bytes -- neither is edited
+DATA     : the staff ledger gains ONE row (LOAN_CAPITALISE -1000 on loan b1eb7a8e419e, date 2026-04, tag restate=S489) through the module's own append, with a dated backup and a correction note; loan_pages.json is made by data_s489.py and holds no balance and no salary. No setting, hold-ledger row, locked month or cron line changes.
+BUILDS   : D681 -- Sheet 2's advances as two tables that never mix (this month's advances; instalment loans, one line per person per loan) with a closing line per person; a salary slip only for a person with a running instalment loan. D682 -- Darpan on the common sheets at salary less the long-term loan's standing instalment, everything attendance on the full salary; his private page is one loan-ledger table from April 2026; April 2026's flat Rs 1,000 comes off the loan.
+NUMBERS  : session 297, kit S489, D681, D682, F-755 (claimed on the System Board 06-Oct-2026 08:49 IST, board v298)
+FIGURES  : no person's salary, balance or instalment is written in this kit (F-31). The only rupee figure is the ledger's own flat Rs 1,000.

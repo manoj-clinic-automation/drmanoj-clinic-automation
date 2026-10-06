@@ -1,0 +1,13 @@
+b312bd949217799a21f971d37547a943  KIT_ID.txt
+8f31a8d54c274a1d1f0e70424112b99e  README.md
+a82e8165eb7171a8cf9f856f3f6bbefc  after_s489.py
+de73dbf194a3f0130bea861e66c213e0  blocks/blk_funcs.py
+c768e26ed6b177f2a5ca8c250f91bfb9  blocks/blk_selftest.py
+85cc76a9e9aa51b030adb7d0f20955a6  blocks/blk_sheet2.py
+8ffd4832f67c7f7137ef4197a4229b23  blocks/blk_slip.py
+3b0e36d5464e1870990c8eb0f6c07ea0  data_s489.py
+095a7c15b1138251b418bdf9be0fd255  install_S489_SALARY_LAYOUT.sh
+215d20e5b32209acdb4f2a3758ee9d06  make_s489.py
+f9b5c9bc71751c2ce21c09b62a6a0a79  restate_s489.py
+ac603874431a43bed278f7db45d2c0f9  salary_policy.py
+28559ababa39134cb8beb6a4d8f17086  walk_s489.py
