@@ -1,0 +1,4 @@
+kit id S491_MEDICAL_WATCHER_DELIVERY
+project Sanjeevni (the chat's own, session 296, 06-Oct-2026) -- the delivery of S488's marg_watch.py (part E) on the pins as they stand after S490
+the medical PC only: marg_watch.py 0a78ae15 (byte-identical to deploy_kits\S488_DATES_AND_WAITS\marg_watch.py) and KIT_MANIFEST.txt
+it replaces deliver_S488.ps1, whose pins are S480's and which must never be run
