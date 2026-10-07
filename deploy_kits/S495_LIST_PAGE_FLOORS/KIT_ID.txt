@@ -1,0 +1,2 @@
+KIT_ID = S495_LIST_PAGE_FLOORS
+built 2026-10-07 IST, session 298 (parent). Adds aaj_floor.py; edits clinic_register.py, records.py, slip_log.py, petty_book.py by apply_s495.py. Inert until the lists are started.

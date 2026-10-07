@@ -1,0 +1,518 @@
+<!doctype html>
+<!-- aaj_panel.html · kit S493_LISTS_2 (07-Oct-2026) · THE OWNER'S PANEL for the staff's 'Aaj ka kaam' lists (English, owner only).
+     PARENT (clinic). The mock-up he edited on 07-Oct-2026, made real: a switch for each person and each line, his wording,
+     his order; the tasks he gives and their answers; September, for him only. Everything is read from and saved through
+     /finance/aaj/api/switch (owner only). Drawn with textContent only. A line's WORKING (what decides it is due, the page it
+     opens) is not on this page and cannot be sent from it: the server takes that from aaj_seed.py. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Staff daily lists</title>
+<style>
+/* Layout: a switch panel on the left, the chosen person's lines in the middle, their phone screen on the right; one column on a phone. */
+:root{
+  --bg:#e8edf0; --card:#ffffff; --ink:#14181c; --muted:#566370; --line:#c8d2d9;
+  --navy:#14456e; --navy-soft:#dce8f2; --on:#1c7a4c; --on-soft:#dff2e7; --warn:#8a5a00; --warn-soft:#fbf0d6; --bad:#a3271f; --bad-soft:#f8dedb;
+  --font:"Segoe UI",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root{
+  --bg:#0f151a; --card:#18212a; --ink:#e7edf2; --muted:#98a6b3; --line:#2b3945;
+  --navy:#86bdea; --navy-soft:#1b2c3b; --on:#4fc48c; --on-soft:#16301f; --warn:#e2b25a; --warn-soft:#33290f; --bad:#f08a80; --bad-soft:#3a1c19; color-scheme:dark } }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--font);margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+h1{font-size:24px;margin:0;color:var(--navy)}
+h2{font-size:18px;margin:0;color:var(--navy)}
+h3{font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:18px 0 6px}
+a{color:var(--navy)}
+.sub{color:var(--muted);margin:4px 0 0}
+.top{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:baseline;justify-content:space-between}
+#status{font-size:14px;color:var(--muted);min-height:21px}
+#status.bad{color:var(--bad);font-weight:700}
+.master{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;border-radius:10px;padding:12px 14px;margin:14px 0 0;background:var(--warn-soft);color:var(--warn);font-weight:700}
+.master.on{background:var(--on-soft);color:var(--on)}
+.master span{flex:1;min-width:220px}
+.alert{border-radius:10px;padding:10px 14px;margin:12px 0 0;background:var(--bad-soft);color:var(--bad);font-size:15px}
+.rules{background:var(--navy-soft);border-radius:10px;padding:10px 14px;margin:12px 0 0;display:flex;flex-wrap:wrap;gap:4px 22px;font-size:15px}
+.rules b{color:var(--navy)}
+.tabs{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}
+.tab{font:inherit;font-weight:700;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 16px;cursor:pointer;min-height:42px}
+.tab[aria-selected="true"]{background:var(--navy);color:var(--card);border-color:var(--navy)}
+.tab .n{font-weight:400;opacity:.85}
+.grid{display:grid;grid-template-columns:250px minmax(0,1fr) 330px;gap:16px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.panel h2,.phonecol h2{margin-bottom:8px}
+.hint{font-size:13.5px;color:var(--muted);margin:6px 0 0}
+.person{display:flex;align-items:center;gap:10px;padding:8px;border-radius:9px;border:1px solid transparent;cursor:pointer;width:100%;background:none;color:inherit;font:inherit;text-align:left}
+.person:hover{background:var(--navy-soft)}
+.person[aria-current="true"]{border-color:var(--navy);background:var(--navy-soft)}
+.person .nm{flex:1;min-width:0}
+.person .nm b{display:block}
+.person .nm span{font-size:13px;color:var(--muted)}
+.prow{display:flex;align-items:center;gap:6px}
+.step{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:10px 0 2px 8px}
+.sw{position:relative;flex:none;width:52px;height:30px;border-radius:15px;border:1px solid var(--muted);background:var(--line);cursor:pointer;padding:0;margin:5px 0}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.25);transition:left .12s}
+.sw[aria-checked="true"]{background:var(--on);border-color:var(--on)}
+.sw[aria-checked="true"]::after{left:24px;background:#fff}
+.sw:focus-visible,.person:focus-visible,button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--navy);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){.sw::after{transition:none}}
+.head{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.head .who{font-size:14px;color:var(--muted)}
+.bigsw{display:flex;align-items:center;gap:10px;font-weight:700}
+.ln{border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;background:var(--card)}
+.ln.off{background:var(--bg)}
+.ln.off textarea{color:var(--muted)}
+.r1{display:flex;gap:10px;align-items:flex-start}
+.r1 textarea{flex:1;min-width:0}
+textarea,input[type=text],input[type=date],select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 9px;width:100%}
+textarea{resize:vertical;min-height:44px;line-height:1.4}
+.en{font-size:14px;color:var(--muted);margin:6px 0 0 62px}
+.r2{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0 62px;align-items:center}
+.r2 select{width:auto;max-width:100%;font-size:14.5px}
+.r2 .acts{display:flex;gap:8px;margin-left:auto}
+.tag{font-size:13px;border-radius:999px;padding:2px 10px;background:var(--bg);color:var(--muted);white-space:nowrap}
+.tag.due{background:var(--on-soft);color:var(--on);font-weight:700}
+.tag.err{background:var(--bad-soft);color:var(--bad);font-weight:700}
+.tag.new{background:var(--warn-soft);color:var(--warn);font-weight:700}
+.why{font-size:13.5px;background:var(--warn-soft);color:var(--warn);border-radius:7px;padding:5px 9px;margin:8px 0 0 62px}
+.tag.held{background:var(--warn-soft);color:var(--warn);font-weight:700}
+.btn{font:inherit;font-size:14.5px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer;min-height:40px;text-decoration:none;display:inline-flex;align-items:center}
+.btn:hover{border-color:var(--navy)}
+.btn.pri{background:var(--navy);color:var(--card);border-color:var(--navy);font-weight:700}
+.btn.go{background:var(--on);color:#fff;border-color:var(--on);font-weight:700;min-height:44px;padding:8px 18px;font-size:16px}
+.btn.stop{background:var(--card);color:var(--bad);border-color:var(--bad);font-weight:700;min-height:44px;padding:8px 18px}
+.btn.x{color:var(--bad)}
+.btn:disabled{opacity:.5;cursor:default}
+.more{margin:8px 0 0 62px;display:grid;gap:8px}
+.more label{font-size:13.5px;color:var(--muted);display:grid;gap:3px}
+.more .fact{font-size:14px;color:var(--muted)}
+.moves{display:flex;gap:8px;flex-wrap:wrap}
+.foot{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;align-items:center}
+.removed{margin-top:14px;font-size:14.5px}
+.removed li{margin:6px 0}
+.note{margin-top:16px}
+.note label{font-weight:700;display:block;margin-bottom:4px}
+/* phone: drawn as the staff phone looks, in its own fixed light colours */
+.phone{background:#dfe5e9;color:#14181c;border-radius:22px;border:8px solid #2a3440;padding:14px 12px 18px;font-family:"Segoe UI",system-ui,sans-serif}
+.phone h4{margin:0;color:#14456e;font-size:20px}
+.phone .day{color:#4a5560;font-size:13.5px;margin:0 0 10px}
+.phone .grp{font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;color:#4a5560;margin:14px 2px 6px}
+.phone .row{background:#fff;border-radius:11px;padding:10px 11px;margin-top:6px;display:flex;gap:10px;align-items:center;justify-content:space-between;color:#14181c}
+.phone .row .t{min-width:0;font-size:15px;line-height:1.35;overflow-wrap:break-word}
+.phone .row .go{flex:none;font-size:13px;font-weight:700;border-radius:8px;padding:6px 9px;background:#14456e;color:#fff;white-space:nowrap}
+.phone .row .go.tick{background:#1c7a4c}
+.phone .off{background:#fff;border-radius:11px;padding:14px;color:#4a5560;font-size:15px}
+.phone .floor{font-size:12.5px;color:#4a5560;margin:14px 2px 0}
+.phonecol .hint{margin-bottom:10px}
+.phone .row .how{display:block;font-size:13px;color:#4a5560;margin-top:3px}
+.phone .row .gos{flex:none;display:flex;flex-direction:column;gap:5px;align-items:stretch;text-align:center}
+.phone .row .go.soft{background:#fff;color:#14456e;border:1px solid #8a9aa6}
+.empty{padding:26px 10px;text-align:center;color:var(--muted)}
+/* tasks */
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px;align-items:start}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:0 12px;min-height:40px;background:var(--card);font-size:15px;cursor:pointer}
+.chip input{width:18px;height:18px}
+.chip.offp{opacity:.55}
+.task{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px}
+.task .tt{font-weight:700;overflow-wrap:break-word}
+.task .from{font-size:13.5px;color:var(--muted)}
+.task .tn{font-size:14.5px;margin-top:6px;padding:6px 9px;border-radius:8px;background:var(--bg);overflow-wrap:break-word}
+.task .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.st{font-size:13px;font-weight:700;border-radius:999px;padding:2px 10px;margin-left:6px;white-space:nowrap}
+.st.open{background:var(--warn-soft);color:var(--warn)}
+.st.done{background:var(--on-soft);color:var(--on)}
+.st.cant{background:var(--bad-soft);color:var(--bad)}
+.st.closed{background:var(--bg);color:var(--muted)}
+.say{display:grid;gap:8px;margin-top:8px}
+.sept{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding:12px 0}
+.sept:first-of-type{border-top:0}
+.sept .t{flex:1;min-width:220px}
+[hidden]{display:none!important}
+@media (max-width:980px){
+  .grid,.two{grid-template-columns:minmax(0,1fr)}
+  .phonecol{order:3}
+  .r2 .acts{margin-left:0}
+  .en,.r2,.why,.more{margin-left:0}
+}
+</style></head><body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Staff daily lists</h1>
+      <p class="sub"><a href="/finance/console">&larr; Your console</a> · This is the real panel. What you change here is what the staff see.</p>
+    </div>
+    <div id="status" role="status" aria-live="polite">Loading the lists…</div>
+  </div>
+
+  <div class="master" id="master" hidden><span id="mtext"></span><button class="btn go" id="mbtn" type="button"></button></div>
+  <div class="alert" id="alert" hidden></div>
+  <div class="rules">
+    <span><b id="rfloor">Starts 1 October.</b> Nothing older shows on a list.</span>
+    <span><b>One line, one job.</b> No counts, no “late”.</span>
+    <span><b>A switch for each person and each line.</b></span>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-lists" aria-selected="true" type="button">Lists</button>
+    <button class="tab" role="tab" id="tab-tasks" aria-selected="false" type="button">Tasks <span class="n" id="tn"></span></button>
+    <button class="tab" role="tab" id="tab-sept" aria-selected="false" type="button">September, for you <span class="n" id="sn"></span></button>
+  </div>
+
+  <div id="v-lists">
+    <div class="grid" id="grid" hidden>
+      <section class="card panel" aria-label="Your switch panel">
+        <h2>Your switch panel</h2>
+        <div id="people"></div>
+        <p class="hint">A person sees their list only when their own switch is on and the lists are started.</p>
+      </section>
+
+      <section class="card" aria-label="Edit the lines">
+        <div class="head">
+          <div><h2 id="pname"></h2><div class="who" id="pwho"></div></div>
+          <div class="bigsw"><span id="pswlabel"></span><button class="sw" id="psw" role="switch" aria-checked="false" type="button"></button></div>
+        </div>
+        <div id="lines"></div>
+        <div class="foot">
+          <button class="btn pri" id="add" type="button">Add a line</button>
+          <span class="hint" style="margin:0">Type in any line to change its wording. Every change is saved by itself. A line you add is one the staff tap “Ho gaya” on.</span>
+        </div>
+        <div class="removed" id="removed"></div>
+        <div class="note">
+          <label for="pnote" id="pnotelabel">A note to yourself about this list</label>
+          <textarea id="pnote" rows="2"></textarea>
+        </div>
+      </section>
+
+      <section class="phonecol" aria-label="What the staff member sees">
+        <div class="card">
+          <h2 id="phtitle">On the phone</h2>
+          <p class="hint">Drawn as on a day when every job is due. On a normal day only the jobs that are due appear. <a id="real" href="#" target="_blank" rel="noopener">See today’s real list&nbsp;›</a></p>
+          <div class="phone" id="phone"></div>
+        </div>
+      </section>
+    </div>
+    <div class="card empty" id="empty" hidden></div>
+  </div>
+
+  <div id="v-tasks" hidden>
+    <div class="two">
+      <section class="card" aria-label="Give a task">
+        <h2>Give a task</h2>
+        <p class="hint">Type it, speak it with the microphone on your keyboard, or paste a to-do list from Voicenotes. <b>One line is one task.</b></p>
+        <textarea id="ttext" rows="5" aria-label="The task, or several, one per line" placeholder="For example: Waiting room ka AC service karwaiye"></textarea>
+        <div class="hint" id="tcount"></div>
+        <div class="chips" id="tchips"></div>
+        <label class="hint" for="tdue">By when (optional)</label>
+        <input type="date" id="tdue">
+        <div class="foot"><button class="btn pri" id="tgive" type="button">Give</button><span class="hint" id="tmsg" style="margin:0"></span></div>
+        <h3>Who else may give tasks</h3>
+        <p class="hint">Logins, separated by commas. They get a “Kaam dijiye” box on their own page.</p>
+        <input type="text" id="tass" aria-label="Logins that may give tasks" placeholder="for example: bhawna">
+        <div class="foot"><button class="btn" id="tasssave" type="button">Save these names</button></div>
+      </section>
+      <section class="card" aria-label="Tasks given">
+        <h2>Tasks given</h2>
+        <div id="tlist"></div>
+      </section>
+    </div>
+  </div>
+
+  <div id="v-sept" hidden>
+    <section class="card" aria-label="September, for you">
+      <h2>September, for you only</h2>
+      <p class="hint">September is off every staff list. These five stay with you; each is read from the books just now.</p>
+      <div id="sept"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var WHEN=[], P={}, order=[], sel=null, openMore={}, timers={}, busy={}, again={}, D=null, armed=0, armedAt=0, readOnly=false, dirty={};
+  var CLEARS={job:"Goes by itself when the work is done", tick:"Staff tap Ho gaya", fetch:"Shows when their own register has something waiting"};
+  var $=function(id){return document.getElementById(id)};
+  function el(tag,cls,text){var e=document.createElement(tag); if(cls)e.className=cls; if(text!=null)e.textContent=text; return e}
+  function status(t,bad){var s=$("status"); s.textContent=t; s.className=bad?"bad":""}
+  function hhmm(){var d=new Date(); return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
+  function remember(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function recall(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  function stamp(s){ s=String(s||""); if(s.length<16)return s; return s.slice(8,10)+"‑"+(MON[Number(s.slice(5,7))-1]||"")+" "+s.slice(11,16) }
+  function dayw(s){ s=String(s||""); if(s.length<10)return s; return s.slice(8,10)+"‑"+(MON[Number(s.slice(5,7))-1]||"") }
+
+  function call(method, body, panel, keep){
+    var o={method:method,credentials:"same-origin",cache:"no-store",headers:{}};
+    if(body){ o.headers["Content-Type"]="application/json"; o.body=JSON.stringify(body) }
+    if(keep) o.keepalive=true;
+    return fetch("/finance/aaj/api/switch"+(panel?"?panel=1":""),o).then(function(x){
+      if((x.headers.get("Content-Type")||"").indexOf("json")<0) throw new Error((x.redirected||x.status===401)?"login":"server");
+      return x.json().then(function(j){ if(!j.ok){ var e=new Error(j.error||"refused"); e.refused=true; e.body=j; throw e } return j });
+    });
+  }
+  function sayErr(e){ status(e&&e.message==="login"?"You are signed out. Open the Clinic app, sign in, and come back.":(e&&e.message==="owner_only"?"This page is the owner’s only.":"Not saved. Check the internet and change it once more."),true) }
+
+  /* ---------- saving: one write at a time per person, a short pause after typing ---------- */
+  function docOf(p){ function L(l){return {id:l.id,hi:l.hi,en:l.en,when:l.when,on:!!l.on}}
+    return {on:!!p.on, note:p.note||"", lines:p.lines.map(L), removed:(p.removed||[]).map(L)} }
+  function touch(id){
+    if(readOnly){ status("Not saved: the saved switches could not be read. Open the page again.",true); return }
+    dirty[id]=true; status("Saving…"); clearTimeout(timers[id]); timers[id]=setTimeout(function(){flush(id)},700) }
+  function flush(id, keep){
+    clearTimeout(timers[id]); timers[id]=null;
+    if(busy[id]){again[id]=true;return}
+    busy[id]=true; dirty[id]=false;
+    /* `base` = this person's last save as this screen knows it. If another screen has saved since, the server refuses
+       and this screen loads the newer one instead of writing over it. */
+    call("POST",{op:"person",key:id,base:P[id].edited_at||null,doc:docOf(P[id])},false,keep).then(function(j){ P[id].edited_at=j.edited_at||P[id].edited_at; status("Saved "+hhmm()) },
+      function(e){ dirty[id]=true;
+        if(e&&e.message==="stale"){ again[id]=false; dirty={}; status("This list was changed on another screen. Loading the newer one…",true); setTimeout(function(){ start(true) },900) }
+        else sayErr(e) })
+      .then(function(){ busy[id]=false; if(again[id]){again[id]=false; flush(id)} });
+  }
+  function idle(){ var k; for(k in timers){ if(timers[k])return false } for(k in busy){ if(busy[k])return false } for(k in dirty){ if(dirty[k])return false }
+    var a=document.activeElement; return !(a&&(a.tagName==="TEXTAREA"||a.tagName==="INPUT")) && !$("ttext").value.trim() }
+  /* leaving the page: what is still waiting to be saved goes now */
+  function flushAll(){ Object.keys(timers).forEach(function(k){ if(timers[k]) flush(k,true) }) }
+  window.addEventListener("pagehide",flushAll);
+  document.addEventListener("visibilitychange",function(){ if(document.hidden) flushAll(); else if(D&&idle()) start() });
+
+  /* ---------- the switch above them all ---------- */
+  function drawMaster(){
+    var m=$("master"), b=$("mbtn"), on=!!D.on, ready=order.filter(function(k){return P[k].on}).map(function(k){return P[k].name});
+    m.hidden=false; m.className="master"+(on?" on":"");
+    $("mtext").textContent=on?("The lists are ON since "+stamp(D.since)+". Each person below sees their list if their own switch is on.")
+      :("The lists are OFF. No staff member sees anything. Set to come on when you start: "+(ready.length?ready.join(", "):"nobody yet")+".");
+    b.className="btn "+(on?"stop":"go"); b.textContent=armed?(on?"Tap again to stop all":"Tap again to start"):(on?"Stop all lists":"Start the lists");
+  }
+  $("mbtn").onclick=function(){
+    if(!armed){ armed=1; armedAt=Date.now(); drawMaster(); setTimeout(function(){ armed=0; if(D)drawMaster() },6000); return }
+    if(Date.now()-armedAt<700) return;                      /* a double-click is one tap, not two */
+    armed=0; $("mbtn").disabled=true; status("Saving…");
+    call("POST",{on:!D.on}).then(function(j){ D.on=j.on; D.since=j.since; status(j.on?"The lists are started.":"The lists are stopped.") }, sayErr)
+      .then(function(){ $("mbtn").disabled=false; drawMaster() });
+  };
+
+  /* ---------- switch panel ---------- */
+  function onCount(p){return p.lines.filter(function(l){return l.on}).length}
+  function drawPeople(){
+    var box=$("people"); box.textContent=""; var lastStep=null;
+    order.forEach(function(id){
+      var p=P[id];
+      if(p.step_label!==lastStep){ box.appendChild(el("div","step",p.step_label)); lastStep=p.step_label }
+      var row=el("div","prow");
+      var b=el("button","person"); b.type="button"; b.setAttribute("aria-current",id===sel?"true":"false");
+      var nm=el("span","nm"); nm.appendChild(el("b",null,p.name));
+      nm.appendChild(el("span",null,onCount(p)+" of "+p.lines.length+" lines on"));
+      b.appendChild(nm); b.onclick=function(){ sel=id; remember("aaj.sel",id); drawAll() };
+      row.appendChild(b);
+      var s=el("button","sw"); s.type="button"; s.setAttribute("role","switch"); s.setAttribute("aria-checked",p.on?"true":"false");
+      s.setAttribute("aria-label","List for "+p.name); s.onclick=function(){ p.on=!p.on; touch(id); drawAll() };
+      row.appendChild(s);
+      box.appendChild(row);
+    });
+  }
+
+  /* ---------- the lines ---------- */
+  function autosize(t){ t.style.height="auto"; t.style.height=(t.scrollHeight+2)+"px" }
+  function sel2(opts,val,label,onch){ var s=el("select"); s.setAttribute("aria-label",label);
+    opts.forEach(function(o){var op=el("option",null,o[1]); op.value=o[0]; if(o[0]===val)op.selected=true; s.appendChild(op)}); s.onchange=function(){onch(s.value)}; return s }
+  function drawLines(){
+    var p=P[sel], box=$("lines"); box.textContent="";
+    $("pname").textContent=p.name+"’s list";
+    $("pwho").textContent=(p.who?p.who+" · ":"")+p.step_label;
+    var big=$("psw"); $("pswlabel").textContent=p.on?"List is on":"List is off";
+    big.setAttribute("aria-checked",p.on?"true":"false"); big.setAttribute("aria-label","List for "+p.name);
+    big.onclick=function(){ p.on=!p.on; touch(sel); drawAll() };
+    $("pnotelabel").textContent="A note to yourself about "+p.name+"’s list";
+    var n=$("pnote"); n.value=p.note||""; n.oninput=function(){ p.note=n.value; touch(sel) };
+    if(!p.lines.length) box.appendChild(el("p","hint","No lines yet. Add the first one below."));
+    p.lines.forEach(function(l,i){
+      var c=el("div","ln"+(l.on?"":" off"));
+      var r1=el("div","r1");
+      var s=el("button","sw"); s.type="button"; s.setAttribute("role","switch"); s.setAttribute("aria-checked",l.on?"true":"false"); s.setAttribute("aria-label","Line on or off");
+      s.onclick=function(){ l.on=!l.on; touch(sel); drawAll() };
+      var t=el("textarea"); t.id="hi-"+l.id; t.rows=1; t.value=l.hi; t.maxLength=300; t.setAttribute("aria-label","The line as staff read it");
+      t.placeholder="Type the line as the staff should read it";
+      t.oninput=function(){ l.hi=t.value; autosize(t); drawPhone(); touch(sel) };
+      r1.appendChild(s); r1.appendChild(t); c.appendChild(r1);
+      if(l.en && !openMore[l.id]) c.appendChild(el("div","en",l.en));
+      var r2=el("div","r2");
+      r2.appendChild(sel2(WHEN.map(function(w){return [w.key,w.en]}),l.when,"When",function(v){ l.when=v; touch(sel); drawPhone() }));
+      if(l.err) r2.appendChild(el("span","tag err","Could not be read"));
+      else if(l.kind==="job"&&l.due) r2.appendChild(el("span","tag due","Due today"));
+      else if(l.kind==="job"&&l.held) r2.appendChild(el("span","tag held","Held back: its oldest work ("+l.held+") is from before "+(D.panel.floor_words||"the start")));
+      else if(l.kind==="job") r2.appendChild(el("span","tag","Nothing due today"));
+      else if(l.kind==="tick") r2.appendChild(el("span","tag","Staff tap it done"));
+      else if(l.kind==="fetch") r2.appendChild(el("span","tag","Shows when its own page has work"));
+      if(l.is_new) r2.appendChild(el("span","tag new","New"));
+      var m=el("button","btn",openMore[l.id]?"Less":"More"); m.type="button"; m.onclick=function(){ openMore[l.id]=!openMore[l.id]; drawLines() };
+      var x=el("button","btn x","Remove"); x.type="button"; x.onclick=function(){ p.lines.splice(i,1); p.removed=(p.removed||[]).concat([l]); touch(sel); drawAll() };
+      var acts=el("span","acts"); acts.appendChild(m); acts.appendChild(x); r2.appendChild(acts); c.appendChild(r2);
+      if(l.why && !l.on) c.appendChild(el("div","why",l.why));
+      if(l.err) c.appendChild(el("div","why","This line could not be read just now, so it is not shown to staff as done or due: "+l.err));
+      if(openMore[l.id]){
+        var mo=el("div","more");
+        var la=el("label",null,"What it means, in English (for you)"); var en=el("textarea"); en.rows=2; en.id="en-"+l.id; en.value=l.en||""; en.maxLength=300;
+        en.oninput=function(){ l.en=en.value; autosize(en); touch(sel) }; la.appendChild(en); mo.appendChild(la);
+        mo.appendChild(el("div","fact","How it clears: "+(CLEARS[l.kind]||"—")+" · "+(l.door?("Opens: "+(l.opens||"its own page")):"Opens nothing: the work is done outside this app")));
+        var mv=el("div","moves");
+        var up=el("button","btn","Move up"); up.type="button"; up.disabled=i===0; up.onclick=function(){ p.lines.splice(i,1); p.lines.splice(i-1,0,l); touch(sel); drawAll() };
+        var dn=el("button","btn","Move down"); dn.type="button"; dn.disabled=i===p.lines.length-1; dn.onclick=function(){ p.lines.splice(i,1); p.lines.splice(i+1,0,l); touch(sel); drawAll() };
+        mv.appendChild(up); mv.appendChild(dn); mo.appendChild(mv); c.appendChild(mo);
+      }
+      box.appendChild(c); autosize(t); var e2=document.getElementById("en-"+l.id); if(e2) autosize(e2);
+    });
+    var rm=$("removed"); rm.textContent="";
+    if(p.removed && p.removed.length){
+      var d=el("details"); d.appendChild(el("summary",null,"Removed lines ("+p.removed.length+")")); var ul=el("ul");
+      p.removed.forEach(function(l,i){ var li=el("li",null,(l.hi||"(empty line)")+"  "); var b=el("button","btn","Put back"); b.type="button";
+        b.onclick=function(){ p.removed.splice(i,1); l.on=false; p.lines.push(l); touch(sel); drawAll() }; li.appendChild(b); ul.appendChild(li) });
+      d.appendChild(ul); rm.appendChild(d);
+    }
+  }
+
+  /* ---------- the phone ---------- */
+  function drawPhone(){
+    var p=P[sel], ph=$("phone"); ph.textContent="";
+    $("phtitle").textContent="On "+p.name+"’s phone";
+    $("real").href="/finance/aaj?as="+encodeURIComponent(p.view_as||p.key);
+    ph.appendChild(el("h4",null,"Aaj ka kaam"));
+    ph.appendChild(el("p","day",p.name+(p.who?" ("+p.who+")":"")));
+    if(!p.on){ ph.appendChild(el("div","off","List is off. "+p.name+" sees no list until you switch it on.")) }
+    else if(!D.on){ ph.appendChild(el("div","off","The lists are not started yet. "+p.name+" will see this when you press Start.")) }
+    var any=false;
+    WHEN.forEach(function(w){
+      var rows=p.lines.filter(function(l){return l.on && (l.hi||"").trim() && l.when===w.key});
+      if(!rows.length) return; any=true;
+      ph.appendChild(el("div","grp",w.hi));
+      rows.forEach(function(l){ var r=el("div","row"), t=el("span","t",l.hi), g=el("span","gos");
+        if(l.how) t.appendChild(el("span","how",l.how));
+        r.appendChild(t);
+        if(l.kind==="tick"){ if(l.door) g.appendChild(el("span","go soft","Kholiye ›")); g.appendChild(el("span","go tick","Ho gaya ✓")) }
+        else if(l.door) g.appendChild(el("span","go","Kholiye ›"));
+        if(g.childNodes.length) r.appendChild(g);
+        ph.appendChild(r) });
+    });
+    if(!any) ph.appendChild(el("div","off","Koi line chalu nahin hai."));
+    ph.appendChild(el("p","floor",(D.panel.floor_words||"01-Oct")+" se pehle ka kuch nahin dikhta."));
+  }
+  function drawAll(){ drawMaster(); drawPeople(); drawLines(); drawPhone(); drawChips() }
+
+  $("add").onclick=function(){
+    var p=P[sel], id="own."+Date.now().toString(36);
+    p.lines.push({id:id,hi:"",en:"",when:"day",on:true,own:true,kind:"tick",opens:"",why:"",door:null,how:""});
+    touch(sel); drawAll(); var t=$("hi-"+id); if(t) t.focus();
+  };
+
+  /* ---------- tasks ---------- */
+  var picks={};
+  /* one line = one task. A list mark at the very start is taken off -- a dash, star or dot followed by a space, '1.' or
+     '1)' followed by a space, a tick-box -- and nothing else is touched: '10.30 baje' and '2.5 kg' stay as he wrote them. */
+  function parseTasks(v){ return String(v||"").split(/\r?\n/).map(function(s){
+      return s.replace(/^\s*(?:[-*•‣◦▪]\s+|\d{1,2}[.)]\s+)/,"").replace(/^\s*(?:\[[ xX]?\]|☐|☑|✅)\s*/,"").trim() }).filter(function(s){return s}) }
+  function drawChips(){
+    var box=$("tchips"); box.textContent="";
+    order.forEach(function(k){ var p=P[k];
+      var l=el("label","chip"+(p.on?"":" offp")), i=el("input"); i.type="checkbox"; i.disabled=!p.on; i.checked=!!picks[k]&&p.on; if(!p.on)picks[k]=false;
+      i.onchange=function(){ picks[k]=i.checked; countTasks() };
+      l.appendChild(i); l.appendChild(document.createTextNode(p.name+(p.on?"":" (list is off)"))); box.appendChild(l) });
+    countTasks();
+  }
+  function countTasks(){ var n=parseTasks($("ttext").value).length, to=order.filter(function(k){return picks[k]}).map(function(k){return P[k].name});
+    $("tcount").textContent=n?(n+(n===1?" task":" tasks")+(to.length?(" to "+to.join(", ")):" — choose who gets "+(n===1?"it":"them"))):"" }
+  $("ttext").oninput=countTasks;
+  $("tgive").onclick=function(){
+    var items=parseTasks($("ttext").value), to=order.filter(function(k){return picks[k]});
+    if(!items.length){ $("tmsg").textContent="Type the task first."; return }
+    if(!to.length){ $("tmsg").textContent="Choose who gets it."; return }
+    $("tgive").disabled=true; $("tmsg").textContent="Sending…";
+    call("POST",{op:"task_add",to:to,items:items,due:$("tdue").value||""},true).then(function(j){
+      $("ttext").value=""; $("tdue").value=""; picks={}; D.panel.tasks=j.panel.tasks; $("tmsg").textContent="Given: "+j.made+(j.made===1?" task.":" tasks."); drawChips(); drawTasks();
+    },function(e){ $("tmsg").textContent=(e&&e.message==="no_person")?"That person’s list is off. Switch it on first.":"Not sent. Try once more." })
+    .then(function(){ $("tgive").disabled=false });
+  };
+  $("tasssave").onclick=function(){
+    var logins=$("tass").value.split(/[,\s]+/).map(function(s){return s.trim().toLowerCase()}).filter(function(s){return s});
+    call("POST",{op:"assigners",logins:logins},true).then(function(j){ D.panel.assigners=j.panel.assigners; $("tass").value=j.panel.assigners.join(", "); status("Saved "+hhmm()) }, sayErr);
+  };
+  var KIND={done:"Done",cant:"Could not",note:"",reply:"",reopen:"Sent back",close:"Closed"}, STATE={open:"Open",done:"Done — for you to close",cant:"Could not — for you to see",closed:"Closed"};
+  function taskAct(t, act, note, btn){
+    if(btn)btn.disabled=true;
+    call("POST",{op:"task",id:t.id,act:act,note:note||""},true).then(function(j){ D.panel.tasks=j.panel.tasks; drawTasks(); status("Saved "+hhmm()) },
+      function(e){ if(btn)btn.disabled=false; sayErr(e) });
+  }
+  function drawTasks(){
+    var box=$("tlist"), ts=D.panel.tasks||[], names={}; box.textContent=""; order.forEach(function(k){names[k]=P[k].name});
+    var openN=ts.filter(function(t){return t.state!=="closed"}).length; $("tn").textContent=openN?("· "+openN):"";
+    if(!ts.length){ box.appendChild(el("p","hint","No task has been given yet.")); return }
+    [["cant","Could not be done"],["done","Done — close them when you have seen them"],["open","Open"],["closed","Closed in the last 7 days"]].forEach(function(g){
+      var rows=ts.filter(function(t){return t.state===g[0]}); if(!rows.length)return;
+      box.appendChild(el("h3",null,g[1]));
+      rows.forEach(function(t){
+        var c=el("div","task"), tt=el("div","tt",t.text); tt.appendChild(el("span","st "+t.state,STATE[t.state]||t.state)); c.appendChild(tt);
+        c.appendChild(el("div","from","To "+(names[t.person]||t.person)+" · from "+t.by_name+" · given "+stamp(t.at)+(t.due?(" · due "+dayw(t.due)):"")));
+        (t.notes||[]).forEach(function(n){ var k=KIND[n.kind]||""; c.appendChild(el("div","tn",n.by_name+(k?(" — "+k):"")+(n.note?(": "+n.note):"")+"  ("+stamp(n.at)+")")) });
+        if(t.state!=="closed"){
+          var acts=el("div","acts"), say=el("div");
+          var b1=el("button","btn pri","Close"); b1.type="button"; b1.onclick=function(){ taskAct(t,"close","",b1) }; acts.appendChild(b1);
+          var ask=function(label,act){ var b=el("button","btn",label); b.type="button"; b.onclick=function(){
+              say.textContent=""; var bx=el("div","say"), ta=el("textarea"); ta.rows=2; ta.setAttribute("aria-label",label); var go=el("button","btn pri","Send"); go.type="button";
+              go.onclick=function(){ var v=ta.value.trim(); if(!v){ ta.focus(); return } taskAct(t,act,v,go) }; bx.appendChild(ta); bx.appendChild(go); say.appendChild(bx); ta.focus() };
+            acts.appendChild(b) };
+          if(t.state!=="open") ask("Send back","reopen");
+          ask("Reply","reply");
+          c.appendChild(acts); c.appendChild(say);
+        }
+        box.appendChild(c);
+      });
+    });
+  }
+
+  /* ---------- September ---------- */
+  function drawSept(){
+    var box=$("sept"), rows=D.panel.sept||[], openN=0; box.textContent="";
+    rows.forEach(function(s){
+      var r=el("div","sept"), t=el("div","t",s.text); r.appendChild(t);
+      if(s.err){ r.appendChild(el("span","tag err","Could not be read")) }
+      else if(s.n>0){ openN+=1; r.appendChild(el("span","st open","Open"+(s.n>1?(" · "+s.n):""))) }
+      else r.appendChild(el("span","st done","Done ✓"));
+      if(s.door){ var a=el("a","btn",(s.tile||"Open")+" ›"); a.href=s.door; a.target="_blank"; a.rel="noopener"; r.appendChild(a) }
+      box.appendChild(r);
+    });
+    $("sn").textContent=openN?("· "+openN+" open"):"· all done";
+  }
+
+  /* ---------- tabs ---------- */
+  function tab(name){ ["lists","tasks","sept"].forEach(function(k){ $("v-"+k).hidden=(k!==name); $("tab-"+k).setAttribute("aria-selected",k===name?"true":"false") }); remember("aaj.tab",name);
+    if(name!=="lists"&&D&&idle()) start() }                  /* answers and the books are read afresh when he looks at them */
+  $("tab-lists").onclick=function(){tab("lists")}; $("tab-tasks").onclick=function(){tab("tasks")}; $("tab-sept").onclick=function(){tab("sept")};
+
+  /* ---------- start ---------- */
+  function fail(msg){ $("grid").hidden=true; var e=$("empty"); e.hidden=false; e.textContent=msg; status("") }
+  function start(force){
+    var again2=!!D;
+    call("GET",null,true).then(function(j){
+      if(again2&&force!==true&&!idle()) return;             /* he began to write while this was on its way: his page is left as it is */
+      D=j; WHEN=j.panel.when; P={};
+      j.panel.people.forEach(function(p){ p.lines.forEach(function(l){ l.is_new=l["new"] }); P[p.key]=p });
+      order=Object.keys(P).sort(function(a,b){return (P[a].pos||0)-(P[b].pos||0)});
+      readOnly=!!j.panel.cfg_err;
+      var bad=[]; if(j.panel.seed_err)bad.push(j.panel.seed_err); if(j.panel.defs_err)bad.push("the duty files: "+j.panel.defs_err);
+      if(j.panel.cfg_err)bad.push("your saved switches ("+j.panel.cfg_err+") — every list is held OFF until they can be read, and nothing can be changed from this page meanwhile");
+      (j.panel.cfg_bad||[]).forEach(function(k){ bad.push("the saved panel of "+k+" is damaged — that list is held OFF") });
+      Object.keys(j.panel.floor_bad||{}).forEach(function(t){ bad.push("the floor on "+t+": "+j.panel.floor_bad[t]) });
+      $("alert").hidden=!bad.length;
+      if(bad.length){ $("alert").textContent="Something could not be read, and what depends on it is held back from staff: "+bad.join("; ")+". Tell Claude." }
+      $("rfloor").textContent="Starts "+(j.panel.floor_words||"01-Oct")+".";
+      $("tass").value=(j.panel.assigners||[]).join(", ");
+      if(!order.length) return fail("The lists could not be read on the server just now. Tell Claude.");
+      var r=recall("aaj.sel"); sel=(r&&P[r])?r:order[0];
+      $("grid").hidden=false; status("All changes are saved by themselves."); drawAll(); drawTasks(); drawSept();
+      var t=recall("aaj.tab"); if((t==="tasks"||t==="sept")&&$("v-"+t).hidden){ ["lists","tasks","sept"].forEach(function(k){ $("v-"+k).hidden=(k!==t); $("tab-"+k).setAttribute("aria-selected",k===t?"true":"false") }) }
+    }).catch(function(e){ if(again2){ sayErr(e); return } fail(e&&e.message==="login"?"You are signed out. Open the Clinic app, sign in, and come back.":(e&&e.message==="owner_only"?"This page is the owner’s only.":"The lists could not be loaded just now. Open the page again.")) });
+  }
+  start(true);
+})();
+</script>
+</body></html>
