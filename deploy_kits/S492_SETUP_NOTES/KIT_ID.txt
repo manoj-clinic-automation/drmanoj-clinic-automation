@@ -1,0 +1,2 @@
+kit id S492_SETUP_NOTES
+project parent (session 298, 07-Oct-2026) -- Other set-ups on the Clinic PCs & phones page: notes and links for the biometric attendance machine, and the list of set-ups still to be built (Hostinger, CyberPanel, SSH, the websites, Bitwarden). Never a password on the page.
