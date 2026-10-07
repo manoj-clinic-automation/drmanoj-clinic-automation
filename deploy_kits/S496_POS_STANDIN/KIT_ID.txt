@@ -1,0 +1,2 @@
+KIT_ID = S496_POS_STANDIN
+built 2026-10-07 IST, session 300 (parent). Adds bank_standin.py; replaces whole bank_mpr_status.py, clinic_money.py, darpan_kal.py, darpan_kal.html, finance_ui/finance_approvals.html (each gated on the md5 it replaces). The owner, 07-Oct 12:17: the POS machine's UPI total stands in for a bank statement that has not come -- on the screens staff already use, only after his confirmation.
