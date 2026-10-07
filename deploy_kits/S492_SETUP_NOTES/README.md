@@ -27,7 +27,7 @@ and the card says so. One thing is on the card as *Not written down yet*: what *
 **Guards.** Without `setup_notes.py`, or if a note raises, the page is byte for byte the page of today (walked). No new door, no
 form, nothing written, the same owner-only gate.
 
-**Walk** (`walk_s492.py`, hermetic, 80 checks): the edits give the predicted bytes; the old page whole and in order; the section's
+**Walk** (`walk_s492.py`, hermetic, 91 checks): the edits give the predicted bytes; the old page whole and in order; the section's
 words; the punch file fresh / five days old / unreadable; the codes from a made-up staff list (code and name only, escaped, no other
 column) and from an unreadable one; 403 and no notes for anyone but the owner; nothing secret-shaped; known
 links only; the HTML closes; both guards.
@@ -40,3 +40,8 @@ One line on the server, after the publish:
 ```
 cd /root/deploy/repo && git pull --ff-only && bash /root/deploy/repo/deploy_kits/S492_SETUP_NOTES/install_S492_SETUP_NOTES.sh
 ```
+
+**The first install, 07-Oct-2026 07:28 IST, went red at its own walk and placed nothing** — the check *five days old* failed on the
+box and passed everywhere it had been built. Cause: the age of the punch file was worked out with `datetime.utcnow().timestamp()`,
+which reads the UTC clock as local time; right on a machine set to UTC, five and a half hours short on a box set to India time.
+Now `time.time()`, and the walk asks the age in four time zones. Reproduced before the fix (`TZ=Asia/Kolkata`: the same one red).

@@ -9,7 +9,9 @@ Nothing on the box is written and no real file is read except pc_kits.py and thi
   2. the page, as the owner: everything that was on it is still on it, in the same order; then 'Other set-ups' with the
      biometric card (seven folded blocks -- the menu, the reset steps numbered -- and the not-written-down list) and the five
      'To be built' lines.
-  3. the punch file: fresh -> 'Punches arriving' with its day; five days old -> 'Needs a look'; unreadable -> 'No record'.
+  3. the punch file: fresh -> 'Punches arriving' with its day; five days old -> 'Needs a look'; unreadable -> 'No record'
+     -- and its age asked in four time zones (the box's own, India, UTC, Los Angeles), because the first install went red
+     on exactly that: right in UTC, five and a half hours short on the box.
      The codes: a made-up staff list shows code and name only, in code order, a name escaped, no other column; an
      unreadable list says so in words.
   4. not the owner -> 403 and not one word of the notes.
@@ -165,10 +167,33 @@ def main():
         # 3 the punch file
         day = time.strftime("%d-%b", time.gmtime(os.path.getmtime(punch) + 19800))
         check("3 fresh: 'Punches arriving' with its day", "<span class='st ok'>Punches arriving</span>" in sec and ("The last punch reached the server on %s " % day) in sec)
-        t5 = time.time() - 5 * 86400 - 600
-        os.utime(punch, (t5, t5))
-        s5 = c_new.get("/finance/pcs").get_data(as_text=True)
-        check("3 five days old: 'Needs a look', says since when", "<span class='st warn'>Needs a look</span>" in s5 and "No punch has reached the server since" in s5 and "(5 days)" in s5)
+        # the age of the punch file must not depend on the box's time zone (the first install, 07-Oct-2026: right in UTC,
+        # five and a half hours short in India time) -- so it is asked in three zones, the box's own first
+        zone0 = os.environ.get("TZ")
+        for zone in (None, "Asia/Kolkata", "UTC", "America/Los_Angeles"):
+            if zone is not None:
+                os.environ["TZ"] = zone
+                time.tzset()
+            t1 = time.time() - 600
+            os.utime(punch, (t1, t1))
+            s1 = c_new.get("/finance/pcs").get_data(as_text=True)
+            when = time.strftime("%d-%b %H:%M", time.gmtime(t1 + 19800))
+            check("3 ten minutes old (%s): 'Punches arriving', the time in India time" % (zone or "the box's zone"),
+                  "<span class='st ok'>Punches arriving</span>" in s1 and ("The last punch reached the server on %s." % when) in s1, when)
+            t5 = time.time() - 5 * 86400 - 600
+            os.utime(punch, (t5, t5))
+            s5 = c_new.get("/finance/pcs").get_data(as_text=True)
+            check("3 five days old (%s): 'Needs a look', says since when" % (zone or "the box's zone"),
+                  "<span class='st warn'>Needs a look</span>" in s5 and "No punch has reached the server since" in s5 and "(5 days)" in s5)
+            t3 = time.time() - 74 * 3600 + 900
+            os.utime(punch, (t3, t3))
+            s3 = c_new.get("/finance/pcs").get_data(as_text=True)
+            check("3 a quarter-hour inside the 74 hours (%s): still 'Punches arriving'" % (zone or "the box's zone"), "<span class='st ok'>Punches arriving</span>" in s3)
+        if zone0 is None:
+            os.environ.pop("TZ", None)
+        else:
+            os.environ["TZ"] = zone0
+        time.tzset()
         os.remove(punch)
         s0 = c_new.get("/finance/pcs").get_data(as_text=True)
         check("3 unreadable: 'No record', in words", "<span class='st info'>No record</span>" in s0 and "could not read its punch file" in s0)

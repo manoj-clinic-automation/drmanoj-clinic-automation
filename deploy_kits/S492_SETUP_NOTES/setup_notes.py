@@ -48,6 +48,7 @@ import csv
 import datetime as dt
 import html
 import os
+import time
 
 PUNCH_CSV = os.environ.get("ATT_PUNCH_CSV", "/root/punches.csv")
 STAFF_MASTER = os.environ.get("ATT_STAFF_MASTER", "/root/staff_master.csv")
@@ -195,7 +196,9 @@ def last_punch(now_ts=None):
         ts = os.path.getmtime(PUNCH_CSV)
     except OSError:
         return "info", "No record", "This box could not read its punch file, so it cannot say when the last punch came."
-    now_ts = dt.datetime.utcnow().timestamp() if now_ts is None else now_ts
+    # time.time(), NOT datetime.utcnow().timestamp(): the second reads the naive UTC clock as LOCAL time, so on this box
+    # (India time) it was five and a half hours short -- the kit's own walk caught it at the first install, 07-Oct-2026.
+    now_ts = time.time() if now_ts is None else now_ts
     hours = max(0.0, (now_ts - ts) / 3600.0)
     when = _ist(ts).strftime("%d-%b %H:%M")
     if hours <= PUNCH_STALE_HOURS:
