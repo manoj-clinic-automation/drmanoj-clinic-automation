@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S298 close** (the parent), 07-Oct-2026, the early afternoon — the Sanjeevni sections exactly as its S296 close wrote them (its session 299 is open)
+# OWNER TO-DO — LIVE · refreshed at the **S299 close** (the Sanjeevni project), 07-Oct-2026, the afternoon — the parent sections exactly as its S298 close wrote them (its session 300 is open), the Sanjeevni sections refreshed here
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S298 close** (the parent), 07-Oct-2026, the early afternoon — the Sanjeevni sections exactly as its S296 close wrote them (its session 299 is open)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S296 close** (the Sanjeevni project), 07-Oct-2026, the morning — the parent sections exactly as its S297 close wrote them (its S298 is open), the Sanjeevni sections refreshed here
 
@@ -26,7 +28,7 @@
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
-*Detail: `START_HERE_SESSION_300.md` · `S298_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S296 close's (07-Oct morning); `S296_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_299.md` that chat's entry.*
+*Detail: `START_HERE_SESSION_300.md` · `S298_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S299 close's (07-Oct afternoon); `S299_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_301.md` that chat's entry.*
 
 ## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S298 close
 
@@ -225,6 +227,56 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S299 close (07-Oct, afternoon)
+
+*Detail: `S299_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_301.md`. The same lines are on your System Board.*
+
+**1 · The publish** — this close's record. The same double-click as the parent's:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · Nothing else is urgent.** Ordering stays on Darpan's Marg sheet; nothing changes for staff until the buying model is final.
+
+**Still yours from before, not urgent (on your board):** bank details for **Agarwal Surgicals and Medicals** — its bill is scanned, so this one is ready to type (the other two suppliers now wait on Amir's page for a bill to scan):
+
+```
+https://followup.dr-manoj.in/finance/purchase/page/book
+```
+
+· the first cheque logged (Shavez can do it) · one photo of Marg's purchase-import screen.
+
+**Worth knowing — the staff's, on their own screens, not yours:** Amir's two orthotic corrections (ANKLE BINDER BAMBOO M, TYNOR WRIST SPLINT RT M ELAST), then his 22 renames · on his page under *Ek baar ke kaam*: a bill to scan for Rama Medicose and for Kushagra Medical Agency, and the ₹310 cash entry for Kedar in Marg.
+
+**Held at your word:** S438_COUNT_BOOK · **S486, the buying model — parked until it is analysed again on Fable after Saturday 10-Oct night** (your word of 05-Oct) · **Amir's *Aaj ka kaam* list — off, and nothing is added to it** (your word of 07-Oct).
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S299 close
+
+1. **First, three reads tomorrow:** the server's nightly copy against today's changed files; the "order sheet has arrived" message on a real sheet (F-767's repair, not yet seen working); Amir's one-time jobs as the system closed them.
+2. **Bills keyed later than their date** (F-787) — 15 of the 19 remaining "Marg has more stock" flags. Analysis first, a few lines to you, then one small build.
+3. **Amir's flow made calendar-safe** — the remaining half; one wrong wording on your view of his day with it (F-786).
+4. **The chain in place of the calendar on the remaining screens**, the stock warning on a day with no purchase (F-769), a purchase report printed for one supplier (F-737), and a refused month-long report shown under a day (F-788).
+5. **The next medical-PC build** — a mended reader shown what it refused (F-766), long exports captured whole, the text cutter's column rule.
+6. **Small, at your go:** an answered salt reaching Amir's sheet (F-726 — wording to you first); the new limits on your settings page; the wording of Darpan's line on your list now that a typed POS total is counted in it; two page floors the clinic chat asked for.
+7. **S486 — the buying model and the first-day fixes of Darpan's tab** — after the fresh analysis on Fable (Saturday night onward): a few lines to you on what changed, then its paste line. **K4 — the switch to the system's own list** only after it is live and the bar on your card (D673) is met three weeks running.
+8. **Then:** the remaining screens onto the single source of truth; count #2 by section; near-expiry and the returns desk's second phase; scanned bills into Marg without waiting for Amir (your aim — not designed yet); last, the old duplicate parts retired.
+9. **Still open from before:** the phone's blind *sent* (F-708); the PDF with phone numbers in `_scratch\` on your PC, to remove; Darpan's phone signed up for alerts.
+
+## ✅ DONE AT THE S299 CLOSE — 07-Oct-2026 (the Sanjeevni project)
+
+- ~~**The publish of the S296 close**~~ — yours, 07-Oct 06:12 (S296 ⭐0 item 1).
+- ~~**Three reads**~~ (S296 ⭐1 item 1): the first weekly order score — 30% of what was bought had been listed beforehand, 2 medicines ran out unlisted; Amir's count board; **why the "order sheet has arrived" message failed** — the part of the system that sent it cannot send messages.
+- ~~**Your three notes of 24-Sep**~~ (S296 ⭐1 item 2): **Kedar's old July balance** — typed by you on the vendor sheet, Paid ₹98,240 (₹97,930 NEFT + ₹310 cash adjustment), read back from the page · **the four appliances** — their category corrected in Marg by you; Marg's own list shows all four under ORTHOTICS · **the name-check sheet** — its remainder is the bill-scan lines on Amir's page.
+- ~~**The stock flags judged again when a late report lands**~~ (S296 ⭐1 item 4, F-765) — **S494, live 07-Oct 12:33** from your one paste line: 81 flags → 10 at the newest closing. With it: the arrival message sent by the part that can send it (F-767); the spot-count line once on your list (F-771); Amir's one-time jobs on his own page (D686).
+- ~~**The sale reports of 08-Sep and 09-Sep exported again**~~ — taken and verified on 07-Oct; the bill chain has no gap.
+- **The bank's missing statements:** your design (the POS total typed at the moment of posting, on the same screen, counted after you confirm) given to the clinic chat as one prompt and built there the same afternoon, pharmacy included.
+- **Amir's work stays here, on his own page** — his *Aaj ka kaam* list stays off and nothing is added to it (D690).
+
+---
+
+*(The S296-close Sanjeevni sections below are history — superseded by the S299 sections above.)*
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S296 close (07-Oct, morning)
 
