@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S296 close** (the Sanjeevni project), 07-Oct-2026, the morning — the parent sections exactly as its S297 close wrote them (its S298 is open), the Sanjeevni sections refreshed here
+# OWNER TO-DO — LIVE · refreshed at the **S298 close** (the parent), 07-Oct-2026, the early afternoon — the Sanjeevni sections exactly as its S296 close wrote them (its session 299 is open)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S296 close** (the Sanjeevni project), 07-Oct-2026, the morning — the parent sections exactly as its S297 close wrote them (its S298 is open), the Sanjeevni sections refreshed here
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S297 close** (the parent), 06-Oct-2026, the evening — the Sanjeevni sections exactly as its S295 close wrote them (its session 296 is open)
 
@@ -24,9 +26,9 @@
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
-*Detail: `START_HERE_SESSION_297.md` · `S294_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S295 close's (05-Oct evening); `S295_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_296.md` the next chat's entry.*
+*Detail: `START_HERE_SESSION_300.md` · `S298_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S296 close's (07-Oct morning); `S296_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_299.md` that chat's entry.*
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S297 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S298 close
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -42,10 +44,10 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · LOOK AT EACH PERSON'S LIST, THEN TURN THE LISTS ON.** The staff's *Aaj ka kaam* lists are live and switched off. On your console open *Today's work* and tap **List** beside each name. Staff see nothing new until you tap **Turn on**. *(The mock-up of the changes you ruled on 06-Oct is paused at your word — say "resume the lists" when you want it.)*
+**2 · TELL ME WHAT THE STAFF SAY after a day with their lists.** The lists are on since 11:27 am on 7 Oct — Bhati, Sukhveer, Shavez, Reception, Darpan; Amir's is off. Your panel, where every change saves itself:
 
 ```
-https://followup.dr-manoj.in/finance/console
+https://followup.dr-manoj.in/finance/aaj
 ```
 
 **3 · THE TWO YES BANK PASSWORDS STILL MISSING — on the packs page, *Statement passwords*, *Set*.** NK Pathology's current account and the Clinic's current account. September reads 13 of 15 without them.
@@ -56,7 +58,7 @@ https://followup.dr-manoj.in/finance/packs
 
 **LATER — none of these is urgent**
 
-**4 · RANJEET'S LOGIN** — on the Portal users page; he has none yet. His attendance page opens by itself once his login is his first name. The password is yours to set.
+**4 · RANJEET'S LOGIN** — on the Portal users page; he has none yet. The password is yours to set.
 
 ```
 https://followup.dr-manoj.in/portal/users
@@ -70,34 +72,41 @@ https://followup.dr-manoj.in/portal/users
 https://followup.dr-manoj.in/scanapp/papers
 ```
 
-**7 · ONE WORD — the follow-up tracker on the server: yes or no.**
+**7 · THE FOLLOW-UP TRACKER ON THE SERVER — you said "ask next week".** I ask once in the week of 12 October. Nothing moves until your yes.
 
-**8 · THE RECEPTION PC — two things.** Its Windows has had no security fixes since November 2025 — your decision. Its LAN cable: try another cable or wall socket.
+**8 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
 
-**9 · THE CONTACTS WORKBOOK — the yellow columns.**
+**9 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
 
-```
-D:\Downloads\margsync\_config\contacts_S282\CONTACT_GROUPS_TO_UPDATE.xlsx
-```
+**10 · THE ARMS LICENCE — expiry is in December; to be submitted in November.** The red on your health page is false and goes with the reminders job. Tick it on the board when it is submitted.
 
-**10 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
+**11 · WHEN YOU HAVE ONE — the "other works" you want Tailscale for.**
 
-**11 · THE ARMS LICENCE — renewal is in December; to be submitted in November** (your correction). Nothing on the system reminds you; tick it on the board when it is submitted.
+**One thing I will not touch without your word:** the punch machine's listener on the server does not check who is sending. I proposed closing it; say "close it" when you want that done.
 
-**12 · WHEN YOU HAVE ONE — the "other works" you want Tailscale for.**
-
-**One ruling I need before Darpan's first skipped month:** today a skipped month is two presses and adds the flat skip amount — tell me in a line how you want a skip to work and I make it one button.
+*Ticked by you on the board on 6 Oct and off this list: the contacts workbook (the file itself is unchanged since 25 Sep — say the word when you have sorted it) · the reception PC's LAN cable.*
 
 *Closed by your word and not on this list: the technician of 25-Sep, AnyDesk and UltraViewer, passwords, the Windows activation on the reception PC (02-Oct) · the accountants get the pack only; no statement passes through the clinic mailbox; the 61 test scans stay (04-Oct) · a panel to waive late minutes or write off a negative carry — "nothing more required" (06-Oct).*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **On your word "resume the lists":** the mock-up of one person's *Aaj ka kaam* list and your switch panel, on your six rulings of 06-Oct — shown to you before anything is built. Then, in the order we settled on 05-Oct: the morning step on punch · stand-ins · the Docterz-export lock · the attendance month-end sheet · later, approving from inside your console.
-2. **From your board, on my list:** a set-up section in your portal — the biometric machine, Hostinger, CyberPanel, SSH, the websites — with set-up notes and links (never a password on a page) · MyOperator's answer about the WhatsApp key, read and turned into exact steps for you.
-3. **My own, no word needed:** two small things on the salary sheets (a total row and commas on Sheet 4; one footnote on Sheet 3) and the slip's line about a negative salary · small wording on your console · the finance app's own test suite · on or after 09-Oct, the old Drive folder on the reception PC.
-4. **On your word:** the expense split · the tracker on the server · the contacts · the mail flood (low) · the portal tiles.
-5. **Held at your word:** the Callback Tracker on the server.
+1. **Next, in the order I offered you — say which first, or "go":** Voicenotes sending its to-do list into the task section by itself (one setting of yours in Voicenotes) · the renewal reminders at 45 days before the real expiry, red only after it · the scan app as its own project, then the papers page's four new sections (Resumes, Miscellaneous documents, Construction work, Personal) and the challan flow — a challan kept as *goods received, bill awaited*, joined to its bill, deletable when the bill is in.
+2. **In the background, as you said:** the reception login's missing tiles.
+3. **My own, no word needed:** your console following the panel and showing tasks, and its small wording · on or after 09-Oct, the old Drive folder on the reception PC · the finance app's own test suite · the other set-up cards (Hostinger, CyberPanel, SSH login, Websites, Bitwarden) · proving the 148 older documents.
+4. **Before October's salary, as you said:** a skipped loan month as one button that shows in his ledger everywhere · the two small things on the salary sheets and the slip's line about a negative salary.
+5. **On your word:** the tracker on the server · the MyOperator key steps · the contacts · the mail flood (low) · the portal tiles · the expense split · kits for Shavez's PC and the lab PC when you set them up · the later steps of the lists (the morning step on punch, stand-ins, the Docterz-export lock, the month-end attendance sheet, approving from inside your console).
+6. **Held at your word:** the Callback Tracker on the server.
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S298 CLOSE — 07-Oct-2026 (the parent)
+
+- ~~**"Build the lists"**~~ — done (S493, S495) and **started by you at 11:27 am on 7 Oct**: a switch for all, for each person and for each line; your wording and order; one line one job; no counts, no "late"; a task section; September on your panel only; nothing before 1 October on a staff list or on the four pages a line opens.
+- ~~**"build biometric and also list all, the proposed ones in the to be built section there"**~~ — done (S492): the machine's set-up, the steps after a reset or with a new machine, and the codes to enrol with, from your 23 photographs; five more set-ups listed as to be built.
+- ~~**Look at each person's list, then turn the lists on**~~ — you did both.
+- ~~**The publish of the S297 record**~~ — landed 7:13 pm on 6 Oct. ~~**Your three publishes of 7 Oct**~~ — all landed (7:26, 7:31 and 10:55 am).
+- ~~**Your three notes on the board**~~ (the tracker, the papers page's new sections, the skipped loan month) — answered on the board at this close.
+- ~~**How a skipped loan month should work**~~ — you answered: it should show in his ledger everywhere. I build it before October's salary.
+- **Corrected on the way, my side:** the first install of the set-up notes stopped itself with nothing placed — I had read a clock in the wrong time zone, and it cost you a second publish and paste · my first build of the lists had ten faults and its repair eight more; three fresh readers found them before anything was placed.
 
 ## ✅ DONE AT THE S297 CLOSE — 06-Oct-2026 (the parent)
 
