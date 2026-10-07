@@ -1,0 +1,5 @@
+kit id S494_AMIR_JOBS_NOTICE_FLAGS
+project Sanjeevni (brief of session 299, 07-Oct-2026; D686; F-765, F-767, F-771) -- Amir's one-time Marg jobs on his own Marg sudhar card; the
+order sheet's arrival notice sent by the tick (the process that can send it); a stock flag judged again when its reports arrive; one
+spot-count line on the owner's list; DUTY_MAP v9 (amir.marg_jobs) -- the map lives in claude_code_briefs/, no copy here (F-751)
+installed by install_S494_AMIR_JOBS_NOTICE_FLAGS.sh (it takes the build lock itself)
