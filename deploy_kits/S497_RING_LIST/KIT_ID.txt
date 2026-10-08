@@ -1,0 +1,3 @@
+kit id S497_RING_LIST
+built 2026-10-08 IST, session 302 (parent). D693: the after-call list -- the tile 'Call ke baad', ONE table in three parts (Nahi aaye, Aane baaki, Aa gaye from the Docterz export), one optional day on the card after 'Appointment book ho gaya'. Replaces whole /root/portal/ring_outcome.py and /root/portal/portal.py (each gated on the md5 it replaces); edits /root/portal/tile_grants.json v32 -> v33 by apply_s497.py. Installed OFF for staff. Mends F-797, closes F-798.
+second build, 08-Oct-2026: the two reviews' findings B1 B2 S1-S7 M1-M4 mended; each is a check of the walk that is red on the first build.

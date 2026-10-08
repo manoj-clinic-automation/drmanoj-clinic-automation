@@ -1,0 +1,4 @@
+kit id S499_MEDICAL_AGENT_BACKUP
+project Sanjeevni (08-Oct-2026) -- the medical PC only: D:\SendToClinic\medical_agent.py S205.1 70d5c4e3 -> S499.1, by a double-click at that PC (INSTALL_AGENT_S499.bat)
+Marg's own automatic backup goes to the stick (E:\MargAuto_by_agent); the backup lines of the heartbeat say what was measured; the prune alarm is judged by the prune's own rule; the hourly re-copy of three namesakes ends
+nothing on the server, nothing on manojz, no scheduled task, no start-up entry; built and walked off the PC -- Drive is written only by the delivery, which is a step of its own

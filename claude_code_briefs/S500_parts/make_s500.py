@@ -5,14 +5,15 @@ make_s500.py -- the builder of kit S500_REPORT_CHECK (08-Oct-2026, D694, F-799, 
 
     python3 -B make_s500.py --finance /root/finance --out DIR
 
-Reads THREE live files, refuses anything but their FROM pins, makes anchored edits (every anchor must occur
+Reads FOUR live files, refuses anything but their FROM pins, makes anchored edits (every anchor must occur
 exactly once, every replaced span must hash to its pin -- else NOTHING is written), compiles each result and
-refuses anything but its TO pin:
+refuses anything but its TO pin (all four build, or nothing is written):
 
     reports_tile.py   the morning pair judged right / wrong with tries; the guide and picture routes; a short
                       or not-whole closing is WRONG; F-788; the bill-gap card floored for a staff login
     stock_app.py      ONE guard in /api/snapshot: a SHORT closing is refused (409), never loaded; and the stock-voucher proof
                       reads the NEWEST closing after the vouchers, not the first (F-801)
+    amir_day.py       the salt list's words: a TEXT export is read (S480/S483), so "Excel mein (text nahi)" goes
     order_rules.py    ONE guarded call in tick(): the reports watch rides the ten-minute job
 
 The three NEW files of the kit (reports_watch.py, reports_guide.py, reports_guide_pics.py) are not made here:
@@ -26,8 +27,9 @@ import os
 import sys
 
 PINS = {   # file: (FROM md5, TO md5)
-    "reports_tile.py": ("6f7cf490c949495e3e714b7dd688b7af", "1d8843ee6b61c0e8edaaa8cf4a552232"),
+    "reports_tile.py": ("6f7cf490c949495e3e714b7dd688b7af", "01f67f4d034cdefd2d9254263e47828e"),
     "stock_app.py": ("cc06dac9e3ab60a85d76e2409815b5af", "bfc2a40bff0d8f0050078ea49f990eda"),
+    "amir_day.py": ("59b035da84a6648b94c1977d0c810b9d", "f1ce78e8bd788fbbb8c9774c04119af9"),
     "order_rules.py": ("ee17c1872acd0c440868a915fa5014df", "79f21c1ee1f763b1ac06b370e3d77b79"),
 }
 
@@ -44,6 +46,13 @@ def one(text, old, new, what):
     n = text.count(old)
     if n != 1:
         raise Stop("anchor '%s' occurs %d times (must be exactly 1)" % (what, n))
+    return text.replace(old, new)
+
+
+def exactly(text, old, new, n, what):
+    k = text.count(old)
+    if k != n:
+        raise Stop("anchor '%s' occurs %d times (must be exactly %d)" % (what, k, n))
     return text.replace(old, new)
 
 
@@ -673,6 +682,23 @@ def build_reports_tile(t):
     t = one(t, '"banner missed" in h2 and "BILL WISE STATEMENT" in h2 and "21-09-2026" in h2)',
             '"banner missed" in h2 and "DAILY SALES" in h2 and "21-09-2026" in h2)', "selftest: the how-to block")
     t = before(t, '    print("reports_tile selftest: %d checks, %d failures" % (n_checks[0], len(fails)))\n', RT_SELFTEST, "selftest: its last line")
+    t = one(t, 'nayi list chahiye (Excel) · %d din se baaki', 'nayi list chahiye · %d din se baaki', "the salt row's hint")   # S500: text is read
+    return t
+
+
+# =====================================================================================================================
+# amir_day.py -- the salt list's words: a text export is read since S480/S483, so "Excel (text nahi)" is no longer true
+# =====================================================================================================================
+def build_amir_day(t):
+    t = one(t, "<p class='big bad'>Ek export aur: SALT WISE ITEM LIST &mdash; Excel mein (text nahi)</p>",
+            "<p class='big bad'>Ek export aur: SALT WISE ITEM LIST</p>", "the salt card's heading")
+    t = one(t, '"<p>Marg se SALT WISE ITEM LIST nikaalo &mdash; yahan khud tick ho jayegi. <b>Excel</b> mein nikaaliye: "\n'
+               '            "text file server nahi padhta.</p>"',
+            '"<p>Marg se SALT WISE ITEM LIST nikaalo &mdash; yahan khud tick ho jayegi. Text ya Excel, dono chalte hain.</p>"   # S500',
+            "the salt card's sentence")
+    t = exactly(t, 'out.append("SALT WISE ITEM LIST not received (Excel)")', 'out.append("SALT WISE ITEM LIST not received")', 2,
+                "the owner's salt line")
+    t = one(t, 'out.append("SALT WISE ITEM LIST abhi nahi aayi (Excel)")', 'out.append("SALT WISE ITEM LIST abhi nahi aayi")', "the staff salt line")
     return t
 
 
@@ -735,7 +761,8 @@ def build_order_rules(t):
     return t
 
 
-BUILD = {"reports_tile.py": build_reports_tile, "stock_app.py": build_stock_app, "order_rules.py": build_order_rules}
+BUILD = {"reports_tile.py": build_reports_tile, "stock_app.py": build_stock_app, "amir_day.py": build_amir_day,
+         "order_rules.py": build_order_rules}
 
 
 def main(argv=None):
