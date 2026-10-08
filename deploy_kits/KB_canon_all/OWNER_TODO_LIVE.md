@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S299 close** (the Sanjeevni project), 07-Oct-2026, the afternoon — the parent sections exactly as its S298 close wrote them (its session 300 is open), the Sanjeevni sections refreshed here
+# OWNER TO-DO — LIVE · refreshed at the **S300 close** (the parent), 07-Oct-2026, the evening — the Sanjeevni sections exactly as its S299 close wrote them (its session 301 is open)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S299 close** (the Sanjeevni project), 07-Oct-2026, the afternoon — the parent sections exactly as its S298 close wrote them (its session 300 is open), the Sanjeevni sections refreshed here
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S298 close** (the parent), 07-Oct-2026, the early afternoon — the Sanjeevni sections exactly as its S296 close wrote them (its session 299 is open)
 
@@ -28,9 +30,9 @@
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
-*Detail: `START_HERE_SESSION_300.md` · `S298_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S299 close's (07-Oct afternoon); `S299_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_301.md` that chat's entry.*
+*Detail: `START_HERE_SESSION_302.md` · `S300_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S299 close's (07-Oct afternoon); `S299_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_301.md` that chat's entry.*
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S298 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S300 close
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -40,7 +42,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries only today's record; nothing changes on the server and no server line follows.
+**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries only today's record; nothing changes on the server and no server line follows. Then open a fresh chat in this project and say "start": it builds the after-call list from your final mock-up.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -56,6 +58,14 @@ https://followup.dr-manoj.in/finance/aaj
 
 ```
 https://followup.dr-manoj.in/finance/packs
+```
+
+**WHEN IT HAPPENS — not a duty**
+
+**A POS TOTAL WAITING FOR YOUR CONFIRM.** When the bank's statement is missing and a staff member types the POS machine's UPI total, one Confirm / Reject line appears first on your approvals page. Nothing is waiting now.
+
+```
+https://followup.dr-manoj.in/finance/approvals
 ```
 
 **LATER — none of these is urgent**
@@ -86,19 +96,30 @@ https://followup.dr-manoj.in/scanapp/papers
 
 **One thing I will not touch without your word:** the punch machine's listener on the server does not check who is sending. I proposed closing it; say "close it" when you want that done.
 
-*Ticked by you on the board on 6 Oct and off this list: the contacts workbook (the file itself is unchanged since 25 Sep — say the word when you have sorted it) · the reception PC's LAN cable.*
+**Parked at your word on 7 Oct, and not raised by me again:** the staff's WhatsApp alerts made loud on their mobiles and on the clinic PCs, with the set-up on your Clinic PCs page. Their phones already get the alerts.
+
+*Ticked by you on the board and off this list: the publish of the 7 Oct afternoon record (landed 12:47 pm) · the contacts workbook (the file itself is unchanged since 25 Sep — say the word when you have sorted it) · the reception PC's LAN cable.*
 
 *Closed by your word and not on this list: the technician of 25-Sep, AnyDesk and UltraViewer, passwords, the Windows activation on the reception PC (02-Oct) · the accountants get the pack only; no statement passes through the clinic mailbox; the 61 test scans stay (04-Oct) · a panel to waive late minutes or write off a negative carry — "nothing more required" (06-Oct).*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Next, in the order I offered you — say which first, or "go":** Voicenotes sending its to-do list into the task section by itself (one setting of yours in Voicenotes) · the renewal reminders at 45 days before the real expiry, red only after it · the scan app as its own project, then the papers page's four new sections (Resumes, Miscellaneous documents, Construction work, Personal) and the challan flow — a challan kept as *goods received, bill awaited*, joined to its bill, deletable when the bill is in.
-2. **In the background, as you said:** the reception login's missing tiles.
-3. **My own, no word needed:** your console following the panel and showing tasks, and its small wording · on or after 09-Oct, the old Drive folder on the reception PC · the finance app's own test suite · the other set-up cards (Hostinger, CyberPanel, SSH login, Websites, Bitwarden) · proving the 148 older documents.
-4. **Before October's salary, as you said:** a skipped loan month as one button that shows in his ledger everywhere · the two small things on the salary sheets and the slip's line about a negative salary.
-5. **On your word:** the tracker on the server · the MyOperator key steps · the contacts · the mail flood (low) · the portal tiles · the expense split · kits for Shavez's PC and the lab PC when you set them up · the later steps of the lists (the morning step on punch, stand-ins, the Docterz-export lock, the month-end attendance sheet, approving from inside your console).
-6. **Held at your word:** the Callback Tracker on the server.
+1. **First, in the fresh chat — your word, "it is final … to build in fresh chat": the after-call list.** A tile *Call ke baad*; one table in three parts — *Nahi aaye* kept on top until someone deals with it, *Aane baaki*, *Aa gaye* filled by itself from the Docterz export; one optional tap *Kis din aayenge?* on the card after the call; full mobile numbers; weekdays in English; a place kept, switched off, for a WhatsApp appointment message. Installed switched off for staff; you turn it on.
+2. **Then, in the order I offered you — say which first, or "go":** Voicenotes sending its to-do list into the task section by itself (one setting of yours in Voicenotes) · the renewal reminders at 45 days before the real expiry, red only after it · the scan app as its own project, then the papers page's four new sections (Resumes, Miscellaneous documents, Construction work, Personal) and the challan flow.
+3. **In the background, as you said:** the reception login's missing tiles.
+4. **My own, no word needed:** your console following the panel and showing tasks, its small wording, and proper words for the new *pos diff* flag · the morning match's line that names the bank while it is only awaited · on or after 09-Oct, the old Drive folder on the reception PC · the finance app's own test suite · the other set-up cards (Hostinger, CyberPanel, SSH login, Websites, Bitwarden) · proving the 148 older documents.
+5. **Before October's salary, as you said:** a skipped loan month as one button that shows in his ledger everywhere · the two small things on the salary sheets and the slip's line about a negative salary.
+6. **On your word:** the WhatsApp appointment message to patients · the staff's loud alerts (parked) · the tracker on the server · the MyOperator key steps · the contacts · the mail flood (low) · the portal tiles · the expense split · kits for Shavez's PC and the lab PC when you set them up · the later steps of the lists.
+7. **Held at your word:** the Callback Tracker on the server.
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S300 CLOSE — 07-Oct-2026 (the parent)
+
+- ~~**"URGENT, BUILD TODAY" — the POS machine's UPI total when the bank's statement has not come**~~ — done and live since 1:42 pm on 7 Oct (S496): one optional box on the screens the staff already use; your Confirm / Reject line; the bank's statement replaces the figure by itself; the tolerance and the expected time are settings on your screen. Not yet needed by anyone.
+- ~~**"tell me how to add the NTFY notifications to the staff mobiles only and park this build"**~~ — you sent the staff the set-up message and said "done the NTFY part"; the loud-alerts build is parked.
+- ~~**The after-call list — "Make a tabular mockup … updated from the Docterz exports … persist for the no shows distinctly"**~~ — the mock-up is made and, with your three changes, final. Building it is item 1 above.
+- ~~**The publish of the S298 record**~~ — landed 12:47 pm on 7 Oct. ~~**Your publish of the POS kit**~~ — landed 1:39 pm.
+- **Corrected on the way, my side:** I wrote clock times from memory instead of reading the clock and corrected them on the board · a test file wiped by my own edit script and written again · a lookup that wrote when it should only read — the last two found before the kit was placed.
 
 ## ✅ DONE AT THE S298 CLOSE — 07-Oct-2026 (the parent)
 
