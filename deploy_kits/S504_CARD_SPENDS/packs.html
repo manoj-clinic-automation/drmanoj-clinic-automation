@@ -1,0 +1,162 @@
+<!doctype html>
+<!-- packs.html · kit S408_MONTH_END_PACKS (26-Sep-2026, D624) · the owner's Month-end packs page (English). PARENT (clinic).
+     Three cards: the accountant pack (every item of his list, ready / missing / late, previews, the two paper ticks, ONE Send),
+     Amir's pack (Sanjeevni), Shavez's checklist as he sees it; above them the statement shelf (the month's cells, the unplaced files
+     with the one-tap 'which account?'). Everything from /finance/packs/api/state.
+     S412: the 'Statement passwords' card -- the owner types Yes Bank's statement password once (masked, one candidate per line); the page
+     shows only 'set on <date>' and Replace, never the value; the shelf opens the locked PDFs itself.
+     S434 (28-Sep-2026, the owner: "do not keep it so long to scroll -- collapsible, expandable sections"): one summary card at the top
+     (ready count, what is missing, the Send button); every section below is folded and opens on a tap -- its summary line says what is
+     inside; a section with something to do (an unplaced file) opens by itself; the open/closed choice is remembered on this browser. -->
+<!-- S476 (F-723): one line above the summary card when the statement road is quiet -- amber while no bank statement has reached
+     the shelf this month (the relay's Google authorisation may have lapsed), a grey note when none came for three days. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Month-end packs — Dr. Manoj Agarwal Clinic</title>
+<style>
+body{margin:0;padding:14px;background:#f3f2ee;color:#23272f;font:16px/1.5 "Segoe UI",system-ui,sans-serif}
+h1{font-size:22px;color:#1c3d5a;margin:0 0 10px}h2{font-size:18px;color:#1c3d5a;margin:0 0 8px}
+.card{background:#fbfaf8;border:1px solid #e6e3dc;border-radius:10px;padding:14px;margin:0 0 14px;overflow-x:auto}
+.mut{color:#666d78;font-size:14px}table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid #e6e3dc;padding:6px 8px;text-align:left;vertical-align:top;font-size:14.5px}
+th{background:#f5f4f0}.ok{color:#0c7a0c;font-weight:600}.bad{color:#9c2a20;font-weight:600}.warn{color:#8a6100;font-weight:600}
+button{border:1px solid #1c5cab;background:#2a78d6;color:#fff;border-radius:8px;padding:6px 12px;font-size:14px;cursor:pointer}
+button.ghost{background:#fff;color:#23272f;border-color:#c9c5bb}button.big{font-size:17px;padding:10px 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.cell{border:1px solid #e6e3dc;border-radius:8px;padding:8px;background:#fff}.cell b{display:block;font-size:13.5px}
+.st-empty{background:#fdecea}.st-arrived{background:#fdf3d7}.st-read{background:#e9f6e9}.st-matched{background:#dff2df}
+.green{background:#e9f6e9;border-left:6px solid #2f6b45;padding:10px 14px;margin-bottom:12px;font-size:17px}
+input,select{padding:6px;font-size:14px;border:1px solid #c9c5bb;border-radius:6px}
+details.sec{background:#fbfaf8;border:1px solid #e6e3dc;border-radius:10px;margin:0 0 10px}
+details.sec>summary{cursor:pointer;padding:12px 14px;font-size:16.5px;color:#1c3d5a;font-weight:600;list-style:none}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary:before{content:"\25B8";display:inline-block;width:18px;color:#8a8f98}
+details.sec[open]>summary:before{content:"\25BE"}
+details.sec>summary .sm{font-weight:400;font-size:14px;color:#666d78;margin-left:6px}
+details.sec>.in{padding:0 14px 14px;overflow-x:auto}
+.top{background:#fff;border:1px solid #d9d5cc;border-left:6px solid #1c5cab;border-radius:10px;padding:12px 14px;margin:10px 0 12px}
+.top .big1{font-size:19px;font-weight:600;color:#1c3d5a}.top ul{margin:6px 0 8px 18px;padding:0}.top li{font-size:14.5px}
+textarea.sec{-webkit-text-security:disc;font-family:monospace;font-size:14px;border:1px solid #c9c5bb;border-radius:6px;padding:6px;width:260px;vertical-align:middle}
+</style></head><body>
+<h1>Month-end packs</h1>
+<div class="mut">Month <input type="month" id="m" value="{{month}}" onchange="load()"> · <button class="ghost" onclick="load()">show</button>
+ · <button class="ghost" onclick="refreshShelf()">re-read the shelf inbox</button> · <a href="/finance/packs/checklist">Shavez's checklist</a> · <a href="/portal">Portal</a></div>
+<div id="flash"></div>
+<div id="road"></div>
+<div class="top" id="topcard"><div class="big1" id="topline">loading…</div><ul id="toplist"></ul>
+<button class="big" onclick="sendPack()">Send to accountants</button> <span class="mut" id="to"></span><div id="sends" class="mut" style="margin-top:4px"></div></div>
+<details class="sec" id="d_pack"><summary>Accountant pack — every item <span class="sm" id="s_pack"></span></summary><div class="in"><div id="rows">loading…</div></div></details>
+<details class="sec" id="d_shelf"><summary>The statement shelf — <span id="mn"></span> <span class="sm" id="s_shelf"></span></summary><div class="in">
+<div class="mut">One cell per account or card. At 05:40 and again at 07:30 the box lists the Drive folders and files what it finds by the statement's own content — the bank, the holder's name, the account or card tail, the period. Never by file name. Two cycle statements that together cover the month count as the month's statement.</div>
+<div class="grid" id="cells"></div>
+<div id="unplaced"></div></div></details>
+<!-- S504: the card spends -- every line of each card statement, proved against its own totals; two words per line (the owner's,
+     the accountant's ledger); the merchants still to be named, named once here. -->
+<details class="sec" id="d_cards"><summary>Card spends — <span id="mn2"></span> <span class="sm" id="s_cards"></span></summary><div class="in">
+<div class="mut">Every line of each card statement dated in the month, read by the server and checked against the totals the statement itself prints. Each line has two words: what it is for you, and the ledger the accountants post it to. Name a merchant once below and every line of it — past and future — follows.</div>
+<div id="cards">loading…</div></div></details>
+<details class="sec" id="d_amir"><summary>Amir's pack <span class="sm" id="s_amir"></span></summary><div class="in"><div class="mut">Sanjeevni · shown on his board, no email.</div><div id="amir"></div></div></details>
+<details class="sec" id="d_chk"><summary>Shavez's checklist <span class="sm" id="s_chk"></span></summary><div class="in"><div id="chk"></div>
+<details><summary class="mut">Edit the items (add / rename / retire)</summary><div id="items"></div>
+<div style="margin-top:8px"><input id="ng" placeholder="group (Sanjeevni / Lab / Clinic / Accountant ka samaan)" style="width:230px"> <input id="ni" placeholder="new item" style="width:300px"> <button class="ghost" onclick="addItem()">add</button></div></details></div></details>
+<details class="sec" id="d_pw"><summary>Statement passwords <span class="sm" id="s_pw"></span></summary><div class="in">
+<div class="mut">For every password-locked PDF — the banks' e-statements and the credit-card statements. One box per Yes Bank account, per ICICI account and per card; the three bank rows at the end take any other. The shelf opens the files itself; nothing waits on an outside script. Typed once, kept on the server only, never shown again, never in any mail or log.</div>
+<div id="secrets"></div></div></details>
+<script>
+function $(i){return document.getElementById(i)}
+function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function flash(t,cls){$("flash").innerHTML=t?'<div class="green">'+esc(t)+'</div>':''}
+var S=null;
+function load(){
+  var m=$("m").value; fetch("/finance/packs/api/state?month="+encodeURIComponent(m)+"&_="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){$("rows").innerHTML='<span class="bad">'+esc(j.message||j.error)+'</span>';return}
+    S=j; $("mn").textContent=j.month_name;
+    roadLine(j.road);
+    $("cells").innerHTML=j.cells.map(function(c){var f=c.file;return '<div class="cell st-'+c.state+'"><b>'+esc(c.label)+'</b><span class="mut">'+esc(c.bank)+' · '+esc(c.kind)+(c.tail?' · …'+esc(c.tail):' · tail not learned yet')+' · <a href="#" onclick="words('+c.slot_id+',\''+esc(c.words||"").replace(/'/g,"\\'")+'\');return false">words</a></span><br>'+
+      (f?('<span class="'+(c.state==="partial"?"warn":"ok")+'">'+esc(c.state)+'</span> <span class="mut">'+(c.pieces&&c.pieces.length?c.pieces.map(function(p){return esc(p.period_from||"")+' → '+esc(p.period_to||"")}).join(' + '):esc(f.period_from||"")+' → '+esc(f.period_to||""))+(f.read_status&&f.read_status!=="read"?' · '+esc(f.read_status):'')+(f.locked?' · opened from the locked e-statement':'')+(c.state==="partial"&&c.partial_words?' · '+esc(c.partial_words):'')+'</span> '+(c.pieces&&c.pieces.length?c.pieces.map(function(p,i){return '<a href="/finance/packs/file/'+p.id+'" target="_blank">open part '+(i+1)+'</a>'}).join(' '):'<a href="/finance/packs/file/'+f.id+'" target="_blank">open</a>')):'<span class="bad">empty</span>')+
+      (c.twin_missing?'<br><span class="warn">newest original has no decrypted twin</span>':'')+
+      (c.copies&&c.copies.length?'<br><span class="mut">also on the shelf: '+c.copies.map(function(x){return '<a href="/finance/packs/file/'+x.id+'" target="_blank">'+esc(x.what)+'</a> ('+esc(x.read_status||"not read")+(x.matched_status?' · '+esc(x.matched_status):'')+')'}).join(' · ')+'</span>':'')+'</div>'}).join("");
+    var u=j.unplaced||[];
+    $("unplaced").innerHTML=u.length?('<h3 style="font-size:15px;margin:10px 0 4px">Unplaced files — which account? (one tap)</h3><table><tr><th>File</th><th>Holder (as the PDF prints it)</th><th>Bank / kind / tail</th><th>Period</th><th>Why unplaced</th><th>Which account?</th></tr>'+
+      u.map(function(x){return '<tr><td>'+esc(x.name)+' <span class="mut">('+esc(x.folder)+(x.subfolder?'/'+esc(x.subfolder):'')+')</span></td><td>'+(x.holder?esc(x.holder):(x.locked?'<span class="warn">'+(x.no_password?'locked — the stored password does not open it':'locked — password needed (Statement passwords, below)')+'</span>':'<span class="mut">—</span>'))+'</td><td>'+esc(x.bank||"?")+' / '+esc(x.kind||"?")+(x.tail?' / …'+esc(x.tail):'')+'</td><td class="mut">'+esc(x.period_from||"")+' → '+esc(x.period_to||"")+'</td><td class="mut">'+esc(x.why||"")+'</td><td><select id="sl'+x.id+'">'+j.slots.map(function(s){return '<option value="'+s.id+'">'+esc(s.holder_label)+'</option>'}).join("")+'</select> <button onclick="assign('+x.id+')">this one</button></td></tr>'}).join("")+'</table>'):'<div class="mut" style="margin-top:6px">No unplaced file.</div>';
+    var sc=j.secrets||{banks:[]};
+    $("secrets").innerHTML='<table><tr><th>Account / bank</th><th>Password</th><th></th></tr>'+sc.banks.map(function(b){return '<tr><td><b>'+esc(b.label)+'</b>'+(b.account?'':' <span class="mut">(bank-wide)</span>')+'</td><td>'+(b.set?'<span class="ok">set</span> <span class="mut">on '+esc((b.set_at||"").slice(0,16).replace("T"," "))+' by '+esc(b.set_by||"")+' · '+b.candidates+' candidate'+(b.candidates===1?'':'s')+(b.opened?' · opened '+b.opened+' file'+(b.opened===1?'':'s')+' ✓':' · opened nothing yet')+'</span>':'<span class="warn">not set</span>')+
+      '</td><td><textarea class="sec" id="sec_'+esc(b.bank).replace(/:/g,"_")+'" rows="2" placeholder="one candidate per line" autocomplete="off"></textarea> <button class="ghost" onclick="setSecret(\''+esc(b.bank)+'\')">'+(b.set?'Replace':'Set')+'</button></td></tr>'}).join("")+'</table>'+
+      '<div class="mut" style="margin-top:6px">Locked files still closed: '+sc.locked_open+(sc.no_password?' ('+sc.no_password+' that no stored password opens)':'')+' · opened by the shelf so far: '+sc.opened+'</div>'+
+      ((sc.locked_files||[]).length?'<table style="margin-top:6px"><tr><th>Locked file, waiting for its password</th><th>Arrived</th><th>State</th><th></th></tr>'+sc.locked_files.map(function(x){return '<tr><td><b>'+esc(x.what)+'</b>'+(x.card?' <span class="mut">('+esc(x.card)+')</span>':'')+'<br><span class="mut">'+esc(x.name)+'</span></td><td class="mut">'+esc(x.arrived)+'</td><td class="mut">'+esc(x.why)+'</td><td><button class="ghost" onclick="setAside('+x.id+',false)">Set aside — not needed</button></td></tr>'}).join("")+'</table>':'')+
+      ((sc.set_aside||[]).length?'<div class="mut" style="margin-top:6px">Set aside (never tried, never counted): '+sc.set_aside.map(function(x){return esc(x.what)+' <a href="#" onclick="setAside('+x.id+',true);return false">put back</a>'}).join(' · ')+'</div>':'');
+    $("rows").innerHTML='<table><tr><th>Item</th><th>Status</th><th>Why / detail</th><th>Preview</th></tr>'+j.rows.map(function(r){
+      var st=r.status==="ready"?'<span class="ok">ready ✓</span>':(r.status==="late"?'<span class="warn">late</span>':(r.status==="partial"?'<span class="warn">partial</span>':(r.status==="tick"?'<button class="ghost" onclick="tick(\''+esc(r.key)+'\')">tick — handed over</button>':'<span class="bad">missing</span>')));
+      var pv=r.preview?'<a href="'+esc(r.preview)+'" target="_blank">open</a>':'';
+      if(r.key==="income")pv+=' · <a href="/finance/packs/preview/income?month='+j.month+'">the sheet</a>';
+      if(r.key==="upi")pv+=' · <a href="/finance/packs/preview/upi?month='+j.month+'">the sheet</a>';
+      if(r.key==="digest")pv='<a href="/finance/packs/preview/digest?month='+j.month+'">the sheet</a>';
+      if(r.key==="neft")pv+=' · <a href="/finance/packs/preview/neft_letter?month='+j.month+'" target="_blank">the letter (PDF)</a>';
+      if(r.key.indexOf("bundle:")===0)pv='<a href="/finance/packs/preview/bundle_'+r.key.slice(7)+'?month='+j.month+'" target="_blank">the bundle</a>';
+      return '<tr><td>'+esc(r.title)+(r.sanjeevni?' <span class="mut">(Sanjeevni)</span>':'')+'</td><td>'+st+'</td><td class="mut">'+esc(r.why||"")+(r.files&&r.files.length?'<br>'+r.files.map(esc).join(", "):'')+'</td><td>'+pv+'</td></tr>'}).join("")+'</table>'+
+      '<div class="mut" style="margin-top:6px">'+j.attachments.length+' attachment(s), '+(j.attachments.reduce(function(a,x){return a+x.bytes},0)/1048576).toFixed(1)+' MB · a pack over '+esc(j.limit_mb)+' MB goes as part 1 / part 2.</div>';
+    $("to").textContent=j.to?("to: "+j.to):"the accountants' addresses are not set (packs.accountant_to)";
+    $("sends").innerHTML=(j.sends||[]).length?'Sent: '+j.sends.map(function(s){return esc(s.sent_at.slice(0,16))+' by '+esc(s.sent_by)+(s.resend?' (re-send)':'')+' · '+s.parts+' part(s) · '+(s.bytes/1048576).toFixed(1)+' MB'}).join(' · '):'Not sent yet for this month.';
+    var a=j.amir; $("amir").innerHTML=a.ready?('<span class="ok">ready</span> — both Sanjeevni statements are on the shelf; Amir sees "Pichle mahine ka pack" on his board. '+(a.seen?('Dekh liya ✓ '+esc(a.seen.by)+' '+esc((a.seen.at||"").slice(0,16))):'<span class="mut">not yet opened by him</span>')):'<span class="mut">not yet — it appears when both Sanjeevni statements (Yes Bank + ICICI) of the month are on the shelf.</span>';
+    var groups={}; j.checklist.forEach(function(c){(groups[c.grp]=groups[c.grp]||[]).push(c)});
+    $("chk").innerHTML=Object.keys(groups).map(function(g){return '<h3 style="font-size:15px;margin:8px 0 2px">'+esc(g)+'</h3><table>'+groups[g].map(function(c){return '<tr><td>'+esc(c.item)+'</td><td>'+(c.done?'<span class="ok">done'+(c.auto?' (system)':'')+'</span> <span class="mut">'+esc(c.done_by||"")+' '+esc((c.done_at||"").slice(0,16))+' '+esc(c.words||"")+'</span>':'<span class="warn">open</span> <span class="mut">'+esc(c.words||"")+'</span>')+'</td></tr>'}).join("")+'</table>'}).join("");
+    fillSummaries(j);
+    cardsView(j);
+    $("items").innerHTML='<table>'+j.items.map(function(i){return '<tr><td class="mut">'+esc(i.grp)+'</td><td>'+esc(i.item)+(i.auto_key?' <span class="mut">(auto: '+esc(i.auto_key)+')</span>':'')+'</td><td>'+(i.active?'<button class="ghost" onclick="itemAct('+i.id+',\'retire\')">retire</button>':'<button class="ghost" onclick="itemAct('+i.id+',\'restore\')">restore</button>')+' <button class="ghost" onclick="renameItem('+i.id+',\''+esc(i.item).replace(/'/g,"\\'")+'\')">rename</button></td></tr>'}).join("")+'</table>';
+  }).catch(function(e){$("rows").innerHTML='<span class="bad">could not reach the server ('+e+')</span>'});
+}
+/* S504: the card spends */
+function rs(p){var n=Math.abs(p||0)/100;return (p<0?"-":"")+"₹"+n.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function cardsView(j){var c=j.cards||{}, e=$("cards"); $("mn2").textContent=j.month_name||"";
+  if(!c.statements){e.innerHTML='<span class="mut">The card reader is not on this server.</span>';$("s_cards").textContent="";return}
+  var st=c.statements, un=c.unnamed||[], spent=(c.by_category||[]).filter(function(g){return g.category!=="repayment"}).reduce(function(a,g){return a+g.net_p},0);
+  $("s_cards").textContent="· "+(st.length?st.length+" statement"+(st.length===1?"":"s")+(c.all_proved?", all proved":", "+st.filter(function(s){return !s.proof_ok}).length+" NOT proved")+" · spent "+rs(spent):"no card statement dated this month yet")+(un.length?" · "+un.length+" merchant"+(un.length===1?"":"s")+" to name":"");
+  var h='<table><tr><th>Card</th><th>Statement dated</th><th>Lines</th><th>Checked against its own totals</th></tr>'+(st.length?st.map(function(s){return '<tr><td>'+esc(s.label)+(s.card_tail?' <span class="mut">…'+esc(s.card_tail)+'</span>':'')+'</td><td>'+esc(s.statement_date)+'</td><td>'+s.lines+'</td><td>'+(s.proof_ok?'<span class="ok">proved</span>':'<span class="bad">does not add up</span>')+' <span class="mut">'+esc(s.proof)+'</span></td></tr>'}).join(""):'<tr><td colspan="4" class="mut">none yet</td></tr>')+'</table>';
+  h+='<h3 style="font-size:15px;margin:12px 0 4px">By what it is</h3><table><tr><th>For you</th><th>Accountant\'s ledger</th><th>Spent</th><th>Credits</th><th>Net</th><th>Lines</th></tr>'+(c.by_category||[]).map(function(g){return '<tr><td>'+esc(g.owner_label)+'</td><td class="mut">'+esc(g.ledger)+'</td><td>'+rs(g.debit_p)+'</td><td>'+(g.credit_p?rs(g.credit_p):'')+'</td><td><b>'+rs(g.net_p)+'</b></td><td>'+g.lines+'</td></tr>'}).join("")+'</table>';
+  if(un.length){var opts=(c.categories||[]).filter(function(k){return k.key!=="unnamed"}).map(function(k){return '<option value="'+esc(k.key)+'">'+esc(k.owner_label)+' — '+esc(k.ledger)+'</option>'}).join("");
+    h+='<h3 style="font-size:15px;margin:12px 0 4px">Name these merchants (once — every line of each follows)</h3><table><tr><th>Merchant, as the card prints it</th><th>Lines</th><th>Amount (all statements)</th><th>What it is</th><th></th></tr>'+un.map(function(x,i){return '<tr><td>'+esc(x.merchant)+'</td><td>'+x.lines+'</td><td>'+rs(x.amount_p)+'</td><td><select id="cm'+i+'"><option value="">— choose —</option>'+opts+'</select></td><td><button class="ghost" onclick="nameMerchant('+i+')">Save</button></td></tr>'}).join("")+'</table>'}
+  var ln=c.lines||[];
+  h+='<details style="margin-top:10px"><summary class="mut">Every line ('+ln.length+')</summary><table><tr><th>Date</th><th>Card</th><th>Narration</th><th>For you</th><th>Ledger</th><th>Amount</th></tr>'+ln.map(function(l){return '<tr><td>'+esc(l.date.slice(8,10)+"-"+l.date.slice(5,7))+'</td><td class="mut">'+esc(l.card)+'</td><td>'+esc(l.description)+(l.intl?' <span class="mut">('+esc(l.intl)+')</span>':'')+'</td><td>'+esc(l.owner_label)+'</td><td class="mut">'+esc(l.ledger)+'</td><td>'+(l.credit?'<span class="ok">'+rs(l.amount_p)+' CR</span>':rs(l.amount_p))+'</td></tr>'}).join("")+'</table></details>';
+  e.innerHTML=h; CU=un}
+var CU=[];
+function nameMerchant(i){var x=CU[i], k=$("cm"+i).value; if(!x||!k){alert("choose what it is first");return}
+  post("/finance/packs/api/card-merchant",{merchant:x.merchant,category:k}).then(function(j){if(!j.ok){alert(j.message||j.error);return} flash("Named — every line of "+x.merchant+" follows."); load()})}
+/* S434: the summaries -- what each folded section holds, in one line; the top card says what is missing */
+function fillSummaries(j){
+  var rows=j.rows||[], ready=rows.filter(function(r){return r.status==="ready"}), miss=rows.filter(function(r){return r.status!=="ready"});
+  $("topline").textContent=j.month_name+" — accountant pack: "+ready.length+" of "+rows.length+" ready";
+  $("toplist").innerHTML=miss.map(function(r){return '<li>'+esc(r.title.replace(/^[\d.]+ · /,""))+' — <span class="'+((r.status==="tick"||r.status==="partial")?"warn":"bad")+'">'+(r.status==="tick"?"tick when handed over":esc(r.why||"missing"))+'</span></li>'}).join("");
+  $("s_pack").textContent="· "+ready.length+" of "+rows.length+" ready";
+  var cl=j.cells||[], on=cl.filter(function(c){return c.file}), em=cl.filter(function(c){return !c.file});
+  var u=(j.unplaced||[]).length;
+  $("s_shelf").textContent="· "+on.length+" of "+cl.length+" on the shelf"+(em.length?" · missing: "+em.map(function(c){return c.label}).join(", "):"")+(u?" · "+u+" file"+(u===1?"":"s")+" need a tap":"");
+  if(u) $("d_shelf").open=true;
+  $("s_amir").textContent="· "+(j.amir&&j.amir.ready?(j.amir.seen?"ready, seen by Amir":"ready, not yet opened by Amir"):"not yet");
+  var ch=j.checklist||[], dn=ch.filter(function(c){return c.done});
+  $("s_chk").textContent="· "+dn.length+" of "+ch.length+" done · "+(ch.length-dn.length)+" open";
+  var sc=j.secrets||{banks:[]}, set=sc.banks.filter(function(b){return b.set}).length;
+  $("s_pw").textContent="· "+(set?set+" set":"none set")+" · "+sc.locked_open+" locked, waiting for a password"+((sc.set_aside||[]).length?" · "+sc.set_aside.length+" set aside":"");
+}
+function remember(){try{["d_pack","d_shelf","d_cards","d_amir","d_chk","d_pw"].forEach(function(id){var d=$(id); var k="packs_open_"+id; var v=localStorage.getItem(k); if(v==="1")d.open=true; d.addEventListener("toggle",function(){try{localStorage.setItem(k,d.open?"1":"0")}catch(e){}})})}catch(e){}}
+function post(p,b){return fetch(p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b||{})}).then(function(r){return r.json()})}
+/* S411: the words a slot's holder must print, one tap to edit (data, never code); the unplaced files are re-identified */
+function words(sid,cur){var w=prompt("The words this account's statement prints in its holder line (all must appear; the longest match wins):",cur||""); if(w==null||!w.trim()) return;
+  post("/finance/packs/api/slot-words",{slot:sid,words:w}).then(function(j){if(!j.ok){alert(j.message||j.error||"not saved");return} flash("words saved: "+j.words+" · re-identified "+JSON.stringify(j.reidentified)); load();});}
+/* S412: the password goes to the server once and is cleared from the box; the answer carries counts, never the value */
+function setSecret(bank){var box=$("sec_"+bank.replace(/:/g,"_")); var t=box.value; if(!t.trim()){alert("type at least one candidate");return}
+  post("/finance/packs/api/secret",{bank:bank,text:t}).then(function(j){box.value=""; if(!j.ok){alert(j.message||j.error||"not saved");return}
+    var r=j.result||{}; flash("Password "+j.action+" for "+bank+" ("+j.candidates+" candidate"+(j.candidates===1?"":"s")+") · opened now: "+(r.unlocked||0)+", read: "+(r.read||0)+", still unplaced: "+(r.unplaced||0)+"."); load();});}
+/* S503: a locked file the owner does not need is set aside (never tried, never counted); one tap puts it back */
+function setAside(fid,back){if(!back&&!confirm("Set this file aside? It will not be tried or counted. You can put it back later."))return;
+  post("/finance/packs/api/set-aside",{file:fid,back:!!back}).then(function(j){if(!j.ok){alert(j.message||j.error||"not saved");return} flash(back?"Put back — it is tried again on the next run.":"Set aside."); load()})}
+function assign(fid){var s=$("sl"+fid).value; post("/finance/packs/api/assign",{file:fid,slot:parseInt(s,10)}).then(function(j){if(!j.ok){alert(j.message||j.error);return} flash("Filed"+(j.tail_learned?" — the account's tail …"+j.tail_learned+" is learned for ever":"")+"."); load()})}
+function tick(k){post("/finance/packs/api/tick",{month:$("m").value,item:k}).then(function(j){if(!j.ok){alert(j.message||j.error);return} flash("Ticked."); load()})}
+function sendPack(){if(!confirm("Send the "+$("mn").textContent+" pack to the accountants now?"))return; post("/finance/packs/api/send",{month:$("m").value}).then(function(j){if(!j.ok){alert(j.message||j.error);return} flash(j.already?j.message:("Sent — "+j.parts+" mail(s), "+j.attachments+" attachment(s)"+(j.resend?" (a re-send, recorded)":"")+".")); load()})}
+function refreshShelf(){post("/finance/packs/api/refresh",{}).then(function(j){flash("Shelf re-read: placed "+j.placed+", unplaced "+j.unplaced+", read "+j.read+", refused "+j.refused+"."); load()})}
+function addItem(){post("/finance/packs/api/item",{action:"add",grp:$("ng").value,item:$("ni").value}).then(function(j){if(!j.ok){alert(j.message||j.error);return} $("ni").value=""; load()})}
+function itemAct(id,a){post("/finance/packs/api/item",{action:a,id:id}).then(function(){load()})}
+function renameItem(id,cur){var v=prompt("New wording:",cur); if(!v)return; post("/finance/packs/api/item",{action:"rename",id:id,item:v}).then(function(){load()})}
+/* S476 (F-723): the statement road -- amber when no bank statement has reached the shelf this month, a grey note when it is quiet */
+function roadLine(r){var e=$("road"); if(!e)return; if(!r||!r.text||r.state==="ok"){e.innerHTML="";return}
+  var w=(r.state==="warn"); e.innerHTML='<div class="top" style="border-left-color:'+(w?"#8a6100":"#8a8f98")+'"><span class="'+(w?"warn":"mut")+'">'+esc(r.text)+'</span>'+(r.hint?'<div class="mut">'+esc(r.hint)+'</div>':'')+'</div>';}
+remember();
+load();
+</script></body></html>
