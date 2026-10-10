@@ -1,0 +1,2 @@
+kit id S509_FOLLOWUP_DEFAULT_EXPORT
+built 2026-10-10 IST, session 304 (parent). The owner, 10-Oct 22:38: reception exports the follow-up log exactly as Docterz shows it (today .. one month), no date changed. docterz_pickup.py: a follow-up log's day is the IST day it was exported (before 13:00, the previous working day), not its earliest due date minus one; aaj_seed.py: the hint under reception's two lines says to leave Docterz's dates as they are. Edits /root/finance/docterz_pickup.py and aaj_seed.py (each gated on the md5 it replaces, S507's bytes). No data step.
