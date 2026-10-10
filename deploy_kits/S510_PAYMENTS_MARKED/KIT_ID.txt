@@ -1,0 +1,2 @@
+kit id S510_PAYMENTS_MARKED
+built 2026-10-10 IST, session 304 (parent). Club D: the server honours the Inbox Janitor v2.4's marks on the Payment Register -- packs.py's monthly payment digest leaves out rows marked '[NOT A PAYMENT]' / '[DUPLICATE'; payments_register.py records the Docterz rows' change without the old words (patient names) and scrubs any older record of them on every nightly run. Edits /root/finance/packs.py and payments_register.py (each gated on the md5 it replaces). No data step.
