@@ -1,0 +1,6 @@
+kit id S521_AMIR_BOARD_STAGE_PROOF
+project Sanjeevni (brief of session 303, 11-Oct-2026; F-838) -- Amir's stock-check board says the same thing as his card about his
+vouchers: section 2's "Marg = shelf?" line and the renames gate (section 3c) are the stage's (amir_stage, the judgment his card reads),
+for every login; his step-6 rename duty (_s444_renames) asks the stage too. Three anchored edits in stock_app.py; no database write
+by the kit (the extra amir_stage call on an owner read writes only the once-only stage events his own card already causes).
+installed by install_S521_AMIR_BOARD_STAGE_PROOF.sh (it takes the build lock itself)
