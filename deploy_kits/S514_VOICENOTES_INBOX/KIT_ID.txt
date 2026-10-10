@@ -1,0 +1,2 @@
+kit id S514_VOICENOTES_INBOX
+project parent (session 304, 10-Oct-2026) -- D689 pick 2: a to-do list made in Voicenotes reaches the owner's task box by itself; one keyed public door, an owner-only inbox; nothing becomes a task until he presses Give

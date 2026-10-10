@@ -20,3 +20,14 @@ Living copy (D583 rule: every Apps Script change placed in the owner's browser l
   ("RETIRED S293: 1 trigger(s) removed", 08:07:01 IST; 7 other triggers untouched). The Janitor and CC saver triggers have failed
   since 1-Oct / 2-Oct with "Authorization is required" -- the owner re-authorises both in his personal account (his hand only);
   the relay's first run after that catches up the last 40 days of unlabelled statement mail.
+- 10-Oct-2026 (S304, the parent), Inbox Janitor v2.4 on the owner's word (the payments sheet "not updated and up to the mark"):
+  Payments_v24.gs (md5 5a388440, 8,019 chars) added as a new file in the owner's signed-in browser, 22:15 IST, through the editor's
+  own model (byte-exact). Code.gs got five anchored edits (RULE_PAYMENTS query; registerThread_ -> registerPayments_; the last
+  3 days re-read; the monthly digest: accountants get payments only, renewals go to the owner alone) -- Code.gs is still NOT
+  copied here (it holds personal identity numbers); the edits and their undo are in the S304 evidence (s506_janitor).
+  markRegisterV24() run once: rows marked, never deleted.
+- 10-Oct-2026 23:10 IST (S304, kit S513; D689, closes F-775): Renewal_Nag.gs -> v3 (md5 af954370; sha256 18fa943b... read back from
+  the editor after a reload). A renewal is counted to its REAL expiry (expiryISO, else the date in its note, else dateISO): the
+  e-mail nag from 45 days before it, OVERDUE only after it; the VPS push carries expiryISO, never the note, and no bracket holding a
+  number. renewalsExpiryCheck() is a dry run (24 rows: 23 dated, 1 undated; the arms licence 2026-12-26 from its note).
+  pushRenewalsToVPS() run once at 23:10:27 IST: the health page's Renewals row went from OVERDUE (false) to ok.

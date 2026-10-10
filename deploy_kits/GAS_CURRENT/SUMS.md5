@@ -26,4 +26,6 @@ e4dc4eee12d2d1517d4767620eedad84  DailyClinicReports/appsscript.json
 43656bcc13677fd4b4bc1c165b29a487  UPIReconciliation/appsscript.json
 1ee312895340293520aa0a0fdec67556  READ_ME.md
 3fd8564ad06afdfba3f81b1c3efd9b80  PersonalJanitor/Bank_Statement_Relay.gs
-dfa23589a8c49ca2202c57806bd9b684  PersonalJanitor/READ_ME.md
+f2f061c892b0380e53ffa311a78ca413  PersonalJanitor/READ_ME.md
+af9543703e78718fe9713856cb311325  PersonalJanitor/Renewal_Nag.gs
+5a38844013ae250502cfa8afd5700c12  PersonalJanitor/Payments_v24.gs

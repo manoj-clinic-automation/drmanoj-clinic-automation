@@ -1,0 +1,6 @@
+kit id S502_STOCK_MILAAN_TODAY
+project Sanjeevni (brief of session 303, 10-Oct-2026; D699; F-812, F-813, F-814, F-815) -- Darpan's Stock milaan shows only today's work;
+a morning-list count can be corrected the same day ('Galat likha? Badlo', the old point superseded, never deleted); the 06-Sep count is
+sealed for staff; a loss line can be voided (void_at / void_why); today's TRUECEPROL OD and the TYRO BR line put right by keyed, idempotent
+data fixes. No duty moves: DUTY_MAP v9 stands. THE LAST PATCH on the old stock-watch layer under the S303 build charter.
+installed by install_S502_STOCK_MILAAN_TODAY.sh (it takes the build lock itself)

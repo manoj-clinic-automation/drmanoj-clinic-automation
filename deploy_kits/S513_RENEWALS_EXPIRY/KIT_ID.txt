@@ -1,0 +1,2 @@
+kit id S513_RENEWALS_EXPIRY
+project parent (session 304, 10-Oct-2026) -- D689, closes F-775: the Renewals row of /finance/health counts each renewal to its REAL expiry -- shown from 45 days before it, red only after it; finance_app.py only, read whole first
