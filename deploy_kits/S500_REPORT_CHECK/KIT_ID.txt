@@ -1,0 +1,6 @@
+kit id S500_REPORT_CHECK
+project Sanjeevni (brief of session 301, 08-Oct-2026; D694; F-799, F-788, F-801) -- the two morning Marg reports: the steps on the page
+with Marg's own screens, each report judged RIGHT or WRONG with the step to redo, two tries, a SHORT closing stock refused everywhere
+(the page and /api/snapshot), the owner told on his phone only on failure (reports_watch.tick on the ten-minute job); Amir's voucher
+proof reads the NEWEST closing after his vouchers (F-801); the salt card's words (a text export is read). No duty moves: DUTY_MAP v9 stands.
+installed by install_S500_REPORT_CHECK.sh (it takes the build lock itself)

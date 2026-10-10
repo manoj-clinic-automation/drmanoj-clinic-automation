@@ -1,0 +1,2 @@
+kit id S511_RECEPTION_MATCH
+built 2026-10-10 IST, session 304 (parent). Club F (1), the owner's list item 7 (CLUB 3 a): the shared reception login granted Docterz daily collection, Morning match and Check karein (tile_grants.json v34); Morning match opens on the October working days still waiting for a first pass, oldest first; its verdict names only the parts that have answered (F-796). Edits /root/portal/tile_grants.json and /root/finance/clinic_money.py (each gated on the md5 it replaces). No data step.

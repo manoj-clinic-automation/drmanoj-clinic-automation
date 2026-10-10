@@ -1,0 +1,2 @@
+kit id S512_CONSOLE_SMALL
+built 2026-10-10 IST, session 304 (parent). Club F (2), the owner's list item 8 -- the console's small kit: F-779 Today's work follows his panel (each person's list as they see it, his switches, the green done rows, their tasks with the answers); F-774 the System line carries the freshness reading's age and never calls a day-old reading fresh; F-795 flag codes in words. Replaces /root/finance/owner_console.py (gated on the md5 it replaces). No data step.
