@@ -274,3 +274,6 @@ _scratch/
 # The publish gate refused at 21:21 IST because this line was missing -- the standing rule above ("ANY NEW KIT WHOSE PAYLOAD IS A .json
 # NEEDS ITS LINE HERE, ADDED WHEN THE KIT IS BUILT") was not followed at the build.
 !deploy_kits/S487_AAJ_KA_KAAM/aaj_duties.json
+# S507 (10-Oct-2026): the kit edits the staff duty lines file aaj_duties.json (duty definitions and their SQL -- no key, no
+# number; the number gate reads it). The blanket *.json rule above hid it and PUBLISH_ALL refused, as it should.
+!deploy_kits/S507_FOLLOWUP_LOG_REACH/aaj_duties.json

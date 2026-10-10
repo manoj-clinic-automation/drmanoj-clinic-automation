@@ -1,0 +1,2 @@
+kit id S508_EXPORTS_CONFIRMED
+built 2026-10-10 IST, session 304 (parent). The owner, 10-Oct ("Good idea, do it"): reception's evening line about the two Docterz reports stays on their list as a GREEN confirmation once both are on the server (after 19:00, working days; the follow-up log must reach the next call day), with the patients counted and the times. Edits /root/finance/aaj_kaam.py and aaj_kaam.html (each gated on the md5 it replaces). No data step.
