@@ -1,0 +1,2 @@
+kit id S505_CARD_ELECTRICITY
+built 2026-10-10 IST, session 304 (parent). The owner's ruling, 10-Oct: a card's electricity bill counts in the month its card STATEMENT is dated in (September's pack takes the 17-Aug payment on the statement dated 12-Sep). packs.py card_electricity() reads the card lines of the statements dated in the month; packs.html says 'spent ... (after refunds)'. Replaces whole /root/finance/packs.py and packs.html (each gated on the md5 it replaces, S504's bytes). No data step.
