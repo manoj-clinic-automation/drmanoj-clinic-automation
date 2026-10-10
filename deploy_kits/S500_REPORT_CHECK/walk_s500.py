@@ -821,7 +821,7 @@ def main():
                                                    "(equal once those are taken out): %s" % salt_only) if salt_only else ""),
               n["status"] == 200 and n["n_tiles"] == o["n_tiles"] and not unexplained and n["pages"].get("home") == o["pages"].get("home"), unexplained)
         if who == "amir":
-            for side, e in (("OLD (the first closing after the vouchers)", o), ("NEW (the newest closing)", e_n := n)):
+            for side, e in (("OLD (the first closing after the vouchers)", o), ("NEW (the newest closing)", n)):
                 print("   Amir's stage-A proof rows on step 6, %s: %s" % (side, mask(str(e["texts"].get("/finance/amir/step/6 proof")))[:600]))
 
         def misses(side):
