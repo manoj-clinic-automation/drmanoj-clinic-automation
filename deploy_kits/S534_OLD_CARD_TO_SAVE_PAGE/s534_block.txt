@@ -1,0 +1,7 @@
+# BEGIN S534 old card address to the save page (kit S534, 12-Oct-2026) -- do not edit by hand
+# Phones that once opened save.dr-manoj.in remember its old forward to this file; it now leads to the new page.
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^DrManojAgarwalClinic\.vcf$ https://drmanojagarwal.com/save/ [R=302,L,NC]
+</IfModule>
+# END S534
