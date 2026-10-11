@@ -1,0 +1,4 @@
+KIT_ID   S525   S525_SPINE_RED_FAST
+session  305 (parent), 11-Oct-2026 · F-849
+files    /root/finance/freshness.py 66d93a63 -> 83865d94 · /root/finance/freshness_legs.json 716734ae -> 9df66934
+cron     one appended line, tagged S525_FRESH_HOURLY (35 9-23 * * *)

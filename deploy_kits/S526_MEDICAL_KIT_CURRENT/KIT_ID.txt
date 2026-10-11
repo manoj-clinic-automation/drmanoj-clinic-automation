@@ -1,0 +1,4 @@
+KIT_ID   S526   S526_MEDICAL_KIT_CURRENT
+session  305 (parent), 11-Oct-2026
+files    deploy_kits/PC_KITS/medical/kit.zip 83922881 -> 54e76aa4 · deploy_kits/PC_KITS/medical/KIT_INFO.txt (kit_md5, version, packed)
+server   nothing to install: the Clinic PCs page serves the repository copy after the next git pull
