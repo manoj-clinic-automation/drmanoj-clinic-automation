@@ -86,13 +86,18 @@ say "[2/8] two live pins exact; the website's folder found; no save folder there
 mkdir -p "$SCR" || { say "!! cannot make $SCR - nothing installed"; exit 1; }
 export PYTHONPYCACHEPREFIX="$SCR/pyc"; export PYTHONDONTWRITEBYTECODE=1
 "$APY" -m py_compile setup_notes.py walk_s529.py make_s529.py || { say "!! [3/8] compile failed - nothing installed"; exit 1; }
-PHPBIN="$(ls -d /usr/local/lsws/lsphp*/bin/php 2>/dev/null | sort -V | tail -1)"
-if [ -n "$PHPBIN" ]; then
-  "$PHPBIN" -l save/index.php >/dev/null 2>&1 || { say "!! [3/8] the save page does not pass $PHPBIN -l - nothing installed"; exit 1; }
-  say "[3/8] py_compile green (3 files); the save page passes php -l ($PHPBIN)"
-else
-  say "[3/8] py_compile green (3 files); no lsphp found for php -l -- the page is proven by reading it over https after placing"
-fi
+# php -l with the box's own PHP builds, newest first. A build that crashes (exit 128+, e.g. lsphp85's CLI on 11-Oct)
+# says nothing about the page: the next one is tried. Only a build that SAYS "Parse error" stops the install.
+PHPSAID=""
+for PHPBIN in $(ls -d /usr/local/lsws/lsphp*/bin/php /usr/bin/php 2>/dev/null | sort -rV); do
+  POUT="$("$PHPBIN" -l save/index.php 2>&1)"; PRC=$?
+  if [ "$PRC" = 0 ]; then PHPSAID="passes php -l ($PHPBIN)"; break; fi
+  if echo "$POUT" | grep -qi "parse error\|errors parsing"; then
+    say "!! [3/8] the save page does not pass $PHPBIN -l: $(echo "$POUT" | head -2 | tr '\n' ' ') - nothing installed"; exit 1
+  fi
+  say "   ($PHPBIN could not check it -- exit $PRC -- trying the next PHP build)"
+done
+say "[3/8] py_compile green (3 files); the save page ${PHPSAID:-was not checked by any PHP build here -- it is proven by reading it over https after placing}"
 
 WOUT="$( cd /tmp && timeout 120 "$APY" -B "$KDIR/walk_s529.py" "$KDIR" --fin "$FIN" 2>&1 )"; WRC=$?
 if [ "$WRC" != 0 ] || ! echo "$WOUT" | grep -q "^WALK OK"; then
