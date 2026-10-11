@@ -1,0 +1,6 @@
+KIT_ID   S522   S522_SALARY_OCTOBER
+kit      S522_SALARY_OCTOBER
+session  305 (the parent)
+built    2026-10-11 IST
+claimed  System Board _numbers v344
+files    staff_ledger.py eacd7154 -> 32dfcfb9 · salary_policy.py ac603874 -> c3653896
