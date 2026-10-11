@@ -1,0 +1,222 @@
+# ---------------------------------------------------------------------------------------------------------------------
+# S527 (the owner, 11-Oct-2026 08:10 IST: "DO NOW") -- the five set-up cards D688 listed as 'to be built'. Every line comes
+# from the server's own files (cert_watch.py's site list, att_doctor.py's ports, the crontab, the unit list), the
+# records (the Register, the renewals and vendor register of S230/S232, the estate inventory, the GoDaddy mails in the
+# clinic account) or a read of the live site; where nothing records a fact, the card says so under 'Not written down
+# yet'. NEVER a password, a key, a code -- nor WHERE one lies on a PC: that is a map to the vault (S232). Bitwarden is
+# named as the one place logins go.
+# Each card: label, chip, what (trusted HTML of this file), blocks [(title, [trusted HTML lines])], steps (numbered,
+# optional, (title, [lines])), gaps [plain text].
+# ---------------------------------------------------------------------------------------------------------------------
+SERVER_IP = "93.127.195.49"
+CARDS = [
+    {
+        "label": "Hostinger — the server",
+        "chip": "Renews 10-Jun-2028",
+        "what": "One rented server (Hostinger KVM 2) runs every clinic page, the website and every nightly job.",
+        "blocks": [
+            ("What it is", [
+                "<b>Hostinger KVM 2 VPS</b>, rented for two years at a time; the next renewal is <b>10-Jun-2028</b>.",
+                "Its name is <span class=nw>srv1746119.hstgr.cloud</span> and its address <span class=nw>" + SERVER_IP + "</span>. "
+                "It runs AlmaLinux 9 on a 99 GB disk.",
+                "<b>At the renewal:</b> Hostinger offers an add-on called Webuzo. It is not used and must stay switched "
+                "off; a reminder for this is set for 10-May-2028.",
+            ]),
+            ("Where to sign in", [
+                "<a href='https://hpanel.hostinger.com' target=_blank rel=noopener>hPanel</a> — Hostinger's own "
+                "panel, with your Hostinger account. That login belongs in Bitwarden (the card below).",
+                "From hPanel you can see whether the server is running, restart it, open its firewall and its weekly "
+                "snapshot, and open a <b>browser terminal</b> that works without the SSH key.",
+            ]),
+            ("Who may reach it, and on which doors", [
+                "Two firewalls stand in front of it: Hostinger's (in hPanel) and the server's own.",
+                "The doors the clinic needs: <b>22</b> the SSH login · <b>80</b> and <b>443</b> every web page · "
+                "<b>8090</b> CyberPanel · <b>8041</b> the biometric machine's punches (with <b>8042</b> beside it). "
+                "Everything else is closed.",
+                "The server checks its own firewall for the two attendance doors every day and puts them back if they "
+                "have gone.",
+            ]),
+            ("Its backups", [
+                "<b>Every night, to Google Drive:</b> the code (01:35), the finance database (01:40) and the clinic's "
+                "encrypted state (01:50). Your PC copies them to the SSD at 03:10.",
+                "<b>Every week, at Hostinger:</b> a snapshot of the whole machine. It brings back the whole server as it was "
+                "that day — never one file — so it is the last resort, after the nightly copies.",
+                "The website has its own weekly backup to Drive (on the Websites card).",
+            ]),
+            ("If the server is down", [
+                "<b>One page not opening</b> is usually that page's program, not the server: the "
+                "<a href='/finance/freshness'>freshness page</a> and the daily health mail say which.",
+                "<b>Nothing opens at all</b> — not followup, not attendance, not the website: sign in to hPanel and look "
+                "at the server's status. If it is stopped, start it; if it hangs, restart it from there. Every clinic "
+                "program starts again by itself when the server starts.",
+                "Until it is back the paper way stays the fallback: the counter sheet, the register, the slips.",
+                "Then tell Claude, so that the cause is found and written down.",
+            ]),
+        ],
+        "gaps": [
+            "The exact list of Hostinger's firewall rules as they stand today, and which day of the week the snapshot "
+            "runs and how many are kept, are not written down. One look in hPanel settles both.",
+        ],
+    },
+    {
+        "label": "CyberPanel",
+        "chip": "Notes",
+        "what": "The control panel of the web server on that machine (OpenLiteSpeed) — the door every page and the "
+                "website pass through, and the place their certificates are renewed.",
+        "blocks": [
+            ("What it does", [
+                "<b>OpenLiteSpeed</b>, managed by CyberPanel, receives every visit on 80 and 443. It serves the website "
+                "<span class=nw>drmanojagarwal.com</span> (WordPress) itself, and hands each clinic address — followup, "
+                "attendance, assets, fit, health, rx — to its own program on the server.",
+                "<b>Certificates</b> (the padlock): free Let's Encrypt ones, renewed by CyberPanel when 15 days or fewer "
+                "are left, checked daily.",
+                "<b>A watch on what the world sees:</b> every morning at 06:40 the server opens each site as a "
+                "patient's phone would and reads its certificate. If one is 10 days from expiry — meaning a renewal is "
+                "late — it sends one alert and one mail; on 08-Sep the website served an expired certificate for a day "
+                "and that is why this watch exists.",
+            ]),
+            ("Where to sign in", [
+                "<a href='https://" + SERVER_IP + ":8090' target=_blank rel=noopener>CyberPanel</a> — door 8090 of the "
+                "server. Its login belongs in Bitwarden.",
+                "<b>On 11-Oct this address did not open from outside</b> (read from Claude's browser): the panel answers on "
+                "the server itself, and its door may be closed to the open internet. If it does not open for you, "
+                "hPanel's page for the server is the way in.",
+            ]),
+            ("Before changing anything there", [
+                "<b>Tell Claude first.</b> A website's settings in CyberPanel are also the clinic pages' settings: "
+                "a changed rule can close followup or attendance for everyone.",
+                "<b>Never delete</b> anything about certificates, nor the server's certificate folder: renewals stop "
+                "silently (D445).",
+                "WordPress itself — the website's pages and posts — is changed inside WordPress, not in CyberPanel.",
+            ]),
+        ],
+        "gaps": [
+            "Whether door 8090 is meant to be open to the internet or only to you is not written down; one look at "
+            "Hostinger's firewall settles it.",
+            "CyberPanel's own backup jobs run but produce nothing (S230). They are not relied on: the website and the "
+            "clinic data have their own backups.",
+        ],
+    },
+    {
+        "label": "SSH login",
+        "chip": "Key only",
+        "what": "How your PC reaches the server's command line — the window you paste the one-line installs into. "
+                "It opens with a key, never with a password.",
+        "blocks": [
+            ("How it is set up", [
+                "The server accepts <b>only a key</b> (type ed25519); logging in with a password is switched off.",
+                "On your PC, one word opens it in a terminal:<pre class=cp>ssh vps</pre>",
+                "<b>WinSCP</b> opens the server's folders with the same key (WinSCP keeps it in its own format), in "
+                "Commander view. A <span class=nw>.py</span> or <span class=nw>.env</span> file is copied across in "
+                "<b>Binary</b> mode, never Text (D164).",
+                "Every install Claude prepares is one line pasted into this window; it fetches the kit itself.",
+            ]),
+            ("Where the key belongs", [
+                "On your PC, in its own SSH folder, and one copy in <b>Bitwarden</b>. Nowhere else — not in a "
+                "chat, a mail, a photo or a document.",
+            ]),
+        ],
+        "steps": ("On a new PC, or if the key is lost", [
+            "<b>A new PC:</b> take the key out of Bitwarden into the new PC's SSH folder; Claude writes the one-word "
+            "<b>vps</b> shortcut and the WinSCP setting for it. Nothing changes on the server.",
+            "<b>The key lost or exposed:</b> sign in to hPanel and open the server's <b>browser terminal</b> — it "
+            "needs no key. Claude makes a new key with you and gives the lines that put it on the server and take the "
+            "old one off.",
+            "<b>Afterwards</b> the new key goes into Bitwarden and the old copy is deleted everywhere.",
+        ]),
+        "gaps": [
+            "A copy of the key is still kept outside Bitwarden on your PC (flagged at S232): it is to go into Bitwarden "
+            "and the key is then to be changed. Not recorded as done.",
+        ],
+    },
+    {
+        "label": "Websites",
+        "chip": "4 names",
+        "what": "The public website, the clinic's own pages, the retired name and the lab's site — where each is "
+                "registered, where it runs, and when it renews.",
+        "blocks": [
+            ("drmanojagarwal.com — the public website", [
+                "<a href='https://drmanojagarwal.com' target=_blank rel=noopener>drmanojagarwal.com</a> — "
+                "<b>WordPress</b> (built with Elementor), on this server, through CyberPanel. The name renews on "
+                "<b>10-Jun-2029</b>; its "
+                "records point at Hostinger's name servers.",
+                "Pages and posts are changed in WordPress itself (its admin page, with its own login — in "
+                "Bitwarden).",
+                "Backed up weekly to Google Drive by WordPress's own backup plug-in (UpdraftPlus).",
+            ]),
+            ("dr-manoj.in — the clinic's own pages", [
+                "Registered at <b>GoDaddy</b> (with the clinic's Google account), renewed on 15-Aug-2026 for a year, "
+                "<b>automatic renewal on</b> — next around Aug-2027.",
+                "<b>On this server:</b> "
+                "<a href='https://followup.dr-manoj.in/portal' target=_blank rel=noopener>followup</a> (the clinic hub) "
+                "· <a href='https://attendance.dr-manoj.in' target=_blank rel=noopener>attendance</a> · "
+                "<a href='https://assets.dr-manoj.in' target=_blank rel=noopener>assets</a> · fit · health "
+                "· rx.",
+                "<b>At GoDaddy, as forwarding links</b> (they never touch this server): save, contact, map, web, ios, "
+                "book, app, www.",
+                "A new address under dr-manoj.in is a record added at GoDaddy and a site added in CyberPanel — "
+                "Claude prepares both.",
+            ]),
+            ("drmanojagarwal.in — retired", [
+                "Registered at Bigrock (bought through Justdial). <b>Retired by you and not renewed on purpose</b> "
+                "(D422); until it lapses it forwards to the .com (it still did on 11-Oct).",
+            ]),
+            ("nkpathology.com — the lab", [
+                "<a href='https://nkpathology.com' target=_blank rel=noopener>nkpathology.com</a> runs on <b>another "
+                "host</b>, not this server — the only site of yours that does not. It is a hand-built site, not "
+                "WordPress.",
+            ]),
+            ("Certificates and renewals", [
+                "Every site on this server has a free certificate renewed by CyberPanel and checked every morning "
+                "(the CyberPanel card).",
+                "Domain renewals also come to you in the renewals list; dr-manoj.in renews by itself at GoDaddy.",
+            ]),
+        ],
+        "gaps": [
+            "Where nkpathology.com is registered and hosted, and when it renews, is not recorded anywhere.",
+            "save.dr-manoj.in (the contact card patients save) did not open on 11-Oct from Claude's browser; on 08-Sep it "
+            "forwarded through GoDaddy. Worth one tap on your phone.",
+            "Which company drmanojagarwal.com is registered with is read only from its records (Hostinger's name "
+            "servers); the bill would confirm it.",
+        ],
+    },
+    {
+        "label": "Bitwarden",
+        "chip": "In use",
+        "what": "One safe place for every login, so that none lives only in memory, on paper notes or in a photo. "
+                "The free account has been in use since September (S230).",
+        "blocks": [
+            ("What is decided", [
+                "Bitwarden replaces Apple Notes for logins (D421).",
+                "Its <b>master password</b> and its <b>two-step recovery code</b> are kept on paper only — never "
+                "inside Bitwarden, never in a chat.",
+                "Claude never sees the vault and never types a password for you.",
+            ]),
+            ("Already in it", [
+                "Folder <b>Clinic — VPS</b>: the key that unlocks the server's nightly encrypted backup.",
+                "Folder <b>Clinic — Google</b>: the apps' Google sign-in secret and the MyOperator values.",
+                "The personal apps' password.",
+            ]),
+            ("How to file one login", [
+                "One entry per login: its name, the user name, the password, and <b>the website address</b> — so the "
+                "browser fills it by itself next time.",
+                "Then the old copy — a note, a photo, a file on the PC — is deleted.",
+            ]),
+        ],
+        "steps": ("Bringing the rest in, a stage at a time", [
+            "<b>The server:</b> the Hostinger account, CyberPanel, WordPress's admin, and the SSH key (after which a new "
+            "key is made — the SSH card).",
+            "<b>Names and code:</b> GoDaddy, Bigrock (until it lapses), the lab's website, GitHub and its recovery codes, "
+            "the recovery codes of both Google accounts.",
+            "<b>The clinic's services:</b> MyOperator's panel, Marg, Docterz, and the statement passwords typed on the "
+            "packs page.",
+            "<b>Last:</b> the older login files kept on your PC are deleted once each is in Bitwarden.",
+        ]),
+        "gaps": [
+            "The move of the older login files on your PC into Bitwarden (the S232 list) is not recorded as done.",
+        ],
+    },
+]
+
+# the owner's ask of 06-Oct, all five built at S527: nothing is left 'to be built' (the section shows only when this has rows)
+TO_BUILD = []
