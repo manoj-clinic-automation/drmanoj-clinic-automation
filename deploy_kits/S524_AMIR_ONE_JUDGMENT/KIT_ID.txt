@@ -1,0 +1,7 @@
+kit id S524_AMIR_ONE_JUDGMENT
+project Sanjeevni (brief of session 307, 11-Oct-2026; D706; F-843 F-844 F-845 F-846 F-847 F-848 F-840 and the spine gate of 08-Oct) -- ONE proof of
+Amir's vouchers, read from the spine: Part 0 repairs the purchase item-wise reader and the tie step so the spine builds again (13/13); then
+_s446_proof is rebuilt on the spine (one key, one judgment), stage A is re-derived from its inputs, the old whole-count proof is retired (the hub,
+the board, the orthotic section and the statement read the stage), the entered door is gated by the stage, the duty counts only what Amir can see,
+a short closing never verifies a rename, the shelf gap judges a voucher by its moment. Seven live files; DUTY_MAP v9 -> v10.
+installed by install_S524_AMIR_ONE_JUDGMENT.sh (it takes the build lock itself)
