@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S307 close** (the Sanjeevni project), 11-Oct-2026, late morning — the parent sections exactly as its S304 close wrote them (its session 305 is open), the Sanjeevni sections refreshed here
+# OWNER TO-DO — LIVE · refreshed at the **S306 close** (the Scan App project, its first session), 11-Oct-2026, early afternoon — the parent sections exactly as its S304 close wrote them (its session 305 is open), the Sanjeevni sections exactly as its S307 close wrote them (308 reserved); the Scan App sections new here, at the head
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S307 close** (the Sanjeevni project), 11-Oct-2026, late morning — the parent sections exactly as its S304 close wrote them (its session 305 is open), the Sanjeevni sections refreshed here
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S304 close** (the parent), 10-Oct-2026, the night — the Sanjeevni sections exactly as its S301 close wrote them (its session 303 is open)
 
@@ -39,6 +41,46 @@
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
 *Detail: `START_HERE_SESSION_305.md` · `S304_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S307 close's (11-Oct, late morning); `S307_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_308.md` that chat's entry.*
+
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — written at the S306 close (11-Oct, early afternoon)
+
+*Detail: `S306_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_309.md`. The same lines are on your System Board.*
+
+**1 · The publish** — this close's record only (papers; nothing changes on the server). The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**Nothing else is yours.** The smart scanner is on for every phone from your tap; its first real reading reaches you by itself on Monday 12-Oct at 08:00 (three lines). The two items on the clinic chat's files (the accountants' pack carrying the clinic's bills; Sukhveer's duty line) are on the board for it — not a step of yours.
+
+**Still yours from before, not urgent (on your board):** the clinic / MK expense split (Y51) — nothing suggests a group for electrical or plumbing papers until you settle it; it is never guessed.
+
+**Worth knowing — the staff's, on their own screens, not yours:**
+- **Reception:** the same scanner, now cropping to the page at full resolution, with *Adjust* beside *Retake*; one big *CHALLAN HAI?* button to tap when the paper is a challan — it resets after every Save.
+- **Shavez (and you):** the papers page has four more sections — Resumes, Miscellaneous documents, Construction work (counted on its own), Personal (yours only); a paper sorted is accepted there and then (no approve tap); *Bills awaited* lists the challans, amber after 15 days; a paper the system placed says so on its page and can be changed there.
+
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — written at the S306 close
+
+**Every build follows `BUILD_NORM_v1` (D704).**
+
+1. **The Monday reading of the smart scanner** (12-Oct 08:00, by itself): any phone that falls back, any sheet cut — a small kit on the real phone's own photos.
+2. **The clinic chat's two items** (D710 (2), (3)) — on its word with a PLANNED line, or its own build.
+3. **A short owner page for the scan app's switches** (F-856) — with the next kit that touches the admin.
+4. **S532 after a week:** every placed paper a person changed is a rule to tighten; nothing is loosened.
+5. **A warranty date offered from the scan's reading** — when you ask.
+
+## ✅ DONE AT THE S306 CLOSE — 11-Oct-2026 (the Scan App project)
+
+- ~~**"The crop feature is not available … the auto cropping is very poor"**~~ — measured (33 of 40 whole photos); **the smart scanner live** (S523), on everywhere from your tap (D711).
+- ~~**"Switch it on everywhere … find an easier way"**~~ — one switch, every phone; the Monday reading scheduled; the long page noted (F-856).
+- ~~**"Suggest a flow … each scan finds its home"**~~ — the flow measured and proposed; your three rulings (D710).
+- ~~**The four sections and sorted = accepted**~~ — live (S530); 8 waiting papers accepted at install.
+- ~~**The challan flow, reception's screen made simpler**~~ — live (S531).
+- ~~**The system sends a scan home**~~ — live (S532); one paper placed at install.
+- ~~**The S523, S530 + S531 and S532 publishes**~~ — yours, 06:49, 12:47, 13:03.
+
+---
 
 ## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S304 close
 
