@@ -1,0 +1,7 @@
+kit id S528_AMIR_PAGE
+project Sanjeevni (brief of session 308, 11-Oct-2026; D706 D708 D709; F-851 F-852 F-853 F-854) -- Kit 2 of three on Amir's page: the judgment
+reaches the screens rightly (one source of the stage's words, do-this lines only for staff, the verdict on the owner's hub and Needs-you; one
+light board; one voucher numbering; the take-back the checker's alone; 'wrong' only inside both reaches; the proof window a batch's first entry)
+and the renames by identity (a closing judged by its capture moment, folds, near-miss questions, read-back, the owner's Accept). Four live files
+(stock_app.py, item_alias.py, amir_day.py anchored; stock_amir.html whole); one additive data step (the 22 ticks judged from the newest closing).
+installed by install_S528_AMIR_PAGE.sh (it takes the build lock itself)

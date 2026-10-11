@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="hi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock check — Amir ka kaam</title>
+<style>
+/* S436 STAFF PAGES CLEAN (D638, 28-Sep-2026): ONE screen, Hindi, four sections -- the vouchers, the closing stock after them, the
+   corrections, the rest. S437 COUNT PAGES FINAL (F-659): section 1 is the vouchers ONLY, numbered as Amir keys them -- STOCK ISSUE
+   voucher 1..N, then STOCK RECEIVE voucher 1..M, continuously across the whole count (the server numbers them) -- and a voucher line is
+   item (packing) · Marg se → tak · kitna, nothing else. A keyed voucher folds to one line with its Marg number.
+   S528 AMIR PAGE (D708, 11-Oct-2026): a staff screen carries only "do this" lines. No take-back here unless the server says the login may
+   (can_clear / clear_hi), no upload box, no sentence that judges his work; the checker's questions block (Accept) renders only for the
+   checker, from the server's own list. Every word on this page that is not a fixed caption comes from /finance/stock/api/pad/amir/<count>
+   (the light board): the voucher titles, the quantity words, the stage line, the rename states, the last closing's time.
+     1  Voucher — Marg mein daalne hain      the vouchers the stage shows him; one tap "Marg mein daal diya" with Marg's voucher number
+     2  Voucher ke baad — closing stock     the one instruction, the stage's line, the last closing stock the server received
+     3  Sudhar — Marg mein                  Salt theek karo · Rate daalo · Naam badlo (the rename rows while any is planned)
+     4  Baaki kaam                          the Sunday, bill entry baaki, the traces' fixes
+   Nothing is computed here. */
+:root{
+  --ground:#F6F8F7;--surface:#FFF;--surface-2:#EDF2F0;--ink:#15201E;--ink-2:#3D4B48;--muted:#66756F;--line:#D9E2DF;
+  --accent:#0E5C58;--on-accent:#FFF;--accent-soft:#D8E9E6;--ok:#0E5C58;--diff:#8C3A2B;--diff-soft:#F6E3DF;--warn:#8A5A12;--warn-soft:#F7ECD8;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}}
+:root[data-theme="dark"]{
+  --ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;--muted:#869892;--line:#26332F;
+  --accent:#63C2B6;--on-accent:#0D1312;--accent-soft:#17322F;--ok:#63C2B6;--diff:#E08A76;--diff-soft:#33201C;--warn:#D3A052;--warn-soft:#2E2617;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans","Noto Sans Devanagari",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+.wrap{max-width:760px;margin:0 auto;padding:12px 12px 40px}
+h1{font-size:20px;margin:0}.sub{color:var(--muted);font-size:13px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}
+.card h2{font-size:18px;margin:0 0 4px}.card .n{display:inline-block;min-width:26px;height:26px;line-height:26px;text-align:center;border-radius:13px;background:var(--accent);color:var(--on-accent);font-size:14px;font-weight:700;margin-right:8px}
+.lead{color:var(--ink-2);font-size:14.5px;margin:6px 0 10px}
+.empty{color:var(--muted);font-style:italic;font-size:14px;padding:4px 0}
+.vc{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0;background:var(--surface)}
+.vc.issue{border-left:5px solid var(--diff)}.vc.receive{border-left:5px solid var(--ok)}
+.vc .vh{font-weight:700;font-size:17px}.vc .vs{color:var(--muted);font-size:13px}
+details.vd{border:1.5px dashed var(--line);border-radius:12px;margin:8px 0;background:var(--surface);opacity:.75}
+details.vd>summary{list-style:none;cursor:pointer;padding:10px 14px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;min-height:44px}
+details.vd>summary::-webkit-details-marker{display:none}
+details.vd>.in{padding:0 14px 10px}
+.ln{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:7px 0;border-top:1px dashed var(--line);font-size:15px}
+.ln:first-of-type{border-top:0}
+.ln .it{font-weight:700}.ln .q{color:var(--ink-2);font-size:13.5px}.ln .r{text-align:right;white-space:nowrap;font-weight:700;font-variant-numeric:tabular-nums;font-size:16px}
+.ln .r.out{color:var(--diff)}.ln .r.inn{color:var(--ok)}
+.ent{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.ent input{font:inherit;font-size:16px;padding:9px;border:1px solid var(--line);border-radius:9px;flex:1;min-width:150px;background:var(--surface);color:var(--ink)}
+button.b{font:inherit;font-size:15px;font-weight:700;padding:10px 14px;border-radius:10px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;min-height:44px}
+button.b.main{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.tg{font:inherit;font-size:13px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--accent);cursor:pointer;font-weight:600}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.row .it{font-weight:700}.row .q{color:var(--ink-2);font-size:13.5px}.row .r{text-align:right;white-space:nowrap;font-weight:700}
+.row.done{opacity:.55}
+.chip{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;border:1px solid var(--line);color:var(--muted)}
+.chip.ok{color:var(--ok);border-color:var(--ok)}.chip.warn{color:var(--warn);border-color:var(--warn)}.chip.bad{color:var(--diff);border-color:var(--diff)}
+.msg{font-size:14px;color:var(--ok);margin-top:6px;font-weight:600;min-height:18px}.err{color:var(--diff);font-weight:700}
+.qbox{margin:8px 0 12px;padding:10px 12px;border:1.5px solid var(--warn);border-radius:10px;background:var(--warn-soft)}
+h3{font-size:15.5px;margin:12px 0 4px}
+.copy{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;background:var(--surface-2);border-radius:6px;padding:2px 6px}
+.tally{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;color:var(--ink-2);margin:4px 0 8px}.tally b{color:var(--ink)}
+</style></head><body><div class="wrap">
+<div class="top"><h1>Stock check — Amir ka kaam</h1><span class="sub" id="who"></span></div>
+<div class="sub">Voucher · closing stock · sudhar · baaki kaam — sab ek hi panne par</div>
+<div id="body"><div class="card"><span class="sub">Loading…</span></div></div>
+</div>
+<script>
+/*__BOOT__*/
+const BASE="/finance/stock";
+const B=window.BOOT||{count_id:0,user:"",checker:false};
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+let D=null;
+function load(){
+  fetch(BASE+"/api/pad/amir/"+B.count_id,{cache:"no-store"}).then(r=>r.json()).then(j=>{ if(!j.ok){ document.getElementById("body").innerHTML='<div class="card err">'+esc(j.message||"ginti nahi mili")+'</div>'; return; } D=j; render(); })
+  .catch(()=>{ document.getElementById("body").innerHTML='<div class="card err">Server ne jawab nahi diya. Internet dekh kar phir kholiye.</div>'; });
+}
+function vkey(v){ return v.round_no+'|'+v.kind+'|'+v.batch_no; }
+function lineHtml(l){
+  // S437: item (packing) · Marg se → tak · kitna -- and nothing else; every word from the server (qty_words, the whole-piece list included)
+  return '<div class="ln"><div><div class="it">'+esc(l.item)+(l.packing?' <span class="sub">('+esc(l.packing)+')</span>':'')+'</div><div class="q">Marg se '+esc(l.from_hi)+' → tak '+esc(l.to_hi)+'</div></div>'
+    +'<div class="r '+(l.change_sign<0?'out':'inn')+'">'+(l.change_sign<0?"− ":"+ ")+esc(l.qty_hi)+'</div></div>';
+}
+function voucherCard(v){
+  const k=vkey(v);
+  if(v.entered){
+    return '<details class="vd"><summary><span><b>'+esc(v.title_hi)+'</b> <span class="sub">· '+v.n+' item</span></span><span class="chip ok">✓ Marg no. '+esc(v.entered.no)+'</span></summary><div class="in">'
+      +(v.lines||[]).map(lineHtml).join("")
+      +'<div class="vs" style="margin-top:8px">Marg mein daala '+(v.entered.on?'('+esc(v.entered.on)+') ':'')+'· '+esc(v.entered.by)+' · '+esc(v.entered.at_text)
+      +(v.can_clear&&v.clear_hi?' <button class="tg" data-unent="'+esc(k)+'">'+esc(v.clear_hi)+'</button>':'')+'</div></div></details>';
+  }
+  return '<div class="vc '+(v.kind==="ISSUE"?'issue':'receive')+'"><div class="vh">'+esc(v.title_hi)+'</div><div class="vs">'+(v.kind==="ISSUE"?"Marg mein kam karna":"Marg mein badhana")+' · '+v.n+' item — Marg mein yeh ek voucher banaiye</div>'
+    +(v.lines||[]).map(lineHtml).join("")
+    +'<div class="ent"><input type="text" inputmode="text" placeholder="Marg ka voucher number" data-vno="'+esc(k)+'"><button class="b main" data-ent="'+esc(k)+'">Marg mein daal diya</button></div></div>';
+}
+function moreBtn(d){
+  // S452: Stage C -- "Aur voucher kholiye" opens the next lot at once, as often as he taps, until none is left (the stage comes for every login)
+  const S=d.stage||{}; if(S.stage!=="C"||!(S.more>0)) return "";
+  return '<div style="margin-top:10px"><button class="b main" data-more="1">Aur voucher kholiye ('+Math.min(S.per||12,S.more)+')</button> <span class="sub">baaki '+S.more+'</span></div>';
+}
+function render(){
+  const d=D;
+  document.getElementById("who").textContent="Ginti #"+d.count_id+" · "+(d.day||"")+" · "+(B.user||"");
+  let h="";
+  // 1 -- the vouchers the stage shows, numbered as Amir keys them (the server's one numbering)
+  const VF=d.vouchers||[];
+  const nI=VF.filter(v=>v.kind==="ISSUE").length, nR=VF.length-nI, done=VF.filter(v=>v.entered).length;
+  h+='<div class="card" id="vouchers"><h2><span class="n">1</span>Voucher — Marg mein daalne hain</h2><div class="lead">Jo voucher yahan dikhen, unhe Marg mein daaliye aur Marg ka voucher number likhiye. Har card Marg mein <b>ek</b> voucher hai. Pehle sab <b>STOCK ISSUE</b> (Marg mein kam karna), phir sab <b>STOCK RECEIVE</b> (Marg mein badhana). Daalne ke baad Marg ka voucher number likhiye aur <b>Marg mein daal diya</b> dabaiye.</div>';
+  h+='<div class="tally"><span>STOCK ISSUE <b>'+nI+'</b></span><span>STOCK RECEIVE <b>'+nR+'</b></span><span>Daal diye <b>'+done+' / '+VF.length+'</b></span></div>';
+  if(!VF.length) h+='<div class="empty">Abhi koi voucher nahi.</div>';
+  VF.forEach(v=>{ h+=voucherCard(v); });
+  h+=moreBtn(d)+'<div class="msg" id="vmsg"></div></div>';
+  // 2 -- after the vouchers: the closing stock; the stage's one line; the last closing the server received
+  const P=d.proof||{}, LC=d.last_closing;
+  h+='<div class="card"><h2><span class="n">2</span>Voucher ke baad — Closing stock nikaaliye</h2><div class="lead">Sab voucher daal dene ke baad poore store ka closing stock export roz ki tarah nikaaliye — woh apne aap server tak pahunchta hai.</div>'
+    +(P.hi?'<div class="row"><div><div class="it">'+esc(P.hi)+'</div></div><div class="r">'+(P.state==="done"?'<span class="chip ok">✓</span>':'')+'</div></div>':'')
+    +(LC&&LC.hi?'<div class="sub" style="margin-top:8px">'+esc(LC.hi)+'</div>':'')+'</div>';
+  // 3 -- corrections in Marg
+  h+='<div class="card"><h2><span class="n">3</span>Sudhar — Marg mein</h2>';
+  const SF=d.salt_fix||[];
+  h+='<h3>(a) Salt theek karo</h3><div class="lead">Marg mein in items ka salt galat hai — item master mein salt badliye. Agla salt export aate hi yeh apne aap hat jayega.</div>';
+  if(!SF.length) h+='<div class="empty">Koi nahi.</div>';
+  SF.forEach(s=>{ h+='<div class="row"><div><div class="it">'+esc(s.item)+'</div><div class="q">Abhi: '+esc(s.marg_now||"—")+' → <span class="copy">'+esc(s.salt_new)+'</span></div></div><div class="r"><span class="chip warn">'+esc(s.hi)+'</span></div></div>'; });
+  const RT=d.rate_tasks||[];
+  h+='<h3 id="rates">(b) Rate daalo</h3><div class="lead">In items ka selling rate Marg mein nahi hai — item master mein rate daaliye, tabhi inka hisaab banega.</div>';
+  if(!RT.length) h+='<div class="empty">Koi nahi.</div>';
+  RT.forEach(t=>{ h+='<div class="row"><div><div class="it">'+esc(t.item)+' <span class="sub">'+esc(t.packing||"")+'</span></div><div class="q">'+esc(t.hi)+'</div></div><div class="r"><span class="chip warn">Karna hai</span></div></div>'; });
+  // (c) Naam badlo -- the rows while any is planned (a non-checker), every row for the checker; the one line once all are ticked; gone once all are seen
+  const RN=d.renames||{}, RR=RN.rows||[], RQ=RN.questions||[];
+  if(!RN.ready){
+    h+='<h3 id="renames">(c) Naam badlo</h3><div class="lead">'+esc(RN.wait_hi||"")+'</div>';
+  } else if(RR.length||RQ.length||RN.done_hi){
+    h+='<h3 id="renames">(c) Naam badlo'+(RR.length?' ('+RR.length+')':'')+'</h3>';
+    if(RQ.length){
+      h+='<div class="qbox"><div class="lead" style="margin:0 0 6px"><b>Doctor sahab ke liye</b></div>';
+      RQ.forEach(q=>{ h+='<div class="row"><div><div class="it">Marg mein \''+esc(q.seen_name)+'\' dikha — kya yahi \''+esc(q.new_name)+'\' hai?</div><div class="q">'+esc(q.old_name)+' → '+esc(q.new_name)+(q.as_on?' · closing '+esc(q.as_on):'')+'</div></div><div class="r">'
+        +(q.accept?'<button class="b main" data-accept="'+esc(q.rename_id)+'" data-seen="'+esc(q.seen_name)+'">Accept</button>':'')+'</div></div>'; });
+      h+='<div class="msg" id="qmsg"></div></div>';
+    }
+    if(RR.length){
+      h+='<div class="lead">Marg mein in naamon ko theek waise hi badliye jaisa likha hai (copy kijiye), phir tick kijiye.</div>';
+      h+=RR.map(r=>'<div class="row'+(r.state==="verified"?' done':'')+'"><div><div class="it">'+esc(r.old_name)+'</div><div class="it" style="color:var(--accent)">→ <span class="copy">'+esc(r.new_name)+'</span></div><div class="q">'+esc(r.state_hi)+(r.done_by?' · '+esc(r.done_by):'')+(r.verified_as_on?' · closing '+esc(r.verified_as_on):'')+'</div></div>'
+        +'<div class="r">'+(r.state==="planned"?'<button class="b main" data-rtick="'+esc(r.old_name)+'">Marg mein badal diya</button>':(r.state==="verified"?'✓':'<span class="chip ok">✓</span>'+(r.clear_hi?' <button class="tg" data-runtick="'+esc(r.old_name)+'">'+esc(r.clear_hi)+'</button>':'')))+'</div></div>').join("");
+    } else if(RN.done_hi){
+      h+='<div class="row"><div><div class="it">'+esc(RN.done_hi)+'</div></div><div class="r"><span class="chip ok">✓</span></div></div>';
+    }
+    h+='<div class="msg" id="rmsg"></div>';
+  }
+  h+='</div>';
+  // 4 -- whatever else the system needs from him
+  h+='<div class="card"><h2><span class="n">4</span>Baaki kaam</h2>'+restCard(d.rest)+'</div>';
+  document.getElementById("body").innerHTML=h;
+  const hh=location.hash.slice(1); if(!window._s436 && (hh==="vouchers"||hh==="renames"||hh==="rates")){ window._s436=1; const e=document.getElementById(hh); if(e) e.scrollIntoView(); }
+}
+function restCard(W){
+  let h=''; let n=0;
+  W=W||{};
+  const P=W.plan;
+  if(P){ n++; h+='<div class="row"><div><div class="it">Poori ginti ka Sunday</div><div class="q">'+(P.status==="confirmed"?'Sunday <b>'+esc(P.sunday_text)+'</b> — Darpan ne haan kahi ✓':(P.status==="picked"?'Aapne <b>'+esc(P.sunday_text)+'</b> chuna — Darpan ki haan baaki':'Ginti ka Sunday chuniye:'))+'</div>'
+    +(P.status!=="confirmed"?'<div style="margin:6px 0">'+(P.window_text||[]).map((t,i)=>'<button class="b'+(P.window[i]===P.sunday?' main':'')+'" data-sunday="'+esc(P.window[i])+'">'+esc(t)+'</button>').join(" ")+'</div><div class="msg" id="wmsg"></div>':'')+'</div><div></div></div>'; }
+  (W.bill_pending||[]).forEach(x=>{ n++; h+='<div class="row"><div><div class="it">'+esc(x.item)+'</div><div class="q">'+esc(x.text_hi)+' — maal aa gaya, Marg mein bill abhi nahi</div></div><div class="r"><span class="chip warn">bill entry</span></div></div>'; });
+  (W.fixes||[]).forEach(x=>{ n++; h+='<div class="row"><div><div class="it">'+esc(x.item)+'</div><div class="q">'+esc(x.fix)+' · '+esc(x.at_text)+'</div></div><div class="r"><span class="chip warn">Sudhar</span></div></div>'; });
+  if(!n) h+='<div class="empty">Aaj kuch nahi — sab upar hai.</div>';
+  return h;
+}
+document.addEventListener("click", async e=>{
+  const mo=e.target.closest("button[data-more]"); if(mo){ const m=document.getElementById("vmsg"); if(m) m.textContent="…";   // S452
+    const r=await fetch(BASE+"/api/pad/amir/"+D.count_id+"/more",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).catch(()=>null);
+    const j=r?await r.json().catch(()=>null):null; if(m) m.textContent=(j&&j.message)||"server ne jawab nahi diya"; if(j&&j.ok) setTimeout(load, 700); return; }
+  const sd=e.target.closest("button[data-sunday]"); if(sd){ const m=document.getElementById("wmsg"); if(m) m.textContent="…";
+    const r=await fetch(BASE+"/api/watch/plan/pick",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({sunday:sd.dataset.sunday})}).catch(()=>null);
+    const j=r?await r.json().catch(()=>null):null; if(m) m.textContent=(j&&j.message)||"server ne jawab nahi diya"; if(j&&j.ok) setTimeout(load, 700); return; }
+  const en=e.target.closest("button[data-ent],button[data-unent]"); if(en){ const k=(en.dataset.ent||en.dataset.unent).split("|"); const m=document.getElementById("vmsg");
+    const inp=en.dataset.ent?document.querySelector('input[data-vno="'+en.dataset.ent+'"]'):null; const no=inp?(inp.value||"").trim():"";
+    if(en.dataset.ent&&!no){ m.textContent="Pehle Marg ka voucher number likhiye."; if(inp) inp.focus(); return; }
+    const r=await fetch(BASE+"/api/pad/vouchers/"+D.count_id+"/entered",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({round:+k[0],kind:k[1],batch:+k[2],marg_voucher_no:no,clear:!!en.dataset.unent})}).catch(()=>null);
+    const j=r?await r.json().catch(()=>null):null; m.textContent=(j&&j.message)||"server ne jawab nahi diya"; if(j&&j.ok) setTimeout(load, 700); return; }
+  const rk=e.target.closest("button[data-rtick],button[data-runtick]"); if(rk){ const m=document.getElementById("rmsg"); if(m) m.textContent="…";
+    const r=await fetch(BASE+"/api/pad/rename/tick",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({old:rk.dataset.rtick||rk.dataset.runtick,clear:!!rk.dataset.runtick})}).catch(()=>null);
+    const j=r?await r.json().catch(()=>null):null; if(m) m.textContent=(j&&j.message)||"server ne jawab nahi diya"; if(j&&j.ok) setTimeout(load, 700); return; }
+  const ac=e.target.closest("button[data-accept]"); if(ac){ const m=document.getElementById("qmsg"); if(m) m.textContent="…";
+    const r=await fetch(BASE+"/api/pad/rename/accept",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({rename_id:+ac.dataset.accept,seen_name:ac.dataset.seen})}).catch(()=>null);
+    const j=r?await r.json().catch(()=>null):null; if(m) m.textContent=(j&&j.message)||"server ne jawab nahi diya"; if(j&&j.ok) setTimeout(load, 700); return; }
+});
+load();
+</script></body></html>
