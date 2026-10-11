@@ -1,0 +1,35 @@
+clinic_papers S530 heal: 8 accepted, 0 held (a same-vendor-number-amount double)
+GREEN W1 the app imports and mounts clinic_papers S530.1
+GREEN W2 the heal at start: grouped clinic drafts 8 -> 0, 8 accepted by the system (idempotent on the next start)
+GREEN W3 a second heal accepts nothing more -- accepted 0 held 0
+GREEN W4 /papers (owner): the page, the new title, the fold 'Where each paper stands' -- 200
+GREEN W5 /papers lists the Other-document paper (a resume) with its suggestion
+GREEN W6 /papers suggests Construction work for the hardware shop's slip
+GREEN W7 /papers says the paper addressed to the clinic is not a supplier's bill
+GREEN W8 /papers (manager): no owner's fold, the list as the owner's
+GREEN W9 a clinic draft's page: the consumables fold and the four sections, Personal shown to the owner
+GREEN W10 the same page for the manager: no Personal
+GREEN W11 one tap on a clinic draft: sorted AND accepted (status approved, by the person) -- {'status': 'approved', 'subgroup': 'procedure', 'approved_by': 'Dr Manoj'}
+GREEN W12 the audit carries d710_accepted
+GREEN W13 the vendor book gained the supplier
+GREEN W14 the duplicate rule holds: the first accepted, the second sorted but NOT accepted and said so -- approved / {'status': 'draft', 'subgroup': 'others'}
+GREEN W15 an Other-document paper takes a section and keeps its status -- ('captured', 'resume')
+GREEN W16 a consumable group is refused off the clinic lane
+GREEN W17 Personal refused to the manager -- (None, 'draft')
+GREEN W18 Personal set by the owner; a clinic draft so sorted is accepted too -- ('personal', 'approved')
+GREEN W19 the manager cannot open a Personal paper
+GREEN W20 a Dr MK expense paper takes a section and keeps its status -- ('misc', 'captured')
+GREEN W21 the month page: 'Other sections' with Construction work (money) and Resumes, Personal for the owner
+GREEN W22 the consumables total leaves the construction slip out (2,234 = 1,234 + 500 + 500; not 9,084) -- ₹2,234.00
+GREEN W23 the manager's month page has no Personal row
+GREEN W24 one section's list opens
+GREEN W25 the manager cannot list Personal
+GREEN W26 the month page still answers -- 200
+GREEN W26 the join page still answers -- 200
+GREEN W26 the bill page still answers -- 200
+GREEN W26 renewals still answers -- 200
+GREEN W26 purchases still answers -- 200
+GREEN W26 the bills list still answers -- 200
+GREEN W26 healthz still answers -- 200
+GREEN W27 the LIVE database was not written (no Z-9xxx row, no d710 audit)
+33 checks: 33 green, 0 red

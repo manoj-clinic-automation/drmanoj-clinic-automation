@@ -1,0 +1,41 @@
+clinic_papers S530 heal: 8 accepted, 0 held (a same-vendor-number-amount double)
+GREEN P1 the app imports; clinic_papers S531.1 mounted
+GREEN P2 the three columns exist after the app's own migration
+GREEN P3 the intake carries the one CHALLAN button, its field and its script -- 200
+GREEN P4 a clinic challan lands: doc_kind challan, awaiting, status draft, the reply says challan -- {'already': False, 'by': 'Dr Manoj', 'challan': True, 'dup_of': None, 'first_stamp': None, 'id': 146, 'lane': 'clinic', 'ok': True, 'stamp': 'B-0146', 'status': 'draft'}
+GREEN P5 the audit carries 'challan'
+GREEN P6 a pharmacy challan is handed over as kind 'Challan' (not Pharmacy), captured, doc_kind challan -- {'id': 147, 'kind': 'Challan', 'vendor': 'Made-Up Pharma Distributors', 'bill_no': None, 'bill_date': None, 'total_amount': None, 'notes': None, 'source_stored': 'bill_f574bcd1a2b6cafe.pdf', 'source_orig': 'bill.pdf', 'created_by': None, 'created_at': '2026-10-11 06:38:59', 'stamp_no': 'B-0147', 'status': 'captured', 'submitted_by': 'Dr Manoj', 'submitted_at': '2026-10-11 06:38', 'approved_by': None, 'approved_at': None, 'reject_reason': None, 'vendor_phone': None, 'vendor_email': None, 'ocr_status': None, 'lane': 'pharmacy', 'fp': None, 'fpc': None, 'dup_of': None, 'dup_flag': None, 'dup_cand': None, 'dup_why': None, 'late_for': None, 'bill_month': None, 'scanned_by': 'Dr Manoj', 'client_token': None, 'page_of': None, 'subgroup': None, 'doc_kind': 'challan', 'challan_state': 'awaiting', 'challan_of': None}
+GREEN P7 a plain bill is untouched: no doc_kind, the reply says challan false
+GREEN P8 the Sanjeevni side's query (kind='Pharmacy' AND captured) does not take the pharmacy challan
+GREEN P9 the slip says CHALLAN
+GREEN P10 a plain bill's slip does not
+GREEN P11 Bills awaited lists both challans; the pharmacy one 'handed to the Sanjeevni side'; the 20-day one amber
+GREEN P12 the to-sort list does not carry the challan; its head links Bills awaited (2) -- True / True / True / 
+GREEN P13 the to-sort card of the new bill says it may be the bill for the challan
+GREEN P14 the bill's page offers the join with one button
+GREEN P15 the join: the challan is a page of the bill, state joined, remembers its bill -- {'id': 146, 'kind': 'Consumable', 'vendor': 'Made-Up Yuvika Surgicals', 'bill_no': None, 'bill_date': '2026-09-21', 'total_amount': 4200.0, 'notes': None, 'source_stored': 'bill_ce696d1361834da9.pdf', 'source_orig': 'bill.pdf', 'created_by': None, 'created_at': '2026-09-21 06:38:59', 'stamp_no': 'B-0146', 'status': 'rejected', 'submitted_by': 'Dr Manoj', 'submitted_at': '2026-10-11 06:38', 'approved_by': 'Dr Manoj', 'approved_at': '2026-10-11 06:38', 'reject_reason': 'joined into B-0149', 'vendor_phone': None, 'vendor_email': None, 'ocr_status': None, 'lane': 'clinic', 'fp': None, 'fpc': None, 'dup_of': None, 'dup_flag': None, 'dup_cand': None, 'dup_why': None, 'late_for': None, 'bill_month': None, 'scanned_by': 'Dr Manoj', 'client_token': None, 'page_of': 149, 'subgroup': None, 'doc_kind': 'challan', 'challan_state': 'joined', 'challan_of': 149}
+GREEN P16 Bills awaited no longer lists it; it is under closed and deleted ones
+GREEN P17 the challan's own page offers Delete after the join
+GREEN P18 undo the join: the challan is awaiting again -- {'id': 146, 'kind': 'Consumable', 'vendor': 'Made-Up Yuvika Surgicals', 'bill_no': None, 'bill_date': '2026-09-21', 'total_amount': 4200.0, 'notes': None, 'source_stored': 'bill_ce696d1361834da9.pdf', 'source_orig': 'bill.pdf', 'created_by': None, 'created_at': '2026-09-21 06:38:59', 'stamp_no': 'B-0146', 'status': 'draft', 'submitted_by': 'Dr Manoj', 'submitted_at': '2026-10-11 06:38', 'approved_by': None, 'approved_at': None, 'reject_reason': None, 'vendor_phone': None, 'vendor_email': None, 'ocr_status': None, 'lane': 'clinic', 'fp': None, 'fpc': None, 'dup_of': None, 'dup_flag': None, 'dup_cand': None, 'dup_why': None, 'late_for': None, 'bill_month': None, 'scanned_by': 'Dr Manoj', 'client_token': None, 'page_of': None, 'subgroup': None, 'doc_kind': 'challan', 'challan_state': 'awaiting', 'challan_of': None}
+GREEN P19 delete before the join is refused
+GREEN P20 delete after the join: state deleted, the reason names the bill, the file MOVED (never removed), the number stays -- {'id': 146, 'kind': 'Consumable', 'vendor': 'Made-Up Yuvika Surgicals', 'bill_no': None, 'bill_date': '2026-09-21', 'total_amount': 4200.0, 'notes': None, 'source_stored': 'bill_walk_challan.pdf', 'source_orig': 'bill.pdf', 'created_by': None, 'created_at': '2026-09-21 06:38:59', 'stamp_no': 'B-0146', 'status': 'rejected', 'submitted_by': 'Dr Manoj', 'submitted_at': '2026-10-11 06:38', 'approved_by': 'Dr Manoj', 'approved_at': '2026-10-11 06:38', 'reject_reason': 'challan — bill came: B-0149 (deleted)', 'vendor_phone': None, 'vendor_email': None, 'ocr_status': None, 'lane': 'clinic', 'fp': None, 'fpc': None, 'dup_of': None, 'dup_flag': None, 'dup_cand': None, 'dup_why': None, 'late_for': None, 'bill_month': None, 'scanned_by': 'Dr Manoj', 'client_token': None, 'page_of': 149, 'subgroup': None, 'doc_kind': 'challan', 'challan_state': 'deleted', 'challan_of': 149}
+GREEN P21 'Bill nahi aayega' closes a challan
+GREEN P22 the month page does not count a challan under consumables
+GREEN P23 papers still answers -- 200
+GREEN P23 month still answers -- 200
+GREEN P23 bills still answers -- 200
+GREEN P23 the challan's bill page still answers -- 200
+GREEN P23 renewals still answers -- 200
+GREEN P23 purchases still answers -- 200
+GREEN P23 healthz still answers -- 200
+GREEN P23 the widget still answers -- 200
+GREEN P24 the served widget carries S531 and S523
+GREEN P25 the LIVE database was not written
+GREEN B1 the intake renders with the widget and the CHALLAN button
+GREEN B2 one tap: the field is 1, the line says CHALLAN, the button turns -- ['1', 'Clinic bill · October 2026 · CHALLAN', '✔ CHALLAN — bill baad mein', '1']
+GREEN B3 a chosen photo became a page -- 1
+GREEN B4 right after Save the button is back to normal and the field is clear -- [None, '📄 CHALLAN HAI?']
+GREEN B5 the upload that was queued BEFORE the reset still landed as a challan (the widget's snapshot) -- {'doc_kind': 'challan', 'challan_state': 'awaiting', 'lane': 'clinic'}
+GREEN B6 the next scan, untouched, is a plain bill -- {'doc_kind': None}
+GREEN B7 no page error
+39 checks: 39 green, 0 red
