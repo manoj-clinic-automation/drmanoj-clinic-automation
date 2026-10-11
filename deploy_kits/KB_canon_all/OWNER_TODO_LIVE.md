@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S306 close** (the Scan App project, its first session), 11-Oct-2026, early afternoon — the parent sections exactly as its S304 close wrote them (its session 305 is open), the Sanjeevni sections exactly as its S307 close wrote them (308 reserved); the Scan App sections new here, at the head
+# OWNER TO-DO — LIVE · refreshed at the **S308 close** (the Sanjeevni project), 11-Oct-2026, the evening — the parent sections exactly as its S304 close wrote them (its session 305 is open), the Scan App sections exactly as its S306 close wrote them (309 reserved), the Sanjeevni sections refreshed here (310 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S306 close** (the Scan App project, its first session), 11-Oct-2026, early afternoon — the parent sections exactly as its S304 close wrote them (its session 305 is open), the Sanjeevni sections exactly as its S307 close wrote them (308 reserved); the Scan App sections new here, at the head
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S307 close** (the Sanjeevni project), 11-Oct-2026, late morning — the parent sections exactly as its S304 close wrote them (its session 305 is open), the Sanjeevni sections refreshed here
 
@@ -40,7 +42,7 @@
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
-*Detail: `START_HERE_SESSION_305.md` · `S304_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S307 close's (11-Oct, late morning); `S307_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_308.md` that chat's entry.*
+*Detail: `START_HERE_SESSION_305.md` · `S304_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S308 close's (11-Oct, the evening); `S308_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_310.md` that chat's entry.*
 
 ## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — written at the S306 close (11-Oct, early afternoon)
 
@@ -325,6 +327,57 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S308 close (11-Oct, the evening)
+
+*Detail: `S308_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_310.md`. The same lines are on your System Board.*
+
+**1 · The publish** — this close's record (papers; nothing changes on the server). The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**Nothing else is yours today.** Your six accepts and your one round are done; Amir's medicine vouchers open by themselves once voucher 29 is entered and proven.
+
+**Still yours from before, not urgent (on your board):**
+- bank details for **Agarwal Surgicals and Medicals** — its bill is scanned:
+
+```
+https://followup.dr-manoj.in/finance/purchase/page/book
+```
+
+- the first cheque logged (Shavez can do it);
+- one photo of Marg's purchase-import screen.
+
+**Worth knowing — the staff's, on their own screens, not yours:**
+- **Amir:** on his next visit, one voucher to enter in Marg (voucher 29, the ankle binder) and its number on his board; the Yuvika bill for the knee immobilizer, still to key (his card's one open line).
+- **Morning staff:** the two reports from the REPORT login, as every day.
+
+**Held at your word:**
+- S438_COUNT_BOOK;
+- **S486, the buying model — Part B re-briefed after stock moves onto the spine; nothing built on it before;**
+- **Amir's *Aaj ka kaam* list — off, and nothing is added to it (D690);**
+- **the orthotic names as Amir typed them — accepted; the last two go into the list by the system (D709).**
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S308 close
+
+**Every build follows the charter v1.1 (`claude/S307_BUILD_CHARTER_v1_1.md`, D707).**
+
+1. **Kit 3 — Amir's page rebuilt whole:** every line said once; the salt list by one rule; a bill's "since when" true; **the bill line from the scan, never a reception tap (D712)**; the two spellings taken as the names; the hub's rename wording from the one stage; the page light. Brief → three reads → your one paste line.
+2. **S486 Part A** — the small ordering fixes, its own kit.
+3. **Stock on the spine (rung 4b)** — one source for "what Marg says" and one for "what the shelf says"; the day's snapshot that holds both spellings of a renamed item retired; your Loss desk's stale piles (F-841) with it.
+4. **S486 Part B** — the buying model re-briefed on that one source.
+5. **The medical PC says "same as before"** instead of dropping a repeated export (F-802), with the reader fixes.
+6. **Small, at your go:** the five limits on your settings page; an answered salt reaching Amir's sheet (wording to you first); Darpan's two lines.
+
+## ✅ DONE AT THE S308 CLOSE — 11-Oct-2026 (the Sanjeevni project)
+
+- ~~**Kit 2 of Amir's page (S528)**~~ — live 16:25 from your paste line: only "do this" lines on his screens; wrong only when certain; the renames by identity; the upload box gone; the board a tenth of its size.
+- ~~**The 22 renames**~~ — 15 seen at install, 6 accepted by you (Marg had clipped the long names), 2 taken into the list in Kit 3.
+- ~~**The one orthotic line without a voucher**~~ — your round of 17:41; voucher 29 on Amir's board.
+- ~~**The buying model re-read against the charter**~~ — paper only (`claude/S308_S486_CHARTER_REREAD.md`); Part B waits for stock on the spine.
+- ~~**The bill line's design**~~ — your ruling of 17:06 (D712), for Kit 3.
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S307 close (11-Oct, late morning)
 
