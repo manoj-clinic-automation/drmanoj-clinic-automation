@@ -282,6 +282,75 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S303 close (11-Oct, dawn)
+
+*Detail: `S303_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_307.md`. The same lines are on your System Board.*
+
+**1 · The publish** — this close's record. The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**Still yours from before, not urgent (on your board):**
+- bank details for **Agarwal Surgicals and Medicals** — its bill is scanned:
+
+```
+https://followup.dr-manoj.in/finance/purchase/page/book
+```
+
+- the first cheque logged (Shavez can do it);
+- one photo of Marg's purchase-import screen.
+
+**Worth knowing — the staff's, on their own screens, not yours:**
+- **Amir:** his 22 renames are open on his card (*Naam badlo*); each proves itself on the next whole closing stock. Two deliveries wait to be entered as bills.
+- **Darpan:** TYRO BR heads Monday's morning count. A count typed wrong can be corrected the same day with *Galat likha? Badlo*.
+- **Morning staff:** the two reports from the REPORT login; the page says right or wrong.
+
+**Held at your word:**
+- S438_COUNT_BOOK;
+- **S486, the buying model — re-read on Fable against the charter before anything is built**;
+- **Amir's *Aaj ka kaam* list — off, and nothing is added to it (D690).**
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S303 close
+
+**Every build follows the charter (`claude/S303_BUILD_CHARTER.md`, D705).**
+
+1. **Read last night's builds in use (no build):**
+   - Darpan's TYRO BR count;
+   - Amir's renames proving themselves;
+   - the morning reports page;
+   - any phone message.
+2. **One small kit:**
+   - the salt-list line said twice on Amir's card (F-839);
+   - the orthotics section that cannot close by itself (F-840);
+   - your Loss desk's stored piles, stale since 29-Sep (F-841).
+3. **S486, the buying model** — the fresh analysis on Fable, against the charter. Its reservations lapse 14-Oct and are renewed if it has not run.
+4. **Stock on the spine (rung 4b)** — one source for "what Marg says" and one for "what the shelf says", with the duplicates removed. This is where the TYRO BR kind of fault ends. Analysis first.
+5. **The medical PC says "same as before"** instead of dropping a repeated export (F-802), with the reader fixes.
+6. **Small, at your go:**
+   - the staff duty list's two wordings;
+   - the five new limits on your settings page;
+   - an answered salt reaching Amir's sheet (wording to you first);
+   - Darpan's two lines.
+7. **Then the charter's order:** late bills → Amir's flow and the bill chain → the remaining screens → count #2 → the old parts retired.
+
+## ✅ DONE AT THE S303 CLOSE — 09 → 11-Oct-2026 (the Sanjeevni project)
+
+- ~~**The publish of the S301 close**~~ — yours, 09-Oct 07:14 (S301 ⭐0 item 1).
+- ~~**S500's line on Saturday night**~~ (S301 ⭐0 item 2) — you pasted it at 22:30. **Live 22:56:**
+  - the morning reports judged right or wrong with two tries;
+  - you are told only on failure (the test reached your phone);
+  - a short stock list is refused.
+- ~~**Darpan's TRUECEPROL count**~~ — put right (13 strips + 7). The 6 September count is back as it was. **His Stock milaan shows today's work only, with same-day correction** (S502, live 23:20; your *"OK"* to the mock-up).
+- ~~**The TYRO BR line**~~ — it was not a real loss. It is gone, and TYRO BR is on Monday's list.
+- ~~**Amir's renames**~~ — his vouchers proved right (S520, 23:45). His card and board now say the same thing (S521, 05:07). The 22 renames are open.
+- ~~**"A final way forward for all future builds and corrections"**~~ — the build charter, adopted (D705).
+
+---
+
+*(The S301-close Sanjeevni sections below are history — superseded by the S303 sections above.)*
+
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S301 close (09-Oct, dawn)
 
 *Detail: `S301_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_303.md`. The same lines are on your System Board.*
