@@ -1,0 +1,28 @@
+clinic_papers S530 heal: 8 accepted, 0 held (a same-vendor-number-amount double)
+clinic_papers S532 auto-home: 1 paper(s) placed from the supplier's history
+GREEN W1 the app imports; clinic_papers S532.1 mounted
+GREEN W2 the heal at start placed what the history allows (waiting 121 -> 120, 1 placed by the system)
+GREEN W3 history: Shivaaz's papers all on the pharmacy lane, two or more -- {'pharmacy': 10}
+GREEN W4 history: Variety Stationers all on the clinic lane, all in one group (others), two or more -- ({'clinic': 5}, {'others': 4})
+GREEN W5 history: Yuvika is seen on two lanes (never decided) -- {'clinic': 2, 'pharmacy': 5}
+GREEN W6 a Shivaaz bill scanned on the clinic lane goes to the pharmacy lane by itself (captured, kind Pharmacy, audited) -- (['lane:pharmacy'], {'lane': 'pharmacy', 'status': 'captured', 'kind': 'Pharmacy', 'subgroup': None, 'approved_by': None})
+GREEN W7 a Variety Stationers bill scanned on the pharmacy lane goes to the clinic lane, gets 'others' and is accepted -- (['lane:clinic', 'group:others,accepted'], {'lane': 'clinic', 'status': 'approved', 'kind': 'Consumable', 'subgroup': 'others', 'approved_by': 'system — from 4 earlier papers of this supplier'})
+GREEN W8 a Yuvika bill is not decided at all (two lanes in its history): no lane, no group -- ([], {'lane': 'clinic', 'status': 'draft', 'kind': 'Consumable', 'subgroup': None, 'approved_by': None})
+GREEN W9 an unknown supplier: nothing
+GREEN W10 a challan is never moved
+GREEN W11 a second look at the same paper does nothing (idempotent)
+GREEN W12 three system-placed papers are no evidence: the next is not moved
+GREEN W13 once a person has confirmed all three, the next follows -- ['lane:pharmacy']
+GREEN W14a a paper on the lab lane is never moved by the system (Envirad bills both NK Pathology and the clinic)
+GREEN W14b a supplier whose clinic papers were never sorted by a person is not sent to the clinic lane
+GREEN W14 a paper a person has moved is never moved by the system
+GREEN W15 the reading hook: after the OCR fills the supplier, the paper goes home by itself -- ('read', {'lane': 'pharmacy', 'status': 'captured', 'vendor': 'GUNINA PHARMACEUTICALS PVT LTD', 'ocr_status': 'read'})
+GREEN W16 the paper page says it was placed by the system and can be changed
+GREEN W17 papers still answers -- 200
+GREEN W17 month still answers -- 200
+GREEN W17 bills awaited still answers -- 200
+GREEN W17 bills still answers -- 200
+GREEN W17 intake still answers -- 200
+GREEN W17 healthz still answers -- 200
+GREEN W18 the LIVE database was not written
+25 checks: 25 green, 0 red
