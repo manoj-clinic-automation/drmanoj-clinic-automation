@@ -1,0 +1,242 @@
+[
+ {
+  "name": "A1 cvScan switch seen by the widget",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "name": "A2 OpenCV.js loaded and ready",
+  "ok": true,
+  "detail": "why="
+ },
+ {
+  "name": "A3 outline on straight_wood",
+  "ok": true,
+  "detail": "max corner error 20 px (tol 82)"
+ },
+ {
+  "name": "A3 outline on tilted12_wood",
+  "ok": true,
+  "detail": "max corner error 18 px (tol 82)"
+ },
+ {
+  "name": "A3 outline on perspective_grey",
+  "ok": true,
+  "detail": "max corner error 17 px (tol 82)"
+ },
+ {
+  "name": "A3 outline on near_edge_black",
+  "ok": true,
+  "detail": "max corner error 20 px (tol 82)"
+ },
+ {
+  "name": "A3 outline on small_light",
+  "ok": true,
+  "detail": "max corner error 19 px (tol 82)"
+ },
+ {
+  "name": "A3 outline on landscape_wood",
+  "ok": true,
+  "detail": "max corner error 8 px (tol 82)"
+ },
+ {
+  "name": "A3 outline on phone_on_bill_wood",
+  "ok": true,
+  "detail": "max corner error 11 px (tol 82)"
+ },
+ {
+  "name": "A3 outline on hand_holding_grey",
+  "ok": true,
+  "detail": "max corner error 12 px (tol 82)"
+ },
+ {
+  "name": "A3 outline on shadow_across_light",
+  "ok": true,
+  "detail": "max corner error 20 px (tol 82)"
+ },
+ {
+  "name": "A4 outline found on all made-up photos",
+  "ok": true,
+  "detail": "9 of 9"
+ },
+ {
+  "name": "B1 two chosen photos became two pages",
+  "ok": true,
+  "detail": "2"
+ },
+ {
+  "name": "B2 page 1 is 1231x1754 (the paper's own size, 1500-2400 long side; half-A4 shape; was 536x759 under the 1400 cap)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "name": "B2 page 2 is 1196x1731 (the paper's own size, 1500-2400 long side; half-A4 shape; was 536x759 under the 1400 cap)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "name": "B3 each page carries Retake and Adjust (4 buttons for 2 pages + 2 delete)",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "name": "B4 the Adjust button is on the page",
+  "ok": true,
+  "detail": "\u2715|Retake|Adjust|\u2715|Retake|Adjust"
+ },
+ {
+  "name": "C1 Adjust opens the stage with 'Theek hai'",
+  "ok": true,
+  "detail": "block|\u2714 Theek hai \u2014 page 1"
+ },
+ {
+  "name": "C2 'Theek hai' re-cuts the page at full size",
+  "ok": true,
+  "detail": "1231x1754"
+ },
+ {
+  "name": "C3 the stage closes and the adjust ends",
+  "ok": true,
+  "detail": "none|-1"
+ },
+ {
+  "name": "C4 'Add whole image' in Adjust keeps the whole photo (4:3)",
+  "ok": true,
+  "detail": "2400x1800"
+ },
+ {
+  "name": "D1 deleting a page drops its kept original too",
+  "ok": true,
+  "detail": "1 pages, 1 originals"
+ },
+ {
+  "name": "E1 the live outline canvas is on the camera",
+  "ok": true,
+  "detail": "block"
+ },
+ {
+  "name": "E2 Capture adds a page through the smart path",
+  "ok": true,
+  "detail": "pages=2 video=640"
+ },
+ {
+  "name": "E3 the camera stays open after Capture (S441 kept)",
+  "ok": true,
+  "detail": "block"
+ },
+ {
+  "name": "E4 Cancel stops the live outline",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "name": "F1 Save empties the pages and the kept originals",
+  "ok": true,
+  "detail": "0, 0"
+ },
+ {
+  "name": "F2 no page error in the smart path",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "name": "G1 without cvScan: switch off, no library requested",
+  "ok": true,
+  "detail": "[False, False]"
+ },
+ {
+  "name": "G2 without cvScan a page is the S441 page (1400 px cap, as today)",
+  "ok": true,
+  "detail": "1400x1050"
+ },
+ {
+  "name": "G3 without cvScan no Adjust button",
+  "ok": true,
+  "detail": "\u2715|Retake"
+ },
+ {
+  "name": "G4 no page error without cvScan",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "name": "G5 a finance-shaped caller (no autoPage): the review stage as before",
+  "ok": true,
+  "detail": "block|\u2714 Add this page"
+ },
+ {
+  "name": "G6 'Add this page' adds the page as before",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "name": "G7 no page error on the finance-shaped caller",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "name": "H1 the old whole-photo scans (already flattened B&W, 1050 px -- the worst case): never a frame-hugging box; the rest refused, not guessed",
+  "ok": true,
+  "detail": "7 of 33 outlined, 0 frame-hugging"
+ },
+ {
+  "name": "P0 the app imports",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "name": "P1 /scan/opencv.js serves the gzip copy with a one-year cache",
+  "ok": true,
+  "detail": "200 gzip public, max-age=31536000, immutable"
+ },
+ {
+  "name": "P2 /scan/opencv.js serves the plain copy without gzip",
+  "ok": true,
+  "detail": "200 10378215"
+ },
+ {
+  "name": "P3 the seeded owner can log in on the throw-away database",
+  "ok": true,
+  "detail": "302"
+ },
+ {
+  "name": "P4 intake OFF by default: no cvScan in the scanner config",
+  "ok": true,
+  "detail": "200"
+ },
+ {
+  "name": "P5 /admin shows the switch card, OFF",
+  "ok": true,
+  "detail": "200"
+ },
+ {
+  "name": "P6 the owner's tap switches it ON",
+  "ok": true,
+  "detail": "200"
+ },
+ {
+  "name": "P7 intake ON: cvScan true and the library's versioned URL in the config",
+  "ok": true,
+  "detail": "200"
+ },
+ {
+  "name": "P8 switched OFF again: the intake is as today",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "name": "P9 ON but no library file on disk: the intake stays as today and /admin says so",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "name": "P10 /healthz answers",
+  "ok": true,
+  "detail": "200"
+ },
+ {
+  "name": "P11 the widget route serves the built widget",
+  "ok": true,
+  "detail": ""
+ }
+]
