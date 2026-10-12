@@ -1,0 +1,5 @@
+kit id S536_AMIR_BOARD_D712
+project Sanjeevni (brief of session 310, 12-Oct-2026; D712 D708; F-864) -- a small follow-up to S533_AMIR_DAY_PAGE: Amir's board stops
+printing the reception-tap arrival row (stock_app.py _amir_board_light, stock_amir.html restCard); the owner's "live orthotic ordering can
+start" line waits for stage C or done and is dated by the first stage-C release (amir_day.py needs_you_lines). No data step.
+installed by install_S536_AMIR_BOARD_D712.sh (it takes the build lock itself)
