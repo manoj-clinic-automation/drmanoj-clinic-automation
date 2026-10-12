@@ -31,3 +31,9 @@ Living copy (D583 rule: every Apps Script change placed in the owner's browser l
   e-mail nag from 45 days before it, OVERDUE only after it; the VPS push carries expiryISO, never the note, and no bracket holding a
   number. renewalsExpiryCheck() is a dry run (24 rows: 23 dated, 1 undated; the arms licence 2026-12-26 from its note).
   pushRenewalsToVPS() run once at 23:10:27 IST: the health page's Renewals row went from OVERDUE (false) to ok.
+- 12-Oct-2026 08:01 IST (S311; D713 (1), the owner's ruling of 12-Oct 05:30): Renewal_Nag.gs -> v4 (md5 bf495d30; sha256 84ac6d33...
+  read back from the editor after a reload; v3's sha256 18fa943b... confirmed before the change). A PASSPORT (its name or note says
+  "passport") comes up 12 months before its expiry again -- once a month until 45 days, then the usual weekly / 3-day / daily
+  steps; every other row keeps the 45-day rule. The VPS push is unchanged (the health page's Renewals row still starts at 45 days).
+  renewalsExpiryCheck() at 08:02 IST: 24 rows (23 dated, 1 undated); 4 passports come up 365 days ahead, 19 rows 45 days ahead.
+  Placed by a sub-agent in the owner's signed-in browser pane; no trigger or property touched.

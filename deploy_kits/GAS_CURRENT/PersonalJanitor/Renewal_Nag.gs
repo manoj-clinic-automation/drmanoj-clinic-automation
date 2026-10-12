@@ -1,5 +1,5 @@
 /** ==========================================================================
- *  Renewal_Nag.gs · v3 · S513 (10-Oct-2026) · PERSONAL account — lives in the
+ *  Renewal_Nag.gs · v4 · S311 (12-Oct-2026) · PERSONAL account — lives in the
  *  Inbox Janitor project beside Code.gs (it reads the RENEWALS array from
  *  there — GAS merges files into one namespace).
  *
@@ -24,6 +24,13 @@
  *      carries the note, and a bracket holding a number is taken out of the
  *      name — an identity-document number does not leave this account.
  *
+ *  v4 — THE OWNER'S RULING (D713 (1), 12-Oct-2026): PASSPORTS come up 12 MONTHS
+ *  before their expiry again; the 45-day rule stays for every other row. A row
+ *  is a passport when its name or its note says "passport". Between 12 months
+ *  and 45 days a passport is in the email once a month; from 45 days on it
+ *  follows the usual weekly / 3-day / daily steps. The VPS push is unchanged
+ *  (the health page's Renewals row still starts 45 days before an expiry).
+ *
  *  SETUP: unchanged — the daily nagRenewals trigger (setupRenewalNag() once).
  *  ========================================================================== */
 
@@ -34,6 +41,14 @@ var NAG_EVERY_DAYS   = 3;
 var NAG_WEEKLY_DAYS  = 7;     // between NAG_WINDOW_DAYS and NAG_CLOSE_DAYS: weekly
 var NAG_OVERDUE_KEEP = 45;    // keep shouting this long past the expiry
 var NAG_TO           = 'drmanojkragarwal@gmail.com';
+var PASSPORT_RE          = /passport/i;   // v4 (D713 (1))
+var PASSPORT_WINDOW_DAYS = 365;           // a passport comes up 12 months before its expiry
+var PASSPORT_EARLY_EVERY = 30;            // between 12 months and NAG_WINDOW_DAYS: once a month
+
+/** v4: how far ahead a row comes up -- 12 months for a passport, NAG_WINDOW_DAYS for every other row. */
+function windowOf_(r) {
+  return PASSPORT_RE.test(String(r.vendor || '') + ' ' + String(r.note || '')) ? PASSPORT_WINDOW_DAYS : NAG_WINDOW_DAYS;
+}
 
 function setupRenewalNag() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
@@ -86,12 +101,13 @@ function nagRenewalsCore() {
     var exp = expiryOf_(r);
     if (!exp) return;
     var days = daysTo_(exp, now);
-    if (days > NAG_WINDOW_DAYS || days < -NAG_OVERDUE_KEEP) return;
+    if (days > windowOf_(r) || days < -NAG_OVERDUE_KEEP) return;
 
     var key = 'nag_' + exp + '_' + r.vendor.slice(0, 40);
     var last = props.getProperty(key);
     var gapNeeded = (days <= NAG_URGENT_DAYS) ? 1
-                  : (days <= NAG_CLOSE_DAYS) ? NAG_EVERY_DAYS : NAG_WEEKLY_DAYS;
+                  : (days <= NAG_CLOSE_DAYS) ? NAG_EVERY_DAYS
+                  : (days <= NAG_WINDOW_DAYS) ? NAG_WEEKLY_DAYS : PASSPORT_EARLY_EVERY;
     var lastD = last ? new Date(last) : null;
     var since = lastD ? Math.floor((now - lastD) / 864e5) : 999;
     if (since >= gapNeeded) { nagNow = true; props.setProperty(key, now.toISOString()); }
@@ -99,7 +115,7 @@ function nagRenewalsCore() {
     due.push({ days: days, vendor: r.vendor, note: r.note || '', exp: exp });
   });
 
-  if (!due.length) return 'quiet: nothing expires within ' + NAG_WINDOW_DAYS + ' days';
+  if (!due.length) return 'quiet: nothing expires within ' + NAG_WINDOW_DAYS + ' days (a passport: 12 months)';
   if (!nagNow)     return 'due items exist but none needed a nag today';
 
   due.sort(function (a, b) { return a.days - b.days; });
@@ -182,7 +198,7 @@ function renewalsExpiryCheck() {
     if (!exp) return 'undated   ' + pushName_(r.vendor);
     var src = (r.expiryISO && exp === r.expiryISO) ? 'expiryISO'
             : (exp !== r.dateISO) ? 'note' : 'dateISO';
-    return exp + ' (' + src + ', ' + daysTo_(exp, now) + 'd)  alert ' + r.dateISO + '  ' + pushName_(r.vendor);
+    return exp + ' (' + src + ', ' + daysTo_(exp, now) + 'd, comes up ' + windowOf_(r) + 'd ahead)  alert ' + r.dateISO + '  ' + pushName_(r.vendor);
   });
   var msg = out.join('\n');
   Logger.log(msg);

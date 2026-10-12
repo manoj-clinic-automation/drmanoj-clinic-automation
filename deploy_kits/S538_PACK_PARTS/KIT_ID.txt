@@ -1,0 +1,3 @@
+KIT_ID   S538   S538_PACK_PARTS
+session  311 (parent), 12-Oct-2026 · D714 · F-867, F-868, F-869
+files    /root/finance/packs.py 368aa68c -> 382081fa · /root/finance/packs.html d25452a5 -> 49906969 (both built on the box from the live bytes by make_s538.py)
