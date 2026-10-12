@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S308 close** (the Sanjeevni project), 11-Oct-2026, the evening — the parent sections exactly as its S304 close wrote them (its session 305 is open), the Scan App sections exactly as its S306 close wrote them (309 reserved), the Sanjeevni sections refreshed here (310 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S305 close** (the parent), 12-Oct-2026, early morning — the Sanjeevni sections exactly as its S308 close wrote them (its session 310 open), the Scan App sections exactly as its S306 close wrote them (its session 309 open); the parent's sections refreshed here (311 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S308 close** (the Sanjeevni project), 11-Oct-2026, the evening — the parent sections exactly as its S304 close wrote them (its session 305 is open), the Scan App sections exactly as its S306 close wrote them (309 reserved), the Sanjeevni sections refreshed here (310 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S306 close** (the Scan App project, its first session), 11-Oct-2026, early afternoon — the parent sections exactly as its S304 close wrote them (its session 305 is open), the Sanjeevni sections exactly as its S307 close wrote them (308 reserved); the Scan App sections new here, at the head
 
@@ -42,7 +44,7 @@
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
-*Detail: `START_HERE_SESSION_305.md` · `S304_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S308 close's (11-Oct, the evening); `S308_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_310.md` that chat's entry.*
+*Detail: `START_HERE_SESSION_311.md` · `S305_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S308 close's (11-Oct, the evening); `S308_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_310.md` that chat's entry.*
 
 ## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — written at the S306 close (11-Oct, early afternoon)
 
@@ -84,7 +86,7 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S304 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S305 close
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -94,21 +96,21 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries only this close's record; nothing changes on the server and no server line follows.
+**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record only; nothing changes on the server and no server line follows.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · VOICENOTES — PASTE ITS ADDRESS ONCE (you said: in the new chat).** Your panel → **Tasks** → *Voicenotes sending here by itself* → **Copy the address**; in Voicenotes: your picture → Integrations → Webhooks → Add Webhook → paste → tick **To-Do List Creation** only → Create. From then a to-do list you make there waits above *Give a task*; nothing is given until you press Give.
+**2 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
-https://followup.dr-manoj.in/finance/aaj
+https://followup.dr-manoj.in/finance/packs
 ```
 
-**3 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** On a spare PC, from `D:\MARGERP\serverbackup` on the pharmacy PC or the pen drive's `MargAuto_by_agent` folder. It differs from the hand-made backup (34 parts against 29), so until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
+**3 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** On a spare PC, from `D:\MARGERP\serverbackup` on the pharmacy PC or the pen drive's `MargAuto_by_agent` folder. Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
 
-**4 · TELL ME WHAT THE STAFF SAY — about their lists (now with the green "both exports in" line), and the after-call list.**
+**4 · TELL ME WHAT THE STAFF SAY — about their lists and the after-call list.**
 
 ```
 https://followup.dr-manoj.in/portal/ring/list
@@ -116,58 +118,53 @@ https://followup.dr-manoj.in/portal/ring/list
 
 **LATER — none of these is urgent**
 
-**5 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** The card spends sheet is ready when every statement of a month is proved; the shops you name are remembered.
-
-```
-https://followup.dr-manoj.in/finance/packs
-```
-
-**6 · PASSPORTS — one word:** keep them coming up 12 months ahead, or 45 days like everything else (the new rule)?
-
-**7 · RANJEET'S LOGIN** — on the Portal users page; he has none yet. The password is yours to set.
+**5 · RANJEET'S LOGIN** — *"to be done"* (12-Oct); the password is yours to set.
 
 ```
 https://followup.dr-manoj.in/portal/users
 ```
 
-**8 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** Nothing goes to the accountants by itself; their monthly mail now carries payments only.
+**6 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** The button now says *Sent at …* right under itself.
 
-**9 · CLINIC EXPENSES AND MK EXPENSES — the split, when you settle it.**
+**7 · THE FOLLOW-UP TRACKER ON THE SERVER — you said "ask next week".** I ask once this week. Nothing moves until your yes.
 
-```
-https://followup.dr-manoj.in/scanapp/papers
-```
+**8 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
 
-**10 · THE FOLLOW-UP TRACKER ON THE SERVER — you said "ask next week".** I ask once this week (from 12 October). Nothing moves until your yes.
+**9 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
 
-**11 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
+**10 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
 
-**12 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
+**WHEN IT HAPPENS — not a duty:** a POS total waiting for your Confirm · a Voicenotes list waiting above *Give a task*.
 
-**13 · THE ARMS LICENCE — expiry 26 December; submit in November.** The false red is gone (10 Oct); your renewal mail starts 45 days before the expiry. Tick it on the board when submitted.
+**Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C). **Dropped:** Tailscale (12-Oct).
 
-**14 · WHEN YOU HAVE ONE — the "other works" you want Tailscale for.**
+*Ticked by you or done, and off this list: the Voicenotes paste (done by 12-Oct) · passports — your word "12 months" (the change is mine) · the clinic / MK expense split — your word "MK personal if no clinic group" (the Scan App chat builds it) · the punch listener — your word "only if safe" (step 1 live; step 2 mine, on evidence) · your Fold's Contacts permission (skipped).*
 
-**WHEN IT HAPPENS — not a duty:** a POS total waiting for your Confirm (your approvals page) · a Voicenotes list waiting above *Give a task*.
-
-**One thing I will not touch without your word:** the punch machine's listener on the server does not check who is sending. Say "close it" when you want that done.
-
-**Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud on their mobiles and PCs · **the mailbox clean-up of both accounts ("park club c", 10 Oct)**.
-
-*Ticked by you or done, and off this list: the publish of 9 Oct morning (landed 7:42 am) · the two Yes Bank passwords (you set them on 9 Oct) · the S503 … S514 publishes and server lines (10 Oct, 9:04 → 11:3x pm).*
-
-*Closed by your word and not on this list: the technician of 25-Sep, AnyDesk and UltraViewer, passwords, the Windows activation on the reception PC (02-Oct) · the accountants get the pack only; no statement passes through the clinic mailbox; the 61 test scans stay (04-Oct) · a panel to waive late minutes (06-Oct) · the daily health mails and Daily Clinic Reports in Trash — you delete them yourself (08-Oct) · the accountants do not get your renewals list; no Docterz patient PDF is in your personal mail (10-Oct).*
+*Closed by your word and not on this list: the technician of 25-Sep, AnyDesk and UltraViewer, passwords, the Windows activation on the reception PC (02-Oct) · the accountants get the pack only; no statement passes through the clinic mailbox; the 61 test scans stay (04-Oct) · a panel to waive late minutes (06-Oct) · the daily health mails and Daily Clinic Reports in Trash — you delete them yourself (08-Oct) · the accountants do not get your renewals list; no Docterz patient PDF is in your personal mail (10-Oct) · no email setup for Razorpay bookings — Docterz marks them (12-Oct).*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Monday 12 Oct, 8:15 am — the follow-up log check:** whether Saturday's log already carries Monday; the rule corrected if it does.
-2. **Your health page's two rows of tonight:** UPI evidence (9 Oct, ₹10,163 apart) and the cash count (54 days) — read and told in one line each.
-3. **Your third pick:** the scan app as its own project, then the papers page's four new sections and the challan flow.
-4. **Before October's salary, as you said:** a skipped loan month as one button that shows in his ledger everywhere · the two small things on the salary sheets and the slip's line about a negative salary.
-5. **My own, no word needed:** the pharmacy PC shouting if the hand-made pen-drive backup is more than a week old · the old Drive folder on the reception PC · the "X-ray test" shortcut made like the new one · the finance app's own test suite · the other set-up cards (Hostinger, CyberPanel, SSH login, Websites, Bitwarden) · proving the 148 older documents · reading Morning match once as the reception login.
-6. **On your word:** the WhatsApp appointment message to patients · the tracker on the server · the MyOperator key steps · the contacts · the mail flood (low) · the portal tiles · the expense split · kits for Shavez's PC and the lab PC when you set them up · the later steps of the lists.
-7. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up.
+1. **The pack build (your word, 12-Oct: "in a fresh chat"):** the income sheet by each split's real cash and online parts; *Wallet* only for a Razorpay booking's consultation fee; the bank checked day by day with a list of days for reception to explain; the digest without double counts. **You see the new September sheet before it is installed.**
+2. **What this morning's 08:15 check found** (the follow-up log; the old Drive folder on the reception PC) — one line each.
+3. **Passports come up 12 months ahead again.**
+4. **The X-ray test shortcut removed** from the reception PC (the Drive folder kept), after checking nothing uses it.
+5. **Your health page's two rows** — UPI evidence (9 Oct) and the cash count — read and told in one line each.
+6. **The punch listener's step 2** — about a week from now, only if every genuine punch carries one steady mark.
+7. **My own, no word needed:** the medical PC shouting if the hand-made pen-drive backup is more than a week old · the finance app's own test suite · reading Morning match once as reception · proving the 148 older documents.
+8. **On your word:** the WhatsApp appointment message to patients · the tracker on the server · the MyOperator key steps · the contacts · the mail flood (low) · the portal tiles · kits for Shavez's PC and the lab PC.
+9. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up.
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S305 CLOSE — 11 → 12-Oct-2026 (the parent)
+
+- ~~**"Before October's salary": a skipped loan month as one button that shows in his ledger everywhere; the sheets' small things; the slip's negative net**~~ — live 11-Oct (S522).
+- ~~**The scan app as its own project**~~ — created; its first session ran 11-Oct (four kits).
+- ~~**"DO NOW" — the set-up cards (Hostinger, CyberPanel, the SSH login, the websites, Bitwarden)**~~ — live (S527).
+- ~~**"The accountant pack … no confirmation message"**~~ — it had gone twice; the button now answers under itself (S529).
+- ~~**"save.dr-manoj.in … check it out yourself and fix it"**~~ — a save-contact page on your website (S529), the GoDaddy link to it, and the old card address led to it (S534); your Fold opens the page.
+- ~~**The punch listener**~~ — step 1 live (S535); step 2 on a week's evidence.
+- ~~**"Some queries regarding the September accountant pack"**~~ — answered and tested; the build is next (⭐1 item 1).
+- ~~**The spine's health warning two days late**~~ (the Sanjeevni chat's word) — red the same hour now (S525). ~~**The medical PC's kit**~~ — current (S526).
 
 ## ✅ DONE AT THE S304 CLOSE — 09 → 10-Oct-2026 (the parent)
 
