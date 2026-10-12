@@ -1,7 +1,7 @@
 {
- "version": 10,
- "kit": "S524_AMIR_ONE_JUDGMENT",
- "_note": "S444 / D648 duty map, machine part: every recurring staff duty that has a queryable state in finance.db, each with ONE read-only SELECT returning one row (n = how many are due now, since = when the oldest became due). Read on every read of the owner's Needs-you list by amir_day.needs_you_lines (through the sanjeevni_approvals hook; read-only connection, SELECT/WITH only): an ORPHAN duty (door null -- nothing on the person's own home shows it) with n > 0 for allowed_days or more raises its owner_line, unless 'coded' names code that already raises the owner's line. A duty WITH a door raises nothing here unless it carries \"raise\": true (none does yet -- the owner's call). 'shared': a login that works another's queue (the staff-eye walk renders both homes). The staff-eye walk of every kit uses tile / door / door_marker. Rule: every kit that adds, moves or removes a staff duty updates this file and claude_code_briefs/DUTY_MAP.md together. S446 (02-Oct-2026): the doors of findings 1-4 and 9 added (Amir's card: the count by stage, the Sunday, arrived goods; Darpan's Kal ka hisaab: Amir's claims; Shavez's Vendor payments: an earlier month's baaki); the count vouchers' marker is the card's 'Marg sudhar'. S452 (02-Oct-2026): amir.rate_entry added (the board's '(b) Rate daalo' now has a door on his card, every step: 'N item ka rate Marg mein daalna hai -- kholiye'); amir.count_vouchers' Stage C is 12 a visit, more on request ('Aur voucher kholiye'). S454 (03-Oct-2026, part 1): the reception screen's one-task home -- reception.medicine_orders (Order karna hai: Darpan's sheet, or on order.source=system the day's proposals), reception.order_arrival (Maal aaya?: an order with no bill scan tied), reception.bill_scan (Bill scan karna hai: counted months only), reception.scan_questions (Photo dekh kar bataiye: counted months); darpan.order_sheet added (Kal ka hisaab's 'Order sheet' card; due only when the newest sheet was refused); shavez.supplier_messages counts the payment kinds only. S454 (03-Oct-2026, part 2): manoj.returns_ok reads the owner's own returns rule (returns.act_from; setting returns.pending_ok kept by amir_day when Needs-you is built); reception.bill_scan's owner line only after purchase.scan_wait_days (scan_register); amir.scan_files added -- never due: Amir is asked nothing new; amir.arrival_bill_entry due only after arrival.bill_grace_days, as its door. S482 (05-Oct-2026, D675 b): shavez.bill_chain_gap added -- a gap in Marg's bill numbers (mi_bill_chain, rewritten whenever a sale report or an EMPTY day lands) shows as one red line per gap on Aaj ki reports, naming the numbers and the days to re-export; the tile's own English line carries it to the owner (coded), and it leaves by itself when the re-export closes the gap. S485 (05-Oct-2026, D677): darpan.order_review added -- on order.source = darpan the system's order list opens on the second tab of Kal ka hisaab ('आज का ऑर्डर') from order.darpan_list_time; due while a proposal of today is still open (not yet Pakka); a proposal exists only on a supplier's order day, so no Sunday is ever due. darpan.order_sheet stays: the Marg sheet is the fallback road. S488 (06-Oct-2026, F-753/F-754 kit; no D-number): manoj.salt_list and manoj.item_lists added -- the owner's own Marg exports (the salt-wise list weekly; the category-wise list and the item list monthly) are his duties; their limits are setting rows (owner.salt_list_days 8, owner.item_lists_days 35, the same rows reports_tile's Marg card reads). They are the map's first duties with no door: the work is done in Marg and no page of ours does it -- the owner is told by amir_day's orphan-duty lines and by his console; the staff-eye walk exempts exactly these two ids from the door check. S494 (07-Oct-2026, D686): amir.marg_jobs added -- the owner's one-time Marg jobs for Amir (an item's category, a vendor's bill to scan for its bank details, a payment entry: table amir_job) are lines on his Marg sudhar card under 'Ek baar ke kaam', each gone when proved or tapped; the owner's lines are coded (amir_day._s494_owner_lines; the 'not done' line after amir.job_wait_days, 10). S524 (11-Oct-2026, D706, F-846): amir.count_vouchers' due_sql counts only the vouchers Amir can see -- the orthotic batches (stage A) and the batches of a released stage-C lot (stock_stage_event C/release naming the batch); a released lot's `since` is its release, not the round's day. Nothing else in the map moves.",
+ "version": 11,
+ "kit": "S533_AMIR_DAY_PAGE",
+ "_note": "S444 / D648 duty map, machine part: every recurring staff duty that has a queryable state in finance.db, each with ONE read-only SELECT returning one row (n = how many are due now, since = when the oldest became due). Read on every read of the owner's Needs-you list by amir_day.needs_you_lines (through the sanjeevni_approvals hook; read-only connection, SELECT/WITH only): an ORPHAN duty (door null -- nothing on the person's own home shows it) with n > 0 for allowed_days or more raises its owner_line, unless 'coded' names code that already raises the owner's line. A duty WITH a door raises nothing here unless it carries \"raise\": true (none does yet -- the owner's call). 'shared': a login that works another's queue (the staff-eye walk renders both homes). The staff-eye walk of every kit uses tile / door / door_marker. Rule: every kit that adds, moves or removes a staff duty updates this file and claude_code_briefs/DUTY_MAP.md together. S446 (02-Oct-2026): the doors of findings 1-4 and 9 added (Amir's card: the count by stage, the Sunday, arrived goods; Darpan's Kal ka hisaab: Amir's claims; Shavez's Vendor payments: an earlier month's baaki); the count vouchers' marker is the card's 'Marg sudhar'. S452 (02-Oct-2026): amir.rate_entry added (the board's '(b) Rate daalo' now has a door on his card, every step: 'N item ka rate Marg mein daalna hai -- kholiye'); amir.count_vouchers' Stage C is 12 a visit, more on request ('Aur voucher kholiye'). S454 (03-Oct-2026, part 1): the reception screen's one-task home -- reception.medicine_orders (Order karna hai: Darpan's sheet, or on order.source=system the day's proposals), reception.order_arrival (Maal aaya?: an order with no bill scan tied), reception.bill_scan (Bill scan karna hai: counted months only), reception.scan_questions (Photo dekh kar bataiye: counted months); darpan.order_sheet added (Kal ka hisaab's 'Order sheet' card; due only when the newest sheet was refused); shavez.supplier_messages counts the payment kinds only. S454 (03-Oct-2026, part 2): manoj.returns_ok reads the owner's own returns rule (returns.act_from; setting returns.pending_ok kept by amir_day when Needs-you is built); reception.bill_scan's owner line only after purchase.scan_wait_days (scan_register); amir.scan_files added -- never due: Amir is asked nothing new; amir.arrival_bill_entry due only after arrival.bill_grace_days, as its door. S482 (05-Oct-2026, D675 b): shavez.bill_chain_gap added -- a gap in Marg's bill numbers (mi_bill_chain, rewritten whenever a sale report or an EMPTY day lands) shows as one red line per gap on Aaj ki reports, naming the numbers and the days to re-export; the tile's own English line carries it to the owner (coded), and it leaves by itself when the re-export closes the gap. S485 (05-Oct-2026, D677): darpan.order_review added -- on order.source = darpan the system's order list opens on the second tab of Kal ka hisaab ('आज का ऑर्डर') from order.darpan_list_time; due while a proposal of today is still open (not yet Pakka); a proposal exists only on a supplier's order day, so no Sunday is ever due. darpan.order_sheet stays: the Marg sheet is the fallback road. S488 (06-Oct-2026, F-753/F-754 kit; no D-number): manoj.salt_list and manoj.item_lists added -- the owner's own Marg exports (the salt-wise list weekly; the category-wise list and the item list monthly) are his duties; their limits are setting rows (owner.salt_list_days 8, owner.item_lists_days 35, the same rows reports_tile's Marg card reads). They are the map's first duties with no door: the work is done in Marg and no page of ours does it -- the owner is told by amir_day's orphan-duty lines and by his console; the staff-eye walk exempts exactly these two ids from the door check. S494 (07-Oct-2026, D686): amir.marg_jobs added -- the owner's one-time Marg jobs for Amir (an item's category, a vendor's bill to scan for its bank details, a payment entry: table amir_job) are lines on his Marg sudhar card under 'Ek baar ke kaam', each gone when proved or tapped; the owner's lines are coded (amir_day._s494_owner_lines; the 'not done' line after amir.job_wait_days, 10). S524 (11-Oct-2026, D706, F-846): amir.count_vouchers' due_sql counts only the vouchers Amir can see -- the orthotic batches (stage A) and the batches of a released stage-C lot (stock_stage_event C/release naming the batch); a released lot's `since` is its release, not the round's day. Nothing else in the map moves. S533 (11/12-Oct-2026, D706 / D712; F-839, F-863): Amir's page rebuilt -- amir.bills_answer, amir.own_correction and amir.salt_list carry amir_day.DUTY_SQL byte-equal (the code runs the same strings): a bill's since-when is its first sight (purchase_bill.first_seen_day), answers are append-only (amir_bill_answer), the own-correction duty is the open wait records, the salt list is judged by one rule (the newest VERIFIED list by received_at); amir.arrival_bill_entry is retired and never due (D712: the arrival tap is reception's record; Amir's card counts the scans, amir.scan_files' marker); amir.marg_jobs counts a reopened job as due again (reopened_at).",
  "shared": {
   "shivani": "alisha"
  },
@@ -20,12 +20,12 @@
   {
    "id": "amir.bills_answer",
    "person": "amir",
-   "duty": "Answer every purchase bill of the bill-wise export (Theek hai, or what was wrong)",
+   "duty": "Answer every purchase bill of the bill-wise export (Theek hai, or what was wrong) -- S533: a bill's since-when is its first sight (first_seen_day); answers are append-only (amir_bill_answer)",
    "duty_hi": "Har purchase bill par jawab -- Theek hai ya kya galat",
    "tile": "Amir ka kaam",
    "door": "/finance/amir/step/5",
    "door_marker": "Har bill par ek tap",
-   "due_sql": "SELECT COUNT(*) AS n, MIN(seen_day) AS since FROM (SELECT b.supplier_norm, b.bill_no, b.bill_date, MIN(CASE WHEN e.export_stamp GLOB '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-*' THEN substr(e.export_stamp,1,4)||'-'||substr(e.export_stamp,5,2)||'-'||substr(e.export_stamp,7,2) ELSE substr(COALESCE(e.export_stamp, e.received_at),1,10) END) AS seen_day FROM purchase_bill b JOIN purchase_export e ON e.md5 = b.bw_md5 LEFT JOIN amir_bill_disposition d ON d.supplier_norm = b.supplier_norm AND d.bill_no = b.bill_no AND d.bill_date = b.bill_date WHERE d.reason IS NULL AND e.type = 'BILLWISE' AND b.bill_date >= '2026-09-01' AND EXISTS (SELECT 1 FROM purchase_bill b2 JOIN purchase_export e2 ON e2.md5 = b2.bw_md5 WHERE e2.superseded_by IS NULL AND e2.type = 'BILLWISE' AND b2.supplier_norm = b.supplier_norm AND b2.bill_no = b.bill_no AND b2.bill_date = b.bill_date) GROUP BY b.supplier_norm, b.bill_no, b.bill_date)",
+   "due_sql": "SELECT COUNT(*) AS n, MIN(first_seen_day) AS since FROM (SELECT b.id, b.first_seen_day FROM purchase_bill b JOIN purchase_export e ON e.md5 = b.bw_md5 WHERE e.type = 'BILLWISE' AND e.superseded_by IS NULL AND b.bill_date >= '2026-09-01' AND NOT EXISTS (SELECT 1 FROM amir_bill_answer a WHERE a.bill_id = b.id OR (a.bill_id IS NULL AND a.supplier_norm = b.supplier_norm AND a.bill_no = b.bill_no AND a.bill_date = b.bill_date)))",
    "allowed_days": 4,
    "owner_line": "Amir's purchase bills unanswered: {n} -- oldest seen {since} ({days} days)",
    "coded": null
@@ -33,12 +33,12 @@
   {
    "id": "amir.own_correction",
    "person": "amir",
-   "duty": "His own Marg correction ('Meri entry galat thi') until Marg's next bill-wise export carries the paper's amount",
+   "duty": "His own Marg correction ('Meri entry galat thi') until Marg's next bill-wise export carries the paper's amount -- S533: the open wait records, not the reason column",
    "duty_hi": "Meri entry galat thi -- Marg ki agli export ka intezaar",
    "tile": "Amir ka kaam",
    "door": "/finance/amir/step/5",
    "door_marker": "Marg ki agli export ka intezaar",
-   "due_sql": "SELECT COUNT(*) AS n, MIN(at) AS since FROM amir_bill_disposition WHERE reason = 'self'",
+   "due_sql": "SELECT COUNT(*) AS n, MIN(substr(replace(marked_at,'T',' '),1,19)) AS since FROM amir_self_wait WHERE cleared_at IS NULL",
    "allowed_days": 3,
    "owner_line": "Amir's own correction not yet seen in Marg: {n} bill(s) -- since {since} ({days} days)",
    "coded": "amir_day (b)"
@@ -46,14 +46,14 @@
   {
    "id": "amir.salt_list",
    "person": "amir",
-   "duty": "Export Marg's SALT WISE ITEM LIST (Excel) after salt corrections, so the server can prove them",
-   "duty_hi": "Ek export aur: SALT WISE ITEM LIST -- Excel mein (text nahi)",
+   "duty": "Export Marg's SALT WISE ITEM LIST (text or Excel) after salt corrections, so the server can prove them",
+   "duty_hi": "Ek export aur: SALT WISE ITEM LIST -- Text ya Excel, dono chalte hain",
    "tile": "Amir ka kaam",
    "door": "/finance/amir/step/6",
    "door_marker": "Ek export aur: SALT WISE ITEM LIST",
-   "due_sql": "WITH l(t) AS (SELECT MAX(CASE WHEN stamp GLOB '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]' THEN substr(stamp,1,4)||'-'||substr(stamp,5,2)||'-'||substr(stamp,7,2)||' '||substr(stamp,10,2)||':'||substr(stamp,12,2)||':'||substr(stamp,14,2) ELSE substr(replace(received_at,'T',' '),1,19) END) FROM mi_file WHERE type='SALT_WISE_ITEM_LIST' AND verdict='VERIFIED') SELECT COUNT(*) AS n, MIN(substr(replace(s.done_at,'T',' '),1,19)) AS since FROM purchase_salt_task s, l WHERE COALESCE(s.done,0) = 1 AND s.done_at IS NOT NULL AND s.done_at <> '' AND (l.t IS NULL OR substr(replace(s.done_at,'T',' '),1,19) > l.t)",
+   "due_sql": "WITH l(t) AS (SELECT MAX(substr(replace(received_at,'T',' '),1,19)) FROM mi_file WHERE type='SALT_WISE_ITEM_LIST' AND verdict='VERIFIED') SELECT COUNT(*) AS n, MIN(substr(replace(s.done_at,'T',' '),1,19)) AS since FROM purchase_salt_task s, l WHERE COALESCE(s.done,0) = 1 AND s.done_at IS NOT NULL AND s.done_at <> '' AND (l.t IS NULL OR substr(replace(s.done_at,'T',' '),1,19) > l.t)",
    "allowed_days": 2,
-   "owner_line": "Salt list not received for {days} days -- {n} salt corrections unproven (Amir / Shavez)",
+   "owner_line": "Salt list not received for {days} days -- {n} salt corrections unproven (Amir; Shavez if it did not come)",
    "coded": "amir_day (a)"
   },
   {
@@ -98,15 +98,15 @@
   {
    "id": "amir.arrival_bill_entry",
    "person": "amir",
-   "duty": "Key the bill in Marg for goods tapped as arrived on Purchase orders -- door added S446 (his card, every step)",
+   "duty": "Key the bill in Marg for goods tapped as arrived on Purchase orders -- door added S446 (his card, every step) -- RETIRED S533 (D712)",
    "duty_hi": "Maal aa gaya -- bill Marg mein daaliye",
    "tile": "Amir ka kaam",
    "door": "/finance/amir",
    "door_marker": "Marg mein bill baaki",
-   "due_sql": "SELECT COUNT(*) AS n, MIN(substr(arrived_at,1,10)) AS since FROM purchase_order_line WHERE arrived_at IS NOT NULL AND COALESCE(supplied,0) > 0 AND COALESCE(billed_bill_no,'') = '' AND arrived_at < strftime('%Y-%m-%dT%H:%M:%S', 'now', 'localtime', '-' || MAX(1, COALESCE((SELECT CAST(value AS INTEGER) FROM setting WHERE key = 'arrival.bill_grace_days'), 3)) || ' days')",
-   "allowed_days": 3,
-   "owner_line": "Arrived goods with no Marg bill: {n} line(s) -- since {since} (Amir)",
-   "coded": null
+   "due_sql": "SELECT 0 AS n, NULL AS since",
+   "allowed_days": 0,
+   "owner_line": null,
+   "coded": "D712 (S533): retired from Amir's card -- the arrival tap is reception's record; an arrival with nothing scanned after arrival.bill_grace_days is the owner's line in amir_day.needs_you_lines"
   },
   {
    "id": "amir.purchase_exports",
@@ -126,8 +126,8 @@
    "person": "amir",
    "tile": "Amir ka kaam",
    "door": "/finance/amir",
-   "door_marker": "Scan ho chuke bill",
-   "duty": "(none asked) The scanned medicine bills Marg does not have yet are offered on step 2, 'Scan ho chuke bill (N)': he enters from his paper bill and register as today; the file is there if he wants it (S454 6, purchase.entry_mode = paper)",
+   "door_marker": "Scan hua bill Marg mein baaki",
+   "duty": "(none asked) The scanned medicine bills Marg does not have yet are offered on step 2, 'Scan ho chuke bill (N)': he enters from his paper bill and register as today; the file is there if he wants it (S454 6, purchase.entry_mode = paper) -- S533 (D712): the same scans are the card's line \"Scan hua bill Marg mein baaki: N\"",
    "duty_hi": "Scan ho chuke bill (chahein to file lijiye)",
    "due_sql": "SELECT 0 AS n, NULL AS since",
    "allowed_days": 0,
@@ -137,12 +137,12 @@
   {
    "id": "amir.marg_jobs",
    "person": "amir",
-   "duty": "One-time Marg jobs the owner sets for him (D686): an item's category, a vendor's bill to scan for its bank details, a payment entry -- each a line on his Marg sudhar card until done",
+   "duty": "One-time Marg jobs the owner sets for him (D686): an item's category, a vendor's bill to scan for its bank details, a payment entry -- each a line on his Marg sudhar card until done -- S533: a job Marg's category list brings back is due again (reopened_at; what he said is kept)",
    "duty_hi": "Ek baar ke Marg ke kaam",
    "tile": "Amir ka kaam",
    "door": "/finance/amir/step/6",
    "door_marker": "Ek baar ke kaam",
-   "due_sql": "SELECT COUNT(*) AS n, MIN(substr(show_from,1,10)) AS since FROM amir_job WHERE done_at IS NULL AND said_at IS NULL AND show_from IS NOT NULL",
+   "due_sql": "SELECT COUNT(*) AS n, MIN(substr(show_from,1,10)) AS since FROM amir_job WHERE show_from IS NOT NULL AND done_at IS NULL AND NOT (said_at IS NOT NULL AND said_at > COALESCE(reopened_at, ''))",
    "allowed_days": 10,
    "owner_line": "Amir's one-time Marg jobs not done: {n} -- since {since} ({days} days)",
    "coded": "amir_day._s494_owner_lines"

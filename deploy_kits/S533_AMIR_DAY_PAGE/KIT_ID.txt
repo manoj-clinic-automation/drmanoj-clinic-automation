@@ -1,0 +1,6 @@
+kit id S533_AMIR_DAY_PAGE
+project Sanjeevni (brief of session 310, 11-Oct-2026; D706 D708 D709 D712; F-839 F-861 F-863 F-864) -- Kit 3 of D706: Amir's page rebuilt once
+under the charter. amir_day.py replaced whole (read once per request, words built once, append-only writes, the duty map's three SQLs);
+anchored edits beside it in stock_app.py (amir_duties and _s444_renames retired), purchase_app.py (a bill's first sight; scans_to_enter
+retired), stockmatch.py (c4 reads the stage); DUTY_MAP v11; one keyed data step (history copied append-only, the two spellings by D709).
+installed by install_S533_AMIR_DAY_PAGE.sh (it takes the build lock itself)

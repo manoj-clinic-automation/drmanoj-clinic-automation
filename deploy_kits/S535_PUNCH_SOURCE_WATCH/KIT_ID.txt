@@ -1,0 +1,3 @@
+KIT_ID   S535   S535_PUNCH_SOURCE_WATCH
+session  305 (parent), 12-Oct-2026 (D713)
+files    /root/attlistener_v2.py 94fc58ca -> 52b26645 (5 anchored edits) · /root/att_source_summary.py new · cron S535_PUNCH_WATCH
