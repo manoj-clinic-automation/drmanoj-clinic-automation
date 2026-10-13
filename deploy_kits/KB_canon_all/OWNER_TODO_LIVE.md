@@ -1,4 +1,8 @@
-# OWNER TO-DO — LIVE · refreshed at the **S305 close** (the parent), 12-Oct-2026, early morning — the Sanjeevni sections exactly as its S308 close wrote them (its session 310 open), the Scan App sections exactly as its S306 close wrote them (its session 309 open); the parent's sections refreshed here (311 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S311 close** (the parent), 13-Oct-2026, early morning — the Sanjeevni sections exactly as its S310 close wrote them (its session 312 reserved), the Scan App sections exactly as its S306 close wrote them (its session 309 open); the parent's sections refreshed here (313 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S310 close** (the Sanjeevni project), 13-Oct-2026, early morning — the parent sections exactly as its S305 close wrote them (its session 311 open), the Scan App sections exactly as its S306 close wrote them (its session 309 open), the Sanjeevni sections refreshed here (312 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S305 close** (the parent), 12-Oct-2026, early morning — the Sanjeevni sections exactly as its S308 close wrote them (its session 310 open), the Scan App sections exactly as its S306 close wrote them (its session 309 open); the parent's sections refreshed here (311 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S308 close** (the Sanjeevni project), 11-Oct-2026, the evening — the parent sections exactly as its S304 close wrote them (its session 305 is open), the Scan App sections exactly as its S306 close wrote them (309 reserved), the Sanjeevni sections refreshed here (310 reserved)
 
@@ -44,7 +48,7 @@
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
-*Detail: `START_HERE_SESSION_311.md` · `S305_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S308 close's (11-Oct, the evening); `S308_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_310.md` that chat's entry.*
+*Detail: `START_HERE_SESSION_313.md` · `S311_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S310 close's (13-Oct, early morning); `S310_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_312.md` that chat's entry.*
 
 ## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — written at the S306 close (11-Oct, early afternoon)
 
@@ -86,7 +90,7 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S305 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S311 close
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -118,42 +122,50 @@ https://followup.dr-manoj.in/portal/ring/list
 
 **LATER — none of these is urgent**
 
-**5 · RANJEET'S LOGIN** — *"to be done"* (12-Oct); the password is yours to set.
+**5 · RANJEET'S LOGIN** — the password is yours to set.
 
 ```
 https://followup.dr-manoj.in/portal/users
 ```
 
-**6 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** The button now says *Sent at …* right under itself.
+**6 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** September's is ready.
 
-**7 · THE FOLLOW-UP TRACKER ON THE SERVER — you said "ask next week".** I ask once this week. Nothing moves until your yes.
+```
+https://followup.dr-manoj.in/finance/packs?month=2026-09
+```
 
-**8 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
+**7 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
 
-**9 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
+**8 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
 
-**10 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
+**9 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
 
-**WHEN IT HAPPENS — not a duty:** a POS total waiting for your Confirm · a Voicenotes list waiting above *Give a task*.
+**WHEN IT HAPPENS — not a duty:** a POS total waiting for your Confirm · a Voicenotes list waiting above *Give a task* · your bank check under row 2 of the packs page — look when you like; nobody else sees it.
 
-**Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C). **Dropped:** Tailscale (12-Oct).
+**Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C) · **the follow-up tracker on the server — "later" (12-Oct)**. **Dropped:** Tailscale (12-Oct).
 
-*Ticked by you or done, and off this list: the Voicenotes paste (done by 12-Oct) · passports — your word "12 months" (the change is mine) · the clinic / MK expense split — your word "MK personal if no clinic group" (the Scan App chat builds it) · the punch listener — your word "only if safe" (step 1 live; step 2 mine, on evidence) · your Fold's Contacts permission (skipped).*
+*Ticked by you or done, and off this list: passports 12 months (done 12-Oct) · the X-ray test shortcut — kept, it is in use (12-Oct) · the bank check's days — not raised to reception or anyone, yours only (12-Oct).*
 
-*Closed by your word and not on this list: the technician of 25-Sep, AnyDesk and UltraViewer, passwords, the Windows activation on the reception PC (02-Oct) · the accountants get the pack only; no statement passes through the clinic mailbox; the 61 test scans stay (04-Oct) · a panel to waive late minutes (06-Oct) · the daily health mails and Daily Clinic Reports in Trash — you delete them yourself (08-Oct) · the accountants do not get your renewals list; no Docterz patient PDF is in your personal mail (10-Oct) · no email setup for Razorpay bookings — Docterz marks them (12-Oct).*
+*Closed by your word and not on this list: the technician of 25-Sep, AnyDesk and UltraViewer, passwords, the Windows activation on the reception PC (02-Oct) · the accountants get the pack only; no statement passes through the clinic mailbox; the 61 test scans stay (04-Oct) · a panel to waive late minutes (06-Oct) · the daily health mails and Daily Clinic Reports in Trash — you delete them yourself (08-Oct) · the accountants do not get your renewals list; no Docterz patient PDF is in your personal mail (10-Oct) · no email setup for Razorpay bookings — Docterz marks them (12-Oct) · your Fold's Contacts permission — skipped (12-Oct).*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The pack build (your word, 12-Oct: "in a fresh chat"):** the income sheet by each split's real cash and online parts; *Wallet* only for a Razorpay booking's consultation fee; the bank checked day by day with a list of days for reception to explain; the digest without double counts. **You see the new September sheet before it is installed.**
-2. **What this morning's 08:15 check found** (the follow-up log; the old Drive folder on the reception PC) — one line each.
-3. **Passports come up 12 months ahead again.**
-4. **The X-ray test shortcut removed** from the reception PC (the Drive folder kept), after checking nothing uses it.
-5. **Your health page's two rows** — UPI evidence (9 Oct) and the cash count — read and told in one line each.
-6. **The punch listener's step 2** — about a week from now, only if every genuine punch carries one steady mark.
-7. **My own, no word needed:** the medical PC shouting if the hand-made pen-drive backup is more than a week old · the finance app's own test suite · reading Morning match once as reception · proving the 148 older documents.
-8. **On your word:** the WhatsApp appointment message to patients · the tracker on the server · the MyOperator key steps · the contacts · the mail flood (low) · the portal tiles · kits for Shavez's PC and the lab PC.
-9. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up.
+1. **The day page without the word "Split" (your word, 13-Oct: "in a fresh chat … as the first thing"):** every line shown as it was actually paid — consultation cash, X-ray online, and so on — from September; the month table and the day PDF the same; a booked visit's procedure line no longer counted as Razorpay money. **You see 12-Oct as it will look before it is installed.**
+2. **The punch listener's step 2** — after about 19-Oct, only if every genuine punch carries one steady mark.
+3. **My own, no word needed:** the medical PC shouting if the hand-made pen-drive backup is more than a week old · the finance app's own test suite · reading Morning match once as reception · proving the 148 older documents.
+4. **On your word:** a *send to Shavez* button for the bank check · the WhatsApp appointment message to patients · the MyOperator key steps · the contacts · the mail flood (low) · the portal tiles · kits for Shavez's PC and the lab PC.
+5. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S311 CLOSE — 12 → 13-Oct-2026 (the parent)
+
+- ~~**"The pack build" (12-Oct)**~~ — live 08:38: split parts, the wallet rule, the digest once per charge (S538).
+- ~~**"Would not like to raise this to reception or anyone … where I can see"**~~ — the bank check is on your packs page only; it no longer goes out in the accountants' mail.
+- ~~**Passports 12 months**~~ — in your renewal mail since 08:01.
+- ~~**"See why the Monday follow-up list did not come"**~~ — the tracker used a one-day evening export; fixed (S540), Monday healed to 12 patients at 08:50.
+- ~~**The old Drive folder on the reception PC**~~ — deleted, 994 MB (j45).
+- ~~**The X-ray test shortcut**~~ — kept; it is in use.
+- ~~**"Answer me if it's possible" (the split word, 13-Oct)**~~ — yes, checked on 42 bills; built next chat, first thing.
 
 ## ✅ DONE AT THE S305 CLOSE — 11 → 12-Oct-2026 (the parent)
 
@@ -324,6 +336,58 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S310 close (13-Oct, early morning)
+
+*Detail: `S310_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_312.md`. The same lines are on your System Board.*
+
+**1 · The publish** — this close's record (papers; nothing changes on the server). The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**Nothing else is yours today.** Voucher 29 is void, NORTIMER is out of the count and voucher 30 carries its other five lines; Amir's medicine vouchers flow to him 12 a visit by themselves.
+
+**Still yours from before, not urgent (on your board):**
+- bank details for **Agarwal Surgicals and Medicals** — its bill is scanned:
+
+```
+https://followup.dr-manoj.in/finance/purchase/page/book
+```
+
+- the first cheque logged (Shavez can do it);
+- one photo of Marg's purchase-import screen.
+
+**Worth knowing — the staff's, on their own screens, not yours:**
+- **Amir:** the 12 medicine vouchers on his board into Marg and their numbers back; the next 12 open as these are proven.
+- **Darpan:** one spot count at the head of his list — ANKLE BINDER L BAMBOO.
+- **Morning staff:** the two reports from the REPORT login, as every day.
+
+**Held at your word:**
+- S438_COUNT_BOOK;
+- S486, the buying model — after the ordering fix and stock on the spine;
+- **Amir's *Aaj ka kaam* list — off, and nothing is added to it (D690);**
+- **NORTIMER — out of the 6-Sep count; any surplus later by a fresh count and a new voucher (D715).**
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S310 close
+
+**Every build follows the charter v1.1 (`claude/S307_BUILD_CHARTER_v1_1.md`, D707).**
+
+1. **The ordering sheet (your ruling of 13-Oct, D716):** a line leaves the list only when Marg closes it (no more COCYP missing, no stale "arrived" or "awaited" lines); the heading counts what is shown; units on the lines; **Marg's own order PDF beside the system's print button**, so the staff print both and compare. Nothing else in the flow changes. Brief → three reads → your one paste line.
+2. **Stock on the spine (rung 4b)** — one source for "what Marg says" and one for "what the shelf says"; the voucher guard then also reads renamed items, and "never past the shelf figure".
+3. **S486 Part A**, then **Part B** on rung 4b.
+4. **Small:** the hub's orthotic section and a held line (F-875); a label on Amir's page (F-881); the medical PC's "same as before"; the five limits on your settings page.
+
+## ✅ DONE AT THE S310 CLOSE — 11 → 13-Oct-2026 (the Sanjeevni project)
+
+- ~~**Kit 3 of Amir's page (S533)**~~ — live 05:48 12-Oct from your paste line: one reading of the facts per request; the bill line from the scan (your D712); all 23 renames verified.
+- ~~**The reception-tap line on Amir's board; "ordering can start" too early (S536)**~~ — live 06:36.
+- ~~**Voucher 29 — a system error**~~ — voided by S537 (08:08) at your "Yes"; the guard so it cannot happen again; the Yuvika line gone (the goods were on bill 672).
+- ~~**NORTIMER out of the count (S539)**~~ — 08:50 at your word; voucher 30 made from the other five lines.
+- ~~**The 6-Sep medicine vouchers**~~ — the first 12 on Amir's board since 08:08 12-Oct.
+- ~~**Y78, the publish of the S308 record**~~ — landed 18:29 IST 11-Oct (`d19be28`).
+- ~~**Darpan's purchase order checked against the ordering screen and its PDF**~~ — the faults named; your ruling of 05:24 13-Oct carried over (D716).
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S308 close (11-Oct, the evening)
 
