@@ -1,0 +1,56 @@
+S545 browser walk -- Chromium (Playwright), OpenCV.js 4.10.0 (@techstark/opencv-js 4.10.0-release.1, md5 ff1e10e7 = the live /root/assetapp/static/opencv.js)
+OLD = live scanner_widget.js 65127fcb (S531) . NEW = the kit's build 1143c77b
+Made-up photos only (no real scan, no patient). PASS needs overlap with the true paper >= 0.88 and >= 97% of the paper kept.
+
+1. FINDING THE PAPER (the whole finder, steps 1-3)
+  PASS(old also passed)  A sideways bill, hand on its edge, wood desk                       old iou 0.981 keep 0.981 | new iou 0.981 keep 0.981 | 36 ms
+  PASS                   B bill touching both side edges, keyboard, hand below              old iou 0.000 keep 0.000 | new iou 0.988 keep 0.988 | 44 ms
+  PASS                   C portrait paper on a desk, no hand                                old iou 0.993 keep 0.999 | new iou 0.993 keep 0.999 | 18 ms
+  PASS(old also passed)  D tilted bill touching the top, two fingers on it, blue tray       old iou 0.983 keep 0.983 | new iou 0.983 keep 0.983 | 16 ms
+  PASS(old also passed)  E bill held with both hands, wood desk                             old iou 0.994 keep 1.000 | new iou 0.994 keep 1.000 | 24 ms
+  PASS                   F bill on a light grey table, hand on it                           old iou 0.000 keep 0.000 | new iou 0.992 keep 0.993 | 30 ms
+  PASS                   H light table, sideways bill touching top and bottom, hand on its side old iou 0.000 keep 0.000 | new iou 0.991 keep 0.991 | 24 ms
+  PASS                   I light table, bill touching both sides, fingers at the bottom     old iou 0.000 keep 0.000 | new iou 0.994 keep 0.994 | 23 ms
+  INFO                   J light table, a thumb over one corner                             old iou 0.957 keep 0.957 | new iou 0.957 keep 0.957 | 14 ms
+  PASS                   K wood desk, sideways bill, fingers over two edges                 old iou 0.000 keep 0.000 | new iou 0.993 keep 0.993 | 23 ms
+  PASS (the bill)        L a blank bright wall above, the bill on a dark desk with a hand   old iou 0.982 keep 0.982 | new iou 0.982 keep 0.982 | 16 ms
+  PASS (the bill)        M a blank bright wall above, the bill on a dark desk, no hand      old iou 0.995 keep 1.000 | new iou 0.995 keep 1.000 | 22 ms
+  INFO                   G paper filling the frame                                          old iou 0.000 keep 0.000 | new iou 0.000 keep 0.000 | 29 ms
+  Negative control: the OLD finder fails B, F, H, I, K (the hand / the frame edge / the light table) -- the NEW passes all five.
+  J (a thumb over a corner): both keep the same share -- unchanged. G (paper filling the photo): the whole photo kept, as before.
+
+2. STEP 3 ALONE (the paper by its colour; must give the bill or nothing -- never a blank wall)
+  PASS                     A sideways bill, hand on its edge, wood desk                       iou 0.994 keep 0.994
+  PASS                     B bill touching both side edges, keyboard, hand below              iou 0.988 keep 0.988
+  INFO (steps 1-2 decide)  D tilted bill touching the top, two fingers on it, blue tray       iou 0.000 keep 0.000
+  PASS                     E bill held with both hands, wood desk                             iou 0.994 keep 0.995
+  INFO (steps 1-2 decide)  F bill on a light grey table, hand on it                           iou 0.000 keep 0.000
+  PASS                     H light table, sideways bill touching top and bottom, hand on its side iou 0.990 keep 0.990
+  PASS                     I light table, bill touching both sides, fingers at the bottom     iou 0.994 keep 0.994
+  PASS                     K wood desk, sideways bill, fingers over two edges                 iou 0.993 keep 0.993
+  PASS (the bill)          L a blank bright wall above, the bill on a dark desk with a hand   iou 0.985 keep 0.985
+  PASS (the bill)          M a blank bright wall above, the bill on a dark desk, no hand      iou 0.988 keep 0.988
+
+3. TURNING A SIDEWAYS PAGE UPRIGHT (NEW only; made-up pages)
+  PASS     U1 landscape bill, upright -> upright
+  PASS     U2 landscape bill turned clockwise -> upright
+  PASS     U3 landscape bill turned anticlockwise -> upright
+  PASS     U4 portrait page, upright -> upright
+  PASS     U5 ruled table bill, upright -> upright
+  PASS     U6 ruled dense portrait page, upright -> upright
+  PASS     U7 ruled table bill turned clockwise -> upright
+
+4. MEMORY: 600 live-outline passes on a light-table photo; 100 upright turns (the independent read also checked by allocation address: no drift)
+  old: WASM heap 128 MB -> 128 MB, 4.5 ms a pass
+  new: WASM heap 128 MB -> 128 MB, 7.4 ms a pass
+
+5. THE SEVEN SURFACES (each surface's own SCANNER_CONFIG shape; OLD and NEW loaded whole)
+finance day scan           GREEN (identical, no error, smart path off) 
+finance non-cash           GREEN (identical, no error, smart path off) 
+finance expense            GREEN (identical, no error, smart path off) 
+finance clinic day         GREEN (identical, no error, smart path off) 
+finance clinic expense     GREEN (identical, no error, smart path off) 
+scan app asset page        GREEN (identical, no error, smart path off) 
+scan app intake (smart)    GREEN (new finds scene B 0.988; control old found=false)
+
+NOT PROVEN HERE: real colour photos from reception's phone -- the first staff scans after the install are read the next morning.

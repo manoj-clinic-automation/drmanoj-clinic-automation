@@ -1,0 +1,100 @@
+S544 walk -- the app (Flask test client) with the built files on a fresh made-up database (made-up rows dated 2031, made-up names);
+on the box the installer runs the same walk on a copy of the live database. Then the intake in Chromium (switch ON).
+
+1. BUILT FILES (asset_register.py 99652ff0 . clinic_papers.py 5b197fb5)
+  GREEN W1 the app imports; clinic_papers S544.1 mounted
+  GREEN W2 the column pe_who exists after the app's own migration
+  GREEN W3 the asset category list reads Dr MK Clinic Equipment, not Medical Equipment
+  GREEN W4 every asset in Medical Equipment moves to Dr MK Clinic Equipment (none left behind)
+  GREEN W5 the lane's words read Personal expense
+  GREEN W6 OFF keeps every login's own default (the owner's seed unchanged)
+  GREEN F1 F-891: a manager is refused a Personal paper on the bill page, its file and its edit page
+  GREEN F2 F-891: a manager's door that changes a bill (its month) refuses a Personal paper
+  GREEN F3 F-891: the manager's bills list, searched by its stamp, does not carry it
+  GREEN F4 F-891: the supplier's purchase history does not show it to a manager
+  GREEN F5 the owner still opens it, finds it by its stamp and in the supplier's history
+  GREEN F6 F-891: the papers page never shows a manager a Personal expense marked Personal
+  GREEN F7 F-891: a manager cannot mark whose a Personal paper is
+  GREEN F8 the owner's papers page does show it in Personal expenses
+  GREEN W7 OFF: reception's intake has no lane buttons; the old drop-down still offers every lane
+  GREEN W8 OFF: the owner's admin page shows the switch reading OFF
+  GREEN W9 the owner's tap switches it ON (settings scan.lanes5 = on)
+  GREEN W10 a reception login cannot touch the switch
+  GREEN W11 ON: reception sees four lane buttons -- Clinic, Pharmacy, NK Pathology, Other document -- in that order
+  GREEN W12 ON: reception has no Personal expense, neither button nor drop-down option
+  GREEN W13 ON: reception's words are Roman Hinglish; the CHALLAN button stays
+  GREEN W14 ON: the owner sees the four and Personal expense, with Dr MK / Dr Bhawna, in English, and opens on Clinic
+  GREEN W15 ON: a manager (Shavez) sees Personal expense too
+  GREEN W16 ON: a reception scan sent as Personal expense (an old page) lands on the Clinic lane
+  GREEN W17 ON: reception's pharmacy challan is handed over as before (kind Challan, doc_kind challan)
+  GREEN W18 the owner's Personal expense for Dr Bhawna lands with pe_who bhawna (Expense, captured)
+  GREEN W19 one with no name chosen lands with pe_who empty (= Dr MK)
+  GREEN W20 the papers page carries the Personal expenses fold; Dr Bhawna's paper under Dr Bhawna
+  GREEN W21 a manager (Shavez) sees the fold too
+  GREEN W22 a personal expense's own page asks whose it is, and keeps its warranty card
+  GREEN W23 a manager's tap sets Dr Bhawna, with an audit line
+  GREEN W24 the owner's tap sets it back to Dr MK (empty)
+  GREEN W25 a reception login cannot set whose expense
+  GREEN W26 a paper that is not a personal expense is refused, unchanged
+  GREEN W27 F-891: a manager is refused a Personal paper on the bill page, its file and its picture
+  GREEN W28 F-891: the manager's bills list, searched by its stamp, does not carry it
+  GREEN W29 the owner still opens it, and finds it by its stamp
+  GREEN W30 the owner's stand row reads Personal expenses, Dr MK and Dr Bhawna counted
+  GREEN W31 the bill page names the lane Personal expense
+  GREEN W32 switched OFF again: reception's intake is the old one
+  GREEN W33 OFF: the server takes the lane as before
+  41 checks, 41 green, 0 red
+
+2. THE CONTROL -- the same walk on the live files (35f9e823 . 476e157c): must be red
+  RED   W1 the app imports; clinic_papers S544.1 mounted -- S532.1
+  RED   W2 the column pe_who exists after the app's own migration
+  RED   W3 the asset category list reads Dr MK Clinic Equipment, not Medical Equipment
+  RED   W4 every asset in Medical Equipment moves to Dr MK Clinic Equipment (none left behind) -- (1, 0)
+  RED   W5 the lane's words read Personal expense -- ('Dr MK expense', 'Expense', 'captured')
+  GREEN W6 OFF keeps every login's own default (the owner's seed unchanged)
+  RED   F1 F-891: a manager is refused a Personal paper on the bill page, its file and its edit page -- [200, 404, 302]
+  RED   F2 F-891: a manager's door that changes a bill (its month) refuses a Personal paper -- 302
+  RED   F3 F-891: the manager's bills list, searched by its stamp, does not carry it
+  RED   F4 F-891: the supplier's purchase history does not show it to a manager
+  GREEN F5 the owner still opens it, finds it by its stamp and in the supplier's history
+  GREEN F6 F-891: the papers page never shows a manager a Personal expense marked Personal
+  RED   F7 F-891: a manager cannot mark whose a Personal paper is -- 404
+  RED   F8 the owner's papers page does show it in Personal expenses
+  GREEN W7 OFF: reception's intake has no lane buttons; the old drop-down still offers every lane
+  RED   W8 OFF: the owner's admin page shows the switch reading OFF
+  RED   W9 the owner's tap switches it ON (settings scan.lanes5 = on) -- (302, None)
+  RED   W10 a reception login cannot touch the switch -- 403
+  RED   W11 ON: reception sees four lane buttons -- Clinic, Pharmacy, NK Pathology, Other document -- in that order
+  RED   W12 ON: reception has no Personal expense, neither button nor drop-down option
+  RED   W13 ON: reception's words are Roman Hinglish; the CHALLAN button stays
+  RED   W14 ON: the owner sees the four and Personal expense, with Dr MK / Dr Bhawna, in English, and opens on Clinic
+  RED   W15 ON: a manager (Shavez) sees Personal expense too
+  RED   W16 ON: a reception scan sent as Personal expense (an old page) lands on the Clinic lane -- (200, 'owner_expense')
+  GREEN W17 ON: reception's pharmacy challan is handed over as before (kind Challan, doc_kind challan)
+  RED   the walk ran to its end -- OperationalError('no such column: pe_who')
+  26 checks, 5 green, 21 red
+
+3. THE INTAKE IN CHROMIUM (390 x 844, switch ON): tapping the buttons
+  GREEN reception: opens on Clinic, its button lit, the line says Clinic
+  GREEN reception: tap Pharmacy -> the scanner sends pharmacy, the half-A4 hint set, the basic form too, one button lit
+  GREEN reception: tap NK Pathology -> lab_purchase, the half-A4 hint cleared, the line says NK Pathology (the button words)
+  GREEN reception: the CHALLAN button still works beside the lanes
+  GREEN reception: no Personal expense and no Dr MK / Dr Bhawna anywhere on the page
+  GREEN reception: every visible button at least 44 px tall on a 390-px phone
+  GREEN reception: no sideways scroll at phone width
+  GREEN reception: no script error on the page
+  GREEN owner: opens on Clinic, its button lit, the line says Clinic
+  GREEN owner: tap Pharmacy -> the scanner sends pharmacy, the half-A4 hint set, the basic form too, one button lit
+  GREEN owner: tap NK Pathology -> lab_purchase, the half-A4 hint cleared, the line says NK Pathology (the button words)
+  GREEN owner: the CHALLAN button still works beside the lanes
+  GREEN owner: tap Personal expense -> owner_expense, Dr MK / Dr Bhawna shown, the line says Dr MK
+  GREEN owner: Dr MK / Dr Bhawna shown at least 44 px tall
+  GREEN owner: tap Dr Bhawna -> pe_who bhawna sent, the basic form too, the line says Dr Bhawna
+  GREEN owner: back to Clinic -> the Dr MK / Dr Bhawna row hidden
+  GREEN owner: every visible button at least 44 px tall on a 390-px phone
+  GREEN owner: no sideways scroll at phone width
+  GREEN owner: no script error on the page
+  19 checks, 19 green, 0 red
+
+4. THE INSTALLER, rehearsed on a made-up root with a running copy of the app: fresh -> DONE (41 green, control 21 red; category 1 -> 0 left;
+   the read-back gate passed) . second run -> ALREADY INSTALLED . health red for 40 s -> both files and the category name restored . wrong FROM -> REFUSED.

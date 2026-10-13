@@ -1,0 +1,12 @@
+const fs=require('fs'),path=require('path');const {chromium}=require('playwright');
+const extract=(f)=>{const s=fs.readFileSync(f,'utf8');return s.slice(s.indexOf('  function orderQuad(pts){'),s.indexOf('  function fullCanvas(img){'));};
+const fac=(b)=>`(function(CVlib){ var CV = CVlib, cvReady = true, CV_DETECT = 640, CV_MAX_OUT = 2400;\n${b}\n return {find: cvFindQuad, upright: (typeof cvUpright==='function')?cvUpright:null}; })`;
+(async()=>{const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});const pg=await br.newPage();await pg.goto('file://'+path.resolve('bench.html'));
+await pg.waitForFunction(()=>window.cv&&(window.cv.Mat||window.cv.then),null,{timeout:120000});await pg.evaluate(async()=>{if(!window.cv.Mat&&window.cv.then){window.cv=await window.cv;}});
+const r=await pg.evaluate(({fo,fn,sc})=>{eval(sc);const O=eval(fo)(cv),N=eval(fn)(cv);const out={};
+ [['old',O],['new',N]].forEach(function(p){var s=scene(Object.assign({},CASES[5]));var c=mk(360,480);c.getContext('2d').drawImage(s.canvas,0,0,360,480);
+  for(var i=0;i<20;i++)p[1].find(c,360); var h0=cv.HEAP8.buffer.byteLength; var t0=performance.now();
+  for(var i=0;i<600;i++)p[1].find(c,360); out[p[0]]={heapMB_before:h0/1048576,heapMB_after:cv.HEAP8.buffer.byteLength/1048576,ms_each:+((performance.now()-t0)/600).toFixed(1)};});
+ var pgc=billCanvas(1500,1060); var x=0; var h1=cv.HEAP8.buffer.byteLength; for(var i=0;i<100;i++){N.upright(pgc);} out.upright={heapMB_before:h1/1048576,heapMB_after:cv.HEAP8.buffer.byteLength/1048576};
+ return out;},{fo:fac(extract(process.argv[2])),fn:fac(extract(process.argv[3])),sc:fs.readFileSync('scenes.js','utf8')});
+console.log(JSON.stringify(r));await br.close();})();
