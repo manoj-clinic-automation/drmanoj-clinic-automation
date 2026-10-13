@@ -1,0 +1,3 @@
+KIT_ID   S542   S542_CONSOLE_FRESH
+session  313 (parent), 13-Oct-2026 · the owner's word 07:26 IST · claimed v388
+files    /root/finance/owner_console.py c09321e2 -> 2b985708 · /root/finance/owner_console.html e6d35d88 -> e0d7d62f (both built on the box from the live bytes by make_s542.py)

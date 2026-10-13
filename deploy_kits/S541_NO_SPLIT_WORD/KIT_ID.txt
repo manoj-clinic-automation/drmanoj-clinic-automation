@@ -1,0 +1,3 @@
+KIT_ID   S541   S541_NO_SPLIT_WORD
+session  313 (parent), 13-Oct-2026 · D718 · F-869 · claimed v381 at S311 · widened to clinic_money.py at the owner's word 07:26 (PLANNED v387)
+files    /root/finance/finance_clinic_day.py f6729d83 -> 2c539bad · /root/finance/clinic_day_pdf.py 150192e2 -> 1534818b · /root/finance/packs.py 382081fa -> ada0860a · /root/finance/clinic_money.py b3ddc8d2 -> b0408f82 (all built on the box from the live bytes by make_s541.py)

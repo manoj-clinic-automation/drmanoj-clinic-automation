@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S311 close** (the parent), 13-Oct-2026, early morning — the Sanjeevni sections exactly as its S310 close wrote them (its session 312 reserved), the Scan App sections exactly as its S306 close wrote them (its session 309 open); the parent's sections refreshed here (313 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S309 close** (the Scan App project), 13-Oct-2026, early morning — the parent's sections exactly as its S311 close wrote them (its session 313 open), the Sanjeevni sections exactly as its S310 close wrote them (its session 312 reserved); the Scan App sections refreshed here (314 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S311 close** (the parent), 13-Oct-2026, early morning — the Sanjeevni sections exactly as its S310 close wrote them (its session 312 reserved), the Scan App sections exactly as its S306 close wrote them (its session 309 open); the parent's sections refreshed here (313 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S310 close** (the Sanjeevni project), 13-Oct-2026, early morning — the parent sections exactly as its S305 close wrote them (its session 311 open), the Scan App sections exactly as its S306 close wrote them (its session 309 open), the Sanjeevni sections refreshed here (312 reserved)
 
@@ -50,33 +52,40 @@
 
 *Detail: `START_HERE_SESSION_313.md` · `S311_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S310 close's (13-Oct, early morning); `S310_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_312.md` that chat's entry.*
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — written at the S306 close (11-Oct, early afternoon)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S309 close (13-Oct, early morning)
 
-*Detail: `S306_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_309.md`. The same lines are on your System Board.*
+*Detail: `S309_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_314.md`. The same lines are on your System Board.*
 
-**1 · The publish** — this close's record only (papers; nothing changes on the server). The same double-click as always:
+**1 · The publish** — this close's record only (papers; nothing changes on the server):
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**Nothing else is yours.** The smart scanner is on for every phone from your tap; its first real reading reaches you by itself on Monday 12-Oct at 08:00 (three lines). The two items on the clinic chat's files (the accountants' pack carrying the clinic's bills; Sukhveer's duty line) are on the board for it — not a step of yours.
+**2 · Your word, when you choose (not urgent):** a stop-gap correction of the Janitor's renewal list. It would add the TVS insurance (5 Dec), the Honda insurance (19 Jan), the four yearly items and Dr Bhawna's licence to your 08:42 mail until the new Google project replaces it.
 
-**Still yours from before, not urgent (on your board):** the clinic / MK expense split (Y51) — nothing suggests a group for electrical or plumbing papers until you settle it; it is never guessed.
+**Coming to you to see, not to do:** the sorting desk as a mock-up (you edit it; the build follows your edits); reception's five buttons before they change.
 
-**Worth knowing — the staff's, on their own screens, not yours:**
-- **Reception:** the same scanner, now cropping to the page at full resolution, with *Adjust* beside *Retake*; one big *CHALLAN HAI?* button to tap when the paper is a challan — it resets after every Save.
-- **Shavez (and you):** the papers page has four more sections — Resumes, Miscellaneous documents, Construction work (counted on its own), Personal (yours only); a paper sorted is accepted there and then (no approve tap); *Bills awaited* lists the challans, amber after 15 days; a paper the system placed says so on its page and can be changed there.
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S309 close
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — written at the S306 close
+**Every build follows `BUILD_NORM_v1` (D704). First D719, then D720.**
 
-**Every build follows `BUILD_NORM_v1` (D704).**
+1. **Reception and the renames:** five capture buttons (Clinic · Pharmacy · NK Pathology · Other document · Challan); *Personal expenses* (Dr MK / Dr Bhavna) as a section for you and Shavez; *Dr MK Clinic Equipment*.
+2. **The sorting desk** — the scan large, the reading beside it, lane → section → sub-section, one Save; mock-up first.
+3. **The asset register** — parts with their warranties, cover history with renewal reminders, spends with their bills.
+4. **Then D720** — your family's documents and renewals in their own Google project beside the shared Drive folder; a *Documents & Renewals* tile.
+5. **Carried:** the smart scanner's first reading and the papers the system placed (reads, at the next open) · a short page for the scan app's switches (F-856) · a warranty date offered from the scan's reading — when you ask.
 
-1. **The Monday reading of the smart scanner** (12-Oct 08:00, by itself): any phone that falls back, any sheet cut — a small kit on the real phone's own photos.
-2. **The clinic chat's two items** (D710 (2), (3)) — on its word with a PLANNED line, or its own build.
-3. **A short owner page for the scan app's switches** (F-856) — with the next kit that touches the admin.
-4. **S532 after a week:** every placed paper a person changed is a rule to tighten; nothing is loosened.
-5. **A warranty date offered from the scan's reading** — when you ask.
+**Waits by your word:** the clinic's bills in the accountants' pack — *"when it is working properly"*.
+
+## ✅ DONE AT THE S309 CLOSE — 12 → 13-Oct-2026 (the Scan App project)
+
+- ~~**"List all the categories and any subcategories"**~~ — five lanes, the clinic groups, four sections, nine asset categories, from the live code.
+- ~~**"Sukhveer will continue … the clinic purchase bill into the accountant pack should wait"**~~ — recorded (D719 (6)); no duty line.
+- ~~**"Analyze the page and my inputs to refine the scan app flow"**~~ — read from the live code; the flow settled (D719).
+- ~~**"The personal section … my Google Drive folder … shared with my family"**~~ — understood; settled as its own Google project (D720).
+- ~~**"Check the renewals Apps Script and the spreadsheet; are they fine"**~~ — read in your account: running fine; five lists that disagree, six items not mailed, numbers in plain text (F-887, F-888).
+- ~~**The S306 publish (Y77)**~~ — landed 16:29 IST 11-Oct (with the Sanjeevni chat's publish).
 
 ## ✅ DONE AT THE S306 CLOSE — 11-Oct-2026 (the Scan App project)
 
