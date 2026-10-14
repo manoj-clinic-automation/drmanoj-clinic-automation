@@ -95,4 +95,4 @@ Including:
 
 ### Outside the brief, noticed
 - `PUBLISH_ALL.bat` also published two pending briefs from the chats (`S315_READING_COMPARE.md`, `S555_DESK_CORRECTIONS.md`). That is expected under the charter.
-- The server's scratch copies (database copies included) were deleted after the install. `/tmp/s543kit` is removed when this report is published.
+- The server's scratch copies with database copies (`/tmp/s543dev`, `/tmp/s543walk`, `/tmp/s543rh`, `/tmp/s543_inst_*`, the probe's `f.db`) were deleted after the install. The build lock was released (its owner file removed, then the empty folder). **Left in /tmp:** `/tmp/s543kit` (the kit's own files) and `/tmp/s543probe` (probe scripts and their masked output). Neither holds a database copy. The permission list refused the recursive delete, so they are left for the server's /tmp cleanup.
