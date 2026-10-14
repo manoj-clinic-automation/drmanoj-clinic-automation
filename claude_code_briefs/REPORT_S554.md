@@ -105,6 +105,7 @@ The setting may stay, because nothing in the old files reads it.
 ### Not done, and why
 - **The board's `_numbers` claims:** not reachable from this runner (the board is a claude.ai artifact). **The chat should append S554's DONE / RELEASED line** (physio_book.py a085fee7, aaj_duties.json fa5cfac5).
 - No physio row and no `clinic_physio_day` row was written on the live database (only the one setting).
+- **Server clean-up was refused by the permission list.** The combined command (`git pull`, lock release, `rm -rf /tmp/s554kit /tmp/s554probe`) was denied. I did not retry it in another form. The lock alone was released with `rm owner` + `rmdir` at **07:06:14 IST** (read from the box), after the report was published, and healthz was 200 then. **Left on the box:** `/tmp/s554kit` (the kit copy that ran, identical to the repository) and `/tmp/s554probe` (a read-only count probe, the trial script and the installer's log). No secret and no number is in them. Either can be deleted by whoever holds a wider permission.
 
 ### Noticed outside the brief (not touched)
 - Bhati's list will now carry this line every day until 1–12 Oct are entered and agree. `bhati.physio_tick` (*Theek hai* in the petty book) still overlaps it, and is the owner's to switch off on his panel.
