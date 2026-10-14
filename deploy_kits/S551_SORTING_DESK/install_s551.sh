@@ -3,7 +3,8 @@
 # the Switches card and the tidy-up of the scan app. Installed with the desk switched OFF for Shavez (desk.on absent).
 # BUILD_NORM_v1 s3 order: gates -> FROM pins -> rebuild from the live bytes -> compile (both pythons) -> walk + control on a
 # scratch copy (DRY=1 stops here) -> backups -> place -> md5 read-back -> data step (tables; desk.floor) -> restart the named
-# service only -> health -> what his pages now show -> undo line. A failure after placing restores the backups and restarts.
+# service only -> health -> /desk answers the login redirect (FIX1 C1) -> what his pages now show -> undo line. A failure
+# after placing restores the backups and restarts.
 # Run as root on the VPS: bash /root/deploy/repo/deploy_kits/S551_SORTING_DESK/install_s551.sh
 set -u
 KIT="S551_SORTING_DESK"
@@ -79,8 +80,9 @@ log "walk on a scratch copy of the database (made-up rows; nothing sent anywhere
 ( cd "$WORK" && "$PY" -B "$HERE/walk_s551.py" "$WORK/built" "$DB" --work "$WORK/walk" --shared "$SHARED" > "$WORK/walk.txt" 2>&1 ) || { grep -E '^RED|checks' "$WORK/walk.txt"; die "the walk is RED on the built files"; }
 grep -E 'checks' "$WORK/walk.txt" | tail -1 | sed 's/^/    walk: /'
 grep -E '^SIZES' "$WORK/walk.txt" | head -1 | sed 's/^/    /'
-( cd "$WORK" && "$PY" -B "$HERE/walk_s551.py" "$WORK/live_in" "$DB" --work "$WORK/control" --shared "$SHARED" --expect-red > "$WORK/control.txt" 2>&1 ) || { grep -E 'checks' "$WORK/control.txt"; die "the NEGATIVE CONTROL did not go red on the live files"; }
+( cd "$WORK" && "$PY" -B "$HERE/walk_s551.py" "$WORK/live_in" "$DB" --work "$WORK/control" --shared "$SHARED" --expect-red > "$WORK/control.txt" 2>&1 ) || { grep -E 'checks|^CONTROL' "$WORK/control.txt"; die "the NEGATIVE CONTROL did not go red on the live files"; }
 grep -E 'checks' "$WORK/control.txt" | tail -1 | sed 's/^/    control (live files, must be red): /'
+grep -E '^CONTROL' "$WORK/control.txt" | tail -1 | sed 's/^/    /'
 if [ -n "${DRY:-}" ]; then echo "DRY=1: stopped before placing. $KIT: NOT INSTALLED (dry run)"; exit 0; fi
 
 log "backups beside the live files, and the database by the backup API"
@@ -121,8 +123,12 @@ HC=""; for i in $(seq 1 "$TRIES"); do sleep 2; HC="$(hc "$HEALTH")"; [ "$HC" = "
 [ -n "${S551_FORCE_RED:-}" ] && { echo "    (rehearsal: a red after placing is forced)"; HC="forced-red"; }
 [ "$HC" = "200" ] || { echo "    healthz answered ${HC:-nothing}"; restore; }
 echo "    healthz 200"
-DESK="$(hc "${HEALTH%/healthz}/desk")"
-echo "    /desk answers ${DESK:-nothing} to a plain request (302 = the login gate -- expected, not a failure)"
+# S551_FIX1 C1: the desk itself must answer -- a plain request gets the login redirect (302); anything else = it did not mount
+DESK=""; for i in $(seq 1 "$TRIES"); do DESK="$(hc "${HEALTH%/healthz}/desk")"; case "$DESK" in 302|200) break;; esac; sleep 2; done
+case "$DESK" in
+  302|200) echo "    /desk answers $DESK (302 = the login gate -- expected, not a failure): the desk is mounted";;
+  *) echo "    /desk answered ${DESK:-nothing}: the desk did not mount"; restore;;
+esac
 
 ON="$("$PY" -c "import sqlite3,sys; c=sqlite3.connect(sys.argv[1]); r=c.execute(\"SELECT value FROM settings WHERE key='desk.on'\").fetchone(); print(r[0] if r else 'absent')" "$DB" 2>/dev/null)"
 echo

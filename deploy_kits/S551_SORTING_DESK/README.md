@@ -43,7 +43,7 @@ old papers pages keep working either way.
 |---|---|
 | `/root/assetapp/asset_register.py` | `3d5a36e3` → `c107c6bb` (19 counted edits) |
 | `/root/assetapp/clinic_papers.py` | `5b197fb5` → `058c9bcb` (12 counted edits) |
-| `/root/assetapp/sorting_desk.py` | new, `3daa1e3a` |
+| `/root/assetapp/sorting_desk.py` | new, `bb28d8c8` (fix round 1; the first round's was `3daa1e3a`) |
 
 The database gets four new tables (`challan_supplier`, `implant_payment`, `implant_check`, `desk_audit`) and two new
 columns (`bills.paid_on`, `bills.paid_amount`). It also gets the setting `desk.floor` (the install day): scans older than
@@ -69,8 +69,19 @@ cp -p /root/assetapp/asset_register.py.bak_S551_3d5a36e3 /root/assetapp/asset_re
 The new tables stay; nothing reads them after the undo. The database backup `assets.db.bak_S551_<time>` is needed only if
 data written by the desk must be reversed.
 
+**Fix round 1 (S551_FIX1, 14-Oct-2026)** — the kit was revised in place before any install:
+- C1: after the restart the installer also needs `/desk` to answer the login redirect (302); anything else restores.
+- C2: a paper set aside as *A patient's paper* is left off Bills awaited, the desk's "covers these challans" box, the
+  Waiting list and every count on The month. It is counted only in *Kept apart*.
+- C3: an accepted paper saved as *Challan* goes back to draft (or its lane's status) and waits, audited as
+  `desk_challan_reopened`, so it can be joined to its bill.
+- C4: a Personal challan never reaches a manager: it is not in his covers box, his supplier note, his Waiting reasons or
+  Bills awaited, and the join refuses it on the server.
+- N2–N6: H2 seeds its own made-up row. The control names the checks that must be red. A locked database at mount is retried,
+  then ignored. A closed challan is never owed. "Rate before" reads only the consumables groups or the row's own section.
+
 **Proof (14-Oct-2026, on the box, in /tmp only).**
-- The walk has 81 checks, all green. It runs on a backup-API copy of the live database, with made-up rows only (suppliers
+- The walk has 87 checks, all green. It runs on a backup-API copy of the live database, with made-up rows only (suppliers
   WALKA–WALKY, a made-up today of 15-Jun-2031). It covers:
   - every destination and *Blank — discard*;
   - the challan modes and their amber rules;
@@ -80,9 +91,12 @@ data written by the desk must be reversed.
   - the switch OFF and ON;
   - a fresh import that moves nothing a person placed;
   - The month equal to `/papers/month`;
-  - reception refused on every new route.
-- The same walk on the live (old) files goes red: 74 of 81 checks red.
-- `rehearse_s551.sh` rehearsed the installer on a made-up root, with three outcomes:
+  - reception refused on every new route;
+  - the fix round's checks FC2, FC3, FC4, FN4, FN5, FN6.
+- The same walk on the live (old) files goes red: 80 of 87 checks red. All 12 checks the control names are red (W2, S3, W3,
+  C2, R2, V1, H2, FC2, FC3, FC4, FN5, FN6).
+- `rehearse_s551.sh` rehearsed the installer on a made-up root, with four outcomes:
   - green;
   - ALREADY INSTALLED;
-  - a forced red after placing, which restored the files to the FROM pins.
+  - a forced red after placing, which restored the files to the FROM pins;
+  - health 200 while `/desk` does not answer, which also restored (C1).

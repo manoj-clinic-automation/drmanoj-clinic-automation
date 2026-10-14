@@ -35,11 +35,12 @@ import json
 import re
 import sqlite3
 import sys
+import time
 
 from flask import abort, g, jsonify, redirect, render_template_string, request, session, url_for
 from markupsafe import Markup
 
-VERSION = "S551.1"
+VERSION = "S551.2"             # S551.2 = fix round 1 (S551_FIX1: C2, C3, C4, N4, N5, N6)
 AR = None                     # the asset app's module, handed in by init()
 CP = None                     # clinic_papers, already mounted by the app
 TODAY = None                  # the walk sets a made-up day here; every date rule also takes `today` as an argument
@@ -127,6 +128,28 @@ def ensure(db):
             if "already exists" not in str(ex).lower():
                 raise
     db.commit()
+
+
+def ensure_at_mount(db_path, tries=3, wait=1.0, timeout=3):
+    """At mount, in each gunicorn worker (FIX1 N4): 'database is locked' is retried briefly and then ignored for this
+    worker -- the installer's data step has already made the tables -- so the desk still mounts. Any other error raises.
+    Returns True when ensure() ran, False when the lock outlasted the tries."""
+    for i in range(max(1, tries)):
+        db = None
+        try:
+            db = sqlite3.connect(db_path, timeout=timeout)
+            ensure(db)
+            return True
+        except sqlite3.OperationalError as ex:
+            if "locked" not in str(ex).lower():
+                raise
+            if i + 1 < tries:
+                time.sleep(wait)
+        finally:
+            if db is not None:
+                db.close()
+    print("sorting_desk: the database stayed locked at mount; its tables are left to the installer's data step", file=sys.stderr)
+    return False
 
 
 def ensure_path(db_path, floor=None):
@@ -301,11 +324,14 @@ def modes(db):
         return {}
 
 
-def awaiting_challans(db):
-    """The challans waiting for their bill -- never the pharmacy lane (the Sanjeevni side keeps its own, D689 item 2)."""
+def awaiting_challans(db, owner=True):
+    """The challans waiting for their bill -- never the pharmacy lane (the Sanjeevni side keeps its own, D689 item 2), never
+    a patient's paper (FIX1 C2: it is only in Kept apart), and a Personal one only for the owner (FIX1 C4, F-891)."""
+    pers = "" if owner else " AND COALESCE(b.subgroup,'')<>'personal'"
     return db.execute("SELECT b.*, " + CP.MONTH_OF + " AS mo FROM bills b WHERE b.doc_kind='challan' "
                       "AND COALESCE(b.challan_state,'awaiting')='awaiting' AND b.status<>'rejected' AND b.dup_of IS NULL "
-                      "AND b.page_of IS NULL AND COALESCE(b.lane,'clinic')<>'pharmacy' ORDER BY b.id").fetchall()
+                      "AND b.page_of IS NULL AND COALESCE(b.lane,'clinic')<>'pharmacy' "
+                      "AND COALESCE(b.subgroup,'')<>'" + PATIENT + "'" + pers + " ORDER BY b.id").fetchall()
 
 
 def reading(db, bid):
@@ -437,7 +463,7 @@ def waiting(db, owner, today=None):
     fl = floor or "9999-99-99"                        # no floor = nothing listed by the floor rules
     days = _int_setting(db, "desk.s441_days", 30)
     mk = _marks(db)
-    sup_wait = {_key(c["vendor"]) for c in awaiting_challans(db)} - {""}
+    sup_wait = {_key(c["vendor"]) for c in awaiting_challans(db, owner)} - {""}
     pers = "" if owner else " AND COALESCE(b.subgroup,'')<>'personal'"
     rows = db.execute(
         "SELECT b.*, " + CP.MONTH_OF + " AS mo FROM bills b WHERE COALESCE(b.lane,'clinic')<>'pharmacy' AND b.page_of IS NULL" + pers +
@@ -451,6 +477,8 @@ def waiting(db, owner, today=None):
             continue
         live = b["status"] != "rejected" and not b["dup_of"]
         lane, sg = _lane(b), (b["subgroup"] or "")
+        if sg == PATIENT:                             # FIX1 C2: a patient's paper is in Kept apart only (Open B-____ still opens it)
+            continue
         after = (b["created_at"] or "")[:10] >= fl
         why = []
         if live and lane in ("clinic", "other_doc") and not sg:
@@ -526,9 +554,9 @@ def current_dest(b):
     return ""
 
 
-def supplier_note(db, key, name, mode, today=None):
+def supplier_note(db, key, name, mode, today=None, owner=True):
     today = today or _today()
-    chs = [c for c in awaiting_challans(db) if _key(c["vendor"]) == key] if key else []
+    chs = [c for c in awaiting_challans(db, owner) if _key(c["vendor"]) == key] if key else []
     nm = name or "This supplier"
     if mode == "paid":
         return "%s is paid on its challan — the challan or estimate is the final paper." % nm
@@ -544,14 +572,15 @@ def supplier_note(db, key, name, mode, today=None):
     return "%s has %d open challan%s, oldest %s — set how it bills on Bills awaited." % (nm, len(chs), "" if len(chs) == 1 else "s", oldest)
 
 
-def covers(db, b, mode, today=None):
+def covers(db, b, mode, today=None, owner=True):
     """'This bill covers these challans' -- the desk's own rule: monthly -> the challans of the bill's month, pre-ticked;
-    otherwise every awaiting challan of the supplier, unticked, oldest first, with its age."""
+    otherwise every awaiting challan of the supplier, unticked, oldest first, with its age. Never a patient's paper; a
+    Personal challan only for the owner (FIX1 C2, C4)."""
     today = today or _today()
     key = _key(b["vendor"])
     if not key or (b["doc_kind"] or "") == "challan":
         return []
-    chs = [c for c in awaiting_challans(db) if _key(c["vendor"]) == key and c["id"] != b["id"]
+    chs = [c for c in awaiting_challans(db, owner) if _key(c["vendor"]) == key and c["id"] != b["id"]
            and c["status"] in ("draft", "captured")]
     tick = mode == "monthly"
     if tick:
@@ -630,8 +659,8 @@ def paper_json(db, b, owner, today=None):
             "items": ("Read: " + items_line(it)) if it else "No items read.", "bill_names": [x[0] for x in it],
             "kind": kind, "kind_from": kind_from, "dest": dest, "dest_line": dest_line, "current": DEST_NAME.get(cur, ""),
             "who": "bhawna" if (_col(b, "pe_who") or "") == "bhawna" else "mk", "hints": hints,
-            "supplier_note": supplier_note(db, key, name, mode, today), "mode": mode,
-            "covers": covers(db, b, mode, today), "flags": flags, "can_page": bool(can_page),
+            "supplier_note": supplier_note(db, key, name, mode, today, owner), "mode": mode,
+            "covers": covers(db, b, mode, today, owner), "flags": flags, "can_page": bool(can_page),
             "status": status, "lane": AR.LANES.get(_lane(b), ("",))[0].split(" — ")[0],
             "owner_line": ("Waiting for Dr Manoj's Save" if (not owner and (b["subgroup"] or "") == "clinic_equipment"
                                                             and b["status"] == "draft") else "")}
@@ -703,10 +732,20 @@ def _doc_kind(db, b, k, mode):
         st = "final" if mode == "paid" else (st_old if (old == "challan" and st_old in ("awaiting", "final", "closed")) else "awaiting")
     else:
         st = None
-    if old == k and st == st_old:
+    # FIX1 C3: an ACCEPTED paper saved as a challan that waits goes back to draft (clinic) / its lane's status, so it can be
+    # joined to its bill (_page_ok refuses an approved page) -- this also frees a challan the old heal had accepted.
+    reopen = k == "challan" and st == "awaiting" and b["status"] == "approved"
+    if old == k and st == st_old and not reopen:
         return False
-    db.execute("UPDATE bills SET doc_kind=?, challan_state=? WHERE id=?", (k, st, b["id"]))
-    AR._audit_bill(db, b["id"], "doc_kind", {"from": old, "to": k, "challan_state_from": st_old, "challan_state": st, "via": "desk"})
+    if old != k or st != st_old:
+        db.execute("UPDATE bills SET doc_kind=?, challan_state=? WHERE id=?", (k, st, b["id"]))
+        AR._audit_bill(db, b["id"], "doc_kind", {"from": old, "to": k, "challan_state_from": st_old, "challan_state": st, "via": "desk"})
+    if reopen:
+        lane = _lane(b)
+        back_to = "draft" if lane == "clinic" else AR._lane_kind_status(lane)[1]
+        db.execute("UPDATE bills SET status=? WHERE id=?", (back_to, b["id"]))
+        AR._audit_bill(db, b["id"], "desk_challan_reopened", {"status_from": b["status"], "status": back_to, "lane": lane,
+                                                              "challan_state": st, "via": "desk"})
     return True
 
 
@@ -882,7 +921,8 @@ def save(db, bid, p, today=None):
             raise DeskError("A challan cannot cover other challans — choose Bill.")
         if not CP._head_ok(b):
             raise DeskError("%s cannot take pages." % st)
-        offered = {c["id"]: c for c in awaiting_challans(db) if _key(c["vendor"]) == _key(b["vendor"]) and c["id"] != bid}
+        # FIX1 C4: the same list the covers box shows this person -- a Personal challan is never joinable by a non-owner
+        offered = {c["id"]: c for c in awaiting_challans(db, owner) if _key(c["vendor"]) == _key(b["vendor"]) and c["id"] != bid}
         pages = []
         for j in joins:
             if j not in offered:
@@ -941,9 +981,7 @@ def awaited(db, owner, today=None):
             cards[key] = {"key": key, "name": names.get(key) or vendor or key, "mode": md.get(key, ""), "rows": [],
                           "unpaid": [], "what": set(), "n_wait": 0}
         return cards[key]
-    for c in awaiting_challans(db):
-        if (c["subgroup"] or "") == "personal" and not owner:
-            continue
+    for c in awaiting_challans(db, owner):
         key = _key(c["vendor"])
         if not key:
             continue
@@ -960,7 +998,7 @@ def awaited(db, owner, today=None):
     since = (today - datetime.timedelta(days=60)).isoformat()
     for f in db.execute("SELECT b.*, " + CP.MONTH_OF + " AS mo FROM bills b WHERE b.doc_kind='challan' AND b.challan_state='final' "
                         "AND b.status<>'rejected' AND b.dup_of IS NULL AND b.page_of IS NULL AND COALESCE(b.lane,'clinic')<>'pharmacy'" + pers +
-                        " ORDER BY b.id"):
+                        " AND COALESCE(b.subgroup,'')<>'" + PATIENT + "' ORDER BY b.id"):
         key = _key(f["vendor"])
         if not key or (f["paid_on"] and (f["paid_on"] or "") < since):
             continue
@@ -1006,7 +1044,7 @@ def set_mode(db, key, mode, name=""):
     _audit_desk(db, "challan_mode", {"supplier": key, "from": old, "to": mode})
     n = 0
     if mode == "paid":
-        for c in awaiting_challans(db):
+        for c in awaiting_challans(db, _owner()):                    # a manager's tap never touches a Personal paper
             if _key(c["vendor"]) != key:
                 continue
             db.execute("UPDATE bills SET challan_state='final' WHERE id=?", (c["id"],))
@@ -1060,6 +1098,8 @@ def ledger(db, today=None):
             kind, it = "Challan", (it + " · " if it else "") + ("joined into " + _stamp(head) if head else "joined")
         elif dk == "challan" and cs == "final":
             kind, owed, paid = "Challan (final)", b["total_amount"], _col(b, "paid_amount")
+        elif dk == "challan" and cs == "closed":                   # FIX1 N5: a closed challan is never owed
+            kind = "Challan (closed)"
         elif dk == "challan":
             kind, owed = "Challan", b["total_amount"]
         else:
@@ -1097,15 +1137,32 @@ def month_data(db, ym, owner, today=None):
     challan, the month = MONTH_OF), plus a final challan's amount; an awaiting challan counts by quantity only."""
     today = today or _today()
     secs = []
-    early = {}
-    for r in db.execute("SELECT bi.item_name, bi.rate, " + CP.MONTH_OF + " AS mo, b.bill_date, bi.id FROM bill_items bi JOIN bills b ON b.id=bi.bill_id "
-                        "WHERE bi.rate IS NOT NULL AND b.status<>'rejected' AND b.dup_of IS NULL AND COALESCE(b.lane,'clinic')<>'pharmacy' "
-                        "AND " + CP.MONTH_OF + "<?", (ym,)):
-        k = _norm_name(r[0])
-        cand = (r[2] or "", r[3] or "", r[4])
-        if k and (k not in early or cand > early[k][0]):
-            early[k] = (cand, r[1])
+    cache = {}
+
+    def early_rates(rsubs, rlanes):
+        """FIX1 N6: 'Rate before' = the item's last rate in an earlier month, read ONLY from the consumables groups (for a
+        consumables row) or the row's own section (for any other) -- never Personal, a personal expense or a patient's paper."""
+        ck_ = (rsubs, rlanes)
+        if ck_ not in cache:
+            early = {}
+            for r in db.execute("SELECT bi.item_name, bi.rate, " + CP.MONTH_OF + " AS mo, b.bill_date, bi.id FROM bill_items bi JOIN bills b ON b.id=bi.bill_id "
+                                "WHERE bi.rate IS NOT NULL AND b.status<>'rejected' AND b.dup_of IS NULL "
+                                "AND COALESCE(b.lane,'clinic') IN (" + ",".join("?" * len(rlanes)) + ") "
+                                "AND b.subgroup IN (" + ",".join("?" * len(rsubs)) + ") AND " + CP.MONTH_OF + "<?",
+                                rlanes + rsubs + (ym,)):
+                k = _norm_name(r[0])
+                cand = (r[2] or "", r[3] or "", r[4])
+                if k and (k not in early or cand > early[k][0]):
+                    early[k] = (cand, r[1])
+            cache[ck_] = early
+        return cache[ck_]
     for key, name, subs in MONTH_SECTIONS:
+        if key in ("procedure", "xray", "others"):
+            early = early_rates(CONS + ("xray",), ("clinic",))
+        elif key == "construction":
+            early = early_rates(subs, ("clinic", "other_doc"))
+        else:
+            early = early_rates(subs, ("clinic",))
         ph = ",".join("?" * len(subs))
         if key == "construction":
             live = CP._live_sections(db)
@@ -1173,7 +1230,8 @@ def month_data(db, ym, owner, today=None):
     pe_bh = one(" AND b.lane='owner_expense' AND COALESCE(b.pe_who,'')='bhawna'" + pers)
     apart = {"pharmacy": one(" AND b.lane='pharmacy'"), "lab": one(" AND b.lane='lab_purchase'"),
              "mk": pe_all - pe_bh, "bh": pe_bh, "patient": one(" AND b.subgroup=?", PATIENT)}
-    nwait = one(" AND b.doc_kind='challan' AND COALESCE(b.challan_state,'awaiting')='awaiting' AND COALESCE(b.lane,'clinic')<>'pharmacy'")
+    nwait = one(" AND b.doc_kind='challan' AND COALESCE(b.challan_state,'awaiting')='awaiting' AND COALESCE(b.lane,'clinic')<>'pharmacy'"
+                " AND COALESCE(b.subgroup,'')<>?" + pers, PATIENT)        # FIX1 C2: a patient's challan is in Kept apart only
     return secs, apart, nwait
 
 
@@ -1657,11 +1715,7 @@ def init(ar):
     CP = getattr(ar, "_clinic_papers", None) or sys.modules.get("clinic_papers")
     if CP is None or not hasattr(CP, "join_pages") or not hasattr(CP, "APART_KEYS"):
         raise RuntimeError("clinic_papers with S551's join_pages is not mounted")
-    db = sqlite3.connect(ar.DB_PATH, timeout=20)
-    try:
-        ensure(db)
-    finally:
-        db.close()
+    ensure_at_mount(ar.DB_PATH)                                      # FIX1 N4: a locked database never unmounts the desk
     app, cr = ar.app, ar.checker_required
     app.add_url_rule("/desk", "s551_desk", cr(_gate(desk_page)))
     app.add_url_rule("/desk/api/list", "s551_api_list", cr(_gate(api_list)))

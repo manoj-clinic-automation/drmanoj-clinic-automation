@@ -1,3 +1,3 @@
 kit id S551_SORTING_DESK
-project Scan App (session 315, 14-Oct-2026, D722) -- asset_register.py 3d5a36e3 -> c107c6bb, clinic_papers.py 5b197fb5 -> 058c9bcb, new sorting_desk.py 3daa1e3a; restarts assetapp only; assets.db backed up, then four new tables, two new columns and desk.floor; desk.on left absent (OFF for Shavez)
-built, walked and rehearsed by the SDK build run; NOT installed and NOT published by that run -- the Scan App chat checks it, the owner publishes and pastes the server line
+project Scan App (session 315, 14-Oct-2026, D722) -- asset_register.py 3d5a36e3 -> c107c6bb, clinic_papers.py 5b197fb5 -> 058c9bcb, new sorting_desk.py bb28d8c8 (fix round 1, S551_FIX1; round 0 was 3daa1e3a); restarts assetapp only; assets.db backed up, then four new tables, two new columns and desk.floor; desk.on left absent (OFF for Shavez)
+built, walked and rehearsed by the SDK build run, then revised in place by fix round 1 (S551_FIX1); NOT installed and NOT published -- the Scan App chat checks it, the owner publishes and pastes the server line

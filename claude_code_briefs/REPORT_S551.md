@@ -1,5 +1,144 @@
 # REPORT S551_SORTING_DESK — the sorting desk (built, walked, rehearsed; NOT installed, NOT published)
 
+## Fix round 1 (S551_FIX1, 14-Oct-2026)
+
+**For Dr Manoj (plain English):**
+- The desk now keeps a patient's paper off every list and count except *Kept apart*, including a challan you set aside
+  there, such as AINDOS 1952.
+- If you mark an already-accepted paper as a *Challan*, it now waits so that its bill can pick it up later.
+- Shavez can never see or join one of your Personal challans.
+- The installer now also checks that the desk itself has started, and puts everything back if it has not.
+- Every check passed again on a copy of your data, and the new checks fail on the old files. **Nothing is installed or
+  published yet.**
+
+### For the chat
+
+**Run.** The brief `S551_FIX1.md` was read, together with brief v4 `S551_SORTING_DESK.md` (md5 read:
+`5996dfd44d4bca9cc9a5eab3ecba5c6d`, = 5996dfd4), the first report, the review `S551_KIT_REVIEW_K1.md` and all 13 kit files.
+The kit was revised in place. The kit number is unchanged.
+- FROM pins were read on the box at **07:16:00 IST**. All 7 files equal the brief, and `/root/assetapp/sorting_desk.py`
+  is absent: `asset_register.py` 3d5a36e3 · `clinic_papers.py` 5b197fb5 · `scanner_widget.js` 1143c77b · `claude_reader.py`
+  3894dc23 · `claude_reread.py` 47548ab9 · `scan_checks_s441.py` b9ba6839 · `packs.py` d86d351a.
+- The last box read was at 07:18 IST (from the box's clock). This section was written after 07:18:52 IST (from the
+  Windows clock).
+- No build lock was taken, because nothing was placed.
+
+**What changed, item by item.**
+
+| item | file | change |
+|---|---|---|
+| C1 | `install_s551.sh` | After restart and healthz 200, `/desk` must answer 302 or 200, polled up to `S551_HEALTH_TRIES` times. Anything else prints "/desk answered N: the desk did not mount" and runs `restore()`. |
+| C1 | `rehearse_s551.sh` | The stand-in also serves `desk`. A new **outcome 4** removes it, so health is 200 but `/desk` gives 404, and requires the restore. |
+| C2 | `sorting_desk.py` | `awaiting_challans()` excludes `subgroup='patient_paper'`. That one change covers the cards, the covers box, the Waiting "covers" reason, the supplier note and *Paid on challan*. Bills awaited's final-paper query also excludes patient papers. The Month's "challans waiting" count (`nwait`) excludes them. `waiting()` skips a patient's paper, so "papers still to sort" leaves it out; *Open B-____* still opens it. The section totals already filtered by subgroup. |
+| C3 | `sorting_desk.py` `_doc_kind` | A Save as Challan whose state is `awaiting` on an `approved` paper sets status to `draft` on the clinic lane, or to `_lane_kind_status(lane)` on other lanes. It writes **`desk_challan_reopened`** `{status_from, status, lane, challan_state, via:"desk"}` by the person. This also applies when the paper was already an awaiting challan that the old heal had accepted. `approved_by`/`approved_at` are kept as history. |
+| C4 | `sorting_desk.py` | `awaiting_challans(db, owner)` drops `subgroup='personal'` for a non-owner. `covers()`, `supplier_note()`, `waiting()`'s `sup_wait`, `awaited()` and **Save's `offered` set** all use it. So a manager's join of a Personal challan is refused on the server (400, nothing saved). |
+| N2 | `walk_s551.py` H2 | H2 seeds a made-up row `Z-2031-H2R` and fetches `/bills?q=Z-2031-H2R`. It requires the row and its link to `/bills/<id>`, and no `<select name=lane`. It is now red on the old files. |
+| N3 | `walk_s551.py` | `--expect-red` exits 0 only if every check in `MUST_RED` is RED. Those are **W2, S3, W3, C2, R2, V1, H2, FC2, FC3, FC4, FN5, FN6**: the desk route, the new SUB sections, the challan-not-accepted rule, the Personal guard, the seeded list and the fix checks. A check that is green or never reached fails the control. The control prints a `CONTROL must-be-red:` line, and the installer echoes it. W3 now also asserts that the three keys are in `SUB` and not in `SECTION_KEYS`. |
+| N4 | `sorting_desk.py` | New `ensure_at_mount(path, tries=3, wait=1.0, timeout=3)`. A "database is locked" error is retried, then ignored with one stderr line, so `init()` still registers the routes. Any other error still raises. |
+| N5 | `sorting_desk.py` `ledger` | A `closed` challan shows as "Challan (closed)" and owes nothing. |
+| N6 | `sorting_desk.py` `month_data` | "Rate before" is read per section. The three consumables sections read only the consumables groups (`procedure`, `xray*`, `others`) on the clinic lane. Implant stock and Clinic equipment read only their own subgroup on the clinic lane. Construction reads its own subgroup on clinic or other_doc, never owner_expense. Personal, personal-expense and patient papers can never feed it. |
+| — | `sorting_desk.py` | `VERSION` `S551.1` → **`S551.2`**. W2 asserts it. |
+
+**Pins (built on Windows and rebuilt on the box from the live bytes; `make_s551.py` is unchanged, cf0a3688):**
+
+| file | FROM | TO |
+|---|---|---|
+| `asset_register.py` | 3d5a36e3f9dc398a948f70a87f12d513 | **c107c6bbb3e6c0c0d0535c5ed094b6e4** (unchanged, 19 counted edits) |
+| `clinic_papers.py` | 5b197fb5718f8d28ed8de6c0cafc9ab0 | **058c9bcb5a4973f8a15984b645ff57d7** (unchanged, 12 counted edits) |
+| `sorting_desk.py` (new) | — | **bb28d8c8d95435b4a566d2929f473587** (round 0 was 3daa1e3a) |
+
+All three compile on `/usr/bin/python3` (3.9.25) and on `/root/wa/venv/bin/python3`.
+
+**The walk, the control and the extra proof** (on the box under `/tmp/s551dev`, the same isolation as round 0; log
+`_scratch\S551_SORTING_DESK\probe\dev_fix1.log`; the counts below are copied from that log):
+- **Walk on the built files: `87 checks: 87 GREEN, 0 RED`.** That is round 0's 81 checks plus FC2, FC3, FC4, FN4, FN5 and
+  FN6. H2 and W3 are stronger.
+  - FC2: a challan saved as *A patient's paper* is off Bills awaited (data and page), off the covers box and off Waiting.
+    The supplier's bill loses its "covers" reason. The Month's challan count drops by 1, and *Kept apart* rises by 1.
+  - FC3: an approved clinic paper saved as Challan becomes `draft`/`awaiting`, with `desk_challan_reopened`
+    (status_from approved, by the owner). It is then offered in the bill's covers box and joined (`page_of`, `joined`).
+  - FC4: a Personal challan is absent from the manager's covers box, his supplier note, his Waiting reasons and his Bills
+    awaited page. His join is refused (400; the challan stays awaiting and the bill stays draft). The owner sees it.
+  - FN4: under another connection's EXCLUSIVE lock, `ensure_at_mount` returns False without an error. Unlocked, it makes the
+    4 tables. Its one stderr line appears in the walk's log.
+  - FN5: with a closed priced challan, owed is 100, not 1,000.
+  - FN6: "Rate before" reads "₹50 (Apr)" from the April procedure paper. It ignores the May Personal, personal-expense and
+    patient-paper rates.
+- Sizes and times: desk 18,293 B (8 ms) · list 4,709 B (18 ms) · paper 487 B (3 ms) · **first load 29 ms** · `/desk/month`
+  14,537 B · `/desk/awaited` 16,451 B · `/desk/implants` 8,001 B.
+- **The control on the live (old) files: `87 checks: 7 GREEN, 80 RED`, and `CONTROL must-be-red: W2, S3, W3, C2, R2, V1,
+  H2, FC2, FC3, FC4, FN5, FN6 -- all RED`** (exit 0). The 7 still green test nothing new: W1, W4, H6, L3, F8, R3, Z1.
+- **Extra proof (beyond the brief):** the new walk was run with round 0's `sorting_desk.py` (3daa1e3a) and the same built
+  files. Result: `87 checks: 80 GREEN, 7 RED (W2, FC2, FC3, FC4, FN5, FN6, FN4)`. So each new check fails on exactly the
+  first round's behaviour:
+  - FC2: the patient challan was still counted.
+  - FC3: the paper stayed `approved`, and the join was refused.
+  - FC4: the covers box held the Personal challan, and the note said "1 open challan".
+  - FN5: owed was 1,000.
+  - FN6: "Rate before" was ₹888 (May), a patient's paper.
+- **The three papers of the plan** were unchanged from round 0: B-0001 (waiting, date flag, nothing pre-selected) · B-0015
+  (Construction work, not waiting) · AINDOS 1952 = B-0125 (waiting, Challan from Claude's reading, nothing pre-selected).
+
+**The rehearsal** (`rehearse_s551.sh`, made-up root `/tmp/s551dev/root`, restart `true`, stand-in health; log
+`_scratch\S551_SORTING_DESK\probe\rehearse_fix1.log`; ended **07:17:12 IST**). `REHEARSAL GREEN`:
+
+| outcome | result |
+|---|---|
+| 1 fresh install | DONE. Inside the installer: walk `87 checks: 87 GREEN, 0 RED` · control `87 checks: 7 GREEN, 80 RED` · `CONTROL must-be-red: … all RED` · placed and read back at c107c6bb / 058c9bcb / bb28d8c8 · "/desk answers 200 … the desk is mounted" · `desk.floor/desk.on/new tables = 2026-10-14/absent/4` |
+| 2 second run | `S551_SORTING_DESK: ALREADY INSTALLED` |
+| 3 forced red after placing | restored to 3d5a36e3 / 5b197fb5; healthz 200; `NOT INSTALLED (restored …)` |
+| 4 (C1) healthz 200, `/desk` gives 404 | "/desk answered 404: the desk did not mount" → restored to the FROM pins; `NOT INSTALLED (restored …)` |
+
+**The C1 control (red on the old installer):** round 0's installer (2b58ddfc, with sorting_desk 3daa1e3a) ran on its own
+made-up root `/tmp/s551dev/root0`, with the same guards and `/desk` answering 404. It printed "/desk answers 404 …" and then
+**`S551_SORTING_DESK: DONE.`** (07:17:49 IST). The old installer could not see a desk that failed to mount; the new one
+restores.
+
+**After everything (07:18 IST):**
+- The live files are still at the FROM pins, and `sorting_desk.py` is absent.
+- Live database: no desk table, no `desk.*` setting, 158 bills and no made-up row.
+- `assetapp` is active and `/healthz` answers 200.
+- `/tmp/s551dev`, `/tmp/s551probe` and the install temp folders were removed.
+- Nothing was placed, restarted or written live.
+
+**The kit and the gates:**
+- **13 files**, LF throughout, with no `__pycache__`, `.json` or database. The installer, patcher, walk, module, rehearsal
+  and PIN files are byte-identical to what ran on the box: install 12729f27 · make cf0a3688 · sorting_desk bb28d8c8 · walk
+  2343b449 · rehearse 22158f96 · PIN_TO_sorting_desk 49a3061f.
+- README (ed8e4ee2) and KIT_ID (8b42e872) were updated after the box run. `SUMS.md5` was rewritten, and every line matches.
+- `.gitignore`: `git check-ignore -v --non-matching` (last match wins) shows all 13 kit files and this report as not
+  ignored.
+- The contact-number gate was run as PUBLISH_ALL runs it (`python -B deploy_kits\NO_PHONE_NUMBERS.py --files-from <list>
+  <repo>`) over the 13 kit files and this report. Result: `NO_PHONE_NUMBERS: clean -- 14 staged file(s) checked (numbers
+  and credentials).` It was run again after this line was added.
+
+**Calls I made (the brief left room), with reasons:**
+1. **C3's audit:** one `desk_challan_reopened` line carrying the old status. I read the brief's "`subgroup` / a
+   `desk_challan_reopened` line" as "audited, e.g. by a line named so". The Save's usual `doc_kind`, `relane` and
+   `subgroup` lines are still written as before.
+2. **C2: a patient's paper is also dropped from Waiting** (and so from "papers still to sort"). This follows "it appears
+   only in *Kept apart*". *Open B-____* still opens it for a change.
+3. **C4: a manager's tap of *Paid on challan* does not finalise the owner's Personal challans** of that supplier. A
+   manager's action never touches a Personal paper. The owner's own tap still does.
+4. **N6:** consumables rows read all three consumables groups (an item bought under *Others* gives its earlier rate to
+   *Procedure room*). Every other section reads only itself, as "the consumables groups and the same sections as the row".
+5. **N4:** each try waits up to 3 s, with 3 tries 1 s apart, so at most about 12 s per worker at start-up.
+6. The new checks are named **FC2–FC4 and FN4–FN6**, because the walk already had checks C1–C13.
+
+**Not done, and why:**
+- Not installed and not published, as the brief says.
+- No real-browser look (unchanged from round 0).
+- `claude_reread.py` and `packs.py` are unchanged: the FOR THE PARENT lines below still stand.
+
+**Cost:** about **US$4** of API credit for this fix round, read from this session's budget meter when the report was written
+(about $3.7 at 07:18 IST, plus the report and the gates).
+
+**Nothing installed, nothing published.**
+
+---
+
+## Round 0 (the first run, 14-Oct-2026 06:15–06:47 IST) — kept as history; its pins and counts are superseded above
+
 **For Dr Manoj (plain English):**
 - **What you get:** one sorting desk on the laptop for you and Shavez.
   - The waiting papers are on the left and the scan is large in the middle.
@@ -381,3 +520,7 @@ About **US$12.6** of API credit for the whole run, read from this session's budg
 
 **Nothing installed, nothing published.** The kit is at `deploy_kits\S551_SORTING_DESK\`, waiting for the Scan App chat's
 check and the owner's publish.
+
+---
+
+**Fix round 1 ends as round 0 did: nothing installed, nothing published.**

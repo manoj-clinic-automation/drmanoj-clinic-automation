@@ -6,13 +6,15 @@ in its own scratch folder; made-up rows only (suppliers WALKA.. WALKY, stamps Z-
     python3 -B walk_s551.py <dir with asset_register.py, clinic_papers.py, claude_reader.py, claude_reread.py [, sorting_desk.py]>
                             <assets.db to copy> [--work DIR] [--shared DIR] [--expect-red] [--papers] [--keep]
 
-GREEN / RED per check; exit 1 on any RED (--expect-red: exit 0 only if some check is RED -- the control on the old files).
+GREEN / RED per check; exit 1 on any RED (--expect-red, the control on the old files: exit 0 only if every check named in
+MUST_RED is RED -- S551_FIX1 N3).
 --papers prints what the desk shows on the three papers of the owner's plan (stamps and choices only, no figure).
 The work folder (default: a new folder under /tmp) is removed at the end unless --keep."""
 import datetime, importlib.util, json, os, re, shutil, sqlite3, subprocess, sys, tempfile, time
 
 ARGS = [a for a in sys.argv[1:]]
-R, FAILED = [], []
+R, FAILED, NAMES = [], [], []
+MUST_RED = ("W2", "S3", "W3", "C2", "R2", "V1", "H2", "FC2", "FC3", "FC4", "FN5", "FN6")    # FIX1 N3: red on the old files, by name
 TODAY = datetime.date(2031, 6, 15)
 MODS = ("asset_register.py", "clinic_papers.py", "claude_reader.py", "claude_reread.py", "sorting_desk.py")
 
@@ -33,6 +35,7 @@ def ck(name, fn, detail=None):
     except Exception as e:                                                 # noqa: BLE001
         ok, d = False, repr(e)
     R.append(ok)
+    NAMES.append(name.split(" ")[0])
     if not ok:
         FAILED.append(name.split(" ")[0])
     print(("GREEN " if ok else "RED   ") + name + ((" -- " + str(d)[:240]) if (d and not ok) else ""))
@@ -132,8 +135,10 @@ def run(D, SRC, shared_src, work):
     sd = sys.modules.get("sorting_desk")
     ck("W1 the app imports; asset_register, clinic_papers and claude_reader come from the scratch folder",
        lambda: under(m.__file__, appdir) and under(cp.__file__, appdir) and under(m.CLAUDE.__file__, appdir))
-    ck("W2 sorting_desk S551.1 is mounted from the scratch folder", lambda: sd is not None and sd.VERSION == "S551.1" and under(sd.__file__, appdir))
-    ck("W3 clinic_papers is S551 (APART_KEYS, join_pages)", lambda: cp.VERSION == "S551" and hasattr(cp, "join_pages") and "patient_paper" in cp.APART_KEYS)
+    ck("W2 sorting_desk S551.2 (fix round 1) is mounted from the scratch folder", lambda: sd is not None and sd.VERSION == "S551.2" and under(sd.__file__, appdir))
+    ck("W3 clinic_papers is S551 (the three new sections in SUB, APART_KEYS, join_pages)", lambda: cp.VERSION == "S551" and hasattr(cp, "join_pages")
+       and "patient_paper" in cp.APART_KEYS and all(k in cp.SUB for k in ("implant_stock", "clinic_equipment", "patient_paper"))
+       and not any(k in cp.SECTION_KEYS for k in ("implant_stock", "clinic_equipment", "patient_paper")))
     ck("W4 the shared modules come from the scratch copy; no finance database is reachable",
        lambda: (m.S441 is None or under(m.S441.__file__, os.path.join(work, "shared"))) and (m.SARVAM is None or under(m.SARVAM.__file__, os.path.join(work, "shared")))
        and (m.S441 is None or not os.path.exists(m.S441.FIN_DB)) and m.DB_PATH == dbp and m.UPLOAD_DIR == env["ASSETS_UPLOADS"])
@@ -225,7 +230,12 @@ def run(D, SRC, shared_src, work):
     # ------------------------------------------------------------------ H: the header, the menus, the banners
     t = html(own, "/bills")
     ck("H1 the header reads 'Scan app & assets' (page title and top bar)", lambda: "<title>Scan app &amp; assets</title>" in t and "Scan app &amp; assets</b>" in t and "Asset Register</b>" not in t)
-    ck("H2 the bills list has no instant lane drop-down", lambda: "<select name=lane" not in t and "/bills/" in t)
+    # FIX1 N2: H2 seeds its own made-up paper first (a sorted document, placed by a person), so an empty list proves nothing
+    h2r = mk("H2R", "WALKH2 LIST ROW", lane="other_doc", subgroup="misc", created="2031-05-01 05:00:00", bill_no="H2-1")
+    db.execute("INSERT INTO bill_audit(bill_id, at, who, action, detail) VALUES(?,?,?,?,?)", (h2r, "2031-05-01 10:00", "Walk Person", "subgroup", "{}")); db.commit()
+    t2 = html(own, "/bills?q=Z-2031-H2R")
+    ck("H2 the bills list has no instant lane drop-down (a made-up row is listed, linked to its paper)",
+       lambda: "Z-2031-H2R" in t2 and ('href="/bills/%d"' % h2r) in t2 and "<select name=lane" not in t2, lambda: ("Z-2031-H2R" in t2, "<select name=lane" in t2))
     ck("H3 the bills list's history links point to The month (owner)", lambda: 'href="/desk/month">The month</a>' in t and "Consumption — now The month" in t)
     t = html(own, "/")
     ck("H4 the owner's front page carries the Switches card (three switches, Claude reading link)",
@@ -564,6 +574,90 @@ def run(D, SRC, shared_src, work):
        lambda: all(x in t for x in ('id="sec-implant_stock"', 'id="sec-construction"', 'id="sec-clinic_equipment"', "clinic / MK not decided")))
     ck("M3 a Clinic-equipment row offers '+ asset record' to the owner, not to the manager", lambda: "+ asset record" in t and "+ asset record" not in html(mgr, "/desk/month?ym=2031-06"))
 
+    # ------------------------------------------------------------------ FIX1 (S551_FIX1): C2, C3, C4, N4, N5, N6
+    def ids(lst):
+        return {x["id"] for x in (lst or [])}
+    # C2 -- a challan saved as A patient's paper: out of Bills awaited, the covers box, the waiting list and every count on The month
+    E_ = "WALKE PATIENT CHALLANS"
+    pch = mk("PCH", E_, doc_kind="challan", challan_state="awaiting", bill_date="2031-06-07", created="2031-06-07 05:00:00", items=[("Locking plate", 1)])
+    md0 = sd.month_data(db, "2031-06", True) if sd else None
+    code_pc, j_pc = save(own, id=pch, dest="patient_paper", kind="challan")
+    pcb = mk("PCB", E_, bill_no="PE-1", total_amount=100, bill_date="2031-06-14", created="2031-06-14 05:00:00", items=[("Locking plate", 1)])
+    _c, jpc = paper(own, pcb)
+    md2 = sd.month_data(db, "2031-06", True) if sd else None
+    aw2 = {r__["id"] for c_ in sd.awaited(db, True, TODAY)[0] for r__ in c_["rows"]} if sd else set()
+    w = wlist(own)
+    ck("FC2 a challan saved as A patient's paper: not on Bills awaited, not in the covers box or the waiting list, out of The month's challan count; counted in Kept apart",
+       lambda: code_pc == 200 and row(pch)["subgroup"] == "patient_paper" and row(pch)["challan_state"] == "awaiting" and pch not in aw2
+       and pch not in ids(jpc.get("covers")) and md2[2] == md0[2] - 1 and md2[1]["patient"] == md0[1]["patient"] + 1
+       and pch not in {i_ for s_ in md2[0] for i_ in s_["money_ids"]} and pch not in w and pcb in w and "covers" not in w[pcb]["why"]
+       and "Z-2031-PCH" not in html(own, "/desk/awaited"),
+       lambda: (code_pc, j_pc, pch in aw2, ids(jpc.get("covers")), md0 and md0[2], md2 and md2[2], w.get(pcb)))
+    # C3 -- an ACCEPTED paper saved as Challan goes back to draft, awaiting, audited -- and is then joined by its bill
+    J_ = "WALKJ REOPEN SUPPLIES"
+    rc = mk("RC1", J_, status="approved", subgroup="others", bill_no="J-C1", bill_date="2031-06-03", created="2031-06-03 05:00:00",
+            approved_by="Walk", approved_at="2031-06-03 10:00", items=[("Toner", 2)], pdf=True)
+    code_r, j_r = save(own, id=rc, dest="others", kind="challan")
+    rr3 = row(rc)
+    ra3 = aud(rc, "desk_challan_reopened")
+    rcb = mk("RCB", J_, bill_no="J-B1", total_amount=500, bill_date="2031-06-14", created="2031-06-14 05:00:00", items=[("Toner", 2)], pdf=True)
+    _c, jr = paper(own, rcb)
+    code_j, j_j = save(own, id=rcb, dest="others", kind="bill", joins=[rc])
+    ck("FC3 an accepted clinic paper saved as Challan: back to draft, challan awaiting, 'desk_challan_reopened' with the old status; then joined by its bill",
+       lambda: code_r == 200 and (rr3["status"], rr3["doc_kind"], rr3["challan_state"], rr3["subgroup"]) == ("draft", "challan", "awaiting", "others")
+       and ra3 and json.loads(ra3[-1]["detail"]).get("status_from") == "approved" and ra3[-1]["who"] == own_u["display_name"]
+       and rc in ids(jr.get("covers")) and code_j == 200 and row(rc)["page_of"] == rcb and row(rc)["challan_state"] == "joined",
+       lambda: (code_r, j_r, rr3["status"], rr3["challan_state"], bool(ra3), ids(jr.get("covers")), code_j, j_j))
+    # C4 -- a Personal challan never reaches a manager: not in his covers box, supplier note or waiting reasons; his join refused
+    Q_ = "WALKQ PRIVATE STORES"
+    qc = mk("QC1", Q_, subgroup="personal", doc_kind="challan", challan_state="awaiting", bill_date="2031-06-04", created="2031-06-04 05:00:00", items=[("Kettle", 1)])
+    qb = mk("QB1", Q_, bill_no="Q-1", total_amount=90, bill_date="2031-06-14", created="2031-06-14 05:00:00", items=[("Kettle", 1)])
+    _c, jqm = paper(mgr, qb)
+    _c, jqo = paper(own, qb)
+    wm = wlist(mgr)
+    code_q, j_q = save(mgr, id=qb, dest="others", kind="bill", joins=[qc])
+    ck("FC4 a Personal challan: never in a manager's covers box, supplier note, waiting reasons or Bills awaited; his join is refused server-side; the owner sees it",
+       lambda: qc not in ids(jqm.get("covers")) and qc in ids(jqo.get("covers")) and "open challan" not in jqm.get("supplier_note", "")
+       and qb in wm and "covers" not in wm[qb]["why"] and code_q == 400 and row(qc)["page_of"] is None and row(qc)["challan_state"] == "awaiting"
+       and row(qb)["status"] == "draft" and "Z-2031-QC1" not in html(mgr, "/desk/awaited"),
+       lambda: (ids(jqm.get("covers")), jqm.get("supplier_note"), wm.get(qb), code_q, j_q))
+    # N5 -- a closed challan is never owed in the implant ledger
+    N_ = "WALKN CLOSED IMPLANTS"
+    mk("NC1", N_, subgroup="implant_stock", doc_kind="challan", challan_state="closed", total_amount=900, bill_date="2031-06-02", items=[("Bone screw", 4)])
+    mk("NB1", N_, status="approved", subgroup="implant_stock", bill_no="N-1", total_amount=100, bill_date="2031-06-05", approved_by="Walk", items=[("Bone screw", 4, 25)])
+    Ln = (sd.ledger(db).get("walkn closed") if sd else None) or {}
+    ck("FN5 the implant ledger never counts a closed challan as owed", lambda: Ln["owed"] == 100.0 and Ln["balance"] == 100.0
+       and any(r__["p"] == "Z-2031-NC1" and r__["o"] is None for r__ in Ln["rows"]), lambda: (Ln.get("owed"), [(r__["p"], r__["k"], r__["o"]) for r__ in Ln.get("rows", [])]))
+    # N6 -- 'Rate before' only from the consumables groups / the row's own section: never Personal, a personal expense or a patient's paper
+    ri = "Walk rate swab"
+    mk("RT4", G, status="approved", subgroup="procedure", bill_no="RT-4", total_amount=50, bill_date="2031-04-05", created="2031-04-05 05:00:00", approved_by="Walk", items=[(ri, 1, 50)])
+    mk("RT5P", G, status="approved", subgroup="personal", bill_no="RT-5P", total_amount=999, bill_date="2031-05-05", created="2031-05-05 05:00:00", approved_by="Walk", items=[(ri, 1, 999)])
+    mk("RT5E", G, lane="owner_expense", bill_no="RT-5E", total_amount=777, bill_date="2031-05-06", created="2031-05-06 05:00:00", items=[(ri, 1, 777)])
+    mk("RT5X", G, lane="other_doc", subgroup="patient_paper", bill_no="RT-5X", total_amount=888, bill_date="2031-05-07", created="2031-05-07 05:00:00", items=[(ri, 1, 888)])
+    mk("RT6", G, status="approved", subgroup="procedure", bill_no="RT-6", total_amount=60, bill_date="2031-06-06", created="2031-06-06 05:00:00", approved_by="Walk", items=[(ri, 1, 60)])
+    rowx = [r__ for s_ in (sd.month_data(db, "2031-06", True)[0] if sd else []) if s_["key"] == "procedure" for r__ in s_["rows"] if r__["n"] == ri]
+    ck("FN6 'Rate before' on The month reads only the consumables groups (never Personal, a personal expense or a patient's paper)",
+       lambda: rowx and rowx[0]["b"] == "%s (Apr)" % sd._inr(50), lambda: rowx)
+    # N4 -- a locked database at mount is retried briefly and then ignored; unlocked, the tables are made
+    lk = os.path.join(work, "lock_test.db")
+    con = sqlite3.connect(lk)
+    con.execute("CREATE TABLE bills(id INTEGER PRIMARY KEY)"); con.execute("CREATE TABLE settings(key TEXT PRIMARY KEY, value TEXT)"); con.commit()
+    con.execute("BEGIN EXCLUSIVE")
+    try:
+        r4, e4 = sd.ensure_at_mount(lk, tries=2, wait=0.05, timeout=0.1), None
+    except Exception as e_:                                                # noqa: BLE001
+        r4, e4 = None, e_
+    con.rollback(); con.close()
+    try:
+        r4b = sd.ensure_at_mount(lk, tries=1, wait=0, timeout=1)
+    except Exception as e_:                                                # noqa: BLE001
+        r4b = repr(e_)
+    con = sqlite3.connect(lk)
+    n4 = con.execute("SELECT COUNT(*) FROM sqlite_master WHERE name IN ('challan_supplier','implant_payment','implant_check','desk_audit')").fetchone()[0]
+    con.close()
+    ck("FN4 at mount a 'database is locked' is retried briefly, then ignored (no error, the desk mounts); unlocked, the tables are made",
+       lambda: r4 is False and e4 is None and r4b is True and n4 == 4, lambda: (r4, repr(e4), r4b, n4))
+
     # ------------------------------------------------------------------ E: the edit page, the month list, the re-read
     le = mk("LE1", G, lane="lab_purchase", bill_no="G-LE", total_amount=55, bill_date="2031-06-05")
     t = html(own, "/bills/%d/edit" % le)
@@ -629,5 +723,14 @@ if __name__ == "__main__":
     reds = R.count(False)
     print("%d checks: %d GREEN, %d RED%s" % (len(R), R.count(True), reds, (" (" + ", ".join(FAILED) + ")") if FAILED else ""))
     if "--expect-red" in ARGS:
-        sys.exit(0 if reds else 1)
+        # FIX1 N3: the control names the checks that MUST be red on the old files -- the desk route (W2 mounted, S3 the page),
+        # the new sections in SUB (W3), the challan-not-accepted rule (C2, R2), the Personal guard (V1), the seeded list (H2)
+        # and the fix round's C2, C3, C4, N5, N6 -- and fails if any of them is green (or was never reached).
+        seen = {}
+        for ok_, nm_ in zip(R, NAMES):
+            seen[nm_] = ok_
+        not_red = [k for k in MUST_RED if seen.get(k) is not False]
+        print("CONTROL must-be-red: %s -- %s" % (", ".join(MUST_RED), ("all RED" if not not_red else "NOT red: " + ", ".join(
+            k + ("(green)" if seen.get(k) else "(not reached)") for k in not_red))))
+        sys.exit(0 if (reds and not not_red) else 1)
     sys.exit(1 if reds or not R else 0)
