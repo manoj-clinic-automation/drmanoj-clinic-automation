@@ -1,0 +1,6 @@
+kit id S556_REFUSED_TEXT_ROAD
+brief claude_code_briefs/S556_REFUSED_TEXT_ROAD.md (v3, Sanjeevni session 316, 14-Oct-2026) -- repairs F-893 (Fault Register v2.138 s7.72); no D number
+a report the medical PC's reader stopped on is held, not called wrong; the owner is told once; a reader change re-offers the refused texts
+edits /root/finance/reports_tile.py (01f67f4d), reports_watch.py (a8bbd95e), order_sheet.py (8c50d41e); DUTY_MAP.json v13 -> v14, DUTY_MAP.md
+the medical PC: Drive ToMedical\_kit\marg_watch.py 0a78ae15 (S488) -> S556 (deliver_S556.ps1)
+restarts clinic-finance only; the medical PC's agent restarts its own watcher

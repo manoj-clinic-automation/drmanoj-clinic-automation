@@ -1,0 +1,15 @@
+d289c1acfcbc9811f2f29a235433944a  KIT_ID.txt
+33bb1c697a249a3e0bb341a212fcfc2c  README.md
+08316fe2b5fb14005823b9a0f5587d98  install_s557.sh
+da35abb488fffefb4860801653ecf347  make_s557.py
+ec8747205b8c29dc6a03d5221d613572  asset_machine.py
+667e9c59b3468e19780e9b7138306e65  walk_s557.py
+96227cfb9aa5daaa11bacee99eb7edb6  rehearse_s557.sh
+8ba320e4fd154a016a9bb4c7ddac8b87  PIN_FROM_asset_register.txt
+9fecdc6c3f6295af5d0f04c545640f1b  PIN_FROM_sorting_desk.txt
+b0f8465c21770c3dea0e5fb939cc71a2  PIN_TO_asset_register.txt
+2cb441a75777490bd5398c2e3aa2e15e  PIN_TO_sorting_desk.txt
+00ec81c3cf8f1f64c3bc6e752eed60a5  PIN_TO_asset_machine.txt
+eaf03ac0e05d88bb8722ee4796571f89  PIN_READ_clinic_papers.txt
+0a34791e7e4519101c07e1c1964dd63c  PIN_READ_claude_reader.txt
+b41f17c7818e7de4ff349607bd482868  PIN_READ_claude_reread.txt
