@@ -1,0 +1,4 @@
+kit id S553_BHATI_SLIP_DUTY
+brief claude_code_briefs/S553_BHATI_SLIP_DUTY.md (14-Oct-2026, parent session 313)
+Bhati's Aaj ka kaam: one line -- the physio slips of a day not in his register, or not agreeing with reception
+edits /root/finance/aaj_duties.json (2d6d30eb) and /root/finance/aaj_seed.py (156ded1e); restarts clinic-finance only
