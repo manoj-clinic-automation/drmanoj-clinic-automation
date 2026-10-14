@@ -1,0 +1,4 @@
+kit id S554_PHYSIO_BACKFILL
+brief claude_code_briefs/S554_PHYSIO_BACKFILL.md (14-Oct-2026, parent session 313)
+Bhati's physio register takes every day from 01-Oct-2026 (one floor date, setting physio_book.from); the report and his duty line count from it
+edits /root/finance/physio_book.py (74513016) and /root/finance/aaj_duties.json (cb8ac36a); setting physio_book.from (INSERT OR IGNORE); restarts clinic-finance only
