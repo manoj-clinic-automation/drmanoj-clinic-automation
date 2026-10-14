@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S312 close** (the Sanjeevni project), 14-Oct-2026, early morning — the parent's sections exactly as its S311 close wrote them (its session 313 open), the Scan App sections exactly as its S314 close wrote them (its session 315 open); the Sanjeevni sections refreshed here (316 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S313 close** (the parent), 14-Oct-2026, morning — the Sanjeevni sections exactly as its S312 close wrote them (its session 316 open), the Scan App sections exactly as its S314 close wrote them (its session 315 open); the parent's sections refreshed here (317 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S312 close** (the Sanjeevni project), 14-Oct-2026, early morning — the parent's sections exactly as its S311 close wrote them (its session 313 open), the Scan App sections exactly as its S314 close wrote them (its session 315 open); the Sanjeevni sections refreshed here (316 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S309 close** (the Scan App project), 13-Oct-2026, early morning — the parent's sections exactly as its S311 close wrote them (its session 313 open), the Sanjeevni sections exactly as its S310 close wrote them (its session 312 reserved); the Scan App sections refreshed here (314 reserved)
 
@@ -118,7 +120,7 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S311 close
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S313 close (14-Oct, morning)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -128,7 +130,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record only; nothing changes on the server and no server line follows.
+**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record and the after-call list's brief. Nothing changes on the server.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -140,13 +142,9 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**3 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** On a spare PC, from `D:\MARGERP\serverbackup` on the pharmacy PC or the pen drive's `MargAuto_by_agent` folder. Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
+**3 · IN THE NEXT CHAT — the one runner line for the after-call list (S558), then switch its two new features on once you have seen them.** The chat gives you the line.
 
-**4 · TELL ME WHAT THE STAFF SAY — about their lists and the after-call list.**
-
-```
-https://followup.dr-manoj.in/portal/ring/list
-```
+**4 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** On a spare PC, from `D:\MARGERP\serverbackup` on the pharmacy PC or the pen drive's `MargAuto_by_agent` folder. Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
 
 **LATER — none of these is urgent**
 
@@ -168,22 +166,38 @@ https://followup.dr-manoj.in/finance/packs?month=2026-09
 
 **9 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
 
-**WHEN IT HAPPENS — not a duty:** a POS total waiting for your Confirm · a Voicenotes list waiting above *Give a task* · your bank check under row 2 of the packs page — look when you like; nobody else sees it.
+**WHEN IT HAPPENS — not a duty:** a POS total waiting for your Confirm · a Voicenotes list waiting above *Give a task* · your bank check under row 2 of the packs page.
 
-**Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C) · **the follow-up tracker on the server — "later" (12-Oct)**. **Dropped:** Tailscale (12-Oct).
+**Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C) · the follow-up tracker on the server — "later" (12-Oct) · Bhati's later features (sessions in the 360° record, *physiotherapy advised* to his page, his absence → WhatsApp to his patients).
 
-*Ticked by you or done, and off this list: passports 12 months (done 12-Oct) · the X-ray test shortcut — kept, it is in use (12-Oct) · the bank check's days — not raised to reception or anyone, yours only (12-Oct).*
+*Ticked by you or done, and off this list: what the staff say about the after-call list — "this feature is working well" (14-Oct).*
 
-*Closed by your word and not on this list: the technician of 25-Sep, AnyDesk and UltraViewer, passwords, the Windows activation on the reception PC (02-Oct) · the accountants get the pack only; no statement passes through the clinic mailbox; the 61 test scans stay (04-Oct) · a panel to waive late minutes (06-Oct) · the daily health mails and Daily Clinic Reports in Trash — you delete them yourself (08-Oct) · the accountants do not get your renewals list; no Docterz patient PDF is in your personal mail (10-Oct) · no email setup for Razorpay bookings — Docterz marks them (12-Oct) · your Fold's Contacts permission — skipped (12-Oct).*
+*Closed by your word and not on this list: everything listed so at the S311 close, plus the WhatsApp alert stays on the server, off Google (13-Oct).*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The day page without the word "Split" (your word, 13-Oct: "in a fresh chat … as the first thing"):** every line shown as it was actually paid — consultation cash, X-ray online, and so on — from September; the month table and the day PDF the same; a booked visit's procedure line no longer counted as Razorpay money. **You see 12-Oct as it will look before it is installed.**
-2. **The punch listener's step 2** — after about 19-Oct, only if every genuine punch carries one steady mark.
-3. **My own, no word needed:** the medical PC shouting if the hand-made pen-drive backup is more than a week old · the finance app's own test suite · reading Morning match once as reception · proving the 148 older documents.
-4. **On your word:** a *send to Shavez* button for the bank check · the WhatsApp appointment message to patients · the MyOperator key steps · the contacts · the mail flood (low) · the portal tiles · kits for Shavez's PC and the lab PC.
+1. **The after-call list (S558, first thing in the next chat — your word):**
+   - link a no-show who came in under another number (any staff; undo the same day);
+   - remember that number for future calls;
+   - an IVR call button on each no-show.
+   - Both come in switched off for you to turn on.
+2. **Small, my own:** the console's doubled *"counter sheet not filled"* line · the medical PC shouting if the hand-made pen-drive backup is more than a week old · the finance app's own test suite · proving the 148 older documents.
+3. **The punch listener's step 2** — after about 19-Oct, only if every genuine punch carries one steady mark.
+4. **On your word:** a *send to Shavez* button for the bank check · Bhati's later features · the WhatsApp appointment message to patients · the MyOperator key steps · the contacts · the mail flood · the portal tiles · kits for Shavez's PC and the lab PC.
 5. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
+
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S313 CLOSE — 13 → 14-Oct-2026 (the parent)
+
+- ~~**"Everywhere this part of split bill does not come"**~~ — live 08:05 13-Oct (S541).
+- ~~**"Check why my command console does not show the amounts … stale messages"**~~ — live 08:05 13-Oct (S542).
+- ~~**"Ntfy WhatsApp alerts have stopped from 7th October" / "why not move to server"**~~ — live 19:27 13-Oct (S549); your test alert came.
+- ~~**"Make use of these [API credits] for these builds"**~~ — the build runner on your PC; three builds for $15.79.
+- ~~**Bhati's physiotherapy register**~~ — live 05:29 14-Oct (S552); you opened it for him.
+- ~~**His daily slip entry on his duty list; the overlapping line off**~~ — live 05:59 (S553); the old line off at your "yes".
+- ~~**"I want him to backfill from 1st October"**~~ — live 07:04 (S554).
+- ~~**"Analyze and reply before any build" (the after-call list)**~~ — answered; your "1 any staff · 2 yes"; briefed as the next chat's first job.
 
 ## ✅ DONE AT THE S311 CLOSE — 12 → 13-Oct-2026 (the parent)
 
