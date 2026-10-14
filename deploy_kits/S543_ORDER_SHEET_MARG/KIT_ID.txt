@@ -1,0 +1,5 @@
+kit id S543_ORDER_SHEET_MARG
+brief claude_code_briefs/S543_ORDER_SHEET_MARG.md (v3.1, Sanjeevni session 312, D716 of 13-Oct-2026 05:24 IST)
+one rule on the ordering pages: Marg's own open order; units in the shop's words; Marg's own order PDF beside the system's sheet
+edits /root/finance/order_sheet.py (012e21c9), porders_s454.py (9c463e7c), order_sheet_pdf.py (6e7a5e1a); new marg_order_pdf.py; DUTY_MAP.json v12 -> v13
+restarts clinic-finance only
