@@ -1,0 +1,4 @@
+kit id S546_SALE_BLANK_HEAD
+project Sanjeevni
+made by the Sanjeevni chat, session 312, 13-Oct-2026
+touches Drive ToMedical\_kit\marg_txt.py and KIT_MANIFEST.txt (and through them the medical PC); nothing on the server

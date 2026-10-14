@@ -1,4 +1,4 @@
-# OWNER TO-DO — LIVE · refreshed at the **S314 close** (the Scan App project), 14-Oct-2026, early morning — the parent's sections exactly as its S311 close wrote them (its session 313 open), the Sanjeevni sections exactly as its S310 close wrote them (its session 312 open); the Scan App sections refreshed here (315 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S312 close** (the Sanjeevni project), 14-Oct-2026, early morning — the parent's sections exactly as its S311 close wrote them (its session 313 open), the Scan App sections exactly as its S314 close wrote them (its session 315 open); the Sanjeevni sections refreshed here (316 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S309 close** (the Scan App project), 13-Oct-2026, early morning — the parent's sections exactly as its S311 close wrote them (its session 313 open), the Sanjeevni sections exactly as its S310 close wrote them (its session 312 reserved); the Scan App sections refreshed here (314 reserved)
 
@@ -364,6 +364,59 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S312 close (14-Oct, early morning)
+
+*Detail: `S312_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_316.md`. The same lines are on your System Board.*
+
+**1 · The publish** — this close's record and the medical PC's reader kit (nothing changes on the server). The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · The ordering sheet (S543) — top priority for the next pharmacy chat, through the SDK path on your API credits (your word, 06:06 14-Oct; the credits last until 17-Oct).** The next chat checks it against that day's files first and then gives you one line to run on this PC; it will be this:
+
+```
+python D:\Downloads\_kbtools\agent_build\run_build.py S543_ORDER_SHEET_MARG
+```
+
+**Still yours from before, not urgent (on your board):**
+- bank details for **Agarwal Surgicals and Medicals** — its bill is scanned:
+
+```
+https://followup.dr-manoj.in/finance/purchase/page/book
+```
+
+- the first cheque logged (Shavez can do it);
+- one photo of Marg's purchase-import screen;
+- phone numbers for **BASS** and **DAANSHI** (or Shavez) — they have none in the phone book.
+
+**Worth knowing — the staff's, on their own screens, not yours:**
+- **Amir:** the 12 medicine vouchers on his board into Marg (none entered at the 13-Oct read).
+- **Darpan:** one spot count at the head of his list — ANKLE BINDER L BAMBOO.
+- **Morning staff:** the two reports from the REPORT login, as every day.
+
+**Held at your word:**
+- S438_COUNT_BOOK;
+- S486, the buying model — after the ordering fix and stock on the spine;
+- **Amir's *Aaj ka kaam* list — off, and nothing is added to it (D690);**
+- **NORTIMER — out of the 6-Sep count (D715).**
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S312 close
+
+**Every build follows the charter v1.1 (`claude/S307_BUILD_CHARTER_v1_1.md`, D707).**
+
+1. **The ordering sheet (S543, your D716)** — briefed and read three times; **top priority, through the SDK path on your API credits** (⭐0 2).
+2. **A refused report goes in by itself once the reader is mended, and the staff are not told to redo a report that is not at fault (F-893).**
+3. **Stock on the spine (rung 4b)**, then **S486 Part A** and **Part B**.
+4. **Small:** the hub's orthotic section and a held line (F-875); a label on Amir's page (F-881); the medical PC's "same as before"; the five limits on your settings page.
+
+## ✅ DONE AT THE S312 CLOSE — 13 → 14-Oct-2026 (the Sanjeevni project)
+
+- ~~**The 12-10 sale report refused twice at 09:23 13-Oct**~~ — two bills with no payment word in Marg (A004143, A004144 — UPI, your word) and a batch with a space; the medical PC's reader mended (S546, your "yes" 10:00); the fresh export taken 10:40 13-Oct.
+- ~~**Y80, the publish of the S310 record**~~ — landed 06:04 IST 13-Oct.
+- ~~**The ordering sheet's faults**~~ — found at the root (the pages kept their own idea of each line instead of Marg's open order) and briefed as S543; the build waits on your one paste line.
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S310 close (13-Oct, early morning)
 
