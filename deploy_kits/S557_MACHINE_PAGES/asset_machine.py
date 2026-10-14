@@ -21,6 +21,15 @@ WHAT THIS FILE IS
     The same gate as the asset pages (owner and manager; reception never). Switch `machine.on` (absent = OFF): while OFF a
     manager sees the machine page exactly as before and every route here refuses him; the owner always has it.
 
+FIX ROUND 1 (S557_FIX1, the independent review's BL1 / C1)
+    No table uses AUTOINCREMENT, so SQLite re-issues the id of a deleted newest machine, paper or reminder. A part / cover is
+    therefore shown on a machine only when its asset_created_at equals that machine's assets.created_at, and a part / cover /
+    spend shows a paper only when its bill_created_at equals that paper's bills.created_at (both written in the request that
+    makes the link). The heal (at every start and when Renewals opens) DETACHES a row whose fingerprint no longer holds --
+    asset_id = -asset_id, or bill_id = NULL -- audited in desk_audit, never deleted. A reminder is S557's own only if its id is
+    the row's expiry_id, it is entity='asset' for that machine and its label starts with one of OWN_PREFIXES; any other row is
+    never updated or resolved -- the link is let go and a fresh reminder made.
+
 WHAT IT DELIBERATELY DOES NOT DO
     It moves or changes no field of an existing machine (the old contract fields are only shown, read-only). It never
     deletes a row or a file. It never links a pharmacy paper, a patient's paper, or (for a manager) a Personal paper.
@@ -46,6 +55,10 @@ PATIENT = "patient_paper"
 REMIND_DEFAULT = 30
 KINDS = (("warranty", "Warranty"), ("amc", "AMC"), ("cmc", "CMC"), ("insurance", "Insurance"), ("other", "Other"))
 KIND_NAME = dict(KINDS)
+# S557_FIX1 (BL1): the ONE list of S557's own reminder labels. A reminder is S557's own only when its id is the row's
+# expiry_id, it is entity='asset' for the row's machine, AND its label starts with one of these (the app's own labels --
+# 'Warranty', 'Contract renewal', 'Item expiry', 'Part warranty: x' -- never do).
+OWN_PREFIXES = tuple(n + " — " for _k, n in KINDS) + ("Cover — ", "Part warranty — ")
 SPEND_TYPES = (("Repair", "Repair"), ("Other service", "Service visit"), ("Spare purchase", "Spare purchase"))
 EQUIP_CATEGORY = "Dr MK Clinic Equipment"
 CLINIC_ENTITY = "Dr Manoj Clinic"
@@ -53,12 +66,18 @@ CLINIC_ENTITY = "Dr Manoj Clinic"
 DDL = (
     "CREATE TABLE IF NOT EXISTS asset_part(id INTEGER PRIMARY KEY, asset_id INTEGER NOT NULL, name TEXT NOT NULL, make TEXT, "
     "model TEXT, serial TEXT, fitted_on TEXT, warranty_till TEXT, bill_id INTEGER, removed_on TEXT, removed_by TEXT, "
-    "expiry_id INTEGER, by_whom TEXT, at TEXT)",
+    "expiry_id INTEGER, by_whom TEXT, at TEXT, asset_created_at TEXT, bill_created_at TEXT)",
     "CREATE TABLE IF NOT EXISTS asset_cover(id INTEGER PRIMARY KEY, asset_id INTEGER NOT NULL, kind TEXT NOT NULL CHECK(kind IN "
     "('warranty','amc','cmc','insurance','other')), provider TEXT, from_day TEXT, till_day TEXT NOT NULL, cost REAL, bill_id "
     "INTEGER, remind_days INTEGER NOT NULL DEFAULT 30, expiry_id INTEGER, voided_at TEXT NOT NULL DEFAULT '', voided_by TEXT NOT "
-    "NULL DEFAULT '', by_whom TEXT, at TEXT)",
+    "NULL DEFAULT '', by_whom TEXT, at TEXT, asset_created_at TEXT, bill_created_at TEXT)",
 )
+# S557_FIX1 (BL1, C1): no table here uses AUTOINCREMENT, so SQLite re-issues the id of a deleted newest machine or paper. A
+# link is therefore trusted only with its fingerprint: the machine's assets.created_at (asset_created_at) and the paper's
+# bills.created_at (bill_created_at), written in the same request that makes the link. Additive columns, guarded for two workers.
+FP_COLUMNS = (("asset_part", "asset_created_at"), ("asset_part", "bill_created_at"),
+              ("asset_cover", "asset_created_at"), ("asset_cover", "bill_created_at"),
+              ("service_logs", "bill_id"), ("service_logs", "bill_created_at"))
 
 
 class Refused(Exception):
@@ -67,22 +86,87 @@ class Refused(Exception):
 
 # ---------------------------------------------------------------------------------------------- the database's part
 def ensure(db):
-    """Additive and idempotent: the two tables and service_logs.bill_id. Two gunicorn workers start at once: 'already
-    exists' / 'duplicate column' from the second is normal."""
+    """Additive and idempotent: the two tables, service_logs.bill_id and the fingerprint columns (S557_FIX1). Two gunicorn
+    workers start at once: 'already exists' / 'duplicate column' from the second is normal."""
     for d in DDL:
         try:
             db.execute(d)
         except sqlite3.OperationalError as ex:
             if "already exists" not in str(ex).lower():
                 raise
-    have = {r[1] for r in db.execute("PRAGMA table_info(service_logs)")}
-    if have and "bill_id" not in have:
-        try:
-            db.execute("ALTER TABLE service_logs ADD COLUMN bill_id INTEGER")
-        except sqlite3.OperationalError as ex:
-            if "duplicate column" not in str(ex).lower():
-                raise
+    for tbl, col in FP_COLUMNS:
+        have = {r[1] for r in db.execute("PRAGMA table_info(%s)" % tbl)}
+        if have and col not in have:
+            try:
+                db.execute("ALTER TABLE %s ADD COLUMN %s %s" % (tbl, col, "INTEGER" if col == "bill_id" else "TEXT"))
+            except sqlite3.OperationalError as ex:
+                if "duplicate column" not in str(ex).lower():
+                    raise
     db.commit()
+
+
+def _fp_ok(db):
+    """True when every fingerprint column is present (ensure has run)."""
+    try:
+        for tbl, col in FP_COLUMNS:
+            if col not in {r[1] for r in db.execute("PRAGMA table_info(%s)" % tbl)}:
+                return False
+        return True
+    except sqlite3.Error:
+        return False
+
+
+def asset_fp(db, aid):
+    """The machine's fingerprint (assets.created_at), or None when there is no such machine."""
+    r = db.execute("SELECT created_at FROM assets WHERE id=?", (aid,)).fetchone() if aid else None
+    return r[0] if r else None
+
+
+def bill_fp(db, bid):
+    """The paper's fingerprint (bills.created_at), or None when there is no such paper."""
+    r = db.execute("SELECT created_at FROM bills WHERE id=?", (bid,)).fetchone() if bid else None
+    return r[0] if r else None
+
+
+def paper_ok(db, bid, fp):
+    """A row's paper link is trusted only when the paper still carries the fingerprint stored with the link."""
+    return bool(bid) and fp is not None and bill_fp(db, bid) == fp
+
+
+def _own_reminder(row, aid):
+    """S557_FIX1 (BL1): an expiries row is S557's own for this machine only if entity='asset', entity_id = the machine and its
+    label starts with one of OWN_PREFIXES (the id test -- id = the row's expiry_id -- is made by the caller)."""
+    return (row is not None and row["entity"] == "asset" and row["entity_id"] == aid
+            and str(row["label"] or "").startswith(OWN_PREFIXES))
+
+
+def strays(db):
+    """S557_FIX1: the rows whose link no longer holds -- (machine, paper):
+    machine: [(table, row id, asset_id, expiry_id)] -- a part / cover whose machine is gone or is a different machine now
+             (assets.created_at differs from asset_created_at, or the fingerprint is NULL);
+    paper:   [(table, row id, bill_id)] -- a part / cover / spend whose paper is gone or is a different paper now."""
+    mach, pap = [], []
+    for tbl in ("asset_part", "asset_cover"):
+        for r in db.execute("SELECT t.id, t.asset_id, t.expiry_id FROM %s t WHERE t.asset_id>0 AND NOT EXISTS (SELECT 1 FROM assets a "
+                            "WHERE a.id=t.asset_id AND t.asset_created_at IS NOT NULL AND a.created_at=t.asset_created_at) ORDER BY t.id" % tbl):
+            mach.append((tbl, r[0], r[1], r[2]))
+    for tbl in ("asset_part", "asset_cover", "service_logs"):
+        for r in db.execute("SELECT t.id, t.bill_id FROM %s t WHERE t.bill_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM bills b "
+                            "WHERE b.id=t.bill_id AND t.bill_created_at IS NOT NULL AND b.created_at=t.bill_created_at) ORDER BY t.id" % tbl):
+            pap.append((tbl, r[0], r[1]))
+    return mach, pap
+
+
+def detach(db, mach, pap):
+    """Detach (never delete): a stray part / cover gets asset_id = -asset_id and its expiry link cleared; a stray paper link
+    gets bill_id = NULL. Each is audited in desk_audit with what it was. No commit."""
+    for tbl, rid, aid, eid in mach:
+        db.execute("UPDATE %s SET asset_id=-asset_id, expiry_id=NULL WHERE id=? AND asset_id=?" % tbl, (rid, aid))
+        _audit(db, "machine_detached", {"table": tbl, "row": rid, "asset": aid, "expiry_id": eid, "was": "machine re-issued or gone"})
+    for tbl, rid, bid in pap:
+        db.execute("UPDATE %s SET bill_id=NULL, bill_created_at=NULL WHERE id=? AND bill_id=?" % tbl, (rid, bid))
+        _audit(db, "machine_paper_detached", {"table": tbl, "row": rid, "bill": bid, "was": "paper re-issued or gone"})
+    return len(mach) + len(pap)
 
 
 def _tables_ok(db):
@@ -101,11 +185,12 @@ def _part_label(p):
     return "Part warranty — %s" % ((p["name"] or "").strip() or "a part")
 
 
-def _wanted(db, aid):
-    """[(table, row id, expiry_id, desired)] for one machine. desired = (label, due, threshold, resolved) for a reminder that
-    must exist, or ('resolve',) for one that may exist and must be resolved, or None (nothing to do)."""
+def _wanted(db, aid, afp):
+    """[(table, row id, expiry_id, desired)] for one machine -- only the rows made on THIS machine (asset_created_at = its
+    created_at). desired = (label, due, threshold, resolved) for a reminder that must exist, or ('resolve',) for one that may
+    exist and must be resolved."""
     out = []
-    covers = db.execute("SELECT * FROM asset_cover WHERE asset_id=? ORDER BY id", (aid,)).fetchall()
+    covers = db.execute("SELECT * FROM asset_cover WHERE asset_id=? AND asset_created_at=? ORDER BY id", (aid, afp)).fetchall()
     cur = {}
     for c in covers:
         if c["voided_at"]:
@@ -119,7 +204,7 @@ def _wanted(db, aid):
         else:
             out.append(("asset_cover", c["id"], c["expiry_id"],
                         (_cover_label(c), c["till_day"], int(c["remind_days"] or REMIND_DEFAULT), 0)))
-    for p in db.execute("SELECT * FROM asset_part WHERE asset_id=? ORDER BY id", (aid,)).fetchall():
+    for p in db.execute("SELECT * FROM asset_part WHERE asset_id=? AND asset_created_at=? ORDER BY id", (aid, afp)).fetchall():
         if p["removed_on"] or not (p["warranty_till"] or "").strip():
             out.append(("asset_part", p["id"], p["expiry_id"], ("resolve",)))
         else:
@@ -132,11 +217,22 @@ def sync_asset(db, aid, dry=False):
     of each kind) and per live part with a warranty -- created once, kept in expiry_id, updated, never duplicated; a newer
     cover's older period, a voided cover and a removed part have theirs resolved. No commit. Returns the changes (made, or
     needed when dry)."""
-    if not db.execute("SELECT 1 FROM assets WHERE id=?", (aid,)).fetchone():
+    afp = asset_fp(db, aid)
+    if afp is None:
         return 0                                                     # the machine is gone: nothing is re-created for it
     n = 0
-    for tbl, rid, eid, want in _wanted(db, aid):
-        row = db.execute("SELECT * FROM expiries WHERE id=? AND entity='asset' AND entity_id=?", (eid, aid)).fetchone() if eid else None
+    for tbl, rid, eid, want in _wanted(db, aid, afp):
+        row = db.execute("SELECT * FROM expiries WHERE id=?", (eid,)).fetchone() if eid else None
+        if row is not None and not _own_reminder(row, aid):
+            # S557_FIX1 (BL1): the id now belongs to a reminder S557 did not make (an id re-issued by SQLite) -- it is never
+            # updated or resolved; this row lets go of it and gets a fresh reminder of its own below.
+            n += 1
+            if not dry:
+                db.execute("UPDATE %s SET expiry_id=NULL WHERE id=?" % tbl, (rid,))
+                _audit(db, "machine_reminder_let_go", {"table": tbl, "row": rid, "asset": aid, "expiry_id": eid})
+            row = None
+            if want[0] == "resolve":
+                continue
         if want[0] == "resolve":
             if row is not None and row["resolved"] != 1:
                 n += 1
@@ -147,11 +243,14 @@ def sync_asset(db, aid, dry=False):
         if row is None:
             n += 1
             if not dry:
-                # re-link first: this machine's own reminder of the same label that no other cover or part holds
-                own = db.execute("SELECT id FROM expiries WHERE entity='asset' AND entity_id=? AND label=? "
+                # re-link first: this machine's own reminder of the same label (S557's form -- the same three tests) that no
+                # other cover or part holds
+                own = db.execute("SELECT * FROM expiries WHERE entity='asset' AND entity_id=? AND label=? "
                                  "AND id NOT IN (SELECT expiry_id FROM asset_cover WHERE expiry_id IS NOT NULL "
                                  "UNION SELECT expiry_id FROM asset_part WHERE expiry_id IS NOT NULL) ORDER BY resolved, id DESC LIMIT 1",
                                  (aid, label)).fetchone()
+                if own is not None and not _own_reminder(own, aid):
+                    own = None
                 if own:
                     db.execute("UPDATE expiries SET due_date=?, threshold_days=?, resolved=? WHERE id=?", (due, thr, res, own[0]))
                     new_id = own[0]
@@ -168,22 +267,27 @@ def sync_asset(db, aid, dry=False):
 
 
 def _asset_ids(db):
-    return [r[0] for r in db.execute("SELECT asset_id FROM asset_cover UNION SELECT asset_id FROM asset_part ORDER BY 1")]
+    return [r[0] for r in db.execute("SELECT asset_id FROM asset_cover WHERE asset_id>0 UNION SELECT asset_id FROM asset_part "
+                                     "WHERE asset_id>0 ORDER BY 1")]
 
 
 def heal(db):
-    """The ensure/heal: re-links any cover or part whose reminder is missing and brings every reminder into line. Writes
-    only when something is out of line; then under one write lock (two workers never both create the same reminder)."""
-    if not _tables_ok(db):
+    """The ensure/heal: first detaches every part / cover / paper link whose fingerprint no longer holds (S557_FIX1), then
+    re-links any cover or part whose reminder is missing and brings every reminder into line. Writes only when something is
+    out of line; then under one write lock (two workers never both create the same reminder)."""
+    if not _tables_ok(db) or not _fp_ok(db):
         return 0
     db.row_factory = sqlite3.Row
-    if not sum(sync_asset(db, a, dry=True) for a in _asset_ids(db)):
+    mach, pap = strays(db)
+    if not (mach or pap) and not sum(sync_asset(db, a, dry=True) for a in _asset_ids(db)):
         return 0
     own = not db.in_transaction
     if own:
         db.execute("BEGIN IMMEDIATE")
     try:
-        n = sum(sync_asset(db, a) for a in _asset_ids(db))
+        mach, pap = strays(db)                                       # read again under the lock
+        n = detach(db, mach, pap)
+        n += sum(sync_asset(db, a) for a in _asset_ids(db))
         if own:
             db.commit()
         return n
@@ -323,8 +427,9 @@ def inr(x):
 def _audit(db, action, detail):
     """Everything without a bill goes to the desk's audit (desk_audit, S551); a linked paper also gets a bill audit row."""
     try:
+        at = AR._now_ist() if AR is not None else (datetime.datetime.utcnow() + datetime.timedelta(hours=5, minutes=30)).strftime("%Y-%m-%d %H:%M:%S")
         db.execute("INSERT INTO desk_audit(at, who, action, detail) VALUES(?,?,?,?)",
-                   (AR._now_ist(), _who(), action, json.dumps(detail or {}, ensure_ascii=False)[:500]))
+                   (at, _who() or "S557 heal", action, json.dumps(detail or {}, ensure_ascii=False)[:500]))
     except sqlite3.OperationalError:
         pass
 
@@ -376,12 +481,13 @@ def paper_from_box(db, v, owner):
     return b["id"]
 
 
-def _paper_view(db, bid, owner, show_price):
-    """{stamp, href} for a row's paper, or None (none linked, or not for this person's eyes)."""
+def _paper_view(db, bid, fp, owner, show_price):
+    """{stamp, href} for a row's paper, or None (none linked, the paper is not the one linked -- its fingerprint differs,
+    S557_FIX1 -- or not for this person's eyes)."""
     if not bid:
         return None
     b = db.execute("SELECT * FROM bills WHERE id=?", (bid,)).fetchone()
-    if b is None or refusal(b, owner) or not show_price:
+    if b is None or fp is None or b["created_at"] != fp or refusal(b, owner) or not show_price:
         return None
     return {"stamp": _stamp(b), "href": url_for("bill_view", bid=b["id"])}
 
@@ -390,14 +496,20 @@ def linked(db, bid, owner):
     """[(asset id, name, as)] -- the machines this paper is linked to, as purchase / part / cover / spend; only the machines
     this person may see (a hidden or owner-only machine never shows to a manager)."""
     out = []
-    q = (("purchase", "SELECT a.id, a.name, a.hidden, l.visibility FROM assets a JOIN locations l ON l.id=a.location_id WHERE a.bill_id=?"),
-         ("part", "SELECT a.id, a.name, a.hidden, l.visibility FROM asset_part p JOIN assets a ON a.id=p.asset_id JOIN locations l ON l.id=a.location_id WHERE p.bill_id=?"),
-         ("cover", "SELECT a.id, a.name, a.hidden, l.visibility FROM asset_cover c JOIN assets a ON a.id=c.asset_id JOIN locations l ON l.id=a.location_id WHERE c.bill_id=? AND c.voided_at=''"),
-         ("spend", "SELECT a.id, a.name, a.hidden, l.visibility FROM service_logs s JOIN assets a ON a.id=s.asset_id JOIN locations l ON l.id=a.location_id WHERE s.bill_id=?"))
+    # S557_FIX1: a part / cover / spend counts only when the paper still carries the fingerprint stored with the link, and a
+    # part / cover only on the machine it was made on (asset_created_at). The purchase link is the app's own assets.bill_id.
+    fpb = "(SELECT b.created_at FROM bills b WHERE b.id=?)"
+    q = (("purchase", "SELECT a.id, a.name, a.hidden, l.visibility FROM assets a JOIN locations l ON l.id=a.location_id WHERE a.bill_id=?", 1),
+         ("part", "SELECT a.id, a.name, a.hidden, l.visibility FROM asset_part p JOIN assets a ON a.id=p.asset_id AND a.created_at=p.asset_created_at "
+                  "JOIN locations l ON l.id=a.location_id WHERE p.bill_id=? AND p.bill_created_at=" + fpb, 2),
+         ("cover", "SELECT a.id, a.name, a.hidden, l.visibility FROM asset_cover c JOIN assets a ON a.id=c.asset_id AND a.created_at=c.asset_created_at "
+                   "JOIN locations l ON l.id=a.location_id WHERE c.bill_id=? AND c.voided_at='' AND c.bill_created_at=" + fpb, 2),
+         ("spend", "SELECT a.id, a.name, a.hidden, l.visibility FROM service_logs s JOIN assets a ON a.id=s.asset_id JOIN locations l ON l.id=a.location_id "
+                   "WHERE s.bill_id=? AND s.bill_created_at=" + fpb, 2))
     seen = set()
-    for as_, sql in q:
+    for as_, sql, np_ in q:
         try:
-            rows = db.execute(sql, (bid,)).fetchall()
+            rows = db.execute(sql, (bid,) * np_).fetchall()
         except sqlite3.Error:
             continue
         for r in rows:
@@ -452,8 +564,8 @@ def can_from_paper(db, b, owner):
 def cover_line(db, a, today=None):
     """(text, state) -- the live cover with the latest end date; state '' / 'amber' (30 days or less to its end) / 'red'."""
     today = today or _today()
-    c = db.execute("SELECT * FROM asset_cover WHERE asset_id=? AND voided_at='' ORDER BY till_day DESC, id DESC LIMIT 1",
-                   (a["id"],)).fetchone()
+    c = db.execute("SELECT * FROM asset_cover WHERE asset_id=? AND asset_created_at=? AND voided_at='' ORDER BY till_day DESC, id DESC LIMIT 1",
+                   (a["id"], a["created_at"])).fetchone()
     if c is None:
         return "No cover", ""
     till = _iso(c["till_day"])
@@ -476,7 +588,8 @@ def cover_line(db, a, today=None):
 
 def totals_line(db, a, show_price):
     logs = db.execute("SELECT COUNT(*), COALESCE(SUM(cost),0) FROM service_logs WHERE asset_id=?", (a["id"],)).fetchone()
-    paid = db.execute("SELECT COALESCE(SUM(cost),0) FROM asset_cover WHERE asset_id=? AND voided_at=''", (a["id"],)).fetchone()[0]
+    paid = db.execute("SELECT COALESCE(SUM(cost),0) FROM asset_cover WHERE asset_id=? AND asset_created_at=? AND voided_at=''",
+                      (a["id"], a["created_at"])).fetchone()[0]
     n = logs[0]
     nn = "1 repair/service" if n == 1 else "%d repairs/services" % n
     when = (" (%s)" % dmy(a["purchase_date"])) if a["purchase_date"] else ""
@@ -548,27 +661,29 @@ def sections(a):
     line, state = cover_line(db, a)
     top = render_template_string(TOP_TPL, line=line, state=state, totals=totals_line(db, a, show_price))
     parts, removed = [], []
-    for p in db.execute("SELECT * FROM asset_part WHERE asset_id=? ORDER BY COALESCE(fitted_on,''), id", (a["id"],)):
+    afp = a["created_at"]                                            # S557_FIX1: only the rows made on THIS machine
+    for p in db.execute("SELECT * FROM asset_part WHERE asset_id=? AND asset_created_at=? ORDER BY COALESCE(fitted_on,''), id", (a["id"], afp)):
         d = {"id": p["id"], "name": p["name"], "make": p["make"], "model": p["model"], "serial": p["serial"],
              "fitted": dmy(p["fitted_on"]) if p["fitted_on"] else "—", "till": dmy(p["warranty_till"]) if p["warranty_till"] else "",
              "removed": dmy(p["removed_on"]) if p["removed_on"] else "", "removed_by": p["removed_by"],
-             "paper": _paper_view(db, p["bill_id"], owner, show_price)}
+             "paper": _paper_view(db, p["bill_id"], p["bill_created_at"], owner, show_price)}
         (removed if p["removed_on"] else parts).append(d)
     cur = {}
-    rows = db.execute("SELECT * FROM asset_cover WHERE asset_id=? ORDER BY till_day DESC, id DESC", (a["id"],)).fetchall()
+    rows = db.execute("SELECT * FROM asset_cover WHERE asset_id=? AND asset_created_at=? ORDER BY till_day DESC, id DESC", (a["id"], afp)).fetchall()
     for c in rows:
         if not c["voided_at"] and c["kind"] not in cur:
             cur[c["kind"]] = c["id"]
     covers = [{"id": c["id"], "kind": KIND_NAME.get(c["kind"], c["kind"]), "provider": c["provider"],
                "frm": dmy(c["from_day"]) if c["from_day"] else "", "till": dmy(c["till_day"]),
                "cost": inr(c["cost"]) if c["cost"] is not None else "—", "voided": dmy(c["voided_at"]) if c["voided_at"] else "",
-               "current": cur.get(c["kind"]) == c["id"], "paper": _paper_view(db, c["bill_id"], owner, show_price)} for c in rows]
+               "current": cur.get(c["kind"]) == c["id"], "paper": _paper_view(db, c["bill_id"], c["bill_created_at"], owner, show_price)} for c in rows]
     spends, years, total = [], {}, 0.0
     for s in db.execute("SELECT * FROM service_logs WHERE asset_id=? ORDER BY log_date DESC, id DESC", (a["id"],)):
         tname = {"Other service": "Service visit"}.get(s["svc_type"] or "", s["svc_type"] or "")
         spends.append({"id": s["id"], "day": dmy(s["log_date"]), "work": s["work"], "type": tname,
-                       "cost": inr(s["cost"]) if s["cost"] is not None else "—", "by": s["done_by"], "bill_id": s["bill_id"],
-                       "paper": _paper_view(db, s["bill_id"], owner, show_price)})
+                       "cost": inr(s["cost"]) if s["cost"] is not None else "—", "by": s["done_by"],
+                       "bill_id": s["bill_id"] if paper_ok(db, s["bill_id"], s["bill_created_at"]) else None,
+                       "paper": _paper_view(db, s["bill_id"], s["bill_created_at"], owner, show_price)})
         if s["cost"] is not None:
             y = (s["log_date"] or "")[:4] or "?"
             years[y] = years.get(y, 0.0) + float(s["cost"])
@@ -623,9 +738,10 @@ def part_add(a):
         bid = paper_from_box(db, f.get("paper"), owner)
         fitted = _date(f.get("fitted_on"), "fitted-on date")
         till = _date(f.get("warranty_till"), "warranty date")
-        cur = db.execute("INSERT INTO asset_part(asset_id, name, make, model, serial, fitted_on, warranty_till, bill_id, by_whom, at) "
-                         "VALUES(?,?,?,?,?,?,?,?,?,?)", (a["id"], name, _txt(f.get("make"), 80), _txt(f.get("model"), 80),
-                                                         _txt(f.get("serial"), 80), fitted, till, bid, _who(), AR._now_ist()))
+        cur = db.execute("INSERT INTO asset_part(asset_id, name, make, model, serial, fitted_on, warranty_till, bill_id, by_whom, at, "
+                         "asset_created_at, bill_created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                         (a["id"], name, _txt(f.get("make"), 80), _txt(f.get("model"), 80), _txt(f.get("serial"), 80), fitted, till,
+                          bid, _who(), AR._now_ist(), a["created_at"], bill_fp(db, bid)))
         sync_asset(db, a["id"])
         _audit(db, "machine_part_add", {"asset": a["id"], "part": cur.lastrowid, "bill": bid})
         if bid:
@@ -636,7 +752,7 @@ def part_add(a):
 
 def part_remove(a, pid):
     def go(db):
-        p = db.execute("SELECT * FROM asset_part WHERE id=? AND asset_id=?", (pid, a["id"])).fetchone()
+        p = db.execute("SELECT * FROM asset_part WHERE id=? AND asset_id=? AND asset_created_at=?", (pid, a["id"], a["created_at"])).fetchone()
         if p is None:
             raise Refused("There is no such part on this machine.")
         if p["removed_on"]:
@@ -668,8 +784,9 @@ def cover_add(a):
             raise Refused("Remind days must be a number. Nothing was saved.")
         rd = max(1, min(rd, 365))
         bid = paper_from_box(db, f.get("paper"), owner)
-        cur = db.execute("INSERT INTO asset_cover(asset_id, kind, provider, from_day, till_day, cost, bill_id, remind_days, by_whom, at) "
-                         "VALUES(?,?,?,?,?,?,?,?,?,?)", (a["id"], kind, _txt(f.get("provider")), frm, till, cost, bid, rd, _who(), AR._now_ist()))
+        cur = db.execute("INSERT INTO asset_cover(asset_id, kind, provider, from_day, till_day, cost, bill_id, remind_days, by_whom, at, "
+                         "asset_created_at, bill_created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                         (a["id"], kind, _txt(f.get("provider")), frm, till, cost, bid, rd, _who(), AR._now_ist(), a["created_at"], bill_fp(db, bid)))
         sync_asset(db, a["id"])
         _audit(db, "machine_cover_add", {"asset": a["id"], "cover": cur.lastrowid, "kind": kind, "till": till, "bill": bid})
         if bid:
@@ -680,7 +797,7 @@ def cover_add(a):
 
 def cover_void(a, cid):
     def go(db):
-        c = db.execute("SELECT * FROM asset_cover WHERE id=? AND asset_id=?", (cid, a["id"])).fetchone()
+        c = db.execute("SELECT * FROM asset_cover WHERE id=? AND asset_id=? AND asset_created_at=?", (cid, a["id"], a["created_at"])).fetchone()
         if c is None:
             raise Refused("There is no such cover on this machine.")
         if c["voided_at"]:
@@ -703,8 +820,8 @@ def spend_add(a):
         st = f.get("svc_type") if f.get("svc_type") in dict(SPEND_TYPES) else "Repair"
         cost = _money(f.get("cost")) if AR.can_see_price(a) else None
         bid = paper_from_box(db, f.get("paper"), _owner())
-        cur = db.execute("INSERT INTO service_logs(asset_id, log_date, work, cost, done_by, is_pm, svc_type, created_by, bill_id) "
-                         "VALUES(?,?,?,?,?,0,?,?,?)", (a["id"], day, work, cost, _txt(f.get("done_by")), st, g.user["id"], bid))
+        cur = db.execute("INSERT INTO service_logs(asset_id, log_date, work, cost, done_by, is_pm, svc_type, created_by, bill_id, bill_created_at) "
+                         "VALUES(?,?,?,?,?,0,?,?,?,?)", (a["id"], day, work, cost, _txt(f.get("done_by")), st, g.user["id"], bid, bill_fp(db, bid)))
         _audit(db, "machine_spend_add", {"asset": a["id"], "log": cur.lastrowid, "bill": bid})
         if bid:
             AR._audit_bill(db, bid, "machine_link", {"asset": a["id"], "as": "spend", "log": cur.lastrowid})
@@ -717,12 +834,12 @@ def spend_paper(a, sid):
         s = db.execute("SELECT * FROM service_logs WHERE id=? AND asset_id=?", (sid, a["id"])).fetchone()
         if s is None:
             raise Refused("There is no such entry on this machine.")
-        if s["bill_id"]:
+        if paper_ok(db, s["bill_id"], s["bill_created_at"]):
             raise Refused("That entry already has its paper.")
         bid = paper_from_box(db, request.form.get("paper"), _owner())
         if not bid:
             raise Refused("Type the paper's number (B-____).")
-        db.execute("UPDATE service_logs SET bill_id=? WHERE id=?", (bid, sid))
+        db.execute("UPDATE service_logs SET bill_id=?, bill_created_at=? WHERE id=?", (bid, bill_fp(db, bid), sid))
         _audit(db, "machine_spend_paper", {"asset": a["id"], "log": sid, "bill": bid})
         AR._audit_bill(db, bid, "machine_link", {"asset": a["id"], "as": "spend", "log": sid})
         return "Paper linked."

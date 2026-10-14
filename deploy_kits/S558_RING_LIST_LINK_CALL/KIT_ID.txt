@@ -1,0 +1,5 @@
+kit id S558_RING_LIST_LINK_CALL
+Session 317, 14-Oct-2026. D726, F-896. Brief: claude_code_briefs/S558_RING_LIST_LINK_CALL.md.
+After-call list (/portal/ring/list): link a no-show who registered under another mobile; the second number remembered by the
+ring pop-up; an IVR call button on each Nahi aaye line. Both installed OFF; the owner turns them on in his box.
+Edits /root/portal/ring_outcome.py (7cb60aad) and /root/portal/ring_common.py (4344b592). Restarts ring-hook, clinic-portal.

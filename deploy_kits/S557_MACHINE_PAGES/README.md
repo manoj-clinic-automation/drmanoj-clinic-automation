@@ -44,20 +44,34 @@
    - **B3:** a stored date with a time part is the same day, so no spurious *Claude read* date line appears (S555 review
      N2). The undo line uses `\cp -p` (review C1).
 
+7. **Fix round 1 (S557_FIX1, the independent review's BL1 / C1), in `asset_machine.py` only.** No table uses
+   AUTOINCREMENT, so SQLite gives a deleted newest machine's, paper's or reminder's id to the next new one.
+   - A link is trusted only with its fingerprint. `asset_part` and `asset_cover` carry `asset_created_at` (the machine's
+     `assets.created_at`) and `bill_created_at` (the paper's `bills.created_at`); `service_logs` carries `bill_created_at`
+     beside `bill_id`. All are written in the request that makes the link.
+   - A row whose machine or paper no longer matches is not shown on that machine or as that paper. The heal (at every start
+     and when Renewals opens) **detaches** it: `asset_id = -asset_id` (its reminder link cleared), or `bill_id = NULL`.
+     Each one is audited in `desk_audit` (`machine_detached` / `machine_paper_detached`). Nothing is deleted.
+   - A reminder is S557's own only if its id is the row's `expiry_id`, it is `entity='asset'` for that machine, and its
+     label starts with one of `OWN_PREFIXES` (*AMC — · CMC — · Warranty — · Insurance — · Other — · Cover — · Part warranty —*).
+     Any other row is never updated or resolved: the link is let go (`machine_reminder_let_go`) and a fresh reminder made.
+     The adoption step keeps the same three tests.
+
 **Files.**
 
 | File | FROM → TO |
 |---|---|
 | `/root/assetapp/asset_register.py` | `7ac38664` → `9e94b11c` (10 counted edits) |
 | `/root/assetapp/sorting_desk.py` | `7e16fd80` → `91a04674` (15 counted edits; `VERSION` S551.2 and `CORRECTIONS` S555 kept, `MACHINE = "S557"` added) |
-| `/root/assetapp/asset_machine.py` | NEW → `ec874720` |
+| `/root/assetapp/asset_machine.py` | NEW → `66c37197` (fix round 1; was `ec874720`) |
 
 - **Read only, pinned:** `clinic_papers.py` `058c9bcb`, `claude_reader.py` `3894dc23`, `claude_reread.py` `d9b75e78`.
 - **Not touched:** `scanner_widget.js` (`1143c77b`), `packs.py`, the finance and Sanjeevni side, the portal, and the
   DUTY_MAP.
 - **Database (additive, by `asset_machine.ensure()` after the backup):**
-  - `asset_part` and `asset_cover`, exactly as the brief.
-  - `service_logs.bill_id`.
+  - `asset_part` and `asset_cover`, as the brief, each with the two fingerprint columns `asset_created_at`,
+    `bill_created_at` at the end (fix round 1).
+  - `service_logs.bill_id` and `service_logs.bill_created_at`.
   - No existing row or field is moved or changed; `machine.on` is not written.
 - Only `assetapp` is restarted.
 
@@ -78,12 +92,16 @@ cd /root/deploy/repo && git pull --ff-only && bash /root/deploy/repo/deploy_kits
 
 The two new tables and the column stay (additive, unused once undone). The database backup `assets.db.bak_S557_<time>` stays.
 
-**Proof (14-Oct-2026, on the box, in /tmp only).**
-- **`walk_s557.py`: 38 checks, all green.** It runs on a backup-API copy of the live database with made-up rows only and a
-  made-up today of 15-Jun-2031. It covers A1–A7, B1–B3, K1/K2 (byte-for-byte against the live files' pages), sizes and
-  isolation.
-- **The control on the live (S555) files: 31 RED.** Every named check is red: W2, A1a–f, A2a–b, A3a–c, A4a–b, A5a–b,
-  A6a–e, A7b–c, B1a–d, B2 and B3.
+**Proof (14-Oct-2026, on the box, in /tmp only; fix round 1 re-run 11:19–11:22 IST).**
+- **`walk_s557.py`: 41 checks, all green.** It runs on a backup-API copy of the live database with made-up rows only and a
+  made-up today of 15-Jun-2031. It covers A1–A7, B1–B3, K1/K2 (byte-for-byte against the live files' pages), F1a–F1c
+  (ids re-issued after a delete), sizes and isolation.
+- **The control on the live (S555) files: 34 RED.** Every named check is red: W2, A1a–f, A2a–b, A3a–c, A4a–b, A5a–b,
+  A6a–e, A7b–c, B1a–d, B2, B3 and F1a–c.
+- **Control 2 (fix round 1): the new app files with the previous `asset_machine.py` (`ec874720`)** are red on exactly
+  F1a, F1b and F1c (and W3, the schema): the deleted machine's AMC shows on the new machine and the app's own *Warranty*
+  reminder is rewritten; the new paper reads *Linked to … as part; … as cover*; the app's *Part warranty:* reminder is
+  rewritten. This run is a dev step on the box; the installer runs the walk and the first control as before.
 - **Regression on the new files:**
   - S555's walk: 19 of 19 green.
   - S551's walk: 87 of 87 green, with its one date line in S555's agreed dd-mm-yyyy form.

@@ -12,14 +12,19 @@ and URL). Flask's test client; no port. Isolated exactly as walk_s555.py (S551 v
              they are on these files, then stop (run on the LIVE files first).
 --baseline FILE: compare those pages byte for byte with the dump.
 GREEN / RED per check; exit 1 on any RED. --expect-red (the control on the old files): exit 0 only if every check named in
-MUST_RED is RED. The work folder (default: a new folder under /tmp) is removed at the end unless --keep."""
+MUST_RED is RED; with --must-red A,B,.. that list replaces MUST_RED (S557_FIX1's second control: the new app files with the
+previous asset_machine.py must be red on F1a, F1b, F1c -- an id re-issued after a delete). The work folder (default: a new folder under /tmp) is removed at the end unless --keep."""
 import datetime, importlib.util, json, os, re, shutil, sqlite3, sys, tempfile, time
 
 ARGS = [a for a in sys.argv[1:]]
 R, FAILED, NAMES = [], [], []
 # W3 (the schema) is not here: it reads the database, and a copy taken after an earlier install already has the additive tables.
 MUST_RED = ("W2", "A1a", "A1b", "A1c", "A1d", "A1e", "A1f", "A2a", "A2b", "A3a", "A3b", "A3c", "A4a", "A4b", "A5a", "A5b",
-            "A6a", "A6b", "A6c", "A6d", "A6e", "A7b", "A7c", "B1a", "B1b", "B1c", "B1d", "B2", "B3")
+            "A6a", "A6b", "A6c", "A6d", "A6e", "A7b", "A7c", "B1a", "B1b", "B1c", "B1d", "B2", "B3", "F1a", "F1b", "F1c")
+# --must-red A,B,..: the second control (S557_FIX1) -- the walk on the new app files with the PREVIOUS asset_machine.py
+# (ec874720) must be red on exactly the fix-round checks named.
+if "--must-red" in ARGS:
+    MUST_RED = tuple(x for x in ARGS[ARGS.index("--must-red") + 1].split(",") if x)
 TODAY = datetime.date(2031, 6, 15)
 MODS = ("asset_register.py", "clinic_papers.py", "claude_reader.py", "claude_reread.py", "sorting_desk.py", "asset_machine.py")
 LONG = re.compile(r"Clinic bill|asset or consumable|Pharmacy purchase|Lab purchase|not a bill")
@@ -154,12 +159,13 @@ def run(D, SRC, shared_src, work):
 
     def cols(t):
         return [r[1] for r in db.execute("PRAGMA table_info(%s)" % t)]
-    ck("W3 the additive schema: asset_part and asset_cover exactly as the brief; service_logs.bill_id (A4)",
+    ck("W3 the additive schema: asset_part and asset_cover as the brief plus the fix-round fingerprints (asset_created_at, bill_created_at); service_logs.bill_id and bill_created_at (A4, S557_FIX1)",
        lambda: cols("asset_part") == ["id", "asset_id", "name", "make", "model", "serial", "fitted_on", "warranty_till", "bill_id",
-                                      "removed_on", "removed_by", "expiry_id", "by_whom", "at"]
+                                      "removed_on", "removed_by", "expiry_id", "by_whom", "at", "asset_created_at", "bill_created_at"]
        and cols("asset_cover") == ["id", "asset_id", "kind", "provider", "from_day", "till_day", "cost", "bill_id", "remind_days",
-                                   "expiry_id", "voided_at", "voided_by", "by_whom", "at"]
-       and "bill_id" in cols("service_logs"), lambda: (cols("asset_part"), cols("asset_cover"), cols("service_logs")))
+                                   "expiry_id", "voided_at", "voided_by", "by_whom", "at", "asset_created_at", "bill_created_at"]
+       and "bill_id" in cols("service_logs") and "bill_created_at" in cols("service_logs"),
+       lambda: (cols("asset_part"), cols("asset_cover"), cols("service_logs")[-3:]))
 
     epoch = db.execute("SELECT value FROM settings WHERE key='auth_epoch'").fetchone()[0]
     own_u = db.execute("SELECT * FROM users WHERE role='owner' AND active=1 ORDER BY id LIMIT 1").fetchone()
@@ -502,6 +508,96 @@ def run(D, SRC, shared_src, work):
     jt = own.get("/desk/api/paper/%d" % dt).get_json(silent=True) or {}
     ck("B3 (S555 review N2) a stored date with a time part is the same day: no spurious 'Claude read' date line",
        lambda: jt.get("ok") and "date" not in (jt.get("claude") or {}), lambda: jt.get("claude"))
+
+    # ------------------------------------------------------------------ F1 (S557_FIX1): ids re-issued after a delete (review BL1, C1)
+    # No table uses AUTOINCREMENT: SQLite gives a deleted NEWEST row's id to the next new row. Each case below is set up so that
+    # the id IS re-issued (asserted as a precondition), through the app's own doors where it has one.
+    def row_t(sql, *a):
+        r_ = db.execute(sql, a).fetchone()
+        return tuple(r_) if r_ is not None else None
+
+    # F1c: a reminder S557 made is lost; the app's own form makes a reminder that takes the same id
+    mc = mach("FC")
+    own.post("/assets/%d/covers/add" % mc, data={"kind": "warranty", "provider": "WALKPROV FC", "till_day": "01-03-2032"})
+    ec = one("SELECT expiry_id FROM asset_cover WHERE asset_id=? AND kind='warranty'", mc)
+    ec_was_max = isinstance(ec, int) and ec == one("SELECT MAX(id) FROM expiries")
+    db.execute("DELETE FROM expiries WHERE id=?", (ec,)) if isinstance(ec, int) else None      # the walk's own made-up row
+    db.commit()
+    own.post("/assets/%d/service" % mc, data={"log_date": "2031-06-14", "svc_type": "Repair", "work": "walk fan swapped",
+                                              "part_replaced": "WALK FAN FC", "part_warranty_period": "1yr"})
+    app_c = row_t("SELECT * FROM expiries WHERE entity='asset' AND entity_id=? AND label='Part warranty: WALK FAN FC'", mc)
+
+    # F1b: the newest paper, linked as a part's, a cover's and a spend's paper, is deleted (the app's door); a new paper takes its id
+    p_dl = mk("PDL", "WALKDEL PAPERS ONE", status="approved", subgroup="others", bill_no="DL-1", total_amount=700,
+              bill_date="2031-06-09", created="2031-06-09 05:00:00")
+    own.post("/assets/%d/parts/add" % ma, data={"name": "WALK PART DL", "paper": "Z-2031-S7PDL"})
+    own.post("/assets/%d/covers/add" % ma, data={"kind": "other", "provider": "WALKPROV DL", "till_day": "01-01-2033", "paper": "Z-2031-S7PDL"})
+    own.post("/assets/%d/spends/add" % ma, data={"day": "09-06-2031", "svc_type": "Repair", "work": "walk dl visit", "cost": "700", "paper": "Z-2031-S7PDL"})
+    dl_rows = [("asset_part", one("SELECT id FROM asset_part WHERE name='WALK PART DL'")),
+               ("asset_cover", one("SELECT id FROM asset_cover WHERE provider='WALKPROV DL'")),
+               ("service_logs", one("SELECT id FROM service_logs WHERE work='walk dl visit'"))]
+    dl_linked = all(isinstance(i, int) and one("SELECT bill_id FROM %s WHERE id=?" % t_, i) == p_dl for t_, i in dl_rows)
+    p_dl_was_max = p_dl == one("SELECT MAX(id) FROM bills")
+    rd_ = own.post("/bills/%d/delete" % p_dl)
+    p_nw = mk("PNW", "WALKNEW PAPERS TWO", status="approved", subgroup="others", bill_no="NW-1", total_amount=300,
+              bill_date="2031-06-13", created="2031-06-13 05:00:00")
+
+    # F1a: the newest machine (a cover and a part on it) is deleted by the owner (the app's door); the next machine, made with
+    # the app's own form with a warranty date, takes its id -- and its 'Warranty' reminder takes the cover reminder's id
+    m_dl = mach("DEL", created_at="2031-01-01 05:00:00")
+    own.post("/assets/%d/covers/add" % m_dl, data={"kind": "amc", "provider": "WALKPROV DEL", "till_day": "01-01-2032", "cost": "4000"})
+    own.post("/assets/%d/parts/add" % m_dl, data={"name": "WALK PART DEL", "warranty_till": "01-02-2032"})
+    e_dl = one("SELECT expiry_id FROM asset_cover WHERE asset_id=? AND provider='WALKPROV DEL'", m_dl)
+    m_dl_was_max = m_dl == one("SELECT MAX(id) FROM assets")
+    n_rows0 = (one("SELECT COUNT(*) FROM asset_part"), one("SELECT COUNT(*) FROM asset_cover"))
+    rx = own.post("/assets/%d/delete" % m_dl)
+    rnew = own.post("/assets/new", data={"name": "WALK S557 MACHINE NEW", "location_id": str(gen), "category": "Dr MK Clinic Equipment",
+                                         "status": "Active", "warranty_till": "2032-01-01"})
+    m_nw = one("SELECT id FROM assets WHERE name='WALK S557 MACHINE NEW'")
+    app_a = row_t("SELECT * FROM expiries WHERE entity='asset' AND entity_id=? AND label='Warranty'", m_nw)
+
+    # the heal: when Renewals opens, then at two starts (the app imported again)
+    rn2 = html(own, "/renewals?all=1")
+    for _i in range(2):
+        mm_ = quiet(lambda: import_file("asset_register", os.path.join(appdir, "asset_register.py")))
+        if mm_ is not None:
+            state["m"] = mm_
+            m = mm_
+    own, mgr, anon = client(own_u), client(mgr_u), client(None)
+    t_nw = html(own, "/assets/%d" % m_nw) if isinstance(m_nw, int) else ""
+    t_ma = html(own, "/assets/%d" % ma)
+    t_pnw = html(own, "/bills/%d" % p_nw)
+    j_pnw = own.get("/desk/api/paper/%d" % p_nw).get_json(silent=True) or {}
+    app_a2 = row_t("SELECT * FROM expiries WHERE id=?", app_a[0]) if app_a else None
+    app_c2 = row_t("SELECT * FROM expiries WHERE id=?", app_c[0]) if app_c else None
+    det = [tuple(r_) for r_ in db.execute("SELECT 'part', asset_id, expiry_id FROM asset_part WHERE name='WALK PART DEL' UNION ALL "
+                                          "SELECT 'cover', asset_id, expiry_id FROM asset_cover WHERE provider='WALKPROV DEL'")] if am else []
+    n_rows1 = (one("SELECT COUNT(*) FROM asset_part"), one("SELECT COUNT(*) FROM asset_cover"))
+    ck("F1a the newest machine deleted, the next one takes its id: it shows no old part or cover ('No cover'); the app's own "
+       "'Warranty' reminder (which took the old cover reminder's id) is untouched; the old rows are detached (asset_id negative), "
+       "audited, nothing deleted",
+       lambda: m_dl_was_max and rx.status_code == 302 and rnew.status_code == 302 and m_nw == m_dl and app_a is not None
+       and app_a[0] == e_dl and app_a2 == app_a and cov(t_nw) == ("", "No cover") and "WALK PART DEL" not in t_nw
+       and "WALKPROV DEL" not in t_nw and sorted(det) == [("cover", -m_dl, None), ("part", -m_dl, None)] and n_rows1 == n_rows0
+       and one("SELECT COUNT(*) FROM desk_audit WHERE action='machine_detached' AND detail LIKE ?", '%%"asset": %d,%%' % m_dl) == 2
+       and "Warranty" in rn2,
+       lambda: (m_dl_was_max, rx.status_code, rnew.status_code, m_nw == m_dl, (app_a or (None,))[0] == e_dl, app_a2 == app_a,
+                cov(t_nw), "WALKPROV DEL" in t_nw, det, n_rows0, n_rows1))
+    ck("F1b the newest paper deleted, a new one takes its id: no part / cover / spend shows it as its paper, its page has no "
+       "'Linked to' line (nor the desk's note); the three links are cleared (bill_id NULL), the rows kept, audited",
+       lambda: dl_linked and p_dl_was_max and rd_.status_code == 302 and p_nw == p_dl and "Z-2031-S7PNW" not in t_ma
+       and "WALK PART DL" in t_ma and "Linked to" not in t_pnw and not j_pnw.get("linked")
+       and all(one("SELECT bill_id FROM %s WHERE id=?" % t_, i) is None for t_, i in dl_rows)
+       and one("SELECT COUNT(*) FROM desk_audit WHERE action='machine_paper_detached' AND detail LIKE ?", '%%"bill": %d,%%' % p_dl) == 3,
+       lambda: (dl_linked, p_dl_was_max, rd_.status_code, p_nw == p_dl, "Z-2031-S7PNW" in t_ma, re.findall(r"<b>Machine:</b>.{0,120}", t_pnw),
+                j_pnw.get("linked"), [one("SELECT bill_id FROM %s WHERE id=?" % t_, i) for t_, i in dl_rows]))
+    e_new = quiet(lambda: row_t("SELECT e.id, e.label, e.due_date, e.resolved, e.entity_id FROM asset_cover c JOIN expiries e "
+                                "ON e.id=c.expiry_id WHERE c.asset_id=? AND c.kind='warranty'", mc))
+    ck("F1c an app-made reminder whose id equals a stored expiry_id is never changed: it stays byte-equal; the cover lets go of it "
+       "and gets a fresh reminder of its own ('Warranty — WALKPROV FC', open)",
+       lambda: ec_was_max and app_c is not None and app_c[0] == ec and app_c2 == app_c and e_new is not None and e_new[0] != ec
+       and e_new[1:] == ("Warranty — WALKPROV FC", "2032-03-01", 0, mc),
+       lambda: (ec_was_max, (app_c or (None,))[0] == ec, app_c2 == app_c, (app_c2 or (0, 0, 0, None))[3], e_new))
 
     # ------------------------------------------------------------------ sizes, and the scratch copy only
     t0 = time.time(); a_ = own.get("/assets/%d" % ma); t1 = time.time()

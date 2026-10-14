@@ -1,5 +1,128 @@
 # REPORT S557_MACHINE_PAGES — the machine pages and the leftovers (built, walked, rehearsed; NOT installed, NOT published)
 
+## Fix round 1 (S557_FIX1, 14-Oct-2026) — rebuilt, re-walked, re-rehearsed; NOT installed, NOT published
+
+**For Dr Manoj (plain English):**
+- The review found one real fault. If you deleted the newest machine and then made a new one, the new machine could show the
+  old machine's parts and cover. It could also change one of the app's own reminders. A deleted bill could do the same: its
+  number could pass to the next scanned bill.
+- That is fixed. Each part, cover and bill link now remembers exactly which machine and which bill it was made with. If
+  that machine or bill is gone, the link is set aside. It is kept, never deleted, and never shown on the wrong machine.
+- The checks pass on a copy of your data, and the same checks fail on the previous version. Nothing is installed yet.
+
+**For the chat:**
+
+*What changed.* `asset_machine.py` only. `asset_register.py` and `sorting_desk.py` and their TO pins are unchanged
+(9e94b11c / 91a04674, rebuilt again on the box to those pins).
+1. **Fingerprints (BL1, C1):**
+   - `asset_part` and `asset_cover` gain `asset_created_at` and `bill_created_at`; `service_logs` gains `bill_created_at`.
+     All are additive (in the `CREATE` for the new tables, plus guarded `ALTER`s that tolerate the two-worker race).
+   - All are written in the same request that makes the link (`part_add`, `cover_add`, `spend_add`, `spend_paper`).
+   - Every read filters on them: the cover line, the totals, the three folds, the reminders' `_wanted`, `part_remove` /
+     `cover_void`, `_paper_view` and `linked()` (part / cover / spend).
+   - `strays()` + `detach()` run first in `heal()` (at each start and when Renewals opens):
+     - a part or cover whose machine is gone, or is now a different machine → `asset_id = -asset_id`, `expiry_id = NULL`;
+     - a paper link whose paper is gone, or is now a different paper → `bill_id = NULL`, `bill_created_at = NULL`.
+   - Each detach is one `desk_audit` row (`machine_detached` / `machine_paper_detached`, with what it was). Nothing is deleted.
+   - A NULL fingerprint is never filled later. It counts as unmatched (none exist before install).
+2. **A reminder is S557's own only by all three tests (BL1):**
+   - Its id is the row's `expiry_id`.
+   - It is `entity='asset'` with `entity_id` = the row's machine.
+   - Its label starts with one of `OWN_PREFIXES` = *AMC — · CMC — · Warranty — · Insurance — · Other — · Cover — ·
+     Part warranty —*. This is one constant, built from `KINDS`.
+
+   Anything else is never updated or resolved: the row lets go of it (audited as `machine_reminder_let_go`) and a fresh
+   reminder is made. The adoption step applies the same three tests.
+3. **Report §9 corrected (C2):** see §9 below.
+4. **Walk:** three new checks, F1a, F1b and F1c. Each sets up a real id re-issue and asserts it as a precondition: the
+   deleted row was the newest, and the new row got its id. The app's own doors are used: `POST /assets/<id>/delete`,
+   `POST /assets/new` with a warranty date, `POST /bills/<id>/delete`, and the old *Add service* form with a part warranty.
+   W3 now asserts the fingerprint columns. A `--must-red LIST` option was added for the second control.
+
+**New pin:** `asset_machine.py` NEW → **`66c37197ae7c0d63874e213d52e7b9e5`** (was `ec874720`). `PIN_TO_asset_machine.txt`,
+`SUMS.md5` (15 lines, 0 mismatches), `README.md` and `KIT_ID.txt` were all updated. `install_s557.sh`, `make_s557.py` and
+`rehearse_s557.sh` are byte-unchanged (08316fe2 / da35abb4 / 96227cfb). The new walk is `140d8742`.
+
+**Pins re-read on the box at 11:12:28 IST** (box clock), all equal to the brief:
+- `asset_register.py` 7ac38664, `sorting_desk.py` 7e16fd80;
+- `clinic_papers.py` 058c9bcb, `claude_reread.py` d9b75e78, `claude_reader.py` 3894dc23, `scanner_widget.js` 1143c77b;
+- no `asset_machine.py`, no `bak_S557`, no build lock.
+- The schema the fix relies on: `assets.created_at` and `bills.created_at` are `NOT NULL DEFAULT datetime('now')`, 0 empty.
+
+**Counts, printed in the log** (dev run 11:20:25–11:20:42 IST; `_scratch\S557_MACHINE_PAGES\fix1\dev_fix1_2.log`; the same
+isolation as before: backup-API snapshot, scratch import, env set before import, separate processes):
+
+| run | result |
+|---|---|
+| walk on the built files | **`41 checks: 41 GREEN, 0 RED`** (38 as before + F1a, F1b, F1c) |
+| control on the live S555 files | **`41 checks: 7 GREEN, 34 RED`**; `CONTROL must-be-red: … F1a, F1b, F1c -- all RED` |
+| **control 2:** the new app files + the PREVIOUS `asset_machine.py` ec874720 | **`41 checks: 37 GREEN, 4 RED (W3, F1a, F1b, F1c)`**; `CONTROL must-be-red: F1a, F1b, F1c -- all RED` |
+| S555 walk on the new files | **`19 checks: 19 GREEN, 0 RED`** |
+| S551 walk (1 date line in dd-mm-yyyy) on the new files | **`87 checks: 87 GREEN, 0 RED`** |
+
+**Control 2 in the old file's own words** (the review's faults, reproduced):
+- F1a: the new machine reads *Covered: AMC by WALKPROV DEL till 01-01-2032*, and the app's own `Warranty` row is not
+  byte-equal (it was rewritten).
+- F1b: the new paper's page reads *Linked to WALK S557 MACHINE A as part; … as cover*, and the desk note adds *… as spend*.
+- F1c: the app's `Part warranty: WALK FAN FC` row was rewritten to *Warranty — WALKPROV FC*.
+
+On the new file all three are green:
+- the new machine reads *No cover*;
+- both app rows are byte-equal;
+- the old rows sit at `-asset_id` / `bill_id NULL`, with the row counts unchanged and 2 + 3 audit rows.
+
+**Rehearsal** (`rehearse_s557.sh`, made-up root, ended **11:22:19 IST**): **`REHEARSAL GREEN`**.
+- Outcome 1, fresh install: DONE. Rebuilt 66c37197 / 91a04674 / 9e94b11c = the pins. Walk 41/41; control 34 RED, all
+  named; S555 19/19; S551 87/87. Tables `False False False` → `True True True`. `machine.on: absent`. The undo line starts
+  `\cp -p`.
+- Outcome 2: ALREADY INSTALLED.
+- Outcome 3 (forced red): restored to 7e16fd80 / 7ac38664.
+- Outcome 4 (`/desk` 404): restored.
+- Outcome 5 (`/desk` 200): restored.
+
+**Byte-identical to what ran:** the box's md5 of every kit file at 11:22:19 equals the repository copy: asset_machine
+66c37197, walk 140d8742, install 08316fe2, make da35abb4, rehearse 96227cfb, PIN_TO_asset_machine 59df1faf. README,
+KIT_ID and SUMS were rewritten after the run; they are not executed.
+
+**After (11:22:33 IST):**
+- All six live files are still at the FROM pins. There is no `asset_machine.py` and no `bak_S557` file.
+- The live database has no `asset_part`, `asset_cover` or `service_logs.bill_id`, and `machine.on` is absent.
+- `assetapp` is active, healthz is 200 and `/desk` is 302.
+- `/tmp/s557kits`, `/tmp/s557dev` and `/tmp/s557_install_*` are gone. No lock was taken, because nothing was placed.
+
+**Calls I made, and limits:**
+- **The review's alternative (wrapping `asset_delete` / `bill_delete`) was not used.** The brief chose fingerprints. The
+  heal detaches on the next start or the next Renewals visit. Before that, every read already ignores the stray row.
+- **On detach the row's `expiry_id` is cleared too.** The id it held now belongs to someone else's reminder. The old value
+  is in the audit row.
+- **Fingerprint resolution is one second** (`datetime('now')`). Suppose the owner deletes the newest machine and a new
+  machine is saved within the same second. Then the fingerprint would match. That cannot be done by hand through two
+  forms. It is named here so it is not hidden.
+- **Out of scope (not touched):**
+  - The *purchase* link is the app's own `assets.bill_id`. `bill_delete` leaves it dangling, so a re-issued paper can read
+    *Linked to X as purchase*. Fixing it would need a column on `assets` or an edit to `asset_register.py`; both are
+    outside this brief.
+  - In the same way, the app's own `bill_audit` rows of a deleted paper pass to a paper that re-uses the id.
+  - `install_s557.sh`'s header comment still lists the additive change as "asset_part, asset_cover, service_logs.bill_id".
+    The brief did not name the installer for change, and its data step makes the new columns all the same (outcome 1).
+- Review notes N6, N7 and N9 (the stamp box accepting dup/page-of papers, the stamp-exists probe, the `from_paper`
+  double-submit) were not in this brief, and were left.
+
+**Gates:**
+- **SUMS.md5:** 15 lines, 0 mismatches. The kit has 16 files, all LF, with no `__pycache__` or `.pyc`.
+- **`.gitignore`:** `git check-ignore -v --non-matching` (last match wins) shows all 16 kit files, this report and the
+  brief as not ignored.
+- **Contact-number gate,** run as PUBLISH_ALL runs it, over those 18 files: `NO_PHONE_NUMBERS: clean -- 18 staged file(s)
+  checked`. It was run again on this report after this line was written.
+- Nothing was committed, pushed or published.
+
+**Cost of this fix round:** about **US$3.5** of API credit, read from this session's budget meter when this section was
+written.
+
+---
+
+## The first build (S557_MACHINE_PAGES, 09:29–09:52 IST) — as reported then; §9 corrected by fix round 1
+
 **For Dr Manoj (plain English):**
 - **Each machine's page** now opens with one line on its cover, for example *"Covered: AMC by … till 01-08-2032"*. The line
   turns amber in the last 30 days and red once the cover has lapsed. A second line gives what the machine cost, what has
@@ -288,8 +411,16 @@ run; they are not executed.
 
 **Seen outside the brief (not touched):**
 - `asset_delete` and `bill_delete` (owner) hard-delete rows. These are existing doors.
-  - A deleted machine's `asset_part` / `asset_cover` rows stay as orphans. The heal skips them, so no reminder comes back.
-  - A deleted bill leaves a dangling `bill_id`, which shows as no paper.
+  - *(Corrected by fix round 1, review C2.)* The first build said a deleted machine's rows "stay as orphans" and a deleted
+    bill's link "shows as no paper". Both were true only until SQLite re-issued the id: no table uses AUTOINCREMENT. The
+    next machine or paper took that id and inherited the rows and links (review BL1 / C1, reproduced by control 2).
+  - **What is true now (66c37197):**
+    - A part or cover is shown only on the machine whose `created_at` it carries.
+    - A part's, cover's or spend's paper is shown, and listed as *Linked to*, only while the paper's `created_at` matches.
+    - At the next start or Renewals visit the heal detaches a stray row (`asset_id = -asset_id`, or `bill_id = NULL`),
+      audited, never deleted. No reminder is re-created for it.
+    - A reminder that is not S557's own (id, machine and label) is never changed.
+  - The purchase link (`assets.bill_id`, the app's own) is still left dangling by `bill_delete`. That is outside S557.
 - The papers page's and the old month page's section headings *"Pharmacy purchases — Sanjeevni"* / *"Lab purchases — NK
   Pathology"* (in `clinic_papers.py`) are plural section names, not lane labels. They are left as they are.
 - **FOR THE PARENT, still standing:** S551's lines on `packs.py` (awaiting challans; the clinic lane's three set-apart
