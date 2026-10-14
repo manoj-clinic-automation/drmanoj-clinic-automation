@@ -1,0 +1,40 @@
+S559 browser walk, FIX1 round -- headless Chrome on the owner's PC (14-Oct-2026, ended 14:53:50 IST by the log file's time), OpenCV.js = the live /root/assetapp/static/opencv.js (md5 ff1e10e7)
+OLD = the live scanner_widget.js 1143c77b (S545) . PREV = the first S559 build 552effcd (scenes E and F must be red on it) . NEW = the FIX1 build 1128ac97 . made-up photos only (a drawn bill on a drawn desk); every upload answered by the walk itself, nothing left the PC
+V = node --check's equivalent (no node on this PC or the box): V8 compiles the whole widget without running it. Shown able to fail: the same check on a copy with one brace removed -> RED V ... SyntaxError: Unexpected token ';'
+
+GREEN V  the new widget compiles in V8 (Chrome's JavaScript engine, the one node uses): parsed whole, not run -- node --check's equivalent  -- 97583 None
+  new A: {"ready": true, "label0": "\u2714 Theek hai \u2014 page 1", "u1": 1, "u2": 1, "stage": "none", "label": "\u2714 Add this page", "pagesAfterTap": 0, "stageLeft": null, "uSame": null, "uDiff": null, "errs": []}
+  new B: {"ready": true, "label0": "\u2714 Theek hai \u2014 page 1", "u1": 1, "u2": null, "stage": "none", "label": null, "pagesAfterTap": null, "stageLeft": null, "uSame": null, "uDiff": null, "errs": []}
+  new C: {"ready": true, "label0": "\u2714 Theek hai \u2014 page 1", "u1": null, "u2": null, "stage": "none", "label": "\u2714 Theek hai \u2014 page 1", "pagesAfterTap": 0, "stageLeft": "block", "uSame": null, "uDiff": null, "errs": []}
+  new D: {"ready": true, "label0": null, "u1": null, "u2": null, "stage": null, "label": null, "pagesAfterTap": null, "stageLeft": null, "uSame": 1, "uDiff": 2, "errs": []}
+  old A: {"ready": true, "label0": "\u2714 Theek hai \u2014 page 1", "u1": 1, "u2": 2, "stage": "block", "label": "\u2714 Theek hai \u2014 page 1", "pagesAfterTap": 1, "stageLeft": null, "uSame": null, "uDiff": null, "errs": []}
+  old B: {"ready": true, "label0": "\u2714 Theek hai \u2014 page 1", "u1": 1, "u2": null, "stage": "none", "label": null, "pagesAfterTap": null, "stageLeft": null, "uSame": null, "uDiff": null, "errs": []}
+  old C: {"ready": true, "label0": "\u2714 Theek hai \u2014 page 1", "u1": null, "u2": null, "stage": "none", "label": "\u2714 Theek hai \u2014 page 1", "pagesAfterTap": 1, "stageLeft": "block", "uSame": null, "uDiff": null, "errs": []}
+  old D: {"ready": true, "label0": null, "u1": null, "u2": null, "stage": null, "label": null, "pagesAfterTap": null, "stageLeft": null, "uSame": 2, "uDiff": 3, "errs": []}
+GREEN A  capture -> Adjust -> Save tapped WHILE adjusting: exactly ONE paper queued, holding the ADJUSTED page; the stage closed; her next tap on the old stage button adds nothing; a second Save queues nothing  -- u1 1 u2 1 adjusted True stage none tap 0 errs []
+GREEN A' CONTROL (the live widget 1143c77b): the same taps give the reported fault -- the UN-adjusted page queued, the stage left open ('✔ Theek hai — page 1'), her next tap makes a new page from it, and Save queues it: TWO papers, two stamps  -- u1 1 u2 2 unadjusted True stage block tap 1
+GREEN B  Adjust -> Theek hai -> Save: one paper, the adjusted page -- the same as the live widget gives (the adjusted page identical)
+GREEN C  the page under adjustment deleted, the stage left on screen: a tap on its button adds NOTHING (the live widget: a new page from the leftover canvas) and the leftover stage is closed  -- new 0 / old 1
+GREEN D  the same pages queued twice within 10 s: queued ONCE (the live widget: twice); a different paper right after: queued  -- new 1,2 / old 2,3
+  new E: {"ready": true, "adjBefore": -1, "u1": 1, "u2": 1, "stage": "none", "label": "\u2714 Add this page", "pagesAfterTap": 0, "adjAfterDel": null, "left": null, "errs": []}
+  new F: {"ready": true, "adjBefore": null, "u1": 1, "u2": null, "stage": "none", "label": null, "pagesAfterTap": null, "adjAfterDel": 0, "left": 2, "errs": []}
+  old E: {"ready": true, "adjBefore": -1, "u1": 1, "u2": 2, "stage": "block", "label": "\u2714 Theek hai \u2014 page 1", "pagesAfterTap": 1, "adjAfterDel": null, "left": null, "errs": []}
+  old F: {"ready": true, "adjBefore": null, "u1": 1, "u2": null, "stage": "block", "label": null, "pagesAfterTap": null, "adjAfterDel": 1, "left": 2, "errs": []}
+  prev E: {"ready": true, "adjBefore": -1, "u1": 1, "u2": 2, "stage": "block", "label": "\u2714 Theek hai \u2014 page 1", "pagesAfterTap": 1, "adjAfterDel": null, "left": null, "errs": []}
+  prev F: {"ready": true, "adjBefore": null, "u1": 1, "u2": null, "stage": "none", "label": null, "pagesAfterTap": null, "adjAfterDel": 1, "left": 2, "errs": []}
+GREEN E  (C1) Save tapped while the Adjust image is still loading (700 ms late): ONE paper queued (the page as it was); the late image does NOT reopen the stage; her next tap adds nothing; a second Save queues nothing  -- u1 1 stage none tap 0 u2 1 errs []
+GREEN E' CONTROL (the first S559 build 552effcd): the late image reopens the stage ('✔ Theek hai — page 1'), her tap makes a page from it, Save queues it -- TWO papers, two stamps  -- u1 1 stage block tap 1 u2 2
+GREEN F  (C2) 3 pages, adjusting page 2, page 1 deleted, Save: ONE paper with two different pages, once each (page 2 adjusted, page 3)  -- adjustIdx after delete 0 . saved [page2-adjusted, page3]
+GREEN F' CONTROL (the first S559 build 552effcd): the same taps save page 2 TWICE (as it was and adjusted) and lose page 3  -- adjustIdx after delete 1 . saved [page2, page2-adjusted]
+  (the live widget 1143c77b, for the record: E red, u2 2 . F saved [page2, page3], stage block)
+GREEN S  finance day scan         loads and saves exactly as before: DOM identical, no error, smart path off, no S559 mark; the same page, the same upload (fields, file name, type, size, bytes), the same way back  -- dom True ups True
+GREEN S  finance non-cash         loads and saves exactly as before: DOM identical, no error, smart path off, no S559 mark; the same page, the same upload (fields, file name, type, size, bytes), the same way back  -- dom True ups True
+GREEN S  finance expense          loads and saves exactly as before: DOM identical, no error, smart path off, no S559 mark; the same page, the same upload (fields, file name, type, size, bytes), the same way back  -- dom True ups True
+GREEN S  finance clinic day       loads and saves exactly as before: DOM identical, no error, smart path off, no S559 mark; the same page, the same upload (fields, file name, type, size, bytes), the same way back  -- dom True ups True
+GREEN S  finance clinic expense   loads and saves exactly as before: DOM identical, no error, smart path off, no S559 mark; the same page, the same upload (fields, file name, type, size, bytes), the same way back  -- dom True ups True
+GREEN S  scan app asset page      loads and saves exactly as before: DOM identical, no error, smart path off, no S559 mark; the same page, the same upload (fields, file name, type, size, bytes), the same way back  -- dom True ups True
+GREEN S  scan app intake (smart)  loads: the same screen (DOM identical), OpenCV ready, no error; the S559 mark present (intake only)
+GREEN W  the bar on the account  page: one line at 1366 px (11 items, a long name and 3-digit counts); at 390 px it wraps, no sideways scroll  -- 1366: nav 1 lines, bar 1, 11 items, 1342 px wide . 390: nav 3 lines, overflow False
+GREEN W  the bar on the desk     page: one line at 1366 px (11 items, a long name and 3-digit counts); at 390 px it wraps, no sideways scroll  -- 1366: nav 1 lines, bar 1, 11 items, 1342 px wide . 390: nav 3 lines, overflow False
+GREEN W  the bar on the month    page: one line at 1366 px (11 items, a long name and 3-digit counts); at 390 px it wraps, no sideways scroll  -- 1366: nav 1 lines, bar 1, 11 items, 1342 px wide . 390: nav 3 lines, overflow False
+20 browser checks: 20 GREEN, 0 RED  (71 s)

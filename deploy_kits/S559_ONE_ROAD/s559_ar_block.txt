@@ -1,0 +1,245 @@
+
+
+# --- S559_ONE_ROAD begin -- D646: one easy road through the scan app -- one menu, the home card, every paper row to the desk (14-Oct-2026) ---
+# Plain helpers, no new module. The owner and the managers get ONE bar (the scan app's pages through page(), the desk's four
+# pages through the Jinja global s559_bar); reception never calls any of it -- its header, intake and slip stay byte for byte.
+ROAD_S559 = "S559"
+_S559_BAR_CSS = (".s559h{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px 16px;background:#3a5a78;"
+                 "color:#fff;padding:10px 18px;box-shadow:0 1px 4px rgba(20,40,70,.18);flex:none;box-sizing:border-box;"
+                 "font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45}"
+                 ".s559h a{color:#dbe7f2;text-decoration:none;margin:0}.s559h a:hover{color:#fff}"
+                 ".s559h .s559t{color:#fff;font-weight:700;font-size:16px;white-space:nowrap}"
+                 ".s559h .s559v{color:#9fb3d9;font-size:12px;font-weight:400}"
+                 ".s559h nav{display:flex;flex-wrap:wrap;align-items:center;gap:2px 14px}"
+                 ".s559h nav a{white-space:nowrap}.s559h nav a.on{color:#fff;font-weight:700}")
+_S559_BAR_TPL = ("<style>{{css}}</style><div class=s559h id=s559bar role=navigation>"
+                 "<a class=s559t href=\"{{url_for('dashboard')}}\"><b>\U0001F5C2 Scan app &amp; assets</b> <span class=s559v>v{{version}}</span></a>"
+                 "<nav>{% for ep_, label, href in items %}<a href=\"{{href}}\" data-s559=\"{{ep_}}\"{% if ep_==ep %} class=on aria-current=page{% endif %}>{{label}}</a>{% endfor %}</nav></div>")
+_S559_HOME_TPL = ("<div class=card id=s559home style=\"display:flex;flex-direction:column;gap:6px;border-color:#9db8d4\">"
+                  "{% if n %}<div style=\"font-size:20px;font-weight:700;color:#2c4258\" id=s559n>{{n}} paper{{'' if n==1 else 's'}} waiting</div>"
+                  "{% else %}<div style=\"font-size:18px;font-weight:600;color:#2c4258\" id=s559n>No paper waiting.</div>{% endif %}"
+                  "<div><a class=btn id=s559open href=\"{{url_for('s551_desk')}}\" style=\"font-size:18px;font-weight:700;padding:13px 26px\">Open the sorting desk</a></div>"
+                  "<div style=\"font-size:14px;color:#5a6b7b\"><a href=\"{{url_for('s551_awaited')}}\">Bills awaited {{aw}}</a> · "
+                  "<a href=\"{{url_for('s551_implants')}}\">Implant ledger</a> · <a href=\"{{url_for('s551_month')}}\">The month</a></div></div>")
+
+
+def _s559_desk_mod():
+    """The sorting desk's module, when it is mounted (its routes are on the app); else None -- every helper then gives the old page."""
+    _m = _sys.modules.get("sorting_desk")
+    return _m if (_m is not None and getattr(_m, "AR", None) is not None and "s551_desk" in app.view_functions) else None
+
+
+def _s559_role(u):
+    try:
+        return (u["role"] or "") if u else ""
+    except (IndexError, KeyError, TypeError):
+        return ""
+
+
+def _s559_desk_open(u):
+    """May this person use the desk now? The owner always; a manager while desk.on is on (the desk's own switch)."""
+    sd = _s559_desk_mod()
+    r = _s559_role(u)
+    if sd is None or r not in ("owner", "manager"):
+        return False
+    if r == "owner":
+        return True
+    try:
+        return bool(sd.desk_on(get_db()))
+    except Exception:                                             # noqa: BLE001
+        return False
+
+
+def _s559_desk_n(u):
+    """The desk's own count: len() of sorting_desk.waiting -- the very function the desk lists with (never a second count).
+    None when the desk is not this person's to open."""
+    if not _s559_desk_open(u):
+        return None
+    try:
+        return len(_s559_desk_mod().waiting(get_db(), _s559_role(u) == "owner"))
+    except Exception as _ex:                                      # noqa: BLE001
+        print("S559 desk count: %s" % _ex, file=_sys.stderr)
+        return None
+
+
+def _s559_awaited_n(u):
+    """Bills awaited's count: the challans waiting for their bill that this person may see (sorting_desk.awaiting_challans)."""
+    sd = _s559_desk_mod()
+    r = _s559_role(u)
+    if sd is None or r not in ("owner", "manager"):
+        return None
+    try:
+        return len(sd.awaiting_challans(get_db(), r == "owner"))
+    except Exception:                                             # noqa: BLE001
+        return None
+
+
+def _s559_items(u):
+    """The bar's items, in the owner's order: Sorting desk (N) . The month . Bills awaited (N) . Implant ledger . Machines .
+    Renewals . All papers . Vendors . Admin . account . Logout. Sorting desk only while the desk is his to open; the four desk
+    items only while the desk is mounted; Admin for the owner. Drafts and Staff are not in it (Assets and Admin reach them)."""
+    r = _s559_role(u)
+    if r not in ("owner", "manager"):
+        return []
+    out = []
+    if _s559_desk_mod() is not None:
+        n = _s559_desk_n(u)
+        if n is not None:
+            out.append(("s551_desk", "Sorting desk (%d)" % n, url_for("s551_desk")))
+        out.append(("s551_month", "The month", url_for("s551_month")))
+        aw = _s559_awaited_n(u)
+        out.append(("s551_awaited", "Bills awaited" + ((" (%d)" % aw) if aw is not None else ""), url_for("s551_awaited")))
+        out.append(("s551_implants", "Implant ledger", url_for("s551_implants")))
+    out += [("assets_list", "Machines", url_for("assets_list")), ("renewals", "Renewals", url_for("renewals")),
+            ("bills_list", "All papers", url_for("bills_list")), ("vendors_list", "Vendors", url_for("vendors_list"))]
+    if r == "owner":
+        out.append(("admin", "Admin", url_for("admin")))
+    out.append(("account", u["display_name"] or u["username"], url_for("account")))
+    out.append(("logout", "Logout", url_for("logout")))
+    return out
+
+
+def _s559_bar(u=None):
+    """THE one helper that builds the bar (S559 item 1) -- for every owner / manager page of the scan app and for the desk's
+    pages. Markup('') for anyone else, and on any error (the page then shows its old header: never a broken page)."""
+    try:
+        u = current_user() if u is None else u
+        items = _s559_items(u)
+        if not items:
+            return Markup("")
+        here = request.endpoint
+        if here == "dashboard":
+            here = ""
+        return Markup(render_template_string(_S559_BAR_TPL, items=items, ep=here, version=APP_VERSION, css=Markup(_S559_BAR_CSS)))
+    except Exception as _ex:                                      # noqa: BLE001
+        print("S559 bar: %s" % _ex, file=_sys.stderr)
+        return Markup("")
+
+
+def _s559_home(u):
+    """S559 item 2: the home page's first card -- the desk's waiting count and its door; '' when the desk is not his to open."""
+    try:
+        n = _s559_desk_n(u)
+        if n is None:
+            return Markup("")
+        aw = _s559_awaited_n(u)
+        return Markup(render_template_string(_S559_HOME_TPL, n=n, aw=(aw if aw is not None else "")))
+    except Exception as _ex:                                      # noqa: BLE001
+        print("S559 home card: %s" % _ex, file=_sys.stderr)
+        return Markup("")
+
+
+def _s559_user():
+    try:
+        return g.user
+    except Exception:                                             # noqa: BLE001
+        return current_user()
+
+
+def _s559_lane_of(row):
+    try:
+        return row["lane"] or KIND_LANE.get(row["kind"], "clinic")
+    except (IndexError, KeyError):
+        return "clinic"
+
+
+def _s559_paper_href(b):
+    """S559 item 4: where a paper's row leads. A non-pharmacy paper: the sorting desk opened on it (/desk?open=<id>), when the
+    desk is this person's to use. A pharmacy paper (the desk never shows one), or the desk not his: the old bill page.
+    b: a bills row, or a paper's id."""
+    try:
+        if isinstance(b, (int, str)):
+            bid = int(b)
+            row = get_db().execute("SELECT id, lane, kind FROM bills WHERE id=?", (bid,)).fetchone()
+        else:
+            row = b
+            bid = int(row["id"])
+        if row is not None and _s559_lane_of(row) != "pharmacy" and _s559_desk_open(_s559_user()):
+            return url_for("s551_desk", open=bid)
+        return url_for("bill_view", bid=bid)
+    except Exception as _ex:                                      # noqa: BLE001
+        print("S559 paper link: %s" % _ex, file=_sys.stderr)
+        try:
+            return url_for("bill_view", bid=int(b if isinstance(b, (int, str)) else b["id"]))
+        except Exception:                                         # noqa: BLE001
+            return "#"
+
+
+def _s559_desk_href(b):
+    """S559 item 5: the old bill page's "Open on the sorting desk" -- a non-pharmacy paper, the desk his to use; else ''."""
+    try:
+        if _s559_lane_of(b) == "pharmacy" or not _s559_desk_open(_s559_user()):
+            return ""
+        return url_for("s551_desk", open=b["id"])
+    except Exception:                                             # noqa: BLE001
+        return ""
+
+
+def _s559_pm(a):
+    """S559 item 9: the service form's "Preventive maintenance is covered under the AMC" -- only under a live AMC / CMC: the
+    machine's cover history (asset_machine.live_amc) when it holds a cover; with none there, the old record's AMC / CMC."""
+    try:
+        _m = _s557_mod()
+        if _m is not None and hasattr(_m, "live_amc"):
+            v = _m.live_amc(get_db(), a)
+            if v is not None:
+                return bool(v)
+    except Exception as _ex:                                      # noqa: BLE001
+        print("S559 pm: %s" % _ex, file=_sys.stderr)
+    try:
+        return (a["contract_type"] or "").strip() in ("AMC", "CMC")
+    except (IndexError, KeyError):
+        return False
+
+
+def _s559_kind(label, contract_type=None):
+    """S559 item 9: Renewals' Kind -- the reminder's own kind, read from its label (the one place it is decided):
+    Warranty / AMC / CMC / Licence / Insurance / Other. The asset form's "Contract renewal" takes the machine's contract type."""
+    l = (label or "").strip().lower()
+    ct = (contract_type or "").strip().lower()
+    if l.startswith("warranty") or l.startswith("part warranty"):
+        return "Warranty"
+    if l.startswith("amc"):
+        return "AMC"
+    if l.startswith("cmc"):
+        return "CMC"
+    if l.startswith("insurance"):
+        return "Insurance"
+    if "licence" in l or "license" in l:
+        return "Licence"
+    if l.startswith("contract renewal"):
+        return {"amc": "AMC", "cmc": "CMC", "warranty only": "Warranty"}.get(ct, "Other")
+    return "Other"
+
+
+def _s559_zone_once(opts, f_zone):
+    """S559 item 9: the Assets page's Zone filter -- one option per zone name (each entity has its own "Unassigned"); choosing
+    it takes every zone of that name among the options. Returns (the options once, the zone ids to filter on, the chosen id)."""
+    first, ids, once = {}, {}, []
+    for z in opts:
+        k = (z["name"] or "").strip().lower()
+        ids.setdefault(k, []).append(z["id"])
+        if k not in first:
+            first[k] = z["id"]
+            once.append(z)
+    pick = next((z for z in opts if f_zone and z["id"] == f_zone), None)
+    if pick is None:
+        return once, [], None
+    k = (pick["name"] or "").strip().lower()
+    return once, ids[k], first[k]
+
+
+def _s559_dmy(s):
+    """dd-mm-yyyy -- the desk's own helper (sorting_desk._dmy) when it is there; the same rule otherwise. Storage unchanged."""
+    _m = _sys.modules.get("sorting_desk")
+    if _m is not None and hasattr(_m, "_dmy"):
+        return _m._dmy(s)
+    try:
+        return datetime.date.fromisoformat(str(s)[:10]).strftime("%d-%m-%Y")
+    except Exception:                                             # noqa: BLE001
+        return s or ""
+
+
+app.jinja_env.filters["s559_dmy"] = _s559_dmy
+app.jinja_env.globals.update(s559_bar=_s559_bar, s559_href=_s559_paper_href, s559_kind=_s559_kind)
+# --- S559_ONE_ROAD end ---
