@@ -47,7 +47,8 @@ Both edited files were rebuilt on the box from the live bytes by `make_s552.py` 
 `\cp -p /root/finance/finance_app.py.bak_S552_0d713b14 /root/finance/finance_app.py && \cp -p /root/finance/clinic_money.py.bak_S552_b0408f82 /root/finance/clinic_money.py && rm -f /root/finance/physio_book.py && systemctl restart clinic-finance`
 
 ### Kit
-`deploy_kits/S552_PHYSIO_REGISTER/`: physio_book.py, make_s552.py, seed_s552.py, walk_s552.py, probe_s552.py, install_S552_PHYSIO_REGISTER.sh, rehearse_s552.sh, README.md, KIT_ID.txt, SUMS.md5 (no .json; F-185 gate clean). The installer ran from a byte-identical copy (`SUMS.md5` md5 ce7a1108… on both sides). Lock `/root/deploy/.claude_code_build.lock` taken 05:28:58 IST, owner S552, removed after this report.
+`deploy_kits/S552_PHYSIO_REGISTER/`: physio_book.py, make_s552.py, seed_s552.py, walk_s552.py, probe_s552.py, install_S552_PHYSIO_REGISTER.sh, rehearse_s552.sh, README.md, KIT_ID.txt, SUMS.md5 (no .json; F-185 gate clean). The installer ran from a byte-identical copy (`SUMS.md5` md5 ce7a1108… on both sides). Lock `/root/deploy/.claude_code_build.lock` taken 05:28:58 IST, owner S552, released 05:30:58 IST (read from the box) after this report was written.
+Published by `PUBLISH_ALL.bat` → origin HEAD `a883218` (verified by the script); on the box `git pull --ff-only` in `/root/deploy/repo`, then `md5sum -c SUMS.md5` green in the repo kit and its `SUMS.md5` identical to the copy that ran. That publish also carried ten S314 canon files that were already pending in the repository (`deploy_kits/KB_canon_all/…S314close…`, `START_HERE_SESSION_315.md`, etc.) — not written by this build; PUBLISH_ALL commits everything pending by design.
 
 ### Calls made (no one was asked)
 - **Tables "at mount":** created on the first request (`_ensure`, the estate's F-303 rule: never at import) and by the installer's data step — not at import time.
