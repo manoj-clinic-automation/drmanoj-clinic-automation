@@ -1,0 +1,7 @@
+kit id S565_DARPAN_SMS_AND_CLAUDE_BILLS
+brief claude_code_briefs/S565_DARPAN_SMS_AND_CLAUDE_BILLS.md (the Sanjeevni chat, session 316, 15-Oct-2026; v2 after R1)
+part A: Darpan's Kal ka hisaab draws the bank's SMS when it stands in for the MPR (his view in Devanagari, the owner's in English); a posted day is worked again when the SMS starts standing
+edits /root/finance/darpan_kal.html (f5e279eb -> 75d5a5b5, four counted edits) and /root/finance/darpan_kal.py (a8e11c31 -> 8128598f, one counted edit)
+reads bank_standin.py (fd635862) and bank_sms.py (aa527840, S564's TO), pinned
+restarts clinic-finance only; no data step
+part B: claude_vs_sarvam_s565.py -- read only, run once on the box on copies under /tmp/s565b; installs, schedules and restarts nothing
