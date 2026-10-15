@@ -1,0 +1,6 @@
+kit id S562_BANK_SMS_STANDS_IN
+brief claude_code_briefs/S562_BANK_SMS_STANDS_IN.md (the parent, session 317, 15-Oct-2026; decision D729)
+the bank's morning UPI settlement SMS stands in for the bank's figure on the clinic's and Sanjeevni's day pages until the MPR mail takes over; both times and the difference (the owner's only); installed OFF behind bank_sms.standin_on
+edits /root/finance/bank_standin.py (a35d04f1 -> fd635862), bank_sms.py (7cdd0ac9 -> 053d4ccb), clinic_money.py (0a2085ca -> 7152cd3a), darpan_kal.py (fd799a56 -> a8e11c31, two counted edits)
+reads darpan_app.py, sanjeevni_approvals.py, bank_mpr_status.py, finance_upi.py, owner_console.py, finance_app.py (pinned)
+restarts clinic-finance only; data step: one setting row bank_sms.standin_on = '0' (INSERT OR IGNORE)
