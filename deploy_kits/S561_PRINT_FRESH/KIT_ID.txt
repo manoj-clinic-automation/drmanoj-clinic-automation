@@ -1,0 +1,5 @@
+kit id S561_PRINT_FRESH
+brief claude_code_briefs/S561_PRINT_FRESH.md (v2, Sanjeevni session 316, 15-Oct-2026; no D or F number)
+the two order PDFs fresh at every tap: a new address per tap, file names by the export's time, no-store headers, "chhapa" on the order sheet's foot
+edits /root/finance/porders_s454.py (72e7fd56 -> 1c3d3927), order_sheet_pdf.py (d0735df8 -> b0cc8694); reads marg_order_pdf.py, order_sheet.py
+restarts clinic-finance only; no data step
