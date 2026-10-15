@@ -1,0 +1,6 @@
+kit id S564_SMS_KEY_OWNER_ONLY
+brief claude_code_briefs/S564_SMS_KEY_OWNER_ONLY.md (the parent, session 317, 15-Oct-2026)
+the phone's door key on /finance/bank-sms (the "Phone setup — MacroDroid" fold) is drawn for the owner's login only; step 4 of the fold says what the phone sends today
+edits /root/finance/bank_sms.py (053d4ccb -> aa527840, four counted edits)
+reads bank_standin.py (fd635862, pinned; is_owner)
+restarts clinic-finance only; no data step; the key file and the door unchanged
