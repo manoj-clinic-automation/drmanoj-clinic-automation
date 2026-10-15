@@ -1,0 +1,74 @@
+// S560_RECEIPTS_STATEMENTS: the desk on one laptop screen; Receipt and Statement; "Paid?"; Send to accountant; the papers to put right
+function inr(x){var n=parseFloat(String(x||'').replace(/[^0-9.\-]/g,''));if(!isFinite(n)){return '₹0';}var s=Math.round(Math.abs(n)).toString(),t=s.slice(-3),h=s.slice(0,-3);if(h){h=h.replace(/\B(?=(\d{2})+(?!\d))/g,',');t=h+','+t;}return (n<0?'-':'')+'₹'+t;}
+function num(x){var n=parseFloat(String(x==null?'':x).replace(/[^0-9.\-]/g,''));return isFinite(n)?n:0;}
+function d2i(s){s=String(s||'').trim();var m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m){return m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);}m=s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2}|\d{4})$/);if(!m){return '';}var y=m[3].length==2?'20'+m[3]:m[3];return y+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2);}
+function addDays(iso,k){var d=new Date(iso+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+k);return d.toISOString().slice(0,10);}
+function sumline(){var v=$('f_vendor').value.trim(),n=$('f_no').value.trim(),d=$('f_date').value.trim(),a=$('f_amt').value.trim();
+ $('readsum').innerHTML='<b>Read:</b> '+esc(v||'supplier not read')+(n?' · no. '+esc(n):'')+(d?' · '+esc(d):'')+(a?' · '+esc(inr(a)):'')+' <span class=ed>edit ▾</span>';}
+function s560init(j){S.acc=!!j.to_acc;var rc=j.rc||{},st=j.st||{};S.rc={pays:rc.cur||'',paid_on:rc.paid_on||'',amount:rc.amount||'',mode:rc.mode||'',ref:rc.ref||''};
+ (rc.cands||[]).forEach(function(c){if(c.pre){S.rc.pays=String(c.id);}});
+ S.st={frm:st.frm||'',to:st.to||'',total:st.total||'',paid_on:st.paid_on||'',amount:st.amount||'',mode:st.mode||'',ref:st.ref||'',ticks:{}};stTick();
+ var cu=(st.cands||[]).filter(function(c){return c.cur;});if(cu.length){S.st.ticks={};cu.forEach(function(c){S.st.ticks[c.id]=true;});}
+ var e=(j.pay||{}).edit;S.pay=e?{paid_on:e.paid_on||'',amount:e.amount||'',mode:e.mode||'',ref:e.ref||''}:{paid_on:'',amount:'',mode:'',ref:''};S.paytouched=false;S.payopen=false;S.readopen=!!(j.flags&&(j.flags.nothing||j.flags.date));}
+function stShown(){var j=S.cur,f=d2i(S.st.frm),t=d2i(S.st.to);return ((j.st||{}).cands||[]).filter(function(c){return c.cur||((!f||c.iso>=addDays(f,-7))&&(!t||c.iso<=addDays(t,7)));});}
+function recline(j,on){var p=j.pay||{};return (on&&p.of)?'<div class=paidline>Recorded: '+esc(p.of)+' — saving again changes this payment, never adds a second.</div>':'';}
+function stTick(){var f=d2i(S.st.frm),t=d2i(S.st.to);S.st.ticks={};if(!f&&!t){return;}((S.cur.st||{}).cands||[]).forEach(function(c){if((!f||c.iso>=f)&&(!t||c.iso<=t)){S.st.ticks[c.id]=true;}});}
+function payBoxes(p,o){return '<div class=pay><label>Paid on<input data-sv="'+p+'.paid_on" value="'+esc(o.paid_on)+'" placeholder="dd-mm-yyyy"></label><label>Amount<input data-sv="'+p+'.amount" value="'+esc(o.amount)+'" inputmode=decimal></label>'
+ +'<label>Cheque / ref no<input data-sv="'+p+'.ref" value="'+esc(o.ref)+'"></label></div><div class=modes>'+(C.modes||[]).map(function(m){return '<button type=button class="b'+(o.mode==m[0]?' on':'')+'" data-mode="'+p+':'+m[0]+'">'+esc(m[1])+'</button>';}).join('')+'</div>';}
+function rcCand(){var j=S.cur,id=S.rc.pays;var c=((j.rc||{}).cands||[]).filter(function(x){return String(x.id)==id;})[0];if(c){return c;}if(id.indexOf('st:')==0){return ((j.rc||{}).stmts||[]).filter(function(x){return 'st:'+x.id==id;})[0]||null;}return null;}
+function forced(){if(S.kind=='receipt'){var c=rcCand();return c?{dest:c.dest,stamp:c.stamp}:null;}
+ if(S.kind=='statement'){var t=stShown().filter(function(c){return S.st.ticks[c.id];});return t.length?{dest:t[0].dest,stamp:t[0].stamp}:null;}return null;}
+function s560linked(){var f=forced();return !!(f&&f.dest);}
+function s560why(){var j=S.cur;if(j.fix&&j.fix.key=='blank'&&j.status=='set aside'){return 'Restore it first (above)';}
+ if(S.kind=='receipt'){if(!S.rc.pays||S.rc.pays=='st'){return 'Choose the bill it pays';}if(S.rc.pays.indexOf('st:')!=0&&!(S.rc.paid_on&&S.rc.amount&&S.rc.mode)){return 'Type the payment: date, amount, how';}}
+ if(S.kind=='statement'&&!(S.st.paid_on&&S.st.amount&&S.st.mode)){return 'Type the payment: date, amount, how';}
+ if(S.kind=='bill'&&(S.pay.paid_on||S.pay.amount)&&!(S.pay.paid_on&&S.pay.amount&&S.pay.mode)){return 'Paid?: date, amount and how';}return '';}
+function stDiff(){var y=num(S.st.total),x=0;stShown().forEach(function(c){if(S.st.ticks[c.id]){x+=num(c.out||c.amount);}});var z=y-x;
+ if($('stdiff')){$('stdiff').textContent='Ticked '+inr(x)+' of statement '+inr(y)+' — difference '+inr(z);$('stgrey').style.display=Math.abs(z)>=0.5?'block':'none';}}
+function fixb(j){if(!j.fix){return '';}var k=j.fix.key,h='<div class=flag id=s560fix><b>'+esc(j.fix.text)+'</b><br>';
+ if(k=='blank'){h+='<button type=button class=b data-fix=restore>Restore</button> <button type=button class=b data-fix=keep>Leave it set aside</button>';}
+ else if(k=='receipt'||k=='statement'){h+='<button type=button class=b data-s560k="'+k+'">Make it a '+(k=='receipt'?'Receipt':'Statement')+'</button> <button type=button class=b data-fix=keep>No — leave it</button>';}
+ else{h+='<span class=muted>A hint only: you choose.</span> <button type=button class=b data-fix=keep>Leave it</button>';}return h+'</div>';}
+function paidline(j){var p=j.pay||{},h='';if(p.of){h='<div>'+esc(p.of)+'</div>';}
+ (p.state?(p.lines||[]):[]).forEach(function(l){h+='<div>'+esc(l.text)+(l.proof_stamp?' · '+(l.file?'<a href="'+esc(l.file)+'" target=_blank>'+esc(l.proof_stamp)+' scan</a>':esc(l.proof_stamp)):'')+(l.pid?' <button type=button class=use data-void="'+l.pid+'">void</button>':'')+'</div>';});
+ if(p.state=='part'){h='<div><b>'+esc(p.word)+'</b></div>'+h;}$('paidline').innerHTML=h;$('paidline').style.display=h?'block':'none';}
+function s560paint(j){var r='',s='',f=forced();
+ if(S.kind=='receipt'){var rc=j.rc||{};r=recline(j,rc.recorded)+'<b>Pays which bill?</b>';(rc.cands||[]).forEach(function(c){r+='<label class=opt><input type=radio name=rcp data-rc="'+c.id+'"'+(S.rc.pays==String(c.id)?' checked':'')+'> '+esc(c.stamp)+(c.no?' · no. '+esc(c.no):'')+' · '+esc(c.date)+' · '+esc(c.inr)+' · '+esc(c.lane)+'</label>';});
+  if(!(rc.cands||[]).length){r+='<div class=muted>No unpaid bill of this supplier in the last 180 days.</div>';}
+  r+='<label class=opt><input type=radio name=rcp data-rc=none'+(S.rc.pays=='none'?' checked':'')+'> No bill — paid directly</label><label class=opt><input type=radio name=rcp data-rc=st'+(S.rc.pays.indexOf('st')==0?' checked':'')+'> A statement</label>';
+  if(S.rc.pays.indexOf('st')==0){(rc.stmts||[]).forEach(function(x){r+='<label class="opt in"><input type=radio name=rcs data-rc="st:'+x.id+'"'+(S.rc.pays=='st:'+x.id?' checked':'')+'> '+esc(x.stamp)+' · '+esc(x.date)+' · '+esc(x.inr)+'</label>';});if(!(rc.stmts||[]).length){r+='<div class="muted in">No statement of this supplier yet.</div>';}}
+  r+=payBoxes('rc',S.rc);}
+ $('rcpt').innerHTML=r;$('rcpt').style.display=r?'flex':'none';
+ if(S.kind=='statement'){s=recline(j,(j.st||{}).recorded)+'<div class=pay><label>Period from<input data-sv="st.frm" value="'+esc(S.st.frm)+'" placeholder="dd-mm-yyyy"></label><label>to<input data-sv="st.to" value="'+esc(S.st.to)+'" placeholder="dd-mm-yyyy"></label><label>Total<input data-sv="st.total" value="'+esc(S.st.total)+'" inputmode=decimal></label></div>'+payBoxes('st',S.st)+'<b>Which invoices does it cover?</b>';
+  var sh=stShown();sh.forEach(function(c){s+='<label class=opt><input type=checkbox data-stt="'+c.id+'"'+(S.st.ticks[c.id]?' checked':'')+'> '+esc(c.stamp)+(c.no?' · no. '+esc(c.no):'')+' · '+esc(c.date)+' · '+esc(c.inr)+' · '+esc(c.lane)+'</label>';});
+  if(!sh.length){s+='<div class=muted>No unpaid invoice of this supplier in that period.</div>';}s+='<div id=stdiff style="font-size:13px"></div><div id=stgrey class=muted style="display:none;font-size:12px">An invoice may not be scanned yet.</div>';}
+ $('stmt').innerHTML=s;$('stmt').style.display=s?'flex':'none';stDiff();
+ var pf=$('paidf'),pp=j.pay||{},paid=pp.state=='paid';pf.style.display=S.kind=='bill'?'block':'none';
+ pf.querySelector('summary').textContent=paid?'Paid on '+(pp.last_on||'')+' — change?':'Paid?';
+ if(S.kind=='bill'&&!$('paidbody').innerHTML){$('paidbody').innerHTML=(paid&&!pp.edit)?'<div class=muted>'+esc(pp.edit_no||'Already paid.')+'</div>':payBoxes('pay',S.pay);}
+ if(S.kind!='bill'){$('paidbody').innerHTML='';pf.open=false;}
+ $('groupsbox').style.display=(f&&f.dest)?'none':'block';$('filedwith').style.display=(f&&f.dest)?'block':'none';
+ $('filedwith').textContent=(f&&f.dest)?'Filed with '+f.stamp+', on its place: '+(C.names[f.dest]||f.dest)+'. Never counted as spend — the bill is.':'';
+ var ab=S.dest=='construction'&&S.kind=='bill'&&!(f&&f.dest);$('accbox').style.display=ab?'flex':'none';$('acc').checked=ab&&S.acc;
+ $('kindnote').textContent=(S.kind=='receipt'||S.kind=='statement')?'Never counted as spend — the bill is.':'';cue();}
+function cue(){var f=$('fields');if(!f){return;}$('morecue').style.display=(f.scrollHeight>f.clientHeight+2)?'block':'none';}
+function s560body(b,j){b.to_accountant=!!(S.acc&&S.dest=='construction'&&S.kind=='bill');
+ if(S.kind=='receipt'){b.receipt={pays:(S.rc.pays=='st'?'':S.rc.pays),paid_on:S.rc.paid_on,amount:S.rc.amount,mode:S.rc.mode,ref:S.rc.ref};b.joins=[];}
+ if(S.kind=='statement'){b.statement={from:S.st.frm,to:S.st.to,total:S.st.total,paid_on:S.st.paid_on,amount:S.st.amount,mode:S.st.mode,ref:S.st.ref,covers:stShown().filter(function(c){return S.st.ticks[c.id];}).map(function(c){return c.id;})};b.joins=[];}
+ if(S.kind=='bill'&&(S.pay.paid_on||S.pay.amount)&&(!(j.pay||{}).edit||S.paytouched)){b.pay={paid_on:S.pay.paid_on,amount:S.pay.amount,mode:S.pay.mode,ref:S.pay.ref};}}
+function jpost(u,body){return fetch(u,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(x){return x;},function(){return{ok:false,error:'The server did not answer ('+r.status+').'};});});}
+document.addEventListener('click',function(e){var t=e.target.closest?e.target.closest('[data-fix],[data-void],[data-s560k],[data-rc],[data-mode],[data-stt],#morecue'):null;if(!t||!S.cur){return;}var j=S.cur;
+ if(t.id=='morecue'){$('fields').scrollTop=$('fields').scrollHeight;return;}
+ if(t.hasAttribute('data-fix')){jpost(C.fix,{id:j.id,answer:t.getAttribute('data-fix')}).then(function(x){if(!x.ok){$('err').textContent=x.error||'Not saved.';return;}$('savednote').textContent=x.message;loadList(t.getAttribute('data-fix')=='restore'?j.id:0);});}
+ else if(t.hasAttribute('data-void')){if(!confirm('Void this payment? It stays on record, marked voided.')){return;}jpost(C.void,{id:parseInt(t.getAttribute('data-void'),10)}).then(function(x){if(!x.ok){$('err').textContent=x.error||'Not saved.';return;}$('savednote').textContent=x.message;openPaper(j.id);});}
+ else if(t.hasAttribute('data-s560k')){S.kind=t.getAttribute('data-s560k');paint();}
+ else if(t.hasAttribute('data-rc')){S.rc.pays=t.getAttribute('data-rc');paint();}
+ else if(t.hasAttribute('data-mode')){var m=t.getAttribute('data-mode').split(':');S[m[0]].mode=m[1];if(m[0]=='pay'){S.paytouched=true;}paint();if(m[0]=='pay'){$('paidbody').innerHTML=payBoxes('pay',S.pay);paint();}}
+ else if(t.hasAttribute('data-stt')){S.st.ticks[t.getAttribute('data-stt')]=t.checked;stDiff();paint();}});
+document.addEventListener('input',function(e){var t=e.target;if(!S.cur){return;}if(t.hasAttribute&&t.hasAttribute('data-sv')){var k=t.getAttribute('data-sv').split('.');S[k[0]][k[1]]=t.value;if(k[0]=='pay'){S.paytouched=true;}if(k[0]=='st'&&k[1]=='total'){stDiff();}paint2();}
+ else if(t.id=='f_vendor'||t.id=='f_no'||t.id=='f_date'||t.id=='f_amt'){sumline();}});
+document.addEventListener('change',function(e){var t=e.target;if(t.hasAttribute&&t.hasAttribute('data-sv')){var k=t.getAttribute('data-sv');if(k=='st.frm'||k=='st.to'){stTick();paint();}}if(t.id=='acc'){S.acc=t.checked;}});
+function paint2(){var j=S.cur;var fl=S.flag,pg=$('pg_on').checked&&$('pg_no').value.trim();var why=s560why();var ok=!!(S.dest||pg||fl=='same'||fl=='restore'||s560linked())&&!((j.flags.hold||j.flags.s441)&&!fl)&&!(why&&!pg&&fl!='same'&&fl!='restore');
+ $('save').disabled=!ok;$('save').textContent=ok?'Save — next paper':(why&&(S.dest||s560linked())?why:((j.flags.hold||j.flags.s441)&&!fl?'Answer the question above':'Choose where it goes'));}
+$('readbox').addEventListener('toggle',function(){S.readopen=$('readbox').open;cue();});
+window.addEventListener('resize',cue);

@@ -1,0 +1,849 @@
+# ---------------------------------------------------------------------------------------------- S560_RECEIPTS_STATEMENTS (D728)
+# The owner's rulings, 14-Oct-2026: a Receipt and a Statement are paper kinds, NEVER counted as spend (the bill is); a receipt
+# pays one bill (or a statement, or "No bill -- paid directly"); a statement pays several invoices by one cheque; a bill can be
+# marked paid directly. ONE payment record (paper_payment + paper_payment_bill), append-only (a mistake is voided), every bill
+# reference carrying its fingerprint (bill_created_at, S557's rule) so a re-issued id never inherits a payment. Construction
+# bills may be marked "Send to accountant". Existing papers are fixed only by a person's tap: the desk lists them at the top of
+# Waiting, with the reason; nothing is changed by a data step and no paper is special-cased by its stamp.
+# FIX1 (15-Oct-2026) B1: a payment is recorded ONCE -- re-saving a receipt / statement, or "Paid on ... — change?" on a paid bill,
+# changes the payment already recorded (its old allocation rows voided, kept; new ones written); an allocation never exceeds what
+# the bill still owes.
+# FIX2 (15-Oct-2026) C4: a receipt / statement saved as any other kind -- in the same Save its own live payment is voided (and
+# that payment's allocations), audited; on the clinic lane the paper goes back to draft so the Save's normal accept runs.
+NOT_SPEND = ("receipt", "statement")
+PAY_MODES = (("cash", "Cash"), ("cheque", "Cheque"), ("bank", "Bank / UPI"))
+PAY_WORD = dict(PAY_MODES)
+RECEIPT_WORDS = ("receipt", "money receipt", "received with thanks", "payment received", "received from")
+STATEMENT_WORDS = ("statement", "statement of account", "ledger", "account statement")
+RECEIPT_DAYS = 180                 # the bills a receipt may pay: the supplier's, of the last 180 days, not yet fully paid
+RECEIPT_MATCH_DAYS = 60            # the likely one: exactly one bill of the same amount within 60 days
+STATEMENT_SLACK = 7                # a statement's invoices: inside its period, give or take 7 days
+FIX_TEXT = {"blank": "Set aside as blank, but it reads as a bill — restore?",
+            "receipt": "This looks like a receipt",
+            "statement": "This looks like a statement"}
+
+
+def _s560_fp(b):
+    return (_col(b, "created_at") or "")
+
+
+def _s560_file(bid):
+    try:
+        return url_for("bill_file", bid=bid)
+    except RuntimeError:                                             # outside a request (a walk's direct call)
+        return "/bills/%d/file" % bid
+
+
+def _s560_live_allocs(db, b):
+    """The live allocations of this bill (not voided; its fingerprint holds): rows of paper_payment + alloc."""
+    try:
+        return db.execute("SELECT p.*, a.amount AS alloc FROM paper_payment_bill a JOIN paper_payment p ON p.id=a.payment_id "
+                          "WHERE a.bill_id=? AND a.bill_created_at=? AND p.voided_at='' AND a.voided_at='' ORDER BY p.paid_on, p.id",
+                          (b["id"], _s560_fp(b))).fetchall()
+    except sqlite3.Error:
+        return []
+
+
+def _s560_proof(db, p):
+    """The receipt / statement paper of a payment, when its fingerprint still holds; else None."""
+    if not p["proof_bill_id"]:
+        return None
+    try:
+        r = db.execute("SELECT id, stamp_no, source_stored, created_at, doc_kind FROM bills WHERE id=?", (p["proof_bill_id"],)).fetchone()
+    except sqlite3.Error:
+        return None
+    return r if (r is not None and (r["created_at"] or "") == (p["proof_created_at"] or "")) else None
+
+
+def _s560_state(total, paid):
+    if not paid or paid <= 0:
+        return "unpaid"
+    try:
+        if total is None or float(paid) + 0.5 >= float(total):
+            return "paid"
+    except (TypeError, ValueError):
+        return "paid"
+    return "part"
+
+
+def _s560_pay_text(paid_on, amount, mode, ref):
+    return "Paid %s · %s · %s%s" % (_dmy(paid_on), _inr(amount), PAY_WORD.get(mode, mode or ""),
+                                     (" · no. " + ref) if ref else "")
+
+
+def paid_state(db, b):
+    """A bill's paid state (S560 item 5): the sum of its live allocations (and the paid-on-challan payment kept on the paper
+    itself, bills.paid_on / paid_amount, read alongside) against its total_amount -> dict(state 'paid' | 'part' | 'unpaid' | ''
+    for a receipt / statement, word, paid, total, lines [dict(text, pid, proof_id, proof_stamp, file)], of)."""
+    dk = (_col(b, "doc_kind") or "")
+    out = {"state": "", "word": "", "paid": 0.0, "total": b["total_amount"], "lines": [], "of": ""}
+    if dk in NOT_SPEND:
+        try:
+            pays = db.execute("SELECT * FROM paper_payment WHERE proof_bill_id=? AND proof_created_at=? AND voided_at='' ORDER BY id",
+                              (b["id"], _s560_fp(b))).fetchall()
+        except sqlite3.Error:
+            pays = []
+        bits = []
+        for p in pays:
+            n = []
+            for a in db.execute("SELECT a.bill_id, a.amount, a.bill_created_at FROM paper_payment_bill a WHERE a.payment_id=? AND a.voided_at='' ORDER BY a.bill_id", (p["id"],)):
+                r = db.execute("SELECT id, stamp_no, created_at FROM bills WHERE id=?", (a[0],)).fetchone()
+                if r is not None and (r["created_at"] or "") == (a[2] or ""):
+                    n.append(_stamp(r))
+            bits.append(_s560_pay_text(p["paid_on"], p["amount"], p["mode"], p["ref"]) +
+                        ((" — pays " + ", ".join(n)) if n else " — no bill, paid directly"))
+            out["lines"].append({"text": bits[-1], "pid": p["id"], "proof_id": None, "proof_stamp": "", "file": ""})
+        try:
+            for a in db.execute("SELECT detail FROM bill_audit WHERE bill_id=? AND action='desk_receipt_to_statement' ORDER BY id DESC LIMIT 1", (b["id"],)):
+                d = json.loads(a[0] or "{}")
+                r = db.execute("SELECT id, stamp_no, created_at FROM bills WHERE id=?", (d.get("statement"),)).fetchone()
+                if r is not None and (r["created_at"] or "") == (d.get("statement_created_at") or ""):
+                    out["of"] = "Receipt for the statement %s" % _stamp(r)
+        except (sqlite3.Error, TypeError, ValueError):
+            pass
+        if not out["of"] and bits:
+            out["of"] = ("Receipt" if dk == "receipt" else "Statement") + " — " + "; ".join(bits)
+        return out
+    paid = 0.0
+    for p in _s560_live_allocs(db, b):
+        paid += p["alloc"] or 0
+        pr = _s560_proof(db, p)
+        out["lines"].append({"text": _s560_pay_text(p["paid_on"], p["alloc"], p["mode"], p["ref"]), "pid": p["id"],
+                             "proof_id": pr["id"] if pr else None, "proof_stamp": _stamp(pr) if pr else "",
+                             "file": _s560_file(pr["id"]) if (pr and pr["source_stored"]) else ""})
+    if _col(b, "paid_on") and _col(b, "paid_amount"):
+        paid += b["paid_amount"] or 0
+        out["lines"].append({"text": "Paid %s · %s (noted on the paper)" % (_dmy(b["paid_on"]), _inr(b["paid_amount"])), "pid": None,
+                             "proof_id": None, "proof_stamp": "", "file": ""})
+    out["paid"] = paid
+    out["state"] = _s560_state(b["total_amount"], paid)
+    out["word"] = {"paid": "Paid", "part": "Part-paid %s of %s" % (_inr(paid), _inr(b["total_amount"])), "unpaid": ""}[out["state"]]
+    return out
+
+
+def paid_map(db):
+    """{(bill id, bill created_at): the sum of its live allocations} -- one read for a list page (All papers, The month)."""
+    try:
+        return {(r[0], r[1] or ""): (r[2] or 0) for r in db.execute(
+            "SELECT a.bill_id, a.bill_created_at, SUM(a.amount) FROM paper_payment_bill a JOIN paper_payment p ON p.id=a.payment_id "
+            "WHERE p.voided_at='' AND a.voided_at='' GROUP BY a.bill_id, a.bill_created_at")}
+    except sqlite3.Error:
+        return {}
+
+
+def state_from_map(pm, b):
+    if (_col(b, "doc_kind") or "") in NOT_SPEND:
+        return ""
+    paid = pm.get((b["id"], _s560_fp(b)), 0) + ((_col(b, "paid_amount") or 0) if _col(b, "paid_on") else 0)
+    return _s560_state(b["total_amount"], paid)
+
+
+def _s560_pay_bills(db, pid):
+    """FIX1 B1: {bill id: (bill_created_at, amount)} -- the live allocations of one payment (none when pid is None)."""
+    if not pid:
+        return {}
+    try:
+        return {r[0]: (r[1] or "", float(r[2] or 0)) for r in db.execute(
+            "SELECT bill_id, bill_created_at, amount FROM paper_payment_bill WHERE payment_id=? AND voided_at=''", (pid,))}
+    except sqlite3.Error:
+        return {}
+
+
+def _s560_mine(db, pid, row):
+    """FIX1 B1: what this payment itself already allocates to this bill (its fingerprint must hold)."""
+    x = _s560_pay_bills(db, pid).get(row["id"])
+    return x[1] if (x and x[0] == _s560_fp(row)) else 0.0
+
+
+def _s560_outstanding(db, b, pid=None):
+    """What the bill still owes -- leaving out what payment `pid` itself pays on it (a re-save changes that payment)."""
+    st = paid_state(db, b)
+    if b["total_amount"] is None:
+        return None
+    return max(0.0, float(b["total_amount"]) - (st["paid"] - _s560_mine(db, pid, b)))
+
+
+def _s560_cap(amt, owes):
+    """FIX1 B1: an allocation is capped at what the bill still owes."""
+    return round(float(amt), 2) if owes is None else round(max(0.0, min(float(amt), float(owes))), 2)
+
+
+def _s560_proof_pay(db, proof):
+    """FIX1 B1: the live payment this receipt / statement already recorded (the latest), or None."""
+    if proof is None:
+        return None
+    try:
+        return db.execute("SELECT * FROM paper_payment WHERE proof_bill_id=? AND proof_created_at=? AND voided_at='' ORDER BY id DESC LIMIT 1",
+                          (proof["id"], _s560_fp(proof))).fetchone()
+    except sqlite3.Error:
+        return None
+
+
+def _s560_stmt_link(db, b):
+    """The statement this receipt was linked to (its fingerprint holding), or None."""
+    try:
+        a = db.execute("SELECT detail FROM bill_audit WHERE bill_id=? AND action='desk_receipt_to_statement' ORDER BY id DESC LIMIT 1", (b["id"],)).fetchone()
+        if not a:
+            return None
+        d = json.loads(a[0] or "{}")
+        r = db.execute("SELECT id, created_at FROM bills WHERE id=?", (d.get("statement"),)).fetchone()
+        return r["id"] if (r is not None and (r["created_at"] or "") == (d.get("statement_created_at") or "")) else None
+    except (sqlite3.Error, TypeError, ValueError):
+        return None
+
+
+def _s560_direct_edit(db, b, st=None):
+    """FIX1 B1: 'Paid?' on a bill already fully paid -> (the one direct payment it changes, '') or (None, why it cannot)."""
+    if (_col(b, "doc_kind") or "") in NOT_SPEND:
+        return None, ""
+    st = st or paid_state(db, b)
+    if st["state"] != "paid":
+        return None, ""
+    pids = [ln["pid"] for ln in st["lines"] if ln["pid"]]
+    noted = [ln for ln in st["lines"] if not ln["pid"]]
+    if len(pids) == 1 and not noted:
+        p = db.execute("SELECT * FROM paper_payment WHERE id=? AND voided_at=''", (pids[0],)).fetchone()
+        if p is not None and not p["proof_bill_id"] and len(_s560_pay_bills(db, p["id"])) == 1:
+            return p, ""
+        pr = _s560_proof(db, p) if p is not None else None
+        if pr is not None:
+            return None, "It is paid by %s — to change the payment, open that %s." % (
+                _stamp(pr), "statement" if (pr["doc_kind"] or "") == "statement" else "receipt")
+    if noted and not pids:
+        return None, "Its payment is noted on the paper itself."
+    return None, "It is paid by more than one payment — void the wrong one first."
+
+
+def _s560_update_payment(db, pay, proof, allocs, f, note=""):
+    """FIX1 B1: a re-save CHANGES the payment already recorded -- never a second one. Its date, amount, mode and ref are
+    updated in place (the old values kept in the audit); when the bills it pays or their amounts change, its old allocation
+    rows are voided (kept, with voided_at / voided_by) and the new ones written. Returns True when anything changed."""
+    d, amt, mode, ref = f
+    pid = pay["id"]
+    old = sorted((r[0], r[1] or "", round(float(r[2] or 0), 2)) for r in db.execute(
+        "SELECT bill_id, bill_created_at, amount FROM paper_payment_bill WHERE payment_id=? AND voided_at=''", (pid,)))
+    new = sorted((row["id"], _s560_fp(row), round(float(a), 2)) for row, a in allocs)
+    same_f = (pay["paid_on"], round(float(pay["amount"]), 2), pay["mode"], pay["ref"] or "") == (d, round(float(amt), 2), mode, ref)
+    if same_f and old == new:
+        return False
+    now, who = AR._now_ist(), _who()
+    if not same_f:
+        db.execute("UPDATE paper_payment SET paid_on=?, amount=?, mode=?, ref=? WHERE id=? AND voided_at=''", (d, amt, mode, ref, pid))
+    if old != new:
+        vt, n = now, 1
+        while db.execute("SELECT 1 FROM paper_payment_bill WHERE payment_id=? AND voided_at=? LIMIT 1", (pid, vt)).fetchone():
+            n += 1
+            vt = "%s #%d" % (now, n)
+        db.execute("UPDATE paper_payment_bill SET voided_at=?, voided_by=? WHERE payment_id=? AND voided_at=''", (vt, who, pid))
+        for row, a in allocs:
+            db.execute("INSERT INTO paper_payment_bill(payment_id, bill_id, bill_created_at, amount) VALUES(?,?,?,?)",
+                       (pid, row["id"], _s560_fp(row), round(float(a), 2)))
+    det = {"payment": pid, "from": {"paid_on": pay["paid_on"], "amount": pay["amount"], "mode": pay["mode"], "ref": pay["ref"],
+                                    "bills": [[x[0], x[2]] for x in old]},
+           "to": {"paid_on": d, "amount": amt, "mode": mode, "ref": ref, "bills": [[x[0], x[2]] for x in new]}, "note": note, "via": "desk"}
+    for bid_ in sorted({x[0] for x in old} | {x[0] for x in new}):
+        AR._audit_bill(db, bid_, "payment_changed", det)
+    if proof is not None:
+        AR._audit_bill(db, proof["id"], "payment_changed", det)
+    _audit_desk(db, "paper_payment_change", det)
+    return True
+
+
+def _s560_void_own(db, pay, proof, why):
+    """FIX1 B1: a receipt re-saved as the receipt of a statement -- its own payment is voided (kept on record): the money is
+    the statement's, counted once."""
+    db.execute("UPDATE paper_payment SET voided_at=?, voided_by=? WHERE id=? AND voided_at=''", (AR._now_ist(), _who(), pay["id"]))
+    for x in sorted(_s560_pay_bills(db, pay["id"])):
+        AR._audit_bill(db, x, "payment_voided", {"payment": pay["id"], "why": why, "via": "desk"})
+    AR._audit_bill(db, proof["id"], "payment_voided", {"payment": pay["id"], "why": why, "via": "desk"})
+    _audit_desk(db, "paper_payment_void", {"id": pay["id"], "amount": pay["amount"], "why": why})
+
+
+def _s560_void_allocs(db, pid):
+    """FIX2 C4: a voided payment's live allocation rows voided too (kept, with voided_at / voided_by). Returns how many."""
+    now, who = AR._now_ist(), _who()
+    vt, n = now, 1
+    while db.execute("SELECT 1 FROM paper_payment_bill WHERE payment_id=? AND voided_at=? LIMIT 1", (pid, vt)).fetchone():
+        n += 1
+        vt = "%s #%d" % (now, n)
+    return db.execute("UPDATE paper_payment_bill SET voided_at=?, voided_by=? WHERE payment_id=? AND voided_at=''", (vt, who, pid)).rowcount
+
+
+def _s560_left(amt, a, row):
+    return (" %s more than %s still owed — not counted on it." % (_inr(float(amt) - a), _stamp(row))) if float(amt) - a >= 0.005 else ""
+
+
+def _s560_day(b):
+    return _iso(b["bill_date"]) or _iso(b["created_at"])
+
+
+def _s560_text(db, b, rd):
+    bits = [b["vendor"] or "", b["bill_no"] or "", CP._items_text(db, b["id"])]
+    if rd:
+        bits += [rd.get("supplier") or "", rd.get("number") or ""] + [str(i.get("name") or "") for i in rd.get("items") or []]
+    return re.sub(r"\s+", " ", " ; ".join(bits).lower()).strip()
+
+
+def _s560_claude_kind(db, b, rd):
+    """S560 item 2: the kind pre-chosen from Claude's reading (never saved alone) -> (kind or '', blocked). A reading whose
+    text says receipt / statement pre-chooses it only when the reader's own kind allows it ('other': the reader has no receipt
+    or statement kind) -- otherwise nothing is pre-chosen (blocked=True). Else the reader's kind as before."""
+    t = _s560_text(db, b, rd)
+    for k, words in (("receipt", RECEIPT_WORDS), ("statement", STATEMENT_WORDS)):
+        if CP._hits(t, list(words)):
+            return (k, False) if (rd and (rd.get("doc_kind") or "") == "other") else ("", True)
+    if rd and CLAUDE_KIND.get(rd.get("doc_kind") or ""):
+        return CLAUDE_KIND[rd["doc_kind"]], False
+    return "", False
+
+
+def _s560_prefill(db, b, rd):
+    """The payment boxes pre-filled from what was read (Claude's reading first): date, amount, how, cheque / reference no."""
+    amt = rd.get("amount") if (rd and rd.get("amount") is not None) else b["total_amount"]
+    day = (rd.get("date") if rd else "") or (b["bill_date"] if _iso(b["bill_date"]) else "")
+    t = _s560_text(db, b, rd)
+    mode = "cheque" if re.search(r"\b(cheque|chq)\b", t) else ("bank" if re.search(r"\b(neft|rtgs|imps|upi|utr)\b", t) else
+                                                             ("cash" if re.search(r"\bcash\b", t) else ""))
+    m = re.search(r"\b(?:cheque|chq|utr|ref)\.?\s*(?:no\.?|number)?\s*[-:#]?\s*([0-9]{5,22})", t)
+    return {"paid_on": _dmy(day) if day else "", "amount": _plain(amt), "mode": mode, "ref": m.group(1) if m else ""}
+
+
+def _s560_payable(db, b, owner, today=None, days=RECEIPT_DAYS, pid=None):
+    """The supplier's (by _supplier_key) bills and challans-turned-final of the last `days` days, NOT yet fully paid, newest
+    first -- never this paper, a pharmacy paper, a patient's paper, a rejected one, a duplicate or a page; Personal only for
+    the owner. FIX1 B1: the bills payment `pid` (this paper's own) already pays stay offered, owing what they owed before it.
+    [(row, outstanding or None, its day)]."""
+    today = today or _today()
+    key = _key(b["vendor"])
+    if not key:
+        return []
+    since = today - datetime.timedelta(days=days)
+    own = _s560_pay_bills(db, pid)
+    pers = "" if owner else " AND COALESCE(b.subgroup,'')<>'personal'"
+    out = []
+    for r in db.execute("SELECT b.*, " + CP.MONTH_OF + " AS mo FROM bills b WHERE b.id<>? AND b.status<>'rejected' AND b.dup_of IS NULL "
+                        "AND b.page_of IS NULL AND COALESCE(b.lane,'clinic')<>'pharmacy' AND COALESCE(b.subgroup,'')<>'" + PATIENT + "'" + pers +
+                        " AND (COALESCE(b.doc_kind,'bill')='bill' OR (b.doc_kind='challan' AND b.challan_state='final')) "
+                        "ORDER BY b.id DESC LIMIT 3000", (b["id"],)):
+        if _key(r["vendor"]) != key:
+            continue
+        x = own.get(r["id"])
+        mine = x[1] if (x and x[0] == _s560_fp(r)) else 0.0
+        d = _s560_day(r)
+        if d is None or (d < since and not x):
+            continue
+        paid = paid_state(db, r)["paid"] - mine
+        if not x and _s560_state(r["total_amount"], paid) == "paid":
+            continue
+        out.append((r, (max(0.0, float(r["total_amount"]) - paid) if r["total_amount"] is not None else None), d))
+    out.sort(key=lambda x: (x[2], x[0]["id"]), reverse=True)
+    return out
+
+
+def _s560_cand(db, r, outst, d):
+    return {"id": r["id"], "stamp": _stamp(r), "no": r["bill_no"] or "", "date": _dmy(d.isoformat()), "iso": d.isoformat(),
+            "amount": _plain(r["total_amount"]), "inr": _inr(r["total_amount"]) if r["total_amount"] is not None else "no amount",
+            "out": _plain(outst), "lane": AR._lane_word_s555(r), "dest": current_dest(r)}
+
+
+def receipt_cands(db, b, owner, today=None, amt=None, day=None, pid=None):
+    """S560 item 3: 'Pays which bill?' -- the likely one pre-ticked when EXACTLY one bill has the same amount within 60 days.
+    FIX1 B1: a receipt that already recorded its payment (pid) has the bill that payment pays ticked (cur) instead."""
+    rows = _s560_payable(db, b, owner, today, pid=pid)
+    out = [_s560_cand(db, r, o, d) for r, o, d in rows]
+    if pid:
+        mine = _s560_pay_bills(db, pid)
+        for c in out:
+            if c["id"] in mine:
+                c["cur"] = c["pre"] = True
+        return out
+    try:
+        a = float(amt) if amt not in (None, "") else None
+    except (TypeError, ValueError):
+        a = None
+    ref = _iso(day) or (today or _today())
+    same = [c for (r, o, d), c in zip(rows, out) if a is not None and r["total_amount"] is not None
+            and abs(float(r["total_amount"]) - a) < 0.5 and abs((ref - d).days) <= RECEIPT_MATCH_DAYS]
+    if len(same) == 1:
+        same[0]["pre"] = True
+    return out
+
+
+def statements_of(db, b, owner, today=None):
+    """The supplier's statements (a receipt may pay a statement instead of one bill)."""
+    key = _key(b["vendor"])
+    if not key:
+        return []
+    pers = "" if owner else " AND COALESCE(b.subgroup,'')<>'personal'"
+    out = []
+    for r in db.execute("SELECT b.* FROM bills b WHERE b.id<>? AND b.doc_kind='statement' AND b.status<>'rejected' AND b.dup_of IS NULL "
+                        "AND COALESCE(b.lane,'clinic')<>'pharmacy'" + pers + " ORDER BY b.id DESC LIMIT 500", (b["id"],)):
+        if _key(r["vendor"]) == key:
+            out.append({"id": r["id"], "stamp": _stamp(r), "date": _dmy(r["bill_date"] or r["created_at"]),
+                        "inr": _inr(r["total_amount"]) if r["total_amount"] is not None else "no amount", "dest": current_dest(r)})
+    return out
+
+
+def _s560_reading_lines(rd):
+    n = 0
+    for i in (rd.get("items") or []) if rd else []:
+        try:
+            if i.get("amount") not in (None, "") and math.isfinite(float(i.get("amount"))):
+                n += 1
+        except (TypeError, ValueError):
+            pass
+    return n
+
+
+def _s560_looks_receipt(db, b, rd):
+    """A filed paper whose Claude kind or read text says receipt: the text's words; or the reader's 'other' paper with an
+    amount and no goods line, while the same supplier has a bill of that amount within 60 days."""
+    if CP._hits(_s560_text(db, b, rd), list(RECEIPT_WORDS)):
+        return True
+    if not rd or (rd.get("doc_kind") or "") != "other" or rd.get("amount") is None or rd.get("items"):
+        return False
+    key = _key(b["vendor"] or rd.get("supplier"))
+    if not key:
+        return False
+    d0 = _iso(rd.get("date")) or _s560_day(b) or _today()
+    for r in db.execute("SELECT b.id, b.vendor, b.total_amount, b.bill_date, b.created_at FROM bills b WHERE b.id<>? AND b.dup_of IS NULL "
+                        "AND COALESCE(b.doc_kind,'bill') IN ('bill','estimate') AND COALESCE(b.lane,'clinic')<>'pharmacy'", (b["id"],)):
+        if _key(r["vendor"]) != key:
+            continue
+        amts = [r["total_amount"]]
+        rr = reading(db, r["id"])
+        if rr:
+            amts.append(rr.get("amount"))
+        d = _iso(r["bill_date"]) or _iso(r["created_at"])
+        if d and abs((d0 - d).days) <= RECEIPT_MATCH_DAYS and any(x is not None and abs(float(x) - float(rd["amount"])) < 0.5 for x in amts):
+            return True
+    return False
+
+
+def _s560_looks_statement(db, b, rd):
+    """A single bill whose reading shows several invoice lines and a period: the text's words; or the reader's 'other' paper
+    with three or more priced lines and no single bill number and no single date (the lines carry their own -- a period)."""
+    if CP._hits(_s560_text(db, b, rd), list(STATEMENT_WORDS)):
+        return True
+    return bool(rd and (rd.get("doc_kind") or "") == "other" and _s560_reading_lines(rd) >= 3 and not rd.get("number") and not rd.get("date"))
+
+
+def _s560_fix_of(db, b, owner, answered=None):
+    """(key, text) when this paper is one to put right by one person's tap, else None. By rule only, never by stamp."""
+    if b is None or _lane(b) == "pharmacy" or b["page_of"] or ((b["subgroup"] or "") == "personal" and not owner):
+        return None
+    if answered is None:
+        answered = db.execute("SELECT 1 FROM bill_audit WHERE bill_id=? AND action='desk_fix_answered' LIMIT 1", (b["id"],)).fetchone() is not None
+    if answered:
+        return None
+    dk = b["doc_kind"] or ""
+    if b["status"] == "rejected":
+        if b["dup_of"] or not (b["reject_reason"] or "").lower().startswith("blank"):
+            return None
+        rd = reading(db, b["id"])
+        if rd and (rd.get("supplier") or "").strip() and rd.get("amount") is not None:
+            return ("blank", FIX_TEXT["blank"])
+        return None
+    if b["dup_of"] or dk in NOT_SPEND + ("challan",) or (b["subgroup"] or "") == PATIENT:
+        return None
+    rd = reading(db, b["id"])
+    if rd and _s560_looks_receipt(db, b, rd):
+        return ("receipt", FIX_TEXT["receipt"])
+    if rd and _s560_looks_statement(db, b, rd):
+        return ("statement", FIX_TEXT["statement"])
+    if _lane(b) == "clinic" and (b["subgroup"] or "") in CONS and b["status"] in ("draft", "approved"):
+        s = CP.suggest(db, b["vendor"], CP._items_text(db, b["id"]), bool(b["bill_no"]), b["total_amount"] is not None)
+        if s and s["kind"] == "sub" and s["value"] == "resume":
+            return ("resume", "looks like " + s["label"])                 # the existing grey hint (_hint's words)
+    return None
+
+
+def fixes(db, owner, today=None):
+    """S560 item 7: the existing papers to put right, each by one person's tap, newest first -- [(row, key, text)]."""
+    answered = {r[0] for r in db.execute("SELECT DISTINCT bill_id FROM bill_audit WHERE action='desk_fix_answered'")}
+    pers = "" if owner else " AND COALESCE(b.subgroup,'')<>'personal'"
+    out = []
+    for b in db.execute("SELECT b.*, " + CP.MONTH_OF + " AS mo FROM bills b WHERE COALESCE(b.lane,'clinic')<>'pharmacy' AND b.page_of IS NULL "
+                        "AND b.dup_of IS NULL" + pers + " AND ((b.status='rejected' AND lower(COALESCE(b.reject_reason,'')) LIKE 'blank%') "
+                        "OR (b.status<>'rejected' AND (EXISTS(SELECT 1 FROM claude_reading c WHERE c.bill_id=b.id AND c.ok=1) "
+                        "OR (COALESCE(b.lane,'clinic')='clinic' AND b.subgroup IN ('procedure','xray_small','xray_11x14','others'))))) "
+                        "ORDER BY b.id DESC LIMIT 1500"):
+        if b["id"] in answered or _lane(b) == "pharmacy":
+            continue
+        f = _s560_fix_of(db, b, owner, answered=False)
+        if f:
+            out.append((b, f[0], f[1]))
+    return out
+
+
+def _s560_with_fixes(db, owner, out, today=None):
+    """waiting() + the papers to put right, at the top of Waiting (each keeps its other reasons)."""
+    try:
+        fx = fixes(db, owner, today)
+    except sqlite3.Error:
+        return out
+    if not fx:
+        return out
+    ids = {b["id"] for b, _k, _t in fx}
+    why_of = {b["id"]: w for b, w in out}
+    return [(b, ["fix:" + k] + why_of.get(b["id"], [])) for b, k, _t in fx] + [(b, w) for b, w in out if b["id"] not in ids]
+
+
+def _s560_fix_hint(db, b, why):
+    for w in why:
+        if w.startswith("fix:"):
+            k = w[4:]
+            if k == "resume":
+                f = _s560_fix_of(db, b, True, answered=False)
+                return f[1] if f else "looks like Resumes"
+            return FIX_TEXT.get(k, "")
+    return None
+
+
+def _s560_paper(db, b, owner, rd, today=None):
+    """paper_json's S560 part: the paid state, the receipt's and the statement's lists, the pre-filled payment, the fix."""
+    today = today or _today()
+    own = _s560_proof_pay(db, b)                                    # FIX1 B1: the payment this paper already recorded
+    pid = own["id"] if own is not None else None
+    mine = _s560_pay_bills(db, pid)
+    pre = _s560_prefill(db, b, rd)
+    if own is not None:
+        pre = dict(pre, paid_on=_dmy(own["paid_on"]), amount=_plain(own["amount"]), mode=own["mode"], ref=own["ref"] or "")
+    st = paid_state(db, b)
+    e, why = _s560_direct_edit(db, b, st)                           # FIX1 B1: "Paid on ... — change?"
+    st["edit_no"] = why
+    st["edit"] = ({"pid": e["id"], "paid_on": _dmy(e["paid_on"]), "amount": _plain(e["amount"]), "mode": e["mode"], "ref": e["ref"] or ""}
+                  if e is not None else None)
+    ons = [p_["paid_on"] for p_ in _s560_live_allocs(db, b)]
+    st["last_on"] = _dmy(max(ons)) if ons else (_dmy(b["paid_on"]) if _col(b, "paid_on") else "")
+    f = _s560_fix_of(db, b, owner)
+    pay = []
+    for r, o, d in _s560_payable(db, b, owner, today, pid=pid):
+        c = _s560_cand(db, r, o, d)
+        if r["id"] in mine:
+            c["cur"] = True
+        pay.append(c)
+    frm, to, total = "", (pre["paid_on"] if (rd and rd.get("date")) else ""), pre["amount"]
+    if own is not None and (b["doc_kind"] or "") == "statement":
+        a = db.execute("SELECT detail FROM bill_audit WHERE bill_id=? AND action='desk_statement' ORDER BY id DESC LIMIT 1", (b["id"],)).fetchone()
+        try:
+            dd = json.loads(a[0] or "{}") if a else {}
+        except (TypeError, ValueError):
+            dd = {}
+        frm, to = _dmy(dd.get("from")) if dd.get("from") else "", _dmy(dd.get("to")) if dd.get("to") else ""
+        total = _plain(dd.get("total")) if dd.get("total") is not None else _plain(b["total_amount"])
+    link = _s560_stmt_link(db, b) if (b["doc_kind"] or "") == "receipt" else None
+    cur = ("none" if (own is not None and not mine) else ("st:%d" % link if (link and own is None) else ""))
+    return {"pay": st, "fix": ({"key": f[0], "text": f[1]} if f else None), "to_acc": bool(_col(b, "to_accountant")),
+            "dk": b["doc_kind"] or "", "rc": dict(pre, cands=receipt_cands(db, b, owner, today, pre["amount"], parse_date(pre["paid_on"]), pid=pid),
+                                                   stmts=statements_of(db, b, owner, today), cur=cur, recorded=own is not None or bool(link)),
+            "st": dict(pre, frm=frm, to=to, total=total, cands=pay, recorded=own is not None)}
+
+
+def _s560_pay_fields(r, need=True):
+    """The payment typed on the desk -> (paid_on ISO, amount, mode, ref); refused with one plain line, nothing saved."""
+    r = r or {}
+    if not str(r.get("paid_on") or "").strip():
+        if not need:
+            return None
+        raise DeskError("Type the day it was paid (dd-mm-yyyy). Nothing was saved.")
+    d = typed_date(r.get("paid_on"))
+    amt = _amount(r.get("amount"))
+    if amt is None or amt <= 0:
+        raise DeskError("Type the amount paid. Nothing was saved.")
+    mode = str(r.get("mode") or "").strip().lower()
+    if mode not in PAY_WORD:
+        raise DeskError("Choose how it was paid: Cash, Cheque or Bank / UPI. Nothing was saved.")
+    ref = re.sub(r"\s+", " ", str(r.get("ref") or "")).strip()[:60]
+    return d, amt, mode, ref
+
+
+def _s560_pre(db, b, p, dest, owner, today=None):
+    """Before the Save's destination: the receipt / statement / 'Paid?' asked for, checked; the destination a receipt or a
+    statement is FILED to (the lane of the bill it pays). Returns (dest, s)."""
+    today = today or _today()
+    k = str(p.get("kind") or "").strip()
+    s = {"kind": k, "no_accept": k in NOT_SPEND}
+    forced = None
+    if k in NOT_SPEND and p.get("joins"):
+        raise DeskError("A receipt or a statement takes no challans — choose Bill to join them.")
+    was = (b["doc_kind"] or "")
+    s["was"] = was
+    if was in NOT_SPEND and k in ("bill", "estimate", "challan"):   # FIX2 C4: a receipt / statement turned into a bill (or estimate / challan)
+        s["unproof"] = _s560_proof_pay(db, b)                       # its own payment, if any -- voided in _s560_post
+        if b["status"] == "captured" and _lane(b) == "clinic":       # back to draft, so the Save's accept (with its duplicate check) runs
+            db.execute("UPDATE bills SET status='draft' WHERE id=?", (b["id"],))
+            AR._audit_bill(db, b["id"], "desk_not_spend_undone", {"kind_from": was, "kind": k, "status_from": "captured",
+                                                                  "status": "draft", "via": "desk"})
+    own = _s560_proof_pay(db, b) if k in NOT_SPEND else None       # FIX1 B1: a re-save changes this payment, never adds one
+    pid = own["id"] if own is not None else None
+    s["own"] = own
+    if k == "receipt":
+        r = p.get("receipt") or {}
+        pays = str(r.get("pays") or "").strip()
+        if not pays:
+            raise DeskError("A receipt: choose the bill it pays, a statement, or “No bill — paid directly”.")
+        if pays == "none":
+            s["pay"] = _s560_pay_fields(r)
+        elif pays.startswith("st:"):
+            sid = int(pays[3:]) if pays[3:].isdigit() else 0
+            ok = {x["id"] for x in statements_of(db, b, owner, today)}
+            if sid not in ok:
+                raise DeskError("That statement is not one of this supplier’s.")
+            s["stmt"] = _row(db, sid)
+            s["pay"] = _s560_pay_fields(r, need=False)
+            forced = current_dest(s["stmt"])
+        else:
+            bid = int(pays) if pays.isdigit() else 0
+            ok = {r_["id"] for r_, _o, _d in _s560_payable(db, b, owner, today, pid=pid)}
+            if bid not in ok:
+                raise DeskError("That bill is not an unpaid bill of this supplier.")
+            s["bill"] = _row(db, bid)
+            s["pay"] = _s560_pay_fields(r)
+            forced = current_dest(s["bill"])
+        src = s.get("bill") or s.get("stmt")
+    elif k == "statement":
+        r = p.get("statement") or {}
+        offered = {r_["id"]: r_ for r_, _o, _d in _s560_payable(db, b, owner, today, pid=pid)}
+        cov = []
+        for x in (r.get("covers") or []):
+            if str(x).isdigit() and int(x) not in [c["id"] for c in cov]:
+                if int(x) not in offered:
+                    raise DeskError("A ticked invoice is not an unpaid invoice of this supplier.")
+                cov.append(offered[int(x)])
+        s["covers"] = cov
+        s["pay"] = _s560_pay_fields(r)
+        s["period"] = (typed_date(r.get("from")) if str(r.get("from") or "").strip() else None,
+                       typed_date(r.get("to")) if str(r.get("to") or "").strip() else None)
+        s["total"] = _amount(r.get("total")) if str(r.get("total") or "").strip() else None
+        if s["total"] is not None:
+            p["total_amount"] = _plain(s["total"])
+        forced = current_dest(cov[0]) if cov else None
+        src = cov[0] if cov else None
+    else:
+        src = None
+        if p.get("pay") and any(str((p.get("pay") or {}).get(x) or "").strip() for x in ("paid_on", "amount")):
+            if k not in ("bill", "") or (not k and (b["doc_kind"] or "bill") != "bill"):
+                raise DeskError("“Paid?” is for a bill.")
+            s["direct"] = _s560_pay_fields(p.get("pay"))
+            st0 = paid_state(db, b)
+            if st0["state"] == "paid":                              # FIX1 B1: "Paid on ... — change?" changes that payment
+                e, why = _s560_direct_edit(db, b, st0)
+                if e is None:
+                    raise DeskError("%s is already paid. %s Nothing was saved." % (_stamp(b), why))
+                s["own"] = e
+    if forced:
+        if forced == "personal" and not owner:
+            raise DeskError("Personal papers are the owner's alone.", 403)
+        dest = forced
+        if forced == "pe" and src is not None:
+            p["who"] = "bhawna" if (_col(src, "pe_who") or "") == "bhawna" else "mk"
+    return dest, s
+
+
+def record_payment(db, proof, allocs, f, note=""):
+    """ONE payment (append-only): paper_payment + one paper_payment_bill per bill it pays, each with the bill's fingerprint;
+    audited on every paper it touches and in the desk's book. Returns the payment's id."""
+    d, amt, mode, ref = f
+    cur = db.execute("INSERT INTO paper_payment(paid_on, amount, mode, ref, proof_bill_id, proof_created_at, by_whom, at) VALUES(?,?,?,?,?,?,?,?)",
+                     (d, amt, mode, ref, proof["id"] if proof is not None else None, _s560_fp(proof) if proof is not None else "", _who(), AR._now_ist()))
+    pid = cur.lastrowid
+    for row, a in allocs:
+        db.execute("INSERT INTO paper_payment_bill(payment_id, bill_id, bill_created_at, amount) VALUES(?,?,?,?)", (pid, row["id"], _s560_fp(row), a))
+        AR._audit_bill(db, row["id"], "paid_by_payment", {"payment": pid, "amount": a, "paid_on": d, "mode": mode, "ref": ref,
+                                                          "proof": proof["id"] if proof is not None else None, "via": "desk"})
+    if proof is not None:
+        AR._audit_bill(db, proof["id"], "payment_recorded", {"payment": pid, "amount": amt, "paid_on": d, "mode": mode, "ref": ref,
+                                                             "bills": [r_["id"] for r_, _a in allocs], "note": note, "via": "desk"})
+    _audit_desk(db, "paper_payment", {"id": pid, "amount": amt, "paid_on": d, "mode": mode, "proof": proof["id"] if proof is not None else None,
+                                      "bills": [r_["id"] for r_, _a in allocs]})
+    return pid
+
+
+def _s560_post(db, bid, p, s, status0):
+    """After the Save's destination: a receipt / statement FILED, never accepted, never counted; its payment recorded; a
+    bill's 'Paid?'; the construction tick; the fix answered. Returns the lines for the message."""
+    msgs = []
+    b = _row(db, bid)
+    k = s.get("kind")
+    if s.get("unproof") is not None:                                # FIX2 C4: its payment as a receipt / statement voided, kept
+        had = _s560_pay_bills(db, s["unproof"]["id"])
+        _s560_void_own(db, s["unproof"], b, "now a %s, not a %s" % (k or "bill", s.get("was")))
+        _s560_void_allocs(db, s["unproof"]["id"])
+        msgs.append("Its payment as a %s is voided (kept on record)%s." % (s.get("was"), " — the bill it paid is unpaid again" if had else ""))
+    if k in NOT_SPEND:
+        if b["status"] in ("draft", "approved"):
+            db.execute("UPDATE bills SET status='captured' WHERE id=?", (bid,))
+            AR._audit_bill(db, bid, "desk_not_spend_filed", {"kind": k, "status_from": b["status"], "status": "captured",
+                                                             "lane": _lane(b), "via": "desk"})
+        b = _row(db, bid)
+        own = s.get("own")                                          # FIX1 B1: the payment already recorded -- changed, never doubled
+        pid = own["id"] if own is not None else None
+        once = "The payment is changed (one payment, never two)."
+        if k == "receipt":
+            if s.get("stmt") is not None:
+                sm = s["stmt"]
+                if own is not None:
+                    _s560_void_own(db, own, b, "now the receipt of the statement %s" % _stamp(sm))
+                if _s560_stmt_link(db, b) != sm["id"]:
+                    AR._audit_bill(db, bid, "desk_receipt_to_statement", {"statement": sm["id"], "statement_created_at": _s560_fp(sm),
+                                                                           "pay": list(s["pay"]) if s.get("pay") else None, "via": "desk"})
+                    AR._audit_bill(db, sm["id"], "desk_receipt_linked", {"receipt": bid, "via": "desk"})
+                msgs.append("The receipt of the statement %s (its payment is the statement's — counted once)." % _stamp(sm))
+            elif s.get("bill") is not None:
+                bl = _row(db, s["bill"]["id"])
+                a = _s560_cap(s["pay"][1], _s560_outstanding(db, bl, pid))
+                allocs = [(bl, a)] if a > 0 else []
+                if own is not None:
+                    if _s560_update_payment(db, own, b, allocs, s["pay"], "receipt"):
+                        msgs.append(once)
+                else:
+                    record_payment(db, b, allocs, s["pay"], "receipt")
+                msgs.append("%s is %s.%s" % (_stamp(bl), paid_state(db, _row(db, bl["id"]))["word"].lower() or "noted", _s560_left(s["pay"][1], a, bl)))
+            else:
+                if own is not None:
+                    if _s560_update_payment(db, own, b, [], s["pay"], "no bill — paid directly"):
+                        msgs.append(once)
+                else:
+                    record_payment(db, b, [], s["pay"], "no bill — paid directly")
+                msgs.append("No bill — paid directly.")
+        else:
+            left = s["pay"][1]
+            allocs = []
+            for row in sorted(s.get("covers") or [], key=lambda r_: ((_s560_day(r_) or _today()), r_["id"])):
+                o = _s560_outstanding(db, row, pid)
+                a = min(left, o if o is not None else left)
+                if a > 0:
+                    allocs.append((row, round(a, 2)))
+                    left -= a
+            if own is not None:
+                if _s560_update_payment(db, own, b, allocs, s["pay"], "statement"):
+                    msgs.append(once)
+            else:
+                record_payment(db, b, allocs, s["pay"], "statement")
+            AR._audit_bill(db, bid, "desk_statement", {"from": s["period"][0], "to": s["period"][1], "total": s.get("total"),
+                                                       "covers": [r_["id"] for r_ in s.get("covers") or []], "via": "desk"})
+            msgs.append("%d invoice%s marked paid by this statement." % (len(allocs), "" if len(allocs) == 1 else "s"))
+    elif s.get("direct"):
+        f, own = s["direct"], s.get("own")
+        a = _s560_cap(f[1], _s560_outstanding(db, b, own["id"] if own is not None else None))
+        allocs = [(b, a)] if a > 0 else []
+        if own is not None:
+            ch = _s560_update_payment(db, own, None, allocs, f, "marked paid on the desk")
+            msgs.append(("Changed: " if ch else "Unchanged: ") + _s560_pay_text(*f) + "." + _s560_left(f[1], a, b))
+        else:
+            record_payment(db, None, allocs, f, "marked paid on the desk")
+            msgs.append("Marked: " + _s560_pay_text(*f) + "." + _s560_left(f[1], a, b))
+    b = _row(db, bid)
+    is_cb = (b["subgroup"] or "") == "construction" and (b["doc_kind"] or "bill") == "bill" and b["status"] != "rejected"
+    cur = bool(_col(b, "to_accountant"))
+    want = (bool(p.get("to_accountant")) if "to_accountant" in p else cur) if is_cb else False
+    if cur != want:
+        db.execute("UPDATE bills SET to_accountant=? WHERE id=?", (1 if want else 0, bid))
+        AR._audit_bill(db, bid, "to_accountant", {"from": int(cur), "to": int(want), "via": "desk"})
+        if want:
+            msgs.append("Marked to send to the accountant.")
+    if not db.execute("SELECT 1 FROM bill_audit WHERE bill_id=? AND action='desk_fix_answered' LIMIT 1", (bid,)).fetchone():
+        AR._audit_bill(db, bid, "desk_fix_answered", {"answer": "saved", "via": "desk"})
+    return msgs
+
+
+def _s560_ledger(db, rows, sups):
+    """The implant ledger's Paid adds the S560 payments of implant-stock bills: one row per allocation, each once (its own
+    'Note payment' rows stay as they are -- the two kinds of record side by side, each once)."""
+    for b in rows:
+        if (b["doc_kind"] or "") in NOT_SPEND or ((b["doc_kind"] or "") == "challan" and (b["challan_state"] or "") == "joined"):
+            continue
+        key = _key(b["vendor"])
+        if key not in sups:
+            continue
+        s = sups[key]
+        for p in _s560_live_allocs(db, b):
+            pr = _s560_proof(db, p)
+            s["rows"].append({"sort": p["paid_on"], "d": _dm(p["paid_on"]), "p": _stamp(pr) if pr else "—", "bid": pr["id"] if pr else None,
+                              "k": "Payment", "i": "%s%s · for %s%s" % (PAY_WORD.get(p["mode"], p["mode"]), (" no. " + p["ref"]) if p["ref"] else "",
+                                                                       _stamp(b), (" · receipt / statement " + _stamp(pr)) if pr else ""),
+                              "o": None, "pd": p["alloc"], "pay": None, "s560": p["id"]})
+            s["paid"] += p["alloc"] or 0
+
+
+def _s560_month_bits(db, key, paid_rows, pm=None):
+    """The month page: 'paid N / unpaid M' per section; the Construction card's 'K marked for the accountant'."""
+    pm = paid_map(db) if pm is None else pm
+    st = [state_from_map(pm, b) for b in paid_rows]
+    bits = " · paid %d / unpaid %d" % (len([x for x in st if x == "paid"]), len([x for x in st if x != "paid"]))
+    if key == "construction":
+        n = len([b for b in paid_rows if (b["doc_kind"] or "bill") == "bill" and _col(b, "to_accountant")])
+        bits += " · %d marked for the accountant" % n
+    return bits
+
+
+def fix_answer():
+    """POST /desk/api/fix {id, answer: restore | keep}: one person's tap on a paper listed to put right."""
+    db = AR.get_db()
+    p = request.get_json(silent=True) or {}
+    try:
+        bid = int(p.get("id"))
+    except (TypeError, ValueError):
+        return jsonify(ok=False, error="No paper was given."), 400
+    owner = _owner()
+    b = _row(db, bid)
+    err = _visible(b, owner)
+    if err:
+        return jsonify(ok=False, error=err), (404 if not b else 403)
+    f = _s560_fix_of(db, b, owner)
+    ans = str(p.get("answer") or "")
+    if not f or ans not in ("restore", "keep") or (ans == "restore" and f[0] != "blank"):
+        return jsonify(ok=False, error="Nothing to answer on %s." % _stamp(b)), 400
+    try:
+        if ans == "restore":
+            r = db.execute("SELECT detail FROM bill_audit WHERE bill_id=? AND action='desk_blank' ORDER BY id DESC LIMIT 1", (bid,)).fetchone()
+            try:
+                back = json.loads(r[0] or "{}").get("status_from") if r else None
+            except (TypeError, ValueError):
+                back = None
+            if back not in ("draft", "approved", "captured"):
+                back = AR._lane_kind_status(_lane(b))[1]
+            db.execute("UPDATE bills SET status=?, reject_reason=NULL%s WHERE id=?" % ("" if back == "approved" else ", approved_by=NULL, approved_at=NULL"),
+                       (back, bid))
+            AR._audit_bill(db, bid, "desk_blank_restored", {"status_from": "rejected", "status": back, "reject_reason": b["reject_reason"],
+                                                            "approved_by": b["approved_by"], "approved_at": b["approved_at"], "lane": _lane(b), "via": "desk"})
+            msg = "%s is back on its lane as it was (%s). Sort it now." % (_stamp(b), back)
+        else:
+            msg = "%s: left as it is." % _stamp(b)
+        AR._audit_bill(db, bid, "desk_fix_answered", {"answer": ans, "fix": f[0], "via": "desk"})
+        db.commit()
+    except Exception as e:                                           # noqa: BLE001
+        db.rollback()
+        return jsonify(ok=False, error="Not saved (%s). Nothing was changed." % type(e).__name__), 500
+    return jsonify(ok=True, message=msg, id=bid)
+
+
+def pay_void():
+    """POST /desk/api/payment/void {id}: a mistaken payment voided -- kept on record, never counted again."""
+    db = AR.get_db()
+    p = request.get_json(silent=True) or {}
+    try:
+        pid = int(p.get("id"))
+    except (TypeError, ValueError):
+        return jsonify(ok=False, error="No payment was given."), 400
+    r = db.execute("SELECT * FROM paper_payment WHERE id=? AND voided_at=''", (pid,)).fetchone()
+    if not r:
+        return jsonify(ok=False, error="That payment is not there (or already voided)."), 404
+    bills = [x[0] for x in db.execute("SELECT bill_id FROM paper_payment_bill WHERE payment_id=? AND voided_at=''", (pid,))] + ([r["proof_bill_id"]] if r["proof_bill_id"] else [])
+    owner = _owner()
+    for x in bills:
+        e = _visible(_row(db, x), owner)
+        if e and "owner's alone" in e:
+            return jsonify(ok=False, error=e), 403
+    db.execute("UPDATE paper_payment SET voided_at=?, voided_by=? WHERE id=? AND voided_at=''", (AR._now_ist(), _who(), pid))
+    for x in bills:
+        AR._audit_bill(db, x, "payment_voided", {"payment": pid, "via": "desk"})
+    _audit_desk(db, "paper_payment_void", {"id": pid, "amount": r["amount"]})
+    db.commit()
+    return jsonify(ok=True, message="Payment voided (kept on record).")
+
+
+# --- S560_RECEIPTS_STATEMENTS end ---
+
+

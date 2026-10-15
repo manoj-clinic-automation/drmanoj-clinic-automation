@@ -1,0 +1,62 @@
+
+
+# --- S560_RECEIPTS_STATEMENTS begin -- D728: a receipt and a statement are papers, never spend; one payment record (14-Oct-2026) ---
+# The old bill page's "Paid dd-mm-yyyy . Rs . mode . ref" line (the receipt's scan one tap away) and All papers' small "Paid"
+# mark. The rule lives in sorting_desk (paid_state / paid_map); without the desk mounted both show nothing (the old page).
+RECEIPTS_S560 = "S560"
+from markupsafe import escape as _s560_esc
+
+
+def _s560_sd():
+    _m = _sys.modules.get("sorting_desk")
+    return _m if (_m is not None and getattr(_m, "AR", None) is not None and hasattr(_m, "paid_state")) else None
+
+
+def _s560_paid(b):
+    """S560 item 5: the old bill page's paid line(s) under Total ('' when unpaid, or on any error)."""
+    try:
+        sd = _s560_sd()
+        if sd is None or (b["lane"] or "") == "pharmacy":
+            return Markup("")
+        st = sd.paid_state(get_db(), b)
+        out = []
+        if st.get("of"):
+            out.append(_s560_esc(st["of"]))
+        for ln in (st["lines"] if st.get("state") else []):
+            t = _s560_esc(ln["text"])
+            if ln.get("proof_stamp"):
+                t += Markup(" · ") + (Markup('<a href="%s" target=_blank>%s scan</a>') % (ln["file"], ln["proof_stamp"]) if ln.get("file")
+                                      else _s560_esc(ln["proof_stamp"]))
+            out.append(t)
+        if st.get("state") == "part":
+            out.insert(0, Markup("<b>%s</b>") % st["word"])
+        if not out:
+            return Markup("")
+        return Markup('<br><span id=s560paid style="color:#2b6e4f">') + Markup("<br>").join(out) + Markup("</span>")
+    except Exception as _ex:                                      # noqa: BLE001
+        print("S560 paid line: %s" % _ex, file=_sys.stderr)
+        return Markup("")
+
+
+def _s560_mark(b):
+    """S560 item 5: All papers' small mark -- 'Paid' / 'Part-paid' (one read of the payments per page, kept on g)."""
+    try:
+        sd = _s560_sd()
+        if sd is None:
+            return Markup("")
+        pm = getattr(g, "_s560_pm", None)
+        if pm is None:
+            pm = g._s560_pm = sd.paid_map(get_db())
+        s = sd.state_from_map(pm, b)
+        if s == "paid":
+            return Markup(' <span class="badge green" id=s560mark title="paid">Paid</span>')
+        if s == "part":
+            return Markup(' <span class="badge amber" id=s560mark title="part-paid">Part-paid</span>')
+        return Markup("")
+    except Exception as _ex:                                      # noqa: BLE001
+        print("S560 paid mark: %s" % _ex, file=_sys.stderr)
+        return Markup("")
+
+
+app.jinja_env.globals.update(s560_paid=_s560_paid, s560_mark=_s560_mark)
+# --- S560_RECEIPTS_STATEMENTS end ---
