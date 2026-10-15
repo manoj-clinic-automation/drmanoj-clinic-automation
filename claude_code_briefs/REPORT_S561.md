@@ -127,6 +127,12 @@ WALK OK negative control: every one of the 13 'C:' checks is red on the old file
 
 The live files were untouched by the rehearsal. A `DRY=1` run on the real box was green before the install.
 
+**Published** with PUBLISH_ALL (commit `33256ec`; the same publish also carried the other chat's pending brief
+`S562_BANK_SMS_STANDS_IN.md`, which is expected). Then `/root/deploy/repo` was pulled `--ff-only`. The kit in the clone passes
+`md5sum -c SUMS.md5`, and so does the `/tmp/s561kit` copy that ran: byte-identical. The clone is clean. After the pull, the live md5s were
+still 1c3d3927 / b0cc8694 and healthz 200. The build lock (`/root/deploy/.claude_code_build.lock`, owner S561_PRINT_FRESH, taken 15:05:53)
+was held from the rehearsal to this report and then removed.
+
 ### Decisions made (no question was put to the owner)
 - **§4 "on the live box, read-only: sheet.pdf with a session of the walk's own".** I did not fetch from the live service. That would need a
   real login (a live secret), and the route writes an audit row, which is not read-only. Instead:
