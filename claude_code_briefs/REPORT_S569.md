@@ -158,6 +158,9 @@ All other fields of the two rows are NULL. Afterwards: `/finance/healthz` 200; `
 ## Numbers, lock, scratch, gates
 - Board `_numbers` (v451 → v452 with its PLANNED line): **not reachable from Claude Code** (a claude.ai artifact). **The chat should append
   S569's DONE line**: data only, amir_job ids 9 and 10, audit 888–889, backup `finance.db.bak_S569_20261016_105712`, live 16-Oct 10:57 IST.
-- Build lock `/root/deploy/.claude_code_build.lock` taken 10:56:38 IST (owner S569) and removed after this report was written.
+- Build lock `/root/deploy/.claude_code_build.lock` taken 10:56:38 IST (owner S569). Released at 10:59:44 IST (read on the box) after
+  this report was written and published, using `rm …/owner; rmdir …`. The first attempt, joined with `rm -rf` in one ssh line, was
+  refused by the permission list, so the narrower command was used. After publishing, `/root/deploy/repo` pulled to `29fbcab`, and
+  `md5sum -c SUMS.md5` there gave OK for every file.
 - Box scratch removed: `/tmp/s569probe` (it held backup-API copies of the databases), `/tmp/s569kit`, `/tmp/s569walk`, `/tmp/s569live`.
 - Kit `deploy_kits/S569_PROOF_REACH_AND_TWO_LINES/`: `add_jobs_s569.py f8963062…`, `README.md`, `KIT_ID.txt`, `SUMS.md5`.
