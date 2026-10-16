@@ -1,4 +1,4 @@
-075b4ed34fdded05826d42c4bce069ed  KIT_ID.txt
+ad06af74c93fd41048a11b4fc457fd8d  KIT_ID.txt
 c0994e1c156514a39b384e43bb6229de  PIN_FROM_asset_register.txt
 68e14efcb2114245518d8656bed04e7e  PIN_FROM_clinic_papers.txt
 be765e6e1c3d6e4647572165331ea7c0  PIN_FROM_sorting_desk.txt
@@ -11,13 +11,13 @@ b41f17c7818e7de4ff349607bd482868  PIN_READ_claude_reread.txt
 46657207aa909adb18c59673a9af18ae  PIN_READ_scanner_widget.txt
 55a6d13522c3608957c9b41e32e5836b  PIN_READ_widget_before_s559.txt
 4157c27add345c06623f91d7b8446620  PIN_TIDY_clinic_papers.txt
-809e4606e2c6b4186ac0800dfa58fb1b  PIN_TO_asset_register.txt
+b0f3b43622bd98b6cfea3fab98f150e2  PIN_TO_asset_register.txt
 dfdfaa953daddc19ca52df60fbdc617d  PIN_TO_clinic_papers.txt
-edef35d9d972d60b7fe777a99d9b7097  PIN_TO_sorting_desk.txt
-0644270706a2ff48f50b36eb3a000911  README.md
-d0aff800ad30415c69249cb8294a7021  install_s566.sh
+032d44746ecf6d8834db89e98001a7c6  PIN_TO_sorting_desk.txt
+b3f3b0a2c76b6108d220957fdda763d0  README.md
+8e2a59413470262c20a77b009ed9cc76  install_s566.sh
 ae9250d4caa25c15d42780c38b64aa31  lines_s566.py
-36d3585faa6623c5ea36cb9e1345e7c0  make_s566.py
+2ed10ce3779d362e1c66f7c32b996712  make_s566.py
 b7a1e2d59e8b4ac66e5d18bba45231df  rehearse_s566.sh
-3037bb46b503acfef5466db5a2c6722e  walk_s566.py
+7017eda4d929e643dfe28a32d34f9f2d  walk_s566.py
 88c942ed2846bdbea737f6f201fee6ae  walk/walk_results_s566.txt

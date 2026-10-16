@@ -8,14 +8,16 @@ thread, no paid call, nothing sent anywhere (a made-up key and URL). Flask's tes
                              asset_machine.py, scanner_widget.js> <assets.db to copy> [--work DIR] [--shared DIR]
                             [--expect-red] [--keep]
 
-One named check per item (I1-I8), GREEN / RED; exit 1 on any RED. --expect-red (the control on the live S563 files): exit 0
-only if every check named in MUST_RED is RED. Counts are printed (never a live row's content). The work folder (default: a
+One named check per item (I1-I8, and FIX1's I6b), GREEN / RED; exit 1 on any RED. --expect-red (the control on the live S563
+files): exit 0 only if every check named in MUST_RED is RED. --expect-red-r0 (FIX1: the control on S566's round-0 TO files):
+exit 0 only if every check named in MUST_RED_R0 (I3, I5, I6b -- the K1 review's points) is RED. Counts are printed (never a live row's content). The work folder (default: a
 new folder under /tmp) is removed at the end unless --keep."""
 import datetime, html as htmlmod, importlib.util, json, os, re, shutil, sqlite3, sys, tempfile
 
 ARGS = [a for a in sys.argv[1:]]
 R, FAILED, NAMES = [], [], []
-MUST_RED = ("W2", "I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8")
+MUST_RED = ("W2", "I1", "I2", "I3", "I4", "I5", "I6", "I6b", "I7", "I8")
+MUST_RED_R0 = ("I3", "I5", "I6b")        # FIX1: --expect-red-r0, the control on S566's round-0 TO files (K1 points 1-3)
 TODAY = datetime.date(2031, 6, 15)
 MODS = ("asset_register.py", "clinic_papers.py", "claude_reader.py", "claude_reread.py", "sorting_desk.py", "asset_machine.py",
         "scanner_widget.js")
@@ -222,6 +224,31 @@ def run(D, SRC, shared_src, work):
     print("I6 counts: The month's sections add to %s; the made-up rows add %s; home shows the month total: %s"
           % (m._inr(after6), m._inr(after6 - base6), want_home in home))
 
+    # ------------------------------------------------------------------ I6b (FIX1, K1 BLOCKER 1): a held double is never money twice
+    base6b, _h = month_total_page(own, "2031-06")
+    mt6b0 = quiet(lambda: sd.month_total(db, "2031-06", True))
+    o6b = mk("O6B", "WALK6B HELD TRADERS", status="approved", subgroup="others", doc_kind="bill", bill_no="H6-1", total_amount=500,
+             bill_date="2031-06-07", approved_by="Walk", approved_at="2031-06-07 10:00")              # the accepted original
+    q6b = mk("Q6B", "WALK6B HELD TRADERS", status="draft", doc_kind="bill", bill_no="H6-1", total_amount=500,
+             bill_date="2031-06-07", created="2031-06-09 05:00:00")                                    # its second paper, unsorted
+    c6b, j6b = post(own, "/desk/api/save", {"id": q6b, "dest": "others", "kind": "bill"})              # the desk Save -> the D710 hold
+    held6b = bool(sd.held(sd._row(db, q6b), sd._marks(db, q6b)))
+    after6b, mh6b = month_total_page(own, "2031-06")
+    home6b = html(own, "/")
+    mt6b = quiet(lambda: sd.month_total(db, "2031-06", True))
+    l6b = listed(True)
+    print("I6b counts: the save answered %s; the copy held: %s; The month rose by %s; month_total rose by %s; home shows the month "
+          "total: %s; the copy waits on the desk: %s" % (c6b, held6b, m._inr(after6b - base6b),
+                                                        m._inr((mt6b or 0) - (mt6b0 or 0)) if mt6b is not None else None,
+                                                        ("₹" + m._inr(after6b)) in home6b, q6b in l6b))
+    ck("I6b (FIX1, K1 BLOCKER 1) an accepted ₹500 bill plus its D710-held copy (same supplier, number, amount; NOT accepted on its "
+       "desk Save) raise The month's total and home's Spend this month by ₹500, not ₹1,000 -- the copy waits on the desk as held",
+       lambda: c6b == 200 and held6b and row(q6b).get("status") == "draft" and abs((after6b - base6b) - 500) < 0.005
+       and mt6b is not None and mt6b0 is not None and abs((mt6b - mt6b0) - 500) < 0.005 and abs(mt6b - after6b) < 0.005
+       and ("₹" + m._inr(after6b)) in home6b and q6b in l6b and "hold" in l6b[q6b]["why"],
+       lambda: dict(save=c6b, msg=(j6b.get("message") or j6b.get("error") or "")[:120], held=held6b, page_delta=after6b - base6b,
+                    mt0=mt6b0, mt=mt6b, page=after6b, home=("₹" + m._inr(after6b)) in home6b, listed=(l6b.get(q6b) or {}).get("why")))
+
     # ------------------------------------------------------------------ I1: a restored paper never counts twice blind
     p10 = mk("P10", "WALK1A ALPHA TRADERS", status="approved", subgroup="others", doc_kind="bill", bill_no="A-1", total_amount=500,
              bill_date="2031-06-02", approved_by="Walk", approved_at="2031-06-02 10:00")
@@ -336,16 +363,30 @@ def run(D, SRC, shared_src, work):
         m.g.user = own_u
         dn_own = quiet(lambda: m._s559_desk_n(own_u))
     added = [x for x in seeds3 if x in lo and "waiting" in lo[x]["why"]]
+    rows3_mid = {x: row(x) for x in seeds3}
+    # FIX1 (K1 CORRECTION 2): the closed challan's desk Save keeps it as a record and takes it off the Waiting list
+    c9s, j9s = post(own, "/desk/api/save", {"id": b9b, "dest": "construction", "kind": "challan"})
+    msg9 = j9s.get("message") or j9s.get("error") or ""
+    lo2, lm2 = listed(True), listed(False)
+    kept9 = len(aud(b9b, "desk_closed_kept"))
     print("I3 counts: the 'waiting' reason lists %d of the 6 made-up papers for the owner, %d for the manager; the owner's Waiting "
-          "grew by %d" % (len(added), len([x for x in seeds3 if x in lm]), n3_after - n3_before))
-    ck("I3 (item 3) a waiting paper is always reachable: B-0009's two shapes (a vendorless awaiting Construction challan and a "
+          "grew by %d; the closed challan's Save answered %s with 'kept as a record': %s, its desk_closed_kept rows %d, still listed "
+          "after: owner %s, manager %s" % (len(added), len([x for x in seeds3 if x in lm]), n3_after - n3_before, c9s,
+                                          "kept as a record" in msg9, kept9, b9b in lo2, b9b in lm2))
+    ck("I3 (item 3; FIX1) a waiting paper is always reachable: B-0009's two shapes (a vendorless awaiting Construction challan and a "
        "closed-challan draft saved before, both scanned before the floor) are in the desk's Waiting with 'challan — supplier not "
        "read' / 'not accepted yet — check'; a challan with its supplier read stays on Bills awaited only; a Clinic-equipment draft and "
-       "a Personal one for the owner only; a patient's paper never; the menu's count is the list's; no row written (D664)",
+       "a Personal one for the owner only; a patient's paper never; the menu's count is the list's; no row written by the list "
+       "(D664) -- and the closed challan's desk Save says 'kept as a record' (never 'Bills awaited'), writes one desk_closed_kept "
+       "audit row and nothing else on the row, and takes it off Waiting for owner and manager",
        lambda: b9a in lo and lo[b9a]["hint"] == "challan — supplier not read" and b9b in lo and lo[b9b]["hint"] == "not accepted yet — check"
        and b9c not in lo and b9e in lo and b9e not in lm and b9p in lo and b9p not in lm and b9t not in lo and b9t not in lm
-       and b9a in lm and b9b in lm and dn_own == n3_after and all(row(x) == rows3[x] for x in seeds3),
-       lambda: {stamp(x): ((lo.get(x) or {}).get("hint"), x in lm) for x in seeds3} | {"desk_n": dn_own, "n": n3_after})
+       and b9a in lm and b9b in lm and dn_own == n3_after and all(rows3_mid[x] == rows3[x] for x in seeds3)
+       and c9s == 200 and "kept as a record" in msg9 and "Bills awaited" not in msg9 and kept9 == 1
+       and b9b not in lo2 and b9b not in lm2 and b9a in lo2 and row(b9b) == rows3[b9b],
+       lambda: {stamp(x): ((lo.get(x) or {}).get("hint"), x in lm) for x in seeds3} | {"desk_n": dn_own, "n": n3_after, "save": c9s,
+                "msg": msg9[:120], "kept": kept9, "after_owner": b9b in lo2, "after_mgr": b9b in lm2,
+                "row_same": row(b9b) == rows3[b9b]})
 
     # ------------------------------------------------------------------ I4: Bills awaited's count = the rows the page shows
     a1 = mk("A41", "WALK4 PLAIN SUPPLY", status="draft", subgroup="others", doc_kind="challan", challan_state="awaiting", created="2031-06-03 05:00:00")
@@ -395,6 +436,25 @@ def run(D, SRC, shared_src, work):
     form(own, "/bills/new", {"bill_date": "14/10", "vendor": "WALK5 NEW PAGE", "kind": "Consumable"})
     f_n5 = flashes(own)
     n_new = db.execute("SELECT COUNT(*) FROM bills WHERE vendor='WALK5 NEW PAGE'").fetchone()[0]
+    # FIX1 (K1 CORRECTION 3): a stored '14/10' left as it was shown is not refused (a clinic draft, a pharmacy captured scan);
+    # a newly typed partial date still is
+    u1 = mk("D5U", "WALK5 UNTOUCHED CLINIC", status="draft", subgroup="others", bill_no="UT-1", bill_date="14/10")
+    u2 = mk("D5V", "WALK5 UNTOUCHED PHARMA", lane="pharmacy", status="captured", bill_no="UT-2", bill_date="14/10")
+    flashes(own)
+    form(own, "/bills/%d/edit" % u1, {"bill_date": "14/10", "vendor": "WALK5 UNTOUCHED CLINIC FIXED", "kind": "Consumable", "bill_no": "UT-1"})
+    f_u1 = flashes(own); r_u1 = row(u1)
+    form(own, "/bills/%d/edit" % u2, {"bill_date": "14/10", "vendor": "WALK5 UNTOUCHED PHARMA FIXED", "kind": "Pharmacy", "bill_no": "UT-2"})
+    f_u2 = flashes(own); r_u2 = row(u2)
+    form(own, "/bills/%d/edit" % u1, {"bill_date": "15/10", "vendor": "WALK5 RETYPED", "kind": "Consumable", "bill_no": "UT-1"})
+    f_u3 = flashes(own); r_u3 = row(u1)
+    print("I5b counts: untouched '14/10' -- clinic vendor saved %s, date kept %r; pharmacy vendor saved %s, date kept %r; a newly "
+          "typed '15/10' refused %s" % (r_u1.get("vendor") == "WALK5 UNTOUCHED CLINIC FIXED", r_u1.get("bill_date"),
+                                        r_u2.get("vendor") == "WALK5 UNTOUCHED PHARMA FIXED", r_u2.get("bill_date"),
+                                        "not a full date" in f_u3 and r_u3.get("vendor") == "WALK5 UNTOUCHED CLINIC FIXED"))
+    untouched_ok = (r_u1.get("vendor") == "WALK5 UNTOUCHED CLINIC FIXED" and r_u1.get("bill_date") == "14/10" and "not a full date" not in f_u1
+                    and r_u2.get("vendor") == "WALK5 UNTOUCHED PHARMA FIXED" and r_u2.get("bill_date") == "14/10" and "not a full date" not in f_u2
+                    and r_u2.get("lane") == "pharmacy" and "not a full date" in f_u3 and r_u3.get("vendor") == "WALK5 UNTOUCHED CLINIC FIXED"
+                    and r_u3.get("bill_date") == "14/10")
     d4 = mk("D55", "WALK5 STORED SUPPLY", status="draft", subgroup="others", doc_kind="challan", challan_state="awaiting",
             bill_date="14/10", approved_by="system — sorted = accepted (D710)", approved_at="2031-06-10 09:00")
     d5 = mk("D56", "WALK5 APPROVED SUPPLY", status="approved", subgroup="others", doc_kind="bill", bill_no="AP-1", total_amount=10,
@@ -412,8 +472,10 @@ def run(D, SRC, shared_src, work):
     ck("I5 (item 5) a bill date is written only as yyyy-mm-dd or left empty: the reading's fill leaves '14/10' out (a full date is "
        "written; the pharmacy lane's fill unchanged); the old edit and new-bill pages refuse it with one line, nothing saved; a "
        "stored '14/10' shows as written with the misread flag, takes the scan month (not a month called '14/10'), and every page "
-       "answers; 'approved by' only on an approved paper ('rejected by' as before)",
-       lambda: row(d1).get("bill_date") is None and row(d1b).get("bill_date") == "2031-10-14" and row(d2).get("bill_date") == "14/10"
+       "answers; 'approved by' only on an approved paper ('rejected by' as before); FIX1: a stored '14/10' left untouched on the "
+       "old edit page saves the other fields and keeps '14/10' (a clinic draft and a pharmacy captured scan), a newly typed '15/10' "
+       "is refused",
+       lambda: untouched_ok and row(d1).get("bill_date") is None and row(d1b).get("bill_date") == "2031-10-14" and row(d2).get("bill_date") == "14/10"
        and "not a full date" in f_e5 and r_e5.get("vendor") == "WALK5 EDIT SUPPLY" and r_e5.get("bill_date") is None
        and r_e5b.get("bill_date") == "2031-06-15" and "not a full date" in f_n5 and n_new == 0
        and month_of(d4) == "2031-06" and h4.status_code == 200 and "14/10" in h4t and "date looks misread" in h4t
@@ -423,7 +485,8 @@ def run(D, SRC, shared_src, work):
        lambda: dict(d1=row(d1).get("bill_date"), d1b=row(d1b).get("bill_date"), d2=row(d2).get("bill_date"), fe=f_e5[:80],
                     e_vendor=r_e5.get("vendor"), e_date=r_e5.get("bill_date"), e2=r_e5b.get("bill_date"), fn=f_n5[:80], n_new=n_new,
                     mo=month_of(d4), flag="date looks misread" in h4t, appr="approved by" in h4t, h5="approved by" in h5,
-                    h6="rejected by" in h6, pj=pj4.status_code, codes=codes5))
+                    h6="rejected by" in h6, pj=pj4.status_code, codes=codes5, untouched=untouched_ok, u1=(r_u1.get("vendor"), r_u1.get("bill_date"), f_u1[:60]),
+                    u2=(r_u2.get("vendor"), r_u2.get("bill_date"), f_u2[:60]), u3=f_u3[:60]))
 
     # ------------------------------------------------------------------ I6: home's Spend this month = The month (computed above)
     ck("I6 (item 6) the home card's 'Spend this month' is The month's grand total (sorting_desk.month_total, the sum of its section "
@@ -498,12 +561,13 @@ if __name__ == "__main__":
         ck("the walk ran to its end", lambda: False, lambda: repr(e))
     reds = R.count(False)
     print("%d checks: %d GREEN, %d RED%s" % (len(R), R.count(True), reds, (" (" + ", ".join(FAILED) + ")") if FAILED else ""))
-    if "--expect-red" in ARGS:
+    if "--expect-red" in ARGS or "--expect-red-r0" in ARGS:
+        must_ = MUST_RED_R0 if "--expect-red-r0" in ARGS else MUST_RED
         seen_ = {}
         for ok_, nm_ in zip(R, NAMES):
             seen_[nm_] = ok_
-        not_red = [k for k in MUST_RED if seen_.get(k) is not False]
-        print("CONTROL must-be-red: %s -- %s" % (", ".join(MUST_RED), ("all RED" if not not_red else "NOT red: " + ", ".join(
+        not_red = [k for k in must_ if seen_.get(k) is not False]
+        print("CONTROL must-be-red: %s -- %s" % (", ".join(must_), ("all RED" if not not_red else "NOT red: " + ", ".join(
             k + ("(green)" if seen_.get(k) else "(not reached)") for k in not_red))))
         sys.exit(0 if (reds and not not_red) else 1)
     sys.exit(1 if reds or not R else 0)

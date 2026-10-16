@@ -6,6 +6,9 @@
 # supplier is not read gets its own card); a bill date is written only as yyyy-mm-dd (a stored '14/10' takes no month and shows
 # with the misread flag; 'approved by' only for an approved paper); the home card's Spend this month = The month's grand total;
 # 'None' never shown as a contract; /desk?open= takes the stamp in any common form.
+# FIX1 (16-Oct-2026, the K1 review): a D710-held double is never money twice (The month and home leave it out until it is
+# answered); a closed challan's desk Save keeps it as a record and takes it off Waiting; the old edit page refuses only a
+# NEWLY typed partial date (an untouched stored one saves). The walk adds I6b; its control on round 0 is --expect-red-r0.
 # Files: /root/assetapp/sorting_desk.py, clinic_papers.py, asset_register.py (the scan app only). asset_machine.py and
 # scanner_widget.js are NOT edited (pinned read only). NO data step, NO new column. Only assetapp restarts.
 # BUILD_NORM_v1 s3 order (S563's shape): gates -> the build lock -> FROM pins (and the read-only pins) -> rebuild from the live
@@ -223,5 +226,7 @@ echo "  B-xxxx — open it instead.'); a restored paper waits on the desk as 're
 echo "  Waiting (B-0009 included). Bills awaited's count equals its rows (a challan with no supplier read: its own card). A half-read"
 echo "  date is never stored; a stored one shows with the misread flag. Home's Spend this month = The month. The Contract column"
 echo "  shows a blank, not 'None'. /desk?open=B162 works. The old challan buttons refuse a patient's / Personal paper on the server."
+echo "  A held double (same supplier, number, amount as an accepted bill) is not counted until it is answered on the desk; a closed"
+echo "  challan saved on the desk is kept as a record and leaves Waiting; an untouched stored date no longer blocks the old edit page."
 echo "  UNDO (one line): $(for f in $FILES; do P="$(pin PIN_FROM_$(base "$f").txt)"; printf '\\cp -p %s %s && ' "$APP/$f.bak_S566_${P:0:8}" "$APP/$f"; done)systemctl restart $SERVICE"
 exit 0

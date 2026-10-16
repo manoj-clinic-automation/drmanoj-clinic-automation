@@ -43,18 +43,36 @@ new page, no new switch, no new column, no data step. Reception's screens unchan
 8. **`/desk?open=` takes the stamp in any common form** — B-0162, b-0162, B-162, B162, b162. A bare number stays the record id
    (every link the app makes carries it). An unknown value: *"No paper <typed>"*; a refused one: `_visible`'s reason.
 
-**Files and pins (FROM → TO).** `/root/assetapp/sorting_desk.py` `062ac43c` → `255a27ed` (19 counted edits) ·
-`clinic_papers.py` `9a59f977` → `024464cc` (9) · `asset_register.py` `0828fbc3` → `19ebade7` (11). Read only, pinned:
+**Fix round 1 (16-Oct-2026, brief `S566_FIX1.md`, after the independent kit review `S566_KIT_REVIEW_K1.md`).**
+- **A held double is never money twice (K1 BLOCKER 1).** `_s566_paid_rows` — the one selection The month and the home card both
+  read — leaves out a D710-held double (`_S566_NOT_HELD`, the SQL twin of `held()`) in both its money and its finals query. The
+  copy drops out of The month and home until it is answered on the desk; the accepted original counts once.
+- **A closed challan does not wait for ever (K1 CORRECTION 2).** A desk Save of a challan already closed on the old page writes a
+  `desk_closed_kept` audit row and says *"B-xxxx is a closed challan — kept as a record; no bill will come."* (never "Bills
+  awaited"); `_marks` reads that row and `_s566_waits` then leaves the challan out of Waiting.
+- **The old edit page does not refuse an untouched stored date (K1 CORRECTION 3).** `bill_edit` refuses a date that is not a full
+  yyyy-mm-dd only when the submitted value differs from the stored one (as the desk's `typed_date`); `_norm_date` writes an
+  untouched value back unchanged. B-0163 and a pharmacy scan with an old partial date can be edited again.
+
+**Files and pins (FROM → TO).** `/root/assetapp/sorting_desk.py` `062ac43c` → `a053a222` (20 counted edits) ·
+`clinic_papers.py` `9a59f977` → `024464cc` (9; unchanged by fix round 1) · `asset_register.py` `0828fbc3` → `8b3c4551` (11).
+(Round 0, superseded, never installed: `255a27ed` / `024464cc` / `19ebade7`.) Read only, pinned:
 `asset_machine.py` `7d4fdffc`, `scanner_widget.js` `10a8bb29`, `claude_reader.py` `3894dc23`, `claude_reread.py` `d9b75e78`,
 the parent's `/root/finance/packs.py` `048d2ad8`. Every edit is an anchor found exactly once in the live bytes (`make_s566.py`).
 Restarts **assetapp** only (`clinic-finance` is not touched).
 
-**Kit.** `make_s566.py` (the patcher; `--cp-on` rebuilds S563's tidy comparison) · `walk_s566.py` (I1–I8, W1, W2, Z1; the control
-with `--expect-red`) · `lines_s566.py` (the earlier walks' lines S566 changes, written to /tmp copies only: S563 F4, S559 O3 / O4)
+**Kit.** `make_s566.py` (the patcher; `--cp-on` rebuilds S563's tidy comparison) · `walk_s566.py` (I1–I8, I6b, W1, W2, Z1; the
+control with `--expect-red` on the FROM files; `--expect-red-r0` on round 0's TO files: I3, I5, I6b must be red) · `lines_s566.py` (the earlier walks' lines S566 changes, written to /tmp copies only: S563 F4, S559 O3 / O4)
 · `install_s566.sh` · `rehearse_s566.sh` · `walk/` (the PC's headless-Chrome S560 desk-layout walk results) · `PIN_*.txt` ·
 `KIT_ID.txt` · `SUMS.md5`.
 
-**Proof (16-Oct-2026, on the box in /tmp only, and in headless Chrome on the PC).** S566's walk 11/11 green on the TO files; the
+**Proof, fix round 1 (16-Oct-2026, 06:25–06:28 IST by the box's clock, on the box in /tmp only).** S566's walk **12/12** green on
+the FIX1 TO files; the control on the FROM files **10 of 10 MUST_RED red**; the control on round 0's TO files (`--expect-red-r0`)
+**I3, I5, I6b red** (I6b: The month rose by ₹1,000 there, by ₹500 now). Inside the rehearsal: S563 17/17 with its tidy fetch
+(102 answers, none differing), S560 37/37, pack 9/9, S548 8/8, S559 43/43, S557 41/41, S555 19/19, S551 87/87; all seven outcomes
+as before. **Round 0 (below)** is kept for the record.
+
+**Proof, round 0 (16-Oct-2026, on the box in /tmp only, and in headless Chrome on the PC).** S566's walk 11/11 green on the TO files; the
 control 9 of 9 MUST_RED red on the live files. S563 17/17 with its tidy fetch (102 answers, none differing), S560 37/37, S560
 pack 9/9, S548 8/8, S559 43/43, S557 41/41, S555 19/19, S551 87/87. The rehearsal on a made-up root: green, ALREADY INSTALLED,
 forced red restored, /desk 404 restored, /desk 200 restored, a moved file and a moved read-only file refused before placing.

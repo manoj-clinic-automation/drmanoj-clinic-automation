@@ -25,8 +25,9 @@ LAST = "S566"                 # S566_SCANAPP_LAST_FIXES: a restore checks for a 
     (r'''    acts = ("desk_saved", "d710_not_accepted", "desk_dup_same", "desk_dup_restored")
     sql = "SELECT bill_id, action, MAX(id) FROM bill_audit WHERE action IN (?,?,?,?)"
 ''',
-     r'''    acts = ("desk_saved", "d710_not_accepted", "desk_dup_same", "desk_dup_restored", "desk_restored", "desk_blank_restored")   # S566: + the restores
-    sql = "SELECT bill_id, action, MAX(id) FROM bill_audit WHERE action IN (?,?,?,?,?,?)"
+     r'''    acts = ("desk_saved", "d710_not_accepted", "desk_dup_same", "desk_dup_restored", "desk_restored", "desk_blank_restored",
+            "desk_closed_kept")                               # S566: + the restores; + a closed challan kept as a record (FIX1)
+    sql = "SELECT bill_id, action, MAX(id) FROM bill_audit WHERE action IN (?,?,?,?,?,?,?)"
 ''', 1),
     # SD3 (items 1, 3) -- waiting(): a draft and a restored paper are selected whatever their scan day
     (r'''        "AND COALESCE(b.subgroup,'')='') OR substr(b.created_at,1,10)>=?)) "
@@ -42,9 +43,23 @@ LAST = "S566"                 # S566_SCANAPP_LAST_FIXES: a restore checks for a 
                 why.append("hold")
         if live and _s566_restored(mk.get(b["id"], {})):            # S566 item 1: restored, not saved on the desk since
             why.append("restored")
-        if live and not why and _s566_waits(b, owner):               # S566 item 3: a waiting paper no other list shows
+        if live and not why and _s566_waits(b, owner, mk.get(b["id"], {})):    # S566 item 3: a waiting paper no other list shows
             why.append("waiting")
         if after and not live and s441_aside(b, today, days):
+''', 1),
+    # SD3b (FIX1, K1 CORRECTION 2) -- a desk Save of a closed challan keeps it as a record (no Bills-awaited line), audited
+    (r'''    b = _row(db, bid)
+    if accept and _lane(b) == "clinic" and b["status"] == "draft":
+        if _challan_waits(b):
+            msgs.append("A challan: filed, waiting for its bill (Bills awaited).")
+''',
+     r'''    b = _row(db, bid)
+    if (b["doc_kind"] or "") == "challan" and (b["challan_state"] or "") == "closed" and b["status"] == "draft":   # S566 FIX1
+        AR._audit_bill(db, bid, "desk_closed_kept", {"via": "desk"})
+        msgs.append("%s is a closed challan — kept as a record; no bill will come." % st)
+    elif accept and _lane(b) == "clinic" and b["status"] == "draft":
+        if _challan_waits(b):
+            msgs.append("A challan: filed, waiting for its bill (Bills awaited).")
 ''', 1),
     # SD4 (items 1, 3) -- the two reasons' words in the list
     (r'''    fx = _s560_fix_hint(db, b, why)                                 # S560 item 7: the reason, in the list
@@ -237,12 +252,15 @@ def _s566_restored(m):
     return bool(r and r > (m.get("desk_saved", 0) or 0))
 
 
-def _s566_waits(b, owner):
+def _s566_waits(b, owner, m=None):
     """S566 item 3: a paper whose status reads 'Waiting' (draft) that no other list shows -- not a double scan, not a page,
     not the pharmacy lane, not a patient's paper, Personal only for the owner; EXCEPT an awaiting challan whose supplier is
-    read (it is on Bills awaited) and a clinic_equipment paper for anyone but the owner (it waits on Dr Manoj's Save).
+    read (it is on Bills awaited), a clinic_equipment paper for anyone but the owner (it waits on Dr Manoj's Save), and
+    (FIX1, K1 CORRECTION 2) a closed challan a desk Save has kept as a record (its desk_closed_kept mark in `m`, from _marks).
     Whatever its scan day and whether or not it was saved on the desk before. Nothing is written (D664)."""
     if b["status"] != "draft" or b["dup_of"] or b["page_of"] or _lane(b) == "pharmacy":
+        return False
+    if (b["doc_kind"] or "") == "challan" and (b["challan_state"] or "") == "closed" and (m or {}).get("desk_closed_kept"):
         return False
     sg = b["subgroup"] or ""
     if sg == PATIENT or (sg == "personal" and not owner):
@@ -267,14 +285,22 @@ def _s566_lanes(key):
     return "COALESCE(b.lane,'clinic')='clinic' AND b.status IN ('draft','approved')"
 
 
+# FIX1 (K1 BLOCKER 1): the SQL twin of held() -- a D710-held double (a clinic draft whose d710_not_accepted is newer than its
+# last desk_saved, not yet answered) is never money: it drops out of The month and the home card until someone answers it.
+_S566_NOT_HELD = (" AND NOT (b.status='draft' AND COALESCE(b.lane,'clinic')='clinic' AND COALESCE(b.dup_flag,'')='' "
+                  "AND EXISTS (SELECT 1 FROM bill_audit h WHERE h.bill_id=b.id AND h.action='d710_not_accepted' AND h.id > "
+                  "COALESCE((SELECT MAX(s.id) FROM bill_audit s WHERE s.bill_id=b.id AND s.action='desk_saved'),0)))")
+
+
 def _s566_paid_rows(db, key, subs, ym):
-    """S566 item 6: (money, finals) -- month_data's own two queries for one section, unchanged, now shared."""
+    """S566 item 6: (money, finals) -- month_data's own two queries for one section, now shared; FIX1: both leave out a
+    D710-held double (_S566_NOT_HELD), so the accepted original counts once."""
     ph = ",".join("?" * len(subs))
     live = CP._live_sections(db) if key == "construction" else CP._live(db)
     lanes = _s566_lanes(key)
-    money = db.execute("SELECT b.* FROM bills b WHERE " + live + " AND b.subgroup IN (" + ph + ") AND " + CP.MONTH_OF + "=? ORDER BY b.bill_date, b.id",
+    money = db.execute("SELECT b.* FROM bills b WHERE " + live + _S566_NOT_HELD + " AND b.subgroup IN (" + ph + ") AND " + CP.MONTH_OF + "=? ORDER BY b.bill_date, b.id",
                        subs + (ym,)).fetchall()
-    finals = db.execute("SELECT b.* FROM bills b WHERE " + lanes + " AND b.dup_of IS NULL AND b.page_of IS NULL AND b.doc_kind='challan' "
+    finals = db.execute("SELECT b.* FROM bills b WHERE " + lanes + " AND b.dup_of IS NULL AND b.page_of IS NULL" + _S566_NOT_HELD + " AND b.doc_kind='challan' "
                         "AND b.challan_state='final' AND b.subgroup IN (" + ph + ") AND " + CP.MONTH_OF + "=? ORDER BY b.id", subs + (ym,)).fetchall()
     return money, finals
 
@@ -454,14 +480,16 @@ AR_EDITS = [
         stamp = next_stamp(db)
         if is_owner() or kind == "Consumable":
 ''', 1),
-    # AR8 (item 5) -- the old edit page the same
+    # AR8 (item 5) -- the old edit page the same, for a date the person typed (FIX1, K1 CORRECTION 3: a stored value left
+    # as it was shown passes, as the desk's typed_date does -- _norm_date writes it back unchanged)
     (r'''    if request.method == "POST":
         f = request.form
         # 'Pharmacy' MUST be in this whitelist: it is a fall-through to
 ''',
      r'''    if request.method == "POST":
         f = request.form
-        if _s566_typed_date(f.get("bill_date")) is False:            # S566 item 5: refused, nothing saved
+        if ((f.get("bill_date") or "").strip() != (b["bill_date"] or "").strip()
+                and _s566_typed_date(f.get("bill_date")) is False):     # S566 item 5: a newly typed partial date refused, nothing saved
             flash(S566_DATE_LINE % (f.get("bill_date") or "").strip()[:20])
             return redirect(url_for("bill_edit", bid=bid))
         # 'Pharmacy' MUST be in this whitelist: it is a fall-through to

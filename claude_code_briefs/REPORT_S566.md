@@ -1,5 +1,117 @@
 # REPORT_S566 — S566_SCANAPP_LAST_FIXES (built, walked, rehearsed; not installed, not published)
 
+## Fix round 1 (brief `S566_FIX1.md`, 16-Oct-2026, 06:20–06:30 IST)
+
+**For Dr Manoj (plain English):**
+- **A bill scanned twice is never counted twice.** If a second copy of an accepted bill waits on the sorting desk, The month and
+  the home page's "Spend this month" count the bill once (₹500, not ₹1,000), until you answer the copy on the desk.
+- **A challan closed on the old page no longer sits on the desk for ever.** Save it once on the desk; it is kept as a record and
+  leaves the Waiting list.
+- **The old edit page lets you fix a bill again** even when its stored date is half-read (like B-0163's "14/10"); only a newly
+  typed half date is refused.
+- Tested on copies only — all green. **Nothing is on the live app yet.**
+
+For the chat. The kit `deploy_kits/S566_SCANAPP_LAST_FIXES/` was revised in place (same number), from the K1 review
+`S566_KIT_REVIEW_K1.md` (md5 read `b99e98f4757f05f205af14e32ffa3edd` — matches the brief) — BLOCKER 1, CORRECTIONS 2 and 3, as
+written there. Its NOTES were not acted on. Round 0's kit was copied to `_scratch\S566_SCANAPP_LAST_FIXES\round0_kit\` before any
+edit (for the round-0 control).
+
+### F1 · FROM pins, read on the box (06:25:45 IST, the box's `date`) — unchanged, all match the brief
+`sorting_desk.py 062ac43c…` · `clinic_papers.py 9a59f977…` · `asset_register.py 0828fbc3…` · read only: `asset_machine.py 7d4fdffc…`
+· `scanner_widget.js 10a8bb29…` · `claude_reader.py 3894dc23…` · `claude_reread.py d9b75e78…` · `/root/finance/packs.py 048d2ad8…`.
+
+### F2 · What changed in `make_s566.py` (every anchor matched exactly once on the live bytes — on the PC and on the box)
+1. **BLOCKER 1** — SD10: `_S566_NOT_HELD` (the review's SQL twin of `held()`, verbatim) appended to **both** queries in
+   `_s566_paid_rows`: after `live` in the money query, after `b.page_of IS NULL` in the finals query. `month_data` and
+   `month_total` both read `_s566_paid_rows`, so The month and home drop the held copy together.
+2. **CORRECTION 2** — SD2: `_marks` reads `desk_closed_kept` (7 placeholders). New SD3b in `save()`: a draft challan whose
+   `challan_state='closed'` writes `desk_closed_kept {"via":"desk"}` and says *"B-xxxx is a closed challan — kept as a record; no
+   bill will come."* in place of the Bills-awaited line. SD3: `waiting()` passes the paper's marks to `_s566_waits`, which returns
+   False for a closed challan with that mark.
+3. **CORRECTION 3** — AR8: `bill_edit` refuses only when `(submitted).strip() != (stored).strip()` **and** `_s566_typed_date` is
+   False (the review's exact condition).
+- Counted edits now: **sorting_desk.py 20** (was 19: + SD3b) · clinic_papers.py 9 (unchanged) · asset_register.py 11 (AR8 revised).
+
+### F3 · TO pins (built on the PC, rebuilt on the box from the live bytes — identical)
+`sorting_desk.py a053a222ee0fa8b0026aa4fc2511e8a9` · `clinic_papers.py 024464cc3d3ab5e1ead1526540904d61` (unchanged) ·
+`asset_register.py 8b3c455128663db69c48232bf26c0083`. Compiled on `/usr/bin/python3` and `/root/wa/venv/bin/python3`. The S563 tidy
+comparison pin `c6f126aa` is unchanged (clinic_papers is unchanged). Round 0's `255a27ed` / `19ebade7` are superseded.
+
+### F4 · The walk and its controls (on the box, `/tmp/s566fix1`, a backup-API copy of the database, made-up rows only)
+- `walk_s566.py` gains **I6b** (an accepted ₹500 Others bill + a second paper with the same supplier / number / amount, saved on
+  the desk → held): **I6b counts: the save answered 200; the copy held: True; The month rose by 500; month_total rose by 500; home
+  shows the month total: True; the copy waits on the desk: True.** **I3** now also saves the closed-challan shape B9B on the desk:
+  *"kept as a record": True, its desk_closed_kept rows 1, still listed after: owner False, manager False* (row unchanged except
+  the audit). **I5** gains *"I5b counts: untouched '14/10' -- clinic vendor saved True, date kept '14/10'; pharmacy vendor saved
+  True, date kept '14/10'; a newly typed '15/10' refused True"*.
+- On the FIX1 TO files: **12 checks: 12 GREEN, 0 RED.**
+- **Control on FROM** (`--expect-red`, live S563 files): **12 checks: 2 GREEN, 10 RED — "CONTROL must-be-red: W2, I1, I2, I3, I4,
+  I5, I6, I6b, I7, I8 -- all RED"**.
+- **Control on round 0's TO** (`--expect-red-r0`, new option, built on the box from the live bytes with round 0's own
+  `make_s566.py` = `255a27ed / 024464cc / 19ebade7`): **12 checks: 9 GREEN, 3 RED (I6b, I3, I5) — "CONTROL must-be-red: I3, I5,
+  I6b -- all RED"**. There I6b read *"The month rose by 1,000; month_total rose by 1,000"* — the review's double count, reproduced.
+
+### F5 · The earlier walks (inside the rehearsal's install, each its own process, on the FIX1 files)
+S563 **17/17** + tidy fetch (*102 answers … differing: none*) · S560 **37/37** · S560 pack **9/9** · S548 **8/8** · S559 **43/43** ·
+S557 **41/41** · S555 **19/19** · S551 **87/87**. No adapted line changed (`lines_s566.py` untouched); no frozen kit edited.
+
+### F6 · The rehearsal (`rehearse_s566.sh`, made-up root, 06:25:59–06:28:25 IST by the box's `date`) — REHEARSAL GREEN
+1 fresh install green (pins read back `a053a222 / 024464cc / 8b3c4551`) · 2 ALREADY INSTALLED · 3 forced red → restored to the FROM
+pins · 4 `/desk` 404 → restored · 5 `/desk` 200 → restored · 6 `clinic_papers.py` moved → REFUSED before any backup · 7
+`asset_machine.py` moved → REFUSED before any backup.
+After: the live box read back at 06:29:10 IST — the five files at their FROM / read-only pins, 0 `.bak_S566_*`, `assetapp` last
+started 19:08:56 IST 15-Oct, `127.0.0.1:8030/healthz` 200, public `/scanapp/healthz` 200, `/finance/healthz` 200, no build lock.
+My `/tmp/s566fix1` and the (empty) `/tmp/s566dev` were removed. The server build lock was not taken: no install step (the
+rehearsal used its own made-up lock).
+
+### F7 · Kit files, gates
+- Changed: `make_s566.py`, `walk_s566.py`, `install_s566.sh` (header lines + two "what his pages now show" lines; no logic),
+  `PIN_TO_sorting_desk.txt`, `PIN_TO_asset_register.txt`, `README.md` (a Fix round 1 section, pins, proof), `KIT_ID.txt` (pins + a
+  fix-round line), `SUMS.md5` (rebuilt, 23 files; `md5sum -c` OK on the box; the scripts that ran on the box are byte-identical to the
+  kit's). Unchanged: `rehearse_s566.sh`, `lines_s566.py`, every other PIN file, `walk/walk_results_s566.txt`.
+- `.gitignore` (last match wins): `git check-ignore -v --no-index` over the 24 kit files, this report and `S566_FIX1.md` —
+  **none ignored** (exit 1); no nested `.gitignore` in the kit. Contact-number gate (`NO_PHONE_NUMBERS.py --files-from`, run from a
+  copy in `_scratch`, `SANJ_CONFIG_STORE` as before: the default store): **"NO_PHONE_NUMBERS: clean -- 26 staged file(s) checked
+  (numbers and credentials)."** No `__pycache__` / `.pyc` in the kit (every python run with `-B`).
+
+### F8 · Calls made (each with its reason)
+1. **The closed-challan branch runs on any lane, for a draft only**, before the clinic-lane accept branch — a Construction challan
+   (B-0009's shape) may sit on a non-clinic lane where the old message never ran; only a draft is on Waiting, so only a draft needs
+   the mark. On the clinic lane it replaces the wrong "Bills awaited" line; nothing else in the accept chain changes for it.
+2. **The review's optional "1 held double not counted" line on The month was not added** — optional, and it would change a page
+   template beyond the three exact fixes.
+3. **The S560 desk-layout browser walk was not re-run**: FIX1 changes no desk layout (a message text, list membership, two SQL
+   filters, one condition on the old edit page). `walk/walk_results_s566.txt` is round 0's (7/7).
+4. **A new control option `--expect-red-r0`** (MUST_RED_R0 = I3, I5, I6b) so the round-0 control is a named, exit-coded run.
+
+### F9 · Not done / seen outside the brief
+- Not installed, not published, nothing restarted, no live row written (the brief overrides CLAUDE.md).
+- K1 note 11 (not acted on, not in the brief): the old `/papers/month` page (`clinic_papers.month()`) still counts a held double
+  through `CP._live` — outside S566's new code.
+- **Cost:** round 0, from the runner's own log `S566_SCANAPP_LAST_FIXES_20261016_0536.log`: **"06:08:04 DONE · cost $8.97 (paid
+  from the API credits)"**. Fix round 1, from its own log `S566_FIX1_20261016_0620.log`: **"06:30:23 DONE · cost $2.79 (paid
+  from the API credits)"** (filled in by the second run below).
+
+### F10 · Second run of `S566_FIX1` (log `S566_FIX1_20261016_0645.log`, 06:45–06:50 IST) — re-checked, nothing rebuilt
+The brief was run a second time after the first run had finished green. Its edits were already in the kit, so it was not
+applied again: that would have patched the patcher twice. Instead:
+- Kit: `SUMS.md5` **23 of 23 OK** on the PC and on the box (`md5sum -c`); the kit's PIN_TO = `a053a222 / 024464cc / 8b3c4551`.
+- Box, 06:46:53 IST (box `date`): FROM / read-only pins unchanged (`062ac43c 9a59f977 0828fbc3 7d4fdffc 10a8bb29 3894dc23 d9b75e78`,
+  packs `048d2ad8`); rebuilt from the live bytes = the TO pins (20 / 9 / 11 edits); compiles on both pythons.
+- Walk on TO **12 checks: 12 GREEN, 0 RED** (I6b: The month and month_total each rose by 500) · control on FROM **2 GREEN, 10 RED —
+  all MUST_RED red** · control on round 0 **9 GREEN, 3 RED (I6b, I3, I5) — all RED** (I6b there: rose by 1,000).
+- Rehearsal 06:47:11–06:49:38 IST: **REHEARSAL GREEN**, all seven outcomes; inside it S563 17/17 + tidy (102, none differing),
+  S560 37/37, pack 9/9, S559 43/43, S557 41/41, S555 19/19, S551 87/87; S548 passed (the installer dies on a red S548 walk,
+  install_s566.sh:159, and outcome 1 was green — my summary filter missed its count line; 8/8 in the first run on the same bytes).
+- Box after, 06:49:51 IST: five files at FROM pins, 0 `.bak_S566_*`, assetapp last started 19:08:56 IST 15-Oct, local / public
+  scanapp / finance healthz 200, no build lock; `/tmp/s566fix1` removed. The cost of this second run is in its own log's closing line.
+
+**Fix round 1: nothing installed, nothing published.**
+
+---
+
+# Round 0 (as reported at 06:08 IST; its pins superseded by Fix round 1)
+
 **For Dr Manoj (plain English):**
 - **Restore on the sorting desk now checks first** that the paper is not a second copy of one already counted ("This looks like
   B-xxxx — open it instead."). A restored paper waits on the desk as "restored — sort it" until it is saved.
@@ -166,8 +278,8 @@ lock. My `/tmp/s566dev` and `/tmp/s566count` were removed.
   24 kit files (with `SUMS.md5`) and this report: `NO_PHONE_NUMBERS: clean -- 25 staged file(s) checked (numbers and credentials).`
   `_scratch\` (the live copies of the four files, the built files, the saved pages) is git-ignored and stays on the PC.
 - No `__pycache__` / `.pyc` in the kit (every python run with `-B`; nothing imported from `deploy_kits\`).
-- **Cost:** the runner's log writes its cost line only when the run ends ("DONE · cost $…", as S563's log shows); at the time this
-  report was written the log (`S566_SCANAPP_LAST_FIXES_20261016_0536.log`) held no cost line yet. The session's own meter read
-  about **US$8.4** at that moment — the log's closing line is the figure to quote.
+- **Cost:** the runner's own log line (`S566_SCANAPP_LAST_FIXES_20261016_0536.log`): **"06:08:04 DONE · cost $8.97 (paid from the
+  API credits)"** — **US$8.97** (corrected in fix round 1; this section first said "about US$8.4", the session meter before the
+  log's closing line).
 
 **Nothing installed, nothing published.**
