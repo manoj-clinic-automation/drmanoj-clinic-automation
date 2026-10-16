@@ -1,0 +1,4 @@
+kit id S569_PROOF_REACH_AND_TWO_LINES
+project Sanjeevni (session 316, 16-Oct-2026; board _numbers v451 -> v452 by the chat; the owner's word 09:33 IST "check and report, and put these 2 for amir as well")
+Part A: a diagnosis, read only -- no code changed, no runbook command run (the cause needs a code change; see REPORT_S569.md)
+Part B: data only -- two amir_job rows (kind tap) on /root/finance/finance.db, by add_jobs_s569.py live, after a backup-API backup; no .py on the box changed, no service restarted
