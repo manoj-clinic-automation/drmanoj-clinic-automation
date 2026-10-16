@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S315 close** (the Scan App project), 15-Oct-2026, afternoon — the parent's sections exactly as its S313 close wrote them (its session 317 open), the Sanjeevni sections exactly as its S312 close wrote them (its session 316 open); the Scan App sections refreshed here (318 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S317 close** (the parent), 16-Oct-2026, early morning — the Scan App sections exactly as its S315 close wrote them (its session 318 open), the Sanjeevni sections exactly as its S312 close wrote them (its session 316 open); the parent's sections refreshed here (319 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S315 close** (the Scan App project), 15-Oct-2026, afternoon — the parent's sections exactly as its S313 close wrote them (its session 317 open), the Sanjeevni sections exactly as its S312 close wrote them (its session 316 open); the Scan App sections refreshed here (318 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S313 close** (the parent), 14-Oct-2026, morning — the Sanjeevni sections exactly as its S312 close wrote them (its session 316 open), the Scan App sections exactly as its S314 close wrote them (its session 315 open); the parent's sections refreshed here (317 reserved)
 
@@ -132,7 +134,7 @@ https://followup.dr-manoj.in/scanapp/
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S313 close (14-Oct, morning)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S317 close (16-Oct, early morning)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -142,7 +144,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record and the after-call list's brief. Nothing changes on the server.
+**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record only. Nothing changes on the server.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -154,51 +156,55 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**3 · IN THE NEXT CHAT — the one runner line for the after-call list (S558), then switch its two new features on once you have seen them.** The chat gives you the line.
-
-**4 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** On a spare PC, from `D:\MARGERP\serverbackup` on the pharmacy PC or the pen drive's `MargAuto_by_agent` folder. Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
+**3 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** On a spare PC, from `D:\MARGERP\serverbackup` on the pharmacy PC or the pen drive's `MargAuto_by_agent` folder. Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
 
 **LATER — none of these is urgent**
 
-**5 · RANJEET'S LOGIN** — the password is yours to set.
+**4 · RANJEET'S LOGIN** — the password is yours to set.
 
 ```
 https://followup.dr-manoj.in/portal/users
 ```
 
-**6 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** September's is ready.
+**5 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** September's is ready.
 
 ```
 https://followup.dr-manoj.in/finance/packs?month=2026-09
 ```
 
-**7 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
+**6 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
 
-**8 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
+**7 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
 
-**9 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
+**8 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
 
-**WHEN IT HAPPENS — not a duty:** a POS total waiting for your Confirm · a Voicenotes list waiting above *Give a task* · your bank check under row 2 of the packs page.
+**WHEN IT HAPPENS — not a duty:** a POS total waiting for your Confirm (now only when neither the bank SMS nor the MPR has come) · an SMS-vs-MPR difference line on your clinic money page · a Voicenotes list waiting above *Give a task* · your bank check under row 2 of the packs page.
 
 **Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C) · the follow-up tracker on the server — "later" (12-Oct) · Bhati's later features (sessions in the 360° record, *physiotherapy advised* to his page, his absence → WhatsApp to his patients).
 
-*Ticked by you or done, and off this list: what the staff say about the after-call list — "this feature is working well" (14-Oct).*
+*Ticked by you or done, and off this list: the after-call list's runner line and its two switches (14-Oct) · the bank SMS switch (15-Oct) · the macro's sender field (15-Oct).*
 
-*Closed by your word and not on this list: everything listed so at the S311 close, plus the WhatsApp alert stays on the server, off Google (13-Oct).*
+*Closed by your word and not on this list: everything listed so at the S313 close, plus the after-call list's link and IVR button work (14-Oct) and the bank SMS standing in for the MPR (15-Oct).*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The after-call list (S558, first thing in the next chat — your word):**
-   - link a no-show who came in under another number (any staff; undo the same day);
-   - remember that number for future calls;
-   - an IVR call button on each no-show.
-   - Both come in switched off for you to turn on.
-2. **Small, my own:** the console's doubled *"counter sheet not filled"* line · the medical PC shouting if the hand-made pen-drive backup is more than a week old · the finance app's own test suite · proving the 148 older documents.
-3. **The punch listener's step 2** — after about 19-Oct, only if every genuine punch carries one steady mark.
-4. **On your word:** a *send to Shavez* button for the bank check · Bhati's later features · the WhatsApp appointment message to patients · the MyOperator key steps · the contacts · the mail flood · the portal tiles · kits for Shavez's PC and the lab PC.
-5. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
+1. **The SMS watch (mine, reads only):** how often each account's SMS comes, and which address the bank uses now that your macro sends it. One line to you; a build only if the phone, not the bank, is missing them.
+2. **The Yes Bank SMS (mine):** five were turned away on 15-Oct as unreadable — I check whether a real NEFT or deposit message is being missed.
+3. **Small, my own:** the console's doubled *"counter sheet not filled"* line · the medical PC shouting if the hand-made pen-drive backup is more than a week old · the finance app's own test suite · proving the 148 older documents.
+4. **The punch listener's step 2** — after about 19-Oct, only if every genuine punch carries one steady mark.
+5. **On your word:** a *send to Shavez* button for the bank check · Bhati's later features · the WhatsApp appointment message to patients · the MyOperator key steps · the contacts · the mail flood · the portal tiles · kits for Shavez's PC and the lab PC.
+6. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S317 CLOSE — 14 → 16-Oct-2026 (the parent)
+
+- ~~**"Patients … call from a different number … register themselves with a different number" / "a click to call link to IVR"**~~ — live 12:29 14-Oct (S558); you switched both on; Shahbaz's call worked.
+- ~~**"First, check this" (the Sanjeevni chat's S561)**~~ — checked: published, and the order page's print links are fresh.
+- ~~**"That SMS amount should fill the relevant pages … the time should also be there"**~~ — live 16:03 15-Oct (S562); you switched it on.
+- ~~**"Is there another way to track the messages?"**~~ — the macro now sends the sender; the bank itself skips some SMS (15-Oct: only Sanjeevni's came); the page marks the missing ones.
+- ~~**"Give me a suitable prompt to paste in that chat" (Darpan's label)**~~ — given; that chat built it (S565, 17:14 15-Oct).
+- ~~**"For the phone's key part also give a line"**~~ — live 16:48 15-Oct (S564): the key is for your login only.
 
 ## ✅ DONE AT THE S313 CLOSE — 13 → 14-Oct-2026 (the parent)
 
