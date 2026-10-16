@@ -63,7 +63,8 @@ All other fields of the two rows are NULL. Afterwards: `/finance/healthz` 200. `
   There is no install `.sh`, since the kit is data only, the same shape as S569.
 - Board `_numbers` v456 → v457: not reachable from Claude Code. **The chat should append S572's DONE line**: data only, amir_job ids 11 and 12,
   audit 937–938, backup `finance.db.bak_S572_20261016_135251`, live 16-Oct 13:52 IST.
-- Build lock `/root/deploy/.claude_code_build.lock` taken at 13:52:10 IST (owner S572_TWO_MORE_LINES). It is released after this report is published (the time is in the chat window's closing lines, read on the box).
+- Build lock `/root/deploy/.claude_code_build.lock` taken at 13:52:10 IST (owner S572_TWO_MORE_LINES). **Released at 2026-10-16 13:54:09 IST** (read on the box) with `rm …/owner; rmdir …`.
+- Published with `PUBLISH_ALL.bat`: commit `378f857` (NO_PHONE_NUMBERS clean, 38 files). That commit also carried files another chat had left pending: the S571 kit, `REPORT_S571.md`, `S571_FIX1.md` and this brief. `/root/deploy/repo` was pulled to `378f857`, and `md5sum -c SUMS.md5` gave OK for every file. The kit's `add_jobs_s572.py` is byte-identical to the copy that ran (`19768f68…`). healthz 200 at 13:54. This line is published by a second `PUBLISH_ALL.bat`.
 - Box scratch: the scripts delete their own database copies. The pre-look's copies in `/tmp/s572probe` were deleted by the script. Code only remains in `/tmp/s572kit` and `/tmp/s572probe`.
 - Seen, not touched (outside the brief): as S569 noted, Amir's four `category` jobs (ids 1–4) still have `show_from` NULL.
   Also, `qty_words` writes "1 patte" for a single strip (plural form). It is the estate's own speller, and the brief says to use what it returns.
