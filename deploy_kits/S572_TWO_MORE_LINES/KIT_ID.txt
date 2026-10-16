@@ -1,0 +1,4 @@
+kit id S572_TWO_MORE_LINES
+project Sanjeevni (session 316, 16-Oct-2026; board _numbers v456 -> v457 by the chat; the owner's word 13:47 IST "Add these two to Amir's work")
+data only -- two amir_job rows (kind tap) on /root/finance/finance.db, by add_jobs_s572.py live, after a backup-API backup; no .py on the box changed, no service restarted
+the same steps as S569 Part B (deploy_kits/S569_PROOF_REACH_AND_TWO_LINES/add_jobs_s569.py); the assertion is the owner's proof (/api/pad/hub/1 proof.C.wrong) instead of the voucher cards
