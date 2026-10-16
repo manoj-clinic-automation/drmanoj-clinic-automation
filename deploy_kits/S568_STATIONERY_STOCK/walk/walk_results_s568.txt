@@ -1,7 +1,7 @@
-S568_STATIONERY_STOCK -- the browser walk on the PC (headless Chrome), 16-Oct-2026, 10:15:11-10:15:21 IST (the PC clock).
+S568_STATIONERY_STOCK -- the desk-layout browser walk on the PC (headless Chrome), 16-Oct-2026, 11:17:45-11:17:54 IST (the PC clock), FIX1 round.
 S560 frozen desk-layout walk (deploy_kits/S560_RECEIPTS_STATEMENTS/walk/run_browser_walk_s560.py), copied with ONE line in S568's form
-(lines_s568.py browser560: nDest 15 -> 16 -- the new 'Stationery & packaging' button), layout.js unchanged, on the final S568 build's desk
-pages (sorting_desk cd6823f1, clinic_papers 6db07c12, asset_register e5356e0c): saved on the box by S563's walk (its F4 line in S566's
+(lines_s568.py browser560: nDest 15 -> 16 -- the new 'Stationery & packaging' button), layout.js unchanged, on the FIX1 build's desk
+pages (sorting_desk 695ba90b, clinic_papers 6db07c12, asset_register e5356e0c): saved on the box by S563's walk (its F4 line in S566's
 form, a /tmp copy) --save-pages, a backup-API copy of the database, made-up rows only (list.json kept only the Z-2031- papers). The
 live box was not reached by the browser. (The check lines still say '15 buttons': their words are the frozen walk's; the count checked is 16.)
   1366,768: {"vw": 1342, "vh": 669, "nDest": 16, "nKind": 5, "hidden": [], "below": [], "minBtn": 36, "fieldsScroll": 0, "cue": false, "pageScroll": false, "saveText": "Save — next paper", "readFolded": true, "errs": []}
@@ -21,4 +21,4 @@ GREEN R  Receipt (1366 x 768): 'Pays which bill?' with the supplier's unpaid bil
   statement: {"stmtShown": true, "offered": 3, "ticked": 3, "diff": "Ticked ₹1,200 of statement ₹1,300 — difference ₹100", "grey": true, "filed": "Filed with Z-2031-RZ3, on its place: Personal expense. Never counted as spend — the bill is.", "saveVisible": true, "saveText": "Save — next paper", "errs": []}
 GREEN S  Statement (1366 x 768): period typed -> the three invoices inside it pre-ticked; 'Ticked Rs1,200 of statement Rs1,300 -- difference Rs100' and the grey 'An invoice may not be scanned yet.'; Save on screen  -- ticked 3 diff 'Ticked ₹1,200 of statement ₹1,300 — difference ₹100' grey True
 GREEN C  Construction work + Bill: 'Send to accountant' shown, off by default, on screen; hidden for an estimate  -- {"accShown": true, "accOff": true, "accHiddenForEstimate": true, "errs": []}
-7 browser checks: 7 GREEN, 0 RED  (9 s)
+7 browser checks: 7 GREEN, 0 RED  (8 s)

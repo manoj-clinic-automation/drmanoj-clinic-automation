@@ -1,40 +1,75 @@
 <!doctype html>
-<html lang=hi-Latn><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
-<title>Stationery diya — mock-up (S568)</title>
-<style>
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#eef2f6;color:#1f2a36;line-height:1.4}
-.note{background:#fff4dc;border-bottom:1px solid #e8c77a;padding:8px 18px;font-size:13px}
-.bar{background:#3a5a78;color:#fff;padding:10px 18px;font-size:14px}.bar b{font-size:16px}
-main{max-width:720px;margin:0 auto;padding:14px 18px}
-.card{background:#fff;border:1px solid #d6dde6;border-radius:12px;padding:14px;margin:0 0 12px}
-label{display:block;font-size:14px;color:#4a5866;margin:10px 0 4px}
-select,input{font-size:16px;padding:8px;border:1px solid #c9d2dc;border-radius:8px;font-family:inherit}
-.pl{display:flex;flex-wrap:wrap;gap:8px}.pl span{border:1px solid #c9d2dc;border-radius:10px;padding:9px 16px;font-size:16px;background:#fff}.pl span.on{border:2px solid #2b5d8a;background:#e3edf7;font-weight:700}
-.btn{display:inline-block;margin-top:12px;background:#2b5d8a;color:#fff;border:0;border-radius:10px;font-size:17px;padding:11px 28px}
-.ok{background:#eaf3ec;border:1px solid #9cc5a6;border-radius:8px;padding:8px 12px;margin:0 0 12px;font-size:15px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px 14px}.muted{color:#5b6878}
-</style></head><body>
-<div class=note><b>Mock-up for Dr Manoj (S568)</b> — made-up items, nothing here is saved. The real page is installed <b>switched OFF</b> for managers:
-it opens for Shavez only when you switch “Stationery diya for managers” ON on your Switches card, after you say <i>final</i>. You can use it at once.
-Edit anything on this page in your words; a follow-up kit then follows your edit.</div>
-<div class=bar><b>🗂 Scan app &amp; assets</b> &nbsp; Sorting desk · The month · Bills awaited · <u>Stationery diya</u> · All papers</div>
-<main>
-<h2 style="margin:6px 0 10px">Stationery diya</h2>
-<div class=ok>Save ho gaya — 2 ream A4 paper, Lab ko.</div>
-<div class=card>
-<label style="margin-top:0">Kya diya?</label>
-<select style="max-width:320px"><option>— chuno —</option><option selected>A4 paper (ream)</option><option>Register 200 page (piece)</option><option>Pen blue (piece)</option><option>File cover (piece)</option></select>
-<label>Kitna?</label><input value="2" style="max-width:120px">
-<label>Kisko diya?</label>
-<div class=pl><span class=on>Lab</span><span>Reception</span><span>Sanjeevni</span><span>Clinic</span></div>
-<button class=btn>Save</button>
-<p class=muted style="font-size:13px;margin:8px 0 0">Ek tap — koi “pakka?” nahi. Stock se zyada diya to bhi save hoga; Dr Manoj ke page par dikhega.</p>
-</div>
-<div class=card><b>Ginti</b> <span class=muted>— shelf par kitna hai, likho (baaki khaali chhodo).</span>
-<div class=grid style="margin-top:8px">
-<label style="margin:0">A4 paper <span class=muted>(ream)</span><input style="max-width:110px"></label>
-<label style="margin:0">Register 200 page <span class=muted>(piece)</span><input style="max-width:110px"></label>
-<label style="margin:0">Pen blue <span class=muted>(piece)</span><input style="max-width:110px"></label>
-<label style="margin:0">File cover <span class=muted>(piece)</span><input style="max-width:110px"></label></div>
-<button class=btn style="font-size:15px;padding:8px 18px">Ginti save karo</button></div>
-</main></body></html>
+<html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>Stationery diya — mock-up (S568 FIX1)</title>
+<style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#eef2f6;color:#1f2a36;line-height:1.45}
+.note{background:#fff4dc;border-bottom:1px solid #e8c77a;padding:10px 18px;font-size:14px}
+.phone{width:390px;height:844px;margin:18px auto 30px;border:10px solid #1f2a36;border-radius:36px;overflow:hidden;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.phone iframe{width:390px;height:844px;border:0;display:block}</style></head><body>
+<div class=note><b>Mock-up for Dr Manoj (S568 FIX1)</b> — this is the real "Stationery diya" screen, exactly as the built kit draws it on a phone
+(390 px wide), copied from the test run. The item names ("Walk A4 paper" …) are made-up test rows; nothing here is saved. It follows your
+mock-up (Issue.dc.html): <i>Kya diya · Kitne · Kisko</i>, four big place buttons, one <i>Save</i>, and after Save the line
+"Ho gaya — … Stock mein ab …" at the top. The <i>Ginti</i> card below it is the one addition (a manager's count). The page is installed
+<b>switched OFF</b> for managers; you can use it at once.</div>
+<div class=phone><iframe title="Stationery diya" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=utf-8&gt;
+&lt;meta name=viewport content=&quot;width=device-width,initial-scale=1&quot;&gt;
+&lt;title&gt;Scan app &amp;amp; assets&lt;/title&gt;&lt;style&gt;
+body{font-family:-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#e9efe8;color:#2d3742;line-height:1.45}
+header{background:#3a5a78;color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;box-shadow:0 1px 4px rgba(20,40,70,.18)}
+header a{color:#dbe7f2;text-decoration:none;margin-left:15px}
+header a:hover{color:#fff}
+main{max-width:1080px;margin:18px auto;padding:0 14px}
+h2{color:#2c4258;font-weight:600;margin:.2em 0 .5em}
+h4{color:#3a5a78;margin:0 0 10px}
+a{color:#3a5a78}
+table{border-collapse:collapse;width:100%;background:#fff;border-radius:8px;overflow:hidden}
+th,td{border:1px solid #eef1f5;padding:8px 10px;font-size:14px;text-align:left}
+th{background:#f2f5f9;color:#3a5a78;font-weight:600}
+.card{background:#fff;border:1px solid #e4e9ef;border-radius:10px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(20,40,70,.06)}
+.amber{background:#fdf3e4}.red{background:#fbecec}
+.badge{padding:2px 9px;border-radius:10px;font-size:12px;font-weight:600;white-space:nowrap}
+.badge.amber{background:#c47f1a;color:#fff}.badge.red{background:#b23b3b;color:#fff}.badge.green{background:#2e7d5b;color:#fff}
+input,select,textarea{padding:8px;margin:3px 0;width:100%;max-width:420px;box-sizing:border-box;border:1px solid #cfd8e3;border-radius:6px;background:#fff;font-size:14px;color:#2d3742}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#9db8d4;box-shadow:0 0 0 2px rgba(157,184,212,.5)}
+label{font-size:13px;color:#5a6b7b;display:block;margin-top:9px}
+button,.btn{background:#3a5a78;color:#fff;border:0;padding:9px 17px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-block;font-size:14px;transition:background .15s}
+button:hover,.btn:hover{background:#31506c}
+.btn.small{padding:4px 10px;font-size:12px}
+.btn.danger{background:#b23b3b}.btn.danger:hover{background:#9c3131}
+.flash{background:#fff8e6;border:1px solid #f2e3b3;color:#6b5a1a;padding:9px 13px;margin-bottom:12px;border-radius:6px}
+.muted{color:#8a97a5;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.s440bar{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:12px;background:#1f3864;color:#fff;padding:6px 10px;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.s440back{display:flex;align-items:center;justify-content:center;min-height:44px;padding:0 22px;background:#fff;color:#1f3864;border-radius:9px;font-size:18px;font-weight:800;text-decoration:none;white-space:nowrap}
+.s440name{margin-left:auto;font-weight:600;text-align:right;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:640px){.s440back{flex:1 1 auto}.s440name{flex:0 1 44%;font-size:14px}}
+#s440up{position:fixed;right:14px;bottom:18px;width:48px;height:48px;border-radius:24px;border:0;background:#1f3864;color:#fff;font-size:24px;padding:0;display:none;z-index:70;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.s440big{display:block;box-sizing:border-box;width:100%;text-align:center;font-size:19px;font-weight:700;padding:15px 10px;margin:10px 0 0;border-radius:10px}
+&lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+&lt;div class=s440bar&gt;&lt;a class=s440back href=&quot;/stationery&quot;&gt;← BACK&lt;/a&gt;&lt;span class=s440name&gt;Stationery diya&lt;/span&gt;&lt;/div&gt;
+&lt;style&gt;.s559h{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px 16px;background:#3a5a78;color:#fff;padding:10px 18px;box-shadow:0 1px 4px rgba(20,40,70,.18);flex:none;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45}.s559h a{color:#dbe7f2;text-decoration:none;margin:0}.s559h a:hover{color:#fff}.s559h .s559t{color:#fff;font-weight:700;font-size:16px;white-space:nowrap}.s559h .s559v{color:#9fb3d9;font-size:12px;font-weight:400}.s559h nav{display:flex;flex-wrap:wrap;align-items:center;gap:2px 14px}.s559h nav a{white-space:nowrap}.s559h nav a.on{color:#fff;font-weight:700}&lt;/style&gt;&lt;div class=s559h id=s559bar role=navigation&gt;&lt;a class=s559t href=&quot;/&quot;&gt;&lt;b&gt;🗂 Scan app &amp;amp; assets&lt;/b&gt; &lt;span class=s559v&gt;v1.14.0&lt;/span&gt;&lt;/a&gt;&lt;nav&gt;&lt;a href=&quot;/desk&quot; data-s559=&quot;s551_desk&quot;&gt;Sorting desk (1)&lt;/a&gt;&lt;a href=&quot;/desk/month&quot; data-s559=&quot;s551_month&quot;&gt;The month&lt;/a&gt;&lt;a href=&quot;/desk/awaited&quot; data-s559=&quot;s551_awaited&quot;&gt;Bills awaited (5)&lt;/a&gt;&lt;a href=&quot;/desk/implants&quot; data-s559=&quot;s551_implants&quot;&gt;Implant ledger&lt;/a&gt;&lt;a href=&quot;/stationery&quot; data-s559=&quot;s568_stock&quot;&gt;Stationery&lt;/a&gt;&lt;a href=&quot;/assets&quot; data-s559=&quot;assets_list&quot;&gt;Machines&lt;/a&gt;&lt;a href=&quot;/renewals&quot; data-s559=&quot;renewals&quot;&gt;Renewals&lt;/a&gt;&lt;a href=&quot;/bills&quot; data-s559=&quot;bills_list&quot;&gt;All papers&lt;/a&gt;&lt;a href=&quot;/vendors&quot; data-s559=&quot;vendors_list&quot;&gt;Vendors&lt;/a&gt;&lt;a href=&quot;/admin&quot; data-s559=&quot;admin&quot;&gt;Admin&lt;/a&gt;&lt;a href=&quot;/account&quot; data-s559=&quot;account&quot;&gt;Walk Owner&lt;/a&gt;&lt;a href=&quot;/logout&quot; data-s559=&quot;logout&quot;&gt;Logout&lt;/a&gt;&lt;/nav&gt;&lt;/div&gt;
+&lt;main&gt;&lt;div class=flash&gt;Ho gaya — Walk Register 200 pages 1 piece, Clinic ko. Stock mein ab 5.&lt;/div&gt;
+&lt;style&gt;
+#s568diya{max-width:420px}
+#s568diya label.s568lb{font-size:16px;font-weight:600;color:#2c4258;margin:14px 0 6px}
+#s568diya select,#s568diya input[name=qty]{font-size:17px;min-height:48px;max-width:none;width:100%}
+#s568diya .s568grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 6px}
+#s568diya .s568place{position:relative;display:block;margin:0}
+#s568diya .s568place input{position:absolute;opacity:0;width:1px;height:1px;margin:0;padding:0}
+#s568diya .s568place span{display:flex;align-items:center;justify-content:center;min-height:56px;box-sizing:border-box;border:1px solid #c9d2dc;border-radius:12px;background:#fff;font-size:18px;font-weight:600;color:#2c4258;cursor:pointer;user-select:none}
+#s568diya .s568place input:checked+span{border:2px solid #2b5d8a;background:#e3edf7;color:#1f3864}
+#s568diya .s568place input:focus-visible+span{outline:2px solid #9db8d4;outline-offset:2px}
+#s568diya .s568save{display:block;width:100%;min-height:52px;margin-top:16px;font-size:18px;font-weight:700;border-radius:12px}
+&lt;/style&gt;
+&lt;h2 style=&quot;margin-bottom:4px&quot;&gt;Stationery diya&lt;/h2&gt;
+
+&lt;div class=card id=s568diya&gt;&lt;form method=post action=&quot;/stationery/diya&quot;&gt;
+&lt;label class=s568lb for=s568item style=&quot;margin-top:0&quot;&gt;Kya diya&lt;/label&gt;&lt;select name=item id=s568item&gt;&lt;option value=&quot;&quot;&gt;— chuno —&lt;/option&gt;&lt;option value=&quot;1&quot;&gt;Walk A4 paper (ream)&lt;/option&gt;&lt;option value=&quot;4&quot;&gt;Walk Folder F1 (piece)&lt;/option&gt;&lt;option value=&quot;3&quot;&gt;Walk Pen blue (piece)&lt;/option&gt;&lt;option value=&quot;2&quot;&gt;Walk Register 200 pages (piece)&lt;/option&gt;&lt;/select&gt;
+&lt;label class=s568lb for=s568qty&gt;Kitne&lt;/label&gt;&lt;input name=qty id=s568qty inputmode=decimal autocomplete=off&gt;
+&lt;label class=s568lb&gt;Kisko&lt;/label&gt;&lt;div class=s568grid role=radiogroup aria-label=Kisko&gt;&lt;label class=s568place&gt;&lt;input type=radio name=place value=&quot;lab&quot;&gt;&lt;span&gt;Lab&lt;/span&gt;&lt;/label&gt;&lt;label class=s568place&gt;&lt;input type=radio name=place value=&quot;reception&quot;&gt;&lt;span&gt;Reception&lt;/span&gt;&lt;/label&gt;&lt;label class=s568place&gt;&lt;input type=radio name=place value=&quot;sanjeevni&quot;&gt;&lt;span&gt;Sanjeevni&lt;/span&gt;&lt;/label&gt;&lt;label class=s568place&gt;&lt;input type=radio name=place value=&quot;clinic&quot;&gt;&lt;span&gt;Clinic&lt;/span&gt;&lt;/label&gt;&lt;/div&gt;
+&lt;button class=&quot;btn s568save&quot;&gt;Save&lt;/button&gt;&lt;/form&gt;&lt;/div&gt;
+&lt;div class=card&gt;&lt;b&gt;Ginti&lt;/b&gt; &lt;span class=muted&gt;— shelf par kitna hai, likho (baaki khaali chhodo).&lt;/span&gt;
+&lt;form method=post action=&quot;/stationery/count&quot; style=&quot;margin-top:8px&quot;&gt;&lt;input type=hidden name=back value=diya&gt;
+&lt;div style=&quot;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px 14px&quot;&gt;&lt;label style=&quot;margin:0&quot;&gt;Walk A4 paper &lt;span class=muted&gt;(ream)&lt;/span&gt;&lt;input name=&quot;c1&quot; inputmode=decimal style=&quot;max-width:110px&quot;&gt;&lt;/label&gt;&lt;label style=&quot;margin:0&quot;&gt;Walk Folder F1 &lt;span class=muted&gt;(piece)&lt;/span&gt;&lt;input name=&quot;c4&quot; inputmode=decimal style=&quot;max-width:110px&quot;&gt;&lt;/label&gt;&lt;label style=&quot;margin:0&quot;&gt;Walk Pen blue &lt;span class=muted&gt;(piece)&lt;/span&gt;&lt;input name=&quot;c3&quot; inputmode=decimal style=&quot;max-width:110px&quot;&gt;&lt;/label&gt;&lt;label style=&quot;margin:0&quot;&gt;Walk Register 200 pages &lt;span class=muted&gt;(piece)&lt;/span&gt;&lt;input name=&quot;c2&quot; inputmode=decimal style=&quot;max-width:110px&quot;&gt;&lt;/label&gt;&lt;/div&gt;
+&lt;button class=&quot;btn small&quot; style=&quot;margin-top:8px&quot;&gt;Ginti save karo&lt;/button&gt;&lt;/form&gt;&lt;/div&gt;&lt;/main&gt;&lt;button id=s440up aria-label=&quot;back to top&quot; onclick=&quot;window.scrollTo({top:0,behavior:&#x27;smooth&#x27;})&quot;&gt;↑&lt;/button&gt;
+&lt;script&gt;window.addEventListener(&#x27;scroll&#x27;,function(){var b=document.getElementById(&#x27;s440up&#x27;);if(b){b.style.display=(window.pageYOffset&gt;window.innerHeight)?&#x27;block&#x27;:&#x27;none&#x27;;}});&lt;/script&gt;&lt;script&gt;document.addEventListener(&#x27;submit&#x27;,function(e){e.preventDefault();});&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"></iframe></div>
+</body></html>

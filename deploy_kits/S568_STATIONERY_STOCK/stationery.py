@@ -17,14 +17,17 @@ WHAT THIS FILE IS
         stationery_move   the issues (stock goes down): item, quantity, to Lab / Reception / Sanjeevni / Clinic
         stationery_count  the counts: the first count of an item is its opening stock; a later one records the difference
                           as "not accounted for" and sets the stock to the count
-    Received is COMPUTED WHEN READ from the saved lines (S568_BRIEF_R1 B2), by these rules only:
+    Received is COMPUTED WHEN READ from the saved lines (S568_BRIEF_R1 B2, with S568 FIX1 = K1 CORRECTION 1), by these rules only:
         a line counts only while a paper with the same id AND the same created_at exists and dup_of IS NULL;
-        a challan (doc_kind 'challan', any challan_state) and an estimate slip count whatever their status (a joined one is
-        status 'rejected' with page_of set, and still counts);
+        S568 FIX1: and only while that paper is still a live paper in Stationery & packaging (the clinic lane, the group
+        stationery) -- or is a challan / estimate joined into one;
+        a challan (doc_kind 'challan') and an estimate slip count while live (not set aside, not a page) or while joined (a
+        joined one is status 'rejected' with page_of set, or challan_state joined / deleted) into a live Stationery paper;
         a bill (COALESCE(doc_kind,'bill')='bill') counts only when not rejected, page_of IS NULL, and no challan / estimate
         has page_of or challan_of = its id;
         any other paper counts nothing.
-    So a join, an undo of a join, a Delete after a join and a hard delete need no hook: the next read is right.
+    So a join, an undo of a join, a Delete after a join, a hard delete -- and (FIX1) a re-sort on the papers page, a re-lane,
+    Blank -- discard, or a rejection -- need no hook: the next read is right, and past figures correct themselves.
     Addresses (the /scanapp prefix is added by the app's middleware):
         GET  /stationery            the owner's page: the inventory, this month's issues, the papers that fed the stock,
                                     the counts, the item list (+ Add item, edited in place, retired -- never deleted once used)
@@ -46,6 +49,7 @@ import time
 from flask import abort, flash, g, redirect, request, url_for
 
 VERSION = "S568"
+FIX = "S568_FIX1"             # K1 CORRECTIONS 1-2: the stock follows where the paper is now; the staff screen as the owner's mock-up
 AR = None                     # the asset app's module, handed in by init()
 TODAY = None                  # the walk sets a made-up day here
 MOUNTED = False
@@ -310,28 +314,66 @@ def _cols(db):
     return {r[1] for r in db.execute("PRAGMA table_info(bills)")}
 
 
-def _counted_sql(db):
-    """R1 B2's rules, as one WHERE over stationery_line l JOIN bills b."""
+def _here_sql(a):
+    """S568 FIX1 (K1 CORRECTION 1): the paper is in Stationery & packaging NOW -- the clinic lane and the group stationery."""
+    return "COALESCE(%s.lane,'clinic')='clinic' AND COALESCE(%s.subgroup,'')='stationery'" % (a, a)
+
+
+def _paper_sql(db, a="b", here=True):
+    """R1 B2's rules with K1 CORRECTION 1 (S568 FIX1), as one condition on the paper `a`: its lines count only while it is still
+    a live paper in Stationery & packaging, or a challan / estimate joined into one.
+        live:   not a second scan; on the clinic lane in the group stationery (here=False leaves this test out -- the desk's
+                panel asks it of a paper about to be saved there);
+        a challan / estimate: not set aside and not a page (status<>'rejected', page_of IS NULL, not joined) -- or JOINED
+                (page_of set, or challan_state joined / deleted) into a paper that is itself live in Stationery & packaging;
+                so one re-sorted elsewhere, moved to another lane, discarded as blank or rejected counts nothing;
+        a bill: not set aside, not a page, and no challan / estimate joined into it;
+        anything else: nothing.
+    Stock is computed when read, so a paper moved out by any door (the desk, the papers page's chooser, the re-lane route, Blank)
+    stops counting at the next read, and one moved back counts again -- no hook and no data step."""
     cols = _cols(db)
-    cof = " OR c.challan_of=b.id" if "challan_of" in cols else ""
-    return ("l.voided_at='' AND l.item_id IS NOT NULL AND l.not_stock=0 AND l.qty IS NOT NULL AND b.dup_of IS NULL AND ("
-            "COALESCE(b.doc_kind,'') IN ('challan','estimate') OR (COALESCE(b.doc_kind,'bill')='bill' AND b.status<>'rejected' "
-            "AND b.page_of IS NULL AND NOT EXISTS (SELECT 1 FROM bills c WHERE COALESCE(c.doc_kind,'') IN ('challan','estimate') "
-            "AND (c.page_of=b.id" + cof + "))))")
+    has_cs, has_co = "challan_state" in cols, "challan_of" in cols
+    cof = (" OR c.challan_of=%s.id" % a) if has_co else ""
+    joined = "%s.page_of IS NOT NULL" % a + ((" OR COALESCE(%s.challan_state,'') IN ('joined','deleted')" % a) if has_cs else "")
+    head = ("COALESCE(%s.page_of, %s.challan_of)" % (a, a)) if has_co else ("%s.page_of" % a)
+    live_head = ("EXISTS (SELECT 1 FROM bills h WHERE h.id=" + head + " AND h.dup_of IS NULL AND h.status<>'rejected' "
+                 "AND h.page_of IS NULL AND " + _here_sql("h") + ")")
+    own = (" AND " + _here_sql(a)) if here else ""
+    return ("(%s.dup_of IS NULL%s AND ("
+            "(COALESCE(%s.doc_kind,'') IN ('challan','estimate') AND ("
+            "(%s.status<>'rejected' AND NOT (%s)) OR ((%s) AND %s)))"
+            " OR (COALESCE(%s.doc_kind,'bill')='bill' AND %s.status<>'rejected' AND %s.page_of IS NULL AND NOT EXISTS ("
+            "SELECT 1 FROM bills c WHERE COALESCE(c.doc_kind,'') IN ('challan','estimate') AND (c.page_of=%s.id%s)))))"
+            % (a, own, a, a, joined, joined, live_head, a, a, a, a, cof))
+
+
+def _counted_sql(db):
+    """R1 B2's rules with K1 CORRECTION 1, as one WHERE over stationery_line l JOIN bills b."""
+    return "l.voided_at='' AND l.item_id IS NOT NULL AND l.not_stock=0 AND l.qty IS NOT NULL AND " + _paper_sql(db, "b")
 
 
 _JOIN = "FROM stationery_line l JOIN bills b ON b.id=l.bill_id AND COALESCE(b.created_at,'')=l.bill_created_at"
 
 
-def paper_counts(db, b):
-    """(True, '') when this paper's matched lines go into the stock now; else (False, why)."""
+def paper_counts(db, b, here=True):
+    """(True, '') when this paper's matched lines go into the stock now; else (False, why). The same rule as the stock's read
+    (_paper_sql). here=False: as if it were saved in Stationery & packaging now (the desk's panel, before its Save)."""
+    try:
+        if db.execute("SELECT 1 FROM bills b WHERE b.id=? AND " + _paper_sql(db, "b", here), (b["id"],)).fetchone():
+            return True, ""
+    except sqlite3.Error:
+        return False, "the stock could not be read"
     dk = (b["doc_kind"] or "")
     if b["dup_of"]:
         return False, "a second scan adds nothing to the stock"
-    if dk in ("challan", "estimate"):
-        return True, ""
     if dk in ("receipt", "statement"):
         return False, "a receipt or a statement adds nothing to the stock"
+    if here and not ((b["lane"] or "clinic") == "clinic" and (b["subgroup"] or "") == "stationery"):
+        return False, "it is not in Stationery & packaging now, so its lines add nothing to the stock"
+    if dk in ("challan", "estimate"):
+        if b["page_of"] or (b["challan_state"] if "challan_state" in b.keys() else "") in ("joined", "deleted"):
+            return False, "the paper it is joined into is not in Stationery & packaging now, so its lines add nothing to the stock"
+        return False, "a paper set aside adds nothing to the stock"
     if b["status"] == "rejected" or b["page_of"]:
         return False, "a paper set aside, or a page of another paper, adds nothing to the stock"
     cols = _cols(db)
@@ -339,7 +381,7 @@ def paper_counts(db, b):
     n = db.execute(q, (b["id"], b["id"]) if "challan_of" in cols else (b["id"],)).fetchone()[0]
     if n:
         return False, "this bill joins %d challan%s — the stock came from %s; the bill adds nothing more" % (n, "" if n == 1 else "s", "it" if n == 1 else "them")
-    return True, ""
+    return False, "its lines add nothing to the stock"
 
 
 def saved_lines(db, b):
@@ -390,7 +432,7 @@ def panel(db, b, rd):
     noread = not rl and not saved
     if noread:
         lines.append({"no": 1, "name": "", "qty": "", "unit": "", "rate": None, "item": "", "saved": False, "sug": False, "hand": True, "flag": ""})
-    ok, why = paper_counts(db, b)
+    ok, why = paper_counts(db, b, here=False)                       # the panel shows only with Stationery & packaging chosen
     return {"lines": lines, "items": [{"id": i["id"], "name": i["name"], "unit": i["unit"], "rate": i["rate"]} for i in act],
             "noread": noread, "counts": ok, "why": why}
 
@@ -640,13 +682,29 @@ STOCK_TPL = """<h2 style="margin-bottom:4px">Stationery &amp; packaging — the 
 <input name=name value="{{r.name}}" style="max-width:220px"><input name=unit value="{{r.unit}}" list=s568units style="max-width:100px"><input name=rate value="{{plain(r.rate)}}" inputmode=decimal style="max-width:100px" placeholder="rate"><input name=low value="{{plain(r.low)}}" inputmode=decimal style="max-width:80px" placeholder="low at">
 <button class="btn small" name=do value=edit>Save</button>{% if r.active %}{% if r.used %}<button class="btn small" name=do value=retire>Retire</button>{% else %}<button class="btn small" name=do value=delete>Delete</button>{% endif %}{% else %}<span class=muted>retired</span> <button class="btn small" name=do value=restore>Bring back</button>{% endif %}</form>{% endfor %}</div>"""
 
-DIYA_TPL = """<h2 style="margin-bottom:4px">Stationery diya</h2>
+# S568 FIX1 (K1 CORRECTION 2): the owner's mock-up, artboard Issue.dc.html (390 x 844, a phone), line by line -- the title
+# "Stationery diya"; "Kya diya" (the item list), "Kitne" (quantity), "Kisko"; four large place buttons in a 2 x 2 grid (one tap
+# picks; at least 52 px tall); one Save; after Save the flash "Ho gaya — <item> <qty> <unit>, <place> ko. Stock mein ab <N>."
+# Phone width first: the form is one column up to 420 px wide. The Ginti card (R1 C9) stays as the one addition.
+DIYA_TPL = """<style>
+#s568diya{max-width:420px}
+#s568diya label.s568lb{font-size:16px;font-weight:600;color:#2c4258;margin:14px 0 6px}
+#s568diya select,#s568diya input[name=qty]{font-size:17px;min-height:48px;max-width:none;width:100%}
+#s568diya .s568grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 6px}
+#s568diya .s568place{position:relative;display:block;margin:0}
+#s568diya .s568place input{position:absolute;opacity:0;width:1px;height:1px;margin:0;padding:0}
+#s568diya .s568place span{display:flex;align-items:center;justify-content:center;min-height:56px;box-sizing:border-box;border:1px solid #c9d2dc;border-radius:12px;background:#fff;font-size:18px;font-weight:600;color:#2c4258;cursor:pointer;user-select:none}
+#s568diya .s568place input:checked+span{border:2px solid #2b5d8a;background:#e3edf7;color:#1f3864}
+#s568diya .s568place input:focus-visible+span{outline:2px solid #9db8d4;outline-offset:2px}
+#s568diya .s568save{display:block;width:100%;min-height:52px;margin-top:16px;font-size:18px;font-weight:700;border-radius:12px}
+</style>
+<h2 style="margin-bottom:4px">Stationery diya</h2>
 {% if not ok %}<div class=card><p style="font-size:17px">{{off}}</p></div>{% else %}
 <div class=card id=s568diya><form method=post action="{{url_for('s568_issue')}}">
-<label style="margin-top:0">Kya diya?</label><select name=item style="max-width:320px;font-size:16px"><option value="">— chuno —</option>{% for i in items %}<option value="{{i.id}}">{{i.name}} ({{i.unit}})</option>{% endfor %}</select>
-<label>Kitna?</label><input name=qty inputmode=decimal style="max-width:120px;font-size:16px">
-<label>Kisko diya?</label><div style="display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 10px">{% for k, w in places %}<label style="margin:0;display:inline-flex;gap:6px;align-items:center;border:1px solid #c9d2dc;border-radius:10px;padding:8px 14px;font-size:16px"><input type=radio name=place value="{{k}}" style="width:auto"> {{w}}</label>{% endfor %}</div>
-<button class=btn style="font-size:17px;padding:10px 26px">Save</button></form></div>
+<label class=s568lb for=s568item style="margin-top:0">Kya diya</label><select name=item id=s568item><option value="">— chuno —</option>{% for i in items %}<option value="{{i.id}}">{{i.name}} ({{i.unit}})</option>{% endfor %}</select>
+<label class=s568lb for=s568qty>Kitne</label><input name=qty id=s568qty inputmode=decimal autocomplete=off>
+<label class=s568lb>Kisko</label><div class=s568grid role=radiogroup aria-label=Kisko>{% for k, w in places %}<label class=s568place><input type=radio name=place value="{{k}}"><span>{{w}}</span></label>{% endfor %}</div>
+<button class="btn s568save">Save</button></form></div>
 <div class=card><b>Ginti</b> <span class=muted>— shelf par kitna hai, likho (baaki khaali chhodo).</span>
 <form method=post action="{{url_for('s568_count')}}" style="margin-top:8px"><input type=hidden name=back value=diya>
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px 14px">{% for i in items %}<label style="margin:0">{{i.name}} <span class=muted>({{i.unit}})</span><input name="c{{i.id}}" inputmode=decimal style="max-width:110px"></label>{% endfor %}</div>
@@ -728,6 +786,11 @@ def item_post():
     return redirect(url_for("s568_stock") + "#s568items")
 
 
+def done_line(it, q, place, after):
+    """S568 FIX1 (the mock-up's line): 'Ho gaya — A4 sheets 2 pack, Lab ko. Stock mein ab 10.'"""
+    return "Ho gaya — %s %s %s, %s ko. Stock mein ab %s." % (it["name"], _plain(q), it["unit"] or "", PLACE_WORD.get(place, place), _plain(after))
+
+
 def issue_page():
     db = AR.get_db()
     ok = may_issue(db)
@@ -741,7 +804,7 @@ def issue_page():
         try:
             it, q, before = issue(db, iid, request.form.get("qty"), (request.form.get("place") or "").strip())
             db.commit()
-            flash("Save ho gaya — %s %s %s, %s ko." % (_plain(q), it["unit"], it["name"], PLACE_WORD[(request.form.get("place") or "").strip()]))
+            flash(done_line(it, q, (request.form.get("place") or "").strip(), stock_of(db, it["id"])))      # S568 FIX1
         except ValueError as e:
             db.rollback()
             flash(str(e) + " Kuch save nahi hua.")

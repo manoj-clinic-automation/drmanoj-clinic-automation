@@ -1,4 +1,137 @@
-# REPORT_S568 — S568_STATIONERY_STOCK (built, walked, rehearsed; finished by S568_RESUME)
+# REPORT_S568 — S568_STATIONERY_STOCK (built, walked, rehearsed; finished by S568_RESUME; fix round 1 by S568_FIX1)
+
+## Fix round 1 (S568_FIX1, 16-Oct-2026, 11:06–11:30 IST)
+
+**For Dr Manoj (plain English):**
+- The three corrections from the independent kit check are made in the same kit. **Nothing on the server was changed.**
+- **Stock follows the paper.** If a stationery paper is later moved to another group, another lane, or thrown out as blank, its
+  items stop counting in your stock straight away (and come back if it is moved back). Old figures correct themselves.
+- **"Stationery diya" now looks like your mock-up:** *Kya diya · Kitne · Kisko*, four big buttons (Lab, Reception, Sanjeevni,
+  Clinic), one Save, then "Ho gaya — A4 paper 2 ream, Lab ko. Stock mein ab 7." It is built for a phone first.
+  `MOCKUP_stationery_diya.html` in the kit is now a picture of the real built screen on a phone, for you to approve.
+- **"Add a paper from a file" takes only a PDF or a photo;** a Word file is refused with one line and nothing is saved.
+- Every test is green (the walk 14 of 14, all earlier walks, both screen walks, the install rehearsal); each new test goes red on
+  the old kit, as it must.
+
+**For the chat.**
+
+*What changed (only the TO files; the FROM pins and every anchor are the same live bytes).*
+1. **K1 CORRECTION 1 — `stationery.py`.** One rule for the stock's read and the desk's panel (`_paper_sql`): a paper's matched lines
+   count only while the paper is a live paper in Stationery & packaging (`COALESCE(lane,'clinic')='clinic' AND
+   COALESCE(subgroup,'')='stationery'`, not a second scan) — a challan / estimate while live (`status<>'rejected'`, `page_of IS NULL`,
+   not joined) or while **joined** (`page_of` set, or `challan_state` joined / deleted) into a paper that is itself live in Stationery &
+   packaging; a bill as before (not set aside, not a page, no challan / estimate joined into it). Computed when read — no data step.
+   `paper_counts` uses the same rule (the panel asks it "as if saved here", since it shows only with Stationery & packaging chosen) and
+   says why a paper does not count.
+2. **K1 CORRECTION 2 — `stationery.py`.** `DIYA_TPL`: title "Stationery diya"; labels "Kya diya", "Kitne", "Kisko"; the four places
+   as radio buttons drawn as large buttons in a 2 × 2 grid (56 px tall; one tap picks); one Save (52 px, full width); the form one
+   column, at most 420 px wide. After Save the flash is `done_line`: "Ho gaya — <item> <qty> <unit>, <place> ko. Stock mein ab <N>."
+   (N = the stock after the issue). The Ginti card (R1 C9) stays as the one addition. `MOCKUP_stationery_diya.html` replaced: the
+   built screen exactly as the walk rendered it (after one Save, made-up items), shown in a 390 × 844 phone frame, with a note.
+3. **K1 CORRECTION 3 — `sorting_desk.py` (through `make_s568.py`'s SD22 block; SD1 gains the mark `STOCK_FIX = "S568_FIX1"`).**
+   `add_page` reads the file's extension as the intake does and refuses anything not in pdf, jpg, jpeg, png, webp, heic **before the
+   intake is called**: "That file cannot be taken — only a PDF or a photo (pdf, jpg, jpeg, png, webp, heic). Nothing was saved." The
+   file field's `accept` lists the same types.
+4. **Costs, read from each run's own log line** (`D:\Downloads\_kbtools\agent_build\logs\`): round 0
+   (`S568_STATIONERY_STOCK_20261016_0939.log`) — **no cost line** (it ends 10:15:43, cut off); RESUME
+   (`S568_RESUME_20261016_1028.log`) — **"10:41:48 DONE · cost $2.31 (paid from the API credits)"**; this run
+   (`S568_FIX1_20261016_1106.log`) — its cost line is written by the runner when the run ends, after this report; read it there.
+
+*Pins (rebuilt on the box from the live bytes, 11:15:27 IST; each anchor exactly once).*
+| file | FROM (live, read 11:15:27 and again 11:28:06 IST) | TO round 0 | TO FIX1 |
+|---|---|---|---|
+| `sorting_desk.py` | `a053a222ee0fa8b0026aa4fc2511e8a9` | `cd6823f1` | **`695ba90b4b3652f0e087f29b7c25d706`** (24 edits) |
+| `clinic_papers.py` | `024464cc3d3ab5e1ead1526540904d61` | `6db07c12` | `6db07c12a8ba5ab0123db2a5bee0fa7b` (13, unchanged) |
+| `asset_register.py` | `8b3c455128663db69c48232bf26c0083` | `e5356e0c` | `e5356e0c75f564085b20a059f76a4b48` (9, unchanged) |
+| `/root/finance/packs.py` | `048d2ad81abb0271a1cddd31134544bb` | `e46264b8` | `e46264b85f22563f3e0d8643597e1d58` (1, unchanged) |
+| `stationery.py` (new) | absent | `3e5d5322` | **`d11d718392782d4a7a8b9c233363a526`** |
+Read-only pins unchanged: `asset_machine 7d4fdffc`, `scanner_widget.js 10a8bb29`, `claude_reader 3894dc23`, `claude_reread d9b75e78`,
+`scan_register 904f07b1`, `purchase_app 147201dd`. All five TO files compile on `/usr/bin/python3` and `/root/wa/venv/bin/python3`.
+`PIN_TO_sorting_desk.txt`, `PIN_TO_stationery.txt`, `KIT_ID.txt`, `README.md` and `SUMS.md5` (33 files) updated.
+
+*The walk and its controls (box, `/tmp/s568fix1`, a backup-API copy of the database, made-up rows only, 11:15:27–11:15:33 IST).*
+- **`walk_s568.py` on the FIX1 TO files: 14 checks: 14 GREEN, 0 RED** (W1, W2, I1–I8, Z1 and the new I3F, I4F, I7F). The new counts:
+  - **I3F:** folder stock before 0 · (a) a challan saved → 5, re-sorted to Others on the papers page (302) → **0**, back → 5 · (b) a
+    challan saved → 8, re-laned to NK Pathology (302, lane `lab_purchase`) → **5** · (c) a challan saved → 9, Blank — discard on the
+    desk (200, status rejected) → **5** · (d) a challan saved → 7, its bill joining it (challan rejected, page_of set) → **7** (still
+    counts), the bill re-sorted to Others → 5, back → 7.
+  - **I4F:** title `Stationery diya`; labels `Kya diya`, `Kitne`, `Kisko`; place buttons Lab, Reception, Sanjeevni, Clinic; 2 × 2 grid;
+    min-height 56 px; one button `Save`; flash "Ho gaya — Walk A4 paper 2 ream, Lab ko. Stock mein ab 7." (= expected); after one more
+    issue "Ho gaya — Walk Register 200 pages 1 piece, Clinic ko. Stock mein ab 5." (= expected).
+  - **I7F:** a .docx and a .doc (on the preset) both answered 302 with the refusal line; papers 187 → 187; stored files 4 → 4.
+  - The earlier counts are as round 0's (I1 790 / sections = month_total; I3 5 / 6 / join 6 / estimate / lone bill / refusal; I4 9 → 7,
+    pen −5, manager 403 then 302, reception 403 / 403; I5 6 → 5 → 3 (−2), manager count 7; I6 1 → 2; I7 two presets, 0 commits as
+    'Pharmacy', 0 payment rows, 7 of 7 Sanjeevni queries clean; I8 8.1 LB, LN · 8.2 OB · 8.4 CB).
+- **Negative control on the live FROM files (`--expect-red`): 14 checks: 2 GREEN, 12 RED — "CONTROL must-be-red: W2, I1, I2, I3, I3F,
+  I4, I4F, I5, I6, I7, I7F, I8 -- all RED".**
+- **FIX1 control on the round-0 kit's TO files (`--expect-red-fix1`, built on the box from the live bytes with the round-0
+  `make_s568.py`, pins `cd6823f1` / `3e5d5322`): 14 checks: 11 GREEN, 3 RED — "CONTROL must-be-red: I3F, I4F, I7F -- all RED".** Its
+  counts: (a) re-sorted → stays 5, (b) re-laned → stays 8; labels `Kya diya?`, `Kitna?`, `Kisko diya?`, no 2 × 2 grid, flash "Save ho
+  gaya — 2 ream …"; the .docx filed (papers 187 → 189, files 4 → 6). The old I4 words were made neutral ("Kya diya", "Kisko", "ho
+  gaya") so I4 keeps testing the issue itself and I4F alone tests the mock-up; I4 is green on both kits.
+
+*The earlier walks (the rehearsal's outcome 1, on the FIX1 TO files, scratch copy).* S566 **12/12** · S563 **17/17** + its tidy fetch ·
+S560 **37/37** · S560 pack **9/9** (P2 / P8 in S568's form) · S548 **8/8** · S559 **43/43** · S557 **41/41** · S555 **19/19** · S551
+**87/87** — the same `/tmp`-copy line adaptations as round 0, nothing new.
+
+*The browser walks (the PC's headless Chrome; pages saved on the box from the FIX1 build, made-up rows).*
+- **New: `walk/browser_diya_s568.py`, Stationery diya at 390 × 844 (11:17:42 IST): 2 browser checks: 2 GREEN, 0 RED** — D1 viewport
+  390 × 844: the title, the three labels on screen, the four buttons in a 2 × 2 grid (56 px tall, 159 px wide, on screen), one tap on
+  Sanjeevni picks it, one Save (52 px), nothing wider than the phone; D2 the "Ho gaya … Stock mein ab 5." line at the top. **Control
+  on the round-0 page: D1 RED** (labels with "?", buttons 41 px in one row and a half, Save 40 px). Headless Chrome keeps its window
+  at least ~500 px wide, so the page is measured inside a 390 × 844 frame (a first try in a bare window measured 518 px and was
+  discarded; the check now also requires the viewport to be 390).
+- **S560's desk-layout walk** (one line in S568's form) on the FIX1 desk pages (11:17:45–11:17:54 IST): **7 browser checks: 7 GREEN,
+  0 RED** (nDest 16 everywhere). Both results are in the kit's `walk/`.
+
+*The rehearsal (made-up root, `rehearse_s568.sh` unchanged).* First run 11:15:35–11:20:06 IST: all ten outcomes as intended, but its
+end guard said **"REHEARSAL RED: the live finance folder changed during the rehearsal"** — the guard compares `packs.py`'s md5
+(unchanged, `048d2ad8`) and the NAME list of `/root/finance`; the live finance app's own jobs were writing there in that window
+(read-only probe: `bank_match.log` 11:15, `job_pulse*` 11:17, `salts_refresh.state.json` / `order_rules.log` / `patient_sync.log` 11:20,
+`finance.db` 11:21 — a database journal file comes and goes with each write). Nothing of the rehearsal's is in that folder. **Re-run
+unchanged with the folder's name list recorded before and after, 11:22:23–11:26:44 IST: `REHEARSAL GREEN`** (no name differed;
+`packs.py` `048d2ad8`): 1 fresh install green (walk 14/14, control 12/12 red, every earlier walk green) · 2 ALREADY INSTALLED ·
+3 forced red → restored · 4 `/desk` 404 → restored · 5 `/desk` 200 → restored · 6 `/stationery` 404 → restored · 7 a moved live file
+→ REFUSED · 8 a moved read-only file → REFUSED · 9 a foreign `stationery.py` → REFUSED · 10 `packs.py` moved → that file STOPPED,
+the rest installed and said.
+
+*Kit identity.* The kit placed in the repository was copied to the box at the end (11:28:06 IST): `SUMS.md5` 33 of 33 ok; every code
+file and PIN file byte-identical to what ran (`make_s568.py cb092f9e`, `stationery.py d11d7183`, `walk_s568.py 3afee313`,
+`install_s568.sh 0e42b75c`, `rehearse_s568.sh 4b20f795`, `lines_s568.py`, `count_s568_pack.py`, the five PIN_TO files). Differing
+from the copy that ran on the box: only `README.md`, `KIT_ID.txt`, `MOCKUP_stationery_diya.html`, `SUMS.md5`, the two `walk/` result
+files, and `walk/browser_diya_s568.py` (the PC-only browser walk, whose final form is the one that produced the results above).
+The installer and the rehearsal are unchanged (they read the new pins from the PIN files).
+
+*Calls made where the brief left room.*
+- **The joined-challan rule follows the brief's words** ("or is a challan joined into one"): a joined challan counts while the paper it
+  is joined into is a live Stationery & packaging paper, and the challan itself is still there. K1's fix tested only the challan's own
+  lane and group; with it, a joined challan kept counting after its bill was re-sorted out (walk case (d) proves the brief's form).
+- **The flash's word order follows the brief and the mock-up's quoted line** ("<item> <qty> <unit>"), not K1's "{qty} {unit} {name}".
+- **The owner's artifact could not be opened** (claude.ai shows only a sign-in shell to a fetch); the screen follows the brief's and
+  K1's quotes of `Issue.dc.html`.
+- **The refusal line names the six types** (one line, as before; the earlier "(jpg, png)" undersold the photo types).
+- **The pack counts on the live data were not re-run:** `packs.py`'s FROM and TO are unchanged from round 0.
+- **No build lock taken:** this run installs nothing (as round 0); the rehearsal uses its own made-up lock. The lock was free throughout.
+- **DUTY_MAP not changed** (as round 0: Stationery diya is on demand, OFF for managers, with no state that makes it due).
+
+*Box scratch.* Removed: `/tmp/s568fix1` (this run's kits, built files, walk work and the backup-API copies — made-up rows on a copy,
+now gone) and `/tmp/s568reh` (the rehearsal's made-up root). Left, named: `/tmp/s568probe` (round 0's pins probe, not this run's).
+
+*Seen outside the brief (not touched).* `finance.db.bak_S569_20261016_105712` in `/root/finance` and `_scratch\S569_PROOF_REACH_AND_TWO_LINES`
+on the PC (10:59) — another build (S569) ran this morning; it did not hold the lock during this run. The rehearsal's end guard (name
+list of the live finance folder) can trip on the finance app's own writes; a later kit could compare program files only.
+
+*Gates (run last, finished 11:29:06 IST on the PC clock), over 38 files — the 34 kit files, this report and the three S568 briefs:*
+- `.gitignore` (last match wins): `git check-ignore -v --no-index` — **none ignored** (exit 1); no nested `.gitignore`, no
+  `__pycache__` / `.pyc` in the kit.
+- Contact-number gate (`NO_PHONE_NUMBERS.py --files-from`, run from a copy in `_scratch\S568_FIX1`, the default store as before):
+  **`NO_PHONE_NUMBERS: clean -- 38 staged file(s) checked (numbers and credentials).`**
+
+**nothing installed, nothing published.**
+
+---
+
+## Round 0 and RESUME (kept as written)
 
 **For Dr Manoj (plain English):**
 - The stationery kit is built, tested and ready in `deploy_kits\S568_STATIONERY_STOCK\`. **Nothing on the server was changed.**

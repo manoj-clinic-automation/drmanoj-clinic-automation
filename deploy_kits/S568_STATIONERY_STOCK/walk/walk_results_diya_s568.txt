@@ -1,0 +1,14 @@
+S568_STATIONERY_STOCK FIX1 -- the Stationery diya browser walk on the PC (headless Chrome), 16-Oct-2026, from 11:17:42 IST (the PC clock).
+walk/browser_diya_s568.py on the FIX1 build's page (stationery.py d11d7183 with sorting_desk 695ba90b / clinic_papers 6db07c12 /
+asset_register e5356e0c), saved on the box by walk_s568.py --save-pages (a backup-API copy of the database, made-up rows only),
+shown in a 390 x 844 frame (the owner's mock-up artboard Issue.dc.html; headless Chrome keeps its window >= 500 px). The live box
+was not reached by the browser. Then the same on the round-0 kit's page (stationery.py 3e5d5322), --control: D1 must be RED.
+== Stationery diya, FIX1 pages, start 11:17:42 (PC clock, IST)
+  diya 390 x 844: {"vw": 390, "vh": 844, "title": "Stationery diya", "labels": [{"t": "Kya diya", "on": true}, {"t": "Kitne", "on": true}, {"t": "Kisko", "on": true}], "places": [{"v": "lab", "t": "Lab", "top": 465, "left": 31, "h": 56, "w": 159, "on": true}, {"v": "reception", "t": "Reception", "top": 465, "left": 200, "h": 56, "w": 159, "on": true}, {"v": "sanjeevni", "t": "Sanjeevni", "top": 531, "left": 31, "h": 56, "w": 159, "on": true}, {"v": "clinic", "t": "Clinic", "top": 531, "left": 200, "h": 56, "w": 159, "on": true}], "tapPicks": true, "buttons": [{"t": "Save", "h": 52, "on": true}], "pageWide": false, "errs": []}
+GREEN D1 Stationery diya at a phone's width (viewport 390x844): the title; 'Kya diya', 'Kitne', 'Kisko' on screen; four place buttons Lab · Reception · Sanjeevni · Clinic in a 2 x 2 grid, each >= 52 px tall and on screen; one tap picks; one Save; nothing wider than the phone  -- labels ['Kya diya', 'Kitne', 'Kisko']; buttons h [56, 56, 56, 56]; Save [{'t': 'Save', 'h': 52, 'on': True}]; page wider False
+  diya_after 390 x 844: {"vw": 390, "vh": 844, "flash": "Ho gaya — Walk Register 200 pages 1 piece, Clinic ko. Stock mein ab 5.", "pageWide": false, "errs": []}
+GREEN D2 after a Save: 'Ho gaya — <item> <qty> <unit>, <place> ko. Stock mein ab <N>.' at the top, nothing wider than the phone  -- 'Ho gaya — Walk Register 200 pages 1 piece, Clinic ko. Stock mein ab 5.'
+2 browser checks: 2 GREEN, 0 RED  (1 s)
+== Stationery diya, round-0 pages (--control: D1 must be RED) 11:17:44
+  diya 390 x 844: {"vw": 390, "vh": 844, "title": "Stationery diya", "labels": [{"t": "Kya diya?", "on": true}, {"t": "Kitna?", "on": true}, {"t": "Kisko diya?", "on": true}], "places": [{"v": "lab", "t": "Lab", "top": 405, "left": 31, "h": 41, "w": 74, "on": true}, {"v": "reception", "t": "Reception", "top": 405, "left": 113, "h": 41, "w": 119, "on": true}, {"v": "sanjeevni", "t": "Sanjeevni", "top": 405, "left": 240, "h": 41, "w": 116, "on": true}, {"v": "clinic", "t": "Clinic", "top": 455, "left": 31, "h": 41, "w": 87, "on": true}], "tapPicks": true, "buttons": [{"t": "Save", "h": 40, "on": true}], "pageWide": false, "errs": []}
+CONTROL the round-0 kit's Stationery diya at 390 x 844: D1 RED (must be RED)

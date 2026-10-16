@@ -9,16 +9,26 @@ database: their queries run on the scratch copy; packs.py runs on a made-up data
 
     python3 -B walk_s568.py <dir with asset_register.py, clinic_papers.py, claude_reader.py, claude_reread.py, sorting_desk.py,
                              asset_machine.py, scanner_widget.js [, stationery.py] [, packs.py]> <assets.db to copy>
-                            [--work DIR] [--shared DIR] [--fin DIR] [--no-pack] [--expect-red] [--keep]
+                            [--work DIR] [--shared DIR] [--fin DIR] [--no-pack] [--expect-red | --expect-red-fix1] [--keep]
+                            [--save-pages DIR]
 
 One named check per item 1-8 (I1..I8), and W1, W2, Z1; GREEN / RED; exit 1 on any RED. --expect-red (the control, on the live
 FROM files -- no stationery.py, the live packs.py): exit 0 only if every check named in MUST_RED is RED. Counts are printed
-(never a live row's content). packs.py: the one in <dir> when there, else <fin>/packs.py; 'before' = <fin>/packs.py."""
-import datetime, html as htmlmod, importlib.util, io, json, os, re, shutil, sqlite3, sys, tempfile, time
+(never a live row's content). packs.py: the one in <dir> when there, else <fin>/packs.py; 'before' = <fin>/packs.py.
+
+S568 FIX1 (the kit review K1's CORRECTIONS 1-3) adds three checks: I3F (the stock follows where the paper is now: re-sorted on the
+papers page, re-laned, discarded as blank -> back where it was before that paper; a joined challan counts while the bill it is
+joined into is in Stationery & packaging), I4F (Stationery diya as the owner's mock-up: the title, "Kya diya" / "Kitne" / "Kisko",
+four place buttons in a 2 x 2 grid at least 52 px tall, one Save, "Ho gaya — <item> <qty> <unit>, <place> ko. Stock mein ab <N>.")
+and I7F (a .docx or .doc is refused by "Add a paper from a file", nothing saved). --expect-red-fix1 = the control on the round-0
+kit's TO files: exit 0 only if I3F, I4F and I7F are all RED. --save-pages DIR writes the Stationery diya page (before and after a
+Save) for the PC's browser walk and the kit's MOCKUP."""
+import datetime, html as htmlmod, importlib.util, io, json, os, re, shutil, sqlite3, sys, tempfile, time, urllib.parse
 
 ARGS = [a for a in sys.argv[1:]]
 R, FAILED, NAMES = [], [], []
-MUST_RED = ("W2", "I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8")
+MUST_RED = ("W2", "I1", "I2", "I3", "I3F", "I4", "I4F", "I5", "I6", "I7", "I7F", "I8")
+MUST_RED_FIX1 = ("I3F", "I4F", "I7F")                                # S568 FIX1: red on the round-0 kit's TO files
 TODAY = datetime.date(2031, 6, 15)
 YM = "2031-06"
 MODS = ("asset_register.py", "clinic_papers.py", "claude_reader.py", "claude_reread.py", "sorting_desk.py", "asset_machine.py",
@@ -408,6 +418,65 @@ def run(D, SRC, shared_src, fin, work):
                     b3x=(c_b3x, (j_b3x.get("error") or "")[:100], b3_sub_after_refusal), b3=(c_b3, s_rg_b3, c_b3o, s_rg_out, row(b3).get("subgroup")),
                     n0=(jn0.get("stk") or {}).get("noread")))
 
+    # ================================================================== I3F (S568 FIX1, K1 CORRECTION 1): the stock follows the paper
+    FD, FV = "Walk Folder F1", "WALK568 FIX1 STATIONERS"
+    flashes(own)
+    form(own, "/stationery/item", {"do": "add", "name": FD, "unit": "piece", "rate": "20", "low": ""})
+    flashes(own)
+
+    def fline(q_):
+        return [{"no": 1, "name": FD, "qty": str(q_), "unit": "piece", "rate": 20, "item": str(item_id(FD))}]
+
+    def fchallan(tag, q_, created):
+        bid_ = mk(tag, FV, doc_kind="challan", challan_state="awaiting", created=created)
+        c_, j_ = post(own, "/desk/api/save", {"id": bid_, "dest": "stationery", "kind": "challan", "st_lines": fline(q_)})
+        return bid_, c_, j_
+    f0 = stock(FD)
+    # (a) the papers page's group chooser (set_group): re-sorted to Others -> back where it was; back to Stationery -> counts again
+    x1, cx1, jx1 = fchallan("X1", 5, "2031-06-10 06:00:00")
+    fa1 = stock(FD)
+    ga = own.post("/bills/%d/subgroup" % x1, data={"subgroup": "others"}).status_code
+    fa2, x1_sub = stock(FD), row(x1).get("subgroup")
+    gb = own.post("/bills/%d/subgroup" % x1, data={"subgroup": "stationery"}).status_code
+    fa3 = stock(FD)
+    # (b) the re-lane route: moved to NK Pathology -> back where it was before this paper
+    x2, cx2, jx2 = fchallan("X2", 3, "2031-06-10 06:10:00")
+    fb1 = stock(FD)
+    gr = own.post("/bills/%d/lane" % x2, data={"lane": "lab_purchase"}).status_code
+    fb2, x2_lane = stock(FD), row(x2).get("lane")
+    # (c) the desk's Blank -- discard (set aside): back where it was before this paper
+    x3, cx3, jx3 = fchallan("X3", 4, "2031-06-10 06:20:00")
+    fc1 = stock(FD)
+    cbl, jbl = post(own, "/desk/api/save", {"id": x3, "blank": True})
+    fc2, x3_st = stock(FD), row(x3).get("status")
+    # (d) a challan joined into its bill still counts -- while that bill is in Stationery & packaging
+    x4, cx4, jx4 = fchallan("X4", 2, "2031-06-10 06:30:00")
+    fd1 = stock(FD)
+    y4 = mk("Y4", FV, doc_kind="bill", bill_no="FX-4", total_amount=40, bill_date="2031-06-12", created="2031-06-12 06:30:00")
+    cy4, jy4 = post(own, "/desk/api/save", {"id": y4, "dest": "stationery", "kind": "bill", "joins": [x4]})
+    fd2, x4_row = stock(FD), row(x4)
+    gy = own.post("/bills/%d/subgroup" % y4, data={"subgroup": "others"}).status_code
+    fd3 = stock(FD)
+    own.post("/bills/%d/subgroup" % y4, data={"subgroup": "stationery"})
+    fd4 = stock(FD)
+    flashes(own)
+    print("I3F counts: folder stock before %s; (a) challan saved %s -> %s, re-sorted to Others on the papers page (%s, group %s) -> %s, "
+          "back to Stationery (%s) -> %s; (b) challan saved %s -> %s, re-laned (%s, lane %s) -> %s; (c) challan saved %s -> %s, Blank -- "
+          "discard (%s, status %s) -> %s; (d) challan saved %s -> %s, its bill joining it (%s; challan status %s, page_of set %s) -> %s, the "
+          "bill re-sorted to Others (%s) -> %s, back -> %s"
+          % (f0, cx1, fa1, ga, x1_sub, fa2, gb, fa3, cx2, fb1, gr, x2_lane, fb2, cx3, fc1, cbl, x3_st, fc2, cx4, fd1, cy4,
+             x4_row.get("status"), bool(x4_row.get("page_of")), fd2, gy, fd3, fd4))
+    ck("I3F (S568 FIX1, K1 CORRECTION 1) the stock follows where the paper is now: a matched challan re-sorted to Others on the papers "
+       "page, re-laned to NK Pathology, or discarded as blank on the desk leaves the stock where it was before that paper (re-sorted "
+       "back, it counts again); a challan joined into its bill still counts, and stops while that bill is out of Stationery & packaging",
+       lambda: f0 == 0.0 and cx1 == 200 and fa1 == 5.0 and x1_sub == "others" and fa2 == 0.0 and fa3 == 5.0
+       and cx2 == 200 and fb1 == 8.0 and x2_lane == "lab_purchase" and fb2 == 5.0
+       and cx3 == 200 and fc1 == 9.0 and cbl == 200 and x3_st == "rejected" and fc2 == 5.0
+       and cx4 == 200 and fd1 == 7.0 and cy4 == 200 and x4_row.get("page_of") == y4 and fd2 == 7.0 and fd3 == 5.0 and fd4 == 7.0,
+       lambda: dict(f0=f0, a=(cx1, fa1, ga, x1_sub, fa2, gb, fa3, (jx1.get("error") or "")[:80]), b=(cx2, fb1, gr, x2_lane, fb2),
+                    c=(cx3, fc1, cbl, (jbl.get("error") or "")[:80], x3_st, fc2),
+                    d=(cx4, fd1, cy4, (jy4.get("error") or "")[:80], x4_row.get("status"), x4_row.get("page_of"), fd2, gy, fd3, fd4)))
+
     # ================================================================== I4 (item 4): issued -- the staff screen, switched OFF
     flashes(own); flashes(mgr)
     rcp_u = {"id": None, "username": "walk_rcp_2031", "display_name": "Walk Reception", "role": "reception", "active": 1}
@@ -444,19 +513,55 @@ def run(D, SRC, shared_src, fin, work):
        "stock goes down; above the stock it is still saved (flagged on his page); the owner at once; a manager refused while "
        "stationery.issue_on is absent, allowed once he switches it ON (a row on his Switches card); reception never; the menu: his "
        "'Stationery', the manager's 'Stationery diya' only with the switch ON",
-       lambda: "Kya diya?" in g_own4 and "Kisko diya?" in g_own4 and all(w in g_own4 for w in ("Lab", "Reception", "Sanjeevni", "Clinic"))
-       and p_own == 302 and "Save ho gaya" in f_own and stock(A) == a_before - 2
-       and p_over == 302 and pen_after == -5.0 and "Save ho gaya" in f_over
+       lambda: "Kya diya" in g_own4 and "Kisko" in g_own4 and all(w in g_own4 for w in ("Lab", "Reception", "Sanjeevni", "Clinic"))
+       and p_own == 302 and "ho gaya" in f_own.lower() and stock(A) == a_before - 2
+       and p_over == 302 and pen_after == -5.0 and "ho gaya" in f_over.lower()
        and g_m_off.status_code == 200 and "band hai" in g_m_off.get_data(as_text=True) and p_m_off == 403 and rg_m_off == 7.0
        and "Stationery diya for managers" in home_off and sw_on is not None and sw_on[0] == "on"
-       and p_m_on == 302 and rg_m_on == 6.0 and "Save ho gaya" in f_m_on
+       and p_m_on == 302 and rg_m_on == 6.0 and "ho gaya" in f_m_on.lower()
        and rc_get == 403 and rc_post == 403
        and 'data-s559="s568_stock"' in bar_own and 'data-s559="s568_issue"' not in bar_m_off and 'data-s559="s568_issue"' in bar_m_on
        and 'data-s559="s568_stock"' not in bar_m_on,
-       lambda: dict(own_page=("Kya diya?" in g_own4), own=(p_own, f_own[:80], a_before, stock(A)), over=(p_over, pen_after, f_over[:60]),
+       lambda: dict(own_page=("Kya diya" in g_own4), own=(p_own, f_own[:80], a_before, stock(A)), over=(p_over, pen_after, f_over[:60]),
                     m_off=(g_m_off.status_code, p_m_off, rg_m_off), card="Stationery diya for managers" in home_off, sw=tuple(sw_on) if sw_on else None,
                     m_on=(p_m_on, rg_m_on, f_m_on[:60]), rc=(rc_get, rc_post), bars=('data-s559="s568_stock"' in bar_own,
                                                                                     'data-s559="s568_issue"' in bar_m_off, 'data-s559="s568_issue"' in bar_m_on)))
+
+    # ================================================================== I4F (S568 FIX1, K1 CORRECTION 2): the owner's mock-up
+    fm = re.search(r'<div class=card id=s568diya><form method=post action="[^"]*">(.*?)</form>', g_own4, re.S)
+    fb = fm.group(1) if fm else ""
+    labels4 = [htmlmod.unescape(x).strip() for x in re.findall(r"<label[^>]*>([^<]+)</label>", fb)]
+    places4 = re.findall(r'<input type=radio name=place value="(\w+)"[^>]*>\s*(?:<span>)?\s*([^<]+?)\s*(?:</span>)?</label>', fb)
+    buttons4 = [htmlmod.unescape(re.sub(r"<[^>]+>", "", x)).strip() for x in re.findall(r"<button[^>]*>(.*?)</button>", fb, re.S)]
+    css4 = g_own4.split("<h2", 1)[0]
+    grid22 = bool(re.search(r"\.s568grid\{[^}]*display:grid;[^}]*grid-template-columns:1fr 1fr", css4))
+    tall = [int(x) for x in re.findall(r"\.s568place span\{[^}]*min-height:(\d+)px", css4)]
+    h2 = re.findall(r"<h2[^>]*>([^<]+)</h2>", g_own4)
+    exp_own = "Ho gaya — %s 2 ream, Lab ko. Stock mein ab %s." % (A, st._plain(a_before - 2) if (st is not None and a_before is not None) else "?")
+    # one more issue (the register, 1 to Clinic), its page read back WITH the flash -- the after-Save screen
+    rg_b4 = stock(RG)
+    p4f = form(own, "/stationery/diya", {"item": str(item_id(RG)), "qty": "1", "place": "clinic"}).status_code
+    after4 = html(own, "/stationery/diya")
+    fl4 = [htmlmod.unescape(x).strip() for x in re.findall(r"<div class=flash>(.*?)</div>", after4, re.S)]
+    exp_rg = "Ho gaya — %s 1 piece, Clinic ko. Stock mein ab %s." % (RG, st._plain(rg_b4 - 1) if (st is not None and rg_b4 is not None) else "?")
+    sp_dir = opt("--save-pages")
+    if sp_dir:
+        os.makedirs(sp_dir, exist_ok=True)
+        for nm_, body_ in (("diya.html", g_own4), ("diya_after.html", after4)):
+            with open(os.path.join(sp_dir, nm_), "w", encoding="utf-8") as fh:
+                fh.write(body_)
+        print("SAVED the Stationery diya page (before / after a Save) to %s" % sp_dir)
+    print("I4F counts: title %s; labels %s; place buttons %s; 2 x 2 grid %s, button min-height %s px; buttons in the form %s; the owner's "
+          "flash %r (expected %r); after one more issue (%s): %r (expected %r)"
+          % (h2[:1], labels4, [w for _k, w in places4], grid22, tall, buttons4, f_own, exp_own, p4f, fl4, exp_rg))
+    ck("I4F (S568 FIX1, K1 CORRECTION 2) Stationery diya follows the owner's mock-up (Issue.dc.html): title 'Stationery diya'; the "
+       "labels 'Kya diya', 'Kitne', 'Kisko'; four place buttons Lab · Reception · Sanjeevni · Clinic in a 2 x 2 grid, at least 52 px "
+       "tall; one Save; after Save 'Ho gaya — <item> <qty> <unit>, <place> ko. Stock mein ab <N>.'",
+       lambda: h2[:1] == ["Stationery diya"] and labels4 == ["Kya diya", "Kitne", "Kisko"]
+       and places4 == [("lab", "Lab"), ("reception", "Reception"), ("sanjeevni", "Sanjeevni"), ("clinic", "Clinic")]
+       and grid22 and tall and min(tall) >= 52 and buttons4 == ["Save"]
+       and f_own == exp_own and p4f == 302 and fl4 == [exp_rg],
+       lambda: dict(h2=h2, labels=labels4, places=places4, grid=grid22, tall=tall, buttons=buttons4, flash=(f_own, exp_own), after=(p4f, fl4, exp_rg)))
 
     # ================================================================== I5 (item 5): the inventory -- counts, low stock, the page
     flashes(own); flashes(mgr)
@@ -675,6 +780,28 @@ def run(D, SRC, shared_src, fin, work):
                     kind=kind_after_edit, card=re.findall(r"id=s568card[^>]*>([^<]*)<", bpage), rl=(rl_m, lane_after_m, rl_o, rl_aud), pl=(r_pl.status_code, r_pl.headers.get("Location"), [(p_["doc_kind"], p_["kind"]) for p_ in plain]),
                     bad=r_bad.status_code, moff=r_moff.status_code))
 
+    # ================================================================== I7F (S568 FIX1, K1 CORRECTION 3): a PDF or a photo only
+    flashes(own)
+    n7 = db.execute("SELECT COUNT(*) FROM bills").fetchone()[0]
+    up7 = len([f_ for f_ in os.listdir(env["ASSETS_UPLOADS"])]) if os.path.isdir(env["ASSETS_UPLOADS"]) else 0
+    r_docx = own.post("/desk/add", data={"what": "paper", "lane": "clinic",
+                                         "paper_file": (io.BytesIO(b"PK\x03\x04 walk568 made-up word file"), "walk568_h.docx")},
+                      content_type="multipart/form-data")
+    r_doc = own.post("/desk/add", data={"what": "pexp", "paid_on": "12-06-2031", "amount": "5",
+                                        "paper_file": (io.BytesIO(b"\xd0\xcf\x11\xe0 walk568 made-up old word file"), "walk568_i.doc")},
+                     content_type="multipart/form-data")
+    n7b = db.execute("SELECT COUNT(*) FROM bills").fetchone()[0]
+    up7b = len([f_ for f_ in os.listdir(env["ASSETS_UPLOADS"])]) if os.path.isdir(env["ASSETS_UPLOADS"]) else 0
+    loc_docx = urllib.parse.unquote_plus(r_docx.headers.get("Location") or "")
+    loc_doc = urllib.parse.unquote_plus(r_doc.headers.get("Location") or "")
+    print("I7F counts: a .docx answered %s, a .doc (the preset) answered %s; papers %d -> %d; stored files %d -> %d; the line: %r"
+          % (r_docx.status_code, r_doc.status_code, n7, n7b, up7, up7b, re.sub(r"^.*?msg=", "", loc_docx)[:140]))
+    ck("I7F (S568 FIX1, K1 CORRECTION 3) 'Add a paper from a file' takes only a PDF or a photo: a .docx (and a .doc on the preset) is "
+       "refused with one plain line, nothing saved (no paper, no stored file)",
+       lambda: r_docx.status_code == 302 and r_doc.status_code == 302 and n7b == n7 and up7b == up7
+       and "only a PDF or a photo" in loc_docx and "Nothing was saved" in loc_docx and "only a PDF or a photo" in loc_doc,
+       lambda: dict(docx=(r_docx.status_code, loc_docx[-160:]), doc=(r_doc.status_code, loc_doc[-160:]), papers=(n7, n7b), files=(up7, up7b)))
+
     # ================================================================== I8 (item 8): the pack fix -- only bills and invoices
     if "--no-pack" in ARGS:                                         # the installer: packs.py STOPPED (not at its FROM pin)
         print("I8 NOT RUN -- packs.py was stopped (not at its FROM pin); the pack fix is not in this install")
@@ -773,11 +900,11 @@ if __name__ == "__main__":
         ck("the walk ran to its end", lambda: False, lambda: repr(e))
     reds = R.count(False)
     print("%d checks: %d GREEN, %d RED%s" % (len(R), R.count(True), reds, (" (" + ", ".join(FAILED) + ")") if FAILED else ""))
-    if "--expect-red" in ARGS:
+    if "--expect-red" in ARGS or "--expect-red-fix1" in ARGS:
         seen_ = {}
         for ok_, nm_ in zip(R, NAMES):
             seen_[nm_] = ok_
-        must_ = tuple(k for k in MUST_RED if not (k == "I8" and "--no-pack" in ARGS))
+        must_ = tuple(k for k in (MUST_RED_FIX1 if "--expect-red-fix1" in ARGS else MUST_RED) if not (k == "I8" and "--no-pack" in ARGS))
         not_red = [k for k in must_ if seen_.get(k) is not False]
         print("CONTROL must-be-red: %s -- %s" % (", ".join(must_),("all RED" if not not_red else "NOT red: " + ", ".join(
             k + ("(green)" if seen_.get(k) else "(not reached)") for k in not_red))))

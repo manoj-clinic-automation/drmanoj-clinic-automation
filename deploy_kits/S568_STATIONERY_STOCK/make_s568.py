@@ -9,7 +9,11 @@ bytes; the new stationery.py is the kit's own file (copied beside them).
 Exact counted edits (BUILD_NORM_v1): refuses when an input is not at its FROM pin or an anchor is not found exactly the
 counted number of times. Every byte of each built file comes from the live file plus these edits. packs.py: build_bundle's
 kind filter only (S568_BRIEF_R1 C3); when packs.py is absent from the input folder, or not at its pin, it is left out and
-said (the brief: "STOP that file, build the rest and say so")."""
+said (the brief: "STOP that file, build the rest and say so").
+
+S568 FIX1 (16-Oct-2026, the kit review K1's CORRECTIONS 1-3; same kit, revised in place): the FROM pins and every anchor are
+unchanged; only SD1's mark (STOCK_FIX) and SD22's block (add_page refuses any file but a PDF or a photo, before the intake is
+called) differ in sorting_desk.py; stationery.py carries CORRECTIONS 1 and 2."""
 import hashlib, os, shutil, sys
 
 FROM = {"sorting_desk.py": "a053a222ee0fa8b0026aa4fc2511e8a9",
@@ -27,6 +31,7 @@ SD_EDITS = [
      r'''LAST = "S566"                 # S566_SCANAPP_LAST_FIXES: a restore checks for a double first; every waiting paper reachable; one count
 STOCK = "S568"                # S568_STATIONERY_STOCK: Stationery & packaging, its lines to the stock, the mixed tick, Add from a file
 PEXP = "Pharmacy expense"     # S568 item 7: the Aumni preset's kind (never 'Pharmacy': Sanjeevni's registers never pair it)
+STOCK_FIX = "S568_FIX1"       # S568 FIX1 (K1 CORRECTION 3): "Add a paper from a file" takes a PDF or a photo only
 ''', 1),
     # SD2 (item 1, R1 C8) -- CONS (and so CLINIC_DEST)
     (r'''CONS = ("procedure", "xray_small", "xray_11x14", "others")
@@ -267,10 +272,13 @@ def _s568_apart(db, ym):
         return {"pexp": 0, "pexp_total": 0}
 
 
-ADD_TPL = PAGE_HEAD + """<div class=top><a href="{{url_for('s551_desk')}}" style="font-size:14px">‹ Sorting desk</a><span class=t>Add a paper from a file</span><span class=muted style="font-size:14px">A PDF or a photo — it goes in as a scan does: the stamp, the double-scan check, the reading.</span></div>
+S568_FILE_EXT = ("pdf", "jpg", "jpeg", "png", "webp", "heic")       # S568 FIX1: the intake's PDF and photo types -- never doc / docx
+S568_FILE_REFUSED = "That file cannot be taken — only a PDF or a photo (pdf, jpg, jpeg, png, webp, heic). Nothing was saved."
+
+ADD_TPL = PAGE_HEAD +"""<div class=top><a href="{{url_for('s551_desk')}}" style="font-size:14px">‹ Sorting desk</a><span class=t>Add a paper from a file</span><span class=muted style="font-size:14px">A PDF or a photo — it goes in as a scan does: the stamp, the double-scan check, the reading.</span></div>
 {% if msg %}<div class="msg{{' bad' if bad else ''}}" id=s568msg>{{msg}}</div>{% endif %}
 <form method=post enctype=multipart/form-data class=card id=s568add style="margin:14px 18px;display:flex;flex-direction:column;gap:10px;max-width:660px">
-<label style="font-size:14px">The file<input type=file name=paper_file accept="application/pdf,image/*" style="display:block;margin-top:4px"></label>
+<label style="font-size:14px">The file<input type=file name=paper_file accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,application/pdf,image/jpeg,image/png,image/webp,image/heic" style="display:block;margin-top:4px"></label>
 <b style="font-size:14px">What is it?</b>
 <label style="font-size:14px;display:flex;gap:6px;align-items:center"><input type=radio name=what value=paper checked style="width:auto"> A paper for the scan app, on the lane</label>
 <div style="margin-left:24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><select name=lane>{% for k, w in lanes %}<option value="{{k}}">{{w}}</option>{% endfor %}</select>
@@ -311,7 +319,10 @@ def add_page():
     note = (f.get("note") or "").strip()[:120]
     if not (fobj and fobj.filename):
         return _back_to("s568_add", "Choose the file (a PDF or a photo). Nothing was saved.", True)
-    pexp = (f.get("what") or "") == "pexp"
+    ext = fobj.filename.rsplit(".", 1)[1].lower() if "." in fobj.filename else ""      # the intake's own reading of it
+    if ext not in S568_FILE_EXT:                                    # S568 FIX1 (K1 CORRECTION 3): a PDF or a photo only
+        return _back_to("s568_add", S568_FILE_REFUSED, True)
+    pexp =(f.get("what") or "") == "pexp"
     if pexp:
         try:
             if not str(f.get("paid_on") or "").strip():
@@ -329,7 +340,7 @@ def add_page():
             return _back_to("s568_add", "Choose the lane. Nothing was saved.", True)
         bid = AR._create_intake_bill(fobj, note, lane, {}, challan=(f.get("challan") == "1"))
     if not bid:
-        return _back_to("s568_add", "That file cannot be taken — a PDF or a photo (jpg, png). Nothing was saved.", True)
+        return _back_to("s568_add", S568_FILE_REFUSED, True)
     db = AR.get_db()
     b = _row(db, bid)
     if b["dup_of"]:
