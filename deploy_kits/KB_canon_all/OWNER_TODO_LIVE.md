@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S317 close** (the parent), 16-Oct-2026, early morning — the Scan App sections exactly as its S315 close wrote them (its session 318 open), the Sanjeevni sections exactly as its S312 close wrote them (its session 316 open); the parent's sections refreshed here (319 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S316 close** (the Sanjeevni project), 17-Oct-2026 — the parent's sections exactly as its S317 close wrote them (its session 319 open), the Scan App sections exactly as its S315 close wrote them (its session 318 open); the Sanjeevni sections refreshed here (322 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S317 close** (the parent), 16-Oct-2026, early morning — the Scan App sections exactly as its S315 close wrote them (its session 318 open), the Sanjeevni sections exactly as its S312 close wrote them (its session 316 open); the parent's sections refreshed here (319 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S315 close** (the Scan App project), 15-Oct-2026, afternoon — the parent's sections exactly as its S313 close wrote them (its session 317 open), the Sanjeevni sections exactly as its S312 close wrote them (its session 316 open); the Scan App sections refreshed here (318 reserved)
 
@@ -396,6 +398,59 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S316 close (17-Oct)
+
+*Detail: `S316_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_322.md`. The same lines are on your System Board.*
+
+**1 · The publish** — this close's record only (nothing changes on the server). The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · The dealers' ordering WhatsApp list (your ask of 16-Oct, 16:48)** — the next pharmacy chat shows you a mock-up first; nothing is built before your OK.
+
+**Still yours from before, not urgent (on your board):**
+- bank details for **Agarwal Surgicals and Medicals** — its bill is scanned:
+
+```
+https://followup.dr-manoj.in/finance/purchase/page/book
+```
+
+- the first cheque logged (Shavez can do it);
+- one photo of Marg's purchase-import screen;
+- phone numbers for **BASS** and **DAANSHI** (or Shavez) — they have none in the phone book.
+
+**Worth knowing — the staff's, on their own screens, not yours:**
+- **Amir:** four one-time Marg jobs on his card — KT ROS DT, VINBACTUM DS, FOLITRAX 15 MG TAB, OSTOVAXL DM (the stock check of the 6-Sep count: 166 of 170 right).
+- **Darpan:** one spot count at the head of his list — ANKLE BINDER L BAMBOO.
+- **Morning staff:** the two reports from the REPORT login, as every day.
+
+**Held at your word:**
+- S438_COUNT_BOOK;
+- S486, the buying model — after stock on the spine;
+- **the lasting fix for an unchanged Marg re-export (parked 16-Oct, 13:47)** — until then, re-export with that day's To-date;
+- **Amir's *Aaj ka kaam* list — off, and nothing is added to it (D690);**
+- **NORTIMER — out of the 6-Sep count (D715).**
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S316 close
+
+**Every build follows the charter v1.1 (`claude/S307_BUILD_CHARTER_v1_1.md`, D707). Your API credits end 17-Oct: from the next chat, builds go back to the Claude Code paste line unless you say otherwise.**
+
+1. **The dealers' ordering WhatsApp list** — a mock-up for you first (⭐0 2).
+2. **Stock on the spine (rung 4b)**, then **S486 Part A** and **Part B**.
+3. **Small:** the hub's orthotic section and a held line (F-875); a label on Amir's page (F-881); the five limits on your settings page.
+
+## ✅ DONE AT THE S316 CLOSE — 14 → 17-Oct-2026 (the Sanjeevni project)
+
+- ~~**The ordering sheet (S543, your D716)**~~ — live 08:35 14-Oct: Marg's own open order, units, the heading, Marg's PDF beside the system's.
+- ~~**A refused report goes in by itself once the reader is mended; the staff are not told to redo it (F-893)**~~ — live 10:49 14-Oct (S556).
+- ~~**The order sheet that showed 12 October on your phone**~~ — every print now fresh, named with its time, *"chhapa"* on every page (S561, 15:10 15-Oct).
+- ~~**Darpan's day with the bank's SMS; Claude vs Sarvam on the medicine bills**~~ — live 17:14 15-Oct (S565).
+- ~~**Amir's 30 stock vouchers checked**~~ — 166 of 170 right; the four on his card (S569, S570, S572, 16-Oct).
+- ~~**Y86, the ordering sheet on your API credits**~~ — done 14-Oct.
+- ~~**Y85, the publish of the S312 record**~~ — landed 06:16 IST 14-Oct.
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S312 close (14-Oct, early morning)
 
