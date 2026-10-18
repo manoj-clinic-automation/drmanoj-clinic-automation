@@ -212,8 +212,11 @@ tables, the switch row at `'0'`) is added by the app on the first phone-book rea
 - **DUTY_MAP:** no duty added, moved or removed — not changed.
 
 ### Publish and the lock
-`PUBLISH_ALL.bat` run after this report; the server clone `/root/deploy/repo` pulled and the kit checked there with `md5sum -c SUMS.md5`; then the
-build lock `/root/deploy/.claude_code_build.lock` (owner S574) removed. Scratch `/tmp/s574kit`, `/tmp/s574probe` removed after.
+`PUBLISH_ALL.bat` published and verified **aa9a0c3** (it also carried what the other chats had pending: the S575 brief, the S576 kit, the canon
+files — expected, charter). The server clone `/root/deploy/repo` pulled to aa9a0c3; there `md5sum -c SUMS.md5` is OK for all six files and every
+kit file is byte-identical (`cmp`) to the copy that ran. The five live files read back at their TO pins again, healthz 200; the build lock
+(owner S574) released at **07:05:37 IST** (the box's `date`); `/tmp/s574kit`, `/tmp/s574probe` and the installer's scratch removed. This
+report is published once more after this line.
 
 ### Undo (if the owner says "undo")
 If he has merged, first his own **Undo the merge** (or **Turn off** — OFF reads every row as before; Marg's rows' own fields were never changed).
