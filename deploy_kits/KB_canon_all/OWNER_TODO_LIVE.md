@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S319 close** (the parent), 18-Oct-2026, morning — the Sanjeevni sections exactly as its S322 close wrote them (its session 324 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (325 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S325 close** (the parent), 18-Oct-2026, afternoon — the Sanjeevni sections exactly as its S322 close wrote them (its session 324 open), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (326 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S319 close** (the parent), 18-Oct-2026, morning — the Sanjeevni sections exactly as its S322 close wrote them (its session 324 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (325 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S322 close** (the Sanjeevni project), 18-Oct-2026, morning — the parent's sections exactly as its S317 close wrote them (its session 319 open), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the Sanjeevni sections refreshed here (324 reserved)
 
@@ -157,7 +159,7 @@ https://followup.dr-manoj.in/scanapp/
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S319 close (18-Oct, morning)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S325 close (18-Oct, afternoon)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -173,61 +175,75 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · IN THE NEXT CHAT — TWO DECISIONS, ASKED THERE.** May the server restart its own stuck parts by itself? May the watcher restart the whole server through Hostinger? If yes to the second, you make one key in your Hostinger panel; the chat shows you the steps.
-
-**3 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+**2 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**4 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** On a spare PC, from `D:\MARGERP\serverbackup` on the pharmacy PC or the pen drive's `MargAuto_by_agent` folder. Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
+**3 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** On a spare PC, from `D:\MARGERP\serverbackup` on the pharmacy PC or the pen drive's `MargAuto_by_agent` folder. Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
 
-**IF THE PORTAL STOPS — your guide, pinned in your Claude sidebar:**
+**IF THE PORTAL STOPS — the first steps now run by themselves; your guide says what already ran:**
 
 ```
 https://claude.ai/artifact/H5W1T3WPNm85t2peTnNnfP
 ```
 
+**SURGERY CASES — use it from the next surgery on (it is not a duty, it is the new place):**
+
+```
+https://followup.dr-manoj.in/finance/surgery
+```
+
 **LATER — none of these is urgent**
 
-**5 · RANJEET'S LOGIN** — the password is yours to set.
+**4 · RANJEET'S LOGIN** — the password is yours to set.
 
 ```
 https://followup.dr-manoj.in/portal/users
 ```
 
-**6 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** September's is ready.
+**5 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** September's is ready.
 
 ```
 https://followup.dr-manoj.in/finance/packs?month=2026-09
 ```
 
-**7 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
+**6 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
 
-**8 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
+**7 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
 
-**9 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
+**8 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
 
-**WHEN IT HAPPENS — not a duty:** a portal alert on your phone or e-mail (open the guide) · a POS total waiting for your Confirm (now only when neither the bank SMS nor the MPR has come) · an SMS-vs-MPR difference line on your clinic money page · a Voicenotes list waiting above *Give a task* · your bank check under row 2 of the packs page.
+**WHEN IT HAPPENS — not a duty:** a phone line saying the server fixed (or could not fix) a part, or that the watcher started the server · a portal alert (open the guide at the step it names) · a POS total waiting for your Confirm · an SMS-vs-MPR difference line on your clinic money page · a Voicenotes list waiting above *Give a task* · your bank check under row 2 of the packs page.
 
 **Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C) · the follow-up tracker on the server — "later" (12-Oct) · Bhati's later features (sessions in the 360° record, *physiotherapy advised* to his page, his absence → WhatsApp to his patients).
 
-*Ticked by you or done, and off this list: the S317 publish · the journal line (16-Oct) · the watcher's authorisation (17-Oct) · the S573 and S576 install lines (18-Oct) · the guide pinned (18-Oct).*
+*Ticked by you or done, and off this list: the S319 publish (09:33 18-Oct) · the two decisions and the Hostinger key (18-Oct) · the S578, S579 and S581 publishes and install lines (18-Oct).*
 
-*Closed by your word and not on this list: everything listed so at the S317 close, plus the 16-Oct outage (Hostinger's) and the parchi's name for a Docterz ID (fixed 18-Oct).*
+*Closed by your word and not on this list: everything listed so at the S319 close, plus the portal's automatic steps (your two yeses), the surgery-case rules you gave, and the dummy-case test (done, all 15 steps passed).*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The portal-down steps made automatic (your word, 18-Oct — the first build of the next chat):** the server repairs its own stuck parts; the watcher checks Hostinger and starts or restarts the server; your phone hears only when the automatic steps did not work, with the one step left for you.
-2. **The website's mail and the vendor's June access (from the Growth chat):** a working mail road for the website's contact forms, proven by one test; any login the vendor set up in June checked and removed.
-3. **The SMS watch (mine, reads only):** how often each account's SMS comes, and whether the sender now arrives.
-4. **Small, my own:** the Yes Bank SMS turned away · the nightly unattended report missing since 10-Oct · the board's number record trimmed · the console's doubled *"counter sheet not filled"* line · the finance app's own test suite · proving the 148 older documents.
-5. **The punch listener's step 2** — after about 19-Oct, only if every genuine punch carries one steady mark.
-6. **On your word:** a *send to Shavez* button for the bank check · Bhati's later features · the WhatsApp appointment message to patients · the MyOperator key steps · the contacts · the mail flood · the portal tiles · kits for Shavez's PC and the lab PC.
-7. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
+1. **The next chat's open, in full** — the checks the last open skipped (tidying, the project-knowledge trim, the four numbers, what no backup holds, the pins against the 19-Oct backup).
+2. **Watch the first real outage and the first real surgery case** — read what ran by itself and what reached you; read the first real case once. Reads only.
+3. **The website's mail and the vendor's June access (from the Growth chat):** a working mail road for the website's contact forms, proven by one test; any login the vendor set up in June checked and removed.
+4. **The SMS watch (mine, reads only):** how often each account's SMS comes, and whether the sender now arrives.
+5. **Small, my own:** the Yes Bank SMS turned away · the nightly unattended report missing since 10-Oct · the board's number record trimmed · the console's doubled *"counter sheet not filled"* line · the finance app's own test suite · proving the 148 older documents.
+6. **The punch listener's step 2** — after about 19-Oct, only if every genuine punch carries one steady mark.
+7. **On your word:** a *send to Shavez* button for the bank check · Bhati's later features · the WhatsApp appointment message to patients · the MyOperator key steps · the contacts · the mail flood · the portal tiles · kits for Shavez's PC and the lab PC.
+8. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S325 CLOSE — 18-Oct-2026 (the parent)
+
+- ~~**The two decisions** (18-Oct, ~09:55): may the server restart its own stuck parts; may the watcher restart the whole server through Hostinger~~ — **yes and yes**; you made the key. Built and live 10:46 (S578, D734).
+- ~~**"I want you to study this screen… tell me the flow for generating the key and also any use of the Claude Code connector shown"**~~ — answered; the key is in the watcher's private settings only.
+- ~~**"Surgical case app… I want this on the server… build some flows… scanning pre-approval records… file cover, the billing page, implant page, discharge summary, and maintain ledger of the implants… vendor-wise, patient-wise, and the reconciliation"** (18-Oct, 10:51 → 11:39)~~ — *Surgery cases* live 12:08 (S579, D735).
+- ~~**"The monthly hospital statement is the one to be reconciled… the casepack patient selection should have option to continue to this flow… sort patients on basis of cash and credit… also add xray images and scans etc, medicolegal papers, police memo and all"**~~ — in the same build.
+- ~~**"I gave the command to VPS and probably it completed the work and then accidentally I closed that window."**~~ — checked live from here; it had installed.
+- ~~**"Do the entire work in the surgical case app by creating a dummy case so that you can verify each step and its functionality. Thoroughly and report back to me"** (12:17)~~ — all 15 steps passed; the fixes live 13:17 (S581); the dummies removed — your first real case is S-2026-0003.
 
 ## ✅ DONE AT THE S319 CLOSE — 16 → 18-Oct-2026 (the parent)
 
