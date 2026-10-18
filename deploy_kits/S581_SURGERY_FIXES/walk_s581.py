@@ -213,7 +213,7 @@ post("/finance/surgery/case/%d/edit" % cid1, dict(stage="discharged", patient="W
 post("/finance/surgery/case/%d/edit" % cid2, dict(stage="discharged", patient="WALKTEST SITA", payer="cash", hospital="WALK HOSPITAL", due="30000"))
 check("K Dr Manoj writes the amount due from the hospital", q1("SELECT due_p FROM surg_case WHERE id=?", (cid1,))[0] == 7000000)
 post("/finance/surgery/receipts", dict(day="2099-01-14", amount="100000", from_whom="WALK HOSPITAL", period="December 2098"))
-rid = q1("SELECT id FROM surg_receipt")[0]
+rid = q1("SELECT id FROM surg_receipt WHERE period='December 2098' AND voided_at=''")[0]   # S581: never the first row -- the live copy holds others
 r = get("/finance/surgery/receipt/%d" % rid)
 check("K the payment page lists this hospital's open cases with what is still due", b"WALKTEST RAMESH" in r.data and b"WALKTEST SITA" in r.data
       and b"70,000" in r.data)
