@@ -1,0 +1,5 @@
+S590_WEBSITE_MAIL_RELAY
+session S326 (the parent), 18-Oct-2026, 18:4x IST
+the owner 18:27 IST: "why not do this now" -- the website mail relayed through smtp.gmail.com:587 as the clinic Gmail (the health mail credentials, /root/wa/.env)
+board _numbers v503 -> v504 (kit S590)
+PLANNED: /etc/postfix/main.cf (backup /root/s590_backup/); new /etc/postfix/sasl/sasl_passwd (+.db), root 600
