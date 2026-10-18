@@ -1,0 +1,6 @@
+S589_FTP_VENDOR_OFF
+session S326 (the parent), 18-Oct-2026, 18:3x IST
+D741 -- the website vendor FTP login admin_approids removed, FTP (pure-ftpd) stopped, disabled, masked
+board _numbers v500 -> v501 (kit S589, D741)
+keeps /root/s589_backup/ftp_admin_approids.sql + pure-ftpd.was (root-only)
+carries probe_s589.py (probe_s588 v2)
