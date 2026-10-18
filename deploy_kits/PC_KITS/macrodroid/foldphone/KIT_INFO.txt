@@ -1,6 +1,8 @@
 # deploy_kits/PC_KITS/macrodroid/foldphone -- the MacroDroid macros of Dr Manoj's phone (Fold): Bank SMS to Clinic Server + Bank SMS 2 (Yes Bank) -- the retired 'SMS to Google Sheet' macro dropped, as the Clinic PCs & phones page serves them (kit S473).
 # The template is the owner's own export of 04-Oct-2026 with every key replaced by a placeholder ({{BANK_SMS_KEY}} / {{PHONE_TOKEN}})
 # and the geofence / cell-tower data and the macros' stored variable values (the last order text) blanked. The LIVE key goes in on the server when the owner presses the button. No secret here.
-version=macros of 04-Oct-2026, keys as placeholders
-packed=04-Oct-2026
-template_md5=72f19a54457e04923b7fb6225cffc031
+version=macros of 04-Oct-2026 + the owner's two query fields of 15/18-Oct on Bank SMS to Clinic Server (from = {sms_number}, text = {sms_message}), keys as placeholders
+packed=04-Oct-2026 · updated 18-Oct-2026 (S326)
+template_md5=cccba9aa8ebc5083c4eeb26aea5348a8
+# S326, 18-Oct-2026 18:1x IST: 'Bank SMS to Clinic Server' gains the two query fields the owner set on his phone -- from = {sms_number} (15-Oct)
+# and text = {sms_message} (18-Oct 18:04, F-903: with 'from' added the server could no longer read the bare SMS-as-field-name form). The Yes Bank macro is unchanged.

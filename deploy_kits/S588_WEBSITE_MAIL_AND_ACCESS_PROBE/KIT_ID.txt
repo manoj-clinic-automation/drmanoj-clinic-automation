@@ -1,0 +1,5 @@
+S588_WEBSITE_MAIL_AND_ACCESS_PROBE
+session S326 (the parent), 18-Oct-2026, 18:2x IST
+READ ONLY -- growth_S320_1: the website mail and the vendor access
+board _numbers v499 -> v500 (kit S588; no PLANNED line: no live file touched)
+writes only /root/finance/s588_probe.json (mode 600)
