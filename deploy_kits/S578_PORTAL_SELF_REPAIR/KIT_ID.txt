@@ -1,0 +1,1 @@
+S578_PORTAL_SELF_REPAIR · session S325 · 18-Oct-2026 · D734 · parent-owned files: /root/deploy/clinic_doctor.py, clinic-watchdog drop-in, the personal Apps Script Clinic Portal Watcher
