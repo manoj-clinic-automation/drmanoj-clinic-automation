@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S316 close** (the Sanjeevni project), 17-Oct-2026 — the parent's sections exactly as its S317 close wrote them (its session 319 open), the Scan App sections exactly as its S315 close wrote them (its session 318 open); the Sanjeevni sections refreshed here (322 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S318 close** (the Scan App project), 18-Oct-2026, morning — the parent's sections exactly as its S317 close wrote them (its session 319 open), the Sanjeevni sections exactly as its S316 close wrote them (its session 322 open); the Scan App sections refreshed here (323 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S316 close** (the Sanjeevni project), 17-Oct-2026 — the parent's sections exactly as its S317 close wrote them (its session 319 open), the Scan App sections exactly as its S315 close wrote them (its session 318 open); the Sanjeevni sections refreshed here (322 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S317 close** (the parent), 16-Oct-2026, early morning — the Scan App sections exactly as its S315 close wrote them (its session 318 open), the Sanjeevni sections exactly as its S312 close wrote them (its session 316 open); the parent's sections refreshed here (319 reserved)
 
@@ -62,38 +64,53 @@
 
 *Detail: `START_HERE_SESSION_313.md` · `S311_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S310 close's (13-Oct, early morning); `S310_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_312.md` that chat's entry.*
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S315 close (15-Oct, afternoon)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S318 close (18-Oct, morning)
 
-*Detail: `S315_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_318.md`. The same lines are on your System Board.*
+*Detail: `S318_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_323.md`. The same lines are on your System Board.*
 
-**1 · The publish:** it carries this close's record only (papers; nothing changes on the server).
+**1 · The publish:** it carries this close's record and the battery-setup brief. These are papers only; nothing changes on the server.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · When you want Shavez on them (not urgent):** switch on *Sorting desk for Shavez* and *Machine pages for Shavez* on the *Switches* card of the scan app's home page:
+**2 · Battery first setup — your one line,** once the Sanjeevni build has finished. It builds old batteries with only a date (*"Old battery — no bill"*), older bills to link, the number of batteries in each online UPS, and a *First setup* list:
+
+```
+python D:\Downloads\_kbtools\agent_build\run_build.py S575_BATTERY_SETUP
+```
+
+**3 · When you want Shavez on them (not urgent):** on the *Switches* card of the scan app's home page, switch on *Sorting desk for Shavez*, *Machine pages for Shavez*, *Batteries for Shavez* and *Stationery diya for managers*:
 
 ```
 https://followup.dr-manoj.in/scanapp/
 ```
 
-**3 · Your word, when you choose (not urgent):** whether to make a stop-gap correction of the Janitor's renewal list (Y83).
-
-**4 · After 17-Oct:** Claude stops reading the scans by itself when your API credit ends, and Sarvam carries on. Paid credit is your choice then.
+**4 · Your word, when you choose (not urgent):** whether to make a stop-gap correction of the Janitor's renewal list (Y83).
 
 **Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison (*"park claude vs sarvam for now"*).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S315 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S318 close
 
-**Every build follows `BUILD_NORM_v1` (D704). Nothing is waiting to be built; the next round is only when you ask.**
+**Every build follows `BUILD_NORM_v1` (D704).**
 
-1. **On the desk:** a paper already set aside shows *"Already set aside on <date> — Restore?"* (F-902).
-2. **Small leftovers in one round:** the scanner's last review note (N7); the reviews' *seen, not changed* notes; a scratch folder on the server.
-3. **Then D720, when you ask:** your family's documents and renewals in their own Google project.
-4. **Carried (reads, mine):** the 16-Oct check that the last kit's four files are as installed; S532's placed papers.
+1. **S575 — battery first setup** (brief ready). After your line: the kit review, your publish and your server line, then the result checked as you will see it.
+2. **Then, after it is live:** you record your batteries under *First setup* on the Batteries page — at your pace.
+3. **Before the next change to the sorting desk or the main app file:** I read each one whole and tidy it first. Both have had eight patches since their last whole read.
+4. **D720, when you ask:** your family's documents and renewals in their own Google project.
+5. **Carried (reads, mine):** S532's placed papers; the old month page's held double; the DTH lab's battery payer, only if you raise it.
 
 **Waits by your word:** the clinic's bills in the accountants' pack.
+
+## ✅ DONE AT THE S318 CLOSE — 15 → 18-Oct-2026 (the Scan App project)
+
+- ~~**"Go ahead, but use the claude api"** — the small round~~ — live 15-Oct ~19:08 (S563): a set-aside paper can be restored on the desk, and the review leftovers are cleared.
+- ~~**"Check the scanner … include these two small follow-ups"**~~ — live 16-Oct ~06:59 (S566). Every waiting paper is on the desk; the counts that disagreed now agree.
+- ~~**Batteries: "analyse and suggest"; the mock-up; "AND THE BATTERY ONE ?"**~~ — live 16-Oct 14:19 (S571). 15 places, *New battery fitted*, the desk's one-tap bill link, and reminders on Renewals.
+- ~~**Stationery, carry bags, Aumni Crafts, estimates (D730, "Go")**~~ — live 16-Oct ~12:15 (S568). The item list and stock, *Stationery diya* (off), Aumni as a pharmacy expense, and only bills and invoices to the accountants.
+- ~~**"Check whether this last build was completed" (the PC restart)**~~ — checked: nothing live had changed, and the build was resumed and finished (S568_RESUME).
+- ~~**"Check these other $200 API credits"**~~ — USD 185.48 left, valid to 18-Nov.
+- ~~**The S315 publish (Y90)**~~ — landed 14:54 IST 15-Oct.
 
 ## ✅ DONE AT THE S315 CLOSE — 14 → 15-Oct-2026 (the Scan App project)
 

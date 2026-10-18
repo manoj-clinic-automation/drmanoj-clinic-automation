@@ -33,6 +33,7 @@ function stopWatcher() {
 }
 
 function check() {
+  retryPending_();
   var P = PropertiesService.getScriptProperties();
   var now = new Date();
   var portal = probe_(PORTAL);
@@ -76,17 +77,47 @@ function probe_(url) {
 }
 
 function notify_(title, body, priority, tags) {
-  var topic = PropertiesService.getScriptProperties().getProperty('NTFY_TOPIC');
-  if (topic) {
-    try {
-      UrlFetchApp.fetch(NTFY + topic, {
-        method: 'post', payload: body, muteHttpExceptions: true,
-        headers: { Title: title, Priority: priority || 'high', Tags: tags || 'warning', Click: GUIDE }
-      });
-    } catch (e) { /* the e-mail below still goes */ }
+  MailApp.sendEmail(EMAIL, title, body);                       // the e-mail always goes first
+  var item = { title: title, body: body, priority: priority || 'high', tags: tags || 'warning', since: new Date().toISOString() };
+  if (!push_(item, 3)) {                                       // ntfy.sh refuses when Google's shared address is over its daily quota
+    var P = PropertiesService.getScriptProperties();
+    var q = JSON.parse(P.getProperty('pendingPush') || '[]'); q.push(item); P.setProperty('pendingPush', JSON.stringify(q.slice(-5)));
   }
-  MailApp.sendEmail(EMAIL, title, body);
+}
+
+function push_(item, tries) {
+  var P = PropertiesService.getScriptProperties();
+  var topic = P.getProperty('NTFY_TOPIC');
+  if (!topic) return false;
+  for (var i = 0; i < tries; i++) {
+    try {
+      var res = UrlFetchApp.fetch(NTFY + topic, {
+        method: 'post', payload: item.body, muteHttpExceptions: true,
+        headers: { Title: item.title, Priority: item.priority, Tags: item.tags, Click: GUIDE }
+      });
+      P.setProperty('lastPush', new Date().toISOString() + ' ' + res.getResponseCode() + ' ' + item.title);
+      if (res.getResponseCode() === 200) return true;
+    } catch (e) {
+      P.setProperty('lastPush', new Date().toISOString() + ' ERROR ' + String(e).slice(0, 120));
+    }
+    if (i < tries - 1) Utilities.sleep(15000);
+  }
+  return false;
+}
+
+function retryPending_() {                                     // every check: send what the phone has not had yet (for up to 3 hours)
+  var P = PropertiesService.getScriptProperties();
+  var q = JSON.parse(P.getProperty('pendingPush') || '[]');
+  if (!q.length) return;
+  var keep = [];
+  q.forEach(function (item) {
+    if (new Date() - new Date(item.since) > 3 * 3600000) return;
+    if (!push_(item, 1)) keep.push(item);
+  });
+  P.setProperty('pendingPush', JSON.stringify(keep));
 }
 
 function fmt_(iso) { return Utilities.formatDate(new Date(iso), 'Asia/Kolkata', 'dd-MMM HH:mm') + ' IST'; }
 function mins_(iso, now) { return Math.max(1, Math.round((now - new Date(iso)) / 60000)); }
+
+
