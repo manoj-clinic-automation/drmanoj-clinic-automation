@@ -248,8 +248,11 @@ def run(D, SRC, shared_src, work):
 
     P = {}
 
-    def add_place(name, grp, payer="clinic"):
-        r_ = form(own, "/batteries/place", {"do": "add", "name": name, "grp": grp, "payer": payer, "sub": "Walk"})
+    def add_place(name, grp, payer="clinic", owner_only=False):
+        d_ = {"do": "add", "name": name, "grp": grp, "payer": payer, "sub": "Walk"}
+        if owner_only:
+            d_["owner_only"] = "1"                                          # a vehicle is yours only, as the seeded ones
+        r_ = form(own, "/batteries/place", d_)
         x = db.execute("SELECT id FROM battery_place WHERE name=? ORDER BY id DESC LIMIT 1", (name,)).fetchone()
         P[name] = x[0] if x else None
         return r_.status_code
@@ -300,7 +303,7 @@ def run(D, SRC, shared_src, work):
     SU, JI, VC = "WALK575 Small UPS", "WALK575 Inverter", "WALK575 Old Car"
     F1, F2, F3 = "WALK575 First small UPS", "WALK575 First inverter", "WALK575 First online UPS"
     adds = [add_place(OA, "online_ups"), add_place(OB, "online_ups"), add_place(OC, "online_ups"), add_place(SU, "small_ups"),
-            add_place(JI, "gen_inv"), add_place(VC, "vehicles", "owner"), add_place(F1, "small_ups"), add_place(F2, "gen_inv"),
+            add_place(JI, "gen_inv"), add_place(VC, "vehicles", "owner", True), add_place(F1, "small_ups"), add_place(F2, "gen_inv"),
             add_place(F3, "online_ups")]
     print("places: %d made through '+ Add a battery place' (%s)" % (sum(1 for x in P.values() if x), "/".join(str(a_) for a_ in adds)))
 
@@ -539,6 +542,9 @@ def run(D, SRC, shared_src, work):
     fd2 = fold(pg4b)
     gf1, gf2, gf3 = cur_fit(F1), cur_fit(F2), cur_fit(F3)
     v_f1b = view(F1)
+    r4_ = fitr(own, F1, fitted_on="01-06-2031", supplier="B.L. Computers", warranty_months="12", bill="awaited")   # the full form, a battery before it
+    fl4 = flashes(own)
+    print("I4 flash: a first battery says 'The one before' %s; a second one %s" % ("The one before" in fl1, "The one before is in the history." in fl4))
     print("I4 counts: the owner's fold %s, its lines -- %s; the first small UPS's badge '%s' (listed by current_fit, not the badge); its line "
           "carries back=first %s, supplier %s, warranty 12 %s, the date required %s; the manager's page has the fold %s; an empty date %s -> "
           "'%s', fittings %s; three in a row %s / %s / %s ('%s' | '%s' | '%s'); each back to the fold %s; the fold then open %s, the three "
@@ -552,7 +558,8 @@ def run(D, SRC, shared_src, work):
     ck("I4 (item 4) First setup: an owner-only fold on the Batteries page lists every place with no battery recorded (decided by "
        "current_fit -- a UPS showing 'Backup check due' is listed), one line each: the date (required), the set for an online UPS, the bill "
        "(Old battery — no bill / pick / find by stamp), Save, carrying the place's supplier and warranty; an empty date is refused; three "
-       "places saved in a row, each back at the open fold with its flash; the places then leave the list; the manager has no fold",
+       "places saved in a row, each back at the open fold with its flash; the places then leave the list; the manager has no fold; the saved "
+       "line speaks of 'the one before' only when there was one",
        lambda: "id=s571first" in pg4 and "First setup" in fd and lines_[F1] and lines_[F2] and lines_[F3] and not lines_[OA] and not lines_[SU]
        and v_f1["badge"][0] == "Backup check due"
        and "name=back value=first" in f1_line and 'name=supplier value="B.L. Computers"' in f1_line and 'name=warranty_months value="12"' in f1_line
@@ -564,7 +571,8 @@ def run(D, SRC, shared_src, work):
        and not any(('data-place="%s"' % P[n_]) in fd2 for n_ in (F1, F2, F3))
        and gf1.get("fitted_on") == "2023-03-01" and gf1.get("warranty_months") == 12 and gf1.get("bill_created_at") == "none:old-battery"
        and v_f1b.get("till") == datetime.date(2024, 3, 1) and gf2.get("fitted_on") == "2022-08-15" and gf2.get("warranty_months") is None
-       and gf3.get("set_n") == 6 and gf3.get("bill_id") == p_f3,
+       and gf3.get("set_n") == 6 and gf3.get("bill_id") == p_f3
+       and "The one before" not in fl1 and r4_.status_code == 302 and "The one before is in the history." in fl4,
        lambda: (lines_, v_f1.get("badge"), f1_line[:900], e_r.status_code, fl_e, n_f1e, r1_.status_code, r2_.status_code, r3_.status_code,
                 fl1, fl2, fl3, locs, gf1, gf2, gf3))
 

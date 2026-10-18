@@ -259,7 +259,7 @@ def _choice(db, p, f, k, owner, today):
 #s571 #s571first form.s575line{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:flex-end;padding:8px 0;border-top:1px solid #ECECE6}
 #s571 #s571first form.s575line label{display:flex;flex-direction:column;gap:2px;font-size:13px;margin:0}
 #s571 #s571first form.s575line input,#s571 #s571first form.s575line select{margin:0;padding:5px 6px}
-#s571 #s571first .s575nm{min-width:190px;max-width:240px;align-self:center}
+#s571 #s571first .s575nm{flex:0 0 240px;align-self:center}
 #s571 a.s575ask{color:#8A5A00;font-weight:500}
 ''', 1),
     # BT13 (C7) -- the list: "How many batteries? — set" for an online UPS with no count (the owner; it opens the place's edit form)
@@ -369,10 +369,12 @@ def _choice(db, p, f, k, owner, today):
             return redirect(url_for("s571_fit", pid=p["id"]))
 ''',
      '''        first = request.form.get("back") == "first"                  # S575 (R1 C6): First setup -- back to the fold, the save and the refusal
+        had = current_fit(db, p["id"]) is not None                     # S575: "The one before ..." only when there was one
         try:
             save_fit(db, p, request.form, owner)
             db.commit()
-            flash("Saved: a new battery at %s, fitted %s. The one before is in the history." % (p["name"], dmy(typed_date(request.form.get("fitted_on")) or _today())))
+            flash("Saved: a new battery at %s, fitted %s.%s" % (p["name"], dmy(typed_date(request.form.get("fitted_on")) or _today()),
+                                                                 " The one before is in the history." if had else ""))
             return redirect(url_for("s571_page", first=1, _anchor="s571first") if first else url_for("s571_place", pid=p["id"]))
         except ValueError as e:
             db.rollback()

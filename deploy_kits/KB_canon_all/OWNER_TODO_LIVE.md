@@ -1,4 +1,8 @@
-# OWNER TO-DO — LIVE · refreshed at the **S318 close** (the Scan App project), 18-Oct-2026, morning — the parent's sections exactly as its S317 close wrote them (its session 319 open), the Sanjeevni sections exactly as its S316 close wrote them (its session 322 open); the Scan App sections refreshed here (323 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S319 close** (the parent), 18-Oct-2026, morning — the Sanjeevni sections exactly as its S322 close wrote them (its session 324 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (325 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S322 close** (the Sanjeevni project), 18-Oct-2026, morning — the parent's sections exactly as its S317 close wrote them (its session 319 open), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the Sanjeevni sections refreshed here (324 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S318 close** (the Scan App project), 18-Oct-2026, morning — the parent's sections exactly as its S317 close wrote them (its session 319 open), the Sanjeevni sections exactly as its S316 close wrote them (its session 322 open); the Scan App sections refreshed here (323 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S316 close** (the Sanjeevni project), 17-Oct-2026 — the parent's sections exactly as its S317 close wrote them (its session 319 open), the Scan App sections exactly as its S315 close wrote them (its session 318 open); the Sanjeevni sections refreshed here (322 reserved)
 
@@ -153,7 +157,7 @@ https://followup.dr-manoj.in/scanapp/
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S317 close (16-Oct, early morning)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S319 close (18-Oct, morning)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -169,52 +173,70 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+**2 · IN THE NEXT CHAT — TWO DECISIONS, ASKED THERE.** May the server restart its own stuck parts by itself? May the watcher restart the whole server through Hostinger? If yes to the second, you make one key in your Hostinger panel; the chat shows you the steps.
+
+**3 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**3 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** On a spare PC, from `D:\MARGERP\serverbackup` on the pharmacy PC or the pen drive's `MargAuto_by_agent` folder. Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
+**4 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** On a spare PC, from `D:\MARGERP\serverbackup` on the pharmacy PC or the pen drive's `MargAuto_by_agent` folder. Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
+
+**IF THE PORTAL STOPS — your guide, pinned in your Claude sidebar:**
+
+```
+https://claude.ai/artifact/H5W1T3WPNm85t2peTnNnfP
+```
 
 **LATER — none of these is urgent**
 
-**4 · RANJEET'S LOGIN** — the password is yours to set.
+**5 · RANJEET'S LOGIN** — the password is yours to set.
 
 ```
 https://followup.dr-manoj.in/portal/users
 ```
 
-**5 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** September's is ready.
+**6 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** September's is ready.
 
 ```
 https://followup.dr-manoj.in/finance/packs?month=2026-09
 ```
 
-**6 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
+**7 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
 
-**7 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
+**8 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
 
-**8 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
+**9 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
 
-**WHEN IT HAPPENS — not a duty:** a POS total waiting for your Confirm (now only when neither the bank SMS nor the MPR has come) · an SMS-vs-MPR difference line on your clinic money page · a Voicenotes list waiting above *Give a task* · your bank check under row 2 of the packs page.
+**WHEN IT HAPPENS — not a duty:** a portal alert on your phone or e-mail (open the guide) · a POS total waiting for your Confirm (now only when neither the bank SMS nor the MPR has come) · an SMS-vs-MPR difference line on your clinic money page · a Voicenotes list waiting above *Give a task* · your bank check under row 2 of the packs page.
 
 **Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C) · the follow-up tracker on the server — "later" (12-Oct) · Bhati's later features (sessions in the 360° record, *physiotherapy advised* to his page, his absence → WhatsApp to his patients).
 
-*Ticked by you or done, and off this list: the after-call list's runner line and its two switches (14-Oct) · the bank SMS switch (15-Oct) · the macro's sender field (15-Oct).*
+*Ticked by you or done, and off this list: the S317 publish · the journal line (16-Oct) · the watcher's authorisation (17-Oct) · the S573 and S576 install lines (18-Oct) · the guide pinned (18-Oct).*
 
-*Closed by your word and not on this list: everything listed so at the S313 close, plus the after-call list's link and IVR button work (14-Oct) and the bank SMS standing in for the MPR (15-Oct).*
+*Closed by your word and not on this list: everything listed so at the S317 close, plus the 16-Oct outage (Hostinger's) and the parchi's name for a Docterz ID (fixed 18-Oct).*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The SMS watch (mine, reads only):** how often each account's SMS comes, and which address the bank uses now that your macro sends it. One line to you; a build only if the phone, not the bank, is missing them.
-2. **The Yes Bank SMS (mine):** five were turned away on 15-Oct as unreadable — I check whether a real NEFT or deposit message is being missed.
-3. **Small, my own:** the console's doubled *"counter sheet not filled"* line · the medical PC shouting if the hand-made pen-drive backup is more than a week old · the finance app's own test suite · proving the 148 older documents.
-4. **The punch listener's step 2** — after about 19-Oct, only if every genuine punch carries one steady mark.
-5. **On your word:** a *send to Shavez* button for the bank check · Bhati's later features · the WhatsApp appointment message to patients · the MyOperator key steps · the contacts · the mail flood · the portal tiles · kits for Shavez's PC and the lab PC.
-6. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
+1. **The portal-down steps made automatic (your word, 18-Oct — the first build of the next chat):** the server repairs its own stuck parts; the watcher checks Hostinger and starts or restarts the server; your phone hears only when the automatic steps did not work, with the one step left for you.
+2. **The website's mail and the vendor's June access (from the Growth chat):** a working mail road for the website's contact forms, proven by one test; any login the vendor set up in June checked and removed.
+3. **The SMS watch (mine, reads only):** how often each account's SMS comes, and whether the sender now arrives.
+4. **Small, my own:** the Yes Bank SMS turned away · the nightly unattended report missing since 10-Oct · the board's number record trimmed · the console's doubled *"counter sheet not filled"* line · the finance app's own test suite · proving the 148 older documents.
+5. **The punch listener's step 2** — after about 19-Oct, only if every genuine punch carries one steady mark.
+6. **On your word:** a *send to Shavez* button for the bank check · Bhati's later features · the WhatsApp appointment message to patients · the MyOperator key steps · the contacts · the mail flood · the portal tiles · kits for Shavez's PC and the lab PC.
+7. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S319 CLOSE — 16 → 18-Oct-2026 (the parent)
+
+- ~~**"The portal followup.drmanoj is down in Chrome as well as in my PWA app right now."** (16-Oct, 19:0x)~~ — Hostinger shut the server down from their side, 18:52 → 19:18; it came back by itself. The server's record now survives a restart.
+- ~~**"…a flow of what all troubleshoot needs to be done in a simple way, which I can also do on VPS…"** (17-Oct, 15:32)~~ — `clinic-doctor` on the server, the watcher in your Google account, and the guide *Clinic Doctor* (S573, D732).
+- ~~**"GOT THE EMAIL, NO MOBILE ALERT"** (17-Oct, 20:47)~~ — the phone push now retries past the free service's shared limit; your phone took the test at 20:48.
+- ~~**The parchi showed another patient's name for a Docterz ID** (17-Oct, 20:47)~~ — the parchi now takes Docterz's newest name (S576, D733), read live 18-Oct.
+- ~~**"Name this artifact clinic doctor … And also pin this to my Claude sidebar."** (18-Oct)~~ — done.
+- ~~**"…automate the steps as much as possible… Only answer me, don't build or code now"** (18-Oct, 07:43)~~ — answered with the plan; **built first in the next chat, your word (07:45).**
 
 ## ✅ DONE AT THE S317 CLOSE — 14 → 16-Oct-2026 (the parent)
 
@@ -416,9 +438,9 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S316 close (17-Oct)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S322 close (18-Oct)
 
-*Detail: `S316_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_322.md`. The same lines are on your System Board.*
+*Detail: `S322_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_324.md`. The same lines are on your System Board.*
 
 **1 · The publish** — this close's record only (nothing changes on the server). The same double-click as always:
 
@@ -426,21 +448,20 @@ The full list: `claude/S288_PENDING_LIST.md`.
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · The dealers' ordering WhatsApp list (your ask of 16-Oct, 16:48)** — the next pharmacy chat shows you a mock-up first; nothing is built before your OK.
-
-**Still yours from before, not urgent (on your board):**
-- bank details for **Agarwal Surgicals and Medicals** — its bill is scanned:
+**2 · The phone book is yours to keep** — a number a dealer gives the staff comes to you, and you enter it here:
 
 ```
 https://followup.dr-manoj.in/finance/purchase/page/book
 ```
 
+**Still yours from before, not urgent (on your board):**
+- bank details for **Agarwal Surgicals and Medicals** — its bill is scanned (the same page);
 - the first cheque logged (Shavez can do it);
 - one photo of Marg's purchase-import screen;
-- phone numbers for **BASS** and **DAANSHI** (or Shavez) — they have none in the phone book.
+- a phone number for **BASS** — it has none (DAANSHI now has one).
 
 **Worth knowing — the staff's, on their own screens, not yours:**
-- **Amir:** four one-time Marg jobs on his card — KT ROS DT, VINBACTUM DS, FOLITRAX 15 MG TAB, OSTOVAXL DM (the stock check of the 6-Sep count: 166 of 170 right).
+- **Amir:** four one-time Marg jobs on his card — KT ROS DT, VINBACTUM DS, FOLITRAX 15 MG TAB, OSTOVAXL DM; his next purchase pair lets the stock check of the 6-Sep count give its verdict.
 - **Darpan:** one spot count at the head of his list — ANKLE BINDER L BAMBOO.
 - **Morning staff:** the two reports from the REPORT login, as every day.
 
@@ -451,13 +472,18 @@ https://followup.dr-manoj.in/finance/purchase/page/book
 - **Amir's *Aaj ka kaam* list — off, and nothing is added to it (D690);**
 - **NORTIMER — out of the 6-Sep count (D715).**
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S316 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S322 close
 
-**Every build follows the charter v1.1 (`claude/S307_BUILD_CHARTER_v1_1.md`, D707). Your API credits end 17-Oct: from the next chat, builds go back to the Claude Code paste line unless you say otherwise.**
+**Every build follows the charter v1.1 (`claude/S307_BUILD_CHARTER_v1_1.md`, D707). Builds go by the Claude Code paste line on your PC unless you say the runner has credit.**
 
-1. **The dealers' ordering WhatsApp list** — a mock-up for you first (⭐0 2).
-2. **Stock on the spine (rung 4b)**, then **S486 Part A** and **Part B**.
-3. **Small:** the hub's orthotic section and a held line (F-875); a label on Amir's page (F-881); the five limits on your settings page.
+1. **Stock on the spine (rung 4b)**, then **S486 Part A** and **Part B**.
+2. **Small, one kit:** the phone book's words and doors (F-913, F-914, F-915) and Yuvika in two lists (F-916, read first); the hub's orthotic section and a held line (F-875); a label on Amir's page (F-881); the five limits on your settings page.
+
+## ✅ DONE AT THE S322 CLOSE — 18-Oct-2026 (the Sanjeevni project)
+
+- ~~**The dealers' ordering WhatsApp numbers (your ask of 16-Oct, 16:48)**~~ — built into the phone book instead of a staff list, at your word (S574, D731): one record per dealer, the 13 doubled dealers merged on your tap at 07:35, up to four numbers and two emails, the Calls / Order WhatsApp / Payment message choices, only you change numbers. Every number the same as before.
+- ~~**Y94, the publish of the S316 record**~~ — landed 19:41 IST 17-Oct.
+- ~~**Shavez's two reports of 17-Oct and your purchase pair of 16-Oct**~~ — all four landed and correct; my wording at the open was wrong (F-910).
 
 ## ✅ DONE AT THE S316 CLOSE — 14 → 17-Oct-2026 (the Sanjeevni project)
 
