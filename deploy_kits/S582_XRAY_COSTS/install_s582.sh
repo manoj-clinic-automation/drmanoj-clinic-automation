@@ -71,7 +71,7 @@ W551="$KITS/S551_SORTING_DESK/walk_s551.py"
 W548="$KITS/S548_PACK_BHAWNA_FILE/walk_s548.py"
 HAVE_LOCK=0
 WORK=""
-cleanup(){ [ -n "$WORK" ] && rm -rf "$WORK"; rm -f "$APP/$F.tmp" "$APP/$N.tmp"; [ "$HAVE_LOCK" = 1 ] && rm -rf "$LOCK"; }
+cleanup(){ [ -n "$WORK" ] && rm -rf "$WORK"; rm -rf /tmp/s582dev /tmp/s582kit /tmp/s582reh; rm -f "$APP/$F.tmp" "$APP/$N.tmp"; [ "$HAVE_LOCK" = 1 ] && rm -rf "$LOCK"; }   # S323 K1 C1: the build's box scratch too
 trap cleanup EXIT
 
 log "gates (the box, root, the files)"

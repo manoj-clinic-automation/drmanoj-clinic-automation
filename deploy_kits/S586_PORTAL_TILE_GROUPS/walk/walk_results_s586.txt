@@ -1,0 +1,95 @@
+PASS  W1 manoj/doctor pc=False same tiles  -- 51 tiles
+PASS  W1 manoj/doctor pc=True same tiles  -- 52 tiles
+PASS  W1 bhawna/doctor pc=False same tiles  -- 10 tiles
+PASS  W1 bhawna/doctor pc=True same tiles  -- 10 tiles
+PASS  W1 shavez/manager pc=False same tiles  -- 20 tiles
+PASS  W1 shavez/manager pc=True same tiles  -- 20 tiles
+PASS  W1 shivani/staff pc=False same tiles  -- 14 tiles
+PASS  W1 shivani/staff pc=True same tiles  -- 14 tiles
+PASS  W1 alisha/staff pc=False same tiles  -- 14 tiles
+PASS  W1 alisha/staff pc=True same tiles  -- 14 tiles
+PASS  W1 reception/staff pc=False same tiles  -- 10 tiles
+PASS  W1 reception/staff pc=True same tiles  -- 10 tiles
+PASS  W1 amir/staff pc=False same tiles  -- 3 tiles
+PASS  W1 amir/staff pc=True same tiles  -- 3 tiles
+PASS  W1 darpan/staff pc=False same tiles  -- 8 tiles
+PASS  W1 darpan/staff pc=True same tiles  -- 8 tiles
+PASS  W1 bhati/staff pc=False same tiles  -- 4 tiles
+PASS  W1 bhati/staff pc=True same tiles  -- 4 tiles
+PASS  W1 awdhesh/staff pc=False same tiles  -- 4 tiles
+PASS  W1 awdhesh/staff pc=True same tiles  -- 4 tiles
+PASS  W1 sukhveer/staff pc=False same tiles  -- 4 tiles
+PASS  W1 sukhveer/staff pc=True same tiles  -- 4 tiles
+PASS  W1 surendra/staff pc=False same tiles  -- 3 tiles
+PASS  W1 surendra/staff pc=True same tiles  -- 3 tiles
+PASS  W2 retired tiles absent  -- []
+PASS  W2 Renewals -> /scanapp/renewals  -- /scanapp/renewals
+PASS  W2 groups are the ten  -- ['Patients', 'Surgery', 'Calls & WhatsApp', 'Docterz & clinic day', 'Accounts & month-end', 'Staff', 'Assets & papers', 'Sanjeevni Medicos', 'Personal', 'System']
+PASS  W2 every tile grouped
+PASS  W2 the Sanjeevni fourteen under one label
+PASS  W2 Sanjeevni tiles unchanged
+PASS  W2 every other kept tile unchanged
+PASS  W3 manoj home = 10 group tiles  -- ['Patients', 'Surgery', 'Calls & WhatsApp', 'Docterz & clinic day', 'Accounts & month-end', 'Staff', 'Assets & papers', 'Sanjeevni Medicos', 'Personal', 'System']
+PASS  W3 manoj sheet Patients  -- 6 tiles
+PASS  W3 manoj sheet Surgery  -- 2 tiles
+PASS  W3 manoj sheet Calls & WhatsApp  -- 8 tiles
+PASS  W3 manoj sheet Docterz & clinic day  -- 6 tiles
+PASS  W3 manoj sheet Accounts & month-end  -- 3 tiles
+PASS  W3 manoj sheet Staff  -- 4 tiles
+PASS  W3 manoj sheet Assets & papers  -- 2 tiles
+PASS  W3 manoj sheet Sanjeevni Medicos  -- 14 tiles
+PASS  W3 manoj sheet Personal  -- 3 tiles
+PASS  W3 manoj sheet System  -- 3 tiles
+PASS  W3 manoj: Surgery cases in Surgery
+PASS  W3 manoj: live-count hooks still in the page
+PASS  W3 manoj: no 'Clinic PC tools' row
+PASS  W3 manoj on the clinic PC: Follow-up Tracker inside Calls & WhatsApp
+PASS  W3 manoj off the clinic PC: no Follow-up Tracker
+PASS  W4 bhawna home = her 7, Staff last  -- ['OPD & X-ray/Proc Slips', 'Report baaki', 'Physiotherapy', 'Petty book', 'Clinic', 'Kal ka hisaab', 'Staff']
+PASS  W4 bhawna Staff sheet = 4  -- ['Attendance', 'Staff Register', 'Salary — approve & lock', 'Staff Ledger']
+PASS  W4 bhawna: no Patient records / Check karein
+PASS  W4 bhawna: no Sanjeevni tile but Kal ka hisaab
+PASS  W5 shavez flat  -- 20 tiles
+PASS  W5 shivani flat  -- 14 tiles
+PASS  W5 alisha flat  -- 14 tiles
+PASS  W5 reception flat  -- 10 tiles
+PASS  W5 amir flat  -- 3 tiles
+PASS  W5 darpan flat  -- 8 tiles
+PASS  W5 bhati flat  -- 4 tiles
+PASS  W5 awdhesh flat  -- 4 tiles
+PASS  W5 sukhveer flat  -- 4 tiles
+PASS  W5 surendra flat  -- 3 tiles
+PASS  W6 alisha.mask kept
+PASS  W6 alisha.extra kept
+PASS  W6 bhawna.mask kept
+PASS  W6 bhawna.extra kept
+PASS  W6 manoj.mask kept
+PASS  W6 manoj.extra kept
+PASS  W6 shavez.mask kept
+PASS  W6 shavez.extra kept
+PASS  W6 shivani.mask kept
+PASS  W6 shivani.extra kept
+PASS  W6 darpan.mask kept
+PASS  W6 darpan.extra kept
+PASS  W6 amir.mask kept
+PASS  W6 amir.extra kept
+PASS  W6 awdhesh.mask kept
+PASS  W6 awdhesh.extra kept
+PASS  W6 sukhveer.mask kept
+PASS  W6 sukhveer.extra kept
+PASS  W6 surendra.mask kept
+PASS  W6 surendra.extra kept
+PASS  W6 parvesh.mask kept
+PASS  W6 parvesh.extra kept
+PASS  W6 sandeep.mask kept
+PASS  W6 sandeep.extra kept
+PASS  W6 vikky.mask kept
+PASS  W6 vikky.extra kept
+PASS  W6 bhati.mask kept
+PASS  W6 bhati.extra kept
+PASS  W6 reception.mask kept
+PASS  W6 reception.extra kept
+PASS  W6 version bumped  -- 35 -> 36
+PASS  Z1 FROM renders
+
+93 checks, 0 FAIL
