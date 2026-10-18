@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S325 close** (the parent), 18-Oct-2026, afternoon — the Sanjeevni sections exactly as its S322 close wrote them (its session 324 open), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (326 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S324 close** (the Sanjeevni project), 18-Oct-2026, afternoon — the parent's sections exactly as its S325 close wrote them (its session 326 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the Sanjeevni sections refreshed here
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S325 close** (the parent), 18-Oct-2026, afternoon — the Sanjeevni sections exactly as its S322 close wrote them (its session 324 open), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (326 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S319 close** (the parent), 18-Oct-2026, morning — the Sanjeevni sections exactly as its S322 close wrote them (its session 324 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (325 reserved)
 
@@ -454,46 +456,52 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S322 close (18-Oct)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S324 close (18-Oct)
 
-*Detail: `S322_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_324.md`. The same lines are on your System Board.*
+*Detail: `S324_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_327.md`. The same lines are on your System Board.*
 
-**1 · The publish** — this close's record only (nothing changes on the server). The same double-click as always:
+**1 · The publish** — this close's record (stock on the spine is already live and published). The same double-click as always:
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · The phone book is yours to keep** — a number a dealer gives the staff comes to you, and you enter it here:
+**2 · Paste S583's result** (the arrivals repair, started before your EOS) into a fresh chat in this project.
 
-```
-https://followup.dr-manoj.in/finance/purchase/page/book
-```
+**Coming, not now:** the morning-flow kit will bring you **one ruling** (Shavez's closing taken before the first sale counts whichever date he prints — it changes a written rule) and **one mock-up** (Amir's page with the purchase export as the last step).
 
 **Still yours from before, not urgent (on your board):**
-- bank details for **Agarwal Surgicals and Medicals** — its bill is scanned (the same page);
+- bank details for **Agarwal Surgicals and Medicals** — its bill is scanned;
 - the first cheque logged (Shavez can do it);
 - one photo of Marg's purchase-import screen;
-- a phone number for **BASS** — it has none (DAANSHI now has one).
+- a phone number for **BASS**.
 
 **Worth knowing — the staff's, on their own screens, not yours:**
-- **Amir:** four one-time Marg jobs on his card — KT ROS DT, VINBACTUM DS, FOLITRAX 15 MG TAB, OSTOVAXL DM; his next purchase pair lets the stock check of the 6-Sep count give its verdict.
-- **Darpan:** one spot count at the head of his list — ANKLE BINDER L BAMBOO.
+- **Amir:** nothing new; his four corrections of 18-Oct are judged on the next closing the rule accepts.
+- **Darpan:** the spot count of ANKLE BINDER L BAMBOO.
 - **Morning staff:** the two reports from the REPORT login, as every day.
 
 **Held at your word:**
 - S438_COUNT_BOOK;
-- S486, the buying model — after stock on the spine;
-- **the lasting fix for an unchanged Marg re-export (parked 16-Oct, 13:47)** — until then, re-export with that day's To-date;
+- the lasting fix for an unchanged Marg re-export (parked 16-Oct, 13:47);
 - **Amir's *Aaj ka kaam* list — off, and nothing is added to it (D690);**
 - **NORTIMER — out of the 6-Sep count (D715).**
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S322 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S324 close
 
-**Every build follows the charter v1.1 (`claude/S307_BUILD_CHARTER_v1_1.md`, D707). Builds go by the Claude Code paste line on your PC unless you say the runner has credit.**
+**Every build follows the charter v1.1 (`claude/S307_BUILD_CHARTER_v1_1.md`, D707). Builds go by the Claude Code paste line on your PC.**
 
-1. **Stock on the spine (rung 4b)**, then **S486 Part A** and **Part B**.
-2. **Small, one kit:** the phone book's words and doors (F-913, F-914, F-915) and Yuvika in two lists (F-916, read first); the hub's orthotic section and a held line (F-875); a label on Amir's page (F-881); the five limits on your settings page.
+1. **S583's result read live** (the arrivals repair).
+2. **Small, one kit:** S577's two display faults (the drift page's "null", the stock-now page's dates) and its owner lines that are not drawn yet; the phone book's words and doors (F-913 … F-915); Yuvika in two lists (F-916); the hub's held line (F-875); a label on Amir's page (F-881); the five limits on your settings page.
+3. **The morning-flow kit (D737)** — your ruling and the mock-up first.
+4. **The buying model (S486 A, then B)**, now on the one stock function.
+
+## ✅ DONE AT THE S324 CLOSE — 18-Oct-2026 (the Sanjeevni project)
+
+- ~~**Stock on the spine (rung 4b)**~~ — live 12:14 IST (S577): one place for Marg's figure and the shelf figure; renamed items recognised; the voucher check's second half (never past the shelf figure); the Loss desk only reads.
+- ~~**"Why is the shelf figure above Marg on some items?"**~~ — found (S580): the bill-scan tie counted a whole order as arrived; the repair S583 started at your word.
+- ~~**"Find all such things so that the flow can be corrected" (your words, 10:12)**~~ — six found (`claude/S324_MORNING_FLOW_FINDINGS.md`); the closing's time fixed in S577; the rest is the morning-flow kit (D737).
+- ~~**Amir's four one-time Marg jobs**~~ — done by Amir on 18-Oct (VINBACTUM DS by you earlier).
 
 ## ✅ DONE AT THE S322 CLOSE — 18-Oct-2026 (the Sanjeevni project)
 

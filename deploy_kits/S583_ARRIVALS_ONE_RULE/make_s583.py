@@ -78,7 +78,8 @@ def _reach_once(sp, ctx):
 
 
 def _bill(b):
-    return re.sub(r"\\s+", "", str(b or "")).upper()
+    """A bill number as a key: spacing and case folded, leading zeros dropped (the spine prints A.A.'s 467 as '0000467'; Marg's own line says '467')."""
+    return re.sub(r"^0+(?=\\d)", "", re.sub(r"\\s+", "", str(b or "")).upper())
 
 
 def arrival_moment(line):
@@ -301,7 +302,7 @@ SH = []
 SH.append(("H1 header: the arrivals", '''#    * arrived, not yet in Marg: tapped arrivals the spine does not carry (stock_watch._arrivals) and orders that arrived by a bill's scan
 #      (S454 4.4: order_scan_tie.arrived) whose lines Marg has not answered;
 ''', '''#    * arrived, not yet in Marg: tapped arrivals and the lines of orders that arrived by a bill's scan (S454 4.4: order_scan_tie.arrived) under
-#      stock_figure's ONE rule (S583: carried / expired -- stock_figure.taps and stock_figure.scan_arrivals, added inside stock_figure.shelf);
+#      stock_figure's ONE rule (S583: carried / expired -- the tap count and the scan count both live in stock_figure and are added in its shelf());
 '''))
 SH.append(("H2 version", '''VERSION = "2.0"
 KIT = "S577_STOCK_ON_SPINE"                                    # v1.0 was S454_BILL_REGISTER (part 3)
