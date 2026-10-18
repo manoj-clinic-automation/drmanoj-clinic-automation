@@ -1,4 +1,4 @@
-# S582_XRAY_COSTS — brief for the build runner (Agent SDK, the API credits)
+# S582_XRAY_COSTS — brief v2 for the build runner (Agent SDK, the API credits)
 
 *Written 18-Oct-2026 by the Scan App project (session 323). Kit **S582** and **D736** claimed on the board `_numbers`
 (v480 -> v481) with its PLANNED line. Run by `D:\Downloads\_kbtools\agent_build\run_build.py S582_XRAY_COSTS`.*
@@ -7,6 +7,10 @@
 *"But it needs to be also under the xray expenses section, so that I can assess expenses of the xray department also."*
 D736: a paper keeps its ONE group (bills.subgroup, D664) **and** may also be counted for the **X-ray department**. An
 owner-only **X-ray expenses** page adds, month by month, everything the X-ray department costs — each rupee once.
+
+**v2 — READ `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S323\S582_BRIEF_R1.md` (md5 `d3e0fa69…`, 3 BLOCKER · 9 CORRECTION · 8 NOTE) WHOLE BEFORE BUILDING. Every BLOCKER and CORRECTION there is binding and its replacement wording REPLACES the text below where they differ.** In short: **B1** the new owner menu item moves S571's walk line 354 (Renewals right after Batteries) — a counted rewrite of that walk check, and S559's menu-order check read and kept green; **B2** the seed is NOT run at app start (gunicorn runs 2 workers): a UNIQUE index on live marks (kind, ref_id, ref_created_at WHERE removed_at=''), INSERT OR IGNORE, and the seed moved into the installer's data step; **B3** the installer copies S575's: an on-box walk on a COPY of the live database, the earlier kits' walks, a database backup before the restart; **C1** `_s566_paid_rows` returns (money, finals) and takes `subs` as a tuple; **C2** reach the desk through `AR._s559_desk_mod()`; **C3** find a paper by stamp with `batteries.by_stamp`; **C4–C7** the exact counted / not-counted reasons and the full each-rupee-once order, with a reconcile line against The month's X-ray films total; **C9** health `http://127.0.0.1:8030/healthz`, then `/desk` and `/xray` 302 when not logged in; the build lock `/root/deploy/.claude_code_build.lock`.
+
+**C8, decided by the Scan App chat:** the battery place **"X-ray detector (FDR) battery"** is NOT in the code — the owner added it on the live page on 18-Oct-2026 (Online UPS group). The installer's data step seeds the two places by their EXACT live names "Digital X-ray" and "X-ray detector (FDR) battery" (each skipped with one printed line if absent) and the paper B-0163 by its stamp; the walk uses made-up rows of the same names.
 
 **THIS RUN BUILDS, WALKS AND REHEARSES. IT DOES NOT INSTALL AND DOES NOT PUBLISH.** The kit goes in
 `deploy_kits\S582_XRAY_COSTS\`, the report in `claude_code_briefs\REPORT_S582.md`; then stop. Nothing live is placed or
