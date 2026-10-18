@@ -1,4 +1,4 @@
-# S585_STATIONERY_ISSUE_MANY — brief v1 for the build runner (Agent SDK, the API credits)
+# S585_STATIONERY_ISSUE_MANY — brief v2 for the build runner (Agent SDK, the API credits)
 
 *Written 18-Oct-2026 by the Scan App project (session 323). Kit **S585** and **D738** claimed on the board `_numbers`
 (v491 -> v492) with its PLANNED line. Run by `D:\Downloads\_kbtools\agent_build\run_build.py S585_STATIONERY_ISSUE_MANY`
@@ -8,6 +8,10 @@
 *"in Shavez folder there is an Excel file named stationery where you can find what all was issued, so you can populate
 that also, and we can edit it later on if needed"*; his mapping of that sheet (below). His opening stock was entered at
 ~14:5x IST 18-Oct on the owner's Stationery page as the FIRST COUNT of nine items (`stationery_count.opening=1`).
+
+**v2 — READ `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S323\S585_BRIEF_R1.md` (md5 `706779ce…`, 2 BLOCKER · 9 CORRECTION · 10 NOTE) WHOLE BEFORE BUILDING. Every BLOCKER and CORRECTION there is binding and its replacement wording REPLACES the text below where they differ.** In short: **B1** the one-item screen keeps a FROZEN four-place list (Lab · Reception · Sanjeevni · Clinic) so switch OFF stays byte-identical and S568's walk I4F stays green; X-ray appears on the new screen and the owner's tables only; **B2 / C9** ORDER: this kit is built and installed AFTER S582_XRAY_COSTS — its read-only pins for `batteries.py` (and the new `xray_costs.py`) are S582's TO pins, read from `deploy_kits\S582_XRAY_COSTS\` (PIN_TO files / README); if that kit is absent, STOP and report; the installer checks this kit's own FROM byte of stationery.py strictly and the read-only files against the pins it records; **C1** the `stationery.many` ON/OFF control sits on the OWNER'S STATIONERY PAGE (the Switches card in sorting_desk.py refuses unknown switches — never edit sorting_desk.py); **C2** the two hard-coded four-place texts (the stock table header, issue()'s error) are handled; **C4** the data step: one transaction with its done-key, Row factory, rollback if any stock figure changes, rehearsed first on the snapshot copy, run after the health check, undone by voiding its rows; **C5** no new column — the void columns exist; voiding a line from before the latest count does not change the stock (say so on the page); **C6** copy S575's installer and its full earlier-walks list, plus S582's walk; **C7** a separate POST endpoint for the many-items save, refused when OFF, rollback on any error, Save disabled after the first tap; **C8** the mock-up is in the repository: `claude_code_briefs\S585_MOCKUP_Main.dc.html` — build to it.
+
+**C3, decided by the Scan App chat:** Shavez's sheet carries no dates and the owner gave none. The seven history rows keep `day` = the item's opening-count day and `ts` = that count's ts − 1 s (stock unchanged), but they are NOT counted in any "Issued this month" figure or per-place total: the owner's page lists them in their own fold, **"Earlier issues — from Shavez's sheet (no date)"**, each voidable; recognise them by `by_whom = 'history (Shavez sheet)'`.
 
 **THIS RUN BUILDS, WALKS AND REHEARSES. IT DOES NOT INSTALL AND DOES NOT PUBLISH.** The kit goes in
 `deploy_kits\S585_STATIONERY_ISSUE_MANY\`, the report in `claude_code_briefs\REPORT_S585.md`; then stop. Nothing live is

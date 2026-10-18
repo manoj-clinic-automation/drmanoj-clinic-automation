@@ -1,0 +1,160 @@
+S582_XRAY_COSTS -- the walk results (18-Oct-2026). Every row made up (June 2031, WALK582 names, stamps B-9nnn); no live row written.
+
+1. walk_s582.py on the S582 files (batteries.py 775471e6 + xray_costs.py 22e59f5a), a scratch copy of the live assets.db on the box (/tmp),
+   15:45:49-15:45:55 IST (the box clock):
+GREEN W1 (structural) the app imports; asset_register, clinic_papers, sorting_desk, asset_machine, stationery and batteries come from the scratch folder; the database is the copy
+GREEN W2 the S582 mark: xray_costs VERSION S582, mounted from the scratch folder (from batteries.init); the S575 / S571 marks kept (batteries SETUP S575, VERSION S571) and the S568 / S566 / S563 / S560 / S559 / S557 / S555 / S551 marks kept
+Z1 counts: new objects ['xray_mark', 'xray_mark_live']; every old table's row count kept True; settings added []; every old setting kept True; xray_mark rows 0
+GREEN Z1 (structural) the mount adds only the table xray_mark and its index xray_mark_live (no seed at mount: no row), no setting; no existing table's rows or setting changed
+made-up rows: 14 papers, 2 machines (3 spends, 3 covers), 1 battery place (2 fittings), June 2031
+marks: ticks 302 / 302 ('Saved: 1 machine now count for X-ray (1 added, 0 taken off).' | 'Saved: 1 battery place now count for X-ray (1 added, 0 taken off).'); by stamp -- [(302, 'Marked B-n for X-ray (June 2031). It stays in its own group.'), (302, 'Marked B-n for X-ray (June 2031). It stays in its own group.'), (302, 'Marked B-n for X-ray (June 2031). It stays in its own group.'), (302, 'Marked B-n for X-ray (June 2031). It stays in its own group.'), (302, 'Marked B-n for X-ray (June 2031). It stays in its own group.'), (302, 'Marked B-n for X-ray (June 2031). It stays in its own group.'), (302, 'Marked B-n for X-ray (June 2031). It stays in its own group.')]; pharmacy (302, 'No paper B-n that you may mark here. Nothing was marked.'); again (302, 'B-n is already marked for X-ray (June 2031).'); live paper marks of ours 7
+X counts: page 200; fold totals {'s582films': 1500.0, 's582papers': 1850.0, 's582machines': 10550.0, 's582batteries': 20000.0}; this month 33900.00, since <the copy's real months included; the figure is not recorded here>; The month's X-ray films 1900.0 (ids ours [192, 193, 194])
+GREEN X1 X-ray films are read with The month's own rule: a bill, a final challan and a film paper are in (₹1,900, the same as The month's X-ray films section); a receipt, an awaiting challan and a set-aside paper are NOT; the fold shows The month's ₹1,900 and counts ₹1,500 -- the ₹400 film paper is the AMC cover's own paper (counted there, each rupee once), said in one line
+GREEN X2 a paper marked for X-ray in Stationery & packaging (marked by its stamp typed 'b' + digits) is counted -- ₹1,200 -- and stays in its own group (the paper's whole row unchanged); every mark audited in desk_audit
+GREEN X3 a film paper also marked for X-ray is not counted twice: it is listed under the marked papers as 'already counted under X-ray films', at no amount; the marked papers' total is ₹1,850 (₹1,200 + ₹650) -- the stale-linked paper counts as a marked paper
+GREEN X4 a machine marked for X-ray (ticked by the owner, never by the system: 'looks like X-ray — tick to count', listed before an ordinary machine): its June spend ₹2,500, its AMC cover ₹8,000 (from 01-06-2031) and a cover with no from-date ₹50 (its recorded month, said so) count -- ₹10,550; its April spend, its voided cover, its ₹5,00,000 purchase price and an unmarked machine's spend do not
+GREEN X5 a battery place marked for X-ray: its fitting's price ₹20,000 counts; a voided fitting (₹9,999) does not
+GREEN X6 each rupee once: the battery fitting's bill (also marked) is shown under the fitting 'its paper B-n' and listed under the marked papers 'its paper — counted under ...' at no amount; the spend's paper likewise; the April spend's link with a wrong fingerprint claims nothing (that paper still counts as a marked paper); the month's total is ₹33,900 = films ₹1,500 + papers ₹1,850 + machines ₹10,550 + batteries ₹20,000
+X7 counts: manager /xray 403, POST 403; manager's menu Sorting desk (4) . The month . Bills awaited (9) . Implant ledger . Machines . Batteries . Renewals . All papers . Vendors . Walk Manager . Logout; owner's menu Sorting desk (4) . The month . Bills awaited (9) . Implant ledger . Stationery . Machines . Batteries . X-ray costs . Renewals . All papers . Vendors . Admin . Walk Owner . Logout
+GREEN X7 a manager (Batteries switched on for him) gets 403 on the page and on a mark, and no 'X-ray costs' in his menu; the owner's menu reads Machines . Batteries . X-ray costs . Renewals and the page's bar marks it as the page he is on
+GREEN X8 a Personal paper is markable by the owner and listed on his page ('not counted: in no section of The month' -- shown, not added); a manager never sees it (403 on the page; not on his Batteries or The month pages); its row unchanged
+GREEN X9 a re-issued id does not inherit a mark: the marked paper was deleted and its id given to a new paper -- the new paper is not listed, not counted, and its id is not a live mark
+X10 counts: first run 0 ['seed: paper B-0163 -- marked for X-ray', 'seed: battery place Digital X-ray -- marked for X-ray', 'seed: battery place X-ray detector (FDR) battery -- marked for X-ray', 'xray_costs S582: table xray_mark ready; live marks 3'] -> [('battery_place', 1), ('battery_place', 2), ('paper', 1)]; second ['seed: paper B-0163 -- already marked', 'seed: battery place Digital X-ray -- already marked', 'seed: battery place X-ray detector (FDR) battery -- already marked', 'xray_costs S582: table xray_mark ready; live marks 3']; after the owner unmarks a place: ['seed: paper B-0163 -- already marked', 'seed: battery place Digital X-ray -- already marked', 'seed: battery place X-ray detector (FDR) battery -- unmarked by the owner, left unmarked', 'xray_costs S582: table xray_mark ready; live marks 2'] -> [('battery_place', 1), ('paper', 1)]; no paper / one name absent: ['seed: no paper B-0163 -- not marked', "seed: no battery place named 'X-ray detector (FDR) battery' -- skipped", 'seed: battery place Digital X-ray -- marked for X-ray', 'xray_costs S582: table xray_mark ready; live marks 1'] -> [('battery_place', 1)]; two at once -> [('battery_place', 1), ('battery_place', 2), ('paper', 1)]
+GREEN X10 the seed (the installer's data step, xray_costs.py --ensure) on a schema copy with made-up rows of the same names: marks the paper B-0163 and the places 'Digital X-ray' and 'X-ray detector (FDR) battery' (no other place, no machine); a second run marks nothing; a seed the owner unmarked is never marked again; an absent paper or name is skipped with one line each; two runs at once give one live mark each
+X11 counts: FROM xray mounted False, TO True; the 'X-ray costs' bar element per page {'owner:month': 1, 'owner:batteries': 1, 'owner:place': 1, 'owner:machine': 1, 'manager:month': 0, 'manager:batteries': 0, 'manager:place': 0, 'manager:machine': 0}; a changed word on the TO page is caught True
+GREEN X11 FROM and TO, each in a fresh process on two copies of the same database with the same made-up rows (today frozen, the month given): for a manager (desk, Batteries and machine pages switched on) The month, Batteries, a battery place and a machine page are byte-identical; for the owner they are identical after removing exactly ONE bar element, 'X-ray costs'
+records: marked papers' rows unchanged True; the machine, the battery place and the fitting unchanged True
+pages saved: 1
+14 checks: 14 GREEN, 0 RED
+
+2. the NEGATIVE CONTROL -- walk_s582.py --expect-red on the FROM files (batteries.py 40eb8a91, no xray_costs.py), the same copy:
+GREEN W1 (structural) the app imports; asset_register, clinic_papers, sorting_desk, asset_machine, stationery and batteries come from the scratch folder; the da ...
+RED   W2 the S582 mark: xray_costs VERSION S582, mounted from the scratch folder (from batteries.init); the S575 / S571 marks kept (batteries SETUP S575, VERSIO ...
+GREEN Z1 (structural) the mount adds only the table xray_mark and its index xray_mark_live (no seed at mount: no row), no setting; no existing table's rows or s ...
+RED   X1 X-ray films are read with The month's own rule: a bill, a final challan and a film paper are in (₹1,900, the same as The month's X-ray films section);  ...
+RED   X2 a paper marked for X-ray in Stationery & packaging (marked by its stamp typed 'b' + digits) is counted -- ₹1,200 -- and stays in its own group (the pap ...
+RED   X3 a film paper also marked for X-ray is not counted twice: it is listed under the marked papers as 'already counted under X-ray films', at no amount; the ...
+RED   X4 a machine marked for X-ray (ticked by the owner, never by the system: 'looks like X-ray — tick to count', listed before an ordinary machine): its June  ...
+RED   X5 a battery place marked for X-ray: its fitting's price ₹20,000 counts; a voided fitting (₹9,999) does not -- (404, '', [])
+RED   X6 each rupee once: the battery fitting's bill (also marked) is shown under the fitting 'its paper B-n' and listed under the marked papers 'its paper — co ...
+RED   X7 a manager (Batteries switched on for him) gets 403 on the page and on a mark, and no 'X-ray costs' in his menu; the owner's menu reads Machines . Batte ...
+RED   X8 a Personal paper is markable by the owner and listed on his page ('not counted: in no section of The month' -- shown, not added); a manager never sees  ...
+RED   X9 a re-issued id does not inherit a mark: the marked paper was deleted and its id given to a new paper -- the new paper is not listed, not counted, and i ...
+RED   X10 the seed (the installer's data step, xray_costs.py --ensure) on a schema copy with made-up rows of the same names: marks the paper B-0163 and the plac ...
+RED   X11 FROM and TO, each in a fresh process on two copies of the same database with the same made-up rows (today frozen, the month given): for a manager (des ...
+14 checks: 2 GREEN, 12 RED (W2, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11)
+CONTROL must-be-red: W2, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11 -- all RED
+CONTROL structural (green on both, named): W1 GREEN, Z1 GREEN
+
+3. walk/browser_xray_s582.py -- the owner's page (made-up month, saved by the walk's --save-pages) in the PC's headless Chrome:
+PC clock 18-Oct-2026 15:46:05 - 15:46:09 (India Standard Time)
+  owner 1366 x 768 (every fold open): {"vw": 1342, "vh": 669, "first": [true, true, true], "folds": 6, "heads": "6/6", "cells": "26/26", "mark": true, "ticks": "70/70", "saves": [true, true], "rows": 13, "pageWide": false, "errs": []}
+  owner 1366 x 620 (the laptop's browser area): {"vw": 1366, "vh": 620, "first": [true, true, true], "folds": 6, "heads": "6/6", "cells": "26/26", "mark": true, "ticks": "70/70", "saves": [true, true], "rows": 13, "pageWide": false, "errs": []}
+GREEN V1 the owner's X-ray expenses page at 1366 x 768 (viewport 1342x669) and 1366 x 620 (viewport 1366x620), every fold open: no sideways scroll; the header, the month buttons and the total line on the first screen; every fold heading, amount and paper link, the '+ Mark a paper' box and every tick box with its Save inside the width
+1 browser check: 1 GREEN, 0 RED  (2 s)
+
+exit 0
+  owner 1366 x 768 (every fold open): {"vw": 1342, "vh": 669, "first": [true, true, true], "folds": 6, "heads": "6/6", "cells": "20/26", "mark": true, "ticks": "70/70", "saves": [true, true], "rows": 13, "pageWide": true, "errs": []}
+CONTROL a made-up broken layout (the films table forced to 1900 px) at 1366 x 768: V1 RED (must be RED)
+
+control exit 0
+
+4. rehearse_s582.sh on the box (a made-up root under /tmp/s582reh; the service faked; nothing live placed or restarted), the box clock:
+start 2026-10-18 15:40:24 IST
+made-up root /tmp/s582reh/root; stand-in on port 49525 (/healthz 200, /desk, /batteries and /xray 302); the restart = true; the lock made-up; the earlier kits read from /root/deploy/repo/deploy_kits
+=== outcome 1: a fresh install (green) ===
+  [1] gates (the box, root, the files)
+  [2] the server-wide build lock (one build at a time on the shared server)
+  [3] pins -- the live bytes must be the ones this kit was built on
+      purchase_app.py is 98f7d9f0, not 147201dd (Sanjeevni's, read only; S568's walk runs its query as it is now)
+  [4] rebuild on the box, from the live bytes (each anchor exactly once)
+      rebuilt batteries.py 775471e6 = the kit's pin
+      xray_costs.py 22e59f5a = the kit's pin
+      S563's tidy comparison rebuilt: S563 item 3 only -> S566's edits -> S568's edits = c3c8bf22 (S582 leaves clinic_papers.py as it is)
+  [5] compile on both pythons
+  [6] walks on a scratch copy of the database (made-up rows; nothing sent anywhere) -- S582's walk and control; S575's; S571's (its line 354 in S582's form, on a copy at its install-day shape), S568's (its stationery list at its install-day shape), S566's, S563's (and its tidy fetch), the S560 (+ pack), S548, S559, S557, S555 and 
+      walk: 14 checks: 14 GREEN, 0 RED
+        X10 counts: first run 0 ['seed: paper B-0163 -- marked for X-ray', 'seed: battery place Digital X-ray -- marked for X-ray', 'seed: battery place X-ray detector (FDR) battery -- marked for X-ray', 'xray_costs S582: table xray_mark ready; live marks 3'] -> [('battery_place', 1), ('battery_place', 2), ('paper', 1)]; second ['
+      control (the live files, must be red): 14 checks: 2 GREEN, 12 RED (W2, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11)
+      CONTROL must-be-red: W2, X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11 -- all RED
+      CONTROL structural (green on both, named): W1 GREEN, Z1 GREEN
+      S575 walk on the new files: 8 checks: 8 GREEN, 0 RED
+      S571's walk copy: S571's tables taken out (left: none), batteries.since taken out
+      S571 walk (its I1 menu line in S582's form; its copy at its install-day shape) on the new files: 12 checks: 12 GREEN, 0 RED
+      S568's walk copy: the stationery list emptied (stationery_line 2, stationery_move 0, stationery_count 9, stationery_item 13), rows left 0
+      S568 walk on the new files (its copy with the stationery list at its install-day shape -- empty; its I8 "before" = packs.py before S568, as when it was proven): 14 checks: 14 GREEN, 0 RED
+      S566 walk on the new files: 12 checks: 12 GREEN, 0 RED
+      S563 walk (its F4 line in S566's form) on the new files: 17 checks: 17 GREEN, 0 RED
+        TIDY fetched 102 answers with item-3-only clinic_papers.py, 102 with the TO file (owner and manager; GET bodies, POST status / Location / flash / rows); differing: none
+      S560 walk (its K2 line in S563's form) on the new files: 37 checks: 37 GREEN, 0 RED
+      S560 pack walk (P2 / P8 in S568's form) on packs.py as it is (S582 does not touch it): 9 pack checks: 9 GREEN, 0 RED
+      S548 pack walk: 8 checks, 8 green, 0 red
+      S559 walk (J1 / J3 in S563's form, O3 / O4 in S566's; M1 unchanged) on the new files: 43 checks: 43 GREEN, 0 RED
+      S557 walk on the new files: 41 checks: 41 GREEN, 0 RED
+      S555 walk on the new files: 19 checks: 19 GREEN, 0 RED
+      S551 walk (S559's three agreed lines) on the new files: 87 checks: 87 GREEN, 0 RED
+  [7] backups beside the live file, and the database by the backup API (BEFORE the restart that makes the new table)
+      batteries.py.bak_S582_40eb8a91 . assets.db.bak_S582_20261018_154025 (xray_costs.py is new: nothing to back up)
+  [8] place (xray_costs.py first -- nothing imports it until batteries.py does), and read the md5s back
+      placed: batteries.py and xray_costs.py at the kit's pins; the read-only files unchanged (finance untouched)
+  [9] restart s582-rehearsal-made-up (only), then health
+      healthz 200
+      /desk answers 302 (the login gate -- expected, not a failure): mounted and gated
+      /batteries answers 302 (the login gate -- expected, not a failure): mounted and gated
+      /xray answers 302 (the login gate -- expected, not a failure): mounted and gated
+  [10] the data step: the table (idempotent) and the owner's own words (the paper B-0163, the two X-ray battery places)
+      seed: paper B-0163 -- marked for X-ray
+      seed: battery place Digital X-ray -- marked for X-ray
+      seed: battery place X-ray detector (FDR) battery -- marked for X-ray
+      xray_costs S582: table xray_mark ready; live marks 3
+  S582_XRAY_COSTS: DONE.
+    PINS (read back): batteries.py 775471e6f7f4b8356142aafccdccfddd . xray_costs.py 22e59f5a275d687bae767da8bf776a6a
+    UNDO (one line): \cp -p /tmp/s582reh/root/app/batteries.py.bak_S582_40eb8a91 /tmp/s582reh/root/app/batteries.py && mv -f /tmp/s582reh/root/app/xray_costs.py /tmp/s582reh/root/app/xray_costs.py.undone_S582 && systemctl restart s582-rehearsal-made-up
+  desk_audit: the seed added 3 line(s) (xray_mark_seed); every earlier line unchanged True
+  database: objects added ['xray_mark', 'xray_mark_live']; every row of the 38 earlier tables unchanged (settings included; desk_audit only appended) True; the backup equal to the database before True; live marks after the data step 3 (battery_place, paper)
+  made-up root after outcome 1: batteries.py and xray_costs.py at the TO pins, batteries.py.bak_S582_40eb8a91 beside them (the FROM bytes); the read-only files and packs.py untouched; the database backed up first; only the new table and its seed added; the lock released; the installer's /tmp scratch removed
+=== outcome 2: the same line again (ALREADY INSTALLED) ===
+  S582_XRAY_COSTS: ALREADY INSTALLED (batteries.py and xray_costs.py at the kit's pins)
+    PINS (read back): batteries.py 775471e6f7f4b8356142aafccdccfddd . xray_costs.py 22e59f5a275d687bae767da8bf776a6a
+=== outcome 3: a forced red after placing (restores batteries.py, takes xray_costs.py out) ===
+      (rehearsal: a red after placing is forced)
+      healthz answered forced-red
+  RESTORING batteries.py from its backup and taking xray_costs.py out
+      batteries.py back at 40eb8a91 (the FROM pin); xray_costs.py out (kept as xray_costs.py.undone_S582); healthz 200 after the restore
+  S582_XRAY_COSTS: NOT INSTALLED (restored; the empty table xray_mark may stay in the database -- additive, read by nothing else; the database backup stays)
+=== outcome 4: healthz 200 but /desk does not answer (404) -> restores ===
+      /desk answered 404, not 302: it did not mount, or its login gate is open
+  RESTORING batteries.py from its backup and taking xray_costs.py out
+      batteries.py back at 40eb8a91 (the FROM pin); xray_costs.py out (kept as xray_costs.py.undone_S582); healthz 200 after the restore
+  S582_XRAY_COSTS: NOT INSTALLED (restored; the empty table xray_mark may stay in the database -- additive, read by nothing else; the database backup stays)
+=== outcome 5: /desk answers 200 -- a login gate open is not accepted -> restores ===
+      /desk answered 200, not 302: it did not mount, or its login gate is open
+  RESTORING batteries.py from its backup and taking xray_costs.py out
+      batteries.py back at 40eb8a91 (the FROM pin); xray_costs.py out (kept as xray_costs.py.undone_S582); healthz 200 after the restore
+  S582_XRAY_COSTS: NOT INSTALLED (restored; the empty table xray_mark may stay in the database -- additive, read by nothing else; the database backup stays)
+=== outcome 6: /xray does not answer (404) -> restores ===
+      /desk answers 302 (the login gate -- expected, not a failure): mounted and gated
+      /xray answered 404, not 302: it did not mount, or its login gate is open
+  RESTORING batteries.py from its backup and taking xray_costs.py out
+      batteries.py back at 40eb8a91 (the FROM pin); xray_costs.py out (kept as xray_costs.py.undone_S582); healthz 200 after the restore
+  S582_XRAY_COSTS: NOT INSTALLED (restored; the empty table xray_mark may stay in the database -- additive, read by nothing else; the database backup stays)
+=== outcome 7: batteries.py not at its FROM pin (another kit moved it) -> REFUSED before anything is placed ===
+  REFUSED: batteries.py is f95b12e4, not the pinned 40eb8a91 (S575's TO) -- another kit moved it; rebuild S582 on the new bytes
+  S582_XRAY_COSTS: NOT INSTALLED (nothing was placed)
+=== outcome 8: a read-only file moved (sorting_desk.py) -> REFUSED before anything is placed ===
+  REFUSED: sorting_desk.py (read only) is f67b87ac, not the pinned 110335ea -- the walk was proven on other bytes
+  S582_XRAY_COSTS: NOT INSTALLED (nothing was placed)
+=== outcome 9: no batteries.py (S571 / S575 not installed) -> REFUSED before anything is placed ===
+  REFUSED: /tmp/s582reh/root/app/batteries.py is missing -- S571 / S575 are not installed; S582 changes S575's batteries.py
+  S582_XRAY_COSTS: NOT INSTALLED (nothing was placed)
+=== outcome 10: the parent's packs.py moved by another kit -> REFUSED before anything is placed (S582 never places it) ===
+  REFUSED: packs.py (the parent's, read only) is 1a3c7d69, not the pinned e46264b8 -- the earlier walks were proven on other bytes
+  S582_XRAY_COSTS: NOT INSTALLED (nothing was placed)
+=== outcome 11: an xray_costs.py already in the folder (not this kit's) -> REFUSED before anything is placed ===
+  REFUSED: /tmp/s582reh/root/app/xray_costs.py is already there (8905ac08) and batteries.py is not at the kit's TO -- not this kit's file; stop and report
+  S582_XRAY_COSTS: NOT INSTALLED (nothing was placed)
+=== outcome 12: a half install (batteries.py at the TO pin, no xray_costs.py) -> REFUSED, never 'ALREADY INSTALLED' ===
+  REFUSED: batteries.py is at the kit's TO pin but xray_costs.py is missing -- a half install; run the UNDO line in the README, then this line again
+  S582_XRAY_COSTS: NOT INSTALLED (nothing was placed)
+REHEARSAL GREEN: fresh install green (the data step: only the new table, its index and the seed's rows); ALREADY INSTALLED; forced red restored; /desk 404, /desk 200 and /xray 404 restored (302 only); a moved batteries.py, a moved read-only file, a missing batteries.py, a moved packs.py, a foreign xray_costs.py and a half install refused before placing. The service faked; nothing live was placed or restarted; the live scan app's and finance folder's program files read back unchanged.
+rehearsal exit 0 at 2026-10-18 15:44:03 IST

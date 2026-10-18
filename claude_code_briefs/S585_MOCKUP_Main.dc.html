@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="hi-Latn">
+<head>
+<meta charset="utf-8">
+<title>Stationery diya</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#0b5cad}a:hover{color:#083f78}
+</style>
+</helmet>
+<div style="width: 390px; min-height: 1040px; box-sizing: border-box; background: #f4f6f8; color: #1d2733; font-family: 'Noto Sans', system-ui, sans-serif; display: flex; flex-direction: column">
+  <div style="background: #1f4e79; color: #ffffff; padding: 16px 18px; display: flex; flex-direction: column; gap: 2px">
+    <div style="font-size: 20px; font-weight: 700">Stationery diya</div>
+    <div style="font-size: 14px; color: #d8e6f3">Ek baar mein kai cheezein — sirf jo diya, uska number likho</div>
+  </div>
+
+  <div style="padding: 16px 16px 8px; display: flex; flex-direction: column; gap: 10px">
+    <div style="font-size: 15px; font-weight: 700">1 · Kisko diya?</div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <sc-for list="{{places}}" as="pl" hint-placeholder-count="4">
+        <button type="button" onClick="{{pl.pick}}" style="{{pl.style}}">{{pl.label}}</button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="padding: 8px 16px; display: flex; flex-direction: column; gap: 8px">
+    <div style="font-size: 15px; font-weight: 700">2 · Kya aur kitna diya?</div>
+    <sc-for list="{{items}}" as="it" hint-placeholder-count="8">
+      <div style="{{it.rowStyle}}">
+        <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0">
+          <div style="font-size: 15px; font-weight: 600">{{it.name}}</div>
+          <div style="font-size: 13px; color: #4a5866">shelf pe {{it.stock}} {{it.unit}}</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px">
+          <button type="button" aria-label="Ek kam" onClick="{{it.minus}}" style="width: 44px; height: 44px; border-radius: 10px; border: 1px solid #b7c3cf; background: #ffffff; font-size: 22px; color: #1d2733">−</button>
+          <div style="width: 40px; text-align: center; font-size: 18px; font-weight: 700">{{it.qtyText}}</div>
+          <button type="button" aria-label="Ek zyada" onClick="{{it.plus}}" style="width: 44px; height: 44px; border-radius: 10px; border: 1px solid #1f4e79; background: #e8f0f8; font-size: 22px; color: #1f4e79">+</button>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="margin-top: auto; padding: 14px 16px 22px; background: #ffffff; border-top: 1px solid #d5dde5; display: flex; flex-direction: column; gap: 8px">
+    <div style="font-size: 14px; color: #33414f">{{summary}}</div>
+    <button type="button" onClick="{{save}}" style="{{saveStyle}}">{{saveLabel}}</button>
+    <sc-if value="{{saved}}" hint-placeholder-val="{{ false }}">
+      <div style="font-size: 14px; color: #1e6b35; font-weight: 600">Save ho gaya ✓ — {{savedText}}</div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1040}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { place: '', qty: {}, saved: false, savedText: '' };
+  }
+  renderVals() {
+    const ITEMS = [
+      { id: 'r192', name: 'Register 192 pages', unit: 'piece', stock: 12 },
+      { id: 'r104', name: 'Register 104 pages', unit: 'piece', stock: 14 },
+      { id: 'r72', name: 'Register 72 pages', unit: 'piece', stock: 6 },
+      { id: 'c72', name: 'Notebook (copy) 72 pages', unit: 'piece', stock: 6 },
+      { id: 'cs', name: 'Small notebook (copy)', unit: 'piece', stock: 4 },
+      { id: 'cbe', name: 'Clear bag (economy)', unit: 'piece', stock: 5 },
+      { id: 'cbp', name: 'Clear bag (premium)', unit: 'piece', stock: 3 },
+      { id: 'rf', name: 'Ring file RBU-400', unit: 'piece', stock: 1 },
+      { id: 'cbf', name: 'Cheque book folder (small clear bag)', unit: 'piece', stock: 2 },
+      { id: 'a4', name: 'A4 paper (75 gsm)', unit: 'ream', stock: 0 }
+    ];
+    const PLACES = ['Lab', 'Reception', 'Sanjeevni', 'Clinic', 'X-ray'];
+    const q = this.state.qty;
+    const set = (id, v) => this.setState({ qty: { ...q, [id]: Math.max(0, v) }, saved: false });
+    const places = PLACES.map((p) => {
+      const on = this.state.place === p;
+      return {
+        label: p,
+        pick: () => this.setState({ place: p, saved: false }),
+        style: 'min-height: 48px; border-radius: 12px; font-size: 16px; font-weight: 600; border: 2px solid ' + (on ? '#1f4e79' : '#c3ced9') + '; background: ' + (on ? '#1f4e79' : '#ffffff') + '; color: ' + (on ? '#ffffff' : '#1d2733') + ';'
+      };
+    });
+    const items = ITEMS.map((it) => {
+      const n = q[it.id] || 0;
+      return {
+        ...it,
+        qtyText: String(n),
+        minus: () => set(it.id, n - 1),
+        plus: () => set(it.id, n + 1),
+        rowStyle: 'display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: ' + (n > 0 ? '#eaf4ec' : '#ffffff') + '; border: 1px solid ' + (n > 0 ? '#7fb38e' : '#d5dde5') + ';'
+      };
+    });
+    const chosen = ITEMS.filter((it) => (q[it.id] || 0) > 0);
+    const ready = this.state.place && chosen.length > 0;
+    const summary = chosen.length === 0
+      ? 'Abhi kuch nahi chuna.'
+      : chosen.length + ' cheezein · ' + chosen.map((it) => it.name + ' ' + q[it.id]).join(', ') + (this.state.place ? ' → ' + this.state.place : ' — Kisko diya chuno');
+    return {
+      places, items, summary,
+      saveLabel: ready ? 'Save karo (' + chosen.length + ')' : 'Save karo',
+      saveStyle: 'min-height: 52px; border-radius: 12px; border: none; font-size: 17px; font-weight: 700; background: ' + (ready ? '#1e6b35' : '#9aa6b2') + '; color: #ffffff;',
+      save: () => { if (ready) this.setState({ saved: true, savedText: summary, qty: {}, place: '' }); },
+      saved: this.state.saved,
+      savedText: this.state.savedText
+    };
+  }
+}
+</script>
+</body>
+</html>
