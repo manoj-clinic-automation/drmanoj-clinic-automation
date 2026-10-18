@@ -1,0 +1,5 @@
+S591_CONTACT_FORM_ONE_RECIPIENT
+session S326 (the parent), 18-Oct-2026, 18:5x IST
+D742 -- the outside marketing firm address removed from every Elementor form e-mail field of the website
+board _numbers v504 -> v505 (kit S591, D742)
+keeps /root/s591_backup/meta_<id>.old.hex (root-only, byte-exact); undo: fix_s591.py --undo
