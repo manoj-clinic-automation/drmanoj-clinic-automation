@@ -1,0 +1,225 @@
+walk_results_s585.txt -- S585_STATIONERY_ISSUE_MANY, 18-Oct-2026 (IST). Made-up rows only; scratch copies under /tmp on srv1746119; the browser walk on the PC.
+
+##### 1. walk_s585.py on the TO files (a scratch copy of the live assets.db), then the control on the FROM files (--expect-red)
+
+GREEN W1 (structural) the app imports; asset_register, clinic_papers, sorting_desk, asset_machine, stationery and batteries come from the scratch folder; the database is the copy
+GREEN W2 the S585 mark: stationery MANY = S585, the switch stationery.many, X-ray in PLACES and the frozen four ONE_PLACES; the S568 marks kept (VERSION S568, FIX S568_FIX1) and the S582 / S575 / S571 marks kept
+M1 counts: OFF pages FROM = TO for the owner, a manager and ?one=1: True; ON the TO page is the new screen (owner, manager) True; a changed word is caught True
+GREEN M1 switch OFF (stationery.many absent) = byte-identical one-item screen: Stationery diya for the owner, for a manager (stationery.issue_on ON) and at ?one=1, FROM and TO each in a fresh process on two copies of the same database with the same made-up items -- identical bytes; with the switch ON the TO page is the new many-items screen
+M2 counts: switch POST 302 -> ('on',) (Many items on one screen: ON. Stationery diya now shows ever), audit lines 1, the card reads ON True, a manager's POST 403 (still ('on',)); rows 16 of 16 active items, equal True; places ['Lab', 'Reception', 'Sanjeevni', 'Clinic', 'X-ray']; button heights [48] / [44] px; Ginti card = the one-item screen's True (2706 bytes); retired item shown False; the manager's screen True
+GREEN M2 switch ON shows every active item with its stock: the ON / OFF card on the owner's Stationery page (OFF until he taps; his tap writes stationery.many = on, audited; a manager's POST is refused); Stationery diya then shows '1 · Kisko diya?' with five buttons Lab · Reception · Sanjeevni · Clinic · X-ray (>= 48 px), '2 · Kya aur kitna diya?' with EVERY active item -- its name, 'shelf pe <stock> <unit>' = the stock book, '−' and '+' >= 44 px -- no retired item; one 'Save karo' (grey until chosen); the Ginti card byte-equal to the one-item screen's
+M3 counts: save of three 302 -> new moves [('B', 1.0), ('C', 4.0), ('A', 2.0)] (places ['lab']), audit lines 3; stock (10.0, 5.0, 3.0) -> (8.0, 4.0, -1.0); flash 'Save ho gaya ✓ — WALK585 Copy 2031 1 piece, WALK585 Pen 2031 4 packet, WALK585 Register 2031 2 piece → Lab'; C above stock flagged True; forced failure on the third: calls 3, new moves 0, audit lines 0, flash 'Database ne mana kiya. Kuch save nahi hua.'; a retired third: new moves 0, flash 'Kya diya — list se chuno. Kuch save nahi hua.'
+GREEN M3 one save of three items writes three moves (one per item with a number, through issue(), stock_before kept) in one transaction: the stock of each goes down, a quantity above the shelf stock is saved and flagged on the owner's page, 'Save ho gaya ✓ — <what was saved> → Lab'; a forced database failure on the third writes NONE (no move, no audit line), and a retired item as the third writes none
+M4 counts: no place 302 'Kisko diya — chuno. Kuch save nahi hua.'; no number 302 'Kuch nahi chuna — kuch save nahi hua.'; zeros 302 'Kuch nahi chuna — kuch save nahi hua.'; not a number 302 '“abc” number nahi hai. Kuch save nahi hua.'; an unknown place 302 'Kisko diya — chuno. Kuch save nahi hua.'; switch OFF 302 'Yeh screen abhi band hai. Kuch save nahi hua.'; a manager with issue_on OFF 403; reception 403; new moves 0; the page's Save grey until a place and a number (and off after the first tap) True
+GREEN M4 no Kisko / no number = nothing sent: the server refuses a save with no place, with no number (or only zeros), with a number that is not one, or with a place that is not on the list -- 'Kuch save nahi hua', nothing written; with the switch OFF the many-items save is refused; a manager with stationery.issue_on OFF and the reception login get 403; the page's Save is grey until a place and a number are chosen and is disabled on the first tap
+M5 counts: save to X-ray 302 -> [(1.0, 'xray')], flash 'Save ho gaya ✓ — WALK585 Copy 2031 1 piece → X-ray'; the owner's header True; B's issued cell '1 · 0 · 0 · 0 · 1', by place {'lab': 1.0, 'reception': 0, 'sanjeevni': 0, 'clinic': 0, 'xray': 1.0}; the one-item screen's places ['lab', 'reception', 'sanjeevni', 'clinic']; issue()'s refusal 'Kisko diya — Lab, Reception, Sanjeevni, Clinic ya X-ray chuno.'; This month's issues shows it True
+GREEN M5 X-ray accepted as a place: the many-items save to X-ray writes one move (place xray), 'Save ho gaya ✓ — … → X-ray'; the owner's stock table's header reads 'Issued this month (Lab · Reception · Sanjeevni · Clinic · X-ray)' and the item's cell carries the X-ray figure; This month's issues shows 'X-ray'; issue()'s refusal names X-ray; the one-item screen keeps its four places
+M6 counts: a manager's page 403, a manager's forged Void 403, reception 403 (the line still live True); the owner's Void 302: voided_by 'Walk Owner', stock 8.0 -> 10.0, audit 1, flash 'Voided: WALK585 Register 2031 2 piece to Lab. In stock now: 10 piece.'; again 'That issue was already voided — nothing changed.'; no such line 'That issue is not on the list — nothing changed.'; before the latest count: stock 7.0 -> 7.0, flash 'Voided: WALK585 Copy 2031 1 piece to Lab. It was made before the latest count, so the stock does not change — '; the page: struck True, 'voided by' True, a live line has a Void button True; A's Lab figure after the Void 0
+GREEN M6 Void by the owner: the line is kept (voided_at, voided_by = the owner), audited in desk_audit, struck through on his page ('voided by …'), and leaves the stock arithmetic (stock up by its quantity; out of the per-place figure); a second Void and an unknown line change nothing; a line made before the latest count changes no stock ('the count stands', said on the page); a manager gets 403 on the page (no Void to see) and on a forged POST, and so does reception -- the line stays live
+M7 counts: first run exit 0, lines written 7, rows 7 (by_whom ['history (Shavez sheet)']; ts 1 s before the count True; day = the count's True; stock_before NULL True); stock lines 9, each before = after True; key True; second run ['history: already done (stationery.history_s585 is set) -- nothing written'], rows 7; an absent item / no opening count: ["history: skipped -- no active item named 'Register 72 pages' (6 to Reception, the OPD register)", "history: skipped -- 'Small notebook (copy)' has no opening count yet (2 to Lab, the expense copy)", "history: skipped -- 'Small notebook (copy)' has no opening count yet (2 to X-ray, X-ray)"], rows 4; a line after the count: 1, ['history: REFUSED -- a stock figure changed (Register 72 pages, Register 104 pages, Register 192 pages, Small notebook (copy), Notebook (copy) 72 pages); rolled back, nothing written'], rows 0, key None
+M7 page: the line written 0 (['history: wrote WALK585 Pen 2031 2 packet -> Reception (walk); day 2031-06-10, 1 s before its opening count']), C's stock -1.0 -> unchanged True; in This month's issues False; in the fold 'Earlier issues — from Shavez's sheet (no date)' True ('no date' True); C's Reception figure 0; its Void 302 'Voided: WALK585 Pen 2031 2 packet to Reception. It was made before the latest count, so th' -> stock -1.0
+GREEN M7 the data step (stationery.py --history, on schema copies with made-up items of the seven exact names): writes the 7 rows (by_whom 'history (Shavez sheet)', day = the opening count's, ts 1 s before it, stock_before NULL), the stock figures before = after, the key set; a second run writes nothing; an absent item and an item with no opening count are skipped with one line each; a line that WOULD change a stock rolls back (nothing written, no key); on the owner's page such a line is never in This month's issues or the per-place figures, it is in the fold 'Earlier issues — from Shavez's sheet (no date)', and Void marks it
+M8 counts: ?one=1 -> the one-item form True with the hidden one=1 True and four places ['lab', 'reception', 'sanjeevni', 'clinic']; its POST 302 -> /stationery/diya?one=1, flash 'Ho gaya — WALK585 Register 2031 1 piece, Clinic ko. Stock mein ab 9.', move [(1.0, 'clinic')]; a POST without one=1 -> /stationery/diya
+GREEN M8 ?one=1 still works with the switch ON: Stationery diya?one=1 is the one-item screen (four places, a hidden one=1); its Save issues one item ('Ho gaya — …') and returns to ?one=1; without one=1 it returns to the many-items screen
+M9 counts: the manager's many-items screen 200, 19836 bytes, 0.019 s
+GREEN M9 the staff page (the many-items screen, a manager) answers under 2 s and under 100 KB
+pages saved: 4
+11 checks: 11 GREEN, 0 RED
+=== the control (FROM files, --expect-red) ===
+GREEN W1 (structural) the app imports; asset_register, clinic_papers, sorting_desk, asset_machine, stationery and batteries come from the scratch folder; the database is the copy
+RED   W2 the S585 mark: stationery MANY = S585, the switch stationery.many, X-ray in PLACES and the frozen four ONE_PLACES; the S568 marks kept (VERSION S568, FIX S568_FIX1) and the S582 / S575 / S571 marks kept
+M1 counts: OFF pages FROM = TO for the owner, a manager and ?one=1: True; ON the TO page is the new screen (owner, manager) False; a changed word is caught True
+RED   M1 switch OFF (stationery.many absent) = byte-identical one-item screen: Stationery diya for the owner, for a manager (stationery.issue_on ON) and at ?one=1, FROM and TO each in a fresh process on two copies of the same database with the same made-up items -- identical bytes; with the switch ON the TO page is the new many-items screen
+M2 counts: switch POST 404 -> None (), audit lines 0, the card reads ON False, a manager's POST 404 (still None); rows 0 of 16 active items, equal False; places []; button heights [] / [] px; Ginti card = the one-item screen's True (2706 bytes); retired item shown False; the manager's screen False
+RED   M2 switch ON shows every active item with its stock: the ON / OFF card on the owner's Stationery page (OFF until he taps; his tap writes stationery.many = on, audited; a manager's POST is refused); Stationery diya then shows '1 · Kisko diya?' with five buttons Lab · Reception · Sanjeevni · Clinic · X-ray (>= 48 px), '2 · Kya aur kitna diya?' with EVERY active item -- its name, 'shelf pe <sto
+M3 counts: save of three 404 -> new moves [] (places []), audit lines 0; stock (10.0, 5.0, 3.0) -> (10.0, 5.0, 3.0); flash ''; C above stock flagged False; forced failure on the third: calls 0, new moves 0, audit lines 0, flash ''; a retired third: new moves 0, flash ''
+RED   M3 one save of three items writes three moves (one per item with a number, through issue(), stock_before kept) in one transaction: the stock of each goes down, a quantity above the shelf stock is saved and flagged on the owner's page, 'Save ho gaya ✓ — <what was saved> → Lab'; a forced database failure on the third writes NONE (no move, no audit line), and a retired item as the third writes 
+M4 counts: no place 404 ''; no number 404 ''; zeros 404 ''; not a number 404 ''; an unknown place 404 ''; switch OFF 404 ''; a manager with issue_on OFF 404; reception 404; new moves 0; the page's Save grey until a place and a number (and off after the first tap) False
+RED   M4 no Kisko / no number = nothing sent: the server refuses a save with no place, with no number (or only zeros), with a number that is not one, or with a place that is not on the list -- 'Kuch save nahi hua', nothing written; with the switch OFF the many-items save is refused; a manager with stationery.issue_on OFF and the reception login get 403; the page's Save is grey until a place and a 
+M5 counts: save to X-ray 404 -> [], flash ''; the owner's header False; B's issued cell '0 · 0 · 0 · 0', by place {'lab': 0, 'reception': 0, 'sanjeevni': 0, 'clinic': 0}; the one-item screen's places ['lab', 'reception', 'sanjeevni', 'clinic']; issue()'s refusal 'Kisko diya — Lab, Reception, Sanjeevni ya Clinic chuno.'; This month's issues shows it False
+RED   M5 X-ray accepted as a place: the many-items save to X-ray writes one move (place xray), 'Save ho gaya ✓ — … → X-ray'; the owner's stock table's header reads 'Issued this month (Lab · Reception · Sanjeevni · Clinic · X-ray)' and the item's cell carries the X-ray figure; This month's issues shows 'X-ray'; issue()'s refusal names X-ray; the one-item screen keeps its four places -- {'p': 404, '
+  (step failed: TypeError("'NoneType' object is not subscriptable"))
+  (step failed: TypeError("'NoneType' object is not iterable"))
+M6 counts: a manager's page 403, a manager's forged Void 404, reception 404 (the line still live False); the owner's Void 404: voided_by None, stock 10.0 -> 10.0, audit 0, flash ''; again ''; no such line ''; before the latest count: stock 7.0 -> 7.0, flash ''; the page: struck None, 'voided by' False, a live line has a Void button False; A's Lab figure after the Void 0
+RED   M6 Void by the owner: the line is kept (voided_at, voided_by = the owner), audited in desk_audit, struck through on his page ('voided by …'), and leaves the stock arithmetic (stock up by its quantity; out of the per-place figure); a second Void and an unknown line change nothing; a line made before the latest count changes no stock ('the count stands', said on the page); a manager gets 403 o
+  (step failed: AttributeError("module 'stationery' has no attribute 'history_step'"))
+M7 counts: first run exit 0, lines written 0, rows 0 (by_whom []; ts 1 s before the count True; day = the count's True; stock_before NULL True); stock lines 0, each before = after True; key False; second run ["    Switches card). The reception login never (the app's checker gate refuses it)."], rows 0; an absent item / no opening count: [], rows 0; a line after the count: None, None, rows 0, key N
+  (step failed: AttributeError("module 'stationery' has no attribute 'history_step'"))
+  (step failed: TypeError("'NoneType' object is not iterable"))
+  (step failed: TypeError("'NoneType' object is not subscriptable"))
+M7 page: the line written None ([]), C's stock 3.0 -> unchanged True; in This month's issues False; in the fold 'Earlier issues — from Shavez's sheet (no date)' False ('no date' False); C's Reception figure 0; its Void 404 '' -> stock 3.0
+RED   M7 the data step (stationery.py --history, on schema copies with made-up items of the seven exact names): writes the 7 rows (by_whom 'history (Shavez sheet)', day = the opening count's, ts 1 s before it, stock_before NULL), the stock figures before = after, the key set; a second run writes nothing; an absent item and an item with no opening count are skipped with one line each; a line that W
+M8 counts: ?one=1 -> the one-item form True with the hidden one=1 False and four places ['lab', 'reception', 'sanjeevni', 'clinic']; its POST 302 -> /stationery/diya, flash 'Ho gaya — WALK585 Register 2031 1 piece, Clinic ko. Stock mein ab 9.', move [(1.0, 'clinic')]; a POST without one=1 -> /stationery/diya
+RED   M8 ?one=1 still works with the switch ON: Stationery diya?one=1 is the one-item screen (four places, a hidden one=1); its Save issues one item ('Ho gaya — …') and returns to ?one=1; without one=1 it returns to the many-items screen -- {'one': True, 'hidden': False, 'p8': (302, '/stationery/diya', 'Ho gaya — WALK585 Register 2031 1 piece, Clinic ko. Stock mein ab 9.'), 'new': [{'id': 1, 'item
+M9 counts: the manager's many-items screen 200, 10836 bytes, 0.019 s
+RED   M9 the staff page (the many-items screen, a manager) answers under 2 s and under 100 KB -- (200, 10836, 0.018828392028808594)
+11 checks: 1 GREEN, 10 RED (W2, M1, M2, M3, M4, M5, M6, M7, M8, M9)
+CONTROL must-be-red: W2, M1, M2, M3, M4, M5, M6, M7, M8, M9 -- all RED
+CONTROL structural (green on both, named): W1 GREEN
+
+##### 2. walk/browser_many_s585.py (PC headless Chrome), then its control (--control)
+
+  many 390 x 844: {"vw": 390, "vh": 844, "places": [{"t": "Lab", "top": 350, "h": 48, "on": true}, {"t": "Reception", "top": 350, "h": 48, "on": true}, {"t": "Sanjeevni", "top": 350, "h": 48, "on": true}, {"t": "Clinic", "top": 406, "h": 48, "on": true}, {"t": "X-ray", "top": 406, "h": 48, "on": true}], "nrows": 16, "rowsOk": true, "save0": {"dis": true, "t": "Save karo", "on": true}, "xrPicked": true, "after2": {"q": "2", "green": true, "dis": false, "t": "Save karo (1)", "sum": "1 cheez · A4 paper (75 gsm) 2 → X-ray", "name": "A4 paper (75 gsm)"}, "after1": {"q": "1", "t": "Save karo (1)"}, "bad": {"dis": true, "sum": "“abc” number nahi hai — theek karo."}, "cleared": {"dis": false, "t": "Save karo (1)"}, "sends": {"first": 1, "dis": true, "second": 1, "t": "Save ho raha hai…"}, "pageWide": false, "errs": []}
+GREEN V1 the many-items screen at a phone's width (390 x 844): five place buttons in 3 + 2, >= 44 px, on screen; every row's − / + >= 44 px and its number box on screen; Save grey at first; X-ray picked by a tap; + + -> 2 (row green, 'Save karo (1)', the line naming it '→ X-ray'); − -> 1; a word greys Save; the first Save tap sends once and greys it, a second sends nothing; nothing wider than the phone
+  many 1366 x 768: {"vw": 1342, "vh": 669, "nrows": 16, "rowsOk": true, "sends": {"first": 1, "dis": true, "second": 1, "t": "Save ho raha hai…"}, "pageWide": false, "errs": []}
+GREEN V2 the same screen at 1366 x 768 (viewport 1342x669): the same taps, every row's controls on screen, nothing wider than the window
+  many_after 390 x 844: {"vw": 390, "flash": "Save ho gaya ✓ — WALK585 Register 2031 1 piece → Lab", "pageWide": false, "errs": []}
+GREEN V3 after a Save at 390: 'Save ho gaya ✓ — <what was saved> → <place>' at the top, nothing wider than the phone  -- 'Save ho gaya ✓ — WALK585 Register 2031 1 piece → Lab'
+  stock 1366 x 768: {"vw": 1342, "vh": 669, "pageWide": false, "errs": []}
+GREEN V4 the owner's Stationery page at 1366 x 768 with every fold open (Show all issues, Shavez's sheet): nothing wider than the window
+4 browser checks: 4 GREEN, 0 RED  (3 s)
+  many 390 x 844: {"vw": 390, "vh": 844, "places": [{"t": "Lab", "top": 354, "h": 48, "on": true}, {"t": "Reception", "top": 354, "h": 48, "on": true}, {"t": "Sanjeevni", "top": 354, "h": 48, "on": true}, {"t": "Clinic", "top": 410, "h": 48, "on": true}, {"t": "X-ray", "top": 410, "h": 48, "on": true}], "nrows": 16, "rowsOk": true, "save0": {"dis": true, "t": "Save karo", "on": true}, "xrPicked": true, "after2": {"q": "2", "green": true, "dis": false, "t": "Save karo (1)", "sum": "1 cheez · A4 paper (75 gsm) 2 → X-ray", "name": "A4 paper (75 gsm)"}, "after1": {"q": "1", "t": "Save karo (1)"}, "bad": {"dis": true, "sum": "“abc” number nahi hai — theek karo."}, "cleared": {"dis": false, "t": "Save karo (1)"}, "sends": {"first": 1, "dis": true, "second": 1, "t": "Save ho raha hai…"}, "pageWide": true, "errs": []}
+CONTROL a 1900 px element in the many-items screen at 390 x 844: V1 RED (must be RED)
+
+##### 3. rehearse_s585.sh on the made-up root /tmp/s585reh/root (16:39:14-16:43:52 IST)
+
+made-up root /tmp/s585reh/root; stand-in on port 38413 (/healthz 200, /stationery and /stationery/diya 302); the restart = true; the lock made-up; the earlier kits read from /root/deploy/repo/deploy_kits
+=== outcome 1: a fresh install (green) ===
+  [1] gates (the box, root, the files; S582 installed first)
+  [2] the server-wide build lock (one build at a time on the shared server)
+  [3] pins -- the live bytes must be the ones this kit was built on
+      purchase_app.py is 60f2d846, not 147201dd (Sanjeevni's, read only; S568's walk runs its query as it is now)
+  [4] rebuild on the box, from the live bytes (each anchor exactly once)
+      rebuilt stationery.py 18268ff0 = the kit's pin
+      S563's tidy comparison rebuilt: S563 item 3 only -> S566's edits -> S568's edits = c3c8bf22 (S585 leaves clinic_papers.py as it is)
+  [5] compile on both pythons
+  [6] walks on a scratch copy of the database (made-up rows; nothing sent anywhere) -- S585's walk and control; the data step rehearsed on a copy; S582's, S575's, S571's, S568's, S566's, S563's (and its tidy fetch), the S560 (+ pack), S548, S559, S557, S555 and S551 walks
+      walk: 11 checks: 11 GREEN, 0 RED
+        M7 counts: first run exit 0, lines written 7, rows 7 (by_whom ['history (Shavez sheet)']; ts 1 s before the count True; day = the count's True; stock_before NULL True); stock lines 9, each before = after True; key True; second run ['history: already done (stationery.history_s585 is set) -- nothing written'], rows 7; an abs
+      control (the live files, must be red): 11 checks: 1 GREEN, 10 RED (W2, M1, M2, M3, M4, M5, M6, M7, M8, M9)
+      CONTROL must-be-red: W2, M1, M2, M3, M4, M5, M6, M7, M8, M9 -- all RED
+      CONTROL structural (green on both, named): W1 GREEN
+      rehearsal (scratch copy): history: wrote Register 72 pages 6 piece -> Reception (the OPD register); day 2026-10-18, 1 s before its opening count
+      rehearsal (scratch copy): history: wrote Register 104 pages 6 piece -> Reception (the lab register kept at reception); day 2026-10-18, 1 s before its opening count
+      rehearsal (scratch copy): history: wrote Register 192 pages 3 piece -> Lab (the lab register); day 2026-10-18, 1 s before its opening count
+      rehearsal (scratch copy): history: wrote Register 104 pages 6 piece -> Lab (the A/C register); day 2026-10-18, 1 s before its opening count
+      rehearsal (scratch copy): history: wrote Small notebook (copy) 2 piece -> Lab (the expense copy); day 2026-10-18, 1 s before its opening count
+      rehearsal (scratch copy): history: wrote Notebook (copy) 72 pages 6 piece -> Sanjeevni (Medical's daily detail); day 2026-10-18, 1 s before its opening count
+      rehearsal (scratch copy): history: wrote Small notebook (copy) 2 piece -> X-ray (X-ray); day 2026-10-18, 1 s before its opening count
+      rehearsal (scratch copy): stock: Cheque book folder (small clear bag) -- before 2, after 2
+      rehearsal (scratch copy): stock: Clear bag (economy) -- before 5, after 5
+      rehearsal (scratch copy): stock: Clear bag (premium) -- before 3, after 3
+      rehearsal (scratch copy): stock: Notebook (copy) 72 pages -- before 6, after 6
+      rehearsal (scratch copy): stock: Register 104 pages -- before 14, after 14
+      rehearsal (scratch copy): stock: Register 192 pages -- before 12, after 12
+      rehearsal (scratch copy): stock: Register 72 pages -- before 6, after 6
+      rehearsal (scratch copy): stock: Ring file RBU-400 -- before 1, after 1
+      rehearsal (scratch copy): stock: Small notebook (copy) -- before 4, after 4
+      rehearsal (scratch copy): history: 7 row(s) written; stationery.history_s585 set; the stock figures before = after (9 counted items)
+      rehearsal, second run: history: already done (stationery.history_s585 is set) -- nothing written
+      S582's walk copy: xray_mark and its index taken out (2 objects there before), left 0
+      S582 walk on the new files (its copy without xray_mark, its FROM = batteries.py before S582): 14 checks: 14 GREEN, 0 RED
+      S575 walk on the new files: 8 checks: 8 GREEN, 0 RED
+      S571's walk copy: S571's tables taken out (left: none), batteries.since taken out
+      S571 walk (its I1 menu line in S582's form; its copy at its install-day shape) on the new files: 12 checks: 12 GREEN, 0 RED
+      S568's walk copy: the stationery list emptied (stationery_line 2, stationery_move 0, stationery_count 9, stationery_item 13), rows left 0
+      S568 walk on the new files (its one-item screen I4 / I4F unedited; its copy with the stationery list at its install-day shape -- empty; its I8 "before" = packs.py before S568): 14 checks: 14 GREEN, 0 RED
+      S566 walk on the new files: 12 checks: 12 GREEN, 0 RED
+      S563 walk (its F4 line in S566's form) on the new files: 17 checks: 17 GREEN, 0 RED
+        TIDY fetched 102 answers with item-3-only clinic_papers.py, 102 with the TO file (owner and manager; GET bodies, POST status / Location / flash / rows); differing: none
+      S560 walk (its K2 line in S563's form) on the new files: 37 checks: 37 GREEN, 0 RED
+      S560 pack walk (P2 / P8 in S568's form) on packs.py as it is (S585 does not touch it): 9 pack checks: 9 GREEN, 0 RED
+      S548 pack walk: 8 checks, 8 green, 0 red
+      S559 walk (J1 / J3 in S563's form, O3 / O4 in S566's; M1 unchanged) on the new files: 43 checks: 43 GREEN, 0 RED
+      S557 walk on the new files: 41 checks: 41 GREEN, 0 RED
+      S555 walk on the new files: 19 checks: 19 GREEN, 0 RED
+      S551 walk (S559's three agreed lines) on the new files: 87 checks: 87 GREEN, 0 RED
+  [7] backups beside the live file, and the database by the backup API (BEFORE the restart and the data step)
+      stationery.py.bak_S585_d11d7183 . assets.db.bak_S585_20261018_163916
+  [8] place, and read the md5 back
+      placed: stationery.py at the kit's pin; the read-only files unchanged (finance untouched)
+  [9] restart s585-rehearsal-made-up (only), then health
+      healthz 200
+      /stationery answers 302 (the login gate -- expected, not a failure): mounted and gated
+      /stationery/diya answers 302 (the login gate -- expected, not a failure): mounted and gated
+  [10] the data step: Shavez's sheet, once (one transaction with its key; the stock figures before = after, else rolled back)
+      history: wrote Register 72 pages 6 piece -> Reception (the OPD register); day 2026-10-18, 1 s before its opening count
+      history: wrote Register 104 pages 6 piece -> Reception (the lab register kept at reception); day 2026-10-18, 1 s before its opening count
+      history: wrote Register 192 pages 3 piece -> Lab (the lab register); day 2026-10-18, 1 s before its opening count
+      history: wrote Register 104 pages 6 piece -> Lab (the A/C register); day 2026-10-18, 1 s before its opening count
+      history: wrote Small notebook (copy) 2 piece -> Lab (the expense copy); day 2026-10-18, 1 s before its opening count
+      history: wrote Notebook (copy) 72 pages 6 piece -> Sanjeevni (Medical's daily detail); day 2026-10-18, 1 s before its opening count
+      history: wrote Small notebook (copy) 2 piece -> X-ray (X-ray); day 2026-10-18, 1 s before its opening count
+      stock: Cheque book folder (small clear bag) -- before 2, after 2
+      stock: Clear bag (economy) -- before 5, after 5
+      stock: Clear bag (premium) -- before 3, after 3
+      stock: Notebook (copy) 72 pages -- before 6, after 6
+      stock: Register 104 pages -- before 14, after 14
+      stock: Register 192 pages -- before 12, after 12
+      stock: Register 72 pages -- before 6, after 6
+      stock: Ring file RBU-400 -- before 1, after 1
+      stock: Small notebook (copy) -- before 4, after 4
+      history: 7 row(s) written; stationery.history_s585 set; the stock figures before = after (9 counted items)
+  S585_STATIONERY_ISSUE_MANY: DONE.
+    PINS (read back): stationery.py 18268ff04b37af8143be1e3395ec5854
+    THE SWITCH: 'Many items on one screen' is a card at the top of his Stationery page (menu: Stationery) -- not on the Switches card.
+    It is OFF now (stationery.many: absent): Shavez's Stationery diya is still the one-item screen until he taps ON there.
+    UNDO (one line): \cp -p /tmp/s585reh/root/app/stationery.py.bak_S585_d11d7183 /tmp/s585reh/root/app/stationery.py && systemctl restart s585-rehearsal-made-up
+    (Shavez's seven lines stay; to take them out: python3 -B /tmp/s585reh/root/app/stationery.py --history-void /tmp/s585reh/root/app/assets.db -- it voids them, never deletes; run it BEFORE the undo line)
+  settings: added ['stationery.history_s585'] = ['7 rows 2026-10-18 16:39:56']; stationery.many absent
+  new move: Register 72 pages 6 -> reception, day 2026-10-18, ts = opening count - 1.000 s, stock_before None, by 'history (Shavez sheet)'
+  new move: Register 104 pages 6 -> reception, day 2026-10-18, ts = opening count - 1.000 s, stock_before None, by 'history (Shavez sheet)'
+  new move: Register 192 pages 3 -> lab, day 2026-10-18, ts = opening count - 1.000 s, stock_before None, by 'history (Shavez sheet)'
+  new move: Register 104 pages 6 -> lab, day 2026-10-18, ts = opening count - 1.000 s, stock_before None, by 'history (Shavez sheet)'
+  new move: Small notebook (copy) 2 -> lab, day 2026-10-18, ts = opening count - 1.000 s, stock_before None, by 'history (Shavez sheet)'
+  new move: Notebook (copy) 72 pages 6 -> sanjeevni, day 2026-10-18, ts = opening count - 1.000 s, stock_before None, by 'history (Shavez sheet)'
+  new move: Small notebook (copy) 2 -> xray, day 2026-10-18, ts = opening count - 1.000 s, stock_before None, by 'history (Shavez sheet)'
+  stationery_move: 7 new line(s), all Shavez's, each 1 s before its item's opening count
+  database: objects added []; every row of the 39 earlier tables unchanged beyond the data step True; the backup equal to the database before True
+  second data-step run: history: already done (stationery.history_s585 is set) -- nothing written
+  made-up root after outcome 1: stationery.py at the TO pin, stationery.py.bak_S585_d11d7183 beside it (the FROM bytes); the read-only files and packs.py untouched; the database backed up first; only Shavez's lines, the key and one audit line added; the switch absent (OFF); the lock released; the installer's /tmp scratch removed
+=== outcome 2: the same line again (ALREADY INSTALLED) ===
+  S585_STATIONERY_ISSUE_MANY: ALREADY INSTALLED (stationery.py at the kit's pin; the history key stationery.history_s585 set)
+    PINS (read back): stationery.py 18268ff04b37af8143be1e3395ec5854
+=== outcome 3: a forced red after placing (restores stationery.py) ===
+        M3 counts: save of three 302 -> new moves [('B', 1.0), ('C', 4.0), ('A', 2.0)] (places ['lab']), audit lines 3; stock (10.0, 5.0, 3.0) -> (8.0, 4.0, -1.0); flash 'Save ho gaya ✓ — WALK585 Copy 2031 1 piece, WALK585 Pen 2031 4 packet, WALK585 Register 203
+        M8 counts: ?one=1 -> the one-item form True with the hidden one=1 True and four places ['lab', 'reception', 'sanjeevni', 'clinic']; its POST 302 -> /stationery/diya?one=1, flash 'Ho gaya — WALK585 Register 2031 1 piece, Clinic ko. Stock mein ab 9.', move
+      (rehearsal: a red after placing is forced)
+      healthz answered forced-red
+  RESTORING stationery.py from its backup
+      stationery.py back at d11d7183 (the FROM pin); healthz 200 after the restore
+  S585_STATIONERY_ISSUE_MANY: NOT INSTALLED (restored; the database backup stays)
+=== outcome 4: healthz 200 but /stationery does not answer (404) -> restores ===
+        M3 counts: save of three 302 -> new moves [('B', 1.0), ('C', 4.0), ('A', 2.0)] (places ['lab']), audit lines 3; stock (10.0, 5.0, 3.0) -> (8.0, 4.0, -1.0); flash 'Save ho gaya ✓ — WALK585 Copy 2031 1 piece, WALK585 Pen 2031 4 packet, WALK585 Register 203
+        M8 counts: ?one=1 -> the one-item form True with the hidden one=1 True and four places ['lab', 'reception', 'sanjeevni', 'clinic']; its POST 302 -> /stationery/diya?one=1, flash 'Ho gaya — WALK585 Register 2031 1 piece, Clinic ko. Stock mein ab 9.', move
+      /stationery answered 404, not 302: it did not mount, or its login gate is open
+  RESTORING stationery.py from its backup
+      stationery.py back at d11d7183 (the FROM pin); healthz 200 after the restore
+  S585_STATIONERY_ISSUE_MANY: NOT INSTALLED (restored; the database backup stays)
+=== outcome 5: /stationery answers 200 -- a login gate open is not accepted -> restores ===
+        M3 counts: save of three 302 -> new moves [('B', 1.0), ('C', 4.0), ('A', 2.0)] (places ['lab']), audit lines 3; stock (10.0, 5.0, 3.0) -> (8.0, 4.0, -1.0); flash 'Save ho gaya ✓ — WALK585 Copy 2031 1 piece, WALK585 Pen 2031 4 packet, WALK585 Register 203
+        M8 counts: ?one=1 -> the one-item form True with the hidden one=1 True and four places ['lab', 'reception', 'sanjeevni', 'clinic']; its POST 302 -> /stationery/diya?one=1, flash 'Ho gaya — WALK585 Register 2031 1 piece, Clinic ko. Stock mein ab 9.', move
+      /stationery answered 200, not 302: it did not mount, or its login gate is open
+  RESTORING stationery.py from its backup
+      stationery.py back at d11d7183 (the FROM pin); healthz 200 after the restore
+  S585_STATIONERY_ISSUE_MANY: NOT INSTALLED (restored; the database backup stays)
+=== outcome 6: /stationery/diya does not answer (404) -> restores ===
+        M3 counts: save of three 302 -> new moves [('B', 1.0), ('C', 4.0), ('A', 2.0)] (places ['lab']), audit lines 3; stock (10.0, 5.0, 3.0) -> (8.0, 4.0, -1.0); flash 'Save ho gaya ✓ — WALK585 Copy 2031 1 piece, WALK585 Pen 2031 4 packet, WALK585 Register 203
+        M8 counts: ?one=1 -> the one-item form True with the hidden one=1 True and four places ['lab', 'reception', 'sanjeevni', 'clinic']; its POST 302 -> /stationery/diya?one=1, flash 'Ho gaya — WALK585 Register 2031 1 piece, Clinic ko. Stock mein ab 9.', move
+      /stationery answers 302 (the login gate -- expected, not a failure): mounted and gated
+      /stationery/diya answered 404, not 302: it did not mount, or its login gate is open
+  RESTORING stationery.py from its backup
+      stationery.py back at d11d7183 (the FROM pin); healthz 200 after the restore
+  S585_STATIONERY_ISSUE_MANY: NOT INSTALLED (restored; the database backup stays)
+=== outcome 7: a forced red data step -> restores (nothing of it written) ===
+        M3 counts: save of three 302 -> new moves [('B', 1.0), ('C', 4.0), ('A', 2.0)] (places ['lab']), audit lines 3; stock (10.0, 5.0, 3.0) -> (8.0, 4.0, -1.0); flash 'Save ho gaya ✓ — WALK585 Copy 2031 1 piece, WALK585 Pen 2031 4 packet, WALK585 Register 203
+        M8 counts: ?one=1 -> the one-item form True with the hidden one=1 True and four places ['lab', 'reception', 'sanjeevni', 'clinic']; its POST 302 -> /stationery/diya?one=1, flash 'Ho gaya — WALK585 Register 2031 1 piece, Clinic ko. Stock mein ab 9.', move
+      /stationery answers 302 (the login gate -- expected, not a failure): mounted and gated
+      /stationery/diya answers 302 (the login gate -- expected, not a failure): mounted and gated
+      (rehearsal: the data step is forced red, before it runs)
+  RESTORING stationery.py from its backup
+      stationery.py back at d11d7183 (the FROM pin); healthz 200 after the restore
+  S585_STATIONERY_ISSUE_MANY: NOT INSTALLED (restored; the database backup stays)
+=== outcome 8: stationery.py not at its FROM pin (a wrong FROM byte) -> REFUSED before anything is placed ===
+  REFUSED: stationery.py is 7bd0245e, not the pinned d11d7183 (S568's TO) -- another kit moved it; rebuild S585 on the new bytes
+  S585_STATIONERY_ISSUE_MANY: NOT INSTALLED (nothing was placed)
+=== outcome 9: a read-only file moved (sorting_desk.py) -> REFUSED before anything is placed ===
+  REFUSED: sorting_desk.py (read only) is f67b87ac, not the pinned 110335ea -- the walk was proven on other bytes
+  S585_STATIONERY_ISSUE_MANY: NOT INSTALLED (nothing was placed)
+=== outcome 10: S582 not installed (batteries.py before S582, no xray_costs.py) -> REFUSED before anything is placed ===
+  REFUSED: /tmp/s585reh/root/app/xray_costs.py missing -- S582 is not installed; install S582 FIRST
+  S585_STATIONERY_ISSUE_MANY: NOT INSTALLED (nothing was placed)
+=== outcome 11: the parent's packs.py moved by another kit -> REFUSED before anything is placed (S585 never places it) ===
+  REFUSED: packs.py (the parent's, read only) is 1a3c7d69, not the pinned e46264b8 -- the earlier walks were proven on other bytes
+  S585_STATIONERY_ISSUE_MANY: NOT INSTALLED (nothing was placed)
+REHEARSAL GREEN: fresh install green (the data step: only Shavez's lines, each 1 s before its opening count, the key and one audit line; a second run writes nothing; the switch left OFF); ALREADY INSTALLED; forced red restored; /stationery 404, /stationery 200, /stationery/diya 404 and a forced red data step restored (302 only); a moved stationery.py, a moved read-only file, S582 not installed and a moved packs.py refused before placing. The service faked; nothing live was placed or restarted; the live scan app's and finance folder's program files read back unchanged.
