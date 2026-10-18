@@ -1,0 +1,5 @@
+S592_CONTACT_FORM_VIA_WPCLI
+session S329 (the parent), 18-Oct-2026, 20:5x IST
+D742 -- the outside marketing firm address removed from every Elementor form e-mail field of the website (S591's logic whole; the road to the database changed: wp-cli first, as S589 proved; then the CyberPanel MySQL root; then the wp-config login)
+board _numbers v507 -> v508 (session 329, kit S592)
+keeps /root/s592_backup/meta_<id>.old.hex (root-only, byte-exact); undo: bash install_S592_CONTACT_FORM_VIA_WPCLI.sh --undo
