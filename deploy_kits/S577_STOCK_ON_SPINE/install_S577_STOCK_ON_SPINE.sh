@@ -205,13 +205,19 @@ if [ "$RRC" != 0 ] || ! echo "$ROUT" | grep -q "^WALK OK negative control"; then
 for n in $EDITED; do [ "$(m5 "$FIN/$n")" = "${FROM[$n]}" ] || { say "!! [6/14] $FIN/$n changed during the walk - nothing installed"; exit 1; }; done
 for n in $SPINEF; do [ "$(m5 "$SPN/$n")" = "${FROM[$n]}" ] || { say "!! [6/14] $SPN/$n changed during the walk - nothing installed"; exit 1; }; done
 say "[6/14] $(echo "$WOUT" | grep "^WALK OK" | tail -1)"
-say "       negative control, the old files: $(echo "$ROUT" | grep "^WALK OK" | tail -1 | cut -c27-)"
+say "       negative control, the old files: $(echo "$ROUT" | grep "^WALK OK negative control" | tail -1 | sed 's/^WALK OK negative control S577: //')"
 if [ "${DRY:-0}" = 1 ]; then say "-- DRY RUN: every gate, the scratch spines and both walks green; NOTHING written, nothing placed, nothing restarted"; exit 0; fi
 
 # ---- 7: the install-day state on the OLD and the NEW files (fresh copies of the live database); a flip or a moved A.pending = STOP ----------
-statelook() {   # $1 = side folder, $2 = label: the state by that folder's files on a fresh copy of the live database
-  local d="$SCR/st_$2"; mkdir -p "$d"; copydb "$DB" "$d/f.db" || return 1
-  ( cd /tmp && timeout 900 "$APY" -B "$KDIR/walk_s577.py" --state --label "$2" --fin "$1" --db "$d/f.db" --adb "$SCR/base_a.db" --marg "$SCR/new/marg_ingest" --map "$DMAP" 2>&1 ) | mask
+statelook() {   # $1 = a scratch finance folder, or LIVE (a fresh scratch copy of /root/finance as it stands, its spine.db beside it); $2 = label
+  local d="$SCR/st_$2" fin="$1"; mkdir -p "$d"
+  if [ "$1" = LIVE ]; then
+    mkside "st_$2" >/dev/null 2>&1 || return 1
+    copydb "$SPN/spine.db" "$d/finance/spine/spine.db" || return 1
+    fin="$d/finance"
+  fi
+  copydb "$DB" "$d/f.db" || return 1
+  ( cd /tmp && timeout 900 "$APY" -B "$KDIR/walk_s577.py" --state --label "$2" --fin "$fin" --db "$d/f.db" --adb "$SCR/base_a.db" --marg "$SCR/new/marg_ingest" --map "$DMAP" 2>&1 ) | mask
 }
 say "[7/14] the install-day state BEFORE (the live files on a copy) and as the NEW files read the same copy:"
 SB="$(statelook "$SCR/old/finance" before)"; echo "$SB" | grep -E "^STATE|^   " | sed 's/^/ /'
@@ -293,7 +299,7 @@ say "[11/14] $SVC restarted at $T0 (nothing else) and active - healthz $c1 - /fi
 
 # ---- 12: the state AFTER (the live files on a copy), nothing else moved ----------------------------------------------------------------------
 say "[12/14] the install-day state AFTER placing (the live files, a fresh copy of the live database):"
-SA_="$(statelook "$FIN" after)"; echo "$SA_" | grep -E "^STATE|^   " | sed 's/^/ /'
+SA_="$(statelook LIVE after)"; echo "$SA_" | grep -E "^STATE|^   " | sed 's/^/ /'
 echo "$SA_" | grep -q "^STATE OK S577" || restore "the state after placing could not be read"
 FLIP2="$("$APY" -c "
 import json,sys
