@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S327 close** (the Sanjeevni project), 18-Oct-2026, evening — the parent's sections exactly as its S325 close wrote them (its session 326 open), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the Sanjeevni sections refreshed here (328 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S326 close** (the parent), 18-Oct-2026, evening — the Sanjeevni sections exactly as its S327 close wrote them (its session 328 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (329 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S327 close** (the Sanjeevni project), 18-Oct-2026, evening — the parent's sections exactly as its S325 close wrote them (its session 326 open), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the Sanjeevni sections refreshed here (328 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S324 close** (the Sanjeevni project), 18-Oct-2026, afternoon — the parent's sections exactly as its S325 close wrote them (its session 326 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the Sanjeevni sections refreshed here
 
@@ -163,7 +165,7 @@ https://followup.dr-manoj.in/scanapp/
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S325 close (18-Oct, afternoon)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S326 close (18-Oct, evening)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -179,66 +181,69 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+**2 · THE CONTACT FORM — open a fresh chat in this project.** It builds the removal of the marketing firm's address first; you will get one publish and one server line. *Until then the firm still receives every website enquiry.*
+
+**3 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**3 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** On a spare PC, from `D:\MARGERP\serverbackup` on the pharmacy PC or the pen drive's `MargAuto_by_agent` folder. Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
+**4 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** On a spare PC, from `D:\MARGERP\serverbackup` on the pharmacy PC or the pen drive's `MargAuto_by_agent` folder. Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
 
-**IF THE PORTAL STOPS — the first steps now run by themselves; your guide says what already ran:**
+**IF THE PORTAL STOPS — the first steps run by themselves; your guide says what already ran:**
 
 ```
 https://claude.ai/artifact/H5W1T3WPNm85t2peTnNnfP
 ```
 
-**SURGERY CASES — use it from the next surgery on (it is not a duty, it is the new place):**
-
-```
-https://followup.dr-manoj.in/finance/surgery
-```
-
 **LATER — none of these is urgent**
 
-**4 · RANJEET'S LOGIN** — the password is yours to set.
+**5 · RANJEET'S LOGIN** — the password is yours to set.
 
 ```
 https://followup.dr-manoj.in/portal/users
 ```
 
-**5 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** September's is ready.
+**6 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** September's is ready.
 
 ```
 https://followup.dr-manoj.in/finance/packs?month=2026-09
 ```
 
-**6 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
+**7 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
 
-**7 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
+**8 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
 
-**8 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
+**9 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
 
-**WHEN IT HAPPENS — not a duty:** a phone line saying the server fixed (or could not fix) a part, or that the watcher started the server · a portal alert (open the guide at the step it names) · a POS total waiting for your Confirm · an SMS-vs-MPR difference line on your clinic money page · a Voicenotes list waiting above *Give a task* · your bank check under row 2 of the packs page.
+**WHEN IT HAPPENS — not a duty:** the first bank SMS of the morning (19-Oct, ~07:00) tests your phone fix — nothing for you to do · a phone line saying the server fixed (or could not fix) a part · a portal alert (open the guide at the step it names) · a POS total waiting for your Confirm · an SMS-vs-MPR difference line on your clinic money page · a Voicenotes list waiting above *Give a task* · your bank check under row 2 of the packs page.
 
 **Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C) · the follow-up tracker on the server — "later" (12-Oct) · Bhati's later features (sessions in the 360° record, *physiotherapy advised* to his page, his absence → WhatsApp to his patients).
 
-*Ticked by you or done, and off this list: the S319 publish (09:33 18-Oct) · the two decisions and the Hostinger key (18-Oct) · the S578, S579 and S581 publishes and install lines (18-Oct).*
+*Ticked by you or done, and off this list: the S325 publish (13:53 18-Oct) · the S586, S588, S589, S590 and S591 publishes and server lines (18-Oct) · the phone's MacroDroid fix (18:04 18-Oct).*
 
-*Closed by your word and not on this list: everything listed so at the S319 close, plus the portal's automatic steps (your two yeses), the surgery-case rules you gave, and the dummy-case test (done, all 15 steps passed).*
+*Closed by your word and not on this list: everything listed so at the S325 close, plus the portal groups and Dr Bhawna's tiles (your words 15:24 → 15:48), the vendor's FTP (your "yes"), `admin_fix` as yours, the website's mail through the clinic Gmail, and the firm's address — "remove" (being done).*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The next chat's open, in full** — the checks the last open skipped (tidying, the project-knowledge trim, the four numbers, what no backup holds, the pins against the 19-Oct backup).
-2. **Watch the first real outage and the first real surgery case** — read what ran by itself and what reached you; read the first real case once. Reads only.
-3. **The website's mail and the vendor's June access (from the Growth chat):** a working mail road for the website's contact forms, proven by one test; any login the vendor set up in June checked and removed.
-4. **The SMS watch (mine, reads only):** how often each account's SMS comes, and whether the sender now arrives.
-5. **Small, my own:** the Yes Bank SMS turned away · the nightly unattended report missing since 10-Oct · the board's number record trimmed · the console's doubled *"counter sheet not filled"* line · the finance app's own test suite · proving the 148 older documents.
-6. **The punch listener's step 2** — after about 19-Oct, only if every genuine punch carries one steady mark.
-7. **On your word:** a *send to Shavez* button for the bank check · Bhati's later features · the WhatsApp appointment message to patients · the MyOperator key steps · the contacts · the mail flood · the portal tiles · kits for Shavez's PC and the lab PC.
-8. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
+1. **The contact form — first, in the next chat:** the marketing firm's address removed from the website's form, then one test mail read in the clinic Gmail to prove only the clinic receives it.
+2. **The morning's checks:** your phone's bank SMS fix (the first SMS of 19-Oct) · the new files against the 19-Oct backup · the rest of the open's checks.
+3. **The punch listener's step 2** — every genuine punch of the last week carried one steady mark; I tell you in one line, and build it only if you want it now.
+4. **Watch the first real outage and the first real surgery case** — read what ran by itself; read the first real case once. Reads only.
+5. **Small, my own:** the mail check's wrong "not sent" line (S590) · the Yes Bank SMS turned away · the nightly's daily warning about the unattended report (kept off) · the console's doubled *"counter sheet not filled"* line · the finance app's own test suite · proving the 148 older documents.
+6. **On your word:** a *send to Shavez* button for the bank check · Bhati's later features · the WhatsApp appointment message to patients · the MyOperator key steps · the contacts · the mail flood · kits for Shavez's PC and the lab PC.
+7. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S326 CLOSE — 18-Oct-2026 (the parent)
+
+- ~~**"you decide and list any pending jobs that you have to do in the order of priority."** (15:18)~~ — listed in order; the unattended scheduled run kept off.
+- ~~**"Review and analyze the groupings… old Google Apps Script related tiles… can be retired… when I click on one tile, a submenu opens"** · **"Dr. Bhavna's PWA is also too much cluttered"** · **"dr bhawna patient records, check karein both to be removed, staff tile needed, mine ok"** (15:24 → 15:48)~~ — live 16:20 (S586, D739): ten groups, eight tiles retired, Dr Bhawna seven.
+- ~~**"macrodroid first"** · **"give step-by-step instructions for point number two onwards"**~~ — your fold phone fixed 18:04; **"you need to update it there also"** — the *PC setup files* copy updated the same way.
+- ~~**"Now the website's mail part"**~~ — the vendor's FTP login removed (18:24, your "yes"); `admin_fix` confirmed yours; **"Why not do this now, if possible?"** — the website's mail now goes through the clinic Gmail (18:34), both tests delivered; the contact-form test (your "yes") delivered too.
+- **"remove"** (18:41) — *the marketing firm's address:* the build stopped safely at the website database's login; nothing changed — **finished in the next chat** (it is ⭐1 item 1).
 
 ## ✅ DONE AT THE S325 CLOSE — 18-Oct-2026 (the parent)
 
