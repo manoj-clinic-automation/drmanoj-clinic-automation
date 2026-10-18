@@ -198,8 +198,16 @@ marg_shadow (server vs PC): 102 lines apart — the PC's base and reach, for 4b-
 - The 27-09 system rows are not marked; the 18-10 desk check found nothing to stop on.
 
 ### Publish and the lock
-`PUBLISH_ALL.bat` is run after this report is written; the commit, the server clone's pull, `md5sum -c SUMS.md5` there and the lock's release are
-written below in the line added after the publish, and the report is published once more after it.
+`PUBLISH_ALL.bat` published and verified **ee2203a** (12:21 IST: this report, the final installer and `SUMS.md5`). The kit folder's other six files
+had already gone up in another chat's publish at 12:07 IST (**534d1fb**, which also carried the S577 brief and the parent's S579 kit — expected,
+charter): the repository's kit is the final one. The server clone `/root/deploy/repo` pulled to ee2203a at **12:22:21 IST**; there `md5sum -c
+SUMS.md5` is OK for all seven files and every kit file is byte-identical (`cmp`) to `/tmp/s577kit`, the copy that ran. The seven live files read
+back at their TO pins again, healthz 200, `clinic-finance` active; the build lock (owner S577) released at **12:23:08 IST** (the box's `date`);
+`/tmp/s577kit`, `/tmp/s577kit_dry`, `/tmp/s577dev`, `/tmp/s577probe` and the database copies in them removed (the installer's own scratch went
+on its exit). **The first live gap set:** the order-rules tick of **12:20:03 IST** wrote `s577_shelf_gap` — 368 rows for the end of 16-10 (capture
+7f4d5832), **0 flagged, 22 approximate** (`gaps: 368` in its log line); `s454_shelf_gap` still 4,574 rows. `stock_point.basis` is added by the first
+stock-watch read after the install (none had happened by 12:20). The one journal line matching "Error" since the restart is gunicorn's own
+*"Worker was sent SIGTERM"* at 12:14:00 — the restart itself. This report is published once more after this line.
 
 ### Undo (if the owner says "undo")
 `\cp -p` each `.bak_S577_<from8>` back over the six files (four in `/root/finance`, two in `/root/finance/spine`), `rm -f /root/finance/stock_figure.py`,
