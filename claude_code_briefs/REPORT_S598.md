@@ -133,7 +133,8 @@ The six pages that differ, each by state only: reception's and the owner's `/por
 - `finance.db.bak_S598_20261019_095314` (40,722,432 bytes, the backup API, mode 600); `stock_figure.py.bak_S598_92367a19`, `stock_watch.py.bak_S598_c5f3ce21`, `porders.py.bak_S598_78ea72be` beside the files.
 - **The rows' JSON:** `/root/finance/purchase_order_line.bak_S598_20261019_095314.json` (3,705 bytes, md5 a0d31a256afd3cdabdcdf1a4b3a54166, mode 600) — the seven rows whole, as they stood at 09:54 before the re-judge. `undo_s598.py --db /root/finance/finance.db --json <that file>` puts them back (refusing a row whose `detected_at` / `arrived_at` moved since); never run.
 - `clinic-finance` restarted once at 09:54:13 IST. Nothing else restarted.
-- The build lock `/root/deploy/.claude_code_build.lock` taken 09:53:14 by S598, released after the publish (the time below); `/tmp/s598kit`, `/tmp/s598probe` and the installer's scratch removed.
+- The build lock `/root/deploy/.claude_code_build.lock` taken 09:53:14 by S598, released 10:00:20 IST after the publish; `/tmp/s598kit`, `/tmp/s598probe` and the installer's scratch removed.
+- **After the publish (commit 107eb68 — it also carried the chat's pending `KB_canon_all` files, as PUBLISH_ALL does):** the clone `/root/deploy/repo` pulled to 107eb68; the kit in the clone passes its SUMS and every file is byte-identical to the copy that ran from `/tmp/s598kit`. Live md5s re-read at 10:00: cb577821 299c3ef7 e5a5c4d4; healthz 200, the service active; no error line in the journal since 09:54; `DOCTOR_AUTO_OFF` absent. (This report's final text goes up in a second publish right after.)
 
 ### Not done, decisions made, and findings outside the brief
 
