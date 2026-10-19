@@ -1,0 +1,6 @@
+kit id S601_PHARMACY_BILLS_READ_BY_CLAUDE
+brief claude_code_briefs/S601_PHARMACY_BILLS_READ_BY_CLAUDE.md (v2, 19-Oct-2026, the Sanjeevni chat, session 332; R1 folded in) -- ruling D747; board _numbers v529 -> v530
+files /root/assetapp/asset_register.py c39c084e -> f29ee515 (14 anchored edits) . /root/assetapp/claude_reread.py d9b75e78 -> ed7023d2 (2 anchored edits) -- the only two files changed
+read only, pinned, never touched: claude_reader.py 3894dc23, sorting_desk.py 110335ea, clinic_papers.py 6db07c12, batteries.py 775471e6 (S582's TO), stationery.py 18268ff0 (S585's TO), xray_costs.py 22e59f5a, asset_machine.py 7d4fdffc, scanner_widget.js 10a8bb29, /root/shared/sarvam_ocr.py b1cc567b, /root/finance/packs.py e46264b8; the six Sanjeevni files printed, never placed
+data step: settings read.sarvam = off on assets.db (one INSERT OR REPLACE, after health; no DDL, no new table; new audit rows filled / read_retry are additive)
+service assetapp, restarted once
