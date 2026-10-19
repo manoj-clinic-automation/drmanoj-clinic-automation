@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S329 close** (the parent), 19-Oct-2026, morning — the Sanjeevni sections exactly as its S328 close wrote them (its session 330 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (331 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S330 close** (the Sanjeevni project), 19-Oct-2026, midday — the parent's sections exactly as its S329 close wrote them (its session 331 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open), the Sanjeevni sections refreshed here (its session 332 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S329 close** (the parent), 19-Oct-2026, morning — the Sanjeevni sections exactly as its S328 close wrote them (its session 330 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (331 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S328 close** (the Sanjeevni project), 19-Oct-2026, morning — the parent's sections exactly as its S326 close wrote them (its session 329 open), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the Sanjeevni sections refreshed here (330 reserved)
 
@@ -480,23 +482,22 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S328 close (19-Oct, morning)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S330 close (19-Oct, midday)
 
-*Detail: `S328_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_330.md`. The same lines are on your System Board.*
+*Detail: `S330_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_332.md`. The same lines are on your System Board.*
 
-**1 · The publish** — this close's record (S593 and S594 are already live and published). The same double-click as always:
+**1 · The publish** — this close's record. The same double-click as always:
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · S598 — the orthotic-sizes fix, if you have not run it yet** (its line was given at 09:2x). Paste into Claude Code on manojz, in `D:\dr-manoj-git\drmanoj-clinic-automation`:
+**2 · Then a fresh chat in this project** (your word, 12:48) — to finalize the three things below. Nothing to prepare.
 
-```
-Build, install, verify and publish the kit in claude_code_briefs/S598_ARRIVALS_BY_LINE.md (v2). Read CLAUDE.md, the charter and the brief first.
-```
-
-**Nothing else is yours now.** Your "Yes" to the Yuvika mock-up (21:21) is built (S593).
+**For your decision in that chat (the facts are in the brief):**
+- **Which reader fills the pharmacy bills** — Claude (fewer quantity mistakes: 8 against 32 on 102 bills) or Sarvam (about a quarter of the price). Today both read every pharmacy bill, so it is paid twice.
+- **Whether Amir is told** that Marg's digital entry leaves the bill date at the entry day — the system repairs the date either way.
+- **The mock-up of Darpan's purchase cut-off line** — a Yes, or what to change.
 
 **Still yours from before, not urgent (on your board):**
 - bank details for **Agarwal Surgicals and Medicals** — its bill is scanned;
@@ -505,9 +506,9 @@ Build, install, verify and publish the kit in claude_code_briefs/S598_ARRIVALS_B
 - a phone number for **BASS**.
 
 **Worth knowing — the staff's, on their own screens, not yours:**
-- **Reception:** the order page — one card per supplier; a done line from an earlier day shows its date. After S598 the Yuvika order of 28-09 shows KNEE SUPPORT HINGED XL open again (it never came on that bill).
-- **Amir:** nothing new; his next export covers the 18-10 09:37 closing.
-- **Darpan:** the spot count of ANKLE BINDER L BAMBOO; his order tab stays unused until the model is scored.
+- **Reception:** nothing new — after S598 the two Yuvika lines (KNEE SUPPORT HINGED XL, L S BELT XXX) count as on order again; no word changed.
+- **Amir:** nothing new on his screen.
+- **Darpan:** nothing new — his order tab stays unused until the model is scored.
 - **Morning staff:** the two reports, as every day.
 
 **Held at your word:**
@@ -517,16 +518,27 @@ Build, install, verify and publish the kit in claude_code_briefs/S598_ARRIVALS_B
 - **NORTIMER — out of the 6-Sep count (D715);**
 - **"Shavez waits for Amir" — evaluated at your ask, not built.**
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S328 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S330 close
 
-**Every build follows the charter v1.1 (`claude/S307_BUILD_CHARTER_v1_1.md`, D707) and the plan `claude/S327_SANJEEVNI_RESTRUCTURING_PLAN.md` (step 7 has no renames — done 11-Oct). Builds go by the Claude Code paste line on your PC, one kit per sitting, each brief read independently first.**
+**Every build follows the charter v1.1 (`claude/S307_BUILD_CHARTER_v1_1.md`, D707) and the plan `claude/S327_SANJEEVNI_RESTRUCTURING_PLAN.md`. Builds go by the Claude Code paste line on your PC, one kit per sitting, each brief read independently first.**
 
-1. **S598** — each bill line answers only its own size (published; your paste line).
-2. **The buying model (Kit II, S486 B)** on the one stock function — scored silently for a few weeks; a mock-up of Darpan's one header line for you first; the switch off Marg's sheet only when the bar on your card is met three weeks running.
-3. **Retiring the old stock figures (4b-2)** after seven explained witness nights (the watch runs from tonight).
-4. **Amir's flow on no-sale days and the bill chain on the remaining screens; Amir's page, build 3; the small F-943 line.**
-5. **Returns, the claim queue, expiry and discount attribution onto the spine.**
-6. **Count #1 closes → the stock-check screens onto the spine → count #2 by section.**
+1. **The pharmacy scan reader** — as you decide; the cheaper Claude model tested on the same 102 bills first.
+2. **The bill-date repair (F-948)** — the paper's date from our scan where Marg carries the entry day; and the check of the 29 bills of 15-10 and 18-10.
+3. **The buying model (Kit II, S486 B)** — with Darpan's purchase cut-off line after your Yes to its mock-up; scored silently for a few weeks; the switch off Marg's sheet only when the bar on your card is met three weeks running.
+4. **Retiring the old stock figures (4b-2)** after seven explained witness nights (from 26-10 at the earliest).
+5. **Amir's flow on no-sale days and the bill chain on the remaining screens; Amir's page, build 3; the small F-943 line.**
+6. **Returns, the claim queue, expiry and discount attribution onto the spine.**
+7. **Count #1 closes → the stock-check screens onto the spine → count #2 by section.**
+
+## ✅ DONE AT THE S330 CLOSE — 19-Oct-2026 (the Sanjeevni project)
+
+- ~~**S598 — the orthotic sizes fix**~~ — your paste line ran (live 09:54); checked on your page at 10:33: 13 arrival lines, five naming the sizes the bill carried; orthotic shortages 2; KNEE SUPPORT HINGED XL and L S BELT XXX back to "not yet billed".
+- ~~**The S328 publish**~~ — landed 10:00 (with S598's report).
+- ~~**"Stop sooner this is confusing…" (10:40)**~~ — the stock-day line is dropped from Darpan's screen (D746).
+- ~~**"We should add the last purchase entry date by Amir or the last purchase report date…" (10:42)**~~ — D746: a purchase cut-off line; the mock-up comes to you in the next chat.
+- ~~**"look into the scanner results now…" (10:43)**~~ — analysed; the pharmacy bills are filled by Sarvam with Claude reading beside it (my first table credited Claude — corrected).
+- ~~**"Bill wise, the dates are bill dates…" / "Amir recently started using marg digital entry…" (12:01, 12:04)**~~ — confirmed from the raw exports: bill dates right up to 10-10; since 15-10 Marg carries the entry day (F-948).
+- ~~**"Claude is four times more expensive…" (12:45)**~~ — the cost set out; the choice is yours in the fresh chat.
 
 ## ✅ DONE AT THE S328 CLOSE — 18 → 19-Oct-2026 (the Sanjeevni project)
 
