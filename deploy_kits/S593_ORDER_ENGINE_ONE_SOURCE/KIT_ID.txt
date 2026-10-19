@@ -1,0 +1,3 @@
+kit id S593_ORDER_ENGINE_ONE_SOURCE
+brief claude_code_briefs/S593_ORDER_ENGINE_ONE_SOURCE.md (v2, 18-Oct-2026, Sanjeevni session 328) under D743; closes F-916, F-717, F-738, F-739
+built 19-Oct-2026 by Claude Code from the live bytes of srv1746119 (six files: order_rules.py, porders.py, porders_s454.py, order_sheet.py, darpan_kal.py, spine/spine_read.py) and the clone's DUTY_MAP.json (v14 -> v15)

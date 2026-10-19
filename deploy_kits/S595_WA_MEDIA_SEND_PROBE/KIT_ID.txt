@@ -1,0 +1,5 @@
+S595_WA_MEDIA_SEND_PROBE
+session S329 (the parent), 19-Oct-2026, 06:3x IST
+D744 -- the WhatsApp Inbox (owner only), step 1: prove photo / PDF / voice-note sends through MyOperator on the owner's own number
+board _numbers v512 -> v513 (kit S595, D744)
+changes nothing live; test files in a random website folder, removed after 30 minutes; result in /root/finance/s595_probe.json
