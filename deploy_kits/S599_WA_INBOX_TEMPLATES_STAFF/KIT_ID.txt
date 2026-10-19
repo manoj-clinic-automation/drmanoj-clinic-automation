@@ -1,0 +1,7 @@
+S599_WA_INBOX_TEMPLATES_STAFF
+session S329 (the parent), 19-Oct-2026
+D744 (continued) -- the inbox's WhatsApp key proved against MyOperator and named in /root/wa/wa_inbox/config.json;
+templates switched live (portal_config.py PORTAL_WA_DRYRUN = "0", and the portal's key if its own was refused);
+staff replies (the portal's template log + the call tracker's sheet) shown in each chat with who sent them.
+board _numbers v519 -> v520 (kit S599)
+pin in: /root/portal/portal_inbox.py 14c94a46 ; undo: bash install_S599_WA_INBOX_TEMPLATES_STAFF.sh --undo (backups /root/s599_backup/)
