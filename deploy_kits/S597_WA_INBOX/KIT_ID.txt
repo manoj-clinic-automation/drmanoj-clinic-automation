@@ -1,0 +1,8 @@
+S597_WA_INBOX
+session S329 (the parent), 19-Oct-2026
+D744 -- the owner's WhatsApp Inbox in the portal: every chat on the clinic number, full mobile number and clinic ID,
+photos / PDFs / voice notes / videos inline, replies by text / photo / PDF / voice note (MP3, made in the browser),
+saved replies, approved templates after 24 h, an inline Call button, the ntfy alert opening the chat.
+board _numbers v516 -> v517 (kit S597, PLANNED portal.py / tile_grants.json / wa_alert.py)
+pins in: portal.py 25cb73e7 · tile_grants.json e54f59db · wa_alert.py e7d0b766 ; out: see AFTER.md5
+undo: bash install_S597_WA_INBOX.sh --undo   (backups in /root/s597_backup/)
