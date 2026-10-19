@@ -100,7 +100,8 @@ On the OLD files the same read-only run printed `stock_figure: start capture 6d7
 
 - `finance.db.bak_S602_20261019_195456` (40,747,008 bytes, the backup API, mode 600); `darpan_kal.py.bak_S602_325d988c`, `darpan_kal.html.bak_S602_75d5a5b5`, `spine/spine_read.py.bak_S602_827b0040`, `stock_figure.py.bak_S602_cb577821` beside the files.
 - `clinic-finance` restarted once at 19:56:43 IST (`ActiveEnterTimestamp` read back). Nothing else restarted.
-- The build lock `/root/deploy/.claude_code_build.lock` taken 19:54:56 by S602, held until the publish; `/root/deploy/_off/DOCTOR_AUTO_OFF` absent; the installer's `/tmp/s602_inst_*` scratch removed on exit.
+- The build lock `/root/deploy/.claude_code_build.lock` taken 19:54:56 by S602, released 20:00:33 IST after the publish; `/root/deploy/_off/DOCTOR_AUTO_OFF` absent; the installer's `/tmp/s602_inst_*` scratch removed on exit; `/tmp/s602kit` and `/tmp/s602probe` removed at 20:00:33.
+- **After the publish (commit 0858185 — it also carried the chat's pending brief file `claude_code_briefs/S602_CUTOFF_LINE_AND_F943.md`, as PUBLISH_ALL does; the gate: 9 staged files clean):** the clone `/root/deploy/repo` pulled 911533d → 0858185 at 20:00:33 IST; the kit in the clone passes its SUMS and `diff -r` against the copy that ran (`/tmp/s602kit`) is empty — byte-identical. Live md5s re-read at 20:00: b28d7342 7c939191 10697b38 51e1fc63; healthz 200, the service active; 0 error lines in the journal since 19:56. (This report's final text goes up in a second publish right after; the kit folder is frozen as it ran.)
 
 ### Not done, decisions made, and findings outside the brief
 
@@ -113,7 +114,7 @@ On the OLD files the same read-only run printed `stock_figure: start capture 6d7
 - **Finding — the witness is fast:** 0.5 s on the copy, 1 s on live (689 lines, 414 names); the brief's "wasted `verify_start` work" was real but small on this data (the capture is `pur_short`: `start_ready` says not ready before `verify_start` runs). Named, not a change.
 - **Finding — the owner's view of the tab:** `_s485_payload` says `editable: true` for the owner (`who[0] in ("staff", "owner")`); the browser's `ro = OWNER_RO || j.me === "owner"` is what makes his view read-only (line 418). Pre-existing design (S485), seen, not touched.
 - **Finding — the witness log:** F-943's one-line-a-night has never yet been written anywhere but the rehearsal; after tonight the log file will exist. The next reader should read its tail (the installer prints it).
-- **Permissions:** nothing asked or refused on the server. On this PC: `git` is not on PowerShell's PATH (PUBLISH_ALL.bat finds its own); one of my ssh lines failed because PowerShell expanded `$(seq …)` locally — rewritten as a file, nothing lost. No memory note beyond what exists (one small addition on the ssh/wait shape).
+- **Permissions:** nothing asked or refused on the server. On this PC: `git` is not on PowerShell's PATH (PUBLISH_ALL.bat finds its own); one of my ssh lines failed because PowerShell expanded `$(seq …)` locally — rewritten as a file, nothing lost. A memory note (the detached-install / wait-file shape, no Node on the box) was refused: the memory folder is denied by the permission list — not worked around; the shape is in this kit's installer and in S602's `_scratch` scripts instead.
 
 ### Charter
 
