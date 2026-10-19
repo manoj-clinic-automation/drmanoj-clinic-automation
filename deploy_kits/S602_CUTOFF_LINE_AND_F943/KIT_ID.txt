@@ -1,0 +1,5 @@
+kit id S602_CUTOFF_LINE_AND_F943
+brief claude_code_briefs/S602_CUTOFF_LINE_AND_F943.md (v2, 19-Oct-2026, Sanjeevni session 332) -- D746 (the cut-off line on Darpan's order tab), closes F-943
+files /root/finance/darpan_kal.py 325d988c -> b28d7342 . /root/finance/darpan_kal.html 75d5a5b5 -> 7c939191 . /root/finance/spine/spine_read.py 827b0040 -> 10697b38 . /root/finance/stock_figure.py cb577821 -> 51e1fc63
+data step none (no DDL, no new table, no new setting)
+service clinic-finance, restarted once
