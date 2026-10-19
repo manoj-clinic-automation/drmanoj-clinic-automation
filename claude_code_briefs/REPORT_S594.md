@@ -80,7 +80,11 @@ Window 08:27 IST (08:00–23:49); the build lock free, taken 08:27:48 by S594; S
 - **Finding (above):** the witness's read-only run prints S587's *"start capture … stays pending: attempt to write a readonly database"* while a start capture is pending. Fail-soft, exit 0, the file written. For the chat's register.
 - **Finding:** the witness file's header still says `kit S587_MORNING_FLOW` (the module's `KIT` constant moved with S587). Cosmetic.
 - **Finding:** `/root/finance/spine/stock_figure_witness.log` does not exist yet; the shell creates it at the first 23:58 run. The 23:58 run's stdout/stderr (the fail-soft line and the "written" line) will accumulate there with no rotation — one or two lines a night.
-- **Permissions:** nothing refused.
+- **Permissions:** nothing refused on the build path. One write to Claude Code's own memory folder (outside the repository) was refused by the permission list; nothing of the kit depended on it.
+
+### Published and closed out
+
+`PUBLISH_ALL.bat` 08:29 IST: commit `e225449` (6 files: the kit's five and this report), origin HEAD verified. On the box 08:30:08 IST: `/root/deploy/repo` pulled to `e225449`; `md5sum -c SUMS.md5` OK in the clone; every kit file `cmp` byte-identical to `/tmp/s594kit`, the copy that ran; the crontab still 84 lines, md5 3ee61405, one tagged line; healthz 200; the build lock released (owner was S594, 08:27:48); `/tmp/s594*` removed; no `__pycache__` in the kit. This section is the one addition after that commit.
 
 ### Charter
 
