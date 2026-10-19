@@ -1,4 +1,8 @@
-# OWNER TO-DO — LIVE · refreshed at the **S326 close** (the parent), 18-Oct-2026, evening — the Sanjeevni sections exactly as its S327 close wrote them (its session 328 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (329 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S329 close** (the parent), 19-Oct-2026, morning — the Sanjeevni sections exactly as its S328 close wrote them (its session 330 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (331 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S328 close** (the Sanjeevni project), 19-Oct-2026, morning — the parent's sections exactly as its S326 close wrote them (its session 329 open), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the Sanjeevni sections refreshed here (330 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S326 close** (the parent), 18-Oct-2026, evening — the Sanjeevni sections exactly as its S327 close wrote them (its session 328 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (329 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S327 close** (the Sanjeevni project), 18-Oct-2026, evening — the parent's sections exactly as its S325 close wrote them (its session 326 open), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the Sanjeevni sections refreshed here (328 reserved)
 
@@ -165,7 +169,7 @@ https://followup.dr-manoj.in/scanapp/
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S326 close (18-Oct, evening)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S329 close (19-Oct, morning)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -181,7 +185,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · THE CONTACT FORM — open a fresh chat in this project.** It builds the removal of the marketing firm's address first; you will get one publish and one server line. *Until then the firm still receives every website enquiry.*
+**2 · MYOPERATOR'S REPLY ABOUT THE WHATSAPP KEY.** I mailed Khushi and MyOperator support at 09:21 on 19-Oct, with you in copy. When they reply, or call you, open a fresh chat in this project and say so — it gives you one server line that switches on templates and your staff's replies. *Until then the inbox cannot send; reply to patients from the MyOperator app.*
 
 **3 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
@@ -217,25 +221,38 @@ https://followup.dr-manoj.in/finance/packs?month=2026-09
 
 **9 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
 
-**WHEN IT HAPPENS — not a duty:** the first bank SMS of the morning (19-Oct, ~07:00) tests your phone fix — nothing for you to do · a phone line saying the server fixed (or could not fix) a part · a portal alert (open the guide at the step it names) · a POS total waiting for your Confirm · an SMS-vs-MPR difference line on your clinic money page · a Voicenotes list waiting above *Give a task* · your bank check under row 2 of the packs page.
+**WHEN IT HAPPENS — not a duty:** a patient's WhatsApp alert — tap it and the chat opens in your inbox · a phone line saying the server fixed (or could not fix) a part · a portal alert (open the guide at the step it names) · a POS total waiting for your Confirm · an SMS-vs-MPR difference line on your clinic money page · a Voicenotes list waiting above *Give a task* · your bank check under row 2 of the packs page.
+
+```
+https://followup.dr-manoj.in/portal/inbox
+```
 
 **Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C) · the follow-up tracker on the server — "later" (12-Oct) · Bhati's later features (sessions in the 360° record, *physiotherapy advised* to his page, his absence → WhatsApp to his patients).
 
-*Ticked by you or done, and off this list: the S325 publish (13:53 18-Oct) · the S586, S588, S589, S590 and S591 publishes and server lines (18-Oct) · the phone's MacroDroid fix (18:04 18-Oct).*
+*Ticked by you or done, and off this list: the S326 publish · the S592, S595, S597, S599 and S600 publishes and server lines (18 → 19-Oct) · the contact form (done 20:33 18-Oct).*
 
-*Closed by your word and not on this list: everything listed so at the S325 close, plus the portal groups and Dr Bhawna's tiles (your words 15:24 → 15:48), the vendor's FTP (your "yes"), `admin_fix` as yours, the website's mail through the clinic Gmail, and the firm's address — "remove" (being done).*
+*Closed by your word and not on this list: everything listed so at the S326 close, plus the firm's address — removed; the WhatsApp Inbox as you set it — only you, full numbers and clinic ID, photos, PDFs and voice both ways, the Call button; and templates with your staff's replies — "go" (waiting only on MyOperator).*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The contact form — first, in the next chat:** the marketing firm's address removed from the website's form, then one test mail read in the clinic Gmail to prove only the clinic receives it.
-2. **The morning's checks:** your phone's bank SMS fix (the first SMS of 19-Oct) · the new files against the 19-Oct backup · the rest of the open's checks.
-3. **The punch listener's step 2** — every genuine punch of the last week carried one steady mark; I tell you in one line, and build it only if you want it now.
-4. **Watch the first real outage and the first real surgery case** — read what ran by itself; read the first real case once. Reads only.
-5. **Small, my own:** the mail check's wrong "not sent" line (S590) · the Yes Bank SMS turned away · the nightly's daily warning about the unattended report (kept off) · the console's doubled *"counter sheet not filled"* line · the finance app's own test suite · proving the 148 older documents.
-6. **On your word:** a *send to Shavez* button for the bank check · Bhati's later features · the WhatsApp appointment message to patients · the MyOperator key steps · the contacts · the mail flood · kits for Shavez's PC and the lab PC.
-7. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
+1. **The WhatsApp key — first, in the next chat:** read MyOperator's reply; when the key works, the one line that switches on templates and your staff's replies, proved on your phone.
+2. **The morning's checks:** your phone's bank SMS fix (the first SMS of 19-Oct) · the new inbox files against the 20-Oct backup · the rest of the open's checks.
+3. **The website:** one more old entry mentions the firm's domain — I read what it is and tell you in one line.
+4. **A backup of the WhatsApp message log** — the inbox is rebuilt from it, and it has only one copy today.
+5. **The punch listener's step 2** — every genuine punch of the last week carried one steady mark; I tell you in one line, and build it only if you want it now.
+6. **Small, my own:** the mail check's wrong "not sent" line (S590) · the Yes Bank SMS turned away · the nightly's daily warning about the unattended report (kept off) · the console's doubled *"counter sheet not filled"* line · the finance app's own test suite · proving the 148 older documents · the weekly auditor's three findings (the two finance tokens, the UPI resync, the key list).
+7. **On your word:** replies your staff type in the MyOperator app shown in the inbox too · a *send to Shavez* button for the bank check · Bhati's later features · the contacts · the mail flood · kits for Shavez's PC and the lab PC.
+8. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S329 CLOSE — 18 → 19-Oct-2026 (the parent)
+
+- ~~**"remove"** (18-Oct, 18:41) — *the marketing firm's address*~~ — removed 20:33 (S592); your "yes" to the test: the 20:35 enquiry reached the clinic Gmail only.
+- ~~**"I need interactive whatsapp communication, from the waba incoming messages… images etc can't be opened"** · **"Only me , and adda call button inline"** · **"Need to send photo and pdf back from beginning"** · **"Need full mobile numbers, clinic id"** · **"Also I want to send voice messages"** · **"Mockups are ok"** (19-Oct, 01:56 → 06:10)~~ — photo, PDF and voice proved on your phone (08:17); the WhatsApp Inbox live 08:49 (S597).
+- **"I want to send templates… see the replies which are sent by my staff members in the chat also"** · **"go"** (08:52 / 08:57) — built (S599); it stopped safely at the key check — **waits for MyOperator** (⭐0 item 2).
+- ~~**"…find out the cause and rectify it or escalate it to the My Operator support team"** (09:09)~~ — the cause is MyOperator's side (your key unchanged; they answer it as a made-up key); ~~**"Send this mail to Khushi my operator and support at myoperator.com, but from my personal email also"** (09:20)~~ — sent 09:21 from the clinic Gmail with your personal address in copy (I can send only as the clinic Gmail).
+- ~~**"will my replies from the WhatsApp inbox be delivered to the patients?"** (09:22)~~ — answered: not until MyOperator restores the key; patients' messages still arrive.
 
 ## ✅ DONE AT THE S326 CLOSE — 18-Oct-2026 (the parent)
 
@@ -463,17 +480,23 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S327 close (18-Oct, evening)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S328 close (19-Oct, morning)
 
-*Detail: `S327_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_328.md`. The same lines are on your System Board.*
+*Detail: `S328_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_330.md`. The same lines are on your System Board.*
 
-**1 · The publish** — this close's record (both kits of today are already live and published). The same double-click as always:
+**1 · The publish** — this close's record (S593 and S594 are already live and published). The same double-click as always:
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**Nothing else is yours now.** Your ruling (D740) and your look at the mock-up were given at 16:24 and are built.
+**2 · S598 — the orthotic-sizes fix, if you have not run it yet** (its line was given at 09:2x). Paste into Claude Code on manojz, in `D:\dr-manoj-git\drmanoj-clinic-automation`:
+
+```
+Build, install, verify and publish the kit in claude_code_briefs/S598_ARRIVALS_BY_LINE.md (v2). Read CLAUDE.md, the charter and the brief first.
+```
+
+**Nothing else is yours now.** Your "Yes" to the Yuvika mock-up (21:21) is built (S593).
 
 **Still yours from before, not urgent (on your board):**
 - bank details for **Agarwal Surgicals and Medicals** — its bill is scanned;
@@ -482,9 +505,10 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 - a phone number for **BASS**.
 
 **Worth knowing — the staff's, on their own screens, not yours:**
-- **Amir:** his page's steps now run *Punch · Bill entry · Marg sudhar · Export · Check · Bills · Band*; a bill entered after the export holds his day until a fresh export. His four corrections of 18-Oct are judged on the next closing taken after them.
-- **Darpan:** the spot count of ANKLE BINDER L BAMBOO.
-- **Morning staff:** the two reports — whichever date Shavez prints on the closing, it is used once checked.
+- **Reception:** the order page — one card per supplier; a done line from an earlier day shows its date. After S598 the Yuvika order of 28-09 shows KNEE SUPPORT HINGED XL open again (it never came on that bill).
+- **Amir:** nothing new; his next export covers the 18-10 09:37 closing.
+- **Darpan:** the spot count of ANKLE BINDER L BAMBOO; his order tab stays unused until the model is scored.
+- **Morning staff:** the two reports, as every day.
 
 **Held at your word:**
 - S438_COUNT_BOOK;
@@ -493,15 +517,24 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 - **NORTIMER — out of the 6-Sep count (D715);**
 - **"Shavez waits for Amir" — evaluated at your ask, not built.**
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S327 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S328 close
 
-**Every build follows the charter v1.1 (`claude/S307_BUILD_CHARTER_v1_1.md`, D707) and the plan `claude/S327_SANJEEVNI_RESTRUCTURING_PLAN.md`. Builds go by the Claude Code paste line on your PC, one kit per sitting, each brief read independently first.**
+**Every build follows the charter v1.1 (`claude/S307_BUILD_CHARTER_v1_1.md`, D707) and the plan `claude/S327_SANJEEVNI_RESTRUCTURING_PLAN.md` (step 7 has no renames — done 11-Oct). Builds go by the Claude Code paste line on your PC, one kit per sitting, each brief read independently first.**
 
-1. **4b-2** — retiring the old stock copies after the side-by-side week (the clinic chat adds the witness line first).
-2. **The buying model (S486 A, then B)** on the one stock function and the one arrivals rule — with Yuvika-in-two-lists (F-916) and a mock-up for you first; the switch off Marg's sheet only when the bar on your card is met three weeks running.
-3. **Amir's flow on no-sale days and the bill chain on the remaining screens; Amir's page, build 3.**
-4. **Returns, the claim queue, expiry and discount attribution onto the spine.**
-5. **Count #1 closes → the 22 renames (the list to you first) → the stock-check screens onto the spine → count #2 by section.**
+1. **S598** — each bill line answers only its own size (published; your paste line).
+2. **The buying model (Kit II, S486 B)** on the one stock function — scored silently for a few weeks; a mock-up of Darpan's one header line for you first; the switch off Marg's sheet only when the bar on your card is met three weeks running.
+3. **Retiring the old stock figures (4b-2)** after seven explained witness nights (the watch runs from tonight).
+4. **Amir's flow on no-sale days and the bill chain on the remaining screens; Amir's page, build 3; the small F-943 line.**
+5. **Returns, the claim queue, expiry and discount attribution onto the spine.**
+6. **Count #1 closes → the stock-check screens onto the spine → count #2 by section.**
+
+## ✅ DONE AT THE S328 CLOSE — 18 → 19-Oct-2026 (the Sanjeevni project)
+
+- ~~**The buying model re-read against today's live code**~~ — two kits, not three; the engine reaches nobody until the switch, so the model is scored in shadow.
+- ~~**"Yes" (21:21) to the Yuvika mock-up — D743**~~ — built as S593, live 08:03 19-Oct: the engine on the one stock function and the one arrivals rule; Marg's "billed" mark alive again (7 old lines); Yuvika's one card, dated done lines; F-916, F-717, F-738, F-739 closed.
+- ~~**"Why need other project for point no 3, can you do it yourself" (your words, 01:40)**~~ — yes: S594 added the nightly witness line, live 08:27; the week runs from 19-10.
+- ~~**"What all is left … Renames were already done?" (01:34, 01:37)**~~ — answered; the plan's step 7 corrected (the renames were done 11-Oct).
+- ~~**"I want this orthotic sizes … confusion to end so that this becomes clean" (your words, 08:47)**~~ — the cause found (the M/L bill credited to XL); S598 briefed, checked and published; your paste line.
 
 ## ✅ DONE AT THE S327 CLOSE — 18-Oct-2026, evening (the Sanjeevni project)
 

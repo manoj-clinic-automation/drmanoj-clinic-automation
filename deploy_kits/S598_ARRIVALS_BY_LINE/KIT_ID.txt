@@ -1,0 +1,5 @@
+kit id S598_ARRIVALS_BY_LINE
+brief claude_code_briefs/S598_ARRIVALS_BY_LINE.md (v2, 19-Oct-2026, Sanjeevni session 328) -- closes F-942
+files /root/finance/stock_figure.py 92367a19 -> cb577821 . /root/finance/stock_watch.py c5f3ce21 -> 299c3ef7 . /root/finance/porders.py 78ea72be -> e5a5c4d4
+data step rejudge_s598.py once on finance.db (S593's marks of 19-Oct re-judged; the rows saved to purchase_order_line.bak_S598_<stamp>.json; undo_s598.py restores)
+service clinic-finance, restarted once
