@@ -106,16 +106,16 @@ C1 is red there because the paper stays empty (SARVAM None) and the stub is aske
 S555 19/19 · S551 87/87 — all green; asserted, not assumed (R1's note that they filter `bill_audit` by action and baseline only the
 intake / reception / machine pages holds).
 
-**Rehearsal (BUILD_NORM §3) on a made-up root under `/tmp/s601reh` with a stand-in service, a made-up key file, the restart = true (17:20–17:28
-IST): REHEARSAL GREEN** — a fresh install green (the two files placed, their backups beside them, the database backed up first and equal to the
+**Rehearsal (BUILD_NORM §3) on a made-up root under `/tmp/s601reh` with a stand-in service, a made-up key file, the restart = true (before
+the install; its log carries no clock, so no time is quoted): REHEARSAL GREEN** — a fresh install green (the two files placed, their backups beside them, the database backed up first and equal to the
 database before, ONLY `read.sarvam = off` added, the lock kept); ALREADY INSTALLED; a forced red after placing restored both files with the
 setting NOT written; `/admin` 404, `/admin` 200 (a login gate open), `/bills` 404 and a forced red data step each restored (302 only); a moved
 `asset_register.py`, a moved read-only file (`claude_reader.py`), `read.claude = off` and an empty key file each REFUSED before anything was
-placed; the live scan app's, finance folder's and /root/shared's program files read back unchanged. A DRY=1 run of the installer on the box
-(17:07–17:12 IST) was green on every gate, the build, both walks and the chain before the rehearsal.
+placed; the live scan app's, finance folder's and /root/shared's program files read back unchanged. Before the rehearsal, a DRY=1 run of
+the installer on the box was green on every gate, the build, both walks and the chain (nothing placed, no lock).
 
-**Build lock:** taken 2026-10-19 17:28:32 IST by `S601_PHARMACY_BILLS_READ_BY_CLAUDE`, held through this report, released after the publish
-and the clone check (the last lines below). `/tmp/s601kit`, `/tmp/s601probe`, `/tmp/s601reh` removed then.
+**Build lock:** taken 2026-10-19 17:28:32 IST by `S601_PHARMACY_BILLS_READ_BY_CLAUDE`, held through this report — **and still held: see
+"Publish and the clone" at the end** (its removal from my shell was refused by the permission list; one line for the chat is given there).
 
 ### What was NOT done, and why
 - **The other lanes' handwritten challans** — the Scan App chat's (told on the board); not in this brief.
@@ -170,5 +170,22 @@ and the clone check (the last lines below). `/tmp/s601kit`, `/tmp/s601probe`, `/
 — then `/healthz` 200 and the files back at `c39c084e` / `d9b75e78`. The setting `read.sarvam = off` stays (the old file ignores it). The
 database backup `assets.db.bak_S601_20261019_172831` is used only if the data change must be reversed — say so before using it.
 
-### Publish and the clone (filled in after the publish)
-See the last lines of this file.
+### Publish and the clone
+- **Published** by `PUBLISH_ALL.bat`: the gate `NO_PHONE_NUMBERS` clean over the 34 staged files (numbers and credentials); commit
+  `4744a858110e7dbac1bfdbbe1e686158a95e180d` "publish: pending kits and files (PUBLISH_ALL)"; origin HEAD verified = local. (This
+  section's lines are a second, small publish of the report alone.)
+- **The clone** `/root/deploy/repo` pulled fast-forward to `4744a858` at 17:36:14 IST; `md5sum -c SUMS.md5` in the clone's kit folder: 0
+  failures; `diff -rq` clone kit vs `/tmp/s601kit/…` (the copy that installed): identical; the live files read back again `f29ee515…` /
+  `ed7023d2…`; healthz 200. No `__pycache__` in the clone's kit.
+- **`/tmp` on the box cleaned:** `/tmp/s601kit`, `/tmp/s601kit.tar`, `/tmp/s601probe`, `/tmp/s601probe1.sh`, `/tmp/s601reh` and the six
+  `/tmp/s601_install_*` scratch folders of the rehearsal removed; `ls -d /tmp/s601*` empty.
+- **The build lock is NOT released — one line for the chat (or the owner):** the lock `/root/deploy/.claude_code_build.lock` (owner line
+  `S601_PHARMACY_BILLS_READ_BY_CLAUDE 2026-10-19 17:28:32`) must be removed now that this report is written, but `rm -rf
+  /root/deploy/.claude_code_build.lock` over ssh was refused by the permission list here (an `rm -rf` under /root), and the rulebook says
+  not to try another spelling. Until it is removed, the next kit's installer on this server refuses with "another build holds the lock".
+  The line, on the box:
+  ```bash
+  rm -rf /root/deploy/.claude_code_build.lock
+  ```
+  (CLAUDE.md allows deleting a lock older than 3 hours whose owner's report shows it finished — this report does.)
+- **The memory note** for Claude Code's own PC-side gotchas was refused too (the memory folder is denied) — nothing of the kit depends on it.
