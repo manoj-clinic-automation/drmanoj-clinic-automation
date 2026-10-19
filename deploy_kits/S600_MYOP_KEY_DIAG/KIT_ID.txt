@@ -1,0 +1,4 @@
+S600_MYOP_KEY_DIAG
+session S329 (the parent), 19-Oct-2026 -- READ-ONLY diagnostic; sends nothing, changes nothing live
+the clinic's one WhatsApp key refused by MyOperator (HTTP 500) since ~08:50 IST 19-Oct; evidence for the fix / MyOperator support
+board _numbers v520 -> v521 (kit S600); output /root/finance/s600_myop_diag.json (no key, no number)
