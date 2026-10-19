@@ -82,7 +82,8 @@ Note for the chat: the brief's §2 described 18-Oct's `done` as Yuvika's order #
 
 - `finance.db.bak_S593_20261019_080218` (40,464,384 bytes, the backup API); `order_rules.py.bak_S593_79f21c1e`, `porders.py.bak_S593_a5a823bf`, `porders_s454.py.bak_S593_83079763`, `order_sheet.py.bak_S593_f00f0163`, `darpan_kal.py.bak_S593_8128598f`, `spine/spine_read.py.bak_S593_712a1e4e` beside the files.
 - `clinic-finance` restarted once at 08:03:22 IST. Nothing else restarted.
-- The build lock `/root/deploy/.claude_code_build.lock` taken 08:02:18 by S593, released after this report; `/tmp/s593*` removed.
+- The build lock `/root/deploy/.claude_code_build.lock` taken 08:02:18 by S593, released 08:08:03 IST after the publish; `/tmp/s593*` removed (the installer's log kept at `/tmp/s593probe/install.log`).
+- **After the publish (08:07:21 IST, commit 6c8599c — it also carried the other chat's pending S594 brief and S595 probe kit, as PUBLISH_ALL does):** the clone `/root/deploy/repo` pulled to 6c8599c; the kit in the clone passes its SUMS and is byte-identical to the copy that ran; `claude_code_briefs/DUTY_MAP.json` in the clone is c2ef9c6c5adb8c930b21bff5441cc017 — **landed**, v15 with the darpan arm, the file `amir_day` / `aaj_kaam` read. Live md5s re-read: 8d078dbe 78ea72be 40f1755a 1f1e85c1 325d988c 827b0040; healthz 200; the only two "error" journal lines since the restart are gunicorn's normal `Worker was sent SIGTERM` at 08:03:22.
 
 ### Not done, decisions made, and findings outside the brief
 
