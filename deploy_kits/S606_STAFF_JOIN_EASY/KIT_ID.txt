@@ -1,0 +1,8 @@
+S606_STAFF_JOIN_EASY
+session S331 (the parent), 20-Oct-2026
+The two-touch Add-staff flow at /finance/staff/new: one form; login by WhatsApp / SMS / printed slip / none (no phone);
+the machine step watches punches.csv for his new finger and links it with one tap (staff_master.csv + staff_register.db
++ the never-reuse code register); the joining closes itself. Arjun Dev's login "arjun dev" -> "arjundev".
+board _numbers v551 -> v552 (kit S606)
+pins in: /root/finance/staff_pages.py 0fde34ca ; /root/finance/staff_manage.html 71540e8c ; readers joiner_app.py 6305b05d, joiner_schema.sql 8bb6aeb9
+undo: bash install_S606_STAFF_JOIN_EASY.sh --undo (backups /root/s606_backup/)

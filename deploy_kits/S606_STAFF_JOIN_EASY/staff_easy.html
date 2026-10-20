@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add staff</title>
+<!-- S606 (session S331, 20-Oct-2026): the two-touch Add-staff flow. The old ladder stays at /finance/staff. -->
+<style>
+ :root{--ink:#1c1c1c;--muted:#7d766c;--line:#e4e0da;--bg:#f6f4f1;--card:#fff;--ok:#2e6b34;--okbg:#eef5ef;--warn:#a8730a;--warnbg:#fff6ef}
+ *{box-sizing:border-box}
+ body{font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;margin:0 auto;max-width:680px;background:var(--bg);color:var(--ink);padding:14px 16px 60px}
+ h1{font-size:21px;margin:6px 0 2px}
+ h2{font-size:17px;margin:0 0 6px;display:flex;align-items:center;gap:8px}
+ .sub{color:var(--muted);font-size:13px;margin-bottom:12px}
+ .card{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:10px 0;padding:14px}
+ .card.done{border-color:#bcd8bf}
+ .card.wait{opacity:.55}
+ .n{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;background:#fff;border:2px solid var(--ok);color:var(--ok);flex:none}
+ .done .n{background:var(--ok);color:#fff}
+ .btn{display:inline-block;border:1px solid #bbb;border-radius:9px;padding:10px 15px;margin:6px 6px 0 0;background:#fafafa;font-size:15px;cursor:pointer;color:var(--ink);text-decoration:none}
+ .btn.primary{background:var(--ok);color:#fff;border-color:var(--ok)}
+ .btn.small{padding:6px 10px;font-size:13px}
+ .btn:disabled{opacity:.5}
+ .fld{margin:12px 0}
+ .fld label{display:block;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+ input,select{font-size:16px;padding:9px;border:1px solid #bbb;border-radius:9px;width:100%;background:#fff}
+ .two{display:flex;gap:8px}.two>*{flex:1}
+ .chips{display:flex;flex-wrap:wrap;gap:6px}
+ .chips.grid{display:grid;grid-template-columns:1fr 1fr}
+ .chip{border:1px solid var(--line);border-radius:9px;padding:9px 12px;background:#fcfbf9;cursor:pointer;font-size:14px;user-select:none}
+ .chip.on{border-color:var(--ok);background:var(--okbg);font-weight:700}
+ .chip small{display:block;font-weight:400;color:var(--muted);font-size:13px}
+ .big{font-size:22px;font-weight:700;letter-spacing:.02em;word-break:break-all}
+ .k{color:var(--muted);font-size:12px}
+ .okline{color:var(--ok);font-weight:600}
+ .warnbox{background:var(--warnbg);border-left:4px solid var(--warn);padding:9px 12px;border-radius:7px;margin:8px 0;font-size:14px}
+ .okbox{background:var(--okbg);border-left:4px solid var(--ok);padding:9px 12px;border-radius:7px;margin:8px 0}
+ ol.how{margin:6px 0 4px 0;padding-left:22px}ol.how li{margin:5px 0}
+ .key{display:inline-block;border:1px solid #999;border-radius:5px;padding:0 6px;font-size:13px;background:#f3f3f3;font-weight:600}
+ .row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0ede8}
+ .row:last-child{border-bottom:0}
+ .pill{font-size:12px;border-radius:20px;padding:2px 10px;background:#efece7;white-space:nowrap}
+ .pill.go{background:var(--okbg);color:var(--ok)}
+ .cand{border:2px solid var(--ok);border-radius:10px;padding:10px 12px;margin:8px 0;background:var(--okbg)}
+ .watch{font-size:14px;color:#555;margin-top:8px}
+ .detl{font-size:14px;color:#444;margin-top:2px}
+ .dotpulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:6px;animation:p 1.4s infinite}
+ @keyframes p{0%,100%{opacity:.25}50%{opacity:1}}
+ #toast{position:fixed;left:0;right:0;bottom:0;background:#1c1c1c;color:#fff;padding:12px 16px;font-size:15px;display:none;white-space:pre-wrap;z-index:9}
+ a{color:var(--ok)}
+ .hide{display:none}
+</style>
+</head>
+<body>
+<h1>Add staff</h1>
+<div class="sub" style="font-size:14px">One form, then the machine. · <a href="/finance/staff">old step-by-step page</a></div>
+<div id="app">Loading…</div>
+<div id="toast"></div>
+
+<script>
+const API="/finance/staff/easy/api";
+let META={}, CUR=null, WATCH=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(t){const m=$("toast");m.textContent=t;m.style.display="block";clearTimeout(toast._t);toast._t=setTimeout(()=>m.style.display="none",4500);}
+async function get(u){const r=await fetch(u,{credentials:"same-origin"});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok)throw(j.message||("did not work ("+r.status+")"));return j;}
+async function post(u,b){const r=await fetch(u,{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok)throw(j.message||("did not work ("+r.status+")"));return j;}
+function stopWatch(){if(WATCH){clearInterval(WATCH);WATCH=null;}}
+function fmtT(t){ if(!t) return ""; const d=t.slice(0,10), h=t.slice(11,16); const today=new Date(); const td=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0"); return (d===td?"today ":d.split("-").reverse().join("-")+" ")+h; }
+const STAGE={details:"fill his details",login:"give him his login",machine:"put his finger on the machine",done:"done"};
+
+/* ---------------- home ---------------- */
+async function home(){
+ stopWatch(); CUR=null; history.replaceState(null,"","/finance/staff/new");
+ let j; try{ j=await get(API+"/list"); }catch(e){ $("app").innerHTML='<div class="warnbox">'+esc(e)+'</div>'; return; }
+ META=j;
+ let h='<button class="btn primary" onclick="showForm(null)">➕ Add a new staff member</button>';
+ const open=j.people.filter(p=>!p.complete), done=j.people.filter(p=>p.complete);
+ if(open.length){
+  h+='<div class="card"><h2>Being added</h2>';
+  for(const p of open) h+='<div class="row"><div><b>'+esc(p.person)+'</b> <span class="k">'+esc(p.job||"")+'</span><br><span class="k">next: '+esc(STAGE[p.stage]||p.stage)+'</span></div><button class="btn small primary" onclick="openP(\''+esc(p.ref)+'\')">Open</button></div>';
+  h+='</div>';
+ }
+ if(done.length){
+  h+='<div class="card"><h2>Added recently</h2>';
+  for(const p of done) h+='<div class="row"><div><b>'+esc(p.person)+'</b> <span class="k">number '+esc(p.code||"")+'</span></div><span class="pill go">✓ done</span></div>';
+  h+='</div>';
+ }
+ $("app").innerHTML=h;
+}
+
+/* ---------------- the form ---------------- */
+function chips(name,opts,val){
+ return '<div class="chips'+(name==="phone"||name==="sunday"?' grid':'')+'" data-name="'+name+'">'+opts.map(o=>'<div class="chip'+(o[0]===val?' on':'')+'" data-v="'+esc(o[0])+'" onclick="pick(this)">'+o[1]+'</div>').join("")+'</div>';
+}
+function pick(el){const g=el.parentNode;for(const c of g.children)c.classList.remove("on");el.classList.add("on");
+ if(g.dataset.name==="sunday") $("sunHours").classList.toggle("hide",el.dataset.v!=="C");
+ if(g.dataset.name==="phone") $("mobWrap").classList.toggle("hide",el.dataset.v==="none");
+ if(g.dataset.name==="emp"){ const pt=el.dataset.v!=="FULLTIME"; pickVal("late", pt?"0":"1"); }
+}
+function pickVal(name,v){const g=document.querySelector('.chips[data-name="'+name+'"]');if(!g)return;for(const c of g.children)c.classList.toggle("on",c.dataset.v===v);}
+function val(name){const c=document.querySelector('.chips[data-name="'+name+'"] .chip.on');return c?c.dataset.v:"";}
+
+function showForm(p){
+ stopWatch();
+ const d=(p&&p.details)||{};
+ const person=(p&&p.person)||"";
+ const today=new Date().toISOString().slice(0,10);
+ const jobs=(META.jobs||[]).slice(); const job=d.department||(p&&p.job)||"";
+ const jobKnown=jobs.map(x=>x.toLowerCase()).includes(job.toLowerCase());
+ const emp=d.employment||(p&&p.employment)||"FULLTIME";
+ let h='<div class="card"><h2>'+(p?'Details — '+esc(person):'New staff member')+'</h2>';
+ h+='<div class="fld"><label>Full name</label><input id="f_name" value="'+esc(person)+'" placeholder="e.g. Arjun Dev" autocomplete="off"></div>';
+ h+='<div class="fld"><label>His phone</label>'+chips("phone",[
+   ["whatsapp","WhatsApp phone<small>login sent on WhatsApp</small>"],
+   ["sms","Simple phone<small>login sent by SMS</small>"],
+   ["slip","Smartphone, no WhatsApp<small>printed slip</small>"],
+   ["none","No phone<small>no login; machine only</small>"]], d.handover||"whatsapp")+'</div>';
+ h+='<div class="fld" id="mobWrap"><label>Mobile number</label><input id="f_mob" inputmode="numeric" maxlength="14" value="'+esc(d.mobile||"")+'" placeholder="10 digits"></div>';
+ h+='<div class="fld"><label>Job</label>'+chips("job",jobs.map(x=>[x,esc(x)]).concat([["__other","Other…"]]), jobKnown?jobs.find(x=>x.toLowerCase()===job.toLowerCase()):(job?"__other":""))+
+    '<input id="f_jobother" class="'+(job&&!jobKnown?'':'hide')+'" style="margin-top:6px" placeholder="his job" value="'+esc(jobKnown?"":job)+'"></div>';
+ h+='<div class="fld"><label>Work</label>'+chips("emp",(META.employment||["FULLTIME","PARTTIME"]).map(x=>[x,{FULLTIME:"Full-time",PARTTIME:"Part-time",BIWEEKLY:"Bi-weekly"}[x]||x]),emp)+'</div>';
+ h+='<div class="fld"><label>Joining date</label><input id="f_jd" type="date" value="'+esc(d.join_date||today)+'"></div>';
+ h+='<div class="fld"><label>Weekday duty</label><div class="two"><div><div class="k">From</div><input id="f_ws" type="time" value="'+esc(d.wd_start||"09:00")+'"></div><div><div class="k">To</div><input id="f_we" type="time" value="'+esc(d.wd_end||"21:00")+'"></div></div></div>';
+ const sun=META.sunday||{};
+ h+='<div class="fld"><label>Sunday duty</label>'+chips("sunday",Object.keys(sun).map(k=>[k,esc(sun[k])]),d.sunday_group||"A")+
+    '<div class="k" style="margin-top:4px;font-size:13px">A 5th Sunday is a normal full day for everyone.</div>'+
+    '<div id="sunHours" class="two'+((d.sunday_group||"A")==="C"?'':' hide')+'" style="margin-top:6px"><div><div class="k">Sunday from</div><input id="f_ss" type="time" value="'+esc(d.sun_start||"09:00")+'"></div><div><div class="k">Sunday to</div><input id="f_se" type="time" value="'+esc(d.sun_end||"15:00")+'"></div></div></div>';
+ h+='<div class="fld"><div class="two"><div><label>Monthly salary (₹)</label><input id="f_sal" inputmode="numeric" value="'+esc(d.base_salary||"")+'"></div><div><label>Offs per month</label><input id="f_offs" inputmode="numeric" value="'+esc(d.allowed_offs!=null?d.allowed_offs:2)+'"></div></div></div>';
+ h+='<div class="fld"><label>Count late minutes?</label>'+chips("late",[["1","Yes"],["0","No (part-time / flexible)"]], d.minutes_exempt==null?(emp==="FULLTIME"?"1":"0"):(d.minutes_exempt?"0":"1"))+'</div>';
+ h+='<button class="btn primary" id="saveBtn" onclick="save(\''+esc(p?p.ref:"")+'\')">Save and continue</button> <button class="btn" onclick="'+(p?'openP(\''+esc(p.ref)+'\')':'home()')+'">Cancel</button>';
+ h+='</div>';
+ $("app").innerHTML=h;
+ document.querySelector('.chips[data-name="job"]').addEventListener("click",()=>$("f_jobother").classList.toggle("hide",val("job")!=="__other"));
+ if(d.handover==="none") $("mobWrap").classList.add("hide");
+ if(!p) $("f_name").focus();
+}
+
+async function save(ref){
+ const job=val("job")==="__other"?($("f_jobother").value||"").trim():val("job");
+ const b={ref:ref||undefined, person:$("f_name").value, handover:val("phone"), mobile:$("f_mob").value,
+   job:job, employment:val("emp"), join_date:$("f_jd").value, wd_start:$("f_ws").value, wd_end:$("f_we").value,
+   sunday_group:val("sunday"), sun_start:$("f_ss").value, sun_end:$("f_se").value,
+   base_salary:$("f_sal").value, allowed_offs:$("f_offs").value, minutes_exempt:val("late")==="0"?"1":"0",
+   authorities:["self"]};
+ const btn=$("saveBtn"); btn.disabled=true; btn.textContent="Saving…";
+ try{ const j=await post(API+"/save",b); if(j.message) toast(j.message); openP(j.ref); }
+ catch(e){ toast(""+e); btn.disabled=false; btn.textContent="Save and continue"; }
+}
+
+/* ---------------- one person ---------------- */
+async function openP(ref){
+ stopWatch();
+ let p; try{ p=await get(API+"/person?ref="+encodeURIComponent(ref)); }catch(e){ toast(""+e); return home(); }
+ CUR=p; history.replaceState(null,"","/finance/staff/new?ref="+encodeURIComponent(ref));
+ const d=p.details;
+ let h='<button class="btn" onclick="home()">← All staff being added</button>';
+ h+='<h1 style="margin-top:10px">'+esc(p.person)+'</h1>';
+ if(p.complete) h+='<div class="okbox"><b>'+esc(p.person)+' is fully added.</b> Number '+esc(p.code)+' · in attendance and salary from '+esc(d?(d.join_date||"").split("-").reverse().join("-"):"")+'.</div>';
+
+ // 1 details
+ h+='<div class="card'+(d?' done':'')+'"><h2><span class="n">'+(d?'✓':'1')+'</span> Details</h2>';
+ if(!d){ h+='<div class="k">Not filled yet.</div><button class="btn primary" onclick=\'showForm(CUR)\'>Fill his details</button>'; }
+ else{
+  const sun=(META.sunday||{})[d.sunday_group]||d.sunday_group;
+  h+='<div>'+esc(d.department)+' · '+esc({FULLTIME:"full-time",PARTTIME:"part-time",BIWEEKLY:"bi-weekly"}[d.employment]||d.employment)+' · joins '+esc((d.join_date||"").split("-").reverse().join("-"))+'</div>';
+  h+='<div class="detl">Weekdays '+esc(d.wd_start)+'–'+esc(d.wd_end)+' · Sunday: '+esc(sun)+(d.sunday_group==="C"?' ('+esc(d.sun_start)+'–'+esc(d.sun_end)+')':'')+' · ₹'+esc(d.base_salary)+' · '+esc(d.allowed_offs)+' offs · late minutes '+(d.minutes_exempt?'not counted':'counted')+'</div>';
+  h+='<div class="detl">Phone: '+esc((META.handover||{})[d.handover]||d.handover)+(d.mobile_masked?' · '+esc(d.mobile_masked):'')+'</div>';
+  if(!p.code) h+='<button class="btn small" onclick=\'showForm(CUR)\'>Change</button>';
+ }
+ h+='</div>';
+
+ // 2 login
+ const given=p.given;
+ h+='<div class="card'+(given?' done':(!d?' wait':''))+'"><h2><span class="n">'+(given?'✓':'2')+'</span> His login</h2>';
+ if(d && d.handover==="none"){
+  h+='<div class="okline">No login — he has no phone. His attendance runs on the machine alone.</div>';
+ } else if(d && p.login){
+  h+='<div class="two"><div><div class="k">User</div><div class="big">'+esc(p.login.user)+'</div></div><div><div class="k">Password</div><div class="big">'+esc(p.login.password)+'</div></div></div>';
+  if(p.login.exists===false) h+='<div class="warnbox">This login is not in the portal yet. Press “Change”, then “Save and continue” to make it.</div>';
+  if(given){ h+='<div class="okline" style="margin-top:8px">✓ Given — '+esc((given.detail||"").replace("login given by ",""))+' · '+esc((given.on||"").split("-").reverse().join("-"))+'</div>'; }
+  else{
+   const mob=d.mobile||"";
+   const msg=p.message||"";
+   if(d.handover==="whatsapp") h+='<a class="btn primary" href="https://wa.me/91'+esc(mob)+'?text='+encodeURIComponent(msg)+'" target="_blank" rel="noopener" onclick="sentAsk(\'whatsapp\')">📤 Send on WhatsApp</a>';
+   if(d.handover==="sms") h+='<a class="btn primary" href="sms:+91'+esc(mob)+'?body='+encodeURIComponent(msg)+'" onclick="sentAsk(\'sms\')">✉️ Send SMS</a><div class="k">Opens your phone\'s messages app — use this from your phone.</div>';
+   if(d.handover==="slip") h+='<a class="btn primary" href="/finance/staff/slip?ref='+encodeURIComponent(p.ref)+'" target="_blank" rel="noopener">🖨️ Print his slip</a> <button class="btn" onclick="given(\'slip\')">He has the slip ✓</button>';
+   h+='<details style="margin-top:12px"><summary class="btn small">Another way to give it</summary><div>'+
+     (mob?'<a class="btn small" href="https://wa.me/91'+esc(mob)+'?text='+encodeURIComponent(msg)+'" target="_blank" rel="noopener" onclick="sentAsk(\'whatsapp\')">WhatsApp</a><a class="btn small" href="sms:+91'+esc(mob)+'?body='+encodeURIComponent(msg)+'" onclick="sentAsk(\'sms\')">SMS</a>':'')+
+     '<a class="btn small" href="/finance/staff/slip?ref='+encodeURIComponent(p.ref)+'" target="_blank" rel="noopener">Print slip</a><button class="btn small" onclick="given(\'slip\')">Given on paper ✓</button></div></details><div id="sentAsk"></div>';
+  }
+ } else if(d){ h+='<div class="k">The login is made when his details are saved.</div>'; }
+ else h+='<div class="k">After his details.</div>';
+ h+='</div>';
+
+ // 3 machine
+ const coded=!!(d&&d.emp_code);
+ h+='<div class="card'+(coded?' done':(!d?' wait':''))+'"><h2><span class="n">'+(coded?'✓':'3')+'</span> The attendance machine</h2>';
+ if(coded){ h+='<div class="okline">✓ Number '+esc(d.emp_code)+' — he is in attendance and salary from '+esc((d.join_date||"").split("-").reverse().join("-"))+'.</div>'; }
+ else if(d){
+  h+='<div>At the machine at reception, with him beside you:</div><ol class="how">'+
+   '<li>Press <span class="key">MENU</span> and put <b>your</b> finger on the reader.</li>'+
+   '<li>Choose <b>1 Register</b>, then <b>1 New Reg.</b> — press <span class="key">OK</span>.</li>'+
+   '<li>If it asks for a number, type <b id="nextCode">…</b> and press <span class="key">OK</span>.</li>'+
+   '<li>Put <b>his</b> finger on the reader as many times as the machine asks, then <span class="key">OK</span> to save.</li>'+
+   '<li>Press <span class="key">ESC</span> until the clock shows, and ask him to press his finger once.</li></ol>'+
+   '<div class="k">You do not need to read or write down any number — this page sees his finger arrive by itself.</div>'+
+   '<div id="machine"><div class="watch"><span class="dotpulse"></span>Watching for his finger…</div></div>';
+ } else h+='<div class="k">After his details.</div>';
+ h+='</div>';
+ $("app").innerHTML=h;
+ if(d && !coded){ machine(); WATCH=setInterval(machine,10000); }
+}
+
+function sentAsk(how){
+ const b=$("sentAsk"); if(!b) return;
+ b.innerHTML='<div class="okbox">When the message has gone, press: <button class="btn primary" onclick="given(\''+how+'\')">Sent ✓</button></div>';
+}
+async function given(how){
+ try{ await post(API+"/given",{ref:CUR.ref,how:how}); setTimeout(()=>openP(CUR.ref),800); }
+ catch(e){ toast(""+e); }
+}
+
+async function machine(){
+ if(!CUR) return;
+ let j; try{ j=await get(API+"/machine"); }catch(e){ return; }
+ const nc=$("nextCode"); if(nc) nc.textContent=j.next_code;
+ const box=$("machine"); if(!box) return;
+ let h='';
+ for(const r of j.reused) h+='<div class="warnbox">The machine used an <b>old number '+esc(r.code)+'</b> (it was '+esc(r.was)+'\'s, who left '+esc((r.left||"").split("-").reverse().join("-"))+'). Delete that finger (<span class="key">MENU</span> → 1 Register → 2 Delete) and enrol him again, typing <b>'+esc(j.next_code)+'</b> when it asks for a number.</div>';
+ if(j.new.length){
+  h+='<div class="k" style="margin-top:8px">New finger'+(j.new.length>1?'s':'')+' on the machine:</div>';
+  for(const c of j.new) h+='<div class="cand"><b>Number '+esc(c.code)+'</b><br><span class="k">first pressed '+esc(fmtT(c.first))+'</span> · <span class="k">'+esc(c.punches)+' press'+(c.punches>1?'es':'')+'</span>'+
+     '<br><button class="btn primary" onclick="link('+Number(c.code)+')">Yes, this is '+esc(CUR.person)+'</button></div>';
+ }
+ h+='<div class="watch"><span class="dotpulse"></span>Watching for his finger… checked '+esc(fmtT(j.now.replace("T"," ")))+'</div>';
+ box.innerHTML=h;
+}
+
+async function link(code){
+ stopWatch();
+ try{ const j=await post(API+"/link",{ref:CUR.ref,code:code}); toast(j.message||"Done"); openP(CUR.ref); }
+ catch(e){ toast(""+e); openP(CUR.ref); }
+}
+
+const q=new URLSearchParams(location.search).get("ref");
+(async()=>{ try{ META=await get(API+"/list"); }catch(e){} if(q) openP(q); else home(); })();
+</script>
+</body>
+</html>

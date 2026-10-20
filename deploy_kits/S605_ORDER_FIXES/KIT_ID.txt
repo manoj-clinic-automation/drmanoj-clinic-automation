@@ -1,0 +1,4 @@
+kit id S605_ORDER_FIXES
+brief claude_code_briefs/S605_ORDER_FIXES.md (v1, 20-Oct-2026, the Sanjeevni chat, session 334)
+D749 · F-951, F-957, F-959, F-960 (F-702), F-961, F-962
+installer install_S605_ORDER_FIXES.sh · builder make_s605.py (+ make_s605_walks.py) · walk walk_s605.py · spine_cmp_s605.py
