@@ -12,4 +12,4 @@ TO[spine/spine_build.py]=1cd20ead1c19ea0418c88bd728374e9c
 TO[DUTY_MAP.json]=ef42b15568f681b1942abcc6639bec57
 TO[DUTY_MAP.md]=b7536e1555c3a433b9f74f05417aa31e
 TO[walk_s603.py]=92c5fa5cc476536d35036e8d4bfa9c89
-TO[walk_s598.py]=44933988703ff1690ac4193ce7e8e03b
+TO[walk_s598.py]=b12c066a300640dd8e39cb3525b8c5da

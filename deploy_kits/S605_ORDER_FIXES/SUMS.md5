@@ -3,10 +3,10 @@ b7536e1555c3a433b9f74f05417aa31e  DUTY_MAP.md
 7ed8327f72fbd11fcdc638dc3a084cf4  install_S605_ORDER_FIXES.sh
 e799d4a49e282fa73f3c840ab68efe71  KIT_ID.txt
 a9bd39bdcb0b396ffb118f10118d55ac  make_s605.py
-61d538be9b7509b9466e7a3f01c1640e  make_s605_walks.py
-ec1786ca0ba95a60a94c451fb3e97de2  PINS.sh
+5b0a61f4f1ce8517960a50eac2dab251  make_s605_walks.py
+bd9f635f5b7711e6fe6c9b6498096e94  PINS.sh
 0c5f5002361d4f6d6744f553a5bab6b8  README.md
 31f03b306f77b034776faf562a1ee44e  spine_cmp_s605.py
-44933988703ff1690ac4193ce7e8e03b  walk_s598.py
+b12c066a300640dd8e39cb3525b8c5da  walk_s598.py
 92c5fa5cc476536d35036e8d4bfa9c89  walk_s603.py
 f32e0f9d53f613e68d6cd554e587556a  walk_s605.py

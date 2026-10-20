@@ -1,0 +1,7 @@
+S607_STAFF_JOIN_MACHINE_FLOOR
+session S331 (the parent), 20-Oct-2026
+The Add-staff machine card offers only fingers pressed from the day before the joining opened (set-up-day test presses
+of 07-Oct -- number 2, retired 100 -- were being offered). staff_easy.py + staff_easy.html.
+board _numbers v553 -> v554 (kit S607)
+pins in: /root/finance/staff_easy.py b120ff1f ; staff_easy.html d0cb85b9 ; readers staff_pages.py 856644e9, joiner_app.py 6305b05d
+undo: bash install_S607_STAFF_JOIN_MACHINE_FLOOR.sh --undo (backups /root/s607_backup/)

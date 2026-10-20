@@ -596,6 +596,8 @@ def main():
                         bad[(u, path)] = probs
                 elif path == "/finance/sanjeevni/api/needs-you":   # the arrival lines (the clause, the two added lines) and the shortage card's count
                     ok = all(("counted as arrived" in l) or re.match(r'^"count": \d+,?$', l) or ("not offered for ordering" in l)
+                             or ("waits for a purchase export taken after it" in l)          # S603's stock_watch line: S598's OLD stock_watch predates it
+                             or re.search(r"the voucher proof has waited \d+ hours", l)       # the clock between the two runs
                              or re.match(r'^"text": "Orthotic shortages: \d+ items? -- (order not sent|an order is out, more still short)",?$', l) for l in gone + new)
                     if not ok:
                         bad[(u, path)] = (gone[:3], new[:3])
