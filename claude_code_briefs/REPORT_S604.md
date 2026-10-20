@@ -190,4 +190,12 @@ No staff duty is added, moved or removed (the card is on the owner's page; Shave
 unchanged; the walk rendered the owner's and Shavez's portal homes (200) and the pay page as Shavez (200, the card seen).
 
 ### Lock, publish
-(filled after the publish)
+- `NO_PHONE_NUMBERS.py` clean over the 11 kit files and over this report and the brief.
+- `PUBLISH_ALL.bat`: **PUBLISHED AND VERIFIED - origin HEAD = aaada6a** (the kit and the brief); this report followed in a second publish.
+- The server clone `/root/deploy/repo` pulled to aaada6a: 10 of the kit's 11 files are byte-identical to the copy the installer ran from
+  (`/tmp/s604kit`), `md5sum -c SUMS.md5` OK for them. **`KIT_MANIFEST.txt` differs by its line endings only**: the repository's
+  `.gitattributes` (`* text=auto`) stores the CRLF manifest as LF — S546's kit shows the same `FAILED` on its manifest in the clone. The
+  manifest is the Drive file (delivered from the CRLF working copy, ddd0eadb on Drive); the server installer never reads it, but run from the
+  clone its SUMS gate would refuse. A `.gitattributes` line (`KIT_MANIFEST.txt -text`) is the repository's, outside this brief — for the chat.
+- The build lock `/root/deploy/.claude_code_build.lock` (taken by the installer at 09:49) released after this report with the two commands
+  of CLAUDE.md (`rm -f …/owner; rmdir …`).
