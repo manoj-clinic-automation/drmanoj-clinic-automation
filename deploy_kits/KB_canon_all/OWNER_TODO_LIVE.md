@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S330 close** (the Sanjeevni project), 19-Oct-2026, midday — the parent's sections exactly as its S329 close wrote them (its session 331 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open), the Sanjeevni sections refreshed here (its session 332 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S332 close** (the Sanjeevni project), 19-Oct-2026, evening — the parent's sections exactly as its S329 close wrote them (its session 331 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open), the Sanjeevni sections refreshed here (its session 333 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S330 close** (the Sanjeevni project), 19-Oct-2026, midday — the parent's sections exactly as its S329 close wrote them (its session 331 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open), the Sanjeevni sections refreshed here (its session 332 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S329 close** (the parent), 19-Oct-2026, morning — the Sanjeevni sections exactly as its S328 close wrote them (its session 330 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (331 reserved)
 
@@ -481,6 +483,61 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S332 close (19-Oct, evening)
+
+*Detail: `S332_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_333.md`. The same lines are on your System Board. This section supersedes the S330 one below it.*
+
+**1 · The publish** — this close's record. The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · Then a fresh chat in this project, when you like** — it reads the first pharmacy bill Claude filled and starts Amir's calendar-safety kit (before 1 November). Nothing to prepare.
+
+**Still yours from before, not urgent (on your board):**
+- bank details for **Agarwal Surgicals and Medicals** — its bill is scanned;
+- the first cheque logged (Shavez can do it);
+- one photo of Marg's purchase-import screen — it decides whether Marg can enter a scanned bill by itself;
+- a phone number for **BASS**.
+
+**Worth knowing — the staff's, on their own screens, not yours:**
+- **Amir:** corrects the bill dates of 15-10 and 18-10 in Marg (your word to him); nothing new on his screen.
+- **Darpan:** the cut-off line waits on his order tab (the tab is unused while ordering stays on Marg's sheet).
+- **Reception:** nothing new — pharmacy scans are read by Claude now; her screen did not change.
+- **Morning staff:** the two reports, as every day.
+
+**Held at your word:**
+- S438_COUNT_BOOK;
+- the lasting fix for an unchanged Marg re-export (parked 16-Oct, 13:47);
+- **Amir's *Aaj ka kaam* list — off, and nothing is added to it (D690);**
+- **NORTIMER — out of the 6-Sep count (D715);**
+- **"Shavez waits for Amir" — evaluated at your ask, not built;**
+- **the big builds from Sunday 25-Oct (your word, 18:09).**
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S332 close
+
+**Every build follows the charter v1.1 (`claude/S307_BUILD_CHARTER_v1_1.md`, D707) and the plan `claude/S327_SANJEEVNI_RESTRUCTURING_PLAN.md`. Builds go by the Claude Code paste line on your PC, one kit per sitting, each brief read independently first.**
+
+1. **Amir's calendar-safety kit** — no-sale days and the 1st of the month by the bill chain, not the calendar; his "bill pending" line from the scanned bill (Amir's Kit 3). **Live before 1 November.**
+2. **The one line in Claude Code's rulebook** for removing its build lock (F-950).
+3. **From Sunday 25-Oct — the buying model (Kit II, S486 B)** — scored silently for a few weeks; the switch off Marg's sheet only when the bar on your card is met three weeks running.
+4. **Retiring the old stock figures (4b-2)** after seven explained witness nights (from 26-10 at the earliest).
+5. **The bill chain in place of the calendar on the remaining screens.**
+6. **Returns, the claim queue, expiry and discount attribution onto the spine.**
+7. **Count #1 closes → the stock-check screens onto the spine → count #2 by section.**
+8. **Retire the old copies → Sanjeevni as its own process with its own database.**
+
+## ✅ DONE AT THE S332 CLOSE — 19-Oct-2026 (the Sanjeevni project)
+
+- ~~**Y111 — the publish of the S330 record**~~ — landed 13:19 IST 19-Oct (`8d3bc42`).
+- **"assess the need for the reading of the scanned bills for the flow of Darpan or any other purpose"** (14:45) — answered: only the top of the bill is used (to link it to Marg's bill); Darpan's flow uses nothing from a scan (`claude/S332_SCAN_READING_ASSESSMENT.md`).
+- **"Start Claude to read the pharmacy bills. Keep servum switched off in settings…"** (15:41, D747) — **done: S601 live 17:29 IST**; Sarvam OFF by your switch on the scan-app Admin page; the other lanes' handwritten challans handed to the Scan App chat.
+- ~~**The server's build lock left by S601**~~ — removed by your line, 17:53 IST (F-950).
+- **The mock-up of Darpan's cut-off line — "Yes"** (18:01, D746) — **done: S602 live 19:56 IST**, with the nightly witness made read-only (F-943 closed).
+- **The bill dates** — you spoke to Amir (14:45); he corrects them in Marg; the system follows by itself (F-948 closed).
+- **Your questions of 18:01–18:09** (the buying model vs S593; what is left; what is urgent) — answered in the chat; the order of work set: Amir's kit now, the rest from Sunday.
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S330 close (19-Oct, midday)
 
