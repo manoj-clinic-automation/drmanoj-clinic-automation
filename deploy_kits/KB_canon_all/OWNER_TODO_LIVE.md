@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S332 close** (the Sanjeevni project), 19-Oct-2026, evening — the parent's sections exactly as its S329 close wrote them (its session 331 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open), the Sanjeevni sections refreshed here (its session 333 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S329 post-close** (the parent), 20-Oct-2026, early morning — the Sanjeevni sections exactly as its S332 close wrote them (its session 333 open), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (331 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S332 close** (the Sanjeevni project), 19-Oct-2026, evening — the parent's sections exactly as its S329 close wrote them (its session 331 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open), the Sanjeevni sections refreshed here (its session 333 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S330 close** (the Sanjeevni project), 19-Oct-2026, midday — the parent's sections exactly as its S329 close wrote them (its session 331 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open), the Sanjeevni sections refreshed here (its session 332 reserved)
 
@@ -173,7 +175,7 @@ https://followup.dr-manoj.in/scanapp/
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S329 close (19-Oct, morning)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S329 post-close (20-Oct, early morning)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -189,15 +191,13 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · MYOPERATOR'S REPLY ABOUT THE WHATSAPP KEY.** I mailed Khushi and MyOperator support at 09:21 on 19-Oct, with you in copy. When they reply, or call you, open a fresh chat in this project and say so — it gives you one server line that switches on templates and your staff's replies. *Until then the inbox cannot send; reply to patients from the MyOperator app.*
-
-**3 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+**2 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**4 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** On a spare PC, from `D:\MARGERP\serverbackup` on the pharmacy PC or the pen drive's `MargAuto_by_agent` folder. Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
+**3 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** On a spare PC, from `D:\MARGERP\serverbackup` on the pharmacy PC or the pen drive's `MargAuto_by_agent` folder. Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
 
 **IF THE PORTAL STOPS — the first steps run by themselves; your guide says what already ran:**
 
@@ -207,23 +207,23 @@ https://claude.ai/artifact/H5W1T3WPNm85t2peTnNnfP
 
 **LATER — none of these is urgent**
 
-**5 · RANJEET'S LOGIN** — the password is yours to set.
+**4 · RANJEET'S LOGIN** — the password is yours to set.
 
 ```
 https://followup.dr-manoj.in/portal/users
 ```
 
-**6 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** September's is ready.
+**5 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** September's is ready.
 
 ```
 https://followup.dr-manoj.in/finance/packs?month=2026-09
 ```
 
-**7 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
+**6 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
 
-**8 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
+**7 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
 
-**9 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
+**8 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
 
 **WHEN IT HAPPENS — not a duty:** a patient's WhatsApp alert — tap it and the chat opens in your inbox · a phone line saying the server fixed (or could not fix) a part · a portal alert (open the guide at the step it names) · a POS total waiting for your Confirm · an SMS-vs-MPR difference line on your clinic money page · a Voicenotes list waiting above *Give a task* · your bank check under row 2 of the packs page.
 
@@ -233,20 +233,19 @@ https://followup.dr-manoj.in/portal/inbox
 
 **Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C) · the follow-up tracker on the server — "later" (12-Oct) · Bhati's later features (sessions in the 360° record, *physiotherapy advised* to his page, his absence → WhatsApp to his patients).
 
-*Ticked by you or done, and off this list: the S326 publish · the S592, S595, S597, S599 and S600 publishes and server lines (18 → 19-Oct) · the contact form (done 20:33 18-Oct).*
+*Ticked by you or done, and off this list: the S326 and S329 publishes · the S592, S595, S597, S599 and S600 publishes and server lines (18 → 19-Oct) · the contact form (done 20:33 18-Oct) · MyOperator's key (working again by 16:38 19-Oct) · templates and staff replies (your "Yes" 16:41 19-Oct).*
 
-*Closed by your word and not on this list: everything listed so at the S326 close, plus the firm's address — removed; the WhatsApp Inbox as you set it — only you, full numbers and clinic ID, photos, PDFs and voice both ways, the Call button; and templates with your staff's replies — "go" (waiting only on MyOperator).*
+*Closed by your word and not on this list: everything listed so at the S326 close, plus the firm's address — removed; the WhatsApp Inbox as you set it — only you, full numbers and clinic ID, photos, PDFs and voice both ways, the Call button; and templates with your staff's replies — live.*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The WhatsApp key — first, in the next chat:** read MyOperator's reply; when the key works, the one line that switches on templates and your staff's replies, proved on your phone.
-2. **The morning's checks:** your phone's bank SMS fix (the first SMS of 19-Oct) · the new inbox files against the 20-Oct backup · the rest of the open's checks.
-3. **The website:** one more old entry mentions the firm's domain — I read what it is and tell you in one line.
-4. **A backup of the WhatsApp message log** — the inbox is rebuilt from it, and it has only one copy today.
-5. **The punch listener's step 2** — every genuine punch of the last week carried one steady mark; I tell you in one line, and build it only if you want it now.
-6. **Small, my own:** the mail check's wrong "not sent" line (S590) · the Yes Bank SMS turned away · the nightly's daily warning about the unattended report (kept off) · the console's doubled *"counter sheet not filled"* line · the finance app's own test suite · proving the 148 older documents · the weekly auditor's three findings (the two finance tokens, the UPI resync, the key list).
-7. **On your word:** replies your staff type in the MyOperator app shown in the inbox too · a *send to Shavez* button for the bank check · Bhati's later features · the contacts · the mail flood · kits for Shavez's PC and the lab PC.
-8. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
+1. **The morning's checks:** your phone's bank SMS fix (no ICICI SMS came on 19-Oct; today's is the test) · MyOperator's explanation of the 19-Oct stop, when it comes · the rest of the open's checks.
+2. **The website:** one more old entry mentions the firm's domain — I read what it is and tell you in one line.
+3. **A backup of the WhatsApp message log** — the inbox is rebuilt from it, and it has only one copy today.
+4. **The punch listener's step 2** — every genuine punch of the last week carried one steady mark; I tell you in one line, and build it only if you want it now.
+5. **Small, my own:** the mail check's wrong "not sent" line (S590) · the Yes Bank SMS turned away · the nightly's daily warning about the unattended report (kept off) · the console's doubled *"counter sheet not filled"* line · the finance app's own test suite · proving the 148 older documents · the weekly auditor's three findings (the two finance tokens, the UPI resync, the key list).
+6. **On your word:** replies your staff type in the MyOperator app shown in the inbox too · a *send to Shavez* button for the bank check · Bhati's later features · the contacts · the mail flood · kits for Shavez's PC and the lab PC.
+7. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
 
 The full list: `claude/S288_PENDING_LIST.md`.
 
@@ -254,7 +253,8 @@ The full list: `claude/S288_PENDING_LIST.md`.
 
 - ~~**"remove"** (18-Oct, 18:41) — *the marketing firm's address*~~ — removed 20:33 (S592); your "yes" to the test: the 20:35 enquiry reached the clinic Gmail only.
 - ~~**"I need interactive whatsapp communication, from the waba incoming messages… images etc can't be opened"** · **"Only me , and adda call button inline"** · **"Need to send photo and pdf back from beginning"** · **"Need full mobile numbers, clinic id"** · **"Also I want to send voice messages"** · **"Mockups are ok"** (19-Oct, 01:56 → 06:10)~~ — photo, PDF and voice proved on your phone (08:17); the WhatsApp Inbox live 08:49 (S597).
-- **"I want to send templates… see the replies which are sent by my staff members in the chat also"** · **"go"** (08:52 / 08:57) — built (S599); it stopped safely at the key check — **waits for MyOperator** (⭐0 item 2).
+- ~~**"I want to send templates… see the replies which are sent by my staff members in the chat also"** · **"go"** (08:52 / 08:57)~~ — live 16:40 (S599), once MyOperator's key worked again; both test messages reached you.
+- ~~**"Check reply from khushi"** · **"Send reply with all technical details"** · **"Could it some settings issue in the panel"** · **"check their webhooks"** (11:06 → 11:51)~~ — sent to the ticket 11:15; your panel read without a change — nothing wrong in it (11:53); the curl test their team asked for answered normally at 16:38.
 - ~~**"…find out the cause and rectify it or escalate it to the My Operator support team"** (09:09)~~ — the cause is MyOperator's side (your key unchanged; they answer it as a made-up key); ~~**"Send this mail to Khushi my operator and support at myoperator.com, but from my personal email also"** (09:20)~~ — sent 09:21 from the clinic Gmail with your personal address in copy (I can send only as the clinic Gmail).
 - ~~**"will my replies from the WhatsApp inbox be delivered to the patients?"** (09:22)~~ — answered: not until MyOperator restores the key; patients' messages still arrive.
 
