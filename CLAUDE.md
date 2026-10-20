@@ -77,7 +77,10 @@ The health apps (`drmanoj-health-systems`) and this repository live on the SAME 
 write briefs here. Before the install step, take the server-wide lock and hold it until the report is written:
 `mkdir /root/deploy/.claude_code_build.lock` (fails if it exists = another build is installing: wait, re-check every
 2 minutes, never delete someone else's lock unless it is older than 3 hours and its owner's report shows it finished).
-Write the brief's kit number into `/root/deploy/.claude_code_build.lock/owner`; remove the directory at the end.
+Write the brief's kit number into `/root/deploy/.claude_code_build.lock/owner`; remove the directory at the end **with exactly these two
+commands — `rm -f /root/deploy/.claude_code_build.lock/owner; rmdir /root/deploy/.claude_code_build.lock` — never `rm -rf`, which the
+permission list denies (F-950, S601: a lock left held because the installer reached for `rm -rf`). An installer script releases the lock
+the same way; if the release is refused, say so in the report and give the chat that one line (added 20-Oct-2026, S333).**
 Never touch `/root/gutlog`, `/root/rxguard`, `/root/fitlog`, `/srv/family`, `/root/family` or their services from a brief here.
 
 ## Permissions (added 26-Sep-2026)

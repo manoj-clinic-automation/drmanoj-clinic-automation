@@ -25,6 +25,8 @@ file; a duty's id from that file is shown in brackets, e.g. `[amir.count_voucher
 
 **19-Oct-2026 · kit S593_ORDER_ENGINE_ONE_SOURCE (D743; F-739):** No duty added, moved or removed. `[reception.medicine_orders]`'s `due_sql` gains the **darpan** arm — on `order.source = darpan` the suppliers Darpan made pakka today (`order_proposal` status `darpan_ok`, distinct `supplier_norm`), the same set reception's "Order karna hai" heading counts (charter 13: the door and the owner's line read one rule; the heading now counts the medicine cards, less a card that is only S403's orthotic shortage). `DUTY_MAP.json` is v15.
 
+**20-Oct-2026 · kit S603_AMIR_CALENDAR_SAFE (F-952, F-953, F-769, F-786, F-726 a):** `[amir.salt_tasks]` added — the open lines of his SALT KAAM sheet (rename / create / change / cleanup, and since this kit a salt the owner answered, which rides on tab 1 as "Item ka salt badliye — Dr sahab ka jawab" with the answer as the exact text to copy; the seven he ticked in October on the owner's page stay ticked). The door is step 6's "Salt aur naye item: list kholiye, Marg mein sudhaar kijiye, tick lagaiye" card; no owner line is raised (door, no raise) — the owner's salts page counts them. The sheet's open tasks had no duty row before (D648 rule 1) — closed here. No other login's list changes. `DUTY_MAP.json` is v16.
+
 **How to read a row.**
 *Due when* = the table and the condition that say the work is waiting. *Door* = the tile on that person's own portal home, and
 the page it opens, where the waiting work is shown. *Owner's line* = what reaches the owner if it is missed:

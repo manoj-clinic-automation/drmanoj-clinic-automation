@@ -1,0 +1,5 @@
+kit id S603_AMIR_CALENDAR_SAFE
+brief claude_code_briefs/S603_AMIR_CALENDAR_SAFE.md (v2, 20-Oct-2026, Sanjeevni session 333) -- F-952, F-953, F-769, F-786, F-726 a; no D-number (the owner's existing rules)
+files /root/finance/amir_day.py 3af992d9 -> TO . /root/finance/stock_app.py 4f73d0b0 -> TO . /root/finance/stock_watch.py 299c3ef7 -> TO . /root/finance/amir_salts.py d8d9ba77 -> TO . claude_code_briefs/DUTY_MAP.json c2ef9c6c (v15) -> v16 by the publish
+data step none (no DDL, no new table, no new setting)
+service clinic-finance, restarted once

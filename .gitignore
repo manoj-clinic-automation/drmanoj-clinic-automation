@@ -285,3 +285,6 @@ _scratch/
 # physio_book.from -- wording, one read-only SELECT, a door path; no number, no secret; in SUMS.md5; placed as /root/finance/aaj_duties.json).
 # As S553: the .kit name is not caught by *.json; this exact-path line keeps it published even if a later rule widens. Exact path only.
 !deploy_kits/S554_PHYSIO_BACKFILL/aaj_duties.json.kit
+
+# S603 (20-Oct-2026): the kit's DUTY_MAP.json (v16: amir.salt_tasks added) that its walk and installer ran with (in SUMS.md5). Exact path.
+!deploy_kits/S603_AMIR_CALENDAR_SAFE/DUTY_MAP.json
