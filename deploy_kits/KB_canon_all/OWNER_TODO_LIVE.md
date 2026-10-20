@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S329 post-close** (the parent), 20-Oct-2026, early morning — the Sanjeevni sections exactly as its S332 close wrote them (its session 333 open), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (331 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S333 close** (the Sanjeevni project), 20-Oct-2026, afternoon — the parent's sections exactly as its S329 post-close wrote them (its 331 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the Sanjeevni sections refreshed here (334 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S329 post-close** (the parent), 20-Oct-2026, early morning — the Sanjeevni sections exactly as its S332 close wrote them (its session 333 open), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the parent's sections refreshed here (331 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S332 close** (the Sanjeevni project), 19-Oct-2026, evening — the parent's sections exactly as its S329 close wrote them (its session 331 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open), the Sanjeevni sections refreshed here (its session 333 reserved)
 
@@ -483,6 +485,64 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S333 close (20-Oct, afternoon)
+
+*Detail: `S333_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_334.md`. The same lines are on your System Board. This section supersedes the S332 one below it.*
+
+**1 · The publish** — this close's record. The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · Lock September** — the FINALISE button on its month page (the card on the payment page already says *"All three reports are in and agree — the month can be locked."*):
+
+```
+https://followup.dr-manoj.in/finance/purchase/page/month/2026-09
+```
+
+**3 · Then a fresh chat in this project, when you like** — it starts the small orthotic-sizes kit (F-951); the buying model from Sunday 25-Oct. Nothing to prepare.
+
+**Still yours from before, not urgent (on your board):**
+- one photo of Marg's purchase-import screen — it decides whether Marg can enter a scanned bill by itself;
+- a phone number and bank details for **BASS** (its bills run on the cheque lane).
+
+**Worth knowing — the staff's, on their own screens, not yours:**
+- **Amir:** his page now waits for a fresh export after a late bill and says since when a report is missing; a salt you answer appears on his sheet as a line he ticks.
+- **Darpan, Shavez, reception:** nothing new.
+
+**Held at your word:**
+- S438_COUNT_BOOK;
+- the lasting fix for an unchanged Marg re-export (parked 16-Oct, 13:47);
+- **Amir's *Aaj ka kaam* list — off, and nothing is added to it (D690);**
+- **NORTIMER — out of the 6-Sep count (D715);**
+- **"Shavez waits for Amir" — evaluated at your ask, not built;**
+- **the big builds from Sunday 25-Oct (your word, 18:09 19-Oct).**
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S333 close
+
+**Every build follows the charter v1.1 (`claude/S307_BUILD_CHARTER_v1_1.md`, D707) and the plan `claude/S327_SANJEEVNI_RESTRUCTURING_PLAN.md`. Builds go by your choice — the Claude Code paste line or the API-credit runner — one kit per sitting, each brief read independently first.**
+
+1. **The orthotic sizes' own stock codes (F-951)** — small; no staff screen changes.
+2. **Two older tests made independent of today's data (F-957)** — with the next kit that runs them.
+3. **From Sunday 25-Oct — the buying model (Kit II, S486 B)** — scored silently for a few weeks; the switch off Marg's sheet only when the bar on your card is met three weeks running.
+4. **Retiring the old stock figures (4b-2)** after seven explained witness nights (from 26-10 at the earliest).
+5. **The bill chain in place of the calendar on the remaining screens.**
+6. **Returns, the claim queue, expiry and discount attribution onto the spine.**
+7. **Count #1 closes → the stock-check screens onto the spine → count #2 by section.**
+8. **Retire the old copies → Sanjeevni as its own process with its own database.**
+
+## ✅ DONE AT THE S333 CLOSE — 20-Oct-2026 (the Sanjeevni project)
+
+- ~~**Y112 — the publish of the S332 record**~~ — landed 06:14 IST 20-Oct (`7de73bf`).
+- ~~**Y2 — bank details for Agarwal Surgicals and Medicals**~~ — typed by you 17-Oct 12:14; ticked 20-Oct.
+- ~~**Y4 — log the first cheque, ₹400 to Agarwal**~~ — retired: *"I paid agarwal a cheque for this full financial year in a single cheque"* (07:27); September's line Carried in −400 / Paid 400 (your "go ahead", 07:52).
+- **Amir's calendar-safety kit** — **S603 live 08:05 IST** (your paste line): the reminder waits for the file; the 1st of a month safe; since-when; your 48-hour line; your drift page's sentences by the facts; an answered salt on his sheet.
+- **"September vendor payments … Agarwal … already paid"** (07:16) — Agarwal off the bank file (₹4,29,019 for 20 vendors).
+- **"do all what is required for the NEFT payment sheet … through the API credits"** (08:17) and **"ask for the final uploads of the REQUIRED purchase reports as text files and … give confirmation"** (08:25, D748) — **S604 live 09:51 IST**, by your runner line ($15.08): the Month-end reports card; your morning supplier/item-wise export accepted (10:01); Bass counted once; the lock waits for the three reports; the boxes.
+- **"please give names of the 3 reports here first"** (09:21) — SUPPLIER WISE, BILL WISE and SUPPLIER/ITEM WISE PURCHASE STATEMENT, 1st to last, as text.
+- **The orthotic sizes question** (06:23) — answered: Marg's per-size count is right; the stock codes between counts are F-951's kit.
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S332 close (19-Oct, evening)
 
