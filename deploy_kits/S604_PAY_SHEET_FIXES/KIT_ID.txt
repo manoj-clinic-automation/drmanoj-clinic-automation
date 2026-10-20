@@ -1,0 +1,5 @@
+kit id S604_PAY_SHEET_FIXES
+brief claude_code_briefs/S604_PAY_SHEET_FIXES.md (v2, 20-Oct-2026, Sanjeevni session 333) -- F-954, F-955, F-956; the owner's ask of 08:25 (the month-end reports card) and the lock gate
+files /root/finance/purchase_app.py 60f2d846 -> 447b745f . Drive ToMedical\_kit\marg_txt.py a59a222f -> e8a60d9d . Drive ToMedical\_kit\KIT_MANIFEST.txt 0bf248e4 -> the reader's new md5
+data step one, audited (data_s604.py): bill 542 takes 5307d3e5's supplier-wise carrying, bill 579 retired (twin_merge 542<-579); no DDL, no new table, no new setting
+service clinic-finance, restarted once

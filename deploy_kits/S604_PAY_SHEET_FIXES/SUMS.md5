@@ -1,0 +1,10 @@
+6a74ff92cb56e5ab326a8cdacaa40341  KIT_ID.txt
+ddd0eadb169f9f1a78c7befa5a550aaa  KIT_MANIFEST.txt
+e0f1472187b38a8700b3d4b390d039b3  PINS.sh
+f3d15cabcdef1dc8c91171c8ffd29d0c  README.md
+70f8db2114da84930240274af7d20e61  data_s604.py
+e6b8716c1fb9e3a368b3d17454c50274  install_S604_PAY_SHEET_FIXES.sh
+f87a9e892109ae4cf557e5b875759eec  make_s604.py
+e8a60d9df79ed9fb763e2be4c4f23d4f  marg_txt.py
+6a52df0885859aadd2a83c068622421a  proof_s604_reader.py
+c776f81506274e0f93056431b4f24986  walk_s604.py
