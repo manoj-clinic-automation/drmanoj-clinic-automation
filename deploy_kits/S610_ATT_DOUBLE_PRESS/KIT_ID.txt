@@ -1,0 +1,7 @@
+S610_ATT_DOUBLE_PRESS
+session S331 (the parent), 21-Oct-2026
+attendance.dr-manoj.in: a second press within 30 min (the salary sheet's ARTEFACT_WINDOW_MIN) is not shown as an OUT
+time, "left early" or "out"; absences on duty days (Sundays for Sunday-duty staff, by the sheet's duty_shift) are
+written "A" and counted. Display only. Surendra's October.
+board _numbers v559 -> v560 (kit S610)
+pin in: /root/att_dashboard.py ebd8bd85 ; undo: bash install_S610_ATT_DOUBLE_PRESS.sh --undo (backup /root/s610_backup/)

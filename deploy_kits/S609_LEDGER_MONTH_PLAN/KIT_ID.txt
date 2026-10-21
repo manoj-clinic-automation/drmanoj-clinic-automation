@@ -1,0 +1,6 @@
+S609_LEDGER_MONTH_PLAN
+session S331 (the parent), 21-Oct-2026
+Staff Ledger: close_month gains a dry run; the statement shows total outstanding, this month's cut line by line and
+what is left; the Loans page's "falling due" is the close's own figure (Surendra Oct: Rs 7000, not 8000). Close unchanged.
+board _numbers v558 -> v559 (kit S609)
+pin in: /root/staff_ledger.py 32dfcfb9 ; undo: bash install_S609_LEDGER_MONTH_PLAN.sh --undo (backup /root/s609_backup/)
