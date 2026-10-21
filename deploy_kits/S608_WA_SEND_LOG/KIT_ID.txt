@@ -1,0 +1,7 @@
+S608_WA_SEND_LOG
+session S331 (the parent), 21-Oct-2026
+Every WhatsApp inbox send logged (status, MyOperator's reply, x-amzn-requestid, request without key) to
+/root/wa/wa_inbox/send_log.jsonl; owner page /portal/inbox/sendlog with CSV and Email-to-MyOperator (ticket 691386);
+each refused send mailed to the clinic Gmail. Sending unchanged.
+board _numbers v556 -> v557 (kit S608)
+pin in: /root/portal/portal_inbox.py 7bb6e0d7 ; undo: bash install_S608_WA_SEND_LOG.sh --undo (backup /root/s608_backup/)
