@@ -1,0 +1,8 @@
+S611_LEDGER_STATEMENT
+session S331 (the parent), 21-Oct-2026
+Staff Ledger statement, month by month: with "All months" every month in the system -- advances taken, cut from salary
+line by line (cleared / left on it), other items, salary from the LOCKED salary sheet (base - advances - leave, late &
+fines = paid), advance remaining at month end; the running month from the close's own dry run; every advance on one
+line with when it settled; the old lines kept under "Technical entries". Read-only: no ledger or salary figure changes.
+board _numbers v561 -> v562 (kit S611)
+pin in: /root/staff_ledger.py 2fc0542f ; out: 96140fe4 ; undo: bash install_S611_LEDGER_STATEMENT.sh --undo (backup /root/s611_backup/)

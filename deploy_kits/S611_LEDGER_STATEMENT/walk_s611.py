@@ -1,0 +1,243 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+"""walk_s611.py -- kit S611 (S331): the statement, month by month.
+
+    python3 walk_s611.py --code DIR --scratch DIR [--live-ledger DIR --live-register FILE --staff-csv FILE]
+
+Part A -- a made-up "Walk Staff" in Surendra's exact shape (Aug: 10th 2000, 14-17th 8000 loan at 2000/month, 25th
+3000; Sep: 3rd 1500, 18th 5000; Oct: 1st 980, 8th 5000) and made-up LOCKED salary runs (Aug paid 3260, Sep -980):
+the page must read Aug cut 7000 / remaining 6000 / paid Rs 3,260; Sep cut 8500 / remaining 4000 / paid Rs 0 short
+by Rs 980; Oct running: to be cut 7980, remaining after 2000; every advance listed; the old lines kept, closed.
+Part B -- (on the box) scratch COPIES of the live ledger and staff register: every staff member's page answers; the
+running month's "remaining after" equals the top box; each month's remaining follows from the one before
+(previous + taken - cut); and every locked month's paid figures add up to that month's locked total payout.
+Exit 0 = GREEN; the S609 file goes RED (no month blocks).
+"""
+import argparse
+import datetime
+import importlib.util
+import json
+import os
+import re
+import shutil
+import sqlite3
+import sys
+
+ap = argparse.ArgumentParser()
+ap.add_argument("--code", required=True)
+ap.add_argument("--scratch", required=True)
+ap.add_argument("--live-ledger", default="")
+ap.add_argument("--live-register", default="")
+ap.add_argument("--staff-csv", default="")
+a = ap.parse_args()
+S = os.path.abspath(a.scratch)
+if S.startswith("/root/staff_ledger") or S.startswith("/root/staff_register"):
+    print("RED: refusing to walk in a live folder")
+    sys.exit(1)
+os.environ["NTFY_URL"] = ""
+passed, failed = [], []
+
+
+def check(cond, label):
+    (passed if cond else failed).append(label)
+    print(("  ok   " if cond else "  FAIL ") + label)
+    return cond
+
+
+def load(ledger_dir, staff_csv, regdb, tag):
+    os.environ.update(LEDGER_DIR=ledger_dir, STAFF_CSV=staff_csv, ATT_BASE=os.path.join(S, "att"),
+                      STAFF_REGISTER_DB=regdb)
+    spec = importlib.util.spec_from_file_location("sl_" + tag, os.path.join(a.code, "staff_ledger.py"))
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def text(html):
+    t = re.sub(r"<[^>]+>", " ", html)
+    for k, v in (("&mdash;", "-"), ("&middot;", "."), ("&rarr;", "->"), ("&amp;", "&"), ("&nbsp;", " "), ("&minus;", "-")):
+        t = t.replace(k, v)
+    return re.sub(r"\s+", " ", t)
+
+
+# ------------------------------------------------------------------ Part A
+os.makedirs(os.path.join(S, "att"), exist_ok=True)
+today = datetime.date.today()
+M = today.strftime("%Y-%m")                        # the running month (Oct in Surendra's case)
+first = today.replace(day=1)
+M1 = (first - datetime.timedelta(days=1)).strftime("%Y-%m")                 # Sep
+M2 = (first - datetime.timedelta(days=1)).replace(day=1)
+M2 = (M2 - datetime.timedelta(days=1)).strftime("%Y-%m")                    # Aug
+LA = os.path.join(S, "A_ledger")
+shutil.rmtree(LA, ignore_errors=True)
+os.makedirs(LA)
+CSV = os.path.join(S, "A_sm.csv")
+with open(CSV, "w") as fh:
+    fh.write("user_id,name,department,base_salary,allowed_offs,wd_start,wd_end,sun_start,sun_end,active,timing_note,"
+             "sunday_group,minutes_exempt\n9001,Walk Staff,Pathology,10500,2,09:00,21:00,09:00,15:00,Y,,C,N\n"
+             "9002,Walk Other,Clinic,9000,2,09:00,21:00,09:00,15:00,Y,,A,N\n")
+TS = "2099-01-01T00:00:00"
+
+
+def row(i, cat, amount, date, **kw):
+    r = {"id": i, "ts_entry": TS, "maker": kw.pop("maker", "walk"), "staff": kw.pop("staff", "Walk Staff"),
+         "category": cat, "date_from": date, "date_to": date, "days": 0, "amount": amount,
+         "instalment": kw.pop("instalment", None), "narration": kw.pop("narration", ""), "self_flag": False,
+         "direct": True, "status": kw.pop("status", "APPROVED"), "checker": "walk", "ts_decision": TS,
+         "contra_of": kw.pop("contra_of", None), "closed_month": kw.pop("closed_month", ""), "interest": False}
+    r.update(kw)
+    return r
+
+
+rows = [
+    row("a10", "ADVANCE_ISSUE", 2000, M2 + "-10", closed_month=M1),
+    row("a14", "ADVANCE_ISSUE", 2000, M2 + "-14", instalment=2000, closed_month=M1),
+    row("a15", "ADVANCE_ISSUE", 3000, M2 + "-15", instalment=2000, closed_month=M1),
+    row("a17", "ADVANCE_ISSUE", 3000, M2 + "-17", instalment=2000, closed_month=M1),
+    row("a25", "ADVANCE_ISSUE", 3000, M2 + "-25", closed_month=M1),
+    row("a25d", "ADVANCE_ISSUE", 3000, M2 + "-25", closed_month=M1),               # a duplicate ...
+    row("a25x", "ADVANCE_ISSUE", -3000, M2 + "-25", contra_of="a25d", closed_month=M1),   # ... reversed
+    row("rej", "ADVANCE_ISSUE", 8000, M2 + "-14", status="REJECTED"),
+    row("r1", "ADVANCE_INSTALMENT", -2000, M2, contra_of="a10", closed_month=M2, maker="RECONCILE",
+        narration="C1 - clears in full. Balance after: 0"),
+    row("r5", "ADVANCE_INSTALMENT", -3000, M2, contra_of="a25", closed_month=M2, maker="RECONCILE",
+        narration="C5 - clears in full. Balance after: 0"),
+    row("r9", "ADVANCE_INSTALMENT", -2000, M2, contra_of="a14", closed_month=M2, maker="RECONCILE",
+        narration="C9 - part 1. Balance after: 0"),
+    row("s3", "ADVANCE_ISSUE", 1500, M1 + "-03", against_month=M1, instalment=1500, closed_month=M1),
+    row("s18", "ADVANCE_ISSUE", 5000, M1 + "-18", against_month=M1, instalment=5000, closed_month=M1),
+    row("i1", "ADVANCE_INSTALMENT", -1500, M1, contra_of="s3", closed_month=M1, maker="SYSTEM",
+        narration="quota advance recovered in full (balance after: 0)"),
+    row("i2", "ADVANCE_INSTALMENT", -5000, M1, contra_of="s18", closed_month=M1, maker="SYSTEM",
+        narration="quota advance recovered in full (balance after: 0)"),
+    row("i3", "ADVANCE_INSTALMENT", -2000, M1, contra_of="a15", closed_month=M1, maker="SYSTEM",
+        narration="auto instalment for advance a15 (balance after: 1000)"),
+    row("o1", "ADVANCE_ISSUE", 980, M + "-01", against_month=M, instalment=980, narration="SHORT OF LAST SALARY"),
+    row("o8", "ADVANCE_ISSUE", 5000, M + "-08", against_month=M, instalment=5000),
+    row("x1", "NIGHT_DUTY", 400, M1 + "-12", staff="Walk Other", closed_month=M1),
+]
+with open(os.path.join(LA, "ledger.jsonl"), "w") as fh:
+    fh.writelines(json.dumps(r) + "\n" for r in rows)
+
+REG = os.path.join(S, "A_register.db")
+if os.path.exists(REG):
+    os.remove(REG)
+con = sqlite3.connect(REG)
+con.execute("CREATE TABLE locked_run (ym TEXT PRIMARY KEY, total_payout INTEGER NOT NULL, report_html TEXT NOT NULL, "
+            "locked_by TEXT NOT NULL, locked_ts TEXT NOT NULL, unlocked_by TEXT, unlocked_ts TEXT, unlock_reason TEXT, "
+            "status TEXT NOT NULL DEFAULT 'locked')")
+
+
+def s3(people):
+    trs = "<tr><th>Name</th></tr>"
+    for nm, base, adv, net in people:
+        vals = [base, adv] + [0] * 16 + [net]
+        trs += "<tr><td><b>%s</b></td>%s</tr>" % (nm, "".join("<td class='n'>%s</td>" % "{:,}".format(v) for v in vals))
+    return "<html><table class='s3t'>%s</table></html>" % trs
+
+
+con.execute("INSERT INTO locked_run(ym,total_payout,report_html,locked_by,locked_ts) VALUES(?,?,?,?,?)",
+            (M2, 3260 + 8000, s3([("Walk Staff", 10500, 7000, 3260), ("Walk Other", 9000, 0, 8000)]), "walk", TS))
+con.execute("INSERT INTO locked_run(ym,total_payout,report_html,locked_by,locked_ts) VALUES(?,?,?,?,?)",
+            (M1, -980 + 8400, s3([("Walk Staff", 10500, 8500, -980), ("Walk Other", 9000, 0, 8400)]), "walk", TS))
+con.commit()
+con.close()
+
+L = load(LA, CSV, REG, "A")
+print("[A] Surendra's shape, made up")
+if not check(hasattr(L, "month_book"), "the ledger has the month-by-month statement"):
+    print("RED: no month blocks (the S609 file)")
+    sys.exit(1)
+book = {b["ym"]: b for b in L.month_book("Walk Staff")}
+check(sorted(book) == sorted([M2, M1, M]), "three months: %s" % sorted(book))
+b2, b1, b0 = book.get(M2, {}), book.get(M1, {}), book.get(M, {})
+check(b2.get("cut_total") == 7000 and b2.get("remaining") == 6000, "%s: cut 7000, remaining 6000" % M2)
+check([t["rs"] for t in b2.get("taken", [])] == [2000, 2000, 3000, 3000, 3000],
+      "%s: the five advances taken (the reversed duplicate and the rejected one are not)" % M2)
+check(b1.get("cut_total") == 8500 and b1.get("remaining") == 4000, "%s: cut 8500, remaining 4000" % M1)
+check(b0.get("state") == "running" and b0.get("cut_total") == 7980 and b0.get("remaining") == 2000,
+      "%s (running): to be cut 7980, remaining after 2000" % M)
+check(b2.get("salary", {}).get("net") == 3260 and b1.get("salary", {}).get("net") == -980,
+      "salary from the locked runs: paid 3260, then -980")
+app = L.create_app()
+L.save_users({"walk": {"role": "checker", "salt": "00", "pw": "x", "active": True}})
+C = app.test_client()
+with C.session_transaction() as s:
+    s["u"] = "walk"
+page = C.get("/ledger/statement?staff=Walk+Staff").data.decode()
+t = text(page)
+check("Advance remaining now: Rs 9,980" in t, "top box: Advance remaining now Rs 9,980")
+check("Advance remaining after" in t and "Total advance outstanding" not in t, "the owner's word: 'Advance remaining'")
+check("Base Rs 10,500 - advances Rs 7,000 - leave, late & fines Rs 240 = paid Rs 3,260" in t,
+      "%s salary adds up: 10,500 - 7,000 - 240 = paid 3,260" % M2)
+check("Base Rs 10,500 - advances Rs 8,500 - leave, late & fines Rs 2,980 = paid Rs 0 - short by Rs 980" in t,
+      "%s salary adds up: 10,500 - 8,500 - 2,980 = Rs 0, short by Rs 980" % M1)
+check("To be cut at month end Rs 7,980" in t and "Advance remaining after the close Rs 2,000" in t,
+      "running month: Rs 7,980 to be cut, Rs 2,000 after")
+check("cleared" in t and "Rs 1,000 left on it" in t, "each cut says what it did to its advance")
+check("will clear it" in t, "the running month says 'will clear it', not 'cleared'")
+check("see the advance of 01" in t and "the same amount" in t, "the short salary points to the same-amount advance")
+check("contra entry" not in t and "reversing entry" in t, "the footer in plain words")
+check("cut from ONE monthly amount" in t and "to be cut in" in t, "the one-monthly-amount rule is said; future cuts say 'to be cut'")
+check("Every advance" in t and "settled " in t, "every advance, one line each, with when it settled")
+check("<details" in page and "Technical entries" in t and "Running net counts APPROVED" in t,
+      "the old ledger lines are kept, closed, under Technical entries")
+pos = [page.find("<b style='font-size:16px'>" + L._month_words(m)) for m in (M2, M1, M)]
+check(all(p >= 0 for p in pos) and pos == sorted(pos), "months run oldest first")
+one = text(C.get("/ledger/statement?staff=Walk+Staff&m=%s" % M1).data.decode())
+check(L._month_words(M1) in one and ("%s (running)" % L._month_words(M)) not in one, "a chosen month shows that month")
+
+# ------------------------------------------------------------------ Part B
+if a.live_ledger:
+    print("[B] scratch copies of the live ledger and staff register")
+    LB = os.path.join(S, "B_ledger")
+    shutil.rmtree(LB, ignore_errors=True)
+    shutil.copytree(a.live_ledger, LB)
+    RB = os.path.join(S, "B_register.db")
+    src = sqlite3.connect("file:%s?mode=ro" % a.live_register, uri=True)
+    dst = sqlite3.connect(RB)
+    src.backup(dst)
+    dst.close()
+    src.close()
+    LBm = load(LB, a.staff_csv, RB, "B")
+    sal = LBm.locked_salaries()
+    con = sqlite3.connect(RB)
+    locked = dict(con.execute("SELECT ym,total_payout FROM locked_run WHERE status='locked'").fetchall())
+    con.close()
+    check(all(int(round(sum(v["net"] for v in sal[ym].values()))) == int(locked[ym]) for ym in sal),
+          "every locked month read (%d of %d) adds up to its locked payout" % (len(sal), len(locked)))
+    appB = LBm.create_app()
+    LBm.save_users({"walkb": {"role": "checker", "salt": "00", "pw": "x", "active": True}})
+    CB = appB.test_client()
+    with CB.session_transaction() as s:
+        s["u"] = "walkb"
+    bad, chain_bad, top_bad, n = [], [], [], 0
+    for nm in LBm.staff_names():
+        n += 1
+        r = CB.get("/ledger/statement?staff=" + nm)
+        if r.status_code != 200 or "advances and salary" not in r.data.decode():
+            bad.append(nm)
+            continue
+        bk = LBm.month_book(nm)
+        prev = 0
+        for b in bk:
+            exp = prev + sum(x["rs"] for x in b["taken"]) + b["cap_total"] - b["rec_total"]
+            if b["remaining"] != exp:
+                chain_bad.append("%s %s: %s vs %s" % (nm, b["ym"], b["remaining"], exp))
+            prev = b["remaining"]
+        if bk and bk[-1]["state"] == "running":
+            pl = LBm.month_plan()
+            mine = LBm.plan_for_staff(nm, pl)
+            outst = sum(x["balance"] for x in LBm.open_advances() if x["issue"]["staff"] == nm)
+            if bk[-1]["remaining"] != max(0, outst - mine["take"]):
+                top_bad.append("%s: %s vs %s" % (nm, bk[-1]["remaining"], outst - mine["take"]))
+    check(not bad, "every staff member's page answers (%d people)%s" % (n, (": " + ", ".join(bad)) if bad else ""))
+    check(not chain_bad, "each month's remaining = previous + taken + added - recovered%s" % ((": " + "; ".join(chain_bad[:4])) if chain_bad else ""))
+    check(not top_bad, "the running month's remaining = the top box%s" % ((": " + "; ".join(top_bad[:4])) if top_bad else ""))
+    shutil.rmtree(LB, ignore_errors=True)
+    os.remove(RB)
+
+print("")
+print("WALK S611: %d passed, %d failed" % (len(passed), len(failed)))
+print("GREEN" if not failed else "RED")
+sys.exit(0 if not failed else 1)
