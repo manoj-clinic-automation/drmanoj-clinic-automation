@@ -1,0 +1,5 @@
+kit id S626_AMIR_PACK_STAYS
+session S338 (the Sanjeevni chat), 22-Oct-2026; built in the chat (no API runner, no Claude Code)
+F-988: Amir's month pack (the two Sanjeevni statements + the paid NEFT sheet) stays on his page until the next month's pack is ready
+pins in: amir_day 1169a3d6; out: amir_day 2c99c29e; read only: packs.py, supplier_msg.py (printed, not pinned -- the parent's / unchanged)
+undo: amir_day.py.bak_S626_1169a3d6 back, restart clinic-finance (the installer prints the one line)
