@@ -1,0 +1,16 @@
+f017d59788be2a23cb290bfb179b1e69  KIT_ID.txt
+0115405903e3069fa0384b87c2d126a3  PIN_FROM_asset_register.txt
+6b6f2f9fc66263a789146ec87edbcf47  PIN_FROM_sorting_desk.txt
+f1623ff323d70078698f267feaee4c64  PIN_READ_asset_machine.txt
+4d22be09d5277c1d76f0fbe0a5ad5c61  PIN_READ_batteries.txt
+f578511c367c2509882f08d1e916e03a  PIN_READ_clinic_papers.txt
+6f3537b808f85738a95c6927c244076b  PIN_READ_stationery.txt
+bcf74474df9e744ab96dac866ffe241c  PIN_READ_xray_costs.txt
+89a3e6b8ad07539de24fb00b433c4425  PIN_TO_asset_register.txt
+bb5c12ec4ed42430b5915dc1ea75558d  PIN_TO_sorting_desk.txt
+5bc331d296a2abe628d5b14a94930918  README.md
+8fa50dce043ce7c2c33d5708c30034d8  heal_s627.py
+306599b8c6dccc17fc675d2cd2336b7b  install_s627.sh
+06097a89e68fdee4bb74f8efc2535e42  make_s627.py
+13090b17d5c602339e715553aaa0c0bd  rehearse_s627.sh
+42f18b3eb92ddf4ac8e77e6fc8b7dfb9  walk_s627_app.py

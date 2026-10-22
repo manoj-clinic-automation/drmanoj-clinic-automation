@@ -1,0 +1,4 @@
+kit id S627_LATE_FOLLOWS_MONTH
+project Scan App (session 337, 22-Oct-2026; kit S627 claimed on the board _numbers v602 -> v603 at the owner's "do all these", 15:49 IST) -- built in the chat, not by the API-credit runner (the owner, 14:07 IST)
+fixes: the old 'late' mark follows S625's month rule; the desk's The month page states the rule
+files: asset_register.py f21ae7ca (S625's TO; 1 counted edit) . sorting_desk.py 110335ea (1 counted edit; drift 8 -- whole-read by the independent review) -- TO pins in PIN_TO_*.txt; read only, pinned: clinic_papers.py 89a3cd0a (S625's TO), batteries.py b2cbb41e, asset_machine.py 7dbd5e0c, stationery.py b6ce217a (S624's TO), xray_costs.py 22e59f5a. No database change. Restarts assetapp only.
