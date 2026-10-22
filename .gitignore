@@ -291,3 +291,7 @@ _scratch/
 # S605 (20-Oct-2026, the Sanjeevni chat; line added by S331 when PUBLISH_ALL refused at 18:2x IST): the kit's DUTY_MAP.json (v17)
 # that its walk and installer ran with (in SUMS.md5; PINS.sh ef42b155). No number (the gate read it). Exact path.
 !deploy_kits/S605_ORDER_FIXES/DUTY_MAP.json
+# S618 (22-Oct-2026): the kit's DUTY_MAP.json (v18: reception.rescan) that its walk and installer ran with, and the eye's labels of 54 pharmacy
+# scans the walk compares Claude with (stamps, vendor names, orientation / sharpness / cut words -- no number, no image). Both in SUMS.md5. Exact paths.
+!deploy_kits/S618_SCAN_QUALITY/DUTY_MAP.json
+!deploy_kits/S618_SCAN_QUALITY/S335_SCAN_VISUAL_AUDIT.json

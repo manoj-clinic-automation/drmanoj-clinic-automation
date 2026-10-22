@@ -1,0 +1,24 @@
+# PINS.sh -- kit S618_SCAN_QUALITY: FROM (the brief; the two finance files = S613's TO), TO (rebuilt from those bytes by make_s618.py),
+# READ (read-only files: STOP if one moved), PRINT (printed only). Sourced by install_S618_SCAN_QUALITY.sh (declare -A FROM TO READ PRINT first).
+FROM[asset_register.py]=f29ee51561ef73b837a25e56651108ac
+FROM[scanner_widget.js]=10a8bb296944542278a06827c4d09c18
+FROM[claude_reader.py]=3894dc2358abd875ee61ced7619e1e1b
+FROM[porders_s454.py]=34bab4648940f30d7fc57188398c51b4
+FROM[order_sheet.py]=c7fe2561b22158f9dffa73b8c963e298
+TO[asset_register.py]=70e35b105477cc2de5ed90c28875a05a
+TO[scanner_widget.js]=b936f0f3d184556aca3007f1a4bdf014
+TO[claude_reader.py]=101189093f8d0f9921fbb3e41b66226e
+TO[porders_s454.py]=4d1506480b2b1388ae1020c302e71a84
+TO[order_sheet.py]=ff9375f98c46f0a004a02a3582693a83
+TO[scan_quality.py]=16fb24029610ce7c0c0ecd502f529f7b
+READ[/root/assetapp/claude_reread.py]=ed7023d22e725b5f4e0a700494059e2b
+READ[/root/assetapp/sorting_desk.py]=110335eac5a9792ebe52620ee676a13c
+READ[/root/assetapp/clinic_papers.py]=6db07c12a8ba5ab0123db2a5bee0fa7b
+READ[/root/finance/purchase_app.py]=447b745f16c81ef62d389900d1d8ae13
+READ[/root/finance/porders.py]=b1736494f6dc58683ccb9c0a4c3fe181
+READ[/root/finance/stock_figure.py]=8c66b6b1010b7f0942768fe04022fa27
+READ[/root/finance/stock_watch.py]=f0d9092a051c4cd043645e4510ef4cee
+READ[/root/finance/item_check.py]=6f3faf899df5120af6ee51167604d457
+READ[/root/finance/darpan_kal.py]=d6ba4882b5f8c4d365016eff87ddba52
+PRINT[/root/finance/packs.py]=6ed8e18a9bad1676ca4156743182b6e5
+PRINT[/root/shared/scan_checks_s441.py]=b9ba6839ec7979cb709909214d6a0b69

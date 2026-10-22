@@ -1,0 +1,49 @@
+  /* ---- S618 (22-Oct-2026): a badly blurred photo is stopped on the phone -- the OpenCV path only -------------------------------------
+     The sharpness of the page as it will be saved: the variance of a 3x3 Laplacian on the page shrunk to 600 px on its long side. Below
+     CFG.blurMin (the owner's setting scan.blur_min, sent by the intake; absent or 0 = no check) the page is not added and the phone says
+     "Photo saaf nahi -- phir se lijiye" with Retake. Never a dead end: after two refusals in a row of the same page slot (reset by a kept
+     page, Save or a delete) the third photo is kept and its upload carries blur_kept=1 (the server lists it). Not in autoAdd (the library
+     is not there), not in adjustDone (the person placed the corners), not for PDF / file (uploaded as it is). */
+  var blurS618 = {slot: null, n: 0}, blurKeptS618 = -1, blurForceS618 = false;
+  function sharpS618(page){
+    var sm = null, g = null, g6 = null, lap = null, mean = null, sd = null;
+    try {
+      var s = Math.min(1, 600 / Math.max(page.width, page.height));
+      sm = CV.imread(page); g = new CV.Mat(); g6 = new CV.Mat(); lap = new CV.Mat(); mean = new CV.Mat(); sd = new CV.Mat();
+      CV.cvtColor(sm, g, CV.COLOR_RGBA2GRAY);
+      // shrunk by the library's own area average (the same on every phone; a canvas shrink aliases and reads print as sharpness)
+      CV.resize(g, g6, new CV.Size(Math.max(8, Math.round(page.width * s)), Math.max(8, Math.round(page.height * s))), 0, 0, CV.INTER_AREA);
+      CV.Laplacian(g6, lap, CV.CV_64F, 1, 1, 0, CV.BORDER_DEFAULT);                    // ksize 1 = the 3x3 kernel [0 1 0; 1 -4 1; 0 1 0]
+      CV.meanStdDev(lap, mean, sd);
+      return sd.data64F[0] * sd.data64F[0];
+    } catch (e) { return -1; }
+    finally { [sm, g, g6, lap, mean, sd].forEach(function(m){ try { if (m) m.delete(); } catch (e2) {} }); }
+  }
+  function blurBoxS618(on){
+    var b = $("blurbox");
+    if (!b && on) { b = document.createElement("div"); b.id = "blurbox"; b.setAttribute("role", "alert");
+      b.style.cssText = "margin:8px 0;padding:10px 12px;border:2px solid #b23b3b;border-radius:8px;background:#fdecea;color:#8c1d18;font-weight:700;font-size:17px";
+      var pg = $("pages"); pg.parentNode.insertBefore(b, pg); }
+    if (!b) return;
+    if (!on) { b.style.display = "none"; return; }
+    b.innerHTML = 'Photo saaf nahi — phir se lijiye<button type=button class=btn id=blurretake style="display:block;width:100%;margin-top:8px;background:#b23b3b;color:#fff">📷 Retake</button>';
+    b.style.display = "block";
+    $("blurretake").onclick = function(){ blurBoxS618(false); if (!stream) openCam(); };
+    try { b.scrollIntoView({behavior: "smooth", block: "nearest"}); } catch (e) {}
+  }
+  function blurRefuseS618(page){
+    /* true = the photo is refused (not added); false = it is added (sharp, not measurable, or the third in a row) */
+    var min = parseFloat(CFG.blurMin) || 0;
+    if (!(min > 0) || !page) return false;
+    var v = sharpS618(page);
+    if (v < 0 || v >= min) { blurS618 = {slot: null, n: 0}; blurBoxS618(false); return false; }
+    var slot = (retakeIdx >= 0 && retakeIdx < pages.length) ? ("r" + retakeIdx) : ("n" + pages.length);
+    blurS618 = (blurS618.slot === slot) ? {slot: slot, n: blurS618.n + 1} : {slot: slot, n: 1};
+    if (blurS618.n > 2) { blurS618 = {slot: null, n: 0}; blurForceS618 = true; blurBoxS618(false); return false; }   // never a dead end
+    blurBoxS618(true);
+    if (importQueue.length) setTimeout(loadNextImport, 60); else $("cam").value = "";   // a gallery import goes on with its next photo
+    return true;
+  }
+  window.__scannerS618 = {version: "S618.1", sharp: function(c){ return cvReady ? sharpS618(c) : -1; }, arOK: function(w, h){ return arOK(w, h); },
+                          state: function(){ return {slot: blurS618.slot, n: blurS618.n, kept: blurKeptS618, pages: pages.length, retake: retakeIdx}; }};
+  /* ---- end S618 ---------------------------------------------------------------------------------------- */

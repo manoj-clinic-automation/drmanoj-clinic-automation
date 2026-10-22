@@ -1,0 +1,260 @@
+# ---------------------------------------------------------------------------------------------- S618: how each page lies, upright on the server
+# Kit S618_SCAN_QUALITY (22-Oct-2026). After a pharmacy paper is read, a SHORT second question: which way the text of each page runs,
+# whether the whole bill is in the scan, whether its total line shows, whether it can be read. Its own prompt and its own call path --
+# never read()'s model loop or _record: it writes neither claude_reading nor settings 'read.claude_model'. Each call is counted by
+# _count_call against cap(con). The answer is kept in scan_lie, keyed by the FILE checked (a merged page 2 is a new file: checked again).
+# A page whose text does not run upright is turned by its /Rotate into a NEW file (the old one stays), set by compare-and-set.
+CHECK_MODELS = ("claude-haiku-5-5", "claude-sonnet-5-5")    # Haiku; Sonnet once when Haiku's answer cannot be read
+CHECK_MAX_TOKENS = 4000                                      # the model thinks before it answers
+TEXT_TOP = {"top": 0, "right": 270, "bottom": 180, "left": 90}   # the edge the top of the letters faces -> the CLOCKWISE turn that rights it
+LIE_DDL = ("CREATE TABLE IF NOT EXISTS scan_lie(bill_id INTEGER NOT NULL, file TEXT NOT NULL, at TEXT, model TEXT, pages_json TEXT, "
+           "whole_bill INTEGER, totals_visible INTEGER, legible INTEGER, note TEXT, blur_kept INTEGER, rotated_to TEXT, PRIMARY KEY(bill_id, file))")
+TURN_PY = os.environ.get("S618_TURN_PY", "/root/wa/venv/bin/python3")      # has pypdf and Pillow (the service python has neither)
+LIE_SKIP_SUBGROUPS = ("personal", "resume", "patient_paper")
+
+CHECK_PROMPT = """You are checking ONE phone scan of a paper received by a pharmacy: a supplier's bill or tax invoice, a delivery challan, or something else. Do not copy the items. Judge only how the paper lies in the scan and whether the scan can be used. Return ONLY one JSON object, no prose:
+
+{"pages": [{"text_top": "top" | "right" | "bottom" | "left"}],
+ "whole_bill": true or false,
+ "totals_visible": true or false,
+ "legible": true or false,
+ "note": "a few words, or empty"}
+
+"pages": one entry for every page of the file, in order. "text_top" says which EDGE of the page, as you see it, the TOP of the printed letters points to:
+  "top"    = the text reads normally, lines running left to right;
+  "right"  = the page lies sideways and the lines run DOWN the page, top to bottom (the tops of the letters face the right edge);
+  "left"   = the page lies sideways and the lines run UP the page, bottom to top (the tops of the letters face the left edge);
+  "bottom" = the text is upside down.
+"whole_bill": false ONLY when a part of the bill that matters is cut off by the edge of the scan: the top half with the supplier's heading, the item lines, the amounts column, or only a corner of the bill shown. A clipped margin, a few letters clipped at an edge, a hand or fingers over the footer, or a slight tilt do NOT count: then true.
+"totals_visible": true when the bill's grand total / net amount line is inside the scan and can be read, or when the paper carries no amounts at all (as most challans); false when that line is cut off or hidden.
+"legible": true when a person could read the item lines and their amounts; false when the scan is too blurred, smeared or dark to read them.
+"note": what is wrong in a few words (never a name or a number), or "" when nothing is."""
+
+
+def _pdf_pages(raw):
+    """Pages of a PDF by its page objects (jsPDF and pypdf write them plainly); None when they are packed out of sight."""
+    n = len(re.findall(rb"/Type\s*/Page(?![a-zA-Z])", raw or b""))
+    return n or None
+
+
+def _bool01(v):
+    return 1 if v is True else 0 if v is False else None
+
+
+def _clean_lie(d, npages=None):
+    """The check's answer, only its own fields: {pages: [{turn}], whole_bill, totals_visible, legible, note}; None when unusable."""
+    if not isinstance(d, dict) or not isinstance(d.get("pages"), list):
+        return None
+    pages = []
+    for p in d["pages"]:
+        t = TEXT_TOP.get(str((p or {}).get("text_top") if isinstance(p, dict) else p).strip().lower())
+        if t is None:
+            return None
+        pages.append({"turn": t})
+    if not pages:
+        return None
+    if npages:
+        pages = (pages + [{"turn": 0}] * npages)[:npages]       # a page the answer left out is left as it lies
+    return {"pages": pages, "whole_bill": d.get("whole_bill") if isinstance(d.get("whole_bill"), bool) else None,
+            "totals_visible": d.get("totals_visible") if isinstance(d.get("totals_visible"), bool) else None,
+            "legible": d.get("legible") if isinstance(d.get("legible"), bool) else None, "note": _txt(d.get("note"), 160) or ""}
+
+
+def check_scan(path, db_path=None):
+    """S618: how each page of one scan lies. {pages: [{turn: 0|90|180|270}], whole_bill, totals_visible, legible, note, model} or None.
+    Its own call path: Haiku, Sonnet once when the answer cannot be read; 429 / 5xx tried again as read() does; every call counted
+    against cap(con). Never records a reading, never changes a setting. Never raises."""
+    db_path = db_path or os.environ.get("ASSETS_DB") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets.db")
+    try:
+        con = _db(db_path)
+    except Exception:                                                # noqa: BLE001
+        return None
+    try:
+        if state(con) != "on":
+            return None
+        blk, why = _block(path)
+        if blk is None:
+            return None
+        npages = None
+        if path.lower().endswith(".pdf"):
+            with open(path, "rb") as fh:
+                npages = _pdf_pages(fh.read())
+        key = _key()
+        for model in CHECK_MODELS:
+            body = {"model": model, "max_tokens": CHECK_MAX_TOKENS,
+                    "messages": [{"role": "user", "content": [blk, {"type": "text", "text": CHECK_PROMPT}]}]}
+            for attempt in range(3):
+                if calls_today(con) >= cap(con):
+                    return None
+                _count_call(con)
+                code, js, text = _post(body, key)
+                if code == 200 and js:
+                    out = "".join(c.get("text", "") for c in (js.get("content") or []) if isinstance(c, dict) and c.get("type") == "text")
+                    d = _clean_lie(_json_from(out), npages)
+                    if d is None:
+                        break                                    # Sonnet, once
+                    d["model"] = model
+                    return d
+                if code in (429, 500, 502, 503, 529, 0):
+                    time.sleep(3 * (attempt + 1))
+                    continue
+                err = js.get("error") if isinstance(js, dict) and isinstance(js.get("error"), dict) else {}
+                if code == 404 or (code == 400 and "model" in ((err.get("message") or "") + " " + (err.get("type") or "")).lower()):
+                    break                                        # this model is not there: the next one
+                return None                                      # refused (key, credit, the paper): no second model for a refusal
+        return None
+    except Exception:                                                # noqa: BLE001
+        return None
+    finally:
+        con.close()
+
+
+_TURN_SRC = ("import sys\n"
+             "dst, src, turns = sys.argv[1], sys.argv[2], [int(x) for x in sys.argv[3].split(',')]\n"
+             "if src.lower().endswith('.pdf'):\n"
+             "    from pypdf import PdfReader, PdfWriter\n"
+             "    w = PdfWriter()\n"
+             "    for i, p in enumerate(PdfReader(src).pages):\n"
+             "        t = turns[i] if i < len(turns) else 0\n"
+             "        if t:\n"
+             "            p.rotate(t)\n"
+             "        w.add_page(p)\n"
+             "    w.write(open(dst, 'wb'))\n"
+             "else:\n"
+             "    from PIL import Image\n"
+             "    im = Image.open(src)\n"
+             "    fmt = im.format or 'JPEG'\n"
+             "    im.rotate(-turns[0], expand=True).save(dst, fmt, quality=92)\n")
+
+
+def turn_file(upload_dir, stored, turns):
+    """The scan with each page turned CLOCKWISE by its turn, as a NEW stored file 'bill_<hex>_u.<ext>' (the old file stays).
+    A PDF by its pages' /Rotate (lossless), a photo with Pillow -- in this process when they import, else the venv python's.
+    Returns the new name, or None when it cannot be done."""
+    if not stored or not any(turns or []):
+        return None
+    stem, ext = os.path.splitext(stored)
+    ext = ext.lower()
+    if ext not in (".pdf", ".jpg", ".jpeg", ".png"):
+        return None
+    name, k = "%s_u%s" % (stem, ext), 1
+    while os.path.exists(os.path.join(upload_dir, name)):
+        k += 1
+        name = "%s_u%d%s" % (stem, k, ext)
+    src, dst = os.path.join(upload_dir, stored), os.path.join(upload_dir, name)
+    arg = ",".join(str(int(t)) for t in turns)
+    try:
+        if ext == ".pdf":
+            from pypdf import PdfReader, PdfWriter                   # noqa: PLC0415
+            w = PdfWriter()
+            for i, p in enumerate(PdfReader(src).pages):
+                t = turns[i] if i < len(turns) else 0
+                if t:
+                    p.rotate(t)
+                w.add_page(p)
+            with open(dst, "wb") as fh:
+                w.write(fh)
+        else:
+            from PIL import Image                                    # noqa: PLC0415
+            im = Image.open(src)
+            im.rotate(-turns[0], expand=True).save(dst, im.format or "JPEG", quality=92)
+        if os.path.exists(dst) and os.path.getsize(dst) > 0:
+            return name
+    except ImportError:
+        pass
+    except Exception:                                                # noqa: BLE001
+        _rm(dst)
+        return None
+    try:
+        import subprocess as _sp                                     # noqa: PLC0415
+        if os.path.exists(TURN_PY):
+            r = _sp.run([TURN_PY, "-c", _TURN_SRC, dst, src, arg], capture_output=True, timeout=90)
+            if r.returncode == 0 and os.path.exists(dst) and os.path.getsize(dst) > 0:
+                return name
+    except Exception:                                                # noqa: BLE001
+        pass
+    _rm(dst)
+    return None
+
+
+def _rm(p):
+    try:
+        if p and os.path.exists(p):
+            os.remove(p)
+    except OSError:
+        pass
+
+
+def _lie_audit(con, bid, who, action, detail):
+    con.execute("INSERT INTO bill_audit(bill_id, at, who, action, detail) VALUES(?,?,?,?,?)",
+                (bid, _dt.datetime.now().strftime("%Y-%m-%d %H:%M"), who, action, json.dumps(detail or {}, ensure_ascii=False)[:500]))
+
+
+def lie_pass(db_path, upload_dir, bid, who="server (S618 upright)"):
+    """S618: check one pharmacy scan's CURRENT file and turn it upright. Guarded here, at the moment of the call: lane 'pharmacy', not set
+    aside, not a joined page, not a person's paper, no check of this file yet (scan_lie). The new file is set by compare-and-set
+    (UPDATE ... WHERE source_stored=<the file checked>); when a join changed the file meanwhile, the current file is checked and turned
+    instead (once more), else the turn is audited and skipped. Returns a word: turned / checked / skipped:<why> / failed. Never raises."""
+    try:
+        con = _db(db_path)
+    except Exception:                                                # noqa: BLE001
+        return "failed"
+    try:
+        con.execute(LIE_DDL)
+        con.commit()
+        for _attempt in (1, 2):
+            b = con.execute("SELECT id, lane, status, page_of, source_stored, subgroup FROM bills WHERE id=?", (bid,)).fetchone()
+            if not b:
+                return "skipped:no bill"
+            if (b["lane"] or "") != "pharmacy":
+                return "skipped:lane"
+            if (b["status"] or "") == "rejected" or b["page_of"]:
+                return "skipped:set aside"
+            if (b["subgroup"] or "") in LIE_SKIP_SUBGROUPS or not b["source_stored"]:
+                return "skipped:not asked"
+            f = b["source_stored"]
+            r = con.execute("SELECT model FROM scan_lie WHERE bill_id=? AND file=?", (bid, f)).fetchone()
+            if r and r["model"]:
+                return "skipped:checked"
+            res = check_scan(os.path.join(upload_dir, f), db_path=db_path)
+            if res is None:
+                return "failed"
+            at = _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            vals = (at, res["model"], json.dumps(res["pages"]), _bool01(res["whole_bill"]), _bool01(res["totals_visible"]),
+                    _bool01(res["legible"]), res["note"])
+            con.execute("INSERT OR IGNORE INTO scan_lie(bill_id, file) VALUES(?,?)", (bid, f))
+            con.execute("UPDATE scan_lie SET at=?, model=?, pages_json=?, whole_bill=?, totals_visible=?, legible=?, note=? WHERE bill_id=? AND file=?",
+                        vals + (bid, f))
+            con.commit()
+            turns = [p["turn"] for p in res["pages"]]
+            if not any(turns):
+                return "checked"
+            new = turn_file(upload_dir, f, turns)
+            if not new:
+                _lie_audit(con, bid, who, "upright_failed", {"pages": turns, "file": f})
+                con.commit()
+                return "checked"
+            cur = con.execute("UPDATE bills SET source_stored=? WHERE id=? AND source_stored=?", (new, bid, f))
+            if cur.rowcount == 1:
+                bk = con.execute("SELECT blur_kept FROM scan_lie WHERE bill_id=? AND file=?", (bid, f)).fetchone()
+                con.execute("UPDATE scan_lie SET rotated_to=? WHERE bill_id=? AND file=?", (new, bid, f))
+                con.execute("INSERT OR IGNORE INTO scan_lie(bill_id, file, at, model, pages_json, whole_bill, totals_visible, legible, note, blur_kept) "
+                            "VALUES(?,?,?,?,?,?,?,?,?,?)", (bid, new, at, "upright copy of " + f, json.dumps([{"turn": 0} for _t in turns]),
+                                                          vals[3], vals[4], vals[5], vals[6], bk["blur_kept"] if bk else None))
+                _lie_audit(con, bid, who, "upright", {"pages": turns, "from": f, "to": new})
+                con.commit()
+                return "turned"
+            con.rollback()
+            _lie_audit(con, bid, who, "upright_raced", {"pages": turns, "checked": f, "kept": new})
+            con.commit()
+        return "skipped:raced"
+    except Exception:                                                # noqa: BLE001
+        try:
+            con.rollback()
+        except Exception:                                            # noqa: BLE001
+            pass
+        return "failed"
+    finally:
+        con.close()
+
+

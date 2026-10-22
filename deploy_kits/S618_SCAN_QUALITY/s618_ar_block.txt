@@ -1,0 +1,87 @@
+
+
+# --- S618 (22-Oct-2026, kit S618_SCAN_QUALITY): every pharmacy scan the right way up; the rescan replaces the old scan ----------------
+# Claude, after the reading, says how each page lies (claude_reader.check_scan / lie_pass -> table scan_lie); the server turns a sideways
+# page upright into a new file. A rescan link (bills.rescan_of) sets the old scan aside in the SAME transaction as the new scan's INSERT,
+# before the fingerprint guard -- so no duplicate rule ever takes the rescan for a second scan of the old paper. The phone's blur refusal
+# lives in scanner_widget.js (scan.blur_min, sent in SCANNER_CONFIG.blurMin); a photo kept after two refusals arrives with blur_kept=1.
+S618_BLUR_MIN = 650.0            # the walk's calibration (brief 3.3; widget scale): B-0181 489 refused, the lowest readable B-0198 867 kept
+
+
+def _s618_blur_min():
+    """The owner's setting scan.blur_min (assets.db settings; absent = the calibrated default). 0 switches the phone's check off."""
+    try:
+        v = float(str(setting_or("scan.blur_min", "") or "").strip() or S618_BLUR_MIN)
+        return v if v >= 0 else S618_BLUR_MIN
+    except (TypeError, ValueError):
+        return S618_BLUR_MIN
+
+
+def _s618_rescan(db, bid, stamp, lane, ro):
+    """The new scan is a rescan of bill `ro` (the Purchase orders link's rescan_of): it carries rescan_of, and the old scan is set aside
+    'rescanned as B-xxxx' (kept, its file kept) -- in the caller's transaction, before the fingerprint guard. A rescan_of that is not a
+    pharmacy-lane scan, is already set aside or is a joined page (or a new scan off the pharmacy lane) is ignored and audited: the new
+    scan then stands as a plain scan."""
+    if not ro:
+        return None
+    try:
+        oid = int(str(ro).strip())
+    except (TypeError, ValueError):
+        oid = None
+    old = db.execute("SELECT id, stamp_no, lane, status, page_of FROM bills WHERE id=?", (oid,)).fetchone() if oid else None
+    why = ("no such scan" if old is None else "the same scan" if oid == bid else "not a pharmacy scan" if (old["lane"] or "") != "pharmacy"
+           else "the new scan is not on the pharmacy lane" if lane != "pharmacy" else "already set aside" if (old["status"] or "") == "rejected"
+           else "a joined page" if old["page_of"] else "")
+    if why:
+        _audit_bill(db, bid, "rescan_ignored", {"rescan_of": str(ro)[:20], "why": why})
+        return None
+    db.execute("UPDATE bills SET rescan_of=? WHERE id=?", (oid, bid))
+    db.execute("UPDATE bills SET status='rejected', reject_reason=?, approved_by=?, approved_at=? WHERE id=? AND status<>'rejected'",
+               ("rescanned as %s" % stamp, "server (S618 rescan)", _now_ist(), oid))
+    _audit_bill(db, bid, "rescan_of", {"old": oid, "old_stamp": old["stamp_no"]})
+    _audit_bill(db, oid, "rescanned", {"new": bid, "new_stamp": stamp})
+    return oid
+
+
+def _s618_blur_kept(db, bid, stored):
+    """The phone kept this photo after two refusals for blur: scan_lie.blur_kept=1 on the stored file (the check fills the rest later)."""
+    try:
+        db.execute(S618_LIE_DDL)
+        db.execute("INSERT OR IGNORE INTO scan_lie(bill_id, file, at) VALUES(?,?,?)", (bid, stored, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        db.execute("UPDATE scan_lie SET blur_kept=1 WHERE bill_id=? AND file=?", (bid, stored))
+        _audit_bill(db, bid, "blur_kept", {"file": stored})
+    except sqlite3.Error:
+        pass
+
+
+def _s618_lie(bid):
+    """After the reading (good or failed): Claude says how the pages lie and the server turns them upright (claude_reader.lie_pass, which
+    re-reads the lane, the set-aside, the joined page and scan_lie at the moment of the call). A page just joined to its head
+    (S441's forgotten page, in this thread) sends its head instead: the head's merged file is new. Only a paper Claude is asked to read."""
+    if CLAUDE is None or not hasattr(CLAUDE, "lie_pass"):
+        return None
+    d = sqlite3.connect(DB_PATH)
+    d.row_factory = sqlite3.Row
+    try:
+        r = d.execute("SELECT id, page_of FROM bills WHERE id=?", (bid,)).fetchone()
+    finally:
+        d.close()
+    if not r:
+        return None
+    target = r["page_of"] or bid
+    if not _s601_asked(target):
+        return None
+    return CLAUDE.lie_pass(DB_PATH, UPLOAD_DIR, target)
+
+
+_bg_extract_before_s618 = _bg_extract
+
+
+def _bg_extract(bid, path, _reading=None):                                   # noqa: F811 -- S618: the reading, then how the pages lie
+    status = _bg_extract_before_s618(bid, path, _reading)
+    try:
+        _s618_lie(bid)
+    except Exception:                                                         # noqa: BLE001
+        pass
+    return status
+# --- S618 end ---

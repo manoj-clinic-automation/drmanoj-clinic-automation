@@ -1,0 +1,71 @@
+# run_browser_walk_s618.py -- headless Chrome on the PC, 22-Oct-2026 10:12 IST (the PC's clock); OLD widget 10a8bb29, NEW widget b936f0f3; opencv.js ff1e10e7; jspdf 4b16d1b6; blur_min 650
+GREEN V  the new widget compiles in V8 (Chrome's JavaScript engine, the one node uses): parsed whole, not run -- node --check's equivalent  -- 102726 
+  the sharpness of every stored page (3x3 Laplacian variance at 600 px): direct = the stored page; through = laid on a desk and taken through the widget's own outline, straighten (B&W) and upright
+    B-0135      1050x1400  direct    3163   through    2460   outline True
+    B-0136       935x1214  direct    4735   through    3804   outline True
+    B-0141      1050x1400  direct    3060   through    2556   outline True
+    B-0143      1050x1400  direct    2408   through    2175   outline True
+    B-0144      1050x1400  direct    3589   through    2857   outline True
+    B-0145      1050x1400  direct    2908   through    2436   outline True
+    B-0146      1073x2400  direct    4027   through    3919   outline True
+    B-0148      1825x2386  direct    1922   through    2183   outline True
+    B-0149       834x1146  direct    1202   through    1099   outline True
+    B-0150      1708x2400  direct    1593   through    1588   outline True
+    B-0151      1659x2400  direct    3460   through    3381   outline True
+    B-0152      1800x2400  direct    1501   through    1490   outline True
+    B-0153      1800x2400  direct    1789   through    1857   outline True
+    B-0154      1800x2400  direct    1530   through    1496   outline True
+    B-0155      2234x2241  direct    1281   through    1440   outline True
+    B-0156      1800x2400  direct    2000   through    1869   outline True
+    B-0157       750x870   direct     688   through     331   outline True
+    B-0158      1702x2400  direct    1788   through    1908   outline True
+    B-0159      1800x2400  direct    1738   through    1923   outline True
+    B-0160       891x702   direct     944   through     789   outline True
+    B-0161      1555x2400  direct    2007   through    2123   outline True
+    B-0165      1800x2400  direct    2385   through    3635   outline True
+    B-0166      1800x2400  direct    1177   through    1065   outline True
+    B-0167      2400x1565  direct    3014   through    3171   outline True
+    B-0168      2400x1314  direct    2434   through    2453   outline True
+    B-0169      2231x1363  direct    5131   through    5357   outline True
+    B-0170      2400x1520  direct    5326   through    5462   outline True
+    B-0171      2400x1563  direct    5230   through    5449   outline True
+    B-0172      2400x2193  direct    1816   through    1853   outline True
+    B-0173      2400x1427  direct    2752   through    2842   outline True
+    B-0174      1830x2400  direct    2539   through    2471   outline True
+    B-0175      1800x2400  direct    2721   through    2510   outline True
+    B-0176      2400x2149  direct     396   through     492   outline True
+    B-0177      1800x2400  direct    1260   through    1276   outline True
+    B-0178      1637x2400  direct    7769   through    7350   outline True
+    B-0180      2004x1094  direct    1584   through    1733   outline True
+    B-0181      1800x2400  direct     489   through     455   outline True
+    B-0182      1800x2400  direct     964   through    1016   outline True
+    B-0183      1800x2400  direct    1081   through     994   outline True
+    B-0184      2193x1896  direct     901   through     864   outline True
+    B-0185      1800x2400  direct     957   through    1064   outline True
+    B-0186      1800x2400  direct    1785   through    1679   outline True
+    B-0187      1800x2400  direct     936   through     853   outline True
+    B-0188      2056x2329  direct    4422   through    4431   outline True
+    B-0189      1800x2400  direct     992   through     976   outline True
+    B-0190      2400x1670  direct    3603   through    3714   outline True
+    B-0192      1800x2400  direct    2163   through    2092   outline True
+    B-0193      2400x1908  direct    4432   through    3785   outline True
+    B-0194      1961x1372  direct    4371   through    4051   outline True
+    B-0195      1800x2400  direct    1383   through    1183   outline True
+    B-0196      1800x2400  direct    2663   through    3393   outline True
+    B-0197      1800x2400  direct    1182   through    1300   outline True
+    B-0198      1435x2400  direct     867   through    1111   outline True
+    B-0199      1883x2277  direct    1804   through    1878   outline True
+    B-0200      1565x2398  direct    6407   through    6485   outline True
+    B-0201      1800x2400  direct    1473   through    1396   outline True
+GREEN CAL  the sharpness of all 56 stored pages measured by the widget's own function
+GREEN A  B-0181's stored page on a desk margin: REFUSED -- not added, the phone says 'Photo saaf nahi — phir se lijiye' with Retake  -- pages 0 box 'Photo saaf nahi — phir se lijiye📷 Retake' errs []
+GREEN A' CONTROL (the live widget 10a8bb29): the same photo is KEPT as page 1 -- no refusal (red on the old file)  -- pages 1 box ''
+GREEN B  B-0198's stored page (the lowest readable) on a desk margin: KEPT as page 1  -- pages 1 box ''
+GREEN C  two refusals of the same page, then the third photo KEPT (never a dead end); Save: the upload carries blur_kept=1  -- pages after each [0, 0, 1]; upload fields [{'lane': 'pharmacy', 'bill_month': '2026-10', 'blur_kept': '1'}]
+  (the live widget, for the record: pages after each [1, 2, 3]; upload blur_kept [None])
+GREEN D  a gallery import of three photos, the middle one blurred: it is refused and the import goes on -- 2 pages, no stall  -- pages 2, the refusal seen at page count 1
+GREEN E  a pharmacy link (the server puts expectAspect in SCANNER_CONFIG): the half-A4 prior in effect from the start (the guide line shown, a square outline refused by arOK) and read at call time (a lane change to clinic lifts it)  -- {"guidehint": true, "cfgAR": 0.7048, "arSquare": false, "arHalfA4": true, "arSquareAfterClinic": true}
+GREEN E' CONTROL (the live intake's SCANNER_CONFIG, set by the lane select after the widget read it): no prior at load -- no guide line (red on the old files)  -- {"guidehint": false, "cfgAR": null}
+GREEN F  the intake page opened from 'Scan karo' (rescan_of=199): the first Save carries rescan_of, the next bill does NOT  -- uploads [['bill_month', 'lane', 'rescan_of', 'vendor'], ['bill_month', 'lane', 'vendor']] errs []
+GREEN F' CONTROL (the live intake page): rescan_of is not even carried (INTAKE_PREFILL has no rescan_of) -- red on the old files  -- uploads [['bill_month', 'lane', 'vendor'], ['bill_month', 'lane', 'vendor']]
+11 browser checks: 11 GREEN, 0 RED  (133 s)

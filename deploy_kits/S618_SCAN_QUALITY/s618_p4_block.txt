@@ -1,0 +1,308 @@
+
+
+# ---- S618 (22-Oct-2026, kit S618_SCAN_QUALITY): send a scan back, rescan it ---------------------------------------------------------------
+#    GET  /finance/porders/s454/scans              Scans to redo -- the owner (English) and the logins in porders.rescan_askers (Roman Hindi):
+#                                                  (a) the open asks, (b) every pharmacy-lane scan since scan.redo_since with a scan_quality
+#                                                  verdict and no open or done ask; Get it rescanned (blurred / cut off / not a bill), Open the
+#                                                  scan. Its read writes nothing (no _every_read).
+#    GET  /finance/porders/s454/rescan             Phir se scan karo -- reception's list of the open asks, each with Scan karo (the intake link
+#                                                  carries rescan_of and the old bill's month)
+#    POST /finance/porders/api/s454/rescan         {asset_bill_id, reason} -- the owner or an asker; refused for a scan set aside or a joined page
+#    POST /finance/porders/api/s454/rescan/withdraw  {id} -- the same people
+#  The words: scan_quality.WORDS only (imported inside the functions, fail-soft -- never at the top of this module). The ask: scan_rescan_ask
+#  (order_sheet.DDL); only done_* / withdrawn_* are ever set; never deleted. An ask is closed by order_sheet.tie_pass from bills.rescan_of.
+S618_ASKERS = "shavez"                                        # setting porders.rescan_askers (the owner asks by his role, always)
+S618_DOERS = "reception,alisha,shivani"                       # setting porders.rescan_doers (not Darpan)
+T.update({"r_rescan": ("Phir se scan karo", "Scans sent back for a rescan"),
+          "r_redo": ("Scan dobara karwane hain", "Scans to redo"),
+          "redo_link": ("Scan dobara karwane hain: %d", "Scans to redo: %d"),
+          "redo_top": ("In scan ko reception se dobara karwaiye. Wajah chuniye.", "Send any of these back to reception for a rescan. Choose the reason."),
+          "redo_asked": ("Reception ko bheje gaye", "Sent to reception"), "redo_none": ("Koi scan dobara nahi karwana.", "No scan needs redoing."),
+          "redo_get": ("Dobara scan karwaiye:", "Get it rescanned:"), "redo_open": ("Scan dekhiye", "Open the scan"),
+          "redo_withdraw": ("Wapas lijiye", "Withdraw"), "redo_by": ("%s · %s ne bheja", "%s · sent by %s"),
+          "rescan_top": ("In bill ka paper dobara scan kijiye.", "Scan the paper of these bills again."),
+          "rescan_none": ("Koi bill dobara scan nahi karna.", "No bill to rescan.")})
+
+
+def _sq():
+    try:
+        import scan_quality                                   # noqa: PLC0415 -- /root/shared (porders.py puts it on sys.path); fail-soft
+        return scan_quality
+    except Exception:                                         # noqa: BLE001
+        return None
+
+
+def _s618_names(con, key, default):
+    try:
+        v = _po()._setting(con, key, default)
+    except Exception:                                         # noqa: BLE001
+        v = default
+    return [p.strip().lower() for p in re.split(r"[,;\s]+", str(v or "")) if p.strip()]
+
+
+def _s618_login(u, login=""):
+    return str(login or (u or {}).get("login") or (u or {}).get("user") or "").lower()
+
+
+def _s618_asker(con, kind, login):
+    return kind == "owner" or login in _s618_names(con, "porders.rescan_askers", S618_ASKERS)
+
+
+def _s618_doer(con, login):
+    return login in _s618_names(con, "porders.rescan_doers", S618_DOERS)
+
+
+def _s618_open_count(con):
+    """THE count of reception's row (and DUTY_MAP reception.rescan's due_sql): the asks neither done nor withdrawn."""
+    try:
+        return int(con.execute("SELECT COUNT(*) FROM scan_rescan_ask WHERE done_at IS NULL AND withdrawn_at IS NULL").fetchone()[0])
+    except sqlite3.Error:
+        return 0
+
+
+def _s618_owner_logins(con):
+    try:
+        return {str(r[0]).lower() for r in con.execute("SELECT username FROM unit_role WHERE unit='porders' AND role='checker' AND active=1")}
+    except sqlite3.Error:
+        return {"manoj"}
+
+
+def _s618_month(r):
+    bm = str(r.get("bill_month") or "")
+    if re.match(r"^\d{4}-\d\d$", bm):
+        return bm
+    bd = str(r.get("bill_date") or "")
+    if re.match(r"^\d{4}-\d\d", bd):
+        return bd[:7]
+    at = r.get("at")
+    return at.strftime("%Y-%m") if at else ""
+
+
+def rescan_list(con):
+    """S618: 'Scans to redo' -- the ONE reader (S619 embeds it). dict(asks=[the open asks], redo=[the scans with a verdict and no open or
+    done ask], since=..., ok=bool). assets.db READ ONLY (scan_lie of each bill's CURRENT file, its good reading, the scan.* settings);
+    finance.db read only. Writes nothing."""
+    sq = _sq()
+    out = dict(asks=[], redo=[], since="", ok=sq is not None)
+    try:
+        asks = [dict(r) for r in con.execute("SELECT * FROM scan_rescan_ask ORDER BY id")]
+    except sqlite3.Error:
+        asks = []
+    open_ = [a for a in asks if not a.get("done_at") and not a.get("withdrawn_at")]
+    taken = {int(a["asset_bill_id"]) for a in asks if not a.get("withdrawn_at")}       # an open or a done ask: never listed again
+    owners = _s618_owner_logins(con)
+    acon = OS._assets()
+    if acon is None:
+        out["asks"] = [dict(a, scan=int(a["asset_bill_id"])) for a in open_]
+        return out
+    try:
+        settings = {}
+        try:
+            settings = {str(r[0]): r[1] for r in acon.execute("SELECT key, value FROM settings WHERE key LIKE 'scan.%'")}
+        except sqlite3.Error:
+            pass
+        since = str((sq.setting(settings, "scan.redo_since") if sq else "") or "2026-10-08")[:10]
+        out["since"] = since
+        cols = {r[1] for r in acon.execute("PRAGMA table_info(bills)")}
+        want = [c for c in ("id", "stamp_no", "vendor", "bill_no", "bill_date", "bill_month", "total_amount", "submitted_at", "created_at", "lane", "kind",
+                            "status", "page_of", "doc_kind", "source_stored") if c in cols]
+        rows = [dict(r) for r in acon.execute("SELECT %s FROM bills WHERE lane='pharmacy' AND substr(created_at,1,10)>=? ORDER BY id" % ", ".join(want), (since,))]
+        ids = {int(a["asset_bill_id"]) for a in open_} - {int(r["id"]) for r in rows}
+        if ids:
+            rows += [dict(r) for r in acon.execute("SELECT %s FROM bills WHERE id IN (%s)" % (", ".join(want), ",".join("?" * len(ids))), sorted(ids))]
+        reading, lie = {}, {}
+        try:
+            for r in acon.execute("SELECT bill_id, data FROM claude_reading WHERE ok=1"):
+                try:
+                    reading[int(r[0])] = json.loads(r[1]) if r[1] else None
+                except ValueError:
+                    pass
+        except sqlite3.Error:
+            pass
+        try:
+            for r in acon.execute("SELECT * FROM scan_lie"):
+                lie[(int(r["bill_id"]), r["file"])] = dict(r)
+        except sqlite3.Error:
+            pass
+    finally:
+        acon.close()
+    by = {}
+    for r in rows:
+        r["at"] = OS.scan_moment(r)
+        r["lie"] = lie.get((int(r["id"]), r.get("source_stored")))
+        r["v"] = str((r["lie"] or {}).get("at") or "").replace(" ", "T")
+        by[int(r["id"])] = r
+    for a in open_:
+        r = by.get(int(a["asset_bill_id"])) or {}
+        login = str(a.get("asked_by") or "").lower()
+        out["asks"].append(dict(id=a["id"], scan=int(a["asset_bill_id"]), stamp=a.get("stamp") or r.get("stamp_no") or "", vendor=r.get("vendor") or "",
+                                date=str(r.get("bill_date") or "")[:10] or (r["at"].date().isoformat() if r.get("at") else ""), reason=a["reason"],
+                                asked_by=login, by_owner=login in owners, asked_at=a.get("asked_at") or "", month=_s618_month(r), v=r.get("v", "")))
+    if sq is None:
+        return out
+    for r in rows:
+        sid = int(r["id"])
+        if sid in taken or str(r.get("status") or "") == "rejected" or r.get("page_of") or str(r.get("created_at") or "")[:10] < since:
+            continue
+        d = sq.detail(r, reading.get(sid), r["lie"], settings)
+        if d:
+            out["redo"].append(dict(scan=sid, stamp=r.get("stamp_no") or "#%d" % sid, vendor=r.get("vendor") or "", code=d["code"], sum=d["sum"], total=d["total"],
+                                    date=str(r.get("bill_date") or "")[:10] or (r["at"].date().isoformat() if r.get("at") else ""), v=r["v"]))
+    return out
+
+
+def _s618_count(con):
+    """The home's link: the open asks and the scans to redo."""
+    try:
+        x = rescan_list(con)
+        return len(x["asks"]) + len(x["redo"])
+    except Exception:                                         # noqa: BLE001
+        return 0
+
+
+def _s618_intake(vendor, ym, rid, back):
+    q = dict(lane="pharmacy")
+    if vendor:
+        q["vendor"] = str(vendor)[:120]
+    if ym:
+        q["bill_month"] = str(ym)[:7]
+    q["rescan_of"] = str(int(rid))
+    q["from"] = back
+    return "/scanapp/intake?" + urlencode(q)
+
+
+def _s618_thumb(x):
+    return "/scanapp/bills/%d/thumb" % x["scan"] + (("?v=" + quote(x["v"])) if x.get("v") else "")
+
+
+def scans_page():
+    """Scans to redo (the owner, English; the askers, Roman Hindi). Writes nothing."""
+    u, con, kind, login, err = _auth_page()
+    if err:
+        return err
+    en = u["_en"]
+    login = _s618_login(u, login)
+    if not _s618_asker(con, kind, login):
+        return redirect(P)
+    sq = _sq()
+    who = "owner" if en else "shavez"
+    x = rescan_list(con)
+    h = ['<div class="mut">%s</div>' % L(en, "redo_top")]
+    if not x["ok"]:
+        h.append('<div class="err">scan_quality is not available -- only the open asks are shown.</div>')
+    if x["asks"]:
+        h.append('<div class="grp" id="redo_asks">%s · %d</div>' % (L(en, "redo_asked"), len(x["asks"])))
+        for a in x["asks"]:
+            by = (sq.sent_by("owner" if a["by_owner"] else "", a["asked_by"]) if sq else a["asked_by"])
+            h.append('<div class="card" data-ask="%d" data-scan="%d"><div class="nm">%s · %s</div><div class="sb">%s</div>'
+                     '<div class="sb am">%s</div><div class="sb">%s</div>'
+                     '<div class="lnk"><button onclick="s454(\'%s/api/s454/rescan/withdraw\',{id:%d})">%s</button></div></div>'
+                     % (a["id"], a["scan"], esc(a["stamp"]), esc(a["vendor"]), esc(OS.ddmm(a["date"])),
+                        esc(sq.words(a["reason"], who) if sq else a["reason"]), esc(by + " · " + OS.ddmm(a["asked_at"])), P, a["id"], L(en, "redo_withdraw")))
+    if x["redo"]:
+        h.append('<div class="grp" id="redo_list">%s · %d</div>' % (L(en, "r_redo"), len(x["redo"])))
+        for r in x["redo"]:
+            chips = "".join('<button data-reason="%s" onclick="s454(\'%s/api/s454/rescan\',{asset_bill_id:%d,reason:\'%s\'})">%s</button>'
+                            % (c, P, r["scan"], c, esc(sq.CHIP_WORDS[c][0 if en else 1])) for c in sq.CHIPS)
+            h.append('<div class="card" data-scan="%d" data-code="%s"><div style="display:flex;gap:10px;align-items:center">'
+                     '<a href="/scanapp/bills/%d/file" target="_blank"><img src="%s" alt="scan" style="width:64px;height:84px;object-fit:cover;border:1px solid #ccc;border-radius:4px"></a>'
+                     '<div><div class="nm">%s · %s</div><div class="sb">%s</div><div class="red">%s</div></div></div>'
+                     '<div class="mut">%s</div><div class="chips">%s</div>'
+                     '<a class="more" href="/scanapp/bills/%d/file" target="_blank">%s</a></div>'
+                     % (r["scan"], r["code"], r["scan"], esc(_s618_thumb(r)), esc(r["stamp"]), esc(r["vendor"]), esc(OS.ddmm(r["date"])),
+                        esc(sq.words(r["code"], who, r["sum"], r["total"])), L(en, "redo_get"), chips, r["scan"], L(en, "redo_open")))
+    if not x["asks"] and not x["redo"]:
+        h.append('<div class="ok"><div class="t">%s</div></div>' % L(en, "redo_none"))
+    return shell(con, u, L(en, "r_redo"), "".join(h), back=P, login=login)
+
+
+def rescan_page():
+    """Phir se scan karo -- reception's list of the open asks (the reception words and who sent it), each with Scan karo."""
+    u, con, kind, login, err = _auth_page()
+    if err:
+        return err
+    en = u["_en"]
+    login = _s618_login(u, login)
+    sq = _sq()
+    x = rescan_list(con)
+    h = ['<div class="mut">%s</div>' % L(en, "rescan_top")]
+    for a in x["asks"]:
+        by = sq.sent_by("owner" if a["by_owner"] else "", a["asked_by"]) if sq else a["asked_by"]
+        h.append('<div class="ln" data-ask="%d" data-scan="%d"><div class="t"><div class="a">%s · %s</div><div class="s red">%s</div><div class="s">%s · %s</div></div>'
+                 '<a class="sk" href="%s">%s</a></div>'
+                 % (a["id"], a["scan"], esc(a["vendor"]), esc(a["stamp"]), esc(sq.words(a["reason"], "owner" if en else "reception") if sq else a["reason"]),
+                    esc(by), esc(OS.ddmm(a["asked_at"])), esc(_s618_intake(a["vendor"], a["month"], a["scan"], P + "/s454/rescan")), L(en, "scankaro")))
+    if not x["asks"]:
+        h.append('<div class="ok"><div class="t">%s</div></div>' % L(en, "rescan_none"))
+    return shell(con, u, L(en, "r_rescan"), "".join(h), back=P, login=login)
+
+
+@bp.route(P + "/s454/scans")
+def r_scans():
+    return scans_page()
+
+
+@bp.route(P + "/s454/rescan")
+def r_rescan():
+    return rescan_page()
+
+
+@bp.route(P + "/api/s454/rescan", methods=["POST"])
+def api_rescan():
+    u, con, kind, err = _auth_api()
+    if err:
+        return err
+    login = _s618_login(u)
+    if not _s618_asker(con, kind, login):
+        return jsonify(ok=False, error="not_asker", message="Only the owner and %s send a scan back." % ", ".join(_s618_names(con, "porders.rescan_askers", S618_ASKERS))), 403
+    b = _body()
+    try:
+        sid = int(b.get("asset_bill_id") or 0)
+    except (TypeError, ValueError):
+        sid = 0
+    reason = str(b.get("reason") or "")
+    sq = _sq()
+    if not sid or reason not in (sq.CHIPS if sq else ("blurred", "cut", "not_bill")):
+        return jsonify(ok=False, error="bad_request"), 400
+    acon = OS._assets()
+    r = None
+    if acon is not None:
+        try:
+            r = acon.execute("SELECT id, stamp_no, lane, status, page_of FROM bills WHERE id=?", (sid,)).fetchone()
+        finally:
+            acon.close()
+    if r is None:
+        return jsonify(ok=False, error="no_such_scan"), 404
+    if str(r["lane"] or "") != "pharmacy":
+        return jsonify(ok=False, error="not_pharmacy", message="Only a pharmacy scan is sent back here."), 409
+    if str(r["status"] or "") == "rejected" or r["page_of"]:
+        return jsonify(ok=False, error="set_aside", message="This scan is already set aside -- nothing to rescan."), 409
+    if con.execute("SELECT 1 FROM scan_rescan_ask WHERE asset_bill_id=? AND done_at IS NULL AND withdrawn_at IS NULL", (sid,)).fetchone():
+        return jsonify(ok=False, error="already_asked", message="It is already with reception."), 409
+    cur = con.execute("INSERT INTO scan_rescan_ask (asset_bill_id, stamp, reason, asked_by, asked_at) VALUES (?,?,?,?,?)",
+                      (sid, r["stamp_no"] or "", reason, login, OS.now_iso()))
+    OS.audit(con, who(u), "s618_rescan_ask", sid, dict(ask=cur.lastrowid, stamp=r["stamp_no"], reason=reason, kit="S618"))
+    con.commit()
+    return jsonify(ok=True, id=cur.lastrowid)
+
+
+@bp.route(P + "/api/s454/rescan/withdraw", methods=["POST"])
+def api_rescan_withdraw():
+    u, con, kind, err = _auth_api()
+    if err:
+        return err
+    login = _s618_login(u)
+    if not _s618_asker(con, kind, login):
+        return jsonify(ok=False, error="not_asker"), 403
+    try:
+        aid = int(_body().get("id") or 0)
+    except (TypeError, ValueError):
+        aid = 0
+    cur = con.execute("UPDATE scan_rescan_ask SET withdrawn_at=?, withdrawn_by=? WHERE id=? AND done_at IS NULL AND withdrawn_at IS NULL",
+                      (OS.now_iso(), login, aid))
+    if not cur.rowcount:
+        return jsonify(ok=False, error="not_open"), 409
+    OS.audit(con, who(u), "s618_rescan_withdrawn", aid, dict(kit="S618"))
+    con.commit()
+    return jsonify(ok=True)
+# ---- S618 end ---------------------------------------------------------------------------------------------------------------------------

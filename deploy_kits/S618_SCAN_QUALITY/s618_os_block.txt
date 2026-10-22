@@ -1,0 +1,88 @@
+
+
+# ------------------------------------------------------------------ S618 (22-Oct-2026): a rescan takes over its old scan (kit S618_SCAN_QUALITY)
+S618_DECIDED = ("likely_bill", "confirmed_by", "confirmed_at", "paper_amount", "chosen_vendor", "hint_no", "amount_state", "dup_ok")
+
+
+def _s618_carry(con, old, new, who):
+    """The people's decisions on the old scan COPIED to its rescan (the old rows stay as they are): purchase_scan_state's decided fields,
+    s454_scan_answer, and reception's CONFIRMED pairing. A link is one per bill (purchase_scan_link's key is the bill): the copy is made
+    once the bill is free -- the matcher lets the set-aside old scan go by itself. Keyed: each copy is written once. True when it wrote."""
+    wrote = False
+    try:
+        cols = [r[1] for r in con.execute("PRAGMA table_info(purchase_scan_state)")]
+        r = con.execute("SELECT * FROM purchase_scan_state WHERE asset_bill_id=?", (old,)).fetchone()
+        if r is not None and not con.execute("SELECT 1 FROM purchase_scan_state WHERE asset_bill_id=?", (new,)).fetchone():
+            row = dict(zip(cols, r))
+            dec = {k: row.get(k) for k in S618_DECIDED if k in cols and row.get(k) not in (None, "")}
+            if dec:
+                ks = ["asset_bill_id", "why", "detail", "checked_at"] + sorted(dec)
+                con.execute("INSERT INTO purchase_scan_state (%s) VALUES (%s)" % (", ".join(ks), ",".join("?" * len(ks))),
+                            [new, row.get("why") or "no_bill_yet", "S618: carried from the rescanned scan %d" % old, now_iso()] + [dec[k] for k in sorted(dec)])
+                wrote = True
+    except sqlite3.Error:
+        pass
+    try:
+        cur = con.execute("INSERT OR IGNORE INTO s454_scan_answer (asset_bill_id, kind, answer, value, by, at) "
+                          "SELECT ?, kind, answer, value, by, at FROM s454_scan_answer WHERE asset_bill_id=?", (new, old))
+        wrote = wrote or cur.rowcount > 0
+        for (bid,) in con.execute("SELECT bill_id FROM purchase_scan_link WHERE asset_bill_id=? AND grade='CONFIRMED'", (old,)).fetchall():
+            cur = con.execute("INSERT OR IGNORE INTO s454_scan_answer (asset_bill_id, kind, answer, value, by, at) VALUES (?,?,?,?,?,?)",
+                              (new, "pair", "yes", str(bid), "S618 (the pairing of scan %d carried)" % old, now_iso()))
+            wrote = wrote or cur.rowcount > 0
+        a = con.execute("SELECT value FROM s454_scan_answer WHERE asset_bill_id=? AND kind='pair' AND answer='yes'", (new,)).fetchone()
+        if a and str(a[0] or "").isdigit():
+            bid = int(a[0])
+            if (not con.execute("SELECT 1 FROM purchase_scan_link WHERE bill_id=? OR asset_bill_id=?", (bid, new)).fetchone()
+                    and con.execute("SELECT 1 FROM purchase_bill WHERE id=?", (bid,)).fetchone()):
+                con.execute("INSERT INTO purchase_scan_link (bill_id, asset_bill_id, grade, matched_on, linked_at) VALUES (?,?,?,?,?)",
+                            (bid, new, "CONFIRMED", "S618: reception's pairing of the rescanned scan %d, carried" % old, now_iso()))
+                con.execute("UPDATE purchase_bill SET scan_bill_id=? WHERE id=?", (new, bid))
+                audit(con, who, "scan_link", bid, dict(scan=new, grade="CONFIRMED", rule="carried from the rescanned scan %d" % old, kit="S618"))
+                wrote = True
+    except sqlite3.Error:
+        pass
+    return wrote
+
+
+def _s618_follow(con, scans, who="tie"):
+    """S618, BEFORE tie_pass's loop (R1-B4). (a) Re-point: each captured pharmacy scan that is a rescan (bills.rescan_of) takes over its old
+    scan's order tie -- the tie's asset_bill_id and stamp become the rescan's, scan_at stays (the delivery moment did not change); never a new
+    tie (the rescan is untied until this step, so the loop below sees it tied). The people's decisions are copied (_s618_carry).
+    (b) Every open ask whose scan has a rescan in assets.db -- any lane, any kind, tie or no tie -- is closed (done_bill_id, done_at).
+    Keyed and idempotent; commits what it wrote. Returns (re-pointed, closed)."""
+    wrote, rp, cl = False, 0, 0
+    for s in scans or []:
+        old = s.get("rescan_of")
+        if not old:
+            continue
+        new, old = int(s["id"]), int(old)
+        t = con.execute("SELECT order_id FROM order_scan_tie WHERE asset_bill_id=?", (old,)).fetchone()
+        if t and not con.execute("SELECT 1 FROM order_scan_tie WHERE asset_bill_id=?", (new,)).fetchone():
+            con.execute("UPDATE order_scan_tie SET asset_bill_id=?, stamp=? WHERE asset_bill_id=?", (new, s.get("stamp_no") or "", old))
+            audit(con, who, "s454_scan_retie", t[0], dict(old=old, new=new, stamp=s.get("stamp_no"), kit="S618"))
+            rp += 1
+            wrote = True
+        wrote = _s618_carry(con, old, new, who) or wrote
+    pairs = []
+    acon = _assets()
+    if acon is not None:
+        try:
+            if "rescan_of" in {r[1] for r in acon.execute("PRAGMA table_info(bills)")}:
+                pairs = [(int(r[0]), int(r[1])) for r in acon.execute("SELECT id, rescan_of FROM bills WHERE rescan_of IS NOT NULL ORDER BY id")]
+        except sqlite3.Error:
+            pairs = []
+        finally:
+            acon.close()
+    for new, old in pairs:
+        try:
+            for (aid,) in con.execute("SELECT id FROM scan_rescan_ask WHERE asset_bill_id=? AND done_at IS NULL AND withdrawn_at IS NULL", (old,)).fetchall():
+                con.execute("UPDATE scan_rescan_ask SET done_bill_id=?, done_at=? WHERE id=? AND done_at IS NULL AND withdrawn_at IS NULL", (new, now_iso(), aid))
+                audit(con, who, "s618_rescan_done", aid, dict(old=old, new=new, kit="S618"))
+                cl += 1
+                wrote = True
+        except sqlite3.Error:
+            pass
+    if wrote:
+        con.commit()
+    return rp, cl
