@@ -1,0 +1,4 @@
+kit id S625_MONTH_AND_DAY
+project Scan App (session 337, 22-Oct-2026; kit S625 claimed on the board _numbers v596 -> v597 at the owner's "do it", 14:50 IST) -- built in the chat, not by the API-credit runner (the owner, 14:07 IST)
+fixes: F-976 the machine Edit form reset the day to 01; F-980 a back-dated bill counted in its scan month -- the owner's ruling 22-Oct 14:5x IST: "Bill's own month", for papers scanned from the install on
+files: clinic_papers.py 6db07c12 (1 counted edit) . asset_register.py 70e35b10 (S618's TO; 6 counted edits) -- TO pins in PIN_TO_*.txt; read only, pinned: sorting_desk.py 110335ea, xray_costs.py 22e59f5a, and S624's TO batteries.py / asset_machine.py / stationery.py (S624 FIRST). assets.db: one settings row papers.month_from_bill_date (the switch-on moment). Restarts assetapp only.

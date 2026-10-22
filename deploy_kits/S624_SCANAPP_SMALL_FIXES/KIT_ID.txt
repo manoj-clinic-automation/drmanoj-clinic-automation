@@ -1,0 +1,4 @@
+kit id S624_SCANAPP_SMALL_FIXES
+project Scan App (session 337, 22-Oct-2026; kit S624 claimed on the board _numbers v595 -> v596 at the owner's "do it", 14:50 IST, on the next scan-app round) -- built in the chat, not by the API-credit runner (the owner, 14:07 IST)
+fixes: F-977 a battery past its warranty showed OK; F-978 no door to link a machine cover's (or part's) paper once added; F-979 the stationery match ignored the item's unit (packets of N)
+files: batteries.py 775471e6 (1 counted edit) . asset_machine.py 7d4fdffc (6) . stationery.py 18268ff0 (4) -- the TO pins in PIN_TO_*.txt; read only, pinned: sorting_desk.py 110335ea, asset_register.py 70e35b10 (S618's TO), xray_costs.py 22e59f5a, clinic_papers.py 6db07c12. No database change. Restarts assetapp only.

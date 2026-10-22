@@ -1,0 +1,15 @@
+201cd63e740a298549b16d59724b18fc  KIT_ID.txt
+7e8f4a0f9717af66cdec9a007927c674  PIN_FROM_asset_register.txt
+63f8a9af1ebcdda3e01ad571e60dda11  PIN_FROM_clinic_papers.txt
+f1623ff323d70078698f267feaee4c64  PIN_READ_asset_machine.txt
+4d22be09d5277c1d76f0fbe0a5ad5c61  PIN_READ_batteries.txt
+6b6f2f9fc66263a789146ec87edbcf47  PIN_READ_sorting_desk.txt
+6f3537b808f85738a95c6927c244076b  PIN_READ_stationery.txt
+bcf74474df9e744ab96dac866ffe241c  PIN_READ_xray_costs.txt
+0115405903e3069fa0384b87c2d126a3  PIN_TO_asset_register.txt
+f578511c367c2509882f08d1e916e03a  PIN_TO_clinic_papers.txt
+3ca84a3ec968fe8c722c9bd2cbc16da5  README.md
+77f5eb67946c5faac73bbb386a042933  install_s625.sh
+4ba0301621d9dbba0579ead9625673ff  make_s625.py
+1804ac5d9df707f573e1d926750c16dd  rehearse_s625.sh
+732ed11c315d738a793417267d5ec323  walk_s625_app.py
