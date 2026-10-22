@@ -1,4 +1,8 @@
-# OWNER TO-DO — LIVE · refreshed at the **S339 close** (the Sanjeevni project), 22-Oct-2026, evening — the parent's sections exactly as its S331 close wrote them (its 336 open), the Scan App sections rewritten at its S337 close (22-Oct, evening; its 341 reserved); the Sanjeevni sections as its S339 close wrote them (its 340 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S336 close** (the parent), 23-Oct-2026, early morning — the parent's sections refreshed here (its 343 reserved); the Scan App sections as its S341 close wrote them (its 342 reserved); the Sanjeevni sections as its S339 close wrote them (its 340 open)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S341 close** (the Scan App project), 23-Oct-2026, early morning — the parent's sections exactly as its S331 close wrote them (its 336 open), the Sanjeevni sections exactly as its S339 close wrote them (its 340 open); the Scan App sections rewritten here (its 342 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S339 close** (the Sanjeevni project), 22-Oct-2026, evening — the parent's sections exactly as its S331 close wrote them (its 336 open), the Scan App sections rewritten at its S337 close (22-Oct, evening; its 341 reserved); the Sanjeevni sections as its S339 close wrote them (its 340 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S338 close** (the Sanjeevni project), 22-Oct-2026, afternoon — the parent's sections exactly as its S331 close wrote them (its 336 open), the Scan App sections exactly as its S323 close wrote them (its 337 open); the Sanjeevni sections rewritten here (its 339 reserved)
 
@@ -100,27 +104,33 @@
 
 *Detail: `START_HERE_SESSION_313.md` · `S311_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S310 close's (13-Oct, early morning); `S310_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_312.md` that chat's entry.*
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S337 close (22-Oct, evening)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S341 close (23-Oct, early morning)
 
-*Detail: `S337_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_341.md`. The same lines are on your System Board (Y132, Y133, Y119 … Y121).*
+*Detail: `S341_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_342.md`. The same lines are on your System Board (Y134 … Y136, Y119 … Y121).*
 
-**1 · The publish (Y132):** it carries this close's record. Papers only; the four fixes of today are already live.
+**1 · The publish (Y134):** it carries this close's record. Papers only; the battery page and the X-ray page are already live.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · The battery page made clean — in a fresh chat of this project (your word of 19:52).** The chat logs in through the browser, reads every place and paper, fixes what it can, and asks you only for what no paper shows. It also answers your question on asset 12.
+**2 · Procedure-room consumables — two answers, then say *final* (Y135).** The mock-up:
 
-**3 · One question, whenever you like (Y133):** a bill dated July but scanned in October now counts in July by itself. If someone picks October on that bill's own page, it stays in July. Is that fine, or should picking the scan month keep it there?
+```
+https://claude.ai/artifact/3Doc4wew9qUonpFxZtDD7W
+```
 
-**4 · Many items on one screen (Y119) — when you are happy with it:** the card at the top of your Stationery page:
+(a) Should the list only count what is bought, or also keep a shelf count like stationery? (b) Which size of surgical gloves — or more than one size? The next chat of this project builds it from your answers.
+
+**3 · Scan the lab consumables bills from April 2026 (Y136, your word of 22:53).** Then the last three lab records on the Machines list (45, 46, 50) can go.
+
+**4 · The battery bills still missing (Y120)** — the Vento's, and B.L. Computers' bill for the DTH lab's UPS battery; and the second AC's bill. Nothing is filled in by guess.
+
+**5 · Many items on one screen (Y119) — when you are happy with it:** the card at the top of your Stationery page:
 
 ```
 https://followup.dr-manoj.in/scanapp/stationery
 ```
-
-**5 · The Vento's and the DTH lab's battery dates (Y120)** — the battery-page chat asks for them in its one list if no paper shows them.
 
 **6 · Fujifilm's tax invoice for the AMC (Y121)** — scan it when it comes.
 
@@ -128,16 +138,23 @@ https://followup.dr-manoj.in/scanapp/stationery
 
 **Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S337 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S341 close
 
 **Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat while the API credits are low (D765).**
 
-1. **The battery page made clean (D766)** — the next chat's first job, through your browser.
-2. **Keep the clearer scan of a duplicate** (your D761, from the pharmacy chat) in the scan app's own duplicate check.
-3. **The handwritten challans of the clinic lanes read by Claude** (from the pharmacy chat).
+1. **Procedure-room consumables (D769)** — from your two answers and *final*; installed switched off.
+2. **Photos too big to read** (F-1003) — a smaller copy for the reader, or the paper says so.
+3. **Keep the clearer scan of a duplicate** (your D761, from the pharmacy chat) in the scan app's own duplicate check.
 4. **D720, when you ask:** your family's documents and renewals in their own Google project.
 
 **Waits by your word:** the clinic's bills in the accountants' pack.
+
+## ✅ DONE AT THE S341 CLOSE — 22 → 23-Oct-2026 (the Scan App project)
+
+- ~~**The battery page made clean** (D766)~~ — every place filled from its bill; a saved battery can be corrected or removed; one bill for several batteries; *Machine batteries* (S632, live 21:4x).
+- ~~**The X-ray page from April** (D767)~~ — the whole year month by month; the AMC and batteries spread; films by size (S633, live 22:32). This year so far ₹98,011.
+- ~~**Bills kept on the Machines list**~~ — moved to the desk (B-0210 … B-0222) and their records deleted at your word; the duplicates (12, 37) and the Gloster line (52) gone; names tidied.
+- ~~**Your back-dated-bill question**~~ — *"It's fine"*: it stays as built.
 
 ## ✅ DONE AT THE S337 CLOSE — 22-Oct-2026 (the Scan App project)
 
@@ -210,7 +227,7 @@ https://followup.dr-manoj.in/scanapp/stationery
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S331 close (22-Oct, early morning)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S336 close (23-Oct, early morning)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -242,25 +259,31 @@ https://claude.ai/artifact/H5W1T3WPNm85t2peTnNnfP
 
 **LATER — none of these is urgent**
 
-**4 · RANJEET'S LOGIN** — the password is yours to set.
+**4 · THE SBI DOWNLOADS still missing from September's pack** — the HUF savings (July–September), your PPF and Dr Bhawna's PPF (April–September). Add them with *Add statements* on the packs page; type each new password once.
+
+**5 · THE TWO MAILS drafted on 22-Oct** — to the accountants (subject *Tally data*: the three accounts, FY 2025-26 and this year) and to CA Harshit Goyal (subject *Tax papers*: FY 2023-24 to this year). Replies to your personal email.
+
+**6 · RAGHAV — the Zerodha papers to your personal email** from now on (the July–October ones are already on the server).
+
+**7 · RANJEET'S LOGIN** — the password is yours to set.
 
 ```
 https://followup.dr-manoj.in/portal/users
 ```
 
-**5 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** September's is ready.
+**8 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** September's waits for the three SBI statements above.
 
 ```
 https://followup.dr-manoj.in/finance/packs?month=2026-09
 ```
 
-**6 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
+**9 · THE RECEPTION PC'S WINDOWS** — no security fixes since November 2025; your decision.
 
-**7 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
+**10 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, saved in `D:\Downloads`.
 
-**8 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
+**11 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
 
-**WHEN IT HAPPENS — not a duty:** a patient's WhatsApp alert — tap it and the chat opens in your inbox · a `[WA send refused]` mail in the clinic Gmail (MyOperator's refusal, already logged — nothing to do) · a phone line saying the server fixed (or could not fix) a part · a portal alert · a POS total waiting for your Confirm · a Voicenotes list waiting above *Give a task*.
+**WHEN IT HAPPENS — not a duty:** a patient's WhatsApp alert — tap it and the chat opens in your inbox · a `[WA send refused]` mail in the clinic Gmail (MyOperator's refusal, already logged — nothing to do) · a phone line saying the server fixed (or could not fix) a part · a portal alert · a POS total waiting for your word.
 
 ```
 https://followup.dr-manoj.in/portal/inbox
@@ -268,22 +291,31 @@ https://followup.dr-manoj.in/portal/inbox
 
 **Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C) · the follow-up tracker on the server — "later" (12-Oct) · Bhati's later features.
 
-*Ticked by you or done, and off this list: the S329 post-close publish · the S606 … S612 publishes and server lines (20 → 22-Oct).*
+*Ticked by you or done, and off this list: the S331 publish · the S614 … S622 publishes and server lines (22-Oct) · the four SBI statements of 20-Oct added and their passwords typed (22-Oct).*
 
-*Closed by your word and not on this list: everything listed so at the S329 close, plus: adding staff whatever phone they have (S606, S607) · MyOperator handled from the clinic Gmail without you, and the send log (S608) · the statement month by month for every staff member (S611, S612) · Surendra's seven no-punch October days are absences.*
+*Closed by your word and not on this list: everything listed so at the S331 close, plus: the advances that make up "remaining after" and the pending advances on New entry (S614) · the owed backups (S615) · the tasks tile (S616) · the Clinic PCs page kept current (S617, S620) · the SBI papers in the pack (S621, S622).*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **First — your "Build seems okay" (22-Oct):** the statement's top section lists what makes up *advance remaining after* (each advance, and when it is cut — e.g. Rs 3,000 from November salary); and New entry shows that person's pending advances one by one, what is already booked against the month you choose, and the room left.
-2. **The morning's checks:** MyOperator's answer on the refused sends · your phone's bank SMS fix · the rest of the open's checks.
-3. **Backups I owe:** the WhatsApp message log, the new send log and the attendance settings file — none has a second copy yet.
-4. **The website:** one more old entry mentions the firm's domain — I read what it is and tell you in one line.
-5. **The punch listener's step 2** — I tell you in one line, and build it only if you want it now.
-6. **Small, my own:** the mail check's wrong "not sent" line · the console's doubled *"counter sheet not filled"* line · the finance app's own test suite · proving the 148 older documents · the weekly auditor's three findings.
-7. **On your word:** replies your staff type in the MyOperator app shown in the inbox too · a *send to Shavez* button for the bank check · Bhati's later features.
+1. **First — Zerodha:** the papers Raghav sends are already reaching the server; they get their own place on the packs page (you and Dr Bhawna), a password box for the locked one, and a row in each quarter's pack.
+2. **The morning's checks:** the publish, the nightly, the first run of the new backups, MyOperator's answer.
+3. **The Tally check** — when the accountants' and the CA's mails arrive: their entries checked month by month against our records (nothing written into Tally).
+4. **Union Bank (half-yearly)** — I ask you once which accounts.
+5. **The Sanjeevni GST composition returns** — quarterly and annual, after the pack.
+6. **Small, my own:** one staff-ledger page error for a person with no entries · the mail check's wrong "not sent" line · the console's doubled *"counter sheet not filled"* line · the finance app's own test suite · the weekly auditor's three findings.
+7. **On your word:** entries prepared for Tally's import (after the check has run a month) · replies your staff type in the MyOperator app shown in the inbox · a *send to Shavez* button for the bank check · Bhati's later features.
 8. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S336 CLOSE — 22 → 23-Oct-2026 (the parent)
+
+- ~~**"I am not seeing the 3000 advance … in the top section. … while issuing a fresh advance, I should know what are the pending advances"** (22-Oct)~~ — live 06:40 (S614).
+- ~~**"go"** — the backups owed (22-Oct)~~ — the attendance settings and the WhatsApp logs in the encrypted nightly, 06:54 (S615).
+- ~~**"we deveoped a messaging and tasks app … cant see it in my portal"** (board note, 22-Oct)~~ — the *Tasks & messages* tile, 07:11 (S616).
+- ~~**"clinic pc tile - keep the content and data updated there, so that it styas current always"** (board note)~~ — live lines on the Clinic PCs page, 08:00 / 08:05 (S617, S620).
+- ~~**"The SBI accounts are savings account for myself, Dr. Bhavna, and for HUF … make a provision for these in future packs"** (22-Oct) · **"not seeing those option of adding password"**~~ — seven SBI accounts on the packs page, *Add statements*, a password per account; your four statements filed, 09:30 (S621, S622).
+- ~~**"What all is possible … for automating this part now"** · **"Make a simple to-do list"** · **"draft one comprehensive email for him"** (22-Oct)~~ — answered; the two mails drafted for you to send.
 
 ## ✅ DONE AT THE S331 CLOSE — 20 → 22-Oct-2026 (the parent)
 
