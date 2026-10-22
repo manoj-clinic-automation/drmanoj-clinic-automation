@@ -154,6 +154,11 @@ def month_book(staff, rows=None, salaries=None):
     if planned or any(r["date_from"][:7] == nxt for r in issues):
         months.add(nxt)
     months = sorted(m for m in months if m and len(m) == 7)
+    # an advance belongs to the month it is dated -- or to an earlier month if a cut was booked against it there
+    _start = {}
+    for r in issues:
+        _st = [_mon(x) for x in sysm if x.get("contra_of") == r["id"] and _mon(x)]
+        _start[r["id"]] = min([r["date_from"][:7]] + _st)
 
     def _rec_upto(iid, ym, extra=0):
         return sum(-r["amount"] for r in sysm if r["category"] == "ADVANCE_INSTALMENT" and r.get("contra_of") == iid
@@ -191,8 +196,9 @@ def month_book(staff, rows=None, salaries=None):
     for ym in months:
         running = (ym == nxt and ym not in closed)
         taken = [{"date": _dmy(r["date_from"]), "rs": r["amount"], "how": _how(r),
-                  "note": (r.get("narration") or "")[:80]} for r in sorted(issues, key=lambda r: r["date_from"])
-                 if r["date_from"][:7] == ym]
+                  "note": (("its first cut came before this date; " if _start[r["id"]] != r["date_from"][:7] else "")
+                           + (r.get("narration") or ""))[:110]}
+                 for r in sorted(issues, key=lambda r: r["date_from"]) if _start[r["id"]] == ym]
         src = planned if running else [r for r in sysm if _mon(r) == ym]
         cuts = [_line(r, running) for r in sorted(src, key=lambda r: (by_id.get(r.get("contra_of") or "", {}).get("date_from", ""),
                                                              r.get("category")))]
@@ -210,7 +216,7 @@ def month_book(staff, rows=None, salaries=None):
                     extra[r.get("contra_of")] = extra.get(r.get("contra_of"), 0) - int(r["amount"])
         rem = 0
         for r in issues:
-            if r["date_from"][:7] <= ym:
+            if _start[r["id"]] <= ym:
                 rem += max(0, r["amount"] + _cap_upto(r["id"], ym) - _rec_upto(r["id"], ym, extra.get(r["id"], 0)))
         out.append({"ym": ym, "words": _month_words(ym),
                     "state": "running" if running else ("closed" if ym in closed else "open"),
@@ -344,6 +350,12 @@ EDITS = [
      '        lines.append({"what": what, "rs": amt, "held": False, "d": when})'),
     ('(" — clears it" if left <= 0 else " — Rs %d left on it" % left))',
      '(" — clears it" if left <= 0 else " — %s left on it" % _rs(left)))'),
+    ('        _left = max(0, _outst - (_mine["take"] if not _plan["closed"] else 0))',
+     '        _left = max(0, _outst - ((_mine["take"] - _mine.get("interest", 0)) if not _plan["closed"] else 0))'
+     '   # S611: interest is not advance'),
+    ('    return {"lines": lines, "take": take, "held": held}',
+     '    return {"lines": lines, "take": take, "held": held,\n'
+     '            "interest": sum(l["rs"] for l in lines if l["what"].startswith("interest on"))}'),
     ('<p><small>v{APP_VERSION} · append-only · corrections by contra entry only</small></p>',
      '<p><small>v{APP_VERSION} · entries are never erased · a mistake is corrected by a reversing entry</small></p>'),
 ]

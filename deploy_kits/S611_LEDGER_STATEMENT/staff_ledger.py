@@ -1088,7 +1088,8 @@ def plan_for_staff(staff, plan, rows=None):
             what = ("advance of %s" % when_s) + ("" if left is None else
                                                  (" — clears it" if left <= 0 else " — %s left on it" % _rs(left)))
         lines.append({"what": what, "rs": amt, "held": False, "d": when})
-    return {"lines": lines, "take": take, "held": held}
+    return {"lines": lines, "take": take, "held": held,
+            "interest": sum(l["rs"] for l in lines if l["what"].startswith("interest on"))}
 
 
 def _month_words(ym):
@@ -1884,6 +1885,11 @@ def month_book(staff, rows=None, salaries=None):
     if planned or any(r["date_from"][:7] == nxt for r in issues):
         months.add(nxt)
     months = sorted(m for m in months if m and len(m) == 7)
+    # an advance belongs to the month it is dated -- or to an earlier month if a cut was booked against it there
+    _start = {}
+    for r in issues:
+        _st = [_mon(x) for x in sysm if x.get("contra_of") == r["id"] and _mon(x)]
+        _start[r["id"]] = min([r["date_from"][:7]] + _st)
 
     def _rec_upto(iid, ym, extra=0):
         return sum(-r["amount"] for r in sysm if r["category"] == "ADVANCE_INSTALMENT" and r.get("contra_of") == iid
@@ -1921,8 +1927,9 @@ def month_book(staff, rows=None, salaries=None):
     for ym in months:
         running = (ym == nxt and ym not in closed)
         taken = [{"date": _dmy(r["date_from"]), "rs": r["amount"], "how": _how(r),
-                  "note": (r.get("narration") or "")[:80]} for r in sorted(issues, key=lambda r: r["date_from"])
-                 if r["date_from"][:7] == ym]
+                  "note": (("its first cut came before this date; " if _start[r["id"]] != r["date_from"][:7] else "")
+                           + (r.get("narration") or ""))[:110]}
+                 for r in sorted(issues, key=lambda r: r["date_from"]) if _start[r["id"]] == ym]
         src = planned if running else [r for r in sysm if _mon(r) == ym]
         cuts = [_line(r, running) for r in sorted(src, key=lambda r: (by_id.get(r.get("contra_of") or "", {}).get("date_from", ""),
                                                              r.get("category")))]
@@ -1940,7 +1947,7 @@ def month_book(staff, rows=None, salaries=None):
                     extra[r.get("contra_of")] = extra.get(r.get("contra_of"), 0) - int(r["amount"])
         rem = 0
         for r in issues:
-            if r["date_from"][:7] <= ym:
+            if _start[r["id"]] <= ym:
                 rem += max(0, r["amount"] + _cap_upto(r["id"], ym) - _rec_upto(r["id"], ym, extra.get(r["id"], 0)))
         out.append({"ym": ym, "words": _month_words(ym),
                     "state": "running" if running else ("closed" if ym in closed else "open"),
@@ -3503,7 +3510,7 @@ small{{color:var(--muted)}}
             _cut = "<i>could not be worked out (%s)</i>" % _plan["error"][:120]
         else:
             _cut = "<b>%s</b>" % _rs(_mine["take"])
-        _left = max(0, _outst - (_mine["take"] if not _plan["closed"] else 0))
+        _left = max(0, _outst - ((_mine["take"] - _mine.get("interest", 0)) if not _plan["closed"] else 0))   # S611: interest is not advance
         _topbox = (f"<div class='card' style='border:2px solid #2e6b34'><b>Advances &mdash; {staff}</b><br>"
                   f"Advance remaining now: <b>{_rs(_outst)}</b><br>"
                   f"{'Cut' if _plan['closed'] else 'To be cut'} from {_mw} salary: {_cut}"

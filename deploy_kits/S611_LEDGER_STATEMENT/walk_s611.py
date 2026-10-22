@@ -75,7 +75,8 @@ CSV = os.path.join(S, "A_sm.csv")
 with open(CSV, "w") as fh:
     fh.write("user_id,name,department,base_salary,allowed_offs,wd_start,wd_end,sun_start,sun_end,active,timing_note,"
              "sunday_group,minutes_exempt\n9001,Walk Staff,Pathology,10500,2,09:00,21:00,09:00,15:00,Y,,C,N\n"
-             "9002,Walk Other,Clinic,9000,2,09:00,21:00,09:00,15:00,Y,,A,N\n")
+             "9002,Walk Other,Clinic,9000,2,09:00,21:00,09:00,15:00,Y,,A,N\n"
+             "9003,Walk Loan,Clinic,30000,2,09:00,21:00,09:00,15:00,Y,,A,N\n")
 TS = "2099-01-01T00:00:00"
 
 
@@ -115,6 +116,12 @@ rows = [
     row("o1", "ADVANCE_ISSUE", 980, M + "-01", against_month=M, instalment=980, narration="SHORT OF LAST SALARY"),
     row("o8", "ADVANCE_ISSUE", 5000, M + "-08", against_month=M, instalment=5000),
     row("x1", "NIGHT_DUTY", 400, M1 + "-12", staff="Walk Other", closed_month=M1),
+    # a loan with interest, whose first cut was booked in a month BEFORE its date (Darpan's live shape)
+    row("l1", "ADVANCE_ISSUE", 20000, M1 + "-05", staff="Walk Loan", instalment=5000, interest=True, closed_month=M1),
+    row("lr", "ADVANCE_INSTALMENT", -4000, M2, staff="Walk Loan", contra_of="l1", closed_month=M2, maker="SYSTEM",
+        narration="auto instalment for loan l1 (balance after: 16000)"),
+    row("li", "LOAN_INTEREST", -1000, M2, staff="Walk Loan", contra_of="l1", closed_month=M2, maker="SYSTEM",
+        narration="flat monthly interest on loan l1"),
 ]
 with open(os.path.join(LA, "ledger.jsonl"), "w") as fh:
     fh.writelines(json.dumps(r) + "\n" for r in rows)
@@ -184,6 +191,19 @@ check("<details" in page and "Technical entries" in t and "Running net counts AP
       "the old ledger lines are kept, closed, under Technical entries")
 pos = [page.find("<b style='font-size:16px'>" + L._month_words(m)) for m in (M2, M1, M)]
 check(all(p >= 0 for p in pos) and pos == sorted(pos), "months run oldest first")
+lb = L.month_book("Walk Loan")
+prev, okc = 0, True
+for b in lb:
+    okc = okc and b["remaining"] == prev + sum(x["rs"] for x in b["taken"]) + b["cap_total"] - b["rec_total"]
+    prev = b["remaining"]
+check(okc and lb and lb[0]["ym"] == M2 and lb[0]["remaining"] == 16000,
+      "a loan cut before its date: shown from its first cut, remaining 16,000 (%s)" % [(b["ym"], b["remaining"]) for b in lb])
+mineL = L.plan_for_staff("Walk Loan", L.month_plan())
+outL = sum(x["balance"] for x in L.open_advances() if x["issue"]["staff"] == "Walk Loan")
+pL = text(C.get("/ledger/statement?staff=Walk+Loan").data.decode())
+check(mineL.get("interest") == 1000 and lb[-1]["remaining"] == outL - (mineL["take"] - 1000)
+      and ("Advance remaining after %s: %s" % (L._month_words(M), L._rs(lb[-1]["remaining"]))) in pL,
+      "interest is not advance: the top box and the running month agree (%s)" % lb[-1]["remaining"])
 one = text(C.get("/ledger/statement?staff=Walk+Staff&m=%s" % M1).data.decode())
 check(L._month_words(M1) in one and ("%s (running)" % L._month_words(M)) not in one, "a chosen month shows that month")
 
@@ -224,13 +244,18 @@ if a.live_ledger:
             exp = prev + sum(x["rs"] for x in b["taken"]) + b["cap_total"] - b["rec_total"]
             if b["remaining"] != exp:
                 chain_bad.append("%s %s: %s vs %s" % (nm, b["ym"], b["remaining"], exp))
+                for x in LBm.load_ledger():           # explain it on screen: the rows of that month (no names but staff)
+                    if x["staff"] == nm and ((x.get("closed_month") or "") == b["ym"] or (x.get("date_from") or "")[:7] == b["ym"]):
+                        print("      row %s %s %s date %s closed %s of %s" % (x["id"][-6:], x["category"], x["amount"],
+                              x.get("date_from"), x.get("closed_month"), (x.get("contra_of") or "")[-6:]))
             prev = b["remaining"]
         if bk and bk[-1]["state"] == "running":
             pl = LBm.month_plan()
             mine = LBm.plan_for_staff(nm, pl)
             outst = sum(x["balance"] for x in LBm.open_advances() if x["issue"]["staff"] == nm)
-            if bk[-1]["remaining"] != max(0, outst - mine["take"]):
-                top_bad.append("%s: %s vs %s" % (nm, bk[-1]["remaining"], outst - mine["take"]))
+            want = max(0, outst - (mine["take"] - mine.get("interest", 0)))
+            if bk[-1]["remaining"] != want:
+                top_bad.append("%s: %s vs %s" % (nm, bk[-1]["remaining"], want))
     check(not bad, "every staff member's page answers (%d people)%s" % (n, (": " + ", ".join(bad)) if bad else ""))
     check(not chain_bad, "each month's remaining = previous + taken + added - recovered%s" % ((": " + "; ".join(chain_bad[:4])) if chain_bad else ""))
     check(not top_bad, "the running month's remaining = the top box%s" % ((": " + "; ".join(top_bad[:4])) if top_bad else ""))

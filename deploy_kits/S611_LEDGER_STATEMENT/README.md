@@ -9,7 +9,7 @@ taken, what were the settled advances, what was the salary cleared, what are the
 
     cd /root/deploy/repo && git pull --ff-only && bash /root/deploy/repo/deploy_kits/S611_LEDGER_STATEMENT/install_S611_LEDGER_STATEMENT.sh
 
-**What the statement shows now** (`/root/staff_ledger.py` 2fc0542f → new, by 14 exact edits in `edits_s611.py`)
+**What the statement shows now** (`/root/staff_ledger.py` 2fc0542f → new, by 16 exact edits in `edits_s611.py`)
 1. The top box (S609's), in the owner's word: **Advance remaining now · To be cut from <Month> salary (line by line) ·
    Advance remaining after <Month>**.
 2. One block per month, oldest first: advances taken (date · amount · in full / Rs N a month) · cut from salary, line
@@ -20,6 +20,11 @@ taken, what were the settled advances, what was the salary cleared, what are the
    Oct 2026", and one line on the one-monthly-amount rule (oldest first).
 4. The old ledger lines and advance cards are kept, closed, under **Technical entries**. Footer in plain words.
    Version → 4.0-S611-STATEMENT.
+
+**Two things the first install attempt found on the live ledger (21-Oct 20:36 IST, stopped safely, nothing changed):**
+(a) Darpan's loan had a cut booked in a month before the loan's own date — the loan is now shown from its first cut,
+with a note; (b) the S609 top box took the loan's Rs 1,000 interest off the advance ("remaining after" Rs 1,000 too
+low) — interest is no longer counted as advance repaid. Both are in the walk now.
 
 A locked month is used only if its NET column adds up to the run's total payout; otherwise the block says so.
 
