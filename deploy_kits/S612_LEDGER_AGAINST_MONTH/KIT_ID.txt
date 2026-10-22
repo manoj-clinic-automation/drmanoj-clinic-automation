@@ -1,0 +1,7 @@
+S612_LEDGER_AGAINST_MONTH
+session S331 (the parent), 22-Oct-2026
+Staff Ledger statement: an advance taken against a month's salary says so ("from November 2026 salary", "to be cut in
+Nov 2026" -- Surendra's Rs 3,000 and Darpan's Rs 10,000, both against November); a negative loan correction reads
+"Rs 1,000 taken off the loan (a correction)"; the interest carries its comma. Display only.
+board _numbers v562 -> v563 (kit S612)
+pin in: /root/staff_ledger.py 6ee4283c ; out: 92885f3b ; undo: bash install_S612_LEDGER_AGAINST_MONTH.sh --undo (backup /root/s612_backup/)
