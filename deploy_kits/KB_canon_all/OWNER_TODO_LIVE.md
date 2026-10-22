@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S335 close** (the Sanjeevni project), 22-Oct-2026, afternoon — the parent's sections exactly as its S331 close wrote them (its 336 open), the Scan App sections exactly as its S323 close wrote them (its 337 reserved); the Sanjeevni sections rewritten here (its 338 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S338 close** (the Sanjeevni project), 22-Oct-2026, afternoon — the parent's sections exactly as its S331 close wrote them (its 336 open), the Scan App sections exactly as its S323 close wrote them (its 337 open); the Sanjeevni sections rewritten here (its 339 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S335 close** (the Sanjeevni project), 22-Oct-2026, afternoon — the parent's sections exactly as its S331 close wrote them (its 336 open), the Scan App sections exactly as its S323 close wrote them (its 337 reserved); the Sanjeevni sections rewritten here (its 338 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S323 close** (the Scan App project), 22-Oct-2026, afternoon — the parent's sections exactly as its S331 close wrote them (its 336 reserved), the Sanjeevni sections exactly as its S334 close wrote them (its 335 open); the Scan App sections refreshed here (337 reserved).
 
@@ -520,6 +522,57 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S338 close (22-Oct, afternoon)
+
+*Detail: `S338_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_339.md`. The same lines are on your System Board. This section supersedes the S335 one below it.*
+
+**1 · The publish** — this close's record. The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · B-0176 out of the pharmacy lane** — the Eureka procedure-room supply. On its page choose *Clinic bill — asset or consumable* and press *move*; then *Withdraw* its rescan ask on the scans page:
+
+```
+https://followup.dr-manoj.in/scanapp/bills/176
+```
+
+```
+https://followup.dr-manoj.in/finance/porders/s454/scans
+```
+
+**3 · Then a fresh chat in this project, when you like** — it builds the combined fix you approved (D761). Nothing to prepare.
+
+**4 · Flacort 6 / Flemcort 6** — your word with Kedar. Until then Flacort 6 (20 strips) stays on Kedar's next order card; reception can remove it with *Abhi nahi chahiye*.
+
+**Still yours from before, not urgent (on your board):**
+- one photo of Marg's purchase-import screen;
+- a phone number and bank details for **BASS**.
+
+**Held at your word:**
+- S438_COUNT_BOOK;
+- the lasting fix for an unchanged Marg re-export (parked 16-Oct, 13:47);
+- **Amir's *Aaj ka kaam* list — off, and nothing is added to it (D690);**
+- **NORTIMER — out of the 6-Sep count (D715);**
+- **"Shavez waits for Amir" — evaluated at your ask, not built;**
+- **the GST composition flow — the automation project's (06:37 22-Oct);**
+- **the rescan's number — as built (D759);**
+- **a substitute never closes a line by itself (D760).**
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S338 close
+
+1. **D761 — the combined build:** one name list for every medicine; Marg's two matching faults; the wrong re-orders gone; the clearer duplicate scan kept; *Send back for rescan* on every pharmacy scan; *Change dealer to the one on the paper*; your page's words. Staff screens unchanged. Built in the chat, not on the API credits.
+2. **Marg's monthly reports in Shavez's and Amir's flow** (your note, points 1–4) — a plan and a mock-up first.
+3. **Kit II — the buying model** (shadow first).
+4. **Small:** F-987; the purchase page's staff send.
+
+## ✅ DONE AT THE S338 CLOSE — 22-Oct-2026 (the Sanjeevni project)
+
+- ~~**Amir's bank statements vanished from his app**~~ — **LIVE** 15:40 (S626): the newest month's statements stay until the next month's arrive.
+- ~~**Send B-0181 and B-0188 back for a rescan**~~ — not possible from any page (my S335 line was wrong, F-994); the combined build adds the button.
+- ~~**Why a rescan gets a new number**~~ — answered; left as built at your word (D759).
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S335 close (22-Oct, afternoon)
 
