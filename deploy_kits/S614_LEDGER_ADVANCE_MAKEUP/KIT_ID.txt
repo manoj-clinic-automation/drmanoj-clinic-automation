@@ -1,0 +1,7 @@
+S614_LEDGER_ADVANCE_MAKEUP
+session S336 (the parent), 22-Oct-2026
+D753: the statement's top section names every advance that makes up "Advance remaining after <month>" and when each
+is cut; New entry shows the chosen person's open advances, the next close's cut, the month's booking and the room
+under the ceiling. F-973: a maker's New entry script no longer dies. Display only.
+board _numbers v570 -> v571 (kit S614, F-973)
+pin in: /root/staff_ledger.py 92885f3b ; out: see SUMS.md5 ; undo: bash install_S614_LEDGER_ADVANCE_MAKEUP.sh --undo (backup /root/s614_backup/)
