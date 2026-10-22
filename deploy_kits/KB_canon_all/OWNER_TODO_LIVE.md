@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S323 close** (the Scan App project), 22-Oct-2026, afternoon — the parent's sections exactly as its S331 close wrote them (its 336 reserved), the Sanjeevni sections exactly as its S334 close wrote them (its 335 open); the Scan App sections refreshed here (337 reserved).
+# OWNER TO-DO — LIVE · refreshed at the **S335 close** (the Sanjeevni project), 22-Oct-2026, afternoon — the parent's sections exactly as its S331 close wrote them (its 336 open), the Scan App sections exactly as its S323 close wrote them (its 337 reserved); the Sanjeevni sections rewritten here (its 338 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S323 close** (the Scan App project), 22-Oct-2026, afternoon — the parent's sections exactly as its S331 close wrote them (its 336 reserved), the Sanjeevni sections exactly as its S334 close wrote them (its 335 open); the Scan App sections refreshed here (337 reserved).
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S331 close** (the parent), 22-Oct-2026, early morning — the Sanjeevni sections exactly as its S334 close wrote them (its 335 open), the Scan App sections exactly as its S318 close wrote them (its 323 open); the parent's sections refreshed here (336 reserved).
 
@@ -518,6 +520,59 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S335 close (22-Oct, afternoon)
+
+*Detail: `S335_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_338.md`. The same lines are on your System Board. This section supersedes the S334 one below it.*
+
+**1 · The publish** — this close's record. The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · Send two scans back for a rescan** — the check cannot see their faults: B-0181 (blurred) and B-0188 (cut off). On *Scans to redo*:
+
+```
+https://followup.dr-manoj.in/finance/porders/s454/scans
+```
+
+**3 · Then a fresh chat in this project, when you like** — it starts with Amir's bank statements (your note, point 5), then your note on Marg's monthly reports (a plan and a mock-up for your look), then the buying model. Nothing to prepare.
+
+**Still yours from before, not urgent (on your board):**
+- one photo of Marg's purchase-import screen — it decides whether Marg can enter a scanned bill by itself;
+- a phone number and bank details for **BASS** (its bills run on the cheque lane).
+
+**Worth knowing — the staff's, on their own screens, not yours:**
+- **Reception:** *Order ka maal nahi aaya — call karo* (late and part orders); *Phir se scan karo*; on removing a line, the reason *Dealer ke paas nahi hai*; carried medicines show as *pichhle order se baaki*; the phone refuses a badly blurred photo.
+- **Darpan:** one dated line on Kal ka hisaab; nothing to tap.
+- **Shavez:** the order list (Roman Hindi) — late and short orders to chase on your behalf; *Scans to redo* — he may send a scan back.
+- **Amir:** nothing new — his vanished statements are the next chat's first fix.
+
+**Held at your word:**
+- S438_COUNT_BOOK;
+- the lasting fix for an unchanged Marg re-export (parked 16-Oct, 13:47);
+- **Amir's *Aaj ka kaam* list — off, and nothing is added to it (D690);**
+- **NORTIMER — out of the 6-Sep count (D715);**
+- **"Shavez waits for Amir" — evaluated at your ask, not built;**
+- **the GST composition flow — the automation project's (your word 06:37 22-Oct).**
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S335 close
+
+**Every build follows the charter v1.1 (`claude/S307_BUILD_CHARTER_v1_1.md`, D707) and the plan `claude/S327_SANJEEVNI_RESTRUCTURING_PLAN.md`. Builds go by your choice — the Claude Code paste line or the API-credit runner — one kit at a time, each brief read once independently and read back on your PC before you get its line.**
+
+1. **F-988 — Amir's bank statements stay in his app until the next month's arrive** (your note, point 5).
+2. **Marg's monthly reports in Shavez's and Amir's flow** (your note, points 1–4): expiry, near expiry, dump, the item list, the salt list, the monthly Tally export — text exports, screenshots, Amir's first visit of the month. A plan and a mock-up first.
+3. **Kit II — the buying model** (shadow first).
+4. **Small:** the dealer-correction door for a scan saved under the wrong dealer; the scan note's spelling match; what a WRONG Marg bill means on *Bill scan karna hai* (F-987); the purchase page's staff send.
+
+## ✅ DONE AT THE S335 CLOSE — 22-Oct-2026 (the Sanjeevni project)
+
+- ~~**The orthotic sizes on the stock pages, the old page's Yuvika button, the call row's count**~~ — **LIVE** 08:59 (S613); a shoulder-size fault found and fixed with it.
+- ~~**Sideways, blurred and cut-off scans; no way to redo one**~~ — **LIVE** 10:54 (S618, D758): 22 bills turned upright; the phone refuses a badly blurred photo; *Scans to redo* for you and Shavez; *Phir se scan karo* for reception.
+- ~~**"Called, arrived, scanned, goods not arrived" visible to everyone concerned**~~ — **LIVE** 13:26 (S619, D757): one order list; late after two days; the 3–6 p.m. / by 11 a.m. line in every WhatsApp order; missing medicines back on the next order by themselves (7 today); Darpan one line.
+- ~~**Lock September**~~ — locked by you (said 14:04).
+- ~~**The GST composition flow**~~ — handed to the automation project with your steps (board message `sanjeevni_S335_1`).
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S334 close (22-Oct, early morning)
 
