@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S331 close** (the parent), 22-Oct-2026, early morning — the Sanjeevni sections exactly as its S334 close wrote them (its 335 open), the Scan App sections exactly as its S318 close wrote them (its 323 open); the parent's sections refreshed here (336 reserved).
+# OWNER TO-DO — LIVE · refreshed at the **S323 close** (the Scan App project), 22-Oct-2026, afternoon — the parent's sections exactly as its S331 close wrote them (its 336 reserved), the Sanjeevni sections exactly as its S334 close wrote them (its 335 open); the Scan App sections refreshed here (337 reserved).
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S331 close** (the parent), 22-Oct-2026, early morning — the Sanjeevni sections exactly as its S334 close wrote them (its 335 open), the Scan App sections exactly as its S318 close wrote them (its 323 open); the parent's sections refreshed here (336 reserved).
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S334 close** (the Sanjeevni project), 22-Oct-2026, early morning — the parent's sections exactly as its S329 post-close wrote them (its 331 open since 20-Oct; no close of it yet), the Scan App sections exactly as its S318 close wrote them (its 323 open); the Sanjeevni sections rewritten below.
 
@@ -92,43 +94,60 @@
 
 *Detail: `START_HERE_SESSION_313.md` · `S311_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S310 close's (13-Oct, early morning); `S310_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_312.md` that chat's entry.*
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S318 close (18-Oct, morning)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S323 close (22-Oct, afternoon)
 
-*Detail: `S318_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_323.md`. The same lines are on your System Board.*
+*Detail: `S323_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_337.md`. The same lines are on your System Board (Y118 … Y121).*
 
-**1 · The publish:** it carries this close's record and the battery-setup brief. These are papers only; nothing changes on the server.
+**1 · The publish (Y118):** it carries this close's record. These are papers only; nothing changes on the server.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Battery first setup — your one line,** once the Sanjeevni build has finished. It builds old batteries with only a date (*"Old battery — no bill"*), older bills to link, the number of batteries in each online UPS, and a *First setup* list:
+**2 · The Variety challans as past stock-in — your one line, in the next fresh chat of this project:**
 
 ```
-python D:\Downloads\_kbtools\agent_build\run_build.py S575_BATTERY_SETUP
+python D:\Downloads\_kbtools\agent_build\run_build.py S623_STATIONERY_CHALLAN_HISTORY
 ```
 
-**3 · When you want Shavez on them (not urgent):** on the *Switches* card of the scan app's home page, switch on *Sorting desk for Shavez*, *Machine pages for Shavez*, *Batteries for Shavez* and *Stationery diya for managers*:
+**3 · Many items on one screen (Y119) — when you are happy with it:** the card at the top of your Stationery page:
 
 ```
-https://followup.dr-manoj.in/scanapp/
+https://followup.dr-manoj.in/scanapp/stationery
 ```
 
-**4 · Your word, when you choose (not urgent):** whether to make a stop-gap correction of the Janitor's renewal list (Y83).
+**4 · The Vento's and the DTH lab's battery dates (Y120)**, under *First setup*:
 
-**Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison (*"park claude vs sarvam for now"*).
+```
+https://followup.dr-manoj.in/scanapp/batteries
+```
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S318 close
+**5 · Fujifilm's tax invoice for the AMC (Y121)** — scan it when it comes.
+
+**Not urgent:** *Sorting desk*, *Machine pages* and *Batteries* for Shavez on the *Switches* card of `https://followup.dr-manoj.in/scanapp/`; Y83 (the Janitor's renewal list).
+
+**Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison.
+
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S323 close
 
 **Every build follows `BUILD_NORM_v1` (D704).**
 
-1. **S575 — battery first setup** (brief ready). After your line: the kit review, your publish and your server line, then the result checked as you will see it.
-2. **Then, after it is live:** you record your batteries under *First setup* on the Batteries page — at your pace.
-3. **Before the next change to the sorting desk or the main app file:** I read each one whole and tidy it first. Both have had eight patches since their last whole read.
+1. **S623 — the Variety challans as history** (brief ready, checked). After your line: the kit review, your publish and your server line, then the result checked as you will see it.
+2. **The next round, when you say:** a machine edit that resets the purchase day (F-976); a passed warranty that shows OK (F-977); linking an AMC's paper afterwards (F-978); the stationery match and pack sizes (F-979); a back-dated bill's month (F-980); the old-battery amount on the X-ray page.
+3. **Before the next change to the sorting desk or the main app file:** I read each one whole and tidy it first.
 4. **D720, when you ask:** your family's documents and renewals in their own Google project.
-5. **Carried (reads, mine):** S532's placed papers; the old month page's held double; the DTH lab's battery payer, only if you raise it.
 
 **Waits by your word:** the clinic's bills in the accountants' pack.
+
+## ✅ DONE AT THE S323 CLOSE — 18 → 22-Oct-2026 (the Scan App project)
+
+- ~~**Battery first setup** (your ask of 06:02, 18-Oct)~~ — live 18-Oct ~09:4x (S575); you set up 14 of 16 places.
+- ~~**"it needs to be also under the xray expenses section"** (D736)~~ — live 18-Oct ~16:1x (S582): the X-ray costs page.
+- ~~**"multiple items can be issued on one screen"**, Shavez's sheet, X-ray a place (D738)~~ — live 18-Oct ~17:00 (S585), the screen OFF until your word.
+- ~~**The stationery opening count**~~ — entered by you, 18-Oct 14:5x.
+- ~~**The FDR AMC and its two papers**~~ — B-0203 (July) and B-0204 (August) entered; the email to Shail / Fujifilm sent from your Gmail.
+- ~~**"populate all entries that are possible from the variety challans"** (D756)~~ — briefed and checked (S623); your line in the next chat.
+- ~~**The S318 publish**~~ — landed 07:05 IST 18-Oct.
 
 ## ✅ DONE AT THE S318 CLOSE — 15 → 18-Oct-2026 (the Scan App project)
 
