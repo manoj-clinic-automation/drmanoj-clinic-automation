@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S334 close** (the Sanjeevni project), 22-Oct-2026, early morning — the parent's sections exactly as its S329 post-close wrote them (its 331 open since 20-Oct; no close of it yet), the Scan App sections exactly as its S318 close wrote them (its 323 open); the Sanjeevni sections rewritten below.
+# OWNER TO-DO — LIVE · refreshed at the **S331 close** (the parent), 22-Oct-2026, early morning — the Sanjeevni sections exactly as its S334 close wrote them (its 335 open), the Scan App sections exactly as its S318 close wrote them (its 323 open); the parent's sections refreshed here (336 reserved).
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S334 close** (the Sanjeevni project), 22-Oct-2026, early morning — the parent's sections exactly as its S329 post-close wrote them (its 331 open since 20-Oct; no close of it yet), the Scan App sections exactly as its S318 close wrote them (its 323 open); the Sanjeevni sections rewritten below.
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S333 close** (the Sanjeevni project), 20-Oct-2026, afternoon — the parent's sections exactly as its S329 post-close wrote them (its 331 reserved), the Scan App sections exactly as its S318 close wrote them (its session 323 open); the Sanjeevni sections refreshed here (334 reserved)
 
@@ -179,7 +181,7 @@ https://followup.dr-manoj.in/scanapp/
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S329 post-close (20-Oct, early morning)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S331 close (22-Oct, early morning)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -229,29 +231,39 @@ https://followup.dr-manoj.in/finance/packs?month=2026-09
 
 **8 · THE ARMS LICENCE — expiry 26 December; submit in November.** Tick it on the board when submitted.
 
-**WHEN IT HAPPENS — not a duty:** a patient's WhatsApp alert — tap it and the chat opens in your inbox · a phone line saying the server fixed (or could not fix) a part · a portal alert (open the guide at the step it names) · a POS total waiting for your Confirm · an SMS-vs-MPR difference line on your clinic money page · a Voicenotes list waiting above *Give a task* · your bank check under row 2 of the packs page.
+**WHEN IT HAPPENS — not a duty:** a patient's WhatsApp alert — tap it and the chat opens in your inbox · a `[WA send refused]` mail in the clinic Gmail (MyOperator's refusal, already logged — nothing to do) · a phone line saying the server fixed (or could not fix) a part · a portal alert · a POS total waiting for your Confirm · a Voicenotes list waiting above *Give a task*.
 
 ```
 https://followup.dr-manoj.in/portal/inbox
 ```
 
-**Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C) · the follow-up tracker on the server — "later" (12-Oct) · Bhati's later features (sessions in the 360° record, *physiotherapy advised* to his page, his absence → WhatsApp to his patients).
+**Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C) · the follow-up tracker on the server — "later" (12-Oct) · Bhati's later features.
 
-*Ticked by you or done, and off this list: the S326 and S329 publishes · the S592, S595, S597, S599 and S600 publishes and server lines (18 → 19-Oct) · the contact form (done 20:33 18-Oct) · MyOperator's key (working again by 16:38 19-Oct) · templates and staff replies (your "Yes" 16:41 19-Oct).*
+*Ticked by you or done, and off this list: the S329 post-close publish · the S606 … S612 publishes and server lines (20 → 22-Oct).*
 
-*Closed by your word and not on this list: everything listed so at the S326 close, plus the firm's address — removed; the WhatsApp Inbox as you set it — only you, full numbers and clinic ID, photos, PDFs and voice both ways, the Call button; and templates with your staff's replies — live.*
+*Closed by your word and not on this list: everything listed so at the S329 close, plus: adding staff whatever phone they have (S606, S607) · MyOperator handled from the clinic Gmail without you, and the send log (S608) · the statement month by month for every staff member (S611, S612) · Surendra's seven no-punch October days are absences.*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The morning's checks:** your phone's bank SMS fix (no ICICI SMS came on 19-Oct; today's is the test) · MyOperator's explanation of the 19-Oct stop, when it comes · the rest of the open's checks.
-2. **The website:** one more old entry mentions the firm's domain — I read what it is and tell you in one line.
-3. **A backup of the WhatsApp message log** — the inbox is rebuilt from it, and it has only one copy today.
-4. **The punch listener's step 2** — every genuine punch of the last week carried one steady mark; I tell you in one line, and build it only if you want it now.
-5. **Small, my own:** the mail check's wrong "not sent" line (S590) · the Yes Bank SMS turned away · the nightly's daily warning about the unattended report (kept off) · the console's doubled *"counter sheet not filled"* line · the finance app's own test suite · proving the 148 older documents · the weekly auditor's three findings (the two finance tokens, the UPI resync, the key list).
-6. **On your word:** replies your staff type in the MyOperator app shown in the inbox too · a *send to Shavez* button for the bank check · Bhati's later features · the contacts · the mail flood · kits for Shavez's PC and the lab PC.
-7. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
+1. **First — your "Build seems okay" (22-Oct):** the statement's top section lists what makes up *advance remaining after* (each advance, and when it is cut — e.g. Rs 3,000 from November salary); and New entry shows that person's pending advances one by one, what is already booked against the month you choose, and the room left.
+2. **The morning's checks:** MyOperator's answer on the refused sends · your phone's bank SMS fix · the rest of the open's checks.
+3. **Backups I owe:** the WhatsApp message log, the new send log and the attendance settings file — none has a second copy yet.
+4. **The website:** one more old entry mentions the firm's domain — I read what it is and tell you in one line.
+5. **The punch listener's step 2** — I tell you in one line, and build it only if you want it now.
+6. **Small, my own:** the mail check's wrong "not sent" line · the console's doubled *"counter sheet not filled"* line · the finance app's own test suite · proving the 148 older documents · the weekly auditor's three findings.
+7. **On your word:** replies your staff type in the MyOperator app shown in the inbox too · a *send to Shavez* button for the bank check · Bhati's later features.
+8. **Held at your word:** the Callback Tracker on the server. **Parked:** the staff's loud alerts · the mailbox clean-up · the follow-up tracker on the server.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S331 CLOSE — 20 → 22-Oct-2026 (the parent)
+
+- ~~**"look into new staff addition flow … Arjun Dev, I got stuck"** · **"Few might not have whatsapp or smartphone occasionally, build this functionality, biometric new staff entry … also confusing for us"** (20-Oct)~~ — *Add staff* in two touches, live 18:36 (S606); the machine card offers only new fingers, 19:47 (S607). Arjun Dev's login is `arjundev`.
+- ~~**"My WhatsApp inbox … sometimes gives http 500 … Khushi … needs the code level curl"** · **"Send the technical email to khushi … automatically from clinic gmail … maintain a detailed log, which I can share with myoperetor team"** (21-Oct)~~ — sent 10:58 from the clinic Gmail; MyOperator escalated it 12:45; the clinic Gmail answers them by itself every 3 hours; the send log live 12:46 (S608). Their fix is still owed.
+- ~~**"सुरेंद्र has ts3kn 5k advance … not visible what इंस्टॉलमेंट amount is due … and what total advance he has"** (21-Oct)~~ — the statement shows it, 19:39 (S609).
+- ~~**"… few days he has punched twice and is mentioned out there wrongly"** · **"these 2 sundays are blank, absent isnt written there"** (21-Oct)~~ — fixed 19:39 (S610): Surendra October P 14 · A 7, as the salary sheet.
+- ~~**"when all months is selected … properly display all the months … a non-confusing statement"** · **"advance remaining"** · **"proceed with the build."** (21-Oct)~~ — live 05:45 22-Oct for every staff member (S611).
+- ~~**"3000 advance was given to him against November salary"** (22-Oct)~~ — it now reads *from November 2026 salary · to be cut in Nov 2026*, 05:52 (S612).
 
 ## ✅ DONE AT THE S329 CLOSE — 18 → 19-Oct-2026 (the parent)
 
