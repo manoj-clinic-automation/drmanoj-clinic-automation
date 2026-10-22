@@ -1,0 +1,6 @@
+S615_BACKUP_THREE_GAPS
+session S336 (the parent), 22-Oct-2026
+The encrypted nightly (clinic_state_backup.py) gains /root/att_config.py, /root/wa/wa_inbox/send_log.jsonl and
+/root/wa/wa_logs -- three server files that were in no backup (AF-19, S608, F-972).
+board _numbers v573 -> v574 (kit S615)
+pin in: /root/state_backup/clinic_state_backup.py be57fe75 ; out: see SUMS.md5 ; undo: bash install_S615_BACKUP_THREE_GAPS.sh --undo (backup /root/s615_backup/)
