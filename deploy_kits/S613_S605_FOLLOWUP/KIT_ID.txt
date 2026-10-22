@@ -1,0 +1,5 @@
+kit id S613_S605_FOLLOWUP
+session S335 (the Sanjeevni chat), brief v2 of 22-Oct-2026; built 22-Oct-2026 by Claude Code
+F-951 (the readers' half), F-959 (the second door), F-962 (the call row's count), F-960 (three loose ends), F-957 (S604's walk lays its own days)
+pins in: stock_figure 51e1fc63, order_sheet 17fa1fdb, porders_s454 7ca91d4f, porders e5a5c4d4, porders.html 7a6799ae; out: PINS.sh / SUMS.md5
+undo: the .bak_S613_<from8> files back, restart clinic-finance (the installer prints the one line)

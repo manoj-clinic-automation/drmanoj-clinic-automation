@@ -1,0 +1,5 @@
+S621_PACKS_SBI
+session S336 (the parent), 22-Oct-2026
+The SBI papers (3 savings, 2 loans, 2 PPF) on the packs page: quarterly / half-yearly cells, an Add statements box, a password box per account.
+board _numbers v582 (kit S621, D754)
+pin in: /root/finance/packs.py e46264b8 , /root/finance/packs.html 49906969 ; out: see SUMS.md5 ; undo: --undo (backup /root/s621_backup/)

@@ -1,0 +1,27 @@
+# PINS.sh -- kit S613_S605_FOLLOWUP: FROM (the brief's section 1), TO (built by make_s613.py from the FROM bytes), READ (read only, must not move)
+FROM[stock_figure.py]=51e1fc63ab3fb1ac21170cb214f15b6b
+FROM[order_sheet.py]=17fa1fdbd34d07b0af0535375926c4fc
+FROM[porders_s454.py]=7ca91d4f8eabc5cdb10c9df55f2c080b
+FROM[porders.py]=e5a5c4d4dfa15c3ecd0b0cdf4786abcd
+FROM[porders.html]=7a6799ae3c8b41e783051cd1280a6964
+TO[stock_figure.py]=8c66b6b1010b7f0942768fe04022fa27
+TO[order_sheet.py]=c7fe2561b22158f9dffa73b8c963e298
+TO[porders_s454.py]=34bab4648940f30d7fc57188398c51b4
+TO[porders.py]=b1736494f6dc58683ccb9c0a4c3fe181
+TO[porders.html]=cbe1a46a72e0e82489c00397e303daab
+READ[supplier_msg.py]=4e3911a79096a6c0ba48f2b0e698ed1e
+READ[stock_watch.py]=f0d9092a051c4cd043645e4510ef4cee
+READ[shelf_figure.py]=23b2394a7a10a99ff0c30121087813f1
+READ[order_rules.py]=8d078dbe1b63a4706dc6f35e3c31ac9a
+READ[stock_app.py]=40f2c92260ae6b6715d49729fef464ff
+READ[purchase_app.py]=447b745f16c81ef62d389900d1d8ae13
+READ[amir_day.py]=1169a3d6ae451ebb4c9806052de0856c
+READ[amir_salts.py]=fc5c1d169cf971deb6b59010141a4550
+READ[darpan_kal.py]=d6ba4882b5f8c4d365016eff87ddba52
+READ[darpan_kal.html]=c0ddc0eaa167b78bbb39bcebbb53c1b0
+READ[order_sheet_pdf.py]=7a6d47c040536a24407ebfbb91d171e1
+READ[marg_order_pdf.py]=bdcf2d00f303a6932c9d1ffe686afffa
+READ[item_alias.py]=111a8e4877035e5a02665dd586e01b06
+READ[spine/spine_build.py]=1cd20ead1c19ea0418c88bd728374e9c
+READ[spine/spine_read.py]=10697b3869218151a75268e2259248d7
+READ[spine/spine_rules.json]=dd6c761665ce38fe4ec65d25b6102265
