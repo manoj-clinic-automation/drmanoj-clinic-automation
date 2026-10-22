@@ -1,0 +1,6 @@
+S616_OWNER_TASKS_TILE
+session S336 (the parent), 22-Oct-2026
+The owner's portal home gets a 'Tasks & messages' tile (his panel's Tasks and the Voicenotes lines, with the waiting
+count); the panel opens on Tasks for ?tab=tasks. His board note 2oxccc0ei12f01307d1q.
+board _numbers v574 -> v575 (kit S616)
+pin in: /root/portal/portal.py 3be15f45 · /root/finance/aaj_panel.html 36bd57bc ; out: see SUMS.md5 ; undo: --undo (backup /root/s616_backup/)
