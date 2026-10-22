@@ -1,0 +1,5 @@
+S622_PACKS_SBI_REAL_HEADS
+session S336 (the parent), 22-Oct-2026
+SBI statements read as SBI really prints them (holder line, KUMARAGARWAL, 'Statement :'); the SBI files re-read once; a jump to the password box.
+board _numbers v586 (kit S622, D755), v587 (F-975)
+pin in: /root/finance/packs.py 6ed8e18a , /root/finance/packs.html da0cbb8c ; out: see SUMS.md5 ; undo: --undo (backup /root/s622_backup/)
