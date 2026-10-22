@@ -1,0 +1,6 @@
+S617_PCS_PAGE_LIVE
+session S336 (the parent), 22-Oct-2026
+The Clinic PCs page's set-up cards read 'Now' lines from the server at each opening (disk, running since, the nightly
+jobs, the certificate check), each card dated, the Websites card brought up to date. The owner's board note 65d2zwey14y1xzg4ytoi.
+board _numbers v576 -> v577 (kit S617)
+pin in: /root/finance/setup_notes.py d32423d1 ; out: see SUMS.md5 ; undo: --undo (backup /root/s617_backup/)
