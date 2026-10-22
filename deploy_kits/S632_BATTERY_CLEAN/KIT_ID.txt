@@ -1,0 +1,4 @@
+kit id S632_BATTERY_CLEAN
+project Scan App (session 341, 22-Oct-2026; kit S632 claimed on the board _numbers v616 -> v617 for D766, the owner's 19:51-19:52 IST 22-Oct: "a clean battery page which has all the relevant scans and fields filled in properly") -- built in the chat, not by the API-credit runner (D765)
+fixes: a saved battery could not be corrected or removed; a statement could not be the bill of two batteries; 'B.L.Computers' unmatched; no group / upkeep door; the machine record's scans not shown on the place; 'yours only' twice
+files: batteries.py b2cbb41e -> bb082b4c (20 counted edits); read only, pinned: asset_register.py 2bb28600, sorting_desk.py 377adbca, clinic_papers.py 89a3cd0a, asset_machine.py 7dbd5e0c, stationery.py b6ce217a, xray_costs.py 22e59f5a. No database change. Restarts assetapp only.

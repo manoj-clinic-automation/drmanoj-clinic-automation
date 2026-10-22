@@ -1,0 +1,14 @@
+79800a68cf37726787d704ad9f03be16  KIT_ID.txt
+4d22be09d5277c1d76f0fbe0a5ad5c61  PIN_FROM_batteries.txt
+f1623ff323d70078698f267feaee4c64  PIN_READ_asset_machine.txt
+89a3e6b8ad07539de24fb00b433c4425  PIN_READ_asset_register.txt
+f578511c367c2509882f08d1e916e03a  PIN_READ_clinic_papers.txt
+bb5c12ec4ed42430b5915dc1ea75558d  PIN_READ_sorting_desk.txt
+6f3537b808f85738a95c6927c244076b  PIN_READ_stationery.txt
+bcf74474df9e744ab96dac866ffe241c  PIN_READ_xray_costs.txt
+95ae676eaefc3cb83a332f6e576c4dfa  PIN_TO_batteries.txt
+44130d1622c211469128a3743e9d705b  README.md
+17b4a31129df769d771bbf3287c086a9  install_s632.sh
+1c76a2dc82add50a5ff932e51976f351  make_s632.py
+357615b3524067ad2eac487e53828907  rehearse_s632.sh
+8fc7bc52be394ee3f7166a4622614932  walk_s632_app.py
