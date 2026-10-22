@@ -1,0 +1,240 @@
+
+
+
+# ---- S619 (22-Oct-2026, kit S619_ORDER_TRACKER): one order, five steps -------------------------------------------------------------------
+#    GET  /finance/porders/s454/late     Order ka maal nahi aaya -- call karo: the late orders (nothing came, or medicines still awaited), each with
+#                                        Call (book_card's Calls number) and Maal aaya / Baaki maal aaya (the existing arrive page)
+#    GET  /finance/porders/s454/track    the order list: the owner (English) and the logins in porders.rescan_askers (Roman Hindi); every other sender
+#                                        refused (403); Bhati redirected as today. Its read writes nothing (no _every_read).
+#  Every count here is order_track's light half (finance.db only); the track page adds the scan half (assets.db READ ONLY) for its notes only.
+T.update({"r_late": ("Order ka maal nahi aaya — call karo", "Goods not arrived — call"),
+          "late_top": ("In order ka maal do din mein nahi aaya. Dealer ko call kijiye. Maal aa jaye to “Maal aaya” dabaiye.",
+                       "These orders did not arrive within two days. Call the dealer. When the goods come, tap “Goods arrived”."),
+          "late_none": ("Koi order der se nahi hai.", "No order is late."),
+          "late_sub": ("Order %s · %s · %d dawa · aaj tak nahi aaya", "Ordered %s · %s · %d medicines · not arrived yet"),
+          "part_sub": ("Order %s · %s · %d mein se %d dawa aayi · %s baaki", "Ordered %s · %s · %d of %d came · %s awaited"),
+          "maal_aaya": ("Maal aaya", "Goods arrived"), "baaki_aaya": ("Baaki maal aaya", "The rest arrived"),
+          "rm_dealer_no": ("Dealer ke paas nahi hai", "Dealer does not have it"), "rm_not_now": ("Abhi nahi chahiye", "Not needed now"),
+          "carry_tag": ("pichhle order se baaki (%s)", "back from the order of %s"),
+          "track": ("Purchase orders ka haal", "Purchase orders — the order list"),
+          "track_link": ("Orders ka haal: %d der se · %d mein dawa kam aayi · %d scan dobara", "The order list: %d late · %d came short · %d scans to redo"),
+          "t_orders": ("order %s se", "orders since %s"), "t_na": ("nahi aaye", "not arrived"), "t_short": ("kam aaye", "came short"),
+          "t_marg": ("Marg mein baaki", "not in Marg yet"), "t_redo": ("scan dobara", "scans to redo"),
+          "s_na": ("Nahi aaye", "Not arrived"), "s_marg": ("Bill scan hua, Marg mein abhi nahi", "Bill scanned, not in Marg yet"),
+          "s_short": ("Kam aaye", "Came short"), "s_redo": ("Scan dobara karwane hain", "Scans to redo"),
+          "s_wrong": ("Kisi aur dealer ke naam se save hue", "Saved under another dealer"), "s_done": ("Poore aa gaye", "Complete"),
+          "refused": ("Yeh list Doctor sahab aur Shavez ke liye hai.", "This list is for the owner and Shavez only."),
+          "late_w": ("der se", "late"), "due_w": ("%s shaam tak aana hai", "due %s evening"), "came_w": ("aaya %s", "came %s"),
+          "outside_w": ("aaya %s — maal ke samay ke bahar", "came %s — outside the delivery hours"),
+          "of_came": ("%d mein se %d aayi", "%d of %d came"), "awaited_w": ("baaki", "awaited"),
+          "nm_short": ("nahi aaya: %s (%s)", "did not come: %s (%s)"), "sent_ph": ("WhatsApp gaya %s", "WhatsApp sent %s"),
+          "open_scan": ("Scan dekhiye", "Open the scan")})
+S619_VIA = {"whatsapp": ("WhatsApp", "WhatsApp"), "call": ("Call", "Call"), "whatsapp+call": ("WhatsApp + call", "WhatsApp + call"), "scan": ("Bill scan", "bill scan"),
+            "paper": ("Paper", "paper")}
+S619_STEP_HI = {"Ordered": "Order", "Arrived": "Maal aaya", "Bill scanned": "Bill scan", "In Marg": "Marg mein", "All lines came": "Saari dawa aayi"}
+S619_DOT = {"done": "#2e6b34", "wait": "#c9c4bc", "late": "#b3261e", "short": "#b3261e", "conflict": "#8a5300"}
+
+
+def _s619_ot():
+    import order_track                                        # noqa: PLC0415 -- S619, beside this file
+    return order_track
+
+
+def _s619_rows(con):
+    return _s619_ot().light_all(con, OS.now())
+
+
+def _s619_late_n(con):
+    try:
+        return len(_s619_ot().late_orders(con, OS.now()))
+    except Exception:                                         # noqa: BLE001 -- the home never waits on this
+        return 0
+
+
+def _s619_via(en, v):
+    return S619_VIA.get(str(v or ""), (str(v or "—"), str(v or "—")))[1 if en else 0]
+
+
+def _s619_carry_tag(en, l):
+    if l.get("src") != "carry":
+        return ""
+    return ' <span class="sb am s619carry">%s</span>' % esc(L(en, "carry_tag", OS.ddmm(l.get("carry_from"))))
+
+
+def _s619_remove_chips(en, b):
+    """The one remove door (api_qty remove) asks one reason chip: Dealer ke paas nahi hai / Abhi nahi chahiye."""
+    return ('<span class="chips s619rm">' + "".join('<button data-reason="%s" onclick="s454(\'%s/api/s454/qty\',Object.assign(%s,{remove:1,reason:\'%s\'}))">%s</button>'
+                                                   % (r, P, b, r, L(en, "rm_" + r)) for r in ("dealer_no", "not_now")) + '</span>')
+
+
+def _s619_track_card(con, en):
+    """The owner's and Shavez's one way in (replaces S618's separate 'Scans to redo' link): the order list, with its three counts."""
+    try:
+        rows = _s619_rows(con)
+        n_late = sum(1 for s in rows if s["late"])
+        n_short = sum(1 for s in rows if s["short"])
+    except Exception:                                         # noqa: BLE001
+        n_late = n_short = 0
+    return '<a class="row" id="track" href="%s/s454/track"><span class="l" style="font-size:16px">%s</span><span>›</span></a>' % (
+        P, esc(L(en, "track_link", n_late, n_short, _s618_count(con))))
+
+
+def _s619_late_card(con, en, s):
+    call, _wa, _shown, _on = OS.book_card(con, s["vendor"])
+    if s["part"]:
+        baaki = ", ".join(x["item"] for x in s["lines"] if x["state"] in ("open", "part"))
+        sub = L(en, "part_sub", OS.ddmm(s["created_at"]), _s619_via(en, s["via"]), s["n"], s["came"], baaki)
+    else:
+        sub = L(en, "late_sub", OS.ddmm(s["created_at"]), _s619_via(en, s["via"]), s["n"])
+    callb = ('<a class="b" href="tel:%s" onclick="s454(\'%s/api/s454/call\',{sn:%s},function(){})">📞 %s</a>' % (esc(_tel(call)), P, esc(json.dumps(s["sn"])), L(en, "call"))
+             if call else '<span class="b" style="color:#8a5300">%s</span>' % L(en, "nonum"))
+    return ('<div class="card" data-order="%d" data-late="1"><div><div class="nm">%s</div><div class="sb am">%s</div></div>'
+            '<div class="two">%s<a class="g" href="%s/s454/maal/%d">%s</a></div></div>'
+            % (s["id"], esc(s["vendor"]), esc(sub), callb, P, s["id"], L(en, "baaki_aaya" if s["part"] else "maal_aaya")))
+
+
+def late_page():
+    """Order ka maal nahi aaya -- call karo: the late orders, oldest first (part orders too)."""
+    u, con, kind, login, err = _auth_page()
+    if err:
+        return err
+    en = u["_en"]
+    _every_read(con)
+    late = [s for s in _s619_rows(con) if s["late"]]
+    h = ['<div class="mut">%s</div>' % L(en, "late_top")]
+    for s in late:
+        h.append(_s619_late_card(con, en, s))
+    if not late:
+        h.append('<div class="ok"><div class="t">%s</div></div>' % L(en, "late_none"))
+    return shell(con, u, L(en, "r_late"), "".join(h), back=P, login=login)
+
+
+def _s619_dots(en, s):
+    out = []
+    for name, st in _s619_ot().dots(s):
+        out.append('<span class="s619d" data-step="%s" data-state="%s" title="%s" style="display:inline-flex;align-items:center;gap:4px;margin-right:8px;font-size:12.5px">'
+                   '<i style="display:inline-block;width:11px;height:11px;border-radius:6px;background:%s"></i>%s</span>'
+                   % (esc(name), st, esc(name), S619_DOT.get(st, "#c9c4bc"), esc(name if en else S619_STEP_HI.get(name, name))))
+    return '<div class="s619dots">%s</div>' % "".join(out)
+
+
+def _s619_order_card(con, en, s, show_lines=True, marg=None):
+    OT = _s619_ot()
+    when = s["created"].strftime("%d-%m %H:%M") if s.get("created") else OS.ddmm(s["created_at"])
+    sub = [_s619_via(en, s["via"])]
+    if s.get("sent_at"):
+        sub.append(L(en, "sent_ph", OS._dtm(s["sent_at"]).strftime("%H:%M") if OS._dtm(s["sent_at"]) else ""))
+    sub.append(L(en, "dawa", s["n"]))
+    if s["part"] or (s["arrived"] and s["came"] and s["came"] < s["n"]):
+        sub.append(L(en, "of_came", s["n"], s["came"]))
+    if s["late"]:
+        sub.append(L(en, "late_w"))
+    elif not s["arrived"] and s.get("due_at"):
+        sub.append(L(en, "due_w", s["due_at"].strftime("%d-%m")))
+    times = []
+    if s.get("arrived_at"):
+        t = s["arrived_at"].strftime("%d-%m %H:%M")
+        times.append(L(en, "came_w", t) + (" (%s)" % {"tap": "tap", "scan": "scan", "marg": "Marg"}.get(s["arrived_how"], s["arrived_how"])))
+    if s.get("outside"):
+        times.append(L(en, "outside_w", s["outside"]))
+    for x in s.get("scans") or []:
+        times.append("%s%s" % (x.get("stamp") or "#%s" % x["scan"], (" " + OS._dtm(x["scan_at"]).strftime("%d-%m %H:%M")) if OS._dtm(x.get("scan_at")) else ""))
+    if s.get("bills"):
+        times.append("Marg: " + ", ".join(s["bills"]))
+    li = []
+    if show_lines:
+        for x in s["lines"]:
+            st = x["state"]
+            if st == "short":
+                w = "%s · %s" % (L(en, "nm_short", x["item"], x["short_text"]), OT.short_words(con, s, x, en, marg))
+                cls = "red"
+            elif st in ("open", "part"):
+                w = "%s · %s%s" % (x["item"], L(en, "awaited_w"), (" (%s)" % x["short_text"]) if st == "part" else "")
+                cls = "amb"
+            elif st == "awaiting":
+                w = x["item"]
+                cls = ""
+            else:
+                w = "%s ✓" % x["item"]
+                cls = "grn"
+            soft = (s.get("soft") or {}).get(x["id"])
+            notes = [OT.W(k, en, *a) for k, a in x.get("notes") or []]
+            li.append('<div class="sb" data-line="%d" data-state="%s"><span class="%s">%s</span>%s%s</div>'
+                      % (x["id"], st, cls, esc(w), (' <span class="amb s619soft" data-soft="%s">· %s</span>' % (soft[0], esc(soft[1]))) if soft else "",
+                         "".join(' <span class="amb s619note">· %s</span>' % esc(n) for n in notes)))
+    thumb = ('<a href="%s" target="_blank"><img src="%s" alt="scan" style="width:56px;height:74px;object-fit:cover;border:1px solid #ccc;border-radius:4px"></a>'
+             % (esc(s["file"]), esc(s["thumb"]))) if s.get("thumb") else ""
+    notes = "".join('<div class="sb am s619note">%s</div>' % esc(n) for n in s.get("notes") or [])
+    return ('<div class="card s619o" data-order="%d" data-key="%s"><div style="display:flex;gap:10px;align-items:flex-start"><div style="flex:1 1 auto">'
+            '<div class="nm">%s · %s</div><div class="sb">%s</div>%s<div class="sb">%s</div>%s%s</div>%s</div></div>'
+            % (s["id"], s["key"], esc(s["vendor"]), esc(when), esc(" · ".join(sub)), _s619_dots(en, s), esc(" · ".join(times)), notes, "".join(li), thumb))
+
+
+def track_page():
+    """The order list -- the owner (English) and porders.rescan_askers (Roman Hindi). Sections: Not arrived (late first; part orders too),
+    Bill scanned not in Marg yet (the soft notes), Came short (Marg-confirmed / tapped), Scans to redo (S618's rescan_list), Saved under another
+    dealer (Open the scan only), Complete (folded). Its read writes nothing."""
+    u, con, kind, login, err = _auth_page()
+    if err:
+        return err
+    en = u["_en"]
+    login = _s618_login(u, login)
+    if not _s618_asker(con, kind, login):
+        pg, _c, hd = shell(con, u, L(en, "track"), '<div class="err" id="refused">%s</div>' % L(en, "refused"), back=P, login=login)
+        return pg, 403, hd
+    OT = _s619_ot()
+    now = OS.now()
+    rows = OT.light_all(con, now)
+    ctx = OT.Ctx(con)
+    OT.full_all(con, now, en=en, ctx=ctx, rows=rows)
+    redo = getattr(ctx, "redo", None) or dict(asks=[], redo=[])
+    tl = OT.tiles(rows, len(redo.get("asks") or []) + len(redo.get("redo") or []))
+    marg = OT._marg_items(con)
+    h = ['<h1 id="trackh">%s</h1>' % L(en, "track")]
+    h.append('<div class="two" id="tiles" style="flex-wrap:wrap">%s</div>' % "".join(
+        '<div class="card" data-tile="%s" style="flex:1 1 30%%;min-width:90px;padding:8px"><div class="nm" style="font-size:22px">%d</div><div class="sb">%s</div></div>'
+        % (k, n, esc(lab)) for k, n, lab in (("orders", tl["orders"], L(en, "t_orders", OS.ddmm(OT.since(con)))), ("not_arrived", tl["not_arrived"], L(en, "t_na")),
+                                             ("short", tl["short"], L(en, "t_short")), ("not_in_marg", tl["not_in_marg"], L(en, "t_marg")),
+                                             ("redo", tl["redo"], L(en, "t_redo")))))
+    na = sorted([s for s in rows if s["key"] in ("not_arrived", "part")], key=lambda s: (0 if s["late"] else 1, s["created_at"]))
+    nm = [s for s in rows if s["key"] == "awaiting"]
+    sh = [s for s in rows if s["short"]]
+    done = [s for s in rows if s["complete"]]
+    for sid, title, lst in (("sec_na", "s_na", na), ("sec_marg", "s_marg", nm), ("sec_short", "s_short", sh)):
+        h.append('<div class="grp" id="%s">%s · %d</div>' % (sid, L(en, title), len(lst)))
+        for s in lst:
+            h.append(_s619_order_card(con, en, s, True, marg))
+    h.append('<div class="grp" id="sec_redo">%s · %d</div>' % (L(en, "s_redo"), tl["redo"]))
+    sq = _sq()
+    for a in redo.get("asks") or []:
+        h.append('<div class="card" data-ask="%d" data-scan="%d"><div class="nm">%s · %s</div><div class="sb am">%s</div></div>'
+                 % (a["id"], a["scan"], esc(a["stamp"]), esc(a["vendor"]), esc(sq.words(a["reason"], "owner" if en else "shavez") if sq else a["reason"])))
+    for r in redo.get("redo") or []:
+        chips = "".join('<button data-reason="%s" onclick="s454(\'%s/api/s454/rescan\',{asset_bill_id:%d,reason:\'%s\'})">%s</button>'
+                        % (c, P, r["scan"], c, esc(sq.CHIP_WORDS[c][0 if en else 1])) for c in sq.CHIPS) if sq else ""
+        h.append('<div class="card" data-scan="%d" data-code="%s"><div style="display:flex;gap:10px;align-items:center">'
+                 '<a href="/scanapp/bills/%d/file" target="_blank"><img src="%s" alt="scan" style="width:56px;height:74px;object-fit:cover;border:1px solid #ccc;border-radius:4px"></a>'
+                 '<div><div class="nm">%s · %s</div><div class="red">%s</div></div></div><div class="mut">%s</div><div class="chips">%s</div>'
+                 '<a class="more" href="/scanapp/bills/%d/file" target="_blank">%s</a></div>'
+                 % (r["scan"], r["code"], r["scan"], esc(_s618_thumb(r)), esc(r["stamp"]), esc(r["vendor"]),
+                    esc(sq.words(r["code"], "owner" if en else "shavez", r["sum"], r["total"]) if sq else r["code"]), L(en, "redo_get"), chips, r["scan"], L(en, "redo_open")))
+    wd = OT.wrong_dealer(con, ctx)
+    h.append('<div class="grp" id="sec_wrong">%s · %d</div>' % (L(en, "s_wrong"), len(wd)))
+    for w in wd:
+        h.append('<div class="card" data-wrong="%d"><div class="nm">%s · %s</div><div class="sb">%s</div><a class="more" href="/scanapp/bills/%d/file" target="_blank">%s</a></div>'
+                 % (w["scan"], esc(w["stamp"]), esc(OS.ddmm(w["date"])), esc(("saved as %s; the paper says %s" if en else "%s ke naam se save; kaagaz par %s") % (w["saved"], w["paper"])),
+                    w["scan"], L(en, "open_scan")))
+    h.append('<details class="card" id="sec_done"><summary style="min-height:44px;cursor:pointer;font-weight:700">%s · %d</summary>%s</details>'
+             % (L(en, "s_done"), len(done), "".join(_s619_order_card(con, en, s, False, marg) for s in done)))
+    return shell(con, u, L(en, "track"), "".join(h), back=P, login=login)
+
+
+@bp.route(P + "/s454/late")
+def r_late():
+    return late_page()
+
+
+@bp.route(P + "/s454/track")
+def r_track():
+    return track_page()
+# ---- S619 end ---------------------------------------------------------------------------------------------------------------------------

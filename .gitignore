@@ -295,3 +295,6 @@ _scratch/
 # scans the walk compares Claude with (stamps, vendor names, orientation / sharpness / cut words -- no number, no image). Both in SUMS.md5. Exact paths.
 !deploy_kits/S618_SCAN_QUALITY/DUTY_MAP.json
 !deploy_kits/S618_SCAN_QUALITY/S335_SCAN_VISUAL_AUDIT.json
+# S619 (22-Oct-2026; line added when PUBLISH_ALL refused at 13:3x IST): the kit's DUTY_MAP.json (v19: reception.order_arrival rewritten,
+# shavez.order_followup added) that its walk and installer ran with (in SUMS.md5). No number (the gate read it). Exact path.
+!deploy_kits/S619_ORDER_TRACKER/DUTY_MAP.json

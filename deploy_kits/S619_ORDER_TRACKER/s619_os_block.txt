@@ -1,0 +1,114 @@
+
+
+# ------------------------------------------------------------------ S619 (22-Oct-2026, kit S619_ORDER_TRACKER): the tie's asking, the carry, the reason
+#  _s619_may_ask: an order whose every line was tapped 'Nahi mila' never asks for a scan; an order whose every line is answered, Marg having
+#  billed one of them, stops asking (order 45). _s619_pick: two or more orders of the dealer waiting -- the reading's best line match among them
+#  (order_track.match_lines), else the oldest. _s619_live: a removal 'Dealer ke paas nahi hai' counts while its sheet is Marg's newest (a sheet
+#  line) or for its day (any other line); 'Abhi nahi chahiye' as before. The carry's lines: their packing and rate from the order they came from.
+def _s619_may_ask(con, oid):
+    try:
+        ls = con.execute("SELECT billed_qty, billed_bill_no, supplied, missing, arrived_by FROM purchase_order_line WHERE order_id=?", (int(oid),)).fetchall()
+    except sqlite3.Error:
+        return True
+    if not ls:
+        return True
+    if all(int(l[3] or 0) == 1 and str(l[4] or "") != "marg" for l in ls):
+        return False
+    if any(l[0] is not None and str(l[1] or "").strip() for l in ls) and all(l[0] is not None or l[2] is not None or int(l[3] or 0) == 1 for l in ls):
+        return False
+    return True
+
+
+def _s619_reads(sid):
+    """The read item names of one scan (assets.db claude_reading, READ ONLY): [(name, stamp)]."""
+    acon = _assets()
+    if acon is None:
+        return []
+    try:
+        st = acon.execute("SELECT stamp_no FROM bills WHERE id=?", (int(sid),)).fetchone()
+        r = acon.execute("SELECT data FROM claude_reading WHERE bill_id=? AND ok=1 ORDER BY at DESC LIMIT 1", (int(sid),)).fetchone()
+    except sqlite3.Error:
+        return []
+    finally:
+        acon.close()
+    try:
+        d = json.loads(r[0]) if r and r[0] else {}
+    except ValueError:
+        d = {}
+    stamp = (st[0] if st else "") or "#%d" % int(sid)
+    return [(str(i.get("name") or ""), stamp) for i in (d.get("items") or []) if isinstance(i, dict) and i.get("name")]
+
+
+def _s619_pick(con, cand, s, sn):
+    """The waiting order whose lines the scan's reading names best (one-to-one, by name, never quantities); None when no line matches."""
+    reads = _s619_reads(s["id"])
+    if not reads:
+        return None
+    best, score = None, 0
+    for o in cand:
+        items = [r[0] for r in con.execute("SELECT item FROM purchase_order_line WHERE order_id=?", (o["id"],))]
+        n = len(_ot().match_lines(con, sn, items, reads))
+        if n > score:
+            best, score = o, n
+    return best
+
+
+def _s619_live(reason, at, src, taken):
+    if str(reason or "") != "dealer_no":
+        return True
+    if src == "sheet":
+        return str(at or "") >= str(taken or "")
+    return str(at or "")[:10] == today().isoformat()
+
+
+def _s619_taken(con):
+    try:
+        r = con.execute("SELECT taken_at FROM order_sheet ORDER BY " + RANK + " LIMIT 1").fetchone()
+        return (r[0] or "") if r else ""
+    except sqlite3.Error:
+        return ""
+
+
+def _s619_removed(con, ns=None):
+    """(removed, dealer_no): the sheet lines (ref, item) a live removal takes off -- and those of them removed as 'Dealer ke paas nahi hai'."""
+    taken = (ns or {}).get("taken_at") if ns else _s619_taken(con)
+    has = _has_col(con, "s454_line_edit", "reason")
+    rem, dn = set(), set()
+    for r in con.execute("SELECT ref, item, %s, at FROM s454_line_edit WHERE src='sheet' AND removed=1" % ("reason" if has else "NULL")):
+        if _s619_live(r[2], r[3], "sheet", taken):
+            rem.add((r[0], r[1]))
+            if r[2] == "dealer_no":
+                dn.add((r[0], r[1]))
+    return rem, dn
+
+
+def _s619_line(con, cr):
+    """(packing, rate_p) of a carried line -- its sheet line's packing and its order line's rate."""
+    pk, rate = "", 0
+    try:
+        r = con.execute("SELECT rate_p FROM purchase_order_line WHERE id=?", (int(cr["from_line_id"]),)).fetchone()
+        rate = int((r[0] if r else 0) or 0)
+        pk = (sheet_lines_of_order(con, int(cr["from_order_id"])).get(cr["item"]) or {}).get("packing") or ""
+    except (sqlite3.Error, TypeError, ValueError):
+        pass
+    return pk, rate
+
+
+def _s619_carry_done(con, e, oid):
+    """The carried lines of the card now ride on order `oid` (done_order_id): never carried again."""
+    ids = [int(l["ref"]) for l in e.get("lines") or [] if l.get("src") == "carry"]
+    if not ids:
+        return 0
+    cur = con.execute("UPDATE order_carry SET done_order_id=?, done_at=? WHERE id IN (%s) AND done_at IS NULL AND dropped_at IS NULL" % ",".join("?" * len(ids)),
+                      [int(oid), now_iso()] + ids)
+    return cur.rowcount
+
+
+def _s619_carried(con, oid):
+    """{item: 'dd-mm'} of the carried lines an order carries (the WhatsApp body's 'pichhle order se baaki (dd-mm)')."""
+    try:
+        return {r[0]: ddmm(r[1] or r[2]) for r in con.execute("SELECT c.item, o.created_at, c.at FROM order_carry c LEFT JOIN purchase_order o ON o.id=c.from_order_id "
+                                                              "WHERE c.done_order_id=?", (int(oid),))}
+    except sqlite3.Error:
+        return {}
+# ---- S619 end ---------------------------------------------------------------------------------------------------------------------------
