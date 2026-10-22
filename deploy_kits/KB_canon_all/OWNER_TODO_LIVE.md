@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S338 close** (the Sanjeevni project), 22-Oct-2026, afternoon — the parent's sections exactly as its S331 close wrote them (its 336 open), the Scan App sections exactly as its S323 close wrote them (its 337 open); the Sanjeevni sections rewritten here (its 339 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S339 close** (the Sanjeevni project), 22-Oct-2026, evening — the parent's sections exactly as its S331 close wrote them (its 336 open), the Scan App sections rewritten at its S337 close (22-Oct, evening; its 341 reserved); the Sanjeevni sections as its S339 close wrote them (its 340 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S338 close** (the Sanjeevni project), 22-Oct-2026, afternoon — the parent's sections exactly as its S331 close wrote them (its 336 open), the Scan App sections exactly as its S323 close wrote them (its 337 open); the Sanjeevni sections rewritten here (its 339 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S335 close** (the Sanjeevni project), 22-Oct-2026, afternoon — the parent's sections exactly as its S331 close wrote them (its 336 open), the Scan App sections exactly as its S323 close wrote them (its 337 reserved); the Sanjeevni sections rewritten here (its 338 reserved)
 
@@ -98,50 +100,54 @@
 
 *Detail: `START_HERE_SESSION_313.md` · `S311_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S310 close's (13-Oct, early morning); `S310_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_312.md` that chat's entry.*
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S323 close (22-Oct, afternoon)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S337 close (22-Oct, evening)
 
-*Detail: `S323_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_337.md`. The same lines are on your System Board (Y118 … Y121).*
+*Detail: `S337_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_341.md`. The same lines are on your System Board (Y132, Y133, Y119 … Y121).*
 
-**1 · The publish (Y118):** it carries this close's record. These are papers only; nothing changes on the server.
+**1 · The publish (Y132):** it carries this close's record. Papers only; the four fixes of today are already live.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · The Variety challans as past stock-in — your one line, in the next fresh chat of this project:**
+**2 · The battery page made clean — in a fresh chat of this project (your word of 19:52).** The chat logs in through the browser, reads every place and paper, fixes what it can, and asks you only for what no paper shows. It also answers your question on asset 12.
 
-```
-python D:\Downloads\_kbtools\agent_build\run_build.py S623_STATIONERY_CHALLAN_HISTORY
-```
+**3 · One question, whenever you like (Y133):** a bill dated July but scanned in October now counts in July by itself. If someone picks October on that bill's own page, it stays in July. Is that fine, or should picking the scan month keep it there?
 
-**3 · Many items on one screen (Y119) — when you are happy with it:** the card at the top of your Stationery page:
+**4 · Many items on one screen (Y119) — when you are happy with it:** the card at the top of your Stationery page:
 
 ```
 https://followup.dr-manoj.in/scanapp/stationery
 ```
 
-**4 · The Vento's and the DTH lab's battery dates (Y120)**, under *First setup*:
+**5 · The Vento's and the DTH lab's battery dates (Y120)** — the battery-page chat asks for them in its one list if no paper shows them.
 
-```
-https://followup.dr-manoj.in/scanapp/batteries
-```
-
-**5 · Fujifilm's tax invoice for the AMC (Y121)** — scan it when it comes.
+**6 · Fujifilm's tax invoice for the AMC (Y121)** — scan it when it comes.
 
 **Not urgent:** *Sorting desk*, *Machine pages* and *Batteries* for Shavez on the *Switches* card of `https://followup.dr-manoj.in/scanapp/`; Y83 (the Janitor's renewal list).
 
 **Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S323 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S337 close
 
-**Every build follows `BUILD_NORM_v1` (D704).**
+**Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat while the API credits are low (D765).**
 
-1. **S623 — the Variety challans as history** (brief ready, checked). After your line: the kit review, your publish and your server line, then the result checked as you will see it.
-2. **The next round, when you say:** a machine edit that resets the purchase day (F-976); a passed warranty that shows OK (F-977); linking an AMC's paper afterwards (F-978); the stationery match and pack sizes (F-979); a back-dated bill's month (F-980); the old-battery amount on the X-ray page.
-3. **Before the next change to the sorting desk or the main app file:** I read each one whole and tidy it first.
+1. **The battery page made clean (D766)** — the next chat's first job, through your browser.
+2. **Keep the clearer scan of a duplicate** (your D761, from the pharmacy chat) in the scan app's own duplicate check.
+3. **The handwritten challans of the clinic lanes read by Claude** (from the pharmacy chat).
 4. **D720, when you ask:** your family's documents and renewals in their own Google project.
 
 **Waits by your word:** the clinic's bills in the accountants' pack.
+
+## ✅ DONE AT THE S337 CLOSE — 22-Oct-2026 (the Scan App project)
+
+- ~~**The Variety challans as past stock-in** (D756)~~ — live 14:42 (S623), built in the chat; your nine counted items unchanged.
+- ~~**A passed warranty that showed OK** (F-977)~~ — now *Out of warranty since …* (S624).
+- ~~**An AMC's paper linked afterwards** (F-978)~~ — the B-____ box on a cover or part (S624); **B-0203 linked to the FDR AMC cover**.
+- ~~**Packets typed as pieces** (F-979)~~ — the desk's Save says so; your Stationery page marks it (S624).
+- ~~**A machine edit that reset the day** (F-976)~~ — the day is kept (S625).
+- ~~**A back-dated bill's month** (F-980, your choice "Bill's own month")~~ — live 15:2x (S625); the late mark follows (S627).
+- ~~**Asset 7**~~ — deleted by you, 19:5x.
 
 ## ✅ DONE AT THE S323 CLOSE — 18 → 22-Oct-2026 (the Scan App project)
 
@@ -522,6 +528,57 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S339 close (22-Oct, evening)
+
+*Detail: `S339_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_340.md`. The same lines are on your System Board. This section supersedes the S338 one below it.*
+
+**1 · The publish** — this close's record. The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · Send the two LINVIZ messages** (drafted in the chat, Roman Hindi): to **Darpan** — hand over and bill the old "LINVIZ 600" (10-tablet strips, 3 left) first, "6T" only after; to **Amir** — every new LINVIZ purchase into "LINVIZ 600 6T", the old item retired with ZZ when it reaches zero (D763).
+
+**3 · Change dealer on B-0161 and B-0167, when you like** — one tap each on your order list (Saved under another dealer):
+
+```
+https://followup.dr-manoj.in/finance/porders/s454/track
+```
+
+After B-0161, Shivaaz's 12-Oct TOLTRIS PLUS reads late — nothing came from any dealer; reception can remove it with *Abhi nahi chahiye*.
+
+**4 · Your yes or no on the pack-change build** (F-1000): count shortfalls in tablets, the strip size from the dealer's latest bill, one line on Amir's page when a pack changes. Until then LINVIZ's carry reads 7 strips of 10 — reception can change it to 11 (strips of 6) on Kedar's card.
+
+**Still yours from before, not urgent (on your board):**
+- Flacort 6 / Flemcort 6 — your word with Kedar;
+- one photo of Marg's purchase-import screen;
+- a phone number and bank details for **BASS**.
+
+**Held at your word:**
+- S438_COUNT_BOOK;
+- the lasting fix for an unchanged Marg re-export (parked 16-Oct, 13:47);
+- **Amir's *Aaj ka kaam* list — off, and nothing is added to it (D690);**
+- **NORTIMER — out of the 6-Sep count (D715);**
+- **"Shavez waits for Amir" — evaluated at your ask, not built;**
+- **the GST composition flow — the automation project's (06:37 22-Oct);**
+- **the rescan's number — as built (D759);**
+- **a substitute never closes a line by itself (D760);**
+- **older purchase bills (Apr–Aug) not scanned for the name list (D762).**
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S339 close
+
+1. **F-1000 — the pack-change build**, on your yes (item 4 above).
+2. **Marg's monthly reports in Shavez's and Amir's flow** (your note, points 1–4) — a plan and a mock-up first.
+3. **Kit II — the buying model** (shadow first).
+4. **Small:** F-987; the purchase page's staff send; `order.lead_days`.
+
+## ✅ DONE AT THE S339 CLOSE — 22-Oct-2026 (the Sanjeevni project)
+
+- ~~**The combined build (D761)**~~ — **LIVE** 18:58 (S629) and 19:1x (S631): one name list (69 dealer spellings from the September and October bills, D762); THIO Q AP, ZUPRINOR 5, POWERGESIC came and their re-orders dropped; LINVIZ 600 short 7 (36 of 100 tablets); Send back on every scan; Change dealer; the same paper twice; your words; set-aside scans kept out.
+- ~~**The publish of 22 Oct afternoon**~~ (`0bbadeb`, 17:08) · ~~**B-0176 out of the pharmacy lane**~~ (done by you) · ~~**A fresh chat for the combined build**~~ (this one).
+- ~~**LINVIZ 600 in Marg**~~ — ruled (D763): the 6-tablet strip is its own item, the old sold first and retired with ZZ.
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S338 close (22-Oct, afternoon)
 
