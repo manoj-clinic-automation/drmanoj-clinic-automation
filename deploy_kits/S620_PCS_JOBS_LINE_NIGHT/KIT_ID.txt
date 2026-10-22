@@ -1,0 +1,5 @@
+S620_PCS_JOBS_LINE_NIGHT
+session S336 (the parent), 22-Oct-2026
+The Clinic PCs page's jobs line holds the freshness check to its own schedule (its night gap to 08:05 is not late).
+board _numbers v578 -> v579 (kit S620; S618 and S619 are the Sanjeevni chat's)
+pin in: /root/finance/setup_notes.py 290722df ; out: see SUMS.md5 ; undo: --undo (backup /root/s620_backup/)
