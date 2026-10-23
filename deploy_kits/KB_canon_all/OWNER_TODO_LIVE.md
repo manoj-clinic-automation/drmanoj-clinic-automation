@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S336 close** (the parent), 23-Oct-2026, early morning — the parent's sections refreshed here (its 343 reserved); the Scan App sections as its S341 close wrote them (its 342 reserved); the Sanjeevni sections as its S339 close wrote them (its 340 open)
+# OWNER TO-DO — LIVE · refreshed at the **S340 close** (the Sanjeevni project), 23-Oct-2026, early morning — the parent's sections exactly as its S336 close wrote them (its 343 reserved), the Scan App sections exactly as its S341 close wrote them (its 342 open); the Sanjeevni sections rewritten here (its 344 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S336 close** (the parent), 23-Oct-2026, early morning — the parent's sections refreshed here (its 343 reserved); the Scan App sections as its S341 close wrote them (its 342 reserved); the Sanjeevni sections as its S339 close wrote them (its 340 open)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S341 close** (the Scan App project), 23-Oct-2026, early morning — the parent's sections exactly as its S331 close wrote them (its 336 open), the Sanjeevni sections exactly as its S339 close wrote them (its 340 open); the Scan App sections rewritten here (its 342 reserved)
 
@@ -560,6 +562,59 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S340 close (23-Oct, early morning)
+
+*Detail: `S340_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_344.md`. The same lines are on your System Board. This section supersedes the S339 one below it.*
+
+**1 · The publish** — this close's record. The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · Before 1 November — Marg stops selling these on the 1st** (they expire 11/2026): REEBORN D 5 tablets, RIFAVAX 550 5, VOM L 3 strips + 2. Prescribe or return. **Before 1 December:** INTACOXIA-60 57 strips + 10 (865 tablets), DOLOGESIC SP 18 strips, and five small batches. *Urgent because the expiry list will not be on any screen before the next build.*
+
+**3 · When you like — Ram Singh:** the three monthly exports as report buttons in Shavez's Marg login (Batch Stock whole store, salt-wise list, list of items). Your photographs and the steps:
+
+```
+D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S340\batch_stock_export\HOW_TO_EXPORT_BATCH_STOCK.md
+```
+
+```
+D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S340\item_salt_export\HOW_TO_EXPORT_SALT_LIST_AND_ITEM_LIST.md
+```
+
+**Still yours from before, not urgent (on your board):**
+- the two LINVIZ 600 messages — Darpan (sell the old strips of 10 first), Amir (the old item retired with ZZ when sold out, D763);
+- *Change dealer* on B-0161 and B-0167 — `https://followup.dr-manoj.in/finance/porders/s454/track`;
+- Flacort 6 / Flemcort 6 — your word with Kedar;
+- one photo of Marg's purchase-import screen;
+- a phone number and bank details for **BASS**.
+
+**Held at your word:**
+- S438_COUNT_BOOK;
+- the lasting fix for an unchanged Marg re-export (parked 16-Oct, 13:47);
+- **Amir's *Aaj ka kaam* list — off, and nothing is added to it (D690);**
+- **NORTIMER — out of the 6-Sep count (D715);**
+- **"Shavez waits for Amir" — evaluated at your ask, not built;**
+- **the GST composition flow — the automation project's (06:37 22-Oct);**
+- **the rescan's number — as built (D759);**
+- **a substitute never closes a line by itself (D760);**
+- **older purchase bills (Apr–Aug) not scanned for the name list (D762);**
+- **the pack-change build — not built (your "no", 04:07 23-Oct; F-1000).**
+
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — refreshed at the S340 close
+
+1. **The expiry, near-expiry, wrong-batch and dump list (D771)** — the mock-up first (your page, Darpan's line, Amir's line, the how-to card), then your yes, then one build.
+2. **Kit II — the buying model** (shadow first).
+3. **Small:** F-987; the purchase page's staff send; `order.lead_days`.
+
+## ✅ DONE AT THE S340 CLOSE — 23-Oct-2026 (the Sanjeevni project)
+
+- ~~**The publish of 22 Oct evening**~~ (`2ab0e2a`, 22:31) — landed; every pharmacy file of 22 Oct confirmed by the 23-Oct backup.
+- ~~**Yes or no on the pack-change build (F-1000)**~~ — **no** (04:07).
+- ~~**Marg's monthly reports (your note, points 1–4)**~~ — listed, checked, your four exports read; the flow settled (D771); the export steps recorded from your photographs (D772).
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S339 close (22-Oct, evening)
 
