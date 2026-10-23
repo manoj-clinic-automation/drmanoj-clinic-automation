@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S340 close** (the Sanjeevni project), 23-Oct-2026, early morning — the parent's sections exactly as its S336 close wrote them (its 343 reserved), the Scan App sections exactly as its S341 close wrote them (its 342 open); the Sanjeevni sections rewritten here (its 344 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S342 close** (the Scan App project), 23-Oct-2026, early morning — the parent's sections exactly as its S336 close wrote them (its 343 reserved), the Sanjeevni sections exactly as its S340 close wrote them (its 344 reserved); the Scan App sections rewritten here (its 345 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S340 close** (the Sanjeevni project), 23-Oct-2026, early morning — the parent's sections exactly as its S336 close wrote them (its 343 reserved), the Scan App sections exactly as its S341 close wrote them (its 342 open); the Sanjeevni sections rewritten here (its 344 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S336 close** (the parent), 23-Oct-2026, early morning — the parent's sections refreshed here (its 343 reserved); the Scan App sections as its S341 close wrote them (its 342 reserved); the Sanjeevni sections as its S339 close wrote them (its 340 open)
 
@@ -106,50 +108,56 @@
 
 *Detail: `START_HERE_SESSION_313.md` · `S311_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S310 close's (13-Oct, early morning); `S310_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_312.md` that chat's entry.*
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S341 close (23-Oct, early morning)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S342 close (23-Oct, early morning)
 
-*Detail: `S341_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_342.md`. The same lines are on your System Board (Y134 … Y136, Y119 … Y121).*
+*Detail: `S342_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_345.md`. The same lines are on your System Board (Y144 … Y148, Y119 … Y121, Y136).*
 
-**1 · The publish (Y134):** it carries this close's record. Papers only; the battery page and the X-ray page are already live.
+**1 · The publish (Y144):** it carries this close's record. Papers only; nothing on the server changes.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Procedure-room consumables — two answers, then say *final* (Y135).** The mock-up:
+**2 · Examination gloves (Y145):** how many pairs are in one box, 50 or 100? This sets the gloves allowance (2 pairs for a cast or slab, 1 for an ILI).
 
-```
-https://claude.ai/artifact/3Doc4wew9qUonpFxZtDD7W
-```
+**3 · The new Surgiwear drape (Y146):** its name or code, for the fibre-cast patients.
 
-(a) Should the list only count what is bought, or also keep a shelf count like stationery? (b) Which size of surgical gloves — or more than one size? The next chat of this project builds it from your answers.
+**4 · Yuvika's May 2026 slips (Y147):** if you find that month's WhatsApp. April, June, July, August and September are in hand.
 
-**3 · Scan the lab consumables bills from April 2026 (Y136, your word of 22:53).** Then the last three lab records on the Machines list (45, 46, 50) can go.
+**5 · Optional (Y148):** ask Yuvika about the 23-09 slip. Six Gloster 5" were charged below your usual rate. Is the quantity 5, or a lower rate?
 
-**4 · The battery bills still missing (Y120)** — the Vento's, and B.L. Computers' bill for the DTH lab's UPS battery; and the second AC's bill. Nothing is filled in by guess.
+**6 · Scan the lab consumables bills from April 2026 (Y136).** Then the last three lab records on the Machines list (45, 46, 50) can go.
 
-**5 · Many items on one screen (Y119) — when you are happy with it:** the card at the top of your Stationery page:
+**7 · The battery bills still missing (Y120)** — the Vento's, B.L. Computers' bill for the DTH lab's UPS battery, and the second AC's bill. Nothing is filled in by guess.
+
+**8 · Many items on one screen (Y119) — when you are happy with it:** the card at the top of your Stationery page:
 
 ```
 https://followup.dr-manoj.in/scanapp/stationery
 ```
 
-**6 · Fujifilm's tax invoice for the AMC (Y121)** — scan it when it comes.
+**9 · Fujifilm's tax invoice for the AMC (Y121)** — scan it when it comes.
 
 **Not urgent:** *Sorting desk*, *Machine pages* and *Batteries* for Shavez on the *Switches* card of `https://followup.dr-manoj.in/scanapp/`; Y83 (the Janitor's renewal list).
 
 **Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S341 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S342 close
 
 **Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat while the API credits are low (D765).**
 
-1. **Procedure-room consumables (D769)** — from your two answers and *final*; installed switched off.
+1. **Procedure-room goods (D773, D774)** — in this order: the Drive sheet's names; the mock-ups (desk lines with places, your page, the WhatsApp check, Shavez's morning screen) for your *final*; then three kits, staff screens switched off. The April–September history goes in after the first kit.
 2. **Photos too big to read** (F-1003) — a smaller copy for the reader, or the paper says so.
 3. **Keep the clearer scan of a duplicate** (your D761, from the pharmacy chat) in the scan app's own duplicate check.
 4. **D720, when you ask:** your family's documents and renewals in their own Google project.
 
 **Waits by your word:** the clinic's bills in the accountants' pack.
+
+## ✅ DONE AT THE S342 CLOSE — 23-Oct-2026 (the Scan App project)
+
+- ~~**The procedure-room mock-up's two questions** (Y135)~~ — answered: a month-end match rather than a stationery-style count; Yuvika's gloves are examination gloves (non-sterile), and the sterile ones are for OT.
+- ~~**The S341 record's publish** (Y134)~~ — landed 04:34 IST 23-Oct.
+- ~~**The procedure-room goods planned whole**~~ — D773 and D774, from your answers and five months of Yuvika's slips (nothing built yet).
 
 ## ✅ DONE AT THE S341 CLOSE — 22 → 23-Oct-2026 (the Scan App project)
 
