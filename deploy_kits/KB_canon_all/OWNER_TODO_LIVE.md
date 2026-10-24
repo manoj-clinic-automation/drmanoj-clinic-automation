@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S342 close** (the Scan App project), 23-Oct-2026, early morning — the parent's sections exactly as its S336 close wrote them (its 343 reserved), the Sanjeevni sections exactly as its S340 close wrote them (its 344 reserved); the Scan App sections rewritten here (its 345 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S345 close** (the Scan App project), 24-Oct-2026, evening — the parent's sections exactly as its S336 close wrote them (its 343 open), the Sanjeevni sections exactly as its S340 close wrote them (its 344 open); the Scan App sections rewritten here (its 346 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S342 close** (the Scan App project), 23-Oct-2026, early morning — the parent's sections exactly as its S336 close wrote them (its 343 reserved), the Sanjeevni sections exactly as its S340 close wrote them (its 344 reserved); the Scan App sections rewritten here (its 345 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S340 close** (the Sanjeevni project), 23-Oct-2026, early morning — the parent's sections exactly as its S336 close wrote them (its 343 reserved), the Scan App sections exactly as its S341 close wrote them (its 342 open); the Sanjeevni sections rewritten here (its 344 reserved)
 
@@ -108,21 +110,21 @@
 
 *Detail: `START_HERE_SESSION_313.md` · `S311_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S310 close's (13-Oct, early morning); `S310_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_312.md` that chat's entry.*
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S342 close (23-Oct, early morning)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S345 close (24-Oct, evening)
 
-*Detail: `S342_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_345.md`. The same lines are on your System Board (Y144 … Y148, Y119 … Y121, Y136).*
+*Detail: `S345_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_346.md`. The same lines are on your System Board (Y149, Y145 … Y148, Y119 … Y121, Y136).*
 
-**1 · The publish (Y144):** it carries this close's record. Papers only; nothing on the server changes.
+**1 · The publish (Y149):** it carries this close's record. Papers only; nothing on the server changes.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Examination gloves (Y145):** how many pairs are in one box, 50 or 100? This sets the gloves allowance (2 pairs for a cast or slab, 1 for an ILI).
+**2 · Examination gloves (Y145):** how many pairs are in one box, 50 or 100? It goes on your Procedure room page (the gloves allowance).
 
 **3 · The new Surgiwear drape (Y146):** its name or code, for the fibre-cast patients.
 
-**4 · Yuvika's May 2026 slips (Y147):** if you find that month's WhatsApp. April, June, July, August and September are in hand.
+**4 · Yuvika's May 2026 slips (Y147):** if you find that month's WhatsApp. April, June, July, August and September are entered.
 
 **5 · Optional (Y148):** ask Yuvika about the 23-09 slip. Six Gloster 5" were charged below your usual rate. Is the quantity 5, or a lower rate?
 
@@ -142,16 +144,24 @@ https://followup.dr-manoj.in/scanapp/stationery
 
 **Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S342 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S345 close
 
-**Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat while the API credits are low (D765).**
+**Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat while the API credits are low (D765). Kits 2 and 3 start only at your word, after your weekly limit resets (Saturday 24-Oct, 10:30 PM).**
 
-1. **Procedure-room goods (D773, D774)** — in this order: the Drive sheet's names; the mock-ups (desk lines with places, your page, the WhatsApp check, Shavez's morning screen) for your *final*; then three kits, staff screens switched off. The April–September history goes in after the first kit.
-2. **Photos too big to read** (F-1003) — a smaller copy for the reader, or the paper says so.
-3. **Keep the clearer scan of a duplicate** (your D761, from the pharmacy chat) in the scan app's own duplicate check.
-4. **D720, when you ask:** your family's documents and renewals in their own Google project.
+1. **Procedure room, Kit 2** — your signed order scanned and joined to Yuvika's delivery slip; the month-end check of her WhatsApp (not scanned · quantity differs · rate changed · the month's total).
+2. **Procedure room, Kit 3** — Shavez's next-morning screen (switched off until you say), use and stock, *Order now*, the month-end match.
+3. **Photos too big to read** (F-1003) — a smaller copy for the reader, or the paper says so.
+4. **Keep the clearer scan of a duplicate** (your D761, from the pharmacy chat) in the scan app's own duplicate check.
+5. **D720, when you ask:** your family's documents and renewals in their own Google project.
 
 **Waits by your word:** the clinic's bills in the accountants' pack.
+
+## ✅ DONE AT THE S345 CLOSE — 23 → 24-Oct-2026 (the Scan App project)
+
+- ~~**The S342 record's publish** (Y144)~~ — landed 08:21 IST 23-Oct.
+- ~~**Procedure room, Kit 1**~~ — live 09:20 IST 23-Oct: your page `https://followup.dr-manoj.in/scanapp/procroom`, the desk's lines with their places and no rupee, your list of 31.
+- ~~**The April–September history**~~ — entered from your photos: ₹27,505, the same as the photos; the 31-07 needle in the Procedure room at your word.
+- ~~**Shavez's Drive sheet**~~ — the same names as the system (32 rows).
 
 ## ✅ DONE AT THE S342 CLOSE — 23-Oct-2026 (the Scan App project)
 
