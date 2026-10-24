@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S344 close** (the Sanjeevni project), 24-Oct-2026, evening — the parent's sections exactly as its S343 close wrote them (its 347 reserved), the Scan App sections exactly as its S345 close wrote them (its 346 open); the Sanjeevni sections rewritten here (its 348 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S347 close** (the parent), 24-Oct-2026, late evening — the parent's sections refreshed here (its 349 reserved); the Scan App sections exactly as its S345 close wrote them (its 346 open); the Sanjeevni sections exactly as its S344 close wrote them (its 348 open)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S344 close** (the Sanjeevni project), 24-Oct-2026, evening — the parent's sections exactly as its S343 close wrote them (its 347 reserved), the Scan App sections exactly as its S345 close wrote them (its 346 open); the Sanjeevni sections rewritten here (its 348 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S343 close** (the parent), 24-Oct-2026, evening — the parent's sections refreshed here (its 347 reserved); the Scan App sections exactly as its S345 close wrote them (its 346 reserved); the Sanjeevni sections exactly as its S340 close wrote them (its 344 open)
 
@@ -251,7 +253,7 @@ https://followup.dr-manoj.in/scanapp/stationery
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S343 close (24-Oct, evening)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S347 close (24-Oct, late evening)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -261,21 +263,23 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record only (the plan). Nothing changes on the server.
+**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this close's record only. Nothing changes on the server — the four changes are already live.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+**2 · ONE ANSWER — is a UPI payment taken on the POS machine typed as "Debit Card" in Docterz?** On 23-Oct five such bills show in the bank as UPI. Yes → the day check stops listing them; no → they stay as staff corrections. One word in the chat is enough.
+
+**3 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**3 · THE TWO FINANCE PASSWORDS shown in chat on 21-Aug — change them** (the weekly audit, board Y106). The next chat prepares it so that it is one server line from you.
+**4 · THE TWO FINANCE PASSWORDS shown in chat on 21-Aug — change them** (the weekly audit, board Y106). The next chat prepares it so that it is one server line from you.
 
-**4 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
+**5 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
 
 **IF THE PORTAL STOPS — the first steps run by themselves; your guide says what already ran:**
 
@@ -285,47 +289,63 @@ https://claude.ai/artifact/H5W1T3WPNm85t2peTnNnfP
 
 **LATER — none of these is urgent**
 
-**5 · THE SBI DOWNLOADS still missing from September's pack** — the HUF savings (July–September), your PPF and Dr Bhawna's PPF (April–September). A PPF statement appeared in your Downloads on 23-Oct (`D:\Downloads\PPFstatement01042025_30092026.pdf`) — add it with *Add statements* on the packs page, or tell the next chat to place it.
+**6 · THE SBI DOWNLOADS still missing from September's pack** — the HUF savings (July–September), your PPF and Dr Bhawna's PPF (April–September). A PPF statement appeared in your Downloads on 23-Oct (`D:\Downloads\PPFstatement01042025_30092026.pdf`) — add it with *Add statements* on the packs page, or tell the next chat to place it.
 
-**6 · RAGHAV — the Zerodha papers to your personal email** from now on.
+**7 · RAGHAV — the Zerodha papers to your personal email** from now on.
 
-**7 · RANJEET'S LOGIN** — the password is yours to set.
+**8 · RANJEET'S LOGIN** — the password is yours to set.
 
 ```
 https://followup.dr-manoj.in/portal/users
 ```
 
-**8 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.**
+**9 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.**
 
 ```
 https://followup.dr-manoj.in/finance/packs?month=2026-09
 ```
 
-**9 · THE RECEPTION PC'S WINDOWS** — your decision. **10 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, into `D:\Downloads`. **11 · THE ARMS LICENCE — submit in November.**
+**10 · THE RECEPTION PC'S WINDOWS** — your decision. **11 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, into `D:\Downloads`. **12 · THE ARMS LICENCE — submit in November.**
 
-**WHEN IT HAPPENS — not a duty:** a patient's WhatsApp alert — tap it and the chat opens in your inbox · **anything you want me to read on WhatsApp: forward it to the clinic WhatsApp number and say so in the chat** · a `[WA send refused]` mail · a phone line saying the server fixed (or could not fix) a part · a portal alert · a POS total waiting for your OK.
+**WHEN IT HAPPENS — not a duty:** a patient's WhatsApp alert — tap it and the chat opens in your inbox · **anything you want me to read on WhatsApp: forward it to the clinic WhatsApp number and say so in the chat** · a `[WA send refused]` mail · a phone line saying the server fixed (or could not fix) a part · a portal alert · a POS total waiting for your OK · **a Free / Not paid line from the day check waiting for your Approve / Reject**.
 
 ```
 https://followup.dr-manoj.in/portal/inbox
 ```
 
+**Your new tiles (no duty):** *Day check* and *Parchi desk* on your PWA —
+
+```
+https://followup.dr-manoj.in/finance/clinic/check/mine
+```
+
+```
+https://followup.dr-manoj.in/finance/slips/desk
+```
+
 **Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C) · the follow-up tracker on the server — "later" (12-Oct) · Bhati's later features.
 
-*Ticked by you or done, and off this list: the S336 publish (23-Oct 08:21) · the accountants' "Tally data needed" mail (sent 22-Oct 08:52) · the CA's tax papers (arrived 22–23 Oct; on your PC in `D:\Downloads\Accounts\Tax_papers`).*
+*Ticked by you or done, and off this list: the S343 publish (24-Oct 20:56) · your four publishes and server lines of 24-Oct evening · the S336 publish (23-Oct 08:21) · the accountants' "Tally data needed" mail (sent 22-Oct 08:52) · the CA's tax papers (on your PC in `D:\Downloads\Accounts\Tax_papers`).*
 
 *Closed by your word and not on this list: everything listed so at the S336 close.*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **First — the day's corrections page (your "build in next session"):** as soon as the morning register is saved, the day is checked patient by patient against the parchi, Docterz and the bank. The *docterz differs* chip opens the day: what is missing in Docterz (by name, with the amount), which payment modes are wrong, which parchis to fix — tap buttons, no typing; Shivani, Alisha and Shavez do the Docterz lines, Shavez the parchi lines; your home line shows the counts, and *"Re-export <day> from Docterz"* when they are done.
-2. **The parchi desk page:** OPD, X-ray/Proc and Blood test on one laptop page, taps instead of typing, a warning on a duplicate item, no refresh, no Paid/Done ticks. Yours to use too.
-3. **The staff's morning duty list** carries each day's correction lines by name.
-4. **Zerodha on the packs page** (you and Dr Bhawna; a password box for the locked one).
-5. **The Tally check** — when the accountants reply. **Union Bank** — I ask you once which accounts. **The Sanjeevni GST returns.**
-6. **Small, my own:** as at the S336 close.
-7. **On your word:** as at the S336 close. **Held / parked:** as at the S336 close.
+1. **First — your answer on Debit Card / UPI**, then one rule in the day check if it is yes.
+2. **Watch the day check's first real morning** (25-Oct) and the staff's lists; anything wrong is fixed first.
+3. **Zerodha on the packs page** (you and Dr Bhawna; a password box for the locked one).
+4. **The Tally check** — when the accountants reply. **Union Bank** — I ask you once which accounts. **The Sanjeevni GST returns.**
+5. **Small, my own:** as at the S336 close.
+6. **On your word:** as at the S336 close. **Held / parked:** as at the S336 close.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S347 CLOSE — 24-Oct-2026 (the parent)
+
+- ~~**"EOS, BUILD IN NEXT SESSION"** — the day's corrections page (24-Oct)~~ — live 21:4x (S636): 22-Oct and 07-Oct read exactly as the analysis.
+- ~~**"do 775"** — the parchi desk~~ — live 22:1x (S639).
+- ~~**"go"** — the staff's lists, the re-export line, "not fixed"~~ — live 22:3x (S640).
+- ~~**"Morning match line now overlaps … show me"** · **"design a way where all can see the bank arrival part …"** · **"I should also get this as a tile in my PWA … and for the slip work … also should have a tile"** · **"build"**~~ — live 22:5x (S641; D781).
 
 ## ✅ DONE AT THE S343 CLOSE — 23 → 24-Oct-2026 (the parent)
 
