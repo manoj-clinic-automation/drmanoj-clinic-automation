@@ -1,0 +1,6 @@
+8a116cbda12e0e2173925c1ae73ed3f8  finance/order_rules.py
+438714b8d5c094a9ee7cdc71731b44e0  finance/porders_s454.py
+ad441b1dabf489e1bd54bb5aa62310a4  finance/spine/spine_read.py
+c5d019ef62d1231502dbc28f2b7833ef  finance/spine/order_rehearsal.py
+a05229e1b74f5cf629d36e0f9434aeee  finance/spine/selftest_spine.py
+885f6f31571ae19d20b8cb065080ad0b  finance/finance_ui/finance_approvals.html
