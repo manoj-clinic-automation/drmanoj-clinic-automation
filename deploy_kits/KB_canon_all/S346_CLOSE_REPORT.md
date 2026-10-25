@@ -1,0 +1,28 @@
+# S346 CLOSE REPORT — the Scan App project, 24 → 25-Oct-2026 (v18's A17, rows 0–16; for the assistant)
+
+*Session 346:*
+- *opened 20:47 IST 24-Oct (board `_numbers` v634 → v635, 20:47:30 IST) and closed at the owner's "eos, do your pendings in next fresh chat" at 07:4x IST 25-Oct (the clock tool read 07:45:35 IST as the close began);*
+- *connected: `D:\Downloads`, `D:\dr-manoj-git`, `F:\ClinicBackup` (the device shell), the owner's built-in browser (his logged-in session);*
+- *code changed — run as **EOS** (C: the commits are his publishes; B: no Gmail note — no manual health check was done);*
+- *the canon was built in the cloud workspace from the staged canon (`/home/claude/eos346/build1.py`, `build2.py`), verified there, and placed in `KB_canon_all` after the one board write;*
+- *clock times read from the clock tool, the commit stamps in `.git/logs/HEAD`, the bundle's BUNDLE_INFO and the board's own claims.*
+
+| # | step | state |
+|---|---|---|
+| 0 | The read before anything | **DONE at 07:4x IST 25-Oct.** Since S345: the parent's S347 and the Sanjeevni chat's S348 closed (Register v5.186, Archive v1.183, Fault v2.170, Runbook v266 — each held at the manifest's md5 when staged); the parent's 349 and the Sanjeevni chat's 350 open. The board read at v667 (43 claims; F-1024 taken by the parent's S349, kits S644–S646 by S349 / S350); the close's batch was refused three times by its pins and re-read at v669, v670 and v671 (the parent's S645 and S646 installed, kit S647 taken; **the NK Pathology chat took session 351** at 07:55 IST — so this close reserves 352), `_claude_status` v448, `_page` v60. Waiting for this project: 0 notes, **2 messages** (`parent_S343_1`, `parent_S349_1`) — both answered in the batch. HEAD = `origin/main` = `61685e2a` (07:43:43 IST 25-Oct, the parent's S349); no `*.lock` under `.git`. |
+| 1 | Archive (A1) | **DONE.** §S346 appended. The first 2,473,178 B are byte-identical to v1.183 (`c6cc415c…`, the manifest's pin); v1.184 is 2,479,902 B, `f1effd850c8e884bb09360c76b521f4a`. |
+| 2 | Fault Register | **DONE — none minted.** §7.105: the review's blockers were the kits' own, fixed before each publish; F-1011 (S637) and F-1012 (S635) CLOSED; F-1013, F-1003 OPEN; F-513 pending 1; the drift. v2.171 `85eca7da127f89ad5b4ad6499e825e18` (prefix 1,174,842 B = v2.170 proven). |
+| 3 | KB Register (A2) | **DONE.** v5.187 `c15e5adee25b81db22f80d764f0aa951` (1,798,516 B): the H1 (v5.186 retained); §S346 above §S348 — six rows; the decisions index (D782, D783); the changelog; the how-to clause; the END marker with next free D784 · F-1025 · A-D25 · kit S648 · session 353. |
+| 4 | Manifest (A7) + its four surfaces (A7b) | **DONE.** The narrative blockquote, the STATUS line (S348's retained), nine CURRENT rows (nine superseded marked), the footer. |
+| 5 | Runbook + START_HERE (A3/A4) | **DONE.** Runbook v267 (§2C rewritten; §3 line; v266 header retained); `START_HERE_SESSION_352.md` (352 reserved; its A-list holds the open's moved steps; B starts with the parent's ask). |
+| 6 | `OWNER_TODO_LIVE` (A10, A10b) | **DONE.** The Scan App's ⭐0 and ⭐1 rewritten, DONE at S346 added; nothing in ⭐0 that the assistant could do. |
+| 7 | Live pins (A8, A8a, A8b) | **DONE.** `live_pins_S346close.txt`: 845 (VPS 751, SHORT 21, BLIND 73), `register_pin_verified: yes`; this project's DECLARED-PENDING 1 (`procroom.py` 7b936d6f); its manifest row written; `MD5SUMS_ALL.txt` rows for every file written here. The 25-Oct bundle (01:35:05 IST) read at this close: `sorting_desk.py` ca9fda74 and `procroom.py` ad0815e1 equal. |
+| 8 | The one board write | **DONE at 07:57 IST 25-Oct**, one atomic batch: `_numbers` v671 → v672 (the close line; D782, D783; session 352 reserved, session_next 353), `_claude_status` v448 → v449 (lastRead, nextFree, scanapp, session overwritten), `_page` v60 → v61 (Y149 done; Y145, Y146 reworded; Y156 the publish, Y157 the shelf counts; four tell lines). Messages answered and marked read: `parent_S343_1`, `parent_S349_1`. |
+| 9 | The page's code | **Not republished** — the lists are data. |
+| 10 | Papers (A13) | **DONE.** The brief in project knowledge, `03_WORKING_PAPERS\S346\` and loose on the SSD (`F:\ClinicBackup\DrManojClinic_Automation\03_BUILD_BRIEFS\`); every project-knowledge document of this close also in `03_WORKING_PAPERS\S346\`; `00_INDEX.md` row. |
+| 11 | New live files (A12b) | `procroom.py` comes back whole from `deploy_kits/S643_ILI_KIT/` and every bundle after 26-Oct; `sorting_desk.py` from S635's maker and the bundle; his rates, photos and counts live in `assets.db` and `uploads/procroom_month/` — both in the scan app's nightly backup leg (`assetapp_backup.py` tars the whole uploads folder, read at this close) — by design out of the repository. |
+| 12 | The publish gates | **DONE.** The three kits: 21, 20 and 19 files, none hit by a `.gitignore` rule, the number gate clean (run at each build). This close's canon: .md / .txt files only, none ignored; the number gate run on them. |
+| 13 | Publish (A16) | **NAMED:** `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat` — pending in it: this close's canon and papers. The S345 record landed 20:46:20 IST 24-Oct (`4efa0bf3`); S635 (`d4110b93`), S637 (`ae6227e0`), S643 (`2e48b3e6`) landed and were installed. This one: the next open's first act. |
+| 14 | Prompts | One board batch; the project-knowledge writes. |
+| 15 | Moved to the open | Listed in `START_HERE_SESSION_352` §0 A: nightly reports · SSD mirror · sweep · tranche and measure · cold kit (due: the Register and Archive bumped) · the four numbers · what no store holds · the pin pass (pending 1). |
+| 16 | Retired (D683) | Notion session log · Drive upload · canon snapshot folder — retired, said. |

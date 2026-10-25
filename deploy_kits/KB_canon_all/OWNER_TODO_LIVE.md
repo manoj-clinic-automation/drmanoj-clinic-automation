@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S348 close** (the Sanjeevni project), 25-Oct-2026, just after midnight — the parent's sections exactly as its S347 close wrote them (its 349 reserved), the Scan App sections exactly as its S345 close wrote them (its 346 open); the Sanjeevni sections rewritten here (its 350 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S346 close** (the Scan App project), 25-Oct-2026, morning — the parent's sections exactly as its S347 close wrote them (its 349 open), the Sanjeevni sections exactly as its S348 close wrote them (its 350 open); the Scan App sections rewritten here (its 352 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S348 close** (the Sanjeevni project), 25-Oct-2026, just after midnight — the parent's sections exactly as its S347 close wrote them (its 349 reserved), the Scan App sections exactly as its S345 close wrote them (its 346 open); the Sanjeevni sections rewritten here (its 350 reserved)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S347 close** (the parent), 24-Oct-2026, late evening — the parent's sections refreshed here (its 349 reserved); the Scan App sections exactly as its S345 close wrote them (its 346 open); the Sanjeevni sections exactly as its S344 close wrote them (its 348 open)
 
@@ -118,51 +120,68 @@
 
 *Detail: `START_HERE_SESSION_313.md` · `S311_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S310 close's (13-Oct, early morning); `S310_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_312.md` that chat's entry.*
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S345 close (24-Oct, evening)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S346 close (25-Oct, morning)
 
-*Detail: `S345_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_346.md`. The same lines are on your System Board (Y149, Y145 … Y148, Y119 … Y121, Y136).*
+*Detail: `S346_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_352.md`. The same lines are on your System Board (Y156, Y157, Y145 … Y148, Y119 … Y121, Y136).*
 
-**1 · The publish (Y149):** it carries this close's record. Papers only; nothing on the server changes.
+**1 · The publish (Y156):** it carries this close's record. Papers only; the three kits are already live.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Examination gloves (Y145):** how many pairs are in one box, 50 or 100? It goes on your Procedure room page (the gloves allowance).
+**2 · A shelf count for each product (Y157)** on your Procedure room page, *Used and in stock*. The stock starts from it.
 
-**3 · The new Surgiwear drape (Y146):** its name or code, for the fibre-cast patients.
+```
+https://followup.dr-manoj.in/scanapp/procroom
+```
 
-**4 · Yuvika's May 2026 slips (Y147):** if you find that month's WhatsApp. April, June, July, August and September are entered.
+**3 · Examination gloves (Y145):** how many pairs are in one box, 50 or 100? Your page counts gloves bought in boxes of this size.
 
-**5 · Optional (Y148):** ask Yuvika about the 23-09 slip. Six Gloster 5" were charged below your usual rate. Is the quantity 5, or a lower rate?
+**4 · The new Surgiwear drape (Y146):** its name or code, and whether the D600 drape stays on casts and slabs.
 
-**6 · Scan the lab consumables bills from April 2026 (Y136).** Then the last three lab records on the Machines list (45, 46, 50) can go.
+**5 · October's month end:** Yuvika's WhatsApp photos, added on the Month end page.
 
-**7 · The battery bills still missing (Y120)** — the Vento's, B.L. Computers' bill for the DTH lab's UPS battery, and the second AC's bill. Nothing is filled in by guess.
+```
+https://followup.dr-manoj.in/scanapp/procroom/month
+```
 
-**8 · Many items on one screen (Y119) — when you are happy with it:** the card at the top of your Stationery page:
+**6 · Yuvika's May 2026 slips (Y147)**, if you find that month's WhatsApp. **Optional (Y148):** ask Yuvika about the 23-09 slip.
+
+**7 · Scan the lab consumables bills from April 2026 (Y136).** Then the last three lab records on the Machines list (45, 46, 50) can go.
+
+**8 · The battery bills still missing (Y120)** — the Vento's, B.L. Computers' bill for the DTH lab's UPS battery, and the second AC's bill. Nothing is filled in by guess.
+
+**9 · Many items on one screen (Y119) — when you are happy with it:** the card at the top of your Stationery page:
 
 ```
 https://followup.dr-manoj.in/scanapp/stationery
 ```
 
-**9 · Fujifilm's tax invoice for the AMC (Y121)** — scan it when it comes.
+**10 · Fujifilm's tax invoice for the AMC (Y121)** — scan it when it comes.
 
 **Not urgent:** *Sorting desk*, *Machine pages* and *Batteries* for Shavez on the *Switches* card of `https://followup.dr-manoj.in/scanapp/`; Y83 (the Janitor's renewal list).
 
 **Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S345 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S346 close
 
-**Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat while the API credits are low (D765). Kits 2 and 3 start only at your word, after your weekly limit resets (Saturday 24-Oct, 10:30 PM).**
+**Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat while the API credits are low (D765). Your word at the close: "do your pendings in next fresh chat".**
 
-1. **Procedure room, Kit 2** — your signed order scanned and joined to Yuvika's delivery slip; the month-end check of her WhatsApp (not scanned · quantity differs · rate changed · the month's total).
-2. **Procedure room, Kit 3** — Shavez's next-morning screen (switched off until you say), use and stock, *Order now*, the month-end match.
-3. **Photos too big to read** (F-1003) — a smaller copy for the reader, or the paper says so.
-4. **Keep the clearer scan of a duplicate** (your D761, from the pharmacy chat) in the scan app's own duplicate check.
+1. **Shavez's count and October** — the number of days still to fill, for his morning list (the clinic chat's tile, S646), and *Baaki din* from 1 October for his backfill.
+2. **Photos too big to read** (F-1003) — a smaller copy for the reader; the month end's photos too.
+3. **Keep the clearer scan of a duplicate** (your D761) in the scan app's own duplicate check.
+4. **Small points from the reviews** (a retired item, the month-end editor's typed rates, S633's points).
 5. **D720, when you ask:** your family's documents and renewals in their own Google project.
 
 **Waits by your word:** the clinic's bills in the accountants' pack.
+
+## ✅ DONE AT THE S346 CLOSE — 24 → 25-Oct-2026 (the Scan App project)
+
+- ~~**The S345 record's publish** (Y149)~~ — landed 20:46 IST 24-Oct (`4efa0bf3`).
+- ~~**Procedure room, Kit 2**~~ — live 21:41 IST 24-Oct: your order on the desk, slips joined and filled from it, awaiting / no order, the month-end WhatsApp check.
+- ~~**Procedure room, Kit 3**~~ — live 22:15 IST 24-Oct: Shavez's *Kal ke procedures*, used and in stock, *Order now*, the month-end match; **switched on by you 07:0x IST 25-Oct**.
+- ~~**ILI KNEE's items**~~ — live 06:48 IST 25-Oct; gloves on an ILI set to 0 by you.
 
 ## ✅ DONE AT THE S345 CLOSE — 23 → 24-Oct-2026 (the Scan App project)
 
