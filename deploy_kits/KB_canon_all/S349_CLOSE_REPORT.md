@@ -1,0 +1,29 @@
+# S349 CLOSE REPORT — the parent, 25-Oct-2026 (for the assistant; END_OF_SESSION_PROMPT_v18 A17)
+
+Connected this session: `D:\Downloads`, `D:\dr-manoj-git`, `F:\ClinicBackup` (manojz; the device shell worked) and the owner's built-in browser (signed in as `manoj`). The close began 08:40 IST at *"do EOS here and build in a fresh chat"*.
+
+| # | step | state |
+|---|---|---|
+| 0 | The read before anything | **DONE.** `KB_canon_all` listed 08:4x IST: first built onto the Scan App's S346 files; **then the board's re-read at 08:5x (`_numbers` v679, `_page` v62, `_claude_status` v450) showed the Sanjeevni chat's S350 close had taken D785 and reserved 353, and placed Register v5.188, Archive v1.185, Fault v2.172, Runbook v268 at 08:49 IST (unpublished)** — so every piece was renumbered (D786, D787, session 354; Register v5.189, Archive v1.186, Fault v2.173 §7.107, Runbook v269) and rebuilt onto S350's files; the first build was discarded unplaced. Board read once: `_numbers` v678 (61,366 B), `_page` v61 (131,640 B), `_claude_status` v449 (8,199 B); the newest lines are the Scan App chat's 352 (S648) and the Sanjeevni chat's S644 INSTALLED; unread messages 3 — `scanapp_S346_1` (to the parent: answered by S646 and `parent_S349_1`), `parent_S329_1` (to the Growth chat — left), the owner's growth note of 22-Oct (the Growth chat's — left, quoted on the board). HEAD = origin = `c79ff2e3`, no `*.lock`. |
+| 1 | Archive | **DONE.** §S349 appended; v1.185's 2,490,571 B prefix proven by md5; v1.186 = 2,500,707 B. |
+| 2 | Fault Register | **DONE.** §7.107: F-1024 (taken on the board at 07:2x, v663, the moment it was found; CLOSED by S645); F-1022 OPEN; F-513 the parent 7; the drift. v2.172's 1,181,745 B prefix proven; v2.173 = 1,185,373 B. |
+| 3 | KB Register | **DONE.** H1 (v5.188 retained); §S349 table of six rows — `aaj_seed.py` 98f63364, `portal.py` 844166b1, `tile_grants.json` 025f8ab9 each **the installer's read-back on the box, DECLARED-PENDING until the 26-Oct bundle**, and the three kit gates; D786, D787; the changelog; the how-to-use clause; the END marker. |
+| 4 | Manifest + its four surfaces | **DONE.** The narrative blockquote, the STATUS line, eight rows superseded and eight added, the footer. |
+| 5 | Runbook + START_HERE | **DONE.** Runbook v269 (§0, §1X, §2A, §3); `START_HERE_SESSION_354.md` — its §0 A lists the moved steps as the open's first work, §0 B is D786. |
+| 6 | `OWNER_TODO_LIVE` + nothing that is not his | **DONE.** The parent's ⭐0 / ⭐1 / DONE S349 rewritten; every ⭐0 item is a double-click, an answer, a password, a GUI step or a call only he can make. |
+| 7 | Live pins + its row + canon sums | **DONE.** `live_pins_S349close.txt` 851 rows (VPS 754 · SHORT 21 · BLIND 76), `register_pin_verified: yes`; **the parent's DECLARED-PENDING 7** (3 + the four outside every bundle); its manifest row; `MD5SUMS_ALL.txt` rebuilt over the placed folder — count and verdict in the chat's last message. The server's clone rides the next install line's own pull. |
+| 8 | The one board write | **DONE** at the batch: D786, D787 taken, session 354 reserved, the close line — pinned at `_numbers` v680 and written as v681 (`_claude_status` v451, `_page` v63, `scanapp_S346_1` v2); a first try pinned at v679 was refused whole because the Scan App's S648 PLACED line had landed — nothing written, re-read, resent; `_claude_status` (parent key, session, nextFree); `_page` (the parent's `yours`, `told`, `tell`); `scanapp_S346_1` marked read. Versions in the chat's last message. |
+| 9 | The page's code | **Not republished** — no code change; the lists are data (D684). |
+| 10 | Papers | **DONE.** The brief in project knowledge, `03_WORKING_PAPERS\S349\` and `F:\ClinicBackup\DrManojClinic_Automation\03_BUILD_BRIEFS\`; every document written to project knowledge also in `03_WORKING_PAPERS\S349\`; `00_INDEX.md` row. Evidence (the board reads) in `_EVIDENCE\S349\`. |
+| 11 | New live files | **DONE.** None new; the three moved files come back from their kits in the repository (each kit holds the whole file) and from the 26-Oct bundle. |
+| 12 | The publish gates | **DONE.** S645 7 files, S646 8, S647 7 and this close's 11 canon files held against `.gitignore` (last match wins; `!deploy_kits/*/tile_grants.json` re-includes S646's) — none ignored. The number gate (`NO_PHONE_NUMBERS.py`) clean on each kit at placing and on this close's files. |
+| 13 | Publish | **Named:** `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat` — this close's record only; nothing on the server changes. Verified landed at the next open (START_HERE_SESSION_354 §0 A2). |
+| 14 | Prompts | One: the board batch. (This session's three publishes and three server lines were the builds', each asked once.) |
+| 15 | Moved to the open | In START_HERE_SESSION_354 §0 A: nightly reports · SSD mirror · sweep · tranche and measure · cold kit when due · the four numbers · what no store holds · the pin pass on the 26-Oct bundle · the statement road. |
+| 16 | Retired (D683) | Notion session log — not written · Drive upload — not done · canon snapshot folder — not taken · the cold kit — not due (last: the S343 open, 23-Oct). |
+
+**The four numbers (the parent's files):** drift — `aaj_seed.py` 4 (S640, S641, S645, S647: the next patch reads it whole and consolidates first), `portal.py` 3, the rest as at S347 — none at 5 · dead — none added · stale — none · **pending 7**.
+
+**The money:** none spent — every kit built in the chat. **Found:** F-1024 (fixed the same morning). **Ruled:** D786 (the attendance correction flow — the next build), D787.
+
+**Project knowledge:** measured at the open 1,532,215 of 2,000,000 B. This close adds the brief, this report, the START_HERE, the runbook and the pin list, and takes out the superseded v265 runbook and S347 pin list (each with its survivor proven by hash in `KB_canon_all`) — the measure at the next open.
