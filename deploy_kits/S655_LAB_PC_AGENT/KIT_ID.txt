@@ -1,0 +1,3 @@
+kit id S655_LAB_PC_AGENT
+session 351 (the NK Pathology chat) 25-Oct-2026 D784
+finance_app.py FROM f2e86ca7919abc9e660b1bd5e811eebf (anchored, built live) · lab_door.py NEW · lab_agent.py NEW

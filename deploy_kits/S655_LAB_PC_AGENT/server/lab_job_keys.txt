@@ -1,0 +1,3 @@
+# lab_job_keys.txt -- PUBLIC keys that may SUBMIT a job to the lab PC through /finance/api/lab/jobs/submit, read a job's
+# state, and read the snapshot list. The secret stays on the owner's PC. S655.
+ddde1e752b711eeac765691131d2a6b4b072e26da38b7fbd68f636db92a28fd5  parent-manojz-lab

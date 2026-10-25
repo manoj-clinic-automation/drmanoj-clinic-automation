@@ -1,0 +1,4 @@
+# PUBLIC keys that may send jobs to the LAB agent through the clinic Drive (ToLab\jobs) or the server relay.
+# One line per key:  <64 hex characters of an Ed25519 public key>  <label>
+# The installer adds these to C:\ClinicLabAgent\authorized_keys.txt if they are not there.
+ddde1e752b711eeac765691131d2a6b4b072e26da38b7fbd68f636db92a28fd5  parent-manojz-lab (secret on the owner's PC: D:\Downloads\margsync\_config\lab_agent_key.txt; made 25-Oct-2026, S655)
