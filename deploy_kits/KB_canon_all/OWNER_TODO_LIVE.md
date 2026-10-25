@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S349 close** (the parent), 25-Oct-2026, morning — the parent's sections refreshed here (its 354 reserved); the Sanjeevni sections exactly as its S350 close wrote them (its 353 reserved); the Scan App sections exactly as its S346 close wrote them (its 352 open)
+# OWNER TO-DO — LIVE · refreshed at the **S352 close** (the Scan App project), 25-Oct-2026, midday — the Scan App sections refreshed here (its 355 reserved); the parent's sections exactly as its S349 close wrote them (its 354 open); the Sanjeevni sections exactly as its S350 close wrote them (its 353 open)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S349 close** (the parent), 25-Oct-2026, morning — the parent's sections refreshed here (its 354 reserved); the Sanjeevni sections exactly as its S350 close wrote them (its 353 reserved); the Scan App sections exactly as its S346 close wrote them (its 352 open)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S350 close** (the Sanjeevni project), 25-Oct-2026, morning — the parent's sections exactly as its S347 close wrote them (its 349 open), the Scan App sections exactly as its S346 close wrote them (its 352 reserved); the Sanjeevni sections rewritten here (its 353 reserved)
 
@@ -124,11 +126,11 @@
 
 *Detail: `START_HERE_SESSION_313.md` · `S311_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S310 close's (13-Oct, early morning); `S310_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_312.md` that chat's entry.*
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S346 close (25-Oct, morning)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S352 close (25-Oct, midday)
 
-*Detail: `S346_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_352.md`. The same lines are on your System Board (Y156, Y157, Y145 … Y148, Y119 … Y121, Y136).*
+*Detail: `S352_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_355.md`. The same lines are on your System Board (Y159, Y157, Y145 … Y148, Y119 … Y121, Y136).*
 
-**1 · The publish (Y156):** it carries this close's record. Papers only; the three kits are already live.
+**1 · The publish (Y159):** it carries this close's record. Papers only; the three kits are already live.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -144,7 +146,7 @@ https://followup.dr-manoj.in/scanapp/procroom
 
 **4 · The new Surgiwear drape (Y146):** its name or code, and whether the D600 drape stays on casts and slabs.
 
-**5 · October's month end:** Yuvika's WhatsApp photos, added on the Month end page.
+**5 · October's month end:** Yuvika's WhatsApp photos, added on the Month end page. Large photos are now read too.
 
 ```
 https://followup.dr-manoj.in/scanapp/procroom/month
@@ -168,17 +170,22 @@ https://followup.dr-manoj.in/scanapp/stationery
 
 **Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S346 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S352 close
 
-**Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat while the API credits are low (D765). Your word at the close: "do your pendings in next fresh chat".**
+**Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat while the API credits are low (D765).**
 
-1. **Shavez's count and October** — the number of days still to fill, for his morning list (the clinic chat's tile, S646), and *Baaki din* from 1 October for his backfill.
-2. **Photos too big to read** (F-1003) — a smaller copy for the reader; the month end's photos too.
-3. **Keep the clearer scan of a duplicate** (your D761) in the scan app's own duplicate check.
-4. **Small points from the reviews** (a retired item, the month-end editor's typed rates, S633's points).
-5. **D720, when you ask:** your family's documents and renewals in their own Google project.
+1. **Small points from the reviews** — one kit on the Procedure room file (a retired procedure or product, the month-end editor's typed rates, an old table's column, S633's points).
+2. **Small points from the duplicate kit** — only when a later kit touches those files.
+3. **D720, when you ask:** your family's documents and renewals in their own Google project.
 
 **Waits by your word:** the clinic's bills in the accountants' pack.
+
+## ✅ DONE AT THE S352 CLOSE — 25-Oct-2026 (the Scan App project)
+
+- ~~**The S346 record's publish** (Y156)~~ — landed 08:26 IST 25-Oct (`c79ff2e3`).
+- ~~**Shavez's count and October**~~ — live 09:04 IST: *Baaki din* from 1 October, and the count his *Aaj ka kaam* line reads (the clinic chat's S652, live 12:20).
+- ~~**Photos too big to read** (F-1003)~~ — live 10:04 IST: a smaller copy goes to the reader; your scan unchanged.
+- ~~**Keep the clearer scan of a duplicate** (your D761)~~ — live 10:40 IST: in the clinic's own lanes, only when the other scan is untouched.
 
 ## ✅ DONE AT THE S346 CLOSE — 24 → 25-Oct-2026 (the Scan App project)
 
