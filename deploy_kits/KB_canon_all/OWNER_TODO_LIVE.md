@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S347 close** (the parent), 24-Oct-2026, late evening — the parent's sections refreshed here (its 349 reserved); the Scan App sections exactly as its S345 close wrote them (its 346 open); the Sanjeevni sections exactly as its S344 close wrote them (its 348 open)
+# OWNER TO-DO — LIVE · refreshed at the **S348 close** (the Sanjeevni project), 25-Oct-2026, just after midnight — the parent's sections exactly as its S347 close wrote them (its 349 reserved), the Scan App sections exactly as its S345 close wrote them (its 346 open); the Sanjeevni sections rewritten here (its 350 reserved)
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S347 close** (the parent), 24-Oct-2026, late evening — the parent's sections refreshed here (its 349 reserved); the Scan App sections exactly as its S345 close wrote them (its 346 open); the Sanjeevni sections exactly as its S344 close wrote them (its 348 open)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S344 close** (the Sanjeevni project), 24-Oct-2026, evening — the parent's sections exactly as its S343 close wrote them (its 347 reserved), the Scan App sections exactly as its S345 close wrote them (its 346 open); the Sanjeevni sections rewritten here (its 348 reserved)
 
@@ -605,6 +607,38 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S348 close (25-Oct, just after midnight)
+
+*Detail: `S348_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_350.md`. The same lines are on your System Board. This section supersedes the S344 one below it.*
+
+**1 · The publish** — this close's record. The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · Before 1 November — Marg stops selling these on the 1st:** VOM L, REEBORN D, RIFAVAX 550 — prescribe or return. They are now on your expiry page (section 2), with December's seven (INTACOXIA-60 51 strips) below them:
+
+```
+https://followup.dr-manoj.in/finance/sanjeevni/expiry
+```
+
+**3 · Reception phone — two September payment messages unconfirmed:** A.A. Pharmaceuticals and Deepam Pharma. Look in the reception phone's WhatsApp; if the message is not there, tap *Bhejo* beside them on the reception phone:
+
+```
+https://followup.dr-manoj.in/finance/purchase/page/pay/2026-09
+```
+
+**4 · Shivani — the Marg reports-only login ID and password.** Her *Aaj ki reports* tile is live since 22:53 IST 24-Oct (D778).
+
+**Still yours from before, not urgent (on your board):** Ram Singh's three report buttons (`D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S340\batch_stock_export\HOW_TO_EXPORT_BATCH_STOCK.md`); whether Shavez's monthly *Stock expiry* export leaves his list (nothing reads it now — the Batch Stock replaces it); the two LINVIZ 600 messages; *Change dealer* on B-0161 and B-0167; Flacort 6 / Flemcort 6 with Kedar; one photo of Marg's purchase-import screen; BASS's phone number and bank details.
+
+## ✅ DONE AT THE S348 CLOSE — 24 → 25-Oct-2026 (the Sanjeevni project)
+
+- ~~**The expiry build — the mock-up, then your yes**~~ — your "yes" 21:47 (D780); **LIVE 22:53 IST 24-Oct (S642)**: your expiry page, Darpan's sell-first line, Amir's three cards, the late card's names, the NEFT-by-SMS button, Shivani's tile.
+- ~~**The publish of 24 Oct evening**~~ — landed 20:56:10 IST 24-Oct (`38230962`).
+- The new Marg reader on the medical PC (22:58) took the 23-Oct Batch Stock by itself; the 23:57 nightly filled your page — 4 expired, 14 near expiry, dump 25 orthotics + 36 medicines, 30 wrong batch.
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S344 close (24-Oct, evening)
 
