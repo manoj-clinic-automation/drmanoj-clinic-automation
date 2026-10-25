@@ -1,0 +1,7 @@
+# live_pins_S351close.txt -- the NK Pathology chat's pins at the S351 close, 25-Oct-2026 ~23:00 IST
+# status: DECLARED-PENDING until the 26-Oct nightly bundle carries them (installed 22:39 IST by the owner's line, md5 read back on the box)
+/root/finance/finance_app.py  1dd66af3dee7f5724b360e8737c74f0a  DECLARED-PENDING  (the parent's; FROM f2e86ca7 of the 25-Oct bundle; two anchored edits, S655)
+/root/finance/lab_door.py     1410793e4f50b645ed183d8898ef5147  DECLARED-PENDING  (NEW, this project's, S655)
+# the lab PC (not in any bundle; the agent's heartbeat carries agent_md5)
+C:\ClinicLabAgent\lab_agent.py   3f0d43e996c6b34a86059be43b299d02  installed 22:29 IST by the owner's double-click (S655)
+C:\ClinicLabAgent\agent_guard.py b9b34417b03329441f904bc4dc77d21e  installed 22:29 IST (S655)

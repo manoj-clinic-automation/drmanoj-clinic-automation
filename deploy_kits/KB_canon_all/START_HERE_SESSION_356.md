@@ -1,0 +1,18 @@
+# START HERE — SESSION 356 — written at the S351 close (the NK Pathology chat), 25-Oct-2026
+
+**Project: NK PATHOLOGY (the lab's chat).** Open in a fresh chat in this project, on manojz (the cloud session linked to his PC).
+1. Phase 0 as the Scan App prompt has it (SCANAPP_START_HERE_PROMPT_v1 §4, read for the shape): the board first (take the session number by a version-pinned write — **356 is RESERVED for the NK Pathology chat**), connect `D:\Downloads` · `D:\dr-manoj-git` · `F:\ClinicBackup` (and, for the lab road, ask for `H:\My Drive\Clinic Data Archive` — it is reached by the file tools only, never the shell), the three nightly reports, the canon gate, then this file.
+2. **Read:** `claude/S351_NK_PC_SPREADSHEETS_ROUTING.md` in the project (the whole of S351: the DTH statement analysis, D784, the lab PC inventory, kit S655 live) and `deploy_kits/S655_LAB_PC_AGENT/README.md`.
+3. **The first work:**
+   - A. **The 26-Oct bundle:** move the S655 pins from DECLARED-PENDING to equal — `/root/finance/finance_app.py` 1dd66af3 · `/root/finance/lab_door.py` 1410793e (both in `live_pins_S351close.txt`). Read the lab PC's heartbeat from Drive `Clinic Data Archive\FromLab\heartbeat.txt`: the PC is switched on ~08:30; expect SERVER "last accepted" and SNAPSHOT "last sent" ~08:35, then every 3 h.
+   - B. **The morning day page (the next kit, this project's):** mdbtools on the server (one `apt install mdbtools` line for the owner), a nightly job that turns the newest `/root/labdata/incoming/labpc_*.zip` into a SQLite read copy, and the page the owner described (§7A of the project document: bills by company — DTH classes · referring doctors · walk-ins; gross/discount/net; cash and UPI vs the ICICI POS feed already on the server; DTH bills with IPD/UHID/receipt no.; the error list). **Mock-up first, from `FromLab\snapshot\lab_20261025.mdb` (on Drive; patient data — never into a project doc), in the layout of the end-of-day Labmate PDF the owner will attach.** Then the one-tap staff rule and the slip number (§9 D).
+   - C. Small kit, with B or before: silence the "Chrome is NOT saving into Docterz exports" attention line in the lab heartbeat (config or a one-line edit in `lab_agent.py`); wire `lab_door.health_row` into the health page (ONE line in `finance_app.py` — the parent's; PLANNED line first).
+   - D. The DTH laptop's agent (the same kit, a second key) after the lab PC runs clean for a week.
+4. **Rules learned this session:** a text file in a kit is LF unless `.gitattributes` pins it CRLF (F-1026); the Drive folder on manojz is reached by `device_stage_files`/`device_commit_files` only; jobs to the lab PC are signed with `deploy_kits/S655_LAB_PC_AGENT/manojz/lab_sign.py` (secret `D:\Downloads\margsync\_config\lab_agent_key.txt`) and dropped into `Clinic Data Archive\ToLab\jobs\` (both files, .cmd then .sig); results come back in `FromLab\results\`.
+
+*The owner's questions still open (project document §6): did DTH pay the phantom ₹550 lines; the DTH/LAB split of the old statement format; the overhead percentages; whether DTH needs its receipt number on the statement; one end-of-day PDF.*
+
+## THE CANON AT THIS CLOSE
+This close wrote `START_HERE_SESSION_356`, `S351_CLOSE_REPORT`, `S351_BUILD_BRIEF`, `live_pins_S351close.txt` and their rows in `MD5SUMS_ALL.txt`. **The Register, the History Archive, the Fault Register and the Runbook were NOT advanced by this chat** (their formats are the parent's; a §S351 entry — kit S655 live, D784, F-1026 — is owed by the next close that touches them, and this file says so).
+
+*Written at the S351 close, 25-Oct-2026 ~23:00 IST.*
