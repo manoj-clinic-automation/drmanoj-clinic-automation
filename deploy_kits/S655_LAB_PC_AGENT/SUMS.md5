@@ -4,11 +4,11 @@ d734a533f193cb238cf31657a8e89a8d  README.md
 d4451d8d4d09b94523489d15948a0bd6  build/make_lab_door.py
 922792c7a38f50af01c83fdc1e961be1  install_S655_LAB_PC_AGENT.sh
 075ef19ca8596c3c9f5b2a1f59a288f1  labpc/INSTALL_LAB_AGENT.bat
-c9367b963a0e3d8309b785dd56aaeaa5  labpc/README_LABPC.txt
+965a26602e9221c245daf9cbae4fbd0a  labpc/README_LABPC.txt
 5f98ae3299da351cf6345cf58cec1517  labpc/REMOVE_CLAUDE_APP.bat
 b9b34417b03329441f904bc4dc77d21e  labpc/agent_guard.py
-eb72b770c7ab5dc9aacb4ba9ddc6d009  labpc/authorized_keys.txt
-7a359a6e2497877826a9743e78f7db93  labpc/config.json.kit
+740b323996083399d5fc19d91035a11f  labpc/authorized_keys.txt
+ab5eaeff13aa65ff4f6297d4992baee7  labpc/config.json.kit
 3f0d43e996c6b34a86059be43b299d02  labpc/lab_agent.py
 f169d9a54c9ca63fe04fb101cab9cdb7  manojz/lab_sign.py
 1410793e4f50b645ed183d8898ef5147  server/lab_door.py
