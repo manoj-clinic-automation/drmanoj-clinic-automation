@@ -1,0 +1,2 @@
+kit id S664_PAY_AND_NAMES
+project Sanjeevni (session 359, 26-Oct-2026) -- Sanjeevni files only (supplier_msg.py, bank_sms.py, purchase_app.py on S662 bytes); no PLANNED line needed (board v731)
