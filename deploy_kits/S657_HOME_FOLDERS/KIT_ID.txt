@@ -1,0 +1,2 @@
+kit id S657_HOME_FOLDERS
+project Sanjeevni (session 353, 26-Oct-2026) -- touches two of THE PARENT'S files (portal.py, tile_grants.json) and its approvals template; PLANNED on the board v714
