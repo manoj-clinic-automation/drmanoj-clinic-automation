@@ -1,0 +1,3 @@
+kit id S660_HOME_DECLUTTER
+project the parent (session 357, 26-Oct-2026) -- its own two files, built ON the Sanjeevni chat's S657 TO bytes; claimed on board/_numbers v716->v717; PLANNED there
+portal/portal.py 5f4f3738 -> fe9cc368 . portal/tile_grants.json 171f94f8 -> 83828b81
