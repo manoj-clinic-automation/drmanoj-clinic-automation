@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S352 close** (the Scan App project), 25-Oct-2026, midday — the Scan App sections refreshed here (its 355 reserved); the parent's sections exactly as its S349 close wrote them (its 354 open); the Sanjeevni sections exactly as its S350 close wrote them (its 353 open)
+# OWNER TO-DO — LIVE · refreshed at the **S354 close** (the parent), 26-Oct-2026, early morning — the parent's sections refreshed here (its 357 reserved); the Scan App sections exactly as its S352 close wrote them (its 355 open since 05:29 IST 26-Oct); the Sanjeevni sections exactly as its S350 close wrote them (its 353 open). *The NK Pathology chat keeps its list in its own project (its 356 reserved).*
+
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S352 close** (the Scan App project), 25-Oct-2026, midday — the Scan App sections refreshed here (its 355 reserved); the parent's sections exactly as its S349 close wrote them (its 354 open); the Sanjeevni sections exactly as its S350 close wrote them (its 353 open)
 
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S349 close** (the parent), 25-Oct-2026, morning — the parent's sections refreshed here (its 354 reserved); the Sanjeevni sections exactly as its S350 close wrote them (its 353 reserved); the Scan App sections exactly as its S346 close wrote them (its 352 open)
 
@@ -285,7 +287,7 @@ https://followup.dr-manoj.in/scanapp/stationery
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S349 close (25-Oct, morning)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S354 close (26-Oct, early morning)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -295,23 +297,37 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries this morning's record only. Nothing changes on the server — the three changes are already live.
+**1 · THE PUBLISH — one double-click, whenever you are at the PC.** It carries the record of 25 Oct only. Nothing changes on the server — the four changes are already live.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · ONE ANSWER, when you can — is a UPI payment taken on the POS machine typed as "Debit Card" in Docterz?** You said you will confirm. Yes → the day check stops listing them; no → they stay as staff corrections.
+**2 · ONE ANSWER — shall the day check disregard Docterz's payment mode for now?** You asked (25 Oct evening). My suggestion is yes: reception and Shavez stop getting *Payment mode wrong* lines; the bank statement stays the referee for the money; you get a monthly count of the mode errors. Say *yes* or *no*.
 
-**3 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+**3 · THE GLUCOMETER CHARGE — add "Blood sugar (glucometer)" ₹50 as a procedure on the sheets page** (one line); then Shavez adds it to slip 1403.
+
+```
+https://followup.dr-manoj.in/finance/clinic/sheets
+```
+
+**4 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**4 · THE TWO FINANCE PASSWORDS shown in chat on 21-Aug — change them** (the weekly audit, board Y106). The next chat prepares it so that it is one server line from you.
+**5 · THE TWO FINANCE PASSWORDS shown in chat on 21-Aug — change them** (the weekly audit, board Y106). The next chat prepares it so that it is one server line from you.
 
-**5 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
+**6 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** Until it has been restored once, **a hand-made backup onto the pen drive about once a week**.
+
+**FROM 1 NOVEMBER — once a month**
+
+**7 · APPROVE OCTOBER'S ATTENDANCE CORRECTIONS** when your console says *Attendance correction: October ready — approve & save*. Reception enters the signed sheet, Shavez checks it, then you change any day you want and press **Approve & save**. Nothing counts for salary until you do; the salary lock waits for it.
+
+```
+https://followup.dr-manoj.in/register/attcorr
+```
 
 **IF THE PORTAL STOPS — the first steps run by themselves; your guide says what already ran:**
 
@@ -321,23 +337,23 @@ https://claude.ai/artifact/H5W1T3WPNm85t2peTnNnfP
 
 **LATER — none of these is urgent**
 
-**6 · THE SBI DOWNLOADS still missing from September's pack** — the HUF savings (July–September), your PPF and Dr Bhawna's PPF (April–September). A PPF statement is in your Downloads (`D:\Downloads\PPFstatement01042025_30092026.pdf`) — add it with *Add statements* on the packs page, or tell the next chat.
+**8 · THE SBI DOWNLOADS still missing from September's pack** — the HUF savings (July–September), your PPF and Dr Bhawna's PPF (April–September). A PPF statement is in your Downloads (`D:\Downloads\PPFstatement01042025_30092026.pdf`) — add it with *Add statements* on the packs page, or tell the next chat.
 
-**7 · RAGHAV — the Zerodha papers to your personal email** from now on.
+**9 · RAGHAV — the Zerodha papers to your personal email** from now on.
 
-**8 · RANJEET'S LOGIN** — the password is yours to set.
+**10 · RANJEET'S LOGIN** — the password is yours to set.
 
 ```
 https://followup.dr-manoj.in/portal/users
 ```
 
-**9 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.**
+**11 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.**
 
 ```
 https://followup.dr-manoj.in/finance/packs?month=2026-09
 ```
 
-**10 · THE RECEPTION PC'S WINDOWS** — your decision. **11 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, into `D:\Downloads` (a file for 10-Sep → 23-Oct arrived on 24-Oct; the earlier years are still wanted). **12 · THE ARMS LICENCE — submit in November.**
+**12 · THE RECEPTION PC'S WINDOWS** — your decision. **13 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → today**, into `D:\Downloads` (a file for 10-Sep → 23-Oct arrived on 24-Oct; the earlier years are still wanted). **14 · THE ARMS LICENCE — submit in November.**
 
 **WHEN IT HAPPENS — not a duty:** a patient's WhatsApp alert — tap it and the chat opens in your inbox · **anything you want me to read on WhatsApp: forward it to the clinic WhatsApp number and say so in the chat** · a `[WA send refused]` mail · a phone line saying the server fixed (or could not fix) a part · a portal alert.
 
@@ -345,28 +361,35 @@ https://followup.dr-manoj.in/finance/packs?month=2026-09
 https://followup.dr-manoj.in/portal/inbox
 ```
 
-**Your new tile (no duty):** *Procedure room* in Assets & papers (and *Kal ke procedures*, Shavez's morning screen, under Patients) —
+**Staff's, not yours (watched by me at each open):** Shavez enters the four X-ray slips of 24-Oct by 31-Oct; October has 25 slip corrections waiting on his desk (24-Oct has 6).
 
-```
-https://followup.dr-manoj.in/scanapp/procroom
-```
+**Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C) · the follow-up tracker on the server — "later" (12-Oct) · Bhati's later features. **Deferred at your word (25-Oct, D789), to observe staff discipline:** the evening same-day check · the daily Docterz error feedback with counts · the month-end pack from register and slips.
 
-**Parked at your word, and not raised by me again:** the staff's WhatsApp alerts made loud · the mailbox clean-up of both accounts (club C) · the follow-up tracker on the server — "later" (12-Oct) · Bhati's later features.
-
-*Ticked by you or done, and off this list: the S347 publish · your three publishes and server lines of 25-Oct morning (S645 07:45, S646 07:55, S647 08:29) · the S343 publish · the S336 publish · the accountants' "Tally data needed" mail (sent 22-Oct 08:52) · the CA's tax papers (on your PC in `D:\Downloads\Accounts\Tax_papers`).*
+*Ticked by you or done, and off this list: the Debit Card / UPI answer (25-Oct 12:24, D788) · the S349 publish · your four publishes and server lines of 25-Oct (S650 10:03, S652 12:20, S653 12:44, S654 19:10) and the slip server line (13:47) · the S347 publish · the S343 publish · the S336 publish · the accountants' "Tally data needed" mail (sent 22-Oct 08:52) · the CA's tax papers (on your PC in `D:\Downloads\Accounts\Tax_papers`).*
 
 *Closed by your word and not on this list: everything listed so at the S336 close.*
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **First — the month-end Attendance correction sheet and its screens** (your mock-up of 25-Oct, D786), **live before 1-Nov**, shown to you on the live screens first.
-2. **Shavez's *Kal ke procedures* line on his duty list** — as soon as the scan app's count is live.
-3. **Your answer on Debit Card / UPI** — then one rule in the day check if it is yes.
+1. **First, my own housekeeping:** the staff-list file that has had six small changes since anyone read it whole (`aaj_seed.py`) — read whole, and tidied if needed.
+2. **Your answer on Docterz's payment mode** — one small change in the day check if it is yes.
+3. **From 1 November:** watch October's attendance correction run on the live screens, step by step, and fix anything that trips.
 4. **Zerodha on the packs page** · **the Tally check** when the accountants reply · **Union Bank** (I ask you once which accounts) · **the Sanjeevni GST returns.**
 5. **Small, my own:** a nightly line that notices a staff list that cannot load, before the staff do; and as at the S336 close.
 6. **On your word:** a duty-timings page with a *from* date · whether staff see the current month's earlier days · the punch listener's second step. **Held / parked:** as at the S336 close.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S354 CLOSE — 25 → 26-Oct-2026 (the parent)
+
+- ~~**"start"**~~ — the open's checks (09:0x).
+- ~~**D786 — the month-end attendance correction flow, live before 1-Nov**~~ — live 10:03 (S650); from 1-Nov on reception's list.
+- ~~**"go"** — Shavez's procedure-room line~~ — live 12:20 (S652).
+- ~~**The Debit Card / UPI answer**~~ — your words of 12:24 (D788); live 12:44 (S653).
+- ~~**Slip 1397 / 1398 — "analyse deeply … do not build"**, then "you do it for Shavez"~~ — put right with Shavez and your one server line (13:44 → 13:52): 23-Oct holds 1398, the patient's 1397 entered, the book 1401–1800, next 1408.
+- ~~**"do only the slips tools now"**~~ — live 19:10 (S654); the rest deferred (D789); the Docterz error categories by frequency given.
+- ~~**"How many slip corrections are pending in October"**~~ — 25 on 14 days.
+- ~~**"EOS"**~~ — this close. *Your payment-mode question waits for your yes (item 2 above).*
 
 ## ✅ DONE AT THE S349 CLOSE — 25-Oct-2026 (the parent)
 
