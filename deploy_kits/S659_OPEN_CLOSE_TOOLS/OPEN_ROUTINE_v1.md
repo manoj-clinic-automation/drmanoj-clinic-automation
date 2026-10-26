@@ -46,7 +46,7 @@ A later session of the day reads the page and its notes and does none of this ag
 
 ## 4 · This project's entry point
 
-Read the `START_HERE_SESSION_###` the manifest marks CURRENT **for this project** (several are CURRENT at once, one per project — F-384 is about the row, not the rule), then its build brief. Tier 0 only: the manifest (from the clone) · this routine · the Register · the Fault Register's last section (the four numbers) · the Runbook's section for this project (§2A the parent · §2B Sanjeevni · §2C the Scan App · the NK Pathology chat's entry point) · `OWNER_TODO_LIVE.md`'s sections for this project · any open incident. Tier 1 on demand; Tier 2 never without a waiver (D34).
+Read the `START_HERE_SESSION_###` the manifest marks CURRENT **for this project** (several are CURRENT at once, one per project — F-384 is about the row, not the rule), then its build brief. Tier 0 only: the manifest (from the clone) · this routine · the Register · the Fault Register's last section (the four numbers) · the Runbook's section for this project (§2A the parent · §2B Sanjeevni · §2C the Scan App · the NK Pathology chat's entry point) · `OWNER_TODO_LIVE.md`'s sections for this project · any open incident. Tier 1 on demand; Tier 2 never without a waiver (D34). **On a Monday, the parent also reads the newest `claude/AUDIT_RUN_*` (the weekly auditor ran at 07:00 IST) and takes its *For the builder* lines into the session's work; its close answers each** (AUDITOR_SEED_v2 §6).
 
 ## 5 · The four numbers
 

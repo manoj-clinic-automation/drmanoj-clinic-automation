@@ -229,10 +229,12 @@ def main():
         sp = P(src)
         if not os.path.isfile(sp):
             raise SystemExit("STOP: extra file missing: " + sp)
-        if os.path.exists(os.path.join(canon, os.path.basename(sp))):
-            raise SystemExit("STOP: already in canon: " + os.path.basename(sp))
+        cp_ = os.path.join(canon, os.path.basename(sp))
+        if os.path.exists(cp_) and md5(cp_) != md5(sp):
+            raise SystemExit("STOP: already in canon with OTHER bytes: " + os.path.basename(sp))
         shutil.copyfile(sp, os.path.join(out, os.path.basename(sp)))
-        note("%s: %s B %s (added to canon)" % (os.path.basename(sp), "{:,}".format(os.path.getsize(sp)), md5(sp)))
+        note("%s: %s B %s (%s)" % (os.path.basename(sp), "{:,}".format(os.path.getsize(sp)), md5(sp),
+                                   "already in canon, byte-identical -- its manifest row is written here" if os.path.exists(cp_) else "added to canon"))
 
     # ---- 7. the manifest: narrative, STATUS, rows, supersedes, pins (after gen), END
     narr = part("man_narr.md").rstrip("\n") + "\n"
@@ -271,10 +273,16 @@ def main():
     mp = wr("CANONICAL_MANIFEST.md", man2)
 
     # ---- 8. the pin list from the new Register against the new manifest
-    shutil.copy(os.path.join(canon, "gen_live_pins.py"), os.path.join(out, "_gen_live_pins.py"))
+    import tempfile
+    gtmp = tempfile.mkdtemp(prefix="close_pins_")              # outside the connected folders: the device shell cannot delete there
+    for n_ in (TO["reg"], "CANONICAL_MANIFEST.md"):
+        shutil.copyfile(os.path.join(out, n_), os.path.join(gtmp, n_))
+    shutil.copy(os.path.join(canon, "gen_live_pins.py"), os.path.join(gtmp, "_gen_live_pins.py"))
     r_ = subprocess.run([sys.executable, "-B", "_gen_live_pins.py", TO["reg"], "--manifest", "CANONICAL_MANIFEST.md", "--session", "%s close" % SS, "-o", TO["pins"]],
-                        cwd=out, capture_output=True, text=True)
-    os.remove(os.path.join(out, "_gen_live_pins.py"))
+                        cwd=gtmp, capture_output=True, text=True)
+    if r_.returncode == 0 and os.path.isfile(os.path.join(gtmp, TO["pins"])):
+        shutil.copyfile(os.path.join(gtmp, TO["pins"]), os.path.join(out, TO["pins"]))
+    shutil.rmtree(gtmp, ignore_errors=True)
     if r_.returncode != 0:
         raise SystemExit("STOP: gen_live_pins failed: " + (r_.stderr or r_.stdout)[-800:])
     pins = rd(os.path.join(out, TO["pins"]))
@@ -311,7 +319,7 @@ def main():
     note("Manifest: %s B %s" % ("{:,}".format(os.path.getsize(mp)), md5(mp)))
 
     # ---- 10. the gates: .gitignore (last match wins) and the number gate, over everything built
-    built = sorted(n for n in os.listdir(out) if not n.startswith("_"))
+    built = sorted(n for n in os.listdir(out) if not n.startswith("_") and os.path.isfile(os.path.join(out, n)))
     gi = [l.rstrip("\n") for l in open(os.path.join(repo, ".gitignore"), encoding="utf-8") if l.strip() and not l.startswith("#")]
     ignored = []
     for n in built:
@@ -334,9 +342,9 @@ def main():
     ng = os.path.join(kits, "NO_PHONE_NUMBERS.py")
     env = dict(os.environ)
     env.setdefault("SANJ_CONFIG_STORE", P(r"D:\Downloads\margsync\_config"))
-    gbase = os.path.join(out, "_gate")
+    import tempfile
+    gbase = tempfile.mkdtemp(prefix="close_gate_")
     gdir = os.path.join(gbase, "deploy_kits", "KB_canon_all")
-    shutil.rmtree(gbase, ignore_errors=True)
     os.makedirs(gdir)
     lst = os.path.join(gbase, "_staged_files.txt")
     with open(lst, "w", encoding="utf-8") as fh:
@@ -360,15 +368,22 @@ def main():
     # ---- 11. PLACE: canon, sums, papers, MANIFEST.md5 rows, the SSD brief
     for n in built:
         dst = os.path.join(canon, n)
-        if n not in ("CANONICAL_MANIFEST.md", "OWNER_TODO_LIVE.md") and os.path.exists(dst):
-            raise SystemExit("STOP: exists in canon: " + n)
+        if n not in ("CANONICAL_MANIFEST.md", "OWNER_TODO_LIVE.md") and os.path.exists(dst) and md5(dst) != md5(os.path.join(out, n)):
+            raise SystemExit("STOP: exists in canon with other bytes: " + n)
     for n in built:
         shutil.copyfile(os.path.join(out, n), os.path.join(canon, n))
     for n in built:
         if md5(os.path.join(canon, n)) != md5(os.path.join(out, n)):
             raise SystemExit("STOP: placed copy differs: " + n)
     print("placed %d files into KB_canon_all, each read back by hash" % len(built))
-    cs = subprocess.run([sys.executable, "-B", os.path.join(tools, "canon_sums.py"), "--canon", canon, "--fix"], capture_output=True, text=True)
+    # the manifest and OWNER_TODO_LIVE are the close's two INTENDED rewrites: check that no other row changed, then let canon_sums accept them
+    pre = subprocess.run(["md5sum", "-c", "MD5SUMS_ALL.txt"], cwd=canon, capture_output=True, text=True)
+    changed = sorted(l.split(":")[0] for l in pre.stdout.splitlines() if l.endswith(": FAILED"))
+    if not set(changed) <= {"CANONICAL_MANIFEST.md", "OWNER_TODO_LIVE.md"}:
+        raise SystemExit("STOP: rows changed beyond the two intended rewrites: %s" % changed)
+    cs = subprocess.run([sys.executable, "-B", os.path.join(tools, "canon_sums.py"), "--canon", canon, "--fix", "--force-changed",
+                         "--backup-dir", os.path.join(tools, "canon_sums_backups")], capture_output=True, text=True)
+    print("rows forced (intended): %s" % ", ".join(changed))
     print("canon_sums --fix: " + (cs.stdout.strip().splitlines() or ["?"])[-1])
     gate = subprocess.run(["md5sum", "-c", "MD5SUMS_ALL.txt"], cwd=canon, capture_output=True, text=True)
     okn = sum(1 for l in gate.stdout.splitlines() if l.endswith(": OK")); bad = [l for l in gate.stdout.splitlines() if not l.endswith(": OK")]
