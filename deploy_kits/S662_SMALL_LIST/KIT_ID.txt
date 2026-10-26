@@ -1,0 +1,2 @@
+kit id S662_SMALL_LIST
+project Sanjeevni (session 359, 26-Oct-2026) -- Sanjeevni files only (porders.py, purchase_app.py, order_rules.py, section_map.py, stock_app.py); no PLANNED line needed (board v728)
