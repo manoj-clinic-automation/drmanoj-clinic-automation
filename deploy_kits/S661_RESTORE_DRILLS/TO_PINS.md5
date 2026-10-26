@@ -1,0 +1,5 @@
+d6f94b121ec814469e61a01e58791db7  root/state_backup/code_bundle.py
+facfb8976578acd94a090a15daad9e12  root/state_backup/clinic_state_backup.py
+b6cfacf3e5c11a8cf14f5db36cff1316  root/finance/freshness_legs.json
+75e64dd3d05c5df30197b2746b7f20e7  root/state_backup/verify_restore_code.py
+5fa0108a12ed37101aa34b190f71bdfc  root/state_backup/verify_restore_state.py

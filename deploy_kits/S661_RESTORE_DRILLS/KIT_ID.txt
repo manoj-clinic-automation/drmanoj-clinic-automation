@@ -1,0 +1,3 @@
+kit id S661_RESTORE_DRILLS
+project the parent (session 357, 26-Oct-2026) -- its own files; claimed on board/_numbers v718->v719; the weekly audit (run 9, slice 4) answered
+code_bundle.py 37a5a132 -> d6f94b12 . clinic_state_backup.py f315bf43 -> facfb897 . freshness_legs.json 9df66934 -> b6cfacf3 . NEW verify_restore_code.py 75e64dd3 . NEW verify_restore_state.py 5fa0108a
