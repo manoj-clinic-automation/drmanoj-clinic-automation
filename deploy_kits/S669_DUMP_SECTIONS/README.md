@@ -21,11 +21,11 @@ Restarts `clinic-finance`; the watch made once now. `section_map.py` is not touc
 **11 of 11 green**; the control **2 S669 red · 0 older red · 9 green**; after the data step on a copy **12 of 12**. The shoulder immobiliser is an orthotic under both spellings. A short name borrows no twin. Two candidate rows: none taken. A medicine's twin ruling keeps it a medicine. Over all 238 names on the Batch Stock a twin is used for exactly 8, every one a width-spelling of the same item, never over an exact row. The two cast shoes read seed Consumables before and owner Orthotics after; the other 7 owner rows are untouched.
 The installer was rehearsed four ways on a made-up server: red before the data step restores the file; red after it restores the file AND the two rows; green places, restarts, changes the rows, makes one run and walks 12 of 12; a second run says ALREADY INSTALLED.
 
-## Install (on the server, after the publish; window 08:02–23:30 IST)
+## Install (on the server, after the publish; window 04:00–23:30 IST, clear of the night’s jobs)
 ```
 cd /root/deploy/repo && git pull --ff-only && rm -rf /tmp/s669kit && cp -rp /root/deploy/repo/deploy_kits/S669_DUMP_SECTIONS /tmp/s669kit && bash /tmp/s669kit/install_S669_DUMP_SECTIONS.sh
 ```
 ## Undo (the installer prints it)
 ```
-\cp -p /root/finance/expiry_watch.py.bak_S669_7ba3b0bc /root/finance/expiry_watch.py && sqlite3 /root/finance/finance.db "UPDATE stock_item_section SET section='Consumables', source='seed', by_user='manoj', at='2026-09-18T07:03:44' WHERE item_key IN ('CAST SHOE S TYNOR','PRIME CAST SHOE S') AND source='owner' AND by_user LIKE 'manoj (28-Oct-2026%';" && systemctl restart clinic-finance
+\cp -p /root/finance/expiry_watch.py.bak_S669_7ba3b0bc /root/finance/expiry_watch.py && /usr/bin/python3 -c "import sqlite3; c=sqlite3.connect('/root/finance/finance.db'); c.execute(\"UPDATE stock_item_section SET section='Consumables', source='seed', by_user='manoj', at='2026-09-18T07:03:44' WHERE item_key IN ('CAST SHOE S TYNOR','PRIME CAST SHOE S') AND source='owner' AND by_user LIKE 'manoj (28-Oct-2026%'\"); c.commit()" && systemctl restart clinic-finance
 ```

@@ -19,7 +19,6 @@ ROOT="${ROOT:-/root}"
 DB="${DB:-$ROOT/finance/finance.db}"
 SPINE="${SPINE:-$ROOT/finance/spine/spine.db}"
 ARCH="${ARCH:-$ROOT/marg_ingest/archive}"
-SQL="${SQL:-sqlite3}"
 SLOCK="${SLOCK:-/tmp/spine.lock}"
 LOCK="${LOCK:-/root/deploy/.claude_code_build.lock}"
 FIN_PORT="${FIN_PORT:-8106}"; FSVC="${FSVC:-clinic-finance}"
@@ -37,6 +36,7 @@ BAK="$ROOT/$REL.bak_S669_${FROM:0:8}"
 m5() { md5sum "$1" 2>/dev/null | awk '{print $1}'; }
 say() { echo "$@"; }
 copydb() { "$APY" -c "import sqlite3,sys; s=sqlite3.connect('file:%s?mode=ro'%sys.argv[1],uri=True,timeout=60); d=sqlite3.connect(sys.argv[2]); s.backup(d); d.close(); s.close()" "$1" "$2"; }
+sqlw() { "$APY" -c "import sqlite3,sys; c=sqlite3.connect(sys.argv[1],timeout=60); c.executescript(sys.argv[2]); c.commit(); c.close()" "$1" "$2"; }   # no sqlite3 CLI on the box
 q() { "$APY" -c "import sqlite3,sys; c=sqlite3.connect('file:%s?mode=ro'%sys.argv[1],uri=True,timeout=60); print(c.execute(sys.argv[2]).fetchone()[0])" "$1" "$2"; }
 fhealth() { curl -s -o /dev/null -m 8 -w '%{http_code}' "http://127.0.0.1:$FIN_PORT$1"; }
 fhz() { fhealth /finance/healthz; }
@@ -49,7 +49,7 @@ restore() {
   say "!! RED after placing ($1) - putting the file back"
   \cp -p "$BAK" "$ROOT/$REL" || say "   !! could not put back $ROOT/$REL"
   rm -f "$ROOT"/finance/.expiry_watch.py.s669
-  [ "$DATA_DONE" = 1 ] && { "$SQL" "$DB" "$UNDO_SQL" && say "   the two cast-shoe rows put back to the seed's Consumables" || say "   !! the two rows could not be put back: $UNDO_SQL"; }
+  [ "$DATA_DONE" = 1 ] && { sqlw "$DB" "$UNDO_SQL" && say "   the two cast-shoe rows put back to the seed's Consumables" || say "   !! the two rows could not be put back: $UNDO_SQL"; }
   "$SYSTEMCTL" restart "$FSVC" || true
   say "   $ROOT/$REL $(m5 "$ROOT/$REL") (expected $FROM); finance healthz $(wait200 fhz). Send a photo of this screen to Claude."
   release_lock
@@ -61,11 +61,11 @@ trap on_signal INT TERM HUP
 stop_unlocked() { say "$1"; release_lock; exit "${2:-1}"; }
 
 cd "$KDIR" || { say "!! cannot enter the kit folder"; exit 1; }
-for c in md5sum awk cp mv date curl grep find sed timeout flock "$SQL"; do command -v "$c" >/dev/null 2>&1 || { say "!! preflight: '$c' missing - nothing installed"; exit 1; }; done
+for c in md5sum awk cp mv date curl grep find sed timeout flock; do command -v "$c" >/dev/null 2>&1 || { say "!! preflight: '$c' missing - nothing installed"; exit 1; }; done
 [ -x "$APY" ] && [ -x "$VPY" ] || { say "!! preflight: $APY or $VPY not executable - nothing installed"; exit 1; }
 HH="$(TZ=Asia/Kolkata date +%H)"; MM="$(TZ=Asia/Kolkata date +%M)"; HH=$((10#$HH)); MM=$((10#$MM))
-[ "${DRY:-0}${SKIP_WINDOW:-0}" = 11 ] || { { [ "$HH" -gt 8 ] || { [ "$HH" -eq 8 ] && [ "$MM" -ge 2 ]; }; } && { [ "$HH" -lt 23 ] || [ "$MM" -le 30 ]; }; } \
-  || { say "!! [1/8] $(TZ=Asia/Kolkata date '+%H:%M IST') is outside the install window 08:02-23:30 IST - nothing installed"; exit 1; }
+[ "${DRY:-0}${SKIP_WINDOW:-0}" = 11 ] || { [ "$HH" -ge 4 ] && { [ "$HH" -lt 23 ] || [ "$MM" -le 30 ]; }; } \
+  || { say "!! [1/8] $(TZ=Asia/Kolkata date '+%H:%M IST') is outside the install window 04:00-23:30 IST (clear of the night's jobs, 23:50-03:30) - nothing installed"; exit 1; }
 md5sum -c SUMS.md5 >/dev/null 2>&1 || { say "!! [1/8] SUMS.md5 gate failed - kit corrupt, nothing installed"; exit 1; }
 [ "$(awk 'NR==1{print $3}' KIT_ID.txt)" = "$KIT" ] || { say "!! [1/8] KIT_ID.txt names another kit - nothing installed"; exit 1; }
 [ -f "$ROOT/$REL" ] && [ -f "$DB" ] && [ -f "$SPINE" ] && [ -d "$ARCH" ] || { say "!! [1/8] $ROOT/$REL, $DB, $SPINE or $ARCH is missing - nothing installed"; exit 1; }
@@ -121,7 +121,7 @@ DATA_SQL="UPDATE stock_item_section SET section='Orthotics', source='owner', by_
 UNDO_SQL="UPDATE stock_item_section SET section='Consumables', source='seed', by_user='manoj', at='2026-09-18T07:03:44' WHERE item_key IN ('CAST SHOE S TYNOR','PRIME CAST SHOE S') AND source='owner' AND by_user LIKE 'manoj (28-Oct-2026%';"
 B0=$(q "$DB" "SELECT COUNT(*) FROM stock_item_section WHERE item_key IN ('CAST SHOE S TYNOR','PRIME CAST SHOE S') AND section='Consumables' AND source='seed'")
 [ "$B0" = 2 ] || restore "the two cast-shoe rows are not as this kit read them (seed Consumables: $B0 of 2)"
-"$SQL" "$DB" "$DATA_SQL" || restore "the data step could not be written"
+sqlw "$DB" "$DATA_SQL" || restore "the data step could not be written"
 B1=$(q "$DB" "SELECT COUNT(*) FROM stock_item_section WHERE item_key IN ('CAST SHOE S TYNOR','PRIME CAST SHOE S') AND section='Orthotics' AND source='owner'")
 [ "$B1" = 2 ] || restore "the data step read back $B1 of 2 rows"
 DATA_DONE=1
@@ -137,7 +137,7 @@ R=$(walk --new "$ROOT" --db "$SCR/walk2.db" --batch "$BATCHF" --scratch "$SCR/w2
 [ "$R" = "12 of 12 green" ] || restore "the walk on the placed file and the changed rows: $R"
 release_lock
 say "[8/8] the walk on the placed file: $R; the build lock released"
-say "undo (one line): \\cp -p $BAK $ROOT/$REL && $SQL $DB \"$UNDO_SQL\" && $SYSTEMCTL restart $FSVC"
+say "undo (one line): \\cp -p $BAK $ROOT/$REL && $APY -c \"import sqlite3; c=sqlite3.connect('$DB'); c.executescript(\\\"$UNDO_SQL\\\"); c.commit()\" && $SYSTEMCTL restart $FSVC"
 say ""
 say "$KIT: DONE. Your section rulings hold under every Marg report width; the two cast shoes are orthotics; the list is made again."
 exit 0
