@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S353 close** (the Sanjeevni chat), 26-Oct-2026, afternoon — the Sanjeevni sections refreshed here (its 359 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S358 close** (the parent), 27-Oct-2026, evening — the parent's sections refreshed here (its 360 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S353 close** (the Sanjeevni chat), 26-Oct-2026, afternoon — the Sanjeevni sections refreshed here (its 359 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S357 close** (the parent), 26-Oct-2026, morning — the parent's sections refreshed here (its 358 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S354 close** (the parent), 26-Oct-2026, early morning — the parent's sections refreshed here (its 357 reserved); the Scan App sections exactly as its S352 close wrote them (its 355 open since 05:29 IST 26-Oct); the Sanjeevni sections exactly as its S350 close wrote them (its 353 open). *The NK Pathology chat keeps its list in its own project (its 356 reserved).*
 
@@ -289,7 +290,7 @@ https://followup.dr-manoj.in/scanapp/stationery
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S357 close (26-Oct, morning)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S358 close (27-Oct, evening)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -299,37 +300,31 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH — one double-click.** It carries today's record. Nothing follows it on the server — the four changes are already live.
+**1 · THE PUBLISH — one double-click.** It carries today's record. Nothing follows it on the server — the three changes are already live.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · PASTE THE ONE PROJECT TEXT — four times, once each.** In each project's settings (this one, Sanjeevni, Scan App, NK Pathology), replace the custom instructions with the whole of this file. A chat already open keeps its old text until it closes.
-
-```
-D:\dr-manoj-git\drmanoj-clinic-automation\deploy_kits\KB_canon_all\COMMON_START_HERE_PROMPT_v1.md
-```
-
-**3 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+**2 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**4 · THE TWO FINANCE PASSWORDS shown in chat on 21-Aug — change them** (board Y106). The next chat prepares it as one server line.
+**3 · THE TWO FINANCE PASSWORDS shown in chat on 21-Aug — change them** (board Y106). The next chat prepares it as one server line.
 
-**5 · THE GLUCOMETER CHARGE — add "Blood sugar (glucometer)" ₹50 as a procedure** (one line); then Shavez adds it to slip 1403.
+**4 · THE GLUCOMETER CHARGE — add "Blood sugar (glucometer)" ₹50 as a procedure** (one line); then Shavez adds it to slip 1403.
 
 ```
 https://followup.dr-manoj.in/finance/clinic/sheets
 ```
 
-**6 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** Until then, a hand-made backup onto the pen drive about once a week.
+**5 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** Until then, a hand-made backup onto the pen drive about once a week.
 
 **FROM 1 NOVEMBER — once a month**
 
-**7 · APPROVE OCTOBER'S ATTENDANCE CORRECTIONS** when your console says *Attendance correction: October ready — approve & save* — now also the **Attendance correction** tile in your Staff folder.
+**6 · APPROVE OCTOBER'S ATTENDANCE CORRECTIONS** when your console says *Attendance correction: October ready — approve & save* — also the **Attendance correction** tile in your Staff folder.
 
 ```
 https://followup.dr-manoj.in/register/attcorr
@@ -343,31 +338,41 @@ https://claude.ai/artifact/H5W1T3WPNm85t2peTnNnfP
 
 **LATER — none of these is urgent**
 
-**8 · BHATI'S APP — October home visits cannot be backfilled.** You said you will take it up later; say when.
-**9 · THE SBI DOWNLOADS** still missing from September's pack (the HUF savings July–September, your and Dr Bhawna's PPF April–September). **10 · RAGHAV — the Zerodha papers** to your personal email. **11 · RANJEET'S LOGIN** — the password is yours to set.
+**7 · BHATI'S APP — October home visits cannot be backfilled.** You said you will take it up later; say when.
+**8 · THE SBI DOWNLOADS** still missing from September's pack (the HUF savings July–September, your and Dr Bhawna's PPF April–September). **9 · RAGHAV — the Zerodha papers** to your personal email. **10 · RANJEET'S LOGIN** — the password is yours to set.
 
 ```
 https://followup.dr-manoj.in/portal/users
 ```
 
-**12 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** **13 · THE RECEPTION PC'S WINDOWS** — your decision. **14 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → 9-Sep**, into `D:\Downloads`. **15 · THE ARMS LICENCE — submit in November.**
+**11 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** **12 · THE RECEPTION PC'S WINDOWS** — your decision. **13 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → 9-Sep**, into `D:\Downloads`. **14 · THE ARMS LICENCE — submit in November.**
 
-**WHEN IT HAPPENS — not a duty:** a patient's WhatsApp alert — tap it and the chat opens in your inbox · anything you want me to read on WhatsApp: forward it to the clinic WhatsApp number and say so in the chat · a `[WA send refused]` mail · a phone line saying the server fixed (or could not fix) a part.
+**WHEN IT HAPPENS — not a duty:** a WhatsApp reply showing *MyOperator busy — retrying* — leave it; the server sends it again by itself (do not send it again — the inbox refuses a second copy) · a red *NOT delivered* or *May have gone — check* — open that chat and look before sending again · a `[WA send refused — being retried]` or `[WA send NOT delivered]` mail · a patient's WhatsApp alert — tap it and the chat opens · anything to read on WhatsApp: forward it to the clinic WhatsApp number and say so in the chat · a phone line saying the server fixed (or could not fix) a part.
 
-**Staff's, not yours (watched by me at each open):** October's slip corrections on Shavez's desk — 22 open on 6 days at this open.
+**Staff's, not yours (watched by me at each open):** October's slip corrections on Shavez's desk — 18 open on 6 days; X-ray 1421 *chhoota* on 27-Oct.
 
 **Parked at your word, and not raised by me again:** as at the S354 close. **Deferred at your word:** the evening same-day check · the daily Docterz feedback · the register+slips pack (D789) · disregarding Docterz's payment mode (D790, *"No, for now"*).
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **First, my own housekeeping:** your home screen's file has had five changes since anyone read it whole (`portal.py`) — read whole, and tidied if needed.
-2. **Watch the first nights:** tonight's staff-list count, the first once-a-day open page, the backups' first Sunday drills (1-Nov).
+1. **Your four board items (27-Oct), in your order** — screens shown to you first: the Call Console's layout and its repeat calls grouped · its top links that do not load · the Clinic Gist's earlier days · Surgery cases as *IPD cases* (surgical / conservative / no implant, the patient source and its filter).
+2. **Watch the WhatsApp retry's first days** and MyOperator's answer (ticket 691386).
 3. **From 1 November:** October's attendance correction on the live screens, step by step.
-4. **The audit's remaining backup item:** the monthly locked copy retaken when the backup grows (AF-16); the WhatsApp receiver's silent answer (AF-19).
+4. **The audit's remaining backup items:** the monthly locked copy retaken when the backup grows (AF-16); the WhatsApp receiver's silent answer (AF-19).
 5. **Zerodha** · **the Tally check** when the accountants reply · **Union Bank** · **the Sanjeevni GST returns.**
 6. **On your word:** Bhati's backfill · a duty-timings page · staff seeing the month's earlier days · the punch listener's second step.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S358 CLOSE — 26 → 27-Oct-2026 (the parent)
+
+- ~~**"start"**~~ — the open (18:08, 26-Oct); your home screen's file read whole: one real fault (Dr Bhawna's Expiry box) and small dead pieces — fixed and live 18:51 (S663); nothing moved on your screen.
+- ~~**"Ticked system board lines"**~~ — read.
+- ~~**"MyOperator technical team … 3.30 pm … do all prep needed"**~~ — the ticket and the send log read whole; ~~**"include all … send it to Khushi … build ready beforehand"**~~ — the full record mailed 12:2x (D794); the retry built.
+- ~~**"First, check the new parchi desk … X-ray section says no parchi saved today"**~~ — found (a desk open since yesterday filed 1420 and 19858 under 26-Oct); fixed and both moved, live 13:01 (S667).
+- ~~**The call — "they will look into it and revert"**~~ — the retry installed 18:13 (S666): a refused reply is sent again by itself; a hand re-send is refused.
+- ~~**"Read system board … select for this project"**~~ — four items for this project, carried to the next chat; one for Sanjeevni.
+- ~~**"Do eos here"**~~ — this close.
 
 ## ✅ DONE AT THE S357 CLOSE — 26-Oct-2026 (the parent)
 
