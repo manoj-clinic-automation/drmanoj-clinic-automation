@@ -1,0 +1,2 @@
+kit id S668_EXPIRY_START_OF_DAY
+project Sanjeevni (session 359, 27-Oct-2026) -- Sanjeevni file finance/expiry_watch.py; on top of S665 (spine/near_expiry.py, the crontab line) which it does not touch
