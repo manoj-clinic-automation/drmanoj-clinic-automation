@@ -1,0 +1,3 @@
+kit id S667_DESK_TODAY
+project the parent (session 358, 27-Oct-2026) -- its own file; claimed on board/_numbers v736->v737; PLANNED there
+finance/parchi_desk.py db5fd07f -> fb405c12 . data step fix_s667_day.py (two rows) . slip_log.py not touched
