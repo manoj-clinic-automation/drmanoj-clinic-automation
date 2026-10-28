@@ -7,11 +7,11 @@ f1623ff323d70078698f267feaee4c64  PIN_READ_asset_machine.txt
 f5e1339336091411909a89c50f82c568  PIN_READ_claude_reader.txt
 1c1f468d1e1696a37fc185297dd48674  PIN_READ_claude_reread.txt
 f578511c367c2509882f08d1e916e03a  PIN_READ_clinic_papers.txt
-532f8575793986f9e27d95ee6e00cced  PIN_READ_procroom.txt
+a7ac93d6c91ed22f8c3af00b7a30d828  PIN_READ_procroom.txt
 d1ccc224e7650c54572b7f0d45c9dd7f  PIN_READ_xray_costs.txt
 53fcf200b2ea68cf9b42e4d7bb9d0f71  PIN_TO_sorting_desk.txt
 2b883e2a20875240c1b59d4a49763e53  PIN_TO_stationery.txt
-f685e5c21f613c61c34f4268e6b5acf3  README.md
+5e14af59028f6c1d2895509fb2753e9c  README.md
 c39bd530a576ed8a1d851df1264e6203  edits_s674.py
 a5d6c4aa9d215041ff0ff72a486f8187  install_s674.sh
 2fca3b959aa1396993f4d6d9ed01c267  make_s674.py

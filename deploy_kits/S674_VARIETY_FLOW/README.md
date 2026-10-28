@@ -38,7 +38,7 @@ statement). `make_s674.py` rebuilds both on the box from the live bytes and refu
 unless each equals the kit's file. Additive at mount: table `stationery_stmt`; columns `side`, `stmt_id` on `stationery_line`
 (added once to a table made before them). One data step: the table and columns made whether or not the mount got them (a locked database), then the first listed supplier and
 the floor day, once. Read only, pinned: `clinic_papers.py
-89a3cd0a`, `asset_register.py 63a8b15b`, `procroom.py f6578535`, `asset_machine.py 7dbd5e0c`, `batteries.py bb082b4c`,
+89a3cd0a`, `asset_register.py 63a8b15b`, `procroom.py e51c00a1` (S670's, live since 05:32 IST 28-Oct), `asset_machine.py 7dbd5e0c`, `batteries.py bb082b4c`,
 `xray_costs.py 5823bae2`, `claude_reader.py 1277e80d`, `claude_reread.py ed7023d2`. The parent's `vendors` table read only.
 
 **Kit.** `edits_s674.py` · `s674_block.py` · `make_s674.py` · `stationery.py` · `sorting_desk.py` · `walk_s674_app.py` (V1–V23, K1–K2
