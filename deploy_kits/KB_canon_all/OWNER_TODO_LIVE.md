@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S359 close** (the Sanjeevni chat), 28-Oct-2026, dawn — the Sanjeevni sections refreshed here (its 361 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S355 close** (the Scan App project), 28-Oct-2026, midday — the Scan App sections refreshed here (its 363 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S361 close** (the Sanjeevni chat), 28-Oct-2026, noon — the Sanjeevni sections refreshed here (its 362 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S359 close** (the Sanjeevni chat), 28-Oct-2026, dawn — the Sanjeevni sections refreshed here (its 361 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S358 close** (the parent), 27-Oct-2026, evening — the parent's sections refreshed here (its 360 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S353 close** (the Sanjeevni chat), 26-Oct-2026, afternoon — the Sanjeevni sections refreshed here (its 359 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S357 close** (the parent), 26-Oct-2026, morning — the parent's sections refreshed here (its 358 reserved); the other projects' sections as their closes left them.
@@ -132,59 +134,67 @@
 
 *Detail: `START_HERE_SESSION_313.md` · `S311_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S310 close's (13-Oct, early morning); `S310_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_312.md` that chat's entry.*
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S352 close (25-Oct, midday)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S355 close (28-Oct, midday)
 
-*Detail: `S352_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_355.md`. The same lines are on your System Board (Y159, Y157, Y145 … Y148, Y119 … Y121, Y136).*
+*Detail: `S355_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_363.md`. The same lines are on your System Board.*
 
-**1 · The publish (Y159):** it carries this close's record. Papers only; the three kits are already live.
+**1 · The publish:** it carries this close's record. Papers only; both kits are live.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · A shelf count for each product (Y157)** on your Procedure room page, *Used and in stock*. The stock starts from it.
+**2 · Variety's phone on the Vendors page** — then the statement's *Send on WhatsApp* button works (until then, *Copy the text*).
 
 ```
-https://followup.dr-manoj.in/scanapp/procroom
+https://followup.dr-manoj.in/scanapp/vendors
 ```
 
-**3 · Examination gloves (Y145):** how many pairs are in one box, 50 or 100? Your page counts gloves bought in boxes of this size.
-
-**4 · The new Surgiwear drape (Y146):** its name or code, and whether the D600 drape stays on casts and slabs.
-
-**5 · October's month end:** Yuvika's WhatsApp photos, added on the Month end page. Large photos are now read too.
-
-```
-https://followup.dr-manoj.in/scanapp/procroom/month
-```
-
-**6 · Yuvika's May 2026 slips (Y147)**, if you find that month's WhatsApp. **Optional (Y148):** ask Yuvika about the 23-09 slip.
-
-**7 · Scan the lab consumables bills from April 2026 (Y136).** Then the last three lab records on the Machines list (45, 46, 50) can go.
-
-**8 · The battery bills still missing (Y120)** — the Vento's, B.L. Computers' bill for the DTH lab's UPS battery, and the second AC's bill. Nothing is filled in by guess.
-
-**9 · Many items on one screen (Y119) — when you are happy with it:** the card at the top of your Stationery page:
+**3 · Settle with Variety:** separate challans for the clinic and NK when they can; they bill against your monthly statement. Your page makes October's statement in one tap:
 
 ```
 https://followup.dr-manoj.in/scanapp/stationery
 ```
 
-**10 · Fujifilm's tax invoice for the AMC (Y121)** — scan it when it comes.
+**4 · B-0235 (yesterday's Variety challan)** was scanned before the flow's start day, so it is not offered on the page. Sort it on the desk if you want it in stock:
 
-**Not urgent:** *Sorting desk*, *Machine pages* and *Batteries* for Shavez on the *Switches* card of `https://followup.dr-manoj.in/scanapp/`; Y83 (the Janitor's renewal list).
+```
+https://followup.dr-manoj.in/scanapp/desk?open=B-0235
+```
+
+**5 · A shelf count for each product (Y157)** on your Procedure room page, *Used and in stock*. **6 · Examination gloves (Y145):** pairs in a box, 50 or 100? **7 · The new Surgiwear drape (Y146):** its name, and whether the D600 drape stays on casts and slabs.
+
+**8 · October's month end:** Yuvika's WhatsApp photos, added on the Month end page.
+
+```
+https://followup.dr-manoj.in/scanapp/procroom/month
+```
+
+**9 · Yuvika's May 2026 slips (Y147)**, if you find that month's WhatsApp. **10 · The lab consumables bills from April 2026 (Y136).** **11 · The battery bills still missing (Y120)** — the Vento's, the DTH lab's UPS battery, the second AC's. **12 · Fujifilm's tax invoice for the AMC (Y121)** — when it comes.
+
+**Not urgent:** *Machine pages* and *Batteries* for Shavez on the *Switches* card of `https://followup.dr-manoj.in/scanapp/`; Y83 (the Janitor's renewal list).
 
 **Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S352 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S355 close
 
-**Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat while the API credits are low (D765).**
+**Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat (D765).**
 
-1. **Small points from the reviews** — one kit on the Procedure room file (a retired procedure or product, the month-end editor's typed rates, an old table's column, S633's points).
-2. **Small points from the duplicate kit** — only when a later kit touches those files.
-3. **D720, when you ask:** your family's documents and renewals in their own Google project.
+1. **The Variety flow's first month:** the statement made, sent, their bill joined — read live with you.
+2. **The procedure goods flow** (Yuvika's challans) on the same pattern — when you say.
+3. **Recent scans by scan date** for you and Shavez — a mock-up when you ask.
+4. **The NK share into NK's accounts** — with the finance side and the NK Pathology project.
+5. **Small points from the reviews** (S651's, S633's) — only when a later kit touches those files.
+6. **D720, when you ask:** your family's documents and renewals in their own Google project.
 
 **Waits by your word:** the clinic's bills in the accountants' pack.
+
+## ✅ DONE AT THE S355 CLOSE — 26 → 28-Oct-2026 (the Scan App project)
+
+- ~~**The S352 record's publish** (Y159)~~ — landed before 05:28 IST 26-Oct (`117791eb`).
+- ~~**The month end counts right** (the reviews' small points)~~ — live 05:32 IST 28-Oct (S670): a retired product still the slip's own, a slip sent twice counted once, typed rates kept across *Its scan*.
+- ~~**The Variety flow** (your D797, ruled on the mock-up)~~ — live 11:09 IST 28-Oct (S674): sort by line to the clinic or NK on your Stationery page, the NK ledger, the account, the monthly statement, Shavez's sort screen.
+- ~~**The cold kit**~~ — taken at the open (26-Oct), in `D:\Downloads` and on the SSD.
 
 ## ✅ DONE AT THE S352 CLOSE — 25-Oct-2026 (the Scan App project)
 
@@ -671,6 +681,42 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S361 close (28-Oct, noon)
+
+*Detail: `S361_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_362.md`. The same lines are on your System Board. This section supersedes the S359 one below it.*
+
+**1 · The publish** — this close's record. The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · Two September payment messages, never sent:** A.A. Pharmaceuticals (₹8,780) and Deepam Pharma (₹42,945). Tap **Bhejo** beside each; it asks first — answer yes:
+
+```
+https://followup.dr-manoj.in/finance/purchase/page/pay/2026-09
+```
+
+**3 · Scan B-0167 is saved under Yogendra; the paper is Mannat's.** One tap, *Dealer badliye: MANNAT PHARMA* (Shavez can do it too):
+
+```
+https://followup.dr-manoj.in/finance/porders/s454/track
+```
+
+**4 · Before 1 November — Marg stops selling these on the 1st:** REEBORN D (5 tablets) and RIFAVAX 550 (3 tablets):
+
+```
+https://followup.dr-manoj.in/finance/sanjeevni/expiry
+```
+
+**5 · Shivani — the Marg reports-only login ID and password.** Her *Aaj ki reports* tile is live (D778).
+
+**Still yours from before, not urgent (on your board):** Ram Singh's three report buttons; whether Shavez's monthly *Stock expiry* export leaves his list; the two LINVIZ 600 messages; Flacort 6 / Flemcort 6.
+
+## ✅ DONE AT THE S361 CLOSE — 28-Oct-2026 (the Sanjeevni project)
+
+- ~~**Procedure bill 4474 of 27-Oct not counted**~~ — found (the half-hourly job and an approval in between), fixed for good (S675, your D798: the deduction is made the moment the sale report lands), 27-Oct corrected — expected ₹8,379, your handover ₹8,380, settled.
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S359 close (28-Oct, dawn)
 
