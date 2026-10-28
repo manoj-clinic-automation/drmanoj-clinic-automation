@@ -1,0 +1,2 @@
+kit id S672_NONCASH_AT_INGEST
+project Sanjeevni (session 361, 28-Oct-2026) -- F-1037: the home/procedure deduction made inside the sale ingest; finance/day_resync.py (Sanjeevni) + finance/finance_ingest.py (shared, the parent's; PLANNED line v760) + a one-time data step for 27-Oct (A004474)
