@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S358 close** (the parent), 27-Oct-2026, evening — the parent's sections refreshed here (its 360 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S359 close** (the Sanjeevni chat), 28-Oct-2026, dawn — the Sanjeevni sections refreshed here (its 361 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S358 close** (the parent), 27-Oct-2026, evening — the parent's sections refreshed here (its 360 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S353 close** (the Sanjeevni chat), 26-Oct-2026, afternoon — the Sanjeevni sections refreshed here (its 359 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S357 close** (the parent), 26-Oct-2026, morning — the parent's sections refreshed here (its 358 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S354 close** (the parent), 26-Oct-2026, early morning — the parent's sections refreshed here (its 357 reserved); the Scan App sections exactly as its S352 close wrote them (its 355 open since 05:29 IST 26-Oct); the Sanjeevni sections exactly as its S350 close wrote them (its 353 open). *The NK Pathology chat keeps its list in its own project (its 356 reserved).*
@@ -670,6 +671,46 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S359 close (28-Oct, dawn)
+
+*Detail: `S359_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_361.md`. The same lines are on your System Board. This section supersedes the S353 one below it.*
+
+**1 · The publish** — this close's record. The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · Two September payment messages, never sent:** A.A. Pharmaceuticals (₹8,780) and Deepam Pharma (₹42,945). Tap **Bhejo** beside each; it now asks first because the reception phone was handed them on 23-Oct — answer yes:
+
+```
+https://followup.dr-manoj.in/finance/purchase/page/pay/2026-09
+```
+
+**3 · Scan B-0167 is saved under Yogendra; the paper is Mannat's.** One tap, *Dealer badliye: MANNAT PHARMA*, on the order list's page (Shavez can do it too):
+
+```
+https://followup.dr-manoj.in/finance/porders/s454/track
+```
+
+**4 · Before 1 November — Marg stops selling these on the 1st:** REEBORN D (5 tablets) and RIFAVAX 550 (3 tablets). VOM L sold out on 26-Oct. Your **Expiry watch** box opens the page:
+
+```
+https://followup.dr-manoj.in/finance/sanjeevni/expiry
+```
+
+**5 · Shivani — the Marg reports-only login ID and password.** Her *Aaj ki reports* tile is live (D778).
+
+**Still yours from before, not urgent (on your board):** Ram Singh's three report buttons; whether Shavez's monthly *Stock expiry* export leaves his list; the two LINVIZ 600 messages; Flacort 6 / Flemcort 6.
+
+## ✅ DONE AT THE S359 CLOSE — 26 → 28-Oct-2026 (the Sanjeevni project)
+
+- ~~**"Do all 5"**~~ — the small list built (S662, S664) and the S335 list settled whole (D796). The old *Order medicines* page sends nothing now; *Bhejo* asks before a second send; the NEFT figure matches the advice; DYNAPAR is a medicine.
+- ~~**VOM L stale on the expiry list**~~ — the list now catches up within ten minutes of the morning export (S665), and a Batch Stock taken before the shop opens counts as the start of its day (S668, your D740). VOM L gone, read on your page.
+- ~~**Orthotics under Medicines in the dump**~~ — your ruling on the shoulder immobiliser holds at every Marg width; the two cast shoes are orthotics (S669). Dump 24 + 33 → 27 + 30.
+- ~~**Crepe bandages are not consumables**~~ — all nine sizes Medicines by your word (S671, D795).
+- ~~**The medical PC after its restart**~~ — came back by itself at 10:30 on 27-Oct; nothing pending.
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S353 close (26-Oct, afternoon)
 
