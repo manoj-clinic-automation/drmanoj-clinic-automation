@@ -1,0 +1,2 @@
+kit id S676_SECTIONS_BY_FAMILY
+project Sanjeevni (session 362, 28-Oct-2026) -- Sanjeevni files finance/section_map.py, finance/stock_app.py + a data step on stock_item_section (the newest closing's names seeded; the family sweep)
