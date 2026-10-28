@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S355 close** (the Scan App project), 28-Oct-2026, midday — the Scan App sections refreshed here (its 363 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S362 close** (the Sanjeevni chat), 28-Oct-2026, afternoon — the Sanjeevni sections refreshed here (its 364 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S355 close** (the Scan App project), 28-Oct-2026, midday — the Scan App sections refreshed here (its 363 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S361 close** (the Sanjeevni chat), 28-Oct-2026, noon — the Sanjeevni sections refreshed here (its 362 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S359 close** (the Sanjeevni chat), 28-Oct-2026, dawn — the Sanjeevni sections refreshed here (its 361 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S358 close** (the parent), 27-Oct-2026, evening — the parent's sections refreshed here (its 360 reserved); the other projects' sections as their closes left them.
@@ -681,6 +682,49 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**Bhati's ledger ₹15,980 vs ₹14,420**~~ — three duplicates cancelled on your word, opening ₹440 set: **₹14,420** (24-Sep). **LIVE** (S394): no double saves; one screen; his Hindi saved card.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
+
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S362 close (28-Oct, afternoon)
+
+*Detail: `S362_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_364.md`. The plan of what is left is section 9 of your System Board's plan. This section supersedes the S361 one below it.*
+
+**1 · The publish** — this close's record. The same double-click as always:
+
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**2 · Two September payment messages** (carried, not re-checked today): A.A. Pharmaceuticals (₹8,780) and Deepam Pharma (₹42,945) — **Bhejo** beside each; it asks first, answer yes:
+
+```
+https://followup.dr-manoj.in/finance/purchase/page/pay/2026-09
+```
+
+**3 · Scan B-0167 is saved under Yogendra; the paper is Mannat's** (carried): *Dealer badliye: MANNAT PHARMA* (Shavez can do it too):
+
+```
+https://followup.dr-manoj.in/finance/porders/s454/track
+```
+
+**4 · Before 1 November — Marg stops selling these on the 1st:** REEBORN D and RIFAVAX 550:
+
+```
+https://followup.dr-manoj.in/finance/sanjeevni/expiry
+```
+
+**5 · Shivani — the Marg reports-only login ID and password.** Her *Aaj ki reports* tile is live (D778).
+
+**6 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
+
+**Later, your word only:** the buying switch, when the bar is met three weeks running (first score 1-Nov night; earliest ~22-Nov) — with one mock-up of Darpan's tab line.
+
+**Still yours from before, not urgent (on your board):** Ram Singh's three report buttons; whether Shavez's monthly *Stock expiry* export leaves his list; the two LINVIZ 600 messages; Flacort 6 / Flemcort 6.
+
+## ✅ DONE AT THE S362 CLOSE — 28-Oct-2026 (the Sanjeevni project)
+
+- ~~**Sections for new Marg names; your ruling reaching the other sizes**~~ — S676, live 13:05 (24 names seeded, three cast shoes moved).
+- ~~**Returns onto the spine**~~ — S677, live 15:50 (85 of 85 credit notes since 1-Sep read exactly as before).
+- ~~**Amir's scanned-bill line (Kit 3)**~~ — already live since 11-Oct; the record corrected.
+- ~~**Count #1**~~ — closed in every sense (your word); **the plan of what is left** on the board (section 9).
 
 ## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S361 close (28-Oct, noon)
 
