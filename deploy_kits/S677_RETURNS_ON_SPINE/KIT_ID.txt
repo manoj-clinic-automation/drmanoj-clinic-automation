@@ -1,0 +1,2 @@
+kit id S677_RETURNS_ON_SPINE
+project Sanjeevni (session 362, 28-Oct-2026) -- Sanjeevni files: spine/spine_read.py, finance_returns_audit.py, returns_kinds.py, finance_returns_escalate.py, sanjeevni_approvals.py; no data step
