@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S362 close** (the Sanjeevni chat), 28-Oct-2026, afternoon — the Sanjeevni sections refreshed here (its 364 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S356 close** (the NK Pathology chat), 28-Oct-2026, evening — the NK Pathology sections written here for the first time (its 365 reserved), before the Scan App's; the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S362 close** (the Sanjeevni chat), 28-Oct-2026, afternoon — the Sanjeevni sections refreshed here (its 364 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S355 close** (the Scan App project), 28-Oct-2026, midday — the Scan App sections refreshed here (its 363 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S361 close** (the Sanjeevni chat), 28-Oct-2026, noon — the Sanjeevni sections refreshed here (its 362 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S359 close** (the Sanjeevni chat), 28-Oct-2026, dawn — the Sanjeevni sections refreshed here (its 361 reserved); the other projects' sections as their closes left them.
@@ -134,6 +135,26 @@
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S286 close** (the parent), 01-Oct-2026
 
 *Detail: `START_HERE_SESSION_313.md` · `S311_BUILD_BRIEF.md` · `claude/S288_PENDING_LIST.md`. Your ruling of 17-Sep still governs this list — nothing here is chased. The Sanjeevni sections below are the S310 close's (13-Oct, early morning); `S310_BUILD_BRIEF.md` is their detail, `START_HERE_SESSION_312.md` that chat's entry.*
+
+## ⭐0 — WHAT NEEDS YOU · THE NK PATHOLOGY PROJECT (the lab) — written at the S356 close (28-Oct, evening)
+
+1. **Empty Google Drive's Trash** (drmka.ortho@gmail.com) when convenient — it holds the 767 stray copies from the lab PC (F-1044) and one patient culture report copy. It also empties itself after 30 days.
+2. **The lab staff: the day report at closing time** — Labmate's "Patient register with details (All)" for the day, taken at 20:30, not earlier (27-Oct's was 18:57).
+3. **When convenient, your answers** (the project document §6): did DTH pay the phantom ₹550 lines; does DTH keep a share of each bill; the overhead percentages; does DTH need its receipt number on the statement.
+
+## ⭐1 — WHAT I BUILD NEXT · THE NK PATHOLOGY PROJECT — written at the S356 close
+
+1. The morning day page — a mock-up for you first (the Runbook §2N item 1).
+2. The lab heartbeat's reception-only lines switched off; the lab PC on the health page.
+3. The DTH laptop's copy job, after the lab PC's clean week (after 2-Nov).
+4. The slip number in Labmate, the packages finder, the report composer.
+
+## ✅ DONE AT THE S356 CLOSE — 27 → 28-Oct-2026 (the NK Pathology project)
+
+- The lab PC's automatic copy confirmed running (27-Oct and 28-Oct).
+- The Labmate day report of 27-Oct found on the lab PC and checked — every total equal; seven points for the day page.
+- The Diwali gift sticker sheet (A4, 8 per sheet) made.
+- Two project-only papers copied to the disk store.
 
 ## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S355 close (28-Oct, midday)
 

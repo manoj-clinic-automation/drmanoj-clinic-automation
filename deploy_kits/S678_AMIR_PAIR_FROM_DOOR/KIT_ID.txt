@@ -1,0 +1,2 @@
+kit id S678_AMIR_PAIR_FROM_DOOR
+Sanjeevni session 367 · 29-Oct-2026 · amir_day.py 3b7dae35 -> a0907b74 · restarts clinic-finance only · no data step
