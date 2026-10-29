@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S356 close** (the NK Pathology chat), 28-Oct-2026, evening — the NK Pathology sections written here for the first time (its 365 reserved), before the Scan App's; the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S366 close** (the parent), 29-Oct-2026, afternoon — the parent's sections refreshed here (its 368 reserved; a design session, nothing live changed); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S356 close** (the NK Pathology chat), 28-Oct-2026, evening — the NK Pathology sections written here for the first time (its 365 reserved), before the Scan App's; the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S362 close** (the Sanjeevni chat), 28-Oct-2026, afternoon — the Sanjeevni sections refreshed here (its 364 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S355 close** (the Scan App project), 28-Oct-2026, midday — the Scan App sections refreshed here (its 363 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S361 close** (the Sanjeevni chat), 28-Oct-2026, noon — the Sanjeevni sections refreshed here (its 362 reserved); the other projects' sections as their closes left them.
@@ -323,7 +324,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S358 close (27-Oct, evening)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S366 close (29-Oct, afternoon)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -333,7 +334,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH — one double-click.** It carries today's record. Nothing follows it on the server — the three changes are already live.
+**1 · THE PUBLISH — one double-click.** It carries today's record (a design session — nothing on the server changed). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -346,6 +347,8 @@ https://followup.dr-manoj.in/finance/packs
 ```
 
 **3 · THE TWO FINANCE PASSWORDS shown in chat on 21-Aug — change them** (board Y106). The next chat prepares it as one server line.
+
+**3a · YOUR SHARE % FOR IPD CASES** — one number, when you have it; it goes into the new Settings (D801). Not urgent: the build starts without it.
 
 **4 · THE GLUCOMETER CHARGE — add "Blood sugar (glucometer)" ₹50 as a procedure** (one line); then Shavez adds it to slip 1403.
 
@@ -388,14 +391,21 @@ https://followup.dr-manoj.in/portal/users
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Your four board items (27-Oct), in your order** — screens shown to you first: the Call Console's layout and its repeat calls grouped · its top links that do not load · the Clinic Gist's earlier days · Surgery cases as *IPD cases* (surgical / conservative / no implant, the patient source and its filter).
-2. **Watch the WhatsApp retry's first days** and MyOperator's answer (ticket 691386).
-3. **From 1 November:** October's attendance correction on the live screens, step by step.
-4. **The audit's remaining backup items:** the monthly locked copy retaken when the backup grows (AF-16); the WhatsApp receiver's silent answer (AF-19).
-5. **Zerodha** · **the Tally check** when the accountants reply · **Union Bank** · **the Sanjeevni GST returns.**
-6. **On your word:** Bhati's backfill · a duty-timings page · staff seeing the month's earlier days · the punch listener's second step.
+1. **IPD cases (D801) — the build, kit by kit, on your Surgery cases page:** the record (name, type, source, payer, Settings) → procedures, implants, papers → the money ladders → the implant-bills desk → the vendor ledger → the monthly statement. Each screen shown to you before it goes live.
+2. **Your three remaining board items (27-Oct), in your order:** the Call Console's layout and its repeat calls grouped · its top links that do not load · the Clinic Gist's earlier days.
+3. **Watch the WhatsApp retry's first days** and MyOperator's answer (ticket 691386).
+4. **From 1 November:** October's attendance correction on the live screens, step by step.
+5. **The audit's remaining backup items:** the monthly locked copy retaken when the backup grows (AF-16); the WhatsApp receiver's silent answer (AF-19).
+6. **Zerodha** · **the Tally check** when the accountants reply · **Union Bank** · **the Sanjeevni GST returns.**
+7. **On your word:** Bhati's backfill · a duty-timings page · staff seeing the month's earlier days · the punch listener's second step.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S366 CLOSE — 29-Oct-2026 (the parent)
+
+- **The IPD cases system — devised from your paper and mocked up** (six boards on one canvas: the list, one case, the implant-bills desk, a vendor's ledger, the monthly statement, the four money flows). Your seven answers are in it (D801). *"Very detailed … looked good to me."*
+- **Nothing on the server changed.** The 29-Oct bundle confirmed the three files that went live on 27-Oct.
+- Session 368 reserved for the build.
 
 ## ✅ DONE AT THE S358 CLOSE — 26 → 27-Oct-2026 (the parent)
 

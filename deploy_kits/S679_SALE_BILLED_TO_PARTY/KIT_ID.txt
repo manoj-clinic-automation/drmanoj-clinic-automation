@@ -1,0 +1,2 @@
+kit id S679_SALE_BILLED_TO_PARTY
+Sanjeevni session 367 · 29-Oct-2026 · server reports_tile.py 535b5790 -> 03902a5d (restarts clinic-finance) · medical PC marg_txt.py 18fa8a83 -> aa7baee5, marg_watch.py 39fa2773 -> a009d2fd (by Drive _kit) · no data step
