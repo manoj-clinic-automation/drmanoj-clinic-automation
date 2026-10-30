@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S367 close** (the Sanjeevni chat), 29-Oct-2026, evening — the Sanjeevni sections refreshed here (its 369 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S368 close** (the parent), 30-Oct-2026, morning — the parent's sections refreshed here (its 370 reserved; nothing live changed); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S367 close** (the Sanjeevni chat), 29-Oct-2026, evening — the Sanjeevni sections refreshed here (its 369 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S366 close** (the parent), 29-Oct-2026, afternoon — the parent's sections refreshed here (its 368 reserved; a design session, nothing live changed); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S356 close** (the NK Pathology chat), 28-Oct-2026, evening — the NK Pathology sections written here for the first time (its 365 reserved), before the Scan App's; the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S362 close** (the Sanjeevni chat), 28-Oct-2026, afternoon — the Sanjeevni sections refreshed here (its 364 reserved); the other projects' sections as their closes left them.
@@ -325,7 +326,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S366 close (29-Oct, afternoon)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S368 close (30-Oct, morning)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -335,7 +336,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH — one double-click.** It carries today's record (a design session — nothing on the server changed). Nothing follows it.
+**1 · THE PUBLISH — one double-click.** It carries today's record (nothing on the server changed). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -349,7 +350,9 @@ https://followup.dr-manoj.in/finance/packs
 
 **3 · THE TWO FINANCE PASSWORDS shown in chat on 21-Aug — change them** (board Y106). The next chat prepares it as one server line.
 
-**3a · YOUR SHARE % FOR IPD CASES** — one number, when you have it; it goes into the new Settings (D801). Not urgent: the build starts without it.
+**3a · YOUR SHARE % FOR IPD CASES** — one number, when you have it; it goes into Settings. The build does not wait for it.
+
+**3b · A WHATSAPP TEMPLATE FOR AFTER-DISCHARGE MESSAGES** — only when you decide the schedule; approval goes through MyOperator.
 
 **4 · THE GLUCOMETER CHARGE — add "Blood sugar (glucometer)" ₹50 as a procedure** (one line); then Shavez adds it to slip 1403.
 
@@ -376,7 +379,7 @@ https://claude.ai/artifact/H5W1T3WPNm85t2peTnNnfP
 **LATER — none of these is urgent**
 
 **7 · BHATI'S APP — October home visits cannot be backfilled.** You said you will take it up later; say when.
-**8 · THE SBI DOWNLOADS** still missing from September's pack (the HUF savings July–September, your and Dr Bhawna's PPF April–September). **9 · RAGHAV — the Zerodha papers** to your personal email. **10 · RANJEET'S LOGIN** — the password is yours to set.
+**8 · THE SBI DOWNLOADS** still missing from September's pack. **9 · RAGHAV — the Zerodha papers** to your personal email. **10 · RANJEET'S LOGIN** — the password is yours to set.
 
 ```
 https://followup.dr-manoj.in/portal/users
@@ -384,23 +387,30 @@ https://followup.dr-manoj.in/portal/users
 
 **11 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** **12 · THE RECEPTION PC'S WINDOWS** — your decision. **13 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → 9-Sep**, into `D:\Downloads`. **14 · THE ARMS LICENCE — submit in November.**
 
-**WHEN IT HAPPENS — not a duty:** a WhatsApp reply showing *MyOperator busy — retrying* — leave it; the server sends it again by itself (do not send it again — the inbox refuses a second copy) · a red *NOT delivered* or *May have gone — check* — open that chat and look before sending again · a `[WA send refused — being retried]` or `[WA send NOT delivered]` mail · a patient's WhatsApp alert — tap it and the chat opens · anything to read on WhatsApp: forward it to the clinic WhatsApp number and say so in the chat · a phone line saying the server fixed (or could not fix) a part.
+**WHEN IT HAPPENS — not a duty:** a WhatsApp reply showing *MyOperator busy — retrying* — leave it · a red *NOT delivered* or *May have gone — check* — open that chat and look before sending again · a `[WA send refused — being retried]` or `[WA send NOT delivered]` mail · a patient's WhatsApp alert — tap it and the chat opens · a phone line saying the server fixed (or could not fix) a part.
 
-**Staff's, not yours (watched by me at each open):** October's slip corrections on Shavez's desk — 18 open on 6 days; X-ray 1421 *chhoota* on 27-Oct.
+**Staff's, not yours (watched by me at each open):** October's slip corrections on Shavez's desk; X-ray 1421 *chhoota* on 27-Oct.
 
-**Parked at your word, and not raised by me again:** as at the S354 close. **Deferred at your word:** the evening same-day check · the daily Docterz feedback · the register+slips pack (D789) · disregarding Docterz's payment mode (D790, *"No, for now"*).
+**Parked at your word, and not raised by me again:** as at the S354 close. **Deferred at your word:** the evening same-day check · the daily Docterz feedback · the register+slips pack (D789) · disregarding Docterz's payment mode (D790).
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **IPD cases (D801) — the build, kit by kit, on your Surgery cases page:** the record (name, type, source, payer, Settings) → procedures, implants, papers → the money ladders → the implant-bills desk → the vendor ledger → the monthly statement. Each screen shown to you before it goes live.
-2. **Your three remaining board items (27-Oct), in your order:** the Call Console's layout and its repeat calls grouped · its top links that do not load · the Clinic Gist's earlier days.
-3. **Watch the WhatsApp retry's first days** and MyOperator's answer (ticket 691386).
-4. **From 1 November:** October's attendance correction on the live screens, step by step.
-5. **The audit's remaining backup items:** the monthly locked copy retaken when the backup grows (AF-16); the WhatsApp receiver's silent answer (AF-19).
-6. **Zerodha** · **the Tally check** when the accountants reply · **Union Bank** · **the Sanjeevni GST returns.**
-7. **On your word:** Bhati's backfill · a duty-timings page · staff seeing the month's earlier days · the punch listener's second step.
+1. **IPD cases kit 1 — final, to your review (D804) and Shavez's mock-up:** the list with three statuses and full-mobile search, the case opening in place stage by stage, compact forms, backfill from April 2025 in the same list, Settings. The real screens shown to you before you publish.
+2. **Then kit 2 (papers, implants and their payment status, assistants) · kit 3 (the hospital bill and your share) · kit 4 (implant desk, cheque, vendor ledger) · kit 5 (the monthly statement) · kit 6 (after-discharge list and WhatsApp).**
+3. **The X-ray film log** (D805) — a mock-up first.
+4. **Your three remaining board items (27-Oct):** the Call Console's layout and repeat calls · its top links · the Clinic Gist's earlier days.
+5. **Watch the WhatsApp retry** and MyOperator's answer (ticket 691386). **From 1 November:** October's attendance correction.
+6. **Zerodha** · **the Tally check** · **Union Bank** · **the Sanjeevni GST returns** · AF-16 · AF-19.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S368 CLOSE — 29 → 30-Oct-2026 (the parent)
+
+- **IPD cases kit 1 — built and proven, then redesigned at your review** (D804). Set aside unpublished; it is the base for the final build.
+- **Backfill from April 2025** — in the design, as you asked.
+- **Shavez's pages mocked up** — PC and phone (`Shavez_IPD_mockup.html`; the IPD Cases canvas).
+- **The X-ray film log — answered; your rulings recorded** (D805).
+- Session 370 reserved for the final build.
 
 ## ✅ DONE AT THE S366 CLOSE — 29-Oct-2026 (the parent)
 
