@@ -1,0 +1,2 @@
+kit id S686_INGEST_SELFTEST_F1051
+the parent, session 372 · 31-Oct-2026 · finance_ingest.py ce01a9e1 -> 029f5c20 · the selftest only · no restart · data step: crashed runs' throwaway copies removed from /tmp
