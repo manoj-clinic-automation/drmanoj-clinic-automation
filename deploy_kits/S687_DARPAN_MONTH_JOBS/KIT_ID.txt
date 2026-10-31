@@ -1,0 +1,3 @@
+kit id S687_DARPAN_MONTH_JOBS
+the parent, session 372 · 31-Oct-2026 · Darpan monthly jobs: home medicines, gaadi ki jaanch + kaagaz ki yaad, expiry ki safai · review round 1 fixed
+finance_app.py 1dd66af3 -> 9ce1b67f (one mount block) · aaj_duties.json 1d085d58 -> 0adf1a84 · aaj_seed.py 2121947f -> 73b8556a · month_jobs.py NEW -> 33fa557f · duty map pinned 78b5f07e · restarts clinic-finance · data step cfg_s687.py
