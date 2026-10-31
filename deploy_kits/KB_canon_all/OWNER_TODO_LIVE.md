@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S371 close** (the parent), 31-Oct-2026, midday — the parent's sections refreshed here (the consent's ankle and spelling fixes installed; IPD kit 4 waits on three answers; its 372 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S372 close** (the parent), 31-Oct-2026, night — the parent's sections refreshed here (the ingest self-check, Darpan's monthly jobs and the X-ray film log installed; his medicines list, paper dates, opening boxes and IPD kit 4's answers wait on him; the procedures list at his word; its 373 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S371 close** (the parent), 31-Oct-2026, midday — the parent's sections refreshed here (the consent's ankle and spelling fixes installed; IPD kit 4 waits on three answers; its 372 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S370 close** (the parent), 30-Oct-2026, afternoon — the parent's sections refreshed here (IPD kits 1–3 installed; its 371 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S368 close** (the parent), 30-Oct-2026, morning — the parent's sections refreshed here (its 370 reserved; nothing live changed); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S367 close** (the Sanjeevni chat), 29-Oct-2026, evening — the Sanjeevni sections refreshed here (its 369 reserved); the other projects' sections as their closes left them.
@@ -328,7 +329,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S371 close (31-Oct, midday)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S372 close (31-Oct, night)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -338,47 +339,61 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH — one double-click.** It carries today's record (both consent fixes are already installed). Nothing follows it.
+**1 · THE PUBLISH — one double-click.** It carries today's record (all three of today's builds are already installed). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · IPD KIT 4 — THREE ANSWERS ON THE MOCK-UP.** The five step names as shown; does Shavez write the cheque from the desk (number, date, amount); are old cases settled only by you, on the vendor's page. Say "build", or what to change.
+**2 · DARPAN'S MONTHLY JOBS — your household medicines list and the vehicle papers' dates.** On your page: each medicine's name, unit and how many are needed in a month; each vehicle paper's expiry date (pollution, insurance, RC). Until then the list is empty and no paper reminder can come.
+
+```
+https://followup.dr-manoj.in/finance/monthjobs/owner
+```
+
+**3 · THE X-RAY FILM LOG — Settings.** The opening spare boxes for each size (8×10, 11×14), and a size for the 16 studies marked "size not set".
+
+```
+https://followup.dr-manoj.in/finance/slips/film/log
+```
+
+**4 · IPD KIT 4 — THREE ANSWERS ON THE MOCK-UP.** The five step names as shown; does Shavez write the cheque from the desk (number, date, amount); are old cases settled only by you, on the vendor's page. Say "build", or what to change. After 6-Nov I re-plan it.
 
 ```
 https://claude.ai/artifact/D4BQUWfNKqoXHt5uZBJmcw
 ```
 
-**3 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+**5 · THE PACKS PAGE — name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**4 · THE TWO FINANCE PASSWORDS shown in chat on 21-Aug — change them** (board Y106). The next chat prepares it as one server line.
+**6 · THE PROCEDURES LIST (D812)** — built when you say "start".
 
-**4a · YOUR SHARE % FOR IPD CASES.** One number in IPD cases' Settings. Until then *your formula* on each case shows "not set"; the hospital's way (50%) works already.
+**7 · THE TWO FINANCE PASSWORDS shown in chat on 21-Aug — change them** (board Y106). The next chat prepares it as one server line.
+
+**7a · YOUR SHARE % FOR IPD CASES.** One number in IPD cases' Settings. Until then *your formula* on each case shows "not set"; the hospital's way (50%) works already.
 
 ```
 https://followup.dr-manoj.in/finance/surgery/settings
 ```
 
-**4b · THE HOSPITAL: HOW IT FILLS THE CREDIT CASES' CHARGES** on the monthly statement. Kit 5 (the monthly statement) waits for it.
+**7b · THE HOSPITAL: HOW IT FILLS THE CREDIT CASES' CHARGES** on the monthly statement. Kit 5 (the monthly statement) waits for it.
 
-**4c · A WHATSAPP TEMPLATE FOR AFTER-DISCHARGE MESSAGES.** Only when you decide the schedule; approval goes through MyOperator.
+**7c · A WHATSAPP TEMPLATE FOR AFTER-DISCHARGE MESSAGES.** Only when you decide the schedule; approval goes through MyOperator.
 
-**5 · THE GLUCOMETER CHARGE — add "Blood sugar (glucometer)" ₹50 as a procedure** (one line); then Shavez adds it to slip 1403.
+**8 · THE GLUCOMETER CHARGE — add "Blood sugar (glucometer)" ₹50 as a procedure** (one line); then Shavez adds it to slip 1403.
 
 ```
 https://followup.dr-manoj.in/finance/clinic/sheets
 ```
 
-**6 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** Until then, a hand-made backup onto the pen drive about once a week.
+**9 · THE MARG ENGINEER: TEST-RESTORE MARG'S AUTOMATIC BACKUP.** Until then, a hand-made backup onto the pen drive about once a week.
 
 **FROM 1 NOVEMBER — once a month**
 
-**7 · APPROVE OCTOBER'S ATTENDANCE CORRECTIONS** when your console says *Attendance correction: October ready — approve & save*. It is also the **Attendance correction** tile in your Staff folder.
+**10 · APPROVE OCTOBER'S ATTENDANCE CORRECTIONS** when your console says *Attendance correction: October ready — approve & save*. It is also the **Attendance correction** tile in your Staff folder.
 
 ```
 https://followup.dr-manoj.in/register/attcorr
@@ -392,33 +407,43 @@ https://claude.ai/artifact/H5W1T3WPNm85t2peTnNnfP
 
 **LATER — none of these is urgent**
 
-**8 · THE HOSTINGER SERVER UPDATE.** Nothing now; Hostinger blocks the flaw at its network. When the fix is out, I give you one server line to run after clinic hours (about a minute offline).
-**9 · BHATI'S APP — October home visits cannot be backfilled.** You said you will take it up later; say when.
-**10 · THE SBI DOWNLOADS** still missing from September's pack. **11 · RAGHAV — the Zerodha papers** to your personal email. **12 · RANJEET'S LOGIN** — the password is yours to set.
+**11 · THE HOSTINGER SERVER UPDATE.** Nothing now; Hostinger blocks the flaw at its network. When the fix is out, I give you one server line to run after clinic hours (about a minute offline).
+**12 · BHATI'S APP — October home visits cannot be backfilled.** You said you will take it up later; say when.
+**13 · THE SBI DOWNLOADS** still missing from September's pack. **14 · RAGHAV — the Zerodha papers** to your personal email. **15 · RANJEET'S LOGIN** — the password is yours to set.
 
 ```
 https://followup.dr-manoj.in/portal/users
 ```
 
-**13 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** **14 · THE RECEPTION PC'S WINDOWS** — your decision. **15 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → 9-Sep**, into `D:\Downloads`. **16 · THE ARMS LICENCE — submit in November.**
+**16 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** **17 · THE RECEPTION PC'S WINDOWS** — your decision. **18 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → 9-Sep**, into `D:\Downloads`. **19 · THE ARMS LICENCE — submit in November.**
 
-**WHEN IT HAPPENS — not a duty:** a WhatsApp reply showing *MyOperator busy — retrying* (leave it) · a red *NOT delivered* or *May have gone — check* (open that chat and look before sending again) · a `[WA send refused — being retried]` or `[WA send NOT delivered]` mail · a patient's WhatsApp alert (tap it and the chat opens) · a phone line saying the server fixed (or could not fix) a part · **the first real *Call (IVR)* from an IPD case** (if your phone does not ring, say so) · **the first real ankle consent and spelling correction** (if anything prints wrong, send a photo).
+**WHEN IT HAPPENS — not a duty:** a WhatsApp reply showing *MyOperator busy — retrying* (leave it) · a red *NOT delivered* or *May have gone — check* (open that chat and look before sending again) · a `[WA send refused — being retried]` or `[WA send NOT delivered]` mail · a patient's WhatsApp alert (tap it and the chat opens) · a phone line saying the server fixed (or could not fix) a part · **the first real *Call (IVR)* from an IPD case** (if your phone does not ring, say so) · **the first real ankle consent and spelling correction** (if anything prints wrong, send a photo) · **the film log's first order line** (it opens a WhatsApp to Nigam; check the count before sending).
 
-**Staff's, not yours (watched by me at each open):** October's slip corrections on Shavez's desk; X-ray 1421 *chhoota* on 27-Oct.
+**Staff's, not yours (watched by me at each open):** the morning film count (reception; Shavez from 11:00); Darpan's month-end jobs and the one old expiry line (a Feb-2025 batch); October's slip corrections on Shavez's desk; X-ray 1421 *chhoota* on 27-Oct.
 
 **Parked at your word, and not raised by me again:** as at the S354 close. **Deferred at your word:** the evening same-day check · the daily Docterz feedback · the register+slips pack (D789) · disregarding Docterz's payment mode (D790) · *plaster / slab now* in the consent (D809; its own wording when you want it).
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **IPD kit 4, once you answer the mock-up (D807; kit S682):** the implant bills desk, the cheque and the vendors' ledger, the old cases' implants settled there.
-2. **The Hostinger update** when its fix is out: one server line, after clinic hours.
-3. **IPD kit 5, the monthly statement:** once the hospital explains the credit charges (D808). **Kit 6, after discharge:** a list to track and WhatsApp from.
-4. **The X-ray film log** (D805), a mock-up first.
-5. **Your three remaining board items (27-Oct):** the Call Console's layout and repeat calls · its top links · the Clinic Gist's earlier days.
-6. **Watch the WhatsApp retry** and MyOperator's answer (ticket 691386). **From 1 November:** October's attendance correction.
-7. **Zerodha** · **the Tally check** · **Union Bank** · **the Sanjeevni GST returns** · AF-16 · AF-19 · F-1051.
+1. **The procedures list (D812), at your word:** like the X-ray list, from 1-Oct, grouped by day with counts by kind, Excel; amounts on your page only. A mock-up first.
+2. **IPD kit 4, once you answer the mock-up (D807; kit S682):** the implant bills desk, the cheque and the vendors' ledger, the old cases' implants settled there.
+3. **Check tonight's backup carries today's files; the first film counts; the 16-vs-12 film bills.**
+4. **The Hostinger update** when its fix is out: one server line, after clinic hours.
+5. **IPD kit 5, the monthly statement:** once the hospital explains the credit charges (D808). **Kit 6, after discharge:** a list to track and WhatsApp from.
+6. **Your three remaining board items (27-Oct):** the Call Console's layout and repeat calls · its top links · the Clinic Gist's earlier days.
+7. **Watch the WhatsApp retry** and MyOperator's answer (ticket 691386). **From 1 November:** October's attendance correction.
+8. **Zerodha** · **the Tally check** · **Union Bank** · **the Sanjeevni GST returns** · AF-16 · AF-19.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S372 CLOSE — 31-Oct-2026 (the parent)
+
+- **The finance import's self-check fixed, INSTALLED (14:31):** it reports instead of stopping, and leaves no copy of the patient database behind (F-1051 closed).
+- **Darpan's monthly jobs, INSTALLED (18:33):** Home medicines, the vehicle check, the expiry clear-out and paper reminders in his Aaj list; your page `/finance/monthjobs/owner`. Your words recorded (D810).
+- **The X-ray film log, INSTALLED (23:30):** films left typed each morning; days left, the gap, the order line with a WhatsApp to Nigam; the contacts card; the X-ray list from 1-Oct with Excel; the weekly film tick retired. Your words recorded (D811).
+- **Nigam's phone** set on the contacts card at your word (in the database only).
+- **The procedures list** recorded as your next build (D812).
+- Session 373 reserved for the parent.
 
 ## ✅ DONE AT THE S371 CLOSE — 30 → 31-Oct-2026 (the parent)
 
