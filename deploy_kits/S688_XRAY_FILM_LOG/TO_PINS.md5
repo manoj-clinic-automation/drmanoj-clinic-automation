@@ -1,0 +1,5 @@
+# S688_XRAY_FILM_LOG -- the four files as the installer places them
+2f604fee8ae7e69af670c55a13592fce  finance/finance_app.py
+c5c80c37e5868864a5e6f58ea7c75112  finance/aaj_duties.json
+dc7050d5de882cb65af843beb8110b07  finance/aaj_seed.py
+c08a10163295d5ab5919472e01977c12  finance/xray_film.py

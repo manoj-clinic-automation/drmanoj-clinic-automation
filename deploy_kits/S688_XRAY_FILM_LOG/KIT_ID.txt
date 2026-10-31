@@ -1,0 +1,3 @@
+kit id S688_XRAY_FILM_LOG
+the parent, session 372 · 31-Oct-2026 · the X-ray film log: the morning FILMS-LEFT figure from the Fuji screen (owner 20:23 IST), box loads seen from it, days left, the spare stock, machine vs paid slips (gap to all), order line + supplier WhatsApp, contacts, owner corrections, X-ray list from 1-Oct, Excel · weekly film-stock tick retired · cold reviews 1, 2, 3 and 4 folded in
+finance_app.py 9ce1b67f -> 2f604fee (one mount block) · aaj_duties.json 0adf1a84 -> c5c80c37 · aaj_seed.py 73b8556a -> dc7050d5 · xray_film.py NEW -> c08a1016 · month_jobs.py 33fa557f read only · duty map pinned 78b5f07e · restarts clinic-finance · data step cfg_s688.py
