@@ -1,0 +1,4 @@
+# S689_CLINIC_LISTS -- the three files as the installer places them
+00cc4935217ac0c59860be947565dbad  finance/finance_app.py
+6118ef4da88ada966752a8c0340828a7  finance/clinic_lists.py
+4ff313516f0521533dff1851d8b018ba  portal/portal.py
