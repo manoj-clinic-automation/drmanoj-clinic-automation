@@ -1,0 +1,2 @@
+kit id S693_STOCK_ON_BATCH
+Sanjeevni session 375 · 01-Nov-2026 · finance/expiry_watch.py b68cda86 -> 15417df5 · the watch run once after placing · restarts clinic-finance · no table change

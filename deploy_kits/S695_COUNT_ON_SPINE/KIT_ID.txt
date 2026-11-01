@@ -1,0 +1,2 @@
+kit id S695_COUNT_ON_SPINE
+Sanjeevni session 375 · 01-Nov-2026 · finance/stock_app.py 5433d7b7 -> 5d83a852 · finance/loss_piles.py 2b9023fd -> ad0454ae · no data step · restarts clinic-finance

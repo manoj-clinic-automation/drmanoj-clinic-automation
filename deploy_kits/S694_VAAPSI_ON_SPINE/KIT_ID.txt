@@ -1,0 +1,2 @@
+kit id S694_VAAPSI_ON_SPINE
+Sanjeevni session 375 · 01-Nov-2026 · finance/returns_desk.py dffbe8fb -> 93fd7556 · data step: older desk lines re-keyed to the spine's key · restarts clinic-finance
