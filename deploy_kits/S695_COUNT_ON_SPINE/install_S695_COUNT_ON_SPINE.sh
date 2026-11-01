@@ -127,8 +127,11 @@ T0="$(date '+%Y-%m-%d %H:%M:%S')"
 c1=$(wait200 fhz); [ "$c1" = 200 ] || restore "finance healthz $c1"
 c2=$(fhealth /finance/stock/); case "$c2" in 302|401|303|403|200) ;; *) restore "the stock pages answered $c2";; esac
 if command -v "$JOURNALCTL" >/dev/null 2>&1; then
-  JR="$("$JOURNALCTL" -u "$FSVC" --since "$T0" --no-pager 2>/dev/null | grep -c -i -E 'Traceback|SyntaxError|ImportError|ModuleNotFoundError|NameError')"
-  [ "${JR:-0}" = 0 ] || restore "journal: $JR error line(s) since the restart"
+  # the NEW master's lines only: the old master's shutdown can print Python's own '--- Logging error ---' traceback while it is being
+  # stopped (gunicorn reaping a worker inside a signal handler) -- that is not the kit's; the 1-Nov install of this kit was refused by it
+  "$JOURNALCTL" -u "$FSVC" --since "$T0" --no-pager 2>/dev/null | awk '/Starting gunicorn/{buf=""} {buf=buf $0 "\n"} END{printf "%s", buf}' > "$SCR/journal_new.txt"
+  JR="$(grep -c -i -E 'Traceback|SyntaxError|ImportError|ModuleNotFoundError|NameError' "$SCR/journal_new.txt")"
+  [ "${JR:-0}" = 0 ] || { grep -i -E -B3 -A12 'Traceback|SyntaxError|ImportError|ModuleNotFoundError|NameError' "$SCR/journal_new.txt" | head -40 | sed 's/^/   /'; restore "journal: $JR error line(s) in the new process since the restart (kept in $SCR/journal_new.txt)"; }
 fi
 say "[6/8] $FSVC restarted at $T0: healthz $c1; the stock pages $c2; journal clean"
 say "[7/8] no data step"
