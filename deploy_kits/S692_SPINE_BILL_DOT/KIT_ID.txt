@@ -1,0 +1,2 @@
+kit id S692_SPINE_BILL_DOT
+Sanjeevni session 375 · 01-Nov-2026 · finance/spine/marg_read.py b47a1d62 -> 55efcbf7 · re-reads the stale purchase readings and rebuilds the spine once · restarts clinic-finance · no data step

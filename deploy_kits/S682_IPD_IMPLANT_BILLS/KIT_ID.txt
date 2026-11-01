@@ -1,0 +1,3 @@
+kit id S682_IPD_IMPLANT_BILLS
+the parent, session 374 · 01-Nov-2026 · IPD kit 4: the implant bills desk, the supplier bill with its scan, the cheque on its own, paid / confirmed, old cases settled by Dr Manoj, section 6; Supplier everywhere
+surgery_cases.py 89a668a9 -> TO (rebuilt on the box by make_s682.py) · additive data on first request · restarts clinic-finance
