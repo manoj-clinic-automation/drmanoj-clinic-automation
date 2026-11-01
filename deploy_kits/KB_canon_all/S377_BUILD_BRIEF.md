@@ -1,0 +1,17 @@
+# S377 — what changed for you · 01 → 02-Nov-2026 (the parent)
+
+**Live since 21:18 — your command console and the month page (S697)**
+
+1. **The console's bars now look like the month page's**, and a line that needs you is itself coloured — amber or rose, with its figure in bold at the end — instead of a small dot. Clear lines stay plain; lines at 0 stay grey.
+   `https://followup.dr-manoj.in/finance/console`
+2. **The Sanjeevni section carries your daily pages with their figures**, under the Needs-you lines: Purchase orders (the reception phone's last check-in, messages waiting, shortages), Review queue, Expiry watch, Stock check, Corrections, and one Marg-reports line that opens into the seven kinds. Each line opens its page. The staff screens are left out, as you said.
+3. **The month** has two chips — October · November — on its bar, each opening the page on that month; the duplicate link is gone. On the page, *Other papers of the month* lists every scanned lane with its count, total and link, the unsorted bills in amber, and *Pharmacy bills scanned* counted paired / unpaired with Marg (their rupees never added). The IPD line reads. The home-medicines line says "due since".
+4. **The film log:** a morning with no machine count still shows that day's slip films, and "Mornings not counted" names the month.
+
+**The Call Console — analysed, not built (your word).** The paper is `claude/S377_CALL_CONSOLE_PLAN.md`; the mock-up in the month page's look is at `https://claude.ai/artifact/AwBDzfttkYPygGVcrQbTfD`. What I found live: every call has been listed twice since 29-Oct midday (the day counts are doubled — a hook fault, mine to fix first); the Conversations and New leads tabs take 16 seconds; the Staff column is cut off; the evening "Stale" banner is the reading stopping at 21:00. Your rulings are recorded (D819): full numbers, recordings and transcripts on the page, unknown callers first with answered / net-missed in the banner, repeat calls grouped, the clinic ID on every patient, the follow-up calls counted per tracker section and expanding into the rows, the Call-ke-baad list read into the console, staff performance shared with each person and shown to you — by each person's own MyOperator agent, the roster and the biometric punch, "to check" never a verdict — the follow-up list sanitised before Shavez and Alisha are assigned, and patient analysis (new vs repeat, diagnosis groups, revenue by group, follow-up show rate since June) on your command console.
+
+**The order, when you say "build":** S698 — the Call Console fixed and rebuilt in the new look · S699 — the follow-ups, Call ke baad and Needs you · S700 — the staff lines (theirs on Aaj ka kaam, yours on the console) · S701 — Patients on the command console. Your three mock-up corrections (bigger, darker small text; every follow-up section expanding; the clinic ID on every patient) go on the canvas first, for your look.
+
+**One wording I owe:** a room group whose bills carry no amount shows "₹0" on the month page; it will say "no amount read" in the next month-page kit.
+
+**Waiting on you:** the publish (papers only; nothing follows) · "build" for S698, in a fresh chat · October's attendance approval, then the salary lock · the purchases finalise · October's Check it → Lock it · the pack by 10 Nov · the film log's opening boxes · the packs page · two answers: slip …1449's two ILI KNEE lines (both knees?) and the two look-alike wrist lines on your rate page (₹800 / ₹500).
