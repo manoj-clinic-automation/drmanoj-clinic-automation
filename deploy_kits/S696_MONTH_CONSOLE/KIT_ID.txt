@@ -1,0 +1,3 @@
+kit id S696_MONTH_CONSOLE
+the parent, session 376 · 01-Nov-2026 · The month on his command console: the section and the page /finance/console/month -- where the month stands, revenue by head, X-ray expenses against revenue, bought for the rooms, supplies and replacements
+owner_console.py e414e7ad -> TO (6 counted edits) · month_read.py NEW · month_page.html NEW · restarts clinic-finance · no data step · the staff register and the Scan App read-only

@@ -1,0 +1,4 @@
+# S696_MONTH_CONSOLE -- the three files as the installer places them
+391823add07b6cedc1054992b3185b12  owner_console.py
+9aa2e053238a4c606dbd41ddc7c8a495  month_read.py
+29db7c20687ab52028f76bfa24543537  month_page.html
