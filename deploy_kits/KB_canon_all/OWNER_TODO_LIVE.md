@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S373 close** (the parent), 01-Nov-2026, early morning — the parent's sections refreshed here (your X-ray & procedures page installed; your October findings for the 374 chat; IPD kit 4's answers, the medicines list, paper dates and spare boxes wait on you; 374 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S369 close** (the Sanjeevni chat), 01-Nov-2026, morning — the Sanjeevni sections refreshed here (Amir's scan list and batch fixes live; 375 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S373 close** (the parent), 01-Nov-2026, early morning — the parent's sections refreshed here (your X-ray & procedures page installed; your October findings for the 374 chat; IPD kit 4's answers, the medicines list, paper dates and spare boxes wait on you; 374 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S372 close** (the parent), 31-Oct-2026, night — the parent's sections refreshed here (the ingest self-check, Darpan's monthly jobs and the X-ray film log installed; his medicines list, paper dates, opening boxes and IPD kit 4's answers wait on him; the procedures list at his word; its 373 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S371 close** (the parent), 31-Oct-2026, midday — the parent's sections refreshed here (the consent's ankle and spelling fixes installed; IPD kit 4 waits on three answers; its 372 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S370 close** (the parent), 30-Oct-2026, afternoon — the parent's sections refreshed here (IPD kits 1–3 installed; its 371 reserved); the other projects' sections as their closes left them.
@@ -790,19 +791,19 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S367 close (29-Oct, evening)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S369 close (01-Nov, morning)
 
-*Detail: `S367_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_369.md`. The plan of what is left is section 9 of your System Board's plan. This section supersedes the S362 one below it.*
+*Detail: `S369_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_375.md`. The plan of what is left is section 9 of your System Board's plan. This section supersedes the S367 one below it.*
 
-**1 · Yesterday's sale (28-Oct)** — Shavez corrects bill **A004482** in Marg from DEEPAM PHARM to Cash or UPI (whichever it really was), then exports the 28-Oct sale report again. A sale is only Cash or UPI (your ruling, D802).
-
-**2 · The publish** — this close's record. The same double-click as always:
+**1 · The publish** — this close's record. The same double-click as always:
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**3 · Two September payment messages** (carried, not re-checked today): A.A. Pharmaceuticals (₹8,780) and Deepam Pharma (₹42,945) — **Bhejo** beside each; it asks first, answer yes:
+**2 · Nothing new for Amir from you** — his card now carries the vouchers and the Batch Stock step by itself. If he asks: vouchers first, then the Batch Stock, as the card says.
+
+**3 · Two September payment messages** (carried, not re-checked): A.A. Pharmaceuticals (₹8,780) and Deepam Pharma (₹42,945) — **Bhejo** beside each; it asks first, answer yes:
 
 ```
 https://followup.dr-manoj.in/finance/purchase/page/pay/2026-09
@@ -814,19 +815,20 @@ https://followup.dr-manoj.in/finance/purchase/page/pay/2026-09
 https://followup.dr-manoj.in/finance/porders/s454/track
 ```
 
-**5 · Before 1 November — Marg stops selling these on the 1st:** REEBORN D and RIFAVAX 550:
+**5 · Shivani — the Marg reports-only login ID and password.** Her *Aaj ki reports* tile is live (D778).
 
-```
-https://followup.dr-manoj.in/finance/sanjeevni/expiry
-```
-
-**6 · Shivani — the Marg reports-only login ID and password.** Her *Aaj ki reports* tile is live (D778).
-
-**7 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
+**6 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
 
 **Later, your word only:** the buying switch, when the bar is met three weeks running (first score 1-Nov night; earliest ~22-Nov) — with one mock-up of Darpan's tab line.
 
 **Still yours from before, not urgent (on your board):** Ram Singh's three report buttons; whether Shavez's monthly *Stock expiry* export leaves his list; the two LINVIZ 600 messages; Flacort 6 / Flemcort 6.
+
+## ✅ DONE AT THE S369 CLOSE — 29-Oct → 01-Nov-2026 (the Sanjeevni project)
+
+- ~~**Amir's scan list showing bills already in Marg (four of finalised September)**~~ — S683, live 18:26 30-Oct; his list 0 (D814).
+- ~~**Amir's batch list: what was wrong, not what to do; never refreshed**~~ — S690, live 06:59 1-Nov: the voucher pairs, the Batch Stock every visit, the confirmation; never a sale bill (D815).
+- ~~**Yesterday's sale (28-Oct, bill A004482)**~~ — landed (87 lines for 28-Oct in the 1-Nov copy).
+- ~~**REEBORN D and RIFAVAX 550 before 1-Nov**~~ — now past; both are on Amir's expiry write-off line.
 
 ## ✅ DONE AT THE S367 CLOSE — 29-Oct-2026 (the Sanjeevni project)
 

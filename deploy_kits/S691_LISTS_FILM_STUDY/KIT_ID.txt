@@ -1,0 +1,3 @@
+kit id S691_LISTS_FILM_STUDY
+the parent, session 374 · 01-Nov-2026 · Paid from Docterz on his lists page; film size and films per study on his rate page; the film log counts every billed slip; bills this financial year
+owner_sheets.py baa7ccc4 -> TO · xray_film.py c08a1016 -> TO · clinic_lists.py 6118ef4d -> TO · restarts clinic-finance · no data step
