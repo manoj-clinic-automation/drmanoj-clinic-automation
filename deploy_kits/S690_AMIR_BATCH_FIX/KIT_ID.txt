@@ -1,0 +1,2 @@
+kit id S690_AMIR_BATCH_FIX
+Sanjeevni session 369 · 01-Nov-2026 · expiry_watch.py 23e0a5bf -> b68cda86 · amir_day.py a0907b74 -> 10a5f9c4 · one cron line (every 5 min, run --if-new) · restarts clinic-finance · data step: the watch run once
