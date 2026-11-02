@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S377 close** (the parent), 02-Nov-2026, after midnight — the parent's sections refreshed here (your console's new look and the Sanjeevni pages installed; the Call Console analysed and planned, your "build" awaited; October's amber lines, the film log's opening boxes, the packs page and two answers wait on you; 378 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S378 close** (the parent, EOS-light), 02-Nov-2026, morning — the parent's sections refreshed here (the morning checks clear; the Call Console's design approved — calls and WhatsApp in one timeline, the Staff performance section, the arrow icons; your "build" in a fresh chat awaited; October's amber lines, the film log's opening boxes, the packs page and two answers wait on you; 379 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S377 close** (the parent), 02-Nov-2026, after midnight — the parent's sections refreshed here (your console's new look and the Sanjeevni pages installed; the Call Console analysed and planned, your "build" awaited; October's amber lines, the film log's opening boxes, the packs page and two answers wait on you; 378 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S376 close** (the parent), 01-Nov-2026, evening — the parent's sections refreshed here ("The month" on your command console built and installed; October's amber lines, the film log's opening boxes, the packs page and two answers wait on you; 377 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S374 close** (the parent), 01-Nov-2026, morning — the parent's sections refreshed here (your October findings built — Paid from Docterz, the film on your rate page; IPD kit 4's implant bills desk installed; the film count, the medicines list, paper dates and the packs page wait on you; 376 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S369 close** (the Sanjeevni chat), 01-Nov-2026, morning — the Sanjeevni sections refreshed here (Amir's scan list and batch fixes live; 375 reserved); the other projects' sections as their closes left them.
@@ -334,7 +335,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S377 close (02-Nov, 00:3x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S378 close (02-Nov, 09:3x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -344,13 +345,13 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH — one double-click.** It carries tonight's record (the console's new look is already installed). Nothing follows it.
+**1 · THE PUBLISH — one double-click.** It carries this morning's record (papers only; nothing on the server changes). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · "BUILD" FOR THE CALL CONSOLE (S698), in a fresh chat** — after you have looked at the corrected mock-up. The plan is `claude/S377_CALL_CONSOLE_PLAN.md`.
+**2 · "BUILD" FOR THE CALL CONSOLE (S698), in a fresh chat** — your approved mock-up (v12) is the specification: calls and WhatsApps in one timeline per person, the Staff performance section, the arrow icons. The papers are `claude/S377_CALL_CONSOLE_PLAN.md` and `claude/S378_WHATSAPP_ON_CONSOLE_PLAN.md`.
 
 ```
 https://claude.ai/artifact/AwBDzfttkYPygGVcrQbTfD
@@ -406,7 +407,7 @@ https://claude.ai/artifact/H5W1T3WPNm85t2peTnNnfP
 https://followup.dr-manoj.in/portal/users
 ```
 
-**14 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** **15 · THE RECEPTION PC'S WINDOWS** — your decision. **16 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → 9-Sep**, into `D:\Downloads`. **17 · THE ARMS LICENCE — submit in November.** **18 · THE ALERT for an unknown caller unreached for an hour** (ntfy to Shavez and you) — your yes, when the Call Console is built.
+**14 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** **15 · THE RECEPTION PC'S WINDOWS** — your decision. **16 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → 9-Sep**, into `D:\Downloads`. **17 · THE ARMS LICENCE — submit in November.** **18 · THE ALERT for an unknown caller unreached for an hour** (ntfy to Shavez and you) — your yes, when the Call Console is built. **19 · "CLEAR IT"** — if you want the old working copies (about 2 GB, earlier sessions' scratch) removed from the cloud workspace linked to your PC; the safety check stopped me doing it without your word.
 
 **WHEN IT HAPPENS — not a duty:** a WhatsApp reply showing *MyOperator busy — retrying* (leave it) · a red *NOT delivered* or *May have gone — check* (open that chat and look before sending again) · a `[WA send refused — being retried]` or `[WA send NOT delivered]` mail · a patient's WhatsApp alert (tap it and the chat opens) · a phone line saying the server fixed (or could not fix) a part · **the first real *Call (IVR)* from an IPD case** · **the first real ankle consent and spelling correction** · **the film log's first order line** (it opens a WhatsApp to Nigam; check the count before sending) · **a line "not matching Docterz" on your X-ray & procedures page** (ask Shavez about that slip) · **the first implant bill on the Implant bills desk, and the first DTH cheque** (write it on its own; tie its bills when you know them) · **on the 1st of a month your X-ray & procedures page opens on the new, empty month** — pick last month · **an amber or rose line on your console** — it is yours; the line opens the page. **Until S698: the Call Console's day counts are doubled (every call listed twice since 29-Oct) — read them as half.**
 
@@ -416,15 +417,21 @@ https://followup.dr-manoj.in/portal/users
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **S698 — the Call Console (D819), on your "build":** your three mock-up corrections on the canvas first; the doubled rows fixed (the hook traced); the 16-second tabs; the page in the month page's look — unknown callers first with answered / net-missed, repeat calls grouped, players and transcripts, full numbers, clinic IDs, phone cards.
-2. **S699 — the follow-ups** (the tracker's list sanitised: one open row per patient, closed by a visit; called-of per section, expanding into the rows), **Call ke baad** read into the console, **Needs you**. **S700 — the staff lines** (theirs on Aaj ka kaam, yours on the console; by each person's own agent, the roster and the punch). **S701 — Patients on your command console** (new vs repeat, diagnosis groups, revenue by group, follow-up show rate since June). A mock-up before each.
-3. **Check tomorrow's backup carries tonight's ten files**, then watch the console's new look, The month's *Other papers* and the film log for a few days; "no amount read" on the month page (F-1085) in the next month-page kit.
+1. **S698 — the Call Console (D819, D820), on your "build", to the approved mock-up v12:** the doubled rows fixed on the page AND cleaned in the stored records (the audit's AF-35); the slow tabs; the new look — the icon legend, icon counts, one row per person ready for calls and WhatsApps, unknown numbers first, recordings and transcripts, full numbers, clinic IDs.
+2. **S699 — the WhatsApps into each person's timeline** (your rules: a reply or a real call of 30 s+ within 2 clinic hours answers a WhatsApp; a missed call only a call), the follow-ups as icon chains, Call ke baad, Needs you — and the audit's small fixes (the health mail's "last 24 h", the WhatsApp/call count check). **S700 — the Staff performance section** (each person's card: answered, missed, made, callbacks, WhatsApps, not logged, staff ≠ AI, with recordings and your review buttons; their own card on Aaj ka kaam). **S701 — Patients on your command console** (a mock-up first).
+3. **Confirm the first Sunday restore drills read green** (the audit's AF-15) at the next open; then watch the console's new look, The month's *Other papers* and the film log; "no amount read" on the month page (F-1085) in the next month-page kit.
 4. **Read the Implant bills desk on the first real IPD case.** **The Hostinger update** when its fix is out. **IPD kit 5** once the hospital explains the credit charges (D808). **Kit 6, after discharge.**
 5. **Your board item of 27-Oct still open:** the Clinic Gist's earlier days.
-6. **Watch the WhatsApp retry** and MyOperator's answer (ticket 691386). **October's attendance correction.**
-7. **Zerodha** · **the Tally check** · **Union Bank** · **the Sanjeevni GST returns** · AF-16 · AF-19.
+6. **Watch the WhatsApp retry** and MyOperator's answer (ticket 691386) — 4 of your 9 replies last week failed. **October's attendance correction.**
+7. **Zerodha** · **the Tally check** · **Union Bank** · **the Sanjeevni GST returns** · AF-16 · AF-19 · the audit's own channel (two small nightly files).
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S378 CLOSE — 02-Nov-2026 (the parent)
+
+- **The morning checks:** last night's backup carries all ten files installed on 31-Oct and 1-Nov, byte for byte; the weekly cold backup kit made and checked on the SSD; the weekly audit read and its asks put into the build order.
+- **The Call Console's design approved (09:32):** your three corrections; calls and WhatsApps in one timeline per person; your answer rules; the Staff performance section; the arrow icons and their legend (D820). The analysis of WhatsApp on the console written (`claude/S378_WHATSAPP_ON_CONSOLE_PLAN.md`).
+- Session 379 reserved for the parent's build.
 
 ## ✅ DONE AT THE S377 CLOSE — 02-Nov-2026 (the parent)
 
