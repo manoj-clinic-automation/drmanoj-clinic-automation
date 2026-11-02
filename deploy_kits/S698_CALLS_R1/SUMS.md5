@@ -1,0 +1,10 @@
+b65d442018a0de5225a440f41c206da4  KIT_ID.txt
+08c0cd61162c8734381fc2e071f3f6da  README.md
+7af86f71dc76643816afa196da04ce71  TO_PINS.md5
+a0f58fec929be96d02cfc278776bd631  calls_console.py
+a94aed281e9c9a96cd643e33459fc5f6  install_S698_CALLS_R1.sh
+cc2ef2a1fb197b4d0748c9c6f3887c73  make_s698.py
+08c9a3fc5fd6f1f5b273b0be4c92beaa  rehearse_s698.sh
+27609eb5b2c5690d808eb2522c4849c5  repair_call_durations_s698.py
+a45f53d1c6dd83fdbe15cbee114cf9a1  trace_s698.py
+d71fd8d533546453b4e02ebc8b6985e5  walk_s698.py

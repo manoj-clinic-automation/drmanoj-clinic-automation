@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S378 close** (the parent, EOS-light), 02-Nov-2026, morning — the parent's sections refreshed here (the morning checks clear; the Call Console's design approved — calls and WhatsApp in one timeline, the Staff performance section, the arrow icons; your "build" in a fresh chat awaited; October's amber lines, the film log's opening boxes, the packs page and two answers wait on you; 379 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S375 close** (the Sanjeevni chat), 02-Nov-2026, morning — the Sanjeevni sections refreshed here (the spine builds again; new stock on its batch, the Vaapsi desk and the count's sale figures on the spine; the reception phone; Stock Expiry retired; 380 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S378 close** (the parent, EOS-light), 02-Nov-2026, morning — the parent's sections refreshed here (the morning checks clear; the Call Console's design approved — calls and WhatsApp in one timeline, the Staff performance section, the arrow icons; your "build" in a fresh chat awaited; October's amber lines, the film log's opening boxes, the packs page and two answers wait on you; 379 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S377 close** (the parent), 02-Nov-2026, after midnight — the parent's sections refreshed here (your console's new look and the Sanjeevni pages installed; the Call Console analysed and planned, your "build" awaited; October's amber lines, the film log's opening boxes, the packs page and two answers wait on you; 378 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S376 close** (the parent), 01-Nov-2026, evening — the parent's sections refreshed here ("The month" on your command console built and installed; October's amber lines, the film log's opening boxes, the packs page and two answers wait on you; 377 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S374 close** (the parent), 01-Nov-2026, morning — the parent's sections refreshed here (your October findings built — Paid from Docterz, the film on your rate page; IPD kit 4's implant bills desk installed; the film count, the medicines list, paper dates and the packs page wait on you; 376 reserved); the other projects' sections as their closes left them.
@@ -809,19 +810,23 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S369 close (01-Nov, morning)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S375 close (02-Nov, morning)
 
-*Detail: `S369_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_375.md`. The plan of what is left is section 9 of your System Board's plan. This section supersedes the S367 one below it.*
+*Detail: `S375_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_380.md`. The plan of what is left is section 9 of your System Board's plan (steps 0–2 done). This section supersedes the S369 one below it.*
 
-**1 · The publish** — this close's record. The same double-click as always:
+**1 · The publish** — this close's record (papers only; nothing follows on the server). The same double-click as always:
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Nothing new for Amir from you** — his card now carries the vouchers and the Batch Stock step by itself. If he asks: vouchers first, then the Batch Stock, as the card says.
+**2 · Tell reception once:** the reception phone stays on charge, unlocked, screen on, mobile data on, 9 am – 8 pm — it sends only while awake and online. You can check it from anywhere:
 
-**3 · Two September payment messages** (carried, not re-checked): A.A. Pharmaceuticals (₹8,780) and Deepam Pharma (₹42,945) — **Bhejo** beside each; it asks first, answer yes:
+```
+https://followup.dr-manoj.in/finance/porders?old=1
+```
+
+**3 · Two September payment messages** (carried): A.A. Pharmaceuticals (₹8,780) and Deepam Pharma (₹42,945) — the phone card still shows 2 payment messages waiting; **Bhejo** beside each if they are not gone:
 
 ```
 https://followup.dr-manoj.in/finance/purchase/page/pay/2026-09
@@ -839,7 +844,15 @@ https://followup.dr-manoj.in/finance/porders/s454/track
 
 **Later, your word only:** the buying switch, when the bar is met three weeks running (first score 1-Nov night; earliest ~22-Nov) — with one mock-up of Darpan's tab line.
 
-**Still yours from before, not urgent (on your board):** Ram Singh's three report buttons; whether Shavez's monthly *Stock expiry* export leaves his list; the two LINVIZ 600 messages; Flacort 6 / Flemcort 6.
+**Still yours from before, not urgent (on your board):** Ram Singh's report buttons (Batch Stock, salt-wise list, item list); the two LINVIZ 600 messages; Flacort 6 / Flemcort 6.
+
+## ✅ DONE AT THE S375 CLOSE — 01 → 02-Nov-2026 (the Sanjeevni project)
+
+- ~~**The spine stopped since 29-Oct (one bill typed "3920.")**~~ — S692, live 08:45 1-Nov.
+- ~~**The revamp's steps 0–2**~~ — S693 (new stock on its batch), S694 (the Vaapsi desk), S695 (the count's sale figures) live 1-Nov; every figure identical on the box (D821).
+- ~~**Today's purchase-order WhatsApps not sent (1-Nov)**~~ — the reception phone locked, then without data; MacroDroid's permission granted; your test sent 18:47; asking again 2-Nov.
+- ~~**Whether Shavez's monthly Stock expiry export leaves his list**~~ — retired at your word (D822); his tile's row goes in the next small fix.
+- ~~**D814 — does Amir's scan list need watching?**~~ — no (answered 1-Nov).
 
 ## ✅ DONE AT THE S369 CLOSE — 29-Oct → 01-Nov-2026 (the Sanjeevni project)
 

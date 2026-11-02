@@ -1,0 +1,2 @@
+KIT S698 S698_CALLS_R1 2026-11-02 the parent (session 379)
+D819 · D820 · F-1083 · F-1084 · AF-35 -- the Call Console to the approved mock-up v12; the doubled call rows mended
