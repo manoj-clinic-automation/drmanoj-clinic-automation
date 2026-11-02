@@ -1,0 +1,2 @@
+KIT S700 S700_CALLS_TAB_REPAIR3 2026-11-02 the parent (session 379)
+F-1083 -- the third run of the Call_Durations tab repair: v3 of the tool (a copy of a row above is dropped; the plan pre-checked; the whole tab scanned)
