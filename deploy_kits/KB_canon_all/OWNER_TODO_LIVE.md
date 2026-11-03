@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S379 close** (the parent), 02-Nov-2026, midday — the parent's sections refreshed here (the Call Console rebuilt in his approved look and live; the doubled rows' cause fixed and the call sheet repaired; his "build" for S701 in a fresh chat awaited; October's amber lines, the film log's opening boxes, the packs page and two answers wait on him; 381 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S381 close** (the parent), 02-Nov-2026, evening (placed 03-Nov) — the parent's sections refreshed here (WhatsApp: our software cleared, the fix next as his top priority; Arjun off the register; working without the PC; 382 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S379 close** (the parent), 02-Nov-2026, midday — the parent's sections refreshed here (the Call Console rebuilt in his approved look and live; the doubled rows' cause fixed and the call sheet repaired; his "build" for S701 in a fresh chat awaited; October's amber lines, the film log's opening boxes, the packs page and two answers wait on him; 381 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S375 close** (the Sanjeevni chat), 02-Nov-2026, morning — the Sanjeevni sections refreshed here (the spine builds again; new stock on its batch, the Vaapsi desk and the count's sale figures on the spine; the reception phone; Stock Expiry retired; 380 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S378 close** (the parent, EOS-light), 02-Nov-2026, morning — the parent's sections refreshed here (the morning checks clear; the Call Console's design approved — calls and WhatsApp in one timeline, the Staff performance section, the arrow icons; your "build" in a fresh chat awaited; October's amber lines, the film log's opening boxes, the packs page and two answers wait on you; 379 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S377 close** (the parent), 02-Nov-2026, after midnight — the parent's sections refreshed here (your console's new look and the Sanjeevni pages installed; the Call Console analysed and planned, your "build" awaited; October's amber lines, the film log's opening boxes, the packs page and two answers wait on you; 378 reserved); the other projects' sections as their closes left them.
@@ -337,7 +338,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S379 close (02-Nov, 12:3x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S381 close (02-Nov, 18:2x; placed 03-Nov)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -347,13 +348,23 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH — one double-click.** It carries this session's record (papers only; the three kits are already published and live). Nothing follows it.
+**1 · THE PUBLISH — one double-click.** It carries the S381 record (papers only). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · "BUILD" FOR THE NEXT PIECE (S701), in a fresh chat** — the WhatsApps into each caller's timeline, the follow-up list cleaned up, Call ke baad, Needs you. I show you a mock-up of the WhatsApp rows on the same canvas before building.
+**2 · THE WHATSAPP FIX (your top priority) — in the next chat:** when it asks, press *Regenerate* on the panel's API page and paste the one server line it gives you. It puts the fresh key everywhere on the server and tests it first.
+
+```
+https://in.app.myoperator.com/integrations/developer-api/whatsapp
+```
+
+**2a · ARJUN'S FINGERPRINT — delete it at the attendance machine** (Menu → User Management → Arjun → Delete). He is already off the register from 1 Oct.
+
+**2b · MYOPERATOR (ticket 691386):** if they have not written the cause by 3 Nov, ask Khushi for a call with their API technical team. Every refusal and its request ID is already on the ticket.
+
+**2c · "BUILD" FOR S701** — after the WhatsApp fix: the WhatsApps into each caller's timeline, the follow-up list cleaned up, Call ke baad, Needs you. A mock-up of the WhatsApp rows first.
 
 ```
 https://claude.ai/artifact/AwBDzfttkYPygGVcrQbTfD
@@ -419,15 +430,22 @@ https://followup.dr-manoj.in/portal/users
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
+0. **The WhatsApp fix (your top priority):** a fresh key written everywhere on the server and tested first; the inbox retrying until the patient's 24-hour window closes; the alert mails showing only the last 4 digits. Then your publish file taking in my uploads first (D823), and the repository made private once the server's pull is proven safe.
 1. **S701 — the WhatsApps into each person's timeline, on your "build"** (your rules: a reply or a real call of 30 s+ within 2 clinic hours answers a WhatsApp; a missed call only a call), the follow-up list cleaned to one open row per patient, Call ke baad, Needs you, the two small display notes from this session (the "missed → reached" icon when the caller rang back; the digest's build time) — and the audit's small fixes (the health mail's "last 24 h", the WhatsApp/call count check). A mock-up of the WhatsApp rows first.
 2. **S702 — the Staff performance section** (each person's card: answered, missed, made, callbacks, WhatsApps, not logged, staff ≠ AI, with recordings and your review buttons; their own card on Aaj ka kaam). **S703 — Patients on your command console** (a mock-up first).
 3. **At the next open:** the 03-Nov bundle must carry S698's three files; the call-hook's journal read once (v3.2, no "no longer holds" line); the console's day count against the sheet once more. Then watch the console's new look, The month's *Other papers* and the film log; "no amount read" on the month page (F-1085) in the next month-page kit.
 4. **Read the Implant bills desk on the first real IPD case.** **The Hostinger update** when its fix is out. **IPD kit 5** once the hospital explains the credit charges (D808). **Kit 6, after discharge.**
 5. **Your board item of 27-Oct still open:** the Clinic Gist's earlier days.
-6. **Watch the WhatsApp retry** and MyOperator's answer (ticket 691386) — 4 of your 9 replies last week failed. **October's attendance correction.**
+6. **MyOperator's written cause** (ticket 691386). **October's attendance correction** (8 staff, 41 days, Arjun off).
 7. **Zerodha** · **the Tally check** · **Union Bank** · **the Sanjeevni GST returns** · AF-16 · AF-19 · the audit's own channel (two small nightly files).
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S381 CLOSE — 02-Nov-2026 (the parent)
+
+- **WhatsApp: our software cleared.** The same key, server and code were refused, accepted (13:40–13:46) and refused again (14:24); the panel and Postman went through with the same key. Six mails with MyOperator's own request IDs on ticket 691386.
+- **Arjun off the register from 1 Oct** (last working day 30 Sep): October's correction sheet 8 staff, 41 days.
+- **Working without your PC** settled (D823): uploads to GitHub only with your yes each time.
 
 ## ✅ DONE AT THE S379 CLOSE — 02-Nov-2026 (the parent)
 
