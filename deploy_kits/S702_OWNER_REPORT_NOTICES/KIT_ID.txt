@@ -1,0 +1,2 @@
+kit id S702_OWNER_REPORT_NOTICES
+Sanjeevni session 380 · 03-Nov-2026 · reports_tile.py 03902a5d -> 0598072c · reports_watch.py 428c389c -> adbb21be · porders_s454.py 438714b8 -> 5de2a4b8 · owner_notice.py NEW 2bc96912 · one cron line (every 5 min, owner_notice.py tick) · restarts clinic-finance · data step: the settings, owner_notice.since; one test message
