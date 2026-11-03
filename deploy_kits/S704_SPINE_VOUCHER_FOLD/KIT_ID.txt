@@ -1,0 +1,2 @@
+kit id S704_SPINE_VOUCHER_FOLD
+Sanjeevni session 383 · 03-Nov-2026 · spine/spine_build.py 1cd20ead -> 67d5693f · order_rules.py 5e8330b3 -> bdefd058 · restarts clinic-finance · runs the spine build once · no data step · F-1025, F-1028
