@@ -1,0 +1,3 @@
+kit id S701_WA_KEY_SWAP
+project the parent (session 382, 03-Nov-2026) -- its own files; claimed on board/_numbers v888->v889; PLANNED there
+portal/portal_inbox.py 58d5318e -> 22b0f965 . NEW /root/wa/swap_key_s701.py (the key swap by value; backups /root/s701_backup)
