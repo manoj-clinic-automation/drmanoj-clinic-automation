@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S381 close** (the parent), 02-Nov-2026, evening (placed 03-Nov) — the parent's sections refreshed here (WhatsApp: our software cleared, the fix next as his top priority; Arjun off the register; working without the PC; 382 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S380 close** (the Sanjeevni chat), 03-Nov-2026, late morning — the Sanjeevni sections refreshed here (you are told when the Marg work is done, Sundays too; Shavez to be told about Sunday's reports on Mondays; 383 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S381 close** (the parent), 02-Nov-2026, evening (placed 03-Nov) — the parent's sections refreshed here (WhatsApp: our software cleared, the fix next as his top priority; Arjun off the register; working without the PC; 382 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S379 close** (the parent), 02-Nov-2026, midday — the parent's sections refreshed here (the Call Console rebuilt in his approved look and live; the doubled rows' cause fixed and the call sheet repaired; his "build" for S701 in a fresh chat awaited; October's amber lines, the film log's opening boxes, the packs page and two answers wait on him; 381 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S375 close** (the Sanjeevni chat), 02-Nov-2026, morning — the Sanjeevni sections refreshed here (the spine builds again; new stock on its batch, the Vaapsi desk and the count's sale figures on the spine; the reception phone; Stock Expiry retired; 380 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S378 close** (the parent, EOS-light), 02-Nov-2026, morning — the parent's sections refreshed here (the morning checks clear; the Call Console's design approved — calls and WhatsApp in one timeline, the Staff performance section, the arrow icons; your "build" in a fresh chat awaited; October's amber lines, the film log's opening boxes, the packs page and two answers wait on you; 379 reserved); the other projects' sections as their closes left them.
@@ -836,9 +837,9 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S375 close (02-Nov, morning)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S380 close (03-Nov, late morning)
 
-*Detail: `S375_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_380.md`. The plan of what is left is section 9 of your System Board's plan (steps 0–2 done). This section supersedes the S369 one below it.*
+*Detail: `S380_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_383.md`. The plan of what is left is section 9 of your System Board's plan (steps 0–2 done; step 3 next session). This section supersedes the S375 one below it.*
 
 **1 · The publish** — this close's record (papers only; nothing follows on the server). The same double-click as always:
 
@@ -846,13 +847,9 @@ The full list: `claude/S288_PENDING_LIST.md`.
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Tell reception once:** the reception phone stays on charge, unlocked, screen on, mobile data on, 9 am – 8 pm — it sends only while awake and online. You can check it from anywhere:
+**2 · Tell Shavez once:** from Monday 9-Nov his page also asks for **Sunday's** sale report and closing stock (the counter sells on some Sundays).
 
-```
-https://followup.dr-manoj.in/finance/porders?old=1
-```
-
-**3 · Two September payment messages** (carried): A.A. Pharmaceuticals (₹8,780) and Deepam Pharma (₹42,945) — the phone card still shows 2 payment messages waiting; **Bhejo** beside each if they are not gone:
+**3 · Two September payment messages** (carried): A.A. Pharmaceuticals and Deepam Pharma — the phone card still shows 2 payment messages waiting; **Bhejo** beside each if they are not gone:
 
 ```
 https://followup.dr-manoj.in/finance/purchase/page/pay/2026-09
@@ -864,13 +861,20 @@ https://followup.dr-manoj.in/finance/purchase/page/pay/2026-09
 https://followup.dr-manoj.in/finance/porders/s454/track
 ```
 
-**5 · Shivani — the Marg reports-only login ID and password.** Her *Aaj ki reports* tile is live (D778).
+**5 · Shivani — the Marg reports-only login ID and password** (carried).
 
 **6 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
 
-**Later, your word only:** the buying switch, when the bar is met three weeks running (first score 1-Nov night; earliest ~22-Nov) — with one mock-up of Darpan's tab line.
+**Later, your word only:** the buying switch, when the bar is met three weeks running (earliest ~22-Nov) — with one mock-up of Darpan's tab line.
 
 **Still yours from before, not urgent (on your board):** Ram Singh's report buttons (Batch Stock, salt-wise list, item list); the two LINVIZ 600 messages; Flacort 6 / Flemcort 6.
+
+## ✅ DONE AT THE S380 CLOSE — 03-Nov-2026 (the Sanjeevni project)
+
+- ~~**How am I told when the Marg reports are made, or missing?**~~ — S702 live 11:08: the clinic app tells you when Shavez's pair, Amir's three, Darpan's order sheet and the valuation are in, about your three lists, and when the reception phone is silent; Sundays too (D825). The test reached your phone at 11:13.
+- ~~**The list of Marg reports required**~~ — given 09:40 (the Batch Stock on every Amir visit).
+- ~~**The reception phone silent with no reason shown**~~ — the order page says since when; you are told after an hour (F-1089).
+- ~~**Stock Expiry still on Shavez's list**~~ — gone (F-1090).
 
 ## ✅ DONE AT THE S375 CLOSE — 01 → 02-Nov-2026 (the Sanjeevni project)
 
