@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S380 close** (the Sanjeevni chat), 03-Nov-2026, late morning — the Sanjeevni sections refreshed here (you are told when the Marg work is done, Sundays too; Shavez to be told about Sunday's reports on Mondays; 383 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S383 close** (the Sanjeevni chat), 03-Nov-2026, noon — the Sanjeevni sections refreshed here (the buying model's step 3 live: the spine's line 198 → 17, your fold in words; 384 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S380 close** (the Sanjeevni chat), 03-Nov-2026, late morning — the Sanjeevni sections refreshed here (you are told when the Marg work is done, Sundays too; Shavez to be told about Sunday's reports on Mondays; 383 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S381 close** (the parent), 02-Nov-2026, evening (placed 03-Nov) — the parent's sections refreshed here (WhatsApp: our software cleared, the fix next as his top priority; Arjun off the register; working without the PC; 382 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S379 close** (the parent), 02-Nov-2026, midday — the parent's sections refreshed here (the Call Console rebuilt in his approved look and live; the doubled rows' cause fixed and the call sheet repaired; his "build" for S701 in a fresh chat awaited; October's amber lines, the film log's opening boxes, the packs page and two answers wait on him; 381 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S375 close** (the Sanjeevni chat), 02-Nov-2026, morning — the Sanjeevni sections refreshed here (the spine builds again; new stock on its batch, the Vaapsi desk and the count's sale figures on the spine; the reception phone; Stock Expiry retired; 380 reserved); the other projects' sections as their closes left them.
@@ -837,9 +838,9 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S380 close (03-Nov, late morning)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S383 close (03-Nov, noon)
 
-*Detail: `S380_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_383.md`. The plan of what is left is section 9 of your System Board's plan (steps 0–2 done; step 3 next session). This section supersedes the S375 one below it.*
+*Detail: `S383_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_384.md`. The plan of what is left is section 9 of your System Board's plan (steps 0–3 done; step 4 — the switch — is your word). This section supersedes the S380 one below it.*
 
 **1 · The publish** — this close's record (papers only; nothing follows on the server). The same double-click as always:
 
@@ -847,9 +848,9 @@ The full list: `claude/S288_PENDING_LIST.md`.
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Tell Shavez once:** from Monday 9-Nov his page also asks for **Sunday's** sale report and closing stock (the counter sells on some Sundays).
+**2 · Tell Shavez once** (carried): from Monday 9-Nov his page also asks for **Sunday's** sale report and closing stock.
 
-**3 · Two September payment messages** (carried): A.A. Pharmaceuticals and Deepam Pharma — the phone card still shows 2 payment messages waiting; **Bhejo** beside each if they are not gone:
+**3 · Two September payment messages** (carried): A.A. Pharmaceuticals and Deepam Pharma — **Bhejo** beside each if they are not gone:
 
 ```
 https://followup.dr-manoj.in/finance/purchase/page/pay/2026-09
@@ -868,6 +869,11 @@ https://followup.dr-manoj.in/finance/porders/s454/track
 **Later, your word only:** the buying switch, when the bar is met three weeks running (earliest ~22-Nov) — with one mock-up of Darpan's tab line.
 
 **Still yours from before, not urgent (on your board):** Ram Singh's report buttons (Batch Stock, salt-wise list, item list); the two LINVIZ 600 messages; Flacort 6 / Flemcort 6.
+
+## ✅ DONE AT THE S383 CLOSE — 03-Nov-2026 (the Sanjeevni project)
+
+- ~~**The buying model's step 3 — "build in next session"**~~ — S704 live 12:20: the spine's line 198 → 17 (Amir's vouchers no longer counted, F-1025); your fold says what the list stood on, in words (F-1028).
+- ~~**The S380 record's publish**~~ — landed (7003f51b, 11:40).
 
 ## ✅ DONE AT THE S380 CLOSE — 03-Nov-2026 (the Sanjeevni project)
 
