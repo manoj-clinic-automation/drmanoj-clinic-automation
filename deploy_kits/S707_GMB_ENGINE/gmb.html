@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GMB Review Assist — Dr. Manoj Agarwal Clinic</title>
+<style>
+:root{
+  --page:#EDF2F7;--card:#fff;--bd:#E2E8F0;--font:'Segoe UI',system-ui,-apple-system,sans-serif;
+  --td:#1A202C;--tm:#4A5568;--ts:#718096;--tu:#A0AEC0;
+  --r:8px;--rl:14px;
+  --crel:#2563EB;--crel-lt:#EFF6FF;--crel-bd:#BFDBFE;--crel-dk:#1D4ED8;
+  --cprob:#0891B2;--cprob-lt:#ECFEFF;--cprob-bd:#A5F3FC;--cprob-dk:#0E7490;
+  --cbone:#7C3AED;--cbone-lt:#F5F3FF;--cbone-bd:#DDD6FE;--cbone-dk:#6D28D9;
+  --cside:#0F766E;--cside-lt:#F0FDFA;--cside-bd:#99F6E4;--cside-dk:#134E4A;
+  --csurg:#9333EA;--csurg-lt:#FAF5FF;--csurg-bd:#E9D5FF;--csurg-dk:#7E22CE;
+  --cknee:#0369A1;--cknee-lt:#EFF6FF;--cknee-bd:#BAE6FD;--cknee-dk:#075985;
+  --cgp:#16A34A;--cgp-lt:#F0FDF4;--cgp-bd:#BBF7D0;--cgp-dk:#15803D;
+  --cqual:#D97706;--cqual-lt:#FFFBEB;--cqual-bd:#FDE68A;--cqual-dk:#B45309;
+  --cay:#059669;--cay-lt:#ECFDF5;--cay-bd:#A7F3D0;--cay-dk:#047857;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--page);color:var(--td);min-height:100vh;padding:0 0 64px;}
+.app-hdr{background:linear-gradient(135deg,#1A365D 0%,#2A4A7F 60%,#2D6A9F 100%);padding:18px 20px 16px;color:#fff;}
+.app-hdr .ey{font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.7;margin-bottom:4px;}
+.app-hdr h1{font-size:22px;font-weight:700;margin-bottom:3px;}
+.app-hdr .ds{font-size:12.5px;opacity:.8;}
+.vb{display:inline-block;font-size:10px;font-weight:700;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);border-radius:4px;padding:2px 7px;margin-left:8px;vertical-align:middle;}
+.bw{max-width:820px;margin:0 auto;padding:16px 14px;}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.card{background:var(--card);border-radius:var(--rl);border:1px solid var(--bd);box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:12px;overflow:hidden;}
+.ch{display:flex;justify-content:space-between;align-items:center;padding:10px 15px 9px;border-bottom:1px solid var(--bd);}
+.chl{display:flex;align-items:center;gap:9px;}
+.ci{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.ct{font-size:13.5px;font-weight:700;}
+.cs{font-size:11.5px;color:var(--ts);margin-top:1px;}
+.cbdg{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+.cb{padding:12px 14px;}
+.c-rel{border-top:3px solid var(--crel);} .c-rel .ci{background:var(--crel-lt);color:var(--crel);} .c-rel .ct{color:var(--crel-dk);} .c-rel .cbdg{background:var(--crel-lt);color:var(--crel);border:1px solid var(--crel-bd);}
+.c-prob{border-top:3px solid var(--cprob);} .c-prob .ci{background:var(--cprob-lt);color:var(--cprob);} .c-prob .ct{color:var(--cprob-dk);} .c-prob .cbdg{background:var(--cprob-lt);color:var(--cprob);border:1px solid var(--cprob-bd);}
+.c-bone{border-top:3px solid var(--cbone);} .c-bone .ci{background:var(--cbone-lt);color:var(--cbone);} .c-bone .ct{color:var(--cbone-dk);}
+.c-side{border-top:3px solid var(--cside);} .c-side .ci{background:var(--cside-lt);color:var(--cside);} .c-side .ct{color:var(--cside-dk);}
+.c-surg{border-top:3px solid var(--csurg);} .c-surg .ci{background:var(--csurg-lt);color:var(--csurg);} .c-surg .ct{color:var(--csurg-dk);}
+.c-knee{border-top:3px solid var(--cknee);} .c-knee .ci{background:var(--cknee-lt);color:var(--cknee);} .c-knee .ct{color:var(--cknee-dk);} .c-knee .cbdg{background:var(--cknee-lt);color:var(--cknee);border:1px solid var(--cknee-bd);}
+.c-gp{border-top:3px solid var(--cgp);} .c-gp .ci{background:var(--cgp-lt);color:var(--cgp);} .c-gp .ct{color:var(--cgp-dk);} .c-gp .cbdg{background:var(--cgp-lt);color:var(--cgp);border:1px solid var(--cgp-bd);}
+.c-qual{border-top:3px solid var(--cqual);} .c-qual .ci{background:var(--cqual-lt);color:var(--cqual);} .c-qual .ct{color:var(--cqual-dk);} .c-qual .cbdg{background:var(--cqual-lt);color:var(--cqual);border:1px solid var(--cqual-bd);}
+.c-ay{border-top:3px solid var(--cay);} .c-ay .ci{background:var(--cay-lt);color:var(--cay);} .c-ay .ct{color:var(--cay-dk);}
+.tb{font-size:13px;font-weight:500;font-family:var(--font);text-align:left;padding:9px 12px;border-radius:var(--r);border:1.5px solid #CBD5E1;background:#F8FAFC;color:var(--tm);cursor:pointer;line-height:1.35;width:100%;transition:all .12s;}
+.tb:hover:not(.sel):not(.dis){background:#F1F5F9;border-color:#94A3B8;color:var(--td);}
+.tb.dis{opacity:.28;cursor:not-allowed;pointer-events:none;}
+.ptb:hover:not(.sel):not(.dis){background:var(--cprob-lt);border-color:var(--cprob);color:var(--cprob-dk);}
+.ptb.sel{background:var(--cprob);border-color:var(--cprob-dk);color:#fff;font-weight:600;}
+.ptb.sel::before{content:"✓ ";}
+.gptb:hover:not(.sel):not(.dis){background:var(--cgp-lt);border-color:var(--cgp);color:var(--cgp-dk);}
+.gptb.sel{background:var(--cgp);border-color:var(--cgp-dk);color:#fff;font-weight:600;}
+.gptb.sel::before{content:"✓ ";}
+.qb{font-size:13px;font-weight:500;font-family:var(--font);text-align:left;padding:9px 12px;border-radius:var(--r);border:1.5px solid #CBD5E1;background:#F8FAFC;color:var(--tm);cursor:pointer;line-height:1.35;width:100%;transition:all .12s;}
+.qb:hover:not(.sel):not(.dis){background:var(--cqual-lt);border-color:var(--cqual);color:var(--cqual-dk);}
+.qb.sel{background:var(--cqual);border-color:var(--cqual-dk);color:#fff;font-weight:600;}
+.qb.sel::before{content:"✓ ";}
+.qb.dis{opacity:.28;cursor:not-allowed;pointer-events:none;}
+.bnbtn{font-size:12.5px;font-weight:500;text-align:center;padding:8px 6px;border-radius:var(--r);border:1.5px solid #CBD5E1;background:#F8FAFC;color:var(--tm);cursor:pointer;width:100%;transition:all .12s;}
+.bnbtn:hover:not(.sel){background:var(--cbone-lt);border-color:var(--cbone);color:var(--cbone-dk);}
+.bnbtn.sel{background:var(--cbone);border-color:var(--cbone-dk);color:#fff;font-weight:600;}
+.sdbtn{font-size:14px;font-weight:600;padding:10px 0;flex:1;text-align:center;border-radius:var(--r);border:1.5px solid #CBD5E1;background:#F8FAFC;color:var(--tm);cursor:pointer;transition:all .12s;}
+.sdbtn:hover:not(.sel){background:var(--cside-lt);border-color:var(--cside);color:var(--cside-dk);}
+.sdbtn.sel{background:var(--cside);border-color:var(--cside-dk);color:#fff;box-shadow:0 2px 8px rgba(15,118,110,.3);}
+.kbtb{font-size:13px;font-weight:500;font-family:var(--font);text-align:left;padding:9px 12px;border-radius:var(--r);border:1.5px solid #CBD5E1;background:#F8FAFC;color:var(--tm);cursor:pointer;line-height:1.35;width:100%;transition:all .12s;}
+.kbtb:hover:not(.sel):not(.dis){background:var(--cknee-lt);border-color:var(--cknee);color:var(--cknee-dk);}
+.kbtb.sel{background:var(--cknee);border-color:var(--cknee-dk);color:#fff;font-weight:600;}
+.kbtb.sel::before{content:"✓ ";}
+.kbtb.dis{opacity:.28;cursor:not-allowed;pointer-events:none;}
+.sb{font-size:13px;font-weight:500;text-align:left;padding:10px 13px;border-radius:var(--r);border:1.5px solid #CBD5E1;background:#F8FAFC;color:var(--tm);cursor:pointer;line-height:1.35;width:100%;transition:all .12s;}
+.sb:hover:not(.sel){background:var(--csurg-lt);border-color:var(--csurg);color:var(--csurg-dk);}
+.sb.sel{background:var(--csurg);border-color:var(--csurg-dk);color:#fff;}
+.sb-n{font-weight:700;display:block;margin-bottom:3px;}
+.sb-s{font-size:11.5px;color:#94A3B8;display:block;line-height:1.4;}
+.sb:hover .sb-s{color:var(--csurg);opacity:.85;}
+.sb.sel .sb-s{color:rgba(255,255,255,.75);}
+.rb{font-size:13px;font-weight:500;padding:7px 14px;border-radius:20px;border:1.5px solid #CBD5E1;background:#F8FAFC;color:var(--tm);cursor:pointer;white-space:nowrap;transition:all .12s;}
+.rb:hover{background:var(--crel-lt);border-color:var(--crel);color:var(--crel);}
+.rb.sel{background:var(--crel);border-color:var(--crel-dk);color:#fff;font-weight:600;box-shadow:0 2px 6px rgba(37,99,235,.3);}
+.lb{font-size:13px;font-weight:500;padding:8px 0;flex:1;text-align:center;border-radius:var(--r);border:1.5px solid #CBD5E1;background:#F8FAFC;color:var(--tm);cursor:pointer;transition:all .12s;}
+.lb:hover{background:var(--crel-lt);border-color:var(--crel);color:var(--crel);}
+.lb.sel{background:var(--crel);border-color:var(--crel-dk);color:#fff;font-weight:700;}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:6px;}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:6px;}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:7px;}
+.pr{display:flex;flex-wrap:wrap;gap:6px;}
+.dv{height:1px;background:#E2E8F0;margin:11px 0 10px;}
+.freetxt{width:100%;padding:9px 12px;font-size:13px;font-family:var(--font);border-radius:var(--r);border:1.5px solid #CBD5E1;background:#F8FAFC;color:var(--td);outline:none;transition:border-color .12s;}
+.freetxt:focus{border-color:var(--cprob);background:#fff;box-shadow:0 0 0 3px rgba(8,145,178,.1);}
+.freetxt::placeholder{color:var(--tu);}
+.ay-t{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;border-radius:var(--r);border:1.5px solid #CBD5E1;background:#F8FAFC;cursor:pointer;transition:all .13s;}
+.ay-t:hover{border-color:var(--cay);background:var(--cay-lt);}
+.ay-t.sel{border-color:var(--cay);background:var(--cay-lt);}
+.ay-t input{width:17px;height:17px;accent-color:var(--cay);cursor:pointer;flex-shrink:0;margin-top:1px;}
+.ay-l{font-size:13px;font-weight:600;color:var(--tm);}
+.ay-t.sel .ay-l{color:var(--cay-dk);}
+.ay-s{font-size:11.5px;color:var(--tu);margin-top:2px;line-height:1.45;}
+.ay-t.sel .ay-s{color:var(--cay);opacity:.85;}
+#genbtn{width:100%;padding:14px;font-size:15px;font-weight:700;font-family:var(--font);border-radius:var(--r);border:2px solid #CBD5E1;background:#EDF2F7;color:var(--tu);cursor:not-allowed;opacity:.5;transition:all .15s;}
+#genbtn.ready{border-color:var(--cgp-dk);background:var(--cgp);color:#fff;cursor:pointer;opacity:1;box-shadow:0 4px 12px rgba(22,163,74,.3);}
+#genbtn.ready:hover{background:var(--cgp-dk);}
+#genbtn.ready:active{transform:translateY(1px);}
+#resetbtn{display:none;font-size:12px;color:var(--ts);cursor:pointer;text-decoration:underline;border:none;background:none;margin-top:8px;}
+#out{margin-top:16px;display:none;}
+.out-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.oi{font-size:13px;color:var(--tm);font-weight:500;}
+.regen-btn{font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:var(--r);border:1.5px solid var(--cprob-bd);background:var(--cprob-lt);color:var(--cprob-dk);cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:5px;}
+.regen-btn:hover{background:#D0F4FC;border-color:var(--cprob);}
+.rc{background:#fff;border-radius:var(--rl);border:1px solid var(--bd);margin-bottom:12px;overflow:hidden;box-shadow:0 1px 5px rgba(0,0,0,.07);}
+.rh{display:flex;justify-content:space-between;align-items:center;padding:10px 15px;border-bottom:1px solid var(--bd);flex-wrap:wrap;gap:7px;}
+.rm{display:flex;gap:8px;align-items:center;}
+.rbdg{font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;letter-spacing:.03em;}
+.rhi{font-size:11.5px;color:var(--ts);}
+.ra{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.rch{font-size:11px;color:var(--tu);}
+.cpbtn{font-size:12.5px;font-weight:600;padding:6px 13px;border-radius:var(--r);border:1.5px solid #CBD5E1;background:#F8FAFC;color:var(--tm);cursor:pointer;transition:all .1s;white-space:nowrap;}
+.cpbtn:hover{border-color:#94A3B8;color:var(--td);}
+.cpbtn.done{background:var(--cgp-lt);border-color:var(--cgp);color:var(--cgp-dk);}
+.wabtn{font-size:12.5px;font-weight:700;padding:6px 13px;border-radius:var(--r);border:1.5px solid #A7F3D0;background:#ECFDF5;color:#065F46;cursor:pointer;transition:all .1s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;}
+.wabtn:hover{background:#D1FAE5;}
+.edit-hint{font-size:11.5px;color:var(--ts);padding:8px 15px 0;font-style:italic;}
+.rev-ta{display:block;width:100%;padding:12px 15px;font-size:14px;line-height:1.85;font-family:var(--font);color:var(--td);background:#fff;border:none;outline:none;resize:vertical;min-height:80px;border-top:1px solid #F0F4F8;}
+.rev-ta:focus{background:#FAFCFF;}
+.rev-foot{display:flex;justify-content:space-between;align-items:center;padding:6px 15px 10px;border-top:1px solid #F0F4F8;}
+.rev-chars{font-size:11.5px;color:var(--tu);}
+.rev-reset{font-size:11.5px;color:var(--ts);background:none;border:none;cursor:pointer;text-decoration:underline;}
+.sop{margin-top:18px;padding:12px 16px;background:#FFFBEB;border:1.5px solid #FCD34D;border-radius:var(--r);}
+.sop-h{font-size:12.5px;font-weight:700;color:#92400E;margin-bottom:6px;}
+.sop ul{padding-left:16px;font-size:12px;color:#78350F;line-height:2;}
+@media(max-width:540px){.r2{grid-template-columns:1fr;}}
+@media(max-width:600px){
+  .app-hdr{padding:14px 16px 13px;} .app-hdr h1{font-size:19px;} .bw{padding:12px 10px;}
+  .ch{padding:9px 12px 8px;} .ct{font-size:13px;} .cb{padding:10px 12px;}
+  .tb,.gptb,.qb,.kbtb{padding:12px 12px;font-size:13.5px;min-height:44px;}
+  .bnbtn{padding:11px 4px;font-size:12px;min-height:44px;}
+  .rb{padding:10px 14px;min-height:44px;} .lb{padding:11px 0;min-height:44px;}
+  .sb{padding:13px 12px;min-height:52px;} .sdbtn{padding:14px 0;min-height:52px;}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));}
+  .g4{grid-template-columns:repeat(3,1fr);} .g2{grid-template-columns:1fr;}
+  #genbtn{padding:16px;font-size:16px;}
+  .cpbtn,.wabtn{padding:9px 14px;font-size:13px;min-height:40px;}
+  .rev-ta{font-size:14px;padding:13px 12px;}
+}
+@media(max-width:380px){.g4{grid-template-columns:repeat(2,1fr);} .bw{padding:10px 8px;}}
+</style>
+</head>
+<body>
+<div class="app-hdr">
+  <div class="ey">Dr. Manoj Agarwal Clinic · Bareilly</div>
+  <h1>GMB Review Assist <span class="vb">v8</span></h1>
+  <p class="ds">Tick boxes → Generate → Patient edits &amp; posts from own phone · Works offline · 4 languages</p>
+</div>
+<div class="bw">
+
+  <div class="r2">
+    <div class="card c-rel">
+      <div class="ch"><div class="chl"><div class="ci">👤</div><div><div class="ct">Patient relation</div><div class="cs">Who is the reviewer?</div></div></div></div>
+      <div class="cb"><div class="pr" id="rg">
+        <button class="rb sel" data-r="self"     onclick="setR(this)">Self</button>
+        <button class="rb"     data-r="mother"   onclick="setR(this)">Mother</button>
+        <button class="rb"     data-r="father"   onclick="setR(this)">Father</button>
+        <button class="rb"     data-r="wife"     onclick="setR(this)">Wife</button>
+        <button class="rb"     data-r="husband"  onclick="setR(this)">Husband</button>
+        <button class="rb"     data-r="child"    onclick="setR(this)">Son / Daughter</button>
+        <button class="rb"     data-r="elderly"  onclick="setR(this)">Grandparent</button>
+        <button class="rb"     data-r="relative" onclick="setR(this)">Other relative</button>
+      </div></div>
+    </div>
+    <div class="card c-rel">
+      <div class="ch"><div class="chl"><div class="ci">🌐</div><div><div class="ct">Language</div><div class="cs">Choose one</div></div></div></div>
+      <div class="cb"><div style="display:flex;gap:7px;flex-wrap:wrap;">
+        <button class="lb sel" data-l="Hinglish" onclick="setL(this)">Hinglish</button>
+        <button class="lb"     data-l="English"  onclick="setL(this)">English</button>
+        <button class="lb"     data-l="Hindi"    onclick="setL(this)">हिंदी</button>
+        <button class="lb"     data-l="Mixed"    onclick="setL(this)">हिंदी + English</button>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card c-prob">
+    <div class="ch"><div class="chl"><div class="ci">🦴</div><div><div class="ct">Main problem / diagnosis</div><div class="cs">Select up to 2</div></div></div><span class="cbdg" id="pc">0 / 2</span></div>
+    <div class="cb">
+      <div class="g3" id="pgrid"></div>
+      <div class="dv"></div>
+      <div style="font-size:12px;font-weight:600;color:var(--ts);margin-bottom:6px;">✏️ Custom diagnosis — type if not listed above</div>
+      <input class="freetxt" id="freetext" type="text" maxlength="80" placeholder="e.g. Osteoporosis, Gout, AVN, Post-op rehab…" oninput="refresh()">
+    </div>
+  </div>
+
+  <div id="bonediv"></div>
+  <div id="sidediv"></div>
+  <div id="surgdiv"></div>
+  <div id="kneediv"></div>
+
+  <div class="card c-gp">
+    <div class="ch"><div class="chl"><div class="ci">⭐</div><div><div class="ct">Treatment highlights / good points</div><div class="cs">Select up to 4</div></div></div><span class="cbdg" id="gc">0 / 4</span></div>
+    <div class="cb"><div class="g3" id="ggrid"></div></div>
+  </div>
+
+  <div class="card c-qual">
+    <div class="ch"><div class="chl"><div class="ci">👨‍⚕️</div><div><div class="ct">Doctor qualities</div><div class="cs">Optional</div></div></div><span class="cbdg" id="qc">0 / 2</span></div>
+    <div class="cb"><div class="g3" id="qgrid"></div></div>
+  </div>
+
+  <div class="card c-ay">
+    <div class="ch"><div class="chl"><div class="ci">🏥</div><div><div class="ct">Scheme / flag</div><div class="cs">Optional</div></div></div></div>
+    <div class="cb">
+      <label class="ay-t" id="aybox" onclick="togAy()">
+        <input type="checkbox" id="aychk" onclick="event.stopPropagation();">
+        <div><div class="ay-l">Ayushman Bharat Yojana — treatment at no cost</div><div class="ay-s">"Treatment covered under Ayushman Bharat Yojana — zero cost to family."</div></div>
+      </label>
+    </div>
+  </div>
+
+  <button id="genbtn" onclick="gen()">✨ &nbsp;Generate Review Templates</button>
+  <div style="text-align:center;"><button id="resetbtn" onclick="resetAll()">Reset all</button></div>
+
+  <div id="out">
+    <div class="out-hdr">
+      <p class="oi">✅ Tap any review to edit, then Copy or WhatsApp:</p>
+      <button class="regen-btn" onclick="gen()">🔄 Fresh variation</button>
+    </div>
+    <div id="cards"></div>
+  </div>
+
+  <div class="sop">
+    <div class="sop-h">⚠️ Staff SOP</div>
+    <ul>
+      <li>Only assist patients / families who are genuinely satisfied and willing</li>
+      <li>Select the <strong>actual clinical diagnosis</strong> as main problem</li>
+      <li>Patient edits and posts from <strong>their own phone</strong> — they can modify or decline</li>
+      <li>Photo request is verbal and fully optional</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+/* ── PHRASE LIBRARY WITH MULTIPLE VARIATIONS ─────────────────── */
+// pick() selects a random item each call — gives fresh variation on regenerate
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function cap(s){ return s?s[0].toUpperCase()+s.slice(1):''; }
+function j2(a,l){ if(!a.length)return''; if(a.length===1)return a[0]; const sep=l==='hin'?' और ':' and '; return a.slice(0,-1).join(', ')+sep+a[a.length-1]; }
+
+// ── DATA ──
+const BONES=[
+  {id:'wrist',lbl:'Wrist',en:'wrist',hi:'kalai',hin:'कलाई'},
+  {id:'hand',lbl:'Hand / Fingers',en:'hand / fingers',hi:'haath / ungliyon',hin:'हाथ / उंगलियों'},
+  {id:'forearm',lbl:'Forearm',en:'forearm',hi:'baazu',hin:'बाज़ू'},
+  {id:'elbow',lbl:'Elbow',en:'elbow',hi:'kohanee',hin:'कोहनी'},
+  {id:'upper_arm',lbl:'Upper arm',en:'upper arm',hi:'upar ki baazu',hin:'ऊपरी बाज़ू'},
+  {id:'shoulder',lbl:'Shoulder / Collarbone',en:'shoulder',hi:'kandhe',hin:'कंधे'},
+  {id:'leg',lbl:'Leg',en:'leg',hi:'pair',hin:'पैर'},
+  {id:'ankle',lbl:'Ankle',en:'ankle',hi:'takhne',hin:'टखने'},
+  {id:'foot',lbl:'Foot / Toes',en:'foot',hi:'paanv',hin:'पाँव'},
+  {id:'knee',lbl:'Knee',en:'knee',hi:'ghutne',hin:'घुटने'},
+  {id:'thigh',lbl:'Thigh (femur)',en:'thigh',hi:'jaangh',hin:'जाँघ'},
+  {id:'spine',lbl:'Spine / Vertebra',en:'spine',hi:'reedh',hin:'रीढ़'},
+  {id:'rib',lbl:'Rib / Chest',en:'rib',hi:'pasli',hin:'पसली'},
+];
+const PROBS=[
+  {id:'fracture',s:true,lbl:'Fracture / Injury / Accident'},
+  {id:'knee',s:false,lbl:'Knee Pain / Arthritis / Knee Replacement'},
+  {id:'back',s:false,lbl:'Back Pain / Sciatica / Slip Disc'},
+  {id:'cervical',s:false,lbl:'Neck Pain / Cervical / Disc Problem'},
+  {id:'hip_pain',s:false,lbl:'Hip Pain / Hip Replacement / AVN'},
+  {id:'hip_fracture',s:true,lbl:'Hip Fracture'},
+  {id:'frozen',s:false,lbl:'Frozen Shoulder'},
+  {id:'tennis',s:false,lbl:'Tennis Elbow'},
+  {id:'plantar',s:false,lbl:'Plantar Fasciitis / Heel Pain'},
+  {id:'rheumatoid',s:false,lbl:'Rheumatoid / Long-term Arthritis'},
+  {id:'as',s:false,lbl:'Ankylosing Spondylitis / Spine Arthritis'},
+  {id:'sports',s:true,lbl:'Sports Injury'},
+  {id:'shoulder_prb',s:false,lbl:'Shoulder / Elbow / Hand (other)'},
+  {id:'general',s:false,lbl:'General Orthopaedic Consultation'},
+];
+const SURGERIES={
+  fracture:{lbl:'Fracture surgery type',icon:'🔩',opts:[
+    {id:'complex_ia',n:'Complex / comminuted — multi-fragment',s:'Bone in multiple pieces, joint involved'},
+    {id:'mifs',n:'Minimally invasive fracture fixation',s:'Small incisions — less pain, faster recovery'},
+  ]},
+  hip_fracture:{lbl:'Hip fracture surgery',icon:'🦺',opts:[
+    {id:'hip_pfn',n:'Hip fracture surgery — walked same / next day',s:'PFN / DHS — immediate weight bearing'},
+    {id:'hemi',n:'Hemiarthroplasty — elderly, next-day walking',s:'Half hip replacement'},
+    {id:'hip_mifs',n:'Minimally invasive hip fracture surgery',s:'Small incision — minimal tissue damage'},
+  ]},
+  hip_pain:{lbl:'Hip surgery type',icon:'🦺',opts:[
+    {id:'thr',n:'Total Hip Replacement — walking within 24 hrs',s:'Full hip replacement, immediate weight bearing'},
+  ]},
+  knee:{lbl:'Knee surgery type',icon:'🦵',opts:[
+    {id:'tkr',n:'Total Knee Replacement — early mobilisation',s:'Walking + physio within first few days'},
+  ]},
+};
+const KNEE_OPTS=[
+  {id:'bilateral',lbl:'Bilateral OA — both knees',is_mod:true},
+  {id:'exercises',lbl:'Personalised exercise programme'},
+  {id:'prp',lbl:'PRP injections'},
+  {id:'viscosup',lbl:'Viscosupplementation (gel injection)'},
+  {id:'metabolic',lbl:'Metabolic / systemic management'},
+  {id:'weightmgmt',lbl:'BMI / weight management & diet plan'},
+  {id:'physio',lbl:'In-house physiotherapy sessions'},
+  {id:'home_ex',lbl:'Home exercise programme'},
+  {id:'nutrition',lbl:'Nutrition / dietary counselling'},
+];
+const GPS=[
+  {id:'pain',lbl:'Excellent pain relief'},
+  {id:'walking',lbl:'Walking / movement improved'},
+  {id:'explained',lbl:'Explained in simple words'},
+  {id:'reports',lbl:'Reports / X-ray / MRI reviewed'},
+  {id:'nosurg',lbl:'Treated without surgery'},
+  {id:'plaster',lbl:'Plaster treatment — no operation'},
+  {id:'surg',lbl:'Surgery done successfully'},
+  {id:'recov',lbl:'Post-surgery recovery good'},
+  {id:'physio_gp',lbl:'Exercise / physio guidance helped'},
+  {id:'charges',lbl:'Reasonable / affordable charges'},
+  {id:'staff',lbl:'Staff helpful / cooperative'},
+  {id:'fac',lbl:'Good clinic / modern equipment'},
+];
+const QUALS=[
+  {id:'exp',lbl:'Highly experienced & skilled'},
+  {id:'person',lbl:'Very good person / kind nature'},
+  {id:'listens',lbl:'Listens patiently'},
+  {id:'nosurgrush',lbl:'No unnecessary surgery / tests'},
+  {id:'calm',lbl:'Calm and reassuring approach'},
+  {id:'caring',lbl:'Genuinely caring and compassionate'},
+];
+const RELS_LBL={self:'Self',mother:'Mother',father:'Father',wife:'Wife',husband:'Husband',child:'Son/Daughter',elderly:'Grandparent',relative:'Family member'};
+
+// ── PHRASE TABLES (multiple options per element for variety) ──
+/* ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+   S707 (05-Nov-2026) — the GMB Review Assist wording engine, rebuilt on the research of 337 real Google reviews
+   (170 of other Bareilly doctors, all 167 on the owner's own listing; 03_WORKING_PAPERS\S385\GMB_RESEARCH.md).
+   The rules it keeps (claude/S385_GMB_PLAN.md, the owner's OK 14:58 IST 05-Nov):
+     · real sizes — short 8–20 words, medium 30–50, long 60–90
+     · a story in order: what happened → (sometimes) tried elsewhere / someone told us → came → what he did → how it
+       is now → (sometimes) one line about him → (sometimes) a close; the optional pieces drawn fresh at every press
+     · the name once at most; afterwards sir / doctor sahab / unhone; the clinic's full name never; Bareilly ~1 in 4
+     · no fixed closing — six kinds, many wordings, one draft in four with none; no "tell others" line
+     · patients' words for conditions (never "osteoarthritis"); English words patients keep in English stay so
+     · the owner's signature set in rotation (plaster only · walking next day · no side effects · kam kharch ·
+       a very good person too · best ortho in Bareilly in new words)
+     · only what is ticked; no invented clinical number — a duration comes from a tick or from STD (his figures)
+     · gender-neutral first person; relatives in neutral forms
+     · typed, not typeset — no title, a draft may end without a full stop, 🙏 in a few thank-yous, Roman-Hindi
+       spelling varied one way per draft
+     · say() picks the wording sharing the fewest content words with the draft so far; mkRevs() redraws until the
+       three drafts share no sentence
+   Four languages: en (English) · hi (Hinglish, Roman) · hin (हिंदी, Devanagari) · mix (हिंदी + English words).
+   ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/* the owner's standard figures — the only clinical numbers the engine may say (D826 / the plan §6) */
+const STD={ plaster_weeks:{ wrist:6 } };
+
+function lk(){ return sL==='English'?'en':sL==='Hinglish'?'hi':sL==='Mixed'?'mix':'hin'; }
+function rnd(){ return Math.random(); }
+function shuffle(a){ return a.slice().sort(()=>Math.random()-0.5); }
+function chance(p){ return Math.random()<p; }
+
+/* ── the anti-repetition picker (from S382, kept) ──────────────────────────────────────────────────────────── */
+const STOP=new Set(('के की का में से और है हैं था थी थे को ने भी ही तो पर एक हो गया गई गए हुआ हुई हुए कर किया दिया लिए साथ अब फिर वो उन्हें उनका उनकी मेरे मेरी मुझे हम हमें यह ये'
+  +' ke ki ka mein me se aur hai hain tha thi the ko ne bhi hi to par ek ho gaya gayi hua hui kar kiya diya liye saath ab phir wo unhe unka unki mere meri mujhe hum hume'
+  +' the a an and of to in is was were for with it at on by be has had have we our my his he she they them their her him i am dr dr. manoj agarwal sir'
+  +' मनोज अग्रवाल डॉ. डॉ डॉक्टर साहब सर नहीं कोई क्या बहुत कुछ सब सही अच्छा अच्छे अच्छी nahi nhi koi kya bahut bohot kuch sab sahi achha achhe acha ache achhi very not no any all good doctor'
+  +' जी ji').split(/\s+/));
+function toks(s){ return String(s).toLowerCase().replace(/«[^»]*»/g,' ').replace(/[।.,;:!?()\-—–"'’🙏]/g,' ').split(/\s+/).filter(w=>w.length>1&&!STOP.has(w)); }
+function newUse(){ return new Map(); }
+let USED_SENT=new Set();
+function normS(s){ return String(s).toLowerCase().replace(/«[^»]*»/g,'').replace(/[^\p{L}\p{N} ]/gu,'').replace(/\s+/g,' ').trim(); }
+let SHORTEST=false;
+function say(arr,U){
+  let a=(Array.isArray(arr)?arr:[arr]).filter(Boolean);
+  if(!a.length) return '';
+  const fresh=a.filter(v=>!USED_SENT.has(normS(v))); if(fresh.length) a=fresh;
+  if(SHORTEST){ const m=Math.min(...a.map(v=>wc(v))); a=a.filter(v=>wc(v)<=m+1); }
+  let best=[],bs=1e9;
+  a.forEach(v=>{ const sc=toks(v).reduce((n,w)=>n+(U.get(w)||0),0); if(sc<bs){bs=sc;best=[v];} else if(sc===bs) best.push(v); });
+  const v=pick(best);
+  toks(v).forEach(w=>U.set(w,(U.get(w)||0)+1));
+  USED_SENT.add(normS(v));
+  return v;
+}
+
+/* ── the person (who the review is about) ─────────────────────────────────────────────────────────────────── */
+/* self: first person, gender-neutral. A relative: by relation, neutral verbs (respectful plural / dative). */
+const REL={
+  en:{ mother:['my mother','my mummy'], father:['my father','my papa'], wife:['my wife'], husband:['my husband'],
+       child:['my child'], elderly:['my grandparent','an elderly member of our family'], relative:['a family member','my relative'] },
+  hi:{ mother:['meri mummy','meri maa'], father:['mere papa','mere pitaji'], wife:['meri wife','meri patni'], husband:['mere husband','mere pati'],
+       child:['mere bachche'], elderly:['hamare bujurg','ghar ke bujurg'], relative:['ghar ke ek member','mere ek rishtedar'] },
+  hin:{ mother:['मेरी माँ','मेरी मम्मी'], father:['मेरे पिताजी','मेरे पापा'], wife:['मेरी पत्नी'], husband:['मेरे पति'],
+        child:['मेरे बच्चे'], elderly:['हमारे बुज़ुर्ग','घर के बुज़ुर्ग'], relative:['घर के एक सदस्य','मेरे एक रिश्तेदार'] },
+  mix:{ mother:['मेरी mummy','मेरी माँ'], father:['मेरे papa','मेरे पिताजी'], wife:['मेरी wife'], husband:['मेरे husband'],
+        child:['मेरे बच्चे'], elderly:['हमारे बुज़ुर्ग','घर के बुज़ुर्ग'], relative:['घर के एक member','मेरे एक रिश्तेदार'] },
+};
+/* English pronouns for a relative; a child or an unnamed relative takes they/them */
+const PRON={ mother:['she','her','her'], wife:['she','her','her'], father:['he','him','his'], husband:['he','him','his'],
+             child:['they','them','their'], elderly:['they','them','their'], relative:['they','them','their'] };
+function person(l,short){
+  if(sR==='self') return {self:true};
+  const pool=REL[l][sR]||REL[l].relative;
+  const n=short?pool.reduce((a,b)=>a.split(' ').length<=b.split(' ').length?a:b):pick(pool);
+  const pr=PRON[sR]||PRON.relative;
+  return {self:false,n:n,S:pr[0],O:pr[1],Ps:pr[2],
+          ko:n+(l==='en'?'':l==='hi'?' ko':' को')};              // dative: meri mummy ko / मेरी माँ को
+}
+
+/* ── the doctor reference ─────────────────────────────────────────────────────────────────────────────────── */
+/* Sentences carry «DR» (subject / object) and «DRs» (possessive). The first «DR» in a draft becomes the full name,
+   every later one the draft's honorific; so the name appears once at most and the clinic's name never. */
+const NAME={ en:['Dr Manoj Agarwal','Dr. Manoj Agarwal'], hi:['Dr Manoj Agarwal','Dr. Manoj Agarwal','Dr Manoj Agarwal sir'],
+             hin:['डॉ. मनोज अग्रवाल','Dr Manoj Agarwal','डॉक्टर मनोज अग्रवाल जी'], mix:['Dr Manoj Agarwal','Dr. Manoj Agarwal sir','डॉ. मनोज अग्रवाल'] };
+const HON={ hi:[['sir','sir ka'],['doctor sahab','doctor sahab ka'],['Dr sahab','Dr sahab ka']],
+            hin:[['सर','सर का'],['डॉक्टर साहब','डॉक्टर साहब का'],['डॉ. साहब','डॉ. साहब का']],
+            mix:[['sir','sir का'],['doctor साहब','doctor साहब का'],['डॉक्टर साहब','डॉक्टर साहब का']] };
+/* English: a later «DR» is He at a sentence start, him elsewhere, his when possessive. */
+function fillDR(text,l,useName,size){
+  const hons=l==='en'?null:shuffle(HON[l]).slice(0,2);
+  let first=useName, k=0;
+  return text.replace(/«DR(s?)»(\s*(ne|ने|ko|को|se|से|ka|का|ki|की|ke|के|par|पर)(?=\s|$|[।.,!?]))?/g,(m,poss,sp,post,off,whole)=>{
+    if(first){ first=false; const nm=pick(size==='short'?NAME[l].filter(x=>x.split(' ').length<=3):NAME[l]); if(poss) return l==='en'?nm+"'s":nm+(l==='hi'?' ka':' का'); return nm+(post?' '+post:''); }
+    if(l==='en'){
+      if(poss) return 'his';
+      const before=whole.slice(0,off), after=whole.slice(off+m.length);
+      if(/\b(to|with|about|in|suggested|consulted|for)\s*$/i.test(before)) return 'him';
+      if(/,\s*$/.test(before)&&/^\s*([.!?]|$)/.test(after)) return 'doctor';
+      return 'he';
+    }
+    const hon=hons[(k++)%hons.length];
+    if(poss) return hon[1];
+    return hon[0]+(post?' '+post:'');
+  });
+}
+
+/* ── the words for the trouble (patients' words; never a textbook term) ───────────────────────────────────── */
+const COND={
+  knee:   {en:['knee pain','pain in the knee','a worn-out knee'], hi:['ghutne ka dard','ghutne me ghisav','knee pain'], hin:['घुटने का दर्द','घुटने में घिसाव','घुटने की तकलीफ'], mix:['knee pain','घुटने में घिसाव','घुटने का दर्द']},
+  knee2:  {en:['pain in both knees','both knees worn out','arthritis in both knees'], hi:['dono ghutno me dard','dono ghutno me ghisav','dono knees me pain'], hin:['दोनों घुटनों में दर्द','दोनों घुटनों में घिसाव','दोनों घुटनों की तकलीफ'], mix:['दोनों knees में दर्द','दोनों घुटनों में घिसाव','दोनों घुटनों में pain']},
+  back:   {en:['lower back pain','back pain','a back problem'], hi:['kamar me dard','kamar dard','kamar ki takleef'], hin:['कमर में दर्द','कमर दर्द','कमर की तकलीफ'], mix:['कमर में दर्द','back pain','कमर की problem']},
+  cervical:{en:['neck pain','a cervical problem','pain in the neck going to the arm'], hi:['gardan me dard','cervical ki takleef','gardan ka dard'], hin:['गर्दन में दर्द','सर्वाइकल की तकलीफ','गर्दन का दर्द'], mix:['गर्दन में दर्द','cervical की problem','neck pain']},
+  hip_pain:{en:['hip pain','pain in the hip'], hi:['kulhe me dard','hip me dard'], hin:['कूल्हे में दर्द','कूल्हे की तकलीफ'], mix:['hip में दर्द','कूल्हे का दर्द']},
+  frozen: {en:['a frozen shoulder','a stiff, painful shoulder'], hi:['kandhe ki jakdan (frozen shoulder)','kandhe me jakdan aur dard'], hin:['कंधे की जकड़न','कंधे में जकड़न और दर्द'], mix:['frozen shoulder','कंधे में जकड़न और दर्द']},
+  tennis: {en:['tennis elbow','pain in the elbow'], hi:['kohni me dard (tennis elbow)','kohni ka dard'], hin:['कोहनी में दर्द','कोहनी का दर्द (टेनिस एल्बो)'], mix:['कोहनी में दर्द','tennis elbow']},
+  plantar:{en:['heel pain','pain in the heel'], hi:['edi me dard','edi ka dard'], hin:['एड़ी में दर्द','एड़ी का दर्द'], mix:['एड़ी में दर्द','heel pain']},
+  rheumatoid:{en:['rheumatoid arthritis','long-standing arthritis','pain and swelling in the joints'], hi:['gathiya','jodo me dard aur sujan','rheumatoid arthritis'], hin:['गठिया','जोड़ों में दर्द और सूजन','रूमेटाइड आर्थराइटिस'], mix:['गठिया','जोड़ों में दर्द और सूजन','rheumatoid arthritis']},
+  as:     {en:['stiffness and pain in the back','ankylosing spondylitis'], hi:['kamar aur peeth me jakdan aur dard','Ankylosing Spondylitis'], hin:['कमर और पीठ में जकड़न और दर्द','रीढ़ की गठिया'], mix:['कमर और पीठ में जकड़न','Ankylosing Spondylitis']},
+  shoulder_prb:{en:['a shoulder problem','pain in the shoulder'], hi:['kandhe me dard','kandhe ki takleef'], hin:['कंधे में दर्द','कंधे की तकलीफ'], mix:['कंधे में दर्द','shoulder की problem']},
+  general:{en:['a bone and joint problem','joint pain'], hi:['haddi ki takleef','jodon me dard'], hin:['हड्डी की तकलीफ','जोड़ों में दर्द'], mix:['हड्डी की problem','जोड़ों में दर्द']},
+};
+let ONE_COND=false;
+function condPhrase(l,U){
+  const parts=[];
+  const ids=(ONE_COND?sP.slice(0,1):sP).filter(id=>COND[(id==='knee'&&sKneeOpts.includes('bilateral'))?'knee2':id]);
+  const ft=(document.getElementById('freetext')||{value:''}).value.trim();
+  const many=ids.length+(ft?1:0)>1, noun=/(takleef|pareshani|dikkat|problem|तकलीफ|परेशानी|दिक्कत)$/;
+  ids.forEach(id=>{
+    const key=(id==='knee'&&sKneeOpts.includes('bilateral'))?'knee2':id;
+    let pool=COND[key][l]; if(many){ const f=pool.filter(v=>!noun.test(v)); if(f.length) pool=f; }
+    parts.push(say(pool,U));
+  });
+  if(ft) parts.push(ft);
+  return joinL(parts,l);
+}
+function joinL(items,l){ items=items.filter(Boolean); if(!items.length) return ''; if(items.length===1) return items[0];
+  const sep=(l==='hin'||l==='mix')?' और ':l==='hi'?' aur ':' and ';
+  return items.slice(0,-1).join(', ')+sep+items[items.length-1]; }
+
+/* ── the bone and side, for a fracture ────────────────────────────────────────────────────────────────────── */
+function boneWord(l){
+  const b=sBone?BONES.find(x=>x.id===sBone):null; if(!b) return '';
+  const fem=['wrist','elbow','rib','thigh','spine'].includes(b.id);
+  const side={en:{left:'left ',right:'right '},hi:{left:'left ',right:'right '},hin:fem?{left:'बाईं ',right:'दाहिनी '}:{left:'बाएँ ',right:'दाहिने '},mix:{left:'left ',right:'right '}}[l][sSide]||'';
+  return side+String(l==='mix'?b.en:b[l]).split(' / ')[0];
+}
+
+/* ── OPEN: what happened / how long it hurt ───────────────────────────────────────────────────────────────── */
+function openSudden(l,P,U){
+  const b=boneWord(l), p0=sP[0];
+  const hip=p0==='hip_fracture', sports=p0==='sports';
+  if(l==='en'){
+    const who=P.self?'I':P.n, pos=P.self?'my':P.Ps;
+    const a=hip?[`${who} broke ${pos} hip.`,`${who} had a hip fracture.`,`${who} had a broken hip bone.`]
+         :sports?[`${who} got hurt while playing${b?' — '+pos+' '+b:''}.`,`${who} had a sports injury${b?' to '+pos+' '+b:''}.`,`${who} got injured during a game${b?', '+pos+' '+b:''}.`]
+         :(['spine','rib'].includes(sBone)?[`${who} had a fracture of ${pos} ${b}.`,`${who} had a ${b} fracture.`,`${who} injured ${pos} ${b}.`]
+           :[`${who} had a fracture${b?' of '+pos+' '+b:''}.`,`${who} broke ${b?pos+' '+b:'a bone'}.`,b?`${who} had a ${b} fracture.`:`${who} had a broken bone.`]);
+    return say(a,U);
+  }
+  const ko=P.self?(l==='hi'?'Mujhe':'मुझे'):P.ko;
+  if(l==='hi') return say(hip?[`${ko} kulhe ki haddi toot gayi thi.`,`${ko} hip fracture ho gaya tha.`,`${ko} kulhe me fracture ho gaya tha.`]
+    :sports?[`${ko} khelte waqt${b?' '+b+' me':''} chot lag gayi thi.`,`${ko} khelte hue${b?' '+b+' me':''} injury ho gayi thi.`,`${ko} khel ke dauran${b?' '+b+' me':''} chot aa gayi thi.`]
+    :[`${ko}${b?' '+b+' me':''} fracture ho gaya tha.`,`${ko}${b?' '+b+' ki':''} haddi toot gayi thi.`,`${ko}${b?' '+b+' me':''} chot lag gayi thi aur haddi toot gayi thi.`],U);
+  if(l==='hin') return say(hip?[`${ko} कूल्हे की हड्डी टूट गई थी।`,`${ko} कूल्हे में फ्रैक्चर हो गया था।`,`${ko} कूल्हे में चोट लगी और हड्डी टूट गई।`]
+    :sports?[`${ko} खेलते समय${b?' '+b+' में':''} चोट लग गई थी।`,`${ko} खेलते हुए${b?' '+b+' में':''} चोट आ गई थी।`,`${ko} खेल के दौरान${b?' '+b+' में':''} चोट आई थी।`]
+    :[`${ko}${b?' '+b+' में':''} फ्रैक्चर हो गया था।`,`${ko}${b?' '+b+' की':''} हड्डी टूट गई थी।`,`${ko}${b?' '+b+' में':''} चोट लगी और हड्डी टूट गई।`],U);
+  return say(hip?[`${ko} कूल्हे में fracture हो गया था।`,`${ko} hip fracture हो गया था।`,`${ko} कूल्हे की हड्डी टूट गई थी।`]
+    :sports?[`${ko} खेलते समय${b?' '+b+' में':''} injury हो गई थी।`,`${ko} खेलते हुए${b?' '+b+' में':''} चोट लग गई थी।`,`${ko} खेल के दौरान${b?' '+b+' में':''} injury आ गई थी।`]
+    :[`${ko}${b?' '+b+' में':''} fracture हो गया था।`,`${ko}${b?' '+b+' की':''} हड्डी टूट गई थी।`,`${ko}${b?' '+b+' में':''} चोट लगी और हड्डी टूट गई।`],U);
+}
+function openChronic(l,P,U){
+  const c=condPhrase(l,U);
+  if(l==='en'){
+    const who=P.self?'I':P.n, had=P.self?'had':'had';
+    return say([`${who} ${had} ${c}.`,`${who} ${had} ${c} for a long time.`,`${who} ${had} been troubled by ${c} for quite some time.`,`For a long time ${who} ${had} ${c}.`,`${who} ${had} ${c} that just would not settle.`],U);
+  }
+  const ko=P.self?(l==='hi'?'Mujhe':'मुझे'):P.ko;
+  const c0=c.replace(/\s*\([^)]*\)\s*$/,'');
+  const dard=/(dard|pain|दर्द)$/.test(c0), fem=/(takleef|pareshani|dikkat|problem|तकलीफ|परेशानी|दिक्कत|जकड़न)$/.test(c0);
+  if(l==='hi') return say(dard?[`${ko} ${c} tha.`,`${ko} kaafi time se ${c} rehta tha.`,`${ko} lambe samay se ${c} tha.`,`${ko} kaafi dino se ${c} ho raha tha.`,`${ko} ${c} kaafi samay se pareshan kar raha tha.`]
+    :fem?[`${ko} ${c} thi.`,`${ko} kaafi time se ${c} thi.`,`${ko} lambe samay se ${c} chal rahi thi.`,`${ko} kaafi dino se ${c} thi.`]
+    :[`${ko} ${c} ki takleef thi.`,`${ko} kaafi time se ${c} ki takleef thi.`,`${ko} lambe samay se ${c} ki pareshani thi.`,`${ko} ${c} ki dikkat kaafi samay se chal rahi thi.`],U);
+  if(l==='hin') return say(dard?[`${ko} ${c} था।`,`${ko} काफी समय से ${c} रहता था।`,`${ko} लंबे समय से ${c} था।`,`${ko} काफी दिनों से ${c} हो रहा था।`,`${ko} ${c} काफी समय से परेशान कर रहा था।`]
+    :fem?[`${ko} ${c} थी।`,`${ko} काफी समय से ${c} थी।`,`${ko} लंबे समय से ${c} चल रही थी।`,`${ko} काफी दिनों से ${c} थी।`]
+    :[`${ko} ${c} की तकलीफ थी।`,`${ko} काफी समय से ${c} की तकलीफ थी।`,`${ko} लंबे समय से ${c} की परेशानी थी।`,`${ko} ${c} की दिक्कत काफी समय से चल रही थी।`],U);
+  return say(dard?[`${ko} ${c} था।`,`${ko} काफी time से ${c} रहता था।`,`${ko} लंबे समय से ${c} था।`,`${ko} काफी दिनों से ${c} हो रहा था।`,`${ko} ${c} काफी समय से परेशान कर रहा था।`]
+    :fem?[`${ko} ${c} थी।`,`${ko} काफी time से ${c} थी।`,`${ko} लंबे समय से ${c} चल रही थी।`,`${ko} काफी दिनों से ${c} थी।`]
+    :[`${ko} ${c} की problem थी।`,`${ko} काफी time से ${c} की problem थी।`,`${ko} लंबे समय से ${c} की तकलीफ थी।`,`${ko} ${c} की दिक्कत काफी समय से थी।`],U);
+}
+
+/* ── TRIED: elsewhere first / someone told us (optional, chronic only) ────────────────────────────────────── */
+const TRIED={
+  en:['I had shown it to a couple of doctors before this but nothing really helped.','Two or three places, no real relief.','Someone known to us suggested «DR».','A relative told us about «DR».'],
+  hi:['Do-teen jagah dikhaya par khaas fayda nahi hua.','Pehle aur doctor ko bhi dikhaya tha, aaram nahi mila.','Kisi jaanne wale ne «DR» ke baare me bataya.','Ek rishtedar ne «DR» ka naam bataya.'],
+  hin:['दो-तीन जगह दिखाया पर खास फायदा नहीं हुआ।','पहले और डॉक्टर को भी दिखाया था, आराम नहीं मिला।','किसी जानने वाले ने «DR» के बारे में बताया।','एक रिश्तेदार ने «DR» का नाम बताया।'],
+  mix:['दो-तीन जगह दिखाया पर खास फायदा नहीं हुआ।','पहले और doctor को भी दिखाया था, relief नहीं मिला।','किसी जानने वाले ने «DR» के बारे में बताया।','एक रिश्तेदार ने «DR» का नाम बताया।'],
+};
+/* ── CAME: to the doctor (carries «DR»; Bareilly sometimes) ───────────────────────────────────────────────── */
+function came(l,P,U,sudden,wantB){
+  if(l==='en') return say(wantB?['Then we went to «DR» in Bareilly.','We came to «DR» at Rampur Garden, Bareilly.']
+    :['Then we went to «DR».','We consulted «DR».','Then we got an appointment with «DR».',sudden?(P.self?'I went straight to «DR».':'We took '+P.O+' straight to «DR».'):'Finally we showed it to «DR».'],U);
+  if(l==='hi') return say(wantB?['Phir Bareilly me «DR» ko dikhaya.','Bareilly aakar «DR» ko dikhaya.']
+    :['Phir «DR» ko dikhaya.','«DR» ke paas gaye.','Phir «DR» se mile.',sudden?(P.self?'Seedhe «DR» ke paas gaye.':'Seedhe «DR» ke paas le gaye.'):'Phir «DR» se ilaj shuru kiya.'],U);
+  if(l==='hin') return say(wantB?['फिर बरेली में «DR» को दिखाया।','बरेली आकर «DR» को दिखाया।']
+    :['फिर «DR» को दिखाया।','«DR» के पास गए।','फिर «DR» से मिले।',sudden?(P.self?'सीधे «DR» के पास गए।':'सीधे «DR» के पास ले गए।'):'फिर «DR» से इलाज शुरू किया।'],U);
+  return say(wantB?['फिर Bareilly में «DR» को दिखाया।','Bareilly आकर «DR» को दिखाया।']
+    :['फिर «DR» को दिखाया।','«DR» के पास गए।','फिर «DR» से मिले।',sudden?(P.self?'सीधे «DR» के पास गए।':'सीधे «DR» के पास ले गए।'):'फिर «DR» से treatment शुरू किया।'],U);
+}
+
+/* ── DID: what he did, in plain words — only what is ticked ──────────────────────────────────────────────── */
+const KNEE_TX={
+  exercises:{en:['gave a set of exercises','set out a few exercises'],hi:['exercise bataye','kuch exercise sikhayi'],hin:['एक्सरसाइज़ बताई','कुछ एक्सरसाइज़ सिखाईं'],mix:['exercise बताई','कुछ exercise सिखाईं']},
+  prp:{en:['gave PRP injections','put PRP injections in the knee'],hi:['PRP injection lagaye','ghutne me PRP lagaya'],hin:['पीआरपी इंजेक्शन लगाए','घुटने में पीआरपी लगाया'],mix:['PRP injection लगाए','knee में PRP लगाया']},
+  viscosup:{en:['gave a gel injection in the knee','injected a gel into the knee joint'],hi:['ghutne me gel ka injection lagaya','ghutne ke jod me gel daala'],hin:['घुटने में जेल का इंजेक्शन लगाया','घुटने के जोड़ में जेल डाला'],mix:['घुटने में gel injection लगाया','knee joint में gel डाला']},
+  metabolic:{en:['looked at the whole body, not only the knee','checked sugar, vitamins and the rest too'],hi:['sirf ghutne nahi, poori sehat ka dhyan rakha','sugar, vitamin sab check karwaya'],hin:['सिर्फ घुटने नहीं, पूरी सेहत का ध्यान रखा','शुगर, विटामिन सब जाँच करवाया'],mix:['सिर्फ knee नहीं, पूरी health का ध्यान रखा','sugar, vitamin सब check करवाया']},
+  weightmgmt:{en:['gave a diet plan to bring the weight down','helped with weight and diet'],hi:['vajan kam karne ke liye diet plan diya','vajan aur khane par dhyan dilwaya'],hin:['वज़न कम करने के लिए खाने का प्लान दिया','वज़न और खाने पर ध्यान दिलवाया'],mix:['वज़न कम करने के लिए diet plan दिया','weight और diet पर ध्यान दिलवाया']},
+  physio:{en:['arranged physiotherapy at the clinic itself','had physiotherapy done right there'],hi:['clinic me hi physiotherapy karwayi','wahin physiotherapy shuru karwayi'],hin:['क्लिनिक में ही फिजियोथेरेपी करवाई','वहीं फिजियोथेरेपी शुरू करवाई'],mix:['clinic में ही physiotherapy करवाई','वहीं physiotherapy शुरू करवाई']},
+  home_ex:{en:['taught exercises to do at home','showed exercises for home'],hi:['ghar par karne wali exercise sikhayi','ghar ke liye exercise dikhayi'],hin:['घर पर करने वाली एक्सरसाइज़ सिखाई','घर के लिए एक्सरसाइज़ दिखाई'],mix:['घर पर करने वाली exercise सिखाई','घर के लिए exercise दिखाई']},
+  nutrition:{en:['advised on food and nutrition','explained what to eat'],hi:['khaan-paan ki salah di','kya khana hai ye samjhaya'],hin:['खान-पान की सलाह दी','क्या खाना है ये समझाया'],mix:['खाने-पीने की advice दी','क्या खाना है ये समझाया']},
+};
+const SURG_PH={
+  complex_ia:{en:['The bone was in several pieces. «DR» set it right with an operation','It was a bad break, in pieces, and «DRs» operation joined it properly','The pieces of bone were fixed back in one operation'],hi:['haddi kai tukdon me tooti thi, «DR» ne operation karke jod di','tukde-tukde haddi ko «DR» ne operation se sahi jod diya','bura fracture tha, par operation ke baad haddi theek jud gayi'],hin:['हड्डी कई टुकड़ों में टूटी थी, «DR» ने ऑपरेशन करके जोड़ दी','टुकड़े-टुकड़े हड्डी को «DR» ने ऑपरेशन से सही जोड़ दिया','बुरा फ्रैक्चर था, पर ऑपरेशन के बाद हड्डी ठीक जुड़ गई'],mix:['हड्डी कई टुकड़ों में टूटी थी, «DR» ने operation करके जोड़ दी','टुकड़े-टुकड़े हड्डी को «DR» ने operation से सही जोड़ दिया','बुरा fracture था, पर operation के बाद हड्डी ठीक जुड़ गई']},
+  mifs:{en:['«DR» operated through a small cut','Only a small cut was needed for the operation','The operation was done with a small incision, so healing was quick'],hi:['«DR» ne chhote cheere se operation kiya','Operation chhote se cheere se ho gaya','Chhota cheera laga, isliye jaldi theek hua'],hin:['«DR» ने छोटे चीरे से ऑपरेशन किया','ऑपरेशन छोटे से चीरे से हो गया','छोटा चीरा लगा, इसलिए जल्दी ठीक हुआ'],mix:['«DR» ने छोटे चीरे से operation किया','Operation छोटे से चीरे से हो गया','छोटा cut लगा, इसलिए जल्दी ठीक हुआ']},
+  hip_pfn:{en:['«DR» operated and had «O» walking the very next day','Operated one day, walking the next','Walking was started the very next day after the operation'],hi:['«DR» ne operation kiya aur agle hi din chalna shuru karwa diya','Ek din operation, agle din chalna shuru','Operation ke agle hi din paon rakhwa diye'],hin:['«DR» ने ऑपरेशन किया और अगले ही दिन चलना शुरू करवा दिया','एक दिन ऑपरेशन, अगले दिन चलना शुरू','ऑपरेशन के अगले ही दिन पाँव रखवा दिए'],mix:['«DR» ने operation किया और अगले ही दिन चलना शुरू करवा दिया','एक दिन operation, अगले दिन चलना शुरू','Operation के अगले ही दिन पाँव रखवा दिए']},
+  hemi:{en:['«DR» replaced the hip joint and had «O» walking the next day','The hip joint was replaced and walking began the next day','Half the hip was replaced; up and walking the next day'],hi:['«DR» ne kulhe ka joint badla aur agle din se chalna shuru ho gaya','Kulhe ka joint badal diya, agle din se chalna shuru','Aadha kulha badla gaya aur agle din se sahare se chalna shuru'],hin:['«DR» ने कूल्हे का जोड़ बदला और अगले दिन से चलना शुरू हो गया','कूल्हे का जोड़ बदल दिया, अगले दिन से चलना शुरू','आधा कूल्हा बदला गया और अगले दिन से सहारे से चलना शुरू'],mix:['«DR» ने hip joint बदला और अगले दिन से चलना शुरू हो गया','Hip का joint बदल दिया, अगले दिन से चलना शुरू','आधा hip बदला गया और अगले दिन से सहारे से चलना शुरू']},
+  hip_mifs:{en:['«DR» operated the hip through a small cut','The hip operation was done with a small cut','A small cut, and the hip was fixed'],hi:['«DR» ne chhote cheere se kulhe ka operation kiya','Kulhe ka operation chhote cheere se hua','Chhote se cheere me kulha theek kar diya'],hin:['«DR» ने छोटे चीरे से कूल्हे का ऑपरेशन किया','कूल्हे का ऑपरेशन छोटे चीरे से हुआ','छोटे से चीरे में कूल्हा ठीक कर दिया'],mix:['«DR» ने छोटे चीरे से hip का operation किया','Hip का operation छोटे चीरे से हुआ','छोटे से cut में hip ठीक कर दिया']},
+  thr:{en:['«DR» did the hip replacement and had «O» walking within a day','The hip was replaced and walking began within a day','Hip replacement done, and on «Ps» feet within a day'],hi:['«DR» ne hip replacement kiya, ek din me chalna shuru ho gaya','Kulha badla gaya aur ek din me chalna shuru','Hip replacement hua, ek din me paon rakh diye'],hin:['«DR» ने कूल्हा बदला (हिप रिप्लेसमेंट), एक दिन में चलना शुरू हो गया','कूल्हा बदला गया और एक दिन में चलना शुरू','हिप रिप्लेसमेंट हुआ, एक दिन में पाँव रख दिए'],mix:['«DR» ने hip replacement किया, एक दिन में चलना शुरू हो गया','कूल्हा बदला गया और एक दिन में चलना शुरू','Hip replacement हुआ, एक दिन में पाँव रख दिए']},
+  tkr:{en:['«DR» did the knee replacement and walking started within days','The knee was replaced and walking began within a few days','Knee replacement done, walking within days'],hi:['«DR» ne knee replacement kiya aur kuch hi din me chalna shuru ho gaya','Ghutna badla gaya aur kuch din me chalna shuru','Knee replacement hua, kuch hi dino me paon rakh diye'],hin:['«DR» ने घुटना बदला (नी रिप्लेसमेंट) और कुछ ही दिन में चलना शुरू हो गया','घुटना बदला गया और कुछ दिन में चलना शुरू','नी रिप्लेसमेंट हुआ, कुछ ही दिनों में पाँव रख दिए'],mix:['«DR» ने knee replacement किया और कुछ ही दिन में चलना शुरू हो गया','घुटना बदला गया और कुछ दिन में चलना शुरू','Knee replacement हुआ, कुछ ही दिनों में पाँव रख दिए']},
+};
+function didList(l,P,U,size,sudden){
+  const out=[];  // each item: {k:key, s:sentence}
+  const G=new Set(sG), surg=sP.map(pid=>sSurg[pid]).find(s=>s&&SURG_PH[s]);
+  const self=P.self, operated=!!surg||G.has('surg');
+  const noOpWord=/operation|ऑपरेशन|surgery|सर्जरी/i;
+  // the look
+  if(G.has('reports')) out.push({k:'reports',s:say({en:['«DR» went through the reports and the X-ray properly.','«DR» looked at the X-ray and MRI himself.','Every report was checked before anything was decided.'],hi:['«DR» ne reports aur X-ray dhyan se dekhe.','«DR» ne X-ray aur MRI khud dekhi.','Saari reports dekh kar hi aage badhe.'],hin:['«DR» ने रिपोर्ट और एक्स-रे ध्यान से देखे।','«DR» ने एक्स-रे और एमआरआई खुद देखी।','सारी रिपोर्ट देखकर ही आगे बढ़े।'],mix:['«DR» ने reports और X-ray ध्यान से देखे।','«DR» ने X-ray और MRI खुद देखी।','सारी reports देखकर ही आगे बढ़े।']}[l],U)});
+  if(G.has('explained')) out.push({k:'explained',s:say({en:['«DR» explained the whole thing in simple words.','«DR» explained what the problem was and what to do about it.','Everything was explained clearly, without any hurry.'],hi:['«DR» ne saari baat aasan shabdon me samjhayi.','«DR» ne saaf bataya ki dikkat kya hai aur kya karna hai.','Poori baat aaram se samjhayi, koi jaldi nahi.'],hin:['«DR» ने सारी बात आसान शब्दों में समझाई।','«DR» ने साफ बताया कि दिक्कत क्या है और क्या करना है।','पूरी बात आराम से समझाई, कोई जल्दी नहीं।'],mix:['«DR» ने सारी बात simple words में समझाई।','«DR» ने clearly बताया कि problem क्या है और क्या करना है।','पूरी बात आराम से समझाई, कोई जल्दी नहीं।']}[l],U)});
+  // the treatment
+  if(surg) out.push({k:'surg',s:say(SURG_PH[surg][l],U).replace(/«O»/g,self?'me':P.O).replace(/«Ps»/g,self?'my':P.Ps)});
+  else if(G.has('surg')) out.push({k:'surg',s:say({en:['The operation went well.','«DR» operated and it went off smoothly.','The operation was done well and on time.'],hi:['Operation bahut achha hua.','«DR» ne operation kiya, sab theek raha.','Operation sahi se ho gaya, koi dikkat nahi aayi.'],hin:['ऑपरेशन बहुत अच्छा हुआ।','«DR» ने ऑपरेशन किया, सब ठीक रहा।','ऑपरेशन सही से हो गया, कोई दिक्कत नहीं आई।'],mix:['Operation बहुत अच्छा हुआ।','«DR» ने operation किया, सब ठीक रहा।','Operation सही से हो गया, कोई दिक्कत नहीं आई।']}[l],U)});
+  const fx=sP.some(p=>p==='fracture'||p==='hip_fracture');
+  const PL_OP={en:['A plaster was put on as well.','There was a plaster too.','A plaster was also needed.'],hi:['Plaster bhi lagaya gaya.','Saath me plaster bhi laga.','Plaster bhi chadha.'],hin:['प्लास्टर भी लगाया गया।','साथ में प्लास्टर भी लगा।','प्लास्टर भी चढ़ा।'],mix:['Plaster भी लगाया गया।','साथ में plaster भी लगा।','Plaster भी चढ़ा।']};
+  if(G.has('plaster')&&operated) out.push({k:'plaster',s:say(PL_OP[l],U)});
+  else if(G.has('plaster')) out.push({k:'plaster',s:say((a=>fx?a:a.filter(v=>!/haddi|हड्डी|bone/i.test(v)))(({en:['It was treated with plaster only, no operation.','«DR» put a plaster and said no operation was needed.','Just a plaster — nothing more.','Healed with only a plaster.','A plaster did the job.'],hi:['Sirf plaster se ilaj hua, operation ki zaroorat nahi padi.','«DR» ne plaster lagaya aur kaha operation ki zaroorat nahi.','Bina operation ke, sirf plaster se theek ho gaya.','Plaster se hi theek ho gaya.','Plaster lagaya, haddi jud gayi.'],hin:['सिर्फ प्लास्टर से इलाज हुआ, ऑपरेशन की ज़रूरत नहीं पड़ी।','«DR» ने प्लास्टर लगाया और कहा ऑपरेशन की ज़रूरत नहीं।','बिना ऑपरेशन के, सिर्फ प्लास्टर से ठीक हो गया।','प्लास्टर से ही ठीक हो गया।','प्लास्टर लगाया, हड्डी जुड़ गई।'],mix:['सिर्फ plaster से इलाज हुआ, operation की ज़रूरत नहीं पड़ी।','«DR» ने plaster लगाया और कहा operation की ज़रूरत नहीं।','बिना operation के, सिर्फ plaster से ठीक हो गया।','Plaster से ही ठीक हो गया।','Plaster लगाया, हड्डी जुड़ गई।']})[l]),U)});
+  else if(G.has('nosurg')&&!operated) out.push({k:'nosurg',s:say({en:['No operation — just medicines and the right advice.','«DR» said there was no need for any operation.','Treated without any operation.'],hi:['Operation nahi karna pada, dawa aur sahi salah se kaam ban gaya.','«DR» ne kaha operation ki koi zaroorat nahi.','Bina operation ke hi kaam ban gaya.'],hin:['ऑपरेशन नहीं करना पड़ा, दवा और सही सलाह से काम बन गया।','«DR» ने कहा ऑपरेशन की कोई ज़रूरत नहीं।','बिना ऑपरेशन के ही काम बन गया।'],mix:['Operation नहीं करना पड़ा, दवा और सही advice से काम बन गया।','«DR» ने कहा operation की कोई ज़रूरत नहीं।','बिना operation के ही काम बन गया।']}[l],U)});
+  // the knee plan
+  const kt=sKneeOpts.filter(id=>id!=='bilateral'&&KNEE_TX[id]);
+  if(sP.includes('knee')&&kt.length){
+    const n=size==='short'?1:size==='medium'?2:3;
+    const items=kt.slice(0,n).map(id=>say(KNEE_TX[id][l],U));
+    const lead=pick({en:['«DR» ','Along with medicines, «DR» '],hi:['«DR» ne ','Dawa ke saath «DR» ne '],hin:['«DR» ने ','दवा के साथ «DR» ने '],mix:['«DR» ने ','दवा के साथ «DR» ने ']}[l]);
+    out.push({k:'knee',s:lead+joinL(items,l)+(l==='en'?'.':l==='hi'?'.':'।')});
+  }
+  if(G.has('physio_gp')&&!kt.length) out.push({k:'physio',s:say({en:['«DRs» exercises made a real difference.','A few exercises and precautions did most of the work.','The physiotherapy advice helped a lot.'],hi:['«DR» ne jo exercise batayi usse bahut fark pada.','Kuch exercise aur parhez se hi kaafi kaam ho gaya.','Physiotherapy ki salah se bahut fayda hua.'],hin:['«DR» ने जो एक्सरसाइज़ बताई उससे बहुत फर्क पड़ा।','कुछ एक्सरसाइज़ और परहेज से ही काफी काम हो गया।','फिजियोथेरेपी की सलाह से बहुत फायदा हुआ।'],mix:['«DR» ने जो exercise बताई उससे बहुत फर्क पड़ा।','कुछ exercise और परहेज से ही काफी काम हो गया।','Physiotherapy की advice से बहुत फायदा हुआ।']}[l],U)});
+  if(sAy) out.push({k:'ay',s:say({en:['It was done under Ayushman, so there was no expense to us.','Ayushman card covered it — not a rupee spent.','Under the Ayushman scheme, free of cost.'],hi:['Ayushman card se ilaj hua, hume kuch kharch nahi karna pada.','Ayushman me ho gaya, ek rupaya nahi laga.','Ayushman yojana se poora ilaj free hua.'],hin:['आयुष्मान कार्ड से इलाज हुआ, हमें कुछ खर्च नहीं करना पड़ा।','आयुष्मान में हो गया, एक रुपया नहीं लगा।','आयुष्मान योजना से पूरा इलाज फ्री हुआ।'],mix:['Ayushman card से इलाज हुआ, हमें कुछ खर्च नहीं करना पड़ा।','Ayushman में हो गया, एक रुपया नहीं लगा।','Ayushman योजना से पूरा इलाज free हुआ।']}[l],U)});
+  return out;
+}
+
+/* ── NOW: how it is now ──────────────────────────────────────────────────────────────────────────────────── */
+function nowList(l,P,U){
+  const out=[], G=new Set(sG), self=P.self;
+  const operated=sP.some(pid=>sSurg[pid])||G.has('surg');
+  // a duration only from the owner's figures: plaster on the wrist = 6 weeks
+  const ftx=(document.getElementById('freetext')||{value:''}).value.trim();
+  if(G.has('plaster')&&!ftx&&!operated&&sP.some(p=>p==='fracture'||p==='sports')&&sBone&&STD.plaster_weeks[sBone]){
+    const w=STD.plaster_weeks[sBone];
+    out.push({k:'dur',s:say({en:[`The plaster came off after ${w} weeks and the hand is working normally.`,`${w} weeks in plaster and it has healed well.`,`After ${w} weeks the plaster was removed; the wrist moves freely now.`],hi:[`${w} hafte baad plaster khula, ab haath bilkul theek chal raha hai.`,`${w} hafte plaster raha, haddi achhe se jud gayi.`,`${w} hafte me plaster khul gaya aur kalai ab aaram se ghoom rahi hai.`],hin:[`${w} हफ्ते बाद प्लास्टर खुला, अब हाथ बिल्कुल ठीक चल रहा है।`,`${w} हफ्ते प्लास्टर रहा, हड्डी अच्छे से जुड़ गई।`,`${w} हफ्ते में प्लास्टर खुल गया और कलाई अब आराम से घूम रही है।`],mix:[`${w} हफ्ते बाद plaster खुला, अब हाथ बिल्कुल ठीक चल रहा है।`,`${w} हफ्ते plaster रहा, हड्डी अच्छे से जुड़ गई।`,`${w} हफ्ते में plaster खुल गया और कलाई अब आराम से घूम रही है।`]}[l],U)});
+  }
+  if(G.has('pain')) out.push({k:'pain',s:say({en:[self?'The pain is almost gone now.':`${P.S==='they'?'They are':P.S==='she'?'She is':'He is'} almost free of pain now.`,'The pain came down a lot within a few weeks.','There is real relief now.'],hi:[self?'Ab dard na ke barabar hai.':'Ab unhe dard na ke barabar hai.','Kuch hi hafton me dard kaafi kam ho gaya.','Ab bahut aaram hai.','Dard me achhi-khasi raahat mili.'],hin:[self?'अब दर्द न के बराबर है।':'अब उन्हें दर्द न के बराबर है।','कुछ ही हफ्तों में दर्द काफी कम हो गया।','अब बहुत आराम है।','दर्द में अच्छी-खासी राहत मिली।'],mix:[self?'अब दर्द न के बराबर है।':'अब उन्हें दर्द न के बराबर है।','कुछ ही हफ्तों में pain काफी कम हो गया।','अब बहुत relief है।','दर्द में बहुत आराम मिला।']}[l],U)});
+  if(G.has('walking')) out.push({k:'walk',s:say({en:[self?'I can walk and climb stairs again without trouble.':'Walking and stairs are no trouble any more.',self?'I am back to my daily work.':'Daily work has become normal again.','Walking is easy now.'],hi:[self?'Ab chalne-phirne aur seedhi chadhne me koi dikkat nahi.':'Ab chalna-phirna aur seedhi chadhna theek ho gaya.',self?'Roz ke kaam phir se shuru ho gaye.':'Roz ka kaam phir se normal ho gaya hai.','Chalna ab aasan ho gaya hai.'],hin:[self?'अब चलने-फिरने और सीढ़ी चढ़ने में कोई दिक्कत नहीं।':'अब चलना-फिरना और सीढ़ी चढ़ना ठीक हो गया।',self?'रोज़ का काम फिर से शुरू हो गया है।':'रोज़ का काम फिर से सामान्य हो गया है।','चलना अब आसान हो गया है।'],mix:[self?'अब चलने-फिरने और stairs चढ़ने में कोई दिक्कत नहीं।':'अब चलना-फिरना और stairs चढ़ना ठीक हो गया।',self?'रोज़ का काम फिर से normal हो गया।':'रोज़ का काम फिर से normal हो गया है।','चलना अब आसान हो गया है।']}[l],U)});
+  if(G.has('recov')&&operated) out.push({k:'recov',s:say({en:['Recovery afterwards was smooth.','The care after the operation was very good.','Healing went well.'],hi:['Baad me recovery achhi rahi.','Operation ke baad dekhbhaal bahut achhi rahi.','Jaldi aaram aa gaya.'],hin:['ऑपरेशन के बाद रिकवरी अच्छी रही।','ऑपरेशन के बाद देखभाल बहुत अच्छी रही।','ऑपरेशन के बाद जल्दी आराम आ गया।'],mix:['Operation के बाद recovery अच्छी रही।','Operation के बाद देखभाल बहुत अच्छी रही।','Operation के बाद जल्दी आराम आ गया।']}[l],U)});
+  if(sP.some(p=>p==='rheumatoid'||p==='as')&&G.has('pain')) out.push({k:'meds',s:say({en:['The medicines are fewer now and there have been no side effects.','Swelling is down and the medicines suit well.','On fewer medicines now, and no side effects.'],hi:['Dawai bhi pehle se kam hai aur koi side effect nahi.','Sujan utar gayi aur dawai suit kar rahi hai.','Ab dawa kam ho gayi hai, side effect bhi nahi.'],hin:['दवा भी पहले से कम है और कोई साइड इफेक्ट नहीं।','सूजन उतर गई और दवा सूट कर रही है।','अब दवा कम हो गई है, साइड इफेक्ट भी नहीं।'],mix:['दवा भी पहले से कम है और कोई side effect नहीं।','सूजन उतर गई और दवा suit कर रही है।','अब दवा कम हो गई है, side effect भी नहीं।']}[l],U)});
+  return out;
+}
+function neutralise(s,l){ return s; }
+
+/* ── the clinic: charges / staff / facilities ─────────────────────────────────────────────────────────────── */
+function clinicList(l,U){
+  const out=[], G=new Set(sG);
+  if(G.has('charges')) out.push({k:'charges',s:say({en:['The charges were reasonable.','Treatment did not cost much.','Fees are fair, nothing unnecessary.'],hi:['Kharcha bhi zyada nahi aaya.','Fees bilkul theek hai.','Ilaj mehnga nahi pada.'],hin:['खर्चा भी ज़्यादा नहीं आया।','फीस बिल्कुल ठीक है।','इलाज महंगा नहीं पड़ा।'],mix:['खर्चा भी ज़्यादा नहीं आया।','Fees बिल्कुल ठीक है।','इलाज महंगा नहीं पड़ा।']}[l],U)});
+  if(G.has('staff')) out.push({k:'staff',s:say({en:['The staff were helpful.','Staff at the clinic are polite and quick.','Reception handled everything smoothly.'],hi:['Staff ka vyavhar achha hai.','Clinic ka staff bhi helpful hai.','Reception wale bhi achhe se baat karte hain.'],hin:['स्टाफ का व्यवहार अच्छा है।','क्लिनिक का स्टाफ भी मददगार है।','रिसेप्शन वाले भी अच्छे से बात करते हैं।'],mix:['Staff का व्यवहार अच्छा है।','Clinic का staff भी helpful है।','Reception वाले भी अच्छे से बात करते हैं।']}[l],U)});
+  if(G.has('fac')) out.push({k:'fac',s:say({en:['X-ray is done at the clinic itself, so no running around.','The clinic is clean and well set up.','Everything is under one roof at the clinic.'],hi:['X-ray clinic me hi ho gaya, bhaag-daud nahi karni padi.','Clinic saaf-suthra aur achhe se bana hai.','Sab kuch ek hi jagah mil jata hai.'],hin:['एक्स-रे क्लिनिक में ही हो गया, भाग-दौड़ नहीं करनी पड़ी।','क्लिनिक साफ-सुथरा और अच्छे से बना है।','सब कुछ एक ही जगह मिल जाता है।'],mix:['X-ray clinic में ही हो गया, भाग-दौड़ नहीं करनी पड़ी।','Clinic साफ-सुथरा और अच्छे से बना है।','सब कुछ एक ही जगह मिल जाता है।']}[l],U)});
+  return out;
+}
+
+/* ── MAN: one line about him (from the ticked qualities) ─────────────────────────────────────────────────── */
+const QUAL_PH={
+  exp:{en:['Very experienced doctor.','A senior, experienced doctor.','«DR» knows his work.'],hi:['Bahut experienced doctor hain.','Senior aur tajurbe wale doctor hain.','«DR» apne kaam me mahir hain.'],hin:['बहुत अनुभवी डॉक्टर हैं।','सीनियर और तजुर्बे वाले डॉक्टर हैं।','«DR» अपने काम में माहिर हैं।'],mix:['बहुत experienced doctor हैं।','Senior और तजुर्बे वाले doctor हैं।','«DR» अपने काम में expert हैं।']},
+  person:{en:['A good human being as well as a good doctor.','Very kind by nature.','A genuinely nice person.'],hi:['Achhe doctor ke saath achhe insaan bhi hain.','Nature ekdum achha hai.','Dil ke bahut saaf insaan hain.'],hin:['अच्छे डॉक्टर के साथ अच्छे इंसान भी हैं।','स्वभाव बहुत अच्छा है।','दिल के बहुत अच्छे हैं।'],mix:['अच्छे doctor के साथ अच्छे इंसान भी हैं।','Nature बहुत अच्छा है।','दिल के बहुत अच्छे हैं।']},
+  listens:{en:['«DR» listens to the whole thing patiently.','Never in a hurry — hears you out.','«DR» hears the patient out properly.'],hi:['«DR» aaram se poori baat sunte hain.','Jaldi nahi karte, tasalli se sunte hain.','Mareez ki baat kaat-te nahi, poora sunte hain.'],hin:['«DR» आराम से पूरी बात सुनते हैं।','जल्दी नहीं करते, तसल्ली से सुनते हैं।','मरीज़ की बात काटते नहीं, पूरा सुनते हैं।'],mix:['«DR» आराम से पूरी बात सुनते हैं।','जल्दी नहीं करते, तसल्ली से सुनते हैं।','Patient की बात काटते नहीं, पूरा सुनते हैं।']},
+  nosurgrush:{en:['No unnecessary tests, no pushing for surgery.','«DR» does not suggest anything that is not needed.','Only what was needed — nothing extra.'],hi:['Faltu test ya surgery ke liye zor nahi dete.','Jo zaroori nahi, wo nahi karwate.','Bina matlab ki dawa ya jaanch nahi likhte.'],hin:['फालतू टेस्ट या सर्जरी के लिए ज़ोर नहीं देते।','जो ज़रूरी नहीं, वो नहीं करवाते।','बिना मतलब की दवा या जाँच नहीं लिखते।'],mix:['फालतू test या surgery के लिए ज़ोर नहीं देते।','जो ज़रूरी नहीं, वो नहीं करवाते।','बिना मतलब की दवा या test नहीं लिखते।']},
+  calm:{en:['Very calm, never makes you panic.','«DR» puts the patient at ease.','Explains calmly, so the fear goes away.'],hi:['Bahut shaant hain, mareez ko darate nahi.','«DR» mareez ko himmat dete hain.','Itne aaram se baat karte hain ki dar khatam ho jata hai.'],hin:['बहुत शांत हैं, मरीज़ को डराते नहीं।','«DR» मरीज़ को हौसला देते हैं।','इतने आराम से बात करते हैं कि डर खत्म हो जाता है।'],mix:['बहुत calm हैं, patient को डराते नहीं।','«DR» मरीज़ को हौसला देते हैं।','इतने आराम से बात करते हैं कि डर खत्म हो जाता है।']},
+  caring:{en:['«DR» genuinely cares about the patient.','Treats every patient like family.','You can tell «DR» actually cares.'],hi:['«DR» mareez ki sachhi parwah karte hain.','Har mareez ko apna samajh kar dekhte hain.','Mareez ka dard samajhte hain.'],hin:['«DR» मरीज़ की सच्ची परवाह करते हैं।','हर मरीज़ को अपना समझ कर देखते हैं।','मरीज़ का दर्द समझते हैं।'],mix:['«DR» patient की सच्ची परवाह करते हैं।','हर मरीज़ को अपना समझ कर देखते हैं।','Patient का दर्द समझते हैं।']},
+};
+function manList(l,U){ return sQ.filter(q=>QUAL_PH[q]).map(q=>({k:'q_'+q,s:say(QUAL_PH[q][l],U)})); }
+
+/* ── CLOSE: six kinds, many wordings; no "tell others" ───────────────────────────────────────────────────── */
+const CLOSE_SHORT={
+  en:['Thanks, «DR».','Grateful to «DR».','«DR» is excellent.','Well done, «DR».','Very happy with «DR».','Glad we came to «DR».'],
+  hi:['«DR», thanks a lot 🙏','«DR» ko dhanyavad.','Shukriya «DR».','«DR» behtareen hain.','«DR» se bahut khush hain.','«DR» par bharosa hai.'],
+  hin:['«DR», आपका आभार 🙏','«DR» का शुक्रिया।','«DR» बेहतरीन हैं।','«DR» को धन्यवाद।','«DR» से बहुत खुश हैं।','«DR» पर भरोसा है।'],
+  mix:['«DR», thanks a lot 🙏','«DR» का शुक्रिया।','«DR» best हैं।','«DR» को धन्यवाद।','«DR» से बहुत happy हैं।','«DR» पर भरोसा है।'],
+};
+const CLOSE={
+  thanks:{en:['Thanks a lot, doctor.','Doctor sahab, thank you.','Many thanks to «DR» and the team.','Grateful to «DR».'],hi:['Doctor sahab, thank you 🙏','«DR» ko bahut bahut dhanyavad.','Dil se shukriya «DR».','Thank u sir 🙏'],hin:['«DR», आपका बहुत धन्यवाद 🙏','दिल से धन्यवाद डॉक्टर साहब।','«DR» का शुक्रिया।','आपका बहुत-बहुत धन्यवाद «DR» 🙏'],mix:['«DR» का तहे दिल से शुक्रिया 🙏','«DR», आपका बहुत धन्यवाद।','दिल से thank you doctor साहब।','आपका बहुत-बहुत धन्यवाद «DR» 🙏']},
+  now:{en:['Life is normal again.','Good to be moving again.','Normal routine has resumed.'],hi:['Ab zindagi normal hai.','Ab sab kaam pehle jaise ho rahe hain.','Ab koi takleef nahi hai.'],hin:['अब ज़िंदगी सामान्य है।','अब सब काम पहले जैसे हो रहे हैं।','अब कोई तकलीफ नहीं है।'],mix:['अब life normal है।','अब सब काम पहले जैसे हो रहे हैं।','अब कोई तकलीफ नहीं है।']},
+  verdict:{en:['«DR» is a really good doctor.','One of the best bone doctors around.','Could not ask for a better doctor.','«DR» is as good as they come.'],hi:['«DR» bahut hi achhe doctor hain.','«DR» haddi ke bahut achhe doctor hain.','Isse achha ortho doctor nahi dekha.','«DR» sach me bahut achhe doctor hain.'],hin:['«DR» बहुत ही अच्छे डॉक्टर हैं।','«DR» हड्डी के बहुत अच्छे डॉक्टर हैं।','इनसे अच्छा हड्डी का डॉक्टर नहीं देखा।','«DR» सच में बहुत अच्छे डॉक्टर हैं।'],mix:['«DR» बहुत ही अच्छे doctor हैं।','«DR» हड्डी के बहुत अच्छे doctor हैं।','इनसे अच्छा ortho doctor नहीं देखा।','«DR» सच में बहुत अच्छे doctor हैं।']},
+  verdictB:{en:['In my experience the best bone doctor in Bareilly.','«DR» is the one to see for bones and joints in Bareilly.','Best ortho doctor in Bareilly, no doubt.'],hi:['Bareilly me haddi ke sabse achhe doctor.','«DR» Bareilly ke best ortho doctor hain.','Mere hisaab se Bareilly me inse behtar ortho doctor nahi.'],hin:['बरेली में हड्डी के सबसे अच्छे डॉक्टर।','«DR» बरेली के बेस्ट ऑर्थो डॉक्टर हैं।','मेरे हिसाब से बरेली में इनसे बेहतर हड्डी का डॉक्टर नहीं।'],mix:['Bareilly में हड्डी के सबसे अच्छे doctor।','«DR» Bareilly के best ortho doctor हैं।','मेरे हिसाब से Bareilly में इनसे बेहतर ortho doctor नहीं।']},
+  trust:{en:['Now we do not need to go anywhere else.','Complete trust in «DR».','We know where to go now.'],hi:['Ab kahin aur jaane ki zaroorat nahi.','«DR» par poora bharosa hai.','Ab pata hai kahan dikhana hai.'],hin:['अब कहीं और जाने की ज़रूरत नहीं।','«DR» पर पूरा भरोसा है।','अब पता है कहाँ दिखाना है।'],mix:['अब कहीं और जाने की ज़रूरत नहीं।','«DR» पर पूरा भरोसा है।','अब पता है कहाँ दिखाना है।']},
+  tiny:{en:['Thank you sir.','Very happy.','Highly satisfied.'],hi:['Thank u sir','Bahut khush hain.','Sab theek hai 🙏'],hin:['धन्यवाद सर।','बहुत खुश हैं।','सब ठीक है 🙏'],mix:['Thank u sir','बहुत खुश हैं।','सब ठीक है 🙏']},
+};
+function closing(l,U,flags){
+  if(chance(0.25)) return '';
+  let kinds=['thanks','now','verdict','trust','tiny'];
+  if(!sG.includes('pain')&&!sG.includes('walking')) kinds=kinds.filter(k=>k!=='now');
+  if(flags.verdict) kinds=kinds.filter(k=>k!=='verdict');
+  let k=pick(kinds);
+  if(k==='verdict'&&!flags.bareilly&&chance(0.4)){ k='verdictB'; flags.bareilly=true; }
+  if(k==='verdict'||k==='verdictB') flags.verdict=true;
+  return say(CLOSE[k][l],U);
+}
+
+/* ── the draft ───────────────────────────────────────────────────────────────────────────────────────────── */
+const SIZE={short:[8,20],medium:[30,50],long:[60,90]};
+function wc(s){ return s.replace(/«[^»]*»/g,'x x x x').trim().split(/\s+/).filter(Boolean).length; }
+function endP(l){ return (l==='hin'||l==='mix')?'।':'.'; }
+function sent(s,l){ s=String(s||'').trim(); if(!s) return ''; s=s[0].toUpperCase()+s.slice(1); return /[।.!?🙏]$/u.test(s)?s:s+endP(l); }
+
+function mkOne(size){
+  const l=lk(), U=newUse(), P=person(l,size==='short');
+  const [lo,hi]=SIZE[size];
+  const flags={verdict:false,bareilly:false};
+  const ft=(document.getElementById('freetext')||{value:''}).value.trim();
+  const sudden=sP.some(id=>(PROBS.find(p=>p.id===id)||{}).s)&&!ft;
+  const wantB=chance(0.25);
+  // the pieces, in story order; each has a priority for trimming (lower = dropped first) and a flag must/optional
+  const pieces=[];
+  SHORTEST=ONE_COND=(size==='short'); pieces.push({k:'open',s:sudden?openSudden(l,P,U):openChronic(l,P,U),pri:100}); ONE_COND=false;
+  /* S385 cold review: "tried elsewhere / someone told us" claims what no tick says -- not used */
+  if(size!=='short'){ const c=came(l,P,U,sudden,wantB&&!flags.bareilly); if(wantB) flags.bareilly=true; pieces.push({k:'came',s:c,pri:90}); }
+  const did=didList(l,P,U,size,sudden), now=nowList(l,P,U), cl=clinicList(l,U), man=manList(l,U);
+  SHORTEST=false;
+  const IMP={surg:5,plaster:5,nosurg:5,knee:5,ay:4,explained:3,physio:3,reports:2};
+  const PRI={surg:76,plaster:76,nosurg:76,knee:75,ay:70,dur:68,pain:73,walk:72,explained:64,physio:64,reports:60,meds:58,recov:55};
+  const byImp=(arr,n)=>arr.map((x,i)=>({x,i})).sort((a,b)=>(IMP[b.x.k]||1)-(IMP[a.x.k]||1)||a.i-b.i).slice(0,n).sort((a,b)=>a.i-b.i).map(o=>o.x);
+  const take=(arr,n,pri)=>(arr===did?byImp(arr,n):arr.slice(0,n)).forEach((x,i)=>pieces.push({k:x.k,s:x.s,pri:PRI[x.k]||(pri-i)}));
+  if(size==='short'){ const n2=now.filter(x=>x.k!=='dur'); const res=n2.length?n2:did.length?did:now; take(res,1,70); }
+  else if(size==='medium'){ take(did,3,60); take(now,2,70); take(cl,1,30); take(man,1,50); }
+  else { take(did,4,60); take(now,3,70); take(cl,2,30); take(man,2,50); }
+  // a short draft with no «DR» anywhere: put the name in the man-line or the close so the review names him
+  let close, closeMust=false;
+  if(size==='short'){ close=say(CLOSE_SHORT[l],U); flags.verdict=true; }
+  else close=closing(l,U,flags);
+  if(size==='short'&&/«DR/.test(close)) closeMust=true;
+  if(close) pieces.push({k:'close',s:close,pri:closeMust?95:40});
+  // fit to size: drop the lowest-priority optional pieces while too long; nothing is added that was not ticked
+  const must=new Set(['open','came']); if(closeMust) must.add('close');
+  let text=()=>pieces.map(p=>p.s).join(' ');
+  const dropRecov=()=>{ if(!pieces.some(p=>p.k==='surg')){ const r=pieces.findIndex(p=>p.k==='recov'); if(r>=0) pieces.splice(r,1); } };
+  dropRecov();
+  if(size==='short'&&wc(text())>hi){ const c=pieces.find(p=>p.k==='close'); if(c){ const sh=CLOSE_SHORT[l].reduce((x,y)=>wc(x)<=wc(y)?x:y); c.s=sh; } }
+  let guard=20;
+  while(wc(text())>hi&&guard--){ const cand=pieces.filter(p=>!must.has(p.k)); if(!cand.length) break; const drop=cand.reduce((a,b)=>a.pri<b.pri?a:b); pieces.splice(pieces.indexOf(drop),1); }
+  // assemble: capitalise, end punctuation, «DR» → the name once then the honorific
+  let out=pieces.map(p=>sent(p.s,l)).join(' ');
+  out=fillDR(out,l,true,size);
+  out=neutralise(out,l);
+  out=out.replace(/(^|[.!?।]\s+)([a-z])/g,(m,a,c)=>a+c.toUpperCase());
+  // typed, not typeset: the last full stop goes sometimes; mix uses '.' or '।' per draft
+  if(l==='mix'&&chance(0.5)) out=out.replace(/।/g,'.');
+  if(chance(l==='en'?0.3:0.5)) out=out.replace(/[।.]\s*$/u,'');
+  // Roman-Hindi spelling, one way per draft
+  if(l==='hi'&&chance(0.4)){ const m=pick([[/([aA])chh/g,'$1ch'],[/([tT])heek/g,'$1hik'],[/([bB])ahut/g,'$1ohot'],[/zaroor/g,'jaroor'],[/([zZ])yada/g,'jyada']]); out=out.replace(m[0],m[1]); }
+  return out.replace(/\s+/g,' ').trim();
+}
+function sentsOf(t){ return t.toLowerCase().replace(/(^|\s)(dr|डॉ)\./g,'$1$2').split(/[।.!?]\s+|\n/).map(s=>s.replace(/[^\p{L}\p{N} ]/gu,'').trim()).filter(s=>s.split(' ').length>=3); }
+function repCount(t){ const m={}; toks(t).forEach(w=>m[w]=(m[w]||0)+1); return Object.values(m).reduce((n,v)=>n+(v>1?v-1:0),0); }
+function mkRevs(){
+  let best=null,bs=1e9;
+  for(let i=0;i<25;i++){
+    USED_SENT=new Set();
+    const r={short:mkOne('short'),medium:mkOne('medium'),long:mkOne('long')};
+    const a=sentsOf(r.short), b=sentsOf(r.medium), c=sentsOf(r.long);
+    const shared=a.filter(s=>b.includes(s)||c.includes(s)).length+b.filter(s=>c.includes(s)).length;
+    const over=Math.max(0,repCount(r.long)-3)+Math.max(0,repCount(r.medium)-3);
+    const order=(wc(r.long)<=wc(r.medium)?5:0)+(wc(r.medium)<=wc(r.short)?5:0);
+    const score=shared*10+over+order;
+    if(score===0) return r;
+    if(score<bs){bs=score;best=r;}
+  }
+  if(best) return best;
+  return {short:mkOne('short'),medium:mkOne('medium'),long:mkOne('long')};
+}
+
+// ── STATE ──
+let sR='self',sL='Hinglish',sP=[],sG=[],sQ=[],sAy=false,sBone=null,sSide=null,sKneeOpts=[];
+const sSurg={};
+
+// ── UI HANDLERS ──
+function setR(b){sR=b.dataset.r;document.querySelectorAll('.rb').forEach(x=>x.classList.toggle('sel',x===b));}
+function setL(b){sL=b.dataset.l;document.querySelectorAll('.lb').forEach(x=>x.classList.toggle('sel',x===b));}
+function togP(b){const id=b.dataset.id;sP.includes(id)?sP=sP.filter(x=>x!==id):sP.length<2&&sP.push(id);refresh();}
+function togG(b){const id=b.dataset.id;sG.includes(id)?sG=sG.filter(x=>x!==id):sG.length<4&&sG.push(id);refresh();}
+function togQ(b){const id=b.dataset.id;sQ.includes(id)?sQ=sQ.filter(x=>x!==id):sQ.length<2&&sQ.push(id);refresh();}
+function togAy(){sAy=!sAy;document.getElementById('aychk').checked=sAy;document.getElementById('aybox').classList.toggle('sel',sAy);}
+function togBone(b){sBone=sBone===b.dataset.id?null:b.dataset.id;document.querySelectorAll('.bnbtn').forEach(x=>x.classList.toggle('sel',x.dataset.id===sBone));hideOut();}
+function togSide(b){sSide=sSide===b.dataset.s?null:b.dataset.s;document.querySelectorAll('.sdbtn').forEach(x=>x.classList.toggle('sel',x.dataset.s===sSide));hideOut();}
+function togSurg(pid,sid){sSurg[pid]=sSurg[pid]===sid?null:sid;document.querySelectorAll('[data-prob="'+pid+'"]').forEach(b=>b.classList.toggle('sel',b.dataset.surg===sSurg[pid]));hideOut();}
+function togKnee(b){const id=b.dataset.id;sKneeOpts.includes(id)?sKneeOpts=sKneeOpts.filter(x=>x!==id):sKneeOpts.length<7&&sKneeOpts.push(id);document.querySelectorAll('.kbtb').forEach(x=>x.classList.toggle('sel',sKneeOpts.includes(x.dataset.id)));hideOut();}
+function hideOut(){document.getElementById('out').style.display='none';}
+
+function buildGrids(){
+  document.getElementById('pgrid').innerHTML=PROBS.map(p=>`<button class="tb ptb" data-id="${p.id}" onclick="togP(this)">${p.lbl}</button>`).join('');
+  document.getElementById('ggrid').innerHTML=GPS.map(g=>`<button class="tb gptb" data-id="${g.id}" onclick="togG(this)">${g.lbl}</button>`).join('');
+  document.getElementById('qgrid').innerHTML=QUALS.map(q=>`<button class="qb" data-id="${q.id}" onclick="togQ(this)">${q.lbl}</button>`).join('');
+}
+
+function renderBoneSection(){
+  const div=document.getElementById('bonediv');
+  if(!sP.some(id=>['fracture','sports'].includes(id))){div.innerHTML='';sBone=null;return;}
+  div.innerHTML=`<div class="card c-bone"><div class="ch"><div class="chl"><div class="ci">📍</div><div><div class="ct">Bone / injury location</div><div class="cs">Optional — adds specificity</div></div></div></div><div class="cb"><div class="g4">${BONES.map(b=>`<button class="bnbtn${sBone===b.id?' sel':''}" data-id="${b.id}" onclick="togBone(this)">${b.lbl}</button>`).join('')}</div></div></div>`;
+}
+function renderSideSection(){
+  const div=document.getElementById('sidediv');
+  if(!sP.some(id=>['fracture','hip_fracture'].includes(id))){div.innerHTML='';sSide=null;return;}
+  div.innerHTML=`<div class="card c-side"><div class="ch"><div class="chl"><div class="ci">↔️</div><div><div class="ct">Side / Laterality</div><div class="cs">Optional</div></div></div></div><div class="cb"><div style="display:flex;gap:8px;"><button class="sdbtn${sSide==='left'?' sel':''}" data-s="left" onclick="togSide(this)">⬅️ Left Side</button><button class="sdbtn${sSide==='right'?' sel':''}" data-s="right" onclick="togSide(this)">➡️ Right Side</button></div></div></div>`;
+}
+function renderSurgSections(){
+  const div=document.getElementById('surgdiv');
+  const rel=sP.filter(id=>SURGERIES[id]);
+  if(!rel.length){div.innerHTML='';return;}
+  div.innerHTML=rel.map(pid=>{
+    const sd=SURGERIES[pid];
+    const opts=sd.opts.map(o=>`<button class="sb" data-prob="${pid}" data-surg="${o.id}" onclick="togSurg('${pid}','${o.id}')"><span class="sb-n">${o.n}</span><span class="sb-s">${o.s}</span></button>`).join('');
+    return `<div class="card c-surg"><div class="ch"><div class="chl"><div class="ci">${sd.icon}</div><div><div class="ct">${sd.lbl}</div><div class="cs">Optional — adds clinical detail to Medium &amp; Long</div></div></div></div><div class="cb"><div class="g2">${opts}</div></div></div>`;
+  }).join('');
+  rel.forEach(pid=>{if(sSurg[pid]){const b=document.querySelector(`[data-prob="${pid}"][data-surg="${sSurg[pid]}"]`);if(b)b.classList.add('sel');}});
+}
+function renderKneeSection(){
+  const div=document.getElementById('kneediv');
+  if(!sP.includes('knee')){div.innerHTML='';sKneeOpts=[];return;}
+  div.innerHTML=`<div class="card c-knee"><div class="ch"><div class="chl"><div class="ci">🦵</div><div><div class="ct">Knee OA treatment plan</div><div class="cs">Select treatments given</div></div></div><span class="cbdg">${sKneeOpts.length} selected</span></div><div class="cb"><div class="g3">${KNEE_OPTS.map(k=>`<button class="kbtb${sKneeOpts.includes(k.id)?' sel':''}" data-id="${k.id}" onclick="togKnee(this)">${k.lbl}</button>`).join('')}</div></div></div>`;
+}
+
+function refresh(){
+  const ft=document.getElementById('freetext').value.trim();
+  document.querySelectorAll('#pgrid .ptb').forEach(b=>{b.classList.toggle('sel',sP.includes(b.dataset.id));b.classList.toggle('dis',!sP.includes(b.dataset.id)&&sP.length>=2);});
+  document.querySelectorAll('#ggrid .gptb').forEach(b=>{b.classList.toggle('sel',sG.includes(b.dataset.id));b.classList.toggle('dis',!sG.includes(b.dataset.id)&&sG.length>=4);});
+  document.querySelectorAll('#qgrid .qb').forEach(b=>{b.classList.toggle('sel',sQ.includes(b.dataset.id));b.classList.toggle('dis',!sQ.includes(b.dataset.id)&&sQ.length>=2);});
+  document.getElementById('pc').textContent=sP.length+' / 2';
+  document.getElementById('gc').textContent=sG.length+' / 4';
+  document.getElementById('qc').textContent=sQ.length+' / 2';
+  renderBoneSection();renderSideSection();renderSurgSections();renderKneeSection();
+  const ok=(sP.length>0||ft.length>0)&&sG.length>0;
+  const gb=document.getElementById('genbtn');
+  gb.className=ok?'ready':'';gb.style.pointerEvents=ok?'auto':'none';
+  document.getElementById('resetbtn').style.display=(sP.length||sG.length||sQ.length||ft||sAy)?'inline-block':'none';
+  hideOut();
+}
+
+function resetAll(){
+  sP=[];sG=[];sQ=[];sAy=false;sBone=null;sSide=null;sKneeOpts=[];
+  Object.keys(sSurg).forEach(k=>delete sSurg[k]);
+  document.getElementById('freetext').value='';
+  document.getElementById('aychk').checked=false;
+  document.getElementById('aybox').classList.remove('sel');
+  document.getElementById('out').style.display='none';
+  refresh();
+}
+
+// ── TEMPLATE ENGINE ──
+// ── GENERATE & DISPLAY ──
+function gen(){
+  const{short,medium,long}=mkRevs();
+  window._origRv=[short,medium,long];
+  const defs=[
+    {lbl:'Short', hint:'one or two lines · up to 20 words', text:short,  bg:'#DCFCE7',col:'#14532D',bc:'#4ADE80'},
+    {lbl:'Medium',hint:'up to 50 words', text:medium, bg:'#DBEAFE',col:'#1E3A8A',bc:'#60A5FA'},
+    {lbl:'Long',  hint:'up to 90 words · the fullest story', text:long,   bg:'#FEF3C7',col:'#78350F',bc:'#FCD34D'},
+  ];
+  document.getElementById('cards').innerHTML=defs.map((d,i)=>`
+    <div class="rc" style="border-top:3px solid ${d.bc};">
+      <div class="rh">
+        <div class="rm"><span class="rbdg" style="background:${d.bg};color:${d.col};border:1px solid ${d.bc};">${d.lbl}</span><span class="rhi">${d.hint}</span></div>
+        <div class="ra">
+          <span class="rch" id="cc${i}">${(d.text||'').length} chars</span>
+          <button class="cpbtn" id="cb${i}" onclick="cp(${i})">⊕ Copy</button>
+          <button class="wabtn" onclick="wa(${i})">${WA_SVG}WhatsApp</button>
+        </div>
+      </div>
+      <div class="edit-hint">✏️ Tap to personalise before sharing</div>
+      <textarea class="rev-ta" id="rt${i}" dir="auto" rows="${i===0?3:i===1?5:8}" oninput="uc(${i})">${esc(d.text||'')}</textarea>
+      <div class="rev-foot">
+        <span class="rev-chars" id="cf${i}">${(d.text||'').length} chars</span>
+        <button class="rev-reset" onclick="rst(${i})">↩ Restore</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('out').style.display='block';
+  document.getElementById('out').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function uc(i){const l=document.getElementById('rt'+i).value.length;document.getElementById('cf'+i).textContent=l+' chars';}
+function rst(i){if(window._origRv){document.getElementById('rt'+i).value=window._origRv[i]||'';uc(i);}}
+function cp(i){
+  const t=document.getElementById('rt'+i).value;
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).catch(()=>{const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();document.execCommand('copy');document.body.removeChild(x);});
+  const b=document.getElementById('cb'+i);b.textContent='✓ Copied!';b.classList.add('done');
+  setTimeout(()=>{b.textContent='⊕ Copy';b.classList.remove('done');},2500);
+}
+function wa(i){window.open('https://wa.me/?text='+encodeURIComponent(document.getElementById('rt'+i).value),'_blank','noopener');}
+
+const WA_SVG=`<svg style="width:14px;height:14px;flex-shrink:0;" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`;
+
+buildGrids();
+</script>
+</body>
+</html>
