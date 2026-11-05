@@ -53,6 +53,8 @@ def spine_db(path, stage=1):
         "EXLAIN A": (12, {d: (12 if d < "2026-11-04" else 0) for d in days}, []),
         "NEXT DAY DROP": (9, {d: (9 if d < "2026-11-05" else 4) for d in days}, []),
         "NIGHT DROP": (7, {d: (7 if d < "2026-11-06" else 2) for d in days}, []),
+        "EARLY CAPTURE": (50, {d: (50 if d < "2026-10-28" else 150 if d == "2026-10-28" else 145) for d in days},
+                          [("2026-10-26", "PURCHASE", 100), ("2026-10-28", "SALE", -5)]),
         "RETURN GEL": (30, {d: (30 if d < "2026-10-30" else 20) for d in days}, [("2026-10-24", "PURCHASE_RETURN", -10)]),
         "ZETA 500": (12, {d: (12 if d < "2026-11-04" else 0) for d in days}, []),
         "Z ETA 500": (0, {d: (0 if d < "2026-11-04" else 12) for d in days}, []),
@@ -140,6 +142,7 @@ with tempfile.TemporaryDirectory() as t:
     check("NOT listed: a rise after the purchase reports' cover (waits)", "LATE RISE CAP" not in R)
     check("NOT listed: a change Amir's filed voucher explains", "VOUCHER GEL" not in R)
     check("NOT listed: a step undone the next closing", "BLIP SYP" not in R)
+    check("NOT listed: a closing printed before the day's sales ended (+5 after a late bill, -5 the next closing)", "EARLY CAPTURE" not in R)
     check("NOT listed: a delivery Marg took in only five closings later (owed, then paid)", "SLOW DELIVERY" not in R)
     # the history is never announced
     col = py("import sqlite3,datetime as dt,owner_notice as O; c=sqlite3.connect(%r); c.row_factory=sqlite3.Row; "

@@ -8,7 +8,7 @@ alert so I open when needed."*
 |---|---|---|---|
 | `/root/finance/owner_notice.py` | 2bc96912 | ca5cd443 | the `hand:` message (08:00–21:00; one per finding run; opens the Expiry watch); the phone line says the clinic Wi-Fi is fine |
 | `/root/finance/expiry_watch.py` | 15417df5 | 1ed95b6c | the top section, collapsed, red "N new" and "N open"; renames apart; put right / explained for 30 days |
-| `/root/finance/marg_hand_change.py` | — | 8d69c55d | NEW: the finder (spine.db + Amir's filed vouchers read-only; its own table `marg_hand_change`) |
+| `/root/finance/marg_hand_change.py` | — | 3b8c2160 | NEW: the finder (spine.db + Amir's filed vouchers read-only; its own table `marg_hand_change`) |
 
 **How a hand change is told apart:** per item, Marg minus the spine's balance minus Amir's filed vouchers, closing by closing. A step is a shift.
 Not a hand change: a purchase (or a purchase return) the system holds that Marg's closing did not have yet (owed, paid by Marg's catch-up); a
@@ -23,12 +23,17 @@ the history: on the page, never announced, never "new". The owner's 05-Nov notes
 Cold review R1 (NOT SAFE: B1 explained rows still told, B2 returns/renames told as falls, B3 voucher read failing open, B4 Sunday exempt) -- all
 built, with S1, S2, S4, S5, S6, S7 (per-day cover), S8 and the overnight batching. Cold review R2 (NOT SAFE until N1: a daytime message
 told again at the next 08:00) -- N1 built with a two-day walk check, N2 (ten days), N3 (the dry run prints the Amir days read), N4 (the
-voucher count by the reader's own rule). Walk 33 ok, control 21 red, 14 of 14 mutants caught.
+voucher count by the reader's own rule). Walk 34 ok, control 21 red, 16 of 16 mutants caught.
+
+R3 -- the live dry run of 05-Nov 11:11 stopped at the noise gate (47 rows, nothing installed): (a) a closing printed before the day's sales
+ended (8-Oct) gives +x then -x after a late bill is paid -- residuals that undo each other within three closings are now dropped; (b) before
+16-Oct count #1's vouchers were being keyed and Marg and the app disagree by days -- hand.from_day 2026-10-16, the owner's 05-Nov table kept
+whole (POWERGESIC's 5-Oct shift stays on the page).
 
 **Install (one server line, after the publish):**
 
     cd /root/deploy/repo && git pull --ff-only && rm -rf /tmp/s706kit && cp -rp /root/deploy/repo/deploy_kits/S706_HAND_CHANGE_WATCH /tmp/s706kit && bash /tmp/s706kit/install_S706_HAND_CHANGE_WATCH.sh
 
-Gates before placing: SUMS, KIT_ID, the window, the live pins, the rebuild from live bytes to the TO pins, the walk (33 ok) on the rebuilt files, the
+Gates before placing: SUMS, KIT_ID, the window, the live pins, the rebuild from live bytes to the TO pins, the walk (34 ok) on the rebuilt files, the
 control (21 red) on the live files, the finder READ-ONLY on the live spine (must find CARTILOX SACHET 3 → 0; at most 40 rows; judged to within 3 days). Restarts
 clinic-finance. Undo is printed. OFF: the setting `hand.on = off`, or `/root/finance/_off/ALL_OFF`.

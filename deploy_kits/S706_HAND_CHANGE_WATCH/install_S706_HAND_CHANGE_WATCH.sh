@@ -33,8 +33,8 @@ for f in $FILES; do TO[$f]="$(awk -v f="$f" '$2==f{print $1}' "$KDIR/TO_PINS.md5
 STAMP="$(date +%Y%m%d_%H%M%S)"
 SCR="${TMPW:-/tmp}/s706_inst_$STAMP"
 PLACED=0; TOOK_LOCK=0
-GREEN="WALK S706: 33 ok, 0 red"
-CONTROL="WALK S706: 12 ok, 21 red"
+GREEN="WALK S706: 34 ok, 0 red"
+CONTROL="WALK S706: 13 ok, 21 red"
 
 m5() { md5sum "$1" 2>/dev/null | awk '{print $1}'; }
 say() { echo "$@"; }

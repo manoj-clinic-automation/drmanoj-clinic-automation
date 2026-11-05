@@ -51,7 +51,7 @@ TOL = 0.5
 
 SETTINGS = (
     ("hand.on", "on", "S706: Marg stock changed with no bill, sale or voucher -- found, kept for the Expiry watch, told next morning (on / off)"),
-    ("hand.from_day", "2026-10-01", "S706: no shift before this day is judged"),
+    ("hand.from_day", "2026-10-16", "S706: no shift before this day is judged (count #1's vouchers were keyed 4-15 Oct; Marg and the app disagree by days before it)"),
     ("hand.new_days", "3", "S706: a row found within this many days counts as NEW on the page's red badge"),
     ("hand.built_seen", "", "S706: the spine build last read (set by the refresh)"),
     ("hand.since", "", "S706: set by the first fill -- rows found then are the history: on the page, never announced"),
@@ -212,7 +212,7 @@ def _filed_count(finance_db):
         return -1
 
 
-def compute(spine_path=SPINE_DB, finance_db=LIVE_DB, from_day="2026-10-01", rules_path=RULES):
+def compute(spine_path=SPINE_DB, finance_db=LIVE_DB, from_day="2026-10-16", rules_path=RULES):
     """-> (rows, info).  Reads only.  rows: dicts k20, item, kind ('hand' | 'rename'), day_from, day_to, marg_from, marg_to, system_moved,
     shift, pair_item, settled.  Raises RuntimeError when Amir's filed vouchers cannot be read (nothing may be judged without them).
     A closing step is JUDGED only when: the sale exports cover every day of its window (an accepted SALE_BILLWISE range -- Sundays too);
@@ -313,6 +313,7 @@ def compute(spine_path=SPINE_DB, finance_db=LIVE_DB, from_day="2026-10-01", rule
                     skip.update((i, j))
                     break
         owed = owed_r = 0.0
+        res = []                                                   # the residual of each step once purchase / return timing is paid
         for i, dlt in steps:
             if i in skip or not sales_ok[i]:
                 continue
@@ -342,7 +343,20 @@ def compute(spine_path=SPINE_DB, finance_db=LIVE_DB, from_day="2026-10-01", rule
                     owed_r += dlt
                     continue
                 judged = pur_ok[i]
-            if d1 < from_day:
+            res.append((i, dlt, judged))
+        gone = set()                                               # S706 R3 (the live dry run of 05-Nov): a closing printed before the day's
+        for x, (i, r, _j) in enumerate(res):                       # sales ended shows +x then -x one closing later -- residuals that undo
+            if i in gone:                                          # each other within three closings are not a change
+                continue
+            for j, rj, _jj in res[x + 1:]:
+                if j > i + 3:
+                    break
+                if j not in gone and abs(r + rj) < TOL:
+                    gone.update((i, j))
+                    break
+        for i, dlt, judged in res:
+            d1 = closings[i]
+            if i in gone or (d1 < from_day and not (K(names.get(k, k)) in NOTES and d1 <= NOTES_TO)):   # the owner's table stays whole
                 continue
             cand.append(dict(k20=k, item=names.get(k, k), day_from=closings[i - 1], day_to=d1, marg_from=m_[i - 1], marg_to=m_[i],
                              system_moved=round(s_[i] - s_[i - 1], 3), shift=dlt, e_before=E[i - 1], e_now=E[-1] if E else 0.0,
@@ -386,7 +400,7 @@ def refresh(con, spine_path=SPINE_DB, finance_db=None, now=None, force=False):
         if finance_db is None:
             finance_db = _main_path(con)
         first = not con.execute("SELECT 1 FROM marg_hand_change LIMIT 1").fetchone() and not setting(con, "hand.since")
-        rows, info = compute(spine_path, finance_db, setting(con, "hand.from_day") or "2026-10-01")
+        rows, info = compute(spine_path, finance_db, setting(con, "hand.from_day") or "2026-10-16")
         now = now or now_ist()
         t = stamp(now)
         found = set()
@@ -517,7 +531,7 @@ def main(argv=None):
         spine = argv[argv.index("--spine") + 1]
     if cmd == "dry":
         con = _connect(db, ro=True)
-        rows, info = compute(spine, db, setting(con, "hand.from_day") or "2026-10-01")
+        rows, info = compute(spine, db, setting(con, "hand.from_day") or "2026-10-16")
         print("S706 dry -- spine built %s; judged to %s; purchases covered to %s; %d closings (%d partial skipped); Amir days read %s; "
               "voucher batches %s" % (info["built"][:16], info["judged_to"], info["last_pur"], info["closings"], info["skipped"],
                                       info["amir_days"], info["vouchers"]))
