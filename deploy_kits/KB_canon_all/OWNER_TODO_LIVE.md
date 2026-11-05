@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S382 close** (the parent), 05-Nov-2026, early morning — the parent's sections refreshed here (WhatsApp: the fresh key in and the replies retried, the fault proven MyOperator's; the recording player live; board R2 to review; the GMB review helper's research next; 385 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S384 close** (the Sanjeevni chat), 05-Nov-2026, early morning — the Sanjeevni sections refreshed here (nine Marg report flows; the October valuation in; 386 reserved for the shareable flows); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S382 close** (the parent), 05-Nov-2026, early morning — the parent's sections refreshed here (WhatsApp: the fresh key in and the replies retried, the fault proven MyOperator's; the recording player live; board R2 to review; the GMB review helper's research next; 385 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S383 close** (the Sanjeevni chat), 03-Nov-2026, noon — the Sanjeevni sections refreshed here (the buying model's step 3 live: the spine's line 198 → 17, your fold in words; 384 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S380 close** (the Sanjeevni chat), 03-Nov-2026, late morning — the Sanjeevni sections refreshed here (you are told when the Marg work is done, Sundays too; Shavez to be told about Sunday's reports on Mondays; 383 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S381 close** (the parent), 02-Nov-2026, evening (placed 03-Nov) — the parent's sections refreshed here (WhatsApp: our software cleared, the fix next as his top priority; Arjun off the register; working without the PC; 382 reserved); the other projects' sections as their closes left them.
@@ -841,37 +842,51 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S383 close (03-Nov, noon)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S384 close (05-Nov, 06:2x)
 
-*Detail: `S383_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_384.md`. The plan of what is left is section 9 of your System Board's plan (steps 0–3 done; step 4 — the switch — is your word). This section supersedes the S380 one below it.*
+*Detail: `S384_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_386.md`. The plan of what is left is section 9 of your System Board's plan (steps 0–3 done; step 4 — the switch — is your word). This section supersedes the S383 one below it.*
 
-**1 · The publish** — this close's record (papers only; nothing follows on the server). The same double-click as always:
+**1 · The publish** — this close's record (papers only; nothing follows on the server):
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Tell Shavez once** (carried): from Monday 9-Nov his page also asks for **Sunday's** sale report and closing stock.
+**2 · The 17 stock differences** — read; one line each was sent to you on 4-Nov. Which ones Amir puts right in Marg is your word (or "leave them").
 
-**3 · Two September payment messages** (carried): A.A. Pharmaceuticals and Deepam Pharma — **Bhejo** beside each if they are not gone:
+**3 · Two September payment messages** (carried; now explained, F-1111): A.A. Pharmaceuticals and Deepam Pharma — handed to the reception phone on 23-Oct and never confirmed. **Bhejo** beside each if they are not gone:
 
 ```
 https://followup.dr-manoj.in/finance/purchase/page/pay/2026-09
 ```
 
-**4 · Scan B-0167 is saved under Yogendra; the paper is Mannat's** (carried): *Dealer badliye: MANNAT PHARMA* (Shavez can do it too):
+**4 · Tell Shavez once** (carried): from Monday 9-Nov his page also asks for **Sunday's** sale report and closing stock.
+
+**5 · Scan B-0167 is saved under Yogendra; the paper is Mannat's** (carried): *Dealer badliye: MANNAT PHARMA* (Shavez can do it too):
 
 ```
 https://followup.dr-manoj.in/finance/porders/s454/track
 ```
 
-**5 · Shivani — the Marg reports-only login ID and password** (carried).
+**6 · Shivani — the Marg reports-only login ID and password** (carried; she is now to be trained as the backup for every Marg report, D827).
 
-**6 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
+**7 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
 
-**Later, your word only:** the buying switch, when the bar is met three weeks running (earliest ~22-Nov) — with one mock-up of Darpan's tab line.
+**Later, your word only:** the buying switch, when the bar is met three weeks running (earliest ~22-Nov) — with one mock-up of Darpan's tab line. Ram Singh's report buttons — once the flows have their own links, you send him the ones to add.
 
-**Still yours from before, not urgent (on your board):** Ram Singh's report buttons (Batch Stock, salt-wise list, item list); the two LINVIZ 600 messages; Flacort 6 / Flemcort 6.
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S384 close
+
+1. **The shareable Marg flows (D827):** one link per flow on followup.dr-manoj.in (no login), a WhatsApp share button, a *Marg reports* tile in the staff logins.
+2. **F-1110:** a refused Marg file says the plain cause (Main Store, the date, M.R.P.) and points to its flow.
+3. **F-1111:** a payment message handed to the phone and never confirmed comes back as *Pending · Bhejo*.
+4. **F-1104:** the 33 of 4-Nov checked at the next nightly copy.
+
+## ✅ DONE AT THE S384 CLOSE — 04 → 05-Nov-2026 (the Sanjeevni project)
+
+- ~~**The S383 record's publish**~~ — landed (4266b29f, 15:25 4-Nov).
+- ~~**The October Stock Valuation**~~ — WHOLE STORES, as on 31-10, Pur. Rate, VERIFIED 04:41 5-Nov.
+- ~~**The Marg report screenshots**~~ — nine flows built (Stock Valuation, Batch Stock, Salt list, Item list, Category list, Purchase bill-wise, Purchase item-wise, Order sheet, the two daily reports).
+- ~~**"Reception mobile not sending order WhatsApps"**~~ — answered: the phone is well; *WhatsApp all* not tapped since 20-Oct.
 
 ## ✅ DONE AT THE S383 CLOSE — 03-Nov-2026 (the Sanjeevni project)
 
