@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S383 close** (the Sanjeevni chat), 03-Nov-2026, noon — the Sanjeevni sections refreshed here (the buying model's step 3 live: the spine's line 198 → 17, your fold in words; 384 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S382 close** (the parent), 05-Nov-2026, early morning — the parent's sections refreshed here (WhatsApp: the fresh key in and the replies retried, the fault proven MyOperator's; the recording player live; board R2 to review; the GMB review helper's research next; 385 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S383 close** (the Sanjeevni chat), 03-Nov-2026, noon — the Sanjeevni sections refreshed here (the buying model's step 3 live: the spine's line 198 → 17, your fold in words; 384 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S380 close** (the Sanjeevni chat), 03-Nov-2026, late morning — the Sanjeevni sections refreshed here (you are told when the Marg work is done, Sundays too; Shavez to be told about Sunday's reports on Mondays; 383 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S381 close** (the parent), 02-Nov-2026, evening (placed 03-Nov) — the parent's sections refreshed here (WhatsApp: our software cleared, the fix next as his top priority; Arjun off the register; working without the PC; 382 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S379 close** (the parent), 02-Nov-2026, midday — the parent's sections refreshed here (the Call Console rebuilt in his approved look and live; the doubled rows' cause fixed and the call sheet repaired; his "build" for S701 in a fresh chat awaited; October's amber lines, the film log's opening boxes, the packs page and two answers wait on him; 381 reserved); the other projects' sections as their closes left them.
@@ -340,7 +341,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S381 close (02-Nov, 18:2x; placed 03-Nov)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S382 close (05-Nov, 05:2x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -350,27 +351,21 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH — one double-click.** It carries the S381 record (papers only). Nothing follows it.
+**1 · THE PUBLISH — one double-click.** It carries the S382 record (papers only). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · THE WHATSAPP FIX (your top priority) — in the next chat:** when it asks, press *Regenerate* on the panel's API page and paste the one server line it gives you. It puts the fresh key everywhere on the server and tests it first.
+**2 · MYOPERATOR (ticket 691386) — their written cause and a fix date.** Proven on 3 Nov: a brand-new key, the old key and a made-up key are refused identically, so the fault is in their system. Ask Khushi for their API team. Once fixed, the waiting replies go out by themselves.
 
-```
-https://in.app.myoperator.com/integrations/developer-api/whatsapp
-```
-
-**2a · ARJUN'S FINGERPRINT — delete it at the attendance machine** (Menu → User Management → Arjun → Delete). He is already off the register from 1 Oct.
-
-**2b · MYOPERATOR (ticket 691386):** if they have not written the cause by 3 Nov, ask Khushi for a call with their API technical team. Every refusal and its request ID is already on the ticket.
-
-**2c · "BUILD" FOR S701** — after the WhatsApp fix: the WhatsApps into each caller's timeline, the follow-up list cleaned up, Call ke baad, Needs you. A mock-up of the WhatsApp rows first.
+**2a · THE CALL CONSOLE'S NEXT UPDATE — look at board R2 and say "build" or what to change.** Today's follow-ups, one row per patient, who called whom, Call ke baad, the old WhatsApp follow-ups page replaced.
 
 ```
 https://claude.ai/artifact/AwBDzfttkYPygGVcrQbTfD
 ```
+
+**2b · ARJUN'S FINGERPRINT — delete it at the attendance machine** (Menu → User Management → Arjun → Delete), if not done. He is off the register from 1 Oct.
 
 **3 · OCTOBER, ON YOUR MONTH PAGE — the amber lines are yours:** the one Sanjeevni day waiting · the purchases finalise (4 bills marked Wrong first) · October's *Check it → Lock it* · the attendance approval when reception and Shavez have done theirs, then the salary lock · the pack by 10 Nov.
 
@@ -422,26 +417,34 @@ https://claude.ai/artifact/H5W1T3WPNm85t2peTnNnfP
 https://followup.dr-manoj.in/portal/users
 ```
 
-**14 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** **15 · THE RECEPTION PC'S WINDOWS** — your decision. **16 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → 9-Sep**, into `D:\Downloads`. **17 · THE ARMS LICENCE — submit in November.** **18 · THE ALERT for an unknown caller unreached for an hour** (ntfy to Shavez and you) — your yes; the console now knows who is unreached. **19 · "CLEAR IT"** — if you want the old working copies (about 2 GB, earlier sessions' scratch) removed from the cloud workspace linked to your PC; the safety check stopped me doing it without your word.
+**14 · THE ACCOUNTANT PACKS — *Send*, when each pack is ready.** **15 · THE RECEPTION PC'S WINDOWS** — your decision. **16 · THE DOCTERZ *CLINICAL DATA REPORT*, 2022 → 9-Sep**, into `D:\Downloads`. **17 · THE ARMS LICENCE — submit in November.** **18 · THE ALERT for an unknown caller unreached for an hour** (ntfy to Shavez and you) — your yes. **19 · "CLEAR IT"** — if you want the old working copies (about 2 GB, earlier sessions' scratch) removed from the cloud workspace linked to your PC. **20 · THE IPD REMOVE BUTTONS** (a Remove on each implant row, the message inside the case) — only when you ask.
 
-**WHEN IT HAPPENS — not a duty:** a WhatsApp reply showing *MyOperator busy — retrying* (leave it) · a red *NOT delivered* or *May have gone — check* (open that chat and look before sending again) · a `[WA send refused — being retried]` or `[WA send NOT delivered]` mail · a patient's WhatsApp alert (tap it and the chat opens) · a phone line saying the server fixed (or could not fix) a part · **the first real *Call (IVR)* from an IPD case** · **the first real ankle consent and spelling correction** · **the film log's first order line** (it opens a WhatsApp to Nigam; check the count before sending) · **a line "not matching Docterz" on your X-ray & procedures page** (ask Shavez about that slip) · **the first implant bill on the Implant bills desk, and the first DTH cheque** (write it on its own; tie its bills when you know them) · **on the 1st of a month your X-ray & procedures page opens on the new, empty month** — pick last month · **an amber or rose line on your console** — it is yours; the line opens the page · **a rose row on the Call Console** — a caller nobody has reached; the arrow icons say what happened, the call button rings them.
+**WHEN IT HAPPENS — not a duty:** a WhatsApp reply showing *MyOperator busy — retrying* (leave it; it now keeps trying until the patient's 24-hour window closes) · a red *NOT delivered* or *May have gone — check* (open that chat and look before sending again) · a `[WA send refused — being retried]` or `[WA send NOT delivered]` mail · a patient's WhatsApp alert · a phone line saying the server fixed (or could not fix) a part · **the first real *Call (IVR)* from an IPD case** · **the first real ankle consent and spelling correction** · **the film log's first order line** · **a line "not matching Docterz" on your X-ray & procedures page** · **the first implant bill on the Implant bills desk, and the first DTH cheque** · **on the 1st of a month your X-ray & procedures page opens on the new, empty month** — pick last month · **an amber or rose line on your console** · **a rose row on the Call Console** — a caller nobody has reached · **a recording on the Call Console** — the player opens at the foot of the screen.
 
-**Staff's, not yours (watched by me at each open):** the morning film count (reception; Shavez from 11:00); reception's attendance corrections and Shavez's check (from the 1st); Shavez's implant bill entries and scans on the desk; Darpan's expiry clear-out (one old line) and the home-medicines count from 25-Nov; October's slip corrections on Shavez's desk; X-ray 1421 *chhoota* on 27-Oct.
+**Staff's, not yours (watched by me at each open):** the morning film count (reception; Shavez from 11:00); reception's attendance corrections and Shavez's check; Shavez's implant bill entries and scans on the desk (a wrong implant: choose it, tap *wrong entry*, *Remove*); Darpan's expiry clear-out and the home-medicines count from 25-Nov; October's slip corrections on Shavez's desk.
 
-**Parked at your word, and not raised by me again:** as at the S354 close. **Deferred at your word:** the evening same-day check · the daily Docterz feedback · the register+slips pack (D789) · disregarding Docterz's payment mode (D790) · *plaster / slab now* in the consent (D809) · a Done tick (D816) · a portal tile for Darpan's owner page (the month page is its door).
+**Parked at your word, and not raised by me again:** as at the S354 close. **Deferred at your word:** the evening same-day check · the daily Docterz feedback · the register+slips pack (D789) · disregarding Docterz's payment mode (D790) · *plaster / slab now* in the consent (D809) · a Done tick (D816) · a portal tile for Darpan's owner page · the IPD remove buttons.
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-0. **The WhatsApp fix (your top priority):** a fresh key written everywhere on the server and tested first; the inbox retrying until the patient's 24-hour window closes; the alert mails showing only the last 4 digits. Then your publish file taking in my uploads first (D823), and the repository made private once the server's pull is proven safe.
-1. **S701 — the WhatsApps into each person's timeline, on your "build"** (your rules: a reply or a real call of 30 s+ within 2 clinic hours answers a WhatsApp; a missed call only a call), the follow-up list cleaned to one open row per patient, Call ke baad, Needs you, the two small display notes from this session (the "missed → reached" icon when the caller rang back; the digest's build time) — and the audit's small fixes (the health mail's "last 24 h", the WhatsApp/call count check). A mock-up of the WhatsApp rows first.
-2. **S702 — the Staff performance section** (each person's card: answered, missed, made, callbacks, WhatsApps, not logged, staff ≠ AI, with recordings and your review buttons; their own card on Aaj ka kaam). **S703 — Patients on your command console** (a mock-up first).
-3. **At the next open:** the 03-Nov bundle must carry S698's three files; the call-hook's journal read once (v3.2, no "no longer holds" line); the console's day count against the sheet once more. Then watch the console's new look, The month's *Other papers* and the film log; "no amount read" on the month page (F-1085) in the next month-page kit.
-4. **Read the Implant bills desk on the first real IPD case.** **The Hostinger update** when its fix is out. **IPD kit 5** once the hospital explains the credit charges (D808). **Kit 6, after discharge.**
-5. **Your board item of 27-Oct still open:** the Clinic Gist's earlier days.
-6. **MyOperator's written cause** (ticket 691386). **October's attendance correction** (8 staff, 41 days, Arjun off).
-7. **Zerodha** · **the Tally check** · **Union Bank** · **the Sanjeevni GST returns** · AF-16 · AF-19 · the audit's own channel (two small nightly files).
+0. **The Google review helper (D826, your brief of 5 Nov):** research how patients around Bareilly actually write doctor reviews — their words, the Hindi–English mix, how they begin and end — then one final plan with sample reviews for you to read; the page changes only on your OK.
+1. **The Call Console's build A, on your word after board R2:** today's follow-ups, one row per patient with who called, Call ke baad, the WhatsApps in each person's timeline, the arrow fix, the old WhatsApp follow-ups page replaced, the count checks.
+2. **WhatsApp after MyOperator's fix:** check the waiting replies went out; the new key into the DailyClinicReports Apps Script; a *Stop retrying* button in the next inbox kit. Then your publish file taking in my uploads first (D823), and the repository made private once the server's pull is proven safe.
+3. **Staff performance** (one card per person) · **Patients on your command console** (a mock-up first).
+4. **Watch** the console's new look, The month's *Other papers* and the film log; "no amount read" on the month page (F-1085) in the next month-page kit; the Implant bills desk on the first real IPD case; **the Hostinger update**; **IPD kit 5** once the hospital explains the credit charges; **kit 6**.
+5. **Your board item of 27-Oct still open:** the Clinic Gist's earlier days. **October's attendance correction** (8 staff, 41 days).
+6. **Zerodha** · **the Tally check** · **Union Bank** · **the Sanjeevni GST returns** · AF-16 · AF-19 · the audit's own channel.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S382 CLOSE — 03 → 05-Nov-2026 (the parent)
+
+- **WhatsApp:** a fresh MyOperator key in every holder on the server; refused replies now retry until the patient's 24-hour window closes (S701). The fault proven MyOperator's: a new, the old and a made-up key refused alike; the evidence on ticket 691386.
+- **The Call Console's recording player** live (S703): Loading…, progress bar, time, pause, tap-to-jump, a plain error line.
+- **The imports checked:** Docterz and the follow-up files arrived and were processed (37 of 37 green on 3 Nov).
+- **Board R2** drawn for the Call Console's next update.
+- **Shavez's wrong-implant removal** explained, with his steps.
+- **The Google review helper** reworked as a preview (four languages, no "osteoarthritis", repeats halved); your brief for the final version recorded (D826).
 
 ## ✅ DONE AT THE S381 CLOSE — 02-Nov-2026 (the parent)
 
