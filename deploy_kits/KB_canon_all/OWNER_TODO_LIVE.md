@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S384 close** (the Sanjeevni chat), 05-Nov-2026, early morning — the Sanjeevni sections refreshed here (nine Marg report flows; the October valuation in; 386 reserved for the shareable flows); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S386 close** (the Sanjeevni chat), 05-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the stock differences explained; the hand-change watch live; 387 reserved for the shareable flows with Shivani's own login); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S384 close** (the Sanjeevni chat), 05-Nov-2026, early morning — the Sanjeevni sections refreshed here (nine Marg report flows; the October valuation in; 386 reserved for the shareable flows); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S382 close** (the parent), 05-Nov-2026, early morning — the parent's sections refreshed here (WhatsApp: the fresh key in and the replies retried, the fault proven MyOperator's; the recording player live; board R2 to review; the GMB review helper's research next; 385 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S383 close** (the Sanjeevni chat), 03-Nov-2026, noon — the Sanjeevni sections refreshed here (the buying model's step 3 live: the spine's line 198 → 17, your fold in words; 384 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S380 close** (the Sanjeevni chat), 03-Nov-2026, late morning — the Sanjeevni sections refreshed here (you are told when the Marg work is done, Sundays too; Shavez to be told about Sunday's reports on Mondays; 383 reserved); the other projects' sections as their closes left them.
@@ -842,9 +843,9 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S384 close (05-Nov, 06:2x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S386 close (05-Nov, 13:1x)
 
-*Detail: `S384_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_386.md`. The plan of what is left is section 9 of your System Board's plan (steps 0–3 done; step 4 — the switch — is your word). This section supersedes the S383 one below it.*
+*Detail: `S386_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_387.md`. The plan of what is left is section 9 of your System Board's plan (steps 0–3 done; step 4 — the switch — is your word). This section supersedes the S384 one below it.*
 
 **1 · The publish** — this close's record (papers only; nothing follows on the server):
 
@@ -852,34 +853,36 @@ The full list: `claude/S288_PENDING_LIST.md`.
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · The 17 stock differences** — read; one line each was sent to you on 4-Nov. Which ones Amir puts right in Marg is your word (or "leave them").
-
-**3 · Two September payment messages** (carried; now explained, F-1111): A.A. Pharmaceuticals and Deepam Pharma — handed to the reception phone on 23-Oct and never confirmed. **Bhejo** beside each if they are not gone:
+**2 · The stock differences — "count them"** when you want the shelf to decide: one server line puts the 13 at the top of Darpan's next morning count. The list with why and remedy is on top of your Expiry watch:
 
 ```
-https://followup.dr-manoj.in/finance/purchase/page/pay/2026-09
+https://followup.dr-manoj.in/finance/sanjeevni/expiry
 ```
 
-**4 · Tell Shavez once** (carried): from Monday 9-Nov his page also asks for **Sunday's** sale report and closing stock.
+**3 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
 
-**5 · Scan B-0167 is saved under Yogendra; the paper is Mannat's** (carried): *Dealer badliye: MANNAT PHARMA* (Shavez can do it too):
+**4 · Tell Shavez once** (carried; you said ok): from Monday 9-Nov his page also asks for **Sunday's** sale report and closing stock.
 
-```
-https://followup.dr-manoj.in/finance/porders/s454/track
-```
-
-**6 · Shivani — the Marg reports-only login ID and password** (carried; she is now to be trained as the backup for every Marg report, D827).
-
-**7 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
+**5 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
 
 **Later, your word only:** the buying switch, when the bar is met three weeks running (earliest ~22-Nov) — with one mock-up of Darpan's tab line. Ram Singh's report buttons — once the flows have their own links, you send him the ones to add.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S384 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S386 close
 
-1. **The shareable Marg flows (D827):** one link per flow on followup.dr-manoj.in (no login), a WhatsApp share button, a *Marg reports* tile in the staff logins.
-2. **F-1110:** a refused Marg file says the plain cause (Main Store, the date, M.R.P.) and points to its flow.
-3. **F-1111:** a payment message handed to the phone and never confirmed comes back as *Pending · Bhejo*.
-4. **F-1104:** the 33 of 4-Nov checked at the next nightly copy.
+1. **The shareable Marg flows (D827) with Shivani in her own app login (D830):** one link per flow (no login), a WhatsApp share button, a *Marg reports* tile in the staff logins; the server's confirmation to her and a message to you when a report is made.
+2. **The tracking page's redesign (D830) — a mock-up first:** collapsible sections, PC and mobile, pick the good scan of a double, the good scans visible after deleting the blurry / cut ones.
+3. **The hand-change watch's first night** (S706) and THIO Q AP (F-1114) at the next nightly copy.
+4. **F-1110** — a refused Marg file says the plain cause and points to its flow.
+
+## ✅ DONE AT THE S386 CLOSE — 05-Nov-2026 (the Sanjeevni project)
+
+- ~~**The S384 record's publish**~~ — landed (d8044bdd, 08:38 5-Nov).
+- ~~**The 17 stock differences — "a proper list, why, and the remedy"**~~ — read by S705 and given 09:5x: 32 a late-keyed delivery (settled), THIO Q AP open, the 17 with why and remedy; now on top of your Expiry watch.
+- ~~**"Unauthorised changes without my knowledge?"**~~ — answered: ten changed by hand 24–25 Oct, no voucher; S706 LIVE — told the next morning, item, days and quantities (D828).
+- ~~**Two September payment messages**~~ — dropped at your word (D829).
+- ~~**Shivani's Marg login**~~ — becomes her own app login with the server's confirmation and your message (D830; the next build).
+- ~~**Scan B-0167 under Yogendra**~~ — done by you. ~~**Kedar: Flemcort for Flacort**~~ — your word with him, done.
+- ~~**Reception phone on charge, unlocked, data on**~~ — told; it stays on the clinic Wi-Fi, which is fine (the silence message now says so).
 
 ## ✅ DONE AT THE S384 CLOSE — 04 → 05-Nov-2026 (the Sanjeevni project)
 
