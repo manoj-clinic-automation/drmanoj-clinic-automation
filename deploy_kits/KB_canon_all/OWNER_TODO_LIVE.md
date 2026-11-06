@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S390 close** (the parent), 06-Nov-2026, evening — the parent's sections refreshed here (staff 20 put right and Arjun Dev set up; the petty statement; Bhati's backfill and reception's physiotherapy slips; the salary approvals tied to their figures; Zerodha and Union Bank in the accountants' pack; the nightly waits for Drive; 394 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S393 close** (the Sanjeevni chat), 06-Nov-2026, evening — the Sanjeevni sections refreshed here (the alarms live; the purchase pairing part 1 and the step view live; 396 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S392 close** (the Scan App project), 06-Nov-2026, evening — the Scan App sections refreshed here (its 395 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S390 close** (the parent), 06-Nov-2026, evening — the parent's sections refreshed here (staff 20 put right and Arjun Dev set up; the petty statement; Bhati's backfill and reception's physiotherapy slips; the salary approvals tied to their figures; Zerodha and Union Bank in the accountants' pack; the nightly waits for Drive; 394 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S391 close** (the Sanjeevni chat), 06-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the purchase reconciliation flow agreed and planned; nothing built; 393 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S363 close** (the Scan App project), 06-Nov-2026, midday — the Scan App sections refreshed here (its 392 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S388 close** (the Sanjeevni chat), 06-Nov-2026, midday — the Sanjeevni sections refreshed here (the wrong-dealer card, the Marg report pages and each report's last good file live; the morning's outage explained — messages that reach you are the next build; 391 reserved); the other projects' sections as their closes left them.
@@ -183,32 +185,32 @@
 - The Diwali gift sticker sheet (A4, 8 per sheet) made.
 - Two project-only papers copied to the disk store.
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S363 close (06-Nov, midday)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S392 close (06-Nov, evening)
 
-*Detail: `S363_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_392.md`. The same lines are on your System Board.*
+*Detail: `S392_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_395.md`. The same lines are on your System Board.*
 
-**1 · The publish:** it carries this close's record. Papers only; S715 is live.
+**1 · The publish:** it carries this close's record. Papers only; S731 and S732 are live.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · B-0250 (the Variety challan of 05-Nov)** — sort it on the new desk: VARIETY STATIONERS from the list, the number and date, one line per item with its quantity and Clinic or NK.
-
-```
-https://followup.dr-manoj.in/scanapp/desk?open=B-0250
-```
-
-**3 · Variety's phone on the Vendors page** — then the statement's *Send on WhatsApp* button works.
+**2 · Variety's phone on the Vendors page** — then the statement's *Send on WhatsApp* button works.
 
 ```
 https://followup.dr-manoj.in/scanapp/vendors
 ```
 
-**4 · Settle with Variety:** separate challans for the clinic and NK when they can; they bill against your monthly statement.
+**3 · Settle with Variety:** separate challans for the clinic and NK when they can; they bill against your monthly statement.
 
 ```
 https://followup.dr-manoj.in/scanapp/stationery
+```
+
+**4 · The X-ray film log's opening boxes** (the clinic chat's page): the spare boxes on the shelf, so the order line is right.
+
+```
+https://followup.dr-manoj.in/finance/slips/film/log
 ```
 
 **5 · A shelf count for each product (Y157)** on your Procedure room page. **6 · Examination gloves (Y145):** pairs in a box, 50 or 100? **7 · The new Surgiwear drape (Y146):** its name.
@@ -221,22 +223,28 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 **9 · Yuvika's May 2026 slips (Y147).** **10 · The lab consumables bills from April 2026 (Y136).** **11 · The battery bills still missing (Y120)** — the Vento's, the DTH lab's UPS battery, the second AC's. **12 · Fujifilm's tax invoice for the AMC (Y121)** — when it comes.
 
-**Not urgent:** *Machine pages* and *Batteries* for Shavez on the *Switches* card; Y83 (the Janitor's renewal list). **When you want them:** X-ray film lines and Others lines on the desk (D838's second part).
+**Not urgent:** *Machine pages* and *Batteries* for Shavez on the *Switches* card; Y83 (the Janitor's renewal list).
 
 **Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S363 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S392 close (D845, in your order)
 
 **Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat (D765).**
 
-1. **Why B-0250 was not read (F-1136)** — from the server's own record; only the fix the cause needs.
-2. **The new desk in use** — read live after the first papers are sorted on it.
-3. **X-ray film and Others lines on the desk** — when you say (D838's second part).
-4. **The Variety flow's first month:** the statement made, sent, their bill joined.
-5. **The procedure goods flow** (Yuvika's challans) — when you say. **Recent scans by scan date** — a mock-up when you ask. **The NK share into NK's accounts.**
-6. **Small points from the reviews** (S715's, S651's, S633's) — only when a later kit touches those files. **D720, when you ask.**
+1. **The Variety flow's first month** — checked end to end on the live page; only a gap found is built.
+2. **Recent scans by scan date** — a mock-up for you first.
+3. **Yuvika's goods to the Procedure room panel** — a kit, shown to you before install.
+4. **The NK share into NK's accounts** — a plan for the clinic chat and the NK Pathology chat.
+5. **Small points from the reviews** (S715's, S651's, S633's) — only when a later kit touches those files. **D720, when you ask.**
 
 **Waits by your word:** the clinic's bills in the accountants' pack.
+
+## ✅ DONE AT THE S392 CLOSE — 06-Nov-2026 (the Scan App project)
+
+- ~~**The S363 record's publish**~~ — landed 16:31 IST 06-Nov.
+- ~~**B-0250 (the Variety challan of 05-Nov)**~~ — sorted on the new desk: three Clinic lines dated 05-Nov, on Variety's account.
+- ~~**Why B-0250 was never read (F-1136)**~~ — a challan on the Other-document lane was never sent to Claude; fixed by S731 (live 17:1x IST): challans read on any lane; a never-read paper read once after its sort.
+- ~~**X-ray film and Others lines on the desk (D838's second part)**~~ — the Others lines live 17:5x IST (S732); the X-ray film lines not needed (D844).
 
 ## ✅ DONE AT THE S363 CLOSE — 04 → 06-Nov-2026 (the Scan App project)
 
@@ -936,9 +944,9 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S391 close (06-Nov, 14:1x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S393 close (06-Nov, 18:1x)
 
-*Detail: `S391_BUILD_BRIEF.md`; the plan agreed with you: `S391_PURCHASE_RECONCILE_PLAN.md`; the next chat's entry is `START_HERE_SESSION_393.md`. This section supersedes the S388 one below it.*
+*Detail: `S393_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_396.md`. This section supersedes the S391 one below it.*
 
 **1 · The publish** — this close's record only (nothing follows on the server):
 
@@ -946,7 +954,11 @@ The full list: `claude/S288_PENDING_LIST.md`.
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · "Go" for the first reconciliation build** — the matching fix, every rupee shown, reception's scan list and your step-by-step view (a mock-up first).
+**2 · Look at your new step view** whenever you like (October is the month to clear):
+
+```
+https://followup.dr-manoj.in/finance/purchase/page/check
+```
 
 **3 · B-0239** — on the order list, tap the right dealer (A.A. PHARMACEUTICALS) on its card, as you said:
 
@@ -966,11 +978,17 @@ https://followup.dr-manoj.in/finance/flows
 
 **Later, your word only:** "count them" for the stock differences; the buying switch (earliest ~22-Nov); a second network for the medical PC only if its LAN fails again (D837).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S391 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S393 close
 
-1. **The purchase reconciliation, kit 1 (on your "go"):** bills matched on number and date (never by amount alone across months); every rupee shown; September, October and November re-checked; reception's daily scan list; your step-by-step view. Then Amir's corrections, returns, supplier summaries and the lock.
-2. **Messages that reach you (F-1134):** the report alarms in the clinic app; *Medical PC offline / back* — when you say.
-3. **The next server copy:** the eleven installs confirmed; Amir's visit since 4-Nov read.
+1. **Reception's list** (kit 1, part 2 — the mock you approved): *Dobara scan karo* straight from the server, two tries, then you and Shavez; *Scan karo*; one-tap questions naming the field. Your step view's row 3 renamed *Differences* (F-1154); *Second look* gets its buttons.
+2. **Then, each on your "go":** Amir's corrections in his app; returns (Janta 21965 first); supplier summaries, the month lock and the one bulk NEFT (the server builds the month's statements, D849).
+3. **The next server copy:** this close's six installs and the ten older ones confirmed.
+
+## ✅ DONE AT THE S393 CLOSE — 06-Nov-2026 (the Sanjeevni project)
+
+- ~~**Messages that reach you (F-1134)**~~ — the morning-report alarms now come to your clinic app; *Medical PC offline / back* is live (the medical PC checks in every 5 minutes since 15:15). Your test message arrived.
+- ~~**"Go" for the first reconciliation build — part 1**~~ — bills paired on number and date first; the wrong links undone (Kedar A000213, Janta JP23217; the two papers out of September on your yes); every rupee shown; Deepam 641 to a second look; Shraddha 10480 not settled; your step view live.
+- ~~**The S391 publish**~~ — landed.
 
 ## ✅ DONE AT THE S391 CLOSE — 06-Nov-2026 (the Sanjeevni project)
 
