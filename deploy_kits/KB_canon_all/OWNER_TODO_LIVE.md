@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S391 close** (the Sanjeevni chat), 06-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the purchase reconciliation flow agreed and planned; nothing built; 393 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S390 close** (the parent), 06-Nov-2026, evening — the parent's sections refreshed here (staff 20 put right and Arjun Dev set up; the petty statement; Bhati's backfill and reception's physiotherapy slips; the salary approvals tied to their figures; Zerodha and Union Bank in the accountants' pack; the nightly waits for Drive; 394 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S391 close** (the Sanjeevni chat), 06-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the purchase reconciliation flow agreed and planned; nothing built; 393 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S363 close** (the Scan App project), 06-Nov-2026, midday — the Scan App sections refreshed here (its 392 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S388 close** (the Sanjeevni chat), 06-Nov-2026, midday — the Sanjeevni sections refreshed here (the wrong-dealer card, the Marg report pages and each report's last good file live; the morning's outage explained — messages that reach you are the next build; 391 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S389 close** (the parent), 06-Nov-2026, midday — the parent's sections refreshed here (the Add staff form fixed; the Google review page keeps your drafts and edits and shows what patients say; Arjun Dev set up next session — my mistake on staff 20; Google Drive on manojz; 390 reserved); the other projects' sections as their closes left them.
@@ -355,7 +356,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S389 close (06-Nov, 12:xx)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S390 close (06-Nov, 17:xx)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -365,17 +366,21 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the S389 record (papers only). Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries the S390 record (papers only). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · GOOGLE DRIVE ON MANOJZ: open it from the Start menu, and sign in if asked.** The nightly of 6 Nov found no Drive, so it could not bring in that night's server copy.
+**2 · THE PACKS PAGE: type the Zerodha password** (Dr Bhawna's statement of transactions opens by itself), **name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
-**3 · ARJUN DEV, THE CLEANER: in the next session.** My mistake this session: I changed the pay of staff number 20 "Arjun" (who left on 30 Sep) instead of setting up Arjun Dev. The next chat puts number 20 right and fills Arjun Dev's details. **Yours then:** his finger on the attendance machine when asked, and one answer: number 20 is still on October's locked sheet at ₹570; is that to be paid or recovered?
+```
+https://followup.dr-manoj.in/finance/packs
+```
 
-**4 · OCTOBER'S STAFF LEDGER: close it, if not done.** October's salary is locked (you, 6 Nov 07:19). Step 5 on the ledger page is your button.
+**3 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20); enrol Arjun Dev's finger, then tell me — I do the link step.
+
+**4 · OCTOBER'S STAFF LEDGER: close it, if not done.** Step 5 on the ledger page is your button.
 
 ```
 https://followup.dr-manoj.in/ledger/salary?m=2026-10
@@ -383,17 +388,13 @@ https://followup.dr-manoj.in/ledger/salary?m=2026-10
 
 **5 · MYOPERATOR (ticket 691386): their written cause and a fix date** (Khushi). Once it is fixed, the waiting replies go out by themselves.
 
-**6 · THE CALL CONSOLE'S NEXT UPDATE: look at board R2 and say "build" or what to change.**
+**6 · THE CALL CONSOLE'S NEXT UPDATE: when you want it,** look at board R2 and say "build" or what to change.
 
 ```
 https://claude.ai/artifact/AwBDzfttkYPygGVcrQbTfD
 ```
 
-**7 · OCTOBER, ON YOUR MONTH PAGE: the amber lines are yours.**
-- the one Sanjeevni day waiting;
-- the purchases to finalise (4 bills marked Wrong first);
-- October's *Check it → Lock it*;
-- the pack, by 10 Nov.
+**7 · OCTOBER, ON YOUR MONTH PAGE: the amber lines are yours** (the one Sanjeevni day waiting; the purchases to finalise; *Check it → Lock it*; the pack, by 10 Nov).
 
 ```
 https://followup.dr-manoj.in/finance/console/month
@@ -405,29 +406,23 @@ https://followup.dr-manoj.in/finance/console/month
 https://followup.dr-manoj.in/finance/slips/film/log
 ```
 
-**9 · THE PACKS PAGE: name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
-
-```
-https://followup.dr-manoj.in/finance/packs
-```
-
-**10 · TWO ANSWERS, one line each:**
+**9 · TWO ANSWERS, one line each:**
 - slip …1449 (31-Oct) has two ILI KNEE lines with no side: both knees, or a double entry?
 - two look-alike wrist lines on your rate page (₹800 and ₹500): is one an old leftover?
 
-**11 · THE TWO FINANCE PASSWORDS shown in chat on 21-Aug: change them** (board Y106).
+**10 · THE TWO FINANCE PASSWORDS shown in chat on 21-Aug: change them** (board Y106).
 
-**11a · YOUR SHARE % FOR IPD CASES.** One number in IPD cases' Settings.
+**10a · YOUR SHARE % FOR IPD CASES.** One number in IPD cases' Settings.
 
 ```
 https://followup.dr-manoj.in/finance/surgery/settings
 ```
 
-**11b · THE HOSPITAL: how it fills the credit cases' charges.** Kit 5 waits for it.
+**10b · THE HOSPITAL: how it fills the credit cases' charges.** Kit 5 waits for it.
 
-**11c · A WHATSAPP TEMPLATE FOR AFTER-DISCHARGE MESSAGES**, when you decide the schedule.
+**10c · A WHATSAPP TEMPLATE FOR AFTER-DISCHARGE MESSAGES**, when you decide the schedule.
 
-**12 · THE MARG ENGINEER: test-restore Marg's automatic backup.**
+**11 · THE MARG ENGINEER: test-restore Marg's automatic backup.**
 
 **IF THE PORTAL STOPS:** the first steps run by themselves, and your guide says what already ran:
 
@@ -437,10 +432,11 @@ https://claude.ai/artifact/H5W1T3WPNm85t2peTnNnfP
 
 **LATER — none of these is urgent**
 
+- **12 · The Union Bank passbooks:** when printed, scan to a PDF, add on the packs page, tap whose.
 - **13 · The Hostinger server update** (one line from me when the fix is out).
 - **14 · Bhati's app:** say when.
 - **15 · The SBI downloads** for September's pack.
-- **16 · Raghav:** the Zerodha papers.
+- **16 · Raghav:** your own Zerodha statement of transactions.
 - **17 · Ranjeet's login:** the password is yours to set.
 
 ```
@@ -456,7 +452,7 @@ https://followup.dr-manoj.in/portal/users
 - **24 · The IPD remove buttons:** only when you ask.
 
 **WHEN IT HAPPENS — not a duty:**
-- a patient asks for help with a Google review: on the GMB page, **press ✓ Shared after you hand a draft over**, so your edits teach the drafts; "What patients say" sits below the drafts;
+- a patient asks for help with a Google review: on the GMB page, **press ✓ Shared after you hand a draft over**;
 - a WhatsApp reply showing *MyOperator busy — retrying* (leave it);
 - a red *NOT delivered* or *May have gone — check*;
 - a `[WA send refused — being retried]` or `[WA send NOT delivered]` mail;
@@ -469,14 +465,16 @@ https://followup.dr-manoj.in/portal/users
 - the first implant bill and DTH cheque;
 - on the 1st of a month, the X-ray & procedures page opening on the new month;
 - an amber or rose line on your console;
-- a rose row or a recording on the Call Console.
+- a rose row or a recording on the Call Console;
+- a salary sheet saying "approved — figures changed since": approve it again.
 
 **Staff's, not yours (watched by me at each open):**
 - the morning film count;
 - reception's attendance corrections and Shavez's check;
 - Shavez's implant bill entries;
 - Darpan's expiry clear-out, and the home-medicines count from 25-Nov;
-- October's slip corrections.
+- October's slip corrections;
+- Bhati's October home visits (the backfill); reception's physiotherapy clinic slips.
 
 **Parked at your word, and not raised by me again:** as at the S354 close.
 
@@ -488,7 +486,8 @@ https://followup.dr-manoj.in/portal/users
 - *plaster / slab now* in the consent (D809);
 - a Done tick (D816);
 - a portal tile for Darpan's owner page;
-- the IPD remove buttons.
+- the IPD remove buttons;
+- the call console's build (06-Nov: "not now").
 
 **Dropped at your word:**
 - "which review drafts got posted", and a newest-reviews panel (D832);
@@ -496,16 +495,28 @@ https://followup.dr-manoj.in/portal/users
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-0. **Arjun Dev set up and staff 20 put right** (F-1131, F-1132): first, in the next session.
-1. **The saved review drafts into the backups** (F-1129).
-2. **October's sheets read "approved 5 Oct 20:49"** before October had run (F-1128): find out why, one line to you.
-3. **The review reading on 19 Nov** (D836): read-only, worked out on your PC; the page then shows the trend.
-4. **The Call Console's build A**, on your word after board R2.
-5. **WhatsApp after MyOperator's fix** · your publish file taking in my uploads first (D823).
-6. **Staff performance** · **Patients on your command console** (a mock-up first) · the watches (F-1085, the IPD desk, the Hostinger update, IPD kits 5 and 6).
-7. **Zerodha** · **the Tally check** · **Union Bank** · **the Sanjeevni GST returns** · AF-16 · AF-19.
+0. **The nightly's copy of the server** (F-1124): read at the next open whether the Drive wait brought it.
+1. **Arjun Dev's link step**, when his finger is on the machine; **staff 20's exit steps** your word covers.
+2. **An exit never leaves a machine code live** (F-1147).
+3. **The review reading on 19 Nov** (D836): read-only, worked out on your PC.
+4. **The packs page reads a statement's head only from its head** (F-1148).
+5. **The Call Console's build A**, on your word after board R2.
+6. **WhatsApp after MyOperator's fix** · your publish file taking in my uploads first (D823).
+7. **Staff performance** · **Patients on your command console** (a mock-up first) · the watches (F-1085, the IPD desk, the Hostinger update, IPD kits 5 and 6).
+8. **The Tally check** · **the Sanjeevni GST returns** · AF-16 · AF-19.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S390 CLOSE — 06-Nov-2026 (the parent)
+
+- **Staff 20 Arjun** inactive from October, his pay put back, his machine number 20 retired (S718, S725). **Arjun Dev** set up as the cleaner; his finger waits.
+- **The saved review drafts are in the nightly backup** (S719).
+- **The petty book's month statement**, with expenses accrued, and your tap for Dr Bhawna (S720).
+- **Bhati's home-visit backfill; reception writes physiotherapy clinic slips** (S721).
+- **The PC set-up kits kept current by the nightly** (S723).
+- **The salary flow opens on the month just ended; an approval holds only while its figures hold; a locked month stays quiet** (S724, S727).
+- **The Zerodha papers in the accountants' pack**, quarterly (S728); **the Union Bank passbooks**, half-yearly (S729).
+- **The nightly waits for Google Drive and catches up in the morning** (S730). The yellow triangle was Drive's logo.
 
 ## ✅ DONE AT THE S389 CLOSE — 06-Nov-2026 (the parent)
 
