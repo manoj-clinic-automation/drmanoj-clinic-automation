@@ -184,9 +184,15 @@ def autolink_ok(cx, s, b, bills, undo=False, before=None):
     The paper's date (no date read: the scan day) is in the bill's calendar month; no OTHER bill of that supplier (scanned or not, any
     state) within HINT_DAYS of the scan carries an amount within Rs 1 of the scan's; the read bill number and the read date do not differ.
     The number: 'differ' (billno_compat) always contradicts; 'close' (one digit off) does not take an existing link apart (undo=True) but
-    is not enough for a NEW pair (reception is asked). before (the undo only): only bills dated on or before it count as 'another bill'."""
+    is not enough for a NEW pair (reception is asked). before (the undo only): only bills dated on or before it count as 'another bill'.
+    A number that AGREES, with the amount within Rs 1 and the supplier agreeing, is the same bill: OK, the date and same-amount tests skipped."""
     a = agree(cx, s, b)
     bcmp = billno_compat(s.get("bill_no"), b["bill_no"])
+    sp0 = scan_amount(cx, s)
+    if (bcmp == "agree" and sp0 not in (None, 0) and abs(int(sp0) - int(b["amount_p"] or 0)) <= 100
+            and supplier(cx, s.get("vendor"), b["supplier"], cx.chosen.get(int(s["id"]))) == "agree"):
+        return True, ""                                            # the number, the amount and the supplier agree: the same bill -- a misread
+        #                                                            date or an older bill of the same amount never takes it apart
     if bcmp == "differ" or (bcmp == "close" and not undo):      # S726: Marg's number written another way is not a contradiction
         return False, "the scan's bill number reads %s%s" % (str(s.get("bill_no") or "").strip()[:30] or "otherwise",
                                                              " (one digit off: a question, not a pair by itself)" if bcmp == "close" else "")

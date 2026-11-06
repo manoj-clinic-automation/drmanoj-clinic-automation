@@ -107,14 +107,15 @@ BILLS = {
     "R06": ("R06", "77627", "2026-10-10", 1106),
     "R07": ("R07", "11086", "2026-10-11", 1107),
     "R08": ("R08", "JP23217", "2026-10-12", 1108),
-    "R09": ("R09", "A000209", "2026-10-20", 1109),
+    "R09": ("R09", "A000209", "2026-10-31", 1109),
+    "R03old": ("R03", "59341", "2026-08-09", 1103),                               # 59 days before GPPPL3679039, the same amount
 }
 # scan key: (id, stamp, supplier read, bill no read, date read, total read, created_at UTC)
 SCANS = {
     "sK2": (150, "B-0150", "K", "A000190", "2026-10-02", "7400", "2026-10-03 05:00:00"),
     "sK3": (155, "B-0155", "K", "A000201", "2026-10-05", "7400", "2026-10-06 05:00:00"),
     "sK1": (161, "B-0161", "K", "A000213", "2026-10-08", "7400", "2026-10-09 05:00:00"),
-    "sK4": (202, "B-0202", "K", "A000223", "2026-10-20", "7400", "2026-10-21 05:00:00"),
+    "sK4": (202, "B-0202", "K", "A000223", "2026-10-21", "7400", "2026-10-22 05:00:00"),
     "sA": (224, "B-0224", "A", "487", "2026-10-14", "5000", "2026-10-15 05:00:00"),
     "sB": (247, "B-0247", "B", "A017456", "2026-11-02", "1597", "2026-11-03 05:00:00"),
     "sS": (130, "B-0130", "S", "3688", "2026-10-10", "7979", "2026-10-11 05:00:00"),
@@ -171,7 +172,7 @@ LINKS = [("K2", "sK2", "EXACT", "verified"), ("K3", "sK3", "EXACT", "verified"),
          ("T1", "sT", "AUTO", "auto_link (S454 5)"), ("U9", "sU9", "AUTO", "auto_link (S454 5)"),
          ("VX", "sVX", "AUTO", "auto_link (S454 5)"), ("NX", "sNX", "AUTO", "auto_link (S454 5)")]
 LINKS += [(k, "s" + k, "AUTO", "auto_link (S454 5)") for k in ("R01", "R02", "R03", "R04", "R05", "R06", "R07", "R08", "R09")]
-REAL = [('R01', '90058', 'RT-490058', '2026-10-05', '2026-10-05', 1101, True), ('R02', 'GPPL2678591', 'GPPL-26-78591', '2026-10-06', '2026-10-06', 1102, True), ('R03', 'GPPPL3679039', 'GPPPL-36-79039', '2026-10-07', '2026-10-07', 1103, True), ('R04', 'YS0706202627', 'YS/0706/2026-27', '2026-10-08', '2026-10-08', 1104, True), ('R05', '1692', 'A011692', '2026-10-09', '2026-10-09', 1105, True), ('R06', '77627', 'GPPL/24-77527', '2026-10-10', '2026-10-10', 1106, True), ('R07', '11086', 'A011986', '2026-10-11', '2026-10-11', 1107, True), ('R08', 'JP23217', 'JPT20207', '2026-10-12', '2026-10-12', 1108, False), ('R09', 'A000209', 'A000209', '2026-10-20', '2026-11-01', 1109, False)]                            # fails the rule, but August is final: kept
+REAL = [('R01', '90058', 'RT-490058', '2026-10-05', '2026-10-05', 1101, True), ('R02', 'GPPL2678591', 'GPPL-26-78591', '2026-10-06', '2026-10-06', 1102, True), ('R03', 'GPPPL3679039', 'GPPPL-36-79039', '2026-10-07', '2026-10-07', 1103, True), ('R04', 'YS0706202627', 'YS/0706/2026-27', '2026-10-08', '2026-10-08', 1104, True), ('R05', '1692', 'A011692', '2026-10-09', '2026-10-09', 1105, True), ('R06', '77627', 'GPPL/24-77527', '2026-10-10', '2026-10-10', 1106, True), ('R07', '11086', 'A011986', '2026-10-11', '2026-10-11', 1107, True), ('R08', 'JP23217', 'JPT20207', '2026-10-12', '2026-10-12', 1108, False), ('R09', 'A000209', 'A000209', '2026-10-31', '2026-11-01', 1109, True)]                            # fails the rule, but August is final: kept
 BID = {k: i for i, k in enumerate(sorted(BILLS), 1)}
 SID = {k: v[0] for k, v in SCANS.items()}
 
@@ -339,7 +340,7 @@ ck("2 Bass A017456's November paper is no longer tied to September's 14538", lin
 au = [dict(r) for r in con.execute("SELECT action, ref, detail FROM purchase_audit WHERE action='auto_link_undone'")]
 note = "owner 06-Nov 17:20: frees a counted paper from a finalised month"
 nd = {x["ref"]: x["detail"] or "" for x in au}
-ck("2 six audit rows 'auto_link_undone', kit S726 (Kedar, A.A., Bass, JP23217, A000209, Tulsi)", len(au) == 6 and all('"kit": "S726"' in (x["detail"] or "") for x in au))
+ck("2 five audit rows 'auto_link_undone', kit S726 (Kedar, A.A., Bass, JP23217, Tulsi)", len(au) == 5 and all('"kit": "S726"' in (x["detail"] or "") for x in au))
 ck("2 a September-only AUTO link that fails the new rule is left untouched (Septimus 777 <- B-0090)", link("P1")[:2] == (90, "AUTO"))
 ck("2 a correct same-month unique AUTO link is kept (Unique 901 <- B-0180)", link("Q1")[:2] == (180, "AUTO"), False)
 ck("1 a new same-month unique scan still pairs by itself (Unique 905 <- B-0181, AUTO)", link("Q2")[:2] == (181, "AUTO"), False)
@@ -380,7 +381,13 @@ ck("3 September: Vega 61 (Rs 5 apart) raises no amount question", (st9.get(str(S
 ck("1 bill number + date (+ supplier) pair first, whatever the totals: Orion 1201 <- B-0190 (PROBABLE, S726)", link("O1")[0] == 190 and link("O1")[1] == "PROBABLE"
    and "S726" in link("O1")[2])
 ck("1 ... but a number and a day with no supplier read, the totals apart, are not paired by themselves (Orion 1400)", link("X1")[0] is None, False)
-ck("the pass says how many links it undid", res.get("undone") == 6)
+ck("the pass says how many links it undid", res.get("undone") == 5)
+ck("real shape: GPPPL3679039 <- 'GPPPL-36-79039' with an older same-amount bill (59341, 59 days before): the number agrees -- KEPT",
+   link("R03")[:2] == (SID["sR03"], "AUTO"))
+ck("real shape: A000209 <- 'A000209', the date read 01-Nov against the bill's 31-Oct (a misread): the number agrees -- KEPT",
+   link("R09")[:2] == (SID["sR09"], "AUTO"))
+ck("real shape: A000213 <- 'A000223' (one digit off), the date read 21-Oct against 08-Oct: UNDONE",
+   link("K1")[0] != 202 and con.execute("SELECT COUNT(*) FROM purchase_audit WHERE action='auto_link_undone' AND ref=?", (str(BID["K1"]),)).fetchone()[0] == 1)
 ck("final-month shape: A.A. 415 (finalised September) <- #224 (an October paper) is undone, with the owner's note",
    link("A1")[0] is None and note in nd.get(str(BID["A1"]), ""))
 ck("final-month shape: Bass 14538 (finalised September) <- #247 (a November paper) is undone, with the owner's note",

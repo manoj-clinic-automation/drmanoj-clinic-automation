@@ -1,7 +1,7 @@
 aa4f8d62f531a91bf61762e98b30886d  ./KIT_ID.txt
-1ae78fb4d5d76ab37e8c672de31b643f  ./README.md
-619cc1c9809bb7f268130872cc12bc99  ./TO_PINS.md5
+f6311f414d90690a92c9193acfc3caa9  ./README.md
+399de61d07540c34bd8d0820b03ed5e9  ./TO_PINS.md5
 6440bdc279d1e9a53af8d038d832b185  ./install_S726_PURCHASE_RULES.sh
-c73d0c0b00465ed326c49cf1299c7fb6  ./make_s726.py
+8c5595a29edd8397b5559f79714abd69  ./make_s726.py
 eeaad2d0f26553a7b2a37ecd14b886eb  ./proof_s726.py
-09a39a8611398d152306638aef1b5d0e  ./walk_s726.py
+af5a5d731abfdf19edc8ca37d8933a9f  ./walk_s726.py
