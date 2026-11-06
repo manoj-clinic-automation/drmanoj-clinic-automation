@@ -1,0 +1,12 @@
+{"taken_on": "2026-11-05",
+ "data": {"ours_n": 167, "else_n": 146, "ours_low_pct": 9.0,
+  "themes": [
+   {"name": "Staff tone", "ours": 6.6, "else": 8.2},
+   {"name": "X-ray and test charges", "ours": 4.8, "else": 2.1},
+   {"name": "Bills and fees", "ours": 4.2, "else": 5.5},
+   {"name": "Waiting", "ours": 3.0, "else": 2.7},
+   {"name": "Treatment did not work", "ours": 1.2, "else": 0.7},
+   {"name": "Doctor did not listen", "ours": 0.0, "else": 0.0}],
+  "words": ["tried elsewhere", "hospitalized", "broke", "fell", "slipped", "badly", "bike", "in pieces", "walking normally", "backache", "brother", "expenses", "thigh", "forearm", "backbone", "painlessly"],
+  "sources": ["Our own listing", "Dr Praveen Agarwal (Jaipur Ortho)", "Dr Abhishek Singh", "RG Hospital", "Shri Siddhi Vinayak Hospital", "Dr Mohit Gupta"],
+  "note": "The 5 Nov reading: complaints counted in the 1★ and 2★ reviews only, and only the newest reviews of the other listings. From the next reading every review is read."}}

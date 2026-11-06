@@ -298,3 +298,8 @@ _scratch/
 # S619 (22-Oct-2026; line added when PUBLISH_ALL refused at 13:3x IST): the kit's DUTY_MAP.json (v19: reception.order_arrival rewritten,
 # shavez.order_followup added) that its walk and installer ran with (in SUMS.md5). No number (the gate read it). Exact path.
 !deploy_kits/S619_ORDER_TRACKER/DUTY_MAP.json
+
+# S388 (the Sanjeevni chat, 06-Nov 11:4x IST) for the parent's kit S717_GMB_WATCH: its installer seeds the store from
+# seed_s717.json (the 5-Nov GMB reading: percentages, theme names, public listing names -- no phone number, no patient,
+# no secret; NO_PHONE_NUMBERS clean). The blanket *.json rule hid it and PUBLISH_ALL refused (11:23 IST). This one file only.
+!deploy_kits/S717_GMB_WATCH/seed_s717.json
