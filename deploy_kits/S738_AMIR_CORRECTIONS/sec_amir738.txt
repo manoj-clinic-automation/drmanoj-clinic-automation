@@ -1,0 +1,125 @@
+
+
+
+# ---- S738 (06-Nov-2026, Sanjeevni session 396, kit S738_AMIR_CORRECTIONS; D839, D840; the owner's OK 21:28 IST on the mock) -------------
+#  "Purchase bill Marg mein theek karein" on the Marg sudhar card: every correction scan_register.s738_fixes gives (the paper reads less
+#  than Marg / more -- with the paper's lines Marg lacks when they add up / entered twice), each with the bill date and "Kaagaz dekhiye"
+#  (/finance/purchase/api/s738/scan/<id>, the scan inline). His line (step 6's tick), proved only by his own export: Marg = the paper and
+#  the line leaves by itself. settle() keeps scan_register's s738_fix in step (only when the list itself was read). A green line counts
+#  the corrections his exports proved in the last 14 days. A back-to-top link on every page (no JavaScript: href '#').
+KIT_S738 = "S738_AMIR_CORRECTIONS"
+_state_before_s738 = state
+
+
+def state(cx, day, who="", step=None, owner=False):           # noqa: F811
+    S = _state_before_s738(cx, day, who, step, owner)
+    S.s738, S.s738_ok, S.s738_proved = [], False, 0
+    try:
+        import scan_register as SR                             # noqa: PLC0415
+        S.s738 = SR.s738_fixes(cx)
+        S.s738_ok = True
+        cut = (datetime.now(IST).replace(tzinfo=None) - timedelta(days=14)).replace(microsecond=0).isoformat()
+        S.s738_proved = sum(1 for t in SR.s738_tracked(cx).values() if t.get("settled_at") and str(t["settled_at"]) >= cut)
+    except Exception as e:                                     # noqa: BLE001 -- his day never waits on it
+        print("amir_day S738: the corrections could not be read: %s" % str(e)[:200], file=sys.stderr)
+    _derive(S)
+    return S
+
+
+def _s738_rs(p):
+    if p is None:
+        return _rupees(p)
+    p = int(p)
+    whole = _rupees(abs(p) - abs(p) % 100)
+    return ("-" if p < 0 else "") + (whole if abs(p) % 100 == 0 else "%s.%02d" % (whole, abs(p) % 100))
+
+
+def _s738_card(fx):
+    out = []
+    for f in fx:
+        nos = f.get("numbers") or [f["bill_no"]]
+        head = "<div class=who>%s &middot; Bill %s</div><div style='font-size:15px'><b>Bill ki tareekh: %s</b></div>" % (
+            _esc(f["supplier"]), _esc(nos[0] if f["kind"] == "double" else f["bill_no"]), _esc(_ddmmyyyy(f["date"])))
+        if f["kind"] == "less":
+            body = ("<div style='font-size:15px'>Marg mein &#8377;%s &middot; kaagaz par &#8377;%s &mdash; <b class=bad>&#8377;%s kam</b></div>"
+                    "<p class=good><b>Marg mein bill &#8377;%s kijiye</b></p>"
+                    % (_esc(_s738_rs(f["marg_p"])), _esc(_s738_rs(f["paper_p"])), _esc(_s738_rs(abs(f["diff_p"]))), _esc(_s738_rs(f["paper_p"]))))
+        elif f["kind"] == "more":
+            if f.get("items"):
+                lines = "".join("<div>%s &middot; %s &middot; &#8377;%s</div>" % (_esc(i.get("name")), _esc(i.get("qty") if i.get("qty") not in (None, "") else "-"),
+                                                                             _esc(_s738_rs(i.get("amount_p")))) for i in f["items"])
+                body = ("<div style='font-size:15px'>Marg mein &#8377;%s &middot; kaagaz par &#8377;%s &mdash; <b class=bad>&#8377;%s zyada</b></div>"
+                        "<p>Bill par yeh item hain, Marg mein nahi:</p><div class=band>%s</div>"
+                        "<p class=good><b>Bill par wapsi likhi ho to: poora bill aur purchase return. Warna: yeh line Marg mein jodiye.</b></p>"
+                        % (_esc(_s738_rs(f["marg_p"])), _esc(_s738_rs(f["paper_p"])), _esc(_s738_rs(f["diff_p"])), lines))
+            else:
+                body = ("<div style='font-size:15px'>Marg mein &#8377;%s &middot; kaagaz par &#8377;%s &mdash; <b class=bad>&#8377;%s zyada</b></div>"
+                        "<p class=good><b>Bill ke item Marg se milaiye. Bill par wapsi likhi ho to: poora bill aur purchase return. "
+                        "Warna: chhooti line Marg mein jodiye.</b></p>"
+                        % (_esc(_s738_rs(f["marg_p"])), _esc(_s738_rs(f["paper_p"])), _esc(_s738_rs(f["diff_p"]))))
+        else:
+            body = ("<div style='font-size:15px'>Yeh bill Marg mein do baar hai (Bill %s)</div><p class=good><b>Marg mein ek entry hataiye</b></p>"
+                    % _esc(" aur ".join(nos)))
+        link = ("<a class='btn plain' style='display:inline-block;width:auto;margin:0' href='/finance/purchase/api/s738/scan/%d' target=_blank "
+                "rel=noopener>Kaagaz dekhiye</a>" % int(f["scan"])
+                if f.get("scan") is not None else "")
+        out.append("<div class=bill data-s738='%d'>%s%s%s</div>" % (int(f["bill_id"]), head, body, link))
+    return ("<div class=line id=s738><span class=big>Purchase bill Marg mein theek karein &middot; %d</span>"
+            "<p class=sub>Har bill ka kaagaz saath mein hai. Marg mein kaagaz jaisa kijiye.</p>%s"
+            "<p class=sub style='background:#eef0f4;border-radius:8px;padding:8px'>Theek karne ke baad aaj ki report export (step 4) kijiye &mdash; "
+            "Marg mein sahi aate hi line khud hat jayegi.</p></div>" % (len(fx), "".join(out)))
+
+
+_card_rows_before_s738 = _card_rows
+
+
+def _card_rows(S):                                            # noqa: F811
+    rows = _card_rows_before_s738(S)
+    fx = getattr(S, "s738", None) or []
+    add = []
+    if fx:
+        add.append(("s738", _s738_card(fx), "purchase bill corrections: %d" % len(fx), True))
+    n = int(getattr(S, "s738_proved", 0) or 0)
+    if n:
+        add.append(("s738ok", "<div class=line><span class=good>Pichhli visit ke sudhar Marg mein mil gaye &#10003; &middot; %d</span></div>" % n, "", False))
+    if not add:
+        return rows
+    at = 0
+    for i, r in enumerate(rows):
+        if r[0] in ("stage", "sunday", "fixes", "scans"):
+            at = i + 1
+    return rows[:at] + add + rows[at:]
+
+
+_settle_before_s738 = settle
+
+
+def settle(cx, S, needs_you=False):                           # noqa: F811
+    out = _settle_before_s738(cx, S, needs_you)
+    if getattr(S, "s738_ok", False):
+        try:
+            import scan_register as SR                         # noqa: PLC0415
+            try:
+                new, proved = SR.s738_sync(cx, S.s738)
+            except Exception:                                  # noqa: BLE001
+                cx.rollback()
+                raise
+            if proved:                                         # this very read proved some: the green line says so at once
+                cut = (datetime.now(IST).replace(tzinfo=None) - timedelta(days=14)).replace(microsecond=0).isoformat()
+                S.s738_proved = sum(1 for t in SR.s738_tracked(cx).values() if t.get("settled_at") and str(t["settled_at"]) >= cut)
+                _derive(S)
+        except Exception as e:                                 # noqa: BLE001
+            print("amir_day S738: the corrections could not be kept: %s" % str(e)[:200], file=sys.stderr)
+    return out
+
+
+_shell_before_s738 = _shell
+
+
+def _shell(title, body, head_extra=""):                       # noqa: F811 -- S738: back to the top, no JavaScript
+    page = _shell_before_s738(title, body, head_extra)
+    up = ("<a href='#' id=s738up aria-label='Upar jaiye' style='position:fixed;right:16px;bottom:16px;width:52px;height:52px;border-radius:26px;"
+          "background:var(--accent);color:#fff;font-size:24px;font-weight:800;display:flex;align-items:center;justify-content:center;"
+          "text-decoration:none;z-index:70'>&#8593;</a>")
+    return page.replace("</body>", up + "</body>", 1)
+# ---- S738 end ---------------------------------------------------------------------------------------------------------------------------

@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S394 close** (the parent), 06-Nov-2026, evening — the parent's sections refreshed here (an exit retires its machine number; statement heads end at their first row; the System Board by area; 397 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S395 close** (the Scan App project), 06-Nov-2026, evening — the Scan App sections refreshed here (its 398 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S394 close** (the parent), 06-Nov-2026, evening — the parent's sections refreshed here (an exit retires its machine number; statement heads end at their first row; the System Board by area; 397 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S393 close** (the Sanjeevni chat), 06-Nov-2026, evening — the Sanjeevni sections refreshed here (the alarms live; the purchase pairing part 1 and the step view live; 396 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S392 close** (the Scan App project), 06-Nov-2026, evening — the Scan App sections refreshed here (its 395 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S390 close** (the parent), 06-Nov-2026, evening — the parent's sections refreshed here (staff 20 put right and Arjun Dev set up; the petty statement; Bhati's backfill and reception's physiotherapy slips; the salary approvals tied to their figures; Zerodha and Union Bank in the accountants' pack; the nightly waits for Drive; 394 reserved); the other projects' sections as their closes left them.
@@ -186,26 +187,26 @@
 - The Diwali gift sticker sheet (A4, 8 per sheet) made.
 - Two project-only papers copied to the disk store.
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S392 close (06-Nov, evening)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S395 close (06-Nov, evening)
 
-*Detail: `S392_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_395.md`. The same lines are on your System Board.*
+*Detail: `S395_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_398.md`. The same lines are on your System Board.*
 
-**1 · The publish:** it carries this close's record. Papers only; S731 and S732 are live.
+**1 · The publish:** it carries this close's record. Papers only; S735 and S737 are live.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Variety's phone on the Vendors page** — then the statement's *Send on WhatsApp* button works.
-
-```
-https://followup.dr-manoj.in/scanapp/vendors
-```
-
-**3 · Settle with Variety:** separate challans for the clinic and NK when they can; they bill against your monthly statement.
+**2 · October's statement to Variety:** *Make October 2026's statement* (16 lines on 7 papers) → *Send on WhatsApp* → *Mark sent*. When their bill comes: *Join their bill*, then *Paid*.
 
 ```
 https://followup.dr-manoj.in/scanapp/stationery
+```
+
+**3 · Recent scans by scan date — when you want it:** Admin → *Recent scans by scan date* → Switch ON.
+
+```
+https://followup.dr-manoj.in/scanapp/admin
 ```
 
 **4 · The X-ray film log's opening boxes** (the clinic chat's page): the spare boxes on the shelf, so the order line is right.
@@ -228,17 +229,25 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 **Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S392 close (D845, in your order)
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S395 close
 
 **Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat (D765).**
 
-1. **The Variety flow's first month** — checked end to end on the live page; only a gap found is built.
-2. **Recent scans by scan date** — a mock-up for you first.
-3. **Yuvika's goods to the Procedure room panel** — a kit, shown to you before install.
+1. **What you did on the Stationery page** — read live; only a gap found is built.
+2. **The desk and Variety's challans (F-1159) with Yuvika's goods to the Procedure room panel** — one kit, a mock-up for you first.
+3. **The product box on the Stationery page (F-1160)** — a searchable list.
 4. **The NK share into NK's accounts** — a plan for the clinic chat and the NK Pathology chat.
-5. **Small points from the reviews** (S715's, S651's, S633's) — only when a later kit touches those files. **D720, when you ask.**
+5. **Small points from the reviews** (S715's, S737's, S651's, S633's) — only when a later kit touches those files. **D720, when you ask.**
 
 **Waits by your word:** the clinic's bills in the accountants' pack.
+
+## ✅ DONE AT THE S395 CLOSE — 06-Nov-2026 (the Scan App project)
+
+- ~~**The S392 record's publish**~~ — landed 19:07 IST 06-Nov.
+- ~~**Variety's phone on the Vendors page**~~ — it is there (read live).
+- ~~**The Variety flow's first month, checked**~~ — no statement had been made and only this month's was offered; S735 (live 19:59 IST) offers the month just ended first. Your six old challans are unpaid (D851).
+- ~~**B-0235 (challan 2727 of 26-Oct)**~~ — it was on neither page; your line at 21:07 IST brought it in; sorted NK. October: 16 lines on 7 papers.
+- ~~**Recent scans by scan date**~~ — your FINAL at 20:24; built and installed switched off (S737, 20:40 IST).
 
 ## ✅ DONE AT THE S392 CLOSE — 06-Nov-2026 (the Scan App project)
 

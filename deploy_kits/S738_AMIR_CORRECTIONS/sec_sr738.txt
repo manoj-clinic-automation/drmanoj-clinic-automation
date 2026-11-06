@@ -1,0 +1,427 @@
+
+
+
+# ---- S738 (06-Nov-2026, Sanjeevni session 396, kit S738_AMIR_CORRECTIONS; D839, D840; the owner's OK 21:28 IST on the mock
+#      https://claude.ai/artifact/8wUuc5o8bNUp19xWRFdtXs) ----------------------------------------------------------------------------------
+#  AMIR'S CORRECTIONS. s738_fixes(con): every bill of a COUNTED month whose register line is "Amir: a Marg correction" -- one item each,
+#  worded by kind:
+#    less    the paper reads LESS than Marg: "Marg mein bill <paper> kijiye".
+#    more    the paper reads MORE than Marg: the scan's item lines Marg's entry of that bill does not carry (matched by quantity + rate, a
+#            learnt name or an akin name) -- listed ONLY when they add up to the difference (within max(Rs 2, 1%)); either way the do line
+#            names both roads (a return written on the bill: the full bill + a purchase return; else the missing lines), as the plan's
+#            section 3 gives Amir the paper beside him.
+#    double  the bill entered twice in Marg: "Marg mein ek entry hataiye".
+#  Proof is ONLY his own export: a line leaves when the register no longer puts it on Amir (Marg = the paper). s738_sync(con, fixes) keeps
+#  s738_fix (bill_id, kind, first_seen, last_seen, settled_at, settled_export, gone_at): first seen, still seen, settled (with the newest
+#  bill-wise export's arrival) or gone (no longer a counted line for another reason). Called from Amir's own page (amir_day.settle -- that
+#  file's only write on a read); the owner's step view only READS it.
+#  THE OWNER'S STEP VIEW (PC first, his changes 21:23-21:27): each line of rows 1-5 that has a scan carries the bill date, the scan's stamp
+#  and a FOLDED "Show scan" -- opened, the scan itself (a lazy iframe / image from /finance/purchase/api/s738/scan/<id>) beside what the
+#  scan read against Marg (supplier, bill no., date, total) and the paper amount given; row 3 says for each line whose it is and since when,
+#  and lists a correction Amir's export proved with its date (not counted). A back-to-top button. On a wide screen each line is a row of
+#  columns; on a phone it stays one card per line.
+KIT_S738 = "S738_AMIR_CORRECTIONS"
+S738_DDL = ("CREATE TABLE IF NOT EXISTS s738_fix (bill_id INTEGER PRIMARY KEY, kind TEXT, month TEXT, first_seen TEXT NOT NULL, last_seen TEXT, "
+            "settled_at TEXT, settled_export TEXT, gone_at TEXT, marg_p INTEGER)")
+S738_NOT_ITEM = re.compile(r"\b(FREIGHT|CARTAGE|ROUND|ROUNDING|DISCOUNT|DISC|GST|CGST|SGST|IGST|TAX|TOTAL|ADJ|ADJUST|LESS|CESS|CHARGES?|POSTAGE)\b", re.I)
+
+
+def _s738_counted_months(con):
+    v = setting(con, "purchase.register_from", "2026-10-01")
+    first = max(v[:7] if re.match(r"^\d{4}-\d\d", v) else "2026-10", "2026-10")
+    try:
+        final = {str(r[0]) for r in con.execute("SELECT month FROM purchase_month WHERE status='final'")}
+    except sqlite3.Error:
+        final = set()
+    ms = [m for m in months_with_bills(con, 24) if m >= first and month_class(con, m) == "counted" and m not in final]
+    return sorted(ms)
+
+
+def _s738_scan_items(sid):
+    """The scan's own item lines (claude_reading, the good reading) -- assets.db READ ONLY. [] when none."""
+    acon = _pa()._assets_con()
+    if acon is None:
+        return []
+    try:
+        r = acon.execute("SELECT data FROM claude_reading WHERE bill_id=? AND ok=1 ORDER BY rowid DESC LIMIT 1", (int(sid),)).fetchone()
+    except sqlite3.Error:
+        r = None
+    finally:
+        acon.close()
+    try:
+        data = json.loads(r[0]) if r and r[0] else {}
+    except ValueError:
+        data = {}
+    return [i for i in (data.get("items") or []) if isinstance(i, dict)]
+
+
+def _s738_missing(con, bill, sid, diff_p):
+    """The scan's lines Marg's entry of this bill does not carry -- only when they add up to the paper's extra (diff_p > 0)."""
+    try:
+        import item_check as IC                               # noqa: PLC0415 -- beside this file, read only
+    except Exception:                                         # noqa: BLE001
+        return []
+    items = _s738_scan_items(sid)
+    if not items:
+        return []
+    try:
+        ml = IC.marg_lines(con, bill)
+    except Exception:                                         # noqa: BLE001
+        return []
+    paired = {id(a) for a, _b in IC.pairs_of(items, ml)} if ml else set()
+    learnt = {}
+    try:
+        for r in con.execute("SELECT scan_norm, marg_item FROM s454_item_name WHERE supplier_norm=?", (bill.get("supplier_norm"),)):
+            learnt[str(r[0])] = str(r[1])
+    except sqlite3.Error:
+        pass
+    marg_names = [str(l.get("item") or "") for l in ml]
+    paired_m = {id(b) for _a, b in IC.pairs_of(items, ml)} if ml else set()
+    for l in ml:                                              # every Marg line must be accounted for on the paper (paired or akin)
+        if id(l) not in paired_m and not any(IC.names_akin(str(l.get("item") or ""), str(it.get("name") or it.get("item") or "")) for it in items):
+            return []
+    psum = sum(int(_amount_p(it.get("amount")) or 0) for it in items)
+    paper = int(bill.get("amount_p") or 0) + int(diff_p)
+    if abs(psum - paper) > max(200, abs(paper) // 100):        # the paper's own lines must add up to the paper's total
+        return []
+    out = []
+    for it in items:
+        if id(it) in paired:
+            continue
+        nm = str(it.get("name") or it.get("item") or "")
+        if IC.name_norm(nm) in learnt and any(IC.name_norm(learnt[IC.name_norm(nm)]) == IC.name_norm(m) for m in marg_names):
+            continue
+        if any(IC.names_akin(nm, m) for m in marg_names):
+            continue
+        if S738_NOT_ITEM.search(nm):
+            return []                                         # a freight / round-off / tax line: never named as a line to add
+        amt = _amount_p(it.get("amount"))
+        out.append(dict(name=nm, qty=it.get("quantity"), amount_p=amt))
+    tot = sum(int(x["amount_p"] or 0) for x in out)
+    if not out or any(x["amount_p"] in (None, 0) for x in out) or abs(tot - int(diff_p)) > 200:
+        return []
+    return out
+
+
+def s738_fixes(con, fast=False):
+    """READ ONLY: the corrections that are Amir's now (the header above) -> [dict(bill_id, month, supplier, bill_no, date, scan, stamp, kind,
+    marg_p, paper_p, diff_p, items, numbers)], oldest bill first. A month that cannot be read RAISES (nothing is then synced). fast: the
+    missing lines are not worked out (the scan door only needs the scans). Inside ONE web request its repeated reads share one result
+    (flask.g, keyed by the connection and its change count); outside a request nothing is kept."""
+    memo, key = None, (id(con), con.total_changes, bool(fast))
+    try:
+        from flask import g, has_request_context              # noqa: PLC0415
+        if has_request_context():
+            memo = g.__dict__.setdefault("_s738_memo", {})
+    except Exception:                                         # noqa: BLE001
+        memo = None
+    if memo is not None and key in memo:
+        return [dict(f) for f in memo[key]]
+    out = []
+    for m in _s738_counted_months(con):
+        r = register(con, m)
+        for x in r["rows"]:
+            if not str(x.get("whose") or "").startswith("Amir"):
+                continue
+            item = dict(bill_id=int(x["id"]), month=m, supplier=x["supplier"], bill_no=str(x["bill_no"] or ""), date=str(x.get("date") or "")[:10],
+                        scan=x.get("scan"), stamp=x.get("stamp") or "", marg_p=int(x.get("amount_p") or 0), paper_p=None, diff_p=0, items=[],
+                        numbers=[])
+            if x["state"] == "double":
+                item["kind"] = "double"
+                item["numbers"] = [s.strip() for s in str(x["bill_no"] or "").split(" and ") if s.strip()]
+            elif x["state"] == "amount_differs":
+                ag = x.get("agree") or {}
+                paper = ag.get("scan_p")
+                if paper in (None, 0):
+                    continue
+                item["paper_p"] = int(paper)
+                item["diff_p"] = int(paper) - item["marg_p"]
+                item["kind"] = "less" if item["diff_p"] < 0 else "more"
+                if item["kind"] == "more" and item["scan"] is not None and not fast:
+                    b = con.execute("SELECT * FROM purchase_bill WHERE id=?", (item["bill_id"],)).fetchone()
+                    item["items"] = _s738_missing(con, dict(b), int(item["scan"]), item["diff_p"]) if b else []
+            else:
+                continue
+            out.append(item)
+    out.sort(key=lambda z: (z["date"], z["bill_id"]))
+    if memo is not None:
+        memo[key] = [dict(f) for f in out]
+    return out
+
+
+def _s738_newest_billwise(con):
+    try:
+        r = con.execute("SELECT MAX(received_at) FROM purchase_export WHERE type='BILLWISE'").fetchone()
+        return str(r[0] or "") if r else ""
+    except sqlite3.Error:
+        return ""
+
+
+def s738_sync(con, fixes, now=None):
+    """Keeps s738_fix in step with the list (the header above). Writes only s738_fix and audit rows; commits when it wrote. -> (new, settled)."""
+    now = now or dt.datetime.now().replace(microsecond=0).isoformat()
+    con.execute(S738_DDL)
+    have = {int(r[0]): dict(kind=r[1], settled_at=r[2], gone_at=r[3], first_seen=r[4], marg_p=r[5]) for r in
+            con.execute("SELECT bill_id, kind, settled_at, gone_at, first_seen, marg_p FROM s738_fix")}
+    cur_ids = {int(f["bill_id"]): f for f in fixes or []}
+    new = settled = 0
+    for bid, f in cur_ids.items():
+        h = have.get(bid)
+        if h is None:
+            con.execute("INSERT INTO s738_fix (bill_id, kind, month, first_seen, last_seen, marg_p) VALUES (?,?,?,?,?,?)",
+                        (bid, f["kind"], f["month"], now, now, f["marg_p"]))
+            new += 1
+        elif h["settled_at"] or h["gone_at"]:                 # back on the list (a later export undid it): open again
+            con.execute("UPDATE s738_fix SET kind=?, last_seen=?, settled_at=NULL, settled_export=NULL, gone_at=NULL, first_seen=?, marg_p=? WHERE bill_id=?",
+                        (f["kind"], now, now, f["marg_p"], bid))
+        else:
+            con.execute("UPDATE s738_fix SET kind=?, last_seen=? WHERE bill_id=?", (f["kind"], now, bid))
+    open_ = [bid for bid, h in have.items() if not h["settled_at"] and not h["gone_at"] and bid not in cur_ids]
+    if open_:
+        exp = _s738_newest_billwise(con)
+        lk = links(con)
+        cx = Ctx(con)
+        scans = asset_scans(con) or {}
+        pa = _pa()
+        for bid in open_:
+            h = have[bid]
+            b = con.execute("SELECT b.* FROM purchase_bill b WHERE b.id=? AND " + pa.EFF_BILL, (bid,)).fetchone()
+            ok = False
+            after = bool(exp) and str(exp) > str(h.get("first_seen") or "")      # an export that came after the line was first shown
+            if b is not None and after:
+                b = dict(b)
+                if h.get("kind") == "double":                 # proved when no other live entry of it is left
+                    twin = con.execute("SELECT COUNT(*) FROM purchase_bill b WHERE b.id<>? AND b.supplier_norm=? AND lower(trim(b.bill_no))=lower(trim(?)) "
+                                       "AND b.bill_date=? AND b.amount_p=? AND " + pa.EFF_BILL,
+                                       (bid, b["supplier_norm"], b["bill_no"], b["bill_date"], b["amount_p"])).fetchone()[0]
+                    ok = twin == 0
+                elif bid in lk and lk[bid]["scan"] in scans and h.get("marg_p") is not None and int(b["amount_p"] or 0) != int(h["marg_p"]):
+                    s = scans[lk[bid]["scan"]]
+                    ok = s726_state(cx, s, agree(cx, s, b), True) in ("verified", "has_scan")
+            if ok:
+                con.execute("UPDATE s738_fix SET settled_at=?, settled_export=? WHERE bill_id=?", (now, exp, bid))
+                settled += 1
+                try:
+                    _pa()._audit(con, "server", "s738_fix_proved", bid, dict(export=exp, kit=KIT_S738))
+                except Exception:                             # noqa: BLE001
+                    pass
+            else:
+                con.execute("UPDATE s738_fix SET gone_at=? WHERE bill_id=?", (now, bid))
+    con.commit()
+    return new, settled
+
+
+def s738_tracked(con):
+    try:
+        return {int(r[0]): dict(kind=r[1], month=r[2], first_seen=r[3], last_seen=r[4], settled_at=r[5], settled_export=r[6], gone_at=r[7]) for r in
+                con.execute("SELECT bill_id, kind, month, first_seen, last_seen, settled_at, settled_export, gone_at FROM s738_fix")}
+    except sqlite3.Error:
+        return {}
+
+
+def _s738_dmy(iso):
+    d = _date(iso)
+    return d.strftime("%d-%m-%Y") if d else ""
+
+
+def _s738_dm(iso):
+    s = str(iso or "")
+    return ("%s-%s" % (s[8:10], s[5:7])) if len(s) >= 10 else ""
+
+
+_S738_CTX = {}                                                # set by check_body for the lines it draws (one request)
+
+
+def _s738_panel(sid):
+    """The opened part: the scan (lazy) beside what it read against Marg."""
+    c = _S738_CTX
+    s = (c.get("scans") or {}).get(int(sid)) or {}
+    b = (c.get("bill_of") or {}).get(int(sid)) or {}
+    paper = (c.get("paper") or {}).get(int(sid))
+    rows = [("Supplier", s.get("vendor") or "—", b.get("supplier") or ""), ("Bill no.", s.get("bill_no") or "—", b.get("bill_no") or ""),
+            ("Date", _s738_dm(s.get("bill_date")) or "—", _s738_dm(b.get("bill_date"))),
+            ("Total", rs2(s.get("amount_p")) if s.get("amount_p") else "—", rs2(b.get("amount_p")) if b.get("amount_p") is not None else "")]
+    tab = "".join("<tr><th>%s</th><td>%s</td><td>%s</td></tr>" % (esc(k), esc(v1), esc(v2)) for k, v1, v2 in rows)
+    if paper is not None:
+        tab += "<tr><th>Paper amount given</th><td>%s</td><td></td></tr>" % esc(rs2(paper))
+    mo = _scan_moment(s) if s else None
+    when = ('<div class="s738w">Scanned %s</div>' % esc(mo.strftime("%d-%m %H:%M"))) if mo else ""
+    src = "%s/api/s738/scan/%d" % (c.get("prefix") or "/finance/purchase", int(sid))
+    return ('<div class="s738vb"><div class="s738f" data-src="%s"></div><div class="s738t"><div class="s738th">Read on the scan · Marg</div>'
+            '<table><tr><th></th><th>Scan</th><th>Marg</th></tr>%s</table>%s<a href="%s" target="_blank" rel="noopener">Open the scan in a new tab</a></div></div>'
+            % (esc(src), tab, when, esc(src)))
+
+
+def _s738_split(tail):
+    """(the difference, whose / status) out of a line's tail as the step view's rows write it."""
+    t = tail.lstrip(" ·")
+    m = re.match(r'^(.*?)\s*<span class="mut">·\s*(.*)</span>\s*$', t, re.S)
+    if m:
+        diff, rest = m.group(1).strip(), m.group(2).strip()
+        mm = re.match(r"^the (paper|scan) reads (more|less) · (.*)$", rest, re.S)
+        if mm and diff:
+            return "%s %s on %s" % (diff, mm.group(2), mm.group(1)), mm.group(3)
+        return diff, rest
+    return t, ""
+
+
+def _s738_cells(x, tail):
+    sid = x.get("scan")
+    diff, who = _s738_split(tail)
+    return ('<span class="c1">%s %s</span><span class="c2">%s</span><span class="c3">%s</span><span class="c4">%s</span><span class="c5">%s</span>'
+            % (esc(x["supplier"]), esc(x["bill_no"]), esc(_s738_dmy(x.get("date"))), ("scan %s" % esc(x.get("stamp") or "")) if sid is not None else "no scan",
+               diff, who))
+
+
+def _s738_wrap(cells, sid, bill_id=None):
+    attr = (' data-bill="%d"' % int(bill_id)) if bill_id is not None else ""
+    if sid is None:
+        return '<div class="s738l"%s>%s<span class="c6"></span></div>' % (attr, cells)
+    return ('<details class="s738v" ontoggle="s738open(this)"><summary class="s738l"%s>%s<span class="c6"><span class="s738b">'
+            '<span class="sh">Show scan &#9662;</span><span class="hd">Hide scan &#9652;</span></span></span></summary>%s</details>'
+            % (attr, cells, _s738_panel(sid)))
+
+
+def _s738_viewer(sid):                                        # the scan-only lines ("Scan B-0182 · ..."): the button and the panel alone
+    return ('<details class="s738v s738v2" ontoggle="s738open(this)"><summary class="s738b"><span class="sh">Show scan &#9662;</span>'
+            '<span class="hd">Hide scan &#9652;</span></summary>%s</details>' % _s738_panel(sid))
+
+
+def _ck_line(x, tail):                                        # noqa: F811 -- S738: the bill date, the scan, the folded viewer (columns on a PC)
+    return _s738_wrap(_s738_cells(x, tail), x.get("scan"), x["id"])
+
+
+_check_rows_before_s738 = check_rows
+
+
+def check_rows(r, cx):                                        # noqa: F811 -- S738: row 3 says whose and since when, and lists the proved
+    rows = _check_rows_before_s738(r, cx)
+    tr = _S738_CTX.get("tracked") or {}
+    month = r.get("month") or ""
+    lab, n, lines, grey = rows[2]
+    extra = []
+    for x in r["rows"]:
+        if x["state"] in ("amount_differs", "double") and str(x.get("whose") or "").startswith("Amir"):
+            t = tr.get(int(x["id"]))
+            if t and not t.get("settled_at"):
+                extra.append((int(x["id"]), "on Amir's list since %s" % _s738_dm(t.get("first_seen"))))
+    proved = [(bid, t) for bid, t in tr.items() if t.get("settled_at") and t.get("month") == month]
+    new_lines = list(lines)
+    for bid, note in extra:
+        new_lines = [ln.replace("Amir: a Marg correction", "Amir: a Marg correction · %s" % esc(note), 1) if ('data-bill="%d"' % bid) in ln else ln
+                     for ln in new_lines]
+    for bid, t in proved:
+        b = con_bill(r, bid)
+        if b is None:
+            continue
+        new_lines.append('<div class="s738l s738ok"><span class="c1">%s %s</span><span class="c2">%s</span><span class="c3"></span><span class="c4"></span>'
+                         '<span class="c5">Amir · corrected — his export of %s shows Marg = the paper ✓</span><span class="c6"></span></div>'
+                         % (esc(b["supplier"]), esc(b["bill_no"]), esc(_s738_dmy(b.get("date"))), esc(_s738_dm(t.get("settled_export") or t.get("settled_at")))))
+    rows[2] = (lab, n, new_lines, grey)
+    hdr = ('<div class="s738hd"><span>Supplier · bill</span><span>Bill date</span><span>Scan</span><span>Difference</span><span>Whose · status</span>'
+           '<span></span></div>')
+    for i, (lab_, n_, ls_, g_) in enumerate(rows[:5]):
+        if any('class="s738l"' in ln for ln in ls_):
+            rows[i] = (lab_, n_, [hdr] + list(ls_), g_)
+    by_stamp = {str(s.get("stamp_no") or ""): int(k) for k, s in (_S738_CTX.get("scans") or {}).items() if s.get("stamp_no")}
+    for i, (lab_, n_, ls_, g_) in enumerate(rows[:5]):        # the lines that name only a scan ("Scan B-0182 · ...") get the viewer too
+        out = []
+        for ln in ls_:
+            m = re.match(r"^Scan ([A-Za-z0-9#-]+) ", ln) if not ln.startswith("<") else None
+            sid = by_stamp.get(m.group(1)) if m else None
+            out.append(ln + _s738_viewer(sid) if sid is not None else ln)
+        rows[i] = (lab_, n_, out, g_)
+    return rows
+
+
+def con_bill(r, bid):
+    for x in r["rows"]:
+        if int(x["id"]) == int(bid):
+            return x
+    return None
+
+
+S738_CSS = """
+#s726chk{max-width:1100px}
+#s726chk details.row,#s726chk details.grey{display:block}
+#s726chk li{list-style:none;margin:0;padding:6px 0;border-top:1px solid #f0ece6}
+#s726chk ul{margin:0 0 10px 0;padding:0}
+#s726chk .s738l{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline}
+#s726chk .s738l .c1{font-weight:700;flex:0 0 100%}
+#s726chk .s738l .c2,#s726chk .s738l .c3{color:#555}
+#s726chk .s738l .c4{flex:0 0 100%}
+#s726chk .s738l .c5{color:#555;flex:1 1 100%}
+#s726chk .s738ok .c5{color:#1f4d25}
+#s726chk .s738hd{display:none}
+@media(min-width:900px){
+ #s726chk .s738l,#s726chk .s738hd{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.3fr) minmax(0,2.2fr) 130px;
+  gap:6px 14px;align-items:center}
+ #s726chk .s738l .c1,#s726chk .s738l .c4,#s726chk .s738l .c5{flex:none}
+ #s726chk .s738hd{font-size:13px;color:#555;font-weight:700;padding:2px 0}
+}
+#s726chk details.s738v{border:0;margin:0}
+#s726chk details.s738v>summary{list-style:none;cursor:pointer;min-height:44px}
+#s726chk details.s738v>summary::-webkit-details-marker{display:none}
+#s726chk .s738b{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border:1px solid #1f3864;border-radius:9px;color:#1f3864;
+ font-weight:600;font-size:14px;background:#fff;white-space:nowrap}
+#s726chk details.s738v[open] .s738b{background:#1f3864;color:#fff}
+#s726chk .s738b .hd{display:none}
+#s726chk details.s738v[open] .s738b .hd{display:inline}
+#s726chk details.s738v[open] .s738b .sh{display:none}
+#s726chk details.s738v2>summary{display:inline-flex}
+#s726chk .s738vb{display:flex;flex-wrap:wrap;gap:12px;margin:8px 0 10px}
+#s726chk .s738f{flex:1 1 520px;min-width:0;min-height:560px;background:#e6e8ee;border:1px solid #cfd3db;border-radius:8px;box-sizing:border-box}
+#s726chk .s738f iframe{width:100%;height:640px;border:0;border-radius:8px;display:block}
+#s726chk .s738f img{max-width:100%;border-radius:8px;display:block}
+#s726chk .s738f .s738err{padding:14px;color:#555;font-size:15px}
+#s726chk .s738t{flex:0 1 300px;font-size:14px;overflow-wrap:normal;word-break:normal}
+#s726chk .s738th{font-weight:700;font-size:15px;margin:0 0 6px}
+#s726chk .s738t table{border-collapse:collapse;margin-bottom:8px}
+#s726chk .s738t th,#s726chk .s738t td{text-align:left;padding:3px 10px 3px 0;vertical-align:top;border:0;text-transform:none;letter-spacing:0;
+ font-size:14px;background:none}
+#s726chk .s738t th{color:#555;font-weight:600}
+#s726chk .s738w{color:#555;margin:0 0 6px}
+#s738up{position:fixed;right:18px;bottom:18px;width:52px;height:52px;border-radius:26px;border:0;background:#1f3864;color:#fff;font-size:24px;
+ font-weight:800;cursor:pointer;z-index:70}
+"""
+S738_JS = """
+<script>function s738open(d){if(!d.open)return;var f=d.querySelector('.s738f');if(!f||f.getAttribute('data-done'))return;f.setAttribute('data-done','1');
+var src=f.getAttribute('data-src');fetch(src,{method:'HEAD'}).then(function(r){var t=(r.headers.get('Content-Type')||'');
+if(t.indexOf('pdf')>=0){var fr=document.createElement('iframe');fr.src=src+'#navpanes=0&view=FitH';fr.title='scan';f.appendChild(fr);}
+else if(r.ok){var im=document.createElement('img');im.src=src;im.alt='scan';f.appendChild(im);}
+else{s738no(f);}}).catch(function(){s738no(f);});}
+function s738no(f){var d=document.createElement('div');d.className='s738err';d.textContent='The scan could not be opened here — use "Open the scan in a new tab" beside it.';f.appendChild(d);}</script>
+<button type="button" id="s738up" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593;</button>
+"""
+
+_check_body_before_s738 = check_body
+
+
+def check_body(con, month, prefix, months, r=None):          # noqa: F811 -- S738: the viewer's facts, the CSS, the button
+    r = r if r is not None else register(con, month)
+    scans = asset_scans(con) or {}
+    cx = Ctx(con)
+    bill_of = {}
+    for x in r["rows"]:
+        if x.get("scan") is not None:
+            b = con.execute("SELECT supplier, bill_no, bill_date, amount_p FROM purchase_bill WHERE id=?", (int(x["id"]),)).fetchone()
+            if b:
+                bill_of[int(x["scan"])] = dict(supplier=_pa().supplier_key(b[0]), bill_no=b[1], bill_date=b[2], amount_p=b[3])
+    _S738_CTX.clear()
+    _S738_CTX.update(scans=scans, bill_of=bill_of, paper=dict(cx.paper), prefix=prefix, tracked=s738_tracked(con))
+    try:
+        h = _check_body_before_s738(con, month, prefix, months, r)
+    finally:
+        _S738_CTX.clear()
+    return h.replace("</style>", S738_CSS + "</style>", 1) + S738_JS
+
+
+def s738_scan_ok(con, sid, doctor, login):
+    """May this person open scan sid through /api/s738/scan? The doctor: any captured pharmacy scan. Amir: only a scan on his list."""
+    if doctor:
+        return True
+    try:
+        return int(sid) in {int(f["scan"]) for f in s738_fixes(con, fast=True) if f.get("scan") is not None}
+    except Exception:                                         # noqa: BLE001
+        return False
+# ---- S738 end ---------------------------------------------------------------------------------------------------------------------------
