@@ -1,0 +1,543 @@
+
+
+
+# ---- S736 (06-Nov-2026, Sanjeevni session 396, kit S736_RECEPTION_BILL_LIST; D847, D839, D840, D848) --------------------------------------
+#  RECEPTION'S ONE LIST -- "Aaj ka bill kaam" (the owner's approved mock https://claude.ai/artifact/Mwe48BGnJcu6vb5ZPMH4tV):
+#    GET  /finance/porders/s454/billkaam   four groups, each card one job: Dobara scan karo (every open rescan ask -- a person's or the
+#                                          server's -- with its try), Order ka bill dhoondo (S708's paper asks, opened on their own page),
+#                                          Scan karo (a Marg bill with no scan: days waited, Bill nahi mil raha), Ek sawaal (Kya yeh wahi
+#                                          bill hai? -- the field that differs and what the scan read against Marg); then today's scans.
+#  THE SERVER ASKS BY ITSELF (D847: a bad scan goes straight to reception, never through Shavez). s736_raise(), on reception's home, on
+#  this page and on Shavez's Scans to redo (never on a GET of the owner's step view): a pharmacy scan of a COUNTED month (September raises
+#  nothing, D848) with a scan_quality verdict (rescan_list's own rule) or a paired scan that read neither a total nor a bill number
+#  (S726's "Paired, nothing read") gets ONE scan_rescan_ask row asked_by='server', reason = the verdict code or 'unread' -- when the scan
+#  has never had an ask (open, done or withdrawn: a person's decision stands), is not set aside, not rescanned, not a picked-away copy
+#  (S708), not a second scan (why 'dup'), is at least S736_SETTLE_MIN minutes old, and the owner has not accepted it. The try is the
+#  rescan chain (assets.db bills.rescan_of): a scan with S736_TRIES rescans behind it is NOT asked again -- it goes to the owner and
+#  Shavez (his step view row 5 and Shavez's Scans to redo). An open server ask whose scan is now fine (a good reading present, no
+#  verdict, not unread) is withdrawn by the server. assets.db READ ONLY; writes only scan_rescan_ask rows and audit rows.
+#  Reception's home: the reception logins (porders.rescan_doers) see ONE row "Aaj ka bill kaam" in place of Phir se scan karo and Bill
+#  scan karna hai; their Photo dekh kar bataiye row counts (and opens) the other questions only. Every old page stays at its address.
+S736_KIT = "S736_RECEPTION_BILL_LIST"
+S736_SERVER = "server"
+S736_TRIES = 2                                                # two tries at reception, then the owner and Shavez (D847)
+S736_SETTLE_MIN = 30                                          # a scan is judged only once its check and reading have had time to land
+S736_SHOW = 8                                                 # cards shown per group before "Aur dikhaiye"
+S736_WORDS = {"unread": ("Nothing was read on the scan — rescan it straight, in good light", "Kuch padha nahi gaya",
+                         "Kuch padha nahi gaya — bill seedha rakh kar, roshni mein, saaf scan kijiye")}
+S736_REASON_EN = {"unread": "nothing read", "blurred": "blurred", "cut": "cut off", "no_total": "no total", "not_adding": "lines do not add up",
+                  "not_bill": "not a bill"}
+T.update({"r_billkaam": ("Aaj ka bill kaam", "Today's bill work"),
+          "bk_top": ("Har line ek kaam hai. Kaam hote hi line khud hat jaati hai.", "Each line is one job. A line goes by itself once its job is done."),
+          "bk_redo": ("Dobara scan karo · %d", "Rescan · %d"), "bk_paper": ("Order ka bill dhoondo · %d", "Find the order's bill · %d"),
+          "bk_scan": ("Scan karo — Marg mein hai, scan nahi · %d", "Scan — in Marg, not scanned · %d"), "bk_q": ("Ek sawaal · %d", "A question · %d"),
+          "bk_try1": ("Pehli baar", "First try"), "bk_try2": ("Doosri baar (aakhri) · iske baad Doctor sahab aur Shavez dekhenge",
+                                                           "Second try (the last) · then you and Shavez look"),
+          "bk_tryn": ("%d-vi baar", "Try %d"), "bk_by_server": ("server ne %s ko bheja", "sent by the server on %s"),
+          "bk_by_owner": ("Doctor sahab ne %s ko bheja", "sent by you on %s"), "bk_by_x": ("%s ne %s ko bheja", "sent by %s on %s"),
+          "bk_scan_no": ("scan %s", "scan %s"), "bk_days": ("%d din se baaki", "%d days waiting"), "bk_today": ("aaj ka bill", "today's bill"),
+          "bk_recv": ("%s · maal aaya %s", "%s · goods came %s"), "bk_recv_s": ("Is order ka bill scan karna hai", "This order's bill is to be scanned"),
+          "bk_missing": ("Bill nahi mil raha", "Bill not found"), "bk_paper_s": ("Order %s · bill ka kaagaz abhi scan nahi hua", "Ordered %s · its bill paper is not scanned yet"),
+          "bk_open": ("Kholo", "Open"), "bk_q_h": ("Kya yeh wahi bill hai?", "Is this the same bill?"), "bk_marg": ("Marg mein:", "In Marg:"),
+          "bk_q_dup": ("Is bill ka ek scan pehle se hai — kya yeh usi bill ka doosra scan hai?", "This bill already has a scan — is this a second scan of it?"),
+          "bk_yes": ("Haan, yahi hai", "Yes, it is"), "bk_no": ("Nahi", "No"), "bk_photo": ("scan %s ki photo", "photo of scan %s"),
+          "bk_f_no": ("Scan par <b>bill number</b> nahi padha gaya.", "The <b>bill number</b> was not read on the scan."),
+          "bk_f_nod": ("Scan par bill number “%s” padha gaya — Marg mein %s.", "The scan reads bill number “%s” — Marg has %s."),
+          "bk_f_amt": ("Scan par <b>amount</b> nahi padha gaya.", "The <b>amount</b> was not read on the scan."),
+          "bk_f_amtd": ("Scan par amount %s padha gaya — Marg mein %s.", "The scan reads the amount %s — Marg has %s."),
+          "bk_f_date": ("Scan par date %s padhi gayi — Marg mein %s.", "The scan reads the date %s — Marg has %s."),
+          "bk_f_none": ("Scan par kuch padha nahi gaya — supplier aur din mil rahe hain.", "Nothing was read on the scan — the supplier and the day match."),
+          "bk_f_same": ("%s mil rahe hain.", "%s match."), "bk_f_check": ("Photo aur Marg ko milaakar dekhiye.", "Compare the photo with Marg."),
+          "bk_w_sup": ("Supplier", "The supplier"), "bk_w_amt": ("amount", "the amount"), "bk_w_date": ("date", "the date"), "bk_w_no": ("bill number", "the bill number"),
+          "bk_and": (" aur ", " and "), "bk_more": ("Aur dikhaiye (%d)", "Show more (%d)"),
+          "bk_aaj0": ("Aaj abhi koi bill scan nahi hua.", "No bill scanned yet today."),
+          "bk_aaj_ok": ("Aaj ke scan: %d bill scan hue, sab padhe gaye ✓", "Today's scans: %d bills scanned, all read ✓"),
+          "bk_aaj_n": ("Aaj ke scan: %d bill scan hue · %d padhe gaye", "Today's scans: %d bills scanned · %d read"),
+          "bk_none": ("Aaj ka bill kaam poora ✓", "Today's bill work is done ✓"),
+          "bk_esc": ("Reception do baar scan kar chuki — Doctor sahab aur aap dekhiye · %d", "Rescanned twice by reception — for you and Shavez · %d"),
+          "bk_esc_s": ("%s · %s · abhi bhi: %s", "%s · %s · still: %s")})
+
+
+def _s736_sr():
+    import scan_register                                      # noqa: PLC0415 -- beside this file
+    return scan_register
+
+
+def _s736_depth(parent, sid):
+    """How many rescans stand behind this scan (bills.rescan_of followed back): 0 for a first scan."""
+    n, seen, cur = 0, set(), int(sid)
+    while cur in parent and cur not in seen and n < 50:
+        seen.add(cur)
+        cur = parent[cur]
+        n += 1
+    return n
+
+
+def _s736_facts(con):
+    """READ ONLY: everything the server's asking needs, in one read of each database. ok=False when assets.db or scan_quality is missing
+    (then nothing is asked or withdrawn)."""
+    sq = _sq()
+    out = dict(ok=False, rows={}, reading={}, settings={}, parent={}, kids=set(), asks=[], link={}, dec={}, picked=set(), dup=set(), since="", final=set())
+    try:                                                      # a finalised month is never changed (S726's rule): nothing is asked in it
+        out["final"] = {str(r[0]) for r in con.execute("SELECT month FROM purchase_month WHERE status='final'")}
+    except sqlite3.Error:
+        pass
+    try:
+        out["asks"] = [dict(r) for r in con.execute("SELECT * FROM scan_rescan_ask ORDER BY id")]
+    except sqlite3.Error:
+        out["asks"] = []
+    try:
+        for r in con.execute("SELECT l.asset_bill_id, l.bill_id, b.month, b.bill_date, b.bill_no, b.supplier, b.amount_p FROM purchase_scan_link l "
+                             "JOIN purchase_bill b ON b.id=l.bill_id"):
+            out["link"][int(r[0])] = dict(bill=int(r[1]), month=r[2], bill_date=r[3], bill_no=r[4], supplier=r[5], amount_p=r[6])
+    except sqlite3.Error:
+        pass
+    try:
+        out["dec"] = {int(r[0]): dict(decision=r[1], raw_p=r[2], at=r[3], by=r[4]) for r in
+                      con.execute("SELECT asset_bill_id, decision, raw_p, at, by FROM s736_decision")}
+    except sqlite3.Error:
+        out["dec"] = {}
+    try:
+        out["picked"] = {int(r[0]) for r in con.execute("SELECT drop_id FROM s708_scan_pick WHERE undone_at IS NULL")}
+    except sqlite3.Error:
+        pass
+    try:
+        out["dup"] = {int(r[0]) for r in con.execute("SELECT asset_bill_id FROM purchase_scan_state WHERE why='dup'")}
+    except sqlite3.Error:
+        pass
+    if sq is None:
+        return out
+    acon = OS._assets()
+    if acon is None:
+        return out
+    try:
+        try:
+            out["settings"] = {str(r[0]): r[1] for r in acon.execute("SELECT key, value FROM settings WHERE key LIKE 'scan.%'")}
+        except sqlite3.Error:
+            pass
+        since = str(sq.setting(out["settings"], "scan.redo_since") or "2026-10-08")[:10]
+        out["since"] = since
+        cols = {r[1] for r in acon.execute("PRAGMA table_info(bills)")}
+        want = [c for c in ("id", "stamp_no", "vendor", "bill_no", "bill_date", "bill_month", "total_amount", "submitted_at", "created_at", "lane", "kind",
+                            "status", "page_of", "doc_kind", "source_stored", "rescan_of", "dup_of", "ocr_status") if c in cols]
+        rows = [dict(r) for r in acon.execute("SELECT %s FROM bills WHERE lane='pharmacy' AND substr(created_at,1,10)>=? ORDER BY id" % ", ".join(want), (since,))]
+        have = {int(r["id"]) for r in rows}
+        extra = ({int(a["asset_bill_id"]) for a in out["asks"]} | set(out["link"])) - have
+        if extra:
+            ids = sorted(extra)
+            for i in range(0, len(ids), 500):
+                part = ids[i:i + 500]
+                rows += [dict(r) for r in acon.execute("SELECT %s FROM bills WHERE id IN (%s)" % (", ".join(want), ",".join("?" * len(part))), part)]
+        if "rescan_of" in cols:
+            for r in acon.execute("SELECT id, rescan_of FROM bills WHERE rescan_of IS NOT NULL"):
+                out["parent"][int(r[0])] = int(r[1])
+                out["kids"].add(int(r[1]))
+        lie = {}
+        try:
+            for r in acon.execute("SELECT * FROM scan_lie"):
+                lie[(int(r["bill_id"]), r["file"])] = dict(r)
+        except sqlite3.Error:
+            pass
+        ids = {int(r["id"]) for r in rows}
+        try:
+            for r in acon.execute("SELECT bill_id, data FROM claude_reading WHERE ok=1"):
+                if int(r[0]) in ids:
+                    try:
+                        out["reading"][int(r[0])] = json.loads(r[1]) if r[1] else None
+                    except ValueError:
+                        pass
+        except sqlite3.Error:
+            pass
+        for r in rows:
+            r["at"] = OS.scan_moment(r)
+            r["lie"] = lie.get((int(r["id"]), r.get("source_stored")))
+            out["rows"][int(r["id"])] = r
+    finally:
+        acon.close()
+    out["ok"] = True
+    return out
+
+
+def _s736_month(f, sid, r):
+    lk = f["link"].get(sid)
+    if lk:
+        return str(lk.get("month") or str(lk.get("bill_date") or "")[:7])
+    return _s618_month(r)
+
+
+def _s736_reason(f, sid, r, sq):
+    """The scan's trouble as a reason code -- the scan_quality verdict, else 'unread' for a paired scan that read neither a total nor a
+    bill number (scan_register.s726_state's own test) -- or None."""
+    if str(r.get("created_at") or "")[:10] >= f["since"]:
+        d = sq.detail(r, f["reading"].get(sid), r.get("lie"), f["settings"])
+        if d:
+            return d["code"]
+    lk = f["link"].get(sid)
+    ocr = str(r.get("ocr_status") or "")
+    settled = ocr in ("", "read", "empty", "failed", "done") or (r.get("at") is not None and (OS.now() - r["at"]).total_seconds() > 6 * 3600)
+    if lk is not None and settled and str(r.get("kind") or "") == "Pharmacy" and str(r.get("status") or "") == "captured":
+        SR = _s736_sr()
+        raw = SR._amount_p(r.get("total_amount"))
+        if raw in (None, 0) and SR.billno(r.get("bill_no"), lk.get("bill_no")) == "not_read":
+            return "unread"
+    return None
+
+
+def _s736_accepted(f, sid, r):
+    d = f["dec"].get(sid)
+    if not d or d.get("decision") != "accept":
+        return False
+    raw = _s736_sr()._amount_p(r.get("total_amount"))
+    return (None if d.get("raw_p") is None else int(d["raw_p"])) == (None if raw is None else int(raw))
+
+
+def s736_plan(con, now=None, facts=None):
+    """READ ONLY: dict(ok, ask=[scans the server asks for now], withdraw=[ask ids it withdraws], escalated=[scans after two tries],
+    facts). Each scan item: dict(scan, stamp, vendor, reason, month, tries, bill)."""
+    f = facts if facts is not None else _s736_facts(con)
+    out = dict(ok=f["ok"], ask=[], withdraw=[], escalated=[], facts=f)
+    if not f["ok"]:
+        return out
+    sq = _sq()
+    now = now or OS.now()
+    by = {}
+    for a in f["asks"]:
+        by.setdefault(int(a["asset_bill_id"]), []).append(a)
+    for sid in sorted(f["rows"]):
+        r = f["rows"][sid]
+        srv_open = [a for a in by.get(sid, []) if str(a.get("asked_by") or "") == S736_SERVER and not a.get("done_at") and not a.get("withdrawn_at")]
+        gone = (str(r.get("status") or "") == "rejected" or r.get("page_of") or str(r.get("lane") or "") != "pharmacy" or sid in f["kids"]
+                or sid in f["picked"] or sid in f["dup"] or r.get("dup_of"))
+        if gone:
+            if srv_open and sid not in f["kids"]:             # set aside, moved off the pharmacy lane, a copy: the server's ask has no work left
+                out["withdraw"] += [int(a["id"]) for a in srv_open]
+            continue                                          # a rescanned scan: its open ask is closed by tie_pass (bills.rescan_of)
+        reason = _s736_reason(f, sid, r, sq)
+        month = _s736_month(f, sid, r)
+        held = month_class(con, month) != "counted" or month in f["final"] or _s736_accepted(f, sid, r)
+        if reason is None or held:
+            if srv_open and (held or sid in f["reading"] or r.get("lie")):
+                out["withdraw"] += [int(a["id"]) for a in srv_open]
+            continue
+        if by.get(sid):
+            continue                                          # asked before (open, done or withdrawn): never asked twice by the server
+        if r.get("at") is None or (now - r["at"]).total_seconds() < S736_SETTLE_MIN * 60:
+            continue
+        lk = f["link"].get(sid) or {}
+        item = dict(scan=sid, stamp=r.get("stamp_no") or "#%d" % sid, vendor=(_pa().supplier_key(lk["supplier"]) if lk.get("supplier") else (r.get("vendor") or "")),
+                    bill_no=str(lk.get("bill_no") or r.get("bill_no") or ""), reason=reason, month=month, tries=_s736_depth(f["parent"], sid),
+                    bill=lk.get("bill"))
+        (out["escalated"] if item["tries"] >= S736_TRIES else out["ask"]).append(item)
+    return out
+
+
+def s736_raise(con, now=None):
+    """The server's asking (the header above): writes the plan's asks and withdrawals, each audited; commits. -> dict(asked, withdrawn,
+    plan). A fault is said on stderr and nothing is written."""
+    try:
+        p = s736_plan(con, now)
+    except Exception as e:                                    # noqa: BLE001 -- the page never fails for it
+        print("S736 plan failed: %r" % (e,), file=sys.stderr)
+        return dict(asked=0, withdrawn=0, plan=None)
+    n = w = 0
+    if not p["ok"]:
+        return dict(asked=0, withdrawn=0, plan=p)
+    at = OS.now_iso()
+    try:
+        for x in p["ask"]:
+            cur = con.execute("INSERT INTO scan_rescan_ask (asset_bill_id, stamp, reason, asked_by, asked_at) SELECT ?,?,?,?,? "
+                              "WHERE NOT EXISTS (SELECT 1 FROM scan_rescan_ask WHERE asset_bill_id=?)", (x["scan"], x["stamp"], x["reason"], S736_SERVER, at, x["scan"]))
+            if cur.rowcount:
+                n += 1
+                OS.audit(con, S736_SERVER, "s736_server_ask", x["scan"], dict(ask=cur.lastrowid, stamp=x["stamp"], reason=x["reason"], try_n=x["tries"] + 1,
+                                                                          month=x["month"], kit=S736_KIT))
+        for aid in p["withdraw"]:
+            cur = con.execute("UPDATE scan_rescan_ask SET withdrawn_at=?, withdrawn_by=? WHERE id=? AND asked_by=? AND done_at IS NULL AND withdrawn_at IS NULL",
+                              (at, "server (S736: the scan is fine now)", aid, S736_SERVER))
+            if cur.rowcount:
+                w += 1
+                OS.audit(con, S736_SERVER, "s736_server_ask_withdrawn", aid, dict(kit=S736_KIT))
+        if n or w:
+            con.commit()
+    except sqlite3.Error as e:
+        con.rollback()
+        print("S736 raise failed: %r" % (e,), file=sys.stderr)
+        return dict(asked=0, withdrawn=0, plan=p)
+    return dict(asked=n, withdrawn=w, plan=p)
+
+
+def _s736_raise_soft(con):
+    try:
+        return s736_raise(con)
+    except Exception as e:                                    # noqa: BLE001
+        print("S736 raise failed: %r" % (e,), file=sys.stderr)
+        return dict(asked=0, withdrawn=0, plan=None)
+
+
+def s736_view(con):
+    """READ ONLY, for the owner's step view: dict(ok, asks=[open asks with month, try, who], escalated=[...], decided=[...])."""
+    p = s736_plan(con)
+    f = p["facts"]
+    out = dict(ok=f["ok"], asks=[], escalated=p["escalated"], decided=[])
+    for a in f["asks"]:
+        if a.get("done_at") or a.get("withdrawn_at"):
+            continue
+        sid = int(a["asset_bill_id"])
+        r = f["rows"].get(sid) or {}
+        lk = f["link"].get(sid) or {}
+        out["asks"].append(dict(id=int(a["id"]), scan=sid, stamp=a.get("stamp") or r.get("stamp_no") or "#%d" % sid, reason=a.get("reason") or "",
+                                by=str(a.get("asked_by") or ""), try_n=_s736_depth(f["parent"], sid) + 1,
+                                month=(_s736_month(f, sid, r) if r else str(lk.get("month") or "")), bill=lk.get("bill")))
+    for sid, d in sorted(f["dec"].items()):
+        r = f["rows"].get(sid) or {}
+        lk = f["link"].get(sid) or {}
+        out["decided"].append(dict(scan=sid, decision=d.get("decision"), at=d.get("at"), by=d.get("by"), stamp=r.get("stamp_no") or "#%d" % sid,
+                                   vendor=(_pa().supplier_key(lk["supplier"]) if lk.get("supplier") else (r.get("vendor") or "")),
+                                   bill_no=str(lk.get("bill_no") or ""), month=(_s736_month(f, sid, r) if r else str(lk.get("month") or ""))))
+    return out
+
+
+# ------------------------------------------------------------------ the page
+def _s736_try(en, n):
+    if n <= 1:
+        return L(en, "bk_try1")
+    if n == 2:
+        return L(en, "bk_try2")
+    return L(en, "bk_tryn", n)
+
+
+def _s736_by(en, con, a):
+    login = str(a.get("asked_by") or "").lower()
+    day = OS.ddmm(a.get("asked_at") or "")
+    if login == S736_SERVER:
+        return L(en, "bk_by_server", day)
+    if a.get("by_owner") or login in _s618_owner_logins(con):
+        return L(en, "bk_by_owner", day)
+    return L(en, "bk_by_x", login.split(" ")[0].title() or "?", day)
+
+
+def _s736_fields(en, q, meta, bill):
+    """The question's lines: each field that differs or was not read, with what the scan read against Marg, then what matches."""
+    if q.get("unread"):
+        return [L(en, "bk_f_none")]
+    SR = _s736_sr()
+    lines, same = [], []
+    sno = str(meta.get("bill_no") or "")
+    bn = SR.billno_compat(sno, bill.get("bill_no"))
+    if bn == "not_read":
+        lines.append(L(en, "bk_f_no"))
+    elif bn in ("differ", "close"):
+        lines.append(L(en, "bk_f_nod", esc(sno), esc(bill.get("bill_no") or "")))
+    else:
+        same.append(L(en, "bk_w_no"))
+    sp = SR._amount_p(meta.get("total_amount"))
+    if sp in (None, 0):
+        lines.append(L(en, "bk_f_amt"))
+    elif abs(int(sp) - int(bill.get("amount_p") or 0)) > 100:
+        lines.append(L(en, "bk_f_amtd", esc(SR.rs2(sp)), esc(SR.rs2(bill.get("amount_p")))))
+    else:
+        same.append(L(en, "bk_w_amt"))
+    dm = SR.date_md(meta.get("bill_date"), bill.get("bill_date"))
+    if dm == "differ":
+        lines.append(L(en, "bk_f_date", esc(OS.ddmm(meta.get("bill_date"))), esc(OS.ddmm(bill.get("bill_date")))))
+    elif dm == "agree":
+        same.append(L(en, "bk_w_date"))
+    if lines:
+        w = [L(en, "bk_w_sup")] + same                        # the question is this supplier's bill: the supplier always matches
+        lines.append(L(en, "bk_f_same", w[0] if len(w) == 1 else ", ".join(w[:-1]) + L(en, "bk_and") + w[-1]))
+    return lines or [L(en, "bk_f_check")]
+
+
+def s736_model(con, now=None, raised=None):
+    """The page's four groups as plain rows (read only; the server's asking is done by the caller). -> dict(redo, paper, scan, q, today, n)."""
+    now = now or OS.now()
+    f = ((raised or {}).get("plan") or {}).get("facts") or _s736_facts(con)
+    x = rescan_list(con)
+    owners = _s618_owner_logins(con)
+    redo = []
+    for a in sorted(x.get("asks") or [], key=lambda z: (str(z.get("asked_at") or ""), z["id"])):
+        sid = int(a["scan"])
+        lk = f["link"].get(sid) or {}
+        r = f["rows"].get(sid) or {}
+        redo.append(dict(a, by_owner=a.get("by_owner") or str(a.get("asked_by") or "").lower() in owners, try_n=_s736_depth(f["parent"], sid) + 1,
+                         head_vendor=(_pa().supplier_key(lk["supplier"]) if lk.get("supplier") else (a.get("vendor") or r.get("vendor") or "")),
+                         head_no=str(lk.get("bill_no") or r.get("bill_no") or "")))
+    paper = []
+    try:
+        import order_track_page as OTP                        # noqa: PLC0415
+        for oid, ask in sorted(OTP.paper_asks(con, reception_only=True).items(), key=lambda z: z[1]["id"]):
+            o = con.execute("SELECT id, vendor, created_at FROM purchase_order WHERE id=?", (oid,)).fetchone()
+            if o is not None:
+                paper.append(dict(order=int(o["id"]), vendor=o["vendor"] or "", created_at=o["created_at"] or "", ask=int(ask["id"])))
+    except Exception:                                         # noqa: BLE001 -- its own page still lists them
+        paper = []
+    scan = scan_lines(con)
+    qs = [q for q in questions(con) if q["kind"] == "bill"]
+    meta = _scan_meta({q["scan"] for q in qs})
+    for q in qs:
+        b = con.execute("SELECT id, supplier, bill_no, bill_date, amount_p FROM purchase_bill WHERE id=?", (q["bill"],)).fetchone()
+        q["_bill"] = dict(b) if b else {}
+        q["_meta"] = meta.get(q["scan"]) or {}
+    today = now.date()
+    todays = [r for r in f["rows"].values() if r.get("at") and r["at"].date() == today and str(r.get("status") or "") != "rejected" and not r.get("page_of")
+              and str(r.get("lane") or "") == "pharmacy"]
+    nread = sum(1 for r in todays if int(r["id"]) in f["reading"])
+    return dict(redo=redo, paper=paper, scan=scan, q=qs, today=(len(todays), nread), n=len(redo) + len(paper) + len(scan) + len(qs), ok=f["ok"])
+
+
+def _s736_home(con, c):
+    """Reception's home row: (counts, ok). The Photo dekh kar bataiye row keeps the questions that are not on this page."""
+    try:
+        m = s736_model(con)
+    except Exception as e:                                    # noqa: BLE001 -- the old rows stand
+        print("S736 home model failed: %r" % (e,), file=sys.stderr)
+        return c, False
+    c = dict(c, billkaam=m["n"], q=max(0, int(c.get("q") or 0) - len(m["q"])))
+    return c, True
+
+
+def _s736_more(en, key, n, shown, total):
+    if total <= shown:
+        return ""
+    return '<a class="more" id="more_%s" href="?all=%s">%s</a>' % (key, key, L(en, "bk_more", total - shown))
+
+
+def billkaam_page():
+    """Aaj ka bill kaam -- reception's ONE list (the header above). The server's asking runs first."""
+    u, con, kind, login, err = _auth_page()
+    if err:
+        return err
+    en = u["_en"]
+    _every_read(con)
+    raised = _s736_raise_soft(con)
+    m = s736_model(con, raised=raised)
+    sq = _sq()
+    allk = str(request.args.get("all") or "")
+    back = P + "/s454/billkaam"
+    h = ['<div class="mut" id="bktop">%s</div>' % L(en, "bk_top")]
+    if m["redo"]:
+        h.append('<div class="grp red" id="g_redo">%s</div>' % L(en, "bk_redo", len(m["redo"])))
+        lim = len(m["redo"]) if allk == "redo" else S736_SHOW
+        for a in m["redo"][:lim]:
+            what = sq.words(a.get("reason"), "owner" if en else "reception") if sq else (a.get("reason") or "")
+            head = " · ".join(z for z in (a["head_vendor"], (L(en, "billno", a["head_no"]) if a["head_no"] else ""), L(en, "bk_scan_no", a.get("stamp") or "#%d" % a["scan"])) if z)
+            h.append('<div class="card" data-redo="%d" data-scan="%d" data-try="%d" data-by="%s"><div class="nm">%s</div><div class="red">%s</div>'
+                     '<div class="sb">%s · %s</div><div><a class="sk" style="display:inline-flex;align-items:center;min-height:48px;padding:0 22px;border-radius:10px;'
+                     'background:#1f3864;color:#fff;font-weight:700;text-decoration:none" href="%s">%s</a></div></div>'
+                     % (a["id"], a["scan"], a["try_n"], esc(str(a.get("asked_by") or "")), esc(head), esc(what), esc(_s736_try(en, a["try_n"])),
+                        esc(_s736_by(en, con, a)), esc(_s618_intake(a["head_vendor"] or a.get("vendor") or "", a.get("month") or "", a["scan"], back)), L(en, "scankaro")))
+        h.append(_s736_more(en, "redo", lim, lim, len(m["redo"])))
+    if m["paper"]:
+        h.append('<div class="grp amb" id="g_paper">%s</div>' % L(en, "bk_paper", len(m["paper"])))
+        for p_ in m["paper"]:
+            h.append('<div class="ln" data-paper="%d"><div class="t"><div class="a">%s</div><div class="s">%s</div></div><a class="sk" href="%s/s454/rescan">%s</a></div>'
+                     % (p_["ask"], esc(p_["vendor"]), esc(L(en, "bk_paper_s", OS.ddmm(p_["created_at"]))), P, L(en, "bk_open")))
+    if m["scan"]:
+        h.append('<div class="grp" id="g_scan" style="color:#1f3864">%s</div>' % L(en, "bk_scan", len(m["scan"])))
+        lim = len(m["scan"]) if allk == "scan" else S736_SHOW
+        t = OS.today()
+        for x in m["scan"][:lim]:
+            if x["kind"] == "recv":
+                h.append('<div class="card" data-scanline="recv" data-order="%d"><div class="nm">%s</div><div class="sb">%s</div>'
+                         '<div class="two"><a class="g" href="%s">%s</a></div></div>'
+                         % (int(x.get("order_id") or 0), esc(L(en, "bk_recv", x["vendor"], OS.ddmm(x["date"]))), L(en, "bk_recv_s"),
+                            esc(_s736_back(x["intake"], back)), L(en, "scankaro")))
+                continue
+            bd = OS._date(x.get("date"))
+            days = (t - bd).days if bd else 0
+            wait = L(en, "bk_days", days) if days > 0 else L(en, "bk_today")
+            h.append('<div class="card" data-scanline="marg" data-bill="%d"><div class="nm">%s · %s · %s · %s</div><div class="sb">%s</div>'
+                     '<div class="two"><a class="g" href="%s">%s</a><button class="b" onclick="s454(\'%s/api/s454/paper_missing\',{bills:[%d]})">%s</button></div></div>'
+                     % (x["bill_id"], esc(x["vendor"]), esc(L(en, "billno", x["bill_no"])), esc(OS.ddmm(x["date"])), esc(rs(x["amount_p"])), esc(wait),
+                        esc(_s736_back(x["intake"], back)), L(en, "scankaro"), P, x["bill_id"], L(en, "bk_missing")))
+        h.append(_s736_more(en, "scan", lim, lim, len(m["scan"])))
+    if m["q"]:
+        h.append('<div class="grp amb" id="g_q">%s</div>' % L(en, "bk_q", len(m["q"])))
+        lim = len(m["q"]) if allk == "q" else S736_SHOW
+        for q in m["q"][:lim]:
+            b = q["_bill"]
+            lines = _s736_fields(en, q, q["_meta"], b)
+            body = esc(json.dumps(dict(scan=q["scan"], bill=q["bill"])))
+            h.append('<div class="card" data-q="%d" data-bill="%d"><div class="nm">%s</div><div style="display:flex;gap:10px">'
+                     '<a href="%s" target="_blank" rel="noopener" style="flex:1 1 0;min-width:0;min-height:120px;display:flex;align-items:center;justify-content:center;'
+                     'background:#eef0f4;border-radius:8px;color:#555;font-size:13px;text-align:center;text-decoration:none;padding:4px">'
+                     '<img src="%s" alt="%s" style="width:100%%;max-height:200px;object-fit:contain;border-radius:8px" '
+                     'onerror="this.replaceWith(document.createTextNode(this.alt))"></a>'
+                     '<div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:3px;font-size:14.5px"><b>%s</b><div>%s · %s</div><div>%s · %s</div>%s</div></div>'
+                     '<div class="two"><button class="g" onclick="s454(\'%s/api/s454/confirm\',Object.assign(%s,{yes:true}))">%s</button>'
+                     '<button class="b" style="color:#8c1d18;border-color:#8c1d18" onclick="s454(\'%s/api/s454/confirm\',Object.assign(%s,{yes:false}))">%s</button></div></div>'
+                     % (q["scan"], q["bill"], L(en, "bk_q_dup") if q.get("taken") else L(en, "bk_q_h"), esc(q["pdf"]), esc(q["thumb"]), esc(L(en, "bk_photo", q.get("stamp") or "")),
+                        L(en, "bk_marg"), esc(q["vendor"]), esc(b.get("bill_no") or q.get("bill_no") or ""), esc(OS.ddmm(b.get("bill_date") or "")),
+                        esc(rs(b.get("amount_p"))) if b.get("amount_p") is not None else esc(q.get("amount") or ""),
+                        "".join('<div style="color:#8a5300">%s</div>' % ln for ln in lines), P, body, L(en, "bk_yes"), P, body, L(en, "bk_no")))
+        h.append(_s736_more(en, "q", lim, lim, len(m["q"])))
+    if not m["n"]:
+        h.append('<div class="ok" id="alldone"><div class="t">%s</div></div>' % L(en, "bk_none"))
+    nt, nr = m["today"]
+    h.append('<div class="mut" id="bkaaj" style="background:#e9f2ea;border-radius:10px;padding:10px 12px;color:#1f4d25">%s</div>'
+             % (L(en, "bk_aaj0") if not nt else (L(en, "bk_aaj_ok", nt) if nr >= nt else L(en, "bk_aaj_n", nt, nr))))
+    return shell(con, u, L(en, "r_billkaam"), "".join(h), back=P, login=login)
+
+
+def _s736_back(href, back):
+    """The intake link with its 'from' set to this page (so the Back of the scan screen returns here)."""
+    try:
+        from urllib.parse import parse_qsl, urlsplit         # noqa: PLC0415
+        sp = urlsplit(href)
+        q = [(k, v) for k, v in parse_qsl(sp.query, keep_blank_values=True) if k != "from"] + [("from", back)]
+        return sp.path + "?" + urlencode(q)
+    except Exception:                                         # noqa: BLE001
+        return href
+
+
+def _s736_escalated_html(con, en):
+    """Shavez's Scans to redo: the scans reception has rescanned twice and that are still in trouble (READ ONLY)."""
+    try:
+        p = s736_plan(con)
+    except Exception:                                         # noqa: BLE001
+        return ""
+    if not p["escalated"]:
+        return ""
+    sq = _sq()
+    h = ['<div class="grp red" id="redo_esc">%s</div>' % L(en, "bk_esc", len(p["escalated"]))]
+    for x in p["escalated"]:
+        what = S736_REASON_EN.get(x["reason"], x["reason"]) if en else (sq.words(x["reason"], "shavez") if sq else x["reason"])
+        h.append('<div class="card" data-esc="%d"><div class="nm">%s</div><a class="more" href="/scanapp/bills/%d/file" target="_blank" rel="noopener">%s</a></div>'
+                 % (x["scan"], esc(L(en, "bk_esc_s", x["stamp"], " ".join(z for z in (x["vendor"], x["bill_no"]) if z), what)), x["scan"], L(en, "redo_open")))
+    return "".join(h)
+
+
+@bp.route(P + "/s454/billkaam")
+def r_billkaam():
+    return billkaam_page()
+
+
+_sq_before_s736 = _sq
+
+
+class _S736Words(object):
+    """scan_quality with the server's own reason ('unread') and the server as the sender -- every screen that reads the asks (this file's,
+    order_track_page's) says them in words, never the bare code."""
+
+    def __init__(self, m):
+        self._m = m
+
+    def __getattr__(self, k):
+        return getattr(self._m, k)
+
+    def words(self, code, who="owner", a=None, b=None):
+        w = S736_WORDS.get(code)
+        if w:
+            return w[self._m.AUDIENCE.get(who, 0)]
+        return self._m.words(code, who, a, b)
+
+    def sent_by(self, kind, login=""):
+        if str(login or "").lower() == S736_SERVER:
+            return "Server ne khud bheja"
+        return self._m.sent_by(kind, login)
+
+
+def _sq():                                                    # noqa: F811 -- S736: the words above, over scan_quality's own
+    m = _sq_before_s736()
+    return _S736Words(m) if m is not None else None
+# ---- S736 end ---------------------------------------------------------------------------------------------------------------------------

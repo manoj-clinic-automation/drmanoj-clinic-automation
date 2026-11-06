@@ -1,0 +1,367 @@
+
+
+
+# ---- S736 (06-Nov-2026, Sanjeevni session 396, kit S736_RECEPTION_BILL_LIST; D840, D847, F-1142, F-1143, F-1154) ---------------------------
+#  THE OWNER'S DECISIONS ON THE STEP VIEW (owner-only, POST /finance/purchase/api/s736/decide -> s736_decide below), kept in
+#  finance.db s736_decision (one row per scan; Undo deletes it; every tap audited):
+#    paper         Second look: the paper's figure stands -- written as reception's own "= the scan -> Marg galat" answer is
+#                  (purchase_scan_state.paper_amount = the scan's own reading, amount_state 'marg_wrong'; the old two kept on the decision
+#                  row for Undo) AND the bill marked WRONG at the paper's figure (purchase_bill.verdict/wrong_amount_p/reason -- S440's own
+#                  "Marg galat" branch, so the month page, the supplier payment group and _resolve_wrong see it); refused when the bill already
+#                  carries a verdict or its month is finalised. The pair becomes Amount differs, "Amir: a Marg correction".
+#    scan_misread  Second look: the scan misread -- the amount given for the paper stands; the pair is judged on it (settled when it agrees).
+#    accept        A scan reception rescanned twice and still in trouble (porders_s454.s736_plan's escalated): the scan stands as it is --
+#                  a "Paired, nothing read" pair is then judged as an ordinary pair, and the server never asks for it again.
+#  A decision holds only while the scan's own reading (raw_p) -- and, for the two second-look decisions, the amount given (paper_p) -- are
+#  what they were at the tap; a changed reading puts the pair back to its state.
+#  THE STEP VIEW: row 2 also lists the rescans the server or a person asked for (with the try); row 3 is "Differences" (F-1154: each line
+#  names whose it is -- Amir, reception or you); row 5 carries the Second look buttons, the scans after two tries (Open paper · Accept)
+#  and the decisions taken (Undo). The NEFT strip counts those scans too. Everything else of the register is unchanged.
+KIT_S736 = "S736_RECEPTION_BILL_LIST"
+S736_DDL = ("CREATE TABLE IF NOT EXISTS s736_decision (asset_bill_id INTEGER PRIMARY KEY, decision TEXT NOT NULL, bill_id INTEGER, raw_p INTEGER, "
+            "paper_p INTEGER, by TEXT, at TEXT, old_paper_p INTEGER, old_amount_state TEXT, old_confirmed_by TEXT, old_confirmed_at TEXT, bill_marked INTEGER)")
+S736_DECISIONS = ("paper", "scan_misread", "accept")
+S736_REASON_EN = {"unread": "nothing read", "blurred": "blurred", "cut": "cut off", "no_total": "no total", "not_adding": "lines do not add up",
+                  "not_bill": "not a bill"}
+
+
+def _s736_load(con):
+    try:
+        return {int(r[0]): dict(decision=r[1], raw_p=r[2], paper_p=r[3], bill_id=r[4], by=r[5], at=r[6], old_paper_p=r[7], old_amount_state=r[8]) for r in
+                con.execute("SELECT asset_bill_id, decision, raw_p, paper_p, bill_id, by, at, old_paper_p, old_amount_state FROM s736_decision")}
+    except sqlite3.Error:
+        return {}
+
+
+_Ctx_before_s736 = Ctx
+
+
+class Ctx(_Ctx_before_s736):                                  # noqa: F811 -- S736: + the owner's decisions
+    def __init__(self, con):
+        _Ctx_before_s736.__init__(self, con)
+        self.s736 = _s736_load(con)
+
+
+def _s736_n(v):
+    return None if v is None else int(v)
+
+
+def _s736_dec(cx, s, kinds):
+    """The owner's decision on this scan when it is one of `kinds` and still holds (the scan's reading, and the amount given, unchanged)."""
+    sid = s.get("id") if s else None
+    if sid is None:
+        return None
+    d = (getattr(cx, "s736", None) or {}).get(int(sid))
+    if not d or d.get("decision") not in kinds:
+        return None
+    raw = s.get("amount_p") if "amount_p" in s else _amount_p(s.get("total_amount"))
+    if _s736_n(d.get("raw_p")) != _s736_n(raw):
+        return None
+    if d["decision"] == "scan_misread" and _s736_n(d.get("paper_p")) != _s736_n(cx.paper.get(int(sid))):
+        return None
+    if d["decision"] == "paper" and _s736_n(raw) != _s736_n(cx.paper.get(int(sid))):
+        return None
+    return d["decision"]
+
+
+_s726_state_before_s736 = s726_state
+
+
+def s726_state(cx, s, a, present=True):                       # noqa: F811
+    """S736: an accepted scan is never 'Paired, nothing read'; a second look the owner decided is judged as an ordinary pair."""
+    st = _s726_state_before_s736(cx, s, a, present)
+    if st == "unread_pair" and _s736_dec(cx, s, ("accept",)):
+        return pair_state(a)
+    if st == "second_look" and _s736_dec(cx, s, ("scan_misread",)):
+        return pair_state(a)
+    return st
+
+
+_note_before_s736 = _note
+
+
+def _note(cx, st, a, b, s, l):                                # noqa: F811
+    """S736: the owner's decision named in the note; 'the paper's figure stands' is Amir's correction."""
+    n, w = _note_before_s736(cx, st, a, b, s, l)
+    if _s736_dec(cx, s, ("paper",)):
+        n = "Your second look: the paper's figure stands (the scan's own reading). " + n
+    elif _s736_dec(cx, s, ("scan_misread",)):
+        n = ("Your second look: the scan misread; the amount given (%s) stands. " % rs2(cx.paper.get(int(s["id"])))) + n
+    elif _s736_dec(cx, s, ("accept",)):
+        n = "You accepted this scan as it is. " + n
+    return n, w
+
+
+def _s736_p4():
+    import porders_s454                                       # noqa: PLC0415 -- beside this file
+    return porders_s454
+
+
+def _s736_view(con):
+    try:
+        return _s736_p4().s736_view(con)
+    except Exception:                                         # noqa: BLE001 -- the step view never waits on it
+        return None
+
+
+def s736_decide(con, who, b):
+    """The owner's tap on the step view (the header above) -> (ok, message). Audited; commits."""
+    try:
+        sid = int((b or {}).get("scan") or 0)
+    except (TypeError, ValueError):
+        sid = 0
+    d = str((b or {}).get("decision") or "")
+    if not sid:
+        return False, "No scan named."
+    con.execute(S736_DDL)
+    now = dt.datetime.now().replace(microsecond=0).isoformat()
+    if d == "undo":
+        row = con.execute("SELECT decision, raw_p, old_paper_p, old_amount_state, old_confirmed_by, old_confirmed_at, bill_marked, bill_id, by "
+                          "FROM s736_decision WHERE asset_bill_id=?", (sid,)).fetchone()
+        if not row:
+            return False, "Nothing to undo."
+        msg = "Undone."
+        if row[0] == "paper":                                 # put reception's own answer back -- only if nobody has changed it since
+            cur_ = con.execute("SELECT paper_amount, amount_state FROM purchase_scan_state WHERE asset_bill_id=?", (sid,)).fetchone()
+            if cur_ and _s736_n(cur_[0]) == _s736_n(row[1]) and str(cur_[1] or "") == "marg_wrong":
+                con.execute("UPDATE purchase_scan_state SET paper_amount=?, amount_state=?, confirmed_by=?, confirmed_at=? WHERE asset_bill_id=?",
+                            (row[2], row[3], row[4], row[5], sid))
+            else:
+                msg = "The paper amount was answered again after your tap -- that answer stands; your decision is removed."
+            if row[6] and row[7]:                             # the WRONG mark this tap made, only while it is still that mark
+                con.execute("UPDATE purchase_bill SET verdict=NULL, verdict_by=NULL, verdict_at=NULL, wrong_amount_p=NULL, reason=NULL "
+                            "WHERE id=? AND verdict='WRONG' AND wrong_amount_p=? AND verdict_by=?", (int(row[7]), row[1], row[8]))
+        con.execute("DELETE FROM s736_decision WHERE asset_bill_id=?", (sid,))
+        _s736_audit(con, who, "s736_decision_undone", sid, dict(kit=KIT_S736))
+        con.commit()
+        return True, msg
+    if d not in S736_DECISIONS:
+        return False, "Not a decision."
+    if con.execute("SELECT 1 FROM s736_decision WHERE asset_bill_id=?", (sid,)).fetchone():
+        return False, "Already decided — undo it first."
+    scans = asset_scans(con) or {}
+    s = scans.get(sid)
+    lk = con.execute("SELECT bill_id FROM purchase_scan_link WHERE asset_bill_id=?", (sid,)).fetchone()
+    bill = None
+    if lk:
+        r = con.execute("SELECT * FROM purchase_bill WHERE id=?", (int(lk[0]),)).fetchone()
+        bill = dict(r) if r else None
+    if d in ("paper", "scan_misread"):
+        if s is None or bill is None:
+            return False, "This scan is no longer paired."
+        if month_class(con, str(bill.get("month") or str(bill.get("bill_date") or "")[:7])) != "counted":
+            return False, "A parked month has no second look."
+        cx = Ctx(con)
+        st = s726_state(cx, s, agree(cx, s, bill), True)
+        if st != "second_look":
+            return False, "This pair is no longer a second look."
+        raw, paper = s.get("amount_p"), cx.paper.get(sid)
+        if raw in (None, 0):
+            return False, "The scan read no amount of its own."
+        if d == "paper":
+            fin = con.execute("SELECT status FROM purchase_month WHERE month=?", (str(bill.get("month") or str(bill.get("bill_date") or "")[:7]),)).fetchone()
+            if fin and fin[0] == "final":
+                return False, "This month is finalised -- nothing is changed in it."
+            if bill.get("verdict"):
+                return False, "This bill already carries a verdict (%s) -- change it on the month's register." % bill.get("verdict")
+            if not con.execute("SELECT 1 FROM purchase_scan_state WHERE asset_bill_id=?", (sid,)).fetchone():
+                return False, "The amount given is not on the scan's own row -- answer it on the register."
+        old = con.execute("SELECT paper_amount, amount_state, confirmed_by, confirmed_at FROM purchase_scan_state WHERE asset_bill_id=?", (sid,)).fetchone()
+        old_pp, old_st, old_cb, old_ca = (old[0], old[1], old[2], old[3]) if old else (None, None, None, None)
+    else:
+        try:
+            esc_ids = {int(x["scan"]) for x in _s736_p4().s736_plan(con)["escalated"]}
+        except Exception:                                     # noqa: BLE001
+            esc_ids = set()
+        if sid not in esc_ids:
+            return False, "This scan is not waiting for you."
+        if s is None:
+            try:
+                acon = _pa()._assets_con()
+                row = acon.execute("SELECT total_amount FROM bills WHERE id=?", (sid,)).fetchone() if acon is not None else None
+                if acon is not None:
+                    acon.close()
+            except Exception:                                 # noqa: BLE001
+                row = None
+            raw = _amount_p(row[0]) if row else None
+        else:
+            raw = s.get("amount_p")
+        paper = None
+        old_pp = old_st = old_cb = old_ca = None
+    marked = 1 if d == "paper" else 0
+    con.execute("INSERT INTO s736_decision (asset_bill_id, decision, bill_id, raw_p, paper_p, by, at, old_paper_p, old_amount_state, old_confirmed_by, "
+                "old_confirmed_at, bill_marked) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                (sid, d, (bill or {}).get("id"), raw, paper, who, now, old_pp, old_st, old_cb, old_ca, marked))
+    if d == "paper":                                          # S440's own "Marg galat" branch, in the owner's name (porders.api_scan_amount)
+        cur = con.execute("UPDATE purchase_scan_state SET paper_amount=?, amount_state='marg_wrong', confirmed_by=?, confirmed_at=? WHERE asset_bill_id=?",
+                          (raw, who, now, sid))
+        why = "bill %s %s: paper Rs %s, Marg Rs %s (the owner's second look, %s)" % (bill.get("bill_no"), _pa().supplier_key(bill.get("supplier") or ""),
+                                                                                 rs2(raw)[1:], rs2(bill.get("amount_p"))[1:], who)
+        cur2 = con.execute("UPDATE purchase_bill SET verdict='WRONG', verdict_by=?, verdict_at=?, wrong_amount_p=?, reason=? WHERE id=? AND verdict IS NULL",
+                           (who, now, raw, why, bill["id"]))
+        if cur.rowcount != 1 or cur2.rowcount != 1:
+            con.rollback()
+            return False, "Nothing was changed -- the scan's row or the bill changed meanwhile; open the page again."
+        _s736_audit(con, who, "verdict", bill["id"], dict(verdict="WRONG", wrong_amount_p=raw, reason=why, before=None, via="S736 second look"))
+    _s736_audit(con, who, "s736_decision", sid, dict(decision=d, bill=(bill or {}).get("id"), raw_p=raw, paper_p=paper, kit=KIT_S736))
+    con.commit()
+    return True, {"paper": "The paper's figure stands — Amir corrects Marg.", "scan_misread": "The scan misread — the amount given stands.",
+                  "accept": "Accepted as it is."}[d]
+
+
+def _s736_audit(con, who, action, ref, detail):
+    try:
+        _pa()._audit(con, who, action, ref, detail)
+    except Exception:                                         # noqa: BLE001 -- the row itself is the record
+        pass
+
+
+def _s736_btn(scan, decision, label, bill=None):
+    return ('<button type="button" class="s736b" data-scan="%d" data-d="%s"%s onclick="s736d(this)">%s</button>'
+            % (int(scan), esc(decision), (' data-bill="%d"' % int(bill)) if bill else "", esc(label)))
+
+
+def check_rows(r, cx):                                        # noqa: F811 -- S736: rows 2, 3 and 5 as the header above says
+    """The seven rows of the step view as [(label, count text, [list lines as HTML], grey)] -- the register's own states, and (S736) the
+    rescans asked, the scans after two tries and the owner's decisions (r['s736'], from porders_s454.s736_view)."""
+    v = r.get("s736") or {}
+    month = r.get("month") or ""
+    asks = [a for a in (v.get("asks") or []) if a.get("month") == month]
+    esc_ = [x for x in (v.get("escalated") or []) if x.get("month") == month]
+    dec = [x for x in (v.get("decided") or []) if x.get("month") == month]
+    ask_by_scan = {int(a["scan"]): a for a in asks}
+    esc_ids = {int(x["scan"]) for x in esc_}                  # a scan after two tries is row 5's, not reception's
+    month_ids = {x["id"] for x in r["rows"]}
+    rows = [x for x in r["rows"] if not str(x.get("whose") or "").startswith("Nobody (")]     # a parked month's new states ask nobody
+    paired = [x for x in r["rows"] if x.get("scan") is not None]
+    unpaired = [x for x in r["rows"] if x.get("scan") is None and x["state"] != "double"]
+    l1 = [_ck_line(x, " · %s · %s" % (esc(rs(x["amount_p"])), esc(STATE_EN[x["state"]].lower()))) for x in unpaired]
+
+    def asked(sid):
+        a = ask_by_scan.get(int(sid)) if sid is not None else None
+        if not a:
+            return ""
+        return ' <span class="mut">· rescan asked by %s, try %d</span>' % ("the server" if a["by"] == "server" else esc(a["by"].split(" ")[0].title() or "?"), a["try_n"])
+    rec, shown = [], set()
+    for x in rows:
+        if x["state"] == "no_scan" and not x.get("missing"):
+            rec.append(_ck_line(x, " · %s · %s" % (esc(rs(x["amount_p"])), "a question" if x.get("whose") == "Reception: a question" else "to scan")))
+        elif x["state"] == "unread_pair" and x.get("scan") not in esc_ids:
+            rec.append(_ck_line(x, " · scan %s · paired, nothing read: rescan%s" % (esc(x["stamp"]), asked(x.get("scan")))))
+            shown.add(x.get("scan"))
+    hinted = {sid for sid, bid in cx.likely.items() if bid in month_ids}
+    for s in r["scans"]:
+        if s["id"] in esc_ids:
+            continue
+        if s["state"] in ("probably", "vendor", "to_name", "unread") and not (s["state"] == "probably" and s["id"] in hinted):
+            rec.append("Scan %s · %s%s" % (esc(s["stamp"]), esc(SCAN_EN[s["state"]]), asked(s["id"])))
+            shown.add(s["id"])
+    for a in asks:
+        if a["scan"] not in shown:
+            rec.append("Scan %s · %s · rescan asked by %s, try %d" % (esc(a["stamp"]), esc(S736_REASON_EN.get(a["reason"], a["reason"])),
+                                                                 "the server" if a["by"] == "server" else esc(a["by"].split(" ")[0].title() or "?"), a["try_n"]))
+    amir = []
+    for x in rows:
+        if x["state"] == "amount_differs":
+            ag = x.get("agree") or {}
+            d = ag.get("diff") or 0
+            amir.append(_ck_line(x, " %s%s" % (esc(rs2(abs(d))), ' <span class="mut">· the %s reads %s · %s</span>'
+                                               % ("paper" if ag.get("paper") else "scan", "more" if d > 0 else "less", esc(x.get("whose") or "")))))
+        elif x["state"] == "double":
+            amir.append(_ck_line(x, ' <span class="mut">· entered twice in Marg · Amir: a Marg correction</span>'))
+    rnd = []
+    for x in rows:
+        a = x.get("agree") or {}
+        if x["state"] in ("verified", "has_scan") and a.get("diff") and abs(int(a["diff"])) <= 100:
+            rnd.append(_ck_line(x, " · paper %s · %s" % (esc(rs2(a.get("scan_p"))), esc(rs2(abs(int(a["diff"])))))))
+    you = []
+    for x in rows:
+        if x["state"] == "second_look":
+            btns = ""
+            if v.get("ok") and x.get("scan") is not None:
+                btns = ('<div class="s736row">%s%s</div>' % (_s736_btn(x["scan"], "paper", "Paper's figure stands — Amir corrects", x["id"]),
+                                                             _s736_btn(x["scan"], "scan_misread", "Scan misread — settled", x["id"])))
+            you.append(_ck_line(x, ' · second look <span class="mut">· %s</span>%s' % (esc(x.get("note") or ""), btns)))
+        elif x["state"] == "no_scan" and x.get("missing"):
+            you.append(_ck_line(x, " · %s · paper not found" % esc(rs(x["amount_p"]))))
+    for x in esc_:
+        head = " ".join(z for z in (x.get("vendor") or "", x.get("bill_no") or "") if z) or "Scan"
+        you.append('%s · scan %s · rescanned %d times, still: %s<div class="s736row"><a class="s736b" href="/scanapp/bills/%d/file" target="_blank" '
+                   'rel="noopener">Open paper</a>%s</div>' % (esc(head), esc(x["stamp"]), int(x["tries"]), esc(S736_REASON_EN.get(x["reason"], x["reason"])),
+                                                             int(x["scan"]), _s736_btn(x["scan"], "accept", "Accept")))
+    n_you = len(you)
+    if dec:
+        you.append('<span class="mut"><b>Decided</b> (undo any):</span>')
+    for x in dec:
+        word = {"paper": "the paper's figure stands", "scan_misread": "the scan misread", "accept": "accepted as it is"}.get(x["decision"], x["decision"])
+        head = " ".join(z for z in (x.get("vendor") or "", x.get("bill_no") or "") if z) or "Scan"
+        you.append('<span class="mut">%s · scan %s · %s (%s)</span><div class="s736row">%s</div>' % (esc(head), esc(x["stamp"]), esc(word), esc(ddmon(x.get("at")) or ""),
+                                                                               _s736_btn(x["scan"], "undo", "Undo")))
+    return [("Scans paired", "%d / %d" % (len(paired), r["total"]), l1 or ["Every bill has its scan."], False),
+            ("With reception", str(len(rec)), rec, False),
+            ("Differences", str(len(amir)), amir, False),
+            ("Rounding (supplier's figure paid)", str(len(rnd)), rnd, False),
+            ("You & Shavez", str(n_you), you, False),
+            ("Supplier summaries", "later", ["Comes after rows 1–5."], True),
+            ("Lock & NEFT", "after 1–6", ["Opens when rows 1–6 are clear."], True)]
+
+
+S736_CSS = """
+#s726chk .s736row{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 2px}
+#s726chk .s736b{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:1px solid #1f3864;border-radius:10px;background:#fff;color:#1f3864;
+ font:600 14px system-ui,sans-serif;text-decoration:none;cursor:pointer}
+#s726chk .s736b[disabled]{opacity:.5;cursor:default}
+#s726chk #s736msg{display:none;border-radius:10px;padding:10px 12px;margin:0 0 10px;font-weight:700}
+"""
+S736_JS = """
+<script>function s736d(b){var m=document.getElementById('s736msg');b.disabled=true;
+fetch(%s,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scan:parseInt(b.getAttribute('data-scan')),decision:b.getAttribute('data-d')})})
+.then(function(r){return r.json().catch(function(){return {};}).then(function(j){return [r,j];});}).then(function(x){
+if(x[0].ok&&x[1].ok){location.reload();return;}b.disabled=false;if(m){m.style.display='block';m.style.background='#fbe7e5';m.style.color='#8c1d18';m.textContent=x[1].message||('HTTP '+x[0].status);}})
+.catch(function(e){b.disabled=false;if(m){m.style.display='block';m.textContent=String(e);}});}</script>
+"""
+
+
+def check_body(con, month, prefix, months, r=None):          # noqa: F811 -- S736: + the asks, the scans after two tries, the decisions
+    """S726 (D840): the owner's step view of one month -- a header, the NEFT strip, seven one-line rows (each opens its list), a month
+    select. Reads only (the buttons of row 5 post to /api/s736/decide; nothing is written by this GET)."""
+    r = r if r is not None else register(con, month)
+    v = _s736_view(con)
+    r = dict(r, s736=v or {})
+    cx = Ctx(con)
+    total_p = sum(int(x["amount_p"] or 0) for x in r["rows"])
+    open_n = (r["total"] - r["settled"]) + r["open_scans"]
+    if v and r["cls"] == "counted":                           # S736: a rescan asked, or a scan after two tries, holds the month too
+        unsettled = {x.get("scan") for x in r["rows"] if x["state"] not in ("verified", "has_scan", "accepted")} | {s["id"] for s in r["scans"]}
+        extra = {int(a["scan"]) for a in (v.get("asks") or []) if a.get("month") == month} | {int(x["scan"]) for x in (v.get("escalated") or [])
+                                                                                               if x.get("month") == month}
+        open_n += len(extra - unsettled)
+    try:
+        mname = MONTHS[int(month[5:7]) - 1]
+    except (ValueError, IndexError):
+        mname = month
+    h = ['<div id="s726chk"><style>%s%s</style>' % (CHECK_CSS, S736_CSS)]
+    h.append('<h1 id="s726head">%s · %d bill%s · %s</h1>' % (esc(mname), r["total"], "" if r["total"] == 1 else "s", esc(rs(total_p))))
+    h.append('<div id="s736msg"></div>')
+    if r["cls"] != "counted":
+        quiet = [x for x in r["rows"] if str(x.get("whose") or "").startswith("Nobody (")]
+        h.append('<div class="mut" id="s726parked" style="margin:-6px 0 8px">%s is parked: shown for reading only; nobody is asked.%s</div>'
+                 % (esc(month_name(month)), (" %d bill%s under the new rules (%s) wait with nobody." % (len(quiet), "" if len(quiet) == 1 else "s",
+                    esc(", ".join("%s %s · %s" % (x["supplier"], x["bill_no"], STATE_EN[x["state"]]) for x in quiet[:6])))) if quiet else ""))
+    if open_n:
+        h.append('<div class="strip hold" id="s726strip">NEFT on hold · %d open</div>' % open_n)
+    else:
+        h.append('<div class="strip clear" id="s726strip">All clear ✓</div>')
+    rows = check_rows(r, cx)
+    for i, (lab, n, lines, grey) in enumerate(rows, 1):
+        h.append('<details class="%s%s" data-row="%d"><summary><span class="l"><b>%d</b> %s</span><span class="n">%s</span></summary>'
+                 '<ul>%s</ul></details>' % ("grey" if grey else "row", " last" if i == len(rows) else "", i, i, esc(lab), esc(n),
+                                           "".join("<li>%s</li>" % x for x in lines) or "<li>Nothing here.</li>"))
+    opts = "".join('<option value="%s"%s>%s</option>' % (esc(m), " selected" if m == month else "", esc(month_name(m))) for m in months)
+    h.append('<div class="msel">Month <select id="s726month" onchange="location.href=\'%s/page/check?month=\'+this.value">%s</select></div>'
+             % (esc(prefix), opts))
+    h.append('<div class="mut">Read only, but for the buttons in row 5. Reception\'s own list: <a href="/finance/porders/s454/billkaam">Aaj ka bill kaam</a> · '
+             'the full list is on <a href="%s/page/scans?month=%s">the month\'s register</a>.</div></div>' % (esc(prefix), esc(month)))
+    h.append(S736_JS % json.dumps(prefix + "/api/s736/decide"))
+    return "".join(h)
+# ---- S736 end ---------------------------------------------------------------------------------------------------------------------------
