@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S393 close** (the Sanjeevni chat), 06-Nov-2026, evening — the Sanjeevni sections refreshed here (the alarms live; the purchase pairing part 1 and the step view live; 396 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S394 close** (the parent), 06-Nov-2026, evening — the parent's sections refreshed here (an exit retires its machine number; statement heads end at their first row; the System Board by area; 397 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S393 close** (the Sanjeevni chat), 06-Nov-2026, evening — the Sanjeevni sections refreshed here (the alarms live; the purchase pairing part 1 and the step view live; 396 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S392 close** (the Scan App project), 06-Nov-2026, evening — the Scan App sections refreshed here (its 395 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S390 close** (the parent), 06-Nov-2026, evening — the parent's sections refreshed here (staff 20 put right and Arjun Dev set up; the petty statement; Bhati's backfill and reception's physiotherapy slips; the salary approvals tied to their figures; Zerodha and Union Bank in the accountants' pack; the nightly waits for Drive; 394 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S391 close** (the Sanjeevni chat), 06-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the purchase reconciliation flow agreed and planned; nothing built; 393 reserved); the other projects' sections as their closes left them.
@@ -364,7 +365,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S390 close (06-Nov, 17:xx)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S394 close (06-Nov, 19:xx)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -374,7 +375,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the S390 record (papers only). Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries the S394 record (papers only). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -386,7 +387,7 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**3 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20); enrol Arjun Dev's finger, then tell me — I do the link step.
+**3 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit — his 30-Sep date stays (S733); enrol Arjun Dev's finger, then tell me — I do the link step.
 
 **4 · OCTOBER'S STAFF LEDGER: close it, if not done.** Step 5 on the ledger page is your button.
 
@@ -505,15 +506,22 @@ https://followup.dr-manoj.in/portal/users
 
 0. **The nightly's copy of the server** (F-1124): read at the next open whether the Drive wait brought it.
 1. **Arjun Dev's link step**, when his finger is on the machine; **staff 20's exit steps** your word covers.
-2. **An exit never leaves a machine code live** (F-1147).
-3. **The review reading on 19 Nov** (D836): read-only, worked out on your PC.
-4. **The packs page reads a statement's head only from its head** (F-1148).
+2. **The review reading on 19 Nov** (D836): read-only, worked out on your PC.
+3. **The packs page's September checklist** kept quiet for the two September bills the pharmacy parked (after its S726 is in the nightly copy).
+4. **The System Board:** kept by area (D850); tell me what to move.
 5. **The Call Console's build A**, on your word after board R2.
 6. **WhatsApp after MyOperator's fix** · your publish file taking in my uploads first (D823).
 7. **Staff performance** · **Patients on your command console** (a mock-up first) · the watches (F-1085, the IPD desk, the Hostinger update, IPD kits 5 and 6).
 8. **The Tally check** · **the Sanjeevni GST returns** · AF-16 · AF-19.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S394 CLOSE — 06-Nov-2026 (the parent)
+
+- **An exit now carries the leaver's machine number, and the biometric tick retires it for good** — refused when no number is found or it is someone else's, never changing a date already set (S733).
+- **A bank statement's top part ends at its first row for ICICI, SBI and HDFC**; all 97 statements on the shelf read and filed as before (S734).
+- **Your System Board reorganised by area** — urgent first, the rest folded, the week by day; it no longer falls back to its 6-October list (D850).
+- **The morning checks run on your PC's helper with no extra typing** (F-1151).
 
 ## ✅ DONE AT THE S390 CLOSE — 06-Nov-2026 (the parent)
 
