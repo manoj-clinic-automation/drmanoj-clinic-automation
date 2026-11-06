@@ -1,0 +1,1 @@
+S711_TRACK_FIXES · S388 (Sanjeevni) · 06-Nov-2026 · the order list: viewer buttons beside the bill; wrong-dealer card (saved first, every dealer, rescan, Undo); F-1120 · F-1121 · F-1123

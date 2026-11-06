@@ -1,0 +1,3 @@
+kit id S712_STAFF_FORM_SUNDAY_ARJUN
+project the parent (session 389, 06-Nov-2026) -- its own files; claimed on board/_numbers v933->v934
+finance/staff_easy.py c5344291 -> da4aabd2 . finance/staff_easy.html 05c1f7b8 -> 45dd0a01 . staff_master.csv Arjun (20) base 3200 -> 3500 (one cell)
