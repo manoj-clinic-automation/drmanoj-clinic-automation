@@ -1,0 +1,3 @@
+kit id S713_GMB_SAVE
+project the parent (session 389, 06-Nov-2026) -- its own files; claimed on board/_numbers v938->v939
+portal/portal_gmb.py new a4606e4c . portal/portal.py a93da673 -> 5cf80f82 (one mount block) . portal/gmb.html d9aad642 -> 964f0288 (Shared buttons + keeping; engine untouched)
