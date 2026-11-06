@@ -5,7 +5,7 @@
 #  supplier at that amount and nothing read differing (else reception's one-tap question); the wrong AUTO links of a counted month undone
 #  at each pass (never a September-only one); every rupee shown; Second look; Paired, nothing read; the owner's step view /page/check.
 #    cd /root/deploy/repo && git pull --ff-only && rm -rf /tmp/s726kit && cp -rp /root/deploy/repo/deploy_kits/S726_PURCHASE_RULES /tmp/s726kit && bash /tmp/s726kit/install_S726_PURCHASE_RULES.sh
-#  (DRY=1 before bash: every gate, the walk, the control and the proof -- printed whole -- nothing written.)
+#  (DRY=1 before bash: every gate, the walk, the control and the proof -- printed whole; nothing written.)
 #   /root/finance/scan_register.py  904f07b1 -> TO
 #   /root/finance/purchase_app.py   2e1e9023 -> TO
 #   /root/finance/porders.py        8326dfc5 -> TO
@@ -35,7 +35,7 @@ STAMP="$(date +%Y%m%d_%H%M%S)"
 SCR="${TMPW:-/tmp}/s726_inst_$STAMP"
 PLACED=0; TOOK_LOCK=0
 GREEN="walk_s726: 0 check(s) failed (0 of them S726 checks)"
-CONTROL="walk_s726: 57 check(s) failed (57 of them S726 checks)"
+CONTROL="walk_s726: 74 check(s) failed (74 of them S726 checks)"
 
 m5() { md5sum "$1" 2>/dev/null | awk '{print $1}'; }
 say() { echo "$@"; }

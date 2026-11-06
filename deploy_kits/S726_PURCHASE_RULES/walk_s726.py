@@ -61,7 +61,18 @@ SUP = {"K": "KEDAR PHARMA DISTRIBUTORS", "A": "AA AGENCIES", "B": "BASS HEALTHCA
        "N": "NANDI DRUG HOUSE", "D": "DEEPAM DRUG HOUSE", "U": "SHRADDHA SURGICALS", "P": "SEPTIMUS TRADERS", "Q": "UNIQUE PHARMA",
        "W": "WINDSOR REMEDIES", "F": "FRESHCO PHARMA", "O": "ORION PHARMA", "R": "ROUNDWELL PHARMA", "V": "VEGA PHARMA",
        "Y": "YASHODA SURGICALS", "H": "HARBOR MEDICALS AGENCIES", "E": "EVEREST LIFESCIENCES", "L": "LOTUS REMEDIES",
-       "M": "MERIDIAN SURGICALS", "C": "NOVACARE HEALTH", "T": "TULSI AGENCIES"}
+       "M": "MERIDIAN SURGICALS", "C": "NOVACARE HEALTH", "T": "TULSI AGENCIES", "U9": "UTKARSH MEDICAL STORES", "V1x": "VEDANTA SALES", "N1x": "NIRMALA SALES",
+       "PG": "PRAGATI SALES",
+       "R01": "RAMTEK SALES CORPORATION",
+       "R02": "GOPAL SALES CORPORATION",
+       "R03": "GOPIKA SALES CORPORATION",
+       "R04": "YASHVI SALES CORPORATION",
+       "R05": "AMBIKA SALES CORPORATION",
+       "R06": "GANGOTRI SALES CORPORATION",
+       "R07": "SURYODAY SALES CORPORATION",
+       "R08": "JAYPEE SALES CORPORATION",
+       "R09": "KRISHNAM SALES CORPORATION",
+}
 # bill key: (supplier, bill_no, date, rupees)
 BILLS = {
     "K1": ("K", "A000213", "2026-10-08", 7400), "K2": ("K", "A000190", "2026-10-02", 7400), "K3": ("K", "A000201", "2026-10-05", 7400),
@@ -84,7 +95,19 @@ BILLS = {
     "L0": ("L", "213", "2025-10-08", 500),                                        # a year-old bill with the same number and day
     "M1": ("M", "A000213", "2026-10-09", 800), "M2": ("M", "B/213", "2026-10-09", 650),   # two series of one supplier on one day
     "C1": ("C", "888", "2026-10-14", 3000),
-    "T1": ("T", "40", "2026-08-20", 700),                                         # August is final: its link is never changed
+    "T1": ("T", "40", "2026-08-20", 700),                                         # August final, an October paper: undone (owner 06-Nov)
+    "U9": ("U9", "500", "2026-11-03", 777),                                       # November final, a September paper: KEPT and flagged
+    "VX": ("V1x", "1692", "2026-10-21", 1201), "NX": ("N1x", "1692", "2026-10-22", 1202),   # 1692 written with a year / an invoice heading
+    "PG": ("PG", "213", "2026-10-16", 1313),                                      # unscanned; a paper reads 223 at the same amount
+    "R01": ("R01", "90058", "2026-10-05", 1101),
+    "R02": ("R02", "GPPL2678591", "2026-10-06", 1102),
+    "R03": ("R03", "GPPPL3679039", "2026-10-07", 1103),
+    "R04": ("R04", "YS0706202627", "2026-10-08", 1104),
+    "R05": ("R05", "1692", "2026-10-09", 1105),
+    "R06": ("R06", "77627", "2026-10-10", 1106),
+    "R07": ("R07", "11086", "2026-10-11", 1107),
+    "R08": ("R08", "JP23217", "2026-10-12", 1108),
+    "R09": ("R09", "A000209", "2026-10-20", 1109),
 }
 # scan key: (id, stamp, supplier read, bill no read, date read, total read, created_at UTC)
 SCANS = {
@@ -116,6 +139,19 @@ SCANS = {
     "sM": (261, "B-0261", "M", "A000213", "2026-10-09", "810", "2026-10-10 05:00:00"),
     "sC": (262, "B-0262", "C", "888", "", "3005", "2026-10-15 05:00:00"),
     "sT": (263, "B-0263", "T", "T-99", "2026-10-02", "700", "2026-10-03 05:00:00"),
+    "sU9": (264, "B-0264", "U9", "U-777", "2026-09-25", "777", "2026-09-26 05:00:00"),
+    "sVX": (270, "B-0270", "V1x", "1692/26-27", "2026-10-21", "1201", "2026-10-22 05:00:00"),
+    "sNX": (271, "B-0271", "N1x", "INV 1692 dt 12/10/2026", "2026-10-22", "1202", "2026-10-23 05:00:00"),
+    "sPG": (272, "B-0272", "PG", "223", "2026-10-16", "1313", "2026-10-17 05:00:00"),
+    "sR01": (300, "B-0300", "R01", "RT-490058", "2026-10-05", "1101", "2026-10-05 05:00:00"),
+    "sR02": (301, "B-0301", "R02", "GPPL-26-78591", "2026-10-06", "1102", "2026-10-06 05:00:00"),
+    "sR03": (302, "B-0302", "R03", "GPPPL-36-79039", "2026-10-07", "1103", "2026-10-07 05:00:00"),
+    "sR04": (303, "B-0303", "R04", "YS/0706/2026-27", "2026-10-08", "1104", "2026-10-08 05:00:00"),
+    "sR05": (304, "B-0304", "R05", "A011692", "2026-10-09", "1105", "2026-10-09 05:00:00"),
+    "sR06": (305, "B-0305", "R06", "GPPL/24-77527", "2026-10-10", "1106", "2026-10-10 05:00:00"),
+    "sR07": (306, "B-0306", "R07", "A011986", "2026-10-11", "1107", "2026-10-11 05:00:00"),
+    "sR08": (307, "B-0307", "R08", "JPT20207", "2026-10-12", "1108", "2026-10-12 05:00:00"),
+    "sR09": (308, "B-0308", "R09", "A000209", "2026-11-01", "1109", "2026-11-01 05:00:00"),
 }
 # the live state the old code left: (bill, scan, grade, rule)
 LINKS = [("K2", "sK2", "EXACT", "verified"), ("K3", "sK3", "EXACT", "verified"),
@@ -132,7 +168,10 @@ LINKS = [("K2", "sK2", "EXACT", "verified"), ("K3", "sK3", "EXACT", "verified"),
          ("Y1", "sY", "CONFIRMED", "reception confirmed"),                      # September: nothing read -- shown, nobody asked
          ("E1", "sE", "EXACT", "paper amount = Marg (reception)"),              # September: a contradicting answer -- shown, nobody asked
          ("H2", "sH2", "EXACT", "verified"),
-         ("T1", "sT", "AUTO", "auto_link (S454 5)")]                            # fails the rule, but August is final: kept
+         ("T1", "sT", "AUTO", "auto_link (S454 5)"), ("U9", "sU9", "AUTO", "auto_link (S454 5)"),
+         ("VX", "sVX", "AUTO", "auto_link (S454 5)"), ("NX", "sNX", "AUTO", "auto_link (S454 5)")]
+LINKS += [(k, "s" + k, "AUTO", "auto_link (S454 5)") for k in ("R01", "R02", "R03", "R04", "R05", "R06", "R07", "R08", "R09")]
+REAL = [('R01', '90058', 'RT-490058', '2026-10-05', '2026-10-05', 1101, True), ('R02', 'GPPL2678591', 'GPPL-26-78591', '2026-10-06', '2026-10-06', 1102, True), ('R03', 'GPPPL3679039', 'GPPPL-36-79039', '2026-10-07', '2026-10-07', 1103, True), ('R04', 'YS0706202627', 'YS/0706/2026-27', '2026-10-08', '2026-10-08', 1104, True), ('R05', '1692', 'A011692', '2026-10-09', '2026-10-09', 1105, True), ('R06', '77627', 'GPPL/24-77527', '2026-10-10', '2026-10-10', 1106, True), ('R07', '11086', 'A011986', '2026-10-11', '2026-10-11', 1107, True), ('R08', 'JP23217', 'JPT20207', '2026-10-12', '2026-10-12', 1108, False), ('R09', 'A000209', 'A000209', '2026-10-20', '2026-11-01', 1109, False)]                            # fails the rule, but August is final: kept
 BID = {k: i for i, k in enumerate(sorted(BILLS), 1)}
 SID = {k: v[0] for k, v in SCANS.items()}
 
@@ -171,7 +210,8 @@ def seed(fdb, adb):
     for k, paper in (("sD", 475100), ("sE", 300000)):
         con.execute("INSERT INTO purchase_scan_state (asset_bill_id, why, detail, checked_at, paper_amount, amount_state, confirmed_by, confirmed_at) "
                     "VALUES (?,?,?,?,?,?,?,?)", (SID[k], "linked", "linked", "2026-10-20T10:00:00", paper, "scan_wrong", "reception", "2026-10-20T10:00:00"))
-    con.execute("INSERT INTO purchase_month (month, status) VALUES ('2026-08', 'final')")
+    for fm in ("2026-08", "2026-09", "2026-11"):                      # September is final on the box (the owner's 17:20 word); Nov for the KEPT shape
+        con.execute("INSERT INTO purchase_month (month, status) VALUES (?, 'final')", (fm,))
     con.commit()
     return con
 
@@ -231,6 +271,18 @@ ok_fn = getattr(SR, "autolink_ok", None)
 ck("scan_register.autolink_ok exists (the S726 auto-link conditions)", ok_fn is not None)
 if ok_fn:
     ck("1 four Kedar bills of Rs 7,400: B-0202 (reads A000223) may not stand on A000213 by amount", not ok_fn(cx, scans[202], bb["K1"], bills)[0])
+    import datetime as _dt
+    _k = ok_fn(cx, dict(scans[202], bill_date=None, created_at="2026-10-09 05:00:00"), bb["K1"], bills, undo=True, before=_dt.date(2026, 10, 20))
+    ck("1/4 the undo, no date read, counting only bills dated on or before the paper (20-Oct): the four Rs 7,400 Kedar bills still refuse "
+       "B-0202 ('another bill of this supplier carries this amount')", not _k[0] and "another bill of this supplier" in _k[1])
+    _n = ok_fn(cx, dict(scans[180], created_at="2026-10-23 05:00:00"), bb["Q1"], bills + [dict(bb["Q1"], id=99999, bill_no="999",
+                                                                                            bill_date="2026-10-30")], undo=True,
+               before=_dt.date(2026, 10, 25))
+    ck("4 the undo: a newer same-amount bill (30-Oct) arriving after the link (25-Oct) never takes a correct pair apart", _n[0])
+    ck("1 'close' (one digit off) is not enough for a NEW amount-only pair: Pragati 213 against a paper reading 223",
+       not ok_fn(cx, scans[272], bb["PG"], bills)[0])
+    ck("1 ... but 'close' does not take an EXISTING link apart (the undo): Suryoday 11086 <- A011986",
+       ok_fn(cx, scans[306], bb["R07"], bills, undo=True, before=_dt.date(2026, 10, 25))[0])
     ck("1 an October paper (A.A. 487) may not stand on September's 415", not ok_fn(cx, scans[224], bb["A1"], bills)[0])
     ck("1 a November paper (Bass A017456) may not stand on September's 14538", not ok_fn(cx, scans[247], bb["B1"], bills)[0])
     ck("1 a same-month, unique amount, nothing differing: it stands", ok_fn(cx, scans[180], bb["Q1"], bills)[0])
@@ -266,6 +318,12 @@ ck("3 ... and not for September (parked: the old band, no new question)", differ
 ck("3 purchase.total_noise_rs is still read as before (item_check's meaning unchanged)", SR.noise_p(con) == 1000, False)
 
 # ---------------------------------------------------------------------------------------------------------------- the pass
+con.execute("INSERT INTO purchase_month (month, status) VALUES ('2026-10', 'final')")
+_po = PA._s726_undo_plan(con) if hasattr(PA, "_s726_undo_plan") else None
+con.rollback()
+_k1 = [x for x in (_po or []) if x["bill"] == BID["K1"]]
+ck("BLOCKER a finalised OCTOBER bill holding an October paper that fails the rule is KEPT and flagged, not undone (Kedar A000213, Oct final)",
+   len(_k1) == 1 and _k1[0].get("final") is True and not _k1[0].get("final_undo"))
 reg_before = SR.register(con, "2026-10")
 ck("the register before the pass: Kedar A000213 has its scan by amount (the wrong pair)", (row(reg_before, "K1") or {}).get("scan") == 202, False)
 md0 = hashlib.md5(open(FDB, "rb").read()).hexdigest()
@@ -279,7 +337,9 @@ ck("2 A.A. 487's paper is no longer tied to September's 415; scan_bill_id cleare
    and con.execute("SELECT scan_bill_id FROM purchase_bill WHERE id=?", (BID["A1"],)).fetchone()[0] is None)
 ck("2 Bass A017456's November paper is no longer tied to September's 14538", link("B1")[0] is None)
 au = [dict(r) for r in con.execute("SELECT action, ref, detail FROM purchase_audit WHERE action='auto_link_undone'")]
-ck("2 three audit rows 'auto_link_undone', kit S726", len(au) == 3 and all('"kit": "S726"' in (x["detail"] or "") for x in au))
+note = "owner 06-Nov 17:20: frees a counted paper from a finalised month"
+nd = {x["ref"]: x["detail"] or "" for x in au}
+ck("2 six audit rows 'auto_link_undone', kit S726 (Kedar, A.A., Bass, JP23217, A000209, Tulsi)", len(au) == 6 and all('"kit": "S726"' in (x["detail"] or "") for x in au))
 ck("2 a September-only AUTO link that fails the new rule is left untouched (Septimus 777 <- B-0090)", link("P1")[:2] == (90, "AUTO"))
 ck("2 a correct same-month unique AUTO link is kept (Unique 901 <- B-0180)", link("Q1")[:2] == (180, "AUTO"), False)
 ck("1 a new same-month unique scan still pairs by itself (Unique 905 <- B-0181, AUTO)", link("Q2")[:2] == (181, "AUTO"), False)
@@ -302,7 +362,17 @@ ck("1 two series of one supplier (A000213 and B/213, one day): no pair by number
 sc = state_of("sC")
 ck("10 number agrees, no date read, Rs 5 apart: an AMOUNT question (the number agrees), not 'number differs'",
    link("C1")[0] is None and sc.get("why") == "amount_differs" and sc.get("likely_bill") == BID["C1"] and "carries the same number" in (sc.get("detail") or ""))
-ck("5 a finalised month's AUTO link is never undone (Tulsi 40 of August <- B-0263)", link("T1")[:2] == (263, "AUTO"))
+ck("5 final-month shape: a finalised August bill holding an October paper is undone like September's (Tulsi 40 <- B-0263)",
+   link("T1")[0] is None and note in nd.get(str(BID["T1"]), ""))
+ck("5 final-month shape: a finalised November bill whose paper is of a month not counted is KEPT (Utkarsh 500 <- B-0264)",
+   link("U9")[:2] == (264, "AUTO"))
+ck("3 Marg 1692 <- '1692/26-27' and <- 'INV 1692 dt 12/10/2026': billno_compat never stricter than billno() -- both links kept",
+   getattr(SR, "billno_compat", lambda a, b: "")("1692/26-27", "1692") == "agree"
+   and getattr(SR, "billno_compat", lambda a, b: "")("INV 1692 dt 12/10/2026", "1692") == "agree"
+   and link("VX")[:2] == (270, "AUTO") and link("NX")[:2] == (271, "AUTO"))
+spg = state_of("sPG")
+ck("1 Pragati 213, a paper reading 223 at the same amount, no other such bill: no auto-link -- reception's question",
+   link("PG")[0] is None and spg.get("why") in PO.S440_ASK and spg.get("likely_bill") == BID["PG"])
 ck("1 September only: a scan the new rule would refuse keeps the old auto-link (Harbor 70 <- B-0095, AUTO) -- nothing asked",
    link("H1")[:2] == (95, "AUTO") and not state_of("sH1").get("likely_bill"))
 st9 = PO.scan_status(con, [SID["sV"]])
@@ -310,7 +380,31 @@ ck("3 September: Vega 61 (Rs 5 apart) raises no amount question", (st9.get(str(S
 ck("1 bill number + date (+ supplier) pair first, whatever the totals: Orion 1201 <- B-0190 (PROBABLE, S726)", link("O1")[0] == 190 and link("O1")[1] == "PROBABLE"
    and "S726" in link("O1")[2])
 ck("1 ... but a number and a day with no supplier read, the totals apart, are not paired by themselves (Orion 1400)", link("X1")[0] is None, False)
-ck("the pass says how many links it undid", res.get("undone") == 3)
+ck("the pass says how many links it undid", res.get("undone") == 6)
+ck("final-month shape: A.A. 415 (finalised September) <- #224 (an October paper) is undone, with the owner's note",
+   link("A1")[0] is None and note in nd.get(str(BID["A1"]), ""))
+ck("final-month shape: Bass 14538 (finalised September) <- #247 (a November paper) is undone, with the owner's note",
+   link("B1")[0] is None and note in nd.get(str(BID["B1"]), ""))
+ck("final-month shape: a counted month's own undo carries no such note (Kedar A000213)", note not in nd.get(str(BID["K1"]), "x"))
+bc = getattr(SR, "billno_compat", None)
+want = {"R01": "agree", "R02": "agree", "R03": "agree", "R04": "agree", "R05": "agree", "R06": "close", "R07": "close", "R08": "differ"}
+for k, m, sc, bd, sd, rsv, kp in REAL:
+    if k in want:
+        ck("the real string: Marg %s <- scan '%s' is '%s' by billno_compat" % (m, sc, want[k]), bc is not None and bc(sc, m) == want[k])
+ck("the real string: Marg A000213 <- scan 'A000223' is 'close' (undone by the four Rs 7,400 bills, not by the number)",
+   bc is not None and bc("A000223", "A000213") == "close")
+for k, m, sc, bd, sd, rsv, kp in REAL:
+    lk = link(k)
+    if kp:
+        ck("real: Marg %s <- '%s' (the same bill written two ways): its AUTO link is KEPT" % (m, sc), lk[:2] == (SID["s" + k], "AUTO"))
+    else:
+        undone = con.execute("SELECT COUNT(*) FROM purchase_audit WHERE action='auto_link_undone' AND ref=?", (str(BID[k]),)).fetchone()[0] == 1
+        if k == "R09":
+            ck("real: Marg A000209 <- 'A000209', the scan's date reads 01-Nov (the bill 20-Oct): its AUTO link is UNDONE, then re-paired by the "
+               "verified rule (number + total + supplier: EXACT), never by amount alone", undone and lk[1] == "EXACT")
+        else:
+            ck("real: Marg %s <- '%s' (20207 against 23217: two digits differ): its AUTO link is UNDONE, reception asked" % (m, sc),
+               undone and lk[0] is None and state_of("s" + k).get("likely_bill") == BID[k])
 au2 = con.execute("SELECT COUNT(*) FROM purchase_audit WHERE action='auto_link_undone'").fetchone()[0]
 PA._rematch(con, "walk")
 ck("2 a second pass changes nothing more (no new undo, the links the same)", con.execute("SELECT COUNT(*) FROM purchase_audit WHERE action='auto_link_undone'")
@@ -417,8 +511,8 @@ PO._db = keep_db
 ck("3 a fault judging the month falls back to the old band and says so on stderr", tolv == 1000 and "porders S726" in err.getvalue())
 plan = getattr(PA, "_s726_undo_plan", None)
 pl = plan(con) if plan else None
-ck("5 the proof's undo plan (read only) after the pass: only the finalised August link, flagged final, kept",
-   pl is not None and [(x["bill"], x.get("final")) for x in pl] == [(BID["T1"], True)])
+ck("5 the proof's undo plan (read only) after the pass: only the finalised November link, flagged final, kept",
+   pl is not None and [(x["bill"], x.get("final")) for x in pl] == [(BID["U9"], True)])
 # 7 -- the S726 context cannot be set up: the pass is the old one entirely (a second scratch pair)
 F2, A2 = os.path.join(TMP, "f2.db"), os.path.join(TMP, "a2.db")
 con2 = seed(F2, A2)

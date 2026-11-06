@@ -100,6 +100,41 @@ def _date(s):
 
 def verified(a):
 ''', 1),
+# 4c -- the S726 number test: Marg's number and the scan's reading written two ways
+('''def date_md(scan_date, marg_date):
+''',
+'''def billno_compat(scan_no, marg_no):
+    """S726: the scan's reading against Marg's number for the S726 tests only (billno() itself is unchanged; other code reads it) ->
+    'agree' | 'close' | 'differ' | 'not_read'. All the digits of each, letters and separators dropped, leading zeros stripped:
+    'agree' when equal, or when the shorter (4 digits or more) ends the longer (Marg truncates: 90058 <- RT-490058, 1692 <- A011692), or
+    when the digit runs, each without its zeros, join to the same (YS0706202627 <- YS/0706/2026-27, the year kept here);
+    'close' when the shorter (3 digits or more) and the same-length end of the longer differ in exactly ONE digit (an OCR misread:
+    11086 <- A011986, 77627 <- GPPL/24-77527); else 'differ'. A licence-shaped reading is 'differ', as in billno()."""
+    st = str(scan_no or "")
+    if not re.search(r"\\d", st):
+        return "not_read"
+    if billno(scan_no, marg_no) == "agree":
+        return "agree"                                             # never stricter than billno() (1692 <- 1692/26-27)
+    if LICENCE_RE.search(st):
+        return "differ"
+    sd = re.sub(r"\\D", "", st).lstrip("0")
+    md = re.sub(r"\\D", "", str(marg_no or "")).lstrip("0")
+    if not sd or not md:
+        return "differ"
+    sr = "".join(x.lstrip("0") for x in re.findall(r"\\d+", st))
+    mr = "".join(x.lstrip("0") for x in re.findall(r"\\d+", str(marg_no or "")))
+    if sd == md or (sr and sr == mr) or sr == md or sd == mr:
+        return "agree"
+    short, long_ = sorted((sd, md), key=len)
+    if len(short) >= 4 and long_.endswith(short):
+        return "agree"
+    if len(short) >= 3 and sum(1 for x, y in zip(short, long_[-len(short):]) if x != y) == 1:
+        return "close"
+    return "differ"
+
+
+def date_md(scan_date, marg_date):
+''', 1),
 # 5 -- the two new states of a paired bill
 ('''def sarvam_flags(cx, s, b):
 ''',
@@ -144,13 +179,17 @@ def sarvam_flags(cx, s, b):
     return day.isoformat()[:7] if day else ""
 
 
-def autolink_ok(cx, s, b, bills):
+def autolink_ok(cx, s, b, bills, undo=False, before=None):
     """S726 (F-1141, D839): may this amount-only pair stand by itself? -> (True, '') or (False, the reason in plain English).
     The paper's date (no date read: the scan day) is in the bill's calendar month; no OTHER bill of that supplier (scanned or not, any
-    state) within HINT_DAYS of the scan carries an amount within Rs 1 of the scan's; the read bill number and the read date do not differ."""
+    state) within HINT_DAYS of the scan carries an amount within Rs 1 of the scan's; the read bill number and the read date do not differ.
+    The number: 'differ' (billno_compat) always contradicts; 'close' (one digit off) does not take an existing link apart (undo=True) but
+    is not enough for a NEW pair (reception is asked). before (the undo only): only bills dated on or before it count as 'another bill'."""
     a = agree(cx, s, b)
-    if a["billno"] == "differ":
-        return False, "the scan's bill number reads %s" % (str(s.get("bill_no") or "").strip()[:30] or "otherwise")
+    bcmp = billno_compat(s.get("bill_no"), b["bill_no"])
+    if bcmp == "differ" or (bcmp == "close" and not undo):      # S726: Marg's number written another way is not a contradiction
+        return False, "the scan's bill number reads %s%s" % (str(s.get("bill_no") or "").strip()[:30] or "otherwise",
+                                                             " (one digit off: a question, not a pair by itself)" if bcmp == "close" else "")
     if a["date"] == "differ":
         return False, "the scan's date reads %s" % (ddmon(s.get("bill_date")) or "otherwise")
     bd = _date(b.get("bill_date"))
@@ -171,6 +210,8 @@ def autolink_ok(cx, s, b, bills):
         xd = _date(x.get("bill_date"))
         if not xd or not days or min(abs((d - xd).days) for d in days) > HINT_DAYS:
             continue
+        if before is not None and xd > before:
+            continue                                               # the undo: a newer same-amount bill never takes a correct pair apart
         if pa.supplier_key(x["supplier"]) != bk and supplier(cx, s.get("vendor"), x["supplier"], cx.chosen.get(sid)) != "agree":
             continue
         return False, "another bill of this supplier carries this amount (%s of %s)" % (x["bill_no"], ddmon(x.get("bill_date")))
@@ -477,7 +518,9 @@ def _s726_counted(con, ym):
 def _s726_undo_plan(con, cx=None, scans=None, bills=None, bm=None):
     """READ ONLY: the AUTO links the S726 rule undoes -> [dict(bill, scan, why, bill_month, scan_month, supplier, bill_no, amount_p, final)];
     None when the asset app's database is not reachable. A link whose bill month and scan month are both not counted is never listed.
-    final=True: the bill's month is finalised (purchase_month.status = 'final') -- such a link is KEPT; listed only so the proof shows it."""
+    A finalised bill month (purchase_month.status = 'final'): final_undo=True only when that bill month is NOT counted and the SCAN's month
+    is counted -- the owner, 06-Nov 17:20 ("yes"): such a link is undone, it frees a counted paper; every other finalised-month link has
+    final=True -- KEPT, listed only so the proof flags it."""
     SR = _s454_sr()
     if scans is None:
         acon = _assets_con()
@@ -496,7 +539,7 @@ def _s726_undo_plan(con, cx=None, scans=None, bills=None, bm=None):
     bby = {b["id"]: b for b in bills}
     out = []
     try:
-        auto = con.execute("SELECT bill_id, asset_bill_id FROM purchase_scan_link WHERE grade='AUTO' ORDER BY bill_id").fetchall()
+        auto = con.execute("SELECT bill_id, asset_bill_id, linked_at FROM purchase_scan_link WHERE grade='AUTO' ORDER BY bill_id").fetchall()
     except sqlite3.Error:
         auto = []
     for r in auto:
@@ -507,10 +550,13 @@ def _s726_undo_plan(con, cx=None, scans=None, bills=None, bm=None):
         smon = SR.scan_month(s, bm.get(int(s["id"])))
         if not (_s726_counted(con, bmon) or _s726_counted(con, smon)):
             continue                                               # September-only (parked, cleared by the owner): never changed
-        ok, why = SR.autolink_ok(cx, s, b, bills)
+        before = SR._date(s.get("bill_date")) or SR._date(str(r[2] or "")[:10])
+        ok, why = SR.autolink_ok(cx, s, b, bills, undo=True, before=before)
         if not ok:
             out.append(dict(bill=int(r[0]), scan=int(r[1]), why=why, bill_month=bmon, scan_month=smon, supplier=supplier_key(b["supplier"]),
-                            bill_no=b["bill_no"], amount_p=b["amount_p"], final=(bmon in final)))
+                            bill_no=b["bill_no"], amount_p=b["amount_p"],
+                            final=(bmon in final and not (not _s726_counted(con, bmon) and _s726_counted(con, smon))),
+                            final_undo=(bmon in final and not _s726_counted(con, bmon) and _s726_counted(con, smon))))
     return out
 
 
@@ -546,14 +592,15 @@ def _rematch(con, who="system"):                                  # noqa: F811
             plan = _s726_undo_plan(con)
             for x in plan or []:
                 if x.get("final"):
-                    continue                                       # a finalised month is never changed
+                    continue                                       # a finalised month is never changed -- unless it holds a counted paper
                 cur = con.execute("DELETE FROM purchase_scan_link WHERE bill_id=? AND asset_bill_id=? AND grade='AUTO'", (x["bill"], x["scan"]))
                 if not cur.rowcount:
                     continue
                 con.execute("UPDATE purchase_bill SET scan_bill_id=NULL WHERE id=? AND scan_bill_id=?", (x["bill"], x["scan"]))
                 _audit(con, who, "auto_link_undone", x["bill"], dict(scan=x["scan"], why=x["why"], supplier=x["supplier"], bill_no=x["bill_no"],
                                                                       amount_p=x["amount_p"], bill_month=x["bill_month"], scan_month=x["scan_month"],
-                                                                      kit="S726"))
+                                                                      kit="S726", **({"note": "owner 06-Nov 17:20: frees a counted paper from a "
+                                                                                      "finalised month"} if x.get("final_undo") else {})))
                 undone.append(x)
             if undone:
                 con.commit()
@@ -591,14 +638,14 @@ def _match_s439(s, b):                                            # noqa: F811
     if m or _S726_PASS is None or b["id"] in s.get("_no", ()):
         return m
     SR = _s454_sr()
-    if SR.billno(s.get("bill_no"), b["bill_no"]) != "agree":
+    if SR.billno_compat(s.get("bill_no"), b["bill_no"]) != "agree":
         return None
     sd, bd = SR._date(s.get("bill_date")), SR._date(b.get("bill_date"))
     if sd is None or bd is None or abs((sd - bd).days) > S439_DATE_DAYS:
         return None                                                # the day and month alone are not the date (Oct-2025 is not Oct-2026)
     if not (_s726_pass_counted(_s726_bill_ym(b)) or _s726_pass_counted(SR.scan_month(s, _S726_PASS["bm"].get(int(s["id"]))))):
         return None
-    same = [x for x in _S726_PASS["by_sup"].get(supplier_key(b["supplier"]), []) if SR.billno(s.get("bill_no"), x["bill_no"]) == "agree"
+    same = [x for x in _S726_PASS["by_sup"].get(supplier_key(b["supplier"]), []) if SR.billno_compat(s.get("bill_no"), x["bill_no"]) == "agree"
             and SR._date(x.get("bill_date")) is not None and abs((SR._date(x.get("bill_date")) - sd).days) <= S439_DATE_DAYS]
     if len(same) != 1:
         return None                                                # two series of one supplier carry this number: a question, not a pair
@@ -690,7 +737,7 @@ def _why_s439(s, bills, taken, last_date):                        # noqa: F811
         s["_likely"] = None
         return ("no_bill_yet", "waits for its own bill in Marg — the bill it reads like (%s %s, %s) is of %s, a month not counted (S726)"
                 % (supplier_key(b["supplier"]), b["bill_no"], _human(b["bill_date"]), _s726_bill_ym(b)), None)
-    if why == "number_differs" and SR.billno(s.get("bill_no"), b["bill_no"]) == "agree":
+    if why == "number_differs" and SR.billno_compat(s.get("bill_no"), b["bill_no"]) == "agree":
         also = (" — that bill already has scan #%d" % taken[b["id"]]) if b["id"] in taken else ""
         return ("amount_differs", "amount differs — the scan reads %s; %s bill %s (%s, %s) carries the same number%s (S726)"
                 % (_r(s.get("amount_p")) if s.get("amount_p") is not None else "no amount", supplier_key(b["supplier"]), b["bill_no"],

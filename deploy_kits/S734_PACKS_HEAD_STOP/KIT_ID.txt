@@ -1,0 +1,3 @@
+kit id S734_PACKS_HEAD_STOP
+project the parent (session 394, 06-Nov-2026) -- its own file; claimed on board/_numbers v981->v982
+finance/packs.py fb987b27 -> 7dc8c39a (1 counted edit, make_s734.py) . F-1148

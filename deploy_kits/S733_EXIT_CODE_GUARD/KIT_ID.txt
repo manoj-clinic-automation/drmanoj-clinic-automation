@@ -1,0 +1,3 @@
+kit id S733_EXIT_CODE_GUARD
+project the parent (session 394, 06-Nov-2026) -- its own file; claimed on board/_numbers v980->v981
+finance/joiner_app.py 6305b05d -> be2bf7e5 (7 counted edits, make_s733.py) . F-1147

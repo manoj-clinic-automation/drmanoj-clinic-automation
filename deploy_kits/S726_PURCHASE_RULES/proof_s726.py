@@ -119,10 +119,11 @@ def main(argv):
     plan = {int(x["bill"]): x for x in new["plan"] if not x.get("final")}
     kept = [x for x in new["plan"] if x.get("final")]
     print("S726 proof -- read only; the register of each month by the live files (old) and the rebuilt ones (new); counted from %s" % first)
-    print("AUTO links the next pass undoes (counted months only, never a finalised one): %d" % len(plan))
+    print("AUTO links the next pass undoes (counted months only; in a finalised month only to free a counted paper): %d" % len(plan))
     for x in new["plan"]:
         print("  %s %s %s (%s, bill month %s) <- scan #%s (scan month %s): %s"
-              % ("KEPT (its month is final) --" if x.get("final") else "undo ", x["supplier"], x["bill_no"], rs(x["amount_p"]), x["bill_month"],
+              % ("KEPT (its month is final) --" if x.get("final") else "undo (final month, owner 06-Nov)" if x.get("final_undo") else "undo ",
+                 x["supplier"], x["bill_no"], rs(x["amount_p"]), x["bill_month"],
                  x["scan"], x["scan_month"] or "?", x["why"]))
     if kept:
         print("  FLAG: %d AUTO link(s) fail the rule but their month is final -- kept; the owner decides" % len(kept))
