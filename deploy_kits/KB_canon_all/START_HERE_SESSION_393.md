@@ -1,0 +1,51 @@
+# START HERE — SESSION 393 — written at the S391 close (the Sanjeevni chat), 06-Nov-2026 (14:1x IST)
+
+**Project: Sanjeevni — Pharmacy & Marg.** Open in a fresh chat in this project, linked to manojz.
+1. Follow `OPEN_ROUTINE_v1` (from the clone: `deploy_kits/KB_canon_all/OPEN_ROUTINE_v1.md`). In the device VM, `day_open.py` needs its paths: `--tools $HOME/mnt/Downloads/_kbtools --repo $HOME/mnt/dr-manoj-git/drmanoj-clinic-automation --kb $HOME/mnt/Downloads/ClaudeCowork --ssd $HOME/mnt/ClinicBackup/DrManojClinic_Automation --roots $HOME/mnt/Downloads $HOME/mnt/dr-manoj-git $HOME/mnt/ClinicBackup` (the defaults are Windows paths; `--read` with the same `--tools`). **A re-run after a publish clears the day's note — write it again.** Run Python with `TMPDIR=/tmp/s###w` (F-1102).
+2. The rulebook for every build is **the charter v1.1 — `claude/S307_BUILD_CHARTER_v1_1.md`** beside the parent's `BUILD_NORM_v1.md` (D704). The plan of what is left is the System Board's plan, section 9 (steps 0–3 done; step 4 — the switch — is the owner's word, earliest ~22-Nov). The close is `CLOSE_ROUTINE_v1` — this project's `close.json` is in `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S391\close_parts\` (copy it, change what changed; `"book": null` when the app did not change).
+3. The brief of this close is `S391_BUILD_BRIEF.md`; **the plan of record is `S391_PURCHASE_RECONCILE_PLAN.md`** (D839, D840 — read it whole before the build); the Book is `SANJEEVNI_SYSTEM_BOOK_v1_47_S388.md` (unchanged at S391).
+
+No incident is open. **DECLARED-PENDING (eleven, unchanged since S388):** `order_track_page.py` 4e6bd715, `porders_s454.py` 8fd445b3, `order_sheet.py` 53abf461 (S711); `reports_tile.py` f44fe768, `marg_flows.py` cc68a1af, `marg_flows_pics.py` e2907c20 (S714 / S716); the parent's `finance_app.py` 15f6b32b (S714); `order_track.py` 6f4746c5 (S708); `owner_notice.py` ca5cd443, `expiry_watch.py` 1ed95b6c, `marg_hand_change.py` 3b8c2160 (S706) — until a bundle newer than 06-Nov (F-1124).
+
+*FIRST ACT: take your session number from the System Board's `board/_numbers` by a version-pinned write (NUMBERS_PROTOCOL_v1).*
+- **393 is RESERVED for the Sanjeevni chat at this close.** The parent's 390 is open; the NK Pathology chat's 365 and the Scan App chat's 392 reserved. Take what the board says and say so in your first line.
+- **Kit numbers are claimed BEFORE the scratch folder is named (F-515);** D and F numbers the moment they are minted (F-920). Read every PLANNED line on the board before touching a file it names (D646). **Re-read `_numbers` just before a pinned write at a close — another chat may be closing (S391: the Scan App's S363 took D838 / F-1136 – F-1139 between this chat's open and its close).**
+
+*Connect `D:\Downloads`, `D:\dr-manoj-git`, `F:\ClinicBackup`.* **Never `git` in the device shell (F-511, F-1103, F-1116):** read `.git\refs\heads\main`, `.git\refs\remotes\origin\main`, `.git\logs\HEAD` as files. **Build road: in the chat itself.** What S339–S391 learnt (keep it): the live code = the newest bundle + the pending kits' `make_*.py` in order (`D:\Downloads\_kbtools\vps_code\code_nightly.tar.gz`, the database copy beside it); the bundle can be staged into the cloud workspace for building (code only; never a database copy, D656); a live-shape read draws the pages READ-ONLY on a copy of the nightly database in the device VM; a file copied to the PC is read back by md5 (F-1099); `deploy_kits\NO_PHONE_NUMBERS.py --files-from <list> <repo>` before naming the publish (F-1098) — binary as hex; the `.gitignore` test on every kit file (F-1130); a walk's controls stand on its OWN rows (F-998); a proof goes RED when the change did nothing (S704); every kit read cold by an independent agent until SAFE; the screen read live after every install (F-1119); an installer's journal check counts only the NEW master's lines (F-1135); the built-in browser on manojz is signed in as `manoj` (read `/finance/api/whoami` first). **The scan app's bill page `/scanapp/bills/<n>` (n = the stamp's number) carries the scan's vendor, number, date and total — read it, never the register's label alone (F-1146).** The pharmacy scans (`assets.db`) are the Scan App's: READ ONLY, a PLANNED line before touching any of its files.
+
+---
+
+## 0 · THE WORK — in order
+
+**A · THE OPEN (OPEN_ROUTINE_v1)** — the board (messages `read:false` to `sanjeevni`, notes); the day's checks; the four numbers. **The newest bundle:** the eleven pins CONFIRMED (or named); the hand-change watch's first nights; F-1114 (THIO Q AP); Amir's Batch Stock. Has Amir visited since 4-Nov (a newer `PURCHASE_BILLWISE` in `D:\Downloads\margsync\MargArchive\PURCHASE_BILLWISE\2026-11\`)?
+
+**B · THE WORK**
+
+1. **THE RECONCILIATION — kit 1, on his "go"** (D839, D840; `S391_PURCHASE_RECONCILE_PLAN.md` §4.1). Ask in ONE line whether to start it or the alarms (F-1134) first if he has not said.
+   - **F-1141:** pair on number (normalised: the paper's "SF 004043", "RT-104322", "A000234", "GPPL-26-81974" = Marg's "4043", "104322", "234", "81974") and date first; amount alone never across months and never where the supplier has another bill of that amount in the window — those become one reception question. Read `scan_register.py` (`autolink_choice`, `agree`, `verified`, `register`) and `purchase_app._rematch` WHOLE from the bundle first.
+   - **F-1140 / F-1142 / F-1143:** every rupee shown (no silent equal / noise); an answer that contradicts the reading gets a second look; a scan with nothing read is never *settled*.
+   - September, October and November re-checked with the new rules (a proof: before / after on a copy; B-0202, B-0161, B-0224, B-0247, B-0143, B-0119 named).
+   - Reception's daily list (*Scan karo* / *Dobara scan karo* / one-tap questions) and the owner's step-by-step view (D840). **A staff screen: the mock first.**
+2. **Then, each on his "go":** kit 2 Amir's correction list in his app (amount and missing-line items; proof from his own exports and, for the previous month, the month-end re-export); kit 3 returns (Janta 21965 first; the full bill plus a purchase return); kit 4 supplier summaries, the issues list, the month lock on Marg = papers = summaries, the supplier's figure on the payment sheet. October is the catch-up; November runs on the flow.
+3. **F-1134 — messages that reach him** (S391's planned build, displaced by his urgent ask): every report alarm by `owner_notice`'s road; *Medical PC offline — reports cannot leave it* after ~20 min silence in the working window (09:00–20:00; Sunday 09:00–14:00); *Medical PC back — N reports delivered*; F-1135 in its installer. Show him the message text before the install.
+4. **F-1110's medical-PC half** — his yes first. **F-1104 "count them"** — his. **F-1145** (Kedar Rs 110 twice) — read with kit 2. **The switch** on his word at D673's bar.
+5. **PARKED by his word:** F-802's permanent fix; F-1133 (D837). **NOT THIS PROJECT'S:** F-1048, D803, F-1102, F-1122 (DUTY_MAP — the parent, with us), F-1124 (manojz's nightly — the parent). **His with Ram Singh:** F-1115.
+6. **The close** — `CLOSE_ROUTINE_v1`.
+
+**NEVER RUN:** `deploy_kits\S488_DATES_AND_WAITS\deliver_S488.ps1`. **NEVER INSTALL:** `deploy_kits\S638_EXPIRY_WATCH\`, `S672_NONCASH_AT_INGEST\`, `S673_NONCASH_AT_INGEST_R2\` (frozen). **NEVER ADD TO:** Amir's *Aaj ka kaam* list (D690) — his corrections go in *Amir ka kaam*. **THE EXPIRY PAGE changes only on his word** (D780, D793; D828). **NEVER CHANGE THE MEANING of a name the parent's console reads** (`supplier_msg.s454_card_facts`, `porders.shortage_summary`, `expiry_watch.newest / now_view / ym_add`, `reports_tile.status`) without a word to the parent. **THE FLOW PAGES ARE PUBLIC — FIXED TEXT AND PICTURES ONLY (S714; F-185).** **NEVER BOOK A VOUCHER IN THE SPINE'S `sp_move`.** **NEVER SEND A SUPPLIER WHATSAPP OR TAP A STAFF BUTTON FOR HIM** without his explicit word.
+
+**WE PAY THE SUPPLIER'S FIGURE; ONE BULK NEFT A MONTH, ONLY AFTER EVERY SUPPLIER'S ISSUE IS RESOLVED (D839).** **EVERY RUPEE BETWEEN A SCAN AND MARG IS CORRECTED IN MARG THROUGH AMIR'S WORKFLOW; A RETURN IS THE FULL BILL PLUS A PURCHASE RETURN (D839).** **HE SEES EVERY STEP UNTIL NOVEMBER IS LOCKED AND PAID (D840).** **THE ORDER LIST TIES NO SCAN BY ITSELF — A PERSON PICKS (D831).** **A MARG STOCK CHANGE WITH NO BILL, SALE OR VOUCHER IS TOLD HIM THE NEXT MORNING (D828).** **THE OWNER IS TOLD WHEN THE MARG WORK IS DONE — EVERY DAY (D825); A NEW MESSAGE GOES THROUGH `owner_notice.py`.** **AMIR NEVER OPENS OR EDITS A SALE BILL (D815).** **A STAFF SCREEN CARRIES ONLY "DO THIS" LINES (D708), ON A FACT NOBODY CAN TAP WRONGLY (D712).** **NO FIGURE TO TYPE, EVER (charter rule 8).** **A SALE IS CASH OR UPI ONLY (D802).** **ONLY THE OWNER CHANGES A DEALER'S NUMBER (D731).** **THE BUYING MODEL IS SCORED IN SHADOW; THE SWITCH IS HIS WORD (D678, D785).** **EVERY MARG REPORT HAS ONE PHONE-FIRST FLOW (D827, D830).** **NO SECOND NETWORK FOR THE MEDICAL PC UNTIL A SECOND LAN FAILURE; THEN AUTOMATIC (D837).**
+
+**CLOSED BY HIS WORD — DO NOT RAISE AGAIN:** as `START_HERE_SESSION_391` listed. **B-0239 is his own tap.**
+
+## 1 · THE STANDING OWNER RULINGS
+
+1. **Publishing is HIS double-click** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`.
+2. **Full paths ALWAYS — including URLs**, each in its own copy block. **ONE line per command.**
+3. **Token-lean — never at the cost of verification.** **Plain language. Short chat.** **ALL-CAPS = urgent.**
+4. **Mask patient numbers (last 4); never print secrets** (the payment page carries bank account numbers — never quoted). **Nothing live rebuilt without his OK; the manual path stays.**
+5. **Sub-agents read screens. Do not hand him diagnostics. When a screen is wrong, read its code first. Never a step that is not his.**
+6. **His board carries only what needs him and what he should know; all pending kept updated on the board each session.**
+7. **His own items are deferred** — name only what has become urgent, and say why.
+8. **Never put a technical choice to him** — decide, say it in one line, carry on. **A screen for staff: the mock first.** **"Don't build now" means plan only.**
+9. **His phone gets the clinic app's messages; ntfy is the fallback (F-1134).**

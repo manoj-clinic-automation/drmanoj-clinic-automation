@@ -1,0 +1,3 @@
+kit id S719_GMB_STORE_BACKUP
+project the parent (session 390, 06-Nov-2026) -- its own file; claimed on board/_numbers v964->v965
+state_backup/clinic_state_backup.py facfb897 -> 37ed5524 (one SRC_FILES line: /root/portal/gmb_store.db) . F-1129

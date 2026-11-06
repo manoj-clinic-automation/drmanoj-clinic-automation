@@ -1,0 +1,3 @@
+kit id S721_PHYSIO_BACKFILL_RECEPTION
+project the parent (session 390, 06-Nov-2026) -- its own files; claimed on board/_numbers v964->v965
+finance/physio_book.py a085fee7 -> 9c3442d6 . portal/tile_grants.json v42 64305c5f -> v43 f2dad157 . finance.db unit_role: physiobook maker alisha, shivani, reception; physio viewer reception

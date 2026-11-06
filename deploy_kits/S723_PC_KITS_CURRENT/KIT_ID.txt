@@ -1,0 +1,3 @@
+kit id S723_PC_KITS_CURRENT
+project the parent (session 390, 06-Nov-2026) -- its own nightly tooling on manojz; claimed on board/_numbers v967->v968
+NEW D:\Downloads\_kbtools\pc_kits_current.py . NIGHTLY.bat one line before the rehearsal . first case: PC_KITS/medical/kit.zip 54e76aa4 -> repacked (marg_watch a009d2fd, marg_txt aa7baee5) . D803 F-1048

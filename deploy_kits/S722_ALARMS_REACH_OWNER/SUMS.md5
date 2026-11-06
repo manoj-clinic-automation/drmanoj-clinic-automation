@@ -1,0 +1,9 @@
+628c690dfe4d2e9ce720087d34758a1a  ./KIT_ID.txt
+987cc6a44adfde3fdd37b65b9c03e104  ./README.md
+681ab142adc9fcd748123763aa257038  ./TO_PINS.md5
+cdfbf2b6e780e84ad381e2011bf68438  ./install_S722_ALARMS_REACH_OWNER.sh
+dc7fa3ea809e8a7369964e61ba93f022  ./make_s722.py
+3f5ed1443778cc4549f75a522db4efa5  ./medical/marg_push.py
+df7736e99abfd13f480d61ab4b5320d0  ./medical/marg_watch.py
+c6d84d9ac97e800529f783f5fe46e858  ./proof_s722.py
+011a8dc138d841f5fceb9fb559ef6eef  ./walk_s722.py
