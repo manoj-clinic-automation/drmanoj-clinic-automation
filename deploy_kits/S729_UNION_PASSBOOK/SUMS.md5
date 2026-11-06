@@ -1,0 +1,10 @@
+25915b63fc82b39ad8a4a6df477e572b  KIT_ID.txt
+956fefd86449630ecd4bf92bd93d1217  README.md
+6810d863bd30a982064e03c79c577915  install_S729_UNION_PASSBOOK.sh
+bdbbc7be97fa89f0642827d6374a9fa0  make_s729.py
+fb987b271f9b99dec2c696590501b19d  packs.py
+00056bac8295ade42d03c93893028a7c  walk_s729.py
+5202677b412114c07a17bdd143180e92  fixtures/icici.pdf
+e46cbea3efb4b1f6ff7c00dda70a493a  fixtures/passbook.pdf
+6a4c31e916fa670e32ebe07b444352d9  fixtures/sbi.pdf
+012b3320756b7a3139c689d072d9de99  fixtures/union.pdf

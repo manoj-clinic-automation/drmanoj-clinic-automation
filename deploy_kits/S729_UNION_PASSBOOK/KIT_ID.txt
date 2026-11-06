@@ -1,0 +1,3 @@
+kit id S729_UNION_PASSBOOK
+project the parent (session 390, 06-Nov-2026) -- its own file; claimed on board/_numbers v973->v974 (packs.py PLANNED)
+finance/packs.py 7507d991 -> fb987b27
