@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S396 close** (the Sanjeevni chat), 07-Nov-2026, morning — the Sanjeevni sections refreshed here (reception's one bill list live; Amir's correction cards and the in-place scan live; 399 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S397 close** (the parent), 07-Nov-2026, morning — the parent's sections refreshed here (the Call Console rebuilt to R3 with its staff cards; the nightly copy came through; 400 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S396 close** (the Sanjeevni chat), 07-Nov-2026, morning — the Sanjeevni sections refreshed here (reception's one bill list live; Amir's correction cards and the in-place scan live; 399 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S395 close** (the Scan App project), 06-Nov-2026, evening — the Scan App sections refreshed here (its 398 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S394 close** (the parent), 06-Nov-2026, evening — the parent's sections refreshed here (an exit retires its machine number; statement heads end at their first row; the System Board by area; 397 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S393 close** (the Sanjeevni chat), 06-Nov-2026, evening — the Sanjeevni sections refreshed here (the alarms live; the purchase pairing part 1 and the step view live; 396 reserved); the other projects' sections as their closes left them.
@@ -375,7 +376,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S394 close (06-Nov, 19:xx)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S397 close (07-Nov, 07:4x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -385,7 +386,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the S394 record (papers only). Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries the S397 record (papers only). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -397,7 +398,7 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**3 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit — his 30-Sep date stays (S733); enrol Arjun Dev's finger, then tell me — I do the link step.
+**3 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit — his 30-Sep date stays; enrol Arjun Dev's finger, then tell me — I do the link step.
 
 **4 · OCTOBER'S STAFF LEDGER: close it, if not done.** Step 5 on the ledger page is your button.
 
@@ -405,43 +406,37 @@ https://followup.dr-manoj.in/finance/packs
 https://followup.dr-manoj.in/ledger/salary?m=2026-10
 ```
 
-**5 · MYOPERATOR (ticket 691386): their written cause and a fix date** (Khushi). Once it is fixed, the waiting replies go out by themselves.
+**5 · MYOPERATOR (ticket 691386): their written cause and a fix date** (Khushi). Until it is fixed, WhatsApp replies are not delivered — the staff cards show them as not answered.
 
-**6 · THE CALL CONSOLE'S NEXT UPDATE: when you want it,** look at board R2 and say "build" or what to change.
-
-```
-https://claude.ai/artifact/AwBDzfttkYPygGVcrQbTfD
-```
-
-**7 · OCTOBER, ON YOUR MONTH PAGE: the amber lines are yours** (the one Sanjeevni day waiting; the purchases to finalise; *Check it → Lock it*; the pack, by 10 Nov).
+**6 · OCTOBER, ON YOUR MONTH PAGE: the amber lines are yours** (the pack, by 10 Nov).
 
 ```
 https://followup.dr-manoj.in/finance/console/month
 ```
 
-**8 · THE X-RAY FILM LOG: the opening spare boxes** (Settings on the log).
+**7 · THE X-RAY FILM LOG: the opening spare boxes** (Settings on the log).
 
 ```
 https://followup.dr-manoj.in/finance/slips/film/log
 ```
 
-**9 · TWO ANSWERS, one line each:**
+**8 · TWO ANSWERS, one line each:**
 - slip …1449 (31-Oct) has two ILI KNEE lines with no side: both knees, or a double entry?
 - two look-alike wrist lines on your rate page (₹800 and ₹500): is one an old leftover?
 
-**10 · THE TWO FINANCE PASSWORDS shown in chat on 21-Aug: change them** (board Y106).
+**9 · THE TWO FINANCE PASSWORDS shown in chat on 21-Aug: change them** (board Y106).
 
-**10a · YOUR SHARE % FOR IPD CASES.** One number in IPD cases' Settings.
+**9a · YOUR SHARE % FOR IPD CASES.** One number in IPD cases' Settings.
 
 ```
 https://followup.dr-manoj.in/finance/surgery/settings
 ```
 
-**10b · THE HOSPITAL: how it fills the credit cases' charges.** Kit 5 waits for it.
+**9b · THE HOSPITAL: how it fills the credit cases' charges.** Kit 5 waits for it.
 
-**10c · A WHATSAPP TEMPLATE FOR AFTER-DISCHARGE MESSAGES**, when you decide the schedule.
+**9c · A WHATSAPP TEMPLATE FOR AFTER-DISCHARGE MESSAGES**, when you decide the schedule.
 
-**11 · THE MARG ENGINEER: test-restore Marg's automatic backup.**
+**10 · THE MARG ENGINEER: test-restore Marg's automatic backup.**
 
 **IF THE PORTAL STOPS:** the first steps run by themselves, and your guide says what already ran:
 
@@ -451,80 +446,67 @@ https://claude.ai/artifact/H5W1T3WPNm85t2peTnNnfP
 
 **LATER — none of these is urgent**
 
-- **12 · The Union Bank passbooks:** when printed, scan to a PDF, add on the packs page, tap whose.
-- **13 · The Hostinger server update** (one line from me when the fix is out).
-- **14 · Bhati's app:** say when.
-- **15 · The SBI downloads** for September's pack.
-- **16 · Raghav:** your own Zerodha statement of transactions.
-- **17 · Ranjeet's login:** the password is yours to set.
+- **11 · The Union Bank passbooks:** when printed, scan to a PDF, add on the packs page, tap whose.
+- **12 · The Hostinger server update** (one line from me when the fix is out).
+- **13 · Bhati's app:** say when.
+- **14 · The SBI downloads** for September's pack.
+- **15 · Raghav:** your own Zerodha statement of transactions.
+- **16 · Ranjeet's login:** the password is yours to set.
 
 ```
 https://followup.dr-manoj.in/portal/users
 ```
 
-- **18 · The accountant packs:** *Send*.
-- **19 · The reception PC's Windows.**
-- **20 · The Docterz *Clinical Data Report*, 2022 → 9-Sep**, into `D:\Downloads`.
-- **21 · The arms licence:** submit in November.
-- **22 · The alert for an unknown caller unreached for an hour:** your yes.
-- **23 · "Clear it":** the old working copies in the cloud workspace.
-- **24 · The IPD remove buttons:** only when you ask.
+- **17 · The accountant packs:** *Send*.
+- **18 · The reception PC's Windows.**
+- **19 · The Docterz *Clinical Data Report*, 2022 → 9-Sep**, into `D:\Downloads`.
+- **20 · The arms licence:** submit in November.
+- **21 · The alert for an unknown caller unreached for an hour:** your yes.
+- **22 · "Clear it":** the old working copies in the cloud workspace.
+- **23 · The IPD remove buttons:** only when you ask.
+- **24 · Patients on your command console** (new vs repeat, your diagnosis groups, revenue by group): a mock-up first, on your yes.
 
 **WHEN IT HAPPENS — not a duty:**
+- a **rose line on the Call Console** — a staff card (a missed call not called back, a call not logged), a follow-up section with patients not called, or someone nobody answered: open it;
+- an amber staff card (staff ≠ AI): listen and decide — "to check" is never a verdict;
 - a patient asks for help with a Google review: on the GMB page, **press ✓ Shared after you hand a draft over**;
-- a WhatsApp reply showing *MyOperator busy — retrying* (leave it);
-- a red *NOT delivered* or *May have gone — check*;
-- a `[WA send refused — being retried]` or `[WA send NOT delivered]` mail;
-- a patient's WhatsApp alert;
+- a WhatsApp reply showing *MyOperator busy — retrying* (leave it); a red *NOT delivered* or *May have gone — check*;
+- a `[WA send refused — being retried]` or `[WA send NOT delivered]` mail; a patient's WhatsApp alert;
 - a phone line saying the server fixed (or could not fix) a part;
-- the first real *Call (IVR)* from an IPD case;
-- the first real ankle consent;
-- the film log's first order line;
-- a line "not matching Docterz";
-- the first implant bill and DTH cheque;
+- the first real *Call (IVR)* from an IPD case; the first real ankle consent; the film log's first order line;
+- a line "not matching Docterz"; the first implant bill and DTH cheque;
 - on the 1st of a month, the X-ray & procedures page opening on the new month;
-- an amber or rose line on your console;
-- a rose row or a recording on the Call Console;
 - a salary sheet saying "approved — figures changed since": approve it again.
 
 **Staff's, not yours (watched by me at each open):**
-- the morning film count;
-- reception's attendance corrections and Shavez's check;
-- Shavez's implant bill entries;
-- Darpan's expiry clear-out, and the home-medicines count from 25-Nov;
-- October's slip corrections;
-- Bhati's October home visits (the backfill); reception's physiotherapy clinic slips.
+- the morning film count; reception's attendance corrections and Shavez's check; Shavez's implant bill entries;
+- Darpan's expiry clear-out, and the home-medicines count from 25-Nov; October's slip corrections;
+- Bhati's October home visits; reception's physiotherapy clinic slips;
+- **the follow-up calls** — Shavez the day's (morning), Alisha the grace period (4–6 pm), as your roster says; the Call Console now shows called-of per section.
 
 **Parked at your word, and not raised by me again:** as at the S354 close.
 
-**Deferred at your word:**
-- the evening same-day check;
-- the daily Docterz feedback;
-- the register+slips pack (D789);
-- Docterz's payment mode (D790);
-- *plaster / slab now* in the consent (D809);
-- a Done tick (D816);
-- a portal tile for Darpan's owner page;
-- the IPD remove buttons;
-- the call console's build (06-Nov: "not now").
+**Deferred at your word:** the evening same-day check · the daily Docterz feedback · the register+slips pack (D789) · Docterz's payment mode (D790) · *plaster / slab now* in the consent (D809) · a Done tick (D816) · a portal tile for Darpan's owner page · the IPD remove buttons.
 
-**Dropped at your word:**
-- "which review drafts got posted", and a newest-reviews panel (D832);
-- judging other clinics' reviews, fake or real (D836).
+**Dropped at your word:** "which review drafts got posted", and a newest-reviews panel (D832) · judging other clinics' reviews, fake or real (D836).
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-0. **The nightly's copy of the server** (F-1124): read at the next open whether the Drive wait brought it.
-1. **Arjun Dev's link step**, when his finger is on the machine; **staff 20's exit steps** your word covers.
-2. **The review reading on 19 Nov** (D836): read-only, worked out on your PC.
-3. **The packs page's September checklist** kept quiet for the two September bills the pharmacy parked (after its S726 is in the nightly copy).
-4. **The System Board:** kept by area (D850); tell me what to move.
-5. **The Call Console's build A**, on your word after board R2.
-6. **WhatsApp after MyOperator's fix** · your publish file taking in my uploads first (D823).
-7. **Staff performance** · **Patients on your command console** (a mock-up first) · the watches (F-1085, the IPD desk, the Hostinger update, IPD kits 5 and 6).
-8. **The Tally check** · **the Sanjeevni GST returns** · AF-16 · AF-19.
+1. **The Call Console, staff part 2 (your word: next session):** your review buttons on each staff card's call (Ask to log · Mark reviewed · Staff right · AI right · Note to staff); each person's own card on *Aaj ka kaam*, in Hindi, with a dispute tap — **a mock-up first**; the reception mobile counted against whoever is on duty.
+2. **Arjun Dev's link step**, when his finger is on the machine; **staff 20's exit steps** your word covers.
+3. **The review reading on 19 Nov** (D836).
+4. **The packs page's September checklist** — the pharmacy's S726 is now in the nightly copy.
+5. **WhatsApp after MyOperator's fix** · your publish file taking in my uploads first (D823).
+6. **Patients on your command console** (a mock-up first) · the watches (F-1085, the IPD desk, the Hostinger update, IPD kits 5 and 6).
+7. **The Tally check** · **the Sanjeevni GST returns** · AF-16 · AF-19.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S397 CLOSE — 06 → 07-Nov-2026 (the parent)
+
+- **The Call Console rebuilt to your mock-up R3** — the one-line key, every section folded with a coloured top line, two columns; WhatsApps beside the calls; the follow-up list cleaned, **today's patients included**; Call ke baad for the week (S742, live 07:04).
+- **Staff performance cards** — one folded line per person who handles calls, duty from the staff list and the morning punch (S744, live 07:31); **by your roster**: Shavez counted only while covering, your own calls no card, late call-backs shown (S745, live 07:38).
+- **The nightly copy of the server came through** (the first night with the Drive wait) — every file the last sessions changed matched.
 
 ## ✅ DONE AT THE S394 CLOSE — 06-Nov-2026 (the parent)
 
