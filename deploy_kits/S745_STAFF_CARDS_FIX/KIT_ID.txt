@@ -1,0 +1,3 @@
+KIT S745 S745_STAFF_CARDS_FIX
+the parent . session S397 . 07-Nov-2026 . the staff cards follow the phone roster
+file: calls_console.py (whole, on S744 df484ee5)
