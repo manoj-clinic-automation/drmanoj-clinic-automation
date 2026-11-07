@@ -1,0 +1,136 @@
+
+
+
+# ---- S740 (07-Nov-2026, Sanjeevni session 399, kit S740_PURCHASE_RETURNS; D839 kit 3 as the owner refined it 06:02 - 06:28 IST) -------------
+#  "Wapsi baaki" on the Marg sudhar card: every pending purchase return (scan_register.s740_pending) stays here until the dealer's credit note
+#  or revised bill resolves it (the owner 06:08). A return waiting for the dealer's paper is shown as a line with nothing to do but the
+#  rule ("aane par hi badlaav"); the day the paper comes it says what to enter. His line (step 6's tick) only when a return has something
+#  for him to enter. S738's "more" card: once reception has answered "Nahi" it says only "add the lines"; unanswered it says not to change
+#  Marg for a return (the net entry is the default, the owner 06:12 - 06:20). settle() keeps s740_track in step. Nothing for him to tap.
+KIT_S740 = "S740_PURCHASE_RETURNS"
+S740_DO = ("do_revised", "do_full", "do_return", "do_own", "do_amount", "do_goods")
+_state_before_s740 = state
+
+
+def state(cx, day, who="", step=None, owner=False):           # noqa: F811
+    S = _state_before_s740(cx, day, who, step, owner)
+    S.s740, S.s740_ok, S.s740_no = [], False, set()
+    try:
+        import scan_register as SR                             # noqa: PLC0415
+        m = SR.s740_model(cx)
+        S.s740 = [r for r in m["returns"] if not r["resolved"]]
+        S.s740_ok = True
+        ans = SR._s740_answers(cx)
+        for f in getattr(S, "s738", None) or []:
+            b = cx.execute("SELECT supplier_norm, bill_no, bill_date FROM purchase_bill WHERE id=?", (int(f["bill_id"]),)).fetchone()
+            if b is not None and (ans.get((str(b[0]), SR._s740_nl(b[1]), str(b[2]))) or {}).get("answer") == "no":
+                S.s740_no.add(int(f["bill_id"]))
+    except Exception as e:                                     # noqa: BLE001 -- his day never waits on it
+        print("amir_day S740: the returns could not be read: %s" % str(e)[:200], file=sys.stderr)
+    _derive(S)
+    return S
+
+
+S740_MORE_A = ("<p class=good><b>Bill par wapsi likhi ho to: poora bill aur purchase return. Warna: yeh line Marg mein jodiye.</b></p>")
+S740_MORE_B = ("<p class=good><b>Bill ke item Marg se milaiye. Bill par wapsi likhi ho to: poora bill aur purchase return. "
+               "Warna: chhooti line Marg mein jodiye.</b></p>")
+S740_ASKED = ("<p class=good><b>Reception se poochha gaya hai ki bill par wapsi likhi hai ya nahi. Wapsi ho to abhi Marg mat badaliye &mdash; "
+              "dealer ka kaagaz aane tak. Warna: %s</b></p>")
+S740_NO = "<p class=good><b>Bill ki yeh line Marg mein nahi hai. Jodiye, aur Marg mein bill &#8377;%s kijiye.</b></p>"
+_s738_card_before_s740 = _s738_card
+
+
+def _s738_card(fx):                                           # noqa: F811 -- S740: the "more" card's words by reception's answer
+    h = _s738_card_before_s740(fx)
+    no = getattr(_S740_NO_BILLS, "v", None) or set()
+    for f in fx:
+        if f.get("kind") != "more":
+            continue
+        mark = "<div class=bill data-s738='%d'>" % int(f["bill_id"])
+        i = h.find(mark)
+        if i < 0:
+            continue
+        j = h.find("<div class=bill data-s738=", i + len(mark))
+        j = len(h) if j < 0 else j
+        part = h[i:j]
+        if int(f["bill_id"]) in no:
+            new = S740_NO % _esc(_s738_rs(f.get("paper_p")))
+            part = part.replace(S740_MORE_A, new, 1).replace(S740_MORE_B, new, 1)
+        else:
+            part = part.replace(S740_MORE_A, S740_ASKED % "yeh line Marg mein jodiye.", 1).replace(S740_MORE_B, S740_ASKED % "chhooti line Marg mein jodiye.", 1)
+        h = h[:i] + part + h[j:]
+    return h
+
+
+import threading as _s740_threading                        # noqa: E402
+_S740_NO_BILLS = _s740_threading.local()                      # per worker thread: the bills reception answered "Nahi"
+
+
+def _s740_card(rets):
+    out = []
+    for r in rets:
+        if r["kind"] == "on_bill":
+            head = ("<div class=who>%s &middot; Bill %s</div><div style='font-size:15px'><b>Bill ki tareekh: %s</b> &middot; wapsi &#8377;%s</div>"
+                    % (_esc(r["supplier"]), _esc(r["bill_no"]), _esc(_ddmmyyyy(r["date"])), _esc(_s738_rs(r["amount_p"]))))
+        elif r["kind"] == "own":
+            head = ("<div class=who>%s</div><div style='font-size:15px'>%s &middot; kaagaz nahi</div>" % (_esc(r["supplier"]), _esc(r.get("item") or "")))
+        else:
+            head = ("<div class=who>%s &middot; Purchase return %s</div><div style='font-size:15px'><b>Tareekh: %s</b> &middot; &#8377;%s</div>"
+                    % (_esc(r["supplier"]), _esc(r["bill_no"]), _esc(_ddmmyyyy(r["date"])), _esc(_s738_rs(r["amount_p"]))))
+        body = ("<p class=good><b>%s</b></p>" % (r.get("hi") or "") if r.get("stage") in S740_DO else
+                "<p style='margin:6px 0 0;color:#1b1b1b;font-size:15px'><b>%s</b></p>" % (r.get("hi") or ""))
+        links = []
+        if r.get("scan") is not None:
+            links.append("<a class='btn plain' style='display:inline-block;width:auto;margin:0 6px 0 0' href='/finance/purchase/api/s738/scan/%d' "
+                         "target=_blank rel=noopener>Kaagaz dekhiye</a>" % int(r["scan"]))
+        if r.get("revised"):
+            links.append("<a class='btn plain' style='display:inline-block;width:auto;margin:0' href='/finance/purchase/api/s738/scan/%d' "
+                         "target=_blank rel=noopener>Naya bill dekhiye</a>" % int(r["revised"]["scan"]))
+        out.append("<div class=bill data-s740='%s'>%s%s%s</div>" % (_esc(r["key"]), head, body, "".join(links)))
+    return ("<div class=line id=s740><span class=big>Wapsi baaki &middot; %d</span>"
+            "<p class=sub>Har wapsi yahan rahegi jab tak dealer ka credit note ya naya bill na aa jaye.</p>%s</div>" % (len(rets), "".join(out)))
+
+
+_card_rows_before_s740 = _card_rows
+
+
+def _card_rows(S):                                            # noqa: F811
+    _S740_NO_BILLS.v = set(getattr(S, "s740_no", None) or set())
+    try:
+        rows = _card_rows_before_s740(S)
+    finally:
+        _S740_NO_BILLS.v = None
+    rets = getattr(S, "s740", None) or []
+    if not rets:
+        return rows
+    n_do = sum(1 for r in rets if r.get("stage") in S740_DO)
+    try:
+        card = _s740_card(rets)
+    except Exception as e:                                     # noqa: BLE001 -- his page never breaks on it
+        print("amir_day S740: the card could not be drawn: %s" % str(e)[:200], file=sys.stderr)
+        return rows
+    add = [("s740", card, "returns pending: %d (%d to enter)" % (len(rets), n_do), bool(n_do))]
+    at = 0
+    for i, r in enumerate(rows):
+        if r[0] in ("stage", "sunday", "fixes", "scans", "s738", "s738ok"):
+            at = i + 1
+    return rows[:at] + add + rows[at:]
+
+
+_settle_before_s740 = settle
+
+
+def settle(cx, S, needs_you=False):                           # noqa: F811
+    out = _settle_before_s740(cx, S, needs_you)
+    if getattr(S, "s740_ok", False):
+        try:
+            import scan_register as SR                         # noqa: PLC0415
+            try:
+                SR.s740_sync(cx)
+            except Exception:                                  # noqa: BLE001
+                cx.rollback()
+                raise
+        except Exception as e:                                 # noqa: BLE001
+            print("amir_day S740: the returns could not be kept: %s" % str(e)[:200], file=sys.stderr)
+    return out
+# ---- S740 end ---------------------------------------------------------------------------------------------------------------------------

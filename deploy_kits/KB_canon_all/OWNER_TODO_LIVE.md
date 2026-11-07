@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S397 close** (the parent), 07-Nov-2026, morning — the parent's sections refreshed here (the Call Console rebuilt to R3 with its staff cards; the nightly copy came through; 400 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S398 close** (the Scan App project), 07-Nov-2026, morning — the Scan App sections refreshed here (four kits live: the desk and Yuvika, the product box, two bills on the statement; 401 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S397 close** (the parent), 07-Nov-2026, morning — the parent's sections refreshed here (the Call Console rebuilt to R3 with its staff cards; the nightly copy came through; 400 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S396 close** (the Sanjeevni chat), 07-Nov-2026, morning — the Sanjeevni sections refreshed here (reception's one bill list live; Amir's correction cards and the in-place scan live; 399 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S395 close** (the Scan App project), 06-Nov-2026, evening — the Scan App sections refreshed here (its 398 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S394 close** (the parent), 06-Nov-2026, evening — the parent's sections refreshed here (an exit retires its machine number; statement heads end at their first row; the System Board by area; 397 reserved); the other projects' sections as their closes left them.
@@ -189,59 +190,66 @@
 - The Diwali gift sticker sheet (A4, 8 per sheet) made.
 - Two project-only papers copied to the disk store.
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S395 close (06-Nov, evening)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S398 close (07-Nov, 08:2x)
 
-*Detail: `S395_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_398.md`. The same lines are on your System Board.*
+*Detail: `S398_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_401.md`. The same lines are on your System Board.*
 
-**1 · The publish:** it carries this close's record. Papers only; S735 and S737 are live.
+**1 · The publish:** it carries this close's record. Papers only; S739, S741, S743 and S746 are live.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · October's statement to Variety:** *Make October 2026's statement* (16 lines on 7 papers) → *Send on WhatsApp* → *Mark sent*. When their bill comes: *Join their bill*, then *Paid*.
+**2 · October's statement to Variety:** *Make October 2026's statement* (16 lines on 7 papers) → *Send on WhatsApp* → *Mark sent*. When their two bills come: the Clinic's in *Clinic's bill*, NK's in *NK Pathology's bill*, each *Paid* on its own.
 
 ```
 https://followup.dr-manoj.in/scanapp/stationery
 ```
 
-**3 · Recent scans by scan date — when you want it:** Admin → *Recent scans by scan date* → Switch ON.
+**3 · Yuvika slips on the desk — when you want it:** Admin → *Yuvika slips on the desk* → Switch ON. **Recent scans by scan date** the same way, when you want it.
 
 ```
 https://followup.dr-manoj.in/scanapp/admin
 ```
 
-**4 · The X-ray film log's opening boxes** (the clinic chat's page): the spare boxes on the shelf, so the order line is right.
+**4 · B-0176** — a Yuvika slip in the Procedure room with no lines entered yet.
+
+**5 · The X-ray film log's opening boxes** (the clinic chat's page): the spare boxes on the shelf, so the order line is right.
 
 ```
 https://followup.dr-manoj.in/finance/slips/film/log
 ```
 
-**5 · A shelf count for each product (Y157)** on your Procedure room page. **6 · Examination gloves (Y145):** pairs in a box, 50 or 100? **7 · The new Surgiwear drape (Y146):** its name.
+**6 · A shelf count for each product (Y157)** on your Procedure room page. **7 · Examination gloves (Y145):** pairs in a box, 50 or 100? **8 · The new Surgiwear drape (Y146):** its name.
 
-**8 · October's month end:** Yuvika's WhatsApp photos, added on the Month end page.
+**9 · October's month end:** Yuvika's WhatsApp photos, added on the Month end page.
 
 ```
 https://followup.dr-manoj.in/scanapp/procroom/month
 ```
 
-**9 · Yuvika's May 2026 slips (Y147).** **10 · The lab consumables bills from April 2026 (Y136).** **11 · The battery bills still missing (Y120)** — the Vento's, the DTH lab's UPS battery, the second AC's. **12 · Fujifilm's tax invoice for the AMC (Y121)** — when it comes.
+**10 · Yuvika's May 2026 slips (Y147).** **11 · The lab consumables bills from April 2026 (Y136).** **12 · The battery bills still missing (Y120)** — the Vento's, the DTH lab's UPS battery, the second AC's. **13 · Fujifilm's tax invoice for the AMC (Y121)** — when it comes.
 
 **Not urgent:** *Machine pages* and *Batteries* for Shavez on the *Switches* card; Y83 (the Janitor's renewal list).
 
 **Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S395 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S398 close
 
 **Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat (D765).**
 
-1. **What you did on the Stationery page** — read live; only a gap found is built.
-2. **The desk and Variety's challans (F-1159) with Yuvika's goods to the Procedure room panel** — one kit, a mock-up for you first.
-3. **The product box on the Stationery page (F-1160)** — a searchable list.
-4. **The NK share into NK's accounts** — a plan for the clinic chat and the NK Pathology chat.
-5. **Small points from the reviews** (S715's, S737's, S651's, S633's) — only when a later kit touches those files. **D720, when you ask.**
+1. **What you did on the Stationery page and the switches** — read live; only a gap found is built.
+2. **Small points from the reviews** (S746's, S739's, S715's, S737's, S651's, S633's) — only when a later kit touches those files; the sorting desk's code read whole first. **D720, when you ask.**
 
 **Waits by your word:** the clinic's bills in the accountants' pack.
+
+## ✅ DONE AT THE S398 CLOSE — 07-Nov-2026 (the Scan App project)
+
+- ~~**The S395 record's publish**~~ — landed (05:21 IST 07-Nov).
+- ~~**The desk and Variety's challans (F-1159)**~~ — S739, live 06:26 IST: the desk shows the Stationery page's link and cannot move them.
+- ~~**Yuvika's goods (D845 (3))**~~ — your ruling and FINAL (D857): slips to the Procedure room, printed bills to the Pharmacy; S739, switched off.
+- ~~**The product box on the Stationery page (F-1160)**~~ — S741 (07:01) and S743 (07:22): a searchable list that always offers the products.
+- ~~**The NK share (D845 (4))**~~ — the plan; your answers (two bills, NK pays its own; estimates stay out of the packs) and FINAL (D858); S746, live 08:19 IST.
 
 ## ✅ DONE AT THE S395 CLOSE — 06-Nov-2026 (the Scan App project)
 

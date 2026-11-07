@@ -1,0 +1,132 @@
+
+
+
+# ---- S740 (07-Nov-2026, Sanjeevni session 399, kit S740_PURCHASE_RETURNS; D839 kit 3 as the owner refined it 06:02 - 06:28 IST) -------------
+#  RECEPTION'S ONE QUESTION ON A RETURN: on "Aaj ka bill kaam", a group "Ek sawaal · wapsi" -- for every bill whose paper reads MORE than Marg
+#  (scan_register.s740_model's questions): "Bill par ya parchi par wapsi (return) likhi hai?" with the scan's photo, Haan / Nahi. One tap; the
+#  line leaves. POST /finance/porders/api/s740/wapsi {bill, yes}. A Marg purchase return with no paper reads on the Scan karo card as
+#  "Wapsi ka kaagaz (credit note)" with its size (never a minus figure), and porders' amount question is never raised for a purchase return.
+#  The list keeps the returns' tracker in step (scan_register.s740_sync) when it is read.
+S740_KIT = "S740_PURCHASE_RETURNS"
+T.update({"bk_q740": ("Ek sawaal · wapsi · %d", "A question · a return · %d"),
+          "bk_q740_h": ("Bill par ya parchi par wapsi (return) likhi hai?", "Is a return written on the bill or on a slip?"),
+          "bk_q740_s": ("Kaagaz par %s · Marg mein %s", "The paper %s · Marg %s"),
+          "bk_q740_y": ("Haan, wapsi likhi hai", "Yes, a return is written"), "bk_q740_n": ("Nahi", "No"),
+          "bk_q740_p": ("Scan %s ki photo kholo", "Open the photo of scan %s"),
+          "bk_ret": ("Wapsi ka kaagaz (credit note)", "The return's paper (credit note)")})
+
+
+def _s740_sr():
+    import scan_register as SR                                # noqa: PLC0415
+    return SR
+
+
+_s736_model_before_s740 = s736_model
+
+
+def s736_model(con, now=None, raised=None):                   # noqa: F811 -- S740: + the return question; a purchase return's card by its size
+    m = _s736_model_before_s740(con, now, raised)
+    q740 = []
+    try:
+        q740 = _s740_sr().s740_model(con)["questions"]
+    except Exception as e:                                    # noqa: BLE001 -- the page stands without it
+        print("S740 questions failed: %r" % (e,), file=sys.stderr)
+    for x in m.get("scan") or []:
+        if x.get("kind") == "marg" and int(x.get("amount_p") or 0) < 0:
+            x["amount_p"] = -int(x["amount_p"])
+            x["s740_ret"] = True
+    m["q740"] = q740
+    m["n"] = int(m.get("n") or 0) + len(q740)
+    return m
+
+
+_billkaam_page_before_s740 = billkaam_page
+
+
+def billkaam_page():                                          # noqa: F811
+    out = _billkaam_page_before_s740()
+    if not (isinstance(out, tuple) and len(out) == 3 and isinstance(out[0], str)):
+        return out
+    page, code, hdr = out
+    try:
+        u, con, kind, login, err = _auth_page()
+        if err:
+            return out
+        en = u["_en"]
+        try:
+            _s740_sr().s740_sync(con)
+        except Exception as e:                                # noqa: BLE001
+            con.rollback()
+            print("S740 sync on billkaam failed: %r" % (e,), file=sys.stderr)
+        m = _s740_sr().s740_model(con)
+        h = []
+        if m["questions"]:
+            h.append('<div class="grp amb" id="g_q740">%s</div>' % L(en, "bk_q740", len(m["questions"])))
+            for q in m["questions"]:
+                photo = ('<a class="more" href="/scanapp/bills/%d/file" target="_blank" rel="noopener">%s</a>'
+                         % (int(q["scan"]), esc(L(en, "bk_q740_p", q.get("stamp") or "")))) if q.get("scan") is not None else ""
+                h.append('<div class="card" data-q740="%d"><div class="nm">%s · %s · %s</div><div class="sb">%s</div><div style="font-size:16px;font-weight:700;margin-top:4px;color:#8a5300">%s</div>%s'
+                         '<div class="two"><button class="g" onclick="s454(\'%s/api/s740/wapsi\',{bill:%d,yes:true})">%s</button>'
+                         '<button class="b" onclick="s454(\'%s/api/s740/wapsi\',{bill:%d,yes:false})">%s</button></div></div>'
+                         % (int(q["bill_id"]), esc(q["supplier"]), esc(L(en, "billno", q["bill_no"])), esc(OS.ddmm(q["date"])),
+                            esc(L(en, "bk_q740_s", rs(q["paper_p"]), rs(q["marg_p"]))), L(en, "bk_q740_h"), photo, P, int(q["bill_id"]),
+                            L(en, "bk_q740_y"), P, int(q["bill_id"]), L(en, "bk_q740_n")))
+        add = "".join(h)
+        if add:
+            if '<div class="ok" id="alldone">' in page:
+                page = re.sub(r'<div class="ok" id="alldone">.*?</div></div>', "", page, count=1, flags=re.S)
+            page = page.replace('<div class="mut" id="bkaaj"', add + '<div class="mut" id="bkaaj"', 1)
+        page = re.sub(r'(<div class="card" data-scanline="marg" data-bill="(\d+)"><div class="nm">)',
+                      lambda mm: mm.group(1) + (esc(L(en, "bk_ret")) + " · " if int(mm.group(2)) in _s740_neg(con) else ""), page)
+    except Exception as e:                                    # noqa: BLE001 -- the page stands as S736 drew it
+        print("S740 billkaam failed: %r" % (e,), file=sys.stderr)
+    return page, code, hdr
+
+
+def _s740_neg(con):
+    try:
+        return {int(r[0]) for r in con.execute("SELECT id FROM purchase_bill WHERE amount_p<0")}
+    except Exception:                                         # noqa: BLE001
+        return set()
+
+
+@bp.route(P + "/api/s740/wapsi", methods=["POST"])
+def api_s740_wapsi():
+    """Reception's answer: is a return written on the bill or on a slip? (scan_register.s740_answer_put)"""
+    u, con, kind, err = _auth_api()
+    if err:
+        return err
+    b = _body()
+    try:
+        bid = int(b.get("bill") or 0)
+    except (TypeError, ValueError):
+        return jsonify(ok=False, error="bad_request"), 400
+    ok, msg = _s740_sr().s740_answer_put(con, who(u), bid, bool(b.get("yes")))
+    if not ok:
+        return jsonify(ok=False, error="gone", message=msg), 409
+    return jsonify(ok=True)
+
+
+try:                                                          # porders' amount question: a purchase return is compared by its size
+    _s440_differs_before_s740 = _po()._s440_differs
+
+    def _s740_differs(scan_p, marg_p, ym=None):
+        try:
+            mp = int(marg_p or 0)
+        except (TypeError, ValueError):
+            mp = 0
+        if mp < 0:                                            # a purchase return: never reception's amount question (S440 would mark it WRONG
+            return False                                      # at a plus figure); S740 puts a differing credit note on Amir's card, paper beside him
+        try:                                                  # a dealer's later bill that took a return off, held in Marg at the goods as S740
+            sp = int(scan_p or 0)                             # requires: its paper is right and so is Marg -- never a question (S440 would mark
+            for pp, cm in _s740_sr().s740_model(_po()._db()).get("later_ok") or ():   # it WRONG at the net figure: the return counted twice)
+                if abs(sp - pp) <= 100 and abs(mp - cm) <= 100:   # that very bill: its paper and its current Marg figure
+                    return False
+        except Exception:                                     # noqa: BLE001 -- the question as before
+            pass
+        return _s440_differs_before_s740(scan_p, marg_p, ym)
+
+    _po()._s440_differs = _s740_differs
+except Exception as _e_s740:                                  # noqa: BLE001
+    print("S740: porders._s440_differs not wrapped: %r" % (_e_s740,), file=sys.stderr)
+# ---- S740 end ---------------------------------------------------------------------------------------------------------------------------

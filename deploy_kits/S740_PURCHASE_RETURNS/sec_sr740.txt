@@ -1,0 +1,1282 @@
+
+
+
+# ---- S740 (07-Nov-2026, Sanjeevni session 399, kit S740_PURCHASE_RETURNS; D839 kit 3 as the owner refined it 06:02 - 06:28 IST; his "build"
+#      06:35 on the mock https://claude.ai/artifact/SSDYXCz12GfTGn3Uy7uKUe rev 5) ---------------------------------------------------------------
+#  PURCHASE RETURNS, TRACKED UNTIL THE DEALER'S PAPER RESOLVES THEM. Every pending return stays on Amir's page and the owner's step view until
+#  the dealer's credit note or revised bill resolves it; a month with a pending return is not clear (its NEFT waits).
+#  THE DEFAULT (the owner 06:12 - 06:20): goods returned at delivery are entered NET (only what was kept), so Marg's stock is the shelf's and the
+#  paper reading more than Marg is what keeps the return tracked. A dealer settles a return in one of two ways (06:02): he REVISES the same bill
+#  (Marg keeps that bill at the revised amount; no purchase return) or gives a CREDIT NOTE (Marg: the full bill + a purchase return).
+#  THE KINDS (s740_model -- READ ONLY, one result per web request):
+#    on_bill  a bill whose paper reads MORE than Marg (S738's "more") and reception answered "Haan, wapsi likhi hai" (s740_answer; the owner's
+#             own word seeds Janta 21965, D839). Its row leaves S738's list. Resolved by: a REVISED bill -- a scan of the same supplier and
+#             bill number reading paper - return (within max(Rs 2, 1%)) with Marg at that figure; or a CREDIT NOTE -- a Marg purchase return
+#             (a minus bill) of that supplier for the return's amount, dated on/after the bill, with Marg holding the full bill and the
+#             credit note's own paper scanned; or the dealer TAKING IT OFF a later bill (a scan's own return line for that amount).
+#    marg     every Marg purchase return of a counted month that no other return claims (goods sent back later, entered from a slip):
+#             resolved when its own paper (the credit note) is scanned and agrees.
+#    own      the owner's own record -- "Yes, returned to <dealer>" on a stock-count shortage (a whole strip / box short of an item bought
+#             in the last 180 days from ONE dealer only; stock_watch_loss_line) or "Record a return" (dealer, item, quantity, all picked;
+#             the value at the last purchase rate). Amir enters the purchase return; then as "marg".
+#  A minus bill is compared with its paper by its size (agree() below; porders' amount question likewise). The register's rows of a return
+#  carry whose it is ("Return: ..."), never "Amir: a Marg correction", so S738's list does not carry them twice.
+#  s740_sync keeps s740_track (first seen / resolved / gone) -- called from Amir's own page and reception's list; the owner's GET writes
+#  nothing. assets.db READ ONLY. Nothing here prints a phone number, an account number or a key.
+KIT_S740 = "S740_PURCHASE_RETURNS"
+S740_DDL = (
+    "CREATE TABLE IF NOT EXISTS s740_answer (sup TEXT NOT NULL, bill_no TEXT NOT NULL, bill_date TEXT NOT NULL, answer TEXT NOT NULL, paper_p INTEGER, "
+    "marg_p INTEGER, ret_p INTEGER, by TEXT, at TEXT NOT NULL, undone_at TEXT, undone_by TEXT, PRIMARY KEY (sup, bill_no, bill_date))",
+    "CREATE TABLE IF NOT EXISTS s740_own (id INTEGER PRIMARY KEY AUTOINCREMENT, sup TEXT NOT NULL, supplier TEXT, item TEXT, qty REAL, unit TEXT, "
+    "est_p INTEGER, source TEXT NOT NULL, loss_id INTEGER, by TEXT, at TEXT NOT NULL, withdrawn_at TEXT, withdrawn_by TEXT)",
+    "CREATE TABLE IF NOT EXISTS s740_flag (loss_id INTEGER PRIMARY KEY, answer TEXT NOT NULL, by TEXT, at TEXT NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS s740_same (bill_id INTEGER PRIMARY KEY, answer TEXT NOT NULL, rkey TEXT, by TEXT, at TEXT NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS s740_cn_look (bill_id INTEGER PRIMARY KEY, marg_p INTEGER NOT NULL, scan_p INTEGER, by TEXT, at TEXT NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS s740_track (rkey TEXT PRIMARY KEY, kind TEXT, month TEXT, first_seen TEXT NOT NULL, last_seen TEXT, resolved_at TEXT, "
+    "road TEXT, ref TEXT, gone_at TEXT, off_ref TEXT)")
+S740_FLAG_DAYS = 180                                          # "bought from ONE dealer" looks back this far
+S740_FLAG_FROM = "2026-10-01"                                 # count shortages before this are history
+S740_RET_LINE = re.compile(r"\b(RETURNS?|RETURNED|RTN|SALES?\s*RETURNS?|GOODS\s*RETURN\w*|CREDIT\s*NOTE|DEBIT\s*NOTE|CR\.?\s*NOTE|CR\.?\s*N\.?|CRN|"
+                           r"C\.?\s*N\.?|D\.?\s*N\.?|CN\s*ADJ\w*|RETRN|DN\s*NO)\b|\b[CD]\s*/\s*N\b|\bCN\d|\bRET\.(?=\s*(GOODS|EXP|$))|\b(EXPIRY|EXP\.?)\s*RET\b|"
+                           r"\bLESS\W*RET\b",
+                           re.I)   # never bare RET (retard); a line counts only when it is NEGATIVE as well
+S740_NOT_RET = re.compile(r"\b(DISC\w*|ROUND\w*|CESS|FREIGHT|CARTAGE|RATE|DIFF\w*|SCHEME|SCH|PRICE)\b|^\s*(C|S|I)?GST\b|^\s*TAX\b", re.I)   # a tax line itself, not a
+# return line that mentions GST
+S740_SETTLED = ("verified", "has_scan", "accepted")
+
+
+def s740_ensure(con):
+    for ddl in S740_DDL:
+        con.execute(ddl)
+    if "off_ref" not in {r[1] for r in con.execute("PRAGMA table_info(s740_track)")}:   # a table made before the column
+        con.execute("ALTER TABLE s740_track ADD COLUMN off_ref TEXT")
+
+
+def _s740_tol(p):
+    return max(200, abs(int(p or 0)) // 100)
+
+
+def _s740_nl(s):
+    return str(s or "").strip().lower()
+
+
+def _s740_now():
+    try:
+        import order_sheet as _OS                             # noqa: PLC0415
+        return _OS.now().replace(microsecond=0, tzinfo=None).isoformat()
+    except Exception:                                         # noqa: BLE001
+        return (dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)).replace(microsecond=0).isoformat()
+
+
+def _s740_rows(con, sql, args=()):
+    try:
+        return [dict(r) if isinstance(r, sqlite3.Row) else r for r in con.execute(sql, args).fetchall()]
+    except sqlite3.Error:
+        return []
+
+
+def _s740_answers(con):
+    out = {}
+    try:
+        for r in con.execute("SELECT sup, bill_no, bill_date, answer, paper_p, marg_p, ret_p, by, at, undone_at FROM s740_answer"):
+            if r[9]:
+                continue
+            out[(str(r[0]), _s740_nl(r[1]), str(r[2]))] = dict(answer=r[3], paper_p=r[4], marg_p=r[5], ret_p=r[6], by=r[7], at=r[8])
+    except sqlite3.Error:
+        pass
+    return out
+
+
+def _s740_readings(ids):
+    """{scan id: its item lines} for many scans in ONE read of assets.db (READ ONLY)."""
+    ids = sorted({int(i) for i in ids if i is not None})
+    if not ids:
+        return {}
+    acon = _pa()._assets_con()
+    if acon is None:
+        return None
+    out = {}
+    try:
+        for i in range(0, len(ids), 400):
+            part = ids[i:i + 400]
+            for bid, data in acon.execute("SELECT bill_id, data FROM claude_reading WHERE ok=1 AND bill_id IN (%s) ORDER BY rowid"
+                                          % ",".join("?" * len(part)), part):
+                try:
+                    d = json.loads(data) if data else {}
+                except ValueError:
+                    d = {}
+                out[int(bid)] = [x for x in (d.get("items") or []) if isinstance(x, dict)]
+    except sqlite3.Error:
+        return None
+    finally:
+        acon.close()
+    return out
+
+
+def _s740_amt_p(v):
+    try:
+        return int(round(float(v) * 100))
+    except (TypeError, ValueError):
+        return None
+
+
+def _s740_taken_off(items, total_p):
+    """The amount a dealer's BILL takes off as a return, in paise; 0 when none. Only a bill counts: its total positive, and goods lines (positive)
+    worth more than what it takes off. Only a line that is NEGATIVE (amount, else quantity) AND says return (RETURN / RTN / CREDIT NOTE --
+    never a bare RET, which is a medicine's name: "ADALAT RET") counts. A credit note read with minus lines is not a bill and counts nothing."""
+    if not total_p or int(total_p) <= 0:
+        return 0, ""
+    ret = goods = 0
+    words = []
+    for it in items or []:
+        nm = str(it.get("name") or "")
+        a = _s740_amt_p(it.get("amount"))
+        if a is None or a == 0:
+            continue
+        try:
+            q = float(it.get("quantity") if it.get("quantity") is not None else 0)
+        except (TypeError, ValueError):
+            q = 0
+        neg = a < 0 or q < 0
+        if neg and S740_RET_LINE.search(nm) and not S740_NOT_RET.search(nm):
+            ret += abs(a)
+            words.append(nm)
+        elif a > 0 and not neg:
+            goods += a
+    return (ret, " ".join(words)) if (ret and goods > ret) else (0, "")
+
+
+def _s740_norm(s):
+    return re.sub(r"[^A-Z0-9]", "", str(s or "").upper())
+
+
+def _s740_tokens(text):
+    """The words of a return line, separators inside a word removed ("ZR-1" -> "ZR1", "A/2026/12" -> "A202612")."""
+    toks = [_s740_norm(t) for t in re.split(r"[\s,;:()\[\]]+", str(text or ""))]
+    toks = [t for t in toks if t]
+    out = set()
+    for i, t in enumerate(toks):
+        if t.isdigit() and len(t) < 3:                        # "2", "45": a count -- unless it follows CN / PR / NO / BILL / DN
+            nxt = toks[i + 1] if i + 1 < len(toks) else ""
+            if (i and toks[i - 1] in ("CN", "CRN", "PR", "NO", "BILL", "DN", "NOTE", "CREDITNOTE")
+                    and not re.match(r"^(STRIPS?|STRP|PCS?|NOS?|TABS?|CAPS?|TUBES?|PKTS?|PACKS?|AMPS?|BOX(ES)?|BOTTLES?|BTL|VIALS?|UNITS?|QTY)$", nxt)):
+                out.add(t)
+            continue
+        out.add(t)
+    return out
+
+
+def _s740_pick_off(offs, used_off, ok, bill_no, named_only=False):          # bill_no: one number or several (the purchase return's, the bill's)
+    me_paper = int(getattr(_S740_T, "cur_paper", 0) or 0)        # a return written on a bill: its own paper re-read under another number is
+    if me_paper:                                                  # never a deduction (the same total)
+        ok0 = ok
+        ok = lambda o: ok0(o) and abs(int(o.get("total_p") or 0) - me_paper) > 100   # noqa: E731
+    """The deduction for a return: among those that fit (ok), the one whose return line names this return's bill first; else the earliest
+    that names NO return's bill (a deduction naming another return is that return's)."""
+    adj_of, me = getattr(_S740_T, "adj_of", None) or {}, getattr(_S740_T, "cur_key", None)
+    pre = (getattr(_S740_T, "pre", None) or {}).get(me)      # this return's own deduction, found before the claim: whatever its date
+    c = [o for o in offs if o["scan"] not in used_off and adj_of.get(o["stamp"], me) == me and (ok(o) or o["scan"] == pre)]   # never ANOTHER's
+    if not c:
+        return None
+    nbs = {_s740_norm(b) for b in (bill_no if isinstance(bill_no, (tuple, list)) else (bill_no,)) if _s740_norm(b)}
+    named = [o for o in c if nbs & (o.get("names") or set())]
+    if named:
+        return named[0]
+    own = [o for o in c if o["scan"] == pre and (not o.get("names") or nbs & o["names"])
+           and not (me_paper and abs(int(o.get("total_p") or 0) - me_paper) <= 100)]   # its own, unless it names ANOTHER return
+    if own:
+        return own[0]
+    if named_only:
+        return None
+    free = sorted([o for o in c if not o.get("names")], key=lambda o: (o["bdate"], o["scan"]))
+    return free[0] if free else None
+
+
+def _s740_unit(packing):
+    p = str(packing or "")
+    m = re.match(r"^\s*1\s*\*\s*(\d+)", p)
+    return "strip" if (m and int(m.group(1)) > 1) else "pc"
+
+
+def _s740_qty_words(qty, unit):
+    q = float(qty or 0)
+    n = int(q) if q == int(q) else q
+    return "%s %s" % (n, unit if n == 1 else (unit + "s"))
+
+
+def _s740_last_rate(con, sup, item):
+    """(rate per Marg unit in paise, packing) of the item's last purchase from this dealer (minus bills left out)."""
+    r = _s740_rows(con, "SELECT l.rate_p, l.packing FROM purchase_line l WHERE l.supplier_norm=? AND lower(trim(l.item))=lower(trim(?)) AND l.rate_p>0 "
+                        "AND NOT EXISTS (SELECT 1 FROM purchase_bill b WHERE b.supplier_norm=l.supplier_norm AND lower(trim(b.bill_no))=lower(trim(l.bill_no)) "
+                        "AND b.bill_date=l.bill_date AND b.amount_p<0) ORDER BY l.bill_date DESC, l.id DESC LIMIT 1", (sup, item))
+    if not r:
+        return None, ""
+    r = r[0]
+    return (int(r["rate_p"]) if isinstance(r, dict) else int(r[0])), (r["packing"] if isinstance(r, dict) else r[1]) or ""
+
+
+_S740_MEMO = {}                                               # outside a web request: id(con) -> (con, changes, time, model), one entry, 20 s
+
+
+def s740_model(con):
+    """READ ONLY: dict(returns=[...], questions=[...], flags=[...], adjusted=[...], assets_ok) -- the header above. One result per web
+    request; outside one, the same result for 20 seconds while the connection has written nothing."""
+    import time as _time                                      # noqa: PLC0415
+    memo, key = None, (id(con), con.total_changes)
+    try:
+        from flask import g, has_request_context              # noqa: PLC0415
+        if has_request_context():
+            memo = g.__dict__.setdefault("_s740_memo", {})
+    except Exception:                                         # noqa: BLE001
+        memo = None
+    if memo is not None and key in memo:
+        return memo[key]
+    if memo is None:
+        hit = _S740_MEMO.get(id(con))
+        if hit and hit[0] is con and hit[1] == con.total_changes and _time.time() - hit[2] < 20:
+            return hit[3]
+    out = _s740_build(con)
+    if memo is not None:
+        memo[key] = out
+    else:
+        _S740_MEMO.clear()
+        _S740_MEMO[id(con)] = (con, con.total_changes, _time.time(), out)
+    return out
+
+
+def _s740_first(con):
+    v = setting(con, "purchase.register_from", "2026-10-01")
+    return max(v[:7] if re.match(r"^\d{4}-\d\d", v) else "2026-10", "2026-10")
+
+
+def _s740_months(con):
+    """Every counted month from purchase.register_from on -- a FINALISED month too while it holds a return (an answer, a purchase return or
+    the owner's record): its pending returns stay until resolved (the owner 06:08)."""
+    first = _s740_first(con)
+    ms = sorted(m for m in months_with_bills(con, 24) if m >= first and month_class(con, m) == "counted")
+    try:
+        final = {str(r[0]) for r in con.execute("SELECT month FROM purchase_month WHERE status='final'")}
+    except sqlite3.Error:
+        final = set()
+    if not final:
+        return ms
+    held = {str(r["bill_date"])[:7] for r in _s740_rows(con, "SELECT bill_date FROM s740_answer WHERE answer='yes' AND undone_at IS NULL")}
+    held |= {str(r["m"] or "")[:7] for r in _s740_rows(con, "SELECT COALESCE(month, substr(bill_date,1,7)) AS m FROM purchase_bill WHERE amount_p<0")}
+    return [m for m in ms if m not in final or m in held]
+
+
+def _s740_revised(cx, scans, r, b):
+    """A scan of the same supplier and bill number reading the paper less the return -- the dealer's revised bill. (sid, paise, stamp) | None."""
+    P, A = int(r["paper_p"] or 0), int(r["amount_p"] or 0)
+    net = P - A
+    for sid, s in scans.items():
+        if sid == r.get("scan") or str(s.get("lane") or "pharmacy") != "pharmacy" or s.get("dup_of"):
+            continue
+        if billno(s.get("bill_no"), b["bill_no"]) != "agree":
+            continue
+        sa = scan_amount(cx, s)
+        if not sa or abs(int(sa) - P) <= 100 or abs(int(sa) - net) > _s740_tol(A):
+            continue
+        if supplier(cx, s.get("vendor"), b["supplier"], cx.chosen.get(sid)) != "agree":
+            continue
+        return (sid, int(sa), s.get("stamp_no") or "#%d" % sid)
+    return None
+
+
+def _s740_build(con):
+    pa = _pa()
+    cx = Ctx(con)
+    first = _s740_first(con)
+    months = _s740_months(con)
+    qmonths = set(_s738_counted_months(con))                  # questions only where S738 itself still works (a finalised month asks nothing new)
+    scans = asset_scans(con)
+    assets_ok = scans is not None
+    scans = scans or {}
+    lk = links(con)
+    ans = _s740_answers(con)
+    tr = s740_tracked(con)
+    _S740_T.look = {int(r["bill_id"]): int(r["marg_p"]) for r in _s740_rows(con, "SELECT bill_id, marg_p FROM s740_cn_look")}
+    rowby, qrows = {}, {}
+    for m in months:
+        for x in _register_before_s740(con, m)["rows"]:
+            rowby[int(x["id"])] = x
+            if m in qmonths:
+                qrows[int(x["id"])] = x
+    bills = [dict(r) for r in con.execute("SELECT b.* FROM purchase_bill b WHERE " + pa.EFF_BILL + " ORDER BY b.bill_date, b.id")]
+    bills = [b for b in bills if str(b.get("month") or str(b["bill_date"])[:7]) >= first]
+    minus = [b for b in bills if int(b["amount_p"] or 0) < 0]
+    rets = []
+    for b in bills:
+        if int(b["amount_p"] or 0) <= 0:
+            continue
+        a = ans.get((str(b["supplier_norm"]), _s740_nl(b["bill_no"]), str(b["bill_date"])))
+        if not a or a["answer"] != "yes":
+            continue
+        r = dict(kind="on_bill", key="bill:%s|%s|%s" % (b["supplier_norm"], _s740_nl(b["bill_no"]), b["bill_date"]),
+                 month=str(b.get("month") or str(b["bill_date"])[:7]), sup=str(b["supplier_norm"]), supplier=pa.supplier_key(b["supplier"]),
+                 bill_id=int(b["id"]), bill_no=str(b["bill_no"] or ""), date=str(b["bill_date"])[:10], amount_p=int(a["ret_p"] or 0),
+                 paper_p=int(a["paper_p"] or 0), marg_p=int(b["amount_p"] or 0), scan=(lk.get(int(b["id"])) or {}).get("scan"),
+                 opened=str(a["at"] or ""), by=str(a["by"] or ""))
+        r["_rev"] = _s740_revised(cx, scans, r, b)
+        rets.append(r)
+    for o in _s740_rows(con, "SELECT o.*, l.at AS loss_at FROM s740_own o LEFT JOIN stock_watch_loss_line l ON l.id=o.loss_id "
+                             "WHERE o.withdrawn_at IS NULL ORDER BY o.id") or _s740_rows(con, "SELECT *, NULL AS loss_at FROM s740_own WHERE withdrawn_at IS NULL ORDER BY id"):
+        rets.append(dict(kind="own", key="own:%d" % o["id"], own_id=int(o["id"]), month=str(o["at"])[:7], sup=str(o["sup"]), cut=str(o["loss_at"] or o["at"]),
+                         supplier=o["supplier"] or o["sup"], bill_id=None, bill_no="", date=str(o["at"])[:10], amount_p=int(o["est_p"] or 0),
+                         item=o["item"] or "", qty=o["qty"], unit=o["unit"] or "pc", source=o["source"], scan=None, opened=str(o["at"]),
+                         by=str(o["by"] or "")))
+    # a dealer's later BILL taking a return off (its own return lines)
+    tr_res = {k for k, t in tr.items() if t.get("resolved_at")}
+    keep = {str(t.get("off_ref") or "") for t in tr.values() if t.get("off_ref") and not t.get("gone_at")}   # a deduction tied to a return stays read
+    open_days = [(((_date(str(r.get("cut") or r["date"])[:10]) or today()) - dt.timedelta(days=45)).isoformat() if r["kind"] == "own" else r["date"])
+                 for r in rets if r["key"] not in tr_res]             # the owner's own: the dealer may have taken it off up to 45 days before
+    open_days += [str(mb["bill_date"])[:10] for mb in minus
+                  if "mret:%s|%s|%s" % (mb["supplier_norm"], _s740_nl(mb["bill_no"]), mb["bill_date"]) not in tr_res]
+    s_from = ((_date(min(open_days)) or today()) - dt.timedelta(days=3)).isoformat()[:7] if open_days else today().isoformat()[:7]
+    prev = (today().replace(day=1) - dt.timedelta(days=1)).isoformat()[:7]
+    s_from = min([s_from, prev] + list(qmonths))              # last month and every month not yet finalised always read (the owner reviews them)
+    s_from = max(s_from, (today() - dt.timedelta(days=120)).isoformat()[:7])     # never more than four months of scans per read
+    sup_scans = [s for s in scans.values() if str(s.get("lane") or "pharmacy") == "pharmacy" and not s.get("dup_of")
+                 and (str(s.get("month") or "") >= max(first, s_from) or (s.get("stamp_no") or "#%d" % int(s["id"])) in keep)]
+    readings = _s740_readings([s["id"] for s in sup_scans])
+    if readings is None:
+        assets_ok, readings = False, {}
+    own_scans = {int(r["scan"]) for r in rets if r.get("scan") is not None}   # a return's own paper is never a deduction
+    offs = []
+    for s in sup_scans:
+        x, words = _s740_taken_off(readings.get(int(s["id"])), scan_amount(cx, s))
+        bd = str(s.get("bill_date") or "")[:10]
+        if x and _date(bd):                                   # the later bill's OWN date must be read
+            offs.append(dict(scan=int(s["id"]), stamp=s.get("stamp_no") or "#%d" % int(s["id"]), vendor=s.get("vendor") or "", day=str(s.get("day") or "")[:10],
+                             bdate=bd, bill_no=str(s.get("bill_no") or ""), amount_p=x, sid=int(s["id"]), total_p=scan_amount(cx, s), text=words))
+    bill_of_scan = {int(v["scan"]): int(bid) for bid, v in lk.items() if v.get("scan") is not None}
+    seen_off, kept = set(), []
+    offs.sort(key=lambda o: (o["scan"] not in bill_of_scan, o["scan"]))   # the scan Marg's bill is linked to first
+    for o in offs:
+        if o["scan"] in own_scans:
+            continue
+        k = (_s740_norm(o["vendor"]), _s740_norm(o["bill_no"]), o["bdate"])
+        if o["bill_no"] and k in seen_off:                    # the same later bill scanned twice: one deduction
+            continue
+        seen_off.add(k)
+        bid = bill_of_scan.get(o["scan"])
+        b2 = con.execute("SELECT amount_p FROM purchase_bill WHERE id=?", (bid,)).fetchone() if bid is not None else None
+        o.update(bill_id=bid, marg_p=(int(b2[0] or 0) if b2 is not None else None))
+        kept.append(o)
+    offs = kept
+    for o in offs:                                            # a deduction names a return of ITS OWN dealer only
+        nm = {_s740_norm(r["bill_no"]) for r in rets if r.get("bill_no") and supplier(cx, o["vendor"], r["supplier"]) == "agree"}
+        nm |= {_s740_norm(mb["bill_no"]) for mb in minus if supplier(cx, o["vendor"], mb["supplier"]) == "agree"}
+        o["names"] = {t for t in _s740_tokens(o.get("text")) if t in nm}
+    claimed = {}
+    lines_of = {}
+    same = {int(x["bill_id"]): dict(answer=x["answer"], rkey=x["rkey"]) for x in _s740_rows(con, "SELECT bill_id, answer, rkey FROM s740_same")}
+    maybe = {}                                                # a later purchase return that MAY be the credit note a settled return's deduction cited
+    for mb in minus:                                          # an item printed on two lines (two batches) is ONE quantity, by its size
+        lq = {}
+        for r in _s740_rows(con, "SELECT item, qty FROM purchase_line WHERE supplier_norm=? AND lower(trim(bill_no))=lower(trim(?)) AND bill_date=?",
+                            (mb["supplier_norm"], mb["bill_no"], mb["bill_date"])):
+            lq[_s740_nl(r["item"])] = lq.get(_s740_nl(r["item"]), 0.0) + abs(float(r["qty"] or 0))
+        lines_of[int(mb["id"])] = lq
+    for r in sorted(rets, key=lambda z: (z["opened"], z["key"])):
+        if r.get("_rev"):                                     # settled by the dealer's revised bill: it takes no purchase return
+            continue
+        off_day = ""
+        if r["kind"] == "on_bill":                            # the dealer took it off a later bill: only a credit note that existed by that
+            nb_ = _s740_norm(r["bill_no"])
+            fit = sorted([o for o in offs if o["scan"] != r.get("scan") and o["bdate"] > r["date"]   # bill's date can be the same return
+                          and billno(o["bill_no"], r["bill_no"]) == "differ" and abs(int(o["total_p"] or 0) - int(r.get("paper_p") or 0)) > 100
+                          and abs(o["amount_p"] - r["amount_p"]) <= _s740_tol(r["amount_p"])
+                          and supplier(cx, o["vendor"], r["supplier"]) == "agree" and (not o.get("names") or nb_ in o["names"])],
+                         key=lambda o: (nb_ not in (o.get("names") or set()), o["bdate"], o["scan"]))   # one naming THIS bill first; never another's
+            t_ = tr.get(r["key"]) or {}
+            tied = next((o for o in offs if t_.get("off_ref") and o["stamp"] == t_["off_ref"]), None)
+            pre = tied or (fit[0] if fit else None)
+            if pre is not None:
+                off_day = pre["bdate"]
+                r["_pre_off"] = pre["scan"]
+                r["_pre_names"] = set(pre.get("names") or set())
+            elif not assets_ok and t_.get("off_ref"):         # the scans unreadable: a return the tracker tied to a deduction claims nothing new
+                off_day = r["date"]
+        best = None
+        for mb in minus:
+            if int(mb["id"]) in claimed or str(mb["supplier_norm"]) != r["sup"]:
+                continue
+            size = -int(mb["amount_p"] or 0)
+            if r["kind"] == "on_bill":
+                ok = str(mb["bill_date"]) >= r["date"] and abs(size - r["amount_p"]) <= _s740_tol(r["amount_p"])
+                sa = same.get(int(mb["id"])) or {}
+                if ok and sa.get("answer") == "other" and sa.get("rkey") == r["key"]:   # the owner said: another return -- never this one's
+                    ok = False
+                elif ok and _s740_norm(mb["bill_no"]) in (r.get("_pre_names") or set()):
+                    pass                                      # the deduction NAMES this purchase return: the same credit note, whatever Marg's date
+                elif ok and off_day and str(mb["bill_date"]) > off_day:           # after the deduction: the same credit note, or another return?
+                    if not (sa.get("answer") == "same" and sa.get("rkey") == r["key"]):
+                        if assets_ok and not sa:
+                            maybe.setdefault(int(mb["id"]), r)
+                        ok = False
+            else:
+                # the owner's own: a purchase return dated within 45 days before it was recorded (Marg may carry the slip's date) that no
+                # one saw as a return of its own before it was recorded -- carrying the item in about that quantity, or else about that value
+                d0 = ((_date(r["date"]) or today()) - dt.timedelta(days=45)).isoformat()
+                mk = "mret:%s|%s|%s" % (mb["supplier_norm"], _s740_nl(mb["bill_no"]), mb["bill_date"])
+                seen = (tr.get(mk) or {}).get("first_seen")
+                fsd = str(mb.get("first_seen_day") or "")[:10]
+                cut = str(r.get("cut") or r["opened"])
+                if str(mb["bill_date"]) < d0 or (seen and str(seen) <= cut) or (fsd and fsd < cut[:10]):
+                    continue
+                lines_mb = lines_of.get(int(mb["id"]), {})
+                q = lines_mb.get(_s740_nl(r.get("item")))
+                want = float(r.get("qty") or 0)
+                if lines_mb:                                  # its lines are in: the item must be on it
+                    ok = q is not None and want > 0 and abs(q - want) <= max(1.0, want / 2)
+                else:                                         # no lines yet: about the value
+                    ok = abs(size - r["amount_p"]) <= max(_s740_tol(r["amount_p"]), r["amount_p"] * 3 // 10)
+            if ok and (best is None or str(mb["bill_date"]) < str(best["bill_date"])):
+                best = mb
+        if best is not None:
+            claimed[int(best["id"])] = r["key"]
+            r["mb"] = dict(id=int(best["id"]), bill_no=str(best["bill_no"] or ""), date=str(best["bill_date"])[:10], size=-int(best["amount_p"] or 0))
+    keys = {r["key"] for r in rets}
+    for mb in minus:
+        if int(mb["id"]) in claimed:
+            continue
+        k = "mret:%s|%s|%s" % (mb["supplier_norm"], _s740_nl(mb["bill_no"]), mb["bill_date"])
+        if k in keys:                                         # the same return entered twice in Marg: ONE return, its stage 'double'
+            continue
+        keys.add(k)
+        rets.append(dict(kind="marg", key=k, maybe_of=(maybe.get(int(mb["id"])) or {}).get("key"),
+                         maybe_bill=(maybe.get(int(mb["id"])) or {}).get("bill_no"),
+                         month=str(mb.get("month") or str(mb["bill_date"])[:7]), sup=str(mb["supplier_norm"]), supplier=pa.supplier_key(mb["supplier"]),
+                         bill_id=int(mb["id"]), bill_no=str(mb["bill_no"] or ""), date=str(mb["bill_date"])[:10], amount_p=-int(mb["amount_p"] or 0),
+                         scan=(lk.get(int(mb["id"])) or {}).get("scan"), opened=str(mb.get("first_seen_day") or mb["bill_date"]),
+                         mb=dict(id=int(mb["id"]), bill_no=str(mb["bill_no"] or ""), date=str(mb["bill_date"])[:10], size=-int(mb["amount_p"] or 0))))
+    used_off = set()
+    _S740_T.adj_of = {str(t.get("off_ref") or ""): k for k, t in tr.items() if t.get("off_ref") and not t.get("gone_at")}
+    _S740_T.pre = {r["key"]: r.get("_pre_off") for r in rets if r.get("_pre_off") is not None}
+    for r in sorted(rets, key=lambda z: (z["kind"] == "own", z["opened"], z["key"])):
+        _S740_T.cur_key = r["key"]
+        _S740_T.cur_paper = int(r.get("paper_p") or 0) if r["kind"] == "on_bill" else 0
+        _s740_stage(con, cx, r, scans, lk, rowby, offs, used_off)
+        r.pop("_rev", None)
+        r.pop("_pre_off", None)
+        r.pop("_pre_names", None)
+    _S740_T.cur_key = None
+    _S740_T.cur_paper = 0
+    later_ok = [(int(r["adj"]["paper_p"]), int(r["adj"]["marg_p"])) for r in rets if r.get("adj") and r["adj"].get("marg_p") is not None]   # every later
+    # bill that took a return off, settled or not, by its paper and its CURRENT Marg figure: S740's card owns it, never S440's question
+    own_open = [r for r in rets if r["kind"] == "own" and not r["resolved"]]
+    adjusted = [o for o in offs if o["scan"] not in used_off and o["scan"] not in own_scans and not any(
+        supplier(cx, o["vendor"], r["supplier"]) == "agree" and abs(o["amount_p"] - r["amount_p"]) <= max(_s740_tol(r["amount_p"]), r["amount_p"] * 3 // 10)
+        and ((_date(str(r.get("cut") or r["date"])[:10]) or today()) - dt.timedelta(days=45)).isoformat() <= o["bdate"]
+        <= ((_date(str(r.get("cut") or r["date"])[:10]) or today()) + dt.timedelta(days=45)).isoformat() for r in own_open) and not any(
+        r["kind"] == "on_bill" and supplier(cx, o["vendor"], r["supplier"]) == "agree"
+        and (billno(o["bill_no"], r["bill_no"]) == "agree" or (billno(o["bill_no"], r["bill_no"]) == "not_read"
+                                                              and abs(int(o["total_p"] or 0) - int(r.get("paper_p") or 0)) <= 100)) for r in rets)]
+    for o in adjusted:
+        o["supplier"] = next((r["supplier"] for r in rets if supplier(cx, o["vendor"], r["supplier"]) == "agree"), o["vendor"])
+    rets.sort(key=lambda z: (z["month"], z["date"], z["key"]))
+    return dict(returns=rets, questions=_s740_questions(con, ans, qrows), no_answers=_s740_no_answers(con, ans, qrows), adjusted=adjusted,
+                first=first, assets_ok=assets_ok, later_ok=later_ok)
+
+
+def _s740_paper_ok(rowby, lk, bid):
+    look = getattr(_S740_T, "look", None) or {}               # set by _s740_build for its own thread: {bill id: Marg's amount when the owner looked}
+    x = rowby.get(int(bid))
+    if x is not None:
+        if x["state"] == "amount_differs" and int(bid) in look and int(look[int(bid)]) == int(x.get("amount_p") or 0):
+            return True, x                                    # the owner looked: the credit note was misread, its paper is Marg's
+        return x["state"] in S740_SETTLED, x
+    return int(bid) in lk, None
+
+
+def _s740_stage(con, cx, r, scans, lk, rowby, offs, used_off):
+    """Sets r['stage'] (resolved | waiting | do_revised | do_full | do_return | do_own | do_amount | paper), r['road'], r['ref'], r['hi'], r['en'],
+    r['whose'] and r['resolved'] -- the header above."""
+    rs_ = rs
+    A = int(r["amount_p"] or 0)
+    r.update(road="", ref="", resolved=False)
+    sup_name = r["supplier"]
+    if r["kind"] == "on_bill":
+        b = con.execute("SELECT * FROM purchase_bill WHERE id=?", (r["bill_id"],)).fetchone()
+        b = dict(b) if b else dict(supplier=r["supplier"], bill_no=r["bill_no"], bill_date=r["date"], amount_p=r["marg_p"])
+        M, P = int(b.get("amount_p") or 0), int(r["paper_p"] or 0)
+        r["marg_p"] = M
+        rev = r.get("_rev")
+        off = _s740_pick_off(offs, used_off, lambda o: (o["scan"] != r.get("scan") and o["bdate"] > r["date"]
+                             and billno(o["bill_no"], r["bill_no"]) == "differ" and abs(int(o["total_p"] or 0) - P) > 100
+                             and abs(o["amount_p"] - A) <= _s740_tol(A) and supplier(cx, o["vendor"], b["supplier"]) == "agree"), r["bill_no"])
+        mb = r.get("mb")
+        if rev is not None:
+            r["revised"] = dict(scan=rev[0], amount_p=rev[1], stamp=rev[2])
+            if abs(M - rev[1]) <= 100:
+                r.update(stage="resolved", road="revised", ref=rev[2], resolved=True,
+                         en="Settled: the dealer revised the bill to %s (scan %s) and Marg holds it." % (rs_(rev[1]), rev[2]))
+            else:
+                r.update(stage="do_revised", hi="Dealer ne bill badla hai (naya bill &#8377;%s). Marg mein bill &#8377;%s kijiye." % (_s740_hrs(rev[1]), _s740_hrs(rev[1])),
+                         en="The dealer revised the bill to %s (scan %s); Marg holds %s — Amir sets Marg to %s." % (rs_(rev[1]), rev[2], rs_(M), rs_(rev[1])),
+                         whose="Return: Amir enters it in Marg")
+        elif mb is not None:
+            if abs(M - P) > 100:
+                off2 = _s740_pick_off(offs, used_off, lambda o: (o["scan"] != r.get("scan") and o["bdate"] > r["date"]   # a later bill that took
+                                      and billno(o["bill_no"], r["bill_no"]) == "differ" and abs(o["amount_p"] - A) <= _s740_tol(A)   # it off too stays
+                                      and supplier(cx, o["vendor"], b["supplier"]) == "agree"), (mb["bill_no"], r["bill_no"]))      # held meanwhile
+                if off2 is not None:
+                    used_off.add(off2["scan"])
+                    r["adj"] = dict(scan=off2["scan"], stamp=off2["stamp"], bill_id=off2.get("bill_id"), bill_no=off2["bill_no"],
+                                    goods_p=int(off2["total_p"] or 0) + int(off2["amount_p"] or 0), off_p=int(off2["amount_p"]),
+                                    paper_p=int(off2["total_p"] or 0), marg_p=off2.get("marg_p"))
+                r.update(stage="do_full", hi="Dealer ka credit note Marg mein aa gaya (purchase return %s). Ab Marg mein bill &#8377;%s kijiye (poora bill)."
+                         % (_esc_h(mb["bill_no"]), _s740_hrs(P)),
+                         en="Credit note %s is in Marg; the bill is still %s in Marg — Amir enters the full bill %s." % (mb["bill_no"], rs_(M), rs_(P)),
+                         whose="Return: Amir enters it in Marg")
+            else:
+                _s740_mb_stage(r, mb, rowby, lk, "Settled: full bill %s and purchase return %s in Marg; the credit note is scanned." % (rs_(M), mb["bill_no"]),
+                               cx, offs, used_off)
+                if r.get("stage") == "paper":
+                    r.update(hi="Poora bill aur purchase return Marg mein hain. Dealer ke credit note ka scan baaki hai (reception).",
+                             en="Full bill and purchase return %s in Marg; the credit note's paper is to be scanned (reception)." % mb["bill_no"])
+        elif off is not None:
+            used_off.add(off["scan"])
+            _s740_adj(r, off, "Settled: the dealer took %s off a later bill (scan %s)" % (rs_(off["amount_p"]), off["stamp"]))
+        elif abs(M - P) <= 100:
+            r.update(stage="do_return", hi="Marg mein %s ka &#8377;%s ka purchase return banaiye (dealer ke credit note se)." % (_esc_h(sup_name), _s740_hrs(A)),
+                     en="Marg holds the full bill %s but no purchase return yet — Amir enters the purchase return %s." % (rs_(M), rs_(A)),
+                     whose="Return: Amir enters it in Marg")
+        else:
+            r.update(stage="waiting", hi="Dealer ka credit note ya naya bill aane par hi Marg mein badlaav kijiye.",
+                     en="Waiting for the dealer's paper: a revised bill or a credit note. Marg holds %s (the goods kept)." % rs_(M),
+                     whose="Return: waiting for the dealer's paper")
+        return
+    mb = r.get("mb")
+    if r["kind"] == "marg" and r.get("maybe_of"):              # the owner's question: the same credit note as a settled return's, or another?
+        r.update(stage="check_same", hi="Yeh purchase return %s (&#8377;%s) Doctor sahab dekh rahe hain &mdash; abhi Marg mein kuch mat badaliye."
+                 % (_esc_h(mb["bill_no"]), _s740_hrs(mb["size"])),
+                 en="Purchase return %s (%s) came after the dealer took the same amount off a later bill for bill %s's return. The same credit "
+                    "note? Then that return is in the books twice: Amir enters bill %s in full. Or another return?" % (
+                     mb["bill_no"], rs_(mb["size"]), r.get("maybe_bill") or "", r.get("maybe_bill") or ""),
+                 whose="You: the same return or another?")
+        return
+    if r["kind"] == "own" and mb is None:                     # goods gone, Marg not told: the purchase return comes first, whatever the dealer did
+        what = "%s · %s" % (r.get("item") or "", _s740_qty_words(r.get("qty"), r.get("unit") or "pc"))
+        r.update(stage="do_own", hi="Marg mein %s ka purchase return banaiye: %s." % (_esc_h(sup_name), _esc_h(what)),
+                 en="Recorded by you (%s, %s): %s, about %s — Amir enters the purchase return." % (
+                     "from the stock count" if r.get("source") == "count" else "by hand", ddmon(r["opened"]), what, rs_(A)),
+                 whose="Return: Amir enters it in Marg")
+        return
+    _s740_mb_stage(r, mb, rowby, lk, "Settled: purchase return %s (%s) in Marg; its credit note is scanned and agrees." % (mb["bill_no"], rs_(mb["size"])),
+                   cx, offs, used_off)
+
+
+def _s740_adj(r, off, en_ok):
+    """A return the dealer took off a later bill: settled only when Marg holds that later bill at the GOODS (its paper + what it took off) --
+    the return is already in the books (net entry, or Marg's purchase return), so a net figure there would count it twice."""
+    G = int(off["total_p"] or 0) + int(off["amount_p"] or 0)
+    M = off.get("marg_p")
+    r["adj"] = dict(scan=off["scan"], stamp=off["stamp"], bill_id=off.get("bill_id"), bill_no=off["bill_no"], goods_p=G, off_p=int(off["amount_p"]),
+                    paper_p=int(off["total_p"] or 0), marg_p=M)
+    if M is not None and abs(int(M) - G) <= _s740_tol(G):
+        r.update(stage="resolved", road="adjusted", ref=off["stamp"], resolved=True, en="%s; Marg holds that bill at the goods' %s." % (en_ok, rs(G)))
+    elif M is None:
+        r.update(stage="do_goods", road="", ref="",
+                 hi="%s ke bill %s mein dealer ne wapsi &#8377;%s ghatai hai. Yeh bill Marg mein &#8377;%s (poora maal) se daaliye."
+                 % (_esc_h(r["supplier"]), _esc_h(off["bill_no"]), _s740_hrs(off["amount_p"]), _s740_hrs(G)),
+                 en="The dealer took %s off bill %s (scan %s); that bill is not in Marg yet — Amir enters it at the goods' %s." % (
+                     rs(off["amount_p"]), off["bill_no"], off["stamp"], rs(G)), whose="Return: Amir enters it in Marg")
+    else:
+        r.update(stage="do_goods", road="", ref="",
+                 hi="%s ke bill %s mein dealer ne wapsi &#8377;%s ghatai hai. Marg mein yeh bill &#8377;%s (poora maal) kijiye &mdash; wapsi pehle se hisaab mein hai."
+                 % (_esc_h(r["supplier"]), _esc_h(off["bill_no"]), _s740_hrs(off["amount_p"]), _s740_hrs(G)),
+                 en="The dealer took %s off bill %s (scan %s); Marg holds %s — Amir sets it to the goods' %s (the return is already in the books)." % (
+                     rs(off["amount_p"]), off["bill_no"], off["stamp"], rs(M), rs(G)), whose="Return: Amir enters it in Marg")
+
+
+def _s740_mb_stage(r, mb, rowby, lk, en_ok, cx=None, offs=(), used_off=None):
+    """The stage of a return whose purchase return is in Marg (mb): its paper scanned and agreeing settles it."""
+    rs_ = rs
+    paper_ok, x = _s740_paper_ok(rowby, lk, mb["id"])
+    if paper_ok:
+        off = None
+        if cx is not None and used_off is not None:           # the credit note came AND the dealer printed "Less CN ..." on a later bill:
+            off = _s740_pick_off(offs, used_off, lambda o: (o["bdate"] >= mb["date"] and billno(o["bill_no"], mb["bill_no"]) != "agree"   # that bill
+                                 and o["scan"] != r.get("scan") and abs(o["amount_p"] - int(mb["size"])) <= _s740_tol(mb["size"])        # stays at
+                                 and supplier(cx, o["vendor"], r["supplier"]) == "agree"), (mb["bill_no"], r.get("bill_no") or ""))       # the goods
+        if off is not None:
+            used_off.add(off["scan"])
+            _s740_adj(r, off, en_ok.rstrip(".") + "; the dealer also took it off a later bill (scan %s)" % off["stamp"])
+            if r.get("resolved"):
+                r.update(road="credit", ref=mb["bill_no"])
+            return
+        r.update(stage="resolved", road="credit", ref=mb["bill_no"], resolved=True, en=en_ok)
+    elif x is not None and x["state"] == "double":
+        r.update(stage="double", hi="Yeh purchase return Marg mein do baar hai (%s) &mdash; upar ki list se ek entry hataiye." % _esc_h(mb["bill_no"]),
+                 en="Purchase return %s is entered twice in Marg — Amir removes one (his correction list)." % mb["bill_no"],
+                 whose=str(x.get("whose") or "Amir: a Marg correction"))
+    elif x is not None and x["state"] == "amount_differs" and (x.get("agree") or {}).get("scan_p"):
+        pp = abs(int((x.get("agree") or {}).get("scan_p") or 0))
+        r.update(stage="do_amount", hi="Kaagaz dekh kar Marg mein purchase return %s theek kijiye: kaagaz par &#8377;%s, Marg mein &#8377;%s."
+                 % (_esc_h(mb["bill_no"]), _s740_hrs(pp), _s740_hrs(mb["size"])),
+                 en="Purchase return %s: its credit note reads %s, Marg %s — Amir checks the paper and corrects Marg." % (mb["bill_no"], rs_(pp), rs_(mb["size"])),
+                 whose="Return: Amir enters it in Marg")
+    elif x is not None and x.get("scan") is not None:
+        r.update(stage="paper_check", hi="Wapsi Marg mein hai (purchase return %s); uske kaagaz ki jaanch baaki hai." % _esc_h(mb["bill_no"]),
+                 en="Purchase return %s (%s): its paper is scanned and being checked — %s." % (mb["bill_no"], rs_(mb["size"]), x.get("whose") or "—"),
+                 whose="Return: " + str(x.get("whose") or "being checked"))
+    else:
+        off = None
+        if cx is not None and used_off is not None:           # no credit note: the dealer took it off a later bill instead
+            d_ = max(mb["date"], r["date"])
+            if r["kind"] == "own":                                # the dealer may take it off before Amir enters the purchase return
+                d_ = ((_date(str(r.get("cut") or r["date"])[:10]) or today()) - dt.timedelta(days=45)).isoformat()
+            off = _s740_pick_off(offs, used_off, lambda o: ((o["bdate"] > d_ or (o["bdate"] == d_ and billno(o["bill_no"], mb["bill_no"]) == "differ"
+                                                                                 and (not r.get("bill_no") or billno(o["bill_no"], r["bill_no"]) == "differ")))
+                                 and billno(o["bill_no"], mb["bill_no"]) != "agree" and o["scan"] != r.get("scan")
+                                 and abs(o["amount_p"] - int(mb["size"])) <= _s740_tol(mb["size"])
+                                 and supplier(cx, o["vendor"], r["supplier"]) == "agree"), (mb["bill_no"], r.get("bill_no") or ""))
+        if off is not None:
+            used_off.add(off["scan"])
+            _s740_adj(r, off, "Settled: purchase return %s (%s) in Marg; the dealer took it off a later bill (scan %s)" % (mb["bill_no"], rs_(mb["size"]), off["stamp"]))
+            return
+        r.update(stage="paper", hi="Wapsi Marg mein hai (purchase return %s). Dealer ka kaagaz (credit note) scan hona baaki hai." % _esc_h(mb["bill_no"]),
+                 en="Purchase return %s (%s) is in Marg; its paper (the credit note) is to be scanned — reception." % (mb["bill_no"], rs_(mb["size"])),
+                 whose="Return: reception scans the credit note")
+
+
+def _esc_h(s):
+    return esc(str(s or ""))
+
+
+def _s740_hrs(p):
+    """Rupees for a Hindi line (no currency sign: the caller writes it)."""
+    t = rs(abs(int(p or 0)))
+    return t.replace("₹", "")
+
+
+def _s740_questions(con, ans, rowby):
+    """Reception's one question: the bills whose paper reads MORE than Marg and are Amir's correction (S738's 'more', read from the register as
+    it stands before this section -- never through s738_fixes, which reads the register this section wraps) with no answer yet."""
+    out = []
+    for bid, x in sorted(rowby.items(), key=lambda z: (str(z[1].get("date") or ""), z[0])):
+        if x["state"] != "amount_differs" or not str(x.get("whose") or "").startswith("Amir"):
+            continue
+        ag = x.get("agree") or {}
+        paper, marg = ag.get("scan_p"), int(x.get("amount_p") or 0)
+        if paper in (None, 0) or marg <= 0 or int(paper) <= marg:
+            continue
+        b = con.execute("SELECT supplier_norm, bill_no, bill_date, month FROM purchase_bill WHERE id=?", (int(bid),)).fetchone()
+        if b is None or (str(b[0]), _s740_nl(b[1]), str(b[2])) in ans:
+            continue
+        out.append(dict(bill_id=int(bid), supplier=x["supplier"], bill_no=str(x["bill_no"] or ""), date=str(x.get("date") or "")[:10],
+                        paper_p=int(paper), marg_p=marg, diff_p=int(paper) - marg, scan=x.get("scan"), stamp=x.get("stamp") or "",
+                        month=str(b[3] or str(b[2])[:7])))
+    return out
+
+
+def _s740_no_answers(con, ans, qrows):
+    """Reception's "Nahi" on a bill whose paper still reads more than Marg (the owner may undo a wrong one)."""
+    out = []
+    for bid, x in qrows.items():
+        if x["state"] != "amount_differs":
+            continue
+        b = con.execute("SELECT supplier_norm, bill_no, bill_date FROM purchase_bill WHERE id=?", (int(bid),)).fetchone()
+        a = ans.get((str(b[0]), _s740_nl(b[1]), str(b[2]))) if b is not None else None
+        if a and a["answer"] == "no":
+            out.append(dict(bill_id=int(bid), supplier=x["supplier"], bill_no=str(x["bill_no"] or ""), date=str(x.get("date") or "")[:10],
+                            paper_p=a["paper_p"], marg_p=int(x.get("amount_p") or 0), by=a["by"], at=a["at"], month=str(x.get("date") or "")[:7]))
+    return out
+
+
+def _s740_flags(con):
+    """The count shortages that may be returns with no paper: a whole strip / box short, of an item bought in the last 180 days from ONE dealer
+    only, not answered, not already recorded. READ ONLY. Built for the owner's row and his tap only (never inside the model): one read of
+    the open loss lines, one grouped read of their items' purchases."""
+    out = []
+    answered = {int(r["loss_id"]) for r in _s740_rows(con, "SELECT loss_id FROM s740_flag")} | {
+        int(r["loss_id"]) for r in _s740_rows(con, "SELECT loss_id FROM s740_own WHERE loss_id IS NOT NULL")}
+    lines = []
+    for l in _s740_rows(con, "SELECT id, at, item, gap_units, pack, packing FROM stock_watch_loss_line WHERE void_at IS NULL AND at >= ? ORDER BY id",
+                        (S740_FLAG_FROM,)):
+        if int(l["id"]) in answered:
+            continue
+        pack = int(l.get("pack") or 1) or 1
+        gap = float(l.get("gap_units") or 0)
+        if gap < pack or abs(gap / pack - round(gap / pack)) > 1e-9:
+            continue
+        lines.append(dict(l, pack=pack, gap=gap))
+    if not lines:
+        return out
+    items = sorted({_s740_nl(l["item"]) for l in lines})
+    d_min = min(((_date(str(l["at"])[:10]) or today()) - dt.timedelta(days=S740_FLAG_DAYS)).isoformat() for l in lines)
+    minus = {(str(r["supplier_norm"]), _s740_nl(r["bill_no"]), str(r["bill_date"])) for r in
+             _s740_rows(con, "SELECT supplier_norm, bill_no, bill_date FROM purchase_bill WHERE amount_p<0")}
+    bought = {}
+    for i0 in range(0, len(items), 300):
+        part = items[i0:i0 + 300]
+        for r in _s740_rows(con, "SELECT lower(trim(item)) AS it, supplier_norm, bill_no, bill_date, rate_p, packing FROM purchase_line WHERE bill_date>=? "
+                                 "AND lower(trim(item)) IN (%s) ORDER BY bill_date" % ",".join("?" * len(part)), [d_min] + part):
+            if (str(r["supplier_norm"]), _s740_nl(r["bill_no"]), str(r["bill_date"])) in minus:
+                continue
+            bought.setdefault(r["it"], []).append(r)
+    for l in lines:
+        day = str(l["at"])[:10]
+        d0 = ((_date(day) or today()) - dt.timedelta(days=S740_FLAG_DAYS)).isoformat()
+        rows = [r for r in bought.get(_s740_nl(l["item"]), []) if d0 <= str(r["bill_date"]) <= day]
+        sups = {str(r["supplier_norm"]) for r in rows}
+        if len(sups) != 1:
+            continue
+        sup = sups.pop()
+        last = rows[-1]
+        rate = int(last["rate_p"] or 0)
+        unit = _s740_unit(last["packing"] or l.get("packing"))
+        qty = l["gap"] / (l["pack"] if unit == "strip" else 1)
+        out.append(dict(loss_id=int(l["id"]), at=str(l["at"]), item=l["item"], gap=l["gap"], pack=l["pack"], qty=qty, unit=unit, sup=sup,
+                        supplier=_pa().supplier_key(sup), last_no=str(last["bill_no"] or ""), last_date=str(last["bill_date"] or ""),
+                        est_p=int(round(rate * qty))))
+    return out
+
+
+def _s740_already(con, sup, item, since_day, model=None):
+    """A purchase return of this dealer carrying this item that reached the server on or after since_day and stands as a return of its own
+    (Amir entered it from a slip) -> its bill no. | ''. An older return is another return."""
+    m = model or s740_model(con)
+    for r in m["returns"]:
+        if r["kind"] != "marg" or r["sup"] != str(sup):
+            continue
+        b = con.execute("SELECT first_seen_day, bill_date FROM purchase_bill WHERE id=?", (int(r["bill_id"]),)).fetchone()
+        if b is None or str(b[0] or b[1] or "")[:10] < str(since_day)[:10]:
+            continue
+        if _s740_rows(con, "SELECT 1 FROM purchase_line WHERE supplier_norm=? AND lower(trim(bill_no))=? AND bill_date=? AND lower(trim(item))=? LIMIT 1",
+                      (r["sup"], _s740_nl(r["bill_no"]), r["date"], _s740_nl(item))):
+            return r["bill_no"]
+    return ""
+
+
+# ------------------------------------------------------------------ writes (each audited; each commits)
+def s740_answer_put(con, who, bill_id, yes):
+    """Reception's answer to "Bill par ya parchi par wapsi likhi hai?" -- only for a bill now on the question list. -> (ok, message)."""
+    s740_ensure(con)
+    m = s740_model(con)
+    q = next((x for x in m["questions"] if int(x["bill_id"]) == int(bill_id)), None)
+    if q is None:
+        return False, "Yeh sawaal ab list par nahi hai."
+    b = con.execute("SELECT supplier_norm, bill_no, bill_date FROM purchase_bill WHERE id=?", (int(bill_id),)).fetchone()
+    now = _s740_now()
+    try:
+        con.execute("INSERT INTO s740_answer (sup, bill_no, bill_date, answer, paper_p, marg_p, ret_p, by, at) VALUES (?,?,?,?,?,?,?,?,?)",
+                    (str(b[0]), _s740_nl(b[1]), str(b[2]), "yes" if yes else "no", q["paper_p"], q["marg_p"], q["diff_p"], who, now))
+    except sqlite3.IntegrityError:
+        con.rollback()
+        return False, "Is bill ka jawab pehle hi diya ja chuka hai."
+    _pa()._audit(con, who, "s740_answer", int(bill_id), dict(answer="yes" if yes else "no", paper=q["paper_p"], marg=q["marg_p"], kit=KIT_S740))
+    con.commit()
+    return True, ""
+
+
+def s740_seed(con, sup, bill_no, bill_date, who, why):
+    """The owner's own word for a bill already known (Janta 21965, D839): answered 'yes' as reception would. Idempotent. -> 'seeded' | 'already'
+    | 'not_a_question' (the bill is not on the question list now: nothing written)."""
+    if (str(sup), _s740_nl(bill_no), str(bill_date)) in _s740_answers(con):
+        return "already"
+    b = con.execute("SELECT b.id FROM purchase_bill b WHERE b.supplier_norm=? AND lower(trim(b.bill_no))=? AND b.bill_date=? AND " + _pa().EFF_BILL,
+                    (sup, _s740_nl(bill_no), bill_date)).fetchone()
+    if b is None:
+        return "not_a_question"
+    q = next((x for x in s740_model(con)["questions"] if int(x["bill_id"]) == int(b[0])), None)
+    if q is None:
+        return "not_a_question"
+    s740_ensure(con)
+    con.execute("INSERT INTO s740_answer (sup, bill_no, bill_date, answer, paper_p, marg_p, ret_p, by, at) VALUES (?,?,?,?,?,?,?,?,?)",
+                (str(sup), _s740_nl(bill_no), str(bill_date), "yes", q["paper_p"], q["marg_p"], q["diff_p"], who, _s740_now()))
+    _pa()._audit(con, who, "s740_answer", int(b[0]), dict(answer="yes", seed=why, kit=KIT_S740))
+    con.commit()
+    return "seeded"
+
+
+def s740_undo_answer(con, who, bill_id):
+    """The owner: a wrong answer is undone -- the question goes back to reception. -> (ok, message)."""
+    s740_ensure(con)
+    b = con.execute("SELECT supplier_norm, bill_no, bill_date FROM purchase_bill WHERE id=?", (int(bill_id),)).fetchone()
+    if b is None:
+        return False, "No such bill."
+    cur = con.execute("UPDATE s740_answer SET undone_at=?, undone_by=? WHERE sup=? AND bill_no=? AND bill_date=? AND undone_at IS NULL",
+                      (_s740_now(), who, str(b[0]), _s740_nl(b[1]), str(b[2])))
+    if not cur.rowcount:
+        return False, "Nothing to undo."
+    con.execute("DELETE FROM s740_answer WHERE sup=? AND bill_no=? AND bill_date=? AND undone_at IS NOT NULL", (str(b[0]), _s740_nl(b[1]), str(b[2])))
+    _pa()._audit(con, who, "s740_answer_undone", int(bill_id), dict(kit=KIT_S740))
+    con.commit()
+    return True, ""
+
+
+def s740_flag_put(con, who, loss_id, yes):
+    """The owner's answer on a count shortage: yes -> a pending return of his own (from the count); no -> a stock loss, as now."""
+    s740_ensure(con)
+    f = next((x for x in _s740_flags(con) if int(x["loss_id"]) == int(loss_id)), None)
+    if f is None:
+        return False, "This line is no longer open."
+    now = _s740_now()
+    already = _s740_already(con, f["sup"], f["item"], f["at"]) if yes else ""
+    try:                                                      # the flag first: a second tap at once is refused here
+        con.execute("INSERT INTO s740_flag (loss_id, answer, by, at) VALUES (?,?,?,?)",
+                    (int(loss_id), ("in_marg:" + already) if already else ("yes" if yes else "no"), who, now))
+    except sqlite3.IntegrityError:
+        con.rollback()
+        return False, "This line is already answered."
+    if yes and not already:
+        con.execute("INSERT INTO s740_own (sup, supplier, item, qty, unit, est_p, source, loss_id, by, at) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    (f["sup"], f["supplier"], f["item"], f["qty"], f["unit"], f["est_p"], "count", int(loss_id), who, now))
+    _pa()._audit(con, who, "s740_count_flag", int(loss_id), dict(answer="yes" if yes else "no", in_marg=already, item=f["item"], supplier=f["sup"],
+                                                                kit=KIT_S740))
+    con.commit()
+    if already:
+        return True, "Already in Marg as purchase return %s -- nothing more to enter; it shows under Returns." % already
+    return True, ""
+
+
+def s740_choices(con, sup=None):
+    """For "Record a return": the dealers bought from in the last 365 days, or (sup given) the items bought from that dealer with the last
+    rate and the unit. READ ONLY."""
+    d0 = (today() - dt.timedelta(days=365)).isoformat()
+    if not sup:
+        return [dict(sup=str(r["supplier_norm"] if isinstance(r, dict) else r[0]), name=_pa().supplier_key(r["supplier_norm"] if isinstance(r, dict) else r[0]))
+                for r in _s740_rows(con, "SELECT DISTINCT supplier_norm FROM purchase_bill WHERE amount_p>0 AND bill_date>=? ORDER BY supplier_norm", (d0,))]
+    out = []
+    for r in _s740_rows(con, "SELECT item, MAX(bill_date) AS d FROM purchase_line WHERE supplier_norm=? AND bill_date>=? GROUP BY lower(trim(item)) "
+                             "ORDER BY item", (sup, d0)):
+        item = r["item"] if isinstance(r, dict) else r[0]
+        rate, packing = _s740_last_rate(con, sup, item)
+        if rate:
+            out.append(dict(item=item, rate_p=rate, unit=_s740_unit(packing)))
+    return out
+
+
+def s740_record(con, who, sup, item, qty):
+    """The owner's "Record a return": dealer, item and quantity are PICKED (never typed); the value is the last purchase rate x qty."""
+    s740_ensure(con)
+    try:
+        qty = float(qty)
+    except (TypeError, ValueError):
+        return False, "Pick a quantity."
+    if qty != qty or qty in (float("inf"), float("-inf")) or qty <= 0 or qty > 999 or qty != int(qty):
+        return False, "Pick a quantity."
+    if sup not in {c["sup"] for c in s740_choices(con)}:
+        return False, "Pick a dealer from the list."
+    ch = next((c for c in s740_choices(con, sup) if c["item"] == item), None)
+    if ch is None:
+        return False, "Pick an item from the list."
+    now = _s740_now()
+    already = _s740_already(con, sup, item, (today() - dt.timedelta(days=7)).isoformat())
+    if already:
+        return False, "Already in Marg as purchase return %s -- it shows under Returns; nothing to record." % already
+    d10 = (dt.datetime.fromisoformat(now) - dt.timedelta(minutes=10)).isoformat()
+    if con.execute("SELECT 1 FROM s740_own WHERE sup=? AND item=? AND qty=? AND withdrawn_at IS NULL AND at>=?", (sup, item, qty, d10)).fetchone():
+        return False, "This return was recorded a moment ago."
+    cur = con.execute("INSERT INTO s740_own (sup, supplier, item, qty, unit, est_p, source, loss_id, by, at) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                      (sup, _pa().supplier_key(sup), item, qty, ch["unit"], int(round(ch["rate_p"] * qty)), "record", None, who, now))
+    _pa()._audit(con, who, "s740_record", cur.lastrowid, dict(supplier=sup, item=item, qty=qty, kit=KIT_S740))
+    con.commit()
+    return True, ""
+
+
+def s740_cn_look(con, who, bill_id):
+    """The owner looked at a purchase return's credit note: the scan misread it, its paper is Marg's figure. Only for a return now on Amir's
+    card as 'correct the amount'. -> (ok, message)."""
+    x = next((r for r in s740_pending(con) if r.get("stage") == "do_amount" and r.get("mb") and int(r["mb"]["id"]) == int(bill_id)), None)
+    if x is None:
+        return False, "This line is no longer open."
+    b = con.execute("SELECT amount_p FROM purchase_bill WHERE id=?", (int(bill_id),)).fetchone()
+    s740_ensure(con)
+    try:
+        con.execute("INSERT INTO s740_cn_look (bill_id, marg_p, scan_p, by, at) VALUES (?,?,?,?,?)", (int(bill_id), int(b[0]), None, who, _s740_now()))
+    except sqlite3.IntegrityError:
+        con.rollback()
+        return False, "Already looked at."
+    _pa()._audit(con, who, "s740_cn_look", int(bill_id), dict(marg=int(b[0]), kit=KIT_S740))
+    con.commit()
+    return True, ""
+
+
+def s740_same_put(con, who, bill_id, is_same):
+    """The owner's answer on a purchase return that came after a settled return's deduction: the same credit note (that return then claims it:
+    Amir enters its bill in full) or another return (its own). -> (ok, message)."""
+    x = next((r for r in s740_pending(con) if r.get("stage") == "check_same" and int(r["bill_id"]) == int(bill_id)), None)
+    if x is None:
+        return False, "This line is no longer open."
+    s740_ensure(con)
+    try:
+        con.execute("INSERT INTO s740_same (bill_id, answer, rkey, by, at) VALUES (?,?,?,?,?)",
+                    (int(bill_id), "same" if is_same else "other", x["maybe_of"], who, _s740_now()))
+    except sqlite3.IntegrityError:
+        con.rollback()
+        return False, "Already answered."
+    _pa()._audit(con, who, "s740_same", int(bill_id), dict(answer="same" if is_same else "other", rkey=x["maybe_of"], kit=KIT_S740))
+    con.commit()
+    return True, ""
+
+
+def s740_withdraw(con, who, own_id):
+    """The owner withdraws a return he recorded (recorded by mistake)."""
+    s740_ensure(con)
+    cur = con.execute("UPDATE s740_own SET withdrawn_at=?, withdrawn_by=? WHERE id=? AND withdrawn_at IS NULL", (_s740_now(), who, int(own_id)))
+    if not cur.rowcount:
+        return False, "Nothing to withdraw."
+    _pa()._audit(con, who, "s740_withdraw", int(own_id), dict(kit=KIT_S740))
+    con.commit()
+    return True, ""
+
+
+def s740_sync(con, model=None, now=None):
+    """Keeps s740_track in step: a return first seen / resolved (the road and the paper) / open again / gone; last_seen once a day. Writes only
+    s740_track and audit rows, and only what changed; commits when it wrote. Nothing when the scans could not be read (a scan database that
+    is down must not flip a resolved return). -> (new, resolved, gone)."""
+    model = model or s740_model(con)
+    if not model.get("assets_ok", True):
+        return 0, 0, 0
+    has = con.execute("SELECT 1 FROM sqlite_master WHERE name='s740_track'").fetchone() is not None
+    if not has and not model["returns"]:
+        return 0, 0, 0
+    s740_ensure(con)
+    now = now or _s740_now()
+    day = now[:10]
+    have = {str(r[0]): dict(resolved_at=r[1], gone_at=r[2], last_seen=r[3], road=r[4], ref=r[5], off_ref=r[6]) for r in
+            con.execute("SELECT rkey, resolved_at, gone_at, last_seen, road, ref, off_ref FROM s740_track")}
+    before = con.total_changes
+    cur_keys, new, res, gone = set(), 0, 0, 0
+    for r in model["returns"]:
+        k = r["key"]
+        cur_keys.add(k)
+        h = have.get(k)
+        off_ref = (r.get("adj") or {}).get("stamp")
+        if h is None:
+            con.execute("INSERT INTO s740_track (rkey, kind, month, first_seen, last_seen, resolved_at, road, ref, off_ref) VALUES (?,?,?,?,?,?,?,?,?)",
+                        (k, r["kind"], r["month"], now, now, now if r["resolved"] else None, r["road"] or None, r["ref"] or None, off_ref))
+            new += 1
+            res += 1 if r["resolved"] else 0
+            continue
+        if r["resolved"] and (not h["resolved_at"] or h["gone_at"]):
+            con.execute("UPDATE s740_track SET last_seen=?, resolved_at=?, road=?, ref=?, off_ref=?, gone_at=NULL WHERE rkey=?",
+                        (now, now, r["road"], r["ref"], off_ref, k))
+            _pa()._audit(con, "server", "s740_resolved", k, dict(road=r["road"], ref=r["ref"], kit=KIT_S740))
+            res += 1
+        elif r["resolved"] and (str(h.get("road") or "") != str(r["road"] or "") or str(h.get("ref") or "") != str(r["ref"] or "")
+                                or (off_ref and str(h.get("off_ref") or "") != str(off_ref))):
+            con.execute("UPDATE s740_track SET last_seen=?, road=?, ref=?, off_ref=COALESCE(?, off_ref) WHERE rkey=?",
+                        (now, r["road"], r["ref"], off_ref, k))   # settled another way now (a tied deduction is never let go)
+            _pa()._audit(con, "server", "s740_resettled", k, dict(road=r["road"], ref=r["ref"], was_road=h.get("road"), was_ref=h.get("ref"), kit=KIT_S740))
+        elif not r["resolved"] and (h["resolved_at"] or h["gone_at"]):
+            con.execute("UPDATE s740_track SET last_seen=?, resolved_at=NULL, road=NULL, ref=NULL, off_ref=?, gone_at=NULL WHERE rkey=?", (now, off_ref, k))
+            if h["resolved_at"]:
+                _pa()._audit(con, "server", "s740_reopened", k, dict(was_road=h.get("road"), was_ref=h.get("ref"), kit=KIT_S740))
+        elif off_ref and str(h.get("off_ref") or "") != str(off_ref):
+            con.execute("UPDATE s740_track SET last_seen=?, off_ref=? WHERE rkey=?", (now, off_ref, k))   # a deduction tied while pending
+        elif str(h["last_seen"] or "")[:10] != day:
+            con.execute("UPDATE s740_track SET last_seen=? WHERE rkey=?", (now, k))
+    for k, h in have.items():
+        if k not in cur_keys and not h["gone_at"]:
+            con.execute("UPDATE s740_track SET gone_at=? WHERE rkey=?", (now, k))
+            gone += 1
+    if con.total_changes != before:
+        con.commit()
+    return new, res, gone
+
+
+def s740_tracked(con):
+    try:
+        return {str(r[0]): dict(first_seen=r[1], resolved_at=r[2], road=r[3], ref=r[4], gone_at=r[5], off_ref=r[6]) for r in
+                con.execute("SELECT rkey, first_seen, resolved_at, road, ref, gone_at, off_ref FROM s740_track")}
+    except sqlite3.Error:
+        return {}
+
+
+def s740_pending(con):
+    """The pending returns (every open month) -- what Amir's page and the owner's row carry."""
+    return [r for r in s740_model(con)["returns"] if not r["resolved"]]
+
+
+# ------------------------------------------------------------------ the register knows a return when it sees one
+_agree_before_s740 = agree
+
+
+def agree(cx, s, b):                                          # noqa: F811 -- S740: a minus bill (a purchase return) is compared by its size
+    try:
+        mp = int(b["amount_p"] or 0)
+    except (KeyError, TypeError, ValueError, IndexError):
+        mp = 0
+    if mp < 0:
+        b = dict(b)
+        b["amount_p"] = -mp
+        s = dict(s)
+        for k in ("amount_p", "total_amount"):
+            try:
+                if s.get(k) is not None and float(s[k]) < 0:
+                    s[k] = -s[k]
+            except (TypeError, ValueError):
+                pass
+        sid = int(s["id"]) if s.get("id") is not None else None
+        if sid is not None and sid in getattr(cx, "paper", {}) and (cx.paper.get(sid) or 0) < 0:
+            cx = _S740Cx(cx, sid)
+    return _agree_before_s740(cx, s, b)
+
+
+class _S740Cx(object):
+    """A Ctx whose one paper amount (a credit note's, typed with its minus) is read by its size."""
+
+    def __init__(self, cx, sid):
+        self._cx = cx
+        self.paper = dict(cx.paper)
+        self.paper[sid] = -self.paper[sid]
+
+    def __getattr__(self, k):
+        return getattr(self._cx, k)
+
+
+_register_before_s740 = register
+
+
+import threading as _s740_threading                        # noqa: E402
+_S740_T = _s740_threading.local()                             # per worker thread: the re-entry guard and the step view's context
+
+
+def register(con, month):                                     # noqa: F811 -- S740: a return's rows say whose they are
+    r = _register_before_s740(con, month)
+    if getattr(_S740_T, "inside", False):                     # never inside its own model (no re-entry)
+        return r
+    _S740_T.inside = True
+    try:
+        _s740_overlay(con, r)
+    except Exception as e:                                    # noqa: BLE001 -- the register stands as it was
+        import sys as _sys                                    # noqa: PLC0415
+        print("scan_register S740 overlay: %r" % (e,), file=_sys.stderr)
+    finally:
+        _S740_T.inside = False
+    return r
+
+
+def _s740_overlay(con, r):
+    try:
+        has = con.execute("SELECT 1 FROM sqlite_master WHERE name='s740_answer'").fetchone() is not None
+    except sqlite3.Error:
+        has = False
+    minus = any(int(x.get("amount_p") or 0) < 0 for x in r["rows"])
+    if not has and not minus:
+        return
+    by, later = {}, {}
+    if has or minus:
+        for x in s740_model(con)["returns"]:
+            if x.get("bill_id") is not None and x["kind"] in ("on_bill", "marg"):
+                by[int(x["bill_id"])] = x
+            if x.get("mb"):
+                by.setdefault(int(x["mb"]["id"]), x)
+            if x.get("adj") and x["adj"].get("bill_id") is not None:
+                later[int(x["adj"]["bill_id"])] = x
+    changed = False
+    for row in r["rows"]:
+        lx = later.get(int(row["id"]))
+        if lx is not None:                                    # the dealer's later bill that took a return off: Marg keeps its goods
+            a = lx["adj"]
+            row["note"] = ("The dealer took return %s (%s) off this bill; Marg keeps the goods' %s. " % (lx.get("bill_no") or (lx.get("mb") or {}).get("bill_no") or "",
+                                                                                                  rs(a["off_p"]), rs(a["goods_p"]))) + (row.get("note") or "")
+            at_goods = a.get("marg_p") is not None and abs(int(a["marg_p"]) - int(a["goods_p"])) <= _s740_tol(a["goods_p"])
+            if lx["resolved"] or at_goods:                    # held at the goods: nothing to do on THIS bill
+                if row["state"] not in S740_SETTLED:
+                    row["state"] = "has_scan"
+                    changed = True
+                row["whose"] = "Nobody"
+            else:
+                if row["state"] in S740_SETTLED:
+                    row["state"] = "amount_differs"
+                    changed = True
+                row["whose"] = "Return: Amir enters it in Marg"
+            continue
+        x = by.get(int(row["id"]))
+        neg = int(row.get("amount_p") or 0) < 0
+        if x is None and not neg:
+            continue
+        if x is not None and x["kind"] == "on_bill" and int(x["bill_id"]) == int(row["id"]):
+            lead = "A return of %s is written on the paper (%s, %s). " % (rs(x["amount_p"]), x.get("by") or "reception", ddmon(x["opened"]))
+            if x["resolved"]:
+                if row["state"] not in S740_SETTLED:
+                    row["state"] = "has_scan"
+                    changed = True
+                row["whose"] = "Nobody"
+            else:
+                row["whose"] = x.get("whose") or "Return: waiting for the dealer's paper"
+            row["note"] = lead + x.get("en", "") + ((" " + row["note"]) if row.get("note") else "")
+            row["s740"] = x["key"]
+            continue
+        if neg:
+            if x is not None and x["resolved"] and row["state"] == "amount_differs":
+                row["state"], row["whose"] = "has_scan", "Nobody"       # the owner looked: the credit note was misread
+                changed = True
+            row["note"] = "Purchase return (Marg). " + (row.get("note") or "")
+            if x is not None and x.get("stage") == "do_amount":
+                row["whose"] = "Return: Amir enters it in Marg"   # S740's own card carries it (never S738's twice)
+            if x is not None:
+                row["s740"] = x["key"]
+    if changed:
+        r["counts"] = {k: sum(1 for z in r["rows"] if z["state"] == k) for k in STATES}
+        r["settled"] = r["counts"]["verified"] + r["counts"]["has_scan"] + r["counts"]["accepted"]
+
+
+# ------------------------------------------------------------------ the owner's step view: row 8 "Returns"
+S740_CSS = """
+#s740rt .s740l{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;padding:8px 0 2px;border-top:1px solid #e3e6ec}
+#s740rt .s740l + .s740m{margin-bottom:2px}
+#s740rt .s740k{font-weight:700}#s740rt .s740m{color:#5b5b5b;font-size:13px}
+#s740rt .s740p{display:inline-block;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:700;background:#fbf0dc;color:#8a5300}
+#s740rt .s740d{background:#e3f3e7;color:#1d6b33}
+#s740rt button{font:inherit;font-size:14px;border-radius:8px;padding:6px 12px;min-height:38px;margin:4px 6px 6px 0;border:1px solid #1f3864;background:#fff;color:#1f3864;cursor:pointer}
+#s740rt button.s740y{background:#1f3864;color:#fff}
+#s740rt select{font:inherit;font-size:14px;width:100%;max-width:420px;padding:6px}
+#s740rec .s740q button{min-width:40px;min-height:40px;font-size:18px}
+details[data-row="8"] summary{color:inherit}
+#s740rec{display:flex;flex-direction:column;gap:6px;border:1px dashed #b8c2d6;border-radius:10px;padding:8px 10px;margin-top:4px}
+#s740rec .s740q{display:flex;gap:8px;align-items:center}
+"""
+S740_JS = """<script>
+async function s740post(btn,u,b){if(btn){if(btn.disabled)return;btn.disabled=true;}
+try{const r=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b||{})});
+const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok){alertBox(j.message||j.error||('HTTP '+r.status));if(btn)btn.disabled=false;return;}
+if(j.message){alertBox(j.message);}setTimeout(function(){location.reload();},j.message?1800:0);}catch(e){alertBox(String(e));if(btn)btn.disabled=false;}}
+function alertBox(t){var m=document.getElementById('s740msg');if(m){m.textContent=t;m.style.display='block';}}
+async function s740sup(sel){var it=document.getElementById('s740item');it.innerHTML='<option value="">Item…</option>';s740q(0,true);
+if(!sel.value){return;}try{const r=await fetch(sel.dataset.u+'?supplier='+encodeURIComponent(sel.value));const j=await r.json();
+(j.items||[]).forEach(function(x){var o=document.createElement('option');o.value=x.item;o.textContent=x.item;o.dataset.rate=x.rate_p;o.dataset.unit=x.unit;it.appendChild(o);});}catch(e){alertBox(String(e));}}
+function s740q(d,reset){var q=document.getElementById('s740qty');var n=reset?1:Math.max(1,Math.min(999,parseInt(q.dataset.n||'1')+d));q.dataset.n=n;
+var it=document.getElementById('s740item');var o=it.options[it.selectedIndex];var u=(o&&o.dataset.unit)||'pc';
+q.textContent=n+' '+(n==1?u:u+'s');var v=document.getElementById('s740val');
+if(o&&o.dataset.rate){var p=Math.round(parseInt(o.dataset.rate)*n);v.textContent='About ₹'+(p/100).toLocaleString('en-IN',{maximumFractionDigits:0})+' at the last purchase rate';}else{v.textContent='';}}
+function s740rec(u){var s=document.getElementById('s740sup').value,i=document.getElementById('s740item').value,n=parseInt(document.getElementById('s740qty').dataset.n||'1');
+if(!s||!i){alertBox('Pick the dealer and the item.');return;}s740post(document.getElementById('s740go'),u,{supplier:s,item:i,qty:n});}
+</script>"""
+
+
+def _s740_line(con, x, tr, owner_buttons, prefix):
+    t = tr.get(x["key"]) or {}
+    since = _s738_dm(t.get("first_seen") or x["opened"])
+    if x["kind"] == "on_bill":
+        head = "%s %s · %s" % (esc(x["supplier"]), esc(x["bill_no"]), esc(_s738_dmy(x["date"])))
+        what = "Return %s written on the bill" % esc(rs(x["amount_p"]))
+    elif x["kind"] == "own":
+        head = "%s · %s · %s" % (esc(x["supplier"]), esc(x.get("item") or ""), esc(_s740_qty_words(x.get("qty"), x.get("unit") or "pc")))
+        what = "Recorded by you (%s) · about %s" % ("stock count" if x.get("source") == "count" else "by hand", esc(rs(x["amount_p"])))
+    else:
+        head = "%s · purchase return %s · %s" % (esc(x["supplier"]), esc(x["bill_no"]), esc(_s738_dmy(x["date"])))
+        what = "Sent back from stock · %s" % esc(rs(x["amount_p"]))
+    if x["resolved"]:
+        st = '<span class="s740p s740d">resolved %s</span>' % esc(_s738_dm(t.get("resolved_at")) if t.get("resolved_at") else "")
+        whose = ""
+    else:
+        st = '<span class="s740p">pending</span>'
+        whose = '<span class="s740m">%s · since %s</span>' % (esc(x.get("whose") or ""), esc(since))
+    btn = ""
+    if owner_buttons and not x["resolved"]:
+        if x["kind"] == "own":
+            btn = '<button onclick="s740post(this,\'%s/api/s740/withdraw\',{id:%d})">Withdraw (recorded by mistake)</button>' % (esc(prefix), x["own_id"])
+        elif x.get("stage") == "check_same":
+            btn = ('<button class="s740y" onclick="s740post(this,\'%s/api/s740/same\',{bill:%d,same:true})">The same return — Amir enters bill %s in full</button>'
+                   '<button onclick="s740post(this,\'%s/api/s740/same\',{bill:%d,same:false})">Another return</button>'
+                   % (esc(prefix), int(x["bill_id"]), esc(x.get("maybe_bill") or ""), esc(prefix), int(x["bill_id"])))
+        elif x.get("stage") == "do_amount" and x.get("mb"):
+            btn = ('<button onclick="s740post(this,\'%s/api/s740/cnlook\',{bill:%d})">The scan misread — the paper is Marg\'s %s</button>'
+                   % (esc(prefix), int(x["mb"]["id"]), esc(rs(x["mb"]["size"]))))
+        elif x["kind"] == "on_bill" and x.get("stage") == "waiting":
+            btn = '<button onclick="s740post(this,\'%s/api/s740/undo\',{bill:%d})">Undo the answer (ask reception again)</button>' % (esc(prefix), x["bill_id"])
+    view = _s738_viewer(int(x["scan"])) if x.get("scan") is not None else ""
+    return ('<div class="s740l" data-s740="%s"><span class="s740k">%s</span><span>%s</span>%s%s</div><div class="s740m">%s</div>%s%s'
+            % (esc(x["key"]), head, what, st, whose, esc(x.get("en") or ""), btn, view))
+
+
+def s740_owner_row(con, month, prefix, model=None):
+    """(label, n text, lines, grey) -- row 8 of the step view: the returns of this month (pending and resolved) and every earlier month's still
+    pending; the count shortages to answer; the Record-a-return form; a dealer's return line no return matches. READ ONLY."""
+    m = model or s740_model(con)
+    tr = s740_tracked(con)
+    mine = [x for x in m["returns"] if (x["month"] == month) or (x["month"] < month and not x["resolved"])]
+    pend = [x for x in mine if not x["resolved"]]
+    lines = ['<div id="s740rt"><div id="s740msg" class="mut" style="display:none;color:#8c1d18"></div>']    # joined into ONE line below
+    for x in sorted(mine, key=lambda z: (z["resolved"], z["month"], z["date"])):
+        lines.append(_s740_line(con, x, tr, True, prefix))
+    for a in [a for a in m.get("no_answers") or [] if a["month"] <= month]:
+        lines.append('<div class="s740l" data-s740no="%d"><span class="s740k">Reception said: no return written</span><span>%s %s · %s · paper %s, Marg %s'
+                     '</span></div><div class="s740m">%s, %s. Amir is asked to add the missing lines. If a return was written, undo the answer.</div>'
+                     '<div class="s740l"><button onclick="s740post(this,\'%s/api/s740/undo\',{bill:%d})">Undo the answer (ask reception again)</button></div>'
+                     % (a["bill_id"], esc(a["supplier"]), esc(a["bill_no"]), esc(_s738_dmy(a["date"])), esc(rs(a["paper_p"])), esc(rs(a["marg_p"])),
+                        esc(a["by"] or ""), esc(ddmon(a["at"])), esc(prefix), a["bill_id"]))
+    flags = _s740_flags(con)
+    for f in flags:
+        lines.append('<div class="s740l" data-s740flag="%d"><span class="s740k">Possibly returned — no paper</span><span>%s · %s short at the count of %s</span>'
+                     '</div><div class="s740m">Bought only from %s in the last %d days (last bill %s, %s). Was it returned to %s?</div>'
+                     '<div class="s740l"><button class="s740y" onclick="s740post(this,\'%s/api/s740/flag\',{loss:%d,yes:true})">Yes, returned to %s</button>'
+                     '<button onclick="s740post(this,\'%s/api/s740/flag\',{loss:%d,yes:false})">No, a stock loss</button></div>'
+                     % (f["loss_id"], esc(f["item"]), esc(_s740_qty_words(f["qty"], f["unit"])), esc(ddmon(f["at"])), esc(f["supplier"]), S740_FLAG_DAYS,
+                        esc(f["last_no"] or "—"), esc(ddmon(f["last_date"]) if f["last_date"] else "—"), esc(f["supplier"]), esc(prefix), f["loss_id"],
+                        esc(f["supplier"]), esc(prefix), f["loss_id"]))
+    for o in [o for o in m["adjusted"] if str(o.get("bdate") or "")[:7] == month]:
+        lines.append('<div class="s740l"><span class="s740k">A dealer\'s bill takes off a return</span><span>%s · scan %s · %s</span></div>'
+                     '<div class="s740m">No pending return matches it. If goods went back, record the return below.</div>%s'
+                     % (esc(o.get("supplier") or o["vendor"]), esc(o["stamp"]), esc(rs(o["amount_p"])), _s738_viewer(o["scan"])))
+    opts = "".join('<option value="%s">%s</option>' % (esc(c["sup"]), esc(c["name"])) for c in s740_choices(con))
+    lines.append('<div id="s740rec"><b>Record a return</b><span class="s740m">When you hear of a return first. Everything is picked; nothing is typed.</span>'
+                 '<select id="s740sup" data-u="%s/api/s740/items" onchange="s740sup(this)"><option value="">Dealer…</option>%s</select>'
+                 '<select id="s740item" onchange="s740q(0,true)"><option value="">Item…</option></select>'
+                 '<div class="s740q"><button onclick="s740q(-1)" aria-label="less">−</button><span id="s740qty" data-n="1">1 pc</span>'
+                 '<button onclick="s740q(1)" aria-label="more">+</button></div><span id="s740val" class="s740m"></span>'
+                 '<div><button class="s740y" id="s740go" onclick="s740rec(\'%s/api/s740/record\')">Record the return</button></div></div></div>'
+                 % (esc(prefix), opts, esc(prefix)))
+    n = "%d pending" % len(pend) + (" · %d to answer" % len(flags) if flags else "")
+    return ("Returns (pending until the dealer's credit note or revised bill)", n, ["".join(lines)], False)
+
+
+_check_rows_before_s740 = check_rows
+
+
+def check_rows(r, cx):                                        # noqa: F811 -- S740: row 8, Returns
+    rows = _check_rows_before_s740(r, cx)
+    ctx = getattr(_S740_T, "check", None)
+    if not ctx:
+        return rows
+    try:
+        rows = list(rows) + [s740_owner_row(ctx["con"], r.get("month") or "", ctx["prefix"])]
+    except Exception as e:                                    # noqa: BLE001 -- the seven rows stand
+        import sys as _sys                                    # noqa: PLC0415
+        print("scan_register S740 row: %r" % (e,), file=_sys.stderr)
+    return rows
+
+
+_check_body_before_s740 = check_body
+
+
+def check_body(con, month, prefix, months, r=None):          # noqa: F811 -- S740: row 8, the NEFT strip holds on a pending return
+    _S740_T.check = dict(con=con, prefix=prefix)
+    try:
+        h = _check_body_before_s740(con, month, prefix, months, r)
+    finally:
+        _S740_T.check = None
+    try:
+        n = sum(1 for x in s740_pending(con) if x["month"] <= month)
+        word = "%d pending return%s" % (n, "" if n == 1 else "s")
+    except Exception as e:                                    # noqa: BLE001 -- fails CLOSED: the strip holds
+        import sys as _sys                                    # noqa: PLC0415
+        print("scan_register S740 strip: %r" % (e,), file=_sys.stderr)
+        n, word = 1, "the returns could not be read"
+    if n:
+        if '<div class="strip clear" id="s726strip">All clear ✓</div>' in h:
+            h = h.replace('<div class="strip clear" id="s726strip">All clear ✓</div>', '<div class="strip hold" id="s726strip">NEFT on hold · %s</div>' % word, 1)
+        else:
+            h = re.sub(r'(<div class="strip hold" id="s726strip">NEFT on hold · \d+ open)', r"\1 · " + word, h, count=1)
+    return h.replace("</style>", S740_CSS + "</style>", 1) + S740_JS
+
+
+_s738_scan_ok_before_s740 = s738_scan_ok
+
+
+def s738_scan_ok(con, sid, doctor, login):                   # noqa: F811 -- S740: Amir also opens the scan of a return on his list
+    if _s738_scan_ok_before_s740(con, sid, doctor, login):
+        return True
+    try:
+        return int(sid) in {int(x["scan"]) for x in s740_pending(con) if x.get("scan") is not None} | {
+            int(x["revised"]["scan"]) for x in s740_pending(con) if x.get("revised")}
+    except Exception:                                         # noqa: BLE001
+        return False
+# ---- S740 end ---------------------------------------------------------------------------------------------------------------------------
