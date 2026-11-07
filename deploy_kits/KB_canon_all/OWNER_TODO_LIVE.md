@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S399 close** (the Sanjeevni chat), 07-Nov-2026, morning — the Sanjeevni sections refreshed here (purchase returns tracked; ZUPRINOR 5 yours to answer; 402 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S400 close** (the parent), 08-Nov-2026, early morning — the parent's sections refreshed here (his review buttons, each person's own call card and Net missed live; tell the staff; 404 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S402 close** (the Sanjeevni chat, EOS-light), 08-Nov-2026, early morning — the Sanjeevni sections refreshed here (the order-list plan written; Janta's revised bill to scan under Pharmacy; ZUPRINOR 5 and PREGHYPE NT yours; 403 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S399 close** (the Sanjeevni chat), 07-Nov-2026, morning — the Sanjeevni sections refreshed here (purchase returns tracked; ZUPRINOR 5 yours to answer; 402 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S398 close** (the Scan App project), 07-Nov-2026, morning — the Scan App sections refreshed here (four kits live: the desk and Yuvika, the product box, two bills on the statement; 401 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S397 close** (the parent), 07-Nov-2026, morning — the parent's sections refreshed here (the Call Console rebuilt to R3 with its staff cards; the nightly copy came through; 400 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S396 close** (the Sanjeevni chat), 07-Nov-2026, morning — the Sanjeevni sections refreshed here (reception's one bill list live; Amir's correction cards and the in-place scan live; 399 reserved); the other projects' sections as their closes left them.
@@ -385,7 +387,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S397 close (07-Nov, 07:4x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S400 close (08-Nov, 04:4x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -395,11 +397,13 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the S397 record (papers only). Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries the S400 record (papers only). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
+
+**1a · TELL SHIVANI, ALISHA AND SHAVEZ: their own call card is on *Aaj ka kaam* (*Mere calls*)** — the same figures as yours, every call with its recording; *Galat hai?* sends you one line about one call, and you answer it on the Call Console.
 
 **2 · THE PACKS PAGE: type the Zerodha password** (Dr Bhawna's statement of transactions opens by itself), **name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
@@ -421,12 +425,6 @@ https://followup.dr-manoj.in/ledger/salary?m=2026-10
 
 ```
 https://followup.dr-manoj.in/finance/console/month
-```
-
-**7 · THE X-RAY FILM LOG: the opening spare boxes** (Settings on the log).
-
-```
-https://followup.dr-manoj.in/finance/slips/film/log
 ```
 
 **8 · TWO ANSWERS, one line each:**
@@ -476,7 +474,8 @@ https://followup.dr-manoj.in/portal/users
 - **24 · Patients on your command console** (new vs repeat, your diagnosis groups, revenue by group): a mock-up first, on your yes.
 
 **WHEN IT HAPPENS — not a duty:**
-- a **rose line on the Call Console** — a staff card (a missed call not called back, a call not logged), a follow-up section with patients not called, or someone nobody answered: open it;
+- a **rose line on the Call Console** — a staff card (*Net missed* above 0, a call not logged), a follow-up section with patients not called, or someone nobody answered: open it, and use your buttons on the calls;
+- a **Disputed** line on a staff card: *Accept* or *It stands*;
 - an amber staff card (staff ≠ AI): listen and decide — "to check" is never a verdict;
 - a patient asks for help with a Google review: on the GMB page, **press ✓ Shared after you hand a draft over**;
 - a WhatsApp reply showing *MyOperator busy — retrying* (leave it); a red *NOT delivered* or *May have gone — check*;
@@ -501,15 +500,23 @@ https://followup.dr-manoj.in/portal/users
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The Call Console, staff part 2 (your word: next session):** your review buttons on each staff card's call (Ask to log · Mark reviewed · Staff right · AI right · Note to staff); each person's own card on *Aaj ka kaam*, in Hindi, with a dispute tap — **a mock-up first**; the reception mobile counted against whoever is on duty.
+1. **Watch the staff cards** at each open (the first disputes, asks and *Net missed* per person); if the 7-day page is slow on your phone, draw a card's calls only when it is opened.
 2. **Arjun Dev's link step**, when his finger is on the machine; **staff 20's exit steps** your word covers.
 3. **The review reading on 19 Nov** (D836).
-4. **The packs page's September checklist** — the pharmacy's S726 is now in the nightly copy.
+4. **The packs page's September checklist** — the pharmacy's S726 is in the nightly copy.
 5. **WhatsApp after MyOperator's fix** · your publish file taking in my uploads first (D823).
 6. **Patients on your command console** (a mock-up first) · the watches (F-1085, the IPD desk, the Hostinger update, IPD kits 5 and 6).
 7. **The Tally check** · **the Sanjeevni GST returns** · AF-16 · AF-19.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S400 CLOSE — 07 → 08-Nov-2026 (the parent)
+
+- **Your review buttons on the Call Console** — on every call behind a staff figure, with its log line, recording and transcript (S747, live 09:58).
+- **Each person's own call card on *Aaj ka kaam*, in Hindi** — the same figures, your asks and notes, the recordings of their calls (never the transcript, your rule), and *Galat hai?* disputes that come to you (S747).
+- **The reception mobile counts to the one phone staff member on duty** (S747).
+- **Net missed leads each card** — patients never reached after; last 7 days Alisha 7, Shivani 5, Shavez 2 (S748, live 10:33).
+- **The X-ray film log's spare boxes** — set by you (from 6-Nov; the 8×10 bill counts its box by itself).
 
 ## ✅ DONE AT THE S397 CLOSE — 06 → 07-Nov-2026 (the parent)
 
@@ -953,9 +960,9 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S399 close (07-Nov, 10:0x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S402 close (08-Nov, 04:3x)
 
-*Detail: `S399_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_402.md`. This section supersedes the S396 one below it.*
+*Detail: `S402_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_403.md`. This section supersedes the S399 one below it.*
 
 **1 · The publish** — this close's record only; nothing follows on the server:
 
@@ -963,41 +970,44 @@ The full list: `claude/S288_PENDING_LIST.md`.
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · ZUPRINOR 5** — 2 pieces short at the 7-Oct count, bought only from Janta. On row 8 of your step view: *Yes, returned to JANTA PHARMACEUTICALS* or *No, a stock loss*:
+**2 · Janta 21965's revised bill** — reception scans it under **Pharmacy**; the return settles by itself:
+
+```
+https://followup.dr-manoj.in/scanapp/intake
+```
+
+**3 · ZUPRINOR 5** (2 pieces short at the 7-Oct count, Janta only) and **PREGHYPE NT** (Shivaaz 02-11: staff tapped *Nahi mila*, Marg billed 12 strips — check the shelf; if not there, Shivaaz owes a credit). On your step view:
 
 ```
 https://followup.dr-manoj.in/finance/purchase/page/check
 ```
 
-**3 · Tell Amir once:** the new *Wapsi baaki* card on his page — no Marg change for a return until the dealer's credit note or revised bill comes; then the card says what to enter. (And, from S396: his *Marg sudhar* card lists purchase bills to correct; each leaves by his own export.)
+**4 · Ravi's 04-11 order** (DOLOGESIC SP) — late, and its WhatsApp shows no *sent* time: a call.
 
-**4 · B-0239** — on the order list, tap the right dealer (A.A. PHARMACEUTICALS) on its card, as you said:
+**5 · Tell Amir once** (carried): *Wapsi baaki* — no Marg change for a return until the dealer's paper comes; *Marg sudhar* lists purchase bills to correct.
 
-```
-https://followup.dr-manoj.in/finance/porders/s454/track
-```
-
-**5 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed. The report links:
+**6 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
 
 ```
 https://followup.dr-manoj.in/finance/flows
 ```
 
-**6 · Tell Shavez once** (carried): from Monday 9-Nov his page also asks for **Sunday's** sale report and closing stock.
+**7 · Tell Shavez once** (carried): from Monday 9-Nov his page also asks for **Sunday's** sale report and closing stock.
 
-**7 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
+**8 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
 
-**Later, your word only:**
-- "count them" for the stock differences;
-- Kedar's ₹110 twice (F-1145);
-- the buying switch (earliest ~22-Nov);
-- a second network for the medical PC, only if its LAN fails again (D837).
+**Later, your word only:** "count them"; Kedar's ₹110 (A000211 and bill 234, F-1145); the buying switch (earliest ~22-Nov); a second network for the medical PC only if its LAN fails again (D837).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S399 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S402 close
 
-1. **Kit 4**, on your "go": each dealer's month summary, the issues list, the month lock on Marg = papers = summaries, and the one bulk NEFT on the suppliers' figures (D839, D849). It is also the last net for a return a dealer takes off a later bill (F-1175).
-2. **The next server copy:** S738's and S740's files confirmed.
-3. **Watch:** Janta 21965's paper, and the return resolving by itself when it comes.
+1. **The order-list kit**, on your "go", the mock first (`S402_ORDER_LIST_PLAN.md`): retire an old order; a replacement product counts; scans with reception stay in your view; the Yuvika mis-tie fixed for good; the page's faults.
+2. **Kit 4**, on your "go": each dealer's month summary, the month lock and the one bulk NEFT (D839, D849; F-1175).
+
+## ✅ DONE AT THE S402 CLOSE — 07 → 08-Nov-2026 (the Sanjeevni project)
+
+- ~~**The order list read and analysed**~~ — your asks written as the plan (D862).
+- ~~**Yuvika 0774's name question**~~ (No) and ~~**B-0239's dealer**~~ — done by you, 7-Nov.
+- ~~**S740 confirmed**~~ by the 08-Nov server copy.
 
 ## ✅ DONE AT THE S399 CLOSE — 07-Nov-2026 (the Sanjeevni project)
 
