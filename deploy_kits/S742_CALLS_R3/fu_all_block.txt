@@ -1,0 +1,44 @@
+# --- S742 (the parent, S397, 07-Nov-2026): the WHOLE Followups_Today feed for the Call Console's cleaned list ---
+# no_shows above keeps only the rows due BEFORE today (the old page reads it, unchanged). The console's follow-up
+# list needs today's rows too (F-1106) and does its own cleaning (one open row per patient), so the feed is kept here
+# as it came: every row with a readable due date. Pure over its arguments; never halts the build.
+_FU_ALL_EXTRA = {
+    "key":     ["key"],
+    "section": ["section"],
+    "dx":      ["diagnosis"],
+    "od":      ["od", "overdue days"],
+}
+
+
+def build_fu_all(conn, fu_header, fu_rows):
+    conn.execute("CREATE TABLE IF NOT EXISTS fu_all (key TEXT, section TEXT, name TEXT, phone10 TEXT, dx TEXT, "
+                 "due_date TEXT, od TEXT, status_raw TEXT)")
+    res = fu_resolve_header(fu_header or [])
+    if "due" not in res:
+        return {"found": False, "rows": 0, "note": "no due-date column"}
+    normed = [norm_header(h) for h in (fu_header or [])]
+    for field, aliases in _FU_ALL_EXTRA.items():
+        for a in aliases:
+            na = norm_header(a)
+            if na in normed:
+                res[field] = normed.index(na)
+                break
+    n = bad_due = no_phone = 0
+    for row in fu_rows or []:
+        def cell(f):
+            i = res.get(f)
+            return (str(row[i]).strip() if i is not None and i < len(row) and row[i] is not None else "")
+        due = fu_parse_due(cell("due"))
+        if due is None:
+            if cell("due"):
+                bad_due += 1
+            continue
+        phone = norm_phone10(cell("phone"))
+        if len(phone) != 10:
+            phone, no_phone = "", no_phone + 1
+        conn.execute("INSERT INTO fu_all VALUES (?,?,?,?,?,?,?,?)",
+                     (cell("key"), cell("section"), cell("name"), phone, cell("dx"), due, cell("od"), cell("status")))
+        n += 1
+    return {"found": True, "rows": n, "bad_due": bad_due, "no_phone": no_phone}
+
+

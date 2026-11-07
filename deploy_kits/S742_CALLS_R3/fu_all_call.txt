@@ -1,0 +1,9 @@
+    # --- S742: the whole feed for the Call Console's cleaned follow-up list (today's rows included, F-1106) ---
+    try:
+        fa_meta = (build_fu_all(conn, fu_h, fu_r) if fu_h is not None
+                   else dict(build_fu_all(conn, [], []), note="tab absent/unreadable"))
+    except Exception as _fa_e:                       # the console page says so; the build itself never stops here
+        fa_meta = {"found": False, "rows": 0, "note": "fu_all failed: %s" % type(_fa_e).__name__}
+    conn.execute("INSERT OR REPLACE INTO meta VALUES ('fu_all', ?)", (json.dumps(fa_meta),))
+    print("-- S742 fu_all: found=%s rows=%s bad_due=%s no_phone=%s --"
+          % (fa_meta.get("found"), fa_meta.get("rows"), fa_meta.get("bad_due", 0), fa_meta.get("no_phone", 0)))

@@ -1,0 +1,3 @@
+KIT S742 S742_CALLS_R3
+the parent . session S397 . 07-Nov-2026 . the Call Console to mock-up R3 (Build A)
+files: calls_console.py (whole) . portal_console.py and portal.py rebuilt on the box by make_s742.py
