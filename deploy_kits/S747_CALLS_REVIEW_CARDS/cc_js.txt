@@ -1,0 +1,32 @@
+/* S747: your review buttons -- one POST each; the row then says what was done. Nothing is asked twice, no pop-up. */
+function _rvSend(url,body,b,done){
+  b.disabled=true;
+  fetch(url,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+  .then(function(r){ if((r.headers.get('Content-Type')||'').indexOf('json')<0) throw new Error('x'); return r.json(); })
+  .then(function(j){ if(j.ok){ done(j); } else { b.disabled=false; } toast(j.msg||(j.ok?'Saved.':'Not saved.')); })
+  .catch(function(){ b.disabled=false; toast('Not saved — the server did not answer. Try again.'); });
+}
+function rv(b,act){
+  var r=b.closest('[data-ref]');
+  _rvSend('/portal/console/api/review2',{ref:r.dataset.ref,staff:r.dataset.staff,act:act},b,function(){
+    var w={ask_log:'Asked',reviewed:'Reviewed ✓',staff_right:'Staff right ✓',ai_right:'AI right ✓',undo:'Back to check'}[act]||'Saved';
+    if(act!=='ask_log'){ r.querySelectorAll('.rb').forEach(function(x){ if(x!==b&&!x.classList.contains('nb')) x.disabled=true; }); }
+    b.textContent=w; b.classList.add('done'); b.disabled=true;
+  });
+}
+function rvOpen(b){ var r=b.closest('[data-ref]'), s=r.querySelector('.nbox'); s.hidden=false; s.querySelector('input').focus(); }
+function rvNote(b){
+  var r=b.closest('[data-ref]'), i=r.querySelector('.nbox input'), v=(i.value||'').trim();
+  if(!v){ toast('Write the note first.'); return; }
+  _rvSend('/portal/console/api/review2',{ref:r.dataset.ref,staff:r.dataset.staff,act:'note',note:v},b,function(){
+    var s=document.createElement('span'); s.className='rvs'; s.textContent='Note sent: “'+v+'”';
+    i.value=''; r.querySelector('.nbox').hidden=true; r.querySelector('.t').insertBefore(s,r.querySelector('.nbox')); b.disabled=false;
+  });
+}
+function dAns(b,ans){
+  var r=b.closest('[data-did]');
+  _rvSend('/portal/console/api/dispute-answer',{id:+r.dataset.did,answer:ans},b,function(){
+    r.querySelectorAll('.rb').forEach(function(x){ x.disabled=true; });
+    b.textContent=(ans==='accept'?'Accepted — off the count':'It stands ✓'); b.classList.add('done');
+  });
+}

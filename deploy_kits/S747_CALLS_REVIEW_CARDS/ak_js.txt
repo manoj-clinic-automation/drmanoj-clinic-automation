@@ -1,0 +1,131 @@
+<script>
+/* S747 (D856): Mere calls -- this person's own call card, asked of the Call Console with their own login
+   (/portal/console/api/mycard; the owner's ?as= view asks /portal/console/api/card/<login> behind his gate). The same figures
+   as the owner's card; every call with its log line and its transcript; the owner's asks and notes; 'Galat hai?' sends one
+   line about one call to him. Drawn with textContent only. A door that does not answer leaves the card as it was (never
+   'all clear'); a person who handles no calls sees nothing. */
+(function(){
+  var AS=(new URLSearchParams(location.search)).get('as')||'', SPAN='yesterday', OPEN=false, OPENALL=false, BUSY=false;
+  var box=document.getElementById('calls'); if(!box)return;
+  function el(tag,cls,text){var e=document.createElement(tag); if(cls)e.className=cls; if(text!==undefined&&text!==null)e.textContent=text; return e;}
+  var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function dmy(s){ s=String(s||''); return s.length>=10?(Number(s.slice(8,10))+' '+(MON[Number(s.slice(5,7))-1]||'')):s; }
+  function hm(s){ s=String(s||''); return s.length>=16?s.slice(11,16):''; }
+  var OUT={'coming':'aayenge','not coming':'nahin aayenge','call again':'phir call karein','no answer':'jawab nahin','to the doctor':'Doctor sahab ko',
+           'booked':'appointment li','enquiry':'sirf poochha','no action':'kuch nahin','spam':'spam'};
+  function hi(w){ w=String(w||''); return OUT[w.toLowerCase()]||w; }
+  var KIND={in_ok:'call aaya, uthaya',in_miss:'call aaya, chhoota',out_ok:'call kiya, utha',out_miss:'call kiya, nahin utha',wa_in:'WhatsApp aaya'};
+  var FIGW={missed:'duty par chhoota call',wa:'WhatsApp ka jawab nahin',not_logged:'nateeja darj nahin',mismatch:'aapka nateeja ≠ AI'};
+  function typing(){ var a=document.activeElement, t=box.querySelectorAll('textarea'), i;
+    if(a&&box.contains(a)&&a.tagName==='TEXTAREA')return true;
+    for(i=0;i<t.length;i++){ if(t[i].value.trim())return true; } return false; }
+  function url(){ return AS?('/portal/console/api/card/'+encodeURIComponent(AS)+'?span='+SPAN):('/portal/console/api/mycard?span='+SPAN); }
+  function callLine(r){ return [r.name||'—', r.cid, r.phone].filter(Boolean).join(' · ')+' · '+(SPAN==='today'?'':(dmy(r.day)+' '))+r.t; }
+  function recLink(holder, r){
+    /* the recording of the call -- staff hear their own calls; no transcript text is ever shown to staff (09:23 IST 07-Nov) */
+    if(!r.has_rec) return;
+    var b=el('button','lnk','Recording sunein ▶'+(r.dur?(' '+r.dur):'')); b.type='button';
+    b.addEventListener('click',function(){
+      var au=el('audio'); au.controls=true; au.preload='auto'; au.style.width='100%'; au.style.marginTop='6px';
+      au.src=(AS?'/portal/rec/':'/portal/console/api/myrec/')+encodeURIComponent(r.jk);
+      au.addEventListener('error',function(){ var m=el('span','sub','Recording abhi nahin chal paayi — thodi der baad dobara dabaiye.'); if(au.parentNode)au.parentNode.replaceChild(m,au); });
+      b.replaceWith(au); var pr=au.play(); if(pr&&pr.catch)pr.catch(function(){});
+    });
+    holder.appendChild(b);
+  }
+  function callItem(r, cls, head){
+    var d=el('div','it'+(cls?(' '+cls):''));
+    if(head)d.appendChild(el('div','dw',head));
+    d.appendChild(el('b',null,callLine(r)));
+    var sub=[KIND[r.kind]||''];
+    if(r.kind!=='wa_in'&&r.kind!=='in_miss'){ sub.push('nateeja: '+(r.claimed?hi(r.claimed):'darj nahin')); if(r.ai)sub.push('AI: '+hi(r.ai)); }
+    if(r.rec)sub.push('reception mobile');
+    d.appendChild(el('span','sub',sub.filter(Boolean).join(' · ')));
+    if(r.body)d.appendChild(el('span','snip','“'+r.body+'”'));
+    recLink(d,r);
+    return d;
+  }
+  function disputeBox(holder, fig, rows){
+    holder.textContent='';
+    var f=el('div','it'), pick='';
+    f.appendChild(el('b',null,'Kis call ke baare mein? ('+FIGW[fig]+')'));
+    rows.forEach(function(r,i){ var l=el('label','pick'), inp=el('input'); inp.type='radio'; inp.name='dp_'+fig; inp.id='dp_'+fig+'_'+i;
+      inp.addEventListener('change',function(){ pick=r.ref; }); l.appendChild(inp); l.appendChild(document.createTextNode(callLine(r))); f.appendChild(l); });
+    var ta=el('textarea'); ta.maxLength=300; ta.placeholder='Kya galat hai? Ek line likhiye ya mic se boliye'; ta.setAttribute('aria-label','Kya galat hai');
+    f.appendChild(ta);
+    var msg=el('div','mut'), acts=el('div'), b=el('button','btn','Doctor sahab ko bhejiye'), c=el('button','btn soft','Rehne dijiye');
+    b.type='button'; c.type='button'; acts.style.display='flex'; acts.style.gap='8px'; acts.style.marginTop='8px'; acts.style.flexWrap='wrap';
+    b.addEventListener('click',function(){ var v=ta.value.trim();
+      if(!pick){ msg.textContent='Pehle call chuniye.'; return; } if(!v){ msg.textContent='Pehle likhiye kya galat hai.'; return; }
+      b.disabled=true;
+      fetch('/portal/console/api/dispute',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({ref:pick,fig:fig,text:v})})
+      .then(function(x){ if((x.headers.get('Content-Type')||'').indexOf('json')<0)throw new Error('x'); return x.json(); })
+      .then(function(j){ if(j.ok){ ta.value=''; holder.textContent=''; load(true); } else { b.disabled=false; msg.textContent=j.msg||'Nahin gaya. Dobara kijiye.'; } })
+      .catch(function(){ b.disabled=false; msg.textContent='Nahin gaya. Dobara kijiye.'; }); });
+    c.addEventListener('click',function(){ ta.value=''; holder.textContent=''; });
+    acts.appendChild(b); acts.appendChild(c); f.appendChild(acts); f.appendChild(msg); holder.appendChild(f); ta.focus();
+  }
+  function draw(j){
+    var od=box.querySelector('details.cc'), oa=box.querySelector('details.all');
+    if(od)OPEN=od.open; if(oa)OPENALL=oa.open;
+    box.textContent='';
+    if(!j||!j.ok||(!j.card&&!j.handler))return;
+    var c=j.card, f=c?c.figs:null, lab={today:'aaj',yesterday:'kal','7':'pichhle 7 din'}[j.span]||'';
+    var d=el('details','cc '+(c?c.tone:'green')); d.open=OPEN;
+    var s=el('summary'), words=[];
+    s.appendChild(el('b',null,'Mere calls — '+lab));
+    if(!c){ words.push('koi call nahin'); }
+    else { words.push(f.answered+'/'+f.rung+' uthaye'); if(f.missed_known)words.push(f.missed+' chhoote'); if(f.not_logged)words.push(f.not_logged+' darj nahin');
+      var n=c.asks.length+c.notes.length; if(n)words.push('Doctor sahab ki '+n+' baat'); }
+    s.appendChild(el('span','s',words.join(' · '))); d.appendChild(s);
+    var tabs=el('div','tabs');
+    [['today','Aaj'],['yesterday','Kal'],['7','7 din']].forEach(function(t){ var b=el('button',t[0]===j.span?'on':'',t[1]); b.type='button';
+      b.addEventListener('click',function(){ SPAN=t[0]; OPEN=true; load(true); }); tabs.appendChild(b); });
+    d.appendChild(tabs);
+    if(c){
+      c.asks.forEach(function(r){ d.appendChild(callItem(r,'dr','Doctor sahab: is call ka nateeja darj karein')); });
+      c.notes.forEach(function(r){ r.notes.forEach(function(x){ d.appendChild(callItem(r,'dr','Doctor sahab ka sandesh ('+dmy(x.at)+' '+hm(x.at)+'): “'+x.text+'”')); }); });
+      var hold=el('div');
+      function fig(label, val, cls, key){
+        var g=el('div','fg'), rows=key?c.calls.filter(function(r){ return r.figs.indexOf(key)>=0; }):[];
+        g.appendChild(el('span',null,label)); g.appendChild(el('b',cls||'',val));
+        if(rows.length&&!AS){ var b=el('button','gal','Galat hai?'); b.type='button';
+          b.addEventListener('click',function(){ disputeBox(hold,key,rows); }); g.appendChild(b); }
+        else g.appendChild(el('span'));
+        d.appendChild(g);
+      }
+      fig('Phone uthaye (bajne wale mein se)', f.answered+'/'+f.rung);
+      if(f.missed_known){ fig('Duty par chhoote call', String(f.missed), f.missed?'bad':'', 'missed');
+        if(f.missed)fig('Chhoote call — 1 ghante mein wapas kiye', f.cb_in_h+'/'+f.missed+(f.cb_later?(' (+'+f.cb_later+' baad mein)'):'')); }
+      fig('Call kiye', String(f.made));
+      if(f.wa_in)fig('WhatsApp aaye → jawab diye', f.wa_in+' → '+f.wa_ans, f.wa_ans<f.wa_in?'bad':'', 'wa');
+      fig('Call ka nateeja darj nahin kiya', String(f.not_logged), f.not_logged?'bad':'', 'not_logged');
+      fig('Aapka nateeja ≠ AI', String(f.mismatch), '', 'mismatch');
+      fig('Sahi darj, AI se mila', String(f.agreed), 'ok');
+      d.appendChild(hold);
+      c.disputes.forEach(function(x){ var it=el('div','it');
+        it.appendChild(el('b',null,x.call_h||''));
+        it.appendChild(el('span','sub','Aapne likha ('+(FIGW[x.fig]||x.fig)+'): “'+x.text+'”'));
+        it.appendChild(el('span','ans', !x.answer?'Doctor sahab ko bheja · jawab ka intezaar':
+          ((x.answer==='accept'?'Doctor sahab ne maana — ginti se hata diya':'Doctor sahab: ginti rahegi')+(x.answer_note?(' — “'+x.answer_note+'”'):''))));
+        d.appendChild(it); });
+      var all=el('details','all'); all.open=OPENALL;
+      all.appendChild(el('summary',null,'Mere sab calls ('+c.calls.length+') — har call ki recording ▸'));
+      c.calls.forEach(function(r){ all.appendChild(callItem(r)); });
+      d.appendChild(all);
+    }
+    box.appendChild(d);
+  }
+  function load(force){
+    if(BUSY||(!force&&typing()))return; BUSY=true;
+    fetch(url(),{credentials:'same-origin',cache:'no-store'})
+     .then(function(x){ var ct=x.headers.get('Content-Type')||''; if(!x.ok||ct.indexOf('json')<0)throw new Error('door'); return x.json(); })
+     .then(function(j){ BUSY=false; if(!force&&typing())return; draw(j); })
+     .catch(function(){ BUSY=false; });
+  }
+  var again=document.getElementById('again'); if(again)again.addEventListener('click',function(){ load(false); });
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden)load(false); });
+  setInterval(function(){ if(!document.hidden)load(false); },300000);
+  load(true);
+})();
+</script>

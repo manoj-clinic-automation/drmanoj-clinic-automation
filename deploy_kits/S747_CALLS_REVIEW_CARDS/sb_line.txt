@@ -1,0 +1,4 @@
+    # S747 (D856, S400), 07-Nov-2026: the Call Console's review store -- the owner's review buttons on the staff cards and
+    # each staff member's 'Galat hai?' disputes (calls_console.py writes it). A database, so it goes through the sqlite
+    # online-backup api and the integrity check like the stores above. The installer creates it before this line is placed.
+    "/root/portal/call_review.db",

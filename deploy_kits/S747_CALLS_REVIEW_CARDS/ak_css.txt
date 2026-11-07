@@ -1,0 +1,22 @@
+/* S747 (D856): Mere calls -- the person's own call card, the Call Console's figures in Hindi */
+.cc{background:#fff;border:2px solid #8a9aa6;border-radius:10px;margin:14px 0 8px;overflow:hidden}
+.cc>summary{list-style:none;cursor:pointer;padding:11px 14px;border-left:7px solid #2f6b45;background:#e9f6e9}
+.cc>summary::-webkit-details-marker{display:none}
+.cc.rose>summary{border-left-color:#9c2a20;background:#fbe4e1}.cc.amber>summary{border-left-color:#8a6100;background:#fff4d6}
+.cc>summary b{display:block;font-size:18px}.cc>summary .s{color:#2c353c;font-size:15px}
+.cc .tabs{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid #d6dde3;flex-wrap:wrap}
+.cc .tabs button{font:inherit;font-size:15px;border:1px solid #8a9aa6;border-radius:999px;background:#fff;color:#14456e;padding:0 14px;min-height:40px;cursor:pointer}
+.cc .tabs button.on{background:#14456e;color:#fff;border-color:#14456e}
+.cc .fg{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid #d6dde3}
+.cc .fg b{font-family:ui-monospace,Consolas,monospace;font-size:18px}.cc .fg b.bad{color:#9c2a20}.cc .fg b.ok{color:#2f6b45}
+.cc .gal{font:inherit;font-size:14px;font-weight:600;color:#7a5600;background:#fff4d6;border:1px solid #8a6100;border-radius:8px;padding:0 10px;min-height:38px;cursor:pointer}
+.cc .it{padding:10px 14px;border-top:1px solid #d6dde3;overflow-wrap:break-word}
+.cc .it .sub{display:block;color:#3c464e;font-size:14.5px}
+.cc .it.dr{background:#fff4d6}.cc .it .dw{font-weight:700;color:#7a5600}
+.cc .it .snip{display:block;margin-top:5px;font-size:14.5px;background:#eef2f5;border-radius:8px;padding:6px 9px}
+.cc .it .full{white-space:pre-wrap;display:block;margin-top:5px;font-size:14.5px;background:#eef2f5;border-radius:8px;padding:7px 9px;max-height:55vh;overflow:auto}
+.cc .lnk{background:none;border:0;color:#14456e;font:inherit;font-size:15px;font-weight:700;padding:6px 0 0;cursor:pointer;text-decoration:underline}
+.cc .ans{display:block;margin-top:5px;font-size:14.5px;color:#14456e;font-weight:600}
+.cc .pick{display:flex;gap:8px;align-items:flex-start;padding:6px 0;font-size:15px}.cc .pick input{width:20px;height:20px;margin-top:3px;flex:none}
+.cc details.all>summary{list-style:none;cursor:pointer;padding:10px 14px;border-top:1px solid #d6dde3;font-weight:700;color:#14456e}
+.cc details.all>summary::-webkit-details-marker{display:none}

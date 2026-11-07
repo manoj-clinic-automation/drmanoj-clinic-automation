@@ -1,0 +1,161 @@
+    # ------------------------------------------------------------------ S747: the review buttons and each person's own card
+    def _review_db():
+        return _cfg_path("PORTAL_CALL_REVIEW_DB", REVIEW_DB_DEFAULT)
+
+    def _jbody():
+        b = request.get_json(silent=True)
+        return b if isinstance(b, dict) else {}
+
+    def _txt(v, n=300):
+        return " ".join(str(v or "").split())[:n]
+
+    @app.route("/portal/console/api/review2", methods=["POST"], endpoint="s747_review")
+    @gate
+    def _review2():
+        b = _jbody()
+        ref, staff_k, act = str(b.get("ref") or ""), str(b.get("staff") or ""), str(b.get("act") or "")
+        note = _txt(b.get("note"))
+        if not _REF.match(ref) or not re.match(r"^[a-z]{1,30}$", staff_k) or act not in REVIEW_ACTS:
+            return jsonify({"ok": False, "msg": "That call could not be read — reload the page."}), 400
+        if act == "note" and not note:
+            return jsonify({"ok": False, "msg": "Write the note first."}), 400
+        try:
+            by = (who() or "") if who else ""
+        except Exception:
+            by = ""
+        try:
+            _rv_write(_review_db(), "INSERT INTO review (ref, staff, act, note, by_whom, at) VALUES (?,?,?,?,?,?)",
+                      (ref, staff_k, act, note if act == "note" else "", by or "manoj", _stamp()))
+        except sqlite3.Error:
+            return jsonify({"ok": False, "msg": "Not saved — the review store could not be written. Try again."}), 503
+        words = {"ask_log": "Asked — it is on their card until they log it.", "reviewed": "Marked reviewed.",
+                 "staff_right": "Saved: staff right.", "ai_right": "Saved: AI right.", "undo": "Back on the 'to check' list.",
+                 "note": "Note sent — it shows on their card."}
+        return jsonify({"ok": True, "msg": words.get(act, "Saved.")})
+
+    @app.route("/portal/console/api/dispute-answer", methods=["POST"], endpoint="s747_dispute_answer")
+    @gate
+    def _dispute_answer():
+        b = _jbody()
+        ans = str(b.get("answer") or "")
+        try:
+            did = int(b.get("id"))
+        except Exception:
+            did = 0
+        if did <= 0 or ans not in ("accept", "stands"):
+            return jsonify({"ok": False, "msg": "That dispute could not be read — reload the page."}), 400
+        try:
+            by = (who() or "") if who else ""
+        except Exception:
+            by = ""
+        try:
+            n = _rv_write(_review_db(), "UPDATE dispute SET answer=?, answer_note=?, answer_by=?, answer_at=? WHERE id=? AND answer=''",
+                          (ans, _txt(b.get("note")), by or "manoj", _stamp(), did))
+        except sqlite3.Error:
+            return jsonify({"ok": False, "msg": "Not saved — the review store could not be written. Try again."}), 503
+        if not n:
+            return jsonify({"ok": False, "msg": "Already answered."}), 409
+        return jsonify({"ok": True, "msg": "Accepted — the call is off their count." if ans == "accept" else "Saved: it stands."})
+
+    def _card_resp(key, span):
+        conn = _H["console_conn"]() if _H.get("console_conn") else None
+        if conn is None:
+            return jsonify({"ok": False, "error": "no_console"}), 503
+        try:
+            c, handler, mode, made = card_for(conn, key, span)
+        finally:
+            conn.close()
+        if not made:
+            return jsonify({"ok": False, "error": "cards"}), 503
+        resp = jsonify({"ok": True, "span": mode, "handler": handler, "card": card_json(c) if c else None})
+        resp.headers["Cache-Control"] = "no-store"
+        return resp
+
+    @app.route("/portal/console/api/card/<login>", endpoint="s747_card_as")
+    @gate
+    def _card_as(login):
+        """The owner's ?as= view of one person's card (Aaj ka kaam), behind his own gate."""
+        return _card_resp(login_key(login), (request.args.get("span") or "yesterday").strip())
+
+    pm = sys.modules.get(getattr(gate, "__module__", "") or "")
+    staff_gate = getattr(pm, "login_required", None) if pm is not None else None
+    sso_user = getattr(pm, "_sso_user", None) if pm is not None else None
+    serve_rec = getattr(pm, "_serve_rec", None) if pm is not None else None
+    if callable(staff_gate) and callable(sso_user):
+        def _me():
+            try:
+                u = sso_user(request) or {}
+            except Exception:
+                u = {}
+            return str(u.get("user") or "").strip()
+
+        @app.route("/portal/console/api/mycard", endpoint="s747_mycard")
+        @staff_gate
+        def _mycard():
+            login = _me()
+            if not login:
+                return jsonify({"ok": False, "error": "not_signed_in"}), 401
+            key = login_key(login)
+            if not key or key in OWNER_FIRST:
+                return jsonify({"ok": True, "span": "", "handler": False, "card": None})
+            return _card_resp(key, (request.args.get("span") or "yesterday").strip())
+
+        def _mine(key, ref, fig=None):
+            """The row of one of THIS person's calls of the last 7 days (and behind `fig`, when given), or None."""
+            conn = _H["console_conn"]() if _H.get("console_conn") else None
+            if conn is None:
+                return None
+            try:
+                c, _h, _m, _made = card_for(conn, key, "7", cached=True)
+            finally:
+                conn.close()
+            if not c:
+                return None
+            r = next((x for x in card_json(c)["calls"] if x["ref"] == ref), None)
+            if r is None or (fig and fig not in r["figs"]):
+                return None
+            return r
+
+        @app.route("/portal/console/api/myrec/<jk>", endpoint="s747_myrec")
+        @staff_gate
+        def _myrec(jk):
+            """The recording of one of THIS person's calls of the last 7 days, through the portal's own recording server
+            (local copy first, else Drive). Anyone else's call: 403. Staff get recordings, never transcripts."""
+            login = _me()
+            key = login_key(login)
+            if not _JK.match(jk or "") or not key or key in OWNER_FIRST or not callable(serve_rec):
+                abort(404)
+            r = _mine(key, jk)
+            if r is None or not r.get("has_rec"):
+                abort(403)
+            return serve_rec(jk)
+
+        @app.route("/portal/console/api/dispute", methods=["POST"], endpoint="s747_dispute")
+        @staff_gate
+        def _dispute():
+            login = _me()
+            key = login_key(login)
+            b = _jbody()
+            ref, fig, text = str(b.get("ref") or ""), str(b.get("fig") or ""), _txt(b.get("text"))
+            if not login or not key or key in OWNER_FIRST:
+                return jsonify({"ok": False, "msg": "Pehle Clinic app par login kijiye."}), 401
+            if not _REF.match(ref) or fig not in FIGS or not text:
+                return jsonify({"ok": False, "msg": "Call chuniye aur likhiye kya galat hai."}), 400
+            r = _mine(key, ref, fig)
+            if r is None:
+                return jsonify({"ok": False, "msg": "Yeh call aapki ginti mein nahin mila — page dobara kholiye."}), 409
+            try:
+                st, ds, ok = rv_read(_review_db())
+            except Exception:
+                ds, ok = [], False
+            if any(x.get("ref") == ref and x.get("staff") == key and not x.get("answer") for x in ds):
+                return jsonify({"ok": False, "msg": "Is call ke baare mein pehle hi bhej diya hai — jawab ka intezaar."}), 409
+            call_h = " · ".join(x for x in ((r["day"][8:10] + "-" + r["day"][5:7] + " " + r["t"]) if r["day"] else r["t"],
+                                            r["name"], r["cid"], fmt_num(r["phone"])) if x)
+            try:
+                _rv_write(_review_db(), "INSERT INTO dispute (ref, staff, fig, text, call_h, by_whom, at) VALUES (?,?,?,?,?,?,?)",
+                          (ref, key, fig, text, call_h, login, _stamp()))
+            except sqlite3.Error:
+                return jsonify({"ok": False, "msg": "Nahin gaya. Dobara kijiye."}), 503
+            return jsonify({"ok": True, "msg": "Doctor sahab ko bhej diya."})
+

@@ -1,0 +1,21 @@
+
+S747_CALLS_REVIEW_CARDS (the parent, S400, 07-Nov-2026) -- D856, Build B part 2, on the owner's mock-up
+https://claude.ai/artifact/LNNtTvacjz3v9Nf77sJfhB (v2; his ask 08:52 IST: every call's transcript inline, expandable as on
+the console, and its log):
+  . HIS REVIEW BUTTONS on each staff card's call: Ask to log . Mark reviewed . Staff right . AI right . Note to staff (and
+    Undo in the Reviewed fold). They are written to a store of this module's own, /root/portal/call_review.db (setting
+    PORTAL_CALL_REVIEW_DB) -- the only thing this page writes besides the click-to-call. A reviewed call leaves the 'to check'
+    lists for the folded 'Reviewed by you'; an ask to log stays on the list, marked asked, until the call is logged. The old
+    final-outcome verdict (/portal/console/review) is read alongside, as before. 'To check' is never a verdict.
+  . EACH PERSON'S OWN CARD (Aaj ka kaam, in Hindi): GET /portal/console/api/mycard with their own login (the owner's ?as=
+    view: /portal/console/api/card/<login>, behind his gate) gives the same card his page draws, every call they handled with
+    its log line; GET /portal/console/api/myrec/<jk> plays the recording of one of THEIR calls (of the last 7 days, through
+    the portal's own recording server) and nobody else's. Staff get recordings, never transcript text (the owner, 09:23 IST
+    07-Nov); the transcripts stay on his own page; POST /portal/console/api/dispute {ref, fig, text} -- 'Galat hai?' -- one line
+    about one call behind one of their figures; it comes to his card as Disputed, he answers Accept (the call leaves that
+    person's figures) or It stands (POST /portal/console/api/dispute-answer).
+  . THE RECEPTION MOBILE (F-1168): a call on the reception mobile's agent (first name, setting PORTAL_RECEPTION_AGENT,
+    default 'reception') is credited to the ONE phone staff member on duty at that minute; with both or neither on duty it
+    stays on a 'Reception mobile' line that says why. Missed calls were and stay charged by duty.
+The staff routes use the portal's own login gate and signed-in user (found in the module that defines the doctor gate);
+when either cannot be found they are not registered and the staff page simply shows no card.

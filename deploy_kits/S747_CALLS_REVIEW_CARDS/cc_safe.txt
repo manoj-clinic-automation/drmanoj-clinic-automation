@@ -1,0 +1,10 @@
+def _safe_cards(conn, people, d_from, d_to, now, master_path, punch_path):
+    """The staff cards, never at the cost of the page: an error here gives no cards and the section says so. S747: the
+    review store and the reception agent from the settings."""
+    try:
+        return staff_cards(people, d_from, d_to, now, master_path=master_path, punch_path=punch_path,
+                           agents=_agent_firsts(conn, now), phone_staff=_cfg_path("PORTAL_PHONE_STAFF", PHONE_STAFF_DEFAULT),
+                           rv=rv_read(_cfg_path("PORTAL_CALL_REVIEW_DB", REVIEW_DB_DEFAULT)),
+                           reception=_cfg_path("PORTAL_RECEPTION_AGENT", RECEPTION_DEFAULT))
+    except Exception:
+        return None

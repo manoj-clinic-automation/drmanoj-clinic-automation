@@ -1,0 +1,97 @@
+RECEPTION_DEFAULT = "reception"                      # S747 (F-1168): the reception mobile's MyOperator agent, by first name
+REVIEW_DB_DEFAULT = "/root/portal/call_review.db"    # S747: the owner's review buttons and the staff's disputes -- this module's own store
+REVIEW_ACTS = ("ask_log", "reviewed", "staff_right", "ai_right", "undo", "note")
+REVIEWED = ("reviewed", "staff_right", "ai_right")
+REVIEW_WORDS = {"reviewed": "Reviewed", "staff_right": "Staff right", "ai_right": "AI right"}
+FIGS = ("missed", "wa", "not_logged", "mismatch")    # the figures a staff member may dispute, one call at a time
+FIG_SHORT = {"not_back": "missed on duty, not called back", "not_logged": "not logged", "mismatch": "staff ≠ AI",
+             "wa": "WhatsApp not answered", "missed": "missed on duty"}
+FIG_WORDS = {"missed": "counted as missed on duty", "wa": "counted as a WhatsApp not answered",
+             "not_logged": "counted as not logged", "mismatch": "counted as staff ≠ AI"}
+_REF = re.compile(r"^(\d{10}_\d{9,12}|c\d{1,12}|wa\d{1,12})$")
+_RV_SQL = (
+    "CREATE TABLE IF NOT EXISTS review (id INTEGER PRIMARY KEY, ref TEXT NOT NULL, staff TEXT NOT NULL, act TEXT NOT NULL, "
+    "note TEXT NOT NULL DEFAULT '', by_whom TEXT NOT NULL, at TEXT NOT NULL)",
+    "CREATE INDEX IF NOT EXISTS review_ref ON review(ref, staff)",
+    "CREATE TABLE IF NOT EXISTS dispute (id INTEGER PRIMARY KEY, ref TEXT NOT NULL, staff TEXT NOT NULL, fig TEXT NOT NULL, "
+    "text TEXT NOT NULL, call_h TEXT NOT NULL DEFAULT '', by_whom TEXT NOT NULL, at TEXT NOT NULL, "
+    "answer TEXT NOT NULL DEFAULT '', answer_note TEXT NOT NULL DEFAULT '', answer_by TEXT NOT NULL DEFAULT '', "
+    "answer_at TEXT NOT NULL DEFAULT '')",
+    "CREATE INDEX IF NOT EXISTS dispute_staff ON dispute(staff, answer)",
+)
+
+
+def iref(it):
+    """One call's or WhatsApp's own reference: its join key, else 'c<id>' (a call) or 'wa<rid>' (a WhatsApp). S747."""
+    if it.get("jk"):
+        return it["jk"]
+    return str(it["id"]) if it.get("ch") == "wa" else "c%s" % it["id"]
+
+
+def rv_init(path):
+    """Create the review store's tables (the installer, and every write). Never drops or changes a row."""
+    con = sqlite3.connect(path, timeout=5)
+    try:
+        for s in _RV_SQL:
+            con.execute(s)
+        con.commit()
+    finally:
+        con.close()
+
+
+def rv_read(path):
+    """The review store, read-only: ({(ref, staff): {state, at, asked, notes[(at, text)]}}, [dispute rows], ok). A store
+    that cannot be read gives ({}, [], False): the cards then count every call as before and the page says so."""
+    try:
+        con = sqlite3.connect("file:%s?mode=ro" % path, uri=True, timeout=3)
+        con.row_factory = sqlite3.Row
+    except sqlite3.Error:
+        return {}, [], False
+    st = {}
+    try:
+        for r in con.execute("SELECT ref, staff, act, note, at FROM review ORDER BY id"):
+            e = st.setdefault((r["ref"], r["staff"]), {"state": "", "at": "", "asked": "", "notes": []})
+            if r["act"] == "note":
+                e["notes"].append((r["at"], r["note"]))
+            elif r["act"] == "undo":
+                e["state"], e["at"], e["asked"] = "", r["at"], ""
+            elif r["act"] == "ask_log":
+                e["asked"] = r["at"]
+            elif r["act"] in REVIEWED:
+                e["state"], e["at"] = r["act"], r["at"]
+        ds = [dict(r) for r in con.execute("SELECT id, ref, staff, fig, text, call_h, by_whom, at, answer, answer_note, "
+                                           "answer_by, answer_at FROM dispute ORDER BY id")]
+    except sqlite3.Error:
+        return {}, [], False
+    finally:
+        con.close()
+    return st, ds, True
+
+
+def _rv_write(path, sql, args):
+    rv_init(path)
+    con = sqlite3.connect(path, timeout=5)
+    try:
+        cur = con.execute(sql, args)
+        con.commit()
+        return cur.rowcount
+    finally:
+        con.close()
+
+
+def _stamp(now=None):
+    return now_ist(now).strftime("%Y-%m-%d %H:%M:%S")
+
+
+def login_key(login):
+    """A login -> the card it reads: the setting PORTAL_CARD_LOGINS ('login:key,...') first, else the login's first word in
+    small letters when it is letters only ('Shivani' -> 'shivani'); a login like 'shivani2' reads no card -- never a near
+    name (the cold review's should-fix 1). S747."""
+    lg = " ".join(str(login or "").lower().split())
+    for part in str(_cfg_path("PORTAL_CARD_LOGINS", "") or "").split(","):
+        if ":" in part:
+            x, y = part.split(":", 1)
+            if x.strip().lower() == lg and y.strip():
+                return re.sub(r"[^a-z]", "", y.strip().lower())
+    first = lg.split()[0] if lg else ""
+    return first if re.match(r"^[a-z]{1,30}$", first) else ""

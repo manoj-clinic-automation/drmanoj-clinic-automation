@@ -1,0 +1,289 @@
+def staff_cards(people, d_from, d_to, now, master_path=None, punch_path=None, agents=None, phone_staff=None, rv=None,
+                reception=None):
+    """One card per person who handled calls in the window (the clinic's MyOperator agents; your own calls are not a
+    card). Figures from the timelines already built for the page; the duty from the master and the punch. Pure but for
+    the two read-only files.
+    S747: `rv` is the review store as rv_read() gives it -- a call the owner reviewed leaves the 'to check' lists for
+    'Reviewed by you'; a dispute he accepted takes that call off that person's figures. A call on the reception mobile
+    (`reception`, its agent's first name) is credited to the ONE phone staff member on duty at that minute; with both or
+    neither on duty, or their duty unknown, it stays on a 'Reception mobile' card that says why."""
+    d0, d1 = _dt.date.fromisoformat(d_from), _dt.date.fromisoformat(d_to)
+    days = [(d0 + _dt.timedelta(days=i)).isoformat() for i in range((d1 - d0).days + 1)]
+    staff, punches, duty_ok = load_duty(master_path, punch_path, days)
+    master_ok = bool(staff) or (duty_ok is not False and os.path.exists(master_path or STAFF_MASTER_DEFAULT))
+    punch_ok = duty_ok or not master_ok                # ... and (staff, {}, False) when only the punch log is
+    agents = agents or {}                              # first name -> the full MyOperator agent names that carry it
+    rst, rdisp, rv_ok = rv if rv is not None else ({}, [], True)
+    rec = (str(reception or "").strip().lower() or RECEPTION_DEFAULT).split()[0]
+    phone = [k.split()[0].lower() for k in (phone_staff or PHONE_STAFF_DEFAULT).split(",") if k.strip()]   # first names
+    pwins = {}                                         # the phone staff's duty windows, to tell when someone else is covering
+    for k in phone:
+        e = staff.get(k) if len(agents.get(k, ())) <= 1 else None
+        if e:
+            pwins[k] = {d: w for d in days for w in [duty_window(e, d, punches.get(k, {}).get(d))] if w}
+    phone_known = all(k in pwins for k in phone)       # an unmatched phone staff member would make everyone "covering"
+
+    def phone_on(t):
+        if t is None:
+            return False
+        d = t.strftime("%Y-%m-%d")
+        return any(w.get(d) and w[d][0] <= t <= w[d][1] for w in pwins.values())
+
+    def phone_who(t):
+        """(the ONE phone staff member on duty at t, '') or (None, why). S747."""
+        if t is None:
+            return None, "the call carries no time"
+        if not phone_known or not punch_ok:
+            return None, "the phone staff's duty is not known"
+        d = t.strftime("%Y-%m-%d")
+        on = [k for k in phone if pwins[k].get(d) and pwins[k][d][0] <= t <= pwins[k][d][1]]
+        if len(on) == 1:
+            return on[0], ""
+        return None, ("two phone staff on duty" if on else "no phone staff on duty")
+    cards = {}
+    calls = []
+    eff, rec_why = {}, {}                              # S747: the card each call belongs to; why a reception call is not credited
+    for p in people:
+        for it in p["calls"]:
+            it["ref"] = iref(it)
+            if it.get("ch") == "wa":
+                continue
+            calls.append((p, it))
+            ah = (it.get("agent_h") or "").strip().lower()
+            if not ah or ah == "you" or ah in OWNER_FIRST:
+                continue
+            k = ah
+            if ah == rec and rec not in phone:
+                it["rec_mob"] = True
+                who_, why = phone_who(it["t"])
+                if who_:
+                    k = who_
+                else:
+                    rec_why[id(it)] = why
+            eff[id(it)] = k
+            cards.setdefault(k, None)
+    for key in agents:                                 # a known call handler on duty gets a card with no call of her own
+        if key in OWNER_FIRST or (key == rec and rec not in phone):
+            continue
+        ent = staff.get(key)
+        if ent and key not in cards and any(duty_window(ent, d, punches.get(key, {}).get(d)) for d in days):
+            cards[key] = None
+    accepted = {(x.get("ref"), x.get("staff")) for x in rdisp if x.get("answer") == "accept"}
+    since7 = (now - _dt.timedelta(days=7)).strftime("%Y-%m-%d")
+    out = []
+    for key in sorted(cards):
+        is_rec = (key == rec and rec not in phone)
+        ambiguous = len(agents.get(key, ())) > 1
+        ent = None if (ambiguous or is_rec) else staff.get(key)
+        wins = {}
+        if ent:
+            for day in days:
+                w = duty_window(ent, day, punches.get(key, {}).get(day))
+                if w:
+                    wins[day] = w
+
+        is_phone = key in phone
+
+        def on_duty(t):
+            if t is None:
+                return False
+            w = wins.get(t.strftime("%Y-%m-%d"))
+            if not (w and w[0] <= t <= w[1]):
+                return False
+            return is_phone or (phone_known and not phone_on(t))   # anyone else answers only while covering
+
+        def reviewed(it):
+            return ((rst.get((it["ref"], key)) or {}).get("state") or "") in REVIEWED
+        c = {"key": key, "name": "", "answered": 0, "rung": 0, "missed": 0, "made": 0, "cb_in_h": 0,
+             "wa_in": 0, "wa_ans": 0, "cb_later": 0, "phone": is_phone, "not_logged": [], "not_back": [], "mismatch": [], "agreed": 0, "wa": [],
+             "matched": bool(ent), "duty_h": "", "punch_h": "", "duty_ok": duty_ok,
+             "missed_known": is_rec or (bool(ent) and punch_ok and (is_phone or phone_known)),
+             "rec": is_rec, "items": [], "missed_items": [], "reviewed": [], "wa_open": [], "credited": 0,
+             "rv": {}, "rv_ok": rv_ok, "disputes": [], "disputes_all": []}
+        for p, it in calls:
+            gone = (it["ref"], key) in accepted
+            mine = eff.get(id(it)) == key
+            if mine:
+                c["name"] = c["name"] or (it.get("agent") or "").strip()
+                c["items"].append((p, it))
+                if it.get("rec_mob") and not is_rec:
+                    c["credited"] += 1
+                if it["direction"] == "Out":
+                    c["made"] += 1
+                if it["answered"]:
+                    if it["direction"] == "In":
+                        c["answered"] += 1
+                    if it["jk"] and not it["claimed"]:
+                        if gone:
+                            pass
+                        elif reviewed(it):
+                            c["reviewed"].append((p, it, "not_logged"))
+                        else:
+                            c["not_logged"].append((p, it))
+                    elif it["mismatch"] and not it["final"]:
+                        if gone:
+                            pass
+                        elif reviewed(it):
+                            c["reviewed"].append((p, it, "mismatch"))
+                        else:
+                            c["mismatch"].append((p, it))
+                    elif it["claimed"] and it["verdict"] == "Match":
+                        c["agreed"] += 1
+            if it["kind"] == "in_miss" and not gone and on_duty(it["t"]):
+                c["missed"] += 1
+                c["missed_items"].append((p, it))
+                later = [y for y in p["calls"] if y.get("ch") != "wa" and y["answered"] and y["t"] and it["t"] and y["t"] > it["t"]]
+                if later:
+                    if (later[0]["t"] - it["t"]).total_seconds() <= CALLBACK_MIN * 60:
+                        c["cb_in_h"] += 1
+                    else:
+                        c["cb_later"] += 1
+                elif reviewed(it):
+                    c["reviewed"].append((p, it, "not_back"))
+                else:
+                    c["not_back"].append((p, it))
+        c["rung"] = c["answered"] + c["missed"]
+        for p in people:
+            for w in p["calls"]:
+                if w["kind"] == "wa_in" and on_duty(w["t"]) and (w["ref"], key) not in accepted:
+                    c["wa_in"] += 1
+                    a = wa_answer(w, p["calls"])
+                    if a is not None:
+                        c["wa_ans"] += 1
+                    elif reviewed(w):
+                        c["reviewed"].append((p, w, "wa"))
+                    else:
+                        c["wa_open"].append((p, w))
+                    c["wa"].append((p, w, a))
+        c["name"] = (ent["name"] if ent else "") or c["name"] or key.title()
+        today_iso = now.strftime("%Y-%m-%d")
+        if is_rec:
+            c["name"] = "Reception mobile"
+            whys = sorted({rec_why.get(id(it), "") for p, it in c["items"]} - {""})
+            c["duty_h"] = ("calls on the reception mobile not credited to a person (" + "; ".join(whys or ["—"]) +
+                           ") · a call there is credited to the phone staff member on duty when exactly one is · missed calls are "
+                           "counted to the phone staff on duty, as always")
+        elif ent and not punch_ok:
+            c["duty_h"] = "the punch log could not be read — missed calls on duty are not counted"
+        elif ent:
+            ws = [wins[d] for d in days if d in wins]
+            if len(days) == 1:
+                a, b = ent["sun"] if d0.weekday() == 6 else ent["wd"]
+                pu = punches.get(key, {}).get(days[0])
+                past = days[0] != today_iso
+                c["duty_h"] = ("on duty %s–%s" % (a.strftime("%H:%M"), b.strftime("%H:%M"))) if (a and b) else ("off that day" if past else "off today")
+                c["punch_h"] = ("punched %s" % pu.strftime("%H:%M")) if pu else (("did not punch" if past else "not punched yet") if (a and b) else "")
+            else:
+                c["duty_h"] = "on duty %d of %d days" % (len(ws), len(days))
+            if not is_phone:
+                c["duty_h"] += (" · missed calls and WhatsApps counted only while covering (no phone staff on duty)" if phone_known
+                                else " · the phone staff's duty is not known, so nothing missed is counted to this card")
+        elif ambiguous:
+            c["duty_h"] = "two agents share this first name — duty not matched, missed calls not counted"
+        elif not master_ok:
+            c["duty_h"] = "the duty list could not be read — missed calls on duty are not counted"
+        else:
+            c["duty_h"] = "duty not known (name not matched in the staff list) — missed calls not counted"
+        if c["credited"]:
+            c["duty_h"] += " · %d call%s on the reception mobile counted here (the only phone staff on duty)" % (
+                c["credited"], "s" if c["credited"] != 1 else "")
+        c["disputes"] = [x for x in rdisp if x.get("staff") == key and not x.get("answer")]
+        c["disputes_all"] = [x for x in rdisp if x.get("staff") == key and
+                             (not x.get("answer") or str(x.get("answer_at") or "")[:10] >= since7)]
+        refs = ({it["ref"] for p, it in c["items"]} | {it["ref"] for p, it in c["missed_items"]} | {w["ref"] for p, w, a in c["wa"]}
+                | {it["ref"] for p, it, k in c["reviewed"]})
+        c["rv"] = {r: rst[(r, key)] for r in refs if (r, key) in rst}
+        nl, nb, mm = len(c["not_logged"]), len(c["not_back"]), len(c["mismatch"])
+        c["check"] = nl + nb + mm
+        c["tone"] = "rose" if (nl or nb) else ("amber" if (mm or c["disputes"] or not c["missed_known"]) else "green")
+        out.append(c)
+    order = {"rose": 0, "amber": 1, "green": 2}
+    out.sort(key=lambda x: (x["rec"], order[x["tone"]], -(x["made"] + x["rung"])))
+    return out
+
+
+def _row_json(p, it, c, figs):
+    """One call (or WhatsApp) of a card, for the staff's own page: what happened, the log, and whether its recording can be
+    played. NO transcript text goes to staff -- the owner's rule (09:23 IST 07-Nov): staff get the recordings only. S747."""
+    st_ = c["rv"].get(it["ref"]) or {}
+    wa = it.get("ch") == "wa"
+    return {"ref": it["ref"], "day": it.get("day") or "", "t": it.get("t_h") or "", "kind": it["kind"],
+            "name": p.get("name") or "", "cid": p.get("cid") or "", "phone": p.get("phone") or "",
+            "claimed": "" if wa else (it.get("claimed_h") or ""), "ai": "" if wa else (it.get("ai_h") or ""),
+            "jk": "" if wa else (it.get("jk") or ""), "dur": "" if wa else (it.get("dur_h") or ""),
+            "has_rec": (not wa) and bool(it.get("has_rec")) and bool(it.get("jk")),
+            "body": (it.get("body") or "")[:200] if wa else "", "figs": sorted(figs),
+            "asked": st_.get("asked") or "", "notes": [{"at": a, "text": n} for a, n in st_.get("notes", [])],
+            "rec": bool(it.get("rec_mob")), "sort": (it["t"] or _dt.datetime.min).strftime("%Y-%m-%d %H:%M:%S")}
+
+
+def card_json(c):
+    """A card as the person's own page reads it: the same figures as the owner's, every call once (newest first) with the
+    figures it is behind, the owner's asks and notes, and their disputes of the last 7 days. S747."""
+    rows = {}
+
+    def add(p, it, fig=None):
+        r = rows.setdefault(it["ref"], [p, it, set()])
+        if fig:
+            r[2].add(fig)
+    for p, it in c["items"]:
+        add(p, it)
+    for p, it in c["missed_items"]:
+        add(p, it, "missed")
+    for p, it in c["not_logged"]:
+        add(p, it, "not_logged")
+    for p, it in c["mismatch"]:
+        add(p, it, "mismatch")
+    for p, w, a in c["wa"]:
+        add(p, w, None if a is not None else "wa")
+    for p, it, k in c["reviewed"]:
+        add(p, it)
+    calls = sorted((_row_json(p, it, c, f) for p, it, f in rows.values()), key=lambda r: r["sort"], reverse=True)
+    keep = ("id", "ref", "fig", "text", "call_h", "at", "answer", "answer_note", "answer_at")
+    return {"key": c["key"], "name": c["name"], "tone": c["tone"], "rec": c["rec"],
+            "figs": {"answered": c["answered"], "rung": c["rung"], "missed": c["missed"], "missed_known": c["missed_known"],
+                     "made": c["made"], "cb_in_h": c["cb_in_h"], "cb_later": c["cb_later"], "wa_in": c["wa_in"],
+                     "wa_ans": c["wa_ans"], "not_logged": len(c["not_logged"]), "mismatch": len(c["mismatch"]),
+                     "agreed": c["agreed"]},
+            "asks": [r for r in calls if r["asked"] and "not_logged" in r["figs"]],
+            "notes": [r for r in calls if r["notes"]],
+            "disputes": [{k: x.get(k) for k in keep} for x in c["disputes_all"]],
+            "calls": calls}
+
+
+_CARD_CACHE = {}
+CARD_CACHE_S = 60
+
+
+def card_for(conn, key, span="yesterday", now=None, cached=False):
+    """(card or None, handler, mode, cards_made) for one person: the window today | yesterday | 7, read exactly as the
+    owner's page reads it. handler: the person handles calls (an agent of the last 30 days, or phone staff). A first name
+    two MyOperator agents share gives NO card (their calls would be one card -- the cold review's should-fix 1). cached:
+    the checks behind a transcript tap or a dispute reuse a card made in the last minute (should-fix 3). S747."""
+    if cached:
+        hit = _CARD_CACHE.get((key, span))
+        if hit and time.time() - hit[0] < CARD_CACHE_S:
+            return hit[1]
+    res = _card_for(conn, key, span, now)
+    if len(_CARD_CACHE) > 50:
+        _CARD_CACHE.clear()
+    _CARD_CACHE[(key, span)] = (time.time(), res)
+    return res
+
+
+def _card_for(conn, key, span, now):
+    now = now_ist(now)
+    d_from, d_to, mode = span_bounds(span if span in ("today", "yesterday", "7") else "yesterday", "", now)
+    wa, _ok = wa_items(_cfg_path("PORTAL_INBOX_DB", INBOX_DB_DEFAULT), d_from, d_to)
+    people, _items, _nn = build_people(conn, d_from, d_to, now, wa=wa)
+    cards = _safe_cards(conn, people, d_from, d_to, now, _cfg_path("SR_STAFF_MASTER", STAFF_MASTER_DEFAULT),
+                        _cfg_path("SR_PUNCH_CSV", PUNCH_CSV_DEFAULT))
+    phone = [k.split()[0].lower() for k in str(_cfg_path("PORTAL_PHONE_STAFF", PHONE_STAFF_DEFAULT)).split(",") if k.strip()]
+    agents = _agent_firsts(conn, now)
+    rec = (str(_cfg_path("PORTAL_RECEPTION_AGENT", RECEPTION_DEFAULT) or "").strip().lower() or RECEPTION_DEFAULT).split()[0]
+    handler = bool(key) and key != rec and (key in phone or key in agents)
+    if cards is None:
+        return None, handler, mode, False
+    if len(agents.get(key, ())) > 1:
+        return None, handler, mode, True
+    return next((x for x in cards if x["key"] == key and not x["rec"]), None), handler, mode, True
