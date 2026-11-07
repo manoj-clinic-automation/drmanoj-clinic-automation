@@ -1,0 +1,416 @@
+<!doctype html>
+<!-- aaj_kaam.html · kit S493_LISTS_2 (07-Oct-2026) · the staff's own daily list (Roman Hinglish, staff). PARENT (clinic).
+     Replaces S487's page whole. Drawn from /finance/aaj/api/list with textContent only. One line = one job: no count, no day,
+     no 'late'. A line whose work lives behind another app's door (the staff register, Mahine ka kaam) is asked of that door
+     with the person's own login and shown only when something waits there. A tap, and an answer on a task, are one POST each.
+     The owner's ?as=<login> shows a person's list as they will see it, with taps off. -->
+<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Aaj ka kaam</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:14px;background:#dfe5e9;color:#14181c;font:17px/1.5 "Segoe UI",system-ui,sans-serif}
+.wrap{max-width:620px;margin:0 auto}
+h1{font-size:23px;color:#14456e;margin:0 0 2px}
+h2{font-size:14px;letter-spacing:.05em;text-transform:uppercase;color:#3c464e;margin:18px 2px 6px}
+.mut{color:#3c464e;font-size:15px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.top a,.top button{background:#fff;color:#14456e;border:1px solid #8a9aa6;border-radius:10px;padding:0 14px;min-height:44px;display:inline-flex;align-items:center;font:inherit;font-size:15px;text-decoration:none;cursor:pointer;white-space:nowrap}
+.banner{background:#fff4d6;border-left:6px solid #8a6100;padding:10px 12px;margin:0 0 12px;font-size:15px;border-radius:6px}
+.green{background:#e9f6e9;border-left:6px solid #2f6b45;padding:12px 14px;margin:10px 0 12px;font-size:19px;font-weight:700;border-radius:6px;color:#2f6b45}
+.card{background:#fffdf7;border:2px solid #8a9aa6;border-radius:10px;padding:4px 14px;margin:0 0 6px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #d6dde3}
+.row:first-child{border-top:0}
+.row .t{flex:1;min-width:0;overflow-wrap:break-word}
+.row .how{display:block;color:#2c353c;font-size:15px;margin-top:4px}
+.row .acts{display:flex;flex-direction:column;gap:8px;align-items:stretch;flex:none}
+.row .acts .btn{justify-content:center}
+.row.done{flex-wrap:wrap;gap:4px 12px}
+.row.done .tx{color:#3c464e}
+.row.done .ok{flex-basis:100%;text-align:left}
+.row.done .tx:only-child{color:#2f6b45;font-weight:600}
+.row.later .tx{color:#3c464e}
+.ok{color:#2f6b45;font-weight:700;font-size:15px;text-align:right}
+.btn{border:0;background:#14456e;color:#fff;border-radius:10px;padding:0 16px;min-height:46px;font:inherit;font-size:16px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;white-space:nowrap}
+.btn.tick{background:#2f6b45}
+.btn.soft{background:#fff;color:#14456e;border:1px solid #8a9aa6}
+.btn.no{background:#fff;color:#9c2a20;border:1px solid #c9a39f}
+.btn:disabled{opacity:.55;cursor:default}
+.task{background:#fff;border:2px solid #14456e;border-radius:10px;padding:12px 14px;margin:0 0 8px}
+.task.ans{border-color:#8a9aa6;background:#f4f6f7}
+.task .tt{font-size:18px;font-weight:700;overflow-wrap:break-word}
+.task .from{color:#3c464e;font-size:14px;margin-top:2px}
+.task .note{font-size:15px;margin-top:6px;padding:6px 9px;border-radius:8px;background:#eef2f5;overflow-wrap:break-word}
+.task .note.his{background:#e3edf6}
+.task .note b{font-weight:700}
+.task .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.task .state{font-weight:700;font-size:15px;margin-top:6px;color:#2f6b45}
+.task .note .from{margin-top:2px}
+.task .state.cant{color:#9c2a20}
+textarea,input[type=date]{font:inherit;width:100%;border:1px solid #8a9aa6;border-radius:10px;padding:9px 11px;background:#fff;color:#14181c}
+textarea{min-height:76px;resize:vertical}
+.say{margin-top:10px;display:grid;gap:8px}
+.give{background:#fff;border:2px solid #8a9aa6;border-radius:10px;padding:12px 14px;display:grid;gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #8a9aa6;border-radius:999px;padding:0 12px;min-height:40px;background:#fff;font-size:15px;cursor:pointer}
+.chip input{width:18px;height:18px}
+.chip.offp{opacity:.5}
+.foot{font-size:13px;color:#3c464e;margin:18px 2px 0}
+#flash{color:#9c2a20;font-weight:700;margin:6px 0;min-height:0}
+[hidden]{display:none!important}
+/* S747 (D856): Mere calls -- the person's own call card, the Call Console's figures in Hindi */
+.cc{background:#fff;border:2px solid #8a9aa6;border-radius:10px;margin:14px 0 8px;overflow:hidden}
+.cc>summary{list-style:none;cursor:pointer;padding:11px 14px;border-left:7px solid #2f6b45;background:#e9f6e9}
+.cc>summary::-webkit-details-marker{display:none}
+.cc.rose>summary{border-left-color:#9c2a20;background:#fbe4e1}.cc.amber>summary{border-left-color:#8a6100;background:#fff4d6}
+.cc>summary b{display:block;font-size:18px}.cc>summary .s{color:#2c353c;font-size:15px}
+.cc .tabs{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid #d6dde3;flex-wrap:wrap}
+.cc .tabs button{font:inherit;font-size:15px;border:1px solid #8a9aa6;border-radius:999px;background:#fff;color:#14456e;padding:0 14px;min-height:40px;cursor:pointer}
+.cc .tabs button.on{background:#14456e;color:#fff;border-color:#14456e}
+.cc .fg{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid #d6dde3}
+.cc .fg b{font-family:ui-monospace,Consolas,monospace;font-size:18px}.cc .fg b.bad{color:#9c2a20}.cc .fg b.ok{color:#2f6b45}
+.cc .gal{font:inherit;font-size:14px;font-weight:600;color:#7a5600;background:#fff4d6;border:1px solid #8a6100;border-radius:8px;padding:0 10px;min-height:38px;cursor:pointer}
+.cc .it{padding:10px 14px;border-top:1px solid #d6dde3;overflow-wrap:break-word}
+.cc .it .sub{display:block;color:#3c464e;font-size:14.5px}
+.cc .it.dr{background:#fff4d6}.cc .it .dw{font-weight:700;color:#7a5600}
+.cc .it .snip{display:block;margin-top:5px;font-size:14.5px;background:#eef2f5;border-radius:8px;padding:6px 9px}
+.cc .it .full{white-space:pre-wrap;display:block;margin-top:5px;font-size:14.5px;background:#eef2f5;border-radius:8px;padding:7px 9px;max-height:55vh;overflow:auto}
+.cc .lnk{background:none;border:0;color:#14456e;font:inherit;font-size:15px;font-weight:700;padding:6px 0 0;cursor:pointer;text-decoration:underline}
+.cc .ans{display:block;margin-top:5px;font-size:14.5px;color:#14456e;font-weight:600}
+.cc .pick{display:flex;gap:8px;align-items:flex-start;padding:6px 0;font-size:15px}.cc .pick input{width:20px;height:20px;margin-top:3px;flex:none}
+.cc details.all>summary{list-style:none;cursor:pointer;padding:10px 14px;border-top:1px solid #d6dde3;font-weight:700;color:#14456e}
+.cc details.all>summary::-webkit-details-marker{display:none}
+</style></head><body><div class="wrap">
+<div class="top"><a href="/portal">&larr; Clinic app</a><button id="again" type="button">Dobara dekhiye</button></div>
+<div class="banner" id="banner" hidden></div>
+<div class="banner" id="partial" hidden>Poori list abhi nahin khul paayi — jo neeche dikh raha hai woh adhoori hai. Dr Manoj ko bataiye.</div>
+<h1 id="h">Aaj ka kaam</h1>
+<div class="mut" id="sub">load ho raha hai&hellip;</div>
+<div id="flash" role="status" aria-live="polite"></div>
+<div id="alldone" class="green" hidden>Sab ho gaya ✓</div>
+<div id="tasks"></div>
+<div id="list"></div>
+<div id="calls"></div>
+<div id="give"></div>
+<p class="foot" id="foot" hidden></p>
+</div>
+<script>
+(function(){
+  var AS=(new URLSearchParams(location.search)).get('as')||'';
+  function $(i){return document.getElementById(i);}
+  function el(tag,cls,text){var e=document.createElement(tag); if(cls)e.className=cls; if(text!==undefined&&text!==null)e.textContent=text; return e;}
+  function q(){return AS?('?as='+encodeURIComponent(AS)):'';}
+  var TODAY='', GEN=0, PENDING=0, EXTRA=0, DOORFAIL=0, BASE={open:0,partial:false,has:false};
+  /* someone is writing: a box on the page holds words, or the cursor is in one. The page is never redrawn under them. */
+  function typing(){ var ts=document.querySelectorAll('textarea'), i; for(i=0;i<ts.length;i++){ if(ts[i].value.trim()||ts[i]===document.activeElement)return true; } return false; }
+  var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function when(s){ s=String(s||''); if(s.length<16)return s;
+    var t=s.slice(11,16); if(s.slice(0,10)===TODAY)return t;
+    return s.slice(8,10)+'‑'+(MON[Number(s.slice(5,7))-1]||'')+' '+t; }
+  function day(s){ s=String(s||''); if(s.length<10)return s; return s.slice(8,10)+'‑'+(MON[Number(s.slice(5,7))-1]||''); }
+  var MSG={off:'Yeh list abhi shuru nahin hui hai.', owner_only:'Yeh sirf Dr Manoj dekh sakte hain.', not_signed_in:'Pehle Clinic app par login kijiye.',
+           no_such_login:'Is naam ka koi login nahin hai.', no_database:'Abhi list nahin ban paayi. Thodi der mein dobara dekhiye.',
+           owner_panel:'Dr Manoj: this page is the staff’s. Your panel opens at /finance/aaj.'};
+  function flash(t){ $('flash').textContent=t||''; }
+
+  function post(body, btn, failText, box){
+    if(btn)btn.disabled=true; flash('');
+    return fetch('/finance/aaj/api/tick',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+     .then(function(x){ if((x.headers.get('Content-Type')||'').indexOf('json')<0){ throw new Error((x.redirected||x.status===401)?'login':'server'); } return x.json(); })
+     .then(function(j){ if(!j.ok){ flash(j.message||(j.error==='not_signed_in'?MSG.not_signed_in:failText)); if(btn)btn.disabled=false; return false; }
+        if(box){ box.value=''; box.blur(); }                 /* what was written has gone: its box is emptied, others are left alone */
+        if(typing()){ flash('Bhej diya ✓'); if(btn)btn.disabled=false; } else load();
+        return true; })
+     .catch(function(e){ flash((e&&e.message==='login')?MSG.not_signed_in:failText); if(btn)btn.disabled=false; return false; });
+  }
+
+  function drawDone(){
+    var open=BASE.open+EXTRA, a=$('alldone');
+    a.hidden=!(BASE.has && !open && PENDING<=0 && !BASE.partial && !DOORFAIL);      /* a door that did not answer is not 'nothing there' */
+  }
+
+  function fillFetch(w, r){
+    /* work that lives behind another app's door: asked with this login; the line shows only when something waits there.
+       An answer that arrives after the list was drawn again is dropped (GEN). */
+    var gen=GEN;
+    if(r.preview){ w.querySelector('.t').appendChild(el('span','how','Shown on their own login, only when something is waiting there.')); return; }
+    w.hidden=true; PENDING+=1;
+    function done(){ if(gen!==GEN)return; PENDING-=1; drawDone(); }
+    fetch(r.fetch.url,{credentials:'same-origin',cache:'no-store'}).then(function(x){ if(!x.ok)throw new Error('door'); return x.json(); }).then(function(d){
+      if(gen!==GEN)return;
+      /* a door that answers without its figure (signed out: {}; refused: {ok:false}) has NOT said 'nothing waits' */
+      if(!d||typeof d[r.fetch.field]==='undefined')throw new Error('door');
+      if((!r.fetch.only_if||d[r.fetch.only_if])&&Number(d[r.fetch.field]||0)>0){
+        w.hidden=false; EXTRA+=1;
+        /* S640: a door may name the work itself (the day's corrections, patient by patient) */
+        if(r.fetch.text_field&&d[r.fetch.text_field]){ var tx=w.querySelector('.tx'); if(tx)tx.textContent=String(d[r.fetch.text_field]); }
+        var card=w.parentNode, head=card&&card.previousSibling; if(card)card.hidden=false; if(head)head.hidden=false;
+      }
+      done();
+    }).catch(function(){ if(gen===GEN)DOORFAIL+=1; done(); });
+  }
+
+  function row(r){
+    var w=el('div','row'), t=el('div','t'), tx=el('span','tx',r.text);
+    t.appendChild(tx);
+    if(r.how)t.appendChild(el('span','how',r.how));
+    w.appendChild(t);
+    var acts=el('div','acts');
+    function opener(cls){ var a=el('a','btn'+(cls?(' '+cls):''),'Kholiye ›'); a.href=r.door; a.target='_blank'; a.rel='noopener'; if(r.tile)a.title=r.tile; acts.appendChild(a); }
+    if(r.kind==='tick'&&r.later){ w.className='row later'; t.appendChild(el('span','how','Begins with the next week / month after the lists are switched on.')); }
+    else if(r.kind==='tick'&&r.done){ w.className='row done'; w.appendChild(el('div','ok','Ho gaya ✓ '+(r.done.by_name||r.done.by||'')+', '+when(r.done.at))); }
+    else if(r.kind==='tick'){
+      if(r.door)opener('soft');                              /* the page where the work is done, then the tap that says it is done */
+      var b=el('button','btn tick','Ho gaya ✓'); b.type='button';
+      if(!r.can_tick){ b.disabled=true; }
+      else b.addEventListener('click',function(){ post({id:r.id}, b, 'Tick nahin lag paaya. Dobara kijiye.'); });
+      acts.appendChild(b);
+    }
+    else if(r.kind==='done'){ w.className='row done'; }        /* S508: the work is done, said in green -- nothing to press */
+    else if(r.door)opener('');
+    if(acts.childNodes.length)w.appendChild(acts);
+    if(r.kind==='fetch')fillFetch(w,r);
+    return w;
+  }
+
+  var KIND={done:'Ho gaya', cant:'Nahin ho paaya', note:'', reply:'', reopen:'Wapas bheja', close:'Band kiya'};
+  function sayBox(holder, label, send){
+    holder.textContent='';
+    var box=el('div','say'), ta=el('textarea'); ta.placeholder=label; ta.setAttribute('aria-label',label); ta.maxLength=500;
+    var b=el('button','btn','Bhejiye'); b.type='button';
+    b.addEventListener('click',function(){ var v=ta.value.trim(); if(!v){ flash('Pehle kuch likhiye.'); return; } send(v,b,ta); });
+    var c=el('button','btn soft','Rehne dijiye'); c.type='button'; c.addEventListener('click',function(){ holder.textContent=''; });
+    var acts=el('div','acts'); acts.style.display='flex'; acts.style.gap='8px'; acts.appendChild(b); acts.appendChild(c);
+    box.appendChild(ta); box.appendChild(acts); holder.appendChild(box); ta.focus();
+  }
+  function taskCard(t, mine){
+    var c=el('div','task'+((t.state==='open')?'':' ans'));
+    c.appendChild(el('div','tt',t.text));
+    c.appendChild(el('div','from',(mine?(t.by_name+' ne diya'):('Kisko: '+(t.person_name||t.person)))+' · '+when(t.at)+(t.due?(' · kab tak: '+day(t.due)):'')));
+    var ns=t.notes||[], last=ns.length?ns[ns.length-1]:null, waits=!!(last&&(last.kind==='done'||last.kind==='cant'||last.kind==='note'));
+    /* the state first, then who said what. 'dekhenge' only while the giver has not yet answered the last word */
+    if(t.state==='done')c.appendChild(el('div','state',(mine&&waits)?('Ho gaya ✓ — '+t.by_name+' dekhenge'):'Ho gaya ✓'));
+    if(t.state==='cant')c.appendChild(el('div','state cant',(mine&&waits)?('Nahin ho paaya — '+t.by_name+' dekhenge'):'Nahin ho paaya'));
+    if(t.state==='closed')c.appendChild(el('div','state','Band'));
+    ns.forEach(function(n){
+      var d=el('div','note'+((n.kind==='reply'||n.kind==='reopen'||n.kind==='close')?' his':'')), k=KIND[n.kind]||'';
+      d.appendChild(el('b',null,n.by_name+(k?(' — '+k):'')+(n.note?': ':''))); if(n.note)d.appendChild(document.createTextNode(n.note));
+      d.appendChild(el('div','from',when(n.at))); c.appendChild(d);
+    });
+    var acts=el('div','acts'), say=el('div');
+    function B(cls,text,fn){ var b=el('button','btn '+cls,text); b.type='button'; b.addEventListener('click',function(){ fn(b); }); acts.appendChild(b); return b; }
+    if(mine&&t.can_answer){
+      if(t.state!=='done')B('tick','Ho gaya ✓',function(b){ post({task:t.id,act:'done'}, b, 'Nahin ho paaya. Dobara kijiye.'); });
+      if(t.state==='open')B('no','Nahin ho paaya',function(){ sayBox(say,'Kyon nahin ho paaya? Likhiye ya mic se boliye',function(v,b,ta){ post({task:t.id,act:'cant',note:v}, b, 'Nahin gaya. Dobara kijiye.', ta); }); });
+      B('soft','Kuch likhna hai',function(){ sayBox(say,'Yahan likhiye ya mic se boliye',function(v,b,ta){ post({task:t.id,act:'note',note:v}, b, 'Nahin gaya. Dobara kijiye.', ta); }); });
+    }
+    if(!mine&&t.can_close){
+      B('tick','Band kijiye',function(b){ post({task:t.id,act:'close'}, b, 'Nahin ho paaya. Dobara kijiye.'); });
+      if(t.state!=='open')B('no','Wapas bhejiye',function(){ sayBox(say,'Kya baaki hai? Likhiye',function(v,b,ta){ post({task:t.id,act:'reopen',note:v}, b, 'Nahin gaya. Dobara kijiye.', ta); }); });
+      B('soft','Jawab likhiye',function(){ sayBox(say,'Jawab likhiye',function(v,b,ta){ post({task:t.id,act:'reply',note:v}, b, 'Nahin gaya. Dobara kijiye.', ta); }); });
+    }
+    if(acts.childNodes.length)c.appendChild(acts);
+    c.appendChild(say);
+    return c;
+  }
+
+  function giveBox(d){
+    var g=$('give'); g.textContent='';
+    if(!d.can_give)return;
+    g.appendChild(el('h2',null,'Kaam dijiye'));
+    var box=el('div','give'), ta=el('textarea'); ta.placeholder='Kaam likhiye ya mic se boliye'; ta.setAttribute('aria-label','Kaam');
+    ta.maxLength=300;
+    var chips=el('div','chips'), picks={};
+    (d.people||[]).forEach(function(p){
+      var l=el('label','chip'+(p.on?'':' offp')), i=el('input'); i.type='checkbox'; i.disabled=!p.on;
+      i.addEventListener('change',function(){ picks[p.key]=i.checked; });
+      l.appendChild(i); l.appendChild(document.createTextNode(p.name+(p.on?'':' (list band)'))); chips.appendChild(l);
+    });
+    var due=el('input'); due.type='date'; due.setAttribute('aria-label','Kab tak (zaroori nahin)');
+    var b=el('button','btn','Bhejiye'); b.type='button';
+    b.addEventListener('click',function(){
+      var to=Object.keys(picks).filter(function(k){return picks[k];}), v=ta.value.trim();
+      if(!v){ flash('Pehle kaam likhiye.'); return; } if(!to.length){ flash('Kisko dena hai, chuniye.'); return; }
+      post({give:{to:to,text:v,due:due.value||''}}, b, 'Nahin gaya. Dobara kijiye.', ta);
+    });
+    box.appendChild(ta); box.appendChild(chips);
+    var dl=el('label','mut','Kab tak (zaroori nahin) '); dl.appendChild(due); box.appendChild(dl); box.appendChild(b); g.appendChild(box);
+    if((d.given||[]).length){
+      g.appendChild(el('h2',null,'Aapke diye kaam'));
+      var names={}; (d.people||[]).forEach(function(p){names[p.key]=p.name;});
+      d.given.forEach(function(t){ t.person_name=names[t.person]||t.person; g.appendChild(taskCard(t,false)); });
+    }
+  }
+
+  function load(){
+    if(typing())return;                                     /* never redraw under someone who is writing */
+    fetch('/finance/aaj/api/list'+q(),{credentials:'same-origin',cache:'no-store'})
+     .then(function(x){ var ct=x.headers.get('Content-Type')||''; if(ct.indexOf('json')<0){ throw new Error((x.redirected||x.status===401)?'login':'server'); } return x.json(); })
+     .then(function(d){
+       if(typing())return;
+       GEN+=1; PENDING=0; EXTRA=0; DOORFAIL=0; TODAY=d.today||'';
+       var list=$('list'), tk=$('tasks'); list.textContent=''; tk.textContent=''; $('give').textContent=''; $('alldone').hidden=true; $('foot').hidden=true;
+       if(!d.ok){ $('partial').hidden=true; $('banner').hidden=true; $('h').textContent='Aaj ka kaam'; $('sub').textContent=MSG[d.error]||'Abhi list nahin ban paayi. Thodi der mein dobara dekhiye.'; return; }
+       $('h').textContent='Aaj ka kaam — '+d.name;
+       $('sub').textContent=d.day+' · '+d.as_of+' baje ki list';
+       var bn=$('banner');
+       if(d.view_as){ bn.hidden=false; bn.textContent='You are seeing '+d.name+'’s list as it will appear to them today. “Ho gaya” taps and task answers are off in this view.'
+          +(d.on?'':' All the lists are still OFF for staff.')+((d.on&&!d.person_on)?' This person’s list is switched OFF.':''); }
+       else bn.hidden=true;
+       $('partial').hidden=!d.partial;
+       BASE.open=d.open; BASE.partial=!!d.partial; BASE.has=!!d.has;
+       if((d.tasks||[]).length){
+         tk.appendChild(el('h2',null,'Alag se diya gaya kaam'));
+         d.tasks.forEach(function(t){ tk.appendChild(taskCard(t,true)); });
+       }
+       (d.sections||[]).forEach(function(s){
+         var h=el('h2',null,s.title), card=el('div','card'), seen=0;
+         s.rows.forEach(function(r){ var w=row(r); if(!w.hidden)seen+=1; card.appendChild(w); });
+         if(!seen){ h.hidden=true; card.hidden=true; }                /* only lines that wait on another door: shown when one answers */
+         list.appendChild(h); list.appendChild(card);
+       });
+       if(!d.has&&!d.can_give){ $('sub').textContent=d.partial?'List abhi nahin khul paayi.':'Aapke naam par abhi koi kaam set nahin hai.'; }
+       if(d.has&&d.floor){ $('foot').hidden=false; $('foot').textContent=d.floor+' se pehle ka kuch nahin dikhta.'; }
+       giveBox(d);
+       drawDone();
+     })
+     .catch(function(e){ $('sub').textContent=(e&&e.message==='login')?MSG.not_signed_in:'Server se jawab nahin aaya — neeche ki list purani ho sakti hai. Thodi der mein dobara dekhiye.'; });
+  }
+  $('again').addEventListener('click',function(){ if(typing()){ flash('Pehle jo likha hai woh bhejiye, ya box khaali kijiye.'); return; } load(); });
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden)load(); });
+  setInterval(function(){ if(!document.hidden)load(); },120000);
+  load();
+})();
+</script>
+<script>
+/* S747 (D856): Mere calls -- this person's own call card, asked of the Call Console with their own login
+   (/portal/console/api/mycard; the owner's ?as= view asks /portal/console/api/card/<login> behind his gate). The same figures
+   as the owner's card; every call with its log line and its transcript; the owner's asks and notes; 'Galat hai?' sends one
+   line about one call to him. Drawn with textContent only. A door that does not answer leaves the card as it was (never
+   'all clear'); a person who handles no calls sees nothing. */
+(function(){
+  var AS=(new URLSearchParams(location.search)).get('as')||'', SPAN='yesterday', OPEN=false, OPENALL=false, BUSY=false;
+  var box=document.getElementById('calls'); if(!box)return;
+  function el(tag,cls,text){var e=document.createElement(tag); if(cls)e.className=cls; if(text!==undefined&&text!==null)e.textContent=text; return e;}
+  var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function dmy(s){ s=String(s||''); return s.length>=10?(Number(s.slice(8,10))+' '+(MON[Number(s.slice(5,7))-1]||'')):s; }
+  function hm(s){ s=String(s||''); return s.length>=16?s.slice(11,16):''; }
+  var OUT={'coming':'aayenge','not coming':'nahin aayenge','call again':'phir call karein','no answer':'jawab nahin','to the doctor':'Doctor sahab ko',
+           'booked':'appointment li','enquiry':'sirf poochha','no action':'kuch nahin','spam':'spam'};
+  function hi(w){ w=String(w||''); return OUT[w.toLowerCase()]||w; }
+  var KIND={in_ok:'call aaya, uthaya',in_miss:'call aaya, chhoota',out_ok:'call kiya, utha',out_miss:'call kiya, nahin utha',wa_in:'WhatsApp aaya'};
+  var FIGW={missed:'duty par chhoota call',wa:'WhatsApp ka jawab nahin',not_logged:'nateeja darj nahin',mismatch:'aapka nateeja ≠ AI'};
+  function typing(){ var a=document.activeElement, t=box.querySelectorAll('textarea'), i;
+    if(a&&box.contains(a)&&a.tagName==='TEXTAREA')return true;
+    for(i=0;i<t.length;i++){ if(t[i].value.trim())return true; } return false; }
+  function url(){ return AS?('/portal/console/api/card/'+encodeURIComponent(AS)+'?span='+SPAN):('/portal/console/api/mycard?span='+SPAN); }
+  function callLine(r){ return [r.name||'—', r.cid, r.phone].filter(Boolean).join(' · ')+' · '+(SPAN==='today'?'':(dmy(r.day)+' '))+r.t; }
+  function recLink(holder, r){
+    /* the recording of the call -- staff hear their own calls; no transcript text is ever shown to staff (09:23 IST 07-Nov) */
+    if(!r.has_rec) return;
+    var b=el('button','lnk','Recording sunein ▶'+(r.dur?(' '+r.dur):'')); b.type='button';
+    b.addEventListener('click',function(){
+      var au=el('audio'); au.controls=true; au.preload='auto'; au.style.width='100%'; au.style.marginTop='6px';
+      au.src=(AS?'/portal/rec/':'/portal/console/api/myrec/')+encodeURIComponent(r.jk);
+      au.addEventListener('error',function(){ var m=el('span','sub','Recording abhi nahin chal paayi — thodi der baad dobara dabaiye.'); if(au.parentNode)au.parentNode.replaceChild(m,au); });
+      b.replaceWith(au); var pr=au.play(); if(pr&&pr.catch)pr.catch(function(){});
+    });
+    holder.appendChild(b);
+  }
+  function callItem(r, cls, head){
+    var d=el('div','it'+(cls?(' '+cls):''));
+    if(head)d.appendChild(el('div','dw',head));
+    d.appendChild(el('b',null,callLine(r)));
+    var sub=[KIND[r.kind]||''];
+    if(r.kind!=='wa_in'&&r.kind!=='in_miss'){ sub.push('nateeja: '+(r.claimed?hi(r.claimed):'darj nahin')); if(r.ai)sub.push('AI: '+hi(r.ai)); }
+    if(r.rec)sub.push('reception mobile');
+    d.appendChild(el('span','sub',sub.filter(Boolean).join(' · ')));
+    if(r.body)d.appendChild(el('span','snip','“'+r.body+'”'));
+    recLink(d,r);
+    return d;
+  }
+  function disputeBox(holder, fig, rows){
+    holder.textContent='';
+    var f=el('div','it'), pick='';
+    f.appendChild(el('b',null,'Kis call ke baare mein? ('+FIGW[fig]+')'));
+    rows.forEach(function(r,i){ var l=el('label','pick'), inp=el('input'); inp.type='radio'; inp.name='dp_'+fig; inp.id='dp_'+fig+'_'+i;
+      inp.addEventListener('change',function(){ pick=r.ref; }); l.appendChild(inp); l.appendChild(document.createTextNode(callLine(r))); f.appendChild(l); });
+    var ta=el('textarea'); ta.maxLength=300; ta.placeholder='Kya galat hai? Ek line likhiye ya mic se boliye'; ta.setAttribute('aria-label','Kya galat hai');
+    f.appendChild(ta);
+    var msg=el('div','mut'), acts=el('div'), b=el('button','btn','Doctor sahab ko bhejiye'), c=el('button','btn soft','Rehne dijiye');
+    b.type='button'; c.type='button'; acts.style.display='flex'; acts.style.gap='8px'; acts.style.marginTop='8px'; acts.style.flexWrap='wrap';
+    b.addEventListener('click',function(){ var v=ta.value.trim();
+      if(!pick){ msg.textContent='Pehle call chuniye.'; return; } if(!v){ msg.textContent='Pehle likhiye kya galat hai.'; return; }
+      b.disabled=true;
+      fetch('/portal/console/api/dispute',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({ref:pick,fig:fig,text:v})})
+      .then(function(x){ if((x.headers.get('Content-Type')||'').indexOf('json')<0)throw new Error('x'); return x.json(); })
+      .then(function(j){ if(j.ok){ ta.value=''; holder.textContent=''; load(true); } else { b.disabled=false; msg.textContent=j.msg||'Nahin gaya. Dobara kijiye.'; } })
+      .catch(function(){ b.disabled=false; msg.textContent='Nahin gaya. Dobara kijiye.'; }); });
+    c.addEventListener('click',function(){ ta.value=''; holder.textContent=''; });
+    acts.appendChild(b); acts.appendChild(c); f.appendChild(acts); f.appendChild(msg); holder.appendChild(f); ta.focus();
+  }
+  function draw(j){
+    var od=box.querySelector('details.cc'), oa=box.querySelector('details.all');
+    if(od)OPEN=od.open; if(oa)OPENALL=oa.open;
+    box.textContent='';
+    if(!j||!j.ok||(!j.card&&!j.handler))return;
+    var c=j.card, f=c?c.figs:null, lab={today:'aaj',yesterday:'kal','7':'pichhle 7 din'}[j.span]||'';
+    var d=el('details','cc '+(c?c.tone:'green')); d.open=OPEN;
+    var s=el('summary'), words=[];
+    s.appendChild(el('b',null,'Mere calls — '+lab));
+    if(!c){ words.push('koi call nahin'); }
+    else { if(f.missed_known&&f.net_missed!==undefined)words.push('Jinse baat nahin hui: '+f.net_missed+' log'); words.push(f.answered+'/'+f.rung+' uthaye'); if(f.missed_known)words.push(f.missed+' chhoote'+((f.missed_people&&f.missed_people!==f.missed)?(' ('+f.missed_people+' logon se)'):'')); if(f.not_logged)words.push(f.not_logged+' darj nahin');
+      var n=c.asks.length+c.notes.length; if(n)words.push('Doctor sahab ki '+n+' baat'); }
+    s.appendChild(el('span','s',words.join(' · '))); d.appendChild(s);
+    var tabs=el('div','tabs');
+    [['today','Aaj'],['yesterday','Kal'],['7','7 din']].forEach(function(t){ var b=el('button',t[0]===j.span?'on':'',t[1]); b.type='button';
+      b.addEventListener('click',function(){ SPAN=t[0]; OPEN=true; load(true); }); tabs.appendChild(b); });
+    d.appendChild(tabs);
+    if(c){
+      c.asks.forEach(function(r){ d.appendChild(callItem(r,'dr','Doctor sahab: is call ka nateeja darj karein')); });
+      c.notes.forEach(function(r){ r.notes.forEach(function(x){ d.appendChild(callItem(r,'dr','Doctor sahab ka sandesh ('+dmy(x.at)+' '+hm(x.at)+'): “'+x.text+'”')); }); });
+      var hold=el('div');
+      function fig(label, val, cls, key){
+        var g=el('div','fg'), rows=key?c.calls.filter(function(r){ return r.figs.indexOf(key)>=0; }):[];
+        g.appendChild(el('span',null,label)); g.appendChild(el('b',cls||'',val));
+        if(rows.length&&!AS){ var b=el('button','gal','Galat hai?'); b.type='button';
+          b.addEventListener('click',function(){ disputeBox(hold,key,rows); }); g.appendChild(b); }
+        else g.appendChild(el('span'));
+        d.appendChild(g);
+      }
+      if(f.missed_known&&f.net_missed!==undefined)fig('Jinse baat nahin hui (call chhoota, phir kabhi nahin mile)', f.net_missed+' log', f.net_missed?'bad':'ok', 'missed');
+      fig('Phone uthaye (bajne wale mein se)', f.answered+'/'+f.rung);
+      if(f.missed_known){ fig('Duty par chhoote call', String(f.missed)+((f.missed_people&&f.missed_people!==f.missed)?(' ('+f.missed_people+' logon se)'):''), f.missed?'bad':'', 'missed');
+        if(f.missed)fig('Chhoote call — 1 ghante mein wapas kiye', f.cb_in_h+'/'+f.missed+(f.cb_later?(' (+'+f.cb_later+' baad mein)'):'')); }
+      fig('Call kiye', String(f.made));
+      if(f.wa_in)fig('WhatsApp aaye → jawab diye', f.wa_in+' → '+f.wa_ans, f.wa_ans<f.wa_in?'bad':'', 'wa');
+      fig('Call ka nateeja darj nahin kiya', String(f.not_logged), f.not_logged?'bad':'', 'not_logged');
+      fig('Aapka nateeja ≠ AI', String(f.mismatch), '', 'mismatch');
+      fig('Sahi darj, AI se mila', String(f.agreed), 'ok');
+      d.appendChild(hold);
+      c.disputes.forEach(function(x){ var it=el('div','it');
+        it.appendChild(el('b',null,x.call_h||''));
+        it.appendChild(el('span','sub','Aapne likha ('+(FIGW[x.fig]||x.fig)+'): “'+x.text+'”'));
+        it.appendChild(el('span','ans', !x.answer?'Doctor sahab ko bheja · jawab ka intezaar':
+          ((x.answer==='accept'?'Doctor sahab ne maana — ginti se hata diya':'Doctor sahab: ginti rahegi')+(x.answer_note?(' — “'+x.answer_note+'”'):''))));
+        d.appendChild(it); });
+      var all=el('details','all'); all.open=OPENALL;
+      all.appendChild(el('summary',null,'Mere sab calls ('+c.calls.length+') — har call ki recording ▸'));
+      c.calls.forEach(function(r){ all.appendChild(callItem(r)); });
+      d.appendChild(all);
+    }
+    box.appendChild(d);
+  }
+  function load(force){
+    if(BUSY||(!force&&typing()))return; BUSY=true;
+    fetch(url(),{credentials:'same-origin',cache:'no-store'})
+     .then(function(x){ var ct=x.headers.get('Content-Type')||''; if(!x.ok||ct.indexOf('json')<0)throw new Error('door'); return x.json(); })
+     .then(function(j){ BUSY=false; if(!force&&typing())return; draw(j); })
+     .catch(function(){ BUSY=false; });
+  }
+  var again=document.getElementById('again'); if(again)again.addEventListener('click',function(){ load(false); });
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden)load(false); });
+  setInterval(function(){ if(!document.hidden)load(false); },300000);
+  load(true);
+})();
+</script>
+</body></html>

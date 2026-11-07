@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S398 close** (the Scan App project), 07-Nov-2026, morning — the Scan App sections refreshed here (four kits live: the desk and Yuvika, the product box, two bills on the statement; 401 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S399 close** (the Sanjeevni chat), 07-Nov-2026, morning — the Sanjeevni sections refreshed here (purchase returns tracked; ZUPRINOR 5 yours to answer; 402 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S398 close** (the Scan App project), 07-Nov-2026, morning — the Scan App sections refreshed here (four kits live: the desk and Yuvika, the product box, two bills on the statement; 401 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S397 close** (the parent), 07-Nov-2026, morning — the parent's sections refreshed here (the Call Console rebuilt to R3 with its staff cards; the nightly copy came through; 400 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S396 close** (the Sanjeevni chat), 07-Nov-2026, morning — the Sanjeevni sections refreshed here (reception's one bill list live; Amir's correction cards and the in-place scan live; 399 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S395 close** (the Scan App project), 06-Nov-2026, evening — the Scan App sections refreshed here (its 398 reserved); the other projects' sections as their closes left them.
@@ -952,9 +953,9 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S396 close (07-Nov, 05:3x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S399 close (07-Nov, 10:0x)
 
-*Detail: `S396_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_399.md`. This section supersedes the S393 one below it.*
+*Detail: `S399_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_402.md`. This section supersedes the S396 one below it.*
 
 **1 · The publish** — this close's record only; nothing follows on the server:
 
@@ -962,13 +963,13 @@ The full list: `claude/S288_PENDING_LIST.md`.
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Your step view**, whenever you like. Every scanned line now opens its scan in place (*Show scan ▾*):
+**2 · ZUPRINOR 5** — 2 pieces short at the 7-Oct count, bought only from Janta. On row 8 of your step view: *Yes, returned to JANTA PHARMACEUTICALS* or *No, a stock loss*:
 
 ```
 https://followup.dr-manoj.in/finance/purchase/page/check
 ```
 
-**3 · Tell Amir once:** his *Marg sudhar* card now lists purchase bills to correct in Marg (three today). Each card has the bill date and *Kaagaz dekhiye*. After correcting, he exports the day's report as usual, and the line goes by itself.
+**3 · Tell Amir once:** the new *Wapsi baaki* card on his page — no Marg change for a return until the dealer's credit note or revised bill comes; then the card says what to enter. (And, from S396: his *Marg sudhar* card lists purchase bills to correct; each leaves by his own export.)
 
 **4 · B-0239** — on the order list, tap the right dealer (A.A. PHARMACEUTICALS) on its card, as you said:
 
@@ -992,11 +993,16 @@ https://followup.dr-manoj.in/finance/flows
 - the buying switch (earliest ~22-Nov);
 - a second network for the medical PC, only if its LAN fails again (D837).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S396 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S399 close
 
-1. **Kit 3 — returns**, on your "go". Janta 21965 comes first: the full bill plus a purchase return, and the return's credit tracked to the supplier's figure.
-2. **Kit 4**, on your "go": the supplier summaries, the issues list, the month lock on Marg = papers = summaries, and the one bulk NEFT on the suppliers' figures (D839, D849).
-3. **The next server copy:** S738's three files confirmed (the 07-Nov copy already confirmed the other fourteen).
+1. **Kit 4**, on your "go": each dealer's month summary, the issues list, the month lock on Marg = papers = summaries, and the one bulk NEFT on the suppliers' figures (D839, D849). It is also the last net for a return a dealer takes off a later bill (F-1175).
+2. **The next server copy:** S738's and S740's files confirmed.
+3. **Watch:** Janta 21965's paper, and the return resolving by itself when it comes.
+
+## ✅ DONE AT THE S399 CLOSE — 07-Nov-2026 (the Sanjeevni project)
+
+- ~~**Kit 3 — purchase returns**~~ (live 09:12): reception's one question; Amir's *Wapsi baaki*; your row 8 with the count shortages, *Record a return* and Undo; the NEFT holds while a return is pending. Janta 21965 recorded from your word.
+- ~~**The S396 publish**~~ and the kit's publish — landed.
 
 ## ✅ DONE AT THE S396 CLOSE — 06 → 07-Nov-2026 (the Sanjeevni project)
 
