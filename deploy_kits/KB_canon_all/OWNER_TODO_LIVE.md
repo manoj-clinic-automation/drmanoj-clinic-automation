@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S395 close** (the Scan App project), 06-Nov-2026, evening — the Scan App sections refreshed here (its 398 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S396 close** (the Sanjeevni chat), 07-Nov-2026, morning — the Sanjeevni sections refreshed here (reception's one bill list live; Amir's correction cards and the in-place scan live; 399 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S395 close** (the Scan App project), 06-Nov-2026, evening — the Scan App sections refreshed here (its 398 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S394 close** (the parent), 06-Nov-2026, evening — the parent's sections refreshed here (an exit retires its machine number; statement heads end at their first row; the System Board by area; 397 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S393 close** (the Sanjeevni chat), 06-Nov-2026, evening — the Sanjeevni sections refreshed here (the alarms live; the purchase pairing part 1 and the step view live; 396 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S392 close** (the Scan App project), 06-Nov-2026, evening — the Scan App sections refreshed here (its 395 reserved); the other projects' sections as their closes left them.
@@ -961,45 +962,62 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S393 close (06-Nov, 18:1x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S396 close (07-Nov, 05:3x)
 
-*Detail: `S393_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_396.md`. This section supersedes the S391 one below it.*
+*Detail: `S396_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_399.md`. This section supersedes the S393 one below it.*
 
-**1 · The publish** — this close's record only (nothing follows on the server):
+**1 · The publish** — this close's record only; nothing follows on the server:
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Look at your new step view** whenever you like (October is the month to clear):
+**2 · Your step view**, whenever you like. Every scanned line now opens its scan in place (*Show scan ▾*):
 
 ```
 https://followup.dr-manoj.in/finance/purchase/page/check
 ```
 
-**3 · B-0239** — on the order list, tap the right dealer (A.A. PHARMACEUTICALS) on its card, as you said:
+**3 · Tell Amir once:** his *Marg sudhar* card now lists purchase bills to correct in Marg (three today). Each card has the bill date and *Kaagaz dekhiye*. After correcting, he exports the day's report as usual, and the line goes by itself.
+
+**4 · B-0239** — on the order list, tap the right dealer (A.A. PHARMACEUTICALS) on its card, as you said:
 
 ```
 https://followup.dr-manoj.in/finance/porders/s454/track
 ```
 
-**4 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed — and the report links:
+**5 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed. The report links:
 
 ```
 https://followup.dr-manoj.in/finance/flows
 ```
 
-**5 · Tell Shavez once** (carried): from Monday 9-Nov his page also asks for **Sunday's** sale report and closing stock.
+**6 · Tell Shavez once** (carried): from Monday 9-Nov his page also asks for **Sunday's** sale report and closing stock.
 
-**6 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
+**7 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
 
-**Later, your word only:** "count them" for the stock differences; the buying switch (earliest ~22-Nov); a second network for the medical PC only if its LAN fails again (D837).
+**Later, your word only:**
+- "count them" for the stock differences;
+- Kedar's ₹110 twice (F-1145);
+- the buying switch (earliest ~22-Nov);
+- a second network for the medical PC, only if its LAN fails again (D837).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S393 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S396 close
 
-1. **Reception's list** (kit 1, part 2 — the mock you approved): *Dobara scan karo* straight from the server, two tries, then you and Shavez; *Scan karo*; one-tap questions naming the field. Your step view's row 3 renamed *Differences* (F-1154); *Second look* gets its buttons.
-2. **Then, each on your "go":** Amir's corrections in his app; returns (Janta 21965 first); supplier summaries, the month lock and the one bulk NEFT (the server builds the month's statements, D849).
-3. **The next server copy:** this close's six installs and the ten older ones confirmed.
+1. **Kit 3 — returns**, on your "go". Janta 21965 comes first: the full bill plus a purchase return, and the return's credit tracked to the supplier's figure.
+2. **Kit 4**, on your "go": the supplier summaries, the issues list, the month lock on Marg = papers = summaries, and the one bulk NEFT on the suppliers' figures (D839, D849).
+3. **The next server copy:** S738's three files confirmed (the 07-Nov copy already confirmed the other fourteen).
+
+## ✅ DONE AT THE S396 CLOSE — 06 → 07-Nov-2026 (the Sanjeevni project)
+
+- ~~**Reception's list (kit 1, part 2)**~~ — *Aaj ka bill kaam*:
+  - the server sends bad scans straight to reception, two tries, then you and Shavez;
+  - *Scan karo* and the one-tap questions;
+  - your *Second look* buttons;
+  - row 3 *Differences*.
+- ~~**Deepam 641**~~ — settled by your tap (the scan misread; the bill says ₹4,751).
+- ~~**Amir's correction list (kit 2)**~~ — his cards with the bill date and the scan, proved by his own export. Your step view shows the bill date, the scan folded in place, and the ↑ button.
+- ~~**The S393 publish**~~ and the two kits' publishes — landed.
 
 ## ✅ DONE AT THE S393 CLOSE — 06-Nov-2026 (the Sanjeevni project)
 
