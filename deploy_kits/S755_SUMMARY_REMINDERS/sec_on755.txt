@@ -1,0 +1,66 @@
+
+
+
+# ---- S755 (08-Nov-2026, Sanjeevni session 408, kit S755_SUMMARY_REMINDERS; D870, F-1190 -- the owner's go 19:10 IST) -------------------------
+#  THE AWAITED SUMMARIES, one line a day: for every counted month that has ended, while a dealer's summary is still awaited on row 7 of the
+#  purchase check, at owner_notice.summaries_hhmm -- "October 2026: 13 summaries awaited" with the dealers' names -- to the logins in
+#  owner_notice.summaries_to (the owner and Shavez; a login with no clinic-app device gets nothing, the ntfy fallback carries it when nobody
+#  has one). One message per month per day (key summaries:<month>:<day>); nothing once none is awaited. Reads only (scan_register.s755_awaited).
+KIT_S755 = "S755_SUMMARY_REMINDERS"
+CHECK_URL = "/finance/purchase/page/check?month=%s"
+
+
+def _part_summaries(con, now):
+    hm = mins(setting(con, "owner_notice.summaries_hhmm"), 10 * 60 + 30)
+    if now.hour * 60 + now.minute < hm:
+        return []
+    day = now.strftime("%Y-%m-%d")
+    shared = os.environ.get("SHARED_LIB_DIR") or os.path.join(os.path.dirname(HERE), "shared")   # cron runs from /root/finance with no SHARED_LIB_DIR
+    if os.path.isdir(shared) and shared not in sys.path:
+        sys.path.append(shared)
+    import scan_register as SR                                    # noqa: PLC0415 -- this project's register; read only
+    out = []
+    for m in SR._s755_ended_months(con):
+        key = "summaries:%s:%s" % (m, day)
+        try:
+            if con.execute("SELECT 1 FROM owner_notice WHERE key=?", (key,)).fetchone():
+                continue                                          # said today -- the register is not read again
+        except sqlite3.Error:
+            pass
+        aw = SR.s755_awaited(con, m)
+        if not aw:
+            continue
+        names = [str(d["name"]).title() for d in aw]
+        title = "%s: %d summar%s awaited" % (SR.month_name(m), len(aw), "y" if len(aw) == 1 else "ies")
+        body = ("%s. Reception's list carries each until the summary is scanned. A dealer who never sends one: mark 'gives no summary' "
+                "once on your purchase check." % ", ".join(names))
+        out.append(dict(key=key, kind="summaries", title=title, body=body))
+    return out
+
+
+_collect_before_s755 = collect
+
+
+def collect(con, now):                                            # noqa: F811 -- S755: + the awaited summaries, fail-soft like every part
+    msgs, errors = _collect_before_s755(con, now)
+    try:
+        more = _part_summaries(con, now)
+    except Exception as e:                                        # noqa: BLE001
+        more, errors = [], errors + ["summaries: %s" % e.__class__.__name__]
+    try:
+        con.commit()
+    except sqlite3.Error:
+        pass
+    seen = {m["key"] for m in msgs}
+    return msgs + [m for m in more if m["key"] not in seen], errors
+
+
+_payload_before_s755 = _payload
+
+
+def _payload(key, title, body):                                   # noqa: F811 -- S755: a summaries message opens the month's purchase check
+    p = _payload_before_s755(key, title, body)
+    if str(key).startswith("summaries:"):
+        p["url"] = CHECK_URL % str(key).split(":")[1]
+    return p
+# ---- S755 end -------------------------------------------------------------------------------------------------------------------------------

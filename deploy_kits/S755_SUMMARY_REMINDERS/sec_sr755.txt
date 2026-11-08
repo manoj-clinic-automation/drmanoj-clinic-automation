@@ -1,0 +1,58 @@
+
+
+
+# ---- S755 (08-Nov-2026, Sanjeevni session 408, kit S755_SUMMARY_REMINDERS; D870, F-1190 -- the owner's go 19:10 IST) -------------------------
+#  THE AWAITED SUMMARIES CHASE THEMSELVES. Once a month has ended (counted, before the running month), every dealer still AWAITED on row 7
+#  -- no summary scanned, no word of the owner's (gives no summary / carried / accepted / asked) -- is on reception's Aaj ka bill kaam by
+#  itself: the S750 card without the owner's tap (s750_reception_asks below adds them, auto=True; porders_s454 words the card "the month has
+#  ended -- the summary has not come"). The card leaves when the summary comes or the owner marks the dealer. The owner's own ask (the S750
+#  door) still stands first and keeps its words. One line a day to the owner and Shavez on the clinic app until none is awaited is
+#  owner_notice._part_summaries (its own file). Row 7's awaited line says so; its "Ask reception to scan it" button is gone -- the ask is
+#  automatic. Also here: F-1188 (s749_month_open's match counts the accepted and confirmed bills, as row 1's heading does), the possessive
+#  (_s755_poss: "A.A. Pharmaceuticals' ledger"), " -- " read as " · " on rows 7 and 8, row 1's body counts as its heading does, row 7's help
+#  sentence in plain English. READ ONLY: nothing here writes.
+KIT_S755 = "S755_SUMMARY_REMINDERS"
+
+
+def _s755_poss(name):
+    """The possessive of a dealer's name: "Yogendra Agencies' ledger", "Daanshi Pharma's ledger"."""
+    s = str(name or "")
+    return s + ("'" if s.endswith(("s", "S")) else "'s")
+
+
+def _s755_ended_months(con):
+    """The counted months before the running one, newest first -- the months whose summaries are awaited (D869: the running month never is)."""
+    tm = str(today())[:7]
+    try:
+        ms = months_with_bills(con, 24)
+    except Exception:                                         # noqa: BLE001
+        return []
+    return sorted([m for m in ms if m < tm and month_class(con, m) == "counted"], reverse=True)
+
+
+def s755_awaited(con, month):
+    """The dealers of an ended month still awaited (no summary, no word of the owner's) -> [dict(dealer, name, month, bills, marg_p)]. READ ONLY."""
+    out = []
+    for d in s750_dealers(con, month):
+        if d.get("state") == "awaited" and d.get("key"):
+            out.append(dict(dealer=d["key"], name=d["name"], month=month, bills=len(d.get("bills") or []), marg_p=int(d.get("net_p") or 0)))
+    return sorted(out, key=lambda x: x["name"])
+
+
+_s750_reception_asks_before_s755 = s750_reception_asks
+
+
+def s750_reception_asks(con):                                 # noqa: F811 -- S755: + every awaited dealer of an ended month, by itself
+    out = list(_s750_reception_asks_before_s755(con))
+    have = {(a["dealer"], a["month"]) for a in out}
+    for m in _s755_ended_months(con):
+        try:
+            aw = s755_awaited(con, m)
+        except Exception:                                     # noqa: BLE001 -- the list stands as the owner's asks alone
+            continue
+        for d in aw:
+            if (d["dealer"], m) in have:
+                continue
+            out.append(dict(dealer=d["dealer"], name=d["name"], month=m, kind="scan", scan=None, stamp="", at="", auto=True))
+    return out
+# ---- S755 end -------------------------------------------------------------------------------------------------------------------------------

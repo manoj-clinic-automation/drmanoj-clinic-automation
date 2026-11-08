@@ -1,0 +1,26 @@
+# S755_SUMMARY_REMINDERS — the awaited summaries chase themselves (Sanjeevni session 408, 08-Nov-2026)
+
+**The owner's go, 19:10 IST 08-Nov** (D870, F-1190 — this project's half; the Scan App's half, recognising a summary by its content, is kit S754 in the Scan App chat). **Four files of this project; no table, no new door; nothing live is re-stated.**
+
+## What it does
+1. **Reception's list carries every awaited summary by itself.** Once a month has ended (counted, before the running month), each dealer still *awaited* on row 7 — no summary scanned, no word of the owner's — is on *Aaj ka bill kaam* as the S750 card without the owner's tap (`scan_register.s750_reception_asks` wrapped, `auto=True`; `porders_s454` words the card *«October 2026 khatam — dealer ka hisaab (summary) abhi tak nahi aaya»*). It leaves when the summary comes or he marks *gives no summary*. The owner's own asks keep their words and are never doubled. The running month is never on the list (D869). Row 7's awaited line reads *On reception's list by itself since the month ended · you and Shavez are told each morning until it comes*; its *Ask reception to scan it* button is gone (the ask is automatic).
+2. **One line a day to the owner and Shavez** — `owner_notice._part_summaries`: after `owner_notice.summaries_hhmm` (10:30 IST), one message per ended month while a dealer is awaited — *October 2026: 13 summaries awaited* with the dealers' names; key `summaries:<month>:<day>`, so once a day and never twice; nothing once none is awaited. Delivered to `owner_notice.summaries_to` (`manoj,shavez`) by the same clinic-app road (D846; ntfy when no device). Tapping opens that month's purchase check. The two settings are written by `owner_notice.ensure()` at the next five-minute tick — no seed. **A login with no clinic-app device gets nothing**: Shavez must have opened the clinic app and allowed messages on his phone once; the message's `how` on `owner_notice show` names each login tried.
+3. **F-1188** — `s749_month_open`'s `match` counts the accepted and confirmed bills too, as row 1's heading does (the hub and the parent's console now read what the step view reads; the keys and their meaning unchanged). Row 1's body counts the same way.
+4. **F-1189** — on every dealer ledger, a month before `purchase.register_from` with no typed Paid reads *settled outside the system (before the register began) · paid = payable*, balance ₹0; the FY block says *(N settled outside the system, before the register began)*; a typed Paid still wins.
+5. **Wording found live** — the possessive (`_s755_poss`: *Yogendra Agencies' ledger*, *Not Delta Drugs' summary*); ` -- ` read as ` · ` on row 7 (the footer, the dealers' lines), row 8 and the sheet's carried note; row 7's help sentence in plain English.
+
+## Proof
+- `walk_s755.py` = walk_s753 whole (S750's and S753's checks stay green; the two S750 lines this kit re-words on purpose are re-worded in it) + the S755 section: the automatic asks, reception's card words, the model's count, row 7's words, the possessive, the help sentence, F-1188 with a bill accepted without paper, F-1189 with a September bill (settled, a typed Paid wins), the daily line at 11:00 (named dealers; nothing at 09:00; said today → not again today; again tomorrow; none once every dealer is marked), the recipients (manoj and shavez for the summaries line, manoj alone otherwise), the url. **GREEN** `walk_s755: 0 check(s) failed (0 of them S755 checks, 0 S753, 0 S750)`; **CONTROL on the live files** `21 check(s) failed (19 of them S755 checks, 0 S753, 2 S750)`.
+- The earlier kits' walks on the TO files (S753, S750, S749, S740, S738, S736, S726, S711): the same reds as the live files, plus only the two re-worded S750 lines (allowed by name in the installer).
+- `proof_s755.py` (read only, both databases `mode=ro`): the ended months, their awaited dealers, reception's automatic cards, the owner's own asks, F-1188's count beside row 1's heading, the daily line as it would read at 11:00, the settled ledger months — by the live files and by the kit's; the installer prints both whole.
+- `rehearse_s755.sh` on a made-up root: setup · dry · real · again · red (the forced red restored the FROM bytes) — all ok, 08-Nov 19:4x IST.
+
+## The owner's lines (after his publish)
+DRY first (nothing written; read the proof by both before the real line):
+```
+cd /root/deploy/repo && git pull --ff-only && rm -rf /tmp/s755kit && cp -rp /root/deploy/repo/deploy_kits/S755_SUMMARY_REMINDERS /tmp/s755kit && DRY=1 bash /tmp/s755kit/install_S755_SUMMARY_REMINDERS.sh
+```
+```
+cd /root/deploy/repo && git pull --ff-only && rm -rf /tmp/s755kit && cp -rp /root/deploy/repo/deploy_kits/S755_SUMMARY_REMINDERS /tmp/s755kit && bash /tmp/s755kit/install_S755_SUMMARY_REMINDERS.sh
+```
+Gates as S753's: SUMS · KIT_ID · the window · the build lock · the four live pins · the rebuild to the TO pins · the walk green · the control red as expected · the earlier kits' walks · the proof by both · health; after placing, `clinic-finance` restarted, health, the pages refuse a stranger, the journal (new PIDs only), the walk and the proof on the placed files; a red puts the FROM bytes back. Backups `*.bak_S755_<from8>` beside the live files; the undo line is printed. `owner_notice.py` needs no restart — cron reads the new file at its next tick.
