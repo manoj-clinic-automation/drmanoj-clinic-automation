@@ -140,6 +140,10 @@ def seed(adb, fdb):
               (295, "2026-11-08 15:13", "server (S441)", "s441_page_merged", json.dumps({"page": 296, "page_stamp": "B-0296", "before": "bill_walk754_295.pdf", "after": "bill_walk754_merged.pdf"})))
     d.execute("INSERT INTO bill_audit(bill_id, at, who, action, detail) VALUES(?,?,?,?,?)", (295, "2026-11-08 15:12", "Alisha", "summary", '{"lane": "pharmacy"}'))
     d.execute("INSERT INTO scan_question(bill_id, kind, cand_id, detail, asked_at) VALUES(291, 'lane', NULL, 'walk', '2026-11-08 15:30:00')")
+    # as on the box (DRY 19:59 IST): B-0292's image amber written at the Save under Alisha's login, cleared by the reading
+    d.execute("INSERT INTO bill_audit(bill_id, at, who, action, detail) VALUES(292, '2026-11-08 15:02', 'Alisha', 'maybe_duplicate', '{\"cand\": 209, \"how\": \"image\"}')")
+    d.execute("INSERT INTO bill_audit(bill_id, at, who, action, detail) VALUES(292, '2026-11-08 15:02', '', 'not_duplicate', '{\"cand\": 209}')")
+    d.execute("UPDATE bills SET dup_flag='no' WHERE id=292")
     d.commit()
     d.close()
     if os.path.exists(fdb):
@@ -257,6 +261,10 @@ control("an amount off by Rs 2 (B-0298)", "UPDATE bills SET total_amount=60684 W
 control("scanned by someone else (B-0292)", "UPDATE bills SET submitted_by='Shivani' WHERE id=292")
 control("scanned another day (B-0297)", "UPDATE bills SET submitted_at='2026-11-07 15:14:00' WHERE id=297")
 control("a person approved / moved it after the scan (B-0293)", "INSERT INTO bill_audit(bill_id, at, who, action, detail) VALUES(293, '2026-11-08 16:00', 'Shavez', 'relane', '{}')")
+control("a 'maybe duplicate' by a person LATER than the Save (B-0297, an hour after)",
+        "INSERT INTO bill_audit(bill_id, at, who, action, detail) VALUES(297, '2026-11-08 16:14', 'Alisha', 'maybe_duplicate', '{}')")
+control("a 'maybe duplicate' at the Save's minute by SOMEONE ELSE (B-0298)",
+        "INSERT INTO bill_audit(bill_id, at, who, action, detail) VALUES(298, '2026-11-08 15:08', 'Shavez', 'maybe_duplicate', '{}')")
 control("a person answered its question (B-0299)", "INSERT INTO scan_question(bill_id, kind, cand_id, detail, asked_at, answer, answered_by) VALUES(299, 'twin', 297, '', '2026-11-08', 'not', 'Shavez')")
 control("an item line on it (B-0297)", "INSERT INTO bill_items(bill_id, item_name) VALUES(297, 'WALK754 ITEM')")
 control("B-0296 no longer a page of B-0295", "UPDATE bills SET page_of=NULL WHERE id=296")

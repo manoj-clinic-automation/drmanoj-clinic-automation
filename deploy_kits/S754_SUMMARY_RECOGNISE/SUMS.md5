@@ -1,14 +1,14 @@
 4ea9f3ea25ad124dfe110369d38be494  KIT_ID.txt
-20b92be70f3e8f825ec38eab3ae78dd1  README.md
+9b733e4134f8fb086bebfaef148b202c  README.md
 f49afae922869aeb2c5f151c825a7f5b  TO_PINS.md5
-5094e23ccdecf4d543e6798bd0ae3dfe  fix_s754.py
+59c4f82bf661cc35f109328d3a7e9ed1  fix_s754.py
 bc222756eab2f8308a4d81cfb3b7fb91  install_S754_SUMMARY_RECOGNISE.sh
 7fd23610ca97c63618de6d9ec5f46fdd  make_s754.py
 f0229e23f65ae6f213b1ee366f65c174  rehearse_s754.sh
 84fc1cdcae0e589fa03a02efe4f75f4a  sec_ar754.txt
 5ea929a81f4541d36dcf0f146df8526b  sec_reader754.txt
 9d63148bde10df44e22d2d3c27fc9dfb  sec_s441_754.txt
-6218acfc1a1e0646950bf79f1dcd9cf3  walk_fix_s754.py
+cdcc961c26043466de0a8655767deb0b  walk_fix_s754.py
 48a9f2234422c5a6dcdb59a117dfc85a  walk_s651_app.py
 6baf1428dd278d6723db4243192edc7e  walk_s750_app.py
 ba58eac822385e8408d493bc6cf529fa  walk_s754.py

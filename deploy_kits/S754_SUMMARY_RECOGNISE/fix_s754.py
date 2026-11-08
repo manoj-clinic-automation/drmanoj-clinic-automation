@@ -49,6 +49,21 @@ IDS = [t[0] for t in TARGETS]
 ALL = IDS + [HEAD[0]]
 Q = ",".join("?" * len(IDS))
 PERSON_OK = ("summary", "challan", "blur_kept", "rescan_of")     # what the scanner's own Save writes under her name
+# the server's own marks written DURING the Save, under the scanner's login (asset_register._mark_maybe: the picture looks like an older
+# scan -- an amber the reading clears by itself): allowed only by the scanner, in the minute of her Save. The DRY of 19:59 IST 08-Nov
+# refused on B-0292's (cand B-0209, cleared by the reading at 15:02 as 'ocr: different bill number').
+SAVE_MARKS = ("maybe_duplicate",)
+
+
+def _save_minute(at, submitted_at):
+    """True when an audit row's time is the Save's own minute (or the next one)."""
+    import datetime as _d
+    try:
+        a = _d.datetime.strptime(str(at or "")[:16], "%Y-%m-%d %H:%M")
+        s = _d.datetime.strptime(str(submitted_at or "")[:16], "%Y-%m-%d %H:%M")
+    except ValueError:
+        return False
+    return _d.timedelta(0) <= a - s <= _d.timedelta(minutes=1)
 REFUSE_A = [("paper_payment_bill", "bill_id"), ("proc_paper", "bill_id"), ("proc_line", "bill_id"), ("proc_photo", "bill_id"), ("stationery_line", "bill_id"),
             ("d664_warranty", "bill_id"), ("d664_join", "head_id"), ("d664_join", "page_id"), ("paper_payment", "proof_bill_id"), ("assets", "bill_id")]
 FIN_REFUSE = [("purchase_scan_link", "asset_bill_id"), ("s736_decision", "asset_bill_id"), ("s749_act", "scan"), ("s750_dealer_of", "scan")]
@@ -230,7 +245,9 @@ def main():
             w = (au["who"] or "").strip()
             person = bool(w) and not w.lower().startswith("server") and not w.startswith("S7")
             mark = ""
-            if person and au["action"] not in PERSON_OK:
+            at_save = (au["action"] in SAVE_MARKS and _save_minute(au["at"], r["submitted_at"])
+                       and w.lower() == str(r["submitted_by"] or "").strip().lower())
+            if person and au["action"] not in PERSON_OK and not at_save:
                 mark = "   !! a person's decision"
                 bad.append("%s: %s by %s (%s)" % (stamp, au["action"], w, au["at"]))
             print("        audit %s  %-24s %-22s %s%s" % (au["at"], (w or "(the reader)")[:24], au["action"], (au["detail"] or "")[:80], mark))
