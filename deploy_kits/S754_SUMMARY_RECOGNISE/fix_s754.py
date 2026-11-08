@@ -121,10 +121,26 @@ def placed(r):
             and not r["page_of"])
 
 
-def found_as(r, what):
+def auto_laned(con, bid):
+    """The SERVER moved it from the clinic lane to the pharmacy lane by the papers page's history rule (clinic_papers.auto_home's
+    'auto_lane', no person) -- as the scan app's restart at 20:03 IST 08-Nov did to B-0291 (its start-up heal runs before S754's guard)."""
+    for au in con.execute("SELECT who, detail FROM bill_audit WHERE bill_id=? AND action='auto_lane' ORDER BY rowid DESC LIMIT 1", (bid,)):
+        w = (au[0] or "").strip()
+        try:
+            d = json.loads(au[1] or "{}")
+        except ValueError:
+            d = {}
+        return (not w or w.lower().startswith("server")) and d.get("from") == "clinic" and d.get("to") == "pharmacy"
+    return False
+
+
+def found_as(r, what, con=None):
     if what == "move":
-        return r["lane"] == "clinic" and r["kind"] == "Consumable" and r["status"] == "draft" and not r["page_of"] and not r["dup_of"] \
-            and not (r["doc_kind"] or "")
+        if r["lane"] == "clinic" and r["kind"] == "Consumable" and r["status"] == "draft" and not r["page_of"] and not r["dup_of"] \
+                and not (r["doc_kind"] or ""):
+            return True
+        return (con is not None and r["lane"] == "pharmacy" and r["kind"] == "Pharmacy" and r["status"] == "captured" and not r["page_of"]
+                and not r["dup_of"] and not (r["doc_kind"] or "") and auto_laned(con, r["id"]))
     if what == "unjoin":
         return (r["lane"] == "pharmacy" and r["kind"] == "Pharmacy" and r["status"] == "rejected" and r["page_of"] == HEAD[0]
                 and (r["reject_reason"] or "").startswith("page 2 of " + HEAD[1]) and (r["approved_by"] or "") == "server (S441 forgotten page)"
@@ -215,7 +231,7 @@ def main():
                 probs.append("vendor/amount %r / %r, read %r / %d" % (r["vendor"], r["total_amount"], vendor, rs))
         else:
             done_state = placed(r)
-            if found_as(r, what) and not (what == "reread" and (reread_done(a, bid) or s754_reread_started(a, bid))):
+            if found_as(r, what, a) and not (what == "reread" and (reread_done(a, bid) or s754_reread_started(a, bid))):
                 state = "as found -> " + {"move": "pharmacy lane, captured, Summary", "unjoin": "unjoined, captured, Summary",
                                           "kind": "Summary", "reread": "re-read"}[what]
                 if not vendor_ok(vendor, r["vendor"]) or r["total_amount"] is None or abs(float(r["total_amount"]) - rs) > 1.0:
@@ -314,11 +330,13 @@ def main():
         a.execute("BEGIN IMMEDIATE")
         for bid, (what, s, cur) in sorted(todo.items()):
             if what == "move" and s == "state":
-                n = a.execute("UPDATE bills SET lane='pharmacy', kind='Summary', doc_kind='summary', status='captured' WHERE id=? AND lane='clinic' "
-                              "AND kind='Consumable' AND status='draft'", (bid,)).rowcount
+                was = a.execute("SELECT lane FROM bills WHERE id=?", (bid,)).fetchone()[0]
+                n = a.execute("UPDATE bills SET lane='pharmacy', kind='Summary', doc_kind='summary', status='captured' WHERE id=? AND ((lane='clinic' "
+                              "AND kind='Consumable' AND status='draft') OR (lane='pharmacy' AND kind='Pharmacy' AND status='captured'))", (bid,)).rowcount
                 if n != 1:
                     raise RuntimeError("#%d changed between the read and the write" % bid)
-                aud(bid, "relane", {"from": "clinic", "to": "pharmacy", "status": "captured", "via": KIT})
+                if was == "clinic":
+                    aud(bid, "relane", {"from": "clinic", "to": "pharmacy", "status": "captured", "via": KIT})
                 aud(bid, "summary", {"lane": "pharmacy", "via": "%s: a dealer's month statement (the owner, 17:27 IST 08-Nov)" % KIT})
                 if has_table(a, "scan_question"):
                     a.execute("UPDATE scan_question SET answer='pharmacy', answered_by=?, answered_at=? WHERE bill_id=? AND kind='lane' AND answer IS NULL",

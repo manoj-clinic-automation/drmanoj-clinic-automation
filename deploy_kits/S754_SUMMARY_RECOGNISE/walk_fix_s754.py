@@ -236,6 +236,20 @@ _d.close()
 rc, out = run("--real")
 ck("2b ... DONE, B-0303 re-read and filled (the end of October, the figure)", lambda: rc == 0 and "DONE." in out and R(303)["bill_date"] == "2026-10-31" and float(R(303)["total_amount"]) == 1200)
 
+print("2c · B-0291 already moved to the pharmacy lane by the server's history rule (auto_lane, as the box's restart did at 20:03 IST)")
+for b in baks():
+    os.remove(os.path.join(os.path.dirname(ADB), b))
+seed(ADB, FDB)
+_d = sqlite3.connect(ADB)
+_d.execute("UPDATE bills SET lane='pharmacy', kind='Pharmacy', status='captured' WHERE id=291")
+_d.execute("INSERT INTO bill_audit(bill_id, at, who, action, detail) VALUES(291, '2026-11-08 20:03', '', 'auto_lane', '{\"from\": \"clinic\", \"to\": \"pharmacy\", \"evidence\": 3, \"status\": \"captured\"}')")
+_d.commit()
+_d.close()
+rc, out = run("--real")
+ck("2c ... accepted and put right: kind 'Summary' on the pharmacy lane, re-read, no second 'relane' row written",
+   lambda: rc == 0 and "DONE." in out and R(291)["kind"] == "Summary" and R(291)["lane"] == "pharmacy" and R(291)["bill_date"] == "2026-10-31"
+   and sqlite3.connect(ADB).execute("SELECT COUNT(*) FROM bill_audit WHERE bill_id=291 AND action='relane'").fetchone()[0] == 0)
+
 print("3 · the CONTROLS: each database broken one way refuses with nothing changed and no backup")
 
 
@@ -265,6 +279,9 @@ control("a 'maybe duplicate' by a person LATER than the Save (B-0297, an hour af
         "INSERT INTO bill_audit(bill_id, at, who, action, detail) VALUES(297, '2026-11-08 16:14', 'Alisha', 'maybe_duplicate', '{}')")
 control("a 'maybe duplicate' at the Save's minute by SOMEONE ELSE (B-0298)",
         "INSERT INTO bill_audit(bill_id, at, who, action, detail) VALUES(298, '2026-11-08 15:08', 'Shavez', 'maybe_duplicate', '{}')")
+control("B-0291 moved to the pharmacy lane by a PERSON (not the server's rule)",
+        lambda d: (d.execute("UPDATE bills SET lane='pharmacy', kind='Pharmacy', status='captured' WHERE id=291"),
+                   d.execute("INSERT INTO bill_audit(bill_id, at, who, action, detail) VALUES(291, '2026-11-08 20:03', 'Shavez', 'auto_lane', '{\"from\": \"clinic\", \"to\": \"pharmacy\"}')")))
 control("a person answered its question (B-0299)", "INSERT INTO scan_question(bill_id, kind, cand_id, detail, asked_at, answer, answered_by) VALUES(299, 'twin', 297, '', '2026-11-08', 'not', 'Shavez')")
 control("an item line on it (B-0297)", "INSERT INTO bill_items(bill_id, item_name) VALUES(297, 'WALK754 ITEM')")
 control("B-0296 no longer a page of B-0295", "UPDATE bills SET page_of=NULL WHERE id=296")
