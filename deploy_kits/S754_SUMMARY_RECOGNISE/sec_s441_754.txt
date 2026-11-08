@@ -1,0 +1,42 @@
+# ------------------------------------------------------------------ S754 (08-Nov-2026, the Scan App chat's session 409, kit S754_SUMMARY_RECOGNISE)
+# THE FORGOTTEN-PAGE RULE (check 1) never joins a COMPLETE STATEMENT to the scan before it. B-0296 (L.K. Drug House's sales statement,
+# no seller name printed, so no vendor and no bill number read) was joined to Janta's B-0295 as its 'page 2' because it was scanned a
+# minute later by the same person. A paper is a complete statement when it is a Summary (kind 'Summary' / doc_kind 'summary') whose
+# reading does not say it only continues a table, or when its reading carries two or more numbered bill lines and a total. A page that
+# only continues a statement's table (no heading, no seller, no buyer block: the reading's 'continued' true) may still join -- a Summary
+# head only. Every other paper is judged exactly as before. Read from assets.db's claude_reading; never raises.
+
+def _s754_reading(db, bid):
+    try:
+        r = db.execute("SELECT ok, doc_kind, data FROM claude_reading WHERE bill_id=?", (bid,)).fetchone()
+    except _sqlite3.Error:
+        return None
+    if not r or not r[0]:
+        return None
+    try:
+        d = _json.loads(r[2]) if r[2] else {}
+    except ValueError:
+        return None
+    return d if isinstance(d, dict) else None
+
+
+def _s754_statement(db, b):
+    """None (not a statement: the rule as before) | 'whole' (never joined) | 'continued' (may join a Summary head)."""
+    try:
+        d = _s754_reading(db, b["id"]) or {}
+        summary = (str(b.get("kind") or "") == "Summary" or str(b.get("doc_kind") or "") == "summary"
+                   or (d.get("doc_kind") == "summary" and d.get("is_summary") is not False))
+        if summary and d.get("continued") is True:
+            return "continued"
+        if summary:
+            return "whole"
+        lines = d.get("lines") if isinstance(d.get("lines"), list) else []
+        nos = [ln for ln in lines if isinstance(ln, dict) and ln.get("kind") == "bill" and str(ln.get("no") or "").strip()]
+        if len(nos) >= 2 and (_f(d.get("total_bills")) is not None or _f(d.get("closing")) is not None):
+            return "whole"
+        return None
+    except Exception:                                          # noqa: BLE001
+        return None
+# ------------------------------------------------------------------ S754 end
+
+

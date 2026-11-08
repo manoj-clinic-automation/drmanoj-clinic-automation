@@ -1,0 +1,251 @@
+
+# ---- S754 (08-Nov-2026, the Scan App chat's session 409, kit S754_SUMMARY_RECOGNISE; PLANNED on board/_numbers v1088) ----
+#  THE OWNER (17:27 IST 08-Nov, superseding D870's 'staff rescan it'): staff scan a dealer's month summary on the pharmacy lane like any
+#  bill -- tick or no tick; the system recognises it. A pharmacy-lane paper scanned WITHOUT a tick (kind 'Pharmacy', doc_kind neither
+#  'challan' nor 'summary') is read by claude_reader.read_pharmacy -- the one Claude call it gets anyway, which first decides whether the
+#  paper is a dealer's statement. A statement then lands exactly as a ticked summary does (S750): kind 'Summary', doc_kind 'summary',
+#  audited 'summary' {"via": "recognised (S754)"}, the bills row lent only the dealer, the period's last day and the figure. A bill stays a
+#  bill. The tick still wins (a ticked paper is kind 'Summary' before it is read and goes to S750's read_summary). The clinic lane and
+#  every other lane are untouched. The kind changes BEFORE _bg_extract fills the row and runs its after-checks, so S441's page rule, the
+#  month and the double guard see a Summary.
+#  A paper read as a summary (doc_kind 'summary') that sits on the pharmacy lane is kind 'Summary' -- whichever road put it there (the
+#  lane button, the desk's Save, a 'Scan ka kaam' answer, the papers page's history rule): healed after every POST, after every
+#  reading and at start, and a reading of such a paper goes to S750's summary road even when it is still marked 'Pharmacy' (the lane
+#  button's S731 read can start before the heal). For a paper made a summary by RECOGNITION, a PERSON's later move is respected (the way
+#  back from a wrong recognition: move it off the pharmacy lane and back -- it stays 'Pharmacy'); a ticked summary is always healed. Moved OFF the pharmacy lane, a summary takes that lane's kind as before -- but it is
+#  never approved as spend (Approve refuses doc_kind 'summary', as S560 refuses a receipt or a statement), and the papers page's history
+#  rule (clinic_papers.auto_home) never moves a summary.
+#  The way back without a code undo: settings 'read.summary_recognise' = 'off' (absent = on) -- every pharmacy paper is then read as a
+#  bill exactly as before S754.
+KIT_S754 = "S754_SUMMARY_RECOGNISE"
+_s550_claude_before_s754 = _s550_claude
+
+
+def _s754_on():
+    try:
+        _d = sqlite3.connect(DB_PATH)
+        try:
+            _r = _d.execute("SELECT value FROM settings WHERE key='read.summary_recognise'").fetchone()
+        finally:
+            _d.close()
+    except sqlite3.Error:
+        return True
+    return not (_r and (_r[0] or "").strip().lower() == "off")
+
+
+def _s754_row(bid):
+    try:
+        _d = sqlite3.connect(DB_PATH); _d.row_factory = sqlite3.Row
+        try:
+            return _d.execute("SELECT * FROM bills WHERE id=?", (bid,)).fetchone()
+        finally:
+            _d.close()
+    except sqlite3.Error:
+        return None
+
+
+def _s754_untick_pharmacy(r):
+    """A pharmacy-lane paper scanned without a tick: lane pharmacy, kind 'Pharmacy', neither a challan nor a summary, not set aside."""
+    if r is None:
+        return False
+    _k = r.keys()
+    _lane = (r["lane"] if "lane" in _k else None) or KIND_LANE.get(r["kind"], "clinic")
+    return (_lane == "pharmacy" and (r["kind"] or "") == "Pharmacy" and (r["status"] or "") != "rejected"
+            and ((r["doc_kind"] if "doc_kind" in _k else None) or "") not in ("challan", "summary"))
+
+
+def _s754_audit(db, bid, action, detail, who="server (S754 recognised)"):
+    db.execute("INSERT INTO bill_audit(bill_id, at, who, action, detail) VALUES(?,?,?,?,?)",
+               (bid, _now_ist(), who, action, json.dumps(detail or {}, ensure_ascii=False)[:500]))
+
+
+def _s754_make_summary(bid):
+    """kind 'Summary', doc_kind 'summary' -- only while the row is still the untick pharmacy paper it was (compare-and-set). A busy
+    database is tried three times; then None (the reading is kept; the heal below makes the row a Summary from it later)."""
+    import time as _s754_time
+    for _try in range(3):
+        try:
+            _d = sqlite3.connect(DB_PATH, timeout=30)
+            try:
+                cur = _d.execute("UPDATE bills SET kind='Summary', doc_kind='summary' WHERE id=? AND kind='Pharmacy' "
+                                 "AND COALESCE(lane,'pharmacy')='pharmacy' AND COALESCE(status,'')<>'rejected' "
+                                 "AND COALESCE(doc_kind,'') NOT IN ('challan','summary')", (bid,))
+                if cur.rowcount == 1:
+                    _s754_audit(_d, bid, "summary", {"lane": "pharmacy", "via": "recognised (S754)"})
+                _d.commit()
+                return cur.rowcount == 1
+            finally:
+                _d.close()
+        except sqlite3.Error:
+            _s754_time.sleep(2 * (_try + 1))
+    return None
+
+
+def _s550_claude(bid, path):                                         # noqa: F811 -- S754: a statement recognised by its content
+    if CLAUDE is None or not hasattr(CLAUDE, "read_pharmacy") or not _s754_on():
+        return _s550_claude_before_s754(bid, path)
+    r = _s754_row(bid)
+    if _s754_heal_one(r):                                            # read as a summary before, now back on the pharmacy lane: S750's road
+        return _s550_claude_before_s754(bid, path)
+    if not _s754_untick_pharmacy(r):
+        return _s550_claude_before_s754(bid, path)                   # the tick, the clinic lane, every other lane: as before
+    try:
+        if not CLAUDE.available(DB_PATH):
+            return None
+        if not _s601_asked(bid):
+            return None
+        data = CLAUDE.read_pharmacy(path, bid=bid, db_path=DB_PATH)
+        if not data:
+            return None                                              # as read_bill's None: _bg_extract marks it failed, S601 tries again
+        if data.get("doc_kind") == "summary":
+            made = _s754_make_summary(bid)
+            if made is None:
+                return None                                          # the database stayed busy: 'failed'; the heal makes it a Summary from the reading
+            if not made:
+                return {}, []                                        # a person moved it meanwhile: nothing lent to the row
+            return CLAUDE.summary_to_bill(data)
+        hdr, items = CLAUDE.to_bill(data)
+        if not (hdr.get("vendor") or hdr.get("total_amount") or items):
+            return None
+        return hdr, items
+    except Exception:                                                # noqa: BLE001
+        return None
+
+
+_S754_HEAL_SQL = ("FROM bills WHERE doc_kind='summary' AND lane='pharmacy' AND kind='Pharmacy' AND COALESCE(status,'')<>'rejected'")
+# a pharmacy paper whose reading found a statement (no tick) but whose row was never made a Summary (the database was busy)
+_S754_HEAL_READ_SQL = ("FROM bills b JOIN claude_reading c ON c.bill_id=b.id WHERE c.ok=1 AND c.doc_kind='summary' AND c.data LIKE '%\"recognised\": true%' "
+                       "AND b.lane='pharmacy' AND b.kind='Pharmacy' AND COALESCE(b.doc_kind,'')='' AND COALESCE(b.status,'')<>'rejected'")
+
+
+def _s754_person_said(_d, bid):
+    """True when the paper was made a summary by RECOGNITION (no tick) and a PERSON moved or re-kinded it after that -- the heal then
+    leaves it as the person left it (the way back from a wrong recognition: move it off the pharmacy lane and back). A ticked summary,
+    or one put right by the owner's line, is always healed."""
+    r = _d.execute("SELECT rowid, detail FROM bill_audit WHERE bill_id=? AND action='summary' ORDER BY rowid DESC LIMIT 1", (bid,)).fetchone()
+    if not r or "recognised (S754)" not in (r[1] or ""):
+        return False
+    last_sum = r[0]
+    for (w,) in _d.execute("SELECT who FROM bill_audit WHERE bill_id=? AND action IN ('relane','kind') AND rowid>?", (bid, last_sum)):
+        w = (w or "").strip()
+        if w and not w.lower().startswith("server") and not w.startswith("S7"):
+            return True
+    return False
+
+
+def _s754_heal(only=None, who="server (S754 heal)"):
+    """Every paper read as a summary that sits on the pharmacy lane as kind 'Pharmacy' -> kind 'Summary', audited 'kind'. Returns how many.
+    Its own short connection; never raises."""
+    try:
+        _d = sqlite3.connect(DB_PATH, timeout=30)
+        try:
+            q = " AND id=?" if only is not None else ""
+            arg = (only,) if only is not None else ()
+            ids = [r[0] for r in _d.execute("SELECT id " + _S754_HEAL_SQL + q, arg)]
+            try:
+                rds = [r[0] for r in _d.execute("SELECT b.id " + _S754_HEAL_READ_SQL + (" AND b.id=?" if only is not None else ""), arg)]
+            except sqlite3.Error:
+                rds = []
+            n = 0
+            for i in ids:
+                if _s754_person_said(_d, i):
+                    continue
+                cur = _d.execute("UPDATE bills SET kind='Summary' WHERE id=? AND doc_kind='summary' AND lane='pharmacy' AND kind='Pharmacy' "
+                                 "AND COALESCE(status,'')<>'rejected'", (i,))
+                if cur.rowcount == 1:
+                    _s754_audit(_d, i, "kind", {"from": "Pharmacy", "to": "Summary", "via": "S754: read as a summary, on the pharmacy lane"}, who=who)
+                    n += 1
+            for i in rds:
+                if i in ids or _s754_person_said(_d, i):
+                    continue
+                cur = _d.execute("UPDATE bills SET kind='Summary', doc_kind='summary' WHERE id=? AND lane='pharmacy' AND kind='Pharmacy' "
+                                 "AND COALESCE(doc_kind,'')='' AND COALESCE(status,'')<>'rejected'", (i,))
+                if cur.rowcount == 1:
+                    _s754_audit(_d, i, "summary", {"lane": "pharmacy", "via": "recognised (S754), from its reading"}, who=who)
+                    n += 1
+            if n:
+                _d.commit()
+            return n
+        finally:
+            _d.close()
+    except Exception:                                                # noqa: BLE001
+        return 0
+
+
+def _s754_heal_one(r):
+    """For _s550_claude: True when this row is a summary on the pharmacy lane still marked 'Pharmacy' (it is healed here first)."""
+    try:
+        if r is None or (r["doc_kind"] or "") != "summary" or (r["lane"] or "") != "pharmacy" or (r["kind"] or "") != "Pharmacy" \
+                or (r["status"] or "") == "rejected":
+            return False
+        return _s754_heal(only=r["id"], who="server (S754 read)") == 1
+    except Exception:                                                # noqa: BLE001
+        return False
+
+
+def _s754_after_post(resp):
+    try:
+        if request.method == "POST":
+            _s754_heal()
+    except Exception:                                                # noqa: BLE001
+        pass
+    return resp
+
+
+def _s754_wrap_approve():
+    _v = app.view_functions.get("bill_approve")
+    if _v is None or getattr(_v, "_s754", False):
+        return
+
+    @functools.wraps(_v)
+    def _s754_bill_approve(bid, *a, **kw):
+        if getattr(g, "user", None) is None:
+            return _v(bid, *a, **kw)                                 # no login: the view's own guard answers, as before
+        _r = _s754_row(bid)
+        if _r is not None and (_r["doc_kind"] or "") == "summary":
+            flash("A dealer's month summary is never approved as a bill — it belongs on the Pharmacy lane.")
+            return redirect(url_for("bill_view", bid=bid))
+        return _v(bid, *a, **kw)
+    _s754_bill_approve._s754 = True
+    app.view_functions["bill_approve"] = _s754_bill_approve
+
+
+def _s754_guard_auto_home():
+    _cp = globals().get("_clinic_papers")
+    if _cp is None or not hasattr(_cp, "auto_home") or getattr(_cp.auto_home, "_s754", False):
+        return
+    _orig = _cp.auto_home
+
+    @functools.wraps(_orig)
+    def _s754_auto_home(db, bid):
+        try:
+            _b = db.execute("SELECT kind, doc_kind FROM bills WHERE id=?", (bid,)).fetchone()
+            if _b is not None and ((_b[0] or "") == "Summary" or (_b[1] or "") == "summary"):
+                return []                                            # a dealer's summary is never sent anywhere by history
+        except Exception:                                            # noqa: BLE001
+            pass
+        return _orig(db, bid)
+    _s754_auto_home._s754 = True
+    _cp.auto_home = _s754_auto_home
+
+
+_bg_extract_before_s754 = _bg_extract
+
+
+def _bg_extract(bid, path, _reading=None):                           # noqa: F811 -- S754: the heal after every reading
+    status = _bg_extract_before_s754(bid, path, _reading)
+    _s754_heal(only=bid)
+    return status
+
+
+for _s754_step in (_s754_wrap_approve, _s754_guard_auto_home):
+    try:
+        _s754_step()
+    except Exception as _ex_s754:                                    # noqa: BLE001
+        print("S754 %s NOT installed: %s" % (_s754_step.__name__, _ex_s754), file=_sys.stderr)
+try:
+    app.after_request(_s754_after_post)
+except Exception as _ex_s754:                                        # noqa: BLE001
+    print("S754 heal after POST NOT installed: %s" % _ex_s754, file=_sys.stderr)
+_s754_heal()                                                         # at start: any summary already on the pharmacy lane as 'Pharmacy'
+# ---- S754 end ---------------------------------------------------------------------------------------------------------------------------

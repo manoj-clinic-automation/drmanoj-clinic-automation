@@ -1,0 +1,250 @@
+
+# ---- S754 (08-Nov-2026, the Scan App chat's session 409, kit S754_SUMMARY_RECOGNISE; PLANNED on board/_numbers v1088) ----
+#  THE OWNER (17:27 IST 08-Nov, superseding D870's 'staff rescan it'): staff scan a dealer's month summary on the pharmacy lane like any
+#  bill -- tick or no tick; the system recognises it. Four things, all in this appended section (nothing above it is edited):
+#  1. read_pharmacy(): the ONE call for a pharmacy-lane paper scanned without a tick. The bill prompt with one more paragraph: decide
+#     first whether the paper is a dealer's statement; a statement is answered in the summary shape, a bill in the bill shape. The
+#     reading is recorded as read() / read_summary() record theirs (claude_reading, doc_kind 'summary' for a statement).
+#  2. The dealer is the SELLER on the letterhead, never the buyer (Sanjeevni Medicos, the pharmacy itself, in any spelling): the prompt
+#     says so, and clean_summary() drops a buyer's name to null by the S439 rule (copied in from scan_checks_s441.is_buyer).
+#  3. The period from the bills: an 'as on' / printing date is not the period. When the period is missing, a single day or the 'as on'
+#     date, the period is the month most of the listed bills fall in (first to last day); the read period is kept beside it. A printed
+#     period is kept as printed. summary_to_bill() then lends that last day as bill_date (unchanged code).
+#  4. Keys only added to the reading, none renamed or dropped: continued, as_on, period_by ('paper' | 'bills'), period_from_as_read,
+#     period_to_as_read, dealer_was_buyer, recognised (true when read_pharmacy found the statement, no tick).
+#  read(), clean(), to_bill(), read_bill(), read_summary(), summary_to_bill() and the bill PROMPT are untouched; SUMMARY_PROMPT and
+#  clean_summary are re-bound here (read_summary() reads both names when it is called).
+import difflib as _s754_difflib
+
+KIT_S754 = "S754_SUMMARY_RECOGNISE"
+
+S754_SELLER_RULE = """The dealer is the SELLER: the business whose name is printed on the letterhead at the top, who sends the statement. The
+paper is made out TO the pharmacy, Sanjeevni Medicos (also spelt Sanjeevni Medicose, Sanjivani, Sanjeevani) -- that is the BUYER: never give
+it as the dealer, in any spelling. When no seller's name is printed, "dealer" is null."""
+
+S754_PERIOD_RULE = """"period_from" / "period_to" are the period the statement covers, as printed. A printing date or an 'as on' date is NOT
+the period: put it in "as_on" and leave the period null unless a period is printed."""
+
+S754_EXTRA_KEYS = """ "as_on": the 'as on' / printing date as "YYYY-MM-DD" or null,
+ "continued": true when this page carries no heading, no seller letterhead and no buyer block -- it only continues a table from an earlier
+ page; otherwise false,"""
+
+SUMMARY_PROMPT = SUMMARY_PROMPT + "\n\nAlso, two more keys in the same object:\n{" + S754_EXTRA_KEYS.rstrip(",") + "}\n\n" + S754_SELLER_RULE + "\n" + S754_PERIOD_RULE
+
+PHARMACY_PROMPT = PROMPT + """
+
+THIS PAPER CAME IN ON THE PHARMACY LANE, so it may instead be a dealer's STATEMENT. Decide that FIRST.
+A STATEMENT lists SEVERAL bills (invoices) of a period, each with its own bill number, date and amount, under a heading such as statement,
+statement of account, sales statement, due list, sales book, ledger, transaction register, outstanding or bill list, with a period or an
+'as on' date and a total or closing balance. A single bill or tax invoice -- ONE bill number, item lines with quantity and rate -- is never a
+statement, even when it also shows earlier dues.
+- A single bill, invoice, challan or anything else: answer in the shape above, with one more key, "is_summary": false.
+- A STATEMENT: do NOT answer in the shape above. Answer instead with ONLY this JSON object:
+{"is_summary": true,
+ "dealer": the seller's business name as printed (string or null),
+ "period_from": "YYYY-MM-DD" or null, "period_to": "YYYY-MM-DD" or null  (Indian papers write day first: 05/10/26 is 2026-10-05),
+""" + S754_EXTRA_KEYS + """
+ "lines": [{"kind": "bill" | "credit" | "payment" | "other",
+            "no": the bill / credit note / reference number as printed (string or null),
+            "date": "YYYY-MM-DD" or null,
+            "amount": the line's amount in rupees as a positive number (null if unreadable)}],
+ "total_bills": the sum of the bills as printed (number or null),
+ "closing": the closing balance / total payable as printed (number or null),
+ "opening": any opening balance carried in (number or null),
+ "handwritten": true or false}
+For a statement: one entry per printed line; never invent a line and never add lines up yourself -- copy the printed totals; a line that
+reduces what is owed (a credit note, a return, a payment, 'by cash', 'by NEFT', 'Cr') is kind 'credit' or 'payment', a bill ('Dr',
+'invoice', 'sale') is kind 'bill'.
+""" + S754_SELLER_RULE + "\n" + S754_PERIOD_RULE + """
+NEVER write any person's name anywhere in the answer (no owner, no staff, no customer, no patient)."""
+
+# the S439 buyer rule, copied in (scan_checks_s441.is_buyer = purchase_app._is_buyer_s439), so the reader and the two checks agree
+_S754_STOP = frozenset(("PVT", "PRIVATE", "LTD", "LIMITED", "MS", "PL", "EXTN", "EXT", "AND", "CO", "THE",
+                        "BAREILLY", "BAREILL", "BAREIL", "BAREI"))
+_S754_TRADE = ("PHARMACEUTICALS", "PHARMACEUTICAL", "PHARMA", "MEDICAL", "MEDICALS", "MEDICOS", "MEDICOSE", "AGENCIES",
+               "AGENCY", "SURGICALS", "SURGICAL", "FORMULATIONS", "DISTRIBUTORS", "ENTERPRISES", "TRADERS", "SCIENTIFIC",
+               "CHEMIST", "DRUGGIST", "DRUG", "HOUSE", "CENTRE", "AID", "WHOLE", "SALE", "WHOLESALE", "BROS", "STORES",
+               "HEALTHCARE")
+_S754_BUYER = ("SANJEEVNI", "SANJEEVANI", "SANJIVANI")
+_S754_CITY_TAILS = ("BAREILLY", "BAREILL", "BAREIL", "BAREI", "BARE", "BAR", "BA")
+
+
+def _s754_sim(a, b):
+    if a == b:
+        return 1.0
+    if len(a) >= 4 and len(b) >= 4 and (a.startswith(b) or b.startswith(a)):
+        return 0.9
+    return _s754_difflib.SequenceMatcher(None, a, b).ratio()
+
+
+def _s754_trade(w):
+    return (w in _S754_TRADE) or any(_s754_sim(w, g) >= 0.85 for g in _S754_TRADE)
+
+
+def _s754_tokens(s):
+    t = re.sub(r"\bM\s*/\s*S\b\.?", " ", str(s or "").upper())
+    out, run = [], ""
+    for w in re.findall(r"[A-Z]+", t):
+        if len(w) == 1:
+            run += w
+            continue
+        if len(run) > 1:
+            out.append(run)
+        run = ""
+        out.append(w)
+    if len(run) > 1:
+        out.append(run)
+    while len(out) > 1 and out[-1] in _S754_CITY_TAILS:
+        out.pop()
+    return [w for w in out if w not in _S754_STOP]
+
+
+def is_buyer_name(name):
+    """True when a name read as the dealer is the pharmacy itself (the buyer), by the S439 rule."""
+    toks = _s754_tokens(name)
+    if not toks:
+        return False
+    for t in toks:
+        if t.startswith(("SANJEEV", "SANJIV", "SANJEV")) or max(_s754_sim(t, x) for x in _S754_BUYER) >= 0.8:
+            return True
+    return (not [t for t in toks if not _s754_trade(t)]) and any(t.startswith("MEDICOS") for t in toks)
+
+
+def _s754_month_end(ym):
+    y, m = int(ym[:4]), int(ym[5:7])
+    nxt = _dt.date(y + (m == 12), (m % 12) + 1, 1)
+    return (nxt - _dt.timedelta(days=1)).isoformat()
+
+
+def _s754_period(out):
+    """The period from the bills (in place). The month most of the listed bills fall in (a tie: the later month); bill lines first,
+    any dated line when no bill line is dated. Taken when the read period is missing, one day, or the 'as on' date; a printed
+    period is kept. period_by says which: 'paper' (as read) or 'bills'."""
+    dated = [ln["date"] for ln in out.get("lines") or [] if ln.get("kind") == "bill" and ln.get("date")]
+    if not dated:
+        dated = [ln["date"] for ln in out.get("lines") or [] if ln.get("date")]
+    pf, pt = out.get("period_from"), out.get("period_to")
+    if not dated:
+        out["period_by"] = "paper" if (pf or pt) else None
+        return out
+    count = {}
+    for d in dated:
+        count[d[:7]] = count.get(d[:7], 0) + 1
+    top = max(count.items(), key=lambda kv: (kv[1], kv[0]))[0]
+    need = (pf is None or pt is None or pf == pt or bool(out.get("as_on") and pt == out.get("as_on")))
+    if not need:
+        out["period_by"] = "paper"
+        return out
+    out["period_from_as_read"], out["period_to_as_read"] = pf, pt
+    out["period_from"], out["period_to"] = top + "-01", _s754_month_end(top)
+    out["period_by"] = "bills"
+    return out
+
+
+_clean_summary_before_s754 = clean_summary
+
+
+def clean_summary(data):                                             # noqa: F811 -- S754: the seller only; the period from the bills
+    out = _clean_summary_before_s754(data)
+    if out is None:
+        return None
+    c = data.get("continued")
+    out["continued"] = c if isinstance(c, bool) else None
+    out["as_on"] = _date(data.get("as_on"))
+    if out.get("dealer") and is_buyer_name(out["dealer"]):
+        out["dealer"] = None                                         # the buyer's name is never the dealer; the Sanjeevni side finds it from the bills
+        out["dealer_was_buyer"] = True
+    try:
+        _s754_period(out)
+    except Exception:                                                # noqa: BLE001 -- the period stays as read
+        pass
+    return out
+
+
+def clean_pharmacy(data):
+    """The combined answer: a statement -> clean_summary (+ recognised); anything else -> clean() (the bill reading, as before)."""
+    if not isinstance(data, dict):
+        return None
+    if data.get("is_summary") is True:
+        out = clean_summary(data)
+        if out is not None:
+            out["is_summary"] = True
+            out["recognised"] = True
+        return out
+    return clean(data)
+
+
+def read_pharmacy(path, bid=None, db_path=None):
+    """S754: ONE call for a pharmacy-lane paper scanned without a tick. Returns the cleaned reading -- a summary (doc_kind 'summary',
+    is_summary true, recognised true) or a bill (as read() returns) -- or None. Recorded in claude_reading exactly as read() and
+    read_summary() record theirs (the same key, state, daily cap, models, retries). Never raises."""
+    db_path = db_path or os.environ.get("ASSETS_DB") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets.db")
+    try:
+        con = _db(db_path)
+    except Exception:                                                # noqa: BLE001
+        return None
+    try:
+        ensure(con)
+        if state(con) != "on":
+            return None
+        blk, why = _block(path)
+        if blk is None:
+            _record(con, bid, None, False, None, None, why)
+            return None
+        key = _key()
+        first = setting(con, "read.claude_model")
+        models = ([first] if first in MODELS else []) + [m for m in MODELS if m != first]
+        last_err, unavailable = "", 0
+        for i, model in enumerate(models):
+            body = {"model": model, "max_tokens": 8000,
+                    "messages": [{"role": "user", "content": [blk, {"type": "text", "text": PHARMACY_PROMPT}]}]}
+            for attempt in range(3):
+                if calls_today(con) >= cap(con):
+                    _record(con, bid, None, False, None, None, "the day's limit reached")
+                    return None
+                _count_call(con)
+                code, js, text = _post(body, key)
+                if code == 200 and js:
+                    if js.get("stop_reason") == "max_tokens":
+                        _record(con, bid, model, False, None, None, "the paper is too long to read in one answer")
+                        return None
+                    out = "".join(c.get("text", "") for c in (js.get("content") or []) if isinstance(c, dict))
+                    data = clean_pharmacy(_json_from(out))
+                    if data is None:
+                        last_err = "the answer was not readable"
+                        break                                        # the next model
+                    if unavailable == i and first != model:
+                        set_setting(con, "read.claude_model", model)
+                    _record(con, bid, model, True, data.get("doc_kind"), data, None)
+                    return data
+                err = js.get("error") if isinstance(js, dict) and isinstance(js.get("error"), dict) else {}
+                low = ((err.get("message") or "") + " " + (err.get("type") or "")).lower()
+                if code in (401, 403) or "authentication" in low or "permission" in low:
+                    set_setting(con, "read.claude", "stopped:the key was refused")
+                    _record(con, bid, model, False, None, None, "key refused")
+                    return None
+                if code == 402 or "credit" in low or "billing" in low or "balance" in low or "usage limit" in low:
+                    set_setting(con, "read.claude", "stopped:the credit has run out")
+                    _record(con, bid, model, False, None, None, "credit")
+                    return None
+                if code == 404 or (code == 400 and "model" in low):
+                    last_err = "model %s not available" % model
+                    unavailable += 1
+                    break                                            # the next model
+                if code in (429, 500, 502, 503, 529, 0):
+                    last_err = "busy (%s)" % (code or text or "no answer")
+                    time.sleep(3 * (attempt + 1))
+                    continue
+                _record(con, bid, model, False, None, None, "HTTP %s %s" % (code, (err.get("message") or "")[:120]))
+                return None
+        _record(con, bid, None, False, None, None, last_err or "no answer")
+        return None
+    except Exception as e:                                           # noqa: BLE001
+        try:
+            _record(con, bid, None, False, None, None, type(e).__name__)
+        except Exception:                                            # noqa: BLE001
+            pass
+        return None
+    finally:
+        con.close()
+# ---- S754 end ---------------------------------------------------------------------------------------------------------------------------
