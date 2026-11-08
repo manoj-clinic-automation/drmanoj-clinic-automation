@@ -1,0 +1,421 @@
+
+
+
+# ---- S750 (08-Nov-2026, Sanjeevni session 406, kit S750_MONTH_END; D849, F-1175): the month end on the purchase pages -----------------------
+#  (1) THE LOCK GATE waits for the dealers' summaries too (through scan_register.s749_lock_reasons, wrapped by S750) -- D849: the month locks when Marg = the papers
+#      and Marg = the dealers' summaries, and Marg's month-end re-export after the last correction is in (the three reports, the cross-check).
+#  (2) THE PAYMENT SHEET: a 'Dealer's summary' column (the figure · agrees / differs / awaited / none given / accepted / carried); Payable
+#      follows the dealer's figure when the line agrees or the owner accepted it; an amount the owner carried shows under next month's
+#      Carried in when nothing was typed there. The owner's typed values are never rewritten (purchase_pay_line untouched).
+#  (3) THE DEALER LEDGER /page/ledger (the dealers) and /page/ledger/<dealer>: the financial year first (April–March: purchases, returns, paid,
+#      the balance; items × quantity), then one month per fold (newest open) -- the bills with their item lines folded, the returns, the
+#      dealer's summary and its verdict, the payments (the NEFT with the bank's reference, the cheques, what was typed as paid) and the
+#      balance; item quantities for the month. Read only; printable (?print=1 opens every fold). For the doctor and the senders
+#      (_s452_may_advice), as the payment pages are. Reached from row 7, the sheet and the hub.
+#  (4) THE DOORS /api/s750/answer, /api/s750/undo, /api/s750/dealer_of -- the doctor only (scan_register.s750_*).
+#  Nothing here writes a Marg figure, a pay line or a message. Nothing here prints a phone number, an account number or a key.
+KIT_S750 = "S750_MONTH_END"
+_pay_rows_before_s750 = _pay_rows
+_pay_sheet_table_before_s750 = _pay_sheet_table
+_s749_hub_scan_card_before_s750 = _s749_hub_scan_card
+# The lock gate needs no new wrapper: S749's _lock_gate reads scan_register.s749_lock_reasons, and S750 wraps THAT to carry the dealers'
+# holds -- one source, one line each ('the purchase check holds: N dealer summaries awaited ...').
+
+
+def _s750_sheet_info(con, month):
+    try:
+        return _s454_sr().s750_sheet(con, month) or {}
+    except Exception as e:                                     # noqa: BLE001 -- the sheet stands as it was; the column says so
+        return {"__error__": str(e)[:80]}
+
+
+def _pay_rows(con, month):                                    # noqa: F811 -- S750: the dealer's figure on the sheet
+    s, groups = _pay_rows_before_s750(con, month)
+    info = _s750_sheet_info(con, month)
+    err = info.pop("__error__", None)
+    for g in groups:
+        i = info.get(g["norm"])
+        g["s750"] = dict(i) if i else (dict(state="", words="not read", figure_p=None, accepted_p=None, carried_out_p=0, carried_in_p=0, payable_p=None, holds=False, error=err)
+                                       if err else None)
+        if not i:
+            continue
+        if g.get("carry_p") is None and i.get("carried_in_p"):
+            g["carry_p"] = int(i["carried_in_p"])
+            g["s750_carry_auto"] = True
+            g["payable_p"] = int(g.get("payable_p") or 0) + int(i["carried_in_p"])
+        if i.get("payable_p") is not None:
+            g["payable_p"] = int(i["payable_p"]) + int(g.get("carry_p") or 0)
+    seen = {g["norm"] for g in groups}
+    for k, i in info.items():                                 # a dealer with no bill this month but an amount carried in from the last
+        if k in seen or not i.get("carried_in_p"):
+            continue
+        name = con.execute("SELECT supplier FROM purchase_bill WHERE supplier_norm=? ORDER BY id DESC LIMIT 1", (k,)).fetchone()
+        bank = _vendor_bank(con).get(k) or {"route": "CHEQUE", "why": "no account on this server"}
+        groups.append({"norm": k, "name": str(name[0]) if name else k, "bills": [], "total_p": 0, "f1_p": 0, "f2_p": 0, "route": bank["route"], "why": bank["why"],
+                       "flags": 0, "carry_p": int(i["carried_in_p"]), "paid_p": None, "note": "", "by": "", "at": "", "payable_p": int(i["carried_in_p"]),
+                       "s750": dict(i), "s750_carry_auto": True})
+    return s, groups
+
+
+def _s750_chip(i):
+    if not i:
+        return ""
+    w = str(i.get("words") or "")
+    cls = {"agrees": "ok", "accepted": "ok", "your Confirm": "ok", "none given": "", "carried": "warn"}.get(w, "warn" if w else "")
+    return ' <span class="chip %s">%s</span>' % (cls, _esc(w)) if w else ""
+
+
+def _pay_sheet_table(groups, prefix, month, editable):        # noqa: F811 -- S750: + the dealer's summary column
+    rows = []
+    for g in groups:
+        auto = bool(g.get("s750_carry_auto"))
+        carry = ("" if g["carry_p"] is None or auto else "%d" % int(round(g["carry_p"] / 100.0)))
+        paid = ("" if g["paid_p"] is None else "%d" % int(round(g["paid_p"] / 100.0)))
+        inp = ('<input class="pin" id="cf_%s" value="%s" placeholder="%s" '
+               'onchange="payline(\'%s\',this)" data-v="%s">'
+               % (_esc(g["norm"]), carry, ("%d" % int(round(g["carry_p"] / 100.0))) if auto else "", _esc(g["norm"]), _esc(g["norm"]))) if editable else (
+               _r(g["carry_p"]) if g["carry_p"] is not None else "—")
+        if auto:
+            inp += '<div class="muted" style="font-size:11px">carried by you (row 7) -- not typed; it leaves with your Undo</div>'
+        pin = ('<input class="pin" id="pd_%s" value="%s" inputmode="numeric" '
+               'onchange="payline(\'%s\',this)">' % (_esc(g["norm"]), paid, _esc(g["norm"]))
+               ) if editable else (_r(g["paid_p"]) if g["paid_p"] is not None else "—")
+        i = g.get("s750") or {}
+        fig = i.get("accepted_p") if i.get("accepted_p") is not None else i.get("figure_p")
+        summ = ((_r(fig) if fig is not None else "") + _s750_chip(i)) if i else '<span class="muted">—</span>'
+        rows.append('<tr><td>%s%s</td><td class="n">%s</td><td class="n">%s</td>'
+                    '<td class="n">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n" id="py_%s">%s</td>'
+                    '<td class="n">%s</td></tr>'
+                    % (_esc(g["name"]),
+                       ' <span class="chip warn">CHEQUE</span>' if g["route"] != "NEFT" else "",
+                       _r(g["f1_p"]), _r(g["f2_p"]), _r(g["total_p"]), summ, inp,
+                       _esc(g["norm"]), _r(g["payable_p"]), pin))
+        if editable and g.get("at"):                           # S604 (F-954): what was saved, by whom (never on the printed pack)
+            rows.append('<tr class="s604saved"><td colspan="8" class="muted" style="padding-top:0">%s</td></tr>'
+                        % _esc(_s604_saved_words(g)))
+    tot_f1 = sum(g["f1_p"] for g in groups)
+    tot_f2 = sum(g["f2_p"] for g in groups)
+    tot = sum(g["total_p"] for g in groups)
+    tot_c = sum(g["carry_p"] or 0 for g in groups)
+    tot_pay = sum(g["payable_p"] for g in groups)
+    tot_paid = sum(g["paid_p"] or 0 for g in groups)
+    tot_s = sum((g.get("s750") or {}).get("accepted_p") if (g.get("s750") or {}).get("accepted_p") is not None else ((g.get("s750") or {}).get("figure_p") or 0) for g in groups)
+    rows.append('<tr><th>TOTAL</th><th class="n">%s</th><th class="n">%s</th><th class="n">%s</th><th class="n">%s</th>'
+                '<th class="n">%s</th><th class="n">%s</th><th class="n">%s</th></tr>'
+                % (_r(tot_f1), _r(tot_f2), _r(tot), _r(tot_s) if tot_s else "—", _r(tot_c) if tot_c else "—",
+                   _r(tot_pay), _r(tot_paid) if tot_paid else "—"))
+    return ('<div class="scroll"><table class="sheet"><tr><th>Vendor</th>'
+            '<th class="n">1st–15th</th><th class="n">16th–end</th>'
+            '<th class="n">%s</th><th class="n">Dealer\'s summary</th><th class="n">Carried in</th><th class="n">Payable</th>'
+            '<th class="n">Paid</th></tr>%s</table></div>'
+            '<div class="muted">Dealer\'s summary: the dealer\'s own month figure (row 7 of <a href="%s/page/check?month=%s">the purchase check</a>). Payable follows it when '
+            'the line agrees or you accepted it; a carried amount shows under next month\'s Carried in. <a href="%s/page/ledger">The dealer ledgers</a>.</div>'
+            % (_esc(_month_name(month)), "".join(rows), _esc(prefix), _esc(month), _esc(prefix)))
+
+
+def _s749_hub_scan_card(con, prefix):                         # noqa: F811 -- S750: the way to the ledgers
+    h = _s749_hub_scan_card_before_s750(con, prefix)
+    add = '<div style="margin-top:6px"><a href="%s/page/ledger">The dealer ledgers</a> — every dealer\'s bills, returns, summaries, payments and item quantities.</div>' % _esc(prefix)
+    i = h.rfind("</div>")
+    return (h[:i] + add + h[i:]) if i > 0 else h + add
+
+
+# ------------------------------------------------------------------ the dealer ledger (read only)
+def _s750_q(key):
+    from urllib.parse import quote                            # noqa: PLC0415
+    return quote(str(key or ""), safe="")
+
+
+def _s750_fy(ym):
+    """'2026-04' .. '2027-03' -> 'FY 2026-27'."""
+    try:
+        y, m = int(ym[:4]), int(ym[5:7])
+    except (TypeError, ValueError):
+        return ""
+    y0 = y if m >= 4 else y - 1
+    return "FY %d-%02d" % (y0, (y0 + 1) % 100)
+
+
+def _s750_qty(ln):
+    try:
+        q = float(ln.get("qty") or 0) + float(ln.get("free") or 0)
+    except (TypeError, ValueError):
+        q = 0.0
+    return -q if str(ln.get("direction") or "").upper() == "RETURN" else q
+
+
+def _s750_fmt_q(q):
+    return ("%d" % int(round(q))) if abs(q - round(q)) < 1e-6 else ("%.1f" % q)
+
+
+def s750_ledger(con, key):
+    """The one dealer's ledger -> dict(key, name, months=[month dicts newest first], fys={FY: dict}) -- bills with their item lines, the returns,
+    the summary's verdict (counted months), the payments and the balance per month; item quantities per month and per financial year."""
+    SR = _s454_sr()
+    IC = _s454_ic()
+    name_r = con.execute("SELECT supplier FROM purchase_bill WHERE supplier_norm=? ORDER BY id DESC LIMIT 1", (key,)).fetchone()
+    name = str(name_r[0]) if name_r else key
+    months = [str(r[0]) for r in con.execute("SELECT DISTINCT b.month FROM purchase_bill b WHERE b.supplier_norm=? AND %s ORDER BY b.month DESC" % EFF_BILL, (key,))]
+    bank = (_vendor_bank(con).get(key) or {}).get("route") or "CHEQUE"
+    out = dict(key=key, name=name, route=bank, months=[], fys={})
+    for m in months:
+        bills = [dict(r) for r in con.execute("SELECT b.* FROM purchase_bill b WHERE b.supplier_norm=? AND b.month=? AND %s ORDER BY b.bill_date, b.bill_no" % EFF_BILL, (key, m))]
+        items_m, bl = {}, []
+        for b in bills:
+            try:
+                lines = IC.marg_lines(con, b)
+            except Exception:                                 # noqa: BLE001
+                lines = []
+            ln2 = []
+            neg = int(b.get("amount_p") or 0) < 0             # Marg prints a purchase return's lines as a PURCHASE and puts the minus on the bill (F-956 B)
+            for ln in lines:
+                q = _s750_qty(ln)
+                nm = str(ln.get("item") or "").strip() or "(unnamed)"
+                try:
+                    val = int(ln.get("net_amount_p") if ln.get("net_amount_p") is not None else (ln.get("amount_p") or 0))
+                except (TypeError, ValueError):
+                    val = 0
+                if str(ln.get("direction") or "").upper() == "RETURN":
+                    val = -abs(val)
+                elif neg:
+                    q, val = -abs(q), -abs(val)
+                it = items_m.setdefault(nm, dict(item=nm, qty=0.0, amount_p=0, packing=str(ln.get("packing") or "")))
+                it["qty"] += q
+                it["amount_p"] += val
+                ln2.append(dict(item=nm, qty=q, rate_p=ln.get("rate_p"), amount_p=val, batch=ln.get("batch"), expiry=ln.get("expiry"), packing=ln.get("packing")))
+            bl.append(dict(id=int(b["id"]), bill_no=str(b.get("bill_no") or ""), date=str(b.get("bill_date") or ""), amount_p=int(b.get("amount_p") or 0),
+                           lines=ln2, scan=b.get("scan_bill_id")))
+        purchases_p = sum(x["amount_p"] for x in bl if x["amount_p"] > 0)
+        returns_p = -sum(x["amount_p"] for x in bl if x["amount_p"] < 0)
+        summ = None
+        if SR.month_class(con, m) == "counted":
+            try:
+                for d in SR.s750_dealers(con, m):
+                    if d["key"] == key:
+                        summ = dict(state=d["state"], words=d["words"], why=d["why"], figure_p=(d.get("summary") or {}).get("figure_p"),
+                                    scan=(d.get("summary") or {}).get("id"), answer=d.get("answer"))
+            except Exception as e:                            # noqa: BLE001
+                summ = dict(state="?", words="not read (%s)" % str(e)[:60], why=[], figure_p=None, scan=None, answer=None)
+        try:
+            pl = con.execute("SELECT carry_fwd_p, paid_p, note, updated_by, updated_at FROM purchase_pay_line WHERE month=? AND vendor_norm=?", (m, key)).fetchone()
+        except sqlite3.Error:
+            pl = None
+        typed_paid = int(pl["paid_p"]) if pl and pl["paid_p"] is not None else None
+        carry_in = int(pl["carry_fwd_p"]) if pl and pl["carry_fwd_p"] is not None else None
+        info = {}
+        try:
+            info = _s750_sheet_info(con, m).get(key) or {}
+        except Exception:                                     # noqa: BLE001
+            info = {}
+        if carry_in is None and info.get("carried_in_p"):
+            carry_in = int(info["carried_in_p"])
+        payable = (int(info["payable_p"]) if info.get("payable_p") is not None else purchases_p - returns_p) + (carry_in or 0)
+        cheques = []
+        try:
+            for r in con.execute("SELECT cheque_no, cheque_date, amount_p, bank, handed_at, voided_at FROM purchase_cheque WHERE month=? AND vendor_norm=? ORDER BY id", (m, key)):
+                cheques.append(dict(no=str(r[0] or ""), date=str(r[1] or ""), amount_p=int(r[2] or 0), bank=str(r[3] or ""), handed_at=r[4], voided=bool(r[5])))
+        except sqlite3.Error:
+            pass
+        neft = None
+        if bank == "NEFT":
+            try:                                              # READ ONLY: the event row itself (supplier_msg.state() writes -- never from a page)
+                ev = con.execute("SELECT utr, sms_date, created_at, amount_p FROM purchase_neft_event WHERE month=? AND kind<>'rejected' ORDER BY id DESC LIMIT 1", (m,)).fetchone()
+                if ev:
+                    neft = dict(utr=str(ev[0] or ""), date=str(ev[1] or ev[2] or "")[:10], amount_p=ev[3])
+            except sqlite3.Error:
+                neft = None
+        paid_p = typed_paid if typed_paid is not None else (payable if (neft and bank == "NEFT") else sum(c["amount_p"] for c in cheques if not c["voided"]))
+        final = str((_month_status(con, m) or {}).get("status") or "") == "final"
+        out["months"].append(dict(month=m, name=_month_name(m), bills=bl, purchases_p=purchases_p, returns_p=returns_p, summary=summ, carry_in_p=carry_in or 0,
+                                  payable_p=payable, paid_p=paid_p, balance_p=payable - (paid_p or 0), cheques=cheques, neft=neft, typed_paid=typed_paid, final=final,
+                                  items=sorted(items_m.values(), key=lambda x: (-x["qty"], x["item"])), n_lines=sum(len(x["lines"]) for x in bl)))
+        fy = out["fys"].setdefault(_s750_fy(m), dict(fy=_s750_fy(m), months=0, purchases_p=0, returns_p=0, paid_p=0, payable_p=0, items={}))
+        fy["months"] += 1
+        fy["purchases_p"] += purchases_p
+        fy["returns_p"] += returns_p
+        fy["paid_p"] += paid_p or 0
+        fy["payable_p"] += payable
+        for it in items_m.values():
+            t = fy["items"].setdefault(it["item"], dict(item=it["item"], qty=0.0, amount_p=0, packing=it["packing"]))
+            t["qty"] += it["qty"]
+            t["amount_p"] += it["amount_p"]
+    for fy in out["fys"].values():
+        fy["items"] = sorted(fy["items"].values(), key=lambda x: (-x["qty"], x["item"]))
+        fy["balance_p"] = fy["payable_p"] - fy["paid_p"]
+    return out
+
+
+S750_LEDGER_CSS = """
+#s750l{max-width:860px}
+#s750l .fy{background:#f4f6f9;border:1px solid #dde3ec;border-radius:10px;padding:10px 12px;margin:8px 0}
+#s750l .kv{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:15px}
+#s750l .kv b{font-size:17px}
+#s750l details.m{border-top:1px solid #e6e2dc;padding:4px 0}
+#s750l details.m>summary{display:flex;justify-content:space-between;gap:10px;align-items:center;min-height:46px;cursor:pointer;list-style:none;font-size:17px}
+#s750l details.m>summary::-webkit-details-marker{display:none}
+#s750l details.m>summary .n{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700}
+#s750l details.b{margin:2px 0 2px 8px;font-size:14px}
+#s750l details.b>summary{cursor:pointer;list-style:none;display:flex;gap:10px;justify-content:space-between;min-height:34px;align-items:center}
+#s750l details.b>summary::-webkit-details-marker{display:none}
+#s750l table.it{border-collapse:collapse;font-size:13px;margin:4px 0 6px 10px;font-variant-numeric:tabular-nums}
+#s750l table.it th,#s750l table.it td{border-bottom:1px solid #eee;padding:2px 8px;text-align:left}
+#s750l table.it td.n,#s750l table.it th.n{text-align:right;white-space:nowrap}
+#s750l .pay{font-size:14px;color:#444;margin:4px 0}
+#s750l .bal{font-weight:700}
+#s750l .ok{color:#1f4d25}#s750l .bad{color:#8c1d18}#s750l .hold{color:#7a4a00}
+#s750l .mut{color:#666;font-size:13px}
+@media print{#s750l details{display:block}#s750l details>summary{list-style:none}#s750l .noprint{display:none}}
+"""
+
+
+def _s750_items_table(items, cap=60):
+    if not items:
+        return '<div class="mut">no item lines</div>'
+    rows = "".join('<tr><td>%s</td><td class="mut">%s</td><td class="n">%s</td><td class="n">%s</td></tr>'
+                   % (_esc(it["item"]), _esc(it.get("packing") or ""), _esc(_s750_fmt_q(it["qty"])), _r(it["amount_p"])) for it in items[:cap])
+    more = ('<tr><td colspan="4" class="mut">… %d more items</td></tr>' % (len(items) - cap)) if len(items) > cap else ""
+    return '<table class="it"><tr><th>Item</th><th>Pack</th><th class="n">Qty (incl. free)</th><th class="n">Net</th></tr>%s%s</table>' % (rows, more)
+
+
+def _s750_month_html(con, L, mo, prefix, open_, print_):
+    bills_h = []
+    for b in mo["bills"]:
+        ret = b["amount_p"] < 0
+        lines = "".join('<tr><td>%s</td><td class="mut">%s</td><td class="n">%s</td><td class="n">%s</td><td class="n">%s</td></tr>'
+                        % (_esc(ln["item"]), _esc(ln.get("batch") or ""), _esc(_s750_fmt_q(ln["qty"])), _r(ln["rate_p"]) if ln.get("rate_p") is not None else "—", _r(ln["amount_p"]))
+                        for ln in b["lines"])
+        tab = ('<table class="it"><tr><th>Item</th><th>Batch</th><th class="n">Qty</th><th class="n">Rate</th><th class="n">Net</th></tr>%s</table>' % lines) if lines else '<div class="mut" style="margin-left:10px">no item lines in Marg\'s item-wise export for this bill</div>'
+        scan = (' · <a href="%s/api/s738/scan/%d" target="_blank" rel="noopener">scan</a>' % (_esc(prefix), int(b["scan"]))) if b.get("scan") else ""
+        bills_h.append('<details class="b"%s><summary><span>%s%s · <b>%s</b>%s · %d item%s</span><span class="n%s">%s</span></summary>%s</details>'
+                       % (" open" if print_ else "", "Purchase return " if ret else "", _esc(_human(b["date"])), _esc(b["bill_no"]), scan, len(b["lines"]), "" if len(b["lines"]) == 1 else "s",
+                          " bad" if ret else "", _r(b["amount_p"]), tab))
+    s = mo.get("summary")
+    if s is None:
+        summ = '<div class="pay">Dealer\'s summary: <span class="mut">not counted for this month (before %s)</span></div>' % _esc(_month_name(_s454_sr().setting(con, "purchase.register_from", "2026-10-01")[:7]))
+    else:
+        cls = {"agrees": "ok", "differs": "bad", "awaited": "hold", "unreadable": "hold", "unknown": "hold"}.get(s["state"], "")
+        why = ("<div class='mut'>" + "<br>".join(_esc(w) for w in (s.get("why") or [])[:5]) + "</div>") if s.get("why") else ""
+        summ = '<div class="pay">Dealer\'s summary: <span class="%s">%s</span>%s%s</div>' % (cls, _esc(s["words"]), (' · <a href="%s/api/s738/scan/%d" target="_blank" rel="noopener">the paper</a>' % (_esc(prefix), int(s["scan"]))) if s.get("scan") else "", why)
+    pays = []
+    if mo.get("neft"):
+        pays.append("NEFT %s%s" % (_esc(_human(mo["neft"]["date"])) if mo["neft"].get("date") else "", (" · bank ref %s" % _esc(mo["neft"]["utr"])) if mo["neft"].get("utr") else ""))
+    for c in mo["cheques"]:
+        pays.append("cheque %s %s %s%s" % (_esc(c["no"]), _esc(_human(c["date"])) if c["date"] else "", _r(c["amount_p"]), " (void)" if c["voided"] else ""))
+    if mo.get("typed_paid") is not None:
+        pays.append("paid as typed on the sheet: %s" % _r(mo["typed_paid"]))
+    pay_h = '<div class="pay">Paid: %s</div>' % (" · ".join(pays) if pays else '<span class="mut">nothing recorded yet</span>')
+    carry = (' · carried in %s' % _r(mo["carry_in_p"])) if mo["carry_in_p"] else ""
+    head = ('<summary><span>%s%s <span class="mut">· %d bill%s%s</span></span><span class="n">%s</span></summary>'
+            % (_esc(mo["name"]), " 🔒" if mo["final"] else "", len([b for b in mo["bills"] if b["amount_p"] > 0]), "" if len(mo["bills"]) == 1 else "s",
+               (" · %d return%s" % (len([b for b in mo["bills"] if b["amount_p"] < 0]), "" if len([b for b in mo["bills"] if b["amount_p"] < 0]) == 1 else "s")) if mo["returns_p"] else "",
+               _r(mo["payable_p"])))
+    recon = ('<div class="pay"><b>Reconciliation:</b> purchases %s − returns %s%s = payable <b>%s</b> · paid %s · <span class="bal %s">balance %s</span></div>'
+             % (_r(mo["purchases_p"]), _r(mo["returns_p"]), carry, _r(mo["payable_p"]), _r(mo["paid_p"]) if mo["paid_p"] is not None else "—",
+                "ok" if not mo["balance_p"] else "bad", _r(mo["balance_p"])))
+    items = ('<details class="b"%s><summary><span>Items this month · %d</span><span class="n">%s</span></summary>%s</details>'
+             % (" open" if print_ else "", len(mo["items"]), _esc(_s750_fmt_q(sum(i["qty"] for i in mo["items"]))) + " units", _s750_items_table(mo["items"])))
+    return '<details class="m"%s>%s%s%s%s<div style="margin:4px 0 2px"><b>Bills</b></div>%s%s</details>' % (" open" if (open_ or print_) else "", head, recon, summ, pay_h, "".join(bills_h), items)
+
+
+@bp.route("/page/ledger")
+def page_s750_ledgers():
+    """The dealers: one line each -- this financial year's purchases, the last month's state, the way to the ledger. Read only."""
+    u, err = _person("checker", "maker", "viewer")
+    if err:
+        return err
+    con = _db()
+    _ensure(con)
+    if not _s452_may_advice(con, u):
+        return _refuse("The dealer ledgers are for the doctor and the senders.")
+    prefix = request.script_root + _url_prefix
+    today = dt.datetime.now(IST).date()
+    fy_from = "%04d-04" % (today.year if today.month >= 4 else today.year - 1)
+    rows = con.execute("SELECT b.supplier_norm, MAX(b.supplier), COUNT(*), SUM(CASE WHEN b.month>=? THEN b.amount_p ELSE 0 END), MAX(b.month), "
+                       "SUM(CASE WHEN b.month>=? THEN 1 ELSE 0 END) FROM purchase_bill b WHERE b.supplier_norm IS NOT NULL AND %s GROUP BY b.supplier_norm ORDER BY 4 DESC" % EFF_BILL,
+                       (fy_from, fy_from)).fetchall()
+    h = ['<div id="s750l"><style>%s</style><h1>Dealer ledgers</h1><div class="muted">Sanjeevni Medicos · one running ledger per dealer: bills with their items, returns, the '
+         'month summaries, payments, the balance; item quantities by month and by financial year. Reads Marg\'s exports and this server\'s own records. '
+         '<a href="%s/page/check">The purchase check</a> · <a href="%s/page/hub">the hub</a>.</div>' % (S750_LEDGER_CSS, _esc(prefix), _esc(prefix))]
+    h.append('<div class="scroll"><table class="sheet"><tr><th>Dealer</th><th class="n">%s bills</th><th class="n">%s purchases</th><th>Last month</th></tr>' % (_esc(_s750_fy(fy_from)), _esc(_s750_fy(fy_from))))
+    for r in rows:
+        h.append('<tr><td><a href="%s/page/ledger/%s">%s</a></td><td class="n">%d</td><td class="n">%s</td><td>%s</td></tr>'
+                 % (_esc(prefix), _esc(_s750_q(str(r[0]))), _esc(str(r[1] or r[0]).title()), int(r[5] or 0), _r(int(r[3] or 0)), _esc(_month_name(str(r[4]))) if r[4] else ""))
+    h.append("</table></div></div>")
+    return _page("Dealer ledgers", "".join(h))
+
+
+@bp.route("/page/ledger/<path:key>")
+def page_s750_ledger(key):
+    """One dealer's running ledger. Read only; ?print=1 opens every fold."""
+    u, err = _person("checker", "maker", "viewer")
+    if err:
+        return err
+    con = _db()
+    _ensure(con)
+    if not _s452_may_advice(con, u):
+        return _refuse("The dealer ledgers are for the doctor and the senders.")
+    key = str(key or "")[:120]
+    if not con.execute("SELECT 1 FROM purchase_bill WHERE supplier_norm=? LIMIT 1", (key,)).fetchone():
+        return "no such dealer", 404
+    prefix = request.script_root + _url_prefix
+    print_ = str(request.args.get("print") or "") == "1"
+    L = s750_ledger(con, key)
+    h = ['<div id="s750l"><style>%s</style><h1>%s — dealer ledger</h1><div class="muted">%s · %d month%s · paid by %s · <a class="noprint" href="%s/page/ledger">all dealers</a> · '
+         '<a class="noprint" href="%s/page/ledger/%s?print=1" target="_blank" rel="noopener">print</a></div>'
+         % (S750_LEDGER_CSS, _esc(L["name"].title()), _esc(L["name"]), len(L["months"]), "" if len(L["months"]) == 1 else "s", _esc(L["route"]), _esc(prefix), _esc(prefix), _esc(_s750_q(key)))]
+    for fy in sorted(L["fys"].values(), key=lambda f: f["fy"], reverse=True):
+        h.append('<div class="fy"><div class="kv"><span><b>%s</b> · %d month%s</span><span>purchases <b>%s</b></span><span>returns <b>%s</b></span><span>payable <b>%s</b></span>'
+                 '<span>paid <b>%s</b></span><span class="%s">balance <b>%s</b></span></div>'
+                 '<details class="b"%s><summary><span>Items supplied in %s · %d</span><span class="n">%s units</span></summary>%s</details></div>'
+                 % (_esc(fy["fy"]), fy["months"], "" if fy["months"] == 1 else "s", _r(fy["purchases_p"]), _r(fy["returns_p"]), _r(fy["payable_p"]), _r(fy["paid_p"]),
+                    "ok" if not fy["balance_p"] else "bad", _r(fy["balance_p"]), " open" if print_ else "", _esc(fy["fy"]), len(fy["items"]),
+                    _esc(_s750_fmt_q(sum(i["qty"] for i in fy["items"]))), _s750_items_table(fy["items"], cap=200 if print_ else 60)))
+    for i, mo in enumerate(L["months"]):
+        h.append(_s750_month_html(con, L, mo, prefix, i == 0, print_))
+    if not L["months"]:
+        h.append('<div class="muted">No bills of this dealer in Marg\'s exports.</div>')
+    h.append('<div class="mut" style="margin-top:10px">Quantities add each line\'s qty and free; a Marg purchase return counts negative. Paid: the NEFT when the month\'s bank SMS '
+             'came, the cheques recorded, or what was typed as paid on the sheet.</div></div>')
+    if print_:
+        h.append("<script>window.addEventListener('load',function(){setTimeout(function(){window.print();},300);});</script>")
+    return _page("%s — dealer ledger" % L["name"].title(), "".join(h))
+
+
+# ------------------------------------------------------------------ the doors (the doctor only)
+@bp.route("/api/s750/answer", methods=["POST"])
+def api_s750_answer():
+    """The owner's answer on a dealer's line of row 7: {dealer, month, decision: ask | carry | accept | none | scan | rescan, amount_p?}."""
+    u, con, err = _s749_owner()
+    if err:
+        return err
+    b = request.get_json(silent=True) or {}
+    amt = b.get("amount_p")
+    try:
+        amt = int(amt) if amt not in (None, "") else None
+    except (TypeError, ValueError):
+        amt = None
+    ok, msg = _s454_sr().s750_answer_put(con, _who(u), str(b.get("dealer") or ""), str(b.get("month") or ""), str(b.get("decision") or ""), amt, str(b.get("note") or ""))
+    return jsonify(ok=ok, message=msg), (200 if ok else 409)
+
+
+@bp.route("/api/s750/undo", methods=["POST"])
+def api_s750_undo():
+    """Undo of an answer on row 7: {act}. The doctor only."""
+    u, con, err = _s749_owner()
+    if err:
+        return err
+    b = request.get_json(silent=True) or {}
+    ok, msg = _s454_sr().s750_undo(con, _who(u), _s749_int(b, "act"))
+    return jsonify(ok=ok, message=msg), (200 if ok else 409)
+
+
+@bp.route("/api/s750/dealer_of", methods=["POST"])
+def api_s750_dealer_of():
+    """The owner names the dealer of a summary the reader could not place: {scan, dealer}. The doctor only."""
+    u, con, err = _s749_owner()
+    if err:
+        return err
+    b = request.get_json(silent=True) or {}
+    ok, msg = _s454_sr().s750_dealer_pick(con, _who(u), _s749_int(b, "scan"), str(b.get("dealer") or ""))
+    return jsonify(ok=ok, message=msg), (200 if ok else 409)
+# ---- S750 end ---------------------------------------------------------------------------------------------------------------------------

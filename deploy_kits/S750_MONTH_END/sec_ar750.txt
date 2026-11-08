@@ -1,0 +1,49 @@
+
+
+
+# ---- S750 (08-Nov-2026, the Sanjeevni chat's session 406, kit S750_MONTH_END; PLANNED on board/_numbers v1066, the Scan App chat told at the close) ----
+#  THE DEALER'S MONTH SUMMARY on the pharmacy lane (D849 / F-1175). Beside the challan button on the intake, one more: 'Dealer ka mahine ka
+#  hisaab (summary) hai' -- the scan lands as kind='Summary', doc_kind='summary' (the challan's own road: the Sanjeevni register reads
+#  kind='Pharmacy' only, so it never takes a summary for a bill scan); the slip says 'SUMMARY -- dealer ka mahine ka hisaab liya'. The reader
+#  reads a Summary with the summary prompt (claude_reader.read_summary; claude_reading doc_kind 'summary') and lends the bills row only the
+#  dealer's name, the period's last day and the figure -- no items, no bill number; Sarvam never reads a summary. The two kind whitelists of
+#  the edit form keep 'Summary' (as they keep 'Challan'). The anchored changes above (the signature, the two call sites, the tick, the slip)
+#  are listed in make_s750.py. Nothing here moves a paper off its lane or deletes a row.
+KIT_S750 = "S750_MONTH_END"
+_s550_claude_before_s750 = _s550_claude
+
+
+def _s750_kind(bid):
+    try:
+        db = sqlite3.connect(DB_PATH)
+        try:
+            r = db.execute("SELECT kind FROM bills WHERE id=?", (bid,)).fetchone()
+        finally:
+            db.close()
+        return str(r[0] or "") if r else ""
+    except Exception:                                                # noqa: BLE001
+        return ""
+
+
+def _s550_claude(bid, path):                                         # noqa: F811 -- S750: a Summary is read as a summary
+    if _s750_kind(bid) != "Summary":
+        return _s550_claude_before_s750(bid, path)
+    if CLAUDE is None or not hasattr(CLAUDE, "read_summary"):
+        return {}, []                                                # nothing filled, never Sarvam: the row reads 'empty', the Sanjeevni side asks for a rescan
+    try:
+        if not CLAUDE.available(DB_PATH) or not _s601_asked(bid):
+            return {}, []
+        data = CLAUDE.read_summary(path, bid=bid, db_path=DB_PATH)
+        if not data:                                                 # the API was busy or the answer unreadable: S601's own retries, as a bill gets
+            try:
+                _s601_retry(bid, path)
+            except Exception:                                        # noqa: BLE001
+                pass
+            return {}, []
+        if data.get("is_summary") is False:
+            return {}, []                                            # the paper is not a summary: the row reads 'empty'; the Sanjeevni side says so
+        hdr, items = CLAUDE.summary_to_bill(data)
+        return hdr, items
+    except Exception:                                                # noqa: BLE001
+        return {}, []
+# ---- S750 end ---------------------------------------------------------------------------------------------------------------------------

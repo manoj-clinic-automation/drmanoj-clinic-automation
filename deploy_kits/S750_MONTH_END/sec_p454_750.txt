@@ -1,0 +1,76 @@
+
+
+
+# ---- S750 (08-Nov-2026, Sanjeevni session 406, kit S750_MONTH_END; D849): the dealer's summary on Aaj ka bill kaam ---------------------------
+#  When the owner taps 'Ask reception to scan it' on a dealer's line of row 7 (or 'Ask reception to rescan' on one that could not be read),
+#  reception's one list gets a card: "<Dealer> ka <month> ka hisaab (summary) scan karo" with the scan screen's link (lane Pharmacy, the
+#  dealer filled in) and the one instruction -- press the 'Dealer ka mahine ka hisaab (summary) hai' button when scanning. The card leaves
+#  by itself when the summary's scan has come (scan_register.s750_reception_asks). Reads only; the home row's count carries it.
+KIT_S750 = "S750_MONTH_END"
+_s736_model_before_s750 = s736_model
+_billkaam_page_before_s750 = billkaam_page
+T.update({"bk_s750": ("Dealer ka hisaab (summary) scan karo · %d", "Scan the dealer's month summary · %d"),
+          "bk_s750_h": ("%s ka %s ka hisaab (summary) scan karo", "Scan %s's %s summary"),
+          "bk_s750_r": ("%s ke hisaab (summary) ko dobara scan karo — pehla padha nahi gaya", "Rescan %s's summary — the first could not be read"),
+          "bk_s750_s": ("Scan karte waqt 'Dealer ka mahine ka hisaab (summary) hai' button dabaiye.", "When scanning, press the 'Dealer ka mahine ka hisaab (summary) hai' button."),
+          "bk_s750_since": ("Doctor sahab ne %s ko kaha", "Asked by the doctor %s")})
+
+
+def _s750_sr():
+    import scan_register                                      # noqa: PLC0415
+    return scan_register
+
+
+def _s750_asks(con):
+    try:
+        return _s750_sr().s750_reception_asks(con)
+    except Exception as e:                                    # noqa: BLE001 -- the list stands as it was
+        print("porders_s454 S750: the summary asks could not be read: %r" % (e,), file=sys.stderr)
+        return []
+
+
+def s736_model(con, now=None, raised=None):                   # noqa: F811 -- S750: + the owner's summary asks
+    m = _s736_model_before_s750(con, now=now, raised=raised)
+    asks = _s750_asks(con)
+    m["s750"] = asks
+    m["n"] = int(m.get("n") or 0) + len(asks)
+    return m
+
+
+def _s750_month_hi(ym, en):
+    try:
+        return "%s %s" % (month_name(ym), ym[:4])
+    except (TypeError, IndexError):
+        return str(ym or "")
+
+
+def billkaam_page():                                          # noqa: F811 -- S750
+    out = _billkaam_page_before_s750()
+    if not (isinstance(out, tuple) and len(out) == 3 and isinstance(out[0], str)):
+        return out
+    page, code, hdr = out
+    try:
+        u, con, kind, login, err = _auth_page()
+        if err:
+            return out
+        en = u["_en"]
+        asks = _s750_asks(con)
+        if not asks:
+            return out
+        back = P + "/s454/billkaam"
+        h = ['<div class="grp" id="g_s750" style="color:#1f3864">%s</div>' % L(en, "bk_s750", len(asks))]
+        for a in asks:
+            head = L(en, "bk_s750_r", a["name"].title()) if a["kind"] == "rescan" else L(en, "bk_s750_h", a["name"].title(), _s750_month_hi(a["month"], en))
+            h.append('<div class="card" data-s750="%s|%s"><div class="nm">%s</div><div class="sb">%s · %s</div>'
+                     '<div class="two"><a class="g" href="%s">%s</a>%s</div></div>'
+                     % (esc(a["dealer"]), esc(a["month"]), esc(head), esc(L(en, "bk_s750_s")), esc(L(en, "bk_s750_since", OS.ddmm(str(a.get("at") or "")[:10]))),
+                        esc(_s736_back(intake(a["name"], back=back), back)), L(en, "scankaro"),
+                        ('<a class="more" href="/scanapp/bills/%d/file" target="_blank" rel="noopener">%s</a>' % (int(a["scan"]), esc(L(en, "bk_scan_no", a.get("stamp") or "")))) if a.get("scan") else ""))
+        add = "".join(h)
+        if '<div class="ok" id="alldone">' in page:
+            page = re.sub(r'<div class="ok" id="alldone">.*?</div></div>', "", page, count=1, flags=re.S)
+        page = page.replace('<div class="mut" id="bkaaj"', add + '<div class="mut" id="bkaaj"', 1)
+    except Exception as e:                                    # noqa: BLE001 -- the page stands as it was
+        print("S750 billkaam failed: %r" % (e,), file=sys.stderr)
+    return page, code, hdr
+# ---- S750 end ---------------------------------------------------------------------------------------------------------------------------

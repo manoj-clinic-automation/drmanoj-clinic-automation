@@ -1,0 +1,904 @@
+
+
+
+# ---- S750 (08-Nov-2026, Sanjeevni session 406, kit S750_MONTH_END; D849, F-1175; the owner's go 09:03 IST, the mock
+#      https://claude.ai/artifact/G7giUj7RrbiJAv2w8kHwvb approved 09:45 with his words: 'summary', not 'statement'; the dealer ledger) ------
+#  THE MONTH END. Row 7 of the step view -- DEALER SUMMARIES -- each dealer's month summary (the paper reception scans under Pharmacy with
+#  the 'summary' tick; the Scan App lands it as kind='Summary', doc_kind='summary', and its reader reads it as a summary, claude_reading
+#  doc_kind 'summary') held against Marg's bills of the month less Marg's purchase returns. A dealer AGREES when the two are equal to the
+#  rupee. A difference is EXPLAINED when row 2 (the paper differs from Marg -> Amir) or row 6 (a return pending) already carries it -- it
+#  holds nothing new. An unexplained difference is HIS: a bill on the summary we do not have, a bill in Marg the dealer does not list, an
+#  amount only the dealer has wrong -- *Ask the dealer* (waits, 'asked dd-mm') · *Carry to next month* (the amount shows under next month's
+#  Carried in; this month stops waiting) · *Accept* (the dealer's figure stands on the sheet; a card asks Amir to enter the bill when its
+#  paper comes). A dealer with no summary is AWAITED -- *Ask reception to scan it* puts a line on Aaj ka bill kaam -- or marked once
+#  *Gives no summary* (a standing word, Undo). An owner-confirmed dealer (row 3): his Confirm counts as the summary. Every answer is a row
+#  in s750_answer with Undo, audited (purchase_audit, kit=S750). The lock (purchase_app._lock_gate, s749_lock_reasons) and n['open']
+#  (s749_month_open -- the parent's month_read reads it; its keys stay, one is added) wait for the dealers too. The ledger reads live in
+#  purchase_app (/page/ledger). assets.db READ ONLY (the summary rows and their readings). Nothing here sends a message, taps a button for
+#  anyone, writes a pay line or changes a Marg figure. Nothing here prints a phone number, an account number or a key.
+KIT_S750 = "S750_MONTH_END"
+S750_TOL_P = 100                                              # 'to the rupee': a summary that rounds differently by one rupee agrees
+S750_DDL = ("CREATE TABLE IF NOT EXISTS s750_answer (id INTEGER PRIMARY KEY AUTOINCREMENT, dealer TEXT NOT NULL, month TEXT NOT NULL, "
+            "kind TEXT NOT NULL, amount_p INTEGER, note TEXT, by TEXT, at TEXT NOT NULL, undone_at TEXT, undone_by TEXT)",
+            "CREATE TABLE IF NOT EXISTS s750_dealer_of (scan INTEGER PRIMARY KEY, dealer TEXT NOT NULL, by TEXT, at TEXT NOT NULL)")
+S750_KINDS = ("ask", "carry", "accept", "none", "scan", "rescan")
+S750_KIND_EN = {"ask": "asked the dealer", "carry": "carried to next month", "accept": "accepted the dealer's figure",
+                "none": "gives no summary", "scan": "reception asked to scan the summary", "rescan": "reception asked to rescan the summary"}
+
+
+def s750_ensure(con):
+    """The writers' tables (the installer makes them too). Readers never call this: a GET writes nothing, and a read-only copy must read."""
+    for ddl in S750_DDL:
+        con.execute(ddl)
+
+
+def _s750_rows(con, sql, args=()):
+    """A read of an S750 table that may not exist yet (before the install's seed, or on a copy): [] then, never a write."""
+    try:
+        return con.execute(sql, args).fetchall()
+    except sqlite3.OperationalError as e:
+        if "no such table" in str(e):
+            return []
+        raise
+
+
+def _s750_now():
+    return dt.datetime.now().replace(microsecond=0).isoformat()
+
+
+def _s750_prev_month(ym):
+    try:
+        y, m = int(ym[:4]), int(ym[5:7])
+    except (TypeError, ValueError):
+        return ""
+    return "%04d-%02d" % ((y - 1, 12) if m == 1 else (y, m - 1))
+
+
+def _s750_next_month(ym):
+    try:
+        y, m = int(ym[:4]), int(ym[5:7])
+    except (TypeError, ValueError):
+        return ""
+    return "%04d-%02d" % ((y + 1, 1) if m == 12 else (y, m + 1))
+
+
+def _s750_digits(s):
+    return str(s or "").translate({ord(c): None for c in " -/._"}).upper().lstrip("0") or ""
+
+
+def _s750_tail_match(a, b):
+    """Two bill numbers name the same bill when one ends the other's digits (Marg clips long numbers; a summary prints 'SF 004043' for '4043')."""
+    da, db_ = re.sub(r"\D", "", str(a or "")).lstrip("0"), re.sub(r"\D", "", str(b or "")).lstrip("0")
+    if not da or not db_:
+        return False
+    if len(da) < 3 and len(db_) < 3:
+        return da == db_
+    return da.endswith(db_) or db_.endswith(da)
+
+
+# ------------------------------------------------------------------ the summaries (assets.db READ ONLY)
+def s750_summary_scans(con=None):
+    """{scan id: dict} -- the summary papers reception scanned under Pharmacy (kind 'Summary', not rejected, not a duplicate) with their
+    reading (claude_reading, doc_kind 'summary'); None when assets.db is unreachable."""
+    pa = _pa()
+    acon = pa._assets_con()
+    if acon is None:
+        return None
+    try:
+        cols = {r[1] for r in acon.execute("PRAGMA table_info(bills)")}
+        sel = [c for c in ("id", "stamp_no", "vendor", "bill_no", "bill_date", "bill_month", "total_amount", "submitted_at", "created_at", "ocr_status",
+                           "dup_of", "lane", "status", "kind", "doc_kind", "rescan_of") if c in cols]
+        rows = [dict(r) for r in acon.execute("SELECT %s FROM bills WHERE kind='Summary' AND COALESCE(status,'')<>'rejected' AND dup_of IS NULL "
+                                              "ORDER BY id" % ", ".join(sel))]
+        ids = [int(r["id"]) for r in rows]
+        rd = {}
+        if ids:
+            q = "SELECT bill_id, ok, doc_kind, data, error FROM claude_reading WHERE bill_id IN (%s)" % ",".join("?" * len(ids))
+            for r in acon.execute(q, ids):
+                try:
+                    data = json.loads(r[3]) if r[3] else {}
+                except ValueError:
+                    data = {}
+                rd[int(r[0])] = dict(ok=int(r[1] or 0), doc_kind=r[2], data=data if isinstance(data, dict) else {}, error=r[4])
+    except sqlite3.Error:
+        return None
+    finally:
+        acon.close()
+    out = {}
+    set_aside = {int(r["rescan_of"]) for r in rows if r.get("rescan_of")}
+    for r in rows:
+        sid = int(r["id"])
+        if sid in set_aside:
+            continue                                          # rescanned: the new scan speaks
+        r["day"] = _scan_day(r)
+        rr = rd.get(sid) or {}
+        d = rr.get("data") or {}
+        is_sum = (rr.get("doc_kind") == "summary" or d.get("doc_kind") == "summary")
+        r["read"] = bool(rr.get("ok")) and is_sum and d.get("is_summary") is not False
+        r["reading"] = d if r["read"] else {}
+        if r["read"]:
+            r["read_error"] = ""
+        elif bool(rr.get("ok")) and is_sum:
+            r["read_error"] = "the reader says this paper is not a dealer's summary"
+        elif bool(rr.get("ok")):
+            r["read_error"] = "read as a bill, not as a summary -- a rescan asks the right question"
+        else:
+            r["read_error"] = rr.get("error") or ("" if rr else "not read yet")
+        r["bill_prompt"] = bool(rr.get("ok")) and not is_sum
+        pt = str((d.get("period_to") or "")) if r["read"] else ""
+        bm = str(r.get("bill_month") or "")
+        if re.match(r"^\d{4}-\d\d-\d\d$", pt):
+            r["month"] = pt[:7]
+        elif re.match(r"^\d{4}-\d\d$", bm) and bm != str(r.get("day") or "")[:7]:
+            r["month"] = bm                                   # reception chose an earlier month on purpose
+        elif r.get("day"):
+            r["month"] = _s750_prev_month(str(r["day"])[:7])  # a summary is scanned early the next month; the intake's default month is the scan's
+        else:
+            r["month"] = bm
+        lines = []
+        for ln in (d.get("lines") or []) if r["read"] else []:
+            if not isinstance(ln, dict):
+                continue
+            lines.append(dict(kind=str(ln.get("kind") or "other"), no=str(ln.get("no") or ""), date=str(ln.get("date") or "")[:10] if ln.get("date") else "",
+                              amount_p=_amount_p(ln.get("amount"))))
+        r["lines"] = lines
+        bills_p = sum(x["amount_p"] for x in lines if x["kind"] == "bill" and x["amount_p"] is not None)
+        credits_p = sum(x["amount_p"] for x in lines if x["kind"] in ("credit", "payment") and x["amount_p"] is not None)
+        tb = _amount_p(d.get("total_bills")) if r["read"] else None
+        cl = _amount_p(d.get("closing")) if r["read"] else None
+        op = _amount_p(d.get("opening")) if r["read"] else None
+        if any(x["kind"] == "bill" and x["amount_p"] is not None for x in lines):
+            fig = bills_p - sum(x["amount_p"] for x in lines if x["kind"] == "credit" and x["amount_p"] is not None)
+        elif tb is not None:
+            fig = tb
+        elif cl is not None:
+            fig = cl - (op or 0)
+        else:
+            fig = None
+        r.update(bills_p=bills_p, credits_p=credits_p, total_bills_p=tb, closing_p=cl, opening_p=op, figure_p=fig)
+        out[sid] = r
+    return out
+
+
+def _s750_dealer_of(con, scans):
+    """{scan id: dealer key}: the owner's pick first (s750_dealer_of), then the intake's vendor, then the reading's dealer name matched to the
+    pharmacy's suppliers (learned spellings, aliases, the key itself); '' when none fits."""
+    pa = _pa()
+    picked = {int(r[0]): str(r[1]) for r in _s750_rows(con, "SELECT scan, dealer FROM s750_dealer_of")}
+    for sid, s in scans.items():
+        s["picked"] = sid in picked
+    sups = {}
+    for r in con.execute("SELECT DISTINCT supplier_norm, supplier FROM purchase_bill WHERE supplier_norm IS NOT NULL"):
+        sups.setdefault(str(r[0]), str(r[1] or r[0]))
+    try:
+        cx = Ctx(con)
+        learned = dict(cx.learned or {})
+        alias = cx.alias or {}
+    except Exception:                                         # noqa: BLE001
+        learned, alias = {}, {}
+    out = {}
+    for sid, s in scans.items():
+        if sid in picked:
+            out[sid] = picked[sid]
+            continue
+        cands = [str(s.get("vendor") or ""), str((s.get("reading") or {}).get("dealer") or "")]
+        key = ""
+        for c in cands:
+            if not c:
+                continue
+            k = pa.supplier_key(c)
+            if k in sups:
+                key = k
+                break
+            if learned.get(k) in sups:
+                key = learned[k]
+                break
+            hit = [sk for sk in sups if pa._vendor_match(k, sk) or sk in (alias.get(k) or ())]
+            if len(hit) == 1:
+                key = hit[0]
+                break
+        out[sid] = key
+    return out
+
+
+def s750_answers(con, month=None):
+    """{(dealer, month): the standing answer dict} -- the newest not-undone answer per dealer and month. 'none' is a standing word: it stands
+    for every month from the one it was given in."""
+    out, none_from = {}, {}
+    rows = _s750_rows(con, "SELECT id, dealer, month, kind, amount_p, note, by, at FROM s750_answer WHERE undone_at IS NULL ORDER BY id")
+    for r in rows:
+        a = dict(id=int(r[0]), dealer=str(r[1]), month=str(r[2]), kind=str(r[3]), amount_p=r[4], note=r[5] or "", by=r[6] or "", at=r[7])
+        if a["kind"] == "none":
+            if a["dealer"] not in none_from or a["month"] < none_from[a["dealer"]][0]:
+                none_from[a["dealer"]] = (a["month"], a["id"])
+            out[(a["dealer"], a["month"])] = a
+        elif a["kind"] in ("scan", "rescan"):
+            out.setdefault((a["dealer"], a["month"]), a)       # a reception ask never replaces the owner's answer
+            if out[(a["dealer"], a["month"])]["kind"] in ("scan", "rescan"):
+                out[(a["dealer"], a["month"])] = a
+        else:
+            out[(a["dealer"], a["month"])] = a
+    if month:
+        for d, (m0, aid) in none_from.items():
+            if m0 <= month and (d, month) not in out:
+                out[(d, month)] = dict(id=aid, dealer=d, month=m0, kind="none", amount_p=None, note="", by="", at="", standing=True)
+    return out
+
+
+def s750_carried_in(con, month):
+    """{dealer: paise} carried INTO this month by the owner's 'carry' answers of the month before -- only while that month's summary still
+    lists the bill Marg does not have. Once Amir enters it (Marg carries it in its own month) the carry is stale and nothing is carried in."""
+    pm = _s750_prev_month(month)
+    carries = {d: a for (d, m), a in s750_answers(con).items() if m == pm and a["kind"] == "carry" and a.get("amount_p")}
+    if not carries:
+        return {}
+    try:
+        still = {d["key"]: d for d in s750_dealers(con, pm)}
+    except Exception:                                         # noqa: BLE001 -- fails closed: nothing is carried in from a month that cannot be read
+        return {}
+    out = {}
+    for d, a in carries.items():
+        x = still.get(d)
+        if x is None or x["state"] != "differs" or not any(i["kind"] == "on_summary" for i in x["issues"]):
+            continue
+        out[d] = out.get(d, 0) + int(a["amount_p"])
+    return out
+
+
+# ------------------------------------------------------------------ the dealers of a month, each against its summary
+def s750_dealers(con, month, r=None, cx=None, scans=None):
+    """The dealers of a month -> list of dicts(key, name, bills, marg_p, returns_p, summary, state, diff_p, why, explained, issues, answer,
+    holds, words). READ ONLY. state: agrees | differs | awaited | none | confirm | unreadable | unknown. holds = the lock waits for it.
+    Memoised per request (flask.g) by (connection, its change count, month), as register() is -- the step view, the sheet and the gate ask several times."""
+    memo = None
+    try:
+        from flask import g as _g                             # noqa: PLC0415
+        memo = _g.__dict__.setdefault("_s750_memo", {})
+    except Exception:                                         # noqa: BLE001 -- outside a request: no memo
+        memo = None
+    mk = (id(con), con.total_changes, month)
+    if memo is not None and mk in memo:
+        return memo[mk]
+    out = _s750_dealers_build(con, month, r, cx, scans)
+    if memo is not None:
+        memo[mk] = out
+    return out
+
+
+def _s750_dealers_build(con, month, r=None, cx=None, scans=None):
+    pa = _pa()
+    r = r if r is not None else register(con, month)
+    cx = cx if cx is not None else Ctx(con)
+    counted = month_class(con, month) == "counted"
+    running = month >= str(today())[:7]                       # the month has not ended: no summary is awaited yet (the owner, 11:30 IST 8-Nov)
+    bills = {}
+    for b in con.execute("SELECT b.id, b.supplier_norm, b.supplier, b.bill_no, b.bill_date, b.amount_p, b.scan_bill_id FROM purchase_bill b "
+                         "WHERE COALESCE(b.month, substr(b.bill_date,1,7))=? AND %s ORDER BY b.supplier, b.bill_date, b.bill_no" % pa.EFF_BILL, (month,)):
+        bills.setdefault(str(b[1] or ""), dict(name=str(b[2] or b[1] or ""), rows=[]))["rows"].append(
+            dict(id=int(b[0]), bill_no=str(b[3] or ""), date=str(b[4] or ""), amount_p=int(b[5] or 0), scan=b[6]))
+    scans = scans if scans is not None else (s750_summary_scans(con) or {})
+    dealer_of = _s750_dealer_of(con, scans) if scans else {}
+    by_dealer = {}
+    unknown = []
+    for sid, s in scans.items():
+        if s.get("month") != month:
+            continue
+        k = dealer_of.get(sid) or ""
+        if not k:
+            unknown.append(s)
+            continue
+        if k not in by_dealer or int(sid) > int(by_dealer[k]["id"]):
+            by_dealer[k] = s                                  # the newest summary of a dealer for the month speaks
+    answers = s750_answers(con, month)
+    row_of = {int(x["id"]): x for x in (r.get("rows") or [])}
+    try:
+        rets = [x for x in s740_pending(con) if x.get("month") == month]
+    except Exception:                                         # noqa: BLE001
+        rets = []
+    out = []
+    for key in sorted(set(bills) | set(by_dealer), key=lambda k: (bills.get(k) or {}).get("name") or k):
+        brow = bills.get(key) or dict(name=key, rows=[])
+        d = dict(key=key, name=brow["name"], bills=brow["rows"], marg_p=sum(x["amount_p"] for x in brow["rows"] if x["amount_p"] > 0),
+                 returns_p=-sum(x["amount_p"] for x in brow["rows"] if x["amount_p"] < 0), summary=by_dealer.get(key), answer=answers.get((key, month)),
+                 why=[], issues=[], explained=True, diff_p=0, holds=False, state="awaited", words="")
+        d["net_p"] = d["marg_p"] - d["returns_p"]
+        s = d["summary"]
+        a = d["answer"]
+        if a and a["kind"] == "none":
+            d["state"] = "none"
+        elif s is None:
+            if s749_owner_supplier(con, key):
+                d["state"] = "confirm"
+            elif running:
+                d["state"] = "running"
+            else:
+                d["state"] = "awaited"
+                d["holds"] = counted
+        elif not s.get("read"):
+            d["state"] = "unreadable"
+            d["why"].append("the summary could not be read (%s)" % (s.get("read_error") or "no reading"))
+            d["holds"] = counted
+        else:
+            d["diff_p"] = int((s.get("figure_p") or 0) - d["net_p"])
+            if abs(d["diff_p"]) <= S750_TOL_P:
+                d["state"] = "agrees"
+            else:
+                d["state"] = "differs"
+                _s750_explain(con, d, s, row_of, rets, cx)
+                if d["explained"]:
+                    d["holds"] = False
+                elif a and a["kind"] in ("carry", "accept"):
+                    d["holds"] = False
+                else:
+                    d["holds"] = counted                       # unanswered, or asked and still waiting
+        d["words"] = _s750_words(d)
+        out.append(d)
+    for s in unknown:
+        out.append(dict(key="", name=str((s.get("reading") or {}).get("dealer") or s.get("vendor") or "a dealer the reader could not name"), bills=[],
+                        marg_p=0, returns_p=0, net_p=0, summary=s, answer=None, why=["the summary names no dealer of this month -- pick the dealer"],
+                        issues=[], explained=False, diff_p=0, holds=counted, state="unknown", words="dealer not recognised"))
+    return out
+
+
+def _s750_explain(con, d, s, row_of, rets, cx):
+    """Why the summary and Marg differ, bill by bill. Each unexplained item is an issue of the owner's; an item row 2 or row 6 already carries
+    is explained."""
+    marg = list(d["bills"])
+    used = set()
+    s_bills = [x for x in s["lines"] if x["kind"] == "bill"]
+    s_credits = [x for x in s["lines"] if x["kind"] == "credit"]
+    paper = (cx.paper or {}) if cx is not None else {}
+    for ln in s_bills:
+        hit = None
+        for b in marg:
+            if b["id"] in used or b["amount_p"] <= 0:
+                continue
+            if ln["no"] and _s750_tail_match(ln["no"], b["bill_no"]):
+                hit = b
+                break
+        if hit is None and ln["amount_p"] is not None:
+            same = [b for b in marg if b["id"] not in used and b["amount_p"] > 0 and abs(b["amount_p"] - ln["amount_p"]) <= S750_TOL_P
+                    and (not ln["date"] or ln["date"] == b["date"])]
+            if len(same) == 1:
+                hit = same[0]
+        if hit is None:
+            where = con.execute("SELECT month FROM purchase_bill WHERE supplier_norm=? AND bill_no=? AND month<>? LIMIT 1", (d["key"], ln["no"], s["month"])).fetchone() if ln["no"] else None
+            if where:
+                d["why"].append("bill %s (%s) is on the summary; Marg has it in %s -- paid on that month's sheet" % (ln["no"], rs(ln["amount_p"]), month_name(where[0])))
+                continue
+            d["why"].append("bill %s · %s · %s is on the summary; not in Marg, no paper scanned" % (ln["no"] or "?", _s738_dmy(ln["date"]) if ln["date"] else "no date", rs(ln["amount_p"])))
+            d["issues"].append(dict(kind="on_summary", no=ln["no"], date=ln["date"], amount_p=ln["amount_p"] or 0))
+            d["explained"] = False
+            continue
+        used.add(hit["id"])
+        if ln["amount_p"] is not None and abs(ln["amount_p"] - hit["amount_p"]) > S750_TOL_P:
+            row = row_of.get(hit["id"]) or {}
+            pp = paper.get(hit.get("scan")) if hit.get("scan") is not None else None
+            if row.get("state") in ("amount_differs", "double") and pp is not None and abs(pp - ln["amount_p"]) <= S750_TOL_P:
+                d["why"].append("bill %s: summary and paper %s, Marg %s -- row 2, Amir corrects Marg" % (hit["bill_no"], rs(ln["amount_p"]), rs(hit["amount_p"])))
+            else:
+                d["why"].append("bill %s: summary %s, Marg%s %s -- the dealer's figure differs" % (hit["bill_no"], rs(ln["amount_p"]), " and paper" if pp is not None and abs(pp - hit["amount_p"]) <= S750_TOL_P else "", rs(hit["amount_p"])))
+                d["issues"].append(dict(kind="amount", no=hit["bill_no"], date=hit["date"], amount_p=ln["amount_p"] - hit["amount_p"], bill_id=hit["id"]))
+                d["explained"] = False
+    for b in marg:
+        if b["id"] in used or b["amount_p"] <= 0:
+            continue
+        if not s_bills:
+            break                                             # a summary with no bill lines read: only the totals are compared
+        d["why"].append("bill %s · %s · %s is in Marg; the summary does not list it" % (b["bill_no"], _s738_dmy(b["date"]), rs(b["amount_p"])))
+        d["issues"].append(dict(kind="in_marg_only", no=b["bill_no"], date=b["date"], amount_p=-b["amount_p"], bill_id=b["id"]))
+        d["explained"] = False
+    for c in s_credits:
+        amt = c["amount_p"] or 0
+        rhit = [x for x in rets if x.get("supplier") == d["key"] or x.get("sup") == d["key"]]
+        rhit = [x for x in rhit if abs(int(x.get("amount_p") or 0) - amt) <= S750_TOL_P] or rhit
+        mret = [b for b in marg if b["amount_p"] < 0 and abs(-b["amount_p"] - amt) <= S750_TOL_P]
+        if mret:
+            d["why"].append("credit %s on the summary = Marg's purchase return %s" % (rs(amt), mret[0]["bill_no"]))
+        elif rhit:
+            d["why"].append("credit %s on the summary is the return pending on row 6 (%s %s) -- clears when Amir enters the purchase return" % (rs(amt), d["name"], rhit[0].get("bill_no") or ""))
+        else:
+            d["why"].append("credit %s on the summary; Marg carries no return for it" % rs(amt))
+            d["issues"].append(dict(kind="credit", no=c["no"], date=c["date"], amount_p=-amt))
+            d["explained"] = False
+    for b in marg:
+        if b["amount_p"] >= 0 or not s_bills:
+            continue
+        if not any(abs(-b["amount_p"] - (c["amount_p"] or 0)) <= S750_TOL_P for c in s_credits):
+            d["why"].append("Marg's purchase return %s (%s) -- the summary carries no credit note for it; ask the dealer" % (b["bill_no"], rs(-b["amount_p"])))
+            d["issues"].append(dict(kind="marg_return_only", no=b["bill_no"], date=b["date"], amount_p=-b["amount_p"], bill_id=b["id"]))
+            d["explained"] = False
+    if not s_bills and not s_credits and d["diff_p"]:
+        pend = [x for x in rets if x.get("supplier") == d["key"] or x.get("sup") == d["key"]]
+        if pend and abs(sum(int(x.get("amount_p") or 0) for x in pend) + d["diff_p"]) <= S750_TOL_P:
+            d["why"].append("the summary is the return pending on row 6 less -- clears when Amir enters the purchase return")
+        else:
+            d["why"].append("the summary's figure %s against Marg's %s; the summary's lines were not read, so the reason is not named" % (rs(s.get("figure_p")), rs(d["net_p"])))
+            d["issues"].append(dict(kind="total", no="", date="", amount_p=d["diff_p"]))
+            d["explained"] = False
+    if not d["issues"] and not d["explained"]:
+        d["explained"] = True
+
+
+def _s750_words(d):
+    s = d.get("summary") or {}
+    if d["state"] == "agrees":
+        return "Agrees ✓ · summary scanned %s · %d bill%s · Marg %s" % (ddmon(s.get("day")) or "", len([b for b in d["bills"] if b["amount_p"] > 0]),
+                                                                        "" if len(d["bills"]) == 1 else "s", rs(d["net_p"]))
+    if d["state"] == "differs":
+        more = "more" if d["diff_p"] > 0 else "less"
+        return "Summary %s %s than Marg (%s) · scanned %s" % (rs(abs(d["diff_p"])), more, rs(d["net_p"]), ddmon(s.get("day")) or "")
+    if d["state"] == "awaited":
+        return "Awaited · %d bill%s · Marg %s" % (len(d["bills"]), "" if len(d["bills"]) == 1 else "s", rs(d["net_p"]))
+    if d["state"] == "running":
+        return "Month running — the summary comes after the month ends · %d bill%s · Marg %s so far" % (len(d["bills"]), "" if len(d["bills"]) == 1 else "s", rs(d["net_p"]))
+    if d["state"] == "none":
+        return "Gives no summary · Marg %s" % rs(d["net_p"])
+    if d["state"] == "confirm":
+        return "An owner-confirmed dealer: your Confirm on row 3 counts as the summary · Marg %s" % rs(d["net_p"])
+    if d["state"] == "unreadable":
+        return "Summary scanned %s, could not be read · Marg %s" % (ddmon(s.get("day")) or "", rs(d["net_p"]))
+    return d.get("words") or d["state"]
+
+
+def s750_open(con, month, r=None):
+    """READ ONLY: the dealers' holds of a month -> dict(differ, awaited, unread, asked, carried, accepted, none, agree, n, holds=[words])."""
+    if month_class(con, month) != "counted":
+        return dict(differ=0, awaited=0, unread=0, asked=0, carried=0, accepted=0, none=0, agree=0, running=0, n=0, holds=[], words="")
+    try:
+        ds = s750_dealers(con, month, r)
+    except Exception as e:                                    # noqa: BLE001 -- fails closed: the month is not clear
+        return dict(differ=0, awaited=0, unread=1, asked=0, carried=0, accepted=0, none=0, agree=0, running=0, n=1,
+                    holds=["the dealer summaries could not be read (%s)" % str(e)[:80]], words="dealer summaries not read")
+    n = dict(differ=0, awaited=0, unread=0, asked=0, carried=0, accepted=0, none=0, agree=0, running=0, n=0, holds=[])
+    for d in ds:
+        a = d.get("answer") or {}
+        if d["state"] == "agrees":
+            n["agree"] += 1
+        elif d["state"] == "none":
+            n["none"] += 1
+        elif d["state"] == "differs" and d["holds"] and a.get("kind") == "ask":
+            n["asked"] += 1
+        elif d["state"] == "differs" and d["holds"]:
+            n["differ"] += 1
+        elif d["state"] == "differs" and a.get("kind") == "carry":
+            n["carried"] += 1
+        elif d["state"] == "differs" and a.get("kind") == "accept":
+            n["accepted"] += 1
+        elif d["state"] in ("awaited",):
+            n["awaited"] += 1
+        elif d["state"] == "running":
+            n["running"] += 1
+        elif d["state"] in ("unreadable", "unknown"):
+            n["unread"] += 1
+    n["n"] = n["differ"] + n["awaited"] + n["unread"] + n["asked"]
+    if n["differ"]:
+        n["holds"].append("%d dealer summar%s differ%s from Marg (yours: ask the dealer, carry or accept)" % (n["differ"], "y" if n["differ"] == 1 else "ies", "s" if n["differ"] == 1 else ""))
+    if n["asked"]:
+        n["holds"].append("%d dealer%s asked, waiting for the answer" % (n["asked"], "" if n["asked"] == 1 else "s"))
+    if n["awaited"]:
+        n["holds"].append("%d dealer summar%s awaited (reception scans it, or you mark the dealer as giving none)" % (n["awaited"], "y" if n["awaited"] == 1 else "ies"))
+    if n["unread"]:
+        n["holds"].append("%d dealer summar%s could not be read or named" % (n["unread"], "y" if n["unread"] == 1 else "ies"))
+    bits = []
+    if n["agree"]:
+        bits.append("%d agree" % n["agree"])
+    if n["differ"] + n["asked"]:
+        bits.append("%d differ" % (n["differ"] + n["asked"]))
+    if n["awaited"]:
+        bits.append("%d awaited" % n["awaited"])
+    if n["unread"]:
+        bits.append("%d unread" % n["unread"])
+    if n["carried"] + n["accepted"]:
+        bits.append("%d settled by you" % (n["carried"] + n["accepted"]))
+    if n["running"]:
+        bits.append("%d after the month ends" % n["running"])
+    n["words"] = " · ".join(bits) or ("none" if not ds else "")
+    return n
+
+
+def s750_lock_reasons(con, month):
+    """The dealers' holds for the lock gate, in his words; [] when clear."""
+    return list(s750_open(con, month).get("holds") or [])
+
+
+# ------------------------------------------------------------------ s749_month_open / s749_lock_reasons: the dealers hold too (keys kept)
+_s749_month_open_before_s750 = s749_month_open
+_s749_lock_reasons_before_s750 = s749_lock_reasons
+
+
+def s749_month_open(con, month, r=None):                      # noqa: F811 -- S750: + dealers; every earlier key and its meaning kept
+    n = _s749_month_open_before_s750(con, month, r)
+    try:
+        dn = s750_open(con, month, r)
+    except Exception:                                         # noqa: BLE001 -- fails closed
+        dn = dict(n=1, differ=0, asked=0, awaited=0, unread=1, words="not read")
+    n["dealers"] = int(dn.get("n") or 0)
+    n["dealer_words"] = dn.get("words") or ""
+    if n["dealers"]:
+        n["open"] = int(n.get("open") or 0) + n["dealers"]
+        bits = []
+        if dn.get("differ") or dn.get("asked"):
+            k = int(dn.get("differ") or 0) + int(dn.get("asked") or 0)
+            bits.append("%d dealer summar%s differ%s" % (k, "y" if k == 1 else "ies", "s" if k == 1 else ""))
+        if dn.get("awaited"):
+            bits.append("%d dealer summar%s awaited" % (dn["awaited"], "y" if dn["awaited"] == 1 else "ies"))
+        if dn.get("unread"):
+            bits.append("%d dealer summar%s unread" % (dn["unread"], "y" if dn["unread"] == 1 else "ies"))
+        n["words"] = " · ".join([n["words"]] + bits) if n.get("words") else " · ".join(bits)
+        n["neft"] = "NEFT on hold"
+    return n
+
+
+def s749_lock_reasons(con, month):                            # noqa: F811 -- S750: the dealers' holds join the register's
+    out = list(_s749_lock_reasons_before_s750(con, month))
+    if month_class(con, month) != "counted":
+        return out
+    try:
+        out.extend(s750_lock_reasons(con, month))
+    except Exception as e:                                    # noqa: BLE001 -- fails closed
+        out.append("the dealer summaries could not be read (%s)" % str(e)[:80])
+    return out
+
+
+# ------------------------------------------------------------------ the owner's answers (doors in purchase_app: /api/s750/*)
+def s750_answer_put(con, who, dealer, month, kind, amount_p=None, note=""):
+    """One answer on a dealer's line: ask | carry | accept | none | scan | rescan. Audited; Undo by s750_undo."""
+    s750_ensure(con)
+    dealer, month, kind = str(dealer or "").strip(), str(month or "").strip(), str(kind or "").strip()
+    if kind not in S750_KINDS:
+        return False, "That answer is not one of this row's."
+    if not re.match(r"^\d{4}-\d\d$", month) or month_class(con, month) != "counted":
+        return False, "%s is not a counted month." % (month or "that")
+    if not dealer or len(dealer) > 120 or not con.execute("SELECT 1 FROM purchase_bill WHERE supplier_norm=? LIMIT 1", (dealer,)).fetchone():
+        return False, "No dealer of that name in Marg."
+    fin = _s750_final(con, month)
+    if fin:
+        return False, ("%s is locked; reopen it first." if fin is True else "%s: the month's status could not be read.") % month_name(month)
+    if kind in ("scan", "rescan") and (s750_answers(con, month).get((dealer, month)) or {}).get("kind") == "none":
+        return False, "%s gives no summary (your word) -- undo that word first." % dealer
+    if kind in ("carry", "accept"):
+        ds = [d for d in s750_dealers(con, month) if d["key"] == dealer]
+        if not ds:
+            return False, "No bills of %s in %s." % (dealer, month_name(month))
+        d = ds[0]
+        if kind == "carry":
+            amount_p = sum(int(i["amount_p"]) for i in d["issues"] if i["kind"] == "on_summary" and int(i["amount_p"]) > 0) if amount_p is None else int(amount_p)
+            if amount_p <= 0:
+                return False, "Nothing of %s to carry: the summary lists no bill we do not have." % d["name"]
+        else:
+            amount_p = int((d["summary"] or {}).get("figure_p") or 0) if amount_p is None else int(amount_p)
+            if amount_p <= 0:
+                return False, "The summary's figure could not be read -- nothing to accept."
+    now = _s750_now()
+    cur = con.execute("INSERT INTO s750_answer (dealer, month, kind, amount_p, note, by, at) VALUES (?,?,?,?,?,?,?)",
+                      (dealer, month, kind, amount_p, str(note or "")[:200], who, now))
+    _s736_audit(con, who, "s750_answer", "%s/%s" % (dealer, month), dict(kind=kind, amount_p=amount_p, id=cur.lastrowid, kit=KIT_S750))
+    con.commit()
+    words = {"ask": "Asked the dealer -- the line waits, 'asked %s'." % ddmon(now[:10]),
+             "carry": "%s carried to %s: it shows under Carried in there; %s stops waiting for it." % (rs(amount_p), month_name(_s750_next_month(month)), month_name(month)),
+             "accept": "The dealer's figure %s stands on the sheet; Amir's card asks him to enter the bill when its paper comes." % rs(amount_p),
+             "none": "%s gives no summary -- from %s on, the lock does not wait for one." % (dealer, month_name(month)),
+             "scan": "Reception's list asks for %s's %s summary." % (dealer, month_name(month)),
+             "rescan": "Reception's list asks for a rescan of %s's summary." % dealer}
+    return True, words[kind]
+
+
+def _s750_final(con, month):
+    """True when the month is locked -- or when its status could not be read (fails closed; the message says which)."""
+    try:
+        return str((_pa()._month_status(con, month) or {}).get("status") or "") == "final"
+    except Exception:                                         # noqa: BLE001 -- fails closed
+        return "unread"
+
+
+def s750_undo(con, who, act_id):
+    s750_ensure(con)
+    r = con.execute("SELECT id, dealer, month, kind FROM s750_answer WHERE id=? AND undone_at IS NULL", (int(act_id or 0),)).fetchone()
+    if not r:
+        return False, "That answer is already undone, or was never given."
+    fin = _s750_final(con, str(r[2]))
+    if fin:
+        return False, ("%s is locked; reopen it first." if fin is True else "%s: the month's status could not be read.") % month_name(str(r[2]))
+    con.execute("UPDATE s750_answer SET undone_at=?, undone_by=? WHERE id=?", (_s750_now(), who, int(r[0])))
+    _s736_audit(con, who, "s750_answer_undone", "%s/%s" % (r[1], r[2]), dict(kind=r[3], id=int(r[0]), kit=KIT_S750))
+    con.commit()
+    return True, "Undone: %s." % S750_KIND_EN.get(str(r[3]), str(r[3]))
+
+
+def s750_dealer_pick(con, who, scan, dealer):
+    """The owner names the dealer of a summary the reader could not place."""
+    s750_ensure(con)
+    scan, dealer = int(scan or 0), str(dealer or "").strip()[:120]
+    if not scan:
+        return False, "Pick a dealer."
+    try:
+        sc = (s750_summary_scans(con) or {}).get(scan)
+    except Exception:                                         # noqa: BLE001
+        sc = None
+    fin = _s750_final(con, str(sc["month"])) if (sc is not None and sc.get("month")) else False
+    if fin:
+        return False, ("%s is locked; reopen it first." if fin is True else "%s: the month's status could not be read.") % month_name(str(sc["month"]))
+    if not dealer:                                            # the Undo: the scan is nobody's again
+        r = con.execute("SELECT dealer FROM s750_dealer_of WHERE scan=?", (scan,)).fetchone()
+        if not r:
+            return False, "That scan was never named."
+        con.execute("DELETE FROM s750_dealer_of WHERE scan=?", (scan,))
+        _s736_audit(con, who, "s750_dealer_of_undone", str(scan), dict(dealer=str(r[0]), kit=KIT_S750))
+        con.commit()
+        return True, "Undone: summary scan %d is nobody's again -- pick the dealer." % scan
+    if not con.execute("SELECT 1 FROM purchase_bill WHERE supplier_norm=? LIMIT 1", (dealer,)).fetchone():
+        return False, "%s is not a dealer Marg knows." % dealer
+    con.execute("INSERT OR REPLACE INTO s750_dealer_of (scan, dealer, by, at) VALUES (?,?,?,?)", (scan, dealer, who, _s750_now()))
+    _s736_audit(con, who, "s750_dealer_of", str(scan), dict(dealer=dealer, kit=KIT_S750))
+    con.commit()
+    return True, "Summary scan %d is %s's." % (scan, dealer)
+
+
+def s750_reception_asks(con):
+    """For Aaj ka bill kaam: [dict(dealer, name, month, kind ('scan'|'rescan'), scan, stamp)] -- the owner's open asks whose summary has not come."""
+    out = []
+    try:
+        scans = s750_summary_scans(con) or {}
+        dealer_of = _s750_dealer_of(con, scans) if scans else {}
+    except Exception:                                         # noqa: BLE001
+        scans, dealer_of = {}, {}
+    names = {str(r[0]): str(r[1] or r[0]) for r in con.execute("SELECT DISTINCT supplier_norm, supplier FROM purchase_bill WHERE supplier_norm IS NOT NULL")}
+    for (d, m), a in s750_answers(con).items():
+        if a["kind"] not in ("scan", "rescan"):
+            continue
+        have = [s for sid, s in scans.items() if dealer_of.get(sid) == d and s.get("month") == m and str(s.get("day") or "") >= str(a["at"])[:10]]
+        if have and (a["kind"] == "scan" or any(s.get("read") for s in have)):
+            continue                                          # the paper came (a rescan: and reads) -- the line goes by itself
+        last = max([s for sid, s in scans.items() if dealer_of.get(sid) == d and s.get("month") == m], key=lambda s: int(s["id"]), default=None)
+        out.append(dict(dealer=d, name=names.get(d, d), month=m, kind=a["kind"], scan=int(last["id"]) if last else None, stamp=(last or {}).get("stamp_no") or "",
+                        at=a["at"]))
+    return out
+
+
+def s750_amir_enter(con):
+    """For Amir's card: the bills the owner ACCEPTED from a dealer's summary that Marg still does not carry -> [dict(dealer, name, no, date, amount_p, month)]."""
+    out = []
+    for (d, m), a in s750_answers(con).items():
+        if a["kind"] != "accept":
+            continue
+        try:
+            ds = [x for x in s750_dealers(con, m) if x["key"] == d]
+        except Exception:                                     # noqa: BLE001
+            continue
+        for x in ds:
+            for i in x["issues"]:
+                if i["kind"] == "on_summary":
+                    out.append(dict(dealer=d, name=x["name"], no=i["no"], date=i["date"], amount_p=int(i["amount_p"] or 0), month=m))
+    return out
+
+
+# ------------------------------------------------------------------ row 7 and row 8 on the step view
+def _s750_panel(d, prefix):
+    """The opened part of a dealer's line: the summary's lines as read beside Marg's bills of the month, and the scan (lazy)."""
+    s = d.get("summary") or {}
+    sid = int(s["id"])
+    rows = []
+    for ln in (s.get("lines") or [])[:60]:
+        rows.append("<tr><th>%s</th><td>%s</td><td>%s</td><td>%s</td></tr>" % (esc({"bill": "Bill", "credit": "Credit", "payment": "Payment"}.get(ln["kind"], "Line")),
+                                                                              esc(ln["no"] or "—"), esc(_s738_dm(ln["date"]) if ln["date"] else "—"), esc(rs(ln["amount_p"]))))
+    if len(s.get("lines") or []) > 60:
+        rows.append("<tr><td colspan='4'>… %d more lines</td></tr>" % (len(s["lines"]) - 60))
+    tot = []
+    if s.get("total_bills_p") is not None:
+        tot.append("bills %s" % rs(s["total_bills_p"]))
+    if s.get("opening_p"):
+        tot.append("opening %s" % rs(s["opening_p"]))
+    if s.get("closing_p") is not None:
+        tot.append("closing %s" % rs(s["closing_p"]))
+    marg = "".join("<tr><th>Marg</th><td>%s</td><td>%s</td><td>%s</td></tr>" % (esc(b["bill_no"]), esc(_s738_dm(b["date"])), esc(rs(b["amount_p"]))) for b in d["bills"][:60])
+    mo = _scan_moment(s) if s else None
+    when = ('<div class="s738w">Scanned %s · %s</div>' % (esc(mo.strftime("%d-%m %H:%M")), esc(" · ".join(tot)))) if mo else ""
+    src = "%s/api/s738/scan/%d" % (prefix, sid)
+    return ('<div class="s738vb"><div class="s738f" data-src="%s"></div><div class="s738t"><div class="s738th">Read on the summary · Marg\'s bills</div>'
+            '<table><tr><th></th><th>No.</th><th>Date</th><th>Amount</th></tr>%s%s</table>%s<a href="%s" target="_blank" rel="noopener">Open the scan in a new tab</a></div></div>'
+            % (esc(src), "".join(rows) or "<tr><td colspan='4'>no lines read</td></tr>", marg, when, esc(src)))
+
+
+def _s750_line(con, d, month, prefix):
+    """One dealer's line in his columns (dealer · the summary's figure, the scan date, the scan, what, whose · next) with its actions."""
+    s = d.get("summary") or {}
+    a = d.get("answer") or {}
+    sid = int(s["id"]) if s.get("id") is not None else None
+    what = esc(_s750_words(d))
+    who, acts = "", []
+    u = prefix + "/api/s750/answer"
+    body = dict(dealer=d["key"], month=month)
+    undo = (lambda label="Undo": _s749_btn(label, dict(u=prefix + "/api/s750/undo", b=dict(act=int(a["id"])))))
+    if d["state"] == "agrees":
+        who = "Nobody. Payable %s." % esc(rs(d["net_p"]))
+        if a.get("kind") in ("carry", "accept"):
+            who += " Your '%s' (%s) is stale -- Marg now carries the bill; undo it." % (esc(S750_KIND_EN[a["kind"]]), esc(rs(a.get("amount_p"))))
+            acts.append(undo())
+    elif d["state"] == "none":
+        who = "Nobody (%s)." % esc(("your word %s" % ddmon(str(a.get("at") or "")[:10])) if a.get("at") else "your standing word")
+        if a.get("id"):
+            acts.append(undo())
+    elif d["state"] == "confirm":
+        who = "Row 3."
+    elif d["state"] == "running":
+        who = "Nobody yet -- reception scans the dealer's summary when it comes, early next month."
+        acts.append(_s749_btn("%s gives no summary" % d["name"].title(), dict(u=u, b=dict(body, decision="none"))))
+    elif d["state"] == "awaited":
+        if a.get("kind") == "scan":
+            who = "Reception: on Aaj ka bill kaam since %s." % esc(ddmon(str(a.get("at") or "")[:10]))
+            acts.append(undo("Undo the ask"))
+        else:
+            who = "Reception, or you."
+            acts.append(_s749_btn("Ask reception to scan it", dict(u=u, b=dict(body, decision="scan")), "s736b s749y"))
+        acts.append(_s749_btn("%s gives no summary" % d["name"].title(), dict(u=u, b=dict(body, decision="none"))))
+    elif d["state"] == "unreadable":
+        if a.get("kind") == "rescan":
+            who = "Reception: rescan asked %s." % esc(ddmon(str(a.get("at") or "")[:10]))
+            acts.append(undo("Undo the ask"))
+        else:
+            who = "Reception rescans it, or you mark the dealer."
+            acts.append(_s749_btn("Ask reception to rescan", dict(u=u, b=dict(body, decision="rescan")), "s736b s749y"))
+            acts.append(_s749_btn("%s gives no summary" % d["name"].title(), dict(u=u, b=dict(body, decision="none"))))
+    elif d["state"] == "differs":
+        why = "<br>".join("Why: %s" % esc(w) for w in d["why"][:6]) + ("<br>… %d more" % (len(d["why"]) - 6) if len(d["why"]) > 6 else "")
+        nxt = month_name(_s750_next_month(month)).split()[0]
+        if d["explained"]:
+            who = "%s<br><b>Nothing for you here</b> -- it clears through rows 2 and 6." % why
+        elif a.get("kind") == "carry":
+            who = "%s<br>%s carried to %s by you (%s)." % (why, esc(rs(a.get("amount_p"))), esc(nxt), esc(ddmon(str(a.get("at") or "")[:10])))
+            if not any(i["kind"] == "on_summary" for i in d["issues"]):
+                who += " <b>That carry is stale</b> -- Marg now carries the bill; nothing is carried; undo it."
+            acts.append(undo())
+        elif a.get("kind") == "accept":
+            who = "%s<br>Accepted by you (%s): the dealer's figure %s stands; Amir enters the bill when its paper comes." % (why, esc(ddmon(str(a.get("at") or "")[:10])), esc(rs(a.get("amount_p"))))
+            acts.append(undo())
+        else:
+            if a.get("kind") == "ask":
+                who = "%s<br>Asked the dealer %s -- waiting." % (why, esc(ddmon(str(a.get("at") or "")[:10])))
+                acts.append(undo("Undo the ask"))
+            else:
+                who = "%s<br><b>Yours.</b>" % why
+                acts.append(_s749_btn("Ask the dealer", dict(u=u, b=dict(body, decision="ask")), "s736b s749y"))
+            if any(i["kind"] == "on_summary" and int(i["amount_p"]) > 0 for i in d["issues"]):
+                acts.append(_s749_btn("Carry to %s" % nxt, dict(u=u, b=dict(body, decision="carry"))))
+            acts.append(_s749_btn("Accept the dealer's figure", dict(u=u, b=dict(body, decision="accept"))))
+    elif d["state"] == "unknown":
+        who = "Pick the dealer: " + _s750_pick_html(con, d, prefix)
+    if sid is not None and s.get("picked") and d["state"] != "unknown":
+        acts.append(_s749_btn("Not %s's summary" % d["name"].title(), dict(u=prefix + "/api/s750/dealer_of", b=dict(scan=sid, dealer=""))))
+    cells = ('<span class="c1">%s%s</span><span class="c2">%s</span><span class="c3">%s</span><span class="c4">%s</span><span class="c5">%s</span>'
+             % (esc(d["name"].title()), (" · " + esc(rs(s["figure_p"]))) if s.get("figure_p") is not None else "", esc(_s738_dmy(s.get("day")) if s.get("day") else ""),
+                ("scan %s" % esc(s.get("stamp_no") or "")) if sid is not None else "no summary", what, who))
+    cls = " s738ok" if d["state"] == "agrees" else ""
+    body_h = ('<div class="s749acts">%s</div>' % "".join(acts)) if acts else ""
+    if sid is None:
+        h = '<div class="s738l%s" data-dealer="%s">%s<span class="c6"></span></div>%s' % (cls, esc(d["key"]), cells, body_h)
+    else:
+        h = ('<details class="s738v" ontoggle="s738open(this)"><summary class="s738l%s" data-dealer="%s">%s<span class="c6"><span class="s738b">'
+             '<span class="sh">Show summary &#9662;</span><span class="hd">Hide summary &#9652;</span></span></span></summary>%s</details>%s'
+             % (cls, esc(d["key"]), cells, _s750_panel(d, prefix), body_h))
+    if d["key"]:
+        h += '<div class="mut" style="margin:-2px 0 6px"><a href="%s/page/ledger/%s">%s\'s ledger</a></div>' % (esc(prefix), esc(_s750_q(d["key"])), esc(d["name"].title()))
+    return h
+
+
+def _s750_q(key):
+    from urllib.parse import quote                            # noqa: PLC0415
+    return quote(str(key or ""), safe="")
+
+
+def _s750_pick_html(con, d, prefix):
+    s = d.get("summary") or {}
+    names = [(str(r[0]), str(r[1] or r[0]).title()) for r in con.execute("SELECT DISTINCT supplier_norm, supplier FROM purchase_bill WHERE supplier_norm IS NOT NULL ORDER BY supplier")]
+    opts = "".join('<option value="%s">%s</option>' % (esc(k), esc(n)) for k, n in names)
+    sid = int(s.get("id") or 0)
+    return ('<select id="s750pick%d" style="font:inherit;min-height:36px;max-width:100%%"><option value="">— the dealer —</option>%s</select> '
+            '<button type="button" class="s736b s749y" onclick=\'var s=document.getElementById("s750pick%d");if(s&&s.value){s749post(this,{u:%s,b:{scan:%d,dealer:s.value}});}\'>This dealer</button>'
+            % (sid, opts, sid, json.dumps(prefix + "/api/s750/dealer_of"), sid))
+
+
+_s749_rows_before_s750 = s749_rows
+
+
+def s749_rows(con, r, cx, prefix):                            # noqa: F811 -- S750: row 7 is the dealers' summaries; row 8 waits for them too
+    rows, open_n = _s749_rows_before_s750(con, r, cx, prefix)
+    month = r.get("month") or ""
+    try:
+        ds = s750_dealers(con, month, r, cx)
+        dn = s750_open(con, month, r)
+    except Exception as e:                                    # noqa: BLE001 -- the row says so; the strip holds
+        import sys as _sys                                    # noqa: PLC0415
+        print("scan_register S750 row 7: %r" % (e,), file=_sys.stderr)
+        rows[6] = ("Dealer summaries", "each dealer's month summary against Marg, returns included", "could not be read",
+                   ["<div class='mut'>The dealer summaries could not be read -- the strip holds.</div>"], False)
+        return rows, open_n + 1
+    counted = r.get("cls") == "counted"
+    hdr7 = ('<div class="s738hd"><span>Dealer · summary</span><span>Scanned</span><span>Scan</span><span>What</span><span>Whose · next</span><span></span></div>')
+    order = {"differs": 0, "unknown": 0, "unreadable": 1, "awaited": 2, "agrees": 3, "confirm": 4, "running": 5, "none": 6}
+    ds = sorted(ds, key=lambda d: (order.get(d["state"], 9), 0 if d.get("holds") else 1, d["name"]))
+    l7 = [('<div class="mut"><b>How it works:</b> reception scans each dealer\'s %s summary under Pharmacy with the <i>summary</i> tick. The server reads every bill '
+           'on it and its credit notes and holds it against Marg\'s %s bills for that dealer less Marg\'s purchase returns. A dealer agrees when the two are equal '
+           'to the rupee. A difference rows 2 or 6 already carry holds nothing new. A dealer who gives no summary is marked once and not waited for.</div>'
+           % (esc(month_name(month)), esc(month_name(month))))]
+    if ds:
+        l7.append(hdr7)
+        l7.extend(_s750_line(con, d, month, prefix) for d in ds)
+    else:
+        l7.append("No bills of %s yet." % esc(month_name(month)))
+    acts = _s750_rows(con, "SELECT id, dealer, month, kind, amount_p, at FROM s750_answer WHERE month=? AND undone_at IS NULL ORDER BY id DESC LIMIT 12", (month,))
+    if acts:
+        l7.append('<span class="mut"><b>Your answers</b> (undo any):</span>')
+        for a_ in acts:
+            l7.append('<span class="mut">%s · %s%s (%s)</span><div class="s749acts">%s</div>'
+                      % (esc(str(a_[1]).title()), esc(S750_KIND_EN.get(str(a_[3]), str(a_[3]))), (" " + esc(rs(a_[4]))) if a_[4] else "", esc(ddmon(str(a_[5])[:10]) or ""),
+                         _s749_btn("Undo", dict(u=prefix + "/api/s750/undo", b=dict(act=int(a_[0]))))))
+    l7.append('<div class="mut">Every dealer\'s running ledger -- bills with their items, returns, summaries, payments, the balance, item quantities by month and by '
+              'financial year: <a href="%s/page/ledger">the dealer ledgers</a>.</div>' % esc(prefix))
+    n7 = dn.get("words") or ("none" if not ds else "")
+    rows[6] = ("Dealer summaries", "each dealer's month summary against Marg, returns included", n7, l7, False)
+    lab8, sub8, n8, l8, g8 = rows[7]
+    d_open = int(dn.get("n") or 0) if counted else 0
+    open_n = open_n + d_open
+    holds7 = []
+    k = int(dn.get("differ") or 0) + int(dn.get("asked") or 0)
+    if k:
+        holds7.append("%d dealer summar%s differ%s" % (k, "y" if k == 1 else "ies", "s" if k == 1 else ""))
+    if dn.get("awaited"):
+        holds7.append("%d dealer summar%s awaited" % (dn["awaited"], "y" if dn["awaited"] == 1 else "ies"))
+    if dn.get("unread"):
+        holds7.append("%d dealer summar%s unread" % (dn["unread"], "y" if dn["unread"] == 1 else "ies"))
+    if l8 and holds7 and counted:
+        first = l8[0]
+        if first.startswith("<div>Nothing holds here."):
+            first = first.replace("<div>Nothing holds here.", "<div>Holding: %s." % esc(" · ".join(holds7)), 1)
+        elif first.startswith("<div>Holding: "):
+            first = re.sub(r"^(<div>Holding: [^.]*)\.", lambda m_: m_.group(1) + " · " + esc(" · ".join(holds7)) + ".", first, count=1)
+        l8 = [first] + list(l8[1:])
+    l8 = list(l8) + ['<div class="mut">D849: the month locks when Marg = the papers (rows 1–6) and Marg = the dealers\' summaries (row 7), and Marg\'s month-end '
+                     're-export after the last correction is in -- that export is the proof the corrections went in. The NEFT then goes on the dealers\' own figures.</div>']
+    rows[7] = (lab8, "opens when rows 2–7 are clear and Marg's re-export after the last correction is in", ("%d open" % open_n) if open_n else "clear", l8, g8)
+    return rows, open_n
+
+
+# ------------------------------------------------------------------ the payment sheet's dealer column (purchase_app reads it)
+def s750_sheet(con, month):
+    """{dealer key: dict(state, words, figure_p, accepted_p, carried_out_p, carried_in_p, payable_p or None)} for the payment sheet. READ ONLY.
+    payable_p is the dealer's figure when the line agrees or the owner accepted it; None when Marg's figure stands."""
+    out = {}
+    if month_class(con, month) != "counted":
+        return out
+    cin = s750_carried_in(con, month)
+    for d in s750_dealers(con, month):
+        if not d["key"]:
+            continue
+        a = d.get("answer") or {}
+        acc = int(a["amount_p"]) if a.get("kind") == "accept" and a.get("amount_p") else None
+        car = int(a["amount_p"]) if a.get("kind") == "carry" and a.get("amount_p") else 0
+        fig = (d.get("summary") or {}).get("figure_p")
+        if d["state"] == "agrees":
+            word, pay = "agrees", (int(fig) if fig is not None else None)
+        elif d["state"] == "differs" and acc is not None:
+            word, pay = "accepted", acc
+        elif d["state"] == "differs" and car:
+            word, pay = "carried", None
+        elif d["state"] == "differs" and d.get("explained"):
+            word, pay = "differs · rows 2/6", None
+        elif d["state"] == "differs":
+            word, pay = "differs · yours", None
+        elif d["state"] == "awaited":
+            word, pay = "awaited", None
+        elif d["state"] == "running":
+            word, pay = "month running", None
+        elif d["state"] == "none":
+            word, pay = "none given", None
+        elif d["state"] == "confirm":
+            word, pay = "your Confirm", None
+        else:
+            word, pay = d["state"], None
+        out[d["key"]] = dict(state=d["state"], words=word, figure_p=fig, accepted_p=acc, carried_out_p=car, carried_in_p=int(cin.get(d["key"], 0)), payable_p=pay,
+                             holds=bool(d.get("holds")))
+    for k, v in cin.items():
+        out.setdefault(k, dict(state="", words="", figure_p=None, accepted_p=None, carried_out_p=0, carried_in_p=int(v), payable_p=None, holds=False))
+    return out
+# ---- S750 end ---------------------------------------------------------------------------------------------------------------------------

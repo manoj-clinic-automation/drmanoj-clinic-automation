@@ -1,0 +1,55 @@
+
+
+
+# ---- S750 (08-Nov-2026, Sanjeevni session 406, kit S750_MONTH_END; D849): the bill the owner accepted from a dealer's summary -----------------
+#  When the owner ACCEPTS a dealer's summary that lists a bill Marg does not carry (row 7 of his step view), Amir's page gets one card:
+#  "Dealer ke hisaab par yeh bill hai, Marg mein nahi -- kaagaz aane par entry karein", one line per bill (dealer, number, date, amount).
+#  The line leaves by itself when Marg carries the bill (scan_register.s750_amir_enter reads the one register). Reads only; nothing here
+#  changes Amir's Aaj ka kaam list (D690) or any Marg figure.
+KIT_S750 = "S750_MONTH_END"
+_state_before_s750 = state
+_card_rows_before_s750 = _card_rows
+
+
+def state(cx, day, who="", step=None, owner=False):           # noqa: F811 -- S750: the accepted bills Amir is to enter
+    S = _state_before_s750(cx, day, who, step, owner)
+    S.s750 = []
+    try:
+        import scan_register as SR                             # noqa: PLC0415
+        S.s750 = SR.s750_amir_enter(cx)
+    except Exception as e:                                     # noqa: BLE001 -- his day never waits on it
+        print("amir_day S750: the accepted bills could not be read: %s" % str(e)[:200], file=sys.stderr)
+    return S
+
+
+def _s750_card(items):
+    out = []
+    for i in items:
+        out.append("<div class=bill data-s750='%s'><div class=who>%s &middot; Bill %s</div><div style='font-size:15px'><b>Bill ki tareekh: %s</b> &middot; <b>&#8377;%s</b></div>"
+                   "<p class=good><b>Dealer ke %s ke hisaab par yeh bill hai, Marg mein nahi &mdash; kaagaz aane par Marg mein entry karein.</b></p></div>"
+                   % (_esc("%s|%s" % (i["dealer"], i["no"])), _esc(str(i["name"]).title()), _esc(i["no"] or "?"), _esc(_ddmmyyyy(i["date"]) if i.get("date") else "?"),
+                      _esc(_s738_rs(int(i["amount_p"] or 0))), _esc(_s750_hi_month(i.get("month")))))
+    return ("<div class=line id=s750><span class=big>Dealer ke hisaab ka bill, Marg mein nahi &middot; %d</span>"
+            "<p class=sub>Doctor sahab ne dealer ka hisaab maan liya hai. Bill ka kaagaz aane par Marg mein entry karein; Marg mein aate hi line khud hat jayegi.</p>%s</div>"
+            % (len(items), "".join(out)))
+
+
+def _s750_hi_month(ym):
+    names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    try:
+        return "%s %s" % (names[int(ym[5:7]) - 1], ym[:4])
+    except (TypeError, ValueError, IndexError):
+        return str(ym or "")
+
+
+def _card_rows(S):                                            # noqa: F811 -- S750
+    rows = _card_rows_before_s750(S)
+    items = getattr(S, "s750", None) or []
+    if not items:
+        return rows
+    at = 0
+    for i, r in enumerate(rows):
+        if r[0] in ("stage", "sunday", "fixes", "scans", "s738", "s738ok"):
+            at = i + 1
+    return rows[:at] + [("s750", _s750_card(items), "dealer summary bills to enter: %d" % len(items), True)] + rows[at:]
+# ---- S750 end --------------------------------------------------------------------------------------------------------

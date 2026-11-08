@@ -1,0 +1,6 @@
+fdb0960f83b98f68b90b340d0655aa37  finance/scan_register.py
+262cafd311a7d1e9d3587aefc8ac6cd1  finance/purchase_app.py
+c86bb8e533a1084c62bd2a2dfc8f7aef  finance/amir_day.py
+a8fca8efcb93256bbf8e579c72ce84e1  finance/porders_s454.py
+dfa0955ccae7d13aa32c069784f054ea  assetapp/asset_register.py
+8e1ae6bf363f99719b6de5d2dbe01783  assetapp/claude_reader.py

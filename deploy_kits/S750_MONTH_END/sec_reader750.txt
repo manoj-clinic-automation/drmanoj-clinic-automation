@@ -1,0 +1,139 @@
+
+
+# ---- S750 (08-Nov-2026, the Sanjeevni chat's session 406, kit S750_MONTH_END; PLANNED on board/_numbers v1066, the Scan App chat told at the close) ----
+#  A dealer's MONTH SUMMARY on the pharmacy lane (D849 / F-1175): the intake's 'summary' tick lands the scan as kind='Summary',
+#  doc_kind='summary'; this reader reads it as a summary, never as a bill -- every bill line it lists (number, date, amount), every
+#  credit note or payment line, the period and the closing total -- and records it in claude_reading with doc_kind='summary'.
+#  read_summary() is called where read_bill() is called today, for kind='Summary' only (asset_register, S750). Nothing else changes:
+#  read(), clean(), to_bill() and the bill prompt are untouched; a summary reading never writes vendor / bill_no / total onto the bills row
+#  by to_bill() (the finance side reads claude_reading itself); summary_to_bill() lends only the dealer's name and figure. No person's name is asked for or kept.
+
+SUMMARY_PROMPT = """You are reading ONE scanned paper received by a small pharmacy in Bareilly, India: a supplier's (dealer's) MONTHLY
+SUMMARY of what the pharmacy bought from them -- also called a statement of account, ledger, outstanding statement or bill list. It lists
+the bills (invoices) of a period with their dates and amounts, sometimes credit notes, purchase returns or payments received, and a total
+or closing balance. Read it carefully, including handwriting. Return ONLY one JSON object, no prose, exactly these keys:
+
+{"is_summary": true or false  (false when the paper is a single bill, a challan or something else -- then leave the rest null),
+ "dealer": the supplier's business name as printed (string or null),
+ "period_from": "YYYY-MM-DD" or null, "period_to": "YYYY-MM-DD" or null  (Indian papers write day first: 05/10/26 is 2026-10-05),
+ "lines": [{"kind": "bill" | "credit" | "payment" | "other",
+            "no": the bill / credit note / reference number as printed (string or null),
+            "date": "YYYY-MM-DD" or null,
+            "amount": the line's amount in rupees as a positive number (null if unreadable)}],
+ "total_bills": the sum of the bills as printed (number or null),
+ "closing": the closing balance / total payable as printed (number or null),
+ "opening": any opening balance carried in (number or null),
+ "handwritten": true or false}
+
+Rules: one entry per printed line; never invent a line and never add lines up yourself -- copy the printed totals; numbers without commas or
+currency signs; use null for anything you cannot read; a line that reduces what is owed (a credit note, a return, a payment, 'by cash',
+'by NEFT', 'Cr') is kind 'credit' or 'payment', a bill ('Dr', 'invoice', 'sale') is kind 'bill'. NEVER write any person's name anywhere in
+the answer (no owner, no staff, no customer) -- the dealer's business name only."""
+
+SUMMARY_KINDS = ("bill", "credit", "payment", "other")
+
+
+def clean_summary(data):
+    """Only the listed fields, each of its own type; at most 400 lines. A free-text note is never kept."""
+    if not isinstance(data, dict):
+        return None
+    hw = data.get("handwritten")
+    iss = data.get("is_summary")
+    out = {"doc_kind": "summary", "is_summary": iss if isinstance(iss, bool) else None, "dealer": _txt(data.get("dealer")),
+           "period_from": _date(data.get("period_from")), "period_to": _date(data.get("period_to")),
+           "total_bills": _num(data.get("total_bills")), "closing": _num(data.get("closing")), "opening": _num(data.get("opening")),
+           "handwritten": hw if isinstance(hw, bool) else None, "lines": []}
+    for ln in (data.get("lines") if isinstance(data.get("lines"), list) else []):
+        if not isinstance(ln, dict):
+            continue
+        k = _txt(ln.get("kind"), 12)
+        amt = _num(ln.get("amount"))
+        if amt is not None:
+            amt = abs(amt)
+        out["lines"].append({"kind": k if k in SUMMARY_KINDS else "other", "no": _txt(ln.get("no"), 60), "date": _date(ln.get("date")),
+                             "date_as_read": _txt(ln.get("date"), 20), "amount": amt})
+        if len(out["lines"]) >= 400:
+            break
+    return out
+
+
+def read_summary(path, bid=None, db_path=None):
+    """Read one paper as a dealer's month summary. Returns the cleaned reading (dict, doc_kind 'summary') or None. Records it in
+    claude_reading exactly as read() records a bill (the same key, state, cap, models, retries). Never raises."""
+    db_path = db_path or os.environ.get("ASSETS_DB") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets.db")
+    try:
+        con = _db(db_path)
+    except Exception:                                                # noqa: BLE001
+        return None
+    try:
+        ensure(con)
+        if state(con) != "on":
+            return None
+        blk, why = _block(path)
+        if blk is None:
+            _record(con, bid, None, False, None, None, why)
+            return None
+        key = _key()
+        first = setting(con, "read.claude_model")
+        models = ([first] if first in MODELS else []) + [m for m in MODELS if m != first]
+        last_err, unavailable = "", 0
+        for i, model in enumerate(models):
+            body = {"model": model, "max_tokens": 8000,
+                    "messages": [{"role": "user", "content": [blk, {"type": "text", "text": SUMMARY_PROMPT}]}]}
+            for attempt in range(3):
+                if calls_today(con) >= cap(con):
+                    _record(con, bid, None, False, None, None, "the day's limit reached")
+                    return None
+                _count_call(con)
+                code, js, text = _post(body, key)
+                if code == 200 and js:
+                    if js.get("stop_reason") == "max_tokens":
+                        _record(con, bid, model, False, None, None, "the paper is too long to read in one answer")
+                        return None
+                    out = "".join(c.get("text", "") for c in (js.get("content") or []) if isinstance(c, dict))
+                    data = clean_summary(_json_from(out))
+                    if data is None:
+                        last_err = "the answer was not readable"
+                        break                                        # the next model
+                    if unavailable == i and first != model:
+                        set_setting(con, "read.claude_model", model)
+                    _record(con, bid, model, True, "summary", data, None)
+                    return data
+                err = js.get("error") if isinstance(js, dict) and isinstance(js.get("error"), dict) else {}
+                low = ((err.get("message") or "") + " " + (err.get("type") or "")).lower()
+                if code in (401, 403) or "authentication" in low or "permission" in low:
+                    set_setting(con, "read.claude", "stopped:the key was refused")
+                    _record(con, bid, model, False, None, None, "key refused")
+                    return None
+                if code == 402 or "credit" in low or "billing" in low or "balance" in low or "usage limit" in low:
+                    set_setting(con, "read.claude", "stopped:the credit has run out")
+                    _record(con, bid, model, False, None, None, "credit")
+                    return None
+                if code == 404 or (code == 400 and "model" in low):
+                    last_err = "model %s not available" % model
+                    unavailable += 1
+                    break                                            # the next model
+                if code in (429, 500, 502, 503, 529, 0):
+                    last_err = "busy (%s)" % (code or text or "no answer")
+                    time.sleep(3 * (attempt + 1))
+                    continue
+                _record(con, bid, model, False, None, None, "HTTP %s %s" % (code, (err.get("message") or "")[:120]))
+                return None
+        _record(con, bid, None, False, None, None, last_err or "no answer")
+        return None
+    except Exception as e:                                           # noqa: BLE001
+        try:
+            _record(con, bid, None, False, None, None, type(e).__name__)
+        except Exception:                                            # noqa: BLE001
+            pass
+        return None
+    finally:
+        con.close()
+
+
+def summary_to_bill(data):
+    """What a summary reading lends the bills row (asset_register S750): the dealer's name and its figure -- no items, no bill number."""
+    d = data or {}
+    fig = d.get("closing") if d.get("closing") is not None else d.get("total_bills")
+    return {"vendor": d.get("dealer"), "vendor_phone": None, "vendor_email": None, "bill_no": None, "bill_date": d.get("period_to"), "total_amount": fig}, []
+# ---- S750 end ---------------------------------------------------------------------------------------------------------------------------
