@@ -86,6 +86,9 @@ def build(work):
         a.execute("INSERT INTO bill_audit(bill_id, at, who, action, detail) VALUES(?,?,?,?,?)", (bid, "2026-11-08 12:00:00", "Shivani", "submitted", "{}"))
         a.execute("INSERT OR REPLACE INTO scan_check_s441(bill_id, verdict, other_id, at) VALUES(?,?,?,?)", (bid, "ok", None, "2026-11-08"))
     a.execute("UPDATE bills SET dup_cand=280, dup_flag='maybe', dup_why='x' WHERE id=273")      # a later paper's 'second scan of B-0280?' question
+    a.execute("INSERT INTO bills(id, kind, vendor, total_amount, created_by, created_at, stamp_no, status, submitted_by, submitted_at, lane, rescan_of) "
+              "VALUES(290,'Summary','RADHA MEDICAL & SCIENTIFIC',4038,?, '2026-11-08 08:30:00','B-0290','captured','Shivani','2026-11-08 14:00:00','pharmacy',286)", (uid,))
+    a.execute("UPDATE bills SET status='rejected', reject_reason='rescanned as B-0290' WHERE id=286")
     a.execute("INSERT INTO scan_question(bill_id, kind, at) VALUES(281, 'dup', '2026-11-08')") if "at" in {r[1] for r in a.execute("PRAGMA table_info(scan_question)")} else None
     a.commit()
     a.close()
@@ -143,7 +146,7 @@ try:
     rc, out = run(adb, fdb, real=True)
     ck("2 REAL exits 0 and says DONE", rc == 0 and "S751_SUMMARY_SCANS_CLEANUP: DONE." in out, out[-800:])
     after = snap(adb, fdb)
-    ck("2 bills 19 -> 3 (the sixteen gone, the three older papers kept)", before[0] == 19 and after[0] == 3, repr((before, after)))
+    ck("2 bills 20 -> 4 (the sixteen gone, the three older papers and the rescan B-0290 kept)", before[0] == 20 and after[0] == 4, repr((before, after)))
     a = sqlite3.connect(adb)
     f = sqlite3.connect(fdb)
     ck("2 B-0151, B-0182, B-0273 still there with their items and readings",
@@ -153,6 +156,9 @@ try:
        a.execute("SELECT COUNT(*) FROM claude_reading WHERE bill_id BETWEEN 274 AND 289").fetchone()[0] == 0
        and a.execute("SELECT COUNT(*) FROM scan_check_s441 WHERE bill_id BETWEEN 274 AND 289").fetchone()[0] == 0
        and a.execute("SELECT COUNT(*) FROM scan_question WHERE bill_id BETWEEN 274 AND 289").fetchone()[0] == 0)
+    ck("2 B-0290 (the rescan of B-0286) kept as it is, its rescan link cleared and audited",
+       a.execute("SELECT rescan_of, kind, status, total_amount FROM bills WHERE id=290").fetchone() == (None, "Summary", "captured", 4038.0)
+       and a.execute("SELECT COUNT(*) FROM bill_audit WHERE bill_id=290 AND action='rescan_link_cleared'").fetchone()[0] == 1)
     ck("2 sixteen paper_deleted audit rows by S751, the old audit history kept (19 'submitted' rows)",
        a.execute("SELECT COUNT(*) FROM bill_audit WHERE action='paper_deleted' AND who LIKE 'S751%'").fetchone()[0] == 16
        and a.execute("SELECT COUNT(*) FROM bill_audit WHERE action='submitted'").fetchone()[0] == 19)

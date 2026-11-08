@@ -10,7 +10,7 @@ inherits nothing; and on finance.db the pairing scratch rows purchase_scan_state
 
 ALL OR NOTHING. Every paper must be the one that was read on the screen (id, stamp, amount to the rupee, scanned 08-Nov-2026, by Shivani,
 the vendor as read) or NOTHING is changed. REFUSES when anything a person decided or paid points at one of them (paper_payment_bill,
-proc_paper / proc_line, stationery_line, d664_warranty, an outside paper's dup_of / dup_cand / challan_of / rescan_of, finance.db's
+proc_paper / proc_line, stationery_line, d664_warranty, an outside paper's dup_of / challan_of (a later paper's dup_cand question or rescan_of link is CLEARED with the paper), finance.db's
 s736_decision / s749_act / s750_dealer_of). Backs up both databases first (sqlite backup API) and prints every count before and after.
 
     python3 cleanup_s751.py --assets /root/assetapp/assets.db --finance /root/finance/finance.db            # DRY: reads, prints, writes nothing
@@ -141,13 +141,21 @@ def main():
         print("   %-22s.%-14s %s" % (t, c, "no table/column" if n is None else n))
         if n:
             bad.append("%s.%s names %d of them" % (t, c, n))
-    n_cand = 0
+    n_cand = n_resc = 0
     for c in ("dup_of", "dup_cand", "challan_of", "rescan_of"):
         if has_col(a, "bills", c):
             n = a.execute("SELECT COUNT(*) FROM bills WHERE %s IN (%s) AND id NOT IN (%s)" % (c, Q, Q), IDS + IDS).fetchone()[0]
             if c == "dup_cand":
                 n_cand = n
                 print("   bills.%-16s from OUTSIDE the sixteen: %d  (a 'second scan of ...?' question on a later paper: cleared with the paper it asks about)" % (c, n))
+                continue
+            if c == "rescan_of":                                      # S618: a later RESCAN of one of them already set the old one aside; the link
+                n_resc = n                                            # names a paper that is going -- cleared, the new scan stands as a plain scan
+                for rr in a.execute("SELECT id, stamp_no, rescan_of, kind, lane, status FROM bills WHERE rescan_of IN (%s) AND id NOT IN (%s)" % (Q, Q), IDS + IDS):
+                    print("   bills.rescan_of        from OUTSIDE: %s #%d (%s, %s, %s) is the rescan of #%d -- the link is cleared, the new scan stays as it is"
+                          % (rr["stamp_no"], rr["id"], rr["kind"], rr["lane"], rr["status"], rr["rescan_of"]))
+                if not n:
+                    print("   bills.%-16s from OUTSIDE the sixteen: 0" % c)
                 continue
             print("   bills.%-16s from OUTSIDE the sixteen: %d" % (c, n))
             if n:
@@ -210,6 +218,12 @@ def main():
             na = a.execute("UPDATE assets SET bill_id=NULL WHERE bill_id=?", (bid,)).rowcount if has_col(a, "assets", "bill_id") else 0
             if has_col(a, "bills", "dup_cand"):
                 a.execute("UPDATE bills SET dup_cand=NULL, dup_flag=NULL, dup_why=NULL WHERE dup_cand=? AND id NOT IN (%s)" % Q, [bid] + IDS)
+            if has_col(a, "bills", "rescan_of"):
+                for rr in a.execute("SELECT id, stamp_no FROM bills WHERE rescan_of=? AND id NOT IN (%s)" % Q, [bid] + IDS).fetchall():
+                    a.execute("UPDATE bills SET rescan_of=NULL WHERE id=?", (rr["id"],))
+                    a.execute("INSERT INTO bill_audit(bill_id, at, who, action, detail) VALUES(?,?,?,?,?)",
+                              (rr["id"], at, "S751 (the owner's line)", "rescan_link_cleared",
+                               json.dumps({"was_rescan_of": bid, "old_stamp": stamp_no, "why": "the old scan removed by S751; this scan stands on its own"})))
             detail = {"stamp": r["stamp_no"], "created_at": r["created_at"], "payments_voided": [], "assets_cleared": na,
                       "kit": KIT, "why": "a dealer's October summary scanned without the SUMMARY tick; rescanned properly by staff (the owner, 13:25 IST 08-Nov)",
                       "vendor": r["vendor"], "amount": r["total_amount"], "kind": r["kind"], "lane": r["lane"], "status": r["status"]}
@@ -254,6 +268,9 @@ def main():
     if n_cand:
         left_c = a.execute("SELECT COUNT(*) FROM bills WHERE dup_cand IN (%s)" % Q, IDS).fetchone()[0]
         print("   later papers' 'second scan of ...?' questions about them cleared: %d -> %d left" % (n_cand, left_c))
+    if n_resc:
+        left_r = a.execute("SELECT COUNT(*) FROM bills WHERE rescan_of IN (%s)" % Q, IDS).fetchone()[0]
+        print("   later papers' rescan links to them cleared: %d -> %d left (each audited 'rescan_link_cleared')" % (n_resc, left_r))
     ok = left == 0 and aud == len(IDS) and n_bills_after == n_bills_before - len(IDS)
     print("%s: %s" % (KIT, "DONE." if ok else "CHECK -- the read-back is not what was expected"))
     return 0 if ok else 1
