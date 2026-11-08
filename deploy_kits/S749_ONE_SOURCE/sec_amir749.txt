@@ -1,0 +1,82 @@
+
+
+
+# ---- S749 (08-Nov-2026, Sanjeevni session 405, kit S749_ONE_SOURCE; D865): one source on Amir's side too --------------------------------------
+#  (1) A ROUND-OFF on his card: a bill whose paper and Marg differ by exactly one rupee (scan_register.s738_fixes kind 'roundoff') says
+#      "Marg mein bill <paper> kijiye (round-off)" -- every rupee is corrected in Marg; proved only by his export, as before.
+#  (2) The owner's English summary (/finance/amir/day) reads HIS list: "Marg sudhar: N bills to correct (the bills) · Wapsi baaki: N · proved
+#      by his exports ✓ N (14 days) · bills waiting for entry: N" -- from scan_register.s738_fixes / s738_tracked / s740_pending and
+#      purchase_app.scans_for_amir, the same readers his own page uses. Reads only.
+KIT_S749 = "S749_ONE_SOURCE"
+_s738_card_before_s749 = _s738_card
+
+
+def _s738_card(fx):                                           # noqa: F811 -- S749: the round-off card
+    rnd = [f for f in fx if f.get("kind") == "roundoff"]
+    rest = [f for f in fx if f.get("kind") != "roundoff"]
+    h = _s738_card_before_s749(rest) if rest else ""
+    if not rnd:
+        return h
+    out = []
+    for f in rnd:
+        head = "<div class=who>%s &middot; Bill %s</div><div style='font-size:15px'><b>Bill ki tareekh: %s</b></div>" % (
+            _esc(f["supplier"]), _esc(f["bill_no"]), _esc(_ddmmyyyy(f["date"])))
+        body = ("<div style='font-size:15px'>Marg mein &#8377;%s &middot; kaagaz par &#8377;%s &mdash; <b class=bad>&#8377;%s ka round&#8209;off</b></div>"
+                "<p class=good><b>Marg mein bill &#8377;%s kijiye (round&#8209;off)</b></p>"
+                % (_esc(_s738_rs(f["marg_p"])), _esc(_s738_rs(f["paper_p"])), _esc(_s738_rs(abs(int(f["diff_p"])))), _esc(_s738_rs(f["paper_p"]))))
+        link = ("<a class='btn plain' style='display:inline-block;width:auto;margin:0' href='/finance/purchase/api/s738/scan/%d' target=_blank "
+                "rel=noopener>Kaagaz dekhiye</a>" % int(f["scan"]) if f.get("scan") is not None else "")
+        out.append("<div class=bill data-s738='%d'>%s%s%s</div>" % (int(f["bill_id"]), head, body, link))
+    block = "".join(out)
+    if h:
+        # the round-off cards join the correction card, and its count carries them
+        h = h.replace("Purchase bill Marg mein theek karein &middot; %d" % len(rest), "Purchase bill Marg mein theek karein &middot; %d" % len(fx), 1)
+        i = h.rfind("<p class=sub style='background:#eef0f4")
+        return (h[:i] + block + h[i:]) if i > 0 else (h + block)
+    return ("<div class=line id=s738><span class=big>Purchase bill Marg mein theek karein &middot; %d</span>"
+            "<p class=sub>Har bill ka kaagaz saath mein hai. Marg mein kaagaz jaisa kijiye &mdash; round-off bhi.</p>%s"
+            "<p class=sub style='background:#eef0f4;border-radius:8px;padding:8px'>Theek karne ke baad aaj ki report export (step 4) kijiye &mdash; "
+            "Marg mein sahi aate hi line khud hat jayegi.</p></div>" % (len(fx), block))
+
+
+def _s749_owner_card(cx):
+    """The owner's English card: his list as his page carries it. Reads only; a fault is one line."""
+    try:
+        import scan_register as SR                             # noqa: PLC0415
+        fx = SR.s738_fixes(cx, fast=True)
+        names = ", ".join("%s %s" % (f["supplier"].title(), f["bill_no"]) for f in fx[:8]) + (" and %d more" % (len(fx) - 8) if len(fx) > 8 else "")
+        rets = [r for r in SR.s740_pending(cx)]
+        rnames = ", ".join("%s %s" % (r["supplier"].title(), r.get("bill_no") or r.get("item") or "") + (" (dealer's paper awaited)" if r.get("stage") == "waiting" else "")
+                           for r in rets[:6])
+        cut = (datetime.now(IST).replace(tzinfo=None) - timedelta(days=14)).replace(microsecond=0).isoformat()
+        proved = sum(1 for t in SR.s738_tracked(cx).values() if t.get("settled_at") and str(t["settled_at"]) >= cut)
+        try:
+            import purchase_app                                # noqa: PLC0415
+            waiting = len(purchase_app.scans_for_amir(cx).get("list") or [])
+        except Exception:                                      # noqa: BLE001
+            waiting = -1
+        return ("<div class=card id=s749amir><h2>Amir -- his list today</h2>"
+                "<div class=line>Marg sudhar: <b>%d</b> bill%s to correct%s</div>"
+                "<div class=line>Wapsi baaki: <b>%d</b>%s</div>"
+                "<div class=line>Proved by his exports (14 days): <b>%d</b> &#10003;</div>"
+                "<div class=line>Bills scanned, waiting for his entry: <b>%s</b></div>"
+                "<p class=sub>The same list his page carries. A correction leaves only when his export shows Marg = the paper.</p>"
+                "<div class=line><a href='/finance/purchase/page/check'>Your purchase check</a> &middot; <a href='/finance/amir/step/6'>his card</a></div></div>"
+                % (len(fx), "" if len(fx) == 1 else "s", (" (%s)" % _esc(names)) if names else "", len(rets), (" (%s)" % _esc(rnames)) if rnames else "",
+                   proved, waiting if waiting >= 0 else "not read"))
+    except Exception as e:                                     # noqa: BLE001
+        return "<div class=card id=s749amir><h2>Amir -- his list today</h2><div class=line>not read: %s</div></div>" % _esc(str(e)[:120])
+
+
+_shell_before_s749 = _shell
+
+
+def _shell(title, body, head_extra=""):                       # noqa: F811 -- S749: the owner's day page carries Amir's list
+    if title == "Amir's day" and "<div class=card id=s444salt>" in body:
+        try:
+            cx = _db()
+            body = body.replace("<div class=card id=s444salt>", _s749_owner_card(cx) + "<div class=card id=s444salt>", 1)
+        except Exception as e:                                 # noqa: BLE001
+            print("amir_day S749: the owner's card could not be drawn: %s" % str(e)[:200], file=sys.stderr)
+    return _shell_before_s749(title, body, head_extra)
+# ---- S749 end ---------------------------------------------------------------------------------------------------------------------------

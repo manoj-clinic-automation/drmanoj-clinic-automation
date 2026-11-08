@@ -1,0 +1,58 @@
+
+
+
+# ---- S749 (08-Nov-2026, Sanjeevni session 405, kit S749_ONE_SOURCE; the parent's file, PLANNED on board/_numbers D646, F-1182) -----------
+#  The console's month page, Sanjeevni group: one line per month, "Purchase check -- <month> · N paper matches · N differences → Amir · N to
+#  confirm · N returns pending · NEFT on hold / clear" -> the owner's step view for that month (scan_register.s749_month_open: the one
+#  source). The pharmacy-scans line of "Other papers" opens the register for THAT month. Reads only; a fault is one grey line.
+P["pcheck"] = "/finance/purchase/page/check?month=%s"
+P["pscans_month"] = "/finance/purchase/page/scans?month=%s"
+_g_sanjeevni_before_s749 = g_sanjeevni
+
+
+def g_sanjeevni(con, env, ym, today, state, un):              # noqa: F811 -- S749: the Purchase check line
+    g = _g_sanjeevni_before_s749(con, env, ym, today, state, un)
+
+    def pcheck():
+        import scan_register as SR                                     # noqa: PLC0415
+        if SR.month_class(con, ym) != "counted":
+            return None
+        n = SR.s749_month_open(con, ym)
+        text = "Purchase check — %s · %s · %s" % (FULL[int(ym[5:7]) - 1], n["words"], "NEFT on hold" if n["open"] else "NEFT clear")
+        links = [dict(t="the full list", href=P["pscans_month"] % ym)]
+        if n["open"]:
+            return row("w" if (n["confirm"] or n["you"]) else "n", text, href=P["pcheck"] % ym, who=("yours · %d to confirm" % n["confirm"]) if n["confirm"] else "",
+                       links=links, act="Open" if (n["confirm"] or n["you"]) else None, act_href=P["pcheck"] % ym, act_cls="soft")
+        return row("g", text, href=P["pcheck"] % ym, links=links)
+    extra = []
+    piece(extra, "the purchase check", pcheck, un)
+    if extra:
+        rows = list(g.get("rows") or [])
+        at = next((i for i, r in enumerate(rows) if "purchase" in str(r.get("text") or "").lower()), None)
+        rows[(at + 1) if at is not None else len(rows):(at + 1) if at is not None else len(rows)] = extra
+        g["rows"] = rows
+        g["n"] = len(rows)
+        g["done"] = sum(1 for r in rows if r["dot"] == "g")
+        g["yours"] = sum(1 for r in rows if r["dot"] == "w")
+        g["waiting"] = sum(1 for r in rows if r["dot"] == "n")
+        if not g.get("act"):
+            a = next((r for r in rows if r["dot"] == "w" and r.get("act")), None)
+            if a:
+                g["act"], g["act_href"], g["act_cls"] = a["act"], a["act_href"], a.get("act_cls") or ""
+        g["sub"] = _sub_from_rows(rows)
+    return g
+
+
+_others_before_s749 = others
+
+
+def others(con, env, ym, today, state, un):                   # noqa: F811 -- S749: the pharmacy scans line opens the register for that month
+    o = _others_before_s749(con, env, ym, today, state, un)
+    try:
+        for r in o.get("rows") or []:
+            if r.get("k") == "Pharmacy bills scanned" and r.get("href") == P["scans"]:
+                r["href"] = P["pscans_month"] % ym
+    except Exception:                                                  # noqa: BLE001
+        pass
+    return o
+# ---- S749 end ---------------------------------------------------------------------------------------------------------------------------

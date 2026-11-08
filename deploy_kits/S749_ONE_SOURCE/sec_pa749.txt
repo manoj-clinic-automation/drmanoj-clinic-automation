@@ -1,0 +1,306 @@
+
+
+
+# ---- S749 (08-Nov-2026, Sanjeevni session 405, kit S749_ONE_SOURCE; D865, D866; F-1181, F-1182, F-1183): one source, one language ---------
+#  * F-1181 -- a line Marg could not name is matched by what it carries before it is called missing: an UNDATED item line (Marg's item-wise
+#    export clips a long bill number -- 'L2678591' for GPPL2678591, or prints none) of the same supplier whose net adds up to ONE bill of the
+#    month to the rupee, and whose number (when read) ends the bill's, is that bill's line set (_line_sets); it leaves the undated list
+#    (_undated_lines) and the bill leaves "no item lines". Exactly one bill for one set; nothing written.
+#  * The one lock gate (_lock_gate): _month_summary's reasons, the three reports, the cross-check -- AND the register's open rows (differences
+#    → Amir, to confirm, with reception, you & Shavez, returns pending: scan_register.s749_lock_reasons). Every page reads this one gate.
+#  * Step 2 of the payment sheet runs by itself: when the supplier-wise statement has arrived and no check has been kept for that very export,
+#    the server keeps one (purchase_pay_check, who 'server'); the sheet shows the server's verdict -- no "Check it now" tap.
+#  * The audit page: the register's state word and whose/next per bill; its Correct / Wrong buttons off the doctor's view (one place to decide:
+#    his step view); the month strip. The hub: counted months only, the register's words per month, the step view as the way in.
+#  * The owner's doors for the step view's inline actions (the doctor only): Confirm / ask reception / undo (owner-confirmed suppliers);
+#    Not this bill (unpair) / the pick list / Pick the right bill (pair) / undo -- scan_register.s749_*. A Marg correction is proved only by
+#    Amir's export (F-1162); no door here settles one.
+KIT_S749 = "S749_ONE_SOURCE"
+_line_sets_before_s749 = _line_sets
+_undated_lines_before_s749 = _undated_lines
+
+
+def _s749_digits(s):
+    return re.sub(r"\D", "", str(s or "")).lstrip("0")
+
+
+def _s749_clipped(con, month):
+    """F-1181: {(supplier_norm, bill_no of the BILL): the set} and {the matched undated line ids}. One bill for one set, the amount to the rupee,
+    the clipped number (when read) ending the bill's digits (or the bill's ending it)."""
+    bills = con.execute("SELECT b.id, b.supplier_norm, b.bill_no, b.bill_date, b.amount_p FROM purchase_bill b WHERE b.month=? AND " + EFF_BILL, (month,)).fetchall()
+    if not bills:
+        return {}, set()
+    base = _line_sets_before_s749(con, month)
+    bdicts = [dict(supplier_norm=b[1], bill_no=b[2], bill_date=b[3]) for b in bills]
+    stray = _stray_sets(bdicts, base)
+    have = {(b[1], b[2]) for b in bills if _bill_lines(dict(supplier_norm=b[1], bill_no=b[2], bill_date=b[3]), base, stray) is not None}
+    groups, singles = {}, {}
+    for l in _undated_lines_before_s749(con, month):
+        net = int(l["net_amount_p"] if l["net_amount_p"] is not None else (l["amount_p"] or 0))
+        k = (l["supplier_norm"], l["bill_no"], l["source_md5"])
+        g = groups.setdefault(k, dict(supplier_norm=l["supplier_norm"], bill_no=l["bill_no"], line_type=l["line_type"], md5=l["source_md5"], stamp="",
+                                      net_p=0, gross_p=0, n=0, ids=[], bill_date=None))
+        g["net_p"] += net
+        g["gross_p"] += int(l["amount_p"] or 0)
+        g["n"] += 1
+        g["ids"].append(int(l["id"]))
+        singles[k + (int(l["id"]),)] = dict(supplier_norm=l["supplier_norm"], bill_no=l["bill_no"], line_type=l["line_type"], md5=l["source_md5"], stamp="",
+                                           net_p=net, gross_p=int(l["amount_p"] or 0), n=1, ids=[int(l["id"])], bill_date=None)
+    if not groups:
+        return {}, set()
+    for k, g in list(groups.items()):                          # a set whose lines together name no bill may still hold ONE line that names one --
+        if g["n"] > 1 and _s749_digits(g["bill_no"]):           # only when the line carries a number (an amount alone names nothing)
+            for sk, sg in singles.items():
+                if sk[:3] == k:
+                    groups[sk] = sg
+    try:
+        stamps = {r[0]: r[1] for r in con.execute("SELECT md5, export_stamp FROM purchase_export")}
+    except sqlite3.Error:
+        stamps = {}
+    pairs = {}                                                 # bill id -> [group keys that fit]
+    gfit = {}                                                  # group key -> [bill ids that fit]
+    for b in bills:
+        if (b[1], b[2]) in have:
+            continue                                           # the bill has its dated lines: never a clipped match
+        bd = _s749_digits(b[2])
+        for k, g in groups.items():
+            if g["supplier_norm"] and g["supplier_norm"] != b[1]:
+                continue
+            if abs(int(g["net_p"]) - int(b[4] or 0)) > AGREE_P:
+                continue
+            ld = _s749_digits(g["bill_no"])
+            if ld and bd and not (bd.endswith(ld) or ld.endswith(bd)):
+                continue
+            pairs.setdefault(int(b[0]), []).append(k)
+            gfit.setdefault(k, []).append(int(b[0]))
+    sets, used, sets_by_bill = {}, set(), set()
+    for b in sorted(bills, key=lambda b: int(b[0])):
+        ks = [k for k in (pairs.get(int(b[0])) or []) if not (set(groups[k]["ids"]) & used)]
+        whole = [k for k in ks if len(k) == 3]
+        ks = whole if whole else ks                            # the whole set first; a single line only when no set fits
+        if len(ks) != 1 or len([x for x in (gfit.get(ks[0]) or []) if x not in {bid for bid in sets_by_bill}]) != 1:
+            continue
+        g = groups[ks[0]]
+        sets_by_bill.add(int(b[0]))
+        sets[(b[1], b[2])] = dict(supplier_norm=b[1], bill_no=b[2], bill_date=b[3], line_type=g["line_type"], md5=g["md5"], stamp=stamps.get(g["md5"], ""),
+                                  net_p=g["net_p"], gross_p=g["gross_p"], n=g["n"], clipped=g["bill_no"])
+        used.update(g["ids"])
+    return sets, used
+
+
+def _line_sets(con, month):                                   # noqa: F811 -- S749 (F-1181): the clipped item-wise sets join the month's
+    sets = _line_sets_before_s749(con, month)
+    try:
+        extra, _used = _s749_clipped(con, month)
+        for k, t in extra.items():
+            sets.setdefault(k, t)
+    except Exception as e:                                     # noqa: BLE001 -- the sets stand as they were
+        import sys as _sys                                     # noqa: PLC0415
+        print("purchase_app S749 clipped sets: %r" % (e,), file=_sys.stderr)
+    return sets
+
+
+def _undated_lines(con, month=None):                          # noqa: F811 -- S749 (F-1181): a matched line is no longer undated
+    rows = _undated_lines_before_s749(con, month)
+    if not month:
+        return rows
+    try:
+        _sets, used = _s749_clipped(con, month)
+        return [l for l in rows if int(l["id"]) not in used] if used else rows
+    except Exception as e:                                     # noqa: BLE001
+        import sys as _sys                                     # noqa: PLC0415
+        print("purchase_app S749 undated: %r" % (e,), file=_sys.stderr)
+        return rows
+
+
+_lock_gate_before_s749 = _lock_gate
+
+
+def _lock_gate(con, month, s):                                # noqa: F811 -- S749: the register's open rows hold the lock too
+    can, reasons = _lock_gate_before_s749(con, month, s)
+    try:
+        more = _s454_sr().s749_lock_reasons(con, month)
+    except Exception as e:                                     # noqa: BLE001 -- fails CLOSED
+        more = ["the purchase check could not be read (%s)" % str(e)[:80]]
+    reasons = list(reasons) + ["the purchase check holds: %s" % m for m in more]
+    return (not reasons), reasons
+
+
+def _s749_states(con, month):
+    try:
+        return _s454_sr().s749_audit_states(con, month)
+    except Exception:                                          # noqa: BLE001
+        return {}
+
+
+def _s749_strip(con, month, page):
+    """The month strip for the audit page ('month') and the payment sheet ('pay'); the step view and the register draw their own."""
+    prefix = request.script_root + _url_prefix
+    try:
+        SR = _s454_sr()
+        return SR.s749_month_strip(con, month, lambda m: "%s/page/%s/%s" % (prefix, page, m), "s749ms_" + page)
+    except Exception:                                          # noqa: BLE001
+        return ""
+
+
+def _s749_hub_words(con, m):
+    """The hub's 'Purchase check' cell for a month: the register's words (counted months), 'parked' or 'locked'."""
+    SR = _s454_sr()
+    if SR.month_class(con, m) != "counted":
+        return '<span class="muted">parked</span>'
+    st = _month_status(con, m)
+    if st.get("status") == "final":
+        return '<span class="ok">locked %s</span>' % _esc(_when_ist(st.get("finalised_at"))[:6])
+    n = SR.s749_month_open(con, m)
+    return '<a href="%s/page/check?month=%s">%s</a>' % (request.script_root + _url_prefix, m, _esc(n["words"] + (" · NEFT on hold" if n["open"] else " · clear")))
+
+
+def _s749_hub_scan_card(con, prefix):
+    """The hub's scan card: counted months only (October onward), the register's words, the step view as the way in."""
+    SR = _s454_sr()
+    lines = []
+    for m in SR.s749_months(con):
+        if SR.month_class(con, m) != "counted":
+            continue
+        try:
+            n = SR.s749_month_open(con, m)
+            lines.append('<div><b>%s</b>: %s · <a href="%s/page/check?month=%s">the purchase check</a> · <a href="%s/page/scans?month=%s">the full list</a></div>'
+                         % (_esc(_month_name(m)), _esc(n["words"]), prefix, m, prefix, m))
+        except Exception as e:                                 # noqa: BLE001
+            lines.append('<div><b>%s</b>: <span class="warn">not read (%s)</span></div>' % (_esc(_month_name(m)), _esc(str(e)[:60])))
+    return ('<div class="card"><h2>Purchase check</h2><div class="muted">Counted months only (from %s). Every page reads the one list.</div>%s</div>'
+            % (_esc(_month_name(SR.setting(con, "purchase.register_from", "2026-10-01")[:7])), "".join(lines) or '<div class="muted">No counted month yet.</div>'))
+
+
+def _s749_auto_verify(con, month, s):
+    """Step 2 run by the server: the cross-check against the newest supplier-wise statement, kept once per statement export. -> the verdict dict
+    (ok, problems, notes, export, at, who) as the sheet shows it; None when no statement has arrived."""
+    _pay_ensure(con)
+    v = _verify_statement(con, month, s)
+    exp = (v.get("export") or {}).get("md5") if v.get("export") else None
+    if not exp:
+        return None
+    last = _pay_last_check(con, month)
+    if (s.get("status") or {}).get("status") == "final":       # a final month keeps its last run; nothing is written for a late re-export
+        return dict(v, at=(last or {}).get("at"), who=(last or {}).get("who") or "server")
+    try:
+        d = json.loads((last or {}).get("detail") or "{}")
+    except ValueError:
+        d = {}
+    if not last or d.get("export") != exp or bool(last["ok"]) != bool(v["ok"]):
+        con.execute("INSERT INTO purchase_pay_check (month, at, who, ok, detail) VALUES (?,?,?,?,?)",
+                    (month, now_iso(), "server", 1 if v["ok"] else 0,
+                     json.dumps({"problems": v["problems"], "notes": v["notes"], "total_p": v["total_p"], "printed_p": v["printed_p"], "export": exp,
+                                 "kit": KIT_S749}, ensure_ascii=False)))
+        _audit(con, "server", "pay_verify", month, {"ok": v["ok"], "problems": len(v["problems"]), "export": exp, "kit": KIT_S749})
+        con.commit()
+        last = _pay_last_check(con, month)
+    return dict(v, at=(last or {}).get("at"), who=(last or {}).get("who") or "server")
+
+
+def _s749_verify_card(con, month, s):
+    v = _s749_auto_verify(con, month, s)
+    if v is None:
+        body = ('<div class="muted">Waiting for Marg\'s supplier-wise statement of this month. The moment it arrives the server holds the sheet '
+                'against it -- every bill it carries, the per-bill amounts and its own printed grand total -- and says here whether they agree.</div>')
+    elif v["ok"]:
+        body = ('<div class="ok"><b>Verified against Marg\'s supplier-wise statement</b> — %s agrees, %s.</div>%s'
+                '<div class="muted">Run by the server %s, when the statement arrived.</div>'
+                % (_r(v["total_p"]), _plural(v["n_bills"], "bill"), "".join('<div class="muted">%s</div>' % _esc(x) for x in v["notes"]),
+                   _esc(_hhmm_ist_full(v["at"])) if v.get("at") else "just now"))
+    else:
+        body = ('<div class="bad"><b>Held against the statement — these do not line up</b></div><ul>%s</ul>%s'
+                '<div class="muted">Run by the server %s. A fresh export from Marg re-runs it by itself.</div>'
+                % ("".join('<li>%s</li>' % _esc(x) for x in v["problems"]), "".join('<div class="muted">%s</div>' % _esc(x) for x in v["notes"]),
+                   _esc(_hhmm_ist_full(v["at"])) if v.get("at") else "just now"))
+    return ('<div class="card"><h2>2 &middot; Verified against the supplier-wise statement</h2>'
+            '<div class="muted">Run by the server, not by a tap: Marg\'s own supplier-wise export of this month is read and the sheet is held '
+            'against it three ways.</div>%s</div>' % body)
+
+
+def _s749_lock_card(con, month, s, final, gate):
+    if final:
+        txt = 'This month is <b>final</b>: the figures are locked until it is reopened.'
+    elif gate[0]:
+        txt = ('<span class="ok">Ready to lock.</span> Finalise the month on <a href="%s/page/month/%s">its audit page</a>, and these figures lock.'
+               % (request.script_root + _url_prefix, month))
+    else:
+        txt = ('Waits for: <ul>%s</ul><div class="muted">The same open items as your <a href="%s/page/check?month=%s">purchase check</a>, row 8.</div>'
+               % ("".join("<li>%s</li>" % _esc(x) for x in gate[1]), request.script_root + _url_prefix, month))
+    return ('<div class="card"><h2>3 &middot; Lock it</h2><div>%s</div><div class="muted">The NEFT total is what goes into the bank advice file and its '
+            'covering letter, and they are built from this sheet and from nothing else.</div></div>' % txt)
+
+
+def _s749_owner():
+    u, err = _person("checker", "maker", "viewer")
+    if err:
+        return None, None, err
+    if not _is_doctor(u):
+        return None, None, _refuse("This is for the doctor only.")
+    return u, _db(), None
+
+
+def _s749_int(b, k):
+    try:
+        return int(b.get(k) or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+@bp.route("/api/s749/confirm", methods=["POST"])
+def api_s749_confirm():
+    """Confirm (yours) on the step view: {bill, decision: confirm | scan | undo} -- scan_register.s749_confirm_put. The doctor only."""
+    u, con, err = _s749_owner()
+    if err:
+        return err
+    b = request.get_json(silent=True) or {}
+    ok, msg = _s454_sr().s749_confirm_put(con, _who(u), _s749_int(b, "bill"), str(b.get("decision") or ""))
+    return jsonify(ok=ok, message=msg), (200 if ok else 409)
+
+
+@bp.route("/api/s749/unpair", methods=["POST"])
+def api_s749_unpair():
+    """Not this bill: {scan, bill} -- the pair undone, audited; the pick list follows. The doctor only."""
+    u, con, err = _s749_owner()
+    if err:
+        return err
+    b = request.get_json(silent=True) or {}
+    ok, msg = _s454_sr().s749_unpair(con, _who(u), _s749_int(b, "scan"), _s749_int(b, "bill"))
+    return jsonify(ok=ok, message=msg), (200 if ok else 409)
+
+
+@bp.route("/api/s749/pick")
+def api_s749_pick():
+    """The bills the owner may pair one scan with. The doctor only. Read only."""
+    u, con, err = _s749_owner()
+    if err:
+        return err
+    try:
+        sid = int(request.args.get("scan") or 0)
+    except (TypeError, ValueError):
+        sid = 0
+    opts = _s454_sr().s749_pick_options(con, sid) if sid else []
+    return jsonify(ok=True, options=[dict(o, amount=_r(o["amount_p"])[1:]) for o in opts])
+
+
+@bp.route("/api/s749/pair", methods=["POST"])
+def api_s749_pair():
+    """Pick the right bill: {scan, bill} -- the owner's own pair, audited, Undo. The doctor only."""
+    u, con, err = _s749_owner()
+    if err:
+        return err
+    b = request.get_json(silent=True) or {}
+    ok, msg = _s454_sr().s749_pair(con, _who(u), _s749_int(b, "scan"), _s749_int(b, "bill"))
+    return jsonify(ok=ok, message=msg), (200 if ok else 409)
+
+
+@bp.route("/api/s749/undo", methods=["POST"])
+def api_s749_undo():
+    """Undo of an unpair or a pair: {act}. The doctor only."""
+    u, con, err = _s749_owner()
+    if err:
+        return err
+    b = request.get_json(silent=True) or {}
+    ok, msg = _s454_sr().s749_undo_act(con, _who(u), _s749_int(b, "act"))
+    return jsonify(ok=ok, message=msg), (200 if ok else 409)
+# ---- S749 end ---------------------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,47 @@
+
+
+
+# ---- S749 (08-Nov-2026, Sanjeevni session 405, kit S749_ONE_SOURCE; D865, D866): reception's side follows the one source -------------------
+#  (1) The amount question follows the new band: in a counted month a bill settles only to the rupee; a one-rupee difference (a round-off)
+#      goes straight to Amir's card and asks reception nothing; beyond that reception types the paper's figure as before
+#      (scan_register.s749_reception_asks). A parked month keeps the old band.
+#  (2) An owner-confirmed supplier's bill (Ravi Medical Agency; setting purchase.owner_confirm_suppliers) is never on reception's Scan karo:
+#      the owner confirms it himself on his step view -- unless he asked reception for that one paper (s749_confirm decision 'scan').
+_s440_differs_before_s749 = _s440_differs
+
+
+def _s440_differs(scan_p, marg_p, ym=None):                   # noqa: F811 -- S749: the one band
+    if ym is None:
+        return _s440_differs_before_s749(scan_p, marg_p, ym)
+    try:
+        import scan_register                                   # noqa: PLC0415
+        return bool(scan_register.s749_reception_asks(_db(), scan_p, marg_p, ym))
+    except Exception as e:                                    # noqa: BLE001 -- fail to the old reading: nothing new is asked
+        if not _S726_SAID:
+            _S726_SAID.append(1)
+            print("porders S749: the band could not be read (%s) -- the old reading is used" % str(e)[:160], file=sys.stderr)
+        return _s440_differs_before_s749(scan_p, marg_p, ym)
+
+
+_unscanned_bills_before_s749 = unscanned_bills
+
+
+def unscanned_bills(con):                                     # noqa: F811 -- S749: the owner-confirmed suppliers' bills are his, not reception's
+    out = _unscanned_bills_before_s749(con)
+    try:
+        import scan_register                                   # noqa: PLC0415
+        if not scan_register._s749_owner_sups(con):
+            return out
+        asked = scan_register.s749_scan_asked(con)
+        return [x for x in out if x.get("bill_id") in asked or not scan_register.s749_owner_supplier(con, x.get("vendor") or x.get("vendor_norm"))]
+    except Exception as e:                                    # noqa: BLE001 -- the list stands as it was
+        print("porders S749: the owner's suppliers could not be read: %s" % str(e)[:160], file=sys.stderr)
+        return out
+_s440_owner_lines_before_s749 = _s440_owner_lines
+
+
+def _s440_owner_lines(con):                                   # noqa: F811 -- S749 (D865 rule 3): the 'owner' amount state is Amir's correction now
+    """Needs-you no longer carries 'Scan amount to settle' lines: a difference the paper and the scan could not settle is on Amir's card and on
+    the owner's step view (row 2), read from the one register."""
+    return []
+# ---- S749 end ---------------------------------------------------------------------------------------------------------------------------

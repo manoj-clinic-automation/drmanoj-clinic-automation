@@ -1,0 +1,965 @@
+
+
+
+# ---- S749 (08-Nov-2026, Sanjeevni session 405, kit S749_ONE_SOURCE; D865, D866; F-1181, F-1182, F-1183; the owner's go 05:56 IST, the mock
+#      https://claude.ai/artifact/BpPSuh8Cm2gPVmkzLDwmXi approved 06:04 with one addition: every action inline on his step view) -----------------
+#  ONE SOURCE, ONE LANGUAGE. register() stays the one source every page reads; this section gives it the owner's words and his rulings:
+#    * PAPER MATCHES is the one good state (verified and has-its-scan read alike; "has its scan" is gone from his screens).
+#    * EVERY DIFFERENCE, Rs 1 INCLUDED, IS AMIR'S: in a counted month a bill settles only when Marg = the paper TO THE RUPEE (band_p -> 0;
+#      total(): paise never hold a bill, a rupee does). A difference of one rupee (under two) is a ROUND-OFF -- straight to Amir's card ("Marg mein bill
+#      <paper> kijiye (round-off)"), never a question to reception; beyond that reception types the paper's figure as before (porders asks
+#      through s749_reception_asks). The "You" state (amount_state owner) is gone: it is Amir's correction; a dispute comes to row 5.
+#    * OWNER-CONFIRMED SUPPLIERS (setting purchase.owner_confirm_suppliers, Ravi Medical Agency first): no scan asked, never "no scan";
+#      one CONFIRM line to the owner per bill (s749_confirm; Undo; "Ask reception for the paper" puts one bill back on reception's list);
+#      a scan that comes pairs as usual. Reception's Scan karo never lists them (porders.unscanned_bills).
+#    * EVERYTHING INLINE on the step view: the scan folded open; Confirm; the second-look pair; the return answers; "Not this bill" (the pair
+#      undone, audited, Undo) and "Pick the right bill" (the owner's own pair, audited, Undo); Accept without paper; Ask reception to
+#      rescan. A Marg correction is still proved ONLY by Amir's export (F-1162) -- no tap here settles one.
+#    * Build and decision numbers never on his screens (_s749_plain). The same month strip on the step view, the register and the audit page.
+#  READ ONLY of assets.db. Nothing here prints a phone number, an account number or a key.
+KIT_S749 = "S749_ONE_SOURCE"
+S749_DDL = ("CREATE TABLE IF NOT EXISTS s749_confirm (bill_id INTEGER PRIMARY KEY, decision TEXT NOT NULL, by TEXT, at TEXT NOT NULL)",
+            "CREATE TABLE IF NOT EXISTS s749_act (id INTEGER PRIMARY KEY AUTOINCREMENT, kind TEXT NOT NULL, scan INTEGER, bill_id INTEGER, old_grade TEXT, "
+            "old_rule TEXT, old_at TEXT, by TEXT, at TEXT NOT NULL, undone_at TEXT, undone_by TEXT)")
+S749_SUPS_KEY = "purchase.owner_confirm_suppliers"
+STATES = STATES + ("confirm", "confirmed")                    # noqa: F811 -- the owner-confirmed supplier's bill: to confirm / confirmed by him
+STATE_EN.update({"verified": "Paper matches", "has_scan": "Paper matches", "amount_differs": "Difference → Amir", "no_scan": "No scan",
+                 "double": "Difference → Amir", "accepted": "Accepted without paper", "second_look": "Second look (yours)",
+                 "unread_pair": "Rescan (reception)", "confirm": "Confirm (yours)", "confirmed": "Confirmed by you"})
+S749_SETTLED = ("verified", "has_scan", "accepted", "confirmed")
+S749_PLAIN = (("manoj (D839, S740 seed)", "your word"), (" (S726)", ""))
+S749_STRIP_RE = re.compile(r"\s*\((?:S\d{3}|D\d{3}|F-\d{3,4})(?:[^)]*)\)")
+S749_ROUND_RE = re.compile(r"\s*Paper ₹[\d,]+(?:\.\d\d)? · ₹[\d,]+(?:\.\d\d)? rounding — supplier's figure paid\.?")
+
+
+def _s749_gap(scan_p, marg_p):
+    """The difference between the paper and Marg, in paise, by its size."""
+    return abs(int(scan_p or 0) - int(marg_p or 0))
+
+
+def _s749_roundoff(scan_p, marg_p):
+    """A round-off: the paper and Marg differ by a rupee (one rupee or more, under two) -- Marg's round-off field, Amir's to set."""
+    if scan_p in (None, 0):
+        return False
+    return 100 <= _s749_gap(scan_p, marg_p) < 200
+
+
+def _s749_plain(t, counted=True):
+    """His words: no build or decision number; in a counted month no 'rounding -- supplier's figure paid' (every rupee is Amir's now; a parked
+    month was cleared at the supplier's figure and says so)."""
+    t = str(t or "")
+    for a, b in S749_PLAIN:
+        t = t.replace(a, b)
+    if counted:
+        t = S749_ROUND_RE.sub("", t)
+    t = S749_STRIP_RE.sub("", t)
+    return t.strip()
+
+
+def _s749_owner_sups(con):
+    """The owner-confirmed suppliers (setting purchase.owner_confirm_suppliers, comma-separated), as supplier keys."""
+    pa = _pa()
+    return {pa.supplier_key(x) for x in setting(con, S749_SUPS_KEY, "").split(",") if x.strip()}
+
+
+def s749_owner_supplier(con, supplier):
+    return bool(supplier) and _pa().supplier_key(supplier) in _s749_owner_sups(con)
+
+
+def s749_confirms(con):
+    try:
+        return {int(r[0]): dict(decision=r[1], by=r[2], at=r[3]) for r in con.execute("SELECT bill_id, decision, by, at FROM s749_confirm")}
+    except sqlite3.Error:
+        return {}
+
+
+def s749_ensure(con):
+    for ddl in S749_DDL:
+        con.execute(ddl)
+
+
+# ------------------------------------------------------------------ the band: to the rupee in a counted month
+def band_p(cx, b):                                            # noqa: F811 -- S749: a counted month settles only to the rupee
+    ym = str(b.get("month") or str(b.get("bill_date") or "")[:7])
+    return 0 if (not ym or ym >= getattr(cx, "first", "2026-10")) else cx.noise
+
+
+_total_before_s749 = total
+
+
+def total(scan_p, marg_p, noise):                             # noqa: F811 -- S749: band 0 = the rupee figures must agree
+    if noise != 0:
+        return _total_before_s749(scan_p, marg_p, noise)
+    if scan_p is None or int(scan_p) == 0:
+        return "not_read", None
+    d = int(scan_p) - int(marg_p or 0)
+    return ("equal" if abs(d) < 100 else "differ"), d                 # to the rupee: paise never hold a bill; a rupee does
+
+
+def s749_reception_asks(con, scan_p, marg_p, ym):
+    """porders' amount question (S440): in a counted month only beyond a round-off (the rupee figures two or more apart); a parked month keeps
+    purchase.total_noise_rs. A round-off goes to Amir by itself."""
+    if not scan_p:
+        return False
+    if ym and month_class(con, str(ym)[:7]) == "counted":
+        return _s749_gap(scan_p, marg_p) >= 200
+    return abs(int(scan_p) - int(marg_p or 0)) > noise_p(con)
+
+
+# ------------------------------------------------------------------ the register in his words
+_register_before_s749 = register
+
+
+def register(con, month):                                     # noqa: F811 -- S749: one language; the You state gone; round-offs Amir's; Confirm
+    """Inside ONE web request the same month is read once (flask.g, keyed by the connection and its change count): the hub, the audit page
+    and the gate ask for it several times. Outside a request nothing is kept."""
+    memo, key = None, (id(con), con.total_changes, month)
+    try:
+        from flask import g, has_request_context              # noqa: PLC0415
+        if has_request_context():
+            memo = g.__dict__.setdefault("_s749_reg_memo", {})
+    except Exception:                                         # noqa: BLE001
+        memo = None
+    if memo is not None and key in memo:
+        return memo[key]
+    r = _register_before_s749(con, month)
+    try:
+        _s749_overlay(con, r)
+    except Exception as e:                                    # noqa: BLE001 -- the register stands as it was
+        import sys as _sys                                    # noqa: PLC0415
+        print("scan_register S749 overlay: %r" % (e,), file=_sys.stderr)
+    if memo is not None:
+        memo[key] = r
+    return r
+
+
+class _S749TLDict(object):
+    """S738's drawing context, one per worker thread (two pages drawn at once never clobber each other's scan panels)."""
+
+    def __init__(self):
+        self._l = _s740_threading.local()
+
+    def _d(self):
+        d = getattr(self._l, "d", None)
+        if d is None:
+            d = self._l.d = {}
+        return d
+
+    def get(self, k, default=None):
+        return self._d().get(k, default)
+
+    def __getitem__(self, k):
+        return self._d()[k]
+
+    def __setitem__(self, k, v):
+        self._d()[k] = v
+
+    def __contains__(self, k):
+        return k in self._d()
+
+    def clear(self):
+        self._d().clear()
+
+    def update(self, *a, **k):
+        self._d().update(*a, **k)
+
+    def items(self):
+        return self._d().items()
+
+
+_S738_CTX = _S749TLDict()                                     # noqa: F811
+
+
+def _s749_overlay(con, r):
+    sups = _s749_owner_sups(con)
+    conf = s749_confirms(con) if sups else {}
+    counted = r.get("cls") == "counted"
+    for row in r["rows"]:
+        st = row.get("state")
+        a = row.get("agree") or {}
+        if st == "no_scan" and row.get("scan") is None and counted and row.get("supplier") in sups and not row.get("missing"):
+            d = conf.get(int(row["id"]))
+            name = str(row["supplier"]).title()
+            if d and d.get("decision") == "confirm":
+                row.update(state="confirmed", whose="Nobody", note="Confirmed by you on %s. %s is settled by you; no scan asked." % (ddmon(d["at"]), name))
+            elif d and d.get("decision") == "scan":
+                row["note"] = "You asked reception for this paper on %s. %s" % (ddmon(d["at"]), row.get("note") or "")
+            else:
+                row.update(state="confirm", whose="You: confirm", note="%s is settled by you: no scan asked. Confirm when the bill is as you paid it." % name)
+            row["s749"] = "owner_sup"
+        elif st == "amount_differs" and not row.get("s740") and counted and not str(row.get("whose") or "").startswith("Return"):
+            whose = str(row.get("whose") or "")
+            rnd = bool(a.get("scan_p")) and _s749_roundoff(a["scan_p"], row.get("amount_p"))
+            if whose in ("You", "Nobody", "") or (rnd and not a.get("paper")):
+                row["whose"] = "Amir: a Marg correction"           # the You state is gone; a difference is never nobody's (fail-safe)
+            if rnd:
+                row["s749"] = "roundoff"
+                row["note"] = "Round-off: the paper reads %s, Marg %s. Marg to be set to %s." % (rs2(a["scan_p"]), rs2(row.get("amount_p")), rs2(a["scan_p"]))
+            elif whose in ("You", "Nobody", "") and a.get("scan_p"):
+                row["note"] = "The paper reads %s, Marg %s. Marg to be set to %s." % (rs2(a["scan_p"]), rs2(row.get("amount_p")), rs2(a["scan_p"]))
+        row["note"] = _s749_plain(row.get("note") or "", counted)
+        row["whose"] = _s749_plain(row.get("whose") or "", counted)
+    r["counts"] = {k: sum(1 for z in r["rows"] if z["state"] == k) for k in STATES}
+    r["settled"] = sum(r["counts"][k] for k in S749_SETTLED)
+    if r["total"] and r["settled"] == r["total"] and not r.get("open_scans") and not r.get("done_date"):
+        r["done_date"] = today().isoformat()
+
+
+_s738_fixes_before_s749 = s738_fixes
+
+
+def s738_fixes(con, fast=False):                              # noqa: F811 -- S749: a one-rupee difference is a round-off on Amir's card
+    out = _s738_fixes_before_s749(con, fast)
+    for f in out:
+        if f.get("kind") in ("less", "more") and f.get("paper_p") and _s749_roundoff(f["paper_p"], f["marg_p"]):
+            f["kind"], f["items"] = "roundoff", []
+    return out
+
+
+# ------------------------------------------------------------------ the owner's taps (each audited; each commits)
+def _s749_counted_bill(con, bill_id):
+    """The live bill, or (None, why) -- a counted, unfinalised month only."""
+    pa = _pa()
+    b = con.execute("SELECT b.* FROM purchase_bill b WHERE b.id=? AND " + pa.EFF_BILL, (int(bill_id),)).fetchone()
+    if b is None:
+        return None, "No such bill."
+    b = dict(b)
+    ym = str(b.get("month") or str(b.get("bill_date") or "")[:7])
+    if month_class(con, ym) != "counted":
+        return None, "A parked month is read only."
+    fin = con.execute("SELECT status FROM purchase_month WHERE month=?", (ym,)).fetchone()
+    if fin and fin[0] == "final":
+        return None, "This month is finalised -- nothing is changed in it."
+    return b, ""
+
+
+def s749_confirm_put(con, who, bill_id, decision):
+    """Confirm (yours): 'confirm' settles the bill of an owner-confirmed supplier; 'scan' asks reception for its paper instead; 'undo' removes
+    either. -> (ok, message)."""
+    s749_ensure(con)
+    b, why = _s749_counted_bill(con, bill_id)
+    if b is None:
+        return False, why
+    if _pa().supplier_key(b.get("supplier")) not in _s749_owner_sups(con):
+        return False, "This supplier's bills are not settled by you."
+    if con.execute("SELECT 1 FROM purchase_scan_link WHERE bill_id=?", (int(bill_id),)).fetchone():
+        return False, "This bill has its scan -- it is judged by the paper."
+    now = dt.datetime.now().replace(microsecond=0).isoformat()
+    if decision == "undo":
+        cur = con.execute("DELETE FROM s749_confirm WHERE bill_id=?", (int(bill_id),))
+        if not cur.rowcount:
+            return False, "Nothing to undo."
+        _s736_audit(con, who, "s749_confirm_undone", int(bill_id), dict(kit=KIT_S749))
+        con.commit()
+        return True, "Undone."
+    if decision not in ("confirm", "scan"):
+        return False, "Not a decision."
+    con.execute("INSERT OR REPLACE INTO s749_confirm (bill_id, decision, by, at) VALUES (?,?,?,?)", (int(bill_id), decision, who, now))
+    _s736_audit(con, who, "s749_confirm", int(bill_id), dict(decision=decision, supplier=_pa().supplier_key(b.get("supplier")), bill_no=b.get("bill_no"),
+                                                              amount_p=b.get("amount_p"), kit=KIT_S749))
+    con.commit()
+    return True, "Confirmed -- settled by you." if decision == "confirm" else "Reception is asked for the paper."
+
+
+def s749_scan_asked(con):
+    """The bills of owner-confirmed suppliers the owner asked reception to scan after all -> {bill id}."""
+    try:
+        return {int(r[0]) for r in con.execute("SELECT bill_id FROM s749_confirm WHERE decision='scan'")}
+    except sqlite3.Error:
+        return set()
+
+
+def _s749_hint_no(con, who, sid, bill_id, add=True):
+    """The matcher must never pair this scan and this bill again (add) -- or may again (undo). purchase_scan_state.hint_no, as reception's Nahi."""
+    _pa()._ensure_s439(con)
+    now = dt.datetime.now().replace(microsecond=0).isoformat()
+    con.execute("INSERT OR IGNORE INTO purchase_scan_state (asset_bill_id, why, detail, checked_at) VALUES (?,?,?,?)", (int(sid), "linked", "linked", now))
+    row = con.execute("SELECT hint_no FROM purchase_scan_state WHERE asset_bill_id=?", (int(sid),)).fetchone()
+    nos = {int(x) for x in str((row[0] if row else "") or "").split(",") if x.strip().isdigit()}
+    nos = (nos | {int(bill_id)}) if add else (nos - {int(bill_id)})
+    con.execute("UPDATE purchase_scan_state SET hint_no=?, confirmed_by=?, confirmed_at=? WHERE asset_bill_id=?",
+                (",".join(str(x) for x in sorted(nos)) or None, who, now, int(sid)))
+
+
+def _s749_pass(con, who):
+    try:
+        _pa()._rematch(con, who)
+    except Exception as e:                                    # noqa: BLE001 -- the next page read runs the pass
+        import sys as _sys                                    # noqa: PLC0415
+        print("scan_register S749 pass: %r" % (e,), file=_sys.stderr)
+
+
+def s749_unpair(con, who, sid, bill_id):
+    """Not this bill: the pair is undone (audited, Undo); the scan never pairs with that bill by itself again. -> (ok, message)."""
+    s749_ensure(con)
+    b, why = _s749_counted_bill(con, bill_id)
+    if b is None:
+        return False, why
+    l = con.execute("SELECT grade, matched_on, linked_at FROM purchase_scan_link WHERE bill_id=? AND asset_bill_id=?", (int(bill_id), int(sid))).fetchone()
+    if l is None:
+        return False, "This scan is not paired with that bill."
+    if b.get("verdict"):
+        return False, "This bill carries a verdict (%s) -- it is not unpaired here." % b.get("verdict")
+    now = dt.datetime.now().replace(microsecond=0).isoformat()
+    con.execute("DELETE FROM purchase_scan_link WHERE bill_id=? AND asset_bill_id=?", (int(bill_id), int(sid)))
+    con.execute("UPDATE purchase_bill SET scan_bill_id=NULL WHERE id=? AND scan_bill_id=?", (int(bill_id), int(sid)))
+    _s749_hint_no(con, who, sid, bill_id, add=True)
+    cur = con.execute("INSERT INTO s749_act (kind, scan, bill_id, old_grade, old_rule, old_at, by, at) VALUES ('unpair',?,?,?,?,?,?,?)",
+                      (int(sid), int(bill_id), l[0], l[1], l[2], who, now))
+    _s736_audit(con, who, "s749_unpaired", int(bill_id), dict(scan=int(sid), act=cur.lastrowid, was_grade=l[0], was_rule=l[1], kit=KIT_S749))
+    con.commit()
+    _s749_pass(con, who)
+    return True, "Unpaired. Pick the right bill below, or leave the scan to reception."
+
+
+def s749_pick_options(con, sid):
+    """The bills the owner may pair this scan with: unscanned, of a counted month, within 120 days of the scan; the supplier's own first."""
+    scans = asset_scans(con) or {}
+    s = scans.get(int(sid))
+    if s is None or con.execute("SELECT 1 FROM purchase_scan_link WHERE asset_bill_id=?", (int(sid),)).fetchone():
+        return []                                              # gone, or the rules found its bill by themselves meanwhile
+    pa = _pa()
+    cx = Ctx(con)
+    day = _date(s.get("bill_date")) or _date(s.get("day")) or today()
+    linked = {int(r[0]) for r in con.execute("SELECT bill_id FROM purchase_scan_link")}
+    out = []
+    for b in con.execute("SELECT b.* FROM purchase_bill b WHERE " + pa.EFF_BILL + " ORDER BY b.bill_date DESC, b.id DESC"):
+        b = dict(b)
+        if int(b["id"]) in linked or int(b.get("amount_p") or 0) <= 0:
+            continue
+        bd = _date(b.get("bill_date"))
+        if bd is None or abs((bd - day).days) > 120 or month_class(con, str(b.get("month") or str(b["bill_date"])[:7])) != "counted":
+            continue
+        same = supplier(cx, s.get("vendor"), b["supplier"], cx.chosen.get(int(sid))) == "agree"
+        out.append(dict(id=int(b["id"]), supplier=pa.supplier_key(b["supplier"]), bill_no=str(b.get("bill_no") or ""), date=str(b["bill_date"])[:10],
+                        amount_p=int(b.get("amount_p") or 0), same=same))
+    out.sort(key=lambda x: (not x["same"], x["date"]))
+    return out[:40]
+
+
+def s749_pair(con, who, sid, bill_id):
+    """Pick the right bill: the owner's own pair (grade CONFIRMED, audited, Undo). -> (ok, message)."""
+    s749_ensure(con)
+    b, why = _s749_counted_bill(con, bill_id)
+    if b is None:
+        return False, why
+    if con.execute("SELECT 1 FROM purchase_scan_link WHERE bill_id=?", (int(bill_id),)).fetchone():
+        return False, "That bill already has its scan."
+    if con.execute("SELECT 1 FROM purchase_scan_link WHERE asset_bill_id=?", (int(sid),)).fetchone():
+        return False, "This scan is already paired -- undo that first."
+    if int(sid) not in (asset_scans(con) or {}):
+        return False, "This scan is not a captured pharmacy scan."
+    now = dt.datetime.now().replace(microsecond=0).isoformat()
+    con.execute("INSERT INTO purchase_scan_link (bill_id, asset_bill_id, grade, matched_on, linked_at) VALUES (?,?,?,?,?)",
+                (int(bill_id), int(sid), "CONFIRMED", "the owner picked it", now))
+    con.execute("UPDATE purchase_bill SET scan_bill_id=? WHERE id=?", (int(sid), int(bill_id)))
+    _s749_hint_no(con, who, sid, bill_id, add=False)
+    cur = con.execute("INSERT INTO s749_act (kind, scan, bill_id, by, at) VALUES ('pair',?,?,?,?)", (int(sid), int(bill_id), who, now))
+    _s736_audit(con, who, "scan_link", int(bill_id), dict(scan=int(sid), grade="CONFIRMED", rule="the owner picked it", act=cur.lastrowid,
+                                                           supplier=_pa().supplier_key(b.get("supplier")), bill_no=b.get("bill_no"), kit=KIT_S749))
+    con.commit()
+    _s749_pass(con, who)
+    return True, "Paired with bill %s." % (b.get("bill_no") or "")
+
+
+def s749_undo_act(con, who, act_id):
+    """Undo of 'Not this bill' (the old pair put back, when both are still free) or of 'Pick the right bill' (the pair removed)."""
+    s749_ensure(con)
+    a = con.execute("SELECT id, kind, scan, bill_id, old_grade, old_rule, old_at FROM s749_act WHERE id=? AND undone_at IS NULL", (int(act_id),)).fetchone()
+    if a is None:
+        return False, "Nothing to undo."
+    now = dt.datetime.now().replace(microsecond=0).isoformat()
+    sid, bid = int(a[2]), int(a[3])
+    _b, why = _s749_counted_bill(con, bid)
+    if _b is None:
+        return False, why
+    if a[1] == "unpair":
+        if con.execute("SELECT 1 FROM purchase_scan_link WHERE bill_id=? OR asset_bill_id=?", (bid, sid)).fetchone():
+            return False, "The scan or the bill has been paired since -- undo that pair first."
+        con.execute("INSERT INTO purchase_scan_link (bill_id, asset_bill_id, grade, matched_on, linked_at) VALUES (?,?,?,?,?)",
+                    (bid, sid, a[4] or "CONFIRMED", a[5] or "the owner's undo", a[6] or now))
+        con.execute("UPDATE purchase_bill SET scan_bill_id=? WHERE id=?", (sid, bid))
+        _s749_hint_no(con, who, sid, bid, add=False)
+    else:
+        cur = con.execute("DELETE FROM purchase_scan_link WHERE bill_id=? AND asset_bill_id=?", (bid, sid))
+        if not cur.rowcount:
+            return False, "That pair is no longer there."
+        con.execute("UPDATE purchase_bill SET scan_bill_id=NULL WHERE id=? AND scan_bill_id=?", (bid, sid))
+    con.execute("UPDATE s749_act SET undone_at=?, undone_by=? WHERE id=?", (now, who, int(act_id)))
+    _s736_audit(con, who, "s749_act_undone", bid, dict(scan=sid, act=int(act_id), kind=a[1], kit=KIT_S749))
+    con.commit()
+    _s749_pass(con, who)
+    return True, "Undone."
+
+
+def s749_acts(con, month_ids):
+    """The owner's pairs and unpairs of these bills not undone, newest first."""
+    try:
+        rows = con.execute("SELECT id, kind, scan, bill_id, by, at FROM s749_act WHERE undone_at IS NULL ORDER BY id DESC").fetchall()
+    except sqlite3.Error:
+        return []
+    return [dict(id=int(r[0]), kind=r[1], scan=r[2], bill_id=r[3], by=r[4], at=r[5]) for r in rows if int(r[3]) in month_ids]
+
+
+# ------------------------------------------------------------------ the month strip (the step view, the register, the audit page)
+def s749_months(con):
+    """The months shown on the strip: every counted month from purchase.register_from, newest first, and the parked months after them."""
+    ms = months_with_bills(con, 24)
+    counted = sorted([m for m in ms if month_class(con, m) == "counted"], reverse=True)
+    parked = sorted([m for m in ms if month_class(con, m) == "parked"], reverse=True)
+    t = today().strftime("%Y-%m")
+    if t not in counted and month_class(con, t) == "counted":
+        counted.insert(0, t)
+    return counted + parked
+
+
+def s749_month_strip(con, month, href_fn, idprefix="s749ms"):
+    """One row of month chips, the chosen one filled; a parked month greyed. href_fn(ym) -> the page's own address for that month."""
+    chips = []
+    for m in s749_months(con):
+        cls = "on" if m == month else ("park" if month_class(con, m) != "counted" else "")
+        try:
+            lab = "%s %s" % (MONTHS3[int(m[5:7]) - 1], m[2:4])
+        except (ValueError, IndexError):
+            lab = m
+        chips.append('<a class="s749m %s" href="%s">%s</a>' % (cls, esc(href_fn(m)), esc(lab)))
+    return ('<div class="s749strip" id="%s"><style>.s749strip{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}'
+            '.s749strip .s749m{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border:1px solid #1f3864;border-radius:18px;'
+            'color:#1f3864;background:#fff;text-decoration:none;font-weight:600;font-size:15px}.s749strip .s749m.on{background:#1f3864;color:#fff}'
+            '.s749strip .s749m.park{color:#8a7a5c;border-color:#c9c1b2}</style>%s</div>' % (esc(idprefix), "".join(chips)))
+
+
+# ------------------------------------------------------------------ what each page says of a month (the hub, the console, the pay sheet)
+def s749_month_open(con, month, r=None):
+    """READ ONLY: the open items of a month as the step view counts them -> dict(match, amir, confirm, reception, you, returns, open, words,
+    neft) -- 'words' is the one line every page shows ('77 paper matches · 6 differences → Amir · 1 to confirm · 1 return pending')."""
+    r = r if r is not None else register(con, month)
+    cx = Ctx(con)
+    g = _s749_groups(con, r, cx)
+    try:
+        rets = [x for x in s740_pending(con) if x["month"] <= month]
+    except Exception:                                         # noqa: BLE001 -- fails closed: the month is not clear
+        rets = [dict(key="?")]
+    c = r.get("counts") or {}
+    n = dict(match=c.get("verified", 0) + c.get("has_scan", 0), accepted=c.get("accepted", 0), confirmed=c.get("confirmed", 0),
+             amir=len(g["amir"]), confirm=len(g["confirm"]), reception=g["n_reception"], you=g["n_you"], returns=len(rets))
+    n["open"] = n["amir"] + n["confirm"] + n["reception"] + n["you"] + n["returns"]
+    bits = ["%d paper match%s" % (n["match"], "" if n["match"] == 1 else "es")]
+    if n["amir"]:
+        bits.append("%d difference%s → Amir" % (n["amir"], "" if n["amir"] == 1 else "s"))
+    if n["confirm"]:
+        bits.append("%d to confirm" % n["confirm"])
+    if n["reception"]:
+        bits.append("%d with reception" % n["reception"])
+    if n["you"]:
+        bits.append("%d for you" % n["you"])
+    if n["returns"]:
+        bits.append("%d return%s pending" % (n["returns"], "" if n["returns"] == 1 else "s"))
+    n["words"] = " · ".join(bits)
+    n["neft"] = "NEFT on hold" if n["open"] else "clear"
+    n["total"] = r.get("total", 0)
+    return n
+
+
+def s749_lock_reasons(con, month):
+    """The register's own holds for the lock gate (rows 2-6 of the step view), in his words; [] when clear. A parked month holds nothing."""
+    if month_class(con, month) != "counted":
+        return []
+    n = s749_month_open(con, month)
+    out = []
+    if n["amir"]:
+        out.append("%d difference%s → Amir (Marg to be corrected to the paper, proved by his export)" % (n["amir"], "" if n["amir"] == 1 else "s"))
+    if n["confirm"]:
+        out.append("%d bill%s to confirm (yours: an owner-confirmed supplier)" % (n["confirm"], "" if n["confirm"] == 1 else "s"))
+    if n["reception"]:
+        out.append("%d with reception (a scan, a rescan or a question)" % n["reception"])
+    if n["you"]:
+        out.append("%d for you and Shavez (a second look or a paper not found)" % n["you"])
+    if n["returns"]:
+        out.append("%d return%s pending (the dealer's credit note or revised bill)" % (n["returns"], "" if n["returns"] == 1 else "s"))
+    return out
+
+
+# ------------------------------------------------------------------ the step view: the eight rows, everything inline
+def _s749_next(x):
+    """'Next: ...' for an open register row, in his words."""
+    st, a = x.get("state"), x.get("agree") or {}
+    whose = str(x.get("whose") or "")
+    if st in ("amount_differs", "double") and whose.startswith("Amir"):
+        if st == "double":
+            return "Next: Amir removes one entry in Marg. Proved by his export."
+        return "Next: Marg bill → %s%s. Proved by his export." % (rs2(a.get("scan_p")), " (round-off)" if x.get("s749") == "roundoff" else "")
+    if st == "amount_differs" and whose.startswith("Reception"):
+        return "Next: reception confirms the paper's figure (the scan reads %s, Marg %s)." % (rs(a.get("scan_p")), rs(x.get("amount_p")))
+    if st == "amount_differs" and whose.startswith("Return"):
+        return "Next: the dealer's revised bill or credit note → Amir enters it. Also under Returns."
+    if st == "confirm":
+        return "Next: your tap settles it; or ask reception for the paper."
+    if st == "no_scan" and x.get("missing"):
+        return "Next: accept it without paper, or ask reception again."
+    if st == "no_scan":
+        return "Next: reception scans the bill%s." % (" (a question is open)" if whose == "Reception: a question" else "")
+    if st == "unread_pair":
+        return "Next: reception rescans the paper."
+    if st == "second_look":
+        return "Next: your two buttons -- the paper's figure stands, or the scan misread."
+    return ""
+
+
+def _s749_cells(x, what, who):
+    """One line of the step view in columns: supplier · bill, the date, the scan, what, whose · next."""
+    sid = x.get("scan")
+    return ('<span class="c1">%s %s</span><span class="c2">%s</span><span class="c3">%s</span><span class="c4">%s</span><span class="c5">%s</span>'
+            % (esc(x["supplier"]), esc(x["bill_no"]), esc(_s738_dmy(x.get("date"))), ("scan %s" % esc(x.get("stamp") or "")) if sid is not None else "no scan",
+               what, who))
+
+
+def _s749_btn(label, body, cls="s736b"):
+    """An inline button posting JSON (s749post in S749_JS); body is a dict."""
+    return '<button type="button" class="%s" onclick=\'s749post(this,%s)\'>%s</button>' % (esc(cls), esc(json.dumps(body)), esc(label))
+
+
+def _s749_line(x, what, who, acts, viewer=True):
+    """A register row as one inline line: the columns, the folded scan, and its own actions."""
+    sid = x.get("scan")
+    cells = _s749_cells(x, what, who)
+    body = ('<div class="s749acts">%s</div>' % "".join(acts)) if acts else ""
+    if sid is None or not viewer:
+        return '<div class="s738l" data-bill="%d">%s<span class="c6"></span></div>%s' % (int(x["id"]), cells, body)
+    return ('<details class="s738v" ontoggle="s738open(this)"><summary class="s738l" data-bill="%d">%s<span class="c6"><span class="s738b">'
+            '<span class="sh">Show scan &#9662;</span><span class="hd">Hide scan &#9652;</span></span></span></summary>%s</details>%s'
+            % (int(x["id"]), cells, _s738_panel(sid), body))
+
+
+def _s749_groups(con, r, cx):
+    """The register's rows of one month sorted into the step view's rows -> dict(amir, confirm, reception, you, confirmed, scans, asks, esc,
+    n_reception, n_you): the ONE tally the step view, the hub, the console, the register chips and the lock gate all read."""
+    rows = [x for x in (r.get("rows") or []) if not str(x.get("whose") or "").startswith("Nobody (")]
+    if "s736" not in r:
+        r = dict(r, s736=_s736_view(con) or {})
+    v = r.get("s736") or {}
+    month = r.get("month") or ""
+    asks = [a for a in (v.get("asks") or []) if a.get("month") == month]
+    esc_ = [x for x in (v.get("escalated") or []) if x.get("month") == month]
+    esc_ids = {int(x["scan"]) for x in esc_}
+    g = dict(amir=[], confirm=[], reception=[], you=[], confirmed=[], scans=[], asks=asks, esc=esc_)
+    for x in rows:
+        st, whose = x.get("state"), str(x.get("whose") or "")
+        if st in ("amount_differs", "double") and whose.startswith("Amir"):
+            g["amir"].append(x)
+        elif st == "amount_differs" and whose.startswith("Return"):
+            pass                                               # a return's bill is row 6's (and the returns count's), never counted twice
+        elif st == "amount_differs" and whose.startswith("Reception"):
+            g["reception"].append(x)
+        elif st == "confirm":
+            g["confirm"].append(x)
+        elif st == "confirmed":
+            g["confirmed"].append(x)
+        elif st == "no_scan" and x.get("missing"):
+            g["you"].append(x)
+        elif st == "no_scan":
+            g["reception"].append(x)
+        elif st == "unread_pair" and x.get("scan") not in esc_ids:
+            g["reception"].append(x)
+        elif st == "second_look":
+            g["you"].append(x)
+    month_ids = {x["id"] for x in (r.get("rows") or [])}
+    hinted = {sid for sid, bid in cx.likely.items() if bid in month_ids}
+    for s in (r.get("scans") or []):
+        if s["id"] in esc_ids:
+            continue
+        if s["state"] in ("probably", "vendor", "to_name", "unread") and not (s["state"] == "probably" and s["id"] in hinted):
+            g["scans"].append(s)
+    shown = {x.get("scan") for x in g["reception"]} | {int(s["id"]) for s in g["scans"]}
+    g["asks_extra"] = [a for a in asks if int(a["scan"]) not in shown]
+    g["n_reception"] = len(g["reception"]) + len(g["scans"]) + len(g["asks_extra"])
+    g["n_you"] = len(g["you"]) + len(esc_)
+    return g
+
+
+def s749_rows(con, r, cx, prefix):
+    """The eight rows of the step view: [(label, sub, count text, [lines as HTML], grey)]."""
+    v = r.get("s736") or {}
+    month = r.get("month") or ""
+    g = _s749_groups(con, r, cx)
+    tr = s738_tracked(con)
+    asks = g["asks"]
+    ask_by_scan = {int(a["scan"]): a for a in asks}
+    esc_ = g["esc"]
+    dec = [x for x in (v.get("decided") or []) if x.get("month") == month]
+    try:
+        verd = {int(x[0]) for x in con.execute("SELECT id FROM purchase_bill WHERE verdict IS NOT NULL")}
+    except sqlite3.Error:
+        verd = set()
+    acts = s749_acts(con, {x["id"] for x in (r.get("rows") or [])})
+    act_by_scan = {int(a["scan"]): a for a in acts if a.get("scan") is not None}
+    hdr = ('<div class="s738hd"><span>Supplier · bill</span><span>Bill date</span><span>Scan</span><span>What</span><span>Whose · next</span><span></span></div>')
+    u_rescan = "/finance/porders/api/s454/rescan"
+    u_nopaper = prefix + "/api/s454/nopaper"
+
+    def rescan_btn(x):
+        sid = x.get("scan")
+        if sid is None:
+            return ""
+        if int(sid) in ask_by_scan:
+            return '<span class="mut">rescan asked, try %d</span>' % int(ask_by_scan[int(sid)].get("try_n") or 1)
+        return _s749_btn("Ask reception to rescan", dict(u=u_rescan, b=dict(asset_bill_id=int(sid), reason="blurred")))
+
+    def notthis_btn(x):
+        sid = x.get("scan")
+        if sid is None or x.get("s740") or int(x["id"]) in verd:        # a bill with a verdict is not unpaired here (the door refuses it)
+            return ""
+        return _s749_btn("Not this bill", dict(u=prefix + "/api/s749/unpair", b=dict(scan=int(sid), bill=int(x["id"])), pick=1))
+
+    # 1 · Paper matches
+    c = r.get("counts") or {}
+    n_match = c.get("verified", 0) + c.get("has_scan", 0)
+    l1 = ['<div class="mut">Nothing to do here. The %d bill%s that match are on <a href="%s/page/scans?month=%s">the full list</a>.%s</div>'
+          % (n_match, "" if n_match == 1 else "s", esc(prefix), esc(month),
+             (" %d accepted without paper." % c.get("accepted", 0)) if c.get("accepted") else "")]
+    if g["confirmed"]:
+        for x in g["confirmed"]:
+            l1.append(_s749_line(x, "%s · confirmed by you" % esc(rs(x["amount_p"])), esc(x.get("note") or ""),
+                                 [_s749_btn("Undo", dict(u=prefix + "/api/s749/confirm", b=dict(bill=int(x["id"]), decision="undo")))]))
+    # 2 · Differences → Amir
+    l2 = []
+    for x in g["amir"]:
+        a = x.get("agree") or {}
+        t = tr.get(int(x["id"]))
+        since = (" · since %s" % _s738_dm(t.get("first_seen"))) if t and not t.get("settled_at") else ""
+        if x.get("state") == "double":
+            what = "%s · entered twice in Marg" % esc(rs(x["amount_p"]))
+        else:
+            what = "paper %s · Marg %s%s" % (esc(rs2(a.get("scan_p"))), esc(rs2(x["amount_p"])), " · round&#8209;off" if x.get("s749") == "roundoff" else "")
+        who = "%s%s<br>%s" % (esc("Dealer's paper awaited" if str(x.get("whose") or "").startswith("Return") else "Amir"), esc(since), esc(_s749_next(x)))
+        l2.append(_s749_line(x, what, who, [notthis_btn(x), rescan_btn(x)]))
+    for bid, t in [(bid, t) for bid, t in tr.items() if t.get("settled_at") and t.get("month") == month]:
+        b = con_bill(r, bid)
+        if b is not None:
+            l2.append('<div class="s738l s738ok" data-bill="%d"><span class="c1">%s %s</span><span class="c2">%s</span><span class="c3"></span>'
+                      '<span class="c4">corrected ✓</span><span class="c5">Amir · his export of %s shows Marg = the paper</span><span class="c6"></span></div>'
+                      % (int(bid), esc(b["supplier"]), esc(b["bill_no"]), esc(_s738_dmy(b.get("date"))), esc(_s738_dm(t.get("settled_export") or t.get("settled_at")))))
+    # 3 · Confirm — yours
+    l3 = []
+    for x in g["confirm"]:
+        l3.append(_s749_line(x, esc(rs(x["amount_p"])), "You<br>" + esc(_s749_next(x)),
+                             [_s749_btn("Confirm", dict(u=prefix + "/api/s749/confirm", b=dict(bill=int(x["id"]), decision="confirm")), "s736b s749y"),
+                              _s749_btn("Ask reception for the paper", dict(u=prefix + "/api/s749/confirm", b=dict(bill=int(x["id"]), decision="scan")))]))
+    sups = sorted(_s749_owner_sups(con))
+    l3.append('<div class="mut">Suppliers you settle yourself: %s. Another dealer is added by a word to Claude.</div>' % esc(", ".join(s.title() for s in sups) or "none yet"))
+    # 4 · With reception
+    l4 = []
+    for x in g["reception"]:
+        st = x.get("state")
+        acts_ = [notthis_btn(x), rescan_btn(x)]
+        if st == "no_scan" and x.get("s749") == "owner_sup":
+            acts_ = [_s749_btn("Undo (back to Confirm)", dict(u=prefix + "/api/s749/confirm", b=dict(bill=int(x["id"]), decision="undo")))]
+        if st == "no_scan":
+            what = "%s · %s" % (esc(rs(x["amount_p"])), "a question is open" if x.get("whose") == "Reception: a question" else "to scan")
+        elif st == "unread_pair":
+            what = "paired, nothing read: rescan"
+        else:
+            what = "scan %s · Marg %s · the paper's figure to confirm" % (esc(rs2((x.get("agree") or {}).get("scan_p"))), esc(rs2(x["amount_p"])))
+        l4.append(_s749_line(x, what, "Reception<br>" + esc(_s749_next(x)), acts_))
+    for s in g["scans"]:
+        tail = ""
+        if int(s["id"]) in ask_by_scan:
+            tail = ' <span class="mut">· rescan asked, try %d</span>' % int(ask_by_scan[int(s["id"])].get("try_n") or 1)
+        l4.append("Scan %s · %s%s%s" % (esc(s["stamp"]), esc(SCAN_EN[s["state"]]), tail, _s738_viewer(int(s["id"]))))
+    for a in g["asks_extra"]:
+        if True:
+            l4.append("Scan %s · %s · rescan asked by %s, try %d" % (esc(a["stamp"]), esc(S736_REASON_EN.get(a["reason"], a["reason"])),
+                                                                 "the server" if a["by"] == "server" else esc(str(a["by"]).split(" ")[0].title() or "?"), a["try_n"]))
+    # 5 · You & Shavez
+    l5 = []
+    for x in g["you"]:
+        if x.get("state") == "second_look":
+            btns = []
+            if v.get("ok") and x.get("scan") is not None:
+                btns = [_s736_btn(x["scan"], "paper", "Paper's figure stands — Amir corrects", x["id"]), _s736_btn(x["scan"], "scan_misread", "Scan misread — settled", x["id"])]
+            l5.append(_s749_line(x, "second look", "You & Shavez<br>" + esc(x.get("note") or ""), btns + [rescan_btn(x)]))
+        else:
+            l5.append(_s749_line(x, "%s · paper not found" % esc(rs(x["amount_p"])), "You<br>" + esc(_s749_next(x)),
+                                 ['<button type="button" class="s736b s749y" onclick="s454np(%d,1)">Accept without paper</button>' % int(x["id"])]))
+    for x in esc_:
+        head = " ".join(z for z in (x.get("vendor") or "", x.get("bill_no") or "") if z) or "Scan"
+        l5.append('%s · scan %s · rescanned %d times, still: %s<div class="s749acts"><a class="s736b" href="/scanapp/bills/%d/file" target="_blank" rel="noopener">Open paper</a>%s</div>'
+                  % (esc(head), esc(x["stamp"]), int(x["tries"]), esc(S736_REASON_EN.get(x["reason"], x["reason"])), int(x["scan"]), _s736_btn(x["scan"], "accept", "Accept")))
+    n_you = len(l5)
+    decided = []
+    for x in dec:
+        word = {"paper": "the paper's figure stands", "scan_misread": "the scan misread", "accept": "accepted as it is"}.get(x["decision"], x["decision"])
+        head = " ".join(z for z in (x.get("vendor") or "", x.get("bill_no") or "") if z) or "Scan"
+        decided.append('<span class="mut">%s · scan %s · %s (%s)</span><div class="s749acts">%s</div>' % (esc(head), esc(x["stamp"]), esc(word), esc(ddmon(x.get("at")) or ""),
+                                                                                               _s736_btn(x["scan"], "undo", "Undo")))
+    for x in (r.get("rows") or []):
+        if x.get("state") == "accepted":
+            decided.append('<span class="mut">%s %s · %s</span><div class="s749acts"><button type="button" class="s736b" onclick="s454np(%d,0)">Undo</button></div>'
+                           % (esc(x["supplier"]), esc(x["bill_no"]), esc(x.get("note") or "accepted without paper"), int(x["id"])))
+    for a in acts:
+        b = con_bill(r, a["bill_id"])
+        if b is None:
+            continue
+        decided.append('<span class="mut">%s %s · %s scan %s (%s)</span><div class="s749acts">%s</div>'
+                       % (esc(b["supplier"]), esc(b["bill_no"]), "unpaired from" if a["kind"] == "unpair" else "paired by you with", esc(str(a.get("scan"))),
+                          esc(ddmon(a.get("at")) or ""), _s749_btn("Undo", dict(u=prefix + "/api/s749/undo", b=dict(act=int(a["id"]))))))
+    if decided:
+        l5.append('<span class="mut"><b>Decided</b> (undo any):</span>')
+        l5.extend(decided)
+    # 6 · Returns (S740's row, in his words)
+    try:
+        lab6, n6, l6, g6 = s740_owner_row(con, month, prefix)
+    except Exception as e:                                    # noqa: BLE001 -- the row says so
+        import sys as _sys                                    # noqa: PLC0415
+        print("scan_register S749 returns row: %r" % (e,), file=_sys.stderr)
+        n6, l6 = "could not be read", ["<div class='mut'>The returns could not be read -- the strip holds.</div>"]
+    # 8 · Lock & NEFT
+    try:
+        rets_n = sum(1 for x in s740_pending(con) if x["month"] <= month)
+    except Exception:                                         # noqa: BLE001
+        rets_n = 1
+    open_n = len(g["amir"]) + len(g["confirm"]) + len(l4) + n_you + rets_n
+    holds = []
+    if g["amir"]:
+        holds.append("%d difference%s" % (len(g["amir"]), "" if len(g["amir"]) == 1 else "s"))
+    if g["confirm"]:
+        holds.append("%d to confirm" % len(g["confirm"]))
+    if l4:
+        holds.append("%d with reception" % len(l4))
+    if n_you:
+        holds.append("%d for you" % n_you)
+    if rets_n:
+        holds.append("%d return%s" % (rets_n, "" if rets_n == 1 else "s"))
+    reps = ""
+    try:
+        pa = _pa()
+        s_ = pa._month_summary(con, month)
+        words = []
+        for e in pa._month_reports(con, month, s_):
+            w = {"SUPPLIERWISE": "supplier-wise", "BILLWISE": "bill-wise", "ITEMS": "item-wise"}.get(e["key"], e["label"])
+            if e["state"] == "received" and not (e["key"] == "ITEMS" and e.get("no_lines")):
+                words.append("%s ✓" % w)
+            elif e["state"] == "received":
+                words.append("%s — %d bill%s still without lines" % (w, e["no_lines"], "" if e["no_lines"] == 1 else "s"))
+            else:
+                words.append("%s — not yet" % w)
+        reps = "Marg's month-end reports: %s." % " · ".join(words)
+    except Exception:                                         # noqa: BLE001
+        reps = "Marg's month-end reports: could not be read."
+    l8 = ['<div>%s %s</div><div class="mut">The lock and the NEFT read this page and Marg\'s reports -- nothing else. <a href="%s/page/pay/%s">The payment sheet</a>.</div>'
+          % (("Holding: %s." % " · ".join(holds)) if holds else "Nothing holds here.", esc(reps), esc(prefix), esc(month))]
+    rows = [("Paper matches", "the paper and Marg agree to the rupee", "%d / %d" % (n_match + c.get("accepted", 0) + c.get("confirmed", 0), r.get("total", 0)), l1, False),
+            ("Differences → Amir", "Marg to be corrected to the paper's figure, ₹1 included", str(len(g["amir"])), [hdr] + l2 if l2 else ["Nothing here."], False),
+            ("Confirm — yours", "suppliers you settle yourself; no scan asked", str(len(g["confirm"])), ([hdr] if g["confirm"] else []) + l3, False),
+            ("With reception", "a scan, a rescan or a one-tap question", str(len(l4)), ([hdr] if g["reception"] else []) + (l4 or ["Nothing with reception."]), False),
+            ("You & Shavez", "a disputed reading or a paper not found — your buttons", str(n_you), l5 or ["Nothing here."], False),
+            ("Returns", "pending until the dealer's revised bill or credit note", n6, l6, False),
+            ("Dealer summaries", "each dealer's month statement against Marg", "later", ["Comes later. Until then the lock does not wait for it."], True),
+            ("Lock & NEFT", "opens when rows 2–6 are clear and Marg's month-end reports are in", ("%d open" % open_n) if open_n else "clear", l8, False)]
+    return rows, open_n
+
+
+S749_CSS = """
+#s726chk .s749sub{display:block;font-weight:400;font-size:14px;color:#666}
+#s726chk .s749acts{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 6px}
+#s726chk .s749y{background:#1f3864;color:#fff}
+#s726chk .s738l .c5{white-space:normal}
+#s726chk #s749pick{border:1px dashed #b8c2d6;border-radius:10px;padding:8px 10px;margin:6px 0}
+#s726chk #s749pick select{font:inherit;font-size:15px;min-height:40px;max-width:100%}
+"""
+S749_JS = """
+<script>
+function s749post(b,o){var m=document.getElementById('s736msg');if(b.disabled)return;b.disabled=true;
+fetch(o.u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o.b||{})})
+.then(function(r){return r.json().catch(function(){return {};}).then(function(j){return [r,j];});}).then(function(x){
+if(x[0].ok&&x[1].ok){if(o.pick){s749pick(o.b.scan,x[1].message||'');return;}if(x[1].message&&m){m.style.display='block';m.style.background='#e8f4ea';m.style.color='#1f4d25';m.textContent=x[1].message;}
+setTimeout(function(){location.reload();},x[1].message?900:0);return;}
+b.disabled=false;if(m){m.style.display='block';m.style.background='#fbe7e5';m.style.color='#8c1d18';m.textContent=x[1].message||x[1].error||('HTTP '+x[0].status);}})
+.catch(function(e){b.disabled=false;if(m){m.style.display='block';m.textContent=String(e);}});}
+function s749pick(scan,msg){var m=document.getElementById('s736msg');if(m){m.style.display='block';m.style.background='#e8f4ea';m.style.color='#1f4d25';m.textContent=msg;}
+fetch(S749_PREFIX+'/api/s749/pick?scan='+encodeURIComponent(scan)).then(function(r){return r.json();}).then(function(j){var opts=j.options||[];
+if(!opts.length){if(m){m.textContent=msg+' The scan found its bill by itself, or has none to offer.';}setTimeout(function(){location.reload();},1500);return;}
+var d=document.getElementById('s749pick');if(!d){d=document.createElement('div');d.id='s749pick';var h=document.getElementById('s736msg');h.parentNode.insertBefore(d,h.nextSibling);}
+d.textContent='';var b=document.createElement('b');b.textContent='Pick the right bill for scan '+scan;d.appendChild(b);d.appendChild(document.createElement('br'));
+var sel=document.createElement('select');sel.id='s749sel';var o0=document.createElement('option');o0.value='';o0.textContent='Leave it to reception';sel.appendChild(o0);
+opts.forEach(function(x){var o=document.createElement('option');o.value=String(x.id);o.textContent=(x.same?'':'(another dealer) ')+x.supplier+' '+x.bill_no+' · '+x.date+' · ₹'+x.amount;sel.appendChild(o);});
+d.appendChild(sel);d.appendChild(document.createTextNode(' '));var bt=document.createElement('button');bt.type='button';bt.className='s736b s749y';bt.textContent='Pair';bt.onclick=function(){s749pair(parseInt(scan));};d.appendChild(bt);}).catch(function(){location.reload();});}
+function s749pair(scan){var s=document.getElementById('s749sel');if(!s||!s.value){location.reload();return;}
+s749post(s,{u:S749_PREFIX+'/api/s749/pair',b:{scan:scan,bill:parseInt(s.value)}});}
+</script>
+"""
+
+
+def check_body(con, month, prefix, months, r=None):          # noqa: F811 -- S749: the step view whole, in his words, everything inline
+    """The owner's step view of one month: the month strip, the header, the NEFT strip, eight rows (each opens its lines; every line carries its
+    scan folded and its own actions), the way to the full list. Reads only; the buttons post to their own doors."""
+    r = r if r is not None else register(con, month)
+    v = _s736_view(con)
+    r = dict(r, s736=v or {})
+    cx = Ctx(con)
+    scans = asset_scans(con) or {}
+    bill_of = {}
+    for x in (r.get("rows") or []):
+        if x.get("scan") is not None:
+            b = con.execute("SELECT supplier, bill_no, bill_date, amount_p FROM purchase_bill WHERE id=?", (int(x["id"]),)).fetchone()
+            if b:
+                bill_of[int(x["scan"])] = dict(supplier=_pa().supplier_key(b[0]), bill_no=b[1], bill_date=b[2], amount_p=b[3])
+    total_p = sum(int(x["amount_p"] or 0) for x in (r.get("rows") or []))
+    try:
+        mname = MONTHS[int(month[5:7]) - 1]
+    except (ValueError, IndexError):
+        mname = month
+    _S738_CTX.clear()
+    _S738_CTX.update(scans=scans, bill_of=bill_of, paper=dict(cx.paper), prefix=prefix, tracked=s738_tracked(con))
+    _S740_T.check = dict(con=con, prefix=prefix)
+    try:
+        rows, open_n = s749_rows(con, r, cx, prefix)
+    finally:
+        _S738_CTX.clear()
+        _S740_T.check = None
+    h = ['<div id="s726chk"><style>%s%s%s%s%s</style>' % (CHECK_CSS, S736_CSS, S738_CSS, S740_CSS, S749_CSS)]
+    h.append(s749_month_strip(con, month, lambda m: "%s/page/check?month=%s" % (prefix, m)))
+    h.append('<h1 id="s726head">%s · %d bill%s · %s</h1>' % (esc(mname), r.get("total", 0), "" if r.get("total", 0) == 1 else "s", esc(rs(total_p))))
+    h.append('<div id="s736msg"></div>')
+    if r.get("cls") != "counted":
+        quiet = [x for x in (r.get("rows") or []) if str(x.get("whose") or "").startswith("Nobody (")]
+        h.append('<div class="mut" id="s726parked" style="margin:-6px 0 8px">%s is parked: shown for reading only; nobody is asked.%s</div>'
+                 % (esc(month_name(month)), (" %d bill%s under the new rules (%s) wait with nobody." % (len(quiet), "" if len(quiet) == 1 else "s",
+                    esc(", ".join("%s %s · %s" % (x["supplier"], x["bill_no"], STATE_EN[x["state"]]) for x in quiet[:6])))) if quiet else ""))
+        open_n = 0
+    if open_n:
+        h.append('<div class="strip hold" id="s726strip">NEFT on hold · %d open</div>' % open_n)
+    else:
+        h.append('<div class="strip clear" id="s726strip">All clear ✓</div>')
+    h.append('<div class="mut" style="margin:0 0 6px">Open = a bill that still needs someone. Each line says what it is, what happens next and whose it is.</div>')
+    for i, (lab, sub, n, lines, grey) in enumerate(rows, 1):
+        h.append('<details class="%s%s" data-row="%d"%s><summary><span class="l"><b>%d</b> %s<span class="s749sub">%s</span></span><span class="n">%s</span></summary>'
+                 '<ul>%s</ul></details>' % ("grey" if grey else "row", " last" if i == len(rows) else "", i, " open" if (i in (2, 3) and lines and n not in ("0", "later")) else "",
+                                           i, esc(lab), esc(sub), esc(n), "".join("<li>%s</li>" % x for x in lines) or "<li>Nothing here.</li>"))
+    h.append('<div class="mut" style="margin-top:10px">The full list, the same words: <a href="%s/page/scans?month=%s">the register</a> · '
+             '<a href="%s/page/month/%s">the purchase audit</a> · <a href="%s/page/pay/%s">the payment sheet</a> · <a href="%s/page/hub">the hub</a> (orders, stock, the phone book) · '
+             'reception\'s own list: <a href="/finance/porders/s454/billkaam">Aaj ka bill kaam</a>.</div></div>'
+             % (esc(prefix), esc(month), esc(prefix), esc(month), esc(prefix), esc(month), esc(prefix)))
+    h.append(S736_JS % json.dumps(prefix + "/api/s736/decide"))
+    h.append(S738_JS)
+    h.append(S740_JS)
+    h.append('<script>var S749_PREFIX=%s;</script>' % json.dumps(prefix))
+    h.append(S749_JS)
+    h.append("""<script>function s454np(b,a){fetch(%s,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bill:b,accept:a})})
+.then(function(r){return r.json();}).then(function(j){var m=document.getElementById('s736msg');if(!j.ok){if(m){m.style.display='block';m.style.background='#fbe7e5';m.style.color='#8c1d18';m.textContent=j.message||j.error;}return;}location.reload();});}</script>"""
+             % json.dumps(prefix + "/api/s454/nopaper"))
+    return "".join(h)
+
+
+# ------------------------------------------------------------------ the register page: the full list, the same words
+def page_body(con, month, prefix, owner, months):            # noqa: F811 -- S749: the full list in his words; the month strip; the read quality folded
+    r = register(con, month)
+    c = r["counts"]
+    parked = r["cls"] != "counted"
+    n = s749_month_open(con, month, r)
+    h = ['<div id="s454reg"><style>%s%s</style>' % (CSS, "#s454reg .bl .c5{color:#555}#s454reg .st.confirm{color:#1f3864}#s454reg .st.confirmed{color:#1f4d25}"
+                                                           "#s454reg details.s738v{border:0}#s454reg details.s738v>summary{list-style:none;cursor:pointer}"
+                                                           "#s454reg .s738vb{display:flex;flex-wrap:wrap;gap:12px;margin:8px 0}#s454reg .s738f{flex:1 1 420px;min-height:420px;background:#e6e8ee;border-radius:8px}"
+                                                           "#s454reg .s738f iframe{width:100%;height:560px;border:0}#s454reg .s738f img{max-width:100%}#s454reg .s738t{max-width:100%;overflow-x:auto}#s454reg .s738t table{border-collapse:collapse}"
+                                                           "#s454reg .s738t th,#s454reg .s738t td{text-align:left;padding:2px 10px 2px 0;border:0;font-size:14px}")]
+    h.append(s749_month_strip(con, month, lambda m: "%s/page/scans?month=%s" % (prefix, m)))
+    h.append('<h1>Purchase bills: %s</h1>' % esc(month_name(month)))
+    h.append('<div class="muted">The full list -- one row per Marg bill, the same words as your <a href="%s/page/check?month=%s">purchase check</a>. '
+             'Tap a row with a scan to see the paper beside what it read.</div>' % (esc(prefix), esc(month)))
+    if parked:
+        h.append('<div class="park">%s is parked: nothing here raises an alert and nobody is asked.</div>' % esc(MONTHS[int(month[5:7]) - 1]))
+    chips = ["%d bills in Marg" % r["total"], n["words"]]
+    if c["accepted"]:
+        chips.append("%d accepted without paper" % c["accepted"])
+    if c["confirmed"]:
+        chips.append("%d confirmed by you" % c["confirmed"])
+    h.append('<div class="hd" id="s454heads">%s</div>' % "".join('<span class="chipn">%s</span>' % esc(x) for x in chips))
+    if parked:
+        h.append('<div id="s454settled"><b>%d of %d settled</b>.</div>' % (r["settled"], r["total"]))
+    elif n["open"]:
+        h.append('<div id="s454settled"><b>%d of %d settled</b> · %d open · NEFT on hold.</div>' % (r["settled"], r["total"], n["open"]))
+    else:
+        h.append('<div id="s454settled"><b>%d of %d ✓</b> All clear.</div>' % (r["total"], r["total"]))
+    order = {"confirm": 0, "no_scan": 0, "unread_pair": 0, "amount_differs": 1, "second_look": 1, "double": 1, "has_scan": 3, "verified": 3, "accepted": 4, "confirmed": 4}
+    rows = sorted(r["rows"], key=lambda x: (order.get(x["state"], 9), x["date"], x["id"]))
+    scans = asset_scans(con) or {}
+    _S738_CTX.clear()
+    _S738_CTX.update(scans=scans, bill_of={}, paper=dict(Ctx(con).paper), prefix=prefix, tracked={})
+    items = []
+    try:
+        for x in rows:
+            tap = ""
+            if owner and not parked and x["state"] in ("no_scan", "accepted") and (x.get("missing") or x["state"] == "accepted"):
+                tap = (' <button class="sm" onclick="s454np(%d,%d)">%s</button>' % (x["id"], 0 if x["state"] == "accepted" else 1,
+                                                                                 "Undo" if x["state"] == "accepted" else "Accept without paper"))
+            a = x.get("agree") or {}
+            paper = rs2(a["scan_p"]) if a.get("scan_p") else "—"
+            word = s749_word(x)
+            head = ('<div class="a">%s · %s · %s · Marg %s · paper %s</div><div><span class="st %s">%s</span>%s%s</div><div class="b">%s%s</div>'
+                    % (esc(ddmon(x["date"])), esc(x["supplier"]), esc(x["bill_no"]), esc(rs(x["amount_p"])), esc(paper), x["state"], esc(word),
+                       (" · scan " + esc(x["stamp"])) if x["stamp"] else "", tap, esc(x["note"]),
+                       (' <i class="c5">%s</i>' % esc(_s749_next(x) or ("Whose: %s" % x["whose"]))) if x["whose"] and x["whose"] != "Nobody" else ""))
+            if x.get("scan") is not None and x["scan"] in scans:
+                b_ = con.execute("SELECT supplier, bill_no, bill_date, amount_p FROM purchase_bill WHERE id=?", (int(x["id"]),)).fetchone()
+                if b_:
+                    _S738_CTX["bill_of"][int(x["scan"])] = dict(supplier=_pa().supplier_key(b_[0]), bill_no=b_[1], bill_date=b_[2], amount_p=b_[3])
+                items.append('<details class="bl s738v" data-bill="%d" data-state="%s" ontoggle="s738open(this)"><summary>%s</summary>%s</details>'
+                             % (x["id"], x["state"], head, _s738_panel(int(x["scan"]))))
+            else:
+                items.append('<div class="bl" data-bill="%d" data-state="%s">%s</div>' % (x["id"], x["state"], head))
+    finally:
+        _S738_CTX.clear()
+    first, rest = items[:15], items[15:]
+    h.append('<div class="card" id="s454bills"><h2 style="margin:0;font-size:16px">The bills, open ones first</h2>%s%s</div>'
+             % ("".join(first), ('<details><summary>Show all %d</summary>%s</details>' % (len(items), "".join(rest))) if rest else ""))
+    sc = r["scan_counts"]
+    srows = "".join('<tr><td>%s</td><td>%d</td><td>%s</td></tr>' % (esc(SCAN_EN[k]), sc[k], esc(SCAN_WHOSE[k])) for k in SCAN_STATES if sc[k])
+    detail = "".join('<div class="bl"><div class="a">%s · %s</div><div class="b">%s · %s · %s</div></div>'
+                     % (esc(x["stamp"]), esc(SCAN_EN[x["state"]]), esc(x["vendor"] or "no supplier read"), esc(x["bill_no"] or "no number"),
+                        esc(rs(x["amount_p"]) if x["amount_p"] else "no amount")) for x in r["scans"])
+    h.append('<div class="card" id="s454scans"><h2 style="margin:0;font-size:16px">Scans with no Marg bill: %d</h2>%s%s</div>'
+             % (len(r["scans"]), ('<table><tr><td><b>What it is</b></td><td><b>Scans</b></td><td><b>Whose</b></td></tr>%s</table>' % srows) if srows else
+                '<div class="muted">None.</div>', ('<details><summary>each scan</summary>%s</details>' % detail) if detail else ""))
+    try:
+        s = sarvam(con, month)
+        nr, had, notap = readiness(con)
+        h.append('<details class="card" id="s454sarvam"><summary style="cursor:pointer;font-weight:600">How well the scan reads, and the last 7 days</summary>'
+                 '<div>On the %d linked bills: supplier %d · bill number %d · date %d · total %d read right. Item lines: %d of %d. '
+                 '<a href="%s/page/sarvam?month=%s">the Sarvam page</a>.</div>'
+                 '<div>Last 7 days: %d bill%s entered in Marg · %d had their scan before the entry · %d paired with no tap.</div>'
+                 '<div class="muted"><a href="%s/page/scans?legacy=1&amp;month=%s">the old Scan links tables</a></div></details>'
+                 % (s["n"], s["supplier"], s["billno"], s["date"], s["total"], s["items_right"], s["items_read"], esc(prefix), esc(month),
+                    nr, "" if nr == 1 else "s", had, notap, esc(prefix), esc(month)))
+    except Exception:                                         # noqa: BLE001 -- the list stands without it
+        pass
+    if owner and not parked:
+        h.append("""<script>function s454np(b,a){fetch('%s/api/s454/nopaper',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bill:b,accept:a})})
+.then(function(r){return r.json();}).then(function(j){if(!j.ok){alert(j.message||j.error);return;}location.reload();});}</script>""" % prefix)
+    h.append(S738_JS.replace('<button type="button" id="s738up"', '<button type="button" id="s738up" style="display:none"'))
+    h.append("</div>")
+    return "".join(h)
+
+
+def s749_word(x):
+    """The state word of a register row as every page prints it."""
+    whose = str(x.get("whose") or "")
+    if whose.startswith("Return"):
+        return "Return pending"
+    if x.get("state") in ("amount_differs", "double") and whose.startswith("Reception"):
+        return "Difference (reception confirms the figure)"
+    return STATE_EN.get(x["state"], x["state"])
+
+
+def s749_audit_states(con, month):
+    """For the audit page (purchase_app.page_month): {bill id: (the state word, whose · next)} from the one register."""
+    out = {}
+    try:
+        r = register(con, month)
+    except Exception:                                         # noqa: BLE001
+        return out
+    for x in r["rows"]:
+        word = s749_word(x)
+        nxt = _s749_next(x) or ("" if x.get("whose") in ("Nobody", "", None) else str(x.get("whose")))
+        out[int(x["id"])] = (word, _s749_plain(nxt), x["state"])
+    return out
+# ---- S749 end ---------------------------------------------------------------------------------------------------------------------------
