@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S401 close** (the Scan App project, EOS-light), 08-Nov-2026, evening — the Scan App sections refreshed here (nothing built; October's statement, the two switches and B-0176 read live and still yours; the Yuvika switch's place corrected; 409 reserved: the summary read); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S409 close** (the Scan App project, full EOS), 08-Nov-2026, evening — the Scan App sections refreshed here (kit S754 live: a dealer's month summary recognised by its content; today's eight summaries put right; 410 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S401 close** (the Scan App project, EOS-light), 08-Nov-2026, evening — the Scan App sections refreshed here (nothing built; October's statement, the two switches and B-0176 read live and still yours; the Yuvika switch's place corrected; 409 reserved: the summary read); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S407 close** (the Sanjeevni chat, EOS), 08-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the sixteen mis-scanned summaries removed at his word, kit S751; row 7 Radha agrees — the flow proven; his go awaited on the reminders to reception, him and Shavez; 408 reserved: one small kit — the reminders + the month-end flow completed, then F-802's fix, then the order-list kit); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S406 close** (the Sanjeevni chat, EOS), 08-Nov-2026, midday — the Sanjeevni sections refreshed here (kit S750 MONTH_END live: row 7 Dealer summaries, the dealer ledgers; the dealers who never send a summary are yours to mark; reception's new summary button; 407 reserved for the month-end flow completed, then F-802's fix, then the order-list kit); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S405 close** (the Sanjeevni chat, EOS), 08-Nov-2026, morning — the Sanjeevni sections refreshed here (kit S749 ONE_SOURCE live: your purchase check is the one page; the Marg Purchases tile's grant is the parent's; ZUPRINOR 5 and the two September supplier messages still yours; 406 reserved for F-802's fix and kit 4); the other projects' sections as their closes left them.
@@ -198,9 +199,9 @@
 - The Diwali gift sticker sheet (A4, 8 per sheet) made.
 - Two project-only papers copied to the disk store.
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S401 close (08-Nov, 18:5x)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S409 close (08-Nov, 20:1x)
 
-*Detail: `S401_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_409.md`. The same lines are on your System Board.*
+*Detail: `S409_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_410.md`. The same lines are on your System Board.*
 
 **1 · The publish:** it carries this close's record (papers only).
 
@@ -214,13 +215,11 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 https://followup.dr-manoj.in/scanapp/stationery
 ```
 
-**3 · Yuvika slips on the desk — when you want it:** the *Switches* row on the scan app's front page (also on *The month*) → *Yuvika slips on the desk* → tap OFF to turn it ON. (Not on Admin — corrected at S401.)
+**3 · Yuvika slips on the desk — when you want it:** the *Switches* row on the scan app's front page (also on *The month*) → *Yuvika slips on the desk*. **Recent scans by scan date**, when you want it: its card on Admin.
 
 ```
 https://followup.dr-manoj.in/scanapp/
 ```
-
-**Recent scans by scan date**, when you want it: its card on Admin → *Switch ON*.
 
 ```
 https://followup.dr-manoj.in/scanapp/admin
@@ -252,16 +251,23 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 **Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S401 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S409 close
 
 **Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat (D765).**
 
-1. **The scan app recognises a dealer's month summary scanned like any bill** (your word 17:27 IST 08-Nov; F-1190's reader half; the pharmacy chat's note `S408_SCANAPP_PROMPT_SUMMARY_READ.md`, which I read myself) — and the eight summaries scanned on 08-Nov put right, guarded.
-2. **A credit note as its own kind in the reader (F-1174).**
-3. **What you did on the Stationery page and the switches** — read live; only a gap found is built.
-4. **Small points from the reviews** — only when a later kit touches those files; the sorting desk's and the main app's code read whole first. **D720, when you ask.**
+1. **Check that tomorrow's summaries land as Summary by themselves** — read live; only a gap found is built.
+2. **The papers page's start-up check never moves a summary (F-1194)** — a small kit.
+3. **A credit note as its own kind in the reader (F-1174).**
+4. **What you did on the Stationery page and the switches** — read live; only a gap found is built.
+5. **Small points from the reviews** — only when a later kit touches those files; the sorting desk's code read whole first. **D720, when you ask.**
 
 **Waits by your word:** the clinic's bills in the accountants' pack.
+
+## ✅ DONE AT THE S409 CLOSE — 08-Nov-2026 (the Scan App project)
+
+- ~~**The scan app recognises a dealer's month summary scanned like any bill**~~ — live 20:03 IST (kit S754, D871): tick or no tick; the dealer never Sanjeevni; the month from the bills; two statements never joined.
+- ~~**The eight summaries scanned on 08-Nov put right**~~ — 20:07 IST: all *Summary* under October, with their real dealers; three off the desk; Janta's page back.
+- ~~**A summary's kind when a paper is moved between lanes**~~ — decided: on the Pharmacy lane it stays a Summary; moved off, it is never approved as spend; moving a wrongly recognised bill off and back undoes it.
 
 ## ✅ DONE AT THE S401 CLOSE — 08-Nov-2026 (the Scan App project)
 
