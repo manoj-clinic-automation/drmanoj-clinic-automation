@@ -1,0 +1,76 @@
+
+
+
+# ---- S753 (08-Nov-2026, Sanjeevni session 408, kit S753_SUMMARY_SCANS_READ; the owner's word 17:19 - 17:32 IST 08-Nov) ------------------------
+#  Reception scans a dealer's month summary on the pharmacy lane like any bill, tick or no tick; the Scan App recognises it by its content
+#  (that half is the Scan App's, asked by the owner's prompt S408_SCANAPP_PROMPT_SUMMARY_READ). This half, read only:
+#    (1) THE MONTH FROM THE BILLS LISTED (_s753_lines_month): the month most of the summary's bill lines are dated in, before the reader's
+#        period_to -- a statement printed "as on 02-11" listing October's bills is October's (Daanshi B-0303, read under November today).
+#    (2) NEVER THE PHARMACY ITSELF AS THE DEALER (_s753_not_us): "Sanjeevni Medicos" in any spelling is the BUYER on every statement; a reader
+#        or intake that names it is ignored and the dealer is found another way.
+#    (3) THE DEALER FROM THE BILLS ON THE PAPER (_s753_dealer_by_bills) -- the FALLBACK, when no printed name matched: each bill line's number
+#        and amount is looked for among Marg's purchase bills; the one dealer whose bills they are is the summary's dealer; a short number must be equal, never a tail (L.K. Drug House's
+#        statement prints no name: its bills RT-090058 and RT-092205 are L.K.'s in Marg). Two dealers fitting = none; the owner's pick stands
+#        first as before (s750_dealer_of). The viewer's footer says "dealer named by its bills".
+#    (4) THE COUNT OF BILLS beside their total on the folded viewer's footer ("12 bills ₹65,357") -- the owner's ask, 17:32 IST.
+#  purchase_app._s446_file_bytes takes the kinds it may serve; /api/s738/scan serves a Summary too (the doctor only -- Amir's list never
+#  carries one). assets.db READ ONLY. Nothing here writes, sends or taps anything.
+KIT_S753 = "S753_SUMMARY_SCANS_READ"
+_S753_US = re.compile(r"SANJ[EI]+V[AE]?N[IY]\s*MEDICO", re.I)   # the pharmacy's own name, however the reader spells it
+
+
+def _s753_not_us(name):
+    """The name unless it is the pharmacy itself (the buyer on every dealer's statement) -- then ''."""
+    s = str(name or "").strip()
+    return "" if (not s or _S753_US.search(s)) else s
+
+
+def _s753_lines_month(lines):
+    """The month most of a summary's BILL lines are dated in ('YYYY-MM'), or '' when there are no dated bill lines or two months tie."""
+    n = {}
+    for ln in lines or []:
+        if not isinstance(ln, dict) or ln.get("kind") != "bill":
+            continue
+        d = str(ln.get("date") or "")
+        if re.match(r"^\d{4}-\d\d(-\d\d)?$", d):
+            n[d[:7]] = n.get(d[:7], 0) + 1
+    if not n:
+        return ""
+    best = sorted(n.items(), key=lambda kv: (-kv[1], kv[0]))
+    if len(best) > 1 and best[0][1] == best[1][1]:
+        return ""
+    return best[0][0]
+
+
+def _s753_same_no(a, b):
+    """The summary's bill number names Marg's: equal digits when either is short (a 'Z-1' never claims every number ending in 1); a long
+    number may be clipped by Marg or prefixed by the dealer ('SF 004043' is '4043'; 'YS/0706/2026-27' is 'YS070620262')."""
+    da, db_ = re.sub(r"\D", "", str(a or "")).lstrip("0"), re.sub(r"\D", "", str(b or "")).lstrip("0")
+    if not da or not db_:
+        return False
+    if len(da) < 4 or len(db_) < 4:
+        return da == db_
+    return da.endswith(db_) or db_.endswith(da)
+
+
+def _s753_dealer_by_bills(con, s, sups):
+    """The one dealer (supplier_norm, among sups) whose Marg bills the summary's bill lines are -- by number tail and amount; '' when none or
+    more than one fits. READ ONLY. Used only when no printed name matched (the owner, 17:27 IST 08-Nov: 'a fallback')."""
+    lines = [x for x in (s.get("lines") or []) if isinstance(x, dict) and x.get("kind") == "bill" and x.get("amount_p") is not None and x.get("no")]
+    if not lines:
+        return ""
+    hits = {}
+    for ln in lines:
+        try:
+            rows = con.execute("SELECT supplier_norm, bill_no FROM purchase_bill WHERE amount_p=? AND supplier_norm IS NOT NULL", (int(ln["amount_p"]),)).fetchall()
+        except sqlite3.Error:
+            return ""
+        for k in {str(r[0] or "") for r in rows if str(r[0] or "") in sups and _s753_same_no(ln["no"], r[1])}:
+            hits[k] = hits.get(k, 0) + 1                      # one per dealer per LINE -- a bill Marg holds twice counts once
+    if not hits:
+        return ""
+    best = sorted(hits.items(), key=lambda kv: (-kv[1], kv[0]))
+    if len(best) > 1 and best[0][1] == best[1][1]:
+        return ""                                             # two dealers fit as well: the owner picks
+    return best[0][0]
+# ---- S753 end -------------------------------------------------------------------------------------------------------------------------------
