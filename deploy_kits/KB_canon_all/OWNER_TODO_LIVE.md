@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S407 close** (the Sanjeevni chat, EOS), 08-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the sixteen mis-scanned summaries removed at his word, kit S751; row 7 Radha agrees — the flow proven; his go awaited on the reminders to reception, him and Shavez; 408 reserved: one small kit — the reminders + the month-end flow completed, then F-802's fix, then the order-list kit); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S401 close** (the Scan App project, EOS-light), 08-Nov-2026, evening — the Scan App sections refreshed here (nothing built; October's statement, the two switches and B-0176 read live and still yours; the Yuvika switch's place corrected; 409 reserved: the summary read); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S407 close** (the Sanjeevni chat, EOS), 08-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the sixteen mis-scanned summaries removed at his word, kit S751; row 7 Radha agrees — the flow proven; his go awaited on the reminders to reception, him and Shavez; 408 reserved: one small kit — the reminders + the month-end flow completed, then F-802's fix, then the order-list kit); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S406 close** (the Sanjeevni chat, EOS), 08-Nov-2026, midday — the Sanjeevni sections refreshed here (kit S750 MONTH_END live: row 7 Dealer summaries, the dealer ledgers; the dealers who never send a summary are yours to mark; reception's new summary button; 407 reserved for the month-end flow completed, then F-802's fix, then the order-list kit); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S405 close** (the Sanjeevni chat, EOS), 08-Nov-2026, morning — the Sanjeevni sections refreshed here (kit S749 ONE_SOURCE live: your purchase check is the one page; the Marg Purchases tile's grant is the parent's; ZUPRINOR 5 and the two September supplier messages still yours; 406 reserved for F-802's fix and kit 4); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S403 close** (the Sanjeevni chat, EOS-light), 08-Nov-2026, early morning — the Sanjeevni sections refreshed here (kit 5 planned and its mock approved; ZUPRINOR 5 and the two September supplier messages yours; the staff words; 405 reserved for the build); the other projects' sections as their closes left them.
@@ -197,29 +198,39 @@
 - The Diwali gift sticker sheet (A4, 8 per sheet) made.
 - Two project-only papers copied to the disk store.
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S398 close (07-Nov, 08:2x)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S401 close (08-Nov, 18:5x)
 
-*Detail: `S398_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_401.md`. The same lines are on your System Board.*
+*Detail: `S401_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_409.md`. The same lines are on your System Board.*
 
-**1 · The publish:** it carries this close's record. Papers only; S739, S741, S743 and S746 are live.
+**1 · The publish:** it carries this close's record (papers only).
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · October's statement to Variety:** *Make October 2026's statement* (16 lines on 7 papers) → *Send on WhatsApp* → *Mark sent*. When their two bills come: the Clinic's in *Clinic's bill*, NK's in *NK Pathology's bill*, each *Paid* on its own.
+**2 · October's statement to Variety** (read 08-Nov: not yet made): *Make October 2026's statement* (16 lines on 7 papers) → *Send on WhatsApp* → *Mark sent*. When their two bills come: the Clinic's in *Clinic's bill*, NK's in *NK Pathology's bill*, each *Paid* on its own.
 
 ```
 https://followup.dr-manoj.in/scanapp/stationery
 ```
 
-**3 · Yuvika slips on the desk — when you want it:** Admin → *Yuvika slips on the desk* → Switch ON. **Recent scans by scan date** the same way, when you want it.
+**3 · Yuvika slips on the desk — when you want it:** the *Switches* row on the scan app's front page (also on *The month*) → *Yuvika slips on the desk* → tap OFF to turn it ON. (Not on Admin — corrected at S401.)
+
+```
+https://followup.dr-manoj.in/scanapp/
+```
+
+**Recent scans by scan date**, when you want it: its card on Admin → *Switch ON*.
 
 ```
 https://followup.dr-manoj.in/scanapp/admin
 ```
 
-**4 · B-0176** — a Yuvika slip in the Procedure room with no lines entered yet.
+**4 · B-0176** — a Yuvika slip (16-Oct) set for the Procedure room, not yet accepted, no lines. Enter them, or tell me what they are.
+
+```
+https://followup.dr-manoj.in/scanapp/desk?open=176
+```
 
 **5 · The X-ray film log's opening boxes** (the clinic chat's page): the spare boxes on the shelf, so the order line is right.
 
@@ -237,18 +248,27 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 **10 · Yuvika's May 2026 slips (Y147).** **11 · The lab consumables bills from April 2026 (Y136).** **12 · The battery bills still missing (Y120)** — the Vento's, the DTH lab's UPS battery, the second AC's. **13 · Fujifilm's tax invoice for the AMC (Y121)** — when it comes.
 
-**Not urgent:** *Machine pages* and *Batteries* for Shavez on the *Switches* card; Y83 (the Janitor's renewal list).
+**Not urgent:** *Machine pages* for Shavez on the *Switches* row; Y83 (the Janitor's renewal list).
 
 **Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S398 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S401 close
 
 **Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat (D765).**
 
-1. **What you did on the Stationery page and the switches** — read live; only a gap found is built.
-2. **Small points from the reviews** (S746's, S739's, S715's, S737's, S651's, S633's) — only when a later kit touches those files; the sorting desk's code read whole first. **D720, when you ask.**
+1. **The scan app recognises a dealer's month summary scanned like any bill** (your word 17:27 IST 08-Nov; F-1190's reader half; the pharmacy chat's note `S408_SCANAPP_PROMPT_SUMMARY_READ.md`, which I read myself) — and the eight summaries scanned on 08-Nov put right, guarded.
+2. **A credit note as its own kind in the reader (F-1174).**
+3. **What you did on the Stationery page and the switches** — read live; only a gap found is built.
+4. **Small points from the reviews** — only when a later kit touches those files; the sorting desk's and the main app's code read whole first. **D720, when you ask.**
 
 **Waits by your word:** the clinic's bills in the accountants' pack.
+
+## ✅ DONE AT THE S401 CLOSE — 08-Nov-2026 (the Scan App project)
+
+- ~~**The S398 record's publish**~~ — landed (`main` = `origin/main`).
+- ~~**The two new files of 07-Nov**~~ — the sorting desk's and the Stationery page's — confirmed in the 08-Nov nightly copy.
+- ~~**What you did on the Stationery page and the switches**~~ — read live 08-Nov: nothing done yet, nothing to build.
+- ~~**Where the Yuvika switch is**~~ — corrected: the front page's Switches row, not Admin (F-1192).
 
 ## ✅ DONE AT THE S398 CLOSE — 07-Nov-2026 (the Scan App project)
 
