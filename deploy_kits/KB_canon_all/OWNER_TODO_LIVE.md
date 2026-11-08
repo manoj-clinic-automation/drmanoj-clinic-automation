@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S400 close** (the parent), 08-Nov-2026, early morning — the parent's sections refreshed here (his review buttons, each person's own call card and Net missed live; tell the staff; 404 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S403 close** (the Sanjeevni chat, EOS-light), 08-Nov-2026, early morning — the Sanjeevni sections refreshed here (kit 5 planned and its mock approved; ZUPRINOR 5 and the two September supplier messages yours; the staff words; 405 reserved for the build); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S400 close** (the parent), 08-Nov-2026, early morning — the parent's sections refreshed here (his review buttons, each person's own call card and Net missed live; tell the staff; 404 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S402 close** (the Sanjeevni chat, EOS-light), 08-Nov-2026, early morning — the Sanjeevni sections refreshed here (the order-list plan written; Janta's revised bill to scan under Pharmacy; ZUPRINOR 5 and PREGHYPE NT yours; 403 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S399 close** (the Sanjeevni chat), 07-Nov-2026, morning — the Sanjeevni sections refreshed here (purchase returns tracked; ZUPRINOR 5 yours to answer; 402 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S398 close** (the Scan App project), 07-Nov-2026, morning — the Scan App sections refreshed here (four kits live: the desk and Yuvika, the product box, two bills on the statement; 401 reserved); the other projects' sections as their closes left them.
@@ -960,9 +961,9 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S402 close (08-Nov, 04:3x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S403 close (08-Nov, 06:1x)
 
-*Detail: `S402_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_403.md`. This section supersedes the S399 one below it.*
+*Detail: `S403_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_405.md` (the build of kit 5). This section supersedes the S402 one below it.*
 
 **1 · The publish** — this close's record only; nothing follows on the server:
 
@@ -970,38 +971,37 @@ The full list: `claude/S288_PENDING_LIST.md`.
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Janta 21965's revised bill** — reception scans it under **Pharmacy**; the return settles by itself:
+**2 · ZUPRINOR 5** (2 pieces short at the 7-Oct count, Janta only) — *Yes, returned* / *No, a stock loss*, row 8 of your step view:
 
 ```
-https://followup.dr-manoj.in/scanapp/intake
+https://followup.dr-manoj.in/finance/purchase/page/check?month=2026-10
 ```
 
-**3 · ZUPRINOR 5** (2 pieces short at the 7-Oct count, Janta only) and **PREGHYPE NT** (Shivaaz 02-11: staff tapped *Nahi mila*, Marg billed 12 strips — check the shelf; if not there, Shivaaz owes a credit). On your step view:
+**3 · Two September supplier messages never went** (A.A. Pharmaceuticals, Deepam Pharma — handed to the reception phone 23-Oct, never confirmed). A word to them, or tell me to queue them again.
 
-```
-https://followup.dr-manoj.in/finance/purchase/page/check
-```
+**4 · Tell staff once:** Amir — enter the 11 waiting November bills; correct Yogendra 19612 (₹5,861) and Shivaaz 3854 (₹921); October's item-wise export to 31-10 at his month-end re-export. Reception — Janta's revised bill under **Pharmacy** when it comes. Shavez — log the Bass ₹1,597 cheque (October and November).
 
-**4 · Ravi's 04-11 order** (DOLOGESIC SP) — late, and its WhatsApp shows no *sent* time: a call.
-
-**5 · Tell Amir once** (carried): *Wapsi baaki* — no Marg change for a return until the dealer's paper comes; *Marg sudhar* lists purchase bills to correct.
+**5 · Ravi's 04-11 order** (DOLOGESIC SP) — late, and its WhatsApp shows no *sent* time: a call.
 
 **6 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
-
-```
-https://followup.dr-manoj.in/finance/flows
-```
 
 **7 · Tell Shavez once** (carried): from Monday 9-Nov his page also asks for **Sunday's** sale report and closing stock.
 
 **8 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
 
-**Later, your word only:** "count them"; Kedar's ₹110 (A000211 and bill 234, F-1145); the buying switch (earliest ~22-Nov); a second network for the medical PC only if its LAN fails again (D837).
+**Later, your word only:** "count them"; the buying switch (earliest ~22-Nov); June and July's old PROVISIONAL months — lock them or leave them; a second network for the medical PC only if its LAN fails again (D837).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S402 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S403 close
 
-1. **The order-list kit**, on your "go", the mock first (`S402_ORDER_LIST_PLAN.md`): retire an old order; a replacement product counts; scans with reception stay in your view; the Yuvika mis-tie fixed for good; the page's faults.
-2. **Kit 4**, on your "go": each dealer's month summary, the month lock and the one bulk NEFT (D839, D849; F-1175).
+1. **Kit 5 `ONE_SOURCE` (S749)** — your "go" given, the mock approved: one list and one language on every purchase page; your step view reachable from the tile and the console; every difference (₹1 included) to Amir; Ravi owner-confirmed; everything inline on your step view; the audit page's buttons off your view; the lock and the step view agreeing; October's "no item lines" closed (`S403_KIT5_ONE_SOURCE_PLAN.md`).
+2. **Kit 4**, on your "go" after it: each dealer's month summary, the issues list, the month lock and the one bulk NEFT (D839, D849; F-1175).
+3. **The order-list kit**, on your "go" (`S402_ORDER_LIST_PLAN.md`).
+
+## ✅ DONE AT THE S403 CLOSE — 08-Nov-2026 (the Sanjeevni project)
+
+- ~~**The purchase-payment flow checked end to end**~~ — what is live, what is left, three faults found (F-1181 – F-1183); your rulings written (D865, D866).
+- ~~**Kit 5 planned and its mock approved**~~ — the build is session 405's.
+- ~~**PREGHYPE NT**~~ — carried into the order-list kit's reading; nothing for you until then.
 
 ## ✅ DONE AT THE S402 CLOSE — 07 → 08-Nov-2026 (the Sanjeevni project)
 

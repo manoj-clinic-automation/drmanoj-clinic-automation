@@ -1,4 +1,6 @@
-# HANDOFF RUNBOOK — v316 — S400 close (the parent), 08-Nov-2026 (early morning), on top of the Sanjeevni chat's S402 close (the NK Pathology chat's 365 reserved, the Scan App chat's 401 open, the Sanjeevni chat's 403 reserved; the parent's 404 reserved) — two kits live (S747_CALLS_REVIEW_CARDS: his review buttons on each staff call with its log, recording and transcript; each person's own card in Hindi on Aaj ka kaam with the recordings of their calls, never the transcript, and 'Galat hai?' disputes; the reception mobile credited to the phone staff on duty; S748_MISSED_PEOPLE: Net missed — patients never reached — leads each card) — D863, D864; F-1168 closed; F-1179, F-1180 minted and closed
+# HANDOFF RUNBOOK — v317 — S403 close (the Sanjeevni chat, EOS-light), 08-Nov-2026 (early morning), on top of the parent's S400 close (the NK Pathology chat's 365 and the Scan App chat's 401 open; the parent's 404 reserved; the Sanjeevni chat's 405 reserved) — nothing built: the purchase reconciliation checked whole (five pages read live and in code), the owner's rulings (Paper matches; every difference, ₹1 included, to Amir; Ravi owner-confirmed; one source, one language, one way in; everything inline on his step view) — D865, D866; F-1181 (Marg's item-wise export clips long bill numbers), F-1182 (no way in to the step view), F-1183 (five pages, five truths) open; kit S749 ONE_SOURCE claimed, planned (S403_KIT5_ONE_SOURCE_PLAN.md) and its mock approved — the build is session 405's
+
+*Supersedes v316 (the S400 close). v316's text stands whole except: **§2B is rewritten here by the Sanjeevni chat's S403 close** (EOS-light — the purchase reconciliation checked whole; D865, D866; F-1181 – F-1183 open; kit S749 ONE_SOURCE planned and its mock approved, the parent's portal.py and month_read.py PLANNED for it; 405 reserved: the build). §3 carries this close's line.*
 
 *Supersedes v315 (the S402 close). v315's text stands whole except: **§2A is rewritten here by the parent's S400 close** (S747_CALLS_REVIEW_CARDS and S748_MISSED_PEOPLE live — D863, D864; F-1168 closed; F-1179, F-1180 closed; 404 reserved). §3 carries this close's line.*
 
@@ -957,7 +959,7 @@ https://followup.dr-manoj.in/finance/slips/desk
    - Take session 404 (RESERVED).
    - Read the board: every note and every unread message. The board is v3 (D850): write `_page.stamp` as a full time (F-1155).
    - The day page in the device VM: `python3 $HOME/mnt/Downloads/_kbtools/day_open.py --read`; re-run without `--read` after a publish or a new bundle. **The cold kit is DUE on 9-Nov** (7 days from 2-Nov) — the first session of 9-Nov makes it.
-   - The parent's DECLARED-PENDING: **0** (the 08-Nov bundle carries S747, S748 and S397's three).
+   - The parent's DECLARED-PENDING: **0** (besides the two standing S423 rows — the Hindi font and the vitals page, which the bundle does not carry) (the 08-Nov bundle carries S747, S748 and S397's three).
    - A device commit: a new staged name each time, the md5 read on the device (F-1149). Walk files build test numbers at run time (the number gate refuses any ten-digit run). A sub-agent has no Projects tool: the project-knowledge measure is the main chat's.
 2. **WATCH THE STAFF CARDS (S747, S748; D863, D864) — read live, read-only, at the open:** the first disputes (*Disputed by …* on his card), the first asks to log, whether staff open *Mere calls*; net missed per person for the week. The 7-day page is 695,548 B with 463 review buttons and as many hidden note boxes — if he finds it slow on his phone, a kit that draws a staff card's rows only when it is opened (`calls_console.py` f233b851, read whole first: 2 patches since S400's whole read). Staff get recordings only — never a transcript route for staff (D863, F-1180).
 3. **ARJUN DEV: the link step, when his finger is on the machine.** JOIN-2026-0002 at *login*. On his word, tap *"Is this Arjun Dev? Yes"* on the Add staff page as manoj (built-in browser), then read his first days (D835).
@@ -979,30 +981,29 @@ https://followup.dr-manoj.in/finance/slips/desk
 
 The living list: `claude/S288_PENDING_LIST.md`.
 
-## §2B · The Sanjeevni chat's backlog — rewritten at its S402 close (08-Nov-2026, 04:3x IST, EOS-light)
+## §2B · The Sanjeevni chat's backlog — rewritten at its S403 close (08-Nov-2026, 06:1x IST, EOS-light)
 
-*Supersedes the §2B of v314 (the S399 close). The next Sanjeevni chat is **session 403**, reserved on the board at this close. The parent's 400 is open; the NK Pathology chat's 365 and the Scan App chat's 401 are reserved.*
+*Supersedes the §2B of v316 (the parent's S400 close carried the S402 text). The next Sanjeevni chat is **session 405**, reserved on the board at this close — the build session for kit S749. The NK Pathology chat's 365 and the Scan App chat's 401 are open; the parent's 404 is reserved.*
 
-**What happened (10:52 7-Nov → 04:32 8-Nov): nothing built.**
-- The open; the board's claims trimmed to 40 (v1049 archived byte-exact).
-- The live picture read: Janta 21965 waiting for its paper (he says the revised bill has come — reception scans it under **Pharmacy**; it settles by itself at bill 21965 / ₹3,205); ZUPRINOR 5 unanswered; Yogendra 19612 and Shivaaz 3854 on Amir's list; Kedar 234 a reception amount question.
-- The order list (`/finance/porders/s454/track`) read live in his login and analysed; his asks planned as **`S402_ORDER_LIST_PLAN.md`** (D862; F-1176, F-1177).
-- The 08-Nov bundle CONFIRMS S740's four pins.
+**What happened (05:02 → 06:04 8-Nov): nothing built.**
+- The open; the day page re-run after his 05:01 publish.
+- **The purchase reconciliation checked whole** — the plan, the briefs, the Book, the 08-Nov code bundle, five pages read live (the step view, the register, the audit page, the hub, the pay sheet) and Amir's English summary. Kits 1 – 3 (S726, S736, S738, S740) and the payment machinery (S261 – S271, S405/S407, S604) live; kit 4 not built.
+- **His rulings** (D865, D866) and **three faults** (F-1181 – F-1183); **kit S749 `ONE_SOURCE` planned** — `S403_KIT5_ONE_SOURCE_PLAN.md` — and **its mock approved** with one addition: everything inline on his step view.
 
 **The lessons:**
-- **A live-read brief names each staff page by its route; a contradiction is read in the code before it reaches him** (F-1178).
-- **A bill whose reading cannot pick its order waits for Marg — never the oldest order** (F-1176, to build).
+- **A page added later must read the list the owner reads, or it tells him a second truth** (F-1183: the audit page's buttons, the lock gate, Amir's summary).
+- **A line Marg could not name is matched by what it does carry before it is called missing** (F-1181).
+- **A page the owner is told to use has a way in from his app** (F-1182).
 
-**In order:** `START_HERE_SESSION_403.md` §0 — the open; then:
-1. **The live picture:** Janta 21965 — did his revised bill's scan settle the return (road *revised*)? ZUPRINOR 5 and PREGHYPE NT (Shivaaz 02-11, *Nahi mila* but billed 12 strips) — his answers.
-2. **THE ORDER-LIST KIT** (`S402_ORDER_LIST_PLAN.md`), on his "go", the mock first: retire an old order; a replacement product (and another pack size) counts; reception's scans stay in his view; the tie follows the Marg bill's items, no oldest fall-back (F-1176); Verma, B-0174, Daanshi, Mannat / Essential (F-1177).
-3. **KIT 4**, on his "go": each dealer's month summary, the issues list, the month lock on Marg = papers = summaries, the statements built by the server (D849), the one NEFT on the suppliers' figures (F-1175's net).
-4. **Waiting on him:** F-1110's medical-PC half (his yes); F-1104 "count them"; F-1145 (Kedar ₹110 — A000211 stays *You*; Kedar 234 the same ₹110); the switch (his word, earliest ~22-Nov).
-5. **PARKED by his word:** F-802's permanent fix; F-1133 (D837).
-6. **NOT THIS PROJECT'S:** F-1048, D803, F-1102, F-1122 (the parent's); F-1174 (the Scan App's reader).
-7. **His with Ram Singh:** F-1115.
+**In order:** `START_HERE_SESSION_405.md` §0 — the open; then:
+1. **KIT S749 `ONE_SOURCE`** (`S403_KIT5_ONE_SOURCE_PLAN.md`, the mock approved 06:04): the register's states as the one source and one language; *Paper matches*; every difference (₹1 included) to Amir, row 4 folded into row 3, the *You* state retired (Kedar A000211 → Amir); Ravi owner-confirmed (D866, a per-supplier setting); every action inline on the step view (the scan, *Confirm*, the second look, the return answers, *Not this bill → pick the right bill*, *Accept without paper*, *Ask reception to rescan*, *Undo*); the audit page's Correct/Wrong off his view, its state column and month strip; the clipped item-wise numbers matched (F-1181 — October's 4 bills close); the hub counted months only; the one lock gate on rows 1 – 5 and 8, Step 2 run by the server; Amir's summary reading his list; the tile and the console line (the parent's `portal.py`, `month_read.py` — PLANNED, built on the 08-Nov bundle's bytes, the parent told). **Read each file whole first (drift +3). DRY on the box before install (F-1153) — it re-states live bills. A cold review until SAFE. The pages read live after, as manoj.**
+2. **KIT 4**, on his "go" after S749: the dealers' month summaries (row 6; the Scan App's statement kind on the pharmacy lane — PLANNED, told), the issues list (*accept / ask the supplier / carry*), the server-built statements (D849), row 7 — the lock and the NEFT when Marg = papers = summaries.
+3. **THE ORDER-LIST KIT** (`S402_ORDER_LIST_PLAN.md`), on his "go": retire an old order; a replacement product counts; reception's scans stay in his view; no oldest fall-back (F-1176); F-1177's faults.
+4. **Waiting on him:** ZUPRINOR 5 (row 8); the two unsent September supplier messages (A.A., Deepam); F-1110's medical-PC half; F-1104 "count them"; the switch (his word, earliest ~22-Nov); June / July's old PROVISIONAL months — his word only.
+5. **Waiting on staff (named in the brief):** Amir — the 11 waiting November bills; Yogendra 19612, Shivaaz 3854; the October item-wise re-export to 31-10. Reception — Janta's revised bill when it comes. Shavez — the Bass ₹1,597 cheque.
+6. **PARKED by his word:** F-802's permanent fix; F-1133 (D837). **NOT THIS PROJECT'S:** F-1048, D803, F-1102, F-1122 (the parent's); F-1174 (the Scan App's reader). **His with Ram Singh:** F-1115.
 
-**Live, this project, confirmed:** S740, S736, S726, S722 (+ the medical pair), S716, S714, S711, S710, S708, S706; S704, S702, S692 – S695, S683, S690, S678, S679, S676, S677, S675, S359's six. S738's files superseded by S740's (confirmed). S644 runs in shadow.
+**Live, this project, confirmed:** S740, S736, S726, S722 (+ the medical pair), S716, S714, S711, S710, S708, S706; S704, S702, S692 – S695, S683, S690, S678, S679, S676, S677, S675, S359's six. S644 runs in shadow.
 
 **Never:**
 - run `deliver_S488.ps1`;
@@ -1011,7 +1012,8 @@ The living list: `claude/S288_PENDING_LIST.md`.
 - change the meaning of a name the parent reads without a word to the parent;
 - book a voucher in `sp_move`;
 - send a supplier WhatsApp, or tap a staff or owner button for him, without his word;
-- install a re-pairing or a re-tie without its DRY run read first (F-1153).
+- install a re-pairing, a re-tie or a re-stating of live bills without its DRY run read first (F-1153);
+- let a tap stand for a Marg correction — Amir's export is the proof (F-1162, D865).
 
 ## §2C · The Scan App project's backlog — rewritten at its S398 close (07-Nov-2026, 08:2x IST)
 
@@ -1072,6 +1074,8 @@ The living list: `claude/S288_PENDING_LIST.md`.
 **Rules learned here.** A lab-PC job that copies files lists first, checks the extension itself and caps the count (F-1044). `cmd dir` takes the pattern inside the path (`dir "E:\*.pdf" /s /b`). `lab_sign.py` with `-B` (F-1041). A text file in a kit is LF unless `.gitattributes` pins it CRLF (F-1026). Patient files stay in the clinic's own Drive and the device VM, never in the cloud workspace.
 
 ## §3 · Files
+
+**At the S403 close (the Sanjeevni chat, EOS-light, 08-Nov, 06:1x IST):** Register v5.237 · Archive v1.234 (§S403) · Fault v2.221 (§7.154) · this Runbook v317 (§2B) · `START_HERE_SESSION_405` · `S403_BUILD_BRIEF` · `S403_CLOSE_REPORT` · `S403_KIT5_ONE_SOURCE_PLAN.md` · `live_pins_S403close.txt` · `OWNER_TODO_LIVE.md`.
 
 **At the S400 close (the parent, 08-Nov, 04:4x IST):** Register v5.236 · Archive v1.233 (§S400) · Fault v2.220 (§7.153) · this Runbook v316 (§2A) · `START_HERE_SESSION_404` · `S400_BUILD_BRIEF` · `S400_CLOSE_REPORT` · `live_pins_S400close.txt` · `OWNER_TODO_LIVE.md`.
 
