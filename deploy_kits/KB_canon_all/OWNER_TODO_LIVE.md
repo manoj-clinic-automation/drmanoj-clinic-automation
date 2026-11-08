@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S409 close** (the Scan App project, full EOS), 08-Nov-2026, evening — the Scan App sections refreshed here (kit S754 live: a dealer's month summary recognised by its content; today's eight summaries put right; 410 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S408 close** (the Sanjeevni chat, EOS), 08-Nov-2026, evening — the Sanjeevni sections refreshed here (the summary scans open and read right, kit S753; staff scan summaries like any bill — the system recognises them, D871; the awaited summaries chase themselves — reception's cards by themselves, one line a day to him and Shavez, kit S755; 411 reserved: F-802's permanent fix, then the order-list kit); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S409 close** (the Scan App project, full EOS), 08-Nov-2026, evening — the Scan App sections refreshed here (kit S754 live: a dealer's month summary recognised by its content; today's eight summaries put right; 410 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S401 close** (the Scan App project, EOS-light), 08-Nov-2026, evening — the Scan App sections refreshed here (nothing built; October's statement, the two switches and B-0176 read live and still yours; the Yuvika switch's place corrected; 409 reserved: the summary read); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S407 close** (the Sanjeevni chat, EOS), 08-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the sixteen mis-scanned summaries removed at his word, kit S751; row 7 Radha agrees — the flow proven; his go awaited on the reminders to reception, him and Shavez; 408 reserved: one small kit — the reminders + the month-end flow completed, then F-802's fix, then the order-list kit); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S406 close** (the Sanjeevni chat, EOS), 08-Nov-2026, midday — the Sanjeevni sections refreshed here (kit S750 MONTH_END live: row 7 Dealer summaries, the dealer ledgers; the dealers who never send a summary are yours to mark; reception's new summary button; 407 reserved for the month-end flow completed, then F-802's fix, then the order-list kit); the other projects' sections as their closes left them.
@@ -990,9 +991,9 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S407 close (08-Nov, 15:1x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S408 close (08-Nov, 20:xx)
 
-*Detail: `S407_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_408.md` (one small kit: the pending-summaries reminders + the month-end flow completed; then F-802's fix; then the order-list kit). This section supersedes the S406 one below it.*
+*Detail: `S408_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_411.md` (F-802's permanent fix; then the order-list kit on your "go"). This section supersedes the S407 one below it.*
 
 **1 · The publish** — this close's records only; nothing follows on the server:
 
@@ -1000,31 +1001,35 @@ The full list: `claude/S288_PENDING_LIST.md`.
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · Your go on the reminders** (your ask 14:15 8-Nov): once a month has ended, every awaited dealer appears on reception's list by itself (no tap from you); you and Shavez get one line a day on the clinic app — *October: 19 summaries awaited — Kedar, Shivaaz, …* — until all are in or marked. No new screen; it rides the next small kit. One word: **go**, or what to change.
-
-**3 · Row 7 — the dealers who never send a summary:** tap *<Dealer> gives no summary* once each (it stands for every month after); the rest wait for reception's rescans:
+**2 · Row 7 — the dealers who never send a summary:** *<Dealer> gives no summary*, once each (Bass, Ess Kay, Jubilee, Kedar, Krishna, Saisun are awaited today; reception's list carries them by itself):
 
 ```
 https://followup.dr-manoj.in/finance/purchase/page/check?month=2026-10
 ```
 
-**4 · Tell staff once (or forward the lines in the brief):** reception — the 19 awaited dealers' October summaries rescanned under **Pharmacy** with the **DEALER KA MAHINE KA HISAAB (SUMMARY) HAI?** button; **Gunina's two pages in one Save**; Mannat once; Radha is done (13:56, correctly). Amir — October's item-wise export to 31-10 (row 8 waits for it); the 5 differences (Marg to the paper's figure, then his export). Shavez — the Bass ₹1,597 cheque.
+**3 · Shavez's phone:** the daily summaries line reaches him only if he has opened the clinic app once and allowed messages — a word to him.
 
-**5 · Still yours:** ZUPRINOR 5 (row 6); the two September supplier messages (A.A. Pharmaceuticals, Deepam Pharma) — a word to them, or tell me to queue them again.
+**4 · Still yours:** ZUPRINOR 5 (row 6); the two September supplier messages (A.A. Pharmaceuticals, Deepam Pharma) — a word to them, or tell me to queue them again.
 
-**6 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
+**5 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
 
-**7 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
+**6 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
 
-**To know:** Shivani's sixteen scans of 11:54 – 12:04 (the summaries without the SUMMARY button) are gone — removed at your word by kit S751 at 14:08, audited, both databases backed up first (`assets.db.bak_S751_20261108_140815`, `finance.db.bak_S751_20261108_140815` on the server). Row 7 reads *1 agree · 19 awaited*. The dealer ledgers still show a balance for April–June (paid before this system) until the next small kit marks them *settled outside the system*. Your portal home still carries no Marg Purchases tile (the parent's grant, F-1185) — the way in is the console's month line or the Vendor payments tile.
+**To know:** staff scan a summary on the pharmacy lane like any bill now — no tick to remember. Row 7 reads *11 agree · 1 differ · 6 awaited*. You and Shavez get one line a day from 10:30 while a summary is awaited. The shell to your PC (the Claude desktop link) stopped answering at ~19:50 — if the next open finds it still down, it says so first.
 
 **Later, your word only:** "count them"; the buying switch (earliest ~22-Nov); June and July's old PROVISIONAL months; a second network for the medical PC only if its LAN fails again (D837 — I will remind you).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S407 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S408 close
 
-1. **One small kit:** the pending-summaries reminders (your go) + the month-end flow completed — pre-September months *settled outside the system* on the ledgers (F-1189); the hub's count equal to the step view's (F-1188); the wording found live.
-2. **F-802's permanent fix** (D867 / D868): a repeated, unchanged Marg export counts as *received again* — the medical PC's watcher and the server's door, its own small kit.
-3. **The order-list kit**, on your "go", the mock first (`S402_ORDER_LIST_PLAN.md`).
+1. **F-802's permanent fix** (D867 / D868): a repeated, unchanged Marg export counts as *received again* — the medical PC's watcher and the server's door, its own small kit.
+2. **The order-list kit**, on your "go", the mock first (`S402_ORDER_LIST_PLAN.md`).
+3. **Small, with the next kit that touches them:** reception's S750 card no longer says *press the summary button*; the four undecided scratch rows the Scan App's one-off left (read at the open); F-1184.
+
+## ✅ DONE AT THE S408 CLOSE — 08-Nov-2026 (the Sanjeevni project)
+
+- ~~**Why don't the summary scans open?**~~ — the viewer served bills only; kit S753 (18:58): every summary opens, the footer counts the bills, the month from the bills, the dealer by its bills when no name is printed, never our own name.
+- ~~**Staff cannot follow the tick; a nameless summary was rejected**~~ — your word: scan like any bill, the system recognises it (D871); the Scan App's kit S754 on this chat's prompt; today's eight papers set right — all thirteen summaries in.
+- ~~**The reminders (your go 19:10)**~~ — kit S755 (20:13): the awaited dealers on reception's list by themselves; one line a day to you and Shavez; the hub's count = row 1's; the old ledger months *settled outside the system*; the wording.
 
 ## ✅ DONE AT THE S407 CLOSE — 08-Nov-2026 (the Sanjeevni project)
 
