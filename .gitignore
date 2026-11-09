@@ -298,3 +298,6 @@ _scratch/
 # S619 (22-Oct-2026; line added when PUBLISH_ALL refused at 13:3x IST): the kit's DUTY_MAP.json (v19: reception.order_arrival rewritten,
 # shavez.order_followup added) that its walk and installer ran with (in SUMS.md5). No number (the gate read it). Exact path.
 !deploy_kits/S619_ORDER_TRACKER/DUTY_MAP.json
+# S763 (09-Nov-2026, the Sanjeevni chat): the kit's DUTY_MAP.json v20 (FROM, its control) and v21 (TO) that its walk and installer ran with (in SUMS.md5). Exact paths.
+!deploy_kits/S763_F802_AGAIN/from/DUTY_MAP.json
+!deploy_kits/S763_F802_AGAIN/to/DUTY_MAP.json

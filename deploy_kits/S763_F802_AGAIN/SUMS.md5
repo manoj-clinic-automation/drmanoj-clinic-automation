@@ -1,0 +1,13 @@
+9a3bd77d431296a2d23dc7db1e29cb67  ./KIT_ID.txt
+7341f6e3e98fd7820e8104fa6215d28f  ./README.md
+4d00ce6f87e5b3b168fdb78f6f488ba2  ./TO_PINS.md5
+78b5f07ef7cdd48b1a76d78db52107fc  ./from/DUTY_MAP.json
+df7736e99abfd13f480d61ab4b5320d0  ./from/marg_watch.py
+2f5c407b872cf2195ac3975cb41d048b  ./install_S763_F802_AGAIN.sh
+7985213d7a82d5ae96e361670c3750f7  ./make_s763.py
+afcc3fd993958dc1db2dd092222c42f8  ./medical/marg_watch.py
+c6747da593386ca6b3192d6ff905fb74  ./proof_s763.py
+65eea18c8edc5d8382348952926bc3b8  ./rehearse_s763.sh
+fdec576c90561ea1692b9d0546f7a368  ./to/DUTY_MAP.json
+88d9093c4ef1da2d8704d67ddd052a30  ./walk_s761.py
+cfbdb63f43bd41b0ecfd74231c8f5312  ./walk_s763.py
