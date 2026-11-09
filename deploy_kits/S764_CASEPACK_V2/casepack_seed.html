@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package seeding — Case Pack</title>
+<!-- S764 (S418, 09-Nov-2026, D880) — the owner's seeding page: his mock-up GGyUJWvbHM5fpR91wJpczS ("the format looks okay"),
+     the charge groups approved 13:27 IST. Owner-only (/portal/casepack/seed, behind the Case Pack gate). One row per fixation he
+     does: Ayushman's package and implant provision on the left, his cash figures on the right; suggested figures dashed amber
+     until he types; the package total at general ward and his NET (share %, a private setting). Saves the whole list to the
+     server (pinned by version — a save from another device first is refused, nothing lost). -->
+<style>
+:root{--bg:#263433;--card:#2F3E3D;--ink:#E7EEEC;--muted:#9DB0AC;--blue:#4E88B8;--green:#74C295;--accent:#E0966B;--line:#3D4F4D;--line2:#5A706E;--warn:#E0B36A;--warnbg:rgba(224,179,106,.14);--low:#E39A96;--priv:#c9a3d6;--privbg:rgba(124,58,237,.16);--sugg:rgba(224,179,106,.10)}
+html{color-scheme:dark}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-size:14px;line-height:1.45;padding:12px 12px 110px}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+h1{font-size:20px;margin:0}h2{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:10px 0 0}
+.sub{color:var(--muted);font-size:13px}
+a{color:var(--blue)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.defaults{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:13px}
+.defaults label{display:flex;align-items:center;gap:6px}
+input,select,button{font:inherit;color:var(--ink)}
+input[type=number],input[type=text],select{border:1px solid var(--line2);border-radius:6px;padding:4px 6px;background:var(--bg);color:var(--ink)}
+input[type=number]{width:84px;text-align:right;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;border-radius:6px;padding:1px 6px;font-size:11px;font-weight:700;white-space:nowrap}
+.tag.ok{background:rgba(116,194,149,.18);color:var(--green)}.tag.warn{background:var(--warnbg);color:var(--warn)}.tag.ay{background:rgba(78,136,184,.18);color:#8FBBDE;font-family:Consolas,ui-monospace,monospace;font-weight:500}.tag.priv{background:var(--privbg);color:var(--priv)}.tag.diff{background:rgba(227,154,150,.16);color:var(--low)}
+.grid{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.gh,.gr{display:grid;grid-template-columns:minmax(170px,1.7fr) minmax(130px,1fr) 175px 90px 90px 64px 96px 120px;gap:0 8px;align-items:center;padding:6px 10px;font-size:13px}
+.gh{background:var(--bg);color:var(--muted);font-size:11px;letter-spacing:.04em;text-transform:uppercase;border-bottom:1px solid var(--line)}
+.gr{border-top:1px solid var(--line)}
+.gr.retired{opacity:.5}
+.gr .fx{font-weight:600;min-width:0}.gr .fx small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.gr .fx input.nm{width:100%;font-weight:600;background:transparent;border-color:transparent;padding:2px 4px}
+.gr .fx input.nm:focus{border-color:var(--line2);background:var(--bg)}
+.gr .ay{font-size:12px;color:var(--muted);line-height:1.3}.gr .ay b{font-family:Consolas,ui-monospace,monospace;font-weight:500;color:var(--ink)}
+.gr .grp{display:flex;flex-direction:column;gap:3px;font-size:12px}
+.gr .grp select{width:100%;font-size:12px;padding:3px 4px}
+.gr .grp label{display:flex;gap:4px;align-items:center;color:var(--muted);cursor:pointer}
+.gr input[type=number]{width:100%;min-width:0}
+.gr input.s{background:var(--sugg);border-style:dashed;border-color:var(--warn)}
+.gr input:disabled{opacity:.55}
+.gr .tot{font-family:Consolas,ui-monospace,monospace;text-align:right;font-variant-numeric:tabular-nums;font-size:13px}
+.gr .tot small{display:block;font-family:inherit;font-size:11px;color:var(--priv)}
+.gr .acts{display:flex;gap:4px;justify-content:flex-end}
+.btn{border:1px solid var(--line2);background:var(--card);border-radius:9px;padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}.btn.sm{padding:3px 8px;font-size:12px}.btn.ghost{background:transparent;color:var(--muted)}
+.foot{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 12px;z-index:6}
+.foot .in{max-width:1040px;margin:0 auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:#12201F;color:#fff;padding:8px 14px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center;z-index:30}
+.toast.show{opacity:1}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:8px}
+.g{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg)}
+.g .n{font-weight:700;display:flex;justify-content:space-between;gap:6px;align-items:center}
+.g .n input{width:100%;min-width:0;font-weight:700;font-size:13px;background:transparent;border-color:transparent;padding:2px 4px}
+.g .n input:focus{border-color:var(--line2);background:var(--card)}
+.g .f{display:flex;gap:8px;align-items:center;margin-top:6px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.g .f input[type=number]{width:76px}
+.g .m{font-size:11.5px;color:var(--muted);margin-top:4px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);align-items:center}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:4px;border:1px dashed var(--warn);background:var(--sugg)}
+.msg{font-size:12.5px;color:var(--muted)}
+.err{color:var(--low);font-weight:600}
+@media (max-width:760px){.gh{display:none}.gr{grid-template-columns:1fr 1fr 1fr;gap:6px 8px;padding:10px}.gr .fx,.gr .ay,.gr .grp,.gr .acts{grid-column:1/4}.gr .tot{grid-column:1/4;text-align:left}.gr input[type=number]{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div><h1>Package seeding — fractures and knee</h1>
+ <div class="sub">One row per fixation you do. Left: the Ayushman package (HBP 2022, Tier 2) and the implant provision HBP gives with it. Right: your cash package — surgery ₹, basic implant ₹, stay and case size; the total at general ward and your net work out as you type. Rows with your existing packages are filled; the rest carry a <span class="sw"></span> suggested figure — edit, then <b>Save all</b>. <a href="/portal/casepack">← back to the Case Pack</a></div></div>
+
+ <div class="card defaults" id="defaults">
+  <b>Defaults</b>
+  <label>Ward <select id="d_room"></select></label>
+  <label>Implant grade <select id="d_grade"></select></label>
+  <label>Admission <input id="d_adm" type="number"></label>
+  <label>C-arm <input id="d_carm" type="number"></label>
+  <label>Investigations <input id="d_inv" type="number"></label>
+  <label><span class="tag priv">only you</span> my share % <input id="d_share" type="number" min="0" max="100" style="width:64px"></label>
+  <span class="sub" id="ratesline"></span>
+  <span class="sub">Size fills anaesthesia · OT meds · ward meds: small 3,000 · 2,000 · 1,000 — medium 5,000 · 3,000 · 2,500 — major 6,000 · 10,000 · 5,000. OT = 20% of surgery. A package with its own heads shows size <i>custom</i>.</span>
+ </div>
+
+ <div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><b>Charge groups</b><span class="sub">surgery ₹, stay and size set ONCE per group — every linked member follows; implant ₹ stays per fixation. Untick <i>linked</i> on a row to keep its own figures.</span><button class="btn sm" id="addgroup">+ Add a group</button></div>
+  <div class="groups" id="groups" style="margin-top:8px"></div>
+ </div>
+
+ <div class="legend"><span class="tag ok">have</span> your package today · <span class="tag warn">new</span> suggested, not yet yours · <span class="tag diff">differs</span> own figures differ from the group's · <span class="sw"></span> a suggested figure</div>
+ <div id="regions"></div>
+ <div class="card"><button class="btn" id="addpkg">+ Add a package of your own</button> <span class="sub">a fixation not in the list — name it, give the figures; it joins "Other packages".</span></div>
+</div>
+
+<div class="foot"><div class="in">
+ <button class="btn pri" id="saveall">Save all packages</button>
+ <span class="msg" id="count"></span>
+ <button class="btn" id="reset">Clear suggestions</button>
+ <button class="btn ghost" id="import">Import this device's saved packages</button>
+ <span class="msg" id="msg"></span>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---- one state: the server's document, edited in place, saved whole ---- */
+var DOC=null, RATES=[], CAT=null, SETTINGS=null, SIZE={small:{anaesthesia:3000,otMeds:2000,wardMeds:1000},medium:{anaesthesia:5000,otMeds:3000,wardMeds:2500},major:{anaesthesia:6000,otMeds:10000,wardMeds:5000}};
+var GRADES=[{k:"eco",n:"Basic (SS)",m:1},{k:"prem",n:"Premium (Ti)",m:1.6},{k:"imp",n:"Imported",m:2.4}];
+var SUGG={};   /* id -> {surgery:true, implant:true} while a suggested figure is still untouched */
+function rs(n){return "₹"+Math.round(n).toLocaleString("en-IN");}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");}
+function toast(t){var e=document.getElementById("toast");e.textContent=t;e.classList.add("show");clearTimeout(e._t);e._t=setTimeout(function(){e.classList.remove("show");},2400);}
+function num(v){var x=Math.round(parseFloat(v));return isNaN(x)?0:Math.max(0,x);}
+function J(url,opt){return fetch(url,Object.assign({credentials:"same-origin"},opt||{})).then(function(r){return r.json().then(function(j){j._code=r.status;return j;});});}
+/* THE ARITHMETIC — the same formula as casepack_v2.calc on the server (the walk proves them equal) */
+function calc(e,share){
+ var by={};RATES.forEach(function(r){by[r.k]=r;});
+ var stay=Math.max(1,num(e.stay)||1), surgery=num(e.surgery), ot=Math.round(surgery*0.2);
+ var gm=1;GRADES.forEach(function(g){if(g.k===(e.grade||"eco"))gm=g.m;});
+ var implant=Math.round(num(e.implant)*gm);
+ var an=num(e.anaesthesia),otm=num(e.otMeds),wm=num(e.wardMeds),adm=num(e.admission),carm=num(e.carm),inv=num(e.investigations),oth=num(e.other);
+ var room=by[e.room||"gen"]||RATES.filter(function(r){return r.t==="ward";})[0]||{r:0,n:"General Ward"};
+ var roomAmt=num(room.r)*stay, day=0, opt=0;
+ RATES.forEach(function(r){if(r.t==="day")day+=num(r.r)*stay;if(r.t==="opt"&&e.opts&&e.opts[r.k])opt+=num(r.r)*stay;});
+ var heads=an+otm+wm+adm+carm+inv+oth, total=surgery+ot+heads+roomAmt+day+opt+implant, disc=num(e.discount);
+ var netp=Math.max(0,total-disc), shareable=netp-adm-(an+otm+wm+implant+inv), myNet=Math.round(shareable*(num(share)/100));
+ return {total:total,net_to_patient:netp,shareable:shareable,my_net:myNet,implant:implant,ot:ot,room:roomAmt,roomName:room.n};
+}
+function pkgCalc(p){var d=DOC.defaults||{};return calc({surgery:p.surgery,implant:p.implant,grade:d.grade||"eco",stay:p.stay,room:d.room||"gen",anaesthesia:p.anaesthesia,otMeds:p.otMeds,wardMeds:p.wardMeds,admission:p.admission,carm:p.carm,investigations:p.investigations,other:p.other},SETTINGS?SETTINGS.share_pct:0);}
+function groupOf(id){for(var i=0;i<DOC.groups.length;i++)if(DOC.groups[i].id===id)return DOC.groups[i];return null;}
+function applyGroups(){DOC.packages.forEach(function(p){var g=groupOf(p.group);if(!g){p.differs=false;return;}
+ if(!p.own){p.surgery=num(g.surgery);p.stay=Math.max(1,num(g.stay)||1);if(SIZE[g.size]){p.size=g.size;Object.assign(p,SIZE[g.size]);}p.differs=false;}
+ else{p.differs=(num(p.surgery)!==num(g.surgery)||num(p.stay)!==num(g.stay)||(p.size||null)!==(g.size||null));}});}
+function sizeOf(p){return p.size||"custom";}
+function setSize(p,sz){if(SIZE[sz]){p.size=sz;Object.assign(p,SIZE[sz]);}else{p.size=null;}}
+/* ---- rendering ---- */
+function renderDefaults(){
+ var d=DOC.defaults||{};
+ var rsel=document.getElementById("d_room");rsel.innerHTML=RATES.filter(function(r){return r.t==="ward";}).map(function(r){return '<option value="'+esc(r.k)+'"'+(r.k===(d.room||"gen")?' selected':'')+'>'+esc(r.n)+' · '+rs(r.r)+'/d</option>';}).join("");
+ var gsel=document.getElementById("d_grade");gsel.innerHTML=GRADES.map(function(g){return '<option value="'+g.k+'"'+(g.k===(d.grade||"eco")?' selected':'')+'>'+g.n+(g.m!==1?' · ×'+g.m:'')+'</option>';}).join("");
+ document.getElementById("d_adm").value=num(d.admission);document.getElementById("d_carm").value=num(d.carm);document.getElementById("d_inv").value=num(d.investigations);
+ var sh=document.getElementById("d_share");sh.value=SETTINGS?num(SETTINGS.share_pct):"";sh.disabled=!SETTINGS;
+ document.getElementById("ratesline").textContent="Per day from the DTH rates list: "+RATES.filter(function(r){return r.t==="day";}).map(function(r){return r.n+" "+rs(r.r);}).join(" · ")+" (edit them on the Case Pack page).";
+}
+function renderGroups(){
+ var box=document.getElementById("groups");
+ box.innerHTML=DOC.groups.map(function(g){var members=DOC.packages.filter(function(p){return p.group===g.id&&!p.retired;});var own=members.filter(function(p){return p.own;}).length;
+  return '<div class="g" data-g="'+esc(g.id)+'"><div class="n"><input type="text" data-gf="name" value="'+esc(g.name)+'"><button class="btn sm ghost" data-gdel="'+esc(g.id)+'" title="Remove the group (members keep their own figures)">✕</button></div>'
+   +'<div class="f"><label>Surgery ₹ <input type="number" data-gf="surgery" value="'+num(g.surgery)+'"></label><label>Stay <input type="number" data-gf="stay" value="'+num(g.stay)+'" style="width:56px"></label><label>Size <select data-gf="size"><option value=""'+(!g.size?' selected':'')+'>—</option>'+["small","medium","major"].map(function(k){return '<option'+(k===g.size?' selected':'')+'>'+k+'</option>';}).join("")+'</select></label></div>'
+   +'<div class="m">'+members.length+' member'+(members.length===1?'':'s')+(own?' · '+own+' with own figures':'')+'</div></div>';}).join("")||'<div class="sub">no groups</div>';
+}
+function rowHTML(p){
+ var c=pkgCalc(p), g=groupOf(p.group), sg=SUGG[p.id]||{};
+ var have=!p.suggested;
+ var ay=p.sb?('<span class="tag ay">'+esc(p.sb)+'</span> <b>'+(ayRate(p.sb)?rs(ayRate(p.sb)):'—')+'</b><br>+ implant: '+esc(p.sb_note||'—')):'<span class="sub">no Ayushman row</span>';
+ var linked=!!(g&&!p.own);
+ return '<div class="gr'+(p.retired?' retired':'')+'" data-id="'+esc(p.id)+'">'
+  +'<span class="fx"><input class="nm" type="text" data-f="name" value="'+esc(p.name)+'" title="Package name"><small>'+(p.fx?esc(p.fx)+' · '+esc(p.fix)+' · ':'')+(have?'<span class="tag ok">have</span>':'<span class="tag warn">new</span>')+(p.differs?' <span class="tag diff">differs</span>':'')+(p.retired?' <span class="tag">retired</span>':'')+'</small></span>'
+  +'<span class="ay">'+ay+'</span>'
+  +'<span class="grp"><select data-f="group"><option value=""'+(!p.group?' selected':'')+'>no group</option>'+DOC.groups.map(function(x){return '<option value="'+esc(x.id)+'"'+(x.id===p.group?' selected':'')+'>'+esc(x.name)+'</option>';}).join("")+'</select>'
+  +(g?'<label><input type="checkbox" data-f="linked"'+(linked?' checked':'')+'> linked to the group</label>':'')+'</span>'
+  +'<input type="number" data-f="surgery" class="'+(sg.surgery?'s':'')+'" value="'+num(p.surgery)+'"'+(linked?' disabled':'')+' title="Surgery ₹">'
+  +'<input type="number" data-f="implant" class="'+(sg.implant?'s':'')+'" value="'+num(p.implant)+'" title="Implant ₹ (basic)">'
+  +'<input type="number" data-f="stay" value="'+num(p.stay)+'"'+(linked?' disabled':'')+' title="Stay (days)">'
+  +'<select data-f="size"'+(linked?' disabled':'')+'><option value=""'+(!p.size?' selected':'')+'>custom</option>'+["small","medium","major"].map(function(k){return '<option'+(k===p.size?' selected':'')+'>'+k+'</option>';}).join("")+'</select>'
+  +'<span class="tot">'+rs(c.total)+'<small>'+(SETTINGS?'net '+rs(c.my_net):'')+'</small><div class="acts"><button class="btn sm ghost" data-act="retire">'+(p.retired?'restore':'retire')+'</button></div></span>'
+  +'</div>';
+}
+var AYR={};
+function ayRate(sb){return AYR[sb]||0;}
+function render(){
+ applyGroups();
+ renderGroups();
+ var regions=(CAT&&CAT.regions?CAT.regions.slice():[]);regions.push("Other packages");
+ var h="",n=0,have=0;
+ regions.forEach(function(rg){var rows=DOC.packages.filter(function(p){return (p.region||"Other packages")===rg;}).sort(function(a,b){return (a.sort||0)-(b.sort||0);});if(!rows.length)return;
+  h+='<h2>'+esc(rg)+'</h2><div class="grid"><div class="gh"><span>Package · fracture · fixation</span><span>Ayushman (HBP 2022, T2)</span><span>Charge group</span><span>Surgery ₹</span><span>Implant ₹ (basic)</span><span>Stay</span><span>Size</span><span>Cash total · <span class="tag priv">net</span></span></div>';
+  rows.forEach(function(p){n++;if(!p.suggested)have++;h+=rowHTML(p);});h+='</div>';});
+ document.getElementById("regions").innerHTML=h;
+ document.getElementById("count").textContent=n+" packages · "+have+" yours · "+(n-have)+" suggested"+(DOC.version?" · v"+DOC.version:"");
+}
+/* ---- edits ---- */
+document.getElementById("regions").addEventListener("input",function(e){var t=e.target,row=t.closest(".gr");if(!row)return;var p=DOC.packages.filter(function(x){return x.id===row.dataset.id;})[0];if(!p)return;var f=t.dataset.f;
+ if(f==="name")p.name=t.value;
+ else if(f==="surgery"||f==="implant"||f==="stay"){p[f]=f==="stay"?Math.max(1,num(t.value)||1):num(t.value);if(SUGG[p.id]){delete SUGG[p.id][f];}t.classList.remove("s");p.suggested=false;
+  var tot=row.querySelector(".tot"),c=pkgCalc(p);tot.firstChild.nodeValue=rs(c.total);tot.querySelector("small").textContent=SETTINGS?"net "+rs(c.my_net):"";}
+});
+document.getElementById("regions").addEventListener("change",function(e){var t=e.target,row=t.closest(".gr");if(!row)return;var p=DOC.packages.filter(function(x){return x.id===row.dataset.id;})[0];if(!p)return;var f=t.dataset.f;
+ if(f==="size"){setSize(p,t.value);p.suggested=false;render();}
+ else if(f==="group"){p.group=t.value||null;if(p.group&&!p.own&&p.suggested===false&&!groupOf(p.group)){}render();}
+ else if(f==="linked"){p.own=!t.checked;render();}
+});
+document.getElementById("regions").addEventListener("click",function(e){var b=e.target.closest("[data-act]");if(!b)return;var row=b.closest(".gr");var p=DOC.packages.filter(function(x){return x.id===row.dataset.id;})[0];if(!p)return;
+ if(b.dataset.act==="retire"){p.retired=!p.retired;render();toast(p.retired?"Retired — hidden from the enquiry list after Save":"Restored");}
+});
+document.getElementById("groups").addEventListener("input",function(e){var t=e.target,g=t.closest(".g");if(!g)return;var G=groupOf(g.dataset.g);if(!G)return;var f=t.dataset.gf;
+ if(f==="name")G.name=t.value;else if(f==="surgery")G.surgery=num(t.value);else if(f==="stay")G.stay=Math.max(1,num(t.value)||1);
+ if(f!=="name"){applyGroups();refreshTotals();}
+});
+document.getElementById("groups").addEventListener("change",function(e){var t=e.target,g=t.closest(".g");if(!g)return;var G=groupOf(g.dataset.g);if(!G)return;if(t.dataset.gf==="size"){G.size=t.value||null;render();}});
+document.getElementById("groups").addEventListener("click",function(e){var b=e.target.closest("[data-gdel]");if(!b)return;var gid=b.dataset.gdel;var G=groupOf(gid);if(!G)return;
+ if(!confirm('Remove the group "'+G.name+'"? Its members keep the figures they show now.'))return;
+ DOC.packages.forEach(function(p){if(p.group===gid){p.group=null;p.own=true;}});DOC.groups=DOC.groups.filter(function(x){return x.id!==gid;});render();});
+document.getElementById("addgroup").onclick=function(){var id="g_"+Date.now().toString(36);DOC.groups.push({id:id,name:"New group",surgery:0,stay:1,size:"small"});render();var el=document.querySelector('.g[data-g="'+id+'"] input[data-gf=name]');if(el){el.focus();el.select();}};
+document.getElementById("addpkg").onclick=function(){var id="p"+Date.now().toString(36);DOC.packages.push({id:id,name:"NEW PACKAGE",surgery:0,implant:0,stay:1,size:"small",anaesthesia:3000,otMeds:2000,wardMeds:1000,admission:num((DOC.defaults||{}).admission),carm:num((DOC.defaults||{}).carm),investigations:num((DOC.defaults||{}).investigations),other:0,group:null,own:true,suggested:false,retired:false,region:null,sort:DOC.packages.length});render();var el=document.querySelector('.gr[data-id="'+id+'"] input.nm');if(el){el.focus();el.select();el.scrollIntoView({block:"center"});}};
+function refreshTotals(){[].forEach.call(document.querySelectorAll(".gr"),function(row){var p=DOC.packages.filter(function(x){return x.id===row.dataset.id;})[0];if(!p)return;var c=pkgCalc(p);var tot=row.querySelector(".tot");tot.firstChild.nodeValue=rs(c.total);tot.querySelector("small").textContent=SETTINGS?"net "+rs(c.my_net):"";
+ var g=groupOf(p.group),linked=!!(g&&!p.own);if(linked){var s=row.querySelector('[data-f=surgery]'),st=row.querySelector('[data-f=stay]');if(s)s.value=num(p.surgery);if(st)st.value=num(p.stay);}});}
+document.getElementById("defaults").addEventListener("input",function(e){var d=DOC.defaults||(DOC.defaults={});var id=e.target.id;
+ if(id==="d_adm")d.admission=num(e.target.value);if(id==="d_carm")d.carm=num(e.target.value);if(id==="d_inv")d.investigations=num(e.target.value);
+ if(id==="d_share"&&SETTINGS)SETTINGS.share_pct=Math.min(100,num(e.target.value));
+ refreshTotals();});
+document.getElementById("defaults").addEventListener("change",function(e){var d=DOC.defaults||(DOC.defaults={});if(e.target.id==="d_room")d.room=e.target.value;if(e.target.id==="d_grade")d.grade=e.target.value;refreshTotals();});
+document.getElementById("reset").onclick=function(){var n=0;DOC.packages.forEach(function(p){if(p.suggested){p.surgery=0;p.implant=0;SUGG[p.id]={};n++;}});render();toast(n?"Suggestions cleared on "+n+" rows — type your own figures":"Nothing suggested is left");};
+/* ---- save (pinned by version) ---- */
+document.getElementById("saveall").onclick=function(){
+ var msg=document.getElementById("msg");msg.textContent="Saving…";msg.className="msg";
+ var blank=DOC.packages.filter(function(p){return !String(p.name||"").trim();}).length;
+ if(blank){msg.textContent="Not saved: "+blank+" package"+(blank>1?"s have":" has")+" no name — name it or retire it (nothing is deleted).";msg.className="msg err";return;}
+ var pk=DOC.packages;
+ if(!pk.length){msg.textContent="Refused: the list would be empty.";msg.className="msg err";return;}
+ var body={base_version:DOC.version,packages:pk,groups:DOC.groups,defaults:DOC.defaults};
+ J("/portal/casepack/packages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}).then(function(j){
+  if(j&&j.ok){DOC.version=j.version;msg.textContent="Saved — "+j.count+" packages, v"+j.version+", on every device.";
+   return (SETTINGS?J("/portal/casepack/settings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({share_pct:SETTINGS.share_pct})}):Promise.resolve()).then(function(){return load();}).then(function(){toast("Saved on the server");});}
+  if(j&&j.stale){msg.textContent="Not saved: "+j.error+". Reloading the list from the server.";msg.className="msg err";return load();}
+  msg.textContent="Not saved: "+((j&&j.error)||"unknown");msg.className="msg err";
+ }).catch(function(){msg.textContent="Not saved — no answer from the server.";msg.className="msg err";});
+};
+/* ---- a device's old list (localStorage dma_cash_v1 of the Case Pack page on THIS device) ---- */
+document.getElementById("import").onclick=function(){
+ var items=null;try{items=JSON.parse(localStorage.getItem("dma_cash_v1")||"null");}catch(_e){}
+ if(!items||!items.length){toast("This device holds no saved package list of its own (nothing to import).");return;}
+ if(!confirm("Import "+items.length+" packages saved on this device? A same-named package takes this device's figures; new names are added; nothing is removed."))return;
+ J("/portal/casepack/packages/import",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:items,base_version:DOC.version})}).then(function(j){
+  if(j&&j.ok){try{localStorage.setItem("dma_cash_v1_imported_"+new Date().toISOString().slice(0,10),JSON.stringify(items));localStorage.removeItem("dma_cash_v1");}catch(_e){}   /* once per device: the old key is retired (kept under a dated name) */
+   toast("Imported "+j.imported+" new, updated "+j.updated+" — this device's old list is retired");return load();}
+  if(j&&j.stale){toast("Not imported: the list changed on another device — reloaded; try again");return load();}
+  toast("Import refused: "+((j&&j.error)||"?"));}).catch(function(){toast("No answer from the server");});
+};
+/* ---- load ---- */
+function load(){
+ return Promise.all([J("/portal/casepack/packages"),J("/portal/casepack/rates"),J("/portal/casepack/templates")]).then(function(a){
+  var pk=a[0],rt=a[1],ct=a[2];
+  if(!pk.ok)throw new Error(pk.error||"packages");
+  DOC={version:pk.version,defaults:pk.defaults,groups:pk.groups,packages:pk.packages};SETTINGS=pk.settings||null;
+  RATES=(rt.ok&&rt.rates)||[];CAT=ct.ok?ct:null;
+  SUGG={};DOC.packages.forEach(function(p){if(p.suggested)SUGG[p.id]={surgery:true,implant:true};});
+  renderDefaults();render();
+ }).catch(function(e){document.getElementById("regions").innerHTML='<div class="card err">Could not load: '+esc(e.message||e)+'</div>';});
+}
+/* the Ayushman rates: read once from the Case Pack page's own data (BUNDLE.ayush), the one source */
+(function(){
+ fetch("/portal/casepack",{credentials:"same-origin"}).then(function(r){return r.ok?r.text():"";}).then(function(t){
+  var m=/const BUNDLE = (\{.*?\});\n/.exec(t);if(!m)return;
+  try{var b=JSON.parse(m[1]);(b.ayush||[]).forEach(function(a){if(a.sub&&!AYR[a.sub])AYR[a.sub]=a.rate||0;});if(DOC)render();}catch(_e){}
+ }).catch(function(){});
+})();
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<style id="s764css">
+/* ===== S764 (S418, 09-Nov-2026, D880) — the Enquiry stage v2: search first, the server's lists, every estimate line a fold ===== */
+.s764pline{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted);margin:6px 0 2px}
+.s764pline #estPbSel{white-space:nowrap;font-weight:600}
+.s764pline .s764pq{position:relative;flex:1;min-width:140px}
+.s764pline input{width:100%;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;background:var(--card);color:var(--ink)}
+.s764pline #estPbRes{position:absolute;left:0;right:0;top:34px;background:var(--card);border:1px solid var(--line);border-radius:8px;display:none;z-index:40;max-height:220px;overflow:auto}
+.s764search{position:relative;margin:8px 0 6px}
+.s764search .search{border:2px solid var(--blue);padding:14px 14px 14px 44px;font-size:17px;font-weight:600;color:var(--ink)}
+.s764search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:20px;height:20px;stroke:var(--blue);fill:none;stroke-width:2.2;pointer-events:none}
+.seg button small{display:block;font-weight:400;font-size:11px;opacity:.85}
+.s764box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}
+.s764box summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:center;font-weight:600}
+.s764box summary::-webkit-details-marker{display:none}
+.s764box summary .k::before{content:"▸ ";color:var(--blue)}
+.s764box[open] summary .k::before{content:"▾ "}
+.s764box[open]{border-color:var(--blue)}
+.s764box .sub{font-size:12.5px}
+.s764rates{display:grid;grid-template-columns:auto 1fr auto auto;gap:6px 8px;margin:10px 0;font-size:13px;align-items:center}
+.s764rates .grp{grid-column:1/5;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.s764rates input.nm{font:inherit;font-size:13px;border:1px solid var(--line2);border-radius:6px;padding:4px 8px;background:var(--bg);color:var(--ink);width:100%;min-width:0}
+.s764rates input.rt{width:90px;font:inherit;font-size:14px;text-align:right;border:1px solid var(--line2);border-radius:6px;padding:4px 8px;background:var(--bg);color:var(--ink);font-variant-numeric:tabular-nums}
+.s764rates select{font:inherit;font-size:12px;border:1px solid var(--line2);border-radius:6px;padding:4px;background:var(--bg);color:var(--ink)}
+.s764rates .del{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px}
+.s764h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:12px 0 2px}
+.s764h h2{font-size:15px;margin:0;font-weight:600}
+.s764region{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px}
+.s764pkg{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:2px 10px;cursor:pointer;margin:6px 0;box-shadow:var(--shadow)}
+.s764pkg .n{font-weight:600}
+.s764pkg .t{font-size:16px;font-weight:700;color:var(--blue);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.s764pkg .m{grid-column:1/3;font-size:12px;color:var(--muted)}
+.s764pkg.tpl{border-style:dashed;box-shadow:none;background:transparent}
+.s764pkg.tpl .t{color:var(--muted);font-size:13px;font-weight:600}
+.s764tag{display:inline-block;border-radius:6px;padding:1px 6px;font-size:11px;font-weight:700;white-space:nowrap}
+.s764tag.ay{background:rgba(78,136,184,.18);color:#8FBBDE;font-family:Consolas,ui-monospace,monospace;font-weight:500}
+.s764tag.warn{background:var(--warnbg);color:var(--warn)}.s764tag.ok{background:rgba(116,194,149,.18);color:var(--green)}.s764tag.priv{background:rgba(124,58,237,.18);color:#c9a3d6}
+.s764sheet{background:var(--card);border:1px solid var(--blue);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;margin:6px 0}
+.s764sheet .row{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:14px}
+.s764sheet h2{font-size:16px;margin:0}
+.s764fold{border:1px solid var(--line);border-radius:10px;padding:0;background:var(--card)}
+.s764fold summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 10px;font-size:14px}
+.s764fold summary::-webkit-details-marker{display:none}
+.s764fold summary .k{display:flex;align-items:center;gap:6px;min-width:0}
+.s764fold summary .k::before{content:"▸";color:var(--blue);font-size:12px}
+.s764fold[open] summary .k::before{content:"▾"}
+.s764fold summary .v{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.s764fold .in{border-top:1px solid var(--line);padding:8px 10px;display:grid;grid-template-columns:1fr auto;gap:6px 10px;font-size:13px;align-items:center;background:var(--bg);border-radius:0 0 10px 10px}
+.s764fold .in .hint{grid-column:1/3;font-size:12px;color:var(--muted)}
+.s764fold .in .r{text-align:right;color:var(--muted)}
+.s764fold .in input,.s764fold .in select{font:inherit;font-size:14px;text-align:right;border:1px solid var(--line2);border-radius:6px;padding:4px 8px;background:var(--card);color:var(--ink);width:110px;font-variant-numeric:tabular-nums}
+.s764fold .in select{text-align:left;width:auto;max-width:190px}
+.s764step{border:1px solid var(--line2);background:var(--card);border-radius:6px;width:28px;height:28px;font:inherit;font-weight:700;cursor:pointer;color:var(--ink)}
+.s764days{display:inline-flex;align-items:center;gap:8px;justify-content:flex-end}
+.s764total{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);padding-top:8px}
+.s764total b{font-size:24px;font-weight:800;color:var(--blue);font-variant-numeric:tabular-nums}
+.s764priv{background:rgba(124,58,237,.14);color:#c9a3d6;border-radius:8px;padding:6px 10px;font-size:12px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.s764priv b{font-weight:700}
+.s764acts{display:flex;flex-wrap:wrap;gap:6px}
+.s764btn{border:1px solid var(--line2);background:var(--card);border-radius:9px;padding:8px 12px;font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
+.s764btn.pri{background:var(--blue);color:#fff;border-color:var(--blue)}
+.s764btn.ghost{background:transparent;color:var(--muted)}
+.s764bin{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.s764bin label{display:flex;flex-direction:column;gap:2px;font-size:11px;color:var(--muted)}
+.s764bin input{font:inherit;font-size:15px;border:1px solid var(--line2);border-radius:8px;padding:6px 8px;background:var(--bg);color:var(--ink);width:100%;text-align:right}
+.s764size{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.s764size button{border:0;background:var(--bg);padding:8px 4px;font:inherit;font-size:12px;color:var(--muted);cursor:pointer}
+.s764size button.on{background:rgba(78,136,184,.22);color:#8FBBDE;font-weight:700}
+.s764foot{display:grid !important;grid-template-columns:1fr 1fr;gap:6px;max-width:760px;margin:0 auto;left:0;right:0}
+.s764foot .s764next{grid-column:1/3;display:flex;justify-content:space-between;align-items:center;background:var(--blue) !important;color:#fff !important;border:0 !important;border-radius:12px;padding:12px 14px !important;font-size:15px !important;font-weight:700;cursor:pointer}
+.s764foot .s764next small{font-weight:500;opacity:.85;font-size:12px;text-align:right}
+.s764foot #recBtn,.s764foot #mgr{text-align:center;padding:9px 10px !important}
+.s764foot #count{grid-column:1/3;text-align:center;font-size:11.5px}
+.s764ay{background:rgba(78,136,184,.08);border:1px dashed var(--line2);border-radius:10px;padding:8px 10px;font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.s764err{color:var(--low);font-size:12.5px;font-weight:600}
+#s764given .mbox{max-width:820px}
+.s764tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.s764tbl th,.s764tbl td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.s764tbl td.r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+#estPb{border:none !important;background:transparent !important;font-size:12.5px}
+#estPbQ{border:1px solid var(--line) !important;font-weight:500;font-size:13px !important;background:var(--card) !important}
+#estPbSel{font-size:12.5px}
+.wrap{padding-bottom:170px}
+.s764box summary .k{white-space:nowrap}
+@media (max-width:480px){
+ .s764bin{grid-template-columns:1fr 1fr}
+ .s764box summary .sub{display:none}
+ .s764fold .in{grid-template-columns:1fr}
+ .s764fold .in .r,.s764fold .in > span[style*="text-align:right"]{text-align:left !important}
+ .s764fold .in select{width:100%;max-width:100%}
+ .s764days{justify-content:flex-start}
+ .s764pline #estPbSel{max-width:40%;overflow:hidden;text-overflow:ellipsis}
+}
+</style>
+<div class="modal" id="s764given"><div class="mbox">
+  <h2>Estimates given</h2>
+  <div class="note">Every estimate given from this page, on the server — date, patient, package, figures, who gave it. Mark what was taken up. An estimate also shows on the IPD case later.</div>
+  <div style="display:flex;gap:8px;margin:8px 0;align-items:center;flex-wrap:wrap"><input id="s764gq" placeholder="Filter — name / ID / package" style="flex:1;min-width:160px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:inherit;color:inherit"><button class="cbtn ghost" id="s764greload">↻ Refresh</button><span id="s764gmsg" class="sub"></span></div>
+  <div style="max-height:56vh;overflow:auto;border:1px solid var(--line);border-radius:10px"><table class="s764tbl" id="s764gtbl"><thead><tr><th>Date</th><th>Patient</th><th>Estimate</th><th class="r">Total</th><th>By</th><th>Taken up?</th><th></th></tr></thead><tbody><tr><td colspan="7" style="padding:14px;color:var(--muted)">Loading…</td></tr></tbody></table></div>
+  <div style="margin-top:12px;border-top:1px solid var(--line);padding-top:10px"><button class="cbtn" id="s764gclose" style="float:right">Close</button><div style="clear:both"></div></div>
+</div></div>
+<script>
+/* ===== S764 (S418, 09-Nov-2026) — THE ENQUIRY STAGE v2 (D880) ====================================================
+   THE OWNER (10:36–13:32 IST 09-Nov, mock-up PNrgan7RNL6Fko4oncFzAs v4): the procedure / bone / code search is the lead control and the
+   patient link a quiet line; cash packages, the DTH rates and the estimates given are SAVED ON THE SERVER — the same list on his phone,
+   the clinic PC and Shavez's PC; the DTH rates ONE separate editable list, never repeated inside an estimate; general ward and the
+   basic (SS) implant the defaults everywhere; "Build an estimate" its own fold-out, blank; EVERY estimate line its own fold that opens
+   its heads in place; "Save as a new package" on every estimate, "Save changes to this package" on a quoted one; "Give estimate"
+   records it under the patient; the foot bar Next: Consent → · Estimates given · Manage packages; the stepper 1 Estimate → 2 Consent →
+   3 OT & orders → 4 IPD case; a template feeds the consent, the OT list and the orders with its bone and operation; his NET at 50% (a
+   private setting) — post-discharge revenue never in the case value.
+   Every function here is new or wraps a base one by name; the consent, OT list and orders code is not rewritten. localStorage is an
+   OFFLINE CACHE only (dma_cp_v2_cache); the server is the list. */
+(function(){
+var S={pk:null,rates:[],cat:null,settings:null,est:null,folds:{},err:"",loaded:false,rv:0,ratesDirty:false};
+var SIZE={small:{anaesthesia:3000,otMeds:2000,wardMeds:1000,lab:"Small · day-care"},medium:{anaesthesia:5000,otMeds:3000,wardMeds:2500,lab:"Medium · 2–3 d"},major:{anaesthesia:6000,otMeds:10000,wardMeds:5000,lab:"Major · 4–5 d"}};
+var GRADES=[{k:"eco",n:"Basic (SS)",m:1},{k:"prem",n:"Premium (Ti)",m:1.6},{k:"imp",n:"Imported",m:2.4}];
+var RTYPES={ward:"Ward · per day",day:"Every day",opt:"Per day, when ticked"};
+var CACHE="dma_cp_v2_cache";
+function num(v){var x=Math.round(parseFloat(v));return isNaN(x)?0:Math.max(0,x);}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");}
+function J(url,opt){return fetch(url,Object.assign({credentials:"same-origin"},opt||{})).then(function(r){return r.json().then(function(j){j._code=r.status;return j;});});}
+function POST(url,body){return J(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});}
+function gradeOf(k){for(var i=0;i<GRADES.length;i++)if(GRADES[i].k===k)return GRADES[i];return GRADES[0];}
+function R(k){for(var i=0;i<S.rates.length;i++)if(S.rates[i].k===k)return S.rates[i];return null;}
+function wards(){return S.rates.filter(function(x){return x.t==="ward";});}
+function defRoom(){var d=(S.pk&&S.pk.defaults)||{};return (d.room&&R(d.room))?d.room:(wards()[0]||{k:"gen"}).k;}
+function defGrade(){var d=(S.pk&&S.pk.defaults)||{};return gradeOf(d.grade||"eco").k;}
+/* THE ARITHMETIC — the same formula as casepack_v2.calc on the server; the walk proves the two agree */
+window.s764Calc=function(e,rates,share){
+ var by={};rates.forEach(function(r){by[r.k]=r;});
+ var stay=Math.max(1,num(e.stay)||1), surgery=num(e.surgery), ot=Math.round(surgery*0.2);
+ var implant=Math.round(num(e.implant)*gradeOf(e.grade||"eco").m);
+ var an=num(e.anaesthesia),otm=num(e.otMeds),wm=num(e.wardMeds),adm=num(e.admission),carm=num(e.carm),inv=num(e.investigations),oth=num(e.other);
+ var room=by[e.room||"gen"]||rates.filter(function(r){return r.t==="ward";})[0]||{r:0,n:"General Ward",k:"gen"};
+ var roomAmt=num(room.r)*stay, day=0, opt=0, dayL=[], optL=[];
+ rates.forEach(function(r){if(r.t==="day"){day+=num(r.r)*stay;dayL.push([r.n+" × "+stay,num(r.r)*stay]);}if(r.t==="opt"&&e.opts&&e.opts[r.k]){opt+=num(r.r)*stay;optL.push([r.n+" × "+stay,num(r.r)*stay]);}});
+ var heads=an+otm+wm+adm+carm+inv+oth, total=surgery+ot+heads+roomAmt+day+opt+implant, disc=num(e.discount);
+ var netp=Math.max(0,total-disc), shareable=netp-adm-(an+otm+wm+implant+inv), myNet=Math.round(shareable*(num(share)/100));
+ var lines=[["Surgery",surgery],["OT charges (20%)",ot]];
+ if(carm)lines.push(["Image / C-arm",carm]);if(adm)lines.push(["Admission",adm]);
+ lines.push([room.n+" × "+stay+" day"+(stay===1?"":"s"),roomAmt]);dayL.forEach(function(x){lines.push(x);});optL.forEach(function(x){lines.push(x);});
+ lines.push(["Implant · "+gradeOf(e.grade||"eco").n,implant]);
+ if(an)lines.push(["Anaesthesia",an]);if(otm)lines.push(["OT medicines",otm]);if(wm)lines.push(["Ward medicines",wm]);if(inv)lines.push(["Investigations",inv]);if(oth)lines.push(["Other",oth]);
+ if(disc)lines.push(["Discount",-disc]);
+ return {surgery:surgery,ot:ot,implant:implant,heads:heads,room:roomAmt,roomName:room.n,day:day,opt:opt,stayAll:roomAmt+day+opt,stay:stay,total:total,discount:disc,net_to_patient:netp,shareable:shareable,my_net:myNet,lines:lines};
+};
+function calc(e){return window.s764Calc(e,S.rates,S.settings?S.settings.share_pct:0);}
+function rs(n){return rupee(n);}
+/* ---- estimate objects ---- */
+function fromPkg(p){var e={src:p.id,template:p.template||null,title:p.name,surgery:p.surgery,implant:p.implant,grade:defGrade(),stay:p.stay,room:defRoom(),opts:{},anaesthesia:p.anaesthesia,otMeds:p.otMeds,wardMeds:p.wardMeds,admission:p.admission,carm:p.carm,investigations:p.investigations,other:p.other||0,discount:0,size:p.size||null,sb:p.sb,sb_note:p.sb_note,consent_k:p.consent_k,c_part:p.c_part,c_bone:p.c_bone,ot_proc:p.ot_proc,tpa_q:p.tpa_q,fx:p.fx,fix:p.fix};return e;}
+function blank(t){var d=(S.pk&&S.pk.defaults)||{};var sz=t?(t.suggest.size||"medium"):"medium";var z=SIZE[sz];
+ return {src:null,template:t?t.id:null,title:t?(t.fx+" — "+t.fix):"New estimate",surgery:"",implant:"",grade:defGrade(),stay:t?t.suggest.stay:2,room:defRoom(),opts:{},anaesthesia:z.anaesthesia,otMeds:z.otMeds,wardMeds:z.wardMeds,admission:num(d.admission!=null?d.admission:1200),carm:num(d.carm!=null?d.carm:4000),investigations:num(d.investigations!=null?d.investigations:2000),other:0,discount:0,size:sz,
+  sb:t?t.sb:null,sb_note:t?t.sb_note:null,consent_k:t?t.consent_k:null,c_part:t?t.c_part:null,c_bone:t?t.c_bone:null,ot_proc:t?t.ot_proc:null,tpa_q:t?t.tpa_q:null,fx:t?t.fx:null,fix:t?t.fix:null};}
+function pkgCalc(p){return calc(fromPkg(p));}
+function ayRate(sb){try{for(var i=0;i<BUNDLE.ayush.length;i++){if(BUNDLE.ayush[i].sub===sb)return BUNDLE.ayush[i].rate||0;}}catch(_e){}return 0;}
+/* ---- load: the server first, the cache when it cannot answer ---- */
+function cacheWrite(){try{localStorage.setItem(CACHE,JSON.stringify({pk:S.pk,rates:S.rates,rv:S.rv,cat:S.cat,settings:S.settings,at:Date.now()}));}catch(_e){}}
+function cacheRead(){try{var c=JSON.parse(localStorage.getItem(CACHE)||"null");if(c&&c.pk){S.pk=c.pk;S.rates=c.rates||[];S.rv=c.rv||0;S.cat=c.cat;S.settings=c.settings||null;return true;}}catch(_e){}return false;}
+window.s764Load=function(){
+ S.err="";
+ return Promise.all([J("/portal/casepack/packages"),J("/portal/casepack/rates"),J("/portal/casepack/templates")]).then(function(a){
+  if(!a[0].ok||!a[1].ok)throw new Error((a[0].error||a[1].error||"the server did not answer"));
+  S.pk={version:a[0].version,saved_at:a[0].saved_at,defaults:a[0].defaults,groups:a[0].groups,packages:a[0].packages};S.settings=a[0].settings||null;   /* null = not the owner's login: no net is shown */
+  S.rates=a[1].rates||[];S.rv=a[1].version;S.ratesDirty=false;S.cat=a[2].ok?a[2]:null;S.loaded=true;cacheWrite();
+  if(S.est&&S.est.src){var p=pkgById(S.est.src);if(!p)S.est=null;}
+  render();
+ }).catch(function(e){
+  var had=cacheRead();S.loaded=had;S.err=(had?"Showing the copy saved on this device — the server did not answer (":"The server did not answer (")+(e&&e.message||e)+").";render();
+ });
+};
+function pkgById(id){var ps=(S.pk&&S.pk.packages)||[];for(var i=0;i<ps.length;i++)if(ps[i].id===id)return ps[i];return null;}
+/* ---- search ---- */
+function qstr(){return ((state.q||"")+" "+(state.chip||"")).trim().toLowerCase();}
+function hit(h){var q=qstr();if(!q)return true;h=String(h||"").toLowerCase();return q.split(/\s+/).every(function(t){return h.indexOf(t)>=0||(t.length>3&&t.slice(-1)==="s"&&h.indexOf(t.slice(0,-1))>=0);});}
+/* ---- rendering: the cash pane ---- */
+function ratesHTML(){
+ var h="";["ward","day","opt"].forEach(function(t){h+='<span class="grp">'+RTYPES[t]+'</span>';S.rates.forEach(function(x,i){if(x.t!==t)return;
+  h+='<select data-ri="'+i+'" data-f="t">'+Object.keys(RTYPES).map(function(tt){return '<option value="'+tt+'"'+(tt===x.t?' selected':'')+'>'+(tt==="ward"?"ward":tt==="day"?"daily":"optional")+'</option>';}).join("")+'</select>'
+   +'<input class="nm" id="s764rn'+i+'" data-ri="'+i+'" data-f="n" value="'+esc(x.n)+'" placeholder="name"><input class="rt" id="s764rr'+i+'" type="number" data-ri="'+i+'" data-f="r" value="'+num(x.r)+'"><button class="del" data-del="'+i+'" title="Delete">✕</button>';});});
+ return h;
+}
+function ratesSum(){return (S.ratesDirty?"UNSAVED · ":"")+wards().map(function(w){return w.n.split(" ")[0]+" "+rs(w.r);}).join(" · ")+(wards().length?" / day":"");}
+function numIn(id,v){return '<input id="'+id+'" type="number" value="'+(v===""||v==null?"":num(v))+'">';}
+function fold(key,label,val,inner){return '<details class="s764fold" data-f="'+key+'"'+(S.folds[key]?' open':'')+'><summary><span class="k">'+label+'</span><span class="v">'+val+'</span></summary><div class="in">'+inner+'</div></details>';}
+function sheetHTML(){var e=S.est,c=calc(e);
+ var top=e.src==null
+  ?'<div class="s764bin"><label>Surgery ₹'+numIn("e_op",e.surgery)+'</label><label>Implant ₹ (basic)'+numIn("e_impl",e.implant)+'</label><label>Stay (days)'+numIn("e_stay",e.stay)+'</label></div>'
+   +'<div class="s764size">'+Object.keys(SIZE).map(function(k){return '<button type="button" data-sz="'+k+'"'+(k===e.size?' class="on"':'')+'>'+SIZE[k].lab+'</button>';}).join("")+'</div>':'';
+ var surg=fold("surg","Surgery + OT (20%)",rs(c.surgery+c.ot),'<span>Surgery ₹</span><span style="text-align:right">'+numIn("e_op",e.surgery)+'</span><span>OT charges</span><span class="r">20% of surgery · '+rs(c.ot)+'</span>');
+ var heads=fold("heads","Anaesthesia · OT meds · ward meds · admission · C-arm · investigations",rs(c.heads),
+  '<span>Anaesthesia</span><span style="text-align:right">'+numIn("e_an",e.anaesthesia)+'</span><span>OT medicines</span><span style="text-align:right">'+numIn("e_otm",e.otMeds)+'</span><span>Ward medicines</span><span style="text-align:right">'+numIn("e_wm",e.wardMeds)+'</span><span>Admission</span><span style="text-align:right">'+numIn("e_adm",e.admission)+'</span><span>C-arm / imaging</span><span style="text-align:right">'+numIn("e_carm",e.carm)+'</span><span>Investigations</span><span style="text-align:right">'+numIn("e_inv",e.investigations)+'</span><span>Other</span><span style="text-align:right">'+numIn("e_oth",e.other)+'</span>');
+ var roomIn='<span>Room</span><span style="text-align:right"><select id="e_room">'+wards().map(function(w){return '<option value="'+esc(w.k)+'"'+(w.k===e.room?' selected':'')+'>'+esc(w.n)+' · '+rs(w.r)+'/d</option>';}).join("")+'</select></span>'
+  +'<span>Days</span><span class="s764days"><button type="button" class="s764step" data-d="-1">−</button><b>'+c.stay+'</b><button type="button" class="s764step" data-d="1">+</button></span>'
+  +S.rates.filter(function(x){return x.t==="day";}).map(function(x){return '<span>'+esc(x.n)+' × '+c.stay+'</span><span class="r">'+rs(num(x.r)*c.stay)+'</span>';}).join("")
+  +S.rates.filter(function(x){return x.t==="opt";}).map(function(x){return '<span><label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" data-opt="'+esc(x.k)+'"'+(e.opts[x.k]?' checked':'')+'> '+esc(x.n)+' · '+rs(x.r)+'/d</label></span><span class="r">'+(e.opts[x.k]?rs(num(x.r)*c.stay):"—")+'</span>';}).join("")
+  +'<span class="hint">Rates come from the DTH rates list above — edit them there, once.</span>';
+ var optNames=S.rates.filter(function(x){return x.t==="opt"&&e.opts[x.k];}).map(function(x){return x.n.toLowerCase();});
+ var room=fold("room",esc(c.roomName)+" × "+c.stay+" + "+S.rates.filter(function(x){return x.t==="day";}).map(function(x){return x.n.toLowerCase();}).join(" + ")+(optNames.length?" + "+optNames.join(" + "):""),rs(c.stayAll),roomIn);
+ var impl=fold("impl","Implant · "+gradeOf(e.grade).n,rs(c.implant),'<span>Implant (basic) ₹</span><span style="text-align:right">'+numIn("e_impl",e.implant)+'</span><span>Grade</span><span style="text-align:right"><select id="e_grade">'+GRADES.map(function(g){return '<option value="'+g.k+'"'+(g.k===e.grade?' selected':'')+'>'+g.n+(g.m!==1?' · ×'+g.m:'')+'</option>';}).join("")+'</select></span>');
+ var disc=fold("disc","Discount",c.discount?"− "+rs(c.discount):"—",'<span>Discount ₹</span><span style="text-align:right">'+numIn("e_disc",e.discount||"")+'</span>');
+ var ay=e.sb?'<div class="s764ay"><span><span class="s764tag ay">'+esc(e.sb)+'</span> Ayushman '+(ayRate(e.sb)?rs(ayRate(e.sb)):'')+(e.sb_note&&e.sb_note!=="—"?' · implant: '+esc(e.sb_note):'')+'</span><button type="button" class="s764btn ghost" data-act="ay">Ayushman row</button></div>':'';
+ return '<div class="s764sheet"><div class="row"><h2>'+esc(e.title)+'</h2><button type="button" class="s764btn ghost" data-act="close">✕</button></div>'+top+surg+heads+room+impl+disc
+  +'<div class="s764total"><span>Estimate to patient</span><b>'+rs(c.net_to_patient)+'</b></div>'
+  +(S.settings?'<div class="s764priv"><span><span class="s764tag priv">only you</span> my net ≈ <b>'+rs(c.my_net)+'</b> <span style="opacity:.8">(shareable '+rs(c.shareable)+' × '+num(S.settings.share_pct)+'%)</span></span><span>'+esc(c.roomName)+' · '+c.stay+' d</span></div>':'<div class="sub" style="font-size:12px">'+esc(c.roomName)+' · '+c.stay+' d</div>')
+  +ay
+  +'<div class="s764acts"><button type="button" class="s764btn pri" data-act="give">Give estimate</button><button type="button" class="s764btn" data-act="wa">WhatsApp</button><button type="button" class="s764btn" data-act="pdf">Print / PDF</button>'
+  +(e.src!=null?'<button type="button" class="s764btn" data-act="savepkg">Save changes to this package</button>':'')+'<button type="button" class="s764btn" data-act="saveas">Save as a new package</button></div>'
+  +'<div class="sub" style="font-size:12px">Give estimate = saved under the patient (date, figures, who gave it); it shows under "Estimates given" and on the IPD case later. A saved package keeps its heads and stay; the room is general ward unless you change it.</div></div>';}
+function pkgHTML(p){var c=pkgCalc(p);
+ return '<div class="s764pkg" data-i="'+esc(p.id)+'"><span class="n">'+esc(p.name)+'</span><span class="t">'+rs(c.total)+'</span><span class="m">'+(p.fx?esc(p.fx)+' · '+esc(p.fix)+' · ':'')+p.stay+' day'+(p.stay>1?'s':'')+' · '+esc((R(defRoom())||{n:"General Ward"}).n.toLowerCase())+' · implant '+rs(p.implant)+' basic'+(p.sb?' · <span class="s764tag ay">'+esc(p.sb)+'</span>':'')+'</span></div>';}
+function tplHTML(t){
+ return '<div class="s764pkg tpl" data-t="'+esc(t.id)+'"><span class="n">'+esc(t.fx)+' — '+esc(t.fix)+'</span><span class="t">no cash package yet</span><span class="m"><span class="s764tag ay">'+esc(t.sb)+'</span> '+(ayRate(t.sb)?rs(ayRate(t.sb)):'')+(t.sb_note&&t.sb_note!=="—"?' · implant: '+esc(t.sb_note):'')+' · tap to build one (stay '+t.suggest.stay+'); the suggested figures are on Manage packages</span></div>';}
+window.s764Render=function(){
+ var host=document.getElementById("s764cash"); if(!host) return;
+ var rb=document.getElementById("s764ratesbox"), bb=document.getElementById("s764buildbox");
+ var rwrap=document.getElementById("s764rates"); if(rwrap){rwrap.innerHTML=ratesHTML();}
+ var rsum=document.getElementById("s764ratesum"); if(rsum) rsum.textContent=ratesSum();
+ var ba=document.getElementById("s764buildarea"); if(ba) ba.innerHTML=(S.est&&S.est.src==null)?sheetHTML():"";
+ var list=document.getElementById("s764list"), cnt=document.getElementById("s764count"), note=document.getElementById("s764note");
+ if(!S.pk){list.innerHTML='<div class="empty">'+(S.err?'<span class="s764err">'+esc(S.err)+'</span>':'Loading your packages from the server…')+'</div>';cnt.textContent="";return;}
+ /* his packages only: a SUGGESTED package (the seeding page's figure he has not yet made his own) is never quoted from here —
+    it shows as a dashed template row and opens Build with the figures blank (D880: Build an estimate is blank) */
+ var pk=S.pk.packages.filter(function(p){return !p.retired&&!p.suggested;});
+ var shown=pk.filter(function(p){return hit(p.name+" "+(p.fx||"")+" "+(p.fix||"")+" "+(p.sb||"")+" "+(p.region||""));});
+ var covered={};pk.forEach(function(p){if(p.template)covered[p.template]=1;});
+ var tpls=(S.cat&&S.cat.options||[]).filter(function(t){return !covered[t.id]&&hit(t.fx+" "+t.fix+" "+t.sb+" "+t.region);});
+ var regions=(S.cat&&S.cat.regions?S.cat.regions.slice():[]);regions.push("Other packages");
+ var h="";
+ regions.forEach(function(rg){var ps=shown.filter(function(p){return (p.region||"Other packages")===rg;}).sort(function(a,b){return (a.sort||0)-(b.sort||0);});var ts=tpls.filter(function(t){return t.region===rg;});
+  if(!ps.length&&!ts.length)return;h+='<div class="s764region">'+esc(rg)+'</div>';
+  ps.forEach(function(p){h+=(S.est&&S.est.src===p.id)?sheetHTML():pkgHTML(p);});
+  ts.forEach(function(t){h+=tplHTML(t);});});
+ list.innerHTML=h||'<div class="empty">No package matches "'+esc(qstr())+'". Build an estimate and save it as a package.</div>';
+ cnt.textContent=shown.length+" of "+pk.length+(S.pk.version?" · v"+S.pk.version:"");
+ if(note) note.innerHTML=(S.err?'<span class="s764err">'+esc(S.err)+'</span> ':'')+'Saved on the server — the same list on your phone, the clinic PC and Shavez\'s PC. Tap one to quote it at general ward; change room, stay, implant grade or discount on the spot.';
+ var nb=document.getElementById("s764nextsub"); if(nb) nb.textContent=S.est?(S.est.title+" · consent opens prefilled"):"pick a package or build an estimate";
+};
+function render(){try{window.s764Render();}catch(_e){}}
+/* ---- the rates fold (edit · add · delete · save, pinned by version) ---- */
+(function(){
+ var rw=document.getElementById("s764rates"); if(!rw) return;
+ rw.addEventListener("input",function(e){var i=parseInt(e.target.dataset.ri,10),f=e.target.dataset.f;if(isNaN(i)||!S.rates[i])return;
+  S.rates[i][f]=(f==="r")?num(e.target.value):e.target.value;S.ratesDirty=true;
+  if(f==="t"){render();}else{var s=document.getElementById("s764ratesum");if(s)s.textContent=ratesSum();if(S.est){refreshSheet();}}});
+ rw.addEventListener("click",function(e){var d=e.target.closest("[data-del]");if(!d)return;var i=parseInt(d.dataset.del,10),x=S.rates[i];if(!x)return;
+  if(x.t==="ward"&&wards().length===1){toast("Keep at least one ward");return;}
+  S.rates.splice(i,1);S.ratesDirty=true;if(S.est&&!R(S.est.room))S.est.room=defRoom();render();toast(x.n+" deleted — Save rates to keep");});
+ var add=document.getElementById("s764addrate"); if(add) add.onclick=function(){S.rates.push({k:"r"+Date.now().toString(36),n:"",r:0,t:"ward"});S.ratesDirty=true;render();var ins=document.querySelectorAll("#s764rates input.nm");if(ins.length)ins[ins.length-1].focus();};
+ var sv=document.getElementById("s764saverates"); if(sv) sv.onclick=function(){
+  var bad=S.rates.filter(function(x){return !String(x.n||"").trim();}).length;if(bad){toast("A rate has no name");return;}
+  POST("/portal/casepack/rates",{base_version:S.rv,rates:S.rates}).then(function(j){
+   if(j.ok){S.rv=j.version;S.ratesDirty=false;toast("DTH rates saved on the server (v"+j.version+"; the old list stays in the history)");cacheWrite();render();return;}
+   if(j.stale){toast("Not saved: the rates changed on another device — reloaded");return window.s764Load();}
+   toast("Not saved: "+(j.error||"?"));}).catch(function(){toast("Not saved — no answer from the server");});};
+})();
+/* ---- the sheet: taps and typing; the focus stays where it was ---- */
+function refreshSheet(){var f=document.activeElement&&document.activeElement.id;var pos=null;try{pos=document.activeElement.selectionStart;}catch(_e){}render();var el=f&&document.getElementById(f);if(el&&el.focus){el.focus();try{if(pos!=null&&el.setSelectionRange)el.setSelectionRange(pos,pos);}catch(_e){}}}
+function onSheetClick(e){
+ /* a fold's state is recorded at the click (the toggle event is queued later — a keystroke that re-draws first would lose it) */
+ var sm=e.target.closest&&e.target.closest("details.s764fold > summary"); if(sm){var dd=sm.parentNode; if(dd&&dd.dataset.f) S.folds[dd.dataset.f]=!dd.open;}
+ var a=e.target.closest("[data-act]");
+ if(a){var act=a.dataset.act;
+  if(act==="close"){var wasBuild=S.est&&S.est.src==null;S.est=null;S.folds={};render();if(wasBuild){var bb=document.getElementById("s764buildbox");if(bb)bb.open=false;}return;}
+  if(act==="give"||act==="savepkg"||act==="saveas"){if(S.ratesDirty){toast("The DTH rates have unsaved changes — Save rates first (or reload), so the figure recorded is the figure quoted",true);return;}}
+  if(act==="give")return giveEstimate();
+  if(act==="wa")return waShare(estText());
+  if(act==="pdf"){var c=calc(S.est);return printEstimate({title:S.est.title+" (Cash)",items:c.lines.filter(function(x){return x[1]!==0;}).map(function(x){return x[1]<0?["Less: "+x[0],x[1]]:x;}),total:c.net_to_patient,id:(typeof pbSel!=="undefined"&&pbSel)?(pbSel.Patient_Name+(pbSel.Clinic_Specific_Id?" · "+pbSel.Clinic_Specific_Id:"")):""});}
+  if(act==="savepkg")return savePkg(false);
+  if(act==="saveas")return savePkg(true);
+  if(act==="ay"){state.payer="ayush";state.q=S.est.sb||"";state.chip="";var q=document.getElementById("q");if(q)q.value=state.q;[].forEach.call(document.querySelectorAll("#seg button"),function(x){x.classList.toggle("on",x.dataset.p==="ayush");});window.cpPayer="ayush";document.getElementById("s764cash").style.display="none";document.getElementById("tpaCtl").style.display="none";render();try{window.render();}catch(_e){}return;}
+  return;}
+ var p=e.target.closest(".s764pkg");
+ if(p){if(p.dataset.t){var t=(S.cat&&S.cat.options||[]).filter(function(x){return x.id===p.dataset.t;})[0];if(!t)return;S.est=blank(t);S.folds={};var bb2=document.getElementById("s764buildbox");if(bb2){bb2.open=true;}render();try{document.getElementById("s764buildbox").scrollIntoView({behavior:"smooth",block:"start"});}catch(_e){}return;}
+  var pk=pkgById(p.dataset.i);if(!pk)return;S.est=fromPkg(pk);S.folds={};var bb3=document.getElementById("s764buildbox");if(bb3)bb3.open=false;render();return;}
+ var s=e.target.closest("[data-sz]");if(s&&S.est){S.est.size=s.dataset.sz;var z=SIZE[s.dataset.sz];S.est.anaesthesia=z.anaesthesia;S.est.otMeds=z.otMeds;S.est.wardMeds=z.wardMeds;render();return;}
+ var sb=e.target.closest(".s764step");if(sb&&S.est){S.est.stay=Math.max(1,num(S.est.stay)+parseInt(sb.dataset.d,10));render();return;}
+}
+function onSheetInput(e){if(!S.est)return;var id=e.target.id,v=e.target.value;
+ var map={e_op:"surgery",e_impl:"implant",e_an:"anaesthesia",e_otm:"otMeds",e_wm:"wardMeds",e_adm:"admission",e_carm:"carm",e_inv:"investigations",e_oth:"other",e_disc:"discount"};
+ if(map[id]){S.est[map[id]]=(v===""?"":num(v));if(id!=="e_op"&&id!=="e_impl"&&id!=="e_disc")S.est.size=null;}
+ if(id==="e_stay")S.est.stay=Math.max(1,num(v)||1);if(id==="e_room")S.est.room=v;if(id==="e_grade")S.est.grade=v;
+ if(e.target.dataset.opt){S.est.opts[e.target.dataset.opt]=e.target.checked;}
+ refreshSheet();
+}
+function onToggle(e){var d=e.target&&e.target.closest&&e.target.closest("details.s764fold");if(d&&d.dataset.f)S.folds[d.dataset.f]=d.open;}
+["s764buildarea","s764list"].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.addEventListener("click",onSheetClick);el.addEventListener("input",onSheetInput);el.addEventListener("change",function(e){if(e.target.tagName==="SELECT"||e.target.type==="checkbox")onSheetInput(e);});el.addEventListener("toggle",onToggle,true);});
+(function(){var bb=document.getElementById("s764buildbox");if(!bb)return;bb.addEventListener("toggle",function(){if(bb.open){if(!(S.est&&S.est.src==null)){S.est=blank(null);S.folds={};}}else if(S.est&&S.est.src==null){S.est=null;}render();});})();
+/* ---- the estimate's text, the record on the server ---- */
+function estText(){var e=S.est,c=calc(e);var t="Dr. Manoj Agarwal Clinic — Estimate\n"+e.title+" (Cash)\n";c.lines.forEach(function(x){if(x[1])t+=x[0]+": "+(x[1]<0?"− "+rs(-x[1]):rs(x[1]))+"\n";});t+="—\nTotal (approx): "+rs(c.net_to_patient)+"\n(Estimate; may vary with actual stay & findings.)";return t;}
+function patientNow(){if(typeof pbSel!=="undefined"&&pbSel)return {uid:pbSel.Patient_UID||"",cid:pbSel.Clinic_Specific_Id||"",name:pbSel.Patient_Name||""};return null;}
+function localLog(rec){try{var d=logData();rec.ts=Date.now();rec.date=new Date().toLocaleString("en-IN",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});d.unshift(rec);if(d.length>60)d.length=60;saveLog(d);}catch(_e){}try{updateEstPreview();}catch(_e){}}
+function giveEstimate(){
+ var e=S.est;if(!e)return;var pt=patientNow();
+ if(!pt){var nm=(prompt("No patient is linked. Patient name or Clinic ID for this estimate (optional):","")||"").trim();pt={uid:"",cid:"",name:nm};}
+ var c=calc(e);var fig={surgery:num(e.surgery),implant:num(e.implant),grade:e.grade,stay:c.stay,room:e.room,opts:e.opts,anaesthesia:num(e.anaesthesia),otMeds:num(e.otMeds),wardMeds:num(e.wardMeds),admission:num(e.admission),carm:num(e.carm),investigations:num(e.investigations),other:num(e.other),discount:num(e.discount)};
+ POST("/portal/casepack/estimates",{patient:pt,payer:"Cash",title:e.title,package_id:e.src||null,template:e.template||null,figures:fig,rates_version:S.rv,quoted_total:c.net_to_patient,text:estText()}).then(function(j){
+  if(j&&j.ok&&j.estimate&&j.estimate.net_to_patient!==c.net_to_patient){toast("Saved, but the server's figure ("+rs(j.estimate.net_to_patient)+") differs from the screen's ("+rs(c.net_to_patient)+") — the rates changed; reload before quoting",true);}
+  if(!j.ok){toast("Not saved: "+(j.error||"?"));return;}
+  localLog({payer:"Cash",id:pt.name||pt.cid||"",title:e.title,total:c.net_to_patient,detail:estText(),server_id:j.estimate.id});
+  toast("Estimate given — saved under "+(pt.name||"the patient")+" ("+rs(c.net_to_patient)+")",true);
+ }).catch(function(){toast("Not saved — no answer from the server");});
+}
+function sizeMatch(e){for(var k in SIZE){var z=SIZE[k];if(num(e.anaesthesia)===z.anaesthesia&&num(e.otMeds)===z.otMeds&&num(e.wardMeds)===z.wardMeds)return k;}return null;}
+function savePkg(asNew){
+ var e=S.est;if(!e||!S.pk)return;
+ var name=e.title;
+ if(asNew){name=(prompt("Name for the new package (e.g. TIBIA PLATE):",e.src==null&&e.fx?(e.fx+" — "+e.fix).toUpperCase():"")||"").trim();if(!name){toast("Package name needed");return;}}
+ var doc={base_version:S.pk.version,groups:S.pk.groups,defaults:S.pk.defaults,packages:S.pk.packages.map(function(p){return Object.assign({},p);})};
+ var fig={surgery:num(e.surgery),implant:num(e.implant),stay:Math.max(1,num(e.stay)||1),anaesthesia:num(e.anaesthesia),otMeds:num(e.otMeds),wardMeds:num(e.wardMeds),admission:num(e.admission),carm:num(e.carm),investigations:num(e.investigations),other:num(e.other),size:sizeMatch(e),own:true,suggested:false};
+ if(asNew){
+  var dup=doc.packages.filter(function(p){return p.name.toUpperCase()===name.toUpperCase();})[0];
+  if(!dup&&e.template){dup=doc.packages.filter(function(p){return p.suggested&&p.template===e.template;})[0];}   /* the suggestion for this fixation becomes his package */
+  if(dup&&!dup.suggested&&!confirm('"'+dup.name+'" exists already. Replace its figures?'))return;
+  var t=e.template?((S.cat&&S.cat.options||[]).filter(function(x){return x.id===e.template;})[0]):null;
+  var base=dup||{id:"p"+Date.now().toString(36),name:name,group:(t?t.group:null),retired:false,unnamed:false,region:t?t.region:null,fx:t?t.fx:null,fix:t?t.fix:null,sb:t?t.sb:null,sb_note:t?t.sb_note:null,template:e.template||null,consent_k:t?t.consent_k:null,c_part:t?t.c_part:null,c_bone:t?t.c_bone:null,ot_proc:t?t.ot_proc:null,tpa_q:t?t.tpa_q:null,sort:doc.packages.length};
+  Object.assign(base,fig);base.name=name;if(!dup)doc.packages.push(base);
+ } else {
+  var cur=doc.packages.filter(function(p){return p.id===e.src;})[0];if(!cur){toast("This package is no longer on the list — reloaded");return window.s764Load();}
+  Object.assign(cur,fig);
+ }
+ POST("/portal/casepack/packages",doc).then(function(j){
+  if(j.ok){toast(asNew?('Saved as a new package — "'+name+'" joins My packages'):"Package updated on the server (v"+j.version+")");if(asNew)S.est=null;return window.s764Load();}
+  if(j.stale){toast("Not saved: the list changed on another device — reloaded; try again");return window.s764Load();}
+  toast("Not saved: "+(j.error||"?"));}).catch(function(){toast("Not saved — no answer from the server");});
+}
+/* ---- the base page's hooks: cashData / recordEstimate / addRecord / render ---- */
+window.s764CashData=function(){var ps=(S.pk&&S.pk.packages)||[];return ps.filter(function(p){return !p.retired;}).map(function(p){return {name:p.name,unnamed:!!p.unnamed,stay:p.stay,implant:p.implant,admission:p.admission,visit:0,operation:p.surgery,ot:Math.round(p.surgery*0.2),carm:p.carm,nursing:0,other:p.other||0,anaesthesia:p.anaesthesia,otMeds:p.otMeds,wardMeds:p.wardMeds,investigations:p.investigations,base:pkgCalc(p).total};});};
+window.s764RenderCash=function(q){render();return [];};
+/* Ayushman / TPA 'Record' buttons: on the server, under the linked patient; the name is asked only when none is linked */
+window.recordEstimate=function(payer,title,total,detail){
+ var pt=patientNow();if(!pt){var nm=(prompt("Patient name or Clinic ID for this record (optional):","")||"").trim();pt={uid:"",cid:"",name:nm};}
+ POST("/portal/casepack/estimates",{patient:pt,payer:payer,title:title,total:total,figures:null,text:detail||""}).then(function(j){
+  if(!j.ok){toast("Not saved: "+(j.error||"?"));return;}
+  localLog({payer:payer,id:pt.name||pt.cid||"",title:title,total:total,detail:detail,server_id:j.estimate.id});toast("Saved under "+(pt.name||"the patient")+" — Estimates given");
+ }).catch(function(){toast("Not saved — no answer from the server");});
+};
+window.addRecord=function(rec){localLog(rec);};
+/* ---- Estimates given (the server's list) ---- */
+(function(){
+ var m=document.getElementById("s764given"),tb=document.querySelector("#s764gtbl tbody"),q=document.getElementById("s764gq"),msg=document.getElementById("s764gmsg");var rows=[];
+ function paint(){var f=(q.value||"").toLowerCase();var h="";rows.forEach(function(r){var p=r.patient||{};var hay=(p.name+" "+p.cid+" "+r.title+" "+r.payer).toLowerCase();if(f&&hay.indexOf(f)<0)return;
+  var tu=r.taken_up===true?'<span class="s764tag ok">taken up</span>':(r.taken_up===false?'<span class="s764tag warn">not taken</span>':'<span class="sub">—</span>');
+  h+='<tr><td style="white-space:nowrap">'+esc((r.at||"").slice(0,16).replace("T"," "))+'</td><td><b>'+esc(p.name||"—")+'</b>'+(p.cid?'<br><span class="sub" style="font-size:11px">ID '+esc(p.cid)+'</span>':'')+'</td><td>'+esc(r.title)+'<br><span class="sub" style="font-size:11px">'+esc(r.payer)+(r.figures&&r.figures.room?' · '+esc(r.figures.room)+' · '+esc(r.figures.stay)+' d':'')+'</span></td><td class="r">'+rs(r.net_to_patient!=null?r.net_to_patient:(r.total||0))+'</td><td>'+esc(r.by||"")+'</td><td>'+tu+'</td>'
+   +'<td style="white-space:nowrap"><button class="cbtn ghost" style="padding:3px 8px;font-size:12px" data-mk="1" data-id="'+esc(r.id)+'">Taken up</button> <button class="cbtn ghost" style="padding:3px 8px;font-size:12px" data-mk="0" data-id="'+esc(r.id)+'">Not</button> <button class="cbtn ghost" style="padding:3px 8px;font-size:12px" data-cp="'+esc(r.id)+'">Copy</button>'+(r.figures&&r.figures.surgery!=null?' <button class="cbtn ghost" style="padding:3px 8px;font-size:12px" data-use="'+esc(r.id)+'">Use again</button>':'')+'</td></tr>';});
+  tb.innerHTML=h||'<tr><td colspan="7" style="padding:14px;color:var(--muted)">No estimates given yet.</td></tr>';}
+ function load(){tb.innerHTML='<tr><td colspan="7" style="padding:14px;color:var(--muted)">Loading…</td></tr>';msg.textContent="";J("/portal/casepack/estimates?n=200").then(function(j){if(!j.ok)throw new Error(j.error||"?");rows=j.estimates||[];paint();msg.textContent=rows.length+" on the server";}).catch(function(e){tb.innerHTML='<tr><td colspan="7" style="padding:14px" class="s764err">Could not load: '+esc(e.message||e)+'</td></tr>';});}
+ var b=document.getElementById("recBtn");if(b)b.onclick=function(){m.classList.add("open");load();};
+ document.getElementById("s764gclose").onclick=function(){m.classList.remove("open");};
+ document.getElementById("s764greload").onclick=load;q.addEventListener("input",paint);
+ tb.addEventListener("click",function(e){var t=e.target.closest("button");if(!t)return;var id=t.dataset.id||t.dataset.cp||t.dataset.use;var r=rows.filter(function(x){return x.id===id;})[0];if(!r)return;
+  if(t.dataset.mk!=null){POST("/portal/casepack/estimates/mark",{id:id,taken_up:t.dataset.mk==="1"}).then(function(j){if(j.ok){toast("Marked");load();}else toast("Not marked: "+(j.error||"?"));});return;}
+  if(t.dataset.cp){copyText(r.text||(r.title+" "+rs(r.net_to_patient||r.total||0)));return;}
+  if(t.dataset.use){var f=r.figures||{};S.est=Object.assign(blank(null),{title:r.title,surgery:num(f.surgery),implant:num(f.implant),grade:f.grade||defGrade(),stay:Math.max(1,num(f.stay)||1),room:(f.room&&R(f.room))?f.room:defRoom(),opts:f.opts||{},anaesthesia:num(f.anaesthesia),otMeds:num(f.otMeds),wardMeds:num(f.wardMeds),admission:num(f.admission),carm:num(f.carm),investigations:num(f.investigations),other:num(f.other),discount:0,size:null});
+   m.classList.remove("open");var bb=document.getElementById("s764buildbox");if(bb)bb.open=true;render();toast("Loaded into Build an estimate");return;}});
+})();
+/* ---- the foot: Next: Consent → · Estimates given · Manage packages; the stepper 1 → 2 → 3 → 4 ---- */
+window.s764FeedTemplate=function(){
+ var e=S.est;if(!e)return;
+ try{ if(e.c_part){var cp=document.getElementById("c_part");if(cp&&!cp.value){cp.value=e.c_part;cp.dispatchEvent(new Event("change"));}}
+  if(e.c_bone){var cb=document.getElementById("c_bone");if(cb&&!cb.value){try{boneSet(e.c_bone);}catch(_e){}}}
+  if(e.consent_k&&!window.cpProcTouched){var cs=document.getElementById("cs_proc");if(cs&&cs.value!==e.consent_k){cs.value=e.consent_k;cs.dispatchEvent(new Event("change"));window.cpProcTouched=false;}}
+  if(e.ot_proc){var op=document.getElementById("ot_proc");if(op&&op.value!==e.ot_proc){op.value=e.ot_proc;otState.proc=e.ot_proc;try{otRebuild();}catch(_e){}}}
+  var o=caseCtxLoad();if(e.c_part)o.c_part=e.c_part;caseCtxSave(o);
+ }catch(_e){}
+};
+window.s764OpenPane=function(pane){var b=document.querySelector('#caseSub button[data-s="'+pane+'"]');if(b)b.click();};
+(function(){
+ var cb=document.getElementById("caseBtn");if(!cb)return;var base=cb.onclick;
+ cb.classList.add("s764next");cb.innerHTML='<span>Next: Consent →</span><small id="s764nextsub">pick a package or build an estimate</small>';
+ cb.onclick=function(){if(base)base.call(cb);window.cpStage=2;try{window.s764FeedTemplate();}catch(_e){}window.s764OpenPane("consent");try{cpPaint();}catch(_e){}};
+ var mg=document.getElementById("mgr");if(mg)mg.onclick=function(){location.href="/portal/casepack/seed";};
+ var f=document.querySelector(".foot");if(f)f.classList.add("s764foot");
+})();
+window.cpSetStage=function(n){
+ var cm=document.getElementById("caseModal");
+ if(n===1){window.cpStage=1;if(cm)cm.classList.remove("open");cpPaint();return;}
+ if(n===4){var p=patientNow();if(!p||!(p.cid||p.uid)){toast("Link the patient first — the IPD case needs the Clinic ID");return;}
+  var payer="";try{var e=chooseEstimate();payer=(e&&e.payer)||"";}catch(_e){}
+  window.open("/finance/surgery/new?cid="+encodeURIComponent(p.cid||"")+"&name="+encodeURIComponent(p.name||"")+"&payer="+encodeURIComponent(payer)+"&cp="+encodeURIComponent((window.loadedCase&&window.loadedCase.case_id)||"")+"&uid="+encodeURIComponent(p.uid||""),"_blank");return;}
+ window.cpStage=n;
+ if(cm&&!cm.classList.contains("open")){var b=document.getElementById("caseBtn");if(b&&b.onclick)b.onclick();}
+ try{cpFeedForward();}catch(_e){}
+ window.s764OpenPane(n===2?"consent":"ot");cpPaint();
+};
+(function(){var cs=document.getElementById("caseSub");if(!cs)return;cs.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;var s=b.dataset.s;window.cpStage=(s==="consent")?2:(s==="cases"?window.cpStage:3);try{cpPaint();}catch(_e){}},true);})();
+/* ---- the loaded case's template travels into the sheet when a saved case is opened with an estimate ---- */
+window.s764Load();
+})();
+</script>

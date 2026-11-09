@@ -1,0 +1,4 @@
+a8774eef5301cb74fe13739336e735c8  /root/portal/casepack_portal.py
+da09b6c53e019903f4d756c7ada11a43  /root/portal/casepack_v2.py
+333f7825e5ba97018fcd1b2acefa74ab  /root/wa/casepack/casepack_page.html
+76f1615921a9d9a8f3cf04190e4132fb  /root/wa/casepack/casepack_seed.html
