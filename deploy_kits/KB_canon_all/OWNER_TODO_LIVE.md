@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S411 close** (the Sanjeevni chat, EOS, no code changed), 09-Nov-2026, dawn — the Sanjeevni sections refreshed here (the S408 records placed; the 09-Nov backup confirms every file; the Returns redesign approved on paper, D873; the hub and the Go to panel mocked; 412 reserved: the summaries snapshot mock with you, then the hub build)
+# OWNER TO-DO — LIVE · refreshed at the **S404 close** (the parent), 09-Nov-2026, early morning — the parent's sections refreshed here (the parked X-ray photos file themselves; the check screens decided, built in the next session; 413 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S411 close** (the Sanjeevni chat, EOS, no code changed), 09-Nov-2026, dawn — the Sanjeevni sections refreshed here (the S408 records placed; the 09-Nov backup confirms every file; the Returns redesign approved on paper, D873; the hub and the Go to panel mocked; 412 reserved: the summaries snapshot mock with you, then the hub build)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S408 close** (the Sanjeevni chat, EOS), 08-Nov-2026, evening — the Sanjeevni sections refreshed here (the summary scans open and read right, kit S753; staff scan summaries like any bill — the system recognises them, D871; the awaited summaries chase themselves — reception's cards by themselves, one line a day to him and Shavez, kit S755; 411 reserved: F-802's permanent fix, then the order-list kit); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S409 close** (the Scan App project, full EOS), 08-Nov-2026, evening — the Scan App sections refreshed here (kit S754 live: a dealer's month summary recognised by its content; today's eight summaries put right; 410 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S401 close** (the Scan App project, EOS-light), 08-Nov-2026, evening — the Scan App sections refreshed here (nothing built; October's statement, the two switches and B-0176 read live and still yours; the Yuvika switch's place corrected; 409 reserved: the summary read); the other projects' sections as their closes left them.
@@ -419,7 +420,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S400 close (08-Nov, 04:4x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S404 close (09-Nov, 06:4x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -429,7 +430,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the S400 record (papers only). Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries the S404 record (papers only). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -506,6 +507,7 @@ https://followup.dr-manoj.in/portal/users
 - **24 · Patients on your command console** (new vs repeat, your diagnosis groups, revenue by group): a mock-up first, on your yes.
 
 **WHEN IT HAPPENS — not a duty:**
+- the **X-ray photo baaki** count falling by itself as the evening slips come in (S752) — the rest wait for the new check screens (next session);
 - a **rose line on the Call Console** — a staff card (*Net missed* above 0, a call not logged), a follow-up section with patients not called, or someone nobody answered: open it, and use your buttons on the calls;
 - a **Disputed** line on a staff card: *Accept* or *It stands*;
 - an amber staff card (staff ≠ AI): listen and decide — "to check" is never a verdict;
@@ -532,15 +534,22 @@ https://followup.dr-manoj.in/portal/users
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Watch the staff cards** at each open (the first disputes, asks and *Net missed* per person); if the 7-day page is slow on your phone, draw a card's calls only when it is opened.
-2. **Arjun Dev's link step**, when his finger is on the machine; **staff 20's exit steps** your word covers.
-3. **The review reading on 19 Nov** (D836).
-4. **The packs page's September checklist** — the pharmacy's S726 is in the nightly copy.
+1. **The X-ray photo and lab-report check screens (your FINAL, 06:39 9-Nov)** — the photo and the day's patients on Check karein (phone and PC), Shavez's one list for photos and lab reports, lab reports with no blood slip to Shavez and to you, your four tiles, the Aaj ka kaam line and the Parchi desk strip. Next session, no question first.
+2. **Watch the parked X-ray photos** after each day (S752).
+3. **The Marg Purchases tile on your home** (the pharmacy chat's ask).
+4. **Watch the staff cards** · **Arjun Dev's link step**, **staff 20's exit steps** · **the review reading on 19 Nov** · **the packs page's September checklist**.
 5. **WhatsApp after MyOperator's fix** · your publish file taking in my uploads first (D823).
 6. **Patients on your command console** (a mock-up first) · the watches (F-1085, the IPD desk, the Hostinger update, IPD kits 5 and 6).
 7. **The Tally check** · **the Sanjeevni GST returns** · AF-16 · AF-19.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S404 CLOSE — 08 → 09-Nov-2026 (the parent)
+
+- **Alisha's 41 October "photo baaki" — the cause found:** the photos had come and sat in the X-ray check folder, never looked at again (100 since 20-Sep).
+- **The parked X-ray photos file themselves** — when the slip comes, or (the day over) when the name is exactly one X-ray patient of that day (S752, live 17:08 8-Nov): 48 filed at once; October 37 → 17.
+- **The check screens decided on your mock-up** (your FINAL 06:39 9-Nov) — built next session.
+- **Lab reports with no blood slip measured:** 42 since 19-Sep; 40 of those patients came to the clinic that day or the day before.
 
 ## ✅ DONE AT THE S400 CLOSE — 07 → 08-Nov-2026 (the parent)
 

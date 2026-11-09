@@ -1,0 +1,21 @@
+
+
+
+# ---- S756 (09-Nov-2026, Sanjeevni session 412, kit S756_SUMMARY_DEALER_WA; the owner's go 06:31 IST) -------------------------------------
+#  THE DOOR /api/s756/pause -- the doctor only: {dealer, on: true | false} pauses or resumes the daily WhatsApp reminder to one dealer whose
+#  month summary is awaited (scan_register.s756_pause_put; audited). The snapshot's Pause / Resume buttons post here.
+KIT_S756 = "S756_SUMMARY_DEALER_WA"
+
+
+@bp.route("/api/s756/pause", methods=["POST"])
+def api_s756_pause():
+    """Pause or resume a dealer's summary reminders: {dealer, on}. The doctor only."""
+    u, con, err = _s749_owner()
+    if err:
+        return err
+    b = request.get_json(silent=True) or {}
+    on = b.get("on")
+    on = on is True or str(on).strip().lower() in ("1", "true", "yes", "on")
+    ok, msg = _s454_sr().s756_pause_put(con, _who(u), str(b.get("dealer") or ""), on)
+    return jsonify(ok=ok, message=msg), (200 if ok else 409)
+# ---- S756 end ---------------------------------------------------------------------------------------------------------------------------
