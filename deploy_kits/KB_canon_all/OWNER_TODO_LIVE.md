@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S404 close** (the parent), 09-Nov-2026, early morning — the parent's sections refreshed here (the parked X-ray photos file themselves; the check screens decided, built in the next session; 413 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S412 close** (the Sanjeevni chat, full EOS), 09-Nov-2026, morning — the Sanjeevni sections refreshed here (the dealers reminded by WhatsApp in your words from 11:30 today, D876; October on one screen at the top of the purchase check; the morning line now really comes; Bass Pharma's number missing; 414 reserved: this session's records placed first, then the hub build)
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S404 close** (the parent), 09-Nov-2026, early morning — the parent's sections refreshed here (the parked X-ray photos file themselves; the check screens decided, built in the next session; 413 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S411 close** (the Sanjeevni chat, EOS, no code changed), 09-Nov-2026, dawn — the Sanjeevni sections refreshed here (the S408 records placed; the 09-Nov backup confirms every file; the Returns redesign approved on paper, D873; the hub and the Go to panel mocked; 412 reserved: the summaries snapshot mock with you, then the hub build)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S408 close** (the Sanjeevni chat, EOS), 08-Nov-2026, evening — the Sanjeevni sections refreshed here (the summary scans open and read right, kit S753; staff scan summaries like any bill — the system recognises them, D871; the awaited summaries chase themselves — reception's cards by themselves, one line a day to him and Shavez, kit S755; 411 reserved: F-802's permanent fix, then the order-list kit); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S409 close** (the Scan App project, full EOS), 08-Nov-2026, evening — the Scan App sections refreshed here (kit S754 live: a dealer's month summary recognised by its content; today's eight summaries put right; 410 reserved); the other projects' sections as their closes left them.
@@ -1001,48 +1002,45 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S411 close (09-Nov, 05:4x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S412 close (09-Nov, 07:5x)
 
-*Detail: `S411_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_412.md` (the summaries snapshot mock with you, then the hub build). This section supersedes the S408 one below it.*
+*Detail: `S412_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_414.md` (this session's records placed first; then the hub build). This section supersedes the S411 one below it.*
 
-**1 · The publish** — this close's records only; nothing follows on the server:
+**1 · Nothing to publish now** — your PC's shell stopped answering at the end; the next session places this session's records and names the publish then.
 
-```
-D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
-```
+**2 · Bass Pharma's payment number** in the phone book — until then it is *number missing* and gets no reminder.
 
-**2 · The mocks** — look whenever convenient; comment on the page itself if you like (the Returns part is approved):
-
-```
-https://claude.ai/artifact/8JhQwrXJ56WAtdCZGUUHN1
-```
-
-**3 · The dealer reminder (next session):** the wording, the time of day, Sundays or not.
-
-**4 · Row 7 — the dealers who never send a summary:** *<Dealer> gives no summary*, once each (Bass, Ess Kay, Jubilee, Kedar, Krishna, Saisun are awaited):
+**3 · Row 7 — a dealer who never sends a summary:** *<Dealer> gives no summary*, once — that stops his reminders for good:
 
 ```
 https://followup.dr-manoj.in/finance/purchase/page/check?month=2026-10
 ```
 
-**5 · Shavez's phone:** the daily summaries line reaches him only once he has opened the clinic app and allowed messages.
+**4 · Shavez's phone:** the daily summaries line reaches him only once he has opened the clinic app and allowed messages.
 
-**6 · Still yours:** ZUPRINOR 5 (row 6); the two September supplier messages (A.A. Pharmaceuticals, Deepam Pharma).
+**5 · Still yours:** ZUPRINOR 5 (row 6); the two September supplier messages (A.A. Pharmaceuticals, Deepam Pharma).
 
-**7 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
+**6 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
 
-**8 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
+**7 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
 
-**To know:** the 09-Nov backup confirms every file the last builds changed. Today's hub contradicts itself in three places (2 vs 4 days awaiting; two "banked" figures; "13 items" naming 8) — the hub build fixes them (F-1199). The same TYRO BR batch is in 3 of the 10 waiting returns.
+**To know:** five dealers get your WhatsApp at 11:30 today (Ess Kay, Jubilee, Kedar, Krishna, Saisun) and each day until their October summary comes; you can pause any one from the purchase check. The morning *summaries awaited* line now really comes.
 
 **Later, your word only:** "count them"; the buying switch (earliest ~22-Nov); June and July's old PROVISIONAL months; a second network for the medical PC only if its LAN fails again (D837 — I will remind you).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S411 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S412 close
 
-1. **The summaries snapshot mock**, finished with you; then the dealer reminder from the 7th (your wording first).
+1. **This session's records placed** (the shell was down at the close); **the reminders' first day checked**.
 2. **The hub build** (D873): Returns as approved, Needs you in groups, the Go to panel, the three contradictions (F-1199), the rounding badge (F-1200).
 3. **F-802's permanent fix** (D867 / D868); then **the order-list kit** on your "go", the mock first.
-4. **Small, with the next kit that touches them:** reception's card no longer says *press the summary button*; the four undecided scratch rows; F-1184.
+4. **Small, with the next kit that touches them:** the phone's own guard for the reminders (F-1209); the snapshot's *gives no summary* sentence; reception's card's *press the summary button*; the four undecided scratch rows; F-1184.
+
+## ✅ DONE AT THE S412 CLOSE — 09-Nov-2026 (the Sanjeevni project)
+
+- ~~**The dealer reminder — wording, hour, Sundays**~~ — your words, 11:30 IST, Sundays too (D876); live from today.
+- ~~**The summaries snapshot**~~ — at the top of the purchase check, as mocked; read live correct.
+- ~~**Row 7's count left dealers out**~~ — it now names all 21 (F-1208).
+- ~~**The morning summaries line never came**~~ — found and fixed (F-1207).
 
 ## ✅ DONE AT THE S411 CLOSE — 09-Nov-2026 (the Sanjeevni project)
 
