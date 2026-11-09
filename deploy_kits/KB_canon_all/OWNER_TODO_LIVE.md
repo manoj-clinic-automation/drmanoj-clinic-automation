@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S415 close** (the parent), 09-Nov-2026, morning — the parent's sections refreshed here (the staff cards round 2 live; 416 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S414 close** (the Sanjeevni chat, full EOS), 09-Nov-2026, morning — the Sanjeevni sections refreshed here (your hub rebuilt as you approved it: Returns on one card, Needs you in groups, Go to, Cash and Bank, one count with your console; 417 reserved: this session's records placed first, then F-802)
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S415 close** (the parent), 09-Nov-2026, morning — the parent's sections refreshed here (the staff cards round 2 live; 416 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S413 close** (the parent), 09-Nov-2026, morning — the parent's sections refreshed here (the X-ray photo and lab-report check screens live; the audit's asks; the website certificate renewed to 7-Feb-2027; 415 reserved: the staff cards); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S412 close** (the Sanjeevni chat, full EOS), 09-Nov-2026, morning — the Sanjeevni sections refreshed here (the dealers reminded by WhatsApp in your words from 11:30 today, D876; October on one screen at the top of the purchase check; the morning line now really comes; Bass Pharma's number missing; 414 reserved: this session's records placed first, then the hub build)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S404 close** (the parent), 09-Nov-2026, early morning — the parent's sections refreshed here (the parked X-ray photos file themselves; the check screens decided, built in the next session; 413 reserved); the other projects' sections as their closes left them.
@@ -1021,38 +1022,49 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S412 close (09-Nov, 07:5x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S414 close (09-Nov, 10:2x)
 
-*Detail: `S412_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_414.md` (this session's records placed first; then the hub build). This section supersedes the S411 one below it.*
+*Detail: `S414_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_417.md` (this session's records placed first; then F-802). This section supersedes the S412 one below it.*
 
-**1 · Nothing to publish now** — your PC's shell stopped answering at the end; the next session places this session's records and names the publish then.
+**1 · Nothing to publish now** — your PC's shell stopped answering again; the next session places this session's records and names the publish then.
 
-**2 · Bass Pharma's payment number** in the phone book — until then it is *number missing* and gets no reminder.
+**2 · Look at your hub when convenient** — the Returns card and the grouped Needs you, as you approved them:
 
-**3 · Row 7 — a dealer who never sends a summary:** *<Dealer> gives no summary*, once — that stops his reminders for good:
+```
+https://followup.dr-manoj.in/finance/approvals
+```
+
+**3 · Bass Pharma's payment number** in the phone book — until then it is *number missing* and gets no reminder.
+
+**4 · Row 7 — a dealer who never sends a summary:** *<Dealer> gives no summary*, once:
 
 ```
 https://followup.dr-manoj.in/finance/purchase/page/check?month=2026-10
 ```
 
-**4 · Shavez's phone:** the daily summaries line reaches him only once he has opened the clinic app and allowed messages.
+**5 · Shavez's phone:** the daily summaries line reaches him only once he has opened the clinic app and allowed messages.
 
-**5 · Still yours:** ZUPRINOR 5 (row 6); the two September supplier messages (A.A. Pharmaceuticals, Deepam Pharma).
+**6 · Still yours:** ZUPRINOR 5 (row 6); the two September supplier messages (A.A. Pharmaceuticals, Deepam Pharma).
 
-**6 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
+**7 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
 
-**7 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
-
-**To know:** five dealers get your WhatsApp at 11:30 today (Ess Kay, Jubilee, Kedar, Krishna, Saisun) and each day until their October summary comes; you can pause any one from the purchase check. The morning *summaries awaited* line now really comes.
+**8 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
 
 **Later, your word only:** "count them"; the buying switch (earliest ~22-Nov); June and July's old PROVISIONAL months; a second network for the medical PC only if its LAN fails again (D837 — I will remind you).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S412 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S414 close
 
-1. **This session's records placed** (the shell was down at the close); **the reminders' first day checked**.
-2. **The hub build** (D873): Returns as approved, Needs you in groups, the Go to panel, the three contradictions (F-1199), the rounding badge (F-1200).
-3. **F-802's permanent fix** (D867 / D868); then **the order-list kit** on your "go", the mock first.
-4. **Small, with the next kit that touches them:** the phone's own guard for the reminders (F-1209); the snapshot's *gives no summary* sentence; reception's card's *press the summary button*; the four undecided scratch rows; F-1184.
+1. **This session's records placed** (the shell was down at the close); **the dealer reminders' second day checked**.
+2. **F-802's permanent fix** (D867 / D868 / D879) — an unchanged Marg export says *received again* and clears its duty.
+3. **The order-list kit** on your "go", the mock first.
+4. **Small, with the next kit that touches them:** the hub's Needs-you speed (F-1215); the purchase-order band (F-1216); Darpan's month view and spine-only returns (F-1217); the phone's own guard for the reminders (F-1209); the parent's note on `day_resync`.
+
+## ✅ DONE AT THE S414 CLOSE — 09-Nov-2026 (the Sanjeevni project)
+
+- ~~**The hub rebuild**~~ — Returns as approved (live 09:14), Needs you grouped, Go to, Cash and Bank, Days (live 10:08) (D873).
+- ~~**Three different counts for one thing**~~ — one figure on the hub and the console (F-1199, D879).
+- ~~**The rounding badge**~~ — small refund differences no longer shown (F-1200).
+- ~~**S412's records**~~ — placed at this session's start.
 
 ## ✅ DONE AT THE S412 CLOSE — 09-Nov-2026 (the Sanjeevni project)
 
