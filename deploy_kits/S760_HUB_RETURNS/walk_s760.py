@@ -215,6 +215,15 @@ try:
 except Exception as e:                                                # noqa: BLE001
     check("BN1 the batch match normalises both sides alike", False, note=repr(e))
 
+# ---- R: repeats found and shown by the same normalisation as the batch match ---------------------------------------------------------
+try:
+    src_rk = open(os.path.join(FIN, "returns_kinds.py"), encoding="utf-8").read()
+    check("R1 repeats use batch_norm, the match's own normalisation ('  ga   1 ' -> 'GA 1'), for the key, the skip and the mark",
+          returns_kinds.batch_norm("  ga   1 ") == "GA 1" and 'if not batch_norm(x["batch"]):' in src_rk
+          and src_rk.count('batch_norm(x["batch"])') >= 3, note=src_rk.count('batch_norm(x["batch"])'))
+except Exception as e:                                                # noqa: BLE001
+    check("R1 repeats use batch_norm", False, note=repr(e))
+
 # ---- W: no new GET writes -- the hub and the Needs-you line read on a READ-ONLY connection --------------------------------------------
 try:
     cro = sqlite3.connect("file:%s?mode=ro" % DB, uri=True, timeout=30)
@@ -305,6 +314,10 @@ try:
     rr = c.execute("SELECT business_date, status FROM darpan_return_approval WHERE unit='medical' AND cn_bill='CN97605'").fetchone()
     check("A2 Reject on the spine-only return CN97605 answers 200 and records it rejected",
           a2.status_code == 200 and rr is not None and tuple(rr) == ("2099-02-06", "rejected"), note=(a2.status_code, tuple(rr) if rr else None))
+    src_da = open(os.path.join(FIN, "darpan_app.py"), encoding="utf-8").read()
+    rb = c.execute("SELECT cn_bill FROM darpan_return_approval WHERE unit='medical' AND cn_bill LIKE 'CN97605%'").fetchall()
+    check("A4 the spine fallback matches the bill exactly as cn-approve holds it (no extra upper-casing) and the row stores that same bill",
+          "WHERE bill=? AND credit_note=1" in src_da and "UPPER(bill)=?" not in src_da and [tuple(x) for x in rb] == [("CN97605",)], note=[tuple(x) for x in rb])
     a3 = cl.post("/finance/darpan/api/cn-approve", json=dict(bill="CN99999", decision="approved", note="walk"))
     check("A3 a bill nobody holds still answers 404 (the old behaviour)", a3.status_code == 404, s760=False, note=a3.status_code)
     check("E4 cn-detail itself unchanged: 200, kinds present, its own day discovery (sale_line_item + sale_item, not the spine) -- 7 of the 8: the spine-only orphan CN97605 is the hub's alone", r4.status_code == 200 and j4.get("count") == 7 and "counter" in (j4.get("kinds") or {}),

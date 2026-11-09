@@ -31,8 +31,7 @@ def _s760_spine_cn_date(bill):
         sp = _spine()
         if sp is None:
             return None
-        r = sp.q("SELECT date FROM sp_sale_bill WHERE UPPER(bill)=? AND credit_note=1 ORDER BY date DESC LIMIT 1",
-                 str(bill or "").strip().upper())
+        r = sp.q("SELECT date FROM sp_sale_bill WHERE bill=? AND credit_note=1 ORDER BY date DESC LIMIT 1", bill)   # as cn-approve holds it
         return {"d": r[0]["date"]} if r else None
     except Exception:                                               # noqa: BLE001
         return None

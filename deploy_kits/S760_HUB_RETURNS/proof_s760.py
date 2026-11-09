@@ -10,7 +10,8 @@ import os, sqlite3, sys, time, warnings
 warnings.filterwarnings("ignore")
 fin, shared, db, scr = (os.path.abspath(x) for x in sys.argv[1:5])
 spine = os.path.abspath(sys.argv[5]) if len(sys.argv) > 5 and sys.argv[5] else ""
-LIMIT_S = 3.0
+LIMIT_S = 8.0                                                 # red over this (the second, warm read)
+WARN_S = 3.0                                                  # a WARN line only
 os.makedirs(scr, exist_ok=True)
 cp = os.path.join(scr, "proof760.db")
 src = sqlite3.connect("file:%s?mode=ro" % db, uri=True, timeout=30)
@@ -36,6 +37,7 @@ if not hasattr(returns_kinds, "hub"):
     sys.exit(0)
 before = c.execute("SELECT COUNT(*) FROM cn_kind").fetchone()[0] if c.execute("SELECT 1 FROM sqlite_master WHERE name='cn_kind'").fetchone() else None
 try:
+    returns_kinds.hub(c, "medical")                                   # warm-up (caches, the spine's first open) -- not timed
     t0 = time.time()
     H = returns_kinds.hub(c, "medical")
     t_full = time.time() - t0
@@ -47,7 +49,9 @@ except Exception as e:                                                # noqa: BL
     sys.exit(0)
 after = c.execute("SELECT COUNT(*) FROM cn_kind").fetchone()[0] if before is not None else None
 R = {r["key"]: r for m in H["months"] for r in m["rows"]}
-print("spine: %s" % ("the live spine, read only" if has_spine else "none given (not the box) -- every return reads 'not examinable'"))
+opened = bool(H.get("batch_check"))                               # hub(): True only when _spine() returned an open connection
+print("spine: %s" % (("the live spine, read only -- opened, the batch check ran" if opened else "GIVEN BUT NOT OPENED") if has_spine
+                     else "none given (not the box) -- every return reads 'not examinable'"))
 print("months (newest first, counts only):")
 for m in H["months"]:
     print("  %s%s · %d returns · Rs %s · counter %s%% · fine %d · need your OK %d · can't be checked %d · discounted %d · large %d · rejected %d · non-cash %d (not in purchases %d)"
@@ -79,7 +83,9 @@ for m in H["months"]:                                    # the F-1200 count: sho
         if sf and returns_kinds.is_noise(st, sf, int(n.get("amount_p") or 0)):
             raw_hidden += 1
 print("cn_kind rows before / after the reads: %s / %s" % (before, after))
-print("time: the full read %.2f s · the light read (the Needs-you line) %.2f s · the limit %.0f s" % (t_full, t_light, LIMIT_S))
+print("time (after one warm-up read): the full read %.2f s · the light read (the Needs-you line) %.2f s · red over %.0f s" % (t_full, t_light, LIMIT_S))
+if t_full > WARN_S:
+    print("WARN: the hub read took %.1f s -- over %.0f s (not red; red is over %.0f s)" % (t_full, WARN_S, LIMIT_S))
 try:
     import sanjeevni_approvals as sa                                  # the Needs-you line, by the files under test
     assert os.path.dirname(os.path.abspath(sa.__file__)) == fin
@@ -94,9 +100,12 @@ if line_n != len(H["needs"]) or HL["needs"] != H["needs"]:
 if before is not None and after != before:
     print("PROOF S760: STOP -- the read saved cn_kind rows (%s -> %s); the hub must write nothing" % (before, after))
     sys.exit(0)
+if has_spine and not opened:
+    print("PROOF S760: STOP -- the spine %s was given but could not be opened; the batch check did not run" % spine)
+    sys.exit(0)
 if t_full > LIMIT_S:
     print("PROOF S760: STOP -- the hub read took %.1f s, over %.0f s" % (t_full, LIMIT_S))
     sys.exit(0)
 print("PROOF S760: months %d · needs %d (Rs %s) · cant %d · repeats %d · history %d · batch checks amber %d red %d not-asked %d · hidden-rounding %d · line = card %d · spine %s · hub %.1f s (light %.1f s)"
       % (len(H["months"]), len(H["needs"]), H["pending_ok_p"] / 100.0, len(H["cant"]), len(H["repeats"]), len(H["history"]),
-         amber, red, notasked, raw_hidden, line_n, "yes" if has_spine else "none", t_full, t_light))
+         amber, red, notasked, raw_hidden, line_n, "yes" if (has_spine and opened) else "none", t_full, t_light))

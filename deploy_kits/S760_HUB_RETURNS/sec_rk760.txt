@@ -249,9 +249,9 @@ def hub(con, unit, today=None, light=False):
     seen = {}
     for r in needs:
         for x in r["in_question"]:
-            if not x["batch"]:
+            if not batch_norm(x["batch"]):                       # S760: the same normalisation as the batch match
                 continue
-            k = (x["item"].strip().upper(), batch_norm(x["batch"]))
+            k = (" ".join(x["item"].upper().split()), batch_norm(x["batch"]))
             seen.setdefault(k, [])
             if r["key"] not in [y[0] for y in seen[k]]:
                 seen[k].append((r["key"], r["date"]))
@@ -264,7 +264,7 @@ def hub(con, unit, today=None, light=False):
     rkeys = {(x["item"], x["batch"]) for x in repeats}
     for r in needs:
         for x in r["in_question"]:
-            x["repeat"] = (x["item"].strip().upper(), batch_norm(x["batch"])) in rkeys
+            x["repeat"] = (" ".join(x["item"].upper().split()), batch_norm(x["batch"])) in rkeys
     cm = next((m for m in out_months if m["ym"] == cur), None)
     prev = [dict(ym=m["ym"], label=_s760_month_label(m["ym"]).split(" ")[0], pct=m["counter_pct"])
             for m in out_months if m["ym"] != cur][:2]

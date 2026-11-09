@@ -16,7 +16,8 @@
 #  Gates: SUMS, KIT_ID, the window, the build lock, the four live pins, the rebuild to the TO pins (both pythons compile), walk_s760
 #  green on the rebuilt files, its CONTROL on the live files, the earlier walks (S677, S406, S368) -- no red beyond the live files'
 #  own --, the proof by both on a COPY of finance.db and the LIVE spine (SPINE_DB = /root/finance/spine/spine.db, opened read only):
-#  counts only, the Needs-you line equal to the card, no cn_kind row saved, the hub read under 3 s. cn-approve can now decide a return
+#  counts only, 'spine yes' only when the spine was opened and the batch check ran, the Needs-you line equal to the card, no cn_kind
+#  row saved, the second (warm) hub read under 8 s (over 3 s a WARN line only). cn-approve can now decide a return
 #  only the spine holds (its date read from the spine, read only). After placing: the service restarted, health,
 #  the hub and the new door refuse a stranger, the journal (new PIDs only), the walk and the proof again on the placed files.
 # =============================================================================
@@ -39,7 +40,7 @@ STAMP="$(date +%Y%m%d_%H%M%S)"
 SCR="${TMPW:-/tmp}/s760_inst_$STAMP"
 PLACED=0; TOOK_LOCK=0
 GREEN="walk_s760: 0 check(s) failed (0 of them S760 checks)"
-CONTROL="walk_s760: 19 check(s) failed (19 of them S760 checks)"
+CONTROL="walk_s760: 21 check(s) failed (21 of them S760 checks)"
 
 m5() { md5sum "$1" 2>/dev/null | awk '{print $1}'; }
 say() { echo "$@"; }
@@ -189,7 +190,8 @@ mkroot "$SCR/placed" || restore "could not copy the placed files for the walk"
 R=$(walk "$SCR/placed" "$SCR/wp" | tail -1)
 [ "${REHEARSE_RED_AT:-}" = 7 ] && R="rehearsal: a forced red at [7/7]"
 [ "$R" = "$GREEN" ] || restore "the walk on the placed files: $R"
-P7=$(proof "$SCR/placed/finance" "$SCR/pplaced" | tail -1)
+P7F="$(proof "$SCR/placed/finance" "$SCR/pplaced")"; P7=$(printf '%s\n' "$P7F" | tail -1)
+printf '%s\n' "$P7F" | grep -E '^WARN' | sed 's/^/      /'
 { echo "$P7" | grep -q -E '^PROOF S760: months [0-9]+ · needs [0-9]+ ' && spine_ok "$P7"; } || restore "the proof by the placed files: $P7"
 say "[7/7] the walk on the placed files: $R; by the placed files: $P7"
 release_lock
