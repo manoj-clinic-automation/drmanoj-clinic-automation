@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S413 close** (the parent), 09-Nov-2026, morning — the parent's sections refreshed here (the X-ray photo and lab-report check screens live; the audit's asks; the website certificate renewed to 7-Feb-2027; 415 reserved: the staff cards); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S415 close** (the parent), 09-Nov-2026, morning — the parent's sections refreshed here (the staff cards round 2 live; 416 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S413 close** (the parent), 09-Nov-2026, morning — the parent's sections refreshed here (the X-ray photo and lab-report check screens live; the audit's asks; the website certificate renewed to 7-Feb-2027; 415 reserved: the staff cards); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S412 close** (the Sanjeevni chat, full EOS), 09-Nov-2026, morning — the Sanjeevni sections refreshed here (the dealers reminded by WhatsApp in your words from 11:30 today, D876; October on one screen at the top of the purchase check; the morning line now really comes; Bass Pharma's number missing; 414 reserved: this session's records placed first, then the hub build)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S404 close** (the parent), 09-Nov-2026, early morning — the parent's sections refreshed here (the parked X-ray photos file themselves; the check screens decided, built in the next session; 413 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S411 close** (the Sanjeevni chat, EOS, no code changed), 09-Nov-2026, dawn — the Sanjeevni sections refreshed here (the S408 records placed; the 09-Nov backup confirms every file; the Returns redesign approved on paper, D873; the hub and the Go to panel mocked; 412 reserved: the summaries snapshot mock with you, then the hub build)
@@ -422,7 +423,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S413 close (09-Nov, 08:3x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S415 close (09-Nov, 10:1x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -432,13 +433,15 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the S413 record (papers only). Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries the S415 record (papers only). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
 **1a · TELL SHIVANI, ALISHA AND SHAVEZ: their own call card is on *Aaj ka kaam* (*Mere calls*)** — the same figures as yours, every call with its recording; *Galat hai?* sends you one line about one call, and you answer it on the Call Console.
+
+**1c · TELL SHIVANI AND ALISHA: a call missed in their shift before they punch in now counts on their card** ("punch se pehle"), and their *Mere calls* line now shows today's "aaj abhi tak: N log".
 
 **1b · TELL ALISHA, SHIVANI AND SHAVEZ: *Check karein* now shows the X-ray photo and that day's patients** — tap the right one, then *Haan*. **Shavez:** lab reports with no blood slip are in his list; *Blood parchi bana di* opens the slip ready.
 
@@ -513,6 +516,7 @@ https://followup.dr-manoj.in/portal/users
 **WHEN IT HAPPENS — not a duty:**
 - the **four tiles on your X-ray page** moving as staff answer (S757) — *Wrong patient? Move* on a filed one, *Charged elsewhere* / *Missed — tell Shavez* on an X-ray with no slip;
 - a red **noncash_at_ingest** line on the pharmacy day: do not approve that day until it clears (S758);
+- a **Both on duty** line on the Call Console — a call missed while two were on duty, counted once: *Call back* or *Mark reviewed* there (S762);
 - a **rose line on the Call Console** — a staff card (*Net missed* above 0, a call not logged), a follow-up section with patients not called, or someone nobody answered: open it, and use your buttons on the calls;
 - a **Disputed** line on a staff card: *Accept* or *It stands*;
 - an amber staff card (staff ≠ AI): listen and decide — "to check" is never a verdict;
@@ -539,14 +543,19 @@ https://followup.dr-manoj.in/portal/users
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The staff cards (your word, 08:23 9-Nov)** — next session; tell it what you want changed.
-2. **Watch the check screens** (S757) · **the nightly's two new files for the auditor, the health mail's 24 hours, the website certificate** (S758, S759).
+1. **Watch the staff cards round 2** (S762): the Both on duty line, "before punch-in", the staff's "aaj abhi tak" line.
+2. **Watch the check screens** (S757) · **the nightly's two new files for the auditor, the health mail's 24 hours, the website certificate** (S758, S759) · **the Google Sheet tracker's health mail** after Sunday's skip.
 3. **Arjun Dev's link step**, **staff 20's exit steps** · **the review reading on 19 Nov** · **the packs page's September checklist**.
 4. **WhatsApp after MyOperator's fix** · your publish file taking in my uploads first (D823).
-5. **Patients on your command console** (a mock-up first) · the watches (F-1085, the IPD desk, the Hostinger update, IPD kits 5 and 6).
+5. **Patients on your command console** (a mock-up first) · each person's follow-up calls on the staff cards, when you ask · the watches (F-1085, the IPD desk, the Hostinger update, IPD kits 5 and 6).
 6. **The Tally check** · **the Sanjeevni GST returns** · AF-16 · AF-19.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S415 CLOSE — 09-Nov-2026 (the parent)
+
+- **The staff cards, round 2, after your review** (S762, live 10:10): a call missed before punch-in counts on her card, marked; a call missed while two were on duty once on your console ("Both on duty"), still in each one's own card; plain words; "to the doctor" vs "coming" no longer staff ≠ AI; newest first; a link to each person's own card; "staff cards ↓"; staff see today's net missed on their line.
+- **The Google Sheet's health mail of 9 Nov read:** one Sunday's skip of two timed jobs; nothing for you to do.
 
 ## ✅ DONE AT THE S413 CLOSE — 09-Nov-2026 (the parent)
 
