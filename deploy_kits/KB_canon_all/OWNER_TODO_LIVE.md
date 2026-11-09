@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S414 close** (the Sanjeevni chat, full EOS), 09-Nov-2026, morning — the Sanjeevni sections refreshed here (your hub rebuilt as you approved it: Returns on one card, Needs you in groups, Go to, Cash and Bank, one count with your console; 417 reserved: this session's records placed first, then F-802)
+# OWNER TO-DO — LIVE · refreshed at the **S416 close** (the parent, EOS-light), 09-Nov-2026, afternoon — the parent's sections refreshed here (the Case Pack enquiry v2 settled with you, built next chat; 418 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S414 close** (the Sanjeevni chat, full EOS), 09-Nov-2026, morning — the Sanjeevni sections refreshed here (your hub rebuilt as you approved it: Returns on one card, Needs you in groups, Go to, Cash and Bank, one count with your console; 417 reserved: this session's records placed first, then F-802)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S415 close** (the parent), 09-Nov-2026, morning — the parent's sections refreshed here (the staff cards round 2 live; 416 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S413 close** (the parent), 09-Nov-2026, morning — the parent's sections refreshed here (the X-ray photo and lab-report check screens live; the audit's asks; the website certificate renewed to 7-Feb-2027; 415 reserved: the staff cards); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S412 close** (the Sanjeevni chat, full EOS), 09-Nov-2026, morning — the Sanjeevni sections refreshed here (the dealers reminded by WhatsApp in your words from 11:30 today, D876; October on one screen at the top of the purchase check; the morning line now really comes; Bass Pharma's number missing; 414 reserved: this session's records placed first, then the hub build)
@@ -424,7 +425,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S415 close (09-Nov, 10:1x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S416 close (09-Nov, 13:4x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -434,7 +435,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the S415 record (papers only). Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries the S416 record (papers only — the Case Pack plan and the mock-ups). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -483,6 +484,8 @@ https://followup.dr-manoj.in/finance/surgery/settings
 **9b · THE HOSPITAL: how it fills the credit cases' charges.** Kit 5 waits for it.
 
 **9c · A WHATSAPP TEMPLATE FOR AFTER-DISCHARGE MESSAGES**, when you decide the schedule.
+
+**9d · FOR THE CASE PACK (not blocking the build):** ask DTH for clean copies of the **FHPL and Paramount TPA rate sheets** (the ones we have are poor scans, most rows unpriced); and yes or no to the "also common" fractures on the templates (a child's supracondylar and lateral condyle humerus, elbow dislocation).
 
 **10 · THE MARG ENGINEER: test-restore Marg's automatic backup.**
 
@@ -544,14 +547,21 @@ https://followup.dr-manoj.in/portal/users
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Watch the staff cards round 2** (S762): the Both on duty line, "before punch-in", the staff's "aaj abhi tak" line.
-2. **Watch the check screens** (S757) · **the nightly's two new files for the auditor, the health mail's 24 hours, the website certificate** (S758, S759) · **the Google Sheet tracker's health mail** after Sunday's skip.
+1. **THE CASE PACK ENQUIRY v2, as settled with you today** — one kit in the next chat: the search first; your packages, the DTH rates and every estimate on the server; the DTH rates list (edit / add / delete); Build an estimate; every line opening in place; Save as a new package; the fracture templates with the Ayushman implant provision; the charge groups and the seeding page with your net at 50%; Next: Consent → · Estimates given · Manage packages; the steps Estimate → Consent → OT & orders → IPD case. Then the first fill with you on the seeding page.
+2. **Watch the staff cards round 2** (S762, read live today as you ruled) · **the check screens** (S757, read live today) · **the 10-Nov mails:** the health mail's 24 hours (the fix went in after today's mail) and the Google Sheet tracker's heartbeat.
 3. **Arjun Dev's link step**, **staff 20's exit steps** · **the review reading on 19 Nov** · **the packs page's September checklist**.
 4. **WhatsApp after MyOperator's fix** · your publish file taking in my uploads first (D823).
 5. **Patients on your command console** (a mock-up first) · each person's follow-up calls on the staff cards, when you ask · the watches (F-1085, the IPD desk, the Hostinger update, IPD kits 5 and 6).
 6. **The Tally check** · **the Sanjeevni GST returns** · AF-16 · AF-19.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S416 CLOSE — 09-Nov-2026 (the parent)
+
+- **The staff cards and the X-ray screens read live:** everything as you ruled yesterday; nothing to fix.
+- **The Case Pack enquiry screen settled with you** in four mock-up rounds, plus the fracture templates and the package seeding page — your rulings recorded (D880), the plan written; built in the next chat.
+- **Your Ayushman rows checked:** HBP 2022, Tier 2 (the right tier for Bareilly), implants separate. **Your TPA sheets:** 8 of 10 read well; FHPL and Paramount are poor scans (9d above).
+- **Your net worked out in rupees** on one case (PFN, general ward, 2 days: ₹54,700 to the patient → ₹17,500 to you at 50%); post-discharge income kept out of it, as you said.
 
 ## ✅ DONE AT THE S415 CLOSE — 09-Nov-2026 (the parent)
 
