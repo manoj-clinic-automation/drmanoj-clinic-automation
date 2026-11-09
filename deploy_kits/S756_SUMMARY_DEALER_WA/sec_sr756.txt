@@ -10,8 +10,11 @@
 #      number: the row is 'skipped' with 'number nahi' and the snapshot says "number missing". A paused dealer (s756_pause) gets nothing. The
 #      reception phone sends it on the supplier_msg road (/finance/api/supplier-msg/next). An unsent row is withdrawn ('skipped') when the
 #      day turns, when its dealer is no longer awaited, or when he is paused -- a phone that was off never sends a backlog.
-#      FAILS CLOSED: assets.db unreadable (s750_summary_scans None) -> nothing is queued or withdrawn (every dealer would look awaited).
-#      A locked month: nothing. Switches: summary_wa.on = off; owner_notice's own (ALL_OFF, OWNER_NOTICE_OFF, owner_notice.on).
+#      FAILS CLOSED: assets.db unreadable (s750_summary_scans None) -> nothing is queued and everything unsent is withdrawn (every dealer
+#      would look awaited). A month with a summary not yet named to a dealer is HELD. A locked month: nothing. A dealer awaited for two
+#      months is told of the OLDEST only, one message a day. Failed sends are withdrawn, never retried; nothing is left after 20:00
+#      (summary_wa.until). Switches (each also withdraws what is unsent): summary_wa.on = off; owner_notice's ALL_OFF, OWNER_NOTICE_OFF,
+#      owner_notice.on.
 #  (2) s756_snapshot(con, month, prefix) -- READ ONLY: the top of the purchase check of an ended counted month (the mock he approved,
 #      06:31 IST): the counts, the awaited dealers with bills, Marg, days waiting, the last reminder and Pause / Resume, the differences that
 #      are his, the rest folded, the parked months named as not chased.
@@ -37,13 +40,17 @@ S756_CSS = ("#s756{background:#fff;border:1px solid #e3e1da;border-radius:12px;p
             "#s756 .mut{color:#5d636d;font-size:13.5px}#s756 .why{color:#49505c;font-size:14px}")
 
 
-def s756_body(month):
-    """The owner's words (06:27 IST 9-Nov), the month in Hindi."""
+def _s756_hi(month):
     try:
-        mh = "%s %s" % (S756_HI_MONTHS[int(month[5:7]) - 1], month[:4])
-    except (ValueError, IndexError):
-        mh = month
-    return S756_BODY % mh
+        return "%s %s" % (S756_HI_MONTHS[int(month[5:7]) - 1], month[:4])
+    except (ValueError, IndexError, TypeError):
+        return str(month)
+
+
+def s756_body(month):
+    """The owner's words (06:27 IST 9-Nov), the month in Hindi. A list of months (a dealer awaited for two) reads 'अक्टूबर 2026 और नवंबर 2026'."""
+    ms = sorted(month) if isinstance(month, (list, tuple)) else [month]
+    return S756_BODY % " और ".join(_s756_hi(m) for m in ms)
 
 
 def _s756_paused(con):
@@ -106,57 +113,132 @@ def _s756_sm():
     return supplier_msg
 
 
-def s756_queue(con, now=None):
-    """THE WRITER (owner_notice's tick only). -> dict(queued, skipped, withdrawn, why | error). Never raises."""
-    res = dict(queued=0, skipped=0, withdrawn=0, why="")
+S756_DAY_DDL = "CREATE TABLE IF NOT EXISTS s756_day (day TEXT PRIMARY KEY, at TEXT NOT NULL, queued INTEGER, skipped INTEGER, held TEXT)"
+S756_FAILED = "the reception phone could not send it"
+
+
+def _s756_until(con):
     try:
-        if setting(con, "summary_wa.on", "on").strip().lower() != "on":
-            res["why"] = "summary_wa.on is off"
-            return res
+        hh, mm = [int(x) for x in setting(con, "summary_wa.until", "20:00").split(":")[:2]]
+        if 0 <= hh < 24 and 0 <= mm < 60:
+            return hh, mm
+    except ValueError:
+        pass
+    return 20, 0
+
+
+def _s756_withdraw(con, where, args, why):
+    """Withdraw (status 'skipped', the reason in last_error) every reminder not yet in the phone's hand that matches `where`. -> rows."""
+    try:
+        cur = con.execute("UPDATE supplier_msg SET status='skipped', last_error=? WHERE kind='summary' AND "
+                          "(status='failed' OR (status='queued' AND handed_at IS NULL)) AND (%s)" % where, (why,) + tuple(args))
+        return cur.rowcount or 0
+    except sqlite3.OperationalError:                          # no supplier_msg table yet: nothing to withdraw
+        return 0
+
+
+def s756_withdraw_all(con, why):
+    """Every reminder not yet in the phone's hand withdrawn -- the switches, the installer's restore, the undo. -> rows. Never raises.
+    Counts first: with nothing to withdraw (every tick while a switch is off) it writes nothing."""
+    try:
+        if not con.execute("SELECT COUNT(*) FROM supplier_msg WHERE kind='summary' AND (status='failed' OR (status='queued' AND handed_at IS NULL))").fetchone()[0]:
+            return 0
+        n = _s756_withdraw(con, "1=1", (), why)
+        con.commit()
+        return n
+    except Exception:                                         # noqa: BLE001
+        return 0
+
+
+def s756_held(ds):
+    """A month whose summaries include one not yet named to a dealer ('unknown') is HELD: it may be any awaited dealer's."""
+    return any(d.get("state") == "unknown" for d in (ds or []))
+
+
+def s756_queue(con, now=None):
+    """THE WRITER (owner_notice's tick only). -> dict(queued, skipped, withdrawn, held, why | error). Never raises.
+    Order (the cold review): FIRST, unconditionally, nothing of an earlier day and no failed reminder is left for the phone (a failed one is
+    not retried); then the switch and the day's end withdraw the rest; only then is assets.db read -- unreadable withdraws everything."""
+    res = dict(queued=0, skipped=0, withdrawn=0, held="", why="")
+    try:
         now = now or dt.datetime.now()
         d0 = now.date()
         ref = int(d0.strftime("%Y%m%d"))
+        res["withdrawn"] += _s756_withdraw(con, "COALESCE(ref, 0) <> ?", (ref,), "superseded")
+        res["withdrawn"] += _s756_withdraw(con, "status='failed'", (), S756_FAILED)
+        con.commit()
+        if setting(con, "summary_wa.on", "on").strip().lower() != "on":
+            res["withdrawn"] += s756_withdraw_all(con, "switched off")
+            res["why"] = "summary_wa.on is off"
+            return res
         hh, mm = _s756_hhmm(con)
+        uh, um = _s756_until(con)
+        mnow = now.hour * 60 + now.minute
+        if mnow >= uh * 60 + um:
+            res["withdrawn"] += s756_withdraw_all(con, "too late in the day")
+            res["why"] = "after summary_wa.until (%02d:%02d)" % (uh, um)
+            return res
         SM = _s756_sm()
         SM.ensure(con)
-        due = now.hour * 60 + now.minute >= hh * 60 + mm
+        con.execute(S756_DAY_DDL)
+        due = mnow >= hh * 60 + mm
         months = [m for m in _s756_ended(con, d0) if (_s756_from(m, con) or dt.date.max) <= d0]
-        done = con.execute("SELECT 1 FROM supplier_msg WHERE kind='summary' AND ref=? LIMIT 1", (ref,)).fetchone() is not None
-        unsent = con.execute("SELECT id, month, vendor_norm, ref FROM supplier_msg WHERE kind='summary' AND "
-                             "(status='failed' OR (status='queued' AND handed_at IS NULL))").fetchall()
-        need = due and months and not done
+        done = con.execute("SELECT 1 FROM s756_day WHERE day=?", (d0.isoformat(),)).fetchone() is not None
+        unsent = con.execute("SELECT id, month, vendor_norm FROM supplier_msg WHERE kind='summary' AND status='queued' AND handed_at IS NULL").fetchall()
+        need = bool(due and months and not done)
         if not need and not unsent:
+            con.commit()
             res["why"] = "nothing to do"
             return res
         scans = s750_summary_scans(con)
         if scans is None:
-            res["why"] = "assets.db unreadable -- nothing queued (fails closed)"
+            res["withdrawn"] += s756_withdraw_all(con, "assets.db unreadable")
+            res["why"] = "assets.db unreadable -- nothing queued, nothing left for the phone (fails closed)"
             return res
-        awaited = {}
+        awaited, held = {}, []
         for m in months:
             if _s750_final(con, m):
                 continue                                      # locked (or its status unread): nobody is chased
-            for d in s750_dealers(con, m, scans=scans):
+            ds = s750_dealers(con, m, scans=scans)
+            if s756_held(ds):
+                held.append(m)                                # a summary not yet named may be any awaited dealer's: the month waits
+                continue
+            for d in ds:
                 if d.get("state") == "awaited" and d.get("key"):
                     awaited[(m, d["key"])] = d
+        res["held"] = ",".join(held)
         paused = _s756_paused(con)
         for r in unsent:
-            k = (str(r[1]), str(r[2]))
-            why = ("paused" if k[1] in paused else "no longer awaited" if k not in awaited else "superseded" if int(r[3] or 0) != ref else "")
+            m, key = str(r[1]), str(r[2])
+            why = ("paused" if key in paused else "held: a summary of the month is not yet named" if m in held
+                   else "no longer awaited" if (m, key) not in awaited else "")
             if why:
-                cur = con.execute("UPDATE supplier_msg SET status='skipped', last_error=? WHERE id=? AND "
-                                  "(status='failed' OR (status='queued' AND handed_at IS NULL))", (why, int(r[0])))
-                res["withdrawn"] += cur.rowcount or 0
+                res["withdrawn"] += _s756_withdraw(con, "id=?", (int(r[0]),), why)
         if need:
-            for (m, key), d in sorted(awaited.items()):
+            by = {}
+            for (m, key), d in awaited.items():
+                by.setdefault(key, []).append((m, d))
+            for key in sorted(by):
                 if key in paused:
                     continue
-                to = SM._digits(con, d["name"])
-                SM._queue_row(con, m, key, d["name"], "summary", ref, to, s756_body(m), None if to else "number nahi")
+                if con.execute("SELECT 1 FROM supplier_msg WHERE kind='summary' AND vendor_norm=? AND ref=? LIMIT 1", (key, ref)).fetchone():
+                    continue                                  # one message per dealer per day, whatever the months
+                m0, d = sorted(by[key], key=lambda x: x[0])[0]  # the OLDEST awaited month only (the second review): the row names one month,
+                to = SM._digits(con, d["name"])                 # so the re-check above withdraws it exactly when that month is no longer awaited
+                if to and con.execute("SELECT 1 FROM supplier_msg WHERE kind='summary' AND ref=? AND to_number=? LIMIT 1", (ref, to)).fetchone():
+                    continue                                  # one message a day per NUMBER too (two Marg names of one firm, sister firms)
+                SM._queue_row(con, m0, key, d["name"], "summary", ref, to, s756_body(m0), None if to else "number nahi")
                 res["queued" if to else "skipped"] += 1
+            con.execute("INSERT OR REPLACE INTO s756_day (day, at, queued, skipped, held) VALUES (?,?,?,?,?)",
+                        (d0.isoformat(), _s750_now(), res["queued"], res["skipped"], res["held"]))
         con.commit()
         return res
     except Exception as e:                                    # noqa: BLE001 -- the tick goes on; the log says why
+        try:
+            con.rollback()
+            s756_withdraw_all(con, "the queue raised")        # an error leaves nothing for the phone
+        except Exception:                                     # noqa: BLE001
+            pass
         return dict(res, error=("%s: %s" % (e.__class__.__name__, e))[:160])
 
 
@@ -188,7 +270,7 @@ def s756_pause_put(con, who, dealer, on):
             return True, "Reminders to %s are not paused." % name
         con.execute("UPDATE s756_pause SET resumed_at=?, resumed_by=? WHERE dealer=? AND resumed_at IS NULL", (now, who, dealer))
         hh, mm = _s756_hhmm(con)
-        msg = "Reminders to %s resume with the next day's %02d:%02d message." % (name, hh, mm)
+        msg = "Reminders to %s resume with the next %02d:%02d message." % (name, hh, mm)
     _s736_audit(con, who, "s756_pause", dealer, dict(on=bool(on), kit=KIT_S756))
     con.commit()
     return True, msg
@@ -258,11 +340,11 @@ def _s756_last(con, d, month, msgs, paused, fr, d0):
     if fr and d0 < fr:
         return "starts %s" % esc(ddmon(fr.isoformat()))
     last = rows[0] if rows else None
+    before = (" · %d sent before" % len(sent)) if sent else ""
     if last and last["status"] == "queued":
-        return "queued %s · waiting for the reception phone%s" % (esc(_s738_dm(last["queued_at"][:10]) + " " + last["queued_at"][11:16]),
-                                                                   (" · %d sent before" % len(sent)) if sent else "")
-    if last and last["status"] == "failed":
-        return "the reception phone could not send it (%s)%s" % (esc(ddmon(last["queued_at"][:10])), (" · %d sent before" % len(sent)) if sent else "")
+        return "queued %s · waiting for the reception phone%s" % (esc(ddmon(last["queued_at"][:10]) + " " + last["queued_at"][11:16]), before)
+    if last and (last["status"] == "failed" or (last["status"] == "skipped" and last["err"] == S756_FAILED)):
+        return "the reception phone could not send it (%s) · tried again next day%s" % (esc(ddmon(last["queued_at"][:10])), before)
     if sent:
         s = sent[0]["sent_at"]
         return "%s %s · %d sent" % (esc(ddmon(s[:10])), esc(s[11:16]), len(sent))
@@ -316,10 +398,15 @@ def s756_snapshot(con, month, prefix):
             rows.append('<tr><td><b>%s</b></td><td class="r">%d</td><td class="r">%s</td><td>%d days</td><td>%s</td><td class="r">%s</td></tr>'
                         % (esc(_s756_name(d)), len(d.get("bills") or []), esc(rs(d.get("net_p"))), days,
                            _s756_last(con, d, month, msgs, paused, fr, d0), btn))
-        h.append('<div class="box"><div class="bh">Awaited · %d — the dealer is reminded each day until it comes · also on reception\'s list</div>'
+        off = setting(con, "summary_wa.on", "on").strip().lower() != "on"
+        hold = ('<div style="margin:4px 0 6px"><span class="miss">Reminders switched off</span> · no dealer is reminded until they are '
+                'switched on again (setting summary_wa.on).</div>') if off else ""
+        hold += ('<div style="margin:4px 0 6px"><span class="miss">Reminders held</span> · a summary scanned for %s is not yet named to a dealer — '
+                'it may be one of these. Pick its dealer on row 7; the reminders go again from the next day.</div>' % esc(mn)) if s756_held(ds) else ""
+        h.append('<div class="box"><div class="bh">Awaited · %d — the dealer is reminded each day until it comes · also on reception\'s list</div>%s'
                  '<div class="tw"><table><tr><th>Dealer</th><th class="r">Bills</th><th class="r">Marg</th><th>Waiting</th><th>Last reminder</th><th></th></tr>%s</table></div>'
                  '<div class="mut">A dealer who never sends one: <b>gives no summary</b> on row 7 stops the reminders for good. The message is your own words, '
-                 'from the reception phone.</div></div>' % (len(aw), "".join(rows)))
+                 'from the reception phone.</div></div>' % (len(aw), hold, "".join(rows)))
     if yours:
         items = []
         for d in yours:

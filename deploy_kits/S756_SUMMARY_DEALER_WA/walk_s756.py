@@ -327,6 +327,8 @@ def rows7(month="2026-10"):
 as_(OWNER, "checker")
 
 
+
+
 # ====================================================================================================================================
 #  S756: the dealer reminder, the snapshot, row 7's count and words
 # ====================================================================================================================================
@@ -380,6 +382,7 @@ ck("11 the heading and the days: 'Where October stands' · 'October ended 9 days
    "Where October stands" in snap and "October ended 9 days ago" in snap and "reminders from 07-Nov" in snap)
 ck("11 the awaited table lists each awaited dealer once, with Pause reminders", all(_ := [DS[k]["name"].split()[0].title() in snap for k in AW]) and snap.count("Pause reminders") == len(AW))
 ck("11 a dealer with no number reads 'number missing'", "number missing" in snap)
+ck("11 a summary not yet named (scan 604) holds the month's reminders, and says so", "Reminders held" in snap)
 ck("11 Bass's difference is under 'Differs — yours' with Ask the dealer and Accept", "Differs — yours" in snap and "Bass Medical Store" in between(snap, "Differs — yours", "</div></div>")
    and "Ask the dealer" in snap and "Accept the dealer&#x27;s figure" in snap)
 ck("11 the agreeing dealers are folded with the payable", "Agree · " in snap and "nothing for you · payable" in snap)
@@ -399,6 +402,10 @@ _s, _h, r7s, _x = rows7("2026-09")
 ck("12 September's awaited line: 'Parked month · nobody is asked' -- never reception's list", "Parked month · nobody is asked" in r7s and "On reception&#x27;s list" not in r7s and "On reception's list" not in r7s)
 
 print("13 · S756: the queue -- from the 7th, at 11:30 IST, once a day, Sundays too")
+r = q(at(8, 11, 30))
+ck("13 HELD: on the 8th, with a summary not yet named, nothing is queued for October", not msgs() and r.get("held") == "2026-10" and r.get("error") is None)
+a.execute("UPDATE bills SET status='rejected' WHERE id=604")             # the unnamed summary set aside: the month is no longer held
+a.commit()
 r = q(at(9, 11, 29))
 ck("13 at 11:29 nothing is queued", not msgs() and r.get("error") is None and "queued" in r)
 r = q(at(9, 11, 30))
@@ -421,7 +428,18 @@ rr2 = cl.post("/finance/api/supplier-msg/done", data=json.dumps(dict(id=j.get("i
               headers={"X-Phone-Token": "walk-token-756"})
 sent1 = msgs("id=?", (j.get("id") or 0,))
 ck("14 done -> sent by the reception phone", rr2.status_code == 200 and sent1 and sent1[0]["status"] == "sent")
+rr3 = cl.get("/finance/api/supplier-msg/next", headers={"X-Phone-Token": "walk-token-756"})
+j3 = rr3.get_json() or {}
+cl.post("/finance/api/supplier-msg/done", data=json.dumps(dict(id=j3.get("id"), ok=False, error="walk: no signal")), content_type="application/json",
+        headers={"X-Phone-Token": "walk-token-756"})
+q(at(9, 11, 50))
+f3 = msgs("id=?", (j3.get("id") or 0,))
+ck("14 a send the phone reports failed is withdrawn at the next tick -- never retried the same day", f3 and f3[0]["status"] == "skipped"
+   and f3[0]["last_error"] == "the reception phone could not send it")
+jx_ = cl.get("/finance/api/supplier-msg/next", headers={"X-Phone-Token": "walk-token-756"}).get_json() or {}
+ck("14 the phone is never handed the failed one again", jx_.get("id") != j3.get("id"))
 st, h, r7, r8 = rows7("2026-10")
+ck("14 the snapshot says the phone could not send it", "could not send it" in between(h, '<div id="s756">', '<div class="strip'))
 ck("14 the snapshot shows the reminder sent ('· 1 sent')", "· 1 sent" in between(h, '<div id="s756">', '<div class="strip'))
 
 print("15 · S756: pause and resume (the doctor only)")
@@ -442,7 +460,7 @@ ck("15 the snapshot says 'Paused by you' with Resume", "Paused by you" in snap a
 print("16 · S756: the day turns -- no backlog, the paused dealer skipped")
 q(at(10, 0, 5))
 y = msgs("ref=20261109 AND status='queued' AND handed_at IS NULL")
-ck("16 at 00:05 yesterday's unsent rows are withdrawn 'superseded'", not y and any(m["last_error"] == "superseded" for m in msgs("ref=20261109")))
+ck("16 at 00:05 nothing of yesterday is left for the phone", not y)
 q(at(10, 11, 31))
 d2 = msgs("ref=20261110")
 ck("16 at 11:31 the next day's rows, Deepam (paused) left out", len(d2) == len(AW) - 1 and dee not in [m["vendor_norm"] for m in d2])
@@ -495,6 +513,87 @@ told = open(stub, encoding="utf-8").read() if os.path.exists(stub) else ""
 ck("19 the tick ran (exit 0) and queued the 17th's reminders", p.returncode == 0 and bool(msgs("ref=20261117")))
 ck("19 S755's morning line was made from cron -- 'October 2026: N summaries awaited' (F-1207)", "summaries:2026-10:2026-11-17" in told and "summaries awaited" in told)
 ck("19 the morning line's names carry no padding", "  " not in "".join(json.loads(x).get("body", "") for x in told.splitlines() if "summaries:" in x))
+
+print("20 · S756: the cold review's cases -- nothing stale, nothing twice, nothing late")
+def fresh(day):
+    """A day's rows, made but not taken by the phone."""
+    q(at(day, 11, 30))
+    return msgs("ref=? AND status='queued' AND handed_at IS NULL", (int("202611%02d" % day),))
+ok20 = fresh(20)
+con.execute("INSERT OR REPLACE INTO setting (key, value) VALUES ('summary_wa.on', 'off')")
+con.commit()
+q(at(20, 11, 40))
+con.execute("DELETE FROM setting WHERE key='summary_wa.on'")
+con.commit()
+ck("20 summary_wa.on = off withdraws today's unsent reminders too ('switched off')", ok20 and not msgs("ref=20261120 AND status='queued' AND handed_at IS NULL")
+   and all(m["last_error"] in ("switched off", "number nahi") for m in msgs("ref=20261120") if m["status"] == "skipped"))
+ok21 = fresh(21)
+keep = PA._assets_db
+PA._assets_db = os.path.join(TMP, "no-such-assets.db")
+q(at(21, 11, 40))
+PA._assets_db = keep
+ck("20 assets.db unreadable withdraws today's unsent reminders ('assets.db unreadable')", ok21 and not msgs("ref=20261121 AND status='queued' AND handed_at IS NULL")
+   and any(m["last_error"] == "assets.db unreadable" for m in msgs("ref=20261121")))
+ok22 = fresh(22)
+q(at(22, 20, 5))
+ck("20 after 20:00 nothing is left for the phone ('too late in the day')", ok22 and not msgs("ref=20261122 AND status='queued' AND handed_at IS NULL")
+   and any(m["last_error"] == "too late in the day" for m in msgs("ref=20261122")))
+mbill("dee3", "DEEPAM PHARMA", "880", "2026-11-05", 1000)               # Deepam awaited for November too
+os.environ["ORDER_TODAY"] = "2026-12-08"
+q(dt.datetime(2026, 12, 8, 11, 30, tzinfo=IST))
+os.environ["ORDER_TODAY"] = "2026-11-09"
+d8 = msgs("ref=20261208")
+dd = [m for m in d8 if m["vendor_norm"] == dee]
+per = {}
+for m in d8:
+    per[m["vendor_norm"]] = per.get(m["vendor_norm"], 0) + 1
+ck("20 a dealer awaited for two months gets ONE message a day, about the older month only", len(dd) == 1 and dd[0]["month"] == "2026-10"
+   and "अक्टूबर 2026 के" in dd[0]["body"] and "नवंबर" not in dd[0]["body"] and max(per.values() or [0]) == 1)
+ck("20 every row of the 8th names exactly its own month (so the re-check is exact)", bool(d8) and all(m["body"] == SR.s756_body(m["month"]) for m in d8))
+os.environ["ORDER_TODAY"] = "2026-12-08"
+summary(620, "DEEPAM PHARMA", "2026-10-31", [("bill", "641", "2026-10-03", 4751.0), ("bill", "702", "2026-10-21", 3230.0)], total=7981.0, closing=7981.0)
+a.execute("UPDATE claude_reading SET doc_kind='summary' WHERE bill_id=620")
+a.commit()
+sd = 200 if (safe(SR.s750_dealers, con, "2026-10") and {d["key"]: d for d in SR.s750_dealers(con, "2026-10")}.get(dee, {}).get("state") == "agrees") else 0
+q(dt.datetime(2026, 12, 8, 11, 40, tzinfo=IST))
+w8 = [m for m in msgs("ref=20261208") if m["vendor_norm"] == dee]
+q(dt.datetime(2026, 12, 9, 11, 30, tzinfo=IST))
+n9 = [m for m in msgs("ref=20261209") if m["vendor_norm"] == dee]
+os.environ["ORDER_TODAY"] = "2026-11-09"
+ck("20 the older month settles (Deepam's October summary scanned, it agrees): the day's unsent October row is withdrawn at once",
+   sd == 200 and w8 and (w8[0]["status"] == "sent" or w8[0]["last_error"] == "no longer awaited"))
+ck("20 and the next day's message is about November, alone", len(n9) == 1 and n9[0]["month"] == "2026-11" and "नवंबर 2026 के" in n9[0]["body"]
+   and "अक्टूबर" not in n9[0]["body"])
+os.environ["ORDER_TODAY"] = "2026-11-09"
+ok23 = fresh(23)
+env3 = dict(env, ORDER_TODAY="2026-11-23")
+os.makedirs(os.path.join(TMP, "_off"), exist_ok=True)
+open(os.path.join(TMP, "_off", "ALL_OFF"), "w").write("walk")
+RUN3 = ("import runpy, sys; import purchase_app as PA; PA._assets_db = %r; "
+        "sys.argv = ['owner_notice.py', 'tick', '--db', %r, '--now', '2026-11-23T11:40:00']; "
+        "runpy.run_path('owner_notice.py', run_name='__main__')" % (ADB, FDB))
+p3 = subprocess.run([sys.executable, "-B", "-c", RUN3], cwd=CODE, env=env3, capture_output=True, text=True, timeout=120)
+os.remove(os.path.join(TMP, "_off", "ALL_OFF"))
+ck("20 ALL_OFF: cron's tick withdraws today's unsent reminders", ok23 and p3.returncode == 0 and not msgs("ref=20261123 AND status='queued' AND handed_at IS NULL")
+   and any(str(m["last_error"]).startswith("switched off (ALL_OFF") for m in msgs("ref=20261123")))
+ok24 = fresh(24)
+q(at(25, 0, 5))
+ck("20 the day turns: yesterday's unsent reminders are withdrawn 'superseded' (no backlog)", ok24 and not msgs("ref=20261124 AND status='queued' AND handed_at IS NULL")
+   and all(m["last_error"] in ("superseded", "number nahi") for m in msgs("ref=20261124") if m["status"] == "skipped"))
+ome = PA.supplier_key("OMEGA REMEDIES")
+con.execute("UPDATE purchase_vendor_contact SET phone=(SELECT phone FROM purchase_vendor_contact WHERE vendor_norm=?) WHERE vendor_norm=?", (ome, dee))
+con.commit()
+q(at(26, 11, 30))
+d26 = msgs("ref=20261126 AND to_number IS NOT NULL")
+ck("20 two dealers on one number get ONE message that day", len(d26) == len({m["to_number"] for m in d26}) and len([m for m in d26 if m["vendor_norm"] in (dee, ome)]) == 1)
+con.execute("INSERT OR REPLACE INTO setting (key, value) VALUES ('summary_wa.on', 'off')")
+con.commit()
+st, h, r7, r8 = rows7("2026-10")
+con.execute("DELETE FROM setting WHERE key='summary_wa.on'")
+con.commit()
+ck("20 the snapshot says 'Reminders switched off' while the switch is off", "Reminders switched off" in h)
+w_ = safe(getattr(SR, "s756_withdraw_all", None), con, "walk") or 0
+ck("20 s756_withdraw_all (the restore and the undo use the same) leaves nothing for the phone", not msgs("status='queued' AND handed_at IS NULL"))
 
 print("")
 print("walk_s756: %d check(s) failed (%d of them S756 checks)" % (len(FAILS), len(S750F)))

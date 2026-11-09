@@ -62,6 +62,8 @@ try:
     try:
         c2 = sqlite3.connect(cp)
         c2.row_factory = sqlite3.Row
+        c2.execute("DELETE FROM setting WHERE key='summary_wa.on'")   # the copy only: the installer keeps the live switch off while it checks
+        c2.commit()
         when = max(now.replace(tzinfo=IST), dt.datetime.combine(d0, dt.time(11, 30), IST))
         r = SR.s756_queue(c2, when)
         rows = c2.execute("SELECT month, status, body, last_error FROM supplier_msg WHERE kind='summary'").fetchall()

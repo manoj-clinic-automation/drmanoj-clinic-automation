@@ -12,7 +12,8 @@
 #   /root/finance/scan_register.py 0822d308 -> TO   /root/finance/purchase_app.py e80f199c -> TO   /root/finance/owner_notice.py 9096af9a -> TO
 #  Gates: SUMS, KIT_ID, the window, the build lock, the three live pins, the rebuild to the TO pins (both pythons compile), walk_s756 green on
 #  the rebuilt files, its CONTROL on the live files, the earlier kits' walks (S755, S753, S750, S749, S740, S738, S736, S726, S711) on the
-#  rebuilt files -- no red beyond the live files' own --, the cron shape by the rebuilt file, the proof by both.
+#  rebuilt files -- no red beyond the live files' own --, the cron shape by the rebuilt file, the proof by both. The reminders are held OFF
+#  (setting summary_wa.on) from just before placing until [7/7] is green, so nothing reaches a dealer while the install still checks.
 #  After placing: the table, the service restarted, health, the pages refuse a stranger, the journal (new PIDs only), the walk again on the
 #  placed files, the proof and the cron shape by the placed files. owner_notice.py needs no restart -- cron reads the new file at its next tick.
 # =============================================================================
@@ -37,7 +38,7 @@ SCR="${TMPW:-/tmp}/s756_inst_$STAMP"
 PLACED=0; TOOK_LOCK=0
 SCHEMA="$ROOT/finance/purchase_schema.sql"
 GREEN="walk_s756: 0 check(s) failed (0 of them S756 checks)"
-CONTROL="walk_s756: 31 check(s) failed (31 of them S756 checks)"
+CONTROL="walk_s756: 46 check(s) failed (46 of them S756 checks)"
 
 m5() { md5sum "$1" 2>/dev/null | awk '{print $1}'; }
 say() { echo "$@"; }
@@ -56,12 +57,16 @@ walkk() { local w="$1" d="$2"; (cd /tmp && case "$w" in
   *) PYTHONPYCACHEPREFIX="$SCR/pyc" timeout 600 "$VPY" -W ignore -B "$KDIR/$w.py" "$d" "$SCHEMA" "$SCR/new/shared" 2>&1;; esac); }
 reds() { grep -E '^  (FAIL|RED) ' | sort; }
 proof() { (cd /tmp && PYTHONPYCACHEPREFIX="$SCR/pyc" timeout 900 "$VPY" -W ignore -B "$KDIR/proof_s756.py" "$1" "$SCR/new/shared" "$DB" "$ADB" "$SCR/proofcopy" 2>&1); }
-cron_shape() { (cd "$1" && PYTHONPYCACHEPREFIX="$SCR/pyc" timeout 300 "$VPY" -W ignore -B "$KDIR/check_s756_cron.py" "$DB" 2>&1); }
+cron_shape() { (cd "$1" && PYTHONPYCACHEPREFIX="$SCR/pyc" timeout 600 "$VPY" -W ignore -B "$KDIR/check_s756_cron.py" "$DB" "$SCR/cronshape" 2>&1); }
 restore() {
   trap '' INT TERM HUP
   say "!! RED after placing ($1) - putting the files back"
   PLACED=2
   for f in $FILES; do \cp -p "$(bak "$f")" "$ROOT/$f" || say "   !! could not put back $ROOT/$f"; rm -f "$(stg "$f")"; done
+  "$VPY" -c "import sqlite3,sys; c=sqlite3.connect(sys.argv[1], timeout=30); n=0
+try: n=c.execute(\"UPDATE supplier_msg SET status='skipped', last_error='restore S756' WHERE kind='summary' AND (status='failed' OR (status='queued' AND handed_at IS NULL))\").rowcount
+except sqlite3.OperationalError: pass
+c.commit(); print('   reminders withdrawn by the restore: %d; the install hold stays (the old code ignores it; a re-run removes it)' % n)" "$DB" || say "   !! could not withdraw the queued reminders -- run the undo line's last part"
   find "$ROOT/finance" -maxdepth 2 -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null
   "$SYSTEMCTL" restart "$FSVC" || true
   for f in $FILES; do say "   $ROOT/$f $(m5 "$ROOT/$f" | cut -c1-8) (expected ${FROM[$f]:0:8})"; done
@@ -98,7 +103,12 @@ for f in $FILES finance/supplier_msg.py; do [ -f "$ROOT/$f" ] || { say "!! [1/7]
 [ -f "$DB" ] && [ -f "$ADB" ] && [ -f "$SCHEMA" ] && [ -f "$ROOT/shared/scan_quality.py" ] || { say "!! [1/7] $DB, $ADB, purchase_schema.sql or scan_quality.py is missing - nothing installed"; exit 1; }
 mkdir -p "$SCR/built/finance" "$SCR/pyc" && chmod 700 "$SCR" || { say "!! cannot make $SCR - nothing installed"; exit 1; }
 ALL=1; for f in $FILES; do [ "$(m5 "$ROOT/$f")" = "${TO[$f]}" ] || ALL=0; done
-[ "$ALL" = 1 ] && { say "-- ALREADY INSTALLED: the three files are the kit's. Nothing written. finance healthz $(fhz)"; exit 0; }
+if [ "$ALL" = 1 ]; then
+  H="$("$VPY" -c "import sqlite3,sys; c=sqlite3.connect(sys.argv[1], timeout=30); n=c.execute(\"DELETE FROM setting WHERE key='summary_wa.on' AND note LIKE 'S756 installer%'\").rowcount; c.commit(); print(n)" "$DB" 2>/dev/null)"
+  [ "${H:-0}" = 1 ] && say "-- ALREADY INSTALLED: the three files are the kit's; an interrupted install's hold on the reminders is removed (they are on). finance healthz $(fhz)" \
+                    || say "-- ALREADY INSTALLED: the three files are the kit's. Nothing written. finance healthz $(fhz)"
+  exit 0
+fi
 if [ "${DRY:-0}" = 1 ]; then
   say "[1/7] DRY RUN: kit gates green (SUMS, KIT_ID, the window); no lock"
 elif mkdir "$LOCK" 2>/dev/null; then
@@ -142,7 +152,7 @@ sed 's/^/   /' "$SCR/proof_kit.txt"
 say "---------------------------------------------------------------- the live files said"
 sed 's/^/   /' "$SCR/proof_live.txt"
 say "----------------------------------------------------------------"
-echo "$PK" | grep -q -E '^PROOF S756: ended months [0-9]+ .* would queue [0-9]+ today' || { PLACED=2; stop_unlocked "!! [4/7] the proof on this box's databases: $PK - nothing installed (kept in $SCR)"; }
+echo "$PK" | grep -q -E '^PROOF S756: ended months [0-9]+ .* would queue [0-9]+ today' && ! echo "$PK" | grep -q -E 'awaited ([1-9][0-9]*) \(number missing \1\)' || { PLACED=2; stop_unlocked "!! [4/7] the proof on this box's databases: $PK - nothing installed (kept in $SCR)"; }
 echo "$PL" | grep -q -E '^PROOF S756: ended months [0-9]+ ' || { PLACED=2; stop_unlocked "!! [4/7] the proof by the live files: $PL - nothing installed (kept in $SCR)"; }
 f0=$(fhz); [ "$f0" = 200 ] || stop_unlocked "!! [4/7] finance healthz $f0 before the install - nothing installed"
 say "[4/7] live: $PL"
@@ -155,14 +165,16 @@ if [ "${DRY:-0}" = 1 ]; then say "-- DRY RUN: every gate, the walk, the control,
 for f in $FILES; do { \cp -p "$ROOT/$f" "$(bak "$f")" && [ "$(m5 "$(bak "$f")")" = "${FROM[$f]}" ]; } || stop_unlocked "!! [5/7] could not write the backup $(bak "$f") - nothing placed"; done
 for f in $FILES; do { cat "$SCR/built/$f" > "$(stg "$f")" && [ "$(m5 "$(stg "$f")")" = "${TO[$f]}" ]; } || stop_unlocked "!! [5/7] could not stage $f - nothing placed"; done
 for f in $FILES; do chmod --reference="$ROOT/$f" "$(stg "$f")" 2>/dev/null; chown --reference="$ROOT/$f" "$(stg "$f")" 2>/dev/null; done
-"$VPY" -c "import sqlite3,sys; c=sqlite3.connect(sys.argv[1], timeout=30); c.execute(\"CREATE TABLE IF NOT EXISTS s756_pause (id INTEGER PRIMARY KEY AUTOINCREMENT, dealer TEXT NOT NULL, paused_at TEXT NOT NULL, paused_by TEXT, resumed_at TEXT, resumed_by TEXT)\"); c.commit()" "$DB" \
-  || stop_unlocked "!! [5/7] could not make the table s756_pause - nothing placed"
+"$VPY" -c "import sqlite3,sys; c=sqlite3.connect(sys.argv[1], timeout=30); c.execute(\"CREATE TABLE IF NOT EXISTS s756_pause (id INTEGER PRIMARY KEY AUTOINCREMENT, dealer TEXT NOT NULL, paused_at TEXT NOT NULL, paused_by TEXT, resumed_at TEXT, resumed_by TEXT)\"); c.execute(\"CREATE TABLE IF NOT EXISTS s756_day (day TEXT PRIMARY KEY, at TEXT NOT NULL, queued INTEGER, skipped INTEGER, held TEXT)\"); c.commit()" "$DB" \
+  || stop_unlocked "!! [5/7] could not make the tables s756_pause, s756_day - nothing placed"
+"$VPY" -c "import sqlite3,sys; c=sqlite3.connect(sys.argv[1], timeout=30); c.execute(\"INSERT OR REPLACE INTO setting (key, value, note) VALUES ('summary_wa.on', 'off', 'S756 installer: off while the install checks; removed at [7/7]')\"); c.commit()" "$DB" \
+  || stop_unlocked "!! [5/7] could not hold the reminders off for the install - nothing placed"
 OLDPIDS="$(pids_of "$FSVC" | tr '\n' ' ')"
 PLACED=1
 for f in $FILES; do mv -f "$(stg "$f")" "$ROOT/$f" || restore "the rename of $f"; done
 for f in $FILES; do [ "$(m5 "$ROOT/$f")" = "${TO[$f]}" ] || restore "read back of $f"; done
 find "$ROOT/finance" -maxdepth 2 -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null
-say "[5/7] the table s756_pause made; placed and read back: scan_register ${TO[finance/scan_register.py]:0:8} · purchase_app ${TO[finance/purchase_app.py]:0:8} · owner_notice ${TO[finance/owner_notice.py]:0:8}"
+say "[5/7] the tables s756_pause and s756_day made; placed and read back: scan_register ${TO[finance/scan_register.py]:0:8} · purchase_app ${TO[finance/purchase_app.py]:0:8} · owner_notice ${TO[finance/owner_notice.py]:0:8}"
 T0="$(date '+%Y-%m-%d %H:%M:%S')"
 "$SYSTEMCTL" restart "$FSVC" || restore "restart $FSVC"
 c1=$(wait200 fhz); [ "$c1" = 200 ] || restore "finance healthz $c1"
@@ -184,13 +196,16 @@ R=$(walk "$SCR/placed/finance" "$SCR/new/shared" | tail -1)
 [ "${REHEARSE_RED_AT:-}" = 7 ] && R="rehearsal: a forced red at [7/7]"
 [ "$R" = "$GREEN" ] || restore "the walk on the placed files: $R"
 P7=$(proof "$SCR/placed/finance" | tail -1)
-echo "$P7" | grep -q -E '^PROOF S756: ended months [0-9]+ .* would queue [0-9]+ today' || restore "the proof by the placed files: $P7"
+echo "$P7" | grep -q -E '^PROOF S756: ended months [0-9]+ .* would queue [0-9]+ today' && ! echo "$P7" | grep -q -E 'awaited ([1-9][0-9]*) \(number missing \1\)' || restore "the proof by the placed files: $P7"
 C7="$(cron_shape "$ROOT/finance")"
 { [ "$ROOT" != "/root" ] || ! echo "$C7" | tail -1 | grep -q "ASSETS UNREAD"; } && echo "$C7" | tail -1 | grep -q -E '^S756 CRON-SHAPE: ok ' || { echo "$C7" | tail -6 | sed 's/^/         /'; restore "owner_notice.py, run as cron runs it, does not reach the morning line"; }
 say "      $(echo "$C7" | tail -1)"
 NOWM=$((10#$(TZ=Asia/Kolkata date +%H) * 60 + 10#$(TZ=Asia/Kolkata date +%M)))
 if [ "$NOWM" -ge 690 ]; then WHEN="at owner_notice's next five-minute tick (it is past 11:30 IST)"; else WHEN="at 11:30 IST today"; fi
 say "[7/7] the walk on the placed files: $R; by the placed files: $P7 -- the first reminders are queued $WHEN; the purchase check shows the snapshot at its next load"
+"$VPY" -c "import sqlite3,sys; c=sqlite3.connect(sys.argv[1], timeout=30); c.execute(\"DELETE FROM setting WHERE key='summary_wa.on' AND note LIKE 'S756 installer%'\"); c.commit()" "$DB" \
+  || restore "could not switch the reminders on"
+say "      the reminders switched on (they were held off from [5/7] while the install checked)"
 release_lock
 say "undo (one line): $(for f in $FILES; do printf '\\cp -p %s %s && ' "$(bak "$f")" "$ROOT/$f"; done)$SYSTEMCTL restart $FSVC && $VPY -c \"import sqlite3; c=sqlite3.connect('$DB'); c.execute(\\\"UPDATE supplier_msg SET status='skipped', last_error='undo S756' WHERE kind='summary' AND (status='failed' OR (status='queued' AND handed_at IS NULL))\\\"); c.commit()\""
 say ""

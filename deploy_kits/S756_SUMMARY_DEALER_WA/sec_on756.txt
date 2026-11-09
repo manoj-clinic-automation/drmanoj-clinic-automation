@@ -4,7 +4,7 @@
 # ---- S756 (09-Nov-2026, Sanjeevni session 412, kit S756_SUMMARY_DEALER_WA; the owner's go 06:31 IST) -------------------------------------
 #  THE DEALER REMINDER RIDES THIS TICK: after the five-minute pass, scan_register.s756_queue(con, now) queues the day's WhatsApp to each
 #  awaited dealer (from the 7th, at summary_wa.hhmm, Sundays too) on the supplier_msg road -- fail-soft, its answer in the tick's log line.
-#  The tick's own switches stop it too (ALL_OFF, OWNER_NOTICE_OFF, owner_notice.on). Also S756: the command-line guard is moved to the END
+#  The tick's own switches stop it too (ALL_OFF, OWNER_NOTICE_OFF, owner_notice.on) -- and withdraw what was queued. Also S756: the command-line guard is moved to the END
 #  of this file -- S755's section had been appended after it, so cron's `owner_notice.py tick` exited before S755 was defined and the
 #  morning summaries line never ran (F-1207).
 KIT_S756 = "S756_SUMMARY_DEALER_WA"
@@ -13,15 +13,16 @@ _tick_before_s756 = _tick
 
 def _tick(con, now=None):                                         # noqa: F811 -- S756: + the dealer reminder, after the pass
     r = _tick_before_s756(con, now)
-    if not r.get("ok") or r.get("off"):
-        return r
     try:
         n = now if (now is not None and now.tzinfo is not None) else now_ist()
         shared = os.environ.get("SHARED_LIB_DIR") or os.path.join(os.path.dirname(HERE), "shared")
         if os.path.isdir(shared) and shared not in sys.path:
             sys.path.append(shared)
         import scan_register as SR                                # noqa: PLC0415 -- this project's register
-        r["summary_wa"] = SR.s756_queue(con, n)
+        if r.get("off"):                                          # a switch is off: nothing is left for the phone either (the cold review)
+            r["summary_wa"] = {"withdrawn": SR.s756_withdraw_all(con, "switched off (%s)" % r.get("off")), "why": "owner_notice is off"}
+        else:
+            r["summary_wa"] = SR.s756_queue(con, n)
     except Exception as e:                                        # noqa: BLE001
         r["summary_wa"] = {"error": e.__class__.__name__}
     return r

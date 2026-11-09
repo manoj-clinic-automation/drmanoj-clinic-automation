@@ -47,6 +47,10 @@ if __name__ == "__main__":
         return []
     for m in SR._s755_ended_months(con):
         key = "summaries:%s:%s" % (m, day)''', 1),
+    # the module's own account of what it writes
+    ("""WRITES ONLY owner_notice and its setting rows.  Reads finance.db, the page's judgement and the order sheets.""",
+     """WRITES ONLY owner_notice and its setting rows -- and (S756, through scan_register.s756_queue) the dealer summary reminders in
+supplier_msg (kind 'summary') and s756_day.  Reads finance.db, the page's judgement and the order sheets.""", 1),
     # the dealers' names without Marg's padding ("Drug Deal                     Bareilly")
     ('''        names = [str(d["name"]).title() for d in aw]''',
      '''        names = [" ".join(str(d["name"]).split()).title() for d in aw]   # S756: Marg's padding gone''', 1),
