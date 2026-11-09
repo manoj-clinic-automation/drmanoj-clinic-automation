@@ -1,0 +1,87 @@
+/* ==== KIT_S761 (D873, F-1199): Needs you grouped · the Go to panel · Cash and Bank as figures ==== */
+function s761Esc(s){return (s==null?"":String(s)).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function s761Ym(){ var t=new Date(); return t.getFullYear()+"-"+("0"+(t.getMonth()+1)).slice(-2); }
+function s761Go(el){ if(!el)return; var h=el.getAttribute("data-href"); if(h){ location.href=h; return; } goSec(el.getAttribute("data-target")||""); }
+function s761Li(l){
+  /* the old line, as the old list drew it: its dot, its words, its own buttons (S405 NEFT, S410 Kedar), its own way out */
+  var act=l.neft_event?' <button onclick="event.stopPropagation();neftEvent('+parseInt(l.neft_event,10)+',\'ok\')">OK</button> <button class="ghost" onclick="event.stopPropagation();neftEvent('+parseInt(l.neft_event,10)+',\'reject\')">Not this</button>':'';
+  if(l.review_supplier) act+=' <button onclick="event.stopPropagation();poSet(\''+esc(l.review_supplier).replace(/'/g,"\\'")+'\',\'move_to\',\''+esc(l.review_target||"weekly")+'\')">Move Kedar to '+esc(l.review_target||"weekly")+'</button>';
+  return '<li data-href="'+s761Esc(l.href||"")+'" data-target="'+s761Esc(l.target||"")+'" onclick="s761Go(this)"><span class="dot '+s761Esc(l.cls||"warn")+'"></span>'+esc(l.text)+act+' <span class="mut">▸</span></li>';
+}
+function s761Group(g){
+  var L=g.lines||[], cls=(g.cls==="bad"||g.cls==="info")?g.cls:"warn";
+  if(L.length===1&&g.key!=="info"&&g.key!=="arrived"){
+    var one=s761Li(L[0]).replace('<li ','<li class="g1" ');
+    if(g.key==="days") one=one.replace(' <span class="mut">▸</span></li>',' <button onclick="event.stopPropagation();goSec(\'days\')">Open the days</button></li>');
+    return one;
+  }
+  var head='<span class="dot '+cls+'"></span><span class="gn '+cls+'">'+L.length+'</span> <b>'+s761Esc(g.title)+'</b>'+
+           (g.key==="info"?' <span class="gsum">— nothing to do</span>':' <span class="gsum">— '+s761Esc(g.summary||"")+'</span>')+
+           (g.key==="days"?' <button onclick="event.preventDefault();event.stopPropagation();goSec(\'days\')">Open the days</button>':'');
+  var body='';
+  if(g.key==="arrived"){
+    var nsize=0;
+    (g.vendors||[]).forEach(function(v){
+      body+='<div class="vrow" data-target="porders" onclick="s761Go(this)"><b>'+s761Esc(v.vendor)+' ('+v.n+')</b> ▸</div><ul class="sub">'+
+        (v.items||[]).map(function(x){ if(x.size) nsize++; return '<li class="vitem">'+s761Esc(x.item)+(x.note?' <span class="vnote">— '+s761Esc(x.note)+'</span>':'')+'</li>'; }).join("")+'</ul>';
+    });
+    body+='<div class="gfoot">Each was counted as arrived when its dealer\'s bill was scanned (or a person tapped it), and is not in Marg\'s purchases yet'+
+          (nsize?(' · '+nsize+' of these: the bill carried another size'):'')+'.</div>';
+  } else {
+    body='<ul class="sub">'+L.map(s761Li).join("")+'</ul>';
+  }
+  return '<li class="grp '+cls+'"><details'+(cls==="bad"?' open':'')+'><summary>'+head+'</summary>'+body+'</details></li>';
+}
+function s761Needs(j){
+  var el=$("needs"), G=j.groups||[];
+  el.innerHTML=G.map(s761Group).join("");
+  var nh=$("needsHead"); if(nh) nh.textContent=j.n_items?(" — "+j.n_items+" item"+(j.n_items===1?"":"s")+" in "+j.n_groups+" group"+(j.n_groups===1?"":"s")):" — nothing needs you";
+}
+/* ---- the Go to panel ---- */
+var GOTO_DONE=false;
+function gotoClose(){ var p=$("gotoPanel"), b=$("gotoBtn"); if(p) p.hidden=true; if(b) b.setAttribute("aria-expanded","false"); }
+function gotoToggle(e){
+  if(e) e.stopPropagation();
+  var p=$("gotoPanel"), b=$("gotoBtn"); if(!p) return;
+  p.hidden=!p.hidden; if(b) b.setAttribute("aria-expanded",p.hidden?"false":"true");
+  if(!p.hidden&&!GOTO_DONE){ GOTO_DONE=true; gotoFill(); }
+}
+function gotoFill(){
+  var t=new Date(); t.setDate(1); t.setMonth(t.getMonth()-1);
+  var ym=t.getFullYear()+"-"+("0"+(t.getMonth()+1)).slice(-2), MON=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var c=$("gotoCheck"); if(c){ c.href="/finance/purchase/page/check?month="+ym; c.textContent="Purchase check — "+MON[t.getMonth()]; }
+  fetch("/finance/sanjeevni/expiry/api/count?_="+Date.now(),{cache:"no-store"}).then(srvJSON).then(function(x){
+    var j=x.j||{}, e=$("gotoExp"); if(e&&j.ok&&j.n) e.innerHTML='<span class="gb" title="'+s761Esc(j.title||"")+'">'+parseInt(j.n,10)+'</span>';
+  }).catch(function(){});
+}
+document.addEventListener("click",function(e){ var p=$("gotoPanel"); if(p&&!p.hidden&&!p.contains(e.target)&&e.target!==$("gotoBtn")) gotoClose(); });
+document.addEventListener("keydown",function(e){ if(e.key==="Escape") gotoClose(); });
+/* ---- Cash as figures (F-1199: the card names no day count of its own -- Days and Needs you carry the one count) ---- */
+var CASHDET=[];
+function s761CashTap(i){
+  var d=$("cashDet"); if(!d) return; var bs=document.querySelectorAll("#cashPos .cb-box");
+  var on=d.getAttribute("data-i")===String(i)&&d.style.display!=="none";
+  for(var k=0;k<bs.length;k++) bs[k].classList.toggle("on",!on&&k===i);
+  if(on){ d.style.display="none"; d.setAttribute("data-i",""); return; }
+  d.innerHTML=CASHDET[i]||'<div class="mut" style="padding:6px 2px">nothing more to show</div>'; d.style.display=""; d.setAttribute("data-i",String(i));
+}
+function s761CashHTML(j,boxes,gapTxt,gapCls){
+  CASHDET=boxes.map(function(b){return b[2]||""});
+  return '<div id="cashPosNote" style="width:100%">'+(window.HEALTH&&window.HEALTH.drawer_inflated?'<div class="alert warn">⚠ Today\'s bank UPI statement has not arrived — the drawer figure may read inflated.</div>':'')+'</div>'+
+    '<div class="cb-grid">'+boxes.map(function(b,i){return '<div class="cb-box" onclick="s761CashTap('+i+')"><div class="ttl">'+b[0]+'</div><div class="fig">'+(b[1]==null?"—":"₹"+fmt(b[1]))+'</div></div>'}).join("")+'</div>'+
+    '<div class="day-detail" id="cashDet" style="display:none"></div>'+
+    '<div class="cb-line'+(gapCls==="b-bad"?' warn':'')+'">Last bank deposit '+gapTxt+(j.as_of?' <span class="mut">· figures as of '+esc(j.as_of)+'</span>':'')+'</div>'+
+    '<div class="mut" style="font-size:12px;margin-top:6px">Tap a figure for its detail · one arithmetic for the whole page (S210).</div>';
+}
+/* ---- Bank: the confirmed fold away; one line says how many are confirmed ---- */
+function s761Bad(list){ return (list||[]).some(function(x){return x.status!=="ok"}); }
+function s761BankLine(j){
+  function cnt(list,word){ var L=list||[], ok=L.filter(function(x){return x.status==="ok"}).length, bad=L.filter(function(x){return x.status==="bad"}).length, w=L.length-ok-bad;
+    if(!L.length) return "no "+word+"s";
+    return ok+" "+word+(ok===1?"":"s")+" ✓"+(w?(" · "+w+" waiting for a statement"):"")+(bad?(' · <b class="bad">'+bad+" not in the statement</b>"):""); }
+  var all=!s761Bad(j.deposits)&&!s761Bad(j.transfers)&&((j.deposits||[]).length+(j.transfers||[]).length>0);
+  var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], ym=String(j.month||"");
+  return '<div class="cb-line">'+cnt(j.deposits,"deposit")+' · '+cnt(j.transfers,"transfer")+(all?' <span class="ok">— all confirmed</span>':'')+
+    (ym.length===7?(' · Pharmacy UPI '+MON[parseInt(ym.slice(5,7),10)-1]+' ₹'+esc(j.upi_total)):'')+'</div>';
+}
+/* ==== end KIT_S761 ==== */

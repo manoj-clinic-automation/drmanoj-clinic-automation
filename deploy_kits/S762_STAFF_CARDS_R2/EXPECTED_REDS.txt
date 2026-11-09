@@ -1,0 +1,14 @@
+walk_s745|S1 one card per call handler today: Shivani, Alisha, and Shavez (on duty, no call of his own); never you
+walk_s745|S8 her duty and punch
+walk_s745|S14 the 7-day view counts duty days
+walk_s745|R2 Shavez is charged only while covering: the two 09:00 missed calls before Shivani punched
+walk_s747|S1 one card per call handler today: Shivani, Alisha, and Shavez (on duty, no call of his own); never you
+walk_s747|S8 her duty and punch
+walk_s747|R2 Shavez is charged only while covering: the two 09:00 missed calls before Shivani punched
+walk_s747|X5 the 7-day page shows the Reception mobile line and does not count it 'on calls'
+walk_s747|Q1 her own card (today): the same figures as the owner's card
+walk_s748|S1 one card per call handler today: Shivani, Alisha, and Shavez (on duty, no call of his own); never you
+walk_s748|S8 her duty and punch
+walk_s748|R2 Shavez is charged only while covering: the two 09:00 missed calls before Shivani punched
+walk_s748|X5 the 7-day page shows the Reception mobile line and does not count it 'on calls'
+walk_s748|Q1 her own card (today): the same figures as the owner's card

@@ -1,0 +1,49 @@
+  <button type="button" id="gotoBtn" class="goto-btn" aria-expanded="false" aria-controls="gotoPanel" onclick="gotoToggle(event)">Go to ▾ <span class="gs">every pharmacy page</span></button>
+  <div id="gotoPanel" class="goto-panel" hidden>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><div><b style="font-size:17px">Go to</b> <span class="mut" style="font-size:13.5px">· every pharmacy page, one tap · a number means something is waiting there</span></div>
+      <button type="button" class="ghost" onclick="gotoClose()">close ✕</button></div>
+    <div class="goto-grid">
+      <div><div class="gh">Purchases &amp; dealers</div>
+        <a id="gotoCheck" href="/finance/purchase/page/check">Purchase check — last month</a>
+        <a href="/finance/purchase/page/hub">Marg purchases hub</a>
+        <a href="/finance/purchase/page/ledger">Dealer ledgers</a>
+        <a href="/finance/purchase/page/scans">Scan register (bills ↔ Marg)</a>
+        <a href="/finance/purchase/page/items">New items this month</a>
+        <a href="/finance/purchase/page/salts">Salt corrections</a>
+        <a href="/finance/purchase/page/book">Supplier phone book</a></div>
+      <div><div class="gh">Payments</div>
+        <a href="/finance/purchase/page/pay">Vendor payments</a>
+        <a href="/finance/purchase/page/cheques">Cheques</a>
+        <a href="/finance/purchase/page/phone-setup">Reception phone (supplier WhatsApp)</a></div>
+      <div><div class="gh">Orders</div>
+        <a href="/finance/porders/s454/track">Order tracker</a>
+        <a href="/finance/porders/s454/late">Late orders</a>
+        <a href="/finance/porders/s454/maal">Goods still to arrive</a>
+        <a href="/finance/purchase/page/staff">Order medicines (the old page)</a></div>
+      <div><div class="gh">Stock &amp; expiry</div>
+        <a href="/finance/stock/page/hub">Stock Check — every step</a>
+        <a href="/finance/stock/page/now">Stock now</a>
+        <a href="/finance/stock/page/diffs">Stock differences</a>
+        <a href="/finance/stock/page/finding">Stock findings</a>
+        <a href="/finance/stock/page/loss">Stock losses</a>
+        <a href="/finance/stockmatch">Stock milaan</a>
+        <a href="/finance/sanjeevni/expiry">Expiry watch <span id="gotoExp"></span></a></div>
+      <div><div class="gh">Returns &amp; sale</div>
+        <a href="/finance/returns/desk">Vaapsi desk (counter returns)</a>
+        <a href="/finance/salecheck">Medical sale check</a>
+        <a href="/finance/darpan/kal/month">The cash month table</a>
+        <a href="/finance/review">Review &amp; month close</a>
+        <a href="/finance/darpan/corrections">Marg corrections</a>
+        <a href="/finance/accountant/upi-cash">Accountant</a>
+        <a href="/finance/workbench">Yes Bank statement · load and reconcile</a></div>
+      <div><div class="gh">What staff see</div>
+        <a href="/finance/porders/s454/billkaam">Reception — bill work</a>
+        <a href="/finance/darpan">Darpan — his page</a>
+        <a href="/finance/darpan/kal">Darpan — his day</a>
+        <a href="/finance/amir/day">Amir — his day (your English summary)</a>
+        <a href="/finance/reports/aaj">Shavez — Marg reports today</a>
+        <a href="/scanapp/intake?lane=pharmacy">Scan screen — pharmacy lane</a>
+        <a href="/finance/flows">Flow pages (staff pictures)</a></div>
+    </div>
+    <div class="goto-foot">Also: <a href="/finance/pipeline">Pipeline</a> · <a href="/finance/staff">Staff</a> · <a href="/finance/approvals/old">The approvals page as it was</a>. Left out on purpose: downloads, single bills and scans, one-day pages, and Amir's step page (opening it runs his day's settling). The portal tiles stay as they are.</div>
+  </div>

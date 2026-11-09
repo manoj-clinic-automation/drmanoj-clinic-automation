@@ -1,0 +1,2 @@
+/root/portal/calls_console.py 45b0373131411242839fecd940fc028c
+/root/finance/aaj_kaam.html e82f23d22fbd228a69b14096bb7b4869

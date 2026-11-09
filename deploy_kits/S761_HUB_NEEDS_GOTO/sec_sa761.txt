@@ -1,0 +1,123 @@
+
+
+# ---- KIT_S761 (09-Nov-2026, Sanjeevni session 414, kit S761_HUB_NEEDS_GOTO; D873, F-1199): Needs you GROUPED --------------------------
+#  The owner's approved hub mock: one line per kind of work, red first, the information folded. The grouping is made HERE so the page,
+#  the header count and every walk read one source. needs_you() keeps 'lines' and 'count' exactly as they were (owner_console and older
+#  walks read them); it only GAINS 'groups', 'n_items', 'n_groups'. Every line lands in exactly one group -- nothing is dropped, nothing is
+#  doubled (the walk proves it). If the grouping fails the answer is the old one, without 'groups', and the page draws the old flat list.
+import re as _re761
+
+S761_TITLES = (("days", "Days to approve"), ("returns", "Returns"), ("orders", "Orders"),
+               ("arrived", "Arrived but not in Marg's purchases"), ("papers", "Bills & papers"), ("stock", "Stock count"),
+               ("marg", "Marg & bank details"), ("bank", "Bank & statements"), ("darpan", "Darpan"), ("expiry", "Expiry watch"),
+               ("other", "Other"), ("info", "For your information"))
+_S761_ARR = _re761.compile(r"^(?P<item>.+?): counted as arrived when (?:the (?P<v1>.+?) bill was scanned|.+? tapped it [^(]*\((?P<v2>[^)]*)\))")
+_S761_NOTE = _re761.compile(r"\((its bill [^)]*)\)\s*$")
+# A grey line is information ONLY when it asks nothing of him: no action of its own (a one-tap id, a button, a link) and no words that ask
+# for a decision. order_rules' Kedar review (its 'Move to weekly' button) and the freeze, porders' 'Buying rules ... await your approval',
+# scan_register's 'Paper not found ... your tap accepts it', order_sheet's 'add it in the phone book' -- all grey at their source, all work.
+_S761_PLAIN = ("cls", "target", "text")
+_S761_ASKS = _re761.compile(r"(?i)your tap|\btap (?:to|here)\b|\bapprov|\baccept|\bfrozen\b|\bfreeze|\badd it\b|\btype\b|\bconfirm\b|\bdecide|\bpick\b|\bpress\b|\bOK\?")
+_S761_BY_TARGET = {"porders": "orders", "weekly": "orders", "scans": "papers", "stock": "stock", "checks-marg": "marg", "bank": "bank",
+                   "checks-kal": "darpan", "expiry": "expiry", "days": "days", "returns": "returns"}
+
+
+def s761_is_info(l):
+    """Grey and asking nothing: the only lines the information fold may hold."""
+    if l.get("cls") != "info":
+        return False
+    if any(k not in _S761_PLAIN and l.get(k) not in (None, "", False) for k in l):
+        return False                                     # an action of its own (review_supplier, neft_event, href, a button ...)
+    return not _S761_ASKS.search(str(l.get("text") or ""))
+
+
+def _s761_key(l):
+    """The one group a line belongs to -- the first rule that fits wins."""
+    t = str(l.get("text") or "")
+    tg = str(l.get("target") or "")
+    if "counted as arrived when" in t:
+        return "arrived"
+    if tg == "returns":
+        return "returns"
+    if tg == "days":
+        return "days"
+    if s761_is_info(l):
+        return "info"
+    if l.get("cls") == "info":                           # grey but it asks him something: the work group of its source
+        return _S761_BY_TARGET.get(tg, "other")
+    if tg == "checks-kal" or t.startswith("Claim for Darpan") or "owed back to Darpan" in t:
+        return "darpan"
+    if tg == "expiry":
+        return "expiry"
+    if tg == "stock":
+        return "stock"
+    if tg == "scans":
+        return "papers"
+    if tg in ("porders", "weekly") or "supplier message" in t:
+        return "orders"
+    if tg == "checks-marg":
+        return "marg"
+    if tg == "bank":
+        return "bank"
+    return "other"
+
+
+def _s761_arrived(lines):
+    """'Yuvika 8 · Kedar 3' -- the dealers, most items first; each item's own line kept whole for the fold."""
+    by, order = {}, []
+    for l in lines:
+        m = _S761_ARR.match(str(l.get("text") or ""))
+        item = (m.group("item") if m else str(l.get("text") or "")).strip()
+        v = ((m.group("v1") or m.group("v2")) if m else "") or "the supplier's"
+        v = v.strip() or "-"
+        if v not in by:
+            by[v] = []
+            order.append(v)
+        nm = _S761_NOTE.search(str(l.get("text") or ""))
+        by[v].append(dict(item=item, text=str(l.get("text") or ""), size=bool(nm), note=(nm.group(1) if nm else "")))
+    vend = sorted(order, key=lambda k: (-len(by[k]), order.index(k)))
+    return [dict(vendor=k, n=len(by[k]), items=by[k]) for k in vend]
+
+
+def s761_groups(lines):
+    """The lines, in groups: red groups first, then amber, information last; inside a colour the fixed order above."""
+    keyed = {}
+    for i, l in enumerate(lines):
+        keyed.setdefault(_s761_key(l), []).append((i, l))
+    rank = {k: n for n, (k, _t) in enumerate(S761_TITLES)}
+    out = []
+    for k, title in S761_TITLES:
+        got = keyed.get(k)
+        if not got:
+            continue
+        ls = [l for _i, l in got]
+        cls = "info" if k == "info" else ("bad" if any(l.get("cls") == "bad" for l in ls) else "warn")
+        g = dict(key=k, title=title, cls=cls, n=len(ls), idx=[i for i, _l in got], lines=ls)
+        if k == "arrived":
+            g["vendors"] = _s761_arrived(ls)
+            g["summary"] = " · ".join("%s %d" % (v["vendor"], v["n"]) for v in g["vendors"])
+        else:
+            g["summary"] = " · ".join(str(l.get("text") or "") for l in ls[:3]) + (" · and %d more" % (len(ls) - 3) if len(ls) > 3 else "")
+        out.append(g)
+    out.sort(key=lambda g: (0 if g["cls"] == "bad" else (2 if g["cls"] == "info" else 1), rank[g["key"]]))
+    return out
+
+
+_needs_you_before_s761 = needs_you
+
+
+def needs_you(con):                                      # noqa: F811 -- S761: the same answer, plus its groups
+    r = _needs_you_before_s761(con)
+    if os.environ.get("NEEDS_YOU_WITHOUT_S761") == "1":     # set ONLY by an older kit's frozen walk re-run; the service never sets it
+        return r
+    try:
+        g = s761_groups(r.get("lines") or [])
+        if sum(x["n"] for x in g) != len(r.get("lines") or []):
+            raise ValueError("a line was lost or doubled")
+        work = [x for x in g if x["key"] != "info"]
+        r.update(groups=g, n_items=sum(x["n"] for x in work), n_groups=len(work),
+                 n_info=sum(x["n"] for x in g if x["key"] == "info"))   # the header counts what needs him; the information is counted in its own fold
+    except Exception as e:                               # noqa: BLE001 -- the old answer stands; the page draws the flat list
+        r["groups_error"] = str(e)[:120]
+    return r
+# ---- KIT_S761 end ---------------------------------------------------------------------------------------------------------------------
