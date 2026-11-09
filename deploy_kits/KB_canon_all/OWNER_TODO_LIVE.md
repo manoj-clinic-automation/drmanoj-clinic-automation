@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S412 close** (the Sanjeevni chat, full EOS), 09-Nov-2026, morning — the Sanjeevni sections refreshed here (the dealers reminded by WhatsApp in your words from 11:30 today, D876; October on one screen at the top of the purchase check; the morning line now really comes; Bass Pharma's number missing; 414 reserved: this session's records placed first, then the hub build)
+# OWNER TO-DO — LIVE · refreshed at the **S413 close** (the parent), 09-Nov-2026, morning — the parent's sections refreshed here (the X-ray photo and lab-report check screens live; the audit's asks; the website certificate renewed to 7-Feb-2027; 415 reserved: the staff cards); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S412 close** (the Sanjeevni chat, full EOS), 09-Nov-2026, morning — the Sanjeevni sections refreshed here (the dealers reminded by WhatsApp in your words from 11:30 today, D876; October on one screen at the top of the purchase check; the morning line now really comes; Bass Pharma's number missing; 414 reserved: this session's records placed first, then the hub build)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S404 close** (the parent), 09-Nov-2026, early morning — the parent's sections refreshed here (the parked X-ray photos file themselves; the check screens decided, built in the next session; 413 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S411 close** (the Sanjeevni chat, EOS, no code changed), 09-Nov-2026, dawn — the Sanjeevni sections refreshed here (the S408 records placed; the 09-Nov backup confirms every file; the Returns redesign approved on paper, D873; the hub and the Go to panel mocked; 412 reserved: the summaries snapshot mock with you, then the hub build)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S408 close** (the Sanjeevni chat, EOS), 08-Nov-2026, evening — the Sanjeevni sections refreshed here (the summary scans open and read right, kit S753; staff scan summaries like any bill — the system recognises them, D871; the awaited summaries chase themselves — reception's cards by themselves, one line a day to him and Shavez, kit S755; 411 reserved: F-802's permanent fix, then the order-list kit); the other projects' sections as their closes left them.
@@ -421,7 +422,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S404 close (09-Nov, 06:4x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S413 close (09-Nov, 08:3x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -431,13 +432,15 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the S404 record (papers only). Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries the S413 record (papers only). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
 **1a · TELL SHIVANI, ALISHA AND SHAVEZ: their own call card is on *Aaj ka kaam* (*Mere calls*)** — the same figures as yours, every call with its recording; *Galat hai?* sends you one line about one call, and you answer it on the Call Console.
+
+**1b · TELL ALISHA, SHIVANI AND SHAVEZ: *Check karein* now shows the X-ray photo and that day's patients** — tap the right one, then *Haan*. **Shavez:** lab reports with no blood slip are in his list; *Blood parchi bana di* opens the slip ready.
 
 **2 · THE PACKS PAGE: type the Zerodha password** (Dr Bhawna's statement of transactions opens by itself), **name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
@@ -508,7 +511,8 @@ https://followup.dr-manoj.in/portal/users
 - **24 · Patients on your command console** (new vs repeat, your diagnosis groups, revenue by group): a mock-up first, on your yes.
 
 **WHEN IT HAPPENS — not a duty:**
-- the **X-ray photo baaki** count falling by itself as the evening slips come in (S752) — the rest wait for the new check screens (next session);
+- the **four tiles on your X-ray page** moving as staff answer (S757) — *Wrong patient? Move* on a filed one, *Charged elsewhere* / *Missed — tell Shavez* on an X-ray with no slip;
+- a red **noncash_at_ingest** line on the pharmacy day: do not approve that day until it clears (S758);
 - a **rose line on the Call Console** — a staff card (*Net missed* above 0, a call not logged), a follow-up section with patients not called, or someone nobody answered: open it, and use your buttons on the calls;
 - a **Disputed** line on a staff card: *Accept* or *It stands*;
 - an amber staff card (staff ≠ AI): listen and decide — "to check" is never a verdict;
@@ -535,15 +539,21 @@ https://followup.dr-manoj.in/portal/users
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The X-ray photo and lab-report check screens (your FINAL, 06:39 9-Nov)** — the photo and the day's patients on Check karein (phone and PC), Shavez's one list for photos and lab reports, lab reports with no blood slip to Shavez and to you, your four tiles, the Aaj ka kaam line and the Parchi desk strip. Next session, no question first.
-2. **Watch the parked X-ray photos** after each day (S752).
-3. **The Marg Purchases tile on your home** (the pharmacy chat's ask).
-4. **Watch the staff cards** · **Arjun Dev's link step**, **staff 20's exit steps** · **the review reading on 19 Nov** · **the packs page's September checklist**.
-5. **WhatsApp after MyOperator's fix** · your publish file taking in my uploads first (D823).
-6. **Patients on your command console** (a mock-up first) · the watches (F-1085, the IPD desk, the Hostinger update, IPD kits 5 and 6).
-7. **The Tally check** · **the Sanjeevni GST returns** · AF-16 · AF-19.
+1. **The staff cards (your word, 08:23 9-Nov)** — next session; tell it what you want changed.
+2. **Watch the check screens** (S757) · **the nightly's two new files for the auditor, the health mail's 24 hours, the website certificate** (S758, S759).
+3. **Arjun Dev's link step**, **staff 20's exit steps** · **the review reading on 19 Nov** · **the packs page's September checklist**.
+4. **WhatsApp after MyOperator's fix** · your publish file taking in my uploads first (D823).
+5. **Patients on your command console** (a mock-up first) · the watches (F-1085, the IPD desk, the Hostinger update, IPD kits 5 and 6).
+6. **The Tally check** · **the Sanjeevni GST returns** · AF-16 · AF-19.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S413 CLOSE — 09-Nov-2026 (the parent)
+
+- **The X-ray photo and lab-report check screens, as on your mock-up** (S757, live 07:45): the photo and that day's patients on *Check karein*; Shavez's one list; lab reports with no blood slip to Shavez and to you; your four tiles (48 · 52 · 0 · 42); the *Aaj ka kaam* line and the Parchi desk strip.
+- **The Marg Purchases tile on your home** (the pharmacy chat's ask).
+- **The weekly audit's asks** (S758, live 08:14): a failed pharmacy step at the import now shows red; two small files for the auditor beside the nightly code backup; the health mail's "last 24h" fixed.
+- **Your website's certificate** — failing to renew since 1-Nov, would have run out 8-Dec; now to 7-Feb-2027 and renewing by itself (S758, S759, live 08:21).
 
 ## ✅ DONE AT THE S404 CLOSE — 08 → 09-Nov-2026 (the parent)
 

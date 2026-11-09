@@ -1,0 +1,19 @@
+/* KIT_S760 (D873): the Returns card as approved */
+.rh-head{font-size:15px;color:var(--text-2)} .rh-head b{color:var(--text-1)}
+.rh-need{margin-top:14px;border:1px solid #ecd9a4;background:#fffdf6;border-radius:10px;padding:12px 14px}
+.rh-big{font-size:16px;font-weight:700;color:var(--text-1)}
+.rh-rep{margin:10px 0;padding:8px 12px;background:var(--warn-bg);color:var(--warn);border-radius:8px;font-size:14px}
+.tblwrap.rh-tw{max-height:none;background:#fff;margin-top:8px}
+.rh-t td{vertical-align:top}
+.rh-row{cursor:pointer} .rh-row:hover td{background:#fafafa}
+.rh-sub{color:var(--text-2);font-size:13px}
+.rh-det{display:flex;flex-direction:column;gap:8px;padding:8px 4px;max-width:780px;color:var(--text-1)}
+.rh-amber{padding:8px 12px;background:var(--warn-bg);color:var(--warn);border-radius:8px;font-size:14px}
+.rh-red{padding:8px 12px;background:var(--bad-bg);color:var(--bad);border-radius:8px;font-size:14px}
+.rh-fold{margin-top:10px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 14px}
+.rh-fold>summary{cursor:pointer;font-size:15px}
+.rh-hist{border-style:dashed;background:var(--surface-2)}
+.rh-kick{margin-top:18px;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text-3)}
+.rh-btn{min-height:44px}
+.rh-tone-ok{color:var(--good)} .rh-tone-warn{color:var(--warn)} .rh-tone-bad{color:var(--bad)} .rh-tone-mut{color:var(--text-2)}
+@media (max-width:640px){.rh-t{font-size:13.5px}.rh-need{padding:10px}}

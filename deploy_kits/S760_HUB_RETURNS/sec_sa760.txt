@@ -1,0 +1,20 @@
+
+
+# ---- KIT_S760 (Sanjeevni session 414, 09-Nov-2026, D873): the Needs-you returns line from the CARD'S OWN READ ----------------------------
+def _s760_returns_line(con, today):
+    """Returns waiting for the owner's OK -- the very read the hub's Returns card makes (returns_kinds.hub, light: the same months,
+    the same rule, the same count), so the line and the card never show two different numbers. Fail-soft: if that read fails,
+    the S446 line as it was. None = keep the old path (NEEDS_YOU_WITHOUT_S406=1, an older kit's frozen walk)."""
+    if os.environ.get("NEEDS_YOU_WITHOUT_S406") == "1":
+        return None
+    try:
+        import returns_kinds  # noqa: PLC0415
+        h = returns_kinds.hub(con, _unit, today=today, light=True)
+        n, p, old = int(h.get("pending_ok") or 0), int(h.get("pending_ok_p") or 0), h.get("pending_oldest")
+    except Exception:  # noqa: BLE001
+        return _s446_returns_line(con, today)
+    if not n:
+        return {}                                   # read, and nothing waits: no line (and not the old path)
+    return dict(cls="warn", target="returns", n=n,
+                text="Returns waiting for your OK — %d · ₹%s · oldest %s" % (n, rs(p), dmy(old) if old else "?"))
+# ---- KIT_S760 end ----

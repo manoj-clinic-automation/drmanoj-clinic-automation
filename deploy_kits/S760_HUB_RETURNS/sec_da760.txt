@@ -1,0 +1,39 @@
+
+
+
+# ======================================================================================================================================
+# KIT_S760 (Sanjeevni session 414, 09-Nov-2026, D873 / F-1200): the hub's Returns card reads every month in one call.
+# READ like cn-detail (the same role, the same engine, the same enrich through returns_kinds.hub). The batch check inside it is a
+# COUNT only: no other patient's name, ID, phone or bill leaves this door. The owner's decisions still go through cn-approve (untouched).
+# ======================================================================================================================================
+@bp.route("/finance/darpan/api/cn-hub")
+def api_cn_hub():
+    u, err = _require("checker")
+    if err:
+        return err
+    con = _db()
+    ensure_schema(con)
+    try:
+        import returns_kinds                                        # noqa: PLC0415
+        h = returns_kinds.hub(con, _unit)
+    except Exception as ex:                                         # noqa: BLE001 -- the page falls back to the month view and says why
+        return jsonify(ok=False, error="hub_unavailable", message=str(ex)[:200]), 503
+    h["spot_checks"] = _spot_checks(con, _unit, h["month"])
+    h["owner"] = bool(_is_owner(con, u))
+    return jsonify(ok=True, **h)
+
+
+def _s760_spine_cn_date(bill):
+    """The date of a credit note only the spine holds (an orphan: no bill row, no sale_line_item) -- read only, through the one
+    spine door. {'d': date} or None; never raises (cn-approve then answers 404 exactly as before)."""
+    try:
+        from finance_returns_audit import _spine                    # noqa: PLC0415
+        sp = _spine()
+        if sp is None:
+            return None
+        r = sp.q("SELECT date FROM sp_sale_bill WHERE UPPER(bill)=? AND credit_note=1 ORDER BY date DESC LIMIT 1",
+                 str(bill or "").strip().upper())
+        return {"d": r[0]["date"]} if r else None
+    except Exception:                                               # noqa: BLE001
+        return None
+# ==== end KIT_S760 ====================================================================================================================

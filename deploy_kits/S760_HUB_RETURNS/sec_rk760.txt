@@ -1,0 +1,280 @@
+
+
+# ======================================================================================================================================
+# KIT_S760 (Sanjeevni session 414, 09-Nov-2026, D873 / F-1200): THE HUB'S RETURNS CARD -- every month on one card.
+#   hub(con, unit) is ONE read for the owner's hub (/finance/approvals, darpan_app's /finance/darpan/api/cn-hub): every month that
+#   holds a return, newest first; the returns waiting for his OK from EVERY month together, newest first; each naming only the
+#   medicine(s) in question and the money in question (Reject recovers that, never more than was refunded); "can't be checked yet";
+#   June - August (before returns.act_from) as history, counted only; petty refund differences (returns.noise_p / noise_pct, the S406
+#   rule) never shown (F-1200: the shortfall badge now obeys the same line -- short_noise below and in enrich).
+#   THE BATCH CHECK: a returned medicine the patient never bought is looked up by its batch in the spine's SALES of the last
+#   WINDOW_DAYS days -- a COUNT only ("sold by us N times, not under this patient's ID"; 0 = "we never sold this batch"). No other
+#   patient's name, ID, phone or bill is read out of the spine or returned. Read only, like cn-detail: the same engine
+#   (finance_returns_audit), the same enrich (cn_kind kept exactly as cn-detail keeps it); no money figure changes anywhere.
+# ======================================================================================================================================
+S760_BAD = ("NEVER BOUGHT", "RETURNED MORE THAN SOLD", "REFUNDED MORE THAN PAID")
+S760_WHY = {"NEVER BOUGHT": "not bought by this patient", "RETURNED MORE THAN SOLD": "more than was bought",
+            "REFUNDED MORE THAN PAID": "refunded more than paid"}
+S760_CANT = {"no patient attributed": "no patient on the bill", "identity disputed": "the name on the bill differs from the ID",
+             "identity needed": "the bill carries the shared walk-in ID, not a patient",
+             "not examinable": "the bill's lines are not read yet"}
+S760_MON = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+_S760_ON = re.compile(r" on (\d{4}-\d{2}-\d{2})")
+
+
+def is_noise(st, d, amt):
+    """The S406 rounding line as one function: a difference below returns.noise_p, or below returns.noise_pct of the return."""
+    if d is None:
+        return False
+    return d < st["noise_p"] or bool(amt and d < st["noise_pct"] / 100.0 * amt)
+
+
+def _s760_month_label(ym):
+    try:
+        return "%s %s" % (("January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+                           "November", "December")[int(ym[5:7]) - 1], ym[:4])
+    except (TypeError, ValueError, IndexError):
+        return str(ym)
+
+
+def _s760_day(d):
+    try:
+        return "%s-%s" % (str(d)[8:10], S760_MON[int(str(d)[5:7]) - 1])
+    except (TypeError, ValueError, IndexError):
+        return str(d or "")
+
+
+def _s760_notes(con, unit, month, act_from):
+    """The month's returns exactly as month_notes builds them (the same engine), with the fields the card's detail shows."""
+    from finance_returns_audit import returns_for_day, return_days    # noqa: PLC0415
+    notes = []
+    for d in return_days(con, unit, month + "-01", month + "-31", newest_first=True):
+        rows, _s = returns_for_day(con, d, unit)
+        for r in rows:
+            appr = con.execute("SELECT status, decided_by, decided_at, note FROM darpan_return_approval WHERE unit=? AND cn_bill=?",
+                               (unit, r["bill"])).fetchone()
+            notes.append(dict(date=d, bill=r["bill"], amount_p=r["amount_p"], verdict=r["verdict"],
+                              refund_shortfall_p=r["refund_shortfall_p"], audit_lines=r["lines"], name=r["name"],
+                              clinic_id=r.get("clinic_id") or "", population=r["population"], money_from=r["money_from"],
+                              sys_note=r.get("note") or "", n_lines=r.get("n_lines"), historical=(d < act_from),
+                              approval=(dict(zip(("status", "decided_by", "decided_at", "note"), tuple(appr))) if appr else None)))
+    return notes
+
+
+def _s760_history_count(con, unit, month):
+    """How many returns a month before the rules holds -- the same union returns_for_day walks (bill rows + the spine's
+    credit-note lines), without auditing any of them."""
+    from finance_returns_audit import return_days, _return_bills, _return_lines_by_bill, _spine    # noqa: PLC0415
+    sp = _spine() if unit == "medical" else None
+    n = 0
+    for d in return_days(con, unit, month + "-01", month + "-31"):
+        bills = set(_return_bills(con, unit, d).keys())
+        try:
+            bills |= set((_return_lines_by_bill(con, unit, d, sp=sp) or {}).keys())
+        except Exception:                                # noqa: BLE001 -- a count, never a failure of the card
+            pass
+        n += len(bills)
+    return n
+
+
+def batch_norm(batch):
+    """The batch as compared: upper case, trimmed, every run of spaces one space -- exactly what _S760_BATCH_SQL does to the
+    spine's column."""
+    return " ".join(str(batch or "").upper().split())
+
+
+# the spine's batch column normalised as batch_norm does: runs of up to 16 spaces collapse to one (four passes of '  ' -> ' ')
+_S760_BATCH_SQL = "TRIM(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(COALESCE(l.batch,'')),'  ',' '),'  ',' '),'  ',' '),'  ',' '))"
+
+
+def batch_sold(sp, item, batch, date, window_days):
+    """How many SALE bills of this medicine carried this batch in the window ending on the return's day. A count, nothing else.
+    None when it cannot be asked (no batch on the line, or no spine)."""
+    b = batch_norm(batch)
+    if sp is None or not b:
+        return None
+    try:
+        since = (dt.date.fromisoformat(str(date)[:10]) - dt.timedelta(days=window_days)).isoformat()
+    except ValueError:
+        return None
+    r = sp.q("SELECT COUNT(*) AS n FROM (SELECT DISTINCT l.date, l.bill FROM sp_sale_line l LEFT JOIN sp_sale_bill b "
+             "ON b.date=l.date AND b.bill=l.bill WHERE l.k20=? AND " + _S760_BATCH_SQL + "=? AND COALESCE(b.credit_note,0)=0 "
+             "AND l.date BETWEEN ? AND ?)", sp.key(item), b, since, str(date)[:10])
+    return int(r[0]["n"]) if r else 0
+
+
+def _s760_line(l):
+    return dict(item=l.get("item") or "", qty_raw=l.get("qty_raw") or "", pack=l.get("pack") or "",
+                amount_p=l.get("amount_line_p"), batch=(l.get("batch") or "").strip(), verdict=l.get("verdict") or "",
+                detail=l.get("detail") or "")
+
+
+def _s760_shape(con, st, n, sp, window_days, batch_ok):
+    """One note in the card's shape: what is in question, the money in question, the words, the batch check."""
+    amt = int(n.get("amount_p") or 0)
+    lines = n.get("audit_lines") or []
+    bad = [_s760_line(l) for l in lines if l.get("verdict") in S760_BAD]
+    good = [_s760_line(l) for l in lines if l.get("verdict") not in S760_BAD]
+    for g in good:
+        m = _S760_ON.search(g["detail"])
+        g["bought_on"] = m.group(1) if m else ""
+    hist = bool(n.get("historical"))
+    for x in bad:
+        x["why"] = S760_WHY.get(x["verdict"], x["verdict"].lower())
+        x["batch_sold"] = None
+        x["batch_asked"] = False
+        if x["verdict"] == "NEVER BOUGHT" and not hist and batch_ok:
+            x["batch_asked"] = bool(x["batch"])
+            if x["batch"]:
+                try:
+                    x["batch_sold"] = batch_sold(sp, x["item"], x["batch"], n["date"], window_days)
+                except Exception:                        # noqa: BLE001 -- the check is a help, never a failure of the card
+                    x["batch_sold"] = None
+    unknown = any(x["amount_p"] is None for x in bad)              # a line whose money the engine could not compute
+    q_p = (None if unknown else sum(x["amount_p"] for x in bad)) if bad else amt
+    recover_p = None if q_p is None else min(q_p, amt)
+    if recover_p is not None and recover_p <= 0:
+        recover_p = None                                             # never "recover ₹0"
+    whys = []
+    for v in S760_BAD:
+        k = sum(1 for x in bad if x["verdict"] == v)
+        if k:
+            whys.append(("%d %s" % (k, S760_WHY[v])) if len(bad) > 1 else S760_WHY[v])
+    if n.get("verdict") in S760_CANT:
+        whys.append(S760_CANT[n["verdict"]])
+    big = amt >= st["big_p"] and n.get("kind") == "counter"
+    sf = n.get("refund_shortfall_p")
+    short_shown = bool(sf) and not is_noise(st, sf, amt)
+    appr = n.get("approval") or {}
+    a_st = appr.get("status") if isinstance(appr, dict) else None
+    w = n.get("status") or "ok"
+    nc = n.get("kind") == "noncash"
+    if n.get("pending_ok"):
+        word, tone = "needs your OK — above", "warn"
+    elif a_st == "approved":
+        word, tone = "✓ approved by you", "ok"
+    elif a_st == "rejected":
+        word, tone = "✕ rejected by you", "bad"
+    elif w == "unchecked":
+        word, tone = ("not checked — before your rules began" if hist else "can't be checked — above"), ("mut" if hist else "warn")
+    elif w == "never bought":
+        word, tone = ("your non-cash return · not in the patient's purchases" if nc else "not in the patient's purchases"), "warn"
+    elif w == "over-refund":
+        word, tone = "more than was bought", "warn"
+    elif w == "discounted":
+        word, tone = "refund %s short" % _s760_rs(sf), "warn"
+    elif w == "large":
+        word, tone = "₹%s+" % format(st["big_p"] // 100, ","), "warn"
+    else:
+        word, tone = ("✓ your non-cash return" if nc else "✓ bought by the patient"), "ok"
+    return dict(key="%s|%s" % (n["date"], n["bill"]), bill=n["bill"], date=n["date"], day=_s760_day(n["date"]), amount_p=amt,
+                kind=n.get("kind"), kind_why=n.get("kind_why") or "", kind_source=n.get("kind_source") or "",
+                status=w, pending_ok=bool(n.get("pending_ok")), historical=hist, verdict=n.get("verdict"),
+                approval=(appr if a_st else None), word=word, tone=tone, in_question=bad, bought=good, n_items=len(lines),
+                q_p=q_p, recover_p=recover_p, amount_unread=(bool(bad) and q_p is None), whole=not bad, whys=whys, big=big,
+                short_p=(sf if short_shown else None), cant=S760_CANT.get(n.get("verdict") or "", ""),
+                name=n.get("name") or "", clinic_id=n.get("clinic_id") or "", patient_text=n.get("patient_text") or "",
+                population=n.get("population") or "", money_from=n.get("money_from") or "", sys_note=n.get("sys_note") or "")
+
+
+def _s760_rs(p):
+    if p is None:
+        return "—"
+    s = "%.2f" % (p / 100.0)
+    if s.endswith(".00"):
+        s = s[:-3]
+    whole, _, frac = s.partition(".")
+    neg = whole.startswith("-")
+    whole = whole.lstrip("-")
+    if len(whole) > 3:                                   # the Indian grouping, as the page writes money
+        head, tail = whole[:-3], whole[-3:]
+        parts = []
+        while len(head) > 2:
+            parts.insert(0, head[-2:])
+            head = head[:-2]
+        if head:
+            parts.insert(0, head)
+        whole = ",".join(parts + [tail])
+    return "₹" + ("-" if neg else "") + whole + ("." + frac if frac else "")
+
+
+def hub(con, unit, today=None, light=False):
+    """THE HUB'S RETURNS CARD in one read (see the KIT_S760 header). Returns a dict (no ok flag -- darpan_app adds it).
+    light=True: the same read and the same counts without the batch look-ups and the history counts -- what the Needs-you line
+    (sanjeevni_approvals._s760_returns_line) reads, so the line and the card can never show two different numbers."""
+    st = settings(con)                                   # S760: read only -- no ensure(), no cn_kind row saved (enrich save=False)
+    today = today or dt.date.today().isoformat()
+    from finance_returns_audit import return_days, WINDOW_DAYS, _spine    # noqa: PLC0415
+    days = return_days(con, unit, "2000-01-01", today)
+    months = sorted({str(d)[:7] for d in days}, reverse=True)
+    cur = today[:7]
+    if cur not in months:
+        months.insert(0, cur)
+    act_m = st["act_from"][:7]
+    sp = None
+    batch_ok = False
+    try:
+        sp = _spine() if (unit == "medical" and not light) else None
+        batch_ok = sp is not None
+    except Exception:                                    # noqa: BLE001
+        sp, batch_ok = None, False
+    out_months, history, allnotes = [], [], []
+    for ym in months:
+        if ym < act_m:
+            if not light:
+                history.append(dict(ym=ym, label=_s760_month_label(ym), n=_s760_history_count(con, unit, ym)))
+            continue
+        raw = _s760_notes(con, unit, ym, st["act_from"])
+        s = enrich(con, unit, ym, raw, with_prev=False, save=False)
+        rows = [_s760_shape(con, st, n, sp, WINDOW_DAYS, batch_ok) for n in raw]
+        rows.sort(key=lambda r: (r["date"], r["bill"]), reverse=True)
+        allnotes.extend(rows)
+        cnt = lambda f: sum(1 for r in rows if f(r))          # noqa: E731
+        out_months.append(dict(
+            ym=ym, label=_s760_month_label(ym), current=(ym == cur),
+            to=(_s760_day(max(r["date"] for r in rows)) if rows and ym == cur else ""),
+            n=len(rows), p=sum(r["amount_p"] for r in rows),
+            counter_n=s["counter"]["n"], counter_p=s["counter"]["p"], counter_pct=s["counter"]["pct"],
+            noncash_n=s["noncash"]["n"], noncash_p=s["noncash"]["p"],
+            fine=cnt(lambda r: r["status"] == "ok"), need=cnt(lambda r: r["pending_ok"]),
+            cant=cnt(lambda r: r["status"] == "unchecked" and not r["historical"] and not r["pending_ok"]),
+            discounted=cnt(lambda r: r["status"] == "discounted"), large=cnt(lambda r: r["status"] == "large"),
+            rejected=cnt(lambda r: (r["approval"] or {}).get("status") == "rejected"),
+            noncash_bad=cnt(lambda r: r["kind"] == "noncash" and r["status"] in ("never bought", "over-refund")),
+            rows=rows))
+    needs = sorted((r for r in allnotes if r["pending_ok"]), key=lambda r: (r["date"], r["bill"]), reverse=True)
+    cant = sorted((r for r in allnotes if r["status"] == "unchecked" and not r["historical"] and not r["pending_ok"]),
+                  key=lambda r: (r["date"], r["bill"]), reverse=True)
+    # repeats: one batch of one medicine coming back in two or more of the waiting returns -- named once
+    seen = {}
+    for r in needs:
+        for x in r["in_question"]:
+            if not x["batch"]:
+                continue
+            k = (x["item"].strip().upper(), batch_norm(x["batch"]))
+            seen.setdefault(k, [])
+            if r["key"] not in [y[0] for y in seen[k]]:
+                seen[k].append((r["key"], r["date"]))
+    repeats = []
+    for (item, batch), refs in seen.items():
+        if len(refs) >= 2:
+            ds = sorted(d for _k, d in refs)
+            repeats.append(dict(item=item, batch=batch, n=len(refs), days=[_s760_day(d) for d in ds], keys=[k for k, _d in refs]))
+    repeats.sort(key=lambda x: (-x["n"], x["item"]))
+    rkeys = {(x["item"], x["batch"]) for x in repeats}
+    for r in needs:
+        for x in r["in_question"]:
+            x["repeat"] = (x["item"].strip().upper(), batch_norm(x["batch"])) in rkeys
+    cm = next((m for m in out_months if m["ym"] == cur), None)
+    prev = [dict(ym=m["ym"], label=_s760_month_label(m["ym"]).split(" ")[0], pct=m["counter_pct"])
+            for m in out_months if m["ym"] != cur][:2]
+    return dict(month=cur, today=today, act_from=st["act_from"], window_days=WINDOW_DAYS, batch_check=batch_ok,
+                settings=dict(noise_p=st["noise_p"], noise_pct=st["noise_pct"], big_p=st["big_p"]),
+                headline=dict(ym=cur, label=_s760_month_label(cur), counter_n=(cm or {}).get("counter_n", 0),
+                              counter_p=(cm or {}).get("counter_p", 0), counter_pct=(cm or {}).get("counter_pct"), prev=prev),
+                pending_ok=len(needs), pending_ok_p=sum(r["amount_p"] for r in needs),
+                pending_oldest=(min(r["date"] for r in needs) if needs else None),
+                pending_ok_rupees=int(round(sum(r["amount_p"] for r in needs) / 100.0)),   # whole rupees, rounded as the Needs-you line rounds
+                needs=[r["key"] for r in needs], cant=[r["key"] for r in cant], repeats=repeats,
+                months=out_months, history=history)
+# ==== end KIT_S760 ====================================================================================================================

@@ -1,0 +1,221 @@
+/* ==== KIT_S760 (Sanjeevni session 414, 09-Nov-2026, D873 / F-1200): THE RETURNS CARD AS APPROVED -- every month on one card. ====
+   One read (/finance/darpan/api/cn-hub, returns_kinds.hub): the returns waiting for your OK from every month together at the top,
+   newest first, each naming only the medicine in question, Approve / Reject on the line (Reject recovers the money in question);
+   a batch repeated across them named once; "can't be checked yet" beneath; every month folded, newest first (this month open);
+   June - August as history; petty refund differences never shown (F-1200); the batch check a COUNT only. The words and the rules
+   are the server's (D349) -- this block only draws them. The S406 month view and the first view stay one link away. */
+var RH=null, RH_ASK={};
+/* the card's own escaper: & < > " AND ' (the page-wide esc() leaves ' alone; its other callers are not touched). Values reach
+   onclick only through data- attributes read with getAttribute -- never inside a quoted JS string. */
+function rhEsc(s){return (s==null?"":String(s)).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function rhAt(el,n){ return el?el.getAttribute(n):null; }
+function rhRs(p){ if(p==null) return "—"; var s=(p/100).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}); return "₹"+s.replace(/\.00$/,""); }
+function rhPc(v){ return v==null?"—":(Number(v).toFixed(1)+"%"); }
+function rhId(k){ return String(k).replace(/[^A-Za-z0-9]/g,"_"); }
+function rhDay(d){ var M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; d=String(d||""); return d.length>=10?(d.slice(8,10)+"-"+M[parseInt(d.slice(5,7),10)-1]):d; }
+function rhQty(q,pack){
+  var s=String(q||"").trim(), m=/^(\d+)\s*[:.]\s*(\d+)$/.exec(s)||(/^(\d+)$/.test(s)?[s,s,"0"]:null);
+  if(!m) return s||"—";
+  var a=parseInt(m[1],10), b=parseInt(m[2],10), p=String(pack||"").trim();
+  var strips=/^1\*(\d+)$/.test(p)&&p!=="1*1";
+  if(!strips) return (a+b)+" pc";
+  var out=[]; if(a) out.push(a+(a===1?" strip":" strips")); if(b) out.push(b+" tab");
+  return out.length?out.join(" + "):"0";
+}
+function rhFind(key){ if(!RH) return null; for(var i=0;i<RH.months.length;i++){ var R=RH.months[i].rows; for(var k=0;k<R.length;k++){ if(R[k].key===key) return R[k]; } } return null; }
+function rhMsg(h){ var e=$("cnMsg"); if(e) e.innerHTML=h||""; }
+function rhOlder(month,which){ var e=$("cnMonth"); if(e&&month) e.value=month; if(which==="old") window.CN_OLD=1; else window.CN_406=1; loadCN(); return false; }
+function rhBack(){ window.CN_406=0; window.CN_OLD=0; loadCN(); return false; }
+function loadCN(){
+  if(window.CN_OLD||window.CN_406){
+    rhMsg('<a href="#" onclick="return rhBack()">← back to the one card</a>');
+    if(window.CN_OLD) loadCNOld(); else loadCN406();
+    return;
+  }
+  var box=$("cnBox"); if(!box) return;
+  fetch("/finance/darpan/api/cn-hub?_="+Date.now(),{cache:"no-store"}).then(srvJSON).then(function(x){
+    var j=x.j||{};
+    if(!j.ok){ rhFallback(j.message||j.error||("HTTP "+x.s)); return; }
+    RH=j; window.CN_PENDING=j.pending_ok||0; if(typeof updateNeeds==="function") updateNeeds();
+    rhMsg(""); box.innerHTML=rhRender(j); loadCNSpot(j);
+  }).catch(function(e){ rhFallback(String(e)); });
+}
+function rhFallback(why){
+  window.CN_406=1;
+  loadCN();
+  rhMsg('<span class="mut">The one card could not load ('+rhEsc(why)+') — the month view is shown instead. </span><a href="#" onclick="return rhBack()">try the one card again</a>');
+}
+function rhWhy(r){
+  var h=(r.whys||[]).map(function(w){ return '<span class="badge b-bad">'+rhEsc(w)+'</span>'; }).join(' ');
+  if(r.cant) h=h.replace('<span class="badge b-bad">'+rhEsc(r.cant)+'</span>','<span class="badge b-warn">'+rhEsc(r.cant)+'</span>');
+  if(r.big) h+=(h?' ':'')+'<span class="badge b-warn">'+rhEsc(rhRs(RH.settings.big_p))+'+</span>';
+  if(r.short_p) h+=(h?' ':'')+'<span class="badge b-warn">'+rhEsc(rhRs(r.short_p))+' withheld on the refund</span>';
+  return h||'<span class="mut">—</span>';
+}
+function rhInQ(r){
+  var Q=r.in_question||[];
+  if(!Q.length) return 'the whole return<br><span class="rh-sub">'+(r.cant?'not checked against purchases':'everything was bought by the patient ✓')+'</span>';
+  if(Q.length===1){
+    var x=Q[0];
+    return rhEsc(x.item)+' · '+(x.amount_p==null?'<span class="mut">amount could not be read</span>':rhEsc(rhRs(x.amount_p)))+(x.repeat?' <span class="rh-tone-warn" title="this batch is in more than one waiting return">↻</span>':'')+
+      '<br><span class="rh-sub">'+(r.n_items===1?'the only item':('1 of '+r.n_items+' items'))+'</span>';
+  }
+  return Q.length+' of '+r.n_items+' items · '+(r.q_p==null?'<span class="mut">amount could not be read</span>':rhEsc(rhRs(r.q_p)))+'<br><span class="rh-sub">'+
+    Q.map(function(x){ return rhEsc(x.item)+(x.repeat?' ↻':''); }).join(', ')+'</span>';
+}
+function rhBatch(x){
+  if(x.verdict!=="NEVER BOUGHT") return '';
+  if(!x.batch) return '<div class="mut">No batch on the bill for '+rhEsc(x.item)+' — the batch check cannot run.</div>';
+  if(!x.batch_asked||x.batch_sold==null) return '<div class="mut">The batch check could not run just now (it reads the sale lines; it will on the next load).</div>';
+  if(x.batch_sold>0) return '<div class="rh-amber"><b>This batch:</b> sold by us '+x.batch_sold+' time'+(x.batch_sold===1?'':'s')+' in the last '+RH.window_days+
+    ' days — never under this patient\'s ID. The medicine is ours; it may have been bought without giving the ID.</div>';
+  return '<div class="rh-red"><b>Not our stock:</b> we never sold batch '+rhEsc(x.batch)+' of '+rhEsc(x.item)+' in the last '+RH.window_days+
+    ' days — not to this patient, not to anyone. The goods did not come from our counter.</div>';
+}
+function rhBought(r){
+  var B=r.bought||[]; if(!B.length) return '';
+  var ds=B.map(function(g){return g.bought_on}).filter(Boolean).sort();
+  var span=ds.length?(ds[0]===ds[ds.length-1]?' on '+rhDay(ds[0]):', '+rhDay(ds[0])+' to '+rhDay(ds[ds.length-1])):'';
+  var head=B.length===1?(r.in_question.length?'✓ the other item — bought by the patient':'✓ bought by the patient'):('✓ '+B.length+(r.in_question.length?' other items':' items')+' — all bought by the patient');
+  return '<details><summary><span class="rh-tone-ok" style="font-weight:600">'+head+span+'</span></summary><div class="mut" style="margin-top:6px;line-height:1.8">'+
+    B.map(function(g){
+      var m=/bought (\S+) on (\d{4}-\d{2}-\d{2})/.exec(g.detail||"");
+      var b=m?('bought '+rhQty(m[1],g.pack)+' on '+rhDay(m[2])):rhEsc(g.detail||"bought");
+      return rhEsc(g.item)+' — '+b+', returned '+rhEsc(rhQty(g.qty_raw,g.pack));
+    }).join('<br>')+'</div></details>';
+}
+function rhDetail(r){
+  var h='<div class="rh-det">';
+  var Q=r.in_question||[];
+  if(Q.length){
+    Q.forEach(function(x,i){
+      h+='<div style="font-size:15px">'+(i===0?'<b>In question:</b> ':'')+rhEsc(x.item)+' · '+rhEsc(rhQty(x.qty_raw,x.pack))+' · '+(x.amount_p==null?'amount could not be read':rhEsc(rhRs(x.amount_p)))+
+        (x.batch?' · batch '+rhEsc(x.batch):'')+' <span class="badge b-bad">'+rhEsc(x.why)+'</span>'+
+        (x.verdict!=="NEVER BOUGHT"&&x.detail?'<div class="rh-sub">'+rhEsc(x.detail)+'</div>':'')+'</div>';
+      h+=rhBatch(x);
+    });
+  }else{
+    h+='<div style="font-size:15px"><b>The whole return</b> · '+rhEsc(rhRs(r.amount_p))+' — '+(r.cant?rhEsc(r.cant):(r.big?'everything was bought by the patient ✓; your OK is asked because it is '+rhEsc(rhRs(RH.settings.big_p))+' or more':'everything was bought by the patient ✓'))+'</div>';
+  }
+  if(r.pending_ok){
+    if(RH.owner) h+='<div style="display:flex;flex-wrap:wrap;gap:8px">'+
+      '<button class="rh-btn" data-k="'+rhEsc(r.key)+'" onclick="event.stopPropagation();rhDecide(rhAt(this,\'data-k\'),\'approved\',this)">I know this case — approve'+(r.recover_p>0?' '+rhEsc(rhRs(r.recover_p)):'')+'</button>'+
+      '<button class="ghost rh-btn" data-k="'+rhEsc(r.key)+'" onclick="event.stopPropagation();rhDecide(rhAt(this,\'data-k\'),\'rejected\',this)">'+(r.recover_p>0?'Reject — recover '+rhEsc(rhRs(r.recover_p)):'Reject')+'</button></div>'+
+      (r.amount_unread?'<div class="mut">The amount in question could not be read from the bill\'s lines — Reject records the return as rejected, with no amount.</div>':'');
+    else h+='<div class="mut">The doctor decides this one.</div>';
+  }
+  h+=rhBought(r);
+  h+='<div class="mut">Refunded '+rhEsc(rhRs(r.amount_p))+(/cash actually refunded/.test(r.money_from||"")?' in cash':'')+' · '+(r.kind==="noncash"?'your non-cash return':'counter return')+
+    (r.short_p?' · '+rhEsc(rhRs(r.short_p))+' withheld on the refund':'')+'</div>';
+  var a=r.approval;
+  if(a&&a.status&&a.status!=="pending") h+='<div class="mut">'+(a.status==="approved"?'✓ approved':'✕ rejected')+' by '+rhEsc(a.decided_by||"")+' · '+rhEsc(String(a.decided_at||"").slice(0,16))+(a.note?' · '+rhEsc(a.note):'')+'</div>';
+  var who=r.name?('patient: <b>'+rhEsc(r.name)+'</b>'+(r.clinic_id?' · ID '+rhEsc(r.clinic_id):'')):(r.patient_text?'patient (from the bill text): '+rhEsc(r.patient_text):'no patient attributed to this return');
+  h+='<details style="font-size:13px" class="mut"><summary>how this was checked</summary><div style="margin-top:4px;line-height:1.7">'+
+    'Lines read from Marg\'s bill · matched against the patient\'s own purchases of the last '+RH.window_days+' days · money from '+rhEsc(r.money_from||"—")+'<br>'+who+
+    (r.sys_note?'<br>'+rhEsc(r.sys_note):'')+
+    '<br>kind: '+rhEsc(r.kind==="noncash"?"your non-cash return":"counter return")+' — '+rhEsc(r.kind_why||"")+(r.kind_source==="owner"?' (your word)':'')+
+    (RH.owner?' <button class="ghost" data-b="'+rhEsc(r.bill)+'" data-to="'+(r.kind==="noncash"?"counter":"noncash")+'" onclick="event.stopPropagation();cnKind(rhAt(this,\'data-b\'),rhAt(this,\'data-to\'))">'+(r.kind==="noncash"?"mark as counter return":"mark as my non-cash return")+'</button>':'')+
+    '<br><a href="#" data-m="'+rhEsc(String(r.date).slice(0,7))+'" onclick="return rhOlder(rhAt(this,\'data-m\'))">this month in the older view</a></div></details>';
+  return h+'</div>';
+}
+function rhToggle(pfx,key){ var d=$("rhd_"+pfx+"_"+rhId(key)); if(d) d.style.display=d.style.display==="none"?"":"none"; }
+function rhRow(pfx,r,cols){
+  var id="rhd_"+pfx+"_"+rhId(r.key);
+  return '<tr class="rh-row" data-p="'+rhEsc(pfx)+'" data-k="'+rhEsc(r.key)+'" onclick="rhToggle(rhAt(this,\'data-p\'),rhAt(this,\'data-k\'))">'+cols+'</tr>'+
+         '<tr id="'+id+'" style="display:none"><td colspan="6" style="background:var(--surface-2)">'+rhDetail(r)+'</td></tr>';
+}
+function rhRender(j){
+  var h='', H=j.headline||{};
+  h+='<div class="rh-head">'+rhEsc(String(H.label||"").split(" ")[0])+' so far: <b>'+(H.counter_n||0)+' counter return'+(H.counter_n===1?'':'s')+' · '+rhEsc(rhRs(H.counter_p||0))+' · '+rhPc(H.counter_pct)+' of counter sales</b>'+
+     (H.prev||[]).map(function(p){ return ' · '+rhEsc(p.label)+' '+rhPc(p.pct); }).join('')+'</div>';
+  /* 1 · NEEDS YOUR OK -- every month, newest first */
+  var N=(j.needs||[]).map(rhFind).filter(Boolean);
+  h+='<div class="rh-need"><div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:10px"><span class="rh-big">Needs your OK — '+N.length+'</span>'+
+     (N.length?'<span class="mut">'+rhEsc("₹"+Number(j.pending_ok_rupees||0).toLocaleString("en-IN"))+' returned · newest first · only the medicines in question are named</span>':'<span class="ok">nothing waits for you ✓</span>')+'</div>';
+  if((j.repeats||[]).length) h+='<div class="rh-rep"><b>Repeats:</b> '+j.repeats.map(function(x){ return rhEsc(x.item)+' batch '+rhEsc(x.batch)+' is in '+x.n+' of these ('+x.days.map(esc).join(', ')+')'; }).join(' · ')+'</div>';
+  if(N.length){
+    h+='<div class="tblwrap rh-tw"><table class="rh-t"><thead><tr><th>bill</th><th>date</th><th class="num">return</th><th>in question</th><th>why</th><th>your decision</th></tr></thead><tbody>';
+    N.forEach(function(r){
+      var dec=RH.owner?('<td style="white-space:nowrap" onclick="event.stopPropagation()"><button data-k="'+rhEsc(r.key)+'" onclick="rhDecide(rhAt(this,\'data-k\'),\'approved\',this)">Approve</button> '+
+        '<button class="ghost" data-k="'+rhEsc(r.key)+'" onclick="rhDecide(rhAt(this,\'data-k\'),\'rejected\',this)">Reject</button></td>'):'<td class="mut">the doctor</td>';
+      h+=rhRow("n",r,'<td><b>'+rhEsc(r.bill)+'</b> <span class="mut">▸</span></td><td>'+rhEsc(r.day)+'</td><td class="num">'+rhEsc(rhRs(r.amount_p))+'</td><td>'+rhInQ(r)+'</td><td>'+rhWhy(r)+'</td>'+dec);
+    });
+    h+='</tbody></table></div>';
+  }
+  h+='</div>';
+  /* 2 · CAN'T BE CHECKED YET */
+  var C=(j.cant||[]).map(rhFind).filter(Boolean);
+  if(C.length){
+    h+='<details open class="rh-fold"><summary><b>Can\'t be checked yet — '+C.length+'</b> <span class="mut">· no patient on the bill, or the name differs from the ID</span></summary>'+
+       '<div class="tblwrap rh-tw" style="margin-top:8px"><table class="rh-t"><tbody>';
+    C.forEach(function(r){
+      h+=rhRow("c",r,'<td><b>'+rhEsc(r.bill)+'</b> <span class="mut">▸</span></td><td>'+rhEsc(r.day)+'</td><td class="num">'+rhEsc(rhRs(r.amount_p))+'</td><td colspan="3"><span class="rh-tone-warn">'+rhEsc(r.cant||"can't be checked")+'</span>'+(r.kind==="noncash"?' · your non-cash return':'')+'</td>');
+    });
+    h+='</tbody></table></div></details>';
+  }
+  /* 3 · EVERY MONTH, newest first */
+  h+='<div class="rh-kick">Every month · newest first · tap to open</div>';
+  (j.months||[]).forEach(function(m){
+    var bits=[];
+    if(m.fine) bits.push('<span class="ok" style="font-weight:600">'+m.fine+' fine ✓</span>');
+    if(m.need) bits.push(m.need+(m.need===1?' needs':' need')+' your OK');
+    if(m.cant) bits.push(m.cant+' can\'t be checked');
+    if(m.discounted) bits.push(m.discounted+' discounted');
+    if(m.large) bits.push(m.large+' large');
+    if(m.rejected) bits.push(m.rejected+' rejected');
+    if(m.noncash_bad) bits.push(m.noncash_bad+' non-cash not in purchases');
+    h+='<details class="rh-fold"'+(m.current?' open':'')+'><summary><b>'+rhEsc(m.label)+'</b> <span class="mut">'+(m.to?'(to '+rhEsc(m.to)+') ':'')+'· '+m.n+' return'+(m.n===1?'':'s')+' · '+rhEsc(rhRs(m.p))+' · counter '+rhPc(m.counter_pct)+'</span>'+
+       (bits.length?' · '+bits.join(' · '):'')+'</summary>';
+    if(!m.rows.length){ h+='<div class="mut" style="margin-top:6px">no returns yet this month</div></details>'; return; }
+    var cr=m.rows.filter(function(r){return r.kind!=="noncash"}), nr=m.rows.filter(function(r){return r.kind==="noncash"});
+    var line=function(r){ return rhRow("m"+m.ym.replace("-",""),r,'<td><b>'+rhEsc(r.bill)+'</b> <span class="mut">▸</span></td><td>'+rhEsc(r.day)+'</td><td class="num">'+rhEsc(rhRs(r.amount_p))+'</td><td colspan="3" class="rh-tone-'+rhEsc(r.tone)+'">'+rhEsc(r.word)+'</td>'); };
+    h+='<div class="tblwrap rh-tw" style="margin-top:8px"><table class="rh-t"><thead><tr><th>bill</th><th>date</th><th class="num">amount</th><th colspan="3">status</th></tr></thead><tbody>'+
+       cr.map(line).join('');
+    if(nr.length){
+      var allok=nr.every(function(r){return r.status==="ok"});
+      h+='<tr><td colspan="6" class="mut">Your non-cash returns: '+nr.length+' · '+rhEsc(rhRs(m.noncash_p))+(allok?' ✓':'')+'</td></tr>'+nr.map(line).join('');
+    }
+    h+='</tbody></table></div></details>';
+  });
+  var Hs=(j.history||[]).slice().sort(function(a,b){return a.ym<b.ym?-1:1});
+  if(Hs.length){
+    var tot=Hs.reduce(function(a,x){return a+(x.n||0)},0);
+    var f=Hs[0].label, l=Hs[Hs.length-1].label;
+    var same=(f.split(" ")[1]===l.split(" ")[1]);
+    var rng=Hs.length===1?f.split(" ")[0]:(same?(f.split(" ")[0]+' to '+l.split(" ")[0]):(f+' to '+l));
+    h+='<details class="rh-fold rh-hist"><summary class="mut"><b>History — '+rhEsc(rng)+'</b> · '+tot+' returns · before your returns rules began on '+rhEsc(rhDay(j.act_from))+'</summary>'+
+       '<div class="mut" style="margin-top:6px">'+Hs.map(function(x){ return '<a href="#" data-m="'+rhEsc(x.ym)+'" onclick="return rhOlder(rhAt(this,\'data-m\'))">'+rhEsc(x.label.split(" ")[0])+'</a> '+x.n; }).join(' · ')+
+       ' — kept as they are, for the record (tap a month for its older view).</div></details>';
+  }
+  h+='<details class="rh-fold" id="cnSpotFold"><summary><b>Spot-count list</b> <span class="mut">· opens by itself when an item is due to count</span></summary><div id="cnSpot" style="margin-top:6px"></div></details>';
+  var S=j.settings||{};
+  h+='<div class="mut" style="margin-top:12px;font-size:13px">Your OK is asked for '+rhEsc(rhRs(S.big_p))+'+, not bought by this patient, or more than was bought — counter returns only. '+
+     'Refund differences under '+rhEsc(rhRs(S.noise_p))+' or '+rhEsc(S.noise_pct)+'% are rounding and are not shown. · '+
+     '<a href="#" data-m="'+rhEsc(j.month)+'" onclick="return rhOlder(rhAt(this,\'data-m\'))">the month view</a> · <a href="#" data-m="'+rhEsc(j.month)+'" onclick="return rhOlder(rhAt(this,\'data-m\'),\'old\')">the first view</a></div>';
+  return h;
+}
+function rhDecide(key,decision,btn){
+  var r=rhFind(key); if(!r) return;
+  var what=(r.in_question||[]).map(function(x){return x.item}).join(", ")||"the whole return";
+  var note;
+  if(decision==="approved"){
+    if(RH_ASK[key]!=="approved"){
+      RH_ASK[key]="approved"; var was=btn.textContent; btn.textContent="Tap again to approve"+(r.recover_p>0?" "+rhRs(r.recover_p):"");
+      setTimeout(function(){ if(RH_ASK[key]==="approved"){ RH_ASK[key]=null; btn.textContent=was; } },5000);
+      return;
+    }
+    RH_ASK[key]=null;
+    note="approved on the hub · "+what;
+  }else{
+    var amt=(r.recover_p>0)?("recover "+rhRs(r.recover_p)):"the amount could not be read";
+    var why=window.prompt("Reject "+r.bill+" — "+amt+" ("+what+"). Why? (recorded)",(r.whys||[]).join("; "));
+    if(why==null||why.trim().length<3) return;
+    note=amt+" ("+what+") — "+why.trim();
+  }
+  btn.disabled=true;
+  fetch("/finance/darpan/api/cn-approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({bill:r.bill,decision:decision,note:note})})
+   .then(srvJSON).then(function(x){ var j=x.j||{}; if(!j.ok){ btn.disabled=false; alert(j.message||j.error||("HTTP "+x.s)); return; }
+     loadCN(); if(typeof loadNeeds==="function") loadNeeds(); })
+   .catch(function(){ btn.disabled=false; alert("nothing was saved — the server could not be reached"); });
+}
+/* ==== end KIT_S760 ==== */
