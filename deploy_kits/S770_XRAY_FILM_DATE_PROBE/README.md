@@ -19,7 +19,9 @@ read. **No database write, no Drive write, no /root file changed.** It installs 
 **The report** (`/root/s770_probe/report.txt` and one mail to the clinic mailbox): counts and dates only — pictures numbered,
 the film's words masked, no name, no clinic ID, no Drive id.
 
-**Walk (cloud, made-up root, drawn films):** 11/11 — printed date read and scored; EXIF date read; no-date picture says so;
+**v2 (11:4x IST):** the first run found NO date in any picture's metadata (0 of 95 — the date is only printed on the film) and tesseract had not installed, so nothing was read from the films. v2 shows why apt fails and falls back to RapidOCR in its own folder (`/root/s770_probe/ocrv`, never `/root/wa/venv`); dates OCR often joins to the time (`2026/10/2509:10`) or reads `0ct` are read.
+
+**Walk (cloud, made-up root, drawn films):** 15/15 (tesseract and RapidOCR) — printed date read and scored; EXIF date read; no-date picture says so;
 ID + film date → file; no-ID → by name on the film date; no name / ID in the report; database unchanged; **CONTROL** (no OCR)
 goes red as it must.
 

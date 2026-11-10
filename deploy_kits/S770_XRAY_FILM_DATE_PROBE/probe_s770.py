@@ -30,6 +30,7 @@ from email.mime.text import MIMEText
 
 DB = os.environ.get("S770_DB", "/root/finance/finance.db")
 HELPER = os.environ.get("S770_HELPER", "/root/finance/records_drive.py")
+HELPER_PY = os.environ.get("S770_HELPER_PY", "/root/wa/venv/bin/python3")   # the venv with the Google libraries
 OUT = os.environ.get("S770_OUT", "/root/s770_probe")
 ENV = os.environ.get("S770_ENV", "/root/wa/.env")
 MAIL = os.environ.get("S770_MAIL", "1") == "1"
@@ -40,9 +41,9 @@ OCR_SECS = 90
 MONTHS = {m: i + 1 for i, m in enumerate(("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"))}
 MON_RE = "JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|SEPT|OCT|NOV|DEC"
 DATE_PATS = [
-    ("dmy", re.compile(r"(?<!\d)(\d{1,2})\s*[/.\-]\s*(\d{1,2})\s*[/.\-]\s*(\d{4}|\d{2})(?!\d)")),
-    ("ymd", re.compile(r"(?<!\d)(\d{4})\s*[/.\-:]\s*(\d{1,2})\s*[/.\-:]\s*(\d{1,2})(?!\d)")),
-    ("dMy", re.compile(r"(?<!\d)(\d{1,2})\s*[\-/ .,]?\s*(" + MON_RE + r")[A-Z]*\s*[\-/ .,]?\s*(\d{4}|\d{2})(?!\d)", re.I)),
+    ("dmy", re.compile(r"(?<!\d)(\d{1,2})\s*[/.\-]\s*(\d{1,2})\s*[/.\-]\s*(\d{4}|\d{2})(?=\D|$|\d{1,2}:\d{2})")),
+    ("ymd", re.compile(r"(?<!\d)(\d{4})\s*[/.\-:]\s*(\d{1,2})\s*[/.\-:]\s*(\d{2}|\d)(?=\D|$|\d{2}:\d{2})")),
+    ("dMy", re.compile(r"(?<!\d)(\d{1,2})\s*[\-/ .,]?\s*(" + MON_RE + r")[A-Z]*\s*[\-/ .,]?\s*(\d{4}|\d{2})(?=\D|$|\d{1,2}:\d{2})", re.I)),
     ("Mdy", re.compile(r"(?<![A-Z])(" + MON_RE + r")[A-Z]*\s*[\-/ .]?\s*(\d{1,2})\s*,?\s*(\d{4})(?!\d)", re.I)),
     ("ymd8", re.compile(r"(?<!\d)(20\d{2})(\d{2})(\d{2})(?!\d)")),
 ]
@@ -65,10 +66,19 @@ def _mk(y, m, d):
         return None
 
 
+def norm(t):
+    """OCR's usual confusions in a date: a zero for the O of a month (12-0ct, N0v), O / o for a zero between digits."""
+    t = re.sub(r"(?i)(?<=[\dA-Z \-/.,])0(?=CT|CTOBER)", "O", t)
+    t = re.sub(r"(?i)(?<=N)0(?=V)", "O", t)
+    t = re.sub(r"(?<=\d)[Oo](?=\d)", "0", t)
+    t = re.sub(r"(?<=[\-/.])[Oo](?=\d)", "0", t)
+    return t
+
+
 def dates_in(text):
     """[(date, how)] -- every plausible date in the text; dd/mm read first (India), mm/dd as a second reading."""
     out = []
-    t = text or ""
+    t = norm(text or "")
     for how, rx in DATE_PATS:
         for m in rx.finditer(t):
             g = m.groups()
@@ -136,45 +146,57 @@ def have_pil():
         return False
 
 
-def ocr_text(path, work):
-    """(text, seconds, how). The bands where the film's text is printed (top and bottom fifth, white on black,
-    so inverted), then the whole picture if the bands give no date."""
-    t0 = time.time()
-    tess = shutil.which("tesseract")
-    if not tess:
-        return "", 0.0, "no tesseract"
+_RAPID = []
 
-    def run(p, psm="11"):
+
+def engine():
+    """'tesseract' | 'rapidocr' | '' -- the system tool when there, else RapidOCR in this python."""
+    if shutil.which("tesseract"):
+        return "tesseract"
+    try:
+        if not _RAPID:
+            from rapidocr_onnxruntime import RapidOCR
+            _RAPID.append(RapidOCR())
+        return "rapidocr"
+    except Exception:                                 # noqa: BLE001
+        return ""
+
+
+def ocr_text(path, work):
+    """(text, seconds, how). The bands where the film's text is printed (top and bottom fifth), then the whole
+    picture if the bands give no date."""
+    t0 = time.time()
+    eng = engine()
+    if not eng:
+        return "", 0.0, "no OCR tool"
+    from PIL import Image, ImageOps
+    im = ImageOps.exif_transpose(Image.open(path)).convert("L")
+    w, h = im.size
+    if max(w, h) > 3000:
+        sc = 3000.0 / max(w, h)
+        im = im.resize((int(w * sc), int(h * sc)))
+        w, h = im.size
+
+    def read(img, tag):
+        if eng == "tesseract":
+            p = os.path.join(work, tag + ".png")
+            ImageOps.invert(img).save(p)
+            try:
+                r = subprocess.run(["tesseract", p, "stdout", "--psm", "11"], capture_output=True, timeout=OCR_SECS)
+                return r.stdout.decode("utf-8", "replace")
+            except Exception:                         # noqa: BLE001
+                return ""
+        import numpy as np
         try:
-            r = subprocess.run([tess, p, "stdout", "--psm", psm], capture_output=True, timeout=OCR_SECS)
-            return r.stdout.decode("utf-8", "replace")
+            res, _ = _RAPID[0](np.array(img.convert("RGB")))
         except Exception:                             # noqa: BLE001
             return ""
-    texts = []
-    if have_pil():
-        from PIL import Image, ImageOps
-        im = Image.open(path)
-        im = ImageOps.exif_transpose(im).convert("L")
-        w, h = im.size
-        scale = 2600.0 / max(w, h) if max(w, h) > 2600 else 1.0
-        if scale != 1.0:
-            im = im.resize((int(w * scale), int(h * scale)))
-            w, h = im.size
-        for k, box in enumerate(((0, 0, w, int(h * 0.2)), (0, int(h * 0.8), w, h))):
-            band = ImageOps.invert(im.crop(box))
-            band = band.resize((band.size[0] * 2, band.size[1] * 2))
-            bp = os.path.join(work, "band%d.png" % k)
-            band.save(bp)
-            texts.append(run(bp))
-        how = "bands"
-        if not any(dates_in(x) for x in texts):
-            fp = os.path.join(work, "full.png")
-            ImageOps.invert(im).save(fp)
-            texts.append(run(fp))
-            how = "bands+whole"
-    else:
-        texts.append(run(path))
-        how = "whole (no Pillow)"
+        return "\n".join(x[1] for x in (res or []))
+    texts = [read(im.crop((0, 0, w, int(h * 0.2))), "top"), read(im.crop((0, int(h * 0.8), w, h)), "bottom")]
+    how = eng + " bands"
+    if not any(dates_in(x) for x in texts):
+        texts.append(read(im, "whole"))
+        how = eng + " bands+whole"
     return "\n".join(texts), time.time() - t0, how
 
 
@@ -283,7 +305,8 @@ def mask_line(line, secret_words, cid):
 
 # ------------------------------------------------------------------ Drive
 def helper(what, fid):
-    r = subprocess.run([sys.executable, "-B", HELPER, what, fid], capture_output=True, timeout=180)
+    py = HELPER_PY if os.path.exists(HELPER_PY) else sys.executable
+    r = subprocess.run([py, "-B", HELPER, what, fid], capture_output=True, timeout=180)
     if r.returncode != 0:
         return None
     return r.stdout
@@ -296,7 +319,7 @@ def main():
     c = db()
     started = dt.datetime.now()
     lines, rows = [], []
-    tools = "tesseract %s · Pillow %s" % ("yes" if shutil.which("tesseract") else "NO", "yes" if have_pil() else "NO")
+    tools = "OCR %s · Pillow %s" % (engine() or "NONE", "yes" if have_pil() else "NO")
     say("S770 probe:", tools)
 
     pics = []                                       # (group, drive id, file name, known day, clinic id, planned_at)

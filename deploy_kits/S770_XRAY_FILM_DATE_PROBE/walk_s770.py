@@ -113,12 +113,16 @@ c.close()
 h0 = hashlib.md5(open(dbp, "rb").read()).hexdigest()
 
 
-def run(control):
-    out = os.path.join(root, "out_c" if control else "out")
-    env = dict(os.environ, S770_DB=dbp, S770_HELPER=HELPER, S770_OUT=out, S770_MAIL="0", RECORDS_HELPER_STUB=stub)
-    if control:
+PY_RAPID = os.environ.get("WALK_PY_RAPID", "")      # a python with rapidocr_onnxruntime (optional second engine)
+
+
+def run(control, py=None, no_tess=False):
+    out = os.path.join(root, "out_%s_%s" % (int(control), int(no_tess)))
+    env = dict(os.environ, S770_DB=dbp, S770_HELPER=HELPER, S770_HELPER_PY=sys.executable, S770_OUT=out, S770_MAIL="0",
+               RECORDS_HELPER_STUB=stub)
+    if control or no_tess:
         env["PATH"] = "/nonexistent"
-    p = subprocess.run([sys.executable, "-B", PROBE], env=env, capture_output=True, text=True, timeout=600)
+    p = subprocess.run([py or sys.executable, "-B", PROBE], env=env, capture_output=True, text=True, timeout=900)
     return p.returncode, open(os.path.join(out, "report.txt")).read() if os.path.exists(os.path.join(out, "report.txt")) else p.stderr
 
 
@@ -134,9 +138,16 @@ check("file by name on the film date" in rep, "the no-ID picture: placed by name
 check(not any(w in rep for w in ("TESTA", "TESTB", "TESTC", "TESTD", "KUMARI", "SINGHAL", "VERMANI", "PRAKASHAN")), "no name in the report")
 check(not any(x in rep for x in ("7001", "7002", "7003", "7004", "FILEDA", "CHECKA")), "no clinic ID or Drive id in the report")
 check(hashlib.md5(open(dbp, "rb").read()).hexdigest() == h0, "the database is unchanged")
+if PY_RAPID:
+    print("second engine -- RapidOCR, no tesseract on PATH")
+    rc3, rep3 = run(False, PY_RAPID, True)
+    check("OCR rapidocr" in rep3, "RapidOCR used when tesseract is missing")
+    check("the known day found 2 " in rep3, "RapidOCR: the printed date and the EXIF date both scored right")
+    check("file by name on the film date" in rep3 and "file: ID + film date" in rep3, "RapidOCR: both parked pictures placed")
+    check(not any(w in rep3 for w in ("TESTA", "TESTB", "TESTC", "TESTD", "7001", "7003")), "RapidOCR: no name or ID in the report")
 print("CONTROL -- the film's text not read")
 rc2, rep2 = run(True)
-check("tesseract NO" in rep2, "control: no OCR tool")
+check("OCR NONE" in rep2, "control: no OCR tool")
 red = "the known day found 2 " in rep2
 print("  CONTROL", "stayed green -- WRONG" if red else "went RED as it must (only the EXIF date is found)")
 check(not red and "the known day found 1 " in rep2, "control red: without the film's text only the metadata date scores")
