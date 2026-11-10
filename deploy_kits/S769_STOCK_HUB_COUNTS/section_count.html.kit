@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Section count · Stock milaan</title>
+<!-- S768_SECTION_COUNT (S420, 10-Nov-2026): the owner's count of one shelf section, any time; print blank / with counts; CSV. -->
+<style>
+:root{--ground:#F6F8F7;--surface:#FFF;--surface-2:#EDF2F0;--ink:#15201E;--ink-2:#3D4B48;--muted:#5E6E68;--line:#D9E2DF;
+  --accent:#0E5C58;--on-accent:#FFF;--star:#FCEFD6;--star-edge:#B07714;--star-ink:#7A4E0F;--two:#F6E3DF;--two-edge:#8C3A2B;--two-ink:#8C3A2B;--ok:#0E5C58;--bad:#8C3A2B}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#0D1312;--surface:#151D1B;--surface-2:#1B2523;--ink:#E7EEEB;--ink-2:#BCC9C5;
+  --muted:#93A49E;--line:#2A3733;--accent:#63C2B6;--on-accent:#0D1312;--star:#3A2E16;--star-edge:#D3A052;--star-ink:#E8C27E;--two:#3A201C;--two-edge:#E08A76;--two-ink:#F0A895;--ok:#63C2B6;--bad:#E08A76}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.45 "IBM Plex Sans",-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:0 14px 110px}
+.top{background:var(--surface);border-bottom:1px solid var(--line);padding:12px 14px}
+.top .in{max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.crumb{font-size:13px;color:var(--muted)} .crumb a{color:var(--accent)}
+h1{margin:2px 0 0;font-size:26px;letter-spacing:-.02em}
+.sub{font-size:14px;color:var(--ink-2)}
+.pill{font:600 15px "IBM Plex Mono",monospace;background:var(--surface-2);border-radius:8px;padding:7px 11px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:16px 0}
+.card h2{margin:0 0 10px;font-size:18px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--muted)}
+input,select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid #9FB1AB;border-radius:8px;padding:9px 10px;min-height:44px}
+button,.btn{font:inherit;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:10px 15px;min-height:44px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.main{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+button[disabled]{opacity:.45;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.why{font-size:13px;color:var(--muted)}
+.msg{border-radius:10px;padding:10px 14px;margin:12px 0;font-weight:500}
+.msg.bad{background:var(--two);color:var(--two-ink);border:1px solid var(--two-edge)}
+.msg.ok{background:var(--surface-2);color:var(--ok);border:1px solid var(--line)}
+.legend{display:flex;flex-wrap:wrap;gap:18px;font-size:14px;margin-top:10px}
+.sw{display:inline-block;width:22px;height:16px;border-radius:3px;vertical-align:-3px;margin-right:6px}
+.sw1{background:var(--star);border:1px solid var(--star-edge)} .sw2{background:var(--two);border:2px solid var(--two-edge)}
+.tbl{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.hd,.ln{display:grid;grid-template-columns:52px minmax(0,2.2fr) 70px minmax(0,2.3fr) 64px 92px 92px 120px;align-items:center;gap:6px;padding:8px 12px}
+.hd{font:12px "IBM Plex Mono",monospace;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)}
+.gh{background:var(--surface-2);padding:7px 12px;font-weight:600;font-size:14px;border-bottom:1px solid var(--line);break-after:avoid}
+.ln{border-bottom:1px solid var(--line);font-size:14px;break-inside:avoid}
+.ln.s1{background:var(--star);box-shadow:inset 4px 0 0 var(--star-edge)}
+.ln.s2{background:var(--two);box-shadow:inset 6px 0 0 var(--two-edge);outline:2px solid var(--two-edge);outline-offset:-2px;padding-top:12px;padding-bottom:12px}
+.num{font:600 14px "IBM Plex Mono",monospace} .mg{font:12px "IBM Plex Mono",monospace;color:var(--ink-2);overflow-wrap:anywhere}
+.r{text-align:right} .c{text-align:center}
+.tag1{font-size:12px;font-weight:600;color:var(--star-ink)} .tag2{font-size:12px;font-weight:700;color:var(--two-ink)}
+.cnt{width:74px;text-align:center;font:600 17px "IBM Plex Mono",monospace;padding:6px}
+.sz{width:110px;max-width:100%}
+.lab2{display:none;font-size:12px;color:var(--muted)}
+label.f input,label.f select{width:100%;min-width:0}
+.ex input{width:100%;min-width:0}
+.pm{display:none} .pm-n{display:none}
+.ex{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr) 90px;gap:8px;margin:6px 0}
+table.cor{width:100%;border-collapse:collapse;font-size:14px} table.cor th,table.cor td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
+table.cor th{font:12px "IBM Plex Mono",monospace;text-transform:uppercase;color:var(--muted)}
+.plus{color:var(--ok);font-weight:700} .minus{color:var(--bad);font-weight:700}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:10px 14px;z-index:5}
+.bar .in{max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.printhead{display:none}
+@media (max-width:760px){
+  .grid4{grid-template-columns:1fr}
+  .lab2{display:block}
+  .hd{display:none}
+  .ln{grid-template-columns:1fr auto;grid-template-areas:"name cnt" "meta cnt" "two two" "box box";gap:4px 10px;padding:10px 12px;border-radius:10px;margin:8px;border:1px solid var(--line)}
+  .ln .c-n{display:none} .ln .c-name{grid-area:name} .ln .c-size{display:none} .ln .c-mg{grid-area:meta} .ln .c-m{display:none}
+  .ln .c-cnt{grid-area:cnt} .ln .c-two{grid-area:two} .ln .c-box{grid-area:box}
+  .pm{display:inline-flex;width:44px;justify-content:center;padding:0;font-size:22px} .pm-n{display:inline}
+  .ex{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 72px}
+}
+@media print{
+  @page{size:A4;margin:12mm}
+  body{background:#fff;color:#000;font-size:12pt}
+  .top,.bar,.noprint,button,.btn,.legend .why{display:none !important}
+  .printhead{display:block;border-bottom:2px solid #000;margin-bottom:6px}
+  .card,.tbl{border:none;margin:0;padding:0}
+  .ln,.hd{grid-template-columns:30px minmax(0,2fr) 48px minmax(0,2.2fr) 40px 60px 60px 80px;padding:3px 2px;font-size:10.5pt}
+  .ln.s1{background:#E6E6E6 !important;box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .ln.s2{background:#CFCFCF !important;box-shadow:none;outline:3px solid #000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  input{border:1px solid #000;min-height:0;padding:2px;border-radius:0}
+  .pm{display:none !important}
+  body.blank input{color:transparent !important}
+  .gh{background:none;border-bottom:1px solid #000;padding:4px 2px}
+  .grpbox{break-inside:avoid}
+  .sz{width:100%}
+  input::placeholder{color:transparent}
+  .lab2{display:none !important}
+}
+</style>
+</head>
+<body>
+<div class="top"><div class="in">
+  <div><div class="crumb"><a id="crumb" href="/finance/stockmatch">Stock milaan</a> › Section count</div>
+  <h1 id="ttl">Section count</h1><div class="sub" id="sub"></div></div>
+  <div class="row"><select id="sec" aria-label="Section"></select><span class="pill" id="prog"></span></div>
+</div></div>
+<div class="wrap"><div class="printhead" id="ph"></div><div id="msg"></div><div id="body">Loading…</div></div>
+<div class="bar noprint" id="bar" style="display:none"><div class="in" id="barin"></div></div>
+<script>
+"use strict";
+const P="/finance/stockmatch/count", el=id=>document.getElementById(id);
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const QS=new URLSearchParams(location.search);
+let S=null, C=null, DIRTY=false, TIMER=null, SAVING=null;
+function say(t,bad){el("msg").innerHTML=t?'<div class="msg '+(bad?"bad":"ok")+'">'+esc(t)+'</div>':"";}
+async function call(u,b){const r=await fetch(u,b?{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}:{cache:"no-store"});
+  const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok){const e=new Error(j.message||j.error||("HTTP "+r.status));e.j=j;e.status=r.status;throw e;}return j;}
+function ddmon(s){if(!s)return "";const d=new Date(String(s).slice(0,10)+"T00:00:00");return isNaN(d)?String(s):d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}).replace(/ /g,"-");}
+function dmyMon(s){const m=/^(\d\d)-(\d\d)-(\d{4})$/.exec(String(s||""));return m?ddmon(m[3]+"-"+m[2]+"-"+m[1]):String(s||"");}
+function cap(s){s=String(s||"");return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
+function todayIso(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+async function load(){
+  const sec=QS.get("section")||(S&&S.section)||"Orthotics", cid=QS.get("count");
+  try{S=await call(P+"/api/state?section="+encodeURIComponent(sec)+(cid?"&count="+encodeURIComponent(cid):"")+"&_="+Date.now());}
+  catch(e){el("body").innerHTML='<div class="card">'+esc(e.message)+'</div>';return;}
+  C=S.count; DIRTY=false; render();
+}
+function render(){
+  el("sec").innerHTML=S.sections.map(s=>'<option'+(s===S.section?" selected":"")+'>'+esc(s)+'</option>').join("");
+  el("sec").style.display=S.sections.length>1?"":"none";
+  el("ttl").textContent=S.section+" count";
+  if(S.me==="owner"){el("crumb").href="/finance/stock/page/hub";el("crumb").textContent="Stock check";}
+  if(!C){el("prog").textContent="";el("bar").style.display="none";el("sub").textContent="Marg's newest closing: "+(dmyMon(S.snap_as_on)||"none");el("body").innerHTML=startHtml();return;}
+  el("prog").textContent=C.progress.done+" of "+C.progress.total+" entered";
+  el("sub").textContent="Sanjeevni Medicos · "+C.lines.length+" items · Marg stock as on "+C.snap_as_on+" · started "+ddmon(C.started_at)+" by "+C.started_by;
+  el("ph").innerHTML='<b>Sanjeevni Medicos — '+esc(S.section)+' count</b> · Marg stock as on '+esc(dmyMon(C.snap_as_on))+' · '+C.lines.length+' items · write a number on every line, 0 when none<br>Counted by ________ · Date ________ · Counted: before the first sale / during the day (last sale bill no. ______) / after the last sale · ★ count twice, write both · ★★ count twice, open every box';
+  if(C.status==="draft"){el("body").innerHTML=draftHtml();bar();wire();}
+  else{el("bar").style.display="none";el("body").innerHTML=doneHtml();wireDone();}
+}
+function startHtml(){
+  const g=S.guard||{}; let h='<div class="card"><h2>Start a new '+esc(S.section)+' count</h2>';
+  h+='<div class="why">The list is every '+esc(S.section)+' item in Marg\'s newest closing ('+esc(dmyMon(S.snap_as_on)||"none")+'). New products join by themselves. Starred lines are frozen when the count starts.</div>';
+  if(g.lines&&g.lines.length){h+='<div class="msg bad">Bills not in Marg yet — Amir enters them first:<br>'+g.lines.map(l=>esc(l.text)).join("<br>")+'</div>';}
+  else if(g.checked===false){h+='<div class="msg bad">'+esc(g.why)+'</div>';}
+  else{h+='<div class="msg ok">No scanned bill from this section\'s dealers is waiting for Marg.</div>';}
+  if(g.warns&&g.warns.length){h+='<div class="why">To look at: '+g.warns.map(w=>esc(w.text)).join("<br>")+'</div>';}
+  const blocked=!!g.blocked;
+  h+='<div class="row">';
+  if(!blocked)h+='<button class="main" id="go">Start the count</button>';
+  else if(S.me==="owner")h+='<button class="main" id="goany">Start anyway (doctor)</button>';
+  else h+='<button class="main" disabled>Start the count</button>';
+  h+='</div></div>';
+  if(S.past&&S.past.length){h+='<div class="card"><h2>Earlier counts</h2>'+S.past.map(p=>'<div><a href="'+P+'?count='+p.id+'">'+esc(ddmon(p.day))+'</a> · '+esc(p.status==="to_amir"?"sent to Amir":p.status)+' · '+esc(cap(p.started_by))+'</div>').join("")+'</div>';}
+  return h;
+}
+function draftHtml(){
+  const d=C.details||{}, n1=C.lines.filter(l=>l.flag===1).length, n2=C.lines.filter(l=>l.flag===2).length;
+  let h='<div class="card noprint"><h2>1 · Before you start</h2><div class="grid4">';
+  h+='<label class="f">Who counted<input id="d_cb" value="'+esc(d.counted_by||"")+'"></label>';
+  h+='<label class="f">Who is entering here<input id="d_eb" value="'+esc(d.entered_by||"")+'"></label>';
+  h+='<label class="f">Date of the count<input id="d_day" type="date" value="'+esc(d.day||todayIso())+'"></label>';
+  h+='<label class="f">When was it counted<select id="d_when"><option value="">— choose —</option>'+[["before_open","Before the first sale"],["during","During the day"],["after_close","After the last sale"]].map(o=>'<option value="'+o[0]+'"'+(d.when===o[0]?" selected":"")+'>'+o[1]+'</option>').join("")+'</select></label>';
+  h+='</div><div class="row" style="margin-top:10px"><label class="f" id="lbw" style="'+(d.when==="during"?"":"display:none")+'">Last sale bill number before the count<input id="d_lb" value="'+esc(d.last_bill||"")+'" placeholder="e.g. A004673"></label></div>';
+  h+='<div class="why">This lets the system take off what was sold after the count — nobody has to adjust anything.</div></div>';
+  h+='<div class="card noprint"><h2>2 · Count — on paper or on this screen</h2><div class="row">';
+  h+='<button class="main" id="pblank">Print the blank sheet</button><button id="pfull">Print with the counts</button><button id="csv">Download for Excel (CSV)</button>'+(S.me==="owner"?'<button id="dcancel" style="color:var(--bad);border-color:var(--bad)">Cancel this count</button>':'')+'</div>';
+  h+='<div class="legend"><span><span class="sw sw1"></span><b class="tag1">★ Count twice</b> — '+n1+' lines; write both counts</span><span><span class="sw sw2"></span><b class="tag2">★★ Count twice, open every box</b> — '+n2+' lines</span></div><div class="why" style="margin-top:8px">Write a number on every line — 0 when there is none.</div></div>';
+  h+='<div class="tbl"><div class="hd"><div>#</div><div>Item (as on the box)</div><div>Size</div><div>Marg name</div><div class="r">Marg</div><div class="c">Count</div><div class="c">2nd count</div><div>Size on box</div></div>';
+  let g=null;
+  C.lines.forEach(l=>{if(l.grp!==g){h+=(g===null?"":'</div>');g=l.grp;const n=C.lines.filter(x=>x.grp===g).length;h+='<div class="grpbox"><div class="gh">'+esc(g)+' <span class="why">· '+n+' lines</span></div>';}
+    const cls=l.flag===2?"ln s2":(l.flag===1?"ln s1":"ln");
+    const tag=l.flag===2?'<div class="tag2">★★ Count twice — open every box'+(l.why?" · "+esc(l.why):"")+'</div>':(l.flag===1?'<div class="tag1">★ Count twice'+(l.why?" · "+esc(l.why):"")+'</div>':"");
+    h+='<div class="'+cls+'" data-n="'+l.n+'"><div class="num c-n">'+l.n+'</div><div class="c-name"><b class="pm-n">'+l.n+' · </b>'+esc(l.kind)+(l.size?' <b>'+esc(l.size)+'</b>':"")+tag+'</div>';
+    h+='<div class="c-size"><b>'+esc(l.size)+'</b></div><div class="mg c-mg">'+esc(l.item)+' · Marg '+l.marg+'</div><div class="r num c-m">'+l.marg+'</div>';
+    h+='<div class="c c-cnt"><button class="pm" data-pm="-1" aria-label="One less">−</button><input class="cnt" inputmode="numeric" aria-label="Count line '+l.n+'" data-f="counted" value="'+(l.counted==null?"":l.counted)+'"><button class="pm" data-pm="1" aria-label="One more">+</button></div>';
+    h+='<div class="c c-two">'+(l.flag?'<span class="lab2">2nd count</span><input class="cnt" inputmode="numeric" aria-label="Second count line '+l.n+'" data-f="second" value="'+(l.second==null?"":l.second)+'" placeholder="2nd">':"")+'</div>';
+    h+='<div class="c-box">'+(l.one_size?'<input class="sz" aria-label="Size on box line '+l.n+'" data-f="size_on_box" value="'+esc(l.size_on_box)+'" placeholder="size, if any">':"")+'</div></div>';});
+  if(g!==null)h+='</div>';
+  h+='</div>';
+  h+='<div class="card"><h2>Came in, not yet in Marg</h2><div class="why">Boxes that arrived but whose bill is not in Marg: write them here and keep them aside. They are not counted below.</div><div id="aside">'+exRows("aside",C.aside,true)+'</div><button class="noprint" id="addaside">+ Add a line</button></div>';
+  h+='<div class="card"><h2>On the shelf but not on this list</h2><div id="extra">'+exRows("extra",C.extra,false)+'</div><button class="noprint" id="addextra">+ Add a line</button></div>';
+  return h;
+}
+function exRows(kind,rows,dealer){const rs=(rows||[]).slice();while(rs.length<3)rs.push({});
+  return rs.map((r,i)=>'<div class="ex" data-k="'+kind+'"><input placeholder="Write the box\'s words exactly" data-x="words" value="'+esc(r.words||"")+'">'+
+   (dealer?'<input placeholder="Dealer" data-x="dealer" value="'+esc(r.dealer||"")+'">':'<span></span>')+'<input placeholder="Count" inputmode="numeric" data-x="qty" value="'+(r.qty==null?"":r.qty)+'"></div>').join("");}
+function bar(){el("bar").style.display="";const left=C.lines.filter(l=>l.counted==null).length;
+  el("barin").innerHTML='<button id="save">Save — finish later</button><button class="main" id="send"'+(left?" disabled":"")+'>'+(left?"Send (" + left + " still empty)":"Count finished — send")+'</button><span class="why" id="saved">'+(C.saved_at?"Saved "+String(C.saved_at).slice(11,16):"")+'</span>';
+  el("save").onclick=()=>doSave(true); el("send").onclick=doSend;}
+function line(n){return C.lines.find(l=>l.n===n);}
+function wire(){
+  el("body").querySelectorAll(".ln input").forEach(i=>{i.addEventListener("input",()=>{const n=+i.closest(".ln").dataset.n,f=i.dataset.f,l=line(n);
+    if(f==="size_on_box"){l.size_on_box=i.value;}else{const v=i.value.trim();l[f]=v===""?null:(/^\d+$/.test(v)?parseInt(v,10):l[f]);}touch();});});
+  el("body").querySelectorAll(".ln .pm").forEach(b=>b.onclick=()=>{const row=b.closest(".ln"),l=line(+row.dataset.n),i=row.querySelector('input[data-f="counted"]');
+    l.counted=Math.max(0,(l.counted==null?0:l.counted)+(+b.dataset.pm));i.value=l.counted;touch();});
+  ["d_cb","d_eb","d_day","d_when","d_lb"].forEach(id=>{const i=el(id);if(i)i.addEventListener("input",()=>{if(id==="d_when")el("lbw").style.display=i.value==="during"?"":"none";touch();});});
+  el("body").querySelectorAll(".ex input").forEach(i=>i.addEventListener("input",touch));
+  el("addaside").onclick=()=>{el("aside").insertAdjacentHTML("beforeend",exRows("aside",[{}],true));wireEx();};
+  el("addextra").onclick=()=>{el("extra").insertAdjacentHTML("beforeend",exRows("extra",[{}],false));wireEx();};
+  el("pblank").onclick=()=>{document.body.classList.add("blank");window.addEventListener("afterprint",()=>document.body.classList.remove("blank"),{once:true});window.print();};
+  el("pfull").onclick=()=>window.print(); el("csv").onclick=csv;
+  const dc=el("dcancel");if(dc)dc.onclick=async()=>{if(dc.dataset.sure!=="1"){dc.dataset.sure="1";dc.textContent="Tap again to cancel this count";return;}
+    clearTimeout(TIMER);DIRTY=false;
+    try{await call(P+"/api/cancel",{count:C.id});say("Cancelled. Nothing was changed anywhere.");QS.delete("count");history.replaceState(null,"","?"+QS);load();}catch(e){say(e.message,true);}};
+}
+function wireEx(){el("body").querySelectorAll(".ex input").forEach(i=>{i.oninput=touch;});}
+function details(){return {counted_by:el("d_cb").value,entered_by:el("d_eb").value,day:el("d_day").value,when:el("d_when").value,last_bill:(el("d_lb")||{}).value||""};}
+function exs(kind){return [...el("body").querySelectorAll('.ex[data-k="'+kind+'"]')].map(r=>{const o={};r.querySelectorAll("input").forEach(i=>o[i.dataset.x]=i.value);return o;});}
+function touch(){DIRTY=true;el("prog").textContent=C.lines.filter(l=>l.counted!=null).length+" of "+C.lines.length+" entered";
+  const left=C.lines.filter(l=>l.counted==null).length,s=el("send");if(s){s.disabled=!!left;s.textContent=left?"Send ("+left+" still empty)":"Count finished — send";}
+  clearTimeout(TIMER);TIMER=setTimeout(()=>doSave(false),4000);}
+async function doSave(shout){if(!C||C.status!=="draft")return true;clearTimeout(TIMER);
+  while(SAVING){await SAVING.catch(()=>{});}
+  let done;SAVING=new Promise(r=>{done=r;});
+  try{const j=await call(P+"/api/save",{count:C.id,rev:C.rev,details:details(),lines:C.lines.map(l=>({n:l.n,counted:l.counted,second:l.second,size_on_box:l.size_on_box})),extra:exs("extra"),aside:exs("aside")});
+    C.rev=j.rev;DIRTY=false;const t=new Date();el("saved").textContent="Saved "+String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0");if(shout)say("Saved. You can finish later from any screen.");return true;}
+  catch(e){if(e.status===409){say("Another screen saved this count first. What you typed here in the last few seconds was not kept — the page reloads with the saved numbers.",true);DIRTY=false;setTimeout(load,2500);}else say(e.message,true);return false;}
+  finally{const d=done;SAVING=null;d();}}
+async function doSend(){if(!(await doSave(false)))return;
+  try{await call(P+"/api/send",{count:C.id,rev:C.rev});say("Sent. Thank you — the correction is worked out after tonight's Marg closing.");QS.set("count",C.id);history.replaceState(null,"","?"+QS);load();}
+  catch(e){say(e.message,true);}}
+function csv(){const rows=[["#","Group","Item","Size","Marg name","Marg","Count","2nd count","Size on box","Count twice"]];
+  C.lines.forEach(l=>rows.push([l.n,l.grp,l.kind,l.size,l.item,l.marg,l.counted==null?"":l.counted,l.second==null?"":l.second,l.size_on_box||"",l.flag===2?"**":(l.flag===1?"*":"")]));
+  const cell=v=>{let s=String(v);if(/^[=+\-@]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';};
+  const t=rows.map(r=>r.map(cell).join(",")).join("\r\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+t],{type:"text/csv"}));a.download=S.section+"_count_"+C.id+".csv";a.click();}
+function doneHtml(){
+  if(C.status==="cancelled")return '<div class="card"><h2>'+esc(S.section)+' count started '+esc(ddmon(C.started_at))+' by '+esc(cap(C.started_by))+' — cancelled '+esc(ddmon(C.cancelled_at))+'</h2><div class="why">Nothing was changed anywhere. The lines below are as they were when it was cancelled.</div></div>'+linesRead();
+  let h='<div class="card"><h2>'+esc(S.section)+' count of '+esc(ddmon(C.count_day))+' — '+(C.status==="to_amir"?"sent to Amir "+esc(ddmon(C.to_amir_at)):"sent")+'</h2>';
+  h+='<div class="why">Counted by '+esc((C.details||{}).counted_by||"?")+' · entered by '+esc(cap(C.sent_by))+' · '+({before_open:"before the first sale",during:"during the day, after bill "+esc(C.last_bill||""),after_close:"after the last sale"}[C.count_when]||"")+'</div>';
+  h+='<div class="row noprint" style="margin-top:10px"><button id="pfull">Print with the counts</button><button id="csv">Download for Excel (CSV)</button></div></div>';
+  const K=C.correction;
+  if(S.me!=="owner"||!K){h+='<div class="card">Thank you. The doctor sees the correction once Marg\'s closing of that day has arrived.</div>';return h+linesRead();}
+  if(K.state!=="ready"){h+='<div class="card"><h2>The correction</h2><div class="msg ok">'+esc(K.why)+'</div></div>';return h+linesRead();}
+  const ch=K.lines.filter(x=>x.change), hand=K.lines.filter(x=>x.change==null), own=C.status==="sent";
+  h+='<div class="card"><h2>The correction — '+ch.length+' line'+(ch.length===1?"":"s")+' to change in Marg</h2><div class="why">Marg at the count = Marg\'s closing of that day + what was sold after the count. One voucher in Marg.</div>';
+  h+='<table class="cor"><tr><th>#</th><th>Item</th><th>Counted</th><th>Marg at count</th><th>Change</th><th>Note</th></tr>';
+  K.lines.filter(x=>x.change||x.change==null||x.notes.length||x.how).forEach(x=>{
+    const ctl=(own&&(x.change==null||x.how))?'<div class="row noprint" style="margin-top:4px"><input class="cnt" style="width:80px" data-hn="'+x.n+'" placeholder="+/-"><button data-hset="'+x.n+'">Use this change</button><button data-hskip="'+x.n+'">Leave it out</button>'+(x.how?'<button data-hclr="'+x.n+'">Undo</button>':"")+'</div>':"";
+    h+='<tr><td>'+x.n+'</td><td>'+esc(x.item)+'</td><td>'+(x.counted==null?"":x.counted)+(x.kept_aside_added?' <span class="why">(incl. '+x.kept_aside_added+' kept aside)</span>':"")+'</td><td>'+(x.at_count==null?"?":x.at_count+(x.sold_after?' <span class="why">(closing '+x.closing+' + sold after '+x.sold_after+')</span>':""))+'</td><td class="'+(x.change>0?"plus":(x.change<0?"minus":""))+'">'+(x.change==null?"by hand":(x.change>0?"+":"")+x.change)+(x.how?' <span class="why">'+esc(x.how)+'</span>':"")+'</td><td class="why">'+esc(x.notes.join("; "))+ctl+'</td></tr>';});
+  h+='</table>';
+  if(K.renames.length){h+='<h2 style="margin-top:14px">Renames after the voucher</h2>'+K.renames.map(r=>'<div>#'+r.n+' '+esc(r.item)+' → <b>'+esc(r.new||"(no safe name — Claude names it)")+'</b></div>').join("");}
+  if(K.aside.length){h+='<h2 style="margin-top:14px">Kept aside — not counted</h2><div class="why">For each: did its bill enter Marg on the count day? Then Marg\'s closing holds these boxes and they are added to the line you name.</div>'+K.aside.map(a=>'<div class="row" style="margin:6px 0">'+esc(a.words)+' · '+esc(a.dealer||"")+' · '+(a.qty==null?"":a.qty)+(a.cleared_at?' <span class="why">settled: '+(a.same_day?"added to #"+a.add_to_n:"bill entered later — nothing added")+'</span>':(own?' <span class="noprint">Line # <input class="cnt" style="width:70px" data-an="'+a.seq+'"> <button data-asame="'+a.seq+'">Bill entered on the count day — add to this line</button> <button data-alater="'+a.seq+'">Bill entered later</button></span>':""))+'</div>').join("");}
+  if(K.extra.length){h+='<h2 style="margin-top:14px">On the shelf, not on the list</h2>'+K.extra.map(a=>'<div>'+esc(a.words)+' · '+(a.qty==null?"":a.qty)+'</div>').join("");}
+  if(C.status==="sent"){const blk=hand.length||K.open_aside;h+='<div class="row noprint" style="margin-top:14px"><button class="main" id="amir"'+(blk?" disabled":"")+'>Send to Amir\'s card ('+ch.length+' voucher lines'+(K.renames.length?", "+K.renames.filter(r=>r.new).length+" renames":"")+')</button><button id="cancel">Cancel this count</button></div>'+(hand.length?'<div class="why">'+hand.length+' line(s) need your figure first (or Leave it out).</div>':"")+(K.open_aside?'<div class="why">'+K.open_aside+' kept-aside line(s) to settle first.</div>':"");}
+  return h+'</div>'+linesRead();
+}
+function linesRead(){let h='<div class="tbl"><div class="hd"><div>#</div><div>Item</div><div>Size</div><div>Marg name</div><div class="r">Marg</div><div class="c">Count</div><div class="c">2nd count</div><div>Size on box</div></div>',g=null;
+  C.lines.forEach(l=>{if(l.grp!==g){h+=(g===null?"":'</div>');g=l.grp;h+='<div class="grpbox"><div class="gh">'+esc(g)+'</div>';}const cls=l.flag===2?"ln s2":(l.flag===1?"ln s1":"ln");
+    h+='<div class="'+cls+'"><div class="num c-n">'+l.n+'</div><div class="c-name">'+(l.flag===2?"★★ ":(l.flag===1?"★ ":""))+esc(l.kind)+(l.size?' <b>'+esc(l.size)+'</b>':"")+'</div><div class="c-size">'+esc(l.size)+'</div><div class="mg c-mg">'+esc(l.item)+'</div><div class="r num c-m">'+l.marg+'</div><div class="c num c-cnt">'+(l.counted==null?"":l.counted)+'</div><div class="c num c-two">'+(l.second==null?"":l.second)+'</div><div class="c-box">'+esc(l.size_on_box)+'</div></div>';});
+  return h+(g===null?"":'</div>')+'</div>';}
+function wireDone(){const f=el("pfull");if(f)f.onclick=()=>window.print();const c=el("csv");if(c)c.onclick=csv;
+  const a=el("amir");if(a)a.onclick=async()=>{a.disabled=true;try{const j=await call(P+"/api/to_amir",{count:C.id});say("On Amir's card: "+j.voucher_lines+" voucher line(s), "+j.renames+" rename(s).");load();}catch(e){say(e.message,true);a.disabled=false;}};
+  const x=el("cancel");if(x)x.onclick=async()=>{try{await call(P+"/api/cancel",{count:C.id});say("Cancelled.");QS.delete("count");history.replaceState(null,"","?"+QS);load();}catch(e){say(e.message,true);}};
+  const go=async(u,b)=>{try{await call(P+u,Object.assign({count:C.id},b));say("");load();}catch(e){say(e.message,true);}};
+  el("body").querySelectorAll("[data-hset]").forEach(b=>b.onclick=()=>{const v=(el("body").querySelector('[data-hn="'+b.dataset.hset+'"]')||{}).value||"";go("/api/hand",{n:+b.dataset.hset,change:v.trim()});});
+  el("body").querySelectorAll("[data-hskip]").forEach(b=>b.onclick=()=>go("/api/hand",{n:+b.dataset.hskip,skip:true}));
+  el("body").querySelectorAll("[data-hclr]").forEach(b=>b.onclick=()=>go("/api/hand",{n:+b.dataset.hclr,clear:true}));
+  el("body").querySelectorAll("[data-asame]").forEach(b=>b.onclick=()=>{const v=(el("body").querySelector('[data-an="'+b.dataset.asame+'"]')||{}).value||"";go("/api/aside_clear",{seq:+b.dataset.asame,same_day:true,n:v.trim()});});
+  el("body").querySelectorAll("[data-alater]").forEach(b=>b.onclick=()=>go("/api/aside_clear",{seq:+b.dataset.alater,same_day:false}));}
+async function startCount(over){["go","goany"].forEach(i=>{const b=el(i);if(b){b.disabled=true;b.textContent="Starting…";}});try{const j=await call(P+"/api/start",{section:S.section,override:!!over});QS.set("count",j.count);history.replaceState(null,"","?"+QS);say("");load();}catch(e){say(e.message,true);load();}}
+document.addEventListener("click",e=>{if(e.target.id==="go")startCount(false);if(e.target.id==="goany")startCount(true);});
+el("sec").onchange=()=>{QS.set("section",el("sec").value);QS.delete("count");history.replaceState(null,"","?"+QS);load();};
+window.addEventListener("beforeunload",e=>{if(DIRTY){e.preventDefault();e.returnValue="";}});
+load();
+</script>
+</body>
+</html>

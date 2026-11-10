@@ -1,0 +1,1058 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# =============================================================================
+#  section_count.py  ·  v1.0  ·  kit S768_SECTION_COUNT  ·  Session 420 (Sanjeevni)  ·  10-Nov-2026
+#
+#  THE OWNER, 10-Nov-2026 05:13-05:35 IST: "give orthotic counting table separately, highlight the 21 lines where you want
+#  double check, and extra highlight items 44 and 45; this becomes a page in stock milaan section, where it can be downloaded
+#  and printed, and can be entered in the page online as well ... after entering we can print the pages" -- "this becomes a
+#  feature which we can execute whenever we want from the stock Milan page, the list gets auto updated with the new products,
+#  and this orthotics becomes a section for whatever we have flagged here" -- "Yuvika supplies an item and it is not yet
+#  entered by Amir into Marg, but on the counter it would be counted as present. Have you managed this part?"
+#
+#  WHAT THIS FILE IS -- a count of ONE section of the shelf (Orthotics first), any time, from Stock milaan:
+#    GET  /finance/stockmatch/count                      the page (section_count.html): PC and phone, print blank / with counts, CSV
+#    GET  /finance/stockmatch/count/api/state            the sections, the open count of a section, the guard, the past counts
+#    POST /finance/stockmatch/count/api/start            {section, override}  a new count: the section's lines from Marg's NEWEST
+#                                                        closing (stock_item_section, which section_map.on_closing seeds every night,
+#                                                        so a new product joins by itself), the count-twice marks frozen at the start
+#    POST /finance/stockmatch/count/api/save             {count, rev, details, lines, extras, aside}   pinned by rev (409 when another
+#                                                        screen saved first)
+#    POST /finance/stockmatch/count/api/send             {count, rev}   every line counted; a starred line's two counts agree
+#    POST /finance/stockmatch/count/api/to_amir          {count}   OWNER: the correction (ready after the count day's closing) goes to
+#                                                        Amir's card as one tap job per changed line, and one per rename
+#    POST /finance/stockmatch/count/api/cancel           {count}   OWNER
+#    POST /finance/stockmatch/count/api/flag             {section, item, level 0|1|2}   OWNER: his own count-twice mark
+#    POST /finance/stockmatch/count/api/aside_clear      {count, seq}   OWNER: a kept-aside box whose bill is now in Marg
+#
+#  THE GUARD (the owner's 05:32 question): a count cannot start while a scanned bill of a dealer who supplies this section is not
+#  yet in Marg (scan_register: this month's and last month's pharmacy scans with no Marg bill). Only the owner starts anyway, and
+#  that is recorded. Boxes that came without a scanned bill are written in the count's own 'came in, not yet in Marg' box, kept
+#  aside, and never enter the correction. The dealer's bill and its Marg entry decide what arrived -- never a staff tap (D883).
+#
+#  THE CORRECTION: Marg at the count = the count day's closing + what was sold that day after the count (before the first sale:
+#  the whole day; during the day: the bills after the last bill number written; after the last sale: nothing). change =
+#  counted - Marg at the count. A purchase dated the count day is named on its line (it may have been entered after the count).
+#  It waits for the count day's closing and its sale lines (the next night).
+#
+#  THE COUNT-TWICE MARKS (frozen per count): the owner's own (section_count_flag; S768 seeds the 21 of S420's paper: 19 star,
+#  #44 and #45 two stars) + an open Marg hand change (marg_hand_change) + after a first count of this kind, the record since it
+#  (counted then + purchases - sales since) against Marg at the start: any gap a star, a gap of 3 or more two stars.
+#
+#  S769 (10-Nov-2026, the owner 07:26 IST): the Stock check hub lists every count (GET /api/hub, the doctor's) and carries "Who may
+#  count": POST /api/access {user, on} switches a staff login's maker row in the unit 'stockcount' -- the counting page only, never
+#  Darpan's other Stock milaan cards. A login with no access sees a plain page saying so (the Stock milaan tile sends it here).
+#  ACCESS: the unit 'stockmatch' (Darpan maker, the owner checker), as Stock milaan itself, or a 'stockcount' maker (the switch). Writes are audited (audit_log).
+#  Nothing here writes to Marg or to stock_count (the 06-Sep count stays sealed). Outside its own five tables it writes only:
+#  amir_job rows of kind 'tap' (the S494 one-time jobs; amir_day shows them and he taps them done), and at a start the
+#  insert-only section_map.seed of names Marg's closing holds that have no section row yet (what the nightly does anyway).
+#
+#  COLD REVIEW (S420, before install) -- built in: a line the arithmetic cannot settle (packs, a purchase dated the count day, a
+#  20-letter twin, a bill of another series, not in the closing) is 'by hand' and blocks Amir until the doctor types its change
+#  or leaves it out; a kept-aside box blocks Amir until the doctor says whether its bill entered Marg on the count day (then it is
+#  added to the line he names); a guard that cannot read the scans blocks like a waiting bill (the doctor may start anyway);
+#  v1 counts Orthotics only (Medicines have packs and 20-letter twins); one draft a section is a unique index; a save bumps the
+#  rev first and stops on a lost race.
+# =============================================================================
+import datetime as dt
+import json
+import os
+import re
+import sqlite3
+import sys
+
+from flask import Blueprint, jsonify, request, send_file
+
+VERSION = "1.1"
+KIT = "S769_STOCK_HUB_COUNTS"                              # v1.0 was S768_SECTION_COUNT
+bp = Blueprint("section_count", __name__)
+_db = _require = None
+ACCESS_UNIT = "stockmatch"
+COUNT_UNIT = "stockcount"                                     # S769: the doctor's "Who may count" switch -- counting only
+HERE = os.path.dirname(os.path.abspath(__file__))
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+PAGE = os.path.join(HERE, "section_count.html")
+P = "/finance/stockmatch/count"
+SIZE_TOKENS = ("XS", "S", "M", "L", "XL", "XXL", "XXXL", "3XL", "4XL")
+WHEN = ("before_open", "during", "after_close")
+COUNT_SECTIONS = ("Orthotics",)                               # v1: the section the owner asked for; the code takes any later
+AMIR_BY = "S768"
+DDL = (
+    "CREATE TABLE IF NOT EXISTS section_count (id INTEGER PRIMARY KEY, section TEXT NOT NULL, status TEXT NOT NULL, snap_as_on TEXT,"
+    " started_at TEXT NOT NULL, started_by TEXT, rev INTEGER NOT NULL DEFAULT 1, details TEXT, saved_at TEXT, saved_by TEXT,"
+    " sent_at TEXT, sent_by TEXT, count_day TEXT, count_when TEXT, last_bill TEXT, guard TEXT, override_by TEXT,"
+    " to_amir_at TEXT, to_amir_by TEXT, cancelled_at TEXT, cancelled_by TEXT)",
+    "CREATE INDEX IF NOT EXISTS ix_section_count_sec ON section_count(section, status)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS ux_section_count_draft ON section_count(section) WHERE status='draft'",
+    "CREATE TABLE IF NOT EXISTS section_count_line (count_id INTEGER NOT NULL, n INTEGER NOT NULL, item TEXT NOT NULL, item_key TEXT,"
+    " grp TEXT, kind TEXT, size TEXT, pack_size INTEGER, marg_qty INTEGER, flag INTEGER NOT NULL DEFAULT 0, flag_why TEXT,"
+    " counted INTEGER, second INTEGER, size_on_box TEXT, owner_change INTEGER, owner_skip INTEGER, PRIMARY KEY (count_id, n))",
+    "CREATE TABLE IF NOT EXISTS section_count_extra (count_id INTEGER NOT NULL, kind TEXT NOT NULL, seq INTEGER NOT NULL,"
+    " words TEXT, dealer TEXT, qty INTEGER, cleared_at TEXT, cleared_by TEXT, add_to_n INTEGER, same_day INTEGER, PRIMARY KEY (count_id, kind, seq))",
+    "CREATE TABLE IF NOT EXISTS section_count_flag (section TEXT NOT NULL, item_key TEXT NOT NULL, item TEXT, level INTEGER NOT NULL,"
+    " why TEXT, by_user TEXT, at TEXT, PRIMARY KEY (section, item_key))",
+    "CREATE TABLE IF NOT EXISTS section_item_display (item_key TEXT PRIMARY KEY, item TEXT, grp TEXT, grp_order INTEGER, ord INTEGER,"
+    " kind TEXT, size TEXT, source TEXT, at TEXT)",
+)
+
+
+def init(app, db_getter, require_fn):
+    global _db, _require
+    _db, _require = db_getter, require_fn
+    app.register_blueprint(bp)
+    return bp
+
+
+def ensure_schema(con):
+    for ddl in DDL:
+        con.execute(ddl)
+
+
+def now_iso():
+    return dt.datetime.now().replace(microsecond=0).isoformat()
+
+
+def _sm():
+    import section_map                                        # noqa: PLC0415 -- beside this file
+    return section_map
+
+
+def nk(name):
+    return _sm().norm_key(name)
+
+
+def k20(name):
+    return re.sub(r"\s+", " ", str(name or "").upper()[:20]).strip()
+
+
+def _table(con, t):
+    return con.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (t,)).fetchone() is not None
+
+
+def audit(con, row_id, action, after, who):
+    if _table(con, "audit_log"):
+        con.execute("INSERT INTO audit_log (table_name, row_id, action, before_json, after_json, by_whom, at) VALUES (?,?,?,?,?,?,?)",
+                    ("section_count", row_id, action, None, json.dumps(after, ensure_ascii=False), who, now_iso()))
+
+
+# ------------------------------------------------------------------ dates
+def dmy_key(a):
+    t = str(a or "").strip().replace("/", "-").split("-")
+    if len(t) == 3:
+        try:
+            d, m, y = (int(x) for x in t)
+            if y > 1900 and 1 <= m <= 12:
+                return (y, m, d)
+        except ValueError:
+            pass
+    return (0, 0, 0)
+
+
+def iso_of_dmy(a):
+    y, m, d = dmy_key(a)
+    return "%04d-%02d-%02d" % (y, m, d) if y else ""
+
+
+def dmy_of_iso(s):
+    try:
+        d = dt.date.fromisoformat(str(s)[:10])
+    except ValueError:
+        return ""
+    return d.strftime("%d-%m-%Y")
+
+
+def ddmon(s):
+    try:
+        return dt.date.fromisoformat(str(s)[:10]).strftime("%d-%b-%Y")
+    except ValueError:
+        return str(s or "")
+
+
+def newest_snapshot(con):
+    dates = [r[0] for r in con.execute("SELECT DISTINCT as_on FROM stock_snapshot").fetchall()]
+    if not dates:
+        return None, []
+    as_on = max(dates, key=dmy_key)
+    rows = con.execute("SELECT item, qty, packing, pack_size FROM stock_snapshot WHERE as_on=? ORDER BY item", (as_on,)).fetchall()
+    return as_on, rows
+
+
+# ------------------------------------------------------------------ the names
+def size_of(name):
+    """The size word of a Marg name ('' when none) and where it starts."""
+    up = str(name or "").upper()
+    hit = ("", -1)
+    for m in re.finditer(r"[A-Z0-9]+", up):
+        if m.group(0) in SIZE_TOKENS:
+            hit = (m.group(0), m.start())                      # the LAST size word: 'L S BELT XL ...' is XL, not the L of 'L S'
+    return hit
+
+
+def loses_size(name):
+    """True when the name has a size word but Marg's 20-letter sale report cuts it off."""
+    s, at = size_of(name)
+    return bool(s) and at + len(s) > 20
+
+
+def rename_for(name, all_names):
+    """The size moved after the opening words (two, or one when two do not leave room), so it sits in the first 20 letters;
+    None when no such name exists or its first 20 letters would clash with another item."""
+    s, at = size_of(name)
+    if not s:
+        return None
+    up = str(name).upper()
+    words = (up[:at] + up[at + len(s):]).split()
+    for k in list(range(2, len(words))) + [1]:
+        if k >= len(words) or not any(len(w) >= 3 for w in words[:k]):
+            continue
+        new = " ".join(words[:k] + [s] + words[k:])
+        if len(" ".join(words[:k] + [s])) <= 20 and len(new) <= 29:
+            clash = [x for x in all_names if k20(x) == k20(new) and nk(x) != nk(name)]
+            return None if clash else new
+    return None
+
+
+def display_of(con, items):
+    """item -> dict(grp, grp_order, ord, kind, size): the stored display (S768's seed for the 75 of 08-Nov), and for a new name its
+    family's group (section_map.family), else the family itself as a new group at the end."""
+    rows = {r["item_key"]: dict(r) for r in con.execute("SELECT * FROM section_item_display")}
+    by_fam, max_go = {}, 0
+    for r in rows.values():
+        by_fam.setdefault(_sm().family(r["item"]), r)
+        max_go = max(max_go, int(r["grp_order"] or 0))
+    out = {}
+    for it in items:
+        k = nk(it)
+        r = rows.get(k)
+        if r:
+            out[it] = dict(grp=r["grp"], grp_order=int(r["grp_order"] or 0), ord=int(r["ord"] or 0), kind=r["kind"] or it, size=r["size"] or "")
+            continue
+        fam = _sm().family(it)
+        sib = by_fam.get(fam)
+        s, _at = size_of(it)
+        if sib:
+            out[it] = dict(grp=sib["grp"], grp_order=int(sib["grp_order"] or 0), ord=9000, kind=it, size=s or "")
+        else:
+            out[it] = dict(grp=(fam.title() if fam else "New items"), grp_order=max_go + 1, ord=9000, kind=it, size=s or "")
+    return out
+
+
+# ------------------------------------------------------------------ sales, purchases
+def bill_key(b):
+    m = re.match(r"^\s*([A-Za-z]*)\s*0*(\d+)\s*$", str(b or ""))
+    return (m.group(1).upper(), int(m.group(2))) if m else None
+
+
+def after_bill(bno, last):
+    a, b = bill_key(bno), bill_key(last)
+    if a and b and a[0] == b[0]:
+        return a[1] > b[1]
+    return None                                                # another series or unreadable: the line goes by hand
+
+
+def sales_on(con, day_iso, when, last_bill, unsure=None):
+    """k20 -> net pieces sold on day_iso AFTER the count (returns subtract). A bill that cannot be placed before or after the last
+    bill number (another series) adds its k20 to `unsure`."""
+    out = {}
+    if when == "after_close" or not _table(con, "sale_line_item"):
+        return out
+    for bno, ret, key, name, q in con.execute("SELECT bill_no, is_return, item_key, item_name, qty_raw FROM sale_line_item WHERE business_date=? "
+                                              "AND COALESCE(unit,'medical')='medical'", (day_iso,)):
+        if when == "during":
+            a = after_bill(bno, last_bill)
+            if a is None:
+                if unsure is not None:
+                    unsure.add(k20(key or name))
+                continue
+            if not a:
+                continue
+        try:
+            qty = float(q or 0)
+        except (TypeError, ValueError):
+            qty = 0.0
+        kk = k20(key or name)
+        out[kk] = out.get(kk, 0.0) + (-qty if int(ret or 0) else qty)
+    return out
+
+
+def sales_between(con, after_day, upto_day):
+    out = {}
+    if not _table(con, "sale_line_item"):
+        return out
+    for ret, key, name, q in con.execute("SELECT is_return, item_key, item_name, qty_raw FROM sale_line_item WHERE business_date > ? AND business_date <= ? "
+                                         "AND COALESCE(unit,'medical')='medical'",
+                                         (after_day, upto_day)):
+        try:
+            qty = float(q or 0)
+        except (TypeError, ValueError):
+            qty = 0.0
+        kk = k20(key or name)
+        out[kk] = out.get(kk, 0.0) + (-qty if int(ret or 0) else qty)
+    return out
+
+
+def purchases(con, where, args):
+    """[(supplier_norm, bill_no, bill_date, item, qty)]: Marg's purchase lines, each bill's item counted from ONE export (the
+    item-wise lines arrive again with every export; the largest export's figure stands)."""
+    if not _table(con, "purchase_line"):
+        return []
+    per = {}
+    for sn, bno, bd, it, src, q, fr in con.execute("SELECT supplier_norm, bill_no, bill_date, item, source_md5, qty, free FROM purchase_line WHERE "
+                                                   "direction='PURCHASE' AND " + where, args):
+        try:
+            qty = float(q or 0) + float(fr or 0)
+        except (TypeError, ValueError):
+            qty = 0.0
+        key = (sn, str(bno), bd, it)
+        per.setdefault(key, {})
+        per[key][src] = per[key].get(src, 0.0) + qty
+    return [(k[0], k[1], k[2], k[3], max(v.values())) for k, v in per.items()]
+
+
+_NK = {}
+
+
+def nkc(name):
+    v = _NK.get(name)
+    if v is None:
+        v = _NK[name] = nk(name)
+        if len(_NK) > 20000:
+            _NK.clear()
+    return v
+
+
+def same_item(line_item, pl_item):
+    a, b = nkc(line_item), nkc(pl_item)
+    return bool(a and b) and (a.startswith(b) or b.startswith(a)) and min(len(a), len(b)) >= 12
+
+
+# ------------------------------------------------------------------ the guard
+def section_names(con, section):
+    """Every name the section holds: its stock_item_section rows, and a name of Marg's newest closing that has no row yet as the
+    seed WILL file it (section_map's own rules, read only -- nothing is written by a read)."""
+    sm = _sm()
+    sm.ensure(con)
+    have = {r[0]: r[1] for r in con.execute("SELECT item_key, section FROM stock_item_section")}
+    names = [r[0] for r in con.execute("SELECT item FROM stock_item_section WHERE section=?", (section,))]
+    _as_on, snap = newest_snapshot(con)
+    new = [r[0] for r in snap if nk(r[0]) not in have]
+    if new:
+        extra = sm.extra_consumable_words(con)
+        fams, _who = sm.owner_families(con)
+        names += [it for it in new if (sm.rule_of(it, fams) or sm.classify(it, extra)) == section]
+    return names
+
+
+def section_dealers(con, section):
+    """The suppliers whose Marg purchase lines carry a name of this section -- by the name itself (old names included), or, for a
+    name Marg no longer holds, by section_map's own rules (the owner's family rulings first)."""
+    sm = _sm()
+    names = section_names(con, section)
+    out = set()
+    if not _table(con, "purchase_line"):
+        return out
+    extra = sm.extra_consumable_words(con)
+    fams, _who = sm.owner_families(con)
+    keys = sorted({nkc(n) for n in names if nkc(n)})
+    for it, sns in _items_by_supplier(con).items():
+        if sns <= out:
+            continue
+        b = nkc(it)
+        hit = bool(b) and any((a.startswith(b) or b.startswith(a)) and min(len(a), len(b)) >= 12 for a in keys)
+        if hit or (sm.rule_of(it, fams) or sm.classify(it, extra)) == section:
+            out |= sns
+    return out
+
+
+def _items_by_supplier(con):
+    by = {}
+    for sn, it in con.execute("SELECT DISTINCT supplier_norm, item FROM purchase_line WHERE direction='PURCHASE'"):
+        by.setdefault(it, set()).add(str(sn or ""))
+    return by
+
+
+def guard(con, section, today=None):
+    """dict(checked, blocked, lines, why): the scanned bills of this section's dealers that are not in Marg (this month and last)."""
+    today = today or dt.date.today()
+    try:
+        import scan_register as SR                            # noqa: PLC0415
+        dealers = {SR.sup_norm(d) for d in section_dealers(con, section) if d}
+        months = [today.strftime("%Y-%m"), (today.replace(day=1) - dt.timedelta(days=1)).strftime("%Y-%m")]
+        lines, warns = [], []
+        for m in months:
+            reg = SR.register(con, m)
+            for s in reg.get("scans") or []:
+                st = s.get("state")
+                if st == "second":
+                    continue
+                v = s.get("vendor") or ""
+                where = "%s bill %s (scan %s, %s)" % (v or "A paper", s.get("bill_no") or "?", s.get("stamp") or "?", ddmon(s.get("day")))
+                if not v.strip() or st in ("to_name", "unread"):
+                    warns.append(dict(stamp=s.get("stamp"), text="%s has no dealer read yet -- if it is from %s's dealers, Amir enters it first."
+                                      % (where, "this section")))
+                elif SR.sup_norm(v) in dealers:
+                    if st == "probably":
+                        warns.append(dict(stamp=s.get("stamp"), text="%s is probably in Marg under another number -- reception settles it." % where))
+                    else:
+                        lines.append(dict(stamp=s.get("stamp"), vendor=v, bill_no=s.get("bill_no") or "", day=str(s.get("day") or "")[:10],
+                                          text="%s is not in Marg yet -- Amir enters it first." % where))
+        return dict(checked=True, blocked=bool(lines), lines=lines, warns=warns[:12], why="")
+    except Exception as e:                                     # noqa: BLE001 -- unread scans block like a waiting bill (the doctor may start anyway)
+        return dict(checked=False, blocked=True, lines=[], warns=[], why="The scanned bills could not be checked (%s) -- only the doctor can start." % str(e)[:80])
+
+
+# ------------------------------------------------------------------ the marks
+def owner_flags(con, section):
+    return {r["item_key"]: (int(r["level"]), r["why"] or "your mark") for r in
+            con.execute("SELECT item_key, level, why FROM section_count_flag WHERE section=? AND level > 0", (section,))}
+
+
+def hand_flags(con, items):
+    out = {}
+    if not _table(con, "marg_hand_change"):
+        return out
+    keys = {k20(i): i for i in items}
+    for it, k, day in con.execute("SELECT item, k20, day_to FROM marg_hand_change WHERE status='open'"):
+        hit = keys.get(k20(k or it)) or keys.get(k20(it))
+        if hit:
+            out[hit] = "Marg changed by hand (%s)" % ddmon(day)
+    return out
+
+
+def record_flags(con, section, rows, snap_as_on):
+    """item -> (level, why) from the record since the newest earlier count of this section that was sent."""
+    prev = con.execute("SELECT * FROM section_count WHERE section=? AND status IN ('sent','to_amir') AND count_day IS NOT NULL "
+                       "ORDER BY count_day DESC, id DESC LIMIT 1", (section,)).fetchone()
+    if not prev:
+        return {}
+    snap_day = iso_of_dmy(snap_as_on)
+    day = prev["count_day"]
+    if not snap_day or snap_day < day:
+        return {}
+    pc = {r["item_key"]: r["counted"] for r in con.execute("SELECT item_key, counted FROM section_count_line WHERE count_id=?", (prev["id"],))}
+    same = sales_on(con, day, prev["count_when"], prev["last_bill"])
+    later = sales_between(con, day, snap_day)
+    pls = purchases(con, "bill_date > ? AND bill_date <= ?", (day, snap_day))
+    out = {}
+    for r in rows:
+        it, q, ps = r[0], int(r[1] or 0), int(r[3] or 1)
+        base = pc.get(nk(it))
+        if base is None or ps != 1:
+            continue
+        bought = sum(x[4] for x in pls if same_item(it, x[3]))
+        rec = int(round(base + bought - same.get(k20(it), 0.0) - later.get(k20(it), 0.0)))
+        gap = q - rec
+        if gap:
+            out[it] = (2 if abs(gap) >= 3 else 1, "Marg %d, the record since %s says %d" % (q, ddmon(day), rec))
+    return out
+
+
+# ------------------------------------------------------------------ a count
+def count_row(con, cid):
+    return con.execute("SELECT * FROM section_count WHERE id=?", (cid,)).fetchone()
+
+
+def open_count(con, section):
+    return con.execute("SELECT * FROM section_count WHERE section=? AND status='draft' ORDER BY id DESC LIMIT 1", (section,)).fetchone()
+
+
+def start(con, section, user, override=False, is_owner=False, today=None):
+    """(ok, payload | message, http)."""
+    sm = _sm()
+    if section not in COUNT_SECTIONS:
+        return False, "This count is for: %s." % ", ".join(COUNT_SECTIONS), 400
+    if open_count(con, section):
+        return False, "A count of %s is already open -- continue it." % section, 409
+    g = guard(con, section, today)
+    if g["blocked"] and not (override and is_owner):
+        return False, dict(message="Bills not in Marg yet -- Amir enters them first.", guard=g), 409
+    as_on, snap = newest_snapshot(con)
+    if not snap:
+        return False, "No Marg closing on this server yet.", 503
+    sm.seed(con, [r[0] for r in snap], by_user=KIT)            # insert-only: a new name gets its section tonight anyway
+    secs = {r[0]: r[1] for r in con.execute("SELECT item_key, section FROM stock_item_section")}
+    rows = [r for r in snap if secs.get(nk(r[0])) == section]
+    if not rows:
+        return False, "Marg's closing of %s has no item in %s." % (as_on, section), 404
+    items = [r[0] for r in rows]
+    disp = display_of(con, items)
+    of = owner_flags(con, section)
+    hf = hand_flags(con, items)
+    rf = record_flags(con, section, rows, as_on)
+    ts = now_iso()
+    try:
+        cur = con.execute("INSERT INTO section_count (section, status, snap_as_on, started_at, started_by, rev, guard, override_by) VALUES (?,?,?,?,?,?,?,?)",
+                          (section, "draft", as_on, ts, user, 1, json.dumps(g, ensure_ascii=False), user if (g["blocked"] and override) else None))
+    except sqlite3.IntegrityError:                             # another screen started it a moment ago (one draft a section)
+        con.rollback()
+        return False, "A count of %s was just started on another screen -- continue it." % section, 409
+    cid = cur.lastrowid
+    order = sorted(rows, key=lambda r: (disp[r[0]]["grp_order"], disp[r[0]]["ord"], r[0]))
+    for n, r in enumerate(order, 1):
+        it = r[0]
+        lv, why = 0, []
+        o = of.get(nk(it))
+        if o:
+            lv, why = max(lv, o[0]), why + [o[1]]
+        if it in hf:
+            lv, why = max(lv, 1), why + [hf[it]]
+        if it in rf:
+            lv, why = max(lv, rf[it][0]), why + [rf[it][1]]
+        d = disp[it]
+        con.execute("INSERT INTO section_count_line (count_id, n, item, item_key, grp, kind, size, pack_size, marg_qty, flag, flag_why) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                    (cid, n, it, nk(it), d["grp"], d["kind"], d["size"], int(r[3] or 1), int(r[1] or 0), lv, "; ".join(why)))
+    audit(con, cid, "start", dict(section=section, lines=len(order), snap=as_on, override=bool(g["blocked"] and override)), user)
+    con.commit()
+    return True, dict(count=cid), 200
+
+
+def _int(v):
+    if v is None or str(v).strip() == "":
+        return None
+    try:
+        x = int(str(v).strip())
+    except ValueError:
+        return "bad"
+    return x if 0 <= x <= 9999 else "bad"
+
+
+def save(con, cid, rev, body, user):
+    c = count_row(con, cid)
+    if not c or c["status"] != "draft":
+        return False, "This count is not open.", 409
+    if int(rev or 0) != int(c["rev"]):
+        return False, "Another screen saved this count first -- the page reloads with its numbers.", 409
+    k = con.execute("UPDATE section_count SET rev=rev+1, saved_at=?, saved_by=? WHERE id=? AND rev=? AND status='draft'",
+                    (now_iso(), user, cid, int(c["rev"]))).rowcount or 0
+    if k != 1:                                                 # lost a race with another screen's save
+        con.rollback()
+        return False, "Another screen saved this count first -- the page reloads with its numbers.", 409
+    det = body.get("details") or {}
+    when = det.get("when") if det.get("when") in WHEN else None
+    day = str(det.get("day") or "")[:10]
+    try:
+        dt.date.fromisoformat(day)
+    except ValueError:
+        day = ""
+    details = dict(counted_by=str(det.get("counted_by") or "")[:60], entered_by=str(det.get("entered_by") or "")[:60], when=when, day=day,
+                   last_bill=str(det.get("last_bill") or "").strip()[:20])
+    have = {r["n"] for r in con.execute("SELECT n FROM section_count_line WHERE count_id=?", (cid,))}
+    for ln in body.get("lines") or []:
+        try:
+            n = int(ln.get("n"))
+        except (TypeError, ValueError):
+            continue
+        if n not in have:
+            continue
+        a, b = _int(ln.get("counted")), _int(ln.get("second"))
+        if a == "bad" or b == "bad":
+            con.rollback()
+            return False, "Line %d: a count is a whole number from 0." % n, 400
+        con.execute("UPDATE section_count_line SET counted=?, second=?, size_on_box=? WHERE count_id=? AND n=?",
+                    (a, b, str(ln.get("size_on_box") or "").strip()[:30] or None, cid, n))
+    for kind in ("extra", "aside"):
+        con.execute("DELETE FROM section_count_extra WHERE count_id=? AND kind=?", (cid, kind))
+        for i, e in enumerate((body.get(kind) or [])[:40], 1):
+            words = str(e.get("words") or "").strip()[:80]
+            q = _int(e.get("qty"))
+            if not words and q in (None, "bad"):
+                continue
+            if q == "bad":
+                con.rollback()
+                return False, "A count is a whole number from 0.", 400
+            con.execute("INSERT INTO section_count_extra (count_id, kind, seq, words, dealer, qty) VALUES (?,?,?,?,?,?)",
+                        (cid, kind, i, words, str(e.get("dealer") or "").strip()[:60] or None, q))
+    con.execute("UPDATE section_count SET details=? WHERE id=?", (json.dumps(details, ensure_ascii=False), cid))
+    con.commit()
+    return True, dict(rev=int(c["rev"]) + 1), 200
+
+
+def send(con, cid, rev, user):
+    c = count_row(con, cid)
+    if not c or c["status"] != "draft":
+        return False, "This count is not open.", 409
+    if int(rev or 0) != int(c["rev"]):
+        return False, "Another screen saved this count first -- reload.", 409
+    det = json.loads(c["details"] or "{}")
+    if not det.get("day") or det.get("when") not in WHEN:
+        return False, "Fill the count's date and when it was counted.", 400
+    if det["when"] == "during" and not bill_key(det.get("last_bill")):
+        return False, "Counted during the day: write the last sale bill number before the count, as Marg prints it (e.g. A004673).", 400
+    empty = [r["n"] for r in con.execute("SELECT n FROM section_count_line WHERE count_id=? AND counted IS NULL", (cid,))]
+    if empty:
+        return False, "%d line(s) still have no number (0 included): %s." % (len(empty), ", ".join("#%d" % n for n in empty[:12])), 400
+    twice = [r["n"] for r in con.execute("SELECT n FROM section_count_line WHERE count_id=? AND flag>0 AND (second IS NULL OR second<>counted)", (cid,))]
+    if twice:
+        return False, "Starred line(s) need two counts that agree: %s." % ", ".join("#%d" % n for n in twice[:12]), 400
+    con.execute("UPDATE section_count SET status='sent', sent_at=?, sent_by=?, count_day=?, count_when=?, last_bill=? WHERE id=? AND status='draft'",
+                (now_iso(), user, det["day"], det["when"], det.get("last_bill") or None, cid))
+    audit(con, cid, "send", dict(day=det["day"], when=det["when"]), user)
+    con.commit()
+    return True, {}, 200
+
+
+def correction(con, c):
+    """dict(state 'waiting'|'ready', why, lines, renames, aside, extra, hand, open_aside). A line's change is None ('by hand') when
+    the arithmetic cannot settle it; the doctor's own figure (owner_change) or 'leave it out' (owner_skip) then decides."""
+    lines = [dict(r) for r in con.execute("SELECT * FROM section_count_line WHERE count_id=? ORDER BY n", (c["id"],))]
+    aside = [dict(r) for r in con.execute("SELECT * FROM section_count_extra WHERE count_id=? AND kind='aside' ORDER BY seq", (c["id"],))]
+    extra = [dict(r) for r in con.execute("SELECT * FROM section_count_extra WHERE count_id=? AND kind='extra' ORDER BY seq", (c["id"],))]
+    out = dict(state="waiting", why="", lines=[], renames=[], aside=aside, extra=extra, hand=0, open_aside=sum(1 for a in aside if not a["cleared_at"]))
+    day = c["count_day"]
+    if not day:
+        return out
+    dmy = dmy_of_iso(day)
+    snap = {r[0]: int(r[1] or 0) for r in con.execute("SELECT item, qty FROM stock_snapshot WHERE as_on=?", (dmy,))}
+    if not snap:
+        out["why"] = "Waiting for Marg's closing of %s (it arrives the next night)." % ddmon(day)
+        return out
+    have = _table(con, "sale_line_item") and con.execute("SELECT 1 FROM sale_line_item WHERE business_date >= ? AND COALESCE(unit,'medical')='medical' LIMIT 1",
+                                                          (day,)).fetchone()
+    if not have:
+        out["why"] = "Waiting for the sale lines of %s." % ddmon(day)
+        return out
+    by_nk = {nk(k): v for k, v in snap.items()}
+    by_20 = {}
+    for k, v in snap.items():
+        by_20.setdefault(k20(k), []).append(v)
+    unsure = set()
+    sold = sales_on(con, day, c["count_when"], c["last_bill"], unsure)
+    pls = purchases(con, "bill_date = ?", (day,))
+    add = {}
+    for a in aside:
+        if a["cleared_at"] and a["same_day"] and a["add_to_n"] and a["qty"]:
+            add[int(a["add_to_n"])] = add.get(int(a["add_to_n"]), 0) + int(a["qty"])
+    all_names = list(snap.keys())
+    for l in lines:
+        it = l["item"]
+        notes = []
+        m = snap.get(it)
+        if m is None:
+            m = by_nk.get(nk(it))
+        if m is None and len(by_20.get(k20(it), [])) == 1:
+            m = by_20[k20(it)][0]
+        if m is None:
+            notes.append("not in Marg's closing of %s (renamed?)" % ddmon(day))
+        if int(l["pack_size"] or 1) != 1:
+            notes.append("sold in packs of %s" % l["pack_size"])
+        if len(by_20.get(k20(it), [])) > 1 and sold.get(k20(it), 0.0):
+            notes.append("another item shares its first 20 letters -- its sales after the count cannot be told apart")
+        if k20(it) in unsure:
+            notes.append("a sale that day is on another bill series -- before or after the count?")
+        p = [x for x in pls if same_item(it, x[3])]
+        if p:
+            notes.append("a purchase dated the count day (%s bill %s) -- was it in Marg before the count?" % (p[0][0], p[0][1]))
+        s = sold.get(k20(it), 0.0)
+        counted = None if l["counted"] is None else int(l["counted"]) + add.get(int(l["n"]), 0)
+        at_count = None if m is None else int(round(m + s))
+        calc = None if (notes or at_count is None or counted is None) else counted - at_count
+        if l["owner_skip"]:
+            ch, how = 0, "left out by the doctor"
+        elif l["owner_change"] is not None:
+            ch, how = int(l["owner_change"]), "the doctor's figure"
+        else:
+            ch, how = calc, ("by hand" if calc is None else "")
+        if ch is None:
+            out["hand"] += 1
+        out["lines"].append(dict(n=l["n"], item=it, counted=counted, kept_aside_added=add.get(int(l["n"]), 0), closing=m, sold_after=int(round(s)),
+                                 at_count=at_count, calc=calc, change=ch, how=how, notes=notes, flag=l["flag"]))
+        if loses_size(it):
+            out["renames"].append(dict(n=l["n"], item=it, new=rename_for(it, all_names)))
+    out["state"] = "ready"
+    return out
+
+
+def to_amir(con, c, user):
+    if c["status"] != "sent":
+        return False, "Only a sent count goes to Amir, once.", 409
+    if not _table(con, "amir_job"):
+        return False, "Amir's card is not on this server.", 503
+    cor = correction(con, c)
+    if cor["state"] != "ready":
+        return False, cor["why"] or "The correction is not ready.", 409
+    if cor["open_aside"]:
+        return False, "%d kept-aside line(s): say first whether their bill entered Marg on the count day." % cor["open_aside"], 409
+    if cor["hand"]:
+        hand = [x for x in cor["lines"] if x["change"] is None]
+        return False, "%d line(s) need your figure first: %s." % (len(hand), ", ".join("#%d" % x["n"] for x in hand[:10])), 409
+    k = con.execute("UPDATE section_count SET status='to_amir', to_amir_at=?, to_amir_by=? WHERE id=? AND status='sent'", (now_iso(), user, c["id"])).rowcount or 0
+    if k != 1:
+        con.rollback()
+        return False, "It was sent to Amir a moment ago.", 409
+    ts = dt.datetime.now().replace(microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+    sec, day = c["section"], ddmon(c["count_day"])
+    n_v = n_r = 0
+    for x in cor["lines"]:
+        if not x["change"]:
+            continue
+        verb = "STOCK RECEIVE" if x["change"] > 0 else "STOCK ISSUE"
+        n_v += con.execute("INSERT OR IGNORE INTO amir_job (key, kind, subject, text_hi, sub_hi, created_at, created_by, show_from) VALUES (?,?,?,?,?,?,?,?)",
+                           ("S768:c%d:v:%d" % (c["id"], x["n"]), "tap", x["item"], "%s — Marg mein %s kijiye: %d nag" % (x["item"], verb, abs(x["change"])),
+                            "%s ginti %s · sab ek hi voucher mein" % (sec, day), ts, AMIR_BY, ts)).rowcount or 0
+    for r in cor["renames"]:
+        if not r["new"]:
+            continue
+        n_r += con.execute("INSERT OR IGNORE INTO amir_job (key, kind, subject, text_hi, sub_hi, created_at, created_by, show_from) VALUES (?,?,?,?,?,?,?,?)",
+                           ("S768:c%d:r:%d" % (c["id"], r["n"]), "tap", r["item"], "%s — Marg mein naam badliye: %s" % (r["item"], r["new"]),
+                            "%s ginti %s · voucher ke baad" % (sec, day), ts, AMIR_BY, ts)).rowcount or 0
+    audit(con, c["id"], "to_amir", dict(voucher_lines=n_v, renames=n_r), user)
+    con.commit()
+    return True, dict(voucher_lines=n_v, renames=n_r), 200
+
+
+def view(con, c, is_owner):
+    d = dict(c)
+    d["details"] = json.loads(c["details"] or "{}")
+    d["guard"] = json.loads(c["guard"] or "{}")
+    d["lines"] = [dict(n=r["n"], item=r["item"], grp=r["grp"], kind=r["kind"], size=r["size"], marg=r["marg_qty"], flag=r["flag"], why=r["flag_why"] or "",
+                       counted=r["counted"], second=r["second"], size_on_box=r["size_on_box"] or "",
+                       one_size=not (r["size"] or "").strip() or (r["size"] or "").lower() == "one size")
+                  for r in con.execute("SELECT * FROM section_count_line WHERE count_id=? ORDER BY n", (c["id"],))]
+    for kind in ("extra", "aside"):
+        d[kind] = [dict(seq=r["seq"], words=r["words"] or "", dealer=r["dealer"] or "", qty=r["qty"], cleared_at=r["cleared_at"])
+                   for r in con.execute("SELECT * FROM section_count_extra WHERE count_id=? AND kind=? ORDER BY seq", (c["id"], kind))]
+    d["progress"] = dict(done=sum(1 for x in d["lines"] if x["counted"] is not None), total=len(d["lines"]))
+    if c["status"] in ("sent", "to_amir") and is_owner:
+        d["correction"] = correction(con, c)
+    return d
+
+
+# ------------------------------------------------------------------ seed (the installer)
+def seed_from(con, path, who=KIT):
+    """S768's paper of 10-Nov: the display of the 75 orthotic names and the owner's 21 marks. Insert-only."""
+    ensure_schema(con)
+    J = json.load(open(path, encoding="utf-8"))
+    ts = now_iso()
+    nd = nf = 0
+    for r in J["display"]:
+        nd += con.execute("INSERT OR IGNORE INTO section_item_display (item_key, item, grp, grp_order, ord, kind, size, source, at) VALUES (?,?,?,?,?,?,?,?,?)",
+                          (nk(r["item"]), r["item"], r["grp"], r["grp_order"], r["ord"], r["kind"], r["size"], who, ts)).rowcount or 0
+    for r in J["flags"]:
+        nf += con.execute("INSERT OR IGNORE INTO section_count_flag (section, item_key, item, level, why, by_user, at) VALUES (?,?,?,?,?,?,?)",
+                          (J["section"], nk(r["item"]), r["item"], int(r["level"]), r["why"], who, ts)).rowcount or 0
+    return nd, nf
+
+
+# ------------------------------------------------------------------ routes
+def _auth():
+    u, err = _require("maker", "checker", unit=ACCESS_UNIT)
+    if err:
+        u, err2 = _require("maker", unit=COUNT_UNIT)           # S769: switched on by the doctor -- counting only, never the checker
+        if err2:
+            return None, None, None, err
+        u = dict(u, roles=[r for r in (u.get("roles") or []) if r != "checker"])
+    con = _db()
+    ensure_schema(con)
+    return u, con, ("checker" in (u.get("roles") or [])), None
+
+
+def _who(u):
+    return (u or {}).get("user") or ""
+
+
+def _body():
+    return request.get_json(silent=True) or {}
+
+
+def _cid(b=None):
+    v = (b or {}).get("count") if b is not None else request.args.get("count")
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _refuse(msg, code):
+    if isinstance(msg, dict):
+        return jsonify(ok=False, error="refused", **msg), code
+    return jsonify(ok=False, error="refused", message=msg), code
+
+
+NO_ACCESS = ("<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+             "<title>Stock count</title></head><body style='font:17px/1.5 sans-serif;margin:0;padding:28px 18px;background:#F6F8F7;color:#15201E'>"
+             "<h1 style='font-size:22px;margin:0 0 8px'>Stock count</h1><p>You are not switched on for counting right now.</p>"
+             "<p>Doctor sahab switches you on from the Stock check page when a count needs you.</p></body></html>")
+
+
+@bp.route(P)
+def page():
+    u, con, own, err = _auth()
+    if err:
+        return NO_ACCESS, 403, {"Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store"}
+    return send_file(PAGE)
+
+
+# ------------------------------------------------------------------ S769: the hub's list, the switch
+def staff_candidates(con):
+    """Who the switch offers: the pharmacy's other logins (medical unit rows), never Darpan (he counts by Stock milaan), the doctor
+    or Dr Bhawna."""
+    if not _table(con, "unit_role"):
+        return []
+    skip = {"darpan", "manoj", "bhawna"}
+    return sorted({str(r[0]).lower() for r in con.execute("SELECT username FROM unit_role WHERE unit='medical' AND active=1")} - skip)
+
+
+def access_on(con):
+    if not _table(con, "unit_role"):
+        return set()
+    return {str(r[0]).lower() for r in con.execute("SELECT username FROM unit_role WHERE unit=? AND role='maker' AND active=1", (COUNT_UNIT,))}
+
+
+def hub(con):
+    as_on, snap = newest_snapshot(con)
+    secs = {r[0]: r[1] for r in con.execute("SELECT item_key, section FROM stock_item_section")} if _table(con, "stock_item_section") else {}
+    tpl = []
+    for s in COUNT_SECTIONS:
+        n = sum(1 for r in snap if secs.get(nk(r[0])) == s)
+        g = guard(con, s)
+        oc = open_count(con, s)
+        tpl.append(dict(section=s, items=n, snap_as_on=as_on, guard=g, open=oc["id"] if oc else None, url=P + "?section=" + s))
+    counts = []
+    rows = con.execute("SELECT * FROM section_count WHERE status IN ('draft','sent') ORDER BY id DESC").fetchall() + \
+        con.execute("SELECT * FROM section_count WHERE status NOT IN ('draft','sent') ORDER BY id DESC LIMIT 8").fetchall()
+    for c in rows:
+        prog = con.execute("SELECT COUNT(*), SUM(counted IS NOT NULL) FROM section_count_line WHERE count_id=?", (c["id"],)).fetchone()
+        x = dict(id=c["id"], section=c["section"], status=c["status"], started_at=c["started_at"], started_by=c["started_by"], saved_at=c["saved_at"],
+                 day=c["count_day"], sent_by=c["sent_by"], to_amir_at=c["to_amir_at"], cancelled_at=c["cancelled_at"], total=prog[0] or 0, done=prog[1] or 0,
+                 url=P + "?count=%d" % c["id"])
+        if c["status"] == "sent":
+            k = correction(con, c)
+            x["correction"] = dict(state=k["state"], why=k["why"], changes=sum(1 for l in k["lines"] if l["change"]), hand=k["hand"],
+                                   open_aside=k["open_aside"], renames=sum(1 for r in k["renames"] if r["new"]))
+        counts.append(x)
+    on = access_on(con)
+    staff = [dict(user=s, on=s in on) for s in staff_candidates(con)]
+    plan = None
+    if _table(con, "stock_count_plan"):
+        r = con.execute("SELECT window_json, status FROM stock_count_plan WHERE status='open' ORDER BY id DESC LIMIT 1").fetchone()
+        if r:
+            try:
+                plan = json.loads(r[0] or "[]")
+            except ValueError:
+                plan = None
+    return dict(templates=tpl, counts=counts, staff=staff, whole=dict(url="/finance/stock/page/count", plan=plan, items=len(snap)))
+
+
+@bp.route(P + "/api/hub")
+def api_hub():
+    u, con, own, err = _auth()
+    if err:
+        return err
+    if not own:
+        return _refuse("The doctor's list.", 403)
+    return jsonify(ok=True, **hub(con))
+
+
+@bp.route(P + "/api/access", methods=["POST"])
+def api_access():
+    """The doctor's switch: {user, on}. Writes (or re-activates / de-activates) ONE row unit_role(stockcount, user, maker)."""
+    u, con, own, err = _auth()
+    if err:
+        return err
+    if not own:
+        return _refuse("Only the doctor switches access.", 403)
+    b = _body()
+    who = str(b.get("user") or "").strip().lower()
+    if who not in staff_candidates(con):
+        return _refuse("That login is not one of the pharmacy's staff.", 400)
+    on = 1 if b.get("on") else 0
+    r = con.execute("SELECT id FROM unit_role WHERE unit=? AND lower(username)=? AND role='maker'", (COUNT_UNIT, who)).fetchone()
+    if r:
+        con.execute("UPDATE unit_role SET active=?, note=? WHERE id=?", (on, "S769 the doctor's switch, %s" % now_iso(), r[0]))
+    elif on:
+        con.execute("INSERT INTO unit_role (unit, username, role, active, note) VALUES (?,?,?,?,?)",
+                    (COUNT_UNIT, who, "maker", 1, "S769 the doctor's switch, %s" % now_iso()))
+    audit(con, None, "access", dict(user=who, on=bool(on)), _who(u))
+    con.commit()
+    return jsonify(ok=True, user=who, on=bool(on))
+
+
+@bp.route(P + "/api/healthz")
+def api_healthz():
+    u, con, own, err = _auth()
+    if err:
+        return err
+    return jsonify(ok=True, module="section_count", version=VERSION, kit=KIT)
+
+
+@bp.route(P + "/api/state")
+def api_state():
+    u, con, own, err = _auth()
+    if err:
+        return err
+    sm = _sm()
+    section = request.args.get("section") or COUNT_SECTIONS[0]
+    if section not in COUNT_SECTIONS:
+        section = COUNT_SECTIONS[0]
+    cid = _cid()
+    c = count_row(con, cid) if cid else open_count(con, section)
+    if c and c["section"] != section:
+        section = c["section"]
+    past = [dict(id=r["id"], status=r["status"], day=r["count_day"] or str(r["started_at"])[:10], started_by=r["started_by"])
+            for r in con.execute("SELECT id, status, count_day, started_at, started_by FROM section_count WHERE section=? AND status<>'draft' "
+                                 "ORDER BY id DESC LIMIT 12", (section,))]
+    as_on, _snap = newest_snapshot(con)
+    out = dict(ok=True, me="owner" if own else "staff", user=_who(u), sections=list(COUNT_SECTIONS), section=section, snap_as_on=as_on,
+               count=view(con, c, own) if c else None, past=past)
+    if not c or c["status"] == "draft":
+        out["guard"] = guard(con, section) if not c else json.loads(c["guard"] or "{}")
+    return jsonify(**out)
+
+
+@bp.route(P + "/api/start", methods=["POST"])
+def api_start():
+    u, con, own, err = _auth()
+    if err:
+        return err
+    b = _body()
+    ok, res, code = start(con, str(b.get("section") or "Orthotics"), _who(u), bool(b.get("override")), own)
+    return jsonify(ok=True, **res) if ok else _refuse(res, code)
+
+
+@bp.route(P + "/api/save", methods=["POST"])
+def api_save():
+    u, con, own, err = _auth()
+    if err:
+        return err
+    b = _body()
+    ok, res, code = save(con, _cid(b), b.get("rev"), b, _who(u))
+    return jsonify(ok=True, **res) if ok else _refuse(res, code)
+
+
+@bp.route(P + "/api/send", methods=["POST"])
+def api_send():
+    u, con, own, err = _auth()
+    if err:
+        return err
+    b = _body()
+    ok, res, code = send(con, _cid(b), b.get("rev"), _who(u))
+    return jsonify(ok=True, **res) if ok else _refuse(res, code)
+
+
+@bp.route(P + "/api/to_amir", methods=["POST"])
+def api_to_amir():
+    u, con, own, err = _auth()
+    if err:
+        return err
+    if not own:
+        return _refuse("Only the doctor sends the correction to Amir.", 403)
+    c = count_row(con, _cid(_body()))
+    if not c:
+        return _refuse("No such count.", 404)
+    ok, res, code = to_amir(con, c, _who(u))
+    return jsonify(ok=True, **res) if ok else _refuse(res, code)
+
+
+@bp.route(P + "/api/cancel", methods=["POST"])
+def api_cancel():
+    u, con, own, err = _auth()
+    if err:
+        return err
+    if not own:
+        return _refuse("Only the doctor cancels a count.", 403)
+    c = count_row(con, _cid(_body()))
+    if not c or c["status"] not in ("draft", "sent"):
+        return _refuse("Only an open or sent count can be cancelled.", 409)
+    if not (con.execute("UPDATE section_count SET status='cancelled', cancelled_at=?, cancelled_by=? WHERE id=? AND status IN ('draft','sent')",
+                        (now_iso(), _who(u), c["id"])).rowcount or 0):
+        con.rollback()
+        return _refuse("It changed a moment ago -- reload.", 409)
+    audit(con, c["id"], "cancel", dict(was=c["status"]), _who(u))
+    con.commit()
+    return jsonify(ok=True)
+
+
+@bp.route(P + "/api/flag", methods=["POST"])
+def api_flag():
+    u, con, own, err = _auth()
+    if err:
+        return err
+    if not own:
+        return _refuse("Only the doctor marks lines.", 403)
+    b = _body()
+    sec, item = str(b.get("section") or ""), str(b.get("item") or "").strip()
+    try:
+        lv = int(b.get("level"))
+    except (TypeError, ValueError):
+        lv = -1
+    if sec not in _sm().SECTIONS or not item or lv not in (0, 1, 2):
+        return _refuse("section, item and level 0, 1 or 2.", 400)
+    con.execute("INSERT INTO section_count_flag (section, item_key, item, level, why, by_user, at) VALUES (?,?,?,?,?,?,?) "
+                "ON CONFLICT(section, item_key) DO UPDATE SET level=excluded.level, why=excluded.why, by_user=excluded.by_user, at=excluded.at",
+                (sec, nk(item), item, lv, "your mark", _who(u), now_iso()))
+    audit(con, None, "flag", dict(section=sec, item=item, level=lv), _who(u))
+    con.commit()
+    return jsonify(ok=True, note="From the next count.")
+
+
+@bp.route(P + "/api/aside_clear", methods=["POST"])
+def api_aside_clear():
+    """The doctor settles a kept-aside line: {count, seq, same_day: true|false, n}. same_day = its bill entered Marg on the count day,
+    so Marg's closing holds those boxes: they are added to line n's count. false = entered later: nothing to add."""
+    u, con, own, err = _auth()
+    if err:
+        return err
+    if not own:
+        return _refuse("Only the doctor settles a kept-aside line.", 403)
+    b = _body()
+    c = count_row(con, _cid(b))
+    if not c or c["status"] != "sent":
+        return _refuse("Only a sent count's kept-aside lines are settled here.", 409)
+    try:
+        seq = int(b.get("seq"))
+    except (TypeError, ValueError):
+        return _refuse("Which line?", 400)
+    same = bool(b.get("same_day"))
+    n = None
+    if same:
+        try:
+            n = int(b.get("n"))
+        except (TypeError, ValueError):
+            return _refuse("Its bill entered Marg on the count day: name the count line (#) the boxes belong to.", 400)
+        if not con.execute("SELECT 1 FROM section_count_line WHERE count_id=? AND n=?", (c["id"], n)).fetchone():
+            return _refuse("There is no line #%d in this count." % n, 400)
+    k = con.execute("UPDATE section_count_extra SET cleared_at=?, cleared_by=?, same_day=?, add_to_n=? WHERE count_id=? AND kind='aside' AND seq=? "
+                    "AND cleared_at IS NULL AND (SELECT status FROM section_count WHERE id=?)='sent'",
+                    (now_iso(), _who(u), 1 if same else 0, n, c["id"], seq, c["id"])).rowcount or 0
+    audit(con, c["id"], "aside_clear", dict(seq=seq, same_day=same, n=n), _who(u))
+    con.commit()
+    return jsonify(ok=True, cleared=k)
+
+
+@bp.route(P + "/api/hand", methods=["POST"])
+def api_hand():
+    """The doctor settles a 'by hand' line: {count, n, change: int} or {count, n, skip: true}; {count, n, clear: true} undoes."""
+    u, con, own, err = _auth()
+    if err:
+        return err
+    if not own:
+        return _refuse("Only the doctor sets a line by hand.", 403)
+    b = _body()
+    c = count_row(con, _cid(b))
+    if not c or c["status"] != "sent":
+        return _refuse("Only a sent count, before it goes to Amir.", 409)
+    try:
+        n = int(b.get("n"))
+    except (TypeError, ValueError):
+        return _refuse("Which line?", 400)
+    if b.get("clear"):
+        ch, sk = None, None
+    elif b.get("skip"):
+        ch, sk = None, 1
+    else:
+        try:
+            ch, sk = int(b.get("change")), None
+        except (TypeError, ValueError):
+            return _refuse("The change is a whole number: + more in Marg, - less.", 400)
+        if abs(ch) > 999:
+            return _refuse("That change is too large to be right.", 400)
+    k = con.execute("UPDATE section_count_line SET owner_change=?, owner_skip=? WHERE count_id=? AND n=? AND (SELECT status FROM section_count WHERE id=?)='sent'",
+                    (ch, sk, c["id"], n, c["id"])).rowcount or 0
+    if not k:
+        con.rollback()
+        return _refuse("No line #%d in a count still open for changes." % n, 409)
+    audit(con, c["id"], "hand", dict(n=n, change=ch, skip=bool(sk)), _who(u))
+    con.commit()
+    return jsonify(ok=True)

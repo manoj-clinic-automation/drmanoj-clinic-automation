@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S418 close** (the parent, full EOS), 09-Nov-2026, evening — the parent's sections refreshed here (the Case Pack enquiry v2 live; your figures on the seeding page are the one thing waiting; 421 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S421 close** (the parent, EOS-light), 10-Nov-2026, morning — the parent's sections refreshed here (your packages all yours; the Patients plan waits for your go; the tracker's program folder in the next session; 422 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S418 close** (the parent, full EOS), 09-Nov-2026, evening — the parent's sections refreshed here (the Case Pack enquiry v2 live; your figures on the seeding page are the one thing waiting; 421 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S417 close** (the Sanjeevni chat, full EOS), 09-Nov-2026, evening — the Sanjeevni sections refreshed here (the salt-list reminder now clears on an unchanged export; Alisha's rescan list cleared; the orthotics clean-up next — who counts and when is yours; 420 reserved)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S416 close** (the parent, EOS-light), 09-Nov-2026, afternoon — the parent's sections refreshed here (the Case Pack enquiry v2 settled with you, built next chat; 418 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S414 close** (the Sanjeevni chat, full EOS), 09-Nov-2026, morning — the Sanjeevni sections refreshed here (your hub rebuilt as you approved it: Returns on one card, Needs you in groups, Go to, Cash and Bank, one count with your console; 417 reserved: this session's records placed first, then F-802)
@@ -427,7 +428,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S418 close (09-Nov, 18:4x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S421 close (10-Nov, 09:5x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -437,16 +438,22 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the S418 record (papers only — both kits are already on the server). Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries the S421 record (papers only — nothing changed on the server). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**1a · YOUR PACKAGE FIGURES on the seeding page.** 42 fixations carry suggested figures (dashed amber) — type your surgery ₹ and implant ₹, *retire* the ones you never do, keep or retire the "also common" rows, then **Save all packages**. Until you save a row, it is not quoted from the enquiry list.
+**1a · IN THE NEXT SESSION: add the follow-up tracker's program folder** with *Add folder* in the Claude desktop app — so the calling list stops showing patients who already came (16 of 10-Nov's 66).
 
 ```
-https://followup.dr-manoj.in/portal/casepack/seed
+C:\followup_tracker_local_test_kit\local_test_kit\followup_tracker
+```
+
+**1aa · YOUR GO ON THE PATIENTS PLAN** (one word): the daily diagnosis feed first, then the Patients section on your console, then follow-ups kept and called by group and by staff. On your go, reception exports the Docterz *Clinical data report* once for **01-Jul-2026 → today**, and from then on every evening with the other two exports.
+
+```
+https://claude.ai/artifact/TNw8B62K2GHvST3NPU1WNA
 ```
 
 **1b · TELL SHIVANI, ALISHA AND SHAVEZ: their own call card is on *Aaj ka kaam* (*Mere calls*)** — the same figures as yours, every call with its recording; *Galat hai?* sends you one line about one call, and you answer it on the Call Console. A call missed in their shift before they punch in now counts on their card ("punch se pehle").
@@ -491,7 +498,7 @@ https://followup.dr-manoj.in/finance/surgery/settings
 
 **9c · A WHATSAPP TEMPLATE FOR AFTER-DISCHARGE MESSAGES**, when you decide the schedule.
 
-**9d · FOR THE CASE PACK (not blocking):** ask DTH for clean copies of the **FHPL and Paramount TPA rate sheets** (the ones we have are poor scans, most rows unpriced).
+**9d · FOR THE CASE PACK (not blocking):** your 57 packages are all yours (v3); ask DTH for clean copies of the **FHPL and Paramount TPA rate sheets** (the ones we have are poor scans, most rows unpriced).
 
 **10 · THE MARG ENGINEER: test-restore Marg's automatic backup.**
 
@@ -516,12 +523,12 @@ https://followup.dr-manoj.in/portal/users
 
 - **17 · The accountant packs:** *Send*.
 - **18 · The reception PC's Windows.**
-- **19 · The Docterz *Clinical Data Report*, 2022 → 9-Sep**, into `D:\Downloads`.
+- **19 · The Docterz *Clinical Data Report*, 2022 → 30-Jun** (older years, after 1aa's 01-Jul → today), into `D:\Downloads`.
 - **20 · The arms licence:** submit in November.
 - **21 · The alert for an unknown caller unreached for an hour:** your yes.
 - **22 · "Clear it":** the old working copies in the cloud workspace.
 - **23 · The IPD remove buttons:** only when you ask.
-- **24 · Patients on your command console** (new vs repeat, your diagnosis groups, revenue by group): a mock-up first, on your yes.
+- **24 · The seeding page's search box and folding regions** — parked at your word (10-Nov).
 
 **WHEN IT HAPPENS — not a duty:**
 - on the Case Pack: an estimate you gave shows under **Estimates given** — mark *Taken up* or *Not* when you know; a package quoted at a changed figure — *Save changes to this package*; a new fixation — *Save as a new package*;
@@ -554,14 +561,21 @@ https://followup.dr-manoj.in/portal/users
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The Case Pack v2 on its first days:** one line to you each session until the suggested rows are yours; your first *Give estimate* watched on the server; the estimate shown on the IPD case later, only if you ask.
-2. **Watch the staff cards round 2** (S762) · **the check screens** (S757) · **the 10-Nov mails:** the health mail's 24 hours and the Google Sheet tracker's heartbeat.
-3. **Arjun Dev's link step**, **staff 20's exit steps** · **the review reading on 19 Nov** · **the packs page's September checklist**.
-4. **WhatsApp after MyOperator's fix** · your publish file taking in my uploads first (D823).
-5. **Patients on your command console** (a mock-up first) · each person's follow-up calls on the staff cards, when you ask · the watches (F-1085, the IPD desk, the Hostinger update, IPD kits 5 and 6).
+1. **The calling list's two rules** (F-1226) — a visit from 3 days before the due date counts, and one visit closes all of a patient's open follow-ups; your staff's list unchanged otherwise.
+2. **The Patients plan, on your go:** the daily diagnosis feed (F-1225) → the Patients section (from August, per open day, festival weeks marked) → follow-ups kept and called by group and by staff.
+3. **Watch:** the two daily mails; the Case Pack's first *Give estimate*; the staff cards (S762); the check screens (S757).
+4. **Arjun Dev's link step**, **staff 20's exit steps** · **the review reading on 19 Nov** · **the packs page's September checklist**.
+5. **WhatsApp after MyOperator's fix** · your publish file taking in my uploads first (D823).
 6. **The Tally check** · **the Sanjeevni GST returns** · AF-16 · AF-19.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S421 CLOSE — 10-Nov-2026 (the parent)
+
+- **Your Case Pack packages are all yours** — 57, saved at 05:17, none suggested, every figure unchanged; edit any one at the estimate or on the seeding page.
+- **The Patients mock-up** for your command console (v4): month by month, how often patients come, returns within 7 and 8–30 days, follow-ups, your diagnosis groups.
+- **The return pattern analysed** (`S421_RETURN_PATTERN_ANALYSIS.md`): new patients steady at about 7 a day; review visits falling since September (not festivals until October); follow-ups kept 53 / 48 / 46%; called patients came back far more often.
+- **Found:** the tracker's diagnoses stopped on 12-Jul; the calling list carries patients who already came.
 
 ## ✅ DONE AT THE S418 CLOSE — 09-Nov-2026 (the parent)
 
