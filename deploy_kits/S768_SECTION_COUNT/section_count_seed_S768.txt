@@ -1,0 +1,713 @@
+{
+"section": "Orthotics",
+"source": "S420 orthotics paper, 10-Nov-2026",
+"display": [
+{
+"item": "ANKLE BINDER M BAMBOO",
+"grp": "Ankle binder",
+"grp_order": 1,
+"ord": 1,
+"kind": "Bamboo",
+"size": "M"
+},
+{
+"item": "ANKLE BINDER L BAMBOO",
+"grp": "Ankle binder",
+"grp_order": 1,
+"ord": 2,
+"kind": "Bamboo",
+"size": "L"
+},
+{
+"item": "ANKLE BINDER M DYNA",
+"grp": "Ankle binder",
+"grp_order": 1,
+"ord": 3,
+"kind": "Dyna",
+"size": "M"
+},
+{
+"item": "ANKLE BINDER M FLAMINGO",
+"grp": "Ankle binder",
+"grp_order": 1,
+"ord": 4,
+"kind": "Flamingo",
+"size": "M"
+},
+{
+"item": "ANKLE BINDER M TYNOR",
+"grp": "Ankle binder",
+"grp_order": 1,
+"ord": 5,
+"kind": "Tynor",
+"size": "M"
+},
+{
+"item": "ANKLE BINDER L TYNOR",
+"grp": "Ankle binder",
+"grp_order": 1,
+"ord": 6,
+"kind": "Tynor",
+"size": "L"
+},
+{
+"item": "ANKLE BINDER XL TYNOR",
+"grp": "Ankle binder",
+"grp_order": 1,
+"ord": 7,
+"kind": "Tynor",
+"size": "XL"
+},
+{
+"item": "ARM SLING M UNISON",
+"grp": "Arm sling",
+"grp_order": 2,
+"ord": 8,
+"kind": "Unison",
+"size": "M"
+},
+{
+"item": "ARM SLING L UNISON",
+"grp": "Arm sling",
+"grp_order": 2,
+"ord": 9,
+"kind": "Unison",
+"size": "L"
+},
+{
+"item": "ARM SLING XL UNISON",
+"grp": "Arm sling",
+"grp_order": 2,
+"ord": 10,
+"kind": "Unison",
+"size": "XL"
+},
+{
+"item": "ARM SLING M DYNA",
+"grp": "Arm sling",
+"grp_order": 2,
+"ord": 11,
+"kind": "Dyna",
+"size": "M"
+},
+{
+"item": "ARM SLING XL HOPE",
+"grp": "Arm sling",
+"grp_order": 2,
+"ord": 12,
+"kind": "Hope",
+"size": "XL"
+},
+{
+"item": "L S BELT M CONT GRAY UNISON",
+"grp": "Back belt (LS belt) and Taylor brace",
+"grp_order": 3,
+"ord": 13,
+"kind": "Unison contoured grey",
+"size": "M"
+},
+{
+"item": "L S BELT L CONT GRAY UNISON",
+"grp": "Back belt (LS belt) and Taylor brace",
+"grp_order": 3,
+"ord": 14,
+"kind": "Unison contoured grey",
+"size": "L"
+},
+{
+"item": "L S BELT XL CONT GRAY UNIS",
+"grp": "Back belt (LS belt) and Taylor brace",
+"grp_order": 3,
+"ord": 15,
+"kind": "Unison contoured grey",
+"size": "XL"
+},
+{
+"item": "L S BELT XXL CONT GRAY UNI",
+"grp": "Back belt (LS belt) and Taylor brace",
+"grp_order": 3,
+"ord": 16,
+"kind": "Unison contoured grey",
+"size": "XXL"
+},
+{
+"item": "L S BELT XXXL CONT GRAY UNISO",
+"grp": "Back belt (LS belt) and Taylor brace",
+"grp_order": 3,
+"ord": 17,
+"kind": "Unison contoured grey",
+"size": "XXXL"
+},
+{
+"item": "BLING CONT. LS BELT XXL",
+"grp": "Back belt (LS belt) and Taylor brace",
+"grp_order": 3,
+"ord": 18,
+"kind": "Bling contoured",
+"size": "XXL"
+},
+{
+"item": "LS BELT BODY AID 28",
+"grp": "Back belt (LS belt) and Taylor brace",
+"grp_order": 3,
+"ord": 19,
+"kind": "Body Aid",
+"size": "28"
+},
+{
+"item": "LS BELT BODY AID 38",
+"grp": "Back belt (LS belt) and Taylor brace",
+"grp_order": 3,
+"ord": 20,
+"kind": "Body Aid",
+"size": "38"
+},
+{
+"item": "BRACE TYLOR UNISON",
+"grp": "Back belt (LS belt) and Taylor brace",
+"grp_order": 3,
+"ord": 21,
+"kind": "Unison Taylor brace",
+"size": "one size"
+},
+{
+"item": "BLING PELVIC L TRACTION BELT",
+"grp": "Pelvic traction belt",
+"grp_order": 4,
+"ord": 22,
+"kind": "Bling",
+"size": "L"
+},
+{
+"item": "BLING PELVIC XL TRACTION BELT",
+"grp": "Pelvic traction belt",
+"grp_order": 4,
+"ord": 23,
+"kind": "Bling",
+"size": "XL"
+},
+{
+"item": "CAST SHOE S TYNOR",
+"grp": "Cast shoe",
+"grp_order": 5,
+"ord": 24,
+"kind": "Tynor",
+"size": "S"
+},
+{
+"item": "CAST SHOE M TYNOR",
+"grp": "Cast shoe",
+"grp_order": 5,
+"ord": 25,
+"kind": "Tynor",
+"size": "M"
+},
+{
+"item": "CAST SHOE L TYNOR",
+"grp": "Cast shoe",
+"grp_order": 5,
+"ord": 26,
+"kind": "Tynor",
+"size": "L"
+},
+{
+"item": "CAST SHOE L UM",
+"grp": "Cast shoe",
+"grp_order": 5,
+"ord": 27,
+"kind": "UM",
+"size": "L"
+},
+{
+"item": "PRIME CAST SHOE S",
+"grp": "Cast shoe",
+"grp_order": 5,
+"ord": 28,
+"kind": "Prime",
+"size": "S"
+},
+{
+"item": "HARD COLLAR ADJ M HOSPIK",
+"grp": "Collar",
+"grp_order": 6,
+"ord": 29,
+"kind": "Hospikit hard, adjustable",
+"size": "M"
+},
+{
+"item": "HARD COLLAR ADJ L HOSPIK",
+"grp": "Collar",
+"grp_order": 6,
+"ord": 30,
+"kind": "Hospikit hard, adjustable",
+"size": "L"
+},
+{
+"item": "HARD COLLAR M BODYAID",
+"grp": "Collar",
+"grp_order": 6,
+"ord": 31,
+"kind": "Body Aid hard",
+"size": "M"
+},
+{
+"item": "SOFT COLLAR BODY AID S",
+"grp": "Collar",
+"grp_order": 6,
+"ord": 32,
+"kind": "Body Aid soft",
+"size": "S"
+},
+{
+"item": "SOFT COLLAR NEOLIFE L",
+"grp": "Collar",
+"grp_order": 6,
+"ord": 33,
+"kind": "Neolife soft",
+"size": "L"
+},
+{
+"item": "CERVICAL COLLAR SOFT HOPE L",
+"grp": "Collar",
+"grp_order": 6,
+"ord": 34,
+"kind": "Hope soft cervical",
+"size": "L"
+},
+{
+"item": "CLAVICAL BRACE S UNISON",
+"grp": "Clavicle brace",
+"grp_order": 7,
+"ord": 35,
+"kind": "Unison",
+"size": "S"
+},
+{
+"item": "CLAVICAL BRACE M UNISON",
+"grp": "Clavicle brace",
+"grp_order": 7,
+"ord": 36,
+"kind": "Unison",
+"size": "M"
+},
+{
+"item": "CLAVICAL BRACE L UNISON",
+"grp": "Clavicle brace",
+"grp_order": 7,
+"ord": 37,
+"kind": "Unison",
+"size": "L"
+},
+{
+"item": "CLAVICAL BRACE XL UNISON",
+"grp": "Clavicle brace",
+"grp_order": 7,
+"ord": 38,
+"kind": "Unison",
+"size": "XL"
+},
+{
+"item": "SHOULDER IMMOB M UNISON",
+"grp": "Shoulder immobiliser",
+"grp_order": 8,
+"ord": 39,
+"kind": "Unison",
+"size": "M"
+},
+{
+"item": "SHOULDER IMMOB L UNISON",
+"grp": "Shoulder immobiliser",
+"grp_order": 8,
+"ord": 40,
+"kind": "Unison",
+"size": "L"
+},
+{
+"item": "SHOULDER IMMOB XL UNISON",
+"grp": "Shoulder immobiliser",
+"grp_order": 8,
+"ord": 41,
+"kind": "Unison",
+"size": "XL"
+},
+{
+"item": "SHOULDER IMMOB XXL UNISON",
+"grp": "Shoulder immobiliser",
+"grp_order": 8,
+"ord": 42,
+"kind": "Unison",
+"size": "XXL"
+},
+{
+"item": "BLING ELASTIC SHOULDER IMMOB",
+"grp": "Shoulder immobiliser",
+"grp_order": 8,
+"ord": 43,
+"kind": "Bling elastic",
+"size": "one size"
+},
+{
+"item": "KNEE SUPPORT M HINGED",
+"grp": "Knee support, hinged",
+"grp_order": 9,
+"ord": 44,
+"kind": "Unison",
+"size": "M"
+},
+{
+"item": "KNEE SUPPORT L HINGED",
+"grp": "Knee support, hinged",
+"grp_order": 9,
+"ord": 45,
+"kind": "Unison",
+"size": "L"
+},
+{
+"item": "KNEE SUPPORT XL HINGED",
+"grp": "Knee support, hinged",
+"grp_order": 9,
+"ord": 46,
+"kind": "Unison",
+"size": "XL"
+},
+{
+"item": "KNEE SUPPORT XXL HINGED UNISO",
+"grp": "Knee support, hinged",
+"grp_order": 9,
+"ord": 47,
+"kind": "Unison",
+"size": "XXL"
+},
+{
+"item": "ROM KNEE BRACE UNI FLAMINGO",
+"grp": "Knee support, hinged",
+"grp_order": 9,
+"ord": 48,
+"kind": "Flamingo ROM knee brace",
+"size": "one size"
+},
+{
+"item": "KNEE IMMOBILISER M UNISON",
+"grp": "Knee immobiliser",
+"grp_order": 10,
+"ord": 49,
+"kind": "Unison",
+"size": "M"
+},
+{
+"item": "KNEE IMMOBILIZER L UNISON",
+"grp": "Knee immobiliser",
+"grp_order": 10,
+"ord": 50,
+"kind": "Unison",
+"size": "L"
+},
+{
+"item": "KNEE IMMOBILIZER XL UNISON",
+"grp": "Knee immobiliser",
+"grp_order": 10,
+"ord": 51,
+"kind": "Unison",
+"size": "XL"
+},
+{
+"item": "KNEE IMMOBILIZER M TYNOR",
+"grp": "Knee immobiliser",
+"grp_order": 10,
+"ord": 52,
+"kind": "Tynor",
+"size": "M"
+},
+{
+"item": "KNEE CAP UNISON M LYCRA",
+"grp": "Knee cap",
+"grp_order": 11,
+"ord": 53,
+"kind": "Unison lycra",
+"size": "M"
+},
+{
+"item": "KNEE CAP UNISON L LYCRA",
+"grp": "Knee cap",
+"grp_order": 11,
+"ord": 54,
+"kind": "Unison lycra",
+"size": "L"
+},
+{
+"item": "KNEE CAP UNISON XL LYCRA",
+"grp": "Knee cap",
+"grp_order": 11,
+"ord": 55,
+"kind": "Unison lycra",
+"size": "XL"
+},
+{
+"item": "TYNOR WRIST SPL LF M ELAS T",
+"grp": "Wrist splint",
+"grp_order": 12,
+"ord": 56,
+"kind": "Tynor elastic, left",
+"size": "M"
+},
+{
+"item": "TYNOR WRIST SPL LF L ELASTI",
+"grp": "Wrist splint",
+"grp_order": 12,
+"ord": 57,
+"kind": "Tynor elastic, left",
+"size": "L"
+},
+{
+"item": "TYNOR WRIST SPL RT M ELASTI",
+"grp": "Wrist splint",
+"grp_order": 12,
+"ord": 58,
+"kind": "Tynor elastic, right",
+"size": "M"
+},
+{
+"item": "TYNOR WRIST SPL RT L ELASTI",
+"grp": "Wrist splint",
+"grp_order": 12,
+"ord": 59,
+"kind": "Tynor elastic, right",
+"size": "L"
+},
+{
+"item": "DYNA WRIST BRACE REVER LONG",
+"grp": "Wrist splint",
+"grp_order": 12,
+"ord": 60,
+"kind": "Dyna reversible, long",
+"size": "one size"
+},
+{
+"item": "FINGER COT M",
+"grp": "Finger",
+"grp_order": 13,
+"ord": 61,
+"kind": "Finger cot (no brand)",
+"size": "M"
+},
+{
+"item": "FINGER COT M TYNOR",
+"grp": "Finger",
+"grp_order": 13,
+"ord": 62,
+"kind": "Tynor finger cot",
+"size": "M"
+},
+{
+"item": "FINGER COT FROG SPILNT",
+"grp": "Finger",
+"grp_order": 13,
+"ord": 63,
+"kind": "Frog splint finger cot",
+"size": "one size"
+},
+{
+"item": "FINGER COT SPILNT REMEDE",
+"grp": "Finger",
+"grp_order": 13,
+"ord": 64,
+"kind": "Remede finger cot splint",
+"size": "one size"
+},
+{
+"item": "FINGER EXTENSION SPLINT PERFE",
+"grp": "Finger",
+"grp_order": 13,
+"ord": 65,
+"kind": "Perfecta finger extension splint",
+"size": "one size"
+},
+{
+"item": "HEEL CUSHION S TYNOR",
+"grp": "Heel cushion",
+"grp_order": 14,
+"ord": 66,
+"kind": "Tynor",
+"size": "S"
+},
+{
+"item": "HEEL CUSHION L FLAMINGO",
+"grp": "Heel cushion",
+"grp_order": 14,
+"ord": 67,
+"kind": "Flamingo",
+"size": "L"
+},
+{
+"item": "RIB BELT S TYNOR",
+"grp": "Rib belt",
+"grp_order": 15,
+"ord": 68,
+"kind": "Tynor",
+"size": "S"
+},
+{
+"item": "RIB BELT UNIVERSAL UNISON",
+"grp": "Rib belt",
+"grp_order": 15,
+"ord": 69,
+"kind": "Unison universal",
+"size": "one size"
+},
+{
+"item": "TENNIS ELBOW M HOPE",
+"grp": "Tennis elbow",
+"grp_order": 16,
+"ord": 70,
+"kind": "Hope",
+"size": "M"
+},
+{
+"item": "TENNIS ELBOW L HOPE",
+"grp": "Tennis elbow",
+"grp_order": 16,
+"ord": 71,
+"kind": "Hope",
+"size": "L"
+},
+{
+"item": "TENNIS ELBOW NEO UNISON",
+"grp": "Tennis elbow",
+"grp_order": 16,
+"ord": 72,
+"kind": "Unison Neo",
+"size": "one size"
+},
+{
+"item": "SKIN TRACTION KIT BODY AID",
+"grp": "Traction kit and walker",
+"grp_order": 17,
+"ord": 73,
+"kind": "Body Aid skin traction kit",
+"size": "one size"
+},
+{
+"item": "SKIN TRACTION HOPE",
+"grp": "Traction kit and walker",
+"grp_order": 17,
+"ord": 74,
+"kind": "Hope skin traction",
+"size": "one size"
+},
+{
+"item": "WALKER FOLDIND UVISON",
+"grp": "Traction kit and walker",
+"grp_order": 17,
+"ord": 75,
+"kind": "Unison folding walker",
+"size": "one size"
+}
+],
+"flags": [
+{
+"item": "ANKLE BINDER M BAMBOO",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "ANKLE BINDER L BAMBOO",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "ANKLE BINDER XL TYNOR",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "L S BELT M CONT GRAY UNISON",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "L S BELT L CONT GRAY UNISON",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "L S BELT XL CONT GRAY UNIS",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "CAST SHOE M TYNOR",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "CAST SHOE L TYNOR",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "HARD COLLAR ADJ M HOSPIK",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "HARD COLLAR ADJ L HOSPIK",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "KNEE SUPPORT M HINGED",
+"level": 2,
+"why": "biggest gap between Marg and the record"
+},
+{
+"item": "KNEE SUPPORT L HINGED",
+"level": 2,
+"why": "biggest gap between Marg and the record"
+},
+{
+"item": "KNEE SUPPORT XXL HINGED UNISO",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "KNEE IMMOBILISER M UNISON",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "KNEE IMMOBILIZER L UNISON",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "KNEE IMMOBILIZER XL UNISON",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "KNEE IMMOBILIZER M TYNOR",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "TYNOR WRIST SPL LF M ELAS T",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "TYNOR WRIST SPL RT M ELASTI",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "FINGER EXTENSION SPLINT PERFE",
+"level": 1,
+"why": "Marg and the record disagree"
+},
+{
+"item": "RIB BELT UNIVERSAL UNISON",
+"level": 1,
+"why": "Marg and the record disagree"
+}
+]
+}
