@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S421 close** (the parent, EOS-light), 10-Nov-2026, morning — the parent's sections refreshed here (your packages all yours; the Patients plan waits for your go; the tracker's program folder in the next session; 422 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S420 close** (the Sanjeevni chat, full EOS), 10-Nov-2026, morning — the Sanjeevni sections refreshed here (the orthotics count live on Stock milaan; the Stock check page lists every count; who counts and when is yours; 423 reserved)
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S421 close** (the parent, EOS-light), 10-Nov-2026, morning — the parent's sections refreshed here (your packages all yours; the Patients plan waits for your go; the tracker's program folder in the next session; 422 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S418 close** (the parent, full EOS), 09-Nov-2026, evening — the parent's sections refreshed here (the Case Pack enquiry v2 live; your figures on the seeding page are the one thing waiting; 421 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S417 close** (the Sanjeevni chat, full EOS), 09-Nov-2026, evening — the Sanjeevni sections refreshed here (the salt-list reminder now clears on an unchanged export; Alisha's rescan list cleared; the orthotics clean-up next — who counts and when is yours; 420 reserved)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S416 close** (the parent, EOS-light), 09-Nov-2026, afternoon — the parent's sections refreshed here (the Case Pack enquiry v2 settled with you, built next chat; 418 reserved); the other projects' sections as their closes left them.
@@ -1059,9 +1060,9 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S417 close (09-Nov, 18:4x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S420 close (10-Nov, 10:4x)
 
-*Detail: `S417_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_420.md` (the orthotics clean-up first). This section supersedes the S414 one below it.*
+*Detail: `S420_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_423.md` (the Orthotic bills card first). This section supersedes the S417 one below it.*
 
 **1 · Publish this session's records** — one double-click, nothing follows it:
 
@@ -1069,32 +1070,41 @@ The full list: `claude/S288_PENDING_LIST.md`.
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · The orthotics count** — who counts the orthotics shelf, and when (the sheet comes next session).
+**2 · The orthotics count** — who counts the shelf, and on which day. Switch helpers on in *Who may count* on the Stock check page:
+
+```
+https://followup.dr-manoj.in/finance/stock/page/hub
+```
 
 **3 · Bass Pharma's payment number** in the phone book — until then it gets no reminder.
 
-**4 · Row 7 — a dealer who never sends a summary:** *<Dealer> gives no summary*, once:
+**4 · ZIBON EXTRA +21** (the 06-Sep count, never given your word) — when the next session shows it.
 
-```
-https://followup.dr-manoj.in/finance/purchase/page/check?month=2026-10
-```
+**5 · Row 7 — a dealer who never sends a summary:** *<Dealer> gives no summary*, once.
 
-**5 · Shavez's phone:** the daily summaries line reaches him only once he has opened the clinic app and allowed messages.
+**6 · Shavez's phone:** the daily summaries line reaches him only once he has opened the clinic app and allowed messages.
 
-**6 · Still yours:** ZUPRINOR 5 (row 6); the two September supplier messages (A.A. Pharmaceuticals, Deepam Pharma).
+**7 · Still yours:** ZUPRINOR 5 (row 6); the two September supplier messages (A.A. Pharmaceuticals, Deepam Pharma).
 
-**7 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
+**8 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
 
-**8 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
+**9 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
 
 **Later, your word only:** "count them"; the buying switch (earliest ~22-Nov); June and July's old PROVISIONAL months; a second network for the medical PC only if its LAN fails again (D837 — I will remind you).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S417 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S420 close
 
-1. **The orthotics clean-up, once** — the count sheet, then Amir's one correction list, the four names, the Yuvika → Marg name list (D883).
-2. **Arrivals judged by the bill, never by a staff tap** — a bill scan no longer counts a whole order as arrived (F-1220); the mock first.
-3. **The order-list kit** on your "go", the mock first.
-4. **Small, with the next kit that touches them:** the hub's Needs-you speed (F-1215); the purchase-order band (F-1216); Darpan's month view and spine-only returns (F-1217); the phone's own guard for the reminders (F-1209); the parent's note on `day_resync`.
+1. **The Orthotic bills this month card** — each orthotics bill's scan beside its Marg lines; differing lines kept highlighted, their bills flagged; the name map corrected and kept (D886). The mock first.
+2. **The first orthotics count** with you — the correction, your figures, Send to Amir, the 4 renames.
+3. **The 06-Sep proof step waiting since 15-Oct** (F-1232) — read on the server first.
+4. **Arrivals judged by the bill, never by a staff tap** (F-1220) — the mock first.
+5. **The order-list kit** on your "go", the mock first.
+
+## ✅ DONE AT THE S420 CLOSE — 10-Nov-2026 (the Sanjeevni project)
+
+- ~~**The orthotics paper**~~ — 75 names, 21 count-twice lines, 4 renames, the Yuvika → Marg list (Docs artifact).
+- ~~**The orthotics count on Stock milaan**~~ — live 07:19 (S768).
+- ~~**The Stock check page lists every count; Who may count; 06-Sep folded**~~ — live 10:3x (S769).
 
 ## ✅ DONE AT THE S417 CLOSE — 09-Nov-2026 (the Sanjeevni project)
 
