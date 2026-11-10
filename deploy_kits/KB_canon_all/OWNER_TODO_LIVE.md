@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S420 close** (the Sanjeevni chat, full EOS), 10-Nov-2026, morning — the Sanjeevni sections refreshed here (the orthotics count live on Stock milaan; the Stock check page lists every count; who counts and when is yours; 423 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S423 close** (the Sanjeevni chat, full EOS), 10-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the Orthotic bills card live; every October bill carries its lines; the dates sent to Amir; the order screen next; 425 reserved)
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S422 close** (the parent, full EOS), 10-Nov-2026, afternoon — the parent's sections refreshed here (the re-added X-rays filed by the film; fewer left for staff; 36 still parked — next session; the tracker's program folder; 424 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S420 close** (the Sanjeevni chat, full EOS), 10-Nov-2026, morning — the Sanjeevni sections refreshed here (the orthotics count live on Stock milaan; the Stock check page lists every count; who counts and when is yours; 423 reserved)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S421 close** (the parent, EOS-light), 10-Nov-2026, morning — the parent's sections refreshed here (your packages all yours; the Patients plan waits for your go; the tracker's program folder in the next session; 422 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S418 close** (the parent, full EOS), 09-Nov-2026, evening — the parent's sections refreshed here (the Case Pack enquiry v2 live; your figures on the seeding page are the one thing waiting; 421 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S417 close** (the Sanjeevni chat, full EOS), 09-Nov-2026, evening — the Sanjeevni sections refreshed here (the salt-list reminder now clears on an unchanged export; Alisha's rescan list cleared; the orthotics clean-up next — who counts and when is yours; 420 reserved)
@@ -429,7 +431,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S421 close (10-Nov, 09:5x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S422 close (10-Nov, 14:5x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -439,137 +441,72 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the S421 record (papers only — nothing changed on the server). Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries the S422 record (the X-ray work is already live on the server). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**1a · IN THE NEXT SESSION: add the follow-up tracker's program folder** with *Add folder* in the Claude desktop app — so the calling list stops showing patients who already came (16 of 10-Nov's 66).
+**1a · BEFORE THE NEXT SESSION: add the follow-up tracker's program folder** with *Add folder* in the Claude desktop app — so the calling list stops showing patients who already came.
 
 ```
 C:\followup_tracker_local_test_kit\local_test_kit\followup_tracker
 ```
 
-**1aa · YOUR GO ON THE PATIENTS PLAN** (one word): the daily diagnosis feed first, then the Patients section on your console, then follow-ups kept and called by group and by staff. On your go, reception exports the Docterz *Clinical data report* once for **01-Jul-2026 → today**, and from then on every evening with the other two exports.
+**1aa · NEXT SESSION, ONE WORD: unmatched X-ray pictures older than 7 days** — off staff's Check karein, onto your X-ray page only? (asked after the 36 are worked out)
+
+**1ab · YOUR GO ON THE PATIENTS PLAN** (one word): the daily diagnosis feed first, then the Patients section on your console, then follow-ups kept and called.
 
 ```
 https://claude.ai/artifact/TNw8B62K2GHvST3NPU1WNA
 ```
 
-**1b · TELL SHIVANI, ALISHA AND SHAVEZ: their own call card is on *Aaj ka kaam* (*Mere calls*)** — the same figures as yours, every call with its recording; *Galat hai?* sends you one line about one call, and you answer it on the Call Console. A call missed in their shift before they punch in now counts on their card ("punch se pehle").
+**1b · TELL SHIVANI, ALISHA AND SHAVEZ: their own call card is on *Aaj ka kaam* (*Mere calls*)**, and *Check karein* shows the X-ray photo and that day's patients — tap the right one, then *Haan*.
 
-**1c · TELL ALISHA, SHIVANI AND SHAVEZ: *Check karein* now shows the X-ray photo and that day's patients** — tap the right one, then *Haan*. **Shavez:** lab reports with no blood slip are in his list; *Blood parchi bana di* opens the slip ready.
-
-**2 · THE PACKS PAGE: type the Zerodha password** (Dr Bhawna's statement of transactions opens by itself), **name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+**2 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**3 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit — his 30-Sep date stays; enrol Arjun Dev's finger, then tell me — I do the link step.
+**3 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
 
-**4 · OCTOBER'S STAFF LEDGER: close it, if not done.** Step 5 on the ledger page is your button.
+**4 · OCTOBER'S STAFF LEDGER: close it, if not done.**
 
 ```
 https://followup.dr-manoj.in/ledger/salary?m=2026-10
 ```
 
-**5 · MYOPERATOR (ticket 691386): their written cause and a fix date** (Khushi). Until it is fixed, WhatsApp replies are not delivered — the staff cards show them as not answered.
+**5 · MYOPERATOR (ticket 691386): their written cause and a fix date.**
 
-**6 · OCTOBER, ON YOUR MONTH PAGE: the amber lines are yours** (the pack, by 10 Nov).
+**6 · OCTOBER, ON YOUR MONTH PAGE: the amber lines are yours.**
 
 ```
 https://followup.dr-manoj.in/finance/console/month
 ```
 
-**8 · TWO ANSWERS, one line each:**
-- slip …1449 (31-Oct) has two ILI KNEE lines with no side: both knees, or a double entry?
-- two look-alike wrist lines on your rate page (₹800 and ₹500): is one an old leftover?
-
-**9 · THE TWO FINANCE PASSWORDS shown in chat on 21-Aug: change them** (board Y106).
-
-**9a · YOUR SHARE % FOR IPD CASES.** One number in IPD cases' Settings.
+**7 · Items 8 – 24 and *when it happens* stand as at the S421 close** (the two slip answers, the finance passwords, your IPD share %, the hospital's credit charges, the WhatsApp template, the Case Pack TPA sheets, the Marg backup test; later: passbooks, server update, Bhati's app, SBI downloads, Raghav, Ranjeet's login, packs *Send*, reception PC's Windows, the older Clinical Data Report, the arms licence, the unknown-caller alert, "clear it", the IPD remove buttons, the seeding page's search). **New under *when it happens*:** a picture on your **X-ray taken, no X-ray slip** list placed by the new rules (a patient who came with no X-ray billed) — *Charged elsewhere* or *Missed — tell Shavez*.
 
 ```
-https://followup.dr-manoj.in/finance/surgery/settings
+https://followup.dr-manoj.in/finance/records/xray-check
 ```
-
-**9b · THE HOSPITAL: how it fills the credit cases' charges.** Kit 5 waits for it.
-
-**9c · A WHATSAPP TEMPLATE FOR AFTER-DISCHARGE MESSAGES**, when you decide the schedule.
-
-**9d · FOR THE CASE PACK (not blocking):** your 57 packages are all yours (v3); ask DTH for clean copies of the **FHPL and Paramount TPA rate sheets** (the ones we have are poor scans, most rows unpriced).
-
-**10 · THE MARG ENGINEER: test-restore Marg's automatic backup.**
-
-**IF THE PORTAL STOPS:** the first steps run by themselves, and your guide says what already ran:
-
-```
-https://claude.ai/artifact/H5W1T3WPNm85t2peTnNnfP
-```
-
-**LATER — none of these is urgent**
-
-- **11 · The Union Bank passbooks:** when printed, scan to a PDF, add on the packs page, tap whose.
-- **12 · The Hostinger server update** (one line from me when the fix is out).
-- **13 · Bhati's app:** say when.
-- **14 · The SBI downloads** for September's pack.
-- **15 · Raghav:** your own Zerodha statement of transactions.
-- **16 · Ranjeet's login:** the password is yours to set.
-
-```
-https://followup.dr-manoj.in/portal/users
-```
-
-- **17 · The accountant packs:** *Send*.
-- **18 · The reception PC's Windows.**
-- **19 · The Docterz *Clinical Data Report*, 2022 → 30-Jun** (older years, after 1aa's 01-Jul → today), into `D:\Downloads`.
-- **20 · The arms licence:** submit in November.
-- **21 · The alert for an unknown caller unreached for an hour:** your yes.
-- **22 · "Clear it":** the old working copies in the cloud workspace.
-- **23 · The IPD remove buttons:** only when you ask.
-- **24 · The seeding page's search box and folding regions** — parked at your word (10-Nov).
-
-**WHEN IT HAPPENS — not a duty:**
-- on the Case Pack: an estimate you gave shows under **Estimates given** — mark *Taken up* or *Not* when you know; a package quoted at a changed figure — *Save changes to this package*; a new fixation — *Save as a new package*;
-- the **four tiles on your X-ray page** moving as staff answer (S757) — *Wrong patient? Move* on a filed one, *Charged elsewhere* / *Missed — tell Shavez* on an X-ray with no slip;
-- a red **noncash_at_ingest** line on the pharmacy day: do not approve that day until it clears (S758);
-- a **Both on duty** line on the Call Console — a call missed while two were on duty, counted once: *Call back* or *Mark reviewed* there (S762);
-- a **rose line on the Call Console** — a staff card (*Net missed* above 0, a call not logged), a follow-up section with patients not called, or someone nobody answered: open it, and use your buttons on the calls;
-- a **Disputed** line on a staff card: *Accept* or *It stands*;
-- an amber staff card (staff ≠ AI): listen and decide — "to check" is never a verdict;
-- a patient asks for help with a Google review: on the GMB page, **press ✓ Shared after you hand a draft over**;
-- a WhatsApp reply showing *MyOperator busy — retrying* (leave it); a red *NOT delivered* or *May have gone — check*;
-- a `[WA send refused — being retried]` or `[WA send NOT delivered]` mail; a patient's WhatsApp alert;
-- a phone line saying the server fixed (or could not fix) a part;
-- the first real *Call (IVR)* from an IPD case; the first real ankle consent; the film log's first order line;
-- a line "not matching Docterz"; the first implant bill and DTH cheque;
-- on the 1st of a month, the X-ray & procedures page opening on the new month;
-- a salary sheet saying "approved — figures changed since": approve it again.
-
-**Staff's, not yours (watched by me at each open):**
-- the morning film count; reception's attendance corrections and Shavez's check; Shavez's implant bill entries;
-- Darpan's expiry clear-out, and the home-medicines count from 25-Nov; October's slip corrections;
-- Bhati's October home visits; reception's physiotherapy clinic slips;
-- **the follow-up calls** — Shavez the day's (morning), Alisha the grace period (4–6 pm), as your roster says; the Call Console now shows called-of per section.
-
-**Parked at your word, and not raised by me again:** as at the S354 close.
-
-**Deferred at your word:** the evening same-day check · the daily Docterz feedback · the register+slips pack (D789) · Docterz's payment mode (D790) · *plaster / slab now* in the consent (D809) · a Done tick (D816) · a portal tile for Darpan's owner page · the IPD remove buttons.
-
-**Dropped at your word:** "which review drafts got posted", and a newest-reviews panel (D832) · judging other clinics' reviews, fake or real (D836).
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The calling list's two rules** (F-1226) — a visit from 3 days before the due date counts, and one visit closes all of a patient's open follow-ups; your staff's list unchanged otherwise.
-2. **The Patients plan, on your go:** the daily diagnosis feed (F-1225) → the Patients section (from August, per open day, festival weeks marked) → follow-ups kept and called by group and by staff.
-3. **Watch:** the two daily mails; the Case Pack's first *Give estimate*; the staff cards (S762); the check screens (S757).
-4. **Arjun Dev's link step**, **staff 20's exit steps** · **the review reading on 19 Nov** · **the packs page's September checklist**.
-5. **WhatsApp after MyOperator's fix** · your publish file taking in my uploads first (D823).
-6. **The Tally check** · **the Sanjeevni GST returns** · AF-16 · AF-19.
+1. **The 36 parked X-rays** (F-1236) — from tonight's database copy: photo numbers read as IDs, same-day duplicates; one fix; then your word on unmatched > 7 days.
+2. **The calling list's two rules** (F-1226) — once the tracker's program folder is added.
+3. **The Patients plan, on your go.**
+4. **Watch:** the film reader every 30 minutes; the X-ray tiles; the two daily mails; the Case Pack's first *Give estimate*.
+5. **Arjun Dev's link step**, **staff 20's exit steps** · **the review reading on 19 Nov** · **the packs page's September checklist** · WhatsApp after MyOperator's fix.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S422 CLOSE — 10-Nov-2026 (the parent)
+
+- **Yesterday's re-added X-rays filed on their real days** — the server now reads the date and clinic ID printed on each film (24 of 25 right in the test, none wrong); 17 of the 18 filed at 13:25; "Filed by themselves" 48 → 79.
+- **The extra copies** (first uploads replaced; 3 filed to the wrong patient under a mistyped ID) go to the duplicates folder once the right copy is filed — nothing deleted.
+- **Fewer left for staff:** new rules for a close name, the one matching X-ray patient, and a visitor with no X-ray billed (to your no-slip list).
+- **Two independent reviews** closed three ways a picture could have gone to the wrong patient, before you installed.
 
 ## ✅ DONE AT THE S421 CLOSE — 10-Nov-2026 (the parent)
 
@@ -1060,9 +997,9 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S420 close (10-Nov, 10:4x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S423 close (10-Nov, 15:1x)
 
-*Detail: `S420_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_423.md` (the Orthotic bills card first). This section supersedes the S417 one below it.*
+*Detail: `S423_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_425.md` (the order screen first). This section supersedes the S420 one below it.*
 
 **1 · Publish this session's records** — one double-click, nothing follows it:
 
@@ -1070,35 +1007,44 @@ The full list: `claude/S288_PENDING_LIST.md`.
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · The orthotics count** — who counts the shelf, and on which day. Switch helpers on in *Who may count* on the Stock check page:
+**2 · The Orthotic bills card** — settle the red lines when you have a moment (*Amir fixes Marg* or *Marg is right*):
 
 ```
 https://followup.dr-manoj.in/finance/stock/page/hub
 ```
 
-**3 · Bass Pharma's payment number** in the phone book — until then it gets no reminder.
+**3 · The orthotics count** — who counts the shelf, and on which day.
 
-**4 · ZIBON EXTRA +21** (the 06-Sep count, never given your word) — when the next session shows it.
+**4 · Bass Pharma's payment number** in the phone book — until then it gets no reminder.
 
-**5 · Row 7 — a dealer who never sends a summary:** *<Dealer> gives no summary*, once.
+**5 · ZIBON EXTRA +21** (the 06-Sep count, never given your word) — when the next session shows it.
 
-**6 · Shavez's phone:** the daily summaries line reaches him only once he has opened the clinic app and allowed messages.
+**6 · Row 7 — a dealer who never sends a summary:** *<Dealer> gives no summary*, once.
 
-**7 · Still yours:** ZUPRINOR 5 (row 6); the two September supplier messages (A.A. Pharmaceuticals, Deepam Pharma).
+**7 · Shavez's phone:** the daily summaries line reaches him only once he has opened the clinic app and allowed messages.
 
-**8 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
+**8 · Still yours:** ZUPRINOR 5 (row 6); the two September supplier messages (A.A. Pharmaceuticals, Deepam Pharma).
 
-**9 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
+**9 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
 
-**Later, your word only:** "count them"; the buying switch (earliest ~22-Nov); June and July's old PROVISIONAL months; a second network for the medical PC only if its LAN fails again (D837 — I will remind you).
+**10 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S420 close
+**Later, your word only:** "count them"; the buying switch (earliest ~22-Nov); June and July's old PROVISIONAL months; Deepam bill 502 of August (its lines filed under Mannat — August is FINAL); a second network for the medical PC (its internet dropped again 10:02 – 10:23 on 10-Nov; D837).
 
-1. **The Orthotic bills this month card** — each orthotics bill's scan beside its Marg lines; differing lines kept highlighted, their bills flagged; the name map corrected and kept (D886). The mock first.
-2. **The first orthotics count** with you — the correction, your figures, Send to Amir, the 4 renames.
-3. **The 06-Sep proof step waiting since 15-Oct** (F-1232) — read on the server first.
-4. **Arrivals judged by the bill, never by a staff tap** (F-1220) — the mock first.
-5. **The order-list kit** on your "go", the mock first.
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S423 close
+
+1. **The order screen (your mock, approved 15:08)** — old undelivered orders at the top in red with their age; *Ab nahi milta* → your *Stop it everywhere*; the wrong-dealer check.
+2. **The scans as reliable early data** — the matching rules made exact, a second reading of a field the reader missed, measured on October before and after.
+3. **Kedar 226's date** read from the paper before it goes to Amir.
+4. **The first orthotics count** with you, when you name who and when.
+5. **The 06-Sep proof step** (F-1232); **arrivals judged by the bill** (F-1220, the mock first); **the order-list kit** on your "go".
+
+## ✅ DONE AT THE S423 CLOSE — 10-Nov-2026 (the Sanjeevni project)
+
+- **The Orthotic bills card** — live 11:56: each Yuvika bill's scan beside what Amir entered in Marg; 6 bills with lines to settle (803's swapped quantities this month); the scanned bill opens folded under each bill.
+- **Bill numbers that Marg pushed into the item name** — live 13:00 and 13:34: 104 lines joined to their bills; every October bill now carries its lines; every future export handled the same way.
+- **Dates:** your rule — Amir enters the date printed on the bill; 13 October bills sent to him for correction.
+- **The order screen** — your mock approved; built next session.
 
 ## ✅ DONE AT THE S420 CLOSE — 10-Nov-2026 (the Sanjeevni project)
 
