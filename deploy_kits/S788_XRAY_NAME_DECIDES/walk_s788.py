@@ -64,6 +64,13 @@ if CS is not None and hasattr(CS, "_s788_name_decides"):
         CS.s787_auto(con)
         a0 = con.execute("SELECT answered_by FROM record_check WHERE key=?", ("xf:" + r0["src_id"],)).fetchone()
         ck("D1 when someone else who came has the same name, the name does not decide", not (a0 and str(a0[0]).startswith("system · S788")))
+if CS is not None and hasattr(CS, "_s788_name_decides"):
+    L = CS.lab_items(con)
+    src = open(os.path.join(K, "check_screens.py"), encoding="utf-8").read()
+    ck("L1 lab reports with no blood slip: only a likely wrong ID stays on Shavez's queue and count",
+       'items += [i for i in lab_items(con) if i["wrong"]]' in src and 'l = len([i for i in lab_items(con) if i["wrong"]])' in src)
+    ck("L2 every such report is already filed in the patient's record (%d)" % len(L),
+       all(con.execute("SELECT 1 FROM record_file WHERE id=? AND kind='blood' AND state='ok'", (i["fid"],)).fetchone() for i in L))
 con.close(); shutil.rmtree(T, ignore_errors=True)
 bad = RES.count(False)
 if CONTROL:

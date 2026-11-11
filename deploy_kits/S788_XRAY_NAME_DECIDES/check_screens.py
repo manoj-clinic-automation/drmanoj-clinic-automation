@@ -778,7 +778,7 @@ def api_mine():
     con = R._db()
     lab = _lab_ok(con, u)
     x = len(_groups(_parked(con, recent=not lab)))     # S787: one per person               # S782: reception -- the last STAFF_DAYS days; Shavez and doctors -- all
-    l = len(lab_items(con)) if lab else 0
+    l = len([i for i in lab_items(con) if i["wrong"]]) if lab else 0   # S788: the rest are filed, for information only
     b = len(xbill_items(con)) if lab else 0
     en = _doctor(u)
     parts = []
@@ -969,7 +969,7 @@ def staff_page(con, u, others, ok=""):
     lab = _lab_ok(con, u)
     items = xray_queue(con, recent=not lab)             # S782: older pictures -- the owner's and Shavez's only
     if lab:
-        items += lab_items(con) + xbill_items(con)
+        items += [i for i in lab_items(con) if i["wrong"]] + xbill_items(con)   # S788: only a likely wrong ID asks
     items.sort(key=lambda i: (i["day"], i.get("time") or "", i["key"]), reverse=True)
     old = "".join(R._old_item_html(i) for i in others)
     boot = {"items": items, "lab": lab, "ok": ok, "others": len(others), "me": R._who(u), "doctor": _doctor(u)}
@@ -1259,10 +1259,10 @@ var B=__BOOT__, TAB=B.tab, OPEN=null, PICK=-1, CF=null, MSG='', ERR='', PATS={},
 function $(i){return document.getElementById(i);}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 var T=[['filed','Filed by themselves since '+B.since,'tap to see each photo and where it went','#0F5E57'],['wait','Waiting to be filed','staff see the last 7 days · older ones: you and Shavez','#17202A'],
- ['nox','X-ray taken, no X-ray slip','possibly not charged — check these'+(B.xbill?' · '+B.xbill+' with Shavez':''),'#B45309'],['lab','Lab report came, no blood slip','also on Shavez’s list','#1D4ED8'],['nodz','Not in Docterz','X-rayed, not registered · file once an ID exists','#7C3AED']];
+ ['nox','X-ray taken, no X-ray slip','possibly not charged — check these'+(B.xbill?' · '+B.xbill+' with Shavez':''),'#B45309'],['lab','Lab report filed, no blood slip','in the record already · for your information','#1D4ED8'],['nodz','Not in Docterz','X-rayed, not registered · file once an ID exists','#7C3AED']];
 var HEAD={filed:['Filed by themselves','each photo, the patient it went to, and how'],wait:['Waiting to be filed','tap a photo to see it and pick the patient · older than 7 days: only you and Shavez see it'],
  nox:['X-ray taken, no X-ray slip','a photo filed on a patient with no X-ray on a slip or in Docterz (the day before to the day after)'],
- lab:['Lab report came, no blood slip','matched by the report’s clinic ID against the slips and Docterz · Shavez answers these too — whoever answers first closes it for both'],
+ lab:['Lab report filed, no blood slip','each report is already in the patient’s record · no blood slip was made for it — nothing to do · only a report that looks like the wrong ID asks you (and Shavez)'],
  nodz:['Not in Docterz','patients X-rayed but not registered in Docterz · once they are, find them by name or mobile here and file the photo']};
 function post(b){return fetch('/finance/records/xray-check/api/answer',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json();}).catch(function(){return{ok:false,err:'The server did not answer — try again.'};});}
 function drop(key,m){B[TAB]=B[TAB].filter(function(i){return i.key!==key;});OPEN=null;PICK=-1;CF=null;MSG=m;ERR='';draw();}
@@ -1281,9 +1281,9 @@ function picker(i){var ps=PATS[i.sid];if(!ps)return '<div class="pk"><span class
  h+='<div class="idb"><input id="nid" placeholder="Not here? Clinic ID, name or mobile" value="'+esc(FQ[i.key]||'')+'"><button class="b2" id="nidgo">Find</button></div>'+(FOUND[i.key]?(FOUND[i.key].length?FOUND[i.key].map(function(p,k){return '<button class="pr" data-f="'+k+'"><span><b>'+esc(p.name)+'</b><span class="s">ID '+esc(p.id)+(p.mobile?' · '+esc(p.mobile):'')+'</span></span>'+(p.came?'<span class="tag">came that day</span>':'')+'</button>';}).join(''):'<span class="f">No patient found for that name or number.</span>'):'')+'<div class="acts"><button class="b2" id="notx">Not an X-ray</button>'+(TAB==='wait'?'<button class="b2" id="nodz">Not in Docterz (not registered)</button>':'')+'</div>';
  h+='<span class="f">The same picker the staff use — a tap here files it (on the next filing run).</span></div>';return h;}
 function opened(i){var h='<div class="op">';
- if(TAB==='lab'){h+='<iframe class="rp" src="/finance/records/file/'+i.fid+'" title="Lab report"></iframe><div class="pk"><b>'+(i.wrong?'Is this report for '+esc(i.sug)+' ('+esc(i.sug_name)+')?':'A blood slip was not made for this test. Has it been made now?')+'</b><div class="acts">'+
-  (i.wrong?'<button class="b1 bbl" data-a="moved">Yes, it is '+esc(i.sug)+'</button><button class="b2" data-a="id_ok">No, '+esc(i.cid)+' is right</button>':'<a class="b1 bbl" style="display:inline-flex;align-items:center;text-decoration:none" href="'+esc(i.desk)+'">Make the blood slip (Parchi desk) →</a><button class="b2" data-a="direct_lab">Went straight to the lab</button>')+
-  '</div><span class="f">The same buttons Shavez has — whoever answers first closes it for both.</span></div>';}
+ if(TAB==='lab'){h+='<iframe class="rp" src="/finance/records/file/'+i.fid+'" title="Lab report"></iframe><div class="pk"><b>'+(i.wrong?'Is this report for '+esc(i.sug)+' ('+esc(i.sug_name)+')?':'Filed in the patient’s record. No blood slip was made for this test — nothing to do.')+'</b><div class="acts">'+
+  (i.wrong?'<button class="b1 bbl" data-a="moved">Yes, it is '+esc(i.sug)+'</button><button class="b2" data-a="id_ok">No, '+esc(i.cid)+' is right</button>':'')+
+  '</div>'+(i.wrong?'<span class="f">The same buttons Shavez has — whoever answers first closes it for both.</span>':'')+'</div>';}
  else{h+='<div class="pv"><a href="'+photo(i)+'" target="_blank" rel="noopener"><img src="'+photo(i)+'" alt="X-ray photo"></a></div>';
   if(TAB==='wait'||TAB==='nodz')h+=picker(i);
   if(TAB==='filed')h+='<div class="pk"><span class="h">Wrong patient? Type the right clinic ID</span><div class="idb"><input id="mid" inputmode="numeric" placeholder="Clinic ID"><button class="b2" id="midgo">Check</button></div>'+(CF?'<div class="cf"><b>Move this photo to '+esc(CF.name)+' ('+esc(CF.id)+')?</b><div class="acts"><button class="b1" id="mvyes">Yes, move it</button><button class="b2" id="no">No</button></div></div>':'')+'<span class="f">From: '+esc(i.orig)+'. The record moves; the Drive copy keeps its first name.</span></div>';}
@@ -1293,7 +1293,7 @@ function list(){var a=B[TAB],h='<div class="lh"><b>'+esc(HEAD[TAB][0])+'</b><spa
  a.forEach(function(i){if(i.month!==last){h+='<div class="mh">'+esc(i.month)+'</div>';last=i.month;}var on=OPEN===i.key,acts='';
   if(TAB==='wait'||TAB==='nodz')acts='<button class="'+(on?'b2':'b1')+'" data-o="1">'+(on?'Close':'See &amp; file')+'</button>';
   if(TAB==='filed')acts='<button class="b2" data-o="1">'+(on?'Close':'See photo')+'</button><button class="b2" data-o="1">Wrong patient? Move</button>';
-  if(TAB==='lab')acts='<button class="'+(on?'b2':'b1 bbl')+'" data-o="1">'+(on?'Close':'See report &amp; answer')+'</button>';
+  if(TAB==='lab')acts='<button class="'+(on||!i.wrong?'b2':'b1 bbl')+'" data-o="1">'+(on?'Close':(i.wrong?'See report &amp; answer':'See report'))+'</button>';
   if(TAB==='nox')acts='<button class="b2" data-o="1">'+(on?'Close':'See photo')+'</button><button class="b2" data-a="charged_elsewhere">Charged elsewhere</button><button class="b1" data-a="tell_shavez">Missed — tell Shavez</button>';
   h+='<div class="it" data-key="'+esc(i.key)+'"><div class="ir"><button class="th'+(TAB==='lab'?' b':'')+'" data-o="1" aria-label="See">'+(TAB==='lab'?'B':'X')+'</button><span class="dy">'+esc(i.dshort)+'</span><span class="tt"><b>'+esc(title(i))+'</b><span>'+esc(detail(i))+'</span></span><span class="acts">'+acts+'</span></div>'+(on?opened(i):'')+'</div>';});
  $('list').innerHTML=h;

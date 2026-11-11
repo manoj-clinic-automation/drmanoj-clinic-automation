@@ -14,7 +14,7 @@ LOCK="${LOCK:-/root/deploy/.claude_code_build.lock}"
 OFFSW="${OFFSW:-/root/deploy/_off/DOCTOR_AUTO_OFF}"
 FIN_PORT="${FIN_PORT:-8106}"; FSVC="${FSVC:-clinic-finance}"
 SYSTEMCTL="${SYSTEMCTL:-systemctl}"; JOURNALCTL="${JOURNALCTL:-journalctl}"
-F1="$ROOT/finance/check_screens.py"; FROM1=597dd8c941408172a6dd6bbcfadd7c4c; TO1=1d436f01f38114f86e492431ff796c74; BAK1="$F1.bak_S788_${FROM1:0:8}"
+F1="$ROOT/finance/check_screens.py"; FROM1=597dd8c941408172a6dd6bbcfadd7c4c; TO1=e86f16e15a2db78ba1c6d5b70bb75766; BAK1="$F1.bak_S788_${FROM1:0:8}"
 DB="${FINANCE_DB:-$ROOT/finance/finance.db}"
 HAVE_LOCK=0; OFF_MINE=0; PLACED=0; SCR=""
 m5() { md5sum "$1" 2>/dev/null | awk '{print $1}'; }
@@ -60,9 +60,9 @@ echo "[2/6] the live file is ${FROM1:0:8}; the kit's is that + the S788 rule (re
 "$APY" -c "import sqlite3; s=sqlite3.connect('file:$DB?mode=ro', uri=True); d=sqlite3.connect('$SCR/f.db'); s.backup(d); d.close(); s.close()" 2>/dev/null || stop "could not copy finance.db for the walk"
 \cp -p "$F1" "$SCR/live/"; \cp -p "$KDIR/check_screens.py" "$KDIR/DUTY_MAP.json.s787" "$SCR/w7/"; \cp -p "$ROOT/finance/records.py" "$SCR/w7/"
 R=$(cd "$SCR" && TMPDIR="$SCR" S788_LIBS="$ROOT/finance" timeout 300 "$APY" -W ignore -B "$KDIR/walk_s788.py" "$KDIR" "$SCR/f.db" 2>&1 | tail -1)
-case "$R" in "WALK OK"*) ;; *) stop "the S788 walk on a copy of today's database is not green ($R)";; esac
+case "$R" in "WALK OK"*) ;; *) (cd "$SCR" && TMPDIR="$SCR" S788_LIBS="$ROOT/finance" timeout 300 "$APY" -W ignore -B "$KDIR/walk_s788.py" "$KDIR" "$SCR/f.db" 2>&1 | grep -E '^BAD|Error' | head -6); stop "the S788 walk on a copy of today's database is not green ($R)";; esac
 R7=$(cd "$SCR" && TMPDIR="$SCR" S787_ANY=1 S787_LIBS="$ROOT/finance" timeout 300 "$APY" -W ignore -B "$KDIR/walk_s787.py" "$SCR/w7" "$SCR/f.db" 2>&1 | tail -1)
-case "$R7" in "WALK OK"*) ;; *) stop "S787's walk on the new file is not green ($R7)";; esac
+case "$R7" in "WALK OK"*) ;; *) (cd "$SCR" && TMPDIR="$SCR" S787_ANY=1 S787_LIBS="$ROOT/finance" timeout 300 "$APY" -W ignore -B "$KDIR/walk_s787.py" "$SCR/w7" "$SCR/f.db" 2>&1 | grep -E '^BAD|Error' | head -6); stop "S787's walk on the new file is not green ($R7)";; esac
 R2=$(cd "$SCR" && TMPDIR="$SCR" S788_LIBS="$ROOT/finance" timeout 300 "$APY" -W ignore -B "$KDIR/walk_s788.py" "$SCR/live" "$SCR/f.db" --control 2>&1 | tail -1)
 case "$R2" in "CONTROL: red"*) ;; *) stop "the control on the live file did not go red ($R2)";; esac
 rm -f "$SCR/f.db"; find "$KDIR" "$SCR" -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null

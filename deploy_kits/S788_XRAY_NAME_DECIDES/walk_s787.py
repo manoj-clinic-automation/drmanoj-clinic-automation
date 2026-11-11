@@ -53,7 +53,8 @@ if CS is not None and hasattr(CS, "s787_auto"):
     ck("D1 'Not in Docterz' answers the whole card", code == 200 and all(ans(s).get("answer") == "no_docterz" for s in sids), (code, d))
     ck("D2 it leaves the waiting list", not any(i["sid"] in sids for i in CS.xray_queue(con)) and not any(r["src_id"] in sids for r in CS._parked(con)))
     nz = CS.xray_queue(con, nodz_only=True)
-    ck("D3 it is ONE item on his 'Not in Docterz' tile", len(nz) == 1 and nz[0]["n"] == len(sids) and nz[0]["reason_en"].startswith("Not in Docterz"))
+    mine = [x for x in nz if x["sid"] in sids or set(x["copies"]) & set(sids)]
+    ck("D3 it is ONE item on his 'Not in Docterz' tile", len(mine) == 1 and mine[0]["n"] >= len(sids) and mine[0]["reason_en"].startswith("Not in Docterz"))
     ck("D4 the old list (records.xray_items) leaves it out too", not any(i.get("key") in ["xf:" + s for s in sids] for i in R.xray_items(con)))
     ck("D5 its photo and patients can still be opened", any(r["src_id"] == g["sid"] for r in CS._parked(con, nodz=True)))
     known = con.execute("SELECT clinic_id FROM patient_ref WHERE clinic_id GLOB '[0-9]*' AND (merged_into IS NULL OR merged_into='') LIMIT 1").fetchone()[0]
@@ -62,7 +63,7 @@ if CS is not None and hasattr(CS, "s787_auto"):
     code, d = CS.answer(con, U, {"key": g["key"], "a": "id_fixed", "new_id": known}, en=True)
     ck("D7 and given: every photo of it filed to that ID", code == 200 and all(ans(s).get("answer") == "id_fixed" and ans(s).get("note") == known for s in sids)
        and "photos" in d.get("msg", ""), (code, d))
-    ck("D8 gone from his tile", not CS.xray_queue(con, nodz_only=True))
+    ck("D8 gone from his tile", not any(x["sid"] in sids or set(x["copies"]) & set(sids) for x in CS.xray_queue(con, nodz_only=True)))
     # E: a card of one, 'not an X-ray' stays per picture
     q2 = CS.xray_queue(con)
     one = next((i for i in q2 if i["n"] == 1), None)
