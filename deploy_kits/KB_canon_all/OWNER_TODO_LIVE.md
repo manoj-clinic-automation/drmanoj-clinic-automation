@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S430 close** (the parent, full EOS), 11-Nov-2026, evening — the parent's sections refreshed here (the X-ray rules and payment gaps; the attendance clock; BL Computers; 431 reserved: the WhatsApp interim); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S432 close** (the Sanjeevni chat, EOS-light), 11-Nov-2026, night — the Sanjeevni sections refreshed here (the Marg watch plan for review; the publish; 434 reserved)
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S431 close** (the parent, full EOS), 11-Nov-2026, night — the parent's sections refreshed here (the WhatsApp MyOperator button; the PC kits; BL Computers and the machine's WiFi; 433 reserved: the Fable session); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S430 close** (the parent, full EOS), 11-Nov-2026, evening — the parent's sections refreshed here (the X-ray rules and payment gaps; the attendance clock; BL Computers; 431 reserved: the WhatsApp interim); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S426 close** (the Sanjeevni chat, full EOS), 11-Nov-2026, early morning — the Sanjeevni sections refreshed here (provisional purchase bills live; the scanner's line figures; reception to scan since 08-Nov; 429 reserved)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S428 close** (the parent, full EOS), 11-Nov-2026, morning — the parent's sections refreshed here (online bookings for staff; your X-ray page: one card per person, Not in Docterz, the name decides; lab reports for information; the 3 p.m. / 6 p.m. X-ray push; 430 reserved: the X-ray matching); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S427 close** (the parent, full EOS), 11-Nov-2026, morning — the parent's sections refreshed here (fewer X-ray pictures for staff, older ones yours and Shavez's; your X-ray page's own tile; 428 reserved: the Patients section, the Call Console's older follow-ups, the PC set-up kits); the other projects' sections as their closes left them.
@@ -437,7 +439,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S430 close (11-Nov, 18:0x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S431 close (11-Nov, 22:2x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -447,13 +449,13 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the S430 record (both kits are already live). Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries the S431 record (the WhatsApp button is already live). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · BL COMPUTERS — THE ATTENDANCE MACHINE'S CLOCK AND BACKUP BATTERY.** Its clock stops whenever the power goes (this morning up to 2 h 57 min behind). The server now saves the correct time, but the machine should be set right and its battery checked.
+**2 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Set its clock and check its backup battery (it stops at power cuts), and check its **WiFi**: the signal where it stands, and that it rejoins the WiFi by itself after a power cut. No punch reached the server after 10:20 on 11-Nov. Until fixed: staff switch it off and on once the WiFi is back after a power cut.
 
 **3 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
@@ -461,31 +463,30 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**4 · TELL RECEPTION, SHIVANI, ALISHA AND SHAVEZ (once):** the **Online booking** tile; the 3 p.m. / 6 p.m. X-ray photo count; and **Shavez:** an X-ray card marked *registered nahi* is a possible payment gap — register and file it, or tap why (Staff / Ghar / Free / Paisa alag se liya).
+**4 · TELL RECEPTION, SHIVANI, ALISHA AND SHAVEZ (once):** the **Online booking** tile; the 3 p.m. / 6 p.m. X-ray photo count; and **Shavez:** an X-ray card marked *registered nahi* is a possible payment gap — register and file it, or tap why.
 
 **5 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
 
-**6 · MYOPERATOR (ticket 691386): their written cause and a fix date.**
+**6 · MYOPERATOR (ticket 691386): their written cause and a fix date.** Meanwhile reply from the inbox's **MyOperator** button.
 
-**7 · The X-ray photos still waiting (about 8, each one a real doubt) and the payment gaps — from your X-ray page:**
-
-```
-https://followup.dr-manoj.in/finance/records/xray-check
-```
-
-**8 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
+**7 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **WhatsApp interim — *Open in MyOperator* on each chat of your inbox** (session 431, first).
-2. **Watch:** the X-ray rules and payment gaps; the attendance clock correction.
-3. **The Patients section on your console** (parts 2 and 3) and reception's third export.
-4. **The Call Console's older follow-ups** — a mock-up first.
-5. **Housekeeping:** the PC set-up files kept current; an old 370 MB test folder removed.
-6. **Arjun Dev / staff 20** once their fingers are done.
-7. **Later, on your word:** the reception mobile with each staff member's own login.
+1. **Session 433 on Claude Fable:** the Patients section (parts 2 and 3, reception's third export) and the Call Console's older follow-ups — analysis and mock-ups first; built on your word.
+2. **Watch:** the attendance punches arriving once the machine is back on WiFi; the medical PC kit repacked by the nightly; the WhatsApp button in use.
+3. **Arjun Dev / staff 20** once their fingers are done.
+4. **Later, on your word:** the reception mobile with each staff member's own login, and Ranjeet as its backup person (not small).
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S431 CLOSE — 11-Nov-2026 (the parent)
+
+- **WhatsApp inbox:** a MyOperator button on every chat — opens the same patient's chat there.
+- **PC set-up kits:** the real cause of staleness found and fixed; the medical kit updates itself tonight.
+- **Server:** an old 431 MB test folder removed.
+- **Checked:** the X-ray page, the 3 / 6 p.m. reminders, online booking; the attendance machine found off its WiFi.
+- **The brief for Fable** written: `claude/S431_FABLE_BRIEF_PATIENTS_CALLS.md`.
 
 ## ✅ DONE AT THE S430 CLOSE — 11-Nov-2026 (the parent)
 
@@ -1011,13 +1012,13 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S426 close (11-Nov, 07:1x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S432 close (11-Nov, 22:4x)
 
-*Detail: `S426_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_429.md` (this close's canon first — the PC-side command window, F-1255). This section supersedes the S425 one below it.*
+*Detail: `S432_BUILD_BRIEF.md`; the plan `S432_MARG_WATCH_PLAN.md`. The next chat's entry is `START_HERE_SESSION_434.md` (the plan's review by Claude Fable). This section supersedes the S426 one.*
 
-**1 · Reception:** scan the bills received since 08-Nov — upright and steady. They appear as provisional the same day, with their lines.
+**1 · The publish of tonight's records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`; nothing follows it.
 
-**2 · The publish of this close's records** — named by the next session once it has filed them (nothing now).
+**2 · Next session:** read the reviewed plan's few lines, then your word on mock v3 (your Marg watch page and the staff cards).
 
 **3 · Amir's three more dates** — the next chat drafts the message for your paste (with Yuvika 803's XL/XXL).
 
@@ -1025,7 +1026,7 @@ The full list: `claude/S288_PENDING_LIST.md`.
 
 **5 · Bass Pharma's payment number** in the phone book.
 
-**6 · ZIBON EXTRA +21** (the 06-Sep count) — when the next session shows it.
+**6 · ZIBON EXTRA +21** (the 06-Sep count) — when a session shows it.
 
 **7 · Row 7 — a dealer who never sends a summary:** *<Dealer> gives no summary*, once.
 
@@ -1037,15 +1038,21 @@ The full list: `claude/S288_PENDING_LIST.md`.
 
 **11 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
 
-**Later, your word only:** when scans start adding to stock (D891); reading older scans again for free / MRP / discount / GST (each costs a read); the Marg Purchases tile opening the Purchase bills page directly; the older parts of the order screen; "count them"; the buying switch (earliest ~22-Nov); June and July's old PROVISIONAL months; Deepam bill 502 of August (FINAL); a second network for the medical PC (D837).
+**Later, your word only:** the reports-login password, typed once on the medical PC at AutoHotkey's trial (D915); when scans start adding to stock (D891); reading older scans again for free / MRP / discount / GST; the Marg Purchases tile opening the Purchase bills page directly; the older parts of the order screen; "count them"; the buying switch (earliest ~22-Nov); June and July's old PROVISIONAL months; Deepam bill 502 of August (FINAL); a second network for the medical PC (D837).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S426 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S432 close
 
-1. **File this close into the canon** (F-1255), then the publish.
-2. **Read the page once reception has scanned** — the new bills' four figures checked against a paper.
+1. **Review `S432_MARG_WATCH_PLAN.md`** (Claude Fable, D918) → v2 → **mock v3** for your word.
+2. **The Marg watch kits**, each on your word: the main-store refusal and section A (F-1270, F-1271) · Ask · section B · the on-need request list · AutoHotkey.
 3. **Amir's three more dates** — the message for your paste.
 4. **The first orthotics count** with you, when you name who and when.
 5. **The 06-Sep proof step** (F-1232); **arrivals judged by the bill** (F-1220, the mock first); **the order-list kit** on your "go".
+
+## ✅ DONE AT THE S432 CLOSE — 11-Nov-2026 (the Sanjeevni project)
+
+- **The S426 records filed into the canon** (S429's open, 11:2x).
+- **Reception's scans read** — 7 since 08-Nov, all reading right; four match Marg.
+- **The Marg watch planned whole** with your rulings (D913 – D918) — `S432_MARG_WATCH_PLAN.md`.
 
 ## ✅ DONE AT THE S426 CLOSE — 11-Nov-2026 (the Sanjeevni project)
 
