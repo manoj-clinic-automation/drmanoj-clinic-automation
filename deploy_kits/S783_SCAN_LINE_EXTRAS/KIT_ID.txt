@@ -1,0 +1,1 @@
+S783_SCAN_LINE_EXTRAS  (S426, 11-Nov-2026, the Sanjeevni chat) the scanner reads free goods, MRP, discount and GST; the Purchase bills page shows them and the newest scan

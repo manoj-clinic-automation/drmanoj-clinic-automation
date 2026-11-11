@@ -29,7 +29,11 @@ R.append(("""    feed = []
 R.append(("""        if not cid:
             continue
         if sid in s772_why:                              # S772: say why this day
-""", """        if not cid:
+""", """        if not cid and r["kind"] == "check" and day < today:   # S782 (d): ONE X-ray patient's name but for the spelling
+            cid, how, d782 = _s782_spell(con, sid, r["orig"], day, cache)
+            if cid and d782:
+                day = d782
+        if not cid:
             continue
         if _s782_film_other(con, sid, cid, day, cache):   # S782 (c): the film prints another patient of that day -- a person decides
             continue
@@ -70,6 +74,7 @@ R.append(("""        if sid and sid not in now_ids and row.get("state") == "plan
 """, """        if sid and sid not in now_ids and row.get("state") == "planned" and (str(row.get("verdict") or "").startswith("S752") or (
                 row.get("action") == "dup" and str(row.get("verdict") or "").startswith(S782_MARK))):   # S782: a duplicate no longer one
 """))
+TAIL_ADD = '\n\nS782_SPELL_SHOW = 0.70                                   # Check karein: the order of the rest (letter likeness), never a tag\n_S782_PH = (("ee", "i"), ("ii", "i"), ("oo", "u"), ("aa", "a"), ("w", "v"), ("ph", "f"), ("sh", "s"), ("th", "t"), ("dh", "d"),\n            ("bh", "b"), ("kh", "k"), ("gh", "g"), ("jh", "j"), ("ch", "c"), ("q", "k"), ("y", "i"))   # no z->j: RAZA is not RAJA\n\n\ndef _s782_ph(w):\n    """A name word as it SOUNDS in the usual Hindi spellings: SUNEETA = SUNITA, KAVITHA = KAVITA, RAMESHWAR = RAMESVAR."""\n    w = str(w or "").lower()\n    for a, b in _S782_PH:\n        w = w.replace(a, b)\n    return re.sub(r"(.)\\1+", r"\\1", w)\n\n\ndef _s782_lev1(a, b):\n    """True when a and b differ by ONE vowel inside the word in a way Hindi names are usually spelt both ways: E/I (or I/E),\n    O/U, A/E, or an A put in or left out -- never the first or the last letter (RAMESHWAR / RAMESHWER yes; VANITA / VINITA and\n    MANISHA / MONISHA no -- A/I and A/O are different names; SARITA / SARIKA no -- a consonant; RAJKUMAR / RAJKUMARI no -- the end)."""\n    ok = ({"e", "i"}, {"o", "u"}, {"a", "e"})\n    if abs(len(a) - len(b)) > 1:\n        return False\n    if len(a) == len(b):\n        d = [i for i, (x, y) in enumerate(zip(a, b)) if x != y]\n        return len(d) == 1 and 0 < d[0] < len(a) - 1 and {a[d[0]], b[d[0]]} in ok\n    s, l = (a, b) if len(a) < len(b) else (b, a)\n    return any(l[:i] + l[i + 1:] == s and 0 < i < len(l) - 1 and l[i] == "a" for i in range(len(l)))\n\n\ndef _s782_word(a, b):\n    """Two name words the same person\'s: the same sound, or -- both six letters or more, the same first letter -- one vowel\n    apart inside the word (RAMESHWAR / RAMESHWER). ANIL is never SUNIL; SUNITA is never SUNIL; SARITA is never SARIKA."""\n    pa, pb = _s782_ph(a), _s782_ph(b)\n    return pa == pb or (len(pa) >= 6 and len(pb) >= 6 and pa[0] == pb[0] and _s782_lev1(pa, pb))\n\n\ndef _s782_alike(pic, pat):\n    """The picture\'s name is the patient\'s, allowing the usual spelling variants: every word of the picture pairs with its own\n    word of the patient\'s name, the FIRST words with each other (a surname alone never); a one-word name only a one-word name."""\n    if not pic or not pat or not _s782_word(pic[0], pat[0]):\n        return False\n    if len(pic) < 2 and len(pat) > 1:\n        return False\n    rest = list(pat[1:])\n    for w in pic[1:]:\n        k = next((i for i, x in enumerate(rest) if _s782_word(w, x)), None)\n        if k is None:\n            return False\n        rest.pop(k)\n    return True\n\n\ndef _s782_sp(toks, names):\n    """0..1, letter likeness of the picture\'s name to the nearest of these names -- ONLY the order of a list a person reads."""\n    import difflib                                       # noqa: PLC0415\n    if not toks:\n        return 0.0\n    a, a2 = " ".join(toks), " ".join(sorted(toks))\n    best = 0.0\n    for n in names or []:\n        t = _s752_tokens(n)\n        if t:\n            best = max(best, difflib.SequenceMatcher(None, a, " ".join(t)).ratio(),\n                       difflib.SequenceMatcher(None, a2, " ".join(sorted(t))).ratio())\n    return best\n\n\ndef _s782_names(con, cid, cache):\n    k = ("s782n", cid)\n    if k not in cache:\n        cache[k] = _s772_names(con, cid)\n    return cache[k]\n\n\ndef _s782_spell(con, sid, orig, day, cache):\n    """(clinic ID, why, his X-ray day) by the name\'s spelling variants -- (d) -- or (\'\', \'\', \'\')."""\n    st = xray_stem(orig)\n    toks = _s752_tokens(st)\n    if not toks or len("".join(toks)) < 6 or _s752_child(st):\n        return "", "", ""\n    fr = _s772_film(con, sid)\n    if not fr or not fr[0] or not _s772_near(day, fr[0], 1):\n        return "", "", ""\n    own, how = xray_id(orig)\n    if how == "many":\n        return "", "", ""\n    everyone, open_ = set(), {}\n    for d in (day, _s772_shift(day, -1), _s772_shift(day, 1)):   # the film\'s day first\n        pats, filed = _s752_day(con, d, cache)\n        everyone |= set(pats) | _s776_visitors(con, d)\n        for c in pats:\n            if c not in open_ and filed.get(c, 0) < max(1, len(_day_studies(con, d, c)[0])):\n                open_[c] = d\n    def alike(c):\n        return any(_s782_alike(toks, _s752_tokens(n)) for n in _s782_names(con, c, cache))\n    hits = [c for c in sorted(open_) if alike(c)]\n    if len(hits) != 1:\n        return "", "", ""\n    best = hits[0]\n    if any(c != best and (alike(c) or _s776_close(toks, _s782_names(con, c, cache))) for c in everyone):\n        return "", "", ""                                # anyone else who came those days could be the picture\'s: a person decides\n    if open_[best] >= _today():\n        return "", "", ""                                # his day is not over: everyone who came is not known yet\n    for x in list(fr[1]) + ([own] if own else []):       # every ID the film prints or the name carries: his, or a slip of the\n        if x != best and not (_s752_one_off(x, best) and not _known_id(con, x)):   # keys that is NOBODY\'s ID\n            return "", "", ""\n    return best, (S782_MARK + "its name is %s\'s X-ray patient %s\'s but for the spelling, and his photo was missing; nobody "\n                  "else who came those days has a name like it" % (_dmy(open_[best]), best)), open_[best]\n'
 TAIL = '''
 
 # ---------------------------------------------------------------- S782: the photo number and the second upload (F-1236)
@@ -86,6 +91,13 @@ TAIL = '''
 #   (c) a picture is never filed by itself on one patient while its film prints the clinic ID of ANOTHER patient who came that
 #       day (X-rayed or only seen) -- the staff's typing and the machine's print disagree on two real people: a person decides.
 #       (Before S782 a name-only picture could be filed on its name's patient whatever the film printed.)
+#   (d) the owner, 05:15 IST 11-Nov: "for the name, exact spelling might not be there" -- a picture nothing else placed, its film's
+#       date read (within a day), is filed on the ONE X-ray patient of that day (or the day either side) whose photo is still
+#       missing and whose name is the picture's but for the usual spelling variants (_s782_alike: SUNEETA = SUNITA, KAVITHA =
+#       KAVITA; the first words must agree -- ANIL is never SUNIL, a surname alone never), while nobody else who came those days
+#       -- X-rayed or only seen -- has a name like it; an ID printed on the film must be his (or one keystroke off); never a
+#       child's picture, never a name of under six letters.
+#   The owner's Check karein (check_screens.py) lists such names first ("Similar name"), the rest by letter likeness (_s782_sp).
 S782_MARK = "S782 \\u00b7 "
 
 
@@ -128,7 +140,8 @@ def _s782_strip(con, sid, name, first, cache):
     who = set()
     for d in days:
         who |= set(_s752_day(con, d, cache)[0]) | _s776_visitors(con, d)
-    drop = [n for n in short if n not in who and not _s772_strict(con, n, name)]
+    drop = [n for n in short if n not in who and not _s772_strict(con, n, name)
+            and not any(_s782_alike(_s752_tokens(xray_stem(name)), _s752_tokens(x)) for x in _s772_names(con, n))]   # (d)'s spelling too
     if not drop:
         return "", ""
     for n in drop:
@@ -195,5 +208,6 @@ for old, new in R:
     assert t.count(old) == 1, "anchor not once: " + old[:60]
     t = t.replace(old, new)
 t = t.rstrip("\n") + "\n" + TAIL
+t = t.rstrip("\n") + "\n" + TAIL_ADD
 open(dst, "wb").write(t.encode("utf-8"))
 print("written", dst, hashlib.md5(t.encode("utf-8")).hexdigest()[:8])

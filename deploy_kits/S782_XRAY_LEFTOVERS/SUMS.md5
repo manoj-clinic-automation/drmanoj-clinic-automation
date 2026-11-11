@@ -1,7 +1,10 @@
 9c1f3a22668a270c2a4c8294a9345ff0  KIT_ID.txt
-ad2e7635120f2a83ce8300e98659da45  README.md
-d2c4ea3f1bcb322834fe8f118ac4c9fe  install_S782_XRAY_LEFTOVERS.sh
-895ad4ddde1948a8da9b8a7a3ed60c98  make_s782.py
-b13d11f59e31751862e80d68ab52f8fa  records.py
-bd3c4c93a4aa26a3e919e884e3921312  walk_s782.py
+51696e3fff0359f6e1de618311e0aa5e  README.md
+8cc75b92eba2811cf6e1205a8b4945c7  install_S782_XRAY_LEFTOVERS.sh
+88db7a1f2b906f3b4851332924177b6c  make_s782.py
+6855f5497c6390bb0dcc2fd7cbf9fae0  make_s782_cs.py
+e5aaf35fe6700986885f3b3da78fbcf9  make_s782_dm.py
+794cb87f64afb89742e6bf0b04114b8e  records.py
+c259e6a258c19f1222820b47e9e9ad34  check_screens.py
+df21da15810df5d9cf83d17967b82253  walk_s782.py
 3e468e91793d3ac94a0c184288a0cb29  shape_s782.py

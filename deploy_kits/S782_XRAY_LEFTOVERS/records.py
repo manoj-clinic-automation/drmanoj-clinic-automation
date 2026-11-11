@@ -2081,6 +2081,10 @@ def _s752_retry(con, files, stamp, listed=True):
             how = ("no ID on the picture; its name is that of %s's one X-ray patient %s" % (_dmy(day), cid)) if cid else ""
         if not cid and r["kind"] == "check" and day < today:   # S776: what nothing else placed
             cid, how = _s776_more(con, sid, r["orig"], day, cache)
+        if not cid and r["kind"] == "check" and day < today:   # S782 (d): ONE X-ray patient's name but for the spelling
+            cid, how, d782 = _s782_spell(con, sid, r["orig"], day, cache)
+            if cid and d782:
+                day = d782
         if not cid:
             continue
         if _s782_film_other(con, sid, cid, day, cache):   # S782 (c): the film prints another patient of that day -- a person decides
@@ -2569,6 +2573,13 @@ def _s776_more(con, sid, orig, day, cache):
 #   (c) a picture is never filed by itself on one patient while its film prints the clinic ID of ANOTHER patient who came that
 #       day (X-rayed or only seen) -- the staff's typing and the machine's print disagree on two real people: a person decides.
 #       (Before S782 a name-only picture could be filed on its name's patient whatever the film printed.)
+#   (d) the owner, 05:15 IST 11-Nov: "for the name, exact spelling might not be there" -- a picture nothing else placed, its film's
+#       date read (within a day), is filed on the ONE X-ray patient of that day (or the day either side) whose photo is still
+#       missing and whose name is the picture's but for the usual spelling variants (_s782_alike: SUNEETA = SUNITA, KAVITHA =
+#       KAVITA; the first words must agree -- ANIL is never SUNIL, a surname alone never), while nobody else who came those days
+#       -- X-rayed or only seen -- has a name like it; an ID printed on the film must be his (or one keystroke off); never a
+#       child's picture, never a name of under six letters.
+#   The owner's Check karein (check_screens.py) lists such names first ("Similar name"), the rest by letter likeness (_s782_sp).
 S782_MARK = "S782 \u00b7 "
 
 
@@ -2611,7 +2622,8 @@ def _s782_strip(con, sid, name, first, cache):
     who = set()
     for d in days:
         who |= set(_s752_day(con, d, cache)[0]) | _s776_visitors(con, d)
-    drop = [n for n in short if n not in who and not _s772_strict(con, n, name)]
+    drop = [n for n in short if n not in who and not _s772_strict(con, n, name)
+            and not any(_s782_alike(_s752_tokens(xray_stem(name)), _s752_tokens(x)) for x in _s772_names(con, n))]   # (d)'s spelling too
     if not drop:
         return "", ""
     for n in drop:
@@ -2673,3 +2685,111 @@ def _s782_second(con, sid, name, cache, orig=""):
             continue                                     # a film of that day still has no photo: this could be it -- a person decides
         hits.add((x["clinic_id"], x["day"]))
     return sorted(hits)[0] if len(hits) == 1 else ("", "")
+
+
+S782_SPELL_SHOW = 0.70                                   # Check karein: the order of the rest (letter likeness), never a tag
+_S782_PH = (("ee", "i"), ("ii", "i"), ("oo", "u"), ("aa", "a"), ("w", "v"), ("ph", "f"), ("sh", "s"), ("th", "t"), ("dh", "d"),
+            ("bh", "b"), ("kh", "k"), ("gh", "g"), ("jh", "j"), ("ch", "c"), ("q", "k"), ("y", "i"))   # no z->j: RAZA is not RAJA
+
+
+def _s782_ph(w):
+    """A name word as it SOUNDS in the usual Hindi spellings: SUNEETA = SUNITA, KAVITHA = KAVITA, RAMESHWAR = RAMESVAR."""
+    w = str(w or "").lower()
+    for a, b in _S782_PH:
+        w = w.replace(a, b)
+    return re.sub(r"(.)\1+", r"\1", w)
+
+
+def _s782_lev1(a, b):
+    """True when a and b differ by ONE vowel inside the word in a way Hindi names are usually spelt both ways: E/I (or I/E),
+    O/U, A/E, or an A put in or left out -- never the first or the last letter (RAMESHWAR / RAMESHWER yes; VANITA / VINITA and
+    MANISHA / MONISHA no -- A/I and A/O are different names; SARITA / SARIKA no -- a consonant; RAJKUMAR / RAJKUMARI no -- the end)."""
+    ok = ({"e", "i"}, {"o", "u"}, {"a", "e"})
+    if abs(len(a) - len(b)) > 1:
+        return False
+    if len(a) == len(b):
+        d = [i for i, (x, y) in enumerate(zip(a, b)) if x != y]
+        return len(d) == 1 and 0 < d[0] < len(a) - 1 and {a[d[0]], b[d[0]]} in ok
+    s, l = (a, b) if len(a) < len(b) else (b, a)
+    return any(l[:i] + l[i + 1:] == s and 0 < i < len(l) - 1 and l[i] == "a" for i in range(len(l)))
+
+
+def _s782_word(a, b):
+    """Two name words the same person's: the same sound, or -- both six letters or more, the same first letter -- one vowel
+    apart inside the word (RAMESHWAR / RAMESHWER). ANIL is never SUNIL; SUNITA is never SUNIL; SARITA is never SARIKA."""
+    pa, pb = _s782_ph(a), _s782_ph(b)
+    return pa == pb or (len(pa) >= 6 and len(pb) >= 6 and pa[0] == pb[0] and _s782_lev1(pa, pb))
+
+
+def _s782_alike(pic, pat):
+    """The picture's name is the patient's, allowing the usual spelling variants: every word of the picture pairs with its own
+    word of the patient's name, the FIRST words with each other (a surname alone never); a one-word name only a one-word name."""
+    if not pic or not pat or not _s782_word(pic[0], pat[0]):
+        return False
+    if len(pic) < 2 and len(pat) > 1:
+        return False
+    rest = list(pat[1:])
+    for w in pic[1:]:
+        k = next((i for i, x in enumerate(rest) if _s782_word(w, x)), None)
+        if k is None:
+            return False
+        rest.pop(k)
+    return True
+
+
+def _s782_sp(toks, names):
+    """0..1, letter likeness of the picture's name to the nearest of these names -- ONLY the order of a list a person reads."""
+    import difflib                                       # noqa: PLC0415
+    if not toks:
+        return 0.0
+    a, a2 = " ".join(toks), " ".join(sorted(toks))
+    best = 0.0
+    for n in names or []:
+        t = _s752_tokens(n)
+        if t:
+            best = max(best, difflib.SequenceMatcher(None, a, " ".join(t)).ratio(),
+                       difflib.SequenceMatcher(None, a2, " ".join(sorted(t))).ratio())
+    return best
+
+
+def _s782_names(con, cid, cache):
+    k = ("s782n", cid)
+    if k not in cache:
+        cache[k] = _s772_names(con, cid)
+    return cache[k]
+
+
+def _s782_spell(con, sid, orig, day, cache):
+    """(clinic ID, why, his X-ray day) by the name's spelling variants -- (d) -- or ('', '', '')."""
+    st = xray_stem(orig)
+    toks = _s752_tokens(st)
+    if not toks or len("".join(toks)) < 6 or _s752_child(st):
+        return "", "", ""
+    fr = _s772_film(con, sid)
+    if not fr or not fr[0] or not _s772_near(day, fr[0], 1):
+        return "", "", ""
+    own, how = xray_id(orig)
+    if how == "many":
+        return "", "", ""
+    everyone, open_ = set(), {}
+    for d in (day, _s772_shift(day, -1), _s772_shift(day, 1)):   # the film's day first
+        pats, filed = _s752_day(con, d, cache)
+        everyone |= set(pats) | _s776_visitors(con, d)
+        for c in pats:
+            if c not in open_ and filed.get(c, 0) < max(1, len(_day_studies(con, d, c)[0])):
+                open_[c] = d
+    def alike(c):
+        return any(_s782_alike(toks, _s752_tokens(n)) for n in _s782_names(con, c, cache))
+    hits = [c for c in sorted(open_) if alike(c)]
+    if len(hits) != 1:
+        return "", "", ""
+    best = hits[0]
+    if any(c != best and (alike(c) or _s776_close(toks, _s782_names(con, c, cache))) for c in everyone):
+        return "", "", ""                                # anyone else who came those days could be the picture's: a person decides
+    if open_[best] >= _today():
+        return "", "", ""                                # his day is not over: everyone who came is not known yet
+    for x in list(fr[1]) + ([own] if own else []):       # every ID the film prints or the name carries: his, or a slip of the
+        if x != best and not (_s752_one_off(x, best) and not _known_id(con, x)):   # keys that is NOBODY's ID
+            return "", "", ""
+    return best, (S782_MARK + "its name is %s's X-ray patient %s's but for the spelling, and his photo was missing; nobody "
+                  "else who came those days has a name like it" % (_dmy(open_[best]), best)), open_[best]
