@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S428 close** (the parent, full EOS), 11-Nov-2026, morning — the parent's sections refreshed here (online bookings for staff; your X-ray page: one card per person, Not in Docterz, the name decides; lab reports for information; the 3 p.m. / 6 p.m. X-ray push; 430 reserved: the X-ray matching); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S426 close** (the Sanjeevni chat, full EOS), 11-Nov-2026, early morning — the Sanjeevni sections refreshed here (provisional purchase bills live; the scanner's line figures; reception to scan since 08-Nov; 429 reserved)
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S428 close** (the parent, full EOS), 11-Nov-2026, morning — the parent's sections refreshed here (online bookings for staff; your X-ray page: one card per person, Not in Docterz, the name decides; lab reports for information; the 3 p.m. / 6 p.m. X-ray push; 430 reserved: the X-ray matching); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S427 close** (the parent, full EOS), 11-Nov-2026, morning — the parent's sections refreshed here (fewer X-ray pictures for staff, older ones yours and Shavez's; your X-ray page's own tile; 428 reserved: the Patients section, the Call Console's older follow-ups, the PC set-up kits); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S424 close** (the parent, full EOS), 11-Nov-2026, early morning — the parent's sections refreshed here (the calling list drops patients who already came; every visit's diagnosis on the server; your clinical exports reach it by themselves; 427 reserved: the X-rays, then the Patients section); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S425 close** (the Sanjeevni chat, full EOS), 11-Nov-2026, early morning — the Sanjeevni sections refreshed here (the order screen live; October's scans measured; provisional purchase bills next; 426 reserved)
@@ -1005,50 +1006,47 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S425 close (11-Nov, 04:3x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S426 close (11-Nov, 07:1x)
 
-*Detail: `S425_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_426.md` (provisional purchase bills first). This section supersedes the S423 one below it.*
+*Detail: `S426_BUILD_BRIEF.md`. The next chat's entry is `START_HERE_SESSION_429.md` (this close's canon first — the PC-side command window, F-1255). This section supersedes the S425 one below it.*
 
-**1 · Publish this session's records** — one double-click, nothing follows it:
+**1 · Reception:** scan the bills received since 08-Nov — upright and steady. They appear as provisional the same day, with their lines.
 
-```
-D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
-```
+**2 · The publish of this close's records** — named by the next session once it has filed them (nothing now).
 
-**2 · Reception:** photograph each bill upright and steady (the sideways and blurred ones are the misreads).
+**3 · Amir's three more dates** — the next chat drafts the message for your paste (with Yuvika 803's XL/XXL).
 
-**3 · Amir's three more dates** — the next chat drafts the message for your paste.
+**4 · The orthotics count** — who counts the shelf, and on which day.
 
-**4 · The Orthotic bills card** — settle the red lines when you have a moment:
+**5 · Bass Pharma's payment number** in the phone book.
 
-```
-https://followup.dr-manoj.in/finance/stock/page/hub
-```
+**6 · ZIBON EXTRA +21** (the 06-Sep count) — when the next session shows it.
 
-**5 · The orthotics count** — who counts the shelf, and on which day.
+**7 · Row 7 — a dealer who never sends a summary:** *<Dealer> gives no summary*, once.
 
-**6 · Bass Pharma's payment number** in the phone book.
+**8 · Shavez's phone:** the daily summaries reach him only once he has opened the clinic app and allowed messages.
 
-**7 · ZIBON EXTRA +21** (the 06-Sep count) — when the next session shows it.
+**9 · Still yours:** ZUPRINOR 5 (row 6); the two September supplier messages (A.A. Pharmaceuticals, Deepam Pharma).
 
-**8 · Row 7 — a dealer who never sends a summary:** *<Dealer> gives no summary*, once.
+**10 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
 
-**9 · Shavez's phone:** the daily summaries reach him only once he has opened the clinic app and allowed messages.
+**11 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
 
-**10 · Still yours:** ZUPRINOR 5 (row 6); the two September supplier messages (A.A. Pharmaceuticals, Deepam Pharma).
+**Later, your word only:** when scans start adding to stock (D891); reading older scans again for free / MRP / discount / GST (each costs a read); the Marg Purchases tile opening the Purchase bills page directly; the older parts of the order screen; "count them"; the buying switch (earliest ~22-Nov); June and July's old PROVISIONAL months; Deepam bill 502 of August (FINAL); a second network for the medical PC (D837).
 
-**11 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S426 close
 
-**12 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
+1. **File this close into the canon** (F-1255), then the publish.
+2. **Read the page once reception has scanned** — the new bills' four figures checked against a paper.
+3. **Amir's three more dates** — the message for your paste.
+4. **The first orthotics count** with you, when you name who and when.
+5. **The 06-Sep proof step** (F-1232); **arrivals judged by the bill** (F-1220, the mock first); **the order-list kit** on your "go".
 
-**Later, your word only:** when scans start adding to stock (D891); the older parts of the order screen the review named (← BACK on staff pages, the greyed WhatsApp button); "count them"; the buying switch (earliest ~22-Nov); June and July's old PROVISIONAL months; Deepam bill 502 of August (FINAL); a second network for the medical PC (D837).
+## ✅ DONE AT THE S426 CLOSE — 11-Nov-2026 (the Sanjeevni project)
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S425 close
-
-1. **Provisional purchase bills (your mock, approved 04:29)** — scanned bills in the month before Marg, item lines inline, the scan beside Marg's lines where they differ, with Amir fixes Marg / Marg is right / Raise a purchase return / Flag.
-2. **Amir's three more dates** — the message for your paste.
-3. **The first orthotics count** with you, when you name who and when.
-4. **The 06-Sep proof step** (F-1232); **arrivals judged by the bill** (F-1220, the mock first); **the order-list kit** on your "go".
+- **Provisional purchase bills** — live 05:48: the month in three parts, reliability, the waiting scans with their lines, *Check here* where Marg differs, the four answers with Undo; the orthotics bills by their own line check.
+- **The scanner's line figures** — live 06:11: free goods, MRP, discount, GST on new pharmacy bills; the newest-scan line.
+- **The Hub's link** — live 06:44: "Purchase bills — in Marg · scanned · differences".
 
 ## ✅ DONE AT THE S425 CLOSE — 11-Nov-2026 (the Sanjeevni project)
 
