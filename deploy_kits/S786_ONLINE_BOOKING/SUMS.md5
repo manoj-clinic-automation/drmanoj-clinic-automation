@@ -1,0 +1,10 @@
+02ae5b28f369398c7cf3143249e3f800  KIT_ID.txt
+9400614141306c1e6dcd04dd3e567237  README.md
+d7fa46932bc07fd20d58aa93890cd788  make_s786.py
+fca03d2916eda97ff0d43259c69efbfa  walk_s786.py
+c0776dba03649533ff206c7e58ccf7aa  install_S786_ONLINE_BOOKING.sh
+eecc44593c0d286385ed16a4767422fd  finance/online_booking.py
+97d63d71479a7a4598c1e8395d0516d0  finance/owner_console.py
+aa1642e110cf1dc9f55b01c45a35e13a  portal/online_booking_portal.py
+8b7239192db3f77493b829a618fb33e9  portal/portal.py
+b7b1fabfa4106ce1041fa13b9ac2bbcf  portal/tile_grants.json.s786
