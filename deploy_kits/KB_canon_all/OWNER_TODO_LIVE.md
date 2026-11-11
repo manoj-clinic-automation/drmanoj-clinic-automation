@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S424 close** (the parent, full EOS), 11-Nov-2026, early morning — the parent's sections refreshed here (the calling list drops patients who already came; every visit's diagnosis on the server; your clinical exports reach it by themselves; 427 reserved: the X-rays, then the Patients section); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S427 close** (the parent, full EOS), 11-Nov-2026, morning — the parent's sections refreshed here (fewer X-ray pictures for staff, older ones yours and Shavez's; your X-ray page's own tile; 428 reserved: the Patients section, the Call Console's older follow-ups, the PC set-up kits); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S424 close** (the parent, full EOS), 11-Nov-2026, early morning — the parent's sections refreshed here (the calling list drops patients who already came; every visit's diagnosis on the server; your clinical exports reach it by themselves; 427 reserved: the X-rays, then the Patients section); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S425 close** (the Sanjeevni chat, full EOS), 11-Nov-2026, early morning — the Sanjeevni sections refreshed here (the order screen live; October's scans measured; provisional purchase bills next; 426 reserved)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S423 close** (the Sanjeevni chat, full EOS), 10-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the Orthotic bills card live; every October bill carries its lines; the dates sent to Amir; the order screen next; 425 reserved)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S422 close** (the parent, full EOS), 10-Nov-2026, afternoon — the parent's sections refreshed here (the re-added X-rays filed by the film; fewer left for staff; 36 still parked — next session; the tracker's program folder; 424 reserved); the other projects' sections as their closes left them.
@@ -433,7 +434,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S424 close (11-Nov, 04:4x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S427 close (11-Nov, 06:5x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -443,15 +444,13 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the S424 record and kits (all three already live). Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries the S427 record (both X-ray kits are already live). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**1a · NEXT SESSION, ONE WORD: unmatched X-ray pictures older than 7 days** — off staff's Check karein, onto your X-ray page only? (asked after the 36 are worked out)
-
-**1b · TELL SHIVANI, ALISHA AND SHAVEZ: their own call card is on *Aaj ka kaam* (*Mere calls*)**, and *Check karein* shows the X-ray photo and that day's patients — tap the right one, then *Haan*. *(If not told yet.)*
+**1a · TELL ALISHA, SHIVANI AND SHAVEZ (once):** *Check karein* now lists that day's patients closest name first, and the box takes a clinic ID, a name or a mobile number. Reception sees the last 7 days; older pictures are with you and Shavez.
 
 **2 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
@@ -469,23 +468,30 @@ https://followup.dr-manoj.in/ledger/salary?m=2026-10
 
 **5 · MYOPERATOR (ticket 691386): their written cause and a fix date.**
 
-**6 · OCTOBER, ON YOUR MONTH PAGE: the amber lines are yours.**
+**6 · The X-ray photos older than 7 days (31 at 06:45) — yours and Shavez's to file, from your X-ray page:**
 
 ```
-https://followup.dr-manoj.in/finance/console/month
+https://followup.dr-manoj.in/finance/records/xray-check
 ```
 
-**7 · Items 8 – 24 and *when it happens* stand as at the S422 close.** **New under *when it happens*:** once the Patients screen is up — the one-tap list of 29 diagnosis terms your taxonomy does not know; and reception adds the *Clinical data report* as its third evening export.
+**7 · Items 8 – 24 and *when it happens* stand as at the S422 close.** Under *when it happens*: once the Patients screen is up — the one-tap list of 29 diagnosis terms; reception adds the *Clinical data report* as its third evening export.
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The 36 parked X-rays** (F-1236) — from this morning's database copy; one fix; then your word on unmatched > 7 days.
-2. **The Patients section on your console** (part 2) — the mock-up you approved, fed by the diagnoses now on the server; the one-tap list of unknown terms.
-3. **Follow-ups kept and called, by diagnosis group and by staff** (part 3).
-4. **Watch:** the calling list each night; each clinical export sent once and read; the X-ray filing; the Case Pack's first *Give estimate*.
-5. **Arjun Dev's link step**, **staff 20's exit steps** · **the review reading on 19 Nov** · **the packs page's September checklist** · WhatsApp after MyOperator's fix.
+1. **The Patients section on your console** (part 2) — the mock-up you approved, fed by the diagnoses on the server; the one-tap list of unknown terms.
+2. **The Call Console's older follow-ups** — the last successful call, its outcome, recording and transcript on your page; the recording on the staff page.
+3. **The PC set-up files on your System tile kept current.**
+4. **Follow-ups kept and called, by diagnosis group and by staff** (part 3).
+5. **Watch:** the X-ray filing after S782; the calling list each night; each clinical export sent once and read.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S427 CLOSE — 11-Nov-2026 (the parent)
+
+- **Fewer X-ray pictures wait for staff:** photo numbers are not read as IDs; second uploads go to duplicates; a name that is one X-ray patient's but for the usual spelling files on him; never while the film shows another patient. 39 → 35 at the install.
+- **Older than 7 days → you and Shavez;** reception sees the last 7 days.
+- **Closest names first, and the search by ID, name or full mobile.**
+- **Your X-ray page's own tile** (Patients → X-ray photos) **and a Needs-you line** on your console.
 
 ## ✅ DONE AT THE S424 CLOSE — 11-Nov-2026 (the parent)
 
