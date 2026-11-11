@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
-#  install_S787_XRAY_SAME_PERSON.sh . kit S787 (11-Nov-2026, session S428, the parent) . the owner 08:38 IST: RESMA shown several times
-#  (her 5-Nov photos added again on 9-Nov); SACHIN AGRAWAL not registered in Docterz -- "no flow for him also. Do the needful."
+#  install_S787_XRAY_SAME_PERSON.sh . kit S787 (11-Nov-2026, session S428, the parent) . the owner 08:38 IST: R. shown several times
+#  (her 5-Nov photos added again on 9-Nov); S.A. not registered in Docterz -- "no flow for him also. Do the needful."
 #    cd /root/deploy/repo && git pull --ff-only && rm -rf /tmp/s787kit && cp -rp /root/deploy/repo/deploy_kits/S787_XRAY_SAME_PERSON /tmp/s787kit && bash /tmp/s787kit/install_S787_XRAY_SAME_PERSON.sh
 #  /root/finance/check_screens.py c259e6a2 -> TO . /root/finance/records.py 794cb87f -> TO (finance restarted once).
 #  claude_code_briefs/DUTY_MAP.json v23 arrives with the git pull (reception's X-ray line leaves 'not in Docterz' out).

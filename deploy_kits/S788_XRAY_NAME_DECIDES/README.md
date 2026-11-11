@@ -1,8 +1,7 @@
 # S788_XRAY_NAME_DECIDES — the name decides when the number is one digit off
 
 **The owner, 11-Nov-2026 09:14 IST:** *"For such cases, the name should be the deciding factor where all other parameters match and the
-ID is only slightly off"* — SUNDARWATI (24-Oct): the film was read as 8344 (another X-ray patient of that day, his photo filed); her ID
-is 8343, and her two other photos that day were filed there. The safety rule of S782 (c) had held it for a person.
+ID is only slightly off"* — S. (24-Oct): the film was read as another patient's ID (another X-ray patient of that day, his photo filed); her ID is one digit off it, and her two other photos that day were filed there. The safety rule of S782 (c) had held it for a person.
 
 `/root/finance/check_screens.py` 597dd8c9 (S787) → TO. Before each filing plan, `s787_auto` now first asks `_s788_name_decides`: the
 photo gets the ID of the patient when its name — word by word, or with the spaces taken out, allowing the usual spelling — is that of
@@ -10,10 +9,10 @@ exactly ONE patient who came on the film's day ±1 (so nobody else who came has 
 those days, and there IS a number (read on the film or written in the file name), every one of which is his ID or one digit off it —
 even when that number is another patient's. Written as "system · S788", filed by the next filing run.
 
-The reason line on both pages now says what the film reads: *"No ID in the file name; the film reads 8344 (Ram Kumar)"* instead of
+The reason line on both pages now says what the film reads: *"No ID in the file name; the film reads NNNN (the name of that ID)"* instead of
 "No clinic ID on the photo".
 
-On the 11-Nov copy: 3 photos (SUNDARWATI to 8343 among them); none where a number was far off; none when a second patient of the same
+On the 11-Nov copy: 3 photos (the 24-Oct one among them); none where a number was far off; none when a second patient of the same
 name came those days (checked with a made-up one). **Walk** 8/8 (+ S787's walk on the new file); the CONTROL red on the live file.
 
 **(b) The lab list, the owner 09:22 IST:** *"How about filing these reports automatically and not holding them just because there was no
@@ -31,3 +30,5 @@ checks now look only at the card the walk itself marks. A red walk now prints it
 cd /root/deploy/repo && git pull --ff-only && rm -rf /tmp/s788kit && cp -rp /root/deploy/repo/deploy_kits/S788_XRAY_NAME_DECIDES /tmp/s788kit && bash /tmp/s788kit/install_S788_XRAY_NAME_DECIDES.sh
 ```
 Undo: `bash /tmp/s788kit/install_S788_XRAY_NAME_DECIDES.sh --undo`.
+
+**F-1264 (S430, 11-Nov-2026):** a patient's name and clinic IDs were taken out of this kit's papers (names -> initials). Its files therefore no longer match the installer's checks: the kit is history, superseded by `S791_XRAY_MATCH_RULES` -- do not re-run it.

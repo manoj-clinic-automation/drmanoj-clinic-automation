@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
 #  install_S788_XRAY_NAME_DECIDES.sh . kit S788 (11-Nov-2026, session S428, the parent) . the owner 09:14 IST: "the name should be the
-#  deciding factor where all other parameters match and the ID is only slightly off" (SUNDARWATI 24-Oct: film read 8344, her ID 8343).
+#  deciding factor where all other parameters match and the ID is only slightly off" (a 24-Oct photo: the film read another patient's ID, one digit off hers).
 #    cd /root/deploy/repo && git pull --ff-only && rm -rf /tmp/s788kit && cp -rp /root/deploy/repo/deploy_kits/S788_XRAY_NAME_DECIDES /tmp/s788kit && bash /tmp/s788kit/install_S788_XRAY_NAME_DECIDES.sh
 #  /root/finance/check_screens.py 597dd8c9 (S787) -> TO (finance restarted once).   Undo: bash /tmp/s788kit/install_S788_XRAY_NAME_DECIDES.sh --undo
 # =============================================================================

@@ -16,7 +16,7 @@ C = rp(C, '''def s787_auto(con):''', '''S788_BY = {"user": "system · S788: the 
 
 
 def _s788_j(s):
-    """A name with its spaces taken out, as it sounds: 'sundarwati' = 'Sunder Wati'."""
+    """A name with its spaces taken out, as it sounds: 'RAMRATI' = 'Ram Rati' (a made-up example)."""
     return R._s782_ph("".join(R._s752_tokens(s)))
 
 
@@ -31,7 +31,7 @@ def _s788_alike(toks, stem, name):
 
 def _s788_name_decides(con, toks, stem, own, how, fr, d0, d1, cache):
     """S788 (the owner 09:14 IST 11-Nov): "the name should be the deciding factor where all other parameters match and the ID is only
-    slightly off" (SUNDARWATI, 24-Oct: the film read 8344 -- another X-ray patient of the day -- her ID 8343). The clinic ID when the
+    slightly off" (a 24-Oct photo: the film read another X-ray patient's ID of that day, one digit off hers). The clinic ID when the
     picture's name (spaces ignored, the usual spelling) is that of exactly ONE patient who came on the film's day +-1 (so nobody else
     who came has a name like it), he had an X-ray (slip or Docterz) those days, and there IS a number -- read on the film or written in
     the file name -- every one of which is his ID or one digit off it, even when it is another patient's. Else ''."""

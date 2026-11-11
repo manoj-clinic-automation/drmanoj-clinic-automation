@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # walk_s788.py -- kit S788_XRAY_NAME_DECIDES. Usage: walk_s788.py <dir holding check_screens.py (and records.py)> <a finance.db copy> [--control]
-# A SCRATCH copy of the database; counts and ok/BAD only. Data-shaped checks (the 24-Oct SUNDARWATI case) run only when S788_SHAPE=1
+# A SCRATCH copy of the database; counts and ok/BAD only. Data-shaped checks (the 24-Oct case) run only when S788_SHAPE=1
 # (the 11-Nov copy); everywhere else the rule is checked on whatever it gives. Last line "WALK OK n/n" | "WALK RED k of n" | "CONTROL: ...".
 import importlib, os, re, shutil, sqlite3, sys, tempfile
 K, SRC = os.path.abspath(sys.argv[1]), sys.argv[2]
@@ -46,9 +46,9 @@ if CS is not None and hasattr(CS, "_s788_name_decides"):
             bad.append(1)
     ck("C2 each given: the name is that patient's and every number his ID or one digit off", not bad, len(bad))
     if os.environ.get("S788_SHAPE") == "1":
-        sw = [r for r in P if re.sub(r"[^a-z]", "", (r["orig_name"] or "").lower()).startswith("sundarwati")]
-        ck("C3 SUNDARWATI (24-Oct, the film read one digit off) goes to her own ID",
-           len(sw) == 1 and ans(sw[0]["src_id"]).get("answer") == "id_fixed" and ans(sw[0]["src_id"]).get("note", "").endswith("43"))
+        sw = [r for r in g8 if set((R._s772_film(con, r["src_id"]) or [[], []])[1]) - {ans(r["src_id"]).get("note", "")}]
+        ck("C3 a photo whose film read another number one digit off goes to the patient its name names (the 11-Nov copy)",
+           len(sw) >= 1 and all(ans(r["src_id"]).get("answer") == "id_fixed" for r in sw))
     ck("C4 a second pass gives nothing more", CS.s787_auto(con) == 0)
     # the guard: a made-up second patient of the same name that day -> no S788 answer (on a fresh copy)
     con.close(); shutil.copyfile(SRC, DB); con = sqlite3.connect(DB); con.row_factory = sqlite3.Row

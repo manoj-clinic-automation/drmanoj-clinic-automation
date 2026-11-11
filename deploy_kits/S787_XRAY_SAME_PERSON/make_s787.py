@@ -1,6 +1,6 @@
 #!/usr/bin/python3
-# make_s787.py -- kit S787_XRAY_SAME_PERSON (S428, 11-Nov-2026, the parent; the owner 08:38 IST: "RESMA is entered multiple times ...
-# Sachin Agrawal ... not registered in Docterz, so there is no flow for him also. Do the needful.")
+# make_s787.py -- kit S787_XRAY_SAME_PERSON (S428, 11-Nov-2026, the parent; the owner 08:38 IST: "R. is entered multiple times ...
+# S.A. ... not registered in Docterz, so there is no flow for him also. Do the needful.")
 # Usage: make_s787.py <live check_screens.py> <live records.py> <live DUTY_MAP.json> <out dir>
 # Exact replacements on the live bytes (check_screens.py c259e6a2 and records.py 794cb87f -- S782; DUTY_MAP.json v22 616e0839).
 import hashlib, json, os, sys

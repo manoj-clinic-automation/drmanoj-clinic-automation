@@ -15,3 +15,5 @@ console's X-ray & lab line counts the same way. Nothing is filed or moved by thi
 cd /root/deploy/repo && git pull --ff-only && rm -rf /tmp/s789kit && cp -rp /root/deploy/repo/deploy_kits/S789_LAB_TILE_COUNT /tmp/s789kit && bash /tmp/s789kit/install_S789_LAB_TILE_COUNT.sh
 ```
 Undo: `bash /tmp/s789kit/install_S789_LAB_TILE_COUNT.sh --undo`.
+
+**F-1264 (S430, 11-Nov-2026):** a patient's name and clinic IDs were taken out of this kit's papers (names -> initials). Its files therefore no longer match the installer's checks: the kit is history, superseded by `S791_XRAY_MATCH_RULES` -- do not re-run it.
