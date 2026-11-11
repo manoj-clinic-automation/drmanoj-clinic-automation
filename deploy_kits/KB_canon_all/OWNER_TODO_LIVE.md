@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S427 close** (the parent, full EOS), 11-Nov-2026, morning — the parent's sections refreshed here (fewer X-ray pictures for staff, older ones yours and Shavez's; your X-ray page's own tile; 428 reserved: the Patients section, the Call Console's older follow-ups, the PC set-up kits); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S428 close** (the parent, full EOS), 11-Nov-2026, morning — the parent's sections refreshed here (online bookings for staff; your X-ray page: one card per person, Not in Docterz, the name decides; lab reports for information; the 3 p.m. / 6 p.m. X-ray push; 430 reserved: the X-ray matching); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S427 close** (the parent, full EOS), 11-Nov-2026, morning — the parent's sections refreshed here (fewer X-ray pictures for staff, older ones yours and Shavez's; your X-ray page's own tile; 428 reserved: the Patients section, the Call Console's older follow-ups, the PC set-up kits); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S424 close** (the parent, full EOS), 11-Nov-2026, early morning — the parent's sections refreshed here (the calling list drops patients who already came; every visit's diagnosis on the server; your clinical exports reach it by themselves; 427 reserved: the X-rays, then the Patients section); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S425 close** (the Sanjeevni chat, full EOS), 11-Nov-2026, early morning — the Sanjeevni sections refreshed here (the order screen live; October's scans measured; provisional purchase bills next; 426 reserved)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S423 close** (the Sanjeevni chat, full EOS), 10-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the Orthotic bills card live; every October bill carries its lines; the dates sent to Amir; the order screen next; 425 reserved)
@@ -434,7 +435,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S427 close (11-Nov, 06:5x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S428 close (11-Nov, 10:1x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -444,13 +445,13 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the S427 record (both X-ray kits are already live). Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries the S428 record (all five kits are already live). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**1a · TELL ALISHA, SHIVANI AND SHAVEZ (once):** *Check karein* now lists that day's patients closest name first, and the box takes a clinic ID, a name or a mobile number. Reception sees the last 7 days; older pictures are with you and Shavez.
+**1a · TELL RECEPTION, SHIVANI, ALISHA AND SHAVEZ (once):** the **Online booking** tile shows patients who paid on Docterz — call anyone booked outside the timings and press *Phone kar diya*. At 3 p.m. and 6 p.m. their phones show how many X-ray photos are not in the folder.
 
 **2 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
@@ -468,23 +469,31 @@ https://followup.dr-manoj.in/ledger/salary?m=2026-10
 
 **5 · MYOPERATOR (ticket 691386): their written cause and a fix date.**
 
-**6 · The X-ray photos older than 7 days (31 at 06:45) — yours and Shavez's to file, from your X-ray page:**
+**6 · The X-ray photos still waiting — yours and Shavez's (older than 7 days), from your X-ray page; "Not in Docterz" ones are possible payment gaps:**
 
 ```
 https://followup.dr-manoj.in/finance/records/xray-check
 ```
 
-**7 · Items 8 – 24 and *when it happens* stand as at the S422 close.** Under *when it happens*: once the Patients screen is up — the one-tap list of 29 diagnosis terms; reception adds the *Clinical data report* as its third evening export.
+**7 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The Patients section on your console** (part 2) — the mock-up you approved, fed by the diagnoses on the server; the one-tap list of unknown terms.
-2. **The Call Console's older follow-ups** — the last successful call, its outcome, recording and transcript on your page; the recording on the staff page.
-3. **The PC set-up files on your System tile kept current.**
-4. **Follow-ups kept and called, by diagnosis group and by staff** (part 3).
-5. **Watch:** the X-ray filing after S782; the calling list each night; each clinical export sent once and read.
+1. **The X-ray matching — eight rules** so most waiting photos file themselves; an X-ray of someone not registered shown as a possible payment gap (red on your console, on Shavez's list).
+2. **The Patients section on your console** (part 2).
+3. **The Call Console's older follow-ups** — last successful call, outcome, recording, transcript.
+4. **The PC set-up files on your System tile kept current.**
+5. **Later, on your word:** the reception mobile used only with each staff member's own login; Ranjit as its backup person.
+6. **Watch:** the 3 p.m. / 6 p.m. X-ray push; the online bookings; the X-ray filing.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S428 CLOSE — 11-Nov-2026 (the parent)
+
+- **Online bookings paid on Docterz shown to staff** — name, clinic ID, full mobile, Rs 600, booked time; out-of-hours ones red until called.
+- **X-ray check page:** one card per person; "Not in Docterz"; another photo of a patient filed that day files itself; the name decides when the number is one digit off; the film's reading shown.
+- **Lab reports with no blood slip:** information only; the tile counts only a possible wrong ID.
+- **X-ray photo notification at 3 p.m. and 6 p.m.** to reception, Shivani, Alisha, Shavez and you.
 
 ## ✅ DONE AT THE S427 CLOSE — 11-Nov-2026 (the parent)
 
