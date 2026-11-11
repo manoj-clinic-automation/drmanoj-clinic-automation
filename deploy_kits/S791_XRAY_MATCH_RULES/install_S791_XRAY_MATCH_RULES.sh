@@ -115,7 +115,7 @@ T0=$(date '+%Y-%m-%d %H:%M:%S')
 "$SYSTEMCTL" restart "$FSVC" || restore "restart $FSVC"
 c1=$(wait200 fhz); [ "$c1" = 200 ] || restore "finance healthz $c1"
 c2=$(hcode "http://127.0.0.1:$FIN_PORT/finance/records/xray-check"); case "$c2" in 302|401|403|303) ;; *) restore "his X-ray page answered $c2 without a login";; esac
-c3=$(hcode "http://127.0.0.1:$FIN_PORT/finance/records/api/xray-plan"); case "$c3" in 401|403) ;; *) restore "the filing plan's door answered $c3 without its token";; esac
+c3=$(hcode "http://127.0.0.1:$FIN_PORT/finance/records/api/xray-plan"); case "$c3" in 302|303|401|403) ;; *) restore "the filing plan's door answered $c3 without its token";; esac   # S430 run 1: the live box sends it to the login (302)
 sleep 2
 JL="$("$JOURNALCTL" -u "$FSVC" --since "$T0" --no-pager 2>/dev/null)"
 JR="$(printf '%s\n' "$JL" | grep -v -i 'reentrant call' | grep -c -i -E 'check_screens|owner_console|failed to load|ImportError|ModuleNotFoundError|SyntaxError|NameError|Traceback')"

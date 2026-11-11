@@ -2,7 +2,7 @@
 4cb308b17066b9ae9cc74d5275b00515  KIT_ID.txt
 b8e9212449a1e13ed584fe237cfced76  README.md
 a8a3552c4dd14f4a01848b063d9cefef  check_screens.py
-bd98e6b2d7337b5e8810b36b99f7f329  install_S791_XRAY_MATCH_RULES.sh
+c7e15cded3f27bd6caab21017e5ca9a1  install_S791_XRAY_MATCH_RULES.sh
 93a8cd498e8447f1c1c30d3607e2af91  make_s791.py
 2c77db3122d66374f7b32643a18f3dbc  owner_console.py
 b81e4e8fe2f7c78e89f7d8fba37bcd14  records.py
