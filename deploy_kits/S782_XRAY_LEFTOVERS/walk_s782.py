@@ -59,6 +59,7 @@ con.execute("INSERT INTO xray_filing(src_id, orig_name, file_time, action, day, 
 con.execute("INSERT INTO xray_filmdate(src_id, dates, ids, how) VALUES (?,?,?,?)", ("WALKPARK000J", json.dumps([D]), json.dumps([]), "walk"))
                                                                # review 2/1: a planned duplicate the rule no longer finds -> back to the list
 MOB = "9" + "8" * 4 + "0" * 4 + "6"                     # a made-up mobile, put together at run time
+con.execute("DELETE FROM patient_ref WHERE clinic_id IN ('99906', '99916', '45')")   # the scratch copy only: the walk's own people
 con.execute("INSERT INTO patient_ref(clinic_id, name, phone_last4, mobile) VALUES (?,?,?,?)", ("99906", "QSUNEETA KAMWALK", MOB[-4:], MOB))
 slip("xp", "99911", "QSARITA DEVWALK", ["Wrist AP"])      # review: SAVITA is not SARITA
 con.execute("INSERT INTO patient_ref(clinic_id, name) VALUES (?,?)", ("99916", "QOTHER PERSONWALK"))   # a real patient one digit off 99906
