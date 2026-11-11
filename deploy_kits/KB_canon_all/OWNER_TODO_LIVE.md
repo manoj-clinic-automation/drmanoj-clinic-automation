@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S426 close** (the Sanjeevni chat, full EOS), 11-Nov-2026, early morning — the Sanjeevni sections refreshed here (provisional purchase bills live; the scanner's line figures; reception to scan since 08-Nov; 429 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S430 close** (the parent, full EOS), 11-Nov-2026, evening — the parent's sections refreshed here (the X-ray rules and payment gaps; the attendance clock; BL Computers; 431 reserved: the WhatsApp interim); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S426 close** (the Sanjeevni chat, full EOS), 11-Nov-2026, early morning — the Sanjeevni sections refreshed here (provisional purchase bills live; the scanner's line figures; reception to scan since 08-Nov; 429 reserved)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S428 close** (the parent, full EOS), 11-Nov-2026, morning — the parent's sections refreshed here (online bookings for staff; your X-ray page: one card per person, Not in Docterz, the name decides; lab reports for information; the 3 p.m. / 6 p.m. X-ray push; 430 reserved: the X-ray matching); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S427 close** (the parent, full EOS), 11-Nov-2026, morning — the parent's sections refreshed here (fewer X-ray pictures for staff, older ones yours and Shavez's; your X-ray page's own tile; 428 reserved: the Patients section, the Call Console's older follow-ups, the PC set-up kits); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S424 close** (the parent, full EOS), 11-Nov-2026, early morning — the parent's sections refreshed here (the calling list drops patients who already came; every visit's diagnosis on the server; your clinical exports reach it by themselves; 427 reserved: the X-rays, then the Patients section); the other projects' sections as their closes left them.
@@ -436,7 +437,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S428 close (11-Nov, 10:1x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S430 close (11-Nov, 18:0x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -446,48 +447,52 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the S428 record (all five kits are already live). Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries the S430 record (both kits are already live). Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**1a · TELL RECEPTION, SHIVANI, ALISHA AND SHAVEZ (once):** the **Online booking** tile shows patients who paid on Docterz — call anyone booked outside the timings and press *Phone kar diya*. At 3 p.m. and 6 p.m. their phones show how many X-ray photos are not in the folder.
+**2 · BL COMPUTERS — THE ATTENDANCE MACHINE'S CLOCK AND BACKUP BATTERY.** Its clock stops whenever the power goes (this morning up to 2 h 57 min behind). The server now saves the correct time, but the machine should be set right and its battery checked.
 
-**2 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+**3 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**3 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
+**4 · TELL RECEPTION, SHIVANI, ALISHA AND SHAVEZ (once):** the **Online booking** tile; the 3 p.m. / 6 p.m. X-ray photo count; and **Shavez:** an X-ray card marked *registered nahi* is a possible payment gap — register and file it, or tap why (Staff / Ghar / Free / Paisa alag se liya).
 
-**4 · OCTOBER'S STAFF LEDGER: close it, if not done.**
+**5 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
 
-```
-https://followup.dr-manoj.in/ledger/salary?m=2026-10
-```
+**6 · MYOPERATOR (ticket 691386): their written cause and a fix date.**
 
-**5 · MYOPERATOR (ticket 691386): their written cause and a fix date.**
-
-**6 · The X-ray photos still waiting — yours and Shavez's (older than 7 days), from your X-ray page; "Not in Docterz" ones are possible payment gaps:**
+**7 · The X-ray photos still waiting (about 8, each one a real doubt) and the payment gaps — from your X-ray page:**
 
 ```
 https://followup.dr-manoj.in/finance/records/xray-check
 ```
 
-**7 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
+**8 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The X-ray matching — eight rules** so most waiting photos file themselves; an X-ray of someone not registered shown as a possible payment gap (red on your console, on Shavez's list).
-2. **The Patients section on your console** (part 2).
-3. **The Call Console's older follow-ups** — last successful call, outcome, recording, transcript.
-4. **The PC set-up files on your System tile kept current.**
-5. **Later, on your word:** the reception mobile used only with each staff member's own login; Ranjit as its backup person.
-6. **Watch:** the 3 p.m. / 6 p.m. X-ray push; the online bookings; the X-ray filing.
+1. **WhatsApp interim — *Open in MyOperator* on each chat of your inbox** (session 431, first).
+2. **Watch:** the X-ray rules and payment gaps; the attendance clock correction.
+3. **The Patients section on your console** (parts 2 and 3) and reception's third export.
+4. **The Call Console's older follow-ups** — a mock-up first.
+5. **Housekeeping:** the PC set-up files kept current; an old 370 MB test folder removed.
+6. **Arjun Dev / staff 20** once their fingers are done.
+7. **Later, on your word:** the reception mobile with each staff member's own login.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S430 CLOSE — 11-Nov-2026 (the parent)
+
+- **X-ray photos matched by 8 rules** — on this morning's copy 28 of 39 settled by themselves; 8 left for a person.
+- **X-ray of someone not registered = possible payment gap** — red tile, red console line, on Shavez's list; closed by billed or explained.
+- **Attendance:** today's punches corrected to the true times; from now on corrected automatically; an amber console line when the clock is off.
+- **A patient's name and IDs taken out of old kit papers.**
 
 ## ✅ DONE AT THE S428 CLOSE — 11-Nov-2026 (the parent)
 
