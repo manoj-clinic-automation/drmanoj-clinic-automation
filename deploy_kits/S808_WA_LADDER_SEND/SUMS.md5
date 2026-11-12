@@ -1,0 +1,8 @@
+d963b232736aed741a9e1e7cea8ac210  KIT_ID.txt
+c36a83fb0606d0b8a77151500bd0cd16  README.md
+47e5b2f656c008720cf040a2ca3df38a  install_S808_WA_LADDER_SEND.sh
+47f26f76a431841f2bd4e7136f2f59c0  make_s808.py
+10a7df39f1d524ed8a79e502667e82cc  walk_s808.py
+34f4672e4a1049a973ffc96b8f64a161  parts/page.html
+5189a155cded969d0aa8fa75c29e0d47  portal/wa_ladder.py
+d8f16f00aecac80c9dd16971383d8163  portal/wa_ladder_send.py

@@ -1,0 +1,239 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WhatsApp messages to patients</title>
+<style>
+:root{--pg:#f3f2ee;--cd:#fbfaf8;--in:#f0eee8;--ln:#e0dcd3;--t1:#23272f;--t2:#5d6470;--t3:#8a8f99;--ac:#1c5cab;--warn:#7a5600;--warnbg:#fdf3d7;--bad:#a52626;--badbg:#fbeaea;--good:#0a6b2a;--goodbg:#e4f3e7;--knob:#fff;--off:#b9b4a8}
+*{box-sizing:border-box}body{margin:0;background:var(--pg);color:var(--t1);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--ln);background:var(--cd)}
+header a{color:var(--t2);text-decoration:none;font-size:22px}h1{font-size:18px;margin:0;flex:1}
+main{max-width:860px;margin:0 auto;padding:12px 16px 48px}
+button{font:inherit;color:inherit}
+.strip{background:var(--warnbg);color:var(--warn);font-weight:700;border-radius:10px;padding:10px 14px;margin:0 0 10px}
+.err{background:var(--badbg);color:var(--bad);font-weight:600;border-radius:10px;padding:10px 14px;margin:0 0 10px}
+.okm{background:var(--goodbg);color:var(--good);font-weight:600;border-radius:10px;padding:10px 14px;margin:0 0 10px}
+.state{background:var(--cd);border:1px solid var(--ln);border-radius:12px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:0 0 10px}
+.state b{font-size:16px;flex:1 1 220px;min-width:0}.state .cap{color:var(--t2);font-variant-numeric:tabular-nums}
+.state.on{background:var(--goodbg);border-color:var(--good)}
+.btn{min-height:40px;padding:6px 12px;border:1px solid var(--ln);background:var(--cd);border-radius:10px;cursor:pointer;color:var(--ac)}
+.btn[disabled]{color:var(--t3);cursor:default}
+.btn.stop{color:var(--bad);border-color:var(--bad);font-weight:700}
+.btn.sure2{background:var(--warnbg);color:var(--warn);border-color:var(--warn);font-weight:700}
+.btn:focus-visible,.sw:focus-visible,summary:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.day{display:flex;align-items:center;gap:8px;margin:0 0 12px;flex-wrap:wrap}
+.day b{font-size:16px}.day button{min-height:38px;min-width:44px;border:1px solid var(--ln);background:var(--cd);border-radius:10px;cursor:pointer;color:var(--t1)}
+.day .tot{margin-left:auto;color:var(--t2);font-variant-numeric:tabular-nums}
+.card,details.box{background:var(--cd);border:1px solid var(--ln);border-radius:12px;margin:0 0 10px;overflow:hidden}
+.card.on{border-color:var(--good)}
+.top{display:flex;gap:10px;align-items:center;padding:12px 14px;flex-wrap:wrap}
+.tt{flex:1 1 200px;min-width:0}.tt b{display:block}.tt span{color:var(--t2);font-size:13px;overflow-wrap:anywhere}
+.n{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}.n b{font-size:20px}.n span{display:block;font-size:13px;color:var(--t2)}
+.sw{position:relative;width:64px;height:36px;border-radius:18px;border:0;background:var(--off);cursor:pointer;flex:none}
+.sw::after{content:"";position:absolute;top:4px;left:4px;width:28px;height:28px;border-radius:50%;background:var(--knob);transition:left .15s}
+.sw[aria-checked="true"]{background:var(--good)}.sw[aria-checked="true"]::after{left:32px}
+@media (prefers-reduced-motion: reduce){.sw::after{transition:none}}
+.swb{display:flex;align-items:center;gap:8px;flex:none}
+.swl{font-size:12px;font-weight:800;letter-spacing:.05em;width:30px;text-align:center;color:var(--t2)}
+.card.on .swl{color:var(--good)}
+.sure{flex:1 1 100%;background:var(--warnbg);color:var(--warn);font-weight:700;border-radius:8px;padding:8px 10px}
+.runl{flex:1 1 100%;color:var(--t2);font-size:14px}.runl.bad{color:var(--bad);font-weight:600}
+.card details{border-top:1px solid var(--ln)}
+.card summary{cursor:pointer;padding:9px 14px;color:var(--ac);font-size:14px}
+details.box summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;gap:10px;align-items:center}
+details.box summary::-webkit-details-marker{display:none}
+.rw{border-top:1px solid var(--ln);padding:9px 14px;display:flex;flex-wrap:wrap;gap:2px 12px;align-items:baseline}
+.rw .nm{font-weight:600;flex:1 1 170px;min-width:0}
+.rw label{display:flex;gap:10px;align-items:center;flex:1 1 170px;min-width:0;font-weight:600;cursor:pointer}
+.rw input{width:20px;height:20px;flex:none}
+.rw .st{font-size:13px;font-weight:600;color:var(--t2)}
+.rw .st.ok,.rw .st.go{color:var(--good)}.rw .st.no{color:var(--bad)}.rw .st.tk{color:var(--warn)}
+.rw .meta{flex:1 1 100%;color:var(--t2);font-size:14px;font-variant-numeric:tabular-nums}
+.rw .meta b{color:var(--t1);font-weight:600;letter-spacing:.3px}
+.rw.held{background:var(--in)}.rw.held .st{color:var(--bad);white-space:normal}
+.rw .off,.rw .on{font-size:13px;min-height:36px;padding:4px 10px;border:1px solid var(--ln);background:var(--cd);border-radius:10px;cursor:pointer;color:var(--ac);white-space:nowrap}
+.rw .off.sure1{background:var(--warnbg);color:var(--warn);border-color:var(--warn);font-weight:700}
+.acts{border-top:1px solid var(--ln);padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.acts .said{color:var(--t2);font-size:13px;flex:1 1 200px;min-width:0}
+pre{margin:0;border-top:1px solid var(--ln);padding:12px 14px;background:var(--in);white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.empty{padding:12px 14px;color:var(--t2);border-top:1px solid var(--ln)}
+ul.rules{margin:0;padding:10px 14px 12px 32px;border-top:1px solid var(--ln)}ul.rules li{margin:4px 0}
+.foot{color:var(--t2);font-size:13px;margin-top:14px}
+</style></head><body>
+<header><a href="/portal" aria-label="back">&#8592;</a><h1>WhatsApp messages to patients</h1></header>
+<main>
+<div id="mode"></div>
+<div class="state" id="state" hidden><b id="stateTxt"></b><span class="cap" id="cap"></span><button class="btn stop" id="stopAll" hidden>Stop all sending</button></div>
+<div id="msg"></div>
+<div id="lis"></div>
+<div class="day"><button id="pv" aria-label="previous day">&#8249;</button><b id="dn"></b><button id="nx" aria-label="next day">&#8250;</button><button id="td">Today</button><span class="tot" id="tot"></span></div>
+<div id="m"></div>
+<p class="foot" id="ft"></p>
+</main>
+<script>
+var DAY='',OPENSTOP=false,D=null,OPEN={},ARM='',ARMT=0,SAID={},TICKED={},TARM=0,BUSY=false,MSG=null;
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function shift(d,n){var p=d.split('-'),t=new Date(Date.UTC(+p[0],+p[1]-1,+p[2]+n));return t.toISOString().slice(0,10);}
+function hm(ts){var m=/(\d\d):(\d\d)/.exec(String(ts||'').slice(11));if(!m)return String(ts||'');var h=+m[1];return ((h%12)||12)+':'+m[2]+(h<12?' am':' pm');}
+function dm(ts){var p=String(ts||'').slice(0,10).split('-');if(p.length<3)return '';return (+p[2])+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+p[1]-1];}
+function S(){return (D&&D.send&&D.send.ok)?D.send:null;}
+function canAct(){var s=S();return !!(s&&s.owner&&s.is_today);}
+function tickable(r){return canAct()&&r.tick&&!r.hold&&!r.sent&&r.token;}
+function nTicked(){var n=0;if(!D)return 0;D.lists.forEach(function(x){if(x.key==='overdue')x.rows.forEach(function(r){if(tickable(r)&&TICKED[r.token])n++;});});return n;}
+function runline(x,li){
+ var r=li.run;
+ if(r){var c=r.sent+' sent'+(r.failed?', '+r.failed+' not sent':'')+(r.held?', '+r.held+' held':'');
+  if(r.state==='done')return ['Went today at '+hm(r.at)+': '+c+'.'+(r.note?' '+r.note+'.':''),0];
+  if(r.state==='stopped')return ['STOPPED today at '+hm(r.at)+': '+c+'. '+r.note,1];
+  return [r.note||'Not sent today.',1];}
+ if(!li.auto||!li.on)return null;
+ if(li.late_on)return ['Switched on after today\'s time had passed. It starts tomorrow at '+li.at+'.',0];
+ if(li.wait)return ['Waiting: '+li.wait+'. It goes as soon as they arrive, or not at all today.',1];
+ if(li.over)return ['Not sent today.',1];
+ return ['Goes today at '+li.at+'.',0];}
+function acts(x,li){
+ var t=li.test||{},k=x.key,h='<div class="acts">';
+ if(k==='overdue'){var n=nTicked();h+='<button class="btn'+(TARM?' sure2':'')+'" data-send="1"'+((n&&t.confirmed)?'':' disabled')+'>'+(TARM?'Tap again to send to '+n+(n===1?' name':' names'):'Send to the ticked names ('+n+')')+'</button>';}
+ h+='<button class="btn" data-test="'+k+'">Send a test to my phone</button>';
+ if(t.ok&&t.mode==='LIVE'&&!t.confirmed)h+='<button class="btn" data-testok="'+k+'">It arrived</button>';
+ var need=(k==='overdue'?'The ticked names cannot be sent':'This message cannot be turned on')+' until a test has reached your phone.';
+ var said=SAID[k]||(t.confirmed?'Test confirmed on '+dm(t.confirmed_at)+'.'+((t.sent_at>t.confirmed_at&&!t.ok&&t.error&&t.error!=='sending')?' A later test was not sent: '+t.error+'.':''):(t.ok&&t.mode==='LIVE'?'Test sent at '+hm(t.sent_at)+'. When it is on your phone, press "It arrived".':
+  (t.sent_at&&!t.ok?'The last test was not sent'+(t.error&&t.error!=='sending'?': '+t.error:'')+'. '+need:'No test sent yet. '+need)));
+ return h+'<span class="said">'+esc(said)+'</span></div>';}
+function sec(x){
+ var s=S(),li=s?s.lists[x.key]:null,isT=x.key==='overdue',today=!!(s&&s.is_today),on=!!(li&&li.on),act=canAct();
+ var big=isT?x.tick:x.go,lab=isT?'for your tick':(on&&today?'will go':'would go');
+ if(li&&li.run&&today&&li.run.state!=='skipped'){big=li.run.sent;lab='sent today';}
+ var h='<div class="card'+(on?' on':'')+'"><div class="top"><span class="tt"><b>'+esc(x.title)+'</b><span>'+esc(li?li.when:x.when)+' &middot; '+esc(x.template)+'</span></span>'+
+  '<span class="n"><b>'+big+'</b><span>'+lab+(x.held?' &middot; '+x.held+' held':'')+'</span></span>';
+ if(li&&li.auto){h+='<span class="swb"><span class="swl">'+(on?'ON':'OFF')+'</span>';
+  if(act)h+='<button class="sw" role="switch" aria-checked="'+on+'" aria-label="'+esc(x.title)+' on or off" data-sw="'+x.key+'"></button>';
+  h+='</span>';}
+ if(ARM===x.key&&li)h+='<div class="sure">Tap the switch once more to turn this ON. From then it goes by itself every day at '+esc(li.at)+'.</div>';
+ if(li&&today){var rl=runline(x,li);if(rl)h+='<div class="runl'+(rl[1]?' bad':'')+'">'+esc(rl[0])+'</div>';}
+ h+='</div><details data-k="'+x.key+'"'+(OPEN[x.key]?' open':'')+'><summary>Who is on this list ('+x.rows.length+')</summary>';
+ if(!x.rows.length)h+='<div class="empty">Nobody on this list for this day.</div>';
+ x.rows.forEach(function(r){
+  var st,cls='';
+  if(r.sent){st=r.sent.t;cls=r.sent.k==='ok'?' ok':' no';}
+  else if(r.hold){st='Held: '+r.hold;}
+  else if(isT){st=r.tick?'on your tick':'';cls=' tk';}
+  else if(on&&today&&li.run){st='not sent in today\'s run';}
+  else if(on&&today&&!li.over&&!li.late_on&&!li.wait){st='will go at '+li.at;cls=' go';}
+  else st='would go';
+  var bad=r.hold||(r.sent&&r.sent.k!=='ok');
+  h+='<div class="rw'+(bad?' held':'')+'">'+(tickable(r)?'<label><input type="checkbox" class="tkb" data-t="'+esc(r.token)+'"'+(TICKED[r.token]?' checked':'')+'>'+esc(r.name)+'</label>':'<span class="nm">'+esc(r.name)+'</span>')+
+   '<span class="st'+cls+'">'+esc(st)+'</span><span class="meta">'+(r.cid?'ID '+esc(r.cid):'new patient')+' &middot; <b>'+esc(r.mobile||(r.last4?'....'+r.last4:'no number'))+'</b> &middot; '+esc(r.date)+'</span></div>';});
+ h+='</details>';
+ if(li&&li.preview)h+='<details data-k="pv-'+x.key+'"'+(OPEN['pv-'+x.key]?' open':'')+'><summary>See the message the patient gets</summary><pre>'+esc(li.preview)+
+  '\n\n(This is the message in short. The full approved wording is the one in your MyOperator panel; the test to your phone shows it exactly.)</pre></details>';
+ if(li&&act)h+=acts(x,li);
+ return h+'</div>';}
+function record(){
+ var s=S();if(!s||!s.is_today||!s.record.length)return '';
+ var h='<div class="card"><details data-k="rec"'+(OPEN.rec?' open':'')+'><summary>What went today ('+s.record.length+')</summary>';
+ s.record.forEach(function(r){h+='<div class="rw'+(r.said.k==='ok'?'':' held')+'"><span class="nm">'+esc(r.name)+'</span><span class="st '+(r.said.k==='ok'?'ok':'no')+'">'+esc(r.said.t)+'</span>'+
+  '<span class="meta">'+esc(r.list)+' &middot; '+(r.cid?'ID '+esc(r.cid):'new patient')+' &middot; <b>'+esc(r.mobile)+'</b></span></div>';});
+ return h+'</details></div>';}
+function rules(){
+ if(!S())return '';
+ return '<div class="card"><details data-k="rules"'+(OPEN.rules?' open':'')+'><summary>What never happens</summary><ul class="rules">'+
+  '<li>A message whose switch is OFF is never sent.</li><li>A number that replied STOP is never messaged. The stop list is read again at the moment of sending.</li>'+
+  '<li>A patient whose return visit is on the server\'s records is not reminded.</li><li>One number gets at most one message a day.</li>'+
+  '<li>No patient gets the same reminder twice for the same follow-up date, whichever page sent the first one.</li>'+
+  '<li>A message that fails after it has left is not sent again.</li><li>"Long overdue" goes only to the names you tick.</li>'+
+  '<li>Before the first real send of any message, a test goes to your own phone.</li>'+
+  '<li>If yesterday\'s visits have not reached the server, the reminders wait rather than tell a patient who came that he did not.</li>'+
+  '<li>Nothing goes after its time has passed by more than an hour and a half; that day is skipped and the page says so.</li></ul></details></div>';}
+function stops(s){
+ var h='<details class="box"'+(OPENSTOP?' open':'')+'><summary><span class="tt"><b>Numbers that said STOP</b><span>never messaged again, unless you take one off</span></span><span class="n"><b>'+s.length+'</b></span></summary>';
+ if(!s.length)return h+'<div class="empty">Nobody has replied STOP.</div></details>';
+ s.forEach(function(r){h+='<div class="rw"><span class="nm">'+esc(r.mobile)+'</span><button class="off" data-m="'+esc(r.mobile)+'">Take off the stop list</button><span class="meta">'+esc(r.source)+((r.at||'')?' &middot; '+esc((r.at||'').slice(0,16)):'')+(r.said?' &middot; said: '+esc(r.said):'')+'</span></div>';});
+ return h+'</details>';}
+function taken(t){
+ if(!t||!t.length)return '';
+ var h='<details class="box"'+(OPENSTOP?' open':'')+'><summary><span class="tt"><b>Taken off the stop list by you</b><span>can be messaged again; a new STOP reply puts the number back</span></span><span class="n"><b>'+t.length+'</b></span></summary>';
+ t.forEach(function(r){h+='<div class="rw"><span class="nm">'+esc(r.mobile)+'</span><button class="on" data-m="'+esc(r.mobile)+'">Put back on the stop list</button><span class="meta">taken off '+esc((r.at||'').slice(0,16))+(r.by?' by '+esc(r.by):'')+(r.said?' &middot; had said: '+esc(r.said):(r.source?' &middot; '+esc(r.source):''))+'</span></div>';});
+ return h+'</details>';}
+function draw(){
+ var d=D,s=S(),go=0,held=0,tick=0,n=0;d.lists.forEach(function(x){go+=x.go;held+=x.held;tick+=x.tick;});
+ document.getElementById('dn').textContent=d.weekday+', '+d.day_nice+(d.day===d.today?' (today)':'');
+ document.getElementById('tot').textContent=go+(s&&s.is_today?' on the lists':' would go')+(tick?' · '+tick+' for your tick':'')+(held?' · '+held+' held':'');
+ var M='';
+ if(!s&&d.send&&d.send.broken)M='<div class="err">'+esc(d.send.msg)+'</div>';
+ else if(!s)M='<div class="strip">SHOW ONLY &mdash; nothing is sent from this page. '+esc((d.send&&d.send.msg)||'It lists who would get which approved message.')+'</div>';
+ else{
+  if(s.mode==='TEST')M+='<div class="strip">'+esc(s.mode_text)+'</div>';
+  else if(s.mode!=='LIVE')M+='<div class="err">'+esc(s.mode_text)+'</div>';
+  if(!s.owner)M+='<div class="strip">You can read this page. Only the doctor\'s own login can turn a message on or send.</div>';
+  else if(!s.is_today)M+='<div class="strip">This is not today\'s page. The switches and the sending are on today\'s page.</div>';
+  else if(!s.test_last4)M+='<div class="err">Your own number for the tests is not set on the server yet. Tell Claude.</div>';}
+ document.getElementById('mode').innerHTML=M;
+ var st=document.getElementById('state'),brk=!s&&d.send&&d.send.broken;st.hidden=!s&&!brk;
+ if(brk){document.getElementById('stateTxt').textContent='The switches could not be read.';document.getElementById('cap').textContent='';st.className='state';document.getElementById('stopAll').hidden=false;}
+ if(s){for(var k in s.lists)if(s.lists[k].auto&&s.lists[k].on)n++;
+  document.getElementById('stateTxt').textContent=n?('Sending is ON for '+n+' of the five automatic messages.'):'Sending is OFF for all five automatic messages.';
+  document.getElementById('cap').textContent=s.sent_today+' sent today · at most '+s.ceiling+' a day';
+  st.className='state'+(n?' on':'');document.getElementById('stopAll').hidden=!(n&&s.owner);}
+ document.getElementById('msg').innerHTML=MSG?'<div class="'+(MSG.ok?'okm':'err')+'">'+esc(MSG.t)+'</div>':'';
+ document.getElementById('m').innerHTML=d.lists.map(sec).join('')+record()+stops(d.stops)+taken(d.taken_off)+rules();
+ var f=d.fresh||{},L='';
+ if(f.stop_error)L='The STOP listener is not working: '+f.stop_error+(f.stop_error_at?' (since '+f.stop_error_at.slice(0,16)+')':'')+'. Tell Claude.';
+ else if(f.stop_stale)L='The STOP listener has not checked for replies since '+((f.stop_scan||'').slice(0,16)||'it was installed')+'. Tell Claude.';
+ var MB=f.mobile_error?'The patient mobile numbers could not be read: '+f.mobile_error+'. Tell Claude.':'';
+ document.getElementById('lis').innerHTML=(L?'<div class="err">'+esc(L)+'</div>':'')+(MB?'<div class="err">'+esc(MB)+'</div>':'');
+ document.getElementById('ft').textContent='Visits on record up to '+(f.last_visit||'?')+' · follow-up dates up to '+(f.last_dx||'?')+' · STOP replies last checked '+((f.stop_scan||'never').slice(0,16))+
+  '. Not applied yet: leaving out patients who bought medicines meanwhile.';}
+function load(){
+ return fetch('/portal/messages/api/plan'+(DAY?'?day='+DAY:''),{credentials:'same-origin',cache:'no-store'}).then(function(x){return x.json();}).then(function(d){
+  if(!d.ok){document.getElementById('m').innerHTML='<div class="err">Could not read the clinic records. Try again in a minute.</div>';return;}
+  D=d;DAY=d.day;draw();
+ }).catch(function(){document.getElementById('m').innerHTML='<div class="err">Could not load. Open the page again.</div>';});}
+function post(what,body,key){
+ if(BUSY)return;BUSY=true;ARM='';TARM=0;
+ if(key){SAID[key]='Working...';draw();}
+ fetch('/portal/messages/api/send/'+what,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-Messages':'1'},body:JSON.stringify(body)})
+  .then(function(x){return x.json();}).then(function(d){
+   var t=(d&&d.msg)||'No answer.';if(key)SAID[key]=t;if(!key||what==='ticked')MSG={ok:!!(d&&d.ok),t:t};
+   if(what==='ticked'&&d&&d.ok)TICKED={};
+   BUSY=false;return load();})
+  .catch(function(){BUSY=false;var t='The server did not answer. Do not press again: open the page again and look at "What went today".';if(key)SAID[key]=t;else MSG={ok:false,t:t};if(D)draw();});}
+document.getElementById('pv').onclick=function(){if(DAY){DAY=shift(DAY,-1);load();}};
+document.getElementById('nx').onclick=function(){if(DAY){DAY=shift(DAY,1);load();}};
+document.getElementById('td').onclick=function(){DAY='';load();};
+document.getElementById('stopAll').onclick=function(){MSG=null;post('stopall',{});};
+document.getElementById('m').addEventListener('toggle',function(e){var k=e.target&&e.target.getAttribute&&e.target.getAttribute('data-k');if(k)OPEN[k]=e.target.open;},true);
+document.getElementById('m').addEventListener('change',function(e){
+ var c=e.target;if(!c||!c.classList||!c.classList.contains('tkb'))return;
+ TICKED[c.getAttribute('data-t')]=c.checked;TARM=0;
+ var b=document.querySelector('[data-send]'),n=nTicked(),s=S(),ok=s&&s.lists.overdue&&s.lists.overdue.test.confirmed;
+ if(b){b.textContent='Send to the ticked names ('+n+')';b.classList.remove('sure2');b.disabled=!(n&&ok);}});
+document.getElementById('m').addEventListener('click',function(e){
+ var b=e.target;if(!b||!b.classList||!b.getAttribute)return;var now=Date.now(),s=S(),k;
+ if(b.getAttribute('data-sw')){k=b.getAttribute('data-sw');var li=s&&s.lists[k];if(!li||BUSY)return;
+  if(li.on){post('switch',{list:k,on:false},k);return;}
+  if(!li.test.confirmed){SAID[k]='First send a test of this message to your phone and press "It arrived". Then it can be turned on.';ARM='';draw();return;}
+  if(ARM!==k){ARM=k;ARMT=now;SAID[k]='';draw();setTimeout(function(){if(ARM===k&&Date.now()-ARMT>=5900){ARM='';if(D&&!BUSY)draw();}},6000);return;}
+  if(now-ARMT<700)return;
+  post('switch',{list:k,on:true},k);return;}
+ if(b.getAttribute('data-test')){k=b.getAttribute('data-test');post('test',{list:k},k);return;}
+ if(b.getAttribute('data-testok')){k=b.getAttribute('data-testok');post('testok',{list:k},k);return;}
+ if(b.getAttribute('data-send')){if(BUSY||b.disabled)return;var toks=[];D.lists.forEach(function(x){if(x.key==='overdue')x.rows.forEach(function(r){if(tickable(r)&&TICKED[r.token])toks.push(r.token);});});
+  if(!toks.length)return;
+  if(!TARM){TARM=now;b.textContent='Tap again to send to '+toks.length+(toks.length===1?' name':' names');b.classList.add('sure2');
+   setTimeout(function(){if(TARM&&Date.now()-TARM>=5900){TARM=0;if(D&&!BUSY)draw();}},6000);return;}
+  if(now-TARM<700)return;
+  post('ticked',{day:D.day,tokens:toks},'overdue');return;}
+ var off=b.classList.contains('off'),on=b.classList.contains('on');if(!off&&!on)return;
+ var label=off?'Take off the stop list':'Put back on the stop list';
+ function calm(){b.disabled=false;b.removeAttribute('data-sure');b.classList.remove('sure1');}
+ if(off){
+  if(b.getAttribute('data-sure')!=='1'){b.setAttribute('data-sure','1');b.setAttribute('data-t',String(now));b.textContent='Tap again to take it off';b.classList.add('sure1');
+   setTimeout(function(){if(b.isConnected&&!b.disabled&&b.getAttribute('data-sure')==='1'){calm();b.textContent=label;}},6000);return;}
+  if(now-(+b.getAttribute('data-t')||0)<700)return;}
+ b.disabled=true;b.textContent=off?'Taking off...':'Putting back...';
+ fetch('/portal/messages/api/'+(off?'unstop':'restop'),{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-Messages':'1'},body:JSON.stringify({mobile:b.getAttribute('data-m')})})
+  .then(function(x){return x.json();}).then(function(d){if(d&&d.ok){OPENSTOP=true;load();}else{calm();b.textContent='Could not: '+((d&&d.msg)||'try again');}})
+  .catch(function(){calm();b.textContent='Could not - open the page again and retry';});
+});
+setInterval(function(){if(document.visibilityState==='visible'&&D&&!BUSY&&!ARM&&!TARM&&!nTicked()&&!document.querySelector('[data-sure="1"]'))load();},120000);
+load();
+</script></body></html>
