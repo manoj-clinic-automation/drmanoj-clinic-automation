@@ -1,0 +1,9 @@
+    _db, _require, _unit = db_getter, require_fn, unit
+    app.register_blueprint(bp)
+    try:                                                      # S803 (12-Nov-2026): the Marg watch -- bills changed after their day (marg_billwatch.py)
+        import marg_billwatch                                 # noqa: PLC0415 -- beside this file
+        marg_billwatch.init(app, db_getter, require_fn)
+    except Exception as _e803:                                # noqa: BLE001 -- these pages keep working without it
+        import sys as _sys803                                 # noqa: PLC0415
+        print("marg_billwatch NOT mounted: %s" % _e803, file=_sys803.stderr)
+    return bp
