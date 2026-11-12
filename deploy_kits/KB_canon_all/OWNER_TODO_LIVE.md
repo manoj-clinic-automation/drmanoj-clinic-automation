@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S438 close** (the Sanjeevni chat, full EOS), 12-Nov-2026, night — the Sanjeevni sections refreshed here (the Marg watch is live — bills changed after their day; three small decisions on its page; the new start text to paste into the four projects; the floor for stock moves at none; the publish; 441 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S440 close** (the parent, full EOS), 12-Nov-2026, night — the parent's sections refreshed here (the old batch page is safe — it refuses the August list and says LIVE at its top; the templates stay as they are; the sending agreed on a mock-up — the times, at most 150 a day, every switch yours; 442 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S438 close** (the Sanjeevni chat, full EOS), 12-Nov-2026, night — the Sanjeevni sections refreshed here (the Marg watch is live — bills changed after their day; three small decisions on its page; the new start text to paste into the four projects; the floor for stock moves at none; the publish; 441 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S439 close** (the parent, full EOS), 12-Nov-2026, late evening — the parent's sections refreshed here (the older approve-and-send page repaired; Take off / Put back on the stop list; the stop list in the backup; the old batch page NOT to be used until it is made safe; your decisions of 8:21 and 8:48 p.m.; 440 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S437 close** (the parent, full EOS), 12-Nov-2026, evening — the parent's sections refreshed here (the WhatsApp Inbox sends again; the show-only list of patient messages on the portal; four decisions for the next session; nothing to MyOperator until you decide; 439 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S436 close** (the Sanjeevni chat, EOS-light), 12-Nov-2026, midday — the Sanjeevni sections refreshed here (mock v6 of the Marg watch; bills to the exact rupee — D935; the paper opens in the row — D936; the publish; 438 reserved)
@@ -446,7 +447,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S439 close (12-Nov, 20:5x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S440 close (12-Nov, 22:3x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -456,22 +457,22 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries this evening's records. Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries tonight's records. Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · DO NOT USE "Send selected" ON THE OLD BATCH PAGE for now.** It is live and shows a list from 13 August (120 patients); since the repair its messages would really go. It is made safe first thing next session.
+**2 · LOOK ONCE AT THE OLD BATCH PAGE (optional).** It now says LIVE at its top and refuses the list of 13 August — nothing can be sent from it. You no longer need to stay away from it.
 
 ```
 https://followup.dr-manoj.in/portal/wa/followups
 ```
 
-**3 · LOOK ONCE AT THE WHATSAPP MESSAGES PAGE (show only — nothing is sent):** does the list read right to you? The new buttons — Take off the stop list, Put back on the stop list — show when someone has replied STOP.
+**3 · THE SENDING — nothing to do yet.** What you agreed is on the mock-up: the times, at most 150 a day, a switch for each message, all OFF. It is built next session; then one publish and one server line, and you turn the first switch on.
 
 ```
-https://followup.dr-manoj.in/portal/messages
+https://claude.ai/artifact/7kYVwTpLj5ZsdkyiXgJPWj
 ```
 
 **4 · TELL SHIVANI, ALISHA, SHAVEZ AND RECEPTION (once):** all four phones now ring on every call; a missed caller not called back in 30 minutes brings a reminder; after an hour it goes to Shavez; what is still open at closing comes to you. **And: replies from the WhatsApp Inbox work again.**
@@ -496,19 +497,26 @@ https://followup.dr-manoj.in/finance/packs
 
 **10 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
 
-**11 · MYOPERATOR (ticket 691386): nothing to do now.** After a day or two of watching I bring you the whole picture and we decide together what to write to them (your ruling, 12-Nov).
+**11 · MYOPERATOR (ticket 691386): nothing to do now.** After a day more of watching I bring you the whole picture and we decide together what to write to them (your ruling, 12-Nov). One more thing for that list: your panel shows a second, empty WhatsApp account beside the real one.
 
 **12 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Session 440 on Claude Fable — the WhatsApp sending (your order):** the appointment reminder shown to you as it stands in MyOperator, then your wording, then its approval · the old batch page made to refuse an old list · a picture of the sending for you · then the sending itself from your WhatsApp messages page — one switch per message, all off until you turn one on.
+1. **Session 442 on Claude Fable — the WhatsApp sending from your WhatsApp messages page (your order):** built from tonight's plan — a switch for each message, all off; the times you agreed; at most 150 a day; a test to your own phone before any switch can be turned on; a second reader's check before it reaches you.
 2. **Then the analytics page** — the Patients page from mock-up version 16.
 3. **Watching, at every open:** the Inbox's sends and refusals (for the ticket) · the show-only list · the helpline number on the Google profile and the contact page.
 4. **On 19-Nov: the same count again** — callers never spoken to, call-backs made, outgoing calls answered.
 5. **Parked at your word (12-Nov):** the Hindi "we will call you back" recording · a busy message for callers.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S440 CLOSE — 12-Nov-2026, night (the parent)
+
+- **The old batch page made safe** (10:16 p.m.): it says LIVE or TEST at its top and works only on a list made for that same day; the August list is refused.
+- **A second press can no longer send a message twice** from that page.
+- **The appointment reminder shown to you as it stands in MyOperator** — your decision: keep the templates as they are.
+- **The sending agreed on a mock-up** — the times, at most 150 a day, every switch yours — and its plan written.
 
 ## ✅ DONE AT THE S439 CLOSE — 12-Nov-2026, evening (the parent)
 
