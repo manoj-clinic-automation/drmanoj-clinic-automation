@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S440 close** (the parent, full EOS), 12-Nov-2026, night — the parent's sections refreshed here (the old batch page is safe — it refuses the August list and says LIVE at its top; the templates stay as they are; the sending agreed on a mock-up — the times, at most 150 a day, every switch yours; 442 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S442 close** (the parent, full EOS), 13-Nov-2026, early morning — the parent's sections refreshed here (the WhatsApp sending is installed, every switch OFF, nothing sent; your new post-visit wording is in; leave the switches OFF until the follow-up feed is put right — the next session brings one plan; 443 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S440 close** (the parent, full EOS), 12-Nov-2026, night — the parent's sections refreshed here (the old batch page is safe — it refuses the August list and says LIVE at its top; the templates stay as they are; the sending agreed on a mock-up — the times, at most 150 a day, every switch yours; 442 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S438 close** (the Sanjeevni chat, full EOS), 12-Nov-2026, night — the Sanjeevni sections refreshed here (the Marg watch is live — bills changed after their day; three small decisions on its page; the new start text to paste into the four projects; the floor for stock moves at none; the publish; 441 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S439 close** (the parent, full EOS), 12-Nov-2026, late evening — the parent's sections refreshed here (the older approve-and-send page repaired; Take off / Put back on the stop list; the stop list in the backup; the old batch page NOT to be used until it is made safe; your decisions of 8:21 and 8:48 p.m.; 440 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S437 close** (the parent, full EOS), 12-Nov-2026, evening — the parent's sections refreshed here (the WhatsApp Inbox sends again; the show-only list of patient messages on the portal; four decisions for the next session; nothing to MyOperator until you decide; 439 reserved); the other projects' sections as their closes left them.
@@ -447,7 +448,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S440 close (12-Nov, 22:3x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S442 close (13-Nov, 05:3x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -463,53 +464,59 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · LOOK ONCE AT THE OLD BATCH PAGE (optional).** It now says LIVE at its top and refuses the list of 13 August — nothing can be sent from it. You no longer need to stay away from it.
+**2 · THE WHATSAPP SENDING IS INSTALLED — LEAVE THE SWITCHES OFF FOR NOW.** Every switch is OFF and nothing has been sent. The reminders with a date wait for the visit records, and those are a day behind (the feed from the Follow-up Tracker on your PC) — the next session brings you a plan for it. Portal → Patients → WhatsApp messages:
 
 ```
-https://followup.dr-manoj.in/portal/wa/followups
+https://followup.dr-manoj.in/portal/messages
 ```
 
-**3 · THE SENDING — nothing to do yet.** What you agreed is on the mock-up: the times, at most 150 a day, a switch for each message, all OFF. It is built next session; then one publish and one server line, and you turn the first switch on.
+**3 · THE TESTS TO YOUR PHONE (when you wish; they do not depend on item 2).** On a message's card press "Send a test to my phone", read it on your phone, press "It arrived". Do this first for "After today's visit" — it is your new wording.
 
-```
-https://claude.ai/artifact/7kYVwTpLj5ZsdkyiXgJPWj
-```
+**4 · THE TEMPLATE FEATURES: tell me which you want** — reply buttons on the reminders · a feedback question the morning after a visit · a "Stop messages" button · X-rays and reports sent as the message (your ruling) · header and footer. The paper is `S442_WA_TEMPLATE_FEATURES_STUDY.md` in the project.
 
-**4 · TELL SHIVANI, ALISHA, SHAVEZ AND RECEPTION (once):** all four phones now ring on every call; a missed caller not called back in 30 minutes brings a reminder; after an hour it goes to Shavez; what is still open at closing comes to you. **And: replies from the WhatsApp Inbox work again.**
+**5 · TELL SHIVANI, ALISHA, SHAVEZ AND RECEPTION (once):** all four phones now ring on every call; a missed caller not called back in 30 minutes brings a reminder; after an hour it goes to Shavez; what is still open at closing comes to you. **And: replies from the WhatsApp Inbox work again.**
 
-**5 · THE HELPLINE NUMBER ON PRINTED MATTER AND JUSTDIAL** — the prescription header, cards, the board — with the old number beside it.
+**6 · THE HELPLINE NUMBER ON PRINTED MATTER AND JUSTDIAL** — the prescription header, cards, the board — with the old number beside it.
 
-**6 · THE PATIENTS PAGE (mock-up, version 16): look, add what you want.** It comes after the WhatsApp sending (your order).
+**7 · THE PATIENTS PAGE (mock-up, version 16): look, add what you want.** It comes after the WhatsApp sending (your order).
 
 ```
 https://claude.ai/artifact/TNw8B62K2GHvST3NPU1WNA
 ```
 
-**7 · LEAVE THE TWO DOCTERZ EXPORT FILES IN `D:\Downloads` AS THEY ARE**; do not attach patient files to the chat.
+**8 · LEAVE THE TWO DOCTERZ EXPORT FILES IN `D:\Downloads` AS THEY ARE**; do not attach patient files to the chat.
 
-**8 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Its clock, its backup battery, its WiFi, and that it rejoins by itself after a power cut.
+**9 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Its clock, its backup battery, its WiFi, and that it rejoins by itself after a power cut.
 
-**9 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+**10 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**10 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
+**11 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
 
-**11 · MYOPERATOR (ticket 691386): nothing to do now.** After a day more of watching I bring you the whole picture and we decide together what to write to them (your ruling, 12-Nov). One more thing for that list: your panel shows a second, empty WhatsApp account beside the real one.
+**12 · MYOPERATOR (ticket 691386): nothing to do now.** After a day more of watching I bring you the whole picture and we decide together what to write to them (your ruling, 12-Nov). One more thing for that list: your panel shows a second, empty WhatsApp account beside the real one.
 
-**12 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
+**13 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Session 442 on Claude Fable — the WhatsApp sending from your WhatsApp messages page (your order):** built from tonight's plan — a switch for each message, all off; the times you agreed; at most 150 a day; a test to your own phone before any switch can be turned on; a second reader's check before it reaches you.
-2. **Then the analytics page** — the Patients page from mock-up version 16.
-3. **Watching, at every open:** the Inbox's sends and refusals (for the ticket) · the show-only list · the helpline number on the Google profile and the contact page.
+1. **Session 443 — the follow-up feed (your order of 13-Nov): analysis and ONE plan, nothing built without your word.** The follow-up tracker set up one way, in time, for the callback tracker, the call console and the WhatsApp system; the "called" counts for the grace period; the WhatsApp chats shown as waiting that are answered or are not patients; the WhatsApp tiles gathered in *Call & WhatsApp*.
+2. **Then, on your word:** the first switch of the sending · the template wordings you choose · the analytics page (the Patients page, mock-up version 16).
+3. **Watching, at every open:** the sending's page and its log · the Inbox's sends and refusals (for the ticket) · the helpline number on the Google profile and the contact page.
 4. **On 19-Nov: the same count again** — callers never spoken to, call-backs made, outgoing calls answered.
 5. **Parked at your word (12-Nov):** the Hindi "we will call you back" recording · a busy message for callers.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S442 CLOSE — 13-Nov-2026, early morning (the parent)
+
+- **The WhatsApp sending is on the server, every switch OFF** — a switch and a test for each message, "Stop all sending", "What went today"; checked four times by a second reader before it reached you. You ran it at 4:53 am. Nothing was sent to anyone.
+- **Your new post-visit wording is in use** for "After today's visit".
+- **The study of the template features** is written.
+- **Your findings on the follow-up tracker, the call console, the WhatsApp chats and the tiles are written down** for the next session's plan.
+- The old "look once at the old batch page" and "the sending — nothing to do yet" items are closed.
 
 ## ✅ DONE AT THE S440 CLOSE — 12-Nov-2026, night (the parent)
 
