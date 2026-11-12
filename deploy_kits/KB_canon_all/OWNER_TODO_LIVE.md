@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S434 close** (the Sanjeevni chat, full EOS), 12-Nov-2026, morning — the Sanjeevni sections refreshed here (November's purchase bills count again — S795; the Marg watch plan v3 and mock v5; the publish; 436 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S435 close** (the parent, full EOS), 12-Nov-2026, morning — the parent's sections refreshed here (the front desk: the phones ring together, the WhatsApp greeting, the call-back clock, the helpline number on the website; 437 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S434 close** (the Sanjeevni chat, full EOS), 12-Nov-2026, morning — the Sanjeevni sections refreshed here (November's purchase bills count again — S795; the Marg watch plan v3 and mock v5; the publish; 436 reserved)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S433 close** (the parent, EOS-light), 12-Nov-2026, morning — the parent's sections refreshed here (the Patients page mock-up v11; the two export files left as named; 435 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S432 close** (the Sanjeevni chat, EOS-light), 11-Nov-2026, night — the Sanjeevni sections refreshed here (the Marg watch plan for review; the publish; 434 reserved)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S431 close** (the parent, full EOS), 11-Nov-2026, night — the parent's sections refreshed here (the WhatsApp MyOperator button; the PC kits; BL Computers and the machine's WiFi; 433 reserved: the Fable session); the other projects' sections as their closes left them.
@@ -441,7 +442,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S433 close (12-Nov, 06:5x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S435 close (12-Nov, 09:5x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -451,44 +452,56 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the records of the last three closes and the medical PC's updated set-up kit. Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries this morning's records. Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · THE PATIENTS PAGE (mock-up, version 11): look, add what you want, or say "build".**
+**2 · TELL SHIVANI, ALISHA, SHAVEZ AND RECEPTION (once):** all four phones now ring on every call; a missed caller not called back in 30 minutes brings a reminder on their phones; after an hour it goes to Shavez; what is still open at closing comes to you.
+
+**3 · THE HELPLINE NUMBER ON PRINTED MATTER AND JUSTDIAL** — the prescription header, cards, the board — with the old number beside it. The website and the WhatsApp greeting are done.
+
+**4 · THE PATIENTS PAGE (mock-up, version 16): look, add what you want, or say "build".**
 
 ```
 https://claude.ai/artifact/TNw8B62K2GHvST3NPU1WNA
 ```
 
-**3 · LEAVE THE TWO DOCTERZ EXPORT FILES IN `D:\Downloads` AS THEY ARE** (`clinical data report (1).csv`, `consultation report.csv`): do not rename or move them. And do not attach patient files to the chat — save them in `D:\Downloads` and tell me.
+**5 · LEAVE THE TWO DOCTERZ EXPORT FILES IN `D:\Downloads` AS THEY ARE**; do not attach patient files to the chat.
 
-**4 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Its clock, its backup battery, its WiFi signal, and that it rejoins the WiFi by itself after a power cut. Until fixed: staff switch it off and on once the WiFi is back.
+**6 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Its clock, its backup battery, its WiFi, and that it rejoins by itself after a power cut.
 
-**5 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+**7 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**6 · TELL RECEPTION, SHIVANI, ALISHA AND SHAVEZ (once):** the **Online booking** tile; the 3 p.m. / 6 p.m. X-ray photo count; and **Shavez:** an X-ray card marked *registered nahi* is a possible payment gap — register and file it, or tap why.
+**8 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
 
-**7 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
+**9 · MYOPERATOR (ticket 691386): their written cause and a fix date.**
 
-**8 · MYOPERATOR (ticket 691386): their written cause and a fix date.** Meanwhile reply from the inbox's **MyOperator** button.
-
-**9 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
+**10 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Session 435 on Claude Fable — the Patients section, continued:** your additions; the call data joined (who was called, who came, why they did not, the Google calls); the Call Console's older follow-ups as a mock-up. **Built only on your word.**
-2. **Watch:** the attendance punches arriving once the machine is back on WiFi; the WhatsApp button in use.
-3. **Arjun Dev / staff 20** once their fingers are done.
-4. **Later, on your word:** the reception mobile with each staff member's own login, and Ranjeet as its backup person (not small).
+1. **Session 437 on Claude Fable — the approved WhatsApp templates** (post-visit, follow-up, appointment reminders): show-only on your console first, then one at a time on your word; a STOP honoured from the first day. **And your MyOperator plan looked at** (the two IVR numbers, the channels).
+2. **The helpline number on the Google profile and the contact page** — not done at S435; on your word.
+3. **After a week (19-Nov): the same count again** — callers never spoken to, call-backs made, outgoing calls answered — to see what the four changes recovered.
+4. **The clock's second part, on your word:** the open duty on the staff's Aaj ka kaam that closes only by a call; the line on your console; the morning list.
+5. **The Patients page** — built only on "build".
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S435 CLOSE — 12-Nov-2026 (the parent)
+
+- **The front desk read from your own records** — calls and WhatsApp together, each caller counted once a day — and put on the Patients mock-up (version 16), with Google reviews and a six-point plan.
+- **All four Appointments phones ring together** (MyOperator).
+- **The WhatsApp greeting is on** — your text.
+- **The call-back clock is live** — 30 minutes, then Shavez at 60, then you at closing.
+- **The helpline number is first on the website**, the old number beside it.
+- **The findings paper:** `claude/S435_FRONT_DESK_FINDINGS.md`.
 
 ## ✅ DONE AT THE S433 CLOSE — 12-Nov-2026 (the parent)
 
