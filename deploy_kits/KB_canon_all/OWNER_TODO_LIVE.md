@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S432 close** (the Sanjeevni chat, EOS-light), 11-Nov-2026, night — the Sanjeevni sections refreshed here (the Marg watch plan for review; the publish; 434 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S433 close** (the parent, EOS-light), 12-Nov-2026, morning — the parent's sections refreshed here (the Patients page mock-up v11; the two export files left as named; 435 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S432 close** (the Sanjeevni chat, EOS-light), 11-Nov-2026, night — the Sanjeevni sections refreshed here (the Marg watch plan for review; the publish; 434 reserved)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S431 close** (the parent, full EOS), 11-Nov-2026, night — the parent's sections refreshed here (the WhatsApp MyOperator button; the PC kits; BL Computers and the machine's WiFi; 433 reserved: the Fable session); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S430 close** (the parent, full EOS), 11-Nov-2026, evening — the parent's sections refreshed here (the X-ray rules and payment gaps; the attendance clock; BL Computers; 431 reserved: the WhatsApp interim); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S426 close** (the Sanjeevni chat, full EOS), 11-Nov-2026, early morning — the Sanjeevni sections refreshed here (provisional purchase bills live; the scanner's line figures; reception to scan since 08-Nov; 429 reserved)
@@ -439,7 +440,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S431 close (11-Nov, 22:2x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S433 close (12-Nov, 06:5x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -449,36 +450,51 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries the S431 record (the WhatsApp button is already live). Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries the records of the last three closes and the medical PC's updated set-up kit. Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Set its clock and check its backup battery (it stops at power cuts), and check its **WiFi**: the signal where it stands, and that it rejoins the WiFi by itself after a power cut. No punch reached the server after 10:20 on 11-Nov. Until fixed: staff switch it off and on once the WiFi is back after a power cut.
+**2 · THE PATIENTS PAGE (mock-up, version 11): look, add what you want, or say "build".**
 
-**3 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+```
+https://claude.ai/artifact/TNw8B62K2GHvST3NPU1WNA
+```
+
+**3 · LEAVE THE TWO DOCTERZ EXPORT FILES IN `D:\Downloads` AS THEY ARE** (`clinical data report (1).csv`, `consultation report.csv`): do not rename or move them. And do not attach patient files to the chat — save them in `D:\Downloads` and tell me.
+
+**4 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Its clock, its backup battery, its WiFi signal, and that it rejoins the WiFi by itself after a power cut. Until fixed: staff switch it off and on once the WiFi is back.
+
+**5 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**4 · TELL RECEPTION, SHIVANI, ALISHA AND SHAVEZ (once):** the **Online booking** tile; the 3 p.m. / 6 p.m. X-ray photo count; and **Shavez:** an X-ray card marked *registered nahi* is a possible payment gap — register and file it, or tap why.
+**6 · TELL RECEPTION, SHIVANI, ALISHA AND SHAVEZ (once):** the **Online booking** tile; the 3 p.m. / 6 p.m. X-ray photo count; and **Shavez:** an X-ray card marked *registered nahi* is a possible payment gap — register and file it, or tap why.
 
-**5 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
+**7 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
 
-**6 · MYOPERATOR (ticket 691386): their written cause and a fix date.** Meanwhile reply from the inbox's **MyOperator** button.
+**8 · MYOPERATOR (ticket 691386): their written cause and a fix date.** Meanwhile reply from the inbox's **MyOperator** button.
 
-**7 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
+**9 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Session 433 on Claude Fable:** the Patients section (parts 2 and 3, reception's third export) and the Call Console's older follow-ups — analysis and mock-ups first; built on your word.
-2. **Watch:** the attendance punches arriving once the machine is back on WiFi; the medical PC kit repacked by the nightly; the WhatsApp button in use.
+1. **Session 435 on Claude Fable — the Patients section, continued:** your additions; the call data joined (who was called, who came, why they did not, the Google calls); the Call Console's older follow-ups as a mock-up. **Built only on your word.**
+2. **Watch:** the attendance punches arriving once the machine is back on WiFi; the WhatsApp button in use.
 3. **Arjun Dev / staff 20** once their fingers are done.
 4. **Later, on your word:** the reception mobile with each staff member's own login, and Ranjeet as its backup person (not small).
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S433 CLOSE — 12-Nov-2026 (the parent)
+
+- **The Patients page studied on real records** — 22 months of visits, the pharmacy bills, Google: mock-up version 4 → 11, with readings and suggestions.
+- **Your observations tested:** medicines without a consultation, late returners, the festival.
+- **The medical PC's set-up kit** updated itself overnight (checked).
+- **The study paper:** `claude/S433_PATIENTS_STUDY.md`.
 
 ## ✅ DONE AT THE S431 CLOSE — 11-Nov-2026 (the parent)
 
