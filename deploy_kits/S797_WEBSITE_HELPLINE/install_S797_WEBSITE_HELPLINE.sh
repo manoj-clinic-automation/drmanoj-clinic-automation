@@ -8,6 +8,7 @@
 #  every call link dials the helpline and the number shown reads "helpline, old number"; WhatsApp links are untouched. Nothing in the
 #  website's database is changed, no plugin or theme file is edited, nothing is restarted.
 #  v2: no `php -l` (the server's crashed on it); the checks run with -n and any PHP that crashes is passed over.
+#  v3: after placing, the web server's cached pages are cleared and the page is read the way a visitor gets it.
 #  DRY=1 before bash: every check, and the home page as it WOULD read -- nothing placed.
 #  Undo:  bash /tmp/s797kit/install_S797_WEBSITE_HELPLINE.sh --undo
 # =============================================================================
@@ -26,7 +27,11 @@ stop() { echo "!! STOPPED: $1"; echo "   ${2:-Nothing on the website was changed
 # fetch <url> <file> -> prints the HTTP status
 fetch() {
   if [ -n "${S797_FAKE_FETCH:-}" ]; then
-    if [ -f "$N1" ] && [ -n "${S797_FAKE_FETCH_AFTER:-}" ]; then \cp "$S797_FAKE_FETCH_AFTER" "$2"; else \cp "$S797_FAKE_FETCH" "$2"; fi; echo 200
+    case "$1" in
+      *s797purge=*) [ -n "${S797_FAKE_PLAIN_AFTER:-}" ] && touch "$SITE/.purged"; \cp "${S797_FAKE_FETCH_AFTER:-$S797_FAKE_FETCH}" "$2";;
+      *\?*) if [ -f "$N1" ] && [ -n "${S797_FAKE_FETCH_AFTER:-}" ]; then \cp "$S797_FAKE_FETCH_AFTER" "$2"; else \cp "$S797_FAKE_FETCH" "$2"; fi;;
+      *) if [ -f "$SITE/.purged" ] && [ -f "$N1" ]; then \cp "$S797_FAKE_PLAIN_AFTER" "$2"; else \cp "$S797_FAKE_FETCH" "$2"; fi;;
+    esac; echo 200
   else curl -sS -m 40 -L -A "Mozilla/5.0 (S797 check)" -o "$2" -w '%{http_code}' "$1" 2>/dev/null; fi
 }
 cnt() { grep -o -i -E "$1" "$2" 2>/dev/null | wc -l | tr -d ' '; }
@@ -43,7 +48,13 @@ case "$OLD" in [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]) ;; *) stop "g
 [ "$HELPLINE" != "$OLD" ] || stop "the two numbers are the same"
 [ -f "$SITE/wp-config.php" ] && [ -d "$SITE/wp-content" ] || stop "the website is not at $SITE"
 SCR=$(mktemp -d /tmp/s797.XXXX); chmod 700 "$SCR"
-sed -e "s/@@OLD@@/$OLD/g" -e "s/@@NEW@@/$HELPLINE/g" clinic-helpline-number.php.tpl > "$SCR/plugin.php" || stop "could not make the file"
+TOKEN=""
+if [ -f "$N1" ] && grep -q "Version: S797.2" "$N1" && grep -q "'S797_OLD', '$OLD'" "$N1" && grep -q "'S797_NEW', '$HELPLINE'" "$N1"; then
+  TOKEN=$(sed -n "s/^ *define('S797_PURGE', '\\([0-9a-f]\\{16,\\}\\)');.*/\\1/p" "$N1" | head -1); SAME=1
+else SAME=0; fi
+[ -n "$TOKEN" ] || { SAME=0; TOKEN=$(head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n'); }
+[ "${#TOKEN}" -ge 32 ] || stop "could not make the one-off cache key"
+sed -e "s/@@OLD@@/$OLD/g" -e "s/@@NEW@@/$HELPLINE/g" -e "s/@@PURGE@@/$TOKEN/g" clinic-helpline-number.php.tpl > "$SCR/plugin.php" || stop "could not make the file"
 grep -q '@@' "$SCR/plugin.php" && stop "the made file still holds a placeholder"
 # A PHP program for the checks. v2 (12-Nov 09:1x IST): the first run stopped because the server's `php -l` itself crashed (a
 # segmentation fault of the program, not a fault of the file). So: every candidate is run with -n (no php.ini, no extensions --
@@ -75,29 +86,36 @@ if [ -n "$PHPBIN_OK" ]; then
 else
   PHPBIN=""
   echo "[1/5] kit files match. NO PHP program on this server ran the checks (tried:$TRIED) -- the file was checked where it was built"
-  echo "      (PHP 8.3, walk 22/22). Going on to the live check, which takes the file out again if the page does not come out right."
+  echo "      (PHP 8.3, walk 23/23). Going on to the live check, which takes the file out again if the page does not come out right."
 fi
 NEWSUM=$(m5 "$SCR/plugin.php")
-if [ -f "$N1" ] && [ "$(m5 "$N1")" = "$NEWSUM" ]; then echo "-- ALREADY INSTALLED with these two numbers. Nothing written."; exit 0; fi
-[ -e "$N1" ] && [ "${REPLACE:-0}" != 1 ] && stop "$N1 is there already and differs (other numbers?). Run with --undo first, or REPLACE=1"
-C0=$(fetch "$URL" "$SCR/before.html")
+OURS=0; [ -f "$N1" ] && grep -q "kit S797" "$N1" && OURS=1
+[ -e "$N1" ] && [ "$OURS" != 1 ] && stop "$N1 is there already and is not this kit's file"
+C0=$(fetch "${URL}?s797pre=$(date +%s)" "$SCR/before.html")
 [ "$C0" = 200 ] || stop "the website's home page did not answer 200 (it answered $C0)"
 B_OLD=$(cnt "href=[\"']tel:[^\"']*$OLD" "$SCR/before.html"); B_WA=$(cnt "(whatsapp\.com/send\?phone=|wa\.me/)[0-9+]*$OLD" "$SCR/before.html")
-[ "$B_OLD" -ge 1 ] || stop "the home page shows no call link to the old number -- nothing for this kit to do (old number given: ...${OLD: -4})"
-if [ -n "$PHPBIN" ]; then
+B_NEW=$(cnt "href=[\"']tel:\+91$HELPLINE[\"']" "$SCR/before.html")
+if [ "$OURS" = 1 ]; then [ "$B_NEW" -ge 1 ] || [ "$B_OLD" -ge 1 ] || stop "the home page shows no call link to either number"
+else [ "$B_OLD" -ge 1 ] || stop "the home page shows no call link to the old number -- nothing for this kit to do (old number given: ...${OLD: -4})"; fi
+if [ -n "$PHPBIN" ] && [ "$B_OLD" -ge 1 ]; then
   A=$( ("$PHPBIN" -n walk_s797.php --apply "$SCR/plugin.php" "$SCR/before.html" "$SCR/would.html" 2>&1 | tail -1) 2>/dev/null )
   W_OLD=$(cnt "href=[\"']tel:[^\"']*$OLD" "$SCR/would.html"); W_NEW=$(cnt "href=[\"']tel:\+91$HELPLINE[\"']" "$SCR/would.html"); W_WA=$(cnt "(whatsapp\.com/send\?phone=|wa\.me/)[0-9+]*$OLD" "$SCR/would.html")
   [ "$W_OLD" = 0 ] && [ "$W_NEW" = "$B_OLD" ] && [ "$W_WA" = "$B_WA" ] || stop "today's home page through the file does not come out as expected ($A)"
   echo "[2/5] today's home page through the file: $A"
 else
-  echo "[2/5] today's home page: call links to the old number $B_OLD, WhatsApp links $B_WA (no PHP here to show the page as it would read)"
+  echo "[2/5] a fresh copy of the home page now: call links to the old number $B_OLD, to the helpline $B_NEW, WhatsApp links $B_WA"
 fi
 [ "${DRY:-0}" = 1 ] && { echo "DRY=1: every gate green; nothing placed."; exit 0; }
-mkdir -p "$MU" || stop "could not make $MU"
-chown --reference="$SITE/wp-content" "$MU" 2>/dev/null
-\cp "$SCR/plugin.php" "$N1.s797new" && chown --reference="$SITE/wp-content" "$N1.s797new" 2>/dev/null; chmod 644 "$N1.s797new" && mv -f "$N1.s797new" "$N1" || stop "could not place $N1"
-[ "$(m5 "$N1")" = "$NEWSUM" ] || { rm -f "$N1"; stop "the read-back did not match (removed again)"; }
-echo "[3/5] placed $N1 (${NEWSUM:0:8})"
+if [ "$SAME" = 1 ] && [ "$(m5 "$N1")" = "$NEWSUM" ]; then
+  echo "[3/5] the file is already in place with these two numbers (${NEWSUM:0:8}) -- not written again"
+else
+  mkdir -p "$MU" || stop "could not make $MU"
+  chown --reference="$SITE/wp-content" "$MU" 2>/dev/null
+  [ -f "$N1" ] && \cp -p "$N1" "/root/s797_prev_$(date +%Y%m%d_%H%M%S).txt"
+  \cp "$SCR/plugin.php" "$N1.s797new" && chown --reference="$SITE/wp-content" "$N1.s797new" 2>/dev/null; chmod 644 "$N1.s797new" && mv -f "$N1.s797new" "$N1" || stop "could not place $N1"
+  [ "$(m5 "$N1")" = "$NEWSUM" ] || { rm -f "$N1"; stop "the read-back did not match (removed again)"; }
+  echo "[3/5] placed $N1 (${NEWSUM:0:8})"
+fi
 sleep "${S797_WAIT:-2}"
 C1=$(fetch "${URL}?s797=$(date +%s)" "$SCR/after.html")
 L_OLD=$(cnt "href=[\"']tel:[^\"']*$OLD" "$SCR/after.html"); L_NEW=$(cnt "href=[\"']tel:\+91$HELPLINE[\"']" "$SCR/after.html"); L_WA=$(cnt "(whatsapp\.com/send\?phone=|wa\.me/)[0-9+]*$OLD" "$SCR/after.html")
@@ -108,4 +126,30 @@ if [ "$C1" != 200 ] || [ "$L_OLD" != 0 ] || [ "$L_NEW" -lt 1 ] || [ "$L_WA" != "
   stop "the live page after placing was not as expected (status $C1; call links old $L_OLD, helpline $L_NEW; WhatsApp links $L_WA of $B_WA; bytes $S0 -> $S1)" "The file was taken out again; the home page now answers $C2."
 fi
 echo "[4/5] the live home page now: status $C1; call links to the helpline $L_NEW, to the old number $L_OLD; WhatsApp links $L_WA (as before); bytes $S0 -> $S1"
-echo "[5/5] $KIT: DONE. Every call link on the website dials the helpline; the number shown reads helpline first, the old number beside it."
+# v3 (12-Nov 09:2x IST): the web server (LiteSpeed) keeps a cached copy of every page for 7 days and was still serving the old
+# one to visitors (the owner: "I can't see the new number") -- the check above reads a FRESH copy. Ask the server to drop its copies
+# (its own purge header, sent by the file for the one-off key; and the cache plugin's own command when it is there), then read the
+# page the way every visitor gets it.
+CP=$(fetch "${URL}?s797purge=$TOKEN" "$SCR/purge.html")
+( cd "$SITE" && timeout 60 wp litespeed-purge all --allow-root >/dev/null 2>&1 ) 2>/dev/null
+sleep "${S797_WAIT:-2}"
+V_OLD=9; V_NEW=0; LSDONE=""; CLEARED=0
+for t in 1 2 3; do
+  CV=$(fetch "$URL" "$SCR/visitor.html")
+  V_OLD=$(cnt "href=[\"']tel:[^\"']*$OLD" "$SCR/visitor.html"); V_NEW=$(cnt "href=[\"']tel:\+91$HELPLINE[\"']" "$SCR/visitor.html")
+  [ "$V_OLD" = 0 ] && [ "$V_NEW" -ge 1 ] && break
+  if [ "$t" = 1 ]; then      # the third road: the server's own cache folder of this website (cached copies only -- nothing else lives there)
+    LS="$(dirname "$SITE")/lscache"
+    if [ -d "$LS" ] && [ "$(basename "$LS")" = lscache ] && [ ! -L "$LS" ]; then find "$LS" -xdev -type f -delete 2>/dev/null; LSDONE=" (the cache folder $LS emptied)"; fi
+  fi
+  sleep "${S797_WAIT:-3}"
+done
+if [ "$V_OLD" = 0 ] && [ "$V_NEW" -ge 1 ]; then
+  CLEARED=1
+  echo "      the home page AS EVERY VISITOR GETS IT: call links to the helpline $V_NEW, to the old number $V_OLD -- the cached copies are cleared$LSDONE"
+else
+  echo "      !! the home page as every visitor gets it STILL shows the cached old copy (helpline $V_NEW, old $V_OLD; purge request answered $CP)."
+  echo "         The file is in place and right; the server's cached pages were not cleared by this kit. Send a photo of this screen to Claude."
+fi
+if [ "$CLEARED" = 1 ]; then echo "[5/5] $KIT: DONE. Every call link on the website dials the helpline; the number shown reads helpline first, the old number beside it."
+else echo "[5/5] $KIT: THE FILE IS IN PLACE, BUT VISITORS STILL GET THE CACHED OLD PAGES (they clear by themselves within 7 days). Send the photo."; fi

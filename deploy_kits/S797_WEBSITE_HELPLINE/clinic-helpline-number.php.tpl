@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Clinic helpline number (kit S797)
  * Description: Shows the clinic's helpline number first wherever the public pages show the old call number: every call link dials the helpline, and the number shown reads "helpline, old number". WhatsApp links are left as they are. Nothing in the database is changed. To undo, remove this one file.
- * Version: S797.1
+ * Version: S797.2
  *
  * Made on the server by install_S797_WEBSITE_HELPLINE.sh from the kit's template; the two numbers were given on the server line
  * (no number is kept in the repository). The owner, 12-Nov-2026: the helpline number is to be made known everywhere, with the old
@@ -16,6 +16,17 @@ if (!defined('S797_OLD')) {
 }
 if (!defined('S797_NEW')) {
     define('S797_NEW', '@@NEW@@');
+}
+if (!defined('S797_PURGE')) {
+    define('S797_PURGE', '@@PURGE@@');
+}
+
+if (!function_exists('s797_purge_wanted')) {
+    /** True only for the one-off key made at install: the installer asks the web server to drop its cached copies of the pages. */
+    function s797_purge_wanted($q)
+    {
+        return is_string($q) && strlen(S797_PURGE) >= 16 && hash_equals(S797_PURGE, $q);
+    }
 }
 
 if (!function_exists('s797_text_nodes')) {
@@ -87,6 +98,10 @@ if (function_exists('add_action')) {
             || (defined('REST_REQUEST') && REST_REQUEST) || (defined('DOING_AJAX') && DOING_AJAX)
             || isset($_GET['elementor-preview']) || isset($_GET['elementor_library'])) {
             return;
+        }
+        if (isset($_GET['s797purge']) && s797_purge_wanted($_GET['s797purge']) && !headers_sent()) {
+            header('X-LiteSpeed-Purge: *');
+            header('X-LiteSpeed-Cache-Control: no-cache');
         }
         ob_start(function ($buffer) {
             return s797_helpline_html($buffer);

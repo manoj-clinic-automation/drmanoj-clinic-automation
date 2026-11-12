@@ -31,7 +31,7 @@ if (!is_readable($tpl)) {
 }
 if ($control) { echo "CONTROL: NOT red -- the template was found where none should be\n"; exit(1); }
 $OLD = str_repeat('9', 10); $NEW = str_repeat('8', 10);          // made-up: no real number in the kit
-$src = str_replace(array('@@OLD@@', '@@NEW@@'), array($OLD, $NEW), file_get_contents($tpl));
+$src = str_replace(array('@@OLD@@', '@@NEW@@', '@@PURGE@@'), array($OLD, $NEW, 'abcdefabcdefabcdef'), file_get_contents($tpl));
 $tmp = tempnam(sys_get_temp_dir(), 's797') . '.php';
 file_put_contents($tmp, $src);
 require $tmp;
@@ -73,6 +73,7 @@ chk('twice is the same as once', $f($o) === $o);
 chk('not a string comes back as it was', $f(null) === null && $f('') === '' && $f(array(1)) === array(1));
 $h = '<a href="tel:+91-' . $OLD . '">x</a><script>unclosed ' . $OLD;
 chk('an unclosed script does not lose the page', $f($h) === '<a href="' . $T . '">x</a><script>unclosed ' . $OLD, $f($h));
+chk('the cache key: only the exact key is accepted', s797_purge_wanted('abcdefabcdefabcdef') === true && s797_purge_wanted('abcdefabcdefabcdeX') === false && s797_purge_wanted('') === false && s797_purge_wanted(null) === false && s797_purge_wanted(array('abcdefabcdefabcdef')) === false);
 chk('the template carries no real number', !preg_match('~[6-9][0-9]{9}~', file_get_contents($tpl)));
 $bad = count(array_filter($res, function ($x) { return !$x; }));
 echo $bad ? "WALK RED $bad of " . count($res) . "\n" : 'WALK OK ' . count($res) . '/' . count($res) . "\n";
