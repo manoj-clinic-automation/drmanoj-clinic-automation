@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S436 close** (the Sanjeevni chat, EOS-light), 12-Nov-2026, midday — the Sanjeevni sections refreshed here (mock v6 of the Marg watch; bills to the exact rupee — D935; the paper opens in the row — D936; the publish; 438 reserved)
+# OWNER TO-DO — LIVE · refreshed at the **S437 close** (the parent, full EOS), 12-Nov-2026, evening — the parent's sections refreshed here (the WhatsApp Inbox sends again; the show-only list of patient messages on the portal; four decisions for the next session; nothing to MyOperator until you decide; 439 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S436 close** (the Sanjeevni chat, EOS-light), 12-Nov-2026, midday — the Sanjeevni sections refreshed here (mock v6 of the Marg watch; bills to the exact rupee — D935; the paper opens in the row — D936; the publish; 438 reserved)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S435 close** (the parent, full EOS), 12-Nov-2026, morning — the parent's sections refreshed here (the front desk: the phones ring together, the WhatsApp greeting, the call-back clock, the helpline number on the website; 437 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S434 close** (the Sanjeevni chat, full EOS), 12-Nov-2026, morning — the Sanjeevni sections refreshed here (November's purchase bills count again — S795; the Marg watch plan v3 and mock v5; the publish; 436 reserved)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S433 close** (the parent, EOS-light), 12-Nov-2026, morning — the parent's sections refreshed here (the Patients page mock-up v11; the two export files left as named; 435 reserved); the other projects' sections as their closes left them.
@@ -443,7 +444,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S435 close (12-Nov, 09:5x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S437 close (12-Nov, 17:5x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -453,47 +454,63 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries this morning's records. Nothing follows it.
+**1 · THE PUBLISH: one double-click.** It carries today's records. Nothing follows it.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · TELL SHIVANI, ALISHA, SHAVEZ AND RECEPTION (once):** all four phones now ring on every call; a missed caller not called back in 30 minutes brings a reminder on their phones; after an hour it goes to Shavez; what is still open at closing comes to you.
+**2 · LOOK ONCE AT THE WHATSAPP MESSAGES LIST (show only — nothing is sent):** does it read right to you?
 
-**3 · THE HELPLINE NUMBER ON PRINTED MATTER AND JUSTDIAL** — the prescription header, cards, the board — with the old number beside it. The website and the WhatsApp greeting are done.
+```
+https://followup.dr-manoj.in/portal/messages
+```
 
-**4 · THE PATIENTS PAGE (mock-up, version 16): look, add what you want, or say "build".**
+**3 · FOUR DECISIONS FOR THE NEXT SESSION, one line each:** when real sending to patients starts (I suggest "follow-up is tomorrow" first, after three days of show-only) · the Hindi wording of a "we will call you back" recording · whether a caller who finds every line busy should get a busy / voicemail step · whether the appointment reminder should carry the helpline number (a fresh WhatsApp approval, a few days).
+
+**4 · TELL SHIVANI, ALISHA, SHAVEZ AND RECEPTION (once):** all four phones now ring on every call; a missed caller not called back in 30 minutes brings a reminder; after an hour it goes to Shavez; what is still open at closing comes to you. **And: replies from the WhatsApp Inbox work again.**
+
+**5 · THE HELPLINE NUMBER ON PRINTED MATTER AND JUSTDIAL** — the prescription header, cards, the board — with the old number beside it.
+
+**6 · THE PATIENTS PAGE (mock-up, version 16): look, add what you want.** It comes after the WhatsApp items (your order).
 
 ```
 https://claude.ai/artifact/TNw8B62K2GHvST3NPU1WNA
 ```
 
-**5 · LEAVE THE TWO DOCTERZ EXPORT FILES IN `D:\Downloads` AS THEY ARE**; do not attach patient files to the chat.
+**7 · LEAVE THE TWO DOCTERZ EXPORT FILES IN `D:\Downloads` AS THEY ARE**; do not attach patient files to the chat.
 
-**6 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Its clock, its backup battery, its WiFi, and that it rejoins by itself after a power cut.
+**8 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Its clock, its backup battery, its WiFi, and that it rejoins by itself after a power cut.
 
-**7 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+**9 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**8 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
+**10 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
 
-**9 · MYOPERATOR (ticket 691386): their written cause and a fix date.**
+**11 · MYOPERATOR (ticket 691386): nothing to do now.** The Inbox's fault is found and repaired on our side. After a day or two of watching I bring you the whole picture and we decide together what to write to them (your ruling, 12-Nov).
 
-**10 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
+**12 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Session 437 on Claude Fable — the approved WhatsApp templates** (post-visit, follow-up, appointment reminders): show-only on your console first, then one at a time on your word; a STOP honoured from the first day. **And your MyOperator plan looked at** (the two IVR numbers, the channels).
-2. **The helpline number on the Google profile and the contact page** — not done at S435; on your word.
-3. **After a week (19-Nov): the same count again** — callers never spoken to, call-backs made, outgoing calls answered — to see what the four changes recovered.
-4. **The clock's second part, on your word:** the open duty on the staff's Aaj ka kaam that closes only by a call; the line on your console; the morning list.
-5. **The Patients page** — built only on "build".
+1. **Session 439 on Claude Fable — the WhatsApp items first (your order):** the older "approve and send" page given the same fix · the show-only list watched for three days · a way to take a number off the stop list · the stop list into the backup · then, only on "build", the sending — one message type at a time.
+2. **Then the analytics page** — the Patients page from mock-up version 16: your additions, the figures still grey, then the real page that fills itself every night.
+3. **Watching, at every open:** the Inbox's sends and refusals (for the ticket) · the helpline number on the Google profile and the contact page.
+4. **On 19-Nov: the same count again** — callers never spoken to, call-backs made, outgoing calls answered.
+5. **The clock's second part, on your word.**
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S437 CLOSE — 12-Nov-2026 (the parent)
+
+- **The WhatsApp Inbox sends again** — the cause found (one label's capital letters, changed by the Inbox's sending program) and repaired; your test message reached you at 3:36 p.m.
+- **The show-only list of patient WhatsApp messages is on your portal**, with mobiles, and a stop list that listens for STOP.
+- **Your MyOperator plan read** — one number, 10 pairs of lines, enough; no busy step in the call flow.
+- **The "we will call you back" recordings found** — three, all MyOperator's stock English, none in use.
+- **The findings paper:** `claude/S437_WHATSAPP_FINDINGS.md`.
 
 ## ✅ DONE AT THE S435 CLOSE — 12-Nov-2026 (the parent)
 
