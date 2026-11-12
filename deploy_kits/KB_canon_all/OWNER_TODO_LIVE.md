@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S433 close** (the parent, EOS-light), 12-Nov-2026, morning — the parent's sections refreshed here (the Patients page mock-up v11; the two export files left as named; 435 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S434 close** (the Sanjeevni chat, full EOS), 12-Nov-2026, morning — the Sanjeevni sections refreshed here (November's purchase bills count again — S795; the Marg watch plan v3 and mock v5; the publish; 436 reserved)
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S433 close** (the parent, EOS-light), 12-Nov-2026, morning — the parent's sections refreshed here (the Patients page mock-up v11; the two export files left as named; 435 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S432 close** (the Sanjeevni chat, EOS-light), 11-Nov-2026, night — the Sanjeevni sections refreshed here (the Marg watch plan for review; the publish; 434 reserved)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S431 close** (the parent, full EOS), 11-Nov-2026, night — the parent's sections refreshed here (the WhatsApp MyOperator button; the PC kits; BL Computers and the machine's WiFi; 433 reserved: the Fable session); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S430 close** (the parent, full EOS), 11-Nov-2026, evening — the parent's sections refreshed here (the X-ray rules and payment gaps; the attendance clock; BL Computers; 431 reserved: the WhatsApp interim); the other projects' sections as their closes left them.
@@ -1028,41 +1029,49 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S432 close (11-Nov, 22:4x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S434 close (12-Nov, 07:5x)
 
-*Detail: `S432_BUILD_BRIEF.md`; the plan `S432_MARG_WATCH_PLAN.md`. The next chat's entry is `START_HERE_SESSION_434.md` (the plan's review by Claude Fable). This section supersedes the S426 one.*
+*Detail: `S434_BUILD_BRIEF.md`; the plan `S434_MARG_WATCH_PLAN_v3.md`. The next chat's entry is `START_HERE_SESSION_436.md`. This section supersedes the S432 one.*
 
-**1 · The publish of tonight's records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`; nothing follows it.
+**1 · The publish of this session's records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`; nothing follows it.
 
-**2 · Next session:** read the reviewed plan's few lines, then your word on mock v3 (your Marg watch page and the staff cards).
+**2 · Next session:** your word on the mock (a removed sale bill comes to you; the small-amount floor — your figure), then the first Marg watch kit.
 
-**3 · Amir's three more dates** — the next chat drafts the message for your paste (with Yuvika 803's XL/XXL).
+**3 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting — the record stays and nothing is flagged (your idea of 07:40).
 
-**4 · The orthotics count** — who counts the shelf, and on which day.
+**4 · Amir's three more dates** — the next chat drafts the message for your paste (with Yuvika 803's XL/XXL).
 
-**5 · Bass Pharma's payment number** in the phone book.
+**5 · The orthotics count** — who counts the shelf, and on which day.
 
-**6 · ZIBON EXTRA +21** (the 06-Sep count) — when a session shows it.
+**6 · Bass Pharma's payment number** in the phone book.
 
-**7 · Row 7 — a dealer who never sends a summary:** *<Dealer> gives no summary*, once.
+**7 · ZIBON EXTRA +21** (the 06-Sep count) — when a session shows it.
 
-**8 · Shavez's phone:** the daily summaries reach him only once he has opened the clinic app and allowed messages.
+**8 · Row 7 — a dealer who never sends a summary:** *<Dealer> gives no summary*, once.
 
-**9 · Still yours:** ZUPRINOR 5 (row 6); the two September supplier messages (A.A. Pharmaceuticals, Deepam Pharma).
+**9 · Shavez's phone:** the daily summaries reach him only once he has opened the clinic app and allowed messages.
 
-**10 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
+**10 · Still yours:** ZUPRINOR 5 (row 6); the two September supplier messages (A.A. Pharmaceuticals, Deepam Pharma).
 
-**11 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
+**11 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
 
-**Later, your word only:** the reports-login password, typed once on the medical PC at AutoHotkey's trial (D915); when scans start adding to stock (D891); reading older scans again for free / MRP / discount / GST; the Marg Purchases tile opening the Purchase bills page directly; the older parts of the order screen; "count them"; the buying switch (earliest ~22-Nov); June and July's old PROVISIONAL months; Deepam bill 502 of August (FINAL); a second network for the medical PC (D837).
+**12 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S432 close
+**Later, your word only:** the reports-login password, typed once on the medical PC at AutoHotkey's trial (D915); when scans start adding to stock (D891); reading older scans again for free / MRP / discount / GST; the Marg Purchases tile opening the Purchase bills page directly.
 
-1. **Review `S432_MARG_WATCH_PLAN.md`** (Claude Fable, D918) → v2 → **mock v3** for your word.
-2. **The Marg watch kits**, each on your word: the main-store refusal and section A (F-1270, F-1271) · Ask · section B · the on-need request list · AutoHotkey.
-3. **Amir's three more dates** — the message for your paste.
-4. **The first orthotics count** with you, when you name who and when.
-5. **The 06-Sep proof step** (F-1232); **arrivals judged by the bill** (F-1220, the mock first); **the order-list kit** on your "go".
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S434 close
+
+1. **Watch S795 on Amir's next double report** (read only) and the next bundle's pin.
+2. **Mock v6** → your word → **Marg watch Kit 1**: bills changed after the day, on your Purchase bills page's paper; *Settled by the scanned bill*; your own close.
+3. **Then, each on your word:** stock moved with no record (13 today) · Ask · reports on need · AutoHotkey.
+4. **The two old item lists of 1 Sep – 3 Oct** (F-1280) — read, then decide.
+5. **Amir's three more dates**; **the first orthotics count**; **the 06-Sep proof step** (F-1232); **arrivals judged by the bill** (F-1220, the mock first); **the order-list kit** on your "go".
+
+## ✅ DONE AT THE S434 CLOSE — 12-Nov-2026 (the Sanjeevni project)
+
+- **November's purchase bills all count again** — a short list can no longer replace a full one (S795; your install ~07:10).
+- **The Marg watch plan reviewed** — `S434_MARG_WATCH_PLAN_v3.md`, with your rulings D923 – D929; the mock at v5.
+- **S426's `purchase_app.py` pin confirmed** by the 12-Nov bundle.
 
 ## ✅ DONE AT THE S432 CLOSE — 11-Nov-2026 (the Sanjeevni project)
 
