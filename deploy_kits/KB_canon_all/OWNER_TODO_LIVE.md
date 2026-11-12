@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S435 close** (the parent, full EOS), 12-Nov-2026, morning — the parent's sections refreshed here (the front desk: the phones ring together, the WhatsApp greeting, the call-back clock, the helpline number on the website; 437 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S436 close** (the Sanjeevni chat, EOS-light), 12-Nov-2026, midday — the Sanjeevni sections refreshed here (mock v6 of the Marg watch; bills to the exact rupee — D935; the paper opens in the row — D936; the publish; 438 reserved)
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S435 close** (the parent, full EOS), 12-Nov-2026, morning — the parent's sections refreshed here (the front desk: the phones ring together, the WhatsApp greeting, the call-back clock, the helpline number on the website; 437 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S434 close** (the Sanjeevni chat, full EOS), 12-Nov-2026, morning — the Sanjeevni sections refreshed here (November's purchase bills count again — S795; the Marg watch plan v3 and mock v5; the publish; 436 reserved)
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S433 close** (the parent, EOS-light), 12-Nov-2026, morning — the parent's sections refreshed here (the Patients page mock-up v11; the two export files left as named; 435 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S432 close** (the Sanjeevni chat, EOS-light), 11-Nov-2026, night — the Sanjeevni sections refreshed here (the Marg watch plan for review; the publish; 434 reserved)
@@ -1042,15 +1043,15 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S434 close (12-Nov, 07:5x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S436 close (12-Nov, 13:0x)
 
-*Detail: `S434_BUILD_BRIEF.md`; the plan `S434_MARG_WATCH_PLAN_v3.md`. The next chat's entry is `START_HERE_SESSION_436.md`. This section supersedes the S432 one.*
+*Detail: `S436_BUILD_BRIEF.md`; the plan `S434_MARG_WATCH_PLAN_v3.md` (amended by your words of 12-Nov — D935, D936). The next chat's entry is `START_HERE_SESSION_438.md`. This section supersedes the S434 one.*
 
 **1 · The publish of this session's records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`; nothing follows it.
 
-**2 · Next session:** your word on the mock (a removed sale bill comes to you; the small-amount floor — your figure), then the first Marg watch kit.
+**2 · One figure:** for stock that moves in Marg with no record — a floor of ₹100, another figure, or none. (Bills have no floor: they agree with the paper to the rupee.)
 
-**3 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting — the record stays and nothing is flagged (your idea of 07:40).
+**3 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting — the record stays and nothing is flagged (your idea of 12-Nov 07:40).
 
 **4 · Amir's three more dates** — the next chat drafts the message for your paste (with Yuvika 803's XL/XXL).
 
@@ -1068,17 +1069,22 @@ The full list: `claude/S288_PENDING_LIST.md`.
 
 **11 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
 
-**12 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords.
+**12 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
 
 **Later, your word only:** the reports-login password, typed once on the medical PC at AutoHotkey's trial (D915); when scans start adding to stock (D891); reading older scans again for free / MRP / discount / GST; the Marg Purchases tile opening the Purchase bills page directly.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S434 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S436 close
 
-1. **Watch S795 on Amir's next double report** (read only) and the next bundle's pin.
-2. **Mock v6** → your word → **Marg watch Kit 1**: bills changed after the day, on your Purchase bills page's paper; *Settled by the scanned bill*; your own close.
-3. **Then, each on your word:** stock moved with no record (13 today) · Ask · reports on need · AutoHotkey.
+1. **Read this morning's repair on Amir's real double report** (read only) and the next bundle's pin.
+2. **Marg watch Kit 1** (your word of 12:50): bills changed after the day — each checked against its scanned paper to the rupee, nothing called small; **View** opens in the row with the paper, you do not leave the page; *Settled by the scanned bill*; your own close.
+3. **Then, each on your word:** stock moved with no record (13 today; your floor figure) · Ask · reports on need · AutoHotkey.
 4. **The two old item lists of 1 Sep – 3 Oct** (F-1280) — read, then decide.
 5. **Amir's three more dates**; **the first orthotics count**; **the 06-Sep proof step** (F-1232); **arrivals judged by the bill** (F-1220, the mock first); **the order-list kit** on your "go".
+
+## ✅ DONE AT THE S436 CLOSE — 12-Nov-2026 (the Sanjeevni project)
+
+- **Mock v6 of the Marg watch** — the inputs strip, *Before this page*, the removed sale bill comes to you.
+- **Your two corrections taken** — bills to the exact rupee, nothing small (D935); the paper opens in the row (D936).
 
 ## ✅ DONE AT THE S434 CLOSE — 12-Nov-2026 (the Sanjeevni project)
 
