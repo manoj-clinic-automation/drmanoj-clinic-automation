@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S445 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (section A of the Marg watch live, S812; Ask built and held; the Wi-Fi dongle later today; 446 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S443 close** (the parent, full EOS), 13-Nov-2026, morning — the parent's sections refreshed here (the follow-up feed's plan approved and its first step live; confirm the five tests and send the sixth; "After today's visit" may be switched on; the three approved screens are built next; 447 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S445 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (section A of the Marg watch live, S812; Ask built and held; the Wi-Fi dongle later today; 446 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S444 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (the stock record's two-day standstill repaired, S813; the medical PC's Wi-Fi dongle recorded; the publish; 445 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S441 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (a one-store stock report refused at the door; the Marg watch's small fixes and its console line; the 05-Oct part lists retired; October's purchase month — what holds the lock; the publish; 444 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S442 close** (the parent, full EOS), 13-Nov-2026, early morning — the parent's sections refreshed here (the WhatsApp sending is installed, every switch OFF, nothing sent; your new post-visit wording is in; leave the switches OFF until the follow-up feed is put right — the next session brings one plan; 443 reserved); the other projects' sections as their closes left them.
@@ -451,7 +452,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S442 close (13-Nov, 05:3x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S443 close (13-Nov, 10:3x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -461,19 +462,15 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE PUBLISH: one double-click.** It carries tonight's records. Nothing follows it.
+**1 · THE RECORDS OF THIS SESSION: nothing to do yet.** They wait for the link to your PC's shell; the next session puts them in place first and then names the one double-click.
 
-```
-D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
-```
-
-**2 · THE WHATSAPP SENDING IS INSTALLED — LEAVE THE SWITCHES OFF FOR NOW.** Every switch is OFF and nothing has been sent. The reminders with a date wait for the visit records, and those are a day behind (the feed from the Follow-up Tracker on your PC) — the next session brings you a plan for it. Portal → Patients → WhatsApp messages:
+**2 · CONFIRM THE FIVE TEST MESSAGES that reached your phone at 5:29 am** — press "It arrived" on each card — **and send the "follow-up tomorrow" test** (the one still to send):
 
 ```
 https://followup.dr-manoj.in/portal/messages
 ```
 
-**3 · THE TESTS TO YOUR PHONE (when you wish; they do not depend on item 2).** On a message's card press "Send a test to my phone", read it on your phone, press "It arrived". Do this first for "After today's visit" — it is your new wording.
+**3 · "AFTER TODAY'S VISIT" CAN BE SWITCHED ON WHEN YOU WISH.** The switches that depend on a date ("follow-up tomorrow", "date passed") wait for the tracker's move from your PC to the server.
 
 **4 · THE TEMPLATE FEATURES: tell me which you want** — reply buttons on the reminders · a feedback question the morning after a visit · a "Stop messages" button · X-rays and reports sent as the message (your ruling) · header and footer. The paper is `S442_WA_TEMPLATE_FEATURES_STUDY.md` in the project.
 
@@ -481,7 +478,7 @@ https://followup.dr-manoj.in/portal/messages
 
 **6 · THE HELPLINE NUMBER ON PRINTED MATTER AND JUSTDIAL** — the prescription header, cards, the board — with the old number beside it.
 
-**7 · THE PATIENTS PAGE (mock-up, version 16): look, add what you want.** It comes after the WhatsApp sending (your order).
+**7 · THE PATIENTS PAGE (mock-up, version 16): look, add what you want.** It comes after the follow-up feed (your order).
 
 ```
 https://claude.ai/artifact/TNw8B62K2GHvST3NPU1WNA
@@ -499,19 +496,29 @@ https://followup.dr-manoj.in/finance/packs
 
 **11 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
 
-**12 · MYOPERATOR (ticket 691386): nothing to do now.** After a day more of watching I bring you the whole picture and we decide together what to write to them (your ruling, 12-Nov). One more thing for that list: your panel shows a second, empty WhatsApp account beside the real one.
+**12 · MYOPERATOR (ticket 691386): nothing to do now.** After a day more of watching I bring you the whole picture and we decide together what to write to them (your ruling, 12-Nov).
 
 **13 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Session 443 — the follow-up feed (your order of 13-Nov): analysis and ONE plan, nothing built without your word.** The follow-up tracker set up one way, in time, for the callback tracker, the call console and the WhatsApp system; the "called" counts for the grace period; the WhatsApp chats shown as waiting that are answered or are not patients; the WhatsApp tiles gathered in *Call & WhatsApp*.
-2. **Then, on your word:** the first switch of the sending · the template wordings you choose · the analytics page (the Patients page, mock-up version 16).
-3. **Watching, at every open:** the sending's page and its log · the Inbox's sends and refusals (for the ticket) · the helpline number on the Google profile and the contact page.
-4. **On 19-Nov: the same count again** — callers never spoken to, call-backs made, outgoing calls answered.
-5. **Parked at your word (12-Nov):** the Hindi "we will call you back" recording · a busy message for callers.
+1. **Session 447 — first this session's records put in place; then the three screens you approved** (your "Screens mockups are all ok", 13-Nov): the tiles gathered under *Calls & WhatsApp* · the Call Console's follow-up lines ("Called today N of M", "Reached", earlier days beside them; only patients who have not come) · WhatsApp "awaiting" judged per chat, with "Done — no reply needed" and "Not a patient".
+2. **Then the tracker's move from your PC to the server** (about three sessions): the lists made on the server from reception's two evening exports; the past month replayed first; your PC kept as the spare; nothing deleted.
+3. **Then one set of sections and one "came back" rule on every screen**, "on medicines", staff outcomes closing rows.
+4. **Watching, at every open:** the new evening alert and the on-arrival pick-up (their logs) · the sending's page · the Inbox's sends and refusals (for the ticket) · the helpline number on the Google profile and the contact page.
+5. **On 19-Nov: the same count again** — callers never spoken to, call-backs made, outgoing calls answered.
+6. **Then, on your word:** the template wordings you choose · the analytics page (the Patients page, mock-up version 16).
+7. **Parked at your word (12-Nov):** the Hindi "we will call you back" recording · a busy message for callers.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S443 CLOSE — 13-Nov-2026, morning (the parent)
+
+- **The follow-up feed was studied and ONE plan brought to you** — you approved it and the three screens of its second step.
+- **Step 1 is live (you ran it at 10:07 am):** visits reach the server's records within about five minutes of arriving, at any hour; a missing reception export is told to you at 9:45 pm and again at 8:15 next morning.
+- **The publish of the S442 records landed** (5:28 am).
+- **You allowed the tracker's program folder for this session** — a later session that needs it asks again, once.
+- The old "leave the switches OFF for now" item is replaced by items 2 and 3 above.
 
 ## ✅ DONE AT THE S442 CLOSE — 13-Nov-2026, early morning (the parent)
 
