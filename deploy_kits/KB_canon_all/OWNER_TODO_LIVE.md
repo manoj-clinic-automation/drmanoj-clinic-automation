@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S441 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (a one-store stock report refused at the door; the Marg watch's small fixes and its console line; the 05-Oct part lists retired; October's purchase month — what holds the lock; the publish; 444 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S444 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (the stock record's two-day standstill repaired, S813; the medical PC's Wi-Fi dongle recorded; the publish; 445 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S441 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (a one-store stock report refused at the door; the Marg watch's small fixes and its console line; the 05-Oct part lists retired; October's purchase month — what holds the lock; the publish; 444 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S442 close** (the parent, full EOS), 13-Nov-2026, early morning — the parent's sections refreshed here (the WhatsApp sending is installed, every switch OFF, nothing sent; your new post-visit wording is in; leave the switches OFF until the follow-up feed is put right — the next session brings one plan; 443 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S440 close** (the parent, full EOS), 12-Nov-2026, night — the parent's sections refreshed here (the old batch page is safe — it refuses the August list and says LIVE at its top; the templates stay as they are; the sending agreed on a mock-up — the times, at most 150 a day, every switch yours; 442 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S438 close** (the Sanjeevni chat, full EOS), 12-Nov-2026, night — the Sanjeevni sections refreshed here (the Marg watch is live — bills changed after their day; three small decisions on its page; the new start text to paste into the four projects; the floor for stock moves at none; the publish; 441 reserved); the other projects' sections as their closes left them.
@@ -1090,9 +1091,9 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S441 close (13-Nov, 07:4x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S444 close (13-Nov, 08:3x)
 
-*Detail: `S441_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. The next chat's entry is `START_HERE_SESSION_444.md`. This section supersedes the S438 one.*
+*Detail: `S444_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. The next chat's entry is `START_HERE_SESSION_445.md`. This section supersedes the S441 one.*
 
 **1 · The publish of this session's records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`; nothing follows it.
 
@@ -1118,12 +1119,18 @@ Then FINALISE on the month page — the advice, letter and NEFT file stop being 
 
 **Later, your word only:** AutoHotkey (with the reports-login password typed once on the medical PC, D915); arrivals judged by the bill; the order list; when scans start adding to stock (D891).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S441 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S444 close
 
+0. **The medical PC's Wi-Fi dongle as the standby network path** (your note, 13-Nov 08:32; F-1133).
 1. **Stock moved in Marg with no record** (Kit 2) — no floor to start; you set the figure on the page later.
 2. **Ask** (Kit 3 — *Not OK* goes to Amir's card), then **reports only when needed** (Kit 4).
 3. **Amir's Batch Stock card says why a one-store export was refused** (F-1328), with the next touch of the expiry page.
 4. **Amir's three more dates**; **the first orthotics count**; **the 06-Sep proof step** (F-1232).
+
+## ✅ DONE AT THE S444 CLOSE — 13-Nov-2026, morning (the Sanjeevni project)
+
+- **The stock record was stuck on 11-Nov figures for two days** (a partial copy of Amir's purchase report had replaced the full one) — repaired by S813 (08:15 IST); the stock record rebuilt at once and up to date; a partial copy can never replace the full report again.
+- **Your Wi-Fi dongle on the medical PC recorded** for the next session.
 
 ## ✅ DONE AT THE S441 CLOSE — 13-Nov-2026, morning (the Sanjeevni project)
 
