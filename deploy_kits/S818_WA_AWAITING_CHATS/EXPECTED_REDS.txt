@@ -1,0 +1,8 @@
+walk_s748|F14 called-of per section (grace: 0 of 3)
+walk_s748|F15 lapsed with an uncalled row is rose; all called is green
+walk_s748|P4 the sections carry their colour on the top line
+walk_s748|Q1 her own card (today): the same figures as the owner's card
+walk_s748|R2 Shavez is charged only while covering: the two 09:00 missed calls before Shivani punched
+walk_s748|S1 one card per call handler today: Shivani, Alisha, and Shavez (on duty, no call of his own); never you
+walk_s748|S8 her duty and punch
+walk_s748|X5 the 7-day page shows the Reception mobile line and does not count it 'on calls'
