@@ -1,0 +1,25 @@
+# S812_MARG_WATCH_STOCK — the Marg watch, section A: stock moved in Marg with no record (13-Nov-2026, Sanjeevni session 445)
+
+**The owner's word:** D951 (06:42 IST 13-Nov — the build list approved: Kit 2, stock moved with no record); D943 (the floor starts at none, a figure he changes on the page); D923 (he closes any row himself, on the row, with an optional reason); D914 (a move with any record behind it, even a wrong one, is "explained after all" — never counted).
+
+**The kit — two files, both this project's, both rebuilt on the box from the live bytes:**
+1. `/root/finance/marg_hand_change.py` (3b8c2160 → TO) — the engine (S706), additive:
+   - **the records, in the plan's order** (S438 plan v4 §5): (1) a bill changed after its day — the Marg watch's own compare, read here: a removed sale bill gives its units back; a changed or removed purchase bill moves now − was; (2) a bill Marg took in at another closing; (3) a voucher filed on another size or form — only when the sibling shows the opposite move on the same closing, the voucher used up (and, for the two items of his 05-Nov table that name it, on that closing); (4) a voucher of another quantity on the item — the same direction, within three closings, no more than its units; (5) a sale Marg did not take off — the window's one sale, or all of them; (6) free goods — the window's one free line. Each filed voucher explains at most its own units. A move with a record is stored with it (`rec_kind`, `rec_ref`, `rec_note`) and is never counted and never told.
+   - **F-1279:** a purchase bill Marg has not taken in yet is noted even on a day that is not judged, so Marg's later catch-up is paid from it (BIO D3 MAX +150, 6–8 Nov). A changed bill's own units are matched first and never pay a late bill.
+   - **F-1278:** a rise is judged only once an item-wise purchase list TAKEN AFTER that closing was printed exists.
+   - **F-1270:** the line says the whole sum — Marg's move, the system's, a bill Marg took in late, and what is left with no record; a note of the owner's 05-Nov table is used only on the closing it was written for.
+   - **the rupees** (`rate_p`, `value_p`): the newest purchase net rate per unit, else Marg's own purchase rate; no rate is said as "no rate", never ₹0.
+   - **the floor** `hand.floor_rs` (D943, ships 0 = none): a counted move worth less is listed, never told. A move he closed is never told.
+   - the Expiry watch's section (S706) reads only what is counted; its words and place are unchanged.
+   - S812's first run marks what it adds as history (shown, never told).
+2. `/root/finance/marg_billwatch.py` (9be1b460 → TO) — section A on top of `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch`: the moves by period with Marg's figures and the rupees; **View** opens the whole-sum line and his decision (OK — Marg is right / Not OK, a reason, Save; Reopen); *Before this section began* with one OK for the lot; the floor field; *Explained after all* grouped by the record; *Renamed*; *Cleared by itself*; the stock record's own health line, red when it has not built for over a working day (F-1329's owed part, on the page — nothing to the phone). Section B is unchanged.
+
+**On the 13-Nov copy (the bench):** counted **14** — the plan's 13 and CCM +5 of 27-Aug (a −3 voucher of 15-Oct, the other way, no longer explains it — the cold review); explained after all **17** (A004591 ×5, DOLONEX 19612 ×2, THIO Q AP TAB, TRAMAVIN ×2, CAST SHOE L/M as one pair, ENZOMAC ×2, CCM 3-Sep and 17-Sep, KNEE IMMOBILIZER M) and two stored rows explained by the late bill (BIO D3 MAX +150, THIO Q AP +120); renames 4.
+
+**Proof before it left the bench.** `walk_s812.py` 61/61 on copies of the 13-Nov database and a spine rebuilt from manojz's archive (the 13, each record, the made-up move counted, the made-up move one unit off a bill not explained, the store, the notice, the floor, his close, the lot, the page); its control on the live files 24 red before it stops · **cold review: SAFE AFTER FIXES** — five must-fixes built and walked (matchers 3, 3c, 4 and 5 bounded; nothing stored when the bills cannot be read), the should-fixes built (a small part only; a bill with no date skipped; the sweep inside F-1278; a closed move off the Expiry watch too; matcher 6 unique; the undo marks explained moves as history first) · `walk_s803.py` (Kit 1's own walk) GREEN on the rebuilt page · the page in Chromium at 1366 / 884 / 360 px: no script error, nothing off-screen, View opens the row · the doors through a Flask test client (close, reopen, floor, lot, no sign-in → 403) · `rehearse_s812.sh` on a stand-in root.
+
+**Install (the VPS, one line):**
+
+    cd /root/deploy/repo && git pull --ff-only && rm -rf /tmp/s812kit && cp -rp /root/deploy/repo/deploy_kits/S812_MARG_WATCH_STOCK /tmp/s812kit && bash /tmp/s812kit/install_S812_MARG_WATCH_STOCK.sh
+
+**Undo:** the installer prints the one line (both files back; the added columns stay and the old files ignore them). **Off:** `hand.on = off`, or `/root/finance/_off/ALL_OFF`.

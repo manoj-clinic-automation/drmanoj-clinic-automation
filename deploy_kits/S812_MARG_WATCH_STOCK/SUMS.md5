@@ -1,0 +1,14 @@
+16c5b17c4881e9aa1b3b4a69951ea3c5  KIT_ID.txt
+d9322647f5e95236fb0cb9b83d5d28ae  README.md
+c9bba03237e7b1406afc1936eda991dd  TO_PINS.md5
+111d8071da38368c7277121f3184f7a9  copy_dbs.py
+8f86ba763d88c6603ea882c64e18d941  install_S812_MARG_WATCH_STOCK.sh
+72e25dad4d92c3113a9c730c8e2d944a  make_s812.py
+ae2e5fd892a149cda9165e607ec5b1f8  make_s812b.py
+3f2288b42f2600ff4121528f5be72880  seg_bw_hand.py
+ee733dba18bd5f78d33a32397b355d55  seg_compute.py
+a108ed5b66baac02b0fcbcd8369cfd86  seg_refresh.py
+9c9aaa0eca312b5b0c6d324117c7d573  walk_s803.py
+cfe5304a883957a840021c746865bf31  walk_s812.py
+78af69d01674252bc1d36b921fd2c31b  rehearse_s812.sh
+ee40242dc0026ca1facca05e02c6773d  hz.sh
