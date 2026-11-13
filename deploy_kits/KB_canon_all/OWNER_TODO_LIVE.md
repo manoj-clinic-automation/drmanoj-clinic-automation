@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S444 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (the stock record's two-day standstill repaired, S813; the medical PC's Wi-Fi dongle recorded; the publish; 445 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S445 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (section A of the Marg watch live, S812; Ask built and held; the Wi-Fi dongle later today; 446 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S444 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (the stock record's two-day standstill repaired, S813; the medical PC's Wi-Fi dongle recorded; the publish; 445 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S441 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (a one-store stock report refused at the door; the Marg watch's small fixes and its console line; the 05-Oct part lists retired; October's purchase month — what holds the lock; the publish; 444 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S442 close** (the parent, full EOS), 13-Nov-2026, early morning — the parent's sections refreshed here (the WhatsApp sending is installed, every switch OFF, nothing sent; your new post-visit wording is in; leave the switches OFF until the follow-up feed is put right — the next session brings one plan; 443 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S440 close** (the parent, full EOS), 12-Nov-2026, night — the parent's sections refreshed here (the old batch page is safe — it refuses the August list and says LIVE at its top; the templates stay as they are; the sending agreed on a mock-up — the times, at most 150 a day, every switch yours; 442 reserved); the other projects' sections as their closes left them.
@@ -1091,41 +1092,44 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S444 close (13-Nov, 08:3x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S445 close (13-Nov, 09:5x)
 
-*Detail: `S444_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. The next chat's entry is `START_HERE_SESSION_445.md`. This section supersedes the S441 one.*
+*Detail: `S445_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. The next chat's entry is `START_HERE_SESSION_446.md`. This section supersedes the S444 one.*
 
-**1 · The publish of this session's records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`; nothing follows it.
+**1 · The publish of this session's records** — named by the next session once it has placed this held close.
 
-**2 · October's purchase month** — `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10`:
-- **L.K. Drug House** — its summary covers 1–15 Oct only: ask them for 16–31 Oct, or accept;
-- **Bass, Jubilee, Saisun** — summaries awaited from reception; mark *gives no summary* for any dealer that never sends one;
-- **Bass Pharma** — ₹1,597 by cheque (no account on the server); its payment number in the phone book.
-Then FINALISE on the month page — the advice, letter and NEFT file stop being drafts.
+**2 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — section A: **15 moves with no record** — *OK all 15*, or one by one with a reason; the floor box (₹0 now); section B as before: sale bill **A004591** (*the sale stands* / *it was cancelled*), *OK all*, the phone notice when you are ready (Off now).
 
-**3 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
+**3 · The Wi-Fi dongle on the medical PC** — two short questions come to you in the next session (is it joined with *Connect automatically*? the same internet line as the cable?).
 
-**4 · The new start text, pasted once into each of the four projects** (custom instructions) — `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S438\COMMON_START_HERE_PROMPT_v1_1.md`
+**4 · October's purchase month** — `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10` — as at the S444 close (L.K. Drug House 16–31 Oct; Bass, Jubilee, Saisun summaries; Bass Pharma ₹1,597 by cheque; then FINALISE).
 
-**5 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — sale bill **A004591** (₹1,760): *the sale stands* or *it was cancelled*; **OK all 13**, or one at a time; **the phone notice** when you are ready (Off now).
+**5 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
 
-**6 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting.
+**6 · The new start text, pasted once into each of the four projects** — `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S438\COMMON_START_HERE_PROMPT_v1_1.md`
 
-**7 · The orthotics count** — who counts the shelf, and on which day.
+**7 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting.
 
-**8 · Still yours:** ZUPRINOR 5 (row 6); Shavez's phone (the daily summaries need him to open the clinic app and allow messages); Ram Singh (F-1115): Marg's change log, stock-editing off every staff login, the AMIRR login closed.
+**8 · The orthotics count** — who counts the shelf, and on which day.
 
-**9 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
+**9 · Still yours:** ZUPRINOR 5 (row 6); Shavez's phone; Ram Singh (F-1115).
 
-**Later, your word only:** AutoHotkey (with the reports-login password typed once on the medical PC, D915); arrivals judged by the bill; the order list; when scans start adding to stock (D891).
+**10 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S444 close
+**Later, your word only:** AutoHotkey (D915); arrivals judged by the bill; the order list; when scans start adding to stock (D891).
 
-0. **The medical PC's Wi-Fi dongle as the standby network path** (your note, 13-Nov 08:32; F-1133).
-1. **Stock moved in Marg with no record** (Kit 2) — no floor to start; you set the figure on the page later.
-2. **Ask** (Kit 3 — *Not OK* goes to Amir's card), then **reports only when needed** (Kit 4).
-3. **Amir's Batch Stock card says why a one-store export was refused** (F-1328), with the next touch of the expiry page.
-4. **Amir's three more dates**; **the first orthotics count**; **the 06-Sep proof step** (F-1232).
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S445 close
+
+0. **Finish this session's close** (held when the PC's shell stopped).
+1. **Ask (Kit 3)** — built; the last tests, a review, then your publish and one line.
+2. **The medical PC's Wi-Fi dongle** as the standby network path (F-1133).
+3. **Darpan's own Ask line**; **reports only when needed** (Kit 4).
+4. **Amir's three more dates**; **the first orthotics count**; F-1328 with the next touch of the expiry page.
+
+## ✅ DONE AT THE S445 CLOSE — 13-Nov-2026, morning (the Sanjeevni project)
+
+- **The Marg watch opens with "Stock moved in Marg with no record"** (S812, live 09:17): 15 moves open with their rupees, each yours to close; 19 moves with a record behind them named and folded away; the floor at ₹0.
+- **Your mock-up of Ask approved** (09:24) — built; finishing next session.
 
 ## ✅ DONE AT THE S444 CLOSE — 13-Nov-2026, morning (the Sanjeevni project)
 
