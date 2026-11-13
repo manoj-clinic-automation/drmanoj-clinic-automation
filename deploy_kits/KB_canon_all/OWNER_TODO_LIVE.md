@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S443 close** (the parent, full EOS), 13-Nov-2026, morning — the parent's sections refreshed here (the follow-up feed's plan approved and its first step live; confirm the five tests and send the sixth; "After today's visit" may be switched on; the three approved screens are built next; 447 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S446 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, midday — the Sanjeevni sections refreshed here (Ask live, S814; Darpan's Ask line and reports on need built and held, S815; the Wi-Fi dongle's two questions; 448 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S443 close** (the parent, full EOS), 13-Nov-2026, morning — the parent's sections refreshed here (the follow-up feed's plan approved and its first step live; confirm the five tests and send the sixth; "After today's visit" may be switched on; the three approved screens are built next; 447 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S445 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (section A of the Marg watch live, S812; Ask built and held; the Wi-Fi dongle later today; 446 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S444 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (the stock record's two-day standstill repaired, S813; the medical PC's Wi-Fi dongle recorded; the publish; 445 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S441 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (a one-store stock report refused at the door; the Marg watch's small fixes and its console line; the 05-Oct part lists retired; October's purchase month — what holds the lock; the publish; 444 reserved); the other projects' sections as their closes left them.
@@ -1099,15 +1100,15 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S445 close (13-Nov, 09:5x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S446 close (13-Nov, ~12:2x)
 
-*Detail: `S445_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. The next chat's entry is `START_HERE_SESSION_446.md`. This section supersedes the S444 one.*
+*Detail: `S446_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. The next chat's entry is `START_HERE_SESSION_448.md`. This section supersedes the S445 one.*
 
-**1 · The publish of this session's records** — named by the next session once it has placed this held close.
+**1 · The publish of this session's records** — named by the next session once it has placed this held close (and, if the parent's close is still held then, after it).
 
-**2 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — section A: **15 moves with no record** — *OK all 15*, or one by one with a reason; the floor box (₹0 now); section B as before: sale bill **A004591** (*the sale stands* / *it was cancelled*), *OK all*, the phone notice when you are ready (Off now).
+**2 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — section A: the moves with no record — *OK all*, or one by one with a reason, or **Ask** Amir from the row (live since 11:37); the floor box (₹0 now); section B: sale bill **A004591** (*the sale stands* / *it was cancelled*); the two phone switches when you are ready (bills — Off; staff answers — Off).
 
-**3 · The Wi-Fi dongle on the medical PC** — two short questions come to you in the next session (is it joined with *Connect automatically*? the same internet line as the cable?).
+**3 · The Wi-Fi dongle on the medical PC** — two short answers: is it joined with *Connect automatically*? is it the same internet line as the cable?
 
 **4 · October's purchase month** — `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10` — as at the S444 close (L.K. Drug House 16–31 Oct; Bass, Jubilee, Saisun summaries; Bass Pharma ₹1,597 by cheque; then FINALISE).
 
@@ -1125,13 +1126,18 @@ The full list: `claude/S288_PENDING_LIST.md`.
 
 **Later, your word only:** AutoHotkey (D915); arrivals judged by the bill; the order list; when scans start adding to stock (D891).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S445 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S446 close
 
-0. **Finish this session's close** (held when the PC's shell stopped).
-1. **Ask (Kit 3)** — built; the last tests, a review, then your publish and one line.
-2. **The medical PC's Wi-Fi dongle** as the standby network path (F-1133).
-3. **Darpan's own Ask line**; **reports only when needed** (Kit 4).
-4. **Amir's three more dates**; **the first orthotics count**; F-1328 with the next touch of the expiry page.
+0. **Place this session's close** (held when the PC's shell stopped).
+1. **Darpan's own Ask line and reports on need (S815)** — built; the last tests, a review, then your publish and one line.
+2. **The medical PC's Wi-Fi dongle** as the standby network path (F-1133) — after your two answers.
+3. **Amir's three more dates**; **the first orthotics count**; F-1328 with the next touch of the expiry page.
+
+## ✅ DONE AT THE S446 CLOSE — 13-Nov-2026, midday (the Sanjeevni project)
+
+- **Ask on the Marg watch** (S814, live 11:37): every open row has an Ask box; a question to Amir lands first on his card and his one-tap answer comes back to the row; the phone line for answers is Off until you turn it on.
+- **Your mock-up of Darpan's Ask line and reports on need approved** (11:33) — built; finishing next session.
+- **Session 445's close placed** in the records.
 
 ## ✅ DONE AT THE S445 CLOSE — 13-Nov-2026, morning (the Sanjeevni project)
 
