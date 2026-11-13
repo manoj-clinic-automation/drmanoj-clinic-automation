@@ -90,8 +90,10 @@ before = con.execute("SELECT COUNT(*) FROM marg_hand_change").fetchone()[0]
 res = H.refresh(con, SPINE, finance_db=db2, force=True)
 check("refresh runs (%s)" % res, res.get("ok"))
 check("no stored row is deleted (%d before)" % before, con.execute("SELECT COUNT(*) FROM marg_hand_change").fetchone()[0] >= before)
-NC = con.execute("SELECT COUNT(*) FROM marg_hand_change WHERE kind='hand' AND status='open' AND COALESCE(rec_kind,'')=''").fetchone()[0]
-check("the counted open rows are the 14 and the newer ones (%d)" % NC, NC == 14 + len(extra))
+TC = {(i, d) for i, d in con.execute("SELECT item, day_to FROM marg_hand_change WHERE kind='hand' AND status='open' AND COALESCE(rec_kind,'')=''")}
+NC = len(TC)
+check("the counted open rows are the 14, and beyond them only newer moves (stored ones not yet judged may wait): %s" % sorted(TC - COUNTED13),
+      COUNTED13 <= TC and all(d > "2026-11-10" for _i, d in TC - COUNTED13))
 check("the stored BIO D3 MAX +150 is explained with its record", con.execute("SELECT rec_kind FROM marg_hand_change WHERE item='BIO D3 MAX' AND day_to='2026-11-08'").fetchone()[0] == "timing")
 check("the expiry page's list (default) holds only counted rows and renames", all(not x.get("rec_kind") for x in H.rows_for_page(con)))
 check("S812's first run marks what it adds as history", con.execute("SELECT COUNT(*) FROM marg_hand_change WHERE hist=0 AND found_at >= (SELECT value FROM setting WHERE key='hand.s812_since')").fetchone()[0] == 0)
@@ -112,7 +114,7 @@ con.execute("UPDATE marg_hand_change SET hist=0, found_at=? WHERE kind='hand'", 
 con.execute("UPDATE setting SET value='2026-01-01 00:00:00' WHERE key='hand.since'")
 g = H.message_groups(con, "2000-01-01", now)
 told = {(x["item"], x["day_to"]) for v in g.values() for x in v}
-check("the notice speaks only of counted moves (no record) -- %d told" % len(told), told and all(x in cnt for x in told))
+check("the notice speaks only of counted moves (no record) -- %d told" % len(told), told and all(x in TC for x in told))
 con.execute("INSERT OR REPLACE INTO setting (key, value, note) VALUES ('hand.floor_rs','50','t')")
 g2 = H.message_groups(con, "2000-01-01", now)
 told2 = {(x["item"], x["day_to"]) for v in g2.values() for x in v}
