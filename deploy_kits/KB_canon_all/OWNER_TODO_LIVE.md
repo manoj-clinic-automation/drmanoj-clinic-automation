@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S448 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, afternoon — the Sanjeevni sections refreshed here (Darpan's Ask line and reports on need live, S815; the medical PC silent since 10:03 IST; the dongle parked; 449 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S447 close** (the parent, full EOS), 13-Nov-2026, evening — the parent's sections refreshed here (the three approved screens live: the tiles, the Call Console's follow-up lines, WhatsApp awaiting with "Done — no reply needed" and "Not a patient"; clear the first day's WhatsApp backlog; "After today's visit" may be switched on; the staff ledger's interest rule and the two switches' mock-up next; 450 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S448 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, afternoon — the Sanjeevni sections refreshed here (Darpan's Ask line and reports on need live, S815; the medical PC silent since 10:03 IST; the dongle parked; 449 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S446 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, midday — the Sanjeevni sections refreshed here (Ask live, S814; Darpan's Ask line and reports on need built and held, S815; the Wi-Fi dongle's two questions; 448 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S443 close** (the parent, full EOS), 13-Nov-2026, morning — the parent's sections refreshed here (the follow-up feed's plan approved and its first step live; confirm the five tests and send the sixth; "After today's visit" may be switched on; the three approved screens are built next; 447 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S445 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (section A of the Marg watch live, S812; Ask built and held; the Wi-Fi dongle later today; 446 reserved); the other projects' sections as their closes left them.
@@ -454,7 +455,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S443 close (13-Nov, 10:3x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S447 close (13-Nov, 17:1x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -466,53 +467,75 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **1 · THE RECORDS OF THIS SESSION: nothing to do yet.** They wait for the link to your PC's shell; the next session puts them in place first and then names the one double-click.
 
-**2 · CONFIRM THE FIVE TEST MESSAGES that reached your phone at 5:29 am** — press "It arrived" on each card — **and send the "follow-up tomorrow" test** (the one still to send):
+**2 · ON THE CALL CONSOLE, CLEAR THE FIRST DAY'S WHATSAPP BACKLOG** — 31 chats awaiting, 29 from earlier days: press "Done — no reply needed" on those that need nothing, "Not a patient" on numbers that are not patients. Both can be undone. **One chat has a reply of yours that was NOT delivered — look at that one.**
+
+```
+https://followup.dr-manoj.in/portal/console
+```
+
+**3 · "AFTER TODAY'S VISIT" CAN BE SWITCHED ON WHEN YOU WISH** — all six test messages are confirmed. The switches that depend on a date ("follow-up tomorrow", "date passed") wait for the tracker's move from your PC to the server.
 
 ```
 https://followup.dr-manoj.in/portal/messages
 ```
 
-**3 · "AFTER TODAY'S VISIT" CAN BE SWITCHED ON WHEN YOU WISH.** The switches that depend on a date ("follow-up tomorrow", "date passed") wait for the tracker's move from your PC to the server.
+**4 · THE PHARMACY'S HEALTH PAGE SHOWS THREE THINGS FOR YOU** (the pharmacy chat follows them up): two October days (9th and 14th) with UPI evidence open on the accountant report · six pharmacy days (6, 7, 9, 10, 11, 12 Nov) waiting for your approval · the last drawer count is 88 days old — a fresh count is due.
 
-**4 · THE TEMPLATE FEATURES: tell me which you want** — reply buttons on the reminders · a feedback question the morning after a visit · a "Stop messages" button · X-rays and reports sent as the message (your ruling) · header and footer. The paper is `S442_WA_TEMPLATE_FEATURES_STUDY.md` in the project.
+```
+https://followup.dr-manoj.in/finance/health
+```
 
-**5 · TELL SHIVANI, ALISHA, SHAVEZ AND RECEPTION (once):** all four phones now ring on every call; a missed caller not called back in 30 minutes brings a reminder; after an hour it goes to Shavez; what is still open at closing comes to you. **And: replies from the WhatsApp Inbox work again.**
+**5 · THE STAFF LEDGER'S TWO SWITCHES: nothing to do yet.** Next session I show you a mock-up of the two monthly switches (late charge; extra leave & absent) on that staff member's private page; they are built on your word. September and October are locked with the deductions — that is a separate decision of yours.
 
-**6 · THE HELPLINE NUMBER ON PRINTED MATTER AND JUSTDIAL** — the prescription header, cards, the board — with the old number beside it.
+**6 · THE TEMPLATE FEATURES: tell me which you want** — reply buttons on the reminders · a feedback question the morning after a visit · a "Stop messages" button · X-rays and reports sent as the message (your ruling) · header and footer. The paper is `S442_WA_TEMPLATE_FEATURES_STUDY.md` in the project.
 
-**7 · THE PATIENTS PAGE (mock-up, version 16): look, add what you want.** It comes after the follow-up feed (your order).
+**7 · TELL SHIVANI, ALISHA, SHAVEZ AND RECEPTION (once):** all four phones now ring on every call; a missed caller not called back in 30 minutes brings a reminder; after an hour it goes to Shavez; what is still open at closing comes to you. **And: replies from the WhatsApp Inbox work again.**
+
+**8 · THE HELPLINE NUMBER ON PRINTED MATTER AND JUSTDIAL** — the prescription header, cards, the board — with the old number beside it.
+
+**9 · THE PATIENTS PAGE (mock-up, version 16): look, add what you want.** It comes after the follow-up feed (your order).
 
 ```
 https://claude.ai/artifact/TNw8B62K2GHvST3NPU1WNA
 ```
 
-**8 · LEAVE THE TWO DOCTERZ EXPORT FILES IN `D:\Downloads` AS THEY ARE**; do not attach patient files to the chat.
+**10 · LEAVE THE TWO DOCTERZ EXPORT FILES IN `D:\Downloads` AS THEY ARE**; do not attach patient files to the chat.
 
-**9 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Its clock, its backup battery, its WiFi, and that it rejoins by itself after a power cut.
+**11 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Its clock, its backup battery, its WiFi, and that it rejoins by itself after a power cut.
 
-**10 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+**12 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**11 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
+**13 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
 
-**12 · MYOPERATOR (ticket 691386): nothing to do now.** After a day more of watching I bring you the whole picture and we decide together what to write to them (your ruling, 12-Nov).
+**14 · MYOPERATOR (ticket 691386): nothing to do now.** Two files that never came (12-Nov) and the missing delivery reports are added to what I bring you; we decide together what to write to them (your ruling, 12-Nov). Until then, a file that does not load in the Inbox opens from the chat's "MyOperator" button.
 
-**13 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
+**15 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Session 447 — first this session's records put in place; then the three screens you approved** (your "Screens mockups are all ok", 13-Nov): the tiles gathered under *Calls & WhatsApp* · the Call Console's follow-up lines ("Called today N of M", "Reached", earlier days beside them; only patients who have not come) · WhatsApp "awaiting" judged per chat, with "Done — no reply needed" and "Not a patient".
-2. **Then the tracker's move from your PC to the server** (about three sessions): the lists made on the server from reception's two evening exports; the past month replayed first; your PC kept as the spare; nothing deleted.
-3. **Then one set of sections and one "came back" rule on every screen**, "on medicines", staff outcomes closing rows.
-4. **Watching, at every open:** the new evening alert and the on-arrival pick-up (their logs) · the sending's page · the Inbox's sends and refusals (for the ticket) · the helpline number on the Google profile and the contact page.
-5. **On 19-Nov: the same count again** — callers never spoken to, call-backs made, outgoing calls answered.
-6. **Then, on your word:** the template wordings you choose · the analytics page (the Patients page, mock-up version 16).
-7. **Parked at your word (12-Nov):** the Hindi "we will call you back" recording · a busy message for callers.
+1. **Session 450 — first this session's records put in place.**
+2. **The staff ledger (your word, 13-Nov 3:09 pm):** the interest rule — interest only in a month when the principal is also taken, otherwise the whole instalment waits — built before November closes (1 December); then the mock-up of the two switches for the late and the leave / absent deductions.
+3. **Three small jobs:** the Inbox says in words when MyOperator never sent a file · the old approvals page's background service stopped and kept · the new WhatsApp marks ("Done", "Not a patient") added to the nightly backup.
+4. **Then the tracker's move from your PC to the server** (about three sessions): the lists made on the server from reception's two evening exports; the past month replayed first; your PC kept as the spare; nothing deleted.
+5. **Then one set of sections and one "came back" rule on every screen**, "on medicines", staff outcomes closing rows.
+6. **Watching, at every open:** the evening alert and the on-arrival pick-up · the sending's page · the Inbox's sends and refusals (for the ticket) · the Call Console's new lines and WhatsApp block · the helpline number on the Google profile and the contact page.
+7. **On 19-Nov: the same count again** — callers never spoken to, call-backs made, outgoing calls answered.
+8. **Then, on your word:** the template wordings you choose · the analytics page (the Patients page, mock-up version 16).
+9. **Parked at your word (12-Nov):** the Hindi "we will call you back" recording · a busy message for callers.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S447 CLOSE — 13-Nov-2026, evening (the parent)
+
+- **The three screens you approved are live (you ran each):** the tiles gathered under Calls & WhatsApp (12:22 pm) · the Call Console's follow-up lines — "Called today N of M", only patients who have not come back, last reached with Play (1:07 pm) · WhatsApp "awaiting" listed once per chat, with "Done — no reply needed" and "Not a patient" (4:59 pm).
+- **All six test messages confirmed by you** (11:15 am) — the old "confirm the five tests and send the sixth" item is done.
+- **The publish of the S443 records landed** (11:41 am); they were put in place at this session's open.
+- **Your Inbox's PDF traced:** MyOperator never sent the file — not the Inbox's fault.
+- **Your two ledger questions answered** (the interest; the optional deductions) — built next session.
 
 ## ✅ DONE AT THE S443 CLOSE — 13-Nov-2026, morning (the parent)
 
