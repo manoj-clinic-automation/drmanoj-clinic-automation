@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S442 close** (the parent, full EOS), 13-Nov-2026, early morning — the parent's sections refreshed here (the WhatsApp sending is installed, every switch OFF, nothing sent; your new post-visit wording is in; leave the switches OFF until the follow-up feed is put right — the next session brings one plan; 443 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S441 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, morning — the Sanjeevni sections refreshed here (a one-store stock report refused at the door; the Marg watch's small fixes and its console line; the 05-Oct part lists retired; October's purchase month — what holds the lock; the publish; 444 reserved); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S442 close** (the parent, full EOS), 13-Nov-2026, early morning — the parent's sections refreshed here (the WhatsApp sending is installed, every switch OFF, nothing sent; your new post-visit wording is in; leave the switches OFF until the follow-up feed is put right — the next session brings one plan; 443 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S440 close** (the parent, full EOS), 12-Nov-2026, night — the parent's sections refreshed here (the old batch page is safe — it refuses the August list and says LIVE at its top; the templates stay as they are; the sending agreed on a mock-up — the times, at most 150 a day, every switch yours; 442 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S438 close** (the Sanjeevni chat, full EOS), 12-Nov-2026, night — the Sanjeevni sections refreshed here (the Marg watch is live — bills changed after their day; three small decisions on its page; the new start text to paste into the four projects; the floor for stock moves at none; the publish; 441 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S439 close** (the parent, full EOS), 12-Nov-2026, late evening — the parent's sections refreshed here (the older approve-and-send page repaired; Take off / Put back on the stop list; the stop list in the backup; the old batch page NOT to be used until it is made safe; your decisions of 8:21 and 8:48 p.m.; 440 reserved); the other projects' sections as their closes left them.
@@ -1089,49 +1090,48 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S438 close (12-Nov, 21:xx)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S441 close (13-Nov, 07:4x)
 
-*Detail: `S438_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. The next chat's entry is `START_HERE_SESSION_441.md`. This section supersedes the S436 one.*
+*Detail: `S441_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. The next chat's entry is `START_HERE_SESSION_444.md`. This section supersedes the S438 one.*
 
 **1 · The publish of this session's records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`; nothing follows it.
 
-**2 · The new start text, pasted once into each of the four projects** (custom instructions; it replaces the text there now) — after it, a chat asks for the three folders itself and you only tap Allow: `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S438\COMMON_START_HERE_PROMPT_v1_1.md`
+**2 · October's purchase month** — `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10`:
+- **L.K. Drug House** — its summary covers 1–15 Oct only: ask them for 16–31 Oct, or accept;
+- **Bass, Jubilee, Saisun** — summaries awaited from reception; mark *gives no summary* for any dealer that never sends one;
+- **Bass Pharma** — ₹1,597 by cheque (no account on the server); its payment number in the phone book.
+Then FINALISE on the month page — the advice, letter and NEFT file stop being drafts.
 
-**3 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — when you have a few minutes:
-- sale bill **A004591** (₹1,760, removed after its day): *the sale stands* or *it was cancelled*;
-- the older rows under *Before this page*: **OK all 13**, or one at a time;
-- **the phone notice** of a newly changed bill is **Off** — turn it on there when you are ready. Then only what is found after that moment reaches your phone.
+**3 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
 
-**4 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting — the record stays and nothing is flagged.
+**4 · The new start text, pasted once into each of the four projects** (custom instructions) — `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S438\COMMON_START_HERE_PROMPT_v1_1.md`
 
-**5 · Amir's three more dates** — the next chat drafts the message for your paste (with Yuvika 803's XL/XXL).
+**5 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — sale bill **A004591** (₹1,760): *the sale stands* or *it was cancelled*; **OK all 13**, or one at a time; **the phone notice** when you are ready (Off now).
 
-**6 · The orthotics count** — who counts the shelf, and on which day.
+**6 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting.
 
-**7 · Bass Pharma's payment number** in the phone book.
+**7 · The orthotics count** — who counts the shelf, and on which day.
 
-**8 · ZIBON EXTRA +21** (the 06-Sep count) — when a session shows it.
+**8 · Still yours:** ZUPRINOR 5 (row 6); Shavez's phone (the daily summaries need him to open the clinic app and allow messages); Ram Singh (F-1115): Marg's change log, stock-editing off every staff login, the AMIRR login closed.
 
-**9 · Row 7 — a dealer who never sends a summary:** *<Dealer> gives no summary*, once.
+**9 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
 
-**10 · Shavez's phone:** the daily summaries reach him only once he has opened the clinic app and allowed messages.
+**Later, your word only:** AutoHotkey (with the reports-login password typed once on the medical PC, D915); arrivals judged by the bill; the order list; when scans start adding to stock (D891).
 
-**11 · Still yours:** ZUPRINOR 5 (row 6); the two September supplier messages (A.A. Pharmaceuticals, Deepam Pharma).
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S441 close
 
-**12 · Ram Singh** (F-1115): Marg's change log; stock-editing removed from every staff login; the AMIRR login closed.
+1. **Stock moved in Marg with no record** (Kit 2) — no floor to start; you set the figure on the page later.
+2. **Ask** (Kit 3 — *Not OK* goes to Amir's card), then **reports only when needed** (Kit 4).
+3. **Amir's Batch Stock card says why a one-store export was refused** (F-1328), with the next touch of the expiry page.
+4. **Amir's three more dates**; **the first orthotics count**; **the 06-Sep proof step** (F-1232).
 
-**13 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
+## ✅ DONE AT THE S441 CLOSE — 13-Nov-2026, morning (the Sanjeevni project)
 
-**Later, your word only:** the reports-login password, typed once on the medical PC at AutoHotkey's trial (D915); when scans start adding to stock (D891); reading older scans again for free / MRP / discount / GST; the Marg Purchases tile opening the Purchase bills page directly.
-
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S438 close
-
-1. **Read the Marg watch's first days** (read only) and the next bundle's pins.
-2. **The door's rule:** a stock report of one store only (not WHOLE STORES) is refused when it arrives, and the staff tile says why in Hindi.
-3. **Five small things on the Marg watch page** (the scan full width on a settled row; clearer counts and wording) and its link on your command console.
-4. **Then, each on your word:** stock moved with no record (no floor to start — you set the figure on the page later) · Ask (*Not OK* goes to Amir's card) · reports on need · AutoHotkey.
-5. **The two old item lists of 1 Sep – 3 Oct** (F-1280) — read, then decide.
-6. **Amir's three more dates**; **the first orthotics count**; **the 06-Sep proof step** (F-1232); **arrivals judged by the bill** (F-1220, the mock first); **the order-list kit** on your "go".
+- **A one-store stock report is refused at the door** — S810 (07:05 IST); Shavez's tile says it in Hindi; the same rule on your PC's Marg archive.
+- **The Marg watch's five small fixes and its line on your command console** — S811 (07:21 IST), read live on your screen.
+- **The three old part purchase lists of 5 Oct retired** (F-1280, your word) — no bill's figure changed.
+- **The month-end status answered** — nothing missing in the build; the holds listed in ⭐0 item 2.
+- **S803's and S795's files confirmed** by the 13-Nov backup.
 
 ## ✅ DONE AT THE S438 CLOSE — 12-Nov-2026, evening (the Sanjeevni project)
 
