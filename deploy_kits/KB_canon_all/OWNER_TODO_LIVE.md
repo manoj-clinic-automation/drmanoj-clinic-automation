@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S459 close** (the Sanjeevni chat, full EOS), 14-Nov-2026, evening — the Sanjeevni sections refreshed here (arrivals judged by the bill, S825; Yuvika 803's GST, S832; the Restore of B-0272 and a word with Amir); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S461 close** (the Scan App project, full EOS), 14-Nov-2026, evening — the Scan App sections refreshed here (your Procedure room page live — S831; a stopped reader told to you at once — S833; credit notes' design final, built next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S459 close** (the Sanjeevni chat, full EOS), 14-Nov-2026, evening — the Sanjeevni sections refreshed here (arrivals judged by the bill, S825; Yuvika 803's GST, S832; the Restore of B-0272 and a word with Amir); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S460 close** (the parent, full EOS), 14-Nov-2026, evening — the parent's sections refreshed here (the attendance alarm live; the filing build next; one double-click publishes today's records); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S457 close** (the Sanjeevni chat, full EOS, placed by its 459 open), 14-Nov-2026 — the Sanjeevni sections refreshed here (the "Amir's work" message made true, S828; KT ROS DT on Amir's card, S829; ZIBON EXTRA recount asked; arrivals by the bill next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S410 close** (the Scan App project, full EOS), 14-Nov-2026, afternoon — the Scan App sections refreshed here (the scan reader working again with a never-expiring key; two amounts never one paper and your Restore — S826; the Procedure room page's design final, built next); the other projects' sections as their closes left them.
@@ -248,9 +249,9 @@
 - The Diwali gift sticker sheet (A4, 8 per sheet) made.
 - Two project-only papers copied to the disk store.
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S410 close (14-Nov, 16:1x)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S461 close (14-Nov, 18:4x)
 
-*Detail: `S410_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_461.md`.*
+*Detail: `S461_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_464.md`.*
 
 **1 · The publish:** this close's papers (nothing follows it).
 
@@ -258,7 +259,13 @@
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · B-0176 (16-Oct) and B-0318 (13-Nov) — Yuvika's dealer challans:** each line's product and quantity on the desk, then Save.
+**2 · The opening shelf count and the Fibrecast reorder levels** — Stock now on your Procedure room page, one Save.
+
+```
+https://followup.dr-manoj.in/scanapp/procroom#s637stock
+```
+
+**3 · B-0176 (16-Oct) and B-0318 (13-Nov) — Yuvika's dealer challans:** each line's product and quantity on the desk, then Save.
 
 ```
 https://followup.dr-manoj.in/scanapp/desk?open=176
@@ -268,25 +275,26 @@ https://followup.dr-manoj.in/scanapp/desk?open=176
 https://followup.dr-manoj.in/scanapp/desk?open=318
 ```
 
-**3 · October's photo from Yuvika:** each line's product and rate, then Save.
+**4 · October's photo from Yuvika:** each line's product and rate, then Save.
 
 ```
 https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 ```
 
-**4 · One shelf count of the procedure room** — on the new page once it is live (next session).
-
 **5 · Carried:** October's statement to Variety (Stationery page) · Y147 Yuvika's May slips · Y136 lab bills from April · Y120 missing battery bills · Y121 Fujifilm's AMC invoice · the X-ray film log's opening boxes · the new Surgiwear drape's name (Y146).
 
-**Not urgent:** a monthly spend limit on the Anthropic Console, if you want a ceiling.
-
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S410 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S461 close
 
 **Every build follows `BUILD_NORM_v1` (D704).**
 
-1. **The Procedure room page as you made it final (D982)** — the next session, from mock-up v4.
-2. **A stopped reader told to you at once (F-1404).**
-3. **The papers page's start-up check never moves a summary (F-1194).** **4.** A credit note as its own kind (F-1174).
+1. **Credit notes on the sorting desk as you made them final (D986)** — the next session, from mock-up v2.
+
+## ✅ DONE AT THE S461 CLOSE — 14-Nov-2026 (the Scan App project)
+
+- ~~**The Procedure room page as you made it final**~~ — kit S831, live 17:59.
+- ~~**A stopped reader told to you at once; an expired key named**~~ — kit S833, live 18:25; the proof message on your phone 18:27 (F-1404).
+- ~~**The start-up check never moves a summary**~~ — kit S833 (F-1194).
+- ~~**Credit notes' design**~~ — mock-up v2, final 18:39 (D986).
 
 ## ✅ DONE AT THE S410 CLOSE — 14-Nov-2026 (the Scan App project)
 
