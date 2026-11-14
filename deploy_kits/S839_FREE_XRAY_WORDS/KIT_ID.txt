@@ -1,0 +1,2 @@
+S839_FREE_XRAY_WORDS
+project the parent (session S465, 14-Nov-2026) -- his word 20:41 IST "MUFT = FREE": Free X-ray on every screen; check_screens.py replaced whole
