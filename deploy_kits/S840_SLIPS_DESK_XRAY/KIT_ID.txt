@@ -1,0 +1,2 @@
+S840_SLIPS_DESK_XRAY
+project the parent (built session S465, rebuilt S467, 14-Nov-2026) -- D979 item 4, A-D55: the slips desk -- X-ray upload count, the 7-day X-ray box, the name search; a name never saved as a clinic ID; parchi_desk.py replaced whole

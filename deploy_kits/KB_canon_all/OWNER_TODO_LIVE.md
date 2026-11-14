@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S465 close** (the parent, full EOS, placed by the 467 open), 14-Nov-2026, evening — the parent's sections refreshed here (Check karein's new screens live — S836; Free X-ray on every screen — S839; the slips desk next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S463 close** (the Sanjeevni chat, full EOS, placed by its 468 open), 14-Nov-2026, evening — the Sanjeevni sections refreshed here (Marg's Stock Register for one item: the screen agreed, the build held for three review faults; a word with Ram Singh); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S465 close** (the parent, full EOS, placed by the 467 open), 14-Nov-2026, evening — the parent's sections refreshed here (Check karein's new screens live — S836; Free X-ray on every screen — S839; the slips desk next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S464 close** (the Scan App project, full EOS), 14-Nov-2026, evening — the Scan App sections refreshed here (credit notes on the sorting desk live — S835; Go to ▾ on the scan app's bar live — S838; both OFF for Shavez until you switch them on); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S462 close** (the parent, full EOS), 14-Nov-2026, evening — the parent's sections refreshed here (the X-ray due rule live; Check karein next; one double-click publishes today's records); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S461 close** (the Scan App project, full EOS), 14-Nov-2026, evening — the Scan App sections refreshed here (your Procedure room page live — S831; a stopped reader told to you at once — S833; credit notes' design final, built next); the other projects' sections as their closes left them.
@@ -1192,13 +1193,13 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S459 close (14-Nov, 18:4x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S463 close (14-Nov, 21:16; placed by the 468 open)
 
-*Detail: `S459_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S457 one.*
+*Detail: `S463_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S459 one.*
 
 **1 · The publish of these records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`
 
-**2 · Yuvika bill 803 — press Restore on scan B-0272** (it is the corrected bill, not a duplicate) — `https://followup.dr-manoj.in/scanapp/bills/272`
+**2 · A word with Ram Singh:** add **Stock Register** to Shavez's reports login in Marg — needed before Shavez is switched on for the single-item register (you start with him OFF).
 
 **3 · A word with Amir:** "Kar diya" only after it is in Marg (two 6-September jobs were tapped done on 18-Oct but never entered).
 
@@ -1220,11 +1221,16 @@ The full list: `claude/S288_PENDING_LIST.md`.
 
 **Later, your word only:** AutoHotkey and the order list (parked, D976); when scans start adding to stock (D891); the carry setting back to 1 if you ever want the old automatic way (D965).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S459 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S463 close
 
-1. **Marg's Stock Register for one item** — a mock-up first, for your look.
+1. **Marg's Stock Register for one item** — the approved screen, after its three review faults are fixed; one publish for you.
 2. **ZIBON EXTRA / GEMCAL XT** — from Darpan's two counts, one job on Amir's card.
 3. **Yuvika 803's purchase check** — judged again against the corrected bill once Amir has fixed Marg.
+
+## ✅ DONE AT THE S463 CLOSE — 14-Nov-2026, evening (the Sanjeevni project)
+
+- **Marg's Stock Register for one item:** the screen agreed (your "Mockup is good"); built and checked — held until three faults the review found are fixed. Nothing changed on any screen yet.
+- **Yuvika bill 803:** you restored the corrected scan B-0272.
 
 ## ✅ DONE AT THE S459 CLOSE — 14-Nov-2026, evening (the Sanjeevni project)
 
