@@ -1,0 +1,7 @@
+9edda6261810f777880710f9004e397e  finance/marg_billwatch.py
+c0aed54fa8c5950da0316353c224d79a  finance/reports_tile.py
+cd5174d6bfb9d62b55dd037e903e1d74  finance/sanjeevni_approvals.py
+9f6295856e36f93a00028de7cc3fe769  finance/finance_ui/finance_approvals.html
+bc621caf202de958517cd5e8d9c25290  marg_ingest/marg_take.py
+b11099ffdf66f6fd78409cecd36a1ec5  marg_ingest/marg_ingest.py
+f411da07f217d2b2afecc97e174a80f7  marg_ingest/marg_register.py
