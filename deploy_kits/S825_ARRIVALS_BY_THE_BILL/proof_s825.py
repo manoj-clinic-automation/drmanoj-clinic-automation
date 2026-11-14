@@ -36,8 +36,13 @@ def _window_fn(ORR, PA, con, today):
             if not s644:
                 return str(created or "") >= (today - dt.timedelta(days=base)).isoformat()
             if sn not in cache:
-                r = ORR.rule_for(con, sn) if sn else {}
-                cache[sn] = max(base, (ORR.review_interval(con, r, today) if r else 0) + int((r or {}).get("lead_days") or 1))
+                rf = con.row_factory
+                con.row_factory = sqlite3.Row                 # as order_rules reads its rules (the 18:24 IST box run: a plain tuple row raised)
+                try:
+                    r = ORR.rule_for(con, sn) if sn else {}
+                    cache[sn] = max(base, (ORR.review_interval(con, r, today) if r else 0) + int((r or {}).get("lead_days") or 1))
+                finally:
+                    con.row_factory = rf
             return (today - dt.date.fromisoformat(str(created)[:10])).days <= cache[sn]
         except Exception:                                     # noqa: BLE001
             return None
@@ -107,7 +112,7 @@ def compare(old_p, new_p):
         # S459: a line off its bill counts on order while its order is inside the engine's on-order window; past it, it counts nowhere --
         # as every unanswered order past that window already does. Inside the window and not on order is a fault.
         if o and not n and not (jj is False and (onord or inwin is False)):
-            bad.append("%s left out but %s" % (it, "not judged off its bill" if jj is not False else "not on order inside its on-order window"))
+            bad.append("%s left out but %s" % (it, "not judged off its bill" if jj is not False else ("not on order inside its on-order window" if inwin else "its on-order window could not be read")))
         if o and n and old["lines"][k] != new["lines"][k]:
             bad.append("%s units moved" % it)
         if jj is False and n:
