@@ -1,0 +1,7 @@
+S821_CLINIC_PCS_SETUP_NOTES
+session S453 (the parent), 14-Nov-2026
+The Clinic PCs page (https://followup.dr-manoj.in/finance/pcs): the Medical PC's card says how that PC is set up now (the
+cable and the Wi-Fi dongle, which USB port holds what), and the Medical and Reception cards say how their kits are kept
+current. The owner's word, 14-Nov-2026 05:57 IST. Display only: no route, no door, no logic changed.
+board _numbers v1420 -> v1421 (kits S821, S822 taken 14-Nov-2026 06:00 IST)
+pin in: /root/finance/pc_kits.py 9c2b3615 ; out: see SUMS.md5 ; undo: --undo (backup /root/s821_backup/)

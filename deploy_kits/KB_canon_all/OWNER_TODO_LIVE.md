@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S450 close** (the parent, EOS-light, placed 14-Nov by its 453 open), 13-Nov-2026, late evening — the parent's sections refreshed here (one double-click publishes the records; the X-ray and blood-report plan waits for our talk; the staff ledger's interest rule is the first build, before 1 December; the first day's WhatsApp backlog cleared by you); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S454 close** (the Sanjeevni chat, full EOS), 14-Nov-2026, morning — the Sanjeevni sections refreshed here (the medical PC names its network, S823; the Janta revised bill waits for the next chat); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S450 close** (the parent, EOS-light, placed 14-Nov by its 453 open), 13-Nov-2026, late evening — the parent's sections refreshed here (one double-click publishes the records; the X-ray and blood-report plan waits for our talk; the staff ledger's interest rule is the first build, before 1 December; the first day's WhatsApp backlog cleared by you); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S451 close** (the Sanjeevni chat, full EOS, placed 14-Nov by its S454 open), 13-Nov-2026, evening — the Sanjeevni sections refreshed here (no automatic re-orders, S820; the medical PC back with a Wi-Fi dongle); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S447 close** (the parent, full EOS), 13-Nov-2026, evening — the parent's sections refreshed here (the three approved screens live: the tiles, the Call Console's follow-up lines, WhatsApp awaiting with "Done — no reply needed" and "Not a patient"; clear the first day's WhatsApp backlog; "After today's visit" may be switched on; the staff ledger's interest rule and the two switches' mock-up next; 450 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S448 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, afternoon — the Sanjeevni sections refreshed here (Darpan's Ask line and reports on need live, S815; the medical PC silent since 10:03 IST; the dongle parked; 449 reserved); the other projects' sections as their closes left them.
@@ -1135,35 +1136,42 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S451 close (13-Nov, ~19:4x; placed 14-Nov)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S454 close (14-Nov, 07:2x)
 
-*Detail: `S451_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S448 one.*
+*Detail: `S454_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S451 one.*
 
-**1 · The publish of these records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat` (named by the session that placed this close).
+**1 · The publish of these records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`
 
-**2 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — section A: the moves with no record (*OK all*, one by one with a reason, **Ask** Amir or **Put on Darpan's page**, or *Ask for the sale report again*); the "ask by itself" figure (3 now); the floor box (₹0 now); section B: sale bill **A004591** (*the sale stands* / *it was cancelled*); the two phone switches when you are ready (bills — Off; staff answers — Off).
+**2 · Janta's 2nd October bill (JP21965)** — in the next chat, say "go" to the fix: the returns check will also read the revised bill that was set aside as a second scan.
 
-**3 · October's purchase month** — `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10` — as at the S444 close (L.K. Drug House 16–31 Oct; Bass, Jubilee, Saisun summaries; Bass Pharma ₹1,597 by cheque; then FINALISE).
+**3 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — section A: the moves with no record; the "ask by itself" figure (3 now); the floor box (₹0 now); section B: sale bill **A004591**; the two phone switches when you are ready.
 
-**4 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
+**4 · October's purchase month** — `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10` — as at the S444 close (L.K. Drug House 16–31 Oct; Bass, Jubilee, Saisun summaries; Bass Pharma ₹1,597 by cheque; then FINALISE) — after the Janta fix.
 
-**5 · The new start text, pasted once into each of the four projects** — `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S438\COMMON_START_HERE_PROMPT_v1_1.md`
+**5 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
 
-**6 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting.
+**6 · The new start text, pasted once into each of the four projects** — `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S438\COMMON_START_HERE_PROMPT_v1_1.md`
 
-**7 · The orthotics count** — who counts the shelf, and on which day.
+**7 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting.
 
-**8 · Still yours:** ZUPRINOR 5 (row 6); Shavez's phone; Ram Singh (F-1115).
+**8 · The orthotics count** — who counts the shelf, and on which day.
 
-**9 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
+**9 · Still yours:** ZUPRINOR 5 (row 6); Shavez's phone; Ram Singh (F-1115).
+
+**10 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
 
 **Later, your word only:** AutoHotkey (D915); arrivals judged by the bill; the order list; when scans start adding to stock (D891); the carry setting back to 1 if you ever want the old automatic way (D965).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S451 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S454 close
 
-1. **The medical PC's network line** — its check-in names which connection (cable or Wi-Fi) carries it (F-1133).
+1. **The Janta fix (F-1378)** — on your "go"; then a note to the Scan App chat.
 2. **The first real report ask and the first Darpan question** — read end to end.
 3. **Amir's three more dates**; **the first orthotics count**; F-1328 with the next touch of the expiry page.
+
+## ✅ DONE AT THE S454 CLOSE — 14-Nov-2026, morning (the Sanjeevni project)
+
+- **The medical PC tells which internet it is using** (S823): its status report names the cable or the Wi-Fi dongle; at 07:21 both were up.
+- **Yesterday evening's records placed** (the S451 close).
 
 ## ✅ DONE AT THE S451 CLOSE — 13-Nov-2026, evening (the Sanjeevni project)
 
