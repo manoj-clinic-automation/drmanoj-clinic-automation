@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S462 close** (the parent, full EOS), 14-Nov-2026, evening — the parent's sections refreshed here (the X-ray due rule live; Check karein next; one double-click publishes today's records); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S464 close** (the Scan App project, full EOS), 14-Nov-2026, evening — the Scan App sections refreshed here (credit notes on the sorting desk live — S835; Go to ▾ on the scan app's bar live — S838; both OFF for Shavez until you switch them on); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S462 close** (the parent, full EOS), 14-Nov-2026, evening — the parent's sections refreshed here (the X-ray due rule live; Check karein next; one double-click publishes today's records); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S461 close** (the Scan App project, full EOS), 14-Nov-2026, evening — the Scan App sections refreshed here (your Procedure room page live — S831; a stopped reader told to you at once — S833; credit notes' design final, built next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S459 close** (the Sanjeevni chat, full EOS), 14-Nov-2026, evening — the Sanjeevni sections refreshed here (arrivals judged by the bill, S825; Yuvika 803's GST, S832; the Restore of B-0272 and a word with Amir); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S460 close** (the parent, full EOS), 14-Nov-2026, evening — the parent's sections refreshed here (the attendance alarm live; the filing build next; one double-click publishes today's records); the other projects' sections as their closes left them.
@@ -250,9 +251,9 @@
 - The Diwali gift sticker sheet (A4, 8 per sheet) made.
 - Two project-only papers copied to the disk store.
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S461 close (14-Nov, 18:4x)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S464 close (14-Nov, 20:4x)
 
-*Detail: `S461_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_464.md`.*
+*Detail: `S464_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_466.md`.*
 
 **1 · The publish:** this close's papers (nothing follows it).
 
@@ -260,13 +261,19 @@
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · The opening shelf count and the Fibrecast reorder levels** — Stock now on your Procedure room page, one Save.
+**2 · When you are ready — for Shavez:** turn on *Credit notes on the desk* and *Go to menu for Shavez* (both OFF for him now; you see both already).
+
+```
+https://followup.dr-manoj.in/scanapp/desk/month#s551switches
+```
+
+**3 · The opening shelf count and the Fibrecast reorder levels** — Stock now on your Procedure room page, one Save.
 
 ```
 https://followup.dr-manoj.in/scanapp/procroom#s637stock
 ```
 
-**3 · B-0176 (16-Oct) and B-0318 (13-Nov) — Yuvika's dealer challans:** each line's product and quantity on the desk, then Save.
+**4 · B-0176 (16-Oct) and B-0318 (13-Nov) — Yuvika's dealer challans:** each line's product and quantity on the desk, then Save.
 
 ```
 https://followup.dr-manoj.in/scanapp/desk?open=176
@@ -276,19 +283,25 @@ https://followup.dr-manoj.in/scanapp/desk?open=176
 https://followup.dr-manoj.in/scanapp/desk?open=318
 ```
 
-**4 · October's photo from Yuvika:** each line's product and rate, then Save.
+**5 · October's photo from Yuvika:** each line's product and rate, then Save.
 
 ```
 https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 ```
 
-**5 · Carried:** October's statement to Variety (Stationery page) · Y147 Yuvika's May slips · Y136 lab bills from April · Y120 missing battery bills · Y121 Fujifilm's AMC invoice · the X-ray film log's opening boxes · the new Surgiwear drape's name (Y146).
+**6 · Carried:** October's statement to Variety (Stationery page) · Y147 Yuvika's May slips · Y136 lab bills from April · Y120 missing battery bills · Y121 Fujifilm's AMC invoice · the X-ray film log's opening boxes · the new Surgiwear drape's name (Y146).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S461 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S464 close
 
 **Every build follows `BUILD_NORM_v1` (D704).**
 
-1. **Credit notes on the sorting desk as you made them final (D986)** — the next session, from mock-up v2.
+1. **A credit note scanned straight on the pharmacy lane (F-1419)** — recognised at intake and kept out of Sanjeevni's bill pairing; the Sanjeevni chat told first.
+
+## ✅ DONE AT THE S464 CLOSE — 14-Nov-2026 (the Scan App project)
+
+- ~~**Credit notes on the sorting desk as you made them final**~~ — kit S835, live 20:10 (D986, F-1174).
+- ~~**Go to ▾ on the scan app's bar — every page grouped, from your portal tile**~~ — kit S838, live 20:40 (D987).
+- ~~**S461's records**~~ — placed at the open, published with S835.
 
 ## ✅ DONE AT THE S461 CLOSE — 14-Nov-2026 (the Scan App project)
 
