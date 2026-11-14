@@ -1,0 +1,7 @@
+S819_LEDGER_INTEREST_WITH_PRINCIPAL
+session S453 (the parent), 14-Nov-2026
+F-1367 (the owner's ruling): no interest on a loan in a month unless principal comes off it that month. A month
+that cannot carry the whole instalment holds it whole: no interest, nothing added, the loan one month longer.
+The Statement, the Loans page, New entry and the close report say so. A carried month is exactly as before.
+board _numbers v1401 -> v1402 (kit S819, taken at S450, 13-Nov-2026 18:15 IST); F-1367 (S447); built and proven at S453
+pin in: /root/staff_ledger.py 85e2ab51 ; out: see SUMS.md5 ; undo: bash install_S819_LEDGER_INTEREST_WITH_PRINCIPAL.sh --undo (backup /root/s819_backup/)
