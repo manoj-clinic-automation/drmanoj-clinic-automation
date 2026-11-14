@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S456 close** (the parent, full EOS), 14-Nov-2026, morning — the parent's sections refreshed here (the Clinic PC kits keep themselves current — kit S822 live; the held S453 records in place; the board trimmed on his word; one double-click publishes this session's records; the X-ray and blood-report plan waits for our talk); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S410 close** (the Scan App project, full EOS), 14-Nov-2026, afternoon — the Scan App sections refreshed here (the scan reader working again with a never-expiring key; two amounts never one paper and your Restore — S826; the Procedure room page's design final, built next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S458 close** (the parent, EOS-light), 14-Nov-2026, afternoon — the parent's sections refreshed here (the X-ray and blood-report filing screens approved, built from the next session; today's attendance put right — the machine to the vendor; the System Board up to date; one double-click publishes today's records); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S456 close** (the parent, full EOS), 14-Nov-2026, morning — the parent's sections refreshed here (the Clinic PC kits keep themselves current — kit S822 live; the held S453 records in place; the board trimmed on his word; one double-click publishes this session's records; the X-ray and blood-report plan waits for our talk); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S455 close** (the Sanjeevni chat, full EOS, placed by its 457 open), 14-Nov-2026, morning — the Sanjeevni sections refreshed here (Janta's revised bill settled, S824; Deepam 502's item line back, S827; arrivals by the bill rebuilt next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S453 close** (the parent, full EOS, placed by its 456 open), 14-Nov-2026, morning — the parent's sections refreshed here (the staff ledger's interest rule and the Clinic PCs page's set-up notes are live; one double-click publishes the records; the Clinic PC kits kept current by themselves is the next build; the X-ray and blood-report plan waits for our talk); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S454 close** (the Sanjeevni chat, full EOS), 14-Nov-2026, morning — the Sanjeevni sections refreshed here (the medical PC names its network, S823; the Janta revised bill waits for the next chat); the other projects' sections as their closes left them.
@@ -243,69 +245,53 @@
 - The Diwali gift sticker sheet (A4, 8 per sheet) made.
 - Two project-only papers copied to the disk store.
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S409 close (08-Nov, 20:1x)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S410 close (14-Nov, 16:1x)
 
-*Detail: `S409_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_410.md`. The same lines are on your System Board.*
+*Detail: `S410_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_461.md`.*
 
-**1 · The publish:** it carries this close's record (papers only).
+**1 · The publish:** this close's papers (nothing follows it).
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · October's statement to Variety** (read 08-Nov: not yet made): *Make October 2026's statement* (16 lines on 7 papers) → *Send on WhatsApp* → *Mark sent*. When their two bills come: the Clinic's in *Clinic's bill*, NK's in *NK Pathology's bill*, each *Paid* on its own.
-
-```
-https://followup.dr-manoj.in/scanapp/stationery
-```
-
-**3 · Yuvika slips on the desk — when you want it:** the *Switches* row on the scan app's front page (also on *The month*) → *Yuvika slips on the desk*. **Recent scans by scan date**, when you want it: its card on Admin.
-
-```
-https://followup.dr-manoj.in/scanapp/
-```
-
-```
-https://followup.dr-manoj.in/scanapp/admin
-```
-
-**4 · B-0176** — a Yuvika slip (16-Oct) set for the Procedure room, not yet accepted, no lines. Enter them, or tell me what they are.
+**2 · B-0176 (16-Oct) and B-0318 (13-Nov) — Yuvika's dealer challans:** each line's product and quantity on the desk, then Save.
 
 ```
 https://followup.dr-manoj.in/scanapp/desk?open=176
 ```
 
-**5 · The X-ray film log's opening boxes** (the clinic chat's page): the spare boxes on the shelf, so the order line is right.
-
 ```
-https://followup.dr-manoj.in/finance/slips/film/log
+https://followup.dr-manoj.in/scanapp/desk?open=318
 ```
 
-**6 · A shelf count for each product (Y157)** on your Procedure room page. **7 · Examination gloves (Y145):** pairs in a box, 50 or 100? **8 · The new Surgiwear drape (Y146):** its name.
-
-**9 · October's month end:** Yuvika's WhatsApp photos, added on the Month end page.
+**3 · October's photo from Yuvika:** each line's product and rate, then Save.
 
 ```
-https://followup.dr-manoj.in/scanapp/procroom/month
+https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 ```
 
-**10 · Yuvika's May 2026 slips (Y147).** **11 · The lab consumables bills from April 2026 (Y136).** **12 · The battery bills still missing (Y120)** — the Vento's, the DTH lab's UPS battery, the second AC's. **13 · Fujifilm's tax invoice for the AMC (Y121)** — when it comes.
+**4 · One shelf count of the procedure room** — on the new page once it is live (next session).
 
-**Not urgent:** *Machine pages* for Shavez on the *Switches* row; Y83 (the Janitor's renewal list).
+**5 · Carried:** October's statement to Variety (Stationery page) · Y147 Yuvika's May slips · Y136 lab bills from April · Y120 missing battery bills · Y121 Fujifilm's AMC invoice · the X-ray film log's opening boxes · the new Surgiwear drape's name (Y146).
 
-**Parked at your word — not raised again:** the Claude-vs-Sarvam reading comparison.
+**Not urgent:** a monthly spend limit on the Anthropic Console, if you want a ceiling.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S409 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S410 close
 
-**Every build follows `BUILD_NORM_v1` (D704); builds are made in the chat (D765).**
+**Every build follows `BUILD_NORM_v1` (D704).**
 
-1. **Check that tomorrow's summaries land as Summary by themselves** — read live; only a gap found is built.
-2. **The papers page's start-up check never moves a summary (F-1194)** — a small kit.
-3. **A credit note as its own kind in the reader (F-1174).**
-4. **What you did on the Stationery page and the switches** — read live; only a gap found is built.
-5. **Small points from the reviews** — only when a later kit touches those files; the sorting desk's code read whole first. **D720, when you ask.**
+1. **The Procedure room page as you made it final (D982)** — the next session, from mock-up v4.
+2. **A stopped reader told to you at once (F-1404).**
+3. **The papers page's start-up check never moves a summary (F-1194).** **4.** A credit note as its own kind (F-1174).
 
-**Waits by your word:** the clinic's bills in the accountants' pack.
+## ✅ DONE AT THE S410 CLOSE — 14-Nov-2026 (the Scan App project)
+
+- ~~**The scan reader working again**~~ — the expired key replaced by a never-expiring one (09:00); the October photo, B-0318 and the four pharmacy bills of 13-Nov read.
+- ~~**Two scans of different amounts never asked about as one paper; your Restore of a pharmacy scan set aside as a duplicate**~~ — kit S826, live 09:07 (F-1378's scan side).
+- ~~**Gloves: box of 100 = 50 pairs; none for an ILI**~~ — set on your page.
+- ~~**The Procedure room page's design**~~ — mock-up v4, final 14:40.
+- ~~**Y145 gloves box size**~~ — answered (50 pairs).
 
 ## ✅ DONE AT THE S409 CLOSE — 08-Nov-2026 (the Scan App project)
 
@@ -461,7 +447,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S456 close (14-Nov, 09:3x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S458 close (14-Nov, 16:1x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -471,13 +457,17 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK: PUBLISH THE RECORDS** — on your PC (manojz). The records of this morning's second session (S456); nothing follows the double-click.
+**1 · ONE DOUBLE-CLICK: PUBLISH THE RECORDS** — on your PC (manojz). The records of today's session (S458); nothing follows the double-click.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · THE X-RAY AND BLOOD-REPORT PLAN: WE DISCUSS IT TOGETHER** (your words, 13-Nov 7:50 pm and 14-Nov 5:59 am). Next session you see one mock-up of the "Check karein" page refined — reached from the link at the top of the slips desk — with each part marked "already there" or "new"; no new page. Nothing is built before the talk. The paper is `S450_XRAY_LAB_FILING_STUDY.md` in the project.
+**2 · THE X-RAY AND BLOOD-REPORT FILING: APPROVED — NOTHING TO DO NOW.** You said "Build the mockups are okay" (14-Nov, 4:08 pm). The next session builds it in small parts; each part reaches you as one publish and one server line. The screens you approved:
+
+```
+https://claude.ai/artifact/W5TAwHRWP5zFBpN9HtqFhB
+```
 
 **3 · "AFTER TODAY'S VISIT" CAN BE SWITCHED ON WHEN YOU WISH** — all six test messages are confirmed. The date-based switches wait for the tracker's move from your PC to the server.
 
@@ -507,7 +497,7 @@ https://claude.ai/artifact/TNw8B62K2GHvST3NPU1WNA
 
 **10 · LEAVE THE TWO DOCTERZ EXPORT FILES IN `D:\Downloads` AS THEY ARE**; do not attach patient files to the chat.
 
-**11 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Its clock, its backup battery, its WiFi, and that it rejoins by itself after a power cut.
+**11 · BL COMPUTERS — THE ATTENDANCE MACHINE (with the vendor since 14-Nov).** Its clock froze on 13-Nov at 10:35 am and it then switched itself off; after a restart it kept time. Ask them to check the adapter, the backup battery and the clock, its WiFi, and that it rejoins by itself after a power cut. Until it is back, staff times go into the staff register by hand.
 
 **12 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
@@ -523,17 +513,21 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The X-ray and blood-report plan with you** — one mock-up of the "Check karein" page refined, the slips desk's link with a count, the Photo column on your X-ray sheet, the two messages; built on your word. **Then the mock-up of the two switches** for the late and the leave / absent deductions.
-2. **Your System Board brought up to date** (owed since yesterday morning) and its notes part shortened.
-3. **Three small jobs:** the Inbox says in words when MyOperator never sent a file · the old approvals page's background service stopped and kept · the new WhatsApp marks ("Done", "Not a patient") added to the nightly backup. **And the small tails of the Clinic PCs page:** the pathology lab PC's card made truthful (the lab chat told first); the "Other set-ups" notes re-read; the nightly check reading the current pin list.
-4. **Then the tracker's move from your PC to the server** (about three sessions): the lists made on the server from reception's two evening exports; the past month replayed first; your PC kept as the spare; nothing deleted.
-5. **Then one set of sections and one "came back" rule on every screen**, "on medicines", staff outcomes closing rows.
-6. **Watching, at every open:** tonight's first run of the kit check on your PC (the medical kit repacked for the new agent; the seven old August files reported) and the server's half-hourly pull · the evening alert and the on-arrival pick-up · the sending's page · the Inbox's sends and refusals (for the ticket) · the Call Console's lines and WhatsApp block · the helpline on the Google profile and the contact page.
-7. **On 19-Nov: the same count again** — callers never spoken to, call-backs made, outgoing calls answered.
-8. **Then, on your word:** the template wordings you choose · the analytics page (the Patients page, mock-up version 16).
-9. **Parked at your word (12-Nov):** the Hindi "we will call you back" recording · a busy message for callers.
+1. **An alarm when the attendance machine goes silent** — no contact for half an hour in clinic hours, or no punch by 10 am on a working day, comes to your phone; and a warning when its clock goes wrong. (On 13–14 Nov it was silent for a day and nobody was told.)
+2. **The X-ray and blood-report filing you approved, in small parts:** the due rule (a morning X-ray due by 3 pm, an evening one by 3 pm next day) · the 7-day strip and the questions on Check karein · the slips desk's count, its 7-day section and the search by name · the Photo column on your X-ray sheet · the 9:30 am and evening messages · lab reports without an ID with suggested patients.
+3. **Slips with no Docterz entry:** the "Sirf X-ray" tick and the X-ray-only line (no cards, one tap back to Docterz) · an OPD slip missing from Docterz flagged on the desk and when the patient comes again · the "X-ray only" line in your daily revenue, so the day's total matches cash and bank.
+4. **Then the mock-up of the two monthly switches** (late charge; extra leave and absent) on that staff member's private page; built on your word.
+5. **Three small jobs:** the Inbox says in words when MyOperator never sent a file · the old approvals page's background service stopped and kept · the WhatsApp marks added to the nightly backup — and the small tails of the Clinic PCs page.
+6. **Then the tracker's move from your PC to the server** (about three sessions); then one set of sections and one "came back" rule on every screen.
+7. **Watching, at every open:** today's attendance count until the alarm is live · tonight's first run of the kit check on your PC · the evening alert and the on-arrival pick-up · the sending's page · the Inbox · the helpline on the Google profile and the contact page.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S458 CLOSE — 14-Nov-2026, afternoon (the parent)
+
+- **The X-ray and blood-report filing screens drawn and approved** (seven screens; 4:08 pm), with your rulings on slips that are not in Docterz (X-ray-only patients get their own quiet line; an OPD slip missing from Docterz is flagged; an "X-ray only" line in your daily revenue).
+- **Today's attendance put right:** nothing had reached the server since yesterday 11:17 am because the machine's clock froze; the server was healthy; after the restart the punches arrive again (Alisha's at 11:44). The machine goes to the vendor.
+- **Your System Board brought up to date:** the lines owed since yesterday, 68 old finished items cleared from your list, and the numbers document's long notes shortened (nothing lost — every fact is in the session records).
 
 ## ✅ DONE AT THE S456 CLOSE — 14-Nov-2026, morning (the parent)
 
