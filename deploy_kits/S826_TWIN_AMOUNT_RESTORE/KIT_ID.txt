@@ -1,0 +1,1 @@
+S826_TWIN_AMOUNT_RESTORE  (S410, 14-Nov-2026, the Scan App chat) F-1378 scan side: no twin question across two amounts; the owner's Restore of a pharmacy scan set aside as a duplicate
