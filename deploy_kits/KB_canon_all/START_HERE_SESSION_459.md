@@ -1,0 +1,8 @@
+# START HERE — SESSION 459 — written at the S457 close (the Sanjeevni chat), 14-Nov-2026 12:1x IST
+
+**Project: Sanjeevni — Pharmacy & Marg.** Open it in a fresh chat in this project, linked to manojz. **S457's close is HELD AT THE BUILD** (the device shell was down from ~10:05 IST); canon is untouched by it. Live from S457: S828 (owner_notice.py 2e52ec12) and S829 (one tap job on Amir's card). S825 is rebuilt but NOT placed (its rehearsal was red).
+
+1. **The open:** `OPEN_ROUTINE_v1` — the first shell line is the `cat` of the routine and nothing else; never `git` in the device shell. Session **459 (RESERVED at the S457 close)** — a SHORT pinned edit of `board/_numbers` session_note (append below its marker line). The day's checks; the medical PC's heartbeat age in one line if over 30 minutes; remind him once of the packs page (D713).
+2. **FIRST WORK — place S457's held close** from `claude/S457_SESSION_RECORD.md`: write the parts into `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S457\close_parts\` (S455's parts in `...\S455\close_parts\` are the model), re-based on the canon as the manifest stands, then `close_build.py` (TZ=Asia/Kolkata), the READY line.
+3. **Then, in order:** the 15-Nov bundle's pins (S828, S824, S827) · **S825**: the rehearsal (F-1400) and the reviewer's should-fixes, then his publish and one server line · **ZIBON EXTRA / GEMCAL XT** (F-1401): Darpan's two counts → one job on Amir's card · KT ROS DT's proof after Amir's issue · Marg's Stock Register for one item (mock-up first) · board/_page.
+4. **PARKED by his word (D976):** the AutoHotkey runner · the order-list kit.

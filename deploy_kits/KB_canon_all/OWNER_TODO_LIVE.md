@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S410 close** (the Scan App project, full EOS), 14-Nov-2026, afternoon — the Scan App sections refreshed here (the scan reader working again with a never-expiring key; two amounts never one paper and your Restore — S826; the Procedure room page's design final, built next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S457 close** (the Sanjeevni chat, full EOS, placed by its 459 open), 14-Nov-2026 — the Sanjeevni sections refreshed here (the "Amir's work" message made true, S828; KT ROS DT on Amir's card, S829; ZIBON EXTRA recount asked; arrivals by the bill next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S410 close** (the Scan App project, full EOS), 14-Nov-2026, afternoon — the Scan App sections refreshed here (the scan reader working again with a never-expiring key; two amounts never one paper and your Restore — S826; the Procedure room page's design final, built next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S458 close** (the parent, EOS-light), 14-Nov-2026, afternoon — the parent's sections refreshed here (the X-ray and blood-report filing screens approved, built from the next session; today's attendance put right — the machine to the vendor; the System Board up to date; one double-click publishes today's records); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S456 close** (the parent, full EOS), 14-Nov-2026, morning — the parent's sections refreshed here (the Clinic PC kits keep themselves current — kit S822 live; the held S453 records in place; the board trimmed on his word; one double-click publishes this session's records; the X-ray and blood-report plan waits for our talk); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S455 close** (the Sanjeevni chat, full EOS, placed by its 457 open), 14-Nov-2026, morning — the Sanjeevni sections refreshed here (Janta's revised bill settled, S824; Deepam 502's item line back, S827; arrivals by the bill rebuilt next); the other projects' sections as their closes left them.
@@ -1148,15 +1149,15 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S455 close (14-Nov, 09:1x; placed by the 457 open)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S457 close (14-Nov, 12:10; placed by the 459 open)
 
-*Detail: `S455_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S454 one.*
+*Detail: `S457_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S455 one.*
 
 **1 · The publish of these records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`
 
-**2 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — section A: the moves with no record; the "ask by itself" figure (3 now); the floor box (₹0 now); section B: sale bill **A004591**; the two phone switches when you are ready.
+**2 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — section A: the moves with no record; the "ask by itself" figure; the floor box; section B: sale bill **A004591**; the two phone switches when you are ready.
 
-**3 · October's purchase month** — `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10` — Janta's return is settled now; then as at the S444 close (L.K. Drug House 16–31 Oct; Bass, Jubilee, Saisun summaries; Bass Pharma ₹1,597 by cheque; then FINALISE).
+**3 · October's purchase month** — `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10` — as at the S455 close (L.K. Drug House 16–31 Oct; Bass, Jubilee, Saisun summaries; Bass Pharma ₹1,597 by cheque; then FINALISE).
 
 **4 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
 
@@ -1172,11 +1173,17 @@ The full list: `claude/S288_PENDING_LIST.md`.
 
 **Later, your word only:** AutoHotkey and the order list (parked, D976); when scans start adding to stock (D891); the carry setting back to 1 if you ever want the old automatic way (D965).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S455 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S457 close
 
-1. **Arrivals judged by the bill** (S825) — rebuilt with the orthotic name list; a missing line stays "on the way".
-2. **The 6-September loose ends** (F-1232) — the answer first.
-3. **Marg's Stock Register for one item.**
+1. **Arrivals judged by the bill** (S825) — its trial install made green, the review's small fixes, then to you.
+2. **ZIBON EXTRA / GEMCAL XT** — from Darpan's two counts, one job on Amir's card.
+3. **Marg's Stock Register for one item** — a mock-up first.
+
+## ✅ DONE AT THE S457 CLOSE — 14-Nov-2026, morning (the Sanjeevni project)
+
+- **Your "Amir's work" message** now waits for the day's batch check and gives the same numbers as Amir's card (S828).
+- **KT ROS DT** (the 6-September count's last voucher) is on Amir's card as one tap job (S829).
+- **ZIBON EXTRA and GEMCAL XT** are at the top of Darpan's next morning count.
 
 ## ✅ DONE AT THE S455 CLOSE — 14-Nov-2026, morning (the Sanjeevni project)
 
