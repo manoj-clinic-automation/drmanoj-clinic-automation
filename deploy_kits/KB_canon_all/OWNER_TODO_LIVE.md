@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S463 close** (the Sanjeevni chat, full EOS, placed by its 468 open), 14-Nov-2026, evening — the Sanjeevni sections refreshed here (Marg's Stock Register for one item: the screen agreed, the build held for three review faults; a word with Ram Singh); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S467 close** (the parent, full EOS), 14-Nov-2026, night — the parent's sections refreshed here (the slips desk and your X-ray sheet live; the messages next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S463 close** (the Sanjeevni chat, full EOS, placed by its 468 open), 14-Nov-2026, evening — the Sanjeevni sections refreshed here (Marg's Stock Register for one item: the screen agreed, the build held for three review faults; a word with Ram Singh); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S465 close** (the parent, full EOS, placed by the 467 open), 14-Nov-2026, evening — the parent's sections refreshed here (Check karein's new screens live — S836; Free X-ray on every screen — S839; the slips desk next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S464 close** (the Scan App project, full EOS), 14-Nov-2026, evening — the Scan App sections refreshed here (credit notes on the sorting desk live — S835; Go to ▾ on the scan app's bar live — S838; both OFF for Shavez until you switch them on); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S462 close** (the parent, full EOS), 14-Nov-2026, evening — the parent's sections refreshed here (the X-ray due rule live; Check karein next; one double-click publishes today's records); the other projects' sections as their closes left them.
@@ -474,7 +475,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S465 close (14-Nov, 20:57; placed by the 467 open)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S467 close (14-Nov, 21:5x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -484,7 +485,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK: PUBLISH THE RECORDS** — on your PC (manojz). The records of this evening's Check karein session (S465), placed now; nothing follows the double-click.
+**1 · ONE DOUBLE-CLICK: PUBLISH THE RECORDS** — on your PC (manojz). The records of tonight's sessions (S465 and S467); nothing follows the double-click.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -492,7 +493,7 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 
 **2 · THE ATTENDANCE ALARM IS LIVE — NOTHING TO DO.** No punch by 10 am on a working day → one message; once the machine is back and the server has seen it, 30 minutes of silence in clinic hours → one message, and one when it is back; a wrong clock → once that day. A closed weekday also brings the 10 am message. Your console shows "attendance machine contact".
 
-**3 · THE X-RAY AND BLOOD-REPORT FILING: CHECK KAREIN'S NEW SCREENS ARE LIVE — TELL SHAVEZ AND RECEPTION (once).** Since 8:39 pm: the 7-day date strip, "Kal ki X-ray" for reception from 9:30 am, the question "Kya yeh photo inki hai?", and "Free X-ray" in place of the payment-gap wording (your "MUFT = FREE"); the red line on your console is gone. The slips desk comes next; each part reaches you as one publish and one server line.
+**3 · THE X-RAY AND BLOOD-REPORT FILING: TELL SHAVEZ AND RECEPTION (once).** Check karein has the 7-day strip, "Kal ki X-ray" and "Kya yeh photo inki hai?"; the slips desk shows "X-ray upload baaki", a 7-day X-ray box, and finds a patient by NAME in the clinic-ID boxes (type 3 letters, tap the right one — a name is never saved as the ID). Your X-ray sheet has a Photo column and "Not filed only". The messages come next; you will see their wording first.
 
 ```
 https://claude.ai/artifact/W5TAwHRWP5zFBpN9HtqFhB
@@ -542,7 +543,7 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The X-ray and blood-report filing you approved, in small parts:** ~~the due rule~~ (live 14-Nov) · ~~the 7-day strip and the questions on Check karein~~ (live 14-Nov) · **next:** the slips desk's count, its 7-day section and the search by name · the Photo column on your X-ray sheet · the 9:30 am and evening messages · lab reports without an ID with suggested patients.
+1. **The X-ray and blood-report filing you approved, in small parts:** ~~the due rule~~ · ~~Check karein's strip and questions~~ · ~~the slips desk's count, 7-day box and name search~~ · ~~the Photo column on your X-ray sheet~~ (all live 14-Nov) · **next:** the 9:30 am and evening messages · the 8 old slips with a name in place of the ID, listed for one-tap correction · lab reports without an ID with suggested patients.
 2. **Slips with no Docterz entry:** the "Sirf X-ray" tick and the X-ray-only line · an OPD slip missing from Docterz flagged on the desk and when the patient comes again · the "X-ray only" line in your daily revenue, so the day's total matches cash and bank.
 3. **Then the mock-up of the two monthly switches** (late charge; extra leave and absent) on that staff member's private page; built on your word.
 4. **The month figures on the scan app's clinic groups:** a receipt, a statement or a credit note must not add to a group's spend (found by the Scan App chat).
@@ -551,6 +552,12 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** Check karein's first working day · the attendance alarm's first working days (and that it starts watching for silence when the machine is back) · tonight's first run of the kit check on your PC · the evening alert and the on-arrival pick-up · the sending's page · the Inbox · the helpline on the Google profile and the contact page.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S467 CLOSE — 14-Nov-2026, night (the parent)
+
+- **The slips desk** (live 9:31 pm): "X-ray upload baaki", the 7-day X-ray box, a patient found by name; a name is never saved as a clinic ID.
+- **Your X-ray sheet's Photo column** (live 9:43 pm): Filed ↗ / Pending with its due day / Issue / Not due yet, and "Not filed only".
+- **Last evening's records** (S465) placed and published.
 
 ## ✅ DONE AT THE S465 CLOSE — 14-Nov-2026, evening (the parent)
 
