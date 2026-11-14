@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S461 close** (the Scan App project, full EOS), 14-Nov-2026, evening — the Scan App sections refreshed here (your Procedure room page live — S831; a stopped reader told to you at once — S833; credit notes' design final, built next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S462 close** (the parent, full EOS), 14-Nov-2026, evening — the parent's sections refreshed here (the X-ray due rule live; Check karein next; one double-click publishes today's records); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S461 close** (the Scan App project, full EOS), 14-Nov-2026, evening — the Scan App sections refreshed here (your Procedure room page live — S831; a stopped reader told to you at once — S833; credit notes' design final, built next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S459 close** (the Sanjeevni chat, full EOS), 14-Nov-2026, evening — the Sanjeevni sections refreshed here (arrivals judged by the bill, S825; Yuvika 803's GST, S832; the Restore of B-0272 and a word with Amir); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S460 close** (the parent, full EOS), 14-Nov-2026, evening — the parent's sections refreshed here (the attendance alarm live; the filing build next; one double-click publishes today's records); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S457 close** (the Sanjeevni chat, full EOS, placed by its 459 open), 14-Nov-2026 — the Sanjeevni sections refreshed here (the "Amir's work" message made true, S828; KT ROS DT on Amir's card, S829; ZIBON EXTRA recount asked; arrivals by the bill next); the other projects' sections as their closes left them.
@@ -458,7 +459,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S460 close (14-Nov, 18:1x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S462 close (14-Nov, 19:1x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -468,7 +469,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK: PUBLISH THE RECORDS** — on your PC (manojz). The records of today's session (S460); nothing follows the double-click.
+**1 · ONE DOUBLE-CLICK: PUBLISH THE RECORDS** — on your PC (manojz). The records of today's session (S462); nothing follows the double-click.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -476,7 +477,7 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 
 **2 · THE ATTENDANCE ALARM IS LIVE — NOTHING TO DO.** No punch by 10 am on a working day → one message; once the machine is back and the server has seen it, 30 minutes of silence in clinic hours → one message, and one when it is back; a wrong clock → once that day. A closed weekday also brings the 10 am message. Your console shows "attendance machine contact".
 
-**3 · THE X-RAY AND BLOOD-REPORT FILING: APPROVED — NOTHING TO DO NOW.** The next session builds the due rule first; each part reaches you as one publish and one server line.
+**3 · THE X-RAY AND BLOOD-REPORT FILING: THE DUE RULE IS LIVE — NOTHING TO DO.** Since 7:03 pm an X-ray photo counts only once due (a morning X-ray at 3 pm the same day, an evening one at 3 pm the next day; a photo within two days counts) on the notice, Report baaki, Check karein and reception's line. Check karein's new screens come next; each part reaches you as one publish and one server line.
 
 ```
 https://claude.ai/artifact/W5TAwHRWP5zFBpN9HtqFhB
@@ -526,7 +527,7 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The X-ray and blood-report filing you approved, in small parts:** the due rule first (a morning X-ray due by 3 pm, an evening one by 3 pm next day) · the 7-day strip and the questions on Check karein · the slips desk's count, its 7-day section and the search by name · the Photo column on your X-ray sheet · the 9:30 am and evening messages · lab reports without an ID with suggested patients.
+1. **The X-ray and blood-report filing you approved, in small parts:** ~~the due rule~~ (live 14-Nov) · the 7-day strip and the questions on Check karein · the slips desk's count, its 7-day section and the search by name · the Photo column on your X-ray sheet · the 9:30 am and evening messages · lab reports without an ID with suggested patients.
 2. **Slips with no Docterz entry:** the "Sirf X-ray" tick and the X-ray-only line · an OPD slip missing from Docterz flagged on the desk and when the patient comes again · the "X-ray only" line in your daily revenue, so the day's total matches cash and bank.
 3. **Then the mock-up of the two monthly switches** (late charge; extra leave and absent) on that staff member's private page; built on your word.
 4. **Three small jobs:** the Inbox says in words when MyOperator never sent a file · the old approvals page's background service stopped and kept · the WhatsApp marks added to the nightly backup — and the small tails of the Clinic PCs page.
@@ -534,6 +535,11 @@ https://followup.dr-manoj.in/finance/packs
 6. **Watching, at every open:** the attendance alarm's first working days (and that it starts watching for silence when the machine is back) · tonight's first run of the kit check on your PC · the evening alert and the on-arrival pick-up · the sending's page · the Inbox · the helpline on the Google profile and the contact page.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S462 CLOSE — 14-Nov-2026, evening (the parent)
+
+- **X-ray photos count only once due** (live 7:03 pm): a morning X-ray at 3 pm the same day, an evening one at 3 pm the next day (Docterz's own morning / evening); a photo filed within two days counts; the notice and reception's line look back 7 days. On yesterday's figures the 3 pm notice would have said 1 today and 5 older instead of 3 and 20.
+- **Your 6:38 pm publish landed**; the attendance alarm's console line reads OK (the machine is with BL Computers).
 
 ## ✅ DONE AT THE S460 CLOSE — 14-Nov-2026, evening (the parent)
 

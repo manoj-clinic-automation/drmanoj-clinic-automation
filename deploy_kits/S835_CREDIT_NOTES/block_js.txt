@@ -1,0 +1,64 @@
+// S835_CREDIT_NOTES (D986, F-1174): the credit note box -- its no., date and amount back (the same three boxes as What was read);
+// "Against which bill?" -- this dealer's bills of 90 days, the reader's pick pre-chosen, each opening its scan and, for a pharmacy bill,
+// Marg's purchase entry lines beside the credit note's own lines; or on the dealer's account. On a bill: its credit notes, Still owed.
+function s835init(j){var c=j.cn||{};S.cn={ag:String(c.cur||''),open:{},b0:k715(j.supplier)+'|'+d2i(j.date)};if(!S.cn.ag){(c.cands||[]).forEach(function(x){if(x.pre){S.cn.ag=String(x.id);}});}if(S.cn.ag&&S.cn.ag!='acct'){S.cn.open[S.cn.ag]=true;}var bx=$('cn835');if(bx){bx.innerHTML='';bx.removeAttribute('data-for');}}
+function s835cand(){var j=S.cur;if(!j||!j.cn||!S.cn||!S.cn.ag||S.cn.ag=='acct'){return null;}return (j.cn.cands||[]).filter(function(x){return String(x.id)==S.cn.ag;})[0]||null;}
+function s835forced(){var c=s835cand();return (c&&c.dest)?{dest:c.dest,stamp:c.stamp}:null;}
+function s835why(){if(!(num($('f_amt').value)>0)){return 'Type the amount back';}if(!S.cn||!S.cn.ag){return 'Choose the bill it is against';}var c=s835cand();if(S.cn.ag!='acct'&&(!c||!c.dest)){return 'That bill is not sorted yet — sort it first';}return '';}
+function s835lines(x,c){var h='',t='<table class=t835><tr>';
+ if(x.pharmacy){var m=x.marg;if(!m){h+='<div class=muted>'+esc(x.marg_why||'Not paired with its Marg bill yet.')+'</div>';}
+  else{h+='<b style="font-size:13px">Marg purchase entry — bill '+esc(m.bill_no)+' · '+esc(m.date)+(m.seen?' · in Marg since '+esc(m.seen):'')+'</b>'+t+'<th>Item</th><th>Batch</th><th class=r835>Qty</th><th class=r835>Rate ₹</th><th class=r835>Amount ₹</th></tr>';
+   (m.lines||[]).forEach(function(l){h+='<tr><td>'+esc(l.item)+'</td><td>'+esc(l.batch)+'</td><td class=r835>'+esc(l.qty)+'</td><td class=r835>'+esc(l.rate)+'</td><td class=r835>'+esc(l.amount)+'</td></tr>';});
+   if(!(m.lines||[]).length){h+='<tr><td colspan=5 class=muted>No lines in Marg’s reports for it yet.</td></tr>';}
+   h+='<tr><td><b>Bill total</b></td><td></td><td></td><td></td><td class=r835><b>'+esc(m.total)+'</b></td></tr></table>';}}
+ else{h+='<b style="font-size:13px">The lines saved on the desk</b>';if((x.lines||[]).length){h+=t+'<th>Item</th><th class=r835>Qty</th><th class=r835>Rate ₹</th><th class=r835>Amount ₹</th></tr>';x.lines.forEach(function(l){h+='<tr><td>'+esc(l.item)+'</td><td class=r835>'+esc(l.qty)+'</td><td class=r835>'+esc(l.rate)+'</td><td class=r835>'+esc(l.amount)+'</td></tr>';});h+='</table>';}else{h+='<div class=muted>No lines saved on it.</div>';}}
+ var cl=(c.lines||[]).map(function(l){return esc(l.name)+(l.qty?' × '+esc(l.qty):'')+(l.amount?' ('+esc(l.amount)+')':'');}).join(' · ');
+ h+='<div class=y835>The credit note’s lines beside it: <b>'+(cl||'none read')+'</b> — <span data-cnamt=1>'+esc(inr($('f_amt').value))+'</span>.'+(x.pharmacy?' Marg’s purchase return for it: <b>'+esc(x.ret||'not entered yet')+'</b> (Amir).':'')+'</div>';return h;}
+function s835bill(j){var e=$('cnon835');if(!e){return;}var o=j.cn_on;if(!o||!(o.credits||[]).length||S.kind=='credit_note'){e.style.display='none';e.innerHTML='';return;}
+ var h='<table class=t835><tr><td>Bill'+(o.no?' '+esc(o.no):'')+(o.date?' · '+esc(o.date):'')+'</td><td class=r835>'+esc(o.total)+'</td></tr>';
+ if(o.paid){h+='<tr><td>Paid</td><td class=r835>− '+esc(o.paid)+'</td></tr>';}
+ o.credits.forEach(function(x){h+='<tr><td>Credit note'+(x.no?' '+esc(x.no):'')+(x.date?' · '+esc(x.date):'')+' · <button type=button class=use data-id="'+x.id+'">'+esc(x.stamp)+'</button></td><td class=r835 style="color:#166534">− '+esc(x.inr)+'</td></tr>';});
+ h+='<tr><td><b>Still owed</b></td><td class=r835><b>'+esc(o.owed)+'</b></td></tr></table>';e.innerHTML=h;e.style.display='block';}
+function s835paint(j){var bx=$('cn835');if(!bx){return;}s835bill(j);var pp=j.pay||{},pf=$('paidf');if(pf&&pp.state=='paid'&&!pp.last_on){pf.querySelector('summary').textContent=pp.word||'Nothing owed';}
+ if(S.kind=='credit_note'){s835maybe();}
+ if(S.kind=='statement'&&j.cn&&(j.cn.acct||[]).length&&$('stmt')){$('stmt').insertAdjacentHTML('beforeend','<div class=muted style="font-size:12px">On this dealer’s account: '+j.cn.acct.map(function(a){return 'credit note '+esc(a.no||a.stamp)+' · '+esc(a.date)+' · '+esc(a.inr)+' ('+esc(a.stamp)+')';}).join('; ')+'</div>');}
+ if(S.kind!='credit_note'||!j.cn){bx.style.display='none';return;}
+ var c=j.cn,key=j.id+':'+S.cn.ag;
+ if(bx.getAttribute('data-for')!=key||!bx.innerHTML){var h='<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end"><label>Credit note no.<input data-cn=no style="width:130px"></label><label>Date<input data-cn=date type=date style="width:150px"></label><label>Amount back ₹<input data-cn=amt inputmode=decimal style="width:110px;text-align:right"></label></div><b style="font-size:14px">Against which bill?</b>';
+  (c.cands||[]).forEach(function(x){var sel=S.cn.ag==String(x.id);h+='<div class="c835'+(sel?' on':'')+'"><label class=opt><input type=radio name=cn835 data-cnag="'+x.id+'"'+(sel?' checked':'')+'> <b>'+esc(x.stamp)+'</b>'+(x.no?' · no. '+esc(x.no):'')+' · '+esc(x.date)+' · '+esc(x.inr)+' · '+esc(x.lane)+'</label>'
+   +(x.pre&&!x.cur?'<div style="color:#166534;font-size:12px;margin-left:22px">the reader’s pick: the no. printed on the credit note</div>':'')+(x.unsorted?'<div class=err style="margin-left:22px">not sorted yet — sort it first</div>':'')
+   +'<details data-cnd="'+x.id+'"'+(S.cn.open[x.id]?' open':'')+'><summary>'+(x.pharmacy?'Show the bill and its Marg entry':'Show the bill and its lines')+'</summary><div class=g835><div style="flex:0 0 200px;display:flex;flex-direction:column;gap:4px">'
+   +(x.file?'<iframe data-cnf="'+esc(x.file)+'" title="the scan of '+esc(x.stamp)+'"'+(S.cn.open[x.id]?' src="'+esc(x.file)+'"':'')+'></iframe><a href="'+esc(x.file)+'" target=_blank style="font-size:12px">open it full size</a>':'<span class=muted>no scan stored</span>')
+   +'</div><div style="flex:1 1 240px;min-width:0;display:flex;flex-direction:column;gap:6px">'+s835lines(x,c)+'</div></div></details></div>';});
+  if(!(c.cands||[]).length){h+='<div class=muted>'+esc(c.none||'No bill of this dealer in the last 90 days.')+'</div>';}
+  h+='<label class=opt><input type=radio name=cn835 data-cnag=acct'+(S.cn.ag=='acct'?' checked':'')+'> Not against one bill — on the dealer’s account</label>';
+  h+='<div class=muted style="font-size:12px">Only this dealer’s bills of the last 90 days are offered, newest first. Each opens here — its scan and, for a pharmacy bill, Marg’s entry lines — so the match is checked on this one screen.</div>';
+  bx.innerHTML=h;bx.setAttribute('data-for',key);}
+ var F={no:'f_no',date:'f_date',amt:'f_amt'};Array.prototype.forEach.call(bx.querySelectorAll('input[data-cn]'),function(i){if(document.activeElement!==i){i.value=$(F[i.getAttribute('data-cn')]).value;}});
+ Array.prototype.forEach.call(bx.querySelectorAll('[data-cnamt]'),function(s){s.textContent=inr($('f_amt').value);});
+ bx.style.display='flex';var f=s835forced();
+ $('groupsbox').style.display=(S.cn.ag=='acct')?'block':'none';
+ if(CN835OK.indexOf(S.dest)<0&&S.cn.ag=='acct'){S.dest='';}
+ $('filedwith').style.display=(f||S.cn.ag=='acct')?'block':'none';
+ $('filedwith').textContent=S.cn.ag=='acct'?'On the dealer’s account — it lowers no bill until it is pointed at one. Choose below where the paper is kept.':(f?(f.dest=='pharmacy'?'Handed to Sanjeevni with '+f.stamp+', marked credit note — it waits there for Amir’s purchase return in Marg.':'Filed with '+f.stamp+', in '+(C.names[f.dest]||f.dest)+' — that group’s month is lowered by the amount back.'):'');
+ $('kindnote').textContent='A credit note is never counted as money spent and is never approved as a bill.';$('covers').style.display='none';
+ ['st568','pr634','fo732'].forEach(function(id){var e=$(id);if(e){e.style.display='none';}});$('accbox').style.display='none';cue();}
+// on the dealer's account: only a clinic group or Sanjeevni (runs last in paint2, after the other gates)
+function s835gate(){if(!S.cur||S.kind!='credit_note'||!S.cn||S.cn.ag!='acct'){return;}Array.prototype.forEach.call(document.querySelectorAll('#groups .d'),function(g){var ok=CN835OK.indexOf(g.getAttribute('data-d'))>=0;if(!ok){g.disabled=true;g.style.opacity='.45';}});}
+var CN835OK=['procedure','xray_small','xray_11x14','others','stationery','implant_stock','clinic_equipment','construction','pharmacy'];
+// the bill list follows the supplier and the date as typed (not saved yet): asked again of the server, only when they change
+function s835maybe(){if(!S.cur||!S.cn||S.kind!='credit_note'){return;}var b=k715($('f_vendor').value)+'|'+d2i(s715date());if(b==S.cn.b0){return;}S.cn.b0=b;var id=S.cur.id,want=b;
+ getJ(pu(id)+'?cn_vendor='+encodeURIComponent($('f_vendor').value.trim())+'&cn_day='+encodeURIComponent(d2i(s715date()))).then(function(j2){if(!j2||!j2.ok||!S.cur||S.cur.id!=id||!S.cn||S.cn.b0!=want){return;}      // a late reply for an older supplier / date is dropped
+ 
+  S.cur.cn=j2.cn;var c=(j2.cn&&j2.cn.cands)||[];if(S.cn.ag!='acct'&&!c.some(function(x){return String(x.id)==S.cn.ag;})){S.cn.ag='';c.forEach(function(x){if(x.pre){S.cn.ag=String(x.id);}});}
+  var bx=$('cn835');if(bx){bx.removeAttribute('data-for');}paint();});}
+var S835T=null;function s835soon(ms){if(S835T){clearTimeout(S835T);}S835T=setTimeout(s835maybe,ms);}
+document.addEventListener('input',function(e){var t=e.target;if(t&&(t.id=='f_vendor'||t.id=='f_date'||(t.getAttribute&&t.getAttribute('data-cn')=='date'))){s835soon(700);}});
+document.addEventListener('change',function(e){var t=e.target;if(t&&(t.id=='f_date'||t.id=='f_vendor')){s835soon(50);}});
+document.addEventListener('mousedown',function(e){var t=e.target.closest?e.target.closest('[data-sp715],[data-spnew715],[data-dt715]'):null;if(t){s835soon(80);}});
+document.addEventListener('click',function(e){var t=e.target.closest?e.target.closest('[data-dt715]'):null;if(t){s835soon(80);}});
+function s835body(b,j){if(S.kind!='credit_note'){return;}b.cn={against:(S.cn&&S.cn.ag)||''};b.joins=[];delete b.st_lines;delete b.pr_lines;delete b.fo_lines;delete b.pay;delete b.mixed;}
+document.addEventListener('input',function(e){var t=e.target;if(!t||!t.hasAttribute||!t.hasAttribute('data-cn')||!S.cur){return;}var k=t.getAttribute('data-cn'),F={no:'f_no',date:'f_date',amt:'f_amt'};$(F[k]).value=t.value;if(k=='date'){S715.dt=true;}
+ Array.prototype.forEach.call(document.querySelectorAll('[data-cnamt]'),function(s){s.textContent=inr($('f_amt').value);});sumline();paint2();});
+document.addEventListener('change',function(e){var t=e.target;if(!t||!t.hasAttribute||!t.hasAttribute('data-cnag')||!S.cur||!S.cn){return;}S.cn.ag=t.getAttribute('data-cnag');if(S.cn.ag!='acct'){S.cn.open[S.cn.ag]=true;}paint();});
+document.addEventListener('toggle',function(e){var t=e.target;if(!t||!t.hasAttribute||!t.hasAttribute('data-cnd')||!S.cn){return;}S.cn.open[t.getAttribute('data-cnd')]=t.open;if(t.open){var f=t.querySelector('iframe[data-cnf]');if(f&&!f.getAttribute('src')){f.setAttribute('src',f.getAttribute('data-cnf'));}}cue();},true);
