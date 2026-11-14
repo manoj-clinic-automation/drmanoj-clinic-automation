@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S454 close** (the Sanjeevni chat, full EOS), 14-Nov-2026, morning — the Sanjeevni sections refreshed here (the medical PC names its network, S823; the Janta revised bill waits for the next chat); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S453 close** (the parent, full EOS, placed by its 456 open), 14-Nov-2026, morning — the parent's sections refreshed here (the staff ledger's interest rule and the Clinic PCs page's set-up notes are live; one double-click publishes the records; the Clinic PC kits kept current by themselves is the next build; the X-ray and blood-report plan waits for our talk); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S454 close** (the Sanjeevni chat, full EOS), 14-Nov-2026, morning — the Sanjeevni sections refreshed here (the medical PC names its network, S823; the Janta revised bill waits for the next chat); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S450 close** (the parent, EOS-light, placed 14-Nov by its 453 open), 13-Nov-2026, late evening — the parent's sections refreshed here (one double-click publishes the records; the X-ray and blood-report plan waits for our talk; the staff ledger's interest rule is the first build, before 1 December; the first day's WhatsApp backlog cleared by you); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S451 close** (the Sanjeevni chat, full EOS, placed 14-Nov by its S454 open), 13-Nov-2026, evening — the Sanjeevni sections refreshed here (no automatic re-orders, S820; the medical PC back with a Wi-Fi dongle); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S447 close** (the parent, full EOS), 13-Nov-2026, evening — the parent's sections refreshed here (the three approved screens live: the tiles, the Call Console's follow-up lines, WhatsApp awaiting with "Done — no reply needed" and "Not a patient"; clear the first day's WhatsApp backlog; "After today's visit" may be switched on; the staff ledger's interest rule and the two switches' mock-up next; 450 reserved); the other projects' sections as their closes left them.
@@ -458,7 +459,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S450 close (13-Nov, 19:57; put in place 14-Nov)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S453 close (14-Nov, 07:5x; put in place by the next session)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -468,13 +469,13 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK: PUBLISH THE RECORDS** — on your PC (manojz). The records of the 13-Nov evening session were put in place on 14-Nov; nothing follows the double-click.
+**1 · ONE DOUBLE-CLICK: PUBLISH THE RECORDS** — on your PC (manojz). The records of the 14-Nov morning session are put in place by the next session; nothing follows the double-click.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · THE X-RAY AND BLOOD-REPORT PLAN: WE DISCUSS IT TOGETHER** (your word, 13-Nov 7:50 pm). Your rulings of that evening are written down with the plan — nothing is built before the talk. You will see one mock-up of the three screen changes first. The paper is `S450_XRAY_LAB_FILING_STUDY.md` in the project.
+**2 · THE X-RAY AND BLOOD-REPORT PLAN: WE DISCUSS IT TOGETHER** (your words, 13-Nov 7:50 pm and 14-Nov 5:59 am). You will see one mock-up of the "Check karein" page refined — reached from the link at the top of the slips desk — with each part marked "already there" or "new"; no new page. Nothing is built before the talk. The paper is `S450_XRAY_LAB_FILING_STUDY.md` in the project.
 
 **3 · "AFTER TODAY'S VISIT" CAN BE SWITCHED ON WHEN YOU WISH** — all six test messages are confirmed. The switches that depend on a date ("follow-up tomorrow", "date passed") wait for the tracker's move from your PC to the server.
 
@@ -504,7 +505,7 @@ https://claude.ai/artifact/TNw8B62K2GHvST3NPU1WNA
 
 **10 · LEAVE THE TWO DOCTERZ EXPORT FILES IN `D:\Downloads` AS THEY ARE**; do not attach patient files to the chat.
 
-**11 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Its clock, its backup battery, its WiFi, and that it rejoins by itself after a power cut. **And now the medical PC's dead front USB port.**
+**11 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Its clock, its backup battery, its WiFi, and that it rejoins by itself after a power cut.
 
 **12 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
@@ -520,9 +521,9 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The staff ledger's interest rule — first (your word, 13-Nov):** interest only in a month when the principal is also taken, otherwise the whole instalment waits — in before November closes (1 December). It was started on 13-Nov and stopped when the link to your PC dropped; nothing was installed.
-2. **The X-ray and blood-report plan with you**, then one mock-up of the three screen changes (the X-ray sorting page's date strip, the section on Shavez's slips desk, the Photo column on your X-ray sheet); built on your word. **Then the mock-up of the two switches** for the late and the leave / absent deductions.
-3. **Three small jobs:** the Inbox says in words when MyOperator never sent a file · the old approvals page's background service stopped and kept · the new WhatsApp marks ("Done", "Not a patient") added to the nightly backup. **And the medical PC's set-up on the Clinic PCs page brought up to date** (the Wi-Fi dongle, the dead USB port).
+1. **The Clinic PC kits kept current by themselves (your word, 14-Nov):** a NEW program added to the medical PC joins its kit (today only changed programs do); a repacked kit reaches the page without waiting for a server line; the pathology lab PC's card made truthful; the "Other set-ups" notes re-read against the newer builds.
+2. **The X-ray and blood-report plan with you** — one mock-up of the "Check karein" page refined, the slips desk's link with a count, the Photo column on your X-ray sheet, the two messages; built on your word. **Then the mock-up of the two switches** for the late and the leave / absent deductions.
+3. **Three small jobs:** the Inbox says in words when MyOperator never sent a file · the old approvals page's background service stopped and kept · the new WhatsApp marks ("Done", "Not a patient") added to the nightly backup. **And your System Board brought up to date.**
 4. **Then the tracker's move from your PC to the server** (about three sessions): the lists made on the server from reception's two evening exports; the past month replayed first; your PC kept as the spare; nothing deleted.
 5. **Then one set of sections and one "came back" rule on every screen**, "on medicines", staff outcomes closing rows.
 6. **Watching, at every open:** the evening alert and the on-arrival pick-up · the sending's page · the Inbox's sends and refusals (for the ticket) · the Call Console's new lines and WhatsApp block · the helpline number on the Google profile and the contact page.
@@ -531,6 +532,14 @@ https://followup.dr-manoj.in/finance/packs
 9. **Parked at your word (12-Nov):** the Hindi "we will call you back" recording · a busy message for callers.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S453 CLOSE — 14-Nov-2026, morning (the parent)
+
+- **The staff ledger's loan-interest rule is live (you ran it, 7:18 am):** interest only in a month when the principal is also taken; a month whose salary cannot carry the whole instalment takes nothing and the loan runs one month longer. On your ledger: one instalment held at the next close, everyone else unchanged, no past entry touched.
+- **The Clinic PCs page says how the Medical PC is set up (you ran it, ~7:50 am):** the cable and the Wi-Fi dongle, the dongle in the working front USB port, the pen drive in a rear port; each kit line says how it is kept current.
+- **The Clinic PC kits checked:** all three match what the PCs run; a repacked kit shows on the page after your publish AND the next server line (corrected from what I first told you).
+- **Yesterday evening's records (S450) put in place** (5:46 am); your publish landed (5:49 am).
+- **The code of the "Check karein" page, the slips desk and your X-ray sheet read** for the X-ray plan.
 
 ## ✅ DONE AT THE S450 CLOSE — 13-Nov-2026, late evening (the parent)
 
