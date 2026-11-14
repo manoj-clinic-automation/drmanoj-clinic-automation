@@ -1,0 +1,2 @@
+S842_XRAY_SHEET_PHOTO
+project the parent (session S467, 14-Nov-2026) -- D979 item 5: his X-ray sheet gets a Photo column per patient and day and a Not filed only switch; clinic_lists.py replaced whole
