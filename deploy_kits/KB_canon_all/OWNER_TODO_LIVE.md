@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S464 close** (the Scan App project, full EOS), 14-Nov-2026, evening — the Scan App sections refreshed here (credit notes on the sorting desk live — S835; Go to ▾ on the scan app's bar live — S838; both OFF for Shavez until you switch them on); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S465 close** (the parent, full EOS, placed by the 467 open), 14-Nov-2026, evening — the parent's sections refreshed here (Check karein's new screens live — S836; Free X-ray on every screen — S839; the slips desk next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S464 close** (the Scan App project, full EOS), 14-Nov-2026, evening — the Scan App sections refreshed here (credit notes on the sorting desk live — S835; Go to ▾ on the scan app's bar live — S838; both OFF for Shavez until you switch them on); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S462 close** (the parent, full EOS), 14-Nov-2026, evening — the parent's sections refreshed here (the X-ray due rule live; Check karein next; one double-click publishes today's records); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S461 close** (the Scan App project, full EOS), 14-Nov-2026, evening — the Scan App sections refreshed here (your Procedure room page live — S831; a stopped reader told to you at once — S833; credit notes' design final, built next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S459 close** (the Sanjeevni chat, full EOS), 14-Nov-2026, evening — the Sanjeevni sections refreshed here (arrivals judged by the bill, S825; Yuvika 803's GST, S832; the Restore of B-0272 and a word with Amir); the other projects' sections as their closes left them.
@@ -472,7 +473,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S462 close (14-Nov, 19:1x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S465 close (14-Nov, 20:57; placed by the 467 open)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -482,7 +483,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK: PUBLISH THE RECORDS** — on your PC (manojz). The records of today's session (S462); nothing follows the double-click.
+**1 · ONE DOUBLE-CLICK: PUBLISH THE RECORDS** — on your PC (manojz). The records of this evening's Check karein session (S465), placed now; nothing follows the double-click.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -490,7 +491,7 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 
 **2 · THE ATTENDANCE ALARM IS LIVE — NOTHING TO DO.** No punch by 10 am on a working day → one message; once the machine is back and the server has seen it, 30 minutes of silence in clinic hours → one message, and one when it is back; a wrong clock → once that day. A closed weekday also brings the 10 am message. Your console shows "attendance machine contact".
 
-**3 · THE X-RAY AND BLOOD-REPORT FILING: THE DUE RULE IS LIVE — NOTHING TO DO.** Since 7:03 pm an X-ray photo counts only once due (a morning X-ray at 3 pm the same day, an evening one at 3 pm the next day; a photo within two days counts) on the notice, Report baaki, Check karein and reception's line. Check karein's new screens come next; each part reaches you as one publish and one server line.
+**3 · THE X-RAY AND BLOOD-REPORT FILING: CHECK KAREIN'S NEW SCREENS ARE LIVE — TELL SHAVEZ AND RECEPTION (once).** Since 8:39 pm: the 7-day date strip, "Kal ki X-ray" for reception from 9:30 am, the question "Kya yeh photo inki hai?", and "Free X-ray" in place of the payment-gap wording (your "MUFT = FREE"); the red line on your console is gone. The slips desk comes next; each part reaches you as one publish and one server line.
 
 ```
 https://claude.ai/artifact/W5TAwHRWP5zFBpN9HtqFhB
@@ -540,14 +541,21 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The X-ray and blood-report filing you approved, in small parts:** ~~the due rule~~ (live 14-Nov) · the 7-day strip and the questions on Check karein · the slips desk's count, its 7-day section and the search by name · the Photo column on your X-ray sheet · the 9:30 am and evening messages · lab reports without an ID with suggested patients.
+1. **The X-ray and blood-report filing you approved, in small parts:** ~~the due rule~~ (live 14-Nov) · ~~the 7-day strip and the questions on Check karein~~ (live 14-Nov) · **next:** the slips desk's count, its 7-day section and the search by name · the Photo column on your X-ray sheet · the 9:30 am and evening messages · lab reports without an ID with suggested patients.
 2. **Slips with no Docterz entry:** the "Sirf X-ray" tick and the X-ray-only line · an OPD slip missing from Docterz flagged on the desk and when the patient comes again · the "X-ray only" line in your daily revenue, so the day's total matches cash and bank.
 3. **Then the mock-up of the two monthly switches** (late charge; extra leave and absent) on that staff member's private page; built on your word.
-4. **Three small jobs:** the Inbox says in words when MyOperator never sent a file · the old approvals page's background service stopped and kept · the WhatsApp marks added to the nightly backup — and the small tails of the Clinic PCs page.
-5. **Then the tracker's move from your PC to the server** (about three sessions); then one set of sections and one "came back" rule on every screen.
-6. **Watching, at every open:** the attendance alarm's first working days (and that it starts watching for silence when the machine is back) · tonight's first run of the kit check on your PC · the evening alert and the on-arrival pick-up · the sending's page · the Inbox · the helpline on the Google profile and the contact page.
+4. **The month figures on the scan app's clinic groups:** a receipt, a statement or a credit note must not add to a group's spend (found by the Scan App chat).
+5. **Three small jobs:** the Inbox says in words when MyOperator never sent a file · the old approvals page's background service stopped and kept · the WhatsApp marks added to the nightly backup — and the small tails of the Clinic PCs page.
+6. **Then the tracker's move from your PC to the server** (about three sessions); then one set of sections and one "came back" rule on every screen.
+7. **Watching, at every open:** Check karein's first working day · the attendance alarm's first working days (and that it starts watching for silence when the machine is back) · tonight's first run of the kit check on your PC · the evening alert and the on-arrival pick-up · the sending's page · the Inbox · the helpline on the Google profile and the contact page.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S465 CLOSE — 14-Nov-2026, evening (the parent)
+
+- **Check karein as your mock-up** (live 8:39 pm): the 7-day date strip, "Kal ki X-ray" for reception, "Kya yeh photo inki hai?", "Not in Docterz" closed by one tap; a picture files itself only when its name or its film's ID says whose it is.
+- **"Free X-ray" on every screen** (live 8:44 pm, your "MUFT = FREE").
+- **The slips desk's X-ray count and name search** were built and held for three small fixes; they come next.
 
 ## ✅ DONE AT THE S462 CLOSE — 14-Nov-2026, evening (the parent)
 
