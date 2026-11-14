@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S447 close** (the parent, full EOS), 13-Nov-2026, evening — the parent's sections refreshed here (the three approved screens live: the tiles, the Call Console's follow-up lines, WhatsApp awaiting with "Done — no reply needed" and "Not a patient"; clear the first day's WhatsApp backlog; "After today's visit" may be switched on; the staff ledger's interest rule and the two switches' mock-up next; 450 reserved); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S450 close** (the parent, EOS-light, placed 14-Nov by its 453 open), 13-Nov-2026, late evening — the parent's sections refreshed here (one double-click publishes the records; the X-ray and blood-report plan waits for our talk; the staff ledger's interest rule is the first build, before 1 December; the first day's WhatsApp backlog cleared by you); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S451 close** (the Sanjeevni chat, full EOS, placed 14-Nov by its S454 open), 13-Nov-2026, evening — the Sanjeevni sections refreshed here (no automatic re-orders, S820; the medical PC back with a Wi-Fi dongle); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S447 close** (the parent, full EOS), 13-Nov-2026, evening — the parent's sections refreshed here (the three approved screens live: the tiles, the Call Console's follow-up lines, WhatsApp awaiting with "Done — no reply needed" and "Not a patient"; clear the first day's WhatsApp backlog; "After today's visit" may be switched on; the staff ledger's interest rule and the two switches' mock-up next; 450 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S448 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, afternoon — the Sanjeevni sections refreshed here (Darpan's Ask line and reports on need live, S815; the medical PC silent since 10:03 IST; the dongle parked; 449 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S446 close** (the Sanjeevni chat, full EOS), 13-Nov-2026, midday — the Sanjeevni sections refreshed here (Ask live, S814; Darpan's Ask line and reports on need built and held, S815; the Wi-Fi dongle's two questions; 448 reserved); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S443 close** (the parent, full EOS), 13-Nov-2026, morning — the parent's sections refreshed here (the follow-up feed's plan approved and its first step live; confirm the five tests and send the sixth; "After today's visit" may be switched on; the three approved screens are built next; 447 reserved); the other projects' sections as their closes left them.
@@ -455,7 +457,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S447 close (13-Nov, 17:1x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S450 close (13-Nov, 19:57; put in place 14-Nov)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -465,13 +467,13 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · THE RECORDS OF THIS SESSION: nothing to do yet.** They wait for the link to your PC's shell; the next session puts them in place first and then names the one double-click.
-
-**2 · ON THE CALL CONSOLE, CLEAR THE FIRST DAY'S WHATSAPP BACKLOG** — 31 chats awaiting, 29 from earlier days: press "Done — no reply needed" on those that need nothing, "Not a patient" on numbers that are not patients. Both can be undone. **One chat has a reply of yours that was NOT delivered — look at that one.**
+**1 · ONE DOUBLE-CLICK: PUBLISH THE RECORDS** — on your PC (manojz). The records of the 13-Nov evening session were put in place on 14-Nov; nothing follows the double-click.
 
 ```
-https://followup.dr-manoj.in/portal/console
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
+
+**2 · THE X-RAY AND BLOOD-REPORT PLAN: WE DISCUSS IT TOGETHER** (your word, 13-Nov 7:50 pm). Your rulings of that evening are written down with the plan — nothing is built before the talk. You will see one mock-up of the three screen changes first. The paper is `S450_XRAY_LAB_FILING_STUDY.md` in the project.
 
 **3 · "AFTER TODAY'S VISIT" CAN BE SWITCHED ON WHEN YOU WISH** — all six test messages are confirmed. The switches that depend on a date ("follow-up tomorrow", "date passed") wait for the tracker's move from your PC to the server.
 
@@ -501,7 +503,7 @@ https://claude.ai/artifact/TNw8B62K2GHvST3NPU1WNA
 
 **10 · LEAVE THE TWO DOCTERZ EXPORT FILES IN `D:\Downloads` AS THEY ARE**; do not attach patient files to the chat.
 
-**11 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Its clock, its backup battery, its WiFi, and that it rejoins by itself after a power cut.
+**11 · BL COMPUTERS — THE ATTENDANCE MACHINE.** Its clock, its backup battery, its WiFi, and that it rejoins by itself after a power cut. **And now the medical PC's dead front USB port.**
 
 **12 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
@@ -517,9 +519,9 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Session 450 — first this session's records put in place.**
-2. **The staff ledger (your word, 13-Nov 3:09 pm):** the interest rule — interest only in a month when the principal is also taken, otherwise the whole instalment waits — built before November closes (1 December); then the mock-up of the two switches for the late and the leave / absent deductions.
-3. **Three small jobs:** the Inbox says in words when MyOperator never sent a file · the old approvals page's background service stopped and kept · the new WhatsApp marks ("Done", "Not a patient") added to the nightly backup.
+1. **The staff ledger's interest rule — first (your word, 13-Nov):** interest only in a month when the principal is also taken, otherwise the whole instalment waits — in before November closes (1 December). It was started on 13-Nov and stopped when the link to your PC dropped; nothing was installed.
+2. **The X-ray and blood-report plan with you**, then one mock-up of the three screen changes (the X-ray sorting page's date strip, the section on Shavez's slips desk, the Photo column on your X-ray sheet); built on your word. **Then the mock-up of the two switches** for the late and the leave / absent deductions.
+3. **Three small jobs:** the Inbox says in words when MyOperator never sent a file · the old approvals page's background service stopped and kept · the new WhatsApp marks ("Done", "Not a patient") added to the nightly backup. **And the medical PC's set-up on the Clinic PCs page brought up to date** (the Wi-Fi dongle, the dead USB port).
 4. **Then the tracker's move from your PC to the server** (about three sessions): the lists made on the server from reception's two evening exports; the past month replayed first; your PC kept as the spare; nothing deleted.
 5. **Then one set of sections and one "came back" rule on every screen**, "on medicines", staff outcomes closing rows.
 6. **Watching, at every open:** the evening alert and the on-arrival pick-up · the sending's page · the Inbox's sends and refusals (for the ticket) · the Call Console's new lines and WhatsApp block · the helpline number on the Google profile and the contact page.
@@ -528,6 +530,15 @@ https://followup.dr-manoj.in/finance/packs
 9. **Parked at your word (12-Nov):** the Hindi "we will call you back" recording · a busy message for callers.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S450 CLOSE — 13-Nov-2026, late evening (the parent)
+
+- **The afternoon's records (S447) were put in place** (5:49 pm) and your publish landed (6:11 pm).
+- **You cleared the first day's WhatsApp backlog** — the Call Console showed 0 chats awaiting at 6:15 pm.
+- **The X-ray count on your phone (24, then 30) explained:** the notice reaches back to September and wants the photo on the very same day as the slip — not your staff's fault. It is corrected with the plan above.
+- **X-rays and blood reports studied end to end**; your rulings and the plan written down (`S450_XRAY_LAB_FILING_STUDY.md`).
+- **The medical PC seen online** by cable and by the Wi-Fi dongle (6:31 pm); the pharmacy chat told.
+- **Nothing on the server changed in this session.**
 
 ## ✅ DONE AT THE S447 CLOSE — 13-Nov-2026, evening (the parent)
 
@@ -1124,38 +1135,40 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S448 close (13-Nov, ~14:1x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S451 close (13-Nov, ~19:4x; placed 14-Nov)
 
-*Detail: `S448_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. The next chat's entry is `START_HERE_SESSION_449.md`. This section supersedes the S446 one.*
+*Detail: `S451_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S448 one.*
 
-**1 · The medical PC** — nothing from it since 10:03 IST 13-Nov: someone at the pharmacy checks it is on and has internet (cable or Wi-Fi).
+**1 · The publish of these records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat` (named by the session that placed this close).
 
-**2 · The publish of this session's records** — named by the next session once it has placed this held close.
+**2 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — section A: the moves with no record (*OK all*, one by one with a reason, **Ask** Amir or **Put on Darpan's page**, or *Ask for the sale report again*); the "ask by itself" figure (3 now); the floor box (₹0 now); section B: sale bill **A004591** (*the sale stands* / *it was cancelled*); the two phone switches when you are ready (bills — Off; staff answers — Off).
 
-**3 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — section A: the moves with no record — *OK all*, one by one with a reason, **Ask** Amir or **Put on Darpan's page** (live since 12:50), or *Ask for the sale report again*; the "ask by itself" figure (3 now); the floor box (₹0 now); section B: sale bill **A004591** (*the sale stands* / *it was cancelled*); the two phone switches when you are ready (bills — Off; staff answers — Off).
+**3 · October's purchase month** — `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10` — as at the S444 close (L.K. Drug House 16–31 Oct; Bass, Jubilee, Saisun summaries; Bass Pharma ₹1,597 by cheque; then FINALISE).
 
-**4 · October's purchase month** — `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10` — as at the S444 close (L.K. Drug House 16–31 Oct; Bass, Jubilee, Saisun summaries; Bass Pharma ₹1,597 by cheque; then FINALISE).
+**4 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
 
-**5 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
+**5 · The new start text, pasted once into each of the four projects** — `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S438\COMMON_START_HERE_PROMPT_v1_1.md`
 
-**6 · The new start text, pasted once into each of the four projects** — `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S438\COMMON_START_HERE_PROMPT_v1_1.md`
+**6 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting.
 
-**7 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting.
+**7 · The orthotics count** — who counts the shelf, and on which day.
 
-**8 · The orthotics count** — who counts the shelf, and on which day.
+**8 · Still yours:** ZUPRINOR 5 (row 6); Shavez's phone; Ram Singh (F-1115).
 
-**9 · Still yours:** ZUPRINOR 5 (row 6); Shavez's phone; Ram Singh (F-1115).
+**9 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
 
-**10 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
+**Later, your word only:** AutoHotkey (D915); arrivals judged by the bill; the order list; when scans start adding to stock (D891); the carry setting back to 1 if you ever want the old automatic way (D965).
 
-**Later, your word only:** AutoHotkey (D915); arrivals judged by the bill; the order list; when scans start adding to stock (D891); the Wi-Fi dongle when someone can sit at the medical PC (D961).
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S451 close
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S448 close
-
-0. **Place this session's close** (held when the PC's shell stopped).
-1. **The medical PC back online** — read its heartbeat, its reports and backups arriving.
+1. **The medical PC's network line** — its check-in names which connection (cable or Wi-Fi) carries it (F-1133).
 2. **The first real report ask and the first Darpan question** — read end to end.
 3. **Amir's three more dates**; **the first orthotics count**; F-1328 with the next touch of the expiry page.
+
+## ✅ DONE AT THE S451 CLOSE — 13-Nov-2026, evening (the Sanjeevni project)
+
+- **No more automatic re-orders** (S820, live 18:36): a medicine that did not come waits in the red *Purane order* box on reception's screen and goes to the dealer only when staff tap *Dobara order karo*.
+- **The medical PC is back** — nothing was lost while it was silent; the Wi-Fi dongle now sits beside the cable (the front USB port is dead — use the rear ports).
 
 ## ✅ DONE AT THE S448 CLOSE — 13-Nov-2026, afternoon (the Sanjeevni project)
 
