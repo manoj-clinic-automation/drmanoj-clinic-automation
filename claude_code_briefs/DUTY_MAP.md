@@ -148,7 +148,7 @@ Meri attendance, Scan Purchase.
 | Check karein: blood test with no report after 2 days `[alisha.check_blood]` | `blood_order` (from 19-Sep) with no `lab_report` within 7 days and no live `record_check` answer | Check karein → /finance/checks "Blood test likha tha, report nahi aayi" | JSON |
 | Check karein: X-ray file with no clinic ID `[alisha.check_xray_files]` | `xray_filing.state='check'` not answered `not_xray` / `id_fixed` | Check karein "X-ray file ka clinic ID nahi mila" | JSON |
 | Check karein: reports patients sent on WhatsApp | `record_wa` not yet saved / answered (none open) | Check karein | none |
-| Report baaki: put each X-ray photo in the folder by next noon `[alisha.xray_photo]` | X-ray slip (from 23-Sep) with no `record_file` X-ray for that ID and day | Report baaki → /finance/slips/pending?t=xray "photo baaki" | JSON |
+| Report baaki: put each X-ray photo in the folder by the 3 pm upload -- a morning X-ray the same day, an evening one the next day (S834) `[alisha.xray_photo]` | X-ray slip of the last 7 days, DUE (Docterz's shift; no line yet: the slip's own time), with no `record_file` X-ray for that ID on its day or the two days after | Report baaki → /finance/slips/pending?t=xray "photo baaki" | JSON |
 | Report baaki: place a lab report that came with no clinic ID | `lab_noid` with no ID and no answer, last 7 days (1 open) | Report baaki (blood tab) | none |
 | Log a slip at the chamber when Shavez is away | `slip` | OPD & X-ray/Proc Slips | none |
 | Follow-up calls | the Call Tracker Google Sheet (no table on the server) | Call Tracker | none |
