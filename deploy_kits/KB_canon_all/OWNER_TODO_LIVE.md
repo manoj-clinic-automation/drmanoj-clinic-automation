@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S455 close** (the Sanjeevni chat, full EOS, placed by its 457 open), 14-Nov-2026, morning — the Sanjeevni sections refreshed here (Janta's revised bill settled, S824; Deepam 502's item line back, S827; arrivals by the bill rebuilt next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S456 close** (the parent, full EOS), 14-Nov-2026, morning — the parent's sections refreshed here (the Clinic PC kits keep themselves current — kit S822 live; the held S453 records in place; the board trimmed on his word; one double-click publishes this session's records; the X-ray and blood-report plan waits for our talk); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S455 close** (the Sanjeevni chat, full EOS, placed by its 457 open), 14-Nov-2026, morning — the Sanjeevni sections refreshed here (Janta's revised bill settled, S824; Deepam 502's item line back, S827; arrivals by the bill rebuilt next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S453 close** (the parent, full EOS, placed by its 456 open), 14-Nov-2026, morning — the parent's sections refreshed here (the staff ledger's interest rule and the Clinic PCs page's set-up notes are live; one double-click publishes the records; the Clinic PC kits kept current by themselves is the next build; the X-ray and blood-report plan waits for our talk); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S454 close** (the Sanjeevni chat, full EOS), 14-Nov-2026, morning — the Sanjeevni sections refreshed here (the medical PC names its network, S823; the Janta revised bill waits for the next chat); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S450 close** (the parent, EOS-light, placed 14-Nov by its 453 open), 13-Nov-2026, late evening — the parent's sections refreshed here (one double-click publishes the records; the X-ray and blood-report plan waits for our talk; the staff ledger's interest rule is the first build, before 1 December; the first day's WhatsApp backlog cleared by you); the other projects' sections as their closes left them.
@@ -460,7 +461,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S453 close (14-Nov, 07:5x; put in place by the next session)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S456 close (14-Nov, 09:3x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -470,35 +471,35 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK: PUBLISH THE RECORDS** — on your PC (manojz). The records of the 14-Nov morning session are put in place by the next session; nothing follows the double-click.
+**1 · ONE DOUBLE-CLICK: PUBLISH THE RECORDS** — on your PC (manojz). The records of this morning's second session (S456); nothing follows the double-click.
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**2 · THE X-RAY AND BLOOD-REPORT PLAN: WE DISCUSS IT TOGETHER** (your words, 13-Nov 7:50 pm and 14-Nov 5:59 am). You will see one mock-up of the "Check karein" page refined — reached from the link at the top of the slips desk — with each part marked "already there" or "new"; no new page. Nothing is built before the talk. The paper is `S450_XRAY_LAB_FILING_STUDY.md` in the project.
+**2 · THE X-RAY AND BLOOD-REPORT PLAN: WE DISCUSS IT TOGETHER** (your words, 13-Nov 7:50 pm and 14-Nov 5:59 am). Next session you see one mock-up of the "Check karein" page refined — reached from the link at the top of the slips desk — with each part marked "already there" or "new"; no new page. Nothing is built before the talk. The paper is `S450_XRAY_LAB_FILING_STUDY.md` in the project.
 
-**3 · "AFTER TODAY'S VISIT" CAN BE SWITCHED ON WHEN YOU WISH** — all six test messages are confirmed. The switches that depend on a date ("follow-up tomorrow", "date passed") wait for the tracker's move from your PC to the server.
+**3 · "AFTER TODAY'S VISIT" CAN BE SWITCHED ON WHEN YOU WISH** — all six test messages are confirmed. The date-based switches wait for the tracker's move from your PC to the server.
 
 ```
 https://followup.dr-manoj.in/portal/messages
 ```
 
-**4 · THE PHARMACY'S HEALTH PAGE SHOWS THREE THINGS FOR YOU** (the pharmacy chat follows them up): two October days (9th and 14th) with UPI evidence open on the accountant report · six pharmacy days (6, 7, 9, 10, 11, 12 Nov) waiting for your approval · the last drawer count is 88 days old — a fresh count is due.
+**4 · THE PHARMACY'S HEALTH PAGE SHOWS THREE THINGS FOR YOU** (the pharmacy chat follows them up): two October days with UPI evidence open · pharmacy days waiting for your approval · a fresh drawer count due.
 
 ```
 https://followup.dr-manoj.in/finance/health
 ```
 
-**5 · THE STAFF LEDGER'S TWO SWITCHES: nothing to do yet.** Next session I show you a mock-up of the two monthly switches (late charge; extra leave & absent) on that staff member's private page; they are built on your word. September and October are locked with the deductions — that is a separate decision of yours.
+**5 · THE STAFF LEDGER'S TWO SWITCHES: nothing to do yet.** Next session I show you a mock-up of the two monthly switches (late charge; extra leave & absent) on that staff member's private page; built on your word.
 
-**6 · THE TEMPLATE FEATURES: tell me which you want** — reply buttons on the reminders · a feedback question the morning after a visit · a "Stop messages" button · X-rays and reports sent as the message (your ruling) · header and footer. The paper is `S442_WA_TEMPLATE_FEATURES_STUDY.md` in the project.
+**6 · THE TEMPLATE FEATURES: tell me which you want** — reply buttons · a feedback question the morning after a visit · a "Stop messages" button · X-rays and reports sent as the message · header and footer. The paper is `S442_WA_TEMPLATE_FEATURES_STUDY.md`.
 
-**7 · TELL SHIVANI, ALISHA, SHAVEZ AND RECEPTION (once):** all four phones now ring on every call; a missed caller not called back in 30 minutes brings a reminder; after an hour it goes to Shavez; what is still open at closing comes to you. **And: replies from the WhatsApp Inbox work again.**
+**7 · TELL SHIVANI, ALISHA, SHAVEZ AND RECEPTION (once):** all four phones ring on every call; a missed caller not called back in 30 minutes brings a reminder; after an hour it goes to Shavez; what is still open at closing comes to you. Replies from the WhatsApp Inbox work again.
 
 **8 · THE HELPLINE NUMBER ON PRINTED MATTER AND JUSTDIAL** — the prescription header, cards, the board — with the old number beside it.
 
-**9 · THE PATIENTS PAGE (mock-up, version 16): look, add what you want.** It comes after the follow-up feed (your order).
+**9 · THE PATIENTS PAGE (mock-up, version 16): look, add what you want.** It comes after the follow-up feed.
 
 ```
 https://claude.ai/artifact/TNw8B62K2GHvST3NPU1WNA
@@ -516,23 +517,30 @@ https://followup.dr-manoj.in/finance/packs
 
 **13 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
 
-**14 · MYOPERATOR (ticket 691386): nothing to do now.** Two files that never came (12-Nov) and the missing delivery reports are added to what I bring you; we decide together what to write to them (your ruling, 12-Nov). Until then, a file that does not load in the Inbox opens from the chat's "MyOperator" button.
+**14 · MYOPERATOR (ticket 691386): nothing to do now.** We decide together what to write to them (your ruling, 12-Nov).
 
 **15 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The Clinic PC kits kept current by themselves (your word, 14-Nov):** a NEW program added to the medical PC joins its kit (today only changed programs do); a repacked kit reaches the page without waiting for a server line; the pathology lab PC's card made truthful; the "Other set-ups" notes re-read against the newer builds.
-2. **The X-ray and blood-report plan with you** — one mock-up of the "Check karein" page refined, the slips desk's link with a count, the Photo column on your X-ray sheet, the two messages; built on your word. **Then the mock-up of the two switches** for the late and the leave / absent deductions.
-3. **Three small jobs:** the Inbox says in words when MyOperator never sent a file · the old approvals page's background service stopped and kept · the new WhatsApp marks ("Done", "Not a patient") added to the nightly backup. **And your System Board brought up to date.**
+1. **The X-ray and blood-report plan with you** — one mock-up of the "Check karein" page refined, the slips desk's link with a count, the Photo column on your X-ray sheet, the two messages; built on your word. **Then the mock-up of the two switches** for the late and the leave / absent deductions.
+2. **Your System Board brought up to date** (owed since yesterday morning) and its notes part shortened.
+3. **Three small jobs:** the Inbox says in words when MyOperator never sent a file · the old approvals page's background service stopped and kept · the new WhatsApp marks ("Done", "Not a patient") added to the nightly backup. **And the small tails of the Clinic PCs page:** the pathology lab PC's card made truthful (the lab chat told first); the "Other set-ups" notes re-read; the nightly check reading the current pin list.
 4. **Then the tracker's move from your PC to the server** (about three sessions): the lists made on the server from reception's two evening exports; the past month replayed first; your PC kept as the spare; nothing deleted.
 5. **Then one set of sections and one "came back" rule on every screen**, "on medicines", staff outcomes closing rows.
-6. **Watching, at every open:** the evening alert and the on-arrival pick-up · the sending's page · the Inbox's sends and refusals (for the ticket) · the Call Console's new lines and WhatsApp block · the helpline number on the Google profile and the contact page.
+6. **Watching, at every open:** tonight's first run of the kit check on your PC (the medical kit repacked for the new agent; the seven old August files reported) and the server's half-hourly pull · the evening alert and the on-arrival pick-up · the sending's page · the Inbox's sends and refusals (for the ticket) · the Call Console's lines and WhatsApp block · the helpline on the Google profile and the contact page.
 7. **On 19-Nov: the same count again** — callers never spoken to, call-backs made, outgoing calls answered.
 8. **Then, on your word:** the template wordings you choose · the analytics page (the Patients page, mock-up version 16).
 9. **Parked at your word (12-Nov):** the Hindi "we will call you back" recording · a busy message for callers.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S456 CLOSE — 14-Nov-2026, morning (the parent)
+
+- **The Clinic PC set-up kits keep themselves current (kit S822; you ran the server line, 9:24 am):** a new program added to the medical PC joins its kit by itself each night (only when that PC still has it and its version is recorded; installers never); the server pulls the repository every half hour, so a repacked kit shows on the Clinic PCs page within half an hour of your publish — no server line; the Medical PC's card says so; the nightly check now finds the Drive copy of the kit.
+- **Yesterday's held records (S453) put in place** (8:17 am); your publish landed.
+- **The System Board's numbers document, which was full, trimmed on your word** (8:22 am) — it takes lines again; the long notes part is shortened next session; nothing is lost.
+- **The three morning reads done** (messages page, Inbox, Call Console): nothing needed you.
 
 ## ✅ DONE AT THE S453 CLOSE — 14-Nov-2026, morning (the parent)
 
