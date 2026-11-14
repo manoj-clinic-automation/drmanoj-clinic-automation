@@ -1,0 +1,2 @@
+S822_PC_KITS_CURRENT_NEW_FILES  session S456 (the parent)  14-Nov-2026  D972 · F-1385 · F-1386
+Two halves. (1) Dr Manoj's PC: D:\Downloads\_kbtools\pc_kits_current.py S723+S794 -> S723+S794+S822 (placed by Claude through the file tools; the nightly runs it): a NEW program file on the medical PC joins its setup kit by itself. (2) The server, by the owner's one line: /root/deploy/repo_pull_s822.sh + cron '# S822_REPO_PULL' (the clone pulled every half hour, fast-forward only) and /root/finance/pc_kits.py 4191e447 -> 45d6f15d (one sentence on the Medical PC's card).
