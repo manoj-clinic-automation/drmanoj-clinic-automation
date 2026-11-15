@@ -1,11 +1,11 @@
 3ee6a44adacb9a8d2cd036eb422b7f4c  KIT_ID.txt
-0f4a5a6799b4845fc124aca2538c9318  README.md
+8f012ad24c25c6b76d9c8737607ecaa2  README.md
 8b4c919d0c1c4887b333b2e022eef21c  TO_PINS.md5
-30347e1eee97accdffcf8eedca981dbd  install_S837_STOCK_REGISTER_ONE_ITEM.sh
+9a88513769d19671adc4814c1c072a11  install_S837_STOCK_REGISTER_ONE_ITEM.sh
 6049e7c7e02e47ab8f7954e4f1afd3ba  make_s837.py
 f411da07f217d2b2afecc97e174a80f7  marg_register.py
 5f7c3ae9ca2421468fe49a6072a238fc  mkreg_s837.py
-c00b03713e4d4c196b05584b612a822b  rehearse_s837.sh
+1c4682250e3fbe5fe9fe15d868ae09a4  rehearse_s837.sh
 81852ad72626b06f986b8c177431f82b  seg_bw_s837.py
 c7c93bc3577877c0941a456dcb8fbf44  undo_s837.sh
 6383aac405db76aad9d8eec16e7726c7  walk_s837.py

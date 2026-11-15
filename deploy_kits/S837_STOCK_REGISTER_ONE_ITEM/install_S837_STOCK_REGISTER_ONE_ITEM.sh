@@ -53,6 +53,8 @@ lay() { local d="$SCR/root_$1"; rm -rf "$d"; mkdir -p "$d/finance/spine" "$d/fin
   [ -f "$d/finance/marg_billwatch.py" ] && [ -f "$d/marg_ingest/marg_take.py" ]; }
 w837() { (cd /tmp && TMPDIR="$SCR" PYTHONPATH="$ROOT/shared${PYTHONPATH:+:$PYTHONPATH}" PYTHONPYCACHEPREFIX="$SCR/pyc" SPINE_DB="$SCR/spine.db" timeout 600 "$VPY" -W ignore -B "$KDIR/walk_s837.py" "$1" "$SCR/finance.db" SYNTH 2>&1); }
 wold() { (cd /tmp && TMPDIR="$SCR" PYTHONPATH="$ROOT/shared${PYTHONPATH:+:$PYTHONPATH}" PYTHONPYCACHEPREFIX="$SCR/pyc" timeout 600 "$VPY" -W ignore -B "$OLDK/$1" "$2" "$SCR/spine.db" "$SCR/finance.db" ${3:+"$3"} 2>&1); }
+w812() { local d="$SCR/s812_$2"; mkdir -p "$d" && cp "$SCR/spine.db" "$d/spine.db" && cp "$SCR/finance.db" "$d/finance.db" || { echo "the copies for the S812 walk failed"; return 0; }
+  (cd /tmp && TMPDIR="$SCR" PYTHONPATH="$ROOT/shared${PYTHONPATH:+:$PYTHONPATH}" PYTHONPYCACHEPREFIX="$SCR/pyc" timeout 600 "$VPY" -W ignore -B "${W812:-$OLDK/walk_s812.py}" "$1" "$d/spine.db" "$d/finance.db" 2>&1); }
 w803() { (cd /tmp && TMPDIR="$SCR" PYTHONPYCACHEPREFIX="$SCR/pyc" timeout 300 "$VPY" -W ignore -B "$OLDK/walk_s803.py" "$1" "$ROOT/shared" "$2" "$DB" 2>&1); }
 full() { case "$1" in "WALK "*) local a=${1#WALK }; [ "${a%/*}" = "${a#*/}" ];; *) return 1;; esac; }
 CPDB='import sqlite3,sys;s=sqlite3.connect("file:%s?mode=ro"%sys.argv[1],uri=True,timeout=60);d=sqlite3.connect(sys.argv[2]);s.backup(d);d.close();s.close();print("copied")'
@@ -83,9 +85,23 @@ printf '%s\n' "$O" | grep -E "^FAIL|Error" | head -8 | sed 's/^/      /'
 full "$R" || stop "!! [3/7] walk_s837: $R - nothing installed"
 O1=$(wold walk_s815.py "$SCR/root_new/finance" "$DMAP"); R1=$(printf '%s\n' "$O1" | tail -1); full "$R1" || stop "!! [3/7] the reports-on-need walk (S815) on the rebuilt files: $R1 - nothing installed"
 O2=$(wold walk_s814.py "$SCR/root_new/finance"); R2=$(printf '%s\n' "$O2" | tail -1); full "$R2" || stop "!! [3/7] the Ask walk (S814) on the rebuilt files: $R2 - nothing installed"
-if [ "${REHEARSE_NO_S812:-0}" = 1 ]; then R3="(the section A walk: not on a rehearsal stand -- it needs the box's own spine)"
-else O3=$(wold walk_s812.py "$SCR/root_new/finance"); R3=$(printf '%s\n' "$O3" | tail -1); full "$R3" || stop "!! [3/7] the section A walk (S812) on the rebuilt files: $R3 - nothing installed"; fi
 lay old || stop "!! [3/7] could not lay out the control - nothing installed"
+if [ "${REHEARSE_NO_S812:-0}" = 1 ]; then R3="(the section A walk: not on a rehearsal stand -- it needs the box's own spine)"
+else
+  # S468 (the first install stopped here at 60/61): the S812 walk holds frozen expectations of the live stock data of mid-November, so it is
+  # judged as a REGRESSION check -- run on the live files and on the rebuilt ones, each on its own copies; it stops the install only when a
+  # check that passes on the live files fails on the rebuilt ones, or the two runs differ in their number of checks.
+  O3=$(w812 "$SCR/root_new/finance" new); O3o=$(w812 "$SCR/root_old/finance" old)
+  R3=$(printf '%s\n' "$O3" | tail -1); R3o=$(printf '%s\n' "$O3o" | tail -1)
+  case "$R3" in "WALK "*/*) ;; *) printf '%s\n' "$O3" | tail -6 | sed 's/^/      /'; stop "!! [3/7] the section A walk (S812) did not finish on the rebuilt files - nothing installed";; esac
+  case "$R3o" in "WALK "*/*) ;; *) printf '%s\n' "$O3o" | tail -6 | sed 's/^/      /'; stop "!! [3/7] the section A walk (S812) did not finish on the live files - nothing installed";; esac
+  [ "${R3#*/}" = "${R3o#*/}" ] || stop "!! [3/7] the section A walk (S812) ran $R3 on the rebuilt files and $R3o on the live ones - nothing installed"
+  printf '%s\n' "$O3" | grep '^FAIL' | sort > "$SCR/s812_new.txt"; printf '%s\n' "$O3o" | grep '^FAIL' | sort > "$SCR/s812_old.txt"
+  NEWF=$(comm -23 "$SCR/s812_new.txt" "$SCR/s812_old.txt")
+  if [ -n "$NEWF" ]; then printf '%s\n' "$NEWF" | head -8 | sed 's/^/      /'; stop "!! [3/7] the section A walk (S812): a check that passes on the live files fails on the rebuilt ones ($R3; live $R3o) - nothing installed"; fi
+  if [ -s "$SCR/s812_old.txt" ]; then say "      the section A walk's frozen checks already red on the LIVE files too (not this kit's; the same on the rebuilt):"; head -6 "$SCR/s812_old.txt" | sed 's/^/      /'; fi
+  R3="$R3, live files $R3o, none worse"
+fi
 R0=$(w837 "$SCR/root_old" | tail -1); full "$R0" && stop "!! [3/7] the control on the live files did not go red ($R0) - nothing installed"
 \cp -p "$SCR/built/finance/marg_billwatch.py" "$SCR/built/finance/sanjeevni_approvals.py" "$SCR/built/finance/finance_ui/finance_approvals.html" "$ROOT/finance/owner_notice.py" "$SCR/w803/"
 O4=$(w803 "$SCR/w803" "$SCR/root_new/finance"); R4=$(printf '%s\n' "$O4" | tail -1); [ "$R4" = "WALK S803 GREEN" ] || { printf '%s\n' "$O4" | grep -E "RED|Error" | head -6 | sed 's/^/      /'; stop "!! [3/7] the Marg watch's own walk (S803) on the rebuilt page: $R4 - nothing installed"; }
