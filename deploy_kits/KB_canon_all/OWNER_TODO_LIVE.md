@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S467 close** (the parent, full EOS), 14-Nov-2026, night — the parent's sections refreshed here (the slips desk and your X-ray sheet live; the messages next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S469 close** (the parent, full EOS, held at the build), 16-Nov-2026, morning — the parent's sections refreshed here (the X-ray messages and the old slips with a name as the ID live; the no-Docterz slips next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S468 close** (the Sanjeevni chat, full EOS, placed by its 470 open), 15-Nov-2026, midday — the Sanjeevni sections refreshed here (Marg's Stock Register for one item live; a word with Ram Singh before Shavez is switched on); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S467 close** (the parent, full EOS), 14-Nov-2026, night — the parent's sections refreshed here (the slips desk and your X-ray sheet live; the messages next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S463 close** (the Sanjeevni chat, full EOS, placed by its 468 open), 14-Nov-2026, evening — the Sanjeevni sections refreshed here (Marg's Stock Register for one item: the screen agreed, the build held for three review faults; a word with Ram Singh); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S465 close** (the parent, full EOS, placed by the 467 open), 14-Nov-2026, evening — the parent's sections refreshed here (Check karein's new screens live — S836; Free X-ray on every screen — S839; the slips desk next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S464 close** (the Scan App project, full EOS), 14-Nov-2026, evening — the Scan App sections refreshed here (credit notes on the sorting desk live — S835; Go to ▾ on the scan app's bar live — S838; both OFF for Shavez until you switch them on); the other projects' sections as their closes left them.
@@ -475,7 +477,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S467 close (14-Nov, 21:5x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S469 close (16-Nov, 07:2x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -485,15 +487,11 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK: PUBLISH THE RECORDS** — on your PC (manojz). The records of tonight's sessions (S465 and S467); nothing follows the double-click.
-
-```
-D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
-```
+**1 · NOTHING TO PUBLISH NOW.** This session's records wait on your PC for the next session to place (the PC's command line was down at the close); that session names the double-click.
 
 **2 · THE ATTENDANCE ALARM IS LIVE — NOTHING TO DO.** No punch by 10 am on a working day → one message; once the machine is back and the server has seen it, 30 minutes of silence in clinic hours → one message, and one when it is back; a wrong clock → once that day. A closed weekday also brings the 10 am message. Your console shows "attendance machine contact".
 
-**3 · THE X-RAY AND BLOOD-REPORT FILING: TELL SHAVEZ AND RECEPTION (once).** Check karein has the 7-day strip, "Kal ki X-ray" and "Kya yeh photo inki hai?"; the slips desk shows "X-ray upload baaki", a 7-day X-ray box, and finds a patient by NAME in the clinic-ID boxes (type 3 letters, tap the right one — a name is never saved as the ID). Your X-ray sheet has a Photo column and "Not filed only". The messages come next; you will see their wording first.
+**3 · THE X-RAY AND BLOOD-REPORT FILING: TELL SHAVEZ AND RECEPTION (once).** Check karein has the 7-day strip, "Kal ki X-ray" and "Kya yeh photo inki hai?"; the slips desk shows "X-ray upload baaki", a 7-day X-ray box, finds a patient by NAME, and now lists **4 old X-ray slips with a name in place of the clinic ID — Shavez (or you) taps the right patient on each**. Your X-ray sheet has a Photo column and "Not filed only". **The messages are live from Monday 16-Nov:** 9:30 am "X-ray <date>" to reception, 7 pm "Aaj ki upload" to reception and "Records today" to you.
 
 ```
 https://claude.ai/artifact/W5TAwHRWP5zFBpN9HtqFhB
@@ -543,8 +541,8 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The X-ray and blood-report filing you approved, in small parts:** ~~the due rule~~ · ~~Check karein's strip and questions~~ · ~~the slips desk's count, 7-day box and name search~~ · ~~the Photo column on your X-ray sheet~~ (all live 14-Nov) · **next:** the 9:30 am and evening messages · the 8 old slips with a name in place of the ID, listed for one-tap correction · lab reports without an ID with suggested patients.
-2. **Slips with no Docterz entry:** the "Sirf X-ray" tick and the X-ray-only line · an OPD slip missing from Docterz flagged on the desk and when the patient comes again · the "X-ray only" line in your daily revenue, so the day's total matches cash and bank.
+1. **Slips with no Docterz entry (next):** your point taken — register such patients in Docterz as much as possible; late-evening X-ray patients cannot be added next day. I read how slips are matched to Docterz and where the day's revenue is made, then a plan to you before any build.
+2. **The X-ray and blood-report filing — the last part:** lab reports without an ID, with suggested patients. (~~the due rule~~ · ~~Check karein~~ · ~~the slips desk~~ · ~~your sheet's Photo column~~ · ~~the messages~~ · ~~the old slips with a name as the ID~~ — all live.)
 3. **Then the mock-up of the two monthly switches** (late charge; extra leave and absent) on that staff member's private page; built on your word.
 4. **The month figures on the scan app's clinic groups:** a receipt, a statement or a credit note must not add to a group's spend (found by the Scan App chat).
 5. **Three small jobs:** the Inbox says in words when MyOperator never sent a file · the old approvals page's background service stopped and kept · the WhatsApp marks added to the nightly backup — and the small tails of the Clinic PCs page.
@@ -552,6 +550,12 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** Check karein's first working day · the attendance alarm's first working days (and that it starts watching for silence when the machine is back) · tonight's first run of the kit check on your PC · the evening alert and the on-arrival pick-up · the sending's page · the Inbox · the helpline on the Google profile and the contact page.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S469 CLOSE — 14 → 16-Nov-2026 (the parent)
+
+- **The X-ray messages, as on your mock-up** (live 15-Nov): 9:30 am to reception, 7 pm to reception and to you; silent on a day with no X-ray and no blood test, and on Sundays.
+- **The old slips with a name in place of the clinic ID** (live 16-Nov 7:16 am): listed on the slips desk with one tap to set the ID; the old slip pages refuse a name.
+- **Your question on Shivani's leave answered** — her work is shared with Alisha; the one gap is Shavez's morning Marg reports when he is away. Nothing built.
 
 ## ✅ DONE AT THE S467 CLOSE — 14-Nov-2026, night (the parent)
 
@@ -1200,39 +1204,46 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S463 close (14-Nov, 21:16; placed by the 468 open)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S468 close (15-Nov, 12:4x; placed by the 470 open on 16-Nov)
 
-*Detail: `S463_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S459 one.*
+*Detail: `S468_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S463 one.*
 
 **1 · The publish of these records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`
 
-**2 · A word with Ram Singh:** add **Stock Register** to Shavez's reports login in Marg — needed before Shavez is switched on for the single-item register (you start with him OFF).
+**2 · A word with Ram Singh:** add **Stock Register** to Shavez's reports login in Marg — then switch Shavez on from your list page `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch/take` (he starts OFF).
 
-**3 · A word with Amir:** "Kar diya" only after it is in Marg (two 6-September jobs were tapped done on 18-Oct but never entered).
+**3 · Marg's Stock Register for one item is live** — ask from a Marg watch row or from your list page (above).
 
-**4 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — section A: the moves with no record; the "ask by itself" figure; the floor box; section B: sale bill **A004591**; the two phone switches when you are ready.
+**4 · A word with Amir:** "Kar diya" only after it is in Marg (two 6-September jobs were tapped done on 18-Oct but never entered).
 
-**5 · October's purchase month** — `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10` — as at the S455 close (L.K. Drug House 16–31 Oct; Bass, Jubilee, Saisun summaries; Bass Pharma ₹1,597 by cheque; then FINALISE).
+**5 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — section A: the moves with no record; the "ask by itself" figure; the floor box; section B: sale bill **A004591**; the two phone switches when you are ready.
 
-**6 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
+**6 · October's purchase month** — `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10` — as at the S455 close (L.K. Drug House 16–31 Oct; Bass, Jubilee, Saisun summaries; Bass Pharma ₹1,597 by cheque; then FINALISE).
 
-**7 · The new start text, pasted once into each of the four projects** — `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S438\COMMON_START_HERE_PROMPT_v1_1.md`
+**7 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
 
-**8 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting.
+**8 · The new start text, pasted once into each of the four projects** — `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S438\COMMON_START_HERE_PROMPT_v1_1.md`
 
-**9 · The orthotics count** — who counts the shelf, and on which day.
+**9 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting.
 
-**10 · Still yours:** ZUPRINOR 5 (row 6); Shavez's phone; Ram Singh (F-1115).
+**10 · The orthotics count** — who counts the shelf, and on which day.
 
-**11 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
+**11 · Still yours:** ZUPRINOR 5 (row 6); Shavez's phone; Ram Singh (F-1115).
+
+**12 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
 
 **Later, your word only:** AutoHotkey and the order list (parked, D976); when scans start adding to stock (D891); the carry setting back to 1 if you ever want the old automatic way (D965).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S463 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S468 close
 
-1. **Marg's Stock Register for one item** — the approved screen, after its three review faults are fixed; one publish for you.
-2. **ZIBON EXTRA / GEMCAL XT** — from Darpan's two counts, one job on Amir's card.
+1. **Your "morning reports in" message** — why it did not reach you on 15-Nov; repaired if it was never sent.
+2. **ZIBON EXTRA / GEMCAL XT** — from Darpan's Monday counts, one job on Amir's card.
 3. **Yuvika 803's purchase check** — judged again against the corrected bill once Amir has fixed Marg.
+
+## ✅ DONE AT THE S468 CLOSE — 15-Nov-2026, midday (the Sanjeevni project)
+
+- **Marg's Stock Register for one item — live** (15-Nov, 10:27 am): the three faults the review found were fixed and a second review passed it.
+- **The six earlier pharmacy installs** confirmed against the server's backup.
 
 ## ✅ DONE AT THE S463 CLOSE — 14-Nov-2026, evening (the Sanjeevni project)
 
