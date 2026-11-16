@@ -1,0 +1,2 @@
+S844_SLIP_NAME_AS_ID
+session S469 (the parent), 15-Nov-2026 -- F-1424: old slips with a name as the clinic ID, one tap to fix; the old doors refuse a name
