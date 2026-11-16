@@ -1,0 +1,2 @@
+# WITHDRAWN 16-Nov-2026 (Sanjeevni S470): kit number S846 belongs to the parent (S846_SLIPS_NOT_IN_DOCTERZ). This fix is kit S847_LEDGER_ARRIVED. Nothing here installs. Move this folder to deploy_kits\_to_delete when the shell allows.
+raise SystemExit("WITHDRAWN: use kit S847_LEDGER_ARRIVED")
