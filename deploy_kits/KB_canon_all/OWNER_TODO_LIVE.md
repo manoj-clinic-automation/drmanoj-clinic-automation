@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S471 close** (the parent, EOS-light, held at the build), 17-Nov-2026, morning — the parent's sections refreshed here (S469's records placed; the audit's one decision for you; your list of slips not in Docterz half built); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S466 close** (the Scan App project, full EOS, held at the build), 17-Nov-2026, morning — the Scan App sections refreshed here (a credit note scanned on the pharmacy lane now comes in as a credit note — S841); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S471 close** (the parent, EOS-light, held at the build), 17-Nov-2026, morning — the parent's sections refreshed here (S469's records placed; the audit's one decision for you; your list of slips not in Docterz half built); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S470 close** (the Sanjeevni chat, full EOS, placed by its 472 open), 16-Nov-2026, midday — the Sanjeevni sections refreshed here (the Item ledger live; unmatched scans to him and Amir next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S469 close** (the parent, full EOS, held at the build), 16-Nov-2026, morning — the parent's sections refreshed here (the X-ray messages and the old slips with a name as the ID live; the no-Docterz slips next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S468 close** (the Sanjeevni chat, full EOS, placed by its 470 open), 15-Nov-2026, midday — the Sanjeevni sections refreshed here (Marg's Stock Register for one item live; a word with Ram Singh before Shavez is switched on); the other projects' sections as their closes left them.
@@ -258,11 +259,11 @@
 - The Diwali gift sticker sheet (A4, 8 per sheet) made.
 - Two project-only papers copied to the disk store.
 
-## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S464 close (14-Nov, 20:4x)
+## ⭐0 — WHAT NEEDS YOU · THE SCAN APP PROJECT (papers & bills) — refreshed at the S466 close (17-Nov, 11:3x)
 
-*Detail: `S464_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_466.md`.*
+*Detail: `S466_BUILD_BRIEF.md`; the next chat's entry is `START_HERE_SESSION_475.md`.*
 
-**1 · The publish:** this close's papers (nothing follows it).
+**1 · The publish:** this close's papers, after the next Scan App chat places them (it names it).
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -298,11 +299,16 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 **6 · Carried:** October's statement to Variety (Stationery page) · Y147 Yuvika's May slips · Y136 lab bills from April · Y120 missing battery bills · Y121 Fujifilm's AMC invoice · the X-ray film log's opening boxes · the new Surgiwear drape's name (Y146).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S464 close
+## ⭐1 — WHAT I BUILD NEXT · THE SCAN APP PROJECT — refreshed at the S466 close
 
 **Every build follows `BUILD_NORM_v1` (D704).**
 
-1. **A credit note scanned straight on the pharmacy lane (F-1419)** — recognised at intake and kept out of Sanjeevni's bill pairing; the Sanjeevni chat told first.
+1. **What you ask.** Nothing is waiting on a build. `clinic_papers.py` is read whole before its next kit (drift 5).
+
+## ✅ DONE AT THE S466 CLOSE — 17-Nov-2026 (the Scan App project)
+
+- ~~**A credit note scanned straight on the pharmacy lane — kept out of Sanjeevni's bill pairing**~~ — kit S841, live 21:17 14-Nov (F-1419); the bill edit page keeps the kind (F-1422).
+- ~~**S464's records**~~ — placed at the open, published 14-Nov.
 
 ## ✅ DONE AT THE S464 CLOSE — 14-Nov-2026 (the Scan App project)
 
