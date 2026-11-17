@@ -1,0 +1,12 @@
+2fbf12c0198e6f97e5edba3f48781ad3  KIT_ID.txt
+1e5629ec7ffb5fc08ae8b76a09cd75b9  README.md
+09954e513adc056174cd5002af583606  TO_PINS.md5
+0e3c0fc5e401cc44f621d49b8cf21797  install_S850_MARG_IS_RIGHT.sh
+d9a23f446785d83f0c866235cdc3bd29  make_s850.py
+c1ba6491c6e707b1779419782b56dd47  marg_right.py
+51abf9217b1fed1724922647d4f42560  scan_ask.py
+c54b1c315392d9c567f99bb1d589e008  purchase_app.py
+b4040d8fc2d09719b27747c9f6a51d26  item_ledger.py
+fa7a9e2b3651847e2517d431a580119c  synth_s850.py
+e8acd073c7a50f08df196304236305fb  undo_s850.sh
+454d54d212a338b54dfc2a1c56c94c59  rehearse_s850.sh

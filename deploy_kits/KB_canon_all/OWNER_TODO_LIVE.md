@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S473 close** (the Sanjeevni chat, full EOS), 17-Nov-2026, midday — the Sanjeevni sections refreshed here (L.K.'s October added up; scanned bills not found in Marg live; S850 next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S474 close** (the parent, full EOS), 17-Nov-2026, afternoon — the parent's sections refreshed here (your list of slips not in Docterz, the Patients page part 1 and three small fixes live); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S473 close** (the Sanjeevni chat, full EOS), 17-Nov-2026, midday — the Sanjeevni sections refreshed here (L.K.'s October added up; scanned bills not found in Marg live; S850 next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S466 close** (the Scan App project, full EOS, held at the build), 17-Nov-2026, morning — the Scan App sections refreshed here (a credit note scanned on the pharmacy lane now comes in as a credit note — S841); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S471 close** (the parent, EOS-light, held at the build), 17-Nov-2026, morning — the parent's sections refreshed here (S469's records placed; the audit's one decision for you; your list of slips not in Docterz half built); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S470 close** (the Sanjeevni chat, full EOS, placed by its 472 open), 16-Nov-2026, midday — the Sanjeevni sections refreshed here (the Item ledger live; unmatched scans to him and Amir next); the other projects' sections as their closes left them.
@@ -486,7 +487,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S471 close (17-Nov, 11:1x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S474 close (17-Nov, 13:1x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -496,9 +497,19 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · NOTHING TO PUBLISH NOW.** This session's records wait on your PC for the next session to place (this chat's link to the PC stayed down); that session names the double-click.
+**1 · ONE DOUBLE-CLICK — today's records** (nothing follows it on the server):
 
-**1b · ONE DECISION WHEN YOU WISH — the old Google-Sheet UPI checker** (the Monday audit): it stopped in early September but still mails you daily, with about ₹87,600 of old gaps never settled. Retire it (stop the two mails, keep the sheet, list the old gaps once for you) or bring it back — one word.
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+
+**1b · YOUR LIST OF SLIPS NOT IN DOCTERZ IS LIVE** — enter each in Docterz back-dated, then tap *Entered in Docterz* (or one of the other three answers):
+
+```
+https://followup.dr-manoj.in/finance/clinic/not-in-docterz
+```
+
+**1c · THE PHARMACY DAYS WAITING FOR YOUR APPROVAL — since 03-Nov** (your console now says how long, and that 03-Nov was passed over).
 
 **2 · THE ATTENDANCE ALARM IS LIVE — NOTHING TO DO.** No punch by 10 am on a working day → one message; once the machine is back and the server has seen it, 30 minutes of silence in clinic hours → one message, and one when it is back; a wrong clock → once that day. A closed weekday also brings the 10 am message. Your console shows "attendance machine contact".
 
@@ -528,10 +539,10 @@ https://followup.dr-manoj.in/finance/health
 
 **9 · THE HELPLINE NUMBER ON PRINTED MATTER AND JUSTDIAL** — the prescription header, cards, the board — with the old number beside it.
 
-**10 · THE PATIENTS PAGE (mock-up, version 16): look, add what you want.** It comes after the follow-up feed.
+**10 · THE PATIENTS PAGE — PART 1 IS LIVE:** look, and say what you want changed; part 2 (calls, WhatsApp, Google, reviews, last year's history) comes after the lab reports.
 
 ```
-https://claude.ai/artifact/TNw8B62K2GHvST3NPU1WNA
+https://followup.dr-manoj.in/finance/console/patients
 ```
 
 **11 · LEAVE THE TWO DOCTERZ EXPORT FILES IN `D:\Downloads` AS THEY ARE**; do not attach patient files to the chat.
@@ -552,16 +563,23 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Slips not in Docterz — your list (half built):** every slip whose patient is not in Docterz, with the full mobile, for you to enter back-dated; four taps — Entered in Docterz · Not entering in Docterz · Free / staff / home · Wrong slip; your console shows the count, and slips you keep outside Docterz count with the day's money; Shavez's desk reminds when such a patient comes again. 33 such slips since 23 September on last night's copy. Finished, tested and handed to you next session.
-2. **The X-ray and blood-report filing — the last part:** lab reports without an ID, with suggested patients.
-3. **A line on your console: the oldest pharmacy day not yet approved** (the Monday audit; none approved since 9-Nov).
+1. **The X-ray and blood-report filing — the last part:** lab reports without an ID, with suggested patients (one strong match files itself, with Move; two or more — one tap; none — "not our patient").
+2. **The Patients page — part 2:** calls and WhatsApp at the front desk, Google, reviews, last year's history from your two Docterz exports, one-tap words, "Called" columns.
+3. **The money exception lists** (the Monday audit): each gets a reader or is retired; the two old bank-statement gaps (09-Oct, 14-Oct) first.
 4. **Then the mock-up of the two monthly switches** (late charge; extra leave and absent) on that staff member's private page; built on your word.
-5. **The month figures on the scan app's clinic groups:** a receipt, a statement or a credit note must not add to a group's spend.
-6. **Three small jobs** (the Inbox's missing-file words · the old approvals service stopped and kept · the WhatsApp marks in the nightly backup) — and the small tails of the Clinic PCs page.
-7. **Then the tracker's move from your PC to the server** (about three sessions).
-8. **Watching, at every open:** the X-ray messages · the attendance alarm (the machine is with BL Computers) · the evening alert · the sending's page · the Inbox · the helpline on the Google profile.
+5. **Three small jobs** (the Inbox's missing-file words · the old approvals service stopped and kept · the WhatsApp marks in the nightly backup) — and the small tails of the Clinic PCs page.
+6. **Then the tracker's move from your PC to the server** (about three sessions).
+7. **The old Google-Sheet UPI checker:** parked at your word; retired when you say.
+8. **Watching, at every open:** your not-in-Docterz taps · the Patients page · the X-ray messages · the attendance alarm (the machine is with BL Computers) · the sending's page · the Inbox.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S474 CLOSE — 17-Nov-2026 (the parent)
+
+- **Your list of slips not in Docterz** (live 11:54 am): full mobiles, four answers, each undoable; the console counts them.
+- **Your Patients page, part 1** (live 12:48 pm), as mock-up v16 — every number opens its list.
+- **Three small fixes** (live 1:10 pm): the approve-days line says the oldest day's wait and the passed-over day; no name as a clinic ID on a cancelled slip without one; the month page's scanned totals leave out receipts and statements and take credit notes off.
+- **Last session's records placed** (11:4x am); the PC's work-disk check added to the morning page.
 
 ## ✅ DONE AT THE S471 CLOSE — 16 → 17-Nov-2026 (the parent)
 
