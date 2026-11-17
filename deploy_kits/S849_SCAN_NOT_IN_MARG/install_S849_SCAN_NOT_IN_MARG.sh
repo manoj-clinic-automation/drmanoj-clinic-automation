@@ -98,7 +98,7 @@ for f in scan_ask.py $FILES; do mv -f "$ROOT/finance/.$f.s849" "$ROOT/finance/$f
 "$SYSTEMCTL" restart "$FSVC" || restore "restart $FSVC"
 [ "${REHEARSE_RED_AT:-}" = 4 ] && restore "rehearsal: a forced red at [4/5]"
 c1=$(wait200); [ "$c1" = 200 ] || restore "finance healthz $c1 after the restart"
-s1=$(shz); [ "$s1" = 200 ] || restore "the new page's healthz answered $s1 (not mounted)"
+s1=$(shz); case "$s1" in 404|000|5*) restore "the new page answered $s1 after the restart (not mounted)";; esac   # 302/401 = mounted behind the login gate (as S845's ledger)
 jnl "$T0" | grep -q "scan_ask NOT mounted" && restore "the Hub's log says scan_ask was NOT mounted"
 PLACING=0
 release_lock
