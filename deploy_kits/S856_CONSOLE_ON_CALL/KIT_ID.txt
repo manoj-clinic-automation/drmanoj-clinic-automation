@@ -1,0 +1,3 @@
+S856_CONSOLE_ON_CALL
+project the parent (session S478, 17-Nov-2026) -- build 1 -- one NEW file, one cron line; portal_console.py and call_hook_capture.py not touched
+console_kick.py -> /root/wa/
