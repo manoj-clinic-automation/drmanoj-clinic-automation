@@ -48,7 +48,7 @@ restore() { say "!! RED after placing ($1) - putting the files back"
   say "   the three new files set aside; $FSVC restarted, finance healthz $(wait200). Send a photo of this screen to Claude."
   release_lock; exit 1; }
 mkfin() { rm -rf "$SCR/fin_$1"; mkdir -p "$SCR/fin_$1" && find "$ROOT/finance" -maxdepth 1 -type f \( -name '*.py' -o -name '*.html' \) -exec cp -p {} "$SCR/fin_$1/" \; && [ -f "$SCR/fin_$1/records.py" ]; }
-pya() { (cd /tmp && TMPDIR="$SCR" PYTHONPYCACHEPREFIX="$SCR/pyc" TZ=Asia/Kolkata timeout 600 "$APY" -W ignore -s -B "$@" 2>&1); }
+pya() { (cd /tmp && TMPDIR="$SCR" PYTHONPYCACHEPREFIX="$SCR/pyc" TZ=Asia/Kolkata timeout 600 "$APY" -W ignore -B "$@" 2>&1); }   # as the app runs: its user site included (flask)
 pyv() { (cd /tmp && TMPDIR="$SCR" PYTHONPYCACHEPREFIX="$SCR/pyc" timeout 600 "$VPY" -W ignore -s -B "$@" 2>&1); }
 cpdb() { [ -f "$1" ] || return 1; "$APY" -c "import sqlite3,sys;s=sqlite3.connect('file:%s?mode=ro'%sys.argv[1],uri=True,timeout=30);d=sqlite3.connect(sys.argv[2]);s.backup(d);d.close()" "$1" "$2"; }
 
@@ -91,8 +91,8 @@ d.commit()" "$SCR/finance.db" "$SCR/schema.db" || stop "!! [3/5] could not make 
 { cpdb "$CONDB" "$SCR/console.db" && cpdb "$INBDB" "$SCR/inbox.db" && cpdb "$GMBDB" "$SCR/gmb.db"; } || stop "!! [3/5] could not copy the call record, the inbox or Review Assist's store - nothing installed"
 MK="-"; [ -f "$MARKDB" ] && { cpdb "$MARKDB" "$SCR/marks.db" && MK="$SCR/marks.db" || stop "!! [3/5] could not copy the WhatsApp marks - nothing installed"; }
 { mkfin old && mkfin new && for n in $NAMES $NEW; do \cp -p "$KDIR/$n" "$SCR/fin_new/$n" || exit 9; done; } || stop "!! [3/5] could not lay out the walks - nothing installed"
-R1=$(pya "$KDIR/walk_s853.py" "$SCR/fin_new" "$CCPY" "$SCR/w853_new" | tail -1)
-case "$R1" in "WALK 39/39") ;; *) stop "!! [3/5] walk_s853 (made-up root) on the new files: $R1 - nothing installed";; esac
+R1A=$(pya "$KDIR/walk_s853.py" "$SCR/fin_new" "$CCPY" "$SCR/w853_new"); R1=$(echo "$R1A" | tail -1)
+case "$R1" in "WALK 39/39") ;; *) echo "$R1A" | grep -E '^FAIL|Error|error' | cut -c1-160 | head -8 | sed 's/^/      /'; stop "!! [3/5] walk_s853 (made-up root) on the new files: $R1 - nothing installed";; esac
 R1c=$(pya "$KDIR/walk_s853.py" "$SCR/fin_old" "$CCPY" "$SCR/w853_old" | tail -1)
 case "$R1c" in "WALK 39/39") stop "!! [3/5] walk_s853's control (the live files) did not go red - nothing installed";; esac
 R2=$(PATIENTS_CONSOLE_DB=/nonexistent/c.db PATIENTS_GMB_DB=/nonexistent/g.db pyv "$KDIR/walk_s851.py" "$SCR/fin_new" "$SCR/fin_new" "$SCR/schema.db" "$SCR/w851_new" | tail -1)
