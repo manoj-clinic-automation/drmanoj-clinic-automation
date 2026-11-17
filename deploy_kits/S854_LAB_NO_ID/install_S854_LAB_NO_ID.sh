@@ -69,7 +69,7 @@ say "[2/5] the live pins exact; both files compile on both pythons"
 "$APY" -c "import sqlite3,sys;s=sqlite3.connect('file:%s?mode=ro'%sys.argv[1],uri=True,timeout=30);d=sqlite3.connect(sys.argv[2]);s.backup(d);d.close()" "$DB" "$SCR/finance.db" || stop "!! [3/5] could not copy the database - nothing installed"
 { mkfin old && mkfin new && for n in $NAMES; do \cp -p "$KDIR/$n" "$SCR/fin_new/$n" || exit 9; done; } || stop "!! [3/5] could not lay out the walks - nothing installed"
 R1A=$(pya "$KDIR/walk_s854.py" "$SCR/fin_new" "$SCR/fin_new" "$SCR/finance.db"); R1=$(echo "$R1A" | tail -1)
-case "$R1" in "WALK OK 28/28") ;; *) echo "$R1A" | grep -E '^BAD' | cut -c1-160 | head -8 | sed 's/^/      /'; stop "!! [3/5] walk_s854 (made-up patients on a copy) on the new files: $R1 - nothing installed";; esac
+case "$R1" in "WALK OK 31/31") ;; *) echo "$R1A" | grep -E '^BAD' | cut -c1-160 | head -8 | sed 's/^/      /'; stop "!! [3/5] walk_s854 (made-up patients on a copy) on the new files: $R1 - nothing installed";; esac
 R1c=$(pya "$KDIR/walk_s854.py" "$SCR/fin_old" "$SCR/fin_old" "$SCR/finance.db" --control | tail -1)
 case "$R1c" in "CONTROL: red "*) ;; *) stop "!! [3/5] walk_s854's control (the live files) did not go red: $R1c - nothing installed";; esac
 W4n=$(pya "$KDIR/walk_s834.py" "$SCR/fin_new" "$DMAP" "$SCR/finance.db" | tail -1); W4o=$(pya "$KDIR/walk_s834.py" "$SCR/fin_old" "$DMAP" "$SCR/finance.db" | tail -1)

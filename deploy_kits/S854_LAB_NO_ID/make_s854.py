@@ -197,7 +197,7 @@ def noid_resolve(con, msg_id, cid, how, who=""):'''),
         idx = noid_name_index(con) if can_tap else {}     # S854: the patient list read once for the whole card
         for r in nxs:"""),
     # 5 -- the card's own row wraps; a suggestion is a full-width button
-    (""".rb{display:flex;gap:4px;flex:0 0 auto}""", """.rb{display:flex;gap:4px;flex:0 0 auto}.rb.nxf{flex-wrap:wrap;flex:1 1 100%}.rb.nxf .cand{flex:1 1 100%;text-align:left;min-height:44px}"""),
+    (""".rb{display:flex;gap:4px;flex:0 0 auto}""", """.rb{display:flex;gap:4px;flex:0 0 auto}.rb.nxf{flex-wrap:wrap;flex:1 1 100%%}.rb.nxf .cand{flex:1 1 100%%;text-align:left;min-height:44px}"""),
 ]
 
 FILED_LAB = '''

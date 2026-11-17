@@ -127,6 +127,14 @@ app = Flask("walk854")
 app.secret_key = "walk"
 SL.init(app, lambda: con, lambda *a, **k: (U, None), None, unit="slips")
 cl = app.test_client()
+for who, roles in (("walkmaker", ["maker"]), ("walkdoc", ["checker"]), ("walkview", ["viewer"])):     # the page itself, every role
+    U2 = {"user": who, "roles": roles}
+    app2 = Flask("walk854" + who)
+    app2.secret_key = "walk"
+    app2.config["PROPAGATE_EXCEPTIONS"] = False
+    SL.init(app2, lambda: con, (lambda u: (lambda *a, **k: (u, None)))(U2), None, unit="slips")
+    rr = app2.test_client().get("/finance/slips/pending")
+    ck("C0 Report baaki opens for %s (200)" % roles[0], rr.status_code == 200, rr.status_code)
 r = cl.post("/finance/slips/pending/act", data={"key": "nx:s854walkR1", "act": "noid_pick:%s" % P["P1"], "cid2": P["P2"]})
 row = con.execute("SELECT clinic_id FROM lab_noid WHERE msg_id='s854walkR1'").fetchone()
 ck("C8 a suggestion tapped with a different ID typed is refused, nothing filed", r.status_code == 303 and row["clinic_id"] == "")

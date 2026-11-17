@@ -17,7 +17,7 @@
 | finance/check_screens.py | ac0e890a → (TO_PINS.md5) |
 
 ## Proof
-- `walk_s854.py` — made-up patients and mails on a copy, a 2027 clock: **WALK OK 28/28**; control on the live files **red 18 of 28**.
+- `walk_s854.py` — made-up patients and mails on a copy, a 2027 clock: **WALK OK 31/31** (now also opening Report baaki for every role); control on the live files **red 18 of 31**. The first install (S477, 15:05) broke Report baaki with a 500: the card's new CSS carried a bare % inside the page's %-formatted template; undone at once; fixed (%%); the walk now opens the page.
 - Cold review (a fresh reader): NOT SAFE on the first look — 2 MUST (Enter in the ID box would have submitted the top suggestion; 'sabse pakka' shown where a second open slip had the name), 5 SHOULD (a posted ID checked to be a known numeric patient; name strength in the order; the card's row wraps on a phone; reception's picks movable from his list; the older walks' results pinned, not only compared), LOW 8–10 — all built in, each with a walk case. Second look: one more MUST (a two-word report name could hide OPEN one-word slips) — fixed exactly as it prescribed, walk case B4b.
 - `walk_s834.py` (S834, slip_log) — 34 green on both, pinned in the installer; `walk_s836.py` (S836, check_screens) — exactly 'BAD E1 E4 E6, WALK RED 3 of 40' on both, pinned (its 3 wording checks were superseded by S839's "Free X-ray").
 - `shape_s854.py` on a copy of the database: S391's answer the same for every past report; every report the old list showed still shown; the X-ray part of "Filed by themselves" unchanged.

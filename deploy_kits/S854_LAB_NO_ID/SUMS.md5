@@ -1,11 +1,11 @@
 428cb704144dfecfd89483eae34c9e04  KIT_ID.txt
-da48e52b03d697af2071e1ff087d71ae  README.md
-f7dab663c9d8f74a2abc4be03cc898ba  TO_PINS.md5
-781f47f3135ce4692d025c118e345747  install_S854_LAB_NO_ID.sh
-fa5583dff791c35e58f2c75f1203539e  make_s854.py
-dc61de9d5ef34be9d930805c76ddf12f  slip_log.py
+f2390a465d94e509844b0b15ab684be5  README.md
+2d2eca38fb2bdb6bdd903c4159db3777  TO_PINS.md5
+43b5ea59d44145080e50bcf6edc2cab6  install_S854_LAB_NO_ID.sh
+5b93c43ecbf8178125e740a1bee591d1  make_s854.py
+c2cf351a74b983e883be6bed1e5d918b  slip_log.py
 5d00b2e80f25875a431b97b0a0331515  check_screens.py
-38e7b653be339a7f7db08d970df6afd9  walk_s854.py
+a0ca8a04d4d59b8f0a10364c1244c8f2  walk_s854.py
 f58ec1b78516e068e37c88ac43d1dbf6  walk_s834.py
 62f25cdee7f36e68e17c61f93114431a  walk_s836.py
 28782f4fedcecd95e16d88c659bdac07  shape_s854.py
