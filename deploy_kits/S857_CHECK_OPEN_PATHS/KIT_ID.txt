@@ -1,0 +1,1 @@
+S857_CHECK_OPEN_PATHS  17-Nov-2026  Sanjeevni session 476  (the purchase check names what is open, each with its path; row 7 worded)
