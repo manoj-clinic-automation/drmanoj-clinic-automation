@@ -37,7 +37,7 @@ restore() { say "!! RED after placing ($1) - putting the files back"
   for n in $NAMES; do say "   $n $(m8 "$ROOT/finance/$n") (expected $(from_of "$n"))"; done
   say "   $FSVC restarted, finance healthz $(wait200). Send a photo of this screen to Claude."; release_lock; exit 1; }
 mkfin() { rm -rf "$SCR/fin_$1"; mkdir -p "$SCR/fin_$1" && find "$ROOT/finance" -maxdepth 1 -type f -name '*.py' -exec cp -p {} "$SCR/fin_$1/" \; && [ -f "$SCR/fin_$1/records.py" ]; }
-pya() { (cd /tmp && TMPDIR="$SCR" PYTHONPYCACHEPREFIX="$SCR/pyc" TZ=Asia/Kolkata timeout 600 "$APY" -W ignore -s -B "$@" 2>&1); }
+pya() { (cd /tmp && TMPDIR="$SCR" PYTHONPYCACHEPREFIX="$SCR/pyc" TZ=Asia/Kolkata timeout 600 "$APY" -W ignore -B "$@" 2>&1); }   # as the app runs: its user site included (flask) -- S853's first run, F at the close
 
 if [ "${1:-}" = "--undo" ]; then
   U=1; for n in $NAMES; do [ "$(m8 "$ROOT/finance/$n")" = "$(from_of "$n")" ] || U=0; done
@@ -68,8 +68,8 @@ for p in "$APY" "$VPY"; do for n in $NAMES; do PYTHONPYCACHEPREFIX="$SCR/pyc" "$
 say "[2/5] the live pins exact; both files compile on both pythons"
 "$APY" -c "import sqlite3,sys;s=sqlite3.connect('file:%s?mode=ro'%sys.argv[1],uri=True,timeout=30);d=sqlite3.connect(sys.argv[2]);s.backup(d);d.close()" "$DB" "$SCR/finance.db" || stop "!! [3/5] could not copy the database - nothing installed"
 { mkfin old && mkfin new && for n in $NAMES; do \cp -p "$KDIR/$n" "$SCR/fin_new/$n" || exit 9; done; } || stop "!! [3/5] could not lay out the walks - nothing installed"
-R1=$(pya "$KDIR/walk_s854.py" "$SCR/fin_new" "$SCR/fin_new" "$SCR/finance.db" | tail -1)
-case "$R1" in "WALK OK 28/28") ;; *) stop "!! [3/5] walk_s854 (made-up patients on a copy) on the new files: $R1 - nothing installed";; esac
+R1A=$(pya "$KDIR/walk_s854.py" "$SCR/fin_new" "$SCR/fin_new" "$SCR/finance.db"); R1=$(echo "$R1A" | tail -1)
+case "$R1" in "WALK OK 28/28") ;; *) echo "$R1A" | grep -E '^BAD' | cut -c1-160 | head -8 | sed 's/^/      /'; stop "!! [3/5] walk_s854 (made-up patients on a copy) on the new files: $R1 - nothing installed";; esac
 R1c=$(pya "$KDIR/walk_s854.py" "$SCR/fin_old" "$SCR/fin_old" "$SCR/finance.db" --control | tail -1)
 case "$R1c" in "CONTROL: red "*) ;; *) stop "!! [3/5] walk_s854's control (the live files) did not go red: $R1c - nothing installed";; esac
 W4n=$(pya "$KDIR/walk_s834.py" "$SCR/fin_new" "$DMAP" "$SCR/finance.db" | tail -1); W4o=$(pya "$KDIR/walk_s834.py" "$SCR/fin_old" "$DMAP" "$SCR/finance.db" | tail -1)
