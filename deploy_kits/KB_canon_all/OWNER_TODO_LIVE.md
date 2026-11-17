@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S474 close** (the parent, full EOS), 17-Nov-2026, afternoon — the parent's sections refreshed here (your list of slips not in Docterz, the Patients page part 1 and three small fixes live); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S477 close** (the parent, full EOS), 17-Nov-2026, evening — the parent's sections refreshed here (the Patients page complete; blood reports with no ID get suggested patients); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S474 close** (the parent, full EOS), 17-Nov-2026, afternoon — the parent's sections refreshed here (your list of slips not in Docterz, the Patients page part 1 and three small fixes live); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S473 close** (the Sanjeevni chat, full EOS), 17-Nov-2026, midday — the Sanjeevni sections refreshed here (L.K.'s October added up; scanned bills not found in Marg live; S850 next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S466 close** (the Scan App project, full EOS, held at the build), 17-Nov-2026, morning — the Scan App sections refreshed here (a credit note scanned on the pharmacy lane now comes in as a credit note — S841); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S471 close** (the parent, EOS-light, held at the build), 17-Nov-2026, morning — the parent's sections refreshed here (S469's records placed; the audit's one decision for you; your list of slips not in Docterz half built); the other projects' sections as their closes left them.
@@ -487,7 +488,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S474 close (17-Nov, 13:1x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S477 close (17-Nov, 17:1x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -503,23 +504,27 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**1b · YOUR LIST OF SLIPS NOT IN DOCTERZ IS LIVE** — enter each in Docterz back-dated, then tap *Entered in Docterz* (or one of the other three answers):
+**1b · YOUR PATIENTS PAGE IS COMPLETE (parts 1 and 2)** — last year's same months, Google, the front desk's calls and WhatsApp, reviews, and who was called about a missed review. Today: portal → *Today · Clinic · Sanjeevni* → *The month* → *Patients*; a tile of its own comes next session.
+
+```
+https://followup.dr-manoj.in/finance/console/patients
+```
+
+**1c · TELL RECEPTION (once): a blood report with no clinic ID now shows the likely patients on Report baaki** — tap the right one; "sabse pakka" marks the surest. Reports placed by themselves or by reception show on your "Filed by themselves", where you can Move one.
+
+**1d · THE PHARMACY DAYS WAITING FOR YOUR APPROVAL — since 03-Nov.**
+
+**1e · YOUR LIST OF SLIPS NOT IN DOCTERZ** — enter each in Docterz back-dated, then tap the answer:
 
 ```
 https://followup.dr-manoj.in/finance/clinic/not-in-docterz
 ```
 
-**1c · THE PHARMACY DAYS WAITING FOR YOUR APPROVAL — since 03-Nov** (your console now says how long, and that 03-Nov was passed over).
+**2 · THE ATTENDANCE ALARM IS LIVE — NOTHING TO DO.**
 
-**2 · THE ATTENDANCE ALARM IS LIVE — NOTHING TO DO.** No punch by 10 am on a working day → one message; once the machine is back and the server has seen it, 30 minutes of silence in clinic hours → one message, and one when it is back; a wrong clock → once that day. A closed weekday also brings the 10 am message. Your console shows "attendance machine contact".
+**3 · THE X-RAY AND BLOOD-REPORT FILING: TELL SHAVEZ AND RECEPTION (once)** — as at the S474 close (the 7-day strip, "Kal ki X-ray", the photo question, the desk's name search, the 9:30 am and 7 pm messages).
 
-**3 · THE X-RAY AND BLOOD-REPORT FILING: TELL SHAVEZ AND RECEPTION (once).** Check karein has the 7-day strip, "Kal ki X-ray" and "Kya yeh photo inki hai?"; the slips desk shows "X-ray upload baaki", a 7-day X-ray box, finds a patient by NAME, and now lists **4 old X-ray slips with a name in place of the clinic ID — Shavez (or you) taps the right patient on each**. Your X-ray sheet has a Photo column and "Not filed only". **The messages are live from Monday 16-Nov:** 9:30 am "X-ray <date>" to reception, 7 pm "Aaj ki upload" to reception and "Records today" to you.
-
-```
-https://claude.ai/artifact/W5TAwHRWP5zFBpN9HtqFhB
-```
-
-**4 · "AFTER TODAY'S VISIT" CAN BE SWITCHED ON WHEN YOU WISH** — all six test messages are confirmed. The date-based switches wait for the tracker's move from your PC to the server.
+**4 · "AFTER TODAY'S VISIT" CAN BE SWITCHED ON WHEN YOU WISH.**
 
 ```
 https://followup.dr-manoj.in/portal/messages
@@ -531,48 +536,46 @@ https://followup.dr-manoj.in/portal/messages
 https://followup.dr-manoj.in/finance/health
 ```
 
-**6 · THE STAFF LEDGER'S TWO SWITCHES: nothing to do yet** — a mock-up comes after the filing build.
+**6 · THE TEMPLATE FEATURES: tell me which you want** — the paper is `S442_WA_TEMPLATE_FEATURES_STUDY.md`.
 
-**7 · THE TEMPLATE FEATURES: tell me which you want** — reply buttons · a feedback question the morning after a visit · a "Stop messages" button · X-rays and reports sent as the message · header and footer. The paper is `S442_WA_TEMPLATE_FEATURES_STUDY.md`.
+**7 · TELL SHIVANI, ALISHA, SHAVEZ AND RECEPTION (once):** all four phones ring on every call; a missed caller not called back in 30 minutes brings a reminder; after an hour it goes to Shavez; what is still open at closing comes to you.
 
-**8 · TELL SHIVANI, ALISHA, SHAVEZ AND RECEPTION (once):** all four phones ring on every call; a missed caller not called back in 30 minutes brings a reminder; after an hour it goes to Shavez; what is still open at closing comes to you.
+**8 · THE HELPLINE NUMBER ON PRINTED MATTER AND JUSTDIAL** — with the old number beside it.
 
-**9 · THE HELPLINE NUMBER ON PRINTED MATTER AND JUSTDIAL** — the prescription header, cards, the board — with the old number beside it.
+**9 · LEAVE THE TWO DOCTERZ EXPORT FILES IN `D:\Downloads` AS THEY ARE**; do not attach patient files to the chat.
 
-**10 · THE PATIENTS PAGE — PART 1 IS LIVE:** look, and say what you want changed; part 2 (calls, WhatsApp, Google, reviews, last year's history) comes after the lab reports.
+**10 · BL COMPUTERS — THE ATTENDANCE MACHINE (with the vendor since 14-Nov).** Until it is back, staff times go into the staff register by hand.
 
-```
-https://followup.dr-manoj.in/finance/console/patients
-```
-
-**11 · LEAVE THE TWO DOCTERZ EXPORT FILES IN `D:\Downloads` AS THEY ARE**; do not attach patient files to the chat.
-
-**12 · BL COMPUTERS — THE ATTENDANCE MACHINE (with the vendor since 14-Nov).** Ask them to check the adapter, the backup battery and the clock, its Wi-Fi, and that it rejoins by itself after a power cut. Until it is back, staff times go into the staff register by hand.
-
-**13 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
+**11 · THE PACKS PAGE: type the Zerodha password, name the 25 card shops once, and type the card and ICICI statement passwords.** *You asked (12-Oct): remind every session until done.*
 
 ```
 https://followup.dr-manoj.in/finance/packs
 ```
 
-**14 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
+**12 · THE ATTENDANCE MACHINE:** delete old Arjun's finger (number 20), then tick *removed from the biometric device* on his exit; enrol Arjun Dev's finger, then tell me.
 
-**15 · MYOPERATOR (ticket 691386): nothing to do now.** We decide together what to write to them (your ruling, 12-Nov).
+**13 · MYOPERATOR (ticket 691386): nothing to do now.**
 
-**16 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
+**14 · Items 8 – 24 and *when it happens* stand as at the S422 close.**
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **The X-ray and blood-report filing — the last part:** lab reports without an ID, with suggested patients (one strong match files itself, with Move; two or more — one tap; none — "not our patient").
-2. **The Patients page — part 2:** calls and WhatsApp at the front desk, Google, reviews, last year's history from your two Docterz exports, one-tap words, "Called" columns.
-3. **The money exception lists** (the Monday audit): each gets a reader or is retired; the two old bank-statement gaps (09-Oct, 14-Oct) first.
-4. **Then the mock-up of the two monthly switches** (late charge; extra leave and absent) on that staff member's private page; built on your word.
+1. **Your three asks of 17-Nov, 5:10 pm:** (a) the Callback Tracker does not work for you — found and fixed; (b) the Call Console's figures lag the Callback Tracker's — the slow leg found and closed; (c) a portal tile of its own for the Patients page.
+2. **The money exception lists** (the Monday audit): each gets a reader or is retired; the two old bank-statement gaps (09-Oct, 14-Oct) first.
+3. **The Patients page's last pieces:** one-tap diagnosis words; Google's monthly figures read by the server from the mail; enquiry callers who became patients.
+4. **The mock-up of the two monthly switches** (late charge; extra leave and absent) on that staff member's private page; built on your word.
 5. **Three small jobs** (the Inbox's missing-file words · the old approvals service stopped and kept · the WhatsApp marks in the nightly backup) — and the small tails of the Clinic PCs page.
 6. **Then the tracker's move from your PC to the server** (about three sessions).
 7. **The old Google-Sheet UPI checker:** parked at your word; retired when you say.
-8. **Watching, at every open:** your not-in-Docterz taps · the Patients page · the X-ray messages · the attendance alarm (the machine is with BL Computers) · the sending's page · the Inbox.
+8. **Watching, at every open:** reception's first suggestion taps · the Patients page's new blocks · your not-in-Docterz taps · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S477 CLOSE — 17-Nov-2026 (the parent)
+
+- **Your Patients page, part 2** (live ~2:55 pm): last year's same months from your two Docterz exports, Google's profile figures, the front desk's calls and WhatsApp month by month, Google reviews, and a "Called" column on missed reviews.
+- **Blood reports with no clinic ID** (live 5:03 pm): reception sees the likely patients and taps one; older unplaced reports no longer drop off after 7 days; reports that placed themselves are on your "Filed by themselves" with Move.
+- **Report baaki was down 3:05 → 5:03 pm** after the first install (a page fault); undone by you and fixed — every staff role's page is now opened before any install.
 
 ## ✅ DONE AT THE S474 CLOSE — 17-Nov-2026 (the parent)
 
