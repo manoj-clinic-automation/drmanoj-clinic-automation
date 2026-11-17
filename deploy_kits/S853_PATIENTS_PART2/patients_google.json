@@ -1,0 +1,13 @@
+{
+ "about": "Google Business Profile, the clinic's listing: each month's figures from Google's own monthly performance mail to drmka.ortho (businessprofile-noreply@google.com), and each month against the same month of 2025 from the profile's Performance page (Google's own comparison). Read 12-Nov-2026 (S433); October re-read from its mail 17-Nov-2026 (S477). Counts only.",
+ "version": "S853 google 1",
+ "months": {
+  "2026-06": {"searches": 1450, "views": 6352, "calls": 231, "directions": 206, "chats": 14, "website": 23, "interactions": 474, "yoy": {"calls": 0.9, "directions": 3.0, "actions": 1.5, "views": 7.9, "searches": -6.1}},
+  "2026-07": {"searches": 1940, "views": 7323, "calls": 258, "directions": 239, "chats": 34, "website": 24, "interactions": 555, "yoy": {"calls": 39.5, "directions": 25.8, "actions": 32.2, "views": 45.4, "searches": 88.9}},
+  "2026-08": {"searches": 1417, "views": 6939, "calls": 205, "directions": 231, "chats": 15, "website": 27, "interactions": 478, "yoy": {"calls": -1.9, "directions": 39.2, "actions": 18.7, "views": -1.1, "searches": -14.1}},
+  "2026-09": {"searches": 1547, "views": 6984, "calls": 212, "directions": 217, "chats": 25, "website": 15, "interactions": 469, "yoy": {"calls": 1.9, "directions": 8.0, "actions": 3.3, "views": 4.8, "searches": 6.4}},
+  "2026-10": {"searches": 1415, "views": 6421, "calls": 185, "directions": 203, "chats": 22, "website": 16, "interactions": 426, "yoy": {"calls": 16.4, "directions": 25.3, "actions": 19.9, "views": 1.6, "searches": 1.1}}
+ },
+ "top_terms": "orthopedic doctor bareilly (250-340 a month) · best orthopedic doctor in bareilly (165-185) · top orthopedic doctor(s) in bareilly (89-136); October's third: manoj (73). The profile's name was changed in mid-October.",
+ "closed_days": "On the 21 days the clinic was closed (Jun-Oct), Google still brought about 4 calls and 3 direction requests a day."
+}

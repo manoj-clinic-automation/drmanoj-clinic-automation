@@ -13,23 +13,27 @@ P["scan_ask.py"] = [(
     '        c["best"] = False\n'
     '    if out:\n'
     '        top = out[0]\n',
-    '    out.sort(key=lambda c: (-int(c["tail"] and c["total"]), -(c["agree"]), -int(c["tail"]), -int(c["total"]), c["gap"]))\n'
+    '    for c in out:                                          # S850 (F-1440): the number read AND the total within Rs 2 -- or, the paper\'s\n'
+    '        c["numtot"] = bool(c["tail"] and (c["total"] or (not total_p and c["gap"] == 0)))   # total not read, the same date\n'
+    '    out.sort(key=lambda c: (-int(c["numtot"]), -(c["agree"]), -int(c["tail"]), -int(c["total"]), c["gap"]))\n'
     '    for c in out:\n'
     '        c["best"] = False\n'
     '        c["why"] = "lines"\n'
-    '    nt = [c for c in out if c["tail"] and c["total"]]       # S850 (F-1440): the number read AND the total within Rs 2 name the bill,\n'
-    '    if len(nt) == 1:                                       # whatever the read lines say (B-0122 -> Marg bill 3499)\n'
+    '    nt = [c for c in out if c["numtot"]]                   # ... name the bill, whatever the read lines say (B-0122 -> Marg bill 3499)\n'
+    '    if len(nt) == 1:\n'
     '        nt[0]["best"] = True\n'
     '        if not (nt[0]["n_scan"] > 0 and nt[0]["agree"] == nt[0]["n_scan"]):\n'
-    '            nt[0]["why"] = "numtot"\n'
+    '            nt[0]["why"] = "numtot" if nt[0]["total"] else "numdate"\n'
     '    elif out:                                              # none, or several (duplicate Marg entries): the old rule\n'
     '        top = out[0]\n'), (
     '                      "every line read on the scan agrees in item, batch and rate" if best["n_scan"] else "its number or total agrees", twice))',
-    '                      ("its bill number and its total agree (%d of %d lines read on the scan agree — the scan misread the rest)"\n'
-    '                       % (best["agree"], best["n_scan"]) if best.get("why") == "numtot" and best["n_scan"] else           # S850 (F-1440)\n'
+    '                      ("its bill number and its %s agree (%d of %d lines read on the scan agree — the scan misread the rest)"\n'
+    '                       % ("total" if best.get("why") == "numtot" else "date (the paper\'s total was not read)", best["agree"], best["n_scan"])\n'
+    '                       if best.get("why") in ("numtot", "numdate") and best["n_scan"] else           # S850 (F-1440)\n'
     '                       "every line read on the scan agrees in item, batch and rate" if best["n_scan"] else "its number or total agrees"), twice))'), (
     '        same_w = "dawai, batch aur rate same hain:" if best["n_scan"] else "bill number ya total same hai:"',
-    '        same_w = (("bill number aur total same hai:" if best.get("why") == "numtot" else "dawai, batch aur rate same hain:")   # S850 (F-1440)\n'
+    '        same_w = (("bill number aur total same hai:" if best.get("why") == "numtot" else "bill number aur tareekh same hai:" if best.get("why") == "numdate"\n'
+    '                   else "dawai, batch aur rate same hain:")   # S850 (F-1440)\n'
     '                  if best["n_scan"] else "bill number ya total same hai:")')]
 P["purchase_app.py"] = [(
     '    return _page("Scan reading against Marg — %s" % _month_name(month), body)\n',

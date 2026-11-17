@@ -1,0 +1,844 @@
+{
+ "fees_from": {
+  "consult": "2025-04",
+  "xray_proc": "2025-10"
+ },
+ "final": {
+  "Degenerative Joint Disease": {
+   "kept": 113,
+   "later": 43,
+   "n": 288,
+   "never": 90,
+   "within": 42
+  },
+  "Degenerative Spine": {
+   "kept": 8,
+   "later": 2,
+   "n": 25,
+   "never": 10,
+   "within": 5
+  },
+  "Foot & Ankle": {
+   "kept": 9,
+   "later": 1,
+   "n": 28,
+   "never": 17,
+   "within": 1
+  },
+  "General Orthopedics": {
+   "kept": 11,
+   "later": 2,
+   "n": 35,
+   "never": 18,
+   "within": 4
+  },
+  "Mechanical Spine": {
+   "kept": 6,
+   "later": 2,
+   "n": 25,
+   "never": 16,
+   "within": 1
+  },
+  "No diagnosis typed": {
+   "kept": 10,
+   "later": 2,
+   "n": 43,
+   "never": 27,
+   "within": 4
+  },
+  "Other groups": {
+   "kept": 111,
+   "later": 23,
+   "n": 222,
+   "never": 60,
+   "within": 28
+  },
+  "Radicular Spine Disease": {
+   "kept": 72,
+   "later": 22,
+   "n": 178,
+   "never": 57,
+   "within": 27
+  },
+  "Rheumatology": {
+   "kept": 364,
+   "later": 100,
+   "n": 668,
+   "never": 87,
+   "within": 117
+  },
+  "Trauma": {
+   "kept": 101,
+   "later": 9,
+   "n": 189,
+   "never": 65,
+   "within": 14
+  }
+ },
+ "late_full": {
+  "2026-07": {
+   "rows": [
+    {
+     "a": 34,
+     "b": 15,
+     "c": 9,
+     "d": 5,
+     "e": 2,
+     "name": "Rheumatology",
+     "t": 65
+    },
+    {
+     "a": 8,
+     "b": 7,
+     "c": 1,
+     "d": 4,
+     "e": 5,
+     "name": "Degenerative Joint Disease",
+     "t": 25
+    },
+    {
+     "a": 3,
+     "b": 3,
+     "c": 2,
+     "d": 7,
+     "e": 2,
+     "name": "Trauma",
+     "t": 17
+    },
+    {
+     "a": 9,
+     "b": 1,
+     "c": 2,
+     "d": 5,
+     "e": 2,
+     "name": "Radicular Spine Disease",
+     "t": 19
+    },
+    {
+     "a": 2,
+     "b": 0,
+     "c": 1,
+     "d": 1,
+     "e": 4,
+     "name": "Mechanical Spine",
+     "t": 8
+    },
+    {
+     "a": 3,
+     "b": 1,
+     "c": 0,
+     "d": 2,
+     "e": 2,
+     "name": "Degenerative Spine",
+     "t": 8
+    },
+    {
+     "a": 2,
+     "b": 0,
+     "c": 2,
+     "d": 3,
+     "e": 3,
+     "name": "General Orthopedics",
+     "t": 10
+    },
+    {
+     "a": 0,
+     "b": 0,
+     "c": 0,
+     "d": 1,
+     "e": 0,
+     "name": "Foot & Ankle",
+     "t": 1
+    },
+    {
+     "a": 8,
+     "b": 6,
+     "c": 3,
+     "d": 5,
+     "e": 4,
+     "name": "Other groups",
+     "t": 26
+    },
+    {
+     "a": 5,
+     "b": 0,
+     "c": 0,
+     "d": 2,
+     "e": 10,
+     "name": "No diagnosis typed",
+     "t": 17
+    }
+   ],
+   "seen": 1210,
+   "share": "16%",
+   "total": {
+    "a": 74,
+    "b": 33,
+    "c": 20,
+    "d": 35,
+    "e": 34,
+    "t": 196
+   },
+   "trio": [
+    "May",
+    "Jun",
+    "Jul"
+   ]
+  },
+  "2026-08": {
+   "rows": [
+    {
+     "a": 39,
+     "b": 14,
+     "c": 12,
+     "d": 6,
+     "e": 3,
+     "name": "Rheumatology",
+     "t": 74
+    },
+    {
+     "a": 13,
+     "b": 7,
+     "c": 4,
+     "d": 10,
+     "e": 3,
+     "name": "Degenerative Joint Disease",
+     "t": 37
+    },
+    {
+     "a": 5,
+     "b": 2,
+     "c": 3,
+     "d": 7,
+     "e": 2,
+     "name": "Trauma",
+     "t": 19
+    },
+    {
+     "a": 5,
+     "b": 2,
+     "c": 3,
+     "d": 4,
+     "e": 2,
+     "name": "Radicular Spine Disease",
+     "t": 16
+    },
+    {
+     "a": 2,
+     "b": 0,
+     "c": 2,
+     "d": 2,
+     "e": 3,
+     "name": "Mechanical Spine",
+     "t": 9
+    },
+    {
+     "a": 4,
+     "b": 1,
+     "c": 1,
+     "d": 2,
+     "e": 2,
+     "name": "Degenerative Spine",
+     "t": 10
+    },
+    {
+     "a": 3,
+     "b": 0,
+     "c": 3,
+     "d": 1,
+     "e": 2,
+     "name": "General Orthopedics",
+     "t": 9
+    },
+    {
+     "a": 0,
+     "b": 0,
+     "c": 0,
+     "d": 1,
+     "e": 0,
+     "name": "Foot & Ankle",
+     "t": 1
+    },
+    {
+     "a": 9,
+     "b": 6,
+     "c": 3,
+     "d": 2,
+     "e": 3,
+     "name": "Other groups",
+     "t": 23
+    },
+    {
+     "a": 7,
+     "b": 0,
+     "c": 0,
+     "d": 1,
+     "e": 14,
+     "name": "No diagnosis typed",
+     "t": 22
+    }
+   ],
+   "seen": 1252,
+   "share": "18%",
+   "total": {
+    "a": 87,
+    "b": 32,
+    "c": 31,
+    "d": 36,
+    "e": 34,
+    "t": 220
+   },
+   "trio": [
+    "Jun",
+    "Jul",
+    "Aug"
+   ]
+  },
+  "2026-09": {
+   "rows": [
+    {
+     "a": 39,
+     "b": 11,
+     "c": 11,
+     "d": 8,
+     "e": 3,
+     "name": "Rheumatology",
+     "t": 72
+    },
+    {
+     "a": 15,
+     "b": 4,
+     "c": 5,
+     "d": 11,
+     "e": 7,
+     "name": "Degenerative Joint Disease",
+     "t": 42
+    },
+    {
+     "a": 9,
+     "b": 1,
+     "c": 4,
+     "d": 8,
+     "e": 2,
+     "name": "Trauma",
+     "t": 24
+    },
+    {
+     "a": 4,
+     "b": 3,
+     "c": 2,
+     "d": 3,
+     "e": 6,
+     "name": "Radicular Spine Disease",
+     "t": 18
+    },
+    {
+     "a": 3,
+     "b": 0,
+     "c": 2,
+     "d": 2,
+     "e": 2,
+     "name": "Mechanical Spine",
+     "t": 9
+    },
+    {
+     "a": 4,
+     "b": 0,
+     "c": 2,
+     "d": 2,
+     "e": 0,
+     "name": "Degenerative Spine",
+     "t": 8
+    },
+    {
+     "a": 4,
+     "b": 0,
+     "c": 1,
+     "d": 2,
+     "e": 3,
+     "name": "General Orthopedics",
+     "t": 10
+    },
+    {
+     "a": 1,
+     "b": 0,
+     "c": 0,
+     "d": 0,
+     "e": 1,
+     "name": "Foot & Ankle",
+     "t": 2
+    },
+    {
+     "a": 4,
+     "b": 6,
+     "c": 3,
+     "d": 4,
+     "e": 2,
+     "name": "Other groups",
+     "t": 19
+    },
+    {
+     "a": 5,
+     "b": 0,
+     "c": 0,
+     "d": 0,
+     "e": 17,
+     "name": "No diagnosis typed",
+     "t": 22
+    }
+   ],
+   "seen": 1185,
+   "share": "19%",
+   "total": {
+    "a": 88,
+    "b": 25,
+    "c": 30,
+    "d": 40,
+    "e": 43,
+    "t": 226
+   },
+   "trio": [
+    "Jul",
+    "Aug",
+    "Sep"
+   ]
+  },
+  "2026-10": {
+   "rows": [
+    {
+     "a": 46,
+     "b": 9,
+     "c": 9,
+     "d": 7,
+     "e": 5,
+     "name": "Rheumatology",
+     "t": 76
+    },
+    {
+     "a": 16,
+     "b": 5,
+     "c": 9,
+     "d": 11,
+     "e": 6,
+     "name": "Degenerative Joint Disease",
+     "t": 47
+    },
+    {
+     "a": 10,
+     "b": 1,
+     "c": 2,
+     "d": 8,
+     "e": 2,
+     "name": "Trauma",
+     "t": 23
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "c": 2,
+     "d": 5,
+     "e": 6,
+     "name": "Radicular Spine Disease",
+     "t": 20
+    },
+    {
+     "a": 2,
+     "b": 0,
+     "c": 3,
+     "d": 3,
+     "e": 1,
+     "name": "Mechanical Spine",
+     "t": 9
+    },
+    {
+     "a": 2,
+     "b": 0,
+     "c": 2,
+     "d": 2,
+     "e": 1,
+     "name": "Degenerative Spine",
+     "t": 7
+    },
+    {
+     "a": 2,
+     "b": 0,
+     "c": 1,
+     "d": 2,
+     "e": 2,
+     "name": "General Orthopedics",
+     "t": 7
+    },
+    {
+     "a": 1,
+     "b": 0,
+     "c": 0,
+     "d": 0,
+     "e": 1,
+     "name": "Foot & Ankle",
+     "t": 2
+    },
+    {
+     "a": 3,
+     "b": 4,
+     "c": 3,
+     "d": 5,
+     "e": 0,
+     "name": "Other groups",
+     "t": 15
+    },
+    {
+     "a": 5,
+     "b": 0,
+     "c": 0,
+     "d": 1,
+     "e": 17,
+     "name": "No diagnosis typed",
+     "t": 23
+    }
+   ],
+   "seen": 1098,
+   "share": "21%",
+   "total": {
+    "a": 90,
+    "b": 23,
+    "c": 31,
+    "d": 44,
+    "e": 41,
+    "t": 229
+   },
+   "trio": [
+    "Aug",
+    "Sep",
+    "Oct"
+   ]
+  }
+ },
+ "late_full_note": "months complete when the file was made (17-Nov-2026); a later month reads the server record only",
+ "made": "2026-11-17",
+ "months": {
+  "2025-01": {
+   "consult": null,
+   "days": 29,
+   "n_old": 252,
+   "new": 135,
+   "o30_num": 27,
+   "patients": 237,
+   "proc": null,
+   "review_closed": 28,
+   "review_due": 28,
+   "review_kept": 15,
+   "review_kept_num": 54,
+   "short_kept_num": 51,
+   "visits": 387,
+   "vpd": 13.3,
+   "xray": null
+  },
+  "2025-02": {
+   "consult": null,
+   "days": 21,
+   "n_old": 181,
+   "new": 100,
+   "o30_num": 34,
+   "patients": 191,
+   "proc": null,
+   "review_closed": 43,
+   "review_due": 43,
+   "review_kept": 16,
+   "review_kept_num": 37,
+   "short_kept_num": 48,
+   "visits": 281,
+   "vpd": 13.4,
+   "xray": null
+  },
+  "2025-03": {
+   "consult": null,
+   "days": 24,
+   "n_old": 249,
+   "new": 148,
+   "o30_num": 27,
+   "patients": 247,
+   "proc": null,
+   "review_closed": 51,
+   "review_due": 51,
+   "review_kept": 24,
+   "review_kept_num": 47,
+   "short_kept_num": 45,
+   "visits": 397,
+   "vpd": 16.5,
+   "xray": null
+  },
+  "2025-04": {
+   "consult": 19490000,
+   "days": 27,
+   "n_old": 313,
+   "new": 164,
+   "o30_num": 31,
+   "patients": 284,
+   "proc": null,
+   "review_closed": 74,
+   "review_due": 74,
+   "review_kept": 37,
+   "review_kept_num": 50,
+   "short_kept_num": 54,
+   "visits": 477,
+   "vpd": 17.7,
+   "xray": null
+  },
+  "2025-05": {
+   "consult": 24665000,
+   "days": 28,
+   "n_old": 388,
+   "new": 226,
+   "o30_num": 27,
+   "patients": 369,
+   "proc": null,
+   "review_closed": 113,
+   "review_due": 113,
+   "review_kept": 71,
+   "review_kept_num": 63,
+   "short_kept_num": 52,
+   "visits": 614,
+   "vpd": 21.9,
+   "xray": null
+  },
+  "2025-06": {
+   "consult": 20930000,
+   "days": 24,
+   "n_old": 366,
+   "new": 169,
+   "o30_num": 24,
+   "patients": 339,
+   "proc": null,
+   "review_closed": 92,
+   "review_due": 92,
+   "review_kept": 41,
+   "review_kept_num": 45,
+   "short_kept_num": 52,
+   "visits": 535,
+   "vpd": 22.3,
+   "xray": null
+  },
+  "2025-07": {
+   "consult": 25860000,
+   "days": 28,
+   "n_old": 412,
+   "new": 222,
+   "o30_num": 28,
+   "patients": 368,
+   "proc": null,
+   "review_closed": 112,
+   "review_due": 112,
+   "review_kept": 52,
+   "review_kept_num": 46,
+   "short_kept_num": 55,
+   "visits": 634,
+   "vpd": 22.6,
+   "xray": null
+  },
+  "2025-08": {
+   "consult": 17960000,
+   "days": 23,
+   "n_old": 288,
+   "new": 161,
+   "o30_num": 25,
+   "patients": 286,
+   "proc": null,
+   "review_closed": 84,
+   "review_due": 84,
+   "review_kept": 37,
+   "review_kept_num": 44,
+   "short_kept_num": 53,
+   "visits": 449,
+   "vpd": 19.5,
+   "xray": null
+  },
+  "2025-09": {
+   "consult": 19400000,
+   "days": 27,
+   "n_old": 347,
+   "new": 139,
+   "o30_num": 22,
+   "patients": 301,
+   "proc": null,
+   "review_closed": 80,
+   "review_due": 80,
+   "review_kept": 35,
+   "review_kept_num": 44,
+   "short_kept_num": 52,
+   "visits": 486,
+   "vpd": 18.0,
+   "xray": null
+  },
+  "2025-10": {
+   "consult": 15870000,
+   "days": 25,
+   "n_old": 270,
+   "new": 141,
+   "o30_num": 28,
+   "patients": 262,
+   "proc": 2300000,
+   "review_closed": 107,
+   "review_due": 107,
+   "review_kept": 49,
+   "review_kept_num": 46,
+   "short_kept_num": 50,
+   "visits": 411,
+   "vpd": 16.4,
+   "xray": 4860000
+  },
+  "2025-11": {
+   "consult": 15310000,
+   "days": 23,
+   "n_old": 265,
+   "new": 114,
+   "o30_num": 33,
+   "patients": 248,
+   "proc": 1980000,
+   "review_closed": 96,
+   "review_due": 96,
+   "review_kept": 55,
+   "review_kept_num": 57,
+   "short_kept_num": 46,
+   "visits": 379,
+   "vpd": 16.5,
+   "xray": 5760000
+  },
+  "2025-12": {
+   "consult": 13800000,
+   "days": 26,
+   "n_old": 211,
+   "new": 110,
+   "o30_num": 26,
+   "patients": 228,
+   "proc": 2180000,
+   "review_closed": 107,
+   "review_due": 107,
+   "review_kept": 48,
+   "review_kept_num": 45,
+   "short_kept_num": 40,
+   "visits": 321,
+   "vpd": 12.3,
+   "xray": 5430000
+  },
+  "2026-01": {
+   "consult": 17240000,
+   "days": 29,
+   "n_old": 281,
+   "new": 146,
+   "o30_num": 24,
+   "patients": 259,
+   "proc": 3140000,
+   "review_closed": 69,
+   "review_due": 69,
+   "review_kept": 22,
+   "review_kept_num": 32,
+   "short_kept_num": 56,
+   "visits": 427,
+   "vpd": 14.7,
+   "xray": 8640000
+  },
+  "2026-02": {
+   "consult": 21000000,
+   "days": 25,
+   "n_old": 333,
+   "new": 169,
+   "o30_num": 26,
+   "patients": 307,
+   "proc": 5290000,
+   "review_closed": 70,
+   "review_due": 70,
+   "review_kept": 35,
+   "review_kept_num": 50,
+   "short_kept_num": 53,
+   "visits": 502,
+   "vpd": 20.1,
+   "xray": 9640000
+  },
+  "2026-03": {
+   "consult": 24280000,
+   "days": 29,
+   "n_old": 366,
+   "new": 202,
+   "o30_num": 27,
+   "patients": 355,
+   "proc": 6145000,
+   "review_closed": 146,
+   "review_due": 146,
+   "review_kept": 63,
+   "review_kept_num": 43,
+   "short_kept_num": 53,
+   "visits": 568,
+   "vpd": 19.6,
+   "xray": 11050000
+  },
+  "2026-04": {
+   "consult": 23700000,
+   "days": 26,
+   "n_old": 393,
+   "new": 193,
+   "o30_num": 26,
+   "patients": 355,
+   "proc": 4830000,
+   "review_closed": 86,
+   "review_due": 86,
+   "review_kept": 45,
+   "review_kept_num": 52,
+   "short_kept_num": 56,
+   "visits": 586,
+   "vpd": 22.5,
+   "xray": 10175000
+  },
+  "2026-05": {
+   "consult": 22500000,
+   "days": 29,
+   "n_old": 362,
+   "new": 197,
+   "o30_num": 27,
+   "patients": 338,
+   "proc": 5865000,
+   "review_closed": 113,
+   "review_due": 113,
+   "review_kept": 50,
+   "review_kept_num": 44,
+   "short_kept_num": 53,
+   "visits": 559,
+   "vpd": 19.3,
+   "xray": 9950000
+  },
+  "2026-06": {
+   "consult": 26310000,
+   "days": 26,
+   "n_old": 434,
+   "new": 192,
+   "o30_num": 31,
+   "patients": 350,
+   "proc": 4500000,
+   "review_closed": 84,
+   "review_due": 84,
+   "review_kept": 49,
+   "review_kept_num": 58,
+   "short_kept_num": 60,
+   "visits": 626,
+   "vpd": 24.1,
+   "xray": 9560000
+  }
+ },
+ "range": {
+  "o30": {
+   "hi": 34,
+   "lo": 22,
+   "n": 17,
+   "p25": 26,
+   "p75": 30
+  },
+  "review_kept": {
+   "hi": 63,
+   "lo": 32,
+   "n": 18,
+   "p25": 44,
+   "p75": 52
+  }
+ },
+ "source": "Docterz clinical data report + consultation report (Jan-2025..Jun-2026) and the server's record from Jul-2026",
+ "version": "S853 history 1"
+}

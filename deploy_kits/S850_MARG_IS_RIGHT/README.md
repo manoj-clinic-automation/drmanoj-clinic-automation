@@ -21,7 +21,7 @@ though its read number is Marg bill 3499 and its total agrees.
 
 **Files:** NEW `marg_right.py` · `scan_ask.py` 41adf66b · `purchase_app.py` b789e379 (the page's cards + `/api/s850/line`) ·
 `item_ledger.py` 49768145 — whole files by `make_s850.py` on exact anchors.
-**Proof:** `synth_s850.py` 24/24 on made-up bills of a made-up month beside a copy of finance.db and a made-up assets.db (T0–T22, T18 the real
+**Proof:** `synth_s850.py` 26/26 on made-up bills of a made-up month beside a copy of finance.db and a made-up assets.db (T0–T22, T16b/c F-1440 with no total read, T18 the real
 page and route in a Flask app); the control (live files + the new module) red 3. Cold review: SAFE, its points 1–8 built in (a tap belongs to its Marg bill; lines paired as the check pairs them; a kept misread never overwritten); second look SAFE. Rehearsal 10/10. On the box the installer adds R1–R3 on copies of the live
 databases (October judged, its corrections kept from the scans' own readings, a second open writes nothing; B-0122 names 3499 while asked)
 and runs walk_s781, walk_s761, walk_s750/753/755, synth_s849, walk_s814, walk_s845 on the live and the new files — every last line the same.

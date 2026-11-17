@@ -220,6 +220,14 @@ if have:
     ok(best is not None and best["bill"]["bill_no"] == "3499" and best.get("why") == "numtot",
        "T16 F-1440: the paper reads 3499 and its total is Marg's: Marg bill 3499 is the best, though bill 3600's line agrees (%r)"
        % ([(c["bill"]["bill_no"], c["agree"], c["tail"], c["total"], c["best"]) for c in cands],))
+    cands = sa._candidates(con, pa.supplier_key("ZZFOUR DEALER"), dt.date(2099, 1, 3), None,
+                           [dict(name="ZZ ITEM A", qty=10, rate=100.0, batch="BT1", expiry="1/28")], "SF 003499", {})
+    best = next((c for c in cands if c["best"]), None)
+    ok(best is not None and best["bill"]["bill_no"] == "3499" and best.get("why") == "numdate",
+       "T16b the paper's total not read (B-0122's case): its number 'SF 003499' and the same date name Marg bill 3499")
+    cands = sa._candidates(con, pa.supplier_key("ZZFOUR DEALER"), dt.date(2099, 1, 5), None,
+                           [dict(name="ZZ ITEM A", qty=10, rate=100.0, batch="BT1", expiry="1/28")], "3499", {})
+    ok(not any(c["best"] and c["bill"]["bill_no"] == "3499" for c in cands), "T16c no total read and another date: the number alone names nothing")
     con.close()
     src = {n: open(os.path.join(code, n), encoding="utf-8").read() for n in ("purchase_app.py", "item_ledger.py")}
     ok("_s850.cards_html(con, month, request.script_root + _url_prefix)" in src["purchase_app.py"] and '@bp.route("/api/s850/line"' in src["purchase_app.py"]

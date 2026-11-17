@@ -282,15 +282,17 @@ def _candidates(con, sup, base, total_p, slines, bill_no, link_of):
         d = _date(b["bill_date"])
         out.append(dict(bill=b, lines=ml, scan=sc, agree=agree, n_scan=len(slines or []), cmp=cmp_, tail=tail, total=tot,
                         gap=abs((d - base).days) if d else 99))
-    out.sort(key=lambda c: (-int(c["tail"] and c["total"]), -(c["agree"]), -int(c["tail"]), -int(c["total"]), c["gap"]))
+    for c in out:                                          # S850 (F-1440): the number read AND the total within Rs 2 -- or, the paper's
+        c["numtot"] = bool(c["tail"] and (c["total"] or (not total_p and c["gap"] == 0)))   # total not read, the same date
+    out.sort(key=lambda c: (-int(c["numtot"]), -(c["agree"]), -int(c["tail"]), -int(c["total"]), c["gap"]))
     for c in out:
         c["best"] = False
         c["why"] = "lines"
-    nt = [c for c in out if c["tail"] and c["total"]]       # S850 (F-1440): the number read AND the total within Rs 2 name the bill,
-    if len(nt) == 1:                                       # whatever the read lines say (B-0122 -> Marg bill 3499)
+    nt = [c for c in out if c["numtot"]]                   # ... name the bill, whatever the read lines say (B-0122 -> Marg bill 3499)
+    if len(nt) == 1:
         nt[0]["best"] = True
         if not (nt[0]["n_scan"] > 0 and nt[0]["agree"] == nt[0]["n_scan"]):
-            nt[0]["why"] = "numtot"
+            nt[0]["why"] = "numtot" if nt[0]["total"] else "numdate"
     elif out:                                              # none, or several (duplicate Marg entries): the old rule
         top = out[0]
         full = top["n_scan"] > 0 and top["agree"] == top["n_scan"]
@@ -504,7 +506,8 @@ def _amir_block(c):
     if best:
         b = best["bill"]
         rows = "".join("<tr><td>%s</td><td>%s</td><td>%s</td></tr>" % (esc(m["name"]), esc(_qf(m)), esc(m.get("batch") or "")) for m in best["lines"][:8])
-        same_w = (("bill number aur total same hai:" if best.get("why") == "numtot" else "dawai, batch aur rate same hain:")   # S850 (F-1440)
+        same_w = (("bill number aur total same hai:" if best.get("why") == "numtot" else "bill number aur tareekh same hai:" if best.get("why") == "numdate"
+                   else "dawai, batch aur rate same hain:")   # S850 (F-1440)
                   if best["n_scan"] else "bill number ya total same hai:")
         body = ("<p class=sub style='margin:8px 0 4px'>Marg ka bill <b>%s</b> (%s, %s) &mdash; " + same_w + "</p>"
                 "%s<table style='font-size:13px;margin:0 0 8px'>%s</table>")
@@ -641,8 +644,9 @@ def _case_html(c, open_=False, again=False):
         twice = (" That bill already has its own scan — so this paper was <b>scanned twice</b>." if best.get("scan") else "")
         verdict = ("<div class=verdict>✓ This looks like Marg bill <b>%s</b> (%s, %s): %s.%s</div>"
                    % (esc(b["bill_no"]), esc(dmy(b["bill_date"])), esc(rs(b["amount_p"])),
-                      ("its bill number and its total agree (%d of %d lines read on the scan agree — the scan misread the rest)"
-                       % (best["agree"], best["n_scan"]) if best.get("why") == "numtot" and best["n_scan"] else           # S850 (F-1440)
+                      ("its bill number and its %s agree (%d of %d lines read on the scan agree — the scan misread the rest)"
+                       % ("total" if best.get("why") == "numtot" else "date (the paper's total was not read)", best["agree"], best["n_scan"])
+                       if best.get("why") in ("numtot", "numdate") and best["n_scan"] else           # S850 (F-1440)
                        "every line read on the scan agrees in item, batch and rate" if best["n_scan"] else "its number or total agrees"), twice))
     elif c["cands"]:
         verdict = "<div class='verdict no'>None of %s's Marg bills from those days clearly matches this scan. Compare them below.</div>" % esc(c["supplier"])
