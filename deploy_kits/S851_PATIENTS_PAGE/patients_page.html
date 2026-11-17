@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Patients — Command console</title>
+<!-- S851_PATIENTS_PAGE (the parent, S474, 17-Nov-2026; D939). The owner's Patients page, mock-up v16, part 1: served by
+     patients_page.py at /finance/console/patients, filled from /finance/console/api/patients; a figure opens the patients behind
+     it from /finance/console/api/patients/list. English, his login alone. No patient is in this file. -->
+<style>
+:root{
+  --bg:#f3f2ed; --paper:#ffffff; --chip:#ecebe4; --fg:#1d211f; --muted:#5d635e; --line:#d6d3c9;
+  --accent:#1f5f4a; --accent-ink:#ffffff; --good:#2f7a4e; --warn:#a9730e; --warn-soft:#f6eedc; --bad:#a8402f; --grey:#9aa19b;
+  --gold:#c99a2e; --shade:#f7f5ee;
+  --body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"IBM Plex Sans",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"IBM Plex Mono",monospace;
+}
+@media (prefers-color-scheme:dark){ :root{
+  --bg:#141718; --paper:#1e2325; --chip:#2a3133; --fg:#e9e7e0; --muted:#a2aaa4; --line:#384042;
+  --accent:#72c4a4; --accent-ink:#0f1a15; --good:#6cc392; --warn:#d2a04a; --warn-soft:#2e2718; --bad:#e58b78; --grey:#6a736d;
+  --gold:#d8b25a; --shade:#232a2c; color-scheme:dark } }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-text-size-adjust:100%}
+a{color:var(--accent)}
+.wrap{max-width:1320px;margin:0 auto;padding:12px max(14px,env(safe-area-inset-left,0px)) 48px}
+.head{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-bottom:10px}
+h1{font-weight:700;font-size:23px;margin:0}
+h1 a{color:var(--muted);text-decoration:none;font-weight:500;font-size:14px;margin-left:8px}
+.months{display:flex;gap:6px;flex-wrap:wrap}
+.months button{font-weight:600;font-size:14px;padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--fg);cursor:pointer}
+.months button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.asof{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:4px 9px;background:var(--paper)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:0 0 14px;min-width:0}
+h2{font-weight:700;font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+.sub{color:var(--muted);font-size:13.5px;margin:0 0 10px}
+.note{color:var(--muted);font-size:13.5px;margin:10px 0 0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.tile{border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:var(--shade);min-width:0}
+.tile .l{font-size:13px;color:var(--muted)} .tile .v{font-size:24px;font-weight:700;margin:2px 0}
+.tile .s{font-size:12.5px;color:var(--muted)}
+.tile.tap{cursor:pointer} .tile.tap:hover{border-color:var(--accent)}
+.rd{border-top:1px solid var(--line);padding:10px 0}
+.rd:first-of-type{border-top:0}
+.rd b{font-size:15px} .rd.w b{color:var(--warn)}
+.rd .sg{display:block;margin-top:4px;color:var(--fg)}
+.rd .sg i{font-style:normal;font-weight:600;color:var(--accent)}
+.rd a.open{font-size:13px;margin-left:6px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{font-size:12.5px;color:var(--muted);font-weight:600;vertical-align:bottom}
+th:first-child,td:first-child{text-align:left}
+td.l{text-align:left;white-space:normal}
+tr.shade td{background:var(--shade)}
+tr.part td{color:var(--muted)}
+td.tap{cursor:pointer;color:var(--accent);text-decoration:underline dotted;text-underline-offset:3px}
+td.grey,span.grey{color:var(--grey)}
+td.w{color:var(--warn);font-weight:600}
+.bars{display:grid;gap:7px}
+.bar{display:grid;grid-template-columns:52px 1fr auto;gap:10px;align-items:center;font-size:14px}
+.bar .t{height:14px;border-radius:4px;background:var(--chip);overflow:hidden;display:flex}
+.bar .t i{display:block;height:100%}
+.bar .t .n{background:var(--gold)} .bar .t .o{background:var(--grey)}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:900px){.cols{grid-template-columns:1fr}}
+.next li{margin:4px 0}
+.err{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn);border-radius:8px;padding:9px 12px;margin:0 0 12px}
+/* the list of patients behind a figure */
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-start;justify-content:center;padding:4vh 10px;z-index:9}
+#ov.on{display:flex}
+#box{background:var(--paper);border-radius:12px;max-width:760px;width:100%;max-height:90vh;overflow:auto;padding:14px 16px;border:1px solid var(--line)}
+#box h3{margin:0 0 8px;font-size:17px}
+#box .x{float:right;border:1px solid var(--line);background:var(--paper);color:var(--fg);border-radius:8px;padding:6px 12px;font-size:15px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <h1>Patients <a href="/finance/console">← Command console</a></h1>
+    <div class="months" id="months"></div>
+    <span class="asof" id="asof">reading…</span>
+  </div>
+  <div id="errbox"></div>
+  <div id="page"></div>
+</div>
+<div id="ov" onclick="if(event.target===this)closeList()"><div id="box"></div></div>
+<script>
+"use strict";
+var R=null, M=null;
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function inr(p){p=Math.round((p||0)/100);var n=p<0;p=Math.abs(p);var s=String(p);if(s.length>3){var h=s.slice(0,-3),t=s.slice(-3),a=[];while(h.length>2){a.unshift(h.slice(-2));h=h.slice(0,-2);}if(h)a.unshift(h);s=a.join(",")+","+t;}return (n?"−₹":"₹")+s;}
+function dmy(iso){if(!iso)return "–";var m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return iso.slice(8,10)+"-"+m[+iso.slice(5,7)-1];}
+function cell(v,key,cls){if(key&&v!==0&&v!=="0"&&v!=="–")return '<td class="tap'+(cls?' '+cls:'')+'" data-k="'+esc(key)+'">'+esc(v)+'</td>';return '<td'+(cls?' class="'+cls+'"':'')+'>'+esc(v)+'</td>';}
+function load(force){
+  document.getElementById("asof").textContent="reading…";
+  fetch("/finance/console/api/patients"+(force?"?refresh=1":""),{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
+    var eb=document.getElementById("errbox");eb.innerHTML="";
+    if(j.build_error)eb.innerHTML='<div class="err">The page could not be read afresh just now ('+esc(j.build_error)+'). The figures below are the last reading.</div>';
+    if(!j.ok||!j.reading||!j.reading.ok){document.getElementById("page").innerHTML='<div class="card">No reading yet'+(j.reading&&j.reading.why?' — '+esc(j.reading.why):'')+'.</div>';return;}
+    R=j.reading;
+    var full=R.months.filter(function(m){return !m.partial;});
+    if(!M||!R.months.some(function(m){return m.ym===M;}))M=(location.hash.slice(1))||(full.length?full[full.length-1].ym:R.months[R.months.length-1].ym);
+    if(!R.months.some(function(m){return m.ym===M;}))M=R.months[R.months.length-1].ym;
+    var a=document.getElementById("asof");a.textContent="as of "+dmy(R.data_to)+" (Docterz visits) · read "+R.built.slice(11);a.title="Tap to read afresh";a.style.cursor="pointer";a.onclick=function(){load(true);};
+    draw();
+  }).catch(function(e){document.getElementById("errbox").innerHTML='<div class="err">The page could not reach the server ('+esc(e)+'). Reload in a moment.</div>';});
+}
+function chips(){
+  document.getElementById("months").innerHTML=R.months.map(function(m){return '<button aria-pressed="'+(m.ym===M)+'" data-m="'+m.ym+'">'+esc(m.short)+(m.partial?' (so far)':'')+'</button>';}).join("");
+  Array.prototype.forEach.call(document.querySelectorAll("#months button"),function(b){b.onclick=function(){M=b.getAttribute("data-m");history.replaceState(null,"","#"+M);draw();};});
+}
+function mrow(ym){for(var i=0;i<R.rows.length;i++)if(R.rows[i].ym===ym)return R.rows[i];return null;}
+function draw(){
+  chips();
+  var mm=mrow(M), lab=mm?mm.label:M, h=[];
+  // 1 -- at a glance
+  h.push('<div class="card"><h2>'+esc(lab)+(mm&&mm.partial?' so far':'')+' at a glance</h2><p class="sub">the month chips above change the month · every figure with a dotted line opens the patients behind it</p><div class="tiles">'+
+    (R.glance[M]||[]).map(function(g){return '<div class="tile'+(g.key?' tap':'')+'"'+(g.key?' data-k="'+esc(g.key)+'"':'')+'><div class="l">'+esc(g.label)+'</div><div class="v">'+esc(g.value)+'</div><div class="s">'+esc(g.sub)+'</div></div>';}).join("")+'</div></div>');
+  // 2 -- reading and suggestions
+  h.push('<div class="card"><h2>Reading and suggestions</h2><p class="sub">written from the month\'s figures by fixed rules — the same figures always give the same words</p>'+
+    (R.readings[M]||[]).map(function(s){return '<div class="rd '+(s.tone==="w"?"w":"")+'"><b>'+esc(s.head)+'.</b> '+esc(s.text)+(s.key?' <a class="open" href="#" data-k="'+esc(s.key)+'">open the patients</a>':'')+(s.sug?'<span class="sg"><i>Suggested:</i> '+esc(s.sug)+'</span>':'')+'</div>';}).join("")+'</div>');
+  // 3 -- month by month
+  h.push('<div class="card"><h2>Month by month</h2><div class="tw"><table><thead><tr><th>Month</th><th>Patients</th><th>New</th><th>Visits</th><th>Visits a day</th><th>Visits / patient</th><th>Free revisits</th><th>Medicines, no visit</th><th>Consultations ₹</th><th>X-rays ₹</th><th>Procedures ₹</th><th>Total ₹</th></tr></thead><tbody>'+
+    R.rows.map(function(r){return '<tr class="'+(r.partial?'part':'')+(r.ym===M?' shade':'')+'"><td>'+esc(r.month)+(r.partial?' (so far)':'')+'</td>'+cell(r.patients,"m:"+r.ym+":patients")+cell(r.new,"m:"+r.ym+":new")+'<td>'+r.visits+'</td><td>'+r.vpd+'</td><td>'+r.vpp+'</td><td>'+r.revisits+'</td>'+cell(r.med,"m:"+r.ym+":med")+'<td>'+inr(r.consult)+'</td><td>'+inr(r.xray)+'</td><td>'+inr(r.proc)+'</td><td><b>'+inr(r.total)+'</b></td></tr>';}).join("")+
+    '</tbody></table></div><p class="note">Revenue is the clinic\'s own day sheet (consultation, X-ray, procedure), matched to each Docterz visit by clinic ID and day. "Medicines, no visit" = Sanjeevni purchases by a known patient on a day with no consultation; only bills tied to a clinic ID with certainty are counted (the Patient Records rule; walk-in bills are never guessed) — '+
+    R.rows.map(function(r){return esc(r.month)+' '+esc(r.tied_share);}).join(", ")+' of the bills. June is left out, as you ruled.</p></div>');
+  // 4 -- new and seen-before + back within 30 days
+  var mx=Math.max.apply(null,R.rows.map(function(r){return r.patients;}).concat([1]));
+  h.push('<div class="cols"><div class="card"><h2>New and seen-before patients</h2><p class="sub">gold = first visit ever (a clinic ID higher than any issued before that day) · grey = seen before</p><div class="bars">'+
+    R.rows.map(function(r){var n=100*r.new/mx,o=100*(r.patients-r.new)/mx;return '<div class="bar"><span>'+esc(r.month)+'</span><span class="t"><i class="n" style="width:'+n+'%"></i><i class="o" style="width:'+o+'%"></i></span><span>'+r.new+' new · '+(r.patients-r.new)+' before</span></div>';}).join("")+'</div></div>'+
+    '<div class="card"><h2>Do they come back within 30 days?</h2><div class="tw"><table><thead><tr><th>Visits of</th><th>New: back ≤ 7 d</th><th>New: back 8–30 d</th><th>Seen before: ≤ 7 d</th><th>Seen before: 8–30 d</th></tr></thead><tbody>'+
+    R.back.map(function(b){if(!b.n_new&&!b.n_old)return '';return '<tr class="'+(b.matured_all?'':'part')+'"><td>'+esc(b.month)+(b.matured_all?'':' (so far)')+'</td><td>'+esc(b.n7)+'</td><td>'+esc(b.n30)+'</td><td>'+esc(b.o7)+'</td><td>'+esc(b.o30)+'</td></tr>';}).join("")+
+    '</tbody></table></div><p class="note">A visit has 30 days to be followed, so the latest month counts only its visits that have had their 30 days.</p></div></div>');
+  // 5 -- follow-ups
+  h.push('<div class="card"><h2>Follow-ups you gave</h2><p class="sub">from the follow-up date you set in Docterz at each visit, by the month it fell due. "Kept" = came by the date or within 7 days after it (an early visit counts). "On medicines" = did not come, but bought medicines at Sanjeevni without a consultation.</p><div class="tw"><table><thead><tr><th>Due in</th><th>You advised</th><th>Due</th><th>Kept</th><th>On medicines</th><th>Came late</th><th>Neither</th><th>Still open</th><th>Kept, of those closed</th><th>Called</th></tr></thead><tbody>'+
+    R.fu.map(function(f){var k="fu:"+f.ym+":"+f.kind+":";return '<tr class="'+(f.kind==="review"?'shade':'')+'"><td>'+esc(f.month)+'</td><td class="l">'+esc(f.kindl)+'</td><td>'+f.due+'</td>'+cell(f.kept,k+"kept")+cell(f.med,k+"med")+cell(f.late,k+"late")+cell(f.neither,k+"neither",f.neither?"w":"")+cell(f.open,k+"open")+'<td>'+esc(f.kept_pct)+'</td><td class="grey">··</td></tr>';}).join("")+
+    '</tbody></table></div><p class="note">"Came late" = came more than 7 days after the date, with no medicine purchase in between — the tap shows how late. "Neither" = no visit and no purchase at Sanjeevni (medicines bought elsewhere cannot be seen). A follow-up is never closed as lost: a patient who comes after 2 or 3 months moves into "Came late". "Called" (grey) splits each row into called by staff and not called — it comes with Part 2, from the call log.</p></div>');
+  // 6 -- by diagnosis group
+  var G=R.groups[M];
+  if(G){h.push('<div class="card"><h2>By diagnosis group — '+esc(lab)+'</h2><p class="sub">your taxonomy: 8 main groups, the small ones folded into "Other groups"</p><div class="tw"><table><thead><tr><th>Group</th><th>Patients</th><th>New</th><th>Clinic ₹</th><th>Pharmacy ₹</th><th>Back ≤ 7 d<br>'+esc(G.trio[0])+'–'+esc(G.trio[G.trio.length-1])+'</th><th>Back 8–30 d<br>'+esc(G.trio[0])+'–'+esc(G.trio[G.trio.length-1])+'</th><th>8–30 d<br>'+esc(G.trio.join(" · "))+'</th><th>Follow-up kept<br>due '+esc(G.trio.join(" → "))+'</th><th>On medicines instead<br>of follow-ups due</th><th>Of the missed: called</th></tr></thead><tbody>'+
+    G.rows.map(function(x){return '<tr><td class="l">'+esc(x.name)+(x.inc?' <span class="grey">('+esc(x.inc)+')</span>':'')+'</td>'+cell(x.p,"g:"+M+":"+x.name)+'<td>'+x.n+'</td><td>'+inr(x.r)+'</td><td>'+inr(x.pp)+'</td><td>'+esc(x.b7)+'</td><td>'+esc(x.b30)+'</td><td>'+esc(x.t)+'</td><td>'+esc(x.k)+'</td><td>'+esc(x.md)+'</td><td class="grey">··</td></tr>';}).join("")+
+    '</tbody></table></div><p class="note">Patients, new, clinic and pharmacy rupees are '+esc(lab)+'\'s (pharmacy = the Sanjeevni bills tied to these patients). The "back" columns use every visit of the three months that has had its 30 days. Where a base is under 20 the page shows the count, not a percentage. A visit with no diagnosis typed takes the same patient\'s diagnosis from their other visit; only a patient with none at all falls in the last row.</p></div>');}
+  // 7 -- back after a gap
+  var L=R.late[M];
+  if(L){h.push('<div class="card"><h2>Back after a gap — the late returners</h2><p class="sub">visits of '+esc(L.trio[0])+'–'+esc(L.trio[L.trio.length-1])+' by patients seen before, whose last consultation was more than 30 days earlier ('+esc(L.share)+' of the '+L.seen+' seen-before visits)</p><div class="tw"><table><thead><tr><th>Group</th><th>After 1–2 months</th><th>2–3 months</th><th>3–6 months</th><th>Over 6 months</th><th>Not seen since the record began</th><th>All late returns</th><th>Bought medicines in the gap</th></tr></thead><tbody>'+
+    L.rows.filter(function(x){return x.t;}).map(function(x){return '<tr><td class="l">'+esc(x.name)+'</td><td>'+x.a+'</td><td>'+x.b+'</td><td>'+x.c+'</td><td>'+x.d+'</td><td>'+x.e+'</td>'+cell(x.t,"late:"+M+":"+x.name)+'<td>'+x.med+'</td></tr>';}).join("")+
+    '<tr class="shade"><td><b>All</b></td><td>'+(L.total.a||0)+'</td><td>'+(L.total.b||0)+'</td><td>'+(L.total.c||0)+'</td><td>'+(L.total.d||0)+'</td><td>'+(L.total.e||0)+'</td><td><b>'+(L.total.t||0)+'</b></td><td>'+(L.total.med||0)+'</td></tr>'+
+    '</tbody></table></div><p class="note">The server\'s visit record begins on '+esc(dmy(R.data_from))+'. "Not seen since the record began" = a patient with an older clinic ID and no visit since then. Last year\'s history (the gaps of a year and more, and how each review date was finally kept) comes with Part 2, from your two Docterz exports.</p></div>');}
+  // 8 -- coverage and words
+  var C=R.cov[M];
+  if(C){h.push('<div class="cols"><div class="card"><h2>How much the diagnoses cover — '+esc(lab)+'</h2><div class="tw"><table><tbody><tr><td class="l">Diagnosis typed at the visit</td><td>'+C.own+'</td><td>'+esc(C.own_pct)+'</td></tr><tr><td class="l">Taken from the patient\'s other visit</td><td>'+C.carried+'</td><td>'+esc(C.carried_pct)+'</td></tr><tr><td class="l">None</td>'+cell(C.none,"cov:"+M+":none")+'<td>'+esc(C.none_pct)+'</td></tr></tbody></table></div><p class="note">The '+C.none+' visits with none belong to '+C.none_patients+' patients; '+C.none_once+' of them came only once, and '+C.none_new+' were new patients. Last open day ('+esc(dmy(R.lastday))+'): '+(R.lastday_none?'<a href="#" data-k="cov:lastday:none">'+R.lastday_none+' visits with no diagnosis typed</a>':'every visit has its diagnosis')+'.</p></div>'+
+    '<div class="card"><h2>Diagnosis words to place</h2>'+(R.words?('<p class="sub">'+R.words.n+' words · '+R.words.visits+' visits — words your taxonomy did not recognise. The largest:</p><div class="tw"><table><tbody>'+R.words.top.map(function(w){return '<tr><td class="l">'+esc(w.word)+'</td><td>'+w.n+' visit'+(w.n===1?'':'s')+'</td></tr>';}).join("")+'</tbody></table></div><p class="note">The one-tap placing (the page suggests a group; one tap places the word, its spelling slips and its other sides) comes with Part 2.</p>'):'<p class="sub">could not be read just now</p>')+'</div></div>');}
+  // 9 -- part 2
+  h.push('<div class="card next"><h2>Comes next — part 2</h2><ul><li>At the front desk — calls and WhatsApp, each caller counted once a day; the "Called" columns above.</li><li>Before they reach you — Google (the monthly Performance figures, year on year).</li><li>Google reviews — the good ones are asked for.</li><li>Last year from your two Docterz exports — the same months a year before; how each review date was finally kept.</li><li>The one-tap placing of diagnosis words.</li></ul></div>');
+  document.getElementById("page").innerHTML=h.join("");
+  Array.prototype.forEach.call(document.querySelectorAll("[data-k]"),function(e){e.onclick=function(ev){ev.preventDefault();openList(e.getAttribute("data-k"),e.textContent);};});
+}
+function openList(key,what){
+  var b=document.getElementById("box");b.innerHTML='<button class="x" onclick="closeList()">Close</button><h3>Reading…</h3>';
+  document.getElementById("ov").classList.add("on");
+  fetch("/finance/console/api/patients/list?key="+encodeURIComponent(key),{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
+    if(!j.ok){b.innerHTML='<button class="x" onclick="closeList()">Close</button><h3>'+esc(j.why||"Not found")+'</h3>';return;}
+    b.innerHTML='<button class="x" onclick="closeList()">Close</button><h3>'+j.n+' '+(j.n===1?'entry':'entries')+'</h3>'+(j.cut?'<p class="sub">the first 500 are shown</p>':'')+
+      '<div class="tw"><table><thead><tr><th>Patient</th><th>Clinic ID</th><th>Day</th><th>Note</th></tr></thead><tbody>'+
+      j.rows.map(function(r){return '<tr><td class="l">'+esc(r.name||"—")+'</td><td><a href="'+esc(r.href)+'" target="_blank" rel="noopener">'+esc(r.cid)+'</a></td><td>'+esc(dmy(r.day))+'</td><td class="l">'+esc(r.note)+'</td></tr>';}).join("")+'</tbody></table></div>';
+  }).catch(function(e){b.innerHTML='<button class="x" onclick="closeList()">Close</button><h3>Could not be read ('+esc(e)+')</h3>';});
+}
+function closeList(){document.getElementById("ov").classList.remove("on");}
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeList();});
+load(false);
+</script>
+</body>
+</html>
