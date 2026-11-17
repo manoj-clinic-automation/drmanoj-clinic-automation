@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S469 close** (the parent, full EOS, held at the build), 16-Nov-2026, morning — the parent's sections refreshed here (the X-ray messages and the old slips with a name as the ID live; the no-Docterz slips next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S470 close** (the Sanjeevni chat, full EOS, placed by its 472 open), 16-Nov-2026, midday — the Sanjeevni sections refreshed here (the Item ledger live; unmatched scans to him and Amir next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S469 close** (the parent, full EOS, held at the build), 16-Nov-2026, morning — the parent's sections refreshed here (the X-ray messages and the old slips with a name as the ID live; the no-Docterz slips next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S468 close** (the Sanjeevni chat, full EOS, placed by its 470 open), 15-Nov-2026, midday — the Sanjeevni sections refreshed here (Marg's Stock Register for one item live; a word with Ram Singh before Shavez is switched on); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S467 close** (the parent, full EOS), 14-Nov-2026, night — the parent's sections refreshed here (the slips desk and your X-ray sheet live; the messages next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S463 close** (the Sanjeevni chat, full EOS, placed by its 468 open), 14-Nov-2026, evening — the Sanjeevni sections refreshed here (Marg's Stock Register for one item: the screen agreed, the build held for three review faults; a word with Ram Singh); the other projects' sections as their closes left them.
@@ -1204,21 +1205,21 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S468 close (15-Nov, 12:4x; placed by the 470 open on 16-Nov)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S470 close (16-Nov, 12:4x; placed by the 472 open)
 
-*Detail: `S468_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S463 one.*
+*Detail: `S470_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S468 one.*
 
-**1 · The publish of these records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`
+**1 · The publish of these records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat` (when the 472 open names it)
 
-**2 · A word with Ram Singh:** add **Stock Register** to Shavez's reports login in Marg — then switch Shavez on from your list page `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch/take` (he starts OFF).
+**2 · The Item ledger is live** — `https://followup.dr-manoj.in/finance/sanjeevni/ledger` (also the Hub's Go to box).
 
-**3 · Marg's Stock Register for one item is live** — ask from a Marg watch row or from your list page (above).
+**3 · A word with Ram Singh:** add **Stock Register** to Shavez's reports login in Marg — then switch Shavez on from `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch/take`.
 
-**4 · A word with Amir:** "Kar diya" only after it is in Marg (two 6-September jobs were tapped done on 18-Oct but never entered).
+**4 · A word with Amir:** "Kar diya" only after it is in Marg.
 
-**5 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — section A: the moves with no record; the "ask by itself" figure; the floor box; section B: sale bill **A004591**; the two phone switches when you are ready.
+**5 · On the Marg watch page** — `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch` — as at S468.
 
-**6 · October's purchase month** — `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10` — as at the S455 close (L.K. Drug House 16–31 Oct; Bass, Jubilee, Saisun summaries; Bass Pharma ₹1,597 by cheque; then FINALISE).
+**6 · October's purchase month** — `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10` — as at the S455 close.
 
 **7 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
 
@@ -1232,13 +1233,19 @@ The full list: `claude/S288_PENDING_LIST.md`.
 
 **12 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
 
-**Later, your word only:** AutoHotkey and the order list (parked, D976); when scans start adding to stock (D891); the carry setting back to 1 if you ever want the old automatic way (D965).
+**Later, your word only:** AutoHotkey and the order list (parked, D976); when scans start adding to stock (D891); the carry setting back to 1 (D965).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S468 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S470 close
 
-1. **Your "morning reports in" message** — why it did not reach you on 15-Nov; repaired if it was never sent.
+1. **Unmatched scans to you and Amir; Marg over a misread line; the monthly misread list** (D993) — first case Deepam Pharma's 12-Oct bill.
 2. **ZIBON EXTRA / GEMCAL XT** — from Darpan's Monday counts, one job on Amir's card.
-3. **Yuvika 803's purchase check** — judged again against the corrected bill once Amir has fixed Marg.
+3. **Yuvika 803 / KT ROS DT** — after Amir's next visit.
+
+## ✅ DONE AT THE S470 CLOSE — 16-Nov-2026, midday (the Sanjeevni project)
+
+- **The Item ledger — live** (16-Nov, 11:18 am), and its fix for old or misread scans (11:54 am).
+- **Your 15-Nov "reports in" message** — it was sent (10:05 am), late only from the PC's internet.
+- **Marg's Stock Register for one item** — confirmed against the server's 16-Nov backup.
 
 ## ✅ DONE AT THE S468 CLOSE — 15-Nov-2026, midday (the Sanjeevni project)
 
