@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S482 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the Hub's Days and Cash live; one look at 17-Nov's twin bill; lock October); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S480 close** (the parent, full EOS), 18-Nov-2026, afternoon — the parent's sections refreshed here (section 8 of the pack only on your tick; days you do not sit; MyOperator's +1 block; the packs page's three next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S482 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the Hub's Days and Cash live; one look at 17-Nov's twin bill; lock October); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S481 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, noon — the Sanjeevni sections refreshed here (Ravi's line says settled or waiting; the Hub's Days and Cash agreed — built next; lock October); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S479 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, morning — the Sanjeevni sections refreshed here (one bill statement, the supplier-wise never asked again; October clear — lock it; items 1 and 5 next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S478 close** (the parent, full EOS), 17-Nov-2026, night — the parent's sections refreshed here (the Call Console keeps pace; his Patients tile; the three small jobs); the other projects' sections as their closes left them.
@@ -493,7 +494,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S478 close (17-Nov, 23:0x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S480 close (18-Nov, 15:0x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -509,7 +510,21 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**1b · YOUR PATIENTS PAGE HAS ITS OWN TILE** on your home — *Patients — month by month* (just above the Patients folder). The Call Console now keeps pace with the Callback Tracker (a call shows in about 2–4 minutes). The Callback Tracker itself is left as it is (your word, 8:55 pm): on a browser signed into two Google accounts Google refuses it; your Call Console carries the same lists.
+**1b · SECTION 8 OF THE PACK — YOUR TICK:** the scanned bills go to your accountants only when you tap *Kept back — send with the pack* on a bundle for that month. Untouched, they stay home and are not mentioned in the mail.
+
+```
+https://followup.dr-manoj.in/finance/packs
+```
+
+**1b2 · DAYS YOU DO NOT SIT — mark them (a day ahead for leave):**
+
+```
+https://followup.dr-manoj.in/finance/console/off-days
+```
+
+**1b3 · MYOPERATOR — replies to US (+1) numbers are blocked by them.** The ticket went at 1:5x pm 18-Nov. When they say it is open, press Send again on that chat (nothing resends by itself).
+
+**1b4 · YOUR PATIENTS PAGE — diagnosis words to place:** one tap each (Undo beside it).
 
 **1c · TELL RECEPTION (once): a blood report with no clinic ID now shows the likely patients on Report baaki** — tap the right one; "sabse pakka" marks the surest. Reports placed by themselves or by reception show on your "Filed by themselves", where you can Move one.
 
@@ -561,15 +576,25 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Your word of 22:49, in a fresh session:** (a) the Patients page's last pieces — one-tap diagnosis words; Google's monthly figures read by the server from Google's mail; enquiry callers who became patients; (b) the small tails of the Clinic PCs page.
-2. **The money exception lists** (the Monday audit): each gets a reader or is retired; the two old bank-statement gaps (09-Oct, 14-Oct) — read only when you ask.
-3. **One small kit of the second readers' notes** (four small points from earlier reviews).
-4. **The mock-up of the two monthly switches** (late charge; extra leave and absent) on that staff member's private page; built on your word.
-5. **Then the tracker's move from your PC to the server** (about three sessions).
-6. **The old Google-Sheet UPI checker:** parked at your word; retired when you say.
-7. **Watching, at every open:** the Call Console keeping pace · the Inbox's no-file count · reception's first suggestion taps · the Patients page's blocks · your not-in-Docterz taps · the X-ray messages · the attendance alarm.
+1. **Your word of 2:49 pm 18-Nov, in a fresh session — the packs page:** (a) the 4.4 card-spends sheet and the 7 payment sheet download in one click, no flashing window; (b) section 7's sheet laid out properly (a picture for you first); (c) why 8.2–8.4 are empty, in a few lines.
+2. **Your patient record page made crisp** — one timeline, no repeats, returns with quantity and amount (a mock-up first).
+3. **MyOperator's reply on US numbers** — read it when it comes.
+4. **The money exception lists** (the Monday audit): each gets a reader or is retired; the two old bank-statement gaps (09-Oct, 14-Oct) — read only when you ask.
+5. **One small kit of the second readers' notes** (four small points from earlier reviews).
+6. **The mock-up of the two monthly switches** (late charge; extra leave and absent) on that staff member's private page; built on your word.
+7. **Then the tracker's move from your PC to the server** (about three sessions).
+8. **The old Google-Sheet UPI checker:** parked at your word; retired when you say.
+9. **Watching, at every open:** Google's monthly mail read · the "away" rows on the Call Console · a WhatsApp from abroad · the packs page's extra reads · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S480 CLOSE — 18-Nov-2026 (the parent)
+
+- **Patients page, last pieces** (8:49 am): diagnosis words placed by one tap; enquiry callers who became patients; Google's monthly figures read by the server from Google's mail.
+- **Clinic PCs page** (9:05 am): the lab PC's own card; the attendance machine's card up to date; reception's PC *Working* when heard.
+- **Packs page** (9:28 am, 1:47 pm, 2:33 pm): late statements picked up the same day; each card row says why it waits; your downloaded Amazon Pay statement read — both electricity bills there; section 8 grouped by month, doubtful scans kept out and named, sent only on your tick; payment papers with the real shop, NK Pathology apart, the card line; each card statement's dates.
+- **Days you do not sit** (12:55 pm): no false export alarms; due patients shown "Dr Manoj was away — offer a new date", no reminder WhatsApp.
+- **WhatsApp from abroad** (1:47 pm): kept whole, Reply reaches it, no Call button. MyOperator's +1 block: ticket sent.
 
 ## ✅ DONE AT THE S478 CLOSE — 17-Nov-2026 (the parent)
 
