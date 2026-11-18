@@ -1,0 +1,2 @@
+S876_HUB_RECORD_INLINE
+Session 483 (Sanjeevni) 18-Nov-2026 -- a clinic ID on the Hub opens the patient record inline (D1007)
