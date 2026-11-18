@@ -1,0 +1,1 @@
+S868_DOCTOR_OFF_DAY  the parent, S480, 18-Nov-2026 -- a day Dr Manoj is not sitting; the empty consultation report; two words on the Clinic PCs page
