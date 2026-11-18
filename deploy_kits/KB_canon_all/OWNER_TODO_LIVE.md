@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S477 close** (the parent, full EOS), 17-Nov-2026, evening — the parent's sections refreshed here (the Patients page complete; blood reports with no ID get suggested patients); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S478 close** (the parent, full EOS), 17-Nov-2026, night — the parent's sections refreshed here (the Call Console keeps pace; his Patients tile; the three small jobs); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S476 close** (the Sanjeevni chat, full EOS), 17-Nov-2026, night — the Sanjeevni sections refreshed here (Marg over a misread line; a month's asks shown everywhere; the check names what is open; D1000 next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S477 close** (the parent, full EOS), 17-Nov-2026, evening — the parent's sections refreshed here (the Patients page complete; blood reports with no ID get suggested patients); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S474 close** (the parent, full EOS), 17-Nov-2026, afternoon — the parent's sections refreshed here (your list of slips not in Docterz, the Patients page part 1 and three small fixes live); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S473 close** (the Sanjeevni chat, full EOS), 17-Nov-2026, midday — the Sanjeevni sections refreshed here (L.K.'s October added up; scanned bills not found in Marg live; S850 next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S466 close** (the Scan App project, full EOS, held at the build), 17-Nov-2026, morning — the Scan App sections refreshed here (a credit note scanned on the pharmacy lane now comes in as a credit note — S841); the other projects' sections as their closes left them.
@@ -488,7 +490,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S477 close (17-Nov, 17:1x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S478 close (17-Nov, 23:0x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -504,11 +506,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**1b · YOUR PATIENTS PAGE IS COMPLETE (parts 1 and 2)** — last year's same months, Google, the front desk's calls and WhatsApp, reviews, and who was called about a missed review. Today: portal → *Today · Clinic · Sanjeevni* → *The month* → *Patients*; a tile of its own comes next session.
-
-```
-https://followup.dr-manoj.in/finance/console/patients
-```
+**1b · YOUR PATIENTS PAGE HAS ITS OWN TILE** on your home — *Patients — month by month* (just above the Patients folder). The Call Console now keeps pace with the Callback Tracker (a call shows in about 2–4 minutes). The Callback Tracker itself is left as it is (your word, 8:55 pm): on a browser signed into two Google accounts Google refuses it; your Call Console carries the same lists.
 
 **1c · TELL RECEPTION (once): a blood report with no clinic ID now shows the likely patients on Report baaki** — tap the right one; "sabse pakka" marks the surest. Reports placed by themselves or by reception show on your "Filed by themselves", where you can Move one.
 
@@ -560,16 +558,22 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Your three asks of 17-Nov, 5:10 pm:** (a) the Callback Tracker does not work for you — found and fixed; (b) the Call Console's figures lag the Callback Tracker's — the slow leg found and closed; (c) a portal tile of its own for the Patients page.
-2. **The money exception lists** (the Monday audit): each gets a reader or is retired; the two old bank-statement gaps (09-Oct, 14-Oct) first.
-3. **The Patients page's last pieces:** one-tap diagnosis words; Google's monthly figures read by the server from the mail; enquiry callers who became patients.
+1. **Your word of 22:49, in a fresh session:** (a) the Patients page's last pieces — one-tap diagnosis words; Google's monthly figures read by the server from Google's mail; enquiry callers who became patients; (b) the small tails of the Clinic PCs page.
+2. **The money exception lists** (the Monday audit): each gets a reader or is retired; the two old bank-statement gaps (09-Oct, 14-Oct) — read only when you ask.
+3. **One small kit of the second readers' notes** (four small points from earlier reviews).
 4. **The mock-up of the two monthly switches** (late charge; extra leave and absent) on that staff member's private page; built on your word.
-5. **Three small jobs** (the Inbox's missing-file words · the old approvals service stopped and kept · the WhatsApp marks in the nightly backup) — and the small tails of the Clinic PCs page.
-6. **Then the tracker's move from your PC to the server** (about three sessions).
-7. **The old Google-Sheet UPI checker:** parked at your word; retired when you say.
-8. **Watching, at every open:** reception's first suggestion taps · the Patients page's new blocks · your not-in-Docterz taps · the X-ray messages · the attendance alarm.
+5. **Then the tracker's move from your PC to the server** (about three sessions).
+6. **The old Google-Sheet UPI checker:** parked at your word; retired when you say.
+7. **Watching, at every open:** the Call Console keeping pace · the Inbox's no-file count · reception's first suggestion taps · the Patients page's blocks · your not-in-Docterz taps · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S478 CLOSE — 17-Nov-2026 (the parent)
+
+- **The Callback Tracker, found** (6 pm): it works; Google refuses it to a browser signed into two Google accounts (yours has two). Left as it is at your word — the Call Console carries the lists.
+- **The Call Console keeps pace with the tracker** (live 8:48 pm): rebuilt about 20 seconds after each call instead of every 10 minutes.
+- **Your Patients tile** (live 10:48 pm) on your home.
+- **Three small jobs** (live 10:48 pm): the Inbox says when MyOperator never gave a file, with an Open in MyOperator link (6 such in 30 days); a file that cannot be fetched gives a plain message; the old WhatsApp approvals service switched off and kept; the WhatsApp "awaiting reply" list in the nightly encrypted backup.
 
 ## ✅ DONE AT THE S477 CLOSE — 17-Nov-2026 (the parent)
 
@@ -1243,41 +1247,45 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S473 close (17-Nov, 12:0x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S476 close (17-Nov, 22:5x)
 
-*Detail: `S473_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S470 one.*
+*Detail: `S476_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S473 one.*
 
 **1 · The publish of these records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`
 
-**2 · Two scans waiting for your answer** — `https://followup.dr-manoj.in/finance/sanjeevni/not-in-marg` (Deepam B-0150: same bill as A000678; Shivaaz B-0122: it is Marg bill 3499). Amir may answer first.
+**2 · Nothing else to do for October by you** — the page asks Amir for the fresh supplier-wise export; once it is in (or after the next session's build), October locks and pays: `https://followup.dr-manoj.in/finance/purchase/page/check?month=2026-10`
 
-**3 · October can be locked and paid** — `https://followup.dr-manoj.in/finance/purchase/page/check?month=2026-10` (L.K. now agrees; payable ₹3,63,125).
+**3 · One tap waiting:** Yuvika 803 on `https://followup.dr-manoj.in/finance/purchase/page/sarvam?month=2026-11` (Amir may answer first). Scans not found in Marg, if any left: `https://followup.dr-manoj.in/finance/sanjeevni/not-in-marg`
 
-**4 · The old disk file on your Desktop** can be deleted — `C:\Users\Dr Manoj Agarwal\Desktop\sessiondata_old.vhdx`
+**4 · A word with Ram Singh:** add **Stock Register** to Shavez's reports login in Marg — then switch Shavez on from `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch/take`.
 
-**5 · A word with Ram Singh:** add **Stock Register** to Shavez's reports login in Marg — then switch Shavez on from `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch/take`.
+**5 · A word with Amir:** "Kar diya" only after it is in Marg.
 
-**6 · A word with Amir:** "Kar diya" only after it is in Marg.
+**6 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
 
-**7 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
+**7 · The new start text, pasted once into each of the four projects** — `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S438\COMMON_START_HERE_PROMPT_v1_1.md`
 
-**8 · The new start text, pasted once into each of the four projects** — `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S438\COMMON_START_HERE_PROMPT_v1_1.md`
+**8 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting.
 
-**9 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting.
+**9 · The orthotics count** — who counts the shelf, and on which day.
 
-**10 · The orthotics count** — who counts the shelf, and on which day.
+**10 · Still yours:** ZUPRINOR 5 (row 6); Shavez's phone; Ram Singh (F-1115).
 
-**11 · Still yours:** ZUPRINOR 5 (row 6); Shavez's phone; Ram Singh (F-1115).
-
-**12 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
+**11 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
 
 **Later, your word only:** AutoHotkey and the order list (parked, D976); when scans start adding to stock (D891); the carry setting back to 1 (D965).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S473 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S476 close
 
-1. **Marg over a misread line; the monthly misread list; the ledger's verdict; a matching number names the match** (S850, D993 b–d, F-1440).
-2. **ZIBON EXTRA / GEMCAL XT** — from Darpan's Monday counts, one job on Amir's card.
-3. **Yuvika 803 / KT ROS DT** — after Amir's next visit.
+1. **The newer bill-wise + item lines settle a month** when they agree with each other, every paper and the dealers' summaries — no re-export asked (D1000, session 479).
+2. **The payment sheet's "your Confirm"** reworded as on the check.
+3. **ZIBON EXTRA / GEMCAL XT** — from Darpan's Monday counts; **Yuvika 803 / KT ROS DT** — after Amir's next visit.
+
+## ✅ DONE AT THE S476 CLOSE — 17-Nov-2026, evening (the Sanjeevni project)
+
+- **Marg is taken over a misread scan line** when totals agree; else one tap; misreads kept monthly; the Item ledger shows the verdict (2:02 pm).
+- **A month's open asks show by themselves** on your payment sheet, the check, Needs-you and Amir's card (6:25 pm).
+- **The purchase check names what is open**, each with its path (9:22 pm).
 
 ## ✅ DONE AT THE S473 CLOSE — 17-Nov-2026, midday (the Sanjeevni project)
 

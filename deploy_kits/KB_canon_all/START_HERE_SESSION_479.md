@@ -1,0 +1,10 @@
+# START HERE — SESSION 479 — written at the S476 close (the Sanjeevni chat), 17-Nov-2026 22:5x IST
+
+**Project: Sanjeevni — Pharmacy & Marg.** Open it in a fresh chat in this project, linked to manojz. Live from S476: **Marg over a misread line** (S850, 14:02), **a month's asks on his pages and Amir's card** (S855, 18:25), **the purchase check names what is open** (S857, 21:22) — nine files DECLARED-PENDING until the 18-Nov bundle.
+
+1. **The open:** `OPEN_ROUTINE_v1` — never `git` in the device shell; scratch in `/tmp`. Session **479 (RESERVED at the S476 close)** — a SHORT pinned edit of `board/_numbers` session_note (append below its last line; read counters with a `where field > value` query, never the whole ~250 KB document). The day's checks; remind him once of the packs page (D713).
+2. **The 18-Nov bundle:** scan_register 1aec54b4 · month_asks cf72cde9 · purchase_app 1ac9d1ef · sanjeevni_approvals a1a09d24 · amir_day 97e56bc7 · marg_right c1ba6491 · scan_ask 13787e07 · item_ledger b4040d8f · provisional_s781 b4d4ceeb.
+3. **Read live** as checker: `https://followup.dr-manoj.in/finance/purchase/page/check?month=2026-10` — has Amir exported the fresh supplier-wise? (if yes, October may already be clear: then D1000 is proven on November instead).
+4. **THE BUILD — D1000 (Runbook §2B item 1):** take the kit number first. The newer bill-wise + item lines settle a month when the four checks pass; the ask stays (naming the failing check) otherwise. Read whole from the newest bundle (F-472): `month_asks.py`, `purchase_app.py` `_month_summary` + the S855 tail, `scan_register.py` `s749_month_open` / `s750_open` + the S857 tail. Copy S857's installer (MONTH_ASKS_FROZEN_WALK around older walks; mount check 404/000/5xx only). Real case: October (11-Nov bill-wise + item lines vs the 06-Nov supplier-wise). Show him the card's new words before placing — what he SEES is his.
+5. **Then:** the payment sheet's "your Confirm" for Ravi · ZIBON EXTRA / GEMCAL XT (F-1401) · Yuvika 803 (F-1413) · KT ROS DT (F-1232, F-1412) · `board/_page` plan rows whole (F-1339).
+6. **PARKED by his word (D976):** the AutoHotkey runner · the order-list kit.
