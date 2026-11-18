@@ -1,0 +1,1 @@
+S883_LEDGER_BATCHES  the Item ledger's batches with expiry, batch per line, month folds (Sanjeevni S485, 18-Nov-2026)

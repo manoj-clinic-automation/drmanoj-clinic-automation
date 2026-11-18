@@ -1,0 +1,9 @@
+b72abb722064caa9d01158cb2f9063a0  KIT_ID.txt
+8da18878637829fb4d6e2cbe7103c755  README.md
+e2554fb27ed5f7e3ce3ad9000d303a85  TO_PINS.md5
+5db83cbcd25b57fdbd52ab3077623f21  expiry_watch.py
+5fbb60200dc836a8a623fa7175bf0492  item_ledger.py
+0010898a4a9246d1b076a34643b321fb  install_S883_LEDGER_BATCHES.sh
+7b3dd2fa6ae8dbcdf144b1bd858127f9  undo_s883.sh
+ddd7e8d9e4eba37777d62ef4c78c9117  rehearse_s883.sh
+0a0b3aff248fb5ec47ea459354e0b4b4  synth_s883.py
