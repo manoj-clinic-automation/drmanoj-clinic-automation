@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S483 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, evening — the Sanjeevni sections refreshed here (a patient's record inline on the Hub; Darpan's page reads your entries; the remaining list at the next open); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S484 close** (the parent, full EOS), 18-Nov-2026, evening — the parent's sections refreshed here (the packs' sheets download in place; your patient record page; sheet 7 off the card spends, then its voucher document next; MyOperator's US block closed at your word; the receipts folder shared); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S483 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, evening — the Sanjeevni sections refreshed here (a patient's record inline on the Hub; Darpan's page reads your entries; the remaining list at the next open); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S480 close** (the parent, full EOS), 18-Nov-2026, afternoon — the parent's sections refreshed here (section 8 of the pack only on your tick; days you do not sit; MyOperator's +1 block; the packs page's three next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S482 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the Hub's Days and Cash live; one look at 17-Nov's twin bill; lock October); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S481 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, noon — the Sanjeevni sections refreshed here (Ravi's line says settled or waiting; the Hub's Days and Cash agreed — built next; lock October); the other projects' sections as their closes left them.
@@ -495,7 +496,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S480 close (18-Nov, 15:0x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S484 close (18-Nov, 18:3x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -523,9 +524,13 @@ https://followup.dr-manoj.in/finance/packs
 https://followup.dr-manoj.in/finance/console/off-days
 ```
 
-**1b3 · MYOPERATOR — replies to US (+1) numbers are blocked by them.** The ticket went at 1:5x pm 18-Nov. When they say it is open, press Send again on that chat (nothing resends by itself).
+**1b3 · MYOPERATOR — replies to US numbers: CLOSED at your word (no facility).** When you want it, say so and the inbox gets a "reply from the reception phone" box for such a chat.
 
 **1b4 · YOUR PATIENTS PAGE — diagnosis words to place:** one tap each (Undo beside it).
+
+**1b5 · THE PAYMENT RECEIPTS FOLDER — SHARED (6:15 pm, done).** Nothing more; the next session proves the server sees it, then builds the voucher document (sheet 7 as one PDF with every receipt).
+
+**1b6 · HDFC's NOVEMBER CARD STATEMENT has not come yet** — when it arrives in Drive the October card sheet completes by itself.
 
 **1c · TELL RECEPTION (once): a blood report with no clinic ID now shows the likely patients on Report baaki** — tap the right one; "sabse pakka" marks the surest. Reports placed by themselves or by reception show on your "Filed by themselves", where you can Move one.
 
@@ -577,17 +582,24 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Your word of 2:49 pm 18-Nov, in a fresh session — the packs page:** (a) the 4.4 card-spends sheet and the 7 payment sheet download in one click, no flashing window; (b) section 7's sheet laid out properly (a picture for you first); (c) why 8.2–8.4 are empty, in a few lines.
-2. **Your patient record page made crisp** — one timeline, no repeats, returns with quantity and amount (a mock-up first).
-3. **MyOperator's reply on US numbers** — read it when it comes.
-4. **The money exception lists** (the Monday audit): each gets a reader or is retired; the two old bank-statement gaps (09-Oct, 14-Oct) — read only when you ask.
-5. **One small kit of the second readers' notes** (four small points from earlier reviews).
-6. **The mock-up of the two monthly switches** (late charge; extra leave and absent) on that staff member's private page; built on your word.
-7. **Then the tracker's move from your PC to the server** (about three sessions).
-8. **The old Google-Sheet UPI checker:** parked at your word; retired when you say.
-9. **Watching, at every open:** Google's monthly mail read · the "away" rows on the Call Console · a WhatsApp from abroad · the packs page's extra reads · the X-ray messages · the attendance alarm.
+1. **Sheet 7 as a proper voucher document (your word of 5:49 pm 18-Nov; the receipts folder shared 6:15 pm) — the next session's first build (S881):** the server fetches your payment receipts from the shared folder nightly; sheet 7 becomes one PDF per month — an index page, then every receipt — with the Excel beside it; the line names exactly which card or bank statement is missing; amounts read from the receipt where the register has none; the card sheet gets its receipts the same way. The plan: `S484_SHEET7_VOUCHERS_PLAN.md`.
+2. **The inbox's "reply from the reception phone"** for a WhatsApp from abroad — on your word.
+3. **The money exception lists** (the Monday audit): the two old gaps (09-Oct, 14-Oct) are fixed by the pharmacy side; the rest read only when you ask.
+4. **One small kit of the second readers' notes** (four small points from earlier reviews) and the Patients tile's position.
+5. **The mock-up of the two monthly switches** (late charge; extra leave and absent) on that staff member's private page; built on your word.
+6. **Then the tracker's move from your PC to the server** (about three sessions).
+7. **The old Google-Sheet UPI checker:** parked at your word; retired when you say.
+8. **Watching, at every open:** your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S484 CLOSE — 18-Nov-2026 (the parent)
+
+- **The packs page's sheets** (4:46 pm): every Excel sheet downloads in place with one click and a note — no flashing window; sheet 7 and NK Pathology's sheet laid out to be read.
+- **Your patient record page** (5:18 pm): built to your mock-up v6 — full mobile and diagnosis in the banner, the money a quiet chip, every day folded, films and reports open in place; the diagnosis also on the Hub's inline record.
+- **Sheet 7 off the card spends** (5:43 pm): card-paid papers move to the card sheet's receipt column and a "Paid by card" sheet; the rest say where the debit is. Then your word: not up to the mark — the voucher document is next (above).
+- **MyOperator's US-number block:** closed at your word (no facility).
+- **The day page on your PC** reads Indian time again.
 
 ## ✅ DONE AT THE S480 CLOSE — 18-Nov-2026 (the parent)
 
