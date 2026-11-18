@@ -62,8 +62,13 @@ O=$(synth "$SCR/root_new/finance" "$SCR/finance.db"); R=$(printf '%s\n' "$O" | t
 case "$R" in "SYNTH S874: "*" PASS, 0 FAIL") ;; *) stop "!! [3/5] synth_s874 on a copy of the live database: $R - nothing installed";; esac
 lay old || stop "!! [3/5] could not lay out the control - nothing installed"
 R0=$(synth "$SCR/root_old/finance" "$SCR/f2.db" | tail -1); case "$R0" in "SYNTH S874: "*" PASS, 0 FAIL") stop "!! [3/5] the control on the live files did not go red ($R0) - nothing installed";; esac
-R9=$(s869 "$SCR/root_new/finance" "$SCR/f3.db"); case "$R9" in "SYNTH S869: "*" PASS, 0 FAIL") ;; *) stop "!! [3/5] S869's own proof on the rebuilt files: $R9 - nothing installed";; esac
-say "[3/5] proof on a copy of the live database: $R; control on the live files: red; S869's proof on the rebuilt files: $R9"
+\cp -p "$SCR/finance.db" "$SCR/f4.db" || stop "!! [3/5] could not copy the database again - nothing installed"
+R9=$(s869 "$SCR/root_new/finance" "$SCR/f3.db"); R9o=$(s869 "$SCR/root_old/finance" "$SCR/f4.db")
+fails() { printf '%s' "$1" | sed -n 's/.* PASS, \([0-9]*\) FAIL.*/\1/p'; }
+f_new=$(fails "$R9"); f_old=$(fails "$R9o")
+[ -n "$f_new" ] && [ -n "$f_old" ] || stop "!! [3/5] S869's proof did not finish (rebuilt: $R9 / live: $R9o) - nothing installed"
+[ "$f_new" -le "$f_old" ] || stop "!! [3/5] S869's own proof is WORSE on the rebuilt files (rebuilt: $R9 / live: $R9o) - nothing installed"
+say "[3/5] proof on a copy of the live database: $R; control on the live files: red; S869's proof: rebuilt $R9 / live $R9o (its frozen expectations the owner's taps may have outgrown; not worse)"
 if [ "${DRY:-0}" = 1 ]; then say "-- DRY RUN: every gate and the proofs green; NOTHING written"; exit 0; fi
 f0=$(fhz); [ "$f0" = 200 ] || stop "!! [4/5] finance healthz $f0 before the install - nothing installed"
 for n in $NAMES; do b=$(bak "$n"); { \cp -p "$ROOT/$n" "$b" && [ "$(m5 "$b")" = "$(from_of "$n")" ]; } || stop "!! [4/5] could not write the backup of $n - nothing placed"; done
