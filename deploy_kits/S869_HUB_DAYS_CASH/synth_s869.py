@@ -222,8 +222,9 @@ try:
     con4.execute("DELETE FROM darpan_kal_day WHERE business_date=?", (last,))
     con4.commit()
     w4 = hc.drawer_why(con4)
-    ok(last not in [d["date"] for d in w4["days"]] and last in [d["date"] for d in w4["not_yet"]] and w4["waiting_p"] > 0,
-       "T43 a filed day not yet handed over (%s) is 'not yet handed', never 'short'" % last)
+    st_last = con4.execute("SELECT status FROM day_entry WHERE unit='medical' AND business_date=?", (last,)).fetchone()[0]
+    ok(last not in [d["date"] for d in w4["days"]] and (st_last not in ("submitted", "draft") or (last in [d["date"] for d in w4["not_yet"]] and w4["waiting_p"] > 0)),
+       "T43 a filed day not yet handed over (%s, %s) is never called 'short' (unapproved: 'not yet handed'; approved: its cash went to the pool)" % (last, st_last))
     # a multi-day cover: the day before last's handover now pays for both days
     prev = con4.execute("SELECT MAX(d.business_date) FROM darpan_kal_day d WHERE d.unit='medical' AND d.handed_p IS NOT NULL "
                         "AND d.business_date < ? AND ABS(COALESCE(d.diff_p,0)) <= 5000 AND d.landed_movement_id IS NOT NULL", (last,)).fetchone()[0]

@@ -13,8 +13,9 @@ script's --fin (default /root/finance); the one calculation is read back at the 
   C. 4-Nov: one owner entry -- Rs 954, a UPI done into another account.
   D. 3-Nov: sale bill A004591 (Rs 1,760) was deleted in Marg ("a backup person was holding the sales counter"); Marg's
      later export (05-Nov 14:42, 13 bills) no longer carries it, the server still did (the ingest only adds).  The bill
-     row and its lines go (kept whole in the audit row), its review-queue line is resolved as gone, and the day --
-     still unapproved -- follows Marg's 13 bills (day_resync pass 0: cash 6,522 -> 4,762).
+     row and its lines go (kept whole in the audit row), its review-queue line is resolved as gone, and the day follows
+     Marg's 13 bills: cash 6,522 -> 4,762 -- by day_resync pass 0 while the day is unapproved, or (the owner approved
+     every November day on the morning of 18-Nov) by one audited 'correct' row in his name. A locked day is refused.
   28-Sep (Rs 680, accepted) and 17-Oct (Rs 504, his tap) need no write here: the accepted-short rule reads the decision.
 """
 import argparse
@@ -144,14 +145,21 @@ def step_d(con, apply, say, fin):
     newest = con.execute("SELECT MAX(source_stamp) FROM sale_bill WHERE unit=? AND business_date=?", (UNIT, iso)).fetchone()[0]
     if brow["source_stamp"] >= newest:
         return "REFUSED: %s is in Marg's newest export of 3-Nov (%s) -- not a deleted bill" % (bill, newest)
-    st = con.execute("SELECT status FROM day_entry WHERE unit=? AND business_date=?", (UNIT, iso)).fetchone()
-    if not st or st[0] not in ("submitted", "draft"):
-        return "REFUSED: 3-Nov is %s -- the day must be unapproved for pass 0 to follow Marg" % (st[0] if st else "not filed")
+    st = con.execute("SELECT id, status FROM day_entry WHERE unit=? AND business_date=?", (UNIT, iso)).fetchone()
+    if not st or st[1] == "locked":
+        return "REFUSED: 3-Nov is %s -- a locked day is never written" % (st[1] if st else "not filed")
+    approved = st[1] not in ("submitted", "draft")            # approved since the spec was written (18-Nov morning): the line is corrected here
+    eid = st[0]
+    if approved:
+        ln = con.execute("SELECT id, amount_p FROM day_line WHERE day_entry_id=? AND service='pharmacy_sale' AND mode='cash'", (eid,)).fetchall()
+        if len(ln) != 1 or int(ln[0][1]) != 652200:
+            return "REFUSED: 3-Nov is approved and its cash line is not the 6,522 the ruling names (%s)" % [int(x[1]) for x in ln]
     li = con.execute("SELECT id, seq, item_name, qty_raw, amount_p FROM sale_line_item WHERE unit=? AND business_date=? AND bill_no=?",
                      (UNIT, iso, bill)).fetchall()
     rv = con.execute("SELECT id, status FROM sale_item_review WHERE raw_text LIKE ? AND status='open'", ('%"' + bill + '"%',)).fetchall()
-    say("D  3-Nov: %s (%s, export %s; the newest is %s) -> removed with %d line(s); review line(s) %s resolved as gone; then pass 0 on the day" % (
-        bill, rs(int(brow["net_p"])), brow["source_stamp"], newest, len(li), [r[0] for r in rv]))
+    say("D  3-Nov: %s (%s, export %s; the newest is %s) -> removed with %d line(s); review line(s) %s resolved as gone; then %s" % (
+        bill, rs(int(brow["net_p"])), brow["source_stamp"], newest, len(li), [r[0] for r in rv],
+        "the approved day's cash line 6,522 -> 4,762 by the owner's ruling (audited as his correction)" if approved else "pass 0 on the day"))
     if not apply:
         return "D  would remove %s and re-read 3-Nov from Marg" % bill
     audit(con, "sale_bill", 0, "remove_gone_bill", dict(bill=brow, lines=[dict(id=l[0], seq=l[1], item=l[2], qty=l[3], amount_p=l[4]) for l in li]),
@@ -163,13 +171,23 @@ def step_d(con, apply, say, fin):
                     ("manoj", now_iso(), "gone from Marg: the bill was deleted (the owner, 18-Nov; %s)" % KIT, rid))
         audit(con, "sale_item_review", rid, "resolve", dict(status="open"), dict(status="resolved", why="bill deleted in Marg", kit=KIT))
     con.commit()
-    sys.path.insert(0, fin)
-    import day_resync
-    con.row_factory = sqlite3.Row
-    e = con.execute("SELECT id, business_date, status FROM day_entry WHERE unit=? AND business_date=?", (UNIT, iso)).fetchone()
-    v, line = day_resync.resync_marg(con, e, apply=True)
-    con.row_factory = None
-    stale = con.execute("SELECT COUNT(*) FROM sale_item WHERE source_ref=? AND day_entry_id=?", (bill, e["id"])).fetchone()[0]
+    if approved:                                              # the day is his: the cash line follows Marg's 13 bills by his ruling, once
+        before = dict(date=iso, cash_p=652200, upi_p=841400, net_p=1493600, status=st[1])
+        after = dict(date=iso, cash_p=476200, upi_p=841400, net_p=1317600, status=st[1],
+                     ruling="sale bill A004591 (Rs 1,760) was deleted in Marg; the day follows Marg's 13 bills (the owner, 18-Nov-2026)", kit=KIT)
+        con.execute("UPDATE day_line SET amount_p=476200 WHERE id=?", (ln[0][0],))
+        con.execute("INSERT INTO audit_log (table_name, row_id, action, before_json, after_json, by_whom, at) VALUES ('day_entry', ?, 'correct', ?, ?, ?, ?)",
+                    (eid, json.dumps(before), json.dumps(after), "manoj", now_iso()))
+        con.commit()
+        v, line = "FIXED", "%s  cash 6522.00 -> 4762.00 (the owner's correction; the day was approved)" % iso
+    else:
+        sys.path.insert(0, fin)
+        import day_resync
+        con.row_factory = sqlite3.Row
+        e = con.execute("SELECT id, business_date, status FROM day_entry WHERE unit=? AND business_date=?", (UNIT, iso)).fetchone()
+        v, line = day_resync.resync_marg(con, e, apply=True)
+        con.row_factory = None
+    stale = con.execute("SELECT COUNT(*) FROM sale_item WHERE source_ref=? AND day_entry_id=?", (bill, eid)).fetchone()[0]
     note = (" (note: %d sale_item row(s) still name %s -- read only, the Returns and counter cards may show it)" % (stale, bill)) if stale else ""
     if v not in ("FIXED", "SAME"):
         return "REFUSED at the end of D: %s removed but pass 0 answered %s (%s) -- the day's cash is NOT yet Marg's; tell Claude%s" % (bill, v, line, note)
