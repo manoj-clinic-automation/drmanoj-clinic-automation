@@ -1,0 +1,13 @@
+87ff011b6b4f6672ef9d2d48465ba88f  KIT_ID.txt
+d0573312ddc6f4ba0a71c4e090f70c3d  README.md
+3816aa411a6db1206812854244386cde  TO_PINS.md5
+8d6c3f692921377dac270a586481de89  hub_cash.py
+818ed0a2464fc079fd87740f7a0ade11  sanjeevni_cash.py
+4359d04826ad508867be3e9e880d9168  sanjeevni_day.py
+0480d1cc06c32d39f39d640b4477cd79  day_resync.py
+f7cf98c0f65282db55fc44f36f4c9219  make_s869.py
+cf40592f68671bf2e5d73d38cb4d27d3  synth_s869.py
+c1d180dbb6f99db0c5ba11d7a6245990  oneoff_s869.py
+729ded7dbaee5cdfd5815b56eea9ddf7  install_S869_HUB_DAYS_CASH.sh
+eec28e13951962a5fbc470bd07bd407e  undo_s869.sh
+9e2c8ddecce38ccdc50b21c9acca688c  rehearse_s869.sh
