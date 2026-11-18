@@ -1,0 +1,10 @@
+# START HERE — SESSION 482 — written at the S481 close (the Sanjeevni chat), 18-Nov-2026 12:1x IST
+
+**Project: Sanjeevni — Pharmacy & Marg.** Open it in a fresh chat in this project, linked to manojz. Live from S481: **Ravi's line says settled or waiting** (S867, 11:38) on the payment sheet, the dealer ledger and row 7. **This session builds the Hub's Days and Cash (D1005)** — the owner OK'd mock-up v3 at 11:59: https://claude.ai/artifact/GeKbcmkCgU2KL11vecWk8R. Five files DECLARED-PENDING until the 19-Nov bundle.
+
+1. **The open:** `OPEN_ROUTINE_v1` — never `git` in the device shell; scratch in `/tmp`, `TMPDIR` under `/tmp` and removed after; `df /sessions` once. Session **482 (RESERVED at the S481 close)** — a SHORT pinned edit of `board/_numbers` session_note (append below its last line; do NOT db_get the whole document — it is ~250 KB: read the four integers with `db_query where <field> > <last known>` misses, then a pinned `update` with the version from the str_replace result). The day's checks; remind him once of the packs page (D713).
+2. **The 19-Nov bundle:** scan_register 44d6e05e · purchase_app c15bc1c5 (S867) · month_asks ff84be3e · amir_day 1cf0f13f · export_watch 33d6d71e (S864).
+3. **THE HUB BUILD (D1005) — read `deploy_kits/KB_canon_all/S481_HUB_BUILD_SPEC.md` WHOLE first**, then `sanjeevni_cash.py` (`days()`, `handovers()`), `sanjeevni_day.py`, `day_resync.py` (PASS 1), `darpan_kal.py` (`api/received`, `owner_decision`), the Hub's `finance_ui/finance_approvals.html` (`renderDays`, `dayDetail`, `rhRender`), `/finance/darpan/api/cn-hub`. Runbook §2B item 1 lists the six parts (a)–(f). The clean-up is DRY on a copy, then live by the installer, each change audited; the drawer comes to ₹49 with 17-Oct's ₹504 left for his tap. Cold review by a sub-agent before placing. Owner page, PC-first; staff screens unchanged.
+4. **ITEM 5 (D1003):** `board/_page` — this project's `plan` rows rewritten whole (F-1339); records only.
+5. **Then, as staff answer:** ZIBON EXTRA / GEMCAL XT (F-1401) · Yuvika 803 (F-1413) · KT ROS DT (F-1232, F-1412).
+6. **PARKED by his word (D976):** the AutoHotkey runner · the order-list kit.
