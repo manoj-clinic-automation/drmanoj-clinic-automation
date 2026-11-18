@@ -1,0 +1,8 @@
+# S882_PAYMENT_RECORDS_LEDGERS — the parent, S486, 18-Nov-2026 (his "proceed with all these jobs", 19:06)
+His payment papers from his shared Drive folder "Payment Records" to the server each night, and two running ledgers on his login.
+- NEW `/root/finance/payment_records.py` — `fetch` (cron 02:20): payment PDFs only (receipts, invoices, Agilus invoices, MyOperator statements); never a CSV, picture, spreadsheet, Airtel bill, policy paper or personal order (`want()`); read-only on Drive; never deletes; table `payment_record_file`. `status`, `layout` (Agilus's layout with rare words masked, D656).
+- NEW `/root/finance/payment_ledgers.py` — `/finance/ledgers`, `/finance/ledgers/agilus` (NK Pathology, one row per invoice for now, running total; patient lines next kit), `/finance/ledgers/myoperator` (invoices, payments, monthly usage, MyOperator's pre-paid balance), `/finance/ledgers/file/<id>`, `/finance/ledgers/agilus/layout`. His login alone (the Patients page's gate).
+- `/root/finance/owner_console.py` e47235b2 -> TO (make_s882.py: one mount block after the Patients page's).
+Install (server): `cd /root/deploy/repo && git pull --ff-only && rm -rf /tmp/s882kit && cp -rp /root/deploy/repo/deploy_kits/S882_PAYMENT_RECORDS_LEDGERS /tmp/s882kit && bash /tmp/s882kit/install_S882_PAYMENT_RECORDS_LEDGERS.sh`
+Undo: `bash /tmp/s882kit/install_S882_PAYMENT_RECORDS_LEDGERS.sh --undo` (papers and their table kept).
+Walk: walk_s882.py on a made-up root (made-up Drive, papers, register; every role) 54/54 (incl. Drive refusals, masking, duplicates, the console standing); controls red: the live files, and names left unmasked.
