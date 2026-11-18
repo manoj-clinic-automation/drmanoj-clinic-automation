@@ -38,8 +38,12 @@ try:
     s = next((x for x in v["sale"]["list"] if x.get("clinic_id") == cid), None)
     ok(s is None or s["mobile"] == N1, "T3 a sale bill of the same patient carries the same mobile")
     ok(all("mobiles" in x and "clinic_id" in x for x in v["sale"]["list"]), "T4 every bill carries the fields (empty when unknown)")
+    acc17 = con.execute("SELECT owner_decision FROM darpan_kal_day WHERE business_date='2026-10-17'").fetchone()
+    acc17 = bool(acc17 and acc17[0] == "accept")                 # the owner may already have accepted 17-Oct on the live copy (his tap 18-Nov)
+    if acc17:
+        con.execute("UPDATE darpan_kal_day SET owner_decision=NULL WHERE business_date='2026-10-17'"); con.commit()
     v17 = sd.day_view(con, "2026-10-17")
-    ok(v17["short"] == "504" and v17["short_p"] == 50400 and v17["can_accept"] is True, "T5 17-Oct names its own short 504 with Accept offered")
+    ok(v17["short"] == "504" and v17["short_p"] == 50400 and v17["can_accept"] is True, "T5 17-Oct names its own short 504 with Accept offered%s" % (" (un-accepted on the copy first)" if acc17 else ""))
     con.execute("UPDATE darpan_kal_day SET owner_decision='accept', state='explained' WHERE business_date='2026-10-17'"); con.commit()
     v17b = sd.day_view(con, "2026-10-17")
     ok(v17b["short"] is None and v17b["written_off"] == "504", "T6 once accepted: no short, 504 written off")
