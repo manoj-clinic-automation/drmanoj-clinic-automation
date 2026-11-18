@@ -1,7 +1,7 @@
 e1e5859df564e0d4b5649e4082efcad5  KIT_ID.txt
 6cc85dfbedc1b3525d447fef63f271ad  README.md
 1d31959f71d74149c10fa35b88b3cffb  TO_PINS.md5
-e0971ed94900be56dac3c77e16dcbd69  install_S882_PAYMENT_RECORDS_LEDGERS.sh
+359d49cf527cc358f8de7d82d32055bd  install_S882_PAYMENT_RECORDS_LEDGERS.sh
 a660c2439048a8cc52a762eb7497faf0  make_s882.py
 c8a2263d9cb32999bb9df3c15a88e88f  owner_console.py
 5832bdad198e5f58cccb70f4c3621ce7  payment_ledgers.py

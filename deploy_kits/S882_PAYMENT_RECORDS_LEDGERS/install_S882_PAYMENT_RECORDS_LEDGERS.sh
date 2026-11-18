@@ -28,6 +28,7 @@ say() { echo "$@"; }
 OBAK="$OC.bak_S882_${OC_FROM:0:8}"
 fget() { if [ -n "${HEALTH_CMD:-}" ]; then $HEALTH_CMD "$1"; else curl -s -o /dev/null -m 8 -w '%{http_code}' "http://127.0.0.1:$FIN_PORT$1"; fi; }
 fhz() { fget /finance/healthz; }
+jrn() { if [ -n "${JOURNAL_CMD:-}" ]; then $JOURNAL_CMD; elif command -v journalctl >/dev/null 2>&1; then journalctl -u "$FSVC" --since "@$1" --no-pager 2>/dev/null; fi; }
 wait200() { local h=000; for _t in 1 2 3 4 5 6 7 8 9 10; do sleep "${NAP:-3}"; h=$(fhz); [ "$h" = 200 ] && break; done; echo "$h"; }
 release_lock() { [ "$TOOK_LOCK" = 1 ] || return 0; rm -f "${LOCK:?}/owner"; rmdir "$LOCK" 2>/dev/null; TOOK_LOCK=0; }
 on_exit() { for n in $NEWF owner_console.py; do rm -f "$FIN/.$n.s882"; done; release_lock; rm -rf "${SCR:?}"; find "$KDIR" -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null; }
@@ -101,10 +102,11 @@ cron_read || restore "the crontab could not be read whole (nothing written to it
 { cat "$SCR/cron.cur"; echo "$CRONLINE"; } > "$SCR/cron.new" && "$CRONTAB" "$SCR/cron.new" || restore "the cron line"
 [ "$("$CRONTAB" -l 2>/dev/null | grep -c .)" -ge "$(( $(grep -c . "$SCR/cron.cur") + 1 ))" ] || restore "the crontab read back shorter than before"
 [ "$("$CRONTAB" -l 2>/dev/null | grep -cF "$MARK")" = 1 ] || restore "the cron line read back"
-"$SYSTEMCTL" restart "$FSVC" || restore "restart $FSVC"
+T0=$(date +%s); "$SYSTEMCTL" restart "$FSVC" || restore "restart $FSVC"
 [ "${REHEARSE_RED_AT:-}" = 4 ] && restore "rehearsal: a forced red at [4/5]"
 c1=$(wait200); [ "$c1" = 200 ] || restore "finance healthz $c1 after the restart"
-lz=$(fget /finance/ledgers/healthz); [ "$lz" = 200 ] || restore "the ledgers answered $lz (not mounted)"
+lz=$(fget /finance/ledgers/healthz); case "$lz" in 200|302|401|403) ;; *) restore "the ledgers are not mounted (healthz $lz; 200 or a login answer means mounted, F-1439)";; esac
+jrn "$T0" | grep -q "payment_ledgers NOT mounted\|owner_console NOT mounted" && restore "the service log says: not mounted"
 for u in /finance/console /finance/console/patients /finance/ledgers /finance/ledgers/agilus /finance/ledgers/myoperator; do pg=$(fget "$u"); case "$pg" in 200|302|303|401|403) ;; *) restore "$u answered $pg";; esac; done
 release_lock
 say "[4/5] placed and read back: the two new files + owner_console.py at their TO pins; one cron line (02:20 nightly); $FSVC restarted $(TZ=Asia/Kolkata date '+%H:%M IST'), finance healthz $c1, the ledgers mounted"
