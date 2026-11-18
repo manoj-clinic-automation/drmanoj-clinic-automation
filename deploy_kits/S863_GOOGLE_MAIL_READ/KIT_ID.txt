@@ -1,0 +1,1 @@
+S863_GOOGLE_MAIL_READ  the parent, S480, 18-Nov-2026 -- Google's monthly mail read by the server
