@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S481 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, noon — the Sanjeevni sections refreshed here (Ravi's line says settled or waiting; the Hub's Days and Cash agreed — built next; lock October); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S482 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the Hub's Days and Cash live; one look at 17-Nov's twin bill; lock October); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S481 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, noon — the Sanjeevni sections refreshed here (Ravi's line says settled or waiting; the Hub's Days and Cash agreed — built next; lock October); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S479 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, morning — the Sanjeevni sections refreshed here (one bill statement, the supplier-wise never asked again; October clear — lock it; items 1 and 5 next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S478 close** (the parent, full EOS), 17-Nov-2026, night — the parent's sections refreshed here (the Call Console keeps pace; his Patients tile; the three small jobs); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S476 close** (the Sanjeevni chat, full EOS), 17-Nov-2026, night — the Sanjeevni sections refreshed here (Marg over a misread line; a month's asks shown everywhere; the check names what is open; D1000 next); the other projects' sections as their closes left them.
@@ -1249,41 +1250,48 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S481 close (18-Nov, 12:1x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S482 close (18-Nov, 15:0x)
 
-*Detail: `S481_BUILD_BRIEF.md`; the Hub spec `S481_HUB_BUILD_SPEC.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S479 one.*
+*Detail: `S482_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S481 one.*
 
 **1 · The publish of these records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`
 
 **2 · Lock October** — everything agrees: FINALISE at the top of `https://followup.dr-manoj.in/finance/purchase/page/month/2026-10`; then the NEFT from `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10`.
 
-**3 · One tap waiting:** Yuvika 803 on `https://followup.dr-manoj.in/finance/purchase/page/sarvam?month=2026-11` (Amir may answer first).
+**3 · One look on the Hub:** 17-Nov's bill A004847 carries the same six medicines as 16-Nov's A004837 (₹1,540 / ₹1,454) — a second purchase, or billed twice? If twice: a sale return in Marg against it, not a delete. `https://followup.dr-manoj.in/finance/approvals`
 
-**4 · A word with Ram Singh:** add **Stock Register** to Shavez's reports login in Marg — then switch Shavez on from `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch/take`.
+**4 · One tap waiting:** Yuvika 803 on `https://followup.dr-manoj.in/finance/purchase/page/sarvam?month=2026-11` (Amir may answer first).
 
-**5 · A word with Amir:** "Kar diya" only after it is in Marg (KT ROS DT, F-1412).
+**5 · A word with Ram Singh:** add **Stock Register** to Shavez's reports login in Marg — then switch Shavez on from `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch/take`.
 
-**6 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
+**6 · A word with Amir:** "Kar diya" only after it is in Marg (KT ROS DT, F-1412).
 
-**7 · The new start text, pasted once into each of the four projects** — `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S438\COMMON_START_HERE_PROMPT_v1_1.md`
+**7 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
 
-**8 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting.
+**8 · The new start text, pasted once into each of the four projects** — `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S438\COMMON_START_HERE_PROMPT_v1_1.md`
 
-**9 · The orthotics count** — who counts the shelf, and on which day.
+**9 · In Marg, when a sale bill has to go:** a sale return (credit note) against it instead of deleting.
 
-**10 · Still yours:** ZUPRINOR 5 (row 6); Shavez's phone; Ram Singh (F-1115).
+**10 · The orthotics count** — who counts the shelf, and on which day.
 
-**11 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
+**11 · Still yours:** ZUPRINOR 5 (row 6); Shavez's phone; Ram Singh (F-1115).
 
-**12 · After the next session's Hub build:** 17-Oct's ₹504 short — Accept or an entry, on the Hub's Cash card.
+**12 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
 
 **Later, your word only:** the Batch Stock asked only when a voucher is open (analysis F3); AutoHotkey and the order list (parked, D976); when scans start adding to stock (D891); the carry setting back to 1 (D965).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S481 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S482 close
 
-1. **The Hub's Days and Cash (D1005)** — names as typed and items, returns' check inline, Dr Bhawna's receipt by you, your day entries, the drawer's reasons, the late-UPI and accepted-short rules, and the one-time clean-up (₹21,512 → ₹49).
-2. **The board's plan rows** rewritten whole (D1003 item 5; F-1339).
+1. **The patient's record inline on the Hub (D1007)** — tap the clinic ID on a bill or return: visits, clinic payments, the pharmacy bills and returns around it (joined), the files, and "Open the record".
+2. **Darpan's page reads your day entries** (F-1468) — 14-Nov no longer shows him a short you have explained.
 3. **ZIBON EXTRA / GEMCAL XT** — from Darpan's count; **Yuvika 803 / KT ROS DT** — after Amir's next visit.
+
+## ✅ DONE AT THE S482 CLOSE — 18-Nov-2026, afternoon (the Sanjeevni project)
+
+- **The Hub's Days and Cash** (live 13:19): a day shows every bill's medicines and the name as Darpan typed it; returns with the patient, ID and mobile and their check inline; Received ✓ for Dr Bhawna per day and "Mark all"; your own entries on a day; the Cash card names why the drawer reads what it reads. Darpan's drawer cleaned once with your rulings: ₹21,512 → ₹553 → **₹49** after your taps (14 handovers received, 17-Oct's ₹504 written off).
+- **No more silent buttons** (~13:35): every Hub action that asked "are you sure" now arms on one tap and goes on the second.
+- **The day panel names its own short** with Accept / Add an entry; **full mobile numbers on every bill and return**, each with 📞 — your phone rings first, then the patient is joined (live 14:17).
+- **Your records question answered**, the records page's muddle analysed and handed to the parent chat.
 
 ## ✅ DONE AT THE S481 CLOSE — 18-Nov-2026, noon (the Sanjeevni project)
 
