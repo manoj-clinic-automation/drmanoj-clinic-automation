@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S478 close** (the parent, full EOS), 17-Nov-2026, night — the parent's sections refreshed here (the Call Console keeps pace; his Patients tile; the three small jobs); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S479 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, morning — the Sanjeevni sections refreshed here (one bill statement, the supplier-wise never asked again; October clear — lock it; items 1 and 5 next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S478 close** (the parent, full EOS), 17-Nov-2026, night — the parent's sections refreshed here (the Call Console keeps pace; his Patients tile; the three small jobs); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S476 close** (the Sanjeevni chat, full EOS), 17-Nov-2026, night — the Sanjeevni sections refreshed here (Marg over a misread line; a month's asks shown everywhere; the check names what is open; D1000 next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S477 close** (the parent, full EOS), 17-Nov-2026, evening — the parent's sections refreshed here (the Patients page complete; blood reports with no ID get suggested patients); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S474 close** (the parent, full EOS), 17-Nov-2026, afternoon — the parent's sections refreshed here (your list of slips not in Docterz, the Patients page part 1 and three small fixes live); the other projects' sections as their closes left them.
@@ -1247,19 +1248,19 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S476 close (17-Nov, 22:5x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S479 close (18-Nov, 10:4x)
 
-*Detail: `S476_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S473 one.*
+*Detail: `S479_BUILD_BRIEF.md`; the analysis `S479_MARG_EXPORTS_ANALYSIS.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S476 one.*
 
 **1 · The publish of these records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`
 
-**2 · Nothing else to do for October by you** — the page asks Amir for the fresh supplier-wise export; once it is in (or after the next session's build), October locks and pays: `https://followup.dr-manoj.in/finance/purchase/page/check?month=2026-10`
+**2 · Lock October** — everything agrees, nothing is asked of Amir: FINALISE at the top of `https://followup.dr-manoj.in/finance/purchase/page/month/2026-10`; then the NEFT from `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10`.
 
 **3 · One tap waiting:** Yuvika 803 on `https://followup.dr-manoj.in/finance/purchase/page/sarvam?month=2026-11` (Amir may answer first). Scans not found in Marg, if any left: `https://followup.dr-manoj.in/finance/sanjeevni/not-in-marg`
 
 **4 · A word with Ram Singh:** add **Stock Register** to Shavez's reports login in Marg — then switch Shavez on from `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch/take`.
 
-**5 · A word with Amir:** "Kar diya" only after it is in Marg.
+**5 · A word with Amir:** "Kar diya" only after it is in Marg (KT ROS DT, F-1412).
 
 **6 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
 
@@ -1273,13 +1274,19 @@ The full list: `claude/S288_PENDING_LIST.md`.
 
 **11 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
 
-**Later, your word only:** AutoHotkey and the order list (parked, D976); when scans start adding to stock (D891); the carry setting back to 1 (D965).
+**Later, your word only:** the Batch Stock asked only when a voucher is open (analysis F3); AutoHotkey and the order list (parked, D976); when scans start adding to stock (D891); the carry setting back to 1 (D965).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S476 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S479 close
 
-1. **The newer bill-wise + item lines settle a month** when they agree with each other, every paper and the dealers' summaries — no re-export asked (D1000, session 479).
-2. **The payment sheet's "your Confirm"** reworded as on the check.
-3. **ZIBON EXTRA / GEMCAL XT** — from Darpan's Monday counts; **Yuvika 803 / KT ROS DT** — after Amir's next visit.
+1. **The payment sheet's "your Confirm"** for Ravi, reworded as on the check (D1003 item 1).
+2. **The board's plan rows** rewritten whole (D1003 item 5; F-1339).
+3. **ZIBON EXTRA / GEMCAL XT** — from Darpan's count; **Yuvika 803 / KT ROS DT** — after Amir's next visit.
+
+## ✅ DONE AT THE S479 CLOSE — 18-Nov-2026, morning (the Sanjeevni project)
+
+- **The Marg exports analysed** before any build — the supplier-wise statement found to be a second copy of the bill-wise (the paper in project knowledge).
+- **One statement, live 9:29 am:** the supplier-wise never asked again; a finished month needs the visit pair once more, on Amir's steps with the reason; a Wrong mark the newest statement shows clears itself.
+- **October clear and lockable** — ₹3,72,609, Marg's own total agreeing to the paise; nothing asked of Amir.
 
 ## ✅ DONE AT THE S476 CLOSE — 17-Nov-2026, evening (the Sanjeevni project)
 
