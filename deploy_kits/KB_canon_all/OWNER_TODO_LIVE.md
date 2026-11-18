@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S484 close** (the parent, full EOS), 18-Nov-2026, evening — the parent's sections refreshed here (the packs' sheets download in place; your patient record page; sheet 7 off the card spends, then its voucher document next; MyOperator's US block closed at your word; the receipts folder shared); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S486 close** (the parent, full EOS), 18-Nov-2026, night — the parent's sections refreshed here (your receipts reach the server; the Janitor keeps only payment PDFs; NK Pathology's Agilus ledger and the accountants' running ledger; the renewals tile and its Apps Script next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S484 close** (the parent, full EOS), 18-Nov-2026, evening — the parent's sections refreshed here (the packs' sheets download in place; your patient record page; sheet 7 off the card spends, then its voucher document next; MyOperator's US block closed at your word; the receipts folder shared); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S483 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, evening — the Sanjeevni sections refreshed here (a patient's record inline on the Hub; Darpan's page reads your entries; the remaining list at the next open); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S480 close** (the parent, full EOS), 18-Nov-2026, afternoon — the parent's sections refreshed here (section 8 of the pack only on your tick; days you do not sit; MyOperator's +1 block; the packs page's three next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S482 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the Hub's Days and Cash live; one look at 17-Nov's twin bill; lock October); the other projects' sections as their closes left them.
@@ -496,7 +497,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S484 close (18-Nov, 18:3x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S486 close (18-Nov, 21:1x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -528,7 +529,11 @@ https://followup.dr-manoj.in/finance/console/off-days
 
 **1b4 · YOUR PATIENTS PAGE — diagnosis words to place:** one tap each (Undo beside it).
 
-**1b5 · THE PAYMENT RECEIPTS FOLDER — SHARED (6:15 pm, done).** Nothing more; the next session proves the server sees it, then builds the voucher document (sheet 7 as one PDF with every receipt).
+**1b5 · YOUR AGILUS LEDGER (NK Pathology) — LIVE.** Every patient line at net, all 83 invoices adding up. *For the accountants* on the same page: one Excel per month — date, invoice, net, a blank deposit column, the running total; nothing else. Send it when you wish.
+
+```
+https://followup.dr-manoj.in/finance/ledgers/agilus
+```
 
 **1b6 · HDFC's NOVEMBER CARD STATEMENT has not come yet** — when it arrives in Drive the October card sheet completes by itself.
 
@@ -582,7 +587,8 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Sheet 7 as a proper voucher document (your word of 5:49 pm 18-Nov; the receipts folder shared 6:15 pm) — the next session's first build (S881):** the server fetches your payment receipts from the shared folder nightly; sheet 7 becomes one PDF per month — an index page, then every receipt — with the Excel beside it; the line names exactly which card or bank statement is missing; amounts read from the receipt where the register has none; the card sheet gets its receipts the same way. The plan: `S484_SHEET7_VOUCHERS_PLAN.md`.
+1. **Your renewals tile and its Apps Script (your personal Google account) — the next session's first job (your word 8:52 pm 18-Nov):** I read it, tell you what I find, propose the improvements; built on your word.
+1b. **Sheet 7 as a proper voucher document — then (S881):** the receipts are now on the server (copied nightly); sheet 7 becomes one PDF per month — an index page, then every receipt — with the Excel beside it; the Agilus ledger file goes into NK Pathology's monthly pack.
 2. **The inbox's "reply from the reception phone"** for a WhatsApp from abroad — on your word.
 3. **The money exception lists** (the Monday audit): the two old gaps (09-Oct, 14-Oct) are fixed by the pharmacy side; the rest read only when you ask.
 4. **One small kit of the second readers' notes** (four small points from earlier reviews) and the Patients tile's position.
@@ -592,6 +598,13 @@ https://followup.dr-manoj.in/finance/packs
 8. **Watching, at every open:** your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S486 CLOSE — 18-Nov-2026 (the parent)
+
+- **Your payment receipts reach the server** (from 7:48 pm): the *Payment Records* folder read nightly at 2:20 am; only real payment papers copied (134 tonight).
+- **The Inbox Janitor** (your Apps Script) saves only payment PDFs and MyOperator statements.
+- **NK Pathology's Agilus ledger** (8:49 pm): every patient line at net; all 83 invoices add up; the accountants' Excel by month — net amounts and the running total only.
+- **The MyOperator ledger**: on the ledgers page; fills as statements arrive.
 
 ## ✅ DONE AT THE S484 CLOSE — 18-Nov-2026 (the parent)
 
