@@ -39,7 +39,8 @@ if on A3; then O=$(run); chk "A3 again: ALREADY INSTALLED, the one-off re-run sa
 if on A4; then O=$(undo); chk "A4 undo: FROM pins back, the module gone, the data stays (3 entries, 9-Oct 13,258)" 'echo "$O" | grep -q "S869 UNDONE" && fromok && [ "$(kept)" = "3 1325800" ]'; fi
 if on A5; then O=$(run); chk "A5 install after the undo: DONE, every one-off step already done" 'echo "$O" | grep -q "S869_HUB_DAYS_CASH: DONE" && took_ok && echo "$O" | grep -q "already"'; fi
 if on B1; then stand; O=$(run REHEARSE_RED_AT=4); chk "B1 a red at [4/7]: restored to FROM, the module gone, the lock released, nothing written" 'echo "$O" | grep -q "RED after placing" && fromok && [ ! -e "$W/lock" ] && [ "$(drawer)" = 2150800 ]'; fi
-if on B2; then stand; O=$(run HZ_HUB=404); chk "B2 hub_cash not mounted after the restart: restored, nothing written" 'echo "$O" | grep -q "not mounted" && fromok && [ "$(drawer)" = 2150800 ]'; fi
+if on B2; then stand; O=$(run HZ_HUB=404); chk "B2 hub_cash not mounted after the restart: restored, nothing written" 'echo "$O" | grep -q "not mounted" && fromok && [ "$(drawer)" = 2150800 ]'
+  stand; O=$(run HZ_HUB=302); chk "B2b hub_cash answers 302 (behind the login gate, as on the box): installed" 'echo "$O" | grep -q "S869_HUB_DAYS_CASH: DONE" && took_ok'; fi
 if on B3; then stand; echo "<!-- drift -->" >> "$W/root/finance/finance_ui/finance_approvals.html"; O=$(run)
   chk "B3 a live file changed since the build: STOP, nothing placed" 'echo "$O" | grep -q "changed after this kit was built" && [ ! -e "$W/root/finance/hub_cash.py" ]'; fi
 if on B4; then stand; echo "x" >> "$KIT/README.md"; O=$(run); chk "B4 a corrupt kit: refused at the SUMS gate" 'echo "$O" | grep -q "SUMS.md5 gate failed" && fromok'; rm -rf "$KIT"; cp -rp "$KD" "$KIT"; fi

@@ -102,7 +102,7 @@ for n in $NAMES $NEW; do [ "$(m5 "$ROOT/$n")" = "$(to_of "$n")" ] || restore "re
 "$SYSTEMCTL" restart "$FSVC" || restore "restart $FSVC"
 [ "${REHEARSE_RED_AT:-}" = 4 ] && restore "rehearsal: a forced red at [4/7]"
 c1=$(wait200); [ "$c1" = 200 ] || restore "finance healthz $c1 after the restart"
-l1=$(hhz); [ "$l1" = 200 ] || restore "hub_cash healthz answered $l1 after the restart (not mounted)"
+l1=$(hhz); case "$l1" in 404|000|5*) restore "hub_cash healthz answered $l1 after the restart (not mounted)";; esac   # 302 = mounted behind the login gate (F-1439)
 jnl "$T0" | grep -q "hub_cash not mounted" && restore "the Hub's log says hub_cash was NOT mounted"
 PLACING=0
 release_lock
