@@ -1,0 +1,2 @@
+S879_DARPAN_ENTRIES_TRANSIT
+Session 483 (Sanjeevni) 18-Nov-2026 -- Darpan s expected cash reads the owner s day entries (F-1468); the tables fallback never double-counts a line off its bill (S825)

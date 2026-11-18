@@ -1,0 +1,2 @@
+S878_RECORDS_PAGE
+the parent · S484 · 18-Nov-2026 · F-1466 his per-patient record page (the mock-up v6); records.py 29114ddd->274460dc, patient_events.py 4ad64172->5c77bf96
