@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S487 close** (the parent, full EOS), 18-Nov-2026, night — the parent's sections refreshed here (the Marg reminder stopped; Dr Bhawna's licence back on the list; TVS insurance due 05-Dec with no reminder; your review of the renewals plan next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S488 close** (the parent, full EOS), 19-Nov-2026, night — the parent's sections refreshed here (your renewals on the server; the TVS insurance and the civic renewals now reach your mail; nothing waits on you for them); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S487 close** (the parent, full EOS), 18-Nov-2026, night — the parent's sections refreshed here (the Marg reminder stopped; Dr Bhawna's licence back on the list; TVS insurance due 05-Dec with no reminder; your review of the renewals plan next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S486 close** (the parent, full EOS), 18-Nov-2026, night — the parent's sections refreshed here (your receipts reach the server; the Janitor keeps only payment PDFs; NK Pathology's Agilus ledger and the accountants' running ledger; the renewals tile and its Apps Script next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S484 close** (the parent, full EOS), 18-Nov-2026, evening — the parent's sections refreshed here (the packs' sheets download in place; your patient record page; sheet 7 off the card spends, then its voucher document next; MyOperator's US block closed at your word; the receipts folder shared); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S483 close** (the Sanjeevni chat, full EOS), 18-Nov-2026, evening — the Sanjeevni sections refreshed here (a patient's record inline on the Hub; Darpan's page reads your entries; the remaining list at the next open); the other projects' sections as their closes left them.
@@ -498,7 +499,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S487 close (18-Nov, 22:4x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S488 close (19-Nov, 01:2x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -508,15 +509,17 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK — today's records** (nothing follows it on the server):
+**1 · ONE DOUBLE-CLICK — tonight's records** (nothing follows it on the server):
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**1a · TVS STAR CITY INSURANCE — DUE 05-DEC-2026. No reminder has gone for it** (it, the yearly Nagar Nigam renewals and the Bareilly Club were only ever meant for calendar reminders that were never made). Renew it through your agent as every year.
+**1a · YOUR RENEWALS ARE ON THE SERVER — nothing to do.** The TVS Star City insurance (05-Dec), the arms licence (26-Dec) and the two Nagar Nigam renewals (01-Jan) are the red **4** on your home tile; the 8:42 am mail now comes from this list. When you renew one, tap **Mark renewed** on its row.
 
-**1a2 · YOUR REVIEW — THE RENEWALS PLAN AND MOCK-UPS (your word 10:35 pm):** in a fresh session. Nothing is built until you say. The plan: `S487_RENEWALS_ON_SERVER_PLAN.md` (in the project).
+```
+https://followup.dr-manoj.in/scanapp/renewals
+```
 
 **1b · SECTION 8 OF THE PACK — YOUR TICK:** the scanned bills go to your accountants only when you tap *Kept back — send with the pack* on a bundle for that month. Untouched, they stay home and are not mentioned in the mail.
 
@@ -592,17 +595,23 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Your renewals — after your review (S890):** every renewal on the server's Renewals page with days left, + Add renewal, Mark renewed, staff documents; the Janitor puts renewal mails from your personal Gmail in *Found in your mail* (one tap); the 8:42 am mail from the server's list; the bold folder tile. Built on your word.
-1b. **Sheet 7 as a proper voucher document — then (S881):** the receipts are now on the server (copied nightly); sheet 7 becomes one PDF per month — an index page, then every receipt — with the Excel beside it; the Agilus ledger file goes into NK Pathology's monthly pack.
+1. **Your renewals — the first morning (19-Nov, 8:42):** I check that the mail came from the server's list and that the Janitor's mail feed posted what it found; the two rows with a stray "…2" / "…5" fixed; after one good morning the script's old typed lists are emptied; a week on, the old push door is retired.
+1b. **Sheet 7 as a proper voucher document — then (S881):** the receipts are on the server (copied nightly); sheet 7 becomes one PDF per month — an index page, then every receipt — with the Excel beside it; the Agilus ledger file goes into NK Pathology's monthly pack.
 2. **The inbox's "reply from the reception phone"** for a WhatsApp from abroad — on your word.
 3. **The money exception lists** (the Monday audit): the two old gaps (09-Oct, 14-Oct) are fixed by the pharmacy side; the rest read only when you ask.
 4. **One small kit of the second readers' notes** (four small points from earlier reviews) and the Patients tile's position.
 5. **The mock-up of the two monthly switches** (late charge; extra leave and absent) on that staff member's private page; built on your word.
 6. **Then the tracker's move from your PC to the server** (about three sessions).
 7. **The old Google-Sheet UPI checker:** parked at your word; retired when you say.
-8. **Watching, at every open:** your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
+8. **Watching, at every open:** your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S488 CLOSE — 19-Nov-2026 (the parent)
+
+- **Every renewal on one list on your server** (30 rows) — days left, Mark renewed, + Add renewal, staff documents; the 8:42 am mail from the server; *Found in your mail* with the mail itself and one tap; the bold folder tile with the red count; numbers last 4 only.
+- **The TVS insurance, the Nagar Nigam renewals and the Bareilly Club now reach your mail** (they never did).
+- **Your Janitor script** replaced (v5) and the seed run; the Google Sheets no longer used.
 
 ## ✅ DONE AT THE S487 CLOSE — 18-Nov-2026 (the parent)
 
