@@ -1,0 +1,148 @@
+/* S489 (the owner, 19-Nov-2026): the home's folders get a visual hierarchy -- a folder is a coloured card (its own accent),
+   its list of names is a quiet one-liner, and the opened panel carries the folder's colour with lighter cards inside.
+   CSS over the S657 markup, drawn on the home only (not the Forms page); the Sanjeevni live numbers stay where they are. */
+#groupGrid{--acc:#60a5fa;--acc-soft:rgba(96,165,250,.13);--acc-line:rgba(96,165,250,.45)}
+.grid-groups{grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+[data-group="patients"],#g-patients{--acc:#38bdf8;--acc-soft:rgba(56,189,248,.13);--acc-line:rgba(56,189,248,.45)}
+[data-group="surgery"],#g-surgery{--acc:#f87171;--acc-soft:rgba(248,113,113,.13);--acc-line:rgba(248,113,113,.45)}
+[data-group="sanjeevni-medicos"],#g-sanjeevni-medicos{--acc:#2dd4bf;--acc-soft:rgba(45,212,191,.13);--acc-line:rgba(45,212,191,.45)}
+[data-group="sanjeevni-staff-screens"],#g-sanjeevni-staff-screens{--acc:#5eead4;--acc-soft:rgba(94,234,212,.11);--acc-line:rgba(94,234,212,.40)}
+[data-group="docterz-clinic-day"],#g-docterz-clinic-day{--acc:#fbbf24;--acc-soft:rgba(251,191,36,.12);--acc-line:rgba(251,191,36,.45)}
+[data-group="accounts-month-end"],#g-accounts-month-end{--acc:#a78bfa;--acc-soft:rgba(167,139,250,.14);--acc-line:rgba(167,139,250,.48)}
+[data-group="staff"],#g-staff{--acc:#fb923c;--acc-soft:rgba(251,146,60,.13);--acc-line:rgba(251,146,60,.45)}
+[data-group="calls-whatsapp"],#g-calls-whatsapp{--acc:#4ade80;--acc-soft:rgba(74,222,128,.12);--acc-line:rgba(74,222,128,.42)}
+[data-group="assets-papers"],#g-assets-papers{--acc:#818cf8;--acc-soft:rgba(129,140,248,.14);--acc-line:rgba(129,140,248,.48)}
+[data-group="personal"],#g-personal{--acc:#f472b6;--acc-soft:rgba(244,114,182,.12);--acc-line:rgba(244,114,182,.45)}
+[data-group="system"],#g-system{--acc:#94a3b8;--acc-soft:rgba(148,163,184,.12);--acc-line:rgba(148,163,184,.45)}
+
+/* level 1 -- the folder card */
+.tile.grp{display:grid;grid-template-columns:44px 1fr auto;grid-template-rows:auto 1fr;column-gap:12px;row-gap:2px;
+ align-items:start;min-height:112px;padding:14px 14px 12px;border-radius:14px;
+ background:linear-gradient(180deg,var(--acc-soft),rgba(0,0,0,0) 70%),var(--card);
+ border:1px solid var(--line);border-top:3px solid var(--acc);box-shadow:var(--shadow)}
+.tile.grp:hover{border-color:var(--acc-line);border-top-color:var(--acc)}
+.tile.grp>.ic{grid-row:1/3;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+ font-size:24px;background:linear-gradient(var(--acc-soft),var(--acc-soft)),rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px var(--acc-line)}
+.tile.grp>.tx{grid-column:2;grid-row:1/3;min-width:0}
+.tile.grp .nm{font-size:16px;font-weight:700;color:#fff;letter-spacing:-.01em;line-height:1.25}
+.tile.grp .gl{display:block;margin-top:5px;font-size:12px;line-height:1.45;color:var(--muted);
+ overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.tile.grp .gll{display:inline;font-size:12px;font-weight:400;color:var(--muted);line-height:1.45}
+.tile.grp .gll+.gll::before{content:"\00a0\00b7  ";white-space:pre-wrap;color:rgba(159,182,204,.55)}
+.tile.grp .gn{grid-column:3;grid-row:1;margin-left:0;align-self:start;font-size:11px;padding:3px 8px;
+ background:var(--acc-soft);color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc-line)}
+.tile.grp[aria-expanded="true"]{background:linear-gradient(180deg,var(--acc-soft),var(--acc-soft)),var(--card2);
+ border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),var(--shadow)}
+
+/* level 2 -- the open panel, in the folder's colour */
+.gpanel{background:linear-gradient(180deg,var(--acc-soft),rgba(0,0,0,0) 140px),var(--card2);
+ border:1px solid var(--acc-line);border-top:3px solid var(--acc);border-radius:14px;padding:14px 14px 16px}
+.gpanel .gph{margin:0 0 12px;padding-bottom:12px;border-bottom:1px solid var(--acc-line)}
+.gpanel .gph .ic{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+ font-size:22px;background:var(--acc-soft);box-shadow:inset 0 0 0 1px var(--acc-line)}
+.gpanel .gph .nm{font-size:18px;font-weight:700;color:#fff}
+.gpanel .gph .ds{font-size:12px;color:var(--muted)}
+.gpanel .gclose:hover{border-color:var(--acc)}
+
+/* level 3 -- the pages inside a folder: LIGHT cards with dark, lighter-weight type, so a page can never be mistaken for a folder */
+.gpanel .grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.gpanel .tile{align-items:flex-start;gap:11px;min-height:62px;padding:10px 12px;border-radius:10px;
+ background:#eef4f9;border:1px solid #d5e2ee;border-left:4px solid var(--acc);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.gpanel .tile{color:#10263a}
+.gpanel .tile:hover{background:#ffffff;border-color:var(--acc);border-left-color:var(--acc)}
+.gpanel .tile .ic{font-size:19px;width:26px;flex:0 0 26px;line-height:1.2;text-align:center}
+.gpanel .tile .nm{font-size:13.5px;font-weight:500;color:#10263a;letter-spacing:0}
+.gpanel .tile .ds{font-size:11.5px;color:#55697d;margin-top:1px}
+.gpanel .tile .who{color:#1d4ed8}
+.gpanel .tile.held{background:#dfe7ee;opacity:.75}
+.gpanel .tile.held .tag.h{background:#c9d5e0;color:#3d5266}
+@media(max-width:480px){
+ .grid-groups{grid-template-columns:1fr 1fr;gap:10px}
+ .tile.grp{grid-template-columns:1fr auto;grid-template-rows:auto auto auto;min-height:118px;padding:12px 11px 10px}
+ .tile.grp>.ic{grid-row:1;grid-column:1;width:38px;height:38px;font-size:21px}
+ .tile.grp .gn{grid-column:2;grid-row:1}
+ .tile.grp>.tx{grid-column:1/3;grid-row:2/4;margin-top:8px}
+ .tile.grp .nm{font-size:15px;min-height:2.5em}
+ .grid-groups{margin-bottom:64px}
+ .tile.grp .gl{font-size:11.5px}
+ .gpanel .grid{grid-template-columns:1fr}
+ .gpanel .tile{flex-direction:row;min-height:58px}
+}
+
+/* S489 part 2 (the owner, 19-Nov-2026 06:37): the top of the home compacted so the whole home sits on one screen of the Fold.
+   The call-alert card becomes one slim bar; Today and Tasks share one row; health and the four counts become one row of pills. */
+#pushCard{padding:7px 12px!important;margin:0 0 10px!important;border-radius:10px!important}
+#pushCard>div:first-child{gap:10px!important;flex-wrap:nowrap!important}
+#pushCard>div:first-child>div:first-child{font-size:18px!important}
+#pushCard>div:first-child>div:nth-child(2){min-width:0!important;display:flex;align-items:baseline;gap:8px}
+#pushCard>div:first-child>div:nth-child(2)>div:first-child{font-size:13.5px;white-space:nowrap;flex:0 0 auto}
+#pushMsg{font-size:12px!important;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pushBtn{padding:6px 12px!important;font-size:13px!important;border-radius:8px!important;white-space:nowrap}
+#pushTestBtn{padding:5px 10px!important;font-size:12.5px!important}
+@media(max-width:480px){ #pushCard>div:first-child>div:nth-child(2){flex-wrap:wrap;gap:0 8px}#pushMsg{white-space:normal}}
+#pushState{margin-top:6px!important;padding:4px 10px!important;font-size:12px!important;line-height:1.4!important}
+
+.todaytile{position:relative;padding:10px 14px 10px!important;margin:0 0 10px!important;border-radius:12px!important}
+.todaytile .tt-h{justify-content:flex-start!important;gap:10px;font-size:14px!important;margin:0 0 6px!important;padding-right:150px}
+.todaytile .tt-k{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:2px 12px!important}
+.todaytile .tt-k b{font-size:19px!important}
+.todaytile .tt-k span{font-size:11.5px!important;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.todaytile .tt-f{position:absolute;top:11px;right:14px;margin:0!important;font-size:11.5px!important;gap:12px!important}
+.todaytile .tt-f>span:first-child{white-space:nowrap}
+.todaytile .tt-f>span:last-child{display:none}
+
+.tasktile{padding:10px 14px!important;margin:0 0 10px!important;border-radius:12px!important;display:flex!important;flex-direction:column;justify-content:center}
+.tasktile[hidden]{display:none!important}
+.tasktile .tk-h{font-size:14px!important;margin:0 0 3px!important}
+.tasktile .tk-l{font-size:13.5px!important;line-height:1.35!important}
+.tasktile .tk-f{margin-top:4px!important;font-size:12px!important}
+@media(min-width:700px){
+ .wrap:has(>#todayTile:not([hidden])){display:grid;grid-template-columns:minmax(0,1.8fr) minmax(0,1fr);column-gap:10px;align-items:stretch}
+ .wrap:has(>#todayTile:not([hidden]))>*{grid-column:1/-1;min-width:0}
+ .wrap:has(>#todayTile:not([hidden]))>#todayTile{grid-column:1}
+ .wrap:has(>#todayTile:not([hidden]))>#taskTile{grid-column:2}
+}
+@media(max-width:699px){
+ .tasktile{flex-direction:row;align-items:baseline;gap:10px;flex-wrap:wrap}
+ .tasktile .tk-f{display:none}
+ .todaytile .tt-h{padding-right:0;flex-wrap:wrap;gap:4px 10px}
+ .todaytile .tt-f{position:static;margin-top:6px!important}
+ .todaytile .tt-k{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px 12px!important}
+}
+
+.wrap .strip{grid-template-columns:minmax(0,2.2fr) repeat(4,minmax(0,1fr));gap:8px;margin:0 0 4px}
+.wrap .hero{grid-column:auto;padding:7px 12px;gap:10px;border-radius:10px;min-width:0}
+.wrap .hero .hstat{font-size:18px}
+.wrap .hero>div{min-width:0;flex:1}
+.wrap .hero .hl{font-size:10px;line-height:1.2}
+.wrap .hero .hv{font-size:12.5px;line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.wrap .hero .badge{font-size:11px;padding:2px 8px}
+.wrap .chipbox{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:10px;min-width:0}
+.wrap .chipbox[hidden]{display:none}
+.wrap .chipbox .cv{font-size:18px;line-height:1.1}
+.wrap .chipbox .cl{font-size:9.5px;line-height:1.25;letter-spacing:.04em}
+@media(max-width:699px){
+ .wrap .strip{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .wrap .hero{grid-column:1/-1}
+ .wrap .chipbox{flex-direction:column;align-items:flex-start;gap:1px;padding:6px 8px}
+}
+.kick{margin:12px 0 6px}
+
+/* folders on phones, tablets and the opened Fold: icon + name only -- four to a row, two on a narrow phone */
+@media(max-width:900px){
+ .grid-groups{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+ .tile.grp{grid-template-columns:34px 1fr;grid-template-rows:auto;min-height:62px;padding:10px 10px 9px;align-items:center;column-gap:9px}
+ .tile.grp>.ic{grid-row:1;width:34px;height:34px;font-size:19px;border-radius:9px}
+ .tile.grp>.tx{grid-row:1;grid-column:2;margin-top:0}
+ .tile.grp .nm{font-size:13.5px;line-height:1.25;min-height:0}
+ .tile.grp .gl{display:block;margin-top:2px;-webkit-line-clamp:1}
+ .tile.grp .gll{display:none}
+ .tile.grp .gll[data-s890-renewals]:has(.s890n){display:inline}
+ .tile.grp .gll+.gll::before{content:none}
+ .tile.grp .gn{position:absolute;top:5px;right:6px;font-size:10px;padding:1px 6px}
+ .tile.grp .gn .gv{display:none}
+}
+@media(max-width:480px){
+ .grid-groups{grid-template-columns:1fr 1fr}
+ .tile.grp{min-height:56px}
+}

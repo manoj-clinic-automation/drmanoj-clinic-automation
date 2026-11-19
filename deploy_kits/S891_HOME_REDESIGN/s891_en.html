@@ -1,0 +1,32 @@
+  {% if role == 'doctor' %}
+<script>
+/* S891 (the owner, 19-Nov-2026): the call-alert bar speaks English on the owner's home; staff homes keep Hindi. The page's own
+   messages pass through en() on their way to the bar -- the words the staff see are untouched. */
+(function(){
+  var EN=[['रुकें','Wait — asking Chrome for permission (press Allow if it asks above)'],
+    ['Chrome ने पूछा ही नहीं','Chrome did not ask — tap the bell in the address bar and choose Allow, or allow followup.dr-manoj.in in Chrome → Site settings → Notifications'],
+    ['अनुमति मिली','Permission given — linking this phone…'],
+    ['✅ चालू — अब test','✅ On — a test alert should arrive now'],
+    ['✅ चालू — test','✅ On — a test alert was sent'],
+    ['✅ test सूचना','✅ Test alert sent — look above'],
+    ['test नहीं पहुँची','The test did not arrive — turn alerts on again'],
+    ['server से जवाब नहीं','No answer from the server'],
+    ['✅ कॉल सूचना चालू है','✅ Call alerts are on'],
+    ['सूचना बंद है','Alerts are blocked — phone Settings → Apps → Chrome → Notifications on; then Chrome → Settings → Site settings → Notifications → allow followup.dr-manoj.in; then tap again'],
+    ['नहीं हो पाया — ','Could not turn on — ']];
+  function en(t){
+    t=String(t==null?'':t);
+    for(var i=0;i<EN.length;i++){
+      if(t.indexOf(EN[i][0])===0){
+        if(i===EN.length-1){ return EN[i][1]+t.slice(EN[i][0].length).replace(' — दोबारा दबाएँ',' — tap again'); }
+        return EN[i][1];
+      }
+    }
+    return t;
+  }
+  var say=window._pushSay, state=window._pushState;
+  if(typeof say==='function'){ window._pushSay=function(t){ return say(en(t)); }; }
+  if(typeof state==='function'){ window._pushState=function(t,w){ return state(t?en(t):t, w); }; }
+})();
+</script>
+  {% endif %}
