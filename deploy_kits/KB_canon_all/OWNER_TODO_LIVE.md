@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S488 close** (the parent, full EOS), 19-Nov-2026, night — the parent's sections refreshed here (your renewals on the server; the TVS insurance and the civic renewals now reach your mail; nothing waits on you for them); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S485 close** (the Sanjeevni chat, full EOS), 19-Nov-2026, early morning — the Sanjeevni sections refreshed here (batches on the item ledger; the Batch Stock kept; the remaining list at the next open); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S488 close** (the parent, full EOS), 19-Nov-2026, night — the parent's sections refreshed here (your renewals on the server; the TVS insurance and the civic renewals now reach your mail; nothing waits on you for them); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S487 close** (the parent, full EOS), 18-Nov-2026, night — the parent's sections refreshed here (the Marg reminder stopped; Dr Bhawna's licence back on the list; TVS insurance due 05-Dec with no reminder; your review of the renewals plan next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S486 close** (the parent, full EOS), 18-Nov-2026, night — the parent's sections refreshed here (your receipts reach the server; the Janitor keeps only payment PDFs; NK Pathology's Agilus ledger and the accountants' running ledger; the renewals tile and its Apps Script next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S484 close** (the parent, full EOS), 18-Nov-2026, evening — the parent's sections refreshed here (the packs' sheets download in place; your patient record page; sheet 7 off the card spends, then its voucher document next; MyOperator's US block closed at your word; the receipts folder shared); the other projects' sections as their closes left them.
@@ -1322,9 +1323,9 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S483 close (18-Nov, 17:4x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S485 close (19-Nov, 06:1x)
 
-*Detail: `S483_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S482 one.*
+*Detail: `S485_BUILD_BRIEF.md`; the plan `S438_MARG_WATCH_PLAN_v4.md`. This section supersedes the S483 one.*
 
 **1 · The publish of these records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`
 
@@ -1334,7 +1335,7 @@ The full list: `claude/S288_PENDING_LIST.md`.
 
 **4 · A word with Ram Singh:** add **Stock Register** to Shavez's reports login in Marg — then switch Shavez on from `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch/take`.
 
-**5 · A word with Amir:** "Kar diya" only after it is in Marg (KT ROS DT, F-1412).
+**5 · A word with Amir:** "Kar diya" only after it is in Marg (KT ROS DT, F-1412); and the Batch Stock at the end of every visit, as now.
 
 **6 · September's two supplier messages** — A.A. Pharmaceuticals and Deepam Pharma, not sent.
 
@@ -1348,13 +1349,20 @@ The full list: `claude/S288_PENDING_LIST.md`.
 
 **11 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
 
-**Later, your word only:** the Batch Stock asked only when a voucher is open (analysis F3); AutoHotkey and the order list (parked, D976); when scans start adding to stock (D891); the carry setting back to 1 (D965).
+**Later, your word only:** the buying switch (once the weekly score holds, earliest ~22-Nov); AutoHotkey and the order list (parked, D976); when scans start adding to stock (D891); the carry setting back to 1 (D965).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S483 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S485 close
 
-1. **First at the next open:** the night's bundle checked, then the remaining list put to you to order (your "list remaining in fresh session").
-2. **The diagnosis on the inline record** — the automations chat adds it (its S878); I read it on the Hub once live.
-3. **ZIBON EXTRA / GEMCAL XT** — from Darpan's count; **Yuvika 803 / KT ROS DT** — after Amir's next visit.
+1. **First at the next open:** the remaining list put to you to order.
+2. **The buying switch** — the weekly score read; put to you when it holds.
+3. **The diagnosis on the inline record** — live from the automations chat; I read it on the Hub.
+4. **The 20 items whose batches do not add up** — after Amir's next Batch Stock.
+
+## ✅ DONE AT THE S485 CLOSE — 19-Nov-2026, early morning (the Sanjeevni project)
+
+- **Batches on the Item ledger** (live 18-Nov 20:15): each item's batches with expiry, stock and status; the batch on every line; month folds; totals in words — `https://followup.dr-manoj.in/finance/sanjeevni/ledger`.
+- **DISPERZYME CD** reads CGD0013 12/27 5:5 and CGC0262 11/27 −0:1 — together 5:4, the same as Marg.
+- **The Batch Stock export** — kept as it is, at every Amir visit.
 
 ## ✅ DONE AT THE S483 CLOSE — 18-Nov-2026, evening (the Sanjeevni project)
 
