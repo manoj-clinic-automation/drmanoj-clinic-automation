@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S493 close** (the parent, Fable, full EOS), 20-Nov-2026, night — the parent's sections refreshed here (the tracker's move: session 2 done, the server's replay identical to your PC's; nothing of yours until you pick the switch evening); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S495 close** (the parent, Fable, full EOS), 20-Nov-2026, night — the parent's sections refreshed here (the tracker's move: session 3 done; THE SWITCH is Saturday 21-Nov evening, one paste of yours); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S493 close** (the parent, Fable, full EOS), 20-Nov-2026, night — the parent's sections refreshed here (the tracker's move: session 2 done, the server's replay identical to your PC's; nothing of yours until you pick the switch evening); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S490 close** (the Sanjeevni chat, full EOS), 20-Nov-2026, evening — the Sanjeevni sections refreshed here (the medical PC's watchdog; Darpan's counts back; the reception phone's stuck messages and your screen-wake steps); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S492 close** (the parent, Fable, full EOS), 20-Nov-2026, evening — the parent's sections refreshed here (the tracker's move: session 1 done, nothing of yours until the switch evening); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S491 close** (the parent, full EOS), 20-Nov-2026, afternoon — the parent's sections refreshed here (the tracker plan written, you finalise it with Fable; the Janitor's failed morning fixed); the other projects' sections as their closes left them.
@@ -505,7 +506,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S493 close (20-Nov, 20:4x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S495 close (20-Nov, 22:1x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -521,7 +522,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**1a · THE FOLLOW-UP TRACKER'S MOVE TO THE SERVER — session 2 of 4 done; nothing for you until you pick the switch evening.** Your PC's ledgers are on the server and the server made last month's call lists from them — identical to your PC's on all 24 evenings compared, after one line in the engine was fixed on both machines with your OK (over 120 calls, tied patients at the cut-off were picked by the computer's chip; now a fixed order). Your PC still makes and sends the list. Next session (mine): the server's runner on its own Python and a dry pass; then **you name the evening** — after that evening's 21:xx run you paste one line on the server, and from the next evening the server makes the list. Your question on the 120 cap: nothing is dropped; the overflow waits for the next run; a console line will show "120 of 143 — 23 wait for tomorrow".
+**1a · THE FOLLOW-UP TRACKER'S MOVE TO THE SERVER — session 3 of 4 done; THE SWITCH IS SATURDAY 21-NOV, AFTER YOUR PC'S 21:xx RUN (your word, 21:33).** The server's engine is now your PC's byte for byte, on its own Python, and last month's lists came out identical again on all 24 evenings; your console's work section carries the new "Call list" line (it says the clinic PC makes the list until the switch, then shows "120 of 143 — 23 wait for tomorrow" from the server's runs). Your PC still makes and sends the list. **Saturday evening, one paste of yours** on the server after your PC's run (the seed taken again, then `OFF` removed) — I prepare it and set your PC's spare flag myself. Undo at any point: the flag off your PC and `touch /root/followup_tracker/OFF`.
 
 **1a1 · A NEW PAGE ON YOUR CONSOLE — Docterz reports:** upload any Docterz export by hand (a consultation report of any period, a follow-up log, a clinical report, a patient list); the page says what it kept and what it already had. Nothing to do; it is there when a report is missing.
 
@@ -607,7 +608,7 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Moving the Follow-up Tracker from your PC to the server — session 3 of 4 next** (`S492_TRACKER_TO_SERVER_PLAN_FINAL.md` §6): the server's runner on its own Python and the dry pass (mine); then the switch evening you pick (one paste of yours); then a week's watch and the console's overflow line. Then the clinical report and the patient list absorbed on arrival, and the old browser page retired.ons.
+1. **Moving the Follow-up Tracker from your PC to the server — THE SWITCH on Saturday 21-Nov evening (session 4 of 4)** (`S492_TRACKER_TO_SERVER_PLAN_FINAL.md` §6): after your PC's 21:xx run — the seed packed and the spare flag set (mine), your one paste on the server; then a week's watch with the console's "server N · PC N · same" line. Then the clinical report and the patient list absorbed on arrival, and the old browser page retired.ons.
 1a. **Your renewals' tails:** the old typed lists in your Google script emptied (now due); a week on, the old push door retired.
 1b. **Sheet 7 as a proper voucher document — then (S881):** the receipts are on the server (copied nightly); sheet 7 becomes one PDF per month — an index page, then every receipt — with the Excel beside it; the Agilus ledger file goes into NK Pathology's monthly pack.
 2. **The inbox's "reply from the reception phone"** for a WhatsApp from abroad — on your word.
@@ -618,6 +619,13 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S495 CLOSE — 20-Nov-2026 (the parent, Fable)
+
+- **The server's tracker engine is your PC's exact bytes, on its own Python 3.11** — last month's lists identical again on all 24 evenings; a dry run on a copy proved the intake. Still switched off.
+- **The 120-cap line on your console** — the engine on both machines now reports "kept 120 of 143 — 23 wait for tomorrow"; your console shows it from the first server evening (until then: "the clinic PC makes it until the switch").
+- **The switch evening fixed at your word: Saturday 21-Nov, after your PC's 21:xx run.**
+- Nothing switched; your PC runs exactly as before (one line added to its engine, the same as the server's; backup beside it).
 
 ## ✅ DONE AT THE S493 CLOSE — 20-Nov-2026 (the parent, Fable)
 
