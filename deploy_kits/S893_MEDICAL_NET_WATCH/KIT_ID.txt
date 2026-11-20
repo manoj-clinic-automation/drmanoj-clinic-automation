@@ -1,0 +1,3 @@
+S893_MEDICAL_NET_WATCH
+session 490 (the Sanjeevni chat), 20-Nov-2026
+netwatch.py S893.5 451bf9b5 . setup_s893.py 2589ce8f (v3.1: the USB GUID written as one hex run for the publish gate; the copy that RAN on the medical PC 14:25 is v3 3739d148, kept in Drive ToMedical -- the same behaviour)
