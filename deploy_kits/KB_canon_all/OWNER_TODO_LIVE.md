@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S491 close** (the parent, full EOS), 20-Nov-2026, afternoon — the parent's sections refreshed here (the tracker plan written, you finalise it with Fable; the Janitor's failed morning fixed); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S492 close** (the parent, Fable, full EOS), 20-Nov-2026, evening — the parent's sections refreshed here (the tracker's move: session 1 done, nothing of yours until the switch evening); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S491 close** (the parent, full EOS), 20-Nov-2026, afternoon — the parent's sections refreshed here (the tracker plan written, you finalise it with Fable; the Janitor's failed morning fixed); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S489 close** (the parent, full EOS), 19-Nov-2026, morning — the parent's sections refreshed here (your home redesigned; the call list no longer waits for your sitting; the renewals' first morning good); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S485 close** (the Sanjeevni chat, full EOS), 19-Nov-2026, early morning — the Sanjeevni sections refreshed here (batches on the item ledger; the Batch Stock kept; the remaining list at the next open); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S488 close** (the parent, full EOS), 19-Nov-2026, night — the parent's sections refreshed here (your renewals on the server; the TVS insurance and the civic renewals now reach your mail; nothing waits on you for them); the other projects' sections as their closes left them.
@@ -502,7 +503,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S491 close (20-Nov, 14:4x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S492 close (20-Nov, 17:0x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -512,17 +513,13 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK — this afternoon's records** (nothing follows it on the server):
+**1 · ONE DOUBLE-CLICK — this evening's records** (nothing follows it on the server; the kits are already installed):
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**1a · THE FOLLOW-UP TRACKER'S MOVE TO THE SERVER — the plan is written; you finalise it with Fable in a fresh session.** When you start that session, add this folder to the chat in the Claude app (the replay of last month needs it):
-
-```
-C:\followup_tracker_local_test_kit
-```
+**1a · THE FOLLOW-UP TRACKER'S MOVE TO THE SERVER — session 1 of 4 done; nothing for you until the switch evening.** Last month replayed on your PC: every call list identical. The engine is installed on the server, switched OFF; your PC runs exactly as before. Next session (mine): the server gets your PC's ledgers, the replay is repeated on the server, and the Docterz-reports page is built. Then you pick the switch evening.
 
 **1a2 · THE INBOX JANITOR — nothing to do.** One email Gmail refused stopped its 19-Nov morning run; the 20-Nov run caught up. Now it skips such an email and finishes, and Google's failure mail still tells you.
 
@@ -606,7 +603,7 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Moving the Follow-up Tracker from your PC to the server — the plan is written** (`S491_TRACKER_TO_SERVER_PLAN.md`); you finalise it with Fable in a fresh session; then the replay of last month, one switch, about three sessions.
+1. **Moving the Follow-up Tracker from your PC to the server — session 2 of 4 next** (`S492_TRACKER_TO_SERVER_PLAN_FINAL.md`): the seed of your PC's ledgers to the server, the replay repeated on the server, the red line on your console, the Docterz-reports page; then the switch evening you pick; then a week's watch. Then the clinical report and the patient list absorbed on arrival, and the old browser page retired.ons.
 1a. **Your renewals' tails:** the old typed lists in your Google script emptied (now due); a week on, the old push door retired.
 1b. **Sheet 7 as a proper voucher document — then (S881):** the receipts are on the server (copied nightly); sheet 7 becomes one PDF per month — an index page, then every receipt — with the Excel beside it; the Agilus ledger file goes into NK Pathology's monthly pack.
 2. **The inbox's "reply from the reception phone"** for a WhatsApp from abroad — on your word.
@@ -617,6 +614,13 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S492 CLOSE — 20-Nov-2026 (the parent, Fable)
+
+- **The plan for the tracker's move reviewed and finalised with you** — your three points of the afternoon in it (the clinical report, Docterz's long reports, the browser page).
+- **Last month replayed on your PC — 30 of 30 runs identical**, every call list cell for cell.
+- **The tracker's engine installed on the server, switched OFF**; your PC's tracker given its "spare" switch, not yet turned.
+- **A fault found and cured on the way:** the Sheet's call list had ignored the Do_Not_Call tab since early October — the server's copy of the writer lacked the filter.
 
 ## ✅ DONE AT THE S491 CLOSE — 20-Nov-2026 (the parent)
 
