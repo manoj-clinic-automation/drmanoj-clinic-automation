@@ -4,7 +4,7 @@
 
 **What changes:** `/root/finance/stock_watch.py` f0d9092a → 1a8c98c6 (make_s894.py, four exact anchors + three new functions: `_s894_text`, `_s894_asked_back`, `_s894_refix`). When Darpan answers an item the owner asked for (the morning list, or *Stock batao*), every open ask for that item closes and ONE Needs-you line is written (notice kind `asked_count`, 7 days, one per item per day): *Darpan counted ZIBON EXTRA (you asked): 20 strips + 6 tabs -- Marg (closing 18-11-2026) 35 strips + 9 tabs -- 15 strips + 3 tabs fewer than Marg* (warn; *matches Marg* shows as info). The line is written first and the ask closed after it; a same-day "Galat likha? Badlo" rewrites the line; Marg read by its closing date. Fail-soft: the count is stored first and is never stopped.
 
-**Data (s894_job.py):** two tap jobs on Amir's card — *ZIBON EXTRA — STOCK ISSUE 15:3* and *GEMCAL XT TABLETS — STOCK ISSUE 0:4* (Darpan's 20:6 and 15:12 against Marg's 35:9 and 16:1; no sale of either 16–18 Nov) — refused if Marg's newest closing no longer stands above the count; and the asks Darpan has since answered closed (ANKLE BINDER L BAMBOO 0 = Marg 0, ZIBON EXTRA, GEMCAL XT).
+**Data (s894_job.py):** two tap jobs on Amir's card — *ZIBON EXTRA — STOCK ISSUE 15:3* and *GEMCAL XT TABLETS — STOCK ISSUE 0:4* (Darpan's 20:6 and 15:12 against Marg's 35:9 and 16:1; no sale of either 16–18 Nov) — refused only if Amir's card already holds another open job for the item (v2: v1 refused GEMCAL XT on the box for its 19-11 sale, 241 -> 234 -- a sale moves Marg and the shelf alike); and the asks Darpan has since answered closed (ANKLE BINDER L BAMBOO 0 = Marg 0, ZIBON EXTRA, GEMCAL XT).
 
 **Install:** his publish, then one server line:
 

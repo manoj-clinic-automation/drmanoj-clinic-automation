@@ -4,7 +4,8 @@
 Data only, idempotent:
   1. Two tap jobs on Amir's card from Darpan's counts of 18-11-2026 (ZIBON EXTRA 20:6 at 10:59, GEMCAL XT 15:12 at 11:06) against
      Marg's closing (35:9 and 16:1; no sale of either 16-18 Nov):  ZIBON EXTRA STOCK ISSUE 15:3 . GEMCAL XT TABLETS STOCK ISSUE 0:4.
-     Refused (nothing added) if Marg's newest closing no longer stands above the count -- the correction may already be in.
+     Refused (nothing added) if Amir's card already holds another open job for the item. A sale after the count is no reason
+     to refuse: it moves Marg and the shelf alike (v2: v1 refused GEMCAL XT for its 19-11 sale, 241 -> 234, on the box at [3/5]).
   2. The owner's open 'Count this' asks that Darpan has since answered (a spot/darpan point after the ask) are closed -- 14-Nov's
      ZIBON EXTRA and GEMCAL XT and 12-Oct's ANKLE BINDER L BAMBOO were answered on 18-Nov on carried rows and never closed.
     python3 -B s894_job.py <finance.db> [--dry]"""
@@ -36,9 +37,11 @@ def main(db, dry):
                 print("S894: ALREADY ON HIS CARD (%s)" % key)
                 continue
             r = con.execute("SELECT qty, as_on FROM stock_snapshot WHERE item=? ORDER BY substr(as_on,7,4)||substr(as_on,4,2)||substr(as_on,1,2) DESC, rowid DESC LIMIT 1", (item,)).fetchone()
-            if not r or r[0] is None or float(r[0]) <= counted:
-                print("S894: REFUSED %s -- Marg's newest closing (%s) is not above Darpan's count (%d): the correction may be in already. "
-                      "Nothing added for it; tell Claude." % (item, r and ("%s on %s" % (r[0], r[1])), counted))
+            # A sale after the count moves Marg and the shelf alike -- the gap to correct stays the same (GEMCAL XT 241 -> 234 on 19-11).
+            # What would make the job wrong is a correction already on its way: another open job on Amir's card for the item.
+            other = con.execute("SELECT key FROM amir_job WHERE subject=? AND done_at IS NULL AND key<>?", (item, key)).fetchone()
+            if other:
+                print("S894: REFUSED %s -- Amir's card already holds an open job for it (%s). Nothing added for it; tell Claude." % (item, other[0]))
                 return 3
             plan.append((key, item, text, sub, r))
         asks = con.execute(
@@ -46,7 +49,7 @@ def main(db, dry):
             "AND p.source IN ('spot','darpan') AND COALESCE(p.status,'')<>'superseded' AND p.at>=a.at)").fetchall()
         if dry:
             for key, item, text, sub, r in plan:
-                print("S894: DRY -- would add: %s (Marg now %s on %s)" % (text, r[0], r[1]))
+                print("S894: DRY -- would add: %s (Marg now %s on %s)" % (text, r and r[0], r and r[1]))
             print("S894: DRY -- would close %d answered ask(s): %s" % (len(asks), ", ".join(x[1] for x in asks) or "none"))
             return 0
         with con:
