@@ -87,8 +87,8 @@ say "[2/5] the receiver's files and the inbox store are where the check looks (r
 "$VPY" -c "$CPDB" "$DB" "$SCR/f_new.db" >/dev/null && "$VPY" -c "$CPDB" "$DB" "$SCR/f_old.db" >/dev/null || stop "!! [3/5] could not copy the database for the walk - nothing installed"
 lay new && \cp -p "$KDIR/supplier_msg.py" "$KDIR/porders_s454.py" "$KDIR/phone_check.py" "$SCR/root_new/finance/" \
   && lay old && \cp -p "$KDIR/phone_check.py" "$SCR/root_old/finance/" || stop "!! [3/5] could not lay out the walk - nothing installed"
-R1=$(py "$KDIR/synth_s909.py" --code "$SCR/root_new/finance" --finance "$SCR/f_new.db" | tail -1)
-case "$R1" in "synth_s909: "*" ok, 0 red") ;; *) stop "!! [3/5] synth_s909 on a copy of the live database: $R1 - nothing installed";; esac
+R1F=$(py "$KDIR/synth_s909.py" --code "$SCR/root_new/finance" --finance "$SCR/f_new.db"); R1=$(echo "$R1F" | tail -1)
+case "$R1" in "synth_s909: "*" ok, 0 red") ;; *) echo "$R1F" | grep "^RED" | cut -c1-160; stop "!! [3/5] synth_s909 on a copy of the live database: $R1 - nothing installed";; esac
 R0F=$(py "$KDIR/synth_s909.py" --code "$SCR/root_old/finance" --finance "$SCR/f_old.db"); R0=$(echo "$R0F" | tail -1)
 echo "$R0F" | grep -q "^RED  T11 never on the stuck list" || stop "!! [3/5] the control on the live files did not go red where it must ($R0) - nothing installed"
 say "[3/5] $R1 (a copy of the live database); the control on the live files: red ($R0)"
