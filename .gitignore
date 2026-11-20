@@ -306,3 +306,4 @@ _scratch/
 !deploy_kits/S853_PATIENTS_PART2/patients_history.json
 !deploy_kits/S853_PATIENTS_PART2/patients_google.json
 !deploy_kits/S863_GOOGLE_MAIL_READ/freshness_legs.json
+!deploy_kits/S897_TRACKER_SEED_REPLAY/freshness_legs.json
