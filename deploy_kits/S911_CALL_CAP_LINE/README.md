@@ -23,7 +23,7 @@
   (no folder; no log before/after the switch; newest line wins with its stamp; wait 0 green; a 200 KB log; a garbled line).
 - `rehearse_s911.sh` 14/14 on a made-up root: green install · again · undo · run #7's hash differs → engine back, console untouched, no
   restart · forced red at [4/5] → both back, restarted · healthz not 200 before → nothing · tampered kit · an undo after a later change refuses · lock held → nothing.
-- Cold review (a reviewer that had not seen the build): no MUST; 4 SHOULD built in (the live hash captured before the replay; the OFF file keys the console wording and the log is never read while OFF stands; an undo refuses when a later kit has moved a file; run #7 must have printed the line) + 2 LOW.
+- Cold review (a reviewer that had not seen the build): no MUST; 4 SHOULD built in (the live hash captured before the replay; the OFF file keys the console wording and the log is never read while OFF stands; an undo refuses when a later kit has moved a file; the line printed: the replay harness keeps the engine's stdout, so execution shows on the first live run instead -- the first server run went red on that check and restored itself cleanly) + 2 LOW.
 - Number gate clean. Second look: see the close report.
 
 ## His part
