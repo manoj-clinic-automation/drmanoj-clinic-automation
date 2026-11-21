@@ -36,7 +36,9 @@ bak() { echo "$ROOT/${NAMES[$1]}.bak_S921_${FROMS[$1]:0:8}"; }
 stg() { local n="${NAMES[$1]}"; echo "$(dirname "$ROOT/$n")/.$(basename "$n").s921"; }
 fhz() { if [ -n "${HEALTH_CMD:-}" ]; then $HEALTH_CMD /finance/healthz; else curl -s -o /dev/null -m 8 -w '%{http_code}' "http://127.0.0.1:$FIN_PORT/finance/healthz"; fi; }
 door() { if [ -n "${DOOR_CMD:-}" ]; then $DOOR_CMD "$1"; else curl -s -o /dev/null -m 8 -w '%{http_code}' "http://127.0.0.1:$FIN_PORT$1"; fi; }
-fkit() { if [ -n "${KITZ_CMD:-}" ]; then $KITZ_CMD; else curl -s -m 8 "http://127.0.0.1:$FIN_PORT/finance/porders/api/flow/healthz"; fi; }
+# the service's own log since the restart: a module that failed to mount (porders' fail-soft prints) or a traceback (every door is
+# login-gated, so a page cannot prove the new module loaded -- S921's first install went red on exactly that, nothing harmed)
+flog() { if [ -n "${LOG_CMD:-}" ]; then $LOG_CMD; else journalctl -u "$FSVC" --since "@$T0" --no-pager 2>/dev/null; fi; }
 wait200() { local h=000; for _t in $(seq 1 20); do sleep "${NAP:-3}"; h=$(fhz); [ "$h" = 200 ] && break; done; echo "$h"; }
 release_lock() { [ "$TOOK_LOCK" = 1 ] || return 0; rm -f "${LOCK:?}/owner"; rmdir "$LOCK" 2>/dev/null; TOOK_LOCK=0; }
 on_exit() { for k in $IDX; do rm -f "$(stg $k)"; done; release_lock; rm -rf "${SCR:?}"; find "$KDIR" -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null; }
@@ -82,14 +84,15 @@ for k in $IDX; do { \cp -p "$ROOT/${NAMES[$k]}" "$(bak $k)" && [ "$(m5 "$(bak $k
 for k in $IDX; do s="$(stg $k)"; { cat "$KDIR/${KF[$k]}" > "$s" && chmod --reference="$ROOT/${NAMES[$k]}" "$s" 2>/dev/null; chown --reference="$ROOT/${NAMES[$k]}" "$s" 2>/dev/null; [ "$(m5 "$s")" = "${TOS[$k]}" ]; } || stop "!! [4/6] could not stage ${KF[$k]} - nothing placed"; done
 PLACING=1
 for k in 3 2 0 1; do mv -f "$(stg $k)" "$ROOT/${NAMES[$k]}" || restore "the rename of ${KF[$k]}"; [ "$(cur $k)" = "${TOS[$k]}" ] || restore "read back of ${KF[$k]}"; done
-"$SYSTEMCTL" restart "$FSVC" || restore "restart $FSVC"
+T0=$(date +%s); "$SYSTEMCTL" restart "$FSVC" || restore "restart $FSVC"
 [ "${REHEARSE_RED_AT:-}" = 4 ] && restore "rehearsal: a forced red at [4/6]"
 c1=$(wait200); [ "$c1" = 200 ] || restore "finance healthz $c1 after the restart"
 d1=$(door /finance/porders); case "$d1" in 404|000|5*) restore "reception's page answers $d1";; esac
 d2=$(door /finance/porders/flow); case "$d2" in 404|000|5*) restore "his grouped page answers $d2";; esac
-kz=$(fkit); case "$kz" in *"$KIT"*) ;; *) restore "the flow module does not name $KIT ($(echo "$kz" | cut -c1-80))";; esac
+sleep "${NAP:-3}"; bad=$(flog | grep -E "order_flow NOT mounted|S921 home failed|order_flow\.py|porders_s454\.py|order_s778\.py" | head -3)
+[ -z "$bad" ] || restore "the service log after the restart: $(echo "$bad" | head -1 | cut -c1-120)"
 PLACING=0
-say "[4/6] four files placed and read back; $FSVC restarted $(TZ=Asia/Kolkata date '+%H:%M IST'), finance healthz $c1, reception's page $d1, his page $d2 (login-gated), the module names $KIT"
+say "[4/6] four files placed and read back; $FSVC restarted $(TZ=Asia/Kolkata date '+%H:%M IST'), finance healthz $c1, reception's page $d1, his page $d2 (login-gated), the service log clean since the restart"
 F1=$(py "$KDIR/f1547_s921.py" "$LIVE_DB" --write)
 case "$F1" in "F1547 n="*) echo "$F1" > "$IDS"; say "[5/6] F-1547 once: $F1 (the ids kept in $IDS for the undo)";;
   *) say "!! [5/6] F-1547 did not run ($(echo "$F1" | tail -1 | cut -c1-120)) - the four files are live and green; the messages are untouched. Tell Claude.";; esac
