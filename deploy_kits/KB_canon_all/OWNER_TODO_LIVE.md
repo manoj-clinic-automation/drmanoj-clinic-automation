@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S494 close** (the Sanjeevni chat, full EOS), 21-Nov-2026, morning — the Sanjeevni sections refreshed here (the reception phone works with its screen dark; the daily delivery check live); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S496 close** (the parent, Fable, full EOS), 21-Nov-2026, morning — the parent's sections refreshed here (older-day slips, the procedures Save, the Docterz messages; THE SWITCH tonight, one paste of yours); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S494 close** (the Sanjeevni chat, full EOS), 21-Nov-2026, morning — the Sanjeevni sections refreshed here (the reception phone works with its screen dark; the daily delivery check live); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S495 close** (the parent, Fable, full EOS), 20-Nov-2026, night — the parent's sections refreshed here (the tracker's move: session 3 done; THE SWITCH is Saturday 21-Nov evening, one paste of yours); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S493 close** (the parent, Fable, full EOS), 20-Nov-2026, night — the parent's sections refreshed here (the tracker's move: session 2 done, the server's replay identical to your PC's; nothing of yours until you pick the switch evening); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S490 close** (the Sanjeevni chat, full EOS), 20-Nov-2026, evening — the Sanjeevni sections refreshed here (the medical PC's watchdog; Darpan's counts back; the reception phone's stuck messages and your screen-wake steps); the other projects' sections as their closes left them.
@@ -507,7 +508,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S495 close (20-Nov, 22:1x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S496 close (21-Nov, 11:3x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -517,13 +518,21 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK — tonight's records** (nothing follows it on the server; every kit of the evening is already installed):
+**1 · ONE DOUBLE-CLICK — this morning's records** (nothing follows it on the server; every kit of the morning is already installed):
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**1a · THE FOLLOW-UP TRACKER'S MOVE TO THE SERVER — session 3 of 4 done; THE SWITCH IS SATURDAY 21-NOV, AFTER YOUR PC'S 21:xx RUN (your word, 21:33).** The server's engine is now your PC's byte for byte, on its own Python, and last month's lists came out identical again on all 24 evenings; your console's work section carries the new "Call list" line (it says the clinic PC makes the list until the switch, then shows "120 of 143 — 23 wait for tomorrow" from the server's runs). Your PC still makes and sends the list. **Saturday evening, one paste of yours** on the server after your PC's run (the seed taken again, then `OFF` removed) — I prepare it and set your PC's spare flag myself. Undo at any point: the flag off your PC and `touch /root/followup_tracker/OFF`.
+**1a · THE FOLLOW-UP TRACKER'S MOVE TO THE SERVER — THE SWITCH IS TONIGHT, SATURDAY 21-NOV, AFTER YOUR PC'S 21:xx RUN.** Open a fresh chat in this project in the evening (session 498). After your PC's run I pack the evening's ledgers to the server and set your PC's spare flag myself; **then one paste of yours** on the server (the seed taken again, then `OFF` removed). Undo at any point: the flag off your PC and `touch /root/followup_tracker/OFF`.
+
+**1a0 · DOCTERZ REPORTS — A MESSAGE EACH TIME THE SERVER TAKES ONE (live 08:53; you confirmed 09:30).** It names the report, its day, and the PC it came from, and says how far the clinical data on the server reaches — export the next clinical report from the day after. Your PC (manojz) now also sends the follow-up logs and one-day consultation reports you export there. A report covering several days goes on the Docterz reports page:
+
+```
+https://followup.dr-manoj.in/finance/console/docterz-reports
+```
+
+**1a00 · TELL SHAVEZ (once):** a slip made on paper on an older day (up to a month back) can now be entered — pick the day; the number box starts blank, type that day's number. On *Kal ke procedures*, Save now moves on to the next waiting day.
 
 **1a1 · A NEW PAGE ON YOUR CONSOLE — Docterz reports:** upload any Docterz export by hand (a consultation report of any period, a follow-up log, a clinical report, a patient list); the page says what it kept and what it already had. Nothing to do; it is there when a report is missing.
 
@@ -609,7 +618,7 @@ https://followup.dr-manoj.in/finance/packs
 
 ## ⭐1 — WHAT I BUILD NEXT · THIS PROJECT
 
-1. **Moving the Follow-up Tracker from your PC to the server — THE SWITCH on Saturday 21-Nov evening (session 4 of 4)** (`S492_TRACKER_TO_SERVER_PLAN_FINAL.md` §6): after your PC's 21:xx run — the seed packed and the spare flag set (mine), your one paste on the server; then a week's watch with the console's "server N · PC N · same" line. Then the clinical report and the patient list absorbed on arrival, and the old browser page retired.ons.
+1. **Moving the Follow-up Tracker from your PC to the server — THE SWITCH tonight, Saturday 21-Nov (session 498)** (`S492_TRACKER_TO_SERVER_PLAN_FINAL.md` §6): after your PC's 21:xx run — the seed packed and the spare flag set (mine), your one paste on the server; then a week's watch with the console's "server N · PC N · same" line. Then the clinical report and the patient list absorbed on arrival, and the old browser page retired.
 1a. **Your renewals' tails:** the old typed lists in your Google script emptied (now due); a week on, the old push door retired.
 1b. **Sheet 7 as a proper voucher document — then (S881):** the receipts are on the server (copied nightly); sheet 7 becomes one PDF per month — an index page, then every receipt — with the Excel beside it; the Agilus ledger file goes into NK Pathology's monthly pack.
 2. **The inbox's "reply from the reception phone"** for a WhatsApp from abroad — on your word.
@@ -620,6 +629,14 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S496 CLOSE — 21-Nov-2026 (the parent, Fable)
+
+- **Older-day slips:** Shavez can enter a slip made on paper on an older day (up to 31 days back); the number box starts blank for that day; a still-waiting cancellation of that number is replaced by the slip.
+- **Kal ke procedures:** Save moves on to the next waiting day, and says when all days are done.
+- **Docterz messages:** one message per report the server takes — which report, which day, which PC — and how far the clinical data reaches. The missing-report alert now says "from reception or your PC (manojz)".
+- **Your PC sends its own exports:** follow-up logs and one-day consultation reports exported on manojz reach the server.
+- **Justdial:** looked at and dropped at your word — on the free plan the "leads" are calls that already reached reception.
 
 ## ✅ DONE AT THE S495 CLOSE — 20-Nov-2026 (the parent, Fable)
 
