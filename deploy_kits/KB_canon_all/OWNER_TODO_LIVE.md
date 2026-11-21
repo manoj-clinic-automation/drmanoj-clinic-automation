@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S496 close** (the parent, Fable, full EOS), 21-Nov-2026, morning — the parent's sections refreshed here (older-day slips, the procedures Save, the Docterz messages; THE SWITCH tonight, one paste of yours); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S497 close** (the Sanjeevni chat, full EOS), 21-Nov-2026, evening — the Sanjeevni sections refreshed here (the phone set-up page true to the phone; the purchase-order flow approved for the next session); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S496 close** (the parent, Fable, full EOS), 21-Nov-2026, morning — the parent's sections refreshed here (older-day slips, the procedures Save, the Docterz messages; THE SWITCH tonight, one paste of yours); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S494 close** (the Sanjeevni chat, full EOS), 21-Nov-2026, morning — the Sanjeevni sections refreshed here (the reception phone works with its screen dark; the daily delivery check live); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S495 close** (the parent, Fable, full EOS), 20-Nov-2026, night — the parent's sections refreshed here (the tracker's move: session 3 done; THE SWITCH is Saturday 21-Nov evening, one paste of yours); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S493 close** (the parent, Fable, full EOS), 20-Nov-2026, night — the parent's sections refreshed here (the tracker's move: session 2 done, the server's replay identical to your PC's; nothing of yours until you pick the switch evening); the other projects' sections as their closes left them.
@@ -1387,34 +1388,30 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S494 close (21-Nov, 07:3x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S497 close (21-Nov, 19:3x)
 
-*Detail: `S494_BUILD_BRIEF.md`. This section supersedes the S490 one.*
+1. **Publish today's records:** double-click on manojz — nothing follows it.
+```
+D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
+```
+2. **Ram Singh:** add the **Stock Register** report to Shavez's Marg reports login; then switch Shavez on at:
+```
+https://followup.dr-manoj.in/finance/sanjeevni/marg-watch/take
+```
+3. **The packs page:** the 25 card shops; the card and ICICI passwords (D713).
 
-**1 · The publish of these records** — `D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat`
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S497 close
 
-**2 · The medical PC's Wi-Fi** — one tap to connect Wi-Fi 2 (its saved network), so it has a second way out.
-
-**3 · Lock October** — FINALISE at the top of `https://followup.dr-manoj.in/finance/purchase/page/month/2026-10`; then the NEFT from `https://followup.dr-manoj.in/finance/purchase/page/pay/2026-10`.
-
-**4 · A word with Ram Singh:** add **Stock Register** to Shavez's reports login in Marg — then switch Shavez on from `https://followup.dr-manoj.in/finance/sanjeevni/marg-watch/take`.
-
-**5 · A word with Amir:** the two stock issues on his card (ZIBON EXTRA, GEMCAL XT); "Kar diya" only after it is in Marg (KT ROS DT, F-1412); the Batch Stock at every visit.
-
-**6 · The new start text, pasted once into each of the four projects** — `D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S438\COMMON_START_HERE_PROMPT_v1_1.md`
-
-**7 · Still yours:** ZUPRINOR 5 (row 6); Shavez's phone; Ram Singh (F-1115); the orthotics count; in Marg a sale return instead of deleting a bill.
-
-**8 · The packs page** (D713, every session until done): the 25 card shops; the card and ICICI passwords — `https://followup.dr-manoj.in/finance/packs`.
-
-**Later, your word only:** the buying switch (earliest ~22-Nov); AutoHotkey and the order list (parked, D976); when scans start adding to stock (D891); the carry setting back to 1 (D965); hiding the daily check message from the staff's WhatsApp inbox.
-
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S494 close
-
-1. **The phone set-up page** — the steps as the phone now stands (no constraints, no screen lock, Screen On + 2 s).
+1. **The purchase-order flow** — your mock-up v4 FINAL (https://claude.ai/artifact/GqBHMeFVQQmksK2fu1qmfN), in kits, one at a time.
 2. **The daily checks read** — anything FAILED or fixed since 21-Nov 10:00.
 3. **The buying switch** — the weekly score read; put to you when it holds.
 4. **The 20 items whose batches do not add up** — after Amir's next Batch Stock.
+
+## ✅ DONE AT THE S497 CLOSE — 21-Nov-2026, evening (the Sanjeevni project)
+
+- **The reception phone's set-up page** now matches the phone (live 07:57): no screen lock, no conditions, the screen woken before sending, the daily check named as its proof.
+- **The purchase-order flow** analysed and its mock-up approved FINAL (19:20) — built in the next session.
+- **Confirmed already done:** Marg's Stock Register (since 15-Nov); the medical PC's Wi-Fi 2 (Up beside the cable).
 
 ## ✅ DONE AT THE S494 CLOSE — 21-Nov-2026, morning (the Sanjeevni project)
 
