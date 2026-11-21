@@ -61,11 +61,12 @@ else say "!! [1/5] another build holds the lock $LOCK (owner: $(cat "$LOCK/owner
 for k in $IDX; do [ "$(cur $k)" = "${FROMS[$k]}" ] || stop "!! [2/5] $ROOT/${NAMES[$k]} is $(cur $k | cut -c1-8), expected ${FROMS[$k]:0:8} - STOP, nothing installed. Tell Claude."; done
 for p in "$APY" "$VPY"; do PYTHONPYCACHEPREFIX="$SCR/pyc" "$p" -W ignore -m py_compile "$KDIR/order_flow.py" "$KDIR/darpan_kal.py" "$KDIR/walk_s922.py" || stop "!! [2/5] a file does not compile on $p - nothing installed"; done
 say "[2/5] the three live files at their FROM pins; the kit's python compiles on both pythons"
-mkdir -p "$SCR/new" && \cp -p "$ROOT"/finance/*.py "$ROOT"/finance/*.html "$ROOT"/finance/*.sql "$SCR/new/" 2>/dev/null; \cp -p "$ROOT"/shared/*.py "$SCR/new/" 2>/dev/null
+mkdir -p "$SCR/new" && \cp -p "$ROOT"/finance/*.py "$ROOT"/finance/*.html "$ROOT"/finance/*.sql "$ROOT"/finance/*.json "$SCR/new/" 2>/dev/null; \cp -p "$ROOT"/shared/*.py "$SCR/new/" 2>/dev/null
 for k in $IDX; do \cp -p "$KDIR/${KF[$k]}" "$SCR/new/" || stop "!! [3/5] could not lay out the walk - nothing installed"; done
 py -c "import sqlite3,sys; s=sqlite3.connect('file:%s?mode=ro' % sys.argv[1], uri=True); d=sqlite3.connect(sys.argv[2]); s.backup(d); d.close(); s.close()" "$LIVE_DB" "$SCR/copy.db" >/dev/null \
   && [ -s "$SCR/copy.db" ] || stop "!! [3/5] could not take a copy of the database for the walk - nothing installed"
 W1=$(py "$KDIR/walk_s922.py" "$SCR/new" "$SCR/copy.db"); R1=$(echo "$W1" | tail -1)
+echo "$W1" | grep "^INFO" | cut -c1-200
 [ "$R1" = "RESULT: ALL PASS" ] || { echo "$W1" | grep "^FAIL" | cut -c1-160; stop "!! [3/5] the walk on a copy: $R1 - nothing installed"; }
 W0=$(py "$KDIR/walk_s922.py" "$SCR/new" "$SCR/copy.db" control); R0=$(echo "$W0" | tail -1)
 case "$R0" in "RESULT: "*FAIL) ;; *) stop "!! [3/5] the control did not go red ($R0) - nothing installed";; esac

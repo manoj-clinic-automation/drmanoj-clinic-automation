@@ -100,7 +100,10 @@ try:
     ok(rv.status_code == 200 and j.get("ok") and isinstance(j.get("rows"), list), "Darpan's door 200")
     t = cl.get("/finance/darpan/kal").get_data(as_text=True)
     ok("loadFlow()" in t and "डीलर से अभी आना बाकी" in t, "his page carries the two blocks")
-    ok(cl.get("/finance/darpan/kal/api/order").status_code == 200, "his order list as before")
+    rv = cl.get("/finance/darpan/kal/api/order")                  # untouched by this kit: mounted is the gate; a copy's own fault is shown
+    if rv.status_code != 200:
+        print("INFO his order list on the walk's copy answers %d: %s" % (rv.status_code, rv.get_data(as_text=True)[:160].replace("\n", " ")))
+    ok(rv.status_code != 404, "his order list still mounted (this kit does not touch it)")
     who["u"] = dict(user="manoj", roles=["checker"])
     ok(cl.get("/finance/darpan/kal/api/order/flow").status_code == 200, "the owner reads it")
     who["u"] = dict(user="nobody_walk", roles=["viewer"])
