@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S500 close** (the Sanjeevni chat, full EOS), 21-Nov-2026, night — the Sanjeevni sections refreshed here (the purchase flow finished: reception's page, Darpan's tab, the Purchase bills page, his Hub's line); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S501 close** (the Sanjeevni chat, full EOS), 22-Nov-2026, morning — the Sanjeevni sections refreshed here (the stock pages read against each other; his tile to the purchase flow; the old purchase pages retired); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S500 close** (the Sanjeevni chat, full EOS), 21-Nov-2026, night — the Sanjeevni sections refreshed here (the purchase flow finished: reception's page, Darpan's tab, the Purchase bills page, his Hub's line); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S499 close** (the Sanjeevni chat, full EOS), 21-Nov-2026, evening — the Sanjeevni sections refreshed here (his Purchase orders page grouped, S920; reception's page next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S497 close** (the Sanjeevni chat, full EOS), 21-Nov-2026, evening — the Sanjeevni sections refreshed here (the phone set-up page true to the phone; the purchase-order flow approved for the next session); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S496 close** (the parent, Fable, full EOS), 21-Nov-2026, morning — the parent's sections refreshed here (older-day slips, the procedures Save, the Docterz messages; THE SWITCH tonight, one paste of yours); the other projects' sections as their closes left them.
@@ -1390,7 +1391,7 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S500 close (21-Nov, 21:5x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S501 close (22-Nov, 09:5x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
@@ -1401,13 +1402,24 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 https://followup.dr-manoj.in/finance/sanjeevni/marg-watch/take
 ```
 3. **The packs page:** the 25 card shops; the card and ICICI passwords (D713).
+4. **The out-of-stock list waits for your word** (Wait — order next week / Drop it) on:
+```
+https://followup.dr-manoj.in/finance/porders/flow
+```
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S500 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S501 close
 
-1. **Read the purchase flow's first day** — reception's taps, Darpan's folds, the bills page, your Hub line (read only).
-2. **The Purchase bills page's lower part without pop-ups** (two taps, as your Hub).
-3. **The buying switch** — the weekly score read; put to you when it holds.
-4. **The 20 items whose batches do not add up** — after Amir's next Batch Stock.
+1. **Out of stock and substitutes** — every item complete and actionable, with a real substitute flow (a mock-up first).
+2. **Your Hub's Needs-you redesigned** — inline lines, scans and item lines inline, the whole flow from the Hub (a mock-up first).
+3. **The stock plan** — re-run with Fable, then built: bill over tap everywhere, the Stock check page, Darpan's counts to you.
+4. **The purchase flow's first day** read; the bills page's lower part without pop-ups; the buying switch.
+
+## ✅ DONE AT THE S501 CLOSE — 22-Nov-2026, morning (the Sanjeevni project)
+
+- **Your Purchase orders tile** opens the purchase flow page (live 09:21); "Reception's screen →" at its top.
+- **The old Orders and Order medicines pages** retired; the purchase top bar has one Purchase orders link.
+- **Every stock page checked** against every other: `S501_STOCK_PAGES_CONSOLIDATION.md`; the Stock check mock-up v5 agreed.
+- **TYRO BR** put at the top of Darpan's next count.
 
 ## ✅ DONE AT THE S500 CLOSE — 21-Nov-2026, night (the Sanjeevni project)
 
