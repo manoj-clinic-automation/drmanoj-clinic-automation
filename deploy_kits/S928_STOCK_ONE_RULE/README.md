@@ -29,3 +29,4 @@ day's line, the settings); the control (the live files) goes red on 23. `regress
 finance.db and spine.db, old files vs new: every difference must be explained by the bill over the tap or an evening spot count, else
 the install stops. The earlier proofs run too (walk_s927, synth_s894: never worse). Cold review: NOT SAFE (3 MUST) → fixed → second look SAFE; its 2 SHOULD + 1 LOW built in (s825 reads the one match; the regress knows "a delivery inside the count"; the marg branch reads the scan arrivals once).
 Install: one server line (the installer's header). Undo: `undo_s928.sh`.
+Fixture note (22-Nov 16:5x): the first box run stopped at [3/6] -- the server's scan-quality judge (/root/shared/scan_quality.py, absent in the build VM) listed the made-up scans as 'to redo' (no total, no line amounts), so the rule could not speak; the fixtures now carry totals that add up, and the synth prints WHY lines (the judge, the scan context, the match). An F at the close.

@@ -1,5 +1,5 @@
 809c8083819634d7e9b932df1b7aa10b  KIT_ID.txt
-08c890284001ff38ebfafe17a87f1968  README.md
+ae6ee7a4fde5c37a352f33d706e50151  README.md
 83d797ed71f0f6fca0ebf71f24369506  TO_PINS.md5
 d2af42b530bf811679b457afb8a6ac20  install_S928_STOCK_ONE_RULE.sh
 d93123737d7ef6b604f1057a0c3ef6fe  make_s928.py
@@ -8,5 +8,5 @@ c869b891fc58af603cfce81ca0bb3273  s928_block.py
 633600278c76351a68fda81802fbfefa  s928_watch_block.py
 8130315e01c7da5d24e1ba93f6e60ad8  stock_figure.py
 02727b0fba9d1dd030d15ae6a4811faa  stock_watch.py
-21a72dfadda1113eb16bcace9ed258e5  synth_s928.py
+721d94588cef1a4a70924d5b8352f8ce  synth_s928.py
 a72afad718e088de63164925247127b5  undo_s928.sh

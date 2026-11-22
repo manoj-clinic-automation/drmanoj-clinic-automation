@@ -80,15 +80,15 @@ CREATE TABLE bills(id INTEGER PRIMARY KEY, kind TEXT, vendor TEXT, bill_no TEXT,
 CREATE TABLE claude_reading(bill_id INTEGER PRIMARY KEY, at TEXT NOT NULL, model TEXT, ok INTEGER NOT NULL DEFAULT 0, doc_kind TEXT, data TEXT, error TEXT);
 CREATE TABLE settings(key TEXT PRIMARY KEY, value TEXT);
 """)
-    a.execute("INSERT INTO bills VALUES (501,'Pharmacy','W928 PHARMA','W-1','2026-11-21',4321.0,NULL,'w928_1.jpg','2026-11-21T05:00:00','2026-11-21T10:30:00','B-9501','pharmacy','ok',NULL,NULL,NULL,'done')")
-    a.execute("INSERT INTO bills VALUES (502,'Pharmacy','W928 PHARMA','W-2','2026-11-21',1234.0,NULL,'w928_2.jpg','2026-11-21T05:00:00','2026-11-21T10:30:00','B-9502','pharmacy','ok',NULL,NULL,NULL,'done')")
-    r1 = dict(doc="bill", dealer="W928 PHARMA", bill_no="W-1", date="2026-11-20", total=4321.0,
+    a.execute("INSERT INTO bills VALUES (501,'Pharmacy','W928 PHARMA','W-1','2026-11-21',550.0,NULL,'w928_1.jpg','2026-11-21T05:00:00','2026-11-21T10:30:00','B-9501','pharmacy','ok',NULL,NULL,NULL,'done')")
+    a.execute("INSERT INTO bills VALUES (502,'Pharmacy','W928 PHARMA','W-2','2026-11-21',90.0,NULL,'w928_2.jpg','2026-11-21T05:00:00','2026-11-21T10:30:00','B-9502','pharmacy','ok',NULL,NULL,NULL,'done')")
+    r1 = dict(doc="bill", doc_kind="bill", dealer="W928 PHARMA", bill_no="W-1", date="2026-11-20", total=550.0, total_amount=550.0,   # the lines add up: scan_quality (the box's /root/shared) must not call it a scan to redo
               items=[dict(name="W928 ALFA 10", qty=15, unit="1*10", rate=10, amount=150, batch="B1"), dict(name="W928 ALFA 10", qty=5, unit="1*10", rate=10, amount=50, batch="B2"),
                      dict(name="W928 DELTA 10", qty=12, unit="1*10", rate=10, amount=120), dict(name="W928 OMEGA 10", qty=5, unit="1*10", rate=10, amount=50),
                      dict(name="W928 ZETA 10", qty=8, free=2, unit="1*10", rate=10, amount=80), dict(name="W928 KAPPA 10", qty=7, unit="1*10", rate=10, amount=70),
                      dict(name="W928 KAPPA 20", qty=3, unit="1*10", rate=10, amount=30)])
     a.execute("INSERT INTO claude_reading VALUES (501,'2026-11-20T11:00:00','walk',1,'bill',?,NULL)", (json.dumps(r1),))
-    a.execute("INSERT INTO claude_reading VALUES (502,'2026-11-21T11:00:00','walk',1,'bill',?,NULL)", (json.dumps(dict(doc="bill", dealer="W928 PHARMA", bill_no="W-2", items=[dict(name="W928 GAMA 10", qty=None)])),))
+    a.execute("INSERT INTO claude_reading VALUES (502,'2026-11-21T11:00:00','walk',1,'bill',?,NULL)", (json.dumps(dict(doc="bill", doc_kind="bill", dealer="W928 PHARMA", bill_no="W-2", total_amount=90.0, items=[dict(name="W928 GAMA 10", qty=None, amount=90)])),))
     a.commit()
     a.close()
 
@@ -167,6 +167,11 @@ def run(fin, copy, control, scratch):
             o = OT.Ctx(con)
         finally:
             con.row_factory = rf
+        try:
+            import porders_s454 as _P4                        # noqa: E402
+            say("INFO scan_quality (the scans-to-redo judge): %s" % ("loaded from %s" % os.path.dirname(_P4._sq_before_s736().__file__) if _P4._sq_before_s736() is not None else "NOT loaded here (the box has it in /root/shared)"))
+        except Exception as e:                                # noqa: BLE001
+            say("INFO scan_quality: unknown (%s)" % type(e).__name__)
         say("INFO order_track.Ctx: ok=%s scans=%d readings=%d bad=%s since=%s" % (getattr(o, "ok", None), len(getattr(o, "scans", {}) or {}), len(getattr(o, "read", {}) or {}), sorted(getattr(o, "bad", ()) or ()), OT.since(con)))
         if getattr(o, "ok", False):
             for sid in (501, 502):
