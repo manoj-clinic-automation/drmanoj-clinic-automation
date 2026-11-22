@@ -153,6 +153,31 @@ def run(fin, copy, control, scratch):
     cap = SF.capture_at(sp, None, ctx)
     check("the made-up closing stands for the end of 20-11", bool(cap) and cap["end_day"] == "2026-11-20", cap)
 
+    # ---- WHY lines (made-up data only): what the scan half sees here -- printed so a red on another machine explains itself (S503, 22-Nov)
+    try:
+        import order_track as OT                              # noqa: E402
+        say("INFO sqlite %s . assets store %s exists=%s . spine %s" % (sqlite3.sqlite_version, os.path.basename(PA._assets_db or ""), os.path.exists(PA._assets_db or ""), os.path.basename(spp)))
+        acon = PA._assets_con()
+        say("INFO _assets_con: %s" % ("open, %d bills" % acon.execute("SELECT COUNT(*) FROM bills").fetchone()[0] if acon is not None else "NONE"))
+        if acon is not None:
+            acon.close()
+        rf = con.row_factory
+        con.row_factory = sqlite3.Row
+        try:
+            o = OT.Ctx(con)
+        finally:
+            con.row_factory = rf
+        say("INFO order_track.Ctx: ok=%s scans=%d readings=%d bad=%s since=%s" % (getattr(o, "ok", None), len(getattr(o, "scans", {}) or {}), len(getattr(o, "read", {}) or {}), sorted(getattr(o, "bad", ()) or ()), OT.since(con)))
+        if getattr(o, "ok", False):
+            for sid in (501, 502):
+                say("INFO scan %d: in scans=%s head=%s usable=%s names=%s" % (sid, sid in o.scans, o.head(sid), o.usable(sid), o.names(sid)))
+            if hasattr(SF, "_s928_order_match"):
+                M = SF._s928_order_match(ctx, o, OT, 1)
+                say("INFO match order 1: %s" % ("NONE" if M is None else "hit=%s heads=%s reads=%d" % (sorted(M["hit"]), M["heads"], len(M["reads"]))))
+        if hasattr(SF, "_s928_settings"):
+            say("INFO settings: bill_over_tap=%s evening_hour=%s" % SF._s928_settings(ctx))
+    except Exception as e:                                    # noqa: BLE001
+        say("INFO why-lines failed: %s: %s" % (type(e).__name__, str(e)[:160]))
     # ---- the bill over the tap
     has = hasattr(SF, "bill_units")
     def bu(lid):
