@@ -45,7 +45,7 @@ def schema_from(copy, path):
 
 
 SAT, SUN = "2026-11-21", "2026-11-22"                          # the walk's days: Fri 20-11 (bills), Sat (sales, the yesterday-print), Sun (the morning print)
-CAP_SAT = "W933CAPSAT0000000000000000000001"                   # printed Sat 09:37 as on Fri 20-11 -> the end of 20-11 ('yesterday')
+CAP_SAT = "W933CAPSAT0000000000000000000001"                   # printed Sat 09:37 as on Thu 19-11 -> the end of 19-11 ('yesterday'): the PREVIOUS print; Fri's bills fall in the window
 CAP_SUN = "W933CAPSUN0000000000000000000002"                   # printed Sun 09:20 as on Sun 22-11 -> the end of Sat 21-11 ('morning')
 K = "WPHARMA"                                                  # supkey of 'W933 PHARMA' (letters only, as the spine's supnorm and stock_watch.supkey fold it)
 
@@ -59,7 +59,7 @@ def make_spine(fin, path):
     sp.executescript(SB.SCHEMA)
     sp.execute("INSERT INTO sp_meta VALUES ('built', '2026-11-22T18:50:00+05:30')")
     E = "INSERT INTO sp_export VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-    sp.execute(E, (CAP_SAT, "closing_sat", "STOCK_CLOSING", "20261121-093700", None, None, "2026-11-20", 1, None, "closing", "walk"))
+    sp.execute(E, (CAP_SAT, "closing_sat", "STOCK_CLOSING", "20261121-093700", None, None, "2026-11-19", 1, None, "closing", "walk"))
     sp.execute(E, (CAP_SUN, "closing_sun", "STOCK_CLOSING", "20261122-092000", None, None, SUN, 1, None, "closing", "walk"))
     sp.execute(E, ("W933SALE", "sale", "SALE_BILLWISE", "20261122-053000", "2026-11-01", SAT, None, 1, None, "sale", "walk"))
     sp.execute(E, ("W933PB", "pur", "PURCHASE_BILLWISE", "20261122-100000", "2026-11-01", SUN, None, 1, None, "pur", "walk"))
@@ -67,14 +67,14 @@ def make_spine(fin, path):
     # (name, Sat closing units, Sun closing units)
     items = [("W933 ALFA 10", 300.0, 205.0), ("W933 BETA 10", 100.0, 40.0), ("W933 GAMA 10", 80.0, 60.0), ("W933 DELTA 10", 25.0, 25.0),
              ("W933 EPS 10", 10.0, 10.0), ("W933 ZETA 10", 100.0, 100.0), ("W933 KAPPA 10", 50.0, 150.0), ("W933 PLAIN 10", 70.0, 70.0),
-             ("W933 RET 10", 100.0, 90.0), ("W933 NEG 10", 70.0, 40.0), ("W933 SUR 10", 20.0, 70.0)]
+             ("W933 RET 10", 100.0, 90.0), ("W933 NEG 10", 70.0, 40.0), ("W933 SUR 10", 20.0, 70.0), ("W933 OLD 10", 10.0, 10.0)]
     sp.execute("INSERT INTO sp_item VALUES (?,?,?,?,?,?)", ("W933 ZERO 10", "W933 ZERO 10", "1*10", "strip", "2026-09-01", "2026-11-10"))   # at zero in Marg: printed in no closing
     for name, sat, sun in items:
         k = name[:20]
         sp.execute("INSERT INTO sp_item VALUES (?,?,?,?,?,?)", (k, name, "1*10", "strip", "2026-09-01", SUN))
         sp.execute("INSERT INTO sp_close_name VALUES (?,?,?,?,?)", (CAP_SAT, name, "1*10", k, sat))
         sp.execute("INSERT INTO sp_close_name VALUES (?,?,?,?,?)", (CAP_SUN, name, "1*10", k, sun))
-        sp.execute("INSERT INTO sp_close VALUES (?,?,?,?)", ("2026-11-20", k, sat, CAP_SAT))
+        sp.execute("INSERT INTO sp_close VALUES (?,?,?,?)", ("2026-11-19", k, sat, CAP_SAT))
         sp.execute("INSERT INTO sp_close VALUES (?,?,?,?)", (SUN, k, sun, CAP_SUN))
     M = "INSERT INTO sp_move VALUES (?,?,?,?,?)"
     # ALFA: opening 300, sold 95 on Sat -> 205 = Sun's closing (no bill): agrees with itself
@@ -84,10 +84,13 @@ def make_spine(fin, path):
     sp.execute(M, ("W933 BETA 10", "2026-11-01", "OPENING", 100.0, "OPEN"))
     sp.execute(M, ("W933 BETA 10", SAT, "SALE", -60.0, "S2"))
     sp.execute(M, ("W933 BETA 10", "2026-11-20", "PURCHASE", 300.0, "K251"))
-    # GAMA: opening 80, sold 20 Sat, bill K252 of 19-11 +120 first seen 23-11 (AFTER the print day: certain), Sun's print 60 (without it)
+    # GAMA: opening 80, sold 20 Sat, bill K252 of Fri +120 first seen 23-11 (AFTER the print day: certain, in the window), Sun's print 60 (without it)
     sp.execute(M, ("W933 GAMA 10", "2026-11-01", "OPENING", 80.0, "OPEN"))
     sp.execute(M, ("W933 GAMA 10", SAT, "SALE", -20.0, "S3"))
-    sp.execute(M, ("W933 GAMA 10", "2026-11-19", "PURCHASE", 120.0, "K252"))
+    sp.execute(M, ("W933 GAMA 10", "2026-11-20", "PURCHASE", 120.0, "K252"))
+    # OLD: opening 10; bill K255 of 18-11 +40 (OLDER than the previous print's day) first seen 23-11, in neither print: certain, pre-window -> added
+    sp.execute(M, ("W933 OLD 10", "2026-11-01", "OPENING", 10.0, "OPEN"))
+    sp.execute(M, ("W933 OLD 10", "2026-11-18", "PURCHASE", 40.0, "K255"))
     # DELTA: a consumable (the consumption list), Marg 25, counted 0
     sp.execute(M, ("W933 DELTA 10", "2026-11-01", "OPENING", 25.0, "OPEN"))
     # EPS: Marg 10 at Sun's print, a sale of 30 dated Sun (after the end day) -> the figure would be -20: Marg behind a bill
@@ -112,7 +115,7 @@ def make_spine(fin, path):
     sp.execute(M, ("W933 SUR 10", "2026-11-20", "PURCHASE", 50.0, "K254"))
     PB = "INSERT INTO sp_purchase_bill VALUES (?,?,?,?,?,?,?)"
     PL = "INSERT INTO sp_purchase_line VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
-    for bill, day, name, units, direction in (("K251", "2026-11-20", "W933 BETA 10", 300.0, "PURCHASE"), ("K252", "2026-11-19", "W933 GAMA 10", 120.0, "PURCHASE"),
+    for bill, day, name, units, direction in (("K251", "2026-11-20", "W933 BETA 10", 300.0, "PURCHASE"), ("K252", "2026-11-20", "W933 GAMA 10", 120.0, "PURCHASE"), ("K255", "2026-11-18", "W933 OLD 10", 40.0, "PURCHASE"),
                                               ("K253", "2026-11-20", "W933 KAPPA-10", 100.0, "PURCHASE"), ("R1", "2026-11-20", "W933 RET 10", 20.0, "RETURN"),
                                               ("K254", "2026-11-20", "W933 SUR 10", 50.0, "PURCHASE")):
         sp.execute(PB, ("W933 PHARMA", K, bill, day, int(units * 1000), direction, "W933PB"))
@@ -190,7 +193,8 @@ def run(fin, copy, control, scratch):
     # Amir's bills in the purchase register: K251 first seen Sun (the print day), K252 first seen 23-11 (after), K253 first seen Sat (before)
     B = "INSERT INTO purchase_bill (id, supplier_norm, supplier, bill_no, bill_date, month, amount_p, first_seen_day) VALUES (?,?,?,?,?,?,?,?)"
     con.execute(B, (901, "W933 PHARMA", "W933 PHARMA", "K251", "2026-11-20", "2026-11", 300000, SUN))
-    con.execute(B, (902, "W933 PHARMA", "W933 PHARMA", "K252", "2026-11-19", "2026-11", 120000, "2026-11-23"))
+    con.execute(B, (902, "W933 PHARMA", "W933 PHARMA", "K252", "2026-11-20", "2026-11", 120000, "2026-11-23"))
+    con.execute(B, (906, "W933 PHARMA", "W933 PHARMA", "K255", "2026-11-18", "2026-11", 40000, "2026-11-23"))
     con.execute(B, (903, "W933 PHARMA", "W933 PHARMA", "K253", "2026-11-20", "2026-11", 100000, SAT))
     con.execute(B, (904, "W933 PHARMA", "W933 PHARMA", "R1", "2026-11-20", "2026-11", 20000, SUN))
     con.execute(B, (905, "W933 PHARMA", "W933 PHARMA", "K254", "2026-11-20", "2026-11", 50000, "2026-11-23"))
@@ -199,7 +203,8 @@ def run(fin, copy, control, scratch):
     P = "INSERT INTO stock_point (item_norm, item, at, qty_units, source, by, status) VALUES (?,?,?,?,?,?,?)"
     for name, at, q in (("W933 BETA 10", "2026-11-19T10:00:00", 100), ("W933 ZETA 10", "2026-11-19T10:00:00", 100), ("W933 KAPPA 10", "2026-11-19T10:00:00", 50),
                         ("W933 DELTA 10", "2026-11-19T10:00:00", 0), ("W933 ALFA 10", "2026-11-20T10:00:00", 300), ("W933 GAMA 10", "2026-11-17T10:00:00", 80),
-                        ("W933 RET 10", "2026-11-19T10:00:00", 100), ("W933 NEG 10", "2026-11-19T10:00:00", 5), ("W933 ZERO 10", "2026-11-19T10:00:00", 30)):
+                        ("W933 RET 10", "2026-11-19T10:00:00", 100), ("W933 NEG 10", "2026-11-19T10:00:00", 5), ("W933 ZERO 10", "2026-11-19T10:00:00", 30),
+                        ("W933 OLD 10", "2026-11-17T10:00:00", 10)):
         con.execute(P, (name, name, at, q, "spot", "darpan", "settled"))
     con.commit()
     sp = SW.Spine(spp)
@@ -219,9 +224,11 @@ def run(fin, copy, control, scratch):
     cap = SR.capture(sp, SF)
     check("R1 the newest report wins: Sun's morning print (as on 22-11) stands for the END of Sat 21-11 ('morning'); no hold", bool(cap) and cap["md5"] == CAP_SUN and cap["end_day"] == SAT and cap["kind"] == "morning", cap)
     old = SF.capture_at(sp, None, SF.Ctx(con, sp))
-    check("R1b (information) the old rule would still stand on Sat's print of Fri 20-11 (a same-day print held)", bool(old) and old["end_day"] == "2026-11-20", old)
+    check("R1b (information) the old rule would still stand on Sat's print of Thu 19-11 (a same-day print held)", bool(old) and old["end_day"] == "2026-11-19", old)
+    pv = SR.previous(sp, cap, SF) if hasattr(SR, "previous") else None   # v1.0 (the control) has no previous(): red, not a crash
+    check("R1c previous(): Sat's print (the end of 19-11) is the one the newest is compared with", bool(pv) and pv["md5"] == CAP_SAT and pv["end_day"] == "2026-11-19", pv)
     r = SR.build(con, sp, log=say)
-    check("R2 build() writes the record: ok, 12 rows (11 printed + ZERO, counted but at zero in Marg), no item skipped", r.get("ok") and r.get("n") == 12 and r.get("errors") == 0, r)
+    check("R2 build() writes the record: ok, 13 rows (12 printed + ZERO, counted but at zero in Marg), no item skipped", r.get("ok") and r.get("n") == 13 and r.get("errors") == 0, r)
     rows, M = SR.rows(con, sp, "never")
     R = {d["item"]: d for d in rows}
     say("INFO rows: " + "; ".join("%s m=%s s=%s w=%s g=%s %s" % (k[5:], d["marg_units"], d["shelf_units"], d["waiting_units"], d["gap_units"], d["state"]) for k, d in sorted(R.items())))
@@ -232,6 +239,10 @@ def run(fin, copy, control, scratch):
           Bt.get("marg_units") == 340 and Bt.get("marg_late") == 300 and Bt.get("shelf_units") == 340 and Bt.get("gap_units") == 0 and "K251" in (Bt.get("words") or "") and "keyed after the print" in (Bt.get("words") or ""), Bt)
     G = R.get("W933 GAMA 10") or {}
     check("R5 GAMA: bill K252 first seen AFTER the print day is added whole (certain): Marg 60 + 120 = 180; shelf 80 (counted 17-11) - 20 + 120 = 180; gap 0", G.get("marg_units") == 180 and G.get("marg_late") == 120 and G.get("shelf_units") == 180 and G.get("gap_units") == 0, G)
+    Od = R.get("W933 OLD 10") or {}
+    check("R24 OLD: bill K255 dated BEFORE the previous print, first seen after this one, in neither print -> added (pre-window certain): Marg 10 + 40 = 50 = shelf 50, gap 0, no flag",
+          Od.get("marg_units") == 50 and Od.get("marg_late") == 40 and Od.get("shelf_units") == 50 and Od.get("gap_units") == 0 and not Od.get("marg_flag"), Od)
+    check("R25 no row carries 'marg_moved_unrecorded' (every print moved by its sales, bills and returns alone) and approx marks only a family", not any("marg_moved" in (d.get("marg_flag") or "") for d in rows) and not any(d.get("approx") for d in rows), [(d["item"], d["marg_flag"]) for d in rows if d.get("marg_flag")])
     D = R.get("W933 DELTA 10") or {}
     check("R6 DELTA: on the consumption list -> state consumable (Marg 25, counted 0: never a shop difference)", D.get("state") == "consumable" and D.get("consumable") == 1 and D.get("gap_units") == -25, D)
     E = R.get("W933 EPS 10") or {}
@@ -246,7 +257,7 @@ def run(fin, copy, control, scratch):
     Pl = R.get("W933 PLAIN 10") or {}
     PW = Pl.get("waiting") or []
     check("R10 PLAIN: no count -> no shelf figure (state no_shelf), Marg 70; its untied Sat tap waits as tap_no_scan (30)", Pl.get("state") == "no_shelf" and Pl.get("marg_units") == 70 and Pl.get("shelf_units") is None and Pl.get("waiting_units") == 30 and PW and PW[0].get("state") == "tap_no_scan", Pl)
-    check("R11 the meta names the closing (as on 22-11, the end of 21-11, 'morning'), the reaches and the build", M.get("cap_as_on") == SUN and M.get("cap_end_day") == SAT and M.get("cap_kind") == "morning" and M.get("sale_to") == SAT and M.get("n_rows") == "12" and bool(M.get("built_at")), M)
+    check("R11 the meta names the closing (as on 22-11, the end of 21-11, 'morning'), the reaches and the build", M.get("cap_as_on") == SUN and M.get("cap_end_day") == SAT and M.get("cap_kind") == "morning" and M.get("sale_to") == SAT and M.get("n_rows") == "13" and bool(M.get("built_at")), M)
     Rt = R.get("W933 RET 10") or {}
     check("R20 RET: a purchase RETURN keyed after the print (first seen on the print day) is SUBTRACTED: Marg 90 - 20 = 70 = shelf 70 (100 - 10 - 20), gap 0", Rt.get("marg_units") == 70 and Rt.get("marg_late") == -20 and Rt.get("shelf_units") == 70 and Rt.get("gap_units") == 0, Rt)
     Ng = R.get("W933 NEG 10") or {}
@@ -265,8 +276,8 @@ def run(fin, copy, control, scratch):
     rec = SC.record(con)
     rr = {x["item"]: x for x in rec.get("rows", [])}
     T = rec.get("totals") or {}
-    check("R13 stock_check.record() reads the record: 12 rows, look 2 (NEG, ZERO; the consumable and the behind row are not 'look'), waiting 2, no_shelf 2 (PLAIN, SUR), behind 1, consumable 1, late 3 (BETA, GAMA, RET); the page did not rebuild (rebuilding False: the record is fresh)",
-          rec.get("ok") and len(rr) == 12 and T.get("look") == 2 and T.get("arrived") == 2 and T.get("noshelf") == 2 and T.get("behind") == 1 and T.get("consumable") == 1 and T.get("late") == 3 and rec.get("record", {}).get("n_rows") == "12" and rec.get("record", {}).get("rebuilding") is False, (T, rec.get("reason"), rec.get("record")))
+    check("R13 stock_check.record() reads the record: 13 rows, look 2 (NEG, ZERO; the consumable and the behind row are not 'look'), waiting 2, no_shelf 2 (PLAIN, SUR), behind 1, consumable 1, late 4 (BETA, GAMA, RET, OLD); the page did not rebuild (rebuilding False: the record is fresh)",
+          rec.get("ok") and len(rr) == 13 and T.get("look") == 2 and T.get("arrived") == 2 and T.get("noshelf") == 2 and T.get("behind") == 1 and T.get("consumable") == 1 and T.get("late") == 4 and rec.get("record", {}).get("n_rows") == "13" and rec.get("record", {}).get("rebuilding") is False, (T, rec.get("reason"), rec.get("record")))
     check("R13e the count-only list no longer carries ZERO (it is a row now)", not any(c["item"] == "W933 ZERO 10" for c in rec.get("count_only") or []), rec.get("count_only"))
     zb = rr.get("W933 ZETA 10") or {}
     check("R13b the page's ZETA row: Marg 10:0, shelf 10:0, waiting +20:0, one line with the bill's word and the short in bold (short<0)", zb.get("marg_t") == "10:0" and zb.get("core_t") == "10:0" and zb.get("arrived_t") == "+20:0" and zb.get("lines") and zb["lines"][0].get("short") == -50 and "short" in zb["lines"][0].get("word", ""), zb)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#  stock_record.py  ·  v1.0  ·  kit S933_STOCK_OF_RECORD  ·  Session 504 (Sanjeevni)  ·  22-Nov-2026
+#  stock_record.py  ·  v1.1  ·  kit S933_STOCK_OF_RECORD  ·  Session 504 (Sanjeevni)  ·  22-Nov-2026
 #
 #  THE STOCK OF RECORD -- one figure per item, written once, read everywhere (the owner's word, 22-Nov 19:28-19:33 IST: "a single truth
 #  for stocks needs to populate system data"; "everywhere our system should read the stock from this place only").
@@ -38,7 +38,7 @@ import sqlite3
 import sys
 import time
 
-VERSION = "1.0"
+VERSION = "1.1"                                             # v1.1 (the cold review + the first live read): the window residual against the previous print, vouchers, RETURN sign, surplus test, below-zero and zero-stock rows, approx = family only
 KIT = "S933_STOCK_OF_RECORD"
 HERE = os.path.dirname(os.path.abspath(__file__))
 IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
@@ -126,12 +126,27 @@ def capture(sp, SF=None):
     """The newest accepted FULL closing by its print stamp, with the day whose END it stands for. dict(md5, as_on, stamp, stamp_iso, print_day,
     end_day, kind) -- kind 'yesterday' (printed for an earlier day), 'morning' (printed on its own day before 22:00: the end of the day
     before), 'night' (printed on its own day from 22:00). None when the spine has none."""
+    cs = captures(sp, SF)
+    return cs[0] if cs else None
+
+
+def previous(sp, cap, SF=None):
+    """The closing report before `cap`: the newest by stamp whose end day is earlier -- what the ledger's reading compares the newest print with."""
+    for c in captures(sp, SF):
+        if c["stamp"] < cap["stamp"] and c["end_day"] < cap["end_day"]:
+            return c
+    return None
+
+
+def captures(sp, SF=None):
+    """Every accepted full closing by its print stamp, newest first, each with the day whose END it stands for (capture()'s rule)."""
     SF = SF or _sf()
+    out = []
     try:
         rows = sp.q("SELECT e.md5 AS md5, e.as_on AS as_on, e.stamp AS stamp FROM sp_export e WHERE e.ok=1 AND e.md5 IN (SELECT DISTINCT md5 FROM sp_close_name) "
                     "ORDER BY e.stamp DESC, e.md5 DESC")
     except sqlite3.Error:
-        return None
+        return out
     for r in rows:
         si = SF.stamp_iso(r["stamp"])
         as_on = str(r["as_on"] or "")[:10]
@@ -149,8 +164,8 @@ def capture(sp, SF=None):
             continue                                          # printed for a day after its own print: not a closing anyone can stand on
         if not end:
             continue
-        return dict(md5=str(r["md5"]), as_on=as_on, stamp=str(r["stamp"] or ""), stamp_iso=si, print_day=pd, end_day=end, kind=kind)
-    return None
+        out.append(dict(md5=str(r["md5"]), as_on=as_on, stamp=str(r["stamp"] or ""), stamp_iso=si, print_day=pd, end_day=end, kind=kind))
+    return out
 
 
 def _first_seen(con, SW):
@@ -183,7 +198,7 @@ def late_hi(cap):
     return cap["as_on"] if cap.get("kind") == "morning" else cap["end_day"]
 
 
-def _late_bills(sp, k, cap, first_seen, resid):
+def _late_bills(sp, k, cap, first_seen, resid, prev_end=""):
     """The purchase bills (and returns, signed) of the key dated within LATE_DAYS on or before late_hi(cap), each with its first-seen day; the
     ones Marg's print did not hold: certain (first seen after the print day) added whole -- unless the closing's SURPLUS over the record equals
     them (then the print held them after all: Amir keyed before the print and exported after it, F-series S504); the ones first seen ON the
@@ -202,28 +217,36 @@ def _late_bills(sp, k, cap, first_seen, resid):
         fs = first_seen.get((str(r["supkey"] or ""), _bill(r["bill"]), str(r["date"] or "")[:10]))
         cands.append(dict(supkey=str(r["supkey"] or ""), supplier=str(r["supplier"] or r["supkey"] or ""), bill=str(r["bill"] or ""), date=str(r["date"] or "")[:10],
                           units=float(r["units"] or 0), first_seen=fs or "", how=("after" if (fs and fs > cap["print_day"]) else ("same_day" if fs == cap["print_day"] else "before"))))
+    for c in cands:
+        c["in_window"] = (c["date"] > str(prev_end or ""))             # dated after the previous print's end day: the record's window holds it
     chosen = [c for c in cands if c["how"] == "after"]
-    rem = float(resid or 0) + sum(c["units"] for c in chosen)          # what the shortfall still leaves after the certain ones
-    if chosen and rem >= TOL:                                          # the print held one of them after all: the surplus names it (singly or in pairs)
-        drop = None
-        for c in chosen:
-            if abs(rem - c["units"]) < TOL:
-                drop = [c]
-                break
-        if drop is None:
-            for i in range(len(chosen)):
-                for j in range(i + 1, len(chosen)):
-                    if abs(rem - chosen[i]["units"] - chosen[j]["units"]) < TOL:
-                        drop = [chosen[i], chosen[j]]
-                        break
-                if drop:
-                    break
-        if drop:
-            for c in drop:
-                c["how"] = "after_but_inside"
-            chosen = [c for c in chosen if c not in drop]
-            rem -= sum(c["units"] for c in drop)
-    maybe = [c for c in cands if c["how"] == "same_day"]
+    # the surplus test (a bill the print held after all -- keyed before the print, exported after it): an in-window one shows as a surplus once
+    # added (the record already holds it); a pre-window one shows as the raw residual's surplus (neither the previous print nor the window holds it)
+    def _drop(pool, target):
+        if target < TOL or not pool:
+            return []
+        for c in pool:
+            if abs(target - c["units"]) < TOL:
+                return [c]
+        for i in range(len(pool)):
+            for j in range(i + 1, len(pool)):
+                if abs(target - pool[i]["units"] - pool[j]["units"]) < TOL:
+                    return [pool[i], pool[j]]
+        return []
+    inw = [c for c in chosen if c["in_window"]]
+    rem = float(resid or 0) + sum(c["units"] for c in inw)             # what the shortfall still leaves after the certain in-window ones
+    drop = _drop(inw, rem) + _drop([c for c in chosen if not c["in_window"]], float(resid or 0))
+    if drop:
+        for c in drop:
+            c["how"] = "after_but_inside"
+        chosen = [c for c in chosen if c not in drop]
+        rem -= sum(c["units"] for c in drop if c["in_window"])
+        if any(not c["in_window"] for c in drop):
+            rem -= sum(c["units"] for c in drop if not c["in_window"])
+    maybe = [c for c in cands if c["how"] == "same_day" and c["in_window"]]   # a pre-window one first seen on the print day cannot be placed: left, named
+    for c in cands:
+        if c["how"] == "same_day" and not c["in_window"]:
+            c["how"] = "same_day_unplaced"
     if maybe and abs(rem) >= TOL:
         pick = None
         for c in maybe:
@@ -244,6 +267,25 @@ def _late_bills(sp, k, cap, first_seen, resid):
             chosen += pick
             rem += sum(c["units"] for c in pick)
     return chosen, rem, cands
+
+
+def _vouchers(con):
+    """{k20: [(ISO day filed, signed units)]} -- Amir's filed stock vouchers (spine_build.filed_vouchers, the spine's own reader), by the spine's key.
+    {} when the spine's folder or the tables are not there."""
+    out = {}
+    try:
+        import stock_watch as SW                              # noqa: PLC0415
+        spd = os.path.join(HERE, "spine")
+        if spd not in sys.path:
+            sys.path.append(spd)
+        import spine_build as SB                              # noqa: PLC0415
+        dbp = os.environ.get("FINANCE_DB") or FINANCE_DB
+        sp = SW.Spine()
+        for name, rows in SB.filed_vouchers(dbp).items():
+            out.setdefault(sp.key(name) if sp.ok else name, []).extend(rows)
+    except Exception:                                         # noqa: BLE001
+        return {}
+    return out
 
 
 def _consumables(con, SF, sp, ctx):
@@ -448,6 +490,10 @@ def build(con, sp=None, log=None):
         except sqlite3.Error:
             sale_day_keys = set()
     hi = late_hi(cap)
+    prev = previous(sp, cap, SF)
+    prev_end = prev["end_day"] if prev else ""
+    pby_n = SF._cn_rows(sp, prev["md5"], ctx)[0] if prev else {}
+    vouch = _vouchers(con)
     t_iso = today().isoformat()
     built = now_ist()
     rows, covered, errs = [], set(), 0
@@ -465,10 +511,19 @@ def build(con, sp=None, log=None):
             if cap["end_day"] < str(sx.get("day") or ""):
                 flags.append("split_before")                  # the print is older than the split: the old key's shared history -- approximate
         pack = int(SF.pack_of(con, sp, n, ctx)[0] or 1)
-        bal = sp.q("SELECT COALESCE(SUM(units),0) AS u FROM sp_move WHERE k20=? AND date<=?", k, cap["end_day"])
-        bal_end = float(bal[0]["u"] or 0) if bal else 0.0
-        resid = closing - bal_end
-        late, rem, cands = _late_bills(sp, k, cap, first_seen, resid)
+        if prev is not None:                                  # the ledger's reading: the previous print carried through the window to this one
+            p_hits = []
+            for f in forms:
+                p_hits.extend(pby_n.get(norm(f), []))
+            p_close = float(sum(u for (_n, _p, u, _k) in p_hits))
+            bal = sp.q("SELECT COALESCE(SUM(units),0) AS u FROM sp_move WHERE k20=? AND date>? AND date<=?", k, prev_end, cap["end_day"])
+            expected = p_close + (float(bal[0]["u"] or 0) if bal else 0.0) + sum(u for (d, u) in vouch.get(k, []) if prev_end < d <= cap["end_day"])
+        else:                                                 # no earlier print: the record's own balance from its opening
+            bal = sp.q("SELECT COALESCE(SUM(units),0) AS u FROM sp_move WHERE k20=? AND date<=?", k, cap["end_day"])
+            expected = (float(bal[0]["u"] or 0) if bal else 0.0) + sum(u for (d, u) in vouch.get(k, []) if d <= cap["end_day"])
+        resid = closing - expected
+        late, rem, cands = _late_bills(sp, k, cap, first_seen, resid, prev_end)
+        unplaced = [c for c in cands if c["how"] == "same_day_unplaced"]
         late_u = float(sum(c["units"] for c in late))
         after = float(SF.spine_move(sp, k, cap["end_day"], t_iso))
         if hi > cap["end_day"]:                               # a morning print: the bills dated its own day are judged with the late ones, never twice
@@ -485,6 +540,8 @@ def build(con, sp=None, log=None):
             flags.append("sold_before_print")
         if abs(rem) >= TOL:
             flags.append("marg_moved_unrecorded")
+        if unplaced:
+            flags.append("bill_unplaced")
         if not printed:
             flags.append("not_printed")
         Sh = SF.shelf(con, sp, n, None, ctx)
@@ -510,7 +567,11 @@ def build(con, sp=None, log=None):
         if "sold_before_print" in flags:
             words.append("a sale on the report's own day may sit inside the report — approximate until tomorrow's report")
         if "marg_moved_unrecorded" in flags:
-            words.append("Marg's closing differs from the record by %s with no bill or sale to show for it — the Marg watch's line" % st(rem, pack, signed=True))
+            words.append("Marg's report moved %s since the previous one with no sale, bill or voucher to show for it — the Marg watch's line" % st(rem, pack, signed=True) if prev is not None
+                         else "Marg's report differs from the record by %s with no sale, bill or voucher to show for it" % st(rem, pack, signed=True))
+        if unplaced:
+            words.append("bill%s %s first seen on the print day and older than the previous report — the system cannot tell whether the print holds %s; Marg's figure may be behind %s" % (
+                "s" if len(unplaced) > 1 else "", ", ".join(c["bill"] for c in unplaced), "them" if len(unplaced) > 1 else "it", "them" if len(unplaced) > 1 else "it"))
         if named == "below_zero":
             words.append("the count carried forward went below zero (a purchase not yet in Marg, or a count to redo) — the shelf stands at 0 here")
         if margi < 0:
@@ -530,7 +591,7 @@ def build(con, sp=None, log=None):
         return (n, k, pack, int(pack <= 1), int(is_ortho), int(is_cons), float(margi), closing, late_u, after, rem, json.dumps(late, ensure_ascii=False),
                 ",".join(flags), (float(core) if core is not None else None), (float(shelf_raw) if shelf_raw is not None else None), arrived, named or "",
                 Sh.get("base_kind") or "", Sh.get("base_day") or "", Sh.get("base_at") or "", int(bool(Sh.get("base_evening"))),
-                wait_u, json.dumps(W, ensure_ascii=False), (float(gap) if gap is not None else None), state, " · ".join(words), int(bool(flags)),
+                wait_u, json.dumps(W, ensure_ascii=False), (float(gap) if gap is not None else None), state, " · ".join(words), int("family" in flags or "split_before" in flags),
                 json.dumps([f for f in forms if norm(f) != norm(n)], ensure_ascii=False), built)
 
     names = sorted({str(r["name"]) for r in sp.q("SELECT DISTINCT name FROM sp_close_name WHERE md5=?", cap["md5"]) if r["name"]})
@@ -603,7 +664,7 @@ def build(con, sp=None, log=None):
 
 def is_stale(con, sp):
     M = meta(con)
-    if not M.get("built_at"):
+    if not M.get("built_at") or M.get("version") != VERSION:
         return True
     try:
         age = (dt.datetime.fromisoformat(now_ist()) - dt.datetime.fromisoformat(M["built_at"])).total_seconds()

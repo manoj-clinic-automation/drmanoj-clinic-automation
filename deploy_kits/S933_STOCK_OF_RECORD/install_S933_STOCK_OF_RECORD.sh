@@ -1,6 +1,10 @@
 #!/bin/bash
 # =============================================================================
-#  install_S933_STOCK_OF_RECORD.sh · kit S933 (22-Nov-2026, Sanjeevni session 504) · the owner's "go" 19:33 IST -- AFTER S928 / S930
+#  install_S933_STOCK_OF_RECORD.sh · kit S933 v1.1 (22-Nov-2026, Sanjeevni session 504) · the owner's "go" 19:33 IST -- AFTER S928 / S930; v1.1 over the live v1.0 (21:11 IST)
+#   v1.1 (the cold review's should-fixes + the first live read, 21:12 IST): the residual against the PREVIOUS print carried through the window (the
+#        ledger's reading) + Amir's filed vouchers -- v1.0 measured it from the opening and flagged 30+ rows as "moved with no record"; a RETURN keyed
+#        late subtracted; the surplus test (a bill the print held after all); a count carried below zero judged at 0; an item at zero in Marg with a
+#        count judged against zero; approx = a family figure only.
 #   NEW /root/finance/stock_record.py : THE STOCK OF RECORD -- one table (stock_of_record) every page reads: Marg's newest closing report (a morning
 #        print = the end of the day before, no hold), the bills Amir keyed after the print (his export's first-seen day; the shortfall decides a
 #        same-day one), the sales since, the last count carried forward, the deliveries waiting in one of three states, consumables, Marg behind a bill.
@@ -23,7 +27,7 @@ FIN_PORT="${FIN_PORT:-8106}"; FSVC="${FSVC:-clinic-finance}"; SYSTEMCTL="${SYSTE
 LIVE_DB="${LIVE_DB:-$ROOT/finance/finance.db}"; SPINE_DB_LIVE="${SPINE_DB_LIVE:-$ROOT/finance/spine/spine.db}"
 CRON_LINE='*/10 * * * * cd /root/finance && FINANCE_DB=/root/finance/finance.db SHARED_LIB_DIR=/root/shared flock -n /tmp/stock_record.lock /root/wa/venv/bin/python3 -B /root/finance/stock_record.py --build >> /root/finance/stock_record.log 2>&1 # S933_STOCK_OF_RECORD'   # every ten minutes round the clock (the box clock is not IST); --build does nothing when the record is fresh
 NAMES=("finance/stock_record.py" "finance/stock_figure.py" "finance/stock_check.py" "finance/stock_check.html" "finance/item_ledger.py")
-FROMS=("absent" "8130315e01c7da5d24e1ba93f6e60ad8" "4211828933a4113e33b7553c8ac89b2d" "ae61a18cbfe7e9d1b75614dc16a7986c" "5fbb60200dc836a8a623fa7175bf0492")   # read from the live pins / S928-S930's TO (F-1480)
+FROMS=("ed622dada34ffdd0d53df2288ffd003c" "5d15e77dae11c7ee0799290e1a442760" "bf68c55b20f90673b134e8d25c23aaa5" "4d6cbc6f8733226663688371473c0ff0" "d2f68ee900dfbcb40a25f570f6782c58")   # v1.1 over v1.0 (live 21:11 IST 22-Nov): stock_record.py v1.0 -> v1.1; the four others unchanged (FROM = TO). The v1.0 kit's FROMS were 8130315e / 42118289 / ae61a18c / 5fbb6020 (+ stock_record absent) -- undo_s933.sh still returns to THOSE (the pre-S933 files) from the first install's backups.
 KF=("stock_record.py" "stock_figure.py" "stock_check.py" "stock_check.html" "item_ledger.py")
 N=5; IDX="0 1 2 3 4"
 TOS=(); for k in $IDX; do TOS[$k]="$(awk -v f="${NAMES[$k]}" '$2==f{print $1}' "$KDIR/TO_PINS.md5")"; done
