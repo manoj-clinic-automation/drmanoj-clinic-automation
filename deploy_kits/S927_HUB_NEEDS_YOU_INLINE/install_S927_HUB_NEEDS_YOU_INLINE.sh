@@ -95,13 +95,14 @@ for k in $IDX; do mv -f "$(stg $k)" "$ROOT/${NAMES[$k]}" || restore "the rename 
 T0=$(date +%s); "$SYSTEMCTL" restart "$FSVC" || restore "restart $FSVC"
 [ "${REHEARSE_RED_AT:-}" = 4 ] && restore "rehearsal: a forced red at [4/6]"
 c1=$(wait200); [ "$c1" = 200 ] || restore "finance healthz $c1 after the restart"
-d1=$(door /finance/sanjeevni/api/needs-you/healthz); [ "$d1" = 200 ] || restore "hub_panels healthz answers $d1 (not mounted)"
+d1=$(door /finance/sanjeevni/api/needs-you/healthz); case "$d1" in 404|000|5*) restore "hub_panels healthz answers $d1";; esac   # login-gated: 302 says nothing (F-1439); the log proves the mount
 d2=$(door /finance/sanjeevni/api/needs-you); case "$d2" in 404|000|5*) restore "the Needs-you door answers $d2";; esac
 d3=$(door /finance/sanjeevni/approvals); case "$d3" in 404|000|5*) restore "his Hub page answers $d3";; esac
 sleep "${NAP:-3}"; bad=$(flog | grep -E "hub_panels not mounted|hub_cash not mounted|S927 .* failed|Traceback" | head -3)
 [ -z "$bad" ] || restore "the service log after the restart: $(echo "$bad" | head -1 | cut -c1-120)"
+flog | grep -q "S927 hub_panels mounted" || restore "the service log since the restart does not say hub_panels mounted (F-1554)"
 PLACING=0
-say "[4/6] the five files placed and read back; $FSVC restarted $(TZ=Asia/Kolkata date '+%H:%M IST'), finance healthz $c1, hub_panels healthz $d1, the Needs-you door $d2 and his Hub $d3 (login-gated), the service log clean since the restart"
+say "[4/6] the five files placed and read back; $FSVC restarted $(TZ=Asia/Kolkata date '+%H:%M IST'), finance healthz $c1, the doors $d1 / $d2 / $d3 (login-gated), the service log says hub_panels mounted and is clean since the restart"
 release_lock
 say "[5/6] what changes now: his Sanjeevni Hub's Needs-you -- three tiers, every line with 'open here' (the thing itself and its buttons), the age on old lines, the arrivals one per item."
 say "[6/6] undo (one line): bash /root/deploy/repo/deploy_kits/$KIT/undo_s927.sh  (the four patched files back, hub_panels.py left in place unmounted, $FSVC restarted; hub_seen and Amir's jobs stay, harmless)"

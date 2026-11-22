@@ -1,10 +1,10 @@
 35c3eced9c1c5968f333170089ba2f80  KIT_ID.txt
 81b4a2739959d38893fef7f1a44842f9  README.md
-e0e84f5f31ae2e53f532b6545a818aee  TO_PINS.md5
-de0fcb594371dc582ece05cdcf3a3583  install_S927_HUB_NEEDS_YOU_INLINE.sh
+29c5b70a737db018dd9467cb9ae0369b  TO_PINS.md5
+0b026c7206e4e315a4bccfcb82940e38  install_S927_HUB_NEEDS_YOU_INLINE.sh
 f661ba3c6105e11e47f4a4066ae5e087  undo_s927.sh
 913b8de4b2c8fafe1daf405fb38e7652  walk_s927.py
-c5af89fc3b7b2176477681a8a81e182f  hub_panels.py
+17e79d725a8e78b81b1d0d176066581f  hub_panels.py
 c01bf05bd754c37b2f73d8d1e18b7091  sanjeevni_day.py
 b9d27f27843f668971f0a6e258ae37df  sanjeevni_approvals.py
 5acf3cf0ca8f927df5ef69bb804815f8  stock_watch.py

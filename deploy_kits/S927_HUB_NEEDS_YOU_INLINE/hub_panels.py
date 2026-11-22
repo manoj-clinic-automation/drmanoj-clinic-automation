@@ -48,6 +48,7 @@ def init(app, db_getter, require_fn, unit="medical"):
     global _db, _require, _unit
     _db, _require, _unit = db_getter, require_fn, unit
     app.register_blueprint(bp)
+    print("S927 hub_panels mounted v%s" % VERSION, file=sys.stderr, flush=True)   # the service log proves the mount (F-1554): every door here is login-gated
     return bp
 
 
