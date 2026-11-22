@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S502 close** (the Sanjeevni chat, full EOS), 22-Nov-2026, midday — the Sanjeevni sections refreshed here (the shortage / substitute flow with the Marg-identity check; his Hub's Needs-you workable inline); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S503 close** (the Sanjeevni chat, Fable, full EOS), 22-Nov-2026, evening — the Sanjeevni sections refreshed here (the one arrivals rule bill over tap; the Stock check page; orthotic order lines under Marg's current name); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S502 close** (the Sanjeevni chat, full EOS), 22-Nov-2026, midday — the Sanjeevni sections refreshed here (the shortage / substitute flow with the Marg-identity check; his Hub's Needs-you workable inline); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S501 close** (the Sanjeevni chat, full EOS), 22-Nov-2026, morning — the Sanjeevni sections refreshed here (the stock pages read against each other; his tile to the purchase flow; the old purchase pages retired); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S500 close** (the Sanjeevni chat, full EOS), 21-Nov-2026, night — the Sanjeevni sections refreshed here (the purchase flow finished: reception's page, Darpan's tab, the Purchase bills page, his Hub's line); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S499 close** (the Sanjeevni chat, full EOS), 21-Nov-2026, evening — the Sanjeevni sections refreshed here (his Purchase orders page grouped, S920; reception's page next); the other projects' sections as their closes left them.
@@ -1392,7 +1393,7 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S502 close (22-Nov, 12:4x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S503 close (22-Nov, 18:3x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
@@ -1402,18 +1403,28 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 https://followup.dr-manoj.in/finance/porders/flow
 ```
-3. **Ram Singh:** add the **Stock Register** report to Shavez's Marg reports login; then switch Shavez on at:
+3. **Your new Stock check page** — Marg against the shelf, Darpan's counts, Count this (TYRO BR is first on his Monday list):
+```
+https://followup.dr-manoj.in/finance/stockcheck/
+```
+4. **Ram Singh:** add the **Stock Register** report to Shavez's Marg reports login; then switch Shavez on at:
 ```
 https://followup.dr-manoj.in/finance/sanjeevni/marg-watch/take
 ```
-4. **The packs page:** the 25 card shops; the card and ICICI passwords (D713).
+5. **The packs page:** the 25 card shops; the card and ICICI passwords (D713).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S502 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S503 close
 
-1. **The stock plan** — re-run with Fable, then built: bill over tap everywhere, the Stock check page, Darpan's counts to you, the ordering list on Marg's current names.
+1. **The stock plan v2, in order:** the count's old spellings folded into Marg's names (no more double rows); the item ledger on the same figures as the Stock check page; Darpan's "is the delivery in your count" question; a short supply on the dealer's next order; the retired feeds switched off.
 2. **The remaining Needs-you panels** (Darpan's lines, Marg details, returns, days, expiry taps; "Accept Marg's figure" on vouchers).
-3. **S926's first days read** — your word on VFER 500, the re-ordered medicines after your doors.
-4. **The bills page's lower part without pop-ups; the buying switch.**
+3. **First-days read** — your VFER 500 word, the "Darpan counted" lines, the first evening count.
+4. **Batches by the full batch; the order–bill ties; the bills page without pop-ups; the buying switch.**
+
+## ✅ DONE AT THE S503 CLOSE — 22-Nov-2026, evening (the Sanjeevni project)
+
+- **A delivery now counts by the dealer's scanned bill, never by reception's tap** (a tap above the bill reads as a short supply); **a count after 17:00 is the end of its day**; **every count Darpan writes reaches your Needs-you as one line a day** (live 16:59).
+- **Your Stock check page** — Marg against the shelf, the deliveries waiting with the bill's word, Darpan's counts, Count this on every row; the old Stock drift and Stock now addresses open it (live 16:59).
+- **Orthotic order lines carry Marg's current name** — the ANKLE BINDER BAMBOO M kind of re-order under an old name stops (live 16:59).
 
 ## ✅ DONE AT THE S502 CLOSE — 22-Nov-2026, midday (the Sanjeevni project)
 
