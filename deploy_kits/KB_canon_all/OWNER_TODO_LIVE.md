@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S499 close** (the Sanjeevni chat, full EOS), 21-Nov-2026, evening — the Sanjeevni sections refreshed here (his Purchase orders page grouped, S920; reception's page next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S500 close** (the Sanjeevni chat, full EOS), 21-Nov-2026, night — the Sanjeevni sections refreshed here (the purchase flow finished: reception's page, Darpan's tab, the Purchase bills page, his Hub's line); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S499 close** (the Sanjeevni chat, full EOS), 21-Nov-2026, evening — the Sanjeevni sections refreshed here (his Purchase orders page grouped, S920; reception's page next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S497 close** (the Sanjeevni chat, full EOS), 21-Nov-2026, evening — the Sanjeevni sections refreshed here (the phone set-up page true to the phone; the purchase-order flow approved for the next session); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S496 close** (the parent, Fable, full EOS), 21-Nov-2026, morning — the parent's sections refreshed here (older-day slips, the procedures Save, the Docterz messages; THE SWITCH tonight, one paste of yours); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S494 close** (the Sanjeevni chat, full EOS), 21-Nov-2026, morning — the Sanjeevni sections refreshed here (the reception phone works with its screen dark; the daily delivery check live); the other projects' sections as their closes left them.
@@ -1389,7 +1390,7 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S499 close (21-Nov, 20:1x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S500 close (21-Nov, 21:5x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
@@ -1401,12 +1402,20 @@ https://followup.dr-manoj.in/finance/sanjeevni/marg-watch/take
 ```
 3. **The packs page:** the 25 card shops; the card and ICICI passwords (D713).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S499 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S500 close
 
-1. **The purchase flow, kit 2 — reception's page:** Out of stock and Substitute aaya beside every Dobara order karo; your Chase shown; the practice list and September backlog off; the 28 skipped order messages cleared once; English quantities on your team list; no pop-up on your old cards.
-2. **Kit 3 — Darpan's tab** with the team list (read only). **Kit 4 — the Purchase bills page** (Arrived the same 16; the six doubtful scans, one tap).
+1. **Read the purchase flow's first day** — reception's taps, Darpan's folds, the bills page, your Hub line (read only).
+2. **The Purchase bills page's lower part without pop-ups** (two taps, as your Hub).
 3. **The buying switch** — the weekly score read; put to you when it holds.
 4. **The 20 items whose batches do not add up** — after Amir's next Batch Stock.
+
+## ✅ DONE AT THE S500 CLOSE — 21-Nov-2026, night (the Sanjeevni project)
+
+- **Reception's page** (live 20:55): one list, her Hindi buttons, Out of stock everywhere; the September backlog and practice list off her screen; fits a phone.
+- **Darpan's tab** (live 21:12): what each dealer still has to send; the out-of-stock list with your decision.
+- **Your Purchase bills page** (live 21:23): round-off scans counted (14 bills, ₹65,190); your allowance on the page; two taps on a doubtful scan.
+- **Your Hub** (live 21:47): one purchase line in place of twelve.
+- **The 27 order messages of 12–20 Nov** read as sent; your team list in English; no pop-ups on your old cards.
 
 ## ✅ DONE AT THE S499 CLOSE — 21-Nov-2026, evening (the Sanjeevni project)
 
