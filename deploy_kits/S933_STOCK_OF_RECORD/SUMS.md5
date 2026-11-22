@@ -1,13 +1,13 @@
 a4b8ad4f498b463cec520bffe959c61e  KIT_ID.txt
 0d68dc4e11e76e60d79950a6184fdbcf  README.md
-06d19f2f230107b485d1794adec1217c  TO_PINS.md5
-b7469f6f087dc64562a47e8a458c061a  install_S933_STOCK_OF_RECORD.sh
+85361fd8eb36708b648bb74391232567  TO_PINS.md5
+14543c2b676485f687cfa8ebc495ddae  install_S933_STOCK_OF_RECORD.sh
 d2f68ee900dfbcb40a25f570f6782c58  item_ledger.py
 e6de0783f5c22230ae81b7968d0d17ae  liveshape_s933.py
 6ab32fd28ecefc85c872546b42d671f2  make_s933.py
 4d6cbc6f8733226663688371473c0ff0  stock_check.html
 bf68c55b20f90673b134e8d25c23aaa5  stock_check.py
 5d15e77dae11c7ee0799290e1a442760  stock_figure.py
-ed3223bf806366b1b15bbbe7832d0d43  stock_record.py
-9f8c139d9389609fac8d56f4f3a8c392  synth_s933.py
+f8883fdffc7f59a630bba586f46c9e92  stock_record.py
+bf5a00a045e2cf45b55cdae4563806dd  synth_s933.py
 585949a1fcd09d4b7a3dd36f236184d0  undo_s933.sh

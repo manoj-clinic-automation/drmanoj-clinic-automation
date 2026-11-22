@@ -1,6 +1,9 @@
 #!/bin/bash
 # =============================================================================
-#  install_S933_STOCK_OF_RECORD.sh · kit S933 v1.1 (22-Nov-2026, Sanjeevni session 504) · the owner's "go" 19:33 IST -- AFTER S928 / S930; v1.1 over the live v1.0 (21:11 IST)
+#  install_S933_STOCK_OF_RECORD.sh · kit S933 v1.2 (22-Nov-2026, Sanjeevni session 504) · the owner's "go" 19:33 IST -- AFTER S928 / S930; v1.2 over the live v1.1 (21:29 IST)
+#   v1.2 (21:32 IST, the owner's challenge on TYRO BR / TRAMATEE): a bill with no first-seen day is placed by the residual, never assumed inside; a pre-window bill
+#        first seen on the print day is placed by the surplus; a fresh count below Marg names the bill of the day before ("was that delivery on the shelf?");
+#        a count older than 21 days is called an estimate ("count again"); the below-zero note once.
 #   v1.1 (the cold review's should-fixes + the first live read, 21:12 IST): the residual against the PREVIOUS print carried through the window (the
 #        ledger's reading) + Amir's filed vouchers -- v1.0 measured it from the opening and flagged 30+ rows as "moved with no record"; a RETURN keyed
 #        late subtracted; the surplus test (a bill the print held after all); a count carried below zero judged at 0; an item at zero in Marg with a
@@ -27,7 +30,7 @@ FIN_PORT="${FIN_PORT:-8106}"; FSVC="${FSVC:-clinic-finance}"; SYSTEMCTL="${SYSTE
 LIVE_DB="${LIVE_DB:-$ROOT/finance/finance.db}"; SPINE_DB_LIVE="${SPINE_DB_LIVE:-$ROOT/finance/spine/spine.db}"
 CRON_LINE='*/10 * * * * cd /root/finance && FINANCE_DB=/root/finance/finance.db SHARED_LIB_DIR=/root/shared flock -n /tmp/stock_record.lock /root/wa/venv/bin/python3 -B /root/finance/stock_record.py --build >> /root/finance/stock_record.log 2>&1 # S933_STOCK_OF_RECORD'   # every ten minutes round the clock (the box clock is not IST); --build does nothing when the record is fresh
 NAMES=("finance/stock_record.py" "finance/stock_figure.py" "finance/stock_check.py" "finance/stock_check.html" "finance/item_ledger.py")
-FROMS=("ed622dada34ffdd0d53df2288ffd003c" "5d15e77dae11c7ee0799290e1a442760" "bf68c55b20f90673b134e8d25c23aaa5" "4d6cbc6f8733226663688371473c0ff0" "d2f68ee900dfbcb40a25f570f6782c58")   # v1.1 over v1.0 (live 21:11 IST 22-Nov): stock_record.py v1.0 -> v1.1; the four others unchanged (FROM = TO). The v1.0 kit's FROMS were 8130315e / 42118289 / ae61a18c / 5fbb6020 (+ stock_record absent) -- undo_s933.sh still returns to THOSE (the pre-S933 files) from the first install's backups.
+FROMS=("ed3223bf806366b1b15bbbe7832d0d43" "5d15e77dae11c7ee0799290e1a442760" "bf68c55b20f90673b134e8d25c23aaa5" "4d6cbc6f8733226663688371473c0ff0" "d2f68ee900dfbcb40a25f570f6782c58")   # v1.2 over v1.1 (live 21:29 IST 22-Nov): stock_record.py v1.1 -> v1.2; the four others unchanged (FROM = TO). The v1.0 kit's FROMS were 8130315e / 42118289 / ae61a18c / 5fbb6020 (+ stock_record absent) -- undo_s933.sh still returns to THOSE (the pre-S933 files) from the first install's backups.
 KF=("stock_record.py" "stock_figure.py" "stock_check.py" "stock_check.html" "item_ledger.py")
 N=5; IDX="0 1 2 3 4"
 TOS=(); for k in $IDX; do TOS[$k]="$(awk -v f="${NAMES[$k]}" '$2==f{print $1}' "$KDIR/TO_PINS.md5")"; done

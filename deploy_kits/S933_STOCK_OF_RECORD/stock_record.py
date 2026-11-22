@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#  stock_record.py  ·  v1.1  ·  kit S933_STOCK_OF_RECORD  ·  Session 504 (Sanjeevni)  ·  22-Nov-2026
+#  stock_record.py  ·  v1.2  ·  kit S933_STOCK_OF_RECORD  ·  Session 504 (Sanjeevni)  ·  22-Nov-2026
 #
 #  THE STOCK OF RECORD -- one figure per item, written once, read everywhere (the owner's word, 22-Nov 19:28-19:33 IST: "a single truth
 #  for stocks needs to populate system data"; "everywhere our system should read the stock from this place only").
@@ -38,11 +38,12 @@ import sqlite3
 import sys
 import time
 
-VERSION = "1.1"                                             # v1.1 (the cold review + the first live read): the window residual against the previous print, vouchers, RETURN sign, surplus test, below-zero and zero-stock rows, approx = family only
+VERSION = "1.2"                                             # v1.2 (21:32 IST, the owner's challenge on TYRO BR / TRAMATEE): a bill with no first-seen day placed by the residual; a pre-window bill placed by the surplus; a fresh count that misses a bill of the day before named; an old base marked an estimate; v1.1 (the cold review + the first live read): the window residual against the previous print, vouchers, RETURN sign, surplus test, below-zero and zero-stock rows, approx = family only
 KIT = "S933_STOCK_OF_RECORD"
 HERE = os.path.dirname(os.path.abspath(__file__))
 IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
 LATE_DAYS = 21                                              # a bill keyed after the print: dated within this many days on or before the end day
+OLD_BASE_DAYS = 21                                          # a count older than this: the shelf figure is called an estimate (count again)
 STALE_SECONDS = 6 * 3600                                    # a record older than this is rebuilt on read even with no input moved
 TOL = 0.5
 FINANCE_DB = os.environ.get("FINANCE_DB") or "/root/finance/finance.db"
@@ -216,7 +217,8 @@ def _late_bills(sp, k, cap, first_seen, resid, prev_end=""):
     for r in rows:
         fs = first_seen.get((str(r["supkey"] or ""), _bill(r["bill"]), str(r["date"] or "")[:10]))
         cands.append(dict(supkey=str(r["supkey"] or ""), supplier=str(r["supplier"] or r["supkey"] or ""), bill=str(r["bill"] or ""), date=str(r["date"] or "")[:10],
-                          units=float(r["units"] or 0), first_seen=fs or "", how=("after" if (fs and fs > cap["print_day"]) else ("same_day" if fs == cap["print_day"] else "before"))))
+                          units=float(r["units"] or 0), first_seen=fs or "",
+                          how=("after" if (fs and fs > cap["print_day"]) else ("same_day" if fs == cap["print_day"] else ("before" if fs else "unknown")))))   # unknown: the Purchase bills page has not registered it yet -- placed by the residual, never assumed inside
     for c in cands:
         c["in_window"] = (c["date"] > str(prev_end or ""))             # dated after the previous print's end day: the record's window holds it
     chosen = [c for c in cands if c["how"] == "after"]
@@ -243,10 +245,16 @@ def _late_bills(sp, k, cap, first_seen, resid, prev_end=""):
         rem -= sum(c["units"] for c in drop if c["in_window"])
         if any(not c["in_window"] for c in drop):
             rem -= sum(c["units"] for c in drop if not c["in_window"])
-    maybe = [c for c in cands if c["how"] == "same_day" and c["in_window"]]   # a pre-window one first seen on the print day cannot be placed: left, named
-    for c in cands:
-        if c["how"] == "same_day" and not c["in_window"]:
-            c["how"] = "same_day_unplaced"
+    # a pre-window bill first seen on the print day (or with no first-seen day): the raw surplus names it as taken in by this print -- inside, nothing to add
+    pre = [c for c in cands if c["how"] in ("same_day", "unknown") and not c["in_window"]]
+    held = _drop(pre, float(resid or 0) - sum(c["units"] for c in [x for x in cands if x["how"] == "after_but_inside" and not x["in_window"]]))
+    for c in held:
+        c["how"] = "inside_by_surplus"
+        rem -= c["units"]
+    for c in pre:
+        if c["how"] in ("same_day", "unknown"):
+            c["how"] = "same_day_unplaced"                         # still unplaced: named on the row, Marg's figure may be behind it
+    maybe = [c for c in cands if c["how"] in ("same_day", "unknown") and c["in_window"]]
     if maybe and abs(rem) >= TOL:
         pick = None
         for c in maybe:
@@ -573,7 +581,31 @@ def build(con, sp=None, log=None):
             words.append("bill%s %s first seen on the print day and older than the previous report — the system cannot tell whether the print holds %s; Marg's figure may be behind %s" % (
                 "s" if len(unplaced) > 1 else "", ", ".join(c["bill"] for c in unplaced), "them" if len(unplaced) > 1 else "it", "them" if len(unplaced) > 1 else "it"))
         if named == "below_zero":
-            words.append("the count carried forward went below zero (a purchase not yet in Marg, or a count to redo) — the shelf stands at 0 here")
+            words.append("the shelf stands at 0 here")
+        base_day = str(Sh.get("base_day") or "")[:10]
+        if base_day and core is not None:
+            try:
+                age = (today() - dt.date.fromisoformat(base_day)).days
+            except ValueError:
+                age = 0
+            moved = abs(float(Sh.get("sold") or 0)) + abs(float(Sh.get("bought") or 0)) + abs(float(Sh.get("returned") or 0))
+            if age > OLD_BASE_DAYS:
+                flags.append("old_base")
+                words.append("the count is %d days old and %s have moved since — the shelf figure is an estimate; count again" % (age, st(moved, pack).replace(":0", "") + (" strips" if pack > 1 else " pieces")))
+            elif age <= 2 and core is not None and (core - margi) < 0:
+                try:                                          # a fresh count below Marg: a bill of the count's day or the day before may not have been on the shelf when he counted
+                    lo_d = (dt.date.fromisoformat(base_day) - dt.timedelta(days=1)).isoformat()
+                    bills = sp.q("SELECT l.supkey AS supkey, l.bill AS bill, l.date AS date, SUM(l.units) AS units, MAX(b.supplier) AS supplier FROM sp_purchase_line l "
+                                 "LEFT JOIN sp_purchase_bill b ON b.supkey=l.supkey AND b.bill=l.bill AND b.date=l.date WHERE l.k20=? AND l.direction='PURCHASE' AND l.date>=? AND l.date<=? "
+                                 "GROUP BY l.supkey, l.bill, l.date", k, lo_d, base_day)
+                    near = [bl for bl in bills if float(bl["units"] or 0) >= 0.8 * abs(core - margi)]
+                    if near:
+                        bl = near[0]
+                        words.append("counted %s on %s; Marg holds bill %s (%s, %s: %s) — was that delivery on the shelf when he counted? count again" % (
+                            st(Sh.get("base") or 0, pack), dmy(base_day), bl["bill"], (str(bl["supplier"] or bl["supkey"]).split() or ["?"])[0], dmy(bl["date"]), st(bl["units"], pack)))
+                        flags.append("fresh_vs_bill")
+                except Exception:                             # noqa: BLE001
+                    pass
         if margi < 0:
             state, gap = "marg_behind", None
             words.insert(0, "Marg's figure would be %s — a bill Marg holds is not in the record yet, or a bill is not keyed; no gap is judged" % st(margi, pack))
