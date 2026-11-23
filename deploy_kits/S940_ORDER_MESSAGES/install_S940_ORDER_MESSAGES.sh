@@ -46,7 +46,7 @@ restore() { PLACING=0; trap '' HUP INT TERM; say "!! RED after placing ($1) - pu
   release_lock; exit 1; }
 on_sig() { if [ "$PLACING" = 1 ]; then restore "the session was interrupted while placing"; fi; say "!! interrupted - nothing placed"; release_lock; exit 1; }
 trap on_sig HUP INT TERM
-py() { (cd /tmp && TMPDIR="$SCR" PYTHONPYCACHEPREFIX="$SCR/pyc" timeout 600 "$VPY" -u -W ignore -B "$@" 2>&1); }
+py() { (cd /tmp && TMPDIR="$SCR" PYTHONPYCACHEPREFIX="$SCR/pyc" SPINE_DB="${SPINE_DB:-$ROOT/finance/spine/spine.db}" timeout 600 "$VPY" -u -W ignore -B "$@" 2>&1); }
 
 cd "$KDIR" || { say "!! cannot enter the kit folder"; exit 1; }
 md5sum -c SUMS.md5 >/dev/null 2>&1 || { say "!! [1/5] SUMS.md5 gate failed - kit corrupt, nothing installed"; exit 1; }
@@ -62,6 +62,7 @@ for k in $IDX; do [ "$(cur $k)" = "${FROMS[$k]}" ] || stop "!! [2/5] $ROOT/${NAM
 for p in "$APY" "$VPY"; do PYTHONPYCACHEPREFIX="$SCR/pyc" "$p" -W ignore -m py_compile "$KDIR/porders_s454.py" "$KDIR/order_rules.py" "$KDIR/order_d1053_msg.py" "$KDIR/walk_s940.py" "$KDIR/s940_on.py" || stop "!! [2/5] a file does not compile on $p - nothing installed"; done
 say "[2/5] the live file at its FROM pin; the kit's python compiles on both pythons"
 mkdir -p "$SCR/new" "$SCR/old" && \cp -p "$ROOT"/finance/*.py "$ROOT"/finance/*.html "$ROOT"/finance/*.sql "$ROOT"/finance/*.json "$SCR/new/" 2>/dev/null; \cp -p "$ROOT"/shared/*.py "$SCR/new/" 2>/dev/null
+mkdir -p "$SCR/new/spine" && \cp -p "$ROOT"/finance/spine/*.py "$ROOT"/finance/spine/*.json "$SCR/new/spine/" 2>/dev/null   # the spine's read door beside the code, as live (S939: Darpan's tab reads it)
 \cp -rp "$SCR/new/." "$SCR/old/"
 for k in $IDX; do [ "${FROMS[$k]}" = absent ] && rm -f "$SCR/old/${KF[$k]}"; \cp -p "$KDIR/${KF[$k]}" "$SCR/new/" || stop "!! [3/5] could not lay out the walk - nothing installed"; done
 py -c "import sqlite3,sys; s=sqlite3.connect('file:%s?mode=ro' % sys.argv[1], uri=True); d=sqlite3.connect(sys.argv[2]); s.backup(d); d.close(); s.close()" "$LIVE_DB" "$SCR/copy.db" >/dev/null \

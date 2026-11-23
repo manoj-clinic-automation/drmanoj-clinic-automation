@@ -41,6 +41,19 @@ def require_fn(*roles, unit=None):
     u = WHO["u"]
     return dict(user=u, login=u, roles=USERS[u]), None
 app = Flask(__name__)
+app.config["PROPAGATE_EXCEPTIONS"] = True                        # a fault shows its own words (INFO TB), never a bare 500
+
+
+class _Err:                                                       # what the code says on stderr reaches the installer's screen
+    def write(self, t):
+        for ln in str(t).splitlines():
+            if ln.strip() and ("S939" in ln or "Error" in ln or "error" in ln or ln.startswith("  File")):
+                print("INFO ERR " + ln.strip()[:190])
+    def flush(self):
+        pass
+
+
+sys.stderr = _Err()
 PO.init(app, db_getter, require_fn)
 DK.init(app, db_getter, require_fn, "medical")
 cl = app.test_client()
@@ -54,7 +67,15 @@ def post(who, url, body):
 def get(who, url):
     WHO["u"] = who; r = cl.get(url); return r.status_code, r.data.decode("utf-8", "replace")
 def tab(who="darpan"):
-    WHO["u"] = who; r = cl.get("/finance/darpan/kal/api/order"); return r.status_code, (r.get_json(silent=True) or {})
+    WHO["u"] = who
+    try:
+        r = cl.get("/finance/darpan/kal/api/order")
+    except Exception:                                             # noqa: BLE001
+        import traceback
+        for ln in traceback.format_exc().splitlines()[-8:]:
+            print("INFO TB " + ln.strip()[:190])
+        return 500, {}
+    return r.status_code, (r.get_json(silent=True) or {})
 setv("order.d1053", "1")
 print("INFO source %s, newest sheet %s" % (OS.source(con), (OS.newest_sheet(con) or {}).get("id")))
 st, j = tab()
