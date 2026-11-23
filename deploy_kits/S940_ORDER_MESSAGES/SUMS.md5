@@ -1,0 +1,13 @@
+f96f02a8151a7e4a5328af21ea12165f  KIT_ID.txt
+857f939d8f1f371ddce04389e7ff268d  README.md
+65a932656b796a7a260e6aec3c281eed  TO_PINS.md5
+c2e541082713532d7e3c10cb77137aff  block_porders_s940.py
+f11323b7fde42701545b1b9160d33fcc  block_rules_s940.py
+a3a81a0d9554f14d6f36f8113ef2f7f8  install_S940_ORDER_MESSAGES.sh
+26c503d70ed31b1b050d1bfe8f68db62  make_s940.py
+451ac3e32fd74a5b48fd5716f7c4ced2  order_d1053_msg.py
+eac7ec3721fb729b9f3f45c0ce2510b3  order_rules.py
+7250b7f5b605bb3ff3c01fc086652b0e  porders_s454.py
+12bad40ac3bcbd900b37acc41781e3ba  s940_on.py
+d5f7fe49b62cdb382af72ab042d7791b  undo_s940.sh
+e5c21687c5d0081e7882390a60b2a715  walk_s940.py
