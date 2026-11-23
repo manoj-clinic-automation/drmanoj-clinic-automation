@@ -1,0 +1,11 @@
+4599801fafc1bc83791b065a7a57f3f9  KIT_ID.txt
+5ac1d32bfcb44035b4fe00313fa54384  README.md
+3f51c19d588370bc528a399286828c58  TO_PINS.md5
+e6918e24a5dfa261b62a09d40380e52c  install_S938_OOS_TAP_UNDO.sh
+8ed134c6076d913ce75a5f563a30955f  undo_s938.sh
+94b496db3759cd8b3057472a47b89802  walk_s938.py
+ef1a9793ffcfbe9b1bc1339d6bd4d521  s938_fix.py
+5791bcc1fec299954ecb2baa9974aecd  make_s938.py
+34c86e6281b5fc5c3dbd7c5974f482ff  order_s778.py
+0ee59a55b1bbaf8566e648ad8e262c35  order_flow.py
+e98e5ed08f861ff3e92ea7fd815cba0f  porders_s454.py
