@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S506 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the recount rule and one bill per sitting live; TRAMATEE repaired; the ten counts to bill 4938 next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S508 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, evening — the Sanjeevni sections refreshed here (WhatsApp all fixed; the order sheet one tap away; an Out-of-stock tap taken back; the purchase order flow next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S506 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the recount rule and one bill per sitting live; TRAMATEE repaired; the ten counts to bill 4938 next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S498 close** (the parent, Opus, full EOS), 23-Nov-2026, midday — the parent's sections refreshed here (THE SWITCH done; app calls counted; three Free X-ray taps; the pause an ask); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S505 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, midday — the Sanjeevni sections refreshed here (Count now / Next list on the Stock check; Darpan's counts placed to the last bill; TRAMATEE's false loss and order line the first fix next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S504 close** (the Sanjeevni chat, Fable, full EOS), 23-Nov-2026, early morning — the Sanjeevni sections refreshed here (the stock of record: one stock figure every page reads; the Stock check's phantom looks gone; the rows say their cause); the other projects' sections as their closes left them.
@@ -1409,26 +1410,32 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S506 close (23-Nov, 14:4x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S508 close (23-Nov, 18:5x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-2. **Your Stock check page** — a count held for a recount says so in its note; nothing for you to do:
+2. **The new order flow — the four suggested extras:** yes or no to each (late message, reminders, 20:00 summary, wrong bill) — on the mock-up:
 ```
-https://followup.dr-manoj.in/finance/stockcheck/
+https://claude.ai/artifact/4zjaEK7xSi91y8e9kGVjWG
 ```
 3. **Kit 2 waits for you** — after Darpan's counts, a look at the Stock check together (your word).
-4. **Ram Singh:** the Stock Register report in Shavez's Marg login; then Shavez's switch on (the Marg Stock Register page).
+4. **Ram Singh:** the Stock Register report in Shavez's Marg login; then Shavez's switch on.
 5. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S506 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S508 close
 
-1. **Tuesday morning** (session 508): TYRO BR judged to bill 4938; this morning's ten counts placed to bill 4938 after a check from the day's sale report; TRAMATEE's next order line read.
-2. **Kit 2** — every other reader on the stock of record, after the joint look.
-3. The stock plan v2: count names through Marg's renames; the short-supply line on the dealer's next order; the remaining Needs-you panels.
+1. **The purchase order flow** (session 509): Darpan's old-line step and one list everywhere; WhatsApp all locked until his final; the sent record per dealer; the messages; your four-step view.
+2. TYRO BR and the ten counts of 23-11 placed to bill 4938 (from the S506 close).
+3. **Kit 2** — every other reader on the stock of record, after the joint look.
 4. PARKED by your word: the AutoHotkey runner; the order-list kit.
+
+## ✅ DONE AT THE S508 CLOSE — 23-Nov-2026, evening (the Sanjeevni project)
+
+- **S937** (17:42): WhatsApp all fixed for dealer names with "&"; "Today's order sheet — Print · WhatsApp" on your Purchase orders page.
+- **S938** (18:23): an accidental Out-of-stock tap taken back — reception's Undo, your "Tapped by mistake — put back"; Alisha's ten taps put back.
+- The purchase order flow mock-up v1 — your OK.
 
 ## ✅ DONE AT THE S506 CLOSE — 23-Nov-2026, afternoon (the Sanjeevni project)
 
