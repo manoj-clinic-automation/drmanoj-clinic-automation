@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#  stock_record.py  ·  v1.2  ·  kit S933_STOCK_OF_RECORD  ·  Session 504 (Sanjeevni)  ·  22-Nov-2026
+#  stock_record.py  ·  v1.3  ·  kit S933_STOCK_OF_RECORD  ·  Session 504 (Sanjeevni)  ·  22-Nov-2026
 #
 #  THE STOCK OF RECORD -- one figure per item, written once, read everywhere (the owner's word, 22-Nov 19:28-19:33 IST: "a single truth
 #  for stocks needs to populate system data"; "everywhere our system should read the stock from this place only").
@@ -38,7 +38,7 @@ import sqlite3
 import sys
 import time
 
-VERSION = "1.2"                                             # v1.2 (21:32 IST, the owner's challenge on TYRO BR / TRAMATEE): a bill with no first-seen day placed by the residual; a pre-window bill placed by the surplus; a fresh count that misses a bill of the day before named; an old base marked an estimate; v1.1 (the cold review + the first live read): the window residual against the previous print, vouchers, RETURN sign, surplus test, below-zero and zero-stock rows, approx = family only
+VERSION = "1.3"                                             # v1.3: a pre-window bill first seen BEFORE the print day can still be what the previous print lacked -- the surplus test takes it too (TRAMATEE: Mannat 502); v1.2 (21:32 IST, the owner's challenge on TYRO BR / TRAMATEE): a bill with no first-seen day placed by the residual; a pre-window bill placed by the surplus; a fresh count that misses a bill of the day before named; an old base marked an estimate; v1.1 (the cold review + the first live read): the window residual against the previous print, vouchers, RETURN sign, surplus test, below-zero and zero-stock rows, approx = family only
 KIT = "S933_STOCK_OF_RECORD"
 HERE = os.path.dirname(os.path.abspath(__file__))
 IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
@@ -246,7 +246,7 @@ def _late_bills(sp, k, cap, first_seen, resid, prev_end=""):
         if any(not c["in_window"] for c in drop):
             rem -= sum(c["units"] for c in drop if not c["in_window"])
     # a pre-window bill first seen on the print day (or with no first-seen day): the raw surplus names it as taken in by this print -- inside, nothing to add
-    pre = [c for c in cands if c["how"] in ("same_day", "unknown") and not c["in_window"]]
+    pre = [c for c in cands if c["how"] in ("same_day", "unknown", "before") and not c["in_window"]]   # 'before' too: keyed after the PREVIOUS print, exported before this one
     held = _drop(pre, float(resid or 0) - sum(c["units"] for c in [x for x in cands if x["how"] == "after_but_inside" and not x["in_window"]]))
     for c in held:
         c["how"] = "inside_by_surplus"

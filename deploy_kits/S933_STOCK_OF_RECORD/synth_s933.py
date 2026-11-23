@@ -68,7 +68,7 @@ def make_spine(fin, path):
     items = [("W933 ALFA 10", 300.0, 205.0), ("W933 BETA 10", 100.0, 40.0), ("W933 GAMA 10", 80.0, 60.0), ("W933 DELTA 10", 25.0, 25.0),
              ("W933 EPS 10", 10.0, 10.0), ("W933 ZETA 10", 100.0, 100.0), ("W933 KAPPA 10", 50.0, 150.0), ("W933 PLAIN 10", 70.0, 70.0),
              ("W933 RET 10", 100.0, 90.0), ("W933 NEG 10", 70.0, 40.0), ("W933 SUR 10", 20.0, 70.0), ("W933 OLD 10", 10.0, 10.0),
-             ("W933 UNK 10", 30.0, 90.0), ("W933 FRESH 10", 50.0, 90.0), ("W933 STALE 10", 100.0, 100.0)]
+             ("W933 UNK 10", 30.0, 90.0), ("W933 FRESH 10", 50.0, 90.0), ("W933 STALE 10", 100.0, 100.0), ("W933 TRAM 10", 60.0, 100.0)]
     sp.execute("INSERT INTO sp_item VALUES (?,?,?,?,?,?)", ("W933 ZERO 10", "W933 ZERO 10", "1*10", "strip", "2026-09-01", "2026-11-10"))   # at zero in Marg: printed in no closing
     for name, sat, sun in items:
         k = name[:20]
@@ -95,6 +95,9 @@ def make_spine(fin, path):
     # FRESH: opening 50; bill K257 of Fri +40 (first seen Sat, inside both the window and Sun's print 90); Darpan counted 50 on Sat 10:30 -- the carton not counted?
     sp.execute(M, ("W933 FRESH 10", "2026-11-01", "OPENING", 50.0, "OPEN"))
     sp.execute(M, ("W933 FRESH 10", "2026-11-20", "PURCHASE", 40.0, "K257"))
+    # TRAM: opening 60; bill K258 of 18-11 +40 (before the previous print's day), first seen Sat (before Sun's print day): Sat's print lacked it (60), Sun's has it (100) -- inside, no flag
+    sp.execute(M, ("W933 TRAM 10", "2026-11-01", "OPENING", 60.0, "OPEN"))
+    sp.execute(M, ("W933 TRAM 10", "2026-11-18", "PURCHASE", 40.0, "K258"))
     # STALE: Marg 100 both prints, counted 70 on 01-10 (old base): the shelf is an estimate
     sp.execute(M, ("W933 STALE 10", "2026-11-01", "OPENING", 100.0, "OPEN"))
     # OLD: opening 10; bill K255 of 18-11 +40 (OLDER than the previous print's day) first seen 23-11, in neither print: certain, pre-window -> added
@@ -124,7 +127,7 @@ def make_spine(fin, path):
     sp.execute(M, ("W933 SUR 10", "2026-11-20", "PURCHASE", 50.0, "K254"))
     PB = "INSERT INTO sp_purchase_bill VALUES (?,?,?,?,?,?,?)"
     PL = "INSERT INTO sp_purchase_line VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
-    for bill, day, name, units, direction in (("K251", "2026-11-20", "W933 BETA 10", 300.0, "PURCHASE"), ("K252", "2026-11-20", "W933 GAMA 10", 120.0, "PURCHASE"), ("K255", "2026-11-18", "W933 OLD 10", 40.0, "PURCHASE"), ("K256", "2026-11-20", "W933 UNK 10", 60.0, "PURCHASE"), ("K257", "2026-11-20", "W933 FRESH 10", 40.0, "PURCHASE"),
+    for bill, day, name, units, direction in (("K251", "2026-11-20", "W933 BETA 10", 300.0, "PURCHASE"), ("K252", "2026-11-20", "W933 GAMA 10", 120.0, "PURCHASE"), ("K255", "2026-11-18", "W933 OLD 10", 40.0, "PURCHASE"), ("K256", "2026-11-20", "W933 UNK 10", 60.0, "PURCHASE"), ("K257", "2026-11-20", "W933 FRESH 10", 40.0, "PURCHASE"), ("K258", "2026-11-18", "W933 TRAM 10", 40.0, "PURCHASE"),
                                               ("K253", "2026-11-20", "W933 KAPPA-10", 100.0, "PURCHASE"), ("R1", "2026-11-20", "W933 RET 10", 20.0, "RETURN"),
                                               ("K254", "2026-11-20", "W933 SUR 10", 50.0, "PURCHASE")):
         sp.execute(PB, ("W933 PHARMA", K, bill, day, int(units * 1000), direction, "W933PB"))
@@ -205,6 +208,7 @@ def run(fin, copy, control, scratch):
     con.execute(B, (902, "W933 PHARMA", "W933 PHARMA", "K252", "2026-11-20", "2026-11", 120000, "2026-11-23"))
     con.execute(B, (906, "W933 PHARMA", "W933 PHARMA", "K255", "2026-11-18", "2026-11", 40000, "2026-11-23"))
     con.execute(B, (907, "W933 PHARMA", "W933 PHARMA", "K257", "2026-11-20", "2026-11", 40000, SAT))      # K256 has NO row: first seen unknown
+    con.execute(B, (908, "W933 PHARMA", "W933 PHARMA", "K258", "2026-11-18", "2026-11", 40000, SAT))
     con.execute(B, (903, "W933 PHARMA", "W933 PHARMA", "K253", "2026-11-20", "2026-11", 100000, SAT))
     con.execute(B, (904, "W933 PHARMA", "W933 PHARMA", "R1", "2026-11-20", "2026-11", 20000, SUN))
     con.execute(B, (905, "W933 PHARMA", "W933 PHARMA", "K254", "2026-11-20", "2026-11", 50000, "2026-11-23"))
@@ -238,7 +242,7 @@ def run(fin, copy, control, scratch):
     pv = SR.previous(sp, cap, SF) if hasattr(SR, "previous") else None   # v1.0 (the control) has no previous(): red, not a crash
     check("R1c previous(): Sat's print (the end of 19-11) is the one the newest is compared with", bool(pv) and pv["md5"] == CAP_SAT and pv["end_day"] == "2026-11-19", pv)
     r = SR.build(con, sp, log=say)
-    check("R2 build() writes the record: ok, 16 rows (15 printed + ZERO, counted but at zero in Marg), no item skipped", r.get("ok") and r.get("n") == 16 and r.get("errors") == 0, r)
+    check("R2 build() writes the record: ok, 17 rows (16 printed + ZERO, counted but at zero in Marg), no item skipped", r.get("ok") and r.get("n") == 17 and r.get("errors") == 0, r)
     rows, M = SR.rows(con, sp, "never")
     R = {d["item"]: d for d in rows}
     say("INFO rows: " + "; ".join("%s m=%s s=%s w=%s g=%s %s" % (k[5:], d["marg_units"], d["shelf_units"], d["waiting_units"], d["gap_units"], d["state"]) for k, d in sorted(R.items())))
@@ -261,6 +265,8 @@ def run(fin, copy, control, scratch):
         check("R27 FRESH: Darpan's fresh count (50) below Marg (90): the row names bill K257 of the day before and asks whether it was on the shelf", Fr.get("gap_units") == -40 and "K257" in (Fr.get("words") or "") and "count again" in (Fr.get("words") or "") and "fresh_vs_bill" in (Fr.get("marg_flag") or ""), Fr)
     else:
         check("R27 FRESH (information: the fixture's count is %d days old today, so the fresh-count words do not apply): gap -40, state look" % age, Fr.get("gap_units") == -40 and Fr.get("state") == "look", Fr)
+    Tm = R.get("W933 TRAM 10") or {}
+    check("R29 TRAM: a bill older than the previous print, first seen before this print day, lacked by the previous print and held by this one: the surplus names it -> Marg 100, no flag, no words", Tm.get("marg_units") == 100 and not Tm.get("marg_flag") and not Tm.get("words"), Tm)
     Stl = R.get("W933 STALE 10") or {}
     check("R28 STALE: a count of 01-10 carried forward: flagged old_base, the words call the shelf an estimate and say count again; gap -30 still shown", "old_base" in (Stl.get("marg_flag") or "") and "estimate" in (Stl.get("words") or "") and Stl.get("gap_units") == -30, Stl)
     D = R.get("W933 DELTA 10") or {}
@@ -277,7 +283,7 @@ def run(fin, copy, control, scratch):
     Pl = R.get("W933 PLAIN 10") or {}
     PW = Pl.get("waiting") or []
     check("R10 PLAIN: no count -> no shelf figure (state no_shelf), Marg 70; its untied Sat tap waits as tap_no_scan (30)", Pl.get("state") == "no_shelf" and Pl.get("marg_units") == 70 and Pl.get("shelf_units") is None and Pl.get("waiting_units") == 30 and PW and PW[0].get("state") == "tap_no_scan", Pl)
-    check("R11 the meta names the closing (as on 22-11, the end of 21-11, 'morning'), the reaches and the build", M.get("cap_as_on") == SUN and M.get("cap_end_day") == SAT and M.get("cap_kind") == "morning" and M.get("sale_to") == SAT and M.get("n_rows") == "16" and bool(M.get("built_at")), M)
+    check("R11 the meta names the closing (as on 22-11, the end of 21-11, 'morning'), the reaches and the build", M.get("cap_as_on") == SUN and M.get("cap_end_day") == SAT and M.get("cap_kind") == "morning" and M.get("sale_to") == SAT and M.get("n_rows") == "17" and bool(M.get("built_at")), M)
     Rt = R.get("W933 RET 10") or {}
     check("R20 RET: a purchase RETURN keyed after the print (first seen on the print day) is SUBTRACTED: Marg 90 - 20 = 70 = shelf 70 (100 - 10 - 20), gap 0", Rt.get("marg_units") == 70 and Rt.get("marg_late") == -20 and Rt.get("shelf_units") == 70 and Rt.get("gap_units") == 0, Rt)
     Ng = R.get("W933 NEG 10") or {}
@@ -296,8 +302,8 @@ def run(fin, copy, control, scratch):
     rec = SC.record(con)
     rr = {x["item"]: x for x in rec.get("rows", [])}
     T = rec.get("totals") or {}
-    check("R13 stock_check.record() reads the record: 16 rows, look 4 (NEG, ZERO, FRESH, STALE; the consumable and the behind row are not 'look'), waiting 2, no_shelf 3 (PLAIN, SUR, UNK), behind 1, consumable 1, late 4 (BETA, GAMA, RET, OLD); the page did not rebuild (rebuilding False: the record is fresh)",
-          rec.get("ok") and len(rr) == 16 and T.get("look") == 4 and T.get("arrived") == 2 and T.get("noshelf") == 3 and T.get("behind") == 1 and T.get("consumable") == 1 and T.get("late") == 4 and rec.get("record", {}).get("n_rows") == "16" and rec.get("record", {}).get("rebuilding") is False, (T, rec.get("reason"), rec.get("record")))
+    check("R13 stock_check.record() reads the record: 17 rows, look 4 (NEG, ZERO, FRESH, STALE; the consumable and the behind row are not 'look'), waiting 2, no_shelf 4 (PLAIN, SUR, UNK, TRAM), behind 1, consumable 1, late 4 (BETA, GAMA, RET, OLD); the page did not rebuild (rebuilding False: the record is fresh)",
+          rec.get("ok") and len(rr) == 17 and T.get("look") == 4 and T.get("arrived") == 2 and T.get("noshelf") == 4 and T.get("behind") == 1 and T.get("consumable") == 1 and T.get("late") == 4 and rec.get("record", {}).get("n_rows") == "17" and rec.get("record", {}).get("rebuilding") is False, (T, rec.get("reason"), rec.get("record")))
     check("R13e the count-only list no longer carries ZERO (it is a row now)", not any(c["item"] == "W933 ZERO 10" for c in rec.get("count_only") or []), rec.get("count_only"))
     zb = rr.get("W933 ZETA 10") or {}
     check("R13b the page's ZETA row: Marg 10:0, shelf 10:0, waiting +20:0, one line with the bill's word and the short in bold (short<0)", zb.get("marg_t") == "10:0" and zb.get("core_t") == "10:0" and zb.get("arrived_t") == "+20:0" and zb.get("lines") and zb["lines"][0].get("short") == -50 and "short" in zb["lines"][0].get("word", ""), zb)
