@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S504 close** (the Sanjeevni chat, Fable, full EOS), 23-Nov-2026, early morning — the Sanjeevni sections refreshed here (the stock of record: one stock figure every page reads; the Stock check's phantom looks gone; the rows say their cause); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S505 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, midday — the Sanjeevni sections refreshed here (Count now / Next list on the Stock check; Darpan's counts placed to the last bill; TRAMATEE's false loss and order line the first fix next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S504 close** (the Sanjeevni chat, Fable, full EOS), 23-Nov-2026, early morning — the Sanjeevni sections refreshed here (the stock of record: one stock figure every page reads; the Stock check's phantom looks gone; the rows say their cause); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S503 close** (the Sanjeevni chat, Fable, full EOS), 22-Nov-2026, evening — the Sanjeevni sections refreshed here (the one arrivals rule bill over tap; the Stock check page; orthotic order lines under Marg's current name); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S502 close** (the Sanjeevni chat, full EOS), 22-Nov-2026, midday — the Sanjeevni sections refreshed here (the shortage / substitute flow with the Marg-identity check; his Hub's Needs-you workable inline); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S501 close** (the Sanjeevni chat, full EOS), 22-Nov-2026, morning — the Sanjeevni sections refreshed here (the stock pages read against each other; his tile to the purchase flow; the old purchase pages retired); the other projects' sections as their closes left them.
@@ -1394,28 +1395,34 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S504 close (23-Nov, 07:3x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S505 close (23-Nov, 11:5x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-2. **One tap — "Yes — same medicine" on VFER 500** (Marg renamed it V FER 500), on the flow page or in your Hub's Needs-you:
-```
-https://followup.dr-manoj.in/finance/porders/flow
-```
-3. **Your Stock check page** now reads the one stock record (Marg's newest report + the bills Amir keyed after it + the sales since; the shelf; the deliveries waiting). Monday: Darpan counts TYRO BR — his line reaches your Needs-you; TRAMATEE P (Mannat's 40 strips of Friday) is the other row to settle by a count:
+2. **Your Stock check page** — Count now / Next list on every row; your open asks with Withdraw. TRAMATEE P's false loss and today's order line for it are known and are the first fix next session — nothing for you to do:
 ```
 https://followup.dr-manoj.in/finance/stockcheck/
 ```
+3. **Kit 2 waits for you** — after Darpan's counts, a look at the Stock check together (your word).
 4. **Ram Singh:** the Stock Register report in Shavez's Marg login; then Shavez's switch on (the Marg Stock Register page).
 5. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S504 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S505 close
 
-1. **Kit 2 — every other reader on the stock of record** (session 505, after Monday's reports and Darpan's count have run through it): Darpan's count judgments, the Hub's count lines, the Expiry watch, the ordering engine's stock position, the Loss desk; the ledger's body; the two-equal-bills wording; the retired feeds off.
-2. The stock plan v2: count names through Marg's renames; Darpan's "is the delivery in your count" question; the short-supply line on the dealer's next order; the remaining Needs-you panels.
-3. PARKED by your word: the AutoHotkey runner; the order-list kit.
+1. **The recount rule** (session 506): a count short by about a fresh delivery is held as "recount" — no shelf, no loss, no order — and goes back to Darpan as a Count now; TRAMATEE's false loss voided.
+2. **One bill per sitting** on Darpan's Abhi ginti card; today's ten counts placed to bill 4938 after a check.
+3. **Kit 2** — every other reader on the stock of record, after the joint look.
+4. The stock plan v2: count names through Marg's renames; the short-supply line on the dealer's next order; the remaining Needs-you panels.
+5. PARKED by your word: the AutoHotkey runner; the order-list kit.
+
+## ✅ DONE AT THE S505 CLOSE — 23-Nov-2026, morning (the Sanjeevni project)
+
+- **S934_COUNT_NOW** (09:11): Count now / Next list on the Stock check; Darpan's Abhi ginti card with the last bill; a bill-placed count judged to the bill once the day's sale report is in; your open asks with Withdraw; your twelve old asks cleared.
+- Monday's Marg reports watched through the stock of record — read right ("the end of 22-11"), about twenty minutes end to end.
+- Darpan's first eleven Count-now counts read; TRAMATEE's missed carton and its effect on the order list found.
+- The cold kit of the week (`COLD_KIT_S505open_2026-11-23.zip`) on the SSD.
 
 ## ✅ DONE AT THE S504 CLOSE — 22 → 23-Nov-2026, overnight (the Sanjeevni project)
 
