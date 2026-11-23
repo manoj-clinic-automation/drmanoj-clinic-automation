@@ -1,11 +1,17 @@
-# S933_STOCK_OF_RECORD — the one stock record every page reads (Session 504, the Sanjeevni chat, 22-Nov-2026)
+# S933_STOCK_OF_RECORD — the one stock record every page reads (Session 504, the Sanjeevni chat, 22 → 23-Nov-2026) — v1.3
 
 **The owner's word (19:28–19:33 IST):** "a single truth for stocks needs to populate system data"; "everywhere our system should read the stock from this place only." Before this kit three readers (the Stock check page, the item ledger, the count judgments) each computed stock their own way and disagreed: the Stock check showed 53 items "needing a look", about 13 of them phantoms worth the quantity of a bill Amir keyed in Marg after Shavez's morning print (S504_STOCKCHECK_FINDINGS_v1).
+
+## The versions (one kit number; the installer's FROM pins move to the previous version's TO; `undo_s933.sh` returns to the pre-S933 files from the first install's backups)
+- **v1.0 (21:11 IST 22-Nov):** the record, the page and the ledger's head on it. First live read: 53 → 39 looks, 0 waiting — but the residual measured from the opening flagged 30+ rows (F-1600).
+- **v1.1 (21:29):** the cold review's fixes (a RETURN's sign; the crontab read back whole before any rewrite; the first build after the restart; the detached rebuild from a page read; a below-zero count judged at 0; an item at zero in Marg with a count; approx = family only) + the residual against the PREVIOUS print carried through the window, Amir's filed vouchers in.
+- **v1.2 (23:21):** the owner's challenge (TYRO BR / TRAMATEE): a bill with no first-seen day placed by the residual; a pre-window bill placed by the surplus; a fresh count below Marg names the bill of the day before ("was that delivery on the shelf when he counted?"); a count older than 21 days is "an estimate — count again"; the below-zero note once.
+- **v1.3 (07:0x IST 23-Nov):** a pre-window bill first seen BEFORE the print day can be what the previous print lacked — the surplus test takes it too (TRAMATEE's "moved +40 with no bill" gone).
 
 ## What is in the kit
 | file | from | what |
 |---|---|---|
-| `stock_record.py` | NEW | THE STOCK OF RECORD: `stock_of_record` (one row per Marg item) + `stock_record_meta`, built by `build()`, read by `rows()` / `row()`; `--build` for the cron, `--check` to read its state |
+| `stock_record.py` | NEW (v1.3) | THE STOCK OF RECORD: `stock_of_record` (one row per Marg item) + `stock_record_meta`, built by `build()`, read by `rows()` / `row()`; `--build` for the cron, `--check` to read its state |
 | `stock_figure.py` | 8130315e → TO | `_s928_order_match`: the `arrived=1` gate dropped — the scan tie is the fact (a tap before the scan left `arrived=0` on 41 of 99 live ties; S928's bill-over-tap rule was silent on all of them) |
 | `stock_check.py` | 42118289 → TO | `record()` reads the record only; `_lines_for` kept, unlinked (one release) |
 | `stock_check.html` | ae61a18c → TO | the words on a row (a bill keyed after the print, Marg moved with no record, a sale before the print), two sections (Marg behind a bill; clinic consumables), the closing's day and the record's build time |
@@ -20,7 +26,7 @@
 - **Freshness:** rebuilt whole, in one transaction, when a fingerprint of its inputs moves (the spine's build stamp, the newest tap, tie, scan link, count point, Marg bill, the settings) or after 6 h; a page read rebuilds it when stale and the connection is free; the cron keeps it fresh between reads. The ledger never rebuilds inside its request (`refresh="never"`).
 
 ## Proofs
-- `synth_s933.py` — made-up spine with two closing reports (Sat as on Fri; Sun same-day morning), bills first seen on / after the print day, scans with `arrived=0` ties, counts, a consumable: 25 checks (R0–R19). The control on the old files: 17 red.
+- `synth_s933.py` — made-up spine with two closing reports (Sat as on Thu — the previous print; Sun same-day morning), bills first seen before / on / after the print day and with none, a RETURN keyed late, scans with `arrived=0` ties, a linked scan, counts (a fresh one below Marg, an old one, one below zero), an item at zero in Marg, a consumable: 37 checks (R0–R29). The control on the pre-S933 files: 17 red; on each earlier version: 2 red.
 - `liveshape_s933.py` — the record built on COPIES of the live databases beside the old page's figures; prints MEG QCS, PATOPAN DSR, FERONES HD, TYRO BR, FLUXIC P, PRETOL 8 old → new; gates: ≥ 200 rows, under 150 s, the new page's "need a look" not above the old's.
 - The installer re-runs walk_s927, synth_s928 and walk_s930 on the new files (S837 not-worse rule); two walk_s930 lines are superseded (a delivery waiting for an UNCOUNTED item is now shown) and named in the script.
 - Rehearsed on a made-up server: install DONE, second run ALREADY INSTALLED, undo back to the FROM pins, a forced red at [4/6] restored everything (files, cron).
