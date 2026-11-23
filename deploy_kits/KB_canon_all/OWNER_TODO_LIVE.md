@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S498 close** (the parent, Opus, full EOS), 23-Nov-2026, midday — the parent's sections refreshed here (THE SWITCH done; app calls counted; three Free X-ray taps; the pause an ask); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S506 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the recount rule and one bill per sitting live; TRAMATEE repaired; the ten counts to bill 4938 next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S498 close** (the parent, Opus, full EOS), 23-Nov-2026, midday — the parent's sections refreshed here (THE SWITCH done; app calls counted; three Free X-ray taps; the pause an ask); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S505 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, midday — the Sanjeevni sections refreshed here (Count now / Next list on the Stock check; Darpan's counts placed to the last bill; TRAMATEE's false loss and order line the first fix next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S504 close** (the Sanjeevni chat, Fable, full EOS), 23-Nov-2026, early morning — the Sanjeevni sections refreshed here (the stock of record: one stock figure every page reads; the Stock check's phantom looks gone; the rows say their cause); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S503 close** (the Sanjeevni chat, Fable, full EOS), 22-Nov-2026, evening — the Sanjeevni sections refreshed here (the one arrivals rule bill over tap; the Stock check page; orthotic order lines under Marg's current name); the other projects' sections as their closes left them.
@@ -1408,13 +1409,13 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S505 close (23-Nov, 11:5x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S506 close (23-Nov, 14:4x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-2. **Your Stock check page** — Count now / Next list on every row; your open asks with Withdraw. TRAMATEE P's false loss and today's order line for it are known and are the first fix next session — nothing for you to do:
+2. **Your Stock check page** — a count held for a recount says so in its note; nothing for you to do:
 ```
 https://followup.dr-manoj.in/finance/stockcheck/
 ```
@@ -1422,13 +1423,18 @@ https://followup.dr-manoj.in/finance/stockcheck/
 4. **Ram Singh:** the Stock Register report in Shavez's Marg login; then Shavez's switch on (the Marg Stock Register page).
 5. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S505 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S506 close
 
-1. **The recount rule** (session 506): a count short by about a fresh delivery is held as "recount" — no shelf, no loss, no order — and goes back to Darpan as a Count now; TRAMATEE's false loss voided.
-2. **One bill per sitting** on Darpan's Abhi ginti card; today's ten counts placed to bill 4938 after a check.
-3. **Kit 2** — every other reader on the stock of record, after the joint look.
-4. The stock plan v2: count names through Marg's renames; the short-supply line on the dealer's next order; the remaining Needs-you panels.
-5. PARKED by your word: the AutoHotkey runner; the order-list kit.
+1. **Tuesday morning** (session 508): TYRO BR judged to bill 4938; this morning's ten counts placed to bill 4938 after a check from the day's sale report; TRAMATEE's next order line read.
+2. **Kit 2** — every other reader on the stock of record, after the joint look.
+3. The stock plan v2: count names through Marg's renames; the short-supply line on the dealer's next order; the remaining Needs-you panels.
+4. PARKED by your word: the AutoHotkey runner; the order-list kit.
+
+## ✅ DONE AT THE S506 CLOSE — 23-Nov-2026, afternoon (the Sanjeevni project)
+
+- **S936_RECOUNT_SITTING** (14:32): a count short by about a fresh delivery held as a recount — never the shelf, a loss or an order line — and sent back to Darpan by itself; one bill per sitting on his Abhi ginti card (your "Wording is fine").
+- **TRAMATEE P repaired:** Saturday's missed carton marked; the false loss line and its trace closed; today's count reads −2:12 against Marg.
+- Darpan's screen address corrected (no trailing slash).
 
 ## ✅ DONE AT THE S505 CLOSE — 23-Nov-2026, morning (the Sanjeevni project)
 
