@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S505 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, midday — the Sanjeevni sections refreshed here (Count now / Next list on the Stock check; Darpan's counts placed to the last bill; TRAMATEE's false loss and order line the first fix next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S498 close** (the parent, Opus, full EOS), 23-Nov-2026, midday — the parent's sections refreshed here (THE SWITCH done; app calls counted; three Free X-ray taps; the pause an ask); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S505 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, midday — the Sanjeevni sections refreshed here (Count now / Next list on the Stock check; Darpan's counts placed to the last bill; TRAMATEE's false loss and order line the first fix next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S504 close** (the Sanjeevni chat, Fable, full EOS), 23-Nov-2026, early morning — the Sanjeevni sections refreshed here (the stock of record: one stock figure every page reads; the Stock check's phantom looks gone; the rows say their cause); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S503 close** (the Sanjeevni chat, Fable, full EOS), 22-Nov-2026, evening — the Sanjeevni sections refreshed here (the one arrivals rule bill over tap; the Stock check page; orthotic order lines under Marg's current name); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S502 close** (the Sanjeevni chat, full EOS), 22-Nov-2026, midday — the Sanjeevni sections refreshed here (the shortage / substitute flow with the Marg-identity check; his Hub's Needs-you workable inline); the other projects' sections as their closes left them.
@@ -516,7 +517,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S496 close (21-Nov, 11:3x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S498 close (23-Nov, 12:xx)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -526,21 +527,25 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK — this morning's records** (nothing follows it on the server; every kit of the morning is already installed):
+**1 · ONE DOUBLE-CLICK — this session's records** (nothing follows it on the server; every kit is already installed):
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**1a · THE FOLLOW-UP TRACKER'S MOVE TO THE SERVER — THE SWITCH IS TONIGHT, SATURDAY 21-NOV, AFTER YOUR PC'S 21:xx RUN.** Open a fresh chat in this project in the evening (session 498). After your PC's run I pack the evening's ledgers to the server and set your PC's spare flag myself; **then one paste of yours** on the server (the seed taken again, then `OFF` removed). Undo at any point: the flag off your PC and `touch /root/followup_tracker/OFF`.
+**1a · THE FOLLOW-UP TRACKER IS ON THE SERVER — DONE 10:43 23-NOV, NOTHING TO DO.** The server makes the call list now; your PC is a spare and sends nothing of its own list. I check the first evening run tonight at 22:00 and compare the server's list with the PC's tomorrow at 08:30; you hear only if something differs. Undo, if ever needed: tell me.
 
-**1a0 · DOCTERZ REPORTS — A MESSAGE EACH TIME THE SERVER TAKES ONE (live 08:53; you confirmed 09:30).** It names the report, its day, and the PC it came from, and says how far the clinical data on the server reaches — export the next clinical report from the day after. Your PC (manojz) now also sends the follow-up logs and one-day consultation reports you export there. A report covering several days goes on the Docterz reports page:
+**1a0 · ALISHA'S CALLS FROM HER MYOPERATOR APP NOW COUNT — NOTHING TO DO.** This morning's console said "0 of 9 called"; it now says 8 of 9. Unanswered calls from the app show as "staff" — if you want her name on them too, say so.
+
+**1a00 · THREE SEPTEMBER FREE X-RAYS — one tap each (you or Shavez):** on *Check karein*, the parked cards of kamla devi, RAGHAV3 and SUBODH have a **Free X-ray** button. Siddhi's 14-Nov slip is put right (1546 is hers again).
+
+**1a01 · STAFF DRESS AND I-CARD — TELL RECEPTION AND SHAVEZ (once):** reception can only *ask* for a pause now; it counts only when Shavez or you approve it on the staff list. Approving a new issue closes that item's pauses. The January 2027 set, the four mobiles and Sandip's cycle are loaded. If you want a tile of its own or a message when a pause is asked, say so.
+
+**1a02 · DOCTERZ REPORTS — a message each time the server takes one (as at 21-Nov).** A report covering several days goes on the Docterz reports page:
 
 ```
 https://followup.dr-manoj.in/finance/console/docterz-reports
 ```
-
-**1a00 · TELL SHAVEZ (once):** a slip made on paper on an older day (up to a month back) can now be entered — pick the day; the number box starts blank, type that day's number. On *Kal ke procedures*, Save now moves on to the next waiting day.
 
 **1a1 · A NEW PAGE ON YOUR CONSOLE — Docterz reports:** upload any Docterz export by hand (a consultation report of any period, a follow-up log, a clinical report, a patient list); the page says what it kept and what it already had. Nothing to do; it is there when a report is missing.
 
@@ -637,6 +642,14 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S498 CLOSE — 21 → 23-Nov-2026 (the parent, Opus)
+
+- **Siddhi's slip:** her 14-Nov X-ray slip 1546 is hers again; the slip saved over it went back to its own number. An old day's slip with a number higher than a later day's now asks once before saving.
+- **Free X-ray:** one tap on a parked X-ray card, for staff and for you.
+- **Staff dress, i-card and assets:** the January 2027 set, mobiles and the cycle loaded; the three old uniform pauses closed; a pause is an ask until Shavez or you approve it.
+- **THE SWITCH:** the Follow-up Tracker runs on the server since 10:43 23-Nov; your PC is the spare.
+- **The Call Console:** calls made from a staff member's MyOperator app now count as follow-up calls (they were missed since July).
 
 ## ✅ DONE AT THE S496 CLOSE — 21-Nov-2026 (the parent, Fable)
 

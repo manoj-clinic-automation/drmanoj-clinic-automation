@@ -1,0 +1,14 @@
+8a17dfeb3a1c7221610e749baf6840f2  KIT_ID.txt
+ebcf02db751899b194d111f375cd029a  README.md
+22a962df90df971f7146e382ae03b48a  TO_PINS.md5
+5462f5b51ec1d38307281f48c2584b19  install_S936_RECOUNT_SITTING.sh
+5322c2b377b4ff21e11a3d55cd3b2dde  liveshape_s936.py
+8eecf83b4683587e55f2878f7134d1a3  make_s936.py
+2d55fae81552a365f6f8440d7b781778  repair_s936.py
+07bca1df78b6f9d3725eda94351158d8  stock_figure.py
+c7584585faf0fc786e4f09ce606989c5  stock_watch.py
+8ba51618ff8a35c2474285367ed81026  stockmatch.html
+1f5a15bade4f6e002e61b883eadcaee0  stockmatch.py
+aed77792edc377075023b242867f1fd6  synth_s934_under_s936.py
+a09b317da4ac7bcab4c380469ec48296  synth_s936.py
+5f4a5a64ee3c5b693d1ece9c237211cf  undo_s936.sh
