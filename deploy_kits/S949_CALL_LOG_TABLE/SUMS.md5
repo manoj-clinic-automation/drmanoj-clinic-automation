@@ -1,0 +1,12 @@
+d955517d7be846d4af8b11447bced172  KIT_ID.txt
+fd1423aa118015721f8398b58c4172e1  TO_PINS.md5
+0a5ded8341126cc7213cabec64fa4572  make_s949.py
+76e0fe1ec32ee67a79d433a5a6c1eec7  walk_s949.py
+183c794a683865f951c9466d0e84938e  call_log_db.py
+d4112db97977809459c240d5f9780941  call_log_compare.py
+f5c68b240f179a8aaee7d6e730dfcd07  freshness_legs.json
+001196c351659b7dc2ec86da181f034e  install_S949_CALL_LOG_TABLE.sh
+859c598549a48447cddfb263f4527621  rehearse_s949.sh
+3ec3a6122c0dc491bd9be9154b748594  README.md
+83865d94c22d57c00661c2b1c3d20209  from/freshness.py
+abcb85653f286736e26243434df307b2  from/freshness_legs.json

@@ -314,3 +314,6 @@ _scratch/
 !deploy_kits/S946_A2_REST/freshness_legs_b.json
 # S948 (24-Nov-2026, the parent, S515): the kit's TO tile_grants.json (v48, logins and tile names only, no numbers) that its walk, make and installer ran with (in SUMS.md5). Exact path.
 !deploy_kits/S948_STAFF_CONSOLE/to/tile_grants.json
+# S949 (24-Nov-2026, the parent, S516): the legs file S946 left (FROM, the walk's control) and the TO with one leg appended (no numbers; in SUMS.md5). Exact paths.
+!deploy_kits/S949_CALL_LOG_TABLE/freshness_legs.json
+!deploy_kits/S949_CALL_LOG_TABLE/from/freshness_legs.json

@@ -1,0 +1,1 @@
+S949_CALL_LOG_TABLE  the parent, S516, 24-Nov-2026 -- roadmap S510 F1a: the call hook writes the server call log table first, the Sheet second; a nightly compare proves table = Sheet on the health page
