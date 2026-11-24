@@ -1,0 +1,2 @@
+S944_SHORT_CLIPS_SKIPPED
+the parent · S511 · 24-Nov-2026 · the transcriber stops re-trying short clips (roadmap A2, F-1633): never sent under 10 s; one skipped row after three failures

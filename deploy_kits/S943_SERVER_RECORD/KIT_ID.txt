@@ -1,0 +1,2 @@
+S943_SERVER_RECORD
+the parent · S511 · 24-Nov-2026 · the nightly server record (roadmap A1, plan L1): disk, RAM, load, processes; one health line; a freshness leg

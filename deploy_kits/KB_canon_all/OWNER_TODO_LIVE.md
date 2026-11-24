@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S507 close** (the parent, Opus, EOS-light), 24-Nov-2026, morning — the parent's sections refreshed here (the switch's first evening green; the notifications and the Call Console plan for Fable's review); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S510 close** (the parent, Fable, EOS-light), 24-Nov-2026, midday — the parent's sections refreshed here (the plan reviewed; the AI pipeline measured; the Call Console roadmap written); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S507 close** (the parent, Opus, EOS-light), 24-Nov-2026, morning — the parent's sections refreshed here (the switch's first evening green; the notifications and the Call Console plan for Fable's review); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S508 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, evening — the Sanjeevni sections refreshed here (WhatsApp all fixed; the order sheet one tap away; an Out-of-stock tap taken back; the purchase order flow next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S506 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the recount rule and one bill per sitting live; TRAMATEE repaired; the ten counts to bill 4938 next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S498 close** (the parent, Opus, full EOS), 23-Nov-2026, midday — the parent's sections refreshed here (THE SWITCH done; app calls counted; three Free X-ray taps; the pause an ask); the other projects' sections as their closes left them.
@@ -520,7 +521,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S507 close (24-Nov, 09:4x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S510 close (24-Nov, 12:xx)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -538,10 +539,10 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 
 **1a · THE FOLLOW-UP TRACKER ON THE SERVER — ITS FIRST EVENING WAS GOOD, NOTHING TO DO.** On 23-Nov the server made the 24-Nov call list at 21:05 — 120 calls on the sheet out of 352 due — exactly what your PC (now the spare) worked out at the same minute; the PC sent nothing.
 
-**1a03 · THE CALL CONSOLE FOR STAFF, THE NOTIFICATIONS AND THE RE-CALL — NOTHING TO DO NOW.** Your decisions of 23–24 Nov are in the plan; the next session starts with Fable reviewing it, then the build, one step at a time. You will be shown the staff screens before they are built. The mock-up you approved:
+**1a03 · THE CALL CONSOLE BUILD — NOTHING TO DO NOW.** The plan is reviewed and the roadmap written (24 small steps in six phases, five to six weeks). The first phase changes nothing staff see. Before each later phase you will be shown one screen, briefly. The paper, if you want it:
 
 ```
-https://claude.ai/artifact/8eCHsQg17igdtbqxaT4Rdj
+D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S510\S510_CALL_CONSOLE_ROADMAP_v1.md
 ```
 
 **1a0 · ALISHA'S CALLS FROM HER MYOPERATOR APP NOW COUNT — NOTHING TO DO.** This morning's console said "0 of 9 called"; it now says 8 of 9. Unanswered calls from the app show as "staff" — if you want her name on them too, say so.
@@ -651,6 +652,13 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S510 CLOSE — 24-Nov-2026 (the parent, Fable)
+
+- **The plan reviewed:** twelve corrections, the biggest — the AI already judges every call within a minute of hangup (99 % within 5 minutes); nothing to build there.
+- **The leftovers found:** 14 very short recordings the transcriber refuses, re-tried every night for ever; 48 July calls never judged; the 1,374 "failed" August verdicts are debris, not unjudged calls.
+- **The whole Call Console system inventoried** from the live code and the Google Apps Script project; the roadmap written — every component, every sheet, 24 kits, six phases with gates.
+- **One thing to fix early:** an old one-off script in the live folder holds 41 full patient numbers — removed in the first phase.
 
 ## ✅ DONE AT THE S507 CLOSE — 23 → 24-Nov-2026 (the parent, Opus)
 
