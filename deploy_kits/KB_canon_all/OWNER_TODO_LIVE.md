@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S511 close** (the parent, Fable, full EOS), 24-Nov-2026, afternoon — the parent's sections refreshed here (Sarvam Saaras v4; the Call Console roadmap's phase 0 live); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S512 close** (the parent, Fable, full EOS), 24-Nov-2026, afternoon — the parent's sections refreshed here (the Call Console roadmap's A2 finished); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S511 close** (the parent, Fable, full EOS), 24-Nov-2026, afternoon — the parent's sections refreshed here (Sarvam Saaras v4; the Call Console roadmap's phase 0 live); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S510 close** (the parent, Fable, EOS-light), 24-Nov-2026, midday — the parent's sections refreshed here (the plan reviewed; the AI pipeline measured; the Call Console roadmap written); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S507 close** (the parent, Opus, EOS-light), 24-Nov-2026, morning — the parent's sections refreshed here (the switch's first evening green; the notifications and the Call Console plan for Fable's review); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S508 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, evening — the Sanjeevni sections refreshed here (WhatsApp all fixed; the order sheet one tap away; an Out-of-stock tap taken back; the purchase order flow next); the other projects' sections as their closes left them.
@@ -522,7 +523,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S511 close (24-Nov, 13:2x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S512 close (24-Nov, 15:3x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -532,7 +533,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK — this session's records** (nothing follows it on the server; the four kits are already installed):
+**1 · ONE DOUBLE-CLICK — this session's records** (nothing follows it on the server; the kit is already installed):
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -540,7 +541,7 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 
 **1a · THE FOLLOW-UP TRACKER ON THE SERVER — ITS FIRST EVENING WAS GOOD, NOTHING TO DO.** On 23-Nov the server made the 24-Nov call list at 21:05 — 120 calls on the sheet out of 352 due — exactly what your PC (now the spare) worked out at the same minute; the PC sent nothing.
 
-**1a03 · THE CALL CONSOLE BUILD — PHASE 0 IS LIVE (24-Nov), NOTHING TO DO.** Your console's **System** section now shows one line a night about the server itself ("Server: disk 28% used · RAM 5.1 GB available · load 0.29 — recorded 12:53"); amber only when something needs a look. The transcriber no longer re-tries the fourteen very short recordings; the old script with 41 patient numbers has left the live code folder; the tracker's program is in the nightly backup. Before phase 1 you will be shown one screen of the staff's Call Console page, briefly. The paper, if you want it:
+**1a03 · THE CALL CONSOLE BUILD — PHASE 0 LIVE, A2 FINISHED (24-Nov), NOTHING TO DO.** Your health page gained two lines: *AI judged within 15 min* (the call pipeline says after every call whether it finished) and *call webhook watchdog* (every morning at 11:15 the server reads its own web log for refused call deliveries — the July-2026 fault that went unnoticed for three days can no longer hide). The 1,374 leftover "failed" August rows are out of the Call Audit sheet (a copy kept on the server). **One small thing when you have a minute:** the watchdog saw deliveries arriving under *two* different keys today — probably two webhook subscriptions in the MyOperator panel, or the old key still in use; I will read the panel's webhook list with you once (nothing is lost meanwhile — both keys are accepted). The paper, if you want it:
 
 ```
 D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S510\S510_CALL_CONSOLE_ROADMAP_v1.md
@@ -657,6 +658,11 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S512 CLOSE — 24-Nov-2026 (the parent, Fable)
+
+- **The Call Console roadmap's A2 finished (S946):** the server's own web log now watched every morning for refused call deliveries; the call pipeline reports itself on the health page; 1,374 debris rows removed from the Call Audit sheet after an owner-only backup; the "48 unjudged July calls" shown to be a counting artefact.
+- **The System Board** made room again (its old claims block archived and emptied).
 
 ## ✅ DONE AT THE S511 CLOSE — 24-Nov-2026 (the parent, Fable)
 
