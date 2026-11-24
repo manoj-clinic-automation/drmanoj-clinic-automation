@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S508 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, evening — the Sanjeevni sections refreshed here (WhatsApp all fixed; the order sheet one tap away; an Out-of-stock tap taken back; the purchase order flow next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S507 close** (the parent, Opus, EOS-light), 24-Nov-2026, morning — the parent's sections refreshed here (the switch's first evening green; the notifications and the Call Console plan for Fable's review); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S508 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, evening — the Sanjeevni sections refreshed here (WhatsApp all fixed; the order sheet one tap away; an Out-of-stock tap taken back; the purchase order flow next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S506 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the recount rule and one bill per sitting live; TRAMATEE repaired; the ten counts to bill 4938 next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S498 close** (the parent, Opus, full EOS), 23-Nov-2026, midday — the parent's sections refreshed here (THE SWITCH done; app calls counted; three Free X-ray taps; the pause an ask); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S505 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, midday — the Sanjeevni sections refreshed here (Count now / Next list on the Stock check; Darpan's counts placed to the last bill; TRAMATEE's false loss and order line the first fix next); the other projects' sections as their closes left them.
@@ -519,7 +520,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S498 close (23-Nov, 12:xx)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S507 close (24-Nov, 09:4x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -535,7 +536,13 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
 
-**1a · THE FOLLOW-UP TRACKER IS ON THE SERVER — DONE 10:43 23-NOV, NOTHING TO DO.** The server makes the call list now; your PC is a spare and sends nothing of its own list. I check the first evening run tonight at 22:00 and compare the server's list with the PC's tomorrow at 08:30; you hear only if something differs. Undo, if ever needed: tell me.
+**1a · THE FOLLOW-UP TRACKER ON THE SERVER — ITS FIRST EVENING WAS GOOD, NOTHING TO DO.** On 23-Nov the server made the 24-Nov call list at 21:05 — 120 calls on the sheet out of 352 due — exactly what your PC (now the spare) worked out at the same minute; the PC sent nothing.
+
+**1a03 · THE CALL CONSOLE FOR STAFF, THE NOTIFICATIONS AND THE RE-CALL — NOTHING TO DO NOW.** Your decisions of 23–24 Nov are in the plan; the next session starts with Fable reviewing it, then the build, one step at a time. You will be shown the staff screens before they are built. The mock-up you approved:
+
+```
+https://claude.ai/artifact/8eCHsQg17igdtbqxaT4Rdj
+```
 
 **1a0 · ALISHA'S CALLS FROM HER MYOPERATOR APP NOW COUNT — NOTHING TO DO.** This morning's console said "0 of 9 called"; it now says 8 of 9. Unanswered calls from the app show as "staff" — if you want her name on them too, say so.
 
@@ -644,6 +651,14 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S507 CLOSE — 23 → 24-Nov-2026 (the parent, Opus)
+
+- **The switch's first evening:** the server made the call list at 21:05 23-Nov, the same as your spare PC's; the PC sent nothing.
+- **The waiting-work notifications and the same-day re-call:** designed with you — mock-up v4 approved in shape; suggestions 1, 3, 4, 5, 6 yes, 2 no.
+- **The AI against staff:** over 354 answered follow-up calls the AI's reading predicted who came back; staff marks did not. The AI becomes the source; staff are not asked.
+- **The Call Console to replace the Callback Tracker,** its data on the server: planned.
+- **The server:** 7.9 GB memory (5 GB free), light load, 71 GB disk free — no upgrade; a nightly size record and a clean-up of old backups planned.
 
 ## ✅ DONE AT THE S498 CLOSE — 21 → 23-Nov-2026 (the parent, Opus)
 
