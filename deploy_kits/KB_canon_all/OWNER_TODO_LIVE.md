@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S510 close** (the parent, Fable, EOS-light), 24-Nov-2026, midday — the parent's sections refreshed here (the plan reviewed; the AI pipeline measured; the Call Console roadmap written); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S511 close** (the parent, Fable, full EOS), 24-Nov-2026, afternoon — the parent's sections refreshed here (Sarvam Saaras v4; the Call Console roadmap's phase 0 live); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S510 close** (the parent, Fable, EOS-light), 24-Nov-2026, midday — the parent's sections refreshed here (the plan reviewed; the AI pipeline measured; the Call Console roadmap written); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S507 close** (the parent, Opus, EOS-light), 24-Nov-2026, morning — the parent's sections refreshed here (the switch's first evening green; the notifications and the Call Console plan for Fable's review); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S508 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, evening — the Sanjeevni sections refreshed here (WhatsApp all fixed; the order sheet one tap away; an Out-of-stock tap taken back; the purchase order flow next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S506 close** (the Sanjeevni chat, full EOS), 23-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the recount rule and one bill per sitting live; TRAMATEE repaired; the ten counts to bill 4938 next); the other projects' sections as their closes left them.
@@ -521,7 +522,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S510 close (24-Nov, 12:xx)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S511 close (24-Nov, 13:2x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -531,7 +532,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK — this session's records** (nothing follows it on the server; every kit is already installed):
+**1 · ONE DOUBLE-CLICK — this session's records** (nothing follows it on the server; the four kits are already installed):
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -539,11 +540,15 @@ D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 
 **1a · THE FOLLOW-UP TRACKER ON THE SERVER — ITS FIRST EVENING WAS GOOD, NOTHING TO DO.** On 23-Nov the server made the 24-Nov call list at 21:05 — 120 calls on the sheet out of 352 due — exactly what your PC (now the spare) worked out at the same minute; the PC sent nothing.
 
-**1a03 · THE CALL CONSOLE BUILD — NOTHING TO DO NOW.** The plan is reviewed and the roadmap written (24 small steps in six phases, five to six weeks). The first phase changes nothing staff see. Before each later phase you will be shown one screen, briefly. The paper, if you want it:
+**1a03 · THE CALL CONSOLE BUILD — PHASE 0 IS LIVE (24-Nov), NOTHING TO DO.** Your console's **System** section now shows one line a night about the server itself ("Server: disk 28% used · RAM 5.1 GB available · load 0.29 — recorded 12:53"); amber only when something needs a look. The transcriber no longer re-tries the fourteen very short recordings; the old script with 41 patient numbers has left the live code folder; the tracker's program is in the nightly backup. Before phase 1 you will be shown one screen of the staff's Call Console page, briefly. The paper, if you want it:
 
 ```
 D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S510\S510_CALL_CONSOLE_ROADMAP_v1.md
 ```
+
+**1a04 · SARVAM — DONE.** Their mail was about the speech-to-text model (v3 → v4, same price): the one program that uses it now asks for v4, proven with your key first. The webhook never spoke to Sarvam — no change there. The 7-Nov "payment failed ₹2,360" was your own top-up attempt; nothing stopped.
+
+**1a05 · YOUR PC's D: DRIVE IS AT 94 % (14 GB free of 206 GB)** — yours to clear when convenient; nothing of the clinic's systems is affected.
 
 **1a0 · ALISHA'S CALLS FROM HER MYOPERATOR APP NOW COUNT — NOTHING TO DO.** This morning's console said "0 of 9 called"; it now says 8 of 9. Unanswered calls from the app show as "staff" — if you want her name on them too, say so.
 
@@ -652,6 +657,11 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S511 CLOSE — 24-Nov-2026 (the parent, Fable)
+
+- **Sarvam Saaras v4:** the one transcription program moved to the new model, proven with your key before the change; no webhook change needed.
+- **Phase 0 of the Call Console build, live:** the nightly server record and its line on your console; the transcriber's give-up rule for very short clips; the 41-number script retired out of the live code and the backup; the follow-up tracker's program in the nightly backup.
 
 ## ✅ DONE AT THE S510 CLOSE — 24-Nov-2026 (the parent, Fable)
 
