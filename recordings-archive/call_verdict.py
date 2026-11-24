@@ -336,7 +336,7 @@ def mask(num):
 # Pure helpers (everything --selftest exercises lives here, network-free)
 # ---------------------------------------------------------------------------
 def split_join_key(join_key):
-    """'9358001234_1751871234' -> ('9358001234', 1751871234). Bad -> (None, None)."""
+    """'5000001234_1751871234' -> ('5000001234', 1751871234). Bad -> (None, None)."""
     m = re.match(r"^(\d{10})_(\d{9,12})$", str(join_key or "").strip())
     if not m:
         return None, None
@@ -765,8 +765,8 @@ def selftest():
         print(f"  [{'PASS' if cond else 'FAIL'}] {name}")
 
     # 1-3: join key parsing
-    p, u = split_join_key("9358001234_1751871234")
-    check("join key parses phone", p == "9358001234")
+    p, u = split_join_key("5000001234_1751871234")
+    check("join key parses phone", p == "5000001234")
     check("join key parses unix", u == 1751871234)
     check("bad join key -> None", split_join_key("garbage") == (None, None))
 
@@ -808,20 +808,20 @@ def selftest():
     call_A = int(datetime.datetime(2026, 7, 6, 16, 0, tzinfo=IST).timestamp())
     call_A2 = int(datetime.datetime(2026, 7, 6, 16, 30, tzinfo=IST).timestamp())
     outcome_rows = [
-        {"Mobile": "919358001234", "When": "2026-07-07 10:00:00",   # next-morning batch
+        {"Mobile": "915000001234", "When": "2026-07-07 10:00:00",   # next-morning batch
          "Outcome": "coming", "Handled By": "Shivani",
          "Patient": "Test A", "Clinic ID": "101"},
-        {"Mobile": "9358001234", "When": "2026-07-07 10:05:00",     # 2nd claim, same number
+        {"Mobile": "5000001234", "When": "2026-07-07 10:05:00",     # 2nd claim, same number
          "Outcome": "problem", "Handled By": "Alisha",
          "Patient": "Test A", "Clinic ID": "101"},
-        {"Mobile": "9000000000", "When": "2026-07-06 16:35:00",     # same-evening filing
+        {"Mobile": "5000000000", "When": "2026-07-06 16:35:00",     # same-evening filing
          "Outcome": "dikha_chuke", "Handled By": "Manoj B",
          "Patient": "Test B", "Clinic ID": "202"},
     ]
     idx = build_claim_index(outcome_rows)
-    jkA, jkA2 = "9358001234_%d" % call_A, "9358001234_%d" % call_A2
-    calls = [("9358001234", call_A, jkA),
-             ("9358001234", call_A2, jkA2),
+    jkA, jkA2 = "5000001234_%d" % call_A, "5000001234_%d" % call_A2
+    calls = [("5000001234", call_A, jkA),
+             ("5000001234", call_A2, jkA2),
              ("1111111111", call_A, "1111111111_%d" % call_A)]
     asg = assign_claims(calls, idx)
     check("next-morning claim NOW MATCHES (the batch-filing fix)",
@@ -831,15 +831,15 @@ def selftest():
     check("competition -> 'ordered' confidence", asg[jkA][1] == "ordered")
     check("no claim for this number -> (None, 'none')",
           asg["1111111111_%d" % call_A] == (None, "none"))
-    solo = assign_claims([("9000000000", call_A, "9000000000_solo")], idx)
+    solo = assign_claims([("5000000000", call_A, "5000000000_solo")], idx)
     check("single call + single candidate claim -> 'unique'",
-          solo["9000000000_solo"][1] == "unique")
-    late = build_claim_index([{"Mobile": "9358001234",
+          solo["5000000000_solo"][1] == "unique")
+    late = build_claim_index([{"Mobile": "5000001234",
                                "When": "2026-07-08 12:00:00", "Outcome": "coming"}])
     check("claim beyond the forward window -> none",
-          assign_claims([("9358001234", call_A, "k")], late)["k"] == (None, "none"))
+          assign_claims([("5000001234", call_A, "k")], late)["k"] == (None, "none"))
     ident = build_identity_index(outcome_rows)
-    nm, cid = resolve_identity(None, ident, "9000000000")
+    nm, cid = resolve_identity(None, ident, "5000000000")
     check("identity fallback fills name/ID for an unmatched call",
           nm == "Test B" and cid == "202")
     rec_idx = build_recording_index([{"Join Key": "k1", "Drive File ID": "FID9"}])
@@ -880,15 +880,15 @@ def selftest():
 
     # row assembly (enriched S123 signature)
     trec = {"Date": "2026-07-06", "Time": "16:30", "Direction": "outgoing",
-            "Duration": "0:52", "Join Key": "9358001234_1751871234",
+            "Duration": "0:52", "Join Key": "5000001234_1751871234",
             "Transcript Drive Link": "https://drive.example/x"}
     row = assemble_verdict_row(trec, rows[0], d, "Match", "TRUE", "unique",
                                "done", "", DEFAULT_MODEL,
-                               "9358001234", "Test A", "101",
+                               "5000001234", "Test A", "101",
                                "https://drive.example/rec")
     check("row length == header length", len(row) == len(VERDICT_HEADER))
     check("row carries FULL patient number",
-          row[VERDICT_HEADER.index("Patient Number")] == "9358001234")
+          row[VERDICT_HEADER.index("Patient Number")] == "5000001234")
     check("row carries agent from claim",
           row[VERDICT_HEADER.index("Agent")] == "Shivani")
     check("row carries match confidence",
@@ -905,7 +905,7 @@ def selftest():
           "Patient name" not in build_user_message("test", "outgoing", 30))
 
     # 24: mask
-    check("mask hides all but last-4", mask("9358001234") == "******1234")
+    check("mask hides all but last-4", mask("5000001234") == "******1234")
 
     passed = sum(1 for _, ok in results if ok)
     print(f"\nSELFTEST: {passed}/{len(results)} PASS")

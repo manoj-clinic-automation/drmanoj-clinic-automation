@@ -1,0 +1,12 @@
+f41e961dd24a3c68ece3d5d0ab45959e  KIT_ID.txt
+7c47234a6fd76a3e24543e4e0ee7bb44  FROM_PINS.md5
+afd2738e9a678651f9739bbc4f2dad16  TO_PINS.md5
+05bcd90d90baaa205037e0e2fc2b171f  make_s947.py
+27cb4c17fb473cd7d4330bee20d3853b  walk_s947.py
+cb93a24d761de4d2bd65f065a6acf3e7  install_S947_FIXTURE_MASK.sh
+c62e8fa93b8d065dd64c12ed0ad79f37  rehearse_s947.sh
+849c77f8ec14b03fbf58ce5118c3b354  README.md
+0e4a7ab1dac17943a94cd1b01982da41  to/call_verdict.py
+8dc2d87befaf1374178b1552b7da334c  to/daily_digest.py
+8a744e8e60f0aa445b02ea86f5606d91  to/flag_investigator.py
+1f6441215805e190bcca9d282fd35e43  to/verdict_review.py

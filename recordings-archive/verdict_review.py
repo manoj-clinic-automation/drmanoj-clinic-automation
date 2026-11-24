@@ -267,7 +267,7 @@ def require_env(name, alt=None):
 
 
 def mask_phone(number):
-    """Console safety: 9358001234 -> ******1234."""
+    """Console safety: 5000001234 -> ******1234."""
     s = "".join(ch for ch in str(number or "") if ch.isdigit())
     if len(s) <= 4:
         return "*" * len(s)
@@ -1307,9 +1307,9 @@ def selftest():
     check("flagged section is drawn first", CARD_SECTIONS[0] == SEC_FLAGGED)
 
     # --- key_token: the tab must never carry a phone number --------------------
-    jk = "9358001234_1783322828"
+    jk = "5000001234_1783322828"
     tok = key_token(jk)
-    check("token is opaque", "9358001234" not in tok and "1783322828" not in tok)
+    check("token is opaque", "5000001234" not in tok and "1783322828" not in tok)
     check("token is stable", key_token(jk) == tok)
     check("token is unique per key", key_token(jk) != key_token(jk + "1"))
     check("token has the vr prefix", tok.startswith("vr") and len(tok) == 16)
@@ -1325,7 +1325,7 @@ def selftest():
     # --- harvest round-trip -------------------------------------------------
     g = Grid()
     row = {"Join Key": "JK1", "Direction": "outgoing", "Patient Name": "Ram",
-           "Patient Number": "9358001234", "Verdict": "Mismatch",
+           "Patient Number": "5000001234", "Verdict": "Mismatch",
            "Evidence": "main aa raha hoon  [Patient]", "Date": "2026-07-06",
            "Time": "17:00", "AI Outcome": "coming", "Claimed Outcome": "problem"}
     render_card(g, row, "Ji main aa raha hoon\nTheek hai", None, {})
@@ -1434,7 +1434,7 @@ def selftest():
             os.environ[_k] = _v
 
     # --- misc ---------------------------------------------------------------
-    check("mask_phone", mask_phone("9358001234") == "******1234")
+    check("mask_phone", mask_phone("5000001234") == "******1234")
     check("mask_phone short", mask_phone("12") == "**")
     check("a1_col A", a1_col(0) == "A")
     check("a1_col G", a1_col(6) == "G")
@@ -1489,16 +1489,16 @@ def selftest():
                           {}, set(), d13) == [])
 
     frow = dict(base, Verdict="Match", Direction="outgoing",
-                **{"Join Key": "9358001234_1783322828", "Date": "2026-07-10",
+                **{"Join Key": "5000001234_1783322828", "Date": "2026-07-10",
                    "Time": "11:00", "AI Outcome": "coming",
                    "Claimed Outcome": "coming"})
-    fdone = dict(frow, **{"Join Key": "9358005678_1783322999"})
-    pfx = {"9358005678_1783322999": {"outcome": "coming", "note": "ok"}}
+    fdone = dict(frow, **{"Join Key": "5000005678_1783322999"})
+    pfx = {"5000005678_1783322999": {"outcome": "coming", "note": "ok"}}
     gf = Grid()
     n_open = render_forced_band(
         gf, [frow, fdone], [], pfx,
-        {"9358001234_1783322828": ("Ji main aa raha hoon", None)},
-        ["9111122233_1700000000"], d13)
+        {"5000001234_1783322828": ("Ji main aa raha hoon", None)},
+        ["5000002233_1700000000"], d13)
     check("forced band: the open card gets exactly one answer cell",
           len(gf.response_rows) == 1 and n_open == 1)
     check("forced band: a MATCH forced key gets a FULL card (the v2 gap, cured)",
@@ -1508,14 +1508,14 @@ def selftest():
     check("forced band: missing keys are named, never silently dropped",
           any("keys not found" in r[COL_LABEL] for r in gf.rows))
     check("forced band: a raw Join Key (phone) never lands on the sheet",
-          not any("9111122233" in "".join(map(str, r)) for r in gf.rows))
+          not any("5000002233" in "".join(map(str, r)) for r in gf.rows))
     check("forced band header uses the forced title",
           any(SECTION_TITLES[SEC_FORCED] in str(r[COL_LABEL]) for r in gf.rows))
 
     gs2 = Grid()
     n_spot = render_forced_band(
         gs2, [], [frow], {},
-        {"9358001234_1783322828": ("Ji main aa raha hoon", None)}, [], d13)
+        {"5000001234_1783322828": ("Ji main aa raha hoon", None)}, [], d13)
     check("spot-check card carries the star banner and an answer cell",
           any("SPOT-CHECK" in str(r[COL_LABEL]) for r in gs2.rows)
           and n_spot == 1 and len(gs2.response_rows) == 1)

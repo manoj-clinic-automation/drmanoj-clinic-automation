@@ -736,7 +736,7 @@ def _selftest():
     check("direction odd", dur_direction("1206138695") == "outgoing")
 
     # --- candidate detection ---
-    lost = {"client_ref_id": "IN-8333", "session_id": "8333", "phone10": "9876500011",
+    lost = {"client_ref_id": "IN-8333", "session_id": "8333", "phone10": "5000000011",
             "customer_result": "connected", "customer_talk_duration": "33",
             "recording_filename": "", "ended_at_ist": "2026-07-13T13:21:00+05:30"}
     ok, _ = is_lost_candidate(lost, now, 25, 10)
@@ -763,7 +763,7 @@ def _selftest():
     fresh = dict(lost, ended_at_ist="2026-07-13T14:50:00+05:30")   # 10 min before 15:00
     check("not candidate: inside grace", not is_lost_candidate(fresh, now, 25, 10)[0])
 
-    odd = {"client_ref_id": "1206138695", "session_id": "1206138695", "phone10": "9812345678",
+    odd = {"client_ref_id": "1206138695", "session_id": "1206138695", "phone10": "5000015678",
            "customer_result": "answered", "customer_talk_duration": "19",
            "recording_filename": "", "ended_at_ist": "2026-07-13T14:54:00+05:30"}
     # 14:54 is 6 min before 15:00 -> inside 25m grace, so NOT yet a candidate...
@@ -772,13 +772,13 @@ def _selftest():
     check("odd-key becomes candidate after grace", is_lost_candidate(odd, later, 25, 10)[0])
 
     # --- hit enrich + matching + diagnosis ---
-    hit_rec = {"_source": {"id": "8333", "caller_number_raw": "919876500011",
+    hit_rec = {"_source": {"id": "8333", "caller_number_raw": "915000000011",
                            "start_time": 1000, "duration": "00:00:33",
                            "status": "1", "filename": "rec_8333.mp3"}}
-    hit_missed = {"_source": {"id": "7777", "caller_number_raw": "919812345678",
+    hit_missed = {"_source": {"id": "7777", "caller_number_raw": "915000015678",
                               "start_time": 2000, "duration": "00:00:19",
                               "status": "2", "filename": ""}}
-    hit_conn_norec = {"_source": {"id": "6666", "caller_number_raw": "919800000066",
+    hit_conn_norec = {"_source": {"id": "6666", "caller_number_raw": "915000000066",
                                   "start_time": 3000, "duration": "00:00:22",
                                   "status": "1", "filename": ""}}
     eh = enrich_hit(hit_rec)
@@ -794,25 +794,25 @@ def _selftest():
     check("diagnose recoverable", o == "recoverable" and fn == "rec_8333.mp3")
 
     # status 2 hit -> missed_no_conversation (F-44), NOT never_recorded
-    lost_missed = {"client_ref_id": "IN-7777", "session_id": "7777", "phone10": "9812345678",
+    lost_missed = {"client_ref_id": "IN-7777", "session_id": "7777", "phone10": "5000015678",
                    "customer_result": "connected", "customer_talk_duration": "19",
                    "recording_filename": "", "ended_at_ist": "2026-07-13T13:33:00+05:30"}
     om, _dm, _fm = diagnose(lost_missed, hits)
     check("diagnose missed_no_conversation (status 2)", om == "missed_no_conversation")
 
     # status 1 + blank filename -> the genuine never_recorded
-    lost_nr = {"client_ref_id": "IN-6666", "session_id": "6666", "phone10": "9800000066",
+    lost_nr = {"client_ref_id": "IN-6666", "session_id": "6666", "phone10": "5000000066",
                "customer_result": "connected", "customer_talk_duration": "22",
                "recording_filename": "", "ended_at_ist": "2026-07-13T13:40:00+05:30"}
     o2, _d2, _f2 = diagnose(lost_nr, hits)
     check("diagnose never_recorded (status 1, no file)", o2 == "never_recorded")
 
-    lost_nolog = dict(lost, session_id="NOPE", client_ref_id="IN-NOPE", phone10="9000000000")
+    lost_nolog = dict(lost, session_id="NOPE", client_ref_id="IN-NOPE", phone10="5000000000")
     o3, _d3, _f3 = diagnose(lost_nolog, hits)
     check("diagnose no_provider_log", o3 == "no_provider_log")
 
     # weak match by phone+time when ids differ
-    row_weak = {"client_ref_id": "IN-zzz", "session_id": "", "phone10": "9876500011",
+    row_weak = {"client_ref_id": "IN-zzz", "session_id": "", "phone10": "5000000011",
                 "customer_result": "connected", "customer_talk_duration": "33",
                 "recording_filename": "", "ended_at_ist": "2026-07-13T00:16:40+05:30"}
     # hit_rec start_time 1000 -> 1970 epoch; skip real-date coupling: just assert phone matcher runs
@@ -872,7 +872,7 @@ def _selftest():
         reloaded = load_ledger(path)
         check("roundtrip preserves keys", set(reloaded.keys()) == set(pruned.keys()))
         check("results file has no full phone",
-              "9876500011" not in open(path, encoding="utf-8").read())
+              "5000000011" not in open(path, encoding="utf-8").read())
         # kick file shape
         kf = drop_heal_kick(os.path.join(td, "q"), now)
         kick = json.load(open(kf, encoding="utf-8"))

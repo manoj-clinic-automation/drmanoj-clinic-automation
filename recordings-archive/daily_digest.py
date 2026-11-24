@@ -255,13 +255,13 @@ REF_RE = re.compile(r"^(\d{10})-(\d{10})")          # OBD client_ref_id shape
 
 
 def parse_join_key(jk):
-    """'9917656698_1783916119' -> ('9917656698', 1783916119) or None."""
+    """'5000006698_1783916119' -> ('5000006698', 1783916119) or None."""
     m = JOIN_RE.match(str(jk or "").strip())
     return (m.group(1), int(m.group(2))) if m else None
 
 
 def parse_client_ref(ref):
-    """'9917656698-178391611958e8' -> ('9917656698', 1783916119) or None
+    """'5000006698-178391611958e8' -> ('5000006698', 1783916119) or None
     (IN-<session> rows and odd shapes return None)."""
     m = REF_RE.match(str(ref or "").strip())
     return (m.group(1), int(m.group(2))) if m else None
@@ -406,7 +406,7 @@ def worst_first(vrows, cap=REVIEW_LIST_CAP):
 
 
 def who(vrow):
-    """'Name (9358001234)' or whichever half exists."""
+    """'Name (5000001234)' or whichever half exists."""
     name = str(vrow.get("Patient Name", "")).strip()
     num = str(vrow.get("Patient Number", "")).strip()
     if name and num:
@@ -1025,11 +1025,11 @@ def selftest():
     check("pad_time already padded", pad_time("10:00") == "10:00")
     check("pad_time junk passthrough", pad_time("x") == "x")
     check("parse_join_key ok",
-          parse_join_key("9917656698_1783916119") == ("9917656698", 1783916119))
+          parse_join_key("5000006698_1783916119") == ("5000006698", 1783916119))
     check("parse_join_key junk", parse_join_key("nope") is None)
     check("parse_client_ref ok",
-          parse_client_ref("9917656698-178391611958e8")
-          == ("9917656698", 1783916119))
+          parse_client_ref("5000006698-178391611958e8")
+          == ("5000006698", 1783916119))
     check("parse_client_ref IN- is None", parse_client_ref("IN-abc") is None)
     check("hhmm_to_min", hhmm_to_min("8:58") == 538 and hhmm_to_min("x") is None)
     dd = dedupe_keep_last([{"client_ref_id": "a", "v": 1},
@@ -1037,28 +1037,28 @@ def selftest():
                            {"client_ref_id": "a", "v": 2}])
     check("dedupe keeps last, keeps order",
           len(dd) == 2 and dd[0]["v"] == 2 and dd[1]["client_ref_id"] == "b")
-    vpe = [("9917656698", 1783916119)]
-    vpm = {"8449348409": [538]}
+    vpe = [("5000006698", 1783916119)]
+    vpm = {"5000008409": [538]}
     check("covered by exact ref",
           duration_covered({"client_ref_id": "K1"}, {"K1"}, [], {}))
     check("covered by phone+epoch",
-          duration_covered({"client_ref_id": "9917656698-178391611958e8"},
+          duration_covered({"client_ref_id": "5000006698-178391611958e8"},
                            set(), vpe, {}))
     check("not covered, epoch too far",
-          not duration_covered({"client_ref_id": "9917656698-179000000058e8"},
+          not duration_covered({"client_ref_id": "5000006698-179000000058e8"},
                                set(), vpe, {}))
     check("covered IN- by phone+time window",
-          duration_covered({"client_ref_id": "IN-x", "phone10": "8449348409",
+          duration_covered({"client_ref_id": "IN-x", "phone10": "5000008409",
                             "ended_at_ist": "2026-07-13T08:59:10+05:30"},
                            set(), [], vpm))
     check("not covered, unknown phone",
-          not duration_covered({"client_ref_id": "IN-y", "phone10": "9000000000",
+          not duration_covered({"client_ref_id": "IN-y", "phone10": "5000000000",
                                 "ended_at_ist": "2026-07-13T08:59:10+05:30"},
                                set(), [], vpm))
 
     # -- classify_pending (v1.2) -------------------------------------------------
     NOW = datetime.datetime(2026, 7, 13, 11, 30, tzinfo=IST)
-    def mk(result, talk, ended, ref="9000000001-1783916000abcd", phone=""):
+    def mk(result, talk, ended, ref="5000000001-1783916000abcd", phone=""):
         return {"customer_result": result, "customer_talk_duration": talk,
                 "ended_at_ist": ended, "client_ref_id": ref, "phone10": phone}
     r1 = classify_pending(mk("not_answered", "", "2026-07-13T09:42:00+05:30"),
@@ -1071,7 +1071,7 @@ def selftest():
                           NOW, [], {})
     check("classify fresh -> in pipeline", r3 == ("in pipeline", False))
     r4 = classify_pending(mk("connected", "40", "2026-07-13T09:37:00+05:30"),
-                          NOW, [("9000000001", 1783916100)], {})
+                          NOW, [("5000000001", 1783916100)], {})
     check("classify transcript exists",
           r4 == ("transcribed — verdict due", False))
     r5 = classify_pending(mk("connected", "40", "2026-07-13T09:37:00+05:30"),
@@ -1085,16 +1085,16 @@ def selftest():
           r5b_out[1] is False and "no recording expected" in r5b_out[0])
     r6 = classify_pending(mk("connected", "101",
                              "2026-07-13T09:37:00+05:30", ref="IN-xyz",
-                             phone="9000000002"),
-                          NOW, [], {"9000000002": [577]})
+                             phone="5000000002"),
+                          NOW, [], {"5000000002": [577]})
     check("classify IN- via phone+time window",
           r6 == ("transcribed — verdict due", False))
 
     # -- who / subjects ---------------------------------------------------------
     check("who both",
-          who({"Patient Name": "Ram", "Patient Number": "9358001234"})
-          == "Ram (9358001234)")
-    check("who number only", who({"Patient Number": "9358001234"}) == "9358001234")
+          who({"Patient Name": "Ram", "Patient Number": "5000001234"})
+          == "Ram (5000001234)")
+    check("who number only", who({"Patient Number": "5000001234"}) == "5000001234")
     check("who none", who({}) == "unknown caller")
     check("pulse subject zero",
           "no calls yet" in pulse_subject("Mon 13 Jul 2026", 0, 0))
@@ -1127,9 +1127,9 @@ def selftest():
           "awaiting verdict" in body and "9222" in body)
     check("pulse footer progress", "7 / 100" in body)
     early = {"Time": "8:58", "Direction": "incoming", "Patient Name": "Early",
-             "Patient Number": "9000000001", "Verdict": V_MATCH}
+             "Patient Number": "5000000001", "Verdict": V_MATCH}
     late = {"Time": "10:00", "Direction": "outgoing", "Patient Name": "Late",
-            "Patient Number": "9000000002", "Verdict": V_MATCH}
+            "Patient Number": "5000000002", "Verdict": V_MATCH}
     bs = build_pulse_email("Mon", [late, early], [], [], 0)
     check("pulse sorts 08:58 before 10:00", bs.index("Early") < bs.index("Late"))
     check("pulse displays padded time", "08:58" in bs)
