@@ -1,0 +1,10 @@
+fc04d47ad71da0f95fe93cd67e90b745  ./KIT_ID.txt
+c4abb53c70310b6a33e5be4462f88572  ./README.md
+314bc0b12461861925790393e942355f  ./TO_PINS.md5
+f956519b15e0d586666781efb1284d67  ./install_S948_STAFF_CONSOLE.sh
+076151b6ff014e09f687acc6862a3b5b  ./make_s948.py
+87ed2ce063ecc4ce1ac51ca72189c802  ./rehearse_s948.sh
+f484cbc23e85817c32cd7a6c9004dd3e  ./to/calls_console.py
+05caf1c32db2e25b7b0723292c234572  ./to/calls_staff.py
+4a23e3c410754e1a5ba2a74b35cf14fb  ./to/tile_grants.json
+47d4f942f2f0785e089faf8b9f2d546e  ./walk_s948.py
