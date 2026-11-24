@@ -29,7 +29,7 @@ USAGE
     /root/wa/venv/bin/python3 callhook_watch_run.py --check         # the state in one line
     /root/wa/venv/bin/python3 callhook_watch_run.py --selftest      # offline, a made-up watchdog
 
-ENV (tests only)   WATCH_RUN_WATCHDOG  path of the watchdog script
+ENV (tests only)   WATCH_RUN_WATCHDOG  path of the watchdog script   (--raw-log-dir and --date pass through to it)
                    WATCH_RUN_PYTHON    the interpreter to run it with
                    WATCH_RUN_STATE     the state file this writes
                    WATCH_RUN_WD_STATE  the watchdog's own --state file
@@ -78,13 +78,15 @@ def save_state(path, payload):
     os.replace(tmp, path)
 
 
-def run_watchdog(access_globs, date=None):
+def run_watchdog(access_globs, date=None, raw_log_dir=None):
     """Run the watchdog once. Returns (exit_code, report_dict_or_None, stderr_tail)."""
     cmd = [PYTHON, "-B", WATCHDOG, "--json", "--state", WD_STATE_PATH]
     for g in access_globs or []:
         cmd += ["--access-glob", g]
     if date:
         cmd += ["--date", date]
+    if raw_log_dir:
+        cmd += ["--raw-log-dir", raw_log_dir]
     try:
         r = subprocess.run(cmd, cwd=HERE, capture_output=True, text=True, timeout=TIMEOUT_S)
     except subprocess.TimeoutExpired:
@@ -123,9 +125,9 @@ def judge(code, rep, err):
     return rec
 
 
-def one_run(access_globs, date=None):
+def one_run(access_globs, date=None, raw_log_dir=None):
     prev = load_state(STATE_PATH)
-    code, rep, err = run_watchdog(access_globs, date)
+    code, rep, err = run_watchdog(access_globs, date, raw_log_dir)
     rec = judge(code, rep, err)
     rec["last_success_iso"] = rec["last_run_iso"] if rec["severity"] in GOOD else prev.get("last_success_iso", "")
     rec["last_fail_iso"] = rec["last_run_iso"] if rec["severity"] not in GOOD else prev.get("last_fail_iso", "")
@@ -216,12 +218,13 @@ def main(argv=None):
     ap.add_argument("--check", action="store_true", help="the state in one line")
     ap.add_argument("--access-glob", action="append", default=None, help="passed to the watchdog (repeatable)")
     ap.add_argument("--date", default=None)
+    ap.add_argument("--raw-log-dir", default=None, help="passed to the watchdog (tests; the box uses its default)")
     a = ap.parse_args(argv)
     if a.selftest:
         return selftest()
     if a.check:
         return check()
-    return one_run(a.access_glob or [], a.date)
+    return one_run(a.access_glob or [], a.date, a.raw_log_dir)
 
 
 if __name__ == "__main__":

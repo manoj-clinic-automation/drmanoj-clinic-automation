@@ -67,17 +67,18 @@ with open(logp, "w") as f:
     f.write('1.2.3.4 - - [23/Nov/2026:09:05:00 +0530] "POST /mo-callhook?key=madeupkey HTTP/1.1" 200 20 "-" "Go"\n')
 env = {"WATCH_RUN_WATCHDOG": WATCHDOG, "WATCH_RUN_PYTHON": PY,
        "WATCH_RUN_STATE": os.path.join(hook, "state.json"), "WATCH_RUN_WD_STATE": os.path.join(hook, "wd.json")}
-rc, out = run([PY, "-B", RUNNER, "--access-glob", os.path.join(hook, "logs", "*access*"), "--date", "2026-11-22"], env)
+rawd = os.path.join(hook, "raw")                    # the walk's own raw-log folder, never the box's
+rc, out = run([PY, "-B", RUNNER, "--access-glob", os.path.join(hook, "logs", "*access*"), "--date", "2026-11-22", "--raw-log-dir", rawd], env)
 st = json.load(open(env["WATCH_RUN_STATE"]))
 check("A2 a Sunday of accepted deliveries -> OK (real watchdog)", rc == 0 and st["severity"] == "OK" and st["accepted_200"] == 5)
 check("A3 no key in the state", "madeupkey" not in json.dumps(st) and "madeupkey" not in out)
 good = st["last_success_iso"]
 time.sleep(1.1)                             # a later second, as a later day would be
-rc, out = run([PY, "-B", RUNNER, "--access-glob", os.path.join(hook, "logs", "*access*"), "--date", "2026-11-23"], env)
+rc, out = run([PY, "-B", RUNNER, "--access-glob", os.path.join(hook, "logs", "*access*"), "--date", "2026-11-23", "--raw-log-dir", rawd], env)
 st = json.load(open(env["WATCH_RUN_STATE"]))
 check("A4 a clinic day with no raw log -> CRITICAL, exit 2", rc == 2 and st["severity"] == "CRITICAL" and "CALLHOOK_RAWLOG_MISSING" in st["findings"])
 check("A5 last_success kept, last_fail set", st["last_success_iso"] == good and st["last_fail_iso"] == st["last_run_iso"])
-rc, out = run([PY, "-B", RUNNER, "--access-glob", os.path.join(hook, "nowhere", "*")], env)
+rc, out = run([PY, "-B", RUNNER, "--access-glob", os.path.join(hook, "nowhere", "*"), "--raw-log-dir", rawd], env)
 st = json.load(open(env["WATCH_RUN_STATE"]))
 check("A6 a glob matching nothing -> ERROR, exit 3", rc == 3 and st["severity"] == "ERROR" and "no access log" in st["error"])
 rc, out = run([PY, "-B", RUNNER, "--check"], env)

@@ -105,7 +105,7 @@ else stop "!! [2/6] another build holds $LOCK (owner: $(cat "$LOCK/owner" 2>/dev
 say "         watchdog: $WDEC"
 if [ "$w" = "$WK_FROM" ]; then WF="$RA/$WK"; else WF="$WK_BAK"; fi
 if [ "$g" = "$LG_FROM" ]; then LF="$FIN/$LG"; else LF="$LG_BAK"; fi
-W="$(pya "$KDIR/walk_s946.py" "$KDIR" "$SCR/w946" | tail -1)"; case "$W" in "WALK 39/39") ;; *) stop "!! [3/6] walk_s946: $W - nothing installed";; esac
+pya "$KDIR/walk_s946.py" "$KDIR" "$SCR/w946" > "$SCR/walk.out"; W="$(tail -1 "$SCR/walk.out")"; case "$W" in "WALK 39/39") ;; *) grep -E "FAIL|Error|Traceback" "$SCR/walk.out" | head -8 | sed 's/^/         /'; stop "!! [3/6] walk_s946: $W - nothing installed (the failing checks above)";; esac
 Wc="$(WORKER_FROM="$WF" LEGS_FROM="$LF" pya "$KDIR/walk_s946.py" "$KDIR" "$SCR/w946c" --control | tail -1)"; [ "$Wc" != "WALK 39/39" ] || { [ "$w" = "$(to_of $WK)" ] || stop "!! [3/6] walk_s946's control did not go red - nothing installed"; }
 D1="$(S946_RA_DIR="$RA" pya "$KDIR/$CL" --dry --backup-dir "$RA/backup_S946")"; echo "$D1" | sed 's/^/         /'
 case "$D1" in *"DRY: nothing written"*) ;; *) stop "!! [3/6] the one-off's dry read did not finish - nothing installed";; esac
