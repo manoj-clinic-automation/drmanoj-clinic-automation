@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S514 close** (the parent, Opus, EOS-light), 24-Nov-2026, evening — the parent's sections refreshed here (the staff Call Console screens agreed); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S515 close** (the parent, Opus, full EOS), 24-Nov-2026, evening — the parent's sections refreshed here (the staff Call Console live); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S514 close** (the parent, Opus, EOS-light), 24-Nov-2026, evening — the parent's sections refreshed here (the staff Call Console screens agreed); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S513 close** (the parent, Opus, full EOS), 24-Nov-2026, evening — the parent's sections refreshed here (a patient number taken out of test data; the board trimmed; the Call Console screens to keep the tracker's English); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S512 close** (the parent, Fable, full EOS), 24-Nov-2026, afternoon — the parent's sections refreshed here (the Call Console roadmap's A2 finished); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S511 close** (the parent, Fable, full EOS), 24-Nov-2026, afternoon — the parent's sections refreshed here (Sarvam Saaras v4; the Call Console roadmap's phase 0 live); the other projects' sections as their closes left them.
@@ -525,7 +526,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S514 close (24-Nov, 18:2x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S515 close (24-Nov, 19:xx)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -535,7 +536,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK — this session's records** (nothing follows it on the server; nothing on the server changed today):
+**1 · ONE DOUBLE-CLICK — this session's records** (nothing follows it on the server; the kit is already installed):
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -551,7 +552,7 @@ D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S510\S510_CALL_CONSOLE_ROADMAP_v1.md
 
 **1a06 · A PATIENT'S MOBILE NUMBER WAS IN THE CALL-AUDIT PROGRAMS' TEST DATA — TAKEN OUT (24-Nov), NOTHING TO DO.** It sat in the live programs and in the public code store since the summer (no name with it). Now every test number is plainly made up. Its old copies in the code store's history stay for now — a later session weighs removing them.
 
-**1a07 · THE STAFF CALL CONSOLE SCREENS — AGREED (your ok, 18:05), NOTHING TO DO.** Six tabs in the Callback Tracker's own words, full mobile numbers, "Call verdict"; the next session builds it, then your publish and one server line.
+**1a07 · THE STAFF CALL CONSOLE IS LIVE (19:01).** Shivani, Alisha and Shavez have a new tile, **My Call Console**, beside the Callback Tracker (you have it too: it opens a picker to see each one's page). **One question for you, when convenient:** the lists read today only — should a call missed after hours carry into the next morning's lists? Your answer in one word is enough.
 
 ```
 https://claude.ai/artifact/V7zF7d79tCF9FS9H1HiNHq
@@ -668,6 +669,10 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S515 CLOSE — 24-Nov-2026 (the parent, Opus)
+
+- **The staff Call Console is live** (19:01): six tabs, full mobile numbers, "Call verdict" and "Wrong?"; your own Call Console unchanged byte for byte.
 
 ## ✅ DONE AT THE S514 CLOSE — 24-Nov-2026 (the parent, Opus)
 
