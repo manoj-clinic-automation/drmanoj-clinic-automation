@@ -308,3 +308,7 @@ _scratch/
 !deploy_kits/S863_GOOGLE_MAIL_READ/freshness_legs.json
 !deploy_kits/S897_TRACKER_SEED_REPLAY/freshness_legs.json
 !deploy_kits/S943_SERVER_RECORD/freshness_legs.json
+# S946 (24-Nov-2026, the parent): the legs file S943 left (FROM, the walk's control) and its two TO shapes (both legs / the pipeline leg only). Exact paths.
+!deploy_kits/S946_A2_REST/from_legs.json
+!deploy_kits/S946_A2_REST/freshness_legs_a.json
+!deploy_kits/S946_A2_REST/freshness_legs_b.json

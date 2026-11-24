@@ -1,0 +1,2 @@
+S946_A2_REST
+the parent · S512 · 24-Nov-2026 · roadmap S510 phase 0, A2 rest: the 403 watchdog scheduled or retired; the pipeline state file + leg; the Call_Verdicts one-off
