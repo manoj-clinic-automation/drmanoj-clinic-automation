@@ -1,0 +1,10 @@
+72eb66506a7b638537d649527fda589c  ./KIT_ID.txt
+94852963960e2532f4370723fd66335d  ./TO_PINS.md5
+b5db545489ce3742a2e9ca638c8a25c6  ./install_S953_STAFF_NOTIFY.sh
+0f9083744b23cfa6db8d8860dd3665c8  ./make_s953.py
+02e57e85ddd45bb006abdf48576c8ff8  ./rehearse_s953.sh
+47d4f942f2f0785e089faf8b9f2d546e  ./walk_s948.py
+dcad97e0e3cd2e3f71e3682bed31cb6c  ./walk_s951.py
+0b59494b6be18b31b73f201af4f70a76  ./walk_s953.py
+f7e77203bec9e58274af16c1475b9911  ./to/calls_staff.py
+5fbcd29cb50a97ce46854d97addba9cd  ./to/callback_clock.py

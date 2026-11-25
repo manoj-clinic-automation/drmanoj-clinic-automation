@@ -1,0 +1,12 @@
+29acdda99fb81f19dd05a3c37202570a  KIT_ID.txt
+1ea81ec6b21d5b7e27b744121424304d  README.md
+2ac8d02004ae29d6905136f158d921a4  TO_PINS.md5
+288fbec298819ecf37bbdc8ae635b3a5  install_S952_RECORD_JUDGES.sh
+cbf3c71091422abf7f67e9bcfe5eeb09  make_s952.py
+daf6f92bfe99cb952aa0a509bacf38d3  porders.py
+06d317a5e4b6b0c0d58ece78b3940846  record_judges.py
+686845f8ec895506a51892d3fbf629d9  stock_check.py
+500a7d46dbd281d7be83dd0e051d2c50  stock_figure.py
+401684eaafc35f10d622046db856246c  stock_watch.py
+8c17b25bd4d27a0572751254697aa955  undo_s952.sh
+cf23118b8a1994e0d766253c50abba29  walk_s952.py
