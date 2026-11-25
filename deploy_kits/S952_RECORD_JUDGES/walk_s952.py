@@ -141,6 +141,8 @@ check("... and books no loss line", con.execute("SELECT COUNT(*) FROM stock_watc
 
 # 3 · a made-up older loss not yet written off is not booked twice (the live door: write_point, now)
 item = "GEMCAL XT TABLETS"
+_now0 = SW.now_iso
+SW.now_iso = lambda: _now0()[:10] + "T10:30:00"               # a morning count, whatever the clock says (an evening one waits, 1c)
 E0 = RJ.judge(con, sp, item, SW.now_iso(), None) if RJ else None
 exp0 = float(E0["expected"]) if (E0 and E0.get("expected") is not None) else None
 if exp0 is None:                                              # the control: the figure the old door judges on
@@ -148,7 +150,10 @@ if exp0 is None:                                              # the control: the
 con.execute("INSERT INTO stock_watch_loss_line (at, item, gap_units, pack, packing, mrp_p, point_id) VALUES (?,?,?,?,?,?,NULL)",
             (SW.now_iso()[:10] + "T00:00:01", item, 50.0, 15, MARK, 0))
 con.commit()
-P = SW.write_point(con, item, exp0 - 50.0, "spot", MARK, silent=True, hold=False)
+try:
+    P = SW.write_point(con, item, exp0 - 50.0, "spot", MARK, silent=True, hold=False)
+finally:
+    SW.now_iso = _now0
 w = con.execute("SELECT gap_units, %s FROM stock_point WHERE id=?" % ("judge_words" if RJ else "NULL"), (P["id"],)).fetchone()
 info("made-up count %s: expected %s, gap %s, verdict '%s', words '%s'" % (item, P.get("expected"), P.get("gap"), P.get("verdict"), w[1] if w else ""))
 check("a short the size of an older loss Marg still holds is NOT a new loss (no loss line)", P.get("loss_line") is None and con.execute(
