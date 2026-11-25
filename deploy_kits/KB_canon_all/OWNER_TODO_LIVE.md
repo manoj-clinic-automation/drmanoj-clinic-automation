@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S520 close** (the parent, Opus, full EOS), 25-Nov-2026, evening — the parent's sections refreshed here (the staff reminders on the new Call Console); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S519 close** (the Sanjeevni chat, full EOS), 25-Nov-2026, evening — the Sanjeevni sections refreshed here (the stock fix live; Amir's three); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S520 close** (the parent, Opus, full EOS), 25-Nov-2026, evening — the parent's sections refreshed here (the staff reminders on the new Call Console); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S517 close** (the parent, Opus, full EOS), 25-Nov-2026, midday — the parent's sections refreshed here (yesterday's missed calls on today's staff lists); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S518 close** (the Sanjeevni chat, full EOS), 25-Nov-2026, noon — the Sanjeevni sections refreshed here (the two repairs live; TYRO BR explained; your yes to kit S952); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S509 close** (the Sanjeevni chat, full EOS), 24-Nov-2026, evening — the Sanjeevni sections refreshed here (the purchase order flow live; your yes to all four extras; the Radha wrong bill); the other projects' sections as their closes left them.
@@ -1498,21 +1499,28 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S518 close (25-Nov, 12:4x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S519 close (25-Nov, 18:5x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-2. **Open the next Sanjeevni chat on Fable** for kit S952 (your "YES" 12:25) — it will ask you for the same one-line server copy of the stock engine's data.
+2. **Amir — three write-offs Marg never took:** KT ROS DT 10:1 (voucher 14 of 15-10), VINBACTUM DS 25 (voucher 22), NORTIMER TAB 10 (batch 10 never marked entered).
 3. **Ram Singh:** the Stock Register report in Shavez's Marg login; then Shavez's switch on.
 4. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S518 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S519 close
 
-1. **Kit S952** (session 519, Fable): deliveries matched by the scanned bill; every count judged against the one stock of record; past counts re-judged and false losses withdrawn (TYRO BR first); a daily self-check; the stock engine's data copied off the server nightly.
-2. Watch the first Marg sheet under the new flow — on your page's "Messages today".
-3. PARKED by your word: the AutoHotkey runner; the order-list kit.
+1. Watch the stock fix's first days: the 06:40 self-check, Darpan's counts with their words, JAKMAC 5 / MEG QCS / ZUPRINOR 5 from his list.
+2. When you choose: the recount rule's base-day line and split sizes (noted by the S956 review).
+3. Watch the first Marg sheet under the order flow — on your page's "Messages today".
+4. PARKED by your word: the AutoHotkey runner; the order-list kit.
+
+## ✅ DONE AT THE S519 CLOSE — 25-Nov-2026, evening (the Sanjeevni project)
+
+- **The stock fix you said YES to, live 17:08** (S952): deliveries matched by their own scanned bill; every count judged against Marg with its reason in words; TYRO BR's false 35:8 gone; FENARIC T4's false loss withdrawn; a check every morning at 06:40.
+- **Your question on Amir's October corrections, 18:04** (S954): they went through; three items left for him.
+- **JAKMAC 5, 18:26** (S956): a delivery after Darpan's morning count now counted — JAKMAC 5 = Marg.
 
 ## ✅ DONE AT THE S518 CLOSE — 25-Nov-2026 (the Sanjeevni project)
 
