@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S509 close** (the Sanjeevni chat, full EOS), 24-Nov-2026, evening — the Sanjeevni sections refreshed here (the purchase order flow live; your yes to all four extras; the Radha wrong bill); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S518 close** (the Sanjeevni chat, full EOS), 25-Nov-2026, noon — the Sanjeevni sections refreshed here (the two repairs live; TYRO BR explained; your yes to kit S952); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S509 close** (the Sanjeevni chat, full EOS), 24-Nov-2026, evening — the Sanjeevni sections refreshed here (the purchase order flow live; your yes to all four extras; the Radha wrong bill); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S516 close** (the parent, Opus, full EOS), 24-Nov-2026, evening — the parent's sections refreshed here (the call log on the server); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S515 close** (the parent, Opus, full EOS), 24-Nov-2026, evening — the parent's sections refreshed here (the staff Call Console live); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S514 close** (the parent, Opus, EOS-light), 24-Nov-2026, evening — the parent's sections refreshed here (the staff Call Console screens agreed); the other projects' sections as their closes left them.
@@ -1483,27 +1484,26 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S509 close (24-Nov, 20:4x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S518 close (25-Nov, 12:4x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-2. **The Radha wrong bill — Keep or Send back** (most likely Keep: the same injection, spelled differently):
-```
-https://followup.dr-manoj.in/finance/porders/d1053/bill/355
-```
-3. **Kit 2 waits for you** — after Darpan's counts, a look at the Stock check together (your word).
-4. **Ram Singh:** the Stock Register report in Shavez's Marg login; then Shavez's switch on.
-5. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
+2. **Open the next Sanjeevni chat on Fable** for kit S952 (your "YES" 12:25) — it will ask you for the same one-line server copy of the stock engine's data.
+3. **Ram Singh:** the Stock Register report in Shavez's Marg login; then Shavez's switch on.
+4. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S509 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S518 close
 
-1. **The two repairs** (session 518): "Wrong bills waiting" on your flow page; the wrong-bill name match; today's messages listed on your page.
-2. Watch the first Marg sheet under the new flow — every message, Darpan's final, the lock.
-3. TYRO BR and the ten counts of 23-11 placed to bill 4938 (from the S506 close; overdue).
-4. **Kit 2** — every other reader on the stock of record, after the joint look.
-5. PARKED by your word: the AutoHotkey runner; the order-list kit.
+1. **Kit S952** (session 519, Fable): deliveries matched by the scanned bill; every count judged against the one stock of record; past counts re-judged and false losses withdrawn (TYRO BR first); a daily self-check; the stock engine's data copied off the server nightly.
+2. Watch the first Marg sheet under the new flow — on your page's "Messages today".
+3. PARKED by your word: the AutoHotkey runner; the order-list kit.
+
+## ✅ DONE AT THE S518 CLOSE — 25-Nov-2026 (the Sanjeevni project)
+
+- **Wrong bills waiting** on your flow page and Darpan's tab; the UPRISE-type name match; today's messages on your page (S950, live 10:51).
+- **TYRO BR's −35:8 explained:** Darpan's count matches Marg; a delivery counted twice through a wrong bill pairing.
 
 ## ✅ DONE AT THE S509 CLOSE — 24-Nov-2026, evening (the Sanjeevni project)
 
