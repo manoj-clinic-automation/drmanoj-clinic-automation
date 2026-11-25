@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S516 close** (the parent, Opus, full EOS), 24-Nov-2026, evening — the parent's sections refreshed here (the call log on the server); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S509 close** (the Sanjeevni chat, full EOS), 24-Nov-2026, evening — the Sanjeevni sections refreshed here (the purchase order flow live; your yes to all four extras; the Radha wrong bill); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S516 close** (the parent, Opus, full EOS), 24-Nov-2026, evening — the parent's sections refreshed here (the call log on the server); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S515 close** (the parent, Opus, full EOS), 24-Nov-2026, evening — the parent's sections refreshed here (the staff Call Console live); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S514 close** (the parent, Opus, EOS-light), 24-Nov-2026, evening — the parent's sections refreshed here (the staff Call Console screens agreed); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S513 close** (the parent, Opus, full EOS), 24-Nov-2026, evening — the parent's sections refreshed here (a patient number taken out of test data; the board trimmed; the Call Console screens to keep the tracker's English); the other projects' sections as their closes left them.
@@ -1482,26 +1483,33 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S508 close (23-Nov, 18:5x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S509 close (24-Nov, 20:4x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-2. **The new order flow — the four suggested extras:** yes or no to each (late message, reminders, 20:00 summary, wrong bill) — on the mock-up:
+2. **The Radha wrong bill — Keep or Send back** (most likely Keep: the same injection, spelled differently):
 ```
-https://claude.ai/artifact/4zjaEK7xSi91y8e9kGVjWG
+https://followup.dr-manoj.in/finance/porders/d1053/bill/355
 ```
 3. **Kit 2 waits for you** — after Darpan's counts, a look at the Stock check together (your word).
 4. **Ram Singh:** the Stock Register report in Shavez's Marg login; then Shavez's switch on.
 5. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S508 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S509 close
 
-1. **The purchase order flow** (session 509): Darpan's old-line step and one list everywhere; WhatsApp all locked until his final; the sent record per dealer; the messages; your four-step view.
-2. TYRO BR and the ten counts of 23-11 placed to bill 4938 (from the S506 close).
-3. **Kit 2** — every other reader on the stock of record, after the joint look.
-4. PARKED by your word: the AutoHotkey runner; the order-list kit.
+1. **The two repairs** (session 518): "Wrong bills waiting" on your flow page; the wrong-bill name match; today's messages listed on your page.
+2. Watch the first Marg sheet under the new flow — every message, Darpan's final, the lock.
+3. TYRO BR and the ten counts of 23-11 placed to bill 4938 (from the S506 close; overdue).
+4. **Kit 2** — every other reader on the stock of record, after the joint look.
+5. PARKED by your word: the AutoHotkey runner; the order-list kit.
+
+## ✅ DONE AT THE S509 CLOSE — 24-Nov-2026, evening (the Sanjeevni project)
+
+- **The purchase order flow, live 23-Nov evening** (S939, S940): Darpan's final after the old lines; reception only raises; WhatsApp all locked till final; the sent record per dealer; messages at each step; your four steps.
+- **Your "YES FOR ALL"** (S941): late order, reminders, the 20:00 summary, wrong bill with Keep / Send back.
+- Proven 24-Nov: 9 messages, none failed.
 
 ## ✅ DONE AT THE S508 CLOSE — 23-Nov-2026, evening (the Sanjeevni project)
 
