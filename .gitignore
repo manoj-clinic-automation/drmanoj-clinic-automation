@@ -317,3 +317,5 @@ _scratch/
 # S949 (24-Nov-2026, the parent, S516): the legs file S946 left (FROM, the walk's control) and the TO with one leg appended (no numbers; in SUMS.md5). Exact paths.
 !deploy_kits/S949_CALL_LOG_TABLE/freshness_legs.json
 !deploy_kits/S949_CALL_LOG_TABLE/from/freshness_legs.json
+# S955 (25-Nov-2026, the parent, S521): the kit's TO tile_grants.json (v49, logins and tile names only, no numbers; in SUMS.md5). Exact path.
+!deploy_kits/S955_RECEPTION_CONSOLE/to/tile_grants.json

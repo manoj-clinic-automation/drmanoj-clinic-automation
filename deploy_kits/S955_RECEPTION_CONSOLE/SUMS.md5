@@ -1,0 +1,11 @@
+f7ee837e7163dea2b6502401a8f7cf69  ./KIT_ID.txt
+ef297ad256a182ad7a92ea09c38445f0  ./TO_PINS.md5
+0912445b2ccc5cc3f7b95bc077190cc2  ./install_S955_RECEPTION_CONSOLE.sh
+c6b2be604a7a8a48057074ace7c3d846  ./make_s955.py
+c332a74f91d62be501ab837a609d6bf8  ./rehearse_s955.sh
+a93cdc86b9870e6c6f92738cd95a2b22  ./to/calls_staff.py
+8a3cff12f66f5ad1ef73627b49091599  ./to/tile_grants.json
+47d4f942f2f0785e089faf8b9f2d546e  ./walk_s948.py
+dcad97e0e3cd2e3f71e3682bed31cb6c  ./walk_s951.py
+0b59494b6be18b31b73f201af4f70a76  ./walk_s953.py
+fe7af0abe34b2f4600a9ba9fd96fff2e  ./walk_s955.py
