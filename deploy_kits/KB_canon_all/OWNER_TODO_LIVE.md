@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S524 close** (the parent, Opus, full EOS), 26-Nov-2026, midday — the parent's sections refreshed here (staff WhatsApp replies; the morning match next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S522 close** (the Sanjeevni chat, full EOS), 26-Nov-2026, midday — the Sanjeevni sections refreshed here (Darpan's lists; KT ROS DT on Amir's card); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S524 close** (the parent, Opus, full EOS), 26-Nov-2026, midday — the parent's sections refreshed here (staff WhatsApp replies; the morning match next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S523 close** (the parent, Opus, full EOS), 26-Nov-2026, morning — the parent's sections refreshed here (the punch door and presence); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S521 close** (the parent, Opus, full EOS), 25-Nov-2026, evening — the parent's sections refreshed here (the reception mobile on My Call Console); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S519 close** (the Sanjeevni chat, full EOS), 25-Nov-2026, evening — the Sanjeevni sections refreshed here (the stock fix live; Amir's three); the other projects' sections as their closes left them.
@@ -1523,22 +1524,28 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S519 close (25-Nov, 18:5x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S522 close (26-Nov, 12:1x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-2. **Amir — three write-offs Marg never took:** KT ROS DT 10:1 (voucher 14 of 15-10), VINBACTUM DS 25 (voucher 22), NORTIMER TAB 10 (batch 10 never marked entered).
-3. **Ram Singh:** the Stock Register report in Shavez's Marg login; then Shavez's switch on.
-4. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
+2. **Amir — KT ROS DT:** STOCK ISSUE 7 strips 11 tabs in Marg (on his card).
+3. **NORTIMER TAB (when you choose):** Darpan's 23-11 count 2 tablets, Marg 6 strips 2 tablets — the strips with Darpan, or Amir issues 6:0.
+4. **Ram Singh:** the Stock Register report in Shavez's Marg login; then Shavez's switch on.
+5. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S519 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S522 close
 
-1. Watch the stock fix's first days: the 06:40 self-check, Darpan's counts with their words, JAKMAC 5 / MEG QCS / ZUPRINOR 5 from his list.
-2. When you choose: the recount rule's base-day line and split sizes (noted by the S956 review).
+1. Watch Darpan's lists for a few days: the morning list of your counts, his alerts, the "not needed" lines.
+2. The Stock check made short — a mock-up for your look first (tags; corrections not yet in Marg; vouchers taken / not taken on the item page).
 3. Watch the first Marg sheet under the order flow — on your page's "Messages today".
 4. PARKED by your word: the AutoHotkey runner; the order-list kit.
+
+## ✅ DONE AT THE S522 CLOSE — 26-Nov-2026, midday (the Sanjeevni project)
+
+- **09:44** (S957): NORTIMER off the older-loss list; KT ROS DT's 7:11 on Amir's card; VINBACTUM left alone.
+- **11:42** (S958): one "not needed" rule on every list (TOLTRIS PLUS gone); YUVIKA's XL shown as came; your counts on Darpan's phone and his Aaj ka kaam; next-list counts every morning; his alerts land on the right place.
 
 ## ✅ DONE AT THE S519 CLOSE — 25-Nov-2026, evening (the Sanjeevni project)
 
