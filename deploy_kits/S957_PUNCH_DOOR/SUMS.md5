@@ -1,0 +1,16 @@
+dd61a4013c1de0f0dea6a3481eb1e520  ./KIT_ID.txt
+c43fd6b1e2134de618e0763e9b3fe712  ./README.md
+328345bd4c9567516f9004f097b1b19c  ./TO_PINS.md5
+fa10b18d004b8808e989a0b705dfa6bf  ./door_s957.py
+55b0f2c7d930df25e4cf4460ce5e7076  ./install_S957_PUNCH_DOOR.sh
+6cc54f889d91d38519ad2063cb59aee0  ./make_s957.py
+f1b3a860114026df730eee8735209c0a  ./rehearse_s957.sh
+5a512b7dae9e8a7e0c027a2402a2221b  ./to/att_source_summary.py
+6ff1cd2bab3c6333e6d536ced3f15247  ./to/attlistener_v2.py
+8cebe3b3a0257814b5dac96f026747b8  ./to/callback_clock.py
+c5b667b4ee8cfbc9c055160870d4be59  ./to/freshness_legs.json
+6bc7138cd47b234e888a5619adc2ab84  ./to/presence.py
+47d4f942f2f0785e089faf8b9f2d546e  ./walk_s948.py
+dcad97e0e3cd2e3f71e3682bed31cb6c  ./walk_s951.py
+0b59494b6be18b31b73f201af4f70a76  ./walk_s953.py
+7bd0cc7cc4d0d827c69f7559b935a42d  ./walk_s957.py
