@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S523 close** (the parent, Opus, full EOS), 26-Nov-2026, morning — the parent's sections refreshed here (the punch door and presence); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S524 close** (the parent, Opus, full EOS), 26-Nov-2026, midday — the parent's sections refreshed here (staff WhatsApp replies; the morning match next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S523 close** (the parent, Opus, full EOS), 26-Nov-2026, morning — the parent's sections refreshed here (the punch door and presence); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S521 close** (the parent, Opus, full EOS), 25-Nov-2026, evening — the parent's sections refreshed here (the reception mobile on My Call Console); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S519 close** (the Sanjeevni chat, full EOS), 25-Nov-2026, evening — the Sanjeevni sections refreshed here (the stock fix live; Amir's three); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S520 close** (the parent, Opus, full EOS), 25-Nov-2026, evening — the parent's sections refreshed here (the staff reminders on the new Call Console); the other projects' sections as their closes left them.
@@ -534,7 +535,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S523 close (26-Nov, 09:4x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S524 close (26-Nov, 12:0x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -559,6 +560,10 @@ D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S510\S510_CALL_CONSOLE_ROADMAP_v1.md
 ```
 
 **1a06 · A PATIENT'S MOBILE NUMBER WAS IN THE CALL-AUDIT PROGRAMS' TEST DATA — TAKEN OUT (24-Nov), NOTHING TO DO.** It sat in the live programs and in the public code store since the summer (no name with it). Now every test number is plainly made up. Its old copies in the code store's history stay for now — a later session weighs removing them.
+
+**1a14 · THE MORNING MATCH — YOUR LOOK, NEXT SESSION.** A mock-up and the full flow (the evening Docterz match, then the next morning) will be put in front of you before anything is built (your word 11:55 26-Nov).
+
+**1a13 · STAFF REPLY TO WHATSAPP FROM MY CALL CONSOLE — LIVE (11:41 26-Nov), NOTHING TO DO.** On the WhatsApp tab, Reply opens the chat; inside 24 hours they type or tap one of your saved replies; after it only the Enquiry acknowledgement. It goes the same way as your Inbox, with their name — your Inbox shows who answered. Two phones cannot answer one chat at once. Your Accept on a disputed call verdict now reads "Accepted — the verdict was wrong".
 
 **1a12 · ONLY THE ATTENDANCE MACHINE CAN PUNCH — LIVE (09:40 26-Nov), NOTHING TO DO.** The server stores a punch only when it carries the machine's own mark; any other is kept aside (never lost) and the health line "punch door" turns red — tell Claude if you ever see it red. Who is on duty now comes from the punches (the roster stands in when nobody has punched by 09:30 or the machine is silent, never on a closed day); the staff reminders follow it.
 
@@ -687,6 +692,11 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S524 CLOSE — 26-Nov-2026 (the parent, Opus)
+
+- **Staff WhatsApp replies from My Call Console** (11:41): the chat read on the page, a reply inside 24 hours with your saved replies, the Enquiry acknowledgement after it, through your Inbox's own sender with their name; guarded against two answers; reviewed twice before install. Your Accept label fixed.
+- **The morning match analysed** (your word 11:55: the evening check yes; slips missing named; a refund gets a Refunded tag) — the mock-up next session.
 
 ## ✅ DONE AT THE S523 CLOSE — 26-Nov-2026 (the parent, Opus)
 
