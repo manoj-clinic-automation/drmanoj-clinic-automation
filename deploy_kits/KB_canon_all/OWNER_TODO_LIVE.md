@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S527 close** (the parent, Opus, full EOS), 26-Nov-2026, afternoon — the parent's sections refreshed here (the evening check live; kits B and C next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S526 close** (the Sanjeevni chat, EOS-light), 26-Nov-2026, afternoon — the Sanjeevni sections refreshed here (stock vouchers from Marg's own reports designed; NORTIMER his to decide); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S528 close** (the parent, Opus, full EOS), 26-Nov-2026, afternoon — the parent's sections refreshed here (the reception PC sends at once; kit C next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S527 close** (the parent, Opus, full EOS), 26-Nov-2026, afternoon — the parent's sections refreshed here (the evening check live; kits B and C next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S525 close** (the parent, Opus, EOS), 26-Nov-2026, afternoon — the parent's sections refreshed here (the Morning Match approved; the build next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S522 close** (the Sanjeevni chat, full EOS), 26-Nov-2026, midday — the Sanjeevni sections refreshed here (Darpan's lists; KT ROS DT on Amir's card); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S524 close** (the parent, Opus, full EOS), 26-Nov-2026, midday — the parent's sections refreshed here (staff WhatsApp replies; the morning match next); the other projects' sections as their closes left them.
@@ -538,7 +540,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S527 close (26-Nov, 14:3x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S528 close (26-Nov, 15:5x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -548,7 +550,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK — this session's records** (nothing follows it on the server; the kit is already installed):
+**1 · ONE DOUBLE-CLICK — the S527 and S528 records** (nothing follows it on the server; both kits are already installed):
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -564,7 +566,7 @@ D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S510\S510_CALL_CONSOLE_ROADMAP_v1.md
 
 **1a06 · A PATIENT'S MOBILE NUMBER WAS IN THE CALL-AUDIT PROGRAMS' TEST DATA — TAKEN OUT (24-Nov), NOTHING TO DO.** It sat in the live programs and in the public code store since the summer (no name with it). Now every test number is plainly made up. Its old copies in the code store's history stay for now — a later session weighs removing them.
 
-**1a14 · THE MORNING MATCH — THE EVENING CHECK LIVE (14:27 26-Nov), NOTHING TO DO.** From tonight Shavez and reception are told within a minute or two of each export which slips Docterz lacks (or that all are in, then work done); the slip desk shows the list with "Paise nahi liye". Next: the reception PC's straight upload (done remotely), then the morning screen.
+**1a14 · THE MORNING MATCH — THE EVENING CHECK LIVE (14:27) AND THE RECEPTION PC SENDING AT ONCE (15:36 26-Nov, on your YES), NOTHING TO DO.** From tonight Shavez and reception are told within about a minute of each export which slips Docterz lacks (or that all are in, then work done); the slip desk shows the list with "Paise nahi liye". Next: the morning screen (kit C).
 
 **1a13 · STAFF REPLY TO WHATSAPP FROM MY CALL CONSOLE — LIVE (11:41 26-Nov), NOTHING TO DO.** On the WhatsApp tab, Reply opens the chat; inside 24 hours they type or tap one of your saved replies; after it only the Enquiry acknowledgement. It goes the same way as your Inbox, with their name — your Inbox shows who answered. Two phones cannot answer one chat at once. Your Accept on a disputed call verdict now reads "Accepted — the verdict was wrong".
 
@@ -695,6 +697,10 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S528 CLOSE — 26-Nov-2026 (the parent, Opus)
+
+- **The reception PC sends a saved Docterz report about 20–25 seconds later** (15:36, on your YES), instead of waiting for its 5-minute check — the evening reports had been reaching the server only next morning. Sent to the PC by a signed job, checked back on the PC at 15:38; the previous version is kept there; nothing changed for the staff.
 
 ## ✅ DONE AT THE S527 CLOSE — 26-Nov-2026 (the parent, Opus)
 
@@ -1534,23 +1540,27 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S522 close (26-Nov, 12:1x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S526 close (26-Nov, 15:5x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-2. **Amir — KT ROS DT:** STOCK ISSUE 7 strips 11 tabs in Marg (on his card).
-3. **NORTIMER TAB (when you choose):** Darpan's 23-11 count 2 tablets, Marg 6 strips 2 tablets — the strips with Darpan, or Amir issues 6:0.
-4. **Ram Singh:** the Stock Register report in Shavez's Marg login; then Shavez's switch on.
-5. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
+2. **NORTIMER TAB (when you choose):** Amir received 9 strips back into Marg on 25-10 (after you took it out of the count on 12-10); Marg 6 strips 2 tabs, Darpan's 23-11 count 2 tabs.
+3. **Amir — KT ROS DT:** STOCK ISSUE 7 strips 11 tabs in Marg (on his card) — still not keyed.
+4. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S522 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S526 close
 
-1. Watch Darpan's lists for a few days: the morning list of your counts, his alerts, the "not needed" lines.
-2. The Stock check made short — a mock-up for your look first (tags; corrections not yet in Marg; vouchers taken / not taken on the item page).
+1. **Stock vouchers with Marg's own number and date** on the Stock check and the item ledger — the screen for your look first, then the build (your Stock Issue / Stock Receive reports read like your other Marg exports).
+2. Watch Darpan's lists for a few days: the morning list of your counts, his alerts, the "not needed" lines.
 3. Watch the first Marg sheet under the order flow — on your page's "Messages today".
 4. PARKED by your word: the AutoHotkey runner; the order-list kit.
+
+## ✅ DONE AT THE S526 CLOSE — 26-Nov-2026, afternoon (the Sanjeevni project)
+
+- The Stock check mock-up with you (v1 → v3); the first one-item Stock Register read (AXIMAL 200: Amir's voucher L000008 of 15-10 found).
+- Your rule: Marg's Stock Issue and Stock Receive reports for a period, not item registers — both read and checked against every ask (KT ROS DT never keyed; five batch pairs keyed twice; Amir's own 25-10 vouchers incl. NORTIMER).
 
 ## ✅ DONE AT THE S522 CLOSE — 26-Nov-2026, midday (the Sanjeevni project)
 
