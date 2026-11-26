@@ -1,0 +1,4 @@
+19eb5f91a47c878c7d4f10f29770c42f  marg_ingest/signatures.json
+3aa1208b108ce5fce1108af8686251a0  marg_ingest/marg_take.py
+09cd260ae7269404523cd8ba2a0a6eda  marg_ingest/marg_ingest.py
+7bc3df848ff4a8fdb5ba6d978d4496c0  marg_ingest/marg_vouchers.py

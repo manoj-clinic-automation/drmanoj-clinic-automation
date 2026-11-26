@@ -1,0 +1,1 @@
+S963_STOCK_VOUCHERS  Marg's Stock Issue / Stock Receive reports read name-free at the server's door into mi_voucher_file / mi_voucher / mi_voucher_line (+ views); the medical PC's marg_txt S963 (26-Nov-2026, Sanjeevni session 530; D1083, D1084)

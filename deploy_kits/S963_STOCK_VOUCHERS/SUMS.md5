@@ -1,0 +1,11 @@
+a5e01d43188d398897d4a62a2a4264bc  FROM_PINS.md5
+ae84ce9ae1ccbdac4b16d49522798da0  KIT_ID.txt
+90a1a3ed3f7021f54b33db03d079ee49  README.md
+366fe7a2e8c921ec2c4c24458fa10b1e  TO_PINS.md5
+9ab7cfe085a9055726f59ee340992d14  install_S963_STOCK_VOUCHERS.sh
+d5a14f1374d0f3e7e772b9db72cee245  make_s963.py
+7bc3df848ff4a8fdb5ba6d978d4496c0  marg_vouchers.py
+5e9d00fb99a0e395288bbf765228800c  medical/marg_txt.py
+76a7f9a19274e34bf85cc3b1fe3cbf64  rehearse_s963.sh
+7c5439415ede2fcbbcb346de4695137e  undo_s963.sh
+ff6c54971b59ea6db26ebcbeee4fcdee  walk_s963.py
