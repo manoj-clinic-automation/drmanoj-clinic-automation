@@ -394,13 +394,13 @@ def beat_version():
     return json.load(open(os.path.join(root2, "heartbeat.json")))["agent_version"]
 
 
-check("guard starts the agent and a heartbeat appears", wait_for(lambda: beat_version() == "S456.1"))
+check("guard starts the agent and a heartbeat appears", wait_for(lambda: beat_version() == "S961.1"))
 g2 = subprocess.run([py, os.path.join(root2, "agent_guard.py")], cwd=root2, env=env, timeout=30)
 check("a second guard steps aside (one per PC)", g2.returncode == 0 and g.poll() is None)
 put(os.path.join(root2, "jobs", "in", "live.py"), "print('through the running agent')\n")
 check("a job dropped in runs through the live agent",
       wait_for(lambda: "through the running agent" in open(os.path.join(root2, "jobs", "out", "live.py.out.txt")).read()))
-put(os.path.join(root2, "reception_agent.py.new"), agent_src.replace('AGENT_VERSION = "S456.1"', 'AGENT_VERSION = "S449.4-test"'))
+put(os.path.join(root2, "reception_agent.py.new"), agent_src.replace('AGENT_VERSION = "S961.1"', 'AGENT_VERSION = "S449.4-test"'))
 check("a good update is installed and the new version reports in",
       wait_for(lambda: beat_version() == "S449.4-test"))
 check("...and is confirmed (marker gone, .prev kept)",
@@ -411,7 +411,7 @@ check("an update that does not compile is refused and set aside",
       wait_for(lambda: os.path.exists(os.path.join(root2, "reception_agent.py.rejected")))
       and beat_version() == "S449.4-test")
 put(os.path.join(root2, "reception_agent.py.new"),
-    agent_src.replace('AGENT_VERSION = "S456.1"', 'AGENT_VERSION = "S449.5-bad"').replace(
+    agent_src.replace('AGENT_VERSION = "S961.1"', 'AGENT_VERSION = "S449.5-bad"').replace(
         "def main():\n    quiet_errors()", "def main():\n    raise RuntimeError('dies at start')\n    quiet_errors()"))
 check("an update that compiles but dies is ROLLED BACK by the guard",
       wait_for(lambda: os.path.exists(os.path.join(root2, "reception_agent.py.failed"))
@@ -538,7 +538,7 @@ st6 = m6.new_state()
 beat6, _ = m6.build_beat(st6, cfg6)
 m6.direct_pass(st6, cfg6, beat6)
 check("the heartbeat reaches the server, signed, and is the same heartbeat",
-      len(GOT["beats"]) == 1 and GOT["beats"][0]["agent_version"] == "S456.1" and st6["upload"]["ok_at"])
+      len(GOT["beats"]) == 1 and GOT["beats"][0]["agent_version"] == "S961.1" and st6["upload"]["ok_at"])
 check("both reports are sent, each once, under a clean name",
       sorted(n for n, _ in GOT["reports"]) == ["consultation_report_2031-01-07.csv", "followup_logs (3).csv"]
       and st6["upload"]["reports_sent"] == 2, GOT["reports"])

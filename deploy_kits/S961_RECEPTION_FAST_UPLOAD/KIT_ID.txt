@@ -1,0 +1,2 @@
+S961_RECEPTION_FAST_UPLOAD -- session 528, 26-Nov-2026 -- D1080 kit B, F-1687. Reception agent S456.1 d3d4b67b -> S961.1 5896d665.
+Placed on the reception PC by signed job j48 (server door) at 15:36 IST 26-Nov, on the owner's YES (15:35); read back by j49.
