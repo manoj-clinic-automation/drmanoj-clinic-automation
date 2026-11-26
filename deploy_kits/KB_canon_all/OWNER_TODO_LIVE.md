@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S526 close** (the Sanjeevni chat, EOS-light), 26-Nov-2026, afternoon — the Sanjeevni sections refreshed here (stock vouchers from Marg's own reports designed; NORTIMER his to decide); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S529 close** (the parent, Opus, full EOS), 26-Nov-2026, afternoon — the parent's sections refreshed here (the Morning Match live; part 2 for your look); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S526 close** (the Sanjeevni chat, EOS-light), 26-Nov-2026, afternoon — the Sanjeevni sections refreshed here (stock vouchers from Marg's own reports designed; NORTIMER his to decide); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S528 close** (the parent, Opus, full EOS), 26-Nov-2026, afternoon — the parent's sections refreshed here (the reception PC sends at once; kit C next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S527 close** (the parent, Opus, full EOS), 26-Nov-2026, afternoon — the parent's sections refreshed here (the evening check live; kits B and C next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S525 close** (the parent, Opus, EOS), 26-Nov-2026, afternoon — the parent's sections refreshed here (the Morning Match approved; the build next); the other projects' sections as their closes left them.
@@ -540,7 +541,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S528 close (26-Nov, 15:5x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S529 close (26-Nov, 16:5x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -550,7 +551,7 @@ https://claude.ai/artifact/EtwtRpK4nAbmY98KB4yijk
 
 **NOW**
 
-**1 · ONE DOUBLE-CLICK — the S527 and S528 records** (nothing follows it on the server; both kits are already installed):
+**1 · ONE DOUBLE-CLICK — this session's records** (nothing follows it on the server; the kit is already installed):
 
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
@@ -566,7 +567,7 @@ D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S510\S510_CALL_CONSOLE_ROADMAP_v1.md
 
 **1a06 · A PATIENT'S MOBILE NUMBER WAS IN THE CALL-AUDIT PROGRAMS' TEST DATA — TAKEN OUT (24-Nov), NOTHING TO DO.** It sat in the live programs and in the public code store since the summer (no name with it). Now every test number is plainly made up. Its old copies in the code store's history stay for now — a later session weighs removing them.
 
-**1a14 · THE MORNING MATCH — THE EVENING CHECK LIVE (14:27) AND THE RECEPTION PC SENDING AT ONCE (15:36 26-Nov, on your YES), NOTHING TO DO.** From tonight Shavez and reception are told within about a minute of each export which slips Docterz lacks (or that all are in, then work done); the slip desk shows the list with "Paise nahi liye". Next: the morning screen (kit C).
+**1a14 · THE MORNING MATCH — LIVE (the evening check 14:27, the reception PC sending at once 15:36, the morning screen 16:44 26-Nov), NOTHING TO DO.** The morning day check now matches refunds and radd both ways, sends slips missing from Docterz to your back-date list by itself (no 'Added' for Shavez), shows the day in one line, and lets Shavez remind you once in three hours. Next for your look: the register's own refund line (part 2).
 
 **1a13 · STAFF REPLY TO WHATSAPP FROM MY CALL CONSOLE — LIVE (11:41 26-Nov), NOTHING TO DO.** On the WhatsApp tab, Reply opens the chat; inside 24 hours they type or tap one of your saved replies; after it only the Enquiry acknowledgement. It goes the same way as your Inbox, with their name — your Inbox shows who answered. Two phones cannot answer one chat at once. Your Accept on a disputed call verdict now reads "Accepted — the verdict was wrong".
 
@@ -697,6 +698,10 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S529 CLOSE — 26-Nov-2026 (the parent, Opus)
+
+- **The morning day check became the Morning Match** (16:44, your one line): refunds and radd matched whether Docterz kept the bill or cancelled it; slips missing from Docterz on your back-date list by themselves; Shavez's "Paise liye hi nahi" and "Dr sahab ko yaad dilayein"; the day in one line; your console line "all matched"; the desk's "Fee lautai" asks Cash or UPI and tags the slip Refunded at once.
 
 ## ✅ DONE AT THE S528 CLOSE — 26-Nov-2026 (the parent, Opus)
 
