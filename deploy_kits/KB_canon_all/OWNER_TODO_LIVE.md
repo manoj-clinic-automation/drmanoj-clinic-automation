@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S525 close** (the parent, Opus, EOS), 26-Nov-2026, afternoon — the parent's sections refreshed here (the Morning Match approved; the build next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S527 close** (the parent, Opus, full EOS), 26-Nov-2026, afternoon — the parent's sections refreshed here (the evening check live; kits B and C next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S525 close** (the parent, Opus, EOS), 26-Nov-2026, afternoon — the parent's sections refreshed here (the Morning Match approved; the build next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S522 close** (the Sanjeevni chat, full EOS), 26-Nov-2026, midday — the Sanjeevni sections refreshed here (Darpan's lists; KT ROS DT on Amir's card); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S524 close** (the parent, Opus, full EOS), 26-Nov-2026, midday — the parent's sections refreshed here (staff WhatsApp replies; the morning match next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S523 close** (the parent, Opus, full EOS), 26-Nov-2026, morning — the parent's sections refreshed here (the punch door and presence); the other projects' sections as their closes left them.
@@ -537,7 +538,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S525 close (26-Nov, 13:0x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S527 close (26-Nov, 14:3x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -563,7 +564,7 @@ D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S510\S510_CALL_CONSOLE_ROADMAP_v1.md
 
 **1a06 · A PATIENT'S MOBILE NUMBER WAS IN THE CALL-AUDIT PROGRAMS' TEST DATA — TAKEN OUT (24-Nov), NOTHING TO DO.** It sat in the live programs and in the public code store since the summer (no name with it). Now every test number is plainly made up. Its old copies in the code store's history stay for now — a later session weighs removing them.
 
-**1a14 · THE MORNING MATCH — APPROVED (your ok 12:58 26-Nov), THE BUILD NEXT SESSION, NOTHING TO DO NOW.** The evening notification to Shavez and reception in about a minute (all good, or the missing slips by name, then work done); a refund tagged and matched; no Cash / UPI in the morning; missing slips on your back-date list by themselves, Shavez sees it to remind you. The reception PC fix is done remotely.
+**1a14 · THE MORNING MATCH — THE EVENING CHECK LIVE (14:27 26-Nov), NOTHING TO DO.** From tonight Shavez and reception are told within a minute or two of each export which slips Docterz lacks (or that all are in, then work done); the slip desk shows the list with "Paise nahi liye". Next: the reception PC's straight upload (done remotely), then the morning screen.
 
 **1a13 · STAFF REPLY TO WHATSAPP FROM MY CALL CONSOLE — LIVE (11:41 26-Nov), NOTHING TO DO.** On the WhatsApp tab, Reply opens the chat; inside 24 hours they type or tap one of your saved replies; after it only the Enquiry acknowledgement. It goes the same way as your Inbox, with their name — your Inbox shows who answered. Two phones cannot answer one chat at once. Your Accept on a disputed call verdict now reads "Accepted — the verdict was wrong".
 
@@ -694,6 +695,10 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S527 CLOSE — 26-Nov-2026 (the parent, Opus)
+
+- **The evening check built and live** (14:27, your publish + one line): the push to Shavez and reception on each evening export, the list on the slip desk with "Paise nahi liye", the Drive pickup every minute at closing. Checked against your own Not-in-Docterz list before switching on: it named nothing your list does not.
 
 ## ✅ DONE AT THE S525 CLOSE — 26-Nov-2026 (the parent, Opus)
 
