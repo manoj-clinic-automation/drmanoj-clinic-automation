@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S519 close** (the Sanjeevni chat, full EOS), 25-Nov-2026, evening — the Sanjeevni sections refreshed here (the stock fix live; Amir's three); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S521 close** (the parent, Opus, full EOS), 25-Nov-2026, evening — the parent's sections refreshed here (the reception mobile on My Call Console); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S519 close** (the Sanjeevni chat, full EOS), 25-Nov-2026, evening — the Sanjeevni sections refreshed here (the stock fix live; Amir's three); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S520 close** (the parent, Opus, full EOS), 25-Nov-2026, evening — the parent's sections refreshed here (the staff reminders on the new Call Console); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S517 close** (the parent, Opus, full EOS), 25-Nov-2026, midday — the parent's sections refreshed here (yesterday's missed calls on today's staff lists); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S518 close** (the Sanjeevni chat, full EOS), 25-Nov-2026, noon — the Sanjeevni sections refreshed here (the two repairs live; TYRO BR explained; your yes to kit S952); the other projects' sections as their closes left them.
@@ -532,7 +533,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S520 close (25-Nov, 17:1x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S521 close (25-Nov, 19:1x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -558,7 +559,9 @@ D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S510\S510_CALL_CONSOLE_ROADMAP_v1.md
 
 **1a06 · A PATIENT'S MOBILE NUMBER WAS IN THE CALL-AUDIT PROGRAMS' TEST DATA — TAKEN OUT (24-Nov), NOTHING TO DO.** It sat in the live programs and in the public code store since the summer (no name with it). Now every test number is plainly made up. Its old copies in the code store's history stay for now — a later session weighs removing them.
 
-**1a10 · STAFF REMINDERS OPEN THE NEW CALL CONSOLE — LIVE (17:03 25-Nov), NOTHING TO DO.** A call-back reminder's tap opens My Call Console on the right tab; the 30/60-minute reminders cover yesterday's missed callers too; "Call again due" and "WhatsApp waiting" go to the phone staff on duty. The reception mobile keeps the old page until it is admitted (your word 17:05 — first next session).
+**1a11 · THE RECEPTION MOBILE ON MY CALL CONSOLE — LIVE (18:41 25-Nov), NOTHING TO DO.** Signed in as reception, the phone opens My Call Console (tile on its home screen); its Handled today shows every call on the reception mobile today with the call verdict (no Wrong?, no recording — those stay on the credited person's page); its call-back reminders open this page. The first day of the reminders: 26 runs, none failed.
+
+**1a10 · STAFF REMINDERS OPEN THE NEW CALL CONSOLE — LIVE (17:03 25-Nov), NOTHING TO DO.** A call-back reminder's tap opens My Call Console on the right tab; the 30/60-minute reminders cover yesterday's missed callers too; "Call again due" and "WhatsApp waiting" go to the phone staff on duty. The reception mobile now opens it too (1a11).
 
 **1a09 · YESTERDAY'S MISSED CALLS ON TODAY'S STAFF LISTS — LIVE (11:33 25-Nov), NOTHING TO DO.** Every missed call of yesterday nobody got through to, who did not WhatsApp, and who has not visited (Docterz) is on the staff's Incoming missed / Call again / Evening lists; from 9 pm it reads "Missed after hours". **Next session, your order (13:09):** the staff alerts open the new console (plus Call again due and WhatsApp waiting), then the attendance machine for who is on duty, then the staff WhatsApp replies. The new-number screen comes to you for a look first.
 
@@ -681,6 +684,10 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S521 CLOSE — 25-Nov-2026 (the parent, Opus)
+
+- **The reception mobile on My Call Console** (18:41): admitted, its tile, its own Handled today, its reminders land there; reviewed twice before install. The reminders' first day read: 26 runs, 0 failed.
 
 ## ✅ DONE AT THE S520 CLOSE — 25-Nov-2026 (the parent, Opus)
 
