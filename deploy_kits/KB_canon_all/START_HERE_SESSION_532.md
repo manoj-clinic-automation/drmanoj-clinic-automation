@@ -1,0 +1,18 @@
+# START HERE — SESSION 532 — written at the S530 close (the Sanjeevni chat), 26-Nov-2026 18:4x IST
+
+**Project: Sanjeevni — Pharmacy & Marg.** Open it in a fresh chat in this project, linked to manojz. Session **532 is RESERVED** for this chat — take it by ONE `db_str_replace` on `board/_numbers` `session_note` (old_str = the end of the newest line). Counters at this close: `D1088 · F-1703 · A-D151 · kit S965 · session 533`. **Read a counter before writing it (F-1680)** — `db_query` on `board` with a `where` on an integer field returns the document once; a pinned `update` refused means re-read.
+
+1. **The open:** `OPEN_ROUTINE_v1` — never `git` in the device shell; finance.db copies only in the device VM `/tmp` (D656). The day's checks (`python D:\Downloads\_kbtools\day_open.py --read`; run it from the VM with `--tools/--repo/--kb/--ssd/--roots` on `$HOME/mnt/...` when the page is not today's). Remind him once of the packs page (D713). The 27-Nov bundle should CONFIRM S963 / S964's four server files (`live_pins_S530close.txt`) and S957 / S958's.
+2. **Read first:** the Runbook §2B (S530), `S526_STOCK_VOUCHERS_DESIGN.md` §3 – §5 (the judge), `S530_BUILD_BRIEF.md`, `deploy_kits\S963_STOCK_VOUCHERS\README.md` (what the door keeps and how), mock-up v4 `https://claude.ai/artifact/W3U9BfeW9K5QKpsgZ6YoqF` (the look he approved, with his D1086: voucher lines inline, collapsed, expandable).
+3. **THE JUDGE AND THE TWO SCREENS (D1083, D1086; F-1690 – F-1692, F-1701, F-1702)** — Runbook §2B item 0.
+   a. **Kit number** from `board/_numbers` before the scratch folder; PLANNED lines: `/root/finance/stock_check.py` + the item ledger page (`item_ledger.py`, S845) + whatever the judge needs — Sanjeevni's own.
+   b. **The data is on the box:** `mi_voucher_now` / `mi_voucher_line_now` (ISSUE 37 / 181; RECEIVE 16 / 73; the 11-14 Nov issue 5 / 23). Read them on the 27-Nov database copy in the device VM first (counts + item names; no person's detail exists there).
+   c. **Read the live bytes** of `stock_check.py`, `item_ledger.py` and the asks' tables' writers from the newest bundle (F-472); one make script from the FROM bytes.
+   d. **The judge** (§2B item 0's states, batch for batch), then **the screens** as mock-up v4 with each voucher folded inline; F-1690's unasked register shown; F-1701 (the export's own stamp) in `marg_vouchers` / the hooks; F-1702 (the PC's report list) as a Drive `_kit` delivery — the folder `H:\My Drive\Clinic Data Archive\ToMedical` is his connected folder (he added it 26-Nov 17:10); write by the file tools, FROM read first, superseded copy beside, manifest line, read back, the heartbeat.
+   e. **Show him the screen fed by the live data before placing** (his rule: his look first).
+4. **Watch S958's first days (no build):** by a sub-agent, item names only.
+5. **Then the backlog** in §2B's order.
+
+**Kit pattern reminders:** the walk's layout carries the vendored `/root/marg_ingest/xlrd/` and [1/n] proves `/root/wa/venv`'s import (F-1698); every shape check measured on every real line (F-1699); a made-up root for the rehearsal with a python that has no `xlrd` of its own; cold review + second look by separate agents for a big kit; number gate `--files-from`; his publish + one server line; a live read by a sub-agent. Patterns: `deploy_kits\S963_STOCK_VOUCHERS\`, `deploy_kits\S964_VOUCHER_NAME_SHAPE\`, `deploy_kits\S958_DARPAN_LISTS\`, `deploy_kits\S845_ITEM_LEDGER\`.
+
+**Close:** `CLOSE_ROUTINE_v1` — copy `03_WORKING_PAPERS\S530\close_parts\mk_close_s530.py`, change what changed; `close_build.py` then `--place`; one board batch; project knowledge gets the entry point, the brief, the close report; the publish named once.
