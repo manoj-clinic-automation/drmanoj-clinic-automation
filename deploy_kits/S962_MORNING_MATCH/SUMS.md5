@@ -1,0 +1,11 @@
+4350fbde7fee98656827b0b2a774c040  ./KIT_ID.txt
+13d85efc54b844fb2746665486b89331  ./README.md
+2645ede7e462307273f50540e0ba601a  ./TO_PINS.md5
+84630aed7053eb6453b44cc212aef706  ./install_S962_MORNING_MATCH.sh
+d72ccc95fddc62e3781817cf87cdb877  ./make_s962.py
+f89303028ae0f3885d3a296e8214650c  ./probe_s962.py
+e07864d48fab0d65ae647f14a0847920  ./rehearse_s962.sh
+6f17979a3e108b2e61f427b44aa78b96  ./to/day_check.py
+7d44cf3e4d99e1ea35b7a729a7da4090  ./to/slip_adjust.py
+3395e71cb0c7694c8f1aeefe5bea9ac6  ./to/slip_log.py
+1e6c27c8d0cd8870772e9c11271d2bdc  ./walk_s962.py
