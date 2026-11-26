@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S530 close** (the Sanjeevni chat, full EOS), 26-Nov-2026, evening — the Sanjeevni sections refreshed here (Marg's stock vouchers now reach the server; the screens next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S532 close** (the Sanjeevni chat, full EOS), 26-Nov-2026, night — the Sanjeevni sections refreshed here (Marg's stock vouchers judged on the Stock check and the item ledger); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S530 close** (the Sanjeevni chat, full EOS), 26-Nov-2026, evening — the Sanjeevni sections refreshed here (Marg's stock vouchers now reach the server; the screens next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S529 close** (the parent, Opus, full EOS), 26-Nov-2026, afternoon — the parent's sections refreshed here (the Morning Match live; part 2 for your look); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S526 close** (the Sanjeevni chat, EOS-light), 26-Nov-2026, afternoon — the Sanjeevni sections refreshed here (stock vouchers from Marg's own reports designed; NORTIMER his to decide); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S528 close** (the parent, Opus, full EOS), 26-Nov-2026, afternoon — the parent's sections refreshed here (the reception PC sends at once; kit C next); the other projects' sections as their closes left them.
@@ -1546,22 +1547,26 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S530 close (26-Nov, 18:4x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S532 close (26-Nov, 21:xx)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-2. **NORTIMER TAB (when you choose):** Amir received 9 strips back into Marg on 25-10 (after you took it out of the count on 12-10); Marg 6 strips 2 tabs, Darpan's 23-11 count 2 tabs.
-3. **Amir — KT ROS DT:** STOCK ISSUE 7 strips 11 tabs in Marg (on his card) — still not keyed in today's Stock Issue report.
-4. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
+2. **NORTIMER TAB (when you choose):** Amir received 9 strips back into Marg on 25-10 (AD00010, now on your Stock check as "nobody asked") after you took it out of the count on 12-10.
+3. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S530 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S532 close
 
-1. **The Stock check and item ledger screens you approved (mock-up v4)** on the stored vouchers: the two boxes, Marg's voucher number and date, each voucher's lines folded shut and opening on tap — shown to you on the live data before it goes in.
-2. Watch Darpan's lists for a few days: the morning list of your counts, his alerts, the "not needed" lines.
-3. Watch the first Marg sheet under the order flow — on your page's "Messages today".
-4. PARKED by your word: the AutoHotkey runner; the order-list kit.
+1. Watch the voucher boxes for a few days, and after your next Stock Issue / Receive export.
+2. Asking Amir from a voucher card (the Marg watch's Ask) — the wrong-batch and twice-keyed fixes, KT ROS DT, the two KNEE SUPPORT HINGED receives — mock-up first.
+3. The medical PC files these reports under "unknown" in its own archive (cosmetic) — needs its Drive kit folder connected.
+4. Watch Darpan's lists and the order flow, as before. PARKED by your word: the AutoHotkey runner; the order-list kit.
+
+## ✅ DONE AT THE S532 CLOSE — 26-Nov-2026, evening (the Sanjeevni project)
+
+- Your look at mock-up v5 (the real vouchers) and your "Ok"; AD00010's two lines named from your Marg screen.
+- Stock check and the item ledger now judge every Marg voucher against what was asked (S965), live 21:03.
 
 ## ✅ DONE AT THE S530 CLOSE — 26-Nov-2026, evening (the Sanjeevni project)
 
