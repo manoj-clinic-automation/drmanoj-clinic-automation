@@ -49,6 +49,7 @@ restore() { say "!! RED after placing ($1) - putting the three files back and ta
 lay() { local d="$SCR/root_$1"; rm -rf "$d"; mkdir -p "$d/marg_ingest/lib" \
   && find "$ROOT/marg_ingest" -maxdepth 1 -type f \( -name '*.py' -o -name '*.json' \) -exec cp -p {} "$d/marg_ingest/" \; \
   && { \cp -p "$ROOT"/marg_ingest/lib/*.py "$d/marg_ingest/lib/" 2>/dev/null; true; } && rm -f "$d/marg_ingest/marg_vouchers.py" \
+  && { [ ! -d "$ROOT/marg_ingest/xlrd" ] || \cp -rp "$ROOT/marg_ingest/xlrd" "$d/marg_ingest/xlrd"; } \
   && [ -f "$d/marg_ingest/marg_take.py" ]; }
 walk() { (cd /tmp && TMPDIR="$SCR" PYTHONPYCACHEPREFIX="$SCR/pyc" timeout 300 "$VPY" -W ignore -B "$KDIR/walk_s963.py" "$1" "$KDIR" 2>&1); }
 full() { case "$1" in "WALK "*) local a=${1#WALK }; [ "${a%/*}" = "${a#*/}" ];; *) return 1;; esac; }
@@ -59,6 +60,8 @@ md5sum -c SUMS.md5 >/dev/null 2>&1 || { say "!! [1/6] SUMS.md5 gate failed - kit
 for n in $NAMES $NEW; do [ -n "$(to_of "$n")" ] || { say "!! [1/6] no TO pin for $n - nothing installed"; exit 1; }; done
 for n in $NAMES; do [ -f "$ROOT/$n" ] || { say "!! [1/6] the live file $ROOT/$n is missing - nothing installed"; exit 1; }; done
 [ -f "$DB" ] || { say "!! [1/6] $DB missing - nothing installed"; exit 1; }
+(cd /tmp && PYTHONPYCACHEPREFIX="${TMPW:-/tmp}/s963_pyc_$$" "$VPY" -B -c "import sys; sys.path.insert(0, sys.argv[1]); import xlrd" "$ROOT/marg_ingest") >/dev/null 2>&1 \
+  || { say "!! [1/6] $VPY cannot import xlrd beside $ROOT/marg_ingest (the collector's own copy) - nothing installed. Tell Claude."; exit 1; }
 ALL=1; for n in $NAMES $NEW; do [ "$(m5 "$ROOT/$n")" = "$(to_of "$n")" ] || ALL=0; done
 [ "$ALL" = 1 ] && { say "-- $KIT is ALREADY INSTALLED - nothing to do."; exit 0; }
 [ -e "$ROOT/$NEW" ] && { say "!! [1/6] $ROOT/$NEW already exists and is not this kit's - nothing installed. Tell Claude."; exit 1; }

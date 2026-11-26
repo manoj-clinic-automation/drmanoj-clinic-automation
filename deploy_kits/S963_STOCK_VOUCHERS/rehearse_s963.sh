@@ -7,10 +7,11 @@ m5() { md5sum "$1" 2>/dev/null | awk '{print $1}'; }
 ok() { N=$((N+1)); if [ "$1" = 0 ]; then PASS=$((PASS+1)); echo "PASS $2"; else echo "FAIL $2"; fi; }
 fresh() { rm -rf "$W/root"; mkdir -p "$W/root/marg_ingest/lib" "$W/root/finance"; cp -p "$F"/*.py "$F"/*.json "$W/root/marg_ingest/" 2>/dev/null
   rm -f "$W/root/marg_ingest/marg_vouchers.py"; cp -p "$F"/lib/*.py "$W/root/marg_ingest/lib/" 2>/dev/null
+  [ ! -d "$F/xlrd" ] || cp -rp "$F/xlrd" "$W/root/marg_ingest/xlrd"
   python3 -c "import sqlite3,sys;sqlite3.connect(sys.argv[1]).execute('CREATE TABLE IF NOT EXISTS x(a)')" "$W/root/finance/finance.db"; }
 printf '#!/bin/bash\necho 200\n' > "$W/hz"; chmod +x "$W/hz"
 run() { (export ROOT="$W/root" DB="$W/root/finance/finance.db" LOCK="$W/build.lock" MLOCK="$W/mi.lock" SYSTEMCTL=true HEALTH_CMD="$W/hz" NAP=0 \
-  APY=python3 VPY=python3 TMPW="$W"; "$@"); }
+  APY=python3 VPY="${VPY:-python3}" TMPW="$W"; "$@"); }
 at_from() { for n in signatures.json marg_take.py marg_ingest.py; do [ "$(m5 "$W/root/marg_ingest/$n")" = "$(awk -v f="marg_ingest/$n" '$2==f{print $1}' "$K/FROM_PINS.md5")" ] || return 1; done; [ ! -e "$W/root/marg_ingest/marg_vouchers.py" ]; }
 at_to() { for n in signatures.json marg_take.py marg_ingest.py marg_vouchers.py; do [ "$(m5 "$W/root/marg_ingest/$n")" = "$(awk -v f="marg_ingest/$n" '$2==f{print $1}' "$K/TO_PINS.md5")" ] || return 1; done; }
 INST="$K/install_S963_STOCK_VOUCHERS.sh"

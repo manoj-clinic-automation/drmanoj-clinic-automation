@@ -67,3 +67,9 @@ sheet it finds not read deletes the file and marks it not kept, as the door does
 every stamped export (a stale hand upload never wins); a missing or changed archive file is marked, so it never blocks the sheets behind
 it; the batch needs no digit and no packing test (the column rule alone decides -- a batch NA or TYNOR is read, not refused). The
 server's shape checks are a backstop; the medical PC is the guard against a name. Both real reports still identical (254 lines).
+
+**First server run, 17:00 IST 26-Nov — stopped itself at [3/6], nothing installed:** the walk's scratch layout copied only the loose files
+of `/root/marg_ingest`, not the collector's own vendored `xlrd/` folder, and the box's venv has no `xlrd` of its own -> the walk could
+not open any .xls (2/11). A walk fault, not the door's: the live collector imports `xlrd` from beside itself. Fixed: the layout copies
+`xlrd/`; [1/6] now proves the venv imports `xlrd` from beside `/root/marg_ingest` before anything else. Rehearsal 12/12 with a Python
+that has no `xlrd` of its own (as on the box); without the vendored folder it refuses at [1/6].
