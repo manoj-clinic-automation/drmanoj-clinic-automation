@@ -265,6 +265,7 @@ def part_c(d):
     sil = os.path.join(tmp, "sil.json")
     os.environ["PRESENCE_SILENCE_STATE"] = sil
     os.environ["SR_DB_PATH"] = os.path.join(tmp, "absent.db")   # never the real staff register
+    os.environ.update({"SR_STAFF_MASTER": m, "SR_PUNCH_CSV": pf})   # never the box's real staff list or punch file (the S523 box run)
     os.environ.pop("PORTAL_PRESENCE_ROSTER", None)
     D = "2026-11-25"                                     # a Wednesday
 
