@@ -1,0 +1,10 @@
+83c4f54c31e2055651fbd90a66dde8fa  KIT_ID.txt
+d3d5a15225e9e5f5a4aba44363895929  TO_PINS.md5
+cd056191a376d3184c84b1cfae110cbc  install_S965_VOUCHER_JUDGE.sh
+074ceeea3cad62c3af62aa99d21e961c  undo_s965.sh
+6a74d12d28a8bb5d511c8d8951eb512f  walk_s965.py
+83bbed0dc396573fa2d0a53d2e12ba93  stock_check.py
+69d1fabe4848d7f0fda5828eb12fb176  stock_check.html
+fe31f2c3a5c41412ccbfc7746a255b89  item_ledger.py
+81d04b411db72820932835c7a43024cf  voucher_judge.py
+0f9b2f0ab1922759a853ec6b5bfc0d00  marg_vouchers.py

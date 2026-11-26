@@ -1,0 +1,5 @@
+83bbed0dc396573fa2d0a53d2e12ba93 finance/stock_check.py
+69d1fabe4848d7f0fda5828eb12fb176 finance/stock_check.html
+fe31f2c3a5c41412ccbfc7746a255b89 finance/item_ledger.py
+81d04b411db72820932835c7a43024cf finance/voucher_judge.py
+0f9b2f0ab1922759a853ec6b5bfc0d00 marg_ingest/marg_vouchers.py
