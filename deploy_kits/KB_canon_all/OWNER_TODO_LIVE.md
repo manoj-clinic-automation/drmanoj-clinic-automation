@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S521 close** (the parent, Opus, full EOS), 25-Nov-2026, evening — the parent's sections refreshed here (the reception mobile on My Call Console); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S523 close** (the parent, Opus, full EOS), 26-Nov-2026, morning — the parent's sections refreshed here (the punch door and presence); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S521 close** (the parent, Opus, full EOS), 25-Nov-2026, evening — the parent's sections refreshed here (the reception mobile on My Call Console); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S519 close** (the Sanjeevni chat, full EOS), 25-Nov-2026, evening — the Sanjeevni sections refreshed here (the stock fix live; Amir's three); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S520 close** (the parent, Opus, full EOS), 25-Nov-2026, evening — the parent's sections refreshed here (the staff reminders on the new Call Console); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S517 close** (the parent, Opus, full EOS), 25-Nov-2026, midday — the parent's sections refreshed here (yesterday's missed calls on today's staff lists); the other projects' sections as their closes left them.
@@ -533,7 +534,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S521 close (25-Nov, 19:1x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S523 close (26-Nov, 09:4x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -558,6 +559,8 @@ D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S510\S510_CALL_CONSOLE_ROADMAP_v1.md
 ```
 
 **1a06 · A PATIENT'S MOBILE NUMBER WAS IN THE CALL-AUDIT PROGRAMS' TEST DATA — TAKEN OUT (24-Nov), NOTHING TO DO.** It sat in the live programs and in the public code store since the summer (no name with it). Now every test number is plainly made up. Its old copies in the code store's history stay for now — a later session weighs removing them.
+
+**1a12 · ONLY THE ATTENDANCE MACHINE CAN PUNCH — LIVE (09:40 26-Nov), NOTHING TO DO.** The server stores a punch only when it carries the machine's own mark; any other is kept aside (never lost) and the health line "punch door" turns red — tell Claude if you ever see it red. Who is on duty now comes from the punches (the roster stands in when nobody has punched by 09:30 or the machine is silent, never on a closed day); the staff reminders follow it.
 
 **1a11 · THE RECEPTION MOBILE ON MY CALL CONSOLE — LIVE (18:41 25-Nov), NOTHING TO DO.** Signed in as reception, the phone opens My Call Console (tile on its home screen); its Handled today shows every call on the reception mobile today with the call verdict (no Wrong?, no recording — those stay on the credited person's page); its call-back reminders open this page. The first day of the reminders: 26 runs, none failed.
 
@@ -684,6 +687,10 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S523 CLOSE — 26-Nov-2026 (the parent, Opus)
+
+- **The punch door shut and presence by punch** (09:40): only the machine's own punches stored, any other kept aside and shown red; who is on duty from the punches with the roster fallback; the machine's serial no longer in the nightly backup file; reviewed twice before install; the first install stopped itself on a test fault and the second went in.
 
 ## ✅ DONE AT THE S521 CLOSE — 25-Nov-2026 (the parent, Opus)
 

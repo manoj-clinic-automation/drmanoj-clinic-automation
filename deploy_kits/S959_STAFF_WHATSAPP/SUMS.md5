@@ -1,0 +1,16 @@
+b1038189e32290ff6b33f5b27c4b799b  ./KIT_ID.txt
+c4bbfd2da0bf83d6f3d3848ce056e7d6  ./TO_PINS.md5
+c1bd1888f94c86ae16eb36a78cceaae5  ./install_S959_STAFF_WHATSAPP.sh
+c60614e3da003829b7e060ee4c7726b6  ./make_s959.py
+67ad53afc67fa8afb35c3438da4ac221  ./cs_parts.py
+8a4adc3debfa0743b4136759d3072768  ./pi_block.txt
+286307ace509b818db8ff9186c9d0a38  ./probe_s959.py
+72af5be48106c86815eb7e828084627d  ./walk_s959.py
+47d4f942f2f0785e089faf8b9f2d546e  ./walk_s948.py
+dcad97e0e3cd2e3f71e3682bed31cb6c  ./walk_s951.py
+0b59494b6be18b31b73f201af4f70a76  ./walk_s953.py
+fe7af0abe34b2f4600a9ba9fd96fff2e  ./walk_s955.py
+eea5900421df98599beb3faee76f2282  ./rehearse_s959.sh
+190238220e8ee5e309c7bc1c650e9ee5  ./to/calls_console.py
+9e2ae6419039388e615ad1b570ca4924  ./to/calls_staff.py
+1c1fc915c53a589150ce6653e71b80b3  ./to/portal_inbox.py

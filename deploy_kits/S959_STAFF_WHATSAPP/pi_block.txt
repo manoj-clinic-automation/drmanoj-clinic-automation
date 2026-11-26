@@ -1,0 +1,270 @@
+
+
+# =========================================================================== S959 (B2 · the parent S524 · 26-Nov-2026)
+# THE STAFF CALL CONSOLE'S WHATSAPP REPLY (roadmap §3 B2). The staff page (calls_staff.py) replies through the three
+# callables below -- the same key (_token), the same send (myop_send), the same send log (log_send, route "staff-console"),
+# the same 24-hour rule (window) and the same retry of a gateway refusal (retry_q, inbox_retry.py) as the text branch of
+# /portal/inbox/api/send above. NOTHING ABOVE THIS LINE IS CHANGED: the owner's Inbox page and its routes keep their bytes.
+# A reply sent here is a row of the same chat (sent_by = the staff login, src "staff-console"), so his Inbox shows it with
+# her name and the owner's "WhatsApp awaiting" counts it as answered. Every function answers a dict and never raises.
+S959_KIT = "S959_STAFF_WHATSAPP"
+STAFF_ROUTE = "staff-console"
+STAFF_CHAT_ROWS = 30
+STAFF_SAME_GAP_S = 120        # another person's reply to this chat in the last 2 minutes, nothing new from the patient: refused
+STAFF_REPEAT_GAP_S = 60       # the same text to the same chat by the same person within a minute: refused (a double tap)
+STAFF_UNSURE_HOLD_S = 600     # a reply whose fate is unknown (no answer from MyOperator) holds the chat for 10 minutes
+STAFF_STUCK_S = 180           # a 'sending' row older than this (a worker killed mid-send) becomes 'unsure'
+
+
+def _s959(ok, msg, code=200, **kw):
+    d = {"ok": bool(ok), "msg": msg, "code": code}
+    d.update(kw)
+    return d
+
+
+def _s959_when(ts):
+    t = parse_ts(ts)
+    if t is None:
+        return ""
+    if t.tzinfo is not None:
+        t = t.astimezone(IST).replace(tzinfo=None)
+    return t.strftime("%H:%M") if t.date() == now_ist().replace(tzinfo=None).date() else t.strftime("%d-%m %H:%M")
+
+
+def staff_chat(phone, limit=STAFF_CHAT_ROWS):
+    """The chat as the staff page shows it, read only: {ok, phone, name, window, msgs, replies}. msgs: the newest `limit`
+    messages, oldest first -- {dir in|out, when, text (a photo / PDF / voice note named, its caption kept), by, st}."""
+    ph = last10(phone)
+    if not ph:
+        return _s959(False, "No number for this chat.", 400)
+    try:
+        ingest()
+        c = db()
+        try:
+            _s959_unstick(c, ph)
+            c.commit()
+            rows = c.execute("SELECT * FROM (SELECT * FROM msgs WHERE phone=? ORDER BY ts DESC, rid DESC LIMIT ?) "
+                             "ORDER BY ts, rid", (ph, int(limit))).fetchall()
+            w = window(c, ph)
+            reps = [{"id": r["id"], "title": r["title"], "body": r["body"]}
+                    for r in c.execute("SELECT id, title, body FROM replies ORDER BY sort, id").fetchall()]
+        finally:
+            c.close()
+        st_h = {"failed": "not sent", "retrying": "retrying", "read": "read", "delivered": "delivered", "pending": "waiting", "sending": "sending", "unsure": "may have gone"}
+        msgs = [{"dir": "out" if r["dir"] == "out" else "in", "when": _s959_when(r["ts"]), "text": preview(r)[:1500],
+                 "by": (r["sent_by"] or "") if r["dir"] == "out" else "",
+                 "st": st_h.get((r["status"] or "").lower(), "") if r["dir"] == "out" else ""} for r in rows]
+        name = (patients().get(ten(ph)) or ("", ""))[0] if len(ph) == 10 else ""
+        return _s959(True, "", phone=ph, name=name, window=w, msgs=msgs, replies=reps, upto=(rows[-1]["ts"] if rows else ""))
+    except Exception as e:                                              # noqa: BLE001
+        return _s959(False, "The chat could not be read just now (%s)." % type(e).__name__, 500)
+
+
+def _s959_aware(t):
+    if t is not None and t.tzinfo is None:
+        t = t.replace(tzinfo=IST)
+    return t
+
+
+def _s959_unstick(c, ph):
+    """A 'sending' row left by a worker killed mid-send never settles: after STAFF_STUCK_S it reads 'unsure' (it may have
+    gone), which the guard treats as an answer for STAFF_UNSURE_HOLD_S and the owner's page as a reply not confirmed."""
+    cut = iso(now_ist() - datetime.timedelta(seconds=STAFF_STUCK_S))
+    c.execute("UPDATE msgs SET status='unsure' WHERE phone=? AND dir='out' AND status='sending' AND src=? AND ts<?",
+              (ph, STAFF_ROUTE, cut))
+
+
+def _s959_guard(c, ph, user, text, seen_upto, kind):
+    """The guards against two answers, read and written under ONE write lock (BEGIN IMMEDIATE), so two phones on two
+    workers cannot both pass: (1) the same text by the same person within a minute; (2) another person's answer in the
+    last 2 minutes, or since the moment this person's chat panel was read (`seen_upto`), with nothing newer from the
+    patient; (3) for a template, any approved message already sent after the patient's last message. When they pass, a
+    'sending' row is put in the chat before the send -- it is what the guards of every other phone now see. Returns
+    (placeholder mid, None) or (None, refusal dict). The caller has opened the transaction."""
+    last_in = _s959_aware(parse_ts((c.execute("SELECT MAX(ts) FROM msgs WHERE phone=? AND dir='in'", (ph,)).fetchone() or [None])[0] or ""))
+    seen = _s959_aware(parse_ts(seen_upto or ""))
+    now = now_ist()
+    _s959_unstick(c, ph)
+    for r in c.execute("SELECT ts, sent_by, body, mtype, status FROM msgs WHERE phone=? AND dir='out' ORDER BY ts DESC, rid DESC LIMIT 20",
+                       (ph,)).fetchall():
+        t_out = _s959_aware(parse_ts(r["ts"]))
+        if t_out is None:
+            continue
+        if last_in is not None and t_out < last_in:
+            break                                                   # older than the patient's last message: answered then
+        by = (r["sent_by"] or "").strip()
+        age = (now - t_out).total_seconds()
+        if (r["status"] or "") == "failed":
+            continue
+        if (r["status"] or "") in ("unsure", "sending") and 0 <= age < STAFF_UNSURE_HOLD_S:
+            return None, _s959(False, "A reply to this chat at %s%s may have gone - WhatsApp did not answer. Read the chat or "
+                                      "call the patient; try again after %s." % (
+                                          t_out.astimezone(IST).strftime("%H:%M"), (" by %s" % by.title()) if by else "",
+                                          (t_out + datetime.timedelta(seconds=STAFF_UNSURE_HOLD_S)).astimezone(IST).strftime("%H:%M")), 409)
+        if kind == "template":
+            if (r["mtype"] or "") == "template" and not (r["body"] or "").startswith("[TEST MODE"):
+                return None, _s959(False, "An approved message already went to this patient%s after their last message - "
+                                          "do not send it again; call them instead." % ((" (by %s)" % by.title()) if by else ""), 409)
+            continue
+        if by.lower() == user.lower() and (r["body"] or "").strip() == text and 0 <= age < STAFF_REPEAT_GAP_S:
+            return None, _s959(False, "Already sent - this message went a moment ago.", 409)
+        if by.lower() != user.lower() and ((0 <= age < STAFF_SAME_GAP_S) or (seen is not None and t_out > seen)):
+            return None, _s959(False, "%s replied %s - read the chat first." % (
+                (by or "Someone").title(), "just now" if 0 <= age < 60 else "since you opened it"), 409)
+    pmid = "sending-" + uuid.uuid4().hex
+    c.execute("INSERT INTO msgs(mid,phone,dir,ts,mtype,body,local_path,mime,fname,status,sent_by,src) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+              (pmid, ph, "out", iso(now), "template" if kind == "template" else "text", text, "", "", "", "sending",
+               user or "staff", STAFF_ROUTE))
+    return pmid, None
+
+
+def _s959_settle(pmid, status=None, mid=None, body=None, drop=False, user=""):
+    """After the send: the 'sending' row becomes the real row (MyOperator's id, its status), or goes (nothing was sent).
+    Never raises: a store that stays locked leaves the 'sending' row, which still stops a second send."""
+    try:
+        c = db()
+        try:
+            if drop:
+                c.execute("DELETE FROM msgs WHERE mid=?", (pmid,))
+            else:
+                try:
+                    c.execute("UPDATE msgs SET mid=COALESCE(?, mid), status=?, body=COALESCE(?, body) WHERE mid=?",
+                              (mid or None, status, body, pmid))
+                except sqlite3.IntegrityError:                      # the receiver already wrote the row with that id:
+                    c.execute("UPDATE msgs SET sent_by=COALESCE(NULLIF(sent_by,''),?) WHERE mid=?", (user or "staff", mid))
+                    c.execute("DELETE FROM msgs WHERE mid=?", (pmid,))   # ... it keeps her name (as run_retries does)
+                if mid:
+                    _apply_pending(c, mid)
+            c.commit()
+        finally:
+            c.close()
+        return True
+    except Exception:                                                   # noqa: BLE001
+        return False
+
+
+def staff_send_text(phone, text, user, cfg_get, seen_upto=None):
+    """One text reply inside the 24-hour window, exactly as the Inbox's text send (key, send, log, retry), signed `user`.
+    `seen_upto`: the time of the newest message the sender's chat panel showed (another person's answer after it refuses)."""
+    ph = last10(phone)
+    text = (text or "").strip()[:4000]
+    user = (user or "").strip()
+    if not ph:
+        return _s959(False, "No number for this chat.", 400)
+    if not user:
+        return _s959(False, "Sign in again, then send.", 403)
+    if not text:
+        return _s959(False, "Type a message first.", 400)
+    pmid = None
+    try:
+        token = _token(cfg_get)
+        if not token:
+            return _s959(False, "The WhatsApp send key is not set on the server - tell the doctor.", 500)
+        ingest(force=True)
+        c = db()
+        try:
+            c.execute("BEGIN IMMEDIATE")
+            w = window(c, ph)
+            if not w["open"]:
+                c.rollback()
+                return _s959(False, "More than 24 hours since this patient last wrote. WhatsApp allows only an approved "
+                                    "message now - or call them.", 409, window=False)
+            if c.execute("SELECT 1 FROM retry_q WHERE phone=? AND kind='text' AND text=? AND state IN ('waiting','busy')",
+                         (ph, text)).fetchone():
+                c.rollback()
+                return _s959(False, "This same message is already being retried by the server - wait for it; do not send "
+                                    "it again.", 409)
+            pmid, refusal = _s959_guard(c, ph, user, text, seen_upto, "text")
+            if refusal:
+                c.rollback()
+                return refusal
+            c.commit()
+        finally:
+            c.close()
+    except Exception as e:                                              # noqa: BLE001
+        return _s959(False, "Not sent (%s) - try again." % type(e).__name__, 500)
+    tr = {}
+    dat = {"type": "text", "context": {"body": text, "preview_url": False}}
+    ok, mid, err = myop_send(token, ph, dat, trace=tr)
+    e0 = attempt_entry(user, ph, "text", text, tr, ok, mid, err, route=STAFF_ROUTE)
+    kept = (not ok) and gateway_refusal(tr)
+    if kept:
+        e0["retrying"] = True
+    log_send(e0)
+    if ok:
+        _s959_settle(pmid, status="sent", mid=mid, user=user)
+        return _s959(True, "Sent.", 200)
+    if not kept and not tr.get("status"):                           # no answer at all: it may have gone -- kept as 'unsure'
+        _s959_settle(pmid, status="unsure", user=user)
+        return _s959(False, "WhatsApp did not answer - the message may have gone. Read the chat or call the patient before "
+                            "sending again.", 504)
+    if not kept:
+        _s959_settle(pmid, drop=True)
+        return _s959(False, "Not sent: %s" % err, 502)
+    rmid = "retry-" + uuid.uuid4().hex
+    try:
+        c = db()
+        try:
+            now = now_ist()
+            c.execute("INSERT INTO retry_q(mid,phone,kind,data,text,fname,mime,by_user,first_ts,next_at) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                      (rmid, ph, "text", json.dumps(dat, ensure_ascii=False), text, "", "", user, iso(now),
+                       iso(now + datetime.timedelta(minutes=RETRY_GAP_MIN))))
+            c.execute("UPDATE msgs SET mid=?, status='retrying' WHERE mid=?", (rmid, pmid))
+            c.commit()
+        finally:
+            c.close()
+    except Exception as e:                                              # noqa: BLE001
+        _s959_settle(pmid, status="failed")
+        return _s959(False, "Not sent: WhatsApp was busy and the retry could not be kept (%s) - try again in a few minutes." % type(e).__name__, 503)
+    return _s959(True, "WhatsApp is busy for the moment - the server will send it by itself in a few minutes.", 200, queued=True)
+
+
+def staff_send_template(phone, template, values, user, cfg_get):
+    """One approved template after the 24-hour window, exactly as the Inbox's template send (portal_wa.send, the live /
+    test-mode setting, the log), signed `user`. The caller names which templates its page offers."""
+    ph = last10(phone)
+    user = (user or "").strip()
+    if not ph:
+        return _s959(False, "No number for this chat.", 400)
+    if not user:
+        return _s959(False, "Sign in again, then send.", 403)
+    if abroad(ph):
+        return _s959(False, "This number is from abroad. Approved messages go only to Indian numbers.", 409)
+    pmid = None
+    try:
+        import portal_wa
+        t = portal_wa.TEMPLATES.get(template or "") or {}
+        title = t.get("title") or template or ""
+        ingest(force=True)
+        c = db()
+        try:
+            c.execute("BEGIN IMMEDIATE")
+            if window(c, ph)["open"]:
+                c.rollback()
+                return _s959(False, "The patient wrote within 24 hours - reply with a message instead.", 409)
+            pmid, refusal = _s959_guard(c, ph, user, "Template: " + title, None, "template")
+            if refusal:
+                c.rollback()
+                return refusal
+            c.commit()
+        finally:
+            c.close()
+        dry = (cfg_get("PORTAL_WA_DRYRUN", "1") or "1") != "0"
+        r = portal_wa.send(ph, template or "", values or {}, user, _token(cfg_get), dry_run=dry)
+    except Exception as e:                                              # noqa: BLE001
+        if pmid:
+            _s959_settle(pmid, drop=True)
+        return _s959(False, "The message could not be sent just now (%s)." % type(e).__name__, 500)
+    if r.get("mode") != "DRY":
+        log_send({"by": user, "customer": ph, "kind": "template", "text": template or "", "route": STAFF_ROUTE + "-template",
+                  "ok": bool(r.get("ok")), "message_id": r.get("message_id", ""), "error": r.get("error", ""),
+                  "http_status": r.get("http_status", r.get("status", "")),
+                  "myoperator_reply": str(r.get("raw") or r.get("response") or "")[:4000], "request_id": "",
+                  "response_headers": {}, "ms": "", "endpoint": "portal_wa.send", "request_json": ""})
+    if not r.get("ok"):
+        _s959_settle(pmid, drop=True)
+        return _s959(False, "Not sent: %s" % (r.get("error") or "refused"), 502)
+    dry = r.get("mode") == "DRY"
+    _s959_settle(pmid, status="pending" if dry else "sent", mid=None if dry else r.get("message_id", ""),
+                 body=("[TEST MODE — not sent] " if dry else "") + "Template: " + title, user=user)
+    return _s959(True, "Test mode - not sent." if dry else "Sent.", 200, mode=r.get("mode"))
