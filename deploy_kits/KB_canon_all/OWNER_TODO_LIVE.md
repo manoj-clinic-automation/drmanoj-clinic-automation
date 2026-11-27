@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S537 close** (the parent, Fable 5.1, EOS-light), 27-Nov-2026, afternoon — the parent's sections refreshed here (the morning check plan reviewed and final; the build by Opus next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S538 close** (the Sanjeevni chat, full EOS), 27-Nov-2026, evening — the Sanjeevni sections refreshed here (Amir by himself and the loss register live; kit C next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S537 close** (the parent, Fable 5.1, EOS-light), 27-Nov-2026, afternoon — the parent's sections refreshed here (the morning check plan reviewed and final; the build by Opus next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S536 close** (the Sanjeevni chat, full EOS), 27-Nov-2026, early afternoon — the Sanjeevni sections refreshed here (the Stock check desk's buttons live); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S531 close** (the parent, Opus, full EOS), 27-Nov-2026, afternoon — the parent's sections refreshed here (WhatsApp BSUID ready; the register Save told to staff; a slip settles by itself; the morning check plan for Fable); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S535 close** (the Sanjeevni chat, full EOS), 27-Nov-2026, late morning — the Sanjeevni sections refreshed here (the one Stock check page live, read only; Darpan's counts traced); the other projects' sections as their closes left them.
@@ -1572,25 +1573,33 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S536 close (27-Nov, 14:1x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S538 close (27-Nov, 18:5x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-2. **NORTIMER TAB:** your Write off (two taps) on the Stock check page — and any other row you decide on.
+2. **Tell Amir:** no stock voucher in Marg unless the system asks — then set that day as the rule date on the Stock check page (box *The rules this page reads*, two taps).
 ```
 https://followup.dr-manoj.in/finance/stockcheck/
 ```
-3. **Then open a fresh Sanjeevni chat with Opus and type `start`** — session 538 checks the first day of the buttons, then builds kit B.
-4. **Tell Amir** (when kit B is live): no stock voucher in Marg unless the system asks; then set that date on the page.
+3. **The loss register** — open or print it whenever you want.
+```
+https://followup.dr-manoj.in/finance/stockcheck/losses
+```
+4. **Then open a fresh Sanjeevni chat with Opus and type `start`** — session 540 checks the first day, then builds kit C.
 5. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S536 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S538 close
 
-1. Kit B — Amir's corrections reaching his card by themselves; the inquiry for a voucher nobody asked for; taking back a write-off Amir never keyed; the page's stuck "Loading…" line.
-2. Kit C — printed stock vouchers scanned only when needed, reception told on its own screen.
-3. The purchase import keeping one row per bill line (F-1710); the medical PC filing voucher reports under "unknown" (cosmetic). PARKED by your word: the AutoHotkey runner; the order-list kit.
+1. Kit C — a printed stock voucher scanned only when needed (Amir's "already made it" claims), reception told on its own screen.
+2. The purchase import keeping one row per bill line (F-1710); the medical PC filing voucher reports under "unknown" (cosmetic). PARKED by your word: the AutoHotkey runner; the order-list kit.
+
+## ✅ DONE AT THE S538 CLOSE — 27-Nov-2026, evening (the Sanjeevni project)
+
+- Amir by himself, live 18:35 (kit S971): his missing vouchers asked back, one export line, the inquiry of a voucher nobody asked for (from your rule date), Withdraw, the settings on the page, the stuck "Loading…" line fixed.
+- The loss register (your ask): every write-off kept for good with its value at the tap — November 6 items, ₹2,057.52 at cost.
+- Kit C designed.
 
 ## ✅ DONE AT THE S536 CLOSE — 27-Nov-2026, early afternoon (the Sanjeevni project)
 
