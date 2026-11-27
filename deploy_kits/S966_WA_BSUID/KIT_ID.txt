@@ -1,0 +1,1 @@
+S966_WA_BSUID  the parent S531 27-Nov-2026  MyOperator 26-Nov mail: Meta BSUID in customer_identifier read as an ID, never as a number; meta_bsuid remembered; the Call Consoles never cut it into a number

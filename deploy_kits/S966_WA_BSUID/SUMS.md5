@@ -1,0 +1,12 @@
+3aa1edbad76c10b816c9f2a3299c0155  ./KIT_ID.txt
+aed94c38d35185ee8be4dd5f987ab582  ./TO_PINS.md5
+c82f1640d32d1078664367b376b45c8f  ./install_S966_WA_BSUID.sh
+7cbe1c562b366ee09cc1eeb50099bf9c  ./make_s966.py
+4ab6e575524680e691102c46d2e3e09f  ./walk_s966.py
+f13a473d8fe76a7646ee9d091ee47b67  ./rehearse_s966.sh
+88b86baf8f98ec619a72c0613e0195d9  ./README.md
+e4053367ed4cf3978ef7d1ef66e27376  ./to/wa_receiver.py
+2426ca46bb2ced4e95db8f45a46e0a90  ./to/wa_alert.py
+5fccbe71aff02b86863dff1235010ff0  ./to/portal_inbox.py
+6db24d22665d739c8b7461eb3a2a08c7  ./to/records.py
+02020b449dd414aabfbb7aa21df1369a  ./to/calls_console.py
