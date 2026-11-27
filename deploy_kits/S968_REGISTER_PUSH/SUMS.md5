@@ -1,0 +1,10 @@
+f579d1d75cce12c48eba3e2bffe49574  ./KIT_ID.txt
+a5fb70788ea07f7c38dc2b07ca76f72d  ./TO_PINS.md5
+39a7d2ce9fd5f7e54ef727f92eadc086  ./install_S968_REGISTER_PUSH.sh
+6f6f355bcb6250112b4dfeb4e50e617c  ./make_s968.py
+2e48f7f08cfe88f61d22e3e870bac917  ./walk_s968.py
+b573c8118f8fb7ef627638c2e26e4e5d  ./rehearse_s968.sh
+da2cc01da6699f7f4b758ada5d5a5613  ./README.md
+ba56418d46e029391a70556949c4e363  ./to/clinic_register.py
+b80078927cfb481d24b3a7ae77f2348e  ./to/day_check.py
+a4e2549e72954d1ed60599a77d20b6a1  ./to/register_push.py
