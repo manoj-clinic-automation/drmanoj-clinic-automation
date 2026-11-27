@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S535 close** (the Sanjeevni chat, full EOS), 27-Nov-2026, late morning — the Sanjeevni sections refreshed here (the one Stock check page live, read only; Darpan's counts traced); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S531 close** (the parent, Opus, full EOS), 27-Nov-2026, afternoon — the parent's sections refreshed here (WhatsApp BSUID ready; the register Save told to staff; a slip settles by itself; the morning check plan for Fable); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S535 close** (the Sanjeevni chat, full EOS), 27-Nov-2026, late morning — the Sanjeevni sections refreshed here (the one Stock check page live, read only; Darpan's counts traced); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S534 close** (the Sanjeevni chat, EOS-light), 27-Nov-2026, morning — the Sanjeevni sections refreshed here (the S533 plan reviewed against the live code; the final build plan for Opus; his word: the night batch asks stay); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S533 close** (the Sanjeevni chat, EOS-light), 27-Nov-2026, morning — the Sanjeevni sections refreshed here (the short-count desk and Amir's corrections by themselves designed; his ok on mock-up v9); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S532 close** (the Sanjeevni chat, full EOS), 26-Nov-2026, night — the Sanjeevni sections refreshed here (Marg's stock vouchers judged on the Stock check and the item ledger); the other projects' sections as their closes left them.
@@ -546,7 +547,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S529 close (26-Nov, 16:5x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S531 close (27-Nov, 13:5x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -571,6 +572,10 @@ D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S510\S510_CALL_CONSOLE_ROADMAP_v1.md
 ```
 
 **1a06 · A PATIENT'S MOBILE NUMBER WAS IN THE CALL-AUDIT PROGRAMS' TEST DATA — TAKEN OUT (24-Nov), NOTHING TO DO.** It sat in the live programs and in the public code store since the summer (no name with it). Now every test number is plainly made up. Its old copies in the code store's history stay for now — a later session weighs removing them.
+
+**1a15 · THE MORNING CHECK — the register Save tells Shavez and reception (11:25 27-Nov), and a slip whose money is in the register settles by itself (13:10), NOTHING TO DO.** A slip so settled shows on your 'Slips not in Docterz' list as 'auto', with its Undo. The narrowed, automated morning check (your 13:44 plan) is reviewed by Fable next session; a screen comes to you before any build.
+
+**1a16 · WHATSAPP FROM 01-DEC — READY (11:25 27-Nov), NOTHING TO DO.** A message that arrives with Meta's new ID instead of a mobile is kept and answered; the screen says 'WhatsApp ID (no number)'.
 
 **1a14 · THE MORNING MATCH — LIVE (the evening check 14:27, the reception PC sending at once 15:36, the morning screen 16:44 26-Nov), NOTHING TO DO.** The morning day check now matches refunds and radd both ways, sends slips missing from Docterz to your back-date list by itself (no 'Added' for Shavez), shows the day in one line, and lets Shavez remind you once in three hours. Next for your look: the register's own refund line (part 2).
 
@@ -703,6 +708,13 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S531 CLOSE — 27-Nov-2026 (the parent, Opus)
+
+- **WhatsApp ready for 01-Dec** (MyOperator's mail of 26-Nov): messages carrying Meta's new ID in place of a mobile are kept, answered and shown as 'WhatsApp ID (no number)'.
+- **The register's Save now tells Shavez and reception** by push what is still wrong on the day (once per line), or that all matched; the heading no longer says 'all agree' when cash or card differ; the not-found card asks for the parchi too.
+- **A late slip settles the morning match by itself** when the register already holds its money — no tap, no back-dated Docterz entry (shown as 'auto' with an Undo).
+- **The morning check, narrowed and automated** — your plan of 13:44 written for Fable's review (`S531_MORNING_CHECK_AUTOMATION_PLAN.md`).
 
 ## ✅ DONE AT THE S529 CLOSE — 26-Nov-2026 (the parent, Opus)
 
