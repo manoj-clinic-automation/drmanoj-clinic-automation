@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Loss register — Sanjeevni stock</title>
+<!-- stock_losses.html · kit S971_AMIR_BY_HIMSELF · Session 538 (Sanjeevni) · 27-Nov-2026 · his word 17:17 IST: "these losses shd be documented somewhere
+     properly so that the loss assessment also stays". The owner only, read only. Plain tables, strips:tabs; values frozen at his tap. -->
+<style>
+body{margin:0;background:#f6f7f9;color:#1d2430;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:#1d4f91}.wrap{max-width:1180px;margin:0 auto;padding:18px 20px 48px}h1{font-size:23px;margin:0 0 4px}h2{font-size:17px;margin:0 0 6px}
+.mute{color:#5f6672}.note{font-size:12px;color:#5f6672}.card{background:#fff;border:1px solid #e3e6ea;border-radius:10px;padding:14px 16px;margin-top:14px}
+table{border-collapse:collapse;width:100%;margin-top:8px}th{text-align:left;font-size:12px;color:#5f6672;font-weight:600;border-bottom:1px solid #e3e6ea;padding:6px 8px}
+td{border-bottom:1px solid #eef0f2;padding:6px 8px;vertical-align:top;font-size:13px}.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tr.wd td{color:#8a8f98;text-decoration:line-through}tr.tot td{font-weight:700;border-top:2px solid #c9ced6}
+.cb{font:inherit;font-size:13px;min-height:36px;padding:0 12px;border-radius:8px;border:1px solid #1d4f91;background:#eaf1fc;color:#123366;cursor:pointer}
+details>summary{cursor:pointer;color:#1d4f91;font-weight:600;min-height:28px}.sum{display:flex;flex-wrap:wrap;gap:14px;margin-top:4px}
+@media print{body{background:#fff}.noprint{display:none}.card{border:0;padding:0}details{display:block}details>summary{color:#000}.wrap{max-width:none;padding:0}}
+</style></head>
+<body><div class="wrap">
+<div class="noprint"><a href="/finance/stockcheck/">← Stock check</a> · <button class="cb" type="button" onclick="openAll();window.print()">Print</button> <span class="note">or Ctrl+P — every month opens for the print</span></div>
+<h1>Loss register — Sanjeevni stock</h1>
+<div class="mute" id="intro">Reading the register…</div>
+<div id="body"></div>
+</div>
+<script>
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function openAll(){document.querySelectorAll('details').forEach(function(d){d.open=true;});}
+function month(m,first){
+  var h='<details class="card"'+(first?' open':'')+'><summary>'+esc(m.label)+' — '+m.n+' write-off'+(m.n===1?'':'s')+' · cost '+esc(m.cost_t)+' · MRP '+esc(m.mrp_t)+'</summary>';
+  h+='<div class="sum note"><span>Within the allowance (cost): <b>'+esc(m.allow_t)+'</b></span><span>Your call (cost): <b>'+esc(m.call_t)+'</b></span>'+(m.unpriced?'<span>'+m.unpriced+' without a price</span>':'')+'</div>';
+  h+='<table><thead><tr><th>Day</th><th>Item</th><th class="n">Qty</th><th>From the count</th><th>Group</th><th class="n">Cost</th><th class="n">MRP</th><th>Marg voucher</th></tr></thead><tbody>';
+  m.lines.forEach(function(l){h+='<tr'+(l.withdrawn?' class="wd"':'')+'><td>'+esc(l.day)+'</td><td>'+esc(l.item)+(l.batch?'<div class="note">batch suggested: '+esc(l.batch)+'</div>':'')+'</td><td class="n">'+esc(l.q)+'</td><td>'+esc(l.count)+'</td><td>'+esc(l.group)+'</td>'
+    +'<td class="n">'+esc(l.cost_t)+'</td><td class="n">'+esc(l.mrp_t)+(l.priced&&l.priced!=='at the tap'?'<div class="note">'+esc(l.priced)+'</div>':'')+'</td><td>'+esc(l.marg)+'</td></tr>';});
+  h+='<tr class="tot"><td colspan="5">Total, '+esc(m.label)+' (withdrawn lines left out)</td><td class="n">'+esc(m.cost_t)+'</td><td class="n">'+esc(m.mrp_t)+'</td><td></td></tr></tbody></table></details>';
+  return h;}
+fetch('/finance/stockcheck/api/losses',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(j){
+  if(!j.ok){document.getElementById('intro').textContent=j.reason||'The register could not be read.';return;}
+  document.getElementById('intro').innerHTML='Every write-off from the Stock check desk, month by month, newest first: the count it came from, whether it was within your allowance or your own call, its value at cost and at MRP — fixed on the day of your tap, so later price changes never alter it — and Marg\'s voucher once Amir keys it. A withdrawn line is struck through and left out of the totals. Read '+esc(String(j.at).replace('T',' ').slice(0,16))+' IST.';
+  var h='';
+  if(j.months.length) j.months.forEach(function(m,i){h+=month(m,i===0);}); else h+='<div class="card mute">No write-off from the desk yet.</div>';
+  if(j.pursued.length){h+='<details class="card"><summary>Pursued — a recount asked instead of a write-off ('+j.pursued.length+')</summary><table><thead><tr><th>Day</th><th>Item</th><th class="n">Short</th><th>How it ended</th></tr></thead><tbody>'
+    +j.pursued.map(function(p){return '<tr><td>'+esc(p.day)+'</td><td>'+esc(p.item)+'</td><td class="n">'+esc(p.q)+'</td><td>'+esc(p.end)+'</td></tr>';}).join('')+'</tbody></table></details>';}
+  if(j.runs.length){h+='<details class="card"><summary>The full count\'s write-offs (06-Sep) — frozen, as written off then</summary><table><thead><tr><th>Day</th><th>Count</th><th class="n">Lines</th><th class="n">Cost</th><th class="n">MRP</th><th class="n">Unpriced</th></tr></thead><tbody>'
+    +j.runs.map(function(r){return '<tr><td>'+esc(r.day)+'</td><td>#'+esc(r.count_id)+'</td><td class="n">'+r.n+'</td><td class="n">'+esc(r.cost_t)+'</td><td class="n">'+esc(r.mrp_t)+'</td><td class="n">'+r.unpriced+'</td></tr>';}).join('')
+    +'</tbody></table><div class="note">Item by item on the count\'s own loss pages (Stock milaan).</div></details>';}
+  document.getElementById('body').innerHTML=h;
+}).catch(function(){document.getElementById('intro').textContent='The register could not be read just now. Reload in a minute.';});
+</script></body></html>

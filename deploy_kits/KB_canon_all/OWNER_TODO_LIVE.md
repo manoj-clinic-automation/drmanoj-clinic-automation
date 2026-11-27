@@ -1,4 +1,6 @@
-# OWNER TO-DO — LIVE · refreshed at the **S531 close** (the parent, Opus, full EOS), 27-Nov-2026, afternoon — the parent's sections refreshed here (WhatsApp BSUID ready; the register Save told to staff; a slip settles by itself; the morning check plan for Fable); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S537 close** (the parent, Fable 5.1, EOS-light), 27-Nov-2026, afternoon — the parent's sections refreshed here (the morning check plan reviewed and final; the build by Opus next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S536 close** (the Sanjeevni chat, full EOS), 27-Nov-2026, early afternoon — the Sanjeevni sections refreshed here (the Stock check desk's buttons live); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S531 close** (the parent, Opus, full EOS), 27-Nov-2026, afternoon — the parent's sections refreshed here (WhatsApp BSUID ready; the register Save told to staff; a slip settles by itself; the morning check plan for Fable); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S535 close** (the Sanjeevni chat, full EOS), 27-Nov-2026, late morning — the Sanjeevni sections refreshed here (the one Stock check page live, read only; Darpan's counts traced); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S534 close** (the Sanjeevni chat, EOS-light), 27-Nov-2026, morning — the Sanjeevni sections refreshed here (the S533 plan reviewed against the live code; the final build plan for Opus; his word: the night batch asks stay); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S533 close** (the Sanjeevni chat, EOS-light), 27-Nov-2026, morning — the Sanjeevni sections refreshed here (the short-count desk and Amir's corrections by themselves designed; his ok on mock-up v9); the other projects' sections as their closes left them.
@@ -547,7 +549,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S531 close (27-Nov, 13:5x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S537 close (27-Nov, 15:2x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -572,6 +574,8 @@ D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S510\S510_CALL_CONSOLE_ROADMAP_v1.md
 ```
 
 **1a06 · A PATIENT'S MOBILE NUMBER WAS IN THE CALL-AUDIT PROGRAMS' TEST DATA — TAKEN OUT (24-Nov), NOTHING TO DO.** It sat in the live programs and in the public code store since the summer (no name with it). Now every test number is plainly made up. Its old copies in the code store's history stay for now — a later session weighs removing them.
+
+**1a17 · THE MORNING CHECK — PLAN FINAL (your rulings 14:31 and 15:09 27-Nov), NOTHING TO DO NOW.** The evening does every Docterz fix on the export (same day); the morning is money against money only — no cash/UPI question, no Docterz edit the next morning; the register stays a morning job. Opus builds it in the next parent session, the evening half first; you will see nothing change until it is installed, and the staff screens are the mock-up v2 you saw: `https://claude.ai/artifact/WpQ3vFpFZNpRPVZxkkxmkb`.
 
 **1a15 · THE MORNING CHECK — the register Save tells Shavez and reception (11:25 27-Nov), and a slip whose money is in the register settles by itself (13:10), NOTHING TO DO.** A slip so settled shows on your 'Slips not in Docterz' list as 'auto', with its Undo. The narrowed, automated morning check (your 13:44 plan) is reviewed by Fable next session; a screen comes to you before any build.
 
@@ -708,6 +712,12 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S537 CLOSE — 27-Nov-2026 (the parent, Fable 5.1)
+
+- **The morning check plan reviewed against the live code and 60 real days** (counts only, in the device VM) and made FINAL with your rulings: no cash/UPI corrections (revenue match only); Docterz edits the same evening only; the register a morning job. Two papers: `S537_PLAN_REVIEW.md` (what the data said, what changed and why) and `S537_MORNING_CHECK_FINAL_BUILD_PLAN.md` (K1 the evening widened · K2 the morning as a revenue match, for Opus).
+- **The staff screens, mock-up v2** (Hindi for staff, an English note for you under each): `https://claude.ai/artifact/WpQ3vFpFZNpRPVZxkkxmkb`.
+- **Found on the way:** 13 of 15 'double' slip lines in 60 days were both sides (both knees, both ankles) — so no automatic 'wrong line' mark; refunds and cancelled slips are already netted before any 'register less' line.
 
 ## ✅ DONE AT THE S531 CLOSE — 27-Nov-2026 (the parent, Opus)
 
@@ -1562,23 +1572,29 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S535 close (27-Nov, 11:4x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S536 close (27-Nov, 14:1x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-2. **Then open a fresh Sanjeevni chat with Opus and type `start`** — session 536 builds kit A2 (Write off · Pursue · the allowance button).
-3. **NORTIMER TAB:** your one Write off tap (6:0) once kit A2 is live.
+2. **NORTIMER TAB:** your Write off (two taps) on the Stock check page — and any other row you decide on.
+```
+https://followup.dr-manoj.in/finance/stockcheck/
+```
+3. **Then open a fresh Sanjeevni chat with Opus and type `start`** — session 538 checks the first day of the buttons, then builds kit B.
 4. **Tell Amir** (when kit B is live): no stock voucher in Marg unless the system asks; then set that date on the page.
 5. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S535 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S536 close
 
-1. Kit A2 — Write off / Pursue on the Stock check's rows, the one-tap allowance group; "count first" rows to Darpan's next list by one tap; a phone alert for every morning count list.
-2. Kit B — Amir's corrections reaching his card by themselves; the inquiry for a voucher nobody asked for.
-3. Kit C — printed stock vouchers scanned only when needed, reception told on its own screen.
-4. The purchase import keeping one row per bill line (F-1710); the medical PC filing voucher reports under "unknown" (cosmetic). PARKED by your word: the AutoHotkey runner; the order-list kit.
+1. Kit B — Amir's corrections reaching his card by themselves; the inquiry for a voucher nobody asked for; taking back a write-off Amir never keyed; the page's stuck "Loading…" line.
+2. Kit C — printed stock vouchers scanned only when needed, reception told on its own screen.
+3. The purchase import keeping one row per bill line (F-1710); the medical PC filing voucher reports under "unknown" (cosmetic). PARKED by your word: the AutoHotkey runner; the order-list kit.
+
+## ✅ DONE AT THE S536 CLOSE — 27-Nov-2026, early afternoon (the Sanjeevni project)
+
+- The Stock check desk's buttons, live 13:11 (kit S969): Write off (one card a day for Amir), Pursue, the allowance group, Count first (19 old counts onto Darpan's list); every morning count list now alerts Darpan's phone.
 
 ## ✅ DONE AT THE S535 CLOSE — 27-Nov-2026, late morning (the Sanjeevni project)
 
