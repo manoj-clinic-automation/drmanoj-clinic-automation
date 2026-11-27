@@ -256,10 +256,12 @@ def walk_b(d, appdir, db):
         c2 = dc.check_day(con, D)
         ok(live == 0 and [b for b in (c2.get("backdate") or []) if b.get("slip_id") == sid], "B10 he undoes it: back on his list, never re-answered")
         nid.mark(con, "manoj", sid, "proc", "outside")
+        o_before = sum(nid.outside_for_day(con, D))           # the day may hold real slips of the same amount: compare sums
         con.execute("INSERT INTO clinic_day_line (business_date, section, sn, patient, clinic_id, amount_p, mode) VALUES (?,'proc',990,'x',?,10000,'Cash')", (D, CID))
         con.commit()
         c3 = dc.check_day(con, D)
-        ok(10000 not in nid.outside_for_day(con, D) and (c3.get("top") or {}).get("left") == left0,
+        ok(sum(nid.outside_for_day(con, D)) == o_before - 10000 and not any(r["slip_id"] == sid for r in nid.rows(con, D, D))
+           and (c3.get("top") or {}).get("left") == left0,
            "B11 Docterz carries it later: the answer leaves with the row, nothing counted twice")
         con.close()
         # B12: a slip of two lines, the register holding only one -- left for him (cold review MUST)
