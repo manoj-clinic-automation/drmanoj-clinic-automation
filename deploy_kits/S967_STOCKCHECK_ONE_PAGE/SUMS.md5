@@ -1,0 +1,12 @@
+76e931eceadfa47f18f5152198c31b1e  KIT_ID.txt
+50966ec8112b4e0a706670e4dacf240d  TO_PINS.md5
+7f4a411eccefd01b65635970d78384f7  install_S967_STOCKCHECK_ONE_PAGE.sh
+ce7bf766425f66fc92f177b6c731047d  undo_s967.sh
+500034637ecf0480aee7ca98e92a367f  rehearse_s967.sh
+a0e8a2486006e8155a541f123e09160c  walk_s967.py
+6a74d12d28a8bb5d511c8d8951eb512f  walk_s965_regress.py
+00aa4cb42b016f5406d9f577eb922780  README.md
+5f1b239e6af3c931cc15adb17fd2edb2  stock_check.py
+a9f7b6827e590cd63a3e2cc053334d0c  stock_check.html
+6735167f3b56793ae6edbfd504f5584e  item_ledger.py
+aea436338fc138b1ff1e27b552b328bc  voucher_judge.py
