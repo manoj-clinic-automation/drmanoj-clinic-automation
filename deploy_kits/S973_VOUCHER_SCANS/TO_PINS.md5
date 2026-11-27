@@ -1,0 +1,8 @@
+567809861c8b63bc1802db178b34f7c8  finance/voucher_inquiry.py
+0a066f960fba1a110084121a82d4ede3  finance/voucher_judge.py
+164dbceb5889e692b6d0c9e25a1559c2  finance/amir_day.py
+25d9767d001112f10583246a828ba2eb  finance/porders_s454.py
+9c5ff7ef2f36ac34a78a42d59793211d  finance/voucher_scan.py
+9cd00d723a0b20e09fa93ac4a70649b8  assetapp/asset_register.py
+12c9d6c801c3a3f374aa73011f9cd658  assetapp/claude_reader.py
+03bf0983928a5a9fb83e212f9732e396  shared/scan_quality.py
