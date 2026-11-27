@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S534 close** (the Sanjeevni chat, EOS-light), 27-Nov-2026, morning — the Sanjeevni sections refreshed here (the S533 plan reviewed against the live code; the final build plan for Opus; his word: the night batch asks stay); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S535 close** (the Sanjeevni chat, full EOS), 27-Nov-2026, late morning — the Sanjeevni sections refreshed here (the one Stock check page live, read only; Darpan's counts traced); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S534 close** (the Sanjeevni chat, EOS-light), 27-Nov-2026, morning — the Sanjeevni sections refreshed here (the S533 plan reviewed against the live code; the final build plan for Opus; his word: the night batch asks stay); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S533 close** (the Sanjeevni chat, EOS-light), 27-Nov-2026, morning — the Sanjeevni sections refreshed here (the short-count desk and Amir's corrections by themselves designed; his ok on mock-up v9); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S532 close** (the Sanjeevni chat, full EOS), 26-Nov-2026, night — the Sanjeevni sections refreshed here (Marg's stock vouchers judged on the Stock check and the item ledger); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S530 close** (the Sanjeevni chat, full EOS), 26-Nov-2026, evening — the Sanjeevni sections refreshed here (Marg's stock vouchers now reach the server; the screens next); the other projects' sections as their closes left them.
@@ -1549,24 +1550,28 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S534 close (27-Nov, 10:2x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S535 close (27-Nov, 11:4x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-2. **Then open a fresh Sanjeevni chat with Opus and type `start`** — session 535 builds kit A1 from the final plan.
-3. **Tell Amir** (when kit B is live): no stock voucher in Marg unless the system asks; then set that date on the page.
-4. **NORTIMER TAB:** your one Write off tap (6:0) once kit A2 is live.
+2. **Then open a fresh Sanjeevni chat with Opus and type `start`** — session 536 builds kit A2 (Write off · Pursue · the allowance button).
+3. **NORTIMER TAB:** your one Write off tap (6:0) once kit A2 is live.
+4. **Tell Amir** (when kit B is live): no stock voucher in Marg unless the system asks; then set that date on the page.
 5. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S534 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S535 close
 
-1. Kit A1 — the one Stock check page you approved (mock-up v9), read-only first: every row opening in place (its steps, voucher lines, item ledger with Darpan's counts), the old corrections re-judged, KT ROS DT reading "waiting" again.
-2. Kit A2 — Write off / Pursue on that page, the one-tap allowance group; nothing written to Amir's card until your tap.
-3. Kit B — Amir's corrections reaching his card by themselves; the inquiry for a voucher nobody asked for.
-4. Kit C — printed stock vouchers scanned only when needed, reception told on its own screen.
-5. The purchase import keeping one row per bill line (F-1710); the medical PC filing voucher reports under "unknown" (cosmetic). PARKED by your word: the AutoHotkey runner; the order-list kit.
+1. Kit A2 — Write off / Pursue on the Stock check's rows, the one-tap allowance group; "count first" rows to Darpan's next list by one tap; a phone alert for every morning count list.
+2. Kit B — Amir's corrections reaching his card by themselves; the inquiry for a voucher nobody asked for.
+3. Kit C — printed stock vouchers scanned only when needed, reception told on its own screen.
+4. The purchase import keeping one row per bill line (F-1710); the medical PC filing voucher reports under "unknown" (cosmetic). PARKED by your word: the AutoHotkey runner; the order-list kit.
+
+## ✅ DONE AT THE S535 CLOSE — 27-Nov-2026, late morning (the Sanjeevni project)
+
+- Darpan's counts traced: none lost — today simply had none; two gaps noted for kit A2.
+- The one Stock check page, read only, live 11:31 (kit S967): the five boxes, every row opening in place, the ledger with Darpan's counts, KT ROS DT reading "waiting" again.
 
 ## ✅ DONE AT THE S534 CLOSE — 27-Nov-2026, morning (the Sanjeevni project)
 
