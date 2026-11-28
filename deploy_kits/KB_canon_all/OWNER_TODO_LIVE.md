@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S541 close** (the parent, Opus 5.5, full EOS), 28-Nov-2026, afternoon — the parent's sections refreshed here (the certificate lands by itself; the refunds-and-gaps screens final); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S544 close** (the parent, Opus 5.5, full EOS), 28-Nov-2026, evening — the parent's sections refreshed here (the morning check matches money against money); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S541 close** (the parent, Opus 5.5, full EOS), 28-Nov-2026, afternoon — the parent's sections refreshed here (the certificate lands by itself; the refunds-and-gaps screens final); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S542 close** (the Sanjeevni chat, full EOS), 28-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the Stock check page v10 live; CCM's pack next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S540 close** (the Sanjeevni chat, full EOS), 28-Nov-2026, morning — the Sanjeevni sections refreshed here (voucher scans live; Stock check v10 next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S539 close** (the parent, Opus 5.5, full EOS), 28-Nov-2026, midday — the parent's sections refreshed here (the evening check widened live; the certificate fixed); the other projects' sections as their closes left them.
@@ -554,7 +555,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S541 close (28-Nov, 13:5x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S544 close (28-Nov, 17:0x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -585,6 +586,8 @@ D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S510\S510_CALL_CONSOLE_ROADMAP_v1.md
 ```
 https://followup.dr-manoj.in/finance/slips?s=approve
 ```
+
+**1a23 · THE MORNING CHECK MATCHES MONEY AGAINST MONEY (live 16:52 28-Nov), NOTHING TO DO.** From the next register save: no payment-mode cards and no Docterz corrections the next morning; register more → one card with the day's unpaid patients (make the parchi, it settles itself); register less by one bill → reception's card (register wrong, or who did not pay — that one comes to you for approval as every radd does); anything nobody can explain → one push to your phone, once per item; the all-clear push carries the day's sum. Next: the staff taps (the late slip in one tap, the register one-tap fix, "Sab ho gaya").
 
 **1a21 · A RENEWED CERTIFICATE NOW REACHES THE SITE BY ITSELF (live 12:32 28-Nov), NOTHING TO DO.** Every night at 05:55 the server puts a renewed certificate in place on each of our sites, restarts once and checks what the site shows; the health page's line "certificate lands" turns red if one cannot land. The six sites that renew another way are still guarded by the 06:40 certificate watch; I read their road next.
 
@@ -735,6 +738,10 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S544 CLOSE — 28-Nov-2026 (the parent, Opus 5.5)
+
+- **The morning check as a money match (S977, live 16:52 28-Nov):** register against Docterz in total only; no mode or Docterz-edit cards next morning; one card for an unexplained surplus (the day's unpaid patients), reception's card for one missing bill, your push for the rest; the false "export again" alert gone. On 60 days: cards 89 → 60, clean days 10 → 16.
 
 ## ✅ DONE AT THE S541 CLOSE — 28-Nov-2026 (the parent, Opus 5.5)
 
