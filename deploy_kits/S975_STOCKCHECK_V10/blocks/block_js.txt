@@ -1,0 +1,49 @@
+/* S975 (28-Nov): THE PAGE IN THREE BANDS (mock-up v10, his 'OK' 11:52 IST, D1106) -- 1 your write-offs waiting for Amir . 2 today's
+   counts, one verdict each . 3 waiting on others: the boxes as before (renderDeskV9 into a scratch box), each folded. The buttons and
+   their two taps are unchanged; a row is shown once (band 1's items are not in the 'on their way' fold). */
+function trk(T){return '<span class="trk">'+(T||[]).map(function(s){return '<span class="st '+esc(s[0])+'">'+esc(s[1])+'</span>';}).join('<span class="ar">→</span>')+'</span>';}
+function b1row(r){return '<details class="row"><summary><span class="sumit">'+esc(r.item)+'</span><span class="sumfig">written off '+esc(r.q)+' · booked '+esc(r.booked)+' · '+esc(r.card)+'</span>'
+  +(r.tags||[]).map(tg).join('')+trk(r.track)+'<span class="sumfig">'+esc(r.cost_t)+'</span>'+acts(r)+'</summary><div class="inner">'+pth(r.path)+vlt(r.vlines)+led(r.key)+'</div></details>';}
+function pdate(s){s=String(s||'');return /^\d\d-\d\d-\d{4}$/.test(s)?s.slice(6)+'-'+s.slice(3,5)+'-'+s.slice(0,2):'';}
+function b2row(r,withDay){var x=JSON.parse(JSON.stringify(r));
+  if(x.surplus&&D&&D.reports){var pt=pdate(D.reports.purchase_to);if(pt&&pt<x.day)x.tags.push(['blu','likely a delivery not yet in Marg (Marg\'s purchases reach '+D.reports.purchase_to.slice(0,5)+')']);}
+  x.fig=(withDay?dm2(x.day)+' ':'')+x.time+(x.by?' · '+x.by:'')+' · '+x.fig;return drow(x);}
+function b3fold(id,title,n,node){if(!node)return '';var t=node.querySelector('h2');if(t)t.remove();
+  return '<details class="card b3f" id="'+id+'"><summary><b>'+title+'</b> <span class="tag">'+n+'</span></summary>'+node.innerHTML+'</details>';}
+function renderDesk(){var K=DK;
+  if(!K||!K.ok||!K.v10){renderDeskV9();if(K&&K.ok&&K.v10_reason)$('desk').insertAdjacentHTML('afterbegin','<div class="vsrc">'+esc(K.v10_reason)+'</div>');return;}
+  var openIds=[].slice.call(document.querySelectorAll('#desk details[id][open]')).map(function(d){return d.id;});
+  var T=K.totals,V=K.v10_totals,h='';
+  /* the boxes as before, drawn into a scratch box with box 2 = the 'on their way' rows less band 1, no box 1 (band 2 carries it) */
+  var keep={way:K.way,box1:K.box1,allow:K.allow,totals:K.totals,exportask:K.exportask},tmp=document.createElement('div'),dm_=DMSG;
+  K.way=K.way3;K.box1=[];K.allow=[];K.exportask=null;K.totals=Object.assign({},T,{way:K.way3.length,short:0,allow:0});DMSG='';
+  try{renderDeskV9(tmp);}finally{K.way=keep.way;K.box1=keep.box1;K.allow=keep.allow;K.totals=keep.totals;K.exportask=keep.exportask;DMSG=dm_;}
+  if(!K.judge_ok)h+='<div class="vsrc"><b>Marg\'s stock vouchers could not be judged just now</b> — band 1 and the folds may be short of lines. Read again in a minute.</div>';
+  h+='<div class="chips"><a class="chip red" href="#band1"><b>'+V.band1+'</b>your write-offs — with Amir, not keyed yet</a><a class="chip blue" href="#band2"><b>'+V.today+'</b>counted today</a>'
+    +(V.earlier?'<a class="chip red" href="#b2early"><b>'+V.earlier+'</b>earlier counts still open</a>':'')
+    +'<a class="chip" href="#b3way"><b>'+V.way3+'</b>other corrections on their way</a><a class="chip" href="#b3rec"><b>'+V.recount+'</b>old counts to count first</a>'
+    +'<span class="small" style="align-self:center">Every button: two taps — the first arms it, the second does it. No pop-up.</span></div>';
+  if(DMSG)h+='<div class="vsrc"'+(DMSG.charAt(0)==='!'?' style="border-color:#f0b4ae"':'')+'>'+esc(DMSG.replace(/^! /,''))+'</div>';
+  if(K.exportask)h+='<div class="grpbar" style="background:#fffaeb;border:1px solid #fec84b;border-radius:8px;padding:8px 10px;margin-top:10px"><span><b>On your list (once):</b> '+esc(K.exportask.text)+'</span></div>';
+  var f=K.band1_foot;
+  h+='<div class="card dk b1" id="band1"><h2>Your write-offs — waiting for Amir <span class="tag">'+V.band1+'</span></h2><div class="lead">Each write-off of yours goes on Amir\'s card as a Stock Issue (the day\'s write-offs are one voucher): booked → Amir keys it → in Marg. A row leaves this band by itself when Marg\'s Stock Issue report shows it. Tap a row for its path: the count, your tap, the card, the closing rule.</div>'
+   +(K.band1.length?K.band1.map(b1row).join(''):'<div class="mute">None waiting: every write-off of yours is in Marg.</div>')
+   +'<div class="lossl" style="margin-top:10px">'+(f?'<span><b>'+esc(f.label)+':</b> '+f.n+' write-off'+(f.n===1?'':'s')+' · cost '+esc(f.cost_t)+' · MRP '+esc(f.mrp_t)+'</span>':'')
+   +'<a class="cb" style="display:inline-flex;align-items:center;text-decoration:none" href="/finance/stockcheck/losses">Open the full loss register</a></div></div>';
+  var aw=K.allow_items||[],cn=(K.counters||[]).join(', ');
+  h+='<div class="card dk b2" id="band2"><h2>Today\'s counts'+(cn?' — '+esc(cn):'')+', '+esc(K.day_word)+' <span class="tag">'+V.today+'</span></h2><div class="lead">Every count saved today, one plain verdict each. More than Marg is never a loss. A loss since the last count carries its own Write off and Pursue; within your allowance, the group button writes them off together.</div>'
+   +(aw.length&&K.can_write?'<div class="grpbar"><button class="cb wo" type="button" data-act="allow" data-items="'+esc(JSON.stringify(aw))+'" onclick="deskAct(event,this)">Write off '+(aw.length===1?'the one':(aw.length===2?'both':'all '+aw.length))+' within the allowance</button><span class="note">'+esc(aw.join(' · '))+'</span></div>':'')
+   +(K.band2.length?K.band2.map(function(r){return b2row(r,false);}).join(''):'<div class="mute">No count saved today yet.</div>');
+  if(K.earlier.length)h+='<div class="vg" id="b2early">Earlier counts still open · '+K.earlier.length+'</div>'+K.earlier.map(drow).join('');
+  if(K.week.length)h+='<details class="sub" id="b2week"><summary>This week\'s earlier counts · '+K.week.length+' — each with its state now</summary>'+K.week.map(function(r){return b2row(r,true);}).join('')+'</details>';
+  h+='</div>';
+  h+='<div class="card" id="band3" style="padding-bottom:6px"><h2>Waiting on others</h2><div class="lead mute">Nothing here needs your tap today. Each fold opens in place.</div>';
+  h+=b3fold('b3way','Other corrections on their way to Marg',V.way3,tmp.querySelector('#dk2'));
+  h+=b3fold('b3old','Old corrections, re-judged on the whole item',T.old,tmp.querySelector('#dk3'));
+  h+=b3fold('b3rec','Count first — an old count differs from Marg',V.recount,tmp.querySelector('#dk6'));
+  h+=b3fold('b3inq','Vouchers nobody asked for',T.moves,tmp.querySelector('#dk4'));
+  [].slice.call(tmp.querySelectorAll(':scope > details.card')).forEach(function(d){h+=d.outerHTML;});   /* settled . short not judged a loss . the rules */
+  h+='</div>';
+  $('desk').innerHTML=h;
+  openIds.forEach(function(i){var d=document.getElementById(i);if(d)d.open=true;});
+}

@@ -1,0 +1,4 @@
+/* S975 (28-Nov): the three bands (mock-up v10, D1106) */
+.dk.b2{border-left-color:#1d4f91}.b3f{border-left:4px solid #c9ced6}.b3f>summary{font-size:15px}.b3f>summary .tag{font-size:12px}
+.trk{display:inline-flex;gap:4px;align-items:center;font-size:12px;margin-left:4px}.trk .st{border-radius:6px;padding:1px 7px;background:#eef0f2;color:#5f6672}
+.trk .st.ok{background:#e9f6ee;color:#1d7a46}.trk .st.now{background:#fff4e0;color:#7a4700;font-weight:600}.trk .ar{color:#9aa1ab}

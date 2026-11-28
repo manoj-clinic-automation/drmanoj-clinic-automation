@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock check — Marg against the shelf</title>
+<!-- stock_check.html · kit S930_STOCK_CHECK_PAGE · Session 503 (Sanjeevni) · 22-Nov-2026 · the owner's mock-up v5 (D1037). English, PC first, no dialogs. -->
+<!-- S965 (26-Nov): Marg's stock vouchers judged -- the two boxes on top, the tags on every item row (mock-up v5 of S532, his 'Ok' 20:30 IST). -->
+<!-- S969 (27-Nov): the desk's buttons -- Write off . Pursue . the allowance group . old counts onto Darpan's next list (F-1712): two taps each,
+     the first arms it ('Tap again'), the second does it; no pop-up (his 18-Nov rule). -->
+<!-- S971 (27-Nov): kit B -- Amir by himself: the claim rows and the ONE export line in box 2, the inquiry in box 4 (Reverse . Close . OK),
+     Withdraw on a write-off not to be keyed, the page's settings editable, the tally, the loss register's link; F-1725 (the intro line). -->
+<!-- S975 (28-Nov): the page in three bands (mock-up v10, his 'OK' 11:52 IST, D1106): your write-offs waiting for Amir first, today's
+     counts second, everything waiting on others folded; the S967-S971 boxes are drawn inside the folds by renderDeskV9. -->
+<!-- S967 (27-Nov): THE ONE PAGE, read only -- the five boxes on top (mock-up v9, his 'ok' 09:25 IST, D1090): each row opens in place to its
+     path, its voucher lines and its item ledger (the ledger's own fold; the full ledger inside). The S965 boxes are folded below them. -->
+<style>
+body{margin:0;background:#f6f7f9;color:#1d2430;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:#1d4f91}a:hover{color:#123366}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 20px 48px}
+h1{font-size:23px;margin:0 0 4px} h2{font-size:17px;margin:0 0 4px}
+.mute{color:#5f6672} .small{font-size:12px;color:#5f6672}
+.top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.top a.back{font-size:13px}
+.card{background:#fff;border:1px solid #e3e6ea;border-radius:10px;padding:14px 16px;margin-top:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{background:#fff;border:1px solid #e3e6ea;border-radius:8px;padding:8px 12px;text-decoration:none;color:#1d2430;min-height:44px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center}
+.chip b{font-size:18px} .chip.red{border-color:#f0b4ae;background:#fdecea} .chip.blue{background:#eaf1fc;border-color:#c5d6f2} .chip.green{background:#e9f6ee;border-color:#bfe3cc}
+.box{overflow-x:auto}
+table{border-collapse:collapse;width:100%;margin-top:8px} th{text-align:left;font-size:12px;color:#5f6672;font-weight:600;border-bottom:1px solid #e3e6ea;padding:6px 8px}
+td{border-bottom:1px solid #eef0f2;padding:7px 8px;vertical-align:top} .n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pos{color:#1d4f91;font-weight:600} .neg{color:#b42318;font-weight:600} .note{font-size:12px;color:#5f6672}
+.cb{font:inherit;font-size:13px;min-height:36px;padding:0 12px;border-radius:8px;border:1px solid #1d4f91;background:#eaf1fc;color:#123366;cursor:pointer}
+.cb[disabled]{opacity:.6;cursor:default}
+details{margin-top:10px} summary{cursor:pointer;color:#1d4f91;min-height:28px}
+.cols{columns:3 240px;font-size:13px;margin-top:8px} .cols div{break-inside:avoid;padding:2px 0}
+.msg{font-size:12px;color:#1d7a46;margin-left:8px} .msg.err{color:#b42318}
+input.q{font:inherit;padding:8px 10px;border:1px solid #c9ced6;border-radius:8px;min-height:44px;box-sizing:border-box;width:18em;max-width:100%}
+.sugg{position:absolute;background:#fff;border:1px solid #c9ced6;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.08);z-index:5;max-height:260px;overflow:auto}
+.sugg div{padding:8px 12px;cursor:pointer;min-height:36px;box-sizing:border-box}.sugg div:hover{background:#eaf1fc}
+.tag{display:inline-block;background:#eef0f2;color:#5f6672;border-radius:6px;padding:1px 7px;font-size:11px;margin-left:6px}
+.ev{background:#fff4e0;color:#7a4700}
+@media (max-width:640px){.wrap{padding:12px}}
+/* S965 (26-Nov): Marg's stock vouchers -- the two boxes, the folds, the tags (mock-up v4/v5, D1083, D1086) */
+.vt{display:inline-block;border-radius:6px;padding:1px 7px;font-size:11px;margin-left:6px;white-space:nowrap}
+.vt.red{background:#fdecea;color:#b42318}.vt.amb{background:#fff4e0;color:#7a4700}.vt.grn{background:#e9f6ee;color:#1d7a46}.vt.gry{background:#eef0f2;color:#5f6672}
+.vgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media (max-width:900px){.vgrid{grid-template-columns:1fr}}
+.vgrid .card{margin-top:0}.vbox-r{border-left:4px solid #d92d20}.vbox-b{border-left:4px solid #1d4f91}
+.vg{font-size:12px;font-weight:700;color:#5f6672;text-transform:uppercase;letter-spacing:.04em;margin:14px 0 4px}
+details.vc{border:1px solid #eef0f2;border-radius:8px;padding:6px 10px;margin:6px 0;background:#fff}
+details.vc>summary{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;min-height:32px;list-style:none}
+details.vc>summary::-webkit-details-marker{display:none}
+details.vc>summary:before{content:"▸";color:#1d4f91;font-size:12px}details.vc[open]>summary:before{content:"▾"}
+.vc .nm{font-weight:600}.vc .q{margin-left:auto;font-variant-numeric:tabular-nums;white-space:nowrap}
+.vc table{margin-top:6px}.vc td{padding:4px 6px;font-size:13px}.vc .why{font-size:13px;color:#3d4450;margin-top:6px}
+.vsrc{font-size:13px;color:#3d4450;background:#fff;border:1px solid #e3e6ea;border-radius:10px;padding:10px 12px;margin-top:14px}
+tr.vflag td{background:#fff8f7}
+/* S967 (27-Nov): the one page -- the five boxes, rows folded, each opening in place (mock-up v9) */
+.vt.blu{background:#eaf1fc;color:#123366}
+.dk{border-left:4px solid #c9ced6}.dk.b1{border-left-color:#d92d20}.dk.b2{border-left-color:#1d4f91}.dk.b3{border-left-color:#7a4700}.dk.b4{border-left-color:#d92d20}
+.dk h2 .tag{font-size:12px}.dk .lead{font-size:13px;color:#3d4450;margin:2px 0 8px}
+details.row{border:1px solid #eef0f2;border-radius:8px;margin:6px 0;background:#fff}
+details.row>summary{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;min-height:40px;padding:4px 10px;list-style:none;cursor:pointer}
+details.row>summary::-webkit-details-marker{display:none}details.row>summary:before{content:"▸";color:#1d4f91;font-size:12px}details.row[open]>summary:before{content:"▾"}
+details.row[open]{border-color:#c5d6f2}.sumit{font-weight:600}.sumfig{font-variant-numeric:tabular-nums;color:#3d4450;font-size:13px}
+.inner{padding:2px 12px 10px 26px}details.sub{margin-top:6px}details.sub>summary{font-size:13px;font-weight:600}
+ul.steps{margin:4px 0 0;padding-left:18px;font-size:13px}ul.steps li{margin:2px 0}ul.steps li.ok{color:#3d4450}ul.steps li.now{color:#123366;font-weight:600}ul.steps li.bad{color:#b42318;font-weight:600}
+.inner table td{font-size:13px;padding:4px 6px}tr.cnt td{background:#fff8e6}tr.vch td{background:#f5f8fd}
+iframe.ledf{width:100%;height:620px;border:1px solid #e3e6ea;border-radius:8px;margin-top:6px;background:#fff}
+.sett td{font-size:13px}.ro{font-size:12px;color:#5f6672;background:#eef0f2;border-radius:6px;padding:1px 7px;margin-left:6px}
+/* S969: the desk's buttons */
+.acts{display:inline-flex;gap:6px;margin-left:auto;flex-wrap:wrap;align-items:center}.cb.wo{border-color:#b42318;background:#fdecea;color:#7a1610}
+.cb.arm{background:#1d4f91;border-color:#1d4f91;color:#fff;font-weight:700}.cb.wo.arm{background:#b42318;border-color:#b42318;color:#fff}
+input.why,input.sv{font:inherit;font-size:13px;padding:6px 8px;border:1px solid #c9ced6;border-radius:8px;min-height:34px;box-sizing:border-box}
+input.why{width:22em;max-width:100%}.lossl{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.grpbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 2px}.dmsg{font-size:12px;color:#1d7a46}.dmsg.err{color:#b42318}
+/* S975 (28-Nov): the three bands (mock-up v10, D1106) */
+.dk.b2{border-left-color:#1d4f91}.b3f{border-left:4px solid #c9ced6}.b3f>summary{font-size:15px}.b3f>summary .tag{font-size:12px}
+.trk{display:inline-flex;gap:4px;align-items:center;font-size:12px;margin-left:4px}.trk .st{border-radius:6px;padding:1px 7px;background:#eef0f2;color:#5f6672}
+.trk .st.ok{background:#e9f6ee;color:#1d7a46}.trk .st.now{background:#fff4e0;color:#7a4700;font-weight:600}.trk .ar{color:#9aa1ab}
+</style></head>
+<body><div class="wrap">
+<div class="top"><a class="back" href="/finance/approvals">← Sanjeevni Hub</a><span class="small" id="when"></span></div>
+<h1>Stock check — Marg against the shelf</h1>
+<div class="mute" id="intro">Loading the figures of record…</div>
+<div id="desk"><div class="mute" style="margin-top:10px">Loading the boxes…</div></div>
+<details class="card" id="vwrap"><summary><b>All of Marg's stock vouchers, judged</b> <span class="small">— the reports read, every voucher, every correction asked of Amir</span></summary><div id="vbody"></div></details>
+<div class="chips" id="chips"></div>
+<div id="body"></div>
+</div>
+<script>
+var D=null;
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function $(i){return document.getElementById(i);}
+function ledger(r){return '/finance/sanjeevni/ledger?k='+encodeURIComponent(r.key||r.item);}
+function nm(r,note){return '<td class="nm"><a href="'+ledger(r)+'">'+esc(r.item)+'</a>'+vtagsFor(r.item)+(note?'<div class="note">'+note+'</div>':'')+'</td>';}
+function gapCls(g){return g>0?'n pos':(g<0?'n neg':'n');}
+function cntBtn(item){return '<td><button class="cb" type="button" data-item="'+esc(item)+'" onclick="countThis(this,this.dataset.item)">Count</button></td>';}
+/* S934 (23-Nov): Count opens two choices -- Count now (Darpan's screen at once, with the last bill number) or Next list (his next morning list). */
+function countThis(btn,item){
+  if(!item||!String(item).trim())return;
+  var host=btn.parentNode, old=host.querySelector('.chooser'); if(old){old.remove();return;}
+  var c=document.createElement('span');c.className='chooser';c.style.cssText='display:inline-flex;gap:6px;margin-left:6px;flex-wrap:wrap';
+  var a=document.createElement('button');a.type='button';a.className='cb';a.textContent='Count now';a.style.fontWeight='700';
+  var b=document.createElement('button');b.type='button';b.className='cb';b.textContent='Next list';
+  a.onclick=function(){doCount(btn,item,'now',c);}; b.onclick=function(){doCount(btn,item,'next',c);};
+  c.appendChild(a);c.appendChild(b);host.appendChild(c);
+}
+function doCount(btn,item,mode,c){
+  btn.disabled=true; c.querySelectorAll('button').forEach(function(x){x.disabled=true;});
+  fetch('/finance/stockcheck/api/count',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({item:item,mode:mode})})
+   .then(function(r){return r.json();}).then(function(j){c.remove();var m=document.createElement('span');m.className='msg'+(j.ok?'':' err');m.textContent=j.message||(j.ok?'Done.':'Not done.');btn.parentNode.appendChild(m);if(!j.ok)btn.disabled=false;})
+   .catch(function(){btn.disabled=false;c.remove();});
+}
+var WD={};
+function withdraw(el,id){
+  if(!WD[id]){WD[id]=1;el.textContent='Sure? Withdraw';el.style.fontWeight='700';setTimeout(function(){if(WD[id]===1){WD[id]=0;el.textContent='Withdraw';el.style.fontWeight='';}},5000);return;}
+  WD[id]=2;el.disabled=true;
+  fetch('/finance/stockcheck/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ask_id:id})})
+   .then(function(r){return r.json();}).then(function(j){el.textContent=j.ok?'withdrawn':(j.message||'Not done');if(j.ok){var p=el.closest('.ask');if(p)p.style.opacity='.45';}else{el.disabled=false;WD[id]=0;}})
+   .catch(function(){el.disabled=false;WD[id]=0;});
+}
+function rowNote(r){
+  var n=[];
+  if(r.evening)n.push('evening count of '+esc(r.base_day?r.base_day.slice(8,10)+'-'+r.base_day.slice(5,7):'')+', the end of its day');
+  if(r.named==='below_zero')n.push('the count carried forward went below zero (a purchase not yet in Marg, or a count to redo)');
+  if(r.approx)n.push('shares a family figure — approximate');
+  if(r.forms&&r.forms.length)n.push('also printed as '+esc(r.forms.join(' / ')));
+  if(r.pieces)n.push('pieces');
+  if(r.words)n.push(esc(r.words));
+  return n.join(' · ');
+}
+function table(rows,cols){
+  var h='<div class="box"><table><thead><tr>'+cols.map(function(c){return '<th'+(c.n?' class="n"':'')+'>'+c.h+'</th>';}).join('')+'<th><span style="position:absolute;left:-9999px">Count</span></th></tr></thead><tbody>';
+  rows.forEach(function(r){h+='<tr>'+cols.map(function(c){return c.f(r);}).join('')+cntBtn(r.item)+'</tr>';});
+  return h+'</tbody></table></div>';
+}
+var LOOK=[{h:'Item',f:function(r){return nm(r,rowNote(r));}},{h:'Marg',n:1,f:function(r){return '<td class="n">'+(r.state==='marg_behind'?'behind a bill':esc(r.marg_t))+'</td>';}},
+ {h:'Shelf',n:1,f:function(r){return '<td class="n">'+esc(r.core_t)+'</td>';}},{h:'Gap',n:1,f:function(r){return '<td class="'+gapCls(r.gap)+'">'+esc(r.gap_t)+'</td>';}}];
+function render(){
+  var T=D.totals||{}, R=D.rows||[];
+  $('when').innerHTML='read '+esc(D.at.replace('T',' ').slice(0,16))+' IST · the record built '+esc((D.reports&&D.reports.built_at)||'—')+(D.record&&D.record.rebuilding?' · <b>being rebuilt now</b> — read again in a minute':'')+(D.cached?' · <a href="/finance/stockcheck/?fresh=1">read again</a>':'');
+  $('intro').setAttribute('data-set','1');$('intro').innerHTML="Marg's closing of <b>"+esc(D.reports.closing_as_on)+"</b> (the report taken "+esc(D.reports.closing_at)+(D.reports.kind_word?', '+esc(D.reports.kind_word):'')+", plus the bills Amir keyed after it and the sales since) against the shelf figure: the last count, carried forward through Marg's sales, purchases and vouchers. Deliveries count by the scanned bill's quantity, never by reception's tap"+(D.bill_over_tap?'':' <span class="tag">switched off</span>')+"; a tap above the bill is a short supply, back on that dealer's next order. A count saved at or after "+esc(D.evening_hour)+":00 stands for the end of its day. Quantities in strips:tabs; pieces for orthotics, gels and sachets. A name opens its item ledger.";
+  $('chips').innerHTML='<a class="chip blue" href="#counts"><b>'+T.counts+'</b>Darpan\'s counts, 30 days</a><a class="chip red" href="#look"><b>'+T.look+'</b>need a look</a>'
+   +'<a class="chip blue" href="#arrived"><b>'+T.arrived+'</b>deliveries waiting for Marg</a><a class="chip" href="#noshelf"><b>'+T.noshelf+'</b>no shelf figure yet</a>'
+   +(T.count_only?'<a class="chip" href="#countonly"><b>'+T.count_only+'</b>count names Marg no longer prints</a>':'')+'<a class="chip green" href="#agree"><b>'+T.agree+'</b>agree</a>';
+  var h='';
+  // Darpan's counts
+  h+='<div class="card" id="counts" style="border-color:#c5d6f2"><h2>Darpan\'s counts — every one reaches you</h2>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 4px;position:relative"><label for="cnt" style="font-weight:600">Count this — any item, now or on Darpan\'s next list:</label>'
+    +'<span style="position:relative"><input id="cnt" class="q" placeholder="Type 2 or more letters" autocomplete="off" oninput="sugg(this.value)"><div class="sugg" id="sugg" hidden></div></span>'
+    +'<button class="cb" type="button" onclick="countThis(this,$(\'cnt\').value)">Count this</button><span class="note">Every row on this page also carries its own Count button.</span></div>';
+  if(D.asks&&D.asks.length) h+='<div class="note" style="margin-bottom:4px">Your open asks: '+D.asks.map(function(a){return '<span class="ask"><b>'+esc(a.item)+'</b> ('+(a.mode==='now'?'<b>count now</b>':'next list')+', asked '+esc(a.at)+') <button class="cb" type="button" style="min-height:26px;padding:0 8px;font-size:12px" onclick="withdraw(this,'+(+a.id)+')">Withdraw</button></span>';}).join(' · ')+'</div>';
+  if(D.next_list&&D.next_list.length) h+='<div class="note" style="margin-bottom:4px">Next list ('+esc(D.next_day)+'): '+D.next_list.map(function(x){return esc(x.item)+(x.reason?' <span class="tag">'+esc(x.reason)+'</span>':'');}).join(' · ')+'</div>';
+  h+='<div class="mute">Each count shows here the moment he saves it, and as one line on your Hub\'s Needs-you. "Judged against" is the shelf figure for a counted item, Marg\'s figure for an uncounted one.</div>';
+  var C=D.counts||[];
+  if(C.length){
+    h+='<div class="box"><table><thead><tr><th>Day</th><th>Item</th><th class="n">He counted</th><th class="n">Judged against</th><th class="n">Gap</th><th>Note</th><th><span style="position:absolute;left:-9999px">Count</span></th></tr></thead><tbody>';
+    C.forEach(function(c){var n=[];if(c.asked)n.push('you asked');else if(c.reason)n.push(esc(c.reason));if(c.evening)n.push('<span class="tag ev">evening count — the end of its day</span>');if(c.provisional)n.push('provisional: a delivery waits for Marg');if(c.awaits)n.push('<b>counted now, to the bill</b> — judged when that day\'s sale report is in');if(c.basis==='approx')n.push('a family figure — not judged');if(c.note)n.push(esc(c.note));if(c.by&&c.by!=='Darpan')n.push('by '+esc(c.by));
+      h+='<tr><td>'+esc(c.day)+' '+esc(c.time)+'</td>'+nm(c,'')+'<td class="n">'+esc(c.qty_t)+'</td><td class="n">'+esc(c.expected_t)+'</td><td class="'+gapCls(c.gap)+'">'+esc(c.gap_t)+'</td><td class="note">'+n.join(' · ')+'</td>'+cntBtn(c.item)+'</tr>';});
+    h+='</tbody></table></div>';
+  } else h+='<div class="mute" style="margin-top:8px">No spot count in the last 30 days.</div>';
+  if(D.older_counts) h+='<div class="note" style="margin-top:6px">'+D.older_counts+' older counts are on the item ledgers.</div>';
+  h+='</div>';
+  // need a look
+  var look=R.filter(function(r){return (r.state==='look'||r.state==='waiting')&&r.gap!==null&&r.gap!==0;});
+  var behind=R.filter(function(r){return r.state==='marg_behind';}), cons=R.filter(function(r){return r.state==='consumable';});
+  var ortho=look.filter(function(r){return r.ortho;}), meds=look.filter(function(r){return !r.ortho;});
+  var big=meds.filter(function(r){return Math.abs(r.gap)>=(r.pack||1);}), small=meds.filter(function(r){return Math.abs(r.gap)<(r.pack||1);});
+  h+='<div class="card" id="look"><h2>Need a look — the shelf and Marg differ, and no delivery explains it</h2><div class="mute">Biggest first. A gap with + means the shelf has more than Marg; − means less. The shelf column is the last count carried forward alone; a delivery waiting for Marg is in the table below, never here.</div>';
+  h+=big.length?table(big,LOOK):'<div class="mute" style="margin-top:8px">No medicine differs by a strip or more.</div>';
+  if(small.length) h+='<details><summary>'+small.length+' more, under one strip each</summary>'+table(small,LOOK)+'</details>';
+  if(ortho.length) h+='<details><summary>'+ortho.length+' orthotics — each once, under its Marg name</summary>'+table(ortho,LOOK)+'</details>';
+  h+='</div>';
+  // Marg's figure behind a bill
+  if(behind.length){h+='<div class="card" id="behind"><h2>'+behind.length+' items where Marg\'s figure is behind a bill</h2><div class="mute">Marg\'s figure would go below zero: a bill Marg holds is not in the record yet, or a bill is not keyed. No gap is judged until the purchase side is settled.</div>'+table(behind,LOOK)+'</div>';}
+  // the clinic's consumables
+  if(cons.length){h+='<div class="card" id="cons"><h2>'+cons.length+' clinic consumables</h2><div class="mute">Used by the clinic without sale bills (your consumption list): shown, never judged as a shop difference.</div><details><summary>Show them</summary>'+table(cons,LOOK)+'</details></div>';}
+  // deliveries waiting
+  var arr=R.filter(function(r){return r.arrived;});
+  h+='<div class="card" id="arrived"><h2>'+arr.length+' deliveries waiting for Marg</h2><div class="mute">A delivery waiting for Amir is not a difference: it lands on the shelf and, once he enters the bill, in Marg — the same amount on both sides. The <b>real difference</b> is the last count carried forward against Marg, the delivery left out of both. Each delivery counts by its scanned bill; a tap above the bill is a short supply, back on that dealer\'s next order.</div>';
+  if(arr.length){
+    h+='<div class="box"><table><thead><tr><th>Item</th><th class="n">Marg</th><th class="n">Waiting (by the bill)</th><th>From</th><th>Reception\'s tap / the bill</th><th class="n">Real difference</th><th><span style="position:absolute;left:-9999px">Count</span></th></tr></thead><tbody>';
+    arr.forEach(function(r){var L=r.lines||[];
+      h+='<tr>'+nm(r,rowNote(r))+'<td class="n">'+esc(r.marg_t)+'</td><td class="n">'+esc(r.arrived_t)+'</td><td>'+L.map(function(l){return esc(l.vendor)+(l.stamp?' '+esc(l.stamp):'')+' · '+esc(l.at.slice(8,10)+'-'+l.at.slice(5,7));}).join('<br>')+'</td>'
+        +'<td class="note">'+L.map(function(l){return (l.short<0?'<b>'+esc(l.word)+'</b>':esc(l.word));}).join('<br>')+'</td><td class="'+gapCls(r.gap)+'">'+esc(r.gap_t)+'</td>'+cntBtn(r.item)+'</tr>';});
+    h+='</tbody></table></div>';
+  } else h+='<div class="mute" style="margin-top:8px">Nothing waiting: every arrival is in Marg.</div>';
+  h+='</div>';
+  // no shelf figure
+  var ns=R.filter(function(r){return r.shelf===null;});
+  h+='<div class="card" id="noshelf"><h2>'+ns.length+' items Marg holds with no shelf figure yet</h2><div class="mute">New since the last full count, or renamed in Marg. They get a shelf figure at their next count — a Count button puts any of them on Darpan\'s list.</div>';
+  if(ns.length) h+='<details><summary>Show the items</summary><div class="cols">'+ns.map(function(r){return '<div><a href="'+ledger(r)+'">'+esc(r.item)+'</a> '+esc(r.marg_t)+' <button class="cb" type="button" style="min-height:28px;padding:0 8px;font-size:12px" data-item="'+esc(r.item)+'" onclick="countThis(this,this.dataset.item)">Count</button></div>';}).join('')+'</div></details>';
+  h+='</div>';
+  // count names Marg no longer prints
+  if(D.count_only&&D.count_only.length){
+    h+='<div class="card" id="countonly"><h2>'+D.count_only.length+' count names Marg no longer prints</h2><div class="mute">Counted under a spelling Marg has since changed, and not yet linked to the new name. The identity question (one medicine under two names?) is on your purchase flow page and the Marg watch; once answered, the count reads under the Marg name here.</div>';
+    h+='<div class="cols">'+D.count_only.map(function(c){return '<div>'+esc(c.item)+' <span class="note">counted '+esc(c.counted_t)+' on '+esc(c.day)+'</span></div>';}).join('')+'</div></div>';
+  }
+  // agree
+  var ag=R.filter(function(r){return r.gap===0&&(r.state==='agree'||r.state==='waiting');}), agIn=ag.filter(function(r){return r.marg>0;});
+  h+='<div class="card" id="agree"><h2>'+ag.length+' items agree</h2><div class="mute">'+agIn.length+' are in stock; the other '+(ag.length-agIn.length)+' are at zero in both and are counted here, never listed.</div>';
+  if(agIn.length) h+='<details><summary>Show the '+agIn.length+' in stock</summary><div class="cols">'+agIn.map(function(r){return '<div><a href="'+ledger(r)+'">'+esc(r.item)+'</a> '+esc(r.marg_t)+'</div>';}).join('')+'</div></details>';
+  h+='</div>';
+  // reports
+  h+='<div class="card"><h2>Reports behind this page</h2><div>Marg\'s closing stock: printed as on '+esc(D.reports.closing_printed)+', taken '+esc(D.reports.closing_at)+' — '+esc(D.reports.kind_word||'')+' · Sale report: to '+esc(D.reports.sale_to||'—')+' · Purchases in Marg: to '+esc(D.reports.purchase_to||'—')+'</div>'
+    +'<div class="mute" style="margin-top:4px">Every figure here is the stock of record (built '+esc(D.reports.built_at||'—')+'), the one record every page reads: Marg\'s newest report, the bills keyed after it, the sales since, the last count carried forward, the deliveries waiting. '+(D.totals&&D.totals.late?D.totals.late+' items carry a bill keyed after the print. ':'')+'The old Stock drift and Stock now addresses open this page.</div></div>';
+  $('body').innerHTML=h;
+  if(DK&&DK.v10&&(DK.band2||[]).concat(DK.week||[]).some(function(r){return r.surplus;})&&!document.querySelector('#desk details.row[open], #desk button.arm'))renderDesk();   /* S975: Marg's purchases-to day for band 2's surplus line -- never under an open row or an armed button */
+}
+/* S965 (26-Nov): Marg's stock vouchers on the Stock check -- read from /finance/stockcheck/api/vouchers (voucher_judge.page). Each voucher's
+   lines fold inline (D1086). Read only: nothing on this section writes. */
+var VJ=null;
+function vtag(c,t){return '<span class="vt '+c+'">'+esc(t)+'</span>';}
+var VSTATE={asked:'grn',early:'grn',sum:'grn',evened:'grn',cancel:'gry',twice:'red',more:'red',less:'red',unasked:'red',wrong_batch:'red'};
+function vlinesTable(L,withNo){
+  return '<table><thead><tr>'+(withNo?'<th>Voucher</th>':'')+'<th>Item</th><th class="n">Qty</th><th>Batch</th><th>Judged</th></tr></thead><tbody>'
+   +L.map(function(x){return '<tr'+(VSTATE[x.state]==='red'?' class="vflag"':'')+'>'+(withNo?'<td>'+esc((x.kind==='ISSUE'?'Issue ':'Receive ')+x.no+' · '+x.day)+'</td>':'')
+     +'<td>'+esc(x.item)+'</td><td class="n">'+esc(x.q)+'</td><td>'+esc(x.batch||'—')+'</td><td>'+vtag(VSTATE[x.state]||'gry',x.word)+(x.ref?' <span class="note">'+esc(x.ref)+'</span>':'')+'</td></tr>';}).join('')+'</tbody></table>';
+}
+function vcard(c,extra){
+  var red=c.lines.filter(function(x){return VSTATE[x.state]==='red';}).length;
+  return '<details class="vc"><summary><span class="nm">'+(c.kind==='ISSUE'?'Issue ':'Receive ')+esc(c.no)+' · '+esc(c.day)+'</span>'+(extra||'')
+   +(red?vtag('red',red+' flagged'):'')+vtag('gry',c.cash)+'<span class="q">'+c.lines.length+' line'+(c.lines.length>1?'s':'')+'</span></summary>'+vlinesTable(c.lines,false)+'</details>';
+}
+function vsection(){
+  var V=VJ; if(!V) return '';
+  if(!V.ok) return '<div class="vsrc"><b>Marg\'s stock vouchers:</b> '+esc(V.reason||'not read yet')+'</div>';
+  var R=V.reports, h='';
+  function rp(k,w){var r=R[k];return r?w+' '+esc(r.frm)+' → '+esc(r.to)+' ('+r.n+' vouchers, '+esc(r.first)+'–'+esc(r.last)+(r.missing.length?'; '+esc(r.missing.join(', '))+' not in the report — deleted in Marg':'')+')':'';}
+  h+='<div class="vsrc" id="vouchers"><b>Marg\'s voucher reports read:</b> '+rp('ISSUE','Stock Issue')+' · '+rp('RECEIVE','Stock Receive')
+    +' — every line judged against what was asked of Amir. <span class="note">The next report is asked of you only when something waits on it.</span></div>';
+  var C=V.chips;
+  h+='<div class="chips"><a class="chip red" href="#vmoves"><b>'+C.moves+'</b>vouchers nobody asked</a><a class="chip red" href="#vcorr"><b>'+C.not_in_marg+'</b>Amir said done — not in Marg</a>'
+   +'<a class="chip red" href="#vcorr"><b>'+C.off+'</b>items keyed not as asked</a><a class="chip" href="#vcorr"><b>'+C.waiting+'</b>waiting on Amir</a>'+(C.cut?'<a class="chip red" href="#vmoves"><b>'+C.cut+'</b>names cut short</a>':'')+'<a class="chip green" href="#vdone"><b>'+C.done+'</b>vouchers as asked</a></div>';
+  h+='<div class="vgrid" style="margin-top:14px">';
+  // box 1: Marg's stock changed -- nobody asked
+  h+='<div class="card vbox-r" id="vmoves"><h2>Marg\'s stock changed — nobody asked</h2><div class="mute">A voucher in Marg that no correction asked for. Tap a voucher: its lines open.</div>';
+  h+=V.moves.length?V.moves.map(function(c){return vcard(c,vtag('red','Nobody asked'));}).join(''):'<div class="mute" style="margin-top:8px">None: every voucher in the reports was asked for.</div>';
+  if(V.cut&&V.cut.length){h+='<div class="vg">Name cut short by Marg — size not printed</div><div class="note">Marg\'s report cut these names so they fit more than one item. Their one-item Stock Registers are asked on your list; the line lands on its item when one arrives.</div>'
+    +V.cut.map(function(x){return '<div class="note"><b>'+esc((x.kind==='ISSUE'?'Issue ':'Receive ')+x.no+' · '+x.day)+'</b> '+esc(x.printed)+' '+esc(x.q)+' — one of: '+esc(x.cands.join(' / '))+'</div>';}).join('');}
+  if(V.named&&V.named.length){h+='<div class="note" style="margin-top:6px">Named for Marg\'s cut lines: '+V.named.map(function(x){return esc(x.no)+' '+esc(x.printed)+' = <b>'+esc(x.item)+'</b> ('+esc(x.by)+')';}).join(' · ')+'</div>';}
+  if(V.registers&&V.registers.length){h+='<div class="vg">Marg\'s one-item Stock Registers you took</div>'+V.registers.map(function(g){return '<div class="note">'+esc(g.item)+' · '+esc(g.frm)+' → '+esc(g.to)+' · opening '+esc(g.opening)+', closing '+esc(g.closing)+' · '+g.lines+' lines'+(g.ok?'':' · <b>not read</b>')+' · taken '+esc(g.at)+'</div>';}).join('');}
+  h+='</div>';
+  // box 2: corrections asked of Amir
+  h+='<div class="card vbox-b" id="vcorr"><h2>Corrections asked of Amir</h2><div class="mute">Each correction closes when Marg\'s report shows its voucher.</div>';
+  if(V.not_in_marg.length){h+='<div class="vg">Amir said done — not in Marg</div>'+V.not_in_marg.map(function(x){
+    return '<details class="vc"><summary><span class="nm">'+esc(x.item)+'</span>'+vtag('red','Not in Marg')+'<span class="q">'+esc(x.ask)+'</span></summary><div class="why">Asked '+esc(x.asked)+' ('+esc(x.src)+'); Amir said done '+esc(x.done)+'.'
+     +(x.typed?(' He noted voucher '+esc(x.typed)+(x.typed_has?' — Marg\'s '+esc(x.typed)+' holds '+esc(x.typed_lines.join(', '))+', not this item.':' — no such voucher in the report.')):'')+' No voucher for it up to '+esc(V.reports[x.ask.indexOf('Receive')===0?'RECEIVE':'ISSUE'].to)+'.</div></details>';}).join('');}
+  if(V.off.length){h+='<div class="vg">In Marg — not as asked</div>'+V.off.map(function(o){
+    return '<details class="vc"><summary><span class="nm">'+esc(o.item)+'</span>'+o.words.map(function(w){return vtag('red',w);}).join('')+'<span class="q">'+o.lines.length+' line'+(o.lines.length>1?'s':'')+'</span></summary>'
+     +(o.asks.length?'<div class="why">Asked: '+o.asks.map(function(a){return esc(a.ask)+' ('+esc(a.src)+', '+esc(a.asked)+')';}).join(' · ')+'</div>':'')+vlinesTable(o.lines,true)+'</details>';}).join('');}
+  if(V.waiting.length){h+='<div class="vg">Waiting on Amir</div>'+V.waiting.map(function(w){
+    return '<details class="vc"><summary><span class="nm">'+esc(w.item)+'</span>'+vtag('amb',w.gap?'No report covers '+w.gap:(w.beyond?'After the newest report':'Waiting on Amir'))+'<span class="q">asked '+esc(w.asked)+'</span></summary><div class="why">'+esc(w.asks.join(' + '))+' — '+esc(w.src)+'.'+(w.gap?' Amir said done on '+esc(w.gap)+', a day none of your Stock Issue / Receive reports covers: a report of that period decides.':(w.beyond?' Done or asked after your newest Stock Issue / Receive report was taken: the next report decides.':''))+'</div></details>';}).join('');}
+  h+='<div class="vg" id="vdone">Asked and in Marg</div><details><summary>'+V.done.length+' vouchers keyed as asked — newest first</summary>'+V.done.map(function(c){return vcard(c,'<span class="note">'+esc(c.src)+'</span>');}).join('')+'</details>';
+  if(V.cancels.length) h+='<details><summary>'+V.cancels.length+' lines keyed and undone — no effect on stock</summary>'+vlinesTable(V.cancels,true)+'</details>';
+  if(V.other.length) h+='<details><summary>'+V.other.length+' wrong-batch fixes Marg\'s batch figures agree with — no voucher of their own</summary><div class="cols">'+V.other.map(function(x){return '<div>'+esc(x.item)+' <span class="note">'+esc(x.ask)+' · asked '+esc(x.asked)+'</span></div>';}).join('')+'</div></details>';
+  h+='</div></div>';
+  return h;
+}
+/* the tags on every item row: Marg's printed name may be cut at 15/20/24 letters */
+function vtagsFor(item){
+  if(!VJ||!VJ.ok||!VJ.tags) return '';
+  var n=String(item||'').toUpperCase().replace(/\s+/g,' ').trim(), out=[], seen={};
+  Object.keys(VJ.tags).forEach(function(k){
+    var hit=(k===n)||(n.length>k.length&&n.slice(0,k.length)===k&&(k.length>=15||(k.length>=12&&n.charAt(k.length)===' ')));
+    if(hit) VJ.tags[k].forEach(function(t){var s=t[0]+t[1];if(!seen[s]){seen[s]=1;out.push(vtag(t[0],t[1]));}});
+  });
+  return out.join('');
+}
+var ST=null;
+function sugg(v){clearTimeout(ST);var b=$('sugg');if(!v||v.length<2){b.hidden=true;return;}
+  ST=setTimeout(function(){fetch('/finance/stockcheck/api/find?q='+encodeURIComponent(v)).then(function(r){return r.json();}).then(function(j){var it=j.items||[];if(!it.length){b.hidden=true;return;}
+   b.innerHTML=it.map(function(n){return '<div data-n="'+esc(n)+'" onclick="pick(this.dataset.n)">'+esc(n)+'</div>';}).join('');b.hidden=false;});},180);}
+function pick(n){$('cnt').value=n;$('sugg').hidden=true;}
+document.addEventListener('click',function(e){var b=$('sugg');if(b&&!b.hidden&&e.target.id!=='cnt')b.hidden=true;});
+/* S967 (27-Nov): THE ONE PAGE's five boxes -- /finance/stockcheck/api/desk, READ ONLY (Write off / Pursue come with the next kit).
+   Each row opens in place: Path · Voucher lines (each voucher opens all its lines) · Item ledger (the ledger's own fold; full / a date range inside). */
+var DK=null;
+function dm2(s){s=String(s||'');return s.length>=10?s.slice(8,10)+'-'+s.slice(5,7):s;}
+function tg(x){return '<span class="vt '+({grn:'grn',red:'red',amb:'amb',gry:'gry',blu:'blu'}[x[0]]||'gry')+'">'+esc(x[1])+'</span>';}
+function pth(P){if(!P||!P.length)return '';return '<details class="sub" open><summary>Path</summary><ul class="steps">'+P.map(function(x){return '<li class="'+esc(x[0])+'">'+esc(x[1])+'</li>';}).join('')+'</ul></details>';}
+function vlt(L){if(!L||!L.length)return '';
+  return '<details class="sub"><summary>Voucher lines · '+L.length+'</summary><div class="box"><table><thead><tr><th>Voucher</th><th>Date</th><th>Kind</th><th class="n">Qty</th><th>Batch</th><th>Judged</th></tr></thead><tbody>'
+   +L.map(function(x){return '<tr'+(VSTATE[x.state]==='red'?' class="vflag"':'')+'><td>'+esc(x.no)+'</td><td>'+esc(dm2(x.day))+'</td><td>'+esc(x.kind==='ISSUE'?'Issue':'Receive')+'</td><td class="n">'+esc(x.q)+'</td><td>'+esc(x.batch||'—')+'</td><td>'+vtag(VSTATE[x.state]||'gry',x.word)+(x.ref?' <span class="note">'+esc(x.ref)+'</span>':'')+'</td></tr>'
+     +'<tr><td colspan="6"><details><summary class="note">Voucher ▾ all its lines</summary>'+vlinesTable(x.voucher||[],false)+'</details></td></tr>';}).join('')+'</tbody></table></div></details>';}
+function led(key){if(!key)return '<details class="sub"><summary>Item ledger</summary><div class="note">This name is not in the stock record, so it has no ledger.</div></details>';
+  return '<details class="sub" data-led="'+esc(key)+'" ontoggle="ledOpen(this)"><summary>Item ledger · newest lines</summary><div class="ledb note">Opening…</div></details>';}
+function ledOpen(d){if(!d.open||d.getAttribute('data-done'))return;d.setAttribute('data-done','1');var k=d.getAttribute('data-led'),b=d.querySelector('.ledb');
+  fetch(DK.fold+'?k='+encodeURIComponent(k),{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(j){
+    if(!j.ok){b.textContent=j.reason||j.message||'The ledger could not be read just now.';d.removeAttribute('data-done');return;}
+    var h='<div class="box"><table><thead><tr><th>Date</th><th>Entry</th><th>No.</th><th class="n">In</th><th class="n">Out</th><th class="n">Balance</th><th>Mark</th></tr></thead><tbody>'
+      +j.rows.map(function(r){return '<tr class="'+esc(r.cls||'')+'"><td>'+esc(r.day)+'</td><td>'+esc(r.entry)+'</td><td>'+esc(r.ref)+'</td><td class="n">'+esc(r.inn)+'</td><td class="n">'+esc(r.out)+'</td><td class="n">'+esc(r.bal)+'</td><td>'+esc(r.mark)+(r.words?' <span class="note">'+esc(r.words)+'</span>':'')+'</td></tr>';}).join('')+'</tbody></table></div>';
+    if(j.asks&&j.asks.length)h='<div class="note">Still asked of Amir: '+j.asks.map(function(a){return esc(a.ask)+' ('+esc(a.word)+', asked '+esc(a.asked)+')';}).join(' · ')+'</div>'+h;
+    h+='<details class="sub" ontoggle="fullOpen(this)" data-k="'+esc(k)+'"><summary>Full ledger · or a date range ▾</summary></details>';
+    b.className='ledb';b.innerHTML=h;}).catch(function(){b.textContent='The ledger could not be read just now. Close and open again.';d.removeAttribute('data-done');});}
+function fullOpen(d){if(!d.open||d.querySelector('iframe'))return;var f=document.createElement('iframe');f.className='ledf';f.loading='lazy';
+  f.src='/finance/sanjeevni/ledger?k='+encodeURIComponent(d.getAttribute('data-k'))+'&r=full&embed=1';d.appendChild(f);}
+function cbtn(item){return '<div style="margin-top:8px"><span class="note">Count first:</span> <span><button class="cb" type="button" data-item="'+esc(item)+'" onclick="countThis(this,this.dataset.item)">Count</button></span></div>';}
+/* S969: the desk's buttons -- two taps, no pop-up: the first arms ('Tap again', 5 s), the second sends. A click never opens the row. */
+function abtn(cls,act,item,label,ref){return '<button class="cb'+(cls?' '+cls:'')+'" type="button" data-act="'+act+'" data-item="'+esc(item)+'"'+(ref!=null?' data-ref="'+esc(ref)+'"':'')+' onclick="deskAct(event,this)">'+esc(label)+'</button>';}
+function acts(r){var a=r.acts||[];if(!a.length||!(DK&&DK.can_write))return '';var f=r.ref!=null?r.ref:r.id;return '<span class="acts">'+(a.indexOf('wo')>=0?abtn('wo','writeoff',r.item,'Write off '+(r.short_t||'')):'')
+  +(a.indexOf('pu')>=0?abtn('','pursue',r.item,'Pursue'):'')+(a.indexOf('nl')>=0?abtn('','nextlist',r.item,'Next list'):'')
+  /* S971 */+(a.indexOf('wd')>=0?abtn('wo','withdraw',r.item,'Withdraw',r.ref):'')+(a.indexOf('back')>=0?abtn('','back',r.item||'','Back to Amir',f):'')
+  +(a.indexOf('dumpok')>=0?abtn('','dumpok',r.item||'','OK — damaged / expiry',f):'')+(a.indexOf('reverse')>=0?abtn('wo','reverse',r.item||'','Reverse',f):'')
+  +(a.indexOf('cclose')>=0?abtn('','cclose',r.item||'','Close',f):'')+(a.indexOf('close')>=0?abtn('','close',r.item||'','Close',f):'')+'</span>';}
+function whyBox(r){var a=r.acts||[];return (DK&&DK.can_write&&(a.indexOf('close')>=0||a.indexOf('cclose')>=0||a.indexOf('dumpok')>=0))?'<div style="margin-top:6px"><span class="note">With Close / OK, a line of yours (optional):</span> <input class="why" maxlength="200" placeholder="e.g. told Amir in person"></div>':'';}
+function disarm(b){if(b&&b.classList.contains('arm')){b.classList.remove('arm');b.textContent=b.getAttribute('data-txt')||b.textContent;}}
+function deskAct(e,b){if(e){e.preventDefault();e.stopPropagation();}if(b.disabled)return;
+  if(!b.classList.contains('arm')){document.querySelectorAll('button.arm').forEach(disarm);b.setAttribute('data-txt',b.textContent);b.classList.add('arm');b.textContent='Tap again';
+    clearTimeout(b._t);b._t=setTimeout(function(){disarm(b);},5000);return;}
+  clearTimeout(b._t);
+  b.classList.remove('arm');b.textContent=b.getAttribute('data-txt');b.disabled=true;var body={act:b.getAttribute('data-act'),item:b.getAttribute('data-item')||''};
+  if(b.getAttribute('data-ref')!=null)body.ref=b.getAttribute('data-ref');   /* S971 */
+  var rw=b.closest('details.row'),wi=rw?rw.querySelector('input.why'):null;if(wi)body.note=wi.value||'';
+  if(body.act==='setting'){body.key=b.getAttribute('data-key');var si=document.getElementById(b.getAttribute('data-in'));body.value=si?si.value:'';}
+  var its=b.getAttribute('data-items');if(its){try{body.items=JSON.parse(its);}catch(x){body.items=[];}}
+  var host=b.parentNode,m=document.createElement('span');m.className='dmsg';m.textContent='Writing…';host.appendChild(m);
+  fetch('/finance/stockcheck/api/desk/act',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+   .then(function(r){return r.json();}).then(function(j){m.className='dmsg'+(j.ok?'':' err');m.textContent=j.message||(j.ok?'Done.':'Not done.');
+     DMSG=(j.ok?'':'! ')+(j.message||'');setTimeout(function(){loadDesk(true);},j.ok?900:1800);})
+   .catch(function(){m.className='dmsg err';m.textContent='Not sent -- the network. Tap again.';b.disabled=false;});}
+var DMSG='';
+function drow(r){return '<details class="row"><summary><span class="sumit">'+esc(r.item)+'</span><span class="sumfig">'+esc(r.fig||'')+'</span>'+(r.tags||[]).map(tg).join('')+acts(r)+'</summary><div class="inner">'
+  +pth(r.path)+whyBox(r)+vlt(r.vlines)+led(r.key)+(r.count_btn?cbtn(r.item):'')+'</div></details>';}
+/* S971: an inquiry row -- the voucher, its path, its buttons; the voucher's lines and each item's ledger inside */
+function irow(x){return '<details class="row"><summary><span class="sumit">'+esc((x.kind==='ISSUE'?'Issue ':'Receive ')+x.no+' · '+x.day)+'</span><span class="sumfig">'+esc(x.fig||'')+'</span>'+(x.tags||[]).map(tg).join('')+acts(x)+'</summary><div class="inner">'
+  +pth(x.path)+whyBox(x)+'<details class="sub"><summary>Voucher ▾ all its lines</summary>'+vlinesTable(x.voucher||[],false)+'</details>'
+  +(x.leds||[]).map(function(l){return led(l.key).replace('Item ledger · newest lines','Item ledger · '+esc(l.item));}).join('')+'</div></details>';}
+function mrow(m){var it=m.items.map(function(i){return tg([{settled:'grn',count_first:'blu',fresh_gap:'red',held:'gry',look:'amb',unknown:'gry'}[i.verdict]||'gry',i.item]);}).join('');
+  return '<details class="row"><summary><span class="sumit">'+esc((m.kind==='ISSUE'?'Issue ':'Receive ')+m.no+' · '+m.day)+'</span>'+tg(['red','nobody asked'])+(m.history?tg(['gry','history — before your rule date']):'')+it+'</summary><div class="inner">'
+   +'<ul class="steps">'+m.items.map(function(i){return '<li class="'+(i.verdict==='settled'?'ok':'now')+'"><b>'+esc(i.item)+'</b> '+esc(i.q)+(i.batch?' · batch '+esc(i.batch):'')+' — whole item today: '+esc(i.word)+'</li>';}).join('')+'</ul>'
+   +'<details class="sub"><summary>Voucher ▾ all its lines</summary>'+vlinesTable(m.lines,false)+'</details>'
+   +m.items.map(function(i){return led(i.key).replace('Item ledger · newest lines','Item ledger · '+esc(i.item))+(i.count_btn?cbtn(i.item):'');}).join('')+'</div></details>';}
+function dbox(cls,title,n,lead,rows,empty){return '<div class="card dk '+cls+'"><h2>'+title+' <span class="tag">'+n+'</span></h2><div class="lead">'+lead+'</div>'+(rows.length?rows.join(''):'<div class="mute">'+empty+'</div>')+'</div>';}
+function renderDeskV9(el){var K=DK, h='';
+  if(!K||!K.ok){$('desk').innerHTML='<div class="vsrc"><b>The boxes:</b> '+esc((K&&K.reason)||'not read yet')+'</div>';return;}
+  var T=K.totals;
+  if(!K.judge_ok)h+='<div class="vsrc"><b>Marg\'s stock vouchers could not be judged just now</b> — boxes 2 to 4 may be short of lines, and a short already asked of Amir can show in box 1. Read again in a minute.</div>';
+  h+='<div class="chips"><a class="chip red" href="#dk1"><b>'+T.short+'</b>short in the count</a><a class="chip" href="#dk1"><b>'+T.allow+'</b>within the allowance</a><a class="chip blue" href="#dk2"><b>'+T.way+'</b>on its way to Marg</a>'
+    +'<a class="chip" href="#dk3"><b>'+T.old+'</b>old corrections to settle</a><a class="chip red" href="#dk4"><b>'+T.moves+'</b>vouchers nobody asked</a><a class="chip green" href="#dk5"><b>'+T.settled+'</b>settled in Marg</a>'
+    +(T.recount?'<a class="chip" href="#dk6"><b>'+T.recount+'</b>old counts to count first</a>':'')
+    +'<span class="small" style="align-self:center">Every button: two taps — the first arms it, the second does it. No pop-up.</span></div>';
+  if(DMSG)h+='<div class="vsrc"'+(DMSG.charAt(0)==='!'?' style="border-color:#f0b4ae"':'')+'>'+esc(DMSG.replace(/^! /,''))+'</div>';
+  h+='<div id="dk1">'+dbox('b1','1 · Short in the count — your call',T.short,'A fresh count (the last '+30+' days) below Marg. <b>Write off</b> puts a Stock Issue on Amir\'s card (the day\'s write-offs are one voucher); <b>Pursue</b> puts a recount at the head of Darpan\'s next list — the row comes back with both counts. A count saved at or after the evening hour waits for that day\'s sales first: no buttons until then.',
+     K.box1.map(drow),'Nothing short in a fresh count.');
+  if(K.allow.length){var aw=K.allow.filter(function(r){return r.wo_ok;}).map(function(r){return r.item;});
+    h+='<div class="card dk" style="margin-top:8px"><h2>Within the allowance <span class="tag">'+T.allow+'</span></h2><div class="lead">Short, but within your allowance ('+esc(K.settings[0].v)+' of the item\'s own sales since its last count, at least '+esc(K.settings[1].v)+'). The group button writes these off onto Amir\'s card, one Stock Issue voucher with the day\'s others.</div>'
+     +(aw.length&&K.can_write?'<div class="grpbar"><button class="cb wo" type="button" data-act="allow" data-items="'+esc(JSON.stringify(aw))+'" onclick="deskAct(event,this)">Write off '+(aw.length===1?'it':(aw.length===2?'both':'all '+aw.length))+'</button></div>':'')
+     +K.allow.map(drow).join('')+'</div>';}
+  h+='</div>';
+  var ex=K.exportask?'<div class="grpbar" style="background:#fffaeb;border:1px solid #fec84b;border-radius:8px;padding:8px 10px"><span><b>On your list (once):</b> '+esc(K.exportask.text)+'</span></div>':'';   /* S971 */
+  h+='<div id="dk2">'+dbox('b2','2 · On its way to Marg',T.way,'Asked of Amir and not yet in Marg\'s Stock Issue / Receive report. Each closes by itself when a report shows it. The Expiry watch\'s night-time batch fixes are here too (your word 27-11: they keep running). When Amir says done and Marg\'s newer report still lacks it, it goes back on his card by itself.',K.way.map(drow),'Nothing waits on Amir.').replace(/<\/div>$/,ex+'</div>')+'</div>';
+  h+='<div id="dk3">'+dbox('b3','3 · Old corrections, re-judged on the whole item',T.old,'Nothing old reaches Amir before the whole item is judged again today: Marg = shelf closes it; a shelf only from an old count means count first; a fresh count that still differs is one correction for today\'s gap.',K.old.map(drow),'No old correction left to settle.')+'</div>';
+  var tl=K.tally||{}, inq=(K.inquiry||[]).map(irow), dn=K.inquiry_done||[];   /* S971: the inquiry, the history folded, the tally (his only) */
+  var b4=inq.concat(K.moves.filter(function(m){return !m.history;}).map(mrow));
+  var hist=K.moves.filter(function(m){return m.history;});
+  if(hist.length)b4.push('<details class="sub"><summary>'+hist.length+' before your rule date — history, judged on the whole item</summary>'+hist.map(mrow).join('')+'</details>');
+  if(dn.length)b4.push('<details class="sub"><summary>'+dn.length+' explained or closed</summary>'+dn.map(irow).join('')+'</details>');
+  h+='<div id="dk4">'+dbox('b4','4 · Voucher nobody asked for — inquiry',T.moves,'Rule date: <b>'+esc(K.rule_date||'not set')+'</b>. '+(K.rule_date?'Every voucher nobody asked for, on or after it, starts the inquiry by itself: the system looks first (an ask it answers, an issue and a receive that cancel, a move between two batches, Marg equal to the shelf after it); else one question on Amir\'s card, and each answer its own check. Only what stays unsettled comes to you.':'Not set yet: every voucher nobody asked for is history, judged by the same whole-item test. Set it below (The rules this page reads) the day you tell Amir: from then on, no voucher unless the system asks.'),b4,'Every voucher in Marg\'s reports was asked for.')
+   +(K.rule_date?'<div class="note" style="margin:-6px 0 0 4px">Unasked vouchers, '+esc(tl.month||'')+': '+(tl.explained||0)+' explained · '+(tl.reversed||0)+' reversed · '+(tl.closed||0)+' closed by you · '+(tl.open||0)+' open</div>':'')+'</div>';
+  if(K.recount&&K.recount.length){var rl=K.recount.filter(function(r){return (r.acts||[]).indexOf('nl')>=0;}).map(function(r){return r.item;});   // S969 (F-1712)
+    h+='<div id="dk6">'+dbox('b2','Count first — an old count differs from Marg',T.recount,'The shelf figure of these is only an old count (06-Sep, or a spot count past 30 days) carried forward, and it differs from Marg. An old count is never a write-off: <b>Next list</b> puts the item at the head of Darpan\'s next morning list; his count brings it to box 1 or settles it.'
+      +(rl.length>1&&K.can_write?'<div class="grpbar"><button class="cb" type="button" data-act="nextlist" data-items="'+esc(JSON.stringify(rl))+'" onclick="deskAct(event,this)">All '+rl.length+' on Darpan\'s next list</button><span class="note">they all go on his next morning list</span></div>':''),
+      K.recount.map(drow),'')+'</div>';}
+  if(K.noted&&K.noted.length)h+='<details class="card"><summary><b>Short, but not judged a loss</b> <span class="tag">'+K.noted.length+'</span> <span class="small">— shown for your look, nothing to write off</span></summary>'+K.noted.map(drow).join('')+'</details>';
+  h+='<details class="card" id="dk5"><summary><b>Settled in Marg</b> <span class="tag">'+T.settled+'</span> <span class="small">— shorts written off in Marg, old corrections settled by later entries</span></summary>'+K.settled.map(drow).join('')+'</details>';
+  h+='<div class="card lossl"><b>Loss register</b><span class="note">every write-off kept: its count, within the allowance or your call, its value at cost and at MRP (fixed on the day of your tap), Marg\'s voucher once keyed; month by month, printable.</span><a class="cb" style="display:inline-flex;align-items:center;text-decoration:none" href="/finance/stockcheck/losses">Open the loss register</a></div>';
+  var ed=(K.edit||[]).map(function(s,i){var id='sv'+i,inp=s.kind==='onoff'?'<select class="sv" id="'+id+'"><option value="on"'+(s.raw==='on'?' selected':'')+'>on</option><option value="off"'+(s.raw==='off'?' selected':'')+'>off</option></select>'
+     :'<input class="sv" id="'+id+'" '+(s.kind==='date'?'placeholder="dd-mm-yyyy" size="11"':'type="number" min="'+s.lo+'" max="'+s.hi+'" style="width:6em"')+' value="'+esc(s.kind==='date'?(s.v||''):s.raw)+'">';
+     return '<tr><td>'+esc(s.label)+'</td><td>'+(K.can_write?inp+' <button class="cb" type="button" data-act="setting" data-key="'+esc(s.k)+'" data-in="'+id+'" onclick="deskAct(event,this)">Save</button>':'<b>'+esc(s.v||'not set')+'</b>')+'</td><td class="note">'+esc(s.k)+'</td></tr>';}).join('');
+  h+='<details class="card" id="dkset"><summary><b>The rules this page reads</b> <span class="small">— the inquiry\'s are yours to change here (two taps: Save, then Tap again)</span></summary><table class="sett"><tbody>'+ed+K.settings.map(function(s){return '<tr><td>'+esc(s.label)+'</td><td><b>'+esc(s.v)+'</b> <span class="ro">read only here</span></td><td class="note">'+esc(s.k)+'</td></tr>';}).join('')+'</tbody></table></details>';
+  (el||$('desk')).innerHTML=h;
+}
+/* S975 (28-Nov): THE PAGE IN THREE BANDS (mock-up v10, his 'OK' 11:52 IST, D1106) -- 1 your write-offs waiting for Amir . 2 today's
+   counts, one verdict each . 3 waiting on others: the boxes as before (renderDeskV9 into a scratch box), each folded. The buttons and
+   their two taps are unchanged; a row is shown once (band 1's items are not in the 'on their way' fold). */
+function trk(T){return '<span class="trk">'+(T||[]).map(function(s){return '<span class="st '+esc(s[0])+'">'+esc(s[1])+'</span>';}).join('<span class="ar">→</span>')+'</span>';}
+function b1row(r){return '<details class="row"><summary><span class="sumit">'+esc(r.item)+'</span><span class="sumfig">written off '+esc(r.q)+' · booked '+esc(r.booked)+' · '+esc(r.card)+'</span>'
+  +(r.tags||[]).map(tg).join('')+trk(r.track)+'<span class="sumfig">'+esc(r.cost_t)+'</span>'+acts(r)+'</summary><div class="inner">'+pth(r.path)+vlt(r.vlines)+led(r.key)+'</div></details>';}
+function pdate(s){s=String(s||'');return /^\d\d-\d\d-\d{4}$/.test(s)?s.slice(6)+'-'+s.slice(3,5)+'-'+s.slice(0,2):'';}
+function b2row(r,withDay){var x=JSON.parse(JSON.stringify(r));
+  if(x.surplus&&D&&D.reports){var pt=pdate(D.reports.purchase_to);if(pt&&pt<x.day)x.tags.push(['blu','likely a delivery not yet in Marg (Marg\'s purchases reach '+D.reports.purchase_to.slice(0,5)+')']);}
+  x.fig=(withDay?dm2(x.day)+' ':'')+x.time+(x.by?' · '+x.by:'')+' · '+x.fig;return drow(x);}
+function b3fold(id,title,n,node){if(!node)return '';var t=node.querySelector('h2');if(t)t.remove();
+  return '<details class="card b3f" id="'+id+'"><summary><b>'+title+'</b> <span class="tag">'+n+'</span></summary>'+node.innerHTML+'</details>';}
+function renderDesk(){var K=DK;
+  if(!K||!K.ok||!K.v10){renderDeskV9();if(K&&K.ok&&K.v10_reason)$('desk').insertAdjacentHTML('afterbegin','<div class="vsrc">'+esc(K.v10_reason)+'</div>');return;}
+  var openIds=[].slice.call(document.querySelectorAll('#desk details[id][open]')).map(function(d){return d.id;});
+  var T=K.totals,V=K.v10_totals,h='';
+  /* the boxes as before, drawn into a scratch box with box 2 = the 'on their way' rows less band 1, no box 1 (band 2 carries it) */
+  var keep={way:K.way,box1:K.box1,allow:K.allow,totals:K.totals,exportask:K.exportask},tmp=document.createElement('div'),dm_=DMSG;
+  K.way=K.way3;K.box1=[];K.allow=[];K.exportask=null;K.totals=Object.assign({},T,{way:K.way3.length,short:0,allow:0});DMSG='';
+  try{renderDeskV9(tmp);}finally{K.way=keep.way;K.box1=keep.box1;K.allow=keep.allow;K.totals=keep.totals;K.exportask=keep.exportask;DMSG=dm_;}
+  if(!K.judge_ok)h+='<div class="vsrc"><b>Marg\'s stock vouchers could not be judged just now</b> — band 1 and the folds may be short of lines. Read again in a minute.</div>';
+  h+='<div class="chips"><a class="chip red" href="#band1"><b>'+V.band1+'</b>your write-offs — with Amir, not keyed yet</a><a class="chip blue" href="#band2"><b>'+V.today+'</b>counted today</a>'
+    +(V.earlier?'<a class="chip red" href="#b2early"><b>'+V.earlier+'</b>earlier counts still open</a>':'')
+    +'<a class="chip" href="#b3way"><b>'+V.way3+'</b>other corrections on their way</a><a class="chip" href="#b3rec"><b>'+V.recount+'</b>old counts to count first</a>'
+    +'<span class="small" style="align-self:center">Every button: two taps — the first arms it, the second does it. No pop-up.</span></div>';
+  if(DMSG)h+='<div class="vsrc"'+(DMSG.charAt(0)==='!'?' style="border-color:#f0b4ae"':'')+'>'+esc(DMSG.replace(/^! /,''))+'</div>';
+  if(K.exportask)h+='<div class="grpbar" style="background:#fffaeb;border:1px solid #fec84b;border-radius:8px;padding:8px 10px;margin-top:10px"><span><b>On your list (once):</b> '+esc(K.exportask.text)+'</span></div>';
+  var f=K.band1_foot;
+  h+='<div class="card dk b1" id="band1"><h2>Your write-offs — waiting for Amir <span class="tag">'+V.band1+'</span></h2><div class="lead">Each write-off of yours goes on Amir\'s card as a Stock Issue (the day\'s write-offs are one voucher): booked → Amir keys it → in Marg. A row leaves this band by itself when Marg\'s Stock Issue report shows it. Tap a row for its path: the count, your tap, the card, the closing rule.</div>'
+   +(K.band1.length?K.band1.map(b1row).join(''):'<div class="mute">None waiting: every write-off of yours is in Marg.</div>')
+   +'<div class="lossl" style="margin-top:10px">'+(f?'<span><b>'+esc(f.label)+':</b> '+f.n+' write-off'+(f.n===1?'':'s')+' · cost '+esc(f.cost_t)+' · MRP '+esc(f.mrp_t)+'</span>':'')
+   +'<a class="cb" style="display:inline-flex;align-items:center;text-decoration:none" href="/finance/stockcheck/losses">Open the full loss register</a></div></div>';
+  var aw=K.allow_items||[],cn=(K.counters||[]).join(', ');
+  h+='<div class="card dk b2" id="band2"><h2>Today\'s counts'+(cn?' — '+esc(cn):'')+', '+esc(K.day_word)+' <span class="tag">'+V.today+'</span></h2><div class="lead">Every count saved today, one plain verdict each. More than Marg is never a loss. A loss since the last count carries its own Write off and Pursue; within your allowance, the group button writes them off together.</div>'
+   +(aw.length&&K.can_write?'<div class="grpbar"><button class="cb wo" type="button" data-act="allow" data-items="'+esc(JSON.stringify(aw))+'" onclick="deskAct(event,this)">Write off '+(aw.length===1?'the one':(aw.length===2?'both':'all '+aw.length))+' within the allowance</button><span class="note">'+esc(aw.join(' · '))+'</span></div>':'')
+   +(K.band2.length?K.band2.map(function(r){return b2row(r,false);}).join(''):'<div class="mute">No count saved today yet.</div>');
+  if(K.earlier.length)h+='<div class="vg" id="b2early">Earlier counts still open · '+K.earlier.length+'</div>'+K.earlier.map(drow).join('');
+  if(K.week.length)h+='<details class="sub" id="b2week"><summary>This week\'s earlier counts · '+K.week.length+' — each with its state now</summary>'+K.week.map(function(r){return b2row(r,true);}).join('')+'</details>';
+  h+='</div>';
+  h+='<div class="card" id="band3" style="padding-bottom:6px"><h2>Waiting on others</h2><div class="lead mute">Nothing here needs your tap today. Each fold opens in place.</div>';
+  h+=b3fold('b3way','Other corrections on their way to Marg',V.way3,tmp.querySelector('#dk2'));
+  h+=b3fold('b3old','Old corrections, re-judged on the whole item',T.old,tmp.querySelector('#dk3'));
+  h+=b3fold('b3rec','Count first — an old count differs from Marg',V.recount,tmp.querySelector('#dk6'));
+  h+=b3fold('b3inq','Vouchers nobody asked for',T.moves,tmp.querySelector('#dk4'));
+  [].slice.call(tmp.querySelectorAll(':scope > details.card')).forEach(function(d){h+=d.outerHTML;});   /* settled . short not judged a loss . the rules */
+  h+='</div>';
+  $('desk').innerHTML=h;
+  openIds.forEach(function(i){var d=document.getElementById(i);if(d)d.open=true;});
+}
+function loadDesk(fresh){fetch('/finance/stockcheck/api/desk'+((fresh||location.search.indexOf('fresh=1')>=0)?'?fresh=1':''),{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(j){DK=j;renderDesk();
+   if(!D&&$('intro').getAttribute('data-set')!=='1')$('intro').textContent='The boxes are read. The item tables further down are still being read — they appear by themselves.';})
+ .catch(function(){$('desk').innerHTML='<div class="vsrc">The boxes could not be read just now. Reload in a minute.</div>';});}
+loadDesk(false);
+fetch('/finance/stockcheck/api/rows'+(location.search.indexOf('fresh=1')>=0?'?fresh=1':'')).then(function(r){return r.json();}).then(function(j){D=j;if(!j.ok){$('intro').setAttribute('data-set','1');$('intro').textContent=j.reason||'The figures could not be read.';return;}render();})
+ .catch(function(){$('intro').textContent='The figures could not be read just now. Reload in a minute.';});
+fetch('/finance/stockcheck/api/vouchers'+(location.search.indexOf('fresh=1')>=0?'?fresh=1':'')).then(function(r){return r.json();}).then(function(j){VJ=j;$('vbody').innerHTML=vsection();if(D&&D.ok)render();}).catch(function(){$('vbody').innerHTML='';});
+</script></body></html>
