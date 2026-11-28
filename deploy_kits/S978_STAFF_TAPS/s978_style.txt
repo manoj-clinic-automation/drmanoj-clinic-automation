@@ -1,0 +1,4 @@
+details.s962m{margin:0 0 12px}details.s962m summary{font-size:17px;color:#2c6e2f;cursor:pointer}
+.cline form.s978{display:block;margin:6px 0 0}.cline form.s978 label{display:block;font-size:16px;margin:8px 0 2px}
+.cline form.s978 input.rs{box-sizing:border-box}
+</style>"""

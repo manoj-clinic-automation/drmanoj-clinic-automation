@@ -1,0 +1,48 @@
+S978_MORNING_UNTIL = 13                         # S978: the register opens on the last working day until 13:00 IST
+
+
+def _s978_now():
+    return dt.datetime.now(dt.timezone(dt.timedelta(hours=5, minutes=30)))
+
+
+def _s978_hour():
+    """The hour in IST, whatever the box's own clock says."""
+    return _s978_now().hour
+
+
+def _s978_today():
+    """Today in IST (second look: one clock for the hour and the day)."""
+    return _s978_now().date().isoformat()
+
+
+def s978_set_cell(con, d, field, new_p, who, why="day check S978"):
+    """S978 (K2.4): ONE register cell set from the day check -- the register's own record, audited as the Save is (every figure
+    before and after), the push re-run as the Save does (S968). Returns the value it replaced. Raises ValueError on a refusal."""
+    if field not in FIELDS:
+        raise ValueError("not a register figure")
+    new_p = int(new_p)
+    if new_p < 0 or new_p > 1_000_000_000:
+        raise ValueError("not a register figure")
+    before = register_row(con, d)
+    if before is None:
+        raise ValueError("the register of this day is not saved")
+    was = int(before[field] or 0)
+    now = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    con.execute("UPDATE clinic_register_day SET %s=?, updated_by=?, updated_at=? WHERE business_date=?" % field,
+                (new_p, who, now, d))
+    con.commit()
+    if _audit:
+        try:
+            b = {k: before[k] for k in FIELDS}
+            a = dict(b)
+            a[field] = new_p
+            a["via"] = why
+            _audit(con, "clinic_register_day", d, "update", before=b, after=a, who=who)
+            con.commit()
+        except Exception:                        # noqa: BLE001
+            pass
+    _s968_spawn(con, d)
+    return was
+
+
+def _s636_check(con, d, u):

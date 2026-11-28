@@ -1,0 +1,16 @@
+DAYCHK_REVENUE=0 puts the S970 morning back exactly as it was.
+
+S978 (session S545, 28-Nov-2026; D1100 -- K2b of S537_MORNING_CHECK_FINAL_BUILD_PLAN; his "Next blank paper" 17:4x 28-Nov).
+THE STAFF TAPS, on the morning's two money cards:
+  * 'nf:' (register MORE): [Parchi banayein] -- a patient of the card, the service from the price-filtered list of the head (one
+    is chosen for them) and the book's next number (the next blank paper, written for that patient and filed): the parchi is made
+    by slip_log.log_slip itself, dated that day, and kept outside Docterz at once (nid 'outside' by the staff login when his list
+    carries the slip; an OPD parchi of a patient Docterz holds at Rs 0 is placed by its 'lateslip' tick). Refused: a patient
+    already billed of that head, a service not at the gap's price, a day older than 7. Its Undo voids that parchi (audited).
+  * [Register galat likha -- theek karein] on 'nf:' and 'less:': the ONE register cell that holds the gap is set through
+    clinic_register.s978_set_cell (audited as the Save is; the push re-run); Undo = the audited before-value. Never offered for
+    cash when the drawer's count equals the register's cash.
+  * [Refund tha (cash)] on 'less:': slip_adjust's own radd, how 'returned', tender cash, on the picked patient's one slip (F-1733).
+  * [Pata nahi]: a 'dunno' tick -- the line leaves the staff list and goes to HIS push (register_push: 'pn:<line>').
+  * [Sab ho gaya]: one tap writes the existing per-card ticks (missing / notbilled -> added; mode -> changed) -- no new state.
+DAYCHK_TAPS=0 hides every new button (the K2a cards exactly as they were).

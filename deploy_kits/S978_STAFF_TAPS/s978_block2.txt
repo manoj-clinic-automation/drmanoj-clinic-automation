@@ -1,0 +1,230 @@
+def _s978_late(con, d, card, f, who, english):
+    """S978 (K2.2): the late parchi from the 'nf:' card, by slip_log's own path, dated that day, kept outside Docterz. -> (ok, er)."""
+    SL = _SL()
+    if SL is None:
+        return "", ("The parchi book is not reachable — tell Dr Manoj." if english else "Parchi book nahi mili — Dr sahab ko batayein.")
+    pick = "".join(ch for ch in str(f.get("pick") or "") if ch.isalnum())[:12]
+    if not pick or pick not in [cid for cid, _n in (card.get("cands") or [])]:
+        return "", ("Pick a patient from the list." if english else "List mein se mareez chuniye.")
+    if not _late_ok(d):
+        return "", ("Older than 7 days — the parchi can no longer be made." if english else "7 din se purani — parchi ab nahi ban sakti.")
+    sec, g = card.get("section") or "consult", int(card.get("amount") or 0)
+    lines, _legs = _docterz(con, d)
+    if any(ln["cid"] == pick and ln["section"] == sec and ln["amount_p"] > 0 for ln in lines):
+        return "", (("This patient is already billed for %s — tap 'Don't know'." % SEC_EN.get(sec, sec)) if english else
+                    ("Is mareez ka %s bill pehle se hai — 'Pata nahi' dabaiye." % SEC_HI.get(sec, sec)))
+    svc = str(f.get("svc") or "")
+    if svc not in [v for v, _l in _s978_services(con, d, sec, g)]:
+        return "", (("That service is not at %s." % rs(g)) if english else ("Yeh kaam %s ka nahi hai." % rs(g)))
+    series = SEC_SERIES.get(sec, "xp")
+    items = []
+    if series == "opd":
+        if any(str(s.get("clinic_id") or "") == pick for s in _parchi(con, d) if s["series"] == "opd"):
+            return "", ("This patient already has an OPD parchi that day — tap 'Don't know'." if english else
+                        "Is mareez ki us din ki OPD parchi pehle se hai — 'Pata nahi' dabaiye.")
+    else:
+        xr, pr = SL.services(con)
+        s = next((x for x in (xr if sec == "xray" else pr) if str(x["id"]) == svc), None)
+        if s is None or int(s["price_p"]) != g:
+            return "", (("That service is not at %s." % rs(g)) if english else ("Yeh kaam %s ka nahi hai." % rs(g)))
+        items = [dict(kind=sec, service_id=s["id"], name=s["name"], side="", price_p=int(s["price_p"]))]
+    raw = "".join(ch for ch in str(f.get("no") or "") if ch.isdigit())[:7]
+    if not raw:
+        return "", ("Write the slip number." if english else "Parchi number likhein.")
+    nx = _s978_next_no(con, series)                      # review M3: only a blank paper of the book (the next number, or up to
+    ok_no = nx is not None and int(nx) <= int(raw) <= int(nx) + SL.GAP_LIMIT   # GAP_LIMIT above it) skips the number checks
+    try:
+        sid, _note = SL.log_slip(con, who, series, int(raw), pick, "", items, confirm_gap=ok_no, day=d)
+    except Exception as ex:                              # noqa: BLE001 -- slip_log's own refusals (number taken, book) as they are
+        try:
+            con.rollback()
+        except Exception:                                # noqa: BLE001
+            pass
+        return "", str(ex)[:200]
+    try:
+        add_tick(con, d, "late:%d" % sid, LATE_ACT, who, reason=sec, pick=str(sid))
+    except Exception:                                    # noqa: BLE001 -- review S1: never a parchi the check cannot see
+        voided = False
+        try:
+            con.rollback()
+            con.execute("UPDATE slip SET state='void', note=?, updated_by=?, updated_at=? WHERE id=? AND state='ok'",
+                        ("not kept: the day check could not record it (S978)", who, _stamp(), sid))
+            con.commit()
+            voided = con.execute("SELECT state FROM slip WHERE id=?", (sid,)).fetchone()[0] == "void"
+            if voided:
+                _audit_safe(con, "slip", sid, "slip_void", {"state": "ok"}, {"state": "void", "why": "S978 tick not recorded"}, who)
+        except Exception:                                # noqa: BLE001
+            voided = False
+        if voided:
+            return "", ("It could not be recorded — nothing was kept; try again." if english else
+                        "Likha nahi ja saka — kuch nahi bana; dobara dabaiye.")
+        return "", (("Parchi %s was made but the check could not record it — tell Dr Manoj." % raw) if english else
+                    ("Parchi %s bani par jaanch mein likhi nahi gayi — Dr sahab ko batayein." % raw))
+    try:                                                 # his list carries it: answered 'kept outside Docterz' by this login
+        import not_in_docterz as _nid                    # noqa: PLC0415
+        _nid.mark(con, who, sid, "opd" if series == "opd" else sec, "outside")
+    except Exception:                                    # noqa: BLE001 -- Docterz holds the patient (Rs 0): the late tick places it
+        try:
+            con.rollback()
+        except Exception:                                # noqa: BLE001
+            pass
+    _s978_push(con, d)
+    return (("Parchi %s made for that day and kept outside Docterz — the day matches by itself." % raw) if english else
+            ("Parchi %s us din ki bani, Docterz ke bahar — din apne aap mil jayega." % raw)), ""
+
+
+def _s978_regfix(con, d, card, f, who, english):
+    """S978 (K2.4): the one register cell set through clinic_register's own audited write. -> (ok, er)."""
+    x = _s978_cell(con, card, d)
+    if x is None:
+        return "", ("The register cannot be fixed from here — open the register." if english else
+                    "Yahan se register theek nahi hoga — register kholiye.")
+    field, was, now = x
+    if str(f.get("field") or "") != field or str(f.get("was") or "") != str(was) or str(f.get("now") or "") != str(now):
+        return "", ("The register has changed — the page is fresh now." if english else "Register badal chuka — page naya hai.")
+    got = _CR().s978_set_cell(con, d, field, now, who)
+    # review M2: the tick is the FIX's, never the card's -- a gap that comes back is a fresh line, pushed again
+    try:
+        add_tick(con, d, "regfix:%s:%d>%d" % (field, got, now), REGFIX_ACT, who, reason=field, pick="%d>%d" % (got, now))
+    except Exception:                                    # noqa: BLE001 -- second look S5: never a fix the check cannot undo
+        try:
+            con.rollback()
+            _CR().s978_set_cell(con, d, field, got, who, why="day check S978: put back, the fix could not be recorded")
+        except Exception:                                # noqa: BLE001
+            return "", ("The register changed but the check could not record it — tell Dr Manoj." if english else
+                        "Register badla par jaanch mein likha nahi gaya — Dr sahab ko batayein.")
+        return "", ("It could not be recorded — the register is as it was; try again." if english else
+                    "Likha nahi ja saka — register pehle jaisa hai; dobara dabaiye.")
+    return (("Register corrected: %s → %s." % (rs(got), rs(now))) if english else
+            ("Register theek kiya: %s → %s." % (rs(got), rs(now)))), ""
+
+
+def _s978_undo(con, d, a, tid, u, who, english):
+    """S978: Undo of a late parchi (voided, audited; his-list answer undone) or of a register fix (the audited before-value)."""
+    ensure(con)
+    t = con.execute("SELECT * FROM day_check_tick WHERE id=? AND day=? AND state='live'", (tid, d)).fetchone()
+    if t is None or t["act"] != (LATE_ACT if a == "undolate" else REGFIX_ACT):
+        return "", ("Already undone." if english else "Pehle hi wapas le liya.")
+    if (t["who"] or "").lower() != who and "checker" not in _roles(u):
+        return "", (("Only %s can undo this." % (t["who"] or "").title()) if english else
+                    ("Sirf %s wapas le sakte hain." % (t["who"] or "").title()))
+    if a == "undolate":
+        if not _late_ok(d):
+            return "", ("Older than 7 days." if english else "7 din se purani.")
+        sid = int(t["pick"] or 0)
+        row = con.execute("SELECT * FROM slip WHERE id=? AND state='ok' AND day=?", (sid, d)).fetchone()
+        if row is not None:
+            con.execute("UPDATE slip SET state='void', note=?, updated_by=?, updated_at=? WHERE id=?",
+                        ("undone (day check S978)", who, _stamp(), sid))
+            _audit_safe(con, "slip", sid, "slip_void", {"state": "ok"}, {"state": "void", "why": "undone (day check S978)"}, who)
+        con.execute("UPDATE day_check_tick SET state='undone' WHERE id=?", (tid,))
+        _audit_safe(con, "day_check_tick", tid, "tick_undo", None, {"day": d, "key": t["key"], "act": LATE_ACT}, who)
+        con.commit()
+        try:
+            import not_in_docterz as _nid                # noqa: PLC0415
+            if _has(con, "nid_mark"):
+                for m in con.execute("SELECT id FROM nid_mark WHERE slip_id=? AND state='live'", (sid,)).fetchall():
+                    _nid.undo(con, who, int(m[0]))
+        except Exception:                                # noqa: BLE001 -- the slip is void: his list no longer carries it
+            try:
+                con.rollback()
+            except Exception:                            # noqa: BLE001
+                pass
+        _s978_push(con, d)
+        if row is None:
+            return ("Undone." if english else "Wapas le liya."), ""
+        return (("Parchi %d taken off; the line is back." % row["slip_no"]) if english else
+                ("Parchi %d hata di; line wapas aa gayi." % row["slip_no"])), ""
+    if not _late_ok(d):
+        return "", ("Older than 7 days." if english else "7 din se purani.")
+    field = str(t["reason"] or "")
+    try:
+        was, now = (int(x) for x in str(t["pick"] or "").split(">"))
+    except ValueError:
+        return "", ("This fix cannot be read." if english else "Yeh badlav padha nahi ja saka.")
+    CR = _CR()
+    row = CR.register_row(con, d)
+    if row is None or field not in CR.FIELDS or int(row[field] or 0) != now:
+        return "", ("The register has changed since — undo it on the register page." if english else
+                    "Register tab se badal chuka — register page par theek karein.")
+    if field.endswith("_cash_p"):                        # second look S1: an Undo never leaves a counted drawer disagreeing
+        try:
+            dr = CR.drawer_row(con, d)
+            exp = CR.expected_handover_p(con, d) if dr is not None else None
+            if dr is not None and (exp is None or int(dr["counted_p"]) != int(exp) + (was - now)):
+                return "", ("The drawer count agrees with the register as it is now — undo it on the register page." if english else
+                            "Galle ki ginti ab ke register se milti hai — register page par theek karein.")
+        except Exception:                                # noqa: BLE001
+            return "", ("The drawer could not be read — undo it on the register page." if english else
+                        "Galla padha nahi ja saka — register page par theek karein.")
+    CR.s978_set_cell(con, d, field, was, who, why="day check S978 undo")
+    con.execute("UPDATE day_check_tick SET state='undone' WHERE id=?", (tid,))
+    _audit_safe(con, "day_check_tick", tid, "tick_undo", None, {"day": d, "key": t["key"], "act": REGFIX_ACT}, who)
+    con.commit()
+    return (("Register put back: %s." % rs(was)) if english else ("Register wapas: %s." % rs(was))), ""
+
+
+def _s978_field_words(field, english):
+    p = str(field).split("_")
+    sec = SEC_OF_REG.get(p[0], p[0])
+    t = p[1] if len(p) > 2 else ""
+    return "%s %s" % ((SEC_EN if english else SEC_HI).get(sec, sec), (T_EN if english else T_HI).get(t, t))
+
+
+def _s978_made_html(con, d, u, english):
+    """What was done from this check (late parchis, register fixes), each with its Undo -- the card itself is gone by then."""
+    try:
+        rows = con.execute("SELECT * FROM day_check_tick WHERE day=? AND state='live' AND act IN (?,?) ORDER BY id",
+                           (d, LATE_ACT, REGFIX_ACT)).fetchall()
+    except Exception:                                    # noqa: BLE001
+        return ""
+    out = []
+    for t in rows:
+        if t["act"] == LATE_ACT:
+            try:
+                s = con.execute("SELECT slip_no, series, clinic_id FROM slip WHERE id=? AND state='ok'", (int(t["pick"] or 0),)).fetchone()
+            except Exception:                            # noqa: BLE001
+                s = None
+            if s is None:
+                continue
+            txt = (("Parchi %d (%s) · ID %s — made late, kept outside Docterz" if english else
+                    "Parchi %d (%s) · ID %s — baad mein bani, Docterz ke bahar") % (
+                       s["slip_no"], (SEC_EN if english else SEC_HI).get(t["reason"], t["reason"]), s["clinic_id"]))
+            a = "undolate"
+        else:
+            try:
+                was, now = (int(x) for x in str(t["pick"] or "").split(">"))
+            except ValueError:
+                continue
+            txt = "Register %s: %s → %s" % (_s978_field_words(t["reason"], english), rs(was), rs(now))
+            a = "undoreg"
+        btn = ""
+        if _user(u) == (t["who"] or "").lower() or "checker" in _roles(u):
+            btn = ("<form method='post' action='/finance/clinic/check/%s/act' class='inline'><input type='hidden' name='key' value=''>"
+                   "<input type='hidden' name='act' value='%s'><input type='hidden' name='tid' value='%d'>"
+                   "<button type='submit' class='tb x'>%s</button></form>" % (d, a, int(t["id"]), "Undo" if english else "Wapas"))
+        out.append("<div class='cline'><span class='ct'>%s</span><span class='tk'>✓ %s %s</span><span class='cb'>%s</span></div>" % (
+            _esc(txt), _esc((t["who"] or "").title()), _esc((t["at"] or "")[11:16]), btn))
+    if not out:
+        return ""
+    return "<h3 class='grp'>%s</h3>%s" % ("Done from this check" if english else "Is jaanch se kiya", "".join(out))
+
+
+def _s978_open_plain(chk):
+    """The Docterz lines whose tick is a plain 'done' -- what 'Sab ho gaya' writes."""
+    return [c for c in (chk.get("cards") or []) if c.get("who") == "docterz" and not c.get("tick")
+            and c.get("kind") in ("missing", "notbilled", "mode")]
+
+
+def _s978_saball(con, d, chk, who, keys=None):
+    """Only the lines the page showed (review S4): a line that came after the page was drawn is not ticked unseen."""
+    n = 0
+    for c in _s978_open_plain(chk):
+        if keys is not None and c["key"] not in keys:
+            continue
+        add_tick(con, d, c["key"], "changed" if c["kind"] == "mode" else "added", who)
+        n += 1
+    return n
+
+
+def breakdown(chk, english=False):

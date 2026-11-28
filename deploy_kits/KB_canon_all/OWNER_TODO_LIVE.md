@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S544 close** (the parent, Opus 5.5, full EOS), 28-Nov-2026, evening — the parent's sections refreshed here (the morning check matches money against money); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S543 close** (the Sanjeevni chat, full EOS), 28-Nov-2026, evening — the Sanjeevni sections refreshed here (CCM counted whole; the batch swap next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S544 close** (the parent, Opus 5.5, full EOS), 28-Nov-2026, evening — the parent's sections refreshed here (the morning check matches money against money); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S541 close** (the parent, Opus 5.5, full EOS), 28-Nov-2026, afternoon — the parent's sections refreshed here (the certificate lands by itself; the refunds-and-gaps screens final); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S542 close** (the Sanjeevni chat, full EOS), 28-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the Stock check page v10 live; CCM's pack next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S540 close** (the Sanjeevni chat, full EOS), 28-Nov-2026, morning — the Sanjeevni sections refreshed here (voucher scans live; Stock check v10 next); the other projects' sections as their closes left them.
@@ -1614,21 +1615,28 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S542 close (28-Nov, 13:3x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S543 close (28-Nov, 18:0x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-2. **Ask Amir to key his two Stock Issue cards** (27-11: six items; 28-11: DFO MR) — the Stock check page's first band shows them "not done".
-3. **Then open a fresh Sanjeevni chat with Opus and type `start`** — session 543 fixes CCM's pack (a mock-up of Darpan's CCM line for your look first).
-4. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
+2. **TRUECEPROL OD, OXFLIN-OZ, HISTOCALAMIN LOTION (exp Dec-26) — last selling day 30-Nov.** If the batch-swap build is not live by then, Darpan can make the two STOCK bills by hand (one sale on the old batches, one return on the newer, same rate).
+3. **Ask Amir to key his two Stock Issue cards** (27-11: six items; 28-11: DFO MR).
+4. **Then open a fresh Sanjeevni chat with Opus and type `start`** — session 546 builds the batch swap.
+5. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
+6. *(optional)* delete `D:\dr-manoj-git\_to_delete_S543\` (four duplicate files).
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S542 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S543 close
 
-1. CCM's pack (F-1742): the stock record and Darpan's count screen count CCM by the bottle, like Marg; this morning's count corrected — your look on Darpan's screen first.
-2. Watch the new Stock check page's first days and S973's first voucher print card.
-3. The purchase import keeping one row per bill line (F-1710). PARKED by your word: the AutoHotkey runner; the order-list kit.
+1. The batch swap (D1113): Darpan's shelf check, the two STOCK bills, closed by the next sale report; STOCK its own section beside Home and Procedures; Batch swaps collapsed on your Expiry watch page.
+2. Your monthly exports confirmed on your phone, one by one and when the set is in (D1114).
+3. Watch S975 / S976's first days; the purchase import keeping one row per bill line (F-1710). PARKED by your word: the AutoHotkey runner; the order-list kit.
+
+## ✅ DONE AT THE S543 CLOSE — 28-Nov-2026 (the Sanjeevni project)
+
+- CCM counted in bottles everywhere (kit S976, live 14:57): Darpan's one Botal box, this morning's count put right, Stock check in bottles, Marg's voucher read as 3 bottles.
+- The batch swap and the export confirmations designed with you (mock-up v7 final).
 
 ## ✅ DONE AT THE S542 CLOSE — 28-Nov-2026 (the Sanjeevni project)
 

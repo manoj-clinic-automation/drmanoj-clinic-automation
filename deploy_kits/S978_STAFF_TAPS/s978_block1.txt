@@ -1,0 +1,182 @@
+# ---------------------------------------------------------------- S978 (K2b): the staff taps
+LATE_ACT = "lateslip"            # a parchi made from the 'nf:' card -- pick = the slip's id, reason = its head
+REGFIX_ACT = "regfix"            # a register cell set from a card -- reason = the field, pick = 'before>after' (paise)
+DUNNO_ACT = "dunno"              # 'Pata nahi': the line leaves the staff list and goes to his push (register_push 'pn:')
+REG_SEC = {"consult": "cons", "xray": "xray", "proc": "proc"}
+SEC_OF_REG = {v: k for k, v in REG_SEC.items()}
+SEC_SERIES = {"consult": "opd", "xray": "xp", "proc": "xp"}
+
+
+def taps_on():
+    """S978: the staff taps (DAYCHK_TAPS=0 hides them -- the K2a cards exactly as they were)."""
+    try:
+        import evening_check as _ev                      # noqa: PLC0415 -- the one settings reader (portal_config, then env)
+        v = _ev.cfg("DAYCHK_TAPS", "1")
+    except Exception:                                    # noqa: BLE001
+        v = os.environ.get("DAYCHK_TAPS", "1")
+    return str(v or "1").strip().lower() not in ("0", "off", "no", "false")
+
+
+def _s978_late_ids(con, d):
+    """{slip_id} of the parchis made from the day's 'nf:' card, not undone. set() when unreadable."""
+    try:
+        if not _has(con, "day_check_tick"):
+            return set()
+        return {int(r[0]) for r in con.execute("SELECT pick FROM day_check_tick WHERE day=? AND act=? AND state='live'",
+                                                (d, LATE_ACT)) if str(r[0] or "").isdigit()}
+    except Exception:                                    # noqa: BLE001
+        return set()
+
+
+def _s978_lcell(sdelta, sec, g):
+    """The one (section, tender) cell that is short by exactly the gap, or None."""
+    ts = [t for t in TENDERS if sdelta.get((sec, t), 0) == -g]
+    return (sec, ts[0]) if len(ts) == 1 else None
+
+
+def _s978_push(con, d):
+    """The day's push re-run at once (the register's own S968 spawn) -- never a reason for a tap to fail."""
+    try:
+        _CR()._s968_spawn(con, d)
+    except Exception:                                    # noqa: BLE001
+        pass
+
+
+def _s978_cash_ok(con, d, kind, g):
+    """A cash figure may be fixed from the card only when the drawer was not counted, or when the fix makes the day's handover
+    (the register's cash + physio + the float, S249) equal the count (review M1). Unreadable: never."""
+    try:
+        CR = _CR()
+        dr = CR.drawer_row(con, d)
+        if dr is None or dr["counted_p"] is None:
+            return True
+        exp = CR.expected_handover_p(con, d)
+        if exp is None:
+            return False
+        after = int(exp) - g if kind == "notfound" else int(exp) + g
+        return int(dr["counted_p"]) == after
+    except Exception:                                    # noqa: BLE001
+        return False
+
+
+def _s978_fixes(con, d):
+    """The day's register cells set from this check and not undone: [{field, was, now, who}] (his push, review S6)."""
+    out = []
+    try:
+        if not _has(con, "day_check_tick"):
+            return out
+        for r in con.execute("SELECT reason, pick, who, state FROM day_check_tick WHERE day=? AND act=? ORDER BY id",
+                             (d, REGFIX_ACT)):
+            try:
+                was, now = (int(x) for x in str(r[1] or "").split(">"))
+            except ValueError:
+                continue
+            out.append({"field": str(r[0] or ""), "was": was, "now": now, "who": str(r[2] or ""), "undone": r[3] == "undone"})
+    except Exception:                                    # noqa: BLE001
+        return []
+    return out
+
+
+def _s978_cell(con, c, d):
+    """(field, before_p, after_p) of the ONE register cell a 'nf:' / 'less:' card's gap sits in, or None (no single cell; the cash
+    proven by the drawer's count; the register not saved; a figure that would fall below zero)."""
+    cell = c.get("cell")
+    if not cell or cell[0] not in REG_SEC or cell[1] not in TENDERS or c.get("kind") not in ("notfound", "less"):
+        return None
+    if not _late_ok(d):                                  # review S2: the staff's week, as the late parchi
+        return None
+    try:
+        row = _CR().register_row(con, d)
+    except Exception:                                    # noqa: BLE001
+        row = None
+    if row is None:
+        return None
+    field = "%s_%s_p" % (REG_SEC[cell[0]], cell[1])
+    try:
+        was = int(row[field] or 0)
+    except (IndexError, KeyError):
+        return None
+    g = int(c.get("amount") or 0)
+    now = was - g if c["kind"] == "notfound" else was + g
+    if g <= 0 or now < 0:
+        return None
+    if cell[1] == "cash" and not _s978_cash_ok(con, d, c["kind"], g):   # review M1: the drawer's count decides
+        return None
+    return field, was, now
+
+
+def _s978_regbtn(con, c, d, english):
+    x = _s978_cell(con, c, d)
+    if x is None:
+        return ""
+    field, was, now = x
+    sec, t = c["cell"]
+    lab = ("The register was written wrong — fix it: %s %s %s → %s" % (SEC_EN[sec], T_EN[t], rs(was), rs(now)) if english else
+           "Register galat likha — theek karein: %s %s %s → %s" % (SEC_HI[sec], T_HI[t], rs(was), rs(now)))
+    return _btn(d, c["key"], "regfix", lab, "x",
+                "<input type='hidden' name='field' value='%s'><input type='hidden' name='was' value='%d'>"
+                "<input type='hidden' name='now' value='%d'>" % (field, was, now))
+
+
+def _s978_services(con, d, sec, amount_p):
+    """[(value, label)] of the services of the head at exactly the gap's price -- the price-filtered list (review Q2)."""
+    SL = _SL()
+    if SL is None or amount_p <= 0:
+        return []
+    if sec == "consult":
+        try:
+            fee = int(SL.usual_fee(con, d) or 0)
+        except Exception:                                # noqa: BLE001
+            fee = 0
+        return [("opd", "Consultation %s" % rs(fee))] if fee and fee == amount_p else []
+    try:
+        xr, pr = SL.services(con)
+    except Exception:                                    # noqa: BLE001
+        return []
+    return [(str(s["id"]), "%s %s" % (s["name"], rs(s["price_p"]))) for s in (xr if sec == "xray" else pr)
+            if int(s["price_p"]) == amount_p]
+
+
+def _s978_next_no(con, series):
+    SL = _SL()
+    try:
+        return SL.next_no(con, series) if SL is not None else None
+    except Exception:                                    # noqa: BLE001
+        return None
+
+
+def _s978_nf_btns(con, c, u, english, d):
+    """S978 (K2.2): the 'nf:' card's three taps -- the late parchi, the register one-tap, 'Pata nahi'."""
+    out = []
+    sec, g = c.get("section") or "consult", int(c.get("amount") or 0)
+    cands = c.get("cands") or []
+    svcs = _s978_services(con, d, sec, g)
+    if cands and svcs and _late_ok(d):
+        series = SEC_SERIES.get(sec, "xp")
+        no = _s978_next_no(con, series)
+        pk = "".join("<option value='%s'>%s</option>" % (_esc(cid), _esc(_who_en(nm, cid))) for cid, nm in cands)
+        sv = "".join("<option value='%s'%s>%s</option>" % (_esc(v), " selected" if len(svcs) == 1 else "", _esc(lab))
+                     for v, lab in svcs)
+        out.append(
+            "<form method='post' action='/finance/clinic/check/%s/act' class='s978'>"
+            "<input type='hidden' name='key' value='%s'><input type='hidden' name='act' value='lateslip'>"
+            "<label>%s</label><select name='pick' class='rs'>%s</select>"
+            "<label>%s</label><select name='svc' class='rs'>%s</select>"
+            "<label>%s</label><input name='no' class='rs' inputmode='numeric' value='' placeholder='%s'>"
+            "<button type='submit' class='tb'>%s</button></form>" % (
+                d, _esc(c["key"]), "Whose was it?" if english else "Kiska tha?", pk,
+                "What was done?" if english else "Kya hua?", sv,
+                "Slip number — the number printed on the blank slip you take from the book (write it for this patient and file it)"
+                if english else "Parchi number — book se jo khaali parchi li, us par chhapa number (is mareez ke naam likh kar rakhein)",
+                ("" if no is None else (("next: %d" if english else "agla: %d") % no)),
+                "Make the slip" if english else "Parchi banayein"))
+    if can_parchi(u) and _late_ok(d):                    # another patient, or no single service at this price: the parchi page
+        out.append("<a class='tb' href='/finance/slips?s=%s&day=%s'>%s</a>" % (
+            SEC_SERIES.get(sec, "xp"), d, "The parchi page" if english else "Parchi page"))
+    rb = _s978_regbtn(con, c, d, english)
+    out.append(rb or "<a class='tb x' href='/finance/clinic/register/%s'>%s</a>" % (
+        d, "The register was written wrong" if english else "Register galat likha"))
+    out.append(_btn(d, c["key"], "dunno", "Don't know" if english else "Pata nahi", "x"))
+    return out
+
+

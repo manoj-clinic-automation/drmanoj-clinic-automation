@@ -1,0 +1,10 @@
+127231c6218ce33c345f828b95b0a290  ./KIT_ID.txt
+071bd231f3c98a13b91583d8fd87546e  ./README.md
+e3cb526469b200e75b2991b184df3980  ./TO_PINS.md5
+5e3a2bd1a8fa63b5142c2c46a8fc5191  ./from/xray_film.py
+97c186f8477388afc4b5a08154676de0  ./install_S980_FILM_COUNT_RISE.sh
+dec0c23fbd808790ccee96b1cd3fada2  ./make_s980.py
+a86bf4b5578bfcb359380bfc653838ad  ./probe_s980.py
+de35a66d2b29b66b6b2e7f751ca77823  ./rehearse_s980.sh
+a5690a40cf10ca296c7d58915ec4ec18  ./to/xray_film.py
+892af5a8b8979dc5393403ca4ce946ef  ./walk_s980.py
