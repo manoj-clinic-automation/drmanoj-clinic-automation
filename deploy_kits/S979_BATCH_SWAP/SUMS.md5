@@ -1,9 +1,9 @@
 96d51081c33e9bff1058105628c19efe  KIT_ID.txt
-a7514f4d082c735abb4b50c5b8cd87c8  README.md
+efe899f0ef2a52f7951b5e9a760d8182  README.md
 438624ea0f6fce25e0231c7f52c711c3  TO_PINS.md5
 5ed7cdc7b24032d57c039c9f6e2301b4  batch_swap.py
 38805560113708bf7cf9928bfa0b02cf  expiry_watch.py
-2d5554de0653e7961ea31b1482b43d45  install_S979_BATCH_SWAP.sh
+6e30f2a9b87d96ffcf1bc2c8f63a48cf  install_S979_BATCH_SWAP.sh
 cc87ccdcbd007c07e2e1ccae297e1078  live_s979.py
 224fac3a9a49c4cbcdcb1236fafb7a02  make_s979.py
 94d98cf8004dd56c1e5ee15de58f4d3e  rehearse_s979.sh
@@ -16,4 +16,4 @@ a0e8a2486006e8155a541f123e09160c  walk_s967.py
 bcd4d041926b80effecc7f715748900d  walk_s971.py
 143a5fc304588884302bca0e4a9dd085  walk_s973.py
 30b387b79716b81399467d7b8dd3bae4  walk_s975.py
-9d8ecb71910ea29ef98eec5f1024998e  walk_s979.py
+eacb30a13b5531d10d683d11192d3f31  walk_s979.py

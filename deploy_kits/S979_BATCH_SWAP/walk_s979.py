@@ -502,6 +502,9 @@ try:
     open(jsp, "w", encoding="utf-8").write("var document={getElementById:function(){return {innerHTML:'',textContent:''};}},location={search:''},window={scrollTo:function(){}},navigator={};"
                                             "var fetch=function(){return new Promise(function(){});};" + js.replace("load();", "") +
                                             "\nvar o=swapCards(%s);console.log(JSON.stringify(o));" % st_)
+    if not shutil.which("node"):
+        print("SKIP  L7 L8 the card's drawing: no node on this machine (proven where node is: the build VM, 74/74)")
+        raise StopIteration
     try:
         out = subprocess.run(["node", jsp], capture_output=True, text=True, timeout=30)
         o = json.loads(out.stdout.strip().splitlines()[-1]) if out.stdout.strip() else ""
@@ -514,6 +517,8 @@ try:
         check("L8 nothing waiting / no swap in the state: the card draws nothing", ls_[-2:] == ['""', '""'], ls_[-2:])
     except FileNotFoundError:
         check("L7 node present to draw the card", False, "node not found")
+except StopIteration:
+    pass
 except Exception as ex:                                       # noqa: BLE001
     check("L0 the stockmatch doors", False, "%s: %s" % (type(ex).__name__, str(ex)[:200]))
 

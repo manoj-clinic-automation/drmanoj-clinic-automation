@@ -30,7 +30,7 @@ Settings (table `setting`): `swap.on` 1 · `swap.push_to` darpan · `swap.owner_
 then a STOCK pair is a sale and an equal return on the same day (net zero in cash). The judge matches by item, batch and quantity, not yet by
 the bill's name STOCK (kit B reads the names). Darpan's sell-first list still names the paper batch. The monthly-export pushes (kit C).
 
-**Proof.** `walk_s979.py` 74/74 (twice), the control red at A1 on the live files; S976's, S975's, S973's, S971's, S969's, S967's and S965's
+**Proof.** `walk_s979.py` 74/74 (twice; 72/72 on a machine without node, the two drawing checks skipped), the control red at A1 on the live files; S976's, S975's, S973's, S971's, S969's, S967's and S965's
 walks the same on old and new files; the watch's own run on a COPY of the live database with the old and the new files: every list and every
 batch identical, the new run finds the cases (28-Nov copy: 5). Rehearsal on a made-up root: dry · red@4 · red@5 · install after a red ·
 again · undo · reinstall · wrong FROM · a read pin moved · the lock · a corrupt kit. NO_PHONE_NUMBERS clean.

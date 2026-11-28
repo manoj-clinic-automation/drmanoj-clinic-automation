@@ -85,7 +85,7 @@ for side in new old; do mkdir -p "$SCR/$side/finance/spine" "$SCR/$side/marg_ing
 rm -f "$SCR/old/finance/batch_swap.py"
 \cp -p "$KDIR/expiry_watch.py" "$KDIR/stockmatch.py" "$KDIR/stockmatch.html" "$KDIR/batch_swap.py" "$SCR/new/finance/" || stop "!! [3/6] could not lay out the walk - nothing installed"
 W1=$(py "$KDIR/walk_s979.py" "$SCR/new/finance"); R1=$(echo "$W1" | tail -1)
-case "$R1" in "WALK "*) a=${R1#WALK }; [ "${a%/*}" = "${a#*/}" ] && [ "${a%/*}" -ge 74 ] || { echo "$W1" | grep "^FAIL" | cut -c1-200; stop "!! [3/6] the walk: $R1 - nothing installed"; };;
+case "$R1" in "WALK "*) a=${R1#WALK }; [ "${a%/*}" = "${a#*/}" ] && [ "${a%/*}" -ge 72 ] || { echo "$W1" | grep "^FAIL" | cut -c1-200; stop "!! [3/6] the walk: $R1 - nothing installed"; };;
   *) echo "$W1" | tail -5 | cut -c1-200; stop "!! [3/6] the walk did not finish - nothing installed";; esac
 W2=$(py "$KDIR/walk_s979.py" "$SCR/new/finance"); [ "$(echo "$W2" | tail -1)" = "$R1" ] || stop "!! [3/6] the walk a second time: $(echo "$W2" | tail -1) - nothing installed"
 W0=$(py "$KDIR/walk_s979.py" "$SCR/old/finance")
