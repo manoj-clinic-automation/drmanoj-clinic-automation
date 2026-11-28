@@ -1,0 +1,14 @@
+4bd18810424d4ba8339814b006927b44  ./KIT_ID.txt
+6a2bf81ae13b39f0447758ac4eb348b4  ./README.md
+0dba96bf5d47f416c8542a3a1dbfa5b3  ./TO_PINS.md5
+946f0408bd9763bfd1578648bd07ab1b  ./from/day_check.py
+8ffb93aa461c74ca4dbbeabdff1d2081  ./from/docterz_pickup.py
+9b1fbc29aff1472a1a4dfb2ad4cfcf3a  ./from/register_push.py
+3cf522ccbc3f018f56d298c214776728  ./install_S977_MORNING_REVENUE_MATCH.sh
+b3774408ff6ca6221b28e5993500d842  ./make_s977.py
+fd8f6f0d8327b55805e6df296c5b11f1  ./probe_s977.py
+83cec850287cad717f4e6fa8bfa3c39c  ./rehearse_s977.sh
+5843d3d579c1571d058bd6e25d8585d4  ./to/day_check.py
+cf42181e62a792adb1014f076f9ad68b  ./to/docterz_pickup.py
+2ba0d63b5c277113cbcfa9f40e2c1d3f  ./to/register_push.py
+f330c04f956e7df2b71008130f19a436  ./walk_s977.py
