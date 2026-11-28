@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S540 close** (the Sanjeevni chat, full EOS), 28-Nov-2026, morning — the Sanjeevni sections refreshed here (voucher scans live; Stock check v10 next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S542 close** (the Sanjeevni chat, full EOS), 28-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the Stock check page v10 live; CCM's pack next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S540 close** (the Sanjeevni chat, full EOS), 28-Nov-2026, morning — the Sanjeevni sections refreshed here (voucher scans live; Stock check v10 next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S539 close** (the parent, Opus 5.5, full EOS), 28-Nov-2026, midday — the parent's sections refreshed here (the evening check widened live; the certificate fixed); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S538 close** (the Sanjeevni chat, full EOS), 27-Nov-2026, evening — the Sanjeevni sections refreshed here (Amir by himself and the loss register live; kit C next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S537 close** (the parent, Fable 5.1, EOS-light), 27-Nov-2026, afternoon — the parent's sections refreshed here (the morning check plan reviewed and final; the build by Opus next); the other projects' sections as their closes left them.
@@ -1592,21 +1593,26 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S540 close (28-Nov, 11:5x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S542 close (28-Nov, 13:3x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-2. **Ask Amir to key his two Stock Issue cards** (27-11: six items; 28-11: DFO MR) — they show as "not done" on the new Stock check page once it is built.
-3. **Then open a fresh Sanjeevni chat with Opus and type `start`** — session 542 builds the Stock check page v10 (your write-offs first).
+2. **Ask Amir to key his two Stock Issue cards** (27-11: six items; 28-11: DFO MR) — the Stock check page's first band shows them "not done".
+3. **Then open a fresh Sanjeevni chat with Opus and type `start`** — session 543 fixes CCM's pack (a mock-up of Darpan's CCM line for your look first).
 4. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S540 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S542 close
 
-1. The Stock check page v10 (approved 11:52): your write-offs first with their status on Amir's card, today's counts in plain lines, the rest folded; CCM's two faults.
-2. Watch the first voucher print card (Amir's next 'Pehle bana chuka hoon') and reception's scan line.
+1. CCM's pack (F-1742): the stock record and Darpan's count screen count CCM by the bottle, like Marg; this morning's count corrected — your look on Darpan's screen first.
+2. Watch the new Stock check page's first days and S973's first voucher print card.
 3. The purchase import keeping one row per bill line (F-1710). PARKED by your word: the AutoHotkey runner; the order-list kit.
+
+## ✅ DONE AT THE S542 CLOSE — 28-Nov-2026 (the Sanjeevni project)
+
+- The Stock check page v10, live 13:02 (kit S975): your write-offs first with their state on Amir's card, today's counts in plain lines, everything else folded.
+- CCM: a surplus no longer shown red "your call"; its ledger count reads "1 bottle" instead of "40 bottles".
 
 ## ✅ DONE AT THE S540 CLOSE — 28-Nov-2026 (the Sanjeevni project)
 
