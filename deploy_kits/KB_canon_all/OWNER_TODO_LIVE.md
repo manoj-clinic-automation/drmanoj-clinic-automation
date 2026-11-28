@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S538 close** (the Sanjeevni chat, full EOS), 27-Nov-2026, evening — the Sanjeevni sections refreshed here (Amir by himself and the loss register live; kit C next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S539 close** (the parent, Opus 5.5, full EOS), 28-Nov-2026, midday — the parent's sections refreshed here (the evening check widened live; the certificate fixed); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S538 close** (the Sanjeevni chat, full EOS), 27-Nov-2026, evening — the Sanjeevni sections refreshed here (Amir by himself and the loss register live; kit C next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S537 close** (the parent, Fable 5.1, EOS-light), 27-Nov-2026, afternoon — the parent's sections refreshed here (the morning check plan reviewed and final; the build by Opus next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S536 close** (the Sanjeevni chat, full EOS), 27-Nov-2026, early afternoon — the Sanjeevni sections refreshed here (the Stock check desk's buttons live); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S531 close** (the parent, Opus, full EOS), 27-Nov-2026, afternoon — the parent's sections refreshed here (WhatsApp BSUID ready; the register Save told to staff; a slip settles by itself; the morning check plan for Fable); the other projects' sections as their closes left them.
@@ -550,7 +551,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S537 close (27-Nov, 15:2x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S539 close (28-Nov, 11:5x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -575,6 +576,16 @@ D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S510\S510_CALL_CONSOLE_ROADMAP_v1.md
 ```
 
 **1a06 · A PATIENT'S MOBILE NUMBER WAS IN THE CALL-AUDIT PROGRAMS' TEST DATA — TAKEN OUT (24-Nov), NOTHING TO DO.** It sat in the live programs and in the public code store since the summer (no name with it). Now every test number is plainly made up. Its old copies in the code store's history stay for now — a later session weighs removing them.
+
+**1a18 · THE ₹600 OF 27-NOV — ONE TAP FOR YOU, AFTER SHAVEZ.** It was a refund at the counter. Shavez marks the patient's OPD slip 20204 as Radd (money returned); the day check clears the ₹600 by itself the moment he does; your approval then waits at Patients → OPD & X-ray/Proc Slips → Chhoot / Radd manzoori:
+
+```
+https://followup.dr-manoj.in/finance/slips?s=approve
+```
+
+**1a19 · YOUR CALL, WHEN YOU LIKE:** may Shavez approve small refunds (say up to one consultation fee) by himself, so only the bigger ones come to you? One word from you is enough.
+
+**1a20 · THE EVENING CHECK NOW CHECKS THE MONEY TOO (live 19:50 27-Nov), NOTHING TO DO.** Its first evening worked: one difference pushed at 20:44, fixed, "sab mile" at 20:56. The morning half (K2) is built after two more export evenings. The certificate of followup.dr-manoj.in is renewed to 26-Feb-2027 (your line 07:58 28-Nov); the lasting fix comes before February.
 
 **1a17 · THE MORNING CHECK — PLAN FINAL (your rulings 14:31 and 15:09 27-Nov), NOTHING TO DO NOW.** The evening does every Docterz fix on the export (same day); the morning is money against money only — no cash/UPI question, no Docterz edit the next morning; the register stays a morning job. Opus builds it in the next parent session, the evening half first; you will see nothing change until it is installed, and the staff screens are the mock-up v2 you saw: `https://claude.ai/artifact/WpQ3vFpFZNpRPVZxkkxmkb`.
 
@@ -713,6 +724,13 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S539 CLOSE — 28-Nov-2026 (the parent, Opus 5.5)
+
+- **The evening check widened (S972, live 19:50 27-Nov):** on the same export and the same one push, each patient's X-ray / procedure money is compared with the slip — a discount not applied, a slip line short in Docterz, a line twice on one side, Docterz more than the slip, money under the wrong head. Payment mode is not compared. First evening: one line at 20:44, cleared at 20:56.
+- **Everything installed on 27-Nov confirmed** by the 28-Nov backup (WhatsApp ID, register push, slips settling, the evening check).
+- **The clinic hub's certificate** (followup.dr-manoj.in): renewed every night but never put where the site reads it — copied in by your line, now valid to 26-Feb-2027.
+- **The gaps list of 28-Nov** (refunds, late X-ray slips, sides, the morning's 'check by hand' line, the empty-report alert, the day-check link) is in the backlog in order.
 
 ## ✅ DONE AT THE S537 CLOSE — 27-Nov-2026 (the parent, Fable 5.1)
 
