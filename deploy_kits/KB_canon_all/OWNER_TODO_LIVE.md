@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S542 close** (the Sanjeevni chat, full EOS), 28-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the Stock check page v10 live; CCM's pack next); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S541 close** (the parent, Opus 5.5, full EOS), 28-Nov-2026, afternoon — the parent's sections refreshed here (the certificate lands by itself; the refunds-and-gaps screens final); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S542 close** (the Sanjeevni chat, full EOS), 28-Nov-2026, afternoon — the Sanjeevni sections refreshed here (the Stock check page v10 live; CCM's pack next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S540 close** (the Sanjeevni chat, full EOS), 28-Nov-2026, morning — the Sanjeevni sections refreshed here (voucher scans live; Stock check v10 next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S539 close** (the parent, Opus 5.5, full EOS), 28-Nov-2026, midday — the parent's sections refreshed here (the evening check widened live; the certificate fixed); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S538 close** (the Sanjeevni chat, full EOS), 27-Nov-2026, evening — the Sanjeevni sections refreshed here (Amir by himself and the loss register live; kit C next); the other projects' sections as their closes left them.
@@ -553,7 +554,7 @@ https://followup.dr-manoj.in/scanapp/procroom/month?ym=2026-10&photo=1#s635edit
 
 ---
 
-## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S539 close (28-Nov, 11:5x)
+## ⭐0 — WHAT NEEDS YOU · THIS PROJECT (the parent) — refreshed at the S541 close (28-Nov, 13:5x)
 
 *This is the same list as your System Board, in the same order. The board is the short one; tick there.*
 
@@ -585,7 +586,15 @@ D:\Downloads\ClaudeCowork\03_WORKING_PAPERS\S510\S510_CALL_CONSOLE_ROADMAP_v1.md
 https://followup.dr-manoj.in/finance/slips?s=approve
 ```
 
-**1a19 · YOUR CALL, WHEN YOU LIKE:** may Shavez approve small refunds (say up to one consultation fee) by himself, so only the bigger ones come to you? One word from you is enough.
+**1a21 · A RENEWED CERTIFICATE NOW REACHES THE SITE BY ITSELF (live 12:32 28-Nov), NOTHING TO DO.** Every night at 05:55 the server puts a renewed certificate in place on each of our sites, restarts once and checks what the site shows; the health page's line "certificate lands" turns red if one cannot land. The six sites that renew another way are still guarded by the 06:40 certificate watch; I read their road next.
+
+**1a22 · THE REFUNDS-AND-GAPS SCREENS ARE FINAL (your "ok" 13:42 28-Nov), NOTHING TO DO NOW.** Built after the morning match: the desk's Refund / Discount button (a refund always in cash); Shavez's own limits, each one flagged to you — refund ₹600, discount ₹300 consultation · ₹100 X-ray · ₹500 procedure; every discount and refund in your revenue report; the register's refund line; the evening push naming refunds; an X-ray with no slip flagged the same day; a repeated line asking the side. The screens:
+
+```
+https://claude.ai/artifact/PpsTF8nWM7YpNbs8Wn5GLE
+```
+
+**1a19 · ANSWERED 13:10 – 13:21 28-Nov:** Shavez approves by himself, each one flagged to you — a refund up to ₹600, a discount up to ₹300 (consultation) · ₹100 (X-ray) · ₹500 (procedure); above that it waits for you. Every refund is paid in cash.
 
 **1a20 · THE EVENING CHECK NOW CHECKS THE MONEY TOO (live 19:50 27-Nov), NOTHING TO DO.** Its first evening worked: one difference pushed at 20:44, fixed, "sab mile" at 20:56. The morning half (K2) is built after two more export evenings. The certificate of followup.dr-manoj.in is renewed to 26-Feb-2027 (your line 07:58 28-Nov); the lasting fix comes before February.
 
@@ -726,6 +735,11 @@ https://followup.dr-manoj.in/finance/packs
 7. **Watching, at every open:** the call list on a day you do not sit · your home · your renewals (the morning mail, your taps) · your patient pages · the packs' downloads · November's pack once HDFC's statement is read · Google's monthly mail · the "away" rows · a WhatsApp from abroad · the X-ray messages · the attendance alarm.
 
 The full list: `claude/S288_PENDING_LIST.md`.
+
+## ✅ DONE AT THE S541 CLOSE — 28-Nov-2026 (the parent, Opus 5.5)
+
+- **The certificate lands by itself (S974, live 12:32 28-Nov):** a nightly job at 05:55 puts a renewed certificate into each site's own files and checks what the site serves — the lasting fix of the followup.dr-manoj.in certificate. First run: both sites on this road in place (70 and 89 days).
+- **The refunds-and-gaps screens** — six screens agreed with your rulings of 13:10, 13:19 and 13:21, your "ok" 13:42; built after the morning match.
 
 ## ✅ DONE AT THE S539 CLOSE — 28-Nov-2026 (the parent, Opus 5.5)
 
