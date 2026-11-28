@@ -1,4 +1,5 @@
-# OWNER TO-DO — LIVE · refreshed at the **S539 close** (the parent, Opus 5.5, full EOS), 28-Nov-2026, midday — the parent's sections refreshed here (the evening check widened live; the certificate fixed); the other projects' sections as their closes left them.
+# OWNER TO-DO — LIVE · refreshed at the **S540 close** (the Sanjeevni chat, full EOS), 28-Nov-2026, morning — the Sanjeevni sections refreshed here (voucher scans live; Stock check v10 next); the other projects' sections as their closes left them.
+*(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S539 close** (the parent, Opus 5.5, full EOS), 28-Nov-2026, midday — the parent's sections refreshed here (the evening check widened live; the certificate fixed); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S538 close** (the Sanjeevni chat, full EOS), 27-Nov-2026, evening — the Sanjeevni sections refreshed here (Amir by himself and the loss register live; kit C next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S537 close** (the parent, Fable 5.1, EOS-light), 27-Nov-2026, afternoon — the parent's sections refreshed here (the morning check plan reviewed and final; the build by Opus next); the other projects' sections as their closes left them.
 *(Previous header, retained:)* OWNER TO-DO — LIVE · refreshed at the **S536 close** (the Sanjeevni chat, full EOS), 27-Nov-2026, early afternoon — the Sanjeevni sections refreshed here (the Stock check desk's buttons live); the other projects' sections as their closes left them.
@@ -1591,27 +1592,28 @@ The full list: `claude/S288_PENDING_LIST.md`.
 - ~~**The contacts work forgotten**~~ — re-found, analysed, and the plan settled with you (D614) for the next chat.
 - ~~**The 360° view**~~ — it is the *Patient records* tile. ~~**Sukhveer's and Dr Bhawna's passwords**~~ — the lines given.
 
-## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S538 close (27-Nov, 18:5x)
+## ⭐0 — WHAT NEEDS YOU · THE SANJEEVNI PROJECT (pharmacy & Marg) — refreshed at the S540 close (28-Nov, 11:5x)
 
 1. **Publish today's records:** double-click on manojz — nothing follows it.
 ```
 D:\dr-manoj-git\drmanoj-clinic-automation\PUBLISH_ALL.bat
 ```
-2. **Tell Amir:** no stock voucher in Marg unless the system asks — then set that day as the rule date on the Stock check page (box *The rules this page reads*, two taps).
-```
-https://followup.dr-manoj.in/finance/stockcheck/
-```
-3. **The loss register** — open or print it whenever you want.
-```
-https://followup.dr-manoj.in/finance/stockcheck/losses
-```
-4. **Then open a fresh Sanjeevni chat with Opus and type `start`** — session 540 checks the first day, then builds kit C.
-5. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
+2. **Ask Amir to key his two Stock Issue cards** (27-11: six items; 28-11: DFO MR) — they show as "not done" on the new Stock check page once it is built.
+3. **Then open a fresh Sanjeevni chat with Opus and type `start`** — session 542 builds the Stock check page v10 (your write-offs first).
+4. **The packs page (D713):** the 25 card shops; the card and ICICI passwords.
 
-## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S538 close
+## ⭐1 — WHAT I BUILD NEXT · THE SANJEEVNI PROJECT — written at the S540 close
 
-1. Kit C — a printed stock voucher scanned only when needed (Amir's "already made it" claims), reception told on its own screen.
-2. The purchase import keeping one row per bill line (F-1710); the medical PC filing voucher reports under "unknown" (cosmetic). PARKED by your word: the AutoHotkey runner; the order-list kit.
+1. The Stock check page v10 (approved 11:52): your write-offs first with their status on Amir's card, today's counts in plain lines, the rest folded; CCM's two faults.
+2. Watch the first voucher print card (Amir's next 'Pehle bana chuka hoon') and reception's scan line.
+3. The purchase import keeping one row per bill line (F-1710). PARKED by your word: the AutoHotkey runner; the order-list kit.
+
+## ✅ DONE AT THE S540 CLOSE — 28-Nov-2026 (the Sanjeevni project)
+
+- Voucher scans, live 20:21 27-Nov (kit S973): a printed Marg voucher scanned on the pharmacy lane is kept as a stock voucher, never as a bill; Amir's "already made it" gets a print card; reception gets its line and one notification; the scan settles it.
+- The rule date set by you (28-11-2026).
+- Your write-offs found and checked: all 7 on Amir's card, none keyed yet; Darpan's four counts of today read.
+- The Stock check page v10 approved.
 
 ## ✅ DONE AT THE S538 CLOSE — 27-Nov-2026, evening (the Sanjeevni project)
 
