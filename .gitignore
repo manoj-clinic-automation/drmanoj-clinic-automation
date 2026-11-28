@@ -321,3 +321,5 @@ _scratch/
 !deploy_kits/S955_RECEPTION_CONSOLE/to/tile_grants.json
 # S957 (26-Nov-2026, the parent, S523): the kit's TO legs file (46 legs: leg names, paths, hours; no numbers; in SUMS.md5). Exact path.
 !deploy_kits/S957_PUNCH_DOOR/to/freshness_legs.json
+# S974 (28-Nov-2026, the parent, S541): the kit's TO legs file (47 legs: leg names, paths, hours; no numbers; in SUMS.md5). Exact path.
+!deploy_kits/S974_CERT_LAND/freshness_legs.json
